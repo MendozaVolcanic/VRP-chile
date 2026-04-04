@@ -101,13 +101,21 @@ def process_date(volcano: dict, date: datetime):
                         print(f"  No geolocation match for {l1b.name}")
                         continue
                     result = process_viirs.calculate_vrp(
-                        l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"]
+                        l1b, geo,
+                        volcano["lat"], volcano["lon"], volcano["radius_km"],
+                        vent_lat=volcano.get("vent_lat"),
+                        vent_lon=volcano.get("vent_lon"),
+                        vent_radius_km=volcano.get("vent_radius_km", 4.0),
                     )
                     if result:
                         store.append_record(volcano["name"], result)
+                        vent_str = (f" | VRP_VENT={result['vrp_vent_mw']} MW "
+                                    f"({result['n_vent_pixels']}px)"
+                                    if volcano.get("vent_lat") else "")
                         print(f"  {result['sensor']} | VRP_MIR={result['vrp_mir_mw']} MW | "
                               f"VRP_TIR={result['vrp_tir_mw']} MW | "
-                              f"T_max_I04={result['t_max_i04_k']} K")
+                              f"T_max_I04={result['t_max_i04_k']} K"
+                              f"{vent_str}")
 
     finally:
         # Always delete raw granules after processing

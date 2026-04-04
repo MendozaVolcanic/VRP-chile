@@ -37,14 +37,18 @@ PIXEL_AREA_M2 = 375.0 ** 2   # 140,625 m^2
 # Flag DN values (from file attributes)
 FLAG_DNS = {65532, 65533, 65534, 65535}  # Missing_EV, Bowtie_Deleted, Cal_Fail, Fill
 
-# Minimum fixed threshold (K above background)
+# --- Thresholds for eruption-scale detection (full radius_km) ---
+# Appropriate for lava flows, active eruptions, high-temperature anomalies
 ANOMALY_THRESHOLD_K = 5.0    # MIR channel (I04)
 TIR_THRESHOLD_K = 0.5        # TIR channel (I05), per TIRVolcH
-
-# Statistical multiplier: threshold = max(fixed, N_SIGMA * std_background)
-# MIROVA uses this to reject natural terrain variability
 N_SIGMA_MIR = 3.0
 N_SIGMA_TIR = 4.0   # TIR is noisier due to surface/cloud variability
+
+# --- Thresholds for vent-scale detection (vent_radius_km, VIIRS only) ---
+# Designed to detect weak fumarolic/hydrothermal anomalies (~1K above bg)
+# Uses tight spatial search around the known vent to suppress terrain FP
+VENT_THRESHOLD_K = 1.0       # MIR channel, low fixed minimum
+N_SIGMA_VENT = 2.0           # Less conservative — small radius suppresses FP
 
 BG_INNER_KM = 5.0
 BG_OUTER_KM = 25.0
@@ -137,16 +141,21 @@ def haversine_km(lat1: float, lon1: float,
 
 def calculate_vrp(l1b_path: Path, geo_path: Path,
                   volcano_lat: float, volcano_lon: float,
-                  radius_km: float = 30.0) -> dict | None:
+                  radius_km: float = 30.0,
+                  vent_lat: float = None, vent_lon: float = None,
+                  vent_radius_km: float = 4.0) -> dict | None:
     """
     Calculate VRP from a single VIIRS L1B granule.
 
     Args:
         l1b_path: Path to VNP02IMG or VJ102IMG file (.nc)
         geo_path: Path to VNP03IMG or VJ103IMG geolocation file (.nc)
-        volcano_lat: Volcano latitude (degrees)
-        volcano_lon: Volcano longitude (degrees)
-        radius_km: Search radius around volcano for anomaly detection
+        volcano_lat: Volcano reference latitude (degrees)
+        volcano_lon: Volcano reference longitude (degrees)
+        radius_km: Search radius for eruption-scale detection
+        vent_lat: Latitude of active vent/fumarolic source (optional)
+        vent_lon: Longitude of active vent/fumarolic source (optional)
+        vent_radius_km: Tight search radius for weak fumarolic detection
 
     Returns dict with VRP values, or None if granule does not cover volcano.
     """
@@ -206,13 +215,41 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             valid_roi5 = roi_bt5[~np.isnan(roi_bt5)]
             t_max_i05 = float(np.max(valid_roi5)) if len(valid_roi5) else float("nan")
 
+    # --- Vent-scale detection (weak fumarolic signals, VIIRS only) ---
+    # Designed to match MIROVA VIIRS375 sensitivity for point-source fumarolic
+    # anomalies (~0.1–2 MW). Uses the single hottest pixel in a tight ROI
+    # around the known vent, evaluated against the SAME regional background
+    # (t_bg_i04) already computed from the volcano reference annulus.
+    # Using a shared background avoids biases from separate vent-centered rings
+    # and is consistent with the eruption-scale VRP calculation.
+    vrp_vent_mw = 0.0
+    n_vent_pixels = 0
+    if (vent_lat is not None and vent_lon is not None
+            and "I04" in bands and not np.isnan(t_bg_i04)):
+        vent_dist = haversine_km(vent_lat, vent_lon, lat, lon)
+        vent_roi_mask = vent_dist <= vent_radius_km
+        if np.any(vent_roi_mask):
+            bt = bands["I04"]
+            vent_roi_bt = bt[vent_roi_mask]
+            vent_roi_bt = vent_roi_bt[~np.isnan(vent_roi_bt)]
+            if len(vent_roi_bt) > 0:
+                t_max_vent = float(np.max(vent_roi_bt))
+                # Use same regional background and a low fixed threshold
+                if t_max_vent > (t_bg_i04 + VENT_THRESHOLD_K):
+                    vrp_vent_mw = float(
+                        PIXEL_AREA_M2 * SIGMA * (t_max_vent ** 4 - t_bg_i04 ** 4)
+                    ) / 1e6
+                    n_vent_pixels = 1
+
     name = l1b_path.name
     sensor = "VIIRS_SNPP" if name.startswith("VNP") else "VIIRS_NOAA20"
 
     return {
         "vrp_mir_mw": round(vrp_mir_mw, 3),
         "vrp_tir_mw": round(vrp_tir_mw, 3),
+        "vrp_vent_mw": round(vrp_vent_mw, 3),
         "n_anomalous_pixels": n_anomalous,
+        "n_vent_pixels": n_vent_pixels,
         "t_bg_k": round(t_bg_i04, 2) if not np.isnan(t_bg_i04) else None,
         "t_max_i04_k": round(t_max_i04, 2) if not np.isnan(t_max_i04) else None,
         "t_max_i05_k": round(t_max_i05, 2) if not np.isnan(t_max_i05) else None,
