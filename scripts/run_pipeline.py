@@ -18,6 +18,20 @@ Environment variables required (set in .env or GitHub secrets):
 
 import argparse
 import os
+
+# Load .env file if present (before any other imports that need credentials)
+def _load_env():
+    env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
+    env_path = os.path.abspath(env_path)
+    if os.path.exists(env_path):
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, _, val = line.partition("=")
+                    os.environ.setdefault(key.strip(), val.strip())
+
+_load_env()
 import shutil
 import sys
 import yaml
@@ -93,12 +107,21 @@ def process_date(volcano: dict, date: datetime):
                         store.append_record(volcano["name"], result)
                         print(f"  {result['sensor']} | VRP_MIR={result['vrp_mir_mw']} MW | "
                               f"VRP_TIR={result['vrp_tir_mw']} MW | "
-                              f"T_max_I4={result['t_max_i4_k']} K")
+                              f"T_max_I04={result['t_max_i04_k']} K")
 
     finally:
         # Always delete raw granules after processing
         if volcano_tmp.exists():
-            shutil.rmtree(volcano_tmp)
+            import time, stat
+            def _remove_readonly(func, path, _):
+                os.chmod(path, stat.S_IWRITE)
+                func(path)
+            for _ in range(3):
+                try:
+                    shutil.rmtree(volcano_tmp, onerror=_remove_readonly)
+                    break
+                except PermissionError:
+                    time.sleep(1)
             print(f"  Cleaned up {volcano_tmp}")
 
 

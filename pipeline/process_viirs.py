@@ -5,13 +5,12 @@ Algorithm: adapted from TIRVolcH (Aveni et al. 2024, RSE) and
            MODIS-to-VIIRS transition (Campus et al. 2022, Sensors).
 
 Bands used:
-  - I4 (3.74 um, 375m): primary MIR channel for volcanic hotspots
-    Saturation radiance: ~26.3 W/m^2/sr/um (~600 K equivalent)
-  - I5 (11.45 um, 375m): TIR channel for low-temperature anomalies
-    Used for hydrothermal/fumarolic systems (T < 600 K) per TIRVolcH
+  - I04 (3.74 um, 375m): primary MIR channel for volcanic hotspots
+  - I05 (11.45 um, 375m): TIR channel for low-temperature anomalies (TIRVolcH)
 
-VIIRS I-band spatial resolution: 375 m (vs MODIS 1 km)
--> Higher spatial resolution = better for small/weak anomalies like Cordon Caulle
+Calibration: VIIRS files include a pre-computed brightness temperature LUT
+  (65536 values indexed by raw DN). This is used directly instead of
+  manual Planck inversion, per the VIIRS L1B User Guide (Aug 2021).
 
 References:
   - VIIRS L1B User Guide Aug 2021 (VIIRS_L1B_UserGuide_Aug2021.pdf)
@@ -30,38 +29,39 @@ except ImportError:
     print("WARNING: h5py not found. Install: pip install h5py")
 
 
-SIGMA = 5.670374419e-8
-C1 = 1.191042e8
-C2 = 14388.0
-
-# VIIRS I-band central wavelengths (um)
-BAND_I4_LAMBDA = 3.740
-BAND_I5_LAMBDA = 11.450
+SIGMA = 5.670374419e-8   # Stefan-Boltzmann constant, W/m^2/K^4
 
 # VIIRS I-band pixel area at nadir (375 m resolution)
-PIXEL_AREA_M2 = 375.0**2    # = 140,625 m^2
+PIXEL_AREA_M2 = 375.0 ** 2   # 140,625 m^2
 
-ANOMALY_THRESHOLD_K = 5.0
+# Flag DN values (from file attributes)
+FLAG_DNS = {65532, 65533, 65534, 65535}  # Missing_EV, Bowtie_Deleted, Cal_Fail, Fill
+
+# Minimum fixed threshold (K above background)
+ANOMALY_THRESHOLD_K = 5.0    # MIR channel (I04)
+TIR_THRESHOLD_K = 0.5        # TIR channel (I05), per TIRVolcH
+
+# Statistical multiplier: threshold = max(fixed, N_SIGMA * std_background)
+# MIROVA uses this to reject natural terrain variability
+N_SIGMA_MIR = 3.0
+N_SIGMA_TIR = 4.0   # TIR is noisier due to surface/cloud variability
+
 BG_INNER_KM = 5.0
 BG_OUTER_KM = 25.0
 
 
-def radiance_to_bt(L: np.ndarray, wavelength_um: float) -> np.ndarray:
-    with np.errstate(invalid="ignore", divide="ignore"):
-        bt = C2 / (wavelength_um * np.log(C1 / (L * wavelength_um**5) + 1))
-    return bt
-
-
 def read_viirs_l1b(l1b_path: Path) -> dict:
     """
-    Read VIIRS VNP02IMG HDF5 file.
+    Read VIIRS VNP02IMG HDF5/NetCDF4 file.
 
-    VIIRS L1B stores radiance as scaled integers under:
-      /observation_data/I4_Radiance   (shape: n_scans*32, n_samples)
-      /observation_data/I5_Radiance
-    Scaling: radiance = DN * scale + offset  (stored as attributes)
+    Returns:
+        {
+          "I04": ndarray float32 — brightness temperature (K) for band I04
+          "I05": ndarray float32 — brightness temperature (K) for band I05
+        }
 
-    Returns dict with 'I4' and 'I5' radiance arrays (W/m^2/sr/um).
+    Calibration uses the built-in BT LUT (I04_brightness_temperature_lut).
+    Flag values (65532–65535) are replaced with NaN.
     """
     if not H5_AVAILABLE:
         raise ImportError("h5py required. Install: pip install h5py")
@@ -69,69 +69,86 @@ def read_viirs_l1b(l1b_path: Path) -> dict:
     result = {}
     with h5py.File(l1b_path, "r") as f:
         obs = f["observation_data"]
-        for band_name in ("I4", "I5"):
-            key = f"{band_name}_Radiance"
-            if key not in obs:
+        for band in ("I04", "I05"):
+            if band not in obs:
                 continue
-            ds = obs[key]
-            data = ds[:].astype(np.float32)
-            # Read calibration coefficients
-            scale = ds.attrs.get("scale_factor", 1.0)
-            offset = ds.attrs.get("add_offset", 0.0)
-            fill = ds.attrs.get("_FillValue", 65535)
-            # Apply scaling
-            radiance = data * scale + offset
-            radiance = np.where(data >= fill, np.nan, radiance)
-            result[band_name] = radiance
+            dn = obs[band][:]                                   # uint16, shape (lines, pixels)
+            lut_key = f"{band}_brightness_temperature_lut"
+            if lut_key in obs:
+                # Direct LUT lookup: bt[i,j] = lut[dn[i,j]]
+                lut = obs[lut_key][:]                           # float32, 65536 values
+                bt = lut[dn].astype(np.float32)
+                # Mask flag values
+                flag_mask = np.isin(dn, list(FLAG_DNS))
+                bt[flag_mask] = np.nan
+                # LUT fill value is -999.9
+                bt[bt < 0] = np.nan
+            else:
+                # Fallback: manual radiance conversion
+                ds = obs[band]
+                scale = float(ds.attrs.get("scale_factor", 1.0))
+                offset = float(ds.attrs.get("add_offset", 0.0))
+                rad = dn.astype(np.float32) * scale + offset
+                flag_mask = np.isin(dn, list(FLAG_DNS))
+                rad[flag_mask] = np.nan
+                bt = _radiance_to_bt_viirs(rad, band)
+            result[band] = bt
     return result
+
+
+def _radiance_to_bt_viirs(L: np.ndarray, band: str) -> np.ndarray:
+    """Planck inversion fallback (used only if LUT is absent)."""
+    C1 = 1.191042e8
+    C2 = 14388.0
+    wavelengths = {"I04": 3.740, "I05": 11.450}
+    lam = wavelengths.get(band, 3.740)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        return C2 / (lam * np.log(C1 / (L * lam ** 5) + 1))
 
 
 def read_viirs_geo(geo_path: Path) -> dict:
     """
-    Read VIIRS VNP03IMG / VJ103IMG geolocation HDF5 file.
-    Returns dict with 'lat' and 'lon' arrays (degrees).
+    Read VIIRS VNP03IMG / VJ103IMG geolocation HDF5/NetCDF4 file.
+    Returns dict with 'lat' and 'lon' arrays (degrees, float32).
     """
     if not H5_AVAILABLE:
         raise ImportError("h5py required.")
 
     with h5py.File(geo_path, "r") as f:
-        geo_data = f["geolocation_data"]
-        lat = geo_data["latitude"][:].astype(np.float32)
-        lon = geo_data["longitude"][:].astype(np.float32)
+        geo = f["geolocation_data"]
+        lat = geo["latitude"][:].astype(np.float32)
+        lon = geo["longitude"][:].astype(np.float32)
+        # Fill value is -999.9
+        lat[lat < -90] = np.nan
+        lon[lon < -180] = np.nan
     return {"lat": lat, "lon": lon}
 
 
-def haversine_km(lat1, lon1, lat2_arr, lon2_arr):
+def haversine_km(lat1: float, lon1: float,
+                 lat2_arr: np.ndarray, lon2_arr: np.ndarray) -> np.ndarray:
+    """Vectorized haversine distance (km) from point to array."""
     R = 6371.0
     dlat = np.radians(lat2_arr - lat1)
     dlon = np.radians(lon2_arr - lon1)
-    a = (np.sin(dlat / 2)**2
-         + np.cos(np.radians(lat1)) * np.cos(np.radians(lat2_arr)) * np.sin(dlon / 2)**2)
-    return R * 2 * np.arcsin(np.sqrt(a))
+    a = (np.sin(dlat / 2) ** 2
+         + np.cos(np.radians(lat1)) * np.cos(np.radians(lat2_arr)) * np.sin(dlon / 2) ** 2)
+    return R * 2 * np.arcsin(np.sqrt(np.clip(a, 0, 1)))
 
 
 def calculate_vrp(l1b_path: Path, geo_path: Path,
                   volcano_lat: float, volcano_lon: float,
-                  radius_km: float = 30.0) -> dict:
+                  radius_km: float = 30.0) -> dict | None:
     """
     Calculate VRP from a single VIIRS L1B granule.
 
-    Uses band I4 (3.74 um) for the MIR-based VRP (same approach as MIROVA/MODIS).
-    Also computes a TIR-based VRP from I5 (11.45 um) using the TIRVolcH approach,
-    which is more sensitive to low-temperature features like Cordon Caulle fumaroles.
+    Args:
+        l1b_path: Path to VNP02IMG or VJ102IMG file (.nc)
+        geo_path: Path to VNP03IMG or VJ103IMG geolocation file (.nc)
+        volcano_lat: Volcano latitude (degrees)
+        volcano_lon: Volcano longitude (degrees)
+        radius_km: Search radius around volcano for anomaly detection
 
-    Returns:
-        {
-          "vrp_mir_mw": float,    # VRP from I4 band (MW)
-          "vrp_tir_mw": float,    # VRP from I5 band, TIRVolcH approach (MW)
-          "n_anomalous_pixels": int,
-          "t_bg_k": float,
-          "t_max_i4_k": float,
-          "t_max_i5_k": float,
-          "sensor": str,
-          "granule": str,
-          "datetime_utc": str,
-        }
+    Returns dict with VRP values, or None if granule does not cover volcano.
     """
     bands = read_viirs_l1b(l1b_path)
     geo = read_viirs_geo(geo_path)
@@ -146,77 +163,76 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     if not np.any(roi_mask):
         return None
 
-    # --- MIR channel (I4, 3.74 um) ---
+    # --- MIR channel I04 (3.74 um) — high-temperature features ---
     vrp_mir_mw = 0.0
-    t_bg_i4 = float("nan")
-    t_max_i4 = float("nan")
+    t_bg_i04 = float("nan")
+    t_max_i04 = float("nan")
     n_anomalous = 0
 
-    if "I4" in bands:
-        bt_i4 = radiance_to_bt(bands["I4"], BAND_I4_LAMBDA)
-        bg_bt = bt_i4[bg_mask]
-        bg_bt = bg_bt[~np.isnan(bg_bt)]
-        if len(bg_bt) >= 10:
-            t_bg_i4 = float(np.median(bg_bt))
-            roi_bt = bt_i4[roi_mask]
-            anomaly = roi_bt > (t_bg_i4 + ANOMALY_THRESHOLD_K)
-            n_anomalous = int(np.sum(anomaly))
+    if "I04" in bands:
+        bt = bands["I04"]
+        bg_vals = bt[bg_mask & ~np.isnan(bt)]
+        if len(bg_vals) >= 10:
+            t_bg_i04 = float(np.median(bg_vals))
+            std_bg = float(np.std(bg_vals))
+            threshold_mir = max(ANOMALY_THRESHOLD_K, N_SIGMA_MIR * std_bg)
+            roi_bt = bt[roi_mask]
+            hotpix = roi_bt[roi_bt > (t_bg_i04 + threshold_mir)]
+            hotpix = hotpix[~np.isnan(hotpix)]
+            n_anomalous = len(hotpix)
             if n_anomalous > 0:
-                t_hot = roi_bt[anomaly]
-                vrp_w = float(np.sum(PIXEL_AREA_M2 * SIGMA * (t_hot**4 - t_bg_i4**4)))
+                vrp_w = float(np.sum(PIXEL_AREA_M2 * SIGMA * (hotpix ** 4 - t_bg_i04 ** 4)))
                 vrp_mir_mw = vrp_w / 1e6
-            t_max_i4 = float(np.nanmax(bt_i4[roi_mask]))
+            valid_roi = roi_bt[~np.isnan(roi_bt)]
+            t_max_i04 = float(np.max(valid_roi)) if len(valid_roi) else float("nan")
 
-    # --- TIR channel (I5, 11.45 um) — TIRVolcH approach ---
-    # Detects anomalies as low as 0.5 K above background
-    # Better suited for Cordon Caulle fumarolic activity (T < 600 K)
+    # --- TIR channel I05 (11.45 um) — TIRVolcH, low-temperature features ---
     vrp_tir_mw = 0.0
-    t_max_i5 = float("nan")
-    TIR_THRESHOLD_K = 0.5   # Per TIRVolcH (Aveni et al. 2024)
+    t_max_i05 = float("nan")
 
-    if "I5" in bands:
-        bt_i5 = radiance_to_bt(bands["I5"], BAND_I5_LAMBDA)
-        bg_bt5 = bt_i5[bg_mask]
-        bg_bt5 = bg_bt5[~np.isnan(bg_bt5)]
-        if len(bg_bt5) >= 10:
-            t_bg_i5 = float(np.median(bg_bt5))
-            roi_bt5 = bt_i5[roi_mask]
-            anomaly5 = roi_bt5 > (t_bg_i5 + TIR_THRESHOLD_K)
-            if np.any(anomaly5):
-                t_hot5 = roi_bt5[anomaly5]
-                vrp_w5 = float(np.sum(PIXEL_AREA_M2 * SIGMA * (t_hot5**4 - t_bg_i5**4)))
+    if "I05" in bands:
+        bt5 = bands["I05"]
+        bg_vals5 = bt5[bg_mask & ~np.isnan(bt5)]
+        if len(bg_vals5) >= 10:
+            t_bg_i05 = float(np.median(bg_vals5))
+            std_bg5 = float(np.std(bg_vals5))
+            threshold_tir = max(TIR_THRESHOLD_K, N_SIGMA_TIR * std_bg5)
+            roi_bt5 = bt5[roi_mask]
+            hotpix5 = roi_bt5[roi_bt5 > (t_bg_i05 + threshold_tir)]
+            hotpix5 = hotpix5[~np.isnan(hotpix5)]
+            if len(hotpix5) > 0:
+                vrp_w5 = float(np.sum(PIXEL_AREA_M2 * SIGMA * (hotpix5 ** 4 - t_bg_i05 ** 4)))
                 vrp_tir_mw = vrp_w5 / 1e6
-            t_max_i5 = float(np.nanmax(bt_i5[roi_mask]))
+            valid_roi5 = roi_bt5[~np.isnan(roi_bt5)]
+            t_max_i05 = float(np.max(valid_roi5)) if len(valid_roi5) else float("nan")
 
-    sensor = "VIIRS_SNPP" if l1b_path.name.startswith("VNP") else "VIIRS_NOAA20"
+    name = l1b_path.name
+    sensor = "VIIRS_SNPP" if name.startswith("VNP") else "VIIRS_NOAA20"
 
     return {
         "vrp_mir_mw": round(vrp_mir_mw, 3),
         "vrp_tir_mw": round(vrp_tir_mw, 3),
         "n_anomalous_pixels": n_anomalous,
-        "t_bg_k": round(t_bg_i4, 2),
-        "t_max_i4_k": round(t_max_i4, 2),
-        "t_max_i5_k": round(t_max_i5, 2),
+        "t_bg_k": round(t_bg_i04, 2) if not np.isnan(t_bg_i04) else None,
+        "t_max_i04_k": round(t_max_i04, 2) if not np.isnan(t_max_i04) else None,
+        "t_max_i05_k": round(t_max_i05, 2) if not np.isnan(t_max_i05) else None,
         "sensor": sensor,
-        "granule": l1b_path.name,
-        "datetime_utc": _parse_datetime(l1b_path.name),
+        "granule": name,
+        "datetime_utc": _parse_datetime(name),
     }
 
 
 def _parse_datetime(filename: str) -> str:
     """
     Extract UTC datetime from VIIRS filename.
-    Example: VNP02IMG.A2024074.0006.002.2024074123456.nc
-             -> 2024-03-14 00:06
+    Example: VNP02IMG.A2024074.0506.002.nc → 2024-03-14 05:06
     """
     try:
         parts = filename.split(".")
-        date_part = parts[1]
-        time_part = parts[2]
-        year = int(date_part[1:5])
-        doy = int(date_part[5:8])
-        hour = int(time_part[:2])
-        minute = int(time_part[2:4])
+        year = int(parts[1][1:5])
+        doy = int(parts[1][5:8])
+        hour = int(parts[2][:2])
+        minute = int(parts[2][2:4])
         import datetime
         dt = datetime.datetime(year, 1, 1) + datetime.timedelta(days=doy - 1,
                                                                   hours=hour,

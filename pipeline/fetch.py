@@ -16,14 +16,14 @@ from pathlib import Path
 
 # Short names for each product in the NASA CMR catalog
 PRODUCTS = {
-    "MODIS_TERRA_L1B":   {"short_name": "MOD021KM",  "version": "061"},
-    "MODIS_TERRA_GEO":   {"short_name": "MOD03",     "version": "061"},
-    "MODIS_AQUA_L1B":    {"short_name": "MYD021KM",  "version": "061"},
-    "MODIS_AQUA_GEO":    {"short_name": "MYD03",     "version": "061"},
-    "VIIRS_SNPP_L1B":    {"short_name": "VNP02IMG",  "version": "002"},
-    "VIIRS_SNPP_GEO":    {"short_name": "VNP03IMG",  "version": "002"},
-    "VIIRS_NOAA20_L1B":  {"short_name": "VJ102IMG",  "version": "002"},
-    "VIIRS_NOAA20_GEO":  {"short_name": "VJ103IMG",  "version": "002"},
+    "MODIS_TERRA_L1B":   {"short_name": "MOD021KM",  "version": "6.1"},
+    "MODIS_TERRA_GEO":   {"short_name": "MOD03",     "version": "6.1"},
+    "MODIS_AQUA_L1B":    {"short_name": "MYD021KM",  "version": "6.1"},
+    "MODIS_AQUA_GEO":    {"short_name": "MYD03",     "version": "6.1"},
+    "VIIRS_SNPP_L1B":    {"short_name": "VNP02IMG",  "version": "2"},
+    "VIIRS_SNPP_GEO":    {"short_name": "VNP03IMG",  "version": "2"},
+    "VIIRS_NOAA20_L1B":  {"short_name": "VJ102IMG",  "version": "2"},
+    "VIIRS_NOAA20_GEO":  {"short_name": "VJ103IMG",  "version": "2"},
 }
 
 
