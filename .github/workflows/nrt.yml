@@ -5,7 +5,6 @@ on:
     # Run every 6 hours: 00:00, 06:00, 12:00, 18:00 UTC
     - cron: "0 0,6,12,18 * * *"
   workflow_dispatch:
-    # Allow manual trigger from GitHub Actions UI
     inputs:
       volcano:
         description: "Volcano name (leave empty for all)"
@@ -20,7 +19,9 @@ jobs:
   process:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # needed to commit data files back to repo
+      contents: write
+      pages: write
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -35,10 +36,9 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          # pyhdf needs HDF4 libraries
           sudo apt-get install -y libhdf4-dev
           pip install pyhdf
-          pip install earthaccess numpy h5py pyproj pandas pyyaml
+          pip install earthaccess numpy h5py scipy pyyaml
 
       - name: Run VRP pipeline
         env:
@@ -53,7 +53,41 @@ jobs:
         run: |
           git config user.name  "vrp-bot"
           git config user.email "vrp-bot@github-actions"
-          git add data/*.json
-          # Only commit if there are changes
+          git add data/*.json data/mirova/*.json
           git diff --staged --quiet || git commit -m "NRT update $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push
+
+      - name: Deploy frontend to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend
+          keep_files: false
+          # Copy data/ into the published site so fetch('../data/...') works
+          # We use a custom publish script instead
+        if: false  # placeholder — see next step
+
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p _site
+          cp -r frontend/. _site/
+          cp -r data _site/data
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy-pages:
+    needs: process
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
