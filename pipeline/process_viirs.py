@@ -29,10 +29,20 @@ except ImportError:
     print("WARNING: h5py not found. Install: pip install h5py")
 
 
-SIGMA = 5.670374419e-8   # Stefan-Boltzmann constant, W/m^2/K^4
+SIGMA = 5.670374419e-8   # Stefan-Boltzmann constant, W/m^2/K^4 (TIR only)
 
 # VIIRS I-band pixel area at nadir (375 m resolution)
 PIXEL_AREA_M2 = 375.0 ** 2   # 140,625 m^2
+
+# Planck constants for spectral radiance (W/m²/sr/µm)
+C1 = 1.191042e8   # 2hc² in W·µm⁴/m²/sr
+C2 = 14388.0      # hc/k in µm·K
+
+# Wooster MIR radiance coefficient (Coppola 2015, Eq.7; Wooster et al. 2003)
+WOOSTER_COEFF = 18.9   # W/m² per (W/m²/sr/µm) — empirical for ~4µm MIR band
+
+# Band wavelengths (µm)
+I04_LAMBDA = 3.740
 
 # Flag DN values (from file attributes)
 FLAG_DNS = {65532, 65533, 65534, 65535}  # Missing_EV, Bowtie_Deleted, Cal_Fail, Fill
@@ -52,6 +62,12 @@ N_SIGMA_VENT = 2.0           # Less conservative — small radius suppresses FP
 
 BG_INNER_KM = 5.0
 BG_OUTER_KM = 25.0
+
+
+def bt_to_spectral_radiance(bt: np.ndarray, wavelength_um: float) -> np.ndarray:
+    """Convert brightness temperature (K) to spectral radiance (W/m²/sr/µm) via Planck."""
+    with np.errstate(invalid="ignore", divide="ignore", over="ignore"):
+        return C1 / (wavelength_um ** 5 * (np.exp(C2 / (wavelength_um * bt)) - 1))
 
 
 def read_viirs_l1b(l1b_path: Path) -> dict:
@@ -190,7 +206,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             hotpix = hotpix[~np.isnan(hotpix)]
             n_anomalous = len(hotpix)
             if n_anomalous > 0:
-                vrp_w = float(np.sum(PIXEL_AREA_M2 * SIGMA * (hotpix ** 4 - t_bg_i04 ** 4)))
+                # Wooster MIR radiance method (Coppola 2015, Eq.7)
+                L_hot = bt_to_spectral_radiance(hotpix, I04_LAMBDA)
+                L_bg = bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA)
+                delta_L = L_hot - L_bg
+                vrp_w = float(np.sum(PIXEL_AREA_M2 * WOOSTER_COEFF * delta_L))
                 vrp_mir_mw = vrp_w / 1e6
             valid_roi = roi_bt[~np.isnan(roi_bt)]
             t_max_i04 = float(np.max(valid_roi)) if len(valid_roi) else float("nan")
@@ -236,8 +256,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 t_max_vent = float(np.max(vent_roi_bt))
                 # Use same regional background and a low fixed threshold
                 if t_max_vent > (t_bg_i04 + VENT_THRESHOLD_K):
+                    # Wooster MIR radiance method for vent pixel
+                    L_vent = bt_to_spectral_radiance(np.float64(t_max_vent), I04_LAMBDA)
+                    L_bg_vent = bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA)
                     vrp_vent_mw = float(
-                        PIXEL_AREA_M2 * SIGMA * (t_max_vent ** 4 - t_bg_i04 ** 4)
+                        PIXEL_AREA_M2 * WOOSTER_COEFF * (L_vent - L_bg_vent)
                     ) / 1e6
                     n_vent_pixels = 1
 

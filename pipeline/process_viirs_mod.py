@@ -25,8 +25,15 @@ try:
 except ImportError:
     H5_AVAILABLE = False
 
-SIGMA = 5.670374419e-8
+SIGMA = 5.670374419e-8  # kept for reference, not used in MIR VRP
 PIXEL_AREA_M2 = 750.0 ** 2   # 562,500 m²
+
+# Planck constants for spectral radiance (W/m²/sr/µm)
+C1_PLANCK = 1.191042e8   # 2hc² in W·µm⁴/m²/sr
+C2_PLANCK = 14388.0      # hc/k in µm·K
+
+# Wooster MIR radiance coefficient (Coppola 2015, Eq.7)
+WOOSTER_COEFF = 18.9
 
 FLAG_DNS = {65532, 65533, 65534, 65535}
 
@@ -101,6 +108,12 @@ def read_viirs_mod_geo(geo_path: Path) -> dict:
     return {"lat": lat, "lon": lon}
 
 
+def bt_to_spectral_radiance(bt: np.ndarray, wavelength_um: float) -> np.ndarray:
+    """Convert brightness temperature (K) to spectral radiance (W/m²/sr/µm) via Planck."""
+    with np.errstate(invalid="ignore", divide="ignore", over="ignore"):
+        return C1_PLANCK / (wavelength_um ** 5 * (np.exp(C2_PLANCK / (wavelength_um * bt)) - 1))
+
+
 def haversine_km(lat1, lon1, lat2_arr, lon2_arr):
     R = 6371.0
     dlat = np.radians(lat2_arr - lat1)
@@ -148,7 +161,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
 
     vrp_mw = 0.0
     if n_anomalous > 0:
-        vrp_w  = float(np.sum(PIXEL_AREA_M2 * SIGMA * (hotpix ** 4 - t_bg ** 4)))
+        # Wooster MIR radiance method (Coppola 2015, Eq.7)
+        L_hot = bt_to_spectral_radiance(hotpix, M13_LAMBDA)
+        L_bg_rad = bt_to_spectral_radiance(np.float64(t_bg), M13_LAMBDA)
+        delta_L = L_hot - L_bg_rad
+        vrp_w = float(np.sum(PIXEL_AREA_M2 * WOOSTER_COEFF * delta_L))
         vrp_mw = vrp_w / 1e6
 
     valid_roi = roi_bt[~np.isnan(roi_bt)]

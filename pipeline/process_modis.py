@@ -37,6 +37,9 @@ BAND21_LAMBDA = 3.929
 BAND22_LAMBDA = 3.959
 PIXEL_AREA_M2 = 1e6       # 1 km^2
 
+# Wooster MIR radiance coefficient (Coppola 2015, Eq.7)
+WOOSTER_COEFF = 18.9
+
 ANOMALY_THRESHOLD_K = 5.0
 N_SIGMA = 3.0
 BG_INNER_KM = 5.0
@@ -149,8 +152,13 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         return None
 
     # Merge bands: use Band 21 primary, Band 22 where 21 is NaN (saturated)
-    bt21 = radiance_to_bt(data["band21"], BAND21_LAMBDA)
-    bt22 = radiance_to_bt(data["band22"], BAND22_LAMBDA)
+    # Work with both radiance (for VRP) and BT (for thresholds/reporting)
+    rad21 = data["band21"]
+    rad22 = data["band22"]
+    rad_mir = np.where(np.isnan(rad21), rad22, rad21)
+
+    bt21 = radiance_to_bt(rad21, BAND21_LAMBDA)
+    bt22 = radiance_to_bt(rad22, BAND22_LAMBDA)
     bt_mir = np.where(np.isnan(bt21), bt22, bt21)
 
     bg_vals = bt_mir[bg_mask & ~np.isnan(bt_mir)]
@@ -162,13 +170,22 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     threshold = max(ANOMALY_THRESHOLD_K, N_SIGMA * std_bg)
 
     roi_bt = bt_mir[roi_mask]
-    hotpix = roi_bt[roi_bt > (t_bg + threshold)]
-    hotpix = hotpix[~np.isnan(hotpix)]
-    n_anomalous = len(hotpix)
+    roi_rad = rad_mir[roi_mask]
+    hot_mask = roi_bt > (t_bg + threshold)
+    hotpix_bt = roi_bt[hot_mask]
+    hotpix_bt = hotpix_bt[~np.isnan(hotpix_bt)]
+    hotpix_rad = roi_rad[hot_mask]
+    hotpix_rad = hotpix_rad[~np.isnan(hotpix_rad)]
+    n_anomalous = len(hotpix_bt)
 
     vrp_mw = 0.0
     if n_anomalous > 0:
-        vrp_w = float(np.sum(PIXEL_AREA_M2 * SIGMA * (hotpix ** 4 - t_bg ** 4)))
+        # Wooster MIR radiance method (Coppola 2015, Eq.7)
+        # Use radiance directly from MODIS calibrated L1B
+        bg_rad_vals = rad_mir[bg_mask & ~np.isnan(rad_mir)]
+        L_bg = float(np.median(bg_rad_vals))
+        delta_L = hotpix_rad - L_bg
+        vrp_w = float(np.sum(PIXEL_AREA_M2 * WOOSTER_COEFF * delta_L))
         vrp_mw = vrp_w / 1e6
 
     valid_roi = roi_bt[~np.isnan(roi_bt)]
