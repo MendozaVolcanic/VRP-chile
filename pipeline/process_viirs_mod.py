@@ -125,9 +125,15 @@ def haversine_km(lat1, lon1, lat2_arr, lon2_arr):
 
 def calculate_vrp(l1b_path: Path, geo_path: Path,
                   volcano_lat: float, volcano_lon: float,
-                  radius_km: float = 30.0) -> dict | None:
+                  radius_km: float = 30.0,
+                  vent_lat: float = None, vent_lon: float = None,
+                  vent_radius_km: float = 4.0) -> dict | None:
     """
     Calculate VRP from VIIRS 750m M-band granule (VNP02MOD / VJ102MOD).
+
+    Args:
+        vent_lat/vent_lon: Optional vent coordinates for weak-signal detection.
+        vent_radius_km: Radius for vent-scale search.
 
     Returns dict with VRP or None if granule does not cover volcano.
     """
@@ -202,12 +208,31 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     valid_roi = roi_bt_full[~np.isnan(roi_bt_full)]
     t_max = float(np.max(valid_roi)) if len(valid_roi) else float("nan")
 
+    # --- Vent-scale detection (weak fumarolic signals) ---
+    vrp_vent_mw = 0.0
+    n_vent_pixels = 0
+    if vent_lat is not None and vent_lon is not None and not np.isnan(t_bg):
+        vent_dist = haversine_km(vent_lat, vent_lon, lat, lon)
+        vent_roi_mask = vent_dist <= vent_radius_km
+        if np.any(vent_roi_mask):
+            vent_bt = np.where(vent_roi_mask & ~np.isnan(bt), bt, np.nan)
+            vent_valid = vent_bt[~np.isnan(vent_bt)]
+            if len(vent_valid) > 0:
+                t_max_vent = float(np.max(vent_valid))
+                if t_max_vent > (t_bg + 1.0):
+                    L_vent = bt_to_spectral_radiance(np.float64(t_max_vent), M13_LAMBDA)
+                    L_bg_vent = bt_to_spectral_radiance(np.float64(t_bg), M13_LAMBDA)
+                    vrp_vent_mw = float(PIXEL_AREA_M2 * WOOSTER_COEFF * (L_vent - L_bg_vent)) / 1e6
+                    n_vent_pixels = 1
+
     name   = l1b_path.name
     sensor = "VIIRS_SNPP_750" if name.startswith("VNP") else "VIIRS_NOAA20_750"
 
     return {
         "vrp_mw": round(vrp_mw, 3),
+        "vrp_vent_mw": round(vrp_vent_mw, 3),
         "n_anomalous_pixels": n_anomalous,
+        "n_vent_pixels": n_vent_pixels,
         "hotspot_lat": hotspot_lat,
         "hotspot_lon": hotspot_lon,
         "hotspot_dist_km": hotspot_dist_km,

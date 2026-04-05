@@ -70,6 +70,19 @@ def append_record(volcano_name: str, record: dict,
     if record is None:
         return
 
+    # Normalize VRP field: ensure every record has a unified 'vrp_mw' field.
+    # VIIRS 375m returns vrp_mir_mw/vrp_vent_mw; MODIS/VIIRS750 return vrp_mw/vrp_vent_mw.
+    # The unified vrp_mw = max(eruption-scale, vent-scale) for dashboard consistency.
+    if "vrp_mir_mw" in record and "vrp_mw" not in record:
+        record["vrp_mw"] = record["vrp_mir_mw"]
+    vrp_eruption = record.get("vrp_mw", 0) or 0
+    vrp_vent = record.get("vrp_vent_mw", 0) or 0
+    record["vrp_mw"] = round(max(vrp_eruption, vrp_vent), 3)
+
+    # Normalize t_max_k for VIIRS 375m (uses t_max_i04_k internally)
+    if "t_max_i04_k" in record and "t_max_k" not in record:
+        record["t_max_k"] = record["t_max_i04_k"]
+
     # Safety net: reject daytime records (solar contamination → false VRP)
     if volcano_lat is not None and volcano_lon is not None:
         dt_str = record.get("datetime_utc", "")

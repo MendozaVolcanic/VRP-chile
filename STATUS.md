@@ -1,5 +1,5 @@
 # STATUS — VRP Chile
-**Ultima actualizacion:** 2026-04-05 (fin de sesion)
+**Ultima actualizacion:** 2026-04-05 (sesion 2 — vent-scale detection)
 
 ---
 
@@ -17,22 +17,40 @@
 
 ---
 
-## Datos por volcan (al cierre de sesion 2026-04-05)
+## Datos por volcan (sesion 2 — 2026-04-05)
 
-| Volcan | Registros | Rango fechas | Detecciones (VRP > 0) | Max VRP | MIROVA ref |
-|--------|-----------|--------------|----------------------|---------|------------|
-| Puyehue-Cordon Caulle | 132 | 2024-03-12 a 2026-04-04 | 2 | 3.81 MW | 94 registros |
-| Villarrica | 13 (parcial) | 2026-01-01 a 2026-04-04 | 0 | 0 MW | -- |
-| Lascar | 10 (parcial) | 2026-01-01 a 2026-04-04 | 0 | 0 MW | 203 registros |
-| Copahue | 11 (parcial) | 2026-01-01 a 2026-04-04 | 0 | 0 MW | -- |
+| Volcan | Registros | Detecciones (VRP > 0) | Max VRP | MIROVA ref | Estado |
+|--------|-----------|-----------------------|---------|------------|--------|
+| Puyehue-Cordon Caulle | 134 | 2 | 3.81 MW | 89 registros | OK (NRT activo) |
+| Villarrica | 0 (reset) | -- | -- | 8 registros | Pendiente recalibracion |
+| Lascar | 0 (reset) | -- | -- | 203 registros | Pendiente recalibracion |
+| Copahue | 0 (reset) | -- | -- | 0 registros | Pendiente recalibracion |
 
-**NOTA**: Las recalibraciones de Villarrica, Lascar y Copahue quedaron corriendo al cerrar sesion.
-Los datos son parciales — probablemente hay mas registros pendientes de escribir.
-PCC paso de 74 a 132 registros (NRT automatico sigue sumando), y max VRP bajo de valores inflados a 3.81 MW (alineado con MIROVA).
+**Villarrica, Lascar y Copahue reseteados** para recalibracion limpia con vent-scale detection.
+Test exitoso con Lascar 2026-03-28: VIIRS SNPP 375m detecto 1.917 MW (MIROVA: 2.34 MW). Vent-scale funciona.
 
 ---
 
-## Lo que se hizo esta sesion (2026-04-05)
+## Lo que se hizo sesion 2 (2026-04-05)
+
+1. **Vent-scale detection** — Nuevo modo de deteccion para senales debiles (fumarolas, lagos de lava)
+   - Threshold 1K sobre background regional (vs 5K del modo erupcion)
+   - ROI pequeno (~2 km) centrado en el vent conocido
+   - Implementado en los 3 procesadores: MODIS, VIIRS 375m, VIIRS 750m
+2. **Coordenadas de venteo** — Agregadas a Villarrica, Lascar y Copahue en volcanoes.yaml
+3. **Normalizacion VRP en store.py** — Todos los registros ahora tienen `vrp_mw` unificado (max entre eruption y vent-scale)
+4. **Normalizacion t_max_k** — VIIRS 375m ahora exporta `t_max_k` ademas de `t_max_i04_k`
+5. **MIROVA ref importados** — Villarrica (8 rec) y Copahue (0 rec) desde Mirova-v1
+6. **Workflow recalibracion** — GitHub Actions ahora soporta --start/--end para rangos de fechas
+7. **Test validacion Lascar 2026-03-28**:
+   - VIIRS SNPP 375m: 1.917 MW (MIROVA: 2.34 MW) — coincide orden de magnitud
+   - VIIRS NOAA20 375m: 0.115 MW (MIROVA: 0.11 MW) — match exacto
+   - VIIRS SNPP 750m: 1.733 MW (MIROVA: 2.0 MW) — cercano
+8. **Reset datos** — Villarrica, Lascar, Copahue limpiados para recalibracion fresca
+
+---
+
+## Lo que se hizo sesion 1 (2026-04-05)
 
 1. **Implementacion multi-pixel anomaly tracking** — Los 3 procesadores (MODIS, VIIRS 375m, VIIRS 750m) ahora guardan `anomaly_pixels[]` con lat/lon/BT/VRP por cada pixel anomalo
 2. **Fix critico MODIS radiance** — `L_bg = median(radiance)` cambiado a `L_bg = Planck(T_bg)` por no-linealidad de Planck
@@ -147,33 +165,28 @@ Un pixel se marca como anomalo solo si pasa TODOS los filtros:
 
 ## PROXIMA SESION — Pasos a seguir
 
-### 1. Verificar recalibraciones (URGENTE)
-- Las recalibraciones de Villarrica, Lascar y Copahue quedaron corriendo
-- **Verificar** si terminaron: revisar `data/Villarrica.json`, `data/Lascar.json`, `data/Copahue.json`
-- Si no terminaron o fallaron: re-ejecutar el pipeline manualmente para Jan-Mar 2026
-- Comparar nuestros VRP nocturnos vs datos MIROVA de referencia (data/mirova/)
-- **Esperado**: Lascar deberia mostrar 0.03-4.61 MW (rango MIROVA), Villarrica ~0-0.5 MW
+### 1. Recalibracion completa via GitHub Actions (URGENTE)
+- Datos de Villarrica, Lascar y Copahue reseteados — necesitan recalibracion
+- Usar workflow_dispatch con --start 2026-01-01 --end 2026-04-05 para cada volcan
+- Ejemplo: volcano=Lascar, start=2026-01-01, end=2026-04-05
+- MODIS solo funciona en GitHub Actions (pyhdf requiere Linux)
+- Verificar resultados contra MIROVA ref (data/mirova/)
 
-### 2. Commit y push datos calibrados
-- Hacer `git add data/*.json` y push con los datos recalibrados
-- Verificar que el dashboard en GitHub Pages muestra datos correctos para los 4 volcanes
+### 2. Validar recalibracion vs MIROVA
+- Lascar: esperado 0.03-4.61 MW, ~200+ detecciones en 3 meses
+- Villarrica: esperado 0.05-0.37 MW, ~8 detecciones
+- Copahue: esperado 0 detecciones (MIROVA tampoco tiene)
+- Si hay discrepancias grandes, revisar thresholds
 
 ### 3. PCC sin anomaly_pixels (formato legacy)
-- PuyehueCordonCaulle tiene 132 registros pero los antiguos no tienen campo `anomaly_pixels`
+- PuyehueCordonCaulle tiene 134 registros pero los antiguos no tienen campo `anomaly_pixels`
 - Los registros nuevos (post-fix) si lo tienen
 - Decidir: (a) re-procesar PCC completo, o (b) dejar los legacy como estan (el dashboard maneja ambos formatos)
 
-### 4. Importar datos MIROVA para Villarrica y Copahue
-- Ya tenemos MIROVA ref para PCC (94 rec) y Lascar (203 rec)
-- Faltan Villarrica y Copahue — buscar en https://github.com/MendozaVolcanic/Mirova-v1
-- Convertir CSV a JSON en `data/mirova/Villarrica.json` y `data/mirova/Copahue.json`
-- Necesario para que la tab "Comparacion MIROVA" funcione para esos volcanes
-
-### 5. Validar detecciones vs actividad conocida
-- Lascar: actividad fumarolica persistente → deberia tener detecciones VRP 0.03-5 MW
-- Villarrica: lago de lava abierto → detecciones frecuentes VRP ~0.1-1 MW
-- Si las recalibraciones dan 0 detecciones para todo, investigar si los thresholds son demasiado estrictos
-- El filtro ROI p95 podria estar eliminando senales reales debiles → revisar
+### 4. PCC recalibracion con vent-scale
+- PCC ya tiene vent_lat/vent_lon (campo fumarolico 2011)
+- Pero los 134 registros existentes NO tienen vrp_vent_mw
+- Considerar re-procesar para capturar senales debiles que el eruption-scale pierde
 
 ### 6. Cloud masking (mejora de calidad)
 - Actualmente sin filtro de nubes

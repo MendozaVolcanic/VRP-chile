@@ -130,12 +130,19 @@ def haversine_km(lat1, lon1, lat2_arr, lon2_arr):
 
 def calculate_vrp(hdf_path: Path, geo_path: Path,
                   volcano_lat: float, volcano_lon: float,
-                  radius_km: float = 15.0) -> dict | None:
+                  radius_km: float = 15.0,
+                  vent_lat: float = None, vent_lon: float = None,
+                  vent_radius_km: float = 4.0) -> dict | None:
     """
     Calculate VRP from MODIS L1B granule.
 
     geo_path is accepted for API compatibility but not used —
     geolocation is embedded in MOD021KM.
+
+    Args:
+        vent_lat/vent_lon: Optional vent coordinates for weak-signal detection.
+            Uses a low threshold (1K) in a tight ROI without ROI p95 filter.
+        vent_radius_km: Radius for vent-scale search.
 
     Returns dict or None if granule does not cover volcano.
     """
@@ -226,9 +233,31 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     valid_roi = roi_bt_full[~np.isnan(roi_bt_full)]
     t_max = float(np.max(valid_roi)) if len(valid_roi) else float("nan")
 
+    # --- Vent-scale detection (weak fumarolic signals) ---
+    # Same approach as VIIRS 375m: tight ROI around known vent, low threshold,
+    # no ROI p95 filter. Uses the regional background (t_bg) already computed.
+    vrp_vent_mw = 0.0
+    n_vent_pixels = 0
+    if vent_lat is not None and vent_lon is not None and not np.isnan(t_bg):
+        vent_dist = haversine_km(vent_lat, vent_lon, lat, lon)
+        vent_roi_mask = vent_dist <= vent_radius_km
+        if np.any(vent_roi_mask):
+            vent_bt = np.where(vent_roi_mask & ~np.isnan(bt_mir), bt_mir, np.nan)
+            vent_valid = vent_bt[~np.isnan(vent_bt)]
+            if len(vent_valid) > 0:
+                t_max_vent = float(np.max(vent_valid))
+                # Low threshold: 1K above regional background (no ROI p95)
+                if t_max_vent > (t_bg + 1.0):
+                    L_vent = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_max_vent)) - 1)))
+                    L_bg_vent = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bg)) - 1)))
+                    vrp_vent_mw = float(PIXEL_AREA_M2 * WOOSTER_COEFF * (L_vent - L_bg_vent)) / 1e6
+                    n_vent_pixels = 1
+
     return {
         "vrp_mw": round(vrp_mw, 3),
+        "vrp_vent_mw": round(vrp_vent_mw, 3),
         "n_anomalous_pixels": n_anomalous,
+        "n_vent_pixels": n_vent_pixels,
         "hotspot_lat": hotspot_lat,
         "hotspot_lon": hotspot_lon,
         "hotspot_dist_km": hotspot_dist_km,

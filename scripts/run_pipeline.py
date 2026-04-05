@@ -156,14 +156,19 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         continue
                     try:
                         result = process_modis.calculate_vrp(
-                            l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"]
+                            l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"],
+                            vent_lat=volcano.get("vent_lat"),
+                            vent_lon=volcano.get("vent_lon"),
+                            vent_radius_km=volcano.get("vent_radius_km", 4.0),
                         )
                         if result:
                             store.append_record(volcano["name"], result,
                                                 volcano_lat=volcano["lat"], volcano_lon=volcano["lon"])
+                            vent_str = (f" | VRP_VENT={result.get('vrp_vent_mw', 0)} MW"
+                                        if volcano.get("vent_lat") and result.get('vrp_vent_mw', 0) > 0 else "")
                             print(f"  {result['sensor']} | VRP={result['vrp_mw']} MW | "
                                   f"T_bg={result['t_bg_k']} K | T_max={result['t_max_k']} K | "
-                                  f"anomalous_px={result['n_anomalous_pixels']}")
+                                  f"anomalous_px={result['n_anomalous_pixels']}{vent_str}")
                     except Exception as e:
                         print(f"  ERROR processing {l1b.name}: {e}")
 
@@ -216,14 +221,19 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         continue
                     try:
                         result = process_viirs_mod.calculate_vrp(
-                            l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"]
+                            l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"],
+                            vent_lat=volcano.get("vent_lat"),
+                            vent_lon=volcano.get("vent_lon"),
+                            vent_radius_km=volcano.get("vent_radius_km", 4.0),
                         )
                         if result:
                             store.append_record(volcano["name"], result,
                                                 volcano_lat=volcano["lat"], volcano_lon=volcano["lon"])
+                            vent_str = (f" | VRP_VENT={result.get('vrp_vent_mw', 0)} MW"
+                                        if volcano.get("vent_lat") and result.get('vrp_vent_mw', 0) > 0 else "")
                             print(f"  {result['sensor']} (750m) | VRP={result['vrp_mw']} MW | "
                                   f"T_bg={result['t_bg_k']} K | T_max={result['t_max_k']} K | "
-                                  f"anomalous_px={result['n_anomalous_pixels']}")
+                                  f"anomalous_px={result['n_anomalous_pixels']}{vent_str}")
                     except Exception as e:
                         print(f"  ERROR processing {l1b.name}: {e}")
 

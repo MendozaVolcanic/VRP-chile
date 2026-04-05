@@ -14,6 +14,14 @@ on:
         description: "Date to process (YYYY-MM-DD, leave empty for yesterday)"
         required: false
         default: ""
+      start:
+        description: "Start date for range recalibration (YYYY-MM-DD)"
+        required: false
+        default: ""
+      end:
+        description: "End date for range recalibration (YYYY-MM-DD)"
+        required: false
+        default: ""
 
 jobs:
   process:
@@ -47,7 +55,9 @@ jobs:
         run: |
           python scripts/run_pipeline.py \
             ${{ github.event.inputs.volcano != '' && format('--volcano {0}', github.event.inputs.volcano) || '' }} \
-            ${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }}
+            ${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }} \
+            ${{ github.event.inputs.start != '' && format('--start {0}', github.event.inputs.start) || '' }} \
+            ${{ github.event.inputs.end != '' && format('--end {0}', github.event.inputs.end) || '' }}
 
       - name: Commit updated data files
         run: |
