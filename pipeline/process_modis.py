@@ -169,31 +169,70 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     std_bg = float(np.std(bg_vals))
     threshold = max(ANOMALY_THRESHOLD_K, N_SIGMA * std_bg)
 
-    roi_bt = bt_mir[roi_mask]
-    roi_rad = rad_mir[roi_mask]
-    hot_mask = roi_bt > (t_bg + threshold)
-    hotpix_bt = roi_bt[hot_mask]
-    hotpix_bt = hotpix_bt[~np.isnan(hotpix_bt)]
-    hotpix_rad = roi_rad[hot_mask]
-    hotpix_rad = hotpix_rad[~np.isnan(hotpix_rad)]
-    n_anomalous = len(hotpix_bt)
+    # Additional local-ROI filter: use the ROI's own statistics to avoid
+    # topographic false positives (e.g., high-altitude volcanoes with warmer
+    # low-altitude terrain in the background annulus).
+    # A pixel must exceed BOTH the background threshold AND the ROI p95 threshold.
+    roi_bt_full = np.where(roi_mask & ~np.isnan(bt_mir), bt_mir, np.nan)
+    roi_valid = roi_bt_full[~np.isnan(roi_bt_full)]
+    if len(roi_valid) >= 10:
+        roi_p95 = float(np.percentile(roi_valid, 95))
+        roi_std = float(np.std(roi_valid))
+        local_threshold = roi_p95 + max(3.0, 2.0 * roi_std)
+        effective_threshold = max(t_bg + threshold, local_threshold)
+    else:
+        effective_threshold = t_bg + threshold
+
+    # Find all anomalous pixels with their 2D indices
+    hot_mask_2d = roi_bt_full > effective_threshold
+    hot_rows, hot_cols = np.where(hot_mask_2d)
+    n_anomalous = len(hot_rows)
 
     vrp_mw = 0.0
+    hotspot_lat = None
+    hotspot_lon = None
+    hotspot_dist_km = None
+    anomaly_pixels = []
+
     if n_anomalous > 0:
         # Wooster MIR radiance method (Coppola 2015, Eq.7)
-        # Use radiance directly from MODIS calibrated L1B
-        bg_rad_vals = rad_mir[bg_mask & ~np.isnan(rad_mir)]
-        L_bg = float(np.median(bg_rad_vals))
-        delta_L = hotpix_rad - L_bg
-        vrp_w = float(np.sum(PIXEL_AREA_M2 * WOOSTER_COEFF * delta_L))
-        vrp_mw = vrp_w / 1e6
+        # Use L_bg derived from BT median (not direct radiance median) to avoid
+        # inconsistency when background annulus has heterogeneous terrain/clouds.
+        # Planck is nonlinear: median(radiance) != radiance(median(BT)).
+        L_bg = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bg)) - 1)))
 
-    valid_roi = roi_bt[~np.isnan(roi_bt)]
+        hotpix_bt = bt_mir[hot_rows, hot_cols]
+        # Convert hot pixel BT to radiance for consistent VRP calculation
+        hotpix_rad = C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * hotpix_bt)) - 1))
+        per_pixel_vrp_mw = PIXEL_AREA_M2 * WOOSTER_COEFF * (hotpix_rad - L_bg) / 1e6
+        vrp_mw = float(np.nansum(per_pixel_vrp_mw))
+
+        # Build list of all anomalous pixels sorted by VRP (descending)
+        for idx in np.argsort(-per_pixel_vrp_mw):
+            r, c = int(hot_rows[idx]), int(hot_cols[idx])
+            anomaly_pixels.append({
+                "lat": round(float(lat[r, c]), 5),
+                "lon": round(float(lon[r, c]), 5),
+                "dist_km": round(float(dist[r, c]), 2),
+                "bt_k": round(float(hotpix_bt[idx]), 2),
+                "vrp_mw": round(float(per_pixel_vrp_mw[idx]), 4),
+            })
+
+        # Primary hotspot = highest VRP pixel
+        hotspot_lat = anomaly_pixels[0]["lat"]
+        hotspot_lon = anomaly_pixels[0]["lon"]
+        hotspot_dist_km = anomaly_pixels[0]["dist_km"]
+
+    valid_roi = roi_bt_full[~np.isnan(roi_bt_full)]
     t_max = float(np.max(valid_roi)) if len(valid_roi) else float("nan")
 
     return {
         "vrp_mw": round(vrp_mw, 3),
         "n_anomalous_pixels": n_anomalous,
+        "hotspot_lat": hotspot_lat,
+        "hotspot_lon": hotspot_lon,
+        "hotspot_dist_km": hotspot_dist_km,
+        "anomaly_pixels": anomaly_pixels,
         "t_bg_k": round(t_bg, 2),
         "t_max_k": round(t_max, 2),
         "sensor": "MODIS_TERRA" if "MOD0" in hdf_path.name else "MODIS_AQUA",

@@ -21,11 +21,27 @@ Format: data/{volcano_name}.json
 """
 
 import json
+import math
 from pathlib import Path
 from datetime import datetime, timezone
 
 
 DATA_DIR = Path(__file__).parent.parent / "data"
+
+
+def _solar_elevation(lat: float, lon: float, dt_utc: datetime) -> float:
+    """Quick solar elevation check. Returns degrees (negative = night)."""
+    doy = dt_utc.timetuple().tm_yday
+    hour_utc = dt_utc.hour + dt_utc.minute / 60.0
+    gamma = 2 * math.pi * (doy - 1) / 365.0
+    decl = (0.006918 - 0.399912 * math.cos(gamma) + 0.070257 * math.sin(gamma)
+            - 0.006758 * math.cos(2 * gamma) + 0.000907 * math.sin(2 * gamma))
+    solar_hour = hour_utc + lon / 15.0
+    hour_angle = math.radians(15.0 * (solar_hour - 12.0))
+    lat_r = math.radians(lat)
+    sin_elev = (math.sin(lat_r) * math.sin(decl)
+                + math.cos(lat_r) * math.cos(decl) * math.cos(hour_angle))
+    return math.degrees(math.asin(max(-1.0, min(1.0, sin_elev))))
 
 
 def _load(volcano_name: str) -> dict:
@@ -44,13 +60,28 @@ def _save(volcano_name: str, store: dict):
         json.dump(store, f, indent=2)
 
 
-def append_record(volcano_name: str, record: dict):
+def append_record(volcano_name: str, record: dict,
+                   volcano_lat: float = None, volcano_lon: float = None):
     """
     Append a VRP record to the volcano's JSON file.
     Deduplicates by (datetime_utc, sensor) — safe to re-run.
+    If volcano_lat/lon provided, rejects daytime records as a safety net.
     """
     if record is None:
         return
+
+    # Safety net: reject daytime records (solar contamination → false VRP)
+    if volcano_lat is not None and volcano_lon is not None:
+        dt_str = record.get("datetime_utc", "")
+        try:
+            dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
+            elev = _solar_elevation(volcano_lat, volcano_lon, dt)
+            if elev > 0:
+                print(f"  STORE REJECT daytime: {dt_str} {record.get('sensor')} "
+                      f"(solar elev={elev:.1f}°)")
+                return
+        except (ValueError, TypeError):
+            pass  # Can't parse — store anyway
 
     store = _load(volcano_name)
     key = (record.get("datetime_utc"), record.get("sensor"))

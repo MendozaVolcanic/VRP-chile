@@ -8,10 +8,26 @@ For each volcano, downloads:
 Granules are saved to a temp directory, processed, then deleted.
 """
 
+import math
 import os
 import earthaccess
 from datetime import datetime, timedelta
 from pathlib import Path
+
+
+def _solar_elevation(lat_deg: float, lon_deg: float, dt_utc: datetime) -> float:
+    """Approximate solar elevation angle (degrees). Negative = nighttime."""
+    doy = dt_utc.timetuple().tm_yday
+    hour_utc = dt_utc.hour + dt_utc.minute / 60.0
+    gamma = 2 * math.pi * (doy - 1) / 365.0
+    decl = (0.006918 - 0.399912 * math.cos(gamma) + 0.070257 * math.sin(gamma)
+            - 0.006758 * math.cos(2 * gamma) + 0.000907 * math.sin(2 * gamma))
+    solar_hour = hour_utc + lon_deg / 15.0
+    hour_angle = math.radians(15.0 * (solar_hour - 12.0))
+    lat_r = math.radians(lat_deg)
+    sin_elev = (math.sin(lat_r) * math.sin(decl)
+                + math.cos(lat_r) * math.cos(decl) * math.cos(hour_angle))
+    return math.degrees(math.asin(max(-1.0, min(1.0, sin_elev))))
 
 
 # Short names for each product in the NASA CMR catalog
@@ -24,13 +40,14 @@ PRODUCTS = {
     # VIIRS 375m I-band (IMG product) — Band I04 @ 3.74µm
     "VIIRS_SNPP_L1B":         {"short_name": "VNP02IMG",  "version": "2"},
     "VIIRS_SNPP_GEO":         {"short_name": "VNP03IMG",  "version": "2"},
-    "VIIRS_NOAA20_L1B":       {"short_name": "VJ102IMG",  "version": "2"},
-    "VIIRS_NOAA20_GEO":       {"short_name": "VJ103IMG",  "version": "2"},
+    # NOAA-20 (JPSS-1): try version 2.1 first, then 2, then 1
+    "VIIRS_NOAA20_L1B":       {"short_name": "VJ102IMG",  "versions": ["2.1", "2", "1"]},
+    "VIIRS_NOAA20_GEO":       {"short_name": "VJ103IMG",  "versions": ["2.1", "2", "1"]},
     # VIIRS 750m M-band (MOD product) — Band M13 @ 4.05µm (same as MIROVA VIIRS750)
     "VIIRS_SNPP_MOD_L1B":     {"short_name": "VNP02MOD",  "version": "2"},
     "VIIRS_SNPP_MOD_GEO":     {"short_name": "VNP03MOD",  "version": "2"},
-    "VIIRS_NOAA20_MOD_L1B":   {"short_name": "VJ102MOD",  "version": "2"},
-    "VIIRS_NOAA20_MOD_GEO":   {"short_name": "VJ103MOD",  "version": "2"},
+    "VIIRS_NOAA20_MOD_L1B":   {"short_name": "VJ102MOD",  "versions": ["2.1", "2", "1"]},
+    "VIIRS_NOAA20_MOD_GEO":   {"short_name": "VJ103MOD",  "versions": ["2.1", "2", "1"]},
 }
 
 
@@ -52,27 +69,56 @@ def search_granules(product_key: str, lat: float, lon: float,
     bbox = (lon - delta, lat - delta, lon + delta, lat + delta)
     date_str = date.strftime("%Y-%m-%d")
 
-    results = earthaccess.search_data(
-        short_name=p["short_name"],
-        version=p["version"],
-        bounding_box=bbox,
-        temporal=(date_str, date_str),
-        count=20,
-    )
-    return results
+    versions = p["versions"] if isinstance(p.get("versions"), list) else [p["version"]]
+    for ver in versions:
+        results = earthaccess.search_data(
+            short_name=p["short_name"],
+            version=ver,
+            bounding_box=bbox,
+            temporal=(date_str, date_str),
+            count=20,
+        )
+        if results:
+            return results
+    return []
 
 
 def download_granules(granules: list, dest_dir: Path) -> list[Path]:
     """Download a list of granules to dest_dir. Returns list of local file paths."""
     dest_dir.mkdir(parents=True, exist_ok=True)
     paths = earthaccess.download(granules, local_path=str(dest_dir))
-    return [Path(p) for p in paths]
+    return [Path(p) for p in paths if Path(p).exists()]
+
+
+def _filter_nighttime_granules(granules: list, lat: float, lon: float) -> list:
+    """Filter granule list to only nighttime passes (solar elevation < 0).
+    This prevents downloading daytime granules that would be discarded later,
+    saving ~50% of bandwidth.
+    """
+    night = []
+    for g in granules:
+        try:
+            begin = g["umm"]["TemporalExtent"]["RangeDateTime"]["BeginningDateTime"]
+            # Parse ISO datetime: "2026-01-01T05:36:00.000Z"
+            dt = datetime.strptime(begin[:19], "%Y-%m-%dT%H:%M:%S")
+            elev = _solar_elevation(lat, lon, dt)
+            if elev < 0:
+                night.append(g)
+        except (KeyError, TypeError, ValueError):
+            night.append(g)  # Keep if can't determine
+    return night
 
 
 def fetch_for_volcano(volcano: dict, date: datetime,
-                      tmp_dir: Path, sensors: list[str] = None) -> dict[str, list[Path]]:
+                      tmp_dir: Path, sensors: list[str] = None,
+                      skip_noaa20: bool = False,
+                      nighttime_only: bool = True) -> dict[str, list[Path]]:
     """
     Download all relevant L1B + geolocation granules for a volcano on a given date.
+
+    Args:
+        nighttime_only: If True, filter granules to nighttime passes BEFORE
+            downloading (saves ~50% bandwidth). Default True.
 
     Returns:
         {
@@ -88,48 +134,43 @@ def fetch_for_volcano(volcano: dict, date: datetime,
     sensors = sensors or volcano.get("sensors", ["MODIS", "VIIRS"])
     results = {}
 
+    all_platforms = []
     if "MODIS" in sensors:
-        for platform, l1b_key, geo_key in [
+        all_platforms += [
             ("MODIS_TERRA", "MODIS_TERRA_L1B", "MODIS_TERRA_GEO"),
             ("MODIS_AQUA",  "MODIS_AQUA_L1B",  "MODIS_AQUA_GEO"),
-        ]:
-            l1b_granules = search_granules(l1b_key, lat, lon, radius, date)
-            if not l1b_granules:
-                continue
-            geo_granules = search_granules(geo_key, lat, lon, radius, date)
-            # Match granules by acquisition time (same timestamp in filename)
-            matched = _match_granules(l1b_granules, geo_granules)
-            platform_dir = tmp_dir / platform
-            paths = []
-            for l1b_g, geo_g in matched:
-                paths += download_granules([l1b_g, geo_g], platform_dir)
-            results[platform] = paths
-
+        ]
     if "VIIRS" in sensors:
-        # VIIRS 375m I-band
-        for platform, l1b_key, geo_key in [
+        # 375m I-band
+        all_platforms += [
             ("VIIRS_SNPP",   "VIIRS_SNPP_L1B",   "VIIRS_SNPP_GEO"),
             ("VIIRS_NOAA20", "VIIRS_NOAA20_L1B",  "VIIRS_NOAA20_GEO"),
-        ]:
-            l1b_granules = search_granules(l1b_key, lat, lon, radius, date)
-            if not l1b_granules:
-                continue
-            geo_granules = search_granules(geo_key, lat, lon, radius, date)
-            matched = _match_granules(l1b_granules, geo_granules)
-            platform_dir = tmp_dir / platform
-            paths = []
-            for l1b_g, geo_g in matched:
-                paths += download_granules([l1b_g, geo_g], platform_dir)
-            results[platform] = paths
-
-        # VIIRS 750m M-band (MIROVA calls this "VIIRS" or "VIIRS750")
-        for platform, l1b_key, geo_key in [
+        ]
+        # 750m M-band (MIROVA's "VIIRS" or "VIIRS750")
+        all_platforms += [
             ("VIIRS_SNPP_750",   "VIIRS_SNPP_MOD_L1B",   "VIIRS_SNPP_MOD_GEO"),
             ("VIIRS_NOAA20_750", "VIIRS_NOAA20_MOD_L1B",  "VIIRS_NOAA20_MOD_GEO"),
-        ]:
+        ]
+
+    if skip_noaa20:
+        all_platforms = [(p, l, g) for p, l, g in all_platforms if "NOAA20" not in p]
+
+    for platform, l1b_key, geo_key in all_platforms:
+        try:
             l1b_granules = search_granules(l1b_key, lat, lon, radius, date)
             if not l1b_granules:
                 continue
+
+            # Pre-download nighttime filter — skip daytime granules entirely
+            if nighttime_only:
+                before = len(l1b_granules)
+                l1b_granules = _filter_nighttime_granules(l1b_granules, lat, lon)
+                skipped = before - len(l1b_granules)
+                if skipped:
+                    print(f"  {platform}: skipped {skipped} daytime granules before download")
+                if not l1b_granules:
+                    continue
+
             geo_granules = search_granules(geo_key, lat, lon, radius, date)
             matched = _match_granules(l1b_granules, geo_granules)
             platform_dir = tmp_dir / platform
@@ -137,6 +178,9 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             for l1b_g, geo_g in matched:
                 paths += download_granules([l1b_g, geo_g], platform_dir)
             results[platform] = paths
+        except Exception as e:
+            print(f"  WARN: Failed to fetch {platform}: {e}")
+            results[platform] = []
 
     return results
 

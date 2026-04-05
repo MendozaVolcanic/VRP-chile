@@ -17,6 +17,7 @@ Environment variables required (set in .env or GitHub secrets):
 """
 
 import argparse
+import math
 import os
 
 # Load .env file if present (before any other imports that need credentials)
@@ -48,6 +49,48 @@ TMP_DIR = Path(__file__).parent.parent / "tmp"
 VOLCANOES_FILE = Path(__file__).parent.parent / "volcanoes.yaml"
 
 
+def solar_elevation(lat_deg: float, lon_deg: float, dt_utc: datetime) -> float:
+    """
+    Approximate solar elevation angle (degrees) for a given location and UTC time.
+    Negative = sun below horizon (nighttime).
+    Accuracy: ~1° — sufficient for day/night classification.
+    """
+    doy = dt_utc.timetuple().tm_yday
+    hour_utc = dt_utc.hour + dt_utc.minute / 60.0
+
+    # Solar declination (Spencer, 1971 approximation)
+    gamma = 2 * math.pi * (doy - 1) / 365.0
+    decl = (0.006918 - 0.399912 * math.cos(gamma) + 0.070257 * math.sin(gamma)
+            - 0.006758 * math.cos(2 * gamma) + 0.000907 * math.sin(2 * gamma))
+
+    # Hour angle (degrees → radians)
+    solar_hour = hour_utc + lon_deg / 15.0  # local solar time
+    hour_angle = math.radians(15.0 * (solar_hour - 12.0))
+
+    lat_r = math.radians(lat_deg)
+    sin_elev = (math.sin(lat_r) * math.sin(decl)
+                + math.cos(lat_r) * math.cos(decl) * math.cos(hour_angle))
+    return math.degrees(math.asin(max(-1.0, min(1.0, sin_elev))))
+
+
+def is_nighttime(lat: float, lon: float, dt_utc: datetime) -> bool:
+    """True if sun is below horizon (solar elevation < 0°)."""
+    return solar_elevation(lat, lon, dt_utc) < 0.0
+
+
+def _parse_granule_datetime(filename: str) -> datetime | None:
+    """Extract UTC datetime from MODIS/VIIRS granule filename."""
+    try:
+        parts = filename.split(".")
+        year = int(parts[1][1:5])
+        doy = int(parts[1][5:8])
+        hour = int(parts[2][:2])
+        minute = int(parts[2][2:4])
+        return datetime(year, 1, 1) + timedelta(days=doy - 1, hours=hour, minutes=minute)
+    except Exception:
+        return None
+
+
 def load_volcanoes(name_filter: str = None) -> list:
     with open(VOLCANOES_FILE) as f:
         cfg = yaml.safe_load(f)
@@ -57,14 +100,42 @@ def load_volcanoes(name_filter: str = None) -> list:
     return volcanoes
 
 
-def process_date(volcano: dict, date: datetime):
-    """Download and process all granules for a volcano on a given date."""
+def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
+                 skip_noaa20: bool = False):
+    """Download and process all granules for a volcano on a given date.
+
+    Args:
+        nighttime_only: If True, skip daytime passes (solar elevation > 0°).
+            MIROVA only uses nighttime data because reflected solar radiation
+            in the MIR band (~4µm) creates massive false positives during daytime.
+        skip_noaa20: If True, skip NOAA-20 VIIRS products (useful when NASA
+            downloads are slow/unreliable).
+    """
     print(f"\n>>> {volcano['display_name']} | {date.strftime('%Y-%m-%d')}")
 
     volcano_tmp = TMP_DIR / volcano["name"] / date.strftime("%Y%m%d")
 
+    def _check_night(l1b_path: Path) -> bool:
+        """Return True if granule is nighttime (or if nighttime_only is disabled)."""
+        if not nighttime_only:
+            return True
+        dt = _parse_granule_datetime(l1b_path.name)
+        if dt is None:
+            return True  # Can't parse → process anyway
+        night = is_nighttime(volcano["lat"], volcano["lon"], dt)
+        if not night:
+            elev = solar_elevation(volcano["lat"], volcano["lon"], dt)
+            print(f"  SKIP daytime: {l1b_path.name} (solar elev={elev:.1f}°)")
+        return night
+
     try:
-        granule_paths = fetch.fetch_for_volcano(volcano, date, volcano_tmp)
+        granule_paths = fetch.fetch_for_volcano(volcano, date, volcano_tmp,
+                                                    skip_noaa20=skip_noaa20,
+                                                    nighttime_only=nighttime_only)
+
+        # Filter to only files that actually exist on disk
+        for platform in granule_paths:
+            granule_paths[platform] = [p for p in granule_paths[platform] if p.exists()]
 
         for platform, paths in granule_paths.items():
             if not paths:
@@ -77,18 +148,24 @@ def process_date(volcano: dict, date: datetime):
                 geo_by_time = {_time_key(g.name): g for g in geo_files}
 
                 for l1b in l1b_files:
+                    if not _check_night(l1b):
+                        continue
                     geo = geo_by_time.get(_time_key(l1b.name))
                     if geo is None:
                         print(f"  No geolocation match for {l1b.name}")
                         continue
-                    result = process_modis.calculate_vrp(
-                        l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"]
-                    )
-                    if result:
-                        store.append_record(volcano["name"], result)
-                        print(f"  {result['sensor']} | VRP={result['vrp_mw']} MW | "
-                              f"T_bg={result['t_bg_k']} K | T_max={result['t_max_k']} K | "
-                              f"anomalous_px={result['n_anomalous_pixels']}")
+                    try:
+                        result = process_modis.calculate_vrp(
+                            l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"]
+                        )
+                        if result:
+                            store.append_record(volcano["name"], result,
+                                                volcano_lat=volcano["lat"], volcano_lon=volcano["lon"])
+                            print(f"  {result['sensor']} | VRP={result['vrp_mw']} MW | "
+                                  f"T_bg={result['t_bg_k']} K | T_max={result['t_max_k']} K | "
+                                  f"anomalous_px={result['n_anomalous_pixels']}")
+                    except Exception as e:
+                        print(f"  ERROR processing {l1b.name}: {e}")
 
             elif platform in ("VIIRS_SNPP", "VIIRS_NOAA20"):
                 # VIIRS 375m I-band (IMG product)
@@ -97,26 +174,32 @@ def process_date(volcano: dict, date: datetime):
                 geo_by_time = {_time_key(g.name): g for g in geo_files}
 
                 for l1b in l1b_files:
+                    if not _check_night(l1b):
+                        continue
                     geo = geo_by_time.get(_time_key(l1b.name))
                     if geo is None:
                         print(f"  No geolocation match for {l1b.name}")
                         continue
-                    result = process_viirs.calculate_vrp(
-                        l1b, geo,
-                        volcano["lat"], volcano["lon"], volcano["radius_km"],
-                        vent_lat=volcano.get("vent_lat"),
-                        vent_lon=volcano.get("vent_lon"),
-                        vent_radius_km=volcano.get("vent_radius_km", 4.0),
-                    )
-                    if result:
-                        store.append_record(volcano["name"], result)
-                        vent_str = (f" | VRP_VENT={result['vrp_vent_mw']} MW "
-                                    f"({result['n_vent_pixels']}px)"
-                                    if volcano.get("vent_lat") else "")
-                        print(f"  {result['sensor']} (375m) | VRP_MIR={result['vrp_mir_mw']} MW | "
-                              f"VRP_TIR={result['vrp_tir_mw']} MW | "
-                              f"T_max={result['t_max_i04_k']} K"
-                              f"{vent_str}")
+                    try:
+                        result = process_viirs.calculate_vrp(
+                            l1b, geo,
+                            volcano["lat"], volcano["lon"], volcano["radius_km"],
+                            vent_lat=volcano.get("vent_lat"),
+                            vent_lon=volcano.get("vent_lon"),
+                            vent_radius_km=volcano.get("vent_radius_km", 4.0),
+                        )
+                        if result:
+                            store.append_record(volcano["name"], result,
+                                                volcano_lat=volcano["lat"], volcano_lon=volcano["lon"])
+                            vent_str = (f" | VRP_VENT={result['vrp_vent_mw']} MW "
+                                        f"({result['n_vent_pixels']}px)"
+                                        if volcano.get("vent_lat") else "")
+                            print(f"  {result['sensor']} (375m) | VRP_MIR={result['vrp_mir_mw']} MW | "
+                                  f"VRP_TIR={result['vrp_tir_mw']} MW | "
+                                  f"T_max={result['t_max_i04_k']} K"
+                                  f"{vent_str}")
+                    except Exception as e:
+                        print(f"  ERROR processing {l1b.name}: {e}")
 
             elif platform in ("VIIRS_SNPP_750", "VIIRS_NOAA20_750"):
                 # VIIRS 750m M-band (MOD product) — MIROVA's "VIIRS" channel
@@ -125,18 +208,24 @@ def process_date(volcano: dict, date: datetime):
                 geo_by_time = {_time_key(g.name): g for g in geo_files}
 
                 for l1b in l1b_files:
+                    if not _check_night(l1b):
+                        continue
                     geo = geo_by_time.get(_time_key(l1b.name))
                     if geo is None:
                         print(f"  No geolocation match for {l1b.name}")
                         continue
-                    result = process_viirs_mod.calculate_vrp(
-                        l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"]
-                    )
-                    if result:
-                        store.append_record(volcano["name"], result)
-                        print(f"  {result['sensor']} (750m) | VRP={result['vrp_mw']} MW | "
-                              f"T_bg={result['t_bg_k']} K | T_max={result['t_max_k']} K | "
-                              f"anomalous_px={result['n_anomalous_pixels']}")
+                    try:
+                        result = process_viirs_mod.calculate_vrp(
+                            l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"]
+                        )
+                        if result:
+                            store.append_record(volcano["name"], result,
+                                                volcano_lat=volcano["lat"], volcano_lon=volcano["lon"])
+                            print(f"  {result['sensor']} (750m) | VRP={result['vrp_mw']} MW | "
+                                  f"T_bg={result['t_bg_k']} K | T_max={result['t_max_k']} K | "
+                                  f"anomalous_px={result['n_anomalous_pixels']}")
+                    except Exception as e:
+                        print(f"  ERROR processing {l1b.name}: {e}")
 
     finally:
         # Always delete raw granules after processing
@@ -175,6 +264,10 @@ def main():
     parser.add_argument("--date", help="Single date YYYY-MM-DD (default: yesterday)")
     parser.add_argument("--start", help="Start date YYYY-MM-DD for range")
     parser.add_argument("--end", help="End date YYYY-MM-DD for range")
+    parser.add_argument("--no-night-filter", action="store_true",
+                        help="Process all passes including daytime (default: nighttime only)")
+    parser.add_argument("--skip-noaa20", action="store_true",
+                        help="Skip NOAA-20 VIIRS (useful when NASA downloads are slow)")
     args = parser.parse_args()
 
     volcanoes = load_volcanoes(args.volcano)
@@ -194,9 +287,17 @@ def main():
         # Default: yesterday (NRT data is typically available with ~3h latency)
         dates = [datetime.utcnow() - timedelta(days=1)]
 
+    nighttime_only = not args.no_night_filter
+    if nighttime_only:
+        print("Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.")
+
+    if args.skip_noaa20:
+        print("Skipping NOAA-20 VIIRS products.")
+
     for volcano in volcanoes:
         for date in dates:
-            process_date(volcano, date)
+            process_date(volcano, date, nighttime_only=nighttime_only,
+                        skip_noaa20=args.skip_noaa20)
 
     print("\nDone.")
 

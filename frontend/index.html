@@ -6,6 +6,8 @@
   <title>VRP Chile — Monitoreo Volcánico</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
       --bg: #1a1a2e; --surface: #16213e; --card: #0f3460;
@@ -146,6 +148,42 @@
     .vrp-cell { font-weight: 700; }
 
     .msg { text-align: center; padding: 60px; color: var(--muted); font-size: 0.88rem; }
+
+    /* ── Map panel ── */
+    .map-container {
+      height: 400px; border-radius: 10px; overflow: hidden;
+      border: 1px solid var(--border); margin-top: 16px;
+    }
+    .map-header {
+      display: flex; align-items: center; gap: 10px; margin-top: 20px; margin-bottom: 8px;
+    }
+    .map-header h3 { font-size: 0.88rem; font-weight: 600; }
+    .map-legend { display: flex; gap: 12px; margin-left: auto; font-size: 0.68rem; color: var(--muted); }
+    .map-legend-item { display: flex; align-items: center; gap: 4px; }
+    .map-legend-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid; }
+
+    /* ── Action buttons ── */
+    .action-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+    .action-btn {
+      padding: 5px 14px; border-radius: 5px; border: 1px solid var(--border);
+      background: var(--card); color: var(--muted); font-size: 0.72rem; cursor: pointer;
+      display: flex; align-items: center; gap: 5px; transition: all 0.2s;
+    }
+    .action-btn:hover { border-color: var(--blue); color: var(--text); }
+    .action-btn svg { width: 14px; height: 14px; }
+
+    /* ── Multi-chart layout ── */
+    .charts-grid {
+      display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 12px;
+    }
+    .charts-grid.dual { grid-template-columns: 1fr 1fr; }
+    @media (max-width: 900px) { .charts-grid.dual { grid-template-columns: 1fr; } }
+    .chart-panel {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px;
+    }
+    .chart-panel h4 { font-size: 0.78rem; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+    .chart-panel .chart-wrapper { height: 280px; }
   </style>
 </head>
 <body>
@@ -191,10 +229,10 @@
 <script>
 // ── Config ──────────────────────────────────────────────────────────────────
 const VOLCANOES = [
-  { name: "PuyehueCordonCaulle", display: "Puyehue–Cordón Caulle", region: "Los Ríos",      hasMirova: true  },
-  { name: "Villarrica",           display: "Villarrica",             region: "Araucanía",    hasMirova: false },
-  { name: "Lascar",               display: "Láscar",                 region: "Antofagasta",  hasMirova: false },
-  { name: "Copahue",              display: "Copahue",                region: "Biobío",       hasMirova: false },
+  { name: "PuyehueCordonCaulle", display: "Puyehue–Cordón Caulle", region: "Los Ríos",     lat: -40.590, lon: -72.117, radius_km: 15, hasMirova: true,  vent_lat: -40.585, vent_lon: -72.020 },
+  { name: "Villarrica",           display: "Villarrica",             region: "Araucanía",   lat: -39.420, lon: -71.930, radius_km: 10, hasMirova: false },
+  { name: "Lascar",               display: "Láscar",                 region: "Antofagasta", lat: -23.369, lon: -67.732, radius_km: 10, hasMirova: true  },
+  { name: "Copahue",              display: "Copahue",                region: "Biobío",      lat: -37.856, lon: -71.183, radius_km: 10, hasMirova: false },
 ];
 
 const SENSORS = [
@@ -431,24 +469,69 @@ function renderDetail() {
     box.append(l, vEl, u);
     sr.appendChild(box);
   }
+  // VRE (Volcanic Radiated Energy) — cumulative integral of VRP
+  // VRE = sum(VRP_i * dt_i), each observation ~ 6h window (4 passes/day)
+  const DT_HOURS = 6;
+  let vre_gj = 0;
+  for (const r of filtered) {
+    const v_mw = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+    if (v_mw > 0) vre_gj += v_mw * DT_HOURS * 3.6; // MW * h * 3.6 = GJ
+  }
+
   addStat("Max VRP", maxVrp > 0 ? maxVrp.toFixed(2) : "—", "MW", level.key !== "nd" ? "var(--green)" : null);
   addStat("Promedio activo", meanVrp > 0 ? meanVrp.toFixed(2) : "—", "MW (>0)");
+  addStat("VRE acumulada", vre_gj > 0 ? vre_gj.toFixed(1) : "—", "GJ", vre_gj > 0 ? "var(--cyan)" : null);
   addStat("Detecciones", String(allVrp.length), "granules");
   addStat("Total granules", String(filtered.length), "procesados");
   dp.appendChild(sr);
 
+  // ── Export CSV buttons ──
+  const actionRow = el("div", "action-row");
+  const csvBtn = el("button", "action-btn");
+  csvBtn.textContent = "\u2B73 Exportar CSV (periodo)";
+  csvBtn.addEventListener("click", () => exportCSV(v, filtered));
+  actionRow.appendChild(csvBtn);
+
+  const csvAllBtn = el("button", "action-btn");
+  csvAllBtn.textContent = "\u2B73 Exportar CSV (todos)";
+  csvAllBtn.addEventListener("click", () => exportCSV(v, d.records));
+  actionRow.appendChild(csvAllBtn);
+  dp.appendChild(actionRow);
+
   // Chart tabs
   const tabs = el("div", "chart-tabs");
-  const tabVRP = el("button","chart-tab active"); tabVRP.textContent = "VRP Total";
-  const tabAll = el("button","chart-tab"); tabAll.textContent = "Por sensor";
-  tabs.append(tabVRP, tabAll);
+  const tabNames = ["VRP", "Distancia", "VRE Acumulada", "MIROVA Comparar"];
+  const tabBtns = tabNames.map((name, i) => {
+    const btn = el("button", "chart-tab" + (i === 0 ? " active" : ""));
+    btn.textContent = name;
+    btn.dataset.idx = i;
+    tabs.appendChild(btn);
+    return btn;
+  });
   dp.appendChild(tabs);
 
-  // Chart
-  const cw = el("div","chart-wrapper");
-  const canvas = el("canvas"); canvas.id = "main-chart";
-  cw.appendChild(canvas);
-  dp.appendChild(cw);
+  // Charts grid — VRP main chart + secondary chart side by side
+  const chartsGrid = el("div", "charts-grid");
+
+  const vrpPanel = el("div", "chart-panel");
+  vrpPanel.id = "vrp-panel";
+  const vrpCW = el("div","chart-wrapper");
+  const vrpCanvas = el("canvas"); vrpCanvas.id = "main-chart";
+  vrpCW.appendChild(vrpCanvas);
+  vrpPanel.appendChild(vrpCW);
+  chartsGrid.appendChild(vrpPanel);
+
+  const secPanel = el("div", "chart-panel");
+  secPanel.id = "secondary-panel";
+  secPanel.style.display = "none";
+  const secTitle = el("h4"); secTitle.id = "sec-chart-title";
+  const secCW = el("div","chart-wrapper");
+  const secCanvas = el("canvas"); secCanvas.id = "sec-chart";
+  secCW.appendChild(secCanvas);
+  secPanel.append(secTitle, secCW);
+  chartsGrid.appendChild(secPanel);
+
+  dp.appendChild(chartsGrid);
 
   // Events table
   const tTitle = el("div"); tTitle.style.cssText = "font-size:.8rem;font-weight:600;margin:16px 0 8px";
@@ -458,7 +541,7 @@ function renderDetail() {
   const tbl = el("table","events-table");
   const thead = el("thead");
   const hrow = el("tr");
-  ["Fecha UTC", "Sensor", "VRP (MW)", "T max (K)", "T fondo (K)", "Píxeles"].forEach(h => {
+  ["Fecha UTC", "Sensor", "VRP (MW)", "Dist (km)", "T max (K)", "T fondo (K)", "Píxeles"].forEach(h => {
     const th = el("th"); th.textContent = h; hrow.appendChild(th);
   });
   thead.appendChild(hrow);
@@ -471,7 +554,7 @@ function renderDetail() {
     .slice(0, 20);
 
   if (recent.length === 0) {
-    const row = el("tr"); const td = el("td"); td.colSpan = 6;
+    const row = el("tr"); const td = el("td"); td.colSpan = 7;
     td.textContent = "Sin detecciones en el período"; td.style.color = "var(--muted)";
     td.style.textAlign = "center"; td.style.padding = "20px";
     row.appendChild(td); tbody.appendChild(row);
@@ -483,10 +566,12 @@ function renderDetail() {
       const npx  = r.n_anomalous_pixels ?? null;
       const lv   = getLevel(vrp);
       const row  = el("tr");
+      const dist = r.hotspot_dist_km ?? (r.anomaly_pixels && r.anomaly_pixels.length > 0 ? r.anomaly_pixels[0].dist_km : null);
       [
         r.datetime_utc,
         r.sensor,
         vrp.toFixed(3),
+        dist != null ? dist.toFixed(1) : "—",
         tmax != null ? tmax.toFixed(1) : "—",
         tbg  != null ? tbg.toFixed(1)  : "—",
         npx  != null ? String(npx)     : "—",
@@ -503,7 +588,111 @@ function renderDetail() {
   tbl.appendChild(tbody);
   dp.appendChild(tbl);
 
+  // ── Hotspot Map ──────────────────────────────────────────────────────────
+  const mapHdr = el("div", "map-header");
+  const mapTitle = el("h3"); mapTitle.textContent = "Mapa de anomalías térmicas";
+  const mapLeg = el("div", "map-legend");
+  [
+    ["#e91e63", "VIIRS 375m"], ["#00bcd4", "VIIRS 750m"], ["#ff8c00", "MODIS"],
+    ["#ffc107", "Cráter/Vent"], ["#7a8fa6", "Radio búsqueda"]
+  ].forEach(([color, label]) => {
+    const item = el("div", "map-legend-item");
+    const dot = el("div", "map-legend-dot");
+    dot.style.borderColor = color;
+    dot.style.background = color + "33";
+    const lbl = document.createTextNode(label);
+    item.append(dot, lbl); mapLeg.appendChild(item);
+  });
+  mapHdr.append(mapTitle, mapLeg);
+  dp.appendChild(mapHdr);
+
+  const mapDiv = el("div", "map-container");
+  mapDiv.id = "hotspot-map";
+  dp.appendChild(mapDiv);
+
   panel.appendChild(dp);
+
+  // Initialize Leaflet map after DOM is ready
+  setTimeout(() => {
+    if (!document.getElementById("hotspot-map")) return;
+    const map = L.map("hotspot-map", { zoomControl: true }).setView([v.lat, v.lon], 12);
+
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      attribution: "Esri World Imagery", maxZoom: 18,
+    }).addTo(map);
+
+    // Search radius circle
+    L.circle([v.lat, v.lon], {
+      radius: v.radius_km * 1000, color: "#7a8fa6", weight: 1,
+      fillColor: "#7a8fa6", fillOpacity: 0.05, dashArray: "5,5",
+    }).addTo(map);
+
+    // Volcano center marker
+    L.circleMarker([v.lat, v.lon], {
+      radius: 6, color: "#fff", weight: 2, fillColor: "#ff5722",
+      fillOpacity: 0.9,
+    }).addTo(map).bindPopup(`<b>${v.display}</b><br>Centro referencia`);
+
+    // Vent marker (if exists)
+    if (v.vent_lat && v.vent_lon) {
+      L.circleMarker([v.vent_lat, v.vent_lon], {
+        radius: 5, color: "#fff", weight: 1.5, fillColor: "#ffc107",
+        fillOpacity: 0.9,
+      }).addTo(map).bindPopup("Vent fumarólico");
+    }
+
+    // Hotspot markers from detections — show ALL anomalous pixels per record
+    const hotspots = filtered
+      .filter(r => (r.vrp_mw ?? r.vrp_mir_mw ?? 0) > 0 && (r.hotspot_lat != null || (r.anomaly_pixels && r.anomaly_pixels.length > 0)))
+      .sort((a, b) => a.datetime_utc.localeCompare(b.datetime_utc));
+
+    const colorMap = {
+      "MODIS_TERRA": "#ff8c00", "MODIS_AQUA": "#ffb347",
+      "VIIRS_SNPP": "#e91e63", "VIIRS_NOAA20": "#f06292",
+      "VIIRS_SNPP_750": "#00bcd4", "VIIRS_NOAA20_750": "#4dd0e1",
+    };
+
+    const allPts = [];
+    hotspots.forEach((r, i) => {
+      const color = colorMap[r.sensor] || "#fff";
+      const recencyOpacity = 0.3 + 0.7 * (i / Math.max(1, hotspots.length - 1));
+
+      // Use anomaly_pixels array if available (new format), else fallback to single hotspot
+      const pixels = (r.anomaly_pixels && r.anomaly_pixels.length > 0)
+        ? r.anomaly_pixels
+        : (r.hotspot_lat != null ? [{
+            lat: r.hotspot_lat, lon: r.hotspot_lon,
+            dist_km: r.hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
+            vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0
+          }] : []);
+
+      pixels.forEach((px, pxIdx) => {
+        const size = Math.max(4, Math.min(15, 4 + Math.log10(Math.max(px.vrp_mw, 0.001)) * 5));
+        const isPrimary = pxIdx === 0;
+        const pxOpacity = isPrimary ? recencyOpacity : recencyOpacity * 0.7;
+
+        L.circleMarker([px.lat, px.lon], {
+          radius: size, color: isPrimary ? "#fff" : "#aaa",
+          weight: isPrimary ? 1.5 : 0.8,
+          fillColor: color, fillOpacity: pxOpacity,
+        }).addTo(map).bindPopup(
+          `<b>${r.sensor}</b>${!isPrimary ? " (pixel #" + (pxIdx+1) + ")" : ""}<br>` +
+          `${r.datetime_utc} UTC<br>` +
+          `VRP: ${px.vrp_mw.toFixed(4)} MW<br>` +
+          `BT: ${px.bt_k ?? "?"} K<br>` +
+          `Distancia: ${px.dist_km ?? "?"} km`
+        );
+        allPts.push([px.lat, px.lon]);
+      });
+    });
+
+    // Fit bounds to show all hotspots + volcano
+    if (allPts.length > 0) {
+      allPts.push([v.lat, v.lon]);
+      if (v.vent_lat) allPts.push([v.vent_lat, v.vent_lon]);
+      map.fitBounds(L.latLngBounds(allPts).pad(0.3));
+    }
+  });
 
   // Build chart datasets
   function buildDatasets() {
@@ -541,6 +730,65 @@ function renderDetail() {
     return ds;
   }
 
+  // ── Distance vs Time data ──
+  function buildDistanceData() {
+    const pts = [];
+    for (const r of filtered) {
+      const vrp = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+      if (vrp <= 0) continue;
+      const dist = r.hotspot_dist_km ?? (r.anomaly_pixels && r.anomaly_pixels.length ? r.anomaly_pixels[0].dist_km : null);
+      if (dist == null) continue;
+      pts.push({ x: r.datetime_utc.slice(0,10), y: dist, vrp: vrp, sensor: r.sensor });
+    }
+    return pts;
+  }
+
+  // ── VRE cumulative data ──
+  function buildVREData() {
+    const sorted = [...filtered]
+      .filter(r => (r.vrp_mw ?? r.vrp_mir_mw ?? 0) > 0)
+      .sort((a,b) => a.datetime_utc.localeCompare(b.datetime_utc));
+    let cumulative = 0;
+    return sorted.map(r => {
+      const vrp = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+      cumulative += vrp * DT_HOURS * 3.6; // GJ
+      return { x: r.datetime_utc.slice(0,10), y: parseFloat(cumulative.toFixed(2)) };
+    });
+  }
+
+  // ── MIROVA comparison data ──
+  function buildComparisonData() {
+    const ds = [];
+    // Our data (daily max, all sensors combined)
+    const ours = filtered.filter(r => (r.vrp_mw ?? r.vrp_mir_mw ?? 0) > 0);
+    if (ours.length) {
+      const ourDaily = new Map();
+      for (const r of ours) {
+        const d = r.datetime_utc.slice(0,10);
+        const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+        if (!ourDaily.has(d) || v > ourDaily.get(d)) ourDaily.set(d, v);
+      }
+      ds.push({
+        label: "VRP Chile (max diario)",
+        data: [...ourDaily.entries()].sort().map(([x,y]) => ({x,y})),
+        type: "bar",
+        backgroundColor: "#2196f3aa", borderColor: "#2196f3", borderWidth: 1,
+        borderRadius: 2, borderSkipped: false, order: 1,
+      });
+    }
+    // MIROVA reference
+    if (mFiltered.length) {
+      ds.push({
+        label: "MIROVA (referencia)",
+        data: toMirovaDaily(mFiltered),
+        type: "line", order: 0,
+        borderColor: "#ffc107", backgroundColor: "transparent",
+        borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: "#ffc107", tension: 0,
+      });
+    }
+    return ds;
+  }
+
   function drawChart() {
     if (charts["main-chart"]) { charts["main-chart"].destroy(); delete charts["main-chart"]; }
     const c = document.getElementById("main-chart");
@@ -557,38 +805,152 @@ function renderDetail() {
           tooltip: {
             backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
             titleColor:"#e0e6f0", bodyColor:"#7a8fa6",
-            callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y?.toFixed(3) ?? "—"} MW` }
+            callbacks: { label: ctx => " " + ctx.dataset.label + ": " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(3) : "\u2014") + " MW" }
           }
         },
         scales: {
-          x: {
-            type:"time", time:{ unit:"day", tooltipFormat:"yyyy-MM-dd" },
-            grid:{ color:"rgba(26,58,92,0.6)" },
-            ticks:{ color:"#7a8fa6", font:{size:10}, maxRotation:45 }
-          },
-          y: {
-            type: logScale ? "logarithmic" : "linear",
-            min: logScale ? undefined : 0,
-            grid:{ color:"rgba(26,58,92,0.6)" },
-            ticks:{ color:"#7a8fa6", font:{size:10} },
-            title:{ display:true, text:"VRP (MW)", color:"#7a8fa6", font:{size:10} }
-          }
+          x: { type:"time", time:{ unit:"day", tooltipFormat:"yyyy-MM-dd" },
+            grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10}, maxRotation:45 } },
+          y: { type: logScale ? "logarithmic" : "linear", min: logScale ? undefined : 0,
+            grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10} },
+            title:{ display:true, text:"VRP (MW)", color:"#7a8fa6", font:{size:10} } }
         }
       }
     });
   }
 
+  function drawSecondary(mode) {
+    const secP = document.getElementById("secondary-panel");
+    const secT = document.getElementById("sec-chart-title");
+    const secC = document.getElementById("sec-chart");
+    if (!secP || !secC) return;
+
+    if (charts["sec-chart"]) { charts["sec-chart"].destroy(); delete charts["sec-chart"]; }
+
+    if (mode === 0) { // VRP only — hide secondary
+      secP.style.display = "none";
+      document.querySelector(".charts-grid").classList.remove("dual");
+      return;
+    }
+
+    secP.style.display = "";
+    document.querySelector(".charts-grid").classList.add("dual");
+
+    if (mode === 1) { // Distance vs Time
+      secT.textContent = "Distancia al crater vs Tiempo";
+      const distData = buildDistanceData();
+      const sensorColors = {
+        "MODIS_TERRA":"#ff8c00","MODIS_AQUA":"#ffb347",
+        "VIIRS_SNPP":"#e91e63","VIIRS_NOAA20":"#f06292",
+        "VIIRS_SNPP_750":"#00bcd4","VIIRS_NOAA20_750":"#4dd0e1"
+      };
+      charts["sec-chart"] = new Chart(secC.getContext("2d"), {
+        type: "scatter",
+        data: { datasets: [{
+          label: "Distancia (km)",
+          data: distData.map(p => ({ x: p.x, y: p.y })),
+          pointRadius: distData.map(p => Math.max(3, Math.min(12, 3 + Math.log10(p.vrp + 0.01) * 4))),
+          pointBackgroundColor: distData.map(p => (sensorColors[p.sensor] || "#fff") + "cc"),
+          pointBorderColor: distData.map(p => sensorColors[p.sensor] || "#fff"),
+          pointBorderWidth: 1,
+        }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
+              titleColor:"#e0e6f0", bodyColor:"#7a8fa6",
+              callbacks: {
+                title: items => items[0] ? distData[items[0].dataIndex]?.x || "" : "",
+                label: item => {
+                  const p = distData[item.dataIndex];
+                  return p ? [p.sensor, "Dist: " + p.y.toFixed(1) + " km", "VRP: " + p.vrp.toFixed(3) + " MW"] : [];
+                }
+              }
+            }
+          },
+          scales: {
+            x: { type:"time", time:{ unit:"day", tooltipFormat:"yyyy-MM-dd" },
+              grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10}, maxRotation:45 } },
+            y: { min: 0, grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10} },
+              title:{ display:true, text:"Distancia (km)", color:"#7a8fa6", font:{size:10} } }
+          }
+        }
+      });
+
+    } else if (mode === 2) { // VRE Cumulative
+      secT.textContent = "Energia Radiada Acumulada (VRE)";
+      const vreData = buildVREData();
+      charts["sec-chart"] = new Chart(secC.getContext("2d"), {
+        type: "line",
+        data: { datasets: [{
+          label: "VRE (GJ)",
+          data: vreData,
+          borderColor: "#00bcd4", backgroundColor: "rgba(0,188,212,0.1)",
+          fill: true, borderWidth: 2, pointRadius: 0, tension: 0.3,
+        }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { labels: { color:"#7a8fa6", font:{size:11}, boxWidth:12 } },
+            tooltip: {
+              backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
+              titleColor:"#e0e6f0", bodyColor:"#7a8fa6",
+              callbacks: { label: ctx => " VRE: " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(1) : "0") + " GJ" }
+            }
+          },
+          scales: {
+            x: { type:"time", time:{ unit:"day", tooltipFormat:"yyyy-MM-dd" },
+              grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10}, maxRotation:45 } },
+            y: { min: 0, grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10} },
+              title:{ display:true, text:"VRE (GJ)", color:"#7a8fa6", font:{size:10} } }
+          }
+        }
+      });
+
+    } else if (mode === 3) { // MIROVA Comparison
+      secT.textContent = "Comparacion VRP Chile vs MIROVA";
+      const compDS = buildComparisonData();
+      charts["sec-chart"] = new Chart(secC.getContext("2d"), {
+        type: "bar",
+        data: { datasets: compDS },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode:"index", intersect:false },
+          plugins: {
+            legend: { labels: { color:"#7a8fa6", font:{size:11}, boxWidth:12, padding:12 } },
+            tooltip: {
+              backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
+              titleColor:"#e0e6f0", bodyColor:"#7a8fa6",
+              callbacks: { label: ctx => " " + ctx.dataset.label + ": " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(3) : "\u2014") + " MW" }
+            }
+          },
+          scales: {
+            x: { type:"time", time:{ unit:"day", tooltipFormat:"yyyy-MM-dd" },
+              grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10}, maxRotation:45 } },
+            y: { type: logScale ? "logarithmic" : "linear", min: logScale ? undefined : 0,
+              grid:{ color:"rgba(26,58,92,0.6)" }, ticks:{ color:"#7a8fa6", font:{size:10} },
+              title:{ display:true, text:"VRP (MW)", color:"#7a8fa6", font:{size:10} } }
+          }
+        }
+      });
+    }
+  }
+
   // Tab switching
-  tabVRP.addEventListener("click", () => {
-    tabVRP.classList.add("active"); tabAll.classList.remove("active");
-    drawChart();
-  });
-  tabAll.addEventListener("click", () => {
-    tabAll.classList.add("active"); tabVRP.classList.remove("active");
-    drawChart(); // same chart, future: split by sensor
+  let activeTab = 0;
+  tabBtns.forEach((btn, i) => {
+    btn.addEventListener("click", () => {
+      tabBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeTab = i;
+      drawChart();
+      drawSecondary(i);
+    });
   });
 
-  requestAnimationFrame(drawChart);
+  setTimeout(() => { drawChart(); drawSecondary(0); }, 50);
 }
 
 // ── Sensor legend ─────────────────────────────────────────────────────────────
@@ -646,6 +1008,36 @@ async function init() {
     buildCards();
     renderDetail();
   }, 60 * 60 * 1000);
+}
+
+// ── CSV Export ────────────────────────────────────────────────────────────────
+function exportCSV(volcano, records) {
+  const headers = [
+    "datetime_utc","sensor","vrp_mw","vrp_mir_mw","vrp_tir_mw","vrp_vent_mw",
+    "n_anomalous_pixels","hotspot_lat","hotspot_lon","hotspot_dist_km",
+    "t_bg_k","t_max_k","t_max_i04_k","t_max_i05_k",
+    "nti_max","nti_bg","n_nti_anomalous","granule"
+  ];
+  const rows = [headers.join(",")];
+  for (const r of records) {
+    const vals = headers.map(h => {
+      const v = r[h];
+      if (v == null) return "";
+      if (typeof v === "string" && v.includes(",")) return '"' + v + '"';
+      return String(v);
+    });
+    rows.push(vals.join(","));
+  }
+  const csv = rows.join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = volcano.name + "_VRP_" + new Date().toISOString().slice(0,10) + ".csv";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 document.addEventListener("DOMContentLoaded", init);

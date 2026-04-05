@@ -188,11 +188,63 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     if not np.any(roi_mask):
         return None
 
+    # --- NTI: Normalized Thermal Index (Coppola 2015) ---
+    # NTI = (L_MIR - L_TIR) / (L_MIR + L_TIR) per-pixel
+    # Anomaly when NTI_pixel > NTI_bg_median + NTI_threshold
+    # This is MIROVA's primary detection method — filters solar contamination
+    # and works contextually against local background.
+    nti_max = float("nan")
+    nti_bg = float("nan")
+    n_nti_anomalous = 0
+
+    if "I04" in bands and "I05" in bands:
+        bt4 = bands["I04"]
+        bt5 = bands["I05"]
+        # Compute spectral radiance for NTI
+        L_mir = bt_to_spectral_radiance(bt4, I04_LAMBDA)
+        L_tir = bt_to_spectral_radiance(bt5, 11.450)
+        valid_both = ~np.isnan(L_mir) & ~np.isnan(L_tir) & (L_mir + L_tir > 0)
+        nti = np.full_like(L_mir, np.nan)
+        nti[valid_both] = (L_mir[valid_both] - L_tir[valid_both]) / (L_mir[valid_both] + L_tir[valid_both])
+
+        # Background NTI statistics
+        bg_nti = nti[bg_mask & ~np.isnan(nti)]
+        if len(bg_nti) >= 10:
+            nti_bg = float(np.median(bg_nti))
+            nti_std = float(np.std(bg_nti))
+            nti_threshold = nti_bg + max(0.005, 3.0 * nti_std)
+
+            # ROI NTI anomalies
+            roi_nti = nti[roi_mask]
+            roi_nti_valid = roi_nti[~np.isnan(roi_nti)]
+            if len(roi_nti_valid) > 0:
+                nti_max = float(np.max(roi_nti_valid))
+                n_nti_anomalous = int(np.sum(roi_nti_valid > nti_threshold))
+
     # --- MIR channel I04 (3.74 um) — high-temperature features ---
+    # Detection uses DUAL criteria (MIROVA-style):
+    #   1. MIR brightness temperature > background + threshold (classic)
+    #   2. NTI > NTI_background + NTI_threshold (contextual, cancels terrain effects)
+    # A pixel must pass BOTH to be counted as truly anomalous.
+    # This eliminates false positives from topographic thermal gradients
+    # (e.g., Lascar at 5592m surrounded by warmer low-altitude terrain).
     vrp_mir_mw = 0.0
     t_bg_i04 = float("nan")
     t_max_i04 = float("nan")
     n_anomalous = 0
+    hotspot_lat = None
+    hotspot_lon = None
+    hotspot_dist_km = None
+    anomaly_pixels = []   # All anomalous pixels with location + per-pixel VRP
+
+    # Pre-compute NTI mask for dual-criteria filtering
+    nti_anomaly_mask = None
+    if "I04" in bands and "I05" in bands and not np.isnan(nti_bg):
+        bg_nti_vals = nti[bg_mask & ~np.isnan(nti)]
+        if len(bg_nti_vals) >= 10:
+            nti_std = float(np.std(bg_nti_vals))
+            nti_thresh = nti_bg + max(0.005, N_SIGMA_MIR * nti_std)
+            nti_anomaly_mask = roi_mask & ~np.isnan(nti) & (nti > nti_thresh)
 
     if "I04" in bands:
         bt = bands["I04"]
@@ -201,18 +253,44 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             t_bg_i04 = float(np.median(bg_vals))
             std_bg = float(np.std(bg_vals))
             threshold_mir = max(ANOMALY_THRESHOLD_K, N_SIGMA_MIR * std_bg)
-            roi_bt = bt[roi_mask]
-            hotpix = roi_bt[roi_bt > (t_bg_i04 + threshold_mir)]
-            hotpix = hotpix[~np.isnan(hotpix)]
-            n_anomalous = len(hotpix)
+
+            # Find pixels exceeding MIR temperature threshold
+            roi_bt_full = np.where(roi_mask & ~np.isnan(bt), bt, np.nan)
+            hot_mask_2d = roi_bt_full > (t_bg_i04 + threshold_mir)
+
+            # Apply NTI dual-criteria: pixel must also be NTI-anomalous
+            # This is critical for volcanoes with strong topographic gradients
+            if nti_anomaly_mask is not None:
+                hot_mask_2d = hot_mask_2d & nti_anomaly_mask
+
+            hot_rows, hot_cols = np.where(hot_mask_2d)
+            n_anomalous = len(hot_rows)
+
             if n_anomalous > 0:
-                # Wooster MIR radiance method (Coppola 2015, Eq.7)
-                L_hot = bt_to_spectral_radiance(hotpix, I04_LAMBDA)
+                hotpix_bt = bt[hot_rows, hot_cols]
+                L_hot = bt_to_spectral_radiance(hotpix_bt, I04_LAMBDA)
                 L_bg = bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA)
                 delta_L = L_hot - L_bg
-                vrp_w = float(np.sum(PIXEL_AREA_M2 * WOOSTER_COEFF * delta_L))
-                vrp_mir_mw = vrp_w / 1e6
-            valid_roi = roi_bt[~np.isnan(roi_bt)]
+                per_pixel_vrp_mw = PIXEL_AREA_M2 * WOOSTER_COEFF * delta_L / 1e6
+                vrp_mir_mw = float(np.sum(per_pixel_vrp_mw))
+
+                # Build list of all anomalous pixels sorted by VRP (descending)
+                for idx in np.argsort(-per_pixel_vrp_mw):
+                    r, c = int(hot_rows[idx]), int(hot_cols[idx])
+                    anomaly_pixels.append({
+                        "lat": round(float(lat[r, c]), 5),
+                        "lon": round(float(lon[r, c]), 5),
+                        "dist_km": round(float(dist[r, c]), 2),
+                        "bt_k": round(float(hotpix_bt[idx]), 2),
+                        "vrp_mw": round(float(per_pixel_vrp_mw[idx]), 4),
+                    })
+
+                # Primary hotspot = highest VRP pixel
+                hotspot_lat = anomaly_pixels[0]["lat"]
+                hotspot_lon = anomaly_pixels[0]["lon"]
+                hotspot_dist_km = anomaly_pixels[0]["dist_km"]
+
+            valid_roi = roi_bt_full[~np.isnan(roi_bt_full)]
             t_max_i04 = float(np.max(valid_roi)) if len(valid_roi) else float("nan")
 
     # --- TIR channel I05 (11.45 um) — TIRVolcH, low-temperature features ---
@@ -273,6 +351,13 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "vrp_vent_mw": round(vrp_vent_mw, 3),
         "n_anomalous_pixels": n_anomalous,
         "n_vent_pixels": n_vent_pixels,
+        "nti_max": round(nti_max, 6) if not np.isnan(nti_max) else None,
+        "nti_bg": round(nti_bg, 6) if not np.isnan(nti_bg) else None,
+        "n_nti_anomalous": n_nti_anomalous,
+        "hotspot_lat": hotspot_lat,
+        "hotspot_lon": hotspot_lon,
+        "hotspot_dist_km": hotspot_dist_km,
+        "anomaly_pixels": anomaly_pixels,
         "t_bg_k": round(t_bg_i04, 2) if not np.isnan(t_bg_i04) else None,
         "t_max_i04_k": round(t_max_i04, 2) if not np.isnan(t_max_i04) else None,
         "t_max_i05_k": round(t_max_i05, 2) if not np.isnan(t_max_i05) else None,
