@@ -16,12 +16,21 @@ DATA_DIR = Path(__file__).parent.parent / "data"
 
 
 def normalize_record(r: dict) -> dict:
-    """Ensure record has unified vrp_mw and t_max_k fields."""
+    """Ensure record has unified vrp_mw and t_max_k fields.
+
+    Applies distance filter: eruption-scale hotspots >5km from crater are
+    discarded as likely non-volcanic (urban, agricultural, geothermal).
+    """
+    MAX_HOTSPOT_DIST_KM = 5.0
+
     # Normalize vrp_mw: max(eruption-scale, vent-scale)
     if "vrp_mir_mw" in r and "vrp_mw" not in r:
         r["vrp_mw"] = r["vrp_mir_mw"]
 
     vrp_eruption = r.get("vrp_mw", 0) or 0
+    hotspot_dist = r.get("hotspot_dist_km")
+    if hotspot_dist is not None and hotspot_dist > MAX_HOTSPOT_DIST_KM:
+        vrp_eruption = 0  # discard distant eruption-scale signal
     vrp_vent = r.get("vrp_vent_mw", 0) or 0
     r["vrp_mw"] = round(max(vrp_eruption, vrp_vent), 3)
 

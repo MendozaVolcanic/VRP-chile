@@ -73,9 +73,18 @@ def append_record(volcano_name: str, record: dict,
     # Normalize VRP field: ensure every record has a unified 'vrp_mw' field.
     # VIIRS 375m returns vrp_mir_mw/vrp_vent_mw; MODIS/VIIRS750 return vrp_mw/vrp_vent_mw.
     # The unified vrp_mw = max(eruption-scale, vent-scale) for dashboard consistency.
+    #
+    # Distance filter: eruption-scale hotspots >5km from crater are almost always
+    # non-volcanic (urban, agricultural, or geothermal sources within the search ROI).
+    # MIROVA uses a similar proximity filter. We only trust eruption-scale VRP when
+    # the hotspot is within MAX_HOTSPOT_DIST_KM of the volcano center.
+    MAX_HOTSPOT_DIST_KM = 5.0
     if "vrp_mir_mw" in record and "vrp_mw" not in record:
         record["vrp_mw"] = record["vrp_mir_mw"]
     vrp_eruption = record.get("vrp_mw", 0) or 0
+    hotspot_dist = record.get("hotspot_dist_km")
+    if hotspot_dist is not None and hotspot_dist > MAX_HOTSPOT_DIST_KM:
+        vrp_eruption = 0  # discard distant eruption-scale signal
     vrp_vent = record.get("vrp_vent_mw", 0) or 0
     record["vrp_mw"] = round(max(vrp_eruption, vrp_vent), 3)
 

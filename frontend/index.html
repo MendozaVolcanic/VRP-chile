@@ -149,6 +149,54 @@
 
     .msg { text-align: center; padding: 60px; color: var(--muted); font-size: 0.88rem; }
 
+    /* ── Alert summary bar ── */
+    .alert-summary {
+      display: flex; gap: 8px; padding: 8px 24px; background: var(--surface);
+      border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center;
+    }
+    .alert-summary .summary-label { font-size: 0.72rem; color: var(--muted); margin-right: 4px; }
+    .alert-box {
+      display: flex; align-items: center; gap: 6px; padding: 4px 12px;
+      border-radius: 6px; border: 1px solid var(--border); background: var(--card); min-width: 80px;
+    }
+    .alert-box .ab-count { font-size: 1.1rem; font-weight: 700; }
+    .alert-box .ab-label { font-size: 0.65rem; color: var(--muted); line-height: 1.2; }
+    .alert-box.ab-high  { border-color: var(--red); }
+    .alert-box.ab-high .ab-count { color: var(--red); }
+    .alert-box.ab-mod   { border-color: var(--orange); }
+    .alert-box.ab-mod .ab-count { color: var(--orange); }
+    .alert-box.ab-low   { border-color: var(--yellow); }
+    .alert-box.ab-low .ab-count { color: var(--yellow); }
+    .alert-box.ab-vlow  { border-color: var(--green); }
+    .alert-box.ab-vlow .ab-count { color: var(--green); }
+    .alert-box.ab-nd .ab-count { color: var(--muted); }
+
+    /* ── Overview map ── */
+    .overview-section {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;
+    }
+    @media (max-width: 900px) { .overview-section { grid-template-columns: 1fr; } }
+    .overview-map-container {
+      height: 420px; border-radius: 10px; overflow: hidden;
+      border: 1px solid var(--border); background: var(--card);
+    }
+    .nrt-table-container {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px; overflow-y: auto; max-height: 420px;
+    }
+    .nrt-table-container h3 { font-size: 0.82rem; font-weight: 600; margin-bottom: 8px; }
+    .nrt-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+    .nrt-table th {
+      text-align: left; padding: 5px 8px; color: var(--muted);
+      border-bottom: 1px solid var(--border); font-weight: 500; font-size: 0.65rem;
+      text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; background: var(--surface);
+    }
+    .nrt-table td { padding: 4px 8px; border-bottom: 1px solid rgba(30,58,92,0.3); cursor: pointer; }
+    .nrt-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+    /* ── UTC clock ── */
+    #utc-clock { font-family: 'Consolas', monospace; font-size: 0.78rem; color: var(--cyan); letter-spacing: 1px; }
+
     /* ── Map panel ── */
     .map-container {
       height: 400px; border-radius: 10px; overflow: hidden;
@@ -198,9 +246,12 @@
       <div class="status-dot"></div>
       Sistema Operativo
     </div>
+    <span id="utc-clock"></span>
     <span id="updated-label"></span>
   </div>
 </header>
+
+<div class="alert-summary" id="alert-summary"></div>
 
 <div class="controls">
   <div>
@@ -222,6 +273,16 @@
 </div>
 
 <main>
+  <div class="overview-section" id="overview-section">
+    <div class="overview-map-container" id="overview-map"></div>
+    <div class="nrt-table-container">
+      <h3>Últimas detecciones NRT (todos los volcanes)</h3>
+      <table class="nrt-table">
+        <thead><tr><th>Fecha UTC</th><th>Volcán</th><th>VRP (MW)</th><th>Sensor</th></tr></thead>
+        <tbody id="nrt-tbody"></tbody>
+      </table>
+    </div>
+  </div>
   <div class="volcano-grid" id="volcano-grid"></div>
   <div id="detail"></div>
 </main>
@@ -981,9 +1042,161 @@ function buildLegend() {
   });
 }
 
+// ── UTC Clock ────────────────────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const hh = String(now.getUTCHours()).padStart(2,"0");
+  const mm = String(now.getUTCMinutes()).padStart(2,"0");
+  const ss = String(now.getUTCSeconds()).padStart(2,"0");
+  document.getElementById("utc-clock").textContent = hh + ":" + mm + ":" + ss + " UTC";
+}
+
+// ── Alert summary bar ────────────────────────────────────────────────────────
+function buildAlertSummary() {
+  const bar = document.getElementById("alert-summary");
+  while (bar.firstChild) bar.removeChild(bar.firstChild);
+
+  const counts = { high: 0, mod: 0, low: 0, vlow: 0, nd: 0 };
+  for (const v of VOLCANOES) {
+    const d = allData[v.name] || { records: [] };
+    const vrp = latestVRP(d.records);
+    const lv = getLevel(vrp);
+    if (lv.key === "high" || lv.key === "vhigh") counts.high++;
+    else if (lv.key === "mod") counts.mod++;
+    else if (lv.key === "low") counts.low++;
+    else if (lv.key === "vlow") counts.vlow++;
+    else counts.nd++;
+  }
+
+  const lbl = el("span", "summary-label"); lbl.textContent = "Estado actual:";
+  bar.appendChild(lbl);
+
+  [
+    ["ab-high", counts.high, ">100 MW", "Alto"],
+    ["ab-mod",  counts.mod,  "10\u2013100 MW", "Moderado"],
+    ["ab-low",  counts.low,  "1\u201310 MW", "Bajo"],
+    ["ab-vlow", counts.vlow, "<1 MW", "Muy Bajo"],
+    ["ab-nd",   counts.nd,   "", "Sin datos"],
+  ].forEach(([cls, count, range, label]) => {
+    const box = el("div", "alert-box " + cls);
+    const c = el("span", "ab-count"); c.textContent = count;
+    const l = el("span", "ab-label");
+    l.textContent = label;
+    if (range) {
+      l.appendChild(document.createElement("br"));
+      l.appendChild(document.createTextNode(range));
+    }
+    box.append(c, l);
+    bar.appendChild(box);
+  });
+}
+
+// ── Overview map ─────────────────────────────────────────────────────────────
+let overviewMap = null;
+let overviewMarkers = [];
+
+function buildOverviewMap() {
+  const container = document.getElementById("overview-map");
+  if (!container) return;
+
+  if (!overviewMap) {
+    overviewMap = L.map("overview-map", { zoomControl: true }).setView([-33.5, -70.5], 4);
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+      attribution: "Esri", maxZoom: 18,
+    }).addTo(overviewMap);
+  }
+
+  // Clear old markers
+  overviewMarkers.forEach(m => overviewMap.removeLayer(m));
+  overviewMarkers = [];
+
+  const alertColors = { nd: "#7a8fa6", vlow: "#00d084", low: "#ffc107", mod: "#ff7043", high: "#f44336", vhigh: "#f44336" };
+
+  VOLCANOES.forEach(v => {
+    const d = allData[v.name] || { records: [] };
+    const vrp = latestVRP(d.records);
+    const lv = getLevel(vrp);
+    const color = alertColors[lv.key] || "#7a8fa6";
+    const size = lv.key === "nd" ? 6 : Math.max(7, Math.min(16, 7 + vrp * 2));
+
+    const marker = L.circleMarker([v.lat, v.lon], {
+      radius: size, color: "#fff", weight: 1.5,
+      fillColor: color, fillOpacity: 0.85,
+    }).addTo(overviewMap);
+
+    marker.bindPopup(
+      "<b>" + v.display + "</b><br>" +
+      lv.label + (vrp > 0 ? " \u2014 " + vrp.toFixed(2) + " MW" : "") + "<br>" +
+      "<small>" + v.region + "</small>"
+    );
+
+    marker.on("click", () => {
+      currentVolcano = v;
+      buildCards();
+      renderDetail();
+    });
+
+    overviewMarkers.push(marker);
+  });
+}
+
+// ── NRT global table ─────────────────────────────────────────────────────────
+function buildNRTTable() {
+  const tbody = document.getElementById("nrt-tbody");
+  if (!tbody) return;
+  while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+
+  // Collect all detections from all volcanoes, last 7 days
+  const cutoff = Date.now() - 7 * 86400000;
+  const allDetections = [];
+  for (const v of VOLCANOES) {
+    const d = allData[v.name] || { records: [] };
+    for (const r of d.records) {
+      const vrp = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+      if (vrp <= 0) continue;
+      const t = new Date(r.datetime_utc).getTime();
+      if (t < cutoff) continue;
+      allDetections.push({ volcano: v, record: r, vrp: vrp });
+    }
+  }
+
+  allDetections.sort((a, b) => b.record.datetime_utc.localeCompare(a.record.datetime_utc));
+
+  const show = allDetections.slice(0, 30);
+  if (show.length === 0) {
+    const row = el("tr");
+    const td = el("td"); td.colSpan = 4; td.textContent = "Sin detecciones recientes";
+    td.style.cssText = "color:var(--muted);text-align:center;padding:20px";
+    row.appendChild(td); tbody.appendChild(row);
+    return;
+  }
+
+  show.forEach(det => {
+    const lv = getLevel(det.vrp);
+    const row = el("tr");
+    row.addEventListener("click", () => {
+      currentVolcano = det.volcano;
+      buildCards();
+      renderDetail();
+    });
+
+    const tdDate = el("td"); tdDate.textContent = det.record.datetime_utc;
+    const tdVolc = el("td"); tdVolc.textContent = det.volcano.display; tdVolc.style.fontWeight = "600";
+    const tdVrp = el("td"); tdVrp.textContent = det.vrp.toFixed(3);
+    tdVrp.style.fontWeight = "700";
+    tdVrp.style.color = "var(--" + (lv.key === "vlow" ? "green" : lv.key === "low" ? "yellow" : lv.key === "mod" ? "orange" : lv.key === "nd" ? "muted" : "red") + ")";
+    const tdSensor = el("td"); tdSensor.textContent = det.record.sensor; tdSensor.style.color = "var(--muted)";
+
+    row.append(tdDate, tdVolc, tdVrp, tdSensor);
+    tbody.appendChild(row);
+  });
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
   buildLegend();
+  updateClock();
+  setInterval(updateClock, 1000);
 
   // Days
   document.getElementById("days-select").addEventListener("change", e => {
@@ -1009,15 +1222,21 @@ async function init() {
   // Load all volcanoes in parallel
   await Promise.all(VOLCANOES.map(v => loadVolcano(v)));
 
+  buildAlertSummary();
   buildCards();
+  buildOverviewMap();
+  buildNRTTable();
   renderDetail();
 
-  // Auto-refresh every 60 minutes
+  // Auto-refresh every 5 minutes
   setInterval(async () => {
     await Promise.all(VOLCANOES.map(v => loadVolcano(v)));
+    buildAlertSummary();
     buildCards();
+    buildOverviewMap();
+    buildNRTTable();
     renderDetail();
-  }, 60 * 60 * 1000);
+  }, 5 * 60 * 1000);
 }
 
 // ── CSV Export ────────────────────────────────────────────────────────────────
