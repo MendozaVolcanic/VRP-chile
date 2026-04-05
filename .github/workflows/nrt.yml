@@ -65,6 +65,8 @@ jobs:
           git config user.email "vrp-bot@github-actions"
           git add data/*.json data/mirova/*.json
           git diff --staged --quiet || git commit -m "NRT update $(date -u '+%Y-%m-%d %H:%M UTC')"
+          # Pull with rebase to handle concurrent workflow pushes
+          git pull --rebase origin main || true
           git push
 
       - name: Deploy frontend to GitHub Pages
