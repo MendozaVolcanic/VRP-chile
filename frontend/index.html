@@ -290,20 +290,55 @@
 <script>
 // ── Config ──────────────────────────────────────────────────────────────────
 const VOLCANOES = [
-  // Norte (N→S)
+  // === Zona Norte CVZ (N→S) ===
+  { name: "Taapaca",              display: "Taapaca",                region: "Arica y Parinacota", lat: -18.100, lon: -69.500, radius_km: 10 },
+  { name: "Parinacota",           display: "Parinacota",             region: "Arica y Parinacota", lat: -18.166, lon: -69.142, radius_km: 10 },
+  { name: "Guallatiri",           display: "Guallatiri",             region: "Arica y Parinacota", lat: -18.420, lon: -69.090, radius_km: 10 },
   { name: "Isluga",               display: "Isluga",                 region: "Tarapacá",      lat: -19.150, lon: -68.830, radius_km: 10, hasMirova: true,  vent_lat: -19.150, vent_lon: -68.830 },
+  { name: "Irruputuncu",          display: "Irruputuncu",            region: "Tarapacá",      lat: -20.730, lon: -68.550, radius_km: 10 },
+  { name: "OlcaParuma",           display: "Olca-Paruma",            region: "Tarapacá",      lat: -20.942, lon: -68.503, radius_km: 10 },
+  { name: "Ollague",              display: "Ollagüe",                region: "Antofagasta",   lat: -21.300, lon: -68.180, radius_km: 10 },
+  { name: "SanPedro",             display: "San Pedro",              region: "Antofagasta",   lat: -21.880, lon: -68.400, radius_km: 10 },
+  { name: "Putana",               display: "Putana",                 region: "Antofagasta",   lat: -22.557, lon: -67.853, radius_km: 10 },
   { name: "Lascar",               display: "Láscar",                 region: "Antofagasta",   lat: -23.369, lon: -67.732, radius_km: 10, hasMirova: true,  vent_lat: -23.369, vent_lon: -67.732 },
-  { name: "Lastarria",            display: "Lastarria",              region: "Antofagasta",   lat: -25.168, lon: -68.507, radius_km: 10, hasMirova: true,  vent_lat: -25.168, vent_lon: -68.507 },
-  // Centro
+  { name: "Lastarria",            display: "Lastarria",              region: "Atacama",        lat: -25.168, lon: -68.507, radius_km: 10, hasMirova: true,  vent_lat: -25.168, vent_lon: -68.507 },
+  // === Zona Central SVZ ===
   { name: "Tupungatito",          display: "Tupungatito",            region: "Valparaíso",    lat: -33.400, lon: -69.800, radius_km: 10, hasMirova: true,  vent_lat: -33.400, vent_lon: -69.800 },
+  { name: "SanJose",              display: "San José",               region: "Metropolitana",  lat: -33.789, lon: -69.897, radius_km: 10 },
+  { name: "Tinguiririca",         display: "Tinguiririca",           region: "O'Higgins",     lat: -34.814, lon: -70.352, radius_km: 10 },
   { name: "PlanchonPeteroa",      display: "Planchón-Peteroa",       region: "Maule",         lat: -35.240, lon: -70.568, radius_km: 10, hasMirova: true,  vent_lat: -35.240, vent_lon: -70.568 },
+  { name: "DescabezadoGrande",    display: "Descabezado Grande",     region: "Maule",         lat: -35.580, lon: -70.750, radius_km: 10 },
+  { name: "CerroAzulQuizapu",     display: "Cerro Azul-Quizapu",     region: "Maule",         lat: -35.653, lon: -70.761, radius_km: 10 },
+  { name: "LagunaDelMaule",       display: "Laguna del Maule",       region: "Maule",         lat: -36.020, lon: -70.580, radius_km: 15 },
+  { name: "NevadoDeLongavi",      display: "Nevado de Longaví",      region: "Maule",         lat: -36.193, lon: -71.161, radius_km: 10 },
   { name: "NevadosDeChillan",     display: "Nevados de Chillán",     region: "Ñuble",         lat: -36.863, lon: -71.377, radius_km: 10, hasMirova: true,  vent_lat: -36.863, vent_lon: -71.377 },
+  { name: "Antuco",               display: "Antuco",                 region: "Biobío",        lat: -37.406, lon: -71.349, radius_km: 10 },
   { name: "Copahue",              display: "Copahue",                region: "Biobío",        lat: -37.856, lon: -71.183, radius_km: 10, hasMirova: true,  vent_lat: -37.856, vent_lon: -71.183 },
-  // Sur
+  { name: "Callaqui",             display: "Callaqui",               region: "Biobío",        lat: -37.920, lon: -71.450, radius_km: 10 },
+  // === Zona Sur SVZ ===
+  { name: "Lonquimay",            display: "Lonquimay",              region: "Araucanía",     lat: -38.380, lon: -71.580, radius_km: 10 },
+  { name: "Tolhuaca",             display: "Tolhuaca",               region: "Araucanía",     lat: -38.310, lon: -71.645, radius_km: 10 },
   { name: "Llaima",               display: "Llaima",                 region: "Araucanía",     lat: -38.692, lon: -71.729, radius_km: 10, hasMirova: true,  vent_lat: -38.692, vent_lon: -71.729 },
+  { name: "Sollipulli",           display: "Sollipulli",             region: "Araucanía",     lat: -38.970, lon: -71.520, radius_km: 10 },
   { name: "Villarrica",           display: "Villarrica",             region: "Araucanía",     lat: -39.420, lon: -71.930, radius_km: 10, hasMirova: true,  vent_lat: -39.420, vent_lon: -71.930 },
+  { name: "Quetrupillan",         display: "Quetrupillán",           region: "Araucanía",     lat: -39.496, lon: -71.722, radius_km: 10 },
+  { name: "Lanin",                display: "Lanín",                  region: "Araucanía",     lat: -39.633, lon: -71.503, radius_km: 10 },
+  { name: "MochoChoshuenco",      display: "Mocho-Choshuenco",       region: "Los Ríos",      lat: -39.927, lon: -72.027, radius_km: 10 },
+  { name: "CarranLosVenados",     display: "Carrán-Los Venados",     region: "Los Ríos",      lat: -40.350, lon: -72.070, radius_km: 10 },
   { name: "PuyehueCordonCaulle",  display: "Puyehue–Cordón Caulle",  region: "Los Ríos",      lat: -40.590, lon: -72.117, radius_km: 15, hasMirova: true,  vent_lat: -40.585, vent_lon: -72.020 },
+  { name: "AntillancaCasablanca", display: "Antillanca-Casablanca",  region: "Los Lagos",     lat: -40.770, lon: -72.150, radius_km: 10 },
+  { name: "Osorno",               display: "Osorno",                 region: "Los Lagos",     lat: -41.100, lon: -72.493, radius_km: 10 },
+  { name: "Calbuco",              display: "Calbuco",                region: "Los Lagos",     lat: -41.330, lon: -72.614, radius_km: 10 },
+  { name: "YateHornopiren",       display: "Yate-Hornopirén",        region: "Los Lagos",     lat: -41.760, lon: -72.390, radius_km: 10 },
+  { name: "Huequi",               display: "Huequi",                 region: "Los Lagos",     lat: -42.377, lon: -72.578, radius_km: 10 },
+  { name: "Michinmahuida",        display: "Michinmahuida",          region: "Los Lagos",     lat: -42.790, lon: -72.440, radius_km: 10 },
   { name: "Chaiten",              display: "Chaitén",                region: "Los Lagos",     lat: -42.833, lon: -72.646, radius_km: 10, hasMirova: true,  vent_lat: -42.833, vent_lon: -72.646 },
+  // === Zona Austral ===
+  { name: "CorcovadoYanteles",    display: "Corcovado-Yanteles",     region: "Los Lagos",     lat: -43.183, lon: -72.800, radius_km: 10 },
+  { name: "Melimoyu",             display: "Melimoyu",               region: "Aysén",         lat: -44.080, lon: -72.880, radius_km: 10 },
+  { name: "Mentolat",             display: "Mentolat",               region: "Aysén",         lat: -44.670, lon: -73.080, radius_km: 10 },
+  { name: "MacaCay",              display: "Macá-Cay",               region: "Aysén",         lat: -45.100, lon: -73.200, radius_km: 10 },
+  { name: "Hudson",               display: "Hudson",                 region: "Aysén",         lat: -45.900, lon: -72.970, radius_km: 15 },
 ];
 
 const SENSORS = [
