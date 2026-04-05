@@ -188,6 +188,20 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     if not np.any(roi_mask):
         return None
 
+    # --- Cloud mask: exclude cold pixels using TIR band (I05) ---
+    # Cloud tops are typically <260K. Excluding them prevents:
+    #  (a) artificially low T_bg from cloudy background pixels
+    #  (b) false negatives from cloudy ROI pixels hiding real anomalies
+    # This is a simple threshold approach — no extra download needed.
+    CLOUD_BT_THRESHOLD = 260.0  # K — pixels colder than this are likely cloudy
+    n_cloud_masked = 0
+    if "I05" in bands:
+        cloud_free = bands["I05"] >= CLOUD_BT_THRESHOLD
+        cloud_free = cloud_free | np.isnan(bands["I05"])  # keep pixels without I05
+        n_cloud_masked = int(np.sum(roi_mask & ~cloud_free & ~np.isnan(bands["I05"])))
+        roi_mask = roi_mask & cloud_free
+        bg_mask = bg_mask & cloud_free
+
     # --- NTI: Normalized Thermal Index (Coppola 2015) ---
     # NTI = (L_MIR - L_TIR) / (L_MIR + L_TIR) per-pixel
     # Anomaly when NTI_pixel > NTI_bg_median + NTI_threshold
@@ -351,6 +365,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "vrp_vent_mw": round(vrp_vent_mw, 3),
         "n_anomalous_pixels": n_anomalous,
         "n_vent_pixels": n_vent_pixels,
+        "n_cloud_masked": n_cloud_masked,
         "nti_max": round(nti_max, 6) if not np.isnan(nti_max) else None,
         "nti_bg": round(nti_bg, 6) if not np.isnan(nti_bg) else None,
         "n_nti_anomalous": n_nti_anomalous,

@@ -60,8 +60,8 @@
 
     /* ── Volcano grid (overview cards) ── */
     .volcano-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 10px; margin-bottom: 24px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 8px; margin-bottom: 24px;
     }
     .volcano-card {
       background: var(--surface); border: 1px solid var(--border);
@@ -229,10 +229,20 @@
 <script>
 // ── Config ──────────────────────────────────────────────────────────────────
 const VOLCANOES = [
-  { name: "PuyehueCordonCaulle", display: "Puyehue–Cordón Caulle", region: "Los Ríos",     lat: -40.590, lon: -72.117, radius_km: 15, hasMirova: true,  vent_lat: -40.585, vent_lon: -72.020 },
-  { name: "Villarrica",           display: "Villarrica",             region: "Araucanía",   lat: -39.420, lon: -71.930, radius_km: 10, hasMirova: false },
-  { name: "Lascar",               display: "Láscar",                 region: "Antofagasta", lat: -23.369, lon: -67.732, radius_km: 10, hasMirova: true  },
-  { name: "Copahue",              display: "Copahue",                region: "Biobío",      lat: -37.856, lon: -71.183, radius_km: 10, hasMirova: false },
+  // Norte (N→S)
+  { name: "Isluga",               display: "Isluga",                 region: "Tarapacá",      lat: -19.150, lon: -68.830, radius_km: 10, hasMirova: true,  vent_lat: -19.150, vent_lon: -68.830 },
+  { name: "Lascar",               display: "Láscar",                 region: "Antofagasta",   lat: -23.369, lon: -67.732, radius_km: 10, hasMirova: true,  vent_lat: -23.369, vent_lon: -67.732 },
+  { name: "Lastarria",            display: "Lastarria",              region: "Antofagasta",   lat: -25.168, lon: -68.507, radius_km: 10, hasMirova: true,  vent_lat: -25.168, vent_lon: -68.507 },
+  // Centro
+  { name: "Tupungatito",          display: "Tupungatito",            region: "Valparaíso",    lat: -33.400, lon: -69.800, radius_km: 10, hasMirova: true,  vent_lat: -33.400, vent_lon: -69.800 },
+  { name: "PlanchonPeteroa",      display: "Planchón-Peteroa",       region: "Maule",         lat: -35.240, lon: -70.568, radius_km: 10, hasMirova: true,  vent_lat: -35.240, vent_lon: -70.568 },
+  { name: "NevadosDeChillan",     display: "Nevados de Chillán",     region: "Ñuble",         lat: -36.863, lon: -71.377, radius_km: 10, hasMirova: true,  vent_lat: -36.863, vent_lon: -71.377 },
+  { name: "Copahue",              display: "Copahue",                region: "Biobío",        lat: -37.856, lon: -71.183, radius_km: 10, hasMirova: true,  vent_lat: -37.856, vent_lon: -71.183 },
+  // Sur
+  { name: "Llaima",               display: "Llaima",                 region: "Araucanía",     lat: -38.692, lon: -71.729, radius_km: 10, hasMirova: true,  vent_lat: -38.692, vent_lon: -71.729 },
+  { name: "Villarrica",           display: "Villarrica",             region: "Araucanía",     lat: -39.420, lon: -71.930, radius_km: 10, hasMirova: true,  vent_lat: -39.420, vent_lon: -71.930 },
+  { name: "PuyehueCordonCaulle",  display: "Puyehue–Cordón Caulle",  region: "Los Ríos",      lat: -40.590, lon: -72.117, radius_km: 15, hasMirova: true,  vent_lat: -40.585, vent_lon: -72.020 },
+  { name: "Chaiten",              display: "Chaitén",                region: "Los Lagos",     lat: -42.833, lon: -72.646, radius_km: 10, hasMirova: true,  vent_lat: -42.833, vent_lon: -72.646 },
 ];
 
 const SENSORS = [
