@@ -41,7 +41,7 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from pipeline import fetch, process_modis, process_viirs, store
+from pipeline import fetch, process_modis, process_viirs, process_viirs_mod, store
 
 
 TMP_DIR = Path(__file__).parent.parent / "tmp"
@@ -90,7 +90,8 @@ def process_date(volcano: dict, date: datetime):
                               f"T_bg={result['t_bg_k']} K | T_max={result['t_max_k']} K | "
                               f"anomalous_px={result['n_anomalous_pixels']}")
 
-            elif "VIIRS" in platform:
+            elif platform in ("VIIRS_SNPP", "VIIRS_NOAA20"):
+                # VIIRS 375m I-band (IMG product)
                 l1b_files = [p for p in paths if "VNP02IMG" in p.name or "VJ102IMG" in p.name]
                 geo_files = [p for p in paths if "VNP03IMG" in p.name or "VJ103IMG" in p.name]
                 geo_by_time = {_time_key(g.name): g for g in geo_files}
@@ -112,10 +113,30 @@ def process_date(volcano: dict, date: datetime):
                         vent_str = (f" | VRP_VENT={result['vrp_vent_mw']} MW "
                                     f"({result['n_vent_pixels']}px)"
                                     if volcano.get("vent_lat") else "")
-                        print(f"  {result['sensor']} | VRP_MIR={result['vrp_mir_mw']} MW | "
+                        print(f"  {result['sensor']} (375m) | VRP_MIR={result['vrp_mir_mw']} MW | "
                               f"VRP_TIR={result['vrp_tir_mw']} MW | "
-                              f"T_max_I04={result['t_max_i04_k']} K"
+                              f"T_max={result['t_max_i04_k']} K"
                               f"{vent_str}")
+
+            elif platform in ("VIIRS_SNPP_750", "VIIRS_NOAA20_750"):
+                # VIIRS 750m M-band (MOD product) — MIROVA's "VIIRS" channel
+                l1b_files = [p for p in paths if "VNP02MOD" in p.name or "VJ102MOD" in p.name]
+                geo_files = [p for p in paths if "VNP03MOD" in p.name or "VJ103MOD" in p.name]
+                geo_by_time = {_time_key(g.name): g for g in geo_files}
+
+                for l1b in l1b_files:
+                    geo = geo_by_time.get(_time_key(l1b.name))
+                    if geo is None:
+                        print(f"  No geolocation match for {l1b.name}")
+                        continue
+                    result = process_viirs_mod.calculate_vrp(
+                        l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"]
+                    )
+                    if result:
+                        store.append_record(volcano["name"], result)
+                        print(f"  {result['sensor']} (750m) | VRP={result['vrp_mw']} MW | "
+                              f"T_bg={result['t_bg_k']} K | T_max={result['t_max_k']} K | "
+                              f"anomalous_px={result['n_anomalous_pixels']}")
 
     finally:
         # Always delete raw granules after processing

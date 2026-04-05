@@ -16,14 +16,21 @@ from pathlib import Path
 
 # Short names for each product in the NASA CMR catalog
 PRODUCTS = {
-    "MODIS_TERRA_L1B":   {"short_name": "MOD021KM",  "version": "6.1"},
-    "MODIS_TERRA_GEO":   {"short_name": "MOD03",     "version": "6.1"},
-    "MODIS_AQUA_L1B":    {"short_name": "MYD021KM",  "version": "6.1"},
-    "MODIS_AQUA_GEO":    {"short_name": "MYD03",     "version": "6.1"},
-    "VIIRS_SNPP_L1B":    {"short_name": "VNP02IMG",  "version": "2"},
-    "VIIRS_SNPP_GEO":    {"short_name": "VNP03IMG",  "version": "2"},
-    "VIIRS_NOAA20_L1B":  {"short_name": "VJ102IMG",  "version": "2"},
-    "VIIRS_NOAA20_GEO":  {"short_name": "VJ103IMG",  "version": "2"},
+    # MODIS 1km emissive bands
+    "MODIS_TERRA_L1B":        {"short_name": "MOD021KM",  "version": "6.1"},
+    "MODIS_TERRA_GEO":        {"short_name": "MOD03",     "version": "6.1"},
+    "MODIS_AQUA_L1B":         {"short_name": "MYD021KM",  "version": "6.1"},
+    "MODIS_AQUA_GEO":         {"short_name": "MYD03",     "version": "6.1"},
+    # VIIRS 375m I-band (IMG product) — Band I04 @ 3.74µm
+    "VIIRS_SNPP_L1B":         {"short_name": "VNP02IMG",  "version": "2"},
+    "VIIRS_SNPP_GEO":         {"short_name": "VNP03IMG",  "version": "2"},
+    "VIIRS_NOAA20_L1B":       {"short_name": "VJ102IMG",  "version": "2"},
+    "VIIRS_NOAA20_GEO":       {"short_name": "VJ103IMG",  "version": "2"},
+    # VIIRS 750m M-band (MOD product) — Band M13 @ 4.05µm (same as MIROVA VIIRS750)
+    "VIIRS_SNPP_MOD_L1B":     {"short_name": "VNP02MOD",  "version": "2"},
+    "VIIRS_SNPP_MOD_GEO":     {"short_name": "VNP03MOD",  "version": "2"},
+    "VIIRS_NOAA20_MOD_L1B":   {"short_name": "VJ102MOD",  "version": "2"},
+    "VIIRS_NOAA20_MOD_GEO":   {"short_name": "VJ103MOD",  "version": "2"},
 }
 
 
@@ -99,9 +106,26 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             results[platform] = paths
 
     if "VIIRS" in sensors:
+        # VIIRS 375m I-band
         for platform, l1b_key, geo_key in [
             ("VIIRS_SNPP",   "VIIRS_SNPP_L1B",   "VIIRS_SNPP_GEO"),
             ("VIIRS_NOAA20", "VIIRS_NOAA20_L1B",  "VIIRS_NOAA20_GEO"),
+        ]:
+            l1b_granules = search_granules(l1b_key, lat, lon, radius, date)
+            if not l1b_granules:
+                continue
+            geo_granules = search_granules(geo_key, lat, lon, radius, date)
+            matched = _match_granules(l1b_granules, geo_granules)
+            platform_dir = tmp_dir / platform
+            paths = []
+            for l1b_g, geo_g in matched:
+                paths += download_granules([l1b_g, geo_g], platform_dir)
+            results[platform] = paths
+
+        # VIIRS 750m M-band (MIROVA calls this "VIIRS" or "VIIRS750")
+        for platform, l1b_key, geo_key in [
+            ("VIIRS_SNPP_750",   "VIIRS_SNPP_MOD_L1B",   "VIIRS_SNPP_MOD_GEO"),
+            ("VIIRS_NOAA20_750", "VIIRS_NOAA20_MOD_L1B",  "VIIRS_NOAA20_MOD_GEO"),
         ]:
             l1b_granules = search_granules(l1b_key, lat, lon, radius, date)
             if not l1b_granules:

@@ -8,146 +8,226 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   <style>
     :root {
-      --bg: #0f1117; --surface: #1a1d27; --border: #2a2d3a;
-      --text: #e2e8f0; --muted: #8892a4;
-      --red: #ff4444; --orange: #ff8c00; --blue: #4a9eff;
-      --teal: #2dd4bf; --yellow: #fbbf24;
+      --bg: #1a1a2e; --surface: #16213e; --card: #0f3460;
+      --border: #1a3a5c; --text: #e0e6f0; --muted: #7a8fa6;
+      --green: #00d084; --yellow: #ffc107; --orange: #ff7043; --red: #f44336;
+      --blue: #2196f3; --cyan: #00bcd4; --purple: #9c27b0;
+      --modis: #ff8c00; --v375: #e91e63; --v750: #00bcd4; --vent: #7c4dff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
 
+    /* ── Header ── */
     header {
-      background: var(--surface); border-bottom: 1px solid var(--border);
-      padding: 16px 24px; display: flex; align-items: center; gap: 16px;
+      background: linear-gradient(135deg, #0d1b2a 0%, #1a2744 100%);
+      border-bottom: 2px solid #1e3a5f;
+      padding: 14px 24px;
+      display: flex; align-items: center; gap: 16px;
     }
-    header h1 { font-size: 1.2rem; font-weight: 600; }
-    .subtitle { color: var(--muted); font-size: 0.82rem; }
-    #updated-label { margin-left: auto; font-size: 0.78rem; color: var(--muted); }
+    .logo { font-size: 1.4rem; font-weight: 700; letter-spacing: 1px; }
+    .logo span { color: var(--orange); }
+    .header-sub { font-size: 0.78rem; color: var(--muted); }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 20px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .status-label { font-size: 0.75rem; color: var(--green); display: flex; align-items: center; gap: 6px; }
+    #updated-label { font-size: 0.72rem; color: var(--muted); }
 
+    /* ── Controls ── */
     .controls {
       background: var(--surface); border-bottom: 1px solid var(--border);
-      padding: 12px 24px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center;
+      padding: 10px 24px; display: flex; gap: 20px; flex-wrap: wrap; align-items: center;
     }
-    .controls label { font-size: 0.82rem; color: var(--muted); }
+    .controls label { font-size: 0.78rem; color: var(--muted); }
     select {
-      background: var(--bg); color: var(--text); border: 1px solid var(--border);
-      border-radius: 6px; padding: 5px 10px; font-size: 0.82rem;
+      background: var(--card); color: var(--text); border: 1px solid var(--border);
+      border-radius: 5px; padding: 5px 10px; font-size: 0.78rem; cursor: pointer;
     }
-    .sensor-toggles { display: flex; gap: 8px; flex-wrap: wrap; }
-    .toggle-btn {
-      padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border);
-      background: transparent; color: var(--muted); font-size: 0.78rem;
-      cursor: pointer; transition: all 0.15s;
+    .scale-btn {
+      padding: 4px 14px; border-radius: 4px; border: 1px solid var(--border);
+      background: var(--card); color: var(--muted); font-size: 0.75rem; cursor: pointer;
     }
-    .toggle-btn.active { color: #fff; }
-    .toggle-btn[data-sensor="MODIS"].active   { background: var(--orange); border-color: var(--orange); }
-    .toggle-btn[data-sensor="VIIRS_MIR"].active  { background: var(--red);    border-color: var(--red); }
-    .toggle-btn[data-sensor="VIIRS_TIR"].active  { background: var(--teal);   border-color: var(--teal); }
-    .toggle-btn[data-sensor="VIIRS_VENT"].active { background: var(--blue);   border-color: var(--blue); }
-    .toggle-btn[data-sensor="MIROVA"].active  { background: var(--yellow); border-color: var(--yellow); }
+    .scale-btn.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .sensor-legend { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-left: auto; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: var(--muted); cursor: pointer; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+    .legend-item.dim { opacity: 0.35; }
 
-    main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+    /* ── Main layout ── */
+    main { padding: 20px 24px; max-width: 1600px; margin: 0 auto; }
 
-    #volcano-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-    .volcano-btn {
-      padding: 8px 18px; border-radius: 8px; border: 1px solid var(--border);
-      background: var(--surface); color: var(--muted); font-size: 0.88rem;
-      cursor: pointer; transition: all 0.15s;
+    /* ── Volcano grid (overview cards) ── */
+    .volcano-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px; margin-bottom: 24px;
     }
-    .volcano-btn.active {
-      border-color: var(--red); color: var(--text); background: rgba(255,68,68,0.08);
-    }
-
-    .stats-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
-      gap: 12px; margin-bottom: 20px;
-    }
-    .stat-card {
+    .volcano-card {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: 10px; padding: 14px 16px;
+      border-radius: 10px; padding: 12px 14px; cursor: pointer;
+      transition: all 0.2s; position: relative; overflow: hidden;
     }
-    .stat-label { font-size: 0.72rem; color: var(--muted); margin-bottom: 4px; }
-    .stat-value { font-size: 1.5rem; font-weight: 700; }
-    .stat-sub   { font-size: 0.70rem; color: var(--muted); margin-top: 2px; }
+    .volcano-card:hover { border-color: var(--blue); transform: translateY(-1px); }
+    .volcano-card.active { border-color: var(--blue); background: #0d2744; }
+    .volcano-card.alert-high  { border-color: var(--red); }
+    .volcano-card.alert-mod   { border-color: var(--orange); }
+    .volcano-card.alert-low   { border-color: var(--yellow); }
+    .volcano-card.alert-vlow  { border-color: var(--green); }
+    .vc-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+    .vc-name { font-size: 0.82rem; font-weight: 600; line-height: 1.2; }
+    .vc-region { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
+    .alert-badge {
+      font-size: 0.60rem; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+      white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .badge-vlow  { background: rgba(0,208,132,0.15); color: var(--green); border: 1px solid var(--green); }
+    .badge-low   { background: rgba(255,193,7,0.15);  color: var(--yellow); border: 1px solid var(--yellow); }
+    .badge-mod   { background: rgba(255,112,67,0.15); color: var(--orange); border: 1px solid var(--orange); }
+    .badge-high  { background: rgba(244,67,54,0.15);  color: var(--red);    border: 1px solid var(--red); }
+    .badge-none  { background: rgba(122,143,166,0.1); color: var(--muted);  border: 1px solid var(--border); }
+    .vc-vrp { font-size: 1.3rem; font-weight: 700; margin-top: 4px; }
+    .vc-vrp-sub { font-size: 0.65rem; color: var(--muted); }
+    .vc-sensors { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+    .sensor-pill {
+      font-size: 0.60rem; padding: 1px 6px; border-radius: 3px;
+      font-weight: 600; letter-spacing: 0.3px;
+    }
+    .pill-modis { background: rgba(255,140,0,0.2);  color: var(--modis); }
+    .pill-v375  { background: rgba(233,30,99,0.2);  color: var(--v375);  }
+    .pill-v750  { background: rgba(0,188,212,0.2);  color: var(--v750);  }
+    .vc-time { font-size: 0.62rem; color: var(--muted); margin-top: 6px; }
 
-    .chart-card {
+    /* ── Detail panel ── */
+    .detail-panel {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 12px; padding: 20px; margin-bottom: 20px;
     }
-    .chart-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
-    .chart-desc  { font-size: 0.75rem; color: var(--muted); margin-bottom: 14px; }
-    .chart-wrapper { position: relative; height: 280px; }
-    .mirova-note {
-      font-size: 0.72rem; color: var(--muted);
-      background: rgba(251,191,36,0.05); border: 1px solid rgba(251,191,36,0.15);
-      border-radius: 6px; padding: 7px 11px; margin-bottom: 12px;
+    .detail-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .detail-title { font-size: 1.1rem; font-weight: 700; }
+    .detail-coords { font-size: 0.72rem; color: var(--muted); }
+
+    /* ── Stats row ── */
+    .stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .stat-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px; min-width: 120px;
     }
-    .msg { text-align: center; padding: 60px; color: var(--muted); font-size: 0.9rem; }
+    .stat-box .label { font-size: 0.68rem; color: var(--muted); margin-bottom: 2px; }
+    .stat-box .val   { font-size: 1.3rem; font-weight: 700; }
+    .stat-box .unit  { font-size: 0.65rem; color: var(--muted); }
+
+    /* ── Energy bands (like MIROVA background) ── */
+    .energy-bands { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+    .energy-bands span { font-size: 0.68rem; color: var(--muted); margin-right: 6px; }
+    .band { padding: 3px 10px; border-radius: 3px; font-size: 0.68rem; font-weight: 600; }
+    .band-nd   { background: rgba(122,143,166,0.15); color: var(--muted); }
+    .band-vlow { background: rgba(0,208,132,0.15);   color: var(--green); }
+    .band-low  { background: rgba(255,193,7,0.15);   color: var(--yellow); }
+    .band-mod  { background: rgba(255,112,67,0.15);  color: var(--orange); }
+    .band-high { background: rgba(244,67,54,0.15);   color: var(--red); }
+
+    /* ── Chart ── */
+    .chart-wrapper { position: relative; height: 340px; }
+    .chart-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+    .chart-tab {
+      padding: 4px 14px; border-radius: 5px; border: 1px solid var(--border);
+      background: var(--card); color: var(--muted); font-size: 0.75rem; cursor: pointer;
+    }
+    .chart-tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+    /* ── Recent events table ── */
+    .events-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 16px; }
+    .events-table th {
+      text-align: left; padding: 6px 10px; color: var(--muted);
+      border-bottom: 1px solid var(--border); font-weight: 500; font-size: 0.68rem;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .events-table td { padding: 6px 10px; border-bottom: 1px solid rgba(30,58,92,0.5); }
+    .events-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .vrp-cell { font-weight: 700; }
+
+    .msg { text-align: center; padding: 60px; color: var(--muted); font-size: 0.88rem; }
   </style>
 </head>
 <body>
 
 <header>
   <div>
-    <h1>VRP Chile — Monitoreo Volcánico</h1>
-    <p class="subtitle">Volcanic Radiative Power · MODIS + VIIRS · NASA Earthdata</p>
+    <div class="logo">VRP <span>Chile</span></div>
+    <div class="header-sub">Monitoreo Volcánico · MODIS + VIIRS · NASA Earthdata</div>
   </div>
-  <span id="updated-label"></span>
+  <div class="header-right">
+    <div class="status-label">
+      <div class="status-dot"></div>
+      Sistema Operativo
+    </div>
+    <span id="updated-label"></span>
+  </div>
 </header>
 
 <div class="controls">
   <div>
-    <label for="days-select">Días a mostrar </label>
+    <label for="days-select">Período </label>
     <select id="days-select">
-      <option value="30">30 días</option>
-      <option value="60" selected>60 días</option>
+      <option value="7">7 días</option>
+      <option value="30" selected>30 días</option>
+      <option value="60">60 días</option>
       <option value="90">90 días</option>
-      <option value="180">180 días</option>
       <option value="0">Todo</option>
     </select>
   </div>
-  <div style="display:flex;gap:8px;align-items:center;">
-    <label>Sensores </label>
-    <div class="sensor-toggles">
-      <button class="toggle-btn active" data-sensor="MODIS">MODIS</button>
-      <button class="toggle-btn active" data-sensor="VIIRS_MIR">VIIRS MIR</button>
-      <button class="toggle-btn active" data-sensor="VIIRS_VENT">VIIRS Vent</button>
-      <button class="toggle-btn"        data-sensor="VIIRS_TIR">VIIRS TIR</button>
-      <button class="toggle-btn active" data-sensor="MIROVA">MIROVA ref.</button>
-    </div>
+  <div style="display:flex;gap:6px;align-items:center;">
+    <label>Escala </label>
+    <button class="scale-btn active" id="btn-linear">Lineal</button>
+    <button class="scale-btn" id="btn-log">Logarítmica</button>
   </div>
+  <div class="sensor-legend" id="sensor-legend"></div>
 </div>
 
 <main>
-  <div id="volcano-selector"></div>
-  <div id="content"><p class="msg">Cargando datos…</p></div>
+  <div class="volcano-grid" id="volcano-grid"></div>
+  <div id="detail"></div>
 </main>
 
 <script>
 // ── Config ──────────────────────────────────────────────────────────────────
 const VOLCANOES = [
-  { name: "PuyehueCordonCaulle", display: "Puyehue – Cordón Caulle", hasMirova: true  },
-  { name: "Villarrica",           display: "Villarrica",              hasMirova: false },
-  { name: "Lascar",               display: "Láscar",                  hasMirova: false },
-  { name: "Copahue",              display: "Copahue",                 hasMirova: false },
+  { name: "PuyehueCordonCaulle", display: "Puyehue–Cordón Caulle", region: "Los Ríos",      hasMirova: true  },
+  { name: "Villarrica",           display: "Villarrica",             region: "Araucanía",    hasMirova: false },
+  { name: "Lascar",               display: "Láscar",                 region: "Antofagasta",  hasMirova: false },
+  { name: "Copahue",              display: "Copahue",                region: "Biobío",       hasMirova: false },
 ];
-const DATA_BASE   = "data/";
-const MIROVA_BASE = "data/mirova/";
-const COLORS = {
-  MODIS_TERRA: "#ff8c00", MODIS_AQUA: "#ffb347",
-  VIIRS_SNPP:  "#ff4444", VIIRS_NOAA20: "#ff7070",
-  VIIRS_TIR:   "#2dd4bf", VIIRS_VENT:  "#4a9eff",
-  MIROVA:      "#fbbf24",
-};
 
-const visible = { MODIS: true, VIIRS_MIR: true, VIIRS_VENT: true, VIIRS_TIR: false, MIROVA: true };
+const SENSORS = [
+  { key: "MODIS",    label: "MODIS (1km)",     color: "#ff8c00" },
+  { key: "VIIRS375", label: "VIIRS 375m",      color: "#e91e63" },
+  { key: "VIIRS750", label: "VIIRS 750m",      color: "#00bcd4" },
+  { key: "MIROVA",   label: "MIROVA ref.",     color: "#ffc107" },
+];
+
+// MIROVA energy scale (MW)
+const LEVELS = [
+  { key: "nd",   label: "Sin datos",   max: 0,    cls: "badge-none",  cardCls: "" },
+  { key: "vlow", label: "Muy Bajo",    max: 1,    cls: "badge-vlow",  cardCls: "alert-vlow" },
+  { key: "low",  label: "Bajo",        max: 10,   cls: "badge-low",   cardCls: "alert-low"  },
+  { key: "mod",  label: "Moderado",    max: 100,  cls: "badge-mod",   cardCls: "alert-mod"  },
+  { key: "high", label: "Alto",        max: 1000, cls: "badge-high",  cardCls: "alert-high" },
+  { key: "vhigh",label: "Muy Alto",   max: Infinity, cls: "badge-high", cardCls: "alert-high" },
+];
+
+function getLevel(vrp) {
+  if (!vrp || vrp <= 0) return LEVELS[0];
+  for (const l of LEVELS.slice(1)) if (vrp < l.max) return l;
+  return LEVELS[LEVELS.length - 1];
+}
+
+const sensorVisible = { MODIS: true, VIIRS375: true, VIIRS750: true, MIROVA: true };
 let currentVolcano = VOLCANOES[0];
-let currentDays = 60;
+let currentDays = 30;
+let logScale = false;
 let charts = {};
-let rawRecords = [];
-let mirovaRecords = [];
+let allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
 
-// ── Fetch helpers ───────────────────────────────────────────────────────────
+// ── Fetch ───────────────────────────────────────────────────────────────────
 async function fetchJSON(url) {
   try {
     const r = await fetch(url + "?_=" + Date.now());
@@ -155,8 +235,20 @@ async function fetchJSON(url) {
   } catch { return null; }
 }
 
-// ── Data processing ─────────────────────────────────────────────────────────
-function filterByDays(records, days) {
+async function loadVolcano(v) {
+  const [data, mirova] = await Promise.all([
+    fetchJSON("data/" + v.name + ".json"),
+    v.hasMirova ? fetchJSON("data/mirova/" + v.name + ".json") : Promise.resolve(null),
+  ]);
+  allData[v.name] = {
+    records:       data?.records   || [],
+    mirovaRecords: mirova?.records || [],
+    updated:       data?.updated   || null,
+  };
+}
+
+// ── Data helpers ─────────────────────────────────────────────────────────────
+function filterDays(records, days) {
   if (!days) return records;
   const cutoff = Date.now() - days * 86400000;
   return records.filter(r => new Date(r.datetime_utc).getTime() >= cutoff);
@@ -165,8 +257,7 @@ function filterByDays(records, days) {
 function toDailyMax(records, key) {
   const m = new Map();
   for (const r of records) {
-    const v = r[key];
-    if (v == null) continue;
+    const v = r[key]; if (v == null) continue;
     const d = r.datetime_utc.slice(0, 10);
     if (!m.has(d) || v > m.get(d)) m.set(d, v);
   }
@@ -176,260 +267,385 @@ function toDailyMax(records, key) {
 function toMirovaDaily(records) {
   const m = new Map();
   for (const r of records) {
-    const d = (r.Fecha_Satelite_UTC || r.datetime_utc || "").slice(0, 10);
-    if (!d) continue;
+    const d = (r.datetime_utc || "").slice(0, 10); if (!d) continue;
     const v = parseFloat(r.VRP_MW ?? r.vrp_mw ?? 0);
     if (!m.has(d) || v > m.get(d)) m.set(d, v);
   }
   return [...m.entries()].sort().map(([x, y]) => ({ x, y }));
 }
 
-// ── Chart factory ───────────────────────────────────────────────────────────
-function makeChart(canvasId, datasets) {
-  if (charts[canvasId]) { charts[canvasId].destroy(); delete charts[canvasId]; }
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-  charts[canvasId] = new Chart(canvas.getContext("2d"), {
-    type: "bar",
-    data: { datasets },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: { mode: "index", intersect: false },
-      plugins: {
-        legend: { labels: { color: "#8892a4", font: { size: 11 }, boxWidth: 12, padding: 14 } },
-        tooltip: {
-          backgroundColor: "#1a1d27", borderColor: "#2a2d3a", borderWidth: 1,
-          titleColor: "#e2e8f0", bodyColor: "#8892a4",
-          callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y?.toFixed(3) ?? "—"} MW` }
-        }
-      },
-      scales: {
-        x: {
-          type: "time",
-          time: { unit: "day", tooltipFormat: "yyyy-MM-dd" },
-          grid: { color: "#2a2d3a" },
-          ticks: { color: "#8892a4", font: { size: 10 }, maxRotation: 45 }
-        },
-        y: {
-          min: 0, grid: { color: "#2a2d3a" },
-          ticks: { color: "#8892a4", font: { size: 10 } },
-          title: { display: true, text: "VRP (MW)", color: "#8892a4", font: { size: 10 } }
-        }
-      }
-    }
-  });
-}
-
-function barDataset(label, data, colorKey, order = 1) {
-  return {
-    label, data, order,
-    backgroundColor: COLORS[colorKey] + "cc",
-    borderColor: COLORS[colorKey], borderWidth: 1,
-    borderRadius: 2, borderSkipped: false,
-  };
-}
-function lineDataset(label, data) {
-  return {
-    label, data, type: "line", order: 0,
-    borderColor: COLORS.MIROVA, backgroundColor: "transparent",
-    borderWidth: 1.5, pointRadius: 2, pointBackgroundColor: COLORS.MIROVA, tension: 0,
-  };
-}
-
-// ── DOM helpers (no innerHTML for data values) ──────────────────────────────
-function el(tag, attrs = {}) {
-  const e = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) {
-    if (k === "class") e.className = v;
-    else if (k === "style") e.style.cssText = v;
-    else e.setAttribute(k, v);
+function latestVRP(records) {
+  // Returns the max VRP from the last 48h across all sensors
+  const cutoff = Date.now() - 48 * 3600000;
+  let max = 0;
+  for (const r of records) {
+    if (new Date(r.datetime_utc).getTime() < cutoff) continue;
+    const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+    if (v > max) max = v;
   }
+  return max;
+}
+
+function latestSensors(records) {
+  const cutoff = Date.now() - 48 * 3600000;
+  const seen = new Set();
+  for (const r of records) {
+    if (new Date(r.datetime_utc).getTime() < cutoff) continue;
+    const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+    if (v > 0) seen.add(sensorGroup(r.sensor));
+  }
+  return seen;
+}
+
+function sensorGroup(sensor) {
+  if (!sensor) return null;
+  if (sensor.startsWith("MODIS")) return "MODIS";
+  if (sensor.includes("750")) return "VIIRS750";
+  if (sensor.startsWith("VIIRS")) return "VIIRS375";
+  return null;
+}
+
+function lastEventTime(records) {
+  let latest = null;
+  for (const r of records) {
+    if (!latest || r.datetime_utc > latest) latest = r.datetime_utc;
+  }
+  return latest;
+}
+
+// ── DOM helpers ──────────────────────────────────────────────────────────────
+function el(tag, cls) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
   return e;
 }
-function text(str) { return document.createTextNode(str); }
 
-function makeStatCard(label, value, unit, color) {
-  const card = el("div", { class: "stat-card" });
-  const lEl  = el("div", { class: "stat-label" });   lEl.textContent  = label;
-  const vEl  = el("div", { class: "stat-value", style: color ? `color:${color}` : "" });
-  vEl.textContent = value;
-  const sEl  = el("div", { class: "stat-sub" });     sEl.textContent  = unit;
-  card.append(lEl, vEl, sEl);
-  return card;
+// ── Volcano cards ─────────────────────────────────────────────────────────────
+function buildCards() {
+  const grid = document.getElementById("volcano-grid");
+  while (grid.firstChild) grid.removeChild(grid.firstChild);
+
+  VOLCANOES.forEach(v => {
+    const d = allData[v.name] || { records: [], mirovaRecords: [] };
+    const vrp = latestVRP(d.records);
+    const level = getLevel(vrp);
+    const sensors = latestSensors(d.records);
+    const lastTime = lastEventTime(d.records);
+
+    const card = el("div", "volcano-card" + (v === currentVolcano ? " active" : "") +
+                    (level.cardCls ? " " + level.cardCls : ""));
+    card.addEventListener("click", () => {
+      currentVolcano = v;
+      buildCards();
+      renderDetail();
+    });
+
+    // Header
+    const hdr = el("div", "vc-header");
+    const nameDiv = el("div");
+    const nm = el("div", "vc-name"); nm.textContent = v.display;
+    const rg = el("div", "vc-region"); rg.textContent = v.region;
+    nameDiv.append(nm, rg);
+    const badge = el("span", "alert-badge " + level.cls);
+    badge.textContent = level.label;
+    hdr.append(nameDiv, badge);
+
+    // VRP
+    const vrpEl = el("div", "vc-vrp");
+    vrpEl.style.color = vrp > 0 ? (level.key === "vlow" ? "var(--green)" :
+                                   level.key === "low"  ? "var(--yellow)" :
+                                   level.key === "mod"  ? "var(--orange)" : "var(--red)") : "var(--muted)";
+    vrpEl.textContent = vrp > 0 ? vrp.toFixed(2) : "—";
+    const vrpSub = el("div", "vc-vrp-sub"); vrpSub.textContent = vrp > 0 ? "MW (48h max)" : "sin detección";
+
+    // Sensor pills
+    const pills = el("div", "vc-sensors");
+    if (sensors.has("MODIS")) { const p = el("span","sensor-pill pill-modis"); p.textContent = "MODIS"; pills.appendChild(p); }
+    if (sensors.has("VIIRS375")) { const p = el("span","sensor-pill pill-v375"); p.textContent = "VIIRS 375m"; pills.appendChild(p); }
+    if (sensors.has("VIIRS750")) { const p = el("span","sensor-pill pill-v750"); p.textContent = "VIIRS 750m"; pills.appendChild(p); }
+
+    // Last update
+    const time = el("div", "vc-time");
+    time.textContent = lastTime ? "Último: " + lastTime.slice(0, 16) + " UTC" : "Sin datos";
+
+    card.append(hdr, vrpEl, vrpSub, pills, time);
+    grid.appendChild(card);
+  });
 }
 
-function makeChartCard(titleStr, descStr, canvasId, showMirovaNote) {
-  const card  = el("div", { class: "chart-card" });
-  const title = el("p",   { class: "chart-title" }); title.textContent = titleStr;
-  const desc  = el("p",   { class: "chart-desc"  }); desc.textContent  = descStr;
-  card.append(title, desc);
-  if (showMirovaNote) {
-    const note = el("p", { class: "mirova-note" });
-    note.textContent = "MIROVA ref. = valores publicados por MIROVA web (escala ~10–100x menor que nuestro cálculo en actividad débil)";
-    card.appendChild(note);
-  }
-  const wrap   = el("div", { class: "chart-wrapper" });
-  const canvas = el("canvas", { id: canvasId });
-  wrap.appendChild(canvas);
-  card.appendChild(wrap);
-  return card;
-}
-
-// ── Render ──────────────────────────────────────────────────────────────────
-function render() {
-  const content = document.getElementById("content");
-  // Clear old charts
+// ── Detail panel ─────────────────────────────────────────────────────────────
+function renderDetail() {
+  const panel = document.getElementById("detail");
   for (const c of Object.values(charts)) c.destroy();
   charts = {};
-  while (content.firstChild) content.removeChild(content.firstChild);
+  while (panel.firstChild) panel.removeChild(panel.firstChild);
 
-  const filtered  = filterByDays(rawRecords, currentDays);
-  const mFiltered = filterByDays(mirovaRecords, currentDays);
-  const hasMirova = mFiltered.length > 0;
+  const v = currentVolcano;
+  const d = allData[v.name] || { records: [], mirovaRecords: [] };
+  const filtered   = filterDays(d.records, currentDays);
+  const mFiltered  = filterDays(d.mirovaRecords, currentDays);
 
-  if (filtered.length === 0 && !hasMirova) {
-    const msg = el("p", { class: "msg" });
-    msg.textContent = "Sin datos para el período seleccionado.";
-    content.appendChild(msg);
-    return;
-  }
-
-  const modis = filtered.filter(r => r.sensor?.startsWith("MODIS"));
-  const viirs = filtered.filter(r => r.sensor?.startsWith("VIIRS"));
-  const hasVent = viirs.some(r => r.vrp_vent_mw != null);
-
-  // Numeric stats
-  const mirVals  = filtered.map(r => r.vrp_mw ?? r.vrp_mir_mw ?? 0).filter(v => v > 0);
-  const ventVals = filtered.map(r => r.vrp_vent_mw ?? 0).filter(v => v > 0);
-  const maxVrp   = mirVals.length  ? Math.max(...mirVals)  : 0;
-  const meanVrp  = mirVals.length  ? mirVals.reduce((a, b) => a + b) / mirVals.length : 0;
-  const maxVent  = ventVals.length ? Math.max(...ventVals) : null;
-
-  // Stats grid
-  const grid = el("div", { class: "stats-grid" });
-  grid.appendChild(makeStatCard("Max VRP (período)",    maxVrp.toFixed(1),  "MW",                       "var(--red)"));
-  grid.appendChild(makeStatCard("Promedio VRP activo",  meanVrp.toFixed(2), "MW (solo detecciones >0)", "var(--orange)"));
-  grid.appendChild(makeStatCard("Detecciones MIR",      String(mirVals.length), "granules con anomalía", "var(--blue)"));
-  if (hasVent && maxVent != null)
-    grid.appendChild(makeStatCard("Max VRP Vent", maxVent.toFixed(2), "MW (vent fumarólico)", "var(--blue)"));
-  grid.appendChild(makeStatCard("Total granules", String(filtered.length), "procesados", null));
-  content.appendChild(grid);
-
-  // ── Main VRP chart ──────────────────────────────────────────────────────
-  const mainDs = [];
-  if (visible.MODIS) {
-    const terra = modis.filter(r => r.sensor === "MODIS_TERRA");
-    const aqua  = modis.filter(r => r.sensor === "MODIS_AQUA");
-    if (terra.length) mainDs.push(barDataset("MODIS Terra", toDailyMax(terra, "vrp_mw"), "MODIS_TERRA"));
-    if (aqua.length)  mainDs.push(barDataset("MODIS Aqua",  toDailyMax(aqua,  "vrp_mw"), "MODIS_AQUA"));
-  }
-  if (visible.VIIRS_MIR) {
-    const snpp   = viirs.filter(r => r.sensor === "VIIRS_SNPP");
-    const noaa20 = viirs.filter(r => r.sensor === "VIIRS_NOAA20");
-    if (snpp.length)   mainDs.push(barDataset("VIIRS SNPP MIR",    toDailyMax(snpp,   "vrp_mir_mw"), "VIIRS_SNPP"));
-    if (noaa20.length) mainDs.push(barDataset("VIIRS NOAA-20 MIR", toDailyMax(noaa20, "vrp_mir_mw"), "VIIRS_NOAA20"));
-  }
-  if (visible.MIROVA && hasMirova)
-    mainDs.push(lineDataset("MIROVA VIIRS375 (ref.)", toMirovaDaily(mFiltered)));
-
-  if (mainDs.length) {
-    const card = makeChartCard(
-      "VRP Total — Escala eruptiva",
-      "MODIS 1km + VIIRS I04 (3.74µm) · umbral 5K + 3σ · detección de flujos de lava y erupciones",
-      "chart-main",
-      hasMirova && visible.MIROVA
-    );
-    content.appendChild(card);
-    requestAnimationFrame(() => makeChart("chart-main", mainDs));
-  }
-
-  // ── Vent chart ──────────────────────────────────────────────────────────
-  if (hasVent && visible.VIIRS_VENT) {
-    const ventDs = [];
-    const snppV  = viirs.filter(r => r.sensor === "VIIRS_SNPP" && r.vrp_vent_mw != null);
-    if (snppV.length) ventDs.push(barDataset("VIIRS SNPP Vent", toDailyMax(snppV, "vrp_vent_mw"), "VIIRS_VENT"));
-    if (visible.MIROVA && hasMirova)
-      ventDs.push(lineDataset("MIROVA VIIRS375 (ref.)", toMirovaDaily(mFiltered)));
-    if (ventDs.length) {
-      const card = makeChartCard(
-        "VRP Vent — Actividad fumarólica",
-        "VIIRS I04 · píxel más caliente en radio 3km del vent fumarólico 2011 · umbral 1K",
-        "chart-vent", false
-      );
-      content.appendChild(card);
-      requestAnimationFrame(() => makeChart("chart-vent", ventDs));
-    }
-  }
-
-  // ── TIR chart ───────────────────────────────────────────────────────────
-  if (visible.VIIRS_TIR) {
-    const tirDs = [];
-    const snppT = viirs.filter(r => r.sensor === "VIIRS_SNPP" && (r.vrp_tir_mw ?? 0) > 0);
-    if (snppT.length) tirDs.push(barDataset("VIIRS SNPP TIR (I05)", toDailyMax(snppT, "vrp_tir_mw"), "VIIRS_TIR"));
-    if (tirDs.length) {
-      const card = makeChartCard(
-        "VRP TIR — Canal infrarrojo térmico (I05)",
-        "VIIRS I05 (11.45µm) · TIRVolcH (Aveni et al. 2024) · anomalías de baja temperatura · umbral 4σ",
-        "chart-tir", false
-      );
-      content.appendChild(card);
-      requestAnimationFrame(() => makeChart("chart-tir", tirDs));
-    }
-  }
-}
-
-// ── Init ────────────────────────────────────────────────────────────────────
-async function loadAndRender(volcano) {
-  const content = document.getElementById("content");
-  while (content.firstChild) content.removeChild(content.firstChild);
-  const msg = el("p", { class: "msg" }); msg.textContent = "Cargando " + volcano.display + "…";
-  content.appendChild(msg);
-  document.getElementById("updated-label").textContent = "";
-
-  const [data, mirova] = await Promise.all([
-    fetchJSON(DATA_BASE + volcano.name + ".json"),
-    volcano.hasMirova ? fetchJSON(MIROVA_BASE + volcano.name + ".json") : Promise.resolve(null),
-  ]);
-
-  rawRecords    = data?.records   || [];
-  mirovaRecords = mirova?.records || [];
-
-  if (data?.updated) {
+  if (d.updated) {
     document.getElementById("updated-label").textContent =
-      "Actualizado: " + data.updated.replace("T", " ").replace("Z", " UTC");
+      "Act: " + d.updated.replace("T"," ").slice(0,16) + " UTC";
   }
-  render();
-}
 
-function init() {
-  const sel = document.getElementById("volcano-selector");
-  VOLCANOES.forEach(v => {
-    const btn = el("button", { class: "volcano-btn" + (v === currentVolcano ? " active" : "") });
-    btn.textContent = v.display;
-    btn.addEventListener("click", () => {
-      currentVolcano = v;
-      sel.querySelectorAll(".volcano-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      loadAndRender(v);
+  // Stats
+  const allVrp = filtered.map(r => r.vrp_mw ?? r.vrp_mir_mw ?? 0).filter(v => v > 0);
+  const maxVrp  = allVrp.length ? Math.max(...allVrp) : 0;
+  const meanVrp = allVrp.length ? allVrp.reduce((a,b)=>a+b)/allVrp.length : 0;
+  const level   = getLevel(maxVrp);
+
+  const dp = el("div", "detail-panel");
+
+  // Header
+  const dh = el("div", "detail-header");
+  const dt = el("div", "detail-title"); dt.textContent = v.display;
+  const badge = el("span", "alert-badge " + level.cls); badge.textContent = level.label;
+  const dc = el("div", "detail-coords");
+  // coords will be added from volcanoes config — hardcoded for now
+  dh.append(dt, badge);
+  dp.appendChild(dh);
+
+  // Energy scale bands legend
+  const eb = el("div", "energy-bands");
+  const ebLabel = el("span"); ebLabel.textContent = "Escala MIROVA:";
+  eb.appendChild(ebLabel);
+  [
+    ["band-nd","Sin datos"], ["band-vlow","<1 MW Muy Bajo"],
+    ["band-low","1–10 MW Bajo"], ["band-mod","10–100 MW Moderado"],
+    ["band-high",">100 MW Alto"]
+  ].forEach(([cls, txt]) => {
+    const b = el("span", "band " + cls); b.textContent = txt; eb.appendChild(b);
+  });
+  dp.appendChild(eb);
+
+  // Stats row
+  const sr = el("div", "stats-row");
+  function addStat(label, val, unit, color) {
+    const box = el("div","stat-box");
+    const l = el("div","label"); l.textContent = label;
+    const vEl = el("div","val"); vEl.textContent = val;
+    if (color) vEl.style.color = color;
+    const u = el("div","unit"); u.textContent = unit;
+    box.append(l, vEl, u);
+    sr.appendChild(box);
+  }
+  addStat("Max VRP", maxVrp > 0 ? maxVrp.toFixed(2) : "—", "MW", level.key !== "nd" ? "var(--green)" : null);
+  addStat("Promedio activo", meanVrp > 0 ? meanVrp.toFixed(2) : "—", "MW (>0)");
+  addStat("Detecciones", String(allVrp.length), "granules");
+  addStat("Total granules", String(filtered.length), "procesados");
+  dp.appendChild(sr);
+
+  // Chart tabs
+  const tabs = el("div", "chart-tabs");
+  const tabVRP = el("button","chart-tab active"); tabVRP.textContent = "VRP Total";
+  const tabAll = el("button","chart-tab"); tabAll.textContent = "Por sensor";
+  tabs.append(tabVRP, tabAll);
+  dp.appendChild(tabs);
+
+  // Chart
+  const cw = el("div","chart-wrapper");
+  const canvas = el("canvas"); canvas.id = "main-chart";
+  cw.appendChild(canvas);
+  dp.appendChild(cw);
+
+  // Events table
+  const tTitle = el("div"); tTitle.style.cssText = "font-size:.8rem;font-weight:600;margin:16px 0 8px";
+  tTitle.textContent = "Últimas detecciones (VRP > 0)";
+  dp.appendChild(tTitle);
+
+  const tbl = el("table","events-table");
+  const thead = el("thead");
+  const hrow = el("tr");
+  ["Fecha UTC", "Sensor", "VRP (MW)", "T max (K)", "T fondo (K)", "Píxeles"].forEach(h => {
+    const th = el("th"); th.textContent = h; hrow.appendChild(th);
+  });
+  thead.appendChild(hrow);
+  tbl.appendChild(thead);
+
+  const tbody = el("tbody");
+  const recent = filtered
+    .filter(r => (r.vrp_mw ?? r.vrp_mir_mw ?? 0) > 0)
+    .sort((a,b) => b.datetime_utc.localeCompare(a.datetime_utc))
+    .slice(0, 20);
+
+  if (recent.length === 0) {
+    const row = el("tr"); const td = el("td"); td.colSpan = 6;
+    td.textContent = "Sin detecciones en el período"; td.style.color = "var(--muted)";
+    td.style.textAlign = "center"; td.style.padding = "20px";
+    row.appendChild(td); tbody.appendChild(row);
+  } else {
+    recent.forEach(r => {
+      const vrp = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+      const tmax = r.t_max_k ?? r.t_max_i04_k ?? null;
+      const tbg  = r.t_bg_k ?? null;
+      const npx  = r.n_anomalous_pixels ?? null;
+      const lv   = getLevel(vrp);
+      const row  = el("tr");
+      [
+        r.datetime_utc,
+        r.sensor,
+        vrp.toFixed(3),
+        tmax != null ? tmax.toFixed(1) : "—",
+        tbg  != null ? tbg.toFixed(1)  : "—",
+        npx  != null ? String(npx)     : "—",
+      ].forEach((val, i) => {
+        const td = el("td");
+        td.textContent = val;
+        if (i === 2) { td.className = "vrp-cell"; td.style.color = "var(--" + (lv.key === "vlow" ? "green" : lv.key === "low" ? "yellow" : lv.key === "mod" ? "orange" : "red") + ")"; }
+        if (i === 1) td.style.color = "var(--muted)";
+        row.appendChild(td);
+      });
+      tbody.appendChild(row);
     });
-    sel.appendChild(btn);
+  }
+  tbl.appendChild(tbody);
+  dp.appendChild(tbl);
+
+  panel.appendChild(dp);
+
+  // Build chart datasets
+  function buildDatasets() {
+    const ds = [];
+    const modis = filtered.filter(r => r.sensor?.startsWith("MODIS"));
+    const v375  = filtered.filter(r => r.sensor?.startsWith("VIIRS") && !r.sensor.includes("750"));
+    const v750  = filtered.filter(r => r.sensor?.includes("750"));
+
+    if (sensorVisible.MODIS && modis.length) {
+      const terra = modis.filter(r => r.sensor === "MODIS_TERRA");
+      const aqua  = modis.filter(r => r.sensor === "MODIS_AQUA");
+      if (terra.length) ds.push({ label:"MODIS Terra", data:toDailyMax(terra,"vrp_mw"), backgroundColor:"#ff8c00cc", borderColor:"#ff8c00", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (aqua.length)  ds.push({ label:"MODIS Aqua",  data:toDailyMax(aqua, "vrp_mw"), backgroundColor:"#ffb347cc", borderColor:"#ffb347", borderWidth:1, borderRadius:2, borderSkipped:false });
+    }
+    if (sensorVisible.VIIRS750 && v750.length) {
+      const snpp750   = v750.filter(r => r.sensor === "VIIRS_SNPP_750");
+      const noaa750   = v750.filter(r => r.sensor === "VIIRS_NOAA20_750");
+      if (snpp750.length)  ds.push({ label:"VIIRS SNPP 750m",   data:toDailyMax(snpp750,"vrp_mw"),   backgroundColor:"#00bcd4cc", borderColor:"#00bcd4", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (noaa750.length)  ds.push({ label:"VIIRS NOAA-20 750m",data:toDailyMax(noaa750,"vrp_mw"),   backgroundColor:"#4dd0e1cc", borderColor:"#4dd0e1", borderWidth:1, borderRadius:2, borderSkipped:false });
+    }
+    if (sensorVisible.VIIRS375 && v375.length) {
+      const snpp375   = v375.filter(r => r.sensor === "VIIRS_SNPP");
+      const noaa375   = v375.filter(r => r.sensor === "VIIRS_NOAA20");
+      if (snpp375.length)  ds.push({ label:"VIIRS SNPP 375m",   data:toDailyMax(snpp375,"vrp_mir_mw"), backgroundColor:"#e91e63cc", borderColor:"#e91e63", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (noaa375.length)  ds.push({ label:"VIIRS NOAA-20 375m",data:toDailyMax(noaa375,"vrp_mir_mw"), backgroundColor:"#f06292cc", borderColor:"#f06292", borderWidth:1, borderRadius:2, borderSkipped:false });
+    }
+    if (sensorVisible.MIROVA && mFiltered.length) {
+      ds.push({
+        label:"MIROVA VIIRS375 (ref.)", data:toMirovaDaily(mFiltered),
+        type:"line", order:0,
+        borderColor:"#ffc107", backgroundColor:"transparent",
+        borderWidth:2, pointRadius:3, pointBackgroundColor:"#ffc107", tension:0,
+      });
+    }
+    return ds;
+  }
+
+  function drawChart() {
+    if (charts["main-chart"]) { charts["main-chart"].destroy(); delete charts["main-chart"]; }
+    const c = document.getElementById("main-chart");
+    if (!c) return;
+    const ds = buildDatasets();
+    charts["main-chart"] = new Chart(c.getContext("2d"), {
+      type: "bar",
+      data: { datasets: ds },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode:"index", intersect:false },
+        plugins: {
+          legend: { labels: { color:"#7a8fa6", font:{size:11}, boxWidth:12, padding:12 } },
+          tooltip: {
+            backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
+            titleColor:"#e0e6f0", bodyColor:"#7a8fa6",
+            callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y?.toFixed(3) ?? "—"} MW` }
+          }
+        },
+        scales: {
+          x: {
+            type:"time", time:{ unit:"day", tooltipFormat:"yyyy-MM-dd" },
+            grid:{ color:"rgba(26,58,92,0.6)" },
+            ticks:{ color:"#7a8fa6", font:{size:10}, maxRotation:45 }
+          },
+          y: {
+            type: logScale ? "logarithmic" : "linear",
+            min: logScale ? undefined : 0,
+            grid:{ color:"rgba(26,58,92,0.6)" },
+            ticks:{ color:"#7a8fa6", font:{size:10} },
+            title:{ display:true, text:"VRP (MW)", color:"#7a8fa6", font:{size:10} }
+          }
+        }
+      }
+    });
+  }
+
+  // Tab switching
+  tabVRP.addEventListener("click", () => {
+    tabVRP.classList.add("active"); tabAll.classList.remove("active");
+    drawChart();
+  });
+  tabAll.addEventListener("click", () => {
+    tabAll.classList.add("active"); tabVRP.classList.remove("active");
+    drawChart(); // same chart, future: split by sensor
   });
 
+  requestAnimationFrame(drawChart);
+}
+
+// ── Sensor legend ─────────────────────────────────────────────────────────────
+function buildLegend() {
+  const legend = document.getElementById("sensor-legend");
+  while (legend.firstChild) legend.removeChild(legend.firstChild);
+  SENSORS.forEach(s => {
+    const item = el("div", "legend-item" + (sensorVisible[s.key] ? "" : " dim"));
+    const dot = el("div","legend-dot"); dot.style.background = s.color;
+    const lbl = document.createTextNode(s.label);
+    item.append(dot, lbl);
+    item.addEventListener("click", () => {
+      sensorVisible[s.key] = !sensorVisible[s.key];
+      item.classList.toggle("dim", !sensorVisible[s.key]);
+      renderDetail();
+    });
+    legend.appendChild(item);
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function init() {
+  buildLegend();
+
+  // Days
   document.getElementById("days-select").addEventListener("change", e => {
     currentDays = parseInt(e.target.value);
-    render();
+    buildCards();
+    renderDetail();
   });
 
-  document.querySelectorAll(".toggle-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const s = btn.dataset.sensor;
-      visible[s] = !visible[s];
-      btn.classList.toggle("active", visible[s]);
-      render();
-    });
+  // Scale
+  document.getElementById("btn-linear").addEventListener("click", () => {
+    logScale = false;
+    document.getElementById("btn-linear").classList.add("active");
+    document.getElementById("btn-log").classList.remove("active");
+    renderDetail();
+  });
+  document.getElementById("btn-log").addEventListener("click", () => {
+    logScale = true;
+    document.getElementById("btn-log").classList.add("active");
+    document.getElementById("btn-linear").classList.remove("active");
+    renderDetail();
   });
 
-  loadAndRender(currentVolcano);
+  // Load all volcanoes in parallel
+  await Promise.all(VOLCANOES.map(v => loadVolcano(v)));
+
+  buildCards();
+  renderDetail();
+
+  // Auto-refresh every 60 minutes
+  setInterval(async () => {
+    await Promise.all(VOLCANOES.map(v => loadVolcano(v)));
+    buildCards();
+    renderDetail();
+  }, 60 * 60 * 1000);
 }
 
 document.addEventListener("DOMContentLoaded", init);
