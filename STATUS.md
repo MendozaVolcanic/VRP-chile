@@ -1,115 +1,174 @@
 # STATUS — VRP Chile
+**Last updated:** 2026-04-05
 
-## Estado actual (2026-04-04)
-Pipeline operativo con GitHub Actions (cada 6h). Formula VRP **corregida** al metodo Wooster MIR radiance (Coppola 2015). Frontend desplegado en GitHub Pages.
+---
 
-## Arquitectura
+## Current state
+
+**Pipeline NRT operational** on GitHub Actions (every 6h).
+- Repository: https://github.com/MendozaVolcanic/VRP-chile
+- Dashboard: https://mendozavolcanic.github.io/VRP-chile/
+- VRP formula: Wooster MIR radiance method (Coppola 2015, Eq. 7)
+- Nighttime-only filtering active (triple barrier: fetch, process, store)
+- NTI dual-criteria detection for VIIRS 375 m
+- Local ROI p95 filter for all sensors (anti-topographic false positives)
+- Multi-pixel anomaly tracking across all 3 processors
+- NOAA-20 multi-version search (2.1/2/1) for VJ1 products
+
+---
+
+## Volcanoes and data
+
+| Volcano | Records | Date range | Detections (VRP > 0) | MIROVA ref |
+|---------|---------|------------|---------------------|------------|
+| Puyehue-Cordon Caulle | 74 | 2024-03 to 2026-04 | 12 | 94 records |
+| Villarrica | calibrating | Jan-Mar 2026 | pending | -- |
+| Lascar | calibrating | Jan-Mar 2026 | pending | 203 records |
+| Copahue | calibrating | Jan-Mar 2026 | pending | -- |
+
+Recalibration (Jan-Mar 2026) running with corrected code for Villarrica, Lascar, and Copahue.
+
+---
+
+## Architecture
+
 ```
-scripts/run_pipeline.py   → Entry point CLI
-pipeline/fetch.py         → Download granulos NASA Earthdata (earthaccess)
-pipeline/process_modis.py → MODIS Terra/Aqua Band 21/22 (1km, 3.93µm)
-pipeline/process_viirs.py → VIIRS I-band I04/I05 (375m, 3.74µm/11.45µm)
-pipeline/process_viirs_mod.py → VIIRS M-band M13 (750m, 4.05µm)
-pipeline/store.py         → JSON persistence (data/*.json)
-frontend/index.html       → Dashboard MIROVA-style (Chart.js)
-.github/workflows/nrt.yml → GitHub Actions NRT pipeline
-volcanoes.yaml            → Configuracion volcanes
+scripts/run_pipeline.py       Entry point CLI (nighttime filter, multi-sensor)
+pipeline/fetch.py             Download granules NASA Earthdata (earthaccess)
+pipeline/process_modis.py     MODIS Terra/Aqua Band 21/22 (1 km, 3.93 um)
+pipeline/process_viirs.py     VIIRS I-band I04/I05 (375 m, NTI dual-criteria)
+pipeline/process_viirs_mod.py VIIRS M-band M13 (750 m, 4.05 um)
+pipeline/store.py             JSON persistence + nighttime solar gate
+frontend/index.html           Dashboard (Chart.js + Leaflet.js)
+.github/workflows/nrt.yml     GitHub Actions NRT (cron 6h + manual trigger)
+volcanoes.yaml                Volcano config (4 active)
+data/mirova/                  MIROVA reference data (JSON)
 ```
 
-## Formula VRP (CORREGIDA)
+---
 
-### Canal MIR (MODIS, VIIRS I04, VIIRS M13)
-**Metodo Wooster** (Coppola et al. 2015, Eq.7):
+## VRP formula (corrected 2026-04-04)
+
+### MIR channel — Wooster method (Coppola 2015, Eq. 7)
 ```
-VRP = 18.9 × A_pix × ΔL_MIR
+VRP = 18.9 * A_pix * (L_hot - L_bg)
+L = C1 / (lambda^5 * (exp(C2 / (lambda * T)) - 1))
 ```
-Donde:
-- `ΔL_MIR = L_MIR,hot - L_MIR,bg` (radiancia espectral excedente, W/m²/sr/µm)
-- `L_MIR` se calcula via funcion de Planck: `L = C1 / (λ⁵ × (exp(C2/(λ×T)) - 1))`
-- `18.9` = coeficiente empirico Wooster para banda ~4µm
-- `A_pix` = area del pixel (m²)
+- Applies to: MODIS bands 21/22, VIIRS I04, VIIRS M13
+- L_bg derived from Planck(T_bg) where T_bg = median BT of background annulus
+- **Critical fix**: previous code used median(radiance) for L_bg, which differs from Planck(median(BT)) due to nonlinearity with heterogeneous terrain
 
-**Equivalencia Campus 2022**: `VRP = 1.97×10⁷ × ΔL_MIR × A_pix(km²)`
-
-### Canal TIR (VIIRS I05, 11.45µm) — TIRVolcH
-**Metodo Stefan-Boltzmann** (Aveni et al. 2024):
+### TIR channel — Stefan-Boltzmann (Aveni 2024)
 ```
-VRP_TIR = A_pix × σ × (T_alert⁴ - T_bg⁴)
+VRP_TIR = A_pix * sigma * (T_alert^4 - T_bg^4)
 ```
-Este metodo SI es correcto para TIR porque la emision termica a 11µm integra la mayor parte del espectro de cuerpo negro a temperaturas volcanicas.
+- Applies to: VIIRS I05 (11.45 um) only
 
-## Auditoria de papers (hallazgos clave)
+---
 
-### Coppola 2015 (MIROVA core)
-- MIROVA usa NTI (Normalized Thermal Index) y ETI (Enhanced Thermal Index) para deteccion
-- Umbral contextual: C2 desviaciones estandar (5-15σ segun dia/noche y ROI)
-- Filtrado espacial via dNTI/dETI (pixel vs media de 8 vecinos)
-- Background = media aritmetica de pixeles circundantes
-- ROI1 = 5×5 km, ROI2 = 50×50 km
+## Anomaly detection criteria
 
-### Campus 2022 (MODIS→VIIRS)
-- Formula: `VRP = 1.97×10⁷ × ΔL_MIR × A_pix(km²)`
-- Validacion cruzada MODIS/VIIRS muestra consistencia
-- VIIRS 750m es el sensor principal para continuidad post-MODIS
+A pixel is flagged as anomalous only if it passes ALL of:
 
-### Aveni 2024 (TIRVolcH)
-- 16 tests jerarquicos en cascada para VIIRS I5 (TIR)
-- Umbral minimo ΔT = 0.5K sobre background
-- Usa escenas de referencia mensuales (REF) y residuales (RES = OBS - REF)
-- Umbrales adaptativos basados en percentil 99.5 de residuales
-- Stefan-Boltzmann correcto para TIR (no para MIR)
+1. **BT threshold**: `BT > T_bg + max(5 K, 3 * sigma_bg)` — standard MIROVA threshold
+2. **Local ROI p95**: `BT > p95_ROI + max(3 K, 2 * sigma_ROI)` — prevents topographic FP at high-altitude volcanoes
+3. **NTI filter** (VIIRS 375 m only): `NTI > NTI_bg + max(0.005, 3 * sigma_NTI)` — cancels terrain effects
 
-### Coppola 2023 (base de datos MIROVA)
-- Datos de volcanes chilenos incluidos
-- Coeficientes c_rad basados en composicion del magma
+---
 
-## Bug critico corregido: formula VRP
+## Dashboard features (all implemented)
 
-**Problema**: Nuestro codigo usaba Stefan-Boltzmann `VRP = A × σ × (T⁴ - Tbg⁴)` para canales MIR.
-**Impacto**: VRP sobreestimado ~100x vs MIROVA para señales debiles.
-**Causa raiz**: Stefan-Boltzmann integra TODO el espectro electromagnetico. A ~290K, la potencia total emitida es enorme, pero el sensor MIR solo ve una ventana estrecha (~4µm). Wooster calibro el coeficiente 18.9 empiricamente para dar potencia radiativa real desde la radiancia espectral MIR.
-**Fix aplicado**: Reemplazado en process_modis.py, process_viirs.py, process_viirs_mod.py (2026-04-04).
+| Feature | Status | Details |
+|---------|--------|---------|
+| VRP time series | Done | Chart.js, log scale, sensor colors |
+| Hotspot map | Done | Leaflet.js, multi-pixel markers, per-pixel popups |
+| Distance vs Time | Done | Tracks anomaly distance from crater |
+| VRE cumulative | Done | Volcanic Radiated Energy integral (GJ) |
+| MIROVA comparison | Done | Overlay our VRP vs MIROVA reference |
+| CSV export | Done | Download filtered data (full + anomalies only) |
+| Global summary | Done | Cross-volcano stats panel |
+| Nighttime filter | Done | Triple barrier (fetch/process/store) |
 
-## Sensores procesados
+---
 
-| Sensor | Producto | Banda | Resolucion | A_pix (m²) |
-|--------|----------|-------|------------|------------|
-| MODIS Terra | MOD021KM | 21/22 (3.93µm) | 1km | 1,000,000 |
-| MODIS Aqua | MYD021KM | 21/22 (3.93µm) | 1km | 1,000,000 |
-| VIIRS SNPP 375m | VNP02IMG | I04 (3.74µm) | 375m | 140,625 |
-| VIIRS NOAA20 375m | VJ102IMG | I04 (3.74µm) | 375m | 140,625 |
-| VIIRS SNPP 750m | VNP02MOD | M13 (4.05µm) | 750m | 562,500 |
-| VIIRS NOAA20 750m | VJ102MOD | M13 (4.05µm) | 750m | 562,500 |
+## Sensors processed
 
-## Escala de energia MIROVA
-- <1 MW: Muy Bajo
-- 1-10 MW: Bajo
-- 10-100 MW: Moderado
-- 100-1000 MW: Alto
-- >1000 MW: Muy Alto
+| Sensor | Product | Band | Resolution | Pixel area |
+|--------|---------|------|------------|------------|
+| MODIS Terra | MOD021KM | 21/22 (3.93 um) | 1 km | 1,000,000 m^2 |
+| MODIS Aqua | MYD021KM | 21/22 (3.93 um) | 1 km | 1,000,000 m^2 |
+| VIIRS SNPP 375 m | VNP02IMG | I04 (3.74 um) | 375 m | 140,625 m^2 |
+| VIIRS NOAA-20 375 m | VJ102IMG | I04 (3.74 um) | 375 m | 140,625 m^2 |
+| VIIRS SNPP 750 m | VNP02MOD | M13 (4.05 um) | 750 m | 562,500 m^2 |
+| VIIRS NOAA-20 750 m | VJ102MOD | M13 (4.05 um) | 750 m | 562,500 m^2 |
 
-## Volcanes configurados
-1. Puyehue-Cordon Caulle (radio 15km, vent tracking)
-2. Villarrica (radio 30km)
-3. Lascar (radio 30km)
-4. Copahue (radio 30km)
+---
 
-## Infraestructura
-- GitHub Actions: cron cada 6h (00, 06, 12, 18 UTC)
-- GitHub Pages: frontend desplegado automaticamente
-- NASA Earthdata: credenciales en GitHub Secrets
-- Datos MIROVA referencia: data/mirova/*.json (overlay en dashboard)
+## Bug fixes and calibration history
 
-## Limitaciones conocidas
-1. **Sin cloud masking**: MIROVA usa NTI/ETI, nosotros no filtramos nubes
-2. **Coordenadas vent aproximadas**: Cordon Caulle vent (-40.585, -72.020) necesita refinamiento
-3. **Deteccion simple vs MIROVA**: Usamos threshold fijo (5K + 3σ), MIROVA usa NTI/ETI contextual
-4. **Sin correccion por angulo de vista**: Pixel area asumida constante (nadir)
-5. **MODIS no detecta señales debiles**: 1km demasiado grueso para fumarolas
+### 2026-04-05 — Topographic false positive fix (Lascar)
+- **Problem**: Lascar at 5592 m surrounded by warmer lower terrain. Background annulus 5-25 km included warm low-altitude terrain, producing artificially low T_bg and 59 false positive pixels (587 MW vs MIROVA 0.03-4.61 MW)
+- **Fix**: Added NTI dual-criteria for VIIRS 375 m + local ROI p95 filter for all sensors
+- **Result**: Eliminates terrain-induced false positives without masking real volcanic signals
 
-## Proximos pasos
-1. **Re-ejecutar pipeline** con formula corregida y validar vs MIROVA CSV
-2. **Implementar NTI/ETI** para deteccion mas robusta (Coppola 2015)
-3. **Cloud masking** basico usando NTI o datos auxiliares
-4. **Refinar coordenadas vent** Cordon Caulle via tracking multi-pasada
-5. **Expandir a 43 volcanes** (Copernicus-v1)
+### 2026-04-04 — MODIS radiance nonlinearity bug (CRITICAL)
+- **Problem**: `L_bg = median(radiance)` differs from `Planck(median(BT))` because Planck is nonlinear. With heterogeneous terrain (mountains + valleys), this produced inconsistent L_bg values, inflating VRP by ~15x
+- **Fix**: Changed to `L_bg = Planck(T_bg)` and convert all hot pixel BTs to radiance consistently
+- **Before/After**: Cordon Caulle 2026-03-10 went from 1438 MW to 101 MW; VIIRS VRP_VENT from 6.3 MW to 0.06-0.31 MW (matches MIROVA range)
+
+### 2026-04-04 — Daytime false positives
+- **Problem**: 78 daytime records with VRP up to 4307 MW due to reflected solar radiation in MIR band
+- **Fix**: Triple nighttime barrier (solar elevation > 0 degrees = reject)
+- **Result**: All daytime records cleaned from data files
+
+### 2026-04-04 — Wooster formula migration
+- **Problem**: Original pipeline used Stefan-Boltzmann `VRP = A * sigma * (T^4 - T_bg^4)` for MIR bands, producing ~15x higher values than MIROVA
+- **Fix**: Migrated all MIR VRP to Wooster method `VRP = 18.9 * A * delta_L` (Coppola 2015, Eq. 7)
+- **Result**: VRP values aligned with MIROVA reference data
+
+---
+
+## Current work (in progress)
+
+- Recalibrating Villarrica, Lascar, Copahue (Jan-Mar 2026) with all bug fixes applied
+- After recalibration: validate VRP values against MIROVA reference data
+
+---
+
+## Pending (next steps)
+
+### High priority
+1. Review recalibration results vs MIROVA reference data
+2. Push calibrated data to GitHub
+3. Validate NTI detection statistics
+
+### Medium priority
+4. Cloud masking (NTI helps partially; proper cloud mask would improve reliability)
+5. NTI for MODIS (needs Band 31 TIR at 11 um — not yet implemented)
+6. Refine vent coordinates for Cordon Caulle (current offset ~8 km from caldera center)
+
+### Low priority
+7. Expand to more Chilean/global volcanoes
+8. Historical data backfill (MODIS from 2000, VIIRS from 2012)
+9. NRT email/push alerts for significant detections
+
+---
+
+## MIROVA energy scale
+
+| VRP range | Classification |
+|-----------|---------------|
+| < 1 MW | Very Low |
+| 1 - 10 MW | Low |
+| 10 - 100 MW | Moderate |
+| 100 - 1000 MW | High |
+| > 1000 MW | Very High |
+
+---
+
+## References
+
+- **Coppola 2015** — MIROVA core: Wooster method, NTI/ETI, coefficient 18.9
+- **Campus 2022** — MODIS to VIIRS cross-calibration, Sensors 22(5):1713
+- **Aveni 2024** — TIRVolcH: TIR detection with Stefan-Boltzmann for I05, RSE 315:114388
+- **Coppola 2023** — MIROVA database, c_rad coefficients for global volcanoes
