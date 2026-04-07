@@ -101,7 +101,7 @@ def load_volcanoes(name_filter: str = None) -> list:
 
 
 def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
-                 skip_noaa20: bool = False):
+                 skip_noaa20: bool = False, overwrite: bool = False):
     """Download and process all granules for a volcano on a given date.
 
     Args:
@@ -163,7 +163,8 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         )
                         if result:
                             store.append_record(volcano["name"], result,
-                                                volcano_lat=volcano["lat"], volcano_lon=volcano["lon"])
+                                                volcano_lat=volcano["lat"], volcano_lon=volcano["lon"],
+                                                overwrite=overwrite)
                             vent_str = (f" | VRP_VENT={result.get('vrp_vent_mw', 0)} MW"
                                         if volcano.get("vent_lat") and result.get('vrp_vent_mw', 0) > 0 else "")
                             print(f"  {result['sensor']} | VRP={result['vrp_mw']} MW | "
@@ -195,7 +196,8 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         )
                         if result:
                             store.append_record(volcano["name"], result,
-                                                volcano_lat=volcano["lat"], volcano_lon=volcano["lon"])
+                                                volcano_lat=volcano["lat"], volcano_lon=volcano["lon"],
+                                                overwrite=overwrite)
                             vent_str = (f" | VRP_VENT={result['vrp_vent_mw']} MW "
                                         f"({result['n_vent_pixels']}px)"
                                         if volcano.get("vent_lat") else "")
@@ -228,7 +230,8 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         )
                         if result:
                             store.append_record(volcano["name"], result,
-                                                volcano_lat=volcano["lat"], volcano_lon=volcano["lon"])
+                                                volcano_lat=volcano["lat"], volcano_lon=volcano["lon"],
+                                                overwrite=overwrite)
                             vent_str = (f" | VRP_VENT={result.get('vrp_vent_mw', 0)} MW"
                                         if volcano.get("vent_lat") and result.get('vrp_vent_mw', 0) > 0 else "")
                             print(f"  {result['sensor']} (750m) | VRP={result['vrp_mw']} MW | "
@@ -278,6 +281,8 @@ def main():
                         help="Process all passes including daytime (default: nighttime only)")
     parser.add_argument("--skip-noaa20", action="store_true",
                         help="Skip NOAA-20 VIIRS (useful when NASA downloads are slow)")
+    parser.add_argument("--overwrite", action="store_true",
+                        help="Overwrite existing records (use when reprocessing with corrected algorithms)")
     args = parser.parse_args()
 
     volcanoes = load_volcanoes(args.volcano)
@@ -304,10 +309,13 @@ def main():
     if args.skip_noaa20:
         print("Skipping NOAA-20 VIIRS products.")
 
+    if args.overwrite:
+        print("Overwrite mode ON: existing records will be replaced.")
+
     for volcano in volcanoes:
         for date in dates:
             process_date(volcano, date, nighttime_only=nighttime_only,
-                        skip_noaa20=args.skip_noaa20)
+                        skip_noaa20=args.skip_noaa20, overwrite=args.overwrite)
 
     print("\nDone.")
 

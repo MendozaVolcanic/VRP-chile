@@ -61,11 +61,14 @@ def _save(volcano_name: str, store: dict):
 
 
 def append_record(volcano_name: str, record: dict,
-                   volcano_lat: float = None, volcano_lon: float = None):
+                   volcano_lat: float = None, volcano_lon: float = None,
+                   overwrite: bool = False):
     """
     Append a VRP record to the volcano's JSON file.
     Deduplicates by (datetime_utc, sensor) — safe to re-run.
     If volcano_lat/lon provided, rejects daytime records as a safety net.
+    If overwrite=True, replace any existing record with the same key
+    (used for reprocessing with corrected algorithms, e.g. scan-angle fix).
     """
     if record is None:
         return
@@ -107,11 +110,16 @@ def append_record(volcano_name: str, record: dict,
 
     store = _load(volcano_name)
     key = (record.get("datetime_utc"), record.get("sensor"))
-    existing_keys = {
-        (r.get("datetime_utc"), r.get("sensor"))
-        for r in store["records"]
+    existing_idx = {
+        (r.get("datetime_utc"), r.get("sensor")): i
+        for i, r in enumerate(store["records"])
     }
-    if key not in existing_keys:
+    if key in existing_idx:
+        if overwrite:
+            store["records"][existing_idx[key]] = record
+            store["records"].sort(key=lambda r: r.get("datetime_utc", ""))
+            _save(volcano_name, store)
+    else:
         store["records"].append(record)
         store["records"].sort(key=lambda r: r.get("datetime_utc", ""))
         _save(volcano_name, store)

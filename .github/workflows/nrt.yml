@@ -22,6 +22,11 @@ on:
         description: "End date for range recalibration (YYYY-MM-DD)"
         required: false
         default: ""
+      overwrite:
+        description: "Overwrite existing records (for reprocessing with fixes)"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   process:
@@ -57,7 +62,8 @@ jobs:
             ${{ github.event.inputs.volcano != '' && format('--volcano {0}', github.event.inputs.volcano) || '' }} \
             ${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }} \
             ${{ github.event.inputs.start != '' && format('--start {0}', github.event.inputs.start) || '' }} \
-            ${{ github.event.inputs.end != '' && format('--end {0}', github.event.inputs.end) || '' }}
+            ${{ github.event.inputs.end != '' && format('--end {0}', github.event.inputs.end) || '' }} \
+            ${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }}
 
       - name: Commit updated data files
         run: |
