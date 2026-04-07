@@ -107,13 +107,36 @@ def modis_pixel_areas(shape: tuple) -> np.ndarray:
 
 def viirs_pixel_areas(sensor_zenith_deg: np.ndarray, nadir_area_m2: float) -> np.ndarray:
     """
-    Return per-pixel area (m^2) for a VIIRS granule given a sensor_zenith
-    array (read from VNP03 / VJ103 geolocation file).
+    Return per-pixel area (m^2) for a VIIRS granule.
+
+    NOTE: VIIRS performs on-board bow-tie aggregation (Wolfe et al. 2013,
+    RSE 137, 76-88). The aggregation divides the swath into 3 zones and
+    aggregates 1x, 2x, or 3x detector samples in the along-scan direction
+    so that the resulting L1B "pixel" has approximately constant ground
+    sample distance regardless of scan angle. Empirical aggregated I-band
+    pixel area varies only between ~0.32 and ~0.6 km^2 across the full
+    swath (Cao et al. 2014, JGR Atmospheres 119), not the sec^3 ~25x that
+    a non-aggregated scanner would produce.
+
+    Empirical test: applying sec^3 to a VIIRS edge pixel (zenith ~70 deg)
+    on Lascar gave a 25x overshoot vs MIROVA reference values. Therefore
+    we apply only a mild correction here, capped at 2.0x, modelled as
+    sec(theta_z)/2 + 0.5 to match the published 0.32->0.6 km^2 range.
+
+    A residual systematic bias vs MIROVA may still exist; it must come
+    from a different source (background method, wavelength, threshold)
+    not from pixel area. Investigate separately.
 
     Args:
         sensor_zenith_deg: array of per-pixel sensor zenith angles (degrees).
         nadir_area_m2: nadir pixel area: 140625 for I-band (375m),
                        562500 for M-band (750m).
     """
-    factor = area_factor_from_zenith(sensor_zenith_deg)
+    z = np.clip(np.abs(np.asarray(sensor_zenith_deg, dtype=np.float64)),
+                0.0, MAX_SENSOR_ZENITH_DEG)
+    cos_z = np.cos(np.radians(z))
+    # Linear interpolation between 1.0 (nadir) and ~2.0 (max zenith ~70 deg)
+    # to approximate published VIIRS aggregated pixel area variation.
+    factor = 1.0 + (1.0 / cos_z - 1.0) * 0.5
+    factor = np.minimum(factor, 2.0)
     return nadir_area_m2 * factor
