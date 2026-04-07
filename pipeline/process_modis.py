@@ -28,6 +28,8 @@ except ImportError:
     HDF4_AVAILABLE = False
     print("WARNING: pyhdf not found. Install: conda install -c conda-forge pyhdf")
 
+from .scan_geometry import modis_pixel_areas
+
 
 SIGMA = 5.670374419e-8
 C1 = 1.191042e8
@@ -35,7 +37,9 @@ C2 = 14388.0
 
 BAND21_LAMBDA = 3.929
 BAND22_LAMBDA = 3.959
-PIXEL_AREA_M2 = 1e6       # 1 km^2
+# Nadir pixel area; actual area is computed per-pixel from scan column index
+# in scan_geometry.modis_pixel_areas (sec^3(theta_z) correction).
+NADIR_PIXEL_AREA_M2 = 1e6  # 1 km^2 at nadir
 
 # Wooster MIR radiance coefficient (Coppola 2015, Eq.7)
 WOOSTER_COEFF = 18.9
@@ -150,6 +154,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
 
     lat = data["lat"]
     lon = data["lon"]
+    # Per-pixel ground area corrected for off-nadir scan geometry
+    pixel_areas = modis_pixel_areas(lat.shape)
     dist = haversine_km(volcano_lat, volcano_lon, lat, lon)
 
     roi_mask = dist <= radius_km
@@ -211,7 +217,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         hotpix_bt = bt_mir[hot_rows, hot_cols]
         # Convert hot pixel BT to radiance for consistent VRP calculation
         hotpix_rad = C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * hotpix_bt)) - 1))
-        per_pixel_vrp_mw = PIXEL_AREA_M2 * WOOSTER_COEFF * (hotpix_rad - L_bg) / 1e6
+        # Per-pixel area accounts for scan-angle elongation
+        hotpix_area = pixel_areas[hot_rows, hot_cols]
+        per_pixel_vrp_mw = hotpix_area * WOOSTER_COEFF * (hotpix_rad - L_bg) / 1e6
         vrp_mw = float(np.nansum(per_pixel_vrp_mw))
 
         # Build list of all anomalous pixels sorted by VRP (descending)
@@ -243,14 +251,16 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         vent_roi_mask = vent_dist <= vent_radius_km
         if np.any(vent_roi_mask):
             vent_bt = np.where(vent_roi_mask & ~np.isnan(bt_mir), bt_mir, np.nan)
-            vent_valid = vent_bt[~np.isnan(vent_bt)]
-            if len(vent_valid) > 0:
-                t_max_vent = float(np.max(vent_valid))
+            if np.any(~np.isnan(vent_bt)):
+                flat_idx = np.nanargmax(vent_bt)
+                r_vent, c_vent = np.unravel_index(flat_idx, vent_bt.shape)
+                t_max_vent = float(vent_bt[r_vent, c_vent])
                 # Low threshold: 1K above regional background (no ROI p95)
                 if t_max_vent > (t_bg + 1.0):
                     L_vent = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_max_vent)) - 1)))
                     L_bg_vent = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bg)) - 1)))
-                    vrp_vent_mw = float(PIXEL_AREA_M2 * WOOSTER_COEFF * (L_vent - L_bg_vent)) / 1e6
+                    vent_area = float(pixel_areas[r_vent, c_vent])
+                    vrp_vent_mw = float(vent_area * WOOSTER_COEFF * (L_vent - L_bg_vent)) / 1e6
                     n_vent_pixels = 1
 
     return {

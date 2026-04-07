@@ -25,8 +25,11 @@ try:
 except ImportError:
     H5_AVAILABLE = False
 
+from .scan_geometry import viirs_pixel_areas
+
 SIGMA = 5.670374419e-8  # kept for reference, not used in MIR VRP
-PIXEL_AREA_M2 = 750.0 ** 2   # 562,500 m²
+# Nadir pixel area; actual area is per-pixel via sensor_zenith correction.
+NADIR_PIXEL_AREA_M2 = 750.0 ** 2   # 562,500 m²
 
 # Planck constants for spectral radiance (W/m²/sr/µm)
 C1_PLANCK = 1.191042e8   # 2hc² in W·µm⁴/m²/sr
@@ -95,7 +98,7 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
 
 
 def read_viirs_mod_geo(geo_path: Path) -> dict:
-    """Read VNP03MOD geolocation file. Returns lat/lon arrays."""
+    """Read VNP03MOD geolocation file. Returns lat/lon and sensor_zenith arrays."""
     if not H5_AVAILABLE:
         raise ImportError("h5py required.")
 
@@ -105,7 +108,14 @@ def read_viirs_mod_geo(geo_path: Path) -> dict:
         lon = geo["longitude"][:].astype(np.float32)
         lat[lat < -90] = np.nan
         lon[lon < -180] = np.nan
-    return {"lat": lat, "lon": lon}
+        if "sensor_zenith" in geo:
+            sz = geo["sensor_zenith"][:].astype(np.float32)
+        elif "satellite_zenith" in geo:
+            sz = geo["satellite_zenith"][:].astype(np.float32)
+        else:
+            sz = np.zeros_like(lat)
+        sz[np.isnan(lat)] = np.nan
+    return {"lat": lat, "lon": lon, "sensor_zenith": sz}
 
 
 def bt_to_spectral_radiance(bt: np.ndarray, wavelength_um: float) -> np.ndarray:
@@ -143,6 +153,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
 
     geo = read_viirs_mod_geo(geo_path)
     lat, lon = geo["lat"], geo["lon"]
+    # Per-pixel ground area corrected for off-nadir geometry
+    pixel_areas = viirs_pixel_areas(geo["sensor_zenith"], NADIR_PIXEL_AREA_M2)
     dist = haversine_km(volcano_lat, volcano_lon, lat, lon)
 
     roi_mask = dist <= radius_km
@@ -186,7 +198,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         hotpix_bt = bt[hot_rows, hot_cols]
         L_hot = bt_to_spectral_radiance(hotpix_bt, M13_LAMBDA)
         L_bg_rad = bt_to_spectral_radiance(np.float64(t_bg), M13_LAMBDA)
-        per_pixel_vrp_mw = PIXEL_AREA_M2 * WOOSTER_COEFF * (L_hot - L_bg_rad) / 1e6
+        # Per-pixel area accounts for scan-angle elongation
+        hotpix_area = pixel_areas[hot_rows, hot_cols]
+        per_pixel_vrp_mw = hotpix_area * WOOSTER_COEFF * (L_hot - L_bg_rad) / 1e6
         vrp_mw = float(np.nansum(per_pixel_vrp_mw))
 
         # Build list of all anomalous pixels sorted by VRP (descending)
@@ -216,13 +230,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         vent_roi_mask = vent_dist <= vent_radius_km
         if np.any(vent_roi_mask):
             vent_bt = np.where(vent_roi_mask & ~np.isnan(bt), bt, np.nan)
-            vent_valid = vent_bt[~np.isnan(vent_bt)]
-            if len(vent_valid) > 0:
-                t_max_vent = float(np.max(vent_valid))
+            if np.any(~np.isnan(vent_bt)):
+                flat_idx = np.nanargmax(vent_bt)
+                r_vent, c_vent = np.unravel_index(flat_idx, vent_bt.shape)
+                t_max_vent = float(vent_bt[r_vent, c_vent])
                 if t_max_vent > (t_bg + 1.0):
                     L_vent = bt_to_spectral_radiance(np.float64(t_max_vent), M13_LAMBDA)
                     L_bg_vent = bt_to_spectral_radiance(np.float64(t_bg), M13_LAMBDA)
-                    vrp_vent_mw = float(PIXEL_AREA_M2 * WOOSTER_COEFF * (L_vent - L_bg_vent)) / 1e6
+                    vent_area = float(pixel_areas[r_vent, c_vent])
+                    vrp_vent_mw = float(vent_area * WOOSTER_COEFF * (L_vent - L_bg_vent)) / 1e6
                     n_vent_pixels = 1
 
     name   = l1b_path.name

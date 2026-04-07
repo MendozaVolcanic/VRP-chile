@@ -28,11 +28,15 @@ except ImportError:
     H5_AVAILABLE = False
     print("WARNING: h5py not found. Install: pip install h5py")
 
+from .scan_geometry import viirs_pixel_areas
+
 
 SIGMA = 5.670374419e-8   # Stefan-Boltzmann constant, W/m^2/K^4 (TIR only)
 
-# VIIRS I-band pixel area at nadir (375 m resolution)
-PIXEL_AREA_M2 = 375.0 ** 2   # 140,625 m^2
+# VIIRS I-band nadir pixel area (375 m resolution).
+# IMPORTANT: actual pixel area is corrected per-pixel using sensor_zenith
+# from the geolocation file. See pipeline/scan_geometry.py.
+NADIR_PIXEL_AREA_M2 = 375.0 ** 2   # 140,625 m^2
 
 # Planck constants for spectral radiance (W/m²/sr/µm)
 C1 = 1.191042e8   # 2hc² in W·µm⁴/m²/sr
@@ -129,7 +133,12 @@ def _radiance_to_bt_viirs(L: np.ndarray, band: str) -> np.ndarray:
 def read_viirs_geo(geo_path: Path) -> dict:
     """
     Read VIIRS VNP03IMG / VJ103IMG geolocation HDF5/NetCDF4 file.
-    Returns dict with 'lat' and 'lon' arrays (degrees, float32).
+
+    Returns dict with:
+        'lat', 'lon': float32 arrays (degrees)
+        'sensor_zenith': float32 array of per-pixel satellite zenith angles
+            (degrees from local vertical at the surface). Used for the
+            scan-angle pixel area correction in scan_geometry.viirs_pixel_areas.
     """
     if not H5_AVAILABLE:
         raise ImportError("h5py required.")
@@ -141,7 +150,18 @@ def read_viirs_geo(geo_path: Path) -> dict:
         # Fill value is -999.9
         lat[lat < -90] = np.nan
         lon[lon < -180] = np.nan
-    return {"lat": lat, "lon": lon}
+
+        # Per-pixel sensor zenith (degrees). Required for pixel-area correction.
+        if "sensor_zenith" in geo:
+            sz = geo["sensor_zenith"][:].astype(np.float32)
+        elif "satellite_zenith" in geo:
+            sz = geo["satellite_zenith"][:].astype(np.float32)
+        else:
+            # Fallback: assume nadir (no correction). Should not happen for
+            # standard VNP03/VJ103 products.
+            sz = np.zeros_like(lat)
+        sz[np.isnan(lat)] = np.nan
+    return {"lat": lat, "lon": lon, "sensor_zenith": sz}
 
 
 def haversine_km(lat1: float, lon1: float,
@@ -180,6 +200,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
 
     lat = geo["lat"]
     lon = geo["lon"]
+    # Per-pixel ground area (m^2) corrected for off-nadir scan geometry.
+    # See pipeline/scan_geometry.py for the sec^3(theta_z) formula.
+    pixel_areas = viirs_pixel_areas(geo["sensor_zenith"], NADIR_PIXEL_AREA_M2)
+
     dist = haversine_km(volcano_lat, volcano_lon, lat, lon)
 
     roi_mask = dist <= radius_km
@@ -285,7 +309,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 L_hot = bt_to_spectral_radiance(hotpix_bt, I04_LAMBDA)
                 L_bg = bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA)
                 delta_L = L_hot - L_bg
-                per_pixel_vrp_mw = PIXEL_AREA_M2 * WOOSTER_COEFF * delta_L / 1e6
+                # Per-pixel area accounts for scan-angle elongation.
+                hotpix_area = pixel_areas[hot_rows, hot_cols]
+                per_pixel_vrp_mw = hotpix_area * WOOSTER_COEFF * delta_L / 1e6
                 vrp_mir_mw = float(np.sum(per_pixel_vrp_mw))
 
                 # Build list of all anomalous pixels sorted by VRP (descending)
@@ -318,12 +344,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             t_bg_i05 = float(np.median(bg_vals5))
             std_bg5 = float(np.std(bg_vals5))
             threshold_tir = max(TIR_THRESHOLD_K, N_SIGMA_TIR * std_bg5)
-            roi_bt5 = bt5[roi_mask]
-            hotpix5 = roi_bt5[roi_bt5 > (t_bg_i05 + threshold_tir)]
-            hotpix5 = hotpix5[~np.isnan(hotpix5)]
-            if len(hotpix5) > 0:
-                vrp_w5 = float(np.sum(PIXEL_AREA_M2 * SIGMA * (hotpix5 ** 4 - t_bg_i05 ** 4)))
+            # Use 2D mask so we can pull per-pixel areas (scan-angle corrected)
+            hot5_mask_2d = roi_mask & ~np.isnan(bt5) & (bt5 > (t_bg_i05 + threshold_tir))
+            hot5_rows, hot5_cols = np.where(hot5_mask_2d)
+            if len(hot5_rows) > 0:
+                hotpix5 = bt5[hot5_rows, hot5_cols]
+                hotpix5_area = pixel_areas[hot5_rows, hot5_cols]
+                vrp_w5 = float(np.sum(hotpix5_area * SIGMA * (hotpix5 ** 4 - t_bg_i05 ** 4)))
                 vrp_tir_mw = vrp_w5 / 1e6
+            roi_bt5 = bt5[roi_mask]
             valid_roi5 = roi_bt5[~np.isnan(roi_bt5)]
             t_max_i05 = float(np.max(valid_roi5)) if len(valid_roi5) else float("nan")
 
@@ -342,17 +371,19 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         vent_roi_mask = vent_dist <= vent_radius_km
         if np.any(vent_roi_mask):
             bt = bands["I04"]
-            vent_roi_bt = bt[vent_roi_mask]
-            vent_roi_bt = vent_roi_bt[~np.isnan(vent_roi_bt)]
-            if len(vent_roi_bt) > 0:
-                t_max_vent = float(np.max(vent_roi_bt))
-                # Use same regional background and a low fixed threshold
+            vent_bt_2d = np.where(vent_roi_mask & ~np.isnan(bt), bt, np.nan)
+            if np.any(~np.isnan(vent_bt_2d)):
+                # Locate the hottest vent pixel (need indices for per-pixel area)
+                flat_idx = np.nanargmax(vent_bt_2d)
+                r_vent, c_vent = np.unravel_index(flat_idx, vent_bt_2d.shape)
+                t_max_vent = float(vent_bt_2d[r_vent, c_vent])
                 if t_max_vent > (t_bg_i04 + VENT_THRESHOLD_K):
-                    # Wooster MIR radiance method for vent pixel
+                    # Wooster MIR radiance with scan-angle corrected pixel area
                     L_vent = bt_to_spectral_radiance(np.float64(t_max_vent), I04_LAMBDA)
                     L_bg_vent = bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA)
+                    vent_area = float(pixel_areas[r_vent, c_vent])
                     vrp_vent_mw = float(
-                        PIXEL_AREA_M2 * WOOSTER_COEFF * (L_vent - L_bg_vent)
+                        vent_area * WOOSTER_COEFF * (L_vent - L_bg_vent)
                     ) / 1e6
                     n_vent_pixels = 1
 
