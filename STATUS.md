@@ -1,5 +1,99 @@
 # STATUS — VRP Chile
-**Ultima actualizacion:** 2026-04-05 (sesion 3 — expansion 45 volcanes + calibracion MIROVA)
+**Ultima actualizacion:** 2026-04-07 (sesion 4 — correccion scan-angle pixel area)
+
+---
+
+## SESION 4 EN CURSO (2026-04-07)
+
+### Problema identificado
+Sesgo sistematico ~2x (ratio 0.55 nuestro/MIROVA) en 152 detecciones pareadas de Lascar, independiente del sensor. Causa: usabamos area nadir fija (1 km² MODIS, 140625 m² VIIRS-I, 562500 m² VIIRS-M) sin corregir por angulo de escaneo off-nadir.
+
+### Fix implementado
+Nuevo modulo `pipeline/scan_geometry.py`:
+- **MODIS**: correccion completa `A = A_nadir / cos³(θ_z)` (Wooster 2003, Wolfe 2002). Zenith del pixel calculado desde columna con curvatura terrestre: `sin(θ_z) = ((R+h)/R)·sin(θ_scan)`. Borde de swath ~13x mas area que nadir.
+- **VIIRS**: correccion suave (lineal, capada en 2.0x). VIIRS tiene agregacion bow-tie on-board (Wolfe 2013) que mantiene tamano de pixel ~constante (0.32-0.6 km², Cao 2014), aplicar sec³ completo causaba overshoot 25x.
+
+### Validacion (Lascar 2026-03-28, GitHub Actions run 24094697988)
+| Sensor | Pre-fix | sec³ completo | **Post-fix** | MIROVA |
+|---|---|---|---|---|
+| MODIS Terra | -- | -- | 2.58 MW | ~2.34 MW |
+| MODIS Aqua | -- | -- | 2.01 MW | -- |
+| VIIRS SNPP 375m | 1.917 MW | 47.9 MW | **3.76 MW** | 2.34 MW |
+| VIIRS SNPP 750m | 1.733 MW | 43.3 MW | **3.40 MW** | -- |
+| VIIRS NOAA20 375m | -- | -- | 0.23 MW (vent) | -- |
+
+Consistencia cross-sensor OK. Overshoot resuelto.
+
+### Commits sesion 4
+- `1e3428a` Add scan-angle pixel area correction to MODIS/VIIRS VRP
+- `9da2157` Fix VIIRS scan-angle overshoot - use milder correction
+
+### Estado al cerrar sesion
+- Fix en `main`, ya pusheado y validado en 1 fecha
+- **NINGUN volcan reprocesado aun** — los 11 JSON existentes siguen con areas nadir antiguas
+- `data/Lascar_backup.json` existe (backup pre-sesion)
+- `scripts/debug_search.py` existe (untracked, debug anterior)
+
+---
+
+## INSTRUCCIONES PARA CONTINUAR EN NUEVA SESION
+
+### Paso 1 — Backup de datos actuales (antes de reprocesar)
+```bash
+cd "VRP Chile"
+mkdir -p data/backups_pre_scanfix
+for v in Chaiten Copahue Isluga Lascar Lastarria Llaima NevadosDeChillan PlanchonPeteroa PuyehueCordonCaulle Tupungatito Villarrica; do
+  cp "data/$v.json" "data/backups_pre_scanfix/${v}_pre_scanfix.json"
+done
+git add data/backups_pre_scanfix/
+git commit -m "Backup pre scan-angle reprocessing"
+git push
+```
+
+### Paso 2 — Test de reproceso en 1 volcan (Villarrica, 1 mes)
+Trigger GitHub Actions:
+```bash
+gh workflow run "NRT VRP Pipeline" \
+  --field volcano=Villarrica \
+  --field start=2026-03-01 \
+  --field end=2026-03-31
+gh run watch
+```
+Verificar que los VRP son razonables y coherentes con MIROVA antes de masificar.
+
+### Paso 3 — Reproceso completo de los 11 volcanes
+Lanzar en lotes (evitar rate limit NASA). Por volcan, rango completo 2026-01-01 → hoy:
+```bash
+for v in Lascar Copahue Villarrica PuyehueCordonCaulle Chaiten Isluga Lastarria Llaima NevadosDeChillan PlanchonPeteroa Tupungatito; do
+  gh workflow run "NRT VRP Pipeline" --field volcano=$v --field start=2026-01-01 --field end=2026-04-07
+  sleep 30
+done
+```
+Nota: cada run tarda ~1-5 min, GitHub permite 20 runs concurrentes.
+
+### Paso 4 — Validar vs MIROVA
+Comparar capture rate y rangos VRP contra `data/mirova/*.json`. Esperado: capture rate >84%, VRP ~1.5-2x mayores que pre-fix (especialmente MODIS bordes de swath).
+
+### Paso 5 — Primer pull de los 34 volcanes nuevos
+Misma estrategia por lotes. Lista en STATUS.md arriba (Taapaca, Parinacota, Guallatiri, etc.).
+
+### Paso 6 — Actualizar README + informe metodologico + export CSV
+Pendiente del mensaje original del usuario (puntos 4, 6, 7, 8).
+
+### Comandos utiles para nueva sesion
+- Ver estado: `git log --oneline -15`
+- Ver workflows corriendo: `gh run list --workflow="NRT VRP Pipeline" --limit 10`
+- Ver log de un run: `gh run view <id> --log | grep -iE "VRP|MW"`
+- Trigger manual: ver Paso 3
+
+### Contexto critico para retomar
+- **NO reprocesar sin backup** (Paso 1 primero)
+- Los JSON actuales son todos pre-fix y subestiman VRP ~2x
+- El fix VIIRS es deliberadamente suave (factor max 2.0) porque bow-tie aggregation ya compensa la geometria. NO cambiar a sec³ completo.
+- MODIS usa sec³ completo, es fisicamente correcto.
+- pyhdf no funciona en Windows → todo MODIS debe correrse en GitHub Actions.
+
+---
 
 ---
 
