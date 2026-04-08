@@ -51,6 +51,63 @@ Impact: a few % extra capture rate would be achievable by allowing daytime
 I05 TIR processing through a separate code path in `process_viirs.py`. This
 is a future improvement — NOT acted upon in session 5.
 
+### L5.6 — Caveat: the MIROVA reference CSV is incomplete
+**User info, 2026-04-08**: the CSV scrape from mirovaweb.it does NOT contain
+every MIROVA detection. Specifically some VIIRS 375m and VIIRS 750m records
+are missing from the CSV. Implication:
+
+- `capture_rate` measured against `data/mirova/*.json` is a **lower bound**,
+  not an absolute truth. A "missed" reference may simply never have been in
+  the scraped CSV to begin with.
+- **Ratio (quantitative calibration) IS still valid**: when both pipelines
+  detect the same event, the VRP comparison is 1:1 real. Median ratio 1.02
+  post scan-fix is a legitimate calibration metric.
+- **Deprioritize "discovery" metrics**: `close_pass_zero_vrp` and
+  `no_close_pass` categories in diagnostic reports may contain refs that
+  never existed in the CSV. Don't invest in "capture rate" fixes unless
+  you can prove the ref was actually present.
+- **Focus future experiments on ratio/bias reduction**, not on catching
+  additional references.
+
+### L5.7 — Detection threshold is dominated by 3*sigma_bg, not the 5K floor
+The MODIS/VIIRS eruption-scale detection threshold is
+`max(ANOMALY_THRESHOLD_K=5.0, N_SIGMA=3.0 * sigma_bg)`. On Lascar's MODIS
+records that underestimate 2-10 MW MIROVA signals by 2-3x, the observed
+ΔT_max is ~5-7 K — above the 5 K floor but below `3*sigma_bg ≈ 7.5 K` when
+sigma is ~2.5 K.
+
+This reframes Finding F3 (bg annulus overlap):
+- The overlap bug matters NOT because hot pixels elevate the MEAN t_bg
+  (empirically only 2.8% of Lascar anomaly pixels are in the overlap zone,
+  so mean shift is minimal)
+- But because the few hot pixels that DO fall in the overlap zone inflate
+  the STANDARD DEVIATION sigma_bg. Even a handful of outliers can push
+  sigma from 1.5 K to 2.5 K, which in turn raises `3*sigma` by 3 K and
+  blocks detections in the ΔT=5-7 K range.
+
+**Practical consequence**: lowering the floor `ANOMALY_THRESHOLD_K` from
+5.0 to 3.0 would NOT help, because `3*sigma` is already the binding
+constraint. The actionable fixes are (a) reducing sigma via better bg_mask
+definition, or (b) reducing N_SIGMA from 3.0 to 2.5.
+
+### L5.5 — Never include eruption-scale TIR in unified vrp_mw without the distance filter
+**Almost-shipped bug (2026-04-08, caught in local smoke test before commit)**.
+
+Phase A of the band-specific filter originally included `vrp_tir_mw` (eruption-scale) in the unified `vrp_mw = max(...)` in both `store.py` and `normalize_data.py`. Plan agent's empirical safety check verified 0/231 Lascar VIIRS 375m records had `vrp_tir_mw > 0`, so the change looked like a no-op.
+
+**But it wasn't**: on PCC, a VNP02IMG granule from 2026-02-03 05:54 has:
+- `vrp_tir_mw = 95.362 MW`
+- `vrp_mir_mw = 15.911 MW` but `hotspot_dist_km = 14.68 km`
+- 92 anomalous pixels all 5-15 km from the crater (forest/geothermal, not volcanic)
+
+The existing distance filter in `store.py` correctly zeroes `vrp_eruption` when `hotspot_dist_km > 5 km`, but the filter was MIR-specific. Adding `vrp_tir_mw` to the max() bypassed the filter entirely and would have inflated 15 PCC records from 0.18 → 95 MW, 0.02 → 26 MW, etc.
+
+**Root cause**: `vrp_tir_mw` in `process_viirs.py` is computed as the SUM of I05 Stefan-Boltzmann VRP across ALL pixels in the 30 km ROI that exceed the TIR threshold, with NO distance weighting. The eruption-scale TIR path shares the distance-filter problem with eruption-scale MIR but nobody wired the filter in.
+
+**Fix shipped in commit 0f039bd**: only include `vrp_vent_tir_mw` (the new vent-scale path, which uses a tight vent_radius_km ROI and naturally enforces proximity). The eruption-scale `vrp_tir_mw` is computed but stays out of the unified vrp_mw. A proper fix for eruption-scale TIR (applying the same 5 km filter, or tracking per-pixel distances) is future work.
+
+**Generalization for future changes**: Any time you add a new VRP channel to the unified `max()`, verify it respects the `MAX_HOTSPOT_DIST_KM` filter — either by construction (tight ROI) or by explicit zeroing. The Lascar empirical check is insufficient because Lascar's Atacama environment keeps TIR signals sub-threshold; PCC's Patagonian forest trips false-positive TIR easily.
+
 ### L5.4 — Store-level daytime filter contaminates validation matching
 In `validate_lascar_vs_mirova.py`, when MIROVA has a daytime VIIRS record
 we have no matching record (filtered), so the "best match" falls back to
