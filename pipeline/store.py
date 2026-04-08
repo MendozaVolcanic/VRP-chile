@@ -89,7 +89,15 @@ def append_record(volcano_name: str, record: dict,
     if hotspot_dist is not None and hotspot_dist > MAX_HOTSPOT_DIST_KM:
         vrp_eruption = 0  # discard distant eruption-scale signal
     vrp_vent = record.get("vrp_vent_mw", 0) or 0
-    record["vrp_mw"] = round(max(vrp_eruption, vrp_vent), 3)
+    # Vent-scale TIR (I05 Stefan-Boltzmann, session 6 Phase A): the vent-TIR
+    # path in process_viirs.py uses a tight vent ROI so it is safe to include
+    # in the unified max() without a distance filter. We deliberately do NOT
+    # include the eruption-scale `vrp_tir_mw` — it accumulates over the full
+    # 30 km ROI and can include distant non-volcanic hotspots (empirically,
+    # PCC 2026-02-03 has vrp_tir_mw=95 MW from pixels 5-15 km off-crater,
+    # which the hotspot_dist_km > 5 km filter correctly discards for MIR).
+    vrp_vent_tir = record.get("vrp_vent_tir_mw", 0) or 0
+    record["vrp_mw"] = round(max(vrp_eruption, vrp_vent, vrp_vent_tir), 3)
 
     # Normalize t_max_k for VIIRS 375m (uses t_max_i04_k internally)
     if "t_max_i04_k" in record and "t_max_k" not in record:

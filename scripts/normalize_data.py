@@ -32,7 +32,11 @@ def normalize_record(r: dict) -> dict:
     if hotspot_dist is not None and hotspot_dist > MAX_HOTSPOT_DIST_KM:
         vrp_eruption = 0  # discard distant eruption-scale signal
     vrp_vent = r.get("vrp_vent_mw", 0) or 0
-    r["vrp_mw"] = round(max(vrp_eruption, vrp_vent), 3)
+    # Vent-scale TIR only (see store.py::append_record for rationale).
+    # Eruption-scale vrp_tir_mw is deliberately excluded — it can include
+    # distant non-volcanic hotspots not covered by the MIR distance filter.
+    vrp_vent_tir = r.get("vrp_vent_tir_mw", 0) or 0
+    r["vrp_mw"] = round(max(vrp_eruption, vrp_vent, vrp_vent_tir), 3)
 
     # Normalize t_max_k for VIIRS 375m
     if "t_max_i04_k" in r and "t_max_k" not in r:
