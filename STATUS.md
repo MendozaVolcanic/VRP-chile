@@ -1,5 +1,97 @@
 # STATUS — VRP Chile
-**Ultima actualizacion:** 2026-04-07 (sesion 5 — validacion scan-fix contra MIROVA en Lascar)
+**Ultima actualizacion:** 2026-04-08 (sesion 6 — diagnóstico profundo MODIS, plan E2 listo para sesión 7)
+
+---
+
+## SESION 6 (2026-04-08) — Diagnóstico profundo
+
+### Para arrancar sesión 7
+
+**Lee primero**: `experiments/04_session6_final_findings.md` (reporte completo
+con todos los hallazgos, datos crudos y plan E2 detallado).
+
+**TL;DR**: el path eruption-scale de MODIS en `process_modis.py` está estructuralmente
+roto desde siempre. 0 detecciones en 183 records históricos de Lascar. Todos los
+VRP MODIS reportados vienen del vent-scale fallback. El diagnóstico está completo,
+el fix está identificado pero NO implementado aún (esperando review).
+
+### Hallazgos clave
+
+1. **MIROVA reference contaminada con OCR**: regenerado `data/mirova/Lascar.json`
+   desde `registro_vrp_consolidado.csv` (175 records limpios vs 203 con
+   OCR truncado). Commit `0e76938`. Métrica mediana global global mejoró 1.003 -> 0.978.
+
+2. **Phase A (vent TIR) revertida**: Phase A inflaba 20 PCC records de 0.18 -> 95 MW
+   por bypass del distance filter. Commit `0e5e2eb`. Lección L5.5.
+
+3. **E1 (exclude vent from p95) inert**: implementado en commit `53d5f62`,
+   reproceso cambió 0 records. El p95 nunca fue el binding constraint.
+
+4. **Diagnóstico instrumentado** (commit `b5c48d5`): 4 campos nuevos en MODIS:
+   - `diag_sigma_bg_k`, `diag_roi_p95_k`, `diag_eff_threshold_k`, `diag_t_max_dist_km`
+   - Reproceso febrero 2026 con instrumentación: commit `573b7d5`.
+
+5. **El binding constraint REAL es `t_bg + 3·σ_bg`**:
+   - σ_bg mediana en Lascar = 5.08 K, máximo 16.36 K
+   - 3σ mediana = 15.24 K (vs floor de 5 K)
+   - 100% (54/54) de records febrero confirman esto, 0% el p95
+   - Causa A: nubes contaminan el background annulus (4 records con t_bg < 260 K)
+   - Causa B: heterogeneidad orográfica (Lascar 5592m, valles 3000m, picos vecinos 5704+m)
+
+6. **Hot pixels casi nunca están en vent_radius=3km**: de 12 records febrero con
+   dT > 8K, solo 2 tenían el hotspot dentro de 3km del cráter. Los otros 10
+   estaban a 6-9.6km. El vent del YAML no es la posición efectiva del MODIS pixel
+   centroid.
+
+### Plan E2 para sesión 7 (NO ejecutado aún)
+
+**E2a — Cloud mask en background** (1 línea en `process_modis.py:177`):
+```python
+bg_vals = bt_mir[bg_mask & ~np.isnan(bt_mir) & (bt_mir > 260)]
+```
+
+**E2b — Cap del componente sigma** (en `process_modis.py:183`):
+```python
+MAX_SIGMA_COMPONENT_K = 7.0
+sigma_component = min(N_SIGMA * std_bg, MAX_SIGMA_COMPONENT_K)
+threshold = max(ANOMALY_THRESHOLD_K, sigma_component)
+```
+
+**Predicción**:
+- Bucket MODIS 2-10 MW mediana ratio: 0.37 -> ~0.7-0.9
+- ~25-30 records nuevos con `n_anomalous_pixels > 0` en febrero
+- Mediana global ~1.0
+- Riesgo: posibles falsos positivos en volcanes quietos (Chaiten, Michinmahuida).
+  Validar antes de masificar.
+
+### Commits sesión 6
+- `0f039bd` Phase A vent TIR (REVERTIDO)
+- `0e5e2eb` Revert Phase A
+- `fd42536` Diagnostic framework (F1-F5)
+- `0e76938` MIROVA Lascar regen sin OCR
+- `d513cae` Lascar baseline post-revert reprocess
+- `53d5f62` E1: vent exclusion from p95 (INERT)
+- `f5f5e12` Lascar post-E1 reprocess (0 changes)
+- `b5c48d5` Diagnostic instrumentation (4 fields)
+- `573b7d5` Lascar Feb 2026 with diag fields
+
+### Estado al cerrar sesión 6
+- Diagnóstico completo y documentado en `experiments/04_session6_final_findings.md`
+- E1 commit `53d5f62` está en main pero es inert. NO revertido a propósito
+  (no hace daño, es defensible mantenerlo, decisión de revert para sesión 7
+  según resultados de E2).
+- 4 campos `diag_*` en MODIS records están en main. NO removidos a propósito
+  (sirven para validar E2 cuando se ejecute).
+- **Pendiente sesión 7**: implementar E2a+E2b' en `process_modis.py`,
+  reprocesar Lascar feb 2026, validar contra MIROVA, decidir rollout.
+- **Pendiente más lejano**: reprocesar 9 volánes restantes, primer pull 34 nuevos.
+
+### Lecciones agregadas (`tasks/lessons.md`)
+- L6.1: Fix the bug you can prove, not the bug you suspect (E1 inert)
+- L6.2: MODIS eruption-scale path broken forever, hidden by vent-scale fallback
+- L6.3: σ_bg en Lascar es 5-16 K naturalmente (nubes + orografía)
+- L6.4: vent_radius=3km es muy ajustado para MODIS 1km pixels
+- L6.5: Siempre preservar baseline JSON antes de reprocesar
 
 ---
 

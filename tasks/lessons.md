@@ -118,3 +118,101 @@ than the reported mean 1.14 / median 1.02.
 
 Fix for future validations: require match-time tolerance ≤60 min as a hard
 cut, not a "closest" fallback.
+
+
+---
+
+## Session 6 — 2026-04-08
+
+### L6.1 — Fix the bug you can prove, not the bug you suspect
+Spent half of session 6 chasing a wrong hypothesis (`roi_p95` filter blocking
+MODIS detections on Lascar). Implemented E1 (commit 53d5f62) to exclude the
+vent ROI from the p95 calculation. Result: 0 records changed in the reprocess.
+
+The hypothesis was plausible (`roi_p95 + 3K` IS a second filter that COULD
+block detections) but I never verified it was the BINDING constraint before
+implementing the fix. Verification required adding diagnostic instrumentation
+(commit b5c48d5) which showed `t_bg + 3·σ_bg` is the binding constraint in
+**100% of records** (54/54 February MODIS) — the p95 was always lower than
+the sigma threshold, so removing it had zero effect.
+
+**Generalization**: when fixing a multi-constraint detection logic, FIRST
+instrument and identify which constraint binds in the failing cases, THEN
+fix only that one. Symptom-based debugging on multi-filter pipelines wastes
+cycles on inert changes.
+
+### L6.2 — MODIS process_modis.py has had broken eruption-scale path forever
+Across 3 historical snapshots of Lascar (sessions 4 pre-scanfix, 5
+post-scanfix, 6 post-revert), the count of MODIS records with
+`n_anomalous_pixels > 0` is **0 in all 3 snapshots** (out of 181/182/183
+records each). Every MODIS VRP we've ever reported for Lascar comes from
+the vent-scale fallback path.
+
+This was hidden by the vent-scale path: it captured 64% of records (117/183)
+with 1-pixel detections that gave reasonable VRPs in the low (<2 MW) range,
+making the bucket 0.5-2 MW look calibrated (median 1.09 vs MIROVA). But
+the bucket 2-10 MW failed (median 0.37) because the vent-scale single
+nearest pixel doesn't capture the brightest pixel in the broader ROI.
+
+**Generalization**: when reporting capture rate / median ratio, ALWAYS
+break down by sensor AND magnitude bucket. Hiding a structural bug behind
+a vent-scale fallback that "mostly works" delayed the discovery by 2 sessions.
+
+### L6.3 — At Lascar, σ_bg in the 5-25 km annulus is 5-16 K naturally
+Diagnostic data from 54 February 2026 records showed σ_bg = 5.08 K median
+with values up to 16.36 K. Two distinct causes:
+
+1. **Cloud contamination** (~7% of records): high cold clouds in the
+   annulus drive `t_bg` below 260 K (one record had t_bg = 224.86 K, -48°C
+   — physically impossible for Lascar's surroundings) and σ_bg above 10 K.
+   Fix: exclude pixels with `BT < 260 K` from background statistics, same
+   strategy `process_viirs.py` already uses (commit pending).
+
+2. **Orographic heterogeneity** (~22% of records): even cloud-free, Lascar's
+   5-25 km annulus sweeps across valleys (3000 m), the volcano summit
+   (5592 m), and neighboring peaks (Juriques 5704, Aguas Calientes 5924).
+   The natural BT range is 10-15 K and σ captures it as "noise".
+   Fix: cap the sigma component of the threshold at ~7 K to prevent
+   orographic σ from dominating (commit pending). Alternative: use MAD ×
+   1.4826 instead of std (more robust to mixture distributions).
+
+**Generalization**: classical anomaly detection assuming homogeneous Gaussian
+backgrounds breaks at high-altitude andean volcanoes where the ROI annulus
+spans several km of vertical relief. Either tighten the annulus (e.g. 8-15 km
+instead of 5-25 km) or use robust statistics.
+
+### L6.4 — Active vent area for MODIS-effective hotspot detection is NOT the geometric crater center
+At Lascar, of 12 February records with dT > 8 K, only 2 had the hottest
+pixel within 3 km of `vent_lat/vent_lon` defined in volcanoes.yaml. The
+other 10 had hotspots 6-10 km from the crater center, all within the
+broader 10 km ROI but outside the vent_radius_km=3 km used by the
+vent-scale fallback.
+
+Two plausible causes (need ground-truth from SERNAGEOMIN):
+- Multiple sub-vents within the crater bowl, each dominating different
+  passes (consistent with the false-color Sentinel-2 image showing 2-3
+  red sub-features within ~200 m diameter)
+- MODIS pixel footprint geometry: a 1×1 km nominal pixel becomes a 1×2 km
+  footprint at scan edges, and the geolocation reports the pixel center,
+  not the brightness centroid. A vent inside a pixel whose center is
+  4-5 km from the crater is reported AT 4-5 km even though the actual
+  emitter is at the crater.
+
+**Generalization**: `vent_radius_km` from volcanoes.yaml is a logical
+proximity filter, not a physical pixel-resolution boundary. For 1 km MODIS
+pixels at off-nadir scan angles, expand by 2-3 km of safety margin.
+Possible fix in process_modis.py: use a larger effective vent radius
+(5-6 km) for the vent-scale fallback when dealing with MODIS, separate
+from VIIRS where 3 km is appropriate (375 m pixels).
+
+### L6.5 — Always preserve a baseline JSON before reprocessing for fix-impact measurement
+Used `experiments/lascar_baseline_pre_E1.json` to measure E1 impact (zero
+records changed). Without this baseline, would have had to deduce E1 was
+inert from indirect evidence ("git diff was 1 line"). Having the literal
+JSON snapshot let me run the same diagnostic script against both pre and
+post and confirm the change was zero.
+
+**Generalization**: any time you implement a pipeline fix that affects
+historical records, save a frozen copy under `experiments/<volcano>_<state>_pre_<fix>.json`
+BEFORE running the reprocess. This lets later sessions (or the next agent)
+re-verify your claim of impact independently.
