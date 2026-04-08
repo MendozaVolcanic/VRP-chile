@@ -9,11 +9,13 @@ volcanoes:
     active: true
     sensors: [MODIS, VIIRS]
     notes: "Persistent fumarolic/hydrothermal anomaly since 2011-2012 eruption"
-    # Fumarolic vent field from the 2011 eruption fissure (~8 km ESE of main reference)
-    # MIROVA consistently detects the anomaly at 7.65-8.55 km from main coords.
-    # Used for weak thermal anomaly detection (VIIRS only, low threshold ~1K).
-    vent_lat: -40.585
-    vent_lon: -72.020
+    # 2011 Cordón Caulle eruptive fissure, NNW of the main Puyehue summit.
+    # Session 9 (RF3) empirical analysis: 24/30 TPs cluster within 1.5 km of
+    # (-40.523, -72.137). Pre-S9 vent (-40.585, -72.020) was 12.0 km from this
+    # cluster — in the wrong direction (ESE instead of NNW). See
+    # experiments/ROOT_CAUSE_S9.md RF3 for the full evidence chain.
+    vent_lat: -40.523
+    vent_lon: -72.137
     vent_radius_km: 3
 
   - name: Villarrica
@@ -396,8 +398,12 @@ volcanoes:
     active: true
     sensors: [MODIS, VIIRS]
     notes: "Active crater lake, fumarolic emissions. Border volcano. MIROVA avg dist 1.2km."
-    vent_lat: -35.240
-    vent_lon: -70.568
+    # Crater zone ground truth (Nicolás, SERNAGEOMIN, 2026-04-08).
+    # 0.46 km from the pre-S9 rounded coord — functionally equivalent but
+    # more precise. See tasks/lessons.md L9.1 for context on why the MIROVA
+    # KMZ grid center (~2 km off) was NOT used as the reference.
+    vent_lat: -35.241099
+    vent_lon: -70.573345
     vent_radius_km: 3
 
   - name: Lastarria
@@ -541,6 +547,12 @@ volcanoes:
     active: true
     sensors: [MODIS, VIIRS]
     notes: "Fumarolic activity, glacier-covered. High-altitude (5682m). MIROVA avg dist 4km."
-    vent_lat: -33.400
-    vent_lon: -69.800
+    # Active hotspot ground truth (Nicolás, SERNAGEOMIN, 2026-04-08).
+    # 2.73 km NNW of the pre-S9 rounded coord, but still within vent_radius_km=5
+    # so detection behavior is unchanged. MIROVA reports distancia_km 4.37-5.41
+    # from its grid center (-33.4269, -69.8004), which is 4.83 km SSW of the
+    # true vent — confirming MIROVA's grid center is NOT the vent reference.
+    # See tasks/lessons.md L9.1.
+    vent_lat: -33.389044
+    vent_lon: -69.826374
     vent_radius_km: 5
