@@ -49,6 +49,23 @@ N_SIGMA = 3.0
 BG_INNER_KM = 5.0
 BG_OUTER_KM = 25.0
 
+# E2a — Cloud mask for the background annulus. High cold clouds routinely
+# contaminate the 5-25 km annulus at high-altitude volcanoes (Lascar 5592 m),
+# pulling t_bg far below physical (observed down to 225 K = -48 C on the
+# Atacama desert floor) and inflating sigma_bg by mixing hot ground with
+# cold cloud tops. Same strategy as process_viirs.py. See
+# experiments/04_session6_final_findings.md.
+CLOUD_MASK_BT_K = 260.0
+
+# E2b' — Cap on the sigma component of the detection threshold. At
+# high-altitude volcanoes the 5-25 km annulus sweeps valleys, ridges and
+# plateau terrain with natural dT ~10-15 K. Uncapped 3*sigma turns any
+# legit 7 K vent anomaly into a rejection. 7 K cap chosen empirically from
+# Lascar Feb 2026 diag data: allows detection when sigma<6 K (clean
+# records, ~70% of passes) while still rejecting residual cloud streaks
+# where sigma>10 K.
+MAX_SIGMA_COMPONENT_K = 7.0
+
 # Indices of bands 21 and 22 within EV_1KM_Emissive
 # Band_1KM_Emissive order: [20,21,22,23,24,25,27,28,29,30,31,32,33,34,35,36]
 BAND21_IDX = 1
@@ -174,13 +191,17 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     bt22 = radiance_to_bt(rad22, BAND22_LAMBDA)
     bt_mir = np.where(np.isnan(bt21), bt22, bt21)
 
-    bg_vals = bt_mir[bg_mask & ~np.isnan(bt_mir)]
+    # E2a: exclude cold-cloud contaminated pixels from the background annulus.
+    bg_vals = bt_mir[bg_mask & ~np.isnan(bt_mir) & (bt_mir > CLOUD_MASK_BT_K)]
     if len(bg_vals) < 10:
         return None
 
     t_bg = float(np.median(bg_vals))
     std_bg = float(np.std(bg_vals))
-    threshold = max(ANOMALY_THRESHOLD_K, N_SIGMA * std_bg)
+    # E2b': cap the sigma component so orographic heterogeneity in the
+    # annulus can't blow up the threshold and mask real vent anomalies.
+    sigma_component = min(N_SIGMA * std_bg, MAX_SIGMA_COMPONENT_K)
+    threshold = max(ANOMALY_THRESHOLD_K, sigma_component)
 
     # Additional local-ROI filter: use the ROI's own statistics to avoid
     # topographic false positives (e.g., high-altitude volcanoes with warmer
