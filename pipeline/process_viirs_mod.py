@@ -172,9 +172,20 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     std_bg = float(np.std(bg_vals))
     threshold = max(ANOMALY_THRESHOLD_K, N_SIGMA_MIR * std_bg)
 
-    # Additional local-ROI filter: avoid topographic false positives
+    # Additional local-ROI filter: avoid topographic false positives.
+    # Session 6 E1 fix: exclude a vent safety zone from the p95 calculation
+    # so the vent pixel doesn't inflate its own filter. See process_modis.py
+    # for the full rationale.
+    P95_VENT_EXCLUSION_KM = 4.0  # smaller margin for 750m VIIRS pixels
     roi_bt_full = np.where(roi_mask & ~np.isnan(bt), bt, np.nan)
-    roi_valid = roi_bt_full[~np.isnan(roi_bt_full)]
+    if vent_lat is not None and vent_lon is not None:
+        vent_dist_for_p95 = haversine_km(vent_lat, vent_lon, lat, lon)
+        p95_mask = (roi_mask
+                    & ~np.isnan(bt)
+                    & (vent_dist_for_p95 > max(vent_radius_km, P95_VENT_EXCLUSION_KM)))
+        roi_valid = bt[p95_mask]
+    else:
+        roi_valid = roi_bt_full[~np.isnan(roi_bt_full)]
     if len(roi_valid) >= 10:
         roi_p95 = float(np.percentile(roi_valid, 95))
         roi_std = float(np.std(roi_valid))

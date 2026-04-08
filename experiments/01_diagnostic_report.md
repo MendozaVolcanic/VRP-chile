@@ -1,8 +1,8 @@
 # Lascar diagnostic report (Paso 1)
 
-**Source JSON**: `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\experiments\lascar_session5_snapshot.json`
+**Source JSON**: `experiments/lascar_baseline_pre_E1.json`
 **MIROVA refs**: `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\data\mirova\Lascar.json` — 175 records
-**Our records**: 644
+**Our records**: 645
 **Matched pairs (same-day, same-family, dt<=30min, both VRP>0)**: 130
 
 ---

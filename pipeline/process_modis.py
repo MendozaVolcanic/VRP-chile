@@ -186,8 +186,28 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     # topographic false positives (e.g., high-altitude volcanoes with warmer
     # low-altitude terrain in the background annulus).
     # A pixel must exceed BOTH the background threshold AND the ROI p95 threshold.
+    #
+    # IMPORTANT (session 6, E1 fix): when a vent is known, exclude a safety
+    # zone around it from the p95 calculation. Otherwise the vent pixel itself
+    # elevates the p95 and the filter "eats its own tail": the vent ends up
+    # needing to be ~3 K hotter than itself to clear the local threshold.
+    # Empirically (Lascar, 16 MODIS pairs in the 2-10 MW bucket), this caused
+    # the pipeline to report n_anomalous_pixels=0 on every single ref, with
+    # dT_bg as high as 11.7 K but blocked by `p95 + 3K`. The vent exclusion
+    # uses a slightly larger margin than vent_radius_km because the 1 km MODIS
+    # pixel footprint can overlap the vent even when its center is outside the
+    # vent ROI (an Aqua pass with vent_radius_km=3 may still have the hottest
+    # pixel at ~4 km from the vent center due to pixel centering).
+    P95_VENT_EXCLUSION_KM = 5.0  # conservative margin for MODIS 1km pixels
     roi_bt_full = np.where(roi_mask & ~np.isnan(bt_mir), bt_mir, np.nan)
-    roi_valid = roi_bt_full[~np.isnan(roi_bt_full)]
+    if vent_lat is not None and vent_lon is not None:
+        vent_dist_for_p95 = haversine_km(vent_lat, vent_lon, lat, lon)
+        p95_mask = (roi_mask
+                    & ~np.isnan(bt_mir)
+                    & (vent_dist_for_p95 > max(vent_radius_km, P95_VENT_EXCLUSION_KM)))
+        roi_valid = bt_mir[p95_mask]
+    else:
+        roi_valid = roi_bt_full[~np.isnan(roi_bt_full)]
     if len(roi_valid) >= 10:
         roi_p95 = float(np.percentile(roi_valid, 95))
         roi_std = float(np.std(roi_valid))
