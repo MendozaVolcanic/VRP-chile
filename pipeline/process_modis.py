@@ -214,6 +214,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         local_threshold = roi_p95 + max(3.0, 2.0 * roi_std)
         effective_threshold = max(t_bg + threshold, local_threshold)
     else:
+        roi_p95 = float("nan")
+        local_threshold = float("nan")
         effective_threshold = t_bg + threshold
 
     # Find all anomalous pixels with their 2D indices
@@ -261,6 +263,15 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     valid_roi = roi_bt_full[~np.isnan(roi_bt_full)]
     t_max = float(np.max(valid_roi)) if len(valid_roi) else float("nan")
 
+    # Diagnostic (session 6): location of the hottest pixel in the ROI.
+    # Useful when n_anomalous_pixels=0 to understand whether the hottest
+    # pixel was inside or outside the vent_radius.
+    t_max_dist_km_diag = float("nan")
+    if len(valid_roi) > 0:
+        flat_idx_max = np.nanargmax(roi_bt_full)
+        r_max, c_max = np.unravel_index(flat_idx_max, roi_bt_full.shape)
+        t_max_dist_km_diag = float(dist[r_max, c_max])
+
     # --- Vent-scale detection (weak fumarolic signals) ---
     # Same approach as VIIRS 375m: tight ROI around known vent, low threshold,
     # no ROI p95 filter. Uses the regional background (t_bg) already computed.
@@ -294,6 +305,11 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "anomaly_pixels": anomaly_pixels,
         "t_bg_k": round(t_bg, 2),
         "t_max_k": round(t_max, 2),
+        # Diagnostic fields (session 6) — present when MODIS path runs.
+        "diag_sigma_bg_k": round(std_bg, 3),
+        "diag_t_max_dist_km": round(t_max_dist_km_diag, 2) if not (t_max_dist_km_diag != t_max_dist_km_diag) else None,
+        "diag_roi_p95_k": round(roi_p95, 2) if not (roi_p95 != roi_p95) else None,
+        "diag_eff_threshold_k": round(effective_threshold, 2),
         "sensor": "MODIS_TERRA" if "MOD0" in hdf_path.name else "MODIS_AQUA",
         "granule": hdf_path.name,
         "datetime_utc": _parse_datetime(hdf_path.name),
