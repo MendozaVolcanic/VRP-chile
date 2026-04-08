@@ -64,13 +64,6 @@ N_SIGMA_TIR = 4.0   # TIR is noisier due to surface/cloud variability
 VENT_THRESHOLD_K = 1.0       # MIR channel, low fixed minimum
 N_SIGMA_VENT = 2.0           # Less conservative — small radius suppresses FP
 
-# --- Vent-scale TIR thresholds (TIRVolcH-inspired, Aveni 2024) ---
-# Low-temperature fumarolic signatures at 11.45 um — robust to solar
-# contamination, so this path works both day and night. Tuned for Lascar-class
-# fumaroles where dT_I05 is typically 1-4 K above Atacama background.
-VENT_TIR_THRESHOLD_K = 0.3   # Safe floor for weak fumarolic TIR signals
-N_SIGMA_VENT_TIR = 2.0       # Tight vent ROI suppresses terrain FP
-
 BG_INNER_KM = 5.0
 BG_OUTER_KM = 25.0
 
@@ -394,44 +387,6 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     ) / 1e6
                     n_vent_pixels = 1
 
-    # --- Vent-scale TIR (I05) detection (Phase A, session 5/6) ---
-    # Complements the I04 vent path for low-temperature fumarolic signatures
-    # that do not clear the MIR threshold (empirically 0/231 nighttime Lascar
-    # records had vrp_tir_mw > 0 under the old eruption-scale thresholds).
-    # Uses Stefan-Boltzmann on I05 BT with a tight vent ROI. Robust to solar
-    # contamination at 11.45 um, so this block also works on daytime granules
-    # (Phase B will wire that in).
-    vrp_vent_tir_mw = 0.0
-    n_vent_tir_pixels = 0
-    t_max_vent_i05 = float("nan")
-    if (vent_lat is not None and vent_lon is not None
-            and "I05" in bands):
-        bt5_all = bands["I05"]
-        bg5_vent_vals = bt5_all[bg_mask & ~np.isnan(bt5_all)]
-        if len(bg5_vent_vals) >= 10:
-            t_bg_i05_vent = float(np.median(bg5_vent_vals))
-            std_bg5_vent = float(np.std(bg5_vent_vals))
-            vent_tir_threshold = t_bg_i05_vent + max(
-                VENT_TIR_THRESHOLD_K, N_SIGMA_VENT_TIR * std_bg5_vent
-            )
-            vent_dist = haversine_km(vent_lat, vent_lon, lat, lon)
-            vent_roi_mask_tir = vent_dist <= vent_radius_km
-            if np.any(vent_roi_mask_tir):
-                vent_bt5_2d = np.where(
-                    vent_roi_mask_tir & ~np.isnan(bt5_all), bt5_all, np.nan
-                )
-                if np.any(~np.isnan(vent_bt5_2d)):
-                    flat_idx5 = np.nanargmax(vent_bt5_2d)
-                    r_v5, c_v5 = np.unravel_index(flat_idx5, vent_bt5_2d.shape)
-                    t_max_vent_i05 = float(vent_bt5_2d[r_v5, c_v5])
-                    if t_max_vent_i05 > vent_tir_threshold:
-                        vent_area_tir = float(pixel_areas[r_v5, c_v5])
-                        vrp_vent_tir_mw = float(
-                            vent_area_tir * SIGMA
-                            * (t_max_vent_i05 ** 4 - t_bg_i05_vent ** 4)
-                        ) / 1e6
-                        n_vent_tir_pixels = 1
-
     name = l1b_path.name
     sensor = "VIIRS_SNPP" if name.startswith("VNP") else "VIIRS_NOAA20"
 
@@ -439,11 +394,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "vrp_mir_mw": round(vrp_mir_mw, 3),
         "vrp_tir_mw": round(vrp_tir_mw, 3),
         "vrp_vent_mw": round(vrp_vent_mw, 3),
-        "vrp_vent_tir_mw": round(vrp_vent_tir_mw, 3),
         "n_anomalous_pixels": n_anomalous,
         "n_vent_pixels": n_vent_pixels,
-        "n_vent_tir_pixels": n_vent_tir_pixels,
-        "t_max_vent_i05_k": round(t_max_vent_i05, 2) if not np.isnan(t_max_vent_i05) else None,
         "n_cloud_masked": n_cloud_masked,
         "nti_max": round(nti_max, 6) if not np.isnan(nti_max) else None,
         "nti_bg": round(nti_bg, 6) if not np.isnan(nti_bg) else None,
