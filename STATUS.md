@@ -1,9 +1,83 @@
 # STATUS — VRP Chile
-**Ultima actualizacion:** 2026-04-07 (sesion 4 — correccion scan-angle pixel area)
+**Ultima actualizacion:** 2026-04-07 (sesion 5 — validacion scan-fix contra MIROVA en Lascar)
 
 ---
 
-## SESION 4 EN CURSO (2026-04-07)
+## SESION 5 (2026-04-07)
+
+### Fix de reprocesamiento
+`store.py:append_record` deduplicaba por (datetime_utc, sensor) y saltaba
+records existentes — los reprocesos solo agregaban records nuevos, nunca
+actualizaban los viejos. Bug detectado cuando un "reproceso" de Villarrica
+marzo 2026 solo agrego 1 registro y dejo los 241 existentes con los VRP pre-fix.
+
+**Solucion**: flag `overwrite=True` propagado end-to-end:
+- `pipeline/store.py`: append_record acepta overwrite, reemplaza existing
+- `scripts/run_pipeline.py`: --overwrite CLI flag
+- `.github/workflows/nrt.yml`: input workflow_dispatch `overwrite=true`
+- Commit: `4d6af41`
+
+### Reprocesamientos completados
+- **Villarrica** 2026-03-01 -> 2026-03-31 (test): 43 records actualizados
+  - VIIRS cap suave ~1.96x, MODIS sec3 variable 1.0-10.5x. Sin regresiones.
+  - Commit: `1afb255`
+- **Lascar** 2026-01-01 -> 2026-04-07 (rango completo): 644 records, 398 con VRP>0
+  - Commit: `c956884`
+
+### Validacion Lascar vs MIROVA (203 refs)
+
+Script: `scripts/validate_lascar_vs_mirova.py`
+
+| Metrica          | Pre-fix | Post-fix | Delta |
+|------------------|---------|----------|-------|
+| Capture rate     | 81.3%   | **88.7%** | +7.4  |
+| Capture MODIS    | 64.3%   | **85.7%** | +21.4 |
+| Capture VIIRS375 | 88.9%   | **93.9%** | +5.0  |
+| Capture VIIRS750 | 80.6%   | **82.3%** | +1.7  |
+| Mean ratio       | 0.60    | **1.14**  | +0.54 |
+| **Median ratio** | **0.57**| **1.02**  | **+0.45** |
+
+**Ratio por sensor (media):**
+- MODIS: 0.50 -> 0.94 (mejora 1.87x)
+- VIIRS-I 375m: 0.67 -> 1.28 (mejora 1.92x)
+- VIIRS-M 750m: 0.54 -> 1.04 (mejora 1.91x)
+
+**Conclusion**: El bias sistematico 0.55 documentado sesion 4 esta resuelto.
+Mediana global post-fix = 1.02 (calibracion dentro del ~2% de MIROVA).
+Todos los sensores mejoraron uniformemente ~1.9x, consistente con la teoria
+(sec3 para MODIS, cap 2.0 para VIIRS bow-tie aggregated).
+
+### Hallazgo metodologico: MIROVA procesa VIIRS diurno via TIR (I05)
+Los outliers extremos de la validacion (ratio <0.1 o >3) trazan todos a
+records MIROVA VIIRS375 a ~18:XX UTC = daytime en Lascar (local ~14:30).
+Nuestro pipeline bloquea todos los records diurnos a nivel `store.py`.
+
+Hipotesis: MIROVA extrae detecciones diurnas VIIRS usando banda I05 TIR
+(11.45 um, Stefan-Boltzmann via Aveni 2024 TIRVolcH). El TIR es robusto a
+contaminacion solar; solo el MIR (3-4 um) la sufre.
+
+Proxima mejora (sesion futura): filtro nocturno **band-specific** en vez de
+global — permitir I05 TIR diurno por un code path separado en
+`process_viirs.py`. Ver `tasks/lessons.md` L5.3.
+
+### Commits sesion 5
+- `7bba3aa` Backup 11 volcano JSONs pre scan-angle reprocessing
+- `4d6af41` Add --overwrite flag for reprocessing existing records
+- `1afb255` NRT reprocess Villarrica 2026-03 (GitHub Actions)
+- `c956884` NRT reprocess Lascar 2026-01 -> 2026-04 (GitHub Actions)
+
+### Estado al cerrar sesion 5
+- Scan-fix validado contra MIROVA. Bias 0.55 -> 1.02 (mediana).
+- Villarrica y Lascar reprocesados.
+- **Pendiente**: reprocesar los 9 volcanes restantes (Copahue, Chaiten, Isluga,
+  Lastarria, Llaima, NevadosDeChillan, PlanchonPeteroa, PCC, Tupungatito).
+  Rango recomendado: 2026-01-01 -> 2026-04-07.
+- **Pendiente**: primer pull 34 volcanes nuevos.
+- **Mejora futura**: daytime I05 TIR en process_viirs.py.
+
+---
+
+## SESION 4 (2026-04-07)
 
 ### Problema identificado
 Sesgo sistematico ~2x (ratio 0.55 nuestro/MIROVA) en 152 detecciones pareadas de Lascar, independiente del sensor. Causa: usabamos area nadir fija (1 km² MODIS, 140625 m² VIIRS-I, 562500 m² VIIRS-M) sin corregir por angulo de escaneo off-nadir.
