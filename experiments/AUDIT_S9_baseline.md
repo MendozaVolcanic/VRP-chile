@@ -1,40 +1,55 @@
 # AUDIT_S9_baseline — honest baseline of the pipeline (2026-04-08)
 
 **Script:** `experiments/11_strict_audit.py`
-**Refs:** `data/mirova/*.json` regenerated from consolidado CSV, clasificacion
-∈ {Muy Bajo, Bajo} only (L7.10 defense: script hard-fails on any other value)
+**Refs:** `data/mirova/*.json` regenerated from `registro_vrp_consolidado al 08042026.csv`
+(11,319 rows, 445 real records, range 2026-01-10 → 2026-04-08),
+clasificacion ∈ {Muy Bajo, Bajo} only (L7.10 defense: script hard-fails
+on any other value).
 **Pipeline:** no changes since session 7
 **Pairing:** strict 1:1 by (sensor_family, datetime) with tolerance
 MODIS ±60 min, VIIRS375 ±30 min, VIIRS ±30 min
-**Scope:** Tier A (5 volcanoes) + Tier B (3 volcanoes) = 378 MIROVA refs
+**Scope:** Tier A (5 volcanoes) + Tier B (3 volcanoes) = 442 MIROVA refs
 
 This document **replaces** the deleted `AUDIT_S8_baseline.md`. Every number
 in it is reproducible by running the script above against the refs in
-`data/mirova/` as of commit `9cccdce`.
+`data/mirova/`.
+
+**Revision history:**
+- 2026-04-08 v1: first clean baseline against 378 refs (old CSV, up to 2026-03-28)
+- 2026-04-08 v2: re-run against new CSV with +64 real records and +11
+  days of coverage (this version). All 5 red flags confirmed or worsened.
 
 ---
 
-## Summary table
+## Summary table (v2, against 442-record new CSV)
 
 | Volcano              |  ref |   TP |  FN |   FP |    P  |    R  |   F1  | ratio_med |
 |----------------------|-----:|-----:|----:|-----:|------:|------:|------:|----------:|
 | **Tier A (calibration)** |      |      |     |      |       |       |       |           |
-| Lascar               |  154 |  123 |  31 |  190 |  0.39 |  0.80 |  0.53 |     0.989 |
-| PuyehueCordonCaulle  |   67 |   41 |  26 |  390 |  0.10 |  0.61 |  0.17 |     0.137 |
-| Lastarria            |   46 |   36 |  10 |  110 |  0.25 |  0.78 |  0.38 |     0.460 |
-| Isluga               |   44 |   32 |  12 |  163 |  0.16 |  0.73 |  0.27 |     0.449 |
-| Tupungatito          |   33 |   24 |   9 |   75 |  0.24 |  0.73 |  0.36 |     0.602 |
+| Lascar               |  177 |  139 |  38 |  213 |  0.40 |  0.79 |  0.53 |     0.971 |
+| PuyehueCordonCaulle  |   74 |   45 |  29 |  432 |  0.09 |  0.61 |  0.16 |     0.132 |
+| Lastarria            |   55 |   42 |  13 |  127 |  0.25 |  0.76 |  0.38 |     0.459 |
+| Isluga               |   49 |   35 |  14 |  200 |  0.15 |  0.71 |  0.25 |     0.432 |
+| Tupungatito          |   44 |   24 |  20 |   80 |  0.23 |  0.55 |  0.32 |     0.602 |
 | **Tier B (corroboration)** |      |      |     |      |       |       |       |           |
-| PlanchonPeteroa      |   18 |   10 |   8 |   56 |  0.15 |  0.56 |  0.24 |     0.375 |
-| Chaiten              |   11 |   11 |   0 |  259 |  0.04 |  1.00 |  0.08 |     0.738 |
+| PlanchonPeteroa      |   24 |   14 |  10 |   62 |  0.18 |  0.58 |  0.28 |     0.377 |
+| Chaiten              |   14 |   13 |   1 |  422 |  0.03 |  0.93 |  0.06 |     0.738 |
 | Villarrica           |    5 |    0 |   5 |   56 |  0.00 |  0.00 |  —    |     —     |
-| **Total**            |  378 |  277 | 101 | 1299 | **0.18** | **0.73** | **0.29** | —         |
+| **Total**            |  442 |  312 | 130 | 1592 | **0.16** | **0.71** | **0.26** | —         |
 
-**Headline numbers (across the whole calibration/corroboration set):**
-- **Precision 0.18** — 82% of our detections are false positives.
-- **Recall 0.73** — we catch 73% of what MIROVA sees.
-- **F1 0.29** — dominated by the precision collapse.
-- **Ratio median at Lascar only ≈ 1.0**, elsewhere 0.1–0.7 (systematic under-estimate).
+**Headline numbers (against 442 clean refs):**
+- **Precision 0.16** — 84% of our detections are false positives.
+- **Recall 0.71** — we catch 71% of what MIROVA sees.
+- **F1 0.26** — dominated by the precision collapse.
+- **Ratio median at Lascar only ≈ 1.0**, elsewhere 0.1–0.74 (systematic under-estimate).
+
+**v1 → v2 deltas** (old 378-ref CSV vs new 442-ref CSV):
+- Precision 0.18 → 0.16, Recall 0.73 → 0.71, F1 0.29 → 0.26 (all slightly worse).
+- FPs grew faster than TPs in the new 11-day window, confirming the
+  structural FP problem gets worse with more data, not better.
+- **Tupungatito recall dropped 0.73 → 0.55**: the 11 new Tupungatito records
+  in the new CSV are 0 TPs / 11 FNs. Worth flagging separately.
+- All 5 red flags below are confirmed or worsened.
 
 ---
 
@@ -43,33 +58,33 @@ in it is reproducible by running the script above against the refs in
 ### RF1 — Precision collapse at EVERY volcano
 Every single volcano has precision < 0.4. This is not a per-volcano tuning
 issue; it's a **structural pipeline problem** that affects the entire
-network uniformly. Distribution of FPs across VRP buckets (Lascar example):
+network uniformly. Distribution of FPs across VRP buckets (Lascar, v2):
 
 | Bucket     | MIROVA refs | Our FPs in same bucket |
 |------------|------------:|-----------------------:|
-| <0.5 MW    |          36 |                     65 |
-| 0.5–1 MW   |          25 |                     30 |
-| 1–2 MW     |          41 |                     23 |
-| 2–5 MW     |          52 |                     47 |
-| 5–10 MW    |           0 |                     23 |
-| >10 MW     |           0 |                      2 |
+| <0.5 MW    |          40 |                     72 |
+| 0.5–1 MW   |          28 |                     33 |
+| 1–2 MW     |          49 |                     30 |
+| 2–5 MW     |          60 |                     50 |
+| 5–10 MW    |           0 |                     25 |
+| >10 MW     |           0 |                      3 |
 
 **Critical observation**: MIROVA's maximum VRP at Lascar in this period is
-~4 MW, yet our pipeline produces **25 detections ≥5 MW** — all of them FPs.
-Same pattern at Tupungatito (8 FPs ≥2 MW on a volcano where MIROVA sees
+~4 MW, yet our pipeline produces **28 detections ≥5 MW** — all of them FPs.
+Same pattern at Tupungatito (17 FPs ≥1 MW on a volcano where MIROVA sees
 nothing above 1 MW). This is the quantitative confirmation of **L7.7**
 (vent_path `t_bg + 1 K` threshold is dangerously permissive).
 
 ### RF2 — MODIS FPs on 4 of 5 Tier A volcanoes
 MIROVA has **ZERO MODIS-family records** at PCC, Lastarria, Isluga,
-Tupungatito (Lascar is the only Tier A volcano where MIROVA publishes MODIS
-detections in this period). Our pipeline produces MODIS detections at all
-four, **all counted as FPs**:
+Tupungatito in the new CSV as well (Lascar is the only Tier A volcano
+where MIROVA publishes MODIS detections). Our pipeline produces MODIS
+detections at all four, **all counted as FPs**:
 
-- PCC: 115 MODIS detections
-- Lastarria: 55
-- Isluga: 58
-- Tupungatito: 37
+- PCC: 130 MODIS detections (v1: 115)
+- Lastarria: 64 (v1: 55)
+- Isluga: 67 (v1: 58)
+- Tupungatito: 41 (v1: 37)
 
 Two possible interpretations (must decide in Phase 2 before "fixing"):
 
@@ -114,14 +129,26 @@ period but none pair within the ±30 min tolerance window. Two options:
 Easy to diagnose: print the datetime lists side by side for Villarrica.
 
 ### RF5 — Systematic under-estimate on low-activity volcanoes
-Ratio medians by volcano:
-- Lascar: 0.989 (calibrated)
-- Tupungatito: 0.602
+Ratio medians by volcano (v2):
+- Lascar: 0.971 (calibrated)
 - Chaiten: 0.738
-- Lastarria: 0.460
-- Isluga: 0.449
-- PlanchonPeteroa: 0.375
-- PCC: 0.137 (broken, see RF3)
+- Tupungatito: 0.602
+- Lastarria: 0.459
+- Isluga: 0.432
+- PlanchonPeteroa: 0.377
+- PCC: 0.132 (broken, see RF3)
+
+### RF6 (new in v2) — Tupungatito recall collapse on new data
+The 11 extra MIROVA records added to Tupungatito in the new CSV (from
+the 2026-03-28 → 2026-04-08 period) are **0 TPs / 11 FNs**. Tupungatito
+recall dropped from 0.73 (v1) to 0.55 (v2) as a direct result. Either:
+- Something changed operationally at Tupungatito in early April that
+  MIROVA catches and we don't (new vent activity outside our ROI?)
+- Our pipeline had a gap in that period (missed granules? cron failure?)
+- The new records cluster at a specific sensor or time that we filter out
+This warrants a quick diagnostic in Phase 2: pull the 11 Tupungatito FNs
+from `experiments/audit_s9/Tupungatito.json` and check their dates,
+sensors, and whether we had matching granules at all.
 
 Excluding Lascar and PCC, ratios cluster around **0.4–0.6**. This is a
 **systematic 2× under-estimate** at low-VRP volcanoes, possibly because:
@@ -143,13 +170,13 @@ low-activity volcanoes:
 
 | Volcano          | MODIS R  | VIIRS375 R | VIIRS R  |
 |------------------|---------:|-----------:|---------:|
-| Lascar           |    0.86  |      0.79  |    0.76  |
-| PCC              |    —     |      0.75  |    0.13  |
-| Lastarria        |    —     |      0.78  |    —     |
-| Isluga           |    —     |      0.86  |    0.00  |
-| Tupungatito      |    —     |      0.83  |    0.00  |
-| PlanchonPeteroa  |    —     |      0.56  |    —     |
-| Chaiten          |    —     |      1.00  |    1.00  |
+| Lascar           |    0.81  |      0.81  |    0.73  |
+| PCC              |    —     |      0.75  |    0.12  |
+| Lastarria        |    —     |      0.76  |    —     |
+| Isluga           |    —     |      0.85  |    0.00  |
+| Tupungatito      |    —     |      0.61  |    0.00  |
+| PlanchonPeteroa  |    —     |      0.58  |    —     |
+| Chaiten          |    —     |      0.92  |    1.00  |
 | Villarrica       |    —     |      0.00  |    —     |
 
 VIIRS 750 m M-band has terrible recall at low-activity volcanoes (0 at

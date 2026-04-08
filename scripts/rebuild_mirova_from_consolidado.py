@@ -27,8 +27,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 REPO = Path(__file__).parent.parent
+# Session 9 2026-04-08: swapped from the original 'registro_vrp_consolidado.csv'
+# (9717 rows, range 2026-01-10 to 2026-03-28, 381 real records) to the updated
+# 'registro_vrp_consolidado al 08042026.csv' (11319 rows, range 2026-01-10 to
+# 2026-04-08, 445 real records). +64 real records and +11 days of coverage.
+# All tiering is stable (no volcano changes tier). The old file is preserved
+# on disk at the same parent directory if a historical comparison is needed.
 SOURCE = Path(
-    r"C:\Users\nmend\OneDrive\Escritorio\claude\Automatizacion web\Automatizacion web\Mirova-v1\monitoreo_satelital\registro_vrp_consolidado.csv"
+    r"C:\Users\nmend\OneDrive\Escritorio\claude\Automatizacion web\Automatizacion web\Mirova-v1\monitoreo_satelital\registro_vrp_consolidado al 08042026.csv"
 )
 
 
