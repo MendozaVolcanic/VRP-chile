@@ -37,6 +37,11 @@ C2 = 14388.0
 
 BAND21_LAMBDA = 3.929
 BAND22_LAMBDA = 3.959
+# Band 31 (TIR 11 um) — used for NTI dual criteria (E3).
+# EV_1KM_Emissive band order [20,21,22,23,24,25,27,28,29,30,31,32,33,34,35,36]
+# so Band 31 is index 10.
+BAND31_IDX = 10
+BAND31_LAMBDA = 11.03
 # Nadir pixel area; actual area is computed per-pixel from scan column index
 # in scan_geometry.modis_pixel_areas (sec^3(theta_z) correction).
 NADIR_PIXEL_AREA_M2 = 1e6  # 1 km^2 at nadir
@@ -48,6 +53,26 @@ ANOMALY_THRESHOLD_K = 5.0
 N_SIGMA = 3.0
 BG_INNER_KM = 5.0
 BG_OUTER_KM = 25.0
+
+# E3 — NTI (Normalized Thermal Index, Coppola 2015) for MODIS.
+# Analogous to the dual criteria already used in process_viirs.py on I04/I05.
+# NTI = (L_MIR - L_TIR) / (L_MIR + L_TIR), computed per-pixel from Band 21
+# (MIR ~3.93 um) and Band 31 (TIR ~11 um).
+#
+# Detection logic: a pixel is considered hot if EITHER
+#   (A) it passes the existing BT threshold (with E2 cloud mask + sigma cap), OR
+#   (B) it passes MIROVA "Test 1": NTI > K1_NIGHT with a small BT sanity floor
+#       so we don't trigger on pure noise or edge-of-granule artifacts.
+#
+# Path (B) is what rescues Lascar's 2-10 MW bucket: at high-altitude andean
+# volcanoes the BT-based path is structurally broken because sigma_bg inflates
+# the threshold beyond reach, but a subpixel hotspot with even 1-2% hot
+# fraction produces NTI > -0.8 trivially.
+#
+# K1_NIGHT from Coppola 2015 Table 1 (night pass). We don't implement dNTI/dETI
+# (would need full spatial-contrast machinery) — just the fixed Test-1 floor.
+NTI_K1_NIGHT = -0.8
+NTI_BT_SANITY_K = 3.0  # pixel must also be at least 3 K above t_bg
 
 # E2a — Cloud mask for the background annulus. High cold clouds routinely
 # contaminate the 5-25 km annulus at high-altitude volcanoes (Lascar 5592 m),
@@ -75,6 +100,12 @@ BAND22_IDX = 2
 def radiance_to_bt(L: np.ndarray, wavelength_um: float) -> np.ndarray:
     with np.errstate(invalid="ignore", divide="ignore"):
         return C2 / (wavelength_um * np.log(C1 / (L * wavelength_um ** 5) + 1))
+
+
+def bt_to_radiance(bt, wavelength_um: float):
+    """Planck spectral radiance (W/m^2/sr/um) for a given BT (K) and wavelength."""
+    with np.errstate(invalid="ignore", divide="ignore", over="ignore"):
+        return C1 / (wavelength_um ** 5 * (np.exp(C2 / (wavelength_um * bt)) - 1))
 
 
 def read_modis_l1b(hdf_path: Path) -> dict:
@@ -111,6 +142,7 @@ def read_modis_l1b(hdf_path: Path) -> dict:
 
     band21 = calibrate(BAND21_IDX, BAND21_LAMBDA)
     band22 = calibrate(BAND22_IDX, BAND22_LAMBDA)
+    band31 = calibrate(BAND31_IDX, BAND31_LAMBDA)  # E3: TIR for NTI
 
     # --- Read coarse geolocation (5km grid embedded in MOD021KM) ---
     lat_coarse = sd.select("Latitude").get().astype(np.float32)   # (406, 271) for 2030x1354
@@ -123,7 +155,7 @@ def read_modis_l1b(hdf_path: Path) -> dict:
     lat = _interp_geo(lat_coarse, n_lines, n_samples)
     lon = _interp_geo(lon_coarse, n_lines, n_samples)
 
-    return {"band21": band21, "band22": band22, "lat": lat, "lon": lon}
+    return {"band21": band21, "band22": band22, "band31": band31, "lat": lat, "lon": lon}
 
 
 def _interp_geo(coarse: np.ndarray, target_lines: int, target_samples: int) -> np.ndarray:
@@ -191,8 +223,17 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     bt22 = radiance_to_bt(rad22, BAND22_LAMBDA)
     bt_mir = np.where(np.isnan(bt21), bt22, bt21)
 
+    # E3: TIR Band 31 for NTI. Keep the MIR radiance we'll use for NTI aligned
+    # with whichever band provided bt_mir (21 primary, 22 fallback).
+    rad31 = data["band31"]
+    bt31 = radiance_to_bt(rad31, BAND31_LAMBDA)
+    rad_mir_for_nti = np.where(np.isnan(rad21), rad22, rad21)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        nti = (rad_mir_for_nti - rad31) / (rad_mir_for_nti + rad31)
+
     # E2a: exclude cold-cloud contaminated pixels from the background annulus.
-    bg_vals = bt_mir[bg_mask & ~np.isnan(bt_mir) & (bt_mir > CLOUD_MASK_BT_K)]
+    bg_cloud_free = bg_mask & ~np.isnan(bt_mir) & (bt_mir > CLOUD_MASK_BT_K)
+    bg_vals = bt_mir[bg_cloud_free]
     if len(bg_vals) < 10:
         return None
 
@@ -239,10 +280,36 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         local_threshold = float("nan")
         effective_threshold = t_bg + threshold
 
-    # Find all anomalous pixels with their 2D indices
-    hot_mask_2d = roi_bt_full > effective_threshold
+    # E3: NTI background statistics on the same cloud-masked annulus.
+    # We also require band 31 to be valid on those pixels.
+    nti_bg_vals = nti[bg_cloud_free & ~np.isnan(nti)]
+    if len(nti_bg_vals) >= 10:
+        nti_bg = float(np.median(nti_bg_vals))
+        nti_std = float(np.std(nti_bg_vals))
+    else:
+        nti_bg = float("nan")
+        nti_std = float("nan")
+
+    # Find all anomalous pixels with their 2D indices.
+    # Dual path (Coppola 2015 / MIROVA Test 1, analogous to process_viirs.py NTI):
+    #   A) BT path: existing E2-capped local+bg threshold (conservative).
+    #   B) NTI path: MIROVA fixed floor K1_NIGHT=-0.8 with a BT sanity margin
+    #      so we never trigger on pure noise. This rescues subpixel hotspots
+    #      at andean volcanoes where sigma_bg inflates the BT threshold beyond
+    #      reach but NTI still responds cleanly to even a 1-2% hot fraction.
+    bt_path_hot = roi_mask & ~np.isnan(bt_mir) & (bt_mir > effective_threshold)
+    nti_path_hot = (
+        roi_mask
+        & ~np.isnan(nti)
+        & ~np.isnan(bt_mir)
+        & (nti > NTI_K1_NIGHT)
+        & (bt_mir > (t_bg + NTI_BT_SANITY_K))
+    )
+    hot_mask_2d = bt_path_hot | nti_path_hot
     hot_rows, hot_cols = np.where(hot_mask_2d)
     n_anomalous = len(hot_rows)
+    n_bt_path = int(np.sum(bt_path_hot))
+    n_nti_path = int(np.sum(nti_path_hot))
 
     vrp_mw = 0.0
     hotspot_lat = None
@@ -283,6 +350,10 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
 
     valid_roi = roi_bt_full[~np.isnan(roi_bt_full)]
     t_max = float(np.max(valid_roi)) if len(valid_roi) else float("nan")
+
+    # E3 diag: max NTI inside the ROI
+    roi_nti = np.where(roi_mask & ~np.isnan(nti), nti, np.nan)
+    nti_max = float(np.nanmax(roi_nti)) if np.any(~np.isnan(roi_nti)) else float("nan")
 
     # Diagnostic (session 6): location of the hottest pixel in the ROI.
     # Useful when n_anomalous_pixels=0 to understand whether the hottest
@@ -331,6 +402,12 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "diag_t_max_dist_km": round(t_max_dist_km_diag, 2) if not (t_max_dist_km_diag != t_max_dist_km_diag) else None,
         "diag_roi_p95_k": round(roi_p95, 2) if not (roi_p95 != roi_p95) else None,
         "diag_eff_threshold_k": round(effective_threshold, 2),
+        # E3 NTI diagnostics
+        "diag_nti_bg": round(nti_bg, 4) if not (nti_bg != nti_bg) else None,
+        "diag_nti_std": round(nti_std, 4) if not (nti_std != nti_std) else None,
+        "diag_nti_max": round(nti_max, 4) if not (nti_max != nti_max) else None,
+        "diag_n_bt_path": n_bt_path,
+        "diag_n_nti_path": n_nti_path,
         "sensor": "MODIS_TERRA" if "MOD0" in hdf_path.name else "MODIS_AQUA",
         "granule": hdf_path.name,
         "datetime_utc": _parse_datetime(hdf_path.name),
