@@ -12,6 +12,30 @@ Repo: https://github.com/MendozaVolcanic/VRP-chile
 - Constantes físicas **exactas** de los papers, nunca aproximar. Citar paper en cualquier cambio metodológico.
 - Si dudas de un método con datos geofísicos, **dilo** — nunca adivines.
 
+## Regla de comunicación con Nicolás
+**Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
+decisiones de umbrales, o cambios metodológicos:
+
+1. **Primero el fenómeno físico**: qué está pasando realmente en el volcán, el
+   pixel del satélite, la atmósfera, el background. Describirlo en lenguaje natural
+   — "el cráter mantiene calor residual después del atardecer y produce un gradiente
+   térmico local", "la nube fina alta enfría el background porque irradia desde
+   -40°C", "el pixel VIIRS de 375m mezcla roca caliente con nieve y el promedio queda
+   en valores intermedios".
+2. **Después el mecanismo del pipeline**: cómo el código interpreta ese fenómeno,
+   qué umbrales lo filtran, qué paths lo capturan. Explicar por qué esa elección de
+   código tiene o no tiene sentido frente al fenómeno físico.
+3. **Recién al final, si aplica, los números y fórmulas**, y solo los estrictamente
+   necesarios para apoyar el razonamiento. Nunca empezar por la fórmula.
+4. **El "por qué" antes del "cómo"**. Si hay un trade-off científico (por ejemplo
+   falsos positivos vs falsos negativos en monitoreo volcánico), nombrarlo
+   explícitamente y decir cuál es el costo de cada lado.
+5. **Tablas comparativas y métricas agregadas sí**, son útiles. Pero las derivaciones
+   matemáticas largas, constantes de Planck, conversiones de radiancia — esas viven
+   en los papers y en los comentarios de código, no en la conversación con Nicolás.
+6. **Nunca adivinar** un valor físico o un dato instrumental. Si no sabés el ΔT real
+   de un volcán, dilo y andá a mirarlo antes de proponer un umbral.
+
 ## Arquitectura
 - `pipeline/`: fetch.py (earthaccess), process_modis.py, process_viirs.py, process_viirs_mod.py, store.py, scan_geometry.py
 - `frontend/index.html` (Chart.js + Leaflet, GitHub Pages)
