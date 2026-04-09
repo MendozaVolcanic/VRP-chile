@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VRP Chile — Monitoreo Volcánico</title>
+  <title>VRP Chile — LABORATORIO (experimental)</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -236,10 +236,16 @@
 </head>
 <body>
 
+<div style="background:#b71c1c;color:#fff;padding:6px 24px;text-align:center;font-size:0.9rem;font-weight:600;letter-spacing:0.5px;">
+  ⚠ MODO LABORATORIO — NO OPERACIONAL.
+  Esta página usa umbrales experimentales y puede contener falsos positivos.
+  Para uso operacional ir al <a href="../" style="color:#fff;text-decoration:underline;">dashboard principal</a>.
+</div>
+
 <header>
   <div>
-    <div class="logo">VRP <span>Chile</span></div>
-    <div class="header-sub">Monitoreo Volcánico · MODIS + VIIRS · NASA Earthdata</div>
+    <div class="logo">VRP <span>Chile</span> · LAB</div>
+    <div class="header-sub">Perfil experimental · MODIS + VIIRS · NASA Earthdata</div>
   </div>
   <div class="header-right">
     <div class="status-label">
@@ -248,7 +254,6 @@
     </div>
     <span id="utc-clock"></span>
     <span id="updated-label"></span>
-    <a href="experimental/" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">🧪 Laboratorio</a>
   </div>
 </header>
 
@@ -382,8 +387,8 @@ async function fetchJSON(url) {
 
 async function loadVolcano(v) {
   const [data, mirova] = await Promise.all([
-    fetchJSON("data/mirova_equivalent/" + v.name + ".json"),
-    v.hasMirova ? fetchJSON("data/mirova/" + v.name + ".json") : Promise.resolve(null),
+    fetchJSON("../data/experimental/" + v.name + ".json"),
+    v.hasMirova ? fetchJSON("../data/mirova/" + v.name + ".json") : Promise.resolve(null),
   ]);
   allData[v.name] = {
     records:       data?.records   || [],

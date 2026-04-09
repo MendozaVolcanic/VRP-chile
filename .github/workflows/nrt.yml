@@ -1,11 +1,22 @@
-name: NRT VRP Pipeline
+name: NRT VRP Pipeline (both profiles)
 
 on:
-  schedule:
-    # Run every 6 hours: 00:00, 06:00, 12:00, 18:00 UTC
-    - cron: "0 0,6,12,18 * * *"
+  # Schedule PAUSED during fork migration (session 9 - 2026-04-09).
+  # Re-enable after the profile refactor is validated on both profiles
+  # and the 11 MIROVA-reference volcanoes pass the operational audit.
+  # schedule:
+  #   - cron: "0 0,6,12,18 * * *"
   workflow_dispatch:
     inputs:
+      profile:
+        description: "Which profile to run (default: both)"
+        required: false
+        default: "both"
+        type: choice
+        options:
+          - both
+          - mirova_equivalent
+          - experimental
       volcano:
         description: "Volcano name (leave empty for all)"
         required: false
@@ -53,12 +64,26 @@ jobs:
           pip install pyhdf
           pip install earthaccess numpy h5py scipy pyyaml
 
-      - name: Run VRP pipeline
+      - name: Run VRP pipeline — mirova_equivalent profile
+        if: ${{ github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'mirova_equivalent' }}
         env:
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
         run: |
-          python scripts/run_pipeline.py \
+          python scripts/run_pipeline.py --profile mirova_equivalent \
+            ${{ github.event.inputs.volcano != '' && format('--volcano {0}', github.event.inputs.volcano) || '' }} \
+            ${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }} \
+            ${{ github.event.inputs.start != '' && format('--start {0}', github.event.inputs.start) || '' }} \
+            ${{ github.event.inputs.end != '' && format('--end {0}', github.event.inputs.end) || '' }} \
+            ${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }}
+
+      - name: Run VRP pipeline — experimental profile
+        if: ${{ github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'experimental' }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        run: |
+          python scripts/run_pipeline.py --profile experimental \
             ${{ github.event.inputs.volcano != '' && format('--volcano {0}', github.event.inputs.volcano) || '' }} \
             ${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }} \
             ${{ github.event.inputs.start != '' && format('--start {0}', github.event.inputs.start) || '' }} \
@@ -69,21 +94,11 @@ jobs:
         run: |
           git config user.name  "vrp-bot"
           git config user.email "vrp-bot@github-actions"
-          git add data/*.json data/mirova/*.json
+          git add data/mirova_equivalent/*.json data/experimental/*.json data/mirova/*.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "NRT update $(date -u '+%Y-%m-%d %H:%M UTC')"
           # Pull with rebase to handle concurrent workflow pushes
           git pull --rebase origin main || true
           git push
-
-      - name: Deploy frontend to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./frontend
-          keep_files: false
-          # Copy data/ into the published site so fetch('../data/...') works
-          # We use a custom publish script instead
-        if: false  # placeholder — see next step
 
       - name: Prepare Pages artifact
         run: |

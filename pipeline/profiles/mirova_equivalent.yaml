@@ -1,0 +1,57 @@
+# VRP-Chile — profile: mirova_equivalent
+#
+# Operational profile. Reproduces the MIROVA detection philosophy: stable,
+# predictable, conservative. Thresholds match Coppola 2015 + local Tier A
+# calibration (Lascar session 9). This is the profile the SERNAGEOMIN
+# geologist reads by default.
+#
+# NOTE: during the session 9 fork migration this profile is BYTE-IDENTICAL
+# to experimental.yaml. Divergence only happens after the 11 volcanoes are
+# fully validated against MIROVA.
+
+profile: mirova_equivalent
+description: >
+  MIROVA-equivalent operational profile. Same detection logic and thresholds
+  we had before the fork, now driven from YAML instead of hardcoded.
+
+# --- Detection thresholds ---
+# Applied inside process_modis.py / process_viirs.py / process_viirs_mod.py
+thresholds:
+  # Eruption-scale MIR anomaly floor (pixel BT must exceed t_bg + this)
+  anomaly_threshold_k: 5.0
+  # TIR (I05) floor for VIIRS TIRVolcH secondary path
+  tir_threshold_k: 0.5
+  # Sigma multipliers for the background-noise floor (effective threshold
+  # is max(fixed_floor, n_sigma * sigma_bg))
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  # Vent-scale path — permissive threshold applied only within vent_radius_km
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  # Coppola 2015 Test 1 NTI-path (F1, session 9)
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  # MODIS extras
+  cloud_mask_bt_k: 260.0
+  max_sigma_component_k: 7.0
+
+# --- Background annulus geometry (km) ---
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+# --- Detection paths ---
+paths:
+  enable_eruption_path: true
+  enable_vent_path: true
+
+# --- Sensor activation ---
+# true = process granules from this sensor in this profile.
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+# --- Output location ---
+output:
+  data_subdir: mirova_equivalent

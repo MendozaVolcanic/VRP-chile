@@ -42,7 +42,19 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+# --- IMPORTANT: parse --profile BEFORE importing pipeline modules ---
+# pipeline.profile reads $VRP_PROFILE at import time. If we let the normal
+# argparse run after imports, the processors would already be locked to
+# whatever the default profile was.
+_early = argparse.ArgumentParser(add_help=False)
+_early.add_argument("--profile", default=None,
+                    choices=["mirova_equivalent", "experimental"])
+_early_args, _ = _early.parse_known_args()
+if _early_args.profile:
+    os.environ["VRP_PROFILE"] = _early_args.profile
+
 from pipeline import fetch, process_modis, process_viirs, process_viirs_mod, store
+from pipeline import profile as vrp_profile
 
 
 TMP_DIR = Path(__file__).parent.parent / "tmp"
@@ -139,6 +151,15 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
 
         for platform, paths in granule_paths.items():
             if not paths:
+                continue
+
+            # Profile-gated sensor filter. Each processor can be disabled in
+            # the active YAML profile without changing calling code.
+            if "MODIS" in platform and not vrp_profile.SENSOR_MODIS:
+                continue
+            if platform in ("VIIRS_SNPP", "VIIRS_NOAA20") and not vrp_profile.SENSOR_VIIRS_375:
+                continue
+            if platform in ("VIIRS_SNPP_750", "VIIRS_NOAA20_750") and not vrp_profile.SENSOR_VIIRS_750:
                 continue
 
             # Separate L1B and geolocation files
@@ -273,6 +294,12 @@ def date_range(start: datetime, end: datetime):
 
 def main():
     parser = argparse.ArgumentParser(description="VRP Chile pipeline")
+    parser.add_argument("--profile", default=None,
+                        choices=["mirova_equivalent", "experimental"],
+                        help="Detection profile (default: mirova_equivalent). "
+                             "Selects thresholds, paths, sensors and output "
+                             "data subdirectory. Already consumed before "
+                             "imports — this arg exists here only for --help.")
     parser.add_argument("--volcano", help="Volcano name (default: all active)")
     parser.add_argument("--date", help="Single date YYYY-MM-DD (default: yesterday)")
     parser.add_argument("--start", help="Start date YYYY-MM-DD for range")
@@ -284,6 +311,8 @@ def main():
     parser.add_argument("--overwrite", action="store_true",
                         help="Overwrite existing records (use when reprocessing with corrected algorithms)")
     args = parser.parse_args()
+
+    print(f"=== {vrp_profile.describe()} ===")
 
     volcanoes = load_volcanoes(args.volcano)
     if not volcanoes:

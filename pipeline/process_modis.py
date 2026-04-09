@@ -49,47 +49,30 @@ NADIR_PIXEL_AREA_M2 = 1e6  # 1 km^2 at nadir
 # Wooster MIR radiance coefficient (Coppola 2015, Eq.7)
 WOOSTER_COEFF = 18.9
 
-ANOMALY_THRESHOLD_K = 5.0
-N_SIGMA = 3.0
-BG_INNER_KM = 5.0
-BG_OUTER_KM = 25.0
-
+# --- All detection thresholds come from the active profile ---
+# See pipeline/profiles/*.yaml for the documented values. Profile is
+# selected via $VRP_PROFILE (set by run_pipeline.py --profile).
+#
 # E3 — NTI (Normalized Thermal Index, Coppola 2015) for MODIS.
 # Analogous to the dual criteria already used in process_viirs.py on I04/I05.
 # NTI = (L_MIR - L_TIR) / (L_MIR + L_TIR), computed per-pixel from Band 21
-# (MIR ~3.93 um) and Band 31 (TIR ~11 um).
+# (MIR ~3.93 um) and Band 31 (TIR ~11 um). A pixel is flagged hot if EITHER
+# the BT-branch passes OR the NTI-branch passes (Coppola 2015 Test 1).
+# See ROOT_CAUSE_S9.md RF4/RF6 and experiments/F1_validation.md.
 #
-# Detection logic: a pixel is considered hot if EITHER
-#   (A) it passes the existing BT threshold (with E2 cloud mask + sigma cap), OR
-#   (B) it passes MIROVA "Test 1": NTI > K1_NIGHT with a small BT sanity floor
-#       so we don't trigger on pure noise or edge-of-granule artifacts.
-#
-# Path (B) is what rescues Lascar's 2-10 MW bucket: at high-altitude andean
-# volcanoes the BT-based path is structurally broken because sigma_bg inflates
-# the threshold beyond reach, but a subpixel hotspot with even 1-2% hot
-# fraction produces NTI > -0.8 trivially.
-#
-# K1_NIGHT from Coppola 2015 Table 1 (night pass). We don't implement dNTI/dETI
-# (would need full spatial-contrast machinery) — just the fixed Test-1 floor.
-NTI_K1_NIGHT = -0.8
-NTI_BT_SANITY_K = 3.0  # pixel must also be at least 3 K above t_bg
-
-# E2a — Cloud mask for the background annulus. High cold clouds routinely
-# contaminate the 5-25 km annulus at high-altitude volcanoes (Lascar 5592 m),
-# pulling t_bg far below physical (observed down to 225 K = -48 C on the
-# Atacama desert floor) and inflating sigma_bg by mixing hot ground with
-# cold cloud tops. Same strategy as process_viirs.py. See
-# experiments/04_session6_final_findings.md.
-CLOUD_MASK_BT_K = 260.0
-
-# E2b' — Cap on the sigma component of the detection threshold. At
-# high-altitude volcanoes the 5-25 km annulus sweeps valleys, ridges and
-# plateau terrain with natural dT ~10-15 K. Uncapped 3*sigma turns any
-# legit 7 K vent anomaly into a rejection. 7 K cap chosen empirically from
-# Lascar Feb 2026 diag data: allows detection when sigma<6 K (clean
-# records, ~70% of passes) while still rejecting residual cloud streaks
-# where sigma>10 K.
-MAX_SIGMA_COMPONENT_K = 7.0
+# E2a — Cloud mask for the background annulus (CLOUD_MASK_BT_K).
+# E2b' — Sigma cap for detection threshold (MAX_SIGMA_COMPONENT_K).
+from pipeline.profile import (
+    ANOMALY_THRESHOLD_K,
+    N_SIGMA,
+    BG_INNER_KM,
+    BG_OUTER_KM,
+    NTI_K1_NIGHT,
+    NTI_BT_SANITY_K,
+    CLOUD_MASK_BT_K,
+    MAX_SIGMA_COMPONENT_K,
+    ENABLE_ERUPTION_PATH,
+)
 
 # Indices of bands 21 and 22 within EV_1KM_Emissive
 # Band_1KM_Emissive order: [20,21,22,23,24,25,27,28,29,30,31,32,33,34,35,36]

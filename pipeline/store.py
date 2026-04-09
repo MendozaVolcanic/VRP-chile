@@ -25,8 +25,11 @@ import math
 from pathlib import Path
 from datetime import datetime, timezone
 
+from pipeline.profile import DATA_SUBDIR
 
-DATA_DIR = Path(__file__).parent.parent / "data"
+
+# Per-profile data directory: data/mirova_equivalent/ or data/experimental/
+DATA_DIR = Path(__file__).parent.parent / "data" / DATA_SUBDIR
 
 
 def _solar_elevation(lat: float, lon: float, dt_utc: datetime) -> float:
@@ -53,7 +56,7 @@ def _load(volcano_name: str) -> dict:
 
 
 def _save(volcano_name: str, store: dict):
-    DATA_DIR.mkdir(exist_ok=True)
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
     store["updated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     path = DATA_DIR / f"{volcano_name}.json"
     with open(path, "w") as f:

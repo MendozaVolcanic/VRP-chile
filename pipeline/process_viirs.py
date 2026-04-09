@@ -51,30 +51,23 @@ I04_LAMBDA = 3.740
 # Flag DN values (from file attributes)
 FLAG_DNS = {65532, 65533, 65534, 65535}  # Missing_EV, Bowtie_Deleted, Cal_Fail, Fill
 
-# --- Thresholds for eruption-scale detection (full radius_km) ---
-# Appropriate for lava flows, active eruptions, high-temperature anomalies
-ANOMALY_THRESHOLD_K = 5.0    # MIR channel (I04)
-TIR_THRESHOLD_K = 0.5        # TIR channel (I05), per TIRVolcH
-N_SIGMA_MIR = 3.0
-N_SIGMA_TIR = 4.0   # TIR is noisier due to surface/cloud variability
-
-# --- Thresholds for vent-scale detection (vent_radius_km, VIIRS only) ---
-# Designed to detect weak fumarolic/hydrothermal anomalies (~1K above bg)
-# Uses tight spatial search around the known vent to suppress terrain FP
-VENT_THRESHOLD_K = 1.0       # MIR channel, low fixed minimum
-N_SIGMA_VENT = 2.0           # Less conservative — small radius suppresses FP
-
-BG_INNER_KM = 5.0
-BG_OUTER_KM = 25.0
-
-# --- F1 (S9): NTI dual-path detection (Coppola 2015 Test 1) ---
-# Mirrors process_modis.py constants. A pixel passing the NTI floor with
-# even a small BT margin above background is rescued, even when sigma_bg
-# inflates the BT branch threshold beyond reach (cloud-warmed background
-# at Villarrica, orographic heterogeneity at Tupungatito; see L7.2,
-# ROOT_CAUSE_S9.md RF4/RF6).
-NTI_K1_NIGHT = -0.8       # Coppola 2015 Table 1, night-pass NTI floor
-NTI_BT_SANITY_K = 3.0     # pixel must also be at least 3 K above t_bg
+# --- All detection thresholds and path toggles come from the active profile ---
+# Profile is selected via $VRP_PROFILE (set by run_pipeline.py --profile).
+# Values documented in pipeline/profiles/*.yaml.
+from pipeline.profile import (
+    ANOMALY_THRESHOLD_K,
+    TIR_THRESHOLD_K,
+    N_SIGMA_MIR,
+    N_SIGMA_TIR,
+    VENT_THRESHOLD_K,
+    N_SIGMA_VENT,
+    BG_INNER_KM,
+    BG_OUTER_KM,
+    NTI_K1_NIGHT,
+    NTI_BT_SANITY_K,
+    ENABLE_VENT_PATH,
+    ENABLE_ERUPTION_PATH,
+)
 
 
 def bt_to_spectral_radiance(bt: np.ndarray, wavelength_um: float) -> np.ndarray:
@@ -381,7 +374,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # and is consistent with the eruption-scale VRP calculation.
     vrp_vent_mw = 0.0
     n_vent_pixels = 0
-    if (vent_lat is not None and vent_lon is not None
+    if (ENABLE_VENT_PATH
+            and vent_lat is not None and vent_lon is not None
             and "I04" in bands and not np.isnan(t_bg_i04)):
         vent_dist = haversine_km(vent_lat, vent_lon, lat, lon)
         vent_roi_mask = vent_dist <= vent_radius_km

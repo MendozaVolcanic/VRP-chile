@@ -40,10 +40,15 @@ WOOSTER_COEFF = 18.9
 
 FLAG_DNS = {65532, 65533, 65534, 65535}
 
-ANOMALY_THRESHOLD_K = 5.0
-N_SIGMA_MIR = 3.0
-BG_INNER_KM = 5.0
-BG_OUTER_KM = 25.0
+# --- All detection thresholds come from the active profile ---
+# See pipeline/profiles/*.yaml. Profile selected via $VRP_PROFILE.
+from pipeline.profile import (
+    ANOMALY_THRESHOLD_K,
+    N_SIGMA_MIR,
+    BG_INNER_KM,
+    BG_OUTER_KM,
+    ENABLE_ERUPTION_PATH,
+)
 
 # M13 band index within VNP02MOD observation_data
 # M-bands: M01..M16 — M13 is at index 12 (0-based)

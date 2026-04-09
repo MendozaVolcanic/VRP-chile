@@ -1,0 +1,44 @@
+# VRP-Chile — profile: experimental
+#
+# Laboratory profile. Designed to probe weaker signals and try new detection
+# methods without affecting the operational product. During session 9 this
+# profile is BYTE-IDENTICAL to mirova_equivalent.yaml — the fork is purely
+# architectural for now.
+#
+# Divergence policy: do NOT tune anything here until the 11 MIROVA-reference
+# volcanoes are fully validated on the operational profile. When divergence
+# starts, document every change in experiments/experimental_tuning.md with
+# a before/after audit.
+
+profile: experimental
+description: >
+  Experimental laboratory profile. Same as mirova_equivalent today; will
+  diverge after the 11 volcanoes are validated.
+
+thresholds:
+  anomaly_threshold_k: 5.0
+  tir_threshold_k: 0.5
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  cloud_mask_bt_k: 260.0
+  max_sigma_component_k: 7.0
+
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+paths:
+  enable_eruption_path: true
+  enable_vent_path: true
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: experimental
