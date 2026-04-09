@@ -1,0 +1,63 @@
+name: Deploy GitHub Pages
+
+# Standalone Pages deploy. Decoupled from the NRT pipeline so frontend
+# and data changes ship to the live site even when the cron is paused
+# (e.g. during the session 9 fork migration).
+#
+# Triggers:
+#   - Direct push to main that touches frontend/ or data/
+#   - workflow_dispatch (manual fire from the Actions tab)
+#   - workflow_run after the NRT pipeline finishes successfully
+#     (because GITHUB_TOKEN-authored commits do not re-trigger `push`)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - "data/**"
+      - ".github/workflows/pages-deploy.yml"
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["NRT VRP Pipeline (both profiles)"]
+    types: [completed]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deploy; cancel in-progress runs.
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # Skip the workflow_run trigger if the upstream run failed.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p _site
+          cp -r frontend/. _site/
+          cp -r data _site/data
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

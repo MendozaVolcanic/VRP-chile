@@ -44,8 +44,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pages: write
-      id-token: write
 
     steps:
       - name: Checkout repository
@@ -100,27 +98,6 @@ jobs:
           git pull --rebase origin main || true
           git push
 
-      - name: Prepare Pages artifact
-        run: |
-          mkdir -p _site
-          cp -r frontend/. _site/
-          cp -r data _site/data
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-
-  deploy-pages:
-    needs: process
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      # Pages deploy moved to .github/workflows/pages-deploy.yml
+      # That workflow is triggered by `workflow_run` after this one finishes,
+      # so the live site still updates after every NRT run.
