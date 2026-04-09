@@ -67,6 +67,15 @@ N_SIGMA_VENT = 2.0           # Less conservative — small radius suppresses FP
 BG_INNER_KM = 5.0
 BG_OUTER_KM = 25.0
 
+# --- F1 (S9): NTI dual-path detection (Coppola 2015 Test 1) ---
+# Mirrors process_modis.py constants. A pixel passing the NTI floor with
+# even a small BT margin above background is rescued, even when sigma_bg
+# inflates the BT branch threshold beyond reach (cloud-warmed background
+# at Villarrica, orographic heterogeneity at Tupungatito; see L7.2,
+# ROOT_CAUSE_S9.md RF4/RF6).
+NTI_K1_NIGHT = -0.8       # Coppola 2015 Table 1, night-pass NTI floor
+NTI_BT_SANITY_K = 3.0     # pixel must also be at least 3 K above t_bg
+
 
 def bt_to_spectral_radiance(bt: np.ndarray, wavelength_um: float) -> np.ndarray:
     """Convert brightness temperature (K) to spectral radiance (W/m²/sr/µm) via Planck."""
@@ -260,29 +269,23 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 n_nti_anomalous = int(np.sum(roi_nti_valid > nti_threshold))
 
     # --- MIR channel I04 (3.74 um) — high-temperature features ---
-    # Detection uses DUAL criteria (MIROVA-style):
-    #   1. MIR brightness temperature > background + threshold (classic)
-    #   2. NTI > NTI_background + NTI_threshold (contextual, cancels terrain effects)
-    # A pixel must pass BOTH to be counted as truly anomalous.
-    # This eliminates false positives from topographic thermal gradients
-    # (e.g., Lascar at 5592m surrounded by warmer low-altitude terrain).
+    # F1 (S9): Dual-PATH detection (logical OR), mirroring process_modis.py.
+    # A pixel is hot if EITHER:
+    #   (A) BT path: bt > t_bg + max(ANOMALY_THRESHOLD_K, N_SIGMA*std_bg)
+    #   (B) NTI path: nti > NTI_K1_NIGHT  AND  bt > t_bg + NTI_BT_SANITY_K
+    # The previous code AND-ed BT and NTI, which killed any pixel where
+    # std_bg was inflated by clouds/orography even when NTI was clearly
+    # anomalous (RF4 Villarrica, RF6 Tupungatito; see L7.2 / ROOT_CAUSE_S9).
     vrp_mir_mw = 0.0
     t_bg_i04 = float("nan")
     t_max_i04 = float("nan")
     n_anomalous = 0
+    n_bt_path = 0
+    n_nti_path = 0
     hotspot_lat = None
     hotspot_lon = None
     hotspot_dist_km = None
     anomaly_pixels = []   # All anomalous pixels with location + per-pixel VRP
-
-    # Pre-compute NTI mask for dual-criteria filtering
-    nti_anomaly_mask = None
-    if "I04" in bands and "I05" in bands and not np.isnan(nti_bg):
-        bg_nti_vals = nti[bg_mask & ~np.isnan(nti)]
-        if len(bg_nti_vals) >= 10:
-            nti_std = float(np.std(bg_nti_vals))
-            nti_thresh = nti_bg + max(0.005, N_SIGMA_MIR * nti_std)
-            nti_anomaly_mask = roi_mask & ~np.isnan(nti) & (nti > nti_thresh)
 
     if "I04" in bands:
         bt = bands["I04"]
@@ -292,14 +295,27 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             std_bg = float(np.std(bg_vals))
             threshold_mir = max(ANOMALY_THRESHOLD_K, N_SIGMA_MIR * std_bg)
 
-            # Find pixels exceeding MIR temperature threshold
             roi_bt_full = np.where(roi_mask & ~np.isnan(bt), bt, np.nan)
-            hot_mask_2d = roi_bt_full > (t_bg_i04 + threshold_mir)
 
-            # Apply NTI dual-criteria: pixel must also be NTI-anomalous
-            # This is critical for volcanoes with strong topographic gradients
-            if nti_anomaly_mask is not None:
-                hot_mask_2d = hot_mask_2d & nti_anomaly_mask
+            # Path A — BT path (existing classic threshold)
+            bt_path_hot = roi_mask & ~np.isnan(bt) & (bt > (t_bg_i04 + threshold_mir))
+
+            # Path B — NTI path (Coppola 2015 Test 1, night).
+            # Only valid if NTI was successfully computed (needs both I04+I05).
+            if "I05" in bands and not np.isnan(nti_bg):
+                nti_path_hot = (
+                    roi_mask
+                    & ~np.isnan(nti)
+                    & ~np.isnan(bt)
+                    & (nti > NTI_K1_NIGHT)
+                    & (bt > (t_bg_i04 + NTI_BT_SANITY_K))
+                )
+            else:
+                nti_path_hot = np.zeros_like(bt_path_hot)
+
+            hot_mask_2d = bt_path_hot | nti_path_hot
+            n_bt_path = int(np.sum(bt_path_hot))
+            n_nti_path = int(np.sum(nti_path_hot))
 
             hot_rows, hot_cols = np.where(hot_mask_2d)
             n_anomalous = len(hot_rows)
@@ -395,6 +411,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "vrp_tir_mw": round(vrp_tir_mw, 3),
         "vrp_vent_mw": round(vrp_vent_mw, 3),
         "n_anomalous_pixels": n_anomalous,
+        "n_bt_path": n_bt_path,
+        "n_nti_path": n_nti_path,
         "n_vent_pixels": n_vent_pixels,
         "n_cloud_masked": n_cloud_masked,
         "nti_max": round(nti_max, 6) if not np.isnan(nti_max) else None,
