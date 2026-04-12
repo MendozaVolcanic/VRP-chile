@@ -97,6 +97,91 @@ at this lesson.
 
 ---
 
+## Session 10 (2026-04-12)
+
+### L10.1 — Vent-path produces sensor-dependent false positive rates
+
+**Context**: RF1 (vent_path FP) was the top open issue from Session 9.
+Experiment `12_rf1_vent_fp_diagnostic.py` measured vent-only detection rates
+on active volcanoes (Tier A+B) vs control volcanoes (Copahue, Llaima,
+NevadosDeChillan — zero MIROVA refs).
+
+**Result**: signal-to-noise ratio (active/control vent-only rate) varies by sensor:
+
+| Sensor   | Active rate | Control rate | S/N ratio |
+|----------|------------|-------------|-----------|
+| VIIRS375 | 20%        | 4.7%        | 4.3×      |
+| VIIRS750 | 22%        | 4.4%        | 5.0×      |
+| MODIS    | 14%        | 5.6%        | 2.5×      |
+
+MODIS 1 km pixel dilutes sub-pixel thermal anomalies, making the vent-path
+(1K threshold) almost indistinguishable from noise. VIIRS (375/750m) has
+enough spatial resolution to actually resolve weak crater signals.
+
+**Fix**: `enable_vent_path_modis: false` in mirova_equivalent profile.
+MODIS eruption-path remains active. Experimental profile keeps everything.
+
+**Rule**: when a detection path has different physics by sensor (pixel size
+fundamentally changes the signal-to-noise), thresholds or enables must be
+sensor-specific, not global.
+
+### L10.2 — MIROVA reference gaps are physical, not scraper artifacts
+
+**Context**: the consolidado CSV has ZERO MODIS references for 6 of 8
+calibration volcanoes, and zero VIIRS750 references for 4 of 8. This
+initially looked like a scraper bug but is actually physical: MIROVA
+itself doesn't detect weak volcanoes at coarser resolution.
+
+**Consequence**: any detection our pipeline makes in those sensor×volcano
+cells is automatically an FP against the reference — even if the signal
+is real. This inflates FP counts and deflates precision unfairly.
+
+**Rule**: when computing per-sensor metrics, flag cells where `ref=0` as
+"no reference" rather than "perfect FP rate." OCR data partially fills
+these gaps and should always be used for reclassification.
+
+### L10.3 — NTI dual-PATH is essential for cloudy/cold conditions
+
+**Context**: VIIRS 375m (`process_viirs.py`) had NTI dual-PATH since F1
+(Session 9). VIIRS 750m (`process_viirs_mod.py`) was missing it — only
+had BT-based detection. This meant VIIRS750 missed volcanic signals on
+cold/cloudy nights where the absolute BT was depressed but NTI (which
+normalizes by TIR) still showed an anomaly.
+
+**Fix**: ported NTI computation (M15 TIR band) and dual-PATH OR logic to
+`process_viirs_mod.py`. Now both VIIRS processors have identical detection
+philosophy: a pixel is hot if `BT > threshold` OR `NTI > nti_k1_night`.
+
+**Rule**: when adding a detection method to one sensor processor, check
+if the same physics applies to all sensor processors. NTI works for any
+sensor with co-located MIR+TIR bands.
+
+### L10.4 — Llaima: vent-path noise on dormant volcanic edifice
+
+**Context**: Llaima showed 121 detections (48 MODIS, 44 VIIRS375, 29
+VIIRS750) with ZERO MIROVA references. Investigation (`13_llaima_investigation.py`)
+revealed:
+
+- 93% are vent-only (n_anomalous_pixels=0)
+- VIIRS375 median VRP = 0.033 MW (noise-level)
+- Temporally uniform (51% of days) — not episodic
+- Repeating VRP values in MODIS (0.328 MW × 7 occurrences)
+- 9 eruption-path records all >3.6 km from crater (cloud artifacts)
+
+**Root cause**: Llaima's crater maintains a mild geothermal gradient (~0.5-1K
+above regional background). The vent-path 1K threshold is right at the noise
+floor for this gradient, triggering on any clear night. This is not volcanic
+activity — it's the baseline thermal state of an active-but-quiescent edifice.
+
+MIROVA presumably absorbs this baseline gradient in its own background model,
+which is why it publishes nothing.
+
+**Rule**: vent-path detections at <0.1 MW on a dormant volcano with uniform
+temporal distribution are not volcanic signals. Need a minimum VRP floor or
+temporal clustering filter for future versions.
+
+---
+
 ## Session 7 (2026-04-08)
 
 ### L7.1 — MIROVA y Aveni publicados NO tienen validación andina
