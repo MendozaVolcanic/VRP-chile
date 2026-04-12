@@ -34,7 +34,7 @@ REPO = Path(__file__).parent.parent
 # All tiering is stable (no volcano changes tier). The old file is preserved
 # on disk at the same parent directory if a historical comparison is needed.
 SOURCE = Path(
-    r"C:\Users\nmend\OneDrive\Escritorio\claude\Automatizacion web\Automatizacion web\Mirova-v1\monitoreo_satelital\registro_vrp_consolidado al 08042026.csv"
+    r"C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\10.04.2026 registro_vrp_consolidado.csv"
 )
 
 

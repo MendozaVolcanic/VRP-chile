@@ -72,6 +72,9 @@ BG_OUTER_KM: float = float(_bg["outer_km"])
 _p = _cfg["paths"]
 ENABLE_ERUPTION_PATH: bool = bool(_p["enable_eruption_path"])
 ENABLE_VENT_PATH: bool = bool(_p["enable_vent_path"])
+# Session 10: sensor-specific vent_path gate for MODIS (RF1 fix).
+# Defaults to ENABLE_VENT_PATH for backward compatibility.
+ENABLE_VENT_PATH_MODIS: bool = bool(_p.get("enable_vent_path_modis", ENABLE_VENT_PATH))
 
 # --- Sensor activation ---
 _s = _cfg["sensors"]

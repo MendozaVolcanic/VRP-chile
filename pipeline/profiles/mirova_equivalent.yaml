@@ -44,6 +44,13 @@ background:
 paths:
   enable_eruption_path: true
   enable_vent_path: true
+  # Session 10: vent_path desactivado para MODIS en mirova_equivalent.
+  # Diagnóstico RF1 mostró que MODIS (1km pixel) produce 21% de falsos positivos
+  # vent-only vs solo 9% en VIIRS. La señal/ruido en MODIS es 2.5x (marginal)
+  # vs 4-5x en VIIRS. MIROVA misma no publica detecciones MODIS para volcanes
+  # de baja actividad (consolidada tiene 0 refs MODIS en 6 de 8 volcanes).
+  # El eruption-path de MODIS sigue activo — solo el vent-scale permisivo se apaga.
+  enable_vent_path_modis: false
 
 # --- Sensor activation ---
 # true = process granules from this sensor in this profile.

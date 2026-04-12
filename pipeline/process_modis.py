@@ -72,6 +72,8 @@ from pipeline.profile import (
     CLOUD_MASK_BT_K,
     MAX_SIGMA_COMPONENT_K,
     ENABLE_ERUPTION_PATH,
+    ENABLE_VENT_PATH_MODIS,
+    VENT_THRESHOLD_K,
 )
 
 # Indices of bands 21 and 22 within EV_1KM_Emissive
@@ -350,9 +352,12 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     # --- Vent-scale detection (weak fumarolic signals) ---
     # Same approach as VIIRS 375m: tight ROI around known vent, low threshold,
     # no ROI p95 filter. Uses the regional background (t_bg) already computed.
+    # Session 10 (RF1 fix): gated by ENABLE_VENT_PATH_MODIS. In mirova_equivalent
+    # this is False — MODIS 1km pixel produces too many vent-only FPs (21% vs 9%
+    # in VIIRS). The eruption-path still runs; only the permissive vent-scale is off.
     vrp_vent_mw = 0.0
     n_vent_pixels = 0
-    if vent_lat is not None and vent_lon is not None and not np.isnan(t_bg):
+    if ENABLE_VENT_PATH_MODIS and vent_lat is not None and vent_lon is not None and not np.isnan(t_bg):
         vent_dist = haversine_km(vent_lat, vent_lon, lat, lon)
         vent_roi_mask = vent_dist <= vent_radius_km
         if np.any(vent_roi_mask):
@@ -361,8 +366,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                 flat_idx = np.nanargmax(vent_bt)
                 r_vent, c_vent = np.unravel_index(flat_idx, vent_bt.shape)
                 t_max_vent = float(vent_bt[r_vent, c_vent])
-                # Low threshold: 1K above regional background (no ROI p95)
-                if t_max_vent > (t_bg + 1.0):
+                # Low threshold: VENT_THRESHOLD_K above regional background (no ROI p95)
+                if t_max_vent > (t_bg + VENT_THRESHOLD_K):
                     L_vent = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_max_vent)) - 1)))
                     L_bg_vent = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bg)) - 1)))
                     vent_area = float(pixel_areas[r_vent, c_vent])

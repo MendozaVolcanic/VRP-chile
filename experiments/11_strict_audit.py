@@ -1,6 +1,6 @@
 """
 11_strict_audit.py — clean-slate strict audit of our pipeline vs MIROVA
-(Session 9, post NULO contamination — see lessons L7.10).
+(Session 10, adds OCR reclassification + spatial FP classification).
 
 Hard rules (defense in depth against S8-style contamination):
     1. Ref MUST have source starting with 'registro_vrp_consolidado'.
@@ -10,13 +10,19 @@ Hard rules (defense in depth against S8-style contamination):
        No closest-of-day fallback.
     4. Never report a ratio without also reporting TP, FP, FN.
 
+Post-pairing reclassification (S10):
+    5. Unmatched FPs are checked against OCR reference (secondary source).
+       OCR-matched FPs become TP_OCR (precision_adjusted includes them).
+    6. Remaining FPs are spatially classified: fp_near (<3km), fp_far (>5km),
+       fp_ambiguous (3-5km), fp_vent_only (no anomalous pixels / no dist).
+
 Usage:
     python experiments/11_strict_audit.py --volcano Lascar
     python experiments/11_strict_audit.py --tier A
     python experiments/11_strict_audit.py --all
 
 Outputs (per run):
-    experiments/audit_s9/<volcano>.json — reproducible snapshot
+    experiments/audit_s10/<volcano>.json — reproducible snapshot
 
 Sensor family mapping (ours -> ref):
     MODIS_TERRA, MODIS_AQUA                  ->  MODIS
@@ -31,6 +37,7 @@ Time tolerance:
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import sys
 from collections import Counter, defaultdict
@@ -40,9 +47,13 @@ from statistics import median, quantiles
 
 REPO = Path(__file__).parent.parent
 DATA_DIR = REPO / "data"
+OURS_DIR = DATA_DIR / "mirova_equivalent"
 MIROVA_DIR = DATA_DIR / "mirova"
-OUT_DIR = REPO / "experiments" / "audit_s9"
+OUT_DIR = REPO / "experiments" / "audit_s10"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+# OCR reference CSV — secondary source for reclassifying FPs
+OCR_CSV_PATH = REPO / "10.04.2026 registro_vrp_ocr.csv"
 
 # Closed set of valid clasificaciones. MUST match rebuild_mirova_from_consolidado.py.
 # Any record outside this set in a ref file means the ref is contaminated (L7.10).
@@ -156,7 +167,7 @@ def load_ref(volcano: str) -> tuple[list[dict], dict]:
 
 def load_ours(volcano: str) -> list[dict]:
     """Load our pipeline output, normalize to audit schema."""
-    path = DATA_DIR / f"{volcano}.json"
+    path = OURS_DIR / f"{volcano}.json"
     if not path.exists():
         raise SystemExit(f"FATAL: ours file not found: {path}")
 
@@ -195,6 +206,149 @@ def bucket_for(vrp: float) -> str:
         if lo <= vrp < hi:
             return name
     return ">10"
+
+
+# Volcano name mapping: OCR CSV names -> our pipeline stems
+OCR_VOLCANO_MAP = {
+    "Puyehue-Cordon Caulle": "PuyehueCordonCaulle",
+    "Nevados de Chillan": "NevadosDeChillan",
+    # These are identical but listed for explicitness
+    "PlanchonPeteroa": "PlanchonPeteroa",
+    "Lascar": "Lascar",
+    "Chaiten": "Chaiten",
+    "Isluga": "Isluga",
+    "Lastarria": "Lastarria",
+    "Tupungatito": "Tupungatito",
+    "Villarrica": "Villarrica",
+    "Copahue": "Copahue",
+    "Llaima": "Llaima",
+}
+
+# Sensor mapping: OCR CSV sensor names -> canonical family
+OCR_SENSOR_TO_FAMILY = {
+    "VIIRS375": "VIIRS375",
+    "VIIRS": "VIIRS",
+    "MODIS": "MODIS",
+}
+
+# Valid OCR clasificaciones (broader than consolidada — includes Medio)
+OCR_VALID_CLASSES = {"Muy Bajo", "Bajo", "Medio"}
+
+
+def load_ocr_ref(volcano: str) -> list[dict]:
+    """Load OCR reference records for a specific volcano.
+
+    Only ALERTA_TERMICA_OCR records with clasificacion in OCR_VALID_CLASSES
+    are returned. These serve as secondary reference to reclassify FPs.
+    """
+    if not OCR_CSV_PATH.exists():
+        return []
+
+    # Build reverse map: our volcano name -> list of OCR names that map to it
+    ocr_names_for_volcano = [k for k, v in OCR_VOLCANO_MAP.items() if v == volcano]
+    if not ocr_names_for_volcano:
+        return []
+
+    records = []
+    with open(OCR_CSV_PATH, encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            # Filter: only ALERTA_TERMICA_OCR
+            if (row.get("Tipo_Registro") or "").strip() != "ALERTA_TERMICA_OCR":
+                continue
+            # Filter: volcano must match
+            volcan = (row.get("Volcan") or "").strip()
+            if volcan not in ocr_names_for_volcano:
+                continue
+            # Filter: clasificacion must be in accepted set
+            clasif = (row.get("Clasificacion Mirova") or "").strip()
+            if clasif not in OCR_VALID_CLASSES:
+                continue
+            # Parse sensor family
+            raw_sensor = (row.get("Sensor") or "").strip()
+            family = OCR_SENSOR_TO_FAMILY.get(raw_sensor)
+            if family is None:
+                continue
+            # Parse datetime from Fecha_Satelite_UTC
+            try:
+                dt = parse_dt(row.get("Fecha_Satelite_UTC", ""))
+            except Exception:
+                continue
+            # Parse VRP
+            try:
+                vrp = float(row.get("VRP_MW", 0.0))
+            except (ValueError, TypeError):
+                vrp = 0.0
+
+            records.append({
+                "dt": dt,
+                "family": family,
+                "vrp": vrp,
+                "raw_sensor": raw_sensor,
+                "clasificacion": clasif,
+                "source": "ocr",
+            })
+
+    return records
+
+
+def reclassify_fps_with_ocr(
+    fp_records: list[dict], ocr_ref: list[dict]
+) -> tuple[list[dict], list[dict]]:
+    """Try to match FPs against OCR records to reclassify as TP-probable-OCR.
+
+    Greedy 1:1 matching: same family, +/-30 min tolerance.
+    Returns (tp_ocr_list, fp_remaining_list).
+    """
+    if not ocr_ref:
+        return [], list(fp_records)
+
+    # Mark OCR records as available
+    ocr_pool = [dict(r, _used=False) for r in ocr_ref]
+
+    tp_ocr = []
+    fp_remaining = []
+
+    for fp in fp_records:
+        family = fp["family"]
+        tol = timedelta(minutes=30)
+
+        best = None
+        best_delta = tol + timedelta(seconds=1)
+        for ocr_rec in ocr_pool:
+            if ocr_rec["_used"]:
+                continue
+            if ocr_rec["family"] != family:
+                continue
+            delta = abs(fp["dt"] - ocr_rec["dt"])
+            if delta <= tol and delta < best_delta:
+                best = ocr_rec
+                best_delta = delta
+
+        if best is not None:
+            best["_used"] = True
+            tp_ocr.append({**fp, "ocr_match_dt": best["dt"], "ocr_vrp": best["vrp"]})
+        else:
+            fp_remaining.append(fp)
+
+    return tp_ocr, fp_remaining
+
+
+def classify_fp_spatial(fp: dict) -> str:
+    """Classify a remaining FP by spatial proximity to crater.
+
+    Returns one of: fp_near, fp_far, fp_ambiguous, fp_vent_only.
+    """
+    n_anom = fp.get("n_anomalous_pixels", 0) or 0
+    dist = fp.get("hotspot_dist_km")
+
+    if n_anom == 0 or dist is None:
+        return "fp_vent_only"
+    if dist < 3.0:
+        return "fp_near"
+    if dist > 5.0:
+        return "fp_far"
+    return "fp_ambiguous"
 
 
 def pair_records(
@@ -259,10 +413,19 @@ def summarize(
     ref: list[dict],
     ours: list[dict],
 ) -> dict:
-    """Compute and return metrics dict."""
+    """Compute and return metrics dict, including OCR reclassification."""
+    # --- OCR reclassification ---
+    ocr_ref = load_ocr_ref(volcano)
+    tp_ocr, fp_after_ocr = reclassify_fps_with_ocr(fp_records, ocr_ref)
+
+    # Spatial classification of remaining FPs
+    fp_classes = Counter(classify_fp_spatial(fp) for fp in fp_after_ocr)
+
     n_tp = len(tp_pairs)
     n_fn = len(fn_records)
-    n_fp = len(fp_records)
+    n_fp = len(fp_records)  # strict (original)
+    n_tp_ocr = len(tp_ocr)
+    n_fp_remaining = len(fp_after_ocr)
     n_ref = len(ref)
     n_ours = len(ours)
 
@@ -273,6 +436,11 @@ def summarize(
         if precision and recall and (precision + recall) > 0
         else None
     )
+
+    # Adjusted metrics: count OCR-confirmed FPs as TPs
+    tp_adj = n_tp + n_tp_ocr
+    fp_adj = n_fp_remaining
+    precision_adjusted = tp_adj / (tp_adj + fp_adj) if (tp_adj + fp_adj) > 0 else None
 
     # Ratios (ours / mirova) for TPs only
     ratios = [our["vrp"] / ref_r["vrp"] for ref_r, our in tp_pairs if ref_r["vrp"] > 0]
@@ -371,6 +539,22 @@ def summarize(
             "f1": round(f1, 3) if f1 is not None else None,
             "ratio_overall": ratio_stats,
         },
+        "ocr_reclassification": {
+            "n_ocr_ref": len(ocr_ref),
+            "tp_ocr": n_tp_ocr,
+            "fp_remaining": n_fp_remaining,
+            "precision_adjusted": (
+                round(precision_adjusted, 3)
+                if precision_adjusted is not None
+                else None
+            ),
+            "fp_classes": {
+                "fp_near": fp_classes.get("fp_near", 0),
+                "fp_far": fp_classes.get("fp_far", 0),
+                "fp_ambiguous": fp_classes.get("fp_ambiguous", 0),
+                "fp_vent_only": fp_classes.get("fp_vent_only", 0),
+            },
+        },
         "by_family": by_family,
         "by_bucket": by_bucket,
     }
@@ -408,6 +592,24 @@ def print_report(metrics: dict) -> None:
         if fm["ratio"]:
             line += f"  ratio_med={fm['ratio']['median']}"
         print(line)
+    # OCR reclassification
+    ocr = metrics.get("ocr_reclassification", {})
+    if ocr.get("n_ocr_ref", 0) > 0 or ocr.get("tp_ocr", 0) > 0:
+        print("  OCR reclassification:")
+        print(
+            f"    ocr_ref={ocr['n_ocr_ref']}  TP_OCR={ocr['tp_ocr']}  "
+            f"FP_remaining={ocr['fp_remaining']}  "
+            f"P_adjusted={ocr['precision_adjusted']}"
+        )
+        fpc = ocr.get("fp_classes", {})
+        print(
+            f"    FP spatial: near={fpc.get('fp_near', 0)}  "
+            f"far={fpc.get('fp_far', 0)}  "
+            f"ambiguous={fpc.get('fp_ambiguous', 0)}  "
+            f"vent_only={fpc.get('fp_vent_only', 0)}"
+        )
+    elif ocr:
+        print(f"  OCR reclassification: no OCR ref for this volcano")
     print("  by bucket (MIROVA VRP):")
     for name, bk in metrics["by_bucket"].items():
         if bk["n_ref"] == 0 and bk["fp_in_bucket"] == 0:
@@ -435,16 +637,30 @@ def audit_one(volcano: str) -> dict:
     tp_pairs, fn, fp = pair_records(ours, ref)
     metrics = summarize(volcano, tp_pairs, fn, fp, ref, ours)
 
+    # Re-run OCR reclassification for snapshot record lists
+    # (summarize() already computed the counts, but we need the record details)
+    ocr_ref = load_ocr_ref(volcano)
+    tp_ocr, fp_after_ocr = reclassify_fps_with_ocr(fp, ocr_ref)
+
     # Save snapshot
     snap_path = OUT_DIR / f"{volcano}.json"
-    # Convert datetimes in FN/FP for serialization
+    # Convert datetimes in FN/FP/TP_OCR for serialization
+    def _ser(r):
+        """Serialize a record dict, converting dt to string."""
+        out = {**r}
+        if isinstance(out.get("dt"), datetime):
+            out["dt"] = out["dt"].strftime("%Y-%m-%d %H:%M")
+        if isinstance(out.get("ocr_match_dt"), datetime):
+            out["ocr_match_dt"] = out["ocr_match_dt"].strftime("%Y-%m-%d %H:%M")
+        return out
+
     snap = {
         **metrics,
-        "fn_records": [
-            {**r, "dt": r["dt"].strftime("%Y-%m-%d %H:%M")} for r in fn
-        ],
-        "fp_records": [
-            {**r, "dt": r["dt"].strftime("%Y-%m-%d %H:%M")} for r in fp
+        "fn_records": [_ser(r) for r in fn],
+        "fp_records": [_ser(r) for r in fp],
+        "tp_ocr_records": [_ser(r) for r in tp_ocr],
+        "fp_after_ocr_records": [
+            {**_ser(r), "fp_class": classify_fp_spatial(r)} for r in fp_after_ocr
         ],
     }
     snap_path.write_text(json.dumps(snap, indent=2, default=str), encoding="utf-8")
@@ -488,16 +704,22 @@ def main():
         print("\n=== SUMMARY ===")
         print(
             f"{'volcano':22s}  {'ref':>4s}  {'TP':>4s}  {'FN':>4s}  {'FP':>4s}  "
-            f"{'P':>5s}  {'R':>5s}  {'F1':>5s}  ratio_med"
+            f"{'P':>5s}  {'R':>5s}  {'F1':>5s}  "
+            f"{'TP_OCR':>6s}  {'P_adj':>5s}  ratio_med"
         )
         for m in results:
             t = m["totals"]
+            ocr = m.get("ocr_reclassification", {})
             rm = t["ratio_overall"]["median"] if t["ratio_overall"] else None
+            tp_ocr = ocr.get("tp_ocr", 0)
+            p_adj = ocr.get("precision_adjusted")
             print(
                 f"{m['volcano']:22s}  {t['n_ref']:4d}  {t['tp']:4d}  "
                 f"{t['fn']:4d}  {t['fp']:4d}  "
                 f"{(t['precision'] or 0):.2f}  {(t['recall'] or 0):.2f}  "
-                f"{(t['f1'] or 0):.2f}  {rm if rm is not None else '-'}"
+                f"{(t['f1'] or 0):.2f}  "
+                f"{tp_ocr:6d}  {(p_adj or 0):.2f}  "
+                f"{rm if rm is not None else '-'}"
             )
 
 

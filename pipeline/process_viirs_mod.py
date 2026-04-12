@@ -48,12 +48,16 @@ from pipeline.profile import (
     BG_INNER_KM,
     BG_OUTER_KM,
     ENABLE_ERUPTION_PATH,
+    ENABLE_VENT_PATH,
+    VENT_THRESHOLD_K,
+    NTI_K1_NIGHT,
+    NTI_BT_SANITY_K,
 )
 
-# M13 band index within VNP02MOD observation_data
-# M-bands: M01..M16 — M13 is at index 12 (0-based)
-M13_INDEX = 12
-M13_LAMBDA = 4.050   # µm
+# M-band wavelengths (µm)
+M13_INDEX = 12       # M13 index within VNP02MOD observation_data (0-based)
+M13_LAMBDA = 4.050   # µm — primary MIR channel
+M15_LAMBDA = 10.763  # µm — TIR channel for NTI computation
 
 
 def read_viirs_mod_l1b(l1b_path: Path) -> dict:
@@ -99,6 +103,31 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
                 bt = C2 / (M13_LAMBDA * np.log(C1 / (rad * M13_LAMBDA ** 5) + 1))
 
         result["M13"] = bt
+
+        # --- M15 TIR band (10.763 µm) for NTI computation ---
+        band_key_15 = "M15"
+        if band_key_15 in obs:
+            dn15 = obs[band_key_15][:]
+            lut_key_15 = "M15_brightness_temperature_lut"
+            if lut_key_15 in obs:
+                lut15 = obs[lut_key_15][:]
+                bt15 = lut15[dn15].astype(np.float32)
+                flag_mask_15 = np.isin(dn15, list(FLAG_DNS))
+                bt15[flag_mask_15] = np.nan
+                bt15[bt15 < 0] = np.nan
+            else:
+                ds15 = obs[band_key_15]
+                scale15  = float(ds15.attrs.get("scale_factor", 1.0))
+                offset15 = float(ds15.attrs.get("add_offset", 0.0))
+                rad15 = dn15.astype(np.float32) * scale15 + offset15
+                flag_mask_15 = np.isin(dn15, list(FLAG_DNS))
+                rad15[flag_mask_15] = np.nan
+                # Planck inversion for M15
+                C1, C2 = 1.191042e8, 14388.0
+                with np.errstate(invalid="ignore", divide="ignore"):
+                    bt15 = C2 / (M15_LAMBDA * np.log(C1 / (rad15 * M15_LAMBDA ** 5) + 1))
+            result["M15"] = bt15
+
     return result
 
 
@@ -177,6 +206,35 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     std_bg = float(np.std(bg_vals))
     threshold = max(ANOMALY_THRESHOLD_K, N_SIGMA_MIR * std_bg)
 
+    # --- NTI: Normalized Thermal Index (Coppola 2015) ---
+    # NTI = (L_MIR - L_TIR) / (L_MIR + L_TIR) per-pixel
+    # Anomaly when NTI_pixel > NTI_bg_median + NTI_threshold
+    # This is MIROVA's primary detection method — filters solar contamination
+    # and works contextually against local background.
+    nti_max = float("nan")
+    nti_bg = float("nan")
+    nti = None
+
+    if "M15" in bands:
+        bt_mir = bands["M13"]
+        bt_tir = bands["M15"]
+        L_mir_all = bt_to_spectral_radiance(bt_mir, M13_LAMBDA)
+        L_tir_all = bt_to_spectral_radiance(bt_tir, M15_LAMBDA)
+        valid_both = ~np.isnan(L_mir_all) & ~np.isnan(L_tir_all) & (L_mir_all + L_tir_all > 0)
+        nti = np.full_like(L_mir_all, np.nan)
+        nti[valid_both] = (L_mir_all[valid_both] - L_tir_all[valid_both]) / (L_mir_all[valid_both] + L_tir_all[valid_both])
+
+        # Background NTI statistics
+        bg_nti = nti[bg_mask & ~np.isnan(nti)]
+        if len(bg_nti) >= 10:
+            nti_bg = float(np.median(bg_nti))
+
+            # ROI NTI max for diagnostics
+            roi_nti = nti[roi_mask]
+            roi_nti_valid = roi_nti[~np.isnan(roi_nti)]
+            if len(roi_nti_valid) > 0:
+                nti_max = float(np.max(roi_nti_valid))
+
     # Additional local-ROI filter: avoid topographic false positives.
     # Session 6 E1 fix: exclude a vent safety zone from the p95 calculation
     # so the vent pixel doesn't inflate its own filter. See process_modis.py
@@ -199,7 +257,33 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     else:
         effective_threshold = t_bg + threshold
 
-    hot_mask_2d = roi_bt_full > effective_threshold
+    # --- Dual-PATH detection (logical OR), mirroring process_viirs.py ---
+    # A pixel is hot if EITHER:
+    #   (A) BT path: bt > effective_threshold (includes p95 local filter)
+    #   (B) NTI path: nti > NTI_K1_NIGHT  AND  bt > t_bg + NTI_BT_SANITY_K
+    # The OR logic rescues detections on cloudy nights where BT threshold
+    # alone fails because std_bg is inflated.
+
+    # Path A — BT path (classic threshold with local p95 filter)
+    bt_path_hot = roi_bt_full > effective_threshold
+
+    # Path B — NTI path (Coppola 2015 Test 1, night)
+    # Only valid if NTI was successfully computed (needs both M13+M15)
+    if nti is not None and not np.isnan(nti_bg):
+        nti_path_hot = (
+            roi_mask
+            & ~np.isnan(nti)
+            & ~np.isnan(bt)
+            & (nti > NTI_K1_NIGHT)
+            & (bt > (t_bg + NTI_BT_SANITY_K))
+        )
+    else:
+        nti_path_hot = np.zeros_like(roi_mask)
+
+    hot_mask_2d = bt_path_hot | nti_path_hot
+    n_bt_path = int(np.sum(bt_path_hot & ~np.isnan(bt_path_hot)))
+    n_nti_path = int(np.sum(nti_path_hot))
+
     hot_rows, hot_cols = np.where(hot_mask_2d)
     n_anomalous = len(hot_rows)
 
@@ -241,7 +325,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # --- Vent-scale detection (weak fumarolic signals) ---
     vrp_vent_mw = 0.0
     n_vent_pixels = 0
-    if vent_lat is not None and vent_lon is not None and not np.isnan(t_bg):
+    if (ENABLE_VENT_PATH
+            and vent_lat is not None and vent_lon is not None
+            and not np.isnan(t_bg)):
         vent_dist = haversine_km(vent_lat, vent_lon, lat, lon)
         vent_roi_mask = vent_dist <= vent_radius_km
         if np.any(vent_roi_mask):
@@ -250,7 +336,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 flat_idx = np.nanargmax(vent_bt)
                 r_vent, c_vent = np.unravel_index(flat_idx, vent_bt.shape)
                 t_max_vent = float(vent_bt[r_vent, c_vent])
-                if t_max_vent > (t_bg + 1.0):
+                if t_max_vent > (t_bg + VENT_THRESHOLD_K):
                     L_vent = bt_to_spectral_radiance(np.float64(t_max_vent), M13_LAMBDA)
                     L_bg_vent = bt_to_spectral_radiance(np.float64(t_bg), M13_LAMBDA)
                     vent_area = float(pixel_areas[r_vent, c_vent])
@@ -264,7 +350,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "vrp_mw": round(vrp_mw, 3),
         "vrp_vent_mw": round(vrp_vent_mw, 3),
         "n_anomalous_pixels": n_anomalous,
+        "n_bt_path": n_bt_path,
+        "n_nti_path": n_nti_path,
         "n_vent_pixels": n_vent_pixels,
+        "nti_bg": round(nti_bg, 6) if not np.isnan(nti_bg) else None,
+        "nti_max": round(nti_max, 6) if not np.isnan(nti_max) else None,
         "hotspot_lat": hotspot_lat,
         "hotspot_lon": hotspot_lon,
         "hotspot_dist_km": hotspot_dist_km,

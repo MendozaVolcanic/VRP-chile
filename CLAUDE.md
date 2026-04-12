@@ -43,6 +43,29 @@ decisiones de umbrales, o cambios metodológicos:
 - `.github/workflows/nrt.yml` (cron 6h)
 - `data/` JSON por volcán (committed). Raw L1B/HDF **nunca** committed.
 
+## Skill triggers (invocar proactivamente)
+
+Claude debe invocar `Skill` sin que Nicolás lo pida cuando el tipo de trabajo
+encaje con la tabla. Esto es vinculante, no opcional.
+
+| Situación | Skill a invocar | Por qué |
+|---|---|---|
+| Cualquier bug, FP/FN inesperado, anomalía en auditoría, "no entiendo por qué pasa esto" | `systematic-debugging` o `superpowers-systematic-debugging` | Forzar hipótesis → evidencia → root cause, no "miro y opino" |
+| Antes de escribir fix que toque `pipeline/` con >20 líneas de cambio | `writing-plans` | Plan formal con criterios de aceptación y reversión antes de tocar código |
+| Ejecutar un plan ya escrito paso a paso | `executing-plans` | Checkpoints y no saltarse pasos |
+| Antes de editar `pipeline/process_*.py` o `scan_geometry.py` | `test-driven-development` | Primero el test que captura el bug, después el fix |
+| Antes de declarar un fix "listo", pushear a main, o cerrar un RF | `verification-before-completion` | Re-audit obligatoria sobre Tier A completo antes del push |
+| 2+ investigaciones independientes que se pueden hacer en paralelo (ej. RF1 en Lascar + RF2 en MODIS a la vez) | `dispatching-parallel-agents` | Paralelismo real vía subagentes, no serie |
+| Nicolás pide "automatiza X", "cada vez que Y", "antes de Z hacé W" | `update-config` | Esto es un hook, no una instrucción conversacional |
+| Cualquier trabajo con HDF/NetCDF/DataFrames grandes de records satelitales | `pandas-pro` | Operaciones vectorizadas correctas, no loops |
+| Antes de correr una auditoría que requiere perfilar/memoria | `python-performance-optimization` | Si el audit script tarda >5 min, perfilarlo antes de "optimizar a ojo" |
+| Diseñar un nuevo experimento (`experiments/NN_*.py`) | `writing-plans` + `test-driven-development` | Mismo rigor que código de producción |
+| Cerrar sesión con learnings nuevos | `revise-claude-md` | Consolidar lecciones en CLAUDE.md y memoria |
+
+**Regla meta**: si estoy por hacer algo y hay una skill listada arriba que
+aplica, la invoco **antes** de actuar. Si dudo si aplica, la invoco igual —
+el costo de invocar de más es bajo, el costo de saltarla es un fix mal hecho.
+
 ## Constraints técnicos
 - **pyhdf roto en Windows** → MODIS solo corre en GitHub Actions Linux.
 - NASA LANCE NRT ~3h latencia.
