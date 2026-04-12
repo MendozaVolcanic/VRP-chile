@@ -52,6 +52,7 @@ from pipeline.profile import (
     VENT_THRESHOLD_K,
     NTI_K1_NIGHT,
     NTI_BT_SANITY_K,
+    ENABLE_NTI_RELATIVE_PATH,
 )
 
 # M-band wavelengths (µm)
@@ -213,6 +214,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # and works contextually against local background.
     nti_max = float("nan")
     nti_bg = float("nan")
+    nti_std = float("nan")
+    n_nti_anomalous = 0
     nti = None
 
     if "M15" in bands:
@@ -228,12 +231,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         bg_nti = nti[bg_mask & ~np.isnan(nti)]
         if len(bg_nti) >= 10:
             nti_bg = float(np.median(bg_nti))
+            nti_std = float(np.std(bg_nti))
+            nti_threshold = nti_bg + max(0.005, 3.0 * nti_std)
 
-            # ROI NTI max for diagnostics
+            # ROI NTI anomalies
             roi_nti = nti[roi_mask]
             roi_nti_valid = roi_nti[~np.isnan(roi_nti)]
             if len(roi_nti_valid) > 0:
                 nti_max = float(np.max(roi_nti_valid))
+                n_nti_anomalous = int(np.sum(roi_nti_valid > nti_threshold))
 
     # Additional local-ROI filter: avoid topographic false positives.
     # Session 6 E1 fix: exclude a vent safety zone from the p95 calculation
@@ -280,7 +286,27 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     else:
         nti_path_hot = np.zeros_like(roi_mask)
 
-    hot_mask_2d = bt_path_hot | nti_path_hot
+    # Path C — NTI relative path (Session 11).
+    # Uses contextual NTI threshold (nti_bg + max(0.005, 3*sigma)) for weak
+    # fumarolic signals unreachable by the absolute NTI_K1_NIGHT floor.
+    n_nti_rel_path = 0
+    if (ENABLE_NTI_RELATIVE_PATH
+            and nti is not None
+            and not np.isnan(nti_bg)
+            and not np.isnan(nti_std)):
+        nti_rel_threshold = nti_bg + max(0.005, 3.0 * nti_std)
+        nti_rel_hot = (
+            roi_mask
+            & ~np.isnan(nti)
+            & ~np.isnan(bt)
+            & (nti > nti_rel_threshold)
+            & (bt > (t_bg + NTI_BT_SANITY_K))
+        )
+        n_nti_rel_path = int(np.sum(nti_rel_hot))
+    else:
+        nti_rel_hot = np.zeros_like(roi_mask)
+
+    hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot
     n_bt_path = int(np.sum(bt_path_hot & ~np.isnan(bt_path_hot)))
     n_nti_path = int(np.sum(nti_path_hot))
 
@@ -352,6 +378,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "n_anomalous_pixels": n_anomalous,
         "n_bt_path": n_bt_path,
         "n_nti_path": n_nti_path,
+        "n_nti_rel_path": n_nti_rel_path,
+        "n_nti_anomalous": n_nti_anomalous,
         "n_vent_pixels": n_vent_pixels,
         "nti_bg": round(nti_bg, 6) if not np.isnan(nti_bg) else None,
         "nti_max": round(nti_max, 6) if not np.isnan(nti_max) else None,

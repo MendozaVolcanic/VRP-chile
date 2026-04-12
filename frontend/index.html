@@ -176,10 +176,23 @@
       display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;
     }
     @media (max-width: 900px) { .overview-section { grid-template-columns: 1fr; } }
+    .overview-map-wrapper { display: flex; flex-direction: column; gap: 0; }
+    .overview-map-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 0; margin-bottom: 6px;
+    }
+    .overview-map-header span { font-size: .82rem; font-weight: 600; color: var(--text); }
+    .overview-map-header .map-controls { display: flex; gap: 6px; align-items: center; }
     .overview-map-container {
       height: 420px; border-radius: 10px; overflow: hidden;
       border: 1px solid var(--border); background: var(--card);
     }
+    .hotspot-legend {
+      display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap;
+      font-size: 0.68rem; color: var(--muted); padding: 0 2px;
+    }
+    .hotspot-legend-item { display: flex; align-items: center; gap: 4px; }
+    .hotspot-legend-dot { width: 9px; height: 9px; border-radius: 50%; }
     .nrt-table-container {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: 10px; padding: 14px; overflow-y: auto; max-height: 420px;
@@ -275,7 +288,25 @@
 
 <main>
   <div class="overview-section" id="overview-section">
-    <div class="overview-map-container" id="overview-map"></div>
+    <div class="overview-map-wrapper">
+      <div class="overview-map-header">
+        <span>Mapa general</span>
+        <div class="map-controls">
+          <select id="hotspot-volcano-filter" style="font-size:0.72rem;padding:3px 8px;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:5px;cursor:pointer;">
+            <option value="">Todos los volcanes</option>
+          </select>
+          <button id="hotspot-layer-btn" class="scale-btn">🔥 Anomalías</button>
+        </div>
+      </div>
+      <div class="overview-map-container" id="overview-map"></div>
+      <div class="hotspot-legend" id="hotspot-legend" style="display:none;">
+        <span style="font-weight:600;color:var(--text);">Anomalías detectadas:</span>
+        <div class="hotspot-legend-item"><div class="hotspot-legend-dot" style="background:#e91e63;"></div>VIIRS 375m</div>
+        <div class="hotspot-legend-item"><div class="hotspot-legend-dot" style="background:#00bcd4;"></div>VIIRS 750m</div>
+        <div class="hotspot-legend-item"><div class="hotspot-legend-dot" style="background:#ff8c00;"></div>MODIS</div>
+        <span style="margin-left:6px;font-style:italic;">Tamaño ∝ VRP · Opacidad ∝ recencia · Borde punteado = filtrado por pipeline</span>
+      </div>
+    </div>
     <div class="nrt-table-container">
       <h3>Últimas detecciones NRT (todos los volcanes)</h3>
       <table class="nrt-table">
@@ -290,6 +321,14 @@
 
 <script>
 // ── Config ──────────────────────────────────────────────────────────────────
+// Auto-detect base path: in GitHub Pages index.html is at root next to data/,
+// but in local preview it may be under /frontend/. Detect and adjust.
+const BASE_PATH = (() => {
+  const path = window.location.pathname;
+  if (path.includes('/frontend/')) return '/';
+  return '';
+})();
+
 const VOLCANOES = [
   // === Zona Norte CVZ (N→S) ===
   { name: "Taapaca",              display: "Taapaca",                region: "Arica y Parinacota", lat: -18.100, lon: -69.500, radius_km: 10 },
@@ -382,8 +421,8 @@ async function fetchJSON(url) {
 
 async function loadVolcano(v) {
   const [data, mirova] = await Promise.all([
-    fetchJSON("data/mirova_equivalent/" + v.name + ".json"),
-    v.hasMirova ? fetchJSON("data/mirova/" + v.name + ".json") : Promise.resolve(null),
+    fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json"),
+    v.hasMirova ? fetchJSON(BASE_PATH + "data/mirova/" + v.name + ".json") : Promise.resolve(null),
   ]);
   allData[v.name] = {
     records:       data?.records   || [],
@@ -1130,6 +1169,76 @@ function buildAlertSummary() {
 // ── Overview map ─────────────────────────────────────────────────────────────
 let overviewMap = null;
 let overviewMarkers = [];
+let showHotspots = false;
+let overviewHotspotGroup = null;
+
+const HOTSPOT_COLORS = {
+  "MODIS_TERRA": "#ff8c00", "MODIS_AQUA": "#ffb347",
+  "VIIRS_SNPP": "#e91e63", "VIIRS_NOAA20": "#f06292",
+  "VIIRS_SNPP_750": "#00bcd4", "VIIRS_NOAA20_750": "#4dd0e1",
+};
+
+function updateHotspotLayer() {
+  if (!overviewMap || !overviewHotspotGroup) return;
+  overviewHotspotGroup.clearLayers();
+  if (!showHotspots) return;
+
+  const filterVolcano = document.getElementById("hotspot-volcano-filter")?.value || "";
+  const volcList = filterVolcano
+    ? VOLCANOES.filter(v => v.name === filterVolcano)
+    : VOLCANOES;
+
+  let count = 0;
+  const bounds = [];
+
+  volcList.forEach(v => {
+    const d = allData[v.name];
+    if (!d) return;
+    const recs = filterDays(d.records, currentDays);
+    // Show any record with hotspot coordinates — use vrp_mw if available,
+    // fallback to vrp_mir_mw (pre-filter VRP), then vrp_vent_mw.
+    // This reveals where the pipeline is detecting signal, even if filtered out.
+    const withCoords = recs.filter(r => r.hotspot_lat != null);
+
+    // Sort oldest→newest so newest renders on top
+    withCoords.sort((a, b) => a.datetime_utc.localeCompare(b.datetime_utc));
+
+    withCoords.forEach((r, i) => {
+      const vrpFinal = r.vrp_mw ?? 0;
+      const vrpRaw = r.vrp_mir_mw ?? r.vrp_tir_mw ?? 0;
+      const vrpVent = r.vrp_vent_mw ?? 0;
+      const vrpShow = vrpFinal || vrpRaw || vrpVent || 0.001;
+      const isFiltered = vrpFinal === 0 && (vrpRaw > 0 || vrpVent > 0);
+      const color = HOTSPOT_COLORS[r.sensor] || "#ffffff";
+      const recency = 0.35 + 0.65 * (i / Math.max(1, withCoords.length - 1));
+      const radius = Math.max(4, Math.min(14, 4 + Math.log10(Math.max(vrpShow, 0.001)) * 4.5));
+      const dist = r.hotspot_dist_km != null ? r.hotspot_dist_km.toFixed(1) + " km" : "—";
+
+      L.circleMarker([r.hotspot_lat, r.hotspot_lon], {
+        radius, color: isFiltered ? "#555" : "#000", weight: isFiltered ? 1 : 0.5,
+        fillColor: color, fillOpacity: isFiltered ? recency * 0.5 : recency,
+        dashArray: isFiltered ? "3,3" : null,
+      }).addTo(overviewHotspotGroup).bindPopup(
+        `<b>${v.display}</b>${isFiltered ? ' <span style="color:#f44;font-size:.8em">(filtrado)</span>' : ''}<br>` +
+        `${r.datetime_utc} UTC<br>` +
+        `<span style="color:${color}">${r.sensor}</span><br>` +
+        `VRP final: <b>${vrpFinal.toFixed(3)} MW</b><br>` +
+        (vrpRaw > 0 ? `VRP MIR crudo: ${vrpRaw.toFixed(3)} MW<br>` : '') +
+        (vrpVent > 0 ? `VRP vent: ${vrpVent.toFixed(3)} MW<br>` : '') +
+        `Dist cráter: ${dist}<br>` +
+        `Píxeles: ${r.n_anomalous_pixels ?? '—'}`
+      );
+
+      bounds.push([r.hotspot_lat, r.hotspot_lon]);
+      count++;
+    });
+  });
+
+  // Fit map to hotspots when filtering a single volcano
+  if (filterVolcano && bounds.length > 0) {
+    overviewMap.fitBounds(L.latLngBounds(bounds).pad(0.4));
+  }
+}
 
 function buildOverviewMap() {
   const container = document.getElementById("overview-map");
@@ -1140,6 +1249,7 @@ function buildOverviewMap() {
     L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
       attribution: "Esri", maxZoom: 18,
     }).addTo(overviewMap);
+    overviewHotspotGroup = L.layerGroup().addTo(overviewMap);
   }
 
   // Clear old markers
@@ -1174,6 +1284,9 @@ function buildOverviewMap() {
 
     overviewMarkers.push(marker);
   });
+
+  // Refresh hotspot layer with current data
+  updateHotspotLayer();
 }
 
 // ── NRT global table ─────────────────────────────────────────────────────────
@@ -1239,6 +1352,23 @@ async function init() {
     currentDays = parseInt(e.target.value);
     buildCards();
     renderDetail();
+    updateHotspotLayer();
+  });
+
+  // Hotspot layer toggle
+  const hotspotBtn = document.getElementById("hotspot-layer-btn");
+  const hotspotLegend = document.getElementById("hotspot-legend");
+  const hotspotFilter = document.getElementById("hotspot-volcano-filter");
+
+  hotspotBtn.addEventListener("click", () => {
+    showHotspots = !showHotspots;
+    hotspotBtn.classList.toggle("active", showHotspots);
+    hotspotLegend.style.display = showHotspots ? "flex" : "none";
+    updateHotspotLayer();
+  });
+
+  hotspotFilter.addEventListener("change", () => {
+    if (showHotspots) updateHotspotLayer();
   });
 
   // Scale
@@ -1257,6 +1387,19 @@ async function init() {
 
   // Load all volcanoes in parallel
   await Promise.all(VOLCANOES.map(v => loadVolcano(v)));
+
+  // Populate volcano filter now that data is loaded
+  VOLCANOES.forEach(v => {
+    const d = allData[v.name];
+    if (!d || !d.records.length) return;
+    const opt = document.createElement("option");
+    opt.value = v.name;
+    opt.textContent = v.display;
+    hotspotFilter.appendChild(opt);
+  });
+  if ([...hotspotFilter.options].some(o => o.value === "Llaima")) {
+    hotspotFilter.value = "Llaima";
+  }
 
   buildAlertSummary();
   buildCards();

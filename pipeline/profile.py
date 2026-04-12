@@ -75,6 +75,10 @@ ENABLE_VENT_PATH: bool = bool(_p["enable_vent_path"])
 # Session 10: sensor-specific vent_path gate for MODIS (RF1 fix).
 # Defaults to ENABLE_VENT_PATH for backward compatibility.
 ENABLE_VENT_PATH_MODIS: bool = bool(_p.get("enable_vent_path_modis", ENABLE_VENT_PATH))
+# Session 11: NTI-relative detection path (Path C) for weak fumarolic signals.
+# When True, pixels passing nti > nti_bg + max(0.005, 3*sigma_nti) AND
+# bt > t_bg + NTI_BT_SANITY_K are included in hot_mask_2d.
+ENABLE_NTI_RELATIVE_PATH: bool = bool(_p.get("enable_nti_relative_path", False))
 
 # --- Sensor activation ---
 _s = _cfg["sensors"]
@@ -93,6 +97,7 @@ def describe() -> str:
         f"nsigma_mir={N_SIGMA_MIR} "
         f"vent_K={VENT_THRESHOLD_K} "
         f"nti_k1={NTI_K1_NIGHT} "
+        f"nti_rel={'on' if ENABLE_NTI_RELATIVE_PATH else 'off'} "
         f"vent_path={'on' if ENABLE_VENT_PATH else 'off'} "
         f"sensors=MODIS:{SENSOR_MODIS} V375:{SENSOR_VIIRS_375} V750:{SENSOR_VIIRS_750} "
         f"data_subdir={DATA_SUBDIR}"

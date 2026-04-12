@@ -67,6 +67,7 @@ from pipeline.profile import (
     NTI_BT_SANITY_K,
     ENABLE_VENT_PATH,
     ENABLE_ERUPTION_PATH,
+    ENABLE_NTI_RELATIVE_PATH,
 )
 
 
@@ -275,6 +276,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     n_anomalous = 0
     n_bt_path = 0
     n_nti_path = 0
+    n_nti_rel_path = 0
     hotspot_lat = None
     hotspot_lon = None
     hotspot_dist_km = None
@@ -306,7 +308,30 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             else:
                 nti_path_hot = np.zeros_like(bt_path_hot)
 
-            hot_mask_2d = bt_path_hot | nti_path_hot
+            # Path C — NTI relative path (Session 11).
+            # Uses the contextual NTI threshold (nti_bg + max(0.005, 3*sigma))
+            # instead of the absolute NTI_K1_NIGHT floor. This detects weak
+            # fumarolic signals (0.05-0.3 MW) where the NTI shifts by ~0.01
+            # above background — too small for the -0.8 absolute floor but
+            # clearly anomalous against the local sigma (~0.002-0.004).
+            # Gated by enable_nti_relative_path (experimental only).
+            if (ENABLE_NTI_RELATIVE_PATH
+                    and "I05" in bands
+                    and not np.isnan(nti_bg)
+                    and len(bg_nti) >= 10):
+                nti_rel_threshold = nti_bg + max(0.005, 3.0 * nti_std)
+                nti_rel_hot = (
+                    roi_mask
+                    & ~np.isnan(nti)
+                    & ~np.isnan(bt)
+                    & (nti > nti_rel_threshold)
+                    & (bt > (t_bg_i04 + NTI_BT_SANITY_K))
+                )
+                n_nti_rel_path = int(np.sum(nti_rel_hot))
+            else:
+                nti_rel_hot = np.zeros_like(bt_path_hot)
+
+            hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot
             n_bt_path = int(np.sum(bt_path_hot))
             n_nti_path = int(np.sum(nti_path_hot))
 
@@ -407,6 +432,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "n_anomalous_pixels": n_anomalous,
         "n_bt_path": n_bt_path,
         "n_nti_path": n_nti_path,
+        "n_nti_rel_path": n_nti_rel_path,
         "n_vent_pixels": n_vent_pixels,
         "n_cloud_masked": n_cloud_masked,
         "nti_max": round(nti_max, 6) if not np.isnan(nti_max) else None,

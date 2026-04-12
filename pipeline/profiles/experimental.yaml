@@ -38,6 +38,10 @@ paths:
   # Permite explorar si ajustes futuros de threshold pueden rescatar señal
   # MODIS sin el ruido que hoy produce el vent-scale permisivo.
   enable_vent_path_modis: true
+  # Session 11: NTI relative path (Path C) for weak fumarolic signals.
+  # Uses nti > nti_bg + max(0.005, 3*sigma_nti) instead of absolute NTI floor.
+  # Targets PP (recall 0.54) and Villarrica (recall 0/6). See plan_s11.
+  enable_nti_relative_path: true
 
 sensors:
   modis: true
