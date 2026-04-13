@@ -827,12 +827,12 @@ function renderDetail() {
         const ventOnly = isVentOnly || px.vent_only;
 
         L.circleMarker([px.lat, px.lon], {
-          radius: ventOnly ? 3 : size,
-          color: ventOnly ? "#7c4dff" : (isPrimary ? "#fff" : "#aaa"),
-          weight: ventOnly ? 1 : (isPrimary ? 1.5 : 0.8),
+          radius: ventOnly ? 5 : size,
+          color: ventOnly ? "#b388ff" : (isPrimary ? "#fff" : "#aaa"),
+          weight: ventOnly ? 1.5 : (isPrimary ? 1.5 : 0.8),
           fillColor: ventOnly ? "#7c4dff" : color,
-          fillOpacity: ventOnly ? pxOpacity * 0.5 : pxOpacity,
-          dashArray: ventOnly ? "3,3" : null,
+          fillOpacity: ventOnly ? Math.max(pxOpacity * 0.6, 0.35) : pxOpacity,
+          dashArray: ventOnly ? "4,3" : null,
         }).addTo(map).bindPopup(
           `<b>${r.sensor}</b>${ventOnly ? " (vent-path)" : (!isPrimary ? " (pixel #" + (pxIdx+1) + ")" : "")}<br>` +
           `${r.datetime_utc} UTC<br>` +

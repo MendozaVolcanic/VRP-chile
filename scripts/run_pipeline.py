@@ -328,8 +328,12 @@ def main():
     elif args.date:
         dates = [datetime.strptime(args.date, "%Y-%m-%d")]
     else:
-        # Default: yesterday (NRT data is typically available with ~3h latency)
-        dates = [datetime.utcnow() - timedelta(days=1)]
+        # Default: last 4 days (NASA LANCE NRT can have multi-day gaps;
+        # store.py deduplicates by (datetime_utc, sensor) so re-processing
+        # already-ingested dates is safe and cheap — the search returns fast
+        # when granules were already downloaded).
+        today = datetime.utcnow()
+        dates = [today - timedelta(days=d) for d in range(4, 0, -1)]
 
     nighttime_only = not args.no_night_filter
     if nighttime_only:
