@@ -68,6 +68,8 @@ from pipeline.profile import (
     ENABLE_VENT_PATH,
     ENABLE_ERUPTION_PATH,
     ENABLE_NTI_RELATIVE_PATH,
+    NTI_REL_N_SIGMA,
+    NTI_REL_MIN_FLOOR,
 )
 
 
@@ -319,7 +321,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     and "I05" in bands
                     and not np.isnan(nti_bg)
                     and len(bg_nti) >= 10):
-                nti_rel_threshold = nti_bg + max(0.005, 3.0 * nti_std)
+                nti_rel_threshold = nti_bg + max(NTI_REL_MIN_FLOOR, NTI_REL_N_SIGMA * nti_std)
                 nti_rel_hot = (
                     roi_mask
                     & ~np.isnan(nti)

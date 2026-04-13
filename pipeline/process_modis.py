@@ -74,6 +74,8 @@ from pipeline.profile import (
     ENABLE_ERUPTION_PATH,
     ENABLE_VENT_PATH_MODIS,
     VENT_THRESHOLD_K,
+    MODIS_VENT_THRESHOLD_K,
+    MODIS_VENT_VRP_FLOOR_MW,
 )
 
 # Indices of bands 21 and 22 within EV_1KM_Emissive
@@ -366,13 +368,18 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                 flat_idx = np.nanargmax(vent_bt)
                 r_vent, c_vent = np.unravel_index(flat_idx, vent_bt.shape)
                 t_max_vent = float(vent_bt[r_vent, c_vent])
-                # Low threshold: VENT_THRESHOLD_K above regional background (no ROI p95)
-                if t_max_vent > (t_bg + VENT_THRESHOLD_K):
+                # Session 12: MODIS uses its own higher threshold (2.5K in experimental)
+                # to compensate for 1km pixel dilution (SNR 2.5× vs VIIRS 4-5×).
+                if t_max_vent > (t_bg + MODIS_VENT_THRESHOLD_K):
                     L_vent = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_max_vent)) - 1)))
                     L_bg_vent = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bg)) - 1)))
                     vent_area = float(pixel_areas[r_vent, c_vent])
                     vrp_vent_mw = float(vent_area * WOOSTER_COEFF * (L_vent - L_bg_vent)) / 1e6
-                    n_vent_pixels = 1
+                    # Session 12: reject noise-level detections below VRP floor
+                    if vrp_vent_mw >= MODIS_VENT_VRP_FLOOR_MW:
+                        n_vent_pixels = 1
+                    else:
+                        vrp_vent_mw = 0.0
 
     return {
         "vrp_mw": round(vrp_mw, 3),

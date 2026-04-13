@@ -26,6 +26,15 @@ thresholds:
   nti_bt_sanity_k: 3.0
   cloud_mask_bt_k: 260.0
   max_sigma_component_k: 7.0
+  # Session 12: Path C sigma multiplier — raised from 3.0 to 5.0 to reduce
+  # vent-only FPs (Villarrica audit: 90 FPs, 0 TPs with 3σ).
+  nti_rel_n_sigma: 5.0
+  nti_rel_min_floor: 0.008
+  # Session 12: MODIS-specific vent threshold (Lascar RF1 trade-off).
+  # MODIS 1km pixel needs higher ΔT to distinguish signal from noise (SNR 2.5×).
+  # Also applies a minimum VRP floor to reject noise-level vent detections.
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
 
 background:
   inner_km: 5.0

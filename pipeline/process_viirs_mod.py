@@ -53,6 +53,8 @@ from pipeline.profile import (
     NTI_K1_NIGHT,
     NTI_BT_SANITY_K,
     ENABLE_NTI_RELATIVE_PATH,
+    NTI_REL_N_SIGMA,
+    NTI_REL_MIN_FLOOR,
 )
 
 # M-band wavelengths (µm)
@@ -294,7 +296,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             and nti is not None
             and not np.isnan(nti_bg)
             and not np.isnan(nti_std)):
-        nti_rel_threshold = nti_bg + max(0.005, 3.0 * nti_std)
+        nti_rel_threshold = nti_bg + max(NTI_REL_MIN_FLOOR, NTI_REL_N_SIGMA * nti_std)
         nti_rel_hot = (
             roi_mask
             & ~np.isnan(nti)
