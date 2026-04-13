@@ -377,6 +377,13 @@ let logScale = false;
 let charts = {};
 let allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
 
+// ── Base path detection (local preview vs GitHub Pages) ─────────────────────
+const BASE_PATH = (() => {
+  const path = window.location.pathname;
+  if (path.includes('/frontend/')) return '/';
+  return '';
+})();
+
 // ── Fetch ───────────────────────────────────────────────────────────────────
 async function fetchJSON(url) {
   try {
@@ -387,8 +394,8 @@ async function fetchJSON(url) {
 
 async function loadVolcano(v) {
   const [data, mirova] = await Promise.all([
-    fetchJSON("../data/experimental/" + v.name + ".json"),
-    v.hasMirova ? fetchJSON("../data/mirova/" + v.name + ".json") : Promise.resolve(null),
+    fetchJSON(BASE_PATH + "data/experimental/" + v.name + ".json"),
+    v.hasMirova ? fetchJSON(BASE_PATH + "data/mirova/" + v.name + ".json") : Promise.resolve(null),
   ]);
   allData[v.name] = {
     records:       data?.records   || [],

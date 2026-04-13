@@ -1,16 +1,16 @@
 {
   "volcano": "Chaiten",
-  "generated_at": "2026-04-12T11:40:14.568854Z",
+  "generated_at": "2026-04-13T11:17:12.527321Z",
   "audit_script": "experiments/11_strict_audit.py",
   "totals": {
     "n_ref": 15,
-    "n_ours_detections": 371,
+    "n_ours_detections": 270,
     "tp": 14,
     "fn": 1,
-    "fp": 357,
-    "precision": 0.038,
+    "fp": 256,
+    "precision": 0.052,
     "recall": 0.933,
-    "f1": 0.073,
+    "f1": 0.098,
     "ratio_overall": {
       "n": 14,
       "min": 0.713,
@@ -23,33 +23,33 @@
   "ocr_reclassification": {
     "n_ocr_ref": 10,
     "tp_ocr": 6,
-    "fp_remaining": 351,
-    "precision_adjusted": 0.054,
+    "fp_remaining": 250,
+    "precision_adjusted": 0.074,
     "fp_classes": {
       "fp_near": 0,
-      "fp_far": 10,
+      "fp_far": 8,
       "fp_ambiguous": 2,
-      "fp_vent_only": 339
+      "fp_vent_only": 240
     }
   },
   "by_family": {
     "MODIS": {
       "n_ref": 0,
-      "n_ours_det": 109,
+      "n_ours_det": 4,
       "tp": 0,
       "fn": 0,
-      "fp": 109,
+      "fp": 4,
       "precision": 0.0,
       "recall": null,
       "ratio": null
     },
     "VIIRS375": {
       "n_ref": 14,
-      "n_ours_det": 147,
+      "n_ours_det": 149,
       "tp": 13,
       "fn": 1,
-      "fp": 134,
-      "precision": 0.088,
+      "fp": 136,
+      "precision": 0.087,
       "recall": 0.929,
       "ratio": {
         "n": 13,
@@ -60,10 +60,10 @@
     },
     "VIIRS": {
       "n_ref": 1,
-      "n_ours_det": 115,
+      "n_ours_det": 117,
       "tp": 1,
       "fn": 0,
-      "fp": 114,
+      "fp": 116,
       "precision": 0.009,
       "recall": 1.0,
       "ratio": {
@@ -79,7 +79,7 @@
       "n_ref": 15,
       "tp": 14,
       "fn": 1,
-      "fp_in_bucket": 205,
+      "fp_in_bucket": 195,
       "ratio": {
         "n": 14,
         "median": 1.563
@@ -89,35 +89,35 @@
       "n_ref": 0,
       "tp": 0,
       "fn": 0,
-      "fp_in_bucket": 61,
+      "fp_in_bucket": 41,
       "ratio": null
     },
     "1-2": {
       "n_ref": 0,
       "tp": 0,
       "fn": 0,
-      "fp_in_bucket": 40,
+      "fp_in_bucket": 16,
       "ratio": null
     },
     "2-5": {
       "n_ref": 0,
       "tp": 0,
       "fn": 0,
-      "fp_in_bucket": 36,
+      "fp_in_bucket": 3,
       "ratio": null
     },
     "5-10": {
       "n_ref": 0,
       "tp": 0,
       "fn": 0,
-      "fp_in_bucket": 11,
+      "fp_in_bucket": 0,
       "ratio": null
     },
     ">10": {
       "n_ref": 0,
       "tp": 0,
       "fn": 0,
-      "fp_in_bucket": 4,
+      "fp_in_bucket": 1,
       "ratio": null
     }
   },
@@ -1339,6 +1339,24 @@
       "hotspot_dist_km": null
     },
     {
+      "dt": "2026-04-08 06:00",
+      "family": "VIIRS375",
+      "vrp": 0.217,
+      "raw_sensor": "VIIRS_SNPP",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-04-08 06:18",
+      "family": "VIIRS375",
+      "vrp": 0.19,
+      "raw_sensor": "VIIRS_NOAA20",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
       "dt": "2026-01-19 06:00",
       "family": "VIIRS",
       "vrp": 0.359,
@@ -2365,631 +2383,19 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-01-19 07:10",
-      "family": "MODIS",
-      "vrp": 0.78,
-      "raw_sensor": "MODIS_AQUA",
+      "dt": "2026-04-08 06:00",
+      "family": "VIIRS",
+      "vrp": 0.621,
+      "raw_sensor": "VIIRS_SNPP_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-01-20 01:35",
-      "family": "MODIS",
-      "vrp": 2.681,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-20 07:45",
-      "family": "MODIS",
-      "vrp": 1.374,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-21 02:15",
-      "family": "MODIS",
-      "vrp": 1.171,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-21 06:45",
-      "family": "MODIS",
-      "vrp": 3.53,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-23 01:55",
-      "family": "MODIS",
-      "vrp": 2.013,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-24 02:35",
-      "family": "MODIS",
-      "vrp": 1.128,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": 8.51
-    },
-    {
-      "dt": "2026-01-25 03:15",
-      "family": "MODIS",
-      "vrp": 2.465,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-26 08:20",
-      "family": "MODIS",
-      "vrp": 4.38,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-27 07:20",
-      "family": "MODIS",
-      "vrp": 1.044,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-28 01:55",
-      "family": "MODIS",
-      "vrp": 1.996,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-29 02:35",
-      "family": "MODIS",
-      "vrp": 2.01,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-30 01:35",
-      "family": "MODIS",
-      "vrp": 3.037,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-30 03:15",
-      "family": "MODIS",
-      "vrp": 6.163,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-30 07:35",
-      "family": "MODIS",
-      "vrp": 1.505,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-31 06:35",
-      "family": "MODIS",
-      "vrp": 14.101,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-31 08:15",
-      "family": "MODIS",
-      "vrp": 9.463,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-01 02:55",
-      "family": "MODIS",
-      "vrp": 1.242,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-01 07:15",
-      "family": "MODIS",
-      "vrp": 0.804,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-02 01:55",
-      "family": "MODIS",
-      "vrp": 3.007,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-03 06:55",
-      "family": "MODIS",
-      "vrp": 0.664,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-04 01:35",
-      "family": "MODIS",
-      "vrp": 1.518,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-04 03:15",
-      "family": "MODIS",
-      "vrp": 2.465,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-04 07:30",
-      "family": "MODIS",
-      "vrp": 0.47,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-06 02:55",
-      "family": "MODIS",
-      "vrp": 1.242,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-06 07:10",
-      "family": "MODIS",
-      "vrp": 1.096,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-07 07:50",
-      "family": "MODIS",
-      "vrp": 1.459,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-08 02:35",
-      "family": "MODIS",
-      "vrp": 0.963,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-08 06:50",
-      "family": "MODIS",
-      "vrp": 3.028,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-09 07:25",
-      "family": "MODIS",
-      "vrp": 0.526,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-11 07:05",
-      "family": "MODIS",
-      "vrp": 0.258,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-13 02:35",
-      "family": "MODIS",
-      "vrp": 0.48,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-13 06:45",
-      "family": "MODIS",
-      "vrp": 6.268,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-13 08:20",
-      "family": "MODIS",
-      "vrp": 4.221,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-14 01:35",
-      "family": "MODIS",
-      "vrp": 4.596,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-14 03:10",
-      "family": "MODIS",
-      "vrp": 5.481,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-14 07:20",
-      "family": "MODIS",
-      "vrp": 0.779,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-16 02:55",
-      "family": "MODIS",
-      "vrp": 3.682,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-17 07:40",
-      "family": "MODIS",
-      "vrp": 0.512,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-18 02:35",
-      "family": "MODIS",
-      "vrp": 0.318,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-18 06:40",
-      "family": "MODIS",
-      "vrp": 4.626,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-18 08:15",
-      "family": "MODIS",
-      "vrp": 3.959,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-19 07:15",
-      "family": "MODIS",
-      "vrp": 0.417,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-20 07:55",
-      "family": "MODIS",
-      "vrp": 0.704,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-21 06:55",
-      "family": "MODIS",
-      "vrp": 2.819,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-22 07:30",
-      "family": "MODIS",
-      "vrp": 0.465,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-23 02:30",
-      "family": "MODIS",
-      "vrp": 1.106,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-24 03:10",
-      "family": "MODIS",
-      "vrp": 2.379,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-24 07:10",
-      "family": "MODIS",
-      "vrp": 0.631,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": 9.68
-    },
-    {
-      "dt": "2026-02-25 02:15",
-      "family": "MODIS",
-      "vrp": 0.62,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-25 07:50",
-      "family": "MODIS",
-      "vrp": 0.844,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-26 08:25",
-      "family": "MODIS",
-      "vrp": 7.331,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-28 02:30",
-      "family": "MODIS",
-      "vrp": 0.472,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-28 08:05",
-      "family": "MODIS",
-      "vrp": 2.963,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-03 02:50",
-      "family": "MODIS",
-      "vrp": 2.383,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-04 07:20",
-      "family": "MODIS",
-      "vrp": 0.662,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-06 01:30",
-      "family": "MODIS",
-      "vrp": 4.723,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-06 03:10",
-      "family": "MODIS",
-      "vrp": 5.229,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-06 07:00",
-      "family": "MODIS",
-      "vrp": 3.219,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-07 02:10",
-      "family": "MODIS",
-      "vrp": 1.559,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-07 07:40",
-      "family": "MODIS",
-      "vrp": 1.337,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-08 02:50",
-      "family": "MODIS",
-      "vrp": 3.436,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-08 06:40",
-      "family": "MODIS",
-      "vrp": 6.396,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-08 08:15",
-      "family": "MODIS",
-      "vrp": 2.672,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-09 07:15",
-      "family": "MODIS",
-      "vrp": 3.483,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-10 02:30",
-      "family": "MODIS",
-      "vrp": 0.7,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-11 06:55",
-      "family": "MODIS",
-      "vrp": 5.006,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-12 02:10",
-      "family": "MODIS",
-      "vrp": 0.875,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-12 07:35",
-      "family": "MODIS",
-      "vrp": 1.115,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-13 08:10",
-      "family": "MODIS",
-      "vrp": 1.547,
-      "raw_sensor": "MODIS_AQUA",
+      "dt": "2026-04-08 06:18",
+      "family": "VIIRS",
+      "vrp": 0.456,
+      "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
@@ -2998,15 +2404,6 @@
       "dt": "2026-03-14 07:10",
       "family": "MODIS",
       "vrp": 0.459,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-15 07:50",
-      "family": "MODIS",
-      "vrp": 0.481,
       "raw_sensor": "MODIS_AQUA",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
@@ -3031,316 +2428,10 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-03-17 02:10",
-      "family": "MODIS",
-      "vrp": 0.753,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-19 07:05",
-      "family": "MODIS",
-      "vrp": 1.41,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-20 02:30",
-      "family": "MODIS",
-      "vrp": 0.765,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-20 07:45",
-      "family": "MODIS",
-      "vrp": 1.461,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-21 01:30",
-      "family": "MODIS",
-      "vrp": 4.084,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-21 03:10",
-      "family": "MODIS",
-      "vrp": 3.93,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-21 08:20",
-      "family": "MODIS",
-      "vrp": 3.837,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-22 02:10",
-      "family": "MODIS",
-      "vrp": 0.378,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-22 07:20",
-      "family": "MODIS",
-      "vrp": 0.633,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-23 02:50",
-      "family": "MODIS",
-      "vrp": 3.794,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-03-24 01:50",
       "family": "MODIS",
       "vrp": 0.714,
       "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-25 02:30",
-      "family": "MODIS",
-      "vrp": 0.831,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-25 07:40",
-      "family": "MODIS",
-      "vrp": 0.472,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-26 03:05",
-      "family": "MODIS",
-      "vrp": 8.234,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-26 08:15",
-      "family": "MODIS",
-      "vrp": 2.637,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-27 07:15",
-      "family": "MODIS",
-      "vrp": 1.498,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-28 02:45",
-      "family": "MODIS",
-      "vrp": 2.238,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-28 07:55",
-      "family": "MODIS",
-      "vrp": 1.115,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-29 06:55",
-      "family": "MODIS",
-      "vrp": 0.928,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-30 02:25",
-      "family": "MODIS",
-      "vrp": 1.643,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-30 07:30",
-      "family": "MODIS",
-      "vrp": 1.252,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-31 01:30",
-      "family": "MODIS",
-      "vrp": 6.361,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-31 03:05",
-      "family": "MODIS",
-      "vrp": 16.286,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-31 08:10",
-      "family": "MODIS",
-      "vrp": 1.56,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-04-01 02:10",
-      "family": "MODIS",
-      "vrp": 0.701,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-04-02 02:45",
-      "family": "MODIS",
-      "vrp": 2.202,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-04-02 07:50",
-      "family": "MODIS",
-      "vrp": 1.541,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-04-03 06:50",
-      "family": "MODIS",
-      "vrp": 8.383,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-04-04 02:25",
-      "family": "MODIS",
-      "vrp": 0.37,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-04-04 07:25",
-      "family": "MODIS",
-      "vrp": 0.436,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-04-05 03:05",
-      "family": "MODIS",
-      "vrp": 18.853,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-04-06 02:05",
-      "family": "MODIS",
-      "vrp": 0.385,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-04-06 07:05",
-      "family": "MODIS",
-      "vrp": 2.225,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-04-07 02:45",
-      "family": "MODIS",
-      "vrp": 2.154,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-04-07 07:45",
-      "family": "MODIS",
-      "vrp": 0.994,
-      "raw_sensor": "MODIS_AQUA",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
@@ -4696,6 +3787,26 @@
       "fp_class": "fp_vent_only"
     },
     {
+      "dt": "2026-04-08 06:00",
+      "family": "VIIRS375",
+      "vrp": 0.217,
+      "raw_sensor": "VIIRS_SNPP",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-04-08 06:18",
+      "family": "VIIRS375",
+      "vrp": 0.19,
+      "raw_sensor": "VIIRS_NOAA20",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
       "dt": "2026-01-19 06:00",
       "family": "VIIRS",
       "vrp": 0.359,
@@ -5836,700 +4947,20 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-01-19 07:10",
-      "family": "MODIS",
-      "vrp": 0.78,
-      "raw_sensor": "MODIS_AQUA",
+      "dt": "2026-04-08 06:00",
+      "family": "VIIRS",
+      "vrp": 0.621,
+      "raw_sensor": "VIIRS_SNPP_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-01-20 01:35",
-      "family": "MODIS",
-      "vrp": 2.681,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-20 07:45",
-      "family": "MODIS",
-      "vrp": 1.374,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-21 02:15",
-      "family": "MODIS",
-      "vrp": 1.171,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-21 06:45",
-      "family": "MODIS",
-      "vrp": 3.53,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-23 01:55",
-      "family": "MODIS",
-      "vrp": 2.013,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-24 02:35",
-      "family": "MODIS",
-      "vrp": 1.128,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": 8.51,
-      "fp_class": "fp_far"
-    },
-    {
-      "dt": "2026-01-25 03:15",
-      "family": "MODIS",
-      "vrp": 2.465,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-26 08:20",
-      "family": "MODIS",
-      "vrp": 4.38,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-27 07:20",
-      "family": "MODIS",
-      "vrp": 1.044,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-28 01:55",
-      "family": "MODIS",
-      "vrp": 1.996,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-29 02:35",
-      "family": "MODIS",
-      "vrp": 2.01,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-30 01:35",
-      "family": "MODIS",
-      "vrp": 3.037,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-30 03:15",
-      "family": "MODIS",
-      "vrp": 6.163,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-30 07:35",
-      "family": "MODIS",
-      "vrp": 1.505,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-31 06:35",
-      "family": "MODIS",
-      "vrp": 14.101,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-31 08:15",
-      "family": "MODIS",
-      "vrp": 9.463,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-01 02:55",
-      "family": "MODIS",
-      "vrp": 1.242,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-01 07:15",
-      "family": "MODIS",
-      "vrp": 0.804,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-02 01:55",
-      "family": "MODIS",
-      "vrp": 3.007,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-03 06:55",
-      "family": "MODIS",
-      "vrp": 0.664,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-04 01:35",
-      "family": "MODIS",
-      "vrp": 1.518,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-04 03:15",
-      "family": "MODIS",
-      "vrp": 2.465,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-04 07:30",
-      "family": "MODIS",
-      "vrp": 0.47,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-06 02:55",
-      "family": "MODIS",
-      "vrp": 1.242,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-06 07:10",
-      "family": "MODIS",
-      "vrp": 1.096,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-07 07:50",
-      "family": "MODIS",
-      "vrp": 1.459,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-08 02:35",
-      "family": "MODIS",
-      "vrp": 0.963,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-08 06:50",
-      "family": "MODIS",
-      "vrp": 3.028,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-09 07:25",
-      "family": "MODIS",
-      "vrp": 0.526,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-11 07:05",
-      "family": "MODIS",
-      "vrp": 0.258,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-13 02:35",
-      "family": "MODIS",
-      "vrp": 0.48,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-13 06:45",
-      "family": "MODIS",
-      "vrp": 6.268,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-13 08:20",
-      "family": "MODIS",
-      "vrp": 4.221,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-14 01:35",
-      "family": "MODIS",
-      "vrp": 4.596,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-14 03:10",
-      "family": "MODIS",
-      "vrp": 5.481,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-14 07:20",
-      "family": "MODIS",
-      "vrp": 0.779,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-16 02:55",
-      "family": "MODIS",
-      "vrp": 3.682,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-17 07:40",
-      "family": "MODIS",
-      "vrp": 0.512,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-18 02:35",
-      "family": "MODIS",
-      "vrp": 0.318,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-18 06:40",
-      "family": "MODIS",
-      "vrp": 4.626,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-18 08:15",
-      "family": "MODIS",
-      "vrp": 3.959,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-19 07:15",
-      "family": "MODIS",
-      "vrp": 0.417,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-20 07:55",
-      "family": "MODIS",
-      "vrp": 0.704,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-21 06:55",
-      "family": "MODIS",
-      "vrp": 2.819,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-22 07:30",
-      "family": "MODIS",
-      "vrp": 0.465,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-23 02:30",
-      "family": "MODIS",
-      "vrp": 1.106,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-24 03:10",
-      "family": "MODIS",
-      "vrp": 2.379,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-24 07:10",
-      "family": "MODIS",
-      "vrp": 0.631,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": 9.68,
-      "fp_class": "fp_far"
-    },
-    {
-      "dt": "2026-02-25 02:15",
-      "family": "MODIS",
-      "vrp": 0.62,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-25 07:50",
-      "family": "MODIS",
-      "vrp": 0.844,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-26 08:25",
-      "family": "MODIS",
-      "vrp": 7.331,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-28 02:30",
-      "family": "MODIS",
-      "vrp": 0.472,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-28 08:05",
-      "family": "MODIS",
-      "vrp": 2.963,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-03 02:50",
-      "family": "MODIS",
-      "vrp": 2.383,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-04 07:20",
-      "family": "MODIS",
-      "vrp": 0.662,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-06 01:30",
-      "family": "MODIS",
-      "vrp": 4.723,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-06 03:10",
-      "family": "MODIS",
-      "vrp": 5.229,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-06 07:00",
-      "family": "MODIS",
-      "vrp": 3.219,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-07 02:10",
-      "family": "MODIS",
-      "vrp": 1.559,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-07 07:40",
-      "family": "MODIS",
-      "vrp": 1.337,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-08 02:50",
-      "family": "MODIS",
-      "vrp": 3.436,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-08 06:40",
-      "family": "MODIS",
-      "vrp": 6.396,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-08 08:15",
-      "family": "MODIS",
-      "vrp": 2.672,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-09 07:15",
-      "family": "MODIS",
-      "vrp": 3.483,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-10 02:30",
-      "family": "MODIS",
-      "vrp": 0.7,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-11 06:55",
-      "family": "MODIS",
-      "vrp": 5.006,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-12 02:10",
-      "family": "MODIS",
-      "vrp": 0.875,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-12 07:35",
-      "family": "MODIS",
-      "vrp": 1.115,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-13 08:10",
-      "family": "MODIS",
-      "vrp": 1.547,
-      "raw_sensor": "MODIS_AQUA",
+      "dt": "2026-04-08 06:18",
+      "family": "VIIRS",
+      "vrp": 0.456,
+      "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
@@ -6539,16 +4970,6 @@
       "dt": "2026-03-14 07:10",
       "family": "MODIS",
       "vrp": 0.459,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-15 07:50",
-      "family": "MODIS",
-      "vrp": 0.481,
       "raw_sensor": "MODIS_AQUA",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
@@ -6576,350 +4997,10 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-03-17 02:10",
-      "family": "MODIS",
-      "vrp": 0.753,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-19 07:05",
-      "family": "MODIS",
-      "vrp": 1.41,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-20 02:30",
-      "family": "MODIS",
-      "vrp": 0.765,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-20 07:45",
-      "family": "MODIS",
-      "vrp": 1.461,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-21 01:30",
-      "family": "MODIS",
-      "vrp": 4.084,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-21 03:10",
-      "family": "MODIS",
-      "vrp": 3.93,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-21 08:20",
-      "family": "MODIS",
-      "vrp": 3.837,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-22 02:10",
-      "family": "MODIS",
-      "vrp": 0.378,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-22 07:20",
-      "family": "MODIS",
-      "vrp": 0.633,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-23 02:50",
-      "family": "MODIS",
-      "vrp": 3.794,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-03-24 01:50",
       "family": "MODIS",
       "vrp": 0.714,
       "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-25 02:30",
-      "family": "MODIS",
-      "vrp": 0.831,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-25 07:40",
-      "family": "MODIS",
-      "vrp": 0.472,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-26 03:05",
-      "family": "MODIS",
-      "vrp": 8.234,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-26 08:15",
-      "family": "MODIS",
-      "vrp": 2.637,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-27 07:15",
-      "family": "MODIS",
-      "vrp": 1.498,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-28 02:45",
-      "family": "MODIS",
-      "vrp": 2.238,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-28 07:55",
-      "family": "MODIS",
-      "vrp": 1.115,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-29 06:55",
-      "family": "MODIS",
-      "vrp": 0.928,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-30 02:25",
-      "family": "MODIS",
-      "vrp": 1.643,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-30 07:30",
-      "family": "MODIS",
-      "vrp": 1.252,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-31 01:30",
-      "family": "MODIS",
-      "vrp": 6.361,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-31 03:05",
-      "family": "MODIS",
-      "vrp": 16.286,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-31 08:10",
-      "family": "MODIS",
-      "vrp": 1.56,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-04-01 02:10",
-      "family": "MODIS",
-      "vrp": 0.701,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-04-02 02:45",
-      "family": "MODIS",
-      "vrp": 2.202,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-04-02 07:50",
-      "family": "MODIS",
-      "vrp": 1.541,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-04-03 06:50",
-      "family": "MODIS",
-      "vrp": 8.383,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-04-04 02:25",
-      "family": "MODIS",
-      "vrp": 0.37,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-04-04 07:25",
-      "family": "MODIS",
-      "vrp": 0.436,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-04-05 03:05",
-      "family": "MODIS",
-      "vrp": 18.853,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-04-06 02:05",
-      "family": "MODIS",
-      "vrp": 0.385,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-04-06 07:05",
-      "family": "MODIS",
-      "vrp": 2.225,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-04-07 02:45",
-      "family": "MODIS",
-      "vrp": 2.154,
-      "raw_sensor": "MODIS_TERRA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-04-07 07:45",
-      "family": "MODIS",
-      "vrp": 0.994,
-      "raw_sensor": "MODIS_AQUA",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
