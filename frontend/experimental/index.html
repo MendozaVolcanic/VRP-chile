@@ -688,11 +688,12 @@ function renderDetail() {
       const lv   = getLevel(vrp);
       const row  = el("tr");
       const dist = r.hotspot_dist_km ?? (r.anomaly_pixels && r.anomaly_pixels.length > 0 ? r.anomaly_pixels[0].dist_km : null);
+      const isVent = (r.n_vent_pixels ?? 0) > 0 && (r.n_anomalous_pixels ?? 0) === 0;
       [
         r.datetime_utc,
         r.sensor,
         vrp.toFixed(3),
-        dist != null ? dist.toFixed(1) : "—",
+        isVent ? "vent" : (dist != null ? dist.toFixed(1) : "—"),
         tmax != null ? tmax.toFixed(1) : "—",
         tbg  != null ? tbg.toFixed(1)  : "—",
         npx  != null ? String(npx)     : "—",
@@ -715,7 +716,7 @@ function renderDetail() {
   const mapLeg = el("div", "map-legend");
   [
     ["#e91e63", "VIIRS 375m"], ["#00bcd4", "VIIRS 750m"], ["#ff8c00", "MODIS"],
-    ["#ffc107", "Cráter/Vent"], ["#7a8fa6", "Radio búsqueda"]
+    ["#7c4dff", "Vent-path"], ["#ffc107", "Cráter/Vent"], ["#7a8fa6", "Radio búsqueda"]
   ].forEach(([color, label]) => {
     const item = el("div", "map-legend-item");
     const dot = el("div", "map-legend-dot");
@@ -763,8 +764,9 @@ function renderDetail() {
     }
 
     // Hotspot markers from detections — show ALL anomalous pixels per record
+    // Include vent-only detections (no hotspot_lat but vrp > 0 from vent-path)
     const hotspots = filtered
-      .filter(r => (r.vrp_mw ?? r.vrp_mir_mw ?? 0) > 0 && (r.hotspot_lat != null || (r.anomaly_pixels && r.anomaly_pixels.length > 0)))
+      .filter(r => (r.vrp_mw ?? r.vrp_mir_mw ?? 0) > 0)
       .sort((a, b) => a.datetime_utc.localeCompare(b.datetime_utc));
 
     const colorMap = {
@@ -778,30 +780,40 @@ function renderDetail() {
       const color = colorMap[r.sensor] || "#fff";
       const recencyOpacity = 0.3 + 0.7 * (i / Math.max(1, hotspots.length - 1));
 
-      // Use anomaly_pixels array if available (new format), else fallback to single hotspot
+      // Use anomaly_pixels array if available (new format), else fallback to single hotspot,
+      // else vent-only detection plotted at the volcano vent coordinates
+      const isVentOnly = r.hotspot_lat == null && (!r.anomaly_pixels || r.anomaly_pixels.length === 0);
       const pixels = (r.anomaly_pixels && r.anomaly_pixels.length > 0)
         ? r.anomaly_pixels
         : (r.hotspot_lat != null ? [{
             lat: r.hotspot_lat, lon: r.hotspot_lon,
             dist_km: r.hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
             vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0
-          }] : []);
+          }] : (v.vent_lat ? [{
+            lat: v.vent_lat, lon: v.vent_lon,
+            dist_km: 0, bt_k: r.t_max_k ?? r.t_max_i04_k,
+            vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0, vent_only: true
+          }] : []));
 
       pixels.forEach((px, pxIdx) => {
         const size = Math.max(4, Math.min(15, 4 + Math.log10(Math.max(px.vrp_mw, 0.001)) * 5));
         const isPrimary = pxIdx === 0;
         const pxOpacity = isPrimary ? recencyOpacity : recencyOpacity * 0.7;
+        const ventOnly = isVentOnly || px.vent_only;
 
         L.circleMarker([px.lat, px.lon], {
-          radius: size, color: isPrimary ? "#fff" : "#aaa",
-          weight: isPrimary ? 1.5 : 0.8,
-          fillColor: color, fillOpacity: pxOpacity,
+          radius: ventOnly ? 3 : size,
+          color: ventOnly ? "#7c4dff" : (isPrimary ? "#fff" : "#aaa"),
+          weight: ventOnly ? 1 : (isPrimary ? 1.5 : 0.8),
+          fillColor: ventOnly ? "#7c4dff" : color,
+          fillOpacity: ventOnly ? pxOpacity * 0.5 : pxOpacity,
+          dashArray: ventOnly ? "3,3" : null,
         }).addTo(map).bindPopup(
-          `<b>${r.sensor}</b>${!isPrimary ? " (pixel #" + (pxIdx+1) + ")" : ""}<br>` +
+          `<b>${r.sensor}</b>${ventOnly ? " (vent-path)" : (!isPrimary ? " (pixel #" + (pxIdx+1) + ")" : "")}<br>` +
           `${r.datetime_utc} UTC<br>` +
           `VRP: ${px.vrp_mw.toFixed(4)} MW<br>` +
           `BT: ${px.bt_k ?? "?"} K<br>` +
-          `Distancia: ${px.dist_km ?? "?"} km`
+          `Distancia: ${ventOnly ? "vent" : (px.dist_km ?? "?")} km`
         );
         allPts.push([px.lat, px.lon]);
       });
