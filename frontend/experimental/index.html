@@ -378,10 +378,12 @@ let charts = {};
 let allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
 
 // ── Base path detection (local preview vs GitHub Pages) ─────────────────────
+// Local dev:  /frontend/experimental/index.html  → need "/" to reach /data/
+// GitHub Pages: /VRP-chile/experimental/index.html → need "../" to reach /VRP-chile/data/
 const BASE_PATH = (() => {
   const path = window.location.pathname;
   if (path.includes('/frontend/')) return '/';
-  return '';
+  return '../';
 })();
 
 // ── Fetch ───────────────────────────────────────────────────────────────────
