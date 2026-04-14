@@ -30,24 +30,43 @@ def _solar_elevation(lat_deg: float, lon_deg: float, dt_utc: datetime) -> float:
     return math.degrees(math.asin(max(-1.0, min(1.0, sin_elev))))
 
 
-# Short names for each product in the NASA CMR catalog
+# Short names for each product in the NASA CMR catalog.
+# S12 fix: each product has a "standard" short_name (calibrated, ~3–5 day lag)
+# and an "nrt" fallback (LANCE near-real-time, ~3 h lag but only kept ~7–14 d).
+# search_granules() tries standard first (permanent calibration, better for
+# historical records) and falls back to NRT when standard is not yet
+# published — this closes the 3–5 day gap that we had previously.
+# MIROVA uses the same strategy; without the NRT fallback our last date
+# always lagged LAADS DAAC publication.
 PRODUCTS = {
     # MODIS 1km emissive bands
-    "MODIS_TERRA_L1B":        {"short_name": "MOD021KM",  "version": "6.1"},
-    "MODIS_TERRA_GEO":        {"short_name": "MOD03",     "version": "6.1"},
-    "MODIS_AQUA_L1B":         {"short_name": "MYD021KM",  "version": "6.1"},
-    "MODIS_AQUA_GEO":         {"short_name": "MYD03",     "version": "6.1"},
+    "MODIS_TERRA_L1B":        {"short_name": "MOD021KM",  "version": "6.1",
+                               "nrt": {"short_name": "MOD021KM_NRT", "version": "61"}},
+    "MODIS_TERRA_GEO":        {"short_name": "MOD03",     "version": "6.1",
+                               "nrt": {"short_name": "MOD03_NRT",     "version": "61"}},
+    "MODIS_AQUA_L1B":         {"short_name": "MYD021KM",  "version": "6.1",
+                               "nrt": {"short_name": "MYD021KM_NRT", "version": "61"}},
+    "MODIS_AQUA_GEO":         {"short_name": "MYD03",     "version": "6.1",
+                               "nrt": {"short_name": "MYD03_NRT",     "version": "61"}},
     # VIIRS 375m I-band (IMG product) — Band I04 @ 3.74µm
-    "VIIRS_SNPP_L1B":         {"short_name": "VNP02IMG",  "version": "2"},
-    "VIIRS_SNPP_GEO":         {"short_name": "VNP03IMG",  "version": "2"},
+    "VIIRS_SNPP_L1B":         {"short_name": "VNP02IMG",  "version": "2",
+                               "nrt": {"short_name": "VNP02IMG_NRT", "version": "2"}},
+    "VIIRS_SNPP_GEO":         {"short_name": "VNP03IMG",  "version": "2",
+                               "nrt": {"short_name": "VNP03IMG_NRT", "version": "2"}},
     # NOAA-20 (JPSS-1): try version 2.1 first, then 2, then 1
-    "VIIRS_NOAA20_L1B":       {"short_name": "VJ102IMG",  "versions": ["2.1", "2", "1"]},
-    "VIIRS_NOAA20_GEO":       {"short_name": "VJ103IMG",  "versions": ["2.1", "2", "1"]},
+    "VIIRS_NOAA20_L1B":       {"short_name": "VJ102IMG",  "versions": ["2.1", "2", "1"],
+                               "nrt": {"short_name": "VJ102IMG_NRT", "versions": ["2.1", "2"]}},
+    "VIIRS_NOAA20_GEO":       {"short_name": "VJ103IMG",  "versions": ["2.1", "2", "1"],
+                               "nrt": {"short_name": "VJ103IMG_NRT", "versions": ["2.1", "2"]}},
     # VIIRS 750m M-band (MOD product) — Band M13 @ 4.05µm (same as MIROVA VIIRS750)
-    "VIIRS_SNPP_MOD_L1B":     {"short_name": "VNP02MOD",  "version": "2"},
-    "VIIRS_SNPP_MOD_GEO":     {"short_name": "VNP03MOD",  "version": "2"},
-    "VIIRS_NOAA20_MOD_L1B":   {"short_name": "VJ102MOD",  "versions": ["2.1", "2", "1"]},
-    "VIIRS_NOAA20_MOD_GEO":   {"short_name": "VJ103MOD",  "versions": ["2.1", "2", "1"]},
+    "VIIRS_SNPP_MOD_L1B":     {"short_name": "VNP02MOD",  "version": "2",
+                               "nrt": {"short_name": "VNP02MOD_NRT", "version": "2"}},
+    "VIIRS_SNPP_MOD_GEO":     {"short_name": "VNP03MOD",  "version": "2",
+                               "nrt": {"short_name": "VNP03MOD_NRT", "version": "2"}},
+    "VIIRS_NOAA20_MOD_L1B":   {"short_name": "VJ102MOD",  "versions": ["2.1", "2", "1"],
+                               "nrt": {"short_name": "VJ102MOD_NRT", "versions": ["2.1", "2"]}},
+    "VIIRS_NOAA20_MOD_GEO":   {"short_name": "VJ103MOD",  "versions": ["2.1", "2", "1"],
+                               "nrt": {"short_name": "VJ103MOD_NRT", "versions": ["2.1", "2"]}},
 }
 
 
@@ -69,17 +88,31 @@ def search_granules(product_key: str, lat: float, lon: float,
     bbox = (lon - delta, lat - delta, lon + delta, lat + delta)
     date_str = date.strftime("%Y-%m-%d")
 
-    versions = p["versions"] if isinstance(p.get("versions"), list) else [p["version"]]
-    for ver in versions:
-        results = earthaccess.search_data(
-            short_name=p["short_name"],
-            version=ver,
-            bounding_box=bbox,
-            temporal=(date_str, date_str),
-            count=20,
-        )
-        if results:
-            return results
+    # S12: try STANDARD (calibrated, permanent) first, then NRT (LANCE, ~3h
+    # latency but only kept ~7-14 days). This closes the 3-5 day gap we
+    # previously had whenever the standard product hadn't been published yet.
+    attempts = [{
+        "short_name": p["short_name"],
+        "versions": p["versions"] if isinstance(p.get("versions"), list) else [p["version"]],
+    }]
+    if "nrt" in p:
+        nrt = p["nrt"]
+        attempts.append({
+            "short_name": nrt["short_name"],
+            "versions": nrt["versions"] if isinstance(nrt.get("versions"), list) else [nrt["version"]],
+        })
+
+    for attempt in attempts:
+        for ver in attempt["versions"]:
+            results = earthaccess.search_data(
+                short_name=attempt["short_name"],
+                version=ver,
+                bounding_box=bbox,
+                temporal=(date_str, date_str),
+                count=20,
+            )
+            if results:
+                return results
     return []
 
 
