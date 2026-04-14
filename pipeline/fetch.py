@@ -229,15 +229,14 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             # Pre-download nighttime filter — skip daytime granules entirely
             if nighttime_only:
                 before = len(l1b_granules)
-                # S12: debug=True prints each granule's begin-time + solar elev.
-                # Needed to diagnose whether "all daytime" means the NRT
-                # catalog genuinely has no night passes for this day, or
-                # whether the metadata field is being misread. Cheap (1
-                # line per granule, ~20 lines/day/volcano max).
-                l1b_granules = _filter_nighttime_granules(l1b_granules, lat, lon, debug=True)
-                skipped = before - len(l1b_granules)
-                if skipped:
-                    print(f"  {platform}: skipped {skipped} daytime granules before download")
+                l1b_granules = _filter_nighttime_granules(l1b_granules, lat, lon)
+                after = len(l1b_granules)
+                skipped = before - after
+                # S12: clearer log. "skipped X of Y" removes the ambiguity
+                # of the old "skipped X daytime" which sounded like the
+                # whole search was daytime when it was just a subset.
+                if before:
+                    print(f"  {platform}: kept {after} of {before} granules (night filter)")
                 if not l1b_granules:
                     continue
 
