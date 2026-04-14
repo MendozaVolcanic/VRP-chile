@@ -66,6 +66,75 @@ encaje con la tabla. Esto es vinculante, no opcional.
 aplica, la invoco **antes** de actuar. Si dudo si aplica, la invoco igual —
 el costo de invocar de más es bajo, el costo de saltarla es un fix mal hecho.
 
+## Glosario obligatorio (usar estos términos siempre en discusiones de resultados)
+
+Pensá la auditoría como un examen donde MIROVA es la hoja de respuestas y nuestro
+pipeline es el alumno. Cada noche-satélite de cada volcán es una pregunta.
+
+- **TP (True Positive)** — MIROVA detectó anomalía térmica esa noche y nosotros
+  también. Acertamos: hay actividad real y la vimos.
+- **FP (False Positive)** — Nosotros detectamos, MIROVA no. Ejemplos físicos
+  típicos: lago que retiene calor post-atardecer, nube fina que deforma el
+  background, ruido sobre nieve parcial. "Grito de fuego" sin fuego.
+- **FN (False Negative)** — MIROVA detectó, nosotros perdimos. **Lo más grave en
+  monitoreo**: un evento real sin alerta. Típico en señales sub-pixel (lava lake
+  Villarrica, 0.05–0.2 MW) que MIROVA ve integrando ROI completo.
+- **TN (True Negative)** — Ambos coinciden en que no hay nada. No se tabula.
+
+Métricas derivadas:
+- **Precision** = TP / (TP+FP). De lo que gritamos, cuánto era real. Baja =
+  ruido de falsa alarma, operador deja de confiar.
+- **Recall** = TP / (TP+FN). De lo real, cuánto detectamos. Baja = perdemos
+  eventos. **Para `mirova_equivalent` priorizamos recall sobre precision**.
+- **F1** = media armónica de ambas. Un solo número para comparar.
+- **Ratio ours/mirova** = VRP nuestro / VRP MIROVA en la misma noche. 1.0 =
+  calibración perfecta. Mediana sobre muchas noches = sesgo sistemático.
+
+Conceptos de detección:
+- **Tier A/B/C** — A ≥30 refs MIROVA (calibración), B 5–29 (corroboración), C <5
+  (solo NRT, no calibramos).
+- **vent-path** — detecta un solo pixel del cráter cuando supera background
+  (señal débil persistente). Más sensible, menos específico.
+- **eruption-path** — requiere clúster de varios pixels (señal fuerte). Más
+  específico, ciego a sub-pixel.
+- **σ_bg** — desvío estándar de T en el anillo de fondo. Se infla con terreno
+  heterogéneo (nieve parcial, orografía) y rompe gates `N·σ`.
+- **Path A / B / C** — A=umbral BT clásico; B=NTI absoluto (>-0.8);
+  C=NTI relativo (supera 3σ local, S11+).
+
+## Regla de publicación en dashboard (obligatorio)
+
+Cualquier cambio que modifique detecciones (nuevo perfil, ajuste de umbral,
+reproceso masivo, fix en pipeline/) **debe reflejarse en el dashboard antes
+de declarar el trabajo completo**. Flujo:
+
+1. Correr el reproceso/fix.
+2. Commit + push del JSON bajo `data/mirova_equivalent/`.
+3. Verificar que GitHub Pages publicó la nueva data (o que el JSON local abrió
+   correctamente en el dashboard) antes de cerrar el tema.
+4. Si el cambio es solo del perfil `experimental`, mencionarlo explícitamente
+   y no contaminar la vista operacional.
+
+El dashboard es el entregable final para Nicolás/SERNAGEOMIN. Auditoría en
+stdout es trabajo interno — no cuenta como resultado hasta que es visible.
+
+## Regla de delegación a subagentes (control de contexto)
+
+Para minimizar compactaciones automáticas ("session continued..."):
+
+- **Lecturas exploratorias** de archivos >500 líneas o de múltiples archivos
+  relacionados → delegar a `Explore` subagent con pedido de resumen <500 tokens,
+  no cargar el archivo completo al contexto principal.
+- **Salidas de auditoría largas** (>200 líneas stdout) → leer directamente el
+  JSON del snapshot (`experiments/audit_s*/Volcano.json`) en vez de reimprimir
+  el stdout crudo.
+- **Investigaciones paralelas** (2+ volcanes independientes, 2+ RF a la vez)
+  → `dispatching-parallel-agents`, cada rama en su propio contexto.
+- **Estado entre sesiones** → memoria (`MEMORY.md` + archivos) en vez de
+  re-derivar al inicio de cada sesión.
+- No re-leer archivos ya leídos en la misma sesión salvo que haya cambio
+  observable.
+
 ## Constraints técnicos
 - **pyhdf roto en Windows** → MODIS solo corre en GitHub Actions Linux.
 - NASA LANCE NRT ~3h latencia.
