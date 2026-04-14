@@ -275,6 +275,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     vrp_mir_mw = 0.0
     t_bg_i04 = float("nan")
     t_max_i04 = float("nan")
+    std_bg_i04 = float("nan")  # S12: needed for vent-path sigma gating
     n_anomalous = 0
     n_bt_path = 0
     n_nti_path = 0
@@ -290,6 +291,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         if len(bg_vals) >= 10:
             t_bg_i04 = float(np.median(bg_vals))
             std_bg = float(np.std(bg_vals))
+            std_bg_i04 = std_bg  # S12: save for vent-path sigma gating
             threshold_mir = max(ANOMALY_THRESHOLD_K, N_SIGMA_MIR * std_bg)
 
             roi_bt_full = np.where(roi_mask & ~np.isnan(bt), bt, np.nan)
@@ -414,7 +416,12 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 flat_idx = np.nanargmax(vent_bt_2d)
                 r_vent, c_vent = np.unravel_index(flat_idx, vent_bt_2d.shape)
                 t_max_vent = float(vent_bt_2d[r_vent, c_vent])
-                if t_max_vent > (t_bg_i04 + VENT_THRESHOLD_K):
+                # S12 fix F1: apply sigma gating (N_SIGMA_VENT was imported
+                # but never used — the fixed 1K threshold fired on every
+                # overpass where the crater was slightly warmer than background,
+                # producing ~85% of all FPs system-wide).
+                vent_thresh = max(VENT_THRESHOLD_K, N_SIGMA_VENT * std_bg_i04) if not np.isnan(std_bg_i04) else VENT_THRESHOLD_K
+                if t_max_vent > (t_bg_i04 + vent_thresh):
                     # Wooster MIR radiance with scan-angle corrected pixel area
                     L_vent = bt_to_spectral_radiance(np.float64(t_max_vent), I04_LAMBDA)
                     L_bg_vent = bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA)

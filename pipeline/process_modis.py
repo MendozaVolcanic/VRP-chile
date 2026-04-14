@@ -76,6 +76,7 @@ from pipeline.profile import (
     VENT_THRESHOLD_K,
     MODIS_VENT_THRESHOLD_K,
     MODIS_VENT_VRP_FLOOR_MW,
+    N_SIGMA_VENT,
 )
 
 # Indices of bands 21 and 22 within EV_1KM_Emissive
@@ -370,7 +371,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                 t_max_vent = float(vent_bt[r_vent, c_vent])
                 # Session 12: MODIS uses its own higher threshold (2.5K in experimental)
                 # to compensate for 1km pixel dilution (SNR 2.5× vs VIIRS 4-5×).
-                if t_max_vent > (t_bg + MODIS_VENT_THRESHOLD_K):
+                # Fix F1: also apply sigma gating (same as VIIRS).
+                modis_vent_thresh = max(MODIS_VENT_THRESHOLD_K, N_SIGMA_VENT * std_bg)
+                if t_max_vent > (t_bg + modis_vent_thresh):
                     L_vent = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_max_vent)) - 1)))
                     L_bg_vent = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bg)) - 1)))
                     vent_area = float(pixel_areas[r_vent, c_vent])

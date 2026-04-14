@@ -47,9 +47,17 @@ from statistics import median, quantiles
 
 REPO = Path(__file__).parent.parent
 DATA_DIR = REPO / "data"
-OURS_DIR = DATA_DIR / "mirova_equivalent"
+
+# Profile selection via --profile flag (parsed early for module-level constants)
+import sys as _sys
+_profile = "mirova_equivalent"
+for _i, _a in enumerate(_sys.argv):
+    if _a == "--profile" and _i + 1 < len(_sys.argv):
+        _profile = _sys.argv[_i + 1]
+
+OURS_DIR = DATA_DIR / _profile
 MIROVA_DIR = DATA_DIR / "mirova"
-OUT_DIR = REPO / "experiments" / "audit_s10"
+OUT_DIR = REPO / "experiments" / (f"audit_s12_{_profile}" if _profile != "mirova_equivalent" else "audit_s10")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # OCR reference CSV — secondary source for reclassifying FPs
@@ -676,6 +684,8 @@ def main():
     g.add_argument("--volcano", help="Single volcano stem")
     g.add_argument("--tier", choices=["A", "B", "C", "all"], help="Tier to audit")
     g.add_argument("--all", action="store_true", help="Audit all volcanoes")
+    p.add_argument("--profile", default="mirova_equivalent",
+                   help="Data profile to audit (mirova_equivalent or experimental)")
     args = p.parse_args()
 
     if args.volcano:
