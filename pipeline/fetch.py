@@ -144,10 +144,16 @@ def download_granules(granules: list, dest_dir: Path) -> list[Path]:
     return [Path(p) for p in paths if Path(p).exists()]
 
 
-def _filter_nighttime_granules(granules: list, lat: float, lon: float) -> list:
+def _filter_nighttime_granules(granules: list, lat: float, lon: float,
+                                 debug: bool = False) -> list:
     """Filter granule list to only nighttime passes (solar elevation < 0).
     This prevents downloading daytime granules that would be discarded later,
     saving ~50% of bandwidth.
+
+    Set debug=True to print each granule's time+elevation. Useful when
+    diagnosing why NRT searches return only "daytime" — distinguishes
+    "catalog genuinely only has daytime passes" from "metadata field
+    points to the wrong time".
     """
     night = []
     for g in granules:
@@ -156,10 +162,15 @@ def _filter_nighttime_granules(granules: list, lat: float, lon: float) -> list:
             # Parse ISO datetime: "2026-01-01T05:36:00.000Z"
             dt = datetime.strptime(begin[:19], "%Y-%m-%dT%H:%M:%S")
             elev = _solar_elevation(lat, lon, dt)
+            if debug:
+                name = g.get("umm", {}).get("GranuleUR", "?")
+                print(f"    [nightfilter] {name[:70]} begin={begin[:19]} elev={elev:+.1f}deg")
             if elev < 0:
                 night.append(g)
-        except (KeyError, TypeError, ValueError):
-            night.append(g)  # Keep if can't determine
+        except (KeyError, TypeError, ValueError) as e:
+            if debug:
+                print(f"    [nightfilter] granule unparseable ({e}), keeping")
+            night.append(g)
     return night
 
 
@@ -218,7 +229,12 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             # Pre-download nighttime filter — skip daytime granules entirely
             if nighttime_only:
                 before = len(l1b_granules)
-                l1b_granules = _filter_nighttime_granules(l1b_granules, lat, lon)
+                # S12: debug=True prints each granule's begin-time + solar elev.
+                # Needed to diagnose whether "all daytime" means the NRT
+                # catalog genuinely has no night passes for this day, or
+                # whether the metadata field is being misread. Cheap (1
+                # line per granule, ~20 lines/day/volcano max).
+                l1b_granules = _filter_nighttime_granules(l1b_granules, lat, lon, debug=True)
                 skipped = before - len(l1b_granules)
                 if skipped:
                     print(f"  {platform}: skipped {skipped} daytime granules before download")
