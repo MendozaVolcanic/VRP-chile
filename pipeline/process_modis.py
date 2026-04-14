@@ -408,6 +408,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "diag_n_nti_path": n_nti_path,
         "sensor": "MODIS_TERRA" if "MOD0" in hdf_path.name else "MODIS_AQUA",
         "granule": hdf_path.name,
+        "product_version": "nrt" if "_NRT" in hdf_path.name else "standard",
         "datetime_utc": _parse_datetime(hdf_path.name),
     }
 

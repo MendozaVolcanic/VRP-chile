@@ -328,12 +328,18 @@ def main():
     elif args.date:
         dates = [datetime.strptime(args.date, "%Y-%m-%d")]
     else:
-        # Default: last 4 days (NASA LANCE NRT can have multi-day gaps;
-        # store.py deduplicates by (datetime_utc, sensor) so re-processing
-        # already-ingested dates is safe and cheap — the search returns fast
-        # when granules were already downloaded).
+        # Default: last 7 days. Two reasons:
+        # 1. NASA LANCE NRT can have multi-day publishing gaps; store.py
+        #    dedups by (datetime_utc, sensor) so re-processing is safe.
+        # 2. Standard L1B products (MOD021KM, VNP02IMG) are published 3-5
+        #    days after the overpass, replacing the LANCE NRT version.
+        #    A 7-day lookback gives the auto-upgrade logic in store.py
+        #    (NRT -> standard replacement) a full window to catch every
+        #    Standard granule when it lands, without needing a separate
+        #    weekly cron. Result: the historical archive converges to
+        #    100% Standard automatically.
         today = datetime.utcnow()
-        dates = [today - timedelta(days=d) for d in range(4, 0, -1)]
+        dates = [today - timedelta(days=d) for d in range(7, 0, -1)]
 
     nighttime_only = not args.no_night_filter
     if nighttime_only:

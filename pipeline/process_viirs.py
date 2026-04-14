@@ -456,6 +456,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "t_max_i05_k": round(t_max_i05, 2) if not np.isnan(t_max_i05) else None,
         "sensor": sensor,
         "granule": name,
+        "product_version": "nrt" if "_NRT" in name else "standard",
         "datetime_utc": _parse_datetime(name),
     }
 

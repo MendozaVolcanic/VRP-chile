@@ -75,6 +75,27 @@ def auth():
     earthaccess.login(strategy="environment")
 
 
+def product_version_from_granule(filename: str) -> str:
+    """
+    Return "nrt" if the granule filename corresponds to a LANCE-NRT product,
+    "standard" otherwise.
+
+    NRT filenames contain the substring "_NRT" in the short_name prefix, e.g.
+    MOD021KM_NRT.A2026100.0215.061.2026100061218.hdf
+    VNP02IMG_NRT.A2026103.0554.002.2026103122413.nc
+
+    Standard filenames do not:
+    MOD021KM.A2026001.0225.061.2026001131216.hdf
+    VJ102IMG.A2026099.0554.021.2026099122413.nc
+
+    Used by process_*.py to tag each record with its data source so the
+    historical archive can be audited for NRT vs Standard provenance, and
+    so the weekly auto-upgrade cron can identify records to replace when
+    Standard becomes available.
+    """
+    return "nrt" if "_NRT" in filename else "standard"
+
+
 def search_granules(product_key: str, lat: float, lon: float,
                     radius_km: float, date: datetime) -> list:
     """

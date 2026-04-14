@@ -118,10 +118,24 @@ def append_record(volcano_name: str, record: dict,
         for i, r in enumerate(store["records"])
     }
     if key in existing_idx:
-        if overwrite:
+        existing = store["records"][existing_idx[key]]
+        # S12: auto-upgrade NRT -> standard. If the previously stored record
+        # came from a LANCE-NRT granule and the new one is a definitive
+        # Standard product, replace it even without overwrite=True. This
+        # lets the regular 6-hourly NRT cron automatically consolidate the
+        # historical archive to Standard once NASA publishes the L1B,
+        # typically 3-5 days after the overpass. No separate weekly cron
+        # needed, no records lost, no bias accumulated.
+        is_upgrade = (
+            existing.get("product_version") == "nrt"
+            and record.get("product_version") == "standard"
+        )
+        if overwrite or is_upgrade:
             store["records"][existing_idx[key]] = record
             store["records"].sort(key=lambda r: r.get("datetime_utc", ""))
             _save(volcano_name, store)
+            if is_upgrade and not overwrite:
+                print(f"  STORE upgrade NRT->standard: {key[0]} {key[1]}")
     else:
         store["records"].append(record)
         store["records"].sort(key=lambda r: r.get("datetime_utc", ""))

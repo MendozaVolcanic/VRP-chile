@@ -404,3 +404,52 @@ had zero real thermal records and are NOT calibratable volcanoes at all.
 or contaminated refs remain qualitatively correct (FPs exist, vent_path
 issue exists) but specific ratios/counts are suspect and must be recomputed
 against clean refs in `AUDIT_S9_baseline.md`.
+
+---
+
+## L12.1 — LANCE NRT vs Standard: gap de datos operacional y mezcla de productos
+
+**Contexto**: en S12, al investigar por qué MIROVA mostraba data hasta Apr 14
+para Isluga mientras nuestra DB cortaba en Apr 9, descubrí un bug de
+configuración silencioso en `fetch.py`.
+
+**Lección**:
+- Los productos L1B de NASA existen en **dos líneas paralelas**:
+  - **Standard** (ej. `VNP02IMG` v2, `MOD021KM` v6.1): calibrado definitivo,
+    publicado 3–5 días post-overpass en LAADS DAAC, permanente.
+  - **NRT / LANCE** (ej. `VNP02IMG_NRT`, `MOD021KM_NRT`): calibración
+    preliminar, publicado ~3h post-overpass, retenido solo 7–14 días.
+- Hasta S12, nuestro `fetch.py` solo pedía Standard. Los últimos 3–5 días
+  **nunca aparecían en la DB** hasta que Standard se publicara. MIROVA y
+  todos los pipelines operacionales usan NRT como fuente primaria para la
+  ventana reciente.
+- **Diferencia física NRT↔Standard**: <0.1 K en BT emisivo, ~100 m extra
+  de geolocalización en NRT. Para VRP volcánico (anomalías de varios K y
+  pixels de 375 m–1 km) el impacto es <1% — despreciable vs varianza
+  observada del ratio (~50%).
+- **Las refs MIROVA que scrapeamos son NRT** (es lo que mirovaweb.it
+  publica en tiempo real). Esto significa que todas nuestras auditorías
+  hasta S12 comparaban "nuestro Standard" vs "MIROVA NRT" con ~1% de
+  sesgo sistemático. No invalida nada — está muy por debajo del ruido.
+
+**Fix S12 (`bf75df4`, `process_*.py`, `store.py`)**:
+1. `fetch.py` ahora intenta Standard primero, cae a NRT como fallback.
+   Cierra el gap de 3–5 días sin sacrificar calibración histórica.
+2. Cada record lleva un nuevo campo `product_version: "standard" | "nrt"`.
+   Los records viejos sin el campo se asumen Standard (así son).
+3. `store.py` hace auto-upgrade: si llega un record Standard para una fecha
+   que ya tenía NRT, lo reemplaza aunque `overwrite=False`. Resultado: el
+   cron regular de 6h consolida NRT→Standard automáticamente.
+4. `run_pipeline.py` amplía el default a 7 días de lookback (antes 4),
+   dándole al upgrade logic ventana completa para detectar Standard cuando
+   aparece.
+
+**Regla operacional**:
+- Cualquier auditoría futura que quiera pureza de fuente puede filtrar por
+  `product_version == "standard"` (el histórico completo ya es Standard,
+  solo los últimos 3–5 días pueden ser NRT transitorios).
+- **No re-scrapear refs MIROVA** con intención de homogeneizar a Standard.
+  MIROVA opera en NRT operacionalmente y SERNAGEOMIN toma decisiones sobre
+  NRT, no sobre Standard. Comparar contra NRT es lo correcto.
+- Si en el futuro MIROVA u otra fuente publica sus refs con fecha de
+  capture y product version, conviene preservar esa metadata.
