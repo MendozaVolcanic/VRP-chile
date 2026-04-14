@@ -34,6 +34,15 @@ thresholds:
   # MODIS extras
   cloud_mask_bt_k: 260.0
   max_sigma_component_k: 7.0
+  # S12 F1b: cap on the sigma contribution for VENT-path gating.
+  # Without this, high-sigma backgrounds (Tupungatito orográfico,
+  # Lastarria nieve parcial) produced effective vent thresholds of
+  # 6–10 K, which killed real weak signals of 1–2 K ΔT. The cap
+  # preserves noise protection (max(1K, N·σ)) at volcanoes with
+  # clean bg while releasing volcanoes with noisy bg. 3K is 1/2
+  # of the eruption-path cap (7K) because vent-path is already
+  # more permissive by design.
+  max_vent_sigma_contrib_k: 3.0
   # Path C parameters (inactive in this profile but defined for schema parity)
   nti_rel_n_sigma: 3.0
   nti_rel_min_floor: 0.005

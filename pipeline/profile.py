@@ -62,6 +62,10 @@ NTI_K1_NIGHT: float = float(_t["nti_k1_night"])
 NTI_BT_SANITY_K: float = float(_t["nti_bt_sanity_k"])
 CLOUD_MASK_BT_K: float = float(_t.get("cloud_mask_bt_k", 260.0))
 MAX_SIGMA_COMPONENT_K: float = float(_t.get("max_sigma_component_k", 7.0))
+# S12 F1b: cap on sigma contribution for VENT-path threshold. Prevents
+# orographically-noisy backgrounds (Tupungatito, Lastarria) from inflating
+# the effective gate beyond real sub-pixel signal magnitude (1–3 K).
+MAX_VENT_SIGMA_CONTRIB_K: float = float(_t.get("max_vent_sigma_contrib_k", 3.0))
 # Session 12: configurable Path C sigma and MODIS vent threshold
 NTI_REL_N_SIGMA: float = float(_t.get("nti_rel_n_sigma", 3.0))
 NTI_REL_MIN_FLOOR: float = float(_t.get("nti_rel_min_floor", 0.005))

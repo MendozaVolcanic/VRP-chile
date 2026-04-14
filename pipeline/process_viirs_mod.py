@@ -56,6 +56,7 @@ from pipeline.profile import (
     NTI_REL_N_SIGMA,
     NTI_REL_MIN_FLOOR,
     N_SIGMA_VENT,
+    MAX_VENT_SIGMA_CONTRIB_K,
 )
 
 # M-band wavelengths (µm)
@@ -366,8 +367,12 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 r_vent, c_vent = np.unravel_index(flat_idx, vent_bt.shape)
                 t_max_vent = float(vent_bt[r_vent, c_vent])
                 # S12 fix F1: sigma gating — reject vent detections within
-                # N_SIGMA_VENT standard deviations of background noise
-                vent_thresh = max(VENT_THRESHOLD_K, N_SIGMA_VENT * std_bg)
+                # N_SIGMA_VENT standard deviations of background noise.
+                # S12 fix F1b: cap the sigma contribution at
+                # MAX_VENT_SIGMA_CONTRIB_K to prevent orographically-noisy
+                # backgrounds from inflating the gate above real weak signal.
+                sigma_contrib = min(N_SIGMA_VENT * std_bg, MAX_VENT_SIGMA_CONTRIB_K)
+                vent_thresh = max(VENT_THRESHOLD_K, sigma_contrib)
                 if t_max_vent > (t_bg + vent_thresh):
                     L_vent = bt_to_spectral_radiance(np.float64(t_max_vent), M13_LAMBDA)
                     L_bg_vent = bt_to_spectral_radiance(np.float64(t_bg), M13_LAMBDA)

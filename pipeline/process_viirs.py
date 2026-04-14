@@ -61,6 +61,7 @@ from pipeline.profile import (
     N_SIGMA_TIR,
     VENT_THRESHOLD_K,
     N_SIGMA_VENT,
+    MAX_VENT_SIGMA_CONTRIB_K,
     BG_INNER_KM,
     BG_OUTER_KM,
     NTI_K1_NIGHT,
@@ -420,7 +421,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 # but never used — the fixed 1K threshold fired on every
                 # overpass where the crater was slightly warmer than background,
                 # producing ~85% of all FPs system-wide).
-                vent_thresh = max(VENT_THRESHOLD_K, N_SIGMA_VENT * std_bg_i04) if not np.isnan(std_bg_i04) else VENT_THRESHOLD_K
+                # S12 fix F1b: CAP sigma contribution (MAX_VENT_SIGMA_CONTRIB_K).
+                # Without the cap, orographically-complex backgrounds produced
+                # thresholds of 6–10 K that killed real 1–2 K sub-pixel signals
+                # at Tupungatito and Lastarria (recall drops 54%->10% and 76%->34%).
+                if not np.isnan(std_bg_i04):
+                    sigma_contrib = min(N_SIGMA_VENT * std_bg_i04, MAX_VENT_SIGMA_CONTRIB_K)
+                    vent_thresh = max(VENT_THRESHOLD_K, sigma_contrib)
+                else:
+                    vent_thresh = VENT_THRESHOLD_K
                 if t_max_vent > (t_bg_i04 + vent_thresh):
                     # Wooster MIR radiance with scan-angle corrected pixel area
                     L_vent = bt_to_spectral_radiance(np.float64(t_max_vent), I04_LAMBDA)
