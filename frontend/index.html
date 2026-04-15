@@ -343,10 +343,10 @@ const VOLCANOES = [
   { name: "Lascar",               display: "Láscar",                 region: "Antofagasta",   lat: -23.369, lon: -67.732, radius_km: 10, hasMirova: true,  vent_lat: -23.369, vent_lon: -67.732 },
   { name: "Lastarria",            display: "Lastarria",              region: "Atacama",        lat: -25.168, lon: -68.507, radius_km: 10, hasMirova: true,  vent_lat: -25.168, vent_lon: -68.507 },
   // === Zona Central SVZ ===
-  { name: "Tupungatito",          display: "Tupungatito",            region: "Valparaíso",    lat: -33.400, lon: -69.800, radius_km: 10, hasMirova: true,  vent_lat: -33.400, vent_lon: -69.800 },
+  { name: "Tupungatito",          display: "Tupungatito",            region: "Valparaíso",    lat: -33.400, lon: -69.800, radius_km: 10, hasMirova: true,  vent_lat: -33.389, vent_lon: -69.8264 },
   { name: "SanJose",              display: "San José",               region: "Metropolitana",  lat: -33.789, lon: -69.897, radius_km: 10 },
   { name: "Tinguiririca",         display: "Tinguiririca",           region: "O'Higgins",     lat: -34.814, lon: -70.352, radius_km: 10 },
-  { name: "PlanchonPeteroa",      display: "Planchón-Peteroa",       region: "Maule",         lat: -35.240, lon: -70.568, radius_km: 10, hasMirova: true,  vent_lat: -35.240, vent_lon: -70.568 },
+  { name: "PlanchonPeteroa",      display: "Planchón-Peteroa",       region: "Maule",         lat: -35.240, lon: -70.568, radius_km: 10, hasMirova: true,  vent_lat: -35.2411, vent_lon: -70.5733 },
   { name: "DescabezadoGrande",    display: "Descabezado Grande",     region: "Maule",         lat: -35.580, lon: -70.750, radius_km: 10 },
   { name: "CerroAzulQuizapu",     display: "Cerro Azul-Quizapu",     region: "Maule",         lat: -35.653, lon: -70.761, radius_km: 10 },
   { name: "LagunaDelMaule",       display: "Laguna del Maule",       region: "Maule",         lat: -36.020, lon: -70.580, radius_km: 15 },
@@ -365,7 +365,7 @@ const VOLCANOES = [
   { name: "Lanin",                display: "Lanín",                  region: "Araucanía",     lat: -39.633, lon: -71.503, radius_km: 10 },
   { name: "MochoChoshuenco",      display: "Mocho-Choshuenco",       region: "Los Ríos",      lat: -39.927, lon: -72.027, radius_km: 10 },
   { name: "CarranLosVenados",     display: "Carrán-Los Venados",     region: "Los Ríos",      lat: -40.350, lon: -72.070, radius_km: 10 },
-  { name: "PuyehueCordonCaulle",  display: "Puyehue–Cordón Caulle",  region: "Los Ríos",      lat: -40.590, lon: -72.117, radius_km: 15, hasMirova: true,  vent_lat: -40.585, vent_lon: -72.020 },
+  { name: "PuyehueCordonCaulle",  display: "Puyehue–Cordón Caulle",  region: "Los Ríos",      lat: -40.590, lon: -72.117, radius_km: 15, hasMirova: true,  vent_lat: -40.523, vent_lon: -72.137 },
   { name: "AntillancaCasablanca", display: "Antillanca-Casablanca",  region: "Los Lagos",     lat: -40.770, lon: -72.150, radius_km: 10 },
   { name: "Osorno",               display: "Osorno",                 region: "Los Lagos",     lat: -41.100, lon: -72.493, radius_km: 10 },
   { name: "Calbuco",              display: "Calbuco",                region: "Los Lagos",     lat: -41.330, lon: -72.614, radius_km: 10 },
@@ -687,7 +687,7 @@ function renderDetail() {
   const tbl = el("table","events-table");
   const thead = el("thead");
   const hrow = el("tr");
-  ["Fecha UTC", "Sensor", "VRP (MW)", "Dist (km)", "T max (K)", "T fondo (K)", "Píxeles"].forEach(h => {
+  ["Fecha UTC", "Sensor", "VRP (MW)", "Dist (km)", "T max (°C)", "T fondo (°C)", "Píxeles"].forEach(h => {
     const th = el("th"); th.textContent = h; hrow.appendChild(th);
   });
   thead.appendChild(hrow);
@@ -714,13 +714,17 @@ function renderDetail() {
       const row  = el("tr");
       const dist = r.hotspot_dist_km ?? (r.anomaly_pixels && r.anomaly_pixels.length > 0 ? r.anomaly_pixels[0].dist_km : null);
       const isVent = (r.n_vent_pixels ?? 0) > 0 && (r.n_anomalous_pixels ?? 0) === 0;
+      // S12: mostrar en Celsius. La física L1B nace en Kelvin (BT =
+      // temperatura de brillo); convertimos en el display porque Celsius
+      // es lo que maneja el operador volcanológico.
+      const k2c = (k) => k != null ? (k - 273.15).toFixed(1) : "—";
       [
         r.datetime_utc,
         r.sensor,
         vrp.toFixed(3),
         isVent ? "vent" : (dist != null ? dist.toFixed(1) : "—"),
-        tmax != null ? tmax.toFixed(1) : "—",
-        tbg  != null ? tbg.toFixed(1)  : "—",
+        k2c(tmax),
+        k2c(tbg),
         npx  != null ? String(npx)     : "—",
       ].forEach((val, i) => {
         const td = el("td");
@@ -826,21 +830,43 @@ function renderDetail() {
         const pxOpacity = isPrimary ? recencyOpacity : recencyOpacity * 0.7;
         const ventOnly = isVentOnly || px.vent_only;
 
-        L.circleMarker([px.lat, px.lon], {
-          radius: ventOnly ? 5 : size,
+        // S12 fix: vent-only markers stack at the exact same coordinates
+        // (all at v.vent_lat/vent_lon), so only 1 dot is visible even if
+        // there are 20 detections. Spread them in a small concentric
+        // spiral around the vent — each detection gets a unique position
+        // ~50 to ~400 m from the vent. Angle = golden-ratio-based so the
+        // pattern fills uniformly regardless of count. Radius grows with
+        // index so older detections appear further out.
+        let mLat = px.lat, mLon = px.lon;
+        if (ventOnly) {
+          const GOLDEN = 2.3999632297286;  // golden angle (rad)
+          const baseRadiusM = 60;          // innermost ring
+          const stepM = 35;                // per-index radial increment
+          const angle = i * GOLDEN;
+          const radiusM = baseRadiusM + stepM * Math.sqrt(i);
+          // 1 degree lat ≈ 111.32 km; 1 degree lon ≈ 111.32 * cos(lat) km
+          const dLat = (radiusM / 111320) * Math.cos(angle);
+          const dLon = (radiusM / (111320 * Math.cos(mLat * Math.PI / 180))) * Math.sin(angle);
+          mLat += dLat;
+          mLon += dLon;
+        }
+
+        const tempC = (bt) => bt == null ? "?" : (bt - 273.15).toFixed(1) + "°C";
+        L.circleMarker([mLat, mLon], {
+          radius: ventOnly ? 6 : size,
           color: ventOnly ? "#b388ff" : (isPrimary ? "#fff" : "#aaa"),
-          weight: ventOnly ? 1.5 : (isPrimary ? 1.5 : 0.8),
+          weight: ventOnly ? 2 : (isPrimary ? 1.5 : 0.8),
           fillColor: ventOnly ? "#7c4dff" : color,
-          fillOpacity: ventOnly ? Math.max(pxOpacity * 0.6, 0.35) : pxOpacity,
-          dashArray: ventOnly ? "4,3" : null,
+          fillOpacity: ventOnly ? Math.max(pxOpacity * 0.85, 0.55) : pxOpacity,
+          dashArray: ventOnly ? "3,2" : null,
         }).addTo(map).bindPopup(
           `<b>${r.sensor}</b>${ventOnly ? " (vent-path)" : (!isPrimary ? " (pixel #" + (pxIdx+1) + ")" : "")}<br>` +
           `${r.datetime_utc} UTC<br>` +
           `VRP: ${px.vrp_mw.toFixed(4)} MW<br>` +
-          `BT: ${px.bt_k ?? "?"} K<br>` +
-          `Distancia: ${ventOnly ? "vent" : (px.dist_km ?? "?")} km`
+          `BT max: ${tempC(px.bt_k)}<br>` +
+          `Distancia: ${ventOnly ? "vent (en cráter)" : (px.dist_km ?? "?") + " km"}`
         );
-        allPts.push([px.lat, px.lon]);
+        allPts.push([mLat, mLon]);
       });
     });
 
