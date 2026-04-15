@@ -145,6 +145,11 @@
     }
     .events-table td { padding: 6px 10px; border-bottom: 1px solid rgba(30,58,92,0.5); }
     .events-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .events-table tr.row-selected td {
+      background: rgba(124,77,255,0.18);
+      border-left: 3px solid #7c4dff;
+    }
+    .events-table tr.row-selected td:first-child { border-left-width: 3px; }
     .vrp-cell { font-weight: 700; }
 
     .msg { text-align: center; padding: 60px; color: var(--muted); font-size: 0.88rem; }
@@ -705,6 +710,9 @@ function renderDetail() {
     td.style.textAlign = "center"; td.style.padding = "20px";
     row.appendChild(td); tbody.appendChild(row);
   } else {
+    // S12: tabla clickeable. Cada row guarda su key (datetime|sensor) y
+    // al hacer click busca el marker del mapa con la misma key, abre
+    // popup, hace zoom, y resalta visualmente la fila.
     recent.forEach(r => {
       const vrp = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
       const tmax = r.t_max_k ?? r.t_max_i04_k ?? null;
@@ -714,10 +722,22 @@ function renderDetail() {
       const row  = el("tr");
       const dist = r.hotspot_dist_km ?? (r.anomaly_pixels && r.anomaly_pixels.length > 0 ? r.anomaly_pixels[0].dist_km : null);
       const isVent = (r.n_vent_pixels ?? 0) > 0 && (r.n_anomalous_pixels ?? 0) === 0;
-      // S12: mostrar en Celsius. La física L1B nace en Kelvin (BT =
-      // temperatura de brillo); convertimos en el display porque Celsius
-      // es lo que maneja el operador volcanológico.
       const k2c = (k) => k != null ? (k - 273.15).toFixed(1) : "—";
+      const rowKey = `${r.datetime_utc}|${r.sensor}`;
+      row.dataset.key = rowKey;
+      row.style.cursor = "pointer";
+      row.addEventListener("click", () => {
+        if (!window._mapRefs || !window._mapRefs.markers) return;
+        // Clear previous selection on this table
+        tbody.querySelectorAll("tr.row-selected").forEach(r2 => r2.classList.remove("row-selected"));
+        row.classList.add("row-selected");
+        const marker = window._mapRefs.markers.get(rowKey);
+        if (marker && window._mapRefs.map) {
+          const latlng = marker.getLatLng();
+          window._mapRefs.map.setView(latlng, 14, { animate: true });
+          marker.openPopup();
+        }
+      });
       [
         r.datetime_utc,
         r.sensor,
@@ -767,6 +787,10 @@ function renderDetail() {
   setTimeout(() => {
     if (!document.getElementById("hotspot-map")) return;
     const map = L.map("hotspot-map", { zoomControl: true }).setView([v.lat, v.lon], 12);
+    // S12: registro de markers para el click-row-to-highlight feature.
+    // Key = "{datetime_utc}|{sensor}" del record.
+    const markersByKey = new Map();
+    window._mapRefs = { map, markers: markersByKey };
 
     L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
       attribution: "Esri World Imagery", maxZoom: 18,
@@ -852,7 +876,7 @@ function renderDetail() {
         }
 
         const tempC = (bt) => bt == null ? "?" : (bt - 273.15).toFixed(1) + "°C";
-        L.circleMarker([mLat, mLon], {
+        const marker = L.circleMarker([mLat, mLon], {
           radius: ventOnly ? 6 : size,
           color: ventOnly ? "#b388ff" : (isPrimary ? "#fff" : "#aaa"),
           weight: ventOnly ? 2 : (isPrimary ? 1.5 : 0.8),
@@ -866,6 +890,13 @@ function renderDetail() {
           `BT max: ${tempC(px.bt_k)}<br>` +
           `Distancia: ${ventOnly ? "vent (en cráter)" : (px.dist_km ?? "?") + " km"}`
         );
+        // S12: registrar SOLO el marker primario (pxIdx===0) para el
+        // click-row-to-highlight. Si el record tiene múltiples pixels,
+        // el primario es el más caliente. Esto es lo que la tabla
+        // representa en una fila.
+        if (isPrimary) {
+          markersByKey.set(`${r.datetime_utc}|${r.sensor}`, marker);
+        }
         allPts.push([mLat, mLon]);
       });
     });
