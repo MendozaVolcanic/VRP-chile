@@ -1,578 +1,577 @@
 volcanoes:
-  - name: PuyehueCordonCaulle
-    display_name: "Puyehue - Cordón Caulle"
-    lat: -40.590
-    lon: -72.117
-    radius_km: 15
-    gvp_id: 357150
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Persistent fumarolic/hydrothermal anomaly since 2011-2012 eruption"
-    # 2011 Cordón Caulle eruptive fissure, NNW of the main Puyehue summit.
-    # Session 9 (RF3) empirical analysis: 24/30 TPs cluster within 1.5 km of
-    # (-40.523, -72.137). Pre-S9 vent (-40.585, -72.020) was 12.0 km from this
-    # cluster — in the wrong direction (ESE instead of NNW). See
-    # experiments/ROOT_CAUSE_S9.md RF3 for the full evidence chain.
-    # S12 2026-04-15: coord exacta del lacolito según SERNAGEOMIN
-    # (Nicolás, geólogo de campo): -40.525499, -72.146137. Queda a
-    # ~0.8 km SW del centroide empírico S9; dentro del vent_radius_km
-    # de 3 km, así los records históricos mantienen su clasificación.
-    vent_lat: -40.525499
-    vent_lon: -72.146137
-    vent_radius_km: 3
-
-  - name: Villarrica
-    display_name: "Villarrica"
-    lat: -39.420
-    lon: -71.930
-    radius_km: 10
-    gvp_id: 357120
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Open lava lake, frequent thermal anomalies. Crater puntual."
-    # Summit crater with persistent lava lake — point source thermal anomaly.
-    # S12 2026-04-15: coord exacta del lava lake según Nicolás (SERNAGEOMIN
-    # criterio de campo): -39.420227, -71.939876. ~0.8 km O de la GVP
-    # summit coord, en el cráter activo real. Dentro del vent_radius_km=2.
-    vent_lat: -39.420227
-    vent_lon: -71.939876
-    vent_radius_km: 2
-
-  - name: Lascar
-    display_name: "Láscar"
-    lat: -23.369
-    lon: -67.732
-    radius_km: 10
-    gvp_id: 355100
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Frequent fumarolic activity and occasional eruptions. MIROVA avg dist 1.1km."
-    # Active crater with persistent fumarolic field.
-    # S12 2026-04-15: coord exacta del cráter activo según Nicolás:
-    # -23.362930, -67.731416. ~0.7 km N del centroide GVP.
-    vent_lat: -23.362930
-    vent_lon: -67.731416
-    vent_radius_km: 3
-
-  - name: Antuco
-    display_name: "Antuco"
-    lat: -37.406
-    lon: -71.349
-    radius_km: 10
-    gvp_id: 357080
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano 2979m. Horseshoe caldera."
-
-  - name: Copahue
-    display_name: "Copahue"
-    lat: -37.856
-    lon: -71.183
-    radius_km: 10
-    gvp_id: 357090
-    country: Chile/Argentina
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Active crater lake, recurring thermal unrest. Crater puntual."
-    # El Agrio crater — acidic lake with periodic thermal unrest
-    vent_lat: -37.856
-    vent_lon: -71.183
-    vent_radius_km: 2
-
-  # --- Volcanes nuevos (MIROVA-monitored) ---
-
-  - name: DescabezadoGrande
-    display_name: "Descabezado Grande"
-    lat: -35.580
-    lon: -70.750
-    radius_km: 10
-    gvp_id: 357050
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano 3953m. Ice-filled caldera. Last eruption 1933."
-
-  - name: CerroAzulQuizapu
-    display_name: "Cerro Azul - Quizapu"
-    lat: -35.653
-    lon: -70.761
-    radius_km: 10
-    gvp_id: 357060
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "1932 Plinian eruption VEI 5. SERNAGEOMIN Cat.1."
-
-  - name: LagunaDelMaule
-    display_name: "Laguna del Maule"
-    lat: -36.020
-    lon: -70.580
-    radius_km: 15
-    gvp_id: 357061
-    country: Chile/Argentina
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Volcanic field/caldera. Ongoing uplift ~20 cm/yr since 2007."
-
-  - name: NevadoDeLongavi
-    display_name: "Nevado de Longaví"
-    lat: -36.193
-    lon: -71.161
-    radius_km: 10
-    gvp_id: 357063
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Glacier-covered stratovolcano 3242m. Fumarolic."
-
-  - name: NevadosDeChillan
-    display_name: "Nevados de Chillán"
-    lat: -36.863
-    lon: -71.377
-    radius_km: 10
-    gvp_id: 357070
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Nicanor crater, active dome growth 2018-2024. Recent lava flows."
-    vent_lat: -36.863
-    vent_lon: -71.377
-    vent_radius_km: 2
-
-  - name: Callaqui
-    display_name: "Callaqui"
-    lat: -37.920
-    lon: -71.450
-    radius_km: 10
-    gvp_id: 357091
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Ice-capped stratovolcano. Last phreatic 1980."
-
-  - name: Lonquimay
-    display_name: "Lonquimay"
-    lat: -38.380
-    lon: -71.580
-    radius_km: 10
-    gvp_id: 357100
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano 2865m. 1988-1990 Navidad flank eruption."
-
-  - name: Tolhuaca
-    display_name: "Tolhuaca"
-    lat: -38.310
-    lon: -71.645
-    radius_km: 10
-    gvp_id: 357106
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano 2806m. Geothermal field."
-
-  - name: Llaima
-    display_name: "Llaima"
-    lat: -38.692
-    lon: -71.729
-    radius_km: 10
-    gvp_id: 357110
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "One of Chile's most active. Last eruption 2008-2009. Summit crater."
-    vent_lat: -38.692
-    vent_lon: -71.729
-    vent_radius_km: 2
-
-  - name: Sollipulli
-    display_name: "Sollipulli"
-    lat: -38.970
-    lon: -71.520
-    radius_km: 10
-    gvp_id: 357111
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Ice-filled caldera 4 km wide. Last eruption ~2950 BCE."
-
-  # --- Between Villarrica and PCC (SVZ sur) ---
-
-  - name: Quetrupillan
-    display_name: "Quetrupillán"
-    lat: -39.496
-    lon: -71.722
-    radius_km: 10
-    gvp_id: 357121
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano 2360m in Villarrica NP. Fumarolic."
-
-  - name: Lanin
-    display_name: "Lanín"
-    lat: -39.633
-    lon: -71.503
-    radius_km: 10
-    gvp_id: 357122
-    country: Chile/Argentina
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano 3747m. Border volcano. Holocene activity."
-
-  - name: MochoChoshuenco
-    display_name: "Mocho-Choshuenco"
-    lat: -39.927
-    lon: -72.027
-    radius_km: 10
-    gvp_id: 357130
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Ice-capped twin volcanoes. Last eruption 1937."
-
-  - name: CarranLosVenados
-    display_name: "Carrán-Los Venados"
-    lat: -40.350
-    lon: -72.070
-    radius_km: 10
-    gvp_id: 357140
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Volcanic field. Last phreatic eruption 1979."
-
-  # --- Zona Sur after PCC ---
-
-  - name: AntillancaCasablanca
-    display_name: "Antillanca-Casablanca"
-    lat: -40.770
-    lon: -72.150
-    radius_km: 10
-    gvp_id: 358001
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Volcanic group near Puyehue NP. Holocene eruptions."
-
-  - name: Osorno
-    display_name: "Osorno"
-    lat: -41.100
-    lon: -72.493
-    radius_km: 10
-    gvp_id: 358010
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano 2652m. Iconic cone. Last eruption 1869."
-
-  - name: Calbuco
-    display_name: "Calbuco"
-    lat: -41.330
-    lon: -72.614
-    radius_km: 10
-    gvp_id: 358020
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Major 2015 eruption VEI 4. SERNAGEOMIN Cat.1."
-
-  - name: YateHornopiren
-    display_name: "Yate-Hornopirén"
-    lat: -41.760
-    lon: -72.390
-    radius_km: 10
-    gvp_id: 358022
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Volcanic complex. Holocene activity."
-
-  - name: Huequi
-    display_name: "Huequi"
-    lat: -42.377
-    lon: -72.578
-    radius_km: 10
-    gvp_id: 358030
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano. Last eruption 1920. Fumarolic."
-
-  - name: Michinmahuida
-    display_name: "Michinmahuida"
-    lat: -42.790
-    lon: -72.440
-    radius_km: 10
-    gvp_id: 358040
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Glacier-covered stratovolcano. Last eruption ~1835."
-
-  - name: Chaiten
-    display_name: "Chaitén"
-    lat: -42.833
-    lon: -72.646
-    # S12 2026-04-15: radius 10 → 5 km para matchear el filtro MIROVA.
-    # El dominio a 10 km incluye features no-volcánicos (pueblo de Chaitén
-    # al SSW, bahías y lagos a 8-10 km). MIROVA usa 5 km para este volcán.
-    radius_km: 5
-    gvp_id: 358041
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Rhyolitic dome from 2008 eruption. Persistent fumarolic activity."
-    # S12 2026-04-15: Nicolás proporciona dos extremos del domo rhyolítico
-    # 2008 (longitud ~2 km):
-    #   tip SW: -42.834093, -72.653431
-    #   tip NE: -42.834870, -72.652344
-    # Centroide del domo: -42.8344815, -72.6528875. Subimos vent_radius_km
-    # de 2 a 3 km para cubrir los 2 km del domo con buffer pequeño, pero
-    # no tanto como para contaminar con ruido urbano (pueblo de Chaitén
-    # está a ~9 km SSW).
-    vent_lat: -42.8344815
-    vent_lon: -72.6528875
-    vent_radius_km: 3
-
-  # --- Zona Austral (SVZ sur) ---
-
-  - name: CorcovadoYanteles
-    display_name: "Corcovado-Yanteles"
-    lat: -43.183
-    lon: -72.800
-    radius_km: 10
-    gvp_id: 358050
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano 2300m. Holocene eruptions."
-
-  - name: Melimoyu
-    display_name: "Melimoyu"
-    lat: -44.080
-    lon: -72.880
-    radius_km: 10
-    gvp_id: 358052
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Ice-capped stratovolcano 2400m. Holocene eruptions."
-
-  - name: Mentolat
-    display_name: "Mentolat"
-    lat: -44.670
-    lon: -73.080
-    radius_km: 10
-    gvp_id: 358054
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano on island in Aysén fjords. Holocene eruptions."
-
-  - name: MacaCay
-    display_name: "Macá-Cay"
-    lat: -45.100
-    lon: -73.200
-    radius_km: 10
-    gvp_id: 358055
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Volcanic complex. 1991 possible eruption."
-
-  - name: Hudson
-    display_name: "Hudson"
-    lat: -45.900
-    lon: -72.970
-    radius_km: 15
-    gvp_id: 358057
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Major eruptions 1971, 1991 VEI 5. SERNAGEOMIN Cat.1. Ice-filled caldera."
-
-  - name: Tinguiririca
-    display_name: "Tinguiririca"
-    lat: -34.814
-    lon: -70.352
-    radius_km: 10
-    gvp_id: 357030
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano 4280m. Phreatic explosion 1994."
-
-  - name: PlanchonPeteroa
-    display_name: "Planchón-Peteroa"
-    lat: -35.240
-    lon: -70.568
-    radius_km: 10
-    gvp_id: 357040
-    country: Chile/Argentina
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Active crater lake, fumarolic emissions. Border volcano. MIROVA avg dist 1.2km."
-    # Crater zone ground truth (Nicolás, SERNAGEOMIN, 2026-04-08).
-    # 0.46 km from the pre-S9 rounded coord — functionally equivalent but
-    # more precise. See tasks/lessons.md L9.1 for context on why the MIROVA
-    # KMZ grid center (~2 km off) was NOT used as the reference.
-    vent_lat: -35.241099
-    vent_lon: -70.573345
-    vent_radius_km: 3
-
-  - name: Lastarria
-    display_name: "Lastarria"
-    lat: -25.168
-    lon: -68.507
-    radius_km: 10
-    gvp_id: 355120
-    country: Chile/Argentina
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Intense fumarolic field, sulphur deposits. High-altitude (5697m). MIROVA avg dist 1.6km."
-    vent_lat: -25.168
-    vent_lon: -68.507
-    vent_radius_km: 3
-
-  - name: Isluga
-    display_name: "Isluga"
-    lat: -19.150
-    lon: -68.830
-    radius_km: 10
-    gvp_id: 355030
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Fumarolic activity at summit crater. High-altitude (5550m)."
-    vent_lat: -19.150
-    vent_lon: -68.830
-    vent_radius_km: 2
-
-  # --- Zona Norte (CVZ) - volcanes nuevos ---
-
-  - name: Taapaca
-    display_name: "Taapaca"
-    lat: -18.100
-    lon: -69.500
-    radius_km: 10
-    gvp_id: 355011
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Dacitic dome complex, 5860m. Last eruption ~320 BCE."
-
-  - name: Parinacota
-    display_name: "Parinacota"
-    lat: -18.166
-    lon: -69.142
-    radius_km: 10
-    gvp_id: 355012
-    country: Chile/Bolivia
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano 6336m. Holocene sector collapse."
-
-  - name: Guallatiri
-    display_name: "Guallatiri"
-    lat: -18.420
-    lon: -69.090
-    radius_km: 10
-    gvp_id: 355020
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano 6071m. Persistent fumaroles. Last eruption 1960."
-
-  - name: Irruputuncu
-    display_name: "Irruputuncu"
-    lat: -20.730
-    lon: -68.550
-    radius_km: 10
-    gvp_id: 355040
-    country: Chile/Bolivia
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano 5163m. Persistent fumaroles, SO2 emissions."
-
-  - name: OlcaParuma
-    display_name: "Olca-Paruma"
-    lat: -20.942
-    lon: -68.503
-    radius_km: 10
-    gvp_id: 355050
-    country: Chile/Bolivia
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Volcanic complex 5407m on border ridge."
-
-  - name: Ollague
-    display_name: "Ollagüe"
-    lat: -21.300
-    lon: -68.180
-    radius_km: 10
-    gvp_id: 355060
-    country: Chile/Bolivia
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano 5868m. Persistent fumaroles, summit dome."
-
-  - name: SanPedro
-    display_name: "San Pedro"
-    lat: -21.880
-    lon: -68.400
-    radius_km: 10
-    gvp_id: 355070
-    country: Chile
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano 6145m. Last eruption ~1960."
-
-  - name: Putana
-    display_name: "Putana"
-    lat: -22.557
-    lon: -67.853
-    radius_km: 10
-    gvp_id: 355090
-    country: Chile/Bolivia
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Vigorous fumaroles, 5890m. Last eruption ~1810."
-
-  # --- Zona Central (SVZ) - volcanes nuevos ---
-
-  - name: SanJose
-    display_name: "San José"
-    lat: -33.789
-    lon: -69.897
-    radius_km: 10
-    gvp_id: 357020
-    country: Chile/Argentina
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Stratovolcano 5856m. Near Santiago. Last eruption 1960."
-
-  - name: Tupungatito
-    display_name: "Tupungatito"
-    lat: -33.400
-    lon: -69.800
-    radius_km: 10
-    gvp_id: 357010
-    country: Chile/Argentina
-    active: true
-    sensors: [MODIS, VIIRS]
-    notes: "Fumarolic activity, glacier-covered. High-altitude (5682m). MIROVA avg dist 4km."
-    # Active hotspot ground truth (Nicolás, SERNAGEOMIN, 2026-04-08).
-    # 2.73 km NNW of the pre-S9 rounded coord, but still within vent_radius_km=5
-    # so detection behavior is unchanged. MIROVA reports distancia_km 4.37-5.41
-    # from its grid center (-33.4269, -69.8004), which is 4.83 km SSW of the
-    # true vent — confirming MIROVA's grid center is NOT the vent reference.
-    # See tasks/lessons.md L9.1.
-    vent_lat: -33.389044
-    vent_lon: -69.826374
-    vent_radius_km: 5
+- name: PuyehueCordonCaulle
+  display_name: Puyehue - Cordón Caulle
+  lat: -40.59
+  lon: -72.117
+  radius_km: 15
+  gvp_id: 357150
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Persistent fumarolic/hydrothermal anomaly since 2011-2012 eruption
+  vent_lat: -40.525499
+  vent_lon: -72.146137
+  vent_radius_km: 3
+- name: Villarrica
+  display_name: Villarrica
+  lat: -39.42
+  lon: -71.93
+  radius_km: 5
+  gvp_id: 357120
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Open lava lake, frequent thermal anomalies. Crater puntual.
+  vent_lat: -39.420227
+  vent_lon: -71.939876
+  vent_radius_km: 2
+- name: Lascar
+  display_name: Láscar
+  lat: -23.369
+  lon: -67.732
+  radius_km: 5
+  gvp_id: 355100
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Frequent fumarolic activity and occasional eruptions. MIROVA avg dist 1.1km.
+  vent_lat: -23.36293
+  vent_lon: -67.731416
+  vent_radius_km: 3
+- name: Antuco
+  display_name: Antuco
+  lat: -37.406
+  lon: -71.349
+  radius_km: 10
+  gvp_id: 357080
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 2979m. Horseshoe caldera.
+- name: Copahue
+  display_name: Copahue
+  lat: -37.856
+  lon: -71.183
+  radius_km: 4
+  gvp_id: 357090
+  country: Chile/Argentina
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Active crater lake, recurring thermal unrest. Crater puntual.
+  vent_lat: -37.856
+  vent_lon: -71.183
+  vent_radius_km: 2
+- name: DescabezadoGrande
+  display_name: Descabezado Grande
+  lat: -35.58
+  lon: -70.75
+  radius_km: 10
+  gvp_id: 357050
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 3953m. Ice-filled caldera. Last eruption 1933.
+- name: CerroAzulQuizapu
+  display_name: Cerro Azul - Quizapu
+  lat: -35.653
+  lon: -70.761
+  radius_km: 10
+  gvp_id: 357060
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: 1932 Plinian eruption VEI 5. SERNAGEOMIN Cat.1.
+- name: LagunaDelMaule
+  display_name: Laguna del Maule
+  lat: -36.02
+  lon: -70.58
+  radius_km: 15
+  gvp_id: 357061
+  country: Chile/Argentina
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Volcanic field/caldera. Ongoing uplift ~20 cm/yr since 2007.
+- name: NevadoDeLongavi
+  display_name: Nevado de Longaví
+  lat: -36.193
+  lon: -71.161
+  radius_km: 10
+  gvp_id: 357063
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Glacier-covered stratovolcano 3242m. Fumarolic.
+- name: NevadosDeChillan
+  display_name: Nevados de Chillán
+  lat: -36.863
+  lon: -71.377
+  radius_km: 5
+  gvp_id: 357070
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Nicanor crater, active dome growth 2018-2024. Recent lava flows.
+  vent_lat: -36.863
+  vent_lon: -71.377
+  vent_radius_km: 2
+- name: Callaqui
+  display_name: Callaqui
+  lat: -37.92
+  lon: -71.45
+  radius_km: 10
+  gvp_id: 357091
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Ice-capped stratovolcano. Last phreatic 1980.
+- name: Lonquimay
+  display_name: Lonquimay
+  lat: -38.38
+  lon: -71.58
+  radius_km: 10
+  gvp_id: 357100
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 2865m. 1988-1990 Navidad flank eruption.
+- name: Tolhuaca
+  display_name: Tolhuaca
+  lat: -38.31
+  lon: -71.645
+  radius_km: 10
+  gvp_id: 357106
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 2806m. Geothermal field.
+- name: Llaima
+  display_name: Llaima
+  lat: -38.692
+  lon: -71.729
+  radius_km: 5
+  gvp_id: 357110
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: One of Chile's most active. Last eruption 2008-2009. Summit crater.
+  vent_lat: -38.692
+  vent_lon: -71.729
+  vent_radius_km: 2
+- name: Sollipulli
+  display_name: Sollipulli
+  lat: -38.97
+  lon: -71.52
+  radius_km: 10
+  gvp_id: 357111
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Ice-filled caldera 4 km wide. Last eruption ~2950 BCE.
+- name: Quetrupillan
+  display_name: Quetrupillán
+  lat: -39.496
+  lon: -71.722
+  radius_km: 10
+  gvp_id: 357121
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 2360m in Villarrica NP. Fumarolic.
+- name: Lanin
+  display_name: Lanín
+  lat: -39.633
+  lon: -71.503
+  radius_km: 10
+  gvp_id: 357122
+  country: Chile/Argentina
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 3747m. Border volcano. Holocene activity.
+- name: MochoChoshuenco
+  display_name: Mocho-Choshuenco
+  lat: -39.927
+  lon: -72.027
+  radius_km: 10
+  gvp_id: 357130
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Ice-capped twin volcanoes. Last eruption 1937.
+- name: CarranLosVenados
+  display_name: Carrán-Los Venados
+  lat: -40.35
+  lon: -72.07
+  radius_km: 10
+  gvp_id: 357140
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Volcanic field. Last phreatic eruption 1979.
+- name: AntillancaCasablanca
+  display_name: Antillanca-Casablanca
+  lat: -40.77
+  lon: -72.15
+  radius_km: 10
+  gvp_id: 358001
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Volcanic group near Puyehue NP. Holocene eruptions.
+- name: Osorno
+  display_name: Osorno
+  lat: -41.1
+  lon: -72.493
+  radius_km: 10
+  gvp_id: 358010
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 2652m. Iconic cone. Last eruption 1869.
+- name: Calbuco
+  display_name: Calbuco
+  lat: -41.33
+  lon: -72.614
+  radius_km: 10
+  gvp_id: 358020
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Major 2015 eruption VEI 4. SERNAGEOMIN Cat.1.
+- name: YateHornopiren
+  display_name: Yate-Hornopirén
+  lat: -41.76
+  lon: -72.39
+  radius_km: 10
+  gvp_id: 358022
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Volcanic complex. Holocene activity.
+- name: Huequi
+  display_name: Huequi
+  lat: -42.377
+  lon: -72.578
+  radius_km: 10
+  gvp_id: 358030
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano. Last eruption 1920. Fumarolic.
+- name: Michinmahuida
+  display_name: Michinmahuida
+  lat: -42.79
+  lon: -72.44
+  radius_km: 10
+  gvp_id: 358040
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Glacier-covered stratovolcano. Last eruption ~1835.
+- name: Chaiten
+  display_name: Chaitén
+  lat: -42.833
+  lon: -72.646
+  radius_km: 5
+  gvp_id: 358041
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Rhyolitic dome from 2008 eruption. Persistent fumarolic activity.
+  vent_lat: -42.8344815
+  vent_lon: -72.6528875
+  vent_radius_km: 3
+- name: CorcovadoYanteles
+  display_name: Corcovado-Yanteles
+  lat: -43.183
+  lon: -72.8
+  radius_km: 10
+  gvp_id: 358050
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 2300m. Holocene eruptions.
+- name: Melimoyu
+  display_name: Melimoyu
+  lat: -44.08
+  lon: -72.88
+  radius_km: 10
+  gvp_id: 358052
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Ice-capped stratovolcano 2400m. Holocene eruptions.
+- name: Mentolat
+  display_name: Mentolat
+  lat: -44.67
+  lon: -73.08
+  radius_km: 10
+  gvp_id: 358054
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano on island in Aysén fjords. Holocene eruptions.
+- name: MacaCay
+  display_name: Macá-Cay
+  lat: -45.1
+  lon: -73.2
+  radius_km: 10
+  gvp_id: 358055
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Volcanic complex. 1991 possible eruption.
+- name: Hudson
+  display_name: Hudson
+  lat: -45.9
+  lon: -72.97
+  radius_km: 15
+  gvp_id: 358057
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Major eruptions 1971, 1991 VEI 5. SERNAGEOMIN Cat.1. Ice-filled caldera.
+- name: Tinguiririca
+  display_name: Tinguiririca
+  lat: -34.814
+  lon: -70.352
+  radius_km: 10
+  gvp_id: 357030
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 4280m. Phreatic explosion 1994.
+- name: PlanchonPeteroa
+  display_name: Planchón-Peteroa
+  lat: -35.24
+  lon: -70.568
+  radius_km: 3
+  gvp_id: 357040
+  country: Chile/Argentina
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Active crater lake, fumarolic emissions. Border volcano. MIROVA avg dist
+    1.2km.
+  vent_lat: -35.241099
+  vent_lon: -70.573345
+  vent_radius_km: 3
+- name: Lastarria
+  display_name: Lastarria
+  lat: -25.168
+  lon: -68.507
+  radius_km: 3
+  gvp_id: 355120
+  country: Chile/Argentina
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Intense fumarolic field, sulphur deposits. High-altitude (5697m). MIROVA
+    avg dist 1.6km.
+  vent_lat: -25.168
+  vent_lon: -68.507
+  vent_radius_km: 3
+- name: Isluga
+  display_name: Isluga
+  lat: -19.15
+  lon: -68.83
+  radius_km: 5
+  gvp_id: 355030
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Fumarolic activity at summit crater. High-altitude (5550m).
+  vent_lat: -19.15
+  vent_lon: -68.83
+  vent_radius_km: 2
+- name: Taapaca
+  display_name: Taapaca
+  lat: -18.1
+  lon: -69.5
+  radius_km: 10
+  gvp_id: 355011
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Dacitic dome complex, 5860m. Last eruption ~320 BCE.
+- name: Parinacota
+  display_name: Parinacota
+  lat: -18.166
+  lon: -69.142
+  radius_km: 10
+  gvp_id: 355012
+  country: Chile/Bolivia
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 6336m. Holocene sector collapse.
+- name: Guallatiri
+  display_name: Guallatiri
+  lat: -18.42
+  lon: -69.09
+  radius_km: 10
+  gvp_id: 355020
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 6071m. Persistent fumaroles. Last eruption 1960.
+- name: Irruputuncu
+  display_name: Irruputuncu
+  lat: -20.73
+  lon: -68.55
+  radius_km: 10
+  gvp_id: 355040
+  country: Chile/Bolivia
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 5163m. Persistent fumaroles, SO2 emissions.
+- name: OlcaParuma
+  display_name: Olca-Paruma
+  lat: -20.942
+  lon: -68.503
+  radius_km: 10
+  gvp_id: 355050
+  country: Chile/Bolivia
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Volcanic complex 5407m on border ridge.
+- name: Ollague
+  display_name: Ollagüe
+  lat: -21.3
+  lon: -68.18
+  radius_km: 10
+  gvp_id: 355060
+  country: Chile/Bolivia
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 5868m. Persistent fumaroles, summit dome.
+- name: SanPedro
+  display_name: San Pedro
+  lat: -21.88
+  lon: -68.4
+  radius_km: 10
+  gvp_id: 355070
+  country: Chile
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 6145m. Last eruption ~1960.
+- name: Putana
+  display_name: Putana
+  lat: -22.557
+  lon: -67.853
+  radius_km: 10
+  gvp_id: 355090
+  country: Chile/Bolivia
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Vigorous fumaroles, 5890m. Last eruption ~1810.
+- name: SanJose
+  display_name: San José
+  lat: -33.789
+  lon: -69.897
+  radius_km: 10
+  gvp_id: 357020
+  country: Chile/Argentina
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Stratovolcano 5856m. Near Santiago. Last eruption 1960.
+- name: Tupungatito
+  display_name: Tupungatito
+  lat: -33.4
+  lon: -69.8
+  radius_km: 5
+  gvp_id: 357010
+  country: Chile/Argentina
+  active: true
+  sensors:
+  - MODIS
+  - VIIRS
+  notes: Fumarolic activity, glacier-covered. High-altitude (5682m). MIROVA avg dist
+    4km.
+  vent_lat: -33.389044
+  vent_lon: -69.826374
+  vent_radius_km: 5

@@ -70,7 +70,8 @@ def _save(volcano_name: str, store: dict):
 
 def append_record(volcano_name: str, record: dict,
                    volcano_lat: float = None, volcano_lon: float = None,
-                   overwrite: bool = False):
+                   overwrite: bool = False,
+                   max_hotspot_dist_km: float = None):
     """
     Append a VRP record to the volcano's JSON file.
     Deduplicates by (datetime_utc, sensor) — safe to re-run.
@@ -89,7 +90,13 @@ def append_record(volcano_name: str, record: dict,
     # non-volcanic (urban, agricultural, or geothermal sources within the search ROI).
     # MIROVA uses a similar proximity filter. We only trust eruption-scale VRP when
     # the hotspot is within MAX_HOTSPOT_DIST_KM of the volcano center.
-    MAX_HOTSPOT_DIST_KM = 5.0
+    # S12 2026-04-15: radius de geofencing por volcán (MIROVA-OVDAS). Si el
+    # caller no pasa el valor, usa 5 km como default conservador. Ejemplos:
+    # Lastarria=3, PP=3, Copahue=4, Villarrica/Lascar/Chaitén/Llaima/NdC/
+    # Tupungatito/Isluga=5, PCC=15. Cualquier hotspot de eruption-path más
+    # allá de este radio se considera no-volcánico (laguna, pueblo,
+    # geotermal, etc.) y se descarta.
+    MAX_HOTSPOT_DIST_KM = max_hotspot_dist_km if max_hotspot_dist_km is not None else 5.0
     if "vrp_mir_mw" in record and "vrp_mw" not in record:
         record["vrp_mw"] = record["vrp_mir_mw"]
     vrp_eruption = record.get("vrp_mw", 0) or 0

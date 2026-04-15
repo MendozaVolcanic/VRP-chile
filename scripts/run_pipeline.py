@@ -185,7 +185,8 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         if result:
                             store.append_record(volcano["name"], result,
                                                 volcano_lat=volcano["lat"], volcano_lon=volcano["lon"],
-                                                overwrite=overwrite)
+                                                overwrite=overwrite,
+                                                max_hotspot_dist_km=volcano.get("radius_km"))
                             vent_str = (f" | VRP_VENT={result.get('vrp_vent_mw', 0)} MW"
                                         if volcano.get("vent_lat") and result.get('vrp_vent_mw', 0) > 0 else "")
                             print(f"  {result['sensor']} | VRP={result['vrp_mw']} MW | "
@@ -218,7 +219,8 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         if result:
                             store.append_record(volcano["name"], result,
                                                 volcano_lat=volcano["lat"], volcano_lon=volcano["lon"],
-                                                overwrite=overwrite)
+                                                overwrite=overwrite,
+                                                max_hotspot_dist_km=volcano.get("radius_km"))
                             vent_str = (f" | VRP_VENT={result['vrp_vent_mw']} MW "
                                         f"({result['n_vent_pixels']}px)"
                                         if volcano.get("vent_lat") else "")
@@ -252,7 +254,8 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         if result:
                             store.append_record(volcano["name"], result,
                                                 volcano_lat=volcano["lat"], volcano_lon=volcano["lon"],
-                                                overwrite=overwrite)
+                                                overwrite=overwrite,
+                                                max_hotspot_dist_km=volcano.get("radius_km"))
                             vent_str = (f" | VRP_VENT={result.get('vrp_vent_mw', 0)} MW"
                                         if volcano.get("vent_lat") and result.get('vrp_vent_mw', 0) > 0 else "")
                             print(f"  {result['sensor']} (750m) | VRP={result['vrp_mw']} MW | "
