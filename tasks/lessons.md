@@ -453,3 +453,76 @@ configuración silencioso en `fetch.py`.
   NRT, no sobre Standard. Comparar contra NRT es lo correcto.
 - Si en el futuro MIROVA u otra fuente publica sus refs con fecha de
   capture y product version, conviene preservar esa metadata.
+
+---
+
+## L12.2 — F1b sigma cap on vent-path: recall rescue + Villarrica architectural gap
+
+**Contexto**: tras F1 (sigma gating en vent-path, L12.1) el recall en
+Tupungatito/Chaiten/Lastarria cayó dramáticamente (54%→10%, 93%→13%,
+76%→34%). Auditoría con refs MIROVA 14042026 confirma qué pasa.
+
+**Root cause identificado**: el gate `max(1K, N_SIGMA_VENT * σ_bg)` no
+tenía cap superior. En volcanes orográficamente complejos (Tupungatito
+5682 m, Lastarria 5697 m con nieve/roca mixta), σ_bg se infla a 3–5 K →
+umbral efectivo 6–10 K → mata señales sub-pixel reales de 1–2 K.
+
+**Fix F1b** (`pipeline/process_*.py`, profile constant
+`MAX_VENT_SIGMA_CONTRIB_K`):
+```
+sigma_contrib = min(N_SIGMA_VENT * σ_bg, MAX_VENT_SIGMA_CONTRIB_K)
+vent_thresh = max(VENT_THRESHOLD_K, sigma_contrib)
+```
+Cap: 3 K en `mirova_equivalent`, 5 K en `experimental`. Espeja el cap
+`MAX_SIGMA_COMPONENT_K=7 K` que ya existía para eruption-path pero nunca
+se había aplicado al vent-path.
+
+**Recuperación (refs MIROVA 14042026, sobre 5 volcanes reprocesados
+full history)**:
+
+| Volcán | Recall F1 → F1b | FP F1 → F1b | P_adj OCR F1 → F1b |
+|---|---|---|---|
+| Tupungatito | 10% → **83%** | 1 → 118 | 0.83 → 0.36 |
+| Chaiten | 13% → **87%** | 13 → 134 | 0.13 → 0.12 |
+| Lastarria | 34% → **85%** | 10 → 73 | 0.72 → 0.52 |
+| Lascar | 41% → **54%** | 67 → 124 | 0.75 → 0.69 |
+| PlanchonPeteroa | 0% → **37%** | - → 13 | - → 0.44 |
+
+Recall sistema 35% → 60% (+25 pp). El trade-off es **el correcto para
+`mirova_equivalent`** — priorizamos no perder eventos reales sobre
+limpieza visual. Los FPs extra son en su mayoría vent-only sub-MIROVA-
+threshold (0.1–1 MW VIIRS375) que MIROVA ve visualmente pero no
+consolida en la BD oficial.
+
+**Lección**: un cap de sigma siempre debe existir en cualquier gate
+`N*σ`. Sin cap, el gate se vuelve inoperante en presencia de ruido
+legítimo pero persistente (orografía, nieve parcial, lagos). El cap es
+una afirmación física: "por más ruido que haya en el background, la
+anomalía volcánica relevante supera N K". Elegir el cap es una
+afirmación de sensibilidad — 3 K es "queremos ver señales de 2–3 K" y
+5 K es "solo eventos más claros".
+
+**Gap arquitectural Villarrica**: F1b no lo resuelve. Las 6 refs MIROVA
+tienen VRP_MW=0 en el CSV (MIROVA las clasifica Bajo/Muy Bajo por NTI-
+only sin VRP calculable). Nuestro análisis muestra ΔT real de 2.5–6.8 K
+en el pixel máximo, pero ninguno de los 3 paths fire:
+- BT-path: `dT > max(5K, 3σ_bg)`. Con σ_bg ~2 K en lakeshore de Pucón,
+  umbral efectivo ~6 K. Las noches con ΔT=6.4–6.8 K están en el filo,
+  las de 2.5–3 K fallan directamente.
+- NTI absoluto: `nti_max > -0.8`. Observado: -0.94 a -0.92. Nunca cerca
+  del floor. Calibrado para MODIS 1 km, no para VIIRS 375 m sub-pixel.
+- NTI relativo (Path C): `nti_max > nti_bg + max(0.008, 5*σ_nti)`.
+  Delta observado 0.0124 — justo debajo del 5σ. Si bajáramos a 3σ
+  introduce FPs masivos (90 en audit pre-F1b).
+
+**Recomendación**: Villarrica es arquitecturalmente incompatible con
+detección per-pixel. Requiere Test 1 integrado de Coppola 2015: sumar
+radiancia MIR sobre todo el ROI, restar radiancia de bg equivalente,
+comparar contra σ_radiance. Es un algoritmo distinto, no un tuning.
+Queda como backlog. En Villarrica seguimos aceptando recall 0%,
+documentado y conocido.
+
+**Regla operacional**: cualquier volcán con detecciones MIROVA donde
+`VRP_MW=0 consistente` en el CSV indica detección NTI-only. En esos
+casos nuestra detección per-pixel estará sesgada a miss — documentarlo
+en `STATUS.md` por volcán.
