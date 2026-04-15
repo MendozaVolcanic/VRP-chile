@@ -77,21 +77,32 @@ jobs:
         # 'volcano' input filters to just that one via the `if` below.
         # If user dispatch sets volcano=Lascar, only Lascar job runs.
 
-    # Skip this matrix entry if dispatch specified a different volcano.
-    # On `schedule`, inputs are null so all jobs run.
-    if: ${{ github.event.inputs.volcano == '' || github.event.inputs.volcano == matrix.volcano }}
-
     steps:
+      # Skip this matrix entry if dispatch specified a different volcano.
+      # On `schedule`, inputs are null so all jobs proceed.
+      - name: Filter volcano match
+        id: filter
+        run: |
+          if [ "${{ github.event.inputs.volcano }}" != "" ] && [ "${{ github.event.inputs.volcano }}" != "${{ matrix.volcano }}" ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "Skipping ${{ matrix.volcano }} (dispatch filter=${{ github.event.inputs.volcano }})"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout repository
+        if: steps.filter.outputs.skip != 'true'
         uses: actions/checkout@v4
 
       - name: Set up Python
+        if: steps.filter.outputs.skip != 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
 
       - name: Install dependencies
+        if: steps.filter.outputs.skip != 'true'
         run: |
           pip install --upgrade pip
           sudo apt-get install -y libhdf4-dev
@@ -99,7 +110,7 @@ jobs:
           pip install earthaccess numpy h5py scipy pyyaml
 
       - name: Run VRP pipeline — mirova_equivalent profile
-        if: ${{ github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'mirova_equivalent' }}
+        if: ${{ steps.filter.outputs.skip != 'true' && (github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'mirova_equivalent') }}
         env:
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
@@ -113,7 +124,7 @@ jobs:
             ${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }}
 
       - name: Run VRP pipeline — experimental profile
-        if: ${{ github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'experimental' }}
+        if: ${{ steps.filter.outputs.skip != 'true' && (github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'experimental') }}
         env:
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
@@ -127,6 +138,7 @@ jobs:
             ${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }}
 
       - name: Commit updated data files
+        if: steps.filter.outputs.skip != 'true'
         # Serialize commits across the matrix using a retry loop on
         # git pull --rebase / git push. Without this, concurrent jobs
         # race on the same remote branch and most end up failing the
