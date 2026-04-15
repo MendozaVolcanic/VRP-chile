@@ -58,14 +58,18 @@ jobs:
       # others. Critical — we want partial progress even if earthdata
       # has a transient issue on one granule.
       fail-fast: false
-      # max-parallel: cap concurrent jobs to avoid pushing 11 commits
-      # simultaneously and overwhelming the rebase logic in the commit
-      # step. 4 at a time is a safe balance.
-      max-parallel: 4
+      # max-parallel: cap concurrent jobs to avoid pushing commits masivos
+      # simultaneously y colapsar el rebase logic. 8 at a time balances
+      # runtime vs commit contention. 45 volcanos / 8 = 6 batches × ~15 min.
+      max-parallel: 8
       matrix:
-        # Only the volcanoes with MIROVA references (Tier A/B/C). Other
-        # 34 yaml volcanoes are not part of the NRT stream yet.
+        # S12 2026-04-15: matriz ampliada a los 45 volcanes del yaml.
+        # Los 11 Tier A/B/C (con refs MIROVA) son los validados. Los otros
+        # 34 corren en "modo exploración" con radius_km=5 y sin vent_path
+        # específico — útil para encontrar volcanes con actividad inesperada
+        # y para data histórica completa. Repo público → Actions sin límite.
         volcano:
+          # Tier A/B/C (11 — con refs MIROVA)
           - Lascar
           - PuyehueCordonCaulle
           - Lastarria
@@ -77,6 +81,41 @@ jobs:
           - NevadosDeChillan
           - Llaima
           - Copahue
+          # Exploration (34 — sin refs MIROVA, radius=5 km)
+          - Antuco
+          - DescabezadoGrande
+          - CerroAzulQuizapu
+          - LagunaDelMaule
+          - NevadoDeLongavi
+          - Callaqui
+          - Lonquimay
+          - Tolhuaca
+          - Sollipulli
+          - Quetrupillan
+          - Lanin
+          - MochoChoshuenco
+          - CarranLosVenados
+          - AntillancaCasablanca
+          - Osorno
+          - Calbuco
+          - YateHornopiren
+          - Huequi
+          - Michinmahuida
+          - CorcovadoYanteles
+          - Melimoyu
+          - Mentolat
+          - MacaCay
+          - Hudson
+          - Tinguiririca
+          - Taapaca
+          - Parinacota
+          - Guallatiri
+          - Irruputuncu
+          - OlcaParuma
+          - Ollague
+          - SanPedro
+          - Putana
+          - SanJose
         # Scheduled runs use 'volcano' from matrix; manual dispatch with
         # 'volcano' input filters to just that one via the `if` below.
         # If user dispatch sets volcano=Lascar, only Lascar job runs.
