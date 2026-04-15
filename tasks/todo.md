@@ -198,3 +198,42 @@ Do NOT pre-commit to F1-F4 ordering. Let Phase 2 decide.
 
 Write `experiments/11_strict_audit.py` with NULO hard-fail, then run it
 on Lascar first (highest record count, best signal-to-noise for bugfinding).
+
+---
+
+## S12 status (2026-04-14)
+
+**CERRADO**:
+- ✅ NRT gap (Apr 10–14 invisible): fix `bf75df4`. LANCE fallback en
+  `fetch.py`. 22 detecciones recuperadas en Isluga solo.
+- ✅ F1b sigma cap en vent-path: commit `4c80429`. Recall recovery
+  Tupungatito 10%→83%, Chaiten 13%→87%, Lastarria 34%→85%.
+- ✅ Refs MIROVA actualizadas a 14042026 (+769 rows, +4 días,
+  +37 refs Apr 10-14).
+- ✅ `product_version` tagging + auto-upgrade NRT→Standard en store.py.
+- ✅ `Peteroa`+`PlanchonPeteroa` merge en rebuild (28 refs total).
+- ✅ CLAUDE.md actualizado: glosario TP/FP/FN + regla dashboard + regla
+  subagentes para control de contexto.
+
+**EN EJECUCIÓN** (F1b full history, ETA 19:45 UTC):
+- 24429645510 PuyehueCordonCaulle
+- 24429646443 Isluga
+- 24429647594 Villarrica
+- 24429648865 Llaima
+- 24429651060 NevadosDeChillan
+- 24429683329 Copahue
+
+**PENDIENTE S13**:
+- Auditoría uniforme todos los 11 volcanes con F1b aplicado uniformly.
+- Trade-off analysis: bajar `MAX_VENT_SIGMA_CONTRIB_K` de 3.0 a 2.5 si
+  FPs operacionales superan tolerancia del operador.
+- **Test 1 integrado-ROI de Coppola 2015**: requerido para resolver
+  Villarrica 0% recall arquitectural. Las 6 refs de Villarrica son
+  NTI-only con señales sub-pixel (~0.05–0.21 MW) que ningún threshold
+  per-pixel va a capturar. Implementar como método B: sum MIR radiance
+  over full ROI, compare vs sigma_radiance_ROI. Documentado L12.2.
+- Chaiten precision: 134 FPs a VRP 0.1–1 MW es mucho. Investigar si
+  son fumarolas reales (MIROVA no consolida) vs ruido estructural.
+- OCR cobertura: solo 301 refs totales, lo que limita OCR
+  reclassification. Propuesta: expandir OCR scraping o dejar así y
+  aceptar precision P_adj conservadora.
