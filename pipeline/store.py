@@ -89,9 +89,30 @@ def append_record(volcano_name: str, record: dict,
         record["vrp_mw"] = record["vrp_mir_mw"]
     vrp_eruption = record.get("vrp_mw", 0) or 0
     hotspot_dist = record.get("hotspot_dist_km")
-    if hotspot_dist is not None and hotspot_dist > MAX_HOTSPOT_DIST_KM:
-        vrp_eruption = 0  # discard distant eruption-scale signal
     vrp_vent = record.get("vrp_vent_mw", 0) or 0
+
+    # S12 fix: when eruption VRP is discarded by distance filter, also clear
+    # the hotspot_lat/lon/dist + anomaly_pixels so the dashboard does NOT
+    # render the record at a non-volcanic feature (e.g., a warm lake 10 km
+    # from the crater). If vent-path fired, the effective detection is at
+    # the vent; dashboard fallback logic will then place it on the vent
+    # marker. If neither fired (vrp=0), record will be silent.
+    # The discarded eruption pixel info is preserved in diagnostic fields.
+    if hotspot_dist is not None and hotspot_dist > MAX_HOTSPOT_DIST_KM:
+        # Preserve diagnostic info for auditing (not displayed in dashboard)
+        record["discarded_hotspot_lat"] = record.get("hotspot_lat")
+        record["discarded_hotspot_lon"] = record.get("hotspot_lon")
+        record["discarded_hotspot_dist_km"] = hotspot_dist
+        record["discarded_reason"] = "eruption_hotspot_too_far"
+        if record.get("anomaly_pixels"):
+            record["discarded_anomaly_pixels"] = record["anomaly_pixels"]
+        # Clear display fields — dashboard will treat as vent-only if vent
+        # fired, or as non-detection if not.
+        record["hotspot_lat"] = None
+        record["hotspot_lon"] = None
+        record["hotspot_dist_km"] = None
+        record["anomaly_pixels"] = []
+        vrp_eruption = 0  # discard distant eruption-scale signal
     record["vrp_mw"] = round(max(vrp_eruption, vrp_vent), 3)
 
     # Normalize t_max_k for VIIRS 375m (uses t_max_i04_k internally)
