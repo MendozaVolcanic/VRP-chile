@@ -320,9 +320,17 @@ volcanoes:
     active: true
     sensors: [MODIS, VIIRS]
     notes: "Rhyolitic dome from 2008 eruption. Persistent fumarolic activity."
-    vent_lat: -42.833
-    vent_lon: -72.646
-    vent_radius_km: 2
+    # S12 2026-04-15: Nicolás proporciona dos extremos del domo rhyolítico
+    # 2008 (longitud ~2 km):
+    #   tip SW: -42.834093, -72.653431
+    #   tip NE: -42.834870, -72.652344
+    # Centroide del domo: -42.8344815, -72.6528875. Subimos vent_radius_km
+    # de 2 a 3 km para cubrir los 2 km del domo con buffer pequeño, pero
+    # no tanto como para contaminar con ruido urbano (pueblo de Chaitén
+    # está a ~9 km SSW).
+    vent_lat: -42.8344815
+    vent_lon: -72.6528875
+    vent_radius_km: 3
 
   # --- Zona Austral (SVZ sur) ---
 
