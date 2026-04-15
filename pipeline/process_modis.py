@@ -361,6 +361,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     # in VIIRS). The eruption-path still runs; only the permissive vent-scale is off.
     vrp_vent_mw = 0.0
     n_vent_pixels = 0
+    vent_hotspot_lat = None
+    vent_hotspot_lon = None
+    vent_hotspot_dist_km = None
     if ENABLE_VENT_PATH_MODIS and vent_lat is not None and vent_lon is not None and not np.isnan(t_bg):
         vent_dist = haversine_km(vent_lat, vent_lon, lat, lon)
         vent_roi_mask = vent_dist <= vent_radius_km
@@ -384,6 +387,10 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                     # Session 12: reject noise-level detections below VRP floor
                     if vrp_vent_mw >= MODIS_VENT_VRP_FLOOR_MW:
                         n_vent_pixels = 1
+                        # S12 2026-04-15: coord real del pixel detectado
+                        vent_hotspot_lat = float(lat[r_vent, c_vent])
+                        vent_hotspot_lon = float(lon[r_vent, c_vent])
+                        vent_hotspot_dist_km = float(haversine_km(vent_lat, vent_lon, vent_hotspot_lat, vent_hotspot_lon))
                     else:
                         vrp_vent_mw = 0.0
 
@@ -392,6 +399,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "vrp_vent_mw": round(vrp_vent_mw, 3),
         "n_anomalous_pixels": n_anomalous,
         "n_vent_pixels": n_vent_pixels,
+        "vent_hotspot_lat": vent_hotspot_lat,
+        "vent_hotspot_lon": vent_hotspot_lon,
+        "vent_hotspot_dist_km": round(vent_hotspot_dist_km, 3) if vent_hotspot_dist_km is not None else None,
         "hotspot_lat": hotspot_lat,
         "hotspot_lon": hotspot_lon,
         "hotspot_dist_km": hotspot_dist_km,

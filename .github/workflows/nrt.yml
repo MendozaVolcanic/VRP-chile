@@ -2,8 +2,12 @@ name: NRT VRP Pipeline (both profiles)
 
 on:
   schedule:
-    # Every 6 hours: 00:00, 06:00, 12:00, 18:00 UTC
-    - cron: "0 0,6,12,18 * * *"
+    # S12 2026-04-15: cada 2 horas (12 runs/día). LANCE NRT publica
+    # granules ~3 h post-overpass. Con 2 h de cadencia, ventana máxima
+    # de data stale = 2 h. Repo público → minutos Actions ilimitados,
+    # sin presión de presupuesto. Paralelizado por matriz (11 volcanes
+    # simultáneos), cada run ~10-15 min, total ~3 h/día de cómputo.
+    - cron: "0 */2 * * *"
   workflow_dispatch:
     inputs:
       profile:

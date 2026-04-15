@@ -404,6 +404,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # and is consistent with the eruption-scale VRP calculation.
     vrp_vent_mw = 0.0
     n_vent_pixels = 0
+    vent_hotspot_lat = None
+    vent_hotspot_lon = None
+    vent_hotspot_dist_km = None
     if (ENABLE_VENT_PATH
             and vent_lat is not None and vent_lon is not None
             and "I04" in bands and not np.isnan(t_bg_i04)):
@@ -417,6 +420,19 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 flat_idx = np.nanargmax(vent_bt_2d)
                 r_vent, c_vent = np.unravel_index(flat_idx, vent_bt_2d.shape)
                 t_max_vent = float(vent_bt_2d[r_vent, c_vent])
+                # S12 2026-04-15: capturar la posición REAL del pixel detectado.
+                # Antes no la guardábamos y el frontend dibujaba todos los
+                # vent-only en un spiral sintético alrededor del vent. Con
+                # las coords reales el mapa refleja dónde físicamente está
+                # la anomalía (igual que MIROVA muestra los pixeles dispersos
+                # sobre el domo/crater).
+                vent_hotspot_lat_candidate = float(lat[r_vent, c_vent])
+                vent_hotspot_lon_candidate = float(lon[r_vent, c_vent])
+                vent_hotspot_dist_km_candidate = float(
+                    haversine_km(vent_lat, vent_lon,
+                                 vent_hotspot_lat_candidate,
+                                 vent_hotspot_lon_candidate)
+                )
                 # S12 fix F1: apply sigma gating (N_SIGMA_VENT was imported
                 # but never used — the fixed 1K threshold fired on every
                 # overpass where the crater was slightly warmer than background,
@@ -439,6 +455,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         vent_area * WOOSTER_COEFF * (L_vent - L_bg_vent)
                     ) / 1e6
                     n_vent_pixels = 1
+                    vent_hotspot_lat = vent_hotspot_lat_candidate
+                    vent_hotspot_lon = vent_hotspot_lon_candidate
+                    vent_hotspot_dist_km = vent_hotspot_dist_km_candidate
 
     name = l1b_path.name
     sensor = "VIIRS_SNPP" if name.startswith("VNP") else "VIIRS_NOAA20"
@@ -452,6 +471,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "n_nti_path": n_nti_path,
         "n_nti_rel_path": n_nti_rel_path,
         "n_vent_pixels": n_vent_pixels,
+        "vent_hotspot_lat": vent_hotspot_lat,
+        "vent_hotspot_lon": vent_hotspot_lon,
+        "vent_hotspot_dist_km": round(vent_hotspot_dist_km, 3) if vent_hotspot_dist_km is not None else None,
         "n_cloud_masked": n_cloud_masked,
         "nti_max": round(nti_max, 6) if not np.isnan(nti_max) else None,
         "nti_bg": round(nti_bg, 6) if not np.isnan(nti_bg) else None,

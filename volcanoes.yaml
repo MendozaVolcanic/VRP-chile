@@ -319,7 +319,10 @@ volcanoes:
     display_name: "Chaitén"
     lat: -42.833
     lon: -72.646
-    radius_km: 10
+    # S12 2026-04-15: radius 10 → 5 km para matchear el filtro MIROVA.
+    # El dominio a 10 km incluye features no-volcánicos (pueblo de Chaitén
+    # al SSW, bahías y lagos a 8-10 km). MIROVA usa 5 km para este volcán.
+    radius_km: 5
     gvp_id: 358041
     country: Chile
     active: true

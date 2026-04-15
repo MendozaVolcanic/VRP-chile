@@ -355,6 +355,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # --- Vent-scale detection (weak fumarolic signals) ---
     vrp_vent_mw = 0.0
     n_vent_pixels = 0
+    vent_hotspot_lat = None
+    vent_hotspot_lon = None
+    vent_hotspot_dist_km = None
     if (ENABLE_VENT_PATH
             and vent_lat is not None and vent_lon is not None
             and not np.isnan(t_bg)):
@@ -366,11 +369,6 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 flat_idx = np.nanargmax(vent_bt)
                 r_vent, c_vent = np.unravel_index(flat_idx, vent_bt.shape)
                 t_max_vent = float(vent_bt[r_vent, c_vent])
-                # S12 fix F1: sigma gating — reject vent detections within
-                # N_SIGMA_VENT standard deviations of background noise.
-                # S12 fix F1b: cap the sigma contribution at
-                # MAX_VENT_SIGMA_CONTRIB_K to prevent orographically-noisy
-                # backgrounds from inflating the gate above real weak signal.
                 sigma_contrib = min(N_SIGMA_VENT * std_bg, MAX_VENT_SIGMA_CONTRIB_K)
                 vent_thresh = max(VENT_THRESHOLD_K, sigma_contrib)
                 if t_max_vent > (t_bg + vent_thresh):
@@ -379,6 +377,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     vent_area = float(pixel_areas[r_vent, c_vent])
                     vrp_vent_mw = float(vent_area * WOOSTER_COEFF * (L_vent - L_bg_vent)) / 1e6
                     n_vent_pixels = 1
+                    # S12 2026-04-15: guardar coord real del pixel detectado
+                    vent_hotspot_lat = float(lat[r_vent, c_vent])
+                    vent_hotspot_lon = float(lon[r_vent, c_vent])
+                    vent_hotspot_dist_km = float(haversine_km(vent_lat, vent_lon, vent_hotspot_lat, vent_hotspot_lon))
 
     name   = l1b_path.name
     sensor = "VIIRS_SNPP_750" if name.startswith("VNP") else "VIIRS_NOAA20_750"
@@ -392,6 +394,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "n_nti_rel_path": n_nti_rel_path,
         "n_nti_anomalous": n_nti_anomalous,
         "n_vent_pixels": n_vent_pixels,
+        "vent_hotspot_lat": vent_hotspot_lat,
+        "vent_hotspot_lon": vent_hotspot_lon,
+        "vent_hotspot_dist_km": round(vent_hotspot_dist_km, 3) if vent_hotspot_dist_km is not None else None,
         "nti_bg": round(nti_bg, 6) if not np.isnan(nti_bg) else None,
         "nti_max": round(nti_max, 6) if not np.isnan(nti_max) else None,
         "hotspot_lat": hotspot_lat,

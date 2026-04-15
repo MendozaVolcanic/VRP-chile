@@ -276,10 +276,15 @@
   <div>
     <label for="days-select">Período </label>
     <select id="days-select">
-      <option value="7">7 días</option>
-      <option value="30" selected>30 días</option>
+      <option value="1">Últimas 24h</option>
+      <option value="3">3 días</option>
+      <option value="7" selected>7 días</option>
+      <option value="14">14 días</option>
+      <option value="30">30 días</option>
       <option value="60">60 días</option>
       <option value="90">90 días</option>
+      <option value="180">6 meses</option>
+      <option value="365">1 año</option>
       <option value="0">Todo</option>
     </select>
   </div>
@@ -411,7 +416,7 @@ function getLevel(vrp) {
 
 const sensorVisible = { MODIS: true, VIIRS375: true, VIIRS750: true, MIROVA: true };
 let currentVolcano = VOLCANOES[0];
-let currentDays = 30;
+let currentDays = 7;  // S12: default 7 días (antes 30) — operador ve lo reciente
 let logScale = false;
 let charts = {};
 let allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
@@ -720,8 +725,17 @@ function renderDetail() {
       const npx  = r.n_anomalous_pixels ?? null;
       const lv   = getLevel(vrp);
       const row  = el("tr");
-      const dist = r.hotspot_dist_km ?? (r.anomaly_pixels && r.anomaly_pixels.length > 0 ? r.anomaly_pixels[0].dist_km : null);
+      // Dist a mostrar en la tabla. Prioridad:
+      //  1. hotspot_dist_km (eruption-path, dist al centro del volcán)
+      //  2. anomaly_pixels[0].dist_km
+      //  3. vent_hotspot_dist_km (S12 2026-04-15: dist del pixel vent-path
+      //     al vent — valor físico real, reemplaza el label "vent")
+      //  4. null → "vent" (record legacy sin coord real)
+      const dist = r.hotspot_dist_km
+        ?? (r.anomaly_pixels && r.anomaly_pixels.length > 0 ? r.anomaly_pixels[0].dist_km : null)
+        ?? r.vent_hotspot_dist_km;
       const isVent = (r.n_vent_pixels ?? 0) > 0 && (r.n_anomalous_pixels ?? 0) === 0;
+      const isVentLegacy = isVent && r.vent_hotspot_dist_km == null;  // legacy sin coord real
       const k2c = (k) => k != null ? (k - 273.15).toFixed(1) : "—";
       const rowKey = `${r.datetime_utc}|${r.sensor}`;
       row.dataset.key = rowKey;
@@ -742,7 +756,7 @@ function renderDetail() {
         r.datetime_utc,
         r.sensor,
         vrp.toFixed(3),
-        isVent ? "vent" : (dist != null ? dist.toFixed(1) : "—"),
+        isVentLegacy ? "vent" : (dist != null ? dist.toFixed(2) : "—"),
         k2c(tmax),
         k2c(tbg),
         npx  != null ? String(npx)     : "—",
@@ -833,20 +847,28 @@ function renderDetail() {
       const color = colorMap[r.sensor] || "#fff";
       const recencyOpacity = 0.3 + 0.7 * (i / Math.max(1, hotspots.length - 1));
 
-      // Use anomaly_pixels array if available (new format), else fallback to single hotspot,
-      // else vent-only detection plotted at the volcano vent coordinates
+      // Posición del marker, en orden de preferencia:
+      // 1. anomaly_pixels (eruption-path, múltiples pixels con coord real)
+      // 2. hotspot_lat/lon (eruption-path, pixel único)
+      // 3. vent_hotspot_lat/lon (vent-path, coord REAL del pixel — S12 2026-04-15)
+      // 4. v.vent_lat/lon (fallback legacy: records viejos sin vent_hotspot_* → spiral)
       const isVentOnly = r.hotspot_lat == null && (!r.anomaly_pixels || r.anomaly_pixels.length === 0);
+      const hasRealVentCoord = r.vent_hotspot_lat != null;
       const pixels = (r.anomaly_pixels && r.anomaly_pixels.length > 0)
         ? r.anomaly_pixels
         : (r.hotspot_lat != null ? [{
             lat: r.hotspot_lat, lon: r.hotspot_lon,
             dist_km: r.hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
             vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0
+          }] : (hasRealVentCoord ? [{
+            lat: r.vent_hotspot_lat, lon: r.vent_hotspot_lon,
+            dist_km: r.vent_hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
+            vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0, vent_only: true, real_coord: true
           }] : (v.vent_lat ? [{
             lat: v.vent_lat, lon: v.vent_lon,
             dist_km: 0, bt_k: r.t_max_k ?? r.t_max_i04_k,
             vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0, vent_only: true
-          }] : []));
+          }] : [])));
 
       pixels.forEach((px, pxIdx) => {
         const size = Math.max(4, Math.min(15, 4 + Math.log10(Math.max(px.vrp_mw, 0.001)) * 5));
@@ -854,21 +876,17 @@ function renderDetail() {
         const pxOpacity = isPrimary ? recencyOpacity : recencyOpacity * 0.7;
         const ventOnly = isVentOnly || px.vent_only;
 
-        // S12 fix: vent-only markers stack at the exact same coordinates
-        // (all at v.vent_lat/vent_lon), so only 1 dot is visible even if
-        // there are 20 detections. Spread them in a small concentric
-        // spiral around the vent — each detection gets a unique position
-        // ~50 to ~400 m from the vent. Angle = golden-ratio-based so the
-        // pattern fills uniformly regardless of count. Radius grows with
-        // index so older detections appear further out.
+        // S12 2026-04-15: el spiral SOLO se aplica a records legacy que no
+        // tienen vent_hotspot_lat/lon (pre-fix). Para records nuevos la
+        // coord real del pixel ya está en px.lat/lon y refleja la
+        // posición física real del hotspot sobre el domo/cráter.
         let mLat = px.lat, mLon = px.lon;
-        if (ventOnly) {
-          const GOLDEN = 2.3999632297286;  // golden angle (rad)
-          const baseRadiusM = 60;          // innermost ring
-          const stepM = 35;                // per-index radial increment
+        if (ventOnly && !px.real_coord) {
+          const GOLDEN = 2.3999632297286;
+          const baseRadiusM = 60;
+          const stepM = 35;
           const angle = i * GOLDEN;
           const radiusM = baseRadiusM + stepM * Math.sqrt(i);
-          // 1 degree lat ≈ 111.32 km; 1 degree lon ≈ 111.32 * cos(lat) km
           const dLat = (radiusM / 111320) * Math.cos(angle);
           const dLon = (radiusM / (111320 * Math.cos(mLat * Math.PI / 180))) * Math.sin(angle);
           mLat += dLat;
@@ -888,7 +906,7 @@ function renderDetail() {
           `${r.datetime_utc} UTC<br>` +
           `VRP: ${px.vrp_mw.toFixed(4)} MW<br>` +
           `BT max: ${tempC(px.bt_k)}<br>` +
-          `Distancia: ${ventOnly ? "vent (en cráter)" : (px.dist_km ?? "?") + " km"}`
+          `Distancia: ${px.dist_km != null ? px.dist_km.toFixed(2) + " km" + (ventOnly && px.real_coord ? " (del vent)" : "") : (ventOnly ? "vent (legacy)" : "?")}`
         );
         // S12: registrar SOLO el marker primario (pxIdx===0) para el
         // click-row-to-highlight. Si el record tiene múltiples pixels,
