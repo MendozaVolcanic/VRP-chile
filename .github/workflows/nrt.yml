@@ -118,7 +118,7 @@ jobs:
         env:
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
-        timeout-minutes: 25
+        timeout-minutes: 50
         run: |
           python scripts/run_pipeline.py --profile mirova_equivalent \
             --volcano ${{ matrix.volcano }} \
@@ -132,7 +132,7 @@ jobs:
         env:
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
-        timeout-minutes: 25
+        timeout-minutes: 50
         run: |
           python scripts/run_pipeline.py --profile experimental \
             --volcano ${{ matrix.volcano }} \
