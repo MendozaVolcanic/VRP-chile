@@ -37,11 +37,49 @@ on:
         type: boolean
         default: false
 
+# S12 2026-04-15: parallelize by volcano via matrix strategy.
+# Previously single job with all 11 volcanoes × 2 profiles × 7 days
+# would hang periodically (3 of last 3 scheduled runs cancelled stuck).
+# Now each volcano runs in its own job with 60-min timeout; one hang
+# does not block the others. Total scheduled runtime: ~20-40 min
+# (parallel) instead of 1-6 hours (sequential) or indefinite (stuck).
 jobs:
   process:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       contents: write
+    strategy:
+      # fail-fast: false means one volcano failing doesn't cancel the
+      # others. Critical — we want partial progress even if earthdata
+      # has a transient issue on one granule.
+      fail-fast: false
+      # max-parallel: cap concurrent jobs to avoid pushing 11 commits
+      # simultaneously and overwhelming the rebase logic in the commit
+      # step. 4 at a time is a safe balance.
+      max-parallel: 4
+      matrix:
+        # Only the volcanoes with MIROVA references (Tier A/B/C). Other
+        # 34 yaml volcanoes are not part of the NRT stream yet.
+        volcano:
+          - Lascar
+          - PuyehueCordonCaulle
+          - Lastarria
+          - Isluga
+          - Tupungatito
+          - PlanchonPeteroa
+          - Chaiten
+          - Villarrica
+          - NevadosDeChillan
+          - Llaima
+          - Copahue
+        # Scheduled runs use 'volcano' from matrix; manual dispatch with
+        # 'volcano' input filters to just that one via the `if` below.
+        # If user dispatch sets volcano=Lascar, only Lascar job runs.
+
+    # Skip this matrix entry if dispatch specified a different volcano.
+    # On `schedule`, inputs are null so all jobs run.
+    if: ${{ github.event.inputs.volcano == '' || github.event.inputs.volcano == matrix.volcano }}
 
     steps:
       - name: Checkout repository
@@ -65,9 +103,10 @@ jobs:
         env:
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 25
         run: |
           python scripts/run_pipeline.py --profile mirova_equivalent \
-            ${{ github.event.inputs.volcano != '' && format('--volcano {0}', github.event.inputs.volcano) || '' }} \
+            --volcano ${{ matrix.volcano }} \
             ${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }} \
             ${{ github.event.inputs.start != '' && format('--start {0}', github.event.inputs.start) || '' }} \
             ${{ github.event.inputs.end != '' && format('--end {0}', github.event.inputs.end) || '' }} \
@@ -78,24 +117,31 @@ jobs:
         env:
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 25
         run: |
           python scripts/run_pipeline.py --profile experimental \
-            ${{ github.event.inputs.volcano != '' && format('--volcano {0}', github.event.inputs.volcano) || '' }} \
+            --volcano ${{ matrix.volcano }} \
             ${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }} \
             ${{ github.event.inputs.start != '' && format('--start {0}', github.event.inputs.start) || '' }} \
             ${{ github.event.inputs.end != '' && format('--end {0}', github.event.inputs.end) || '' }} \
             ${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }}
 
       - name: Commit updated data files
+        # Serialize commits across the matrix using a retry loop on
+        # git pull --rebase / git push. Without this, concurrent jobs
+        # race on the same remote branch and most end up failing the
+        # push. 5 retries with exponential-ish backoff is enough.
         run: |
           git config user.name  "vrp-bot"
           git config user.email "vrp-bot@github-actions"
           git add data/mirova_equivalent/*.json data/experimental/*.json data/mirova/*.json 2>/dev/null || true
-          git diff --staged --quiet || git commit -m "NRT update $(date -u '+%Y-%m-%d %H:%M UTC')"
-          # Pull with rebase to handle concurrent workflow pushes
-          git pull --rebase origin main || true
-          git push
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "NRT update ${{ matrix.volcano }} $(date -u '+%Y-%m-%d %H:%M UTC')"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
 
       # Pages deploy moved to .github/workflows/pages-deploy.yml
-      # That workflow is triggered by `workflow_run` after this one finishes,
-      # so the live site still updates after every NRT run.
