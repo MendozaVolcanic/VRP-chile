@@ -27,14 +27,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 REPO = Path(__file__).parent.parent
-# Session 9 2026-04-08: swapped from the original 'registro_vrp_consolidado.csv'
-# (9717 rows, range 2026-01-10 to 2026-03-28, 381 real records) to the updated
-# 'registro_vrp_consolidado al 08042026.csv' (11319 rows, range 2026-01-10 to
-# 2026-04-08, 445 real records). +64 real records and +11 days of coverage.
-# All tiering is stable (no volcano changes tier). The old file is preserved
-# on disk at the same parent directory if a historical comparison is needed.
+# Session 12 2026-04-14: swap from '10.04.2026' (11668 rows) to '14042026'
+# (12437 rows, +769 rows, +4 days of coverage through Apr 14 including 37
+# new refs in the Apr 10-14 window previously missing from our NRT gap).
+# Older CSVs preserved on disk for historical reproducibility.
 SOURCE = Path(
-    r"C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\10.04.2026 registro_vrp_consolidado.csv"
+    r"C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\14042026 registro_vrp_consolidado.csv"
 )
 
 

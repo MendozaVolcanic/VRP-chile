@@ -61,7 +61,8 @@ OUT_DIR = REPO / "experiments" / (f"audit_s12_{_profile}" if _profile != "mirova
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # OCR reference CSV — secondary source for reclassifying FPs
-OCR_CSV_PATH = REPO / "10.04.2026 registro_vrp_ocr.csv"
+# S12 2026-04-14: updated to 14042026 scrape (+4 days coverage through Apr 14).
+OCR_CSV_PATH = REPO / "14042026 registro_vrp_ocr.csv"
 
 # Closed set of valid clasificaciones. MUST match rebuild_mirova_from_consolidado.py.
 # Any record outside this set in a ref file means the ref is contaminated (L7.10).
