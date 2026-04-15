@@ -71,6 +71,13 @@ NTI_REL_N_SIGMA: float = float(_t.get("nti_rel_n_sigma", 3.0))
 NTI_REL_MIN_FLOOR: float = float(_t.get("nti_rel_min_floor", 0.005))
 MODIS_VENT_THRESHOLD_K: float = float(_t.get("modis_vent_threshold_k", VENT_THRESHOLD_K))
 MODIS_VENT_VRP_FLOOR_MW: float = float(_t.get("modis_vent_vrp_floor_mw", 0.0))
+# S12 2026-04-15: piso VRP por sensor. Aplicado en store.py después de
+# unificar vrp_mw = max(eruption, vent). Cualquier VRP por debajo del
+# piso se lleva a 0 (no-detección). Piso calibrado al mínimo MIROVA
+# observado por sensor (inclusive, operador >=). Default 0.0 = sin piso.
+MIN_VRP_MW_VIIRS375: float = float(_t.get("min_vrp_mw_viirs375", 0.0))
+MIN_VRP_MW_VIIRS750: float = float(_t.get("min_vrp_mw_viirs750", 0.0))
+MIN_VRP_MW_MODIS: float = float(_t.get("min_vrp_mw_modis", 0.0))
 
 # --- Background annulus geometry (km) ---
 _bg = _cfg["background"]

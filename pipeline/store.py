@@ -25,7 +25,12 @@ import math
 from pathlib import Path
 from datetime import datetime, timezone
 
-from pipeline.profile import DATA_SUBDIR
+from pipeline.profile import (
+    DATA_SUBDIR,
+    MIN_VRP_MW_VIIRS375,
+    MIN_VRP_MW_VIIRS750,
+    MIN_VRP_MW_MODIS,
+)
 
 
 # Per-profile data directory: data/mirova_equivalent/ or data/experimental/
@@ -114,6 +119,25 @@ def append_record(volcano_name: str, record: dict,
         record["anomaly_pixels"] = []
         vrp_eruption = 0  # discard distant eruption-scale signal
     record["vrp_mw"] = round(max(vrp_eruption, vrp_vent), 3)
+
+    # S12 2026-04-15: piso VRP por sensor (paridad MIROVA).
+    # Si vrp_mw < piso_sensor, se trata como no-detección (vrp_mw = 0).
+    # Preserva el valor original en diag_vrp_raw_mw para auditoría.
+    sensor = record.get("sensor", "")
+    if "375" in sensor or sensor in ("VIIRS_SNPP", "VIIRS_NOAA20"):
+        floor = MIN_VRP_MW_VIIRS375
+    elif "750" in sensor:
+        floor = MIN_VRP_MW_VIIRS750
+    elif "MODIS" in sensor:
+        floor = MIN_VRP_MW_MODIS
+    else:
+        floor = 0.0
+    if floor > 0 and 0 < record["vrp_mw"] < floor:
+        record["diag_vrp_raw_mw"] = record["vrp_mw"]
+        record["diag_vrp_floor_mw"] = floor
+        record["vrp_mw"] = 0.0
+        # El operador sigue viendo el record (con vrp=0) pero no cuenta
+        # como detección en auditoría ni en dashboard "últimas VRP>0".
 
     # Normalize t_max_k for VIIRS 375m (uses t_max_i04_k internally)
     if "t_max_i04_k" in record and "t_max_k" not in record:

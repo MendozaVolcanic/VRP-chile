@@ -34,6 +34,19 @@ thresholds:
   # MODIS extras
   cloud_mask_bt_k: 260.0
   max_sigma_component_k: 7.0
+  # S12 2026-04-15: piso VRP por sensor para paridad MIROVA estricta.
+  # Cualquier detección por debajo del piso se trata como no-detección
+  # (vrp_mw = 0) en este perfil. Los valores coinciden exactamente con
+  # el mínimo VRP observado en MIROVA consolidado 14042026 por sensor,
+  # usando comparación >= para preservar TODAS las refs conocidas:
+  #   VIIRS375: min observado 0.02 MW (PCC, Lastarria, n=2)
+  #   VIIRS750: min observado 0.15 MW (Lascar, n=1)
+  #   MODIS:    min observado 0.27 MW (Lascar, n=1)
+  # El perfil experimental queda sin floor (detección más sensible para
+  # investigación de señales sub-MIROVA).
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
   # S12 F1b: cap on the sigma contribution for VENT-path gating.
   # Without this, high-sigma backgrounds (Tupungatito orográfico,
   # Lastarria nieve parcial) produced effective vent thresholds of
