@@ -45,9 +45,14 @@ def rebuild(json_stem: str, csv_volcano: str) -> None:
     with open(SOURCE, encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
 
-    matched = [r for r in rows if (r.get("Volcan") or "").strip() == csv_volcano]
+    # S12 2026-04-14: allow multiple CSV names per volcano (comma-separated).
+    # MIROVA renamed some volcanoes mid-year (e.g., 'Peteroa' -> 'PlanchonPeteroa'
+    # on 2026-01-16). The scraper preserves both names exactly as found, so
+    # the rebuild must merge them. Pass as e.g. "Peteroa,PlanchonPeteroa".
+    names = [n.strip() for n in csv_volcano.split(",") if n.strip()]
+    matched = [r for r in rows if (r.get("Volcan") or "").strip() in names]
     print(f"Total CSV rows: {len(rows)}")
-    print(f"{csv_volcano}: {len(matched)}")
+    print(f"Matching {names}: {len(matched)}")
 
     # CRITICAL — see lessons L7.10 (post-mortem of session 8 contamination):
     # Filter by 'Clasificacion Mirova'. The CSV's universe of values is exactly
