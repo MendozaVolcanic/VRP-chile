@@ -1,133 +1,149 @@
 {
   "volcano": "PuyehueCordonCaulle",
-  "generated_at": "2026-04-16T11:58:20.432802Z",
+  "generated_at": "2026-04-16T11:58:50.800903Z",
   "audit_script": "experiments/11_strict_audit.py",
   "totals": {
     "n_ref": 84,
-    "n_ours_detections": 278,
-    "tp": 69,
-    "fn": 15,
-    "fp": 209,
-    "precision": 0.248,
-    "recall": 0.821,
-    "f1": 0.381,
+    "n_ours_detections": 216,
+    "tp": 56,
+    "fn": 28,
+    "fp": 160,
+    "precision": 0.259,
+    "recall": 0.667,
+    "f1": 0.373,
     "ratio_overall": {
-      "n": 69,
-      "min": 0.288,
-      "q1": 0.859,
-      "median": 1.253,
-      "q3": 1.864,
+      "n": 56,
+      "min": 0.526,
+      "q1": 0.929,
+      "median": 1.325,
+      "q3": 2.029,
       "max": 19.1
     }
   },
   "ocr_reclassification": {
     "n_ocr_ref": 39,
-    "tp_ocr": 28,
-    "fp_remaining": 181,
-    "precision_adjusted": 0.349,
+    "tp_ocr": 24,
+    "fp_remaining": 136,
+    "precision_adjusted": 0.37,
     "fp_classes": {
       "fp_near": 1,
       "fp_far": 1,
       "fp_ambiguous": 3,
-      "fp_vent_only": 176
+      "fp_vent_only": 131
     }
   },
   "by_family": {
     "MODIS": {
       "n_ref": 0,
-      "n_ours_det": 5,
+      "n_ours_det": 26,
       "tp": 0,
       "fn": 0,
-      "fp": 5,
+      "fp": 26,
       "precision": 0.0,
       "recall": null,
       "ratio": null
     },
     "VIIRS375": {
       "n_ref": 65,
-      "n_ours_det": 196,
-      "tp": 60,
-      "fn": 5,
-      "fp": 136,
-      "precision": 0.306,
-      "recall": 0.923,
+      "n_ours_det": 150,
+      "tp": 55,
+      "fn": 10,
+      "fp": 95,
+      "precision": 0.367,
+      "recall": 0.846,
       "ratio": {
-        "n": 60,
-        "q1": 0.843,
-        "median": 1.305,
-        "q3": 1.98
+        "n": 55,
+        "q1": 0.925,
+        "median": 1.323,
+        "q3": 2.041
       }
     },
     "VIIRS": {
       "n_ref": 19,
-      "n_ours_det": 77,
-      "tp": 9,
-      "fn": 10,
-      "fp": 68,
-      "precision": 0.117,
-      "recall": 0.474,
+      "n_ours_det": 40,
+      "tp": 1,
+      "fn": 18,
+      "fp": 39,
+      "precision": 0.025,
+      "recall": 0.053,
       "ratio": {
-        "n": 9,
-        "q1": 1.071,
-        "median": 1.156,
-        "q3": 1.74
+        "n": 1,
+        "q1": 1.66,
+        "median": 1.66,
+        "q3": 1.66
       }
     }
   },
   "by_bucket": {
     "<0.5": {
       "n_ref": 46,
-      "tp": 40,
-      "fn": 6,
-      "fp_in_bucket": 111,
+      "tp": 35,
+      "fn": 11,
+      "fp_in_bucket": 70,
       "ratio": {
-        "n": 40,
-        "median": 1.439
+        "n": 35,
+        "median": 1.557
       }
     },
     "0.5-1": {
       "n_ref": 33,
-      "tp": 26,
-      "fn": 7,
-      "fp_in_bucket": 61,
+      "tp": 20,
+      "fn": 13,
+      "fp_in_bucket": 37,
       "ratio": {
-        "n": 26,
-        "median": 1.104
+        "n": 20,
+        "median": 1.092
       }
     },
     "1-2": {
       "n_ref": 5,
-      "tp": 3,
-      "fn": 2,
+      "tp": 1,
+      "fn": 4,
       "fp_in_bucket": 30,
       "ratio": {
-        "n": 3,
-        "median": 0.757
+        "n": 1,
+        "median": 0.719
       }
     },
     "2-5": {
       "n_ref": 0,
       "tp": 0,
       "fn": 0,
-      "fp_in_bucket": 6,
+      "fp_in_bucket": 14,
       "ratio": null
     },
     "5-10": {
       "n_ref": 0,
       "tp": 0,
       "fn": 0,
-      "fp_in_bucket": 1,
+      "fp_in_bucket": 8,
       "ratio": null
     },
     ">10": {
       "n_ref": 0,
       "tp": 0,
       "fn": 0,
-      "fp_in_bucket": 0,
+      "fp_in_bucket": 1,
       "ratio": null
     }
   },
   "fn_records": [
+    {
+      "dt": "2026-01-13 06:12",
+      "family": "VIIRS",
+      "vrp": 1.07,
+      "raw_sensor": "VIIRS",
+      "clasificacion": "Bajo",
+      "distancia_km": 8.55
+    },
+    {
+      "dt": "2026-01-16 05:12",
+      "family": "VIIRS",
+      "vrp": 0.58,
+      "raw_sensor": "VIIRS",
+      "clasificacion": "Muy Bajo",
+      "distancia_km": 8.55
+    },
     {
       "dt": "2026-01-20 05:36",
       "family": "VIIRS",
@@ -145,12 +161,68 @@
       "distancia_km": 7.65
     },
     {
+      "dt": "2026-01-21 06:42",
+      "family": "VIIRS375",
+      "vrp": 0.38,
+      "raw_sensor": "VIIRS375",
+      "clasificacion": "Muy Bajo",
+      "distancia_km": 7.65
+    },
+    {
+      "dt": "2026-01-23 04:42",
+      "family": "VIIRS375",
+      "vrp": 0.39,
+      "raw_sensor": "VIIRS375",
+      "clasificacion": "Muy Bajo",
+      "distancia_km": 8.66
+    },
+    {
+      "dt": "2026-01-23 06:00",
+      "family": "VIIRS",
+      "vrp": 1.34,
+      "raw_sensor": "VIIRS",
+      "clasificacion": "Bajo",
+      "distancia_km": 7.83
+    },
+    {
       "dt": "2026-01-23 06:24",
       "family": "VIIRS",
       "vrp": 0.49,
       "raw_sensor": "VIIRS",
       "clasificacion": "Muy Bajo",
       "distancia_km": 7.65
+    },
+    {
+      "dt": "2026-01-24 05:42",
+      "family": "VIIRS",
+      "vrp": 0.94,
+      "raw_sensor": "VIIRS",
+      "clasificacion": "Muy Bajo",
+      "distancia_km": 7.83
+    },
+    {
+      "dt": "2026-01-25 05:42",
+      "family": "VIIRS",
+      "vrp": 0.86,
+      "raw_sensor": "VIIRS",
+      "clasificacion": "Muy Bajo",
+      "distancia_km": 7.83
+    },
+    {
+      "dt": "2026-01-26 05:24",
+      "family": "VIIRS",
+      "vrp": 0.93,
+      "raw_sensor": "VIIRS",
+      "clasificacion": "Muy Bajo",
+      "distancia_km": 7.83
+    },
+    {
+      "dt": "2026-01-29 04:30",
+      "family": "VIIRS375",
+      "vrp": 0.31,
+      "raw_sensor": "VIIRS375",
+      "clasificacion": "Muy Bajo",
+      "distancia_km": 8.66
     },
     {
       "dt": "2026-01-29 06:12",
@@ -175,6 +247,22 @@
       "raw_sensor": "VIIRS",
       "clasificacion": "Muy Bajo",
       "distancia_km": 4.74
+    },
+    {
+      "dt": "2026-02-06 05:18",
+      "family": "VIIRS",
+      "vrp": 0.59,
+      "raw_sensor": "VIIRS",
+      "clasificacion": "Muy Bajo",
+      "distancia_km": 7.83
+    },
+    {
+      "dt": "2026-02-06 06:42",
+      "family": "VIIRS375",
+      "vrp": 0.2,
+      "raw_sensor": "VIIRS375",
+      "clasificacion": "Muy Bajo",
+      "distancia_km": 7.65
     },
     {
       "dt": "2026-02-26 05:24",
@@ -209,6 +297,14 @@
       "distancia_km": 12.11
     },
     {
+      "dt": "2026-03-28 04:42",
+      "family": "VIIRS375",
+      "vrp": 0.15,
+      "raw_sensor": "VIIRS375",
+      "clasificacion": "Muy Bajo",
+      "distancia_km": 8.91
+    },
+    {
       "dt": "2026-04-04 05:54",
       "family": "VIIRS",
       "vrp": 0.55,
@@ -223,6 +319,14 @@
       "raw_sensor": "VIIRS",
       "clasificacion": "Muy Bajo",
       "distancia_km": 7.65
+    },
+    {
+      "dt": "2026-04-09 06:00",
+      "family": "VIIRS",
+      "vrp": 0.95,
+      "raw_sensor": "VIIRS",
+      "clasificacion": "Muy Bajo",
+      "distancia_km": 7.83
     },
     {
       "dt": "2026-04-09 06:48",
@@ -251,28 +355,10 @@
   ],
   "fp_records": [
     {
-      "dt": "2026-01-11 04:48",
-      "family": "VIIRS375",
-      "vrp": 0.165,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-01-11 06:24",
       "family": "VIIRS375",
       "vrp": 0.302,
       "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-11 06:48",
-      "family": "VIIRS375",
-      "vrp": 0.191,
-      "raw_sensor": "VIIRS_NOAA20",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
@@ -296,15 +382,6 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-01-13 04:30",
-      "family": "VIIRS375",
-      "vrp": 0.207,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-01-13 05:48",
       "family": "VIIRS375",
       "vrp": 0.687,
@@ -319,24 +396,6 @@
       "vrp": 0.963,
       "raw_sensor": "VIIRS_SNPP",
       "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-15 05:12",
-      "family": "VIIRS375",
-      "vrp": 0.142,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-15 05:30",
-      "family": "VIIRS375",
-      "vrp": 0.127,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
     },
@@ -359,15 +418,6 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-01-16 06:54",
-      "family": "VIIRS375",
-      "vrp": 0.154,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-01-17 04:36",
       "family": "VIIRS375",
       "vrp": 0.188,
@@ -386,27 +436,9 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-01-17 06:12",
-      "family": "VIIRS375",
-      "vrp": 0.166,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-01-17 06:36",
       "family": "VIIRS375",
       "vrp": 0.293,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-18 04:36",
-      "family": "VIIRS375",
-      "vrp": 0.222,
       "raw_sensor": "VIIRS_NOAA20",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
@@ -440,15 +472,6 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-01-20 07:00",
-      "family": "VIIRS375",
-      "vrp": 0.23,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-01-21 05:00",
       "family": "VIIRS375",
       "vrp": 0.643,
@@ -476,15 +499,6 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-01-23 06:00",
-      "family": "VIIRS375",
-      "vrp": 0.874,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-01-24 05:42",
       "family": "VIIRS375",
       "vrp": 0.782,
@@ -508,15 +522,6 @@
       "vrp": 0.467,
       "raw_sensor": "VIIRS_SNPP",
       "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-26 06:48",
-      "family": "VIIRS375",
-      "vrp": 0.2,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
     },
@@ -638,24 +643,6 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-02-02 06:36",
-      "family": "VIIRS375",
-      "vrp": 0.127,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 44,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-03 04:36",
-      "family": "VIIRS375",
-      "vrp": 0.08,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-02-03 05:54",
       "family": "VIIRS375",
       "vrp": 0.356,
@@ -683,24 +670,6 @@
       "hotspot_dist_km": 4.61
     },
     {
-      "dt": "2026-02-05 05:18",
-      "family": "VIIRS375",
-      "vrp": 0.164,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-05 05:36",
-      "family": "VIIRS375",
-      "vrp": 0.137,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-02-05 07:00",
       "family": "VIIRS375",
       "vrp": 0.247,
@@ -715,15 +684,6 @@
       "vrp": 0.281,
       "raw_sensor": "VIIRS_SNPP",
       "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-07 04:42",
-      "family": "VIIRS375",
-      "vrp": 0.215,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
     },
@@ -800,29 +760,11 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-02-12 04:48",
-      "family": "VIIRS375",
-      "vrp": 0.103,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-02-12 05:06",
       "family": "VIIRS375",
       "vrp": 0.227,
       "raw_sensor": "VIIRS_NOAA20",
       "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-12 06:24",
-      "family": "VIIRS375",
-      "vrp": 0.092,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 1,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
     },
@@ -872,56 +814,11 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-02-16 06:54",
-      "family": "VIIRS375",
-      "vrp": 0.174,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-17 04:54",
-      "family": "VIIRS375",
-      "vrp": 0.114,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 21,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-17 05:12",
-      "family": "VIIRS375",
-      "vrp": 0.11,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 33,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-02-18 04:36",
       "family": "VIIRS375",
       "vrp": 0.562,
       "raw_sensor": "VIIRS_SNPP",
       "n_anomalous_pixels": 2,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-18 06:12",
-      "family": "VIIRS375",
-      "vrp": 0.133,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 24,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-18 06:36",
-      "family": "VIIRS375",
-      "vrp": 0.099,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
     },
@@ -971,24 +868,6 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-02-23 04:42",
-      "family": "VIIRS375",
-      "vrp": 0.226,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-23 06:18",
-      "family": "VIIRS375",
-      "vrp": 0.171,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-02-24 04:42",
       "family": "VIIRS375",
       "vrp": 0.26,
@@ -1025,24 +904,6 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-02-27 06:48",
-      "family": "VIIRS375",
-      "vrp": 0.127,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-28 04:48",
-      "family": "VIIRS375",
-      "vrp": 0.16,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-02-28 05:06",
       "family": "VIIRS375",
       "vrp": 0.172,
@@ -1070,15 +931,6 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-03-05 04:54",
-      "family": "VIIRS375",
-      "vrp": 0.139,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-03-05 06:36",
       "family": "VIIRS375",
       "vrp": 0.321,
@@ -1097,38 +949,11 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-03-07 06:18",
-      "family": "VIIRS375",
-      "vrp": 0.138,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-03-08 05:36",
       "family": "VIIRS375",
       "vrp": 0.621,
       "raw_sensor": "VIIRS_SNPP",
       "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-08 06:00",
-      "family": "VIIRS375",
-      "vrp": 0.194,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-09 05:36",
-      "family": "VIIRS375",
-      "vrp": 0.161,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
     },
@@ -1160,33 +985,6 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-03-18 04:30",
-      "family": "VIIRS375",
-      "vrp": 0.096,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-18 05:48",
-      "family": "VIIRS375",
-      "vrp": 0.157,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-20 05:12",
-      "family": "VIIRS375",
-      "vrp": 0.108,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-03-20 06:54",
       "family": "VIIRS375",
       "vrp": 0.201,
@@ -1203,15 +1001,6 @@
       "n_anomalous_pixels": 2,
       "n_vent_pixels": 0,
       "hotspot_dist_km": 4.35
-    },
-    {
-      "dt": "2026-03-21 06:36",
-      "family": "VIIRS375",
-      "vrp": 0.112,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 3,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
     },
     {
       "dt": "2026-03-22 06:36",
@@ -1241,15 +1030,6 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-03-25 05:18",
-      "family": "VIIRS375",
-      "vrp": 0.117,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-03-25 05:36",
       "family": "VIIRS375",
       "vrp": 0.211,
@@ -1264,15 +1044,6 @@
       "vrp": 0.165,
       "raw_sensor": "VIIRS_SNPP",
       "n_anomalous_pixels": 119,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-26 05:00",
-      "family": "VIIRS375",
-      "vrp": 0.111,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
     },
@@ -1304,15 +1075,6 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-03-29 06:06",
-      "family": "VIIRS375",
-      "vrp": 0.105,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 124,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-03-31 06:48",
       "family": "VIIRS375",
       "vrp": 0.136,
@@ -1331,15 +1093,6 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-04-01 05:06",
-      "family": "VIIRS375",
-      "vrp": 0.167,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 4,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-04-02 06:06",
       "family": "VIIRS375",
       "vrp": 0.362,
@@ -1354,7 +1107,7 @@
       "vrp": 0.201,
       "raw_sensor": "VIIRS_NOAA20",
       "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
+      "n_vent_pixels": 0,
       "hotspot_dist_km": 2.95
     },
     {
@@ -1448,24 +1201,6 @@
       "hotspot_dist_km": 7.64
     },
     {
-      "dt": "2026-04-12 05:00",
-      "family": "VIIRS375",
-      "vrp": 0.111,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 4,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-04-13 04:42",
-      "family": "VIIRS375",
-      "vrp": 0.153,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-04-13 06:06",
       "family": "VIIRS375",
       "vrp": 0.38,
@@ -1475,72 +1210,9 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-01-11 05:06",
-      "family": "VIIRS",
-      "vrp": 1.108,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-12 04:48",
-      "family": "VIIRS",
-      "vrp": 0.911,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-01-12 06:06",
       "family": "VIIRS",
       "vrp": 1.308,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-13 05:48",
-      "family": "VIIRS",
-      "vrp": 0.948,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-14 05:30",
-      "family": "VIIRS",
-      "vrp": 0.982,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-17 04:54",
-      "family": "VIIRS",
-      "vrp": 1.204,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-17 06:36",
-      "family": "VIIRS",
-      "vrp": 0.813,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-18 05:54",
-      "family": "VIIRS",
-      "vrp": 1.374,
       "raw_sensor": "VIIRS_SNPP_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
@@ -1556,36 +1228,9 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-01-22 05:00",
-      "family": "VIIRS",
-      "vrp": 0.976,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-01-22 06:42",
       "family": "VIIRS",
       "vrp": 0.846,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-25 05:24",
-      "family": "VIIRS",
-      "vrp": 1.145,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-01-28 04:48",
-      "family": "VIIRS",
-      "vrp": 0.713,
       "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
@@ -1664,46 +1309,10 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-02-03 06:18",
-      "family": "VIIRS",
-      "vrp": 0.617,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 5,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-02-04 05:54",
       "family": "VIIRS",
       "vrp": 0.746,
       "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-05 05:18",
-      "family": "VIIRS",
-      "vrp": 0.718,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-05 07:00",
-      "family": "VIIRS",
-      "vrp": 0.75,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-08 06:00",
-      "family": "VIIRS",
-      "vrp": 1.277,
-      "raw_sensor": "VIIRS_SNPP_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
@@ -1763,64 +1372,10 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-02-11 06:48",
-      "family": "VIIRS",
-      "vrp": 0.684,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-12 05:06",
-      "family": "VIIRS",
-      "vrp": 0.844,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-13 06:06",
-      "family": "VIIRS",
-      "vrp": 0.981,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-14 04:30",
-      "family": "VIIRS",
-      "vrp": 0.65,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-14 05:48",
-      "family": "VIIRS",
-      "vrp": 1.177,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-02-17 04:54",
       "family": "VIIRS",
       "vrp": 1.042,
       "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-17 05:12",
-      "family": "VIIRS",
-      "vrp": 0.779,
-      "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
@@ -1844,15 +1399,6 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-02-18 06:12",
-      "family": "VIIRS",
-      "vrp": 0.685,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-02-27 05:06",
       "family": "VIIRS",
       "vrp": 2.833,
@@ -1865,24 +1411,6 @@
       "dt": "2026-02-27 05:24",
       "family": "VIIRS",
       "vrp": 1.295,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-02-28 05:06",
-      "family": "VIIRS",
-      "vrp": 0.877,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-01 06:30",
-      "family": "VIIRS",
-      "vrp": 0.648,
       "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
@@ -1907,27 +1435,9 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-03-07 05:54",
-      "family": "VIIRS",
-      "vrp": 0.915,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-03-07 06:18",
       "family": "VIIRS",
       "vrp": 1.398,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-12 04:42",
-      "family": "VIIRS",
-      "vrp": 1.073,
       "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
@@ -1952,15 +1462,6 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-03-14 05:42",
-      "family": "VIIRS",
-      "vrp": 1.073,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
       "dt": "2026-03-15 05:06",
       "family": "VIIRS",
       "vrp": 0.454,
@@ -1970,28 +1471,10 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-03-19 05:30",
+      "dt": "2026-03-16 06:24",
       "family": "VIIRS",
-      "vrp": 0.226,
+      "vrp": 0.13,
       "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-21 06:36",
-      "family": "VIIRS",
-      "vrp": 0.521,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-22 04:54",
-      "family": "VIIRS",
-      "vrp": 0.258,
-      "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
@@ -2024,10 +1507,10 @@
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-03-29 06:06",
+      "dt": "2026-03-24 05:36",
       "family": "VIIRS",
-      "vrp": 0.551,
-      "raw_sensor": "VIIRS_NOAA20_750",
+      "vrp": 0.13,
+      "raw_sensor": "VIIRS_SNPP_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
@@ -2037,7 +1520,7 @@
       "family": "VIIRS",
       "vrp": 0.422,
       "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 7,
+      "n_anomalous_pixels": 8,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
     },
@@ -2074,61 +1557,241 @@
       "vrp": 1.36,
       "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
-      "n_vent_pixels": 11,
+      "n_vent_pixels": 7,
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-04-12 06:24",
-      "family": "VIIRS",
-      "vrp": 0.554,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 5,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-14 07:10",
+      "dt": "2026-01-17 02:55",
       "family": "MODIS",
-      "vrp": 0.524,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null
-    },
-    {
-      "dt": "2026-03-19 01:50",
-      "family": "MODIS",
-      "vrp": 0.655,
+      "vrp": 7.705,
       "raw_sensor": "MODIS_TERRA",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-03-19 07:05",
+      "dt": "2026-01-31 08:15",
       "family": "MODIS",
-      "vrp": 0.372,
+      "vrp": 23.264,
       "raw_sensor": "MODIS_AQUA",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-04-12 02:45",
+      "dt": "2026-02-03 06:55",
       "family": "MODIS",
-      "vrp": 2.741,
-      "raw_sensor": "MODIS_TERRA",
+      "vrp": 3.546,
+      "raw_sensor": "MODIS_AQUA",
       "n_anomalous_pixels": 0,
-      "n_vent_pixels": 2,
+      "n_vent_pixels": 1,
       "hotspot_dist_km": null
     },
     {
-      "dt": "2026-04-12 07:35",
+      "dt": "2026-02-09 01:35",
       "family": "MODIS",
-      "vrp": 0.983,
+      "vrp": 4.346,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-02-10 02:15",
+      "family": "MODIS",
+      "vrp": 1.726,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-02-11 07:05",
+      "family": "MODIS",
+      "vrp": 3.547,
       "raw_sensor": "MODIS_AQUA",
       "n_anomalous_pixels": 0,
-      "n_vent_pixels": 3,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-02-12 01:55",
+      "family": "MODIS",
+      "vrp": 1.944,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-02-17 07:35",
+      "family": "MODIS",
+      "vrp": 1.367,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-02-18 02:35",
+      "family": "MODIS",
+      "vrp": 3.434,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-02-28 02:30",
+      "family": "MODIS",
+      "vrp": 1.596,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-03-02 07:45",
+      "family": "MODIS",
+      "vrp": 1.308,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-03-07 07:35",
+      "family": "MODIS",
+      "vrp": 1.11,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-03-08 08:15",
+      "family": "MODIS",
+      "vrp": 8.323,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-03-13 02:50",
+      "family": "MODIS",
+      "vrp": 7.481,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 1,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-03-15 07:50",
+      "family": "MODIS",
+      "vrp": 2.739,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-03-16 01:30",
+      "family": "MODIS",
+      "vrp": 6.621,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-03-17 02:10",
+      "family": "MODIS",
+      "vrp": 1.49,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-03-17 07:25",
+      "family": "MODIS",
+      "vrp": 0.837,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-03-18 02:50",
+      "family": "MODIS",
+      "vrp": 3.576,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-03-20 02:30",
+      "family": "MODIS",
+      "vrp": 1.72,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-03-21 01:30",
+      "family": "MODIS",
+      "vrp": 6.008,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-03-23 08:00",
+      "family": "MODIS",
+      "vrp": 2.298,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-03-30 02:30",
+      "family": "MODIS",
+      "vrp": 2.427,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-03-31 08:10",
+      "family": "MODIS",
+      "vrp": 5.835,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-04-03 01:50",
+      "family": "MODIS",
+      "vrp": 2.147,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-04-03 08:25",
+      "family": "MODIS",
+      "vrp": 9.258,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
       "hotspot_dist_km": null
     }
   ],
@@ -2154,17 +1817,6 @@
       "hotspot_dist_km": null,
       "ocr_match_dt": "2026-01-21 05:00",
       "ocr_vrp": 0.32
-    },
-    {
-      "dt": "2026-01-23 06:00",
-      "family": "VIIRS375",
-      "vrp": 0.874,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "ocr_match_dt": "2026-01-23 06:00",
-      "ocr_vrp": 0.85
     },
     {
       "dt": "2026-01-24 05:42",
@@ -2255,17 +1907,6 @@
       "ocr_vrp": 0.28
     },
     {
-      "dt": "2026-02-23 04:42",
-      "family": "VIIRS375",
-      "vrp": 0.226,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "ocr_match_dt": "2026-02-23 05:00",
-      "ocr_vrp": 0.15
-    },
-    {
       "dt": "2026-02-24 06:00",
       "family": "VIIRS375",
       "vrp": 0.444,
@@ -2343,17 +1984,6 @@
       "ocr_vrp": 0.16
     },
     {
-      "dt": "2026-03-26 05:00",
-      "family": "VIIRS375",
-      "vrp": 0.111,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "ocr_match_dt": "2026-03-26 05:18",
-      "ocr_vrp": 0.26
-    },
-    {
       "dt": "2026-03-27 04:42",
       "family": "VIIRS375",
       "vrp": 0.338,
@@ -2409,17 +2039,6 @@
       "ocr_vrp": 0.54
     },
     {
-      "dt": "2026-04-13 04:42",
-      "family": "VIIRS375",
-      "vrp": 0.153,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "ocr_match_dt": "2026-04-13 04:42",
-      "ocr_vrp": 0.07
-    },
-    {
       "dt": "2026-04-13 06:06",
       "family": "VIIRS375",
       "vrp": 0.38,
@@ -2444,30 +2063,10 @@
   ],
   "fp_after_ocr_records": [
     {
-      "dt": "2026-01-11 04:48",
-      "family": "VIIRS375",
-      "vrp": 0.165,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-01-11 06:24",
       "family": "VIIRS375",
       "vrp": 0.302,
       "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-11 06:48",
-      "family": "VIIRS375",
-      "vrp": 0.191,
-      "raw_sensor": "VIIRS_NOAA20",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
@@ -2494,16 +2093,6 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-01-13 04:30",
-      "family": "VIIRS375",
-      "vrp": 0.207,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-01-13 05:48",
       "family": "VIIRS375",
       "vrp": 0.687,
@@ -2519,26 +2108,6 @@
       "vrp": 0.963,
       "raw_sensor": "VIIRS_SNPP",
       "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-15 05:12",
-      "family": "VIIRS375",
-      "vrp": 0.142,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-15 05:30",
-      "family": "VIIRS375",
-      "vrp": 0.127,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
       "fp_class": "fp_vent_only"
@@ -2564,16 +2133,6 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-01-16 06:54",
-      "family": "VIIRS375",
-      "vrp": 0.154,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-01-17 04:36",
       "family": "VIIRS375",
       "vrp": 0.188,
@@ -2594,29 +2153,9 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-01-17 06:12",
-      "family": "VIIRS375",
-      "vrp": 0.166,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-01-17 06:36",
       "family": "VIIRS375",
       "vrp": 0.293,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-18 04:36",
-      "family": "VIIRS375",
-      "vrp": 0.222,
       "raw_sensor": "VIIRS_NOAA20",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
@@ -2644,16 +2183,6 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-01-20 07:00",
-      "family": "VIIRS375",
-      "vrp": 0.23,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-01-22 04:42",
       "family": "VIIRS375",
       "vrp": 0.378,
@@ -2669,16 +2198,6 @@
       "vrp": 0.347,
       "raw_sensor": "VIIRS_NOAA20",
       "n_anomalous_pixels": 2,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-26 06:48",
-      "family": "VIIRS375",
-      "vrp": 0.2,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
       "fp_class": "fp_vent_only"
@@ -2784,26 +2303,6 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-02-02 06:36",
-      "family": "VIIRS375",
-      "vrp": 0.127,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 44,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-03 04:36",
-      "family": "VIIRS375",
-      "vrp": 0.08,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-02-03 05:54",
       "family": "VIIRS375",
       "vrp": 0.356,
@@ -2834,26 +2333,6 @@
       "fp_class": "fp_ambiguous"
     },
     {
-      "dt": "2026-02-05 05:18",
-      "family": "VIIRS375",
-      "vrp": 0.164,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-05 05:36",
-      "family": "VIIRS375",
-      "vrp": 0.137,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-02-05 07:00",
       "family": "VIIRS375",
       "vrp": 0.247,
@@ -2869,16 +2348,6 @@
       "vrp": 0.281,
       "raw_sensor": "VIIRS_SNPP",
       "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-07 04:42",
-      "family": "VIIRS375",
-      "vrp": 0.215,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
       "fp_class": "fp_vent_only"
@@ -2964,31 +2433,11 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-02-12 04:48",
-      "family": "VIIRS375",
-      "vrp": 0.103,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-02-12 05:06",
       "family": "VIIRS375",
       "vrp": 0.227,
       "raw_sensor": "VIIRS_NOAA20",
       "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-12 06:24",
-      "family": "VIIRS375",
-      "vrp": 0.092,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 1,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
       "fp_class": "fp_vent_only"
@@ -3034,61 +2483,11 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-02-16 06:54",
-      "family": "VIIRS375",
-      "vrp": 0.174,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-17 04:54",
-      "family": "VIIRS375",
-      "vrp": 0.114,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 21,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-17 05:12",
-      "family": "VIIRS375",
-      "vrp": 0.11,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 33,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-02-18 04:36",
       "family": "VIIRS375",
       "vrp": 0.562,
       "raw_sensor": "VIIRS_SNPP",
       "n_anomalous_pixels": 2,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-18 06:12",
-      "family": "VIIRS375",
-      "vrp": 0.133,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 24,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-18 06:36",
-      "family": "VIIRS375",
-      "vrp": 0.099,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
       "fp_class": "fp_vent_only"
@@ -3134,41 +2533,11 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-02-23 06:18",
-      "family": "VIIRS375",
-      "vrp": 0.171,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-02-24 04:42",
       "family": "VIIRS375",
       "vrp": 0.26,
       "raw_sensor": "VIIRS_NOAA20",
       "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-27 06:48",
-      "family": "VIIRS375",
-      "vrp": 0.127,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-28 04:48",
-      "family": "VIIRS375",
-      "vrp": 0.16,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
       "fp_class": "fp_vent_only"
@@ -3194,50 +2563,10 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-03-05 04:54",
-      "family": "VIIRS375",
-      "vrp": 0.139,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-03-05 06:36",
       "family": "VIIRS375",
       "vrp": 0.321,
       "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-07 06:18",
-      "family": "VIIRS375",
-      "vrp": 0.138,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-08 06:00",
-      "family": "VIIRS375",
-      "vrp": 0.194,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-09 05:36",
-      "family": "VIIRS375",
-      "vrp": 0.161,
-      "raw_sensor": "VIIRS_NOAA20",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
@@ -3264,36 +2593,6 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-03-18 04:30",
-      "family": "VIIRS375",
-      "vrp": 0.096,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-18 05:48",
-      "family": "VIIRS375",
-      "vrp": 0.157,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-20 05:12",
-      "family": "VIIRS375",
-      "vrp": 0.108,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-03-20 06:54",
       "family": "VIIRS375",
       "vrp": 0.201,
@@ -3312,16 +2611,6 @@
       "n_vent_pixels": 0,
       "hotspot_dist_km": 4.35,
       "fp_class": "fp_ambiguous"
-    },
-    {
-      "dt": "2026-03-21 06:36",
-      "family": "VIIRS375",
-      "vrp": 0.112,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 3,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
     },
     {
       "dt": "2026-03-22 06:36",
@@ -3349,16 +2638,6 @@
       "vrp": 0.187,
       "raw_sensor": "VIIRS_NOAA20",
       "n_anomalous_pixels": 56,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-25 05:18",
-      "family": "VIIRS375",
-      "vrp": 0.117,
-      "raw_sensor": "VIIRS_SNPP",
-      "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
       "fp_class": "fp_vent_only"
@@ -3404,16 +2683,6 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-03-29 06:06",
-      "family": "VIIRS375",
-      "vrp": 0.105,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 124,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-03-31 06:48",
       "family": "VIIRS375",
       "vrp": 0.136,
@@ -3434,22 +2703,12 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-04-01 05:06",
-      "family": "VIIRS375",
-      "vrp": 0.167,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 4,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-04-03 04:30",
       "family": "VIIRS375",
       "vrp": 0.201,
       "raw_sensor": "VIIRS_NOAA20",
       "n_anomalous_pixels": 1,
-      "n_vent_pixels": 1,
+      "n_vent_pixels": 0,
       "hotspot_dist_km": 2.95,
       "fp_class": "fp_near"
     },
@@ -3524,89 +2783,9 @@
       "fp_class": "fp_far"
     },
     {
-      "dt": "2026-04-12 05:00",
-      "family": "VIIRS375",
-      "vrp": 0.111,
-      "raw_sensor": "VIIRS_NOAA20",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 4,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-11 05:06",
-      "family": "VIIRS",
-      "vrp": 1.108,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-12 04:48",
-      "family": "VIIRS",
-      "vrp": 0.911,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-01-12 06:06",
       "family": "VIIRS",
       "vrp": 1.308,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-13 05:48",
-      "family": "VIIRS",
-      "vrp": 0.948,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-14 05:30",
-      "family": "VIIRS",
-      "vrp": 0.982,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-17 04:54",
-      "family": "VIIRS",
-      "vrp": 1.204,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-17 06:36",
-      "family": "VIIRS",
-      "vrp": 0.813,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-18 05:54",
-      "family": "VIIRS",
-      "vrp": 1.374,
       "raw_sensor": "VIIRS_SNPP_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
@@ -3624,39 +2803,9 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-01-22 05:00",
-      "family": "VIIRS",
-      "vrp": 0.976,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-01-22 06:42",
       "family": "VIIRS",
       "vrp": 0.846,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-25 05:24",
-      "family": "VIIRS",
-      "vrp": 1.145,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-01-28 04:48",
-      "family": "VIIRS",
-      "vrp": 0.713,
       "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
@@ -3734,50 +2883,10 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-02-03 06:18",
-      "family": "VIIRS",
-      "vrp": 0.617,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 5,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-02-04 05:54",
       "family": "VIIRS",
       "vrp": 0.746,
       "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-05 05:18",
-      "family": "VIIRS",
-      "vrp": 0.718,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-05 07:00",
-      "family": "VIIRS",
-      "vrp": 0.75,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-08 06:00",
-      "family": "VIIRS",
-      "vrp": 1.277,
-      "raw_sensor": "VIIRS_SNPP_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
@@ -3844,70 +2953,10 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-02-11 06:48",
-      "family": "VIIRS",
-      "vrp": 0.684,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-12 05:06",
-      "family": "VIIRS",
-      "vrp": 0.844,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-13 06:06",
-      "family": "VIIRS",
-      "vrp": 0.981,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-14 04:30",
-      "family": "VIIRS",
-      "vrp": 0.65,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-14 05:48",
-      "family": "VIIRS",
-      "vrp": 1.177,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-02-17 04:54",
       "family": "VIIRS",
       "vrp": 1.042,
       "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-17 05:12",
-      "family": "VIIRS",
-      "vrp": 0.779,
-      "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
@@ -3934,16 +2983,6 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-02-18 06:12",
-      "family": "VIIRS",
-      "vrp": 0.685,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-02-27 05:06",
       "family": "VIIRS",
       "vrp": 2.833,
@@ -3957,26 +2996,6 @@
       "dt": "2026-02-27 05:24",
       "family": "VIIRS",
       "vrp": 1.295,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-02-28 05:06",
-      "family": "VIIRS",
-      "vrp": 0.877,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-01 06:30",
-      "family": "VIIRS",
-      "vrp": 0.648,
       "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
@@ -4004,29 +3023,9 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-03-07 05:54",
-      "family": "VIIRS",
-      "vrp": 0.915,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-03-07 06:18",
       "family": "VIIRS",
       "vrp": 1.398,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-12 04:42",
-      "family": "VIIRS",
-      "vrp": 1.073,
       "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
@@ -4054,16 +3053,6 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-03-14 05:42",
-      "family": "VIIRS",
-      "vrp": 1.073,
-      "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
       "dt": "2026-03-15 05:06",
       "family": "VIIRS",
       "vrp": 0.454,
@@ -4074,30 +3063,10 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-03-19 05:30",
+      "dt": "2026-03-16 06:24",
       "family": "VIIRS",
-      "vrp": 0.226,
+      "vrp": 0.13,
       "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-21 06:36",
-      "family": "VIIRS",
-      "vrp": 0.521,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-22 04:54",
-      "family": "VIIRS",
-      "vrp": 0.258,
-      "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
@@ -4134,10 +3103,10 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-03-29 06:06",
+      "dt": "2026-03-24 05:36",
       "family": "VIIRS",
-      "vrp": 0.551,
-      "raw_sensor": "VIIRS_NOAA20_750",
+      "vrp": 0.13,
+      "raw_sensor": "VIIRS_SNPP_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
@@ -4148,7 +3117,7 @@
       "family": "VIIRS",
       "vrp": 0.422,
       "raw_sensor": "VIIRS_NOAA20_750",
-      "n_anomalous_pixels": 7,
+      "n_anomalous_pixels": 8,
       "n_vent_pixels": 1,
       "hotspot_dist_km": null,
       "fp_class": "fp_vent_only"
@@ -4189,34 +3158,14 @@
       "vrp": 1.36,
       "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
-      "n_vent_pixels": 11,
+      "n_vent_pixels": 7,
       "hotspot_dist_km": null,
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-04-12 06:24",
-      "family": "VIIRS",
-      "vrp": 0.554,
-      "raw_sensor": "VIIRS_SNPP_750",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 5,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-14 07:10",
+      "dt": "2026-01-17 02:55",
       "family": "MODIS",
-      "vrp": 0.524,
-      "raw_sensor": "MODIS_AQUA",
-      "n_anomalous_pixels": 0,
-      "n_vent_pixels": 1,
-      "hotspot_dist_km": null,
-      "fp_class": "fp_vent_only"
-    },
-    {
-      "dt": "2026-03-19 01:50",
-      "family": "MODIS",
-      "vrp": 0.655,
+      "vrp": 7.705,
       "raw_sensor": "MODIS_TERRA",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
@@ -4224,9 +3173,9 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-03-19 07:05",
+      "dt": "2026-01-31 08:15",
       "family": "MODIS",
-      "vrp": 0.372,
+      "vrp": 23.264,
       "raw_sensor": "MODIS_AQUA",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
@@ -4234,22 +3183,242 @@
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-04-12 02:45",
+      "dt": "2026-02-03 06:55",
       "family": "MODIS",
-      "vrp": 2.741,
-      "raw_sensor": "MODIS_TERRA",
+      "vrp": 3.546,
+      "raw_sensor": "MODIS_AQUA",
       "n_anomalous_pixels": 0,
-      "n_vent_pixels": 2,
+      "n_vent_pixels": 1,
       "hotspot_dist_km": null,
       "fp_class": "fp_vent_only"
     },
     {
-      "dt": "2026-04-12 07:35",
+      "dt": "2026-02-09 01:35",
       "family": "MODIS",
-      "vrp": 0.983,
+      "vrp": 4.346,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-02-10 02:15",
+      "family": "MODIS",
+      "vrp": 1.726,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-02-11 07:05",
+      "family": "MODIS",
+      "vrp": 3.547,
       "raw_sensor": "MODIS_AQUA",
       "n_anomalous_pixels": 0,
-      "n_vent_pixels": 3,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-02-12 01:55",
+      "family": "MODIS",
+      "vrp": 1.944,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-02-17 07:35",
+      "family": "MODIS",
+      "vrp": 1.367,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-02-18 02:35",
+      "family": "MODIS",
+      "vrp": 3.434,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-02-28 02:30",
+      "family": "MODIS",
+      "vrp": 1.596,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-03-02 07:45",
+      "family": "MODIS",
+      "vrp": 1.308,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-03-07 07:35",
+      "family": "MODIS",
+      "vrp": 1.11,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-03-08 08:15",
+      "family": "MODIS",
+      "vrp": 8.323,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-03-13 02:50",
+      "family": "MODIS",
+      "vrp": 7.481,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 1,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-03-15 07:50",
+      "family": "MODIS",
+      "vrp": 2.739,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-03-16 01:30",
+      "family": "MODIS",
+      "vrp": 6.621,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-03-17 02:10",
+      "family": "MODIS",
+      "vrp": 1.49,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-03-17 07:25",
+      "family": "MODIS",
+      "vrp": 0.837,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-03-18 02:50",
+      "family": "MODIS",
+      "vrp": 3.576,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-03-20 02:30",
+      "family": "MODIS",
+      "vrp": 1.72,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-03-21 01:30",
+      "family": "MODIS",
+      "vrp": 6.008,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-03-23 08:00",
+      "family": "MODIS",
+      "vrp": 2.298,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-03-30 02:30",
+      "family": "MODIS",
+      "vrp": 2.427,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-03-31 08:10",
+      "family": "MODIS",
+      "vrp": 5.835,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-04-03 01:50",
+      "family": "MODIS",
+      "vrp": 2.147,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-04-03 08:25",
+      "family": "MODIS",
+      "vrp": 9.258,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 1,
       "hotspot_dist_km": null,
       "fp_class": "fp_vent_only"
     }

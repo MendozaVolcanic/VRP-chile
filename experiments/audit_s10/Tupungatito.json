@@ -1,16 +1,16 @@
 {
   "volcano": "Tupungatito",
-  "generated_at": "2026-04-16T05:08:00.932318Z",
+  "generated_at": "2026-04-16T11:58:20.482673Z",
   "audit_script": "experiments/11_strict_audit.py",
   "totals": {
     "n_ref": 54,
-    "n_ours_detections": 162,
+    "n_ours_detections": 164,
     "tp": 45,
     "fn": 9,
-    "fp": 117,
-    "precision": 0.278,
+    "fp": 119,
+    "precision": 0.274,
     "recall": 0.833,
-    "f1": 0.417,
+    "f1": 0.413,
     "ratio_overall": {
       "n": 45,
       "min": 0.396,
@@ -23,23 +23,23 @@
   "ocr_reclassification": {
     "n_ocr_ref": 20,
     "tp_ocr": 13,
-    "fp_remaining": 104,
-    "precision_adjusted": 0.358,
+    "fp_remaining": 106,
+    "precision_adjusted": 0.354,
     "fp_classes": {
       "fp_near": 0,
       "fp_far": 0,
       "fp_ambiguous": 0,
-      "fp_vent_only": 104
+      "fp_vent_only": 106
     }
   },
   "by_family": {
     "MODIS": {
       "n_ref": 0,
-      "n_ours_det": 0,
+      "n_ours_det": 2,
       "tp": 0,
       "fn": 0,
-      "fp": 0,
-      "precision": null,
+      "fp": 2,
+      "precision": 0.0,
       "recall": null,
       "ratio": null
     },
@@ -89,7 +89,7 @@
       "n_ref": 2,
       "tp": 1,
       "fn": 1,
-      "fp_in_bucket": 39,
+      "fp_in_bucket": 40,
       "ratio": {
         "n": 1,
         "median": 0.396
@@ -120,7 +120,7 @@
       "n_ref": 0,
       "tp": 0,
       "fn": 0,
-      "fp_in_bucket": 0,
+      "fp_in_bucket": 1,
       "ratio": null
     }
   },
@@ -1250,6 +1250,24 @@
       "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-04-12 01:10",
+      "family": "MODIS",
+      "vrp": 10.914,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 2,
+      "hotspot_dist_km": null
+    },
+    {
+      "dt": "2026-04-12 07:35",
+      "family": "MODIS",
+      "vrp": 0.524,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 2,
       "hotspot_dist_km": null
     }
   ],
@@ -2436,6 +2454,26 @@
       "raw_sensor": "VIIRS_NOAA20_750",
       "n_anomalous_pixels": 0,
       "n_vent_pixels": 1,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-04-12 01:10",
+      "family": "MODIS",
+      "vrp": 10.914,
+      "raw_sensor": "MODIS_TERRA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 2,
+      "hotspot_dist_km": null,
+      "fp_class": "fp_vent_only"
+    },
+    {
+      "dt": "2026-04-12 07:35",
+      "family": "MODIS",
+      "vrp": 0.524,
+      "raw_sensor": "MODIS_AQUA",
+      "n_anomalous_pixels": 0,
+      "n_vent_pixels": 2,
       "hotspot_dist_km": null,
       "fp_class": "fp_vent_only"
     }
