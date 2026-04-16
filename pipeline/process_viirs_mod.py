@@ -57,6 +57,7 @@ from pipeline.profile import (
     NTI_REL_MIN_FLOOR,
     N_SIGMA_VENT,
     MAX_VENT_SIGMA_CONTRIB_K,
+    MIN_VENT_PIXELS,
 )
 
 # M-band wavelengths (µm)
@@ -372,15 +373,18 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 sigma_contrib = min(N_SIGMA_VENT * std_bg, MAX_VENT_SIGMA_CONTRIB_K)
                 vent_thresh = max(VENT_THRESHOLD_K, sigma_contrib)
                 if t_max_vent > (t_bg + vent_thresh):
-                    L_vent = bt_to_spectral_radiance(np.float64(t_max_vent), M13_LAMBDA)
-                    L_bg_vent = bt_to_spectral_radiance(np.float64(t_bg), M13_LAMBDA)
-                    vent_area = float(pixel_areas[r_vent, c_vent])
-                    vrp_vent_mw = float(vent_area * WOOSTER_COEFF * (L_vent - L_bg_vent)) / 1e6
-                    n_vent_pixels = 1
-                    # S12 2026-04-15: guardar coord real del pixel detectado
-                    vent_hotspot_lat = float(lat[r_vent, c_vent])
-                    vent_hotspot_lon = float(lon[r_vent, c_vent])
-                    vent_hotspot_dist_km = float(haversine_km(vent_lat, vent_lon, vent_hotspot_lat, vent_hotspot_lon))
+                    # S12 E4: count pixels above threshold
+                    vent_hot_mask = vent_bt > (t_bg + vent_thresh)
+                    n_hot_in_vent = int(np.sum(vent_hot_mask))
+                    if n_hot_in_vent >= MIN_VENT_PIXELS:
+                        L_vent = bt_to_spectral_radiance(np.float64(t_max_vent), M13_LAMBDA)
+                        L_bg_vent = bt_to_spectral_radiance(np.float64(t_bg), M13_LAMBDA)
+                        vent_area = float(pixel_areas[r_vent, c_vent])
+                        vrp_vent_mw = float(vent_area * WOOSTER_COEFF * (L_vent - L_bg_vent)) / 1e6
+                        n_vent_pixels = n_hot_in_vent
+                        vent_hotspot_lat = float(lat[r_vent, c_vent])
+                        vent_hotspot_lon = float(lon[r_vent, c_vent])
+                        vent_hotspot_dist_km = float(haversine_km(vent_lat, vent_lon, vent_hotspot_lat, vent_hotspot_lon))
 
     name   = l1b_path.name
     sensor = "VIIRS_SNPP_750" if name.startswith("VNP") else "VIIRS_NOAA20_750"

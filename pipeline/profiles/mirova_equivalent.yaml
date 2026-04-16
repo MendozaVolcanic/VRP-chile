@@ -47,6 +47,9 @@ thresholds:
   min_vrp_mw_viirs375: 0.02
   min_vrp_mw_viirs750: 0.15
   min_vrp_mw_modis:    0.27
+  # S12 E4: mirova_equivalent mantiene min_vent_pixels=1 (actual).
+  # Experimental prueba con 2 para medir impacto en FPs.
+  min_vent_pixels: 1
   # S12 F1b: cap on the sigma contribution for VENT-path gating.
   # Without this, high-sigma backgrounds (Tupungatito orográfico,
   # Lastarria nieve parcial) produced effective vent thresholds of
@@ -72,13 +75,13 @@ background:
 paths:
   enable_eruption_path: true
   enable_vent_path: true
-  # Session 10: vent_path desactivado para MODIS en mirova_equivalent.
-  # Diagnóstico RF1 mostró que MODIS (1km pixel) produce 21% de falsos positivos
-  # vent-only vs solo 9% en VIIRS. La señal/ruido en MODIS es 2.5x (marginal)
-  # vs 4-5x en VIIRS. MIROVA misma no publica detecciones MODIS para volcanes
-  # de baja actividad (consolidada tiene 0 refs MODIS en 6 de 8 volcanes).
-  # El eruption-path de MODIS sigue activo — solo el vent-scale permisivo se apaga.
-  enable_vent_path_modis: false
+  # S12 E1: MODIS vent-path reactivado. Audit experimental mostró que
+  # MODIS vent con threshold=2.5K + floor=0.3MW da +3 TP / -19 FP en
+  # Lascar — neto positivo. Las condiciones estrictas (2.5K > VIIRS 1K,
+  # floor 0.3 MW > sin floor) compensan el menor SNR del pixel 1km.
+  enable_vent_path_modis: true
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
   # NTI relative path disabled in operational profile until validated.
   enable_nti_relative_path: false
 

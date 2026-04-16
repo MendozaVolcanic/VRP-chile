@@ -78,6 +78,7 @@ from pipeline.profile import (
     MODIS_VENT_VRP_FLOOR_MW,
     N_SIGMA_VENT,
     MAX_VENT_SIGMA_CONTRIB_K,
+    MIN_VENT_PIXELS,
 )
 
 # Indices of bands 21 and 22 within EV_1KM_Emissive
@@ -384,10 +385,11 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                     L_bg_vent = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bg)) - 1)))
                     vent_area = float(pixel_areas[r_vent, c_vent])
                     vrp_vent_mw = float(vent_area * WOOSTER_COEFF * (L_vent - L_bg_vent)) / 1e6
-                    # Session 12: reject noise-level detections below VRP floor
-                    if vrp_vent_mw >= MODIS_VENT_VRP_FLOOR_MW:
-                        n_vent_pixels = 1
-                        # S12 2026-04-15: coord real del pixel detectado
+                    # S12 E4: count hot pixels + floor check
+                    vent_hot_mask = vent_bt > (t_bg + modis_vent_thresh)
+                    n_hot_in_vent = int(np.sum(vent_hot_mask))
+                    if vrp_vent_mw >= MODIS_VENT_VRP_FLOOR_MW and n_hot_in_vent >= MIN_VENT_PIXELS:
+                        n_vent_pixels = n_hot_in_vent
                         vent_hotspot_lat = float(lat[r_vent, c_vent])
                         vent_hotspot_lon = float(lon[r_vent, c_vent])
                         vent_hotspot_dist_km = float(haversine_km(vent_lat, vent_lon, vent_hotspot_lat, vent_hotspot_lon))

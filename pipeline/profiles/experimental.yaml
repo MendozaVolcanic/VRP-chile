@@ -36,6 +36,12 @@ thresholds:
   min_vrp_mw_viirs375: 0.0
   min_vrp_mw_viirs750: 0.0
   min_vrp_mw_modis:    0.0
+  # S12 E4: requerir >=2 pixeles calientes en el vent radius para
+  # declarar detección vent-path. Hipótesis: señales reales (domo,
+  # lava lake, fumarola) calientan 2+ pixeles contiguos a 375m,
+  # mientras que ruido térmico afecta 1 pixel aislado. Si reduce
+  # FPs sin matar TPs → candidato para mirova_equivalent.
+  min_vent_pixels: 2
   # Session 12: Path C sigma multiplier — raised from 3.0 to 5.0 to reduce
   # vent-only FPs (Villarrica audit: 90 FPs, 0 TPs with 3σ).
   nti_rel_n_sigma: 5.0

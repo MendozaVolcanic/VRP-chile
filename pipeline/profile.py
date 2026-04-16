@@ -75,6 +75,9 @@ MODIS_VENT_VRP_FLOOR_MW: float = float(_t.get("modis_vent_vrp_floor_mw", 0.0))
 # unificar vrp_mw = max(eruption, vent). Cualquier VRP por debajo del
 # piso se lleva a 0 (no-detección). Piso calibrado al mínimo MIROVA
 # observado por sensor (inclusive, operador >=). Default 0.0 = sin piso.
+# S12 E4: mínimo de pixeles calientes en el vent radius para declarar
+# detección vent-path. Default 1 = comportamiento actual.
+MIN_VENT_PIXELS: int = int(_t.get("min_vent_pixels", 1))
 MIN_VRP_MW_VIIRS375: float = float(_t.get("min_vrp_mw_viirs375", 0.0))
 MIN_VRP_MW_VIIRS750: float = float(_t.get("min_vrp_mw_viirs750", 0.0))
 MIN_VRP_MW_MODIS: float = float(_t.get("min_vrp_mw_modis", 0.0))

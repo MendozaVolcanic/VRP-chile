@@ -62,6 +62,7 @@ from pipeline.profile import (
     VENT_THRESHOLD_K,
     N_SIGMA_VENT,
     MAX_VENT_SIGMA_CONTRIB_K,
+    MIN_VENT_PIXELS,
     BG_INNER_KM,
     BG_OUTER_KM,
     NTI_K1_NIGHT,
@@ -447,17 +448,21 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 else:
                     vent_thresh = VENT_THRESHOLD_K
                 if t_max_vent > (t_bg_i04 + vent_thresh):
-                    # Wooster MIR radiance with scan-angle corrected pixel area
-                    L_vent = bt_to_spectral_radiance(np.float64(t_max_vent), I04_LAMBDA)
-                    L_bg_vent = bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA)
-                    vent_area = float(pixel_areas[r_vent, c_vent])
-                    vrp_vent_mw = float(
-                        vent_area * WOOSTER_COEFF * (L_vent - L_bg_vent)
-                    ) / 1e6
-                    n_vent_pixels = 1
-                    vent_hotspot_lat = vent_hotspot_lat_candidate
-                    vent_hotspot_lon = vent_hotspot_lon_candidate
-                    vent_hotspot_dist_km = vent_hotspot_dist_km_candidate
+                    # S12 E4: count how many pixels in vent radius exceed threshold
+                    vent_hot_mask = vent_bt_2d > (t_bg_i04 + vent_thresh)
+                    n_hot_in_vent = int(np.sum(vent_hot_mask))
+                    if n_hot_in_vent >= MIN_VENT_PIXELS:
+                        # Wooster MIR radiance with scan-angle corrected pixel area
+                        L_vent = bt_to_spectral_radiance(np.float64(t_max_vent), I04_LAMBDA)
+                        L_bg_vent = bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA)
+                        vent_area = float(pixel_areas[r_vent, c_vent])
+                        vrp_vent_mw = float(
+                            vent_area * WOOSTER_COEFF * (L_vent - L_bg_vent)
+                        ) / 1e6
+                        n_vent_pixels = n_hot_in_vent
+                        vent_hotspot_lat = vent_hotspot_lat_candidate
+                        vent_hotspot_lon = vent_hotspot_lon_candidate
+                        vent_hotspot_dist_km = vent_hotspot_dist_km_candidate
 
     name = l1b_path.name
     sensor = "VIIRS_SNPP" if name.startswith("VNP") else "VIIRS_NOAA20"
