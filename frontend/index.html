@@ -949,8 +949,11 @@ function renderDetail() {
     if (sensorVisible.VIIRS375 && v375.length) {
       const snpp375   = v375.filter(r => r.sensor === "VIIRS_SNPP");
       const noaa375   = v375.filter(r => r.sensor === "VIIRS_NOAA20");
-      if (snpp375.length)  ds.push({ label:"VIIRS SNPP 375m",   data:toDailyMax(snpp375,"vrp_mir_mw"), backgroundColor:"#e91e63cc", borderColor:"#e91e63", borderWidth:1, borderRadius:2, borderSkipped:false });
-      if (noaa375.length)  ds.push({ label:"VIIRS NOAA-20 375m",data:toDailyMax(noaa375,"vrp_mir_mw"), backgroundColor:"#f06292cc", borderColor:"#f06292", borderWidth:1, borderRadius:2, borderSkipped:false });
+      // S12 fix: VIIRS 375m chart usaba vrp_mir_mw (VRP crudo pre-filtro),
+      // mostrando barras para detecciones descartadas por geofencing.
+      // Cambiado a vrp_mw (valor unificado y filtrado por distancia).
+      if (snpp375.length)  ds.push({ label:"VIIRS SNPP 375m",   data:toDailyMax(snpp375,"vrp_mw"), backgroundColor:"#e91e63cc", borderColor:"#e91e63", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (noaa375.length)  ds.push({ label:"VIIRS NOAA-20 375m",data:toDailyMax(noaa375,"vrp_mw"), backgroundColor:"#f06292cc", borderColor:"#f06292", borderWidth:1, borderRadius:2, borderSkipped:false });
     }
     if (sensorVisible.MIROVA && mFiltered.length) {
       ds.push({
