@@ -140,6 +140,35 @@ Para minimizar compactaciones automáticas ("session continued..."):
 - NASA LANCE NRT ~3h latencia.
 - NOAA-20: buscar v2 **y** v2.1 (disponibilidad variable).
 - Secrets en GitHub: EARTHDATA_USERNAME, EARTHDATA_PASSWORD.
+- **NRT vs Standard L1B**: fetch.py intenta Standard primero, cae a `_NRT`
+  (LANCE). Records llevan `product_version: "standard"|"nrt"`. store.py
+  auto-upgrade NRT→Standard. Delta BT <0.1K, despreciable para VRP.
+- **Encoding Windows**: scripts Python que imprimen Unicode (σ, →, ✓) deben
+  usar `sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')`.
+- **volcanoes.yaml**: `yaml.safe_dump` destruye comentarios. Preferir `Edit`
+  tool para cambios puntuales, no rewrite completo con Python.
+- **GitHub Actions**: repo público = minutos ilimitados. Matrix 45 volcanes,
+  max-parallel=8, fail-fast=false, cron cada 2h. Timeout 25 min/step puede
+  ser corto para reprocess full history (NdC timeout recurrente).
+- **Radios geofencing MIROVA-OVDAS**: cada volcán tiene radius_km propio
+  (3-15 km). store.py usa `max_hotspot_dist_km` per-volcano, no global 5km.
+  Refs: https://github.com/MendozaVolcanic/Mirova-v1
+- **Refs MIROVA son NRT**: los CSV consolidado/OCR scrapeados de mirovaweb.it
+  contienen datos NRT. Comparar contra NRT es operacionalmente correcto.
+  OCR cubre ~80% VIIRS, MODIS completo. No re-scrapear para homogeneizar.
+- **Frontend chart gotcha**: VIIRS 375m debe usar `vrp_mw` (filtrado), no
+  `vrp_mir_mw` (pre-filtro). Bug S12: barras fantasma de detecciones
+  descartadas por geofencing.
 
 ## Estado
-Calibración de sesiones 4-5 **INVALIDADA** en sesión 8 (refs OCR-noisy + pairing débil + sin contar FPs). **No hay baseline validado** hasta terminar auditoría estricta. Leer `tasks/todo.md` antes de cualquier "fix" y `tasks/lessons.md` L7.6-L7.9 para el diagnóstico. Detalles históricos en memoria `project_vrp_chile.md`.
+**S12 baseline (2026-04-16)**: 45 volcanes operacionales, 11 con refs MIROVA
+(14042026 consolidado, 494 refs). Auditoría contra MIROVA:
+- Recall top: Chaitén 87%, Lastarria 85%, Tupungatito 83%, PCC 82%.
+- Lascar (Tier A): recall 55%, precision OCR-adj 0.69, ratio 1.11.
+- Villarrica 0% recall: gap arquitectural, requiere Test 1 integrado-ROI
+  (plan en `tasks/plan_s13_test1_integrated_roi.md`).
+- FPs principales: vent-only detecciones sub-MIROVA-threshold (0.1-1 MW).
+- Experimental prueba `min_vent_pixels=2` (E4): −39% FPs vs meq.
+- Leer `tasks/status_s12_overnight.md` y `tasks/todo.md` para pendientes.
+- Coords de vent actualizadas por Nicolás (campo): PCC lacolito, Chaitén
+  domo, Villarrica lava lake, Lascar cráter V.
