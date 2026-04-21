@@ -175,7 +175,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                   volcano_lat: float, volcano_lon: float,
                   radius_km: float = 15.0,
                   vent_lat: float = None, vent_lon: float = None,
-                  vent_radius_km: float = 4.0) -> dict | None:
+                  vent_radius_km: float = 4.0,
+                  inner_radius_km: float | None = None) -> dict | None:
     """
     Calculate VRP from MODIS L1B granule.
 
@@ -186,6 +187,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         vent_lat/vent_lon: Optional vent coordinates for weak-signal detection.
             Uses a low threshold (1K) in a tight ROI without ROI p95 filter.
         vent_radius_km: Radius for vent-scale search.
+        inner_radius_km: MIROVA-style visual classification radius (S14 D1).
+            If None, distance_class is None.
 
     Returns dict or None if granule does not cover volcano.
     """
@@ -396,6 +399,27 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                     else:
                         vrp_vent_mw = 0.0
 
+    # --- Schema unification (S14 D6) ---
+    if hotspot_lat is not None and hotspot_lon is not None:
+        final_hotspot_lat = hotspot_lat
+        final_hotspot_lon = hotspot_lon
+        final_hotspot_dist_km = hotspot_dist_km
+        final_hotspot_source = "eruption"
+    elif vent_hotspot_lat is not None and vent_hotspot_lon is not None:
+        final_hotspot_lat = vent_hotspot_lat
+        final_hotspot_lon = vent_hotspot_lon
+        final_hotspot_dist_km = vent_hotspot_dist_km
+        final_hotspot_source = "vent"
+    else:
+        final_hotspot_lat = None
+        final_hotspot_lon = None
+        final_hotspot_dist_km = None
+        final_hotspot_source = None
+
+    distance_class = None
+    if final_hotspot_dist_km is not None and inner_radius_km is not None:
+        distance_class = "summit" if final_hotspot_dist_km <= inner_radius_km else "far"
+
     return {
         "vrp_mw": round(vrp_mw, 3),
         "vrp_vent_mw": round(vrp_vent_mw, 3),
@@ -407,6 +431,11 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "hotspot_lat": hotspot_lat,
         "hotspot_lon": hotspot_lon,
         "hotspot_dist_km": hotspot_dist_km,
+        "final_hotspot_lat": final_hotspot_lat,
+        "final_hotspot_lon": final_hotspot_lon,
+        "final_hotspot_dist_km": round(final_hotspot_dist_km, 3) if final_hotspot_dist_km is not None else None,
+        "final_hotspot_source": final_hotspot_source,
+        "distance_class": distance_class,
         "anomaly_pixels": anomaly_pixels,
         "t_bg_k": round(t_bg, 2),
         "t_max_k": round(t_max, 2),

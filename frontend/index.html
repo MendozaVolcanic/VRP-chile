@@ -267,8 +267,93 @@
     <span id="utc-clock"></span>
     <span id="updated-label"></span>
     <a href="experimental/" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">🧪 Laboratorio</a>
+    <button id="btn-about" style="background:transparent;color:#7a8fa6;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;cursor:pointer;">ℹ️ Acerca de</button>
   </div>
 </header>
+
+<!-- S14: About modal — credits to MIROVA / D. Coppola and canonical papers -->
+<div id="about-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:9999;overflow-y:auto;padding:40px 20px;">
+  <div style="max-width:780px;margin:0 auto;background:#0f1a2a;color:#e0e7f0;border:1px solid #1a3a5c;border-radius:8px;padding:28px 32px;font-size:0.92rem;line-height:1.55;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <h2 style="margin:0;color:#ff5722;">Acerca de VRP Chile</h2>
+      <button id="btn-close-about" style="background:transparent;color:#7a8fa6;border:none;font-size:1.4rem;cursor:pointer;padding:0 6px;">✕</button>
+    </div>
+
+    <p><b>VRP Chile</b> es un sistema independiente de monitoreo térmico satelital
+    para volcanes chilenos, construido sobre la metodología del sistema
+    <b>MIROVA</b> (Middle InfraRed Observation of Volcanic Activity) desarrollado
+    por el grupo de <b>Diego Coppola</b> y colaboradores en la Università di Torino.</p>
+
+    <div style="background:#0a1320;border-left:3px solid #ff5722;padding:12px 16px;margin:18px 0;border-radius:0 4px 4px 0;">
+      <b style="color:#ffab91;">Agradecimientos</b><br>
+      Este trabajo no sería posible sin la ciencia pública de:
+      <ul style="margin:8px 0 0 0;padding-left:20px;">
+        <li><b>Diego Coppola</b> — autor de MIROVA, Dipartimento di Scienze della Terra, Università di Torino.</li>
+        <li><b>Marco Laiolo, Francesco Massimetti, Adele Campus, Simone Aveni, Corrado Cigolini</b> — grupo UNITO.</li>
+        <li><b>Martin Wooster</b> — fórmula VRP MIR sobre la que descansa todo el cálculo.</li>
+        <li><b>NASA LANCE / Earthdata</b> por la data MODIS/VIIRS NRT pública.</li>
+        <li><b>Rodrigo De Negri</b> (Univ. de Chile) por contexto OVDAS/OpenVIS.</li>
+      </ul>
+    </div>
+
+    <h3 style="color:#ffab91;margin:20px 0 8px 0;">Papers canónicos</h3>
+    <ol style="padding-left:22px;margin:0;">
+      <li><b>Coppola D., Laiolo M., Cigolini C., Delle Donne D., Ripepe M. (2016)</b>.
+        <i>Enhanced volcanic hot-spot detection using MODIS IR data: results from the
+        MIROVA system.</i> Geological Society, London, Special Publications 426.
+        <a href="https://doi.org/10.1144/SP426.5" style="color:#4fc3f7;" target="_blank">DOI 10.1144/SP426.5</a> — algoritmo maestro MIROVA MODIS.</li>
+      <li><b>Wooster M. et al. (2003)</b>. <i>Fire radiative energy for quantitative study of biomass burning.</i>
+        Remote Sensing of Environment 86.
+        <a href="https://doi.org/10.1016/S0034-4257(03)00070-1" style="color:#4fc3f7;" target="_blank">DOI</a> —
+        base física de VRP MIR (coeficiente Wooster).</li>
+      <li><b>Campus A., Laiolo M., Massimetti F., Coppola D. (2022)</b>. <i>The transition from MODIS to
+        VIIRS for global volcano thermal monitoring.</i> Sensors 22(5):1713.
+        <a href="https://doi.org/10.3390/s22051713" style="color:#4fc3f7;" target="_blank">DOI</a> —
+        adaptación VIIRS M13 750m.</li>
+      <li><b>Campus A., Aveni S., Laiolo M., Massimetti F., Coppola D. (2024)</b>. <i>Thermal unrest at La
+        Fossa (Vulcano): VIIRS 375m MIROVA dataset.</i> Bull Volcanol 86:25.
+        <a href="https://doi.org/10.1007/s00445-024-01721-z" style="color:#4fc3f7;" target="_blank">DOI</a> —
+        calibración VIIRS I4 375m (k=18.0).</li>
+      <li><b>Aveni S., Laiolo M., Campus A., Massimetti F., Coppola D. (2024)</b>. <i>TIRVolcH: single-band
+        TIR algorithm for volcanic hotspot detection.</i> Remote Sensing of Environment 315.
+        <a href="https://doi.org/10.1016/j.rse.2024.114388" style="color:#4fc3f7;" target="_blank">DOI</a> —
+        path TIR I5 complementario.</li>
+      <li><b>Coppola D. et al. (2023)</b>. <i>Global radiant flux from active volcanoes: 2000–2019 MIROVA
+        database.</i> Frontiers in Earth Science 11:1240107.
+        <a href="https://doi.org/10.3389/feart.2023.1240107" style="color:#4fc3f7;" target="_blank">DOI</a> —
+        base de datos pública OSF sobre la que calibramos paridad.</li>
+      <li><b>Di Bella G.S., Corradino C., Cariello S., Torrisi F., Del Negro C. (2024)</b>. <i>Advancing
+        volcanic activity monitoring: NRT RSDF for VRP estimation.</i> Remote Sensing 16(16):2879.
+        <a href="https://doi.org/10.3390/rs16162879" style="color:#4fc3f7;" target="_blank">DOI</a> —
+        fusión multi-sensor de referencia.</li>
+    </ol>
+
+    <h3 style="color:#ffab91;margin:20px 0 8px 0;">Links</h3>
+    <ul style="padding-left:22px;">
+      <li>MIROVA oficial: <a href="https://www.mirovaweb.it" style="color:#4fc3f7;" target="_blank">www.mirovaweb.it</a></li>
+      <li>Base de datos MIROVA v2.5 (OSF): <a href="https://osf.io/zm62w/" style="color:#4fc3f7;" target="_blank">osf.io/zm62w</a></li>
+      <li>Código VRP Chile (este proyecto): <a href="https://github.com/MendozaVolcanic/VRP-chile" style="color:#4fc3f7;" target="_blank">github.com/MendozaVolcanic/VRP-chile</a></li>
+    </ul>
+
+    <p style="color:#7a8fa6;font-size:0.82rem;margin-top:18px;border-top:1px solid #1a3a5c;padding-top:12px;">
+      VRP Chile es un proyecto independiente desarrollado en SERNAGEOMIN por Nicolás Mendoza (geólogo).
+      No está afiliado a MIROVA ni a la Università di Torino. Todo aporte metodológico corresponde a
+      los autores arriba citados. Cualquier discrepancia con el sistema oficial MIROVA es responsabilidad
+      exclusiva de este proyecto.
+    </p>
+  </div>
+</div>
+<script>
+  document.getElementById("btn-about").addEventListener("click", () => {
+    document.getElementById("about-modal").style.display = "block";
+  });
+  document.getElementById("btn-close-about").addEventListener("click", () => {
+    document.getElementById("about-modal").style.display = "none";
+  });
+  document.getElementById("about-modal").addEventListener("click", (e) => {
+    if (e.target.id === "about-modal") e.target.style.display = "none";
+  });
+</script>
 
 <div class="alert-summary" id="alert-summary"></div>
 
@@ -328,6 +413,20 @@
   <div class="volcano-grid" id="volcano-grid"></div>
   <div id="detail"></div>
 </main>
+
+<!-- S14: Footer persistente con créditos a MIROVA. -->
+<footer style="margin-top:32px;padding:18px 24px;border-top:1px solid #1a3a5c;color:#7a8fa6;font-size:0.82rem;text-align:center;background:#0a1320;">
+  Basado en la metodología del sistema
+  <b style="color:#ffab91;">MIROVA</b>
+  (<a href="https://www.mirovaweb.it" style="color:#4fc3f7;" target="_blank">mirovaweb.it</a>)
+  de <b>Diego Coppola</b> y colaboradores, Università di Torino.
+  Fórmula VRP MIR por <b>Wooster et al. 2003</b>.
+  <br>
+  Calibrado contra la base de datos pública MIROVA v2.5
+  (<a href="https://osf.io/zm62w/" style="color:#4fc3f7;" target="_blank">OSF</a>,
+  Coppola et al. 2023).
+  Click <b>ℹ️ Acerca de</b> arriba para la lista completa de papers y agradecimientos.
+</footer>
 
 <script>
 // ── Config ──────────────────────────────────────────────────────────────────
@@ -779,6 +878,7 @@ function renderDetail() {
   const mapLeg = el("div", "map-legend");
   [
     ["#e91e63", "VIIRS 375m"], ["#00bcd4", "VIIRS 750m"], ["#ff8c00", "MODIS"],
+    ["#ff5252", "Anomalía real (MIROVA rojo)"], ["#8a8a8a", "Lejana (far)"],
     ["#7c4dff", "Vent-path"], ["#ffc107", "Cráter/Vent"], ["#7a8fa6", "Radio búsqueda"]
   ].forEach(([color, label]) => {
     const item = el("div", "map-legend-item");
@@ -810,11 +910,22 @@ function renderDetail() {
       attribution: "Esri World Imagery", maxZoom: 18,
     }).addTo(map);
 
-    // Search radius circle
+    // S14: outer search radius (grilla MIROVA 51×51 km efectiva)
     L.circle([v.lat, v.lon], {
       radius: v.radius_km * 1000, color: "#7a8fa6", weight: 1,
       fillColor: "#7a8fa6", fillOpacity: 0.05, dashArray: "5,5",
-    }).addTo(map);
+    }).addTo(map).bindTooltip(`Radio detección ${v.radius_km} km`, { sticky: true });
+
+    // S14: inner radius MIROVA oficial — clasificación visual summit/far.
+    // Detecciones dentro de este círculo se consideran "anomalía volcánica real"
+    // (rojo); fuera se consideran posibles pero menor confianza (gris).
+    // Valores extraídos de los KML oficiales MIROVA por volcán.
+    if (v.inner_radius_km) {
+      L.circle([v.vent_lat || v.lat, v.vent_lon || v.lon], {
+        radius: v.inner_radius_km * 1000, color: "#ff5252", weight: 1.5,
+        fillColor: "#ff5252", fillOpacity: 0.08, dashArray: "3,3",
+      }).addTo(map).bindTooltip(`Radio MIROVA "rojo" ${v.inner_radius_km} km`, { sticky: true });
+    }
 
     // Volcano center marker
     L.circleMarker([v.lat, v.lon], {
@@ -847,16 +958,24 @@ function renderDetail() {
       const color = colorMap[r.sensor] || "#fff";
       const recencyOpacity = 0.3 + 0.7 * (i / Math.max(1, hotspots.length - 1));
 
-      // Posición del marker, en orden de preferencia:
-      // 1. anomaly_pixels (eruption-path, múltiples pixels con coord real)
-      // 2. hotspot_lat/lon (eruption-path, pixel único)
-      // 3. vent_hotspot_lat/lon (vent-path, coord REAL del pixel — S12 2026-04-15)
-      // 4. v.vent_lat/lon (fallback legacy: records viejos sin vent_hotspot_* → spiral)
+      // S14: usar campo unificado final_hotspot_* cuando exista (schema nuevo
+      // resuelve eruption/vent internamente con fallback). Para records legacy
+      // pre-S14 que no tienen final_hotspot_*, mantiene la cascada histórica.
+      //
+      // Clasificación visual (summit vs far) viene de r.distance_class (nuevo
+      // schema); si no existe, se calcula al vuelo con inner_radius_km del
+      // volcán + distancia disponible.
       const isVentOnly = r.hotspot_lat == null && (!r.anomaly_pixels || r.anomaly_pixels.length === 0);
       const hasRealVentCoord = r.vent_hotspot_lat != null;
+      const hasFinal = r.final_hotspot_lat != null;
       const pixels = (r.anomaly_pixels && r.anomaly_pixels.length > 0)
         ? r.anomaly_pixels
-        : (r.hotspot_lat != null ? [{
+        : (hasFinal ? [{
+            lat: r.final_hotspot_lat, lon: r.final_hotspot_lon,
+            dist_km: r.final_hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
+            vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0,
+            vent_only: r.final_hotspot_source === "vent", real_coord: true
+          }] : (r.hotspot_lat != null ? [{
             lat: r.hotspot_lat, lon: r.hotspot_lon,
             dist_km: r.hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
             vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0
@@ -868,7 +987,14 @@ function renderDetail() {
             lat: v.vent_lat, lon: v.vent_lon,
             dist_km: 0, bt_k: r.t_max_k ?? r.t_max_i04_k,
             vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0, vent_only: true
-          }] : [])));
+          }] : []))));
+
+      // S14 D1: distance_class → colorear rojo (summit) o gris (far) al estilo MIROVA
+      let distClass = r.distance_class;
+      if (!distClass && v.inner_radius_km != null && pixels.length > 0 && pixels[0].dist_km != null) {
+        distClass = pixels[0].dist_km <= v.inner_radius_km ? "summit" : "far";
+      }
+      const isFar = distClass === "far";
 
       pixels.forEach((px, pxIdx) => {
         const size = Math.max(4, Math.min(15, 4 + Math.log10(Math.max(px.vrp_mw, 0.001)) * 5));
@@ -894,15 +1020,26 @@ function renderDetail() {
         }
 
         const tempC = (bt) => bt == null ? "?" : (bt - 273.15).toFixed(1) + "°C";
-        const marker = L.circleMarker([mLat, mLon], {
-          radius: ventOnly ? 6 : size,
-          color: ventOnly ? "#b388ff" : (isPrimary ? "#fff" : "#aaa"),
-          weight: ventOnly ? 2 : (isPrimary ? 1.5 : 0.8),
-          fillColor: ventOnly ? "#7c4dff" : color,
-          fillOpacity: ventOnly ? Math.max(pxOpacity * 0.85, 0.55) : pxOpacity,
-          dashArray: ventOnly ? "3,2" : null,
-        }).addTo(map).bindPopup(
-          `<b>${r.sensor}</b>${ventOnly ? " (vent-path)" : (!isPrimary ? " (pixel #" + (pxIdx+1) + ")" : "")}<br>` +
+        // S14 D1: si distance_class="far" → gris/outline, si "summit" → color sensor
+        // normal. Matches MIROVA visual convention (rojo=real, gris=posible-lejano).
+        const farColor = "#8a8a8a";
+        const markerStyle = isFar ? {
+          radius: Math.max(3, size * 0.75),
+          color: "#ddd", weight: 0.8, fillColor: farColor,
+          fillOpacity: Math.max(pxOpacity * 0.5, 0.3), dashArray: "2,3",
+        } : (ventOnly ? {
+          radius: 6,
+          color: "#b388ff", weight: 2, fillColor: "#7c4dff",
+          fillOpacity: Math.max(pxOpacity * 0.85, 0.55), dashArray: "3,2",
+        } : {
+          radius: size,
+          color: isPrimary ? "#fff" : "#aaa",
+          weight: isPrimary ? 1.5 : 0.8,
+          fillColor: color, fillOpacity: pxOpacity, dashArray: null,
+        });
+        const marker = L.circleMarker([mLat, mLon], markerStyle).addTo(map).bindPopup(
+          `<b>${r.sensor}</b>${ventOnly ? " (vent-path)" : (!isPrimary ? " (pixel #" + (pxIdx+1) + ")" : "")}` +
+          (isFar ? ' <span style="color:#888">(far)</span>' : (distClass === "summit" ? ' <span style="color:#ff5252">(summit)</span>' : '')) + `<br>` +
           `${r.datetime_utc} UTC<br>` +
           `VRP: ${px.vrp_mw.toFixed(4)} MW<br>` +
           `BT max: ${tempC(px.bt_k)}<br>` +

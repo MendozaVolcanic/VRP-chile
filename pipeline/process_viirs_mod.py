@@ -35,8 +35,13 @@ NADIR_PIXEL_AREA_M2 = 750.0 ** 2   # 562,500 m²
 C1_PLANCK = 1.191042e8   # 2hc² in W·µm⁴/m²/sr
 C2_PLANCK = 14388.0      # hc/k in µm·K
 
-# Wooster MIR radiance coefficient (Coppola 2015, Eq.7)
-WOOSTER_COEFF = 18.9
+# Wooster MIR radiance coefficient.
+# For VIIRS M13 (4.05 µm, 750 m) use 19.7 per empirical calibration against
+# MIROVA v2.5 OSF (experiments/21_calibrate_k_viirs375_vs_osf.py): reconstructs
+# exactly the effective coefficient 1.97e7 × A_pix(0.5625 km²) = 11,081,250
+# that MIROVA publishes for VIIRS_M across 2,515 Chilean rows with 0.169% error.
+# Not 18.9 (which is MODIS 1km). Difference is band center (4.05 vs 3.96 µm).
+WOOSTER_COEFF = 19.7   # VIIRS M13 750m, empirically validated S14 2026-04-21
 
 FLAG_DNS = {65532, 65533, 65534, 65535}
 
@@ -177,13 +182,16 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                   volcano_lat: float, volcano_lon: float,
                   radius_km: float = 30.0,
                   vent_lat: float = None, vent_lon: float = None,
-                  vent_radius_km: float = 4.0) -> dict | None:
+                  vent_radius_km: float = 4.0,
+                  inner_radius_km: float | None = None) -> dict | None:
     """
     Calculate VRP from VIIRS 750m M-band granule (VNP02MOD / VJ102MOD).
 
     Args:
         vent_lat/vent_lon: Optional vent coordinates for weak-signal detection.
         vent_radius_km: Radius for vent-scale search.
+        inner_radius_km: MIROVA-style visual classification radius (S14 D1).
+            If None, distance_class is None.
 
     Returns dict with VRP or None if granule does not cover volcano.
     """
@@ -389,6 +397,27 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     name   = l1b_path.name
     sensor = "VIIRS_SNPP_750" if name.startswith("VNP") else "VIIRS_NOAA20_750"
 
+    # --- Schema unification (S14 D6) ---
+    if hotspot_lat is not None and hotspot_lon is not None:
+        final_hotspot_lat = hotspot_lat
+        final_hotspot_lon = hotspot_lon
+        final_hotspot_dist_km = hotspot_dist_km
+        final_hotspot_source = "eruption"
+    elif vent_hotspot_lat is not None and vent_hotspot_lon is not None:
+        final_hotspot_lat = vent_hotspot_lat
+        final_hotspot_lon = vent_hotspot_lon
+        final_hotspot_dist_km = vent_hotspot_dist_km
+        final_hotspot_source = "vent"
+    else:
+        final_hotspot_lat = None
+        final_hotspot_lon = None
+        final_hotspot_dist_km = None
+        final_hotspot_source = None
+
+    distance_class = None
+    if final_hotspot_dist_km is not None and inner_radius_km is not None:
+        distance_class = "summit" if final_hotspot_dist_km <= inner_radius_km else "far"
+
     return {
         "vrp_mw": round(vrp_mw, 3),
         "vrp_vent_mw": round(vrp_vent_mw, 3),
@@ -406,6 +435,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "hotspot_lat": hotspot_lat,
         "hotspot_lon": hotspot_lon,
         "hotspot_dist_km": hotspot_dist_km,
+        "final_hotspot_lat": final_hotspot_lat,
+        "final_hotspot_lon": final_hotspot_lon,
+        "final_hotspot_dist_km": round(final_hotspot_dist_km, 3) if final_hotspot_dist_km is not None else None,
+        "final_hotspot_source": final_hotspot_source,
+        "distance_class": distance_class,
         "anomaly_pixels": anomaly_pixels,
         "t_bg_k": round(t_bg, 2),
         "t_max_k": round(t_max, 2) if not np.isnan(t_max) else None,

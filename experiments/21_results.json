@@ -1,0 +1,85 @@
+{
+  "experiment": "21_calibrate_k_mir_empirical_via_osf",
+  "session": "S14",
+  "generated_utc": "2026-04-21T06:35:45.989345Z",
+  "method": "reconstruct coef = VRP / (Tot_Lmir_hot - Tot_Lmir_bk) directly on OSF v2.5 rows; match against published formulas",
+  "n_rows_total": 48360,
+  "candidates": {
+    "MODIS_1000m": [
+      {
+        "name": "Coppola2016_Wooster_k18.9_Apix1e6",
+        "value": 18900000.0
+      },
+      {
+        "name": "Wooster2003_k1.89e7",
+        "value": 18900000.0
+      }
+    ],
+    "VIIRS_750m": [
+      {
+        "name": "Campus2022_k1.97e7",
+        "value": 19700000.0
+      },
+      {
+        "name": "Laiolo_k18.0_Apix562500",
+        "value": 10125000.0
+      },
+      {
+        "name": "DiBella2024_k1.11e7",
+        "value": 11100000.0
+      }
+    ],
+    "VIIRS_375m": [
+      {
+        "name": "Laiolo2024_k18.0_Apix140625",
+        "value": 2531250.0
+      },
+      {
+        "name": "DiBella2024_k2.48e7",
+        "value": 24800000.0
+      },
+      {
+        "name": "Wooster2003_k1.89e7",
+        "value": 18900000.0
+      }
+    ]
+  },
+  "results": {
+    "MODIS_1000m": {
+      "n": 13157,
+      "median_coef": 18900000.000000004,
+      "q25": 18899999.974357255,
+      "q75": 18900000.026312336,
+      "spread_iqr_pct": 2.748946112299722e-07,
+      "zenith_bin_stddev_of_median": 0.0005594302210456735,
+      "matched_formula": "Coppola2016_Wooster_k18.9_Apix1e6",
+      "matched_value": 18900000.0,
+      "matched_error_pct": 1.9710530679692667e-14,
+      "a_pix_mode": "nadir_fijo"
+    },
+    "VIIRS_750m": {
+      "n": 2515,
+      "median_coef": 11081250.000083901,
+      "q25": 11081249.997395806,
+      "q75": 11081250.002915982,
+      "spread_iqr_pct": 4.9815464342130645e-08,
+      "zenith_bin_stddev_of_median": 0.00030582917731392036,
+      "matched_formula": "DiBella2024_k1.11e7",
+      "matched_value": 11100000.0,
+      "matched_error_pct": 0.16891891816305415,
+      "a_pix_mode": "nadir_fijo"
+    },
+    "VIIRS_375m": {
+      "n": 32688,
+      "median_coef": 2531250.0000000005,
+      "q25": 2531249.9961170666,
+      "q75": 2531250.0039476263,
+      "spread_iqr_pct": 3.093554465859024e-07,
+      "zenith_bin_stddev_of_median": 4.869981265742082e-05,
+      "matched_formula": "Laiolo2024_k18.0_Apix140625",
+      "matched_value": 2531250.0,
+      "matched_error_pct": 1.839649530104649e-14,
+      "a_pix_mode": "nadir_fijo"
+    }
+  }
+}

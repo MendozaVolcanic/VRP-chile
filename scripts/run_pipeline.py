@@ -181,6 +181,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                             vent_lat=volcano.get("vent_lat"),
                             vent_lon=volcano.get("vent_lon"),
                             vent_radius_km=volcano.get("vent_radius_km", 4.0),
+                            inner_radius_km=volcano.get("inner_radius_km"),
                         )
                         if result:
                             store.append_record(volcano["name"], result,
@@ -215,6 +216,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                             vent_lat=volcano.get("vent_lat"),
                             vent_lon=volcano.get("vent_lon"),
                             vent_radius_km=volcano.get("vent_radius_km", 4.0),
+                            inner_radius_km=volcano.get("inner_radius_km"),
                         )
                         if result:
                             store.append_record(volcano["name"], result,
@@ -250,6 +252,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                             vent_lat=volcano.get("vent_lat"),
                             vent_lon=volcano.get("vent_lon"),
                             vent_radius_km=volcano.get("vent_radius_km", 4.0),
+                            inner_radius_km=volcano.get("inner_radius_km"),
                         )
                         if result:
                             store.append_record(volcano["name"], result,

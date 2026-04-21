@@ -3,14 +3,72 @@
 Sistema VRP independiente para volcanes chilenos (equivalente MIROVA, propio).
 Repo: https://github.com/MendozaVolcanic/VRP-chile
 
+## Integración con el vault Obsidian
+
+Las notas de papers, conceptos, volcanes y sensores que se usan en VRP Chile
+viven en el vault Obsidian: `C:\Users\nmend\OneDrive\Escritorio\claude\Vault\`.
+
+- **Procesar papers**: ver `..\..\Vault\CLAUDE.md` sección "Workflow de procesamiento
+  de papers". Invocación típica: "procesá el paper coppola2016fifteen" o
+  "procesá todos los papers de VRP Chile". Claude aplica el workflow documentado
+  sin necesidad de prompt adicional.
+- **Índice de proyectos** (para cross-project linking de papers):
+  `..\..\Vault\00_Meta\proyectos.md`.
+- **Convenciones del vault** (kebab-case, frontmatter `ai_generated`/`confidence`/
+  `explored`, links `[[]]`, tags jerárquicos): ver `..\..\Vault\CLAUDE.md`.
+
 ## Reglas científicas (no negociables)
-- **VRP MIR (Wooster)**: `VRP = 18.9 × A_pix × ΔL_MIR` — Coppola 2015 Eq.7. NO Stefan-Boltzmann.
-- **VRP TIR (I05)**: Stefan-Boltzmann (Aveni 2024).
+- **VRP MIR (Wooster)** por sensor, coeficientes **empíricamente validados S14
+  contra MIROVA v2.5 OSF (error ≤0.17% sobre 48,360 filas)**:
+  - MODIS 1 km (B21/22): `k = 18.9 × A_pix(1e6)` = **18,900,000** (`WOOSTER_COEFF=18.9`)
+  - VIIRS M-band 750m (M13): `k = 1.97×10⁷ × A_pix(km²)` = **11,081,250** (`WOOSTER_COEFF=19.7`)
+  - VIIRS I-band 375m (I4): `k = 18.0 × A_pix(140625)` = **2,531,250** (`WOOSTER_COEFF=18.0`)
+  - MIROVA usa **A_pix nadir fijo** (sin corrección zenithal) para los 3 sensores.
+  - NO usar Di Bella 2024 k=2.48×10⁷ para VIIRS 375m — no reproduce OSF (empírico).
+- **VRP TIR (I05)**: Stefan-Boltzmann (Aveni 2025 GRL, `σ = 5.67×10⁻⁸`).
 - **NTI**: umbral 3σ sobre background, mínimo 0.005.
 - **MIR solo nocturno** (contaminación solar diurna).
-- Bandas: MODIS 21/22 (3.929/3.959 μm), VIIRS I04 (3.74 μm) / I05 (11.45 μm).
+- Bandas: MODIS 21/22 (3.929/3.959 μm) + 31 (11 μm TIR),
+  VIIRS I04 (3.74 μm) / I05 (11.45 μm), VIIRS M13 (4.05 μm) / M15 (10.76 μm).
 - Constantes físicas **exactas** de los papers, nunca aproximar. Citar paper en cualquier cambio metodológico.
 - Si dudas de un método con datos geofísicos, **dilo** — nunca adivines.
+
+## Reglas geométricas S14 (MIROVA-equivalent)
+- **`radius_km = 25 km` uniforme** para volcanes chilenos — replica grilla
+  MIROVA UTM 51×51 km (radio inscrito 25.5 km).
+- **`inner_radius_km` por volcán** (valores oficiales MIROVA de los KML):
+  | Volcán | inner | Volcán | inner |
+  |---|---|---|---|
+  | Lastarria | 3 | Lascar, Isluga, NdC, Llaima, Villarrica, Chaiten | 5 |
+  | Planchón-Peteroa | 3 | Tupungatito | 7 |
+  | Copahue | 4 | PuyehueCordonCaulle | **20** |
+- **Esquema dual "detectar amplio + clasificar visual"**: detecciones dentro
+  de `inner_radius_km` → `distance_class="summit"` (rojo, anomalía real).
+  Fuera → `"far"` (gris, posible lejana). **No se filtran**, se clasifican.
+- **Campo unificado `final_hotspot_lat/lon/dist_km`** con fallback
+  eruption→vent. El dashboard y las auditorías usan **solo** este campo, no
+  `hotspot_*` o `vent_hotspot_*` por separado.
+
+## Reglas operacionales S14 (aprendizajes)
+- **A1. Calibración empírica > derivación teórica**: cuando haya data pública
+  del mismo grupo (OSF, Zenodo), calcular coeficientes empíricos antes de
+  confiar en un número de paper. Resolvió en 1 min discrepancia Di Bella vs
+  Laiolo que ocupó un mes de discusión teórica.
+- **A2. Diagnósticos paralelos antes de reprocesos caros**: agotar análisis
+  sobre data ya en disco antes de descargar más. Paso 0+1a+diagnósticos
+  A/B/D resolvieron 80% de dudas sin fetch. Solo entonces tiene sentido
+  reprocesar.
+- **A3. Campos "distance" en schema deben documentar desde qué punto miden**:
+  `hotspot_dist_km` se medía desde `volcano_lat/lon` (centro) no desde el
+  vent. Ahora `final_hotspot_dist_km` unifica y documenta.
+- **A4. MIROVA es arquitecturalmente más simple que lo que creíamos**:
+  no hay máscaras geométricas ni radios adaptativos. Es grilla UTM 51×51 +
+  NTI/ETI/contextual (Coppola 2016a) + clasificación visual post-detección.
+  La complejidad está en los umbrales, no en la geometría.
+- **A5. Los valores MIROVA oficiales (KML, OSF) son datos no opiniones**:
+  usarlos tal cual es más defendible que inventar umbrales. Solo divergir
+  con experimentos propios y en el perfil `experimental`, no en
+  `mirova_equivalent`.
 
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
@@ -161,6 +219,14 @@ Para minimizar compactaciones automáticas ("session continued..."):
   descartadas por geofencing.
 
 ## Estado
+**S14 en curso (2026-04-21) — fix geometría MIROVA-equivalent SIN COMMITEAR.**
+Leer `tasks/status_s14_handoff.md` al arrancar próxima sesión. Cambios pendientes:
+radius_km=25 uniforme + inner_radius_km oficial MIROVA + schema unificado
+final_hotspot_* + distance_class + WOOSTER_COEFF 19.7 VIIRS_M + dashboard con
+About/credits + CLAUDE.md actualizado. OSF v2.5 descargada en
+`data/mirova_reference/` (no commitear 98 MB). Validación empírica coeficientes
+(error ≤0.17%) en `experiments/21_results.json`.
+
 **S12 baseline (2026-04-16)**: 45 volcanes operacionales, 11 con refs MIROVA
 (14042026 consolidado, 494 refs). Auditoría contra MIROVA:
 - Recall top: Chaitén 87%, Lastarria 85%, Tupungatito 83%, PCC 82%.
