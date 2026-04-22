@@ -105,6 +105,36 @@ def modis_pixel_areas(shape: tuple) -> np.ndarray:
     return nadir_area * np.broadcast_to(factor, (n_lines, n_samples)).copy()
 
 
+def roi_mask_bbox(
+    lat: np.ndarray,
+    lon: np.ndarray,
+    center_lat: float,
+    center_lon: float,
+    half_km: float,
+) -> np.ndarray:
+    """Bbox cuadrado de ``half_km`` por lado en cada eje centrado en
+    (center_lat, center_lon). Es la geometria que MIROVA usa en sus KMZ
+    GroundOverlay (bbox 50x50 km confirmado S15 2026-04-22), en lugar
+    del circulo inscrito que usabamos con ``dist <= radius_km``.
+
+    Diferencia fisica: un circulo radio 25 km tiene area 1963 km^2; un
+    bbox 50x50 (half=25) tiene 2500 km^2 — 27% mas, las esquinas diagonales.
+    MIROVA publica detecciones en esas esquinas (Llaima Conguillio a 28 km
+    del vent, en esquina NE del bbox). Cambiar a bbox recupera esas refs.
+
+    Args:
+        lat, lon: arrays 2D de latitud/longitud per-pixel (grados).
+        center_lat, center_lon: centro del volcan (usar vent o mirova_center).
+        half_km: medio lado del bbox en km (=radius_km del volcano).
+
+    Returns:
+        bool array mismo shape que lat, True dentro del bbox.
+    """
+    lat_span_km = (lat - center_lat) * 111.0
+    lon_span_km = (lon - center_lon) * 111.0 * np.cos(np.radians(center_lat))
+    return (np.abs(lat_span_km) <= half_km) & (np.abs(lon_span_km) <= half_km)
+
+
 def viirs_pixel_areas(sensor_zenith_deg: np.ndarray, nadir_area_m2: float) -> np.ndarray:
     """
     Return per-pixel area (m^2) for a VIIRS granule.

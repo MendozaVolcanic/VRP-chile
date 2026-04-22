@@ -25,7 +25,7 @@ try:
 except ImportError:
     H5_AVAILABLE = False
 
-from .scan_geometry import viirs_pixel_areas
+from .scan_geometry import viirs_pixel_areas, roi_mask_bbox
 
 SIGMA = 5.670374419e-8  # kept for reference, not used in MIR VRP
 # Nadir pixel area; actual area is per-pixel via sensor_zenith correction.
@@ -220,7 +220,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     else:
         vent_dist_per_pixel = dist
 
-    roi_mask = dist <= radius_km
+    # S15 Tema E: bbox cuadrado (paridad MIROVA KMZ 50x50 km).
+    roi_mask = roi_mask_bbox(lat, lon, volcano_lat, volcano_lon, radius_km)
     bg_mask  = (dist >= BG_INNER_KM) & (dist <= BG_OUTER_KM)
 
     if not np.any(roi_mask):

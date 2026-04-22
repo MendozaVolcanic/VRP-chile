@@ -28,7 +28,7 @@ except ImportError:
     HDF4_AVAILABLE = False
     print("WARNING: pyhdf not found. Install: conda install -c conda-forge pyhdf")
 
-from .scan_geometry import modis_pixel_areas
+from .scan_geometry import modis_pixel_areas, roi_mask_bbox
 
 
 SIGMA = 5.670374419e-8
@@ -215,7 +215,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     else:
         vent_dist_per_pixel = dist
 
-    roi_mask = dist <= radius_km
+    # S15 Tema E: bbox cuadrado (paridad MIROVA KMZ 50x50 km).
+    roi_mask = roi_mask_bbox(lat, lon, volcano_lat, volcano_lon, radius_km)
     bg_mask = (dist >= BG_INNER_KM) & (dist <= BG_OUTER_KM)
 
     if not np.any(roi_mask):
