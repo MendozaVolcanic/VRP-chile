@@ -69,6 +69,9 @@ MAX_VENT_SIGMA_CONTRIB_K: float = float(_t.get("max_vent_sigma_contrib_k", 3.0))
 # Session 12: configurable Path C sigma and MODIS vent threshold
 NTI_REL_N_SIGMA: float = float(_t.get("nti_rel_n_sigma", 3.0))
 NTI_REL_MIN_FLOOR: float = float(_t.get("nti_rel_min_floor", 0.005))
+# S15 P3.2: dNTI contextual 8-vecinos (Coppola 2016a SP 426.5).
+# Pixel hot si (NTI_pixel - median(NTI_8_vecinos)) > C1 AND bt > t_bg + sanity.
+DNTI_CONTEXTUAL_C1: float = float(_t.get("dnti_contextual_c1", 0.003))
 MODIS_VENT_THRESHOLD_K: float = float(_t.get("modis_vent_threshold_k", VENT_THRESHOLD_K))
 MODIS_VENT_VRP_FLOOR_MW: float = float(_t.get("modis_vent_vrp_floor_mw", 0.0))
 # S12 2026-04-15: piso VRP por sensor. Aplicado en store.py después de
@@ -98,6 +101,10 @@ ENABLE_VENT_PATH_MODIS: bool = bool(_p.get("enable_vent_path_modis", ENABLE_VENT
 # When True, pixels passing nti > nti_bg + max(0.005, 3*sigma_nti) AND
 # bt > t_bg + NTI_BT_SANITY_K are included in hot_mask_2d.
 ENABLE_NTI_RELATIVE_PATH: bool = bool(_p.get("enable_nti_relative_path", False))
+# S15 P3.2: dNTI contextual 8-vecinos (Path D). On = agregar al OR de
+# hot_mask el gate contextual vs vecinos inmediatos. Default false para
+# compatibilidad con profiles previos.
+ENABLE_DNTI_CONTEXTUAL_PATH: bool = bool(_p.get("enable_dnti_contextual_path", False))
 
 # --- Sensor activation ---
 _s = _cfg["sensors"]

@@ -51,6 +51,8 @@ thresholds:
   # Also applies a minimum VRP floor to reject noise-level vent detections.
   modis_vent_threshold_k: 2.5
   modis_vent_vrp_floor_mw: 0.3
+  # P3.2 S15: dNTI contextual C1 (schema parity; disabled en paths).
+  dnti_contextual_c1: 0.003
 
 background:
   inner_km: 5.0
@@ -67,6 +69,10 @@ paths:
   # Uses nti > nti_bg + max(0.005, 3*sigma_nti) instead of absolute NTI floor.
   # Targets PP (recall 0.54) and Villarrica (recall 0/6). See plan_s11.
   enable_nti_relative_path: true
+  # P3.2 S15: Path D (dNTI contextual) deshabilitado en experimental
+  # para preservar comportamiento baseline comparativo A/B con
+  # mirova_equivalent.
+  enable_dnti_contextual_path: false
 
 sensors:
   modis: true
