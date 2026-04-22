@@ -66,6 +66,13 @@ thresholds:
   # C1 absoluto del umbral local dNTI = NTI_pixel - median(8 vecinos).
   # 0.003 = summit ROI segun paper. 0.010 scene ROI (reservado para P3.1).
   dnti_contextual_c1: 0.003
+  # P3.1 S15: dual-ROI thresholds (Coppola 2016a Table 2).
+  # Aplica cuando enable_dnti_dual_roi=true: summit sensible + scene
+  # estricto. Justificacion fisica: OSF Lastarria 25 anos tiene 80%
+  # refs en 0-3 km; Path D solo (P3.2) capturaba 55% pixels a 15-25 km
+  # (Lazufre) que MIROVA descarta. scene 3.3x mas estricto lo corta.
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
   # MODIS-specific vent threshold (inactive: enable_vent_path_modis is false)
   modis_vent_threshold_k: 1.0
   modis_vent_vrp_floor_mw: 0.0
@@ -92,6 +99,11 @@ paths:
   # Reduce sobreestimacion VRP por heterogeneidad terreno (Lastarria
   # ratio 19.87 pre-fix). Ver tasks/plan_s15_p3_2_dnti_contextual.md.
   enable_dnti_contextual_path: true
+  # P3.1 S15: cuando true, Path D usa thresholds distintos summit vs scene
+  # (C1_SUMMIT / C1_SCENE). Cuando false, usa C1 unico (comportamiento
+  # P3.2 original). Requiere enable_dnti_contextual_path=true para tener
+  # efecto.
+  enable_dnti_dual_roi: true
 
 # --- Sensor activation ---
 # true = process granules from this sensor in this profile.

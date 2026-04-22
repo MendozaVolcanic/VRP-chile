@@ -72,6 +72,11 @@ NTI_REL_MIN_FLOOR: float = float(_t.get("nti_rel_min_floor", 0.005))
 # S15 P3.2: dNTI contextual 8-vecinos (Coppola 2016a SP 426.5).
 # Pixel hot si (NTI_pixel - median(NTI_8_vecinos)) > C1 AND bt > t_bg + sanity.
 DNTI_CONTEXTUAL_C1: float = float(_t.get("dnti_contextual_c1", 0.003))
+# S15 P3.1: dual-ROI thresholds (Coppola 2016a Table 2).
+# summit (dist <= inner_radius_km): C1_SUMMIT sensible.
+# scene  (dist >  inner_radius_km): C1_SCENE estricto (3.3x summit).
+DNTI_CONTEXTUAL_C1_SUMMIT: float = float(_t.get("dnti_contextual_c1_summit", 0.003))
+DNTI_CONTEXTUAL_C1_SCENE: float = float(_t.get("dnti_contextual_c1_scene", 0.010))
 MODIS_VENT_THRESHOLD_K: float = float(_t.get("modis_vent_threshold_k", VENT_THRESHOLD_K))
 MODIS_VENT_VRP_FLOOR_MW: float = float(_t.get("modis_vent_vrp_floor_mw", 0.0))
 # S12 2026-04-15: piso VRP por sensor. Aplicado en store.py después de
@@ -105,6 +110,9 @@ ENABLE_NTI_RELATIVE_PATH: bool = bool(_p.get("enable_nti_relative_path", False))
 # hot_mask el gate contextual vs vecinos inmediatos. Default false para
 # compatibilidad con profiles previos.
 ENABLE_DNTI_CONTEXTUAL_PATH: bool = bool(_p.get("enable_dnti_contextual_path", False))
+# S15 P3.1: dual-ROI (summit vs scene C1 distintos). On = Path D usa
+# C1_SUMMIT cerca del vent y C1_SCENE lejos. Off = usa C1 unico (P3.2 solo).
+ENABLE_DNTI_DUAL_ROI: bool = bool(_p.get("enable_dnti_dual_roi", False))
 
 # --- Sensor activation ---
 _s = _cfg["sensors"]
