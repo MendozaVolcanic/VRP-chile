@@ -55,6 +55,7 @@ if _early_args.profile:
 
 from pipeline import fetch, process_modis, process_viirs, process_viirs_mod, store
 from pipeline import profile as vrp_profile
+from pipeline.geo_utils import get_effective_vent
 
 
 TMP_DIR = Path(__file__).parent.parent / "tmp"
@@ -176,10 +177,11 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         print(f"  No geolocation match for {l1b.name}")
                         continue
                     try:
+                        eff_vent_lat, eff_vent_lon = get_effective_vent(volcano)
                         result = process_modis.calculate_vrp(
                             l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"],
-                            vent_lat=volcano.get("vent_lat"),
-                            vent_lon=volcano.get("vent_lon"),
+                            vent_lat=eff_vent_lat,
+                            vent_lon=eff_vent_lon,
                             vent_radius_km=volcano.get("vent_radius_km", 4.0),
                             inner_radius_km=volcano.get("inner_radius_km"),
                         )
@@ -189,7 +191,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                                                 overwrite=overwrite,
                                                 max_hotspot_dist_km=volcano.get("radius_km"))
                             vent_str = (f" | VRP_VENT={result.get('vrp_vent_mw', 0)} MW"
-                                        if volcano.get("vent_lat") and result.get('vrp_vent_mw', 0) > 0 else "")
+                                        if eff_vent_lat is not None and result.get('vrp_vent_mw', 0) > 0 else "")
                             print(f"  {result['sensor']} | VRP={result['vrp_mw']} MW | "
                                   f"T_bg={result['t_bg_k']} K | T_max={result['t_max_k']} K | "
                                   f"anomalous_px={result['n_anomalous_pixels']}{vent_str}")
@@ -210,11 +212,12 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         print(f"  No geolocation match for {l1b.name}")
                         continue
                     try:
+                        eff_vent_lat, eff_vent_lon = get_effective_vent(volcano)
                         result = process_viirs.calculate_vrp(
                             l1b, geo,
                             volcano["lat"], volcano["lon"], volcano["radius_km"],
-                            vent_lat=volcano.get("vent_lat"),
-                            vent_lon=volcano.get("vent_lon"),
+                            vent_lat=eff_vent_lat,
+                            vent_lon=eff_vent_lon,
                             vent_radius_km=volcano.get("vent_radius_km", 4.0),
                             inner_radius_km=volcano.get("inner_radius_km"),
                         )
@@ -225,7 +228,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                                                 max_hotspot_dist_km=volcano.get("radius_km"))
                             vent_str = (f" | VRP_VENT={result['vrp_vent_mw']} MW "
                                         f"({result['n_vent_pixels']}px)"
-                                        if volcano.get("vent_lat") else "")
+                                        if eff_vent_lat is not None else "")
                             print(f"  {result['sensor']} (375m) | VRP_MIR={result['vrp_mir_mw']} MW | "
                                   f"VRP_TIR={result['vrp_tir_mw']} MW | "
                                   f"T_max={result['t_max_i04_k']} K"
@@ -247,10 +250,11 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         print(f"  No geolocation match for {l1b.name}")
                         continue
                     try:
+                        eff_vent_lat, eff_vent_lon = get_effective_vent(volcano)
                         result = process_viirs_mod.calculate_vrp(
                             l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"],
-                            vent_lat=volcano.get("vent_lat"),
-                            vent_lon=volcano.get("vent_lon"),
+                            vent_lat=eff_vent_lat,
+                            vent_lon=eff_vent_lon,
                             vent_radius_km=volcano.get("vent_radius_km", 4.0),
                             inner_radius_km=volcano.get("inner_radius_km"),
                         )
