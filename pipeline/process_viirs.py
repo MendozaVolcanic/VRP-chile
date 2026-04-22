@@ -76,7 +76,10 @@ from pipeline.profile import (
     ENABLE_NTI_RELATIVE_PATH,
     NTI_REL_N_SIGMA,
     NTI_REL_MIN_FLOOR,
+    DNTI_CONTEXTUAL_C1,
+    ENABLE_DNTI_CONTEXTUAL_PATH,
 )
+from .detection_context import contextual_dnti_hot_mask
 
 
 def bt_to_spectral_radiance(bt: np.ndarray, wavelength_um: float) -> np.ndarray:
@@ -346,7 +349,25 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             else:
                 nti_rel_hot = np.zeros_like(bt_path_hot)
 
-            hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot
+            # Path D — dNTI contextual 8-vecinos (P3.2 S15, Coppola 2016a).
+            # Anomaly requires the pixel to stand out from its immediate
+            # neighbors, not from the ring average -- immune to uniformly
+            # warm terrain (Lastarria hidrotermal, ratio 19.87 pre-P3.2).
+            n_dnti_ctx_path = 0
+            if (ENABLE_DNTI_CONTEXTUAL_PATH
+                    and "I05" in bands
+                    and not np.isnan(nti_bg)):
+                dnti_ctx_hot = contextual_dnti_hot_mask(
+                    nti=nti, bt=bt, roi_mask=roi_mask,
+                    t_bg=t_bg_i04,
+                    c1=DNTI_CONTEXTUAL_C1,
+                    bt_sanity_k=NTI_BT_SANITY_K,
+                )
+                n_dnti_ctx_path = int(np.sum(dnti_ctx_hot))
+            else:
+                dnti_ctx_hot = np.zeros_like(bt_path_hot)
+
+            hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot | dnti_ctx_hot
             n_bt_path = int(np.sum(bt_path_hot))
             n_nti_path = int(np.sum(nti_path_hot))
 
@@ -508,6 +529,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "n_bt_path": n_bt_path,
         "n_nti_path": n_nti_path,
         "n_nti_rel_path": n_nti_rel_path,
+        "n_dnti_ctx_path": n_dnti_ctx_path,
         "n_vent_pixels": n_vent_pixels,
         "vent_hotspot_lat": vent_hotspot_lat,
         "vent_hotspot_lon": vent_hotspot_lon,
