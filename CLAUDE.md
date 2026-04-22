@@ -219,13 +219,81 @@ Para minimizar compactaciones automáticas ("session continued..."):
   descartadas por geofencing.
 
 ## Estado
-**S14 en curso (2026-04-21) — fix geometría MIROVA-equivalent SIN COMMITEAR.**
-Leer `tasks/status_s14_handoff.md` al arrancar próxima sesión. Cambios pendientes:
-radius_km=25 uniforme + inner_radius_km oficial MIROVA + schema unificado
-final_hotspot_* + distance_class + WOOSTER_COEFF 19.7 VIIRS_M + dashboard con
-About/credits + CLAUDE.md actualizado. OSF v2.5 descargada en
-`data/mirova_reference/` (no commitear 98 MB). Validación empírica coeficientes
-(error ≤0.17%) en `experiments/21_results.json`.
+
+**S15 en curso (2026-04-22) — 4 fixes arquitecturales aplicados, validación en
+reproceso background. NO pusheado a main, NRT GitHub Actions sigue con S12.**
+
+Leer `tasks/handoff_mananero_2026_04_22.md` al arrancar próxima sesión.
+
+### Fixes S15 aplicados (commits locales, pendientes push):
+
+1. **P3.2 — dNTI contextual 8-vecinos** (Coppola 2016a SP 426.5): Path D en
+   hot_mask de los 3 procesadores. Gate local NTI vs vecinos inmediatos,
+   inmune a heterogeneidad regional. Flag `enable_dnti_contextual_path: true`.
+
+2. **P3.1 — Dual-ROI thresholds** (Coppola 2016a Table 2): Path D con umbrales
+   distintos según distancia al vent. Summit `c1=0.003` sensible; scene
+   `c1=0.010` estricto. Flag `enable_dnti_dual_roi: true`.
+
+3. **Tema E — ROI bbox cuadrado** (paridad MIROVA KMZ GroundOverlay): reemplazar
+   `roi_mask = dist <= radius_km` (círculo) por bbox cuadrado 50×50 km via
+   `scan_geometry.roi_mask_bbox()`. Recupera las esquinas donde MIROVA publica
+   detecciones (Llaima Conguillío a 28 km, Copahue lejanas). +27% área.
+
+4. **Tema F — Sigma-cap eruption-path VIIRS**: paridad con MODIS que ya tenía
+   `MAX_SIGMA_COMPONENT_K=7.0` desde S6. Aplicado a VIIRS 375m y 750m. Cura
+   Tupungatito recall 0.04 donde σ_bg inflado (glaciar) saturaba el threshold
+   a 9-12 K, rechazando pixels reales a ΔT=8-9 K.
+
+### Scope limpieza S15 (aplicada):
+
+- Perfil `mirova_equivalent` ahora procesa SOLO los 11 volcanes Tier A que
+  MIROVA efectivamente monitorea (flag `mirova_monitored: true` en yaml).
+- Los 34 volcanes restantes (Laguna del Maule, Calbuco, Osorno, Parinacota,
+  etc.) fueron movidos a `data/experimental/` — siguen procesables bajo
+  perfil `experimental` pero fuera del dashboard operacional mientras modo (1).
+
+### Ground truth canónico S15:
+
+- **CSV MIROVA NRT** (`21_04_2026 registro_vrp_consolidado.csv`, scraper
+  Mirova-v1 contra latest.php): 13.7k filas, 3.5 meses, ~100% MODIS / ~80%
+  VIIRS. **Ground truth operacional primario bajo objetivo (1) clon MIROVA.**
+- **OSF v2.5 archive** (`data/mirova_reference/`): 615k filas globales, 48k
+  chilenas 2000-2025. Ground truth algorítmico histórico. 10/11 Tier A
+  calibrables. Tupungatito no aparece (caso singular OSF=0 NRT=60 AT).
+- **KMZ oficiales MIROVA** (`kmz/`): 15 archivos, GroundOverlay 50×50 km.
+  Revelaron offset Tupungatito 3 km SE y Planchón-Peteroa 1.87 km N del
+  vent Nicolás → `mirova_center_lat/lon` en volcanoes.yaml (Fase 0.7 S15).
+
+### Umbrales paridad MIROVA (acordados bajo objetivo 1):
+
+- Ratio VRP individual tolerable 0.5-2.0 (MIROVA declara ±30% error).
+- Ratio mediano volcán tolerable 0.7-1.4.
+- Recall tolerable ≥0.60 por volcán.
+- Precision tolerable ≥0.50 por volcán.
+- Max FP individual ≤5× MIROVA-max mensual.
+
+### Objetivo actual:
+
+**(1) Clon MIROVA operacional**. Ligeras diferencias aceptables (dentro de
+umbrales arriba), groseras inaceptables. Fase (2) herramienta independiente
+es futuro no inmediato.
+
+### Pendientes S15 (post-reproceso validación):
+
+- Leer `experiments/30_p32_delta_report.md` (o similar) para veredicto fixes.
+- Si validan: push main para sincronizar NRT.
+- Plan P3.6 water-aware filter escrito en `tasks/plan_s15_p3_6_water_aware_filter.md`
+  para fase (2) cuando Laguna del Maule vuelva a scope.
+- Lascar S11 regresión: en investigación agent forense (S15 2026-04-22).
+
+### Pre-S15 (S14 histórico):
+
+Fix S14 geometría MIROVA-equivalent: `radius_km=25` uniforme + `inner_radius_km`
+oficial MIROVA + schema unificado `final_hotspot_*` + `distance_class` +
+WOOSTER_COEFF 19.7 VIIRS_M + dashboard About/credits. OSF v2.5 en
+`data/mirova_reference/` (no commitear 98 MB). Validación empírica
+coeficientes (error ≤0.17%) en `experiments/21_results.json`.
 
 **S12 baseline (2026-04-16)**: 45 volcanes operacionales, 11 con refs MIROVA
 (14042026 consolidado, 494 refs). Auditoría contra MIROVA:
