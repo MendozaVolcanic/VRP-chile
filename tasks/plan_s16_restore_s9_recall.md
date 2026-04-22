@@ -26,18 +26,29 @@ post-fixes solo 0.45 y 0.80 respectivamente.** Villarrica siempre fue 0
 
 ## Hipótesis ranked por evidencia
 
-### H1 DOMINANTE — Vent-path sigma-gating S12 F1 + F1b
+### H1 CONFIRMADA CON GROUND TRUTH — Vent-path sigma-gating (commit 6eaed67 S12 F1)
 
-**Config S9 vent-path (process_viirs.py ecb5d66)**:
-```
-threshold_vent = VENT_THRESHOLD_K   # = 1.0 K fijo
+**Diff exacto del commit 6eaed67 (process_viirs.py, 2026-04-13)**:
+```python
+# ANTES (S9, S10, S11 — código idéntico):
+if t_max_vent > (t_bg_i04 + VENT_THRESHOLD_K):   # = t_bg + 1.0 K fijo
+
+# DESPUES (S12+ actual):
+vent_thresh = max(VENT_THRESHOLD_K, N_SIGMA_VENT * std_bg_i04)
+if t_max_vent > (t_bg_i04 + vent_thresh):
 ```
 
-**Config S15 actual vent-path**:
-```
-sigma_contrib = min(N_SIGMA_VENT * std_bg, MAX_VENT_SIGMA_CONTRIB_K)  # = min(2*σ, 3)
-threshold_vent = max(VENT_THRESHOLD_K, sigma_contrib)                  # = max(1, hasta 3)
-```
+Del commit message: *"N_SIGMA_VENT (2.0) was imported but never actually used
+in the vent-path detection logic. The threshold was a fixed 1K above
+background"*.
+
+En S9 la variable N_SIGMA_VENT estaba muerta. S12 F1 la "activó" usándola —
+y eso eliminó 85% de los FPs PERO también eliminó TPs débiles en volcanes
+con σ_bg alto (Tupungatito glaciar, Chaitén domo sub-pixel).
+
+Commit S12 F1b (4c80429) agregó cap `MAX_VENT_SIGMA_CONTRIB_K=3` como
+mitigación parcial (3K en vez de 4-6K con σ alto), pero **3K sigue siendo
+3× más estricto que los 1K de S9**.
 
 **Escenario Tupungatito glaciar σ_bg ~2K**: S9 threshold=1K. S15 threshold=min(4, 3)=3K.
 Pixel fumarólico a ΔT=1.5K pasa S9, no pasa S15. → Recall perdido.
