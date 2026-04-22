@@ -76,6 +76,7 @@ from pipeline.profile import (
     ENABLE_NTI_RELATIVE_PATH,
     NTI_REL_N_SIGMA,
     NTI_REL_MIN_FLOOR,
+    MAX_SIGMA_COMPONENT_K,
     DNTI_CONTEXTUAL_C1,
     DNTI_CONTEXTUAL_C1_SUMMIT,
     DNTI_CONTEXTUAL_C1_SCENE,
@@ -323,7 +324,14 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             t_bg_i04 = float(np.median(bg_vals))
             std_bg = float(np.std(bg_vals))
             std_bg_i04 = std_bg  # S12: save for vent-path sigma gating
-            threshold_mir = max(ANOMALY_THRESHOLD_K, N_SIGMA_MIR * std_bg)
+            # S15 Tema F: sigma-cap en eruption-path (paridad con MODIS,
+            # cura Tupungatito recall 0.04). Sin cap, sigma_bg inflado por
+            # glaciar/orografia (Tupungatito 5682m, Villarrica cono glaciar)
+            # empujaba el threshold a 9-12 K, rechazando pixels reales
+            # MIROVA a DeltaT=8-9 K. Cap a 7 K (default MIROVA) coincide
+            # con el gate MODIS (process_modis.py linea 253).
+            sigma_component = min(N_SIGMA_MIR * std_bg, MAX_SIGMA_COMPONENT_K)
+            threshold_mir = max(ANOMALY_THRESHOLD_K, sigma_component)
 
             roi_bt_full = np.where(roi_mask & ~np.isnan(bt), bt, np.nan)
 

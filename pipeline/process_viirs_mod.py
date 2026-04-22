@@ -63,6 +63,7 @@ from pipeline.profile import (
     N_SIGMA_VENT,
     MAX_VENT_SIGMA_CONTRIB_K,
     MIN_VENT_PIXELS,
+    MAX_SIGMA_COMPONENT_K,
     DNTI_CONTEXTUAL_C1,
     DNTI_CONTEXTUAL_C1_SUMMIT,
     DNTI_CONTEXTUAL_C1_SCENE,
@@ -234,7 +235,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
 
     t_bg   = float(np.median(bg_vals))
     std_bg = float(np.std(bg_vals))
-    threshold = max(ANOMALY_THRESHOLD_K, N_SIGMA_MIR * std_bg)
+    # S15 Tema F: sigma-cap eruption-path (cura Tupungatito recall 0.04).
+    sigma_component = min(N_SIGMA_MIR * std_bg, MAX_SIGMA_COMPONENT_K)
+    threshold = max(ANOMALY_THRESHOLD_K, sigma_component)
 
     # --- NTI: Normalized Thermal Index (Coppola 2015) ---
     # NTI = (L_MIR - L_TIR) / (L_MIR + L_TIR) per-pixel
