@@ -253,17 +253,26 @@ def main():
     a2 = analysis_2_distance_distribution(osf_rows)
     print_distance_table(a2)
 
-    # OSF v2.5 archive termina 2025. Usamos ultimo anio completo (2025)
-    # como proxy estructural para comparar tasa anual OSF vs NRT 3.5 meses.
-    start = datetime(2025, 1, 1)
-    end = datetime(2025, 12, 31, 23, 59)
-    a3 = analysis_3_osf_vs_nrt_overlap(osf_rows, nrt_rows, start, end)
+    # CORRECCION: OSF v2.5 termina 2025-12-31 y NRT empieza 2026-01-10, NO hay
+    # overlap temporal real. Comparamos VENTANAS IGUALES en calendario (Ene-Abr)
+    # de anios adyacentes como mejor proxy: si actividad similar ano-a-ano,
+    # ratio ~= 1 = paridad; desviaciones != 1 pueden ser (a) supervision
+    # mirovaweb, (b) deriva temporal de actividad, (c) incompletitud OSF.
+    # NO podemos distinguir (a) de (b)/(c) sin OSF actualizado a 2026.
+    # Para NRT usamos solo 2026-01-10 -> 2026-04-22 (misma ventana).
+    start_osf = datetime(2025, 1, 10)
+    end_osf = datetime(2025, 4, 22, 23, 59)
+    nrt_window = [r for r in nrt_rows
+                  if datetime(2026, 1, 10) <= r["dt"] <= datetime(2026, 4, 22, 23, 59)]
+    a3 = analysis_3_osf_vs_nrt_overlap(osf_rows, nrt_window, start_osf, end_osf)
     print_overlap_table(a3)
     print()
-    print("NOTA: 'Overlap' no existe (OSF termina 2025-12-31, NRT empieza 2026-01-10).")
-    print("      Tabla 3 muestra OSF-2025-full vs NRT-3.5meses para comparar tasas.")
-    print("      Esperamos NRT/OSF ~= 0.29 por razon temporal (3.5/12 meses) si no")
-    print("      hay filtros supervisados ocultos. Desviaciones >>0.29 -> supervision.")
+    print("NOTA METODOLOGICA: no hay overlap temporal OSF-NRT. Comparamos misma")
+    print("ventana calendario Ene-Abr en anios adyacentes (2025 vs 2026), asumiendo")
+    print("actividad similar entre anios. Desviaciones del ratio ~1 pueden ser")
+    print("supervision Y/O deriva real de actividad volcanica. No son distinguibles")
+    print("con estos datos. Paridad confirmada SOLO donde ambas fuentes tienen")
+    print("muchas refs y ratio ~1 (Lascar, Lastarria, NdC VIIRS_I).")
 
     out_path = Path("experiments/28_osf_historical_analysis.json")
     json.dump(
