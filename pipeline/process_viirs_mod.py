@@ -63,7 +63,10 @@ from pipeline.profile import (
     N_SIGMA_VENT,
     MAX_VENT_SIGMA_CONTRIB_K,
     MIN_VENT_PIXELS,
+    DNTI_CONTEXTUAL_C1,
+    ENABLE_DNTI_CONTEXTUAL_PATH,
 )
+from .detection_context import contextual_dnti_hot_mask
 
 # M-band wavelengths (µm)
 M13_INDEX = 12       # M13 index within VNP02MOD observation_data (0-based)
@@ -319,7 +322,24 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     else:
         nti_rel_hot = np.zeros_like(roi_mask)
 
-    hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot
+    # Path D — dNTI contextual 8-vecinos (P3.2 S15, Coppola 2016a).
+    # Gate local: anomaly vs 8 vecinos inmediatos, immune a heterogeneidad
+    # regional. Para M-band 750m el footprint cubre ~2.25x2.25 km.
+    n_dnti_ctx_path = 0
+    if (ENABLE_DNTI_CONTEXTUAL_PATH
+            and nti is not None
+            and not np.isnan(nti_bg)):
+        dnti_ctx_hot = contextual_dnti_hot_mask(
+            nti=nti, bt=bt, roi_mask=roi_mask,
+            t_bg=t_bg,
+            c1=DNTI_CONTEXTUAL_C1,
+            bt_sanity_k=NTI_BT_SANITY_K,
+        )
+        n_dnti_ctx_path = int(np.sum(dnti_ctx_hot))
+    else:
+        dnti_ctx_hot = np.zeros_like(roi_mask)
+
+    hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot | dnti_ctx_hot
     n_bt_path = int(np.sum(bt_path_hot & ~np.isnan(bt_path_hot)))
     n_nti_path = int(np.sum(nti_path_hot))
 
@@ -425,6 +445,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "n_bt_path": n_bt_path,
         "n_nti_path": n_nti_path,
         "n_nti_rel_path": n_nti_rel_path,
+        "n_dnti_ctx_path": n_dnti_ctx_path,
         "n_nti_anomalous": n_nti_anomalous,
         "n_vent_pixels": n_vent_pixels,
         "vent_hotspot_lat": vent_hotspot_lat,
