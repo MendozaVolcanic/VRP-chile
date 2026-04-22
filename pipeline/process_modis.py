@@ -79,7 +79,10 @@ from pipeline.profile import (
     N_SIGMA_VENT,
     MAX_VENT_SIGMA_CONTRIB_K,
     MIN_VENT_PIXELS,
+    DNTI_CONTEXTUAL_C1,
+    ENABLE_DNTI_CONTEXTUAL_PATH,
 )
+from .detection_context import contextual_dnti_hot_mask
 
 # Indices of bands 21 and 22 within EV_1KM_Emissive
 # Band_1KM_Emissive order: [20,21,22,23,24,25,27,28,29,30,31,32,33,34,35,36]
@@ -298,7 +301,23 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         & (nti > NTI_K1_NIGHT)
         & (bt_mir > (t_bg + NTI_BT_SANITY_K))
     )
-    hot_mask_2d = bt_path_hot | nti_path_hot
+
+    # Path D — dNTI contextual 8-vecinos (P3.2 S15, Coppola 2016a).
+    # Pixel MODIS 1 km -> footprint 8-vecinos cubre 3x3 km. Gate local
+    # inmune a sigma_bg inflado por orografia/nieve parcial.
+    n_dnti_ctx_path = 0
+    if ENABLE_DNTI_CONTEXTUAL_PATH and not np.isnan(nti_bg):
+        dnti_ctx_hot = contextual_dnti_hot_mask(
+            nti=nti, bt=bt_mir, roi_mask=roi_mask,
+            t_bg=t_bg,
+            c1=DNTI_CONTEXTUAL_C1,
+            bt_sanity_k=NTI_BT_SANITY_K,
+        )
+        n_dnti_ctx_path = int(np.sum(dnti_ctx_hot))
+    else:
+        dnti_ctx_hot = np.zeros_like(bt_path_hot)
+
+    hot_mask_2d = bt_path_hot | nti_path_hot | dnti_ctx_hot
     hot_rows, hot_cols = np.where(hot_mask_2d)
     n_anomalous = len(hot_rows)
     n_bt_path = int(np.sum(bt_path_hot))
@@ -450,6 +469,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "diag_nti_max": round(nti_max, 4) if not (nti_max != nti_max) else None,
         "diag_n_bt_path": n_bt_path,
         "diag_n_nti_path": n_nti_path,
+        "diag_n_dnti_ctx_path": n_dnti_ctx_path,
         "sensor": "MODIS_TERRA" if "MOD0" in hdf_path.name else "MODIS_AQUA",
         "granule": hdf_path.name,
         "product_version": "nrt" if "_NRT" in hdf_path.name else "standard",
