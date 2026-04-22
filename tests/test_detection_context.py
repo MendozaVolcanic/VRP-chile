@@ -11,7 +11,10 @@ anomaly detection", seccion "contextual NTI difference".
 """
 
 import numpy as np
-from pipeline.detection_context import contextual_dnti_hot_mask
+from pipeline.detection_context import (
+    contextual_dnti_hot_mask,
+    dual_roi_contextual_dnti_hot_mask,
+)
 
 
 def test_isolated_hotspot_passes():
@@ -102,6 +105,94 @@ def test_c1_threshold_below_rejects_above_passes():
         nti=nti_above, bt=bt, roi_mask=roi,
         t_bg=285.0, c1=0.003, bt_sanity_k=3.0)
     assert mask_above[2, 2] == True
+
+
+# ===================================================================
+# P3.1 dual-ROI tests: summit vs scene con C1 distintos
+# ===================================================================
+
+
+def test_dual_roi_pixel_in_summit_passes_with_low_c1():
+    """Pixel a 2 km del vent (summit si inner=5) con dNTI=0.005 pasa
+    con c1_summit=0.003 pero fallaria con c1_scene=0.010."""
+    nti = np.full((5, 5), -0.95)
+    nti[2, 2] = -0.945       # dNTI ~ 0.005
+    bt = np.full((5, 5), 295.0)
+    roi = np.ones((5, 5), dtype=bool)
+    dist = np.full((5, 5), 20.0)  # default lejos
+    dist[2, 2] = 2.0              # este pixel a 2 km (summit)
+    mask = dual_roi_contextual_dnti_hot_mask(
+        nti=nti, bt=bt, roi_mask=roi, dist_km=dist,
+        t_bg=285.0,
+        c1_summit=0.003, c1_scene=0.010,
+        inner_km=5.0, bt_sanity_k=3.0,
+    )
+    assert mask[2, 2] == True
+
+
+def test_dual_roi_pixel_in_scene_rejected_with_strict_c1():
+    """Pixel a 15 km del vent (scene si inner=5) con dNTI=0.005 falla
+    porque scene requiere c1=0.010."""
+    nti = np.full((5, 5), -0.95)
+    nti[2, 2] = -0.945       # dNTI ~ 0.005
+    bt = np.full((5, 5), 295.0)
+    roi = np.ones((5, 5), dtype=bool)
+    dist = np.full((5, 5), 2.0)   # default summit
+    dist[2, 2] = 15.0             # este pixel scene
+    mask = dual_roi_contextual_dnti_hot_mask(
+        nti=nti, bt=bt, roi_mask=roi, dist_km=dist,
+        t_bg=285.0,
+        c1_summit=0.003, c1_scene=0.010,
+        inner_km=5.0, bt_sanity_k=3.0,
+    )
+    assert mask[2, 2] == False
+
+
+def test_dual_roi_pixel_in_scene_passes_with_high_dnti():
+    """Pixel a 15 km con dNTI=0.015 (clearly sobre c1_scene=0.010) pasa."""
+    nti = np.full((5, 5), -0.95)
+    nti[2, 2] = -0.935       # dNTI ~ 0.015
+    bt = np.full((5, 5), 295.0)
+    roi = np.ones((5, 5), dtype=bool)
+    dist = np.full((5, 5), 2.0)
+    dist[2, 2] = 15.0
+    mask = dual_roi_contextual_dnti_hot_mask(
+        nti=nti, bt=bt, roi_mask=roi, dist_km=dist,
+        t_bg=285.0,
+        c1_summit=0.003, c1_scene=0.010,
+        inner_km=5.0, bt_sanity_k=3.0,
+    )
+    assert mask[2, 2] == True
+
+
+def test_dual_roi_lastarria_realistic_scenario():
+    """Escenario Lastarria realista: 7x7 zona mixta.
+    - pixel summit a 1 km, dNTI=0.005 -> pasa (C1=0.003).
+    - pixel scene a 20 km, dNTI=0.005 -> rechazo (C1=0.010 scene).
+    - pixel scene a 20 km, dNTI=0.015 -> pasa (>C1 scene).
+    Esto emula: MIROVA summit ok + Lazufre rechazado + eventual erupcion
+    grande fuera del summit tambien detectada.
+    """
+    nti = np.full((7, 7), -0.95)
+    nti[1, 1] = -0.945    # summit, dNTI=0.005
+    nti[5, 5] = -0.945    # scene lejos, dNTI=0.005 (Lazufre ruido)
+    nti[3, 6] = -0.935    # scene lejos, dNTI=0.015 (erupcion real)
+    bt = np.full((7, 7), 295.0)
+    roi = np.ones((7, 7), dtype=bool)
+    dist = np.full((7, 7), 10.0)
+    dist[1, 1] = 1.0       # summit
+    dist[5, 5] = 20.0      # Lazufre
+    dist[3, 6] = 20.0      # erupcion
+
+    mask = dual_roi_contextual_dnti_hot_mask(
+        nti=nti, bt=bt, roi_mask=roi, dist_km=dist,
+        t_bg=285.0,
+        c1_summit=0.003, c1_scene=0.010,
+        inner_km=3.0, bt_sanity_k=3.0,
+    )
+    assert mask[1, 1] == True, "summit fumarola debe pasar"
+    assert mask[5, 5] == False, "Lazufre dNTI=0.005 con c1_scene=0.010 debe rechazarse"
+    assert mask[3, 6] == True, "erupcion dNTI=0.015 scene debe pasar"
 
 
 def test_lastarria_scenario_with_one_real_hotspot():

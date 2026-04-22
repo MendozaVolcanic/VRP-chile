@@ -79,3 +79,48 @@ def contextual_dnti_hot_mask(
         & (bt > t_bg + bt_sanity_k)
     )
     return hot
+
+
+def dual_roi_contextual_dnti_hot_mask(
+    nti: np.ndarray,
+    bt: np.ndarray,
+    roi_mask: np.ndarray,
+    dist_km: np.ndarray,
+    t_bg: float,
+    c1_summit: float,
+    c1_scene: float,
+    inner_km: float,
+    bt_sanity_k: float,
+) -> np.ndarray:
+    """Dual-ROI contextual dNTI mask (Coppola 2016a SP 426.5, P3.1 S15).
+
+    Aplica umbrales distintos segun la distancia al centro del volcan:
+      - summit (dist <= inner_km): c1_summit (sensible, 0.003 por paper).
+      - scene  (dist >  inner_km): c1_scene  (estricto, 0.010 por paper).
+
+    Fenomeno fisico: el analisis S15 Lastarria muestra que 80% de refs MIROVA
+    25 anos estan en summit (0-3 km), pero Path D sin dual-ROI captura 55%
+    de pixels a 15-25 km (Lazufre/Cordon del Azufre — termicamente reales
+    pero fuera del vent MIROVA). Umbral scene estricto descarta esos.
+
+    Args:
+        nti, bt, roi_mask, t_bg, bt_sanity_k: como en contextual_dnti_hot_mask.
+        dist_km: array 2D con distancia de cada pixel al vent (km).
+        c1_summit: C1 contextual para summit ROI.
+        c1_scene: C1 contextual para scene ROI.
+        inner_km: radio que separa summit de scene (inner_radius_km del vol).
+
+    Returns:
+        bool array True donde hot segun el C1 aplicable por distancia.
+    """
+    if dist_km.shape != nti.shape:
+        raise ValueError(f"dist_km shape {dist_km.shape} != nti {nti.shape}")
+    summit_mask = roi_mask & (dist_km <= inner_km)
+    scene_mask = roi_mask & (dist_km > inner_km)
+    hot_summit = contextual_dnti_hot_mask(
+        nti, bt, summit_mask, t_bg, c1_summit, bt_sanity_k,
+    )
+    hot_scene = contextual_dnti_hot_mask(
+        nti, bt, scene_mask, t_bg, c1_scene, bt_sanity_k,
+    )
+    return hot_summit | hot_scene
