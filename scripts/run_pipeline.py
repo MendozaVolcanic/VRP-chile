@@ -361,6 +361,14 @@ def main():
     if args.overwrite:
         print("Overwrite mode ON: existing records will be replaced.")
 
+    # S15 Tema E: scope filtering. Perfil mirova_equivalent procesa solo los
+    # 11 volcanes que MIROVA monitorea (Tier A). experimental procesa todos.
+    # Cuando se pide --volcano X explicito, se respeta (bypass).
+    if vrp_profile.PROFILE_NAME == "mirova_equivalent" and not args.volcano:
+        volcanoes = [v for v in volcanoes if v.get("mirova_monitored", False)]
+        print(f"Profile mirova_equivalent: filtrado a {len(volcanoes)} volcanes "
+              f"MIROVA-monitoreados.")
+
     for volcano in volcanoes:
         for date in dates:
             process_date(volcano, date, nighttime_only=nighttime_only,
