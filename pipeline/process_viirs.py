@@ -77,9 +77,15 @@ from pipeline.profile import (
     NTI_REL_N_SIGMA,
     NTI_REL_MIN_FLOOR,
     DNTI_CONTEXTUAL_C1,
+    DNTI_CONTEXTUAL_C1_SUMMIT,
+    DNTI_CONTEXTUAL_C1_SCENE,
     ENABLE_DNTI_CONTEXTUAL_PATH,
+    ENABLE_DNTI_DUAL_ROI,
 )
-from .detection_context import contextual_dnti_hot_mask
+from .detection_context import (
+    contextual_dnti_hot_mask,
+    dual_roi_contextual_dnti_hot_mask,
+)
 
 
 def bt_to_spectral_radiance(bt: np.ndarray, wavelength_um: float) -> np.ndarray:
@@ -225,6 +231,13 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
 
     dist = haversine_km(volcano_lat, volcano_lon, lat, lon)
 
+    # P3.1 S15: per-pixel distance from effective vent (mirova_center if set,
+    # else vent_lat/lon, else volcano center). Used for dual-ROI summit/scene.
+    if vent_lat is not None and vent_lon is not None:
+        vent_dist_per_pixel = haversine_km(vent_lat, vent_lon, lat, lon)
+    else:
+        vent_dist_per_pixel = dist
+
     roi_mask = dist <= radius_km
     bg_mask = (dist >= BG_INNER_KM) & (dist <= BG_OUTER_KM)
 
@@ -349,20 +362,35 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             else:
                 nti_rel_hot = np.zeros_like(bt_path_hot)
 
-            # Path D — dNTI contextual 8-vecinos (P3.2 S15, Coppola 2016a).
-            # Anomaly requires the pixel to stand out from its immediate
-            # neighbors, not from the ring average -- immune to uniformly
-            # warm terrain (Lastarria hidrotermal, ratio 19.87 pre-P3.2).
+            # Path D — dNTI contextual 8-vecinos (P3.2 + P3.1 S15, Coppola 2016a).
+            # P3.2: anomaly requires the pixel to stand out from its immediate
+            # neighbors, not from the ring average -- immune to uniformly warm
+            # terrain (Lastarria hidrotermal, ratio 19.87 pre-P3.2).
+            # P3.1: when enabled + inner_radius_km set, use dual-ROI thresholds:
+            # summit (dist<=inner) C1=0.003 sensible; scene C1=0.010 strict.
+            # Necesario para Lastarria: Path D solo capturaba 55% pixels en
+            # 15-25 km (Lazufre, termico real pero MIROVA descarta).
             n_dnti_ctx_path = 0
             if (ENABLE_DNTI_CONTEXTUAL_PATH
                     and "I05" in bands
                     and not np.isnan(nti_bg)):
-                dnti_ctx_hot = contextual_dnti_hot_mask(
-                    nti=nti, bt=bt, roi_mask=roi_mask,
-                    t_bg=t_bg_i04,
-                    c1=DNTI_CONTEXTUAL_C1,
-                    bt_sanity_k=NTI_BT_SANITY_K,
-                )
+                if ENABLE_DNTI_DUAL_ROI and inner_radius_km is not None:
+                    dnti_ctx_hot = dual_roi_contextual_dnti_hot_mask(
+                        nti=nti, bt=bt, roi_mask=roi_mask,
+                        dist_km=vent_dist_per_pixel,
+                        t_bg=t_bg_i04,
+                        c1_summit=DNTI_CONTEXTUAL_C1_SUMMIT,
+                        c1_scene=DNTI_CONTEXTUAL_C1_SCENE,
+                        inner_km=inner_radius_km,
+                        bt_sanity_k=NTI_BT_SANITY_K,
+                    )
+                else:
+                    dnti_ctx_hot = contextual_dnti_hot_mask(
+                        nti=nti, bt=bt, roi_mask=roi_mask,
+                        t_bg=t_bg_i04,
+                        c1=DNTI_CONTEXTUAL_C1,
+                        bt_sanity_k=NTI_BT_SANITY_K,
+                    )
                 n_dnti_ctx_path = int(np.sum(dnti_ctx_hot))
             else:
                 dnti_ctx_hot = np.zeros_like(bt_path_hot)

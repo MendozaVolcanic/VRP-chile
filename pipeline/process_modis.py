@@ -80,9 +80,15 @@ from pipeline.profile import (
     MAX_VENT_SIGMA_CONTRIB_K,
     MIN_VENT_PIXELS,
     DNTI_CONTEXTUAL_C1,
+    DNTI_CONTEXTUAL_C1_SUMMIT,
+    DNTI_CONTEXTUAL_C1_SCENE,
     ENABLE_DNTI_CONTEXTUAL_PATH,
+    ENABLE_DNTI_DUAL_ROI,
 )
-from .detection_context import contextual_dnti_hot_mask
+from .detection_context import (
+    contextual_dnti_hot_mask,
+    dual_roi_contextual_dnti_hot_mask,
+)
 
 # Indices of bands 21 and 22 within EV_1KM_Emissive
 # Band_1KM_Emissive order: [20,21,22,23,24,25,27,28,29,30,31,32,33,34,35,36]
@@ -203,6 +209,12 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     pixel_areas = modis_pixel_areas(lat.shape)
     dist = haversine_km(volcano_lat, volcano_lon, lat, lon)
 
+    # P3.1 S15: per-pixel distance from effective vent for dual-ROI.
+    if vent_lat is not None and vent_lon is not None:
+        vent_dist_per_pixel = haversine_km(vent_lat, vent_lon, lat, lon)
+    else:
+        vent_dist_per_pixel = dist
+
     roi_mask = dist <= radius_km
     bg_mask = (dist >= BG_INNER_KM) & (dist <= BG_OUTER_KM)
 
@@ -302,17 +314,27 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         & (bt_mir > (t_bg + NTI_BT_SANITY_K))
     )
 
-    # Path D — dNTI contextual 8-vecinos (P3.2 S15, Coppola 2016a).
-    # Pixel MODIS 1 km -> footprint 8-vecinos cubre 3x3 km. Gate local
-    # inmune a sigma_bg inflado por orografia/nieve parcial.
+    # Path D — dNTI contextual 8-vecinos (P3.2 + P3.1 S15, Coppola 2016a).
+    # P3.1 dual-ROI: summit C1=0.003 sensible, scene C1=0.010 estricto.
     n_dnti_ctx_path = 0
     if ENABLE_DNTI_CONTEXTUAL_PATH and not np.isnan(nti_bg):
-        dnti_ctx_hot = contextual_dnti_hot_mask(
-            nti=nti, bt=bt_mir, roi_mask=roi_mask,
-            t_bg=t_bg,
-            c1=DNTI_CONTEXTUAL_C1,
-            bt_sanity_k=NTI_BT_SANITY_K,
-        )
+        if ENABLE_DNTI_DUAL_ROI and inner_radius_km is not None:
+            dnti_ctx_hot = dual_roi_contextual_dnti_hot_mask(
+                nti=nti, bt=bt_mir, roi_mask=roi_mask,
+                dist_km=vent_dist_per_pixel,
+                t_bg=t_bg,
+                c1_summit=DNTI_CONTEXTUAL_C1_SUMMIT,
+                c1_scene=DNTI_CONTEXTUAL_C1_SCENE,
+                inner_km=inner_radius_km,
+                bt_sanity_k=NTI_BT_SANITY_K,
+            )
+        else:
+            dnti_ctx_hot = contextual_dnti_hot_mask(
+                nti=nti, bt=bt_mir, roi_mask=roi_mask,
+                t_bg=t_bg,
+                c1=DNTI_CONTEXTUAL_C1,
+                bt_sanity_k=NTI_BT_SANITY_K,
+            )
         n_dnti_ctx_path = int(np.sum(dnti_ctx_hot))
     else:
         dnti_ctx_hot = np.zeros_like(bt_path_hot)

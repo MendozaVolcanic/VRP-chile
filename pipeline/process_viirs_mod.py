@@ -64,9 +64,15 @@ from pipeline.profile import (
     MAX_VENT_SIGMA_CONTRIB_K,
     MIN_VENT_PIXELS,
     DNTI_CONTEXTUAL_C1,
+    DNTI_CONTEXTUAL_C1_SUMMIT,
+    DNTI_CONTEXTUAL_C1_SCENE,
     ENABLE_DNTI_CONTEXTUAL_PATH,
+    ENABLE_DNTI_DUAL_ROI,
 )
-from .detection_context import contextual_dnti_hot_mask
+from .detection_context import (
+    contextual_dnti_hot_mask,
+    dual_roi_contextual_dnti_hot_mask,
+)
 
 # M-band wavelengths (µm)
 M13_INDEX = 12       # M13 index within VNP02MOD observation_data (0-based)
@@ -208,6 +214,12 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     pixel_areas = viirs_pixel_areas(geo["sensor_zenith"], NADIR_PIXEL_AREA_M2)
     dist = haversine_km(volcano_lat, volcano_lon, lat, lon)
 
+    # P3.1 S15: per-pixel distance from effective vent for dual-ROI.
+    if vent_lat is not None and vent_lon is not None:
+        vent_dist_per_pixel = haversine_km(vent_lat, vent_lon, lat, lon)
+    else:
+        vent_dist_per_pixel = dist
+
     roi_mask = dist <= radius_km
     bg_mask  = (dist >= BG_INNER_KM) & (dist <= BG_OUTER_KM)
 
@@ -322,19 +334,29 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     else:
         nti_rel_hot = np.zeros_like(roi_mask)
 
-    # Path D — dNTI contextual 8-vecinos (P3.2 S15, Coppola 2016a).
-    # Gate local: anomaly vs 8 vecinos inmediatos, immune a heterogeneidad
-    # regional. Para M-band 750m el footprint cubre ~2.25x2.25 km.
+    # Path D — dNTI contextual 8-vecinos (P3.2 + P3.1 S15, Coppola 2016a).
+    # P3.1 dual-ROI: summit C1=0.003 sensible, scene C1=0.010 estricto.
     n_dnti_ctx_path = 0
     if (ENABLE_DNTI_CONTEXTUAL_PATH
             and nti is not None
             and not np.isnan(nti_bg)):
-        dnti_ctx_hot = contextual_dnti_hot_mask(
-            nti=nti, bt=bt, roi_mask=roi_mask,
-            t_bg=t_bg,
-            c1=DNTI_CONTEXTUAL_C1,
-            bt_sanity_k=NTI_BT_SANITY_K,
-        )
+        if ENABLE_DNTI_DUAL_ROI and inner_radius_km is not None:
+            dnti_ctx_hot = dual_roi_contextual_dnti_hot_mask(
+                nti=nti, bt=bt, roi_mask=roi_mask,
+                dist_km=vent_dist_per_pixel,
+                t_bg=t_bg,
+                c1_summit=DNTI_CONTEXTUAL_C1_SUMMIT,
+                c1_scene=DNTI_CONTEXTUAL_C1_SCENE,
+                inner_km=inner_radius_km,
+                bt_sanity_k=NTI_BT_SANITY_K,
+            )
+        else:
+            dnti_ctx_hot = contextual_dnti_hot_mask(
+                nti=nti, bt=bt, roi_mask=roi_mask,
+                t_bg=t_bg,
+                c1=DNTI_CONTEXTUAL_C1,
+                bt_sanity_k=NTI_BT_SANITY_K,
+            )
         n_dnti_ctx_path = int(np.sum(dnti_ctx_hot))
     else:
         dnti_ctx_hot = np.zeros_like(roi_mask)
