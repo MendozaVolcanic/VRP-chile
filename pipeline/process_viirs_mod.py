@@ -26,6 +26,7 @@ except ImportError:
     H5_AVAILABLE = False
 
 from .scan_geometry import viirs_pixel_areas, roi_mask_bbox
+from .exclusion_zones import filter_hot_mask
 
 SIGMA = 5.670374419e-8  # kept for reference, not used in MIR VRP
 # Nadir pixel area; actual area is per-pixel via sensor_zenith correction.
@@ -193,7 +194,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                   radius_km: float = 30.0,
                   vent_lat: float = None, vent_lon: float = None,
                   vent_radius_km: float = 4.0,
-                  inner_radius_km: float | None = None) -> dict | None:
+                  inner_radius_km: float | None = None,
+                  exclude_zones: list = None,
+                  active_water_bodies: list = None) -> dict | None:
     """
     Calculate VRP from VIIRS 750m M-band granule (VNP02MOD / VJ102MOD).
 
@@ -366,6 +369,12 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         dnti_ctx_hot = np.zeros_like(roi_mask)
 
     hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot | dnti_ctx_hot
+
+    # S16 P3.6: filtrar exclude_zones (cuerpos de agua/salares).
+    n_excluded_water = 0
+    if exclude_zones:
+        hot_mask_2d, n_excluded_water = filter_hot_mask(
+            hot_mask_2d, lat, lon, exclude_zones, active_water_bodies)
     n_bt_path = int(np.sum(bt_path_hot & ~np.isnan(bt_path_hot)))
     n_nti_path = int(np.sum(nti_path_hot))
 

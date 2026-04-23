@@ -29,6 +29,7 @@ except ImportError:
     print("WARNING: h5py not found. Install: pip install h5py")
 
 from .scan_geometry import viirs_pixel_areas, roi_mask_bbox
+from .exclusion_zones import filter_hot_mask
 
 
 SIGMA = 5.670374419e-8   # Stefan-Boltzmann constant, W/m^2/K^4 (TIR only)
@@ -201,7 +202,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                   radius_km: float = 30.0,
                   vent_lat: float = None, vent_lon: float = None,
                   vent_radius_km: float = 4.0,
-                  inner_radius_km: float | None = None) -> dict | None:
+                  inner_radius_km: float | None = None,
+                  exclude_zones: list = None,
+                  active_water_bodies: list = None) -> dict | None:
     """
     Calculate VRP from a single VIIRS L1B granule.
 
@@ -316,6 +319,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # condicional, para evitar UnboundLocalError cuando "I04" no esta en bands
     # o len(bg_vals) < 10 (granules con poco data utilizable).
     n_dnti_ctx_path = 0
+    n_excluded_water = 0
     hotspot_lat = None
     hotspot_lon = None
     hotspot_dist_km = None
@@ -412,6 +416,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 dnti_ctx_hot = np.zeros_like(bt_path_hot)
 
             hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot | dnti_ctx_hot
+
+            # S16 P3.6: filtrar pixels en exclude_zones (cuerpos de agua/salares
+            # irradiando calor nocturno que bbox 50x50 km incluye -> FPs masivos).
+            # Whitelist active_water_bodies preserva (lagos crateres activos).
+            n_excluded_water = 0
+            if exclude_zones:
+                hot_mask_2d, n_excluded_water = filter_hot_mask(
+                    hot_mask_2d, lat, lon, exclude_zones, active_water_bodies)
+
             n_bt_path = int(np.sum(bt_path_hot))
             n_nti_path = int(np.sum(nti_path_hot))
 
@@ -570,6 +583,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "vrp_tir_mw": round(vrp_tir_mw, 3),
         "vrp_vent_mw": round(vrp_vent_mw, 3),
         "n_anomalous_pixels": n_anomalous,
+        "n_excluded_water": n_excluded_water if "I04" in bands and len(bg_vals) >= 10 else 0,
         "n_bt_path": n_bt_path,
         "n_nti_path": n_nti_path,
         "n_nti_rel_path": n_nti_rel_path,

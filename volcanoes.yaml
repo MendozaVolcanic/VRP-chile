@@ -50,6 +50,14 @@ volcanoes:
   vent_lat: -23.36293
   vent_lon: -67.731416
   vent_radius_km: 3
+  # S16 P3.6: zonas excluidas (cuerpos de agua/salares irradiando calor
+  # nocturno que el bbox 50x50 km incluye y generan FPs masivos).
+  # Salar de Atacama: 4326 pixels FP en VIIRS_SNPP 2026-04-08 -> VRP 1437 MW.
+  exclude_zones:
+    - name: "Salar de Atacama"
+      lat: -23.5
+      lon: -68.2
+      radius_km: 25.0
 - name: Antuco
   display_name: Antuco
   lat: -37.406
@@ -606,3 +614,16 @@ volcanoes:
   # Nicolas vent; MIROVA likely anchored on SE crater field, not main summit.
   mirova_center_lat: -33.4269
   mirova_center_lon: -69.8004
+  # S16 P3.6: Embalse El Yeso a 25-27 km SE del vent. Bbox lo incluye ->
+  # FPs 58-205 MW en abril 2026.
+  exclude_zones:
+    - name: "Embalse El Yeso"
+      lat: -33.67
+      lon: -70.08
+      radius_km: 5.0
+  # Whitelist: laguna cratérica activa (preserva detecciones reales del lago).
+  active_water_bodies:
+    - name: "crater_lake_tupungatito"
+      lat: -33.4269
+      lon: -69.8004
+      radius_km: 1.0

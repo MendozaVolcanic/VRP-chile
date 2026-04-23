@@ -29,6 +29,7 @@ except ImportError:
     print("WARNING: pyhdf not found. Install: conda install -c conda-forge pyhdf")
 
 from .scan_geometry import modis_pixel_areas, roi_mask_bbox
+from .exclusion_zones import filter_hot_mask
 
 
 SIGMA = 5.670374419e-8
@@ -185,7 +186,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                   radius_km: float = 15.0,
                   vent_lat: float = None, vent_lon: float = None,
                   vent_radius_km: float = 4.0,
-                  inner_radius_km: float | None = None) -> dict | None:
+                  inner_radius_km: float | None = None,
+                  exclude_zones: list = None,
+                  active_water_bodies: list = None) -> dict | None:
     """
     Calculate VRP from MODIS L1B granule.
 
@@ -341,6 +344,12 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         dnti_ctx_hot = np.zeros_like(bt_path_hot)
 
     hot_mask_2d = bt_path_hot | nti_path_hot | dnti_ctx_hot
+
+    # S16 P3.6: filtrar exclude_zones.
+    n_excluded_water = 0
+    if exclude_zones:
+        hot_mask_2d, n_excluded_water = filter_hot_mask(
+            hot_mask_2d, lat, lon, exclude_zones, active_water_bodies)
     hot_rows, hot_cols = np.where(hot_mask_2d)
     n_anomalous = len(hot_rows)
     n_bt_path = int(np.sum(bt_path_hot))
