@@ -98,31 +98,42 @@ decisiones de umbrales, o cambios metodológicos:
 - `pipeline/`: fetch.py (earthaccess), process_modis.py, process_viirs.py, process_viirs_mod.py, store.py, scan_geometry.py
 - `frontend/index.html` (Chart.js + Leaflet, GitHub Pages)
 - `volcanoes.yaml` (45 configurados, 11 con data, 34 sin pull)
-- `.github/workflows/nrt.yml` (cron 6h)
+- `.github/workflows/nrt.yml` (cron cada 2h, matrix por volcán, **timeout 50 min per-step**)
+
+**Aprendizaje S15 sobre reprocesos largos (obligatorio respetar)**:
+- GitHub Actions free tier: **6h hard limit por job, 50 min soft timeout en nuestro workflow**.
+- **Nunca** lanzar reproceso full-history en GitHub Actions — timeout seguro.
+- Reprocesos de historia (más de 1 día) **deben correr en máquina local de Nicolás**
+  via `scripts/run_pipeline.py --profile X --volcano Y --start ... --end ...`.
+- GitHub Actions NRT solo procesa 1 día / cron (paraleliza por volcán, cabe en 50 min).
 - `data/` JSON por volcán (committed). Raw L1B/HDF **nunca** committed.
 
-## Skill triggers (invocar proactivamente)
+## Skill triggers (OBLIGATORIO invocar proactivamente)
 
-Claude debe invocar `Skill` sin que Nicolás lo pida cuando el tipo de trabajo
-encaje con la tabla. Esto es vinculante, no opcional.
+**Regla fuerte**: Claude DEBE invocar `Skill` ANTES de actuar cuando el trabajo
+encaje con la tabla. No es "proactivo opcional", es **vinculante**. El costo
+de invocar de más es bajo; el costo de saltarla es un fix mal hecho que
+después hay que revertir.
 
 | Situación | Skill a invocar | Por qué |
 |---|---|---|
-| Cualquier bug, FP/FN inesperado, anomalía en auditoría, "no entiendo por qué pasa esto" | `systematic-debugging` o `superpowers-systematic-debugging` | Forzar hipótesis → evidencia → root cause, no "miro y opino" |
-| Antes de escribir fix que toque `pipeline/` con >20 líneas de cambio | `writing-plans` | Plan formal con criterios de aceptación y reversión antes de tocar código |
+| Cualquier bug, FP/FN inesperado, anomalía, regresión de métricas, "no entiendo por qué pasa esto" | `superpowers-systematic-debugging` | Forzar hipótesis → evidencia → root cause. 4 fases obligatorias. Prohibido proponer fix sin investigación previa |
+| Antes de escribir fix que toque `pipeline/` con >20 líneas | `writing-plans` | Plan bite-sized con criterios de aceptación antes de tocar código |
+| **Paso atrás metodológico, revisión integral de trabajo, "estamos haciendo las cosas bien?"** | **`superpowers-brainstorming`** | Gate de diseño antes de seguir con implementación |
 | Ejecutar un plan ya escrito paso a paso | `executing-plans` | Checkpoints y no saltarse pasos |
 | Antes de editar `pipeline/process_*.py` o `scan_geometry.py` | `test-driven-development` | Primero el test que captura el bug, después el fix |
-| Antes de declarar un fix "listo", pushear a main, o cerrar un RF | `verification-before-completion` | Re-audit obligatoria sobre Tier A completo antes del push |
-| 2+ investigaciones independientes que se pueden hacer en paralelo (ej. RF1 en Lascar + RF2 en MODIS a la vez) | `dispatching-parallel-agents` | Paralelismo real vía subagentes, no serie |
-| Nicolás pide "automatiza X", "cada vez que Y", "antes de Z hacé W" | `update-config` | Esto es un hook, no una instrucción conversacional |
-| Cualquier trabajo con HDF/NetCDF/DataFrames grandes de records satelitales | `pandas-pro` | Operaciones vectorizadas correctas, no loops |
-| Antes de correr una auditoría que requiere perfilar/memoria | `python-performance-optimization` | Si el audit script tarda >5 min, perfilarlo antes de "optimizar a ojo" |
-| Diseñar un nuevo experimento (`experiments/NN_*.py`) | `writing-plans` + `test-driven-development` | Mismo rigor que código de producción |
-| Cerrar sesión con learnings nuevos | `revise-claude-md` | Consolidar lecciones en CLAUDE.md y memoria |
+| Antes de declarar un fix "listo", pushear a main, o cerrar item | `verification-before-completion` | Re-audit obligatoria sobre Tier A completo antes del push |
+| 2+ investigaciones independientes que se pueden hacer en paralelo | `dispatching-parallel-agents` | Paralelismo real vía subagentes, no serie |
+| Nicolás pide "automatiza X", "cada vez que Y", "antes de Z hacé W" | `update-config` | Esto es un hook de settings.json, no instrucción conversacional |
+| Trabajo con HDF/NetCDF/DataFrames grandes de records satelitales | `pandas-pro` | Operaciones vectorizadas, no loops |
+| Audit script que tarda >5 min | `python-performance-optimization` | Perfilar antes de "optimizar a ojo" |
+| Diseñar nuevo experimento (`experiments/NN_*.py`) | `writing-plans` + `test-driven-development` | Mismo rigor que código de producción |
+| **Cerrar sesión con learnings nuevos** | **`revise-claude-md` + `anthropic-skills:consolidate-memory`** | Consolidar lecciones en CLAUDE.md Y en memoria persistente antes de cerrar |
 
-**Regla meta**: si estoy por hacer algo y hay una skill listada arriba que
-aplica, la invoco **antes** de actuar. Si dudo si aplica, la invoco igual —
-el costo de invocar de más es bajo, el costo de saltarla es un fix mal hecho.
+**Regla meta (reforzada S16)**: si Claude duda si una skill aplica, la invoca igual.
+Costo invocar = 30 segundos. Costo de NO invocar = sesión entera perdida por
+fix mal hecho (ej: S15 S12 F1 sigma-gating que se aplicó sin systematic-debugging
+previo y tardamos 4 sesiones en entender la regresión).
 
 ## Glosario obligatorio (usar estos términos siempre en discusiones de resultados)
 
