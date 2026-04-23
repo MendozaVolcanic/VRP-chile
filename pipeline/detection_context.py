@@ -66,10 +66,24 @@ def contextual_dnti_hot_mask(
         raise ValueError(
             f"shape mismatch nti={nti.shape} bt={bt.shape} roi={roi_mask.shape}"
         )
-    nti_nbr_med = generic_filter(
-        nti, _nanmedian_ignore_self,
+    # S17 perf fix: generic_filter con funcion Python sobre granule
+    # completo (~6400x6400 VIIRS) tarda horas. Recortamos al bbox del
+    # ROI (+1 pixel de margen para el footprint 3x3) — el resultado
+    # fuera del ROI se descarta de todos modos, asi que el recorte es
+    # matematicamente no-op.
+    ys, xs = np.where(roi_mask)
+    if ys.size == 0:
+        return np.zeros_like(roi_mask, dtype=bool)
+    y0 = max(0, int(ys.min()) - 1)
+    y1 = min(nti.shape[0], int(ys.max()) + 2)
+    x0 = max(0, int(xs.min()) - 1)
+    x1 = min(nti.shape[1], int(xs.max()) + 2)
+    nbr_crop = generic_filter(
+        nti[y0:y1, x0:x1], _nanmedian_ignore_self,
         footprint=_FOOTPRINT_8N, mode="constant", cval=np.nan,
     )
+    nti_nbr_med = np.full_like(nti, np.nan)
+    nti_nbr_med[y0:y1, x0:x1] = nbr_crop
     dnti = nti - nti_nbr_med
     hot = (
         roi_mask

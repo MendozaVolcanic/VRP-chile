@@ -212,3 +212,142 @@ def test_lastarria_scenario_with_one_real_hotspot():
     others = mask.copy()
     others[3, 3] = False
     assert others.sum() == 0, f"Expected 0 false positives, got {others.sum()}"
+
+
+# ===================================================================
+# S17 bbox-crop performance optimization tests
+# Fenomeno: el ROI util (bbox 50x50 km) es ~133x133 pixels en VIIRS 375m,
+# pero scipy.ndimage.generic_filter con funcion Python se ejecuta sobre el
+# granule completo (~6400x6400 = 41M pixels). Fix: recortar nti/bt/roi al
+# bounding box del roi_mask antes del generic_filter. Resultado debe ser
+# bit-identical (fuera del ROI el output se descarta) y ~1000x mas rapido.
+# ===================================================================
+
+
+def _reference_slow_contextual_dnti(nti, bt, roi_mask, t_bg, c1, bt_sanity_k):
+    """Implementacion de referencia SIN bbox-crop (version lenta original
+    que corre generic_filter sobre el array completo). Usada solo en tests
+    para verificar bit-equivalence contra la version optimizada."""
+    from scipy.ndimage import generic_filter
+    footprint = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=bool)
+
+    def nanmed(x):
+        valid = x[~np.isnan(x)]
+        return float(np.median(valid)) if valid.size else np.nan
+
+    nbr = generic_filter(nti, nanmed, footprint=footprint,
+                         mode="constant", cval=np.nan)
+    dnti = nti - nbr
+    return (roi_mask & ~np.isnan(dnti) & ~np.isnan(bt)
+            & (dnti > c1) & (bt > t_bg + bt_sanity_k))
+
+
+def test_bbox_crop_equivalence_small_roi_in_large_array():
+    """Equivalencia bit-identical: ROI 50x50 en array 500x500 debe dar
+    el mismo output que la version slow. Escenario tipico VIIRS 375m
+    con bbox 50 km dentro de granule completo."""
+    rng = np.random.default_rng(2026)
+    nti = rng.normal(-0.92, 0.02, size=(500, 500)).astype(np.float64)
+    bt = rng.normal(285.0, 2.0, size=(500, 500)).astype(np.float64)
+    roi = np.zeros((500, 500), dtype=bool)
+    roi[200:250, 200:250] = True  # ROI central 50x50
+    # Meter un hotspot real en el ROI
+    nti[225, 225] = -0.88
+    bt[225, 225] = 305.0
+
+    mask_fast = contextual_dnti_hot_mask(
+        nti=nti, bt=bt, roi_mask=roi,
+        t_bg=285.0, c1=0.003, bt_sanity_k=3.0,
+    )
+    mask_slow = _reference_slow_contextual_dnti(
+        nti=nti, bt=bt, roi_mask=roi,
+        t_bg=285.0, c1=0.003, bt_sanity_k=3.0,
+    )
+    assert np.array_equal(mask_fast, mask_slow), \
+        f"fast vs slow differ at {np.argwhere(mask_fast != mask_slow)[:5]}"
+
+
+def test_bbox_crop_roi_at_corner():
+    """ROI tocando esquina (0,0) — el margen +1 del footprint 3x3 debe
+    clippearse a bordes sin crash. Salida debe coincidir con slow."""
+    rng = np.random.default_rng(7)
+    nti = rng.normal(-0.92, 0.02, size=(100, 100)).astype(np.float64)
+    bt = rng.normal(285.0, 2.0, size=(100, 100)).astype(np.float64)
+    roi = np.zeros((100, 100), dtype=bool)
+    roi[0:10, 0:10] = True  # ROI en esquina superior izquierda
+    nti[3, 3] = -0.85
+    bt[3, 3] = 310.0
+
+    mask_fast = contextual_dnti_hot_mask(
+        nti=nti, bt=bt, roi_mask=roi,
+        t_bg=285.0, c1=0.003, bt_sanity_k=3.0,
+    )
+    mask_slow = _reference_slow_contextual_dnti(
+        nti=nti, bt=bt, roi_mask=roi,
+        t_bg=285.0, c1=0.003, bt_sanity_k=3.0,
+    )
+    assert np.array_equal(mask_fast, mask_slow)
+
+
+def test_bbox_crop_empty_roi_returns_all_false():
+    """ROI todo False (ejemplo: volcan fuera del granule) — debe retornar
+    mask all-False sin crash, sin correr generic_filter."""
+    nti = np.full((50, 50), -0.95, dtype=np.float64)
+    bt = np.full((50, 50), 285.0)
+    roi = np.zeros((50, 50), dtype=bool)
+    mask = contextual_dnti_hot_mask(
+        nti=nti, bt=bt, roi_mask=roi,
+        t_bg=285.0, c1=0.003, bt_sanity_k=3.0,
+    )
+    assert mask.shape == (50, 50)
+    assert not mask.any()
+
+
+def test_bbox_crop_performance_large_array():
+    """Performance: array 1000x1000 con ROI chico 50x50 debe tardar <1s.
+    Version slow tarda ~10-15s (generic_filter Python sobre 1M pixels).
+    Este test FALLA con el codigo pre-fix S17."""
+    import time
+    rng = np.random.default_rng(99)
+    nti = rng.normal(-0.92, 0.02, size=(1000, 1000)).astype(np.float64)
+    bt = rng.normal(285.0, 2.0, size=(1000, 1000)).astype(np.float64)
+    roi = np.zeros((1000, 1000), dtype=bool)
+    roi[500:550, 500:550] = True
+
+    t0 = time.time()
+    mask = contextual_dnti_hot_mask(
+        nti=nti, bt=bt, roi_mask=roi,
+        t_bg=285.0, c1=0.003, bt_sanity_k=3.0,
+    )
+    elapsed = time.time() - t0
+    assert elapsed < 1.0, (
+        f"bbox-crop fix tardo {elapsed:.2f}s (esperado <1s); "
+        f"possible regression al comportamiento pre-S17"
+    )
+    # sanity: salida tiene la forma correcta
+    assert mask.shape == (1000, 1000)
+    # fuera del ROI: todo False
+    out_roi = mask.copy()
+    out_roi[500:550, 500:550] = False
+    assert not out_roi.any()
+
+
+def test_bbox_crop_roi_covers_full_array():
+    """ROI cubre todo el array — bbox crop debe ser no-op y dar mismo
+    resultado que slow. Importante: no regresion en el caso degenerado."""
+    rng = np.random.default_rng(11)
+    nti = rng.normal(-0.92, 0.02, size=(30, 30)).astype(np.float64)
+    bt = rng.normal(285.0, 2.0, size=(30, 30)).astype(np.float64)
+    roi = np.ones((30, 30), dtype=bool)
+    nti[15, 15] = -0.85
+    bt[15, 15] = 310.0
+
+    mask_fast = contextual_dnti_hot_mask(
+        nti=nti, bt=bt, roi_mask=roi,
+        t_bg=285.0, c1=0.003, bt_sanity_k=3.0,
+    )
+    mask_slow = _reference_slow_contextual_dnti(
+        nti=nti, bt=bt, roi_mask=roi,
+        t_bg=285.0, c1=0.003, bt_sanity_k=3.0,
+    )
+    assert np.array_equal(mask_fast, mask_slow)
