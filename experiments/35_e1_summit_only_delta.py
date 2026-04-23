@@ -61,16 +61,20 @@ def load_csv_refs(path, start, end):
 
 
 def load_profile_summit_records(profile_dir, vols, start, end):
-    """Carga records per-volcano FILTRADOS a summit-only."""
+    """Carga records per-volcano FILTRADOS a summit-only.
+
+    Devuelve dict {vol: {'recs': [...], 'n_excl_water_total': int}}
+    """
     out = {}
     for vol in vols:
         p = ROOT / "data" / profile_dir / f"{vol}.json"
         if not p.exists():
-            out[vol] = []
+            out[vol] = {"recs": [], "n_excl_water_total": 0}
             continue
         d = json.load(open(p, "r", encoding="utf-8"))
         inner = INNER_KM[vol]
         recs = []
+        n_excl_total = 0
         for r in d.get("records", []):
             dt_str = r.get("datetime_utc", "")
             if not dt_str:
@@ -81,7 +85,7 @@ def load_profile_summit_records(profile_dir, vols, start, end):
                 continue
             if not (start <= dt <= end):
                 continue
-            # Filter summit-only: final_hotspot dist OR distance_class="summit"
+            n_excl_total += int(r.get("n_excluded_water", 0) or 0)
             dist = r.get("final_hotspot_dist_km") or r.get("hotspot_dist_km") or 0
             dclass = r.get("distance_class")
             is_summit = (dclass == "summit") or (dist <= inner and dist > 0)
@@ -89,7 +93,7 @@ def load_profile_summit_records(profile_dir, vols, start, end):
                 continue
             v = r.get("vrp_mir_mw") or r.get("vrp_mw") or 0
             recs.append({"dt": dt, "sensor": r.get("sensor"), "vrp": v, "dist": dist})
-        out[vol] = recs
+        out[vol] = {"recs": recs, "n_excl_water_total": n_excl_total}
     return out
 
 
@@ -176,16 +180,18 @@ def main():
 
     print(f"\n{'Volcan':<14} {'N_CSV_summit':>12} | "
           f"{'TP_s15':>6} {'TP_e1':>6} | {'Rec_s15':>7} {'Rec_e1':>7} | "
-          f"{'RatMed_s15':>10} {'RatMed_e1':>10}")
-    print("-" * 100)
+          f"{'RatMed_s15':>10} {'RatMed_e1':>10} | {'PxFiltrados':>12}")
+    print("-" * 115)
 
     for vol in vols:
-        m_s15 = metrics(refs_summit.get(vol, []), s15.get(vol, []))
-        m_e1 = metrics(refs_summit.get(vol, []), e1.get(vol, []))
+        m_s15 = metrics(refs_summit.get(vol, []), s15.get(vol, {}).get("recs", []))
+        m_e1 = metrics(refs_summit.get(vol, []), e1.get(vol, {}).get("recs", []))
+        n_excl = e1.get(vol, {}).get("n_excl_water_total", 0)
         print(f"{vol:<14} {len(refs_summit.get(vol, [])):>12} | "
               f"{m_s15['tp']:>6} {m_e1['tp']:>6} | "
               f"{m_s15['recall']:>7.2f} {m_e1['recall']:>7.2f} | "
-              f"{m_s15['ratio_med']:>10.2f} {m_e1['ratio_med']:>10.2f}")
+              f"{m_s15['ratio_med']:>10.2f} {m_e1['ratio_med']:>10.2f} | "
+              f"{n_excl:>12}")
 
     print()
     print("INTERPRETACION summit-only:")
