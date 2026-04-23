@@ -312,6 +312,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     n_bt_path = 0
     n_nti_path = 0
     n_nti_rel_path = 0
+    # S16 fix: inicializar n_dnti_ctx_path aqui en vez de dentro del bloque
+    # condicional, para evitar UnboundLocalError cuando "I04" no esta en bands
+    # o len(bg_vals) < 10 (granules con poco data utilizable).
+    n_dnti_ctx_path = 0
     hotspot_lat = None
     hotspot_lon = None
     hotspot_dist_km = None
@@ -382,7 +386,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             # summit (dist<=inner) C1=0.003 sensible; scene C1=0.010 strict.
             # Necesario para Lastarria: Path D solo capturaba 55% pixels en
             # 15-25 km (Lazufre, termico real pero MIROVA descarta).
-            n_dnti_ctx_path = 0
+            # n_dnti_ctx_path ya inicializado a 0 antes del bloque (S16 fix).
             if (ENABLE_DNTI_CONTEXTUAL_PATH
                     and "I05" in bands
                     and not np.isnan(nti_bg)):
