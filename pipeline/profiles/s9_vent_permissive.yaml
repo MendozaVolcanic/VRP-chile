@@ -1,0 +1,76 @@
+# VRP-Chile — profile: s9_vent_permissive (S16 E1)
+#
+# Clon de mirova_equivalent con UN SOLO CAMBIO: n_sigma_vent=0.0.
+# Objetivo: testear H1 del plan S16 restore_s9_recall.
+#
+# H1: el commit S12 F1 (6eaed67) introdujo sigma-gating en vent-path
+# que eliminó 85% FPs pero también TPs débiles sub-pixel.
+#   S9 original: vent-path = bt > t_bg + 1.0 K (fijo).
+#   S12+ actual: vent-path = bt > t_bg + max(1.0, n_sigma*sigma_bg).
+#
+# Con n_sigma_vent=0.0:
+#   max(1.0, 0.0 * sigma_bg) = max(1.0, 0.0) = 1.0 K fijo.
+# Equivalente exacto al comportamiento S9.
+#
+# Todo lo demás (P3.1, P3.2, bbox, sigma-cap eruption, scope 11 volcanes,
+# mirova_center_*) se mantiene. Solo cambia el gate vent-path para aislar
+# la variable H1.
+#
+# Reproceso output a data/s9_vent_permissive/ (no contamina mirova_equivalent).
+# Criterio éxito E1: Tupungatito recall >= 0.85, Chaiten recall >= 0.90
+# (valores objetivo del plan S16).
+
+profile: s9_vent_permissive
+description: >
+  S16 E1 test profile. Clon mirova_equivalent con n_sigma_vent=0.0 para
+  restaurar comportamiento vent-path S9 (threshold fijo 1K sin sigma
+  gating). Aislado para testear H1 del plan restore_s9_recall.
+
+thresholds:
+  anomaly_threshold_k: 5.0
+  tir_threshold_k: 0.5
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  vent_threshold_k: 1.0
+  # S16 E1 KEY CHANGE: n_sigma_vent de 2.0 -> 0.0.
+  # Esto hace que max(1.0, 0.0*sigma_bg) = 1.0 K fijo (S9 comportamiento).
+  n_sigma_vent: 0.0
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  cloud_mask_bt_k: 260.0
+  max_sigma_component_k: 7.0
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
+  min_vent_pixels: 1
+  # Sin efecto cuando n_sigma_vent=0 (sigma_contrib = 0).
+  max_vent_sigma_contrib_k: 3.0
+  nti_rel_n_sigma: 3.0
+  nti_rel_min_floor: 0.005
+  dnti_contextual_c1: 0.003
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
+  modis_vent_threshold_k: 1.0
+  modis_vent_vrp_floor_mw: 0.0
+
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+paths:
+  enable_eruption_path: true
+  enable_vent_path: true
+  enable_vent_path_modis: true
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
+  enable_nti_relative_path: false
+  enable_dnti_contextual_path: true
+  enable_dnti_dual_roi: true
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: s9_vent_permissive

@@ -25,7 +25,7 @@ from pathlib import Path
 
 PROFILES_DIR = Path(__file__).parent / "profiles"
 DEFAULT_PROFILE = "mirova_equivalent"
-VALID_PROFILES = {"mirova_equivalent", "experimental", "mirova_equivalent_backfill_nov2025"}
+VALID_PROFILES = {"mirova_equivalent", "experimental", "mirova_equivalent_backfill_nov2025", "s9_vent_permissive"}
 
 
 def _load_profile() -> dict:
