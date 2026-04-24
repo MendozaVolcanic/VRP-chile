@@ -82,6 +82,22 @@ M13_LAMBDA = 4.050   # µm — primary MIR channel
 M15_LAMBDA = 10.763  # µm — TIR channel for NTI computation
 
 
+def _sensor_label_from_filename(filename: str) -> str:
+    """Map VIIRS M-band 750m L1B filename → sensor label.
+
+    VNP02MOD  → VIIRS_SNPP_750
+    VJ102MOD  → VIIRS_NOAA20_750   (JPSS-1)
+    VJ202MOD  → VIIRS_NOAA21_750   (JPSS-2, S18)
+
+    Ver pipeline/process_viirs.py para el equivalente I-band.
+    """
+    if filename.startswith("VNP"):
+        return "VIIRS_SNPP_750"
+    if filename.startswith("VJ2"):
+        return "VIIRS_NOAA21_750"
+    return "VIIRS_NOAA20_750"
+
+
 def read_viirs_mod_l1b(l1b_path: Path) -> dict:
     """
     Read VIIRS VNP02MOD HDF5/NetCDF4 file.
@@ -450,7 +466,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         vent_hotspot_dist_km = float(haversine_km(vent_lat, vent_lon, vent_hotspot_lat, vent_hotspot_lon))
 
     name   = l1b_path.name
-    sensor = "VIIRS_SNPP_750" if name.startswith("VNP") else "VIIRS_NOAA20_750"
+    sensor = _sensor_label_from_filename(name)
 
     # --- Schema unification (S14 D6) ---
     if hotspot_lat is not None and hotspot_lon is not None:

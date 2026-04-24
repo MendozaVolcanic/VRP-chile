@@ -67,6 +67,18 @@ PRODUCTS = {
                                "nrt": {"short_name": "VJ102MOD_NRT", "versions": ["2.1", "2"]}},
     "VIIRS_NOAA20_MOD_GEO":   {"short_name": "VJ103MOD",  "versions": ["2.1", "2", "1"],
                                "nrt": {"short_name": "VJ103MOD_NRT", "versions": ["2.1", "2"]}},
+    # NOAA-21 (JPSS-2, lanzado nov-2022, operacional ene-2023). MIROVA lo procesa
+    # desde 2023; nuestro fetch lo ignoró hasta S18 — cuello de botella recall
+    # confirmado H10 (docs/HYPOTHESIS_LOG.md). Solo v2.1 publicada en CMR.
+    # Respaldo: JPSS VIIRS SDR Radiometric ATBD Rev C.
+    "VIIRS_NOAA21_L1B":       {"short_name": "VJ202IMG",  "versions": ["2.1"],
+                               "nrt": {"short_name": "VJ202IMG_NRT", "versions": ["2.1"]}},
+    "VIIRS_NOAA21_GEO":       {"short_name": "VJ203IMG",  "versions": ["2.1"],
+                               "nrt": {"short_name": "VJ203IMG_NRT", "versions": ["2.1"]}},
+    "VIIRS_NOAA21_MOD_L1B":   {"short_name": "VJ202MOD",  "versions": ["2.1"],
+                               "nrt": {"short_name": "VJ202MOD_NRT", "versions": ["2.1"]}},
+    "VIIRS_NOAA21_MOD_GEO":   {"short_name": "VJ203MOD",  "versions": ["2.1"],
+                               "nrt": {"short_name": "VJ203MOD_NRT", "versions": ["2.1"]}},
 }
 
 
@@ -206,15 +218,17 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             ("MODIS_AQUA",  "MODIS_AQUA_L1B",  "MODIS_AQUA_GEO"),
         ]
     if "VIIRS" in sensors:
-        # 375m I-band
+        # 375m I-band — 3 plataformas: SNPP (2011), NOAA-20 (2017), NOAA-21 (2022)
         all_platforms += [
-            ("VIIRS_SNPP",   "VIIRS_SNPP_L1B",   "VIIRS_SNPP_GEO"),
-            ("VIIRS_NOAA20", "VIIRS_NOAA20_L1B",  "VIIRS_NOAA20_GEO"),
+            ("VIIRS_SNPP",    "VIIRS_SNPP_L1B",    "VIIRS_SNPP_GEO"),
+            ("VIIRS_NOAA20",  "VIIRS_NOAA20_L1B",  "VIIRS_NOAA20_GEO"),
+            ("VIIRS_NOAA21",  "VIIRS_NOAA21_L1B",  "VIIRS_NOAA21_GEO"),
         ]
         # 750m M-band (MIROVA's "VIIRS" or "VIIRS750")
         all_platforms += [
-            ("VIIRS_SNPP_750",   "VIIRS_SNPP_MOD_L1B",   "VIIRS_SNPP_MOD_GEO"),
-            ("VIIRS_NOAA20_750", "VIIRS_NOAA20_MOD_L1B",  "VIIRS_NOAA20_MOD_GEO"),
+            ("VIIRS_SNPP_750",    "VIIRS_SNPP_MOD_L1B",    "VIIRS_SNPP_MOD_GEO"),
+            ("VIIRS_NOAA20_750",  "VIIRS_NOAA20_MOD_L1B",  "VIIRS_NOAA20_MOD_GEO"),
+            ("VIIRS_NOAA21_750",  "VIIRS_NOAA21_MOD_L1B",  "VIIRS_NOAA21_MOD_GEO"),
         ]
 
     if skip_noaa20:

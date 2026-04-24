@@ -50,7 +50,8 @@ _early = argparse.ArgumentParser(add_help=False)
 _early.add_argument("--profile", default=None,
                     choices=["mirova_equivalent", "experimental",
                              "mirova_equivalent_backfill_nov2025",
-                             "s9_vent_permissive"])
+                             "s9_vent_permissive",
+                             "nsigma_mir_5", "nsigma_mir_12"])
 _early_args, _ = _early.parse_known_args()
 if _early_args.profile:
     os.environ["VRP_PROFILE"] = _early_args.profile
@@ -160,9 +161,9 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
             # the active YAML profile without changing calling code.
             if "MODIS" in platform and not vrp_profile.SENSOR_MODIS:
                 continue
-            if platform in ("VIIRS_SNPP", "VIIRS_NOAA20") and not vrp_profile.SENSOR_VIIRS_375:
+            if platform in ("VIIRS_SNPP", "VIIRS_NOAA20", "VIIRS_NOAA21") and not vrp_profile.SENSOR_VIIRS_375:
                 continue
-            if platform in ("VIIRS_SNPP_750", "VIIRS_NOAA20_750") and not vrp_profile.SENSOR_VIIRS_750:
+            if platform in ("VIIRS_SNPP_750", "VIIRS_NOAA20_750", "VIIRS_NOAA21_750") and not vrp_profile.SENSOR_VIIRS_750:
                 continue
 
             # Separate L1B and geolocation files
@@ -202,10 +203,10 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                     except Exception as e:
                         print(f"  ERROR processing {l1b.name}: {e}")
 
-            elif platform in ("VIIRS_SNPP", "VIIRS_NOAA20"):
-                # VIIRS 375m I-band (IMG product)
-                l1b_files = [p for p in paths if "VNP02IMG" in p.name or "VJ102IMG" in p.name]
-                geo_files = [p for p in paths if "VNP03IMG" in p.name or "VJ103IMG" in p.name]
+            elif platform in ("VIIRS_SNPP", "VIIRS_NOAA20", "VIIRS_NOAA21"):
+                # VIIRS 375m I-band (IMG product). 3 plataformas: SNPP / NOAA-20 / NOAA-21 (S18)
+                l1b_files = [p for p in paths if "VNP02IMG" in p.name or "VJ102IMG" in p.name or "VJ202IMG" in p.name]
+                geo_files = [p for p in paths if "VNP03IMG" in p.name or "VJ103IMG" in p.name or "VJ203IMG" in p.name]
                 geo_by_time = {_time_key(g.name): g for g in geo_files}
 
                 for l1b in l1b_files:
@@ -242,10 +243,10 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                     except Exception as e:
                         print(f"  ERROR processing {l1b.name}: {e}")
 
-            elif platform in ("VIIRS_SNPP_750", "VIIRS_NOAA20_750"):
-                # VIIRS 750m M-band (MOD product) — MIROVA's "VIIRS" channel
-                l1b_files = [p for p in paths if "VNP02MOD" in p.name or "VJ102MOD" in p.name]
-                geo_files = [p for p in paths if "VNP03MOD" in p.name or "VJ103MOD" in p.name]
+            elif platform in ("VIIRS_SNPP_750", "VIIRS_NOAA20_750", "VIIRS_NOAA21_750"):
+                # VIIRS 750m M-band (MOD product) — MIROVA's "VIIRS" channel. +NOAA-21 (S18)
+                l1b_files = [p for p in paths if "VNP02MOD" in p.name or "VJ102MOD" in p.name or "VJ202MOD" in p.name]
+                geo_files = [p for p in paths if "VNP03MOD" in p.name or "VJ103MOD" in p.name or "VJ203MOD" in p.name]
                 geo_by_time = {_time_key(g.name): g for g in geo_files}
 
                 for l1b in l1b_files:

@@ -25,7 +25,12 @@ from pathlib import Path
 
 PROFILES_DIR = Path(__file__).parent / "profiles"
 DEFAULT_PROFILE = "mirova_equivalent"
-VALID_PROFILES = {"mirova_equivalent", "experimental", "mirova_equivalent_backfill_nov2025", "s9_vent_permissive"}
+VALID_PROFILES = {
+    "mirova_equivalent", "experimental",
+    "mirova_equivalent_backfill_nov2025", "s9_vent_permissive",
+    # S18 test A/B drift D2 (N·σ multiplier)
+    "nsigma_mir_5", "nsigma_mir_12",
+}
 
 
 def _load_profile() -> dict:

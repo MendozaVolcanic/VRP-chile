@@ -90,6 +90,23 @@ from .detection_context import (
 )
 
 
+def _sensor_label_from_filename(filename: str) -> str:
+    """Map VIIRS I-band L1B filename → sensor label used in records/CSV.
+
+    VNP02IMG / VNP03IMG  → VIIRS_SNPP     (Suomi-NPP, 2011)
+    VJ102IMG / VJ103IMG  → VIIRS_NOAA20   (JPSS-1, 2017)
+    VJ202IMG / VJ203IMG  → VIIRS_NOAA21   (JPSS-2, 2022, S18)
+
+    El sufijo _NRT (LANCE) no altera el sensor. Antes de S18 todo VJ*IMG se
+    colapsaba a VIIRS_NOAA20, confundiendo NOAA-21 con NOAA-20 en el CSV.
+    """
+    if filename.startswith("VNP"):
+        return "VIIRS_SNPP"
+    if filename.startswith("VJ2"):
+        return "VIIRS_NOAA21"
+    return "VIIRS_NOAA20"
+
+
 def bt_to_spectral_radiance(bt: np.ndarray, wavelength_um: float) -> np.ndarray:
     """Convert brightness temperature (K) to spectral radiance (W/m²/sr/µm) via Planck."""
     with np.errstate(invalid="ignore", divide="ignore", over="ignore"):
@@ -552,7 +569,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         vent_hotspot_dist_km = vent_hotspot_dist_km_candidate
 
     name = l1b_path.name
-    sensor = "VIIRS_SNPP" if name.startswith("VNP") else "VIIRS_NOAA20"
+    sensor = _sensor_label_from_filename(name)
 
     # --- Schema unification (S14 D6) ---
     # Unified final_hotspot_* fields with eruption→vent fallback so downstream

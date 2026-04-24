@@ -35,8 +35,8 @@ CSV_PATH = ROOT / "21_04_2026 registro_vrp_consolidado.csv"
 INNER_KM = {"Tupungatito": 7.0, "Chaiten": 5.0, "Lascar": 5.0}
 VOLMAP = {"Lascar": "Lascar", "Chaiten": "Chaiten", "Tupungatito": "Tupungatito"}
 SMAP = {"MODIS": {"MODIS_TERRA", "MODIS_AQUA"},
-        "VIIRS": {"VIIRS_SNPP_750", "VIIRS_NOAA20_750"},
-        "VIIRS375": {"VIIRS_SNPP", "VIIRS_NOAA20"}}
+        "VIIRS": {"VIIRS_SNPP_750", "VIIRS_NOAA20_750", "VIIRS_NOAA21_750"},
+        "VIIRS375": {"VIIRS_SNPP", "VIIRS_NOAA20", "VIIRS_NOAA21"}}
 
 
 def load_csv_refs(path, start, end):
