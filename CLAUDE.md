@@ -25,8 +25,12 @@ viven en el vault Obsidian: `C:\Users\nmend\OneDrive\Escritorio\claude\Vault\`.
   - VIIRS I-band 375m (I4): `k = 18.0 × A_pix(140625)` = **2,531,250** (`WOOSTER_COEFF=18.0`)
   - MIROVA usa **A_pix nadir fijo** (sin corrección zenithal) para los 3 sensores.
   - NO usar Di Bella 2024 k=2.48×10⁷ para VIIRS 375m — no reproduce OSF (empírico).
-- **VRP TIR (I05)**: Stefan-Boltzmann (Aveni 2025 GRL, `σ = 5.67×10⁻⁸`).
-- **NTI**: umbral 3σ sobre background, mínimo 0.005.
+- **VRP TIR (I05)**: Stefan-Boltzmann (`σ = 5.67×10⁻⁸`) — citación original a Aveni 2025 es INCORRECTA
+  (Aveni 2025 propone Eq.9 con k_TIR=60.17 μm·sr, NO Stefan-Boltzmann puro; Coppola 2024 cap Springer
+  sí usa Stefan-Boltzmann). **Drift D3 ambigüedad doctrinal** — ver `docs/DRIFTS_S17.md`.
+- **NTI**: umbral 3σ sobre background, mínimo 0.005. **DRIFT D2 S17**: ningún paper autoritativo
+  respalda 3σ uniforme. Coppola 2016a Tabla 1 dice 5σ summit / 10σ scene / 15σ diurno para MODIS.
+  Di Bella 2024 §3.3 dice VIIRS 12σ noche / 8σ día. Test A/B pendiente S18 — ver `docs/DRIFTS_S17.md`.
 - **MIR solo nocturno** (contaminación solar diurna).
 - Bandas: MODIS 21/22 (3.929/3.959 μm) + 31 (11 μm TIR),
   VIIRS I04 (3.74 μm) / I05 (11.45 μm), VIIRS M13 (4.05 μm) / M15 (10.76 μm).
@@ -231,10 +235,23 @@ Para minimizar compactaciones automáticas ("session continued..."):
 
 ## Estado
 
-**S15 en curso (2026-04-22) — 4 fixes arquitecturales aplicados, validación en
-reproceso background. NO pusheado a main, NRT GitHub Actions sigue con S12.**
+**S17 cerrada (2026-04-23) — investigación sistemática + arquitectura de memoria instalada.**
 
-Leer `tasks/handoff_mananero_2026_04_22.md` al arrancar próxima sesión.
+**Hallazgos críticos S17** (ver `docs/DRIFTS_S17.md`, `docs/PAPERS_AUDIT.md`, `docs/HYPOTHESIS_LOG.md`):
+1. **H10 CONFIRMADA**: falta NOAA-21 (VJ202IMG/VJ202MOD) en `fetch.py`. MIROVA sí lo procesa.
+   El cuello de botella real de recall Tupungatito/Chaitén no era sigma-gating (H1 refutada) sino
+   un satélite entero faltante. Implementación S18.
+2. **Fix performance Path D** aplicado (commit `ad030f5`): `generic_filter` crop al bbox ROI,
+   factor ~2400× más rápido.
+3. **3 drifts detectados** entre código vs papers autoritativos (ver DRIFTS_S17.md).
+4. **Arquitectura de memoria**: `docs/` con 5 documentos vivos (drifts, papers audit, data sources,
+   hypothesis log, session index). Mantener al cierre de cada sesión.
+
+**Próxima sesión S18**: fix D1 (median→mean), agregar NOAA-21, test A/B D2 (N·σ), reproceso 3
+volcanes Tier A, si valida push main. Leer `docs/SESSION_INDEX.md` para plan.
+
+**Handoff S16→S17 original**: `tasks/handoff_s17_2026_04_23.md` (parcialmente superado por S17 —
+H1 de ese handoff fue refutada, H10 es la real).
 
 ### Fixes S15 aplicados (commits locales, pendientes push):
 
