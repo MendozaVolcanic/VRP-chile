@@ -257,7 +257,7 @@
 <header>
   <div>
     <div class="logo">VRP <span>Chile</span></div>
-    <div class="header-sub">Monitoreo Volcánico · MODIS + VIIRS · NASA Earthdata</div>
+    <div class="header-sub">Monitoreo Volcánico · MODIS + VIIRS · NASA Earthdata · <span style="color:#ffc107;">11 volcanes Tier A MIROVA</span></div>
   </div>
   <div class="header-right">
     <div class="status-label">
@@ -378,6 +378,11 @@
     <button class="scale-btn active" id="btn-linear">Lineal</button>
     <button class="scale-btn" id="btn-log">Logarítmica</button>
   </div>
+  <div style="display:flex;gap:6px;align-items:center;" title="Cuando está apagado, el dashboard solo considera anomalías dentro del radio del cráter (summit). Las detecciones lejanas siguen visibles en el mapa y en la tabla pero atenuadas.">
+    <label>Distancia </label>
+    <button class="scale-btn active" id="btn-summit-only">🎯 Solo cráter</button>
+    <button class="scale-btn" id="btn-include-far">📍 Incluir lejanas</button>
+  </div>
   <div class="sensor-legend" id="sensor-legend"></div>
 </div>
 
@@ -438,50 +443,55 @@ const BASE_PATH = (() => {
   return '';
 })();
 
-const VOLCANOES = [
+// S18 2026-04-24: el dashboard operacional muestra SOLO los 11 volcanes Tier A
+// que procesa el perfil `mirova_equivalent` (flag `mirova_monitored: true` en
+// volcanoes.yaml; aquí `hasMirova: true`). Los 34 restantes se procesan en el
+// perfil `experimental` y tienen su propio flujo — mezclarlos contamina la
+// lectura operacional (ver pedido Nicolás S18).
+const VOLCANOES_ALL = [
   // === Zona Norte CVZ (N→S) ===
   { name: "Taapaca",              display: "Taapaca",                region: "Arica y Parinacota", lat: -18.100, lon: -69.500, radius_km: 10 },
   { name: "Parinacota",           display: "Parinacota",             region: "Arica y Parinacota", lat: -18.166, lon: -69.142, radius_km: 10 },
   { name: "Guallatiri",           display: "Guallatiri",             region: "Arica y Parinacota", lat: -18.420, lon: -69.090, radius_km: 10 },
-  { name: "Isluga",               display: "Isluga",                 region: "Tarapacá",      lat: -19.150, lon: -68.830, radius_km: 10, hasMirova: true,  vent_lat: -19.150, vent_lon: -68.830 },
+  { name: "Isluga",               display: "Isluga",                 region: "Tarapacá",      lat: -19.150, lon: -68.830, radius_km: 25, inner_radius_km: 5, vent_radius_km: 2, hasMirova: true,  vent_lat: -19.150, vent_lon: -68.830 },
   { name: "Irruputuncu",          display: "Irruputuncu",            region: "Tarapacá",      lat: -20.730, lon: -68.550, radius_km: 10 },
   { name: "OlcaParuma",           display: "Olca-Paruma",            region: "Tarapacá",      lat: -20.942, lon: -68.503, radius_km: 10 },
   { name: "Ollague",              display: "Ollagüe",                region: "Antofagasta",   lat: -21.300, lon: -68.180, radius_km: 10 },
   { name: "SanPedro",             display: "San Pedro",              region: "Antofagasta",   lat: -21.880, lon: -68.400, radius_km: 10 },
   { name: "Putana",               display: "Putana",                 region: "Antofagasta",   lat: -22.557, lon: -67.853, radius_km: 10 },
-  { name: "Lascar",               display: "Láscar",                 region: "Antofagasta",   lat: -23.369, lon: -67.732, radius_km: 10, hasMirova: true,  vent_lat: -23.362930, vent_lon: -67.731416 },
-  { name: "Lastarria",            display: "Lastarria",              region: "Atacama",        lat: -25.168, lon: -68.507, radius_km: 10, hasMirova: true,  vent_lat: -25.168, vent_lon: -68.507 },
+  { name: "Lascar",               display: "Láscar",                 region: "Antofagasta",   lat: -23.369, lon: -67.732, radius_km: 25, inner_radius_km: 5, vent_radius_km: 3, hasMirova: true,  vent_lat: -23.362930, vent_lon: -67.731416 },
+  { name: "Lastarria",            display: "Lastarria",              region: "Atacama",        lat: -25.168, lon: -68.507, radius_km: 25, inner_radius_km: 3, vent_radius_km: 3, hasMirova: true,  vent_lat: -25.168, vent_lon: -68.507 },
   // === Zona Central SVZ ===
-  { name: "Tupungatito",          display: "Tupungatito",            region: "Valparaíso",    lat: -33.400, lon: -69.800, radius_km: 10, hasMirova: true,  vent_lat: -33.389, vent_lon: -69.8264 },
+  { name: "Tupungatito",          display: "Tupungatito",            region: "Valparaíso",    lat: -33.400, lon: -69.800, radius_km: 25, inner_radius_km: 7, vent_radius_km: 5, hasMirova: true,  vent_lat: -33.389044, vent_lon: -69.826374 },
   { name: "SanJose",              display: "San José",               region: "Metropolitana",  lat: -33.789, lon: -69.897, radius_km: 10 },
   { name: "Tinguiririca",         display: "Tinguiririca",           region: "O'Higgins",     lat: -34.814, lon: -70.352, radius_km: 10 },
-  { name: "PlanchonPeteroa",      display: "Planchón-Peteroa",       region: "Maule",         lat: -35.240, lon: -70.568, radius_km: 10, hasMirova: true,  vent_lat: -35.2411, vent_lon: -70.5733 },
+  { name: "PlanchonPeteroa",      display: "Planchón-Peteroa",       region: "Maule",         lat: -35.240, lon: -70.568, radius_km: 25, inner_radius_km: 3, vent_radius_km: 3, hasMirova: true,  vent_lat: -35.241099, vent_lon: -70.573345 },
   { name: "DescabezadoGrande",    display: "Descabezado Grande",     region: "Maule",         lat: -35.580, lon: -70.750, radius_km: 10 },
   { name: "CerroAzulQuizapu",     display: "Cerro Azul-Quizapu",     region: "Maule",         lat: -35.653, lon: -70.761, radius_km: 10 },
   { name: "LagunaDelMaule",       display: "Laguna del Maule",       region: "Maule",         lat: -36.020, lon: -70.580, radius_km: 15 },
   { name: "NevadoDeLongavi",      display: "Nevado de Longaví",      region: "Maule",         lat: -36.193, lon: -71.161, radius_km: 10 },
-  { name: "NevadosDeChillan",     display: "Nevados de Chillán",     region: "Ñuble",         lat: -36.863, lon: -71.377, radius_km: 10, hasMirova: true,  vent_lat: -36.863, vent_lon: -71.377 },
+  { name: "NevadosDeChillan",     display: "Nevados de Chillán",     region: "Ñuble",         lat: -36.863, lon: -71.377, radius_km: 25, inner_radius_km: 5, vent_radius_km: 2, hasMirova: true,  vent_lat: -36.863, vent_lon: -71.377 },
   { name: "Antuco",               display: "Antuco",                 region: "Biobío",        lat: -37.406, lon: -71.349, radius_km: 10 },
-  { name: "Copahue",              display: "Copahue",                region: "Biobío",        lat: -37.856, lon: -71.183, radius_km: 10, hasMirova: true,  vent_lat: -37.856, vent_lon: -71.183 },
+  { name: "Copahue",              display: "Copahue",                region: "Biobío",        lat: -37.856, lon: -71.183, radius_km: 25, inner_radius_km: 4, vent_radius_km: 2, hasMirova: true,  vent_lat: -37.856, vent_lon: -71.183 },
   { name: "Callaqui",             display: "Callaqui",               region: "Biobío",        lat: -37.920, lon: -71.450, radius_km: 10 },
   // === Zona Sur SVZ ===
   { name: "Lonquimay",            display: "Lonquimay",              region: "Araucanía",     lat: -38.380, lon: -71.580, radius_km: 10 },
   { name: "Tolhuaca",             display: "Tolhuaca",               region: "Araucanía",     lat: -38.310, lon: -71.645, radius_km: 10 },
-  { name: "Llaima",               display: "Llaima",                 region: "Araucanía",     lat: -38.692, lon: -71.729, radius_km: 10, hasMirova: true,  vent_lat: -38.692, vent_lon: -71.729 },
+  { name: "Llaima",               display: "Llaima",                 region: "Araucanía",     lat: -38.692, lon: -71.729, radius_km: 25, inner_radius_km: 5, vent_radius_km: 2, hasMirova: true,  vent_lat: -38.692, vent_lon: -71.729 },
   { name: "Sollipulli",           display: "Sollipulli",             region: "Araucanía",     lat: -38.970, lon: -71.520, radius_km: 10 },
-  { name: "Villarrica",           display: "Villarrica",             region: "Araucanía",     lat: -39.420, lon: -71.930, radius_km: 10, hasMirova: true,  vent_lat: -39.420227, vent_lon: -71.939876 },
+  { name: "Villarrica",           display: "Villarrica",             region: "Araucanía",     lat: -39.420, lon: -71.930, radius_km: 25, inner_radius_km: 5, vent_radius_km: 2, hasMirova: true,  vent_lat: -39.420227, vent_lon: -71.939876 },
   { name: "Quetrupillan",         display: "Quetrupillán",           region: "Araucanía",     lat: -39.496, lon: -71.722, radius_km: 10 },
   { name: "Lanin",                display: "Lanín",                  region: "Araucanía",     lat: -39.633, lon: -71.503, radius_km: 10 },
   { name: "MochoChoshuenco",      display: "Mocho-Choshuenco",       region: "Los Ríos",      lat: -39.927, lon: -72.027, radius_km: 10 },
   { name: "CarranLosVenados",     display: "Carrán-Los Venados",     region: "Los Ríos",      lat: -40.350, lon: -72.070, radius_km: 10 },
-  { name: "PuyehueCordonCaulle",  display: "Puyehue–Cordón Caulle",  region: "Los Ríos",      lat: -40.590, lon: -72.117, radius_km: 15, hasMirova: true,  vent_lat: -40.525499, vent_lon: -72.146137 },
+  { name: "PuyehueCordonCaulle",  display: "Puyehue–Cordón Caulle",  region: "Los Ríos",      lat: -40.590, lon: -72.117, radius_km: 25, inner_radius_km: 20, vent_radius_km: 3, hasMirova: true,  vent_lat: -40.525499, vent_lon: -72.146137 },
   { name: "AntillancaCasablanca", display: "Antillanca-Casablanca",  region: "Los Lagos",     lat: -40.770, lon: -72.150, radius_km: 10 },
   { name: "Osorno",               display: "Osorno",                 region: "Los Lagos",     lat: -41.100, lon: -72.493, radius_km: 10 },
   { name: "Calbuco",              display: "Calbuco",                region: "Los Lagos",     lat: -41.330, lon: -72.614, radius_km: 10 },
   { name: "YateHornopiren",       display: "Yate-Hornopirén",        region: "Los Lagos",     lat: -41.760, lon: -72.390, radius_km: 10 },
   { name: "Huequi",               display: "Huequi",                 region: "Los Lagos",     lat: -42.377, lon: -72.578, radius_km: 10 },
   { name: "Michinmahuida",        display: "Michinmahuida",          region: "Los Lagos",     lat: -42.790, lon: -72.440, radius_km: 10 },
-  { name: "Chaiten",              display: "Chaitén",                region: "Los Lagos",     lat: -42.833, lon: -72.646, radius_km: 10, hasMirova: true,  vent_lat: -42.8344815, vent_lon: -72.6528875 },
+  { name: "Chaiten",              display: "Chaitén",                region: "Los Lagos",     lat: -42.833, lon: -72.646, radius_km: 25, inner_radius_km: 5, vent_radius_km: 3, hasMirova: true,  vent_lat: -42.8344815, vent_lon: -72.6528875 },
   // === Zona Austral ===
   { name: "CorcovadoYanteles",    display: "Corcovado-Yanteles",     region: "Los Lagos",     lat: -43.183, lon: -72.800, radius_km: 10 },
   { name: "Melimoyu",             display: "Melimoyu",               region: "Aysén",         lat: -44.080, lon: -72.880, radius_km: 10 },
@@ -489,6 +499,12 @@ const VOLCANOES = [
   { name: "MacaCay",              display: "Macá-Cay",               region: "Aysén",         lat: -45.100, lon: -73.200, radius_km: 10 },
   { name: "Hudson",               display: "Hudson",                 region: "Aysén",         lat: -45.900, lon: -72.970, radius_km: 15 },
 ];
+
+// Dashboard operacional: mostramos las 45 tarjetas para conservar el panorama
+// geográfico completo, pero solo fetcheamos data de los 11 Tier A. Los otros
+// 34 quedan como tarjetas "sin datos" — no leen los JSONs archivados ni los
+// que el cron NRT siga generando en data/mirova_equivalent/ hasta el merge S18.
+const VOLCANOES = VOLCANOES_ALL;
 
 const SENSORS = [
   { key: "MODIS",    label: "MODIS (1km)",     color: "#ff8c00" },
@@ -517,6 +533,11 @@ const sensorVisible = { MODIS: true, VIIRS375: true, VIIRS750: true, MIROVA: tru
 let currentVolcano = VOLCANOES[0];
 let currentDays = 7;  // S12: default 7 días (antes 30) — operador ve lo reciente
 let logScale = false;
+// S18: por defecto el dashboard solo cuenta detecciones dentro del radio del
+// cráter (summit). Las lejanas (far) siguen visibles en los conteos 🎯/📍, en
+// el mapa y en la tabla (atenuadas), pero no inflan el valor "48h max" ni el
+// nivel de alerta. El usuario puede prender "Incluir lejanas" desde el header.
+let includeFarDistance = false;
 let charts = {};
 let allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
 
@@ -529,9 +550,15 @@ async function fetchJSON(url) {
 }
 
 async function loadVolcano(v) {
+  // Solo los 11 Tier A (hasMirova=true) tienen data operacional. Los 34 restantes
+  // quedan como tarjetas "sin datos" — ni data propia ni refs MIROVA.
+  if (!v.hasMirova) {
+    allData[v.name] = { records: [], mirovaRecords: [], updated: null };
+    return;
+  }
   const [data, mirova] = await Promise.all([
     fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json"),
-    v.hasMirova ? fetchJSON(BASE_PATH + "data/mirova/" + v.name + ".json") : Promise.resolve(null),
+    fetchJSON(BASE_PATH + "data/mirova/" + v.name + ".json"),
   ]);
   allData[v.name] = {
     records:       data?.records   || [],
@@ -567,23 +594,37 @@ function toMirovaDaily(records) {
   return [...m.entries()].sort().map(([x, y]) => ({ x, y }));
 }
 
-function latestVRP(records) {
-  // Returns the max VRP from the last 48h across all sensors
+// S18: clasifica una detección como "cráter" (summit). Criterios, en orden:
+//   1. distance_class === "summit" (asignado por los procesadores S14+).
+//   2. distance_class === "far" → no es summit.
+//   3. Record legacy sin distance_class pero con vrp_vent_mw > 0: el
+//      vent-path solo dispara dentro del radio del vent → trátalo como summit.
+//   4. Otros casos sin metadato claro → no es summit (evita contar ruido).
+function isSummitDetection(r) {
+  if (r.distance_class === "summit") return true;
+  if (r.distance_class === "far") return false;
+  return (r.vrp_vent_mw ?? 0) > 0;
+}
+
+function latestVRP(records, includeFar = false) {
+  // Max VRP de las últimas 48h. Por defecto solo detecciones del cráter.
   const cutoff = Date.now() - 48 * 3600000;
   let max = 0;
   for (const r of records) {
     if (new Date(r.datetime_utc).getTime() < cutoff) continue;
+    if (!includeFar && !isSummitDetection(r)) continue;
     const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
     if (v > max) max = v;
   }
   return max;
 }
 
-function latestSensors(records) {
+function latestSensors(records, includeFar = false) {
   const cutoff = Date.now() - 48 * 3600000;
   const seen = new Set();
   for (const r of records) {
     if (new Date(r.datetime_utc).getTime() < cutoff) continue;
+    if (!includeFar && !isSummitDetection(r)) continue;
     const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
     if (v > 0) seen.add(sensorGroup(r.sensor));
   }
@@ -606,6 +647,28 @@ function lastEventTime(records) {
   return latest;
 }
 
+// Conteo de detecciones dentro vs fuera del cráter en la ventana reciente.
+// Usa el campo distance_class asignado por los procesadores (S14): "summit"
+// si la detección cae dentro del inner_radius del volcán (3-7 km oficial
+// MIROVA), "far" si queda entre el inner y el radio total (~25 km).
+// Solo cuenta detecciones reales (vrp > 0) para no inflar con records-0.
+function distanceCounts(records, days = 7) {
+  const cutoff = Date.now() - days * 86400000;
+  let summit = 0, far = 0;
+  for (const r of records) {
+    if (new Date(r.datetime_utc).getTime() < cutoff) continue;
+    const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+    if (v <= 0) continue;
+    // S18: usar el mismo criterio summit/far que el resto del dashboard
+    // (isSummitDetection). Sin eso, records legacy pre-S14 con vrp_vent>0
+    // pero sin distance_class quedaban sin contar — Nicolás notó que en
+    // Tupungatito faltaban las lecturas históricas de la laguna crateriana.
+    if (isSummitDetection(r)) summit++;
+    else far++;
+  }
+  return { summit, far };
+}
+
 // ── DOM helpers ──────────────────────────────────────────────────────────────
 function el(tag, cls) {
   const e = document.createElement(tag);
@@ -620,9 +683,9 @@ function buildCards() {
 
   VOLCANOES.forEach(v => {
     const d = allData[v.name] || { records: [], mirovaRecords: [] };
-    const vrp = latestVRP(d.records);
+    const vrp = latestVRP(d.records, includeFarDistance);
     const level = getLevel(vrp);
-    const sensors = latestSensors(d.records);
+    const sensors = latestSensors(d.records, includeFarDistance);
     const lastTime = lastEventTime(d.records);
 
     const card = el("div", "volcano-card" + (v === currentVolcano ? " active" : "") +
@@ -657,11 +720,26 @@ function buildCards() {
     if (sensors.has("VIIRS375")) { const p = el("span","sensor-pill pill-v375"); p.textContent = "VIIRS 375m"; pills.appendChild(p); }
     if (sensors.has("VIIRS750")) { const p = el("span","sensor-pill pill-v750"); p.textContent = "VIIRS 750m"; pills.appendChild(p); }
 
+    // Conteo cráter vs lejanas (últimos 7 días). Solo mostramos si hay al menos
+    // 1 detección real — evita filas vacías en las 34 tarjetas no-Tier-A.
+    const dc = distanceCounts(d.records, 7);
+    const dcRow = el("div", "vc-distance");
+    if (dc.summit + dc.far > 0) {
+      const sSummit = el("span"); sSummit.style.color = "#f44336"; sSummit.style.fontWeight = "600";
+      sSummit.textContent = "🎯 Cráter: " + dc.summit;
+      const sep = document.createTextNode(" · ");
+      const sFar = el("span"); sFar.style.color = "#7a8fa6";
+      sFar.textContent = "📍 Lejanas: " + dc.far;
+      const sLabel = el("span"); sLabel.style.color = "#556"; sLabel.style.fontSize = "0.7em";
+      sLabel.textContent = " (7d)";
+      dcRow.append(sSummit, sep, sFar, sLabel);
+    }
+
     // Last update
     const time = el("div", "vc-time");
     time.textContent = lastTime ? "Último: " + lastTime.slice(0, 16) + " UTC" : "Sin datos";
 
-    card.append(hdr, vrpEl, vrpSub, pills, time);
+    card.append(hdr, vrpEl, vrpSub, pills, dcRow, time);
     grid.appendChild(card);
   });
 }
@@ -796,7 +874,7 @@ function renderDetail() {
   const tbl = el("table","events-table");
   const thead = el("thead");
   const hrow = el("tr");
-  ["Fecha UTC", "Sensor", "VRP (MW)", "Dist (km)", "T max (°C)", "T fondo (°C)", "Píxeles"].forEach(h => {
+  ["Fecha UTC", "Sensor", "Zona", "VRP (MW)", "Dist (km)", "T max (°C)", "T fondo (°C)", "Píxeles"].forEach(h => {
     const th = el("th"); th.textContent = h; hrow.appendChild(th);
   });
   thead.appendChild(hrow);
@@ -809,7 +887,7 @@ function renderDetail() {
     .slice(0, 20);
 
   if (recent.length === 0) {
-    const row = el("tr"); const td = el("td"); td.colSpan = 7;
+    const row = el("tr"); const td = el("td"); td.colSpan = 8;
     td.textContent = "Sin detecciones en el período"; td.style.color = "var(--muted)";
     td.style.textAlign = "center"; td.style.padding = "20px";
     row.appendChild(td); tbody.appendChild(row);
@@ -851,9 +929,20 @@ function renderDetail() {
           marker.openPopup();
         }
       });
+      // S18: clasificar fila como summit/far. Si está "far" y el toggle está
+      // en "Solo cráter", atenuar toda la fila (opacity baja) pero dejarla
+      // visible — Nicolás pidió conservar la evidencia.
+      const isSummit = isSummitDetection(r);
+      const zoneLabel = isSummit ? "🎯 Dentro" : "📍 Fuera";
+      const zoneColor = isSummit ? "#f44336" : "#7a8fa6";
+      if (!isSummit && !includeFarDistance) {
+        row.style.opacity = "0.45";
+        row.style.fontStyle = "italic";
+      }
       [
         r.datetime_utc,
         r.sensor,
+        zoneLabel,
         vrp.toFixed(3),
         isVentLegacy ? "vent" : (dist != null ? dist.toFixed(2) : "—"),
         k2c(tmax),
@@ -862,8 +951,9 @@ function renderDetail() {
       ].forEach((val, i) => {
         const td = el("td");
         td.textContent = val;
-        if (i === 2) { td.className = "vrp-cell"; td.style.color = "var(--" + (lv.key === "vlow" ? "green" : lv.key === "low" ? "yellow" : lv.key === "mod" ? "orange" : "red") + ")"; }
+        if (i === 3) { td.className = "vrp-cell"; td.style.color = "var(--" + (lv.key === "vlow" ? "green" : lv.key === "low" ? "yellow" : lv.key === "mod" ? "orange" : "red") + ")"; }
         if (i === 1) td.style.color = "var(--muted)";
+        if (i === 2) { td.style.color = zoneColor; td.style.fontWeight = "600"; td.style.whiteSpace = "nowrap"; }
         row.appendChild(td);
       });
       tbody.appendChild(row);
@@ -878,8 +968,8 @@ function renderDetail() {
   const mapLeg = el("div", "map-legend");
   [
     ["#e91e63", "VIIRS 375m"], ["#00bcd4", "VIIRS 750m"], ["#ff8c00", "MODIS"],
-    ["#ff5252", "Anomalía real (MIROVA rojo)"], ["#8a8a8a", "Lejana (far)"],
-    ["#7c4dff", "Vent-path"], ["#ffc107", "Cráter/Vent"], ["#7a8fa6", "Radio búsqueda"]
+    ["#ff5252", "Radio cráter (🎯 summit)"], ["#8a8a8a", "Detección lejana (📍 far)"],
+    ["#7c4dff", "Vent-path"], ["#ffc107", "Radio vent-path"], ["#7a8fa6", "Radio búsqueda 25 km"]
   ].forEach(([color, label]) => {
     const item = el("div", "map-legend-item");
     const dot = el("div", "map-legend-dot");
@@ -924,7 +1014,16 @@ function renderDetail() {
       L.circle([v.vent_lat || v.lat, v.vent_lon || v.lon], {
         radius: v.inner_radius_km * 1000, color: "#ff5252", weight: 1.5,
         fillColor: "#ff5252", fillOpacity: 0.08, dashArray: "3,3",
-      }).addTo(map).bindTooltip(`Radio MIROVA "rojo" ${v.inner_radius_km} km`, { sticky: true });
+      }).addTo(map).bindTooltip(`Radio cráter MIROVA ${v.inner_radius_km} km (summit/far)`, { sticky: true });
+    }
+
+    // S18: vent_radius — círculo más chico para el vent-path sub-pixel
+    // (pixels dentro de este anillo se evalúan con umbral permisivo BT > t_bg+1K).
+    if (v.vent_radius_km && v.vent_lat && v.vent_lon) {
+      L.circle([v.vent_lat, v.vent_lon], {
+        radius: v.vent_radius_km * 1000, color: "#ffc107", weight: 1,
+        fillColor: "#ffc107", fillOpacity: 0.06, dashArray: "2,4",
+      }).addTo(map).bindTooltip(`Radio vent-path ${v.vent_radius_km} km`, { sticky: true });
     }
 
     // Volcano center marker
@@ -1487,7 +1586,7 @@ function buildOverviewMap() {
 
   VOLCANOES.forEach(v => {
     const d = allData[v.name] || { records: [] };
-    const vrp = latestVRP(d.records);
+    const vrp = latestVRP(d.records, includeFarDistance);
     const lv = getLevel(vrp);
     const color = alertColors[lv.key] || "#7a8fa6";
     const size = lv.key === "nd" ? 6 : Math.max(7, Math.min(16, 7 + vrp * 2));
@@ -1497,10 +1596,15 @@ function buildOverviewMap() {
       fillColor: color, fillOpacity: 0.85,
     }).addTo(overviewMap);
 
+    // Conteo summit/far 7d consistente con las tarjetas del grid (cambio C S18).
+    const dc = distanceCounts(d.records, 7);
+    const dcLine = (dc.summit + dc.far > 0)
+      ? `<br><span style="color:#f44336">🎯 ${dc.summit}</span> · <span style="color:#7a8fa6">📍 ${dc.far}</span> <small style="color:#556">(7d)</small>`
+      : "";
     marker.bindPopup(
       "<b>" + v.display + "</b><br>" +
       lv.label + (vrp > 0 ? " \u2014 " + vrp.toFixed(2) + " MW" : "") + "<br>" +
-      "<small>" + v.region + "</small>"
+      "<small>" + v.region + "</small>" + dcLine
     );
 
     marker.on("click", () => {
@@ -1609,6 +1713,25 @@ async function init() {
     logScale = true;
     document.getElementById("btn-log").classList.add("active");
     document.getElementById("btn-linear").classList.remove("active");
+    renderDetail();
+  });
+
+  // S18: toggle "Solo cráter" vs "Incluir lejanas". Default = solo summit.
+  // Cambia buildCards, overview map, chart y tabla del detalle.
+  document.getElementById("btn-summit-only").addEventListener("click", () => {
+    includeFarDistance = false;
+    document.getElementById("btn-summit-only").classList.add("active");
+    document.getElementById("btn-include-far").classList.remove("active");
+    buildCards();
+    buildOverviewMap();
+    renderDetail();
+  });
+  document.getElementById("btn-include-far").addEventListener("click", () => {
+    includeFarDistance = true;
+    document.getElementById("btn-include-far").classList.add("active");
+    document.getElementById("btn-summit-only").classList.remove("active");
+    buildCards();
+    buildOverviewMap();
     renderDetail();
   });
 
