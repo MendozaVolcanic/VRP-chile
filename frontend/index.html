@@ -659,8 +659,12 @@ function distanceCounts(records, days = 7) {
     if (new Date(r.datetime_utc).getTime() < cutoff) continue;
     const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
     if (v <= 0) continue;
-    if (r.distance_class === "summit") summit++;
-    else if (r.distance_class === "far") far++;
+    // S18: usar el mismo criterio summit/far que el resto del dashboard
+    // (isSummitDetection). Sin eso, records legacy pre-S14 con vrp_vent>0
+    // pero sin distance_class quedaban sin contar — Nicolás notó que en
+    // Tupungatito faltaban las lecturas históricas de la laguna crateriana.
+    if (isSummitDetection(r)) summit++;
+    else far++;
   }
   return { summit, far };
 }
