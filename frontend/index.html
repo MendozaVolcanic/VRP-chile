@@ -257,7 +257,7 @@
 <header>
   <div>
     <div class="logo">VRP <span>Chile</span></div>
-    <div class="header-sub">Monitoreo Volcánico · MODIS + VIIRS · NASA Earthdata</div>
+    <div class="header-sub">Monitoreo Volcánico · MODIS + VIIRS · NASA Earthdata · <span style="color:#ffc107;">11 volcanes Tier A MIROVA</span></div>
   </div>
   <div class="header-right">
     <div class="status-label">
@@ -438,7 +438,12 @@ const BASE_PATH = (() => {
   return '';
 })();
 
-const VOLCANOES = [
+// S18 2026-04-24: el dashboard operacional muestra SOLO los 11 volcanes Tier A
+// que procesa el perfil `mirova_equivalent` (flag `mirova_monitored: true` en
+// volcanoes.yaml; aquí `hasMirova: true`). Los 34 restantes se procesan en el
+// perfil `experimental` y tienen su propio flujo — mezclarlos contamina la
+// lectura operacional (ver pedido Nicolás S18).
+const VOLCANOES_ALL = [
   // === Zona Norte CVZ (N→S) ===
   { name: "Taapaca",              display: "Taapaca",                region: "Arica y Parinacota", lat: -18.100, lon: -69.500, radius_km: 10 },
   { name: "Parinacota",           display: "Parinacota",             region: "Arica y Parinacota", lat: -18.166, lon: -69.142, radius_km: 10 },
@@ -489,6 +494,9 @@ const VOLCANOES = [
   { name: "MacaCay",              display: "Macá-Cay",               region: "Aysén",         lat: -45.100, lon: -73.200, radius_km: 10 },
   { name: "Hudson",               display: "Hudson",                 region: "Aysén",         lat: -45.900, lon: -72.970, radius_km: 15 },
 ];
+
+// Dashboard operacional: SOLO los 11 Tier A (perfil mirova_equivalent).
+const VOLCANOES = VOLCANOES_ALL.filter(v => v.hasMirova);
 
 const SENSORS = [
   { key: "MODIS",    label: "MODIS (1km)",     color: "#ff8c00" },
