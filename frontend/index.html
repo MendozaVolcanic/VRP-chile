@@ -495,8 +495,11 @@ const VOLCANOES_ALL = [
   { name: "Hudson",               display: "Hudson",                 region: "Aysén",         lat: -45.900, lon: -72.970, radius_km: 15 },
 ];
 
-// Dashboard operacional: SOLO los 11 Tier A (perfil mirova_equivalent).
-const VOLCANOES = VOLCANOES_ALL.filter(v => v.hasMirova);
+// Dashboard operacional: mostramos las 45 tarjetas para conservar el panorama
+// geográfico completo, pero solo fetcheamos data de los 11 Tier A. Los otros
+// 34 quedan como tarjetas "sin datos" — no leen los JSONs archivados ni los
+// que el cron NRT siga generando en data/mirova_equivalent/ hasta el merge S18.
+const VOLCANOES = VOLCANOES_ALL;
 
 const SENSORS = [
   { key: "MODIS",    label: "MODIS (1km)",     color: "#ff8c00" },
@@ -537,9 +540,15 @@ async function fetchJSON(url) {
 }
 
 async function loadVolcano(v) {
+  // Solo los 11 Tier A (hasMirova=true) tienen data operacional. Los 34 restantes
+  // quedan como tarjetas "sin datos" — ni data propia ni refs MIROVA.
+  if (!v.hasMirova) {
+    allData[v.name] = { records: [], mirovaRecords: [], updated: null };
+    return;
+  }
   const [data, mirova] = await Promise.all([
     fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json"),
-    v.hasMirova ? fetchJSON(BASE_PATH + "data/mirova/" + v.name + ".json") : Promise.resolve(null),
+    fetchJSON(BASE_PATH + "data/mirova/" + v.name + ".json"),
   ]);
   allData[v.name] = {
     records:       data?.records   || [],
@@ -614,6 +623,24 @@ function lastEventTime(records) {
   return latest;
 }
 
+// Conteo de detecciones dentro vs fuera del cráter en la ventana reciente.
+// Usa el campo distance_class asignado por los procesadores (S14): "summit"
+// si la detección cae dentro del inner_radius del volcán (3-7 km oficial
+// MIROVA), "far" si queda entre el inner y el radio total (~25 km).
+// Solo cuenta detecciones reales (vrp > 0) para no inflar con records-0.
+function distanceCounts(records, days = 7) {
+  const cutoff = Date.now() - days * 86400000;
+  let summit = 0, far = 0;
+  for (const r of records) {
+    if (new Date(r.datetime_utc).getTime() < cutoff) continue;
+    const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+    if (v <= 0) continue;
+    if (r.distance_class === "summit") summit++;
+    else if (r.distance_class === "far") far++;
+  }
+  return { summit, far };
+}
+
 // ── DOM helpers ──────────────────────────────────────────────────────────────
 function el(tag, cls) {
   const e = document.createElement(tag);
@@ -665,11 +692,26 @@ function buildCards() {
     if (sensors.has("VIIRS375")) { const p = el("span","sensor-pill pill-v375"); p.textContent = "VIIRS 375m"; pills.appendChild(p); }
     if (sensors.has("VIIRS750")) { const p = el("span","sensor-pill pill-v750"); p.textContent = "VIIRS 750m"; pills.appendChild(p); }
 
+    // Conteo cráter vs lejanas (últimos 7 días). Solo mostramos si hay al menos
+    // 1 detección real — evita filas vacías en las 34 tarjetas no-Tier-A.
+    const dc = distanceCounts(d.records, 7);
+    const dcRow = el("div", "vc-distance");
+    if (dc.summit + dc.far > 0) {
+      const sSummit = el("span"); sSummit.style.color = "#f44336"; sSummit.style.fontWeight = "600";
+      sSummit.textContent = "🎯 Cráter: " + dc.summit;
+      const sep = document.createTextNode(" · ");
+      const sFar = el("span"); sFar.style.color = "#7a8fa6";
+      sFar.textContent = "📍 Lejanas: " + dc.far;
+      const sLabel = el("span"); sLabel.style.color = "#556"; sLabel.style.fontSize = "0.7em";
+      sLabel.textContent = " (7d)";
+      dcRow.append(sSummit, sep, sFar, sLabel);
+    }
+
     // Last update
     const time = el("div", "vc-time");
     time.textContent = lastTime ? "Último: " + lastTime.slice(0, 16) + " UTC" : "Sin datos";
 
-    card.append(hdr, vrpEl, vrpSub, pills, time);
+    card.append(hdr, vrpEl, vrpSub, pills, dcRow, time);
     grid.appendChild(card);
   });
 }
@@ -1505,10 +1547,15 @@ function buildOverviewMap() {
       fillColor: color, fillOpacity: 0.85,
     }).addTo(overviewMap);
 
+    // Conteo summit/far 7d consistente con las tarjetas del grid (cambio C S18).
+    const dc = distanceCounts(d.records, 7);
+    const dcLine = (dc.summit + dc.far > 0)
+      ? `<br><span style="color:#f44336">🎯 ${dc.summit}</span> · <span style="color:#7a8fa6">📍 ${dc.far}</span> <small style="color:#556">(7d)</small>`
+      : "";
     marker.bindPopup(
       "<b>" + v.display + "</b><br>" +
       lv.label + (vrp > 0 ? " \u2014 " + vrp.toFixed(2) + " MW" : "") + "<br>" +
-      "<small>" + v.region + "</small>"
+      "<small>" + v.region + "</small>" + dcLine
     );
 
     marker.on("click", () => {
