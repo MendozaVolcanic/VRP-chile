@@ -378,6 +378,11 @@
     <button class="scale-btn active" id="btn-linear">Lineal</button>
     <button class="scale-btn" id="btn-log">Logarítmica</button>
   </div>
+  <div style="display:flex;gap:6px;align-items:center;" title="Cuando está apagado, el dashboard solo considera anomalías dentro del radio del cráter (summit). Las detecciones lejanas siguen visibles en el mapa y en la tabla pero atenuadas.">
+    <label>Distancia </label>
+    <button class="scale-btn active" id="btn-summit-only">🎯 Solo cráter</button>
+    <button class="scale-btn" id="btn-include-far">📍 Incluir lejanas</button>
+  </div>
   <div class="sensor-legend" id="sensor-legend"></div>
 </div>
 
@@ -528,6 +533,11 @@ const sensorVisible = { MODIS: true, VIIRS375: true, VIIRS750: true, MIROVA: tru
 let currentVolcano = VOLCANOES[0];
 let currentDays = 7;  // S12: default 7 días (antes 30) — operador ve lo reciente
 let logScale = false;
+// S18: por defecto el dashboard solo cuenta detecciones dentro del radio del
+// cráter (summit). Las lejanas (far) siguen visibles en los conteos 🎯/📍, en
+// el mapa y en la tabla (atenuadas), pero no inflan el valor "48h max" ni el
+// nivel de alerta. El usuario puede prender "Incluir lejanas" desde el header.
+let includeFarDistance = false;
 let charts = {};
 let allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
 
@@ -584,23 +594,37 @@ function toMirovaDaily(records) {
   return [...m.entries()].sort().map(([x, y]) => ({ x, y }));
 }
 
-function latestVRP(records) {
-  // Returns the max VRP from the last 48h across all sensors
+// S18: clasifica una detección como "cráter" (summit). Criterios, en orden:
+//   1. distance_class === "summit" (asignado por los procesadores S14+).
+//   2. distance_class === "far" → no es summit.
+//   3. Record legacy sin distance_class pero con vrp_vent_mw > 0: el
+//      vent-path solo dispara dentro del radio del vent → trátalo como summit.
+//   4. Otros casos sin metadato claro → no es summit (evita contar ruido).
+function isSummitDetection(r) {
+  if (r.distance_class === "summit") return true;
+  if (r.distance_class === "far") return false;
+  return (r.vrp_vent_mw ?? 0) > 0;
+}
+
+function latestVRP(records, includeFar = false) {
+  // Max VRP de las últimas 48h. Por defecto solo detecciones del cráter.
   const cutoff = Date.now() - 48 * 3600000;
   let max = 0;
   for (const r of records) {
     if (new Date(r.datetime_utc).getTime() < cutoff) continue;
+    if (!includeFar && !isSummitDetection(r)) continue;
     const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
     if (v > max) max = v;
   }
   return max;
 }
 
-function latestSensors(records) {
+function latestSensors(records, includeFar = false) {
   const cutoff = Date.now() - 48 * 3600000;
   const seen = new Set();
   for (const r of records) {
     if (new Date(r.datetime_utc).getTime() < cutoff) continue;
+    if (!includeFar && !isSummitDetection(r)) continue;
     const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
     if (v > 0) seen.add(sensorGroup(r.sensor));
   }
@@ -655,9 +679,9 @@ function buildCards() {
 
   VOLCANOES.forEach(v => {
     const d = allData[v.name] || { records: [], mirovaRecords: [] };
-    const vrp = latestVRP(d.records);
+    const vrp = latestVRP(d.records, includeFarDistance);
     const level = getLevel(vrp);
-    const sensors = latestSensors(d.records);
+    const sensors = latestSensors(d.records, includeFarDistance);
     const lastTime = lastEventTime(d.records);
 
     const card = el("div", "volcano-card" + (v === currentVolcano ? " active" : "") +
@@ -846,7 +870,7 @@ function renderDetail() {
   const tbl = el("table","events-table");
   const thead = el("thead");
   const hrow = el("tr");
-  ["Fecha UTC", "Sensor", "VRP (MW)", "Dist (km)", "T max (°C)", "T fondo (°C)", "Píxeles"].forEach(h => {
+  ["Fecha UTC", "Sensor", "Zona", "VRP (MW)", "Dist (km)", "T max (°C)", "T fondo (°C)", "Píxeles"].forEach(h => {
     const th = el("th"); th.textContent = h; hrow.appendChild(th);
   });
   thead.appendChild(hrow);
@@ -859,7 +883,7 @@ function renderDetail() {
     .slice(0, 20);
 
   if (recent.length === 0) {
-    const row = el("tr"); const td = el("td"); td.colSpan = 7;
+    const row = el("tr"); const td = el("td"); td.colSpan = 8;
     td.textContent = "Sin detecciones en el período"; td.style.color = "var(--muted)";
     td.style.textAlign = "center"; td.style.padding = "20px";
     row.appendChild(td); tbody.appendChild(row);
@@ -901,9 +925,20 @@ function renderDetail() {
           marker.openPopup();
         }
       });
+      // S18: clasificar fila como summit/far. Si está "far" y el toggle está
+      // en "Solo cráter", atenuar toda la fila (opacity baja) pero dejarla
+      // visible — Nicolás pidió conservar la evidencia.
+      const isSummit = isSummitDetection(r);
+      const zoneLabel = isSummit ? "🎯 Dentro" : "📍 Fuera";
+      const zoneColor = isSummit ? "#f44336" : "#7a8fa6";
+      if (!isSummit && !includeFarDistance) {
+        row.style.opacity = "0.45";
+        row.style.fontStyle = "italic";
+      }
       [
         r.datetime_utc,
         r.sensor,
+        zoneLabel,
         vrp.toFixed(3),
         isVentLegacy ? "vent" : (dist != null ? dist.toFixed(2) : "—"),
         k2c(tmax),
@@ -912,8 +947,9 @@ function renderDetail() {
       ].forEach((val, i) => {
         const td = el("td");
         td.textContent = val;
-        if (i === 2) { td.className = "vrp-cell"; td.style.color = "var(--" + (lv.key === "vlow" ? "green" : lv.key === "low" ? "yellow" : lv.key === "mod" ? "orange" : "red") + ")"; }
+        if (i === 3) { td.className = "vrp-cell"; td.style.color = "var(--" + (lv.key === "vlow" ? "green" : lv.key === "low" ? "yellow" : lv.key === "mod" ? "orange" : "red") + ")"; }
         if (i === 1) td.style.color = "var(--muted)";
+        if (i === 2) { td.style.color = zoneColor; td.style.fontWeight = "600"; td.style.whiteSpace = "nowrap"; }
         row.appendChild(td);
       });
       tbody.appendChild(row);
@@ -1537,7 +1573,7 @@ function buildOverviewMap() {
 
   VOLCANOES.forEach(v => {
     const d = allData[v.name] || { records: [] };
-    const vrp = latestVRP(d.records);
+    const vrp = latestVRP(d.records, includeFarDistance);
     const lv = getLevel(vrp);
     const color = alertColors[lv.key] || "#7a8fa6";
     const size = lv.key === "nd" ? 6 : Math.max(7, Math.min(16, 7 + vrp * 2));
@@ -1664,6 +1700,25 @@ async function init() {
     logScale = true;
     document.getElementById("btn-log").classList.add("active");
     document.getElementById("btn-linear").classList.remove("active");
+    renderDetail();
+  });
+
+  // S18: toggle "Solo cráter" vs "Incluir lejanas". Default = solo summit.
+  // Cambia buildCards, overview map, chart y tabla del detalle.
+  document.getElementById("btn-summit-only").addEventListener("click", () => {
+    includeFarDistance = false;
+    document.getElementById("btn-summit-only").classList.add("active");
+    document.getElementById("btn-include-far").classList.remove("active");
+    buildCards();
+    buildOverviewMap();
+    renderDetail();
+  });
+  document.getElementById("btn-include-far").addEventListener("click", () => {
+    includeFarDistance = true;
+    document.getElementById("btn-include-far").classList.add("active");
+    document.getElementById("btn-summit-only").classList.remove("active");
+    buildCards();
+    buildOverviewMap();
     renderDetail();
   });
 
