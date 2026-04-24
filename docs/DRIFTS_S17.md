@@ -25,6 +25,11 @@ Moderado. Mediana es más robusta vs outliers (NaN, edges), tiende a producir **
 ### Decisión S18
 **Corregir a `np.mean` (arithmetic mean, ignorando NaN)** en `detection_context.py`. Test TDD: validar bit-equivalence contra reference implementation + regresión de test corpus antes de merge.
 
+### ✅ RESUELTO en S17 (2026-04-23 tarde)
+Fix aplicado: renombrado `_nanmedian_ignore_self` → `_nanmean_ignore_self` usando `np.mean`.
+Test nuevo `test_kernel_uses_arithmetic_mean_not_median` con outlier explícito confirma que ya no dispara falso positivo.
+50/50 tests verde. Pipeline alineado a Coppola 2016a + Campus 2024.
+
 ---
 
 ## D2 — N·σ multiplier (el más impactante)
@@ -73,10 +78,15 @@ Métrica de decisión: recall/precision/F1 vs OSF v2.5 CSV consolidado. Adoptar 
 - Coppola 2024 (review post-Aveni): usa Stefan-Boltzmann igual.
 - Aveni 2025: dice Stefan-Boltzmann subestima 90%.
 
-### Decisión S18/S19
-**Auditoría pendiente de Aveni et al. 2024 TIRVolcH RSE** (`1-s2.0-S0034425724004140-main.pdf`), que es el paper algorítmico previo al GRL 2025. Debería clarificar si Aveni propone REEMPLAZAR Stefan-Boltzmann o es un método complementario.
+### ✅ RESUELTO en S17 (2026-04-23 tarde)
+Auditoría de **Aveni et al. 2024 RSE "TIRVolcH"** (DOI 10.1016/j.rse.2024.114388, paper algorítmico previo al GRL 2025):
+**Aveni 2024 RSE Eq.5 p.12 usa Stefan-Boltzmann puro** — idéntico a nuestro código y a Coppola 2024.
 
-**Por ahora**: mantener Stefan-Boltzmann (consistente con Coppola 2024). **No** migrar a Eq.9 hasta tener evidencia de que MIROVA oficial lo adoptó.
+La Eq.9 con k_TIR=60.17 μm·sr **aparece SOLO en Aveni 2025 GRL** (paper posterior, refinamiento cuantitativo, no operacional). Coppola 2024 cap Springer (review post-Aveni 2024) también usa Stefan-Boltzmann.
+
+**Veredicto**: MIROVA operacional usa Stefan-Boltzmann puro. TIRVolcH (algoritmo 2024) es investigación paralela del mismo grupo, no migración de MIROVA.
+
+**Decisión**: mantener Stefan-Boltzmann puro en `mirova_equivalent`. No migrar a Eq.9 GRL. Para futuro (objetivo 2): considerar perfil experimental `tirvolch_experimental` sobre Copahue/Peteroa/Tupungatito crater lakes (alto valor para sub-pixel hydrothermal, costo implementación grande).
 
 ---
 
@@ -113,9 +123,9 @@ Fase 3 (S19+). Agregar bandas coloreadas en chart + badge por volcán con nivel 
 
 | ID | Drift | Estado | Decisión | Sesión |
 |---|---|---|---|---|
-| D1 | `np.median` kernel 8-vec | Confirmado | Cambiar a `np.mean` | S18 |
+| D1 | `np.median` kernel 8-vec | ✅ Resuelto S17 tarde | Fix `np.mean` aplicado (commit pendiente) | **S17** |
 | D2 | `N_SIGMA_MIR=3.0` uniforme | Confirmado, ambiguo entre papers | Test A/B 3 configs vs OSF | S18 |
-| D3 | TIR Stefan-Boltzmann | Ambigüedad | Mantener, auditar Aveni 2024 RSE | S19 |
+| D3 | TIR Stefan-Boltzmann | ✅ Resuelto S17 tarde (Aveni 2024 confirma SB puro) | Mantener | — |
 | D4 | Escala Low/Medium/.../Extreme | Feature gap | Agregar dashboard | S19-20 |
 | D5 | Sin supervisión humana | Diseño | Documentar | — |
 

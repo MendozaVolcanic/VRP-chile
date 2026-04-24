@@ -125,12 +125,32 @@
 
 ---
 
+### 11. Aveni et al. 2024 RSE 315:114388 — "TIRVolcH single-band TIR algorithm"
+
+- **PDF**: `documentacion/1-s2.0-S0034425724004140-main.pdf`
+- **DOI**: 10.1016/j.rse.2024.114388. Autores: Aveni, Laiolo, Campus, Massimetti, Coppola (grupo MIROVA).
+- **Rol**: algoritmo TIR experimental paralelo a MIROVA (mismo grupo, no reemplazo).
+- **Confirma (CRÍTICO para D3)**:
+  - **Eq.5 p.12 usa Stefan-Boltzmann puro** `Rad = Σ ε·σ·(BT⁴alert − BT⁴bg) · A` con σ=5.67×10⁻⁸, ε=1, A=140,625 m². **Idéntico a nuestro código.**
+  - **NO contiene Eq.9 con k_TIR=60.17** — esa solo aparece en Aveni 2025 GRL posterior.
+  - Corrobora que MIROVA operacional usa Stefan-Boltzmann, no Eq.9.
+- **Algoritmo TIRVolcH (14 tests)**:
+  - Z-RES > 7 (test 4, p.8-9).
+  - ABSBT ≥ 313.15 K (test 1).
+  - 4 ROIs concéntricos + VSROI (más fino que Coppola 2016a dual-ROI).
+  - REF mensual 12 escenas/año por volcán.
+  - BTbg iterativo con bi-cubic interpolation.
+- **Valida en**: Vulcano (hydrothermal), Agung (dome), La Palma Tajogaite 2021. FPR intrínseco 1.77-1.90%, reducible a 0.47% con filtrado geométrico.
+- **NOAA-21**: mencionado como "future" p.20, no procesado en el paper.
+- **Implicación para VRP Chile**: TIRVolcH completo sería de alto valor para **Copahue/Peteroa/Tupungatito crater lakes** (sub-pixel hydrothermal donde MIR da FN sistemático). Implementación costosa (~10-15h). Backlog objetivo 2.
+
+---
+
 ## Papers pendientes auditar (futuras sesiones)
 
 | Paper | PDF | Gap que cubre | Prioridad |
 |---|---|---|---|
-| Aveni 2024 TIRVolcH RSE | `1-s2.0-S0034425724004140-main.pdf` | Resolver D3 TIR Stefan vs Eq.9 | 🔴 Alta — S19 |
-| Coppola 2022 Sabancaya Bull Volcanol | `s00445-022-01523-1.pdf` | Origen histórico k=18.0 | 🟡 Media — S19 |
+| Coppola 2022 Sabancaya Bull Volcanol | `s00445-022-01523-1.pdf` | Origen histórico k=18.0 | 🟡 Media — S18 |
 | Massimetti 2020 RS 12:820 (SWIR) | `remotesensing-12-00820-v4.pdf` | Base SWIR | 🟢 Baja — Fase SWIR |
 | Torrisi 2023 Fast VRP VIIRS SLSTR | `Torrisi2023_FastVRP_VIIRS_SLSTR.pdf` | Cross-validación | 🟢 Baja |
 | Reath 2018 JGR (47 volcanes) | `JGR Solid Earth - 2018 - Reath.pdf` | Thermal time-series 2000-2017 | 🟢 Baja |

@@ -25,12 +25,15 @@ viven en el vault Obsidian: `C:\Users\nmend\OneDrive\Escritorio\claude\Vault\`.
   - VIIRS I-band 375m (I4): `k = 18.0 × A_pix(140625)` = **2,531,250** (`WOOSTER_COEFF=18.0`)
   - MIROVA usa **A_pix nadir fijo** (sin corrección zenithal) para los 3 sensores.
   - NO usar Di Bella 2024 k=2.48×10⁷ para VIIRS 375m — no reproduce OSF (empírico).
-- **VRP TIR (I05)**: Stefan-Boltzmann (`σ = 5.67×10⁻⁸`) — citación original a Aveni 2025 es INCORRECTA
-  (Aveni 2025 propone Eq.9 con k_TIR=60.17 μm·sr, NO Stefan-Boltzmann puro; Coppola 2024 cap Springer
-  sí usa Stefan-Boltzmann). **Drift D3 ambigüedad doctrinal** — ver `docs/DRIFTS_S17.md`.
+- **VRP TIR (I05)**: Stefan-Boltzmann puro (`σ = 5.67×10⁻⁸`). **Drift D3 RESUELTO S17**: Aveni 2024
+  RSE (TIRVolcH, mismo grupo MIROVA) usa Stefan-Boltzmann igual que Coppola 2024 y nuestro código.
+  La Eq.9 con k_TIR=60.17 de Aveni 2025 GRL es investigación no adoptada operacionalmente. Referencia
+  correcta ahora: Coppola 2024 cap Springer Eq.16 + Aveni 2024 RSE Eq.5. Ver `docs/DRIFTS_S17.md`.
 - **NTI**: umbral 3σ sobre background, mínimo 0.005. **DRIFT D2 S17**: ningún paper autoritativo
   respalda 3σ uniforme. Coppola 2016a Tabla 1 dice 5σ summit / 10σ scene / 15σ diurno para MODIS.
   Di Bella 2024 §3.3 dice VIIRS 12σ noche / 8σ día. Test A/B pendiente S18 — ver `docs/DRIFTS_S17.md`.
+- **Kernel 8-vecinos dNTI contextual**: `np.mean` aritmética (Coppola 2016a + Campus 2024). **Drift D1
+  RESUELTO S17** — previamente usábamos `np.median` sin respaldo documental.
 - **MIR solo nocturno** (contaminación solar diurna).
 - Bandas: MODIS 21/22 (3.929/3.959 μm) + 31 (11 μm TIR),
   VIIRS I04 (3.74 μm) / I05 (11.45 μm), VIIRS M13 (4.05 μm) / M15 (10.76 μm).

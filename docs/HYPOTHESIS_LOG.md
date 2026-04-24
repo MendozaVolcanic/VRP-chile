@@ -125,8 +125,8 @@
 - **Formulada**: S17 (2026-04-23) tras auditoría de Coppola 2016a.
 - **Evidencia**: Coppola 2016a §"Spatial analysis" literal "arithmetic mean"; Campus 2024 p.3 literal "arithmetic mean"; código `detection_context.py:35` usa `np.median`.
 - **Criterio testable**: cambiar a `np.mean` + test regresión vs OSF.
-- **Estado**: **CONFIRMADA** (drift documental sin resolver).
-- **Resolución**: corregir en S18 con TDD.
+- **Estado**: **✅ CONFIRMADA y RESUELTA** (S17 2026-04-23 tarde).
+- **Resolución**: fix aplicado en `detection_context.py` — `_nanmedian_ignore_self` → `_nanmean_ignore_self`. Test nuevo `test_kernel_uses_arithmetic_mean_not_median` con outlier explícito. 50/50 tests verde.
 
 ---
 
@@ -150,12 +150,21 @@
 - **Evidencia**:
   - Aveni 2025 GRL: Eq.9 con k_TIR=60.17 μm·sr; Stefan-Boltzmann subestima 90% bajo 600 K.
   - Coppola 2024 cap Springer: Eq.16 Stefan-Boltzmann (usado canonicamente para low-T).
+  - **Aveni 2024 TIRVolcH RSE Eq.5 p.12: Stefan-Boltzmann puro** — mismo grupo MIROVA.
   - Nuestro código: Stefan-Boltzmann ([process_viirs.py:481](../pipeline/process_viirs.py#L481)).
-- **Hipótesis alt A**: migrar a Aveni Eq.9 es correcto (paper más reciente autoritativo).
-- **Hipótesis alt B**: mantener Stefan-Boltzmann (Coppola 2024 revisa post-Aveni y usa igual).
 - **Criterio testable**: auditar Aveni 2024 TIRVolcH RSE (paper algorítmico previo a GRL 2025). Ver si MIROVA oficial adoptó Eq.9.
-- **Estado**: **ACTIVE — AMBIGÜEDAD DOCTRINAL**.
-- **Resolución pendiente**: S19.
+- **Estado**: **✅ RESUELTA HIPÓTESIS ALT B** (Stefan-Boltzmann correcto).
+- **Resolución**: Aveni 2024 RSE (paper algorítmico del mismo grupo MIROVA) usa Stefan-Boltzmann puro, igual que Coppola 2024 y nuestro código. La Eq.9 con k_TIR=60.17 solo existe en Aveni 2025 GRL (refinamiento teórico, no adoptado operacionalmente por MIROVA). Mantener Stefan-Boltzmann. Considerar TIRVolcH completo (perfil experimental futuro) para Copahue/Peteroa/Tupungatito crater lakes.
+
+---
+
+## H16 — TIRVolcH (Aveni 2024) es investigación paralela, no migración MIROVA
+
+- **Formulada**: S17 (2026-04-23 tarde).
+- **Hipótesis**: TIRVolcH (Aveni 2024 RSE) **no reemplaza** MIROVA operacional — es un algoritmo experimental paralelo del mismo grupo (Turín+Sapienza).
+- **Evidencia**: Coppola coautor tanto en Aveni 2024 como en su review Springer 2024. Review 2024 sigue usando Stefan-Boltzmann puro sin mención de TIRVolcH como método operacional. Aveni 2024 menciona NOAA-21 como "future" (p.20), reforzando que el paper se escribió pre-operacional J2.
+- **Estado**: **CONFIRMADA**.
+- **Implicación**: TIRVolcH tiene valor potencial para crater lakes chilenos (Copahue, Peteroa, Tupungatito hydrothermal sub-pixel) pero su implementación es costosa (REF mensuales por volcán, 4 ROIs + VSROI, 14 tests, bi-cubic BT_bg). Mantener en backlog para objetivo 2 (herramienta independiente). Bajo objetivo 1 (clon MIROVA) no aporta.
 
 ---
 

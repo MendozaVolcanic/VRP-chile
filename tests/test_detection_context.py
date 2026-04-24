@@ -227,19 +227,57 @@ def test_lastarria_scenario_with_one_real_hotspot():
 def _reference_slow_contextual_dnti(nti, bt, roi_mask, t_bg, c1, bt_sanity_k):
     """Implementacion de referencia SIN bbox-crop (version lenta original
     que corre generic_filter sobre el array completo). Usada solo en tests
-    para verificar bit-equivalence contra la version optimizada."""
+    para verificar bit-equivalence contra la version optimizada.
+
+    S17 D1 fix: usa ARITHMETIC MEAN (no median) para matchear Coppola 2016a
+    SP 426.5 seccion Spatial analysis, confirmado en Campus et al. 2024 Bull
+    Volcanol 86:25 p.3 ("arithmetic mean of the radiance of the pixels
+    surrounding the alerted one(s)").
+    """
     from scipy.ndimage import generic_filter
     footprint = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=bool)
 
-    def nanmed(x):
+    def nanmean(x):
         valid = x[~np.isnan(x)]
-        return float(np.median(valid)) if valid.size else np.nan
+        return float(np.mean(valid)) if valid.size else np.nan
 
-    nbr = generic_filter(nti, nanmed, footprint=footprint,
+    nbr = generic_filter(nti, nanmean, footprint=footprint,
                          mode="constant", cval=np.nan)
     dnti = nti - nbr
     return (roi_mask & ~np.isnan(dnti) & ~np.isnan(bt)
             & (dnti > c1) & (bt > t_bg + bt_sanity_k))
+
+
+def test_kernel_uses_arithmetic_mean_not_median():
+    """Test S17 D1: el kernel 8-vecinos debe usar MEAN aritmetico, no median.
+
+    Caso: 1 outlier entre los 8 vecinos del pixel central. Mean y median
+    difieren. Coppola 2016a + Campus 2024 mandan mean aritmetico.
+
+    Pixel central NTI = -0.947. Siete vecinos = -0.95, uno (outlier) = -0.80.
+    Mean de vecinos = (7*(-0.95) + (-0.80))/8 = -6.65/8 - 0.1 = -0.93125.
+    Median de vecinos = -0.95 (sorted 8 values, center is -0.95).
+
+    dNTI con MEAN   = -0.947 - (-0.93125) = -0.01575  -> NEGATIVO, NO hot.
+    dNTI con MEDIAN = -0.947 - (-0.95)    = +0.003    -> JUSTO en c1 border.
+    Con c1=0.002 (estricto bajo c1=0.003 paper), median dispara, mean no.
+    """
+    nti = np.full((5, 5), -0.95, dtype=np.float64)
+    nti[2, 2] = -0.947         # centro
+    nti[1, 1] = -0.80          # outlier caliente (un vecino)
+    bt = np.full((5, 5), 295.0)
+    roi = np.ones((5, 5), dtype=bool)
+    # c1 = 0.002 es el umbral que distingue: mean no dispara, median si.
+    mask = contextual_dnti_hot_mask(
+        nti=nti, bt=bt, roi_mask=roi,
+        t_bg=285.0, c1=0.002, bt_sanity_k=3.0,
+    )
+    # Con mean: dNTI centro = -0.01575 < 0.002 -> NO hot.
+    # Con median (drift): dNTI centro = +0.003 > 0.002 -> SI hot (falso positivo).
+    assert mask[2, 2] == False, (
+        "Kernel usa median (drift S17 D1). Debe usar arithmetic mean segun "
+        "Coppola 2016a + Campus 2024."
+    )
 
 
 def test_bbox_crop_equivalence_small_roi_in_large_array():

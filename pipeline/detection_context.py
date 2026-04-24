@@ -27,12 +27,20 @@ _FOOTPRINT_8N = np.array(
 )
 
 
-def _nanmedian_ignore_self(x: np.ndarray) -> float:
-    """Median ignorando NaN; NaN si todos los vecinos son NaN."""
+def _nanmean_ignore_self(x: np.ndarray) -> float:
+    """Arithmetic mean ignorando NaN; NaN si todos los vecinos son NaN.
+
+    S17 D1 fix: Coppola 2016a SP 426.5 seccion "Spatial analysis" dice
+    textualmente "subtracting from its value the average (arithmetic mean)
+    of the eight neighbouring pixels". Campus et al. 2024 Bull Volcanol
+    86:25 p.3 confirma: "arithmetic mean of the radiance of the pixels
+    surrounding the alerted one(s)". Previo a este commit usabamos np.median,
+    drift sin respaldo en papers MIROVA. Cambio a np.mean aritmetica.
+    """
     valid = x[~np.isnan(x)]
     if valid.size == 0:
         return np.nan
-    return float(np.median(valid))
+    return float(np.mean(valid))
 
 
 def contextual_dnti_hot_mask(
@@ -79,7 +87,7 @@ def contextual_dnti_hot_mask(
     x0 = max(0, int(xs.min()) - 1)
     x1 = min(nti.shape[1], int(xs.max()) + 2)
     nbr_crop = generic_filter(
-        nti[y0:y1, x0:x1], _nanmedian_ignore_self,
+        nti[y0:y1, x0:x1], _nanmean_ignore_self,
         footprint=_FOOTPRINT_8N, mode="constant", cval=np.nan,
     )
     nti_nbr_med = np.full_like(nti, np.nan)
