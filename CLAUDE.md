@@ -25,8 +25,15 @@ viven en el vault Obsidian: `C:\Users\nmend\OneDrive\Escritorio\claude\Vault\`.
   - VIIRS I-band 375m (I4): `k = 18.0 × A_pix(140625)` = **2,531,250** (`WOOSTER_COEFF=18.0`)
   - MIROVA usa **A_pix nadir fijo** (sin corrección zenithal) para los 3 sensores.
   - NO usar Di Bella 2024 k=2.48×10⁷ para VIIRS 375m — no reproduce OSF (empírico).
-- **VRP TIR (I05)**: Stefan-Boltzmann (Aveni 2025 GRL, `σ = 5.67×10⁻⁸`).
-- **NTI**: umbral 3σ sobre background, mínimo 0.005.
+- **VRP TIR (I05)**: Stefan-Boltzmann puro (`σ = 5.67×10⁻⁸`). **Drift D3 RESUELTO S17**: Aveni 2024
+  RSE (TIRVolcH, mismo grupo MIROVA) usa Stefan-Boltzmann igual que Coppola 2024 y nuestro código.
+  La Eq.9 con k_TIR=60.17 de Aveni 2025 GRL es investigación no adoptada operacionalmente. Referencia
+  correcta ahora: Coppola 2024 cap Springer Eq.16 + Aveni 2024 RSE Eq.5. Ver `docs/DRIFTS_S17.md`.
+- **NTI**: umbral 3σ sobre background, mínimo 0.005. **DRIFT D2 S17**: ningún paper autoritativo
+  respalda 3σ uniforme. Coppola 2016a Tabla 1 dice 5σ summit / 10σ scene / 15σ diurno para MODIS.
+  Di Bella 2024 §3.3 dice VIIRS 12σ noche / 8σ día. Test A/B pendiente S18 — ver `docs/DRIFTS_S17.md`.
+- **Kernel 8-vecinos dNTI contextual**: `np.mean` aritmética (Coppola 2016a + Campus 2024). **Drift D1
+  RESUELTO S17** — previamente usábamos `np.median` sin respaldo documental.
 - **MIR solo nocturno** (contaminación solar diurna).
 - Bandas: MODIS 21/22 (3.929/3.959 μm) + 31 (11 μm TIR),
   VIIRS I04 (3.74 μm) / I05 (11.45 μm), VIIRS M13 (4.05 μm) / M15 (10.76 μm).
@@ -98,31 +105,42 @@ decisiones de umbrales, o cambios metodológicos:
 - `pipeline/`: fetch.py (earthaccess), process_modis.py, process_viirs.py, process_viirs_mod.py, store.py, scan_geometry.py
 - `frontend/index.html` (Chart.js + Leaflet, GitHub Pages)
 - `volcanoes.yaml` (45 configurados, 11 con data, 34 sin pull)
-- `.github/workflows/nrt.yml` (cron 6h)
+- `.github/workflows/nrt.yml` (cron cada 2h, matrix por volcán, **timeout 50 min per-step**)
+
+**Aprendizaje S15 sobre reprocesos largos (obligatorio respetar)**:
+- GitHub Actions free tier: **6h hard limit por job, 50 min soft timeout en nuestro workflow**.
+- **Nunca** lanzar reproceso full-history en GitHub Actions — timeout seguro.
+- Reprocesos de historia (más de 1 día) **deben correr en máquina local de Nicolás**
+  via `scripts/run_pipeline.py --profile X --volcano Y --start ... --end ...`.
+- GitHub Actions NRT solo procesa 1 día / cron (paraleliza por volcán, cabe en 50 min).
 - `data/` JSON por volcán (committed). Raw L1B/HDF **nunca** committed.
 
-## Skill triggers (invocar proactivamente)
+## Skill triggers (OBLIGATORIO invocar proactivamente)
 
-Claude debe invocar `Skill` sin que Nicolás lo pida cuando el tipo de trabajo
-encaje con la tabla. Esto es vinculante, no opcional.
+**Regla fuerte**: Claude DEBE invocar `Skill` ANTES de actuar cuando el trabajo
+encaje con la tabla. No es "proactivo opcional", es **vinculante**. El costo
+de invocar de más es bajo; el costo de saltarla es un fix mal hecho que
+después hay que revertir.
 
 | Situación | Skill a invocar | Por qué |
 |---|---|---|
-| Cualquier bug, FP/FN inesperado, anomalía en auditoría, "no entiendo por qué pasa esto" | `systematic-debugging` o `superpowers-systematic-debugging` | Forzar hipótesis → evidencia → root cause, no "miro y opino" |
-| Antes de escribir fix que toque `pipeline/` con >20 líneas de cambio | `writing-plans` | Plan formal con criterios de aceptación y reversión antes de tocar código |
+| Cualquier bug, FP/FN inesperado, anomalía, regresión de métricas, "no entiendo por qué pasa esto" | `superpowers-systematic-debugging` | Forzar hipótesis → evidencia → root cause. 4 fases obligatorias. Prohibido proponer fix sin investigación previa |
+| Antes de escribir fix que toque `pipeline/` con >20 líneas | `writing-plans` | Plan bite-sized con criterios de aceptación antes de tocar código |
+| **Paso atrás metodológico, revisión integral de trabajo, "estamos haciendo las cosas bien?"** | **`superpowers-brainstorming`** | Gate de diseño antes de seguir con implementación |
 | Ejecutar un plan ya escrito paso a paso | `executing-plans` | Checkpoints y no saltarse pasos |
 | Antes de editar `pipeline/process_*.py` o `scan_geometry.py` | `test-driven-development` | Primero el test que captura el bug, después el fix |
-| Antes de declarar un fix "listo", pushear a main, o cerrar un RF | `verification-before-completion` | Re-audit obligatoria sobre Tier A completo antes del push |
-| 2+ investigaciones independientes que se pueden hacer en paralelo (ej. RF1 en Lascar + RF2 en MODIS a la vez) | `dispatching-parallel-agents` | Paralelismo real vía subagentes, no serie |
-| Nicolás pide "automatiza X", "cada vez que Y", "antes de Z hacé W" | `update-config` | Esto es un hook, no una instrucción conversacional |
-| Cualquier trabajo con HDF/NetCDF/DataFrames grandes de records satelitales | `pandas-pro` | Operaciones vectorizadas correctas, no loops |
-| Antes de correr una auditoría que requiere perfilar/memoria | `python-performance-optimization` | Si el audit script tarda >5 min, perfilarlo antes de "optimizar a ojo" |
-| Diseñar un nuevo experimento (`experiments/NN_*.py`) | `writing-plans` + `test-driven-development` | Mismo rigor que código de producción |
-| Cerrar sesión con learnings nuevos | `revise-claude-md` | Consolidar lecciones en CLAUDE.md y memoria |
+| Antes de declarar un fix "listo", pushear a main, o cerrar item | `verification-before-completion` | Re-audit obligatoria sobre Tier A completo antes del push |
+| 2+ investigaciones independientes que se pueden hacer en paralelo | `dispatching-parallel-agents` | Paralelismo real vía subagentes, no serie |
+| Nicolás pide "automatiza X", "cada vez que Y", "antes de Z hacé W" | `update-config` | Esto es un hook de settings.json, no instrucción conversacional |
+| Trabajo con HDF/NetCDF/DataFrames grandes de records satelitales | `pandas-pro` | Operaciones vectorizadas, no loops |
+| Audit script que tarda >5 min | `python-performance-optimization` | Perfilar antes de "optimizar a ojo" |
+| Diseñar nuevo experimento (`experiments/NN_*.py`) | `writing-plans` + `test-driven-development` | Mismo rigor que código de producción |
+| **Cerrar sesión con learnings nuevos** | **`revise-claude-md` + `anthropic-skills:consolidate-memory`** | Consolidar lecciones en CLAUDE.md Y en memoria persistente antes de cerrar |
 
-**Regla meta**: si estoy por hacer algo y hay una skill listada arriba que
-aplica, la invoco **antes** de actuar. Si dudo si aplica, la invoco igual —
-el costo de invocar de más es bajo, el costo de saltarla es un fix mal hecho.
+**Regla meta (reforzada S16)**: si Claude duda si una skill aplica, la invoca igual.
+Costo invocar = 30 segundos. Costo de NO invocar = sesión entera perdida por
+fix mal hecho (ej: S15 S12 F1 sigma-gating que se aplicó sin systematic-debugging
+previo y tardamos 4 sesiones en entender la regresión).
 
 ## Glosario obligatorio (usar estos términos siempre en discusiones de resultados)
 
@@ -219,13 +237,94 @@ Para minimizar compactaciones automáticas ("session continued..."):
   descartadas por geofencing.
 
 ## Estado
-**S14 en curso (2026-04-21) — fix geometría MIROVA-equivalent SIN COMMITEAR.**
-Leer `tasks/status_s14_handoff.md` al arrancar próxima sesión. Cambios pendientes:
-radius_km=25 uniforme + inner_radius_km oficial MIROVA + schema unificado
-final_hotspot_* + distance_class + WOOSTER_COEFF 19.7 VIIRS_M + dashboard con
-About/credits + CLAUDE.md actualizado. OSF v2.5 descargada en
-`data/mirova_reference/` (no commitear 98 MB). Validación empírica coeficientes
-(error ≤0.17%) en `experiments/21_results.json`.
+
+**S17 cerrada (2026-04-23) — investigación sistemática + arquitectura de memoria instalada.**
+
+**Hallazgos críticos S17** (ver `docs/DRIFTS_S17.md`, `docs/PAPERS_AUDIT.md`, `docs/HYPOTHESIS_LOG.md`):
+1. **H10 CONFIRMADA**: falta NOAA-21 (VJ202IMG/VJ202MOD) en `fetch.py`. MIROVA sí lo procesa.
+   El cuello de botella real de recall Tupungatito/Chaitén no era sigma-gating (H1 refutada) sino
+   un satélite entero faltante. Implementación S18.
+2. **Fix performance Path D** aplicado (commit `ad030f5`): `generic_filter` crop al bbox ROI,
+   factor ~2400× más rápido.
+3. **3 drifts detectados** entre código vs papers autoritativos (ver DRIFTS_S17.md).
+4. **Arquitectura de memoria**: `docs/` con 5 documentos vivos (drifts, papers audit, data sources,
+   hypothesis log, session index). Mantener al cierre de cada sesión.
+
+**Próxima sesión S18**: fix D1 (median→mean), agregar NOAA-21, test A/B D2 (N·σ), reproceso 3
+volcanes Tier A, si valida push main. Leer `docs/SESSION_INDEX.md` para plan.
+
+**Handoff S16→S17 original**: `tasks/handoff_s17_2026_04_23.md` (parcialmente superado por S17 —
+H1 de ese handoff fue refutada, H10 es la real).
+
+### Fixes S15 aplicados (commits locales, pendientes push):
+
+1. **P3.2 — dNTI contextual 8-vecinos** (Coppola 2016a SP 426.5): Path D en
+   hot_mask de los 3 procesadores. Gate local NTI vs vecinos inmediatos,
+   inmune a heterogeneidad regional. Flag `enable_dnti_contextual_path: true`.
+
+2. **P3.1 — Dual-ROI thresholds** (Coppola 2016a Table 2): Path D con umbrales
+   distintos según distancia al vent. Summit `c1=0.003` sensible; scene
+   `c1=0.010` estricto. Flag `enable_dnti_dual_roi: true`.
+
+3. **Tema E — ROI bbox cuadrado** (paridad MIROVA KMZ GroundOverlay): reemplazar
+   `roi_mask = dist <= radius_km` (círculo) por bbox cuadrado 50×50 km via
+   `scan_geometry.roi_mask_bbox()`. Recupera las esquinas donde MIROVA publica
+   detecciones (Llaima Conguillío a 28 km, Copahue lejanas). +27% área.
+
+4. **Tema F — Sigma-cap eruption-path VIIRS**: paridad con MODIS que ya tenía
+   `MAX_SIGMA_COMPONENT_K=7.0` desde S6. Aplicado a VIIRS 375m y 750m. Cura
+   Tupungatito recall 0.04 donde σ_bg inflado (glaciar) saturaba el threshold
+   a 9-12 K, rechazando pixels reales a ΔT=8-9 K.
+
+### Scope limpieza S15 (aplicada):
+
+- Perfil `mirova_equivalent` ahora procesa SOLO los 11 volcanes Tier A que
+  MIROVA efectivamente monitorea (flag `mirova_monitored: true` en yaml).
+- Los 34 volcanes restantes (Laguna del Maule, Calbuco, Osorno, Parinacota,
+  etc.) fueron movidos a `data/experimental/` — siguen procesables bajo
+  perfil `experimental` pero fuera del dashboard operacional mientras modo (1).
+
+### Ground truth canónico S15:
+
+- **CSV MIROVA NRT** (`21_04_2026 registro_vrp_consolidado.csv`, scraper
+  Mirova-v1 contra latest.php): 13.7k filas, 3.5 meses, ~100% MODIS / ~80%
+  VIIRS. **Ground truth operacional primario bajo objetivo (1) clon MIROVA.**
+- **OSF v2.5 archive** (`data/mirova_reference/`): 615k filas globales, 48k
+  chilenas 2000-2025. Ground truth algorítmico histórico. 10/11 Tier A
+  calibrables. Tupungatito no aparece (caso singular OSF=0 NRT=60 AT).
+- **KMZ oficiales MIROVA** (`kmz/`): 15 archivos, GroundOverlay 50×50 km.
+  Revelaron offset Tupungatito 3 km SE y Planchón-Peteroa 1.87 km N del
+  vent Nicolás → `mirova_center_lat/lon` en volcanoes.yaml (Fase 0.7 S15).
+
+### Umbrales paridad MIROVA (acordados bajo objetivo 1):
+
+- Ratio VRP individual tolerable 0.5-2.0 (MIROVA declara ±30% error).
+- Ratio mediano volcán tolerable 0.7-1.4.
+- Recall tolerable ≥0.60 por volcán.
+- Precision tolerable ≥0.50 por volcán.
+- Max FP individual ≤5× MIROVA-max mensual.
+
+### Objetivo actual:
+
+**(1) Clon MIROVA operacional**. Ligeras diferencias aceptables (dentro de
+umbrales arriba), groseras inaceptables. Fase (2) herramienta independiente
+es futuro no inmediato.
+
+### Pendientes S15 (post-reproceso validación):
+
+- Leer `experiments/30_p32_delta_report.md` (o similar) para veredicto fixes.
+- Si validan: push main para sincronizar NRT.
+- Plan P3.6 water-aware filter escrito en `tasks/plan_s15_p3_6_water_aware_filter.md`
+  para fase (2) cuando Laguna del Maule vuelva a scope.
+- Lascar S11 regresión: en investigación agent forense (S15 2026-04-22).
+
+### Pre-S15 (S14 histórico):
+
+Fix S14 geometría MIROVA-equivalent: `radius_km=25` uniforme + `inner_radius_km`
+oficial MIROVA + schema unificado `final_hotspot_*` + `distance_class` +
+WOOSTER_COEFF 19.7 VIIRS_M + dashboard About/credits. OSF v2.5 en
+`data/mirova_reference/` (no commitear 98 MB). Validación empírica
+coeficientes (error ≤0.17%) en `experiments/21_results.json`.
 
 **S12 baseline (2026-04-16)**: 45 volcanes operacionales, 11 con refs MIROVA
 (14042026 consolidado, 494 refs). Auditoría contra MIROVA:

@@ -131,7 +131,7 @@ def append_record(volcano_name: str, record: dict,
     # Si vrp_mw < piso_sensor, se trata como no-detección (vrp_mw = 0).
     # Preserva el valor original en diag_vrp_raw_mw para auditoría.
     sensor = record.get("sensor", "")
-    if "375" in sensor or sensor in ("VIIRS_SNPP", "VIIRS_NOAA20"):
+    if "375" in sensor or sensor in ("VIIRS_SNPP", "VIIRS_NOAA20", "VIIRS_NOAA21"):
         floor = MIN_VRP_MW_VIIRS375
     elif "750" in sensor:
         floor = MIN_VRP_MW_VIIRS750

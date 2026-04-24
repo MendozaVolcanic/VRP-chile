@@ -48,13 +48,17 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # whatever the default profile was.
 _early = argparse.ArgumentParser(add_help=False)
 _early.add_argument("--profile", default=None,
-                    choices=["mirova_equivalent", "experimental"])
+                    choices=["mirova_equivalent", "experimental",
+                             "mirova_equivalent_backfill_nov2025",
+                             "s9_vent_permissive",
+                             "nsigma_mir_5", "nsigma_mir_12"])
 _early_args, _ = _early.parse_known_args()
 if _early_args.profile:
     os.environ["VRP_PROFILE"] = _early_args.profile
 
 from pipeline import fetch, process_modis, process_viirs, process_viirs_mod, store
 from pipeline import profile as vrp_profile
+from pipeline.geo_utils import get_effective_vent
 
 
 TMP_DIR = Path(__file__).parent.parent / "tmp"
@@ -157,9 +161,9 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
             # the active YAML profile without changing calling code.
             if "MODIS" in platform and not vrp_profile.SENSOR_MODIS:
                 continue
-            if platform in ("VIIRS_SNPP", "VIIRS_NOAA20") and not vrp_profile.SENSOR_VIIRS_375:
+            if platform in ("VIIRS_SNPP", "VIIRS_NOAA20", "VIIRS_NOAA21") and not vrp_profile.SENSOR_VIIRS_375:
                 continue
-            if platform in ("VIIRS_SNPP_750", "VIIRS_NOAA20_750") and not vrp_profile.SENSOR_VIIRS_750:
+            if platform in ("VIIRS_SNPP_750", "VIIRS_NOAA20_750", "VIIRS_NOAA21_750") and not vrp_profile.SENSOR_VIIRS_750:
                 continue
 
             # Separate L1B and geolocation files
@@ -176,12 +180,15 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         print(f"  No geolocation match for {l1b.name}")
                         continue
                     try:
+                        eff_vent_lat, eff_vent_lon = get_effective_vent(volcano)
                         result = process_modis.calculate_vrp(
                             l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"],
-                            vent_lat=volcano.get("vent_lat"),
-                            vent_lon=volcano.get("vent_lon"),
+                            vent_lat=eff_vent_lat,
+                            vent_lon=eff_vent_lon,
                             vent_radius_km=volcano.get("vent_radius_km", 4.0),
                             inner_radius_km=volcano.get("inner_radius_km"),
+                            exclude_zones=volcano.get("exclude_zones"),
+                            active_water_bodies=volcano.get("active_water_bodies"),
                         )
                         if result:
                             store.append_record(volcano["name"], result,
@@ -189,17 +196,17 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                                                 overwrite=overwrite,
                                                 max_hotspot_dist_km=volcano.get("radius_km"))
                             vent_str = (f" | VRP_VENT={result.get('vrp_vent_mw', 0)} MW"
-                                        if volcano.get("vent_lat") and result.get('vrp_vent_mw', 0) > 0 else "")
+                                        if eff_vent_lat is not None and result.get('vrp_vent_mw', 0) > 0 else "")
                             print(f"  {result['sensor']} | VRP={result['vrp_mw']} MW | "
                                   f"T_bg={result['t_bg_k']} K | T_max={result['t_max_k']} K | "
                                   f"anomalous_px={result['n_anomalous_pixels']}{vent_str}")
                     except Exception as e:
                         print(f"  ERROR processing {l1b.name}: {e}")
 
-            elif platform in ("VIIRS_SNPP", "VIIRS_NOAA20"):
-                # VIIRS 375m I-band (IMG product)
-                l1b_files = [p for p in paths if "VNP02IMG" in p.name or "VJ102IMG" in p.name]
-                geo_files = [p for p in paths if "VNP03IMG" in p.name or "VJ103IMG" in p.name]
+            elif platform in ("VIIRS_SNPP", "VIIRS_NOAA20", "VIIRS_NOAA21"):
+                # VIIRS 375m I-band (IMG product). 3 plataformas: SNPP / NOAA-20 / NOAA-21 (S18)
+                l1b_files = [p for p in paths if "VNP02IMG" in p.name or "VJ102IMG" in p.name or "VJ202IMG" in p.name]
+                geo_files = [p for p in paths if "VNP03IMG" in p.name or "VJ103IMG" in p.name or "VJ203IMG" in p.name]
                 geo_by_time = {_time_key(g.name): g for g in geo_files}
 
                 for l1b in l1b_files:
@@ -210,13 +217,16 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         print(f"  No geolocation match for {l1b.name}")
                         continue
                     try:
+                        eff_vent_lat, eff_vent_lon = get_effective_vent(volcano)
                         result = process_viirs.calculate_vrp(
                             l1b, geo,
                             volcano["lat"], volcano["lon"], volcano["radius_km"],
-                            vent_lat=volcano.get("vent_lat"),
-                            vent_lon=volcano.get("vent_lon"),
+                            vent_lat=eff_vent_lat,
+                            vent_lon=eff_vent_lon,
                             vent_radius_km=volcano.get("vent_radius_km", 4.0),
                             inner_radius_km=volcano.get("inner_radius_km"),
+                            exclude_zones=volcano.get("exclude_zones"),
+                            active_water_bodies=volcano.get("active_water_bodies"),
                         )
                         if result:
                             store.append_record(volcano["name"], result,
@@ -225,7 +235,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                                                 max_hotspot_dist_km=volcano.get("radius_km"))
                             vent_str = (f" | VRP_VENT={result['vrp_vent_mw']} MW "
                                         f"({result['n_vent_pixels']}px)"
-                                        if volcano.get("vent_lat") else "")
+                                        if eff_vent_lat is not None else "")
                             print(f"  {result['sensor']} (375m) | VRP_MIR={result['vrp_mir_mw']} MW | "
                                   f"VRP_TIR={result['vrp_tir_mw']} MW | "
                                   f"T_max={result['t_max_i04_k']} K"
@@ -233,10 +243,10 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                     except Exception as e:
                         print(f"  ERROR processing {l1b.name}: {e}")
 
-            elif platform in ("VIIRS_SNPP_750", "VIIRS_NOAA20_750"):
-                # VIIRS 750m M-band (MOD product) — MIROVA's "VIIRS" channel
-                l1b_files = [p for p in paths if "VNP02MOD" in p.name or "VJ102MOD" in p.name]
-                geo_files = [p for p in paths if "VNP03MOD" in p.name or "VJ103MOD" in p.name]
+            elif platform in ("VIIRS_SNPP_750", "VIIRS_NOAA20_750", "VIIRS_NOAA21_750"):
+                # VIIRS 750m M-band (MOD product) — MIROVA's "VIIRS" channel. +NOAA-21 (S18)
+                l1b_files = [p for p in paths if "VNP02MOD" in p.name or "VJ102MOD" in p.name or "VJ202MOD" in p.name]
+                geo_files = [p for p in paths if "VNP03MOD" in p.name or "VJ103MOD" in p.name or "VJ203MOD" in p.name]
                 geo_by_time = {_time_key(g.name): g for g in geo_files}
 
                 for l1b in l1b_files:
@@ -247,12 +257,15 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         print(f"  No geolocation match for {l1b.name}")
                         continue
                     try:
+                        eff_vent_lat, eff_vent_lon = get_effective_vent(volcano)
                         result = process_viirs_mod.calculate_vrp(
                             l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"],
-                            vent_lat=volcano.get("vent_lat"),
-                            vent_lon=volcano.get("vent_lon"),
+                            vent_lat=eff_vent_lat,
+                            vent_lon=eff_vent_lon,
                             vent_radius_km=volcano.get("vent_radius_km", 4.0),
                             inner_radius_km=volcano.get("inner_radius_km"),
+                            exclude_zones=volcano.get("exclude_zones"),
+                            active_water_bodies=volcano.get("active_water_bodies"),
                         )
                         if result:
                             store.append_record(volcano["name"], result,
@@ -301,7 +314,9 @@ def date_range(start: datetime, end: datetime):
 def main():
     parser = argparse.ArgumentParser(description="VRP Chile pipeline")
     parser.add_argument("--profile", default=None,
-                        choices=["mirova_equivalent", "experimental"],
+                        choices=["mirova_equivalent", "experimental",
+                                 "mirova_equivalent_backfill_nov2025",
+                                 "s9_vent_permissive"],
                         help="Detection profile (default: mirova_equivalent). "
                              "Selects thresholds, paths, sensors and output "
                              "data subdirectory. Already consumed before "
@@ -356,6 +371,14 @@ def main():
 
     if args.overwrite:
         print("Overwrite mode ON: existing records will be replaced.")
+
+    # S15 Tema E: scope filtering. Perfil mirova_equivalent procesa solo los
+    # 11 volcanes que MIROVA monitorea (Tier A). experimental procesa todos.
+    # Cuando se pide --volcano X explicito, se respeta (bypass).
+    if vrp_profile.PROFILE_NAME == "mirova_equivalent" and not args.volcano:
+        volcanoes = [v for v in volcanoes if v.get("mirova_monitored", False)]
+        print(f"Profile mirova_equivalent: filtrado a {len(volcanoes)} volcanes "
+              f"MIROVA-monitoreados.")
 
     for volcano in volcanoes:
         for date in dates:

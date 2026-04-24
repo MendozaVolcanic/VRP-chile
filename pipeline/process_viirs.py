@@ -28,7 +28,8 @@ except ImportError:
     H5_AVAILABLE = False
     print("WARNING: h5py not found. Install: pip install h5py")
 
-from .scan_geometry import viirs_pixel_areas
+from .scan_geometry import viirs_pixel_areas, roi_mask_bbox
+from .exclusion_zones import filter_hot_mask
 
 
 SIGMA = 5.670374419e-8   # Stefan-Boltzmann constant, W/m^2/K^4 (TIR only)
@@ -76,7 +77,34 @@ from pipeline.profile import (
     ENABLE_NTI_RELATIVE_PATH,
     NTI_REL_N_SIGMA,
     NTI_REL_MIN_FLOOR,
+    MAX_SIGMA_COMPONENT_K,
+    DNTI_CONTEXTUAL_C1,
+    DNTI_CONTEXTUAL_C1_SUMMIT,
+    DNTI_CONTEXTUAL_C1_SCENE,
+    ENABLE_DNTI_CONTEXTUAL_PATH,
+    ENABLE_DNTI_DUAL_ROI,
 )
+from .detection_context import (
+    contextual_dnti_hot_mask,
+    dual_roi_contextual_dnti_hot_mask,
+)
+
+
+def _sensor_label_from_filename(filename: str) -> str:
+    """Map VIIRS I-band L1B filename → sensor label used in records/CSV.
+
+    VNP02IMG / VNP03IMG  → VIIRS_SNPP     (Suomi-NPP, 2011)
+    VJ102IMG / VJ103IMG  → VIIRS_NOAA20   (JPSS-1, 2017)
+    VJ202IMG / VJ203IMG  → VIIRS_NOAA21   (JPSS-2, 2022, S18)
+
+    El sufijo _NRT (LANCE) no altera el sensor. Antes de S18 todo VJ*IMG se
+    colapsaba a VIIRS_NOAA20, confundiendo NOAA-21 con NOAA-20 en el CSV.
+    """
+    if filename.startswith("VNP"):
+        return "VIIRS_SNPP"
+    if filename.startswith("VJ2"):
+        return "VIIRS_NOAA21"
+    return "VIIRS_NOAA20"
 
 
 def bt_to_spectral_radiance(bt: np.ndarray, wavelength_um: float) -> np.ndarray:
@@ -191,7 +219,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                   radius_km: float = 30.0,
                   vent_lat: float = None, vent_lon: float = None,
                   vent_radius_km: float = 4.0,
-                  inner_radius_km: float | None = None) -> dict | None:
+                  inner_radius_km: float | None = None,
+                  exclude_zones: list = None,
+                  active_water_bodies: list = None) -> dict | None:
     """
     Calculate VRP from a single VIIRS L1B granule.
 
@@ -222,7 +252,18 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
 
     dist = haversine_km(volcano_lat, volcano_lon, lat, lon)
 
-    roi_mask = dist <= radius_km
+    # P3.1 S15: per-pixel distance from effective vent (mirova_center if set,
+    # else vent_lat/lon, else volcano center). Used for dual-ROI summit/scene.
+    if vent_lat is not None and vent_lon is not None:
+        vent_dist_per_pixel = haversine_km(vent_lat, vent_lon, lat, lon)
+    else:
+        vent_dist_per_pixel = dist
+
+    # S15 Tema E: bbox cuadrado (paridad MIROVA) en vez de circulo inscrito.
+    # Recupera las esquinas del bbox 50x50 km (hasta ~35 km diagonal) donde
+    # MIROVA publica detecciones que circulo radio 25 km perdia (Llaima
+    # Conguillio a 28 km, Copahue lejanas, etc.).
+    roi_mask = roi_mask_bbox(lat, lon, volcano_lat, volcano_lon, radius_km)
     bg_mask = (dist >= BG_INNER_KM) & (dist <= BG_OUTER_KM)
 
     if not np.any(roi_mask):
@@ -291,6 +332,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     n_bt_path = 0
     n_nti_path = 0
     n_nti_rel_path = 0
+    # S16 fix: inicializar n_dnti_ctx_path aqui en vez de dentro del bloque
+    # condicional, para evitar UnboundLocalError cuando "I04" no esta en bands
+    # o len(bg_vals) < 10 (granules con poco data utilizable).
+    n_dnti_ctx_path = 0
+    n_excluded_water = 0
     hotspot_lat = None
     hotspot_lon = None
     hotspot_dist_km = None
@@ -303,7 +349,14 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             t_bg_i04 = float(np.median(bg_vals))
             std_bg = float(np.std(bg_vals))
             std_bg_i04 = std_bg  # S12: save for vent-path sigma gating
-            threshold_mir = max(ANOMALY_THRESHOLD_K, N_SIGMA_MIR * std_bg)
+            # S15 Tema F: sigma-cap en eruption-path (paridad con MODIS,
+            # cura Tupungatito recall 0.04). Sin cap, sigma_bg inflado por
+            # glaciar/orografia (Tupungatito 5682m, Villarrica cono glaciar)
+            # empujaba el threshold a 9-12 K, rechazando pixels reales
+            # MIROVA a DeltaT=8-9 K. Cap a 7 K (default MIROVA) coincide
+            # con el gate MODIS (process_modis.py linea 253).
+            sigma_component = min(N_SIGMA_MIR * std_bg, MAX_SIGMA_COMPONENT_K)
+            threshold_mir = max(ANOMALY_THRESHOLD_K, sigma_component)
 
             roi_bt_full = np.where(roi_mask & ~np.isnan(bt), bt, np.nan)
 
@@ -346,7 +399,49 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             else:
                 nti_rel_hot = np.zeros_like(bt_path_hot)
 
-            hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot
+            # Path D — dNTI contextual 8-vecinos (P3.2 + P3.1 S15, Coppola 2016a).
+            # P3.2: anomaly requires the pixel to stand out from its immediate
+            # neighbors, not from the ring average -- immune to uniformly warm
+            # terrain (Lastarria hidrotermal, ratio 19.87 pre-P3.2).
+            # P3.1: when enabled + inner_radius_km set, use dual-ROI thresholds:
+            # summit (dist<=inner) C1=0.003 sensible; scene C1=0.010 strict.
+            # Necesario para Lastarria: Path D solo capturaba 55% pixels en
+            # 15-25 km (Lazufre, termico real pero MIROVA descarta).
+            # n_dnti_ctx_path ya inicializado a 0 antes del bloque (S16 fix).
+            if (ENABLE_DNTI_CONTEXTUAL_PATH
+                    and "I05" in bands
+                    and not np.isnan(nti_bg)):
+                if ENABLE_DNTI_DUAL_ROI and inner_radius_km is not None:
+                    dnti_ctx_hot = dual_roi_contextual_dnti_hot_mask(
+                        nti=nti, bt=bt, roi_mask=roi_mask,
+                        dist_km=vent_dist_per_pixel,
+                        t_bg=t_bg_i04,
+                        c1_summit=DNTI_CONTEXTUAL_C1_SUMMIT,
+                        c1_scene=DNTI_CONTEXTUAL_C1_SCENE,
+                        inner_km=inner_radius_km,
+                        bt_sanity_k=NTI_BT_SANITY_K,
+                    )
+                else:
+                    dnti_ctx_hot = contextual_dnti_hot_mask(
+                        nti=nti, bt=bt, roi_mask=roi_mask,
+                        t_bg=t_bg_i04,
+                        c1=DNTI_CONTEXTUAL_C1,
+                        bt_sanity_k=NTI_BT_SANITY_K,
+                    )
+                n_dnti_ctx_path = int(np.sum(dnti_ctx_hot))
+            else:
+                dnti_ctx_hot = np.zeros_like(bt_path_hot)
+
+            hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot | dnti_ctx_hot
+
+            # S16 P3.6: filtrar pixels en exclude_zones (cuerpos de agua/salares
+            # irradiando calor nocturno que bbox 50x50 km incluye -> FPs masivos).
+            # Whitelist active_water_bodies preserva (lagos crateres activos).
+            n_excluded_water = 0
+            if exclude_zones:
+                hot_mask_2d, n_excluded_water = filter_hot_mask(
+                    hot_mask_2d, lat, lon, exclude_zones, active_water_bodies)
+
             n_bt_path = int(np.sum(bt_path_hot))
             n_nti_path = int(np.sum(nti_path_hot))
 
@@ -474,7 +569,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         vent_hotspot_dist_km = vent_hotspot_dist_km_candidate
 
     name = l1b_path.name
-    sensor = "VIIRS_SNPP" if name.startswith("VNP") else "VIIRS_NOAA20"
+    sensor = _sensor_label_from_filename(name)
 
     # --- Schema unification (S14 D6) ---
     # Unified final_hotspot_* fields with eruption→vent fallback so downstream
@@ -505,9 +600,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "vrp_tir_mw": round(vrp_tir_mw, 3),
         "vrp_vent_mw": round(vrp_vent_mw, 3),
         "n_anomalous_pixels": n_anomalous,
+        "n_excluded_water": n_excluded_water if "I04" in bands and len(bg_vals) >= 10 else 0,
         "n_bt_path": n_bt_path,
         "n_nti_path": n_nti_path,
         "n_nti_rel_path": n_nti_rel_path,
+        "n_dnti_ctx_path": n_dnti_ctx_path,
         "n_vent_pixels": n_vent_pixels,
         "vent_hotspot_lat": vent_hotspot_lat,
         "vent_hotspot_lon": vent_hotspot_lon,

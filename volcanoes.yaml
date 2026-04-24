@@ -1,5 +1,6 @@
 volcanoes:
 - name: PuyehueCordonCaulle
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
   display_name: Puyehue - Cordón Caulle
   lat: -40.59
   lon: -72.117
@@ -16,6 +17,7 @@ volcanoes:
   vent_lon: -72.146137
   vent_radius_km: 3
 - name: Villarrica
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
   display_name: Villarrica
   lat: -39.42
   lon: -71.93
@@ -32,6 +34,7 @@ volcanoes:
   vent_lon: -71.939876
   vent_radius_km: 2
 - name: Lascar
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
   display_name: Láscar
   lat: -23.369
   lon: -67.732
@@ -47,6 +50,14 @@ volcanoes:
   vent_lat: -23.36293
   vent_lon: -67.731416
   vent_radius_km: 3
+  # S16 P3.6: zonas excluidas (cuerpos de agua/salares irradiando calor
+  # nocturno que el bbox 50x50 km incluye y generan FPs masivos).
+  # Salar de Atacama: 4326 pixels FP en VIIRS_SNPP 2026-04-08 -> VRP 1437 MW.
+  exclude_zones:
+    - name: "Salar de Atacama"
+      lat: -23.5
+      lon: -68.2
+      radius_km: 25.0
 - name: Antuco
   display_name: Antuco
   lat: -37.406
@@ -60,6 +71,7 @@ volcanoes:
   - VIIRS
   notes: Stratovolcano 2979m. Horseshoe caldera.
 - name: Copahue
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
   display_name: Copahue
   lat: -37.856
   lon: -71.183
@@ -125,6 +137,7 @@ volcanoes:
   - VIIRS
   notes: Glacier-covered stratovolcano 3242m. Fumarolic.
 - name: NevadosDeChillan
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
   display_name: Nevados de Chillán
   lat: -36.863
   lon: -71.377
@@ -177,6 +190,7 @@ volcanoes:
   - VIIRS
   notes: Stratovolcano 2806m. Geothermal field.
 - name: Llaima
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
   display_name: Llaima
   lat: -38.692
   lon: -71.729
@@ -325,6 +339,7 @@ volcanoes:
   - VIIRS
   notes: Glacier-covered stratovolcano. Last eruption ~1835.
 - name: Chaiten
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
   display_name: Chaitén
   lat: -42.833
   lon: -72.646
@@ -413,6 +428,7 @@ volcanoes:
   - VIIRS
   notes: Stratovolcano 4280m. Phreatic explosion 1994.
 - name: PlanchonPeteroa
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
   display_name: Planchón-Peteroa
   lat: -35.24
   lon: -70.568
@@ -429,7 +445,12 @@ volcanoes:
   vent_lat: -35.241099
   vent_lon: -70.573345
   vent_radius_km: 3
+  # MIROVA scene center (KMZ GroundOverlay LatLonBox) offset 1.87 km N of
+  # Nicolas vent; MIROVA anchors on old Planchon crater, not new Peteroa SW.
+  mirova_center_lat: -35.2232
+  mirova_center_lon: -70.5695
 - name: Lastarria
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
   display_name: Lastarria
   lat: -25.168
   lon: -68.507
@@ -447,6 +468,7 @@ volcanoes:
   vent_lon: -68.507
   vent_radius_km: 3
 - name: Isluga
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
   display_name: Isluga
   lat: -19.15
   lon: -68.83
@@ -571,6 +593,7 @@ volcanoes:
   - VIIRS
   notes: Stratovolcano 5856m. Near Santiago. Last eruption 1960.
 - name: Tupungatito
+  mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
   display_name: Tupungatito
   lat: -33.4
   lon: -69.8
@@ -587,3 +610,20 @@ volcanoes:
   vent_lat: -33.389044
   vent_lon: -69.826374
   vent_radius_km: 5
+  # MIROVA scene center (KMZ GroundOverlay LatLonBox) offset 2.99 km SE of
+  # Nicolas vent; MIROVA likely anchored on SE crater field, not main summit.
+  mirova_center_lat: -33.4269
+  mirova_center_lon: -69.8004
+  # S16 P3.6: Embalse El Yeso a 25-27 km SE del vent. Bbox lo incluye ->
+  # FPs 58-205 MW en abril 2026.
+  exclude_zones:
+    - name: "Embalse El Yeso"
+      lat: -33.67
+      lon: -70.08
+      radius_km: 5.0
+  # Whitelist: laguna cratérica activa (preserva detecciones reales del lago).
+  active_water_bodies:
+    - name: "crater_lake_tupungatito"
+      lat: -33.4269
+      lon: -69.8004
+      radius_km: 1.0

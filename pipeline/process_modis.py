@@ -28,7 +28,8 @@ except ImportError:
     HDF4_AVAILABLE = False
     print("WARNING: pyhdf not found. Install: conda install -c conda-forge pyhdf")
 
-from .scan_geometry import modis_pixel_areas
+from .scan_geometry import modis_pixel_areas, roi_mask_bbox
+from .exclusion_zones import filter_hot_mask
 
 
 SIGMA = 5.670374419e-8
@@ -79,6 +80,15 @@ from pipeline.profile import (
     N_SIGMA_VENT,
     MAX_VENT_SIGMA_CONTRIB_K,
     MIN_VENT_PIXELS,
+    DNTI_CONTEXTUAL_C1,
+    DNTI_CONTEXTUAL_C1_SUMMIT,
+    DNTI_CONTEXTUAL_C1_SCENE,
+    ENABLE_DNTI_CONTEXTUAL_PATH,
+    ENABLE_DNTI_DUAL_ROI,
+)
+from .detection_context import (
+    contextual_dnti_hot_mask,
+    dual_roi_contextual_dnti_hot_mask,
 )
 
 # Indices of bands 21 and 22 within EV_1KM_Emissive
@@ -176,7 +186,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                   radius_km: float = 15.0,
                   vent_lat: float = None, vent_lon: float = None,
                   vent_radius_km: float = 4.0,
-                  inner_radius_km: float | None = None) -> dict | None:
+                  inner_radius_km: float | None = None,
+                  exclude_zones: list = None,
+                  active_water_bodies: list = None) -> dict | None:
     """
     Calculate VRP from MODIS L1B granule.
 
@@ -200,7 +212,14 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     pixel_areas = modis_pixel_areas(lat.shape)
     dist = haversine_km(volcano_lat, volcano_lon, lat, lon)
 
-    roi_mask = dist <= radius_km
+    # P3.1 S15: per-pixel distance from effective vent for dual-ROI.
+    if vent_lat is not None and vent_lon is not None:
+        vent_dist_per_pixel = haversine_km(vent_lat, vent_lon, lat, lon)
+    else:
+        vent_dist_per_pixel = dist
+
+    # S15 Tema E: bbox cuadrado (paridad MIROVA KMZ 50x50 km).
+    roi_mask = roi_mask_bbox(lat, lon, volcano_lat, volcano_lon, radius_km)
     bg_mask = (dist >= BG_INNER_KM) & (dist <= BG_OUTER_KM)
 
     if not np.any(roi_mask):
@@ -298,7 +317,39 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         & (nti > NTI_K1_NIGHT)
         & (bt_mir > (t_bg + NTI_BT_SANITY_K))
     )
-    hot_mask_2d = bt_path_hot | nti_path_hot
+
+    # Path D — dNTI contextual 8-vecinos (P3.2 + P3.1 S15, Coppola 2016a).
+    # P3.1 dual-ROI: summit C1=0.003 sensible, scene C1=0.010 estricto.
+    n_dnti_ctx_path = 0
+    if ENABLE_DNTI_CONTEXTUAL_PATH and not np.isnan(nti_bg):
+        if ENABLE_DNTI_DUAL_ROI and inner_radius_km is not None:
+            dnti_ctx_hot = dual_roi_contextual_dnti_hot_mask(
+                nti=nti, bt=bt_mir, roi_mask=roi_mask,
+                dist_km=vent_dist_per_pixel,
+                t_bg=t_bg,
+                c1_summit=DNTI_CONTEXTUAL_C1_SUMMIT,
+                c1_scene=DNTI_CONTEXTUAL_C1_SCENE,
+                inner_km=inner_radius_km,
+                bt_sanity_k=NTI_BT_SANITY_K,
+            )
+        else:
+            dnti_ctx_hot = contextual_dnti_hot_mask(
+                nti=nti, bt=bt_mir, roi_mask=roi_mask,
+                t_bg=t_bg,
+                c1=DNTI_CONTEXTUAL_C1,
+                bt_sanity_k=NTI_BT_SANITY_K,
+            )
+        n_dnti_ctx_path = int(np.sum(dnti_ctx_hot))
+    else:
+        dnti_ctx_hot = np.zeros_like(bt_path_hot)
+
+    hot_mask_2d = bt_path_hot | nti_path_hot | dnti_ctx_hot
+
+    # S16 P3.6: filtrar exclude_zones.
+    n_excluded_water = 0
+    if exclude_zones:
+        hot_mask_2d, n_excluded_water = filter_hot_mask(
+            hot_mask_2d, lat, lon, exclude_zones, active_water_bodies)
     hot_rows, hot_cols = np.where(hot_mask_2d)
     n_anomalous = len(hot_rows)
     n_bt_path = int(np.sum(bt_path_hot))
@@ -450,6 +501,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "diag_nti_max": round(nti_max, 4) if not (nti_max != nti_max) else None,
         "diag_n_bt_path": n_bt_path,
         "diag_n_nti_path": n_nti_path,
+        "diag_n_dnti_ctx_path": n_dnti_ctx_path,
         "sensor": "MODIS_TERRA" if "MOD0" in hdf_path.name else "MODIS_AQUA",
         "granule": hdf_path.name,
         "product_version": "nrt" if "_NRT" in hdf_path.name else "standard",
