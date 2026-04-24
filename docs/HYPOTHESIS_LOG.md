@@ -106,8 +106,30 @@
 - **Hipótesis**: las horas MIROVA que "no existen en CMR" son granules NOAA-21 (VJ202IMG) que nuestro fetch.py no enumera. `PRODUCTS` dict tiene SNPP (VNP) + NOAA-20 (VJ1) pero no NOAA-21 (VJ2).
 - **Evidencia**: earthaccess.search_data con VJ202IMG 2026-04-10 retorna granules a **04:48 y 06:24 UTC** — exactamente las horas MIROVA que faltaban.
 - **Criterio testable**: agregar NOAA-21 a PRODUCTS, reproceso Tupungatito abril 2026, recall summit-only vent-based debe subir de 5/13 a ≥10/13 (0.77+).
-- **Estado**: **CONFIRMADA PARCIAL** (granules existen, falta integrar al pipeline).
-- **Resolución**: implementación S18. NOAA-21 no tiene paper MIROVA que lo respalde, pero sí ATBD NASA (JPSS Rev C) — respaldo operacional suficiente.
+- **Estado**: **✅ CONFIRMADA y RESUELTA** (S18 2026-04-24).
+- **Resolución S18**: implementación en commit `b08b71f`. Reproceso 3 volcanes Tier A validó:
+    - Lascar: 22/42 → 36/42 (0.52 → **0.86**, +14 TP)
+    - Chaitén: 1/2 → 2/2 (0.50 → **1.00**, +1 TP)
+    - Tupungatito: 4/17 → 7/17 (0.24 → **0.41**, +3 TP, +75% relativo)
+  Confirmado que NOAA-21 agrega TPs reales (contrafactual: sin NOAA-21 el recall cae al baseline). Tupungatito no alcanza el criterio 0.77 del handoff — el resto del cuello es H17 (Embalse El Yeso / σ_bg inflado). Merge a main commit `f78ad5d`.
+
+---
+
+## H17 — Tupungatito: el cuello residual post-NOAA-21 es Embalse El Yeso (FPs far) o σ_bg inflado por glaciar
+
+- **Formulada**: S18 (2026-04-24).
+- **Contexto**: H10 implementada y validada, pero Tupungatito sigue en recall 0.41 vs 0.77 esperado. De los 148 records reprocesados en la ventana, **solo 1 quedó clasificado summit** y 36 como far. El Embalse El Yeso (documentado en S16 P3.6 con exclusion_zones) queda a ~15 km del cráter y genera FPs de 200-1500 MW que se clasifican "far" correctamente pero pueden estar "robando" el match 15-min a las refs MIROVA summit legítimas (un record far no cuenta como TP summit).
+- **Hipótesis alternativa**: σ_bg de Tupungatito inflado por glaciar/heterogeneidad eleva el umbral efectivo (max(1K, 2·σ)) por encima de la señal real sub-pixel de 1-2 K del cráter hidrotermal.
+- **Evidencia a favor**:
+  - 36/37 detecciones S18 Tupungatito son "far" — desbalance extremo vs Lascar (34/79 far) y Chaitén (0 far).
+  - σ_bg de Tupungatito pre-S16 era 2-3 K (glaciar + orografía), no 0.5-1 K esperable en volcán claro.
+  - exclusion_zones P3.6 marcó Embalse El Yeso pero puede no estar activo en el reproceso S18 (verificar flag).
+- **Criterio testable**:
+  1. Verificar si `exclude_zones` del YAML Tupungatito está siendo aplicado (log `n_excluded_water > 0`).
+  2. Separar FN por causa: (a) no hay granule ese día, (b) granule sí pero BT<umbral, (c) detección está pero cae en far por FP Embalse.
+  3. Si (c) es >30%, expandir exclusion_zones radial o aplicar sigma-cap más agresivo.
+- **Estado**: **ACTIVE** — investigación S19.
+- **Resolución**: pendiente.
 
 ---
 

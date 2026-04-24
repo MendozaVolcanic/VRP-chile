@@ -123,8 +123,8 @@ Fase 3 (S19+). Agregar bandas coloreadas en chart + badge por volcán con nivel 
 
 | ID | Drift | Estado | Decisión | Sesión |
 |---|---|---|---|---|
-| D1 | `np.median` kernel 8-vec | ✅ Resuelto S17 tarde | Fix `np.mean` aplicado (commit pendiente) | **S17** |
-| D2 | `N_SIGMA_MIR=3.0` uniforme | Confirmado, ambiguo entre papers | Test A/B 3 configs vs OSF | S18 |
+| D1 | `np.median` kernel 8-vec | ✅ Resuelto S17 tarde | Fix `np.mean` aplicado (merge `f78ad5d`) | **S17** |
+| D2 | `N_SIGMA_MIR=3.0` uniforme | Infra instalada S18 (profiles nsigma_mir_5/12 + script 37), ejecución diferida | Ejecutar en S19 con los 11 Tier A | S19 |
 | D3 | TIR Stefan-Boltzmann | ✅ Resuelto S17 tarde (Aveni 2024 confirma SB puro) | Mantener | — |
 | D4 | Escala Low/Medium/.../Extreme | Feature gap | Agregar dashboard | S19-20 |
 | D5 | Sin supervisión humana | Diseño | Documentar | — |
