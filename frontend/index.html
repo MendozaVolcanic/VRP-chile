@@ -462,7 +462,15 @@ const VOLCANOES_ALL = [
   { name: "Lascar",               display: "Láscar",                 region: "Antofagasta",   lat: -23.369, lon: -67.732, radius_km: 25, inner_radius_km: 5, vent_radius_km: 3, hasMirova: true,  vent_lat: -23.362930, vent_lon: -67.731416 },
   { name: "Lastarria",            display: "Lastarria",              region: "Atacama",        lat: -25.168, lon: -68.507, radius_km: 25, inner_radius_km: 3, vent_radius_km: 3, hasMirova: true,  vent_lat: -25.168, vent_lon: -68.507 },
   // === Zona Central SVZ ===
-  { name: "Tupungatito",          display: "Tupungatito",            region: "Valparaíso",    lat: -33.400, lon: -69.800, radius_km: 25, inner_radius_km: 7, vent_radius_km: 5, hasMirova: true,  vent_lat: -33.389044, vent_lon: -69.826374 },
+  { name: "Tupungatito",          display: "Tupungatito",            region: "Valparaíso",    lat: -33.400, lon: -69.800, radius_km: 25, inner_radius_km: 7, vent_radius_km: 5, hasMirova: true,  vent_lat: -33.389044, vent_lon: -69.826374,
+    // S19 M2: hotspot NE recurrente detectado en 4 días distintos del reproceso
+    // S18 (2026-04-15/17/18/19). H17a candidato — identificar visualmente.
+    points_of_interest: [
+      { lat: -33.28, lon: -69.58, label: "Hotspot NE recurrente",
+        note: "4 detecciones 2026-04-15/17/18/19. ¿Nevado El Plomo? ¿planta solar? ¿ruta minera?",
+        radius_km: 3 }
+    ]
+  },
   { name: "SanJose",              display: "San José",               region: "Metropolitana",  lat: -33.789, lon: -69.897, radius_km: 10 },
   { name: "Tinguiririca",         display: "Tinguiririca",           region: "O'Higgins",     lat: -34.814, lon: -70.352, radius_km: 10 },
   { name: "PlanchonPeteroa",      display: "Planchón-Peteroa",       region: "Maule",         lat: -35.240, lon: -70.568, radius_km: 25, inner_radius_km: 3, vent_radius_km: 3, hasMirova: true,  vent_lat: -35.241099, vent_lon: -70.573345 },
@@ -969,7 +977,7 @@ function renderDetail() {
   [
     ["#e91e63", "VIIRS 375m"], ["#00bcd4", "VIIRS 750m"], ["#ff8c00", "MODIS"],
     ["#ff5252", "Radio cráter (🎯 summit)"], ["#8a8a8a", "Detección lejana (📍 far)"],
-    ["#7c4dff", "Vent-path"], ["#ffc107", "Radio vent-path"], ["#7a8fa6", "Radio búsqueda 25 km"]
+    ["#7c4dff", "Vent-path / POI investigación"], ["#ffc107", "Radio vent-path"], ["#7a8fa6", "Radio búsqueda 25 km"]
   ].forEach(([color, label]) => {
     const item = el("div", "map-legend-item");
     const dot = el("div", "map-legend-dot");
@@ -1038,6 +1046,29 @@ function renderDetail() {
         radius: 5, color: "#fff", weight: 1.5, fillColor: "#ffc107",
         fillOpacity: 0.9,
       }).addTo(map).bindPopup("Vent fumarólico");
+    }
+
+    // S19 M2: puntos de interés (hotspots recurrentes a investigar, etc.)
+    // Color violeta para no chocar con rojo (cráter)/gris (far)/amarillo (vent).
+    if (v.points_of_interest && v.points_of_interest.length > 0) {
+      v.points_of_interest.forEach(poi => {
+        // Círculo del radio match (3 km típico)
+        if (poi.radius_km) {
+          L.circle([poi.lat, poi.lon], {
+            radius: poi.radius_km * 1000, color: "#b388ff", weight: 1,
+            fillColor: "#b388ff", fillOpacity: 0.10, dashArray: "4,4",
+          }).addTo(map);
+        }
+        // Marcador del POI
+        L.circleMarker([poi.lat, poi.lon], {
+          radius: 8, color: "#fff", weight: 2, fillColor: "#7c4dff",
+          fillOpacity: 0.95,
+        }).addTo(map).bindPopup(
+          `<b>${poi.label}</b><br>` +
+          `${poi.lat.toFixed(3)}, ${poi.lon.toFixed(3)}<br>` +
+          (poi.note ? `<small>${poi.note}</small>` : "")
+        );
+      });
     }
 
     // Hotspot markers from detections — show ALL anomalous pixels per record
