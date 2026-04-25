@@ -32,7 +32,8 @@ from statistics import median
 
 
 ROOT = Path(__file__).parent.parent
-CSV_PATH = ROOT / "21_04_2026 registro_vrp_consolidado.csv"
+# S19 2026-04-25: actualizado al CSV reciente con +5 días de cobertura.
+CSV_PATH = ROOT / "registro_vrp_consolidado_25_04_2026.csv"
 
 INNER_KM = {"Tupungatito": 7.0, "Chaiten": 5.0, "Lascar": 5.0}
 VOLMAP = {"Lascar": "Lascar", "Chaiten": "Chaiten", "Tupungatito": "Tupungatito"}
@@ -147,11 +148,14 @@ def main():
     if sys.platform == "win32":
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
-    start = datetime(2026, 4, 8)
-    end = datetime(2026, 4, 22, 23, 59)
+    # S19 2026-04-25: ventana extendida a 30 días (vs 15 de S18) para más
+    # poder estadístico, especialmente Tupungatito (35 refs vs 17) y Lascar
+    # (~85 refs vs 42).
+    start = datetime(2026, 3, 25)
+    end = datetime(2026, 4, 24, 23, 59)
 
-    print("S18 Test A/B drift D2 — N·σ multiplier")
-    print(f"Ventana: 2026-04-08 → 2026-04-22 | Volcanes: {', '.join(VOLS)}")
+    print("S19 Test A/B drift D2 — N·σ multiplier")
+    print(f"Ventana: 2026-03-25 → 2026-04-24 (30 días) | Volcanes: {', '.join(VOLS)}")
     print(f"Criterio TP: match MIROVA sensor+tiempo (<=15 min) con vrp>0 nuestro")
     print("=" * 108)
 

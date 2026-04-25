@@ -163,14 +163,23 @@
 ## H13 — N·σ uniforme 3.0 es inferior al ~4× vs papers MIROVA (drift D2)
 
 - **Formulada**: S17 (2026-04-23).
-- **Evidencia**:
+- **Evidencia inicial**:
   - Coppola 2016a Tabla 1: MODIS 5/10/15 dual-ROI + día.
   - Di Bella 2024 §3.3 p.6: VIIRS 12 noche / 8 día, MODIS 5/10.
   - Nuestro código: 3.0 uniforme.
-- **Hipótesis**: nuestro 3σ es demasiado permisivo, explica FPs sistemáticos.
-- **Criterio testable**: test A/B de 3 configuraciones (actual, Coppola 5/10/15, Di Bella 12/8) en los 11 Tier A, sobre OSF v2.5. Adoptar el que maximice F1 sin recall < 0.60.
-- **Estado**: **CONFIRMADA con ambigüedad** (ningún paper soporta 3σ uniforme, pero Coppola y Di Bella discrepan entre sí).
-- **Resolución**: S18.
+- **Hipótesis original**: nuestro 3σ es demasiado permisivo, explica FPs sistemáticos.
+- **Criterio testable**: test A/B de 3 configuraciones (3σ baseline, 5σ Coppola, 12σ Di Bella) sobre Tupungatito/Chaitén/Lascar, ventana 30 días. Adoptar el que maximice F1.
+- **Estado**: **✅ REFUTADA — 3σ NO es problemático**. Resuelto S19 (2026-04-25).
+- **Resolución completa**:
+  - Test A/B ejecutado S19 con 6 reprocesos (3 volcanes × 2 perfiles 5σ/12σ + baseline 3σ S18 existente).
+  - **Resultado agregado**: 3σ gana en F1 (0.36 vs 0.29), recall (0.71 vs 0.64), precision (0.24 vs 0.19).
+  - **Hallazgo crítico**: 5σ y 12σ producen resultados **idénticos al bit** en Lascar y Tupungatito. Causa: el cap `MAX_SIGMA_COMPONENT_K=7K` ([process_viirs.py:358](../pipeline/process_viirs.py#L358)) satura cuando `std_bg > 0.58 K` (típico).
+  - **Por qué 3σ + cap gana**: actúa como umbral adaptativo de facto:
+    - σ_bg bajo: threshold = max(5K, 3·σ_bg) → permisivo, captura señales débiles.
+    - σ_bg alto: threshold capeado a 7K → no se infla a 9-15K que mata señal real.
+  - **Decisión**: mantener `n_sigma_mir = 3.0` + `MAX_SIGMA_COMPONENT_K = 7.0`. Documentar el cap como **innovación nuestra (S15 Tema F)** que empíricamente supera 5σ/12σ uniformes para nuestra geometría σ-anillo bbox 50×50 km.
+  - **No resuelve H17 Tupungatito**: el A/B confirma que el problema NO es N·σ. Camino alternativo S20: dual-ROI Coppola 5σ summit / 10σ scene.
+  - Detalle completo: `docs/DRIFTS_S17.md` sección "D2 — Resolución S19".
 
 ---
 

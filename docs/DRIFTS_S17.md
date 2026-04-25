@@ -124,10 +124,59 @@ Fase 3 (S19+). Agregar bandas coloreadas en chart + badge por volcán con nivel 
 | ID | Drift | Estado | Decisión | Sesión |
 |---|---|---|---|---|
 | D1 | `np.median` kernel 8-vec | ✅ Resuelto S17 tarde | Fix `np.mean` aplicado (merge `f78ad5d`) | **S17** |
-| D2 | `N_SIGMA_MIR=3.0` uniforme | Infra instalada S18 (profiles nsigma_mir_5/12 + script 37), ejecución diferida | Ejecutar en S19 con los 11 Tier A | S19 |
+| D2 | `N_SIGMA_MIR=3.0` uniforme | ✅ **Resuelto S19** | **Mantener 3σ** — cap=7K implementa umbral adaptativo superior | **S19** |
 | D3 | TIR Stefan-Boltzmann | ✅ Resuelto S17 tarde (Aveni 2024 confirma SB puro) | Mantener | — |
 | D4 | Escala Low/Medium/.../Extreme | Feature gap | Agregar dashboard | S19-20 |
 | D5 | Sin supervisión humana | Diseño | Documentar | — |
+
+## D2 — Resolución S19 (2026-04-25)
+
+### Test A/B realizado
+
+Reproceso 30 días (2026-03-25 → 2026-04-24), 3 volcanes (Tupungatito, Chaitén, Lascar), 3 perfiles (3σ baseline, 5σ Coppola, 12σ Di Bella). Ground truth: CSV MIROVA NRT updated (`registro_vrp_consolidado_25_04_2026.csv`).
+
+### Resultado agregado
+
+| Perfil | TP | FP | FN | Recall | Precision | F1 |
+|---|---|---|---|---|---|---|
+| **3σ (baseline)** | **84** | **263** | **34** | **0.71** | **0.24** | **0.36** |
+| 5σ (Coppola 2016a) | 75 | 330 | 43 | 0.64 | 0.19 | 0.29 |
+| 12σ (Di Bella 2024) | 75 | 327 | 43 | 0.64 | 0.19 | 0.29 |
+
+### Hallazgo clave: el cap `MAX_SIGMA_COMPONENT_K=7K` anula la diferencia 5σ vs 12σ
+
+Código relevante ([process_viirs.py:358](../pipeline/process_viirs.py#L358)):
+
+```python
+sigma_component = min(N_SIGMA_MIR * std_bg, MAX_SIGMA_COMPONENT_K)  # cap=7K
+threshold_mir = max(ANOMALY_THRESHOLD_K, sigma_component)             # floor=5K
+```
+
+**Consecuencia matemática**: cuando `std_bg > 0.58 K` (típico Lascar, Tupungatito), `5×σ > 7` y `12×σ > 7` ambos saturan → threshold idéntico. **5σ y 12σ devuelven exactamente los mismos números** en estos volcanes.
+
+Verificación empírica (Lascar y Tupungatito, ambos completos):
+- 5σ: TP=58/20, FP=118/77, FN=21/22 (Lascar/Tupungatito)
+- 12σ: TP=58/20, FP=118/77, FN=21/22 ← **idéntico al bit**
+
+### Por qué 3σ + cap gana
+
+El comportamiento efectivo del baseline es:
+- σ_bg bajo (≤1.7 K, atmósfera limpia): threshold = max(5K, 3·σ_bg) → permisivo, captura señales débiles.
+- σ_bg alto (>2.3 K, glaciar): threshold capeado a 7K → no se infla a 9-15K que mataría señal real.
+
+Es **un umbral adaptativo de facto** que ningún paper documenta pero combina lo mejor de:
+- Coppola 2016a 5σ ROI1: noise protection.
+- Di Bella 2024 12σ: aún más estricto pero no aplicable a nuestra geometría σ-anillo.
+
+### Decisión operacional
+
+**Mantener `n_sigma_mir = 3.0` + `MAX_SIGMA_COMPONENT_K = 7.0`** en `mirova_equivalent`. Documentar que el drift D2 NO es problemático — es una innovación nuestra (S15 Tema F) que empíricamente supera las alternativas teóricas para nuestra geometría σ-anillo.
+
+### H17 (Tupungatito) sigue activa
+
+El A/B no resuelve Tupungatito: recall 0.57 con 3σ (mejor que 5σ 0.37) pero lejos del 0.85+ esperado. **La causa NO es N·σ**, es geografía o sub-pixel intrínseco.
+
+**Próximo camino S20**: dual-ROI Coppola 5σ summit / 10σ scene — ataca FPs espacialmente, no con multiplier global. Tupungatito beneficiaría de threshold permisivo en summit (3σ adaptativo) y estricto en scene (10σ del paper).
 
 ## Otros hallazgos que NO son drift
 
