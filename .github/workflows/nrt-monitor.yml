@@ -1,0 +1,94 @@
+name: NRT Monitor — alerta si fallan 3+ corridas
+
+# M3 instalado S18 2026-04-24 a pedido de Nicolás (auditoría meta).
+# Si el cron NRT principal falla 3 corridas consecutivas, abre un issue
+# automático en el repo. Sin esto, una caída del cron solo se notaba viendo
+# que el dashboard se quedaba viejo — falta de alerta proactiva.
+
+on:
+  schedule:
+    # Corre cada 6 horas, offsetted (minuto 30) para no chocar con el cron principal (minuto 0).
+    - cron: "30 */6 * * *"
+  workflow_dispatch:  # permite correr a mano para testear.
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspeccionar últimas 3 corridas del cron NRT
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'nrt.yml',
+              per_page: 3,
+              status: 'completed',
+              event: 'schedule',
+            });
+
+            const runs = data.workflow_runs || [];
+            console.log(`Últimas ${runs.length} corridas completadas del cron NRT:`);
+            runs.forEach(r => console.log(`  ${r.created_at} → ${r.conclusion} (${r.html_url})`));
+
+            if (runs.length < 3) {
+              console.log('Menos de 3 corridas completadas para evaluar — sin acción.');
+              return;
+            }
+
+            const failures = runs.filter(r => r.conclusion === 'failure' || r.conclusion === 'timed_out');
+            if (failures.length < 3) {
+              console.log(`Solo ${failures.length}/${runs.length} fallaron — sin alerta.`);
+              return;
+            }
+
+            console.log('Las 3 últimas corridas fallaron — buscando issue abierto existente...');
+
+            const TITLE = 'NRT cron: 3+ corridas consecutivas fallaron';
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'nrt-alert',
+              per_page: 20,
+            });
+
+            if (existing.data.some(i => i.title === TITLE)) {
+              console.log('Issue ya abierto con mismo título — no duplico. Agrego comentario con últimos runs.');
+              const issue = existing.data.find(i => i.title === TITLE);
+              const comment = 'Estado actual al ' + new Date().toISOString() + ':\n\n' +
+                failures.map(r => `- [${r.created_at}](${r.html_url}): ${r.conclusion}`).join('\n');
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: comment,
+              });
+              return;
+            }
+
+            const body = '**Alerta automática del NRT monitor**.\n\n' +
+              `Las últimas ${failures.length} corridas del cron \`nrt.yml\` fallaron:\n\n` +
+              failures.map(r => `- [${r.created_at}](${r.html_url}): ${r.conclusion}`).join('\n') +
+              '\n\nVerificar:\n' +
+              '1. ¿Cambió algo en el último merge a `main`?\n' +
+              '2. ¿NASA Earthdata (CMR / LANCE) está caído? (https://lance.modaps.eosdis.nasa.gov/)\n' +
+              '3. ¿Credenciales `EARTHDATA_USERNAME`/`PASSWORD` siguen válidas? (revisar Settings → Secrets)\n' +
+              '4. ¿Algún test rompiendo? (ver `pytest tests/`)\n\n' +
+              'Generado por `.github/workflows/nrt-monitor.yml`.';
+
+            const created = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: TITLE,
+              body: body,
+              labels: ['nrt-alert', 'priority-high'],
+            });
+            console.log(`Issue #${created.data.number} creado.`);
