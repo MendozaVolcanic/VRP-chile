@@ -152,8 +152,17 @@ jobs:
           pip install pyhdf
           pip install earthaccess numpy h5py scipy pyyaml
 
+      # S19 2026-04-25: el step `mirova_equivalent` solo se ejecuta para los 11
+      # Tier A monitoreados oficialmente por MIROVA (CSV consolidado, KMLs).
+      # Los 34 volcanes restantes pasan directamente a `experimental` (siguiente
+      # step) y no escriben a data/mirova_equivalent/. Esto:
+      #   - reduce ~50% minutos Actions del step mirova_equivalent.
+      #   - limpia data/mirova_equivalent/ de no-Tier-A automáticamente.
+      #   - alinea el cron con el dashboard que ya filtraba a 11 Tier A en S18.
       - name: Run VRP pipeline — mirova_equivalent profile
-        if: ${{ steps.filter.outputs.skip != 'true' && (github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'mirova_equivalent') }}
+        if: ${{ steps.filter.outputs.skip != 'true'
+             && (github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'mirova_equivalent')
+             && contains(fromJson('["Lascar","PuyehueCordonCaulle","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","Chaiten","Villarrica","NevadosDeChillan","Llaima","Copahue"]'), matrix.volcano) }}
         env:
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}

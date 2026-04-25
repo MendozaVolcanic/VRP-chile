@@ -72,10 +72,31 @@
 
 ### NRT CSV scraper (archivo operacional)
 
-- **Archivo**: `21_04_2026 registro_vrp_consolidado.csv` (13.7k filas, 3.5 meses, ~100% MODIS / ~80% VIIRS).
+- **Archivo (S18)**: `21_04_2026 registro_vrp_consolidado.csv` (13.7k filas, 3.5 meses, ~100% MODIS / ~80% VIIRS).
+- **Archivo (S19 actualizado)**: `registro_vrp_consolidado_25_04_2026.csv` (14.1k filas, +5 días).
 - **Fuente**: `https://www.mirovaweb.it/NRT/latest.php` — scrape con `MendozaVolcanic/Mirova-v1`.
 - **Columnas clave**: `Fecha_Satelite_UTC`, `Fecha_Captura_Chile`, `Volcan`, `Sensor` (MODIS / VIIRS / VIIRS375), `VRP_MW`, `Distancia_km`, `Tipo_Registro`.
 - **Uso**: ground truth operacional NRT bajo objetivo (1) clon MIROVA.
+- **Cobertura por sensor (S19 verificado)**: ~100% MODIS, ~70% VIIRS. El restante 30% VIIRS solo aparece en imágenes (Latest10NTI/Dist/logVRP/VRP) pero no en latest.php.
+
+### IMPORTANTE — Truncamiento VRP en imágenes MIROVA (S19 2026-04-25)
+
+Las imágenes publicadas en mirovaweb.it muestran **VRP truncado por `floor()`** (parte entera, no redondeo). Verificación empírica S19 contra CSV Lascar MODIS:
+
+| Fecha | VRP en CSV | VRP visible en imagen Latest Images |
+|---|---|---|
+| 2026-04-25 07:35 | **1.28** MW | "1 MW" |
+| 2026-04-25 01:30 | **1.6** MW | "1 MW" |
+| 2026-04-23 01:50 | **1.7** MW | "1 MW" |
+
+Si fuera redondeo, 1.6 y 1.7 → "2 MW". Como muestran "1", es **floor**.
+
+**Reglas para comparaciones**:
+- **Magnitud VRP exacta** → SOLO el CSV.
+- **Presencia/ausencia** → imagen `VRP =NaN MW` confiable.
+- **Distribución espacial (distancia/dirección)** → imágenes `Dist`/`Latest10NTI` válidas — esos puntos son reales.
+- **Categoría de alerta** (Low/Moderate/High/Very High/Extreme) → imágenes `logVRP` válidas, posición sobre eje Y correcta.
+- **Tendencia temporal** → series Last Month / Last Year posiciones correctas, solo el label numérico truncado.
 
 ---
 

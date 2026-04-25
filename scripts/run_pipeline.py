@@ -316,7 +316,8 @@ def main():
     parser.add_argument("--profile", default=None,
                         choices=["mirova_equivalent", "experimental",
                                  "mirova_equivalent_backfill_nov2025",
-                                 "s9_vent_permissive"],
+                                 "s9_vent_permissive",
+                                 "nsigma_mir_5", "nsigma_mir_12"],
                         help="Detection profile (default: mirova_equivalent). "
                              "Selects thresholds, paths, sensors and output "
                              "data subdirectory. Already consumed before "
