@@ -1,5 +1,8 @@
 # VRP Chile — Volcanic Radiative Power Monitor
 
+[![NRT Pipeline](https://github.com/MendozaVolcanic/VRP-chile/actions/workflows/nrt.yml/badge.svg)](https://github.com/MendozaVolcanic/VRP-chile/actions/workflows/nrt.yml)
+[![Pages Deploy](https://github.com/MendozaVolcanic/VRP-chile/actions/workflows/pages-deploy.yml/badge.svg)](https://github.com/MendozaVolcanic/VRP-chile/actions/workflows/pages-deploy.yml)
+
 **Near-Real-Time thermal monitoring of Chilean volcanoes using MODIS and VIIRS satellite data.**
 
 Independent implementation of the MIROVA algorithm (Coppola et al. 2015) with automated satellite data processing, anomaly detection, and a web dashboard — all self-hosted on GitHub.

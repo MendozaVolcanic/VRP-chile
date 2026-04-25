@@ -115,20 +115,28 @@
 
 ---
 
-## H17 — Tupungatito: el cuello residual post-NOAA-21 es Embalse El Yeso (FPs far) o σ_bg inflado por glaciar
+## H17 — Tupungatito: el cuello residual post-NOAA-21
 
 - **Formulada**: S18 (2026-04-24).
-- **Contexto**: H10 implementada y validada, pero Tupungatito sigue en recall 0.41 vs 0.77 esperado. De los 148 records reprocesados en la ventana, **solo 1 quedó clasificado summit** y 36 como far. El Embalse El Yeso (documentado en S16 P3.6 con exclusion_zones) queda a ~15 km del cráter y genera FPs de 200-1500 MW que se clasifican "far" correctamente pero pueden estar "robando" el match 15-min a las refs MIROVA summit legítimas (un record far no cuenta como TP summit).
-- **Hipótesis alternativa**: σ_bg de Tupungatito inflado por glaciar/heterogeneidad eleva el umbral efectivo (max(1K, 2·σ)) por encima de la señal real sub-pixel de 1-2 K del cráter hidrotermal.
-- **Evidencia a favor**:
-  - 36/37 detecciones S18 Tupungatito son "far" — desbalance extremo vs Lascar (34/79 far) y Chaitén (0 far).
-  - σ_bg de Tupungatito pre-S16 era 2-3 K (glaciar + orografía), no 0.5-1 K esperable en volcán claro.
-  - exclusion_zones P3.6 marcó Embalse El Yeso pero puede no estar activo en el reproceso S18 (verificar flag).
-- **Criterio testable**:
-  1. Verificar si `exclude_zones` del YAML Tupungatito está siendo aplicado (log `n_excluded_water > 0`).
-  2. Separar FN por causa: (a) no hay granule ese día, (b) granule sí pero BT<umbral, (c) detección está pero cae en far por FP Embalse.
-  3. Si (c) es >30%, expandir exclusion_zones radial o aplicar sigma-cap más agresivo.
-- **Estado**: **ACTIVE** — investigación S19.
+- **Reformulada**: S18 tarde (2026-04-24) tras evidencia de `scripts/verify_reproc.py` (M2) y análisis direccional de hotspots.
+- **Contexto**: H10 validada pero Tupungatito quedó en recall 0.41 vs 0.77 esperado. De 37 detecciones reprocesadas, 36 son "far" y solo 1 "summit".
+- **Hipótesis original (DESCARTADA)**: el Embalse El Yeso era el principal contribuyente de FPs far.
+  - **Evidencia en contra**: el Embalse está a **39.7 km** del centro Tupungatito (no 15-27 km como comentarios antiguos). El bbox de detección es ±25 km. **El Embalse queda fuera del área de análisis** — sus pixels nunca son candidatos hot. `verify_reproc` reporta `n_excluded_water=0` no por bug del filtro sino porque no hay nada que filtrar.
+  - Análisis direccional (S18 tarde): los 23 hotspots far Tupungatito están distribuidos: 9 NE, 5 NW, 5 SW, 4 SE. **Ninguno cerca del Embalse**.
+- **Hipótesis revisada (3 candidatos)**:
+  - **H17a**: Hotspot caliente persistente al NE alrededor de (-33.28, -69.58), recurrente en 4 días distintos a 22-25 km. Podría ser Cerro Marmolejo (volcán a ~30 km NE de Tupungatito) o infraestructura. **Cuando un record tiene un hotspot far más fuerte que la señal del cráter, todo el record queda clasificado "far" y no matchea contra refs MIROVA summit**.
+  - **H17b**: σ_bg inflado por casquete glaciar a 5682 m levanta el umbral efectivo (max(ANOMALY_K, sigma_cap)) por encima de la señal real sub-pixel de 1-2 K del vent fumarólico.
+  - **H17c**: vent fumarólico inherentemente débil (<0.5 MW) — limit del detector independiente del background.
+- **Evidencia a favor (revisada)**:
+  - H17a: 9 detecciones far NE recurrentes en mismo cuadrante (-33.28, -69.58), separadas semanas → no es ruido aleatorio sino fuente persistente.
+  - H17b: σ_bg Tupungatito ~2-3 K pre-S16 (vs 0.5-1 K en volcanes sin glaciar).
+  - H17c: refs MIROVA Tupungatito son típicamente <0.5 MW.
+- **Criterio testable revisado**:
+  1. Geocodificar/identificar el hotspot NE recurrente (¿Cerro Marmolejo? ¿planta solar? ¿centro minero?). Si es no-volcánico, agregar a `exclude_zones` Tupungatito.
+  2. Separar los 10 FN por causa con script forense: (a) no hay granule, (b) hay granule pero BT_max<umbral, (c) hay detección clasificada far por hotspot NE más fuerte.
+  3. Si (c) > 50% → fix expandiendo exclude_zones o re-ranking del hotspot dentro del inner_radius_km cuando existe.
+  4. Si (c) bajo → fix sigma-cap más agresivo para vent-path Tupungatito.
+- **Estado**: **ACTIVE** — investigación S19 con hipótesis nueva.
 - **Resolución**: pendiente.
 
 ---

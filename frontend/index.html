@@ -1136,13 +1136,24 @@ function renderDetail() {
           weight: isPrimary ? 1.5 : 0.8,
           fillColor: color, fillOpacity: pxOpacity, dashArray: null,
         });
+        // S18: popup distingue VRP total del record (suma) vs VRP del pixel
+        // individual (este punto). Antes el popup decía solo "VRP: X MW" sin
+        // aclarar que es el pixel, y la tabla muestra el total — generaba
+        // confusión cuando un record tiene muchos pixels (ej Lascar 1955 pixels,
+        // total 549 MW, pixel individual 1 MW).
+        const recordTotalVrp = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+        const nPix = pixels.length;
+        const multiPixel = nPix > 1;
         const marker = L.circleMarker([mLat, mLon], markerStyle).addTo(map).bindPopup(
-          `<b>${r.sensor}</b>${ventOnly ? " (vent-path)" : (!isPrimary ? " (pixel #" + (pxIdx+1) + ")" : "")}` +
+          `<b>${r.sensor}</b>` +
+          (ventOnly ? " (vent-path)" : "") +
           (isFar ? ' <span style="color:#888">(far)</span>' : (distClass === "summit" ? ' <span style="color:#ff5252">(summit)</span>' : '')) + `<br>` +
           `${r.datetime_utc} UTC<br>` +
-          `VRP: ${px.vrp_mw.toFixed(4)} MW<br>` +
+          `<b>VRP total del record:</b> ${recordTotalVrp.toFixed(3)} MW` +
+          (multiPixel ? ` <small style="color:#888">(${nPix} pixels)</small>` : '') + `<br>` +
+          (multiPixel ? `<b>Este pixel:</b> ${px.vrp_mw.toFixed(4)} MW (pixel #${pxIdx+1})<br>` : '') +
           `BT max: ${tempC(px.bt_k)}<br>` +
-          `Distancia: ${px.dist_km != null ? px.dist_km.toFixed(2) + " km" + (ventOnly && px.real_coord ? " (del vent)" : "") : (ventOnly ? "vent (legacy)" : "?")}`
+          `Distancia al cráter: ${px.dist_km != null ? px.dist_km.toFixed(2) + " km" + (ventOnly && px.real_coord ? " (del vent)" : "") : (ventOnly ? "vent (legacy)" : "?")}`
         );
         // S12: registrar SOLO el marker primario (pxIdx===0) para el
         // click-row-to-highlight. Si el record tiene múltiples pixels,
