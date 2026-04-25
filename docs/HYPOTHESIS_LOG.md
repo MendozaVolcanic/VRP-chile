@@ -136,8 +136,31 @@
   2. Separar los 10 FN por causa con script forense: (a) no hay granule, (b) hay granule pero BT_max<umbral, (c) hay detección clasificada far por hotspot NE más fuerte.
   3. Si (c) > 50% → fix expandiendo exclude_zones o re-ranking del hotspot dentro del inner_radius_km cuando existe.
   4. Si (c) bajo → fix sigma-cap más agresivo para vent-path Tupungatito.
-- **Estado**: **ACTIVE** — investigación S19 con hipótesis nueva.
-- **Resolución**: pendiente.
+- **Estado**: **PARCIALMENTE RESUELTA S20 (2026-04-25 tarde)**.
+- **Resolución S20**: forense ejecutada — clasificadas 35 refs Tupungatito summit en 30 días:
+  - 20 TP correctos.
+  - **8 T3 (vent-path detectó cráter pero record clasificado far)** → resueltos por **Regla D vent-priority** (commit `2fde274`).
+  - **9 T4 (no hay pixel summit detectado)** + 4 T2b → causa nueva **D6 (background no localizado)**, ver `docs/DRIFTS_S17.md` D6.
+  - 2 T1 (no granule) → límite físico cobertura satélite.
+- **Recall post-Regla D**: Tupungatito 0.57 (vs 0.00 pre-D, vs 0.98 S9). El gap restante (-0.41) corresponde a T4 + T2b → D6.
+- **H17a (POI hotspot NE Tupungatito)**: descartada (Nicolás verificó visualmente que no hay nada en (-33.28, -69.58)). El hotspot recurrente es ruido térmico difuso del altiplano, no fuente identificable.
+- **H17b/H17c**: subsumidas en **D6 (background no localizado)** — la causa raíz es el cómputo de `std_bg` sobre el bbox global incluyendo terreno heterogéneo (glaciar). Solución requiere `std_bg_summit` localizado en ROI1 5×5km.
+- **Próximo paso**: S21 implementar background localizado.
+
+---
+
+## H18 — Vent-priority (Regla D): si vrp_vent_mw>0, distance_class debe ser summit
+
+- **Formulada**: S20 (2026-04-25 tarde) tras forense de H17.
+- **Hipótesis**: 8/15 FN Tupungatito tienen vrp_vent_mw>0 pero distance_class='far' porque un eruption-path far más caliente "robó" el final_hotspot. El vent-path por construcción solo dispara dentro del vent_radius_km, así que vrp_vent>0 implica anomalía real del cráter por construcción.
+- **Criterio testable**: aplicar regla D (forzar class=summit cuando vrp_vent>0) sobre JSONs ya generados y medir delta recall summit-class.
+- **Evidencia**: contrafactual + aplicación empírica:
+  - Tupungatito: 0.00 → 0.57 (+0.57)
+  - Chaitén: 0.50 → 1.00 (+0.50, supera S9 0.93)
+  - Lascar: 0.35 → 0.73 (+0.38)
+  - Agregado: 0.25 → 0.69 (+0.44)
+- **Estado**: **✅ CONFIRMADA y RESUELTA** (S20 2026-04-25 tarde).
+- **Resolución**: implementada en `pipeline/store.py` append_record(). 5 tests TDD nuevos. Aplicada retroactivamente a 11 Tier A (1,574 records reclasificados). Commit `2fde274` mergeado a main `9b8d852`.
 
 ---
 

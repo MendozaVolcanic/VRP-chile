@@ -126,8 +126,53 @@ Fase 3 (S19+). Agregar bandas coloreadas en chart + badge por volcán con nivel 
 | D1 | `np.median` kernel 8-vec | ✅ Resuelto S17 tarde | Fix `np.mean` aplicado (merge `f78ad5d`) | **S17** |
 | D2 | `N_SIGMA_MIR=3.0` uniforme | ✅ **Resuelto S19** | **Mantener 3σ** — cap=7K implementa umbral adaptativo superior | **S19** |
 | D3 | TIR Stefan-Boltzmann | ✅ Resuelto S17 tarde (Aveni 2024 confirma SB puro) | Mantener | — |
-| D4 | Escala Low/Medium/.../Extreme | Feature gap | Agregar dashboard | S19-20 |
+| D4 | Escala Low/Medium/.../Extreme | Feature gap | Agregar dashboard | S22+ |
 | D5 | Sin supervisión humana | Diseño | Documentar | — |
+| **D6** | **`std_bg` global no localizado** | **Detectado S20** | **Implementar `std_bg_summit` sobre ROI1 5×5km** | **S21** |
+
+## D6 — Background no localizado (S20 2026-04-25 tarde)
+
+### Evidencia
+
+Forense H17 Tupungatito (S20 tarde) reveló que 13 records FN tienen pixels detectados (n_anom 1-772) pero TODOS están far (>7 km del cráter). Cero pixels dentro del inner_radius_km. Sin embargo, MIROVA detecta el cráter en esas mismas pasadas con VRP=0.05-0.32 MW.
+
+**Diagnóstico físico**:
+- Nuestro `std_bg` se computa sobre el anillo bg_inner_km a bg_outer_km (bbox 50×50 km).
+- En Tupungatito el glaciar lateral infla `std_bg` a ~2-3 K.
+- El cap `MAX_VENT_SIGMA_CONTRIB_K=3.0` empuja el threshold vent a max(1K, 3K) = 3K.
+- La señal real del cráter (fumarola) tiene ΔT ≈ 1.5-2K — **no cruza 3K**.
+
+**Si calculáramos `std_bg` solo sobre ROI1 5×5km cerca del cráter**:
+- ROI1 está fuera del glaciar (que está al N/E del cráter Tupungatito).
+- `std_bg_local` ≈ 0.5-0.8 K (vs 2-3 K global).
+- Threshold vent local = max(1K, min(2·0.5, 3)) = max(1K, 1K) = 1K.
+- ΔT 1.5-2K **SÍ dispara** vent-path con bg local.
+
+### Marco MIROVA
+
+Coppola 2016a SP 426.5 Tabla 1 documenta exactamente esta separación:
+- **ROI1** (5×5 km del cráter): umbral 5σ noche.
+- **ROI2** (50×50 km bbox): umbral 10σ noche.
+
+Nosotros tenemos un solo `std_bg` que es híbrido: anillo entre `bg_inner_km` y `bg_outer_km` (~2-25 km) que excluye el cráter pero INCLUYE el glaciar.
+
+### Decisión S21
+
+Implementar **dual background statistics**:
+- `t_bg_summit, std_bg_summit`: media y desv estándar sobre ROI1 (5×5 km cerca del cráter, excluyendo el vent_radius para no contaminar con detecciones reales).
+- `t_bg_scene, std_bg_scene`: como ahora (anillo grande).
+- Vent-path usa `std_bg_summit` para su threshold.
+- Eruption-path scene usa `std_bg_scene`.
+- Path D dNTI puede usar ambos con dual-ROI thresholds (Coppola Tabla 2).
+
+### Riesgos a manejar
+
+1. **ROI1 chico → muestra ruidosa**: si <25 pixels válidos en ROI1, fallback a `std_bg_scene`.
+2. **Volcanes con cráter persistentemente caliente** (Lascar, Villarrica): el cráter mismo contamina ROI1 si no se excluye `vent_radius_km`. Implementar exclusión.
+3. **Cambio puede afectar Lascar/Chaitén**: golden tests M1 ya cubren records canónicos. Si rompen, evaluar.
+4. **Reproceso necesario** (~7h cómputo) — dual bg afecta clasificación de pixels.
+
+### Backlog
 
 ## D2 — Resolución S19 (2026-04-25)
 
