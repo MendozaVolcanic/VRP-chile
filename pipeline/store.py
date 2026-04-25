@@ -36,6 +36,12 @@ from pipeline.profile import (
 # Per-profile data directory: data/mirova_equivalent/ or data/experimental/
 DATA_DIR = Path(__file__).parent.parent / "data" / DATA_SUBDIR
 
+# S19 M4 2026-04-24: sanity cap físico para vrp_mw. Calibrado contra el archivo
+# OSF v2.5 (615k filas globales 2000-2025): P99.99 = 39.3 GW, max histórico
+# = 70 GW. 50 GW = 1.3x P99.99 / 0.71x record. Cualquier vrp_mw arriba es
+# inverosímil → bug (típicamente flag DN no enmascarado en granule MODIS).
+SANITY_CAP_VRP_MW = 50000.0
+
 
 def _solar_elevation(lat: float, lon: float, dt_utc: datetime) -> float:
     """Quick solar elevation check. Returns degrees (negative = night)."""
@@ -126,6 +132,19 @@ def append_record(volcano_name: str, record: dict,
         record["anomaly_pixels"] = []
         vrp_eruption = 0  # discard distant eruption-scale signal
     record["vrp_mw"] = round(max(vrp_eruption, vrp_vent), 3)
+
+    # S19 M4 2026-04-24: sanity cap físico antes del piso por sensor.
+    # 50,000 MW = 1.3x el P99.99 del archivo OSF v2.5 (615k filas globales
+    # 2000-2025) y 0.71x el récord histórico documentado por MIROVA (~70 GW
+    # Etna paroxismo). Cualquier vrp por arriba es estadística y físicamente
+    # inverosímil — bandera de bug (típicamente flag DN no enmascarado, ej.
+    # caso Lastarria 2026-04-23 01:50 con BT=566 K que generó 1.5M MW).
+    # Records sobre el cap se clampean a 0 con el valor crudo preservado
+    # en diag_rejected_sanity_cap_mw para auditoría posterior.
+    if record["vrp_mw"] > SANITY_CAP_VRP_MW:
+        record["diag_rejected_sanity_cap_mw"] = record["vrp_mw"]
+        record["diag_sanity_cap_threshold_mw"] = SANITY_CAP_VRP_MW
+        record["vrp_mw"] = 0.0
 
     # S12 2026-04-15: piso VRP por sensor (paridad MIROVA).
     # Si vrp_mw < piso_sensor, se trata como no-detección (vrp_mw = 0).
