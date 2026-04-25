@@ -133,6 +133,28 @@ def append_record(volcano_name: str, record: dict,
         vrp_eruption = 0  # discard distant eruption-scale signal
     record["vrp_mw"] = round(max(vrp_eruption, vrp_vent), 3)
 
+    # S20 Regla D — vent-priority (2026-04-25, espíritu S9 traducido a S14+).
+    # Si vrp_vent_mw > 0, el vent-path detectó señal sub-pixel del cráter
+    # (por construcción dentro del vent_radius_km). Forzamos distance_class=
+    # 'summit' y final_hotspot apunta al vent, independientemente de qué
+    # pixel far más caliente exista en el record.
+    #
+    # Causa del fix: forense H17 S20 mostró que 8/15 FN Tupungatito eran
+    # "T3" — vent-path SÍ detectaba el cráter (vrp_vent>0) pero distance_class
+    # quedaba 'far' porque un eruption-path far más caliente "robaba" el
+    # clasificador. El vent en MIROVA implica anomalía real del cráter.
+    #
+    # Validación contrafactual (3 volcanes, 30 días): aplicar regla D sobre
+    # JSONs ya generados subió recall 0.25 → 0.69 (+0.44). Chaitén alcanzó
+    # 1.00 (iguala S9 0.93+).
+    if vrp_vent > 0:
+        record["distance_class"] = "summit"
+        if record.get("vent_hotspot_lat") is not None and record.get("vent_hotspot_lon") is not None:
+            record["final_hotspot_lat"] = record["vent_hotspot_lat"]
+            record["final_hotspot_lon"] = record["vent_hotspot_lon"]
+            record["final_hotspot_dist_km"] = record["vent_hotspot_dist_km"]
+            record["final_hotspot_source"] = "vent"
+
     # S19 M4 2026-04-24: sanity cap físico antes del piso por sensor.
     # 50,000 MW = 1.3x el P99.99 del archivo OSF v2.5 (615k filas globales
     # 2000-2025) y 0.71x el récord histórico documentado por MIROVA (~70 GW
