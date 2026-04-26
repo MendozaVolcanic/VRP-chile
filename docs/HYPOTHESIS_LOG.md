@@ -319,6 +319,66 @@
 
 ---
 
+## H_S24_P31_VALIDATED — P3.1 dual-ROI corta FP_far sin tocar summit
+
+- **Formulada**: S24 (2026-04-26) ejecutando P1 del handoff S24.
+- **Hipótesis**: P3.1 (Coppola 2016a Tabla 2, dual-ROI thresholds summit/scene)
+  reduce FPs en zona "far" (5-25 km del vent) sin afectar TPs summit. S15
+  implementó pero nunca cuantificó la contribución aislada vs P3.2 single-ROI.
+- **Criterio testable**: A/B 14d × 4 Tier A con dual_roi=true vs false. P3.1
+  pasa si Δ FP_far ≪ 0 y Δ summit ≈ 0.
+- **Evidencia** (run 24962122990, `experiments/51_p31_ab/DELTA_REPORT.md`):
+  - **FP_far: 282 → 189 (−33%)** ✓
+  - Summit estable: 185 → 187 (Lascar/Lastarria/Tupungatito idénticos; +2 Chaitén = efecto borde mediana 8-vecinos cuando split por máscaras separadas).
+  - Trade-off: TP_far cae 86 → 64 (−25%) — refs MIROVA en zona scene descartadas.
+- **Estado**: **✅ CONFIRMADA**.
+- **Resolución**: MANTENER P3.1 en `mirova_equivalent`. Trade-off TP_far
+  aceptable: operacional prioriza precision, refs MIROVA lejanas suelen ser
+  ruido geográfico no actividad eruptiva.
+
+---
+
+## H_S24_AVENI_NEGATIVE — Aveni 2025 Eq.9 NO resuelve Villarrica recall 0%
+
+- **Formulada**: S24 (2026-04-26) ejecutando P2 del handoff S24.
+- **Hipótesis original (handoff)**: Eq.9 con k_TIR=60.17 capturaría señal
+  sub-pixel <600K que Stefan-Boltzmann puro pierde.
+- **Criterio testable**: aplicar Eq.9 sobre las 6 refs MIROVA Villarrica con
+  t_max,t_bg disponibles. Pasa si VRP_Aveni ~ VRP MIROVA (ratio [0.5, 2.0]).
+- **Evidencia** (`experiments/52_aveni_tir_poc.py`):
+  - 6/6 refs tenemos record con t_max−t_bg = 2.5–6.8 K (señal SÍ presente).
+  - Pipeline reporta vrp_mw=0 en los 6 → DETECCIÓN falla, no fórmula.
+  - VRP_Aveni naive sobre-estima 15.5–74.1× MIROVA NRT.
+  - VRP_SB 10–50× similar — diferencia Aveni vs SB solo ~30%, no factor 10.
+  - Sanity: VRP_Aveni = 0.1 MW basta ΔBT 0.15 K — sin floor produce FPs masa.
+- **Estado**: **REFUTADA EN SU FORMULACIÓN**.
+- **Resolución**: NO implementar Eq.9 como fix Villarrica. Verdadero cuello
+  de botella es **falta de path TIR-only de detección**. MIROVA usa algoritmo
+  sub-pixel (Dozier dual-band o equivalente) que la fórmula sola no reproduce.
+  Diferido S25+ con decisión metodológica con Nicolás (TIRVolcH completo vs
+  path TIR lightweight).
+
+---
+
+## H_S24_DIBELLA_OUT_OF_OSF — Campus k=18 correcto también out-of-OSF
+
+- **Formulada**: S24 (2026-04-26) ejecutando P3 del handoff S24.
+- **Hipótesis original (handoff)**: S14 calibró Campus k=18.0 contra OSF v2.5
+  que excluye Villarrica/Tupungatito. Di Bella 2024 k=2.48×10⁷ (10× distinto)
+  podría ajustar mejor para esos 2 volcanes out-of-OSF.
+- **Criterio testable**: comparar VRP nuestro vs MIROVA NRT en matches
+  Tupungatito/Villarrica VIIRS 375m. Pasa Di Bella si ratio MIROVA/nuestro ≈ 10.
+- **Evidencia** (análisis offline, sin reproceso):
+  - Tupungatito 37/56 matches con vrp_mw>0: **ratio mediano 1.16** (within
+    [0.7, 1.4] tolerable).
+  - Aplicar Di Bella 10× → ratio caería a ~0.12 → sobre-estimaríamos 10×.
+  - Villarrica 0/6 matches con vrp_mw>0 → confirma H_S24_AVENI_NEGATIVE.
+- **Estado**: **REFUTADA**.
+- **Resolución**: NO adoptar Di Bella k=2.48×10⁷ ni global ni per-volcán.
+  Confirma doctrina CLAUDE.md y la extiende a casos out-of-OSF.
+
+---
+
 ## Formato para agregar nuevas hipótesis
 
 ```
