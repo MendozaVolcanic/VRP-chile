@@ -86,6 +86,12 @@ DNTI_CONTEXTUAL_C1_SUMMIT: float = float(_t.get("dnti_contextual_c1_summit", 0.0
 DNTI_CONTEXTUAL_C1_SCENE: float = float(_t.get("dnti_contextual_c1_scene", 0.010))
 MODIS_VENT_THRESHOLD_K: float = float(_t.get("modis_vent_threshold_k", VENT_THRESHOLD_K))
 MODIS_VENT_VRP_FLOOR_MW: float = float(_t.get("modis_vent_vrp_floor_mw", 0.0))
+# S23 T18: P95_VENT_EXCLUSION_KM antes hardcoded en process_*.py.
+# Margen alrededor del vent_radius_km para excluir el cráter del cómputo
+# del percentil 95 local (sino contaminaría con detecciones reales).
+# Defaults: MODIS 5km (pixels 1km), VIIRS 750m 4km (pixels 750m).
+P95_VENT_EXCLUSION_MODIS_KM: float = float(_t.get("p95_vent_exclusion_modis_km", 5.0))
+P95_VENT_EXCLUSION_VIIRS750_KM: float = float(_t.get("p95_vent_exclusion_viirs750_km", 4.0))
 # S12 2026-04-15: piso VRP por sensor. Aplicado en store.py después de
 # unificar vrp_mw = max(eruption, vent). Cualquier VRP por debajo del
 # piso se lleva a 0 (no-detección). Piso calibrado al mínimo MIROVA

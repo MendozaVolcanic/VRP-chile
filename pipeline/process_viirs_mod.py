@@ -70,6 +70,7 @@ from pipeline.profile import (
     DNTI_CONTEXTUAL_C1_SCENE,
     ENABLE_DNTI_CONTEXTUAL_PATH,
     ENABLE_DNTI_DUAL_ROI,
+    P95_VENT_EXCLUSION_VIIRS750_KM,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -295,7 +296,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # Session 6 E1 fix: exclude a vent safety zone from the p95 calculation
     # so the vent pixel doesn't inflate its own filter. See process_modis.py
     # for the full rationale.
-    P95_VENT_EXCLUSION_KM = 4.0  # smaller margin for 750m VIIRS pixels
+    # S23 T18: configurable via profile (era hardcoded 4.0 km).
+    P95_VENT_EXCLUSION_KM = P95_VENT_EXCLUSION_VIIRS750_KM
     roi_bt_full = np.where(roi_mask & ~np.isnan(bt), bt, np.nan)
     if vent_lat is not None and vent_lon is not None:
         vent_dist_for_p95 = haversine_km(vent_lat, vent_lon, lat, lon)

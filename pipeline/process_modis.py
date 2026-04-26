@@ -84,6 +84,7 @@ from pipeline.profile import (
     DNTI_CONTEXTUAL_C1_SCENE,
     ENABLE_DNTI_CONTEXTUAL_PATH,
     ENABLE_DNTI_DUAL_ROI,
+    P95_VENT_EXCLUSION_MODIS_KM,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -267,7 +268,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     # pixel footprint can overlap the vent even when its center is outside the
     # vent ROI (an Aqua pass with vent_radius_km=3 may still have the hottest
     # pixel at ~4 km from the vent center due to pixel centering).
-    P95_VENT_EXCLUSION_KM = 5.0  # conservative margin for MODIS 1km pixels
+    # S23 T18: configurable via profile (era hardcoded 5.0 km).
+    P95_VENT_EXCLUSION_KM = P95_VENT_EXCLUSION_MODIS_KM
     roi_bt_full = np.where(roi_mask & ~np.isnan(bt_mir), bt_mir, np.nan)
     if vent_lat is not None and vent_lon is not None:
         vent_dist_for_p95 = haversine_km(vent_lat, vent_lon, lat, lon)
