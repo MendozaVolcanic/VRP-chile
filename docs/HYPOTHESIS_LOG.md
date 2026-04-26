@@ -149,6 +149,43 @@
 
 ---
 
+## H_S21_10 — D6 (background localizado) refuta empíricamente
+
+- **Formulada**: S20 (2026-04-25 tarde) tras forense H17, como camino S21.
+- **Hipótesis**: std_bg sobre ROI1 5×5 km local sería ≪ std_bg sobre anillo bbox
+  50×50 km global en Tupungatito. Si se cambiara el gate vent-path a usar el
+  std_bg local, el threshold caería de ~3 K a ~1-1.5 K, disparando la fumarola
+  sub-pixel y resolviendo los 12 T4.
+- **Criterio testable**: medir std_bg sobre múltiples ROI en granules T4 reales.
+  Ratio summit/global esperado <0.5 si D6 viable.
+- **Evidencia**: experiments/41 S21 descarga 3 granules T4 vía earthaccess. Resultado:
+  std_bg_global=5.47 K, std_bg_summit_5_8=4.41 K. **Ratio = 0.81** (no <0.5).
+- **Estado**: **❌ REFUTADA S21 (2026-04-25 noche)**.
+- **Resolución**: el glaciar Tupungatito 5682m afecta toda el área hasta 10+ km,
+  no solo lateralmente. El cap MAX_VENT_SIGMA_CONTRIB_K=3K satura igual con std_bg
+  local que global → threshold idéntico, no resuelve. Causa raíz definitiva:
+  fumarola sub-pixel + sub-Kelvin con variabilidad. Detalles en
+  `experiments/41_DIAGNOSIS_FINAL_S21.md` y `docs/DRIFTS_S17.md` D6.
+
+---
+
+## H_S21_11 — Schema gap VIIRS bloquea diagnóstico posterior
+
+- **Formulada**: S21 (2026-04-25 noche) al ejecutar experiments/40.
+- **Hipótesis**: `process_viirs.py` y `process_viirs_mod.py` no persisten campos
+  diagnósticos (`diag_sigma_bg_k`, `diag_eff_threshold_k`, `diag_n_bt_path`,
+  `diag_n_nti_path`, `diag_n_dnti_ctx_path`). `process_modis.py` sí los persiste.
+- **Evidencia**: 47/47 records MODIS Tupungatito abril tienen `diag_sigma_bg_k`;
+  0/177 records VIIRS lo tienen. Mismo patrón en otros volcanes.
+- **Implicancia operacional**: como refs MIROVA Tupungatito son 100% VIIRS
+  (H_S21_2), todos los records relevantes para diagnóstico quedan ciegos.
+- **Estado**: **CONFIRMADA, ACTIVA — pendiente fix S22.1**.
+- **Resolución pendiente S22**: agregar campos al return de `calculate_vrp` en
+  ambos procesadores VIIRS + actualizar `store.py append_record`. ~10-15 líneas
+  + tests TDD. NO requiere reproceso (NRT cron poblará gradualmente).
+
+---
+
 ## H18 — Vent-priority (Regla D): si vrp_vent_mw>0, distance_class debe ser summit
 
 - **Formulada**: S20 (2026-04-25 tarde) tras forense de H17.

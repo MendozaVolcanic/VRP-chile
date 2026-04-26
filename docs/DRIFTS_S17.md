@@ -128,9 +128,50 @@ Fase 3 (S19+). Agregar bandas coloreadas en chart + badge por volcán con nivel 
 | D3 | TIR Stefan-Boltzmann | ✅ Resuelto S17 tarde (Aveni 2024 confirma SB puro) | Mantener | — |
 | D4 | Escala Low/Medium/.../Extreme | Feature gap | Agregar dashboard | S22+ |
 | D5 | Sin supervisión humana | Diseño | Documentar | — |
-| **D6** | **`std_bg` global no localizado** | **Detectado S20** | **Implementar `std_bg_summit` sobre ROI1 5×5km** | **S21** |
+| **D6** | **`std_bg` global no localizado** | **❌ REFUTADO S21** | NO implementar — std_bg local ≈ global (ratio 0.81); glaciar afecta toda el área | **S21** |
 
-## D6 — Background no localizado (S20 2026-04-25 tarde)
+## D6 — REFUTADO S21 (2026-04-25 noche)
+
+### Resolución empírica
+
+experiments/41 (S21): descarga 3 granules T4 Tupungatito reales vía NASA Earthdata
+y mide std_bg multi-ROI directo sobre BT raw:
+
+| ROI | std_bg mediana | n_pixels mediana |
+|---|---:|---:|
+| annulus_global (2–25 km) | **5.47 K** | 8473 |
+| annulus_summit_5_8 (5–8 km) | **4.41 K** | 586 |
+
+Ratio summit/global = 0.81. **Hipótesis D6 esperaba <0.5**.
+
+### Por qué falló la intuición
+
+La intuición S20 era: "glaciar lateral infla std_bg global; ROI1 local sería limpio".
+Realidad: el glaciar a 5682 m **afecta toda el área hasta 10+ km**, no solo
+lateralmente. El gradiente térmico glaciar-roca-altiplano se extiende sobre toda
+la cuenca, así que reducir el anillo NO baja std_bg significativamente.
+
+### Por qué no movería el threshold
+
+Cap `MAX_VENT_SIGMA_CONTRIB_K=3K` satura cuando `2 × std_bg > 3 K`, lo que ocurre
+con `std_bg > 1.5 K`. Tanto local (4.4 K) como global (5.5 K) están sobre ese
+umbral → threshold idéntico = 3 K. ΔT real fumarola 1.5-2 K no dispara en ninguno.
+
+### Causa raíz definitiva del cuello Tupungatito
+
+Fumarola sub-pixel + sub-Kelvin con variabilidad. T4 = pasadas donde la actividad
+térmica fue genuinamente <3 K sobre fondo. MIROVA captura más probablemente por
+NTI más sensible o supervisión humana (drift D5).
+
+### Decisión
+
+**NO implementar D6**. Backlog S22 reorientado:
+- Prioridad 1: **H_S21_11** — agregar `diag_*` campos al schema VIIRS
+  (`process_viirs.py` + `process_viirs_mod.py`) para diagnóstico futuro.
+- Prioridad 2: A/B test `MAX_VENT_SIGMA_CONTRIB_K` 3→2 K una vez schema poblado.
+- Aceptar Tupungatito ≈0.57-0.65 como límite del MIR puro nocturno automatizado.
+
+## D6 — Background no localizado (S20 2026-04-25 tarde, contexto histórico)
 
 ### Evidencia
 
