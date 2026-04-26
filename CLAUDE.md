@@ -173,6 +173,13 @@ pipeline es el alumno. Cada noche-satélite de cada volcán es una pregunta.
   monitoreo**: un evento real sin alerta. Típico en señales sub-pixel (lava lake
   Villarrica, 0.05–0.2 MW) que MIROVA ve integrando ROI completo.
 - **TN (True Negative)** — Ambos coinciden en que no hay nada. No se tabula.
+- **Cluster vs pixel (S23 T14, hallazgo factor 42)** — MIROVA reporta
+  `n_hotspots` (regiones espacialmente contiguas, conectividad ~1km).
+  VRP Chile reporta `n_anomalous_pixels` (pixels individuales del granule).
+  Para 1 cluster MIROVA esperamos 5-50 pixels nuestros (depende tamaño región
+  hot). NO es bug — diferencia de agregación al reportar. Recall/precision no
+  afectados. Ver `experiments/50_FACTOR_42_HALLAZGO.md` para detalles
+  empíricos (Lastarria 77px=3 clusters@1km, ratio 25.7).
 
 Métricas derivadas:
 - **Precision** = TP / (TP+FP). De lo que gritamos, cuánto era real. Baja =
