@@ -129,6 +129,7 @@ Fase 3 (S19+). Agregar bandas coloreadas en chart + badge por volcán con nivel 
 | D4 | Escala Low/Medium/.../Extreme | Feature gap | Agregar dashboard | S22+ |
 | D5 | Sin supervisión humana | Diseño | Documentar | — |
 | **D6** | **`std_bg` global no localizado** | **❌ REFUTADO S21** | NO implementar — std_bg local ≈ global (ratio 0.81); glaciar afecta toda el área | **S21** |
+| **D7** | **Local ROI threshold MODIS-only** | **Detectado S23 audit** | Documentar; fix algorítmico (agregar a VIIRS o quitar de MODIS) requiere A/B vs OSF — diferido S24+ | **S23** |
 
 ## D6 — REFUTADO S21 (2026-04-25 noche)
 
@@ -342,6 +343,64 @@ Es **un umbral adaptativo de facto** que ningún paper documenta pero combina lo
 El A/B no resuelve Tupungatito: recall 0.57 con 3σ (mejor que 5σ 0.37) pero lejos del 0.85+ esperado. **La causa NO es N·σ**, es geografía o sub-pixel intrínseco.
 
 **Próximo camino S20**: dual-ROI Coppola 5σ summit / 10σ scene — ataca FPs espacialmente, no con multiplier global. Tupungatito beneficiaría de threshold permisivo en summit (3σ adaptativo) y estricto en scene (10σ del paper).
+
+## D7 — Local ROI threshold ausente solo en VIIRS 375m (S23 audit followup)
+
+### Evidencia
+
+`pipeline/process_modis.py:285-288` aplica un filtro local p95 al threshold:
+
+```python
+if len(roi_valid) >= 10:
+    roi_p95 = float(np.percentile(roi_valid, 95))
+    roi_std = float(np.std(roi_valid))
+    local_threshold = roi_p95 + max(3.0, 2.0 * roi_std)
+    effective_threshold = max(t_bg + threshold, local_threshold)
+```
+
+`pipeline/process_viirs_mod.py:309-312` **SÍ tiene la misma fórmula** (M-band 750m).
+
+`pipeline/process_viirs.py` (I-band 375m): **NO tiene equivalente**.
+effective_threshold solo considera `t_bg + sigma_component` (sin filtro p95).
+
+**Resumen sensores**:
+
+| Sensor | local ROI threshold | Resolución |
+|---|---|---|
+| MODIS B21/B22 (1 km) | ✅ Sí | 1×1 km |
+| VIIRS M-band M13 (750 m) | ✅ Sí | 0.75×0.75 km |
+| **VIIRS I-band I04 (375 m)** | ❌ **No** | 0.375×0.375 km |
+
+### Implicancia
+
+- MODIS y VIIRS 750m aplican filtro local p95 que rechaza pixels que solo son
+  levemente más calientes que el percentil 95 del ROI.
+- **VIIRS 375m NO aplica ese filtro** → más pixels detectados en VIIRS 375m
+  para mismas condiciones físicas.
+- Hipótesis posible explicación parcial del "factor 42" cuando el sensor es
+  VIIRS 375m. El 1/4 de área del pixel I-band vs M-band hace que cualquier
+  ligero gradiente térmico genere muchos pixels VIIRS 375m candidatos.
+- ¿Por qué solo I-band fue omitido? Razón histórica: revisar git log del
+  archivo. Hipótesis: pixels chicos (140,625 m² nadir vs 562,500 m² M-band)
+  → estadísticas locales menos robustas con n_pixels chico → filtro p95 puede
+  ser ruidoso. Decisión deliberada o omisión accidental.
+
+### Por qué decisión diferida
+
+El fix puede ir en dos direcciones (agregar a VIIRS para paridad, o quitar de
+MODIS para paridad inversa). Para decidir cuál es correcto, necesita validación
+A/B contra OSF v2.5:
+- ¿VIIRS+local_threshold vs VIIRS sin → cuál matchea mejor refs MIROVA?
+- ¿MODIS sin local_threshold vs con → cuál matchea mejor?
+
+Diferido S24+ porque scope grande y requiere reproceso.
+
+### Estado actual
+
+- Documentado como D7 en esta sección.
+- `tests/test_local_roi_paridad.py` (4 tests schema-source) alerta si el
+  estado del código diverge sin actualizar este documento.
+- Si en S24+ se decide implementar paridad, actualizar D7 → "RESUELTO".
 
 ## Otros hallazgos que NO son drift
 
