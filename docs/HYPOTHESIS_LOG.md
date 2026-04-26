@@ -284,6 +284,41 @@
 
 ---
 
+## H_S23_FACTOR42 — MIROVA reporta clusters, nosotros pixels
+
+- **Formulada**: S23 (2026-04-26) tras audit profundo S22 que detectó "factor 42"
+  abierto desde S15 (77 px nuestro vs 4 MIROVA Lascar 2025-11-15) sin causa raíz.
+- **Hipótesis**: MIROVA reporta `n_hotspots` (regiones contiguas, conectividad ~1km),
+  nosotros reportamos `n_anomalous_pixels` (pixels individuales). Mismos pixels
+  físicamente — diferencia de agregación al reportar.
+- **Criterio testable**: union-find sobre records con muchos pixels, cluster_radius
+  variable. Si ratio `pixels/clusters` ≈ 20-50, hipótesis confirmada.
+- **Evidencia** (`experiments/50_factor_42_clustering_test.py`, S23 T14):
+  - Lastarria 77 px → 3 clusters @1km (ratio 25.7)
+  - Chaitén 360 px → 9 clusters @1km (ratio 40)
+  - Lascar 77/4 reportado audit = ratio 19.25 → compatible cluster_radius ~0.5-1km.
+- **Estado**: **✅ CONFIRMADA y RESUELTA** S23 (commit `2646fe2`).
+- **Resolución**: NO es bug — diferencia de agregación. Recall/precision NO afectados.
+  Documentado `experiments/50_FACTOR_42_HALLAZGO.md` + glosario CLAUDE.md.
+- **Item derivado S24+**: agregar `n_anomalous_clusters` al schema para paridad
+  exacta con MIROVA (no crítico).
+
+---
+
+## H_S23_LOCAL_ROI — Solo VIIRS 375m carece local p95 threshold (D7)
+
+- **Formulada**: S23 (2026-04-26) tras audit profundo. Audit S22 inicial sugirió
+  "MODIS-only" pero re-investigación reveló matiz importante.
+- **Hipótesis**: process_modis (1km) y process_viirs_mod (750m) aplican
+  `local_threshold = roi_p95 + max(3.0, 2.0*roi_std)`. process_viirs (375m) NO.
+- **Estado**: **DOCUMENTADO como D7** en `docs/DRIFTS_S17.md` (S23 commit `acb98ff`).
+- **Resolución**: 4 tests schema-source (`test_local_roi_paridad.py`) alertan si
+  el código diverge sin update docs.
+- **Decisión diferida S24+**: fix algorítmico (agregar a VIIRS 375m o quitar de
+  MODIS/VIIRS 750m) requiere A/B contra OSF v2.5.
+
+---
+
 ## Formato para agregar nuevas hipótesis
 
 ```
