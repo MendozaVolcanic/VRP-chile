@@ -1,12 +1,32 @@
 # Inventario de imágenes MIROVA — `imagenes/`
 
-> Capturas mirovaweb.it tomadas 2026-04-25 ~05:54:01 UTC (Last Update visible en headers).
-> Entregadas por Nicolás S21 como ground truth visual complementaria al CSV
+> Snapshots fechados de mirovaweb.it. Ground truth visual complementaria al CSV
 > `data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado.csv`.
+
+## Estructura
+
+`imagenes/<YYYY_MM_DD>/<Volcano>_<Sensor>_<Tipo>.png`
+
+Snapshots disponibles:
+- **`2026_04_25/`**: 36 imágenes, Last Update varía 05:54:01–06:00:01 UTC.
+  Entregadas por Nicolás S21.
+- **`2026_04_26/`**: 36 imágenes, bajadas automáticamente con `scripts/`
+  (S22, ver "Reposición" abajo). Last Update ~18:18:01 UTC del 25-Abr
+  (mirovaweb actualiza cuando hay nuevas detecciones, no cada hora).
+
+## URLs MIROVA web (templates predictibles)
+
+```
+MODIS:    https://www.mirovaweb.it/OUTPUTweb/MIROVA/MODIS/VOLCANOES/<Volcano>/<Volcano>_MODIS_<Type>.png
+VIIRS750: https://www.mirovaweb.it/OUTPUTweb/MIROVA/VIIRS750/VOLCANOES/<Volcano>/<Volcano>_VIIRS750_<Type>.png
+VIIRS375: https://www.mirovaweb.it/OUTPUTweb/MIROVA/VIIRS375/VOLCANOES/<Volcano>/<Volcano>_VIIRS375_<Type>.png
+```
+
+Type ∈ {Dist, VRP, logVRP, Latest10NTI}.
 
 ## Cobertura
 
-3 volcanes × 3 sensores × 4 tipos de plot = **36 imágenes**.
+3 volcanes × 3 sensores × 4 tipos de plot = **36 imágenes por snapshot**.
 
 | Volcán | Sensores | Tier MIROVA | Estado pipeline |
 |---|---|---|---|
@@ -43,8 +63,34 @@
 - **Sanity check** post-fix: re-generar imágenes equivalentes desde nuestro pipeline
   con `scripts/visualize_volcano.py` (a crear S22+) y comparar contra mirovaweb.
 
+## Hallazgos visuales 2026-04-26 (gap actividad Tupungatito)
+
+Comparación 25-Abr vs 26-Abr en Tupungatito_VIIRS375_Dist:
+- 25-Abr Last Update: 05:54:01 UTC. Línea roja densa hasta el final.
+- 26-Abr Last Update: 25-Apr-2026 18:18:01 UTC. **Sin detecciones rojas
+  después del 24-Abr** en Last Month plot. Confirma que MIROVA no detecta
+  Tupungatito en últimos 2-3 días → fumarola en período de actividad muy
+  baja (consistente con T4 que vimos).
+
 ## Reposición
 
-Si las imágenes se pierden: descargar via Mirova-v1 visualizador
-(`https://github.com/MendozaVolcanic/Mirova-v1/blob/main/visualizador.py`) o re-pedir
-a Nicolás. Generación automatizada futura: scrape mirovaweb.it/latest.php directamente.
+Snapshot manual de cualquier fecha:
+```bash
+mkdir -p imagenes/$(date +%Y_%m_%d)
+cd imagenes/$(date +%Y_%m_%d)
+for vol in Tupungatito Lascar Chaiten; do
+  for type in Dist VRP logVRP Latest10NTI; do
+    curl -sL -o "${vol}_MODIS_${type}.png" \
+      "https://www.mirovaweb.it/OUTPUTweb/MIROVA/MODIS/VOLCANOES/${vol}/${vol}_MODIS_${type}.png"
+    curl -sL -o "${vol}_VIIRS750_${type}.png" \
+      "https://www.mirovaweb.it/OUTPUTweb/MIROVA/VIIRS750/VOLCANOES/${vol}/${vol}_VIIRS750_${type}.png"
+    curl -sL -o "${vol}_VIIRS375_${type}.png" \
+      "https://www.mirovaweb.it/OUTPUTweb/MIROVA/VIIRS375/VOLCANOES/${vol}/${vol}_VIIRS375_${type}.png"
+  done
+done
+```
+
+Para volcanes adicionales (e.g. Lastarria, Villarrica), agregar al loop.
+
+Generación automatizada futura: scrape mirovaweb.it/latest.php directamente
+(Mirova-v1 ya lo hace cada 5min, ver `~memory/feedback_mirova_no_human_supervision`).
