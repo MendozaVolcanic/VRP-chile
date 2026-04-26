@@ -219,6 +219,65 @@ Implementar **dual background statistics**:
 
 ### Backlog
 
+## S22.2 — A/B test cap MAX_VENT_SIGMA_CONTRIB_K (3K → 2K) RECHAZADO
+
+### Contexto
+
+S21 H_S21_10 refutó D6 (background localizado). Causa raíz Tupungatito: fumarola
+sub-pixel + sub-Kelvin que no cruza vent_thresh (cap satura a 3K). Camino S22.2:
+bajar el cap a 2K → permite que ΔT real ~1.5–2K dispare en pasadas con bg ruidoso.
+
+### Setup
+
+- `pipeline/profiles/low_vent_cap.yaml` (commit `92141bc`): copy byte-idéntica de
+  `mirova_equivalent.yaml` con `max_vent_sigma_contrib_k: 2.0`.
+- Reproceso 14 días (2026-04-08 a 2026-04-21) sobre 3 Tier A. Outputs en
+  `data/low_vent_cap/{Tupungatito,Lascar,Chaiten}.json`.
+- Comparativa **per-record** (apples-to-apples sobre records compartidos en ambos
+  JSONs, ignorando granules que solo NRT cron acumuló).
+
+### Resultados
+
+| Volcán | summit→far | far→summit | None→summit | Net delta | Recall fair |
+|---|---:|---:|---:|---:|---|
+| Tupungatito | 0 | 5 | 0 | +5 | 0.40 → 0.47 |
+| Lascar | 0 | 4 | 0 | +4 | 0.875 (estable) |
+| **Chaitén** | **0** | **10** | **7** | **+17** | 1.00 (mismo TP, +17 FPs vs MIROVA) |
+
+### Análisis Chaitén (decisivo)
+
+Los 17 nuevos summit Chaitén:
+- Posición: median 2.48 km, max 2.94 km del cráter (TODOS dentro inner_radius=5km).
+- VRP_vent: median 0.094 MW, max 0.747 MW (sub-pixel).
+- Fueron **detectados por nuestro pipeline** pero **NO reportados por MIROVA**.
+
+Estas detecciones **NO son FPs dispersos** — son señales sub-pixel coherentes del
+domo Chaitén. Físicamente plausible que sean reales. Pero MIROVA NRT (algoritmo
+puro, sin supervisión humana, ver `~memory/feedback_mirova_no_human_supervision`)
+las descarta — su umbral interno es más estricto que el nuestro con cap=2K.
+
+### Decisión: RECHAZAR cap=2K como default
+
+Aplicando criterio S15 CLAUDE.md ("Max FP individual ≤5× MIROVA-max mensual"):
+- MIROVA Chaitén: ~4 refs/mes (2 en 14 días).
+- Cap=2K Chaitén: ~36 detecciones/mes (17 en 14 días).
+- **9× sobre MIROVA → excede umbral 5× tolerable**.
+
+Bajo objetivo 1 (clon MIROVA), 9× es divergencia grosera, no "ligera diferencia
+aceptable". Adoptar cap=2K nos pondría sistemáticamente por encima del recall
+MIROVA en volcanes con fumarola persistente — pierde el "clon" del nombre.
+
+### Plan a futuro
+
+- **Mantener default `mirova_equivalent` con cap=3K**.
+- **Mantener `low_vent_cap` profile** versionado como evidencia A/B y para uso
+  selectivo cuando objetivo 2 (mejor que MIROVA, recall sub-pixel hidrotermal)
+  sea prioridad.
+- **Aceptar Tupungatito ~0.40-0.50 recall** como límite del MIR puro nocturno
+  automatizado sin curaduría humana.
+- Foco S22+ en otros frentes (feature parity dashboard, SWIR Sentinel-2,
+  validación H6 retry NRT).
+
 ## D2 — Resolución S19 (2026-04-25)
 
 ### Test A/B realizado
