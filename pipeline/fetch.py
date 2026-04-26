@@ -85,15 +85,22 @@ PRODUCTS = {
 def auth():
     """Authenticate with NASA Earthdata.
 
-    Strategy order: environment vars → netrc. Falla solo si NINGUNA funciona,
-    permitiendo correr local con `~/_netrc` (Windows) o `~/.netrc` (Unix) sin
-    requerir env vars. CI sigue usando env vars (secrets en GitHub Actions).
+    Strategy order: environment vars → netrc (si archivo existe). Falla solo si
+    NINGUNA funciona. Permite correr local con `~/_netrc` (Windows) o `~/.netrc`
+    (Unix) sin requerir env vars. CI sigue usando env vars (secrets GitHub
+    Actions); netrc se skipea automáticamente si no existe.
 
-    H6 S22 retry+backoff: 3 intentos con waits 5s/15s/45s para mitigar
-    "Network is unreachable" intermitente GitHub Actions → urs.earthdata.nasa.gov
-    (issue #1, ~40% runs fallaron S20-S22 sin razón clara desde código).
+    H6 S22 retry+backoff: 4 intentos con waits 5s/15s/45s para mitigar
+    "Network is unreachable" intermitente. Bug fix S22 (run 07:14 failure):
+    netrc fallback solo si archivo existe — antes lanzaba FileNotFoundError
+    en CI runners ocultando el verdadero error de environment.
     """
+    import os
     import time
+    netrc_path_unix = os.path.expanduser("~/.netrc")
+    netrc_path_win = os.path.expanduser("~/_netrc")
+    has_netrc = os.path.exists(netrc_path_unix) or os.path.exists(netrc_path_win)
+
     delays = [0, 5, 15, 45]  # 4 attempts: immediate + 3 retries
     last_err = None
     for delay in delays:
@@ -104,12 +111,14 @@ def auth():
             return
         except Exception as e:
             last_err = e
-        try:
-            earthaccess.login(strategy="netrc")
-            return
-        except Exception as e:
-            last_err = e
-    # Si aquí, todos los attempts fallaron. Reraise el último error.
+        if has_netrc:
+            try:
+                earthaccess.login(strategy="netrc")
+                return
+            except Exception as e:
+                last_err = e
+    # Si aquí, todos los attempts fallaron. Reraise el último error
+    # (será environment error en CI, netrc error solo si netrc existe).
     raise last_err if last_err else RuntimeError("auth failed")
 
 
