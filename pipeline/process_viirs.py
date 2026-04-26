@@ -290,7 +290,13 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # and works contextually against local background.
     nti_max = float("nan")
     nti_bg = float("nan")
+    nti_std = float("nan")
     n_nti_anomalous = 0
+    # S22.1 paridad MODIS schema (H_S21_11): diagnósticos siempre presentes
+    # aunque no haya bandas válidas. Reseteados a valores reales en el path BT.
+    roi_p95_diag = float("nan")
+    t_max_dist_km_diag = float("nan")
+    effective_threshold_diag = float("nan")
 
     if "I04" in bands and "I05" in bands:
         bt4 = bands["I04"]
@@ -357,8 +363,19 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             # con el gate MODIS (process_modis.py linea 253).
             sigma_component = min(N_SIGMA_MIR * std_bg, MAX_SIGMA_COMPONENT_K)
             threshold_mir = max(ANOMALY_THRESHOLD_K, sigma_component)
+            # S22.1 paridad MODIS: persistir threshold efectivo para diagnóstico
+            effective_threshold_diag = threshold_mir
 
             roi_bt_full = np.where(roi_mask & ~np.isnan(bt), bt, np.nan)
+            # S22.1 paridad MODIS: percentile 95 ROI + distancia al pixel más
+            # caliente. Útiles para diagnosticar T4 (cráter sub-detección).
+            roi_bt_valid_flat = roi_bt_full[~np.isnan(roi_bt_full)]
+            if roi_bt_valid_flat.size >= 10:
+                roi_p95_diag = float(np.percentile(roi_bt_valid_flat, 95))
+            if np.any(~np.isnan(roi_bt_full)):
+                flat_idx_max = np.nanargmax(roi_bt_full)
+                r_max, c_max = np.unravel_index(flat_idx_max, roi_bt_full.shape)
+                t_max_dist_km_diag = float(dist[r_max, c_max])
 
             # Path A — BT path (existing classic threshold)
             bt_path_hot = roi_mask & ~np.isnan(bt) & (bt > (t_bg_i04 + threshold_mir))
@@ -613,6 +630,21 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "nti_max": round(nti_max, 6) if not np.isnan(nti_max) else None,
         "nti_bg": round(nti_bg, 6) if not np.isnan(nti_bg) else None,
         "n_nti_anomalous": n_nti_anomalous,
+        # S22.1 paridad schema MODIS (H_S21_11). Los `diag_*` permiten
+        # diagnosticar T4 sin descargar granules raw cada vez. Algunos son
+        # alias de campos existentes (nti_bg, nti_max, n_*_path) preservados
+        # por compat frontend; otros son nuevos (sigma_bg, eff_threshold,
+        # nti_std, t_max_dist_km, roi_p95).
+        "diag_sigma_bg_k": round(std_bg_i04, 3) if not np.isnan(std_bg_i04) else None,
+        "diag_eff_threshold_k": round(effective_threshold_diag, 2) if not np.isnan(effective_threshold_diag) else None,
+        "diag_t_max_dist_km": round(t_max_dist_km_diag, 2) if not np.isnan(t_max_dist_km_diag) else None,
+        "diag_roi_p95_k": round(roi_p95_diag, 2) if not np.isnan(roi_p95_diag) else None,
+        "diag_nti_bg": round(nti_bg, 4) if not np.isnan(nti_bg) else None,
+        "diag_nti_std": round(nti_std, 4) if not np.isnan(nti_std) else None,
+        "diag_nti_max": round(nti_max, 4) if not np.isnan(nti_max) else None,
+        "diag_n_bt_path": n_bt_path,
+        "diag_n_nti_path": n_nti_path,
+        "diag_n_dnti_ctx_path": n_dnti_ctx_path,
         "hotspot_lat": hotspot_lat,
         "hotspot_lon": hotspot_lon,
         "hotspot_dist_km": hotspot_dist_km,

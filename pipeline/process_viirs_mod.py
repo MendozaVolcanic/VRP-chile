@@ -268,6 +268,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     nti_std = float("nan")
     n_nti_anomalous = 0
     nti = None
+    # S22.1 paridad MODIS schema (H_S21_11). roi_p95 y t_max_dist_km_diag se
+    # rellenan en el bloque BT cuando hay ROI válida; quedan NaN si no.
+    roi_p95 = float("nan")
+    t_max_dist_km_diag = float("nan")
 
     if "M15" in bands:
         bt_mir = bands["M13"]
@@ -313,6 +317,12 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         effective_threshold = max(t_bg + threshold, local_threshold)
     else:
         effective_threshold = t_bg + threshold
+
+    # S22.1 paridad MODIS: distancia al pixel más caliente del ROI.
+    if np.any(~np.isnan(roi_bt_full)):
+        flat_idx_max = np.nanargmax(roi_bt_full)
+        r_max, c_max = np.unravel_index(flat_idx_max, roi_bt_full.shape)
+        t_max_dist_km_diag = float(dist[r_max, c_max])
 
     # --- Dual-PATH detection (logical OR), mirroring process_viirs.py ---
     # A pixel is hot if EITHER:
@@ -515,6 +525,19 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "anomaly_pixels": anomaly_pixels,
         "t_bg_k": round(t_bg, 2),
         "t_max_k": round(t_max, 2) if not np.isnan(t_max) else None,
+        # S22.1 paridad schema MODIS (H_S21_11). Algunos diag_* duplican campos
+        # existentes (nti_bg, nti_max, n_*_path) por compat frontend; otros son
+        # nuevos (sigma_bg, eff_threshold, nti_std, t_max_dist_km, roi_p95).
+        "diag_sigma_bg_k": round(std_bg, 3) if not np.isnan(std_bg) else None,
+        "diag_eff_threshold_k": round(effective_threshold, 2) if not np.isnan(effective_threshold) else None,
+        "diag_t_max_dist_km": round(t_max_dist_km_diag, 2) if not np.isnan(t_max_dist_km_diag) else None,
+        "diag_roi_p95_k": round(roi_p95, 2) if not np.isnan(roi_p95) else None,
+        "diag_nti_bg": round(nti_bg, 4) if not np.isnan(nti_bg) else None,
+        "diag_nti_std": round(nti_std, 4) if not np.isnan(nti_std) else None,
+        "diag_nti_max": round(nti_max, 4) if not np.isnan(nti_max) else None,
+        "diag_n_bt_path": n_bt_path,
+        "diag_n_nti_path": n_nti_path,
+        "diag_n_dnti_ctx_path": n_dnti_ctx_path,
         "sensor": sensor,
         "granule": name,
         "product_version": "nrt" if "_NRT" in name else "standard",
