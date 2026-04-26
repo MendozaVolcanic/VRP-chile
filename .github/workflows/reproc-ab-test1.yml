@@ -1,0 +1,83 @@
+name: A/B reproceso Test 1 integrated-ROI (S25)
+
+# Workflow dispatch-only para validación cuantitativa del nuevo Path Test 1
+# (Coppola 2015 §2.2 Eq.1 integrated-ROI MIR). POC standalone S25 mostró
+# 6/6 refs Villarrica VIIRS 375m disparan vs 0/6 con paths actuales.
+#
+# Profiles paralelos:
+#   _test1_enabled  → enable_test1_path=true (treatment)
+#   _test1_disabled → enable_test1_path=false (mirror operacional, control)
+# Ambos a data/<profile_subdir>/, NO contaminan data/mirova_equivalent/.
+#
+# Volcanes: Villarrica (target — caso sub-pixel) + 3 controles Tier A para
+# validar que Test 1 NO infla FPs en volcanes que ya estaban resueltos.
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-12"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-04-25"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano: [Villarrica, Lascar, Lastarria, Tupungatito]
+        profile: [_test1_enabled, _test1_disabled]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — ${{ matrix.profile }} / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 50
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed A/B data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/${{ matrix.profile }}/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S25 A/B Test 1 — ${{ matrix.profile }} / ${{ matrix.volcano }} 14d"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1

@@ -122,6 +122,15 @@ ENABLE_DNTI_CONTEXTUAL_PATH: bool = bool(_p.get("enable_dnti_contextual_path", F
 # S15 P3.1: dual-ROI (summit vs scene C1 distintos). On = Path D usa
 # C1_SUMMIT cerca del vent y C1_SCENE lejos. Off = usa C1 unico (P3.2 solo).
 ENABLE_DNTI_DUAL_ROI: bool = bool(_p.get("enable_dnti_dual_roi", False))
+# S25: Path Test 1 integrated-ROI (Coppola 2015 Eq.1). Suma exceso de radiancia
+# MIR sobre toda la ROI vent (default 3 km radio); detecta señales sub-pixel
+# espacialmente extendidas que paths per-pixel pierden. POC S25 6/6 refs
+# Villarrica disparan vs 0/6 con paths actuales.
+ENABLE_TEST1_PATH: bool = bool(_p.get("enable_test1_path", False))
+TEST1_K_SIGMA: float = float(_t.get("test1_k_sigma", 3.0))
+TEST1_MIR_RELATIVE: float = float(_t.get("test1_mir_relative", 0.02))
+TEST1_ROI_KM: float = float(_t.get("test1_roi_km", 3.0))
+TEST1_INNER_RING_KM: float = float(_t.get("test1_inner_ring_km", 1.0))
 
 # --- Sensor activation ---
 _s = _cfg["sensors"]

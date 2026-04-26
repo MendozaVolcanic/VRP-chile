@@ -83,11 +83,17 @@ from pipeline.profile import (
     DNTI_CONTEXTUAL_C1_SCENE,
     ENABLE_DNTI_CONTEXTUAL_PATH,
     ENABLE_DNTI_DUAL_ROI,
+    ENABLE_TEST1_PATH,
+    TEST1_K_SIGMA,
+    TEST1_MIR_RELATIVE,
+    TEST1_ROI_KM,
+    TEST1_INNER_RING_KM,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
     dual_roi_contextual_dnti_hot_mask,
 )
+from .test1_integrated import compute_test1_mir
 
 
 def _sensor_label_from_filename(filename: str) -> str:
@@ -335,6 +341,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # condicional, para evitar UnboundLocalError cuando "I04" no esta en bands
     # o len(bg_vals) < 10 (granules con poco data utilizable).
     n_dnti_ctx_path = 0
+    # S25 Path Test 1 — defaults antes del bloque I04 (mismo patrón S16)
+    test1_triggered = False
+    test1_n_contrib = 0
+    test1_k_obs = 0.0
     n_excluded_water = 0
     hotspot_lat = None
     hotspot_lon = None
@@ -443,7 +453,35 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             else:
                 dnti_ctx_hot = np.zeros_like(bt_path_hot)
 
-            hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot | dnti_ctx_hot
+            # Path Test 1 — integrated-ROI MIR (Coppola 2015 §2.2 Eq.1).
+            # Suma el exceso de radiancia MIR sobre la ROI vent y compara
+            # contra σ_bg propagado (cae como √N). Detecta señales sub-pixel
+            # espacialmente extendidas (lava lake Villarrica 0.05-0.21 MW)
+            # que los paths per-pixel pierden porque ningún pixel rompe
+            # threshold absoluto pero su suma integrada sí. POC S25 (6/6
+            # refs Villarrica disparan vs 0/6 con paths actuales).
+            test1_hot = np.zeros_like(bt_path_hot)
+            test1_triggered = False
+            test1_n_contrib = 0
+            test1_k_obs = 0.0
+            if (ENABLE_TEST1_PATH
+                    and vent_lat is not None and vent_lon is not None):
+                test1_res = compute_test1_mir(
+                    bt=bt, lat=lat, lon=lon,
+                    vent_lat=vent_lat, vent_lon=vent_lon,
+                    lambda_um=I04_LAMBDA,
+                    roi_km=TEST1_ROI_KM,
+                    inner_ring_km=TEST1_INNER_RING_KM,
+                    k_sigma=TEST1_K_SIGMA,
+                    mir_relative=TEST1_MIR_RELATIVE,
+                )
+                test1_triggered = test1_res["triggered"]
+                test1_k_obs = test1_res["k_sigma_observed"]
+                if test1_triggered:
+                    test1_hot = test1_res["mask_contributing"]
+                    test1_n_contrib = test1_res["n_contributing"]
+
+            hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot | dnti_ctx_hot | test1_hot
 
             # S16 P3.6: filtrar pixels en exclude_zones (cuerpos de agua/salares
             # irradiando calor nocturno que bbox 50x50 km incluye -> FPs masivos).
@@ -639,6 +677,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "diag_n_bt_path": n_bt_path,
         "diag_n_nti_path": n_nti_path,
         "diag_n_dnti_ctx_path": n_dnti_ctx_path,
+        # S25 Path Test 1 (Coppola 2015 Eq.1) integrated-ROI MIR
+        "triggered_test1": test1_triggered,
+        "n_test1_pixels": test1_n_contrib,
+        "test1_k_observed": round(float(test1_k_obs), 2) if test1_k_obs else 0.0,
         "hotspot_lat": hotspot_lat,
         "hotspot_lon": hotspot_lon,
         "hotspot_dist_km": hotspot_dist_km,
