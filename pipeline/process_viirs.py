@@ -363,8 +363,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             # con el gate MODIS (process_modis.py linea 253).
             sigma_component = min(N_SIGMA_MIR * std_bg, MAX_SIGMA_COMPONENT_K)
             threshold_mir = max(ANOMALY_THRESHOLD_K, sigma_component)
-            # S22.1 paridad MODIS: persistir threshold efectivo para diagnóstico
-            effective_threshold_diag = threshold_mir
+            # S22.1 paridad MODIS: threshold efectivo es BT absoluto (t_bg + delta),
+            # no el delta solo. process_modis.py:289 hace lo mismo.
+            effective_threshold_diag = t_bg_i04 + threshold_mir
 
             roi_bt_full = np.where(roi_mask & ~np.isnan(bt), bt, np.nan)
             # S22.1 paridad MODIS: percentile 95 ROI + distancia al pixel más

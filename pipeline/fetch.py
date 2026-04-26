@@ -83,8 +83,18 @@ PRODUCTS = {
 
 
 def auth():
-    """Authenticate with NASA Earthdata. Uses env vars or ~/.netrc."""
-    earthaccess.login(strategy="environment")
+    """Authenticate with NASA Earthdata.
+
+    Strategy order: environment vars → netrc. Falla solo si NINGUNA funciona,
+    permitiendo correr local con `~/_netrc` (Windows) o `~/.netrc` (Unix) sin
+    requerir env vars. CI sigue usando env vars (secrets en GitHub Actions).
+    """
+    try:
+        earthaccess.login(strategy="environment")
+        return
+    except Exception:
+        pass
+    earthaccess.login(strategy="netrc")
 
 
 def product_version_from_granule(filename: str) -> str:
