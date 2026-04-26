@@ -28,13 +28,13 @@ except ImportError:
 from .scan_geometry import viirs_pixel_areas, roi_mask_bbox
 from .exclusion_zones import filter_hot_mask
 
-SIGMA = 5.670374419e-8  # kept for reference, not used in MIR VRP
+# S23 T17: constantes físicas centralizadas en pipeline/constants.py
+from pipeline.constants import SIGMA  # kept for reference, not used in MIR VRP
 # Nadir pixel area; actual area is per-pixel via sensor_zenith correction.
 NADIR_PIXEL_AREA_M2 = 750.0 ** 2   # 562,500 m²
 
 # Planck constants for spectral radiance (W/m²/sr/µm)
-C1_PLANCK = 1.191042e8   # 2hc² in W·µm⁴/m²/sr
-C2_PLANCK = 14388.0      # hc/k in µm·K
+from pipeline.constants import C1_PLANCK, C2_PLANCK  # 2hc², hc/k Planck
 
 # Wooster MIR radiance coefficient.
 # For VIIRS M13 (4.05 µm, 750 m) use 19.7 per empirical calibration against

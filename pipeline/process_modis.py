@@ -32,9 +32,8 @@ from .scan_geometry import modis_pixel_areas, roi_mask_bbox
 from .exclusion_zones import filter_hot_mask
 
 
-SIGMA = 5.670374419e-8
-C1 = 1.191042e8
-C2 = 14388.0
+# S23 T17: constantes físicas centralizadas en pipeline/constants.py
+from pipeline.constants import SIGMA, C1, C2
 
 BAND21_LAMBDA = 3.929
 BAND22_LAMBDA = 3.959

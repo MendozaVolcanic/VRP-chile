@@ -32,7 +32,8 @@ from .scan_geometry import viirs_pixel_areas, roi_mask_bbox
 from .exclusion_zones import filter_hot_mask
 
 
-SIGMA = 5.670374419e-8   # Stefan-Boltzmann constant, W/m^2/K^4 (TIR only)
+# S23 T17: constantes físicas centralizadas en pipeline/constants.py
+from pipeline.constants import SIGMA  # Stefan-Boltzmann (TIR only)
 
 # VIIRS I-band nadir pixel area (375 m resolution).
 # IMPORTANT: actual pixel area is corrected per-pixel using sensor_zenith
@@ -40,8 +41,7 @@ SIGMA = 5.670374419e-8   # Stefan-Boltzmann constant, W/m^2/K^4 (TIR only)
 NADIR_PIXEL_AREA_M2 = 375.0 ** 2   # 140,625 m^2
 
 # Planck constants for spectral radiance (W/m²/sr/µm)
-C1 = 1.191042e8   # 2hc² in W·µm⁴/m²/sr
-C2 = 14388.0      # hc/k in µm·K
+from pipeline.constants import C1, C2  # 2hc², hc/k Planck radiation
 
 # Wooster MIR radiance coefficient.
 # For VIIRS I4 (3.74 µm, 375 m) use 18.0 per Laiolo et al. 2024
