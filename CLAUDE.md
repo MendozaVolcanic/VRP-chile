@@ -135,12 +135,18 @@ después hay que revertir.
 | Trabajo con HDF/NetCDF/DataFrames grandes de records satelitales | `pandas-pro` | Operaciones vectorizadas, no loops |
 | Audit script que tarda >5 min | `python-performance-optimization` | Perfilar antes de "optimizar a ojo" |
 | Diseñar nuevo experimento (`experiments/NN_*.py`) | `writing-plans` + `test-driven-development` | Mismo rigor que código de producción |
-| **Cerrar sesión con learnings nuevos** | **`revise-claude-md` + `anthropic-skills:consolidate-memory`** | Consolidar lecciones en CLAUDE.md Y en memoria persistente antes de cerrar |
+| **Cerrar sesión con learnings nuevos** | **`revise-claude-md` + `anthropic-skills:consolidate-memory`** + seguir [`docs/SESSION_CLOSE_CHECKLIST.md`](docs/SESSION_CLOSE_CHECKLIST.md) bloque por bloque | El trigger sin checklist falló S20 (gaps redescubiertos S21). Checklist obligatorio bloques A-F |
 
 **Regla meta (reforzada S16)**: si Claude duda si una skill aplica, la invoca igual.
 Costo invocar = 30 segundos. Costo de NO invocar = sesión entera perdida por
 fix mal hecho (ej: S15 S12 F1 sigma-gating que se aplicó sin systematic-debugging
 previo y tardamos 4 sesiones en entender la regresión).
+
+**Regla meta-meta (S21)**: persistencia in-vivo, no al cierre. Cuando descubras un
+hallazgo durante la sesión (schema gap, source externa, dato nuevo), persistilo
+INMEDIATAMENTE en memoria/docs antes de continuar con el trabajo. La sesión puede
+cortarse abruptamente. La regla del cierre (Bloque A del SESSION_CLOSE_CHECKLIST) es
+red de seguridad, no la persistencia primaria.
 
 ## Glosario obligatorio (usar estos términos siempre en discusiones de resultados)
 
