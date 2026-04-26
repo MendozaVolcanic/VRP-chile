@@ -147,12 +147,22 @@ def append_record(volcano_name: str, record: dict,
     # Validación contrafactual (3 volcanes, 30 días): aplicar regla D sobre
     # JSONs ya generados subió recall 0.25 → 0.69 (+0.44). Chaitén alcanzó
     # 1.00 (iguala S9 0.93+).
+    # S23 audit fix: usar .get() para evitar KeyError silencioso si la key
+    # vent_hotspot_dist_km está AUSENTE del dict (no None — ausente).
+    # Mantiene comportamiento legacy S20 deliberado:
+    # vrp_vent>0 → distance_class='summit' aunque coords vent estén missing
+    # ('podemos etiquetarlo correctamente como summit aunque no tengamos
+    # coords' — test_legacy_vent_without_coords_classified_summit).
+    # Solo se reescriben final_hotspot_* si los 3 campos están presentes y no-None.
     if vrp_vent > 0:
         record["distance_class"] = "summit"
-        if record.get("vent_hotspot_lat") is not None and record.get("vent_hotspot_lon") is not None:
-            record["final_hotspot_lat"] = record["vent_hotspot_lat"]
-            record["final_hotspot_lon"] = record["vent_hotspot_lon"]
-            record["final_hotspot_dist_km"] = record["vent_hotspot_dist_km"]
+        vh_lat = record.get("vent_hotspot_lat")
+        vh_lon = record.get("vent_hotspot_lon")
+        vh_dist = record.get("vent_hotspot_dist_km")
+        if vh_lat is not None and vh_lon is not None and vh_dist is not None:
+            record["final_hotspot_lat"] = vh_lat
+            record["final_hotspot_lon"] = vh_lon
+            record["final_hotspot_dist_km"] = vh_dist
             record["final_hotspot_source"] = "vent"
 
     # S19 M4 2026-04-24: sanity cap físico antes del piso por sensor.
