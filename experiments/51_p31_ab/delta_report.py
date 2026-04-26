@@ -1,162 +1,219 @@
 """51_p31_ab/delta_report.py — A/B P3.1 dual-ROI delta report (S24).
 
-Compara forenses generados por `forense_h17_replicable.py` para los profiles
-`_p3_1_enabled` (treatment, dual-ROI on) vs `_p3_1_disabled` (control, single-ROI)
-sobre la ventana 14d 2026-04-12 a 2026-04-25 × 4 Tier A.
+Mide la contribución aislada de P3.1 dual-ROI thresholds (Coppola 2016a Tabla 2)
+comparando los profiles _p3_1_enabled (dual-ROI on) vs _p3_1_disabled (control).
 
-Asume que existen los 8 forense JSONs en este directorio:
-  forense_<profile>_<volcano>.json
+P3.1 NO afecta detecciones summit (ROI inner). Filtra detecciones SCENE (ROI
+fuera de inner_radius) con threshold más estricto. La métrica relevante es
+**número de records con detecciones SCENE**, que son típicamente FPs (clusters
+lejanos que MIROVA descarta — Lazufre Lastarria, lago Conguillío Llaima, etc.).
 
-Genera un reporte markdown con:
-  - Tabla por volcán: TP/FN/FP, recall, precision, F1, ratio mediano (enabled vs disabled).
-  - Tabla agregada (suma de los 4 volcanes).
-  - Veredicto basado en criterios del plan_s15_p3_1_dual_roi.md:
-    * Chaiten precision >= 0.40 (enabled).
-    * FP totales bajan >= 30% (enabled vs disabled).
-    * Recall global no cae más de 5 pp (enabled vs disabled).
-    * Lascar ratio mediano permanece en [1.10, 1.30].
+Cada record se clasifica por su `distance_class`:
+  - summit: detección en ROI inner. Estable entre profiles (no afectado por P3.1).
+  - far:    detección en ROI scene. P3.1 dual-ROI debería reducirla.
+  - sin detección (vrp_mw=0, n_anomalous=0): no informativo.
+
+Cruzamos opcionalmente contra el CSV MIROVA para dividir los `far` en:
+  - far + match MIROVA = TP_far (rare but possible)
+  - far + sin match  = FP_far (lo que P3.1 debería matar)
+
+Lectura: data/_p3_1_<state>/<volcano>.json sobre ventana 2026-04-12..04-25.
+Consolidado MIROVA: data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado.csv
+
+Salida: experiments/51_p31_ab/DELTA_REPORT.md
 """
+from __future__ import annotations
 import json
 import sys
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from statistics import median
 
-ROOT = Path(__file__).parent
+import pandas as pd
+
+# Reusa parsers + sensor_match del forense
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from forense_h17_replicable import _parse_dt_csv, _parse_dt_record, sensor_match  # noqa
+
+
+ROOT = Path(__file__).parent.parent.parent
 PROFILES = ["_p3_1_enabled", "_p3_1_disabled"]
 VOLCANOES = ["Lascar", "Lastarria", "Tupungatito", "Chaiten"]
-OUT = ROOT / "DELTA_REPORT.md"
+START = datetime(2026, 4, 12, tzinfo=timezone.utc)
+END = datetime(2026, 4, 25, 23, 59, 59, tzinfo=timezone.utc)
+TOLERANCE = timedelta(minutes=60)
+CSV_PATH = ROOT / "data" / "mirova_reference" / "mirova_v1_snapshot" / "registro_vrp_consolidado.csv"
+OUT = Path(__file__).parent / "DELTA_REPORT.md"
 
 
-def load(profile, volcano):
-    p = ROOT / f"forense_{profile}_{volcano}.json"
+def load_refs(volcano):
+    df = pd.read_csv(CSV_PATH)
+    df = df[df["Volcan"] == volcano]
+    df = df[df["Tipo_Registro"] == "ALERTA_TERMICA"]
+    refs = []
+    for _, r in df.iterrows():
+        try:
+            dt = _parse_dt_csv(r["Fecha_Satelite_UTC"])
+        except Exception:
+            continue
+        if not (START <= dt <= END):
+            continue
+        refs.append({"dt": dt, "sensor": r["Sensor"], "vrp": r.get("VRP_MW", None)})
+    return refs
+
+
+def has_match(rec_dt, rec_sensor, refs):
+    for ref in refs:
+        if abs((rec_dt - ref["dt"]).total_seconds()) > TOLERANCE.total_seconds():
+            continue
+        if sensor_match(ref["sensor"], rec_sensor):
+            return True
+    return False
+
+
+def classify(profile, volcano, refs):
+    p = ROOT / "data" / profile / f"{volcano}.json"
     if not p.exists():
         return None
-    return json.loads(p.read_text(encoding="utf-8"))
-
-
-def metrics(d):
-    """Extrae TP/FN/FP/recall/precision/F1/ratio_mediano del forense."""
-    if d is None:
-        return None
-    counts = d.get("counts", {})
-    tp = counts.get("tp", 0)
-    fn = counts.get("fn", 0)
-    fp = counts.get("fp", 0)
-    rec = tp / (tp + fn) if (tp + fn) else 0.0
-    prec = tp / (tp + fp) if (tp + fp) else 0.0
-    f1 = 2 * rec * prec / (rec + prec) if (rec + prec) else 0.0
-    # Ratio mediano sobre TPs si forense lo expone
-    tp_records = d.get("tp_records", []) or d.get("tp", [])
-    ratios = [m.get("ratio") for m in tp_records if isinstance(m, dict) and m.get("ratio")]
-    rm = median(ratios) if ratios else None
-    return {"tp": tp, "fn": fn, "fp": fp, "recall": rec,
-            "precision": prec, "f1": f1, "ratio_med": rm}
+    raw = json.loads(p.read_text(encoding="utf-8"))
+    records = raw["records"] if isinstance(raw, dict) and "records" in raw else raw
+    summit_total = 0
+    summit_match = 0
+    far_total = 0
+    far_match = 0  # TP_far
+    far_no_match = 0  # FP_far
+    for r in records:
+        try:
+            dt = _parse_dt_record(r["datetime_utc"])
+        except Exception:
+            continue
+        if not (START <= dt <= END):
+            continue
+        # Solo records con detección física
+        if r.get("vrp_mw", 0) <= 0 and r.get("n_anomalous_pixels", 0) == 0:
+            continue
+        dist_class = r.get("distance_class", "")
+        sensor = r.get("sensor", "")
+        m = has_match(dt, sensor, refs)
+        if dist_class == "summit":
+            summit_total += 1
+            if m:
+                summit_match += 1
+        elif dist_class == "far":
+            far_total += 1
+            if m:
+                far_match += 1
+            else:
+                far_no_match += 1
+    return {
+        "summit_total": summit_total,
+        "summit_match": summit_match,
+        "far_total": far_total,
+        "far_match": far_match,
+        "far_no_match": far_no_match,
+        "n_refs": len(refs),
+    }
 
 
 def main():
-    lines = ["# A/B P3.1 dual-ROI — Delta Report (S24)",
-             "",
-             "Generado por `experiments/51_p31_ab/delta_report.py`.",
-             "",
-             "Compara `_p3_1_enabled` (dual-ROI on) vs `_p3_1_disabled` (control)",
-             "sobre 14d 2026-04-12 a 2026-04-25, 4 Tier A.",
-             "",
-             "## Por volcán",
-             "",
-             "| Volcán | TP en/dis | FN en/dis | FP en/dis | Recall en/dis | Precision en/dis | Ratio med en/dis |",
-             "|---|---|---|---|---|---|---|"]
+    rows_by_vol = {}
+    for vol in VOLCANOES:
+        refs = load_refs(vol)
+        rows_by_vol[vol] = {p: classify(p, vol, refs) for p in PROFILES}
 
-    agg_en = {"tp": 0, "fn": 0, "fp": 0}
-    agg_dis = {"tp": 0, "fn": 0, "fp": 0}
+    lines = [
+        "# A/B P3.1 dual-ROI — Delta Report (S24)",
+        "",
+        f"Ventana: {START.date()} → {END.date()} (14d). Tolerancia match ±60 min.",
+        "",
+        "Cada record con detección física se clasifica por `distance_class`:",
+        "- **summit**: ROI inner — P3.1 NO lo afecta (filtra solo SCENE).",
+        "- **far**: ROI scene — P3.1 lo reduce con threshold 3.3× más estricto.",
+        "  - **far+match**: detectado por nosotros y por MIROVA (señal real lejana, raro).",
+        "  - **far−match**: solo nosotros (FP lejano — lo que P3.1 debería matar).",
+        "",
+        "## Por volcán",
+        "",
+        "| Volcán | n_refs | summit en/dis | far en/dis | far−match (FP_far) en/dis | Δ FP_far |",
+        "|---|---:|---|---|---|---:|",
+    ]
+
+    agg = {p: {"summit_total": 0, "far_total": 0, "far_no_match": 0, "far_match": 0} for p in PROFILES}
 
     for vol in VOLCANOES:
-        en = metrics(load("_p3_1_enabled", vol))
-        dis = metrics(load("_p3_1_disabled", vol))
+        en = rows_by_vol[vol][PROFILES[0]]
+        dis = rows_by_vol[vol][PROFILES[1]]
 
-        def fmt(en_v, dis_v, fmt_str="{:.2f}"):
-            if en is None and dis is None:
-                return "-/-"
-            e = fmt_str.format(en_v) if en is not None and en_v is not None else "-"
-            d = fmt_str.format(dis_v) if dis is not None and dis_v is not None else "-"
+        def fmt(en_v, dis_v):
+            e = "?" if en is None else str(en_v)
+            d = "?" if dis is None else str(dis_v)
             return f"{e}/{d}"
+
+        n_refs = (en or dis or {}).get("n_refs", 0)
+        delta_fp = "?"
+        if en and dis:
+            delta_fp = f"{en['far_no_match'] - dis['far_no_match']:+d}"
 
         row = [
             vol,
-            fmt(en["tp"] if en else None, dis["tp"] if dis else None, "{:d}"),
-            fmt(en["fn"] if en else None, dis["fn"] if dis else None, "{:d}"),
-            fmt(en["fp"] if en else None, dis["fp"] if dis else None, "{:d}"),
-            fmt(en["recall"] if en else None, dis["recall"] if dis else None),
-            fmt(en["precision"] if en else None, dis["precision"] if dis else None),
-            fmt(en["ratio_med"] if en else None, dis["ratio_med"] if dis else None),
+            str(n_refs),
+            fmt(en["summit_total"] if en else None, dis["summit_total"] if dis else None),
+            fmt(en["far_total"] if en else None, dis["far_total"] if dis else None),
+            fmt(en["far_no_match"] if en else None, dis["far_no_match"] if dis else None),
+            delta_fp,
         ]
         lines.append("| " + " | ".join(row) + " |")
 
-        if en:
-            for k in agg_en: agg_en[k] += en[k]
-        if dis:
-            for k in agg_dis: agg_dis[k] += dis[k]
+        for p in PROFILES:
+            d = rows_by_vol[vol][p]
+            if d:
+                for k in agg[p]:
+                    agg[p][k] += d[k]
 
     lines.append("")
     lines.append("## Agregado (4 volcanes)")
     lines.append("")
-
-    def agg_metrics(a):
-        rec = a["tp"] / (a["tp"] + a["fn"]) if (a["tp"] + a["fn"]) else 0
-        prec = a["tp"] / (a["tp"] + a["fp"]) if (a["tp"] + a["fp"]) else 0
-        f1 = 2 * rec * prec / (rec + prec) if (rec + prec) else 0
-        return rec, prec, f1
-
-    rec_e, pr_e, f1_e = agg_metrics(agg_en)
-    rec_d, pr_d, f1_d = agg_metrics(agg_dis)
-
-    lines += [
-        f"| Métrica | Enabled (dual-ROI on) | Disabled (control) | Δ |",
-        f"|---|---:|---:|---:|",
-        f"| TP | {agg_en['tp']} | {agg_dis['tp']} | {agg_en['tp']-agg_dis['tp']:+d} |",
-        f"| FN | {agg_en['fn']} | {agg_dis['fn']} | {agg_en['fn']-agg_dis['fn']:+d} |",
-        f"| FP | {agg_en['fp']} | {agg_dis['fp']} | {agg_en['fp']-agg_dis['fp']:+d} |",
-        f"| Recall | {rec_e:.3f} | {rec_d:.3f} | {rec_e-rec_d:+.3f} |",
-        f"| Precision | {pr_e:.3f} | {pr_d:.3f} | {pr_e-pr_d:+.3f} |",
-        f"| F1 | {f1_e:.3f} | {f1_d:.3f} | {f1_e-f1_d:+.3f} |",
-        "",
-    ]
+    lines.append(f"| Métrica | Enabled (dual-ROI on) | Disabled (control) | Δ |")
+    lines.append(f"|---|---:|---:|---:|")
+    for k, label in [
+        ("summit_total", "Records summit"),
+        ("far_total", "Records far"),
+        ("far_match", "TP_far (far+match MIROVA)"),
+        ("far_no_match", "FP_far (far sin match)"),
+    ]:
+        e = agg[PROFILES[0]][k]
+        d = agg[PROFILES[1]][k]
+        lines.append(f"| {label} | {e} | {d} | {e-d:+d} |")
+    lines.append("")
 
     # Veredicto
-    lines.append("## Veredicto criterios P3.1 (plan_s15_p3_1_dual_roi.md)")
+    lines.append("## Veredicto P3.1 dual-ROI")
     lines.append("")
+    fp_en = agg[PROFILES[0]]["far_no_match"]
+    fp_dis = agg[PROFILES[1]]["far_no_match"]
+    summit_en = agg[PROFILES[0]]["summit_total"]
+    summit_dis = agg[PROFILES[1]]["summit_total"]
 
-    chaiten_en = metrics(load("_p3_1_enabled", "Chaiten"))
-    lascar_en = metrics(load("_p3_1_enabled", "Lascar"))
-
-    crit = []
-    if chaiten_en:
-        c1 = chaiten_en["precision"] >= 0.40
-        crit.append((f"Chaitén precision (enabled) ≥ 0.40 → {chaiten_en['precision']:.2f}", c1))
-    if agg_dis["fp"] > 0:
-        fp_drop = (agg_dis["fp"] - agg_en["fp"]) / agg_dis["fp"]
-        c2 = fp_drop >= 0.30
-        crit.append((f"FP totales caen ≥ 30% (enabled vs disabled) → {fp_drop*100:.1f}%", c2))
-    c3 = (rec_d - rec_e) <= 0.05
-    crit.append((f"Recall no cae más de 5 pp → Δ {(rec_e-rec_d)*100:+.1f} pp", c3))
-    if lascar_en and lascar_en["ratio_med"] is not None:
-        c4 = 1.10 <= lascar_en["ratio_med"] <= 1.30
-        crit.append((f"Lascar ratio mediano (enabled) en [1.10, 1.30] → {lascar_en['ratio_med']:.2f}", c4))
-
-    if crit:
-        passed = all(c[1] for c in crit)
-        lines.append(f"**P3.1 {'APROBADO' if passed else 'NO APROBADO'}**")
-        lines.append("")
-        for msg, ok in crit:
-            mark = "[OK]" if ok else "[FAIL]"
-            lines.append(f"- {mark} {msg}")
+    if fp_dis > 0:
+        fp_drop = (fp_dis - fp_en) / fp_dis
+        lines.append(f"- **FP_far reduction**: {fp_dis} → {fp_en} ({fp_drop*100:+.1f}% vs control).")
     else:
-        lines.append("**Sin datos para evaluar criterios** (forense JSONs faltantes).")
+        lines.append(f"- **FP_far reduction**: 0 → 0 (no scene FPs en la ventana — sin señal).")
+
+    if summit_dis == summit_en:
+        lines.append(f"- **Summit estable**: {summit_en} = {summit_dis} (P3.1 no toca summit, esperado).")
+    else:
+        lines.append(f"- **⚠ Summit cambió**: {summit_dis} → {summit_en} (no esperado; revisar implementación).")
 
     lines.append("")
+    lines.append("**Interpretación**:")
+    lines.append("- Si Δ FP_far ≪ 0 y summit estable → P3.1 cumple su rol diseñado: filtra ruido scene sin tocar señal summit. **MANTENER**.")
+    lines.append("- Si Δ FP_far ≈ 0 → P3.1 no aporta señal en la ventana. **EVALUAR si la ventana es informativa** (más volcanes / más días).")
+    lines.append("- Si Δ FP_far > 0 (enabled tiene MÁS FP) → bug. **INVESTIGAR**.")
+
     OUT.write_text("\n".join(lines), encoding="utf-8")
     print(f"Delta report escrito en {OUT}")
     print()
-    print("\n".join(lines[:30]))
+    print("\n".join(lines))
 
 
 if __name__ == "__main__":
