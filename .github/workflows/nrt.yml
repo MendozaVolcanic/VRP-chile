@@ -191,19 +191,31 @@ jobs:
 
       - name: Commit updated data files
         if: steps.filter.outputs.skip != 'true'
-        # Serialize commits across the matrix using a retry loop on
-        # git pull --rebase / git push. Without this, concurrent jobs
-        # race on the same remote branch and most end up failing the
-        # push. 5 retries with exponential-ish backoff is enough.
+        # S22 H_S22_NRT_PUSH_CONFLICT: el git add con *.json agarraba
+        # cualquier modificación incidental → conflicts en rebase concurrente.
+        # Fix: add SOLO el archivo del volcán de este job, así diferentes
+        # matrix-jobs nunca tocan los mismos archivos. El rebase queda
+        # libre de conflicts. Si rebase falla por otra razón (e.g. branch
+        # protection), -X theirs auto-resuelve aceptando lo del remoto
+        # (NRT files de otros volcanes ganan; nuestro volcano es el cambio
+        # nuevo a aplicar encima).
         run: |
+          set +e  # No abortar en errores intermedios — manejamos exit codes
           git config user.name  "vrp-bot"
           git config user.email "vrp-bot@github-actions"
-          git add data/mirova_equivalent/*.json data/experimental/*.json data/mirova/*.json 2>/dev/null || true
-          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          # Solo el archivo del volcán de este job (cada matrix tiene volcano único)
+          git add "data/mirova_equivalent/${{ matrix.volcano }}.json" \
+                  "data/experimental/${{ matrix.volcano }}.json" \
+                  "data/mirova/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit for ${{ matrix.volcano }}"; exit 0; }
           git commit -m "NRT update ${{ matrix.volcano }} $(date -u '+%Y-%m-%d %H:%M UTC')"
           for attempt in 1 2 3 4 5; do
-            git pull --rebase origin main && git push && exit 0
+            # -X theirs: en caso de conflict, aceptar el remoto (otros jobs)
+            # y aplicar nuestro cambio del volcán encima.
+            git pull --rebase -X theirs origin main && git push && exit 0
             echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            # Si rebase falla a mitad, abortarlo antes del próximo intento
+            git rebase --abort 2>/dev/null
             sleep $((attempt * 10))
           done
           echo "all push attempts failed"; exit 1
