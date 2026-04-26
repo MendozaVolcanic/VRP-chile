@@ -72,6 +72,17 @@ viven en el vault Obsidian: `C:\Users\nmend\OneDrive\Escritorio\claude\Vault\`.
   no hay máscaras geométricas ni radios adaptativos. Es grilla UTM 51×51 +
   NTI/ETI/contextual (Coppola 2016a) + clasificación visual post-detección.
   La complejidad está en los umbrales, no en la geometría.
+- **A6. Trazar callers cuando concluyas comportamiento (S21)**: leer firma+cuerpo
+  de un callee NO basta. El caller puede transformar args. S21 leí
+  `process_viirs.py:518` (vent_dist=haversine(vent_lat,...)) y concluí "vent-path
+  usa vent_lat nominal" — falso: `run_pipeline.py:220` pasa eff_vent_lat de
+  `get_effective_vent()` que ya fallbackea a mirova_center. ~30 min perdidos
+  en hipótesis ya implementada S15.
+- **A7. Schema gaps: "no calculado" ≠ "calculado pero no persistido" (S21)**:
+  cuando un campo aparece None en JSONs, ANTES de proponer "agregar cómputo"
+  verificar si la variable local YA se calcula y solo falta el key en el return
+  dict. H_S21_11: process_viirs.py calculaba `std_bg_i04`, `threshold_mir`,
+  `nti_std` — solo no los retornaba. Fix de 6 líneas, no 60.
 - **A5. Los valores MIROVA oficiales (KML, OSF) son datos no opiniones**:
   usarlos tal cual es más defendible que inventar umbrales. Solo divergir
   con experimentos propios y en el perfil `experimental`, no en
