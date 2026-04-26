@@ -46,13 +46,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # pipeline.profile reads $VRP_PROFILE at import time. If we let the normal
 # argparse run after imports, the processors would already be locked to
 # whatever the default profile was.
+# S24: discovery dinámico de profiles válidos leyendo pipeline/profiles/*.yaml,
+# para mantener una source-of-truth única con pipeline/profile.py:VALID_PROFILES.
+_PROFILES_DIR = Path(__file__).parent.parent / "pipeline" / "profiles"
+_VALID_PROFILES = sorted(p.stem for p in _PROFILES_DIR.glob("*.yaml"))
 _early = argparse.ArgumentParser(add_help=False)
-_early.add_argument("--profile", default=None,
-                    choices=["mirova_equivalent", "experimental",
-                             "mirova_equivalent_backfill_nov2025",
-                             "s9_vent_permissive",
-                             "nsigma_mir_5", "nsigma_mir_12",
-                             "low_vent_cap"])
+_early.add_argument("--profile", default=None, choices=_VALID_PROFILES)
 _early_args, _ = _early.parse_known_args()
 if _early_args.profile:
     os.environ["VRP_PROFILE"] = _early_args.profile
@@ -314,12 +313,7 @@ def date_range(start: datetime, end: datetime):
 
 def main():
     parser = argparse.ArgumentParser(description="VRP Chile pipeline")
-    parser.add_argument("--profile", default=None,
-                        choices=["mirova_equivalent", "experimental",
-                                 "mirova_equivalent_backfill_nov2025",
-                                 "s9_vent_permissive",
-                                 "nsigma_mir_5", "nsigma_mir_12",
-                                 "low_vent_cap"],
+    parser.add_argument("--profile", default=None, choices=_VALID_PROFILES,
                         help="Detection profile (default: mirova_equivalent). "
                              "Selects thresholds, paths, sensors and output "
                              "data subdirectory. Already consumed before "

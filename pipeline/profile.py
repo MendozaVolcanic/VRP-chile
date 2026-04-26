@@ -25,16 +25,10 @@ from pathlib import Path
 
 PROFILES_DIR = Path(__file__).parent / "profiles"
 DEFAULT_PROFILE = "mirova_equivalent"
-VALID_PROFILES = {
-    "mirova_equivalent", "experimental",
-    "mirova_equivalent_backfill_nov2025", "s9_vent_permissive",
-    # S18 test A/B drift D2 (N·σ multiplier)
-    "nsigma_mir_5", "nsigma_mir_12",
-    # S22.2 test A/B cap MAX_VENT_SIGMA_CONTRIB_K (3.0 → 2.0)
-    "low_vent_cap",
-    # S24 test A/B P3.1 dual-ROI (enable_dnti_dual_roi true vs false)
-    "_p3_1_disabled", "_p3_1_enabled",
-}
+# S24: discovery dinámico — un profile válido es cualquier YAML en profiles/.
+# Antes era hardcoded duplicado en run_pipeline.py argparse choices, drift
+# generaba bug invisible (S24 A/B P3.1 falló 8/8 jobs por profile no en lista).
+VALID_PROFILES = {p.stem for p in PROFILES_DIR.glob("*.yaml")}
 
 
 def _load_profile() -> dict:
