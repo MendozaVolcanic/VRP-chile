@@ -180,6 +180,26 @@
 
 ---
 
+## Asunciones locales sin paper específico (S23 audit)
+
+### `NTI_REL_MIN_FLOOR = 0.005`
+
+**Origen**: commit `628e374` (S5, 2026-04-05). Mensaje commit: "Add dual NTI+MIR
+threshold for VIIRS 375m (MIROVA-style contextual detection)".
+
+**Razón**: piso conservador para evitar que `nti_threshold = nti_bg + max(0.005,
+3.0 × nti_std)` sea inútilmente bajo cuando `nti_std` es muy chico (0.001-0.002
+en escenas atmosféricamente limpias). Sin el piso, threshold absoluto cercano a
+`nti_bg` → cualquier ruido dispara FPs.
+
+**Status**: ✅ asunción local justificada empíricamente S5, no contradice papers.
+Coppola 2016a SP 426.5 menciona thresholds dual-ROI (5σ ROI1 / 10σ ROI2) pero NO
+piso absoluto. Nuestro 0.005 es complemento defensivo, no algoritmo distinto.
+
+**Validación pendiente**: A/B test con 0.001 / 0.005 / 0.01 sobre Tier A volcanes
+para verificar que 0.005 es el sweet spot. Diferido S24+ (bajo prioridad — fix
+defensivo no afecta cuello de botella Tupungatito).
+
 ## Vault crosslinks (S21)
 
 Los 26 papers MIROVA-relevantes están notados en
