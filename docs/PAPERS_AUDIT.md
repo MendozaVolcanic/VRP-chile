@@ -177,3 +177,26 @@
 | TIR Aveni Eq.9 | k_TIR=60.17 μm·sr | Aveni 2025 | Eq.9 p.4 |
 | Niveles alerta | Low/Medium/High/Very High/Extreme | Coppola 2016a, Coppola 2023 | — / p.5 |
 | NRT latencia | 1-4h MIR, 6-24h SWIR | mirovaweb.it about.php | web |
+
+---
+
+## Vault crosslinks (S21)
+
+Los 26 papers MIROVA-relevantes están notados en
+`Vault/10_Bibliografia/99_por_clasificar/` con frontmatter `proyecto: "[[VRP Chile]]"`.
+La nota extendida de cada uno (metadata Zotero, abstract, conexiones) vive allá.
+
+**Listado vivo y filtros**: abrir `Vault/00_Meta/proyectos.md` sección "Papers
+vinculados — VRP Chile" — usa **dataview** para query automático sobre el
+frontmatter. Si se procesa un paper nuevo, simplemente agregar `proyecto: "[[VRP Chile]]"`
+al frontmatter y aparece en la lista sin tocar este archivo.
+
+**Sincronización masiva**: `scripts/vault_link_papers_to_project.py` (idempotente)
+agrega el campo a una lista canónica de papers. Re-correr cuando se auditen papers
+nuevos:
+
+    python scripts/vault_link_papers_to_project.py [--dry-run]
+
+Si un paper se mueve a una subcarpeta temática (ej: `termico/`), el dataview lo
+sigue porque filtra por frontmatter no por path — instrucción de Nicolás S21 fue
+**no mover archivos físicamente**.
