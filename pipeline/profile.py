@@ -30,6 +30,8 @@ VALID_PROFILES = {
     "mirova_equivalent_backfill_nov2025", "s9_vent_permissive",
     # S18 test A/B drift D2 (N·σ multiplier)
     "nsigma_mir_5", "nsigma_mir_12",
+    # S22.2 test A/B cap MAX_VENT_SIGMA_CONTRIB_K (3.0 → 2.0)
+    "low_vent_cap",
 }
 
 

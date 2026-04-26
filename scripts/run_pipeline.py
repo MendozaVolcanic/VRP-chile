@@ -51,7 +51,8 @@ _early.add_argument("--profile", default=None,
                     choices=["mirova_equivalent", "experimental",
                              "mirova_equivalent_backfill_nov2025",
                              "s9_vent_permissive",
-                             "nsigma_mir_5", "nsigma_mir_12"])
+                             "nsigma_mir_5", "nsigma_mir_12",
+                             "low_vent_cap"])
 _early_args, _ = _early.parse_known_args()
 if _early_args.profile:
     os.environ["VRP_PROFILE"] = _early_args.profile
@@ -317,7 +318,8 @@ def main():
                         choices=["mirova_equivalent", "experimental",
                                  "mirova_equivalent_backfill_nov2025",
                                  "s9_vent_permissive",
-                                 "nsigma_mir_5", "nsigma_mir_12"],
+                                 "nsigma_mir_5", "nsigma_mir_12",
+                                 "low_vent_cap"],
                         help="Detection profile (default: mirova_equivalent). "
                              "Selects thresholds, paths, sensors and output "
                              "data subdirectory. Already consumed before "
