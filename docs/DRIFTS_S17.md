@@ -167,6 +167,22 @@ Si MIROVA NRT captura más, es por diferencia algorítmica (NTI más sensible,
 secuencia de paths distinta, suavizado temporal). Drift D5 supervisión aplica
 al OSF v2.5 publicado, NO al NRT NRT-vs-NRT que es nuestra comparación operativa.
 
+### Validación S22 — Tupungatito es CASO SINGULAR
+
+Forense Lastarria 14 días (2026-04-08 a 2026-04-22, profile baseline `mirova_equivalent`):
+- 14 refs MIROVA → 14 TP, 0 T1/T2b/T3/T4 → **recall 1.000**.
+
+Lastarria también es bg-noisy (σ_bg ~3-5K, glaciar lateral, hidrotermal Lazufre
+15-25 km), pero su fumarola es lo suficientemente fuerte para disparar el
+vent-path o eruption-path en TODAS las pasadas con ref MIROVA.
+
+Lascar baseline 14d: recall 0.875 (5 T2b por escenas frías reales, 0 T4).
+
+**Solo Tupungatito tiene T4 sistemático** (~9 en 30 días). NO es problema
+generalizable de pipelines bg-noisy — es propiedad específica de **fumarola
+Tupungatito sub-Kelvin con variabilidad nocturna**. Acepto como límite físico
+del MIR puro nocturno automatizado.
+
 ### Decisión
 
 **NO implementar D6**. Backlog S22 reorientado:
