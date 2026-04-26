@@ -156,7 +156,14 @@ def run_forense(*, volcano: str, consolidado_csv: Path, records_json: Path,
     records = json.loads(records_json.read_text(encoding="utf-8")).get("records", [])
 
     cfg = yaml.safe_load(volcanoes_yaml.read_text(encoding="utf-8"))
-    inner_km = float(cfg.get(volcano, {}).get("inner_radius_km", 5.0))
+    # volcanoes.yaml es {volcanoes: [{name, ...}, ...]}, no dict por nombre.
+    # Tests usan mini-yaml dict-style; soportar ambos.
+    if isinstance(cfg, dict) and "volcanoes" in cfg:
+        vol_cfg = next((v for v in cfg["volcanoes"]
+                        if v.get("name") == volcano), {})
+    else:
+        vol_cfg = (cfg or {}).get(volcano, {}) if isinstance(cfg, dict) else {}
+    inner_km = float(vol_cfg.get("inner_radius_km", 5.0))
 
     classifications = [classify_ref(r, records, inner_km, tolerance_min) for r in refs]
     counts = {c: 0 for c in ("TP", "T1", "T2b", "T3", "T4")}

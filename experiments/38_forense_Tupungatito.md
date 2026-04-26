@@ -1,6 +1,6 @@
 # Forense H17 replicable — Tupungatito
 
-Ventana: 2026-03-25 → 2026-04-25  ·  inner_radius_km=5.0  ·  tolerance_min=60
+Ventana: 2026-03-25 → 2026-04-25  ·  inner_radius_km=7.0  ·  tolerance_min=60
 
 **N refs MIROVA (latest.php only)**: **35**
 
