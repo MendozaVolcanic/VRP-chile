@@ -196,13 +196,8 @@ def bt_to_spectral_radiance(bt: np.ndarray, wavelength_um: float) -> np.ndarray:
         return C1_PLANCK / (wavelength_um ** 5 * (np.exp(C2_PLANCK / (wavelength_um * bt)) - 1))
 
 
-def haversine_km(lat1, lon1, lat2_arr, lon2_arr):
-    R = 6371.0
-    dlat = np.radians(lat2_arr - lat1)
-    dlon = np.radians(lon2_arr - lon1)
-    a = (np.sin(dlat / 2) ** 2
-         + np.cos(np.radians(lat1)) * np.cos(np.radians(lat2_arr)) * np.sin(dlon / 2) ** 2)
-    return R * 2 * np.arcsin(np.sqrt(np.clip(a, 0, 1)))
+# S23 Task 2: haversine_km centralizado en pipeline/scan_geometry.py
+from pipeline.scan_geometry import haversine_km
 
 
 def calculate_vrp(l1b_path: Path, geo_path: Path,

@@ -172,13 +172,9 @@ def _interp_geo(coarse: np.ndarray, target_lines: int, target_samples: int) -> n
                          int(round(scale_x)), axis=1)[:target_lines, :target_samples]
 
 
-def haversine_km(lat1, lon1, lat2_arr, lon2_arr):
-    R = 6371.0
-    dlat = np.radians(lat2_arr - lat1)
-    dlon = np.radians(lon2_arr - lon1)
-    a = (np.sin(dlat / 2) ** 2
-         + np.cos(np.radians(lat1)) * np.cos(np.radians(lat2_arr)) * np.sin(dlon / 2) ** 2)
-    return R * 2 * np.arcsin(np.sqrt(np.clip(a, 0, 1)))
+# S23 Task 2: haversine_km centralizado en pipeline/scan_geometry.py
+# (era duplicado en 3 archivos process_*.py).
+from pipeline.scan_geometry import haversine_km
 
 
 def calculate_vrp(hdf_path: Path, geo_path: Path,

@@ -35,6 +35,37 @@ EARTH_RADIUS_KM = 6371.0
 MODIS_ALTITUDE_KM = 705.0          # Terra/Aqua orbital altitude
 VIIRS_ALTITUDE_KM = 829.0          # Suomi-NPP / NOAA-20 orbital altitude
 
+
+def haversine_km(lat1: float, lon1: float,
+                 lat2: np.ndarray, lon2: np.ndarray) -> np.ndarray:
+    """Vectorized haversine distance (km) from scalar point to array.
+
+    S23 Task 2: centralized here (was duplicated in process_modis/viirs/viirs_mod).
+
+    Args:
+        lat1, lon1: scalar floats (volcano center).
+        lat2, lon2: numpy arrays (per-pixel grids).
+
+    Returns:
+        Array same shape as lat2/lon2, distance in km. NaN propagates.
+
+    Raises:
+        TypeError: si lat1 o lon1 es None (defensa: antes silenciosamente
+            propagaba np.radians(None) → ValueError críptico).
+    """
+    if lat1 is None or lon1 is None:
+        raise TypeError(
+            f"haversine_km: lat1/lon1 cannot be None (got lat1={lat1}, "
+            f"lon1={lon1}). Check volcano YAML config has lat/lon set."
+        )
+    R = EARTH_RADIUS_KM
+    dlat = np.radians(lat2 - lat1)
+    dlon = np.radians(lon2 - lon1)
+    a = (np.sin(dlat / 2) ** 2
+         + np.cos(np.radians(lat1)) * np.cos(np.radians(lat2))
+         * np.sin(dlon / 2) ** 2)
+    return R * 2 * np.arcsin(np.sqrt(np.clip(a, 0, 1)))
+
 MODIS_NSAMPLES = 1354              # samples per scan line
 MODIS_SCAN_HALFWIDTH_DEG = 55.0    # +/- from nadir at the satellite
 
