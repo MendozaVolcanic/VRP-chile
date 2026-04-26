@@ -88,13 +88,29 @@ def auth():
     Strategy order: environment vars → netrc. Falla solo si NINGUNA funciona,
     permitiendo correr local con `~/_netrc` (Windows) o `~/.netrc` (Unix) sin
     requerir env vars. CI sigue usando env vars (secrets en GitHub Actions).
+
+    H6 S22 retry+backoff: 3 intentos con waits 5s/15s/45s para mitigar
+    "Network is unreachable" intermitente GitHub Actions → urs.earthdata.nasa.gov
+    (issue #1, ~40% runs fallaron S20-S22 sin razón clara desde código).
     """
-    try:
-        earthaccess.login(strategy="environment")
-        return
-    except Exception:
-        pass
-    earthaccess.login(strategy="netrc")
+    import time
+    delays = [0, 5, 15, 45]  # 4 attempts: immediate + 3 retries
+    last_err = None
+    for delay in delays:
+        if delay:
+            time.sleep(delay)
+        try:
+            earthaccess.login(strategy="environment")
+            return
+        except Exception as e:
+            last_err = e
+        try:
+            earthaccess.login(strategy="netrc")
+            return
+        except Exception as e:
+            last_err = e
+    # Si aquí, todos los attempts fallaron. Reraise el último error.
+    raise last_err if last_err else RuntimeError("auth failed")
 
 
 def product_version_from_granule(filename: str) -> str:
@@ -160,10 +176,25 @@ def search_granules(product_key: str, lat: float, lon: float,
 
 
 def download_granules(granules: list, dest_dir: Path) -> list[Path]:
-    """Download a list of granules to dest_dir. Returns list of local file paths."""
+    """Download a list of granules to dest_dir. Returns list of local file paths.
+
+    H6 S22 retry+backoff: 3 intentos con waits 10s/30s/60s para mitigar
+    fallos intermitentes red GitHub→NASA. Cada intento llama earthaccess.download
+    completo; si parcialmente exitoso (algunos files OK), retorna lo que pudo.
+    """
+    import time
     dest_dir.mkdir(parents=True, exist_ok=True)
-    paths = earthaccess.download(granules, local_path=str(dest_dir))
-    return [Path(p) for p in paths if Path(p).exists()]
+    delays = [0, 10, 30, 60]
+    last_err = None
+    for delay in delays:
+        if delay:
+            time.sleep(delay)
+        try:
+            paths = earthaccess.download(granules, local_path=str(dest_dir))
+            return [Path(p) for p in paths if Path(p).exists()]
+        except Exception as e:
+            last_err = e
+    raise last_err if last_err else RuntimeError("download failed")
 
 
 def _filter_nighttime_granules(granules: list, lat: float, lon: float,
