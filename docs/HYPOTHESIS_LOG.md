@@ -71,7 +71,13 @@
 - **Formulada**: S17 (2026-04-23).
 - **Hipótesis**: 3 intentos sleep 5s/15s/45s en `fetch.auth()` recuperan los runs Actions que fallan con "Network is unreachable".
 - **Criterio testable**: tras implementar, runs fallidos bajan de 7/7 a <2/7 en 14 días.
-- **Estado**: **ACTIVE** — no implementada. Diferible a S19.
+- **Estado**: **IMPLEMENTADA S22 (commit `bf5ecce`)** — pendiente validación
+  empírica (esperar 14 días NRT runs y comparar tasa de fallos vs baseline 40%).
+- **Resolución implementada**: 4 intentos (immediate + 5s + 15s + 45s) en
+  `auth()` probando environment y netrc en cada uno. También aplicado a
+  `download_granules()` con waits 10s/30s/60s. Suite 119/119 verde. Retry
+  behavior NO mockeado (mockear earthaccess es complejo); validación
+  empírica en NRT cron próximas semanas.
 
 ---
 
