@@ -97,6 +97,60 @@ GOLDEN = [
             # No verificamos vrp_mw porque varía con qué path dispara.
         },
     },
+    # === S23 Task 8 — expand M1 a 9 records canónicos ===
+    {
+        "id": "tupungatito_regla_d_modis_2026_04_16",
+        "volcano": "Tupungatito",
+        "datetime_utc": "2026-04-16 06:50",
+        "sensor": "MODIS_AQUA",
+        "why": "Regla D vent-priority S20 funciona en MODIS — vrp_vent>0 promueve summit + final_hotspot=vent.",
+        "expected": {
+            "vrp_vent_mw":            (11.5, 13.5),
+            "final_hotspot_dist_km":  (2.3, 2.8),
+            "distance_class":         "summit",
+            "final_hotspot_source":   "vent",
+            "sensor":                 "MODIS_AQUA",
+        },
+    },
+    {
+        "id": "lascar_path_d_contextual_modis_2026_04_19",
+        "volcano": "Lascar",
+        "datetime_utc": "2026-04-19 07:05",
+        "sensor": "MODIS_AQUA",
+        "why": "Path D dNTI contextual S15 P3.2 dispara — diag_n_dnti_ctx_path>0 confirma que el path está activo.",
+        "expected": {
+            "diag_n_dnti_ctx_path":   (35, 50),
+            "n_anomalous_pixels":     (30, 50),
+            "sensor":                 "MODIS_AQUA",
+        },
+    },
+    {
+        "id": "lastarria_path_d_contextual_viirs_2026_04_08",
+        "volcano": "Lastarria",
+        "datetime_utc": "2026-04-08 05:18",
+        "sensor": "VIIRS_NOAA21",
+        "why": "Path D contextual + vent-path en Lastarria hidrotermal — combinación P3.2 + Regla D resuelve el caso S22.5.",
+        "expected": {
+            "vrp_vent_mw":            (0.10, 0.15),
+            "diag_n_dnti_ctx_path":   (1, 8),
+            "distance_class":         "summit",
+            "final_hotspot_source":   "vent",
+            "sensor":                 "VIIRS_NOAA21",
+        },
+    },
+    {
+        "id": "tupungatito_regla_d_edge_no_coords_2026_01_01",
+        "volcano": "Tupungatito",
+        "datetime_utc": "2026-01-01 04:54",
+        "sensor": "VIIRS_NOAA20",
+        "why": "Regla D edge S23 T1 — vrp_vent>0 sin vent_hotspot_dist_km debe quedar summit (legacy S20). Anti-regresión del fix S23 T1.",
+        "expected": {
+            "vrp_vent_mw":     (0.13, 0.15),
+            "distance_class":  "summit",
+            "sensor":          "VIIRS_NOAA20",
+            # vent_hotspot_dist_km es None — no testeamos
+        },
+    },
 ]
 
 
