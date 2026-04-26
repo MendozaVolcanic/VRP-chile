@@ -67,11 +67,15 @@ La fumarola activa Tupungatito es **sub-pixel + sub-Kelvin con variabilidad
 nocturna**. En las pasadas T4 fue genuinamente <3 K sobre fondo. Ningún cambio
 local-vs-global de std_bg ayuda porque el cap satura igual.
 
-**¿Por qué MIROVA captura más?** Hipótesis (no validables sin código MIROVA):
-- Algoritmo NTI absoluto distinto / más sensible
+**¿Por qué MIROVA NRT captura más?** Hipótesis algorítmicas (no validables sin
+código MIROVA). MIROVA NRT es 100% automático — NO tiene supervisión humana
+(servicio global gratuito, ver `~memory/feedback_mirova_no_human_supervision`).
+Coppola 2023 §2.5 supervisión aplica solo a OSF v2.5 publicado, no al NRT que
+scrapeamos. Causas algorítmicas posibles:
+- NTI absoluto más agresivo (umbral K1 distinto)
 - Path D dual-ROI con thresholds más permisivos para summit
 - Suavizado temporal multi-pasada
-- Supervisión manual post-algorítmica (Coppola 2023 §2.5)
+- Secuencia de filtros distinta
 
 ## Decisión S22
 
@@ -120,6 +124,10 @@ otra parte filtra → bug fix targetted. Si nada dispara → Opción 4.
    medición real lo refutó porque el glaciar afecta toda el área, no solo el
    anillo lateral.
 
-4. **El recall MIROVA tiene componente no-algorítmico** (supervisión humana
-   Coppola 2023 §2.5, drift D5). Hay un techo intrínseco que un clon
-   100% automático no alcanza sin replicar la curaduría manual.
+4. **El recall MIROVA NRT vs nuestro es 100% diferencia algorítmica** —
+   MIROVA NRT no supervisa manualmente (servicio gratuito sin capacidad
+   operacional de revisar volcán por volcán; ver
+   `~memory/feedback_mirova_no_human_supervision`). El drift D5 de Coppola 2023
+   §2.5 (supervisión) aplica al OSF v2.5 publicado, no al CSV NRT scrapeado.
+   Si MIROVA captura más en sub-pixel, hay diferencia algorítmica replicable
+   con investigación.

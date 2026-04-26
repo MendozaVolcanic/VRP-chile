@@ -164,8 +164,10 @@
 - **Resolución**: el glaciar Tupungatito 5682m afecta toda el área hasta 10+ km,
   no solo lateralmente. El cap MAX_VENT_SIGMA_CONTRIB_K=3K satura igual con std_bg
   local que global → threshold idéntico, no resuelve. Causa raíz definitiva:
-  fumarola sub-pixel + sub-Kelvin con variabilidad. Detalles en
-  `experiments/41_DIAGNOSIS_FINAL_S21.md` y `docs/DRIFTS_S17.md` D6.
+  fumarola sub-pixel + sub-Kelvin con variabilidad. **MIROVA NRT no supervisa
+  manualmente** (ver `~memory/feedback_mirova_no_human_supervision`); diferencias
+  son algorítmicas. Detalles en `experiments/41_DIAGNOSIS_FINAL_S21.md` y
+  `docs/DRIFTS_S17.md` D6.
 
 ---
 

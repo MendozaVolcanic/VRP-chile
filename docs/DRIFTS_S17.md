@@ -160,8 +160,12 @@ umbral → threshold idéntico = 3 K. ΔT real fumarola 1.5-2 K no dispara en ni
 ### Causa raíz definitiva del cuello Tupungatito
 
 Fumarola sub-pixel + sub-Kelvin con variabilidad. T4 = pasadas donde la actividad
-térmica fue genuinamente <3 K sobre fondo. MIROVA captura más probablemente por
-NTI más sensible o supervisión humana (drift D5).
+térmica fue genuinamente <3 K sobre fondo. **MIROVA NRT (lo que scrapeamos) es
+100% algorítmico — sin supervisión humana, servicio global gratuito sin
+capacidad de revisión manual** (ver `~memory/feedback_mirova_no_human_supervision`).
+Si MIROVA NRT captura más, es por diferencia algorítmica (NTI más sensible,
+secuencia de paths distinta, suavizado temporal). Drift D5 supervisión aplica
+al OSF v2.5 publicado, NO al NRT NRT-vs-NRT que es nuestra comparación operativa.
 
 ### Decisión
 
