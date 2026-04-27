@@ -139,15 +139,15 @@ GOLDEN = [
         },
     },
     {
-        "id": "tupungatito_regla_d_edge_no_coords_2026_01_01",
+        "id": "tupungatito_regla_d_edge_no_coords_2026_01_08",
         "volcano": "Tupungatito",
-        "datetime_utc": "2026-01-01 04:54",
-        "sensor": "VIIRS_NOAA20",
-        "why": "Regla D edge S23 T1 — vrp_vent>0 sin vent_hotspot_dist_km debe quedar summit (legacy S20). Anti-regresión del fix S23 T1.",
+        "datetime_utc": "2026-01-08 06:35",
+        "sensor": "MODIS_AQUA",
+        "why": "Regla D edge S23 T1 — vrp_vent>0 sin vent_hotspot_dist_km debe quedar summit (legacy S20). Anti-regresión del fix S23 T1. Record actualizado S26 tras reproceso histórico (record S23 original 2026-01-01 04:54 quedó sin vrp_vent>0 con código S25).",
         "expected": {
-            "vrp_vent_mw":     (0.13, 0.15),
+            "vrp_vent_mw":     (0.05, 0.10),
             "distance_class":  "summit",
-            "sensor":          "VIIRS_NOAA20",
+            "sensor":          "MODIS_AQUA",
             # vent_hotspot_dist_km es None — no testeamos
         },
     },

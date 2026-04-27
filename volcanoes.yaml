@@ -101,6 +101,17 @@ volcanoes:
   vent_lat: -37.856
   vent_lon: -71.183
   vent_radius_km: 2
+  # S26: Lago Caviahue / Laguna del Agrio ~14 km SE del vent (lado Argentina).
+  # Auditoría empírica S26 sobre data fresca: 107 hotspots clusterizados
+  # @(-37.876,-71.025). Radio 4 km cubre cluster sin tocar summit
+  # (inner_radius=4 km, distancia vent → exclude más cercano = 14-4 = 10 km).
+  # NOTA: Copahue tiene laguna crater ácida activa muy chica adentro del
+  # vent_radius — no confundir con lago Caviahue grande lejos.
+  exclude_zones:
+    - name: "Lago Caviahue"
+      lat: -37.876
+      lon: -71.025
+      radius_km: 4.0
 - name: DescabezadoGrande
   display_name: Descabezado Grande
   lat: -35.58
@@ -220,6 +231,16 @@ volcanoes:
   vent_lat: -38.692
   vent_lon: -71.729
   vent_radius_km: 2
+  # S26: Lago Conguillío ~10 km NE genera FPs ya documentados
+  # (project_llaima_thermal.md: 139 FPs ruido térmico). Auditoría empírica
+  # S26 sobre data fresca: 184 hotspots clusterizados @(-38.634,-71.639).
+  # Radio 4 km cubre cluster sin tocar summit (inner_radius=5 km, distancia
+  # vent → exclude más cercano = 10-4 = 6 km).
+  exclude_zones:
+    - name: "Lago Conguillío"
+      lat: -38.634
+      lon: -71.639
+      radius_km: 4.0
 - name: Sollipulli
   display_name: Sollipulli
   lat: -38.97
