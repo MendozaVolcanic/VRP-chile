@@ -373,8 +373,13 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         per_pixel_vrp_mw = hotpix_area * WOOSTER_COEFF * (hotpix_rad - L_bg) / 1e6
         vrp_mw = float(np.nansum(per_pixel_vrp_mw))
 
-        # Build list of all anomalous pixels sorted by VRP (descending)
-        for idx in np.argsort(-per_pixel_vrp_mw):
+        # Build list of TOP-100 anomalous pixels sorted by VRP (descending).
+        # S26: cap a 100 para evitar bloat JSON (>100MB GitHub limit). Records
+        # eruptivos típicamente tienen 1000-4000 pixels detectados; los top 100
+        # capturan >95% de la señal VRP y son suficientes para visualización
+        # frontend. n_anomalous_pixels conserva el count total.
+        sorted_indices = np.argsort(-per_pixel_vrp_mw)[:100]
+        for idx in sorted_indices:
             r, c = int(hot_rows[idx]), int(hot_cols[idx])
             anomaly_pixels.append({
                 "lat": round(float(lat[r, c]), 5),
