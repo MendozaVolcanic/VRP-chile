@@ -87,6 +87,13 @@ viven en el vault Obsidian: `C:\Users\nmend\OneDrive\Escritorio\claude\Vault\`.
   usarlos tal cual es más defendible que inventar umbrales. Solo divergir
   con experimentos propios y en el perfil `experimental`, no en
   `mirova_equivalent`.
+- **A8. Verificar data fresca antes de asumir problema (S25)**: cuando un
+  handoff o CLAUDE.md afirme "X tiene problema Y" (ej: "Villarrica recall
+  0%"), reprocesar primero un día con código actual sobre profile destino
+  antes de proponer fix. Costo verificación = 5-15 min. Costo de saltarla:
+  S25 implementó Test 1 Coppola 2015 (~4h) que resultó redundante porque
+  data stale en `data/mirova_equivalent/Villarrica.json` reportaba 4%
+  recall mientras código S25 daba 94% real.
 
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
@@ -146,6 +153,7 @@ después hay que revertir.
 | Trabajo con HDF/NetCDF/DataFrames grandes de records satelitales | `pandas-pro` | Operaciones vectorizadas, no loops |
 | Audit script que tarda >5 min | `python-performance-optimization` | Perfilar antes de "optimizar a ojo" |
 | Diseñar nuevo experimento (`experiments/NN_*.py`) | `writing-plans` + `test-driven-development` | Mismo rigor que código de producción |
+| A/B test cuantitativo de un fix con profile flag | clonar `.github/workflows/reproc-ab-p3-1.yml` o `reproc-ab-test1.yml` como template + 2 profiles `_<feature>_{enabled,disabled}.yaml` con `data_subdir` aislado | Patrón validado S24+S25, no contamina operacional |
 | **Cerrar sesión con learnings nuevos** | **`revise-claude-md` + `anthropic-skills:consolidate-memory`** + seguir [`docs/SESSION_CLOSE_CHECKLIST.md`](docs/SESSION_CLOSE_CHECKLIST.md) bloque por bloque | El trigger sin checklist falló S20 (gaps redescubiertos S21). Checklist obligatorio bloques A-F |
 
 **Regla meta (reforzada S16)**: si Claude duda si una skill aplica, la invoca igual.
@@ -259,6 +267,14 @@ Para minimizar compactaciones automáticas ("session continued..."):
 - **Frontend chart gotcha**: VIIRS 375m debe usar `vrp_mw` (filtrado), no
   `vrp_mir_mw` (pre-filtro). Bug S12: barras fantasma de detecciones
   descartadas por geofencing.
+- **Race condition matrix paralelo sobre mismo archivo (S25)**: workflows
+  con matrix-de-fechas que escriben al MISMO `data/<profile>/<vol>.json`
+  tienen race con `pull --rebase -X theirs origin main`: cada commit
+  posterior puede borrar records del anterior. Mitigación: `max-parallel: 1`
+  o split a archivos distintos por chunk + merge final. Patrón A/B
+  vol×profile (`reproc-ab-*.yml`) NO afecta porque cada job toca archivo único.
+- **earthaccess granule API**: `g["umm"]` (dict-like, no `g.umm`).
+  Estructura: `g["umm"]["TemporalExtent"]["RangeDateTime"]["BeginningDateTime"]`.
 
 ## Estado
 
