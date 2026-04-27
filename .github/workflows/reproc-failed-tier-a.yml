@@ -1,0 +1,76 @@
+name: Reproceso S26 — completar 3 fallidos por timeout
+
+# Re-corre Chaitén/Villarrica/Lascar (fallidos por timeout 220min en run
+# 24994055814) en 2 chunks paralelos para que quepan en step timeout.
+#
+# Volcanes pesados (1500-3200 pixels anómalos por granule en jan-mar 2026
+# para Villarrica; alta actividad continua para Lascar/Chaitén).
+#
+# Total 3 vol × 2 chunks = 6 jobs paralelos. Wall-clock ~1h.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 220
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        volcano: [Chaiten, Villarrica, Lascar]
+        chunk:
+          - { start: "2026-01-01", end: "2026-02-15", label: "ene-feb" }
+          - { start: "2026-02-16", end: "2026-04-11", label: "feb-abr" }
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — ${{ matrix.volcano }} / ${{ matrix.chunk.label }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 200
+        run: |
+          python scripts/run_pipeline.py \
+            --profile mirova_equivalent \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ matrix.chunk.start }} \
+            --end ${{ matrix.chunk.end }} \
+            --overwrite
+
+      - name: Commit reprocessed data
+        # NOTE: 2 jobs por volcano escriben mismo Villarrica.json/etc.
+        # Race condition idéntica a S25 — pero con max-parallel=6 (no 1)
+        # y solo 2 chunks por volcán, riesgo bajo. Si pasa: rerun chunk
+        # perdido secuencialmente.
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/mirova_equivalent/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S26 reproc fallido — ${{ matrix.volcano }} ${{ matrix.chunk.label }}"
+          for attempt in 1 2 3 4 5 6 7 8; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 15))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 15))
+          done
+          echo "all push attempts failed"; exit 1
