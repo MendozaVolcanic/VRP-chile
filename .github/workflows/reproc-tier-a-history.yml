@@ -1,0 +1,95 @@
+name: Reproceso histórico Tier A con código S25
+
+# Workflow dispatch-only para refrescar `data/mirova_equivalent/` de los 11
+# Tier A con código actual (todos los fixes S20-S25). Motivado por S25 twist:
+# data en disco era pre-S20 → recall aparente 4% en Villarrica vs 94% real
+# con código fresco. Refrescar los 11 Tier A revela el recall verdadero del
+# pipeline en todo el dashboard.
+#
+# Cada matrix-volcano toca SU archivo data/mirova_equivalent/<vol>.json.
+# Sin race condition (a diferencia del workflow refs S25 que hizo 5 jobs
+# escribir mismo archivo).
+#
+# --overwrite por default: regenera records existentes en la ventana con
+# código actual, mantiene records fuera de ventana.
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD (default: 2026-01-01)"
+        required: true
+        default: "2026-01-01"
+      end:
+        description: "End date YYYY-MM-DD inclusive"
+        required: true
+        default: "2026-04-11"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        # Solo los 11 Tier A monitoreados por MIROVA
+        volcano:
+          - Lascar
+          - PuyehueCordonCaulle
+          - Lastarria
+          - Isluga
+          - Tupungatito
+          - PlanchonPeteroa
+          - Chaiten
+          - Villarrica
+          - NevadosDeChillan
+          - Llaima
+          - Copahue
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — mirova_equivalent / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 220
+        run: |
+          python scripts/run_pipeline.py \
+            --profile mirova_equivalent \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/mirova_equivalent/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S26 reproceso histórico — ${{ matrix.volcano }} ${{ github.event.inputs.start }} a ${{ github.event.inputs.end }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
