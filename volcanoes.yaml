@@ -33,6 +33,20 @@ volcanoes:
   vent_lat: -39.420227
   vent_lon: -71.939876
   vent_radius_km: 2
+  # S26: cuerpos de agua nocturnos generan FPs masivos verano (lagos ~9°C
+  # vs ambiente nevado ~0°C → ΔBT 5-15K trigger eruption-path). En jan-mar
+  # 2026 se observaron 88 records con vrp_mw > 100 MW clusterizados aquí.
+  # Distancias del vent: lago Villarrica NW 16 km, Calafquén SW 24 km.
+  # Radios chicos para no tocar summit (inner=5 km).
+  exclude_zones:
+    - name: "Lago Villarrica"
+      lat: -39.27
+      lon: -72.09
+      radius_km: 7.0
+    - name: "Lago Calafquen"
+      lat: -39.56
+      lon: -72.14
+      radius_km: 5.0
 - name: Lascar
   mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
   display_name: Láscar
