@@ -1,0 +1,81 @@
+name: Reproceso Villarrica con Test 1 (S26 D)
+
+# Workflow dispatch-only que reprocesa SOLO Villarrica con profile dedicado
+# `mirova_equivalent_villarrica_test1` (Test 1 integrated-ROI activo).
+# Escribe a data/mirova_equivalent/Villarrica.json (data_subdir override).
+#
+# Cubre las 6 ALERTAs MIROVA Villarrica (jan-mar 2026, todas VIIRS 375m,
+# VRP 0.05-0.21 MW lava lake sub-pixel) + ventana NRT actual (abr 2026).
+# POC S25 standalone validó 6/6 disparan con este path.
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-01-01"
+      end:
+        description: "End date YYYY-MM-DD"
+        required: true
+        default: "2026-04-25"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        chunk:
+          - { start: "2026-01-01", end: "2026-02-15", label: "ene-feb" }
+          - { start: "2026-02-16", end: "2026-04-25", label: "feb-abr" }
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess Villarrica + Test 1 — ${{ matrix.chunk.label }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 50
+        run: |
+          python scripts/run_pipeline.py \
+            --profile mirova_equivalent_villarrica_test1 \
+            --volcano Villarrica \
+            --start ${{ matrix.chunk.start }} \
+            --end ${{ matrix.chunk.end }} \
+            --overwrite
+
+      - name: Commit data Villarrica
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          # data_subdir override → escribe a mirova_equivalent/Villarrica.json
+          git add "data/mirova_equivalent/Villarrica.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S26 D Villarrica + Test 1 — ${{ matrix.chunk.label }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 15))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 15))
+          done
+          echo "all push attempts failed"; exit 1
