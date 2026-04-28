@@ -392,7 +392,11 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         hotpix_rad = C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * hotpix_bt)) - 1))
         # Per-pixel area accounts for scan-angle elongation
         hotpix_area = pixel_areas[hot_rows, hot_cols]
-        per_pixel_vrp_mw = hotpix_area * WOOSTER_COEFF * (hotpix_rad - L_bg) / 1e6
+        # S26: clip ΔL ≥ 0 — Wooster requiere excess radiancia positivo.
+        # Pixels marcados hot por Path D dNTI o Test 1 pueden tener BT < t_bg
+        # global (vs L_bg local). Sin clip, VRP_MIR sale negativo y rompe sumas.
+        delta_L = np.maximum(hotpix_rad - L_bg, 0.0)
+        per_pixel_vrp_mw = hotpix_area * WOOSTER_COEFF * delta_L / 1e6
         vrp_mw = float(np.nansum(per_pixel_vrp_mw))
 
         # Build list of TOP-100 anomalous pixels sorted by VRP (descending).
