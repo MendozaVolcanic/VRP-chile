@@ -146,3 +146,51 @@ def dual_roi_contextual_dnti_hot_mask(
         nti, bt, scene_mask, t_bg, c1_scene, bt_sanity_k,
     )
     return hot_summit | hot_scene
+
+
+def dual_roi_bt_threshold(
+    bt: np.ndarray,
+    roi_mask: np.ndarray,
+    dist_km: np.ndarray,
+    t_bg: float,
+    std_bg: float,
+    inner_km: float,
+    n_sigma_summit: float,
+    n_sigma_scene: float,
+    anomaly_floor_k: float,
+    max_sigma_cap_k: float,
+) -> np.ndarray:
+    """Coppola 2016a Tabla 1 — dual-ROI N·sigma thresholds en eruption-path BT.
+
+    Pixels dentro del summit (dist <= inner_km) usan threshold sensible
+    (5 sigma tipico Coppola); fuera usan threshold estricto (10 sigma noche).
+
+    Mantiene fixes historicos:
+    - Floor (`anomaly_floor_k`, Coppola 2015 ANOMALY_THRESHOLD_K).
+    - Cap (`max_sigma_cap_k`, S15 Tema F MAX_SIGMA_COMPONENT_K=7K) para no
+      explotar threshold cuando std_bg es enorme (orografia glaciar).
+
+    Args:
+        bt: 2-D array brightness temperature (K). NaN preserva.
+        roi_mask: bool 2-D, pixels candidatos a evaluar.
+        dist_km: 2-D distancia al vent (km).
+        t_bg: median background.
+        std_bg: sigma background.
+        inner_km: radio del split summit/scene.
+        n_sigma_summit, n_sigma_scene: multiplicadores N sigma por zona.
+        anomaly_floor_k: floor delta-BT minimo.
+        max_sigma_cap_k: cap del componente N sigma.
+
+    Returns:
+        bool array shape igual a bt, True donde pixel es hot.
+    """
+    sigma_summit = min(n_sigma_summit * std_bg, max_sigma_cap_k)
+    sigma_scene = min(n_sigma_scene * std_bg, max_sigma_cap_k)
+    threshold_summit = max(anomaly_floor_k, sigma_summit)
+    threshold_scene = max(anomaly_floor_k, sigma_scene)
+    eff_summit = t_bg + threshold_summit
+    eff_scene = t_bg + threshold_scene
+
+    is_summit = dist_km <= inner_km
+    eff_threshold = np.where(is_summit, eff_summit, eff_scene)
+    return roi_mask & ~np.isnan(bt) & (bt > eff_threshold)
