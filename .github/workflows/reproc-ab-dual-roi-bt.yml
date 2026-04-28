@@ -1,0 +1,84 @@
+name: A/B reproceso dual-ROI BT (S26)
+
+# Workflow dispatch-only para validación cuantitativa del fix arquitectural
+# dual-ROI N·σ en eruption-path BT (Coppola 2016a Tabla 1).
+#
+# Profiles paralelos:
+#   _dual_roi_bt_enabled  → enable_dual_roi_bt=true, summit 5σ + scene 10σ.
+#   _dual_roi_bt_disabled → mirror operacional con 3σ uniforme (control).
+# Ambos a data/<profile_subdir>/, NO contaminan data/mirova_equivalent/.
+#
+# Criterio de aceptación (plan 2026-04-27):
+# - Recall agregado cae < 5 pp.
+# - FPs lejanos vrp>1MW caen ≥40%.
+# - Ratio mediano VRP ≤30× (hoy 57×).
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-12"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-04-25"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano: [Villarrica, Lascar, Lastarria, Tupungatito]
+        profile: [_dual_roi_bt_enabled, _dual_roi_bt_disabled]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — ${{ matrix.profile }} / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 50
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed A/B data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/${{ matrix.profile }}/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S26 A/B dual-ROI BT — ${{ matrix.profile }} / ${{ matrix.volcano }} 14d"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
