@@ -160,9 +160,12 @@ jobs:
       #   - limpia data/mirova_equivalent/ de no-Tier-A automáticamente.
       #   - alinea el cron con el dashboard que ya filtraba a 11 Tier A en S18.
       - name: Run VRP pipeline — mirova_equivalent profile
+        # S26 D: Villarrica EXCLUIDA de este step. Usa profile dedicado
+        # mirova_equivalent_villarrica_test1 con Test 1 activo (paths
+        # actuales no captan lava lake sub-pixel <600K). Ver step siguiente.
         if: ${{ steps.filter.outputs.skip != 'true'
              && (github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'mirova_equivalent')
-             && contains(fromJson('["Lascar","PuyehueCordonCaulle","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","Chaiten","Villarrica","NevadosDeChillan","Llaima","Copahue"]'), matrix.volcano) }}
+             && contains(fromJson('["Lascar","PuyehueCordonCaulle","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","Chaiten","NevadosDeChillan","Llaima","Copahue"]'), matrix.volcano) }}
         env:
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
@@ -170,6 +173,26 @@ jobs:
         run: |
           python scripts/run_pipeline.py --profile mirova_equivalent \
             --volcano ${{ matrix.volcano }} \
+            ${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }} \
+            ${{ github.event.inputs.start != '' && format('--start {0}', github.event.inputs.start) || '' }} \
+            ${{ github.event.inputs.end != '' && format('--end {0}', github.event.inputs.end) || '' }} \
+            ${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }}
+
+      - name: Run VRP pipeline — Villarrica con Test 1 (S26 D)
+        # S26 D: Villarrica usa profile dedicado mirova_equivalent_villarrica_test1
+        # con Test 1 integrated-ROI activo + Regla D Test 1-priority + fix
+        # magnitud L_bg local. Recall jan-mar 2026: 0/6 → 6/6. Escribe a
+        # data/mirova_equivalent/Villarrica.json (data_subdir override).
+        if: ${{ steps.filter.outputs.skip != 'true'
+             && (github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'mirova_equivalent')
+             && matrix.volcano == 'Villarrica' }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 50
+        run: |
+          python scripts/run_pipeline.py --profile mirova_equivalent_villarrica_test1 \
+            --volcano Villarrica \
             ${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }} \
             ${{ github.event.inputs.start != '' && format('--start {0}', github.event.inputs.start) || '' }} \
             ${{ github.event.inputs.end != '' && format('--end {0}', github.event.inputs.end) || '' }} \
