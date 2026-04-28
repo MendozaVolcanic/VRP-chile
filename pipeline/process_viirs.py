@@ -351,6 +351,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     test1_k_obs = 0.0
     test1_centroid_lat = None
     test1_centroid_lon = None
+    test1_L_bg_local = None  # S26 default outside I04 block
     n_excluded_water = 0
     hotspot_lat = None
     hotspot_lon = None
@@ -485,6 +486,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             test1_k_obs = 0.0
             test1_centroid_lat = None
             test1_centroid_lon = None
+            test1_L_bg_local = None  # S26 para recompute VRP test1-only
             if (ENABLE_TEST1_PATH
                     and vent_lat is not None and vent_lon is not None):
                 test1_res = compute_test1_mir(
@@ -503,6 +505,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     test1_n_contrib = test1_res["n_contributing"]
                     test1_centroid_lat = test1_res.get("centroid_lat")
                     test1_centroid_lon = test1_res.get("centroid_lon")
+                    # L_bg local del ring 1-3km, NO el anillo global 5-25km.
+                    # En Villarrica el global está MÁS caliente (lago lateral)
+                    # que el cráter (glaciar). Usar global → todos los ΔL clip a 0.
+                    test1_L_bg_local = test1_res.get("L_bg")
 
             hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot | dnti_ctx_hot | test1_hot
 
@@ -716,27 +722,27 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         distance_class = "summit" if final_hotspot_dist_km <= inner_radius_km else "far"
 
     # S26 D fix magnitud: cuando final_hotspot_source='test1', recomputar VRP_MIR
-    # usando SOLO los pixels Test 1 mask. Sin esto, los pixels far en hot_mask
-    # (lago/fjord/Lazufre detectados por BT/dNTI/NTI paths) inflan el VRP_MIR
-    # de Villarrica de 0.05 MW (MIROVA real) a 562 MW (incorrecto, dominado
-    # por contribuciones far). Recall ya pasó (Regla D Test 1-priority captó
-    # summit-class), pero magnitud rompe paridad.
-    # MIROVA reporta solo cráter — nuestro VRP también debe reflejar cráter
-    # cuando la decisión espacial es summit Test 1.
+    # usando SOLO los pixels Test 1 mask Y con L_bg LOCAL (ring 1-3km del Test 1).
+    # Sin esto:
+    #   (a) si usamos t_bg_i04 GLOBAL (anillo 5-25km), Villarrica sale 0 porque
+    #       el lago lateral calienta el global por encima del cráter glaciar.
+    #   (b) si sumamos todos los hot pixels (no solo Test 1), VRP infla por
+    #       contribuciones far (562 MW vs MIROVA 0.05 MW).
+    # MIROVA reporta solo cráter usando bg local — replicamos exactamente.
     vrp_mir_mw_test1_only = None  # diag
     if (final_hotspot_source == "test1" and "I04" in bands
-            and test1_n_contrib > 0 and not np.isnan(t_bg_i04)):
-        # Recompute usando solo Test 1 mask (mask_contributing).
+            and test1_n_contrib > 0 and test1_L_bg_local is not None
+            and not np.isnan(test1_L_bg_local)):
         t1_rows, t1_cols = np.where(test1_hot)
         if len(t1_rows) > 0:
             t1_bt = bt[t1_rows, t1_cols]
             t1_L = bt_to_spectral_radiance(t1_bt, I04_LAMBDA)
-            t1_L_bg = bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA)
-            t1_delta_L = np.maximum(t1_L - t1_L_bg, 0.0)
+            # L_bg LOCAL del Test 1 (median radiancia en ring 1-3km del cráter),
+            # no el global 5-25km. Replica MIROVA: bg cráter, no bg región.
+            t1_delta_L = np.maximum(t1_L - test1_L_bg_local, 0.0)
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             vrp_mir_mw_test1_only = float(np.sum(t1_vrp))
-            # Sustituir vrp_mir_mw por versión Test 1-only para paridad MIROVA.
             vrp_mir_mw = vrp_mir_mw_test1_only
 
     return {
