@@ -146,3 +146,16 @@ def test_regla_d_test1_priority_logic_present_in_process_viirs():
         "Combinación test1_summit_hit + eruption_far rota"
     assert 'final_hotspot_source = "test1"' in src, \
         "Asignación final_hotspot_source=\"test1\" rota"
+
+
+def test_vrp_recompute_test1_only_logic_present():
+    """Anti-regresión S26 D fix magnitud: cuando source=test1 → VRP solo
+    sobre Test 1 mask. Sin esto, Villarrica reporta 562 MW vs MIROVA 0.05
+    porque pixels far inflan el sum.
+    """
+    from pathlib import Path
+    src = Path("pipeline/process_viirs.py").read_text(encoding="utf-8")
+    assert "vrp_mir_mw_test1_only" in src, \
+        "Recálculo VRP_MIR solo Test 1 mask removido"
+    assert 'final_hotspot_source == "test1"' in src, \
+        "Guard `if source==test1 → recompute VRP` rota"

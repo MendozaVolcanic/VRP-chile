@@ -715,6 +715,30 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     if final_hotspot_dist_km is not None and inner_radius_km is not None:
         distance_class = "summit" if final_hotspot_dist_km <= inner_radius_km else "far"
 
+    # S26 D fix magnitud: cuando final_hotspot_source='test1', recomputar VRP_MIR
+    # usando SOLO los pixels Test 1 mask. Sin esto, los pixels far en hot_mask
+    # (lago/fjord/Lazufre detectados por BT/dNTI/NTI paths) inflan el VRP_MIR
+    # de Villarrica de 0.05 MW (MIROVA real) a 562 MW (incorrecto, dominado
+    # por contribuciones far). Recall ya pasó (Regla D Test 1-priority captó
+    # summit-class), pero magnitud rompe paridad.
+    # MIROVA reporta solo cráter — nuestro VRP también debe reflejar cráter
+    # cuando la decisión espacial es summit Test 1.
+    vrp_mir_mw_test1_only = None  # diag
+    if (final_hotspot_source == "test1" and "I04" in bands
+            and test1_n_contrib > 0 and not np.isnan(t_bg_i04)):
+        # Recompute usando solo Test 1 mask (mask_contributing).
+        t1_rows, t1_cols = np.where(test1_hot)
+        if len(t1_rows) > 0:
+            t1_bt = bt[t1_rows, t1_cols]
+            t1_L = bt_to_spectral_radiance(t1_bt, I04_LAMBDA)
+            t1_L_bg = bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA)
+            t1_delta_L = np.maximum(t1_L - t1_L_bg, 0.0)
+            t1_area = pixel_areas[t1_rows, t1_cols]
+            t1_vrp = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
+            vrp_mir_mw_test1_only = float(np.sum(t1_vrp))
+            # Sustituir vrp_mir_mw por versión Test 1-only para paridad MIROVA.
+            vrp_mir_mw = vrp_mir_mw_test1_only
+
     return {
         "vrp_mir_mw": round(vrp_mir_mw, 3),
         "vrp_tir_mw": round(vrp_tir_mw, 3),
