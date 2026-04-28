@@ -1126,6 +1126,13 @@ function renderDetail() {
       }
       const isFar = distClass === "far";
 
+      // S26 B: cuando toggle "Solo cráter" activo (default), NO renderizar markers
+      // far en el mapa para reducir ruido visual. La tabla los mantiene atenuados
+      // (preserva evidencia, pedido S18 Nicolás). Toggle "Incluir lejanas" los
+      // muestra de nuevo. Reduce dashboards "llenos de anomalías" causados por
+      // 100s de FPs scene en lagos/salares no documentados como exclude_zones.
+      if (isFar && !includeFarDistance) return;
+
       pixels.forEach((px, pxIdx) => {
         const size = Math.max(4, Math.min(15, 4 + Math.log10(Math.max(px.vrp_mw, 0.001)) * 5));
         const isPrimary = pxIdx === 0;
