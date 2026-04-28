@@ -124,3 +124,25 @@ def test_dual_roi_bt_handles_nan():
         anomaly_floor_k=2.0, max_sigma_cap_k=7.0,
     )
     assert hot[2, 2] == False
+
+
+# === Regla D Test 1-priority (S26 D fix) ===
+# Validación schema-source: el código contiene la lógica que prioriza Test 1
+# cuando dispara summit y eruption hotspot está far.
+
+def test_regla_d_test1_priority_logic_present_in_process_viirs():
+    """process_viirs.py debe contener la cascada Regla D Test 1-priority.
+
+    Anti-regresión del fix S26 D — si alguien remueve la lógica que
+    prioriza Test 1 sobre eruption-far, el recall Villarrica volverá a 0.
+    """
+    from pathlib import Path
+    src = Path("pipeline/process_viirs.py").read_text(encoding="utf-8")
+    # Marker comment del fix
+    assert "Regla D Test 1-priority" in src, \
+        "Regla D Test 1 lógica removida — recall Villarrica regresaría a 0"
+    # Lógica clave: test1_summit_hit AND eruption_far → forzar test1 source
+    assert "test1_summit_hit and eruption_far" in src, \
+        "Combinación test1_summit_hit + eruption_far rota"
+    assert 'final_hotspot_source = "test1"' in src, \
+        "Asignación final_hotspot_source=\"test1\" rota"

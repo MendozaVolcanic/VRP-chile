@@ -349,6 +349,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     test1_triggered = False
     test1_n_contrib = 0
     test1_k_obs = 0.0
+    test1_centroid_lat = None
+    test1_centroid_lon = None
     n_excluded_water = 0
     hotspot_lat = None
     hotspot_lon = None
@@ -481,6 +483,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             test1_triggered = False
             test1_n_contrib = 0
             test1_k_obs = 0.0
+            test1_centroid_lat = None
+            test1_centroid_lon = None
             if (ENABLE_TEST1_PATH
                     and vent_lat is not None and vent_lon is not None):
                 test1_res = compute_test1_mir(
@@ -497,6 +501,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 if test1_triggered:
                     test1_hot = test1_res["mask_contributing"]
                     test1_n_contrib = test1_res["n_contributing"]
+                    test1_centroid_lat = test1_res.get("centroid_lat")
+                    test1_centroid_lon = test1_res.get("centroid_lon")
 
             hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot | dnti_ctx_hot | test1_hot
 
@@ -647,14 +653,52 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     name = l1b_path.name
     sensor = _sensor_label_from_filename(name)
 
-    # --- Schema unification (S14 D6) ---
-    # Unified final_hotspot_* fields with eruption→vent fallback so downstream
-    # (dashboard, auditorías) no tiene que elegir entre dos pares de campos.
+    # --- Schema unification (S14 D6) + Regla D Test 1-priority (S26 D) ---
+    # S26 D: cuando Test 1 dispara con centroide dentro de inner_radius_km,
+    # priorizar ese centroide sobre eruption hotspot far. Análogo a Regla D
+    # vent-priority S20 pero para Test 1. Razón: lava lake sub-pixel
+    # (Villarrica) genera pixels Test 1 summit pero otros paths detectan
+    # pixels far en lago/fjord con VRP individual mayor → primary hotspot
+    # cae far → distance_class=far → no matchea ref MIROVA summit.
+    # Compute Test 1 hotspot candidate (centroide + dist al vent).
+    test1_hotspot_dist_km = None
+    if (test1_triggered and test1_centroid_lat is not None
+            and vent_lat is not None and vent_lon is not None):
+        from .scan_geometry import haversine_km as _hav
+        # haversine devuelve array; convertir a float si entradas escalares
+        _d = _hav(vent_lat, vent_lon, np.array([test1_centroid_lat]),
+                  np.array([test1_centroid_lon]))
+        test1_hotspot_dist_km = float(_d[0]) if hasattr(_d, '__len__') else float(_d)
+
+    # Cascada con Regla D Test 1-priority:
+    # 1) Si eruption hotspot está far Y Test 1 detectó summit → priorizar Test 1.
+    # 2) Sino, eruption normal.
+    # 3) Sino, vent-priority (Regla D S20).
+    # 4) Sino, None.
+    test1_summit_hit = (test1_triggered and inner_radius_km is not None
+                        and test1_hotspot_dist_km is not None
+                        and test1_hotspot_dist_km <= inner_radius_km)
+    eruption_far = (hotspot_dist_km is not None and inner_radius_km is not None
+                    and hotspot_dist_km > inner_radius_km)
+
     if hotspot_lat is not None and hotspot_lon is not None:
-        final_hotspot_lat = hotspot_lat
-        final_hotspot_lon = hotspot_lon
-        final_hotspot_dist_km = hotspot_dist_km
-        final_hotspot_source = "eruption"
+        if test1_summit_hit and eruption_far:
+            # Regla D Test 1-priority: eruption far + Test 1 summit → Test 1 gana.
+            final_hotspot_lat = test1_centroid_lat
+            final_hotspot_lon = test1_centroid_lon
+            final_hotspot_dist_km = test1_hotspot_dist_km
+            final_hotspot_source = "test1"
+        else:
+            final_hotspot_lat = hotspot_lat
+            final_hotspot_lon = hotspot_lon
+            final_hotspot_dist_km = hotspot_dist_km
+            final_hotspot_source = "eruption"
+    elif test1_summit_hit:
+        # No hay eruption hotspot pero Test 1 detectó summit.
+        final_hotspot_lat = test1_centroid_lat
+        final_hotspot_lon = test1_centroid_lon
+        final_hotspot_dist_km = test1_hotspot_dist_km
+        final_hotspot_source = "test1"
     elif vent_hotspot_lat is not None and vent_hotspot_lon is not None:
         final_hotspot_lat = vent_hotspot_lat
         final_hotspot_lon = vent_hotspot_lon
