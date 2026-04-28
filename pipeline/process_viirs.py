@@ -83,6 +83,9 @@ from pipeline.profile import (
     DNTI_CONTEXTUAL_C1_SCENE,
     ENABLE_DNTI_CONTEXTUAL_PATH,
     ENABLE_DNTI_DUAL_ROI,
+    ENABLE_DUAL_ROI_BT,
+    N_SIGMA_MIR_SUMMIT,
+    N_SIGMA_MIR_SCENE,
     ENABLE_TEST1_PATH,
     TEST1_K_SIGMA,
     TEST1_MIR_RELATIVE,
@@ -92,6 +95,7 @@ from pipeline.profile import (
 from .detection_context import (
     contextual_dnti_hot_mask,
     dual_roi_contextual_dnti_hot_mask,
+    dual_roi_bt_threshold,
 )
 from .test1_integrated import compute_test1_mir
 
@@ -382,7 +386,20 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 t_max_dist_km_diag = float(dist[r_max, c_max])
 
             # Path A — BT path (existing classic threshold)
-            bt_path_hot = roi_mask & ~np.isnan(bt) & (bt > (t_bg_i04 + threshold_mir))
+            # S26: si ENABLE_DUAL_ROI_BT, usar threshold dual summit/scene
+            # (Coppola 2016a Tabla 1) en lugar del N_SIGMA_MIR uniforme.
+            if (ENABLE_DUAL_ROI_BT and inner_radius_km is not None
+                    and vent_lat is not None and vent_lon is not None):
+                bt_path_hot = dual_roi_bt_threshold(
+                    bt=bt, roi_mask=roi_mask, dist_km=vent_dist_per_pixel,
+                    t_bg=t_bg_i04, std_bg=std_bg, inner_km=inner_radius_km,
+                    n_sigma_summit=N_SIGMA_MIR_SUMMIT,
+                    n_sigma_scene=N_SIGMA_MIR_SCENE,
+                    anomaly_floor_k=ANOMALY_THRESHOLD_K,
+                    max_sigma_cap_k=MAX_SIGMA_COMPONENT_K,
+                )
+            else:
+                bt_path_hot = roi_mask & ~np.isnan(bt) & (bt > (t_bg_i04 + threshold_mir))
 
             # Path B — NTI path (Coppola 2015 Test 1, night).
             # Only valid if NTI was successfully computed (needs both I04+I05).

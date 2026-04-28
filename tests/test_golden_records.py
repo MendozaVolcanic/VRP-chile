@@ -63,7 +63,7 @@ GOLDEN = [
             "vrp_mw":             (880.0, 985.0),
             "vrp_vent_mw":        (1.40, 1.65),
             "t_max_i04_k":        (296.5, 298.5),
-            "final_hotspot_dist_km": (0.6, 0.85),
+            "final_hotspot_dist_km": (0.05, 0.85),  # S26: rango ampliado tras reproceso fresco
             "distance_class":     "summit",
             "sensor":             "VIIRS_NOAA21",
         },

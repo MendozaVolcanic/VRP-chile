@@ -1,0 +1,126 @@
+"""S26 T1+T2 — TDD para dual-ROI N·σ en eruption-path BT (Coppola 2016a Tabla 1).
+
+Validación que helper aplica thresholds distintos summit (5σ) vs scene (10σ),
+respetando floor (ANOMALY_THRESHOLD_K) y cap (MAX_SIGMA_COMPONENT_K).
+"""
+from __future__ import annotations
+
+import importlib
+import os
+
+import numpy as np
+import pytest
+
+
+# === T1: profile keys ===
+
+def test_profile_loads_dual_roi_bt_keys(monkeypatch):
+    """ENABLE_DUAL_ROI_BT y N_SIGMA_MIR_{SUMMIT,SCENE} deben cargarse del YAML."""
+    monkeypatch.setenv("VRP_PROFILE", "_dual_roi_bt_enabled")
+    import pipeline.profile as profile
+    importlib.reload(profile)
+    assert profile.ENABLE_DUAL_ROI_BT is True
+    assert profile.N_SIGMA_MIR_SUMMIT == 5.0
+    assert profile.N_SIGMA_MIR_SCENE == 10.0
+
+
+def test_profile_disabled_default(monkeypatch):
+    """En mirova_equivalent operacional, dual-ROI BT debería estar OFF (no activado todavía)."""
+    monkeypatch.setenv("VRP_PROFILE", "mirova_equivalent")
+    import pipeline.profile as profile
+    importlib.reload(profile)
+    # Default seguro mientras se valida con A/B.
+    assert profile.ENABLE_DUAL_ROI_BT is False
+
+
+# === T2: helper dual_roi_bt_threshold ===
+# Importado dentro de los tests porque la función aún no existe (TDD red).
+
+def test_dual_roi_bt_summit_lower_threshold_than_scene():
+    """Mismo pixel +4K: summit (5σ=2.5K) pasa, scene (10σ=5K) NO pasa."""
+    from pipeline.detection_context import dual_roi_bt_threshold
+    bt = np.full((10, 10), 270.0)
+    bt[5, 5] = 274.0  # +4K
+    roi_mask = np.ones((10, 10), dtype=bool)
+    t_bg = 270.0
+    std_bg = 0.5  # 5σ=2.5K, 10σ=5K
+
+    # Caso summit: pixel a 1km del vent (dentro inner=3km)
+    dist_summit = np.full((10, 10), 5.0)  # mostly scene
+    dist_summit[5, 5] = 1.0  # this pixel summit
+    hot_summit = dual_roi_bt_threshold(
+        bt=bt, roi_mask=roi_mask, dist_km=dist_summit, t_bg=t_bg, std_bg=std_bg,
+        inner_km=3.0, n_sigma_summit=5.0, n_sigma_scene=10.0,
+        anomaly_floor_k=2.0, max_sigma_cap_k=7.0,
+    )
+    assert hot_summit[5, 5] == True, "summit pixel +4K (5σ=2.5K) debería disparar"
+
+    # Caso scene: mismo pixel pero a 5km del vent (fuera inner)
+    dist_scene = np.full((10, 10), 5.0)
+    hot_scene = dual_roi_bt_threshold(
+        bt=bt, roi_mask=roi_mask, dist_km=dist_scene, t_bg=t_bg, std_bg=std_bg,
+        inner_km=3.0, n_sigma_summit=5.0, n_sigma_scene=10.0,
+        anomaly_floor_k=2.0, max_sigma_cap_k=7.0,
+    )
+    assert hot_scene[5, 5] == False, "scene pixel +4K (10σ=5K) NO debería disparar"
+
+
+def test_dual_roi_bt_respects_anomaly_floor():
+    """Si N·σ < floor, threshold = floor (Coppola 2015 ANOMALY_THRESHOLD_K)."""
+    from pipeline.detection_context import dual_roi_bt_threshold
+    bt = np.full((5, 5), 270.0)
+    bt[2, 2] = 272.5  # +2.5K
+    dist_km = np.zeros((5, 5))  # todo summit
+    roi_mask = np.ones((5, 5), dtype=bool)
+    hot = dual_roi_bt_threshold(
+        bt=bt, roi_mask=roi_mask, dist_km=dist_km, t_bg=270.0, std_bg=0.1,
+        inner_km=3.0, n_sigma_summit=5.0, n_sigma_scene=10.0,
+        anomaly_floor_k=2.0, max_sigma_cap_k=7.0,
+    )
+    # 5·0.1=0.5K < floor 2K, threshold efectivo summit = 2K. +2.5K pasa.
+    assert hot[2, 2] == True
+
+
+def test_dual_roi_bt_respects_sigma_cap():
+    """Si N·σ > cap, threshold = cap (S15 Tema F MAX_SIGMA_COMPONENT_K=7K)."""
+    from pipeline.detection_context import dual_roi_bt_threshold
+    bt = np.full((5, 5), 270.0)
+    bt[2, 2] = 277.5  # +7.5K
+    dist_km = np.full((5, 5), 5.0)  # todo scene
+    roi_mask = np.ones((5, 5), dtype=bool)
+    hot = dual_roi_bt_threshold(
+        bt=bt, roi_mask=roi_mask, dist_km=dist_km, t_bg=270.0, std_bg=2.0,
+        inner_km=3.0, n_sigma_summit=5.0, n_sigma_scene=10.0,
+        anomaly_floor_k=2.0, max_sigma_cap_k=7.0,
+    )
+    # 10·2=20K → capped a 7K. +7.5K pasa.
+    assert hot[2, 2] == True
+
+
+def test_dual_roi_bt_excludes_outside_roi():
+    """roi_mask=False → siempre False sin importar BT."""
+    from pipeline.detection_context import dual_roi_bt_threshold
+    bt = np.full((5, 5), 290.0)  # MUY caliente
+    dist_km = np.zeros((5, 5))
+    roi_mask = np.zeros((5, 5), dtype=bool)  # nada en ROI
+    hot = dual_roi_bt_threshold(
+        bt=bt, roi_mask=roi_mask, dist_km=dist_km, t_bg=270.0, std_bg=0.5,
+        inner_km=3.0, n_sigma_summit=5.0, n_sigma_scene=10.0,
+        anomaly_floor_k=2.0, max_sigma_cap_k=7.0,
+    )
+    assert not hot.any()
+
+
+def test_dual_roi_bt_handles_nan():
+    """Pixels con BT=NaN nunca deben ser hot."""
+    from pipeline.detection_context import dual_roi_bt_threshold
+    bt = np.full((5, 5), 270.0)
+    bt[2, 2] = np.nan
+    dist_km = np.zeros((5, 5))
+    roi_mask = np.ones((5, 5), dtype=bool)
+    hot = dual_roi_bt_threshold(
+        bt=bt, roi_mask=roi_mask, dist_km=dist_km, t_bg=270.0, std_bg=0.5,
+        inner_km=3.0, n_sigma_summit=5.0, n_sigma_scene=10.0,
+        anomaly_floor_k=2.0, max_sigma_cap_k=7.0,
+    )
+    assert hot[2, 2] == False

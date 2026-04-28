@@ -84,11 +84,15 @@ from pipeline.profile import (
     DNTI_CONTEXTUAL_C1_SCENE,
     ENABLE_DNTI_CONTEXTUAL_PATH,
     ENABLE_DNTI_DUAL_ROI,
+    ENABLE_DUAL_ROI_BT,
+    N_SIGMA_MIR_SUMMIT,
+    N_SIGMA_MIR_SCENE,
     P95_VENT_EXCLUSION_MODIS_KM,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
     dual_roi_contextual_dnti_hot_mask,
+    dual_roi_bt_threshold,
 )
 
 # Indices of bands 21 and 22 within EV_1KM_Emissive
@@ -306,7 +310,25 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     #      so we never trigger on pure noise. This rescues subpixel hotspots
     #      at andean volcanoes where sigma_bg inflates the BT threshold beyond
     #      reach but NTI still responds cleanly to even a 1-2% hot fraction.
-    bt_path_hot = roi_mask & ~np.isnan(bt_mir) & (bt_mir > effective_threshold)
+    # S26 dual-ROI N·sigma BT (Coppola 2016a Tabla 1): summit 5sigma, scene 10sigma.
+    # Cuando flag activo y hay vent + inner_radius, sustituimos el bt_path_hot
+    # uniforme por dos thresholds diferenciados. local_threshold sigue aplicando
+    # encima como filtro p95 (preserva fix histórico).
+    if (ENABLE_DUAL_ROI_BT and inner_radius_km is not None
+            and vent_lat is not None and vent_lon is not None):
+        bt_path_hot = dual_roi_bt_threshold(
+            bt=bt_mir, roi_mask=roi_mask, dist_km=vent_dist_per_pixel,
+            t_bg=t_bg, std_bg=std_bg, inner_km=inner_radius_km,
+            n_sigma_summit=N_SIGMA_MIR_SUMMIT,
+            n_sigma_scene=N_SIGMA_MIR_SCENE,
+            anomaly_floor_k=ANOMALY_THRESHOLD_K,
+            max_sigma_cap_k=MAX_SIGMA_COMPONENT_K,
+        )
+        # Aplicar local_threshold p95 si existe (filtro complementario).
+        if not np.isnan(local_threshold):
+            bt_path_hot = bt_path_hot & (bt_mir > local_threshold)
+    else:
+        bt_path_hot = roi_mask & ~np.isnan(bt_mir) & (bt_mir > effective_threshold)
     nti_path_hot = (
         roi_mask
         & ~np.isnan(nti)

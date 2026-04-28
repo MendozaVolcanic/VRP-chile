@@ -131,6 +131,15 @@ TEST1_K_SIGMA: float = float(_t.get("test1_k_sigma", 3.0))
 TEST1_MIR_RELATIVE: float = float(_t.get("test1_mir_relative", 0.02))
 TEST1_ROI_KM: float = float(_t.get("test1_roi_km", 3.0))
 TEST1_INNER_RING_KM: float = float(_t.get("test1_inner_ring_km", 1.0))
+# S26 Dual-ROI N·σ en eruption-path BT (Coppola 2016a Tabla 1).
+# Path BT (eruption) usa thresholds N·σ distintos summit vs scene.
+# - summit (dist <= inner_radius_km): N·σ_summit = 5 (sensible).
+# - scene  (dist >  inner_radius_km): N·σ_scene  = 10 (estricto).
+# Análogo a P3.1 P3.2 que ya aplican dual-ROI en Path D dNTI.
+# Default OFF mientras se valida con A/B.
+ENABLE_DUAL_ROI_BT: bool = bool(_p.get("enable_dual_roi_bt", False))
+N_SIGMA_MIR_SUMMIT: float = float(_t.get("n_sigma_mir_summit", 5.0))
+N_SIGMA_MIR_SCENE: float = float(_t.get("n_sigma_mir_scene", 10.0))
 
 # --- Sensor activation ---
 _s = _cfg["sensors"]

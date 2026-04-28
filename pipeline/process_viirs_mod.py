@@ -70,11 +70,15 @@ from pipeline.profile import (
     DNTI_CONTEXTUAL_C1_SCENE,
     ENABLE_DNTI_CONTEXTUAL_PATH,
     ENABLE_DNTI_DUAL_ROI,
+    ENABLE_DUAL_ROI_BT,
+    N_SIGMA_MIR_SUMMIT,
+    N_SIGMA_MIR_SCENE,
     P95_VENT_EXCLUSION_VIIRS750_KM,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
     dual_roi_contextual_dnti_hot_mask,
+    dual_roi_bt_threshold,
 )
 
 # M-band wavelengths (µm)
@@ -329,7 +333,24 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # alone fails because std_bg is inflated.
 
     # Path A — BT path (classic threshold with local p95 filter)
-    bt_path_hot = roi_bt_full > effective_threshold
+    # S26: si ENABLE_DUAL_ROI_BT, threshold dual summit/scene (Coppola 2016a Tabla 1)
+    if (ENABLE_DUAL_ROI_BT and inner_radius_km is not None
+            and vent_lat is not None and vent_lon is not None):
+        bt_dual_hot = dual_roi_bt_threshold(
+            bt=roi_bt_full, roi_mask=roi_mask, dist_km=vent_dist_per_pixel,
+            t_bg=t_bg, std_bg=std_bg, inner_km=inner_radius_km,
+            n_sigma_summit=N_SIGMA_MIR_SUMMIT,
+            n_sigma_scene=N_SIGMA_MIR_SCENE,
+            anomaly_floor_k=ANOMALY_THRESHOLD_K,
+            max_sigma_cap_k=MAX_SIGMA_COMPONENT_K,
+        )
+        # Combinar con local_threshold p95 (preserva fix histórico)
+        if not np.isnan(local_threshold):
+            bt_path_hot = bt_dual_hot & (roi_bt_full > local_threshold)
+        else:
+            bt_path_hot = bt_dual_hot
+    else:
+        bt_path_hot = roi_bt_full > effective_threshold
 
     # Path B — NTI path (Coppola 2015 Test 1, night)
     # Only valid if NTI was successfully computed (needs both M13+M15)
