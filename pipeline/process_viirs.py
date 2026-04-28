@@ -518,7 +518,12 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 hotpix_bt = bt[hot_rows, hot_cols]
                 L_hot = bt_to_spectral_radiance(hotpix_bt, I04_LAMBDA)
                 L_bg = bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA)
-                delta_L = L_hot - L_bg
+                # S26: clip a 0 — Wooster requiere ΔL ≥ 0 por física.
+                # Bug detectado cuando Test 1 (path D nuevo) o NTI agregaba
+                # pixels hot vs L_bg LOCAL (3km) pero más fríos que t_bg_i04
+                # GLOBAL (anillo 5-25km). VRP_MIR salía negativo (-26 MW).
+                # Fix: pixel "hot" pero L_hot < L_bg_global no contribuye.
+                delta_L = np.maximum(L_hot - L_bg, 0.0)
                 # Per-pixel area accounts for scan-angle elongation.
                 hotpix_area = pixel_areas[hot_rows, hot_cols]
                 per_pixel_vrp_mw = hotpix_area * WOOSTER_COEFF * delta_L / 1e6

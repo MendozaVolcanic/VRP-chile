@@ -438,7 +438,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         L_bg_rad = bt_to_spectral_radiance(np.float64(t_bg), M13_LAMBDA)
         # Per-pixel area accounts for scan-angle elongation
         hotpix_area = pixel_areas[hot_rows, hot_cols]
-        per_pixel_vrp_mw = hotpix_area * WOOSTER_COEFF * (L_hot - L_bg_rad) / 1e6
+        # S26: clip ΔL ≥ 0 (paridad MODIS/VIIRS 375m). Wooster physics.
+        delta_L = np.maximum(L_hot - L_bg_rad, 0.0)
+        per_pixel_vrp_mw = hotpix_area * WOOSTER_COEFF * delta_L / 1e6
         vrp_mw = float(np.nansum(per_pixel_vrp_mw))
 
         # Build list of TOP-100 anomalous pixels sorted by VRP (descending).
