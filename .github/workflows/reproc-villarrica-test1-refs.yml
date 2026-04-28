@@ -1,0 +1,81 @@
+name: Reproceso Villarrica + Test 1 sobre refs MIROVA (S26 D simplificado)
+
+# Workflow dispatch-only que reprocesa SOLO los días con refs MIROVA Villarrica
+# (6 refs ALERTA jan-mar 2026), 5 ventanas de 3 días en paralelo.
+# Más eficiente que el workflow chunks largos (que timed-out con Test 1 activo).
+#
+# Profile: mirova_equivalent_villarrica_test1 (Test 1 integrated-ROI).
+# data_subdir override → escribe a data/mirova_equivalent/Villarrica.json.
+#
+# Refs MIROVA Villarrica VIIRS 375m:
+#   2026-04-09 06:00 VRP=0.110 MW
+#   2026-03-08 06:00 VRP=0.210 MW
+#   2026-02-26 05:42 VRP=0.120 MW
+#   2026-01-19 05:54 VRP=0.090 MW
+#   2026-01-14 05:48 VRP=0.070 MW
+#   2026-01-13 05:48 VRP=0.050 MW
+
+on:
+  workflow_dispatch:
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        window:
+          - { start: "2026-04-08", end: "2026-04-10", label: "abr-09" }
+          - { start: "2026-03-07", end: "2026-03-09", label: "mar-08" }
+          - { start: "2026-02-25", end: "2026-02-27", label: "feb-26" }
+          - { start: "2026-01-18", end: "2026-01-20", label: "ene-19" }
+          - { start: "2026-01-12", end: "2026-01-15", label: "ene-13-14" }
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess Villarrica + Test 1 — ${{ matrix.window.label }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 50
+        run: |
+          python scripts/run_pipeline.py \
+            --profile mirova_equivalent_villarrica_test1 \
+            --volcano Villarrica \
+            --start ${{ matrix.window.start }} \
+            --end ${{ matrix.window.end }} \
+            --overwrite
+
+      - name: Commit data Villarrica
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/mirova_equivalent/Villarrica.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S26 D Villarrica + Test 1 — ${{ matrix.window.label }}"
+          for attempt in 1 2 3 4 5 6 7 8; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 15))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 15))
+          done
+          echo "all push attempts failed"; exit 1
