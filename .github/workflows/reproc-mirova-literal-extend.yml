@@ -1,0 +1,86 @@
+name: Reproceso MIROVA literal — 7 Tier A faltantes (S27)
+
+# Workflow dispatch-only para extender el reproceso literal a los 7 Tier A
+# que no entraron en el A/B principal (reproc-ab-mirova-literal.yml usa solo
+# Lascar/Lastarria/Tupungatito/Villarrica).
+#
+# Solo treatment: el control "operacional con parches" para estos 7 está
+# preservado en git tag pre-s27-baseline.
+#
+# Objetivo: dashboard coherente con 11 volcanes Tier A bajo MIROVA literal.
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-12"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-04-25"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 7
+      matrix:
+        volcano:
+          - PuyehueCordonCaulle
+          - Copahue
+          - NevadosDeChillan
+          - Llaima
+          - Chaiten
+          - PlanchonPeteroa
+          - Isluga
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — _mirova_literal / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 50
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _mirova_literal \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/_mirova_literal/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S27 extend MIROVA literal — ${{ matrix.volcano }} 14d"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
