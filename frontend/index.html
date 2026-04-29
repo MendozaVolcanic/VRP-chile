@@ -363,9 +363,9 @@
     <select id="days-select">
       <option value="1">Últimas 24h</option>
       <option value="3">3 días</option>
-      <option value="7" selected>7 días</option>
+      <option value="7">7 días</option>
       <option value="14">14 días</option>
-      <option value="30">30 días</option>
+      <option value="30" selected>30 días</option>
       <option value="60">60 días</option>
       <option value="90">90 días</option>
       <option value="180">6 meses</option>
@@ -539,7 +539,7 @@ function getLevel(vrp) {
 
 const sensorVisible = { MODIS: true, VIIRS375: true, VIIRS750: true, MIROVA: true };
 let currentVolcano = VOLCANOES[0];
-let currentDays = 7;  // S12: default 7 días (antes 30) — operador ve lo reciente
+let currentDays = 30;  // S26 D: default 30 días (antes 7). Las refs MIROVA Villarrica históricas necesitan al menos 30d para visibilidad. Toggle a 90d/180d para historia completa.
 let logScale = false;
 // S18: por defecto el dashboard solo cuenta detecciones dentro del radio del
 // cráter (summit). Las lejanas (far) siguen visibles en los conteos 🎯/📍, en
