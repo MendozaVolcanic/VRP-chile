@@ -1,0 +1,69 @@
+name: NdC retry MIROVA literal (S27)
+
+# Workflow ad-hoc one-shot para reintentar NevadosDeChillan que ha fallado
+# 4 veces en runs anteriores con NASA Earthdata transient outage. Una vez
+# que NdC complete success, este workflow puede borrarse.
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-01-29"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-04-29"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — _mirova_literal / NevadosDeChillan
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 320
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _mirova_literal \
+            --volcano NevadosDeChillan \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/_mirova_literal/NevadosDeChillan.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S27 NdC retry MIROVA literal 90d"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
