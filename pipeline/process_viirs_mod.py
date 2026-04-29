@@ -431,23 +431,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     hot_rows, hot_cols = np.where(hot_mask_2d)
     n_anomalous = len(hot_rows)
 
-    # S27 — cluster aggregation alineado con MIROVA n_hotspots (Coppola 2016a).
-    # Cierre divergencia D1 (docs/MIROVA_DIVERGENCES.md).
+    # S27 cluster aggregation se mueve abajo (post per_pixel_vrp_mw)
+    # para incluir vrp_mw del cluster contiguo principal (D1 cierre completo).
     n_hotspots_clustered = 0
     primary_cluster = None
-    if n_anomalous > 0:
-        _vlat = vent_lat if vent_lat is not None else volcano_lat
-        _vlon = vent_lon if vent_lon is not None else volcano_lon
-        _clusters = cluster_hotspots(hot_mask_2d, lat, lon, _vlat, _vlon)
-        n_hotspots_clustered = len(_clusters)
-        if _clusters:
-            _c = _clusters[0]
-            primary_cluster = {
-                "n_pixels": _c["n_pixels"],
-                "centroid_lat": round(_c["centroid_lat"], 5),
-                "centroid_lon": round(_c["centroid_lon"], 5),
-                "centroid_dist_km": round(_c["centroid_dist_km"], 3),
-            }
 
     vrp_mw = 0.0
     hotspot_lat = None
@@ -484,6 +471,28 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         # Primary hotspot = highest VRP pixel
         hotspot_lat = anomaly_pixels[0]["lat"]
         hotspot_lon = anomaly_pixels[0]["lon"]
+
+        # S27 — cluster aggregation con vrp_mw del cluster principal (Coppola
+        # 2016a). MIROVA reporta VRP del cluster contiguo, no suma indistinta.
+        # Cierre D1 a nivel pipeline.
+        vrp_per_pixel_2d = np.zeros_like(hot_mask_2d, dtype=float)
+        vrp_per_pixel_2d[hot_rows, hot_cols] = per_pixel_vrp_mw
+        _vlat = vent_lat if vent_lat is not None else volcano_lat
+        _vlon = vent_lon if vent_lon is not None else volcano_lon
+        _clusters = cluster_hotspots(
+            hot_mask_2d, lat, lon, _vlat, _vlon,
+            vrp_per_pixel=vrp_per_pixel_2d,
+        )
+        n_hotspots_clustered = len(_clusters)
+        if _clusters:
+            _c = _clusters[0]
+            primary_cluster = {
+                "n_pixels": _c["n_pixels"],
+                "vrp_mw": round(_c["vrp_mw"], 3),
+                "centroid_lat": round(_c["centroid_lat"], 5),
+                "centroid_lon": round(_c["centroid_lon"], 5),
+                "centroid_dist_km": round(_c["centroid_dist_km"], 3),
+            }
         hotspot_dist_km = anomaly_pixels[0]["dist_km"]
 
     valid_roi = roi_bt_full[~np.isnan(roi_bt_full)]
