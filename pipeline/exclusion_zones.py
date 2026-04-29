@@ -29,6 +29,27 @@ from typing import Iterable
 import numpy as np
 
 
+def guard_exclude_zones(exclude_zones, active_water_bodies, *, enabled: bool):
+    """S27: gate de feature-flag para profile-level deshabilitación de exclude_zones.
+
+    Para clon literal MIROVA, este parche (S16 P3.6) NO se aplica porque ningún
+    paper MIROVA documenta máscaras geográficas. El profile setea
+    `enable_exclude_zones: false` y este helper convierte ambos args en None
+    antes de que process_*.py los use.
+
+    Args:
+        exclude_zones: lista o None de dicts (lat/lon/radius_km).
+        active_water_bodies: lista o None de dicts (whitelist crateres).
+        enabled: cuando False (literal), retorna (None, None).
+
+    Returns:
+        Tupla (exclude_zones, active_water_bodies) potencialmente nulificada.
+    """
+    if not enabled:
+        return None, None
+    return exclude_zones, active_water_bodies
+
+
 def haversine_km(lat1: float, lon1: float,
                  lat2: np.ndarray, lon2: np.ndarray) -> np.ndarray:
     """Distancia haversine entre punto fijo y array de puntos. Devuelve km."""

@@ -141,6 +141,12 @@ ENABLE_DUAL_ROI_BT: bool = bool(_p.get("enable_dual_roi_bt", False))
 N_SIGMA_MIR_SUMMIT: float = float(_t.get("n_sigma_mir_summit", 5.0))
 N_SIGMA_MIR_SCENE: float = float(_t.get("n_sigma_mir_scene", 10.0))
 
+# S27 MIROVA literal: flag para deshabilitar exclude_zones (parche nuestro).
+# MIROVA NO usa máscaras geográficas (verificado vs Coppola 2016a, Coppola 2020,
+# Laiolo 2026). Default true (operacional mantiene comportamiento actual);
+# false en _mirova_literal para test A/B.
+ENABLE_EXCLUDE_ZONES: bool = bool(_p.get("enable_exclude_zones", True))
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))
