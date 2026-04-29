@@ -36,6 +36,7 @@ def cluster_hotspots(
     vent_lon: float,
     *,
     connectivity: int = 8,
+    vrp_per_pixel: np.ndarray = None,
 ) -> List[dict]:
     """Agrupa pixels detectados (hot_mask_2d=True) en clusters espaciales.
 
@@ -45,13 +46,20 @@ def cluster_hotspots(
         vent_lat, vent_lon: coordenadas del vent (para computar dist).
         connectivity: 4 (solo H/V) o 8 (H/V + diagonales). Default 8 — mas
             permisivo, alineado con Coppola 2016a "neighbor pixels" tipica.
+        vrp_per_pixel: 2D array opcional con VRP_MW por pixel (mismo shape
+            que hot_mask_2d). Cuando se provee, cada cluster output incluye
+            `vrp_mw` (suma de VRPs de sus pixels) y los clusters se ordenan
+            por vrp_mw desc (no por n_pixels). Alineado con MIROVA NRT que
+            reporta VRP del cluster contiguo principal.
 
     Returns:
-        Lista de dicts (uno por cluster), ordenados por n_pixels descendente.
+        Lista de dicts (uno por cluster). Sin vrp_per_pixel, ordenados por
+        n_pixels desc. Con vrp_per_pixel, ordenados por vrp_mw desc.
         Cada dict:
-            n_pixels: int, cantidad de pixels en el cluster.
-            centroid_lat: float, media de lat de los pixels.
-            centroid_lon: float, media de lon de los pixels.
+            n_pixels: int.
+            vrp_mw: float (solo si vrp_per_pixel se proveyo).
+            centroid_lat: float.
+            centroid_lon: float.
             centroid_dist_km: float, haversine centroid -> vent.
             pixel_indices: list[(i, j)] coords de los pixels en arrays 2D.
     """
@@ -68,6 +76,7 @@ def cluster_hotspots(
         raise ValueError(f"connectivity debe ser 4 u 8, got {connectivity}")
 
     labels, n_clusters = ndi_label(hot_mask_2d, structure=structure)
+    has_vrp = vrp_per_pixel is not None
     clusters = []
     for k in range(1, n_clusters + 1):
         ii, jj = np.where(labels == k)
@@ -75,15 +84,21 @@ def cluster_hotspots(
         c_lat = float(np.mean(lat[ii, jj]))
         c_lon = float(np.mean(lon[ii, jj]))
         c_dist = _haversine_km(c_lat, c_lon, vent_lat, vent_lon)
-        clusters.append({
+        cluster = {
             "n_pixels": n,
             "centroid_lat": c_lat,
             "centroid_lon": c_lon,
             "centroid_dist_km": c_dist,
             "pixel_indices": [(int(i), int(j)) for i, j in zip(ii, jj)],
-        })
+        }
+        if has_vrp:
+            cluster["vrp_mw"] = float(np.sum(vrp_per_pixel[ii, jj]))
+        clusters.append(cluster)
 
-    clusters.sort(key=lambda c: c["n_pixels"], reverse=True)
+    if has_vrp:
+        clusters.sort(key=lambda c: c["vrp_mw"], reverse=True)
+    else:
+        clusters.sort(key=lambda c: c["n_pixels"], reverse=True)
     return clusters
 
 

@@ -133,6 +133,59 @@ def test_returns_pixel_indices():
     assert sorted(clusters[0]["pixel_indices"]) == [(2, 2), (2, 3)]
 
 
+def test_cluster_with_vrp_per_pixel_sums_correctly():
+    """S27: cluster_hotspots con vrp_per_pixel devuelve vrp_mw del cluster."""
+    from pipeline.clustering import cluster_hotspots
+    import numpy as np
+    mask = np.zeros((4, 4), dtype=bool)
+    mask[1, 1] = True
+    mask[1, 2] = True
+    lat = np.full((4, 4), -23.0)
+    lon = np.full((4, 4), -67.0)
+    vrp = np.zeros((4, 4))
+    vrp[1, 1] = 3.5
+    vrp[1, 2] = 7.0
+    clusters = cluster_hotspots(mask, lat, lon, -23.0, -67.0, vrp_per_pixel=vrp)
+    assert len(clusters) == 1
+    assert clusters[0]["n_pixels"] == 2
+    assert "vrp_mw" in clusters[0]
+    assert abs(clusters[0]["vrp_mw"] - 10.5) < 1e-6
+
+
+def test_clusters_sorted_by_vrp_when_vrp_provided():
+    """Cuando se pasa vrp_per_pixel, ordenar por vrp_mw desc (no por n_pixels)."""
+    from pipeline.clustering import cluster_hotspots
+    import numpy as np
+    mask = np.zeros((10, 10), dtype=bool)
+    # Cluster A: 3 pixels VRP total = 3 (1+1+1)
+    mask[1, 1] = mask[1, 2] = mask[1, 3] = True
+    # Cluster B: 1 pixel VRP = 50 (más caliente, gana)
+    mask[8, 8] = True
+    lat = np.full((10, 10), -23.0)
+    lon = np.full((10, 10), -67.0)
+    vrp = np.zeros((10, 10))
+    vrp[1, 1] = vrp[1, 2] = vrp[1, 3] = 1.0
+    vrp[8, 8] = 50.0
+    clusters = cluster_hotspots(mask, lat, lon, -23.0, -67.0, vrp_per_pixel=vrp)
+    assert clusters[0]["vrp_mw"] == 50.0
+    assert clusters[0]["n_pixels"] == 1
+    assert clusters[1]["vrp_mw"] == 3.0
+
+
+def test_cluster_without_vrp_per_pixel_keeps_old_behavior():
+    """Sin vrp_per_pixel: ordenar por n_pixels desc, no incluir vrp_mw."""
+    from pipeline.clustering import cluster_hotspots
+    import numpy as np
+    mask = np.zeros((4, 4), dtype=bool)
+    mask[1, 1] = mask[1, 2] = True
+    lat = np.full((4, 4), -23.0)
+    lon = np.full((4, 4), -67.0)
+    clusters = cluster_hotspots(mask, lat, lon, -23.0, -67.0)
+    assert clusters[0]["n_pixels"] == 2
+    # vrp_mw no debe aparecer si no se pasó vrp_per_pixel
+    assert "vrp_mw" not in clusters[0]
+
+
 def test_clusters_sorted_by_size_descending():
     """Convencion: clusters retornados ordenados por n_pixels desc.
 
