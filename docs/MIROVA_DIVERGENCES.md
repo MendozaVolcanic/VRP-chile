@@ -126,6 +126,36 @@ todavía no replicamos.
 **Estado**: ✅ Calibración de magnitud lograda. Ratio 1.35× es excelente para
 paridad MIROVA estricta.
 
+## Auditoría visual S27 (post-render fix, 90d)
+
+Conteo de markers en hotspot-map por Tier A (toggle "Solo principal" + "Solo cráter"):
+
+| Volcán | Markers | MIROVA esperado (90d) | Diagnóstico |
+|---|---:|---|---|
+| Lascar | 309 | 226 alertas reales | Coherente, erupción crónica activa |
+| **Lastarria** | **11** | **71 alertas reales** | **Subdetección catastrófica** (D4 — recall 8% en "Muy Bajo") |
+| Tupungatito | 87 | 64 "Muy Bajo" | Coherente |
+| Villarrica | 41 | 5 alertas (3 Muy Bajo + 2 Bajo) | Sobre-detección moderada |
+| **PCC** | **518** | 86 alertas reales | **6× MIROVA** — clusters esperados ~80-100 post-aggregation |
+| Copahue | 26 | 1 alerta real, 13 FPs | Sobre-detección 23× |
+| NdC | 65 (16 vent-path) | 4 alertas reales, 26 FPs | **Data legacy mixta** (NdC retry falló 4× — esperado) |
+| **Llaima** | **81** | **0 alertas reales, 33 FPs** | **78 detecciones summit, MIROVA dice 0**. Sobre-detección extrema sin contexto eruptivo |
+| Chaitén | 173 | 20 alertas reales, 5 FPs | Sobre-detección 8× |
+| **Planchón-Peteroa** | **13** | **29 alertas reales** | **Subdetección catastrófica** (D4 — recall 4% en "Muy Bajo") |
+| Isluga | 134 | 67 alertas + 26 FPs | Coherente |
+
+### Hallazgos clave de la auditoría visual
+
+**H1 — D4 confirmado en ambos extremos**:
+- Subdetección: Lastarria + Planchón. Inner_radius pequeño (5 / 3 km) correlaciona pero también puede haber mecanismo de detección sub-pixel summit que MIROVA usa y no replicamos.
+- Sobredetección: Llaima + Copahue. MIROVA descarta sistemáticamente lo que detectamos (Llaima 78 markers vs 0 alertas reales MIROVA). Posible filtro temporal/persistencia que no replicamos.
+
+**H2 — Llaima patrón distinto**: `inner_radius=5` no es chico, no es D4 clásico. Las 78 detecciones MIROVA las marca todas como FALSO_POSITIVO (33 en CSV). Hipótesis: lago Conguillío al ENE genera anomalías térmicas persistentes que el literal puro detecta (sin exclude_zones) pero MIROVA filtra con un mecanismo automático que NO está en papers que auditamos.
+
+**H3 — NdC con vent-path activo**: 16 markers vent (color violeta) son evidencia residual de data pre-S27. Se limpia automáticamente con el reproc 11×90d en curso (run 25110402836).
+
+**H4 — Toggle "Solo cráter" funciona perfecto**: 0 markers `far` en TODOS los volcanes auditados ✓. La distancia como criterio principal (alineado con MIROVA) está implementada.
+
 ## Roadmap de cierre de divergencias
 
 | ID | Divergencia | Estado | Próximo paso |
