@@ -41,13 +41,24 @@ Esperado: `status: completed, conclusion: success` con los 11 jobs en
 gh run view 25092057763 -R MendozaVolcanic/VRP-chile --log-failed | tail -60
 ```
 
-Patrón conocido: `Network is unreachable` a `urs.earthdata.nasa.gov` =
-NASA Earthdata transient outage. Re-launch el workflow:
+**Patrón conocido**: `Network is unreachable` a `urs.earthdata.nasa.gov` =
+NASA Earthdata transient outage. NevadosDeChillan ha fallado en cada launch
+hasta ahora (3 veces seguidas) — el runner asignado a NdC tiene problema de
+red sistemático en este momento. Mañana es muy probable que pase OK.
+
+Re-launch si quedaron fallos:
 ```bash
 gh workflow run reproc-mirova-literal-extend.yml -R MendozaVolcanic/VRP-chile --ref main -f start=2026-01-29 -f end=2026-04-29
 ```
 
-Solo afecta los volcanes que fallaron (ver matrix), pero el workflow re-procesa los 11 igual. Si querés solo los que fallaron, ajustá la matrix temporal.
+El workflow re-procesa los 11 (no solo los que fallaron). Si querés ahorrar
+tiempo, podés crear una matrix custom con solo los fallidos editando el YAML
+o ejecutar local con `python scripts/run_pipeline.py --profile _mirova_literal --volcano X --start 2026-01-29 --end 2026-04-29 --overwrite` (no recomendado en
+Windows porque pyhdf no compila — usar Linux/WSL).
+
+**Si NdC falla 3+ veces seguidas mañana**: aceptar que ese volcán mantiene
+data pre-S27 en el dashboard (no es Tier A primario, es secundario para
+calibración). Continuar con los 10 que sí completaron.
 
 ## Pasos finales para mañana (cuando workflow esté success)
 
