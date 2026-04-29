@@ -94,6 +94,18 @@ viven en el vault Obsidian: `C:\Users\nmend\OneDrive\Escritorio\claude\Vault\`.
   S25 implementó Test 1 Coppola 2015 (~4h) que resultó redundante porque
   data stale en `data/mirova_equivalent/Villarrica.json` reportaba 4%
   recall mientras código S25 daba 94% real.
+- **A9. Verificar afiliación de paper antes de citarlo como autoridad MIROVA
+  (S26)**: por ~10 sesiones citamos Di Bella 2024 §3.3 (12σ VIIRS noche)
+  como "thresholds MIROVA". Di Bella es del grupo INGV Catania (sistema
+  RSDF), NO MIROVA. Auditoría S26 detectó 13 papers más confundibles
+  (Catania + CNR Potenza). Regla canonical:
+  - **MIROVA = Torino + Firenze + Sapienza Roma**: Coppola, Laiolo,
+    Massimetti, Campus, Aveni, Cigolini.
+  - **NO MIROVA aunque sea italiano**: INGV Catania (Del Negro, Corradino,
+    Di Bella, Torrisi, Cariello, Amato, Malaguti) → sistemas RSDF/V-STAR/
+    FastVRP/CNN. CNR-IMAA Potenza (Marchese, Pergola, Genzano, Filizzola)
+    → sistema NHI.
+  - Lista completa en `~memory/reference_papers_mirova_canonical.md`.
 
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
