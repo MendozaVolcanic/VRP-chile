@@ -24,7 +24,7 @@ on:
 jobs:
   reproc:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 350  # Hard cap GitHub-hosted: 6h (360 min). 350 deja margen.
     permissions:
       contents: write
     strategy:
@@ -64,7 +64,7 @@ jobs:
         env:
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
-        timeout-minutes: 80
+        timeout-minutes: 320  # Margen para 90d (escalado 14d~30min -> 90d~190min).
         run: |
           python scripts/run_pipeline.py \
             --profile _mirova_literal \
