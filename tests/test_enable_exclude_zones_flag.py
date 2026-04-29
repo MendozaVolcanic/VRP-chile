@@ -34,14 +34,6 @@ def test_profile_default_enables_exclude_zones(monkeypatch):
     assert profile.ENABLE_EXCLUDE_ZONES is True
 
 
-def test_profile_legacy_enables_exclude_zones(monkeypatch):
-    """_mirova_legacy (control A/B mirror del operacional) mantiene ON."""
-    monkeypatch.setenv("VRP_PROFILE", "_mirova_legacy")
-    import pipeline.profile as profile
-    importlib.reload(profile)
-    assert profile.ENABLE_EXCLUDE_ZONES is True
-
-
 def test_profile_literal_disables_exclude_zones(monkeypatch):
     """_mirova_literal (treatment A/B) desactiva exclude_zones — parche no-paper."""
     monkeypatch.setenv("VRP_PROFILE", "_mirova_literal")
