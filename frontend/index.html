@@ -383,6 +383,11 @@
     <button class="scale-btn active" id="btn-summit-only">🎯 Solo cráter</button>
     <button class="scale-btn" id="btn-include-far">📍 Incluir lejanas</button>
   </div>
+  <div style="display:flex;gap:6px;align-items:center;" title="MIROVA reporta UN registro por (timestamp, volcán, sensor). Por default mostramos un marcador por record (el pixel más caliente). Toggle a 'Todos los pixels' para ver cada pixel individual del granule.">
+    <label>Pixels </label>
+    <button class="scale-btn active" id="btn-primary-pixel">⊙ Solo principal</button>
+    <button class="scale-btn" id="btn-all-pixels">⊛ Todos los pixels</button>
+  </div>
   <div class="sensor-legend" id="sensor-legend"></div>
 </div>
 
@@ -546,6 +551,10 @@ let logScale = false;
 // el mapa y en la tabla (atenuadas), pero no inflan el valor "48h max" ni el
 // nivel de alerta. El usuario puede prender "Incluir lejanas" desde el header.
 let includeFarDistance = false;
+// S27 — render solo el pixel primario (más caliente) por record. MIROVA reporta
+// UN registro por (timestamp, volcán, sensor); replicamos esa visualización.
+// PCC sin esto saturaba el mapa con 86,655 pixels en 90 días vs ~800 records.
+let onlyPrimaryPixel = true;
 let charts = {};
 let allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
 
@@ -1133,7 +1142,13 @@ function renderDetail() {
       // 100s de FPs scene en lagos/salares no documentados como exclude_zones.
       if (isFar && !includeFarDistance) return;
 
-      pixels.forEach((px, pxIdx) => {
+      // S27 — Por default solo renderizar el pixel primario (índice 0, el más
+      // caliente). Reduce saturación visual en volcanes con inner_radius grande
+      // (PCC=20km → 86k pixels en 90d). Toggle "Todos los pixels" muestra cada
+      // pixel individual del granule (ventajoso para análisis forense fino).
+      const renderPixels = onlyPrimaryPixel ? pixels.slice(0, 1) : pixels;
+
+      renderPixels.forEach((px, pxIdx) => {
         const size = Math.max(4, Math.min(15, 4 + Math.log10(Math.max(px.vrp_mw, 0.001)) * 5));
         const isPrimary = pxIdx === 0;
         const pxOpacity = isPrimary ? recencyOpacity : recencyOpacity * 0.7;
@@ -1781,6 +1796,21 @@ async function init() {
     document.getElementById("btn-summit-only").classList.remove("active");
     buildCards();
     buildOverviewMap();
+    renderDetail();
+  });
+
+  // S27: toggle "Solo principal" (default) vs "Todos los pixels". MIROVA
+  // visualmente reporta 1 marker por (timestamp, volcán, sensor) — alineamos.
+  document.getElementById("btn-primary-pixel").addEventListener("click", () => {
+    onlyPrimaryPixel = true;
+    document.getElementById("btn-primary-pixel").classList.add("active");
+    document.getElementById("btn-all-pixels").classList.remove("active");
+    renderDetail();
+  });
+  document.getElementById("btn-all-pixels").addEventListener("click", () => {
+    onlyPrimaryPixel = false;
+    document.getElementById("btn-all-pixels").classList.add("active");
+    document.getElementById("btn-primary-pixel").classList.remove("active");
     renderDetail();
   });
 
