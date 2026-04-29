@@ -1197,13 +1197,22 @@ function renderDetail() {
         const recordTotalVrp = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
         const nPix = pixels.length;
         const multiPixel = nPix > 1;
+        // S27: primary_cluster.vrp_mw es el VRP del cluster geográfico mayor
+        // — alineado con lo que MIROVA reporta en CSV consolidado. Cuando
+        // existe, lo presentamos como métrica principal y el "VRP total"
+        // pasa a ser secundario (suma indistinta de todos los pixels).
+        const pc = r.primary_cluster;
+        const hasPC = pc && pc.vrp_mw != null;
         const marker = L.circleMarker([mLat, mLon], markerStyle).addTo(map).bindPopup(
           `<b>${r.sensor}</b>` +
           (ventOnly ? " (vent-path)" : "") +
           (isFar ? ' <span style="color:#888">(far)</span>' : (distClass === "summit" ? ' <span style="color:#ff5252">(summit)</span>' : '')) + `<br>` +
           `${r.datetime_utc} UTC<br>` +
-          `<b>VRP total del record:</b> ${recordTotalVrp.toFixed(3)} MW` +
-          (multiPixel ? ` <small style="color:#888">(${nPix} pixels)</small>` : '') + `<br>` +
+          (hasPC
+            ? `<b style="color:#ffc107">VRP MIROVA-equiv:</b> ${pc.vrp_mw.toFixed(3)} MW <small style="color:#888">(cluster ${pc.n_pixels} pix)</small><br>`
+            : '') +
+          `<small style="color:#888">VRP total record (suma): ${recordTotalVrp.toFixed(3)} MW` +
+          (multiPixel ? ` (${nPix} pixels)` : '') + `</small><br>` +
           (multiPixel ? `<b>Este pixel:</b> ${px.vrp_mw.toFixed(4)} MW (pixel #${pxIdx+1})<br>` : '') +
           `BT max: ${tempC(px.bt_k)}<br>` +
           `Distancia al cráter: ${px.dist_km != null ? px.dist_km.toFixed(2) + " km" + (ventOnly && px.real_coord ? " (del vent)" : "") : (ventOnly ? "vent (legacy)" : "?")}`
