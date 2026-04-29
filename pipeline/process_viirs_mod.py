@@ -26,7 +26,7 @@ except ImportError:
     H5_AVAILABLE = False
 
 from .scan_geometry import viirs_pixel_areas, roi_mask_bbox
-from .exclusion_zones import filter_hot_mask
+from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
 from pipeline.constants import SIGMA  # kept for reference, not used in MIR VRP
@@ -73,6 +73,7 @@ from pipeline.profile import (
     ENABLE_DUAL_ROI_BT,
     N_SIGMA_MIR_SUMMIT,
     N_SIGMA_MIR_SCENE,
+    ENABLE_EXCLUDE_ZONES,
     P95_VENT_EXCLUSION_VIIRS750_KM,
 )
 from .detection_context import (
@@ -415,6 +416,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot | dnti_ctx_hot
 
     # S16 P3.6: filtrar exclude_zones (cuerpos de agua/salares).
+    # S27 T3: guard ENABLE_EXCLUDE_ZONES — en _mirova_literal queda en False
+    # (parche no documentado en papers MIROVA).
+    exclude_zones, active_water_bodies = guard_exclude_zones(
+        exclude_zones, active_water_bodies, enabled=ENABLE_EXCLUDE_ZONES)
     n_excluded_water = 0
     if exclude_zones:
         hot_mask_2d, n_excluded_water = filter_hot_mask(

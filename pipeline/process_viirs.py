@@ -29,7 +29,7 @@ except ImportError:
     print("WARNING: h5py not found. Install: pip install h5py")
 
 from .scan_geometry import viirs_pixel_areas, roi_mask_bbox
-from .exclusion_zones import filter_hot_mask
+from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
@@ -91,6 +91,7 @@ from pipeline.profile import (
     TEST1_MIR_RELATIVE,
     TEST1_ROI_KM,
     TEST1_INNER_RING_KM,
+    ENABLE_EXCLUDE_ZONES,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -515,6 +516,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             # S16 P3.6: filtrar pixels en exclude_zones (cuerpos de agua/salares
             # irradiando calor nocturno que bbox 50x50 km incluye -> FPs masivos).
             # Whitelist active_water_bodies preserva (lagos crateres activos).
+            # S27 T3: guard ENABLE_EXCLUDE_ZONES — en _mirova_literal queda en
+            # False (parche no documentado en papers MIROVA).
+            exclude_zones, active_water_bodies = guard_exclude_zones(
+                exclude_zones, active_water_bodies, enabled=ENABLE_EXCLUDE_ZONES)
             n_excluded_water = 0
             if exclude_zones:
                 hot_mask_2d, n_excluded_water = filter_hot_mask(
