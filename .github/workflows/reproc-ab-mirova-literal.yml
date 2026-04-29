@@ -1,0 +1,90 @@
+name: A/B reproceso MIROVA literal puro (S27)
+
+# Workflow dispatch-only para validación cuantitativa de "MIROVA literal":
+# - 5σ summit / 10σ scene noche (Coppola 2016a Tabla 1).
+# - Sin cap=7K (parche S15 deshabilitado, max_sigma_component_k=999).
+# - Sin vent-path (no existe en papers MIROVA).
+# - Sin exclude_zones (parche nuestro, ENABLE_EXCLUDE_ZONES=False).
+# - Sin cloud mask BT<260K (Laiolo 2026: MIROVA NRT no filtra).
+# - Sin Test 1 path (clon literal puro).
+# - Mantiene Coppola 2015 NTI Test 2 + Coppola 2016a dNTI 8-vec mean +
+#   P3.1 dual-ROI dNTI + Stefan-Boltzmann TIR + k Wooster/Campus.
+#
+# Profiles paralelos:
+#   _mirova_literal  → treatment (literal puro)
+#   _mirova_legacy   → control (operacional con parches)
+#
+# Criterio de aceptación (docs/superpowers/plans/2026-04-28-mirova-literal-puro.md):
+# - Recall agregado vs MIROVA NRT cae < 10 pp (vs ~0.81 actual).
+# - FPs lejanos vrp>1MW caen ≥40% global.
+# - Ratio mediano VRP ≤30× (hoy 57×).
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-12"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-04-25"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano: [Lascar, Lastarria, Tupungatito, Villarrica]
+        profile: [_mirova_literal, _mirova_legacy]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — ${{ matrix.profile }} / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 50
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed A/B data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/${{ matrix.profile }}/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S27 A/B MIROVA literal — ${{ matrix.profile }} / ${{ matrix.volcano }} 14d"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
