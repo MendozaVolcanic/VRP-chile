@@ -69,13 +69,16 @@ cd "C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile"
 git pull origin main
 ```
 
-Esto trae los 11 JSONs reprocesados a `data/_mirova_literal/`.
+Esto trae los 10 JSONs reprocesados a `data/_mirova_literal/` (con cluster
+aggregation: `n_hotspots_clustered` + `primary_cluster`). NdC sigue en data
+legacy mixta (4 fallos transient NASA Earthdata).
 
 ### 2. Sobrescribir `data/mirova_equivalent/` con la versión literal
 
 ```bash
-# Sobrescribir SOLO los 11 Tier A (no afectar los otros 39 volcanes)
-for vol in Lascar Lastarria Tupungatito Villarrica PuyehueCordonCaulle Copahue NevadosDeChillan Llaima Chaiten PlanchonPeteroa Isluga; do
+# Sobrescribir SOLO los 10 Tier A que SÍ tienen literal 90d con clustering
+# (NdC NO se sobrescribe — mantiene data legacy hasta retry exitoso)
+for vol in Lascar Lastarria Tupungatito Villarrica PuyehueCordonCaulle Copahue Llaima Chaiten PlanchonPeteroa Isluga; do
   cp "data/_mirova_literal/${vol}.json" "data/mirova_equivalent/${vol}.json"
 done
 ls -la data/mirova_equivalent/Lascar.json   # debería pesar ~3-5 MB ahora (no 54 MB)
