@@ -1,13 +1,13 @@
-name: Reproceso MIROVA literal — 7 Tier A faltantes (S27)
+name: Reproceso MIROVA literal — 11 Tier A 90d (S27)
 
-# Workflow dispatch-only para extender el reproceso literal a los 7 Tier A
-# que no entraron en el A/B principal (reproc-ab-mirova-literal.yml usa solo
-# Lascar/Lastarria/Tupungatito/Villarrica).
+# Workflow dispatch-only para reprocesar los 11 volcanes Tier A con
+# _mirova_literal sobre 90 días de historia (default 2026-01-29 → 2026-04-29).
 #
-# Solo treatment: el control "operacional con parches" para estos 7 está
-# preservado en git tag pre-s27-baseline.
+# Objetivo: dashboard coherente con 11 Tier A bajo MIROVA literal.
+# El operacional pre-S27 está preservado en git tag pre-s27-baseline.
 #
-# Objetivo: dashboard coherente con 11 volcanes Tier A bajo MIROVA literal.
+# Histórico: el A/B principal (reproc-ab-mirova-literal.yml) usó 14d para
+# el delta report. Este workflow extiende a 90d para visibilidad operacional.
 
 on:
   workflow_dispatch:
@@ -15,23 +15,27 @@ on:
       start:
         description: "Start date YYYY-MM-DD"
         required: true
-        default: "2026-04-12"
+        default: "2026-01-29"
       end:
         description: "End date YYYY-MM-DD (inclusive)"
         required: true
-        default: "2026-04-25"
+        default: "2026-04-29"
 
 jobs:
   reproc:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     permissions:
       contents: write
     strategy:
       fail-fast: false
-      max-parallel: 7
+      max-parallel: 8
       matrix:
         volcano:
+          - Lascar
+          - Lastarria
+          - Tupungatito
+          - Villarrica
           - PuyehueCordonCaulle
           - Copahue
           - NevadosDeChillan
@@ -60,7 +64,7 @@ jobs:
         env:
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
-        timeout-minutes: 50
+        timeout-minutes: 80
         run: |
           python scripts/run_pipeline.py \
             --profile _mirova_literal \
@@ -76,7 +80,7 @@ jobs:
           git config user.email "vrp-bot@github-actions"
           git add "data/_mirova_literal/${{ matrix.volcano }}.json" 2>/dev/null
           git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
-          git commit -m "S27 extend MIROVA literal — ${{ matrix.volcano }} 14d"
+          git commit -m "S27 reproc MIROVA literal 11Tier-A 90d — ${{ matrix.volcano }}"
           for attempt in 1 2 3 4 5; do
             git pull --rebase -X theirs origin main && git push && exit 0
             echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
