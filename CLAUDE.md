@@ -3,6 +3,19 @@
 Sistema VRP independiente para volcanes chilenos (equivalente MIROVA, propio).
 Repo: https://github.com/MendozaVolcanic/VRP-chile
 
+## Misión vinculante (LEER ANTES DE TOCAR PIPELINE)
+
+**Objetivo: clon literal MIROVA NRT.** Antes de implementar cualquier feature,
+fix, threshold, exclusion, path o transformación en `pipeline/`, leer
+[docs/MISSION.md](docs/MISSION.md) y aplicar las 3 preguntas. Si las 3 dan NO,
+NO IMPLEMENTAR — anotar en `tasks/backlog_*.md` con la razón.
+
+Lecciones acumuladas: cada parche que agregamos en sesiones pasadas
+(`MAX_SIGMA_COMPONENT_K=7K`, vent-path, `exclude_zones`, Reglas D, cloud mask,
+pisos VRP) era remediación de un drift previo, no causa raíz. Acumulados,
+anulaban la diferenciación summit/scene de MIROVA. **Volver a meter ese tipo
+de parche NO está autorizado** — primero pasar por las 3 preguntas en MISSION.md.
+
 ## Integración con el vault Obsidian
 
 Las notas de papers, conceptos, volcanes y sensores que se usan en VRP Chile
