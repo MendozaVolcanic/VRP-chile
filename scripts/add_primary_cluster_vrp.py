@@ -22,8 +22,8 @@ from pipeline.clustering import cluster_pixels_geographic  # noqa: E402
 
 TIER_A = [
     "Lascar", "Lastarria", "Tupungatito", "Villarrica",
-    "PuyehueCordonCaulle", "Copahue", "Llaima",
-    "Chaiten", "PlanchonPeteroa", "Isluga",
+    "PuyehueCordonCaulle", "Copahue", "NevadosDeChillan",
+    "Llaima", "Chaiten", "PlanchonPeteroa", "Isluga",
 ]
 
 
