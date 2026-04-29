@@ -30,6 +30,7 @@ except ImportError:
 
 from .scan_geometry import viirs_pixel_areas, roi_mask_bbox
 from .exclusion_zones import filter_hot_mask, guard_exclude_zones
+from .clustering import cluster_hotspots
 
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
@@ -346,6 +347,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # condicional, para evitar UnboundLocalError cuando "I04" no esta en bands
     # o len(bg_vals) < 10 (granules con poco data utilizable).
     n_dnti_ctx_path = 0
+    # S27: cluster aggregation defaults (mismo motivo: evitar UnboundLocalError
+    # si rama "I04" no se ejecuta).
+    n_hotspots_clustered = 0
+    primary_cluster = None
     # S25 Path Test 1 — defaults antes del bloque I04 (mismo patrón S16)
     test1_triggered = False
     test1_n_contrib = 0
@@ -530,6 +535,24 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
 
             hot_rows, hot_cols = np.where(hot_mask_2d)
             n_anomalous = len(hot_rows)
+
+            # S27 — cluster aggregation alineado con MIROVA n_hotspots
+            # (Coppola 2016a connectivity ~1km). Cierre divergencia D1.
+            n_hotspots_clustered = 0
+            primary_cluster = None
+            if n_anomalous > 0:
+                _vlat = vent_lat if vent_lat is not None else volcano_lat
+                _vlon = vent_lon if vent_lon is not None else volcano_lon
+                _clusters = cluster_hotspots(hot_mask_2d, lat, lon, _vlat, _vlon)
+                n_hotspots_clustered = len(_clusters)
+                if _clusters:
+                    _c = _clusters[0]
+                    primary_cluster = {
+                        "n_pixels": _c["n_pixels"],
+                        "centroid_lat": round(_c["centroid_lat"], 5),
+                        "centroid_lon": round(_c["centroid_lon"], 5),
+                        "centroid_dist_km": round(_c["centroid_dist_km"], 3),
+                    }
 
             if n_anomalous > 0:
                 hotpix_bt = bt[hot_rows, hot_cols]
@@ -755,6 +778,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "vrp_tir_mw": round(vrp_tir_mw, 3),
         "vrp_vent_mw": round(vrp_vent_mw, 3),
         "n_anomalous_pixels": n_anomalous,
+        "n_hotspots_clustered": n_hotspots_clustered,
+        "primary_cluster": primary_cluster,
         "n_excluded_water": n_excluded_water if "I04" in bands and len(bg_vals) >= 10 else 0,
         "n_bt_path": n_bt_path,
         "n_nti_path": n_nti_path,

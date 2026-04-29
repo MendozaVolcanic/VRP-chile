@@ -66,3 +66,34 @@ primario, calibración secundaria).
 
 Cumplido en S27. El `_mirova_literal.yaml` se mantiene como infraestructura
 para H_S27_1 a H_S27_4 (próximas sesiones).
+
+## Pendientes S28+ (filtro: "solo si acercan a copia fiel MIROVA")
+
+### B — Re-scrape Mirova-v1 cubriendo gap ~30% VIIRS del CSV consolidado
+
+Decisión Nicolás 2026-04-29: solo si acerca a clon fiel MIROVA. Re-scrape sí lo
+hace porque el CSV es el único ground truth NRT que tenemos; sin cobertura
+completa, las métricas TP/FN están sesgadas y no podemos calibrar precision
+real. Repo Mirova-v1 (separado): https://github.com/MendozaVolcanic/Mirova-v1.
+
+Acción: identificar pasadas con detección nuestra pero sin entry CSV; lanzar
+scraper para cubrir gaps temporales. Tiempo estimado 2-4h.
+
+### C — Investigar D4 (recall sub-pixel summit Lastarria 8% / Planchón 4%)
+
+Decisión Nicolás 2026-04-29: solo si acerca a clon fiel MIROVA. Investigar SÍ
+acerca SI descubrimos que MIROVA usa un mecanismo documentado en papers que
+nosotros no replicamos (Test 1 más agresivo, dNTI con C1 negativo, path TIR
+Aveni 2024). Investigar NO acerca si la fix termina siendo subir
+inner_radius_km (parche, viola "literal puro").
+
+Acción: bajar 5 granules Lastarria con detección "Muy Bajo" MIROVA que
+nosotros perdemos. Examinar radiancias MIR/TIR pixel-por-pixel. Cruzar contra
+Coppola 2015 §2.2 Test 1 + Aveni 2024 RSE TIRVolcH. Tiempo 2-3h.
+
+### Cluster aggregation D1 — IMPLEMENTAR S27 HOY (Opción A)
+
+MIROVA junta pixels contiguos (~1km connectivity) en clusters y reporta
+`n_hotspots` agregado. Nuestro `n_anomalous_pixels` no agrupa — diferencia
+"factor 42" del glosario. Pendiente: helper `cluster_hotspots()` con
+`scipy.ndimage.label` + integrar en process_*.py output.

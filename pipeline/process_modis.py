@@ -30,6 +30,7 @@ except ImportError:
 
 from .scan_geometry import modis_pixel_areas, roi_mask_bbox
 from .exclusion_zones import filter_hot_mask, guard_exclude_zones
+from .clustering import cluster_hotspots
 
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
@@ -379,6 +380,26 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     n_bt_path = int(np.sum(bt_path_hot))
     n_nti_path = int(np.sum(nti_path_hot))
 
+    # S27 — cluster aggregation alineado con MIROVA n_hotspots (Coppola 2016a).
+    # MIROVA reporta UN registro por (timestamp, volcan, sensor) integrando
+    # pixels contiguos. Replicamos el conteo de regiones contiguas (8-conn).
+    # Cierre divergencia D1 (docs/MIROVA_DIVERGENCES.md).
+    n_hotspots_clustered = 0
+    primary_cluster = None
+    if n_anomalous > 0:
+        _vlat = vent_lat if vent_lat is not None else volcano_lat
+        _vlon = vent_lon if vent_lon is not None else volcano_lon
+        _clusters = cluster_hotspots(hot_mask_2d, lat, lon, _vlat, _vlon)
+        n_hotspots_clustered = len(_clusters)
+        if _clusters:
+            _c = _clusters[0]
+            primary_cluster = {
+                "n_pixels": _c["n_pixels"],
+                "centroid_lat": round(_c["centroid_lat"], 5),
+                "centroid_lon": round(_c["centroid_lon"], 5),
+                "centroid_dist_km": round(_c["centroid_dist_km"], 3),
+            }
+
     vrp_mw = 0.0
     hotspot_lat = None
     hotspot_lon = None
@@ -508,6 +529,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "vrp_mw": round(vrp_mw, 3),
         "vrp_vent_mw": round(vrp_vent_mw, 3),
         "n_anomalous_pixels": n_anomalous,
+        "n_hotspots_clustered": n_hotspots_clustered,
+        "primary_cluster": primary_cluster,
         "n_vent_pixels": n_vent_pixels,
         "vent_hotspot_lat": vent_hotspot_lat,
         "vent_hotspot_lon": vent_hotspot_lon,
