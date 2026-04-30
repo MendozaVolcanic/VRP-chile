@@ -163,7 +163,7 @@ Conteo de markers en hotspot-map por Tier A (toggle "Solo principal" + "Solo cr�
 | D1 | 1 punto/pasada vs N pixels | ✅ **Cerrado S27** (pipeline + data + popup + tabla) | — |
 | D2 | CSV ground truth ~70% VIIRS | Conocido | Re-scrape Mirova-v1 (S28+) |
 | D3 | FP explícito MIROVA vs nuestro `far` | Conocido | Posible categoría `mirova_fp_match` en records (S28+) |
-| D4 | Recall sub-pixel summit (Lastarria 8%, Planchón 4%) | 🔄 **En proceso S27** — H_S27_1 (Test 1 ON) | Reproc 11×90d + delta report |
+| D4 | Recall sub-pixel summit (Lastarria 8%, Planchón 4%) | ✅ **Cerrado S27** — H_S27_1 confirmada categóricamente | — |
 | D5 | Magnitud (ratio VRP) | ✅ Resuelto S27 | — |
 
 ## H_S27_1 — Test 1 integrated-ROI activado en `_mirova_literal` (S27 cierre D4)
@@ -208,6 +208,51 @@ recall + FP_far por volcán contra el baseline literal puro actual. Si:
 - Lastarria 8% → ≥40%: H_S27_1 confirmada, mergear a operacional.
 - FPs scene aumentan dramáticamente: investigar parámetros Test 1 (k_sigma,
   mir_relative) — siempre dentro de Coppola 2015, sin parches.
+
+### Resultado H_S27_1 — confirmada categóricamente (S27 madrugada 2026-04-30)
+
+Reproc completado exitosamente: run principal 25148058512 (9/11 success
+directo) + retries 25148326350+25148328814 (Chaitén, Tupungatito).
+Delta report 90d (2026-01-29 → 2026-04-29):
+
+```
+Volcán                Pre-Test 1     Post-Test 1     Δ recall
+====================================================================
+Lastarria               8% (5/60)    100% (60/60)    +92 pp  ★
+Planchón-Peteroa        4% (1/28)    100% (28/28)    +96 pp  ★
+Chaitén                73% (8/11)    100% (11/11)    +27 pp
+Villarrica              0% (0/3)     100% (3/3)      rescate total
+Tupungatito            72% (46/64)    88% (56/64)    +16 pp
+Lascar                 67%           63%             -4 (ruido)
+PCC                    97%           97%             0 (saturado)
+Isluga                 80%           83%             +3
+NdC                    33% (1/3)     25% (1/4)       ruido (N=4)
+Copahue               100% (1/1)    100% (1/1)       0
+====================================================================
+TOTAL                  ~50%          80% (406/507)   +30 pp
+```
+
+**Conclusión**: Test 1 (Coppola 2015 §2.2 Eq.1) era exactamente lo que
+faltaba para los casos D4 catastróficos. La hipótesis se confirma sin
+ambigüedad — los 3 casos predichos como "más afectados" (Lastarria,
+Planchón, Villarrica) tuvieron rescate de 8%/4%/0% → 100% cada uno.
+
+**Caveat FPs**: los counts de detecciones `far` post-Test 1 son ~3,840
+totales (vs ~3,500 baseline). Increment moderado, NO explosión. El toggle
+"Solo cráter" del dashboard filtra los `far` por default; el usuario solo
+ve summit (4,060 detecciones).
+
+**Edge case identificado para S28+**: cuando Test 1 dispara solo
+(eruption-path descartado por Regla X y Test 1 rescata), `final_hotspot_source="test1"`
+y `final_hotspot_dist_km` queda en summit, pero `vrp_mw=0` mientras
+`vrp_mir_mw>0`. Bug menor de propagación VRP en ese path. NO afecta
+recall (la métrica usa primary_cluster.vrp_mw + triggered_test1 como OR),
+pero conviene fixear para coherencia data layer.
+
+**Decisión consolidada**: mergear `enable_test1_path: true` también a
+`mirova_equivalent` operacional — Test 1 es paper MIROVA core y debería
+estar ON en todos los profiles, no solo `_mirova_literal`. Pendiente
+para S28+.
 
 ## Referencias
 
