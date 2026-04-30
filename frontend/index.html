@@ -891,15 +891,33 @@ function renderDetail() {
   const tbl = el("table","events-table");
   const thead = el("thead");
   const hrow = el("tr");
-  ["Fecha UTC", "Sensor", "Zona", "VRP (MW)", "Dist (km)", "T max (°C)", "T fondo (°C)", "Píxeles"].forEach(h => {
-    const th = el("th"); th.textContent = h; hrow.appendChild(th);
+  // S27: la columna VRP muestra el del cluster contiguo principal
+  // (primary_cluster.vrp_mw, alineado con MIROVA NRT). Tooltip explica.
+  const headers = [
+    {label: "Fecha UTC"},
+    {label: "Sensor"},
+    {label: "Zona"},
+    {label: "VRP (MW)", title: "VRP MIROVA-equiv: del cluster contiguo principal (Coppola 2016a). Comparable directo con CSV consolidado MIROVA NRT. Fallback a suma indistinta para records pre-S27."},
+    {label: "Dist (km)"},
+    {label: "T max (°C)"},
+    {label: "T fondo (°C)"},
+    {label: "Píxeles", title: "Cluster principal / total detectados. Cluster = región contigua ~1km."},
+  ];
+  headers.forEach(h => {
+    const th = el("th"); th.textContent = h.label;
+    if (h.title) th.title = h.title;
+    hrow.appendChild(th);
   });
   thead.appendChild(hrow);
   tbl.appendChild(thead);
 
   const tbody = el("tbody");
+  // S27: filtrar y ordenar por VRP MIROVA-equiv cuando exista, sino suma.
+  const getDisplayVrp = (r) => (r.primary_cluster && r.primary_cluster.vrp_mw != null)
+    ? r.primary_cluster.vrp_mw
+    : (r.vrp_mw ?? r.vrp_mir_mw ?? 0);
   const recent = filtered
-    .filter(r => (r.vrp_mw ?? r.vrp_mir_mw ?? 0) > 0)
+    .filter(r => getDisplayVrp(r) > 0)
     .sort((a,b) => b.datetime_utc.localeCompare(a.datetime_utc))
     .slice(0, 20);
 
@@ -913,10 +931,15 @@ function renderDetail() {
     // al hacer click busca el marker del mapa con la misma key, abre
     // popup, hace zoom, y resalta visualmente la fila.
     recent.forEach(r => {
-      const vrp = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+      // S27: VRP de la tabla = primary_cluster.vrp_mw (MIROVA-equiv) cuando
+      // exista; fallback a suma indistinta del record para legacy.
+      const vrpRaw = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+      const vrp = getDisplayVrp(r);
+      const hasPC = r.primary_cluster && r.primary_cluster.vrp_mw != null;
       const tmax = r.t_max_k ?? r.t_max_i04_k ?? null;
       const tbg  = r.t_bg_k ?? null;
-      const npx  = r.n_anomalous_pixels ?? null;
+      const npxTotal = r.n_anomalous_pixels ?? null;
+      const npxCluster = hasPC ? r.primary_cluster.n_pixels : null;
       const lv   = getLevel(vrp);
       const row  = el("tr");
       // Dist a mostrar en la tabla. Prioridad:
@@ -956,6 +979,14 @@ function renderDetail() {
         row.style.opacity = "0.45";
         row.style.fontStyle = "italic";
       }
+      // S27: pixels muestra cluster/total cuando hay primary_cluster.
+      const npxLabel = (npxCluster != null && npxTotal != null && npxCluster !== npxTotal)
+        ? `${npxCluster} / ${npxTotal}`
+        : (npxTotal != null ? String(npxTotal) : "—");
+      // Tooltip VRP: cuando es MIROVA-equiv aclarar; cuando es suma indistinta también.
+      const vrpTitle = hasPC
+        ? `VRP MIROVA-equiv (cluster ${npxCluster} pix). Suma indistinta del record: ${vrpRaw.toFixed(3)} MW`
+        : `VRP suma del record (sin cluster aggregation, record legacy)`;
       [
         r.datetime_utc,
         r.sensor,
@@ -964,13 +995,20 @@ function renderDetail() {
         isVentLegacy ? "vent" : (dist != null ? dist.toFixed(2) : "—"),
         k2c(tmax),
         k2c(tbg),
-        npx  != null ? String(npx)     : "—",
+        npxLabel,
       ].forEach((val, i) => {
         const td = el("td");
         td.textContent = val;
-        if (i === 3) { td.className = "vrp-cell"; td.style.color = "var(--" + (lv.key === "vlow" ? "green" : lv.key === "low" ? "yellow" : lv.key === "mod" ? "orange" : "red") + ")"; }
+        if (i === 3) {
+          td.className = "vrp-cell";
+          td.style.color = "var(--" + (lv.key === "vlow" ? "green" : lv.key === "low" ? "yellow" : lv.key === "mod" ? "orange" : "red") + ")";
+          td.title = vrpTitle;
+        }
         if (i === 1) td.style.color = "var(--muted)";
         if (i === 2) { td.style.color = zoneColor; td.style.fontWeight = "600"; td.style.whiteSpace = "nowrap"; }
+        if (i === 7 && npxCluster != null && npxCluster !== npxTotal) {
+          td.title = `${npxCluster} pix en cluster principal · ${npxTotal} pix totales detectados`;
+        }
         row.appendChild(td);
       });
       tbody.appendChild(row);
