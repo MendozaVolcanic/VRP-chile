@@ -119,9 +119,14 @@ paths:
   # P3.1 S15: dual-ROI dNTI summit/scene — Coppola 2016a Table 2.
   # Validado A/B S24 (mantener).
   enable_dnti_dual_roi: true
-  # S27 MIROVA literal: Test 1 (Coppola 2015 §2.2 Eq.1) DESACTIVADO en
-  # clon literal puro. Disponible como flag para profile experimental.
-  enable_test1_path: false
+  # S27 MIROVA literal: Test 1 integrated-ROI ACTIVADO (Coppola 2015 §2.2 Eq.1).
+  # Paper MIROVA core, foundational del sistema. Detecta señal sub-pixel
+  # espacialmente distribuida que el path BT pixel-por-pixel pierde con
+  # 5σ summit (Lastarria 71 alertas reales 0.11 MW mediana, Villarrica lava
+  # lake 0.05-0.21 MW). Tenerlo OFF previamente era omisión, no decisión
+  # basada en papers — corregido S27 análisis multi-sensor. Cierre H_S27_1
+  # de D4 en docs/MIROVA_DIVERGENCES.md.
+  enable_test1_path: true
   # S27 MIROVA literal: dual-ROI BT ACTIVADO. Aplica thresholds
   # N_SIGMA_MIR_SUMMIT=5σ vs N_SIGMA_MIR_SCENE=10σ según distancia
   # al vent (Coppola 2016a Tabla 1).

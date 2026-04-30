@@ -160,11 +160,54 @@ Conteo de markers en hotspot-map por Tier A (toggle "Solo principal" + "Solo cr�
 
 | ID | Divergencia | Estado | Próximo paso |
 |---|---|---|---|
-| D1 | 1 punto/pasada vs N pixels | Frontend ✓, data parcial | Cluster aggregation en pipeline |
-| D2 | CSV ground truth ~70% VIIRS | Conocido | Re-scrape Mirova-v1 |
-| D3 | FP explícito MIROVA vs nuestro `far` | Conocido | Posible categoría `mirova_fp_match` en records |
-| D4 | Recall sub-pixel summit | A investigar | Estudio inner_radius o mecanismo MIROVA equivalente |
+| D1 | 1 punto/pasada vs N pixels | ✅ **Cerrado S27** (pipeline + data + popup + tabla) | — |
+| D2 | CSV ground truth ~70% VIIRS | Conocido | Re-scrape Mirova-v1 (S28+) |
+| D3 | FP explícito MIROVA vs nuestro `far` | Conocido | Posible categoría `mirova_fp_match` en records (S28+) |
+| D4 | Recall sub-pixel summit (Lastarria 8%, Planchón 4%) | 🔄 **En proceso S27** — H_S27_1 (Test 1 ON) | Reproc 11×90d + delta report |
 | D5 | Magnitud (ratio VRP) | ✅ Resuelto S27 | — |
+
+## H_S27_1 — Test 1 integrated-ROI activado en `_mirova_literal` (S27 cierre D4)
+
+**Hipótesis**: las señales sub-pixel summit que el literal puro pierde con 5σ
+pixel-por-pixel se rescatan con Test 1 integrated-ROI (Coppola 2015 §2.2 Eq.1).
+Test 1 integra la radiancia EXCESS sobre el ROI summit completo (~3km del
+vent) y dispara cuando la suma supera un umbral por área del ROI — capta
+señal espacialmente distribuida sub-σ pixel-individual.
+
+**Evidencia que llevó a la decisión** (S27 análisis multi-sensor 2026-04-30):
+
+1. **MODIS está fundamentalmente ciego** para los volcanes débiles
+   (Lastarria 0/71, Villarrica 0/6, Chaitén 0/15, Tupungatito 0/64, PCC 0/86).
+   Solo Lascar (eruptivo crónico, 1.3 MW mediana) tiene 60 alertas MODIS.
+2. **VIIRS 750m capta parcialmente** PCC (17), Tupungatito (8), pero **ciego
+   para Lastarria, Villarrica, Chaitén**.
+3. **VIIRS 375m es el ÚNICO sensor** que captura sub-pixel summit en
+   Lastarria (71), Villarrica (6), Chaitén (14).
+4. **Test 1 está implementado SOLO en `process_viirs.py`** (VIIRS 375m con
+   I04). Activarlo afecta exactamente el sensor crítico para los casos D4.
+5. **Distribución espacial confirmada**: Lastarria con magnitud 0.11 MW
+   recall 8%, Tupungatito con magnitud comparable 0.22 MW recall 72%. La
+   diferencia no es magnitud sola — es que Tupungatito es hotspot
+   concentrado (laguna), Lastarria es señal distribuida en fumarolas.
+   Esa firma es exactamente Test 1 integrated-ROI.
+
+**Implementación**:
+- `pipeline/profiles/_mirova_literal.yaml`: `enable_test1_path: true`.
+- Parámetros default Coppola 2015: `k_sigma=3, mir_relative=0.02,
+  roi_km=3, inner_ring_km=1`.
+- Validado pre-S27 contra Villarrica lava lake en S25 POC: 6/6 refs
+  triggered en magnitudes 0.05-0.21 MW.
+
+**Pasa las 3 preguntas de docs/MISSION.md**:
+1. Test 1 ES Coppola 2015 §2.2 Eq.1, paper MIROVA core foundational.
+2. Cierra D4.
+3. Reusa código existente sin parches geográficos.
+
+**Próximo paso**: reproc 11×90d con `_mirova_literal` actualizado, comparar
+recall + FP_far por volcán contra el baseline literal puro actual. Si:
+- Lastarria 8% → ≥40%: H_S27_1 confirmada, mergear a operacional.
+- FPs scene aumentan dramáticamente: investigar parámetros Test 1 (k_sigma,
+  mir_relative) — siempre dentro de Coppola 2015, sin parches.
 
 ## Referencias
 
