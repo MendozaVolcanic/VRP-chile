@@ -97,3 +97,29 @@ MIROVA junta pixels contiguos (~1km connectivity) en clusters y reporta
 `n_hotspots` agregado. Nuestro `n_anomalous_pixels` no agrupa — diferencia
 "factor 42" del glosario. Pendiente: helper `cluster_hotspots()` con
 `scipy.ndimage.label` + integrar en process_*.py output.
+
+## Backlog dashboard S30+ (auditoría visual S29 frontend)
+
+Bugs LOW del audit S29 (frontend/index.html). Los 7 críticos ya fixeados
+en commit 12384af. Estos quedan para sesiones futuras:
+
+- **Bug 9 — exclude_zones invisibles en mapa de detalle**: el yaml define
+  zonas (Embalse El Yeso Tupungatito, lagos Villarrica) pero el mapa solo
+  renderiza POIs, no exclude_zones. Falta transparencia. Fix: renderizar
+  círculos gris/punteado.
+- **Bug 10 — schema MIROVA `VRP_MW` vs `vrp_mw`**: el JSON de referencia
+  tiene mayúsculas, los nuestros minúsculas. Documentar en comentario.
+- **Bug 11 — límite render pixels en mapa**: con toggle "Todos los pixels"
+  un volcán como PCC carga 86k markers. Limitar a 500 + tooltip de aviso.
+- **Bug 12 — buildDistanceData filtro**: `(r.vrp_mw ?? 0) > 0` ya aplicado
+  en bug 5. OK ya parchado.
+- **Bug 13 — VOLCANOES_ALL hardcoded vs volcanoes.yaml**: actualmente
+  consistente pero riesgo de divergencia. Cargar dinámico.
+- **Bug 14 — buildAlertSummary() ignora includeFarDistance**: línea 1574
+  `latestVRP(d.records)` debería ser `latestVRP(d.records, includeFarDistance)`.
+- **Bug 15 — CSV export incompleto**: faltan campos S27/S29:
+  `primary_cluster.vrp_mw`, `final_hotspot_dist_km`, `discarded_reason`,
+  `triggered_test1`, `n_test1_pixels`.
+- **Bug 16 — comentario desactualizado VIIRS 375m S12**: refactor.
+- **Bug 17 — `vrp_vent_mw` no en CSV export**: agregar.
+- **Bug 18 — hardcoded Llaima filter default**: cambiar a `currentVolcano`.
