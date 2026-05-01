@@ -75,6 +75,11 @@ from pipeline.profile import (
     N_SIGMA_MIR_SUMMIT,
     N_SIGMA_MIR_SCENE,
     ENABLE_EXCLUDE_ZONES,
+    ENABLE_TEST1_PATH,
+    TEST1_K_SIGMA,
+    TEST1_MIR_RELATIVE,
+    TEST1_ROI_KM,
+    TEST1_INNER_RING_KM,
     P95_VENT_EXCLUSION_VIIRS750_KM,
 )
 from .detection_context import (
@@ -82,6 +87,7 @@ from .detection_context import (
     dual_roi_contextual_dnti_hot_mask,
     dual_roi_bt_threshold,
 )
+from .test1_integrated import compute_test1_mir
 
 # M-band wavelengths (µm)
 M13_INDEX = 12       # M13 index within VNP02MOD observation_data (0-based)
@@ -414,7 +420,39 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     else:
         dnti_ctx_hot = np.zeros_like(roi_mask)
 
-    hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot | dnti_ctx_hot
+    # S28 — Path Test 1 integrated-ROI MIR (Coppola 2015 §2.2 Eq.1) en VIIRS 750m M13.
+    # Extensión post-S27 H_S27_1 (validada en VIIRS 375m). Misma función pura
+    # con lambda=M13_LAMBDA=4.05µm. Detecta señal sub-pixel espacialmente
+    # extendida que paths per-pixel pierden — esperado rescatar ~20 FNs en
+    # Tupungatito (8) + Isluga (10) + PCC (1) según delta S27 madrugada.
+    test1_hot = np.zeros_like(bt_path_hot)
+    test1_triggered = False
+    test1_n_contrib = 0
+    test1_k_obs = 0.0
+    test1_centroid_lat = None
+    test1_centroid_lon = None
+    test1_L_bg_local = None
+    if (ENABLE_TEST1_PATH
+            and vent_lat is not None and vent_lon is not None):
+        test1_res = compute_test1_mir(
+            bt=bt, lat=lat, lon=lon,
+            vent_lat=vent_lat, vent_lon=vent_lon,
+            lambda_um=M13_LAMBDA,
+            roi_km=TEST1_ROI_KM,
+            inner_ring_km=TEST1_INNER_RING_KM,
+            k_sigma=TEST1_K_SIGMA,
+            mir_relative=TEST1_MIR_RELATIVE,
+        )
+        test1_triggered = test1_res["triggered"]
+        test1_k_obs = test1_res["k_sigma_observed"]
+        if test1_triggered:
+            test1_hot = test1_res["mask_contributing"]
+            test1_n_contrib = test1_res["n_contributing"]
+            test1_centroid_lat = test1_res.get("centroid_lat")
+            test1_centroid_lon = test1_res.get("centroid_lon")
+            test1_L_bg_local = test1_res.get("L_bg")
+
+    hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot | dnti_ctx_hot | test1_hot
 
     # S16 P3.6: filtrar exclude_zones (cuerpos de agua/salares).
     # S27 T3: guard ENABLE_EXCLUDE_ZONES — en _mirova_literal queda en False
@@ -566,6 +604,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "n_nti_rel_path": n_nti_rel_path,
         "n_dnti_ctx_path": n_dnti_ctx_path,
         "n_nti_anomalous": n_nti_anomalous,
+        # S28: Test 1 integrated-ROI extendido a VIIRS 750m M13.
+        "triggered_test1": test1_triggered,
+        "n_test1_pixels": test1_n_contrib,
+        "test1_k_observed": round(test1_k_obs, 2) if test1_k_obs else 0.0,
         "n_vent_pixels": n_vent_pixels,
         "vent_hotspot_lat": vent_hotspot_lat,
         "vent_hotspot_lon": vent_hotspot_lon,
