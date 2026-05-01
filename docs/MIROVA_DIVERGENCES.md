@@ -254,6 +254,50 @@ pero conviene fixear para coherencia data layer.
 estar ON en todos los profiles, no solo `_mirova_literal`. Pendiente
 para S28+.
 
+## S28 — Test 1 extendido a VIIRS 750m M13
+
+Tras milestone S27, el delta cuantitativo identificó ~20 FNs residuales
+todos en VIIRS 750m (Tupungatito 8, Isluga 10, PCC 1). Test 1 estaba
+implementado solo en `process_viirs.py` (VIIRS 375m I04 3.74µm). S28 lo
+extendió a `process_viirs_mod.py` (VIIRS 750m M13 4.05µm) reusando el
+helper agnóstico `compute_test1_mir(lambda_um=...)`.
+
+**Delta S28 vs S27** (recall por volcán, 90d):
+
+```
+Volcán              S27 (375 solo)   S28 (375+750)   Δ
+====================================================
+Tupungatito           88%             95%            +7 pp ★
+Isluga                83%             89%            +6 pp ★
+Lascar                63%             64%            +1
+Lastarria            100%            100%            0
+Villarrica           100%            100%            0
+PCC                   97%             97%            0
+Chaitén              100%            100%            0
+Planchón             100%            100%            0
+====================================================
+TOTAL                 80%             82%            +2 pp
+```
+
+**Lectura física**: la predicción era +20 FNs rescatados (10% del total).
+Logramos +10 (4 Tupungatito + 4 Isluga + 2 ruido). El gain real es la
+mitad de lo predicho. Razón probable: VIIRS 750m tiene ~4× menos pixels
+en el ROI summit 3km que VIIRS 375m (30 vs 120 pixels), reduciendo el
+statistical power de Test 1 (σ_ΔL = σ_bg × √N escala con √N). Los FNs
+residuales tienen señal demasiado débil para superar el threshold `k_sigma=3`
+en VIIRS 750m incluso con integración de ROI.
+
+**Estado D4**: parcialmente cerrado pero no completamente.
+- Casos catastróficos cerrados (Lastarria 100%, Planchón 100%, Chaitén 100%).
+- Casos parciales (Tupungatito 95%, Isluga 89%) — gain pero residuo.
+- Casos MODIS-dependientes (Lascar 64%) — Test 1 no aplica, requiere
+  investigación separada en `process_modis.py`.
+
+**Pendiente S29+**:
+- Investigar Lascar 77 FNs MODIS (~44 son Bajo, magnitud >2 MW — debería ser fácil).
+- Posible Test 1 también en MODIS (Coppola 2015 §2.2 fue diseñado originalmente
+  para MODIS, no requiere adaptación física).
+
 ## Referencias
 
 - CSV consolidado: `data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado.csv`
