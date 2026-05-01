@@ -554,11 +554,43 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                         vrp_vent_mw = 0.0
 
     # --- Schema unification (S14 D6) ---
+    # S30: portar Regla D Test 1-priority desde process_viirs.py.
+    # Cuando eruption-path detecta lejos (Salar Atacama caso Lascar MODIS) Y
+    # Test 1 detecta señal sub-pixel summit (cráter), Test 1 GANA. Sin este
+    # fix los 63 FNs MODIS Lascar quedaban "far" porque el primary_cluster
+    # caía en el Salar a 19-27km.
+    test1_hotspot_dist_km = None
+    if (test1_triggered and test1_centroid_lat is not None
+            and vent_lat is not None and vent_lon is not None):
+        from .scan_geometry import haversine_km as _hav
+        _d = _hav(vent_lat, vent_lon, np.array([test1_centroid_lat]),
+                  np.array([test1_centroid_lon]))
+        test1_hotspot_dist_km = float(_d[0]) if hasattr(_d, '__len__') else float(_d)
+
+    test1_summit_hit = (test1_triggered and inner_radius_km is not None
+                        and test1_hotspot_dist_km is not None
+                        and test1_hotspot_dist_km <= inner_radius_km)
+    eruption_far = (hotspot_dist_km is not None and inner_radius_km is not None
+                    and hotspot_dist_km > inner_radius_km)
+
     if hotspot_lat is not None and hotspot_lon is not None:
-        final_hotspot_lat = hotspot_lat
-        final_hotspot_lon = hotspot_lon
-        final_hotspot_dist_km = hotspot_dist_km
-        final_hotspot_source = "eruption"
+        if test1_summit_hit and eruption_far:
+            # Regla D Test 1-priority: eruption far + Test 1 summit → Test 1 gana.
+            final_hotspot_lat = test1_centroid_lat
+            final_hotspot_lon = test1_centroid_lon
+            final_hotspot_dist_km = test1_hotspot_dist_km
+            final_hotspot_source = "test1"
+        else:
+            final_hotspot_lat = hotspot_lat
+            final_hotspot_lon = hotspot_lon
+            final_hotspot_dist_km = hotspot_dist_km
+            final_hotspot_source = "eruption"
+    elif test1_summit_hit:
+        # No hay eruption pero Test 1 detectó summit.
+        final_hotspot_lat = test1_centroid_lat
+        final_hotspot_lon = test1_centroid_lon
+        final_hotspot_dist_km = test1_hotspot_dist_km
+        final_hotspot_source = "test1"
     elif vent_hotspot_lat is not None and vent_hotspot_lon is not None:
         final_hotspot_lat = vent_hotspot_lat
         final_hotspot_lon = vent_hotspot_lon
@@ -573,6 +605,22 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     distance_class = None
     if final_hotspot_dist_km is not None and inner_radius_km is not None:
         distance_class = "summit" if final_hotspot_dist_km <= inner_radius_km else "far"
+
+    # S30: VRP recompute cuando final_hotspot_source='test1' — replica fix
+    # S26 D de process_viirs.py. Sin esto vrp_mw queda como suma del cluster
+    # eruption far (Salar) o 0. Recomputamos VRP usando SOLO pixels Test 1
+    # con L_bg LOCAL del ring 1-3km del cráter (no global del ROI 25km).
+    if (final_hotspot_source == "test1" and test1_n_contrib > 0
+            and test1_L_bg_local is not None
+            and not np.isnan(test1_L_bg_local)):
+        t1_rows, t1_cols = np.where(test1_hot)
+        if len(t1_rows) > 0:
+            t1_bt = bt_mir[t1_rows, t1_cols]
+            t1_rad = C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t1_bt)) - 1))
+            t1_delta_L = np.maximum(t1_rad - test1_L_bg_local, 0.0)
+            t1_area = pixel_areas[t1_rows, t1_cols]
+            t1_vrp = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
+            vrp_mw = float(np.sum(t1_vrp))
 
     return {
         "vrp_mw": round(vrp_mw, 3),
