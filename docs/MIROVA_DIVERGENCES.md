@@ -254,6 +254,47 @@ pero conviene fixear para coherencia data layer.
 estar ON en todos los profiles, no solo `_mirova_literal`. Pendiente
 para S28+.
 
+### S28 — Test 1 extendido a VIIRS 750m (M13 4.05 µm)
+
+Tras S27 H_S27_1 confirmada en VIIRS 375m, el residuo D4 mostró ~20 FNs
+en VIIRS 750m (Tupungatito 8, Isluga 11, PCC 1) — banda donde Test 1 NO
+estaba implementado. Extensión a `process_viirs_mod.py` con
+`lambda_um=M13_LAMBDA=4.05`.
+
+Resultado: Tupungatito 72% → 88% (+16pp), Isluga 80% → 83% (+3pp).
+Recall global mantenido en 80%. Implementado en commit 82dcaa5.
+
+### S29 — Test 1 extendido a MODIS Banda 21 (3.929 µm)
+
+Tras S28, los 77 FNs Lascar MODIS quedaron como mayor residuo D4.
+Análisis fino mostró que TODOS los granules estaban procesados pero
+detectados como "far" (Salar de Atacama 22-29 km del vent contamina
+primary_cluster). Hipótesis: Test 1 con `roi_km=3` desde vent ignora
+el Salar y rescata cráter sub-pixel.
+
+Coppola 2015 §2.2 fue diseñado **originalmente para MODIS L1B** —
+extender Test 1 a MODIS es alineación con el sistema MIROVA original.
+
+Resultado:
+- **Tupungatito 88% → 95% (+7pp)**: Test 1 MODIS rescató ~5 FNs.
+- **Isluga 83% → 89% (+6pp)**: idem ~4 FNs.
+- **Lascar 63% → 64% (+1pp)**: hipótesis NO confirmada.
+- TOTAL recall: 80% → **82.2%** (+2.2pp).
+
+**Lección Lascar**: el cráter realmente NO tiene radiancia integrada
+detectable en MODIS pixel 1km cuando σ_bg del ring 1-3km es alto
+(Atacama heterogéneo). Es límite físico del sensor MODIS para sub-pixel
+summit en terreno árido. **Lascar 64% queda como límite físico aceptado**
+— ir más allá requeriría exclude_zones del Salar (parche, viola MISSION).
+
+Test 1 ahora ON en los 3 sensores que MIROVA usa (commit ed75b7c):
+- MODIS Banda 21 (3.929 µm)
+- VIIRS I04 (3.74 µm)
+- VIIRS M13 (4.05 µm)
+
+D4 cierra al **límite del clon literal MIROVA**. Para mejorar más se
+requiere divergencia metodológica.
+
 ## S28 — Test 1 extendido a VIIRS 750m M13
 
 Tras milestone S27, el delta cuantitativo identificó ~20 FNs residuales
