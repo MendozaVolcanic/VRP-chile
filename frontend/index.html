@@ -467,15 +467,10 @@ const VOLCANOES_ALL = [
   { name: "Lascar",               display: "Láscar",                 region: "Antofagasta",   lat: -23.369, lon: -67.732, radius_km: 25, inner_radius_km: 5, vent_radius_km: 3, hasMirova: true,  vent_lat: -23.362930, vent_lon: -67.731416 },
   { name: "Lastarria",            display: "Lastarria",              region: "Atacama",        lat: -25.168, lon: -68.507, radius_km: 25, inner_radius_km: 3, vent_radius_km: 3, hasMirova: true,  vent_lat: -25.168, vent_lon: -68.507 },
   // === Zona Central SVZ ===
-  { name: "Tupungatito",          display: "Tupungatito",            region: "Valparaíso",    lat: -33.400, lon: -69.800, radius_km: 25, inner_radius_km: 7, vent_radius_km: 5, hasMirova: true,  vent_lat: -33.389044, vent_lon: -69.826374,
-    // S19 M2: hotspot NE recurrente detectado en 4 días distintos del reproceso
-    // S18 (2026-04-15/17/18/19). H17a candidato — identificar visualmente.
-    points_of_interest: [
-      { lat: -33.28, lon: -69.58, label: "Hotspot NE recurrente",
-        note: "4 detecciones 2026-04-15/17/18/19. ¿Nevado El Plomo? ¿planta solar? ¿ruta minera?",
-        radius_km: 3 }
-    ]
-  },
+  { name: "Tupungatito",          display: "Tupungatito",            region: "Valparaíso",    lat: -33.400, lon: -69.800, radius_km: 25, inner_radius_km: 7, vent_radius_km: 5, hasMirova: true,  vent_lat: -33.389044, vent_lon: -69.826374 },
+  // S29: POI hardcoded "Hotspot NE recurrente" S19 M2 eliminado — ya cumplió su
+  // función de identificar Nevado El Plomo / planta solar / ruta minera como
+  // FPs. El pipeline ahora descarta esos hotspots correctamente como "far".
   { name: "SanJose",              display: "San José",               region: "Metropolitana",  lat: -33.789, lon: -69.897, radius_km: 10 },
   { name: "Tinguiririca",         display: "Tinguiririca",           region: "O'Higgins",     lat: -34.814, lon: -70.352, radius_km: 10 },
   { name: "PlanchonPeteroa",      display: "Planchón-Peteroa",       region: "Maule",         lat: -35.240, lon: -70.568, radius_km: 25, inner_radius_km: 3, vent_radius_km: 3, hasMirova: true,  vent_lat: -35.241099, vent_lon: -70.573345 },
@@ -618,6 +613,10 @@ function toMirovaDaily(records) {
 //      vent-path solo dispara dentro del radio del vent → trátalo como summit.
 //   4. Otros casos sin metadato claro → no es summit (evita contar ruido).
 function isSummitDetection(r) {
+  // S29 fix bug 8: si el record fue descartado por el pipeline (vrp_mw=0 y
+  // discarded_reason no nulo), NO contar como detección summit aunque el
+  // distance_class lo diga — el cluster que disparó es el descartado.
+  if ((r.vrp_mw ?? 0) === 0 && r.discarded_reason && !r.triggered_test1) return false;
   if (r.distance_class === "summit") return true;
   if (r.distance_class === "far") return false;
   return (r.vrp_vent_mw ?? 0) > 0;
@@ -625,12 +624,18 @@ function isSummitDetection(r) {
 
 function latestVRP(records, includeFar = false) {
   // Max VRP de las últimas 48h. Por defecto solo detecciones del cráter.
+  // S29 fix: usar vrp_mw como fuente primaria (no fallback a vrp_mir_mw que
+  // mete records descartados). Test 1 alone path tiene vrp_mw=0 pero
+  // primary_cluster.vrp_mw — usar ese cuando aplica.
   const cutoff = Date.now() - 48 * 3600000;
   let max = 0;
   for (const r of records) {
     if (new Date(r.datetime_utc).getTime() < cutoff) continue;
     if (!includeFar && !isSummitDetection(r)) continue;
-    const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+    if ((r.vrp_mw ?? 0) === 0 && !r.triggered_test1) continue;
+    const v = (r.primary_cluster?.vrp_mw && r.primary_cluster.vrp_mw > 0)
+      ? r.primary_cluster.vrp_mw
+      : (r.vrp_mw ?? 0);
     if (v > max) max = v;
   }
   return max;
@@ -642,8 +647,10 @@ function latestSensors(records, includeFar = false) {
   for (const r of records) {
     if (new Date(r.datetime_utc).getTime() < cutoff) continue;
     if (!includeFar && !isSummitDetection(r)) continue;
-    const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
-    if (v > 0) seen.add(sensorGroup(r.sensor));
+    // S29 fix: requerir vrp_mw>0 o triggered_test1 (no vrp_mir_mw que mete
+    // records descartados).
+    if ((r.vrp_mw ?? 0) === 0 && !r.triggered_test1) continue;
+    seen.add(sensorGroup(r.sensor));
   }
   return seen;
 }
@@ -913,9 +920,20 @@ function renderDetail() {
 
   const tbody = el("tbody");
   // S27: filtrar y ordenar por VRP MIROVA-equiv cuando exista, sino suma.
-  const getDisplayVrp = (r) => (r.primary_cluster && r.primary_cluster.vrp_mw != null)
-    ? r.primary_cluster.vrp_mw
-    : (r.vrp_mw ?? r.vrp_mir_mw ?? 0);
+  // S29 fix bugs 1+2: si record fue descartado (vrp_mw=0 con discarded_reason),
+  // NO mostrar el primary_cluster.vrp_mw como si fuera detección real — ese
+  // cluster fue justamente el que disparó el descarte (eruption_hotspot_too_far).
+  const isValidDetection = (r) => {
+    if ((r.vrp_mw ?? 0) > 0) return true;  // detección eruption-path
+    if (r.triggered_test1) return true;     // detección Test 1 (vrp_mw puede ser 0 por edge case S28+)
+    return false;
+  };
+  const getDisplayVrp = (r) => {
+    if (!isValidDetection(r)) return 0;
+    if (r.primary_cluster && r.primary_cluster.vrp_mw != null && r.primary_cluster.vrp_mw > 0)
+      return r.primary_cluster.vrp_mw;
+    return r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+  };
   const recent = filtered
     .filter(r => getDisplayVrp(r) > 0)
     .sort((a,b) => b.datetime_utc.localeCompare(a.datetime_utc))
@@ -948,7 +966,11 @@ function renderDetail() {
       //  3. vent_hotspot_dist_km (S12 2026-04-15: dist del pixel vent-path
       //     al vent — valor físico real, reemplaza el label "vent")
       //  4. null → "vent" (record legacy sin coord real)
+      // S29 fix bug 3: cuando Test 1 dispara solo (sin eruption-path),
+      // hotspot_dist_km queda en None pero final_hotspot_dist_km tiene el
+      // valor real. Fallback a final_hotspot_dist_km antes de anomaly_pixels.
       const dist = r.hotspot_dist_km
+        ?? r.final_hotspot_dist_km
         ?? (r.anomaly_pixels && r.anomaly_pixels.length > 0 ? r.anomaly_pixels[0].dist_km : null)
         ?? r.vent_hotspot_dist_km;
       const isVent = (r.n_vent_pixels ?? 0) > 0 && (r.n_anomalous_pixels ?? 0) === 0;
@@ -1314,14 +1336,17 @@ function renderDetail() {
   }
 
   // ── Distance vs Time data ──
+  // S29 fixes bug 5+12: filtrar records descartados (no incluir vrp_mir_mw como
+  // fallback que mete records con vrp_mw=0 + discarded_reason); fallback a
+  // final_hotspot_dist_km cuando hotspot_dist_km es None (Test 1 solo path).
   function buildDistanceData() {
     const pts = [];
     for (const r of filtered) {
-      const vrp = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
-      if (vrp <= 0) continue;
-      const dist = r.hotspot_dist_km ?? (r.anomaly_pixels && r.anomaly_pixels.length ? r.anomaly_pixels[0].dist_km : null);
+      const vrp = r.vrp_mw ?? 0;
+      if (vrp <= 0 && !r.triggered_test1) continue;
+      const dist = r.hotspot_dist_km ?? r.final_hotspot_dist_km ?? (r.anomaly_pixels && r.anomaly_pixels.length ? r.anomaly_pixels[0].dist_km : null);
       if (dist == null) continue;
-      pts.push({ x: r.datetime_utc.slice(0,10), y: dist, vrp: vrp, sensor: r.sensor });
+      pts.push({ x: r.datetime_utc.slice(0,10), y: dist, vrp: vrp || (r.primary_cluster?.vrp_mw ?? 0), sensor: r.sensor });
     }
     return pts;
   }
@@ -1343,12 +1368,18 @@ function renderDetail() {
   function buildComparisonData() {
     const ds = [];
     // Our data (daily max, all sensors combined)
-    const ours = filtered.filter(r => (r.vrp_mw ?? r.vrp_mir_mw ?? 0) > 0);
+    // S29 fix bug 6: filtrar records descartados (vrp_mw=0 con discarded_reason).
+    // Antes usaba `?? r.vrp_mir_mw` que metía records donde el pipeline ya
+    // descartó la detección — distorsionaba la comparación con MIROVA.
+    const ours = filtered.filter(r => (r.vrp_mw ?? 0) > 0 || r.triggered_test1);
     if (ours.length) {
       const ourDaily = new Map();
       for (const r of ours) {
         const d = r.datetime_utc.slice(0,10);
-        const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+        // Usar primary_cluster.vrp_mw (MIROVA-equiv) cuando exista; sino vrp_mw.
+        const v = (r.primary_cluster?.vrp_mw && r.primary_cluster.vrp_mw > 0)
+          ? r.primary_cluster.vrp_mw
+          : (r.vrp_mw ?? 0);
         if (!ourDaily.has(d) || v > ourDaily.get(d)) ourDaily.set(d, v);
       }
       ds.push({
@@ -1649,7 +1680,9 @@ function updateHotspotLayer() {
       const color = HOTSPOT_COLORS[r.sensor] || "#ffffff";
       const recency = 0.35 + 0.65 * (i / Math.max(1, withCoords.length - 1));
       const radius = Math.max(4, Math.min(14, 4 + Math.log10(Math.max(vrpShow, 0.001)) * 4.5));
-      const dist = r.hotspot_dist_km != null ? r.hotspot_dist_km.toFixed(1) + " km" : "—";
+      // S29 fix: fallback final_hotspot_dist_km para Test 1 solo paths.
+      const distRaw = r.hotspot_dist_km ?? r.final_hotspot_dist_km;
+      const dist = distRaw != null ? distRaw.toFixed(1) + " km" : "—";
 
       L.circleMarker([r.hotspot_lat, r.hotspot_lon], {
         radius, color: isFiltered ? "#555" : "#000", weight: isFiltered ? 1 : 0.5,
@@ -1743,11 +1776,18 @@ function buildNRTTable() {
   for (const v of VOLCANOES) {
     const d = allData[v.name] || { records: [] };
     for (const r of d.records) {
-      const vrp = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
-      if (vrp <= 0) continue;
+      // S29 fix bug 7: filtrar records descartados. Antes `?? r.vrp_mir_mw`
+      // metía records con vrp_mw=0 + discarded_reason (eruption_hotspot_too_far),
+      // mostrándolos como "detecciones" recientes en la tabla NRT global.
+      const vrpFinal = r.vrp_mw ?? 0;
+      if (vrpFinal <= 0 && !r.triggered_test1) continue;
       const t = new Date(r.datetime_utc).getTime();
       if (t < cutoff) continue;
-      allDetections.push({ volcano: v, record: r, vrp: vrp });
+      // Reportar VRP MIROVA-equiv (cluster contiguo) cuando exista.
+      const vrpShow = (r.primary_cluster?.vrp_mw && r.primary_cluster.vrp_mw > 0)
+        ? r.primary_cluster.vrp_mw
+        : vrpFinal;
+      allDetections.push({ volcano: v, record: r, vrp: vrpShow });
     }
   }
 
