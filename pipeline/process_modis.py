@@ -31,6 +31,7 @@ except ImportError:
 from .scan_geometry import modis_pixel_areas, roi_mask_bbox
 from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots
+from .test1_integrated import compute_test1_mir
 
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
@@ -89,6 +90,11 @@ from pipeline.profile import (
     N_SIGMA_MIR_SUMMIT,
     N_SIGMA_MIR_SCENE,
     ENABLE_EXCLUDE_ZONES,
+    ENABLE_TEST1_PATH,
+    TEST1_K_SIGMA,
+    TEST1_MIR_RELATIVE,
+    TEST1_ROI_KM,
+    TEST1_INNER_RING_KM,
     P95_VENT_EXCLUSION_MODIS_KM,
 )
 from .detection_context import (
@@ -364,7 +370,41 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     else:
         dnti_ctx_hot = np.zeros_like(bt_path_hot)
 
-    hot_mask_2d = bt_path_hot | nti_path_hot | dnti_ctx_hot
+    # S29 — Path Test 1 integrated-ROI MIR (Coppola 2015 §2.2 Eq.1) en MODIS
+    # Banda 21 (3.929 µm). Coppola 2015 fue diseñado ORIGINALMENTE para MODIS
+    # L1B. Tras S27 (VIIRS 375m) y S28 (VIIRS 750m M13) confirmaron H_S27_1 con
+    # +30pp y +2pp recall, S29 lo extiende a MODIS para rescatar Lascar 77 FNs
+    # MODIS donde el primary_cluster cae en Salar de Atacama (~25 km del vent)
+    # mientras MIROVA detecta el cráter a 1-2 km. Test 1 con ROI=3km centrado
+    # en vent ignora el Salar y rescata el cráter sub-pixel.
+    test1_hot = np.zeros_like(bt_path_hot)
+    test1_triggered = False
+    test1_n_contrib = 0
+    test1_k_obs = 0.0
+    test1_centroid_lat = None
+    test1_centroid_lon = None
+    test1_L_bg_local = None
+    if (ENABLE_TEST1_PATH
+            and vent_lat is not None and vent_lon is not None):
+        test1_res = compute_test1_mir(
+            bt=bt_mir, lat=lat, lon=lon,
+            vent_lat=vent_lat, vent_lon=vent_lon,
+            lambda_um=BAND21_LAMBDA,
+            roi_km=TEST1_ROI_KM,
+            inner_ring_km=TEST1_INNER_RING_KM,
+            k_sigma=TEST1_K_SIGMA,
+            mir_relative=TEST1_MIR_RELATIVE,
+        )
+        test1_triggered = test1_res["triggered"]
+        test1_k_obs = test1_res["k_sigma_observed"]
+        if test1_triggered:
+            test1_hot = test1_res["mask_contributing"]
+            test1_n_contrib = test1_res["n_contributing"]
+            test1_centroid_lat = test1_res.get("centroid_lat")
+            test1_centroid_lon = test1_res.get("centroid_lon")
+            test1_L_bg_local = test1_res.get("L_bg")
+
+    hot_mask_2d = bt_path_hot | nti_path_hot | dnti_ctx_hot | test1_hot
 
     # S16 P3.6: filtrar exclude_zones.
     # S27 T3: guard ENABLE_EXCLUDE_ZONES — en _mirova_literal queda en False
@@ -540,6 +580,10 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "n_anomalous_pixels": n_anomalous,
         "n_hotspots_clustered": n_hotspots_clustered,
         "primary_cluster": primary_cluster,
+        # S29: Test 1 integrated-ROI extendido a MODIS Banda 21.
+        "triggered_test1": test1_triggered,
+        "n_test1_pixels": test1_n_contrib,
+        "test1_k_observed": round(test1_k_obs, 2) if test1_k_obs else 0.0,
         "n_vent_pixels": n_vent_pixels,
         "vent_hotspot_lat": vent_hotspot_lat,
         "vent_hotspot_lon": vent_hotspot_lon,
