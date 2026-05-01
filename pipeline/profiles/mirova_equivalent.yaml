@@ -1,18 +1,24 @@
-# VRP-Chile — profile: mirova_equivalent
+# VRP-Chile — profile: mirova_equivalent (OPERACIONAL post-S29)
 #
-# Operational profile. Reproduces the MIROVA detection philosophy: stable,
-# predictable, conservative. Thresholds match Coppola 2015 + local Tier A
-# calibration (Lascar session 9). This is the profile the SERNAGEOMIN
-# geologist reads by default.
+# Profile que el cron NRT corre cada 2h. Sincronizado con _mirova_literal
+# en S29 — clon literal MIROVA con Test 1 integrated-ROI activo en los 3
+# sensores que MIROVA usa (MODIS B21 + VIIRS I04 + VIIRS M13).
 #
-# NOTE: during the session 9 fork migration this profile is BYTE-IDENTICAL
-# to experimental.yaml. Divergence only happens after the 11 volcanoes are
-# fully validated against MIROVA.
+# Metodología activa (ver docs/MIROVA_DIVERGENCES.md S27/S28/S29):
+# - cap MAX_SIGMA_COMPONENT_K=999K (sin cap; antes 7K era parche S15).
+# - vent-path OFF (no en papers MIROVA; reemplazado por Test 1).
+# - cloud_mask_bt_k=0 (Laiolo 2026: MIROVA NRT no filtra nubes).
+# - dual-ROI BT ON con 5σ summit / 10σ scene (Coppola 2016a Tabla 1).
+# - dNTI dual-ROI summit/scene ON (P3.1).
+# - Test 1 integrated-ROI ON en MODIS B21 + VIIRS I04 + M13 (S27-S29).
+# - exclude_zones OFF (parche pre-S27 removido).
+#
+# data_subdir: mirova_equivalent (lo que renderiza el dashboard publicado).
 
 profile: mirova_equivalent
 description: >
-  MIROVA-equivalent operational profile. Same detection logic and thresholds
-  we had before the fork, now driven from YAML instead of hardcoded.
+  Operacional: clon MIROVA literal según Coppola 2016a + 2020 + Campus 2024.
+  Sin parches.
 
 # --- Detection thresholds ---
 # Applied inside process_modis.py / process_viirs.py / process_viirs_mod.py
@@ -32,8 +38,14 @@ thresholds:
   nti_k1_night: -0.8
   nti_bt_sanity_k: 3.0
   # MODIS extras
-  cloud_mask_bt_k: 260.0
-  max_sigma_component_k: 7.0
+  # S27 MIROVA literal: cloud_mask_bt_k=0 desactiva máscara de nubes.
+  # Laiolo 2026 textual: "no atmospheric correction or cloud-contamination
+  # automatic filtering is applied". MIROVA NRT no filtra nubes.
+  cloud_mask_bt_k: 0.0
+  # S27 MIROVA literal: cap=999K efectivo desactivado.
+  # El cap=7K (S15 Tema F) anula la diferenciación summit/scene de MIROVA
+  # porque clipea N·σ scene=10 cuando σ_bg>0.7K (común en escena).
+  max_sigma_component_k: 999.0
   # S12 2026-04-15: piso VRP por sensor para paridad MIROVA estricta.
   # Cualquier detección por debajo del piso se trata como no-detección
   # (vrp_mw = 0) en este perfil. Los valores coinciden exactamente con
@@ -58,7 +70,9 @@ thresholds:
   # clean bg while releasing volcanoes with noisy bg. 3K is 1/2
   # of the eruption-path cap (7K) because vent-path is already
   # more permissive by design.
-  max_vent_sigma_contrib_k: 3.0
+  # S27 MIROVA literal: cap vent-path tampoco aplica (vent-path off de todos
+  # modos), pero por consistencia se desactiva el cap también.
+  max_vent_sigma_contrib_k: 999.0
   # Path C parameters (inactive in this profile but defined for schema parity)
   nti_rel_n_sigma: 3.0
   nti_rel_min_floor: 0.005
@@ -76,6 +90,13 @@ thresholds:
   # MODIS-specific vent threshold (inactive: enable_vent_path_modis is false)
   modis_vent_threshold_k: 1.0
   modis_vent_vrp_floor_mw: 0.0
+  # S27 MIROVA literal — N·sigma differential summit/scene (Coppola 2016a Tabla 1).
+  # Activos solo cuando enable_dual_roi_bt=true.
+  # Sustituyen al n_sigma_mir=3.0 plano para diferenciar región summit (5σ noche)
+  # vs scene (10σ noche). Esa diferenciación es lo que reemplaza al ad-hoc
+  # cap=7K + exclude_zones que usábamos.
+  n_sigma_mir_summit: 5.0
+  n_sigma_mir_scene: 10.0
 
 # --- Background annulus geometry (km) ---
 background:
@@ -85,25 +106,38 @@ background:
 # --- Detection paths ---
 paths:
   enable_eruption_path: true
-  enable_vent_path: true
-  # S12 E1: MODIS vent-path reactivado. Audit experimental mostró que
-  # MODIS vent con threshold=2.5K + floor=0.3MW da +3 TP / -19 FP en
-  # Lascar — neto positivo. Las condiciones estrictas (2.5K > VIIRS 1K,
-  # floor 0.3 MW > sin floor) compensan el menor SNR del pixel 1km.
-  enable_vent_path_modis: true
+  # S27 MIROVA literal: vent-path NO existe en papers MIROVA.
+  # Coppola 2015 §2.2 Test 1 integrated-ROI cumple rol equivalente
+  # para sub-pixel cuando aplica. Vent-path entero queda como infra
+  # disponible en _mirova_legacy y experimental.
+  enable_vent_path: false
+  enable_vent_path_modis: false
   modis_vent_threshold_k: 2.5
   modis_vent_vrp_floor_mw: 0.3
   # NTI relative path disabled in operational profile until validated.
   enable_nti_relative_path: false
   # P3.2 S15: habilitar gate contextual dNTI 8-vecinos (Path D).
-  # Reduce sobreestimacion VRP por heterogeneidad terreno (Lastarria
-  # ratio 19.87 pre-fix). Ver tasks/plan_s15_p3_2_dnti_contextual.md.
+  # Coppola 2016a SP 426.5 — sí está en papers MIROVA, mantener.
   enable_dnti_contextual_path: true
-  # P3.1 S15: cuando true, Path D usa thresholds distintos summit vs scene
-  # (C1_SUMMIT / C1_SCENE). Cuando false, usa C1 unico (comportamiento
-  # P3.2 original). Requiere enable_dnti_contextual_path=true para tener
-  # efecto.
+  # P3.1 S15: dual-ROI dNTI summit/scene — Coppola 2016a Table 2.
+  # Validado A/B S24 (mantener).
   enable_dnti_dual_roi: true
+  # S27 MIROVA literal: Test 1 integrated-ROI ACTIVADO (Coppola 2015 §2.2 Eq.1).
+  # Paper MIROVA core, foundational del sistema. Detecta señal sub-pixel
+  # espacialmente distribuida que el path BT pixel-por-pixel pierde con
+  # 5σ summit (Lastarria 71 alertas reales 0.11 MW mediana, Villarrica lava
+  # lake 0.05-0.21 MW). Tenerlo OFF previamente era omisión, no decisión
+  # basada en papers — corregido S27 análisis multi-sensor. Cierre H_S27_1
+  # de D4 en docs/MIROVA_DIVERGENCES.md.
+  enable_test1_path: true
+  # S27 MIROVA literal: dual-ROI BT ACTIVADO. Aplica thresholds
+  # N_SIGMA_MIR_SUMMIT=5σ vs N_SIGMA_MIR_SCENE=10σ según distancia
+  # al vent (Coppola 2016a Tabla 1).
+  enable_dual_roi_bt: true
+  # S27 MIROVA literal: exclude_zones (parche nuestro, no en papers MIROVA)
+  # desactivadas. MIROVA NO usa máscaras geográficas; depende de N·σ
+  # scene=10 para suprimir lagos/salares como FP.
+  enable_exclude_zones: false
 
 # --- Sensor activation ---
 # true = process granules from this sensor in this profile.
