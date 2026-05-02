@@ -782,6 +782,22 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             vrp_mir_mw_test1_only = float(np.sum(t1_vrp))
             vrp_mir_mw = vrp_mir_mw_test1_only
 
+    # S30+ fix coherencia: cuando final_hotspot_source='test1', primary_cluster
+    # debe representar el cluster Test 1 (cráter), NO el cluster geográfico
+    # mayor (lacolito Cordón Caulle a 16km, etc.). Sin esto el dashboard
+    # mostraba primary_cluster.vrp_mw del cluster lejano → ratio 6-300× sobre
+    # MIROVA. Ver tasks/fix_primary_cluster_test1_coherence.md.
+    if (final_hotspot_source == "test1" and test1_n_contrib > 0
+            and test1_centroid_lat is not None):
+        primary_cluster = {
+            "n_pixels": test1_n_contrib,
+            "vrp_mw": round(vrp_mir_mw, 3),
+            "centroid_lat": round(test1_centroid_lat, 5),
+            "centroid_lon": round(test1_centroid_lon, 5),
+            "centroid_dist_km": round(test1_hotspot_dist_km, 3) if test1_hotspot_dist_km is not None else None,
+        }
+        n_hotspots_clustered = max(n_hotspots_clustered, 1)
+
     return {
         "vrp_mir_mw": round(vrp_mir_mw, 3),
         "vrp_tir_mw": round(vrp_tir_mw, 3),

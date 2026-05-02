@@ -622,6 +622,21 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             t1_vrp = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             vrp_mw = float(np.sum(t1_vrp))
 
+    # S30+: primary_cluster coherence cuando Test 1 gana — debe representar
+    # el cluster del cráter (Test 1 mask), no el cluster geográfico mayor
+    # (Salar Atacama caso Lascar). Sin esto delta report mostraba magnitudes
+    # 6-300× sobre MIROVA aunque final_hotspot fuera correcto.
+    if (final_hotspot_source == "test1" and test1_n_contrib > 0
+            and test1_centroid_lat is not None):
+        primary_cluster = {
+            "n_pixels": test1_n_contrib,
+            "vrp_mw": round(vrp_mw, 3),
+            "centroid_lat": round(test1_centroid_lat, 5),
+            "centroid_lon": round(test1_centroid_lon, 5),
+            "centroid_dist_km": round(test1_hotspot_dist_km, 3) if test1_hotspot_dist_km is not None else None,
+        }
+        n_hotspots_clustered = max(n_hotspots_clustered, 1)
+
     return {
         "vrp_mw": round(vrp_mw, 3),
         "vrp_vent_mw": round(vrp_vent_mw, 3),
