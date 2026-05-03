@@ -782,16 +782,18 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             vrp_mir_mw_test1_only = float(np.sum(t1_vrp))
             vrp_mir_mw = vrp_mir_mw_test1_only
 
-    # S31 fix magnitud: cuando final_hotspot_source='test1', primary_cluster
-    # debe representar el CLUSTER CONTIGUO PRINCIPAL del Test 1 mask (lo que
-    # MIROVA reporta), NO la suma integrated total de todos los pixels Test 1.
-    # Sin esto, en Lastarria/Planchón con fumarolas distribuidas el VRP integrado
-    # era 20× MIROVA (sumábamos 80 pixels, MIROVA reporta solo 8 contiguos).
-    # Aplicamos cluster_pixels_geographic sobre los pixels Test 1 con sus VRPs
-    # individuales (Wooster por pixel) y reportamos el cluster con mayor VRP.
+    # S31+ fix magnitud: cuando final_hotspot_source='test1', primary_cluster
+    # debe ser el cluster contiguo PIXEL-VECINDAD principal (8-conn scipy.label
+    # sobre grid 2D), NO un cluster geográfico haversine (que con max_dist
+    # 1.5km uniría todos los 62 pixels Test 1 en 1 solo cluster falso).
+    # Coppola 2016a SP 426.5 §2.2: "neighbor pixels" = pixels que comparten
+    # borde, no "pixels a <Xkm". cluster_hotspots con vrp_per_pixel hace eso.
     if (final_hotspot_source == "test1" and test1_n_contrib > 0
             and test1_L_bg_local is not None
             and not np.isnan(test1_L_bg_local)):
+        # Construir array 2D de VRP por pixel (solo los pixels Test 1 tienen
+        # valor; resto en 0 para que no entren al sum del cluster).
+        t1_vrp_2d = np.zeros_like(bt, dtype=np.float64)
         t1_rows, t1_cols = np.where(test1_hot)
         if len(t1_rows) > 0:
             t1_bt = bt[t1_rows, t1_cols]
@@ -799,24 +801,19 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             t1_delta_L = np.maximum(t1_L - test1_L_bg_local, 0.0)
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp_arr = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
-            t1_pixels = [
-                {"lat": float(lat[r, c]), "lon": float(lon[r, c]), "vrp_mw": float(v)}
-                for r, c, v in zip(t1_rows, t1_cols, t1_vrp_arr)
-            ]
-            t1_clusters = cluster_pixels_geographic(t1_pixels, max_dist_km=1.5)
+            t1_vrp_2d[t1_rows, t1_cols] = t1_vrp_arr
+            t1_clusters = cluster_hotspots(
+                test1_hot, lat, lon, vent_lat, vent_lon,
+                connectivity=8, vrp_per_pixel=t1_vrp_2d,
+            )
             if t1_clusters:
-                top = t1_clusters[0]  # mayor VRP (helper ordena desc)
-                from .scan_geometry import haversine_km as _hav
-                _d = _hav(vent_lat, vent_lon,
-                          np.array([top["centroid_lat"]]),
-                          np.array([top["centroid_lon"]]))
-                cluster_dist = float(_d[0]) if hasattr(_d, '__len__') else float(_d)
+                top = t1_clusters[0]  # mayor VRP (helper ordena desc cuando vrp dado)
                 primary_cluster = {
                     "n_pixels": top["n_pixels"],
                     "vrp_mw": round(top["vrp_mw"], 3),
                     "centroid_lat": round(top["centroid_lat"], 5),
                     "centroid_lon": round(top["centroid_lon"], 5),
-                    "centroid_dist_km": round(cluster_dist, 3),
+                    "centroid_dist_km": round(top["centroid_dist_km"], 3),
                 }
                 n_hotspots_clustered = len(t1_clusters)
 
