@@ -29,7 +29,10 @@ on:
 jobs:
   reproc:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # S32 fix: timeout 350min (escalado 14d~30min -> 90d~190min, margen). Patrón
+    # de reproc-mirova-literal-extend.yml para ventanas de 90d. El primer intento
+    # (60/50) fue insuficiente — los 8 jobs primera ola hicieron timeout.
+    timeout-minutes: 350
     permissions:
       contents: write
     strategy:
@@ -72,7 +75,7 @@ jobs:
         env:
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
-        timeout-minutes: 50
+        timeout-minutes: 320
         run: |
           python scripts/run_pipeline.py \
             --profile ${{ matrix.profile }} \

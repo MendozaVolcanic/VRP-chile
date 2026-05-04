@@ -1231,9 +1231,13 @@ function renderDetail() {
 
       // S27 — Por default solo renderizar el pixel primario (índice 0, el más
       // caliente). Reduce saturación visual en volcanes con inner_radius grande
-      // (PCC=20km → 86k pixels en 90d). Toggle "Todos los pixels" muestra cada
-      // pixel individual del granule (ventajoso para análisis forense fino).
-      const renderPixels = onlyPrimaryPixel ? pixels.slice(0, 1) : pixels;
+      // (PCC=20km → 86k pixels en 90d). Toggle "Todos los pixels" muestra
+      // top-10 por VRP del granule (Bug 11 S32: cap pixel-per-record para
+      // evitar 86k markers; pixels viene pre-ordenado desc en process_*.py).
+      const PIXEL_CAP_PER_RECORD = 10;
+      const renderPixels = onlyPrimaryPixel
+        ? pixels.slice(0, 1)
+        : pixels.slice(0, PIXEL_CAP_PER_RECORD);
 
       renderPixels.forEach((px, pxIdx) => {
         const size = Math.max(4, Math.min(15, 4 + Math.log10(Math.max(px.vrp_mw, 0.001)) * 5));
