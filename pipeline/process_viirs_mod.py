@@ -72,6 +72,7 @@ from pipeline.profile import (
     ENABLE_DNTI_CONTEXTUAL_PATH,
     ENABLE_DNTI_DUAL_ROI,
     ENABLE_DUAL_ROI_BT,
+    ENABLE_TEST1_PIXEL_FILTER,
     N_SIGMA_MIR_SUMMIT,
     N_SIGMA_MIR_SCENE,
     ENABLE_EXCLUDE_ZONES,
@@ -622,12 +623,31 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     if final_hotspot_dist_km is not None and inner_radius_km is not None:
         distance_class = "summit" if final_hotspot_dist_km <= inner_radius_km else "far"
 
+    # S32 P2 Driver B — Test 1 pixel-level filter (Coppola 2016a Tabla 1).
+    # Ver explicación en process_viirs.py. Default OFF.
+    test1_hot_filtered = test1_hot
+    if (ENABLE_TEST1_PIXEL_FILTER and final_hotspot_source == "test1"
+            and inner_radius_km is not None
+            and not np.isnan(t_bg) and not np.isnan(std_bg)):
+        pixel_thr_mask = dual_roi_bt_threshold(
+            bt=bt,
+            roi_mask=np.ones_like(bt, dtype=bool),
+            dist_km=vent_dist_per_pixel,
+            t_bg=t_bg, std_bg=std_bg,
+            inner_km=inner_radius_km,
+            n_sigma_summit=N_SIGMA_MIR_SUMMIT,
+            n_sigma_scene=N_SIGMA_MIR_SCENE,
+            anomaly_floor_k=ANOMALY_THRESHOLD_K,
+            max_sigma_cap_k=MAX_SIGMA_COMPONENT_K,
+        )
+        test1_hot_filtered = test1_hot & pixel_thr_mask
+
     # S30+: VRP recompute cuando final_hotspot_source='test1' (mismo fix S26 D
     # de VIIRS 375m). Replica MIROVA: bg local del cráter (1-3km), no global.
     if (final_hotspot_source == "test1" and test1_n_contrib > 0
             and test1_L_bg_local is not None
             and not np.isnan(test1_L_bg_local)):
-        t1_rows, t1_cols = np.where(test1_hot)
+        t1_rows, t1_cols = np.where(test1_hot_filtered)
         if len(t1_rows) > 0:
             t1_bt = bt[t1_rows, t1_cols]
             t1_L = bt_to_spectral_radiance(t1_bt, M13_LAMBDA)
@@ -642,7 +662,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             and test1_L_bg_local is not None
             and not np.isnan(test1_L_bg_local)):
         t1_vrp_2d = np.zeros_like(bt, dtype=np.float64)
-        t1_rows, t1_cols = np.where(test1_hot)
+        t1_rows, t1_cols = np.where(test1_hot_filtered)
         if len(t1_rows) > 0:
             t1_bt = bt[t1_rows, t1_cols]
             t1_L = bt_to_spectral_radiance(t1_bt, M13_LAMBDA)
@@ -651,7 +671,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             t1_vrp_arr = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             t1_vrp_2d[t1_rows, t1_cols] = t1_vrp_arr
             t1_clusters = cluster_hotspots(
-                test1_hot, lat, lon, vent_lat, vent_lon,
+                test1_hot_filtered, lat, lon, vent_lat, vent_lon,
                 connectivity=8, vrp_per_pixel=t1_vrp_2d,
             )
             if t1_clusters:

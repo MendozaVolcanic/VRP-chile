@@ -586,10 +586,14 @@ function filterDays(records, days) {
   return records.filter(r => new Date(r.datetime_utc).getTime() >= cutoff);
 }
 
-function toDailyMax(records, key) {
+function toDailyMax(records, keyOrFn) {
+  // S32 P2: keyOrFn puede ser string (legacy: r[key]) o function (r => valor).
+  // Llamadas nuevas pasan mirovaEqVrp para usar pc_vrp summit-only en lugar
+  // del vrp_mw global integrated.
+  const getter = typeof keyOrFn === 'function' ? keyOrFn : (r) => r[keyOrFn];
   const m = new Map();
   for (const r of records) {
-    const v = r[key]; if (v == null) continue;
+    const v = getter(r); if (v == null) continue;
     const d = r.datetime_utc.slice(0, 10);
     if (!m.has(d) || v > m.get(d)) m.set(d, v);
   }
@@ -597,6 +601,9 @@ function toDailyMax(records, key) {
 }
 
 function toMirovaDaily(records) {
+  // Usado para registros que vienen del CSV consolidado MIROVA NRT (campo
+  // VRP_MW directo). NO aplica mirovaEqVrp — los records MIROVA ya son
+  // cluster-contiguos por construcción.
   const m = new Map();
   for (const r of records) {
     const d = (r.datetime_utc || "").slice(0, 10); if (!d) continue;
@@ -604,6 +611,22 @@ function toMirovaDaily(records) {
     if (!m.has(d) || v > m.get(d)) m.set(d, v);
   }
   return [...m.entries()].sort().map(([x, y]) => ({ x, y }));
+}
+
+// S32 P2 — VRP "MIROVA-equivalent": cluster contiguo del cráter, no integrated
+// global. Coppola 2016a SP 426.5 §2.2 "neighbor pixels connectivity": MIROVA
+// reporta el VRP del cluster contiguo principal cerca del vent. Si nuestro
+// primary_cluster cae fuera del inner_radius (dist_class='far'), MIROVA tampoco
+// reportaría → magnitud=0. Reduce ratio mediano nuestro/MIROVA de 6.25× a 2.29×.
+// Fallback a vrp_mw global solo en records legacy pre-S27 sin primary_cluster.
+function mirovaEqVrp(r) {
+  if (!r) return 0;
+  // Records pre-S27 (sin primary_cluster) → mantener vrp_mw global como fallback.
+  if (!r.primary_cluster) return r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+  // Records modernos: si dist_class no es summit, MIROVA no reportaría → 0.
+  if (r.distance_class && r.distance_class !== "summit") return 0;
+  // Records modernos summit/legacy-summit: usar cluster contiguo del cráter.
+  return r.primary_cluster.vrp_mw ?? 0;
 }
 
 // S18: clasifica una detección como "cráter" (summit). Criterios, en orden:
@@ -785,8 +808,9 @@ function renderDetail() {
       "Act: " + d.updated.replace("T"," ").slice(0,16) + " UTC";
   }
 
-  // Stats
-  const allVrp = filtered.map(r => r.vrp_mw ?? r.vrp_mir_mw ?? 0).filter(v => v > 0);
+  // Stats — S32 P2: usa mirovaEqVrp (cluster summit-only) para Max/Promedio,
+  // alineado con el chart timeline. Mantiene "Total granules" usando todos.
+  const allVrp = filtered.map(mirovaEqVrp).filter(v => v > 0);
   const maxVrp  = allVrp.length ? Math.max(...allVrp) : 0;
   const meanVrp = allVrp.length ? allVrp.reduce((a,b)=>a+b)/allVrp.length : 0;
   const level   = getLevel(maxVrp);
@@ -828,10 +852,13 @@ function renderDetail() {
   }
   // VRE (Volcanic Radiated Energy) — cumulative integral of VRP
   // VRE = sum(VRP_i * dt_i), each observation ~ 6h window (4 passes/day)
+  // S32 P2: usa mirovaEqVrp para alinear con el chart timeline (cluster
+  // contiguo summit-only). Con vrp_mw global la VRE quedaba inflada por
+  // anomalías térmicas no-volcánicas en el granule.
   const DT_HOURS = 6;
   let vre_gj = 0;
   for (const r of filtered) {
-    const v_mw = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+    const v_mw = mirovaEqVrp(r);
     if (v_mw > 0) vre_gj += v_mw * DT_HOURS * 3.6; // MW * h * 3.6 = GJ
   }
 
@@ -1306,23 +1333,22 @@ function renderDetail() {
     if (sensorVisible.MODIS && modis.length) {
       const terra = modis.filter(r => r.sensor === "MODIS_TERRA");
       const aqua  = modis.filter(r => r.sensor === "MODIS_AQUA");
-      if (terra.length) ds.push({ label:"MODIS Terra", data:toDailyMax(terra,"vrp_mw"), backgroundColor:"#ff8c00cc", borderColor:"#ff8c00", borderWidth:1, borderRadius:2, borderSkipped:false });
-      if (aqua.length)  ds.push({ label:"MODIS Aqua",  data:toDailyMax(aqua, "vrp_mw"), backgroundColor:"#ffb347cc", borderColor:"#ffb347", borderWidth:1, borderRadius:2, borderSkipped:false });
+      // S32 P2: usar mirovaEqVrp (cluster contiguo summit-only) en lugar de
+      // r.vrp_mw global. Reduce magnitud reportada de 6.25× MIROVA a 2.29× mediano.
+      if (terra.length) ds.push({ label:"MODIS Terra", data:toDailyMax(terra, mirovaEqVrp), backgroundColor:"#ff8c00cc", borderColor:"#ff8c00", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (aqua.length)  ds.push({ label:"MODIS Aqua",  data:toDailyMax(aqua,  mirovaEqVrp), backgroundColor:"#ffb347cc", borderColor:"#ffb347", borderWidth:1, borderRadius:2, borderSkipped:false });
     }
     if (sensorVisible.VIIRS750 && v750.length) {
       const snpp750   = v750.filter(r => r.sensor === "VIIRS_SNPP_750");
       const noaa750   = v750.filter(r => r.sensor === "VIIRS_NOAA20_750");
-      if (snpp750.length)  ds.push({ label:"VIIRS SNPP 750m",   data:toDailyMax(snpp750,"vrp_mw"),   backgroundColor:"#00bcd4cc", borderColor:"#00bcd4", borderWidth:1, borderRadius:2, borderSkipped:false });
-      if (noaa750.length)  ds.push({ label:"VIIRS NOAA-20 750m",data:toDailyMax(noaa750,"vrp_mw"),   backgroundColor:"#4dd0e1cc", borderColor:"#4dd0e1", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (snpp750.length)  ds.push({ label:"VIIRS SNPP 750m",   data:toDailyMax(snpp750, mirovaEqVrp), backgroundColor:"#00bcd4cc", borderColor:"#00bcd4", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (noaa750.length)  ds.push({ label:"VIIRS NOAA-20 750m",data:toDailyMax(noaa750, mirovaEqVrp), backgroundColor:"#4dd0e1cc", borderColor:"#4dd0e1", borderWidth:1, borderRadius:2, borderSkipped:false });
     }
     if (sensorVisible.VIIRS375 && v375.length) {
       const snpp375   = v375.filter(r => r.sensor === "VIIRS_SNPP");
       const noaa375   = v375.filter(r => r.sensor === "VIIRS_NOAA20");
-      // S12 fix: VIIRS 375m chart usaba vrp_mir_mw (VRP crudo pre-filtro),
-      // mostrando barras para detecciones descartadas por geofencing.
-      // Cambiado a vrp_mw (valor unificado y filtrado por distancia).
-      if (snpp375.length)  ds.push({ label:"VIIRS SNPP 375m",   data:toDailyMax(snpp375,"vrp_mw"), backgroundColor:"#e91e63cc", borderColor:"#e91e63", borderWidth:1, borderRadius:2, borderSkipped:false });
-      if (noaa375.length)  ds.push({ label:"VIIRS NOAA-20 375m",data:toDailyMax(noaa375,"vrp_mw"), backgroundColor:"#f06292cc", borderColor:"#f06292", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (snpp375.length)  ds.push({ label:"VIIRS SNPP 375m",   data:toDailyMax(snpp375, mirovaEqVrp), backgroundColor:"#e91e63cc", borderColor:"#e91e63", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (noaa375.length)  ds.push({ label:"VIIRS NOAA-20 375m",data:toDailyMax(noaa375, mirovaEqVrp), backgroundColor:"#f06292cc", borderColor:"#f06292", borderWidth:1, borderRadius:2, borderSkipped:false });
     }
     if (sensorVisible.MIROVA && mFiltered.length) {
       ds.push({

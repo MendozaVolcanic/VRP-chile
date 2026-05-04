@@ -1,0 +1,98 @@
+name: A/B reproceso Test 1 pixel filter (S32 P2 Driver B)
+
+# Workflow dispatch-only para validación cuantitativa del fix Driver B —
+# filtro N·σ pixel-level (Coppola 2016a Tabla 1, 5σ summit / 10σ scene)
+# sobre la mask Test 1 antes de sumar VRP.
+#
+# Profiles paralelos:
+#   mirova_equivalent_test1pix_filter   → enable_test1_pixel_filter=true (experimental)
+#   mirova_equivalent_test1pix_disabled → enable_test1_pixel_filter=false (control)
+# Ambos a data/<profile_subdir>/, NO contaminan data/mirova_equivalent/.
+#
+# Criterio de aceptación (plan S32 P2 Driver B):
+# - Recall global se mantiene ≥83.5% (flag NO afecta trigger Test 1).
+# - Ratio mediano nuestro/MIROVA ≤1.5× (vs 2.29× post-Driver A).
+# - Ningún volcán sub-estima a <0.3× (sub-detección por filtro excesivo).
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-01-29"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-04-29"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano:
+          - Lascar
+          - Lastarria
+          - Tupungatito
+          - Villarrica
+          - PuyehueCordonCaulle
+          - Copahue
+          - NevadosDeChillan
+          - Llaima
+          - Chaiten
+          - PlanchonPeteroa
+          - Isluga
+        profile:
+          - mirova_equivalent_test1pix_filter
+          - mirova_equivalent_test1pix_disabled
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — ${{ matrix.profile }} / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 50
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed A/B data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/${{ matrix.profile }}/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S32 P2 Driver B A/B — ${{ matrix.profile }} / ${{ matrix.volcano }} 90d"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
