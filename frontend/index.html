@@ -1628,7 +1628,9 @@ function buildAlertSummary() {
   const counts = { high: 0, mod: 0, low: 0, vlow: 0, nd: 0 };
   for (const v of VOLCANOES) {
     const d = allData[v.name] || { records: [] };
-    const vrp = latestVRP(d.records);
+    // Bug 14 fix: respetar el toggle includeFarDistance (consistente con
+    // buildCards y panel detalle que ya lo respetan).
+    const vrp = latestVRP(d.records, includeFarDistance);
     const lv = getLevel(vrp);
     if (lv.key === "high" || lv.key === "vhigh") counts.high++;
     else if (lv.key === "mod") counts.mod++;
@@ -1939,8 +1941,13 @@ async function init() {
     opt.textContent = v.display;
     hotspotFilter.appendChild(opt);
   });
-  if ([...hotspotFilter.options].some(o => o.value === "Llaima")) {
-    hotspotFilter.value = "Llaima";
+  // Bug 18 fix: usar currentVolcano si tiene data; si no, primer volcán con
+  // records en el dropdown. Reemplaza el hardcoded "Llaima" que fallaba
+  // silenciosamente si Llaima no tenía records.
+  if (currentVolcano && [...hotspotFilter.options].some(o => o.value === currentVolcano.name)) {
+    hotspotFilter.value = currentVolcano.name;
+  } else if (hotspotFilter.options.length > 0) {
+    hotspotFilter.value = hotspotFilter.options[0].value;
   }
 
   buildAlertSummary();
@@ -1962,16 +1969,32 @@ async function init() {
 
 // ── CSV Export ────────────────────────────────────────────────────────────────
 function exportCSV(volcano, records) {
+  // Bug 15+17 fix: incluir campos S27/S29 (primary_cluster, final_hotspot,
+  // discarded_reason, triggered_test1, n_test1_pixels, distance_class) y
+  // vrp_vent_mw (ya estaba pero sin distance_class para diagnosticarlo).
   const headers = [
     "datetime_utc","sensor","vrp_mw","vrp_mir_mw","vrp_tir_mw","vrp_vent_mw",
     "n_anomalous_pixels","hotspot_lat","hotspot_lon","hotspot_dist_km",
     "t_bg_k","t_max_k","t_max_i04_k","t_max_i05_k",
-    "nti_max","nti_bg","n_nti_anomalous","granule"
+    "nti_max","nti_bg","n_nti_anomalous",
+    "distance_class","final_hotspot_lat","final_hotspot_lon",
+    "final_hotspot_dist_km","final_hotspot_source",
+    "triggered_test1","n_test1_pixels","test1_k_observed",
+    "primary_cluster_n_pixels","primary_cluster_vrp_mw","primary_cluster_dist_km",
+    "discarded_reason","granule"
   ];
   const rows = [headers.join(",")];
   for (const r of records) {
+    // Aplanar primary_cluster (objeto anidado) para el CSV
+    const pc = r.primary_cluster || {};
+    const flat = {
+      ...r,
+      primary_cluster_n_pixels: pc.n_pixels,
+      primary_cluster_vrp_mw: pc.vrp_mw,
+      primary_cluster_dist_km: pc.centroid_dist_km,
+    };
     const vals = headers.map(h => {
-      const v = r[h];
+      const v = flat[h];
       if (v == null) return "";
       if (typeof v === "string" && v.includes(",")) return '"' + v + '"';
       return String(v);
