@@ -24,13 +24,20 @@ def test_profile_loads_dual_roi_bt_keys(monkeypatch):
     assert profile.N_SIGMA_MIR_SCENE == 10.0
 
 
-def test_profile_disabled_default(monkeypatch):
-    """En mirova_equivalent operacional, dual-ROI BT debería estar OFF (no activado todavía)."""
+def test_profile_default_state_post_s27(monkeypatch):
+    """S27: dual-ROI BT activado en mirova_equivalent operacional.
+
+    Pre-S27 (este test originalmente): default OFF mientras se validaba A/B.
+    S27 (commit 2026-04-29): A/B validado, dual-ROI BT pasa a operacional con
+    5σ summit / 10σ scene Coppola 2016a Tabla 1. Ver pipeline/profiles/mirova_equivalent.yaml
+    enable_dual_roi_bt: true.
+    """
     monkeypatch.setenv("VRP_PROFILE", "mirova_equivalent")
     import pipeline.profile as profile
     importlib.reload(profile)
-    # Default seguro mientras se valida con A/B.
-    assert profile.ENABLE_DUAL_ROI_BT is False
+    assert profile.ENABLE_DUAL_ROI_BT is True
+    assert profile.N_SIGMA_MIR_SUMMIT == 5.0
+    assert profile.N_SIGMA_MIR_SCENE == 10.0
 
 
 # === T2: helper dual_roi_bt_threshold ===
