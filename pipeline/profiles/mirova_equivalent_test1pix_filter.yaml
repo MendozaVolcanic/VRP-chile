@@ -1,0 +1,77 @@
+# VRP-Chile — profile: mirova_equivalent_test1pix_filter (S32 P2 Driver B A/B)
+#
+# Idéntico a mirova_equivalent EXCEPTO:
+# - enable_test1_pixel_filter: true → cuando Test 1 dispara, intersectar la
+#   mask Test 1 con threshold dual-ROI 5σ summit / 10σ scene (Coppola 2016a
+#   Tabla 1) antes de sumar VRP y antes de cluster_hotspots.
+#
+# Hipótesis: Driver A (frontend reporta pc_vrp summit-only) reduce ratio
+# global de 6.25× → 2.29× MIROVA. El residual viene de paths Test 1 que
+# suman 14-49 pixels marginales. Análisis 64_vrp_aggregation_hypothesis.py
+# muestra que max(pixel) tiene ratio 0.95× (paridad). Si filtramos pixels
+# Test 1 con N·σ pixel-level (5σ summit), debería bajar a ~1-1.5×.
+#
+# Recall NO se ve afectado: el TRIGGER Test 1 sigue siendo el mismo, solo
+# cambia qué pixels suman al VRP final. Los eventos detectados se siguen
+# detectando.
+#
+# data_subdir: mirova_equivalent_test1pix_filter (aislado del operacional).
+
+profile: mirova_equivalent_test1pix_filter
+description: >
+  A/B test S32 P2 Driver B: filtro N·σ pixel-level sobre Test 1 mask
+  (Coppola 2016a Tabla 1). Hipótesis: residual ratio 8-30× viene de pixels
+  marginales en la mask Test 1.
+
+thresholds:
+  anomaly_threshold_k: 5.0
+  tir_threshold_k: 0.5
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  cloud_mask_bt_k: 0.0
+  max_sigma_component_k: 999.0
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
+  min_vent_pixels: 1
+  max_vent_sigma_contrib_k: 999.0
+  nti_rel_n_sigma: 3.0
+  nti_rel_min_floor: 0.005
+  dnti_contextual_c1: 0.003
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
+  modis_vent_threshold_k: 1.0
+  modis_vent_vrp_floor_mw: 0.0
+  n_sigma_mir_summit: 5.0
+  n_sigma_mir_scene: 10.0
+
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+paths:
+  enable_eruption_path: true
+  enable_vent_path: false
+  enable_vent_path_modis: false
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
+  enable_nti_relative_path: false
+  enable_dnti_contextual_path: true
+  enable_dnti_dual_roi: true
+  enable_test1_path: true
+  enable_dual_roi_bt: true
+  enable_exclude_zones: false
+  # S32 P2 Driver B — el cambio clave del A/B
+  enable_test1_pixel_filter: true
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: mirova_equivalent_test1pix_filter

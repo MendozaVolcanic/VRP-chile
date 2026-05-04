@@ -141,6 +141,16 @@ ENABLE_DUAL_ROI_BT: bool = bool(_p.get("enable_dual_roi_bt", False))
 N_SIGMA_MIR_SUMMIT: float = float(_t.get("n_sigma_mir_summit", 5.0))
 N_SIGMA_MIR_SCENE: float = float(_t.get("n_sigma_mir_scene", 10.0))
 
+# S32 P2 Driver B — Test 1 pixel-level filter (Coppola 2016a Tabla 1 aplicado
+# a la mask Test 1 antes de sumar VRP). Cuando Test 1 integrated-ROI dispara,
+# nuestra mask test1_hot incluye TODOS los pixels que contribuyeron al
+# integrated trigger sin filtro N·σ pixel-level adicional. Resultado:
+# clusters de 14-49 pixels suman VRP factor 8-30× MIROVA. Hipótesis (validada
+# vía análisis agregación): MIROVA reporta sum solo de los pixels que
+# además superan threshold dual-ROI 5σ summit / 10σ scene.
+# Default OFF (backward compat). Activar en profile experimental para A/B.
+ENABLE_TEST1_PIXEL_FILTER: bool = bool(_p.get("enable_test1_pixel_filter", False))
+
 # S27 MIROVA literal: flag para deshabilitar exclude_zones (parche nuestro).
 # MIROVA NO usa máscaras geográficas (verificado vs Coppola 2016a, Coppola 2020,
 # Laiolo 2026). Default true (operacional mantiene comportamiento actual);

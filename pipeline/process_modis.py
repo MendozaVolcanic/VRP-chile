@@ -87,6 +87,7 @@ from pipeline.profile import (
     ENABLE_DNTI_CONTEXTUAL_PATH,
     ENABLE_DNTI_DUAL_ROI,
     ENABLE_DUAL_ROI_BT,
+    ENABLE_TEST1_PIXEL_FILTER,
     N_SIGMA_MIR_SUMMIT,
     N_SIGMA_MIR_SCENE,
     ENABLE_EXCLUDE_ZONES,
@@ -610,10 +611,29 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     # S26 D de process_viirs.py. Sin esto vrp_mw queda como suma del cluster
     # eruption far (Salar) o 0. Recomputamos VRP usando SOLO pixels Test 1
     # con L_bg LOCAL del ring 1-3km del cráter (no global del ROI 25km).
+    # S32 P2 Driver B — Test 1 pixel-level filter (Coppola 2016a Tabla 1).
+    # Ver explicación en process_viirs.py. Default OFF.
+    test1_hot_filtered = test1_hot
+    if (ENABLE_TEST1_PIXEL_FILTER and final_hotspot_source == "test1"
+            and inner_radius_km is not None
+            and not np.isnan(t_bg) and not np.isnan(std_bg)):
+        pixel_thr_mask = dual_roi_bt_threshold(
+            bt=bt_mir,
+            roi_mask=np.ones_like(bt_mir, dtype=bool),
+            dist_km=vent_dist_per_pixel,
+            t_bg=t_bg, std_bg=std_bg,
+            inner_km=inner_radius_km,
+            n_sigma_summit=N_SIGMA_MIR_SUMMIT,
+            n_sigma_scene=N_SIGMA_MIR_SCENE,
+            anomaly_floor_k=ANOMALY_THRESHOLD_K,
+            max_sigma_cap_k=MAX_SIGMA_COMPONENT_K,
+        )
+        test1_hot_filtered = test1_hot & pixel_thr_mask
+
     if (final_hotspot_source == "test1" and test1_n_contrib > 0
             and test1_L_bg_local is not None
             and not np.isnan(test1_L_bg_local)):
-        t1_rows, t1_cols = np.where(test1_hot)
+        t1_rows, t1_cols = np.where(test1_hot_filtered)
         if len(t1_rows) > 0:
             t1_bt = bt_mir[t1_rows, t1_cols]
             t1_rad = C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t1_bt)) - 1))
@@ -628,7 +648,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             and test1_L_bg_local is not None
             and not np.isnan(test1_L_bg_local)):
         t1_vrp_2d = np.zeros_like(bt_mir, dtype=np.float64)
-        t1_rows, t1_cols = np.where(test1_hot)
+        t1_rows, t1_cols = np.where(test1_hot_filtered)
         if len(t1_rows) > 0:
             t1_bt = bt_mir[t1_rows, t1_cols]
             t1_rad = C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t1_bt)) - 1))
@@ -637,7 +657,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             t1_vrp_arr = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             t1_vrp_2d[t1_rows, t1_cols] = t1_vrp_arr
             t1_clusters = cluster_hotspots(
-                test1_hot, lat, lon, vent_lat, vent_lon,
+                test1_hot_filtered, lat, lon, vent_lat, vent_lon,
                 connectivity=8, vrp_per_pixel=t1_vrp_2d,
             )
             if t1_clusters:

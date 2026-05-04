@@ -87,6 +87,7 @@ from pipeline.profile import (
     ENABLE_DUAL_ROI_BT,
     N_SIGMA_MIR_SUMMIT,
     N_SIGMA_MIR_SCENE,
+    ENABLE_TEST1_PIXEL_FILTER,
     ENABLE_TEST1_PATH,
     TEST1_K_SIGMA,
     TEST1_MIR_RELATIVE,
@@ -767,10 +768,32 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     #       contribuciones far (562 MW vs MIROVA 0.05 MW).
     # MIROVA reporta solo cráter usando bg local — replicamos exactamente.
     vrp_mir_mw_test1_only = None  # diag
+    # S32 P2 Driver B — Test 1 pixel-level filter (Coppola 2016a Tabla 1).
+    # Cuando Test 1 dispara, MIROVA reporta sum solo de pixels que también
+    # superan threshold dual-ROI 5σ summit / 10σ scene. Sin este filtro
+    # nuestra mask test1_hot suma 14-49 pixels marginales → factor 8-30× MIROVA.
+    # Default OFF (backward compat). Activar via enable_test1_pixel_filter.
+    test1_hot_filtered = test1_hot
+    if (ENABLE_TEST1_PIXEL_FILTER and final_hotspot_source == "test1"
+            and inner_radius_km is not None
+            and not np.isnan(t_bg_i04) and not np.isnan(std_bg_i04)):
+        pixel_thr_mask = dual_roi_bt_threshold(
+            bt=bt,
+            roi_mask=np.ones_like(bt, dtype=bool),
+            dist_km=vent_dist_per_pixel,
+            t_bg=t_bg_i04, std_bg=std_bg_i04,
+            inner_km=inner_radius_km,
+            n_sigma_summit=N_SIGMA_MIR_SUMMIT,
+            n_sigma_scene=N_SIGMA_MIR_SCENE,
+            anomaly_floor_k=ANOMALY_THRESHOLD_K,
+            max_sigma_cap_k=MAX_SIGMA_COMPONENT_K,
+        )
+        test1_hot_filtered = test1_hot & pixel_thr_mask
+
     if (final_hotspot_source == "test1" and "I04" in bands
             and test1_n_contrib > 0 and test1_L_bg_local is not None
             and not np.isnan(test1_L_bg_local)):
-        t1_rows, t1_cols = np.where(test1_hot)
+        t1_rows, t1_cols = np.where(test1_hot_filtered)
         if len(t1_rows) > 0:
             t1_bt = bt[t1_rows, t1_cols]
             t1_L = bt_to_spectral_radiance(t1_bt, I04_LAMBDA)
@@ -793,8 +816,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             and not np.isnan(test1_L_bg_local)):
         # Construir array 2D de VRP por pixel (solo los pixels Test 1 tienen
         # valor; resto en 0 para que no entren al sum del cluster).
+        # S32 P2 Driver B: usar test1_hot_filtered (con N·σ pixel-level si flag ON)
         t1_vrp_2d = np.zeros_like(bt, dtype=np.float64)
-        t1_rows, t1_cols = np.where(test1_hot)
+        t1_rows, t1_cols = np.where(test1_hot_filtered)
         if len(t1_rows) > 0:
             t1_bt = bt[t1_rows, t1_cols]
             t1_L = bt_to_spectral_radiance(t1_bt, I04_LAMBDA)
@@ -803,7 +827,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             t1_vrp_arr = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             t1_vrp_2d[t1_rows, t1_cols] = t1_vrp_arr
             t1_clusters = cluster_hotspots(
-                test1_hot, lat, lon, vent_lat, vent_lon,
+                test1_hot_filtered, lat, lon, vent_lat, vent_lon,
                 connectivity=8, vrp_per_pixel=t1_vrp_2d,
             )
             if t1_clusters:
