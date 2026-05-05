@@ -89,6 +89,7 @@ from pipeline.profile import (
     N_SIGMA_MIR_SCENE,
     ENABLE_TEST1_PIXEL_FILTER,
     ENABLE_FINAL_PIXEL_FILTER,
+    ENABLE_TEST1_LBG_GLOBAL,
     ENABLE_TEST1_PATH,
     TEST1_K_SIGMA,
     TEST1_MIR_RELATIVE,
@@ -811,16 +812,24 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         )
         test1_hot_filtered = test1_hot & pixel_thr_mask
 
+    # S33 D4 fix — effective L_bg para Test 1 VRP recompute. En volcanes con
+    # geotermal crónico ring 1-3km cráter (Tupungatito, Lastarria, Llaima),
+    # test1_L_bg_local está contaminado → ΔL clip 0 → vrp=0 falsos negativos.
+    # Cuando flag ON, usar L_bg(t_bg_i04) global del anillo background 5-25km.
+    if ENABLE_TEST1_LBG_GLOBAL and not np.isnan(t_bg_i04):
+        effective_L_bg = float(bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA))
+    else:
+        effective_L_bg = test1_L_bg_local
+
     if (final_hotspot_source == "test1" and "I04" in bands
-            and test1_n_contrib > 0 and test1_L_bg_local is not None
-            and not np.isnan(test1_L_bg_local)):
+            and test1_n_contrib > 0 and effective_L_bg is not None
+            and not np.isnan(effective_L_bg)):
         t1_rows, t1_cols = np.where(test1_hot_filtered)
         if len(t1_rows) > 0:
             t1_bt = bt[t1_rows, t1_cols]
             t1_L = bt_to_spectral_radiance(t1_bt, I04_LAMBDA)
-            # L_bg LOCAL del Test 1 (median radiancia en ring 1-3km del cráter),
-            # no el global 5-25km. Replica MIROVA: bg cráter, no bg región.
-            t1_delta_L = np.maximum(t1_L - test1_L_bg_local, 0.0)
+            # S33 D4: usar effective_L_bg (local default, global con flag ON).
+            t1_delta_L = np.maximum(t1_L - effective_L_bg, 0.0)
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             vrp_mir_mw_test1_only = float(np.sum(t1_vrp))
@@ -833,17 +842,18 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # Coppola 2016a SP 426.5 §2.2: "neighbor pixels" = pixels que comparten
     # borde, no "pixels a <Xkm". cluster_hotspots con vrp_per_pixel hace eso.
     if (final_hotspot_source == "test1" and test1_n_contrib > 0
-            and test1_L_bg_local is not None
-            and not np.isnan(test1_L_bg_local)):
+            and effective_L_bg is not None
+            and not np.isnan(effective_L_bg)):
         # Construir array 2D de VRP por pixel (solo los pixels Test 1 tienen
         # valor; resto en 0 para que no entren al sum del cluster).
         # S32 P2 Driver B: usar test1_hot_filtered (con N·σ pixel-level si flag ON)
+        # S33 D4: usar effective_L_bg (global con flag ON).
         t1_vrp_2d = np.zeros_like(bt, dtype=np.float64)
         t1_rows, t1_cols = np.where(test1_hot_filtered)
         if len(t1_rows) > 0:
             t1_bt = bt[t1_rows, t1_cols]
             t1_L = bt_to_spectral_radiance(t1_bt, I04_LAMBDA)
-            t1_delta_L = np.maximum(t1_L - test1_L_bg_local, 0.0)
+            t1_delta_L = np.maximum(t1_L - effective_L_bg, 0.0)
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp_arr = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             t1_vrp_2d[t1_rows, t1_cols] = t1_vrp_arr

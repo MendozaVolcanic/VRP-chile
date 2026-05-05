@@ -160,6 +160,17 @@ ENABLE_TEST1_PIXEL_FILTER: bool = bool(_p.get("enable_test1_pixel_filter", False
 # Default OFF (backward-compat). Activar en profile A/B para validación.
 ENABLE_FINAL_PIXEL_FILTER: bool = bool(_p.get("enable_final_pixel_filter", False))
 
+# S33 D4 fix — Tupungatito 51% FNs sub-pixel: cuando Test 1 dispara, usar
+# L_bg del anillo background global (5-25km) en lugar de test1_L_bg_local
+# (ring 1-3km del cráter). En volcanes con geotermal crónico (Tupungatito,
+# Lastarria fumarolas, Llaima cráter, Copahue lago ácido), el ring 1-3km
+# está contaminado por el calor crónico — ΔL pixel-individual clip a 0 →
+# suma=0 aunque Test 1 integrated SÍ haya detectado señal.
+# Fallback a L_bg global anillo 5-25km (lejos del cráter) recupera la
+# señal que el integrated trigger ya detectó.
+# Default OFF (backward-compat). Activar via profile A/B.
+ENABLE_TEST1_LBG_GLOBAL: bool = bool(_p.get("enable_test1_lbg_global", False))
+
 # S27 MIROVA literal: flag para deshabilitar exclude_zones (parche nuestro).
 # MIROVA NO usa máscaras geográficas (verificado vs Coppola 2016a, Coppola 2020,
 # Laiolo 2026). Default true (operacional mantiene comportamiento actual);
