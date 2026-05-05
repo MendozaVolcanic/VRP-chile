@@ -9,6 +9,11 @@ name: A/B reproceso Test 1 pixel filter (S32 P2 Driver B)
 #   mirova_equivalent_test1pix_disabled → enable_test1_pixel_filter=false (control)
 # Ambos a data/<profile_subdir>/, NO contaminan data/mirova_equivalent/.
 #
+# Estrategia S32 (post-fix race):
+# - Cada job reproc procesa + sube JSON como artifact (NO commit).
+# - Job final consolidate descarga todos los artifacts y commitea de una sola vez.
+# - Evita race condition de 16+ pushes concurrentes contra main.
+#
 # Criterio de aceptación (plan S32 P2 Driver B):
 # - Recall global se mantiene ≥83.5% (flag NO afecta trigger Test 1).
 # - Ratio mediano nuestro/MIROVA ≤1.5× (vs 2.29× post-Driver A).
@@ -29,9 +34,9 @@ on:
 jobs:
   reproc:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 350
     permissions:
-      contents: write
+      contents: read
     strategy:
       fail-fast: false
       max-parallel: 8
@@ -72,7 +77,7 @@ jobs:
         env:
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
-        timeout-minutes: 50
+        timeout-minutes: 320
         run: |
           python scripts/run_pipeline.py \
             --profile ${{ matrix.profile }} \
@@ -81,18 +86,71 @@ jobs:
             --end ${{ github.event.inputs.end }} \
             --overwrite
 
-      - name: Commit reprocessed A/B data
+      - name: Upload reprocessed JSON as artifact
+        if: always()  # Subir aún si reprocess parcial; consolidate decide
+        uses: actions/upload-artifact@v4
+        with:
+          name: ab-${{ matrix.profile }}-${{ matrix.volcano }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          retention-days: 7
+          if-no-files-found: warn
+
+  consolidate:
+    needs: reproc
+    if: always()  # Ejecuta aún si algunos reproc fallaron
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download all reproc artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ab-artifacts/
+          # No filtrar — descargar todos los ab-* que existan
+
+      - name: Move artifacts into place
         run: |
-          set +e
+          set -e
+          shopt -s nullglob
+          # Cada artifact dir es ab-<profile>-<volcano>/<volcano>.json
+          for dir in ab-artifacts/ab-*/; do
+            base=$(basename "$dir")
+            # base = ab-<profile>-<volcano>; profile contiene un guion en el nombre
+            # (mirova_equivalent_test1pix_filter o _disabled), pero todo es underscore.
+            # Strip "ab-" prefix.
+            rest="${base#ab-}"
+            # rest = mirova_equivalent_test1pix_filter-Lascar
+            profile="${rest%-*}"
+            volcano="${rest##*-}"
+            target_dir="data/$profile"
+            mkdir -p "$target_dir"
+            # El artifact contiene el JSON; copiarlo
+            for f in "$dir"*.json; do
+              cp "$f" "$target_dir/"
+              echo "Moved: $f -> $target_dir/$(basename "$f")"
+            done
+          done
+          ls -la data/mirova_equivalent_test1pix_filter/ 2>/dev/null || echo "filter dir empty"
+          ls -la data/mirova_equivalent_test1pix_disabled/ 2>/dev/null || echo "disabled dir empty"
+
+      - name: Commit consolidated A/B data
+        run: |
+          set -e
           git config user.name  "vrp-bot"
           git config user.email "vrp-bot@github-actions"
-          git add "data/${{ matrix.profile }}/${{ matrix.volcano }}.json" 2>/dev/null
+          git add data/mirova_equivalent_test1pix_filter/ data/mirova_equivalent_test1pix_disabled/ 2>/dev/null || true
           git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
-          git commit -m "S32 P2 Driver B A/B — ${{ matrix.profile }} / ${{ matrix.volcano }} 90d"
+          git commit -m "S32 P2 Driver B A/B — consolidated reproc 11 Tier A x 2 profiles 90d (${{ github.event.inputs.start }} → ${{ github.event.inputs.end }})"
           for attempt in 1 2 3 4 5; do
             git pull --rebase -X theirs origin main && git push && exit 0
-            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
-            git rebase --abort 2>/dev/null
-            sleep $((attempt * 10))
+            echo "push attempt $attempt failed, sleeping $((attempt * 30))s"
+            git rebase --abort 2>/dev/null || true
+            sleep $((attempt * 30))
           done
           echo "all push attempts failed"; exit 1

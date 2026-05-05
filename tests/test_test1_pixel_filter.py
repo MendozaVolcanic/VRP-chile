@@ -13,12 +13,18 @@ import numpy as np
 import pytest
 
 
-def test_profile_default_off_in_mirova_equivalent(monkeypatch):
-    """En profile operacional, flag debe estar OFF (backward compat)."""
+def test_profile_state_post_s32_ab(monkeypatch):
+    """S32 fin: flag ON en mirova_equivalent tras A/B validado.
+
+    Pre-adopción (S32 inicio): default OFF backward-compat mientras se
+    validaba A/B. Post-A/B run 25339969705: ratio mediano 2.52→1.66×
+    con recall paridad. Adoptado como operacional al cierre S32.
+    Ver experiments/65_audit_ab_test1pix_filter.out.md.
+    """
     monkeypatch.setenv("VRP_PROFILE", "mirova_equivalent")
     import pipeline.profile as profile
     importlib.reload(profile)
-    assert profile.ENABLE_TEST1_PIXEL_FILTER is False
+    assert profile.ENABLE_TEST1_PIXEL_FILTER is True
 
 
 def test_profile_on_in_test1pix_filter_profile(monkeypatch):

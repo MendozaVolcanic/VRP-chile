@@ -26,12 +26,17 @@ def _restore_default_profile():
     importlib.reload(pipeline.profile)
 
 
-def test_profile_default_enables_exclude_zones(monkeypatch):
-    """mirova_equivalent operacional mantiene exclude_zones ON (default)."""
+def test_profile_default_state_post_s27(monkeypatch):
+    """S27: exclude_zones desactivado en mirova_equivalent operacional.
+
+    Pre-S27 (este test originalmente): default ON mantenía parche S16 P3.6.
+    S27: clon literal MIROVA — Coppola/Laiolo NO usan máscaras geográficas.
+    Ver pipeline/profiles/mirova_equivalent.yaml enable_exclude_zones: false.
+    """
     monkeypatch.setenv("VRP_PROFILE", "mirova_equivalent")
     import pipeline.profile as profile
     importlib.reload(profile)
-    assert profile.ENABLE_EXCLUDE_ZONES is True
+    assert profile.ENABLE_EXCLUDE_ZONES is False
 
 
 def test_profile_literal_disables_exclude_zones(monkeypatch):
