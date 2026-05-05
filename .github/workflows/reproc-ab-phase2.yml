@@ -1,0 +1,144 @@
+name: A/B reproceso Phase 2 final-pixel-filter (S33 Driver B)
+
+# Workflow dispatch-only para validar Driver B Phase 2 (filtro dual-ROI a
+# mask final combinada). Phase 1 (test1 only) ya operacional.
+#
+# Profiles:
+#   mirova_equivalent_phase2 → Phase 1 + Phase 2 (final mask filter)
+#   mirova_equivalent_test1pix_disabled → control (Phase 1 + Phase 2 OFF, baseline)
+#
+# NOTA: el control "test1pix_disabled" tiene Phase 1 OFF también, lo que
+# significa que el A/B compara (Phase 1 + Phase 2) vs (sin filtros). Eso
+# permite ver el efecto combinado. Para aislar Phase 2 puro, comparar
+# con data operacional ya reprocesada (mirova_equivalent post-Phase 1 sync).
+#
+# Estrategia anti-race S32: artifacts + consolidate (un push final).
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-01-29"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-04-29"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano:
+          - Lascar
+          - Lastarria
+          - Tupungatito
+          - Villarrica
+          - PuyehueCordonCaulle
+          - Copahue
+          - NevadosDeChillan
+          - Llaima
+          - Chaiten
+          - PlanchonPeteroa
+          - Isluga
+        profile:
+          - mirova_equivalent_phase2
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — ${{ matrix.profile }} / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 320
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Upload reprocessed JSON as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase2-${{ matrix.profile }}-${{ matrix.volcano }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          retention-days: 7
+          if-no-files-found: warn
+
+  consolidate:
+    needs: reproc
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
+
+      - name: Download all reproc artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: phase2-artifacts/
+
+      - name: Move artifacts into place
+        run: |
+          set -e
+          shopt -s nullglob
+          for dir in phase2-artifacts/phase2-*/; do
+            base=$(basename "$dir")
+            rest="${base#phase2-}"
+            profile="${rest%-*}"
+            volcano="${rest##*-}"
+            target_dir="data/$profile"
+            mkdir -p "$target_dir"
+            for f in "$dir"*.json; do
+              cp "$f" "$target_dir/"
+              echo "Moved: $f -> $target_dir/$(basename "$f")"
+            done
+          done
+          ls -la data/mirova_equivalent_phase2/ 2>/dev/null || echo "phase2 dir empty"
+
+      - name: Commit consolidated Phase 2 A/B data
+        run: |
+          set -e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add data/mirova_equivalent_phase2/ 2>/dev/null || true
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S33 Phase 2 A/B — reproc 11 Tier A 90d (${{ github.event.inputs.start }} → ${{ github.event.inputs.end }})"
+          BRANCH="${{ github.ref_name }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin "$BRANCH" && git push origin "$BRANCH" && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 30))s"
+            git rebase --abort 2>/dev/null || true
+            sleep $((attempt * 30))
+          done
+          echo "all push attempts failed"; exit 1

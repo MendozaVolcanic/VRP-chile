@@ -151,6 +151,15 @@ N_SIGMA_MIR_SCENE: float = float(_t.get("n_sigma_mir_scene", 10.0))
 # Default OFF (backward compat). Activar en profile experimental para A/B.
 ENABLE_TEST1_PIXEL_FILTER: bool = bool(_p.get("enable_test1_pixel_filter", False))
 
+# S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene aplicado a
+# la mask final combinada (post-OR de todos los paths) antes de calcular
+# n_anomalous_pixels, cluster_hotspots y vrp_mw.
+# Phase 1 (test1_pixel_filter) cubre solo path Test 1; Phase 2 cubre TODOS
+# los paths incluyendo Path D dNTI contextual (Coppola 2016a SP 426.5)
+# que aporta los pixels marginales en Chaiten 14.5x y PCC 11.9x post-Phase 1.
+# Default OFF (backward-compat). Activar en profile A/B para validación.
+ENABLE_FINAL_PIXEL_FILTER: bool = bool(_p.get("enable_final_pixel_filter", False))
+
 # S27 MIROVA literal: flag para deshabilitar exclude_zones (parche nuestro).
 # MIROVA NO usa máscaras geográficas (verificado vs Coppola 2016a, Coppola 2020,
 # Laiolo 2026). Default true (operacional mantiene comportamiento actual);
