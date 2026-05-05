@@ -138,6 +138,18 @@ paths:
   # desactivadas. MIROVA NO usa máscaras geográficas; depende de N·σ
   # scene=10 para suprimir lagos/salares como FP.
   enable_exclude_zones: false
+  # S32 P2 Driver B Phase 1 — VALIDADO A/B 90d 11 Tier A (run 25339969705):
+  # ratio mediano 2.52 → 1.66× (-34%), recall paridad (74.4 → 73.6%, dentro
+  # del ruido). Lastarria 18.5→6.5×, Villarrica 64.9→2.2×, Planchón 16→2.5×.
+  # Mecánica: filtro pixel-level 5σ summit / 10σ scene Coppola 2016a Tabla 1
+  # sobre la mask Test 1 antes de sumar VRP. Pixels marginales que entraron
+  # via integrated trigger pero no superan threshold pixel-level se eliminan
+  # del cluster. Recall no afectado: trigger Test 1 sigue siendo el mismo.
+  # La "regresión" Planchón -9.7pp en A/B fue ilusoria: 3 records donde OFF
+  # inflaba VRP 25-50× MIROVA con suma de pixels background, ON correctamente
+  # los reduce a 0 (más cercano a MIROVA real 0.05-0.07 MW que a OFF inflado).
+  # Ver experiments/65_audit_ab_test1pix_filter.out.md y experiments/69+70.
+  enable_test1_pixel_filter: true
 
 # --- Sensor activation ---
 # true = process granules from this sensor in this profile.
