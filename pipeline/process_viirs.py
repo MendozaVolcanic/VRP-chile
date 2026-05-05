@@ -88,6 +88,7 @@ from pipeline.profile import (
     N_SIGMA_MIR_SUMMIT,
     N_SIGMA_MIR_SCENE,
     ENABLE_TEST1_PIXEL_FILTER,
+    ENABLE_FINAL_PIXEL_FILTER,
     ENABLE_TEST1_PATH,
     TEST1_K_SIGMA,
     TEST1_MIR_RELATIVE,
@@ -518,6 +519,26 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     test1_L_bg_local = test1_res.get("L_bg")
 
             hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot | dnti_ctx_hot | test1_hot
+
+            # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene a
+            # la mask final combinada (Coppola 2016a Tabla 1). Pixels que
+            # entraron via dNTI/NTI/Test1 pero no superan BT > t_bg + 5σ summit
+            # (o 10σ scene) son removidos del cluster reportado. Garantiza que
+            # cualquier pixel sumado al VRP supere el gate de magnitud absoluta.
+            if (ENABLE_FINAL_PIXEL_FILTER and inner_radius_km is not None
+                    and not np.isnan(t_bg_i04) and not np.isnan(std_bg_i04)):
+                final_thr_mask = dual_roi_bt_threshold(
+                    bt=bt,
+                    roi_mask=np.ones_like(bt, dtype=bool),
+                    dist_km=vent_dist_per_pixel,
+                    t_bg=t_bg_i04, std_bg=std_bg_i04,
+                    inner_km=inner_radius_km,
+                    n_sigma_summit=N_SIGMA_MIR_SUMMIT,
+                    n_sigma_scene=N_SIGMA_MIR_SCENE,
+                    anomaly_floor_k=ANOMALY_THRESHOLD_K,
+                    max_sigma_cap_k=MAX_SIGMA_COMPONENT_K,
+                )
+                hot_mask_2d = hot_mask_2d & final_thr_mask
 
             # S16 P3.6: filtrar pixels en exclude_zones (cuerpos de agua/salares
             # irradiando calor nocturno que bbox 50x50 km incluye -> FPs masivos).

@@ -1,0 +1,78 @@
+# VRP-Chile — profile: mirova_equivalent_phase2 (S33 Driver B Phase 2 A/B)
+#
+# Idéntico a mirova_equivalent (Phase 1 ya operacional) EXCEPTO:
+# - enable_final_pixel_filter: true → aplica filtro dual-ROI 5σ summit /
+#   10σ scene a la mask final combinada (post-OR de todos los paths)
+#   antes de calcular n_anomalous_pixels, cluster_hotspots y vrp_mw.
+#
+# Hipótesis: Phase 1 cubre solo path Test 1; los pixels marginales de
+# Path D dNTI contextual siguen entrando al cluster sin gate N·σ pixel-level.
+# Análisis post-Phase 1 (experiments/70): Chaiten 80% + PCC 100% de TPs
+# top-10-ratio tienen triggered_test1=true PERO también n_dnti_ctx_path
+# alto (mediana 73 pixels en ratio>5×, hasta 667 en un record PCC).
+#
+# Phase 2 garantiza que cualquier pixel del cluster reportado supere
+# el threshold de magnitud 5σ summit / 10σ scene Coppola 2016a Tabla 1,
+# independientemente del path por el que entró al hot_mask.
+#
+# data_subdir: mirova_equivalent_phase2 (aislado del operacional Phase 1).
+
+profile: mirova_equivalent_phase2
+description: >
+  A/B test S33 Driver B Phase 2: filtro dual-ROI a mask final combinada.
+  Cubre Path D dNTI no filtrado en Phase 1.
+
+thresholds:
+  anomaly_threshold_k: 5.0
+  tir_threshold_k: 0.5
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  cloud_mask_bt_k: 0.0
+  max_sigma_component_k: 999.0
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
+  min_vent_pixels: 1
+  max_vent_sigma_contrib_k: 999.0
+  nti_rel_n_sigma: 3.0
+  nti_rel_min_floor: 0.005
+  dnti_contextual_c1: 0.003
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
+  modis_vent_threshold_k: 1.0
+  modis_vent_vrp_floor_mw: 0.0
+  n_sigma_mir_summit: 5.0
+  n_sigma_mir_scene: 10.0
+
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+paths:
+  enable_eruption_path: true
+  enable_vent_path: false
+  enable_vent_path_modis: false
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
+  enable_nti_relative_path: false
+  enable_dnti_contextual_path: true
+  enable_dnti_dual_roi: true
+  enable_test1_path: true
+  enable_dual_roi_bt: true
+  enable_exclude_zones: false
+  # S32 P2 Driver B Phase 1 — operacional (cubierto en mirova_equivalent.yaml)
+  enable_test1_pixel_filter: true
+  # S33 Driver B Phase 2 — el cambio clave del A/B vs operacional
+  enable_final_pixel_filter: true
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: mirova_equivalent_phase2
