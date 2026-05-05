@@ -1,0 +1,141 @@
+name: Reproc Tier A operacional — Phase 1 sync (S32 P2 Driver B)
+
+# Workflow dispatch-only para reprocesar los 11 volcanes Tier A con
+# profile `mirova_equivalent` (operacional, ya con enable_test1_pixel_filter:true)
+# sobre 90 días de historia.
+#
+# Objetivo: que el dashboard publicado refleje Driver B Phase 1 después de
+# la adopción S32. Sin esto, los JSONs en data/mirova_equivalent/ siguen con
+# valores PRE-fix (cron NRT solo regenera el último día).
+#
+# Estrategia anti-race (S32 lección aprendida):
+# - 22→11 jobs reproc suben artifacts.
+# - Job consolidate descarga + commit único (no race con cron NRT ni entre jobs).
+# - consolidate pull la rama del workflow (no hardcoded main).
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-01-29"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-04-29"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano:
+          - Lascar
+          - Lastarria
+          - Tupungatito
+          - Villarrica
+          - PuyehueCordonCaulle
+          - Copahue
+          - NevadosDeChillan
+          - Llaima
+          - Chaiten
+          - PlanchonPeteroa
+          - Isluga
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — mirova_equivalent / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 320
+        run: |
+          python scripts/run_pipeline.py \
+            --profile mirova_equivalent \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Upload reprocessed JSON as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-${{ matrix.volcano }}
+          path: data/mirova_equivalent/${{ matrix.volcano }}.json
+          retention-days: 7
+          if-no-files-found: warn
+
+  consolidate:
+    needs: reproc
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
+
+      - name: Download all reproc artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: phase1-artifacts/
+
+      - name: Move artifacts into place
+        run: |
+          set -e
+          shopt -s nullglob
+          for dir in phase1-artifacts/phase1-*/; do
+            base=$(basename "$dir")
+            volcano="${base#phase1-}"
+            target_dir="data/mirova_equivalent"
+            mkdir -p "$target_dir"
+            for f in "$dir"*.json; do
+              cp "$f" "$target_dir/"
+              echo "Moved: $f -> $target_dir/$(basename "$f")"
+            done
+          done
+          ls -la data/mirova_equivalent/ | head -20
+
+      - name: Commit consolidated Phase 1 data
+        run: |
+          set -e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add data/mirova_equivalent/ 2>/dev/null || true
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S32 Phase 1 sync — reproc 11 Tier A 90d con enable_test1_pixel_filter:true (${{ github.event.inputs.start }} → ${{ github.event.inputs.end }})"
+          # S32 fix consolidate: pull/push a la MISMA rama del workflow,
+          # no hardcoded main (eso falla cuando workflow corre en s15-dev).
+          BRANCH="${{ github.ref_name }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin "$BRANCH" && git push origin "$BRANCH" && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 30))s"
+            git rebase --abort 2>/dev/null || true
+            sleep $((attempt * 30))
+          done
+          echo "all push attempts failed"; exit 1
