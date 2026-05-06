@@ -13,18 +13,21 @@ import numpy as np
 import pytest
 
 
-def test_profile_state_post_s32_ab(monkeypatch):
-    """S32 fin: flag ON en mirova_equivalent tras A/B validado.
+def test_profile_state_post_s33_refutation(monkeypatch):
+    """S33: flag REVERTIDO a OFF tras refutación con métrica corregida.
 
-    Pre-adopción (S32 inicio): default OFF backward-compat mientras se
-    validaba A/B. Post-A/B run 25339969705: ratio mediano 2.52→1.66×
-    con recall paridad. Adoptado como operacional al cierre S32.
-    Ver experiments/65_audit_ab_test1pix_filter.out.md.
+    S32 adoptó flag=true creyendo validar 73.6%/1.66×, pero la métrica
+    `mirovaEqVrp` tenía bug (no validaba pc.centroid_dist_km contra
+    inner_radius). Re-audit S33 con métrica corregida:
+      Driver A solo:      recall 74.2%, ratio 2.53×
+      Driver A + Phase 1: recall 55.6%, ratio 1.39× (-18.6pp recall)
+    Phase 1 destruye señal real validada por MIROVA. Revertido.
+    Ver docs/PROCESS_RULES_S33.md.
     """
     monkeypatch.setenv("VRP_PROFILE", "mirova_equivalent")
     import pipeline.profile as profile
     importlib.reload(profile)
-    assert profile.ENABLE_TEST1_PIXEL_FILTER is True
+    assert profile.ENABLE_TEST1_PIXEL_FILTER is False
 
 
 def test_profile_on_in_test1pix_filter_profile(monkeypatch):

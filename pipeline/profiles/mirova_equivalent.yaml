@@ -138,18 +138,22 @@ paths:
   # desactivadas. MIROVA NO usa máscaras geográficas; depende de N·σ
   # scene=10 para suprimir lagos/salares como FP.
   enable_exclude_zones: false
-  # S32 P2 Driver B Phase 1 — VALIDADO A/B 90d 11 Tier A (run 25339969705):
-  # ratio mediano 2.52 → 1.66× (-34%), recall paridad (74.4 → 73.6%, dentro
-  # del ruido). Lastarria 18.5→6.5×, Villarrica 64.9→2.2×, Planchón 16→2.5×.
-  # Mecánica: filtro pixel-level 5σ summit / 10σ scene Coppola 2016a Tabla 1
-  # sobre la mask Test 1 antes de sumar VRP. Pixels marginales que entraron
-  # via integrated trigger pero no superan threshold pixel-level se eliminan
-  # del cluster. Recall no afectado: trigger Test 1 sigue siendo el mismo.
-  # La "regresión" Planchón -9.7pp en A/B fue ilusoria: 3 records donde OFF
-  # inflaba VRP 25-50× MIROVA con suma de pixels background, ON correctamente
-  # los reduce a 0 (más cercano a MIROVA real 0.05-0.07 MW que a OFF inflado).
-  # Ver experiments/65_audit_ab_test1pix_filter.out.md y experiments/69+70.
-  enable_test1_pixel_filter: true
+  # S32 P2 Driver B Phase 1 — REFUTADO S33 (commit b9a6857 retirado).
+  # El audit S32 que "validó" Phase 1 (recall paridad 73.6% / ratio 1.66×)
+  # estaba contaminado por bug `mirovaEqVrp` que NO validaba pc.centroid_dist_km
+  # contra inner_radius. Clusters Salar Atacama/lago a 22-30km del cráter
+  # con final_hotspot_source=test1 (que pone dist_class=summit) se contaban
+  # como TPs falsos.
+  # Re-audit S33 con métrica corregida (pipeline/audit_metrics.py +
+  # experiments/76_audit_independent.py, ambos coincidentes):
+  #   Driver A solo:        recall 74.2%, ratio 2.53×
+  #   Driver A + Phase 1:   recall 55.6%, ratio 1.39× (-18.6pp recall)
+  # Phase 1 destruye señal real validada por MIROVA en Lastarria/Villarrica/
+  # Planchón (eventos "Muy Bajo" sub-pixel del cráter — fumarolas con BT
+  # poco arriba bg). El filtro 5σ pixel-level elimina los pixels marginales
+  # del cluster Test 1 contiguo y rompe la detección summit.
+  # Ver docs/PROCESS_RULES_S33.md y experiments/74-76 audit completo.
+  enable_test1_pixel_filter: false
 
 # --- Sensor activation ---
 # true = process granules from this sensor in this profile.

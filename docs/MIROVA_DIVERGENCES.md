@@ -164,7 +164,58 @@ Conteo de markers en hotspot-map por Tier A (toggle "Solo principal" + "Solo cr�
 | D2 | CSV ground truth ~70% VIIRS | Conocido | Re-scrape Mirova-v1 (S28+) |
 | D3 | FP explícito MIROVA vs nuestro `far` | Conocido | Posible categoría `mirova_fp_match` en records (S28+) |
 | D4 | Recall sub-pixel summit (Lastarria 8%, Planchón 4%) | ✅ **Cerrado S27** — H_S27_1 confirmada categóricamente | — |
-| D5 | Magnitud (ratio VRP) | ✅ Resuelto S27 | — |
+| D5 | Magnitud (ratio VRP) | ⚠️ **Re-abierto S33** — el "1.35× S27" estaba contaminado por bug `mirovaEqVrp` (no validaba pc_dist contra inner_radius). Ratio real Driver A solo: 2.53× | Aceptable dentro de tolerancia ±2× MIROVA |
+
+## S33 — Refutación Driver B Phase 1 + D4 (sub-pixel L_bg global)
+
+### Bug `mirovaEqVrp` (S33)
+
+`frontend/index.html:mirovaEqVrp` y `experiments/65_audit:vrp_summit_only`
+chequeaban `distance_class==='summit'` pero NO validaban
+`primary_cluster.centroid_dist_km <= inner_radius_km`. Caso patológico:
+Lascar 2026-02-14 con cluster Salar Atacama a 24km daba pc.vrp_mw=19389 MW
+reportado como VRP del cráter. Audit S32 que "validó" Driver B Phase 1
+estaba contaminado.
+
+### Re-audit con métrica corregida (`pipeline/audit_metrics.py` + `experiments/76_audit_independent.py`)
+
+A/B 11 Tier A 90d (run 25339969705 + 25401379853 + 25414145698):
+
+| Profile | Recall global | Ratio mediano |
+|---|---:|---:|
+| Driver A solo (operacional S33+) | **74.2%** | **2.53×** |
+| Driver A + Phase 1 (test1 pixel filter 5σ) | 55.6% | 1.39× |
+| Driver A + Phase 2 (final mask filter 5σ) | 10.5% | 1.23× |
+| Driver A + D4 (L_bg global) | 55.7% | 1.39× |
+
+### Veredicto
+
+- **Phase 1 REFUTADO** (S33): destruye recall −18.6pp porque elimina
+  pixels Test 1 marginales que SÍ formaban el cluster contiguo del
+  cráter en Lastarria/Villarrica/Planchón. Sin esos pixels, el cluster
+  cae al siguiente mayor (lago/scene). Reverted operacional.
+
+- **Phase 2 REFUTADO** (run 25401379853): filtro 5σ a mask final
+  destroza recall −63pp en volcanes con std_bg heterogéneo (cráter
+  pixel real ΔT=15K no pasa threshold 5σ_summit=23K). Catastrófico.
+
+- **D4 REFUTADO** (run 25414145698): efecto despreciable post-fix S33.
+  +0.1pp recall, sin cambio de ratio. Diseñado para resolver problema
+  que el bug S33 ya había auto-creado.
+
+### Implicaciones para D4 (recall sub-pixel summit)
+
+D4 sigue siendo problema real: Lastarria 100% recall, pero Villarrica
+33%, Tupungatito 37%, Planchón 96.8%. Inclusive sin Phase 1, hay
+volcanes con sub-detección (Tupungatito, Villarrica). H_S27_1 cerró
+parte de D4 (Test 1 trigger se activa) pero recall summit-only cuando
+pc_dist > inner_radius sigue como FN.
+
+Plan S33+: investigar mecanismo MIROVA NRT que reporta señal sub-pixel
+en volcanes con bg heterogéneo (Villarrica glaciar, Tupungatito glaciar).
+Coppola 2015 Eq.1 textual: VRP = ΔL_ROI · A_ROI · k. Posible: reportar
+**VRP integrated** del trigger Test 1 en lugar de descomponer per-pixel
+y sumar (que es lo que hacemos hoy y pierde señal sub-pixel distribuida).
 
 ## H_S27_1 — Test 1 integrated-ROI activado en `_mirova_literal` (S27 cierre D4)
 

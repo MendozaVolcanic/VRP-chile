@@ -266,6 +266,7 @@
     </div>
     <span id="utc-clock"></span>
     <span id="updated-label"></span>
+    <a href="diario.html" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">📊 Vista Diaria</a>
     <a href="experimental/" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">🧪 Laboratorio</a>
     <button id="btn-about" style="background:transparent;color:#7a8fa6;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;cursor:pointer;">ℹ️ Acerca de</button>
   </div>
@@ -619,14 +620,21 @@ function toMirovaDaily(records) {
 // primary_cluster cae fuera del inner_radius (dist_class='far'), MIROVA tampoco
 // reportaría → magnitud=0. Reduce ratio mediano nuestro/MIROVA de 6.25× a 2.29×.
 // Fallback a vrp_mw global solo en records legacy pre-S27 sin primary_cluster.
-function mirovaEqVrp(r) {
+//
+// S33 bug fix — validar también pc.centroid_dist_km contra inner_radius del
+// volcán. Caso patológico: distance_class='summit' (final_hotspot Test1
+// cerca del vent) pero primary_cluster a 24km en Salar Atacama. Sin este
+// chequeo, devolvíamos pc.vrp_mw=19389 MW del Salar como si fuera del cráter.
+function mirovaEqVrp(r, innerKm = 10) {
   if (!r) return 0;
   // Records pre-S27 (sin primary_cluster) → mantener vrp_mw global como fallback.
   if (!r.primary_cluster) return r.vrp_mw ?? r.vrp_mir_mw ?? 0;
   // Records modernos: si dist_class no es summit, MIROVA no reportaría → 0.
   if (r.distance_class && r.distance_class !== "summit") return 0;
-  // Records modernos summit/legacy-summit: usar cluster contiguo del cráter.
-  return r.primary_cluster.vrp_mw ?? 0;
+  // Validar pc realmente esté dentro del inner_radius del volcán.
+  const pc = r.primary_cluster;
+  if (pc.centroid_dist_km != null && pc.centroid_dist_km > innerKm) return 0;
+  return pc.vrp_mw ?? 0;
 }
 
 // S18: clasifica una detección como "cráter" (summit). Criterios, en orden:
@@ -645,20 +653,16 @@ function isSummitDetection(r) {
   return (r.vrp_vent_mw ?? 0) > 0;
 }
 
-function latestVRP(records, includeFar = false) {
+function latestVRP(records, includeFar = false, innerKm = 10) {
   // Max VRP de las últimas 48h. Por defecto solo detecciones del cráter.
-  // S29 fix: usar vrp_mw como fuente primaria (no fallback a vrp_mir_mw que
-  // mete records descartados). Test 1 alone path tiene vrp_mw=0 pero
-  // primary_cluster.vrp_mw — usar ese cuando aplica.
+  // S33: usa mirovaEqVrp con validación pc.centroid_dist_km contra innerKm.
   const cutoff = Date.now() - 48 * 3600000;
   let max = 0;
   for (const r of records) {
     if (new Date(r.datetime_utc).getTime() < cutoff) continue;
     if (!includeFar && !isSummitDetection(r)) continue;
     if ((r.vrp_mw ?? 0) === 0 && !r.triggered_test1) continue;
-    const v = (r.primary_cluster?.vrp_mw && r.primary_cluster.vrp_mw > 0)
-      ? r.primary_cluster.vrp_mw
-      : (r.vrp_mw ?? 0);
+    const v = mirovaEqVrp(r, innerKm);
     if (v > max) max = v;
   }
   return max;
@@ -730,7 +734,8 @@ function buildCards() {
 
   VOLCANOES.forEach(v => {
     const d = allData[v.name] || { records: [], mirovaRecords: [] };
-    const vrp = latestVRP(d.records, includeFarDistance);
+    const innerKm = v.inner_radius_km ?? 10;
+    const vrp = latestVRP(d.records, includeFarDistance, innerKm);
     const level = getLevel(vrp);
     const sensors = latestSensors(d.records, includeFarDistance);
     const lastTime = lastEventTime(d.records);
@@ -803,6 +808,12 @@ function renderDetail() {
   const filtered   = filterDays(d.records, currentDays);
   const mFiltered  = filterDays(d.mirovaRecords, currentDays);
 
+  // S33 bug fix: pasar inner_radius_km del volcán a mirovaEqVrp para validar
+  // pc.centroid_dist_km. Sin esto, clusters far en Salar Atacama se reportaban
+  // como summit (final_hotspot Test1 cerca pero pc real lejos).
+  const innerKm = v.inner_radius_km ?? 10;
+  const eqVrp = (rec) => mirovaEqVrp(rec, innerKm);
+
   if (d.updated) {
     document.getElementById("updated-label").textContent =
       "Act: " + d.updated.replace("T"," ").slice(0,16) + " UTC";
@@ -810,7 +821,7 @@ function renderDetail() {
 
   // Stats — S32 P2: usa mirovaEqVrp (cluster summit-only) para Max/Promedio,
   // alineado con el chart timeline. Mantiene "Total granules" usando todos.
-  const allVrp = filtered.map(mirovaEqVrp).filter(v => v > 0);
+  const allVrp = filtered.map(eqVrp).filter(v => v > 0);
   const maxVrp  = allVrp.length ? Math.max(...allVrp) : 0;
   const meanVrp = allVrp.length ? allVrp.reduce((a,b)=>a+b)/allVrp.length : 0;
   const level   = getLevel(maxVrp);
@@ -858,7 +869,7 @@ function renderDetail() {
   const DT_HOURS = 6;
   let vre_gj = 0;
   for (const r of filtered) {
-    const v_mw = mirovaEqVrp(r);
+    const v_mw = eqVrp(r);
     if (v_mw > 0) vre_gj += v_mw * DT_HOURS * 3.6; // MW * h * 3.6 = GJ
   }
 
@@ -1339,20 +1350,20 @@ function renderDetail() {
       const aqua  = modis.filter(r => r.sensor === "MODIS_AQUA");
       // S32 P2: usar mirovaEqVrp (cluster contiguo summit-only) en lugar de
       // r.vrp_mw global. Reduce magnitud reportada de 6.25× MIROVA a 2.29× mediano.
-      if (terra.length) ds.push({ label:"MODIS Terra", data:toDailyMax(terra, mirovaEqVrp), backgroundColor:"#ff8c00cc", borderColor:"#ff8c00", borderWidth:1, borderRadius:2, borderSkipped:false });
-      if (aqua.length)  ds.push({ label:"MODIS Aqua",  data:toDailyMax(aqua,  mirovaEqVrp), backgroundColor:"#ffb347cc", borderColor:"#ffb347", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (terra.length) ds.push({ label:"MODIS Terra", data:toDailyMax(terra, eqVrp), backgroundColor:"#ff8c00cc", borderColor:"#ff8c00", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (aqua.length)  ds.push({ label:"MODIS Aqua",  data:toDailyMax(aqua,  eqVrp), backgroundColor:"#ffb347cc", borderColor:"#ffb347", borderWidth:1, borderRadius:2, borderSkipped:false });
     }
     if (sensorVisible.VIIRS750 && v750.length) {
       const snpp750   = v750.filter(r => r.sensor === "VIIRS_SNPP_750");
       const noaa750   = v750.filter(r => r.sensor === "VIIRS_NOAA20_750");
-      if (snpp750.length)  ds.push({ label:"VIIRS SNPP 750m",   data:toDailyMax(snpp750, mirovaEqVrp), backgroundColor:"#00bcd4cc", borderColor:"#00bcd4", borderWidth:1, borderRadius:2, borderSkipped:false });
-      if (noaa750.length)  ds.push({ label:"VIIRS NOAA-20 750m",data:toDailyMax(noaa750, mirovaEqVrp), backgroundColor:"#4dd0e1cc", borderColor:"#4dd0e1", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (snpp750.length)  ds.push({ label:"VIIRS SNPP 750m",   data:toDailyMax(snpp750, eqVrp), backgroundColor:"#00bcd4cc", borderColor:"#00bcd4", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (noaa750.length)  ds.push({ label:"VIIRS NOAA-20 750m",data:toDailyMax(noaa750, eqVrp), backgroundColor:"#4dd0e1cc", borderColor:"#4dd0e1", borderWidth:1, borderRadius:2, borderSkipped:false });
     }
     if (sensorVisible.VIIRS375 && v375.length) {
       const snpp375   = v375.filter(r => r.sensor === "VIIRS_SNPP");
       const noaa375   = v375.filter(r => r.sensor === "VIIRS_NOAA20");
-      if (snpp375.length)  ds.push({ label:"VIIRS SNPP 375m",   data:toDailyMax(snpp375, mirovaEqVrp), backgroundColor:"#e91e63cc", borderColor:"#e91e63", borderWidth:1, borderRadius:2, borderSkipped:false });
-      if (noaa375.length)  ds.push({ label:"VIIRS NOAA-20 375m",data:toDailyMax(noaa375, mirovaEqVrp), backgroundColor:"#f06292cc", borderColor:"#f06292", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (snpp375.length)  ds.push({ label:"VIIRS SNPP 375m",   data:toDailyMax(snpp375, eqVrp), backgroundColor:"#e91e63cc", borderColor:"#e91e63", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (noaa375.length)  ds.push({ label:"VIIRS NOAA-20 375m",data:toDailyMax(noaa375, eqVrp), backgroundColor:"#f06292cc", borderColor:"#f06292", borderWidth:1, borderRadius:2, borderSkipped:false });
     }
     if (sensorVisible.MIROVA && mFiltered.length) {
       ds.push({
@@ -1632,9 +1643,10 @@ function buildAlertSummary() {
   const counts = { high: 0, mod: 0, low: 0, vlow: 0, nd: 0 };
   for (const v of VOLCANOES) {
     const d = allData[v.name] || { records: [] };
-    // Bug 14 fix: respetar el toggle includeFarDistance (consistente con
-    // buildCards y panel detalle que ya lo respetan).
-    const vrp = latestVRP(d.records, includeFarDistance);
+    // Bug 14 fix: respetar el toggle includeFarDistance.
+    // S33: pasar inner_radius_km del volcán para validar pc_dist.
+    const innerKm = v.inner_radius_km ?? 10;
+    const vrp = latestVRP(d.records, includeFarDistance, innerKm);
     const lv = getLevel(vrp);
     if (lv.key === "high" || lv.key === "vhigh") counts.high++;
     else if (lv.key === "mod") counts.mod++;
@@ -1762,7 +1774,8 @@ function buildOverviewMap() {
 
   VOLCANOES.forEach(v => {
     const d = allData[v.name] || { records: [] };
-    const vrp = latestVRP(d.records, includeFarDistance);
+    const innerKm = v.inner_radius_km ?? 10;
+    const vrp = latestVRP(d.records, includeFarDistance, innerKm);
     const lv = getLevel(vrp);
     const color = alertColors[lv.key] || "#7a8fa6";
     const size = lv.key === "nd" ? 6 : Math.max(7, Math.min(16, 7 + vrp * 2));

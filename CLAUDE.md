@@ -173,6 +173,9 @@ después hay que revertir.
 | Ejecutar un plan ya escrito paso a paso | `executing-plans` | Checkpoints y no saltarse pasos |
 | Antes de editar `pipeline/process_*.py` o `scan_geometry.py` | `test-driven-development` | Primero el test que captura el bug, después el fix |
 | Antes de declarar un fix "listo", pushear a main, o cerrar item | `verification-before-completion` | Re-audit obligatoria sobre Tier A completo antes del push |
+| **Antes de cambiar `enable_*: true` en `pipeline/profiles/mirova_equivalent.yaml`** (adopción operacional metodológica) | **`superpowers-brainstorming` OBLIGATORIO + R2 verificación pixel-level** | S33: bug `mirovaEqVrp` causó adopción Driver B Phase 1 con métrica auto-confirmatoria. Sin R2 (pixel-level vs MIROVA web) NO adoptar. Ver `docs/PROCESS_RULES_S33.md` |
+| **Antes de aceptar resultado A/B con "mejora" >30%** | **`superpowers-systematic-debugging` + R3 audit independiente** | S33: cuestionar la métrica antes de confirmar resultado. Audit independiente (`experiments/76_audit_independent.py`) debe coincidir |
+| **Antes de modificar `pipeline/audit_metrics.py` o cualquier función de métrica** | **R1 + R7 — tests sintéticos antes del cambio** | Bug S33 era detectable con 1 test unitario. Ver `tests/test_audit_metrics.py` |
 | 2+ investigaciones independientes que se pueden hacer en paralelo | `dispatching-parallel-agents` | Paralelismo real vía subagentes, no serie |
 | Nicolás pide "automatiza X", "cada vez que Y", "antes de Z hacé W" | `update-config` | Esto es un hook de settings.json, no instrucción conversacional |
 | Trabajo con HDF/NetCDF/DataFrames grandes de records satelitales | `pandas-pro` | Operaciones vectorizadas, no loops |
