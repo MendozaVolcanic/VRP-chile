@@ -92,12 +92,25 @@ def find_match(ref_dt, ref_sensor, recs):
     return best
 
 
-def vrp_summit_only(rec):
-    """Replica de mirovaEqVrp del frontend."""
+INNER_RADIUS_KM = {
+    'Lascar': 5, 'Lastarria': 3, 'Tupungatito': 7, 'Villarrica': 5,
+    'PuyehueCordonCaulle': 20, 'Copahue': 4, 'NevadosDeChillan': 5,
+    'Llaima': 5, 'Chaiten': 5, 'PlanchonPeteroa': 3, 'Isluga': 5,
+}
+
+def vrp_summit_only(rec, volc=None):
+    """Replica de mirovaEqVrp del frontend con fix S33.
+    Bug pre-S33: distance_class='summit' (final_hotspot Test1 cerca) pero
+    primary_cluster a 24km en Salar daba pc.vrp_mw inflado del Salar.
+    Fix: validar pc.centroid_dist_km <= inner_radius_km del volcán."""
     if not rec: return 0
     pc = rec.get('primary_cluster')
     if not pc: return rec.get('vrp_mw') or 0
     if rec.get('distance_class') and rec.get('distance_class') != 'summit': return 0
+    inner_km = INNER_RADIUS_KM.get(volc, 10)
+    pc_dist = pc.get('centroid_dist_km')
+    if pc_dist is not None and pc_dist > inner_km:
+        return 0
     return pc.get('vrp_mw', 0)
 
 
@@ -114,7 +127,7 @@ def audit_profile(label, profile_dir):
             by_vol[our_v]['refs'] += 1
             rec = find_match(row['dt'], row['Sensor'], recs)
             if rec is None: continue
-            our_vrp = vrp_summit_only(rec)
+            our_vrp = vrp_summit_only(rec, our_v)
             if our_vrp > 0:
                 by_vol[our_v]['tps'] += 1
                 if row['VRP_MW'] > 0:
