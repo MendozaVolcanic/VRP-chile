@@ -150,9 +150,17 @@ function el(tag, cls) {
   return e;
 }
 
+// Path autodetectado: dev local sirviendo desde root del repo → /frontend/diario.html
+// usa BASE_PATH='/'; Pages servido desde root → BASE_PATH=''.
+const BASE_PATH = (() => {
+  const path = window.location.pathname;
+  if (path.includes('/frontend/')) return '/';
+  return '';
+})();
+
 async function loadVolcanoData(volc) {
   try {
-    const r = await fetch(`../data/mirova_equivalent/${encodeURIComponent(volc.name)}.json`);
+    const r = await fetch(`${BASE_PATH}data/mirova_equivalent/${encodeURIComponent(volc.name)}.json`);
     if (!r.ok) return null;
     return await r.json();
   } catch (e) { return null; }
@@ -162,7 +170,7 @@ let mirovaCsvCache = null;
 async function loadMirovaCsv() {
   if (mirovaCsvCache) return mirovaCsvCache;
   try {
-    const r = await fetch("../01_05_2026_registro_vrp_consolidado.csv");
+    const r = await fetch(`${BASE_PATH}01_05_2026_registro_vrp_consolidado.csv`);
     if (!r.ok) return [];
     const text = await r.text();
     const lines = text.split("\n");

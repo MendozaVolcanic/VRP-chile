@@ -16,6 +16,7 @@ on:
     paths:
       - "frontend/**"
       - "data/**"
+      - "01_05_2026_registro_vrp_consolidado.csv"
       - ".github/workflows/pages-deploy.yml"
   workflow_dispatch:
   workflow_run:
@@ -45,6 +46,9 @@ jobs:
           mkdir -p _site
           cp -r frontend/. _site/
           cp -r data _site/data
+          # S33: copiar CSV consolidado MIROVA NRT para que diario.html pueda
+          # mostrar la curva de referencia MIROVA en el chart timeline.
+          cp 01_05_2026_registro_vrp_consolidado.csv _site/ 2>/dev/null || true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
