@@ -14,12 +14,16 @@ import numpy as np
 
 
 def test_profile_default_off_in_mirova_equivalent(monkeypatch):
-    """Operacional Phase 1 ON pero D4 fix OFF (todavía no validado A/B)."""
+    """S33 post-refutación: Phase 1 + D4 ambos OFF en operacional.
+    Driver A solo es el operacional (recall 74.2%, ratio 2.53×).
+    Phase 1 refutado (-18.6pp recall con métrica corregida).
+    D4 refutado (efecto despreciable, no recupera Tupungatito).
+    """
     monkeypatch.setenv("VRP_PROFILE", "mirova_equivalent")
     import pipeline.profile as profile
     importlib.reload(profile)
     assert profile.ENABLE_TEST1_LBG_GLOBAL is False
-    assert profile.ENABLE_TEST1_PIXEL_FILTER is True  # Phase 1 sí ON
+    assert profile.ENABLE_TEST1_PIXEL_FILTER is False
 
 
 def test_profile_on_in_lbg_global_profile(monkeypatch):
