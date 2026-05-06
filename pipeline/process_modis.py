@@ -89,6 +89,7 @@ from pipeline.profile import (
     ENABLE_DUAL_ROI_BT,
     ENABLE_TEST1_PIXEL_FILTER,
     ENABLE_FINAL_PIXEL_FILTER,
+    ENABLE_TEST1_LBG_GLOBAL,
     N_SIGMA_MIR_SUMMIT,
     N_SIGMA_MIR_SCENE,
     ENABLE_EXCLUDE_ZONES,
@@ -648,14 +649,21 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         )
         test1_hot_filtered = test1_hot & pixel_thr_mask
 
+    # S33 D4 fix — effective L_bg para Test 1 VRP (ver process_viirs.py).
+    if ENABLE_TEST1_LBG_GLOBAL and not np.isnan(t_bg):
+        # MODIS Banda 21 — Planck 3.929 µm
+        effective_L_bg = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bg)) - 1)))
+    else:
+        effective_L_bg = test1_L_bg_local
+
     if (final_hotspot_source == "test1" and test1_n_contrib > 0
-            and test1_L_bg_local is not None
-            and not np.isnan(test1_L_bg_local)):
+            and effective_L_bg is not None
+            and not np.isnan(effective_L_bg)):
         t1_rows, t1_cols = np.where(test1_hot_filtered)
         if len(t1_rows) > 0:
             t1_bt = bt_mir[t1_rows, t1_cols]
             t1_rad = C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t1_bt)) - 1))
-            t1_delta_L = np.maximum(t1_rad - test1_L_bg_local, 0.0)
+            t1_delta_L = np.maximum(t1_rad - effective_L_bg, 0.0)
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             vrp_mw = float(np.sum(t1_vrp))
@@ -663,14 +671,14 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     # S31+ fix magnitud: cluster_hotspots (8-conn pixel-vecindad scipy.label)
     # — ver explicación en process_viirs.py.
     if (final_hotspot_source == "test1" and test1_n_contrib > 0
-            and test1_L_bg_local is not None
-            and not np.isnan(test1_L_bg_local)):
+            and effective_L_bg is not None
+            and not np.isnan(effective_L_bg)):
         t1_vrp_2d = np.zeros_like(bt_mir, dtype=np.float64)
         t1_rows, t1_cols = np.where(test1_hot_filtered)
         if len(t1_rows) > 0:
             t1_bt = bt_mir[t1_rows, t1_cols]
             t1_rad = C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t1_bt)) - 1))
-            t1_delta_L = np.maximum(t1_rad - test1_L_bg_local, 0.0)
+            t1_delta_L = np.maximum(t1_rad - effective_L_bg, 0.0)
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp_arr = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             t1_vrp_2d[t1_rows, t1_cols] = t1_vrp_arr
