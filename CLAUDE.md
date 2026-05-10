@@ -306,6 +306,68 @@ Para minimizar compactaciones automáticas ("session continued..."):
 
 ## Estado
 
+**S35 en curso (2026-05-10) — fix H8 + revelación D8 cluster selection.**
+
+### Hallazgos S35 (2026-05-10)
+
+1. **Bug H8 descubierto**: `pipeline/store.py:119` filtro all-or-nothing descartaba
+   anomaly_pixels enteras cuando hotspot_dist (= pixel más caliente individual) >
+   radius_km. Reach 13.7% records Tier A en 30d. **20 ALERTA_TERMICA MIROVA
+   confirmadas como pérdidas** (Lacolito Puyehue, cráter Lascar, summit Isluga/
+   Lastarria/Tupungatito, Planchón).
+
+2. **R2 pixel-level CONFIRMADO** (caso Puyehue lacolito 05:42 GMT):
+   - TIF MIROVA en `mirova-tif-archive/data/tif/PuyehueCordonCaulle/20260509_054202_VIIRS375.tif`
+   - 56 pixels VRP-chile descartó en zona lacolito (5-10km) tienen valores TIF reales
+   - Top hottest @ 7.99km, val=0.18 (50% sobre mean bg)
+   - Coincide pixel-by-pixel con MIROVA (0.18 MW @ 7.73km lacolito)
+
+3. **Fix H8 implementado** (commit `9570375`, PR #3 mergeado main):
+   - Nueva función `_filter_pixels_by_distance` en store.py
+   - Filtra pixel-por-pixel, recalcula vrp_mir_mw + hotspot_* desde in_range
+   - Flag `enable_pixel_level_distance_filter` por profile (default OFF, opt-in)
+   - 5 tests sintéticos en `tests/test_store_eruption_filter_bug.py`
+   - Suite verde 231/0/16
+
+4. **A/B reproceso H8 disparado** (run 25623575250, 25d × 11 Tier A × 2 perfiles):
+   - `_h8_pixel_filter_enabled` vs `_h8_pixel_filter_disabled`
+   - Adopción operacional pendiente de validación R2 + R6 + R3.
+
+5. **D8 NUEVO**: cluster selection diverge de MIROVA. `pipeline/clustering.py`
+   sort by vrp_mw desc o n_pixels desc (línea 99/101). MIROVA aparentemente
+   usa otro criterio (posiblemente proximidad-al-vent o anomaly score relativo).
+   Caso Puyehue: VRP-chile elige cluster cráter principal (99 px, vrp=4.94 MW)
+   cuando MIROVA reporta lacolito (35 px, vrp=0.18 MW). Frontend `mirova_eq_vrp`
+   retorna pc.vrp_mw del cluster equivocado. Ratio inflado 27×. Pendiente
+   investigación papers Coppola.
+
+6. **Mejora process compliance** instalada:
+   - R5 design doc: `docs/superpowers/specs/2026-05-10-h8-eruption-filter-pixel-level.md`
+   - R1+R7 tests sintéticos antes del fix
+   - R2 verificación pixel-level via mirova-tif-archive
+   - R3 audit independiente: `experiments/77_r2_h8_pixel_audit.py`
+   - R4 pre-mortem en design doc
+   - R6 pendiente (cuestionar resultado A/B)
+   - R8 pendiente (URL pública post-deploy)
+
+### Fix H7 S35 también (commit anterior)
+
+NRT VRP Pipeline fallaba 24+ runs consecutivos por OSError 101 Network unreachable.
+Fix: socket.getaddrinfo monkey-patch IPv4-only en fetch.py + extender retries
+4→6 attempts (delays 0/5/15/45/90/180s). PR #2 mergeado.
+
+### Pendientes inmediatos S35→S36
+
+- [ ] Esperar A/B run 25623575250 termina (~22 jobs, ~1-2h)
+- [ ] Audit comparativo H8 enabled vs disabled vs mirova_equivalent baseline
+- [ ] R6 cuestionar si recall sube >30%
+- [ ] Decidir adopción operacional H8 (cambiar mirova_equivalent.yaml)
+- [ ] Investigar D8 cluster selection (paper Coppola 2016a §)
+- [ ] Decidir revert fix S33 mirovaEqVrp (cierre S33+ pendía)
+- [ ] Toggle dual "Solo cráter / Incluir lejanas" en frontend (cierre S33+)
+
+---
+
 **S17 cerrada (2026-04-23) — investigación sistemática + arquitectura de memoria instalada.**
 
 **Hallazgos críticos S17** (ver `docs/DRIFTS_S17.md`, `docs/PAPERS_AUDIT.md`, `docs/HYPOTHESIS_LOG.md`):
