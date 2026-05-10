@@ -63,9 +63,33 @@ MIROVA reporta el cluster que cae dentro del ROI Test 1.
 **Con**: VRP-chile YA tiene Test 1 enabled (`enable_test1_path: true`).
    Si Test 1 disparó, debería elegir cluster en ROI Test 1.
 
+## Coppola 2016 enhanced — gaps detectados (clave para D8)
+
+Lectura Vault `coppola2016enhanced.md` (verificada 2026-05-10) revela 2 algoritmos
+clave de MIROVA que VRP-chile NO implementa, y que probablemente explican D8:
+
+### Gap 1: ETI cuadrático (background adaptativo scene-wide)
+```
+NTI_bk = a·NTI²_app + b·NTI_app + c   # regresión cuadrática sobre la escena
+ETI = NTI_pix − NTI_bk                # signal vs background regresional
+```
+VRP-chile usa background local annulus (5-25km del vent). MIROVA usa background
+regresional sobre toda la escena. Para Puyehue cluster cráter (warm BG), la
+regresión MIROVA scene-wide ajusta NTI_bk alto en esa zona → ETI bajo →
+cluster cráter descartado. Para lacolito (zona lava field BG bajo), NTI_bk
+bajo → ETI alto → cluster pasa threshold.
+
+### Gap 2: Second-pass adyacente
+Detect anomalous pixel → BAJAR threshold para 8-vecinos → agregar al cluster.
+VRP-chile clusters post-detección por contigüidad, no organic growth.
+
+### H_D8_4 (revisada): MIROVA = ETI cuadrático + second-pass
+Gap arquitectural mayor. Implementar ETI cuadrático en perfil experimental
+es la próxima acción concreta.
+
 ## Investigación pendiente
 
-- [ ] Leer Coppola 2016a SP426.5 sección "Cluster identification and aggregation"
+- [x] Leer Coppola 2016a (Vault) — DONE 2026-05-10
 - [ ] Verificar si MIROVA reporta múltiples clusters por pasada o solo uno
   (revisar TIF MIROVA + KMZ Last_GE.kmz overlay)
 - [ ] Sample casos Lascar Salar — ¿VRP-chile sí filtra cluster lejano por radius_km?
