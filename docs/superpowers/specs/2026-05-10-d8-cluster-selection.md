@@ -63,9 +63,61 @@ MIROVA reporta el cluster que cae dentro del ROI Test 1.
 **Con**: VRP-chile YA tiene Test 1 enabled (`enable_test1_path: true`).
    Si Test 1 disparó, debería elegir cluster en ROI Test 1.
 
+## Coppola 2016 enhanced — gaps detectados (nueva clave para D8)
+
+Lectura Vault `coppola2016enhanced.md` (verificada 2026-05-10) revela 2 algoritmos
+clave de MIROVA que VRP-chile NO implementa, y que probablemente explican D8:
+
+### Gap 1: ETI cuadrático (background adaptativo scene-wide)
+```
+NTI_bk = a·NTI²_app + b·NTI_app + c   # regresión cuadrática sobre la escena
+ETI = NTI_pix − NTI_bk                # signal vs background regresional
+```
+
+**Implicación para D8**:
+- VRP-chile usa background local annulus (5-25 km del vent)
+- MIROVA usa background regresional sobre toda la escena
+- Para Puyehue cluster cráter principal (T_max=284K, area "warm BG"), la
+  regresión MIROVA scene-wide podría ajustar `NTI_bk` alto en esa zona
+  → ETI bajo → NO supera threshold → cluster cráter descartado
+- Para cluster lacolito (zona lava field con BG bajo), NTI_bk regresional
+  bajo → ETI alto → cluster pasa threshold
+
+**Esto explica por qué MIROVA "elige" el lacolito**: no elige, descarta el
+cluster cráter por bg adaptativo y reporta el que pasa.
+
+### Gap 2: Second-pass adyacente
+```
+Detect anomalous pixel → BAJAR threshold para 8-vecinos →
+agregar pixels que califican al cluster → repetir hasta convergencia
+```
+
+**Implicación para D8**:
+- VRP-chile detecta clusters por OR de paths (BT, dNTI, Test1) sobre toda
+  la grilla, luego agrupa por contigüidad espacial
+- MIROVA detecta UN pixel anómalo, EXPANDE el cluster bajando threshold
+  alrededor → cluster crece organicamente desde el centro hot
+- Resultado MIROVA puede tener clusters más grandes (incluyen periferias
+  cool) y pierde clusters "spurious" (no tienen centro fuerte)
+
+### Otros gaps relacionados
+- ✅ ROI1/ROI2 dual BT — implementado S26 (`enable_dual_roi_bt`)
+- ✅ dNTI 8-vecinos — implementado S15 (`enable_dnti_contextual_path`)
+- ❌ dETI 8-vecinos — NO implementado (dNTI sí, dETI no)
+
+## Hipótesis principal revisada (post-Coppola 2016)
+
+**H_D8_4**: MIROVA usa **ETI con bg regresional cuadrático** + **second-pass
+adyacente**. El bg cuadrático filtra clusters spurious (cráter Puyehue con
+warm BG) y el second-pass produce clusters orgánicos centrados en señal real.
+VRP-chile usa bg local annulus + clustering post-detección, que produce
+clusters distintos.
+
+**Esto es un gap arquitectural mayor**, no un fix de threshold simple.
+
 ## Investigación pendiente
 
-- [ ] Leer Coppola 2016a SP426.5 sección "Cluster identification and aggregation"
+- [ ] (PRIORIDAD) Implementar ETI cuadrático en perfil experimental para A/B
 - [ ] Verificar si MIROVA reporta múltiples clusters por pasada o solo uno
   (revisar TIF MIROVA + KMZ Last_GE.kmz overlay)
 - [ ] Sample casos Lascar Salar — ¿VRP-chile sí filtra cluster lejano por radius_km?
