@@ -1,8 +1,36 @@
 # H8 A/B reproceso — reporte final (S35)
 
 **Fecha**: 2026-05-10
-**Run**: [25626608687](https://github.com/MendozaVolcanic/2VRP-chile/actions/runs/25626608687) (7d window 2026-05-03 → 2026-05-09)
+**Run**: [25626608687](https://github.com/MendozaVolcanic/VRP-chile/actions/runs/25626608687) (7d window 2026-05-03 → 2026-05-09, 20/22 success)
 **Run anterior cancelado**: [25623575250](https://github.com/MendozaVolcanic/VRP-chile/actions/runs/25623575250) (25d window, 19/22 timeout 50min)
+
+## ⚠️ Update: comparación apples-to-apples (7d window + vols comunes)
+
+Las métricas iniciales abajo estaban sesgadas por window/vol mismatch.
+La comparación correcta restringida a 7d window + 10 vols comunes
+(`experiments/80_h8_apples_to_apples.py`) muestra:
+
+| Métrica | h8_off (control) | **h8_on (fix)** | Delta |
+|---|---:|---:|---:|
+| Recall vs ALERTA | 83.3% (30/36) | **88.9% (32/36)** | **+5.6pp** ✓ |
+| Ratio mediano | 3.48× | **5.09×** | **+46%** ↑ |
+| Ratio mean | 50.78× | 49.53× | -2.5% |
+
+**Recovery confirmado**: Lascar +1 ALERTA, PuyehueCordonCaulle +1 ALERTA
+(probablemente lacolito 05:42 GMT, el caso original).
+
+**Decisión revisada con criterios del handoff doc**:
+- `Recall +5.6pp`: NO cumple "≥10pp" para ADOPTAR puro
+- `Ratio 5.09×`: cae en zona "ADOPTAR CON RESERVAS" (5-7×)
+- 86 recovery cases adicionales son mayormente RUTINA (FP en vol que MIROVA
+  excluye con lógica adicional no replicada por VRP-chile)
+
+**Veredicto**: ⚠️ **NO adoptar puro**. H8 mejora recall marginalmente pero
+amplifica el bug D8 (cluster selection). El fix correcto es H8+D8 combinado.
+
+---
+
+## Métricas originales (sesgadas por window/vol mismatch — preservadas como referencia)
 
 ## Métricas
 
