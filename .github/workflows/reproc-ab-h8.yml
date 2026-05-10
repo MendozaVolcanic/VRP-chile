@@ -1,0 +1,90 @@
+name: A/B reproceso H8 pixel-level distance filter (S35)
+
+# Workflow dispatch-only para validación cuantitativa del fix H8
+# (filtro distance pixel-por-pixel en store.append_record).
+#
+# Bug detectado al hacer R2 sobre Puyehue lacolito 05:42:02 — store.py
+# descartaba TODA anomaly_pixels cuando hotspot (pixel más caliente individual)
+# estaba fuera de radius_km. Reach 13.7% records Tier A en 30d, ~20 ALERTA
+# MIROVA confirmadas como pérdidas (lacolito Puyehue, cráter Lascar, summit
+# Isluga/Lastarria).
+#
+# Profiles paralelos (cada uno escribe a data/<profile>/, no contamina operacional):
+#   _h8_pixel_filter_enabled  → fix H8 ON (filtro per-pixel)
+#   _h8_pixel_filter_disabled → comportamiento legacy (control)
+#
+# Criterios de aceptación H8:
+# - Recall global sube ≥10pp (esperado: rescata ~20 ALERTA confirmadas).
+# - Ratio mediano se mantiene <5× (no infla magnitudes).
+# - FPs no se disparan (>20% delta).
+# - R2 pixel-level vs MIROVA TIFs en mirova-tif-archive valida 5+ casos.
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-15"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-05-09"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano: [Lascar, Lastarria, Tupungatito, PuyehueCordonCaulle, Isluga, PlanchonPeteroa, Villarrica, Llaima, Copahue, NevadosDeChillan, Chaiten]
+        profile: [_h8_pixel_filter_enabled, _h8_pixel_filter_disabled]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — ${{ matrix.profile }} / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 50
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed A/B data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/${{ matrix.profile }}/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S35 A/B H8 — ${{ matrix.profile }} / ${{ matrix.volcano }} ${{ github.event.inputs.start }}→${{ github.event.inputs.end }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
