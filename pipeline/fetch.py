@@ -10,9 +10,22 @@ Granules are saved to a temp directory, processed, then deleted.
 
 import math
 import os
+import socket
 import earthaccess
 from datetime import datetime, timedelta
 from pathlib import Path
+
+# H7 (S35): Force IPv4 for NASA Earthdata DNS resolution. Errno 101
+# "Network is unreachable" en GitHub-hosted runners es típicamente IPv6
+# routing degradado — el runner resuelve urs.earthdata.nasa.gov a una
+# dirección IPv6 y no puede rutear. Forzar AF_INET evita el problema sin
+# afectar nada local. Aplica solo al proceso (no al sistema).
+_orig_getaddrinfo = socket.getaddrinfo
+def _ipv4_only_getaddrinfo(host, *args, **kwargs):
+    res = _orig_getaddrinfo(host, *args, **kwargs)
+    res4 = [r for r in res if r[0] == socket.AF_INET]
+    return res4 if res4 else res  # fallback al original si no hay IPv4
+socket.getaddrinfo = _ipv4_only_getaddrinfo
 
 
 def _solar_elevation(lat_deg: float, lon_deg: float, dt_utc: datetime) -> float:
@@ -94,6 +107,10 @@ def auth():
     "Network is unreachable" intermitente. Bug fix S22 (run 07:14 failure):
     netrc fallback solo si archivo existe — antes lanzaba FileNotFoundError
     en CI runners ocultando el verdadero error de environment.
+
+    H7 S35 extended retry: subido a 6 intentos con waits hasta 180s para
+    mitigar transients de hasta ~5 min observados en runs 9-10 mayo. Combinar
+    con IPv4 force (top of file) que apunta al root cause más probable.
     """
     import os
     import time
@@ -101,7 +118,7 @@ def auth():
     netrc_path_win = os.path.expanduser("~/_netrc")
     has_netrc = os.path.exists(netrc_path_unix) or os.path.exists(netrc_path_win)
 
-    delays = [0, 5, 15, 45]  # 4 attempts: immediate + 3 retries
+    delays = [0, 5, 15, 45, 90, 180]  # 6 attempts, ~5.5 min total max
     last_err = None
     for delay in delays:
         if delay:
