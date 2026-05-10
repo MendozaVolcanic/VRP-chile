@@ -74,63 +74,113 @@ def _save(volcano_name: str, store: dict):
         json.dump(store, f, indent=2)
 
 
+def _filter_pixels_by_distance(record: dict, max_dist_km: float) -> tuple[bool, int, int]:
+    """H8 (S35): filtra anomaly_pixels pixel-por-pixel por distance.
+
+    Reemplaza el filtro all-or-nothing antiguo (línea 119 pre-S35) que
+    descartaba TODA la lista cuando el pixel más caliente individual estaba
+    fuera de max_dist_km.
+
+    Bug que resuelve: caso Puyehue lacolito 2026-05-09 05:42 — VRP-chile
+    detectó 35 pixels en zona summit (7-8 km, dentro inner_radius=20) +
+    1 pixel a 29 km (fuego). El pixel lejano era el más caliente → todo
+    se descartaba → vrp_mw=0 aunque vrp_mir_mw=5.07.
+
+    Returns: (changed, n_kept, n_discarded).
+    Modifica record in-place:
+      - record.anomaly_pixels = pixels in_range
+      - record.discarded_anomaly_pixels = pixels out_of_range
+      - record.vrp_mir_mw recalculado = sum(in_range vrp_mw)
+      - record.hotspot_* recalculado = max in_range
+      - record.discarded_reason = 'partial_eruption_hotspot_too_far' si
+        hubo descarte parcial; 'eruption_hotspot_too_far' si todo descartado.
+    """
+    pixels = record.get("anomaly_pixels") or []
+    if not pixels or max_dist_km is None:
+        return False, len(pixels), 0
+
+    in_range = [p for p in pixels if (p.get("dist_km") or 0) <= max_dist_km]
+    out_range = [p for p in pixels if (p.get("dist_km") or 0) > max_dist_km]
+
+    if not out_range:
+        return False, len(in_range), 0
+
+    record["discarded_anomaly_pixels"] = out_range
+    record["anomaly_pixels"] = in_range
+    record["discarded_n_pixels"] = len(out_range)
+
+    if in_range:
+        # Recalcular hotspot desde pixels preservados
+        hottest = max(in_range, key=lambda p: p.get("vrp_mw", 0) or 0)
+        record["hotspot_lat"] = hottest.get("lat")
+        record["hotspot_lon"] = hottest.get("lon")
+        record["hotspot_dist_km"] = hottest.get("dist_km")
+        # vrp_mir_mw recalculado = suma in_range
+        new_vrp = sum((p.get("vrp_mw") or 0) for p in in_range)
+        record["vrp_mir_mw"] = round(new_vrp, 4)
+        record["discarded_reason"] = "partial_eruption_hotspot_too_far"
+    else:
+        record["hotspot_lat"] = None
+        record["hotspot_lon"] = None
+        record["hotspot_dist_km"] = None
+        record["vrp_mir_mw"] = 0
+        record["discarded_reason"] = "eruption_hotspot_too_far"
+
+    return True, len(in_range), len(out_range)
+
+
 def append_record(volcano_name: str, record: dict,
                    volcano_lat: float = None, volcano_lon: float = None,
                    overwrite: bool = False,
-                   max_hotspot_dist_km: float = None):
+                   max_hotspot_dist_km: float = None,
+                   enable_pixel_level_distance_filter: bool = False):
     """
     Append a VRP record to the volcano's JSON file.
     Deduplicates by (datetime_utc, sensor) — safe to re-run.
     If volcano_lat/lon provided, rejects daytime records as a safety net.
     If overwrite=True, replace any existing record with the same key
     (used for reprocessing with corrected algorithms, e.g. scan-angle fix).
+
+    S35 H8: enable_pixel_level_distance_filter (default True) usa el nuevo
+    filtro pixel-por-pixel. False = comportamiento legacy (all-or-nothing).
     """
     if record is None:
         return
 
     # Normalize VRP field: ensure every record has a unified 'vrp_mw' field.
     # VIIRS 375m returns vrp_mir_mw/vrp_vent_mw; MODIS/VIIRS750 return vrp_mw/vrp_vent_mw.
-    # The unified vrp_mw = max(eruption-scale, vent-scale) for dashboard consistency.
-    #
-    # Distance filter: eruption-scale hotspots >5km from crater are almost always
-    # non-volcanic (urban, agricultural, or geothermal sources within the search ROI).
-    # MIROVA uses a similar proximity filter. We only trust eruption-scale VRP when
-    # the hotspot is within MAX_HOTSPOT_DIST_KM of the volcano center.
-    # S12 2026-04-15: radius de geofencing por volcán (MIROVA-OVDAS). Si el
-    # caller no pasa el valor, usa 5 km como default conservador. Ejemplos:
-    # Lastarria=3, PP=3, Copahue=4, Villarrica/Lascar/Chaitén/Llaima/NdC/
-    # Tupungatito/Isluga=5, PCC=15. Cualquier hotspot de eruption-path más
-    # allá de este radio se considera no-volcánico (laguna, pueblo,
-    # geotermal, etc.) y se descarta.
     MAX_HOTSPOT_DIST_KM = max_hotspot_dist_km if max_hotspot_dist_km is not None else 5.0
+
+    # S35 H8: filtro pixel-por-pixel ANTES de los normalizaciones de VRP.
+    # Esto garantiza que vrp_mir_mw refleje SOLO los pixels in_range, y que
+    # los downstream consumers (audit, dashboard) vean datos consistentes.
+    if enable_pixel_level_distance_filter:
+        _filter_pixels_by_distance(record, MAX_HOTSPOT_DIST_KM)
+
     if "vrp_mir_mw" in record and "vrp_mw" not in record:
         record["vrp_mw"] = record["vrp_mir_mw"]
     vrp_eruption = record.get("vrp_mw", 0) or 0
     hotspot_dist = record.get("hotspot_dist_km")
     vrp_vent = record.get("vrp_vent_mw", 0) or 0
 
-    # S12 fix: when eruption VRP is discarded by distance filter, also clear
-    # the hotspot_lat/lon/dist + anomaly_pixels so the dashboard does NOT
-    # render the record at a non-volcanic feature (e.g., a warm lake 10 km
-    # from the crater). If vent-path fired, the effective detection is at
-    # the vent; dashboard fallback logic will then place it on the vent
-    # marker. If neither fired (vrp=0), record will be silent.
-    # The discarded eruption pixel info is preserved in diagnostic fields.
+    # Safety net (legacy + H8): si después del pixel-level filter, hotspot_dist
+    # sigue indicando un hotspot lejano (caso típico legacy: anomaly_pixels
+    # vacío pero record["hotspot_dist_km"] fue seteado por upstream), aplicar
+    # el zero-out histórico. Garantiza que vrp_mw=0 cuando solo hay señal far.
     if hotspot_dist is not None and hotspot_dist > MAX_HOTSPOT_DIST_KM:
-        # Preserve diagnostic info for auditing (not displayed in dashboard)
         record["discarded_hotspot_lat"] = record.get("hotspot_lat")
         record["discarded_hotspot_lon"] = record.get("hotspot_lon")
         record["discarded_hotspot_dist_km"] = hotspot_dist
-        record["discarded_reason"] = "eruption_hotspot_too_far"
+        # Solo seteamos discarded_reason si no fue ya seteado por H8
+        record.setdefault("discarded_reason", "eruption_hotspot_too_far")
         if record.get("anomaly_pixels"):
             record["discarded_anomaly_pixels"] = record["anomaly_pixels"]
-        # Clear display fields — dashboard will treat as vent-only if vent
-        # fired, or as non-detection if not.
         record["hotspot_lat"] = None
         record["hotspot_lon"] = None
         record["hotspot_dist_km"] = None
         record["anomaly_pixels"] = []
-        vrp_eruption = 0  # discard distant eruption-scale signal
+        vrp_eruption = 0
+
     record["vrp_mw"] = round(max(vrp_eruption, vrp_vent), 3)
 
     # S20 Regla D — vent-priority (2026-04-25, espíritu S9 traducido a S14+).

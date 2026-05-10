@@ -160,6 +160,15 @@ ENABLE_TEST1_PIXEL_FILTER: bool = bool(_p.get("enable_test1_pixel_filter", False
 # Default OFF (backward-compat). Activar en profile A/B para validación.
 ENABLE_FINAL_PIXEL_FILTER: bool = bool(_p.get("enable_final_pixel_filter", False))
 
+# S35 H8 — Filtro distance pixel-por-pixel en store.append_record.
+# Cuando True, filtra anomaly_pixels in/out según volcano.radius_km en lugar
+# del filtro all-or-nothing (basado en pixel más caliente individual).
+# Bug pre-S35: cuando coexistían cluster summit + pixel lejano (incendio),
+# el lejano "robaba" la decisión y se descartaba TODO. Reach 13.7% records
+# Tier A en 30d. Fix sin cambio metodológico — alinea con MIROVA per-pixel.
+# Default OFF (CLAUDE.md regla: requiere A/B antes de adopción operacional).
+ENABLE_PIXEL_LEVEL_DISTANCE_FILTER: bool = bool(_p.get("enable_pixel_level_distance_filter", False))
+
 # S33 D4 fix — Tupungatito 51% FNs sub-pixel: cuando Test 1 dispara, usar
 # L_bg del anillo background global (5-25km) en lugar de test1_L_bg_local
 # (ring 1-3km del cráter). En volcanes con geotermal crónico (Tupungatito,
