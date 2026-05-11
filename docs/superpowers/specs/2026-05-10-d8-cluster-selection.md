@@ -138,13 +138,22 @@ Si en el futuro se intenta fix D8:
    están en Coppola **2015a** (Geological Society SP, "Enhanced volcanic
    hot-spot detection using MODIS IR data") que NO está en Vault.
 
-2. **PRIORIDAD ALTA**: obtener PDF Coppola 2015a (GS Special Publications).
+2. **PRIORIDAD ALTA**: obtener PDF Coppola 2016a (GS Special Publications).
    Sin ese paper, no podemos implementar ETI cuadrático correctamente.
-   Posibles fuentes:
-   - GS Library access (institucional)
-   - Diego Coppola directo (diego.coppola@unito.it)
-   - ResearchGate / autor
-   - Issue en repos académicos
+
+   **Citation exacta** (encontrada S36 2026-05-11):
+   Coppola, D., Laiolo, M., Cigolini, C., Delle Donne, D., & Ripepe, M. (2016).
+   Enhanced volcanic hot-spot detection using MODIS IR data: results from the
+   MIROVA system. **Geological Society, London, Special Publications**, 426,
+   181–205.
+   **DOI**: `10.1144/SP426.5`
+
+   Posibles fuentes (en orden de menor fricción):
+   - **ResearchGate** "Request PDF": https://www.researchgate.net/publication/277899112
+     (autor responde típicamente 0-2 días)
+   - **Email directo Diego Coppola**: diego.coppola@unito.it
+   - **Lyell Collection** (paywall institucional): https://www.lyellcollection.org/doi/abs/10.1144/sp426.5
+   - **Semantic Scholar** (abstract + refs): https://www.semanticscholar.org/paper/e90359a33659c945b767a7c97ea590e6ffa30547
 
 3. Si paper no es accesible → contactar Coppola directo o publicar issue
    en algún repo MIROVA si existe.
