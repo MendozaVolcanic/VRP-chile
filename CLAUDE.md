@@ -16,17 +16,53 @@ pisos VRP) era remediación de un drift previo, no causa raíz. Acumulados,
 anulaban la diferenciación summit/scene de MIROVA. **Volver a meter ese tipo
 de parche NO está autorizado** — primero pasar por las 3 preguntas en MISSION.md.
 
-## Integración con el vault Obsidian
+## Documentación bibliográfica (source of truth — leer ANTES de buscar online)
 
-Las notas de papers, conceptos, volcanes y sensores que se usan en VRP Chile
-viven en el vault Obsidian: `C:\Users\nmend\OneDrive\Escritorio\claude\Vault\`.
+**PDFs papers + síntesis viven en `VRP Chile/documentacion/`** (NO en el Vault).
 
-- **Procesar papers**: ver `..\..\Vault\CLAUDE.md` sección "Workflow de procesamiento
-  de papers". Invocación típica: "procesá el paper coppola2016fifteen" o
-  "procesá todos los papers de VRP Chile". Claude aplica el workflow documentado
-  sin necesidad de prompt adicional.
-- **Índice de proyectos** (para cross-project linking de papers):
-  `..\..\Vault\00_Meta\proyectos.md`.
+### `documentacion/BIBLIOGRAPHY_SYNTHESIS.md` — SOURCE OF TRUTH bibliográfico
+
+429 líneas con síntesis algoritmo + umbrales + tablas canónicas + sistemas
+competidores. Creado S13 (2026-04-18). Cobertura **30/60 PDFs (54%)**.
+**Antes de investigar cualquier paper MIROVA, leer este doc primero.**
+Contiene:
+- Algoritmo Coppola 2016a SP426.5 completo (ETI cuadrático + Tests 1/2/3 + second-pass)
+- Tabla canónica umbrales por sensor (MODIS / VIIRS750 / VIIRS375)
+- Sistemas competidores (HotLINK USGS AVO +22% recall, MOUNTS, NHI, V-STAR, etc.)
+- MIROVA OSF v2.5 stats (615k filas globales, 5211 Villarrica refs)
+- Coppola 2025 book chapter resumen
+
+### `documentacion/` archivos clave (paper completo / texto extraído)
+- `sp426.5.pdf` + `sp426_5.txt` — Coppola 2016a SP426.5 (algoritmo MIROVA core)
+- `THESIS_MASSIMETTI.pdf` + `_mm_ch[2,4,5]_*.txt` — tesis con detalle VIIRS adaptation
+- `coppola2024_chapter.txt` — Coppola 2025 book chapter "Thermal Monitoring"
+- `feart-12-1345104.pdf` — HotLINK (Saunders-Shultz 2024)
+- `Advancing_Volcanic_Activity_Monitoring_A_Near-Real.pdf` — Di Bella 2024 RSDF
+- `campus2024_extracted.txt` — Campus 2024 Vulcano VIIRS 375m
+- `coppola2021thermal.txt` — Coppola 2021 thermal monitoring
+
+### Workflow obligatorio ANTES de investigar papers (lección S36 fallo)
+
+1. `find "VRP Chile/documentacion/" -iname "*<topic>*"` — verificar PDF disponible local
+2. Leer `BIBLIOGRAPHY_SYNTHESIS.md` sección correspondiente
+3. Si paper NO está sintetizado → leer PDF directo o `.txt` extraído antes de
+   buscar online
+4. **NUNCA** dar por sentado que un paper no está disponible sin haber buscado
+   en `documentacion/` primero
+5. S36 fallo: yo busqué Coppola 2016a SP426.5 online cuando el PDF estaba
+   en `documentacion/sp426.5.pdf` desde abril. **Costo: 1h investigación
+   innecesaria + falsa conclusión "no podemos implementar sin paper"**.
+
+## Integración con el vault Obsidian (secundario — notas resumidas)
+
+Las **notas resumidas** de papers viven en `C:\Users\nmend\OneDrive\Escritorio\claude\Vault\`.
+Los PDFs completos están en `documentacion/` (ver arriba). El Vault es útil
+para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
+
+- **Procesar papers nuevos**: ver `..\..\Vault\CLAUDE.md` sección "Workflow de
+  procesamiento de papers". Útil para crear notes resumidas en Vault, NO para
+  consultar contenido completo.
+- **Índice de proyectos** (cross-project linking): `..\..\Vault\00_Meta\proyectos.md`.
 - **Convenciones del vault** (kebab-case, frontmatter `ai_generated`/`confidence`/
   `explored`, links `[[]]`, tags jerárquicos): ver `..\..\Vault\CLAUDE.md`.
 
