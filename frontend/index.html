@@ -625,15 +625,21 @@ function toMirovaDaily(records) {
 // volcán. Caso patológico: distance_class='summit' (final_hotspot Test1
 // cerca del vent) pero primary_cluster a 24km en Salar Atacama. Sin este
 // chequeo, devolvíamos pc.vrp_mw=19389 MW del Salar como si fuera del cráter.
-function mirovaEqVrp(r, innerKm = 10) {
+// S36: agregado parámetro includeFar para toggle dual "Solo cráter / Incluir lejanas".
+// Cuando includeFar=true, devuelve pc.vrp_mw incluso si pc.centroid_dist_km > innerKm
+// (clon literal MIROVA — MIROVA reporta clusters far como detecciones válidas
+// según evidencia TIF cierre S33+).
+function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
   if (!r) return 0;
   // Records pre-S27 (sin primary_cluster) → mantener vrp_mw global como fallback.
   if (!r.primary_cluster) return r.vrp_mw ?? r.vrp_mir_mw ?? 0;
-  // Records modernos: si dist_class no es summit, MIROVA no reportaría → 0.
-  if (r.distance_class && r.distance_class !== "summit") return 0;
-  // Validar pc realmente esté dentro del inner_radius del volcán.
+  // Records modernos: si dist_class no es summit, MIROVA no reportaría → 0
+  // (a menos que el toggle "incluir lejanas" esté activo).
+  if (r.distance_class && r.distance_class !== "summit" && !includeFar) return 0;
+  // Validar pc realmente esté dentro del inner_radius del volcán
+  // (saltado si includeFar = true).
   const pc = r.primary_cluster;
-  if (pc.centroid_dist_km != null && pc.centroid_dist_km > innerKm) return 0;
+  if (!includeFar && pc.centroid_dist_km != null && pc.centroid_dist_km > innerKm) return 0;
   return pc.vrp_mw ?? 0;
 }
 
@@ -656,13 +662,14 @@ function isSummitDetection(r) {
 function latestVRP(records, includeFar = false, innerKm = 10) {
   // Max VRP de las últimas 48h. Por defecto solo detecciones del cráter.
   // S33: usa mirovaEqVrp con validación pc.centroid_dist_km contra innerKm.
+  // S36: pasa includeFar a mirovaEqVrp también para que respete el toggle.
   const cutoff = Date.now() - 48 * 3600000;
   let max = 0;
   for (const r of records) {
     if (new Date(r.datetime_utc).getTime() < cutoff) continue;
     if (!includeFar && !isSummitDetection(r)) continue;
     if ((r.vrp_mw ?? 0) === 0 && !r.triggered_test1) continue;
-    const v = mirovaEqVrp(r, innerKm);
+    const v = mirovaEqVrp(r, innerKm, includeFar);
     if (v > max) max = v;
   }
   return max;
@@ -812,7 +819,8 @@ function renderDetail() {
   // pc.centroid_dist_km. Sin esto, clusters far en Salar Atacama se reportaban
   // como summit (final_hotspot Test1 cerca pero pc real lejos).
   const innerKm = v.inner_radius_km ?? 10;
-  const eqVrp = (rec) => mirovaEqVrp(rec, innerKm);
+  // S36: eqVrp captura includeFarDistance para que charts/stats respeten toggle.
+  const eqVrp = (rec) => mirovaEqVrp(rec, innerKm, includeFarDistance);
 
   if (d.updated) {
     document.getElementById("updated-label").textContent =

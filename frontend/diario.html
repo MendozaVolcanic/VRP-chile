@@ -84,6 +84,8 @@ footer a:hover { text-decoration: underline; }
     </span>
   </div>
   <div>
+    <button id="btn-summit-only" class="btn-ui" style="background:#1f5e3a">🎯 Solo cráter</button>
+    <button id="btn-include-far" class="btn-ui">📍 Incluir lejanas</button>
     <button id="btn-scale" class="btn-ui">📈 Escala: Lineal</button>
     <a href="index.html" class="btn-ui">🏠 Dashboard principal</a>
   </div>
@@ -202,17 +204,24 @@ const INNER_RADIUS_KM = {
   Llaima: 5, Chaiten: 5, PlanchonPeteroa: 3, Isluga: 5,
 };
 
+// S36: includeFarDistance toggle ("Solo cráter" vs "Incluir lejanas")
+// Default = false (solo cluster summit). True = clon literal MIROVA (incluye
+// clusters far). Cierre S33+ documentó que MIROVA reporta clusters far como
+// detecciones válidas — ver TIF público y plot Distance Last Year.
+let includeFarDistance = false;
+
 function mirovaEqVrp(r, volcanoName) {
   if (!r) return 0;
-  if (r.distance_class && r.distance_class !== "summit") return 0;
+  if (r.distance_class && r.distance_class !== "summit" && !includeFarDistance) return 0;
   const pc = r.primary_cluster;
   if (!pc) return r.vrp_mw ?? 0;
   // Bug fix S33: distance_class se calcula con final_hotspot (Test1 centroide
   // cerca del vent puede dar 'summit') pero primary_cluster puede ser otro
   // cluster geográfico mayor (Salar Atacama, lago, etc) lejos. Validar que
   // el cluster reportado realmente esté dentro del inner_radius del volcán.
+  // S36: cuando includeFarDistance=true, saltar este filtro (clon literal).
   const innerKm = INNER_RADIUS_KM[volcanoName] ?? 5;
-  if (pc.centroid_dist_km != null && pc.centroid_dist_km > innerKm) return 0;
+  if (!includeFarDistance && pc.centroid_dist_km != null && pc.centroid_dist_km > innerKm) return 0;
   return pc.vrp_mw ?? 0;
 }
 
@@ -419,6 +428,29 @@ function closeModal() {
   if (modalChart) { modalChart.destroy(); modalChart = null; }
 }
 document.getElementById("btn-close-modal").addEventListener("click", closeModal);
+
+// S36: toggle "Solo cráter" vs "Incluir lejanas" — clon literal MIROVA
+// reporta clusters far (cierre S33+ documentó esto via TIF público).
+// State persistido en sessionStorage para sobrevivir reload.
+const savedToggle = sessionStorage.getItem("diario_include_far");
+if (savedToggle === "true") {
+  includeFarDistance = true;
+  // Aplicar visualmente al inicializar (waitfor DOM)
+  window.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("btn-include-far").style.background = "#1f5e3a";
+    document.getElementById("btn-summit-only").style.background = "";
+  });
+}
+document.getElementById("btn-summit-only").addEventListener("click", () => {
+  if (!includeFarDistance) return;
+  sessionStorage.setItem("diario_include_far", "false");
+  location.reload();
+});
+document.getElementById("btn-include-far").addEventListener("click", () => {
+  if (includeFarDistance) return;
+  sessionStorage.setItem("diario_include_far", "true");
+  location.reload();
+});
 
 document.getElementById("btn-scale").addEventListener("click", () => {
   const btn = document.getElementById("btn-scale");
