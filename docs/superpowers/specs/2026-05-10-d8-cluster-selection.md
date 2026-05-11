@@ -133,7 +133,28 @@ Si en el futuro se intenta fix D8:
 
 ## Plan investigación próxima sesión S36
 
-1. Leer Coppola 2016a §sección clustering (Vault tiene PDF)
-2. Si encuentra criterio claro → diseñar fix → A/B sobre 30 días → adopción
-3. Si paper no es claro → considerar contactar Diego Coppola directamente
-   o publicar issue en GitHub MIROVA
+1. ~~Leer Coppola 2016a §sección clustering (Vault tiene PDF)~~ — **DONE**:
+   Vault tiene solo notes resumidos. Detalles cuantitativos del ETI cuadrático
+   están en Coppola **2015a** (Geological Society SP, "Enhanced volcanic
+   hot-spot detection using MODIS IR data") que NO está en Vault.
+
+2. **PRIORIDAD ALTA**: obtener PDF Coppola 2015a (GS Special Publications).
+   Sin ese paper, no podemos implementar ETI cuadrático correctamente.
+   Posibles fuentes:
+   - GS Library access (institucional)
+   - Diego Coppola directo (diego.coppola@unito.it)
+   - ResearchGate / autor
+   - Issue en repos académicos
+
+3. Si paper no es accesible → contactar Coppola directo o publicar issue
+   en algún repo MIROVA si existe.
+
+4. **Confirmación cross-paper** (S35 update 2026-05-10):
+   - Coppola 2020 thermal cita literal: "spatial operations allow us to
+     highlight the pixels having these indices **in excess with respect to
+     their surroundings** — hybrid and contextual approach"
+   - Coppola 2016 fifteen redirige TODO el detalle algorítmico a Coppola 2015a
+   - Coppola 2016 enhanced (Vault note) menciona ETI cuadrático pero sin
+     fórmula completa
+   - Coppola 2020/2016f confirman implícitamente: detección requiere
+     superar el bg local Y un bg regresional scene-wide
