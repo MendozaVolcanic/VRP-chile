@@ -63,29 +63,151 @@ MIROVA reporta el cluster que cae dentro del ROI Test 1.
 **Con**: VRP-chile YA tiene Test 1 enabled (`enable_test1_path: true`).
    Si Test 1 disparó, debería elegir cluster en ROI Test 1.
 
-## Coppola 2016 enhanced — gaps detectados (clave para D8)
+## Coppola 2016a (SP426.5) — algoritmo COMPLETO leído (2026-05-11)
 
-Lectura Vault `coppola2016enhanced.md` (verificada 2026-05-10) revela 2 algoritmos
-clave de MIROVA que VRP-chile NO implementa, y que probablemente explican D8:
+**PDF localizado**: `VRP Chile/documentacion/sp426.5.pdf` (9.4 MB) + `sp426_5.txt` extraído.
+Yo había leído antes solo el note resumido en Vault. Lectura completa revela
+la matemática exacta de TODOS los gaps.
 
-### Gap 1: ETI cuadrático (background adaptativo scene-wide)
+### Paso 1: Spectral analysis (NTI + ETI)
+
+**NTI** (Wright et al. 2002):
 ```
-NTI_bk = a·NTI²_app + b·NTI_app + c   # regresión cuadrática sobre la escena
-ETI = NTI_pix − NTI_bk                # signal vs background regresional
+NTI = (L_MIR - L_TIR) / (L_MIR + L_TIR)
 ```
-VRP-chile usa background local annulus (5-25km del vent). MIROVA usa background
-regresional sobre toda la escena. Para Puyehue cluster cráter (warm BG), la
-regresión MIROVA scene-wide ajusta NTI_bk alto en esa zona → ETI bajo →
-cluster cráter descartado. Para lacolito (zona lava field BG bajo), NTI_bk
-bajo → ETI alto → cluster pasa threshold.
 
-### Gap 2: Second-pass adyacente
-Detect anomalous pixel → BAJAR threshold para 8-vecinos → agregar al cluster.
-VRP-chile clusters post-detección por contigüidad, no organic growth.
+**NTI_app** (synthetic NTI assuming homogeneous pixel temperature):
+```
+T_app = BT_TIR                                          # asume T uniforme per pixel
+L_MIR,app = Planck_MIR(T_app)                           # eq 2
+NTI_app = (L_MIR,app - L_TIR) / (L_MIR,app + L_TIR)     # eq 3
+```
 
-### H_D8_4 (revisada): MIROVA = ETI cuadrático + second-pass
-Gap arquitectural mayor. Implementar ETI cuadrático en perfil experimental
-es la próxima acción concreta.
+**ETI cuadrático** (background regresional scene-wide):
+```
+# Regresión polynomial sobre scene completa (NTI vs NTI_app)
+# Parámetros a, b, c se ajustan por imagen (no fijos):
+NTI_bk = a·NTI²_app + b·NTI_app + c                     # eq 4
+ETI = NTI - NTI_bk                                      # eq 5
+```
+**Resultado**: ETI alto = pixel anómalo vs el comportamiento esperado de la
+escena. Hot pixels desvían de la regresión.
+
+### Paso 2: Spatial analysis (dNTI + dETI)
+
+Para cada pixel:
+```
+dNTI_pix = NTI_pix - mean(NTI_8_neighbors)
+dETI_pix = ETI_pix - mean(ETI_8_neighbors)
+```
+- Todos los 8 vecinos usados (NO cloud filter)
+- Filter "unsuitable": edge pixels, dNTI/dETI < -0.1
+
+### Paso 3: Test 1 (Fixed NTI threshold)
+
+```
+NTI_pix > K1     → flag as active, remove from further analysis
+```
+- K1 = **-0.8 noche** / -0.6 día (uniforme para ROI1 y ROI2)
+- Settled per MODVOLC global validation (Wright et al. 2002)
+
+### Paso 4: Tests 2 + 3 (Contextual thresholds) — BOTH must hold
+
+```
+Test 2: dNTI_pix > C1   OR   dNTI_pix > μ_dNTI + C2·σ_dNTI
+Test 3: dETI_pix > C1   OR   dETI_pix > μ_dETI + C2·σ_dETI
+
+# Pixel flagged active iff Test 2 AND Test 3 (línea 315 paper)
+```
+
+**Tabla 1 oficial Coppola 2016a** (parámetros noche/día × ROI1/ROI2):
+| Parámetro | ROI1 (summit 5×5km) night | ROI2 (scene) night | ROI1 day | ROI2 day |
+|---|---|---|---|---|
+| K1   | -0.8 | -0.8 | -0.6 | -0.6 |
+| C1   | **0.003** | **0.01** | 0.02 | 0.02 |
+| C2   | **5**     | **10**   | 15   | 15   |
+
+ROI1 = summit (más sensible). ROI2 = whole scene minus ROI1 (más estricto).
+
+### Paso 5: Second-pass adyacente (CRITICAL — gap nuestro)
+
+Cita exacta (líneas 347-356):
+> "active pixels may strongly modify the average values of their surroundings,
+> with a consequent decrease in the dNTI and dETI values of adjacent pixels.
+> To avoid this problem, step 2 (spatial analysis) is performed a **SECOND
+> TIME**, being particularly careful to eliminate all of the 'active' pixels
+> already detected. Hence, the previous step (contextual threshold: tests 2
+> and 3) are applied again to the new dNTI and dETI matrices."
+
+Implicación: el cluster crece orgánicamente recapturando pixels marginales que
+quedan opacados por el primer pass.
+
+### Paso 6: VRP calculation
+
+```
+ΔL4_pix = L4_alert - L4_bk                              # eq 6
+L4_bk = arithmetic mean of pixels around the active cluster   # NO global annulus
+
+RP_pix = 18.9 · A_pix · ΔL4_pix                         # eq 7 (W)
+RP_total = Σ RP_pix                                     # eq 8 over ALL active pixels
+```
+**Crítico**: RP total = suma de TODOS los pixels active en TODA la escena.
+**NO se selecciona un "primary cluster"**.
+
+### Paso 7: Distance reportada
+
+Cita líneas 510-513:
+> "we measured the approximate distance (±1 km) between the **main vent**
+> (whose location must be known a priori) and **the centre of the furthermost
+> alerted pixel**"
+
+Distance = vent → **pixel ACTIVE MÁS LEJANO**, no centroide cluster.
+
+---
+
+## Implicación para D8 (cluster selection bug)
+
+VRP-chile actualmente:
+1. Detecta pixels active vía paths (BT, dNTI, Test 1)
+2. **Clustering posterior**: agrupa pixels conectados (8-conn) en clusters
+3. **Selecciona primary_cluster**: por máximo VRP / máximo n_pixels
+4. **Reporta**: pc.vrp_mw, pc.centroid_dist_km
+
+MIROVA:
+1. Detecta pixels active vía NTI + ETI + dNTI + dETI + 4 tests
+2. **NO clustering posterior** ni selección de primary
+3. **Reporta**: Σ RP_pix de TODOS los pixels active
+4. **Distance**: vent → pixel más lejano (¡no del cluster!)
+
+**Conclusión D8**: el "bug cluster selection" no es bug — es divergencia
+arquitectural. VRP-chile inventó un concept de primary_cluster que MIROVA
+no usa. Si reportamos sum(vrp_mw) en vez de pc.vrp_mw, eliminamos el bug
+D8 estructuralmente.
+
+**PERO** sum(vrp_mw) sin filtros ETI cuadrático suma TODOS los pixels
+detectados, incluyendo Salar Atacama (Lascar) y fuegos. Para que sum(vrp_mw)
+matchee MIROVA, hay que tener detección filtered como MIROVA → necesitamos
+ETI cuadrático + second-pass.
+
+### H_D8_5 (FINAL, basada en paper completo): 3 fixes combinados
+
+1. **ETI cuadrático**: implementar `NTI_bk = a·NTI²_app + b·NTI_app + c`
+   con regresión polynomial scene-wide por imagen. Reemplaza nuestro
+   background local annulus.
+
+2. **Second-pass adyacente**: tras primera detección de active pixels,
+   re-correr Step 2 + Tests 2/3 EXCLUYENDO active pixels (para que no
+   contaminen mean de 8-vecinos).
+
+3. **Reporting MIROVA-style**:
+   - vrp_mw_total = sum(vrp_mw) sobre TODOS los pixels active
+   - hotspot_dist_km = max(dist_km) entre active pixels (no centroide cluster)
+   - primary_cluster.vrp_mw → DEPRECATE (no MIROVA concept)
+
+**Implementación**: feasible ahora que tenemos la matemática completa.
+Costos: ~3-5 días de trabajo, NUEVO perfil experimental, A/B 30 días.
+
+### H_D8_4 (anterior, parcial) — superseded by H_D8_5
 
 ## Investigación pendiente
 
