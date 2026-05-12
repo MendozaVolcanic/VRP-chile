@@ -483,11 +483,101 @@ def test_nti_typical_volcanic_range():
     assert np.all(nti_app <= 0.0)
 
 
-@pytest.mark.xfail(reason='sum_vrp_reporting implementación pendiente — toca store.py',
-                   strict=True)
-def test_sum_vrp_reporting_replaces_primary_cluster():
-    """Cuando enable_sum_vrp_reporting=true, el record persistido debe
-    contener `vrp_mw_sum_active` = sum sobre TODOS los active pixels, y
-    `hotspot_dist_km_furthest` = max distancia entre active pixels.
+def test_sum_vrp_reporting_persists_fields(tmp_path, monkeypatch):
+    """Con ENABLE_SUM_VRP_REPORTING=True (toggle vía VRP_PROFILE=_h_d8_5_full),
+    store.append_record persiste vrp_mw_sum_active y hotspot_dist_km_furthest
+    sobre TODOS los anomaly_pixels reportados.
+
+    Test usa monkeypatch para forzar el flag sin requerir env var,
+    asegurando que el comportamiento opt-in funciona independiente del
+    entorno de tests.
     """
-    raise NotImplementedError('pending H_D8_5 implementation')
+    import pipeline.store as store
+    import importlib
+    monkeypatch.setattr(store, 'ENABLE_SUM_VRP_REPORTING', True)
+    monkeypatch.setattr(store, 'DATA_DIR', tmp_path)
+
+    record = {
+        'datetime_utc': '2026-05-12 03:30',
+        'sensor': 'MODIS_TERRA',
+        'vrp_mw': 5.18,           # sum total esperada
+        'hotspot_lat': -40.6,
+        'hotspot_lon': -72.1,
+        'hotspot_dist_km': 0.5,    # primary cluster (cráter cercano)
+        'anomaly_pixels': [
+            {'lat': -40.6, 'lon': -72.1, 'dist_km': 0.5, 'vrp_mw': 1.0},
+            {'lat': -40.6, 'lon': -72.1, 'dist_km': 0.5, 'vrp_mw': 1.0},
+            {'lat': -40.6, 'lon': -72.1, 'dist_km': 0.5, 'vrp_mw': 1.0},
+            {'lat': -40.6, 'lon': -72.1, 'dist_km': 0.5, 'vrp_mw': 1.0},
+            {'lat': -40.6, 'lon': -72.1, 'dist_km': 0.5, 'vrp_mw': 1.0},
+            # Cluster lacolito lejano (que MIROVA reportaría):
+            {'lat': -40.5, 'lon': -72.0, 'dist_km': 7.7, 'vrp_mw': 0.06},
+            {'lat': -40.5, 'lon': -72.0, 'dist_km': 7.7, 'vrp_mw': 0.06},
+            {'lat': -40.5, 'lon': -72.0, 'dist_km': 7.7, 'vrp_mw': 0.06},
+        ],
+        'product_version': 'standard',
+    }
+    # No coords de volcán → safety net no aplica
+    store.append_record('TestVolcano', record)
+
+    # Releer
+    records = store.get_records('TestVolcano')
+    assert len(records) == 1
+    r = records[0]
+    # Sum MIROVA-style: 5×1.0 + 3×0.06 = 5.18
+    assert r['vrp_mw_sum_active'] == pytest.approx(5.18, abs=0.001)
+    # Furthest active pixel: lacolito @ 7.7 km
+    assert r['hotspot_dist_km_furthest'] == pytest.approx(7.7, abs=0.001)
+    # primary_cluster style fields siguen intactos (no se sobreescriben)
+    assert r['hotspot_dist_km'] == pytest.approx(0.5, abs=0.001)
+
+
+def test_sum_vrp_reporting_off_does_not_add_fields(tmp_path, monkeypatch):
+    """Con ENABLE_SUM_VRP_REPORTING=False (default operacional), los
+    campos vrp_mw_sum_active / hotspot_dist_km_furthest NO deben aparecer
+    en el record persistido. Garantiza backward-compat del schema.
+    """
+    import pipeline.store as store
+    monkeypatch.setattr(store, 'ENABLE_SUM_VRP_REPORTING', False)
+    monkeypatch.setattr(store, 'DATA_DIR', tmp_path)
+
+    record = {
+        'datetime_utc': '2026-05-12 03:30',
+        'sensor': 'MODIS_TERRA',
+        'vrp_mw': 1.0,
+        'hotspot_dist_km': 0.5,
+        'anomaly_pixels': [
+            {'lat': -40.6, 'lon': -72.1, 'dist_km': 0.5, 'vrp_mw': 1.0},
+        ],
+        'product_version': 'standard',
+    }
+    store.append_record('TestVolcanoOff', record)
+    r = store.get_records('TestVolcanoOff')[0]
+    assert 'vrp_mw_sum_active' not in r
+    assert 'hotspot_dist_km_furthest' not in r
+
+
+def test_sum_vrp_reporting_zero_when_floor_zeros_out(tmp_path, monkeypatch):
+    """Si el sensor floor llevó vrp_mw a 0 (señal sub-piso), reportar
+    vrp_mw_sum_active=0 (no inventar suma de pixels descartados por floor).
+    """
+    import pipeline.store as store
+    monkeypatch.setattr(store, 'ENABLE_SUM_VRP_REPORTING', True)
+    monkeypatch.setattr(store, 'DATA_DIR', tmp_path)
+
+    record = {
+        'datetime_utc': '2026-05-12 03:30',
+        'sensor': 'VIIRS_SNPP',  # piso 0.02 MW
+        'vrp_mw': 0.015,         # bajo piso → será zero-out
+        'vrp_mir_mw': 0.015,
+        'hotspot_dist_km': 0.5,
+        'anomaly_pixels': [
+            {'lat': -40.6, 'lon': -72.1, 'dist_km': 0.5, 'vrp_mw': 0.015},
+        ],
+        'product_version': 'standard',
+    }
+    store.append_record('TestVolcanoFloor', record)
+    r = store.get_records('TestVolcanoFloor')[0]
+    assert r['vrp_mw'] == 0.0  # zero-out floor aplicó
+    assert r['vrp_mw_sum_active'] == 0.0
+    assert r['hotspot_dist_km_furthest'] is None

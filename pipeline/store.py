@@ -30,6 +30,7 @@ from pipeline.profile import (
     MIN_VRP_MW_VIIRS375,
     MIN_VRP_MW_VIIRS750,
     MIN_VRP_MW_MODIS,
+    ENABLE_SUM_VRP_REPORTING,
 )
 
 
@@ -250,6 +251,31 @@ def append_record(volcano_name: str, record: dict,
     # Normalize t_max_k for VIIRS 375m (uses t_max_i04_k internally)
     if "t_max_i04_k" in record and "t_max_k" not in record:
         record["t_max_k"] = record["t_max_i04_k"]
+
+    # S37 H_D8_5 — sum VRP reporting (Coppola 2016a eq 8 + líneas 510-513).
+    # Cuando ENABLE_SUM_VRP_REPORTING=True, el record persiste dos campos
+    # adicionales que reflejan la convención MIROVA literal:
+    #   - vrp_mw_sum_active: Σ RP_pix sobre TODOS los anomaly pixels reportados
+    #     (no primary cluster). MIROVA no selecciona cluster — eq 8 paper.
+    #   - hotspot_dist_km_furthest: distancia al vent del active pixel MÁS
+    #     LEJANO. Paper líneas 510-513: "distance between main vent and the
+    #     centre of the furthermost alerted pixel".
+    # Ambos campos respetan el sensor floor (si vrp_mw fue zero-out por floor,
+    # vrp_mw_sum_active también se reporta 0). Frontend / audit pueden usar
+    # estos campos para reproducir la métrica MIROVA-style sin tocar
+    # primary_cluster (que sigue presente para backward compat).
+    if ENABLE_SUM_VRP_REPORTING:
+        pixels = record.get("anomaly_pixels") or []
+        if pixels and record.get("vrp_mw", 0) > 0:
+            sum_vrp = sum((p.get("vrp_mw") or 0) for p in pixels)
+            dists = [p.get("dist_km") for p in pixels if p.get("dist_km") is not None]
+            record["vrp_mw_sum_active"] = round(float(sum_vrp), 4)
+            record["hotspot_dist_km_furthest"] = (
+                round(float(max(dists)), 3) if dists else None
+            )
+        else:
+            record["vrp_mw_sum_active"] = 0.0
+            record["hotspot_dist_km_furthest"] = None
 
     # Safety net: reject daytime records (solar contamination → false VRP)
     if volcano_lat is not None and volcano_lon is not None:
