@@ -15,7 +15,7 @@ detection algorithm" — C1 absoluto + C2 contextual en dual-ROI.
 """
 
 import numpy as np
-from scipy.ndimage import generic_filter
+from scipy.ndimage import generic_filter, convolve
 
 from .constants import C1 as _PLANCK_C1, C2 as _PLANCK_C2
 
@@ -27,6 +27,43 @@ _FOOTPRINT_8N = np.array(
      [1, 1, 1]],
     dtype=bool,
 )
+
+# Kernel para convolución vectorizada 8-vecinos (center=0, neighbors=1)
+_KERNEL_8N = np.array(
+    [[1.0, 1.0, 1.0],
+     [1.0, 0.0, 1.0],
+     [1.0, 1.0, 1.0]],
+)
+
+
+def _nanmean_8neighbors_fast(arr: np.ndarray) -> np.ndarray:
+    """Vectorized arithmetic mean of 8-neighbors ignoring NaN.
+
+    Equivalente a `generic_filter(arr, _nanmean_ignore_self, footprint=_FOOTPRINT_8N)`
+    pero ~100× más rápido sobre arrays grandes porque evita el callback Python
+    por pixel. Crítico para escenas VIIRS 375m (~29M pixels) donde el callback
+    lento causa timeout del worker.
+
+    Algoritmo:
+        sum_neigh = convolve(where(nan, 0, arr), kernel_3x3_center0)
+        count_neigh = convolve(is_valid_int, kernel_3x3_center0)
+        mean = sum_neigh / count_neigh   (NaN donde count == 0)
+
+    Args:
+        arr: 2D array float con NaN posibles.
+
+    Returns:
+        2D array float con la media aritmética de los 8 vecinos (sin centro)
+        donde hay >=1 vecino válido. NaN donde no hay ningún vecino válido.
+    """
+    is_valid = np.isfinite(arr)
+    arr_filled = np.where(is_valid, arr, 0.0)
+    sum_neigh = convolve(arr_filled, _KERNEL_8N, mode='constant', cval=0.0)
+    count_neigh = convolve(is_valid.astype(np.float64), _KERNEL_8N,
+                           mode='constant', cval=0.0)
+    with np.errstate(invalid='ignore', divide='ignore'):
+        mean = np.where(count_neigh > 0, sum_neigh / count_neigh, np.nan)
+    return mean
 
 
 def _nanmean_ignore_self(x: np.ndarray) -> float:
@@ -444,15 +481,12 @@ def second_pass_adjacent(
     nti_for_mean = np.where(active_mask, np.nan, nti)
     eti_for_mean = np.where(active_mask, np.nan, eti)
 
-    # 2) 8-neighbor mean ignorando NaN (footprint excluye el centro).
-    mean_nti_neigh = generic_filter(
-        nti_for_mean, _nanmean_ignore_self,
-        footprint=_FOOTPRINT_8N, mode='constant', cval=np.nan,
-    )
-    mean_eti_neigh = generic_filter(
-        eti_for_mean, _nanmean_ignore_self,
-        footprint=_FOOTPRINT_8N, mode='constant', cval=np.nan,
-    )
+    # 2) 8-neighbor mean ignorando NaN (vectorized — _nanmean_8neighbors_fast).
+    #    Equivalente al generic_filter+_nanmean_ignore_self pero ~100× más rápido
+    #    sobre escenas grandes (VIIRS 375m ~29M pixels). Crítico para que el
+    #    workflow A/B no haga timeout per granule.
+    mean_nti_neigh = _nanmean_8neighbors_fast(nti_for_mean)
+    mean_eti_neigh = _nanmean_8neighbors_fast(eti_for_mean)
     dnti = nti - mean_nti_neigh
     deti = eti - mean_eti_neigh
 
