@@ -45,7 +45,7 @@ on:
 jobs:
   reproc:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 110  # S37 v3: subido de 60 para cubrir 100min step + instalación deps + push
     permissions:
       contents: write
     strategy:
@@ -75,7 +75,10 @@ jobs:
         env:
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
-        timeout-minutes: 50
+        # S37 v3: subido de 50 → 100. Lascar v2 procesó 17/30 días en 50min
+        # → throughput 2.9 min/día con NASA Earthdata lento (no caído).
+        # 30 días × 2.9 min/día = 87 min → cabe en 100 min con margen.
+        timeout-minutes: 100
         run: |
           python scripts/run_pipeline.py \
             --profile ${{ matrix.profile }} \
