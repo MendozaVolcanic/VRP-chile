@@ -1,8 +1,17 @@
 # D8 (S35) — Cluster selection diverge de MIROVA
 
-**Status**: investigación + design draft 2026-05-10
+**Status**: implementación H_D8_5 iniciada S37 (2026-05-11) — skeleton + perfil + tests sintéticos. Lógica ETI cuadrático + second-pass + sum reporting pendiente (commits 2-N S37).
 **Driver**: bug detectado durante análisis A/B H8. Sin fix D8, H8 amplifica overdetection.
 **Reach**: 34/191 alertas MIROVA (18%) tienen `dist_diff > 5km` entre primary_cluster.centroid_dist_km y MIROVA reported distance.
+
+**Tracking implementación**:
+- [x] S37 commit 1 — skeleton (perfil `_h_d8_5_full.yaml` + stubs `compute_eti_scene_quadratic`/`second_pass_adjacent` + tests sintéticos D8 bug + xfail markers)
+- [ ] S37 commit 2 — implementar `compute_eti_scene_quadratic` (regresión polinomial scene-wide, paper eqs 4-5)
+- [ ] S37 commit 3 — implementar `second_pass_adjacent` (paper líneas 347-356)
+- [ ] S37 commit 4 — integrar ambas funciones en `process_modis.py` / `process_viirs.py` / `process_viirs_mod.py` gated por flags del perfil
+- [ ] S37 commit 5 — implementar `enable_sum_vrp_reporting` en `store.py` (campos `vrp_mw_sum_active` + `hotspot_dist_km_furthest`)
+- [ ] S37 commit 6 — workflow A/B reproc 30 días H_D8_5 vs mirova_equivalent baseline
+- [ ] S37 commit N — validación R2 pixel-level vs mirova-tif-archive + R3 audit independiente
 
 ---
 

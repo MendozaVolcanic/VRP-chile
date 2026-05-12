@@ -194,3 +194,121 @@ def dual_roi_bt_threshold(
     is_summit = dist_km <= inner_km
     eff_threshold = np.where(is_summit, eff_summit, eff_scene)
     return roi_mask & ~np.isnan(bt) & (bt > eff_threshold)
+
+
+# ---------------------------------------------------------------------------
+# H_D8_5 (S37) — skeleton funciones algoritmo MIROVA literal Coppola 2016a.
+#
+# Status: stubs registrados. Lógica pendiente — disparan NotImplementedError
+# hasta que se implementen. Tres flags en `_h_d8_5_full.yaml` controlan su
+# activación; mientras estén OFF en `mirova_equivalent`, el operacional no
+# se ve afectado.
+#
+# Diseño completo: `docs/superpowers/specs/2026-05-10-d8-cluster-selection.md`.
+# Paper referencia: `documentacion/sp426.5.pdf` (Coppola 2016a SP 426.5).
+# ---------------------------------------------------------------------------
+
+
+def compute_eti_scene_quadratic(
+    nti: np.ndarray,
+    nti_app: np.ndarray,
+    mask_valid: np.ndarray,
+) -> np.ndarray:
+    """Coppola 2016a SP 426.5 eqs 4-5 — ETI scene-wide regresional.
+
+    Reemplaza el background local annulus por una regresión polinomial
+    cuadrática sobre la escena completa::
+
+        NTI_bk = a · NTI²_app + b · NTI_app + c        (eq 4)
+        ETI    = NTI - NTI_bk                          (eq 5)
+
+    Los coeficientes ``a, b, c`` se ajustan por imagen (NO fijos): se hace
+    una regresión polynomial de orden 2 sobre los pixels válidos de la
+    escena, robust to outliers (paper sugiere RANSAC o iterative re-fit
+    excluyendo pixels active del fit). Resultado: ETI alto = pixel anómalo
+    vs el comportamiento esperado de la escena. Hot pixels desvían de la
+    regresión y son los que terminamos detectando.
+
+    Por qué importa para clon MIROVA: nuestro pipeline actual usa
+    background local annulus (radio 5-25 km). Ese background es bueno para
+    contraste local pero el paper opera scene-wide para que el "esperado"
+    sea consistente entre regiones de la escena.
+
+    Args:
+        nti: 2D array NTI observado por pixel.
+        nti_app: 2D array NTI sintético assuming pixel temp homogéneo
+            (computado de BT_TIR vía Planck_MIR, eqs 2-3 del paper).
+        mask_valid: bool 2D array, True donde pixel es analizable (no
+            edge, no NaN, dentro de ROI scene).
+
+    Returns:
+        2D array ETI = NTI - NTI_bk, shape igual a `nti`. NaN donde
+        ``mask_valid`` es False.
+
+    Raises:
+        NotImplementedError: stub. Implementación pendiente — primer commit
+            del H_D8_5 (S37) solo registra el contrato. Ver
+            `docs/superpowers/specs/2026-05-10-d8-cluster-selection.md`
+            sección "Paso 1: Spectral analysis (NTI + ETI)".
+    """
+    raise NotImplementedError(
+        "H_D8_5 (S37) part 1 — ETI cuadrático scene-wide pendiente. "
+        "Ver docs/superpowers/specs/2026-05-10-d8-cluster-selection.md "
+        "y documentacion/sp426.5.pdf eqs 4-5."
+    )
+
+
+def second_pass_adjacent(
+    dnti: np.ndarray,
+    deti: np.ndarray,
+    active_mask: np.ndarray,
+    *,
+    c1_dnti: float,
+    c1_deti: float,
+    c2_dnti: float,
+    c2_deti: float,
+    is_summit: np.ndarray,
+) -> np.ndarray:
+    """Coppola 2016a SP 426.5 paso 5 — second-pass adyacente.
+
+    Tras detectar pixels active en el primer pass, recomputar dNTI y dETI
+    EXCLUYENDO esos pixels active del cómputo de la media de 8-vecinos.
+    Re-aplicar Tests 2 y 3 sobre las matrices nuevas. El cluster crece
+    orgánicamente recapturando pixels marginales que el primer pass
+    perdió porque sus propios vecinos active opacaban el contraste local.
+
+    Cita exacta del paper (líneas 347-356)::
+
+        "active pixels may strongly modify the average values of their
+        surroundings, with a consequent decrease in the dNTI and dETI
+        values of adjacent pixels. To avoid this problem, step 2 (spatial
+        analysis) is performed a SECOND TIME, being particularly careful
+        to eliminate all of the 'active' pixels already detected."
+
+    Es por esto que MIROVA, a igualdad de threshold contextual, captura
+    más pixels del cluster que nuestro pipeline single-pass — ergo,
+    reporta `Σ RP_pix` mayor sobre la misma señal real.
+
+    Args:
+        dnti: 2D array dNTI del primer pass.
+        deti: 2D array dETI del primer pass.
+        active_mask: bool 2D array, True donde primer pass marcó active.
+        c1_dnti, c1_deti: umbrales absolutos (paper Tabla 1, depende ROI).
+        c2_dnti, c2_deti: multiplicadores σ contextual (Tabla 1).
+        is_summit: bool 2D array, True en ROI summit (Tabla 1 distingue
+            ROI1 summit 5×5km vs ROI2 scene; thresholds distintos).
+
+    Returns:
+        bool 2D array con pixels active TRAS recapture del second-pass
+        (incluye los del primer pass más nuevos). Shape igual a ``dnti``.
+
+    Raises:
+        NotImplementedError: stub. Ver
+            `docs/superpowers/specs/2026-05-10-d8-cluster-selection.md`
+            sección "Paso 5: Second-pass adyacente".
+    """
+    raise NotImplementedError(
+        "H_D8_5 (S37) part 2 — second-pass adyacente pendiente. "
+        "Ver docs/superpowers/specs/2026-05-10-d8-cluster-selection.md "
+        "y documentacion/sp426.5.pdf líneas 347-356."
+    )

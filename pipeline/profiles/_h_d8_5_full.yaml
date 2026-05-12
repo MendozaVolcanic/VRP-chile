@@ -1,0 +1,106 @@
+# A/B PROFILE: H_D8_5 (S37) — fix D8 cluster selection vía algoritmo MIROVA literal.
+#
+# Idéntico a mirova_equivalent salvo tres flags H_D8_5 ON + data_subdir aislado.
+# Implementa el fix combinado para D8 documentado en
+# `docs/superpowers/specs/2026-05-10-d8-cluster-selection.md` tras lectura
+# verbatim de Coppola 2016a SP426.5 (`documentacion/sp426.5.pdf`):
+#
+#   1. enable_eti_quadratic_scene: NTI_bk = a·NTI²_app + b·NTI_app + c
+#      regresión polinomial scene-wide por imagen (paper eqs 4-5).
+#      Reemplaza el background local annulus actual.
+#
+#   2. enable_second_pass_adjacent: tras detectar pixels active, re-correr
+#      Step 2 + Tests 2/3 EXCLUYENDO los active pixels del cómputo de
+#      vecinos. Coppola 2016a líneas 347-356 — el cluster crece orgánicamente
+#      recapturando pixels marginales opacados por el primer pass.
+#
+#   3. enable_sum_vrp_reporting: en vez de reportar primary_cluster.vrp_mw,
+#      reportar `Σ RP_pix` sobre TODOS los active pixels de la escena (paper
+#      eq 8). MIROVA NO selecciona cluster. Distance reportada = vent →
+#      pixel active MÁS LEJANO (paper líneas 510-513), NO centroide de cluster.
+#
+# Bug D8 (S35): 34/191 alertas (18%) tienen `dist_diff > 5km` entre nuestro
+# primary_cluster.centroid_dist_km y la distancia reportada por MIROVA.
+# Caso Puyehue lacolito 2026-05-09 05:42 VIIRS_N20: VRP-chile reporta cluster
+# cráter @ 0.69km (4.94 MW); MIROVA reporta lacolito @ 7.7km (0.18 MW). El
+# cluster lacolito existe en discarded_anomaly_pixels — pipeline detecta,
+# selección lo descarta.
+#
+# Decisión adopción operacional: gated por R2 pixel-level vs mirova-tif-archive
+# + A/B 30 días + R3 audit independiente (regla R5/R6 CLAUDE.md).
+#
+# NO ACTIVAR en mirova_equivalent.yaml hasta validar.
+
+profile: _h_d8_5_full
+description: >
+  A/B test S37 H_D8_5 — fix D8 algoritmo MIROVA literal: ETI cuadrático +
+  second-pass adyacente + sum(VRP) reporting. Idéntico a mirova_equivalent
+  salvo tres flags H_D8_5 ON.
+
+thresholds:
+  anomaly_threshold_k: 5.0
+  tir_threshold_k: 0.5
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  cloud_mask_bt_k: 0.0
+  max_sigma_component_k: 999.0
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
+  min_vent_pixels: 1
+  max_vent_sigma_contrib_k: 999.0
+  nti_rel_n_sigma: 3.0
+  nti_rel_min_floor: 0.005
+  dnti_contextual_c1: 0.003
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
+  modis_vent_threshold_k: 1.0
+  modis_vent_vrp_floor_mw: 0.0
+  n_sigma_mir_summit: 5.0
+  n_sigma_mir_scene: 10.0
+  # H_D8_5 — Coppola 2016a Tabla 1 (Tests 2/3 contextual)
+  # C1 (umbral absoluto dNTI/dETI por ROI) ya está cubierto por
+  # dnti_contextual_c1_summit/scene arriba (0.003 / 0.010).
+  # C2 (multiplicador σ) NUEVO para H_D8_5 second-pass:
+  c2_dnti_summit_night: 5.0
+  c2_dnti_scene_night: 10.0
+  c2_deti_summit_night: 5.0
+  c2_deti_scene_night: 10.0
+
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+paths:
+  enable_eruption_path: true
+  enable_vent_path: false
+  enable_vent_path_modis: false
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
+  enable_nti_relative_path: false
+  enable_dnti_contextual_path: true
+  enable_dnti_dual_roi: true
+  enable_test1_path: true
+  enable_dual_roi_bt: true
+  enable_exclude_zones: false
+  enable_test1_pixel_filter: false
+  enable_pixel_level_distance_filter: false  # H8 OFF — H_D8_5 implementa
+                                              # sum reporting que es la fix
+                                              # estructural; H8 redundante
+                                              # bajo H_D8_5.
+  # H_D8_5 — tres flags nuevos (ver cabecera).
+  enable_eti_quadratic_scene: true
+  enable_second_pass_adjacent: true
+  enable_sum_vrp_reporting: true
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: _h_d8_5_full
