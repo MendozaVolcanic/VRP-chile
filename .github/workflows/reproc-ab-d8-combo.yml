@@ -1,0 +1,84 @@
+name: A/B reproceso D8 combo full — vent_anchored + H8 + lbg_global (S38 C.1)
+
+# Antecedente: A/B vent_anchored (run 25749336998, S38) recall 84.9% → 92.2%
+# (+9.6pp). Análisis 9 FN restantes: 5/9 son D4 (Test 1 dispara, primary cráter
+# correcto, vrp=0 por L_bg local contaminado en geotermal crónico).
+#
+# Combo S38 C.1 activa los 3 fixes coordinados:
+#   - enable_vent_anchored_clustering (D8 fix S38)
+#   - enable_pixel_level_distance_filter (H8 fix S35)
+#   - enable_test1_lbg_global (D4 fix S33)
+#
+# Estimación recall esperado: 92.2% → 95-96% (capturar 4-5 Tupungatito/Lascar
+# FN con D4 fix). Los 4 sub-pixel extremos (VRP_MIROVA < 0.1 MW) probablemente
+# siguen FN.
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-27"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-05-11"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano: [Lascar, Lastarria, Tupungatito, PuyehueCordonCaulle, Isluga, PlanchonPeteroa, Villarrica, Llaima, Copahue, NevadosDeChillan, Chaiten]
+        profile: [_d8_combo_full, _d8_combo_disabled]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — ${{ matrix.profile }} / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 100
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed A/B data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/${{ matrix.profile }}/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S38 C.1 combo — ${{ matrix.profile }} / ${{ matrix.volcano }} ${{ github.event.inputs.start }}→${{ github.event.inputs.end }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
