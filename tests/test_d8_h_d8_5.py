@@ -234,24 +234,142 @@ def test_eti_quadratic_respects_mask():
     assert np.all(np.isfinite(eti[1:-1, :]))
 
 
-def test_second_pass_stub_raises():
-    """second_pass_adjacent stubbed — NotImplementedError con referencia
-    a líneas exactas del paper.
+def test_second_pass_recovers_adjacent_marginal_pixels():
+    """Replica el efecto descrito por Coppola 2016a líneas 347-356.
+
+    Escena: 3 pixels core muy hot + 2 pixels marginales ligeramente hot
+    adyacentes al core. Los marginales NO se detectan en single-pass
+    porque sus vecinos incluyen el core, que infla la mean local y baja
+    su dNTI. Tras excluir el core del cómputo de mean (second-pass), los
+    marginales destacan contra el verdadero bg uniforme y son
+    recapturados.
     """
-    dnti = np.zeros((10, 10))
-    deti = np.zeros((10, 10))
-    active = np.zeros((10, 10), dtype=bool)
-    is_summit = np.zeros((10, 10), dtype=bool)
-    with pytest.raises(NotImplementedError) as exc:
-        second_pass_adjacent(
-            dnti, deti, active,
-            c1_dnti=0.003, c1_deti=0.003,
-            c2_dnti=5.0, c2_deti=5.0,
-            is_summit=is_summit,
-        )
-    msg = str(exc.value).lower()
-    assert "h_d8_5" in msg
-    assert "347" in msg  # paper line range citado
+    H = W = 10
+    nti = np.full((H, W), -0.9, dtype=np.float64)
+    eti = np.full((H, W), 0.0, dtype=np.float64)
+
+    # 3 pixels core muy hot (primer pass los detectó)
+    core = [(5, 5), (5, 6), (6, 5)]
+    for (i, j) in core:
+        nti[i, j] = -0.50
+        eti[i, j] = 0.060
+
+    # 2 pixels marginales adyacentes al core, ligeramente hot
+    marginal = [(5, 4), (6, 6)]
+    for (i, j) in marginal:
+        nti[i, j] = -0.85   # 0.05 sobre el bg
+        eti[i, j] = 0.005   # 0.005 sobre el bg
+
+    active_mask = np.zeros((H, W), dtype=bool)
+    for (i, j) in core:
+        active_mask[i, j] = True
+
+    new_active = second_pass_adjacent(
+        nti, eti, active_mask,
+        c1_dnti=0.003, c1_deti=0.003,
+        c2_dnti=5.0, c2_deti=5.0,
+    )
+
+    # Core preservado
+    for (i, j) in core:
+        assert new_active[i, j], f'core pixel ({i},{j}) perdido'
+    # Marginales recapturados (eran invisibles con vecinos contaminados)
+    for (i, j) in marginal:
+        assert new_active[i, j], f'marginal ({i},{j}) no recapturado'
+    # Bg lejano no marcado
+    assert not new_active[0, 0]
+    assert not new_active[9, 9]
+
+
+def test_second_pass_isolated_active_unchanged():
+    """Si los pixels active están aislados y los vecinos son uniformes,
+    no hay marginales que recapturar — el mask se devuelve igual.
+    """
+    H = W = 12
+    nti = np.full((H, W), -0.9, dtype=np.float64)
+    eti = np.full((H, W), 0.0, dtype=np.float64)
+    # Un solo pixel active rodeado por bg uniforme
+    nti[6, 6] = -0.4
+    eti[6, 6] = 0.08
+    active_mask = np.zeros((H, W), dtype=bool)
+    active_mask[6, 6] = True
+
+    new_active = second_pass_adjacent(
+        nti, eti, active_mask,
+        c1_dnti=0.003, c1_deti=0.003,
+        c2_dnti=5.0, c2_deti=5.0,
+    )
+
+    # active pixel preservado
+    assert new_active[6, 6]
+    # Ningún otro pixel agregado (vecinos uniformes, dNTI/dETI ≈ 0)
+    assert int(np.count_nonzero(new_active)) == 1
+
+
+def test_second_pass_dual_roi_applies_distinct_thresholds():
+    """Con dual-ROI (is_summit + thresholds scene), pixels marginales en
+    summit pasan thresholds permisivos; mismos pixels en scene son
+    cortados por umbral más estricto. Replica Coppola 2016a Tabla 1
+    (5σ summit / 10σ scene).
+    """
+    H = W = 15
+    nti = np.full((H, W), -0.9, dtype=np.float64)
+    eti = np.full((H, W), 0.0, dtype=np.float64)
+    # ROI summit (mitad izquierda) y scene (mitad derecha)
+    is_summit = np.zeros((H, W), dtype=bool)
+    is_summit[:, :7] = True
+
+    # Cluster en summit (cols 4-5)
+    nti[7, 4] = -0.50; eti[7, 4] = 0.06
+    nti[7, 5] = -0.50; eti[7, 5] = 0.06
+    # Marginal summit (col 3) — debe pasar con c1=0.003
+    nti[7, 3] = -0.85; eti[7, 3] = 0.005
+
+    # Cluster en scene (cols 11-12)
+    nti[7, 11] = -0.50; eti[7, 11] = 0.06
+    nti[7, 12] = -0.50; eti[7, 12] = 0.06
+    # Marginal scene (col 10) con MISMO exceso — debe ser cortado por c1=0.10
+    nti[7, 10] = -0.85; eti[7, 10] = 0.005
+
+    active_mask = np.zeros((H, W), dtype=bool)
+    active_mask[7, 4] = active_mask[7, 5] = True
+    active_mask[7, 11] = active_mask[7, 12] = True
+
+    new_active = second_pass_adjacent(
+        nti, eti, active_mask,
+        c1_dnti=0.003, c1_deti=0.003,    # summit permisivo
+        c2_dnti=5.0, c2_deti=5.0,
+        is_summit=is_summit,
+        c1_dnti_scene=0.10, c1_deti_scene=0.10,  # scene MUY estricto
+        c2_dnti_scene=10.0, c2_deti_scene=10.0,
+    )
+
+    # Marginal en summit recapturado
+    assert new_active[7, 3], 'marginal summit no recapturado'
+    # Marginal en scene cortado por threshold estricto
+    assert not new_active[7, 10], 'marginal scene escapó al threshold'
+
+
+def test_second_pass_too_few_bg_returns_unchanged():
+    """Si tras excluir active pixels quedan <min_bg_pixels válidos, μ/σ
+    no son confiables → devolver active_mask original.
+    """
+    H = W = 5
+    nti = np.full((H, W), -0.9, dtype=np.float64)
+    eti = np.full((H, W), 0.0, dtype=np.float64)
+    # Casi todos active — solo queda 1 bg
+    active_mask = np.ones((H, W), dtype=bool)
+    active_mask[0, 0] = False
+
+    new_active = second_pass_adjacent(
+        nti, eti, active_mask,
+        c1_dnti=0.003, c1_deti=0.003,
+        c2_dnti=5.0, c2_deti=5.0,
+        min_bg_pixels=10,
+    )
+
+    # Sin bg suficiente, retorna el active_mask sin cambios
+    np.testing.assert_array_equal(new_active, active_mask)
 
 
 # ---------------------------------------------------------------------------
@@ -285,16 +403,6 @@ def test_h_d8_5_profile_loads():
 # ---------------------------------------------------------------------------
 # 4. Marcador: tests funcionales pendientes (xfail hasta implementación)
 # ---------------------------------------------------------------------------
-
-@pytest.mark.xfail(reason='H_D8_5 second-pass implementación pendiente',
-                   strict=True)
-def test_second_pass_recovers_adjacent_pixels():
-    """Cuando se implemente second_pass_adjacent, verificará que sobre cluster
-    sintético con pixels marginales escondidos por contaminación del primer
-    pass, el segundo pass los recapture.
-    """
-    raise NotImplementedError('pending H_D8_5 implementation')
-
 
 @pytest.mark.xfail(reason='sum_vrp_reporting implementación pendiente — toca store.py',
                    strict=True)

@@ -308,23 +308,29 @@ def compute_eti_scene_quadratic(
 
 
 def second_pass_adjacent(
-    dnti: np.ndarray,
-    deti: np.ndarray,
+    nti: np.ndarray,
+    eti: np.ndarray,
     active_mask: np.ndarray,
     *,
     c1_dnti: float,
     c1_deti: float,
     c2_dnti: float,
     c2_deti: float,
-    is_summit: np.ndarray,
+    is_summit: np.ndarray = None,
+    c1_dnti_scene: float = None,
+    c1_deti_scene: float = None,
+    c2_dnti_scene: float = None,
+    c2_deti_scene: float = None,
+    min_bg_pixels: int = 10,
 ) -> np.ndarray:
     """Coppola 2016a SP 426.5 paso 5 — second-pass adyacente.
 
     Tras detectar pixels active en el primer pass, recomputar dNTI y dETI
-    EXCLUYENDO esos pixels active del cómputo de la media de 8-vecinos.
+    EXCLUYENDO esos pixels active del cómputo de la media de 8-vecinos
+    (un active vecino contamina la media bajando el contraste de pixels
+    adyacentes y los hace pasar desapercibidos en el primer pass).
     Re-aplicar Tests 2 y 3 sobre las matrices nuevas. El cluster crece
-    orgánicamente recapturando pixels marginales que el primer pass
-    perdió porque sus propios vecinos active opacaban el contraste local.
+    orgánicamente recapturando los pixels marginales perdidos.
 
     Cita exacta del paper (líneas 347-356)::
 
@@ -334,30 +340,81 @@ def second_pass_adjacent(
         analysis) is performed a SECOND TIME, being particularly careful
         to eliminate all of the 'active' pixels already detected."
 
-    Es por esto que MIROVA, a igualdad de threshold contextual, captura
-    más pixels del cluster que nuestro pipeline single-pass — ergo,
-    reporta `Σ RP_pix` mayor sobre la misma señal real.
+    Tests 2 y 3 (paper líneas 311-315), aplicados en conjunción (AND)::
+
+        Test 2:  dNTI > C1   OR   dNTI > μ_dNTI + C2·σ_dNTI
+        Test 3:  dETI > C1   OR   dETI > μ_dETI + C2·σ_dETI
+        pixel active ⇔ Test 2 ∧ Test 3
+
+    μ y σ se computan sobre pixels NO active (background regional) de la
+    escena (no del primer pass — la idea es separar señal de fondo).
+
+    Dual-ROI: cuando ``is_summit`` y los thresholds ``*_scene`` se proveen,
+    se aplican umbrales distintos según Tabla 1 del paper (5σ summit /
+    10σ scene noche). Cuando no, se aplica el set único uniforme.
 
     Args:
-        dnti: 2D array dNTI del primer pass.
-        deti: 2D array dETI del primer pass.
-        active_mask: bool 2D array, True donde primer pass marcó active.
-        c1_dnti, c1_deti: umbrales absolutos (paper Tabla 1, depende ROI).
-        c2_dnti, c2_deti: multiplicadores σ contextual (Tabla 1).
-        is_summit: bool 2D array, True en ROI summit (Tabla 1 distingue
-            ROI1 summit 5×5km vs ROI2 scene; thresholds distintos).
+        nti: 2D array NTI original (no dNTI). El second-pass recalcula
+            dNTI internamente.
+        eti: 2D array ETI original. El second-pass recalcula dETI.
+        active_mask: bool 2D, True donde primer pass marcó active.
+            Estos pixels se excluyen del cómputo de la media de vecinos.
+        c1_dnti, c1_deti: umbrales absolutos summit (o uniforme).
+        c2_dnti, c2_deti: multiplicadores σ summit (o uniforme).
+        is_summit: bool 2D opcional. True en ROI summit (paper Tabla 1).
+        c1_dnti_scene, c1_deti_scene: umbrales absolutos scene (Tabla 1).
+        c2_dnti_scene, c2_deti_scene: multiplicadores σ scene.
+        min_bg_pixels: mínimo pixels bg para computar μ, σ confiable.
+            Si menos, devuelve active_mask sin cambios.
 
     Returns:
-        bool 2D array con pixels active TRAS recapture del second-pass
-        (incluye los del primer pass más nuevos). Shape igual a ``dnti``.
-
-    Raises:
-        NotImplementedError: stub. Ver
-            `docs/superpowers/specs/2026-05-10-d8-cluster-selection.md`
-            sección "Paso 5: Second-pass adyacente".
+        bool 2D con pixels active tras recapture (incluye primer pass +
+        nuevos). Shape igual a ``nti``.
     """
-    raise NotImplementedError(
-        "H_D8_5 (S37) part 2 — second-pass adyacente pendiente. "
-        "Ver docs/superpowers/specs/2026-05-10-d8-cluster-selection.md "
-        "y documentacion/sp426.5.pdf líneas 347-356."
+    # 1) Excluir active pixels del cómputo de mean: ponerlos a NaN.
+    nti_for_mean = np.where(active_mask, np.nan, nti)
+    eti_for_mean = np.where(active_mask, np.nan, eti)
+
+    # 2) 8-neighbor mean ignorando NaN (footprint excluye el centro).
+    mean_nti_neigh = generic_filter(
+        nti_for_mean, _nanmean_ignore_self,
+        footprint=_FOOTPRINT_8N, mode='constant', cval=np.nan,
     )
+    mean_eti_neigh = generic_filter(
+        eti_for_mean, _nanmean_ignore_self,
+        footprint=_FOOTPRINT_8N, mode='constant', cval=np.nan,
+    )
+    dnti = nti - mean_nti_neigh
+    deti = eti - mean_eti_neigh
+
+    # 3) μ, σ del background (no active, finito).
+    bg_mask = (~active_mask) & np.isfinite(dnti) & np.isfinite(deti)
+    if int(np.count_nonzero(bg_mask)) < min_bg_pixels:
+        return active_mask.copy()
+    mu_dnti = float(np.mean(dnti[bg_mask]))
+    sd_dnti = float(np.std(dnti[bg_mask]))
+    mu_deti = float(np.mean(deti[bg_mask]))
+    sd_deti = float(np.std(deti[bg_mask]))
+
+    # 4) Threshold por ROI (dual o uniforme).
+    dual = (is_summit is not None
+            and c1_dnti_scene is not None and c1_deti_scene is not None
+            and c2_dnti_scene is not None and c2_deti_scene is not None)
+    if dual:
+        thr_dnti_sum = max(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
+        thr_deti_sum = max(c1_deti, mu_deti + c2_deti * sd_deti)
+        thr_dnti_sce = max(c1_dnti_scene, mu_dnti + c2_dnti_scene * sd_dnti)
+        thr_deti_sce = max(c1_deti_scene, mu_deti + c2_deti_scene * sd_deti)
+        pass_2 = np.where(is_summit, dnti > thr_dnti_sum, dnti > thr_dnti_sce)
+        pass_3 = np.where(is_summit, deti > thr_deti_sum, deti > thr_deti_sce)
+    else:
+        thr_dnti = max(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
+        thr_deti = max(c1_deti, mu_deti + c2_deti * sd_deti)
+        pass_2 = dnti > thr_dnti
+        pass_3 = deti > thr_deti
+
+    # 5) Pixel "newly active" si pasa Test 2 ∧ Test 3 y es válido.
+    newly_active = (pass_2 & pass_3
+                    & np.isfinite(dnti) & np.isfinite(deti))
+
+    return active_mask | newly_active
