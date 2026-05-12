@@ -1,0 +1,101 @@
+name: A/B reproceso H_D8_5 — algoritmo MIROVA literal (S37)
+
+# Workflow dispatch-only para validación cuantitativa del fix H_D8_5
+# (ETI cuadrático scene-wide + second-pass adyacente + sum VRP reporting).
+#
+# Implementación basada en Coppola 2016a SP 426.5 leído verbatim:
+#   - ETI = NTI - NTI_bk con NTI_bk = a·NTI²_app + b·NTI_app + c
+#     (regresión polinomial scene-wide por imagen, eqs 4-5).
+#   - Tests 2 ∧ 3 sobre dNTI/dETI (8-vecinos), dual-ROI 5σ/10σ Tabla 1.
+#   - Second-pass excluye active pixels del cómputo de mean — recapture
+#     marginales (líneas 347-356).
+#   - sum(RP_pix) sobre TODOS los active pixels (eq 8) en lugar de
+#     primary_cluster.vrp_mw. Resuelve D8 estructuralmente.
+#
+# Profiles paralelos (cada uno escribe a data/<profile>/, aislado del operacional):
+#   _h_d8_5_full     → tres flags H_D8_5 ON (algoritmo paper)
+#   _h_d8_5_disabled → tres flags OFF (control sobre las mismas granules)
+#
+# Criterios de aceptación H_D8_5:
+# - Recall global se mantiene o sube (no perdemos detecciones reales).
+# - Ratio mediano (sum_vrp_active / mirova_vrp) acercarse a 1.0× — actualmente
+#   3.48× con primary_cluster. Si sum desciende muy debajo de 1, el ETI corta
+#   demasiado.
+# - Mejora dist_diff vs MIROVA reported (caso D8 Puyehue lacolito, Lascar Salar).
+# - R2 pixel-level vs mirova-tif-archive valida 5+ casos D8 (lacolito captura).
+#
+# Decisión adopción operacional gated por:
+#   - R5 brainstorming (CLAUDE.md regla)
+#   - R6 cuestionar mejora >30% antes de aceptar
+#   - R2 pixel-level confirmación
+#   - R3 audit independiente
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-12"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-05-11"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano: [Lascar, Lastarria, Tupungatito, PuyehueCordonCaulle, Isluga, PlanchonPeteroa, Villarrica, Llaima, Copahue, NevadosDeChillan, Chaiten]
+        profile: [_h_d8_5_full, _h_d8_5_disabled]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — ${{ matrix.profile }} / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 50
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed A/B data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/${{ matrix.profile }}/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S37 A/B H_D8_5 — ${{ matrix.profile }} / ${{ matrix.volcano }} ${{ github.event.inputs.start }}→${{ github.event.inputs.end }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1

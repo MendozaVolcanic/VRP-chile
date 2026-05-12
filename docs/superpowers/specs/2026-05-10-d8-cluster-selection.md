@@ -8,10 +8,14 @@
 - [x] S37 commit 1 (`39cd9f4`) — skeleton (perfil `_h_d8_5_full.yaml` + stubs `compute_eti_scene_quadratic`/`second_pass_adjacent` + tests sintéticos D8 bug + xfail markers)
 - [x] S37 commit 2 (`f9e5cb7`) — `compute_eti_scene_quadratic` funcional: regresión polinomial scene-wide (`np.polyfit` orden 2) + iterative re-fit excluyendo outliers >3σ (max 3 iter). 5 tests funcionales (recovery clean / hot stand-out / refit excludes outliers / too few pixels / respects mask). Paper eqs 4-5.
 - [x] S37 commit 3 (`bb7ed2e`) — `second_pass_adjacent` funcional: recomputa dNTI/dETI excluyendo active pixels del cómputo de mean 8-vecinos, aplica Tests 2 ∧ 3 con thresholds dual-ROI opcionales. 4 tests funcionales (recovery marginal / isolated unchanged / dual-ROI / too few bg). Paper líneas 311-315 + 347-356.
-- [ ] S37 commit 4 — integrar ambas funciones en `process_modis.py` / `process_viirs.py` / `process_viirs_mod.py` gated por flags del perfil (más complejo: toca 3 archivos grandes con flujo de detección)
-- [ ] S37 commit 5 — implementar `enable_sum_vrp_reporting` en `store.py` (campos `vrp_mw_sum_active` + `hotspot_dist_km_furthest`)
-- [ ] S37 commit 6 — workflow A/B reproc 30 días H_D8_5 vs mirova_equivalent baseline
-- [ ] S37 commit N — validación R2 pixel-level vs mirova-tif-archive + R3 audit independiente
+- [x] S37 commit 4a (`fbffcdd`) — helper `compute_nti_and_nti_app` en `detection_context.py` con constantes Planck. 4 tests sintéticos.
+- [x] S37 commit 4b (`970d79e`) — integrar path ETI cuadrático en `process_modis.py` gated por flags. Suma `eti_path_hot` al OR final. `diag_n_eti_path` persistido.
+- [x] S37 commit 4c+4d (`bc4502c`) — integrar en `process_viirs.py` (I04/I05 375m) y `process_viirs_mod.py` (M13/M15 750m). Mismo patrón que 4b.
+- [x] S37 commit 5 (`dc3cfb7`) — `enable_sum_vrp_reporting` en `store.py`. Campos `vrp_mw_sum_active` (Σ RP_pix paper eq 8) + `hotspot_dist_km_furthest` (paper líneas 510-513). 3 tests funcionales. Cierra el último xfail.
+- [x] S37 commit 6 (este commit) — perfil control `_h_d8_5_disabled.yaml` + workflow `reproc-ab-h-d8-5.yml`. A/B reproc 30 días 11 Tier A × 2 perfiles aislados de operacional.
+- [ ] S37 commit 7 — disparar workflow A/B, esperar finalización (~1-2 h).
+- [ ] S37 commit 8 — script audit comparativo enabled vs disabled vs operacional baseline.
+- [ ] S37 commit N — validación R2 pixel-level vs mirova-tif-archive + R3 audit independiente. Decisión adopción operacional bajo regla R5/R6 CLAUDE.md.
 
 ---
 
