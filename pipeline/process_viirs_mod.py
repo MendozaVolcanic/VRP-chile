@@ -90,6 +90,7 @@ from pipeline.profile import (
     C2_DNTI_SCENE_NIGHT,
     C2_DETI_SUMMIT_NIGHT,
     C2_DETI_SCENE_NIGHT,
+    ENABLE_VENT_ANCHORED_CLUSTERING,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -603,9 +604,18 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         vrp_per_pixel_2d[hot_rows, hot_cols] = per_pixel_vrp_mw
         _vlat = vent_lat if vent_lat is not None else volcano_lat
         _vlon = vent_lon if vent_lon is not None else volcano_lon
+        # S38 D8 fix: cluster selection vent-anchored.
+        _cluster_strategy = ("vent_anchored"
+                              if (ENABLE_VENT_ANCHORED_CLUSTERING
+                                  and inner_radius_km is not None)
+                              else "vrp_max")
+        _cluster_inner = (inner_radius_km
+                           if _cluster_strategy == "vent_anchored" else None)
         _clusters = cluster_hotspots(
             hot_mask_2d, lat, lon, _vlat, _vlon,
             vrp_per_pixel=vrp_per_pixel_2d,
+            strategy=_cluster_strategy,
+            inner_radius_km=_cluster_inner,
         )
         n_hotspots_clustered = len(_clusters)
         if _clusters:
@@ -761,9 +771,17 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp_arr = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             t1_vrp_2d[t1_rows, t1_cols] = t1_vrp_arr
+            # S38: vent-anchored strategy también al cluster Test 1.
+            _t1_strategy = ("vent_anchored"
+                             if (ENABLE_VENT_ANCHORED_CLUSTERING
+                                 and inner_radius_km is not None)
+                             else "vrp_max")
+            _t1_inner = (inner_radius_km
+                          if _t1_strategy == "vent_anchored" else None)
             t1_clusters = cluster_hotspots(
                 test1_hot_filtered, lat, lon, vent_lat, vent_lon,
                 connectivity=8, vrp_per_pixel=t1_vrp_2d,
+                strategy=_t1_strategy, inner_radius_km=_t1_inner,
             )
             if t1_clusters:
                 top = t1_clusters[0]

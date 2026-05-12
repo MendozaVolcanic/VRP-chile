@@ -211,6 +211,20 @@ C2_DNTI_SCENE_NIGHT: float = float(_t.get("c2_dnti_scene_night", 10.0))
 C2_DETI_SUMMIT_NIGHT: float = float(_t.get("c2_deti_summit_night", 5.0))
 C2_DETI_SCENE_NIGHT: float = float(_t.get("c2_deti_scene_night", 10.0))
 
+# S38 D8 fix verdadero — cluster selection vent-anchored.
+# A/B H_D8_5 (S37) refutó "MIROVA suma todo" empíricamente: el path ETI
+# cuadrático del paper produce subset redundante con paths existentes,
+# NO mejora recall. Re-análisis caso canónico Puyehue lacolito + Lascar
+# Salar: el problema no es detección (clusters relevantes sí se detectan)
+# sino selection — nuestro pipeline elige el cluster con vrp_mw máximo,
+# que típicamente es el más grande, NO el más relevante volcanológicamente.
+# Fix S38: cuando ON, cluster_hotspots() ordena por vent-anchored
+# (clusters dentro de inner_radius_km ganan sobre lejanos, entre cada
+# grupo el más cercano gana). Combinado con enable_pixel_level_distance_filter
+# (H8 fix existente OFF default) para filtrar pixels lejanos individuales.
+# Default OFF en mirova_equivalent. Activar solo en _d8_vent_anchored.yaml.
+ENABLE_VENT_ANCHORED_CLUSTERING: bool = bool(_p.get("enable_vent_anchored_clustering", False))
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))
