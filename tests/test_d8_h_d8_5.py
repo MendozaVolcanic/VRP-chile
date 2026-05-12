@@ -107,18 +107,131 @@ def test_clustering_picks_largest_not_closest():
 # 2. Contrato de los stubs H_D8_5
 # ---------------------------------------------------------------------------
 
-def test_eti_quadratic_stub_raises():
-    """compute_eti_scene_quadratic está stubbed — debe disparar
-    NotImplementedError con mensaje que apunte al design doc y al paper.
+def test_eti_quadratic_recovers_coefficients_clean():
+    """Sobre escena sintética sin outliers donde NTI = a·NTI²_app + b·NTI_app + c
+    exactamente, ETI debe ser ~0 en todos los pixels (residual = ruido numérico).
     """
-    nti = np.zeros((10, 10))
-    nti_app = np.zeros((10, 10))
-    mask = np.ones((10, 10), dtype=bool)
-    with pytest.raises(NotImplementedError) as exc:
-        compute_eti_scene_quadratic(nti, nti_app, mask)
-    msg = str(exc.value).lower()
-    assert "h_d8_5" in msg
-    assert "sp426.5" in msg or "documentacion" in msg
+    rng = np.random.default_rng(42)
+    H = W = 30
+    # NTI_app distribuido en rango realista [-1, -0.6]
+    nti_app = rng.uniform(-1.0, -0.6, size=(H, W))
+    # Coeficientes "verdaderos" de la escena
+    a_true, b_true, c_true = 0.2, 1.1, 0.3
+    nti = a_true * nti_app**2 + b_true * nti_app + c_true
+    mask = np.ones((H, W), dtype=bool)
+
+    eti = compute_eti_scene_quadratic(nti, nti_app, mask)
+
+    # Sin hot pixels: NTI matchea la regresión perfectamente → ETI ≈ 0
+    assert np.all(np.isfinite(eti))
+    assert np.max(np.abs(eti)) < 1e-9, f'ETI no es ~0: max={np.max(np.abs(eti))}'
+
+
+def test_eti_quadratic_hot_pixels_stand_out():
+    """Sobre escena sintética con background regresional + algunos pixels
+    "hot" (NTI elevado vs el predicho), los hot pixels deben tener ETI
+    significativamente mayor que los background.
+
+    Replica el rol detector del paper: hot pixels desvían de la regresión
+    cuadrática esperada y se identifican como anómalos.
+    """
+    rng = np.random.default_rng(7)
+    H = W = 30
+    nti_app = rng.uniform(-1.0, -0.6, size=(H, W))
+    nti = 0.15 * nti_app**2 + 1.05 * nti_app + 0.25 + rng.normal(0, 0.002, size=(H, W))
+    mask = np.ones((H, W), dtype=bool)
+
+    # Inyectar 5 hot pixels con NTI elevado (~0.05 sobre el predicho)
+    hot_coords = [(5, 5), (5, 6), (6, 5), (20, 20), (15, 25)]
+    for (i, j) in hot_coords:
+        nti[i, j] += 0.05
+
+    eti = compute_eti_scene_quadratic(nti, nti_app, mask)
+
+    # Background: ETI debe ser pequeño (residual de ruido + ajuste)
+    bg_mask = np.ones((H, W), dtype=bool)
+    for (i, j) in hot_coords:
+        bg_mask[i, j] = False
+    eti_bg = eti[bg_mask]
+    eti_hot = np.array([eti[i, j] for (i, j) in hot_coords])
+
+    bg_std = np.std(eti_bg)
+    assert bg_std < 0.01, f'bg ETI std demasiado alto: {bg_std}'
+    # Hot pixels deben sobresalir >5σ del background
+    assert np.all(eti_hot > 5 * bg_std), (
+        f'hot pixels no destacan: eti_hot={eti_hot}, 5*bg_std={5*bg_std}'
+    )
+    # Hot pixels deben tener ETI cercano a los 0.05 inyectados (iterative
+    # re-fit los excluye del ajuste, así que el background se recupera limpio)
+    assert np.all(eti_hot > 0.03)
+    assert np.all(eti_hot < 0.07)
+
+
+def test_eti_quadratic_iterative_refit_excludes_outliers():
+    """Con iterative_refit=True vs False, el resultado para hot pixels debe
+    diferir: sin refit, los hot pixels contaminan el ajuste; con refit, son
+    excluidos y los coeficientes recuperados están más cerca de la verdad.
+    """
+    rng = np.random.default_rng(11)
+    H = W = 40
+    nti_app = rng.uniform(-1.0, -0.5, size=(H, W))
+    a_true, b_true, c_true = 0.1, 1.0, 0.2
+    nti = a_true * nti_app**2 + b_true * nti_app + c_true
+    mask = np.ones((H, W), dtype=bool)
+
+    # Contaminar 8% con hot pixels (offset grande)
+    n_hot = int(0.08 * H * W)
+    flat_idx = rng.choice(H * W, size=n_hot, replace=False)
+    for idx in flat_idx:
+        i, j = idx // W, idx % W
+        nti[i, j] += 0.1
+
+    eti_refit = compute_eti_scene_quadratic(nti, nti_app, mask, iterative_refit=True)
+    eti_no_refit = compute_eti_scene_quadratic(nti, nti_app, mask, iterative_refit=False)
+
+    bg_mask = np.ones((H, W), dtype=bool)
+    for idx in flat_idx:
+        i, j = idx // W, idx % W
+        bg_mask[i, j] = False
+
+    # Con refit, el background ETI debe estar más cerca de 0 que sin refit
+    bg_abs_refit = np.mean(np.abs(eti_refit[bg_mask]))
+    bg_abs_no_refit = np.mean(np.abs(eti_no_refit[bg_mask]))
+    assert bg_abs_refit < bg_abs_no_refit, (
+        f'iterative refit no mejoró: con={bg_abs_refit}, sin={bg_abs_no_refit}'
+    )
+
+
+def test_eti_quadratic_too_few_pixels_returns_nan():
+    """Cuando hay <min_pixels válidos en la escena, el fit es inseguro y
+    debe devolver array de NaN (no inventar coeficientes con datos
+    insuficientes).
+    """
+    nti = np.full((5, 5), -0.8)
+    nti_app = np.full((5, 5), -0.7)
+    mask = np.zeros((5, 5), dtype=bool)
+    mask[0, 0] = True  # 1 solo pixel válido
+    eti = compute_eti_scene_quadratic(nti, nti_app, mask, min_pixels=10)
+    assert np.all(np.isnan(eti))
+
+
+def test_eti_quadratic_respects_mask():
+    """Pixels donde mask_valid=False deben quedar como NaN, aunque el fit
+    se haya hecho sobre los válidos.
+    """
+    rng = np.random.default_rng(3)
+    H = W = 25
+    nti_app = rng.uniform(-1.0, -0.6, size=(H, W))
+    nti = 0.1 * nti_app**2 + 1.0 * nti_app + 0.2
+    mask = np.ones((H, W), dtype=bool)
+    mask[0, :] = False  # primera fila enmascarada (e.g. edge)
+    mask[-1, :] = False
+
+    eti = compute_eti_scene_quadratic(nti, nti_app, mask)
+
+    assert np.all(np.isnan(eti[0, :]))
+    assert np.all(np.isnan(eti[-1, :]))
+    assert np.all(np.isfinite(eti[1:-1, :]))
 
 
 def test_second_pass_stub_raises():
@@ -172,16 +285,6 @@ def test_h_d8_5_profile_loads():
 # ---------------------------------------------------------------------------
 # 4. Marcador: tests funcionales pendientes (xfail hasta implementación)
 # ---------------------------------------------------------------------------
-
-@pytest.mark.xfail(reason='H_D8_5 implementación pendiente — primer commit S37 solo skeleton',
-                   strict=True)
-def test_eti_quadratic_recovers_synthetic_background():
-    """Cuando se implemente compute_eti_scene_quadratic, este test verificará
-    que sobre escena sintética con (a, b, c) conocidos + ruido, la función
-    recupere coeficientes dentro de tolerancia. Stub hoy → xfail strict.
-    """
-    raise NotImplementedError('pending H_D8_5 implementation')
-
 
 @pytest.mark.xfail(reason='H_D8_5 second-pass implementación pendiente',
                    strict=True)

@@ -213,6 +213,11 @@ def compute_eti_scene_quadratic(
     nti: np.ndarray,
     nti_app: np.ndarray,
     mask_valid: np.ndarray,
+    *,
+    iterative_refit: bool = True,
+    max_iter: int = 3,
+    outlier_sigma: float = 3.0,
+    min_pixels: int = 10,
 ) -> np.ndarray:
     """Coppola 2016a SP 426.5 eqs 4-5 — ETI scene-wide regresional.
 
@@ -222,40 +227,84 @@ def compute_eti_scene_quadratic(
         NTI_bk = a · NTI²_app + b · NTI_app + c        (eq 4)
         ETI    = NTI - NTI_bk                          (eq 5)
 
-    Los coeficientes ``a, b, c`` se ajustan por imagen (NO fijos): se hace
-    una regresión polynomial de orden 2 sobre los pixels válidos de la
-    escena, robust to outliers (paper sugiere RANSAC o iterative re-fit
-    excluyendo pixels active del fit). Resultado: ETI alto = pixel anómalo
-    vs el comportamiento esperado de la escena. Hot pixels desvían de la
-    regresión y son los que terminamos detectando.
+    Los coeficientes ``a, b, c`` se ajustan por imagen (NO fijos). Estrategia:
 
-    Por qué importa para clon MIROVA: nuestro pipeline actual usa
-    background local annulus (radio 5-25 km). Ese background es bueno para
-    contraste local pero el paper opera scene-wide para que el "esperado"
-    sea consistente entre regiones de la escena.
+    1. **Single-pass polyfit** orden 2 (``numpy.polyfit``) sobre todos los
+       pixels válidos. Baseline robusta de la relación esperada NTI(NTI_app).
+    2. **Iterative re-fit** (cuando ``iterative_refit=True``): hasta
+       ``max_iter`` iteraciones, identificar outliers donde
+       ``|nti - NTI_bk| > outlier_sigma · σ(residuals)`` y re-fit
+       excluyéndolos. Equivalente práctico al RANSAC del paper para
+       evitar que los hot pixels reales distorsionen el ajuste del bg.
+
+    Resultado: ETI alto = pixel anómalo vs el comportamiento esperado de
+    la escena. Los pixels que el paper describe como "active" son
+    exactamente los que sobresalen de la regresión.
+
+    Por qué importa para clon MIROVA: nuestro pipeline usa background local
+    annulus (radio 5-25 km). Funciona para contraste local pero el paper
+    opera scene-wide para que el "esperado" sea consistente entre regiones.
 
     Args:
         nti: 2D array NTI observado por pixel.
         nti_app: 2D array NTI sintético assuming pixel temp homogéneo
             (computado de BT_TIR vía Planck_MIR, eqs 2-3 del paper).
-        mask_valid: bool 2D array, True donde pixel es analizable (no
-            edge, no NaN, dentro de ROI scene).
+        mask_valid: bool 2D array, True donde pixel es analizable.
+        iterative_refit: si True, refina excluyendo outliers >outlier_sigma·σ.
+        max_iter: máximo de iteraciones de refit (default 3, típicamente
+            converge en 1-2).
+        outlier_sigma: umbral en sigmas de residual para marcar outlier
+            (default 3.0).
+        min_pixels: mínimo de pixels válidos para intentar el fit. Si la
+            scene tiene menos, devuelve array de NaN (signal "fit unsafe").
+            Default 10.
 
     Returns:
-        2D array ETI = NTI - NTI_bk, shape igual a `nti`. NaN donde
-        ``mask_valid`` es False.
-
-    Raises:
-        NotImplementedError: stub. Implementación pendiente — primer commit
-            del H_D8_5 (S37) solo registra el contrato. Ver
-            `docs/superpowers/specs/2026-05-10-d8-cluster-selection.md`
-            sección "Paso 1: Spectral analysis (NTI + ETI)".
+        2D array ETI = NTI - NTI_bk, shape igual a ``nti``. NaN donde
+        ``mask_valid`` es False O donde no se pudo ajustar el modelo.
     """
-    raise NotImplementedError(
-        "H_D8_5 (S37) part 1 — ETI cuadrático scene-wide pendiente. "
-        "Ver docs/superpowers/specs/2026-05-10-d8-cluster-selection.md "
-        "y documentacion/sp426.5.pdf eqs 4-5."
-    )
+    eti = np.full_like(nti, np.nan, dtype=np.float64)
+
+    finite_mask = mask_valid & np.isfinite(nti) & np.isfinite(nti_app)
+    n_valid = int(np.count_nonzero(finite_mask))
+    if n_valid < min_pixels:
+        return eti
+
+    x = nti_app[finite_mask].astype(np.float64)
+    y = nti[finite_mask].astype(np.float64)
+
+    # Pass 1 — fit inicial sobre todos los pixels válidos
+    try:
+        coeffs = np.polyfit(x, y, 2)  # [a, b, c]
+    except (np.linalg.LinAlgError, ValueError):
+        return eti
+
+    # Pass 2..max_iter — iterative re-fit excluyendo outliers
+    if iterative_refit:
+        inlier_idx = np.arange(len(x))
+        for _ in range(max_iter):
+            x_in = x[inlier_idx]
+            y_in = y[inlier_idx]
+            residuals = y_in - np.polyval(coeffs, x_in)
+            sigma = np.std(residuals)
+            if sigma == 0 or not np.isfinite(sigma):
+                break
+            new_inliers = np.where(np.abs(residuals) <= outlier_sigma * sigma)[0]
+            if len(new_inliers) == len(inlier_idx):
+                break  # converged
+            inlier_idx = inlier_idx[new_inliers]
+            if len(inlier_idx) < min_pixels:
+                break  # too few inliers — keep last good coeffs
+            try:
+                coeffs = np.polyfit(x[inlier_idx], y[inlier_idx], 2)
+            except (np.linalg.LinAlgError, ValueError):
+                break
+
+    # Evaluar NTI_bk = a·NTI²_app + b·NTI_app + c sobre TODO el grid
+    nti_bk = np.polyval(coeffs, nti_app)
+    eti_full = nti - nti_bk
+    eti[mask_valid] = eti_full[mask_valid]
+    return eti
 
 
 def second_pass_adjacent(
