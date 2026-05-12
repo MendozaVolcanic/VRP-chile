@@ -1,0 +1,105 @@
+name: A/B reproceso D8 vent-anchored clustering (S38)
+
+# Workflow dispatch-only para validación cuantitativa del fix D8 verdadero:
+# cluster selection vent-anchored en pipeline/clustering.py.
+#
+# Antecedente S37: A/B H_D8_5 (algoritmo paper Coppola 2016a literal) refutó
+# empíricamente la hipótesis "MIROVA suma todo". Recall idéntico, delta TP=0
+# en todos los Tier A. Causa raíz: el bug D8 NO es de detección sino de
+# CLUSTER SELECTION. Nuestro primary_cluster = max(vrp_mw) elige el cluster
+# más grande, no el volcánicamente relevante (cráter vent).
+#
+# Fix S38: cluster_hotspots(strategy="vent_anchored") prioriza clusters
+# dentro de inner_radius_km. Combinado con enable_pixel_level_distance_filter
+# (H8 fix existente OFF default desde S35).
+#
+# Profiles paralelos (aislados del operacional):
+#   _d8_vent_anchored          → vent_anchored ON + H8 ON
+#   _d8_vent_anchored_disabled → ambos OFF (control)
+#
+# Criterios de aceptación D8 vent-anchored:
+# - Recall global >= 82.8% (no perdemos detecciones por elegir cluster
+#   distinto — los clusters siguen detectándose, solo cambia cuál es primary).
+# - ratio_med significativamente menor (objetivo <2.0× vs 3.79× actual con
+#   primary=max vrp_mw porque ya no reportamos el feature lejano).
+# - dist_diff_med < 2.0 km (mejora desde 0.99km actual no esperada, pero
+#   tampoco empeoramiento).
+# - D8_cases (dist_diff > 5km) < 10 (vs 31 actual).
+# - R2 pixel-level vs mirova-tif-archive valida 5+ casos D8 canónicos
+#   (Puyehue lacolito captura, Lascar primary=cráter no Salar).
+#
+# Decisión adopción operacional gated por:
+#   - R5 brainstorming (regla CLAUDE.md)
+#   - R6 cuestionar mejora >30% antes de aceptar
+#   - R2 pixel-level confirmación
+#   - R3 audit independiente
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-27"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-05-11"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110  # Mismo timeout que reproc-ab-h-d8-5 (S37 v3)
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano: [Lascar, Lastarria, Tupungatito, PuyehueCordonCaulle, Isluga, PlanchonPeteroa, Villarrica, Llaima, Copahue, NevadosDeChillan, Chaiten]
+        profile: [_d8_vent_anchored, _d8_vent_anchored_disabled]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — ${{ matrix.profile }} / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 100
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed A/B data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/${{ matrix.profile }}/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S38 A/B D8 vent-anchored — ${{ matrix.profile }} / ${{ matrix.volcano }} ${{ github.event.inputs.start }}→${{ github.event.inputs.end }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1

@@ -37,6 +37,8 @@ def cluster_hotspots(
     *,
     connectivity: int = 8,
     vrp_per_pixel: np.ndarray = None,
+    strategy: str = "vrp_max",
+    inner_radius_km: float = None,
 ) -> List[dict]:
     """Agrupa pixels detectados (hot_mask_2d=True) en clusters espaciales.
 
@@ -48,23 +50,39 @@ def cluster_hotspots(
             permisivo, alineado con Coppola 2016a "neighbor pixels" tipica.
         vrp_per_pixel: 2D array opcional con VRP_MW por pixel (mismo shape
             que hot_mask_2d). Cuando se provee, cada cluster output incluye
-            `vrp_mw` (suma de VRPs de sus pixels) y los clusters se ordenan
-            por vrp_mw desc (no por n_pixels). Alineado con MIROVA NRT que
-            reporta VRP del cluster contiguo principal.
+            `vrp_mw` (suma de VRPs de sus pixels).
+        strategy: estrategia de ordenamiento (cuál cluster gana el "primary"):
+            * "vrp_max" (default, backward-compat): mayor vrp_mw gana.
+              Comportamiento histórico. Alineado con MIROVA cuando el
+              cluster volcánico real es también el más grande.
+            * "vent_anchored" (S38): prioridad por proximidad al vent.
+              Clusters con centroide dentro de `inner_radius_km` ganan
+              sobre clusters fuera (independiente de vrp_mw). Entre
+              clusters dentro: el más cercano gana. Entre clusters fuera:
+              el más cercano gana. Resuelve bug D8 donde un cluster
+              grande lejano (Salar Atacama, lago) se elegía como primary
+              ignorando el cluster real del cráter. Requiere
+              `inner_radius_km` no-None.
+        inner_radius_km: usado solo con strategy="vent_anchored". Radio en
+            km del vent dentro del cual los clusters son "del cráter".
 
     Returns:
-        Lista de dicts (uno por cluster). Sin vrp_per_pixel, ordenados por
-        n_pixels desc. Con vrp_per_pixel, ordenados por vrp_mw desc.
-        Cada dict:
-            n_pixels: int.
-            vrp_mw: float (solo si vrp_per_pixel se proveyo).
-            centroid_lat: float.
-            centroid_lon: float.
-            centroid_dist_km: float, haversine centroid -> vent.
-            pixel_indices: list[(i, j)] coords de los pixels en arrays 2D.
+        Lista de dicts (uno por cluster), ordenados según strategy. Sin
+        vrp_per_pixel y strategy="vrp_max", ordenados por n_pixels desc.
+        Cada dict contiene n_pixels, centroid_lat/lon, centroid_dist_km,
+        pixel_indices, y vrp_mw (si vrp_per_pixel se proveyo).
     """
     if hot_mask_2d.size == 0 or not hot_mask_2d.any():
         return []
+
+    if strategy not in ("vrp_max", "vent_anchored"):
+        raise ValueError(
+            f"strategy debe ser 'vrp_max' o 'vent_anchored', got {strategy!r}"
+        )
+    if strategy == "vent_anchored" and inner_radius_km is None:
+        raise ValueError(
+            "strategy='vent_anchored' requiere inner_radius_km"
+        )
 
     if connectivity == 4:
         structure = np.array([[0, 1, 0],
@@ -95,7 +113,19 @@ def cluster_hotspots(
             cluster["vrp_mw"] = float(np.sum(vrp_per_pixel[ii, jj]))
         clusters.append(cluster)
 
-    if has_vrp:
+    if strategy == "vent_anchored":
+        # S38 D8 fix: cluster cercano al vent gana sobre cluster lejano,
+        # independiente de vrp_mw. Filtro vent-anchored: clusters dentro
+        # del inner_radius_km tienen prioridad absoluta; entre ellos y
+        # entre los fuera, el más cercano gana. Empate por proximity con
+        # vrp_mw desc como tiebreaker.
+        def _vent_key(c):
+            inside = c["centroid_dist_km"] <= inner_radius_km
+            # tuple: (0 si inside else 1, dist asc, -vrp desc)
+            vrp = c.get("vrp_mw", 0.0) if has_vrp else 0.0
+            return (0 if inside else 1, c["centroid_dist_km"], -vrp)
+        clusters.sort(key=_vent_key)
+    elif has_vrp:
         clusters.sort(key=lambda c: c["vrp_mw"], reverse=True)
     else:
         clusters.sort(key=lambda c: c["n_pixels"], reverse=True)

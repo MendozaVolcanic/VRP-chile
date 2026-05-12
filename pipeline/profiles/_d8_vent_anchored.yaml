@@ -1,0 +1,99 @@
+# A/B PROFILE: D8 vent-anchored clustering (S38) — verdadero fix D8.
+#
+# A/B H_D8_5 (S37) refutó "MIROVA suma todo" empíricamente:
+#   - Recall idéntico 82.8% en operacional / disabled / full
+#   - Delta TP per volcán: +0 en TODOS los 11 Tier A
+#   - Path ETI cuadrático genera subset redundante con paths existentes
+#
+# Re-análisis casos D8 canónicos:
+#   - Puyehue lacolito: cluster cráter (0.5km, 1MW) + cluster lacolito
+#     (8km, 0.18MW) ambos detectados. MIROVA reporta lacolito; nosotros
+#     primary_cluster = max(vrp_mw) = cráter. Bug.
+#   - Lascar Salar: cluster cráter (1km, 1MW) + cluster Salar Atacama
+#     (25km, 100MW). MIROVA reporta cráter; nosotros vrp_max = Salar. Bug.
+#
+# Conclusión S37: el bug D8 NO es de detección sino de cluster selection.
+# Nuestro pipeline elige "max vrp_mw" lo cual típicamente es el cluster
+# más grande (NO el más relevante volcanológicamente).
+#
+# Fix S38:
+#   - cluster_hotspots(strategy="vent_anchored"): clusters dentro de
+#     inner_radius_km ganan sobre clusters fuera (cráter > Salar
+#     independiente de magnitud). Entre cada grupo, el más cercano gana.
+#   - Combinado con enable_pixel_level_distance_filter (H8 fix existente,
+#     OFF default desde S35): filtra anomaly_pixels lejanos que MIROVA
+#     no consideraría parte del cluster vent.
+#
+# Decisión adopción operacional gated por:
+#   - A/B 15d × 11 Tier A confirma recall ≥ 82.8% (no perdemos detección).
+#   - ratio_med baja significativamente (objetivo <2.0× vs 3.79× actual).
+#   - D8_cases (dist_diff>5km) baja (objetivo <10 vs 31 actual).
+#   - R2 pixel-level vs mirova-tif-archive valida Puyehue + Lascar.
+#   - R5 brainstorming + R6 cuestionar mejora (regla CLAUDE.md).
+
+profile: _d8_vent_anchored
+description: >
+  A/B S38 — cluster selection vent-anchored + H8 pixel filter combo.
+  Resuelve bug D8 estructuralmente sin tocar detección (paths existentes).
+
+thresholds:
+  anomaly_threshold_k: 5.0
+  tir_threshold_k: 0.5
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  cloud_mask_bt_k: 0.0
+  max_sigma_component_k: 999.0
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
+  min_vent_pixels: 1
+  max_vent_sigma_contrib_k: 999.0
+  nti_rel_n_sigma: 3.0
+  nti_rel_min_floor: 0.005
+  dnti_contextual_c1: 0.003
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
+  modis_vent_threshold_k: 1.0
+  modis_vent_vrp_floor_mw: 0.0
+  n_sigma_mir_summit: 5.0
+  n_sigma_mir_scene: 10.0
+
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+paths:
+  enable_eruption_path: true
+  enable_vent_path: false
+  enable_vent_path_modis: false
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
+  enable_nti_relative_path: false
+  enable_dnti_contextual_path: true
+  enable_dnti_dual_roi: true
+  enable_test1_path: true
+  enable_dual_roi_bt: true
+  enable_exclude_zones: false
+  enable_test1_pixel_filter: false
+  # H8 fix existente desde S35 — combo con vent-anchored.
+  # Sin H8, los pixels lejanos del cluster Salar siguen poblando
+  # anomaly_pixels aunque primary apunte al cráter. H8 los filtra.
+  enable_pixel_level_distance_filter: true
+  # H_D8_5 paths REFUTADOS en S37 — permanecen OFF.
+  enable_eti_quadratic_scene: false
+  enable_second_pass_adjacent: false
+  enable_sum_vrp_reporting: false
+  # S38 D8 fix verdadero — vent-anchored clustering.
+  enable_vent_anchored_clustering: true
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: _d8_vent_anchored
