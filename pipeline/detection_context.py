@@ -17,6 +17,8 @@ detection algorithm" — C1 absoluto + C2 contextual en dual-ROI.
 import numpy as np
 from scipy.ndimage import generic_filter
 
+from .constants import C1 as _PLANCK_C1, C2 as _PLANCK_C2
+
 
 # 8-neighbor footprint (3x3 excluyendo centro)
 _FOOTPRINT_8N = np.array(
@@ -194,3 +196,294 @@ def dual_roi_bt_threshold(
     is_summit = dist_km <= inner_km
     eff_threshold = np.where(is_summit, eff_summit, eff_scene)
     return roi_mask & ~np.isnan(bt) & (bt > eff_threshold)
+
+
+# ---------------------------------------------------------------------------
+# H_D8_5 (S37) — helper compartido NTI / NTI_app (Coppola 2016a eqs 1-3).
+# Necesario por los 3 procesadores cuando enable_eti_quadratic_scene=true.
+# ---------------------------------------------------------------------------
+
+
+def compute_nti_and_nti_app(
+    rad_mir: np.ndarray,
+    bt_tir: np.ndarray,
+    lambda_mir_um: float,
+    lambda_tir_um: float,
+) -> tuple:
+    """Coppola 2016a SP 426.5 eqs 1-3 — NTI observado + NTI_app sintético.
+
+    Por qué necesitamos ambos: la regresión cuadrática del paso 1
+    (compute_eti_scene_quadratic) opera sobre la relación esperada
+    ``NTI(NTI_app)`` para pixels "cold" (temperatura homogénea). Pixels
+    con fracción hot tienen ``NTI > NTI_app`` y desvían de la regresión —
+    ese desvío es exactamente la anomalía ETI que detectamos.
+
+    Definiciones (paper §"NTI and ETI"):
+
+        L_TIR ≡ Planck(λ_TIR, BT_TIR)        # rad TIR observada
+        NTI   = (L_MIR_obs - L_TIR) / (L_MIR_obs + L_TIR)         # eq 1
+        L_MIR_app(T) = Planck(λ_MIR, T)      # MIR si pixel fuera T uniforme
+        NTI_app = (L_MIR_app(BT_TIR) - L_TIR) / (L_MIR_app(BT_TIR) + L_TIR)
+                                                                   # eq 3
+
+    Donde T_app = BT_TIR (asumir pixel temp homogénea = la T que el TIR
+    "ve"; eq 2 del paper). Por construcción, para un pixel realmente
+    homogéneo se cumple ``rad_mir ≈ L_MIR_app(BT_TIR)`` → ``NTI ≈ NTI_app``.
+
+    Para un pixel con sub-pixel hotspot, MIR es mucho más sensible al
+    componente hot (Planck crece más rápido en MIR que en TIR a alta T),
+    así que ``rad_mir > L_MIR_app(BT_TIR)`` → ``NTI > NTI_app``.
+
+    Constantes Planck reusadas de pipeline.constants (forma L_λ = C1 /
+    (λ^5 (e^(C2/λT) - 1))) con λ en μm.
+
+    Args:
+        rad_mir: 2D array radiancia MIR observada (W·m⁻²·sr⁻¹·μm⁻¹).
+        bt_tir: 2D array brightness temperature TIR (K).
+        lambda_mir_um: longitud de onda central MIR en μm (ej 3.959 para
+            MODIS B22, 3.74 VIIRS I04, 4.05 VIIRS M13).
+        lambda_tir_um: longitud de onda central TIR en μm (ej 11.0 MODIS
+            B31, 11.45 VIIRS I05, 10.76 VIIRS M15).
+
+    Returns:
+        (nti, nti_app): tuple de 2D arrays float64 con shape igual a
+        ``rad_mir``. NaN donde inputs son NaN o donde la fórmula diverge.
+    """
+    # rad_tir desde BT_TIR (consistencia: tratamos BT como definición
+    # invertible de la radiance; rad_tir = Planck(λ_TIR, BT_TIR))
+    with np.errstate(over='ignore', invalid='ignore', divide='ignore'):
+        rad_tir = _PLANCK_C1 / (
+            lambda_tir_um ** 5
+            * (np.exp(_PLANCK_C2 / (lambda_tir_um * bt_tir)) - 1.0)
+        )
+        nti = (rad_mir - rad_tir) / (rad_mir + rad_tir)
+        rad_mir_app = _PLANCK_C1 / (
+            lambda_mir_um ** 5
+            * (np.exp(_PLANCK_C2 / (lambda_mir_um * bt_tir)) - 1.0)
+        )
+        nti_app = (rad_mir_app - rad_tir) / (rad_mir_app + rad_tir)
+    return nti.astype(np.float64), nti_app.astype(np.float64)
+
+
+# ---------------------------------------------------------------------------
+# H_D8_5 (S37) — skeleton funciones algoritmo MIROVA literal Coppola 2016a.
+#
+# Status: stubs registrados. Lógica pendiente — disparan NotImplementedError
+# hasta que se implementen. Tres flags en `_h_d8_5_full.yaml` controlan su
+# activación; mientras estén OFF en `mirova_equivalent`, el operacional no
+# se ve afectado.
+#
+# Diseño completo: `docs/superpowers/specs/2026-05-10-d8-cluster-selection.md`.
+# Paper referencia: `documentacion/sp426.5.pdf` (Coppola 2016a SP 426.5).
+# ---------------------------------------------------------------------------
+
+
+def compute_eti_scene_quadratic(
+    nti: np.ndarray,
+    nti_app: np.ndarray,
+    mask_valid: np.ndarray,
+    *,
+    iterative_refit: bool = True,
+    max_iter: int = 3,
+    outlier_sigma: float = 3.0,
+    min_pixels: int = 10,
+) -> np.ndarray:
+    """Coppola 2016a SP 426.5 eqs 4-5 — ETI scene-wide regresional.
+
+    Reemplaza el background local annulus por una regresión polinomial
+    cuadrática sobre la escena completa::
+
+        NTI_bk = a · NTI²_app + b · NTI_app + c        (eq 4)
+        ETI    = NTI - NTI_bk                          (eq 5)
+
+    Los coeficientes ``a, b, c`` se ajustan por imagen (NO fijos). Estrategia:
+
+    1. **Single-pass polyfit** orden 2 (``numpy.polyfit``) sobre todos los
+       pixels válidos. Baseline robusta de la relación esperada NTI(NTI_app).
+    2. **Iterative re-fit** (cuando ``iterative_refit=True``): hasta
+       ``max_iter`` iteraciones, identificar outliers donde
+       ``|nti - NTI_bk| > outlier_sigma · σ(residuals)`` y re-fit
+       excluyéndolos. Equivalente práctico al RANSAC del paper para
+       evitar que los hot pixels reales distorsionen el ajuste del bg.
+
+    Resultado: ETI alto = pixel anómalo vs el comportamiento esperado de
+    la escena. Los pixels que el paper describe como "active" son
+    exactamente los que sobresalen de la regresión.
+
+    Por qué importa para clon MIROVA: nuestro pipeline usa background local
+    annulus (radio 5-25 km). Funciona para contraste local pero el paper
+    opera scene-wide para que el "esperado" sea consistente entre regiones.
+
+    Args:
+        nti: 2D array NTI observado por pixel.
+        nti_app: 2D array NTI sintético assuming pixel temp homogéneo
+            (computado de BT_TIR vía Planck_MIR, eqs 2-3 del paper).
+        mask_valid: bool 2D array, True donde pixel es analizable.
+        iterative_refit: si True, refina excluyendo outliers >outlier_sigma·σ.
+        max_iter: máximo de iteraciones de refit (default 3, típicamente
+            converge en 1-2).
+        outlier_sigma: umbral en sigmas de residual para marcar outlier
+            (default 3.0).
+        min_pixels: mínimo de pixels válidos para intentar el fit. Si la
+            scene tiene menos, devuelve array de NaN (signal "fit unsafe").
+            Default 10.
+
+    Returns:
+        2D array ETI = NTI - NTI_bk, shape igual a ``nti``. NaN donde
+        ``mask_valid`` es False O donde no se pudo ajustar el modelo.
+    """
+    eti = np.full_like(nti, np.nan, dtype=np.float64)
+
+    finite_mask = mask_valid & np.isfinite(nti) & np.isfinite(nti_app)
+    n_valid = int(np.count_nonzero(finite_mask))
+    if n_valid < min_pixels:
+        return eti
+
+    x = nti_app[finite_mask].astype(np.float64)
+    y = nti[finite_mask].astype(np.float64)
+
+    # Pass 1 — fit inicial sobre todos los pixels válidos
+    try:
+        coeffs = np.polyfit(x, y, 2)  # [a, b, c]
+    except (np.linalg.LinAlgError, ValueError):
+        return eti
+
+    # Pass 2..max_iter — iterative re-fit excluyendo outliers
+    if iterative_refit:
+        inlier_idx = np.arange(len(x))
+        for _ in range(max_iter):
+            x_in = x[inlier_idx]
+            y_in = y[inlier_idx]
+            residuals = y_in - np.polyval(coeffs, x_in)
+            sigma = np.std(residuals)
+            if sigma == 0 or not np.isfinite(sigma):
+                break
+            new_inliers = np.where(np.abs(residuals) <= outlier_sigma * sigma)[0]
+            if len(new_inliers) == len(inlier_idx):
+                break  # converged
+            inlier_idx = inlier_idx[new_inliers]
+            if len(inlier_idx) < min_pixels:
+                break  # too few inliers — keep last good coeffs
+            try:
+                coeffs = np.polyfit(x[inlier_idx], y[inlier_idx], 2)
+            except (np.linalg.LinAlgError, ValueError):
+                break
+
+    # Evaluar NTI_bk = a·NTI²_app + b·NTI_app + c sobre TODO el grid
+    nti_bk = np.polyval(coeffs, nti_app)
+    eti_full = nti - nti_bk
+    eti[mask_valid] = eti_full[mask_valid]
+    return eti
+
+
+def second_pass_adjacent(
+    nti: np.ndarray,
+    eti: np.ndarray,
+    active_mask: np.ndarray,
+    *,
+    c1_dnti: float,
+    c1_deti: float,
+    c2_dnti: float,
+    c2_deti: float,
+    is_summit: np.ndarray = None,
+    c1_dnti_scene: float = None,
+    c1_deti_scene: float = None,
+    c2_dnti_scene: float = None,
+    c2_deti_scene: float = None,
+    min_bg_pixels: int = 10,
+) -> np.ndarray:
+    """Coppola 2016a SP 426.5 paso 5 — second-pass adyacente.
+
+    Tras detectar pixels active en el primer pass, recomputar dNTI y dETI
+    EXCLUYENDO esos pixels active del cómputo de la media de 8-vecinos
+    (un active vecino contamina la media bajando el contraste de pixels
+    adyacentes y los hace pasar desapercibidos en el primer pass).
+    Re-aplicar Tests 2 y 3 sobre las matrices nuevas. El cluster crece
+    orgánicamente recapturando los pixels marginales perdidos.
+
+    Cita exacta del paper (líneas 347-356)::
+
+        "active pixels may strongly modify the average values of their
+        surroundings, with a consequent decrease in the dNTI and dETI
+        values of adjacent pixels. To avoid this problem, step 2 (spatial
+        analysis) is performed a SECOND TIME, being particularly careful
+        to eliminate all of the 'active' pixels already detected."
+
+    Tests 2 y 3 (paper líneas 311-315), aplicados en conjunción (AND)::
+
+        Test 2:  dNTI > C1   OR   dNTI > μ_dNTI + C2·σ_dNTI
+        Test 3:  dETI > C1   OR   dETI > μ_dETI + C2·σ_dETI
+        pixel active ⇔ Test 2 ∧ Test 3
+
+    μ y σ se computan sobre pixels NO active (background regional) de la
+    escena (no del primer pass — la idea es separar señal de fondo).
+
+    Dual-ROI: cuando ``is_summit`` y los thresholds ``*_scene`` se proveen,
+    se aplican umbrales distintos según Tabla 1 del paper (5σ summit /
+    10σ scene noche). Cuando no, se aplica el set único uniforme.
+
+    Args:
+        nti: 2D array NTI original (no dNTI). El second-pass recalcula
+            dNTI internamente.
+        eti: 2D array ETI original. El second-pass recalcula dETI.
+        active_mask: bool 2D, True donde primer pass marcó active.
+            Estos pixels se excluyen del cómputo de la media de vecinos.
+        c1_dnti, c1_deti: umbrales absolutos summit (o uniforme).
+        c2_dnti, c2_deti: multiplicadores σ summit (o uniforme).
+        is_summit: bool 2D opcional. True en ROI summit (paper Tabla 1).
+        c1_dnti_scene, c1_deti_scene: umbrales absolutos scene (Tabla 1).
+        c2_dnti_scene, c2_deti_scene: multiplicadores σ scene.
+        min_bg_pixels: mínimo pixels bg para computar μ, σ confiable.
+            Si menos, devuelve active_mask sin cambios.
+
+    Returns:
+        bool 2D con pixels active tras recapture (incluye primer pass +
+        nuevos). Shape igual a ``nti``.
+    """
+    # 1) Excluir active pixels del cómputo de mean: ponerlos a NaN.
+    nti_for_mean = np.where(active_mask, np.nan, nti)
+    eti_for_mean = np.where(active_mask, np.nan, eti)
+
+    # 2) 8-neighbor mean ignorando NaN (footprint excluye el centro).
+    mean_nti_neigh = generic_filter(
+        nti_for_mean, _nanmean_ignore_self,
+        footprint=_FOOTPRINT_8N, mode='constant', cval=np.nan,
+    )
+    mean_eti_neigh = generic_filter(
+        eti_for_mean, _nanmean_ignore_self,
+        footprint=_FOOTPRINT_8N, mode='constant', cval=np.nan,
+    )
+    dnti = nti - mean_nti_neigh
+    deti = eti - mean_eti_neigh
+
+    # 3) μ, σ del background (no active, finito).
+    bg_mask = (~active_mask) & np.isfinite(dnti) & np.isfinite(deti)
+    if int(np.count_nonzero(bg_mask)) < min_bg_pixels:
+        return active_mask.copy()
+    mu_dnti = float(np.mean(dnti[bg_mask]))
+    sd_dnti = float(np.std(dnti[bg_mask]))
+    mu_deti = float(np.mean(deti[bg_mask]))
+    sd_deti = float(np.std(deti[bg_mask]))
+
+    # 4) Threshold por ROI (dual o uniforme).
+    dual = (is_summit is not None
+            and c1_dnti_scene is not None and c1_deti_scene is not None
+            and c2_dnti_scene is not None and c2_deti_scene is not None)
+    if dual:
+        thr_dnti_sum = max(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
+        thr_deti_sum = max(c1_deti, mu_deti + c2_deti * sd_deti)
+        thr_dnti_sce = max(c1_dnti_scene, mu_dnti + c2_dnti_scene * sd_dnti)
+        thr_deti_sce = max(c1_deti_scene, mu_deti + c2_deti_scene * sd_deti)
+        pass_2 = np.where(is_summit, dnti > thr_dnti_sum, dnti > thr_dnti_sce)
+        pass_3 = np.where(is_summit, deti > thr_deti_sum, deti > thr_deti_sce)
+    else:
+        thr_dnti = max(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
+        thr_deti = max(c1_deti, mu_deti + c2_deti * sd_deti)
+        pass_2 = dnti > thr_dnti
+        pass_3 = deti > thr_deti
+
+    # 5) Pixel "newly active" si pasa Test 2 ∧ Test 3 y es válido.
+    newly_active = (pass_2 & pass_3
+                    & np.isfinite(dnti) & np.isfinite(deti))
+
+    return active_mask | newly_active

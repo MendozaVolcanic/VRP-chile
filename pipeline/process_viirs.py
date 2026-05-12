@@ -96,11 +96,20 @@ from pipeline.profile import (
     TEST1_ROI_KM,
     TEST1_INNER_RING_KM,
     ENABLE_EXCLUDE_ZONES,
+    ENABLE_ETI_QUADRATIC_SCENE,
+    ENABLE_SECOND_PASS_ADJACENT,
+    C2_DNTI_SUMMIT_NIGHT,
+    C2_DNTI_SCENE_NIGHT,
+    C2_DETI_SUMMIT_NIGHT,
+    C2_DETI_SCENE_NIGHT,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
     dual_roi_contextual_dnti_hot_mask,
     dual_roi_bt_threshold,
+    compute_eti_scene_quadratic,
+    compute_nti_and_nti_app,
+    second_pass_adjacent,
 )
 from .test1_integrated import compute_test1_mir
 
@@ -350,6 +359,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # condicional, para evitar UnboundLocalError cuando "I04" no esta en bands
     # o len(bg_vals) < 10 (granules con poco data utilizable).
     n_dnti_ctx_path = 0
+    n_eti_path = 0  # S37 H_D8_5 — mismo motivo (paridad MODIS pattern).
     # S27: cluster aggregation defaults (mismo motivo: evitar UnboundLocalError
     # si rama "I04" no se ejecuta).
     n_hotspots_clustered = 0
@@ -519,7 +529,65 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     # que el cráter (glaciar). Usar global → todos los ΔL clip a 0.
                     test1_L_bg_local = test1_res.get("L_bg")
 
-            hot_mask_2d = bt_path_hot | nti_path_hot | nti_rel_hot | dnti_ctx_hot | test1_hot
+            # S37 H_D8_5 — path ETI cuadrático scene-wide VIIRS I04/I05.
+            # I04 (3.74 μm MIR) + I05 (11.45 μm TIR) entran al cómputo de
+            # NTI / NTI_app. Tests 2 ∧ 3 sobre dNTI/dETI (8-vecinos).
+            # Opcional second-pass que recapture marginales contaminados.
+            eti_path_hot = np.zeros_like(bt_path_hot, dtype=bool)
+            n_eti_path = 0
+            if (ENABLE_ETI_QUADRATIC_SCENE
+                    and inner_radius_km is not None
+                    and vent_lat is not None and vent_lon is not None
+                    and not np.isnan(nti_bg)):
+                _, nti_app_viirs = compute_nti_and_nti_app(
+                    rad_mir=L_mir,
+                    bt_tir=bt5,
+                    lambda_mir_um=I04_LAMBDA,
+                    lambda_tir_um=11.450,
+                )
+                mask_valid_eti = (
+                    roi_mask
+                    & ~np.isnan(nti) & ~np.isnan(nti_app_viirs)
+                    & ~np.isnan(bt)
+                )
+                eti_2d = compute_eti_scene_quadratic(
+                    nti, nti_app_viirs, mask_valid_eti,
+                )
+                is_summit = vent_dist_per_pixel <= inner_radius_km
+                empty_active = np.zeros_like(mask_valid_eti, dtype=bool)
+                first_pass_active = second_pass_adjacent(
+                    nti, eti_2d, empty_active,
+                    c1_dnti=DNTI_CONTEXTUAL_C1_SUMMIT,
+                    c1_deti=DNTI_CONTEXTUAL_C1_SUMMIT,
+                    c2_dnti=C2_DNTI_SUMMIT_NIGHT,
+                    c2_deti=C2_DETI_SUMMIT_NIGHT,
+                    is_summit=is_summit,
+                    c1_dnti_scene=DNTI_CONTEXTUAL_C1_SCENE,
+                    c1_deti_scene=DNTI_CONTEXTUAL_C1_SCENE,
+                    c2_dnti_scene=C2_DNTI_SCENE_NIGHT,
+                    c2_deti_scene=C2_DETI_SCENE_NIGHT,
+                )
+                if ENABLE_SECOND_PASS_ADJACENT:
+                    eti_path_hot = second_pass_adjacent(
+                        nti, eti_2d, first_pass_active,
+                        c1_dnti=DNTI_CONTEXTUAL_C1_SUMMIT,
+                        c1_deti=DNTI_CONTEXTUAL_C1_SUMMIT,
+                        c2_dnti=C2_DNTI_SUMMIT_NIGHT,
+                        c2_deti=C2_DETI_SUMMIT_NIGHT,
+                        is_summit=is_summit,
+                        c1_dnti_scene=DNTI_CONTEXTUAL_C1_SCENE,
+                        c1_deti_scene=DNTI_CONTEXTUAL_C1_SCENE,
+                        c2_dnti_scene=C2_DNTI_SCENE_NIGHT,
+                        c2_deti_scene=C2_DETI_SCENE_NIGHT,
+                    )
+                else:
+                    eti_path_hot = first_pass_active
+                eti_path_hot = (eti_path_hot & roi_mask & ~np.isnan(bt)
+                                & (bt > (t_bg_i04 + NTI_BT_SANITY_K)))
+                n_eti_path = int(np.sum(eti_path_hot))
+
+            hot_mask_2d = (bt_path_hot | nti_path_hot | nti_rel_hot
+                           | dnti_ctx_hot | test1_hot | eti_path_hot)
 
             # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene a
             # la mask final combinada (Coppola 2016a Tabla 1). Pixels que
@@ -907,6 +975,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "diag_n_bt_path": n_bt_path,
         "diag_n_nti_path": n_nti_path,
         "diag_n_dnti_ctx_path": n_dnti_ctx_path,
+        "diag_n_eti_path": n_eti_path,  # S37 H_D8_5
         # S25 Path Test 1 (Coppola 2015 Eq.1) integrated-ROI MIR
         "triggered_test1": test1_triggered,
         "n_test1_pixels": test1_n_contrib,
