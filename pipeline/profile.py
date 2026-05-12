@@ -186,6 +186,31 @@ ENABLE_TEST1_LBG_GLOBAL: bool = bool(_p.get("enable_test1_lbg_global", False))
 # false en _mirova_literal para test A/B.
 ENABLE_EXCLUDE_ZONES: bool = bool(_p.get("enable_exclude_zones", True))
 
+# S37 H_D8_5 — algoritmo MIROVA literal (Coppola 2016a SP 426.5).
+# Tres flags coordinados que activan el clon literal:
+#   1. enable_eti_quadratic_scene: regresión cuadrática scene-wide
+#      (NTI_bk = a·NTI²_app + b·NTI_app + c, eqs 4-5 paper) +
+#      first pass Tests 2 ∧ 3 sobre dNTI/dETI contextuales.
+#   2. enable_second_pass_adjacent: tras first pass, re-correr el cómputo
+#      excluyendo active pixels (líneas 347-356 paper). Recapture pixels
+#      marginales que el first pass perdió por contaminación de vecinos.
+#   3. enable_sum_vrp_reporting: store.py reporta vrp_mw_sum_active y
+#      hotspot_dist_km_furthest (cluster-agnostic). MIROVA no selecciona
+#      cluster — suma TODOS los active pixels (eq 8). Resuelve D8.
+# Default OFF en mirova_equivalent. Activar solo en _h_d8_5_full.yaml para A/B.
+ENABLE_ETI_QUADRATIC_SCENE: bool = bool(_p.get("enable_eti_quadratic_scene", False))
+ENABLE_SECOND_PASS_ADJACENT: bool = bool(_p.get("enable_second_pass_adjacent", False))
+ENABLE_SUM_VRP_REPORTING: bool = bool(_p.get("enable_sum_vrp_reporting", False))
+
+# C2 multiplicadores σ contextual para Tests 2 (dNTI) y 3 (dETI), por ROI.
+# Coppola 2016a Tabla 1 noche: 5σ summit (ROI1) / 10σ scene (ROI2).
+# Tests 2 y 3 usan los mismos valores pero los expongo separados para
+# afinamientos futuros (paper deja libertad ROI-specific).
+C2_DNTI_SUMMIT_NIGHT: float = float(_t.get("c2_dnti_summit_night", 5.0))
+C2_DNTI_SCENE_NIGHT: float = float(_t.get("c2_dnti_scene_night", 10.0))
+C2_DETI_SUMMIT_NIGHT: float = float(_t.get("c2_deti_summit_night", 5.0))
+C2_DETI_SCENE_NIGHT: float = float(_t.get("c2_deti_scene_night", 10.0))
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))
