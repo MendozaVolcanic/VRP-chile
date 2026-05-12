@@ -17,6 +17,8 @@ detection algorithm" — C1 absoluto + C2 contextual en dual-ROI.
 import numpy as np
 from scipy.ndimage import generic_filter
 
+from .constants import C1 as _PLANCK_C1, C2 as _PLANCK_C2
+
 
 # 8-neighbor footprint (3x3 excluyendo centro)
 _FOOTPRINT_8N = np.array(
@@ -194,6 +196,73 @@ def dual_roi_bt_threshold(
     is_summit = dist_km <= inner_km
     eff_threshold = np.where(is_summit, eff_summit, eff_scene)
     return roi_mask & ~np.isnan(bt) & (bt > eff_threshold)
+
+
+# ---------------------------------------------------------------------------
+# H_D8_5 (S37) — helper compartido NTI / NTI_app (Coppola 2016a eqs 1-3).
+# Necesario por los 3 procesadores cuando enable_eti_quadratic_scene=true.
+# ---------------------------------------------------------------------------
+
+
+def compute_nti_and_nti_app(
+    rad_mir: np.ndarray,
+    bt_tir: np.ndarray,
+    lambda_mir_um: float,
+    lambda_tir_um: float,
+) -> tuple:
+    """Coppola 2016a SP 426.5 eqs 1-3 — NTI observado + NTI_app sintético.
+
+    Por qué necesitamos ambos: la regresión cuadrática del paso 1
+    (compute_eti_scene_quadratic) opera sobre la relación esperada
+    ``NTI(NTI_app)`` para pixels "cold" (temperatura homogénea). Pixels
+    con fracción hot tienen ``NTI > NTI_app`` y desvían de la regresión —
+    ese desvío es exactamente la anomalía ETI que detectamos.
+
+    Definiciones (paper §"NTI and ETI"):
+
+        L_TIR ≡ Planck(λ_TIR, BT_TIR)        # rad TIR observada
+        NTI   = (L_MIR_obs - L_TIR) / (L_MIR_obs + L_TIR)         # eq 1
+        L_MIR_app(T) = Planck(λ_MIR, T)      # MIR si pixel fuera T uniforme
+        NTI_app = (L_MIR_app(BT_TIR) - L_TIR) / (L_MIR_app(BT_TIR) + L_TIR)
+                                                                   # eq 3
+
+    Donde T_app = BT_TIR (asumir pixel temp homogénea = la T que el TIR
+    "ve"; eq 2 del paper). Por construcción, para un pixel realmente
+    homogéneo se cumple ``rad_mir ≈ L_MIR_app(BT_TIR)`` → ``NTI ≈ NTI_app``.
+
+    Para un pixel con sub-pixel hotspot, MIR es mucho más sensible al
+    componente hot (Planck crece más rápido en MIR que en TIR a alta T),
+    así que ``rad_mir > L_MIR_app(BT_TIR)`` → ``NTI > NTI_app``.
+
+    Constantes Planck reusadas de pipeline.constants (forma L_λ = C1 /
+    (λ^5 (e^(C2/λT) - 1))) con λ en μm.
+
+    Args:
+        rad_mir: 2D array radiancia MIR observada (W·m⁻²·sr⁻¹·μm⁻¹).
+        bt_tir: 2D array brightness temperature TIR (K).
+        lambda_mir_um: longitud de onda central MIR en μm (ej 3.959 para
+            MODIS B22, 3.74 VIIRS I04, 4.05 VIIRS M13).
+        lambda_tir_um: longitud de onda central TIR en μm (ej 11.0 MODIS
+            B31, 11.45 VIIRS I05, 10.76 VIIRS M15).
+
+    Returns:
+        (nti, nti_app): tuple de 2D arrays float64 con shape igual a
+        ``rad_mir``. NaN donde inputs son NaN o donde la fórmula diverge.
+    """
+    # rad_tir desde BT_TIR (consistencia: tratamos BT como definición
+    # invertible de la radiance; rad_tir = Planck(λ_TIR, BT_TIR))
+    with np.errstate(over='ignore', invalid='ignore', divide='ignore'):
+        rad_tir = _PLANCK_C1 / (
+            lambda_tir_um ** 5
+            * (np.exp(_PLANCK_C2 / (lambda_tir_um * bt_tir)) - 1.0)
+        )
+        nti = (rad_mir - rad_tir) / (rad_mir + rad_tir)
+        rad_mir_app = _PLANCK_C1 / (
+            lambda_mir_um ** 5
+            * (np.exp(_PLANCK_C2 / (lambda_mir_um * bt_tir)) - 1.0)
+        )
+        nti_app = (rad_mir_app - rad_tir) / (rad_mir_app + rad_tir)
+    return nti.astype(np.float64), nti_app.astype(np.float64)
 
 
 # ---------------------------------------------------------------------------

@@ -32,10 +32,17 @@ import yaml
 from pathlib import Path
 
 from pipeline.clustering import cluster_hotspots
+from pipeline.constants import C1 as PLANCK_C1, C2 as PLANCK_C2
 from pipeline.detection_context import (
     compute_eti_scene_quadratic,
+    compute_nti_and_nti_app,
     second_pass_adjacent,
 )
+
+
+def _planck(lam_um, T_k):
+    """Helper Planck para tests sintéticos (misma fórmula que el código)."""
+    return PLANCK_C1 / (lam_um ** 5 * (np.exp(PLANCK_C2 / (lam_um * T_k)) - 1.0))
 
 REPO = Path(__file__).resolve().parent.parent
 
@@ -403,6 +410,78 @@ def test_h_d8_5_profile_loads():
 # ---------------------------------------------------------------------------
 # 4. Marcador: tests funcionales pendientes (xfail hasta implementación)
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# NTI / NTI_app helper (commit 4a)
+# ---------------------------------------------------------------------------
+
+def test_nti_app_equals_nti_for_homogeneous_pixel():
+    """Para un pixel realmente homogéneo (temperatura uniforme), por
+    construcción rad_mir = Planck(λ_MIR, BT_TIR) y por tanto NTI ≈ NTI_app.
+    """
+    # Pixel a 280 K (típica escena nocturna sin actividad)
+    bt_tir = np.full((5, 5), 280.0)
+    # rad_mir consistente con temp 280 K en λ_MIR=3.959 μm (MODIS B22)
+    lam_mir = 3.959
+    lam_tir = 11.0
+    rad_mir = _planck(lam_mir, 280.0) * np.ones((5, 5))
+
+    nti, nti_app = compute_nti_and_nti_app(rad_mir, bt_tir, lam_mir, lam_tir)
+
+    np.testing.assert_allclose(nti, nti_app, rtol=1e-12)
+
+
+def test_nti_greater_than_nti_app_for_hot_subpixel():
+    """Para un pixel con fracción hot (parte del pixel a alta temperatura),
+    rad_mir excede el rad esperado para temp uniforme → NTI > NTI_app.
+
+    Físicamente: MIR (3.7-4 μm) es mucho más sensible al componente hot que
+    TIR (11 μm) porque Planck crece más rápido a alta T en λ corta. Un
+    sub-pixel hotspot levanta mucho la radiance MIR pero apenas la TIR.
+    """
+    bt_tir = np.full((3, 3), 270.0)
+    lam_mir, lam_tir = 3.959, 11.0
+    # Pixel "cold" + 5% de pixel hot a 600 K (lava)
+    f_hot = 0.05
+    rad_mir_homog = _planck(lam_mir, 270.0)
+    rad_mir_hot = _planck(lam_mir, 600.0)
+    rad_mir_mixed = (1 - f_hot) * rad_mir_homog + f_hot * rad_mir_hot
+    rad_mir = np.full((3, 3), rad_mir_mixed)
+
+    nti, nti_app = compute_nti_and_nti_app(rad_mir, bt_tir, lam_mir, lam_tir)
+
+    # NTI debe estar significativamente arriba de NTI_app
+    diff = nti - nti_app
+    assert np.all(diff > 0.01), f'NTI no destacó de NTI_app: diff={diff}'
+
+
+def test_nti_nan_propagates():
+    """Donde input tiene NaN, output debe ser NaN."""
+    rad_mir = np.array([[0.5, np.nan], [0.5, 0.5]])
+    bt_tir = np.array([[270.0, 270.0], [np.nan, 270.0]])
+    nti, nti_app = compute_nti_and_nti_app(rad_mir, bt_tir, 3.959, 11.0)
+    assert np.isnan(nti[0, 1])  # rad_mir NaN
+    assert np.isnan(nti[1, 0])  # bt_tir NaN
+    assert np.isfinite(nti[0, 0])
+    assert np.isfinite(nti[1, 1])
+
+
+def test_nti_typical_volcanic_range():
+    """Sanity: para BT_TIR en rango realista (260-280 K) y rad_mir
+    igualmente realista, NTI sale en rango [-1, 0] (paper noche típica -0.8).
+    """
+    rng = np.random.default_rng(0)
+    bt_tir = rng.uniform(260, 280, size=(20, 20))
+    lam_mir, lam_tir = 3.959, 11.0
+    # rad_mir consistente: pixels homogéneos a una temp ligeramente menor
+    # (~5K menos, simula MIR de noche típica)
+    rad_mir = _planck(lam_mir, bt_tir - 5.0)
+    nti, nti_app = compute_nti_and_nti_app(rad_mir, bt_tir, lam_mir, lam_tir)
+    assert np.all(nti >= -1.0)
+    assert np.all(nti <= 0.0)
+    assert np.all(nti_app >= -1.0)
+    assert np.all(nti_app <= 0.0)
+
 
 @pytest.mark.xfail(reason='sum_vrp_reporting implementación pendiente — toca store.py',
                    strict=True)
