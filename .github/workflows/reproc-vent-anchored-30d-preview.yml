@@ -1,0 +1,84 @@
+name: Reproc vent-anchored 30d preview (S38 Bloque B)
+
+# Reproc 30 días sobre perfil _d8_vent_anchored exclusivamente, para
+# preview pre-adopción operacional. data/_d8_vent_anchored/ ya tiene
+# 15 días (2026-04-27 → 2026-05-11) del A/B S38. Este workflow extiende
+# la ventana a 30 días (2026-04-12 → 2026-05-11) sobreescribiendo con
+# --overwrite los días ya presentes (no rompe nada) + agregando los
+# nuevos 15 días previos.
+#
+# No corre _d8_vent_anchored_disabled (ya validado como idéntico a
+# operacional en S38 A/B).
+#
+# Output: data/_d8_vent_anchored/ con 30 días por volcán. Audit
+# subsecuente con experiments/86 muestra recall/ratio sobre 200+ alertas
+# MIROVA NRT (vs 116 del 15d window).
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-12"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-05-11"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano: [Lascar, Lastarria, Tupungatito, PuyehueCordonCaulle, Isluga, PlanchonPeteroa, Villarrica, Llaima, Copahue, NevadosDeChillan, Chaiten]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — _d8_vent_anchored / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 100
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _d8_vent_anchored \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/_d8_vent_anchored/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S38 Bloque B preview 30d — _d8_vent_anchored / ${{ matrix.volcano }} ${{ github.event.inputs.start }}→${{ github.event.inputs.end }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
