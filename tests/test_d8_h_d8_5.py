@@ -34,10 +34,12 @@ from pathlib import Path
 from pipeline.clustering import cluster_hotspots
 from pipeline.constants import C1 as PLANCK_C1, C2 as PLANCK_C2
 from pipeline.detection_context import (
+    _nanmean_8neighbors_fast,
     compute_eti_scene_quadratic,
     compute_nti_and_nti_app,
     second_pass_adjacent,
 )
+from scipy.ndimage import generic_filter
 
 
 def _planck(lam_um, T_k):
@@ -410,6 +412,94 @@ def test_h_d8_5_profile_loads():
 # ---------------------------------------------------------------------------
 # 4. Marcador: tests funcionales pendientes (xfail hasta implementación)
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# _nanmean_8neighbors_fast — vectorized 8-neighbor arithmetic mean (perf fix)
+# ---------------------------------------------------------------------------
+
+def _slow_reference_8neighbor_mean(arr):
+    """Versión "lenta" usando generic_filter — referencia para verificar
+    que la vectorizada produce mismos resultados.
+    """
+    footprint = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]], dtype=bool)
+
+    def mean_ignore_nan(x):
+        valid = x[~np.isnan(x)]
+        if len(valid) == 0:
+            return np.nan
+        return float(np.mean(valid))
+
+    return generic_filter(arr, mean_ignore_nan, footprint=footprint,
+                          mode='constant', cval=np.nan)
+
+
+def test_nanmean_8neighbors_fast_matches_slow_reference():
+    """El helper vectorizado debe producir EXACTAMENTE el mismo resultado que
+    la versión generic_filter+callback. Test de regresión preservando
+    semántica tras el perf fix (157× speedup).
+    """
+    rng = np.random.default_rng(123)
+    arr = rng.uniform(-1, 1, size=(50, 50))
+    # Sembrar algunos NaN realistas (~10%)
+    nan_idx = rng.choice(50 * 50, size=250, replace=False)
+    arr.ravel()[nan_idx] = np.nan
+
+    fast = _nanmean_8neighbors_fast(arr)
+    slow = _slow_reference_8neighbor_mean(arr)
+
+    # Comparar lugares donde ambos son finitos (mismo conjunto debería ser)
+    fast_nan = np.isnan(fast)
+    slow_nan = np.isnan(slow)
+    np.testing.assert_array_equal(fast_nan, slow_nan,
+                                  err_msg='NaN mask differs')
+    # Donde ambos finitos, valores idénticos hasta float precision
+    both_finite = ~fast_nan & ~slow_nan
+    np.testing.assert_allclose(fast[both_finite], slow[both_finite],
+                               rtol=1e-12, atol=1e-12)
+
+
+def test_nanmean_8neighbors_fast_handles_all_nan_neighbors():
+    """Pixel aislado rodeado por NaN: el mean de 8-vecinos debe ser NaN
+    (no hay vecinos válidos para promediar).
+    """
+    arr = np.full((5, 5), np.nan)
+    arr[2, 2] = 1.0  # solo pixel center válido
+
+    result = _nanmean_8neighbors_fast(arr)
+    # El pixel center: sus 8 vecinos son NaN → mean = NaN
+    assert np.isnan(result[2, 2])
+
+
+def test_nanmean_8neighbors_fast_uniform_field():
+    """En campo uniforme arr=K constante, cada pixel tiene 8 vecinos de
+    valor K → mean = K (excepto bordes donde count<8 pero el promedio
+    sigue siendo K).
+    """
+    arr = np.full((10, 10), 0.5)
+    result = _nanmean_8neighbors_fast(arr)
+    # Interior: 8 vecinos = 0.5 → mean = 0.5
+    assert np.all(np.isclose(result[1:-1, 1:-1], 0.5))
+    # Bordes: menos vecinos pero todos 0.5 → mean también 0.5
+    assert np.all(np.isclose(result[0, 1:-1], 0.5))
+
+
+def test_nanmean_8neighbors_fast_edge_pixels_have_fewer_neighbors():
+    """En esquina del grid, un pixel tiene solo 3 vecinos válidos
+    (no 8). El mean debe usar esos 3.
+    """
+    arr = np.array([
+        [1.0, 2.0, 3.0],
+        [4.0, 5.0, 6.0],
+        [7.0, 8.0, 9.0],
+    ])
+    result = _nanmean_8neighbors_fast(arr)
+    # Corner (0,0): vecinos = {arr[0,1]=2, arr[1,0]=4, arr[1,1]=5}
+    # mean esperado = (2 + 4 + 5) / 3 = 11/3
+    assert np.isclose(result[0, 0], 11.0 / 3.0)
+    # Center (1,1): vecinos = {1,2,3,4,6,7,8,9}
+    # mean = (1+2+3+4+6+7+8+9) / 8 = 40/8 = 5.0
+    assert np.isclose(result[1, 1], 5.0)
+
 
 # ---------------------------------------------------------------------------
 # NTI / NTI_app helper (commit 4a)
