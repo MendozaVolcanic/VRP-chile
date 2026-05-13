@@ -225,6 +225,15 @@ C2_DETI_SCENE_NIGHT: float = float(_t.get("c2_deti_scene_night", 10.0))
 # Default OFF en mirova_equivalent. Activar solo en _d8_vent_anchored.yaml.
 ENABLE_VENT_ANCHORED_CLUSTERING: bool = bool(_p.get("enable_vent_anchored_clustering", False))
 
+# S40 cleanup paths viejos — flag para desactivar bt_path_hot path.
+# Análisis empírico S39 (records operacional 30d): bt_path_hot solo
+# contribuye EXCLUSIVAMENTE en 0-6 records de 1846 TPs totales en 11 vol
+# Tier A. Test 1 integrated-ROI (test1_hot) + dNTI contextual (dnti_ctx_hot)
+# cubren prácticamente todas las detecciones. bt_path puede ser redundante.
+# Default true para backward-compat. A/B desactivar en _no_bt_path.yaml
+# y comparar recall delta. Si baja < 1pp → safe retirar del clon literal.
+ENABLE_BT_PATH_HOT: bool = bool(_p.get("enable_bt_path_hot", True))
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))
