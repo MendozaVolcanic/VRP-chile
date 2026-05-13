@@ -103,6 +103,7 @@ from pipeline.profile import (
     C2_DETI_SUMMIT_NIGHT,
     C2_DETI_SCENE_NIGHT,
     ENABLE_VENT_ANCHORED_CLUSTERING,
+    ENABLE_BT_PATH_HOT,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -424,6 +425,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 )
             else:
                 bt_path_hot = roi_mask & ~np.isnan(bt) & (bt > (t_bg_i04 + threshold_mir))
+            # S40 cleanup paths viejos: desactivar bt_path_hot si flag OFF.
+            if not ENABLE_BT_PATH_HOT:
+                bt_path_hot = np.zeros_like(bt_path_hot, dtype=bool)
 
             # Path B — NTI path (Coppola 2015 Test 1, night).
             # Only valid if NTI was successfully computed (needs both I04+I05).

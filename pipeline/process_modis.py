@@ -106,6 +106,7 @@ from pipeline.profile import (
     C2_DETI_SUMMIT_NIGHT,
     C2_DETI_SCENE_NIGHT,
     ENABLE_VENT_ANCHORED_CLUSTERING,
+    ENABLE_BT_PATH_HOT,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -351,6 +352,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             bt_path_hot = bt_path_hot & (bt_mir > local_threshold)
     else:
         bt_path_hot = roi_mask & ~np.isnan(bt_mir) & (bt_mir > effective_threshold)
+    # S40 cleanup paths viejos: desactivar bt_path_hot si flag OFF.
+    if not ENABLE_BT_PATH_HOT:
+        bt_path_hot = np.zeros_like(bt_path_hot, dtype=bool)
     nti_path_hot = (
         roi_mask
         & ~np.isnan(nti)

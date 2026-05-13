@@ -1,0 +1,77 @@
+name: Reproc _no_bt_path 15d (S40 cleanup A/B)
+
+# A/B incremental: desactivar bt_path_hot y medir delta recall vs
+# operacional actual (vent_anchored + H8 + D4 todos ON).
+#
+# Hipótesis (análisis S39 sobre 1846 TPs en 11 vol 30d): bt_path_hot solo
+# contribuye 0-6 records exclusivamente. test1_hot + dnti_ctx_hot
+# cubren el resto. Retirable safe si recall delta < 1pp.
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-27"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-05-11"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano: [Lascar, Lastarria, Tupungatito, PuyehueCordonCaulle, Isluga, PlanchonPeteroa, Villarrica, Llaima, Copahue, NevadosDeChillan, Chaiten]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — _no_bt_path / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 100
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _no_bt_path \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/_no_bt_path/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S40 A/B no_bt_path — _no_bt_path / ${{ matrix.volcano }} ${{ github.event.inputs.start }}→${{ github.event.inputs.end }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
