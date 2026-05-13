@@ -86,6 +86,7 @@ footer a:hover { text-decoration: underline; }
   <div>
     <button id="btn-summit-only" class="btn-ui" style="background:#1f5e3a">🎯 Solo cráter</button>
     <button id="btn-include-far" class="btn-ui">📍 Incluir lejanas</button>
+    <button id="btn-post-s38" class="btn-ui" title="Oculta records procesados antes de la adopción operacional vent_anchored + H8 (2026-05-13 03:05 GMT, PR #28). Los registros anteriores pueden tener primary_cluster equivocado.">🆕 Solo post-S38</button>
     <button id="btn-scale" class="btn-ui">📈 Escala: Lineal</button>
     <a href="index.html" class="btn-ui">🏠 Dashboard principal</a>
   </div>
@@ -316,9 +317,22 @@ function chartConfig(datasets) {
   };
 }
 
+// S38: filtro opt-in para ocultar records pre-adopción vent_anchored + H8.
+// Persiste en sessionStorage compartido con index.html (key vrp_post_s38_only).
+const S38_ADOPTION_CUTOFF_UTC = "2026-05-13 03:00";
+let postS38Only = sessionStorage.getItem("vrp_post_s38_only") === "true";
+
+function applyS38Filter(records) {
+  if (!records || !records.length) return records || [];
+  if (!postS38Only) return records;
+  return records.filter(r => (r.datetime_utc || r.dt || "") >= S38_ADOPTION_CUTOFF_UTC);
+}
+
 function computeStats(jsonData, mirovaForVolc, volcanoName) {
   const cutoff = Date.now() - WINDOW_DAYS * 86400000;
-  const recs = (jsonData?.records || []).filter(r => new Date(r.datetime_utc).getTime() >= cutoff);
+  // S38: aplicar filtro post-S38 antes del filtro de ventana temporal.
+  const baseRecs = applyS38Filter(jsonData?.records || []);
+  const recs = baseRecs.filter(r => new Date(r.datetime_utc).getTime() >= cutoff);
   const detRecs = recs.filter(r => mirovaEqVrp(r, volcanoName) > 0);
   const mirovaWindowed = mirovaForVolc.filter(r => {
     const t = new Date(r.dt).getTime();
@@ -449,6 +463,15 @@ document.getElementById("btn-summit-only").addEventListener("click", () => {
 document.getElementById("btn-include-far").addEventListener("click", () => {
   if (includeFarDistance) return;
   sessionStorage.setItem("diario_include_far", "true");
+  location.reload();
+});
+
+// S38: toggle post-S38. Mismo sessionStorage key que index.html → sincronizado.
+const btnPostS38 = document.getElementById("btn-post-s38");
+if (postS38Only) btnPostS38.style.background = "#1f5e3a";
+btnPostS38.addEventListener("click", () => {
+  postS38Only = !postS38Only;
+  sessionStorage.setItem("vrp_post_s38_only", postS38Only ? "true" : "false");
   location.reload();
 });
 
