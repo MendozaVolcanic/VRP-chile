@@ -379,6 +379,10 @@
     <button class="scale-btn active" id="btn-linear">Lineal</button>
     <button class="scale-btn" id="btn-log">Logarítmica</button>
   </div>
+  <div style="display:flex;gap:6px;align-items:center;" title="🆕 SOLO POST-S38: Cuando está activo, oculta records procesados antes de la adopción operacional vent_anchored + H8 (PR #28, mergeado 2026-05-13 03:05 GMT). Los registros anteriores pueden tener primary_cluster equivocado (Salar/lago/satélite lejano en lugar del cráter). Útil para ver solo la data del operacional actual sin contaminación histórica.">
+    <label>Calidad </label>
+    <button class="scale-btn" id="btn-post-s38">🆕 Solo post-S38</button>
+  </div>
   <div style="display:flex;gap:6px;align-items:center;" title="Cuando está apagado, el dashboard solo considera anomalías dentro del radio del cráter (summit). Las detecciones lejanas siguen visibles en el mapa y en la tabla pero atenuadas.">
     <label>Distancia </label>
     <button class="scale-btn active" id="btn-summit-only">🎯 Solo cráter</button>
@@ -551,6 +555,24 @@ let includeFarDistance = false;
 // UN registro por (timestamp, volcán, sensor); replicamos esa visualización.
 // PCC sin esto saturaba el mapa con 86,655 pixels en 90 días vs ~800 records.
 let onlyPrimaryPixel = true;
+
+// S38 — toggle "🆕 Solo post-S38" para ocultar records procesados antes de la
+// adopción operacional vent_anchored + H8 (PR #28 mergeado 2026-05-13 03:05
+// GMT, primer cron NRT post-merge ~03:00 UTC). Cuando ON, los records pre-S38
+// con primary_cluster equivocado (Salar lejano, lago lateral, etc.) se ocultan
+// del dashboard, dejando solo los datos del operacional actual con cluster
+// vent-anchored correcto. Persiste en sessionStorage para sobrevivir reloads.
+const S38_ADOPTION_CUTOFF_UTC = "2026-05-13 03:00";
+let postS38Only = sessionStorage.getItem("vrp_post_s38_only") === "true";
+
+function applyS38Filter(records) {
+  // Filtra records con datetime_utc anterior al cutoff S38. Cuando el toggle
+  // está OFF (default), devuelve la lista intacta. Si records es vacío o
+  // falsy, devuelve [] siempre.
+  if (!records || !records.length) return records || [];
+  if (!postS38Only) return records;
+  return records.filter(r => (r.datetime_utc || "") >= S38_ADOPTION_CUTOFF_UTC);
+}
 let charts = {};
 let allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
 
@@ -582,6 +604,8 @@ async function loadVolcano(v) {
 
 // ── Data helpers ─────────────────────────────────────────────────────────────
 function filterDays(records, days) {
+  // S38: aplicar primero el filtro post-S38 (oculta records pre-adopción).
+  records = applyS38Filter(records);
   if (!days) return records;
   const cutoff = Date.now() - days * 86400000;
   return records.filter(r => new Date(r.datetime_utc).getTime() >= cutoff);
@@ -663,6 +687,8 @@ function latestVRP(records, includeFar = false, innerKm = 10) {
   // Max VRP de las últimas 48h. Por defecto solo detecciones del cráter.
   // S33: usa mirovaEqVrp con validación pc.centroid_dist_km contra innerKm.
   // S36: pasa includeFar a mirovaEqVrp también para que respete el toggle.
+  // S38: aplicar filtro post-S38 al inicio.
+  records = applyS38Filter(records);
   const cutoff = Date.now() - 48 * 3600000;
   let max = 0;
   for (const r of records) {
@@ -676,6 +702,8 @@ function latestVRP(records, includeFar = false, innerKm = 10) {
 }
 
 function latestSensors(records, includeFar = false) {
+  // S38: aplicar filtro post-S38 al inicio.
+  records = applyS38Filter(records);
   const cutoff = Date.now() - 48 * 3600000;
   const seen = new Set();
   for (const r of records) {
@@ -698,6 +726,8 @@ function sensorGroup(sensor) {
 }
 
 function lastEventTime(records) {
+  // S38: aplicar filtro post-S38 al inicio.
+  records = applyS38Filter(records);
   let latest = null;
   for (const r of records) {
     if (!latest || r.datetime_utc > latest) latest = r.datetime_utc;
@@ -711,6 +741,8 @@ function lastEventTime(records) {
 // MIROVA), "far" si queda entre el inner y el radio total (~25 km).
 // Solo cuenta detecciones reales (vrp > 0) para no inflar con records-0.
 function distanceCounts(records, days = 7) {
+  // S38: aplicar filtro post-S38 al inicio.
+  records = applyS38Filter(records);
   const cutoff = Date.now() - days * 86400000;
   let summit = 0, far = 0;
   for (const r of records) {
@@ -1917,6 +1949,20 @@ async function init() {
     logScale = true;
     document.getElementById("btn-log").classList.add("active");
     document.getElementById("btn-linear").classList.remove("active");
+    renderDetail();
+  });
+
+  // S38: toggle "🆕 Solo post-S38". Default OFF — muestra todo el histórico.
+  // Cuando ON, oculta records con datetime_utc < S38_ADOPTION_CUTOFF_UTC.
+  // Persiste en sessionStorage para sobrevivir reloads de la página.
+  const btnPostS38 = document.getElementById("btn-post-s38");
+  if (postS38Only) btnPostS38.classList.add("active");
+  btnPostS38.addEventListener("click", () => {
+    postS38Only = !postS38Only;
+    btnPostS38.classList.toggle("active", postS38Only);
+    sessionStorage.setItem("vrp_post_s38_only", postS38Only ? "true" : "false");
+    buildCards();
+    buildOverviewMap();
     renderDetail();
   });
 
