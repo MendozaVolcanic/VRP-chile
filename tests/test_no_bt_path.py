@@ -15,12 +15,17 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 
 
-def test_default_on_in_mirova_equivalent(monkeypatch):
-    """Default ENABLE_BT_PATH_HOT=True en operacional — backward-compat."""
+def test_off_in_mirova_equivalent_s40(monkeypatch):
+    """S40 ADOPTADO: ENABLE_BT_PATH_HOT=False en operacional.
+
+    A/B run 25804811234 (11/11 success) confirmó retirar bt_path SUBE
+    recall +1.7pp (90.5%→92.2%) sin regresión en ningún vol. Isluga +2 TP
+    por menos contaminación lejana en anomaly_pixels.
+    """
     monkeypatch.setenv("VRP_PROFILE", "mirova_equivalent")
     import pipeline.profile as profile
     importlib.reload(profile)
-    assert profile.ENABLE_BT_PATH_HOT is True
+    assert profile.ENABLE_BT_PATH_HOT is False
 
 
 def test_off_in_no_bt_path_profile(monkeypatch):

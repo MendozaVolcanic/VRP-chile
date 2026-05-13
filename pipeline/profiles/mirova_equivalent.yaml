@@ -208,6 +208,31 @@ paths:
   # NO está contaminado por la actividad del cráter mismo.
   enable_test1_lbg_global: true
 
+  # **ADOPTADO S40 (2026-05-13)** — cleanup paths viejos: bt_path_hot OFF.
+  #
+  # Análisis empírico S39 sobre 1846 TPs en 11 vol Tier A operacional 30d
+  # mostró que bt_path_hot solo contribuye exclusivamente en 0-6 records
+  # (test1_hot y dnti_ctx_hot cubrían >99% de las detecciones).
+  #
+  # A/B run 25804811234 (11/11 success, window 15d):
+  #   - Recall 90.5% → **92.2%** (+1.7pp, +2 TP)
+  #   - ratio_med 3.00× → 3.00× (idéntico)
+  #   - Isluga +2 TP (mejora directa por menos ruido en anomaly_pixels)
+  #   - Lascar/Lastarria/Tupungatito/etc: +0 (sin regresión)
+  #
+  # Mecanismo físico: bt_path_hot metía pixels lejanos calientes (Salar
+  # bordes, terreno cálido) al hot_mask combined. Con vent_anchored
+  # eligiendo cluster summit como primary, esos pixels lejanos quedaban
+  # como ruido contaminando el top-100 anomaly_pixels. Sin bt_path, las
+  # detecciones son solo del path Test 1 (Coppola 2015 §2.2 integrated-ROI)
+  # + dnti contextual (Coppola 2016a Tests 2/3 abreviados) — más limpio
+  # y más alineado con el paper.
+  #
+  # Acerca el operacional al clon literal MIROVA: paper Coppola 2016a NO
+  # menciona "bt_path puro" como detector. Los detectores son contextuales
+  # sobre NTI/dETI (Tests 2/3 conjunción) + integrated-ROI (Test 1 Eq.1).
+  enable_bt_path_hot: false
+
 # --- Sensor activation ---
 # true = process granules from this sensor in this profile.
 sensors:
