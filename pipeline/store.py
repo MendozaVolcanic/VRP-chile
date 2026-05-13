@@ -229,6 +229,23 @@ def append_record(volcano_name: str, record: dict,
         record["diag_sanity_cap_threshold_mw"] = SANITY_CAP_VRP_MW
         record["vrp_mw"] = 0.0
 
+    # S41 fix: sanity cap también a primary_cluster.vrp_mw. El cap S19 M4
+    # original aplicaba solo a record.vrp_mw (sum total), dejando pasar el
+    # caso Lastarria 2026-04-23 01:50 MODIS_TERRA donde el granule tenía
+    # BT=566K (sensor saturado, flag DN no enmascarado) → pc.vrp_mw=1.6M MW
+    # pero record.vrp_mw=0 (post-floor) → cap original no aplicaba a pc.
+    # El dashboard usa pc.vrp_mw via mirovaEqVrp → values garbage llegaban
+    # al UI. Fix: aplicar mismo cap a pc.vrp_mw, marcar diag para auditoría.
+    pc = record.get("primary_cluster") or {}
+    pc_vrp = pc.get("vrp_mw", 0) or 0
+    if pc_vrp > SANITY_CAP_VRP_MW:
+        record["diag_pc_rejected_sanity_cap_mw"] = pc_vrp
+        record["primary_cluster"]["vrp_mw"] = 0.0
+        # Si record.vrp_mw también es 0 (caso Lastarria garbage), marcar
+        # discarded_reason explícito.
+        if record["vrp_mw"] == 0 and not record.get("discarded_reason"):
+            record["discarded_reason"] = "sanity_cap_pc_garbage"
+
     # S12 2026-04-15: piso VRP por sensor (paridad MIROVA).
     # Si vrp_mw < piso_sensor, se trata como no-detección (vrp_mw = 0).
     # Preserva el valor original en diag_vrp_raw_mw para auditoría.
