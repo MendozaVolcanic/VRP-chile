@@ -189,6 +189,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                             inner_radius_km=volcano.get("inner_radius_km"),
                             exclude_zones=volcano.get("exclude_zones"),
                             active_water_bodies=volcano.get("active_water_bodies"),
+                            lbg_global_compatible=volcano.get("lbg_global_compatible", False),
                         )
                         if result:
                             store.append_record(volcano["name"], result,
@@ -228,6 +229,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                             inner_radius_km=volcano.get("inner_radius_km"),
                             exclude_zones=volcano.get("exclude_zones"),
                             active_water_bodies=volcano.get("active_water_bodies"),
+                            lbg_global_compatible=volcano.get("lbg_global_compatible", False),
                         )
                         if result:
                             store.append_record(volcano["name"], result,
@@ -268,6 +270,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                             inner_radius_km=volcano.get("inner_radius_km"),
                             exclude_zones=volcano.get("exclude_zones"),
                             active_water_bodies=volcano.get("active_water_bodies"),
+                            lbg_global_compatible=volcano.get("lbg_global_compatible", False),
                         )
                         if result:
                             store.append_record(volcano["name"], result,

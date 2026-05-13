@@ -1,0 +1,85 @@
+# A/B PROFILE: D8 vent_anchored + H8 + D4 per-volcano (S39).
+#
+# Estado base: operacional vent_anchored + H8 adoptado S38 (recall 82.5%
+# → 89.5%, +16 TP en 30d). Análisis 9 FN persistentes mostró 5/9 son D4
+# (Test 1 dispara, primary cráter correcto, vrp=0 por L_bg local
+# contaminado en geotermal crónico).
+#
+# Combo C.1 S38 (run 25762044191) intentó D4 UNIVERSAL → regresión
+# Tupungatito (-1 TP) y Planchón (-1 TP) por glaciar frío (anillo global
+# > local empeora ΔL). Recall combo 89.7% < vent_anchored solo 92.2%.
+#
+# S39 fix: D4 PER-VOLCANO. Profile flag ENABLE_TEST1_LBG_GLOBAL=true,
+# pero pipeline solo aplica si volcanoes.yaml field
+# lbg_global_compatible=true para ese volcán específico.
+# Marcados true: Lascar (cráter caliente), Lastarria (fumarolas).
+# Default (false): Tupungatito glaciar, Planchón nieve, otros.
+#
+# Estimación: recall 89.5% → 91-92% (capturar 4-5 FN Lascar+Lastarria
+# sin regresión glaciares).
+
+profile: _d8_d4_per_vol
+description: >
+  S39 — vent_anchored + H8 (adoptado S38) + D4 per-volcano (Lascar +
+  Lastarria solamente). Sin regresión glaciares.
+
+thresholds:
+  anomaly_threshold_k: 5.0
+  tir_threshold_k: 0.5
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  cloud_mask_bt_k: 0.0
+  max_sigma_component_k: 999.0
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
+  min_vent_pixels: 1
+  max_vent_sigma_contrib_k: 999.0
+  nti_rel_n_sigma: 3.0
+  nti_rel_min_floor: 0.005
+  dnti_contextual_c1: 0.003
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
+  modis_vent_threshold_k: 1.0
+  modis_vent_vrp_floor_mw: 0.0
+  n_sigma_mir_summit: 5.0
+  n_sigma_mir_scene: 10.0
+
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+paths:
+  enable_eruption_path: true
+  enable_vent_path: false
+  enable_vent_path_modis: false
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
+  enable_nti_relative_path: false
+  enable_dnti_contextual_path: true
+  enable_dnti_dual_roi: true
+  enable_test1_path: true
+  enable_dual_roi_bt: true
+  enable_exclude_zones: false
+  enable_test1_pixel_filter: false
+  enable_eti_quadratic_scene: false
+  enable_second_pass_adjacent: false
+  enable_sum_vrp_reporting: false
+  # Operacional actual (S38 adoptado) — mantener ON
+  enable_vent_anchored_clustering: true
+  enable_pixel_level_distance_filter: true
+  # D4 fix profile-level ON; gating per-volcán en volcanoes.yaml field
+  # lbg_global_compatible (Lascar + Lastarria true, resto false default)
+  enable_test1_lbg_global: true
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: _d8_d4_per_vol
