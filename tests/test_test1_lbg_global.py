@@ -13,16 +13,21 @@ import importlib
 import numpy as np
 
 
-def test_profile_default_off_in_mirova_equivalent(monkeypatch):
-    """S33 post-refutación: Phase 1 + D4 ambos OFF en operacional.
-    Driver A solo es el operacional (recall 74.2%, ratio 2.53×).
-    Phase 1 refutado (-18.6pp recall con métrica corregida).
-    D4 refutado (efecto despreciable, no recupera Tupungatito).
+def test_profile_d4_on_in_mirova_equivalent_s39(monkeypatch):
+    """S39 D4 per-vol ADOPTADO: ENABLE_TEST1_LBG_GLOBAL ahora ON en
+    operacional. Pero gating per-volcán vía field `lbg_global_compatible`
+    en volcanoes.yaml — solo Lascar y Lastarria reciben el fix.
+
+    A/B run 25797247811 mostró recall preservado 92.2% + ratio_med
+    mejora -21% (3.82× → 3.00×), 0 regresiones.
+
+    Phase 1 (test1_pixel_filter) sigue OFF (refutado S33).
     """
     monkeypatch.setenv("VRP_PROFILE", "mirova_equivalent")
     import pipeline.profile as profile
     importlib.reload(profile)
-    assert profile.ENABLE_TEST1_LBG_GLOBAL is False
+    assert profile.ENABLE_TEST1_LBG_GLOBAL is True
+    # Phase 1 sigue OFF (refutado S33)
     assert profile.ENABLE_TEST1_PIXEL_FILTER is False
 
 
