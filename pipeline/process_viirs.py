@@ -239,7 +239,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                   vent_radius_km: float = 4.0,
                   inner_radius_km: float | None = None,
                   exclude_zones: list = None,
-                  active_water_bodies: list = None) -> dict | None:
+                  active_water_bodies: list = None,
+                  lbg_global_compatible: bool = False) -> dict | None:
     """
     Calculate VRP from a single VIIRS L1B granule.
 
@@ -892,10 +893,14 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         test1_hot_filtered = test1_hot & pixel_thr_mask
 
     # S33 D4 fix — effective L_bg para Test 1 VRP recompute. En volcanes con
-    # geotermal crónico ring 1-3km cráter (Tupungatito, Lastarria, Llaima),
-    # test1_L_bg_local está contaminado → ΔL clip 0 → vrp=0 falsos negativos.
-    # Cuando flag ON, usar L_bg(t_bg_i04) global del anillo background 5-25km.
-    if ENABLE_TEST1_LBG_GLOBAL and not np.isnan(t_bg_i04):
+    # geotermal crónico ring 1-3km cráter (Lascar cráter permanente, Lastarria
+    # fumarolas), test1_L_bg_local está contaminado → ΔL clip 0 → vrp=0
+    # falsos negativos. Cuando flag ON, usar L_bg(t_bg_i04) global del anillo
+    # background 5-25km.
+    # S39 D4 per-volcano: combinar profile flag con field lbg_global_compatible
+    # de volcanoes.yaml — solo aplica si AMBOS son true. Evita regresión
+    # Tupungatito glaciar (combo C.1 S38 mostró -1 TP con D4 universal).
+    if ENABLE_TEST1_LBG_GLOBAL and lbg_global_compatible and not np.isnan(t_bg_i04):
         effective_L_bg = float(bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA))
     else:
         effective_L_bg = test1_L_bg_local

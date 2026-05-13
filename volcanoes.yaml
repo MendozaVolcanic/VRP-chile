@@ -64,6 +64,11 @@ volcanoes:
   vent_lat: -23.36293
   vent_lon: -67.731416
   vent_radius_km: 3
+  # S39 D4 per-vol: cráter activo permanente — ring 1-3km contaminado por
+  # calor crónico → L_bg local alto → ΔL clip 0 con Test 1 path. Fix: usar
+  # L_bg global anillo 5-25km. Confirmed S38 análisis 9 FN: 1/9 Lascar TP
+  # con triggered_test1 + vrp=0 → recuperable con flag ON.
+  lbg_global_compatible: true
   # S16 P3.6: zonas excluidas (cuerpos de agua/salares irradiando calor
   # nocturno que el bbox 50x50 km incluye y generan FPs masivos).
   # Salar de Atacama: 4326 pixels FP en VIIRS_SNPP 2026-04-08 -> VRP 1437 MW.
@@ -502,6 +507,10 @@ volcanoes:
   vent_lat: -25.168
   vent_lon: -68.507
   vent_radius_km: 3
+  # S39 D4 per-vol: fumarolas intensas permanentes (sulphur deposits) — ring
+  # 1-3km contaminado por calor fumarólico crónico → L_bg local alto → ΔL clip 0
+  # con Test 1 path. Fix: usar L_bg global anillo 5-25km.
+  lbg_global_compatible: true
 - name: Isluga
   mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
   display_name: Isluga

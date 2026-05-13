@@ -233,7 +233,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                   vent_radius_km: float = 4.0,
                   inner_radius_km: float | None = None,
                   exclude_zones: list = None,
-                  active_water_bodies: list = None) -> dict | None:
+                  active_water_bodies: list = None,
+                  lbg_global_compatible: bool = False) -> dict | None:
     """
     Calculate VRP from VIIRS 750m M-band granule (VNP02MOD / VJ102MOD).
 
@@ -738,7 +739,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         test1_hot_filtered = test1_hot & pixel_thr_mask
 
     # S33 D4 fix — effective L_bg para Test 1 VRP (ver process_viirs.py).
-    if ENABLE_TEST1_LBG_GLOBAL and not np.isnan(t_bg):
+    # S39 D4 per-volcano: combinar profile flag con lbg_global_compatible
+    # per-volcán para evitar regresión en glaciares (Tupungatito, Planchón).
+    if ENABLE_TEST1_LBG_GLOBAL and lbg_global_compatible and not np.isnan(t_bg):
         effective_L_bg = float(bt_to_spectral_radiance(np.float64(t_bg), M13_LAMBDA))
     else:
         effective_L_bg = test1_L_bg_local

@@ -209,7 +209,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                   vent_radius_km: float = 4.0,
                   inner_radius_km: float | None = None,
                   exclude_zones: list = None,
-                  active_water_bodies: list = None) -> dict | None:
+                  active_water_bodies: list = None,
+                  lbg_global_compatible: bool = False) -> dict | None:
     """
     Calculate VRP from MODIS L1B granule.
 
@@ -733,7 +734,12 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         test1_hot_filtered = test1_hot & pixel_thr_mask
 
     # S33 D4 fix — effective L_bg para Test 1 VRP (ver process_viirs.py).
-    if ENABLE_TEST1_LBG_GLOBAL and not np.isnan(t_bg):
+    # S39 D4 per-volcano: combinar profile flag (ENABLE_TEST1_LBG_GLOBAL) con
+    # field per-volcán (lbg_global_compatible) — solo aplica si AMBOS son true.
+    # Esto evita regresión Tupungatito glaciar (donde global > local empeora
+    # ΔL) y permite el fix donde ring 1-3km está caliente (Lascar cráter
+    # permanente, Lastarria fumarolas).
+    if ENABLE_TEST1_LBG_GLOBAL and lbg_global_compatible and not np.isnan(t_bg):
         # MODIS Banda 21 — Planck 3.929 µm
         effective_L_bg = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bg)) - 1)))
     else:
