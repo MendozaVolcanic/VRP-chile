@@ -186,6 +186,28 @@ paths:
   enable_vent_anchored_clustering: true
   enable_pixel_level_distance_filter: true
 
+  # **ADOPTADO S39 (2026-05-13)** — D4 per-volcano: enable_test1_lbg_global
+  # con gating per-vol vía field `lbg_global_compatible` en volcanoes.yaml.
+  #
+  # Combo S38 C.1 mostró que D4 fix UNIVERSAL regresiona Tupungatito + Planchón
+  # (glaciares fríos donde L_bg global > local empeora ΔL). Fix S39: profile
+  # flag ON pero pipeline solo aplica D4 cuando lbg_global_compatible=true
+  # para ese volcán. Marcados true: Lascar (cráter permanente),
+  # Lastarria (fumarolas crónicas).
+  #
+  # A/B S39 (run 25797247811, 11/11 success) validó:
+  #   - Recall preservado: 92.2% en ambos (vent_anchored vs D4 per-vol)
+  #   - ratio_med MEJORA 3.82× → 3.00× (-21%), records TP ahora con VRP más
+  #     cercano al MIROVA real. Lascar y Lastarria principales beneficiarios.
+  #   - 0 regresiones per-vol (Tupungatito, Planchón sin cambio gracias al
+  #     gating per-vol).
+  #
+  # Mecanismo: cuando Test 1 dispara y el ring 1-3km del cráter está caliente
+  # (fumarola crónica), L_bg local está contaminado → ΔL clip 0 → vrp inflado
+  # o subestimado. D4 fix usa L_bg del anillo background global 5-25km que
+  # NO está contaminado por la actividad del cráter mismo.
+  enable_test1_lbg_global: true
+
 # --- Sensor activation ---
 # true = process granules from this sensor in this profile.
 sensors:
