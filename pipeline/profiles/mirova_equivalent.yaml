@@ -155,6 +155,37 @@ paths:
   # Ver docs/PROCESS_RULES_S33.md y experiments/74-76 audit completo.
   enable_test1_pixel_filter: false
 
+  # **ADOPTADO S38 Bloque B (2026-05-12)** — vent_anchored cluster selection
+  # + H8 pixel-level filter.
+  #
+  # Antecedente: A/B vent_anchored solo (run 25749336998) +9.6pp recall
+  # (82.8% → 92.2%), +11 TP, 0 regresiones per-vol. Combo C.1 con D4 fix
+  # adicional (run 25762044191) ANULÓ ganancia por regresión Tupungatito
+  # (glaciar) — D4 descartado, queda en S39+ para activación per-vol.
+  #
+  # Validación previa al merge:
+  #   - R2 pixel-level 5 casos canónicos (Lascar Salar→cráter, Puyehue
+  #     lacolito, Tupungatito control, Isluga, Lastarria): mecanismo
+  #     confirmado, 0 regresiones.
+  #   - 30d preview (run 25768334206, 10/11 vol completos): +11 TP neto,
+  #     ratio_med 3.54→3.52× estable, 9 días positivos vs 4 negativos
+  #     (artefacto Planchón data faltante).
+  #
+  # Mecanismo:
+  #   - vent_anchored: clusters dentro de inner_radius_km tienen prioridad
+  #     sobre lejanos, luego por proximity asc (pipeline/clustering.py).
+  #     Resuelve bug D8 estructural (primary = Salar lejano → primary =
+  #     cráter cercano).
+  #   - H8 pixel-level filter: en store.append_record, filtra pixels lejanos
+  #     individualmente en lugar del all-or-nothing legacy. Sin H8, si el
+  #     pixel más caliente está fuera de radius_km, se descartaba TODO
+  #     anomaly_pixels. Combo con vent_anchored: pixels lejanos del Salar
+  #     se filtran, cráter cercano se preserva.
+  #
+  # Próximo cron NRT 2h aplica el nuevo comportamiento.
+  enable_vent_anchored_clustering: true
+  enable_pixel_level_distance_filter: true
+
 # --- Sensor activation ---
 # true = process granules from this sensor in this profile.
 sensors:
