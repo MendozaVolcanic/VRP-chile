@@ -563,16 +563,12 @@ let onlyPrimaryPixel = true;
 // con primary_cluster equivocado (Salar lejano, lago lateral, etc.) se ocultan
 // del dashboard, dejando solo los datos del operacional actual con cluster
 // vent-anchored correcto. Persiste en sessionStorage para sobrevivir reloads.
-const S38_ADOPTION_CUTOFF_UTC = "2026-05-13 03:00";
-let postS38Only = sessionStorage.getItem("vrp_post_s38_only") === "true";
-
+// S42: applyS38Filter neutralizado. Tras reproc completo 30d, todos los
+// records ya vienen del modelo S42. Mantenemos passthrough para no romper
+// call sites (filterDays/latestVRP/latestSensors/lastEventTime/distanceCounts).
+let postS38Only = false;  // unused, kept para evitar ReferenceError residual
 function applyS38Filter(records) {
-  // Filtra records con datetime_utc anterior al cutoff S38. Cuando el toggle
-  // está OFF (default), devuelve la lista intacta. Si records es vacío o
-  // falsy, devuelve [] siempre.
-  if (!records || !records.length) return records || [];
-  if (!postS38Only) return records;
-  return records.filter(r => (r.datetime_utc || "") >= S38_ADOPTION_CUTOFF_UTC);
+  return records || [];
 }
 let charts = {};
 let allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
