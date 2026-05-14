@@ -831,9 +831,31 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     eruption_far = (hotspot_dist_km is not None and inner_radius_km is not None
                     and hotspot_dist_km > inner_radius_km)
 
+    # S44 fix: si Test 1 disparó y NINGÚN otro path contribuyó pixels al
+    # hot_mask (bt/nti/dnti_ctx/eti todos 0), entonces TODO el hotspot real
+    # viene de Test 1, independiente de si está "summit" o "far" relative al
+    # inner_radius. Sin este fix, Tupungatito FN persistente: Test 1 dispara
+    # con 100 pixels @ 1.05km (summit) pero source="eruption" porque
+    # eruption_far=False (1.81km < 7km inner), bloqueando el D4 VRP recompute.
+    only_test1_source = (
+        test1_triggered and test1_centroid_lat is not None
+        and (n_bt_path or 0) == 0
+        and (n_nti_path or 0) == 0
+        and (n_dnti_ctx_path or 0) == 0
+        and (n_eti_path or 0) == 0
+    )
+
     if hotspot_lat is not None and hotspot_lon is not None:
         if test1_summit_hit and eruption_far:
             # Regla D Test 1-priority: eruption far + Test 1 summit → Test 1 gana.
+            final_hotspot_lat = test1_centroid_lat
+            final_hotspot_lon = test1_centroid_lon
+            final_hotspot_dist_km = test1_hotspot_dist_km
+            final_hotspot_source = "test1"
+        elif only_test1_source:
+            # S44: Test 1 es la única fuente — eruption hotspot existe pero
+            # viene desde pixels Test 1 (que están en hot_mask vía OR).
+            # source="test1" garantiza que D4 VRP recompute aplique correctamente.
             final_hotspot_lat = test1_centroid_lat
             final_hotspot_lon = test1_centroid_lon
             final_hotspot_dist_km = test1_hotspot_dist_km
