@@ -281,9 +281,63 @@ enable_bt_path_hot: false                   # S40 retirado
 
 ---
 
+## ✅ RESULTADOS S44 (anexados al cierre)
+
+Reproc S44 (run 25859304952) completó **11/11 success**. Audit final con
+criterio correcto (`pc.vrp_mw` filtered, FP solo contra `FALSO_POSITIVO`,
+NO RUTINA), window 15d 2026-04-27 → 2026-05-11:
+
+| Métrica | Pre-S44 | **Post-S44** | Δ |
+|---|---|---|---|
+| TP | 107 | **110** | +3 |
+| FN | 9 | **6** | **-3** ✓ |
+| FP | 22 | 25 | +3 |
+| **Precision** | 81.7% | 81.5% | -0.2 (estable) |
+| **Recall** | 92.2% | **94.8%** | **+2.6pp** ✓✓ |
+| **F1** | 86.6% | **87.6%** | **+1pp** ✓ |
+
+### Per-volcán S44 wins
+
+| Vol | TP | FN | FP | Precision | Recall |
+|---|---|---|---|---|---|
+| Lascar | 46 | 2 | 4 | 92.0% | 95.8% |
+| **Tupungatito** | **8** | **0** | 2 | **80.0%** | **100%** ✓✓ |
+| Lastarria | 16 | 0 | 5 | 76.2% | 100% |
+| **PCC** | 14 | 0 | 0 | **100%** | **100%** ✓ |
+| Planchón | 8 | 1 | 3 | 72.7% | 88.9% |
+| Isluga | 17 | 2 | 5 | 77.3% | 89.5% |
+| Villarrica | 1 | 0 | 1 | 50.0% | 100% |
+| Llaima/Copahue/NdC | 0 | 1 | 5 | 0% (sin alertas) | — |
+
+**Tupungatito: 62.5% → 100% recall** — los 3 FN persistentes (Test 1
+dispara con 100 pixels pero `source="eruption"` y D4 no aplicaba) fueron
+recuperados como predicho. Fix S44 funcionó.
+
+### FN persistentes post-S44 (6 totales)
+
+- 2 Lascar (no inspeccionado todavía)
+- 2 Isluga (no inspeccionado)
+- 1 NdC (granule probable no procesado, alerta 2026-04-20 VIIRS 750m no
+  matched)
+- 1 Planchón (caso vent offset documentado en D3)
+
+Estos 6 son casos heterogéneos sin patrón único — quedan para
+investigación per-caso S45+.
+
 ## 📌 PRIMER MENSAJE PRÓXIMA SESIÓN
 
-Leer este archivo. Después:
-1. Verificar reproc S44 (run 25859304952) finalizó OK
-2. Audit con criterio correcto + agregar resultados acá
-3. Decidir prioridad: D2 cluster MIROVA / D3 Planchón vent / D4 Tupungatito D4 ON
+Leer este archivo COMPLETO. Especialmente "ERRORES METODOLÓGICOS"
+(sección 🔴 al inicio). Después:
+
+1. Confirmar modelo operacional S44 en main es el último (PR #39)
+2. Dashboard publicado: https://mendozavolcanic.github.io/VRP-chile/
+3. Decidir prioridad próximo trabajo:
+   - **D1 cluster MIROVA**: investigar cómo MIROVA hace cluster selection
+     real (Coppola 2025 chapter `documentacion/coppola2024_chapter.txt`)
+   - **D3 Planchón vent**: validar coords GVP/KML Peteroa, posible offset
+     ~3km del vent oficial nuestro
+   - **D4 D4 ON Tupungatito**: ahora con S44 fix funcionando, probar A/B
+     incremental con `lbg_global_compatible: true` en Tupungatito
+   - **P3 R2 pixel-level**: usar `experiments/85` sistemáticamente sobre
+     6 FN persistentes para identificar mecanismo divergencia
+   - **P4 renombrar record.vrp_mw**: confunde consumidores externos
