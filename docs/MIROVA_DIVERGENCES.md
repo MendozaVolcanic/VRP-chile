@@ -529,3 +529,97 @@ duales o vent desactualizado vs MIROVA anchor). Configuración ya manejada.
 - R2 pixel-level estricto vs MIROVA requiere ambos archivos sincronizados.
   S46+ accionable: configurar scraper Mirova-v1 + mirova-tif-archive con
   retención más larga, o capturar TIFs proactivamente al detectar FN.
+
+---
+
+## S45+R6 (2026-05-14 tarde) — Auditoría independiente pipeline vs papers + rescate s15-dev
+
+Auditoría profunda R6 (regla `docs/PROCESS_RULES_S33.md`) comparando los 3
+procesadores línea-por-línea con papers MIROVA core identificó **21 drifts**,
+5 ALTA severidad. Trabajo independiente de la auditoría empírica S45.
+
+### Insight TIF MIROVA rescatado de `s15-dev` (commit 64bd37d S33+ cierre)
+
+`Pruebas/mirova_real/Lascar_VIIRS375_I04.tif` analizado S33+ (2026-05-08):
+- 134×134 float64 EPSG:4326. **17,911 pixels >0** (99.7% del raster).
+- Valores 0.04-0.19 MW. **Sum total 1680 MW**. Pico 0.187 MW a 23-24 km.
+- Header MIROVA reporta **VRP: 0.2 MW @ Distance 9.7 km**.
+
+**Implicación crítica**: el TIF NO es VRP per-pixel sumable scene-wide. Es
+producto de **visualización del campo de radiancia completo**. El "VRP: 0.2 MW"
+del header viene de **selección específica de cluster post-filtros**, NO suma
+del TIF visible.
+
+Plot Distance MIROVA Lascar Last Year confirma: MIROVA reporta clusters
+far (>5km) como detecciones válidas (etiqueta clase distancia, NO descarta).
+
+### Reinterpretación R6 drift #5 a la luz del insight TIF
+
+R6 audit identificó como drift #5: "Reportamos `primary_cluster.vrp_mw`
+cuando paper Eq.8 dice `RP = Σ RP_PIX` sobre `n_alert`". Interpretación
+inicial: Σ scene-wide.
+
+**Reinterpretación corregida**: Eq.8 aplica sobre `alerted pixels` =
+pixels que pasaron filtros Tests 1∧2∧3∧second-pass. Con filtros completos
+del paper, lo que queda es un cluster específico = "main alert" natural.
+NO es Σ visualizable del TIF.
+
+Si esta lectura es correcta, el verdadero drift no es "primary_cluster vs Σ"
+— es que **NO ejecutamos los filtros Coppola 2016a completos**, por eso
+nuestros `anomaly_pixels` quedan inflados (75-83 px en Lascar) y forzamos
+parches S33-S44 para compensar.
+
+### Drifts R6 ALTA severidad
+
+| # | Drift | Localización pipeline | Paper |
+|---|---|---|---|
+| #1 | Test 1 K1 → `hot_mask` reportable | `process_*.py` nti_path_hot | sp426_5.txt:298: "discarded for further steps" — debe ser saturation mask |
+| #2+3 | Path D usa solo Test 2 (dNTI), falta Test 3 (dETI) + conjunción AND | `detection_context.py:85-142` | sp426_5.txt:316-325: Tests 2∧3 obligatorios |
+| #4 | Second-pass adyacente OFF operacionalmente | `enable_second_pass_adjacent=false` | sp426_5.txt:347-356: Step obligatorio |
+| #5 | `primary_cluster.vrp_mw` vs Σ alerted | `store.py` + dashboard | sp426_5.txt:374-398 Eq.8 — pero ver reinterpretación arriba |
+| #7 | MODIS `sec³(θz)` scan-angle vs nadir-fijo | `scan_geometry.modis_pixel_areas` | sp426_5.txt:201-202: A_pix=1 km² fijo. Factor hasta 13× edge — probable causa ratio 1.21× |
+
+### Drifts R6 MEDIA / BAJA
+
+- #15: falta exclusión edge `dNTI/dETI < -0.1` (sp426_5.txt:271-273)
+- #17: yaml VIIRS `enable_vent_path` sobreviviente (drift histórico)
+- #18: `ENABLE_TEST1_PATH` mala nomenclatura — confunde con Test 1 del paper
+- #21: bg ring no excluye pixels active antes de Wooster ΔL
+- #12: falta emisividad ε≈0.95 explícita en Stefan-Boltzmann I05 (Aveni 2024 Eq.5)
+- #20: bbox geográfico vs grilla UTM equiárea (~1% deformación)
+
+### Hipótesis S46 reencuadrada — "Coppola 2016a literal puro"
+
+Plan S46 reencuadre (post-brainstorming pendiente):
+
+**Fase 1 — corregir filtros Coppola 2016a** (drifts #1, #2+3, #4):
+- Test 1 K1 a saturation mask (no hot_mask)
+- Implementar Test 3 (dETI) + conjunción AND + rama estadística C2·σ
+- Activar second-pass adyacente operacional
+- Esperado: `anomaly_pixels` se reduce drásticamente, queda "main alert" natural
+
+**Fase 2 — A/B aislado drift #7 MODIS nadir-fijo** (independiente):
+- `scan_geometry.modis_pixel_areas` → `np.full(shape, 1e6)` con flag
+- A/B reproc 30d MODIS-heavy
+- Esperado: ratio mediano 1.21× → ~1.0×
+
+**Fase 3 — evaluar si parches S33-S44 siguen necesarios**:
+- Con filtros completos, S38 vent_anchored / S43 vrp>0 priority / S41 cap /
+  S44 final_hotspot_source pueden ser redundantes
+- A/B reproc con filtros completos + parches OFF
+- Si recall y ratio mantienen, deprecar parches
+
+### Insight S33+ adicional rescatado de s15-dev
+
+> "MIROVA reporta clusters far como detecciones válidas — los etiqueta con
+> su clase de distancia y reporta VRP normal. La pasada actual (estrella
+> verde) está a 9 km y MIROVA la reporta válida."
+
+Esto refuta hipótesis D9 summit-priority exclusiva — MIROVA SÍ reporta
+clusters far cuando los detecta. Lo que distingue es **qué pasa por los
+filtros** (Coppola 2016a Tests completos), no "preferencia summit".
+
+Caso PCC 2026-05-09 (lacolito 0.18 MW @ 7.7km reportado, cráter 4.94 MW
+@ 0.69km ignorado por MIROVA): probablemente nuestro "cráter @ 0.69km"
+es FP que MIROVA habría descartado vía Tests 2∧3 + second-pass. No es que
+MIROVA "prefiera" lacolito — es que cráter no pasa filtros estrictos.

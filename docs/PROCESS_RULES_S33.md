@@ -131,6 +131,39 @@ Si alguna respuesta es "no" → BLOQUEAR conclusión hasta validar.
 **Por qué**: el "Phase 1 mejora ratio 35%" no fue cuestionado en S32.
 Si hubiera sido, R3 + R2 habrían detectado el bug.
 
+### R8 — Validación contra URL pública post-deploy
+
+**Aplica**: cualquier cambio a `frontend/` que toque paths, assets, o
+rutas relativas. NO solo verificar con `preview_eval` desde dev local.
+
+**Implementación**:
+
+Después de push a main que dispara Pages deploy, **antes** de declarar
+"funciona":
+
+```bash
+# Verificar URLs accesibles
+curl -s -o /dev/null -w "HTTP %{http_code}: %{url_effective}\n" \
+  "https://mendozavolcanic.github.io/VRP-chile/<path>"
+```
+
+Para cada path nuevo:
+- Página principal (`diario.html`).
+- Data dependency (`data/mirova_equivalent/<vol>.json`).
+- CSV ground truth (`01_05_2026_registro_vrp_consolidado.csv`).
+- Imágenes / assets.
+
+Si HTTP 404 → falta archivo en deploy. Investigar workflow yaml.
+
+**Por qué**: dev local sirve desde root del repo (`/frontend/diario.html`).
+Pages sirve `frontend/` al root del site (`/diario.html`). Paths `../`
+se comportan distinto. `preview_eval` desde local NO es equivalente a
+Pages.
+
+**Caso real S33 (2026-05-06)**: `diario.html` con `../data/...` y
+`../01_05_2026_...csv` falló en Pages (404 en ambos casos). preview_eval
+dev local mostró 11 charts OK pero Pages mostró "sin datos últimos 90d".
+
 ### R7 — Audit the audit con casos sintéticos
 
 **Aplica**: cuando se introduce o modifica función de métrica.
