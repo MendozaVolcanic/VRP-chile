@@ -34,6 +34,8 @@ def test_lbg_global_compatible_in_volcanoes_yaml():
                if v.get('lbg_global_compatible') is True]
     assert 'Lascar' in enabled, 'Lascar debe tener lbg_global_compatible=true (cráter caliente permanente)'
     assert 'Lastarria' in enabled, 'Lastarria debe tener lbg_global_compatible=true (fumarolas crónicas)'
+    # S42 — NdC agregado tras análisis 9 FN S39 (2/3 alertas patrón D4):
+    assert 'NevadosDeChillan' in enabled, 'NdC agregado S42 (cráter Nicanor + domo activo)'
     # Tupungatito y Planchón explicitamente NO deben tener el flag (glaciares)
     excluded = ['Tupungatito', 'PlanchonPeteroa']
     for vname in excluded:
