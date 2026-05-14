@@ -86,7 +86,8 @@ footer a:hover { text-decoration: underline; }
   <div>
     <button id="btn-summit-only" class="btn-ui" style="background:#1f5e3a">🎯 Solo cráter</button>
     <button id="btn-include-far" class="btn-ui">📍 Incluir lejanas</button>
-    <button id="btn-post-s38" class="btn-ui" title="Oculta records procesados antes de la adopción operacional vent_anchored + H8 (2026-05-13 03:05 GMT, PR #28). Los registros anteriores pueden tener primary_cluster equivocado.">🆕 Solo post-S38</button>
+    <!-- S42: filtro post-S38 removido tras reproc completo 30d. Todos los
+         records ya tienen modelo S42. -->
     <button id="btn-scale" class="btn-ui">📈 Escala: Lineal</button>
     <a href="index.html" class="btn-ui">🏠 Dashboard principal</a>
   </div>
@@ -317,15 +318,12 @@ function chartConfig(datasets) {
   };
 }
 
-// S38: filtro opt-in para ocultar records pre-adopción vent_anchored + H8.
-// Persiste en sessionStorage compartido con index.html (key vrp_post_s38_only).
-const S38_ADOPTION_CUTOFF_UTC = "2026-05-13 03:00";
-let postS38Only = sessionStorage.getItem("vrp_post_s38_only") === "true";
-
+// S42: applyS38Filter neutralizado. Tras reproc completo 30d todos los
+// records vienen del modelo S42. Mantenemos función como passthrough para
+// no romper call sites. sessionStorage limpiado.
+sessionStorage.removeItem("vrp_post_s38_only");
 function applyS38Filter(records) {
-  if (!records || !records.length) return records || [];
-  if (!postS38Only) return records;
-  return records.filter(r => (r.datetime_utc || r.dt || "") >= S38_ADOPTION_CUTOFF_UTC);
+  return records || [];
 }
 
 function computeStats(jsonData, mirovaForVolc, volcanoName) {
@@ -466,14 +464,7 @@ document.getElementById("btn-include-far").addEventListener("click", () => {
   location.reload();
 });
 
-// S38: toggle post-S38. Mismo sessionStorage key que index.html → sincronizado.
-const btnPostS38 = document.getElementById("btn-post-s38");
-if (postS38Only) btnPostS38.style.background = "#1f5e3a";
-btnPostS38.addEventListener("click", () => {
-  postS38Only = !postS38Only;
-  sessionStorage.setItem("vrp_post_s38_only", postS38Only ? "true" : "false");
-  location.reload();
-});
+// S42: toggle post-S38 removido (botón ya no existe en HTML).
 
 document.getElementById("btn-scale").addEventListener("click", () => {
   const btn = document.getElementById("btn-scale");

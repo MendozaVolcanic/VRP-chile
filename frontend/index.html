@@ -379,10 +379,11 @@
     <button class="scale-btn active" id="btn-linear">Lineal</button>
     <button class="scale-btn" id="btn-log">Logarítmica</button>
   </div>
-  <div style="display:flex;gap:6px;align-items:center;" title="🆕 SOLO POST-S38: Cuando está activo, oculta records procesados antes de la adopción operacional vent_anchored + H8 (PR #28, mergeado 2026-05-13 03:05 GMT). Los registros anteriores pueden tener primary_cluster equivocado (Salar/lago/satélite lejano en lugar del cráter). Útil para ver solo la data del operacional actual sin contaminación histórica.">
-    <label>Calidad </label>
-    <button class="scale-btn" id="btn-post-s38">🆕 Solo post-S38</button>
-  </div>
+  <!-- S42: filtro 🆕 Solo post-S38 removido. Tras el reproc completo 30d
+       del 2026-05-13, TODOS los records vienen del modelo S42 (vent_anchored
+       + H8 + D4 per-vol + sanity cap), independiente de su datetime_utc.
+       El filtro original lo ocultaba todo porque datetime es la fecha del
+       granule, no del processing. Limpiamos botón para evitar confusión. -->
   <div style="display:flex;gap:6px;align-items:center;" title="Cuando está apagado, el dashboard solo considera anomalías dentro del radio del cráter (summit). Las detecciones lejanas siguen visibles en el mapa y en la tabla pero atenuadas.">
     <label>Distancia </label>
     <button class="scale-btn active" id="btn-summit-only">🎯 Solo cráter</button>
@@ -562,16 +563,12 @@ let onlyPrimaryPixel = true;
 // con primary_cluster equivocado (Salar lejano, lago lateral, etc.) se ocultan
 // del dashboard, dejando solo los datos del operacional actual con cluster
 // vent-anchored correcto. Persiste en sessionStorage para sobrevivir reloads.
-const S38_ADOPTION_CUTOFF_UTC = "2026-05-13 03:00";
-let postS38Only = sessionStorage.getItem("vrp_post_s38_only") === "true";
-
+// S42: applyS38Filter neutralizado. Tras reproc completo 30d, todos los
+// records ya vienen del modelo S42. Mantenemos passthrough para no romper
+// call sites (filterDays/latestVRP/latestSensors/lastEventTime/distanceCounts).
+let postS38Only = false;  // unused, kept para evitar ReferenceError residual
 function applyS38Filter(records) {
-  // Filtra records con datetime_utc anterior al cutoff S38. Cuando el toggle
-  // está OFF (default), devuelve la lista intacta. Si records es vacío o
-  // falsy, devuelve [] siempre.
-  if (!records || !records.length) return records || [];
-  if (!postS38Only) return records;
-  return records.filter(r => (r.datetime_utc || "") >= S38_ADOPTION_CUTOFF_UTC);
+  return records || [];
 }
 let charts = {};
 let allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
@@ -1952,19 +1949,10 @@ async function init() {
     renderDetail();
   });
 
-  // S38: toggle "🆕 Solo post-S38". Default OFF — muestra todo el histórico.
-  // Cuando ON, oculta records con datetime_utc < S38_ADOPTION_CUTOFF_UTC.
-  // Persiste en sessionStorage para sobrevivir reloads de la página.
-  const btnPostS38 = document.getElementById("btn-post-s38");
-  if (postS38Only) btnPostS38.classList.add("active");
-  btnPostS38.addEventListener("click", () => {
-    postS38Only = !postS38Only;
-    btnPostS38.classList.toggle("active", postS38Only);
-    sessionStorage.setItem("vrp_post_s38_only", postS38Only ? "true" : "false");
-    buildCards();
-    buildOverviewMap();
-    renderDetail();
-  });
+  // S42: filtro post-S38 removido — reproc completo 30d ya aplicó modelo
+  // nuevo a TODOS los records. El botón #btn-post-s38 ya no existe en HTML.
+  // sessionStorage del flag se limpia para no causar confusión futura.
+  sessionStorage.removeItem("vrp_post_s38_only");
 
   // S18: toggle "Solo cráter" vs "Incluir lejanas". Default = solo summit.
   // Cambia buildCards, overview map, chart y tabla del detalle.
