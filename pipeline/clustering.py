@@ -119,12 +119,33 @@ def cluster_hotspots(
         # del inner_radius_km tienen prioridad absoluta; entre ellos y
         # entre los fuera, el más cercano gana. Empate por proximity con
         # vrp_mw desc como tiebreaker.
+        #
+        # S43 fix: cuando has_vrp, primero filtrar clusters con vrp_mw > 0.
+        # Bug pre-S43: si cluster A está a 1.8km del vent con vrp=0 (todos
+        # pixels delta_L clip a 0) y cluster B está a 5km con vrp=0.43 MW
+        # (pixels hot reales), vent_anchored elegía A (más cerca) y pc.vrp=0.
+        # Eso causaba 18 FNs sistemáticos en Tupungatito/Lastarria/Planchón
+        # donde Test 1 dispara pero D4 fix solo aplica a SOME pixels —
+        # cluster cercano queda vrp=0 mientras pixels con vrp real están más
+        # lejos. Fix: si hay clusters con vrp>0, ignorar los con vrp=0 al
+        # rankear. Solo si todos vrp=0, fallback al menor dist (preserva
+        # comportamiento previo cuando no hay señal real).
+        if has_vrp:
+            with_vrp = [c for c in clusters if c.get("vrp_mw", 0.0) > 0]
+            ranking_set = with_vrp if with_vrp else clusters
+        else:
+            ranking_set = clusters
+
         def _vent_key(c):
             inside = c["centroid_dist_km"] <= inner_radius_km
             # tuple: (0 si inside else 1, dist asc, -vrp desc)
             vrp = c.get("vrp_mw", 0.0) if has_vrp else 0.0
             return (0 if inside else 1, c["centroid_dist_km"], -vrp)
-        clusters.sort(key=_vent_key)
+        ranking_set.sort(key=_vent_key)
+        # Clusters no en ranking_set van al final (no eligibles para primary)
+        not_ranked = [c for c in clusters if c not in ranking_set]
+        not_ranked.sort(key=_vent_key)
+        clusters = ranking_set + not_ranked
     elif has_vrp:
         clusters.sort(key=lambda c: c["vrp_mw"], reverse=True)
     else:
