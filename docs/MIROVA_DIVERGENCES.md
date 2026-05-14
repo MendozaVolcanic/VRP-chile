@@ -398,3 +398,134 @@ en VIIRS 750m incluso con integración de ROI.
 - Análisis S27: en este documento + `~memory/project_s27_mirova_literal_negativo.md`
 - Hipótesis arquitecturales H_S27_1 a H_S27_5: ver memoria.
 - Frontend fix S27: `frontend/index.html` toggle "Solo principal vs Todos los pixels".
+
+---
+
+## S45 (2026-05-14) — D9 cluster selection MIROVA: summit-priority confirmado Lascar
+
+**Contexto**: S44 cerró con recall 94.8% y 6 FN persistentes. Investigación
+S45 con audit corregido (`pc.vrp_mw` filtered, FP solo vs FALSO_POSITIVO,
+window 15d 2026-04-27→2026-05-11) dio TP=35, FN=6, FP=5 (P=87.5%, R=85.4%).
+Los 6 FN tienen 3 mecanismos distintos.
+
+### Mecanismo 1 (4 FN Lascar MODIS) — cluster selection diverge
+
+**Patrón estructural confirmado** auditando los 4 granules Lascar MODIS:
+
+| Caso | MIROVA reporta | Nuestro cluster | Píxel cráter en `anomaly_pixels`? |
+|---|---|---|---|
+| 04-30 07:30 | 0.99 MW @ 1.0 km | n_pix=1, dist=22.6 km W | SÍ (BT 273.58 K @ 0.59 km, vrp=1.34) |
+| 04-28 07:50 | 1.31 MW @ 2.0 km | n_pix=2, dist=27.5 km NW | SÍ (BT 274.29 K @ 2.43 km, vrp=1.88) |
+| 04-28 01:50 | 0.66 MW @ 1.4 km | n_pix=1, dist=27.4 km WSW | NO listed (anomaly_pixels=0) |
+| 04-27 07:15 | 0.28 MW @ 1.4 km | n_pix=2, dist=30.0 km SW | SÍ (BT 272.46 K @ 1.81 km, vrp=1.57) |
+
+**Diagnóstico**:
+- Background MODIS B21 t_bg ≈ 265-268 K (incluye Salar de Atacama, ~25 km W).
+- σ_bg = 4.5-6.5 K → eff_threshold = t_bg + 4σ ≈ 286-292 K.
+- Píxeles Salar @ 20-30 km W tienen BT 278-283 K (térmica residual post-atardecer).
+- Píxeles cráter @ <3 km tienen BT 272-274 K (anomalía sub-MW sub-pixel real).
+- **Ningún path formal (n_bt=None, dnti_ctx=None, test1=False) dispara**.
+  Pero anomaly_pixels llega con 75-83 pixels listados via un mecanismo previo
+  no aislado en diag.
+- Cluster centroid eligió siempre el grupo Salar (más caliente scene-wide)
+  e ignoró el píxel cráter.
+
+**Conclusión D9**: MIROVA tiene **summit-priority cluster selection** no
+documentada explícitamente en Coppola 2016a SP426.5 pero operacional. La
+evidencia es triangular:
+1. **Indirecta paper**: dual-ROI con C1 summit=0.003 más permisivo que C1
+   scene=0.010 (Coppola 2016a Table 2). Si summit dispara con su umbral
+   permisivo, MIROVA reporta esa alerta.
+2. **OSF v2.5 empírico**: 10,579 filas Chile Tier A, solo 2 timestamps con
+   verdadero multi-cluster mismo sensor (NdC 2021-07-21). MIROVA emite
+   1 alerta por (volcán, timestamp, sensor) — no es max-VRP global (caso PCC
+   2026-05-09 lo refuta), por exclusión queda summit-priority.
+3. **Lascar 4 FN**: nuestro pipeline detecta el píxel cráter en
+   `anomaly_pixels` pero clustering lo entierra entre Salar; MIROVA en cambio
+   reporta justo ese píxel cráter — consistente con ROI summit evaluado
+   separadamente del scene.
+
+**Acción S46+**: implementar flag `enable_summit_priority_eruption`. Lógica:
+- Si hay píxel(es) dentro de `inner_radius_km` (summit ROI) con
+  BT > t_bg_summit + 2σ_summit (umbral permisivo C1_summit ≈ 0.003), construir
+  primary_cluster desde esos píxeles SIN considerar scene-wide.
+- Si NO hay summit detection, fallback a comportamiento actual (cluster
+  scene-max via vent_anchored).
+- A/B reproc 30d × 11 Tier A vs `mirova_equivalent` baseline.
+
+### Mecanismo 2 (1 FN Tupungatito VIIRS375) — Test 1 dispara con VRP MIR=0
+
+**Caso**: 2026-04-27 05:18 VIIRS_NOAA20. Test 1 disparó 88 píxeles dentro del
+summit ROI (`pc.centroid_dist_km=1.25 km`, n_pixels=88), pero
+**`pc.vrp_mw=0.0`**. Wooster MIR formula correctamente da 0 porque ΔL_MIR ≈ 0
+en los píxeles que Test 1 marca anómalos por NTI (NTI dispara con 4.77σ pero
+σ=0.0036, contraste absoluto chico).
+
+MIROVA reporta 0.11 MW @ 5.41 km — un píxel específico en zona "near-vent"
+con MIR ligeramente sobre fondo que sí da VRP>0.
+
+**Hipótesis**: el píxel @ 5.4 km que MIROVA reporta tiene NTI más alto y MIR
+ligeramente sobre fondo. Nuestro clustering 8-conn agrupa los 88 píxeles de
+NTI sutil incluyendo zonas "frías" donde ΔL_MIR=0; el centroid resultante no
+representa el píxel caliente real. Investigación pixel-level específica
+requiere re-procesar el granule VJ102IMG.A2026117.0518 con diag verbose
+por píxel.
+
+**Acción S46+**: backlog. Probable solución: filtrar `anomaly_pixels` por
+`vrp_mw > 0` antes de clustering — ya parcialmente cubierto S43
+vent_anchored prefiere vrp>0, pero parece no aplicar a Test 1 puro.
+
+### Mecanismo 3 (1 FN Isluga VIIRS375) — granule VJ202IMG no procesado
+
+**Caso**: 2026-04-29 05:24. MIROVA tiene VIIRS375 (alerta @ 0.84 km, vrp=0.10).
+Nosotros solo tenemos VJ202MOD (NOAA-21 M-band 750), no VJ202IMG (I-band 375).
+fetch.py SÍ está configurado para VJ202IMG (líneas 74-76). Probable gap NRT
+LANCE puntual o fallo de descarga ese día. Patrón conocido (handoff S44
+menciona similar para NdC).
+
+**Acción S46+**: backlog. No hay fix mecánico — depende disponibilidad NASA
+LANCE. Monitorear si patrón aumenta de frecuencia.
+
+### Paths legacy retirables (P5 audit S45)
+
+Auditoría empírica sobre 9,206 records con `n_anomalous_pixels>0`:
+
+| Path | Records dispara | Único contributor |
+|---|---|---|
+| `test1` | 4554 | — |
+| `dnti_ctx` | 5445 | — |
+| `bt` | 429 | — |
+| `nti` | **50** | **0** |
+| `nti_rel` | **0** | **0** |
+
+- `nti_rel_path` es **dead code** (0 records contribuyen).
+- `nti_path_hot` tiene 50 records totales pero **0 son únicos contributors**
+  (test1 y/o dnti_ctx siempre cubren). Retirable sin pérdida de recall.
+
+**Acción S46+**: plan documentado, A/B reproc 30d antes de adoptar.
+
+### Coords Tier A validados (P6 audit S45)
+
+Barrido sistemático `volcanoes.yaml` vs centros de GroundOverlay MIROVA en KMZs:
+
+| Volcán | dist vent → kml | Status |
+|---|---|---|
+| PCC | 7.57 km | Sin `mirova_center`, pero `inner_radius=20` absorbe |
+| Tupungatito | 4.86 km | `mirova_center` configurado, MATCH KML |
+| Planchón | 2.02 km | `mirova_center` configurado (Planchón W vs Peteroa E), MATCH KML |
+| Lascar | 0.87 km | OK borderline |
+| Otros 7 Tier A | <0.5 km | OK |
+
+**Sin errores de configuración**. Offsets reflejan vulcanología real (volcanes
+duales o vent desactualizado vs MIROVA anchor). Configuración ya manejada.
+
+### Limitaciones evidence S45
+
+- mirova-tif-archive: solo cubre 2026-05-08+ para casi todos los sensores.
+  Los 4 FN Lascar (2026-04-27 a 04-30) están en gap.
+- CSV consolidado más reciente: 01_05_2026 (latest 2026-05-01). Window audit
+  efectivo: 2026-04-27 a 2026-05-01 (5 días, no 15 como afirmaba handoff S44).
+- OSF v2.5 termina 2025-12-31, no cubre 2026.
+- R2 pixel-level estricto vs MIROVA requiere ambos archivos sincronizados.
+  S46+ accionable: configurar scraper Mirova-v1 + mirova-tif-archive con
+  retención más larga, o capturar TIFs proactivamente al detectar FN.

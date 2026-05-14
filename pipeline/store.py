@@ -150,6 +150,18 @@ def append_record(volcano_name: str, record: dict,
 
     # Normalize VRP field: ensure every record has a unified 'vrp_mw' field.
     # VIIRS 375m returns vrp_mir_mw/vrp_vent_mw; MODIS/VIIRS750 return vrp_mw/vrp_vent_mw.
+    #
+    # IMPORTANTE para consumers (S45 nota anti-confusión):
+    # - `record["vrp_mw"]` es la SUMA scene-wide de todos los hot pixels in_range
+    #   post-piso-sensor. NO es lo que el dashboard muestra. NO usar en audits.
+    # - `record["primary_cluster"]["vrp_mw"]` es el cluster principal post
+    #   vent_anchored + sanity cap 50,000 MW. ES lo que dashboard usa via
+    #   `mirovaEqVrp(r)` (frontend/index.html) — además filtra cdist > inner_radius.
+    # - Audits Python: replicar la lógica mirovaEqVrp:
+    #     pc = r["primary_cluster"]; cdist = pc["centroid_dist_km"]; v = pc["vrp_mw"]
+    #     vrp_eq = 0 if (cdist > inner_radius_km or v > 50_000) else v
+    # - Refactor a `vrp_mw_scene_total` + `vrp_mw_primary` queda en backlog S46+
+    #   (afecta schema, dashboard, audits, OSF mapping).
     MAX_HOTSPOT_DIST_KM = max_hotspot_dist_km if max_hotspot_dist_km is not None else 5.0
 
     # S35 H8: filtro pixel-por-pixel ANTES de los normalizaciones de VRP.
