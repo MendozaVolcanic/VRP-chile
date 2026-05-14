@@ -188,6 +188,54 @@ def test_vent_anchored_requires_inner_radius_km():
         )
 
 
+def test_vent_anchored_prefers_cluster_with_vrp_over_zero_close():
+    """S43 fix — Caso Lastarria FN: cluster cercano vent con vrp=0 (todos
+    pixels delta_L clip 0) vs cluster lejano con vrp>0 (hot real).
+    vent_anchored debe elegir el cluster con vrp>0 aunque sea más lejos.
+    """
+    H, W, lat, lon, vlat, vlon = _make_scene_two_clusters()
+    hot_mask = np.zeros((H, W), dtype=bool)
+    vrp = np.zeros((H, W), dtype=float)
+    # Cluster A: 5 pixels @ vent, vrp=0 (delta_L clip a 0)
+    for (i, j) in [(10, 10), (10, 11), (11, 10), (11, 11), (9, 10)]:
+        hot_mask[i, j] = True
+        vrp[i, j] = 0.0  # ¡vrp=0!
+    # Cluster B: 3 pixels @ ~7km, vrp=0.43 (hot real)
+    for (i, j) in [(3, 16), (3, 17), (4, 16)]:
+        hot_mask[i, j] = True
+        vrp[i, j] = 0.15
+
+    cl = cluster_hotspots(
+        hot_mask, lat, lon, vlat, vlon, vrp_per_pixel=vrp,
+        strategy="vent_anchored", inner_radius_km=5.0,
+    )
+    primary = cl[0]
+    # vent_anchored prefiere cluster B (vrp>0) aunque más lejos vs cluster A vrp=0
+    assert primary["vrp_mw"] == pytest.approx(0.45, abs=0.01), \
+        'Debe elegir cluster con vrp>0, no el vrp=0 más cerca'
+    assert primary["centroid_dist_km"] > 5  # cluster B está más lejos
+
+
+def test_vent_anchored_fallback_to_closest_when_all_vrp_zero():
+    """S43 sanity: si TODOS clusters tienen vrp=0, fallback a vent_anchored
+    proximity normal (preserva comportamiento previo cuando no hay señal real).
+    """
+    H, W, lat, lon, vlat, vlon = _make_scene_two_clusters()
+    hot_mask = np.zeros((H, W), dtype=bool)
+    vrp = np.zeros((H, W), dtype=float)
+    # Ambos clusters con vrp=0
+    for (i, j) in [(10, 10), (10, 11)]: hot_mask[i, j] = True
+    for (i, j) in [(3, 16), (3, 17)]: hot_mask[i, j] = True
+
+    cl = cluster_hotspots(
+        hot_mask, lat, lon, vlat, vlon, vrp_per_pixel=vrp,
+        strategy="vent_anchored", inner_radius_km=5.0,
+    )
+    # Cluster cercano (10,10) gana porque ambos tienen vrp=0
+    primary = cl[0]
+    assert primary["centroid_dist_km"] < 2
+
+
 def test_invalid_strategy_raises():
     """strategy desconocido → ValueError."""
     H, W, lat, lon, vlat, vlon = _make_scene_two_clusters()
