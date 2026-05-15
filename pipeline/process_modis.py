@@ -109,6 +109,7 @@ from pipeline.profile import (
     ENABLE_BT_PATH_HOT,
     ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK,
     ENABLE_TEST1_K1_BG_EXCLUDE,
+    ENABLE_NADIR_FIXED_PIXEL_AREA_MODIS,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -236,7 +237,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     lat = data["lat"]
     lon = data["lon"]
     # Per-pixel ground area corrected for off-nadir scan geometry
-    pixel_areas = modis_pixel_areas(lat.shape)
+    pixel_areas = modis_pixel_areas(
+        lat.shape, nadir_fixed=ENABLE_NADIR_FIXED_PIXEL_AREA_MODIS
+    )
     dist = haversine_km(volcano_lat, volcano_lon, lat, lon)
 
     # P3.1 S15: per-pixel distance from effective vent for dual-ROI.

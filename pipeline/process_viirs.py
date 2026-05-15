@@ -106,6 +106,7 @@ from pipeline.profile import (
     ENABLE_BT_PATH_HOT,
     ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK,
     ENABLE_TEST1_K1_BG_EXCLUDE,
+    ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -272,7 +273,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     lon = geo["lon"]
     # Per-pixel ground area (m^2) corrected for off-nadir scan geometry.
     # See pipeline/scan_geometry.py for the sec^3(theta_z) formula.
-    pixel_areas = viirs_pixel_areas(geo["sensor_zenith"], NADIR_PIXEL_AREA_M2)
+    pixel_areas = viirs_pixel_areas(
+        geo["sensor_zenith"],
+        NADIR_PIXEL_AREA_M2,
+        nadir_fixed=ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS,
+    )
 
     dist = haversine_km(volcano_lat, volcano_lon, lat, lon)
 

@@ -249,6 +249,21 @@ ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK: bool = bool(_p.get("enable_test1_k1_retire
 # t_bg/std_bg. Default OFF (backward-compat).
 ENABLE_TEST1_K1_BG_EXCLUDE: bool = bool(_p.get("enable_test1_k1_bg_exclude", False))
 
+# S46 Drift #7 — Coppola 2016a SP426.5 línea 201-202 + Eq.7 dicen:
+# "resampled within a 50x50 km grid... spatial resolution of the resampled
+# MODIS pixels is 1 km" y "A_PIX is the pixel size (1 km^2 for the resampled
+# MODIS pixels)". MIROVA usa A_pix nadir-fijo en los 3 sensores (CLAUDE.md
+# regla científica). Flags opt-in por sensor para preservar calibración
+# empírica S14 (MODIS sec^3, VIIRS factor lineal 1-2x) como default.
+# Cuando ON: A_pix uniforme (1 km^2 MODIS, 0.140625 km^2 VIIRS I, 0.5625 km^2
+# VIIRS M) — clon literal MIROVA.
+ENABLE_NADIR_FIXED_PIXEL_AREA_MODIS: bool = bool(
+    _p.get("enable_nadir_fixed_pixel_area_modis", False)
+)
+ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS: bool = bool(
+    _p.get("enable_nadir_fixed_pixel_area_viirs", False)
+)
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))

@@ -121,13 +121,24 @@ def modis_zenith_from_column(col_idx: np.ndarray) -> np.ndarray:
     return np.degrees(np.arcsin(sin_z))
 
 
-def modis_pixel_areas(shape: tuple) -> np.ndarray:
+def modis_pixel_areas(shape: tuple, nadir_fixed: bool = False) -> np.ndarray:
     """
     Return per-pixel area (m^2) for a full MODIS 1km granule of given shape.
 
     shape = (n_lines, n_samples) where n_samples should be 1354 for MOD021KM.
+
+    Args:
+        shape: granule shape (n_lines, n_samples).
+        nadir_fixed: si True, retorna A_pix uniforme = 1 km^2 (1e6 m^2) para
+            todas las pixels. Corresponde a la definición de Coppola 2016a
+            SP426.5 línea 201-202 + Eq.7: "A_PIX is the pixel size (1 km^2
+            for the resampled MODIS pixels)". MIROVA resamplea a grid UTM
+            50x50 km de 1km uniforme antes de aplicar VRP. Default False
+            preserva el factor sec^3(theta_z) histórico (Drift #7 S46).
     """
     n_lines, n_samples = shape
+    if nadir_fixed:
+        return np.full((n_lines, n_samples), 1.0e6, dtype=np.float64)
     cols = np.arange(n_samples)
     z = modis_zenith_from_column(cols)        # 1D, length n_samples
     factor = area_factor_from_zenith(z)       # 1D
@@ -166,7 +177,11 @@ def roi_mask_bbox(
     return (np.abs(lat_span_km) <= half_km) & (np.abs(lon_span_km) <= half_km)
 
 
-def viirs_pixel_areas(sensor_zenith_deg: np.ndarray, nadir_area_m2: float) -> np.ndarray:
+def viirs_pixel_areas(
+    sensor_zenith_deg: np.ndarray,
+    nadir_area_m2: float,
+    nadir_fixed: bool = False,
+) -> np.ndarray:
     """
     Return per-pixel area (m^2) for a VIIRS granule.
 
@@ -192,9 +207,16 @@ def viirs_pixel_areas(sensor_zenith_deg: np.ndarray, nadir_area_m2: float) -> np
         sensor_zenith_deg: array of per-pixel sensor zenith angles (degrees).
         nadir_area_m2: nadir pixel area: 140625 for I-band (375m),
                        562500 for M-band (750m).
+        nadir_fixed: si True, retorna A_pix uniforme = nadir_area_m2 para
+            todas las pixels (Coppola 2016a SP426.5 Eq.7 + CLAUDE.md regla:
+            MIROVA usa A_pix nadir-fijo en los 3 sensores). Default False
+            preserva el factor lineal 1-2x calibrado empíricamente S14
+            (Drift #7 S46, ver CLAUDE.md).
     """
     z = np.clip(np.abs(np.asarray(sensor_zenith_deg, dtype=np.float64)),
                 0.0, MAX_SENSOR_ZENITH_DEG)
+    if nadir_fixed:
+        return np.full_like(z, nadir_area_m2, dtype=np.float64)
     cos_z = np.cos(np.radians(z))
     # Linear interpolation between 1.0 (nadir) and ~2.0 (max zenith ~70 deg)
     # to approximate published VIIRS aggregated pixel area variation.
