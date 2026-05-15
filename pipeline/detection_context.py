@@ -312,6 +312,9 @@ def first_pass_tests_2_and_3(
         "mu_dnti": mu_dnti, "sd_dnti": sd_dnti,
         "mu_deti": mu_deti, "sd_deti": sd_deti,
         "n_bg_used": n_bg,
+        # S46 Task 5: expose eti para second_pass_adjacent reuse (evita recomputar
+        # la regresión cuadrática scene-wide que ya hicimos arriba).
+        "eti": eti,
     }
     return hot, diag
 
@@ -632,16 +635,21 @@ def second_pass_adjacent(
     dual = (is_summit is not None
             and c1_dnti_scene is not None and c1_deti_scene is not None
             and c2_dnti_scene is not None and c2_deti_scene is not None)
+    # Paper Tests 2/3 (líneas 316-325): `dNTI > C1 OR dNTI > μ + C2·σ` →
+    # threshold efectivo es el MENOR de los dos (basta superar uno). Equivalente:
+    # ``thr = min(C1, μ + C2·σ)``. Bug fix S46 Task 5: antes usábamos `max`
+    # (AND lógico), ahora `min` (OR lógico paper-correct). Alineado con
+    # first_pass_tests_2_and_3 líneas 290-300.
     if dual:
-        thr_dnti_sum = max(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
-        thr_deti_sum = max(c1_deti, mu_deti + c2_deti * sd_deti)
-        thr_dnti_sce = max(c1_dnti_scene, mu_dnti + c2_dnti_scene * sd_dnti)
-        thr_deti_sce = max(c1_deti_scene, mu_deti + c2_deti_scene * sd_deti)
+        thr_dnti_sum = min(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
+        thr_deti_sum = min(c1_deti, mu_deti + c2_deti * sd_deti)
+        thr_dnti_sce = min(c1_dnti_scene, mu_dnti + c2_dnti_scene * sd_dnti)
+        thr_deti_sce = min(c1_deti_scene, mu_deti + c2_deti_scene * sd_deti)
         pass_2 = np.where(is_summit, dnti > thr_dnti_sum, dnti > thr_dnti_sce)
         pass_3 = np.where(is_summit, deti > thr_deti_sum, deti > thr_deti_sce)
     else:
-        thr_dnti = max(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
-        thr_deti = max(c1_deti, mu_deti + c2_deti * sd_deti)
+        thr_dnti = min(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
+        thr_deti = min(c1_deti, mu_deti + c2_deti * sd_deti)
         pass_2 = dnti > thr_dnti
         pass_3 = deti > thr_deti
 

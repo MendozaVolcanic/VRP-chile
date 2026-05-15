@@ -109,6 +109,7 @@ from pipeline.profile import (
     ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS,
     ENABLE_FIRST_PASS_TESTS_2_AND_3,
     ENABLE_DUAL_ROI_FIRST_PASS,
+    ENABLE_DUAL_ROI_SECOND_PASS,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -399,6 +400,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     anomaly_pixels = []   # All anomalous pixels with location + per-pixel VRP
     # S46 drift23 — first_pass_tests_2_and_3 diag (default outside I04 block).
     fp_diag = None
+    # S46 Task 5 Drift #4 — second_pass_adjacent recapture counter (default 0).
+    n_second_pass_recapture = 0
 
     if "I04" in bands:
         bt = bands["I04"]
@@ -666,6 +669,40 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 )
                 hot_mask_2d = fp_hot
                 n_first_pass = fp_diag["n_first_pass_pixels"]
+
+            # S46 Task 5 Drift #4 — second_pass_adjacent recapture
+            # (paper SP426.5:347-356). Tras el first-pass, recompute dNTI/dETI
+            # excluyendo active pixels del 8-vecino mean → recaptura pixels
+            # marginales adyacentes que el first-pass perdió por contaminación.
+            if (ENABLE_SECOND_PASS_ADJACENT
+                    and ENABLE_FIRST_PASS_TESTS_2_AND_3
+                    and fp_diag is not None
+                    and inner_radius_km is not None
+                    and not np.isnan(t_bg_i04)):
+                eti_for_second_pass = fp_diag.get("eti")
+                if eti_for_second_pass is not None:
+                    is_summit_mask = vent_dist_per_pixel <= inner_radius_km
+                    final_active_mask = second_pass_adjacent(
+                        nti=nti, eti=eti_for_second_pass,
+                        active_mask=hot_mask_2d,
+                        c1_dnti=DNTI_CONTEXTUAL_C1_SUMMIT,
+                        c1_deti=DNTI_CONTEXTUAL_C1_SUMMIT,
+                        c2_dnti=C2_DNTI_SUMMIT_NIGHT,
+                        c2_deti=C2_DETI_SUMMIT_NIGHT,
+                        is_summit=(is_summit_mask
+                                   if ENABLE_DUAL_ROI_SECOND_PASS else None),
+                        c1_dnti_scene=(DNTI_CONTEXTUAL_C1_SCENE
+                                       if ENABLE_DUAL_ROI_SECOND_PASS else None),
+                        c1_deti_scene=(DNTI_CONTEXTUAL_C1_SCENE
+                                       if ENABLE_DUAL_ROI_SECOND_PASS else None),
+                        c2_dnti_scene=(C2_DNTI_SCENE_NIGHT
+                                       if ENABLE_DUAL_ROI_SECOND_PASS else None),
+                        c2_deti_scene=(C2_DETI_SCENE_NIGHT
+                                       if ENABLE_DUAL_ROI_SECOND_PASS else None),
+                    )
+                    n_second_pass_recapture = int(
+                        np.sum(final_active_mask & ~hot_mask_2d))
+                    hot_mask_2d = final_active_mask
 
             # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene a
             # la mask final combinada (Coppola 2016a Tabla 1). Pixels que
@@ -1114,6 +1151,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             fp_diag["sd_deti"] if fp_diag is not None else None),
         "diag_n_bg_used_first_pass": (
             fp_diag["n_bg_used"] if fp_diag is not None else 0),
+        # S46 Task 5 — second_pass_adjacent recapture diag (Drift #4).
+        "diag_n_second_pass_recapture": n_second_pass_recapture,
         # S25 Path Test 1 (Coppola 2015 Eq.1) integrated-ROI MIR
         "triggered_test1": test1_triggered,
         "n_test1_pixels": test1_n_contrib,

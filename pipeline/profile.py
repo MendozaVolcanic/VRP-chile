@@ -282,6 +282,20 @@ ENABLE_DUAL_ROI_FIRST_PASS: bool = bool(
     _p.get("enable_dual_roi_first_pass", False)
 )
 
+# S46 Task 5 Drift #4 — Coppola 2016a SP426.5:347-356 dice literalmente:
+#   "active pixels may strongly modify the average values of their surroundings,
+#    with a consequent decrease in the dNTI and dETI values of adjacent pixels.
+#    To avoid this problem, step 2 (spatial analysis) is performed a second time,
+#    being particularly careful to eliminate all of the 'active' pixels already
+#    detected"
+# La flag ENABLE_SECOND_PASS_ADJACENT (definida arriba en bloque H_D8_5 S37)
+# controla activación. ENABLE_DUAL_ROI_SECOND_PASS activa Tabla 2 noche thresholds
+# summit/scene en el second-pass. Off → set uniforme summit. Solo aplica si
+# ENABLE_SECOND_PASS_ADJACENT está ON.
+ENABLE_DUAL_ROI_SECOND_PASS: bool = bool(
+    _p.get("enable_dual_roi_second_pass", False)
+)
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))
