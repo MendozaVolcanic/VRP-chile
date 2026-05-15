@@ -234,6 +234,80 @@ ENABLE_VENT_ANCHORED_CLUSTERING: bool = bool(_p.get("enable_vent_anchored_cluste
 # y comparar recall delta. Si baja < 1pp → safe retirar del clon literal.
 ENABLE_BT_PATH_HOT: bool = bool(_p.get("enable_bt_path_hot", True))
 
+# S46 Drift #1a — Coppola 2016a SP426.5:298-300 dice que Test 1 K1 pixels
+# se "discard (unsuitable) for further steps". Nuestro código actual los
+# mete al hot_mask reportable vía nti_path_hot — drift respecto al paper.
+# Cuando ON: nti_path_hot NO contribuye al hot_mask. Su cálculo se mantiene
+# para diagnóstico. Default OFF (backward-compat).
+ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK: bool = bool(_p.get("enable_test1_k1_retire_from_hot_mask", False))
+
+# S46 Drift #1b — Coppola 2016a SP426.5:352-356 dice "step 2 is performed a
+# second time, being particularly careful to eliminate all of the 'active'
+# pixels already detected". Nuestro bg_vals NO excluye pixels Test 1 K1 active,
+# contaminando t_bg/std_bg si hay anomalías cerca/dentro del ring.
+# Cuando ON: compute_bg_stats excluye pixels NTI > NTI_K1 antes de computar
+# t_bg/std_bg. Default OFF (backward-compat).
+ENABLE_TEST1_K1_BG_EXCLUDE: bool = bool(_p.get("enable_test1_k1_bg_exclude", False))
+
+# S46 Drift #7 — Coppola 2016a SP426.5 línea 201-202 + Eq.7 dicen:
+# "resampled within a 50x50 km grid... spatial resolution of the resampled
+# MODIS pixels is 1 km" y "A_PIX is the pixel size (1 km^2 for the resampled
+# MODIS pixels)". MIROVA usa A_pix nadir-fijo en los 3 sensores (CLAUDE.md
+# regla científica). Flags opt-in por sensor para preservar calibración
+# empírica S14 (MODIS sec^3, VIIRS factor lineal 1-2x) como default.
+# Cuando ON: A_pix uniforme (1 km^2 MODIS, 0.140625 km^2 VIIRS I, 0.5625 km^2
+# VIIRS M) — clon literal MIROVA.
+ENABLE_NADIR_FIXED_PIXEL_AREA_MODIS: bool = bool(
+    _p.get("enable_nadir_fixed_pixel_area_modis", False)
+)
+ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS: bool = bool(
+    _p.get("enable_nadir_fixed_pixel_area_viirs", False)
+)
+
+# S46 Drift #2+#3 — Coppola 2016a SP426.5 líneas 316-325 dicen literalmente:
+#   Test 2: dNTI > C1   OR   dNTI > μ_dNTI + C2·σ_dNTI
+#   Test 3: dETI > C1   OR   dETI > μ_dETI + C2·σ_dETI
+#   pixel active ⇔ Test 2 ∧ Test 3
+# Implementación actual contextual_dnti_hot_mask sólo computa `dnti > c1` (drift):
+# falta Test 3 (dETI), falta rama OR estadística, falta dual-ROI Tabla 2.
+# Cuando ON: paths legacy (bt_path, nti_path, dnti_ctx, test1) se calculan para
+# diag pero NO contribuyen al hot_mask — éste se obtiene de first_pass_tests_2_and_3.
+ENABLE_FIRST_PASS_TESTS_2_AND_3: bool = bool(
+    _p.get("enable_first_pass_tests_2_and_3", False)
+)
+# ENABLE_DUAL_ROI_FIRST_PASS activa Tabla 2 noche: C1=0.003/C2=5 summit,
+# C1=0.010/C2=10 scene. Off → set uniforme summit. Solo aplica si
+# ENABLE_FIRST_PASS_TESTS_2_AND_3 está ON.
+ENABLE_DUAL_ROI_FIRST_PASS: bool = bool(
+    _p.get("enable_dual_roi_first_pass", False)
+)
+
+# S46 Task 6 Variante 13 EXPERIMENTAL — Di Bella 2024 n=12 noche VIIRS.
+# NO clon literal MIROVA. Di Bella es INGV Catania (regla S26, NO MIROVA).
+# Permite reemplazar Coppola C2=5/10 (Tabla 1 noche) con n=12 (Di Bella 2024
+# RSDF Z-score) en first_pass_tests_2_and_3 dentro de los procesadores VIIRS
+# (I-band 375m y M-band 750m). MODIS NO recibe override (drift solo VIIRS).
+# Comparación empírica vs Coppola C2=5/10 en A/B aislado objetivo (2).
+# Default None: preserva legacy (sin override). Cuando float, overrides
+# summit y scene C2 (dNTI y dETI) simultáneamente.
+VIIRS_C2_OVERRIDE_NIGHT = _p.get("viirs_c2_override_night", None)
+if VIIRS_C2_OVERRIDE_NIGHT is not None:
+    VIIRS_C2_OVERRIDE_NIGHT = float(VIIRS_C2_OVERRIDE_NIGHT)
+
+# S46 Task 5 Drift #4 — Coppola 2016a SP426.5:347-356 dice literalmente:
+#   "active pixels may strongly modify the average values of their surroundings,
+#    with a consequent decrease in the dNTI and dETI values of adjacent pixels.
+#    To avoid this problem, step 2 (spatial analysis) is performed a second time,
+#    being particularly careful to eliminate all of the 'active' pixels already
+#    detected"
+# La flag ENABLE_SECOND_PASS_ADJACENT (definida arriba en bloque H_D8_5 S37)
+# controla activación. ENABLE_DUAL_ROI_SECOND_PASS activa Tabla 2 noche thresholds
+# summit/scene en el second-pass. Off → set uniforme summit. Solo aplica si
+# ENABLE_SECOND_PASS_ADJACENT está ON.
+ENABLE_DUAL_ROI_SECOND_PASS: bool = bool(
+    _p.get("enable_dual_roi_second_pass", False)
+)
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))

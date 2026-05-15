@@ -14,6 +14,8 @@ Ref: Coppola et al. 2016 SP 426.5 "An enhanced automated thermal anomaly
 detection algorithm" — C1 absoluto + C2 contextual en dual-ROI.
 """
 
+from typing import Optional
+
 import numpy as np
 from scipy.ndimage import generic_filter, convolve
 
@@ -185,6 +187,136 @@ def dual_roi_contextual_dnti_hot_mask(
         nti, bt, scene_mask, t_bg, c1_scene, bt_sanity_k,
     )
     return hot_summit | hot_scene
+
+
+# ---------------------------------------------------------------------------
+# S46 Drift #2+#3 — first-pass Tests 2 ∧ 3 + dETI + AND + C2·σ + dual-ROI.
+#
+# Coppola 2016a SP 426.5 líneas 316-325 dicen textualmente:
+#   Test 2:  dNTI > C1   OR   dNTI > μ_dNTI + C2·σ_dNTI
+#   Test 3:  dETI > C1   OR   dETI > μ_dETI + C2·σ_dETI
+#   pixel active ⇔ Test 2 ∧ Test 3
+#
+# Tabla 1 (noche): C1_summit=0.003 / C1_scene=0.010, C2_summit=5 / C2_scene=10.
+#
+# Implementación actual contextual_dnti_hot_mask sólo computa dnti > c1 (drift):
+# falta Test 3 (dETI), falta rama OR estadística (μ + C2·σ), falta dual-ROI Tabla 2.
+#
+# Flag ENABLE_FIRST_PASS_TESTS_2_AND_3 reemplaza paths legacy con conjunción
+# Tests 2 ∧ 3 sobre dNTI/dETI. ENABLE_DUAL_ROI_FIRST_PASS activa Tabla 2.
+# ---------------------------------------------------------------------------
+
+
+def first_pass_tests_2_and_3(
+    nti: np.ndarray,
+    nti_app: np.ndarray,
+    bt: np.ndarray,
+    roi_mask: np.ndarray,
+    dist_km: np.ndarray,
+    t_bg: float,
+    bt_sanity_k: float,
+    *,
+    c1_dnti_summit: float = 0.003,
+    c1_deti_summit: float = 0.003,
+    c2_dnti_summit: float = 5,
+    c2_deti_summit: float = 5,
+    inner_km: float,
+    c1_dnti_scene: Optional[float] = None,
+    c1_deti_scene: Optional[float] = None,
+    c2_dnti_scene: Optional[float] = None,
+    c2_deti_scene: Optional[float] = None,
+    min_bg_pixels: int = 10,
+) -> tuple:
+    """Coppola 2016a SP426.5 first-pass — Tests 2 ∧ 3 conjunción + dual-ROI.
+
+    Paper líneas 316-325:
+        Test 2: dNTI > C1  OR  dNTI > μ_dNTI + C2·σ_dNTI
+        Test 3: dETI > C1  OR  dETI > μ_dETI + C2·σ_dETI
+        active ⇔ Test 2 ∧ Test 3
+
+    Tabla 1 (noche): C1_summit=0.003 / C1_scene=0.010, C2_summit=5 / C2_scene=10.
+
+    Reusa compute_eti_scene_quadratic (eq 4 paper, regresión NTI_bk) y
+    _nanmean_8neighbors_fast (kernel mean aritmético, paper línea 242-244).
+
+    Args:
+        nti: NTI observado (eq 1 paper).
+        nti_app: NTI sintético modelo no-volcánico (eq 2 paper).
+        bt: BT MIR (K).
+        roi_mask: bool 2D ROI mask.
+        dist_km: per-pixel distance to vent (km).
+        t_bg, bt_sanity_k: bg stats + floor.
+        c1_*_summit, c2_*_summit: thresholds ROI1 (Tabla 1).
+        inner_km: radio split summit/scene.
+        c1_*_scene, c2_*_scene: thresholds ROI2 si dual; None → uniforme.
+        min_bg_pixels: mínimo para μ, σ confiable.
+
+    Returns:
+        (hot_mask: bool 2D, diag: dict con n_first_pass_pixels, mu_dnti,
+         sd_dnti, mu_deti, sd_deti, n_bg_used).
+    """
+    # 1) ETI via helper existente
+    mask_valid_eti = roi_mask & np.isfinite(nti) & np.isfinite(nti_app)
+    eti = compute_eti_scene_quadratic(nti, nti_app, mask_valid_eti)
+
+    # 2) dNTI y dETI vía 8-neighbor mean
+    mean_nti = _nanmean_8neighbors_fast(nti)
+    mean_eti = _nanmean_8neighbors_fast(eti)
+    dnti = nti - mean_nti
+    deti = eti - mean_eti
+
+    # 3) μ, σ bg regional
+    bg_mask = roi_mask & np.isfinite(dnti) & np.isfinite(deti)
+    n_bg = int(np.count_nonzero(bg_mask))
+    if n_bg < min_bg_pixels:
+        return np.zeros_like(roi_mask, dtype=bool), {
+            "n_first_pass_pixels": 0, "n_bg_used": n_bg,
+            "mu_dnti": None, "sd_dnti": None,
+            "mu_deti": None, "sd_deti": None,
+        }
+    mu_dnti = float(np.mean(dnti[bg_mask]))
+    sd_dnti = float(np.std(dnti[bg_mask]))
+    mu_deti = float(np.mean(deti[bg_mask]))
+    sd_deti = float(np.std(deti[bg_mask]))
+
+    # 4) Threshold por ROI (dual o uniforme).
+    # Paper Tests 2/3: `dNTI > C1 OR dNTI > μ + C2·σ` → threshold efectivo es
+    # el MENOR de los dos (suficiente con que uno se supere). Equivalente:
+    # ``thr = min(C1, μ + C2·σ)``.
+    is_summit = dist_km <= inner_km
+    dual = c1_dnti_scene is not None
+
+    if dual:
+        thr_dnti_sum = min(c1_dnti_summit, mu_dnti + c2_dnti_summit * sd_dnti)
+        thr_deti_sum = min(c1_deti_summit, mu_deti + c2_deti_summit * sd_deti)
+        thr_dnti_sce = min(c1_dnti_scene, mu_dnti + c2_dnti_scene * sd_dnti)
+        thr_deti_sce = min(c1_deti_scene, mu_deti + c2_deti_scene * sd_deti)
+        pass_2 = np.where(is_summit, dnti > thr_dnti_sum, dnti > thr_dnti_sce)
+        pass_3 = np.where(is_summit, deti > thr_deti_sum, deti > thr_deti_sce)
+    else:
+        thr_dnti = min(c1_dnti_summit, mu_dnti + c2_dnti_summit * sd_dnti)
+        thr_deti = min(c1_deti_summit, mu_deti + c2_deti_summit * sd_deti)
+        pass_2 = dnti > thr_dnti
+        pass_3 = deti > thr_deti
+
+    # 5) Conjunción AND + ROI + bt sanity
+    hot = (
+        roi_mask
+        & np.isfinite(dnti) & np.isfinite(deti)
+        & pass_2 & pass_3
+        & (bt > t_bg + bt_sanity_k)
+    )
+
+    diag = {
+        "n_first_pass_pixels": int(np.sum(hot)),
+        "mu_dnti": mu_dnti, "sd_dnti": sd_dnti,
+        "mu_deti": mu_deti, "sd_deti": sd_deti,
+        "n_bg_used": n_bg,
+        # S46 Task 5: expose eti para second_pass_adjacent reuse (evita recomputar
+        # la regresión cuadrática scene-wide que ya hicimos arriba).
+        "eti": eti,
+    }
+    return hot, diag
 
 
 def dual_roi_bt_threshold(
@@ -503,16 +635,21 @@ def second_pass_adjacent(
     dual = (is_summit is not None
             and c1_dnti_scene is not None and c1_deti_scene is not None
             and c2_dnti_scene is not None and c2_deti_scene is not None)
+    # Paper Tests 2/3 (líneas 316-325): `dNTI > C1 OR dNTI > μ + C2·σ` →
+    # threshold efectivo es el MENOR de los dos (basta superar uno). Equivalente:
+    # ``thr = min(C1, μ + C2·σ)``. Bug fix S46 Task 5: antes usábamos `max`
+    # (AND lógico), ahora `min` (OR lógico paper-correct). Alineado con
+    # first_pass_tests_2_and_3 líneas 290-300.
     if dual:
-        thr_dnti_sum = max(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
-        thr_deti_sum = max(c1_deti, mu_deti + c2_deti * sd_deti)
-        thr_dnti_sce = max(c1_dnti_scene, mu_dnti + c2_dnti_scene * sd_dnti)
-        thr_deti_sce = max(c1_deti_scene, mu_deti + c2_deti_scene * sd_deti)
+        thr_dnti_sum = min(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
+        thr_deti_sum = min(c1_deti, mu_deti + c2_deti * sd_deti)
+        thr_dnti_sce = min(c1_dnti_scene, mu_dnti + c2_dnti_scene * sd_dnti)
+        thr_deti_sce = min(c1_deti_scene, mu_deti + c2_deti_scene * sd_deti)
         pass_2 = np.where(is_summit, dnti > thr_dnti_sum, dnti > thr_dnti_sce)
         pass_3 = np.where(is_summit, deti > thr_deti_sum, deti > thr_deti_sce)
     else:
-        thr_dnti = max(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
-        thr_deti = max(c1_deti, mu_deti + c2_deti * sd_deti)
+        thr_dnti = min(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
+        thr_deti = min(c1_deti, mu_deti + c2_deti * sd_deti)
         pass_2 = dnti > thr_dnti
         pass_3 = deti > thr_deti
 
@@ -521,3 +658,121 @@ def second_pass_adjacent(
                     & np.isfinite(dnti) & np.isfinite(deti))
 
     return active_mask | newly_active
+
+
+# ---------------------------------------------------------------------------
+# S46 Drift #1a — combine_hot_paths helper.
+#
+# Coppola 2016a SP 426.5 línea 298-300 dice textualmente:
+#   "Pixels that satisfy Test 1 are flagged as 'active' and subsequently
+#    discarded (unsuitable) for further steps"
+#
+# Test 1 K1 (NTI > -0.8 noche / NTI > -0.6 día) es una MÁSCARA DE SATURACIÓN
+# que retira pixels del cómputo de mean/std del background — NO un path de
+# detección reportable. Nuestro código actual mete `nti_path_hot` al OR del
+# hot_mask, lo cual es un drift respecto al paper.
+#
+# Flag `enable_test1_k1_retire_from_hot_mask` (default OFF): cuando ON,
+# `nti_path_hot` NO contribuye al hot_mask reportable. Su cálculo se mantiene
+# para diagnóstico (qué pixels eran "saturados" Test 1 K1).
+# ---------------------------------------------------------------------------
+
+
+def combine_hot_paths(
+    bt_path_hot: np.ndarray,
+    nti_path_hot: np.ndarray,
+    dnti_ctx_hot: np.ndarray,
+    test1_hot: np.ndarray,
+    *,
+    enable_test1_k1_retire_from_hot_mask: bool = False,
+    nti_rel_hot: np.ndarray = None,
+    eti_path_hot: np.ndarray = None,
+) -> np.ndarray:
+    """Combina paths legacy + nuevos drift flags (S46 drift #1a).
+
+    Drift #1a: si flag ON, nti_path_hot NO entra al OR (Coppola 2016a literal —
+    Test 1 K1 es saturation mask, NO hotspot reportable; SP426.5:298-300).
+
+    Args:
+        bt_path_hot, nti_path_hot, dnti_ctx_hot, test1_hot: bool 2D masks.
+        enable_test1_k1_retire_from_hot_mask: flag drift #1a.
+        nti_rel_hot, eti_path_hot: opcional, default None → zeros.
+
+    Returns:
+        bool 2D hot_mask combinado.
+    """
+    if nti_rel_hot is None:
+        nti_rel_hot = np.zeros_like(bt_path_hot)
+    if eti_path_hot is None:
+        eti_path_hot = np.zeros_like(bt_path_hot)
+
+    if enable_test1_k1_retire_from_hot_mask:
+        # Drift #1a: nti_path_hot NO contribuye al hot_mask
+        return bt_path_hot | dnti_ctx_hot | test1_hot | nti_rel_hot | eti_path_hot
+    else:
+        return bt_path_hot | nti_path_hot | dnti_ctx_hot | test1_hot | nti_rel_hot | eti_path_hot
+
+
+# ---------------------------------------------------------------------------
+# S46 Drift #1b — bg_vals excluye Test 1 K1 active pixels.
+#
+# Coppola 2016a SP 426.5 línea 352-356 dice textualmente:
+#   "active pixels may strongly modify the average values of their surroundings,
+#    with a consequent decrease in the dNTI and dETI values of adjacent pixels.
+#    To avoid this problem, step 2 (spatial analysis) is performed a second time,
+#    being particularly careful to eliminate all of the 'active' pixels already
+#    detected"
+#
+# Drift #1b: nuestro bg_vals (background ring usado para t_bg/std_bg) actualmente
+# NO excluye pixels Test 1 K1 active. Si hay anomalías dentro o cerca del ring,
+# t_bg/std_bg se contaminan y los umbrales N·σ inflan o pierden señal real.
+#
+# Flag `enable_test1_k1_bg_exclude` (default OFF): cuando ON, computamos bg
+# sobre pixels NTI <= NTI_K1 (es decir, excluimos los Test 1 K1 active del bg).
+# ---------------------------------------------------------------------------
+
+
+def compute_bg_stats(
+    bt: np.ndarray,
+    bg_mask: np.ndarray,
+    *,
+    nti: Optional[np.ndarray] = None,
+    nti_k1_threshold: float = -0.8,
+    enable_test1_k1_bg_exclude: bool = False,
+    min_bg_pixels: int = 10,
+) -> tuple:
+    """Compute t_bg (median), std_bg, n_bg sobre bg_mask.
+
+    Drift #1b (Coppola 2016a SP426.5:352-356): si enable_test1_k1_bg_exclude
+    True, excluye pixels Test 1 K1 active del bg_vals para alinear con paper
+    "second time... eliminate all of the 'active' pixels already detected".
+
+    Args:
+        bt: 2D array BT (K).
+        bg_mask: bool 2D, True en bg ring.
+        nti: 2D array NTI (requerido si enable_test1_k1_bg_exclude).
+        nti_k1_threshold: K1 noche (-0.8) o día (-0.6).
+        enable_test1_k1_bg_exclude: flag drift #1b.
+        min_bg_pixels: mínimo bg para confiabilidad.
+
+    Returns:
+        (t_bg, std_bg, n_bg) o (None, None, n_bg_count) si <min_bg_pixels.
+    """
+    effective_bg_mask = bg_mask & ~np.isnan(bt)
+
+    if enable_test1_k1_bg_exclude:
+        if nti is None:
+            raise ValueError(
+                "nti requerido si enable_test1_k1_bg_exclude=True"
+            )
+        test1_k1_active = (nti > nti_k1_threshold) & ~np.isnan(nti)
+        effective_bg_mask = effective_bg_mask & ~test1_k1_active
+
+    bg_vals = bt[effective_bg_mask]
+    n_bg = int(len(bg_vals))
+    if n_bg < min_bg_pixels:
+        return None, None, n_bg
+
+    t_bg = float(np.median(bg_vals))
+    std_bg = float(np.std(bg_vals))
+    return t_bg, std_bg, n_bg

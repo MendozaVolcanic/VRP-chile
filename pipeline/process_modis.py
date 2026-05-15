@@ -107,6 +107,12 @@ from pipeline.profile import (
     C2_DETI_SCENE_NIGHT,
     ENABLE_VENT_ANCHORED_CLUSTERING,
     ENABLE_BT_PATH_HOT,
+    ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK,
+    ENABLE_TEST1_K1_BG_EXCLUDE,
+    ENABLE_NADIR_FIXED_PIXEL_AREA_MODIS,
+    ENABLE_FIRST_PASS_TESTS_2_AND_3,
+    ENABLE_DUAL_ROI_FIRST_PASS,
+    ENABLE_DUAL_ROI_SECOND_PASS,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -115,6 +121,9 @@ from .detection_context import (
     compute_eti_scene_quadratic,
     compute_nti_and_nti_app,
     second_pass_adjacent,
+    combine_hot_paths,
+    compute_bg_stats,
+    first_pass_tests_2_and_3,
 )
 
 # Indices of bands 21 and 22 within EV_1KM_Emissive
@@ -232,7 +241,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     lat = data["lat"]
     lon = data["lon"]
     # Per-pixel ground area corrected for off-nadir scan geometry
-    pixel_areas = modis_pixel_areas(lat.shape)
+    pixel_areas = modis_pixel_areas(
+        lat.shape, nadir_fixed=ENABLE_NADIR_FIXED_PIXEL_AREA_MODIS
+    )
     dist = haversine_km(volcano_lat, volcano_lon, lat, lon)
 
     # P3.1 S15: per-pixel distance from effective vent for dual-ROI.
@@ -267,13 +278,19 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         nti = (rad_mir_for_nti - rad31) / (rad_mir_for_nti + rad31)
 
     # E2a: exclude cold-cloud contaminated pixels from the background annulus.
+    # S46 drift #1b: cuando ENABLE_TEST1_K1_BG_EXCLUDE, además excluir pixels
+    # Test 1 K1 active (NTI > -0.8 noche) del bg per Coppola 2016a:352-356.
     bg_cloud_free = bg_mask & ~np.isnan(bt_mir) & (bt_mir > CLOUD_MASK_BT_K)
-    bg_vals = bt_mir[bg_cloud_free]
-    if len(bg_vals) < 10:
+    t_bg, std_bg, _n_bg = compute_bg_stats(
+        bt=bt_mir,
+        bg_mask=bg_cloud_free,
+        nti=nti,
+        nti_k1_threshold=NTI_K1_NIGHT,
+        enable_test1_k1_bg_exclude=ENABLE_TEST1_K1_BG_EXCLUDE,
+        min_bg_pixels=10,
+    )
+    if t_bg is None:
         return None
-
-    t_bg = float(np.median(bg_vals))
-    std_bg = float(np.std(bg_vals))
     # E2b': cap the sigma component so orographic heterogeneity in the
     # annulus can't blow up the threshold and mask real vent anomalies.
     sigma_component = min(N_SIGMA * std_bg, MAX_SIGMA_COMPONENT_K)
@@ -487,8 +504,86 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                         & (bt_mir > (t_bg + NTI_BT_SANITY_K)))
         n_eti_path = int(np.sum(eti_path_hot))
 
-    hot_mask_2d = (bt_path_hot | nti_path_hot | dnti_ctx_hot | test1_hot
-                   | eti_path_hot)
+    hot_mask_2d = combine_hot_paths(
+        bt_path_hot=bt_path_hot,
+        nti_path_hot=nti_path_hot,
+        dnti_ctx_hot=dnti_ctx_hot,
+        test1_hot=test1_hot,
+        eti_path_hot=eti_path_hot,
+        enable_test1_k1_retire_from_hot_mask=ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK,
+    )
+
+    # S46 Drift #2+#3 — first-pass Tests 2 ∧ 3 (Coppola 2016a SP426.5:316-325).
+    # Reemplaza hot_mask_2d con la conjunción AND de Test 2 (dNTI) y Test 3 (dETI),
+    # rama OR estadística μ+C2σ + dual-ROI Tabla 2 (summit/scene).
+    # Paths legacy se calcularon arriba pero no contribuyen al hot_mask cuando ON.
+    n_first_pass = 0
+    fp_diag = None
+    if (ENABLE_FIRST_PASS_TESTS_2_AND_3
+            and inner_radius_km is not None
+            and not np.isnan(t_bg)):
+        # NTI_app necesario; lo computamos si no se generó antes (ETI quadratic OFF)
+        _, nti_app_fp = compute_nti_and_nti_app(
+            rad_mir=rad_mir_for_nti,
+            bt_tir=bt31,
+            lambda_mir_um=BAND21_LAMBDA,
+            lambda_tir_um=BAND31_LAMBDA,
+        )
+        fp_hot, fp_diag = first_pass_tests_2_and_3(
+            nti=nti, nti_app=nti_app_fp, bt=bt_mir,
+            roi_mask=roi_mask, dist_km=vent_dist_per_pixel,
+            t_bg=t_bg, bt_sanity_k=NTI_BT_SANITY_K,
+            c1_dnti_summit=DNTI_CONTEXTUAL_C1_SUMMIT,
+            c1_deti_summit=DNTI_CONTEXTUAL_C1_SUMMIT,
+            c2_dnti_summit=C2_DNTI_SUMMIT_NIGHT,
+            c2_deti_summit=C2_DETI_SUMMIT_NIGHT,
+            inner_km=inner_radius_km,
+            c1_dnti_scene=(DNTI_CONTEXTUAL_C1_SCENE
+                           if ENABLE_DUAL_ROI_FIRST_PASS else None),
+            c1_deti_scene=(DNTI_CONTEXTUAL_C1_SCENE
+                           if ENABLE_DUAL_ROI_FIRST_PASS else None),
+            c2_dnti_scene=(C2_DNTI_SCENE_NIGHT
+                           if ENABLE_DUAL_ROI_FIRST_PASS else None),
+            c2_deti_scene=(C2_DETI_SCENE_NIGHT
+                           if ENABLE_DUAL_ROI_FIRST_PASS else None),
+        )
+        hot_mask_2d = fp_hot
+        n_first_pass = fp_diag["n_first_pass_pixels"]
+
+    # S46 Task 5 Drift #4 — second_pass_adjacent recapture (paper SP426.5:347-356).
+    # Tras el first-pass, recompute dNTI/dETI excluyendo active pixels del 8-vecino
+    # mean → recaptura pixels marginales adyacentes que el first-pass perdió por
+    # contaminación de vecinos. Sólo opera cuando first-pass Tests 2 ∧ 3 ya corrió
+    # (necesitamos hot_mask_2d = fp_hot del bloque anterior y eti reusable del diag).
+    n_second_pass_recapture = 0
+    if (ENABLE_SECOND_PASS_ADJACENT
+            and ENABLE_FIRST_PASS_TESTS_2_AND_3
+            and fp_diag is not None
+            and inner_radius_km is not None
+            and not np.isnan(t_bg)):
+        eti_for_second_pass = fp_diag.get("eti")
+        if eti_for_second_pass is not None:
+            is_summit_mask = vent_dist_per_pixel <= inner_radius_km
+            final_active_mask = second_pass_adjacent(
+                nti=nti, eti=eti_for_second_pass,
+                active_mask=hot_mask_2d,
+                c1_dnti=DNTI_CONTEXTUAL_C1_SUMMIT,
+                c1_deti=DNTI_CONTEXTUAL_C1_SUMMIT,
+                c2_dnti=C2_DNTI_SUMMIT_NIGHT,
+                c2_deti=C2_DETI_SUMMIT_NIGHT,
+                is_summit=(is_summit_mask if ENABLE_DUAL_ROI_SECOND_PASS
+                           else None),
+                c1_dnti_scene=(DNTI_CONTEXTUAL_C1_SCENE
+                               if ENABLE_DUAL_ROI_SECOND_PASS else None),
+                c1_deti_scene=(DNTI_CONTEXTUAL_C1_SCENE
+                               if ENABLE_DUAL_ROI_SECOND_PASS else None),
+                c2_dnti_scene=(C2_DNTI_SCENE_NIGHT
+                               if ENABLE_DUAL_ROI_SECOND_PASS else None),
+                c2_deti_scene=(C2_DETI_SCENE_NIGHT
+                               if ENABLE_DUAL_ROI_SECOND_PASS else None),
+            )
+            n_second_pass_recapture = int(np.sum(final_active_mask & ~hot_mask_2d))
+            hot_mask_2d = final_active_mask
 
     # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene a la mask
     # final combinada (Coppola 2016a Tabla 1). Ver explicación en process_viirs.py.
@@ -849,6 +944,23 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "diag_n_nti_path": n_nti_path,
         "diag_n_dnti_ctx_path": n_dnti_ctx_path,
         "diag_n_eti_path": n_eti_path,  # S37 H_D8_5
+        # S46 drift23 — first_pass_tests_2_and_3 diag fields (Task 4 wiring).
+        # Persistir n_first_pass_pixels + estadísticos μ/σ del background usados
+        # en la regla μ+C2σ. Ausentes (0/None) si flag OFF o sin background válido.
+        "diag_n_first_pass_pixels": (
+            fp_diag["n_first_pass_pixels"] if fp_diag is not None else 0),
+        "diag_mu_dnti": (
+            fp_diag["mu_dnti"] if fp_diag is not None else None),
+        "diag_sd_dnti": (
+            fp_diag["sd_dnti"] if fp_diag is not None else None),
+        "diag_mu_deti": (
+            fp_diag["mu_deti"] if fp_diag is not None else None),
+        "diag_sd_deti": (
+            fp_diag["sd_deti"] if fp_diag is not None else None),
+        "diag_n_bg_used_first_pass": (
+            fp_diag["n_bg_used"] if fp_diag is not None else 0),
+        # S46 Task 5 — second_pass_adjacent recapture diag (Drift #4).
+        "diag_n_second_pass_recapture": n_second_pass_recapture,
         "sensor": "MODIS_TERRA" if "MOD0" in hdf_path.name else "MODIS_AQUA",
         "granule": hdf_path.name,
         "product_version": "nrt" if "_NRT" in hdf_path.name else "standard",
