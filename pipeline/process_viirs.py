@@ -397,6 +397,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     hotspot_lon = None
     hotspot_dist_km = None
     anomaly_pixels = []   # All anomalous pixels with location + per-pixel VRP
+    # S46 drift23 — first_pass_tests_2_and_3 diag (default outside I04 block).
+    fp_diag = None
 
     if "I04" in bands:
         bt = bands["I04"]
@@ -1096,6 +1098,22 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "diag_n_nti_path": n_nti_path,
         "diag_n_dnti_ctx_path": n_dnti_ctx_path,
         "diag_n_eti_path": n_eti_path,  # S37 H_D8_5
+        # S46 drift23 — first_pass_tests_2_and_3 diag fields (Task 4 wiring).
+        # Persistir n_first_pass_pixels + estadísticos μ/σ del background usados
+        # en la regla μ+C2σ. Ausentes (0/None) si flag OFF, I04 no presente, o
+        # sin background válido.
+        "diag_n_first_pass_pixels": (
+            fp_diag["n_first_pass_pixels"] if fp_diag is not None else 0),
+        "diag_mu_dnti": (
+            fp_diag["mu_dnti"] if fp_diag is not None else None),
+        "diag_sd_dnti": (
+            fp_diag["sd_dnti"] if fp_diag is not None else None),
+        "diag_mu_deti": (
+            fp_diag["mu_deti"] if fp_diag is not None else None),
+        "diag_sd_deti": (
+            fp_diag["sd_deti"] if fp_diag is not None else None),
+        "diag_n_bg_used_first_pass": (
+            fp_diag["n_bg_used"] if fp_diag is not None else 0),
         # S25 Path Test 1 (Coppola 2015 Eq.1) integrated-ROI MIR
         "triggered_test1": test1_triggered,
         "n_test1_pixels": test1_n_contrib,

@@ -517,6 +517,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     # rama OR estadística μ+C2σ + dual-ROI Tabla 2 (summit/scene).
     # Paths legacy se calcularon arriba pero no contribuyen al hot_mask cuando ON.
     n_first_pass = 0
+    fp_diag = None
     if (ENABLE_FIRST_PASS_TESTS_2_AND_3
             and inner_radius_km is not None
             and not np.isnan(t_bg)):
@@ -907,6 +908,21 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "diag_n_nti_path": n_nti_path,
         "diag_n_dnti_ctx_path": n_dnti_ctx_path,
         "diag_n_eti_path": n_eti_path,  # S37 H_D8_5
+        # S46 drift23 — first_pass_tests_2_and_3 diag fields (Task 4 wiring).
+        # Persistir n_first_pass_pixels + estadísticos μ/σ del background usados
+        # en la regla μ+C2σ. Ausentes (0/None) si flag OFF o sin background válido.
+        "diag_n_first_pass_pixels": (
+            fp_diag["n_first_pass_pixels"] if fp_diag is not None else 0),
+        "diag_mu_dnti": (
+            fp_diag["mu_dnti"] if fp_diag is not None else None),
+        "diag_sd_dnti": (
+            fp_diag["sd_dnti"] if fp_diag is not None else None),
+        "diag_mu_deti": (
+            fp_diag["mu_deti"] if fp_diag is not None else None),
+        "diag_sd_deti": (
+            fp_diag["sd_deti"] if fp_diag is not None else None),
+        "diag_n_bg_used_first_pass": (
+            fp_diag["n_bg_used"] if fp_diag is not None else 0),
         "sensor": "MODIS_TERRA" if "MOD0" in hdf_path.name else "MODIS_AQUA",
         "granule": hdf_path.name,
         "product_version": "nrt" if "_NRT" in hdf_path.name else "standard",

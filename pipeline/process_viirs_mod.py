@@ -563,6 +563,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # Reemplaza hot_mask_2d con la conjunción Test 2 ∧ Test 3 + dual-ROI Tabla 2.
     # Paths legacy se calcularon arriba (diag) pero no contribuyen cuando ON.
     n_first_pass = 0
+    fp_diag = None
     if (ENABLE_FIRST_PASS_TESTS_2_AND_3
             and "M15" in bands and "M13" in bands
             and inner_radius_km is not None
@@ -926,6 +927,21 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "diag_n_bt_path": n_bt_path,
         "diag_n_nti_path": n_nti_path,
         "diag_n_dnti_ctx_path": n_dnti_ctx_path,
+        # S46 drift23 — first_pass_tests_2_and_3 diag fields (Task 4 wiring).
+        # Persistir n_first_pass_pixels + estadísticos μ/σ del background usados
+        # en la regla μ+C2σ. Ausentes (0/None) si flag OFF o sin background válido.
+        "diag_n_first_pass_pixels": (
+            fp_diag["n_first_pass_pixels"] if fp_diag is not None else 0),
+        "diag_mu_dnti": (
+            fp_diag["mu_dnti"] if fp_diag is not None else None),
+        "diag_sd_dnti": (
+            fp_diag["sd_dnti"] if fp_diag is not None else None),
+        "diag_mu_deti": (
+            fp_diag["mu_deti"] if fp_diag is not None else None),
+        "diag_sd_deti": (
+            fp_diag["sd_deti"] if fp_diag is not None else None),
+        "diag_n_bg_used_first_pass": (
+            fp_diag["n_bg_used"] if fp_diag is not None else 0),
         "sensor": sensor,
         "granule": name,
         "product_version": "nrt" if "_NRT" in name else "standard",
