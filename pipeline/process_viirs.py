@@ -105,6 +105,7 @@ from pipeline.profile import (
     ENABLE_VENT_ANCHORED_CLUSTERING,
     ENABLE_BT_PATH_HOT,
     ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK,
+    ENABLE_TEST1_K1_BG_EXCLUDE,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -114,6 +115,7 @@ from .detection_context import (
     compute_nti_and_nti_app,
     second_pass_adjacent,
     combine_hot_paths,
+    compute_bg_stats,
 )
 from .test1_integrated import compute_test1_mir
 
@@ -314,6 +316,12 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     nti_bg = float("nan")
     nti_std = float("nan")
     n_nti_anomalous = 0
+    # S46 drift #1b: inicializar nti=None aquí (antes del bloque I04+I05) para
+    # que compute_bg_stats reciba un argumento válido aunque I05 no esté.
+    # Cuando nti es None y enable_test1_k1_bg_exclude=False (default OFF),
+    # compute_bg_stats opera como legacy. Cuando flag ON sin I05, levanta error
+    # (configuración inválida — drift #1b requiere NTI para detectar K1 active).
+    nti = None
     # S22.1 paridad MODIS schema (H_S21_11): diagnósticos siempre presentes
     # aunque no haya bandas válidas. Reseteados a valores reales en el path BT.
     roi_p95_diag = float("nan")
@@ -384,10 +392,21 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
 
     if "I04" in bands:
         bt = bands["I04"]
-        bg_vals = bt[bg_mask & ~np.isnan(bt)]
-        if len(bg_vals) >= 10:
-            t_bg_i04 = float(np.median(bg_vals))
-            std_bg = float(np.std(bg_vals))
+        # S46 drift #1b: cuando ENABLE_TEST1_K1_BG_EXCLUDE, excluir pixels
+        # Test 1 K1 active (NTI > -0.8 noche) del bg per Coppola 2016a:352-356.
+        # Requiere nti (computed arriba si I05 disponible). Si nti is None y
+        # flag OFF, compute_bg_stats opera como legacy.
+        _t_bg_tmp, _std_bg_tmp, _n_bg_tmp = compute_bg_stats(
+            bt=bt,
+            bg_mask=bg_mask,
+            nti=nti,
+            nti_k1_threshold=NTI_K1_NIGHT,
+            enable_test1_k1_bg_exclude=ENABLE_TEST1_K1_BG_EXCLUDE,
+            min_bg_pixels=10,
+        )
+        if _t_bg_tmp is not None:
+            t_bg_i04 = _t_bg_tmp
+            std_bg = _std_bg_tmp
             std_bg_i04 = std_bg  # S12: save for vent-path sigma gating
             # S15 Tema F: sigma-cap en eruption-path (paridad con MODIS,
             # cura Tupungatito recall 0.04). Sin cap, sigma_bg inflado por

@@ -241,6 +241,14 @@ ENABLE_BT_PATH_HOT: bool = bool(_p.get("enable_bt_path_hot", True))
 # para diagnóstico. Default OFF (backward-compat).
 ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK: bool = bool(_p.get("enable_test1_k1_retire_from_hot_mask", False))
 
+# S46 Drift #1b — Coppola 2016a SP426.5:352-356 dice "step 2 is performed a
+# second time, being particularly careful to eliminate all of the 'active'
+# pixels already detected". Nuestro bg_vals NO excluye pixels Test 1 K1 active,
+# contaminando t_bg/std_bg si hay anomalías cerca/dentro del ring.
+# Cuando ON: compute_bg_stats excluye pixels NTI > NTI_K1 antes de computar
+# t_bg/std_bg. Default OFF (backward-compat).
+ENABLE_TEST1_K1_BG_EXCLUDE: bool = bool(_p.get("enable_test1_k1_bg_exclude", False))
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))

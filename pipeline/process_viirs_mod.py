@@ -93,6 +93,7 @@ from pipeline.profile import (
     ENABLE_VENT_ANCHORED_CLUSTERING,
     ENABLE_BT_PATH_HOT,
     ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK,
+    ENABLE_TEST1_K1_BG_EXCLUDE,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -102,6 +103,7 @@ from .detection_context import (
     compute_nti_and_nti_app,
     second_pass_adjacent,
     combine_hot_paths,
+    compute_bg_stats,
 )
 from .test1_integrated import compute_test1_mir
 
@@ -273,12 +275,32 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         return None
 
     bt = bands["M13"]
-    bg_vals = bt[bg_mask & ~np.isnan(bt)]
-    if len(bg_vals) < 10:
+
+    # S46 drift #1b: pre-computar NTI antes del bg_vals para que
+    # compute_bg_stats pueda excluir Test 1 K1 active pixels del bg ring
+    # (Coppola 2016a:352-356). NTI requiere M15 (TIR). Si no está, nti=None
+    # y el flag drift #1b no aplica (compute_bg_stats opera legacy).
+    nti = None
+    if "M15" in bands:
+        bt_mir = bands["M13"]
+        bt_tir = bands["M15"]
+        L_mir_all = bt_to_spectral_radiance(bt_mir, M13_LAMBDA)
+        L_tir_all = bt_to_spectral_radiance(bt_tir, M15_LAMBDA)
+        valid_both = ~np.isnan(L_mir_all) & ~np.isnan(L_tir_all) & (L_mir_all + L_tir_all > 0)
+        nti = np.full_like(L_mir_all, np.nan)
+        nti[valid_both] = (L_mir_all[valid_both] - L_tir_all[valid_both]) / (L_mir_all[valid_both] + L_tir_all[valid_both])
+
+    t_bg, std_bg, _n_bg = compute_bg_stats(
+        bt=bt,
+        bg_mask=bg_mask,
+        nti=nti,
+        nti_k1_threshold=NTI_K1_NIGHT,
+        enable_test1_k1_bg_exclude=ENABLE_TEST1_K1_BG_EXCLUDE,
+        min_bg_pixels=10,
+    )
+    if t_bg is None:
         return None
 
-    t_bg   = float(np.median(bg_vals))
-    std_bg = float(np.std(bg_vals))
     # S15 Tema F: sigma-cap eruption-path (cura Tupungatito recall 0.04).
     sigma_component = min(N_SIGMA_MIR * std_bg, MAX_SIGMA_COMPONENT_K)
     threshold = max(ANOMALY_THRESHOLD_K, sigma_component)
@@ -292,22 +314,13 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     nti_bg = float("nan")
     nti_std = float("nan")
     n_nti_anomalous = 0
-    nti = None
     # S22.1 paridad MODIS schema (H_S21_11). roi_p95 y t_max_dist_km_diag se
     # rellenan en el bloque BT cuando hay ROI válida; quedan NaN si no.
     roi_p95 = float("nan")
     t_max_dist_km_diag = float("nan")
 
-    if "M15" in bands:
-        bt_mir = bands["M13"]
-        bt_tir = bands["M15"]
-        L_mir_all = bt_to_spectral_radiance(bt_mir, M13_LAMBDA)
-        L_tir_all = bt_to_spectral_radiance(bt_tir, M15_LAMBDA)
-        valid_both = ~np.isnan(L_mir_all) & ~np.isnan(L_tir_all) & (L_mir_all + L_tir_all > 0)
-        nti = np.full_like(L_mir_all, np.nan)
-        nti[valid_both] = (L_mir_all[valid_both] - L_tir_all[valid_both]) / (L_mir_all[valid_both] + L_tir_all[valid_both])
-
-        # Background NTI statistics
+    if nti is not None:
+        # Background NTI statistics (NTI ya computado arriba para drift #1b)
         bg_nti = nti[bg_mask & ~np.isnan(nti)]
         if len(bg_nti) >= 10:
             nti_bg = float(np.median(bg_nti))

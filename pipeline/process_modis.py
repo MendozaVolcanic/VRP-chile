@@ -108,6 +108,7 @@ from pipeline.profile import (
     ENABLE_VENT_ANCHORED_CLUSTERING,
     ENABLE_BT_PATH_HOT,
     ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK,
+    ENABLE_TEST1_K1_BG_EXCLUDE,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -117,6 +118,7 @@ from .detection_context import (
     compute_nti_and_nti_app,
     second_pass_adjacent,
     combine_hot_paths,
+    compute_bg_stats,
 )
 
 # Indices of bands 21 and 22 within EV_1KM_Emissive
@@ -269,13 +271,19 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         nti = (rad_mir_for_nti - rad31) / (rad_mir_for_nti + rad31)
 
     # E2a: exclude cold-cloud contaminated pixels from the background annulus.
+    # S46 drift #1b: cuando ENABLE_TEST1_K1_BG_EXCLUDE, además excluir pixels
+    # Test 1 K1 active (NTI > -0.8 noche) del bg per Coppola 2016a:352-356.
     bg_cloud_free = bg_mask & ~np.isnan(bt_mir) & (bt_mir > CLOUD_MASK_BT_K)
-    bg_vals = bt_mir[bg_cloud_free]
-    if len(bg_vals) < 10:
+    t_bg, std_bg, _n_bg = compute_bg_stats(
+        bt=bt_mir,
+        bg_mask=bg_cloud_free,
+        nti=nti,
+        nti_k1_threshold=NTI_K1_NIGHT,
+        enable_test1_k1_bg_exclude=ENABLE_TEST1_K1_BG_EXCLUDE,
+        min_bg_pixels=10,
+    )
+    if t_bg is None:
         return None
-
-    t_bg = float(np.median(bg_vals))
-    std_bg = float(np.std(bg_vals))
     # E2b': cap the sigma component so orographic heterogeneity in the
     # annulus can't blow up the threshold and mask real vent anomalies.
     sigma_component = min(N_SIGMA * std_bg, MAX_SIGMA_COMPONENT_K)

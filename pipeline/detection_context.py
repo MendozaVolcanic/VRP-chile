@@ -14,6 +14,8 @@ Ref: Coppola et al. 2016 SP 426.5 "An enhanced automated thermal anomaly
 detection algorithm" — C1 absoluto + C2 contextual en dual-ROI.
 """
 
+from typing import Optional
+
 import numpy as np
 from scipy.ndimage import generic_filter, convolve
 
@@ -574,3 +576,68 @@ def combine_hot_paths(
         return bt_path_hot | dnti_ctx_hot | test1_hot | nti_rel_hot | eti_path_hot
     else:
         return bt_path_hot | nti_path_hot | dnti_ctx_hot | test1_hot | nti_rel_hot | eti_path_hot
+
+
+# ---------------------------------------------------------------------------
+# S46 Drift #1b — bg_vals excluye Test 1 K1 active pixels.
+#
+# Coppola 2016a SP 426.5 línea 352-356 dice textualmente:
+#   "active pixels may strongly modify the average values of their surroundings,
+#    with a consequent decrease in the dNTI and dETI values of adjacent pixels.
+#    To avoid this problem, step 2 (spatial analysis) is performed a second time,
+#    being particularly careful to eliminate all of the 'active' pixels already
+#    detected"
+#
+# Drift #1b: nuestro bg_vals (background ring usado para t_bg/std_bg) actualmente
+# NO excluye pixels Test 1 K1 active. Si hay anomalías dentro o cerca del ring,
+# t_bg/std_bg se contaminan y los umbrales N·σ inflan o pierden señal real.
+#
+# Flag `enable_test1_k1_bg_exclude` (default OFF): cuando ON, computamos bg
+# sobre pixels NTI <= NTI_K1 (es decir, excluimos los Test 1 K1 active del bg).
+# ---------------------------------------------------------------------------
+
+
+def compute_bg_stats(
+    bt: np.ndarray,
+    bg_mask: np.ndarray,
+    *,
+    nti: Optional[np.ndarray] = None,
+    nti_k1_threshold: float = -0.8,
+    enable_test1_k1_bg_exclude: bool = False,
+    min_bg_pixels: int = 10,
+) -> tuple:
+    """Compute t_bg (median), std_bg, n_bg sobre bg_mask.
+
+    Drift #1b (Coppola 2016a SP426.5:352-356): si enable_test1_k1_bg_exclude
+    True, excluye pixels Test 1 K1 active del bg_vals para alinear con paper
+    "second time... eliminate all of the 'active' pixels already detected".
+
+    Args:
+        bt: 2D array BT (K).
+        bg_mask: bool 2D, True en bg ring.
+        nti: 2D array NTI (requerido si enable_test1_k1_bg_exclude).
+        nti_k1_threshold: K1 noche (-0.8) o día (-0.6).
+        enable_test1_k1_bg_exclude: flag drift #1b.
+        min_bg_pixels: mínimo bg para confiabilidad.
+
+    Returns:
+        (t_bg, std_bg, n_bg) o (None, None, n_bg_count) si <min_bg_pixels.
+    """
+    effective_bg_mask = bg_mask & ~np.isnan(bt)
+
+    if enable_test1_k1_bg_exclude:
+        if nti is None:
+            raise ValueError(
+                "nti requerido si enable_test1_k1_bg_exclude=True"
+            )
+        test1_k1_active = (nti > nti_k1_threshold) & ~np.isnan(nti)
+        effective_bg_mask = effective_bg_mask & ~test1_k1_active
+
+    bg_vals = bt[effective_bg_mask]
+    n_bg = int(len(bg_vals))
+    if n_bg < min_bg_pixels:
+        return None, None, n_bg
+
+    t_bg = float(np.median(bg_vals))
+    std_bg = float(np.std(bg_vals))
+    return t_bg, std_bg, n_bg
