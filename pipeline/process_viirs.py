@@ -107,6 +107,8 @@ from pipeline.profile import (
     ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK,
     ENABLE_TEST1_K1_BG_EXCLUDE,
     ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS,
+    ENABLE_FIRST_PASS_TESTS_2_AND_3,
+    ENABLE_DUAL_ROI_FIRST_PASS,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -117,6 +119,7 @@ from .detection_context import (
     second_pass_adjacent,
     combine_hot_paths,
     compute_bg_stats,
+    first_pass_tests_2_and_3,
 )
 from .test1_integrated import compute_test1_mir
 
@@ -627,6 +630,40 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 eti_path_hot=eti_path_hot,
                 enable_test1_k1_retire_from_hot_mask=ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK,
             )
+
+            # S46 Drift #2+#3 — first-pass Tests 2 ∧ 3 (Coppola 2016a SP426.5:316-325).
+            # Reemplaza hot_mask_2d con la conjunción Test 2 ∧ Test 3 + dual-ROI Tabla 2.
+            # Paths legacy se calcularon arriba (diag) pero no contribuyen cuando ON.
+            n_first_pass = 0
+            if (ENABLE_FIRST_PASS_TESTS_2_AND_3
+                    and inner_radius_km is not None
+                    and not np.isnan(t_bg_i04)):
+                _, nti_app_fp = compute_nti_and_nti_app(
+                    rad_mir=L_mir,
+                    bt_tir=bt5,
+                    lambda_mir_um=I04_LAMBDA,
+                    lambda_tir_um=11.450,
+                )
+                fp_hot, fp_diag = first_pass_tests_2_and_3(
+                    nti=nti, nti_app=nti_app_fp, bt=bt,
+                    roi_mask=roi_mask, dist_km=vent_dist_per_pixel,
+                    t_bg=t_bg_i04, bt_sanity_k=NTI_BT_SANITY_K,
+                    c1_dnti_summit=DNTI_CONTEXTUAL_C1_SUMMIT,
+                    c1_deti_summit=DNTI_CONTEXTUAL_C1_SUMMIT,
+                    c2_dnti_summit=C2_DNTI_SUMMIT_NIGHT,
+                    c2_deti_summit=C2_DETI_SUMMIT_NIGHT,
+                    inner_km=inner_radius_km,
+                    c1_dnti_scene=(DNTI_CONTEXTUAL_C1_SCENE
+                                   if ENABLE_DUAL_ROI_FIRST_PASS else None),
+                    c1_deti_scene=(DNTI_CONTEXTUAL_C1_SCENE
+                                   if ENABLE_DUAL_ROI_FIRST_PASS else None),
+                    c2_dnti_scene=(C2_DNTI_SCENE_NIGHT
+                                   if ENABLE_DUAL_ROI_FIRST_PASS else None),
+                    c2_deti_scene=(C2_DETI_SCENE_NIGHT
+                                   if ENABLE_DUAL_ROI_FIRST_PASS else None),
+                )
+                hot_mask_2d = fp_hot
+                n_first_pass = fp_diag["n_first_pass_pixels"]
 
             # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene a
             # la mask final combinada (Coppola 2016a Tabla 1). Pixels que

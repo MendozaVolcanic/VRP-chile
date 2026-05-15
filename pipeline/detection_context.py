@@ -189,6 +189,133 @@ def dual_roi_contextual_dnti_hot_mask(
     return hot_summit | hot_scene
 
 
+# ---------------------------------------------------------------------------
+# S46 Drift #2+#3 — first-pass Tests 2 ∧ 3 + dETI + AND + C2·σ + dual-ROI.
+#
+# Coppola 2016a SP 426.5 líneas 316-325 dicen textualmente:
+#   Test 2:  dNTI > C1   OR   dNTI > μ_dNTI + C2·σ_dNTI
+#   Test 3:  dETI > C1   OR   dETI > μ_dETI + C2·σ_dETI
+#   pixel active ⇔ Test 2 ∧ Test 3
+#
+# Tabla 1 (noche): C1_summit=0.003 / C1_scene=0.010, C2_summit=5 / C2_scene=10.
+#
+# Implementación actual contextual_dnti_hot_mask sólo computa dnti > c1 (drift):
+# falta Test 3 (dETI), falta rama OR estadística (μ + C2·σ), falta dual-ROI Tabla 2.
+#
+# Flag ENABLE_FIRST_PASS_TESTS_2_AND_3 reemplaza paths legacy con conjunción
+# Tests 2 ∧ 3 sobre dNTI/dETI. ENABLE_DUAL_ROI_FIRST_PASS activa Tabla 2.
+# ---------------------------------------------------------------------------
+
+
+def first_pass_tests_2_and_3(
+    nti: np.ndarray,
+    nti_app: np.ndarray,
+    bt: np.ndarray,
+    roi_mask: np.ndarray,
+    dist_km: np.ndarray,
+    t_bg: float,
+    bt_sanity_k: float,
+    *,
+    c1_dnti_summit: float = 0.003,
+    c1_deti_summit: float = 0.003,
+    c2_dnti_summit: float = 5,
+    c2_deti_summit: float = 5,
+    inner_km: float,
+    c1_dnti_scene: Optional[float] = None,
+    c1_deti_scene: Optional[float] = None,
+    c2_dnti_scene: Optional[float] = None,
+    c2_deti_scene: Optional[float] = None,
+    min_bg_pixels: int = 10,
+) -> tuple:
+    """Coppola 2016a SP426.5 first-pass — Tests 2 ∧ 3 conjunción + dual-ROI.
+
+    Paper líneas 316-325:
+        Test 2: dNTI > C1  OR  dNTI > μ_dNTI + C2·σ_dNTI
+        Test 3: dETI > C1  OR  dETI > μ_dETI + C2·σ_dETI
+        active ⇔ Test 2 ∧ Test 3
+
+    Tabla 1 (noche): C1_summit=0.003 / C1_scene=0.010, C2_summit=5 / C2_scene=10.
+
+    Reusa compute_eti_scene_quadratic (eq 4 paper, regresión NTI_bk) y
+    _nanmean_8neighbors_fast (kernel mean aritmético, paper línea 242-244).
+
+    Args:
+        nti: NTI observado (eq 1 paper).
+        nti_app: NTI sintético modelo no-volcánico (eq 2 paper).
+        bt: BT MIR (K).
+        roi_mask: bool 2D ROI mask.
+        dist_km: per-pixel distance to vent (km).
+        t_bg, bt_sanity_k: bg stats + floor.
+        c1_*_summit, c2_*_summit: thresholds ROI1 (Tabla 1).
+        inner_km: radio split summit/scene.
+        c1_*_scene, c2_*_scene: thresholds ROI2 si dual; None → uniforme.
+        min_bg_pixels: mínimo para μ, σ confiable.
+
+    Returns:
+        (hot_mask: bool 2D, diag: dict con n_first_pass_pixels, mu_dnti,
+         sd_dnti, mu_deti, sd_deti, n_bg_used).
+    """
+    # 1) ETI via helper existente
+    mask_valid_eti = roi_mask & np.isfinite(nti) & np.isfinite(nti_app)
+    eti = compute_eti_scene_quadratic(nti, nti_app, mask_valid_eti)
+
+    # 2) dNTI y dETI vía 8-neighbor mean
+    mean_nti = _nanmean_8neighbors_fast(nti)
+    mean_eti = _nanmean_8neighbors_fast(eti)
+    dnti = nti - mean_nti
+    deti = eti - mean_eti
+
+    # 3) μ, σ bg regional
+    bg_mask = roi_mask & np.isfinite(dnti) & np.isfinite(deti)
+    n_bg = int(np.count_nonzero(bg_mask))
+    if n_bg < min_bg_pixels:
+        return np.zeros_like(roi_mask, dtype=bool), {
+            "n_first_pass_pixels": 0, "n_bg_used": n_bg,
+            "mu_dnti": None, "sd_dnti": None,
+            "mu_deti": None, "sd_deti": None,
+        }
+    mu_dnti = float(np.mean(dnti[bg_mask]))
+    sd_dnti = float(np.std(dnti[bg_mask]))
+    mu_deti = float(np.mean(deti[bg_mask]))
+    sd_deti = float(np.std(deti[bg_mask]))
+
+    # 4) Threshold por ROI (dual o uniforme).
+    # Paper Tests 2/3: `dNTI > C1 OR dNTI > μ + C2·σ` → threshold efectivo es
+    # el MENOR de los dos (suficiente con que uno se supere). Equivalente:
+    # ``thr = min(C1, μ + C2·σ)``.
+    is_summit = dist_km <= inner_km
+    dual = c1_dnti_scene is not None
+
+    if dual:
+        thr_dnti_sum = min(c1_dnti_summit, mu_dnti + c2_dnti_summit * sd_dnti)
+        thr_deti_sum = min(c1_deti_summit, mu_deti + c2_deti_summit * sd_deti)
+        thr_dnti_sce = min(c1_dnti_scene, mu_dnti + c2_dnti_scene * sd_dnti)
+        thr_deti_sce = min(c1_deti_scene, mu_deti + c2_deti_scene * sd_deti)
+        pass_2 = np.where(is_summit, dnti > thr_dnti_sum, dnti > thr_dnti_sce)
+        pass_3 = np.where(is_summit, deti > thr_deti_sum, deti > thr_deti_sce)
+    else:
+        thr_dnti = min(c1_dnti_summit, mu_dnti + c2_dnti_summit * sd_dnti)
+        thr_deti = min(c1_deti_summit, mu_deti + c2_deti_summit * sd_deti)
+        pass_2 = dnti > thr_dnti
+        pass_3 = deti > thr_deti
+
+    # 5) Conjunción AND + ROI + bt sanity
+    hot = (
+        roi_mask
+        & np.isfinite(dnti) & np.isfinite(deti)
+        & pass_2 & pass_3
+        & (bt > t_bg + bt_sanity_k)
+    )
+
+    diag = {
+        "n_first_pass_pixels": int(np.sum(hot)),
+        "mu_dnti": mu_dnti, "sd_dnti": sd_dnti,
+        "mu_deti": mu_deti, "sd_deti": sd_deti,
+        "n_bg_used": n_bg,
+    }
+    return hot, diag
+
+
 def dual_roi_bt_threshold(
     bt: np.ndarray,
     roi_mask: np.ndarray,

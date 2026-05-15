@@ -264,6 +264,24 @@ ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS: bool = bool(
     _p.get("enable_nadir_fixed_pixel_area_viirs", False)
 )
 
+# S46 Drift #2+#3 — Coppola 2016a SP426.5 líneas 316-325 dicen literalmente:
+#   Test 2: dNTI > C1   OR   dNTI > μ_dNTI + C2·σ_dNTI
+#   Test 3: dETI > C1   OR   dETI > μ_dETI + C2·σ_dETI
+#   pixel active ⇔ Test 2 ∧ Test 3
+# Implementación actual contextual_dnti_hot_mask sólo computa `dnti > c1` (drift):
+# falta Test 3 (dETI), falta rama OR estadística, falta dual-ROI Tabla 2.
+# Cuando ON: paths legacy (bt_path, nti_path, dnti_ctx, test1) se calculan para
+# diag pero NO contribuyen al hot_mask — éste se obtiene de first_pass_tests_2_and_3.
+ENABLE_FIRST_PASS_TESTS_2_AND_3: bool = bool(
+    _p.get("enable_first_pass_tests_2_and_3", False)
+)
+# ENABLE_DUAL_ROI_FIRST_PASS activa Tabla 2 noche: C1=0.003/C2=5 summit,
+# C1=0.010/C2=10 scene. Off → set uniforme summit. Solo aplica si
+# ENABLE_FIRST_PASS_TESTS_2_AND_3 está ON.
+ENABLE_DUAL_ROI_FIRST_PASS: bool = bool(
+    _p.get("enable_dual_roi_first_pass", False)
+)
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))
