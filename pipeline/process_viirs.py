@@ -104,6 +104,7 @@ from pipeline.profile import (
     C2_DETI_SCENE_NIGHT,
     ENABLE_VENT_ANCHORED_CLUSTERING,
     ENABLE_BT_PATH_HOT,
+    ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -112,6 +113,7 @@ from .detection_context import (
     compute_eti_scene_quadratic,
     compute_nti_and_nti_app,
     second_pass_adjacent,
+    combine_hot_paths,
 )
 from .test1_integrated import compute_test1_mir
 
@@ -592,8 +594,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                                 & (bt > (t_bg_i04 + NTI_BT_SANITY_K)))
                 n_eti_path = int(np.sum(eti_path_hot))
 
-            hot_mask_2d = (bt_path_hot | nti_path_hot | nti_rel_hot
-                           | dnti_ctx_hot | test1_hot | eti_path_hot)
+            hot_mask_2d = combine_hot_paths(
+                bt_path_hot=bt_path_hot,
+                nti_path_hot=nti_path_hot,
+                dnti_ctx_hot=dnti_ctx_hot,
+                test1_hot=test1_hot,
+                nti_rel_hot=nti_rel_hot,
+                eti_path_hot=eti_path_hot,
+                enable_test1_k1_retire_from_hot_mask=ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK,
+            )
 
             # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene a
             # la mask final combinada (Coppola 2016a Tabla 1). Pixels que

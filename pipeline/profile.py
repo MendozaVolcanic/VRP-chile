@@ -234,6 +234,13 @@ ENABLE_VENT_ANCHORED_CLUSTERING: bool = bool(_p.get("enable_vent_anchored_cluste
 # y comparar recall delta. Si baja < 1pp → safe retirar del clon literal.
 ENABLE_BT_PATH_HOT: bool = bool(_p.get("enable_bt_path_hot", True))
 
+# S46 Drift #1a — Coppola 2016a SP426.5:298-300 dice que Test 1 K1 pixels
+# se "discard (unsuitable) for further steps". Nuestro código actual los
+# mete al hot_mask reportable vía nti_path_hot — drift respecto al paper.
+# Cuando ON: nti_path_hot NO contribuye al hot_mask. Su cálculo se mantiene
+# para diagnóstico. Default OFF (backward-compat).
+ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK: bool = bool(_p.get("enable_test1_k1_retire_from_hot_mask", False))
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))

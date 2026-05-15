@@ -521,3 +521,56 @@ def second_pass_adjacent(
                     & np.isfinite(dnti) & np.isfinite(deti))
 
     return active_mask | newly_active
+
+
+# ---------------------------------------------------------------------------
+# S46 Drift #1a — combine_hot_paths helper.
+#
+# Coppola 2016a SP 426.5 línea 298-300 dice textualmente:
+#   "Pixels that satisfy Test 1 are flagged as 'active' and subsequently
+#    discarded (unsuitable) for further steps"
+#
+# Test 1 K1 (NTI > -0.8 noche / NTI > -0.6 día) es una MÁSCARA DE SATURACIÓN
+# que retira pixels del cómputo de mean/std del background — NO un path de
+# detección reportable. Nuestro código actual mete `nti_path_hot` al OR del
+# hot_mask, lo cual es un drift respecto al paper.
+#
+# Flag `enable_test1_k1_retire_from_hot_mask` (default OFF): cuando ON,
+# `nti_path_hot` NO contribuye al hot_mask reportable. Su cálculo se mantiene
+# para diagnóstico (qué pixels eran "saturados" Test 1 K1).
+# ---------------------------------------------------------------------------
+
+
+def combine_hot_paths(
+    bt_path_hot: np.ndarray,
+    nti_path_hot: np.ndarray,
+    dnti_ctx_hot: np.ndarray,
+    test1_hot: np.ndarray,
+    *,
+    enable_test1_k1_retire_from_hot_mask: bool = False,
+    nti_rel_hot: np.ndarray = None,
+    eti_path_hot: np.ndarray = None,
+) -> np.ndarray:
+    """Combina paths legacy + nuevos drift flags (S46 drift #1a).
+
+    Drift #1a: si flag ON, nti_path_hot NO entra al OR (Coppola 2016a literal —
+    Test 1 K1 es saturation mask, NO hotspot reportable; SP426.5:298-300).
+
+    Args:
+        bt_path_hot, nti_path_hot, dnti_ctx_hot, test1_hot: bool 2D masks.
+        enable_test1_k1_retire_from_hot_mask: flag drift #1a.
+        nti_rel_hot, eti_path_hot: opcional, default None → zeros.
+
+    Returns:
+        bool 2D hot_mask combinado.
+    """
+    if nti_rel_hot is None:
+        nti_rel_hot = np.zeros_like(bt_path_hot)
+    if eti_path_hot is None:
+        eti_path_hot = np.zeros_like(bt_path_hot)
+
+    if enable_test1_k1_retire_from_hot_mask:
+        # Drift #1a: nti_path_hot NO contribuye al hot_mask
+        return bt_path_hot | dnti_ctx_hot | test1_hot | nti_rel_hot | eti_path_hot
+    else:
+        return bt_path_hot | nti_path_hot | dnti_ctx_hot | test1_hot | nti_rel_hot | eti_path_hot
