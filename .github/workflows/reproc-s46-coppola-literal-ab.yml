@@ -1,0 +1,166 @@
+name: S46 Coppola Literal A/B Reproc
+
+# A/B reproc Ronda 1 S46 para las 13 variantes Coppola-literal/Drift-isolation.
+# Cada variante tiene un profile aislado en pipeline/profiles/_<variant>.yaml
+# con data_subdir homónimo. Output: data/<variant>/<volcano>.json.
+#
+# 13 variantes × 11 Tier A = 143 jobs (max-parallel 8, ~2-3h compute).
+# Input "variant" permite correr 1 sola variante (iteración rápida) o "all".
+#
+# Convención args: run_pipeline.py usa --start/--end (no --window-days).
+# Si el usuario no provee start, calculamos start = today - window_days.
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        type: choice
+        description: "Variante A/B (o 'all' para las 13)"
+        options:
+          - all
+          - _baseline_s44
+          - _drift1a_only
+          - _drift1b_only
+          - _drift1ab_only
+          - _drift23_only
+          - _drift23_dual_only
+          - _drift4_only
+          - _drift234_only
+          - _drift7_modis_only
+          - _drift7_viirs_only
+          - _drift7_both_only
+          - _coppola_full
+          - _dibella_n12_viirs_only
+        default: all
+      window_days:
+        description: "Window de reproc en días (ignorado si start/end provistos)"
+        default: "30"
+        required: false
+      start:
+        description: "Start date YYYY-MM-DD (opcional, default = today - window_days)"
+        default: ""
+        required: false
+      end:
+        description: "End date YYYY-MM-DD inclusive (opcional, default = today)"
+        default: ""
+        required: false
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        variant:
+          - _baseline_s44
+          - _drift1a_only
+          - _drift1b_only
+          - _drift1ab_only
+          - _drift23_only
+          - _drift23_dual_only
+          - _drift4_only
+          - _drift234_only
+          - _drift7_modis_only
+          - _drift7_viirs_only
+          - _drift7_both_only
+          - _coppola_full
+          - _dibella_n12_viirs_only
+        volcano:
+          - Lascar
+          - Tupungatito
+          - Lastarria
+          - NevadosDeChillan
+          - Llaima
+          - Copahue
+          - PuyehueCordonCaulle
+          - PlanchonPeteroa
+          - Isluga
+          - Villarrica
+          - Chaiten
+    steps:
+      - name: Filter variant (skip if not selected)
+        id: filter
+        run: |
+          if [ "${{ inputs.variant }}" != "all" ] && [ "${{ inputs.variant }}" != "${{ matrix.variant }}" ]; then
+            echo "Skipping ${{ matrix.variant }} × ${{ matrix.volcano }} (filter: ${{ inputs.variant }})"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout repository
+        if: steps.filter.outputs.skip != 'true'
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        if: steps.filter.outputs.skip != 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        if: steps.filter.outputs.skip != 'true'
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Resolve date range
+        if: steps.filter.outputs.skip != 'true'
+        id: dates
+        run: |
+          if [ -n "${{ inputs.start }}" ]; then
+            START="${{ inputs.start }}"
+          else
+            START=$(date -u -d "${{ inputs.window_days }} days ago" +%Y-%m-%d)
+          fi
+          if [ -n "${{ inputs.end }}" ]; then
+            END="${{ inputs.end }}"
+          else
+            END=$(date -u +%Y-%m-%d)
+          fi
+          echo "start=$START" >> $GITHUB_OUTPUT
+          echo "end=$END" >> $GITHUB_OUTPUT
+          echo "Resolved window: $START -> $END"
+
+      - name: Run reprocess — ${{ matrix.variant }} / ${{ matrix.volcano }}
+        if: steps.filter.outputs.skip != 'true'
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 100
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.variant }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ steps.dates.outputs.start }} \
+            --end ${{ steps.dates.outputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed A/B data
+        if: steps.filter.outputs.skip != 'true'
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          OUT="data/${{ matrix.variant }}/${{ matrix.volcano }}.json"
+          if [ ! -f "$OUT" ]; then
+            echo "WARN: No output JSON generated at $OUT"
+            exit 0
+          fi
+          git add "$OUT"
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S46 A/B Coppola-literal — ${{ matrix.variant }} / ${{ matrix.volcano }} ${{ steps.dates.outputs.start }}->${{ steps.dates.outputs.end }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin ${{ github.ref_name }} && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
