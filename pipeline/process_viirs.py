@@ -403,6 +403,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     fp_diag = None
     # S46 Task 5 Drift #4 — second_pass_adjacent recapture counter (default 0).
     n_second_pass_recapture = 0
+    # S46 hotfix bug Task 2: n_bg_i04 pre-Task2 era len(bg_vals); ahora
+    # compute_bg_stats retorna n_bg directamente. Default 0 evita
+    # UnboundLocalError en return dict línea 1125 cuando I04 ausente.
+    n_bg_i04 = 0
 
     if "I04" in bands:
         bt = bands["I04"]
@@ -418,6 +422,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             enable_test1_k1_bg_exclude=ENABLE_TEST1_K1_BG_EXCLUDE,
             min_bg_pixels=10,
         )
+        n_bg_i04 = _n_bg_tmp  # S46 hotfix: save for return dict
         if _t_bg_tmp is not None:
             t_bg_i04 = _t_bg_tmp
             std_bg = _std_bg_tmp
@@ -1122,7 +1127,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "n_anomalous_pixels": n_anomalous,
         "n_hotspots_clustered": n_hotspots_clustered,
         "primary_cluster": primary_cluster,
-        "n_excluded_water": n_excluded_water if "I04" in bands and len(bg_vals) >= 10 else 0,
+        "n_excluded_water": n_excluded_water if "I04" in bands and n_bg_i04 >= 10 else 0,
         "n_bt_path": n_bt_path,
         "n_nti_path": n_nti_path,
         "n_nti_rel_path": n_nti_rel_path,
