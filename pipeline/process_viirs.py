@@ -110,6 +110,7 @@ from pipeline.profile import (
     ENABLE_FIRST_PASS_TESTS_2_AND_3,
     ENABLE_DUAL_ROI_FIRST_PASS,
     ENABLE_DUAL_ROI_SECOND_PASS,
+    VIIRS_C2_OVERRIDE_NIGHT,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -649,22 +650,30 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     lambda_mir_um=I04_LAMBDA,
                     lambda_tir_um=11.450,
                 )
+                # S46 Task 6 Variante 13 — override C2 con Di Bella n=12 (solo VIIRS).
+                # Cuando set, reemplaza C2_DNTI_*_NIGHT y C2_DETI_*_NIGHT.
+                _c2_summit_v13 = (VIIRS_C2_OVERRIDE_NIGHT
+                                  if VIIRS_C2_OVERRIDE_NIGHT is not None
+                                  else C2_DNTI_SUMMIT_NIGHT)
+                _c2_scene_v13 = (VIIRS_C2_OVERRIDE_NIGHT
+                                 if VIIRS_C2_OVERRIDE_NIGHT is not None
+                                 else C2_DNTI_SCENE_NIGHT)
                 fp_hot, fp_diag = first_pass_tests_2_and_3(
                     nti=nti, nti_app=nti_app_fp, bt=bt,
                     roi_mask=roi_mask, dist_km=vent_dist_per_pixel,
                     t_bg=t_bg_i04, bt_sanity_k=NTI_BT_SANITY_K,
                     c1_dnti_summit=DNTI_CONTEXTUAL_C1_SUMMIT,
                     c1_deti_summit=DNTI_CONTEXTUAL_C1_SUMMIT,
-                    c2_dnti_summit=C2_DNTI_SUMMIT_NIGHT,
-                    c2_deti_summit=C2_DETI_SUMMIT_NIGHT,
+                    c2_dnti_summit=_c2_summit_v13,
+                    c2_deti_summit=_c2_summit_v13,
                     inner_km=inner_radius_km,
                     c1_dnti_scene=(DNTI_CONTEXTUAL_C1_SCENE
                                    if ENABLE_DUAL_ROI_FIRST_PASS else None),
                     c1_deti_scene=(DNTI_CONTEXTUAL_C1_SCENE
                                    if ENABLE_DUAL_ROI_FIRST_PASS else None),
-                    c2_dnti_scene=(C2_DNTI_SCENE_NIGHT
+                    c2_dnti_scene=(_c2_scene_v13
                                    if ENABLE_DUAL_ROI_FIRST_PASS else None),
-                    c2_deti_scene=(C2_DETI_SCENE_NIGHT
+                    c2_deti_scene=(_c2_scene_v13
                                    if ENABLE_DUAL_ROI_FIRST_PASS else None),
                 )
                 hot_mask_2d = fp_hot
@@ -682,22 +691,29 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 eti_for_second_pass = fp_diag.get("eti")
                 if eti_for_second_pass is not None:
                     is_summit_mask = vent_dist_per_pixel <= inner_radius_km
+                    # S46 Task 6 Variante 13 — override C2 also en second-pass.
+                    _c2_summit_sp = (VIIRS_C2_OVERRIDE_NIGHT
+                                     if VIIRS_C2_OVERRIDE_NIGHT is not None
+                                     else C2_DNTI_SUMMIT_NIGHT)
+                    _c2_scene_sp = (VIIRS_C2_OVERRIDE_NIGHT
+                                    if VIIRS_C2_OVERRIDE_NIGHT is not None
+                                    else C2_DNTI_SCENE_NIGHT)
                     final_active_mask = second_pass_adjacent(
                         nti=nti, eti=eti_for_second_pass,
                         active_mask=hot_mask_2d,
                         c1_dnti=DNTI_CONTEXTUAL_C1_SUMMIT,
                         c1_deti=DNTI_CONTEXTUAL_C1_SUMMIT,
-                        c2_dnti=C2_DNTI_SUMMIT_NIGHT,
-                        c2_deti=C2_DETI_SUMMIT_NIGHT,
+                        c2_dnti=_c2_summit_sp,
+                        c2_deti=_c2_summit_sp,
                         is_summit=(is_summit_mask
                                    if ENABLE_DUAL_ROI_SECOND_PASS else None),
                         c1_dnti_scene=(DNTI_CONTEXTUAL_C1_SCENE
                                        if ENABLE_DUAL_ROI_SECOND_PASS else None),
                         c1_deti_scene=(DNTI_CONTEXTUAL_C1_SCENE
                                        if ENABLE_DUAL_ROI_SECOND_PASS else None),
-                        c2_dnti_scene=(C2_DNTI_SCENE_NIGHT
+                        c2_dnti_scene=(_c2_scene_sp
                                        if ENABLE_DUAL_ROI_SECOND_PASS else None),
-                        c2_deti_scene=(C2_DETI_SCENE_NIGHT
+                        c2_deti_scene=(_c2_scene_sp
                                        if ENABLE_DUAL_ROI_SECOND_PASS else None),
                     )
                     n_second_pass_recapture = int(

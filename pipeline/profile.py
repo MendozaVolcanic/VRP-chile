@@ -282,6 +282,18 @@ ENABLE_DUAL_ROI_FIRST_PASS: bool = bool(
     _p.get("enable_dual_roi_first_pass", False)
 )
 
+# S46 Task 6 Variante 13 EXPERIMENTAL — Di Bella 2024 n=12 noche VIIRS.
+# NO clon literal MIROVA. Di Bella es INGV Catania (regla S26, NO MIROVA).
+# Permite reemplazar Coppola C2=5/10 (Tabla 1 noche) con n=12 (Di Bella 2024
+# RSDF Z-score) en first_pass_tests_2_and_3 dentro de los procesadores VIIRS
+# (I-band 375m y M-band 750m). MODIS NO recibe override (drift solo VIIRS).
+# Comparación empírica vs Coppola C2=5/10 en A/B aislado objetivo (2).
+# Default None: preserva legacy (sin override). Cuando float, overrides
+# summit y scene C2 (dNTI y dETI) simultáneamente.
+VIIRS_C2_OVERRIDE_NIGHT = _p.get("viirs_c2_override_night", None)
+if VIIRS_C2_OVERRIDE_NIGHT is not None:
+    VIIRS_C2_OVERRIDE_NIGHT = float(VIIRS_C2_OVERRIDE_NIGHT)
+
 # S46 Task 5 Drift #4 — Coppola 2016a SP426.5:347-356 dice literalmente:
 #   "active pixels may strongly modify the average values of their surroundings,
 #    with a consequent decrease in the dNTI and dETI values of adjacent pixels.
