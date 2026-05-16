@@ -90,15 +90,18 @@ def _vrp_mirovaEq(record: dict, inner_radius_km: float) -> float:
 
     Steps:
       1. None/non-dict -> 0
-      2. distance_class == 'far' -> 0 (pipeline ya lo descarto)
-      3. primary_cluster None -> fallback global vrp_mw
-      4. centroid_dist_km > inner_radius_km -> 0 (Salar/lago lejano)
-      5. sanity cap vrp_mw > 50000 MW (S41 — garbage BT) -> 0
-      6. return pc.vrp_mw
+      2. primary_cluster None -> fallback global vrp_mw
+      3. centroid_dist_km > inner_radius_km -> 0 (Salar/lago lejano)
+      4. sanity cap vrp_mw > 50000 MW (S41 — garbage BT) -> 0
+      5. return pc.vrp_mw
+
+    BUG FIX S46 audit: el filtro previo `distance_class == "far"` filtraba
+    records donde el hotspot LEGACY estaba lejano pero el primary_cluster
+    SÍ estaba en summit. Sub-contaba TPs por ~70% en Lascar MODIS.
+    El dashboard real (mirovaEqVrp) solo filtra por pc.centroid_dist_km,
+    no por distance_class. Alineamos.
     """
     if record is None or not isinstance(record, dict):
-        return 0.0
-    if record.get("distance_class") == "far":
         return 0.0
     pc = record.get("primary_cluster")
     if pc is None:
