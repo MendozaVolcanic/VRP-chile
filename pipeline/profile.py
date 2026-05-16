@@ -294,6 +294,17 @@ VIIRS_C2_OVERRIDE_NIGHT = _p.get("viirs_c2_override_night", None)
 if VIIRS_C2_OVERRIDE_NIGHT is not None:
     VIIRS_C2_OVERRIDE_NIGHT = float(VIIRS_C2_OVERRIDE_NIGHT)
 
+# S46 Ronda 2 — overrides param C1/C2 summit para exploración A/B
+# (Coppola 2016a Tabla 1 default: C1_summit=0.003, C2_summit=5).
+# Aplican a first_pass_tests_2_and_3 + second_pass_adjacent (los 3 sensores).
+# Defaults None preservan paper-Tabla 1 literal.
+C1_SUMMIT_OVERRIDE = _p.get("c1_summit_override", None)
+if C1_SUMMIT_OVERRIDE is not None:
+    C1_SUMMIT_OVERRIDE = float(C1_SUMMIT_OVERRIDE)
+C2_SUMMIT_OVERRIDE = _p.get("c2_summit_override", None)
+if C2_SUMMIT_OVERRIDE is not None:
+    C2_SUMMIT_OVERRIDE = float(C2_SUMMIT_OVERRIDE)
+
 # S46 Task 5 Drift #4 — Coppola 2016a SP426.5:347-356 dice literalmente:
 #   "active pixels may strongly modify the average values of their surroundings,
 #    with a consequent decrease in the dNTI and dETI values of adjacent pixels.

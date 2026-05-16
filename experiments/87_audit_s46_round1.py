@@ -35,6 +35,13 @@ VARIANTS = [
     "_drift7_modis_only", "_drift7_viirs_only", "_drift7_both_only",
     "_coppola_full",
     "_dibella_n12_viirs_only",
+    # Ronda 2 — C1/C2 overrides + architectural variations
+    "_r2_baseline_drift234",
+    "_r2_C2_3_summit", "_r2_C2_4_summit", "_r2_C2_8_summit",
+    "_r2_C1_001_summit",
+    "_r2_uniform_no_dual",
+    "_r2_drift4_alone",
+    "_r2_drift234_modis_only", "_r2_drift234_viirs_only",
 ]
 
 # vol_key (folder/yaml) -> nombre en CSV

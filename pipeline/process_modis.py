@@ -101,6 +101,8 @@ from pipeline.profile import (
     P95_VENT_EXCLUSION_MODIS_KM,
     ENABLE_ETI_QUADRATIC_SCENE,
     ENABLE_SECOND_PASS_ADJACENT,
+    C1_SUMMIT_OVERRIDE,
+    C2_SUMMIT_OVERRIDE,
     C2_DNTI_SUMMIT_NIGHT,
     C2_DNTI_SCENE_NIGHT,
     C2_DETI_SUMMIT_NIGHT,
@@ -529,14 +531,18 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             lambda_mir_um=BAND21_LAMBDA,
             lambda_tir_um=BAND31_LAMBDA,
         )
+        # S46 Ronda 2: C1/C2 summit override si profile lo provee (default Tabla 1).
+        _c1_sum = C1_SUMMIT_OVERRIDE if C1_SUMMIT_OVERRIDE is not None else DNTI_CONTEXTUAL_C1_SUMMIT
+        _c2_sum = C2_SUMMIT_OVERRIDE if C2_SUMMIT_OVERRIDE is not None else C2_DNTI_SUMMIT_NIGHT
+        _c2_det_sum = C2_SUMMIT_OVERRIDE if C2_SUMMIT_OVERRIDE is not None else C2_DETI_SUMMIT_NIGHT
         fp_hot, fp_diag = first_pass_tests_2_and_3(
             nti=nti, nti_app=nti_app_fp, bt=bt_mir,
             roi_mask=roi_mask, dist_km=vent_dist_per_pixel,
             t_bg=t_bg, bt_sanity_k=NTI_BT_SANITY_K,
-            c1_dnti_summit=DNTI_CONTEXTUAL_C1_SUMMIT,
-            c1_deti_summit=DNTI_CONTEXTUAL_C1_SUMMIT,
-            c2_dnti_summit=C2_DNTI_SUMMIT_NIGHT,
-            c2_deti_summit=C2_DETI_SUMMIT_NIGHT,
+            c1_dnti_summit=_c1_sum,
+            c1_deti_summit=_c1_sum,
+            c2_dnti_summit=_c2_sum,
+            c2_deti_summit=_c2_det_sum,
             inner_km=inner_radius_km,
             c1_dnti_scene=(DNTI_CONTEXTUAL_C1_SCENE
                            if ENABLE_DUAL_ROI_FIRST_PASS else None),
@@ -567,10 +573,10 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             final_active_mask = second_pass_adjacent(
                 nti=nti, eti=eti_for_second_pass,
                 active_mask=hot_mask_2d,
-                c1_dnti=DNTI_CONTEXTUAL_C1_SUMMIT,
-                c1_deti=DNTI_CONTEXTUAL_C1_SUMMIT,
-                c2_dnti=C2_DNTI_SUMMIT_NIGHT,
-                c2_deti=C2_DETI_SUMMIT_NIGHT,
+                c1_dnti=_c1_sum,
+                c1_deti=_c1_sum,
+                c2_dnti=_c2_sum,
+                c2_deti=_c2_det_sum,
                 is_summit=(is_summit_mask if ENABLE_DUAL_ROI_SECOND_PASS
                            else None),
                 c1_dnti_scene=(DNTI_CONTEXTUAL_C1_SCENE
