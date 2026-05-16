@@ -233,6 +233,19 @@ paths:
   # sobre NTI/dETI (Tests 2/3 conjunción) + integrated-ROI (Test 1 Eq.1).
   enable_bt_path_hot: false
 
+  # S46 ADOPTED — drift234 (Coppola 2016a literal first-pass + second-pass).
+  # A/B Ronda 1 (run 25934224248, audit 87_results.md) demostró:
+  # - F1 89.2% -> 89.9% (+0.69pp)
+  # - MODIS recall 92.3% -> 100% (recupera 3 FN-far Lascar: clusters Salar
+  #   Atacama desplazados a cráter via second-pass bg recompute)
+  # - Ratio mediano VRP 1.72x -> 1.21x (mejor paridad MIROVA)
+  # - Precision intacta (84.6% -> 84.8%)
+  # Sin regresión per-volcán observada.
+  enable_first_pass_tests_2_and_3: true
+  enable_dual_roi_first_pass: true
+  enable_second_pass_adjacent: true
+  enable_dual_roi_second_pass: true
+
 # --- Sensor activation ---
 # true = process granules from this sensor in this profile.
 sensors:
