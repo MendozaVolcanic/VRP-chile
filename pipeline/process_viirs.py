@@ -31,6 +31,7 @@ except ImportError:
 from .scan_geometry import viirs_pixel_areas, roi_mask_bbox
 from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots, cluster_pixels_geographic
+from .vrp_regimes import compute_local_background
 
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
@@ -105,6 +106,7 @@ from pipeline.profile import (
     C2_DETI_SUMMIT_NIGHT,
     C2_DETI_SCENE_NIGHT,
     ENABLE_VENT_ANCHORED_CLUSTERING,
+    ENABLE_LOCAL_KERNEL_BG,
     ENABLE_BT_PATH_HOT,
     ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK,
     ENABLE_TEST1_K1_BG_EXCLUDE,
@@ -781,12 +783,29 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             if n_anomalous > 0:
                 hotpix_bt = bt[hot_rows, hot_cols]
                 L_hot = bt_to_spectral_radiance(hotpix_bt, I04_LAMBDA)
-                L_bg = bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA)
+
+                # S58 H_S57_LOCAL_KERNEL: cuando flag ON, usar background local
+                # kernel 3x3 alrededor de cada hot pixel (Coppola 2024 L1129
+                # literal). Caso contrario fallback al t_bg_i04 global del ring
+                # 5-25km (comportamiento legacy).
+                if ENABLE_LOCAL_KERNEL_BG:
+                    # Lista de t_bk per hot pixel (NaN si todos vecinos invalidos)
+                    t_bk_local = compute_local_background(
+                        bt, list(hot_rows), list(hot_cols), kernel_size=3
+                    )
+                    t_bk_arr = np.array(t_bk_local, dtype=np.float64)
+                    # Fallback a t_bg_i04 global cuando local es NaN
+                    if not np.isnan(t_bg_i04):
+                        t_bk_arr = np.where(np.isnan(t_bk_arr), t_bg_i04, t_bk_arr)
+                    L_bg = bt_to_spectral_radiance(t_bk_arr, I04_LAMBDA)
+                else:
+                    L_bg = bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA)
+
                 # S26: clip a 0 — Wooster requiere ΔL ≥ 0 por física.
                 # Bug detectado cuando Test 1 (path D nuevo) o NTI agregaba
                 # pixels hot vs L_bg LOCAL (3km) pero más fríos que t_bg_i04
                 # GLOBAL (anillo 5-25km). VRP_MIR salía negativo (-26 MW).
-                # Fix: pixel "hot" pero L_hot < L_bg_global no contribuye.
+                # Fix: pixel "hot" pero L_hot < L_bg no contribuye.
                 delta_L = np.maximum(L_hot - L_bg, 0.0)
                 # Per-pixel area accounts for scan-angle elongation.
                 hotpix_area = pixel_areas[hot_rows, hot_cols]
