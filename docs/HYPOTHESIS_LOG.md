@@ -6,6 +6,32 @@
 
 ---
 
+## H_S60_KERNEL_BG_HELPS_MIROVA_DAYS — Fix local kernel bg cura calibración solo en días MIROVA reportó
+
+- **Formulada**: S60 (2026-05-17) tras audit A+B+B2 sobre reproc S58 Villarrica window 2026-04-16 → 2026-05-15.
+- **Hipótesis**: el fix `enable_local_kernel_bg=true` (kernel 3×3 vecinos en lugar de median ring 5-25km) reduce inflación de magnitud por contaminación del lago Villarrica, pero el efecto es VISIBLE solo en días donde MIROVA NRT reporta. En días RUTINA MIROVA, NEW = LEGACY porque no hay lago contaminando ese subgrupo.
+- **Evidencia a favor** (experiments/104_s60_audit_b2_decompose_by_mirova_day.md):
+  - Días MIROVA reportó (n=17): NEW median **1.51 MW** vs LEGACY 1.88 MW (**-20%**). Target OSF curado VIIRS375 class=1 = 1.06 MW; NEW gap 42% vs LEGACY gap 77%.
+  - Caso paradigmático 2026-05-11 ALERTA: LEGACY 5.84 MW (ratio 18.8×) → NEW 0.50 MW (ratio 1.61×). Cura la inflación extrema.
+  - Top 10 outliers NEW (vrp > 4.3 MW summit) son **TODOS** días RUTINA — no son refs MIROVA inflados.
+- **Evidencia en contra / limitación**:
+  - Días MIROVA RUTINA (n=85-94): NEW median 2.19 MW ≈ LEGACY 2.20 MW. Fix no aporta porque la causa de la sobre-detección NO es contaminación lago — es divergencia en umbral publicación interno MIROVA NRT (no documentado en papers Coppola).
+  - Caso 2026-05-14 ALERTA: LEGACY 0.30 MW (0.97×) → NEW 0.67 MW (2.17×). Empeora marginalmente (acepta porque <30× tolerable).
+  - Mediana agregada VIIRS375 summit sigue 2× sobre OSF target (artefacto de mezclar MIROVA-days con RUTINA-days).
+- **Criterio testable**:
+  - Recall sin regresión: NEW detecta los mismos 2 ALERTAS + 2 FPs MIROVA que LEGACY. ✓ CONFIRMADO.
+  - Mediana MIROVA-day NEW < mediana LEGACY: 1.51 < 1.88. ✓ CONFIRMADO.
+  - Extensión: con C (reproc 2026-02 → 2026-05) confirmar el patrón sobre 5 ALERTAS (no solo 2).
+- **Estado**: **CONFIRMADA** (parcialmente — pendiente C para n=5 ALERTAS).
+- **Resolución**:
+  - NEW preserva intacto recall MIROVA y cura calibración en días-MIROVA (cierra 20% del gap a OSF).
+  - **Adopción operacional defendible** pero pendiente C para validar sobre 5 ALERTAS.
+  - Tupungatito mantiene exclusión explícita (`local_kernel_bg: false`) por ring frío de glaciar (decisión S59 PR #65).
+  - Refinamientos S61+ pendientes si se quiere converger más a OSF target: `kernel_size=5` o `p25 del kernel` en lugar de mean.
+- **Decisión adopción S60**: pendiente cierre con resultado workflow run 25998122095 (90d reproc).
+
+---
+
 ## H1 — Sigma-gating vent-path introducido en S12 F1 mató TPs sub-pixel
 
 - **Formulada**: S16 (2026-04-22) en `tasks/plan_s16_restore_s9_recall.md`.
