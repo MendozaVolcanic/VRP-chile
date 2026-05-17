@@ -434,6 +434,28 @@
 
 ---
 
+## H_S52_PCC_COORD_3CASES_TRADEOFF — 3/69 PCC empeoraron, trade-off aceptable
+
+- **Formulada**: S52 (2026-05-17) tras investigación 3 casos PCC que empeoraron post-fix coord.
+- **Hallazgo**: los 3 casos son del **mismo día (2026-05-15)** y todos VIIRS (NOAA20 + SNPP_750 + NOAA20_750):
+
+  | Granule | Pre-fix | Post-fix | Diff |
+  |---|---|---|---|
+  | 06:24 NOAA20 (375m) | 41 px, vrp=0.78, d=5.60km | 1 px, vrp=0.06, d=6.37km | +0.78km |
+  | 06:06 SNPP_750 | 3 px, vrp=2.82, d=5.76km | 1 px, vrp=0.00, d=7.18km | +1.42km |
+  | 06:24 NOAA20_750 | 1 px, vrp=0.37, d=1.93km | 1 px, vrp=0.34, d=11.89km | +9.96km |
+
+- **Causa**: vent_anchored cluster selection prioriza cluster cerca de `effective_vent` (ahora lacolito). En estos 3 casos, el cluster real estaba cerca del **cone morfológico Puyehue** (no del lacolito). Post-fix, vent_anchored "abandona" el cluster cone-cercano y elige uno más cercano al lacolito — que puede ser cluster degradado (1 px) o muy lejano (11.89 km).
+- **Interpretación volcanológica**: PCC tiene actividad histórica en 2 zonas: (1) lacolito 2011 SE del cone (térmico persistente, donde MIROVA centra TIFs) y (2) cone morfológico Puyehue (posibles fumarolas residuales). El fix optimiza para (1) pero degrada (2).
+- **Estado**: ACEPTAR como trade-off conocido.
+- **Razón**: 48/69 (70%) mejoraron, 18/69 (26%) sin cambio, 3/69 (4%) empeoraron. Ratio claramente positivo. Los 3 casos son del mismo día (sugiere actividad anómala puntual cone) no patrón estructural.
+- **Mitigación pendiente S53+**: si actividad en cone Puyehue se vuelve persistente, considerar:
+  - Estrategia `multi_vent`: vent_anchored evalúa proximidad a múltiples vents (cone + lacolito) y elige cluster más grande
+  - Volver a `vent_anchored` con `vent_lat/vent_lon` (cone) si actividad cone supera lacolito en sesiones futuras
+- **No-acción S52**: documentado en este entry. No revertir fix coord — el 70% de mejora es estructural.
+
+---
+
 ## H_S51_PCC_COORD_VALIDATED — Validación empírica fix mirova_center PCC
 
 - **Formulada**: S51 (2026-05-17) post-reproc PCC --overwrite (run 25981141120).
