@@ -434,6 +434,37 @@
 
 ---
 
+## H_S53_R2_LAVA_LAKE_PARTIAL_REPLICATES_MIROVA — Eq.16 funciona solo cuando lava lake emerge
+
+- **Formulada**: S53 (2026-05-17) tras implementación R2 Eq.16 (TDD) + calibración empírica.
+- **Hipótesis original**: R2 Eq.16 Burgi-Coppola con T_e=1000K replicaría MIROVA Villarrica 0.1-0.3 MW.
+- **Implementación**: `pipeline/vrp_regimes.py:compute_vrp_lava_lake_eq16` con TDD (10/10 tests pass).
+- **Calibración empírica** (`experiments/98_calibrate_te_villarrica.py`) contra 5 ALERTAS MIROVA confirmadas:
+
+  | Caso | BT_hot pixel summit | t_bg_k ring | ΔBT | MIROVA MW | R2 T_e=400K | Ratio |
+  |---|---:|---:|---:|---:|---:|---:|
+  | 2026-05-11 06:00 NOAA20 | 283.3 | 279.06 | **+4.24** | 0.31 | 0.077 | 0.25 (T_e=600K mejor) |
+  | 2026-05-11 (Wooster actual) | — | — | — | 0.31 | 0.385 | 1.24 ✓ |
+  | 2026-02-26 05:42 NOAA20 | 281.85 | 281.25 | +0.60 | 0.12 | 0.076 | 0.63 |
+  | 2026-04-09 06:00 NOAA20 | 276.97 | 281.12 | **-4.15** | 0.11 | 0.00 | 0.00 ✗ |
+  | 2026-03-08 06:00 NOAA20 | 282.28 | 282.62 | -0.34 | 0.21 | 0.00 | 0.00 ✗ |
+
+- **Hallazgo clave**: en 2 de 4 casos, **pixel summit (cráter) ES MÁS FRÍO que ring 5-25km**. Físicamente posible: invierno chileno, summit Villarrica nieve cubre lava lake oculto, ring contiene zonas más bajas/cálidas (lake Villarrica, valles).
+- **MIROVA aún reporta alertas en esos casos**: probablemente captura cluster del lake Villarrica al N (BT 285-291K, distancia 5-30km) y lo asigna al volcán Villarrica por estar dentro del ROI MIROVA. Reporta 0.11-0.21 MW de cluster lake, NO del lava lake.
+- **Implicación importante**: las "ALERTAS MIROVA Villarrica" NO son necesariamente del lava lake. Pueden ser:
+  - (a) Lava lake emergente (caso 2026-05-11): MIROVA captura summit correctamente
+  - (b) Fenómenos térmicos lake/valley adyacente asignados al volcán
+- **R2 Eq.16 funciona estructuralmente** cuando hay gradiente summit positivo (ΔBT > 0). Para casos sin emergencia, R2 retorna 0 (correcto físicamente). Replica MIROVA solo parcialmente.
+- **Estado**: IMPLEMENTACIÓN COMPLETA, REPLICA PARCIAL.
+- **Próximos pasos S54+**:
+  1. Integrar R2 en `process_viirs.py` como path opt-in (flag profile `enable_r2_lava_lake`)
+  2. Agregar `lava_lake_magmatic: true` a Villarrica en `volcanoes.yaml`
+  3. A/B reproc Villarrica para validar magnitudes per-caso
+  4. Para casos sin emergencia summit (2 de 4): investigar si MIROVA realmente reporta lake/valley clusters → entender método MIROVA cluster-selection
+- **Lección metodológica**: replicar MIROVA exactamente requiere también replicar su CLUSTER SELECTION operacional, no solo la fórmula de magnitud. Coppola 2024 chapter no describe esto explícitamente.
+
+---
+
 ## H_S52_PCC_COORD_3CASES_TRADEOFF — 3/69 PCC empeoraron, trade-off aceptable
 
 - **Formulada**: S52 (2026-05-17) tras investigación 3 casos PCC que empeoraron post-fix coord.
