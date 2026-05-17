@@ -360,6 +360,32 @@
 
 ---
 
+## H_S48_AUDIT_VRP_ZERO_FALSE_FN — Audit cuenta FN cuando Test 1 dispara summit pero pc.vrp=0
+
+- **Formulada**: S48 (2026-05-17) post-comentario usuario "MODIS no detecta lava lake Villarrica, VIIRS-I sí — ¿qué pasa con VIIRS?".
+- **Síntoma observado**: subagente VIIRS deep dive reportó "NdC recall 0/3 alertas MIROVA VIIRS-I" como anomalía. Investigación caso-a-caso reveló que las 3 alertas MIROVA NdC VIIRS-I (vrp 0.02-0.06 MW, "Muy Bajo") SÍ estaban detectadas por VRP-chile: Test 1 disparaba con 49-98 pixels summit a 0.0-2.7 km del vent.
+- **Causa raíz**: `vrp_mirovaEq(rec, inner)` en `experiments/88_audit_s47_fps_distribution.py` retorna 0 si `pc.vrp_mw == 0`. El audit gate `if vrp_mirovaEq(r, inner) <= 0: continue` descartaba **records con detección legítima pero magnitud cero**.
+- **Mecanismo físico (patrón D4 documentado CLAUDE.md)**: en volcanes con domo activo persistente (NdC Nicanor, Lascar fumarola summit, Lastarria geotermal), el ring background 1-3km está contaminado por calor crónico → L_bg local sale alta → ΔL_pix - L_bg ≈ 0 → pc.vrp=0 aunque Test 1 dispare correctamente sobre background global.
+- **Alcance del bug en window 30d**: 118 records totales perdidos. **NdC concentra 89 (82% de sus test1+summit)**. Lascar 15, Lastarria 9. 4 vols sin impacto.
+- **Estado**: **CONFIRMADA y FIX APLICADO**.
+- **Fix S48** (`experiments/88_audit_s47_fps_distribution.py`):
+  - Nuevo helper `is_test1_summit_detection(rec, inner)`: True si `final_hotspot_source=="test1"` + `distance_class=="summit"` + `final_hotspot_dist_km <= inner`.
+  - Nuevo helper `is_detected(rec, inner)`: `vrp_mirovaEq > 0 OR is_test1_summit_detection`.
+  - Reemplazado gate del audit en main loop + en loop FN matching.
+- **Impacto cuantitativo en métricas S48 finales**:
+  | Métrica | Pre-fix vrp_zero | Post-fix |
+  |---|---:|---:|
+  | TP | 329 | **352** (+23) |
+  | FN | 21 | **10** (-11) |
+  | Recall | 94.0% | **97.2%** |
+  | F1 | 96.6% | **98.3%** |
+  | NdC TP | 0 | 5 |
+  | NdC FN | 4 | 1 |
+- **Issue separado a investigar S49**: ¿por qué `lbg_global_compatible: true` (set en `volcanoes.yaml` NdC desde S42) no produce pc.vrp>0 en VIIRS-I? El fix D4 S39 fue aplicado a MODIS; verificar si VIIRS-I propaga el flag correctamente en `pipeline/process_viirs.py:compute_primary_cluster_vrp`.
+- **Lección metodológica**: para volcanes con actividad summit persistente (≥6/11 Tier A), el VRP es señal sub-piso (0.02-0.5 MW) y MIROVA NRT mismo reporta así. Distinguir entre "no detectado" (no entró Test 1) y "detectado pero magnitud sub-piso" (entró Test 1, pc.vrp=0). Ambos son TPs operacionales si el alerta MIROVA existía.
+
+---
+
 ## H_S48_AUDIT_SPATIAL_MISMATCH — Audit matcher confunde clusters distintos del mismo granule
 
 - **Formulada**: S48 (2026-05-17) post-investigación 8 FPs Isluga + 5 FPs Lascar.
