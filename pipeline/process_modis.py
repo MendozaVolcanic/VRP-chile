@@ -224,7 +224,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                   inner_radius_km: float | None = None,
                   exclude_zones: list = None,
                   active_water_bodies: list = None,
-                  lbg_global_compatible: bool = False) -> dict | None:
+                  lbg_global_compatible: bool = False,
+                  local_kernel_bg_compatible: bool = False) -> dict | None:
     """
     Calculate VRP from MODIS L1B granule.
 
@@ -654,7 +655,11 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         # otros hot + NaNs). Fallback al L_bg_global derivado del ring 5-25km
         # cuando todos los vecinos son NaN. Paridad con VIIRS (process_viirs.py
         # ~791-802).
-        if ENABLE_LOCAL_KERNEL_BG:
+        # S59 H_S58_PER_VOL: combinar con field local_kernel_bg_compatible per-vol.
+        # Solo aplica si AMBOS true. Audit S58 mostro que Tupungatito tiene ring
+        # FRIO (glaciar) y kernel local empeoraria. Candidatos opt-in: Villarrica,
+        # Copahue, Planchon, Llaima.
+        if ENABLE_LOCAL_KERNEL_BG and local_kernel_bg_compatible:
             t_bk_local = compute_local_background(
                 bt_mir, list(hot_rows), list(hot_cols), kernel_size=3
             )
