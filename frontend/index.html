@@ -329,16 +329,19 @@
         fusión multi-sensor de referencia.</li>
     </ol>
 
-    <h3 style="color:#ffab91;margin:20px 0 8px 0;">Métricas de desempeño (S46 — ventana 30 d, 11 volcanes Tier A)</h3>
+    <h3 style="color:#ffab91;margin:20px 0 8px 0;">Métricas de desempeño (S48 — ventana 30 d, 11 volcanes Tier A)</h3>
     <div style="background:#0a1320;border-left:3px solid #ffc107;padding:12px 16px;margin:12px 0;border-radius:0 4px 4px 0;font-size:0.92rem;">
       <b>Algoritmo operacional:</b> drift234 (Coppola 2016a literal) =
       first-pass Tests 2 ∧ 3 con dETI cuadrático + dual-ROI (Tabla 2 summit/scene) + second-pass adyacente con dual-ROI.
       Adoptado 2026-05-16.<br><br>
-      <b>F1 89.9 %</b> (+0.69 pp vs S44) · <b>Recall 95.6 %</b> · <b>Precision 84.8 %</b><br>
+      <b>F1 98.3 %</b> (+8.4 pp vs S44) · <b>Recall 97.2 %</b> · <b>Precision 99.4 %</b><br>
+      <b>VIIRS-I 375 m: 254 / 329 TPs (77 %)</b> — sensor principal en monitoreo chileno.<br>
       <b>MODIS recall 92.3 % → 100 %</b> con drift234 (recupera 3 FN Lascar).<br>
-      <b>Ratio mediano VRP 1.72× → 1.21×</b> (mejor paridad con MIROVA).<br>
+      <b>Ratio mediano VRP 1.21×</b> (paridad con MIROVA dentro tolerancia ±30 %).<br>
+      <b>NRT cron 97.8 %</b> success post-fix H7b (era 0/45 pre-fix).<br>
       <span style="color:#9bb4cc;font-size:0.85rem;">Ventana 2026-04-16 → 2026-05-16. Ground truth: CSV consolidado scraper Mirova-v1
-      contra mirovaweb.it. Precision evaluada solo contra FALSO_POSITIVO MIROVA explícito
+      contra mirovaweb.it. Audit espacial-aware (S48): TP cuenta detección summit (test1 OR Wooster vrp>0).
+      Precision evaluada contra FALSO_POSITIVO MIROVA explícito con coincidencia espacial ≤5 km
       (RUTINA no penaliza — MIROVA NRT no tiene supervisión humana).</span>
     </div>
 
