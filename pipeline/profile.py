@@ -225,6 +225,24 @@ C2_DETI_SCENE_NIGHT: float = float(_t.get("c2_deti_scene_night", 10.0))
 # Default OFF en mirova_equivalent. Activar solo en _d8_vent_anchored.yaml.
 ENABLE_VENT_ANCHORED_CLUSTERING: bool = bool(_p.get("enable_vent_anchored_clustering", False))
 
+# S58 H_S57_LOCAL_KERNEL — flag para activar background local kernel 3x3.
+#
+# Coppola 2024 chapter L1129 literal: "T_bk is retrieved from the pixels
+# adjacent to the hot one". MIROVA usa kernel local 3x3 alrededor de cada
+# hot pixel, NO median del ring 5-25km como nuestro pipeline actual.
+#
+# Hipotesis S56-S57: median(ring 5-25km) sesgado hacia caliente en Villarrica
+# por incluir lake/valley adyacentes (1.5-3K mas caliente que summit nevado).
+# Result: pixels summit reales con vrp_individual=0 por clip ΔL.
+#
+# Cuando flag ON: per_pixel_vrp_mw usa L_bg_local computed con kernel 3x3
+# alrededor de cada hot pixel (excluye otros hot + NaNs).
+# Default OFF: comportamiento legacy (L_bg = bt_to_spectral_radiance(t_bg_i04)).
+#
+# Implementacion en pipeline/vrp_regimes.py:compute_local_background (S57).
+# Tests sinteticos en tests/test_local_kernel_background.py (8 PASS).
+ENABLE_LOCAL_KERNEL_BG: bool = bool(_p.get("enable_local_kernel_bg", False))
+
 # S40 cleanup paths viejos — flag para desactivar bt_path_hot path.
 # Análisis empírico S39 (records operacional 30d): bt_path_hot solo
 # contribuye EXCLUSIVAMENTE en 0-6 records de 1846 TPs totales en 11 vol
