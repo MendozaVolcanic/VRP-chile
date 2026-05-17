@@ -11,8 +11,82 @@ HYPOTHESIS_LOG: H_S52_VIIRS375_OVERDETECT + H_S53_R2_LAVA_LAKE_EQ16
 from __future__ import annotations
 
 import math
+from typing import Sequence
+
+import numpy as np
 
 from pipeline.constants import SIGMA, C1, C2
+
+
+def compute_local_background(
+    bt_grid: np.ndarray,
+    hot_rows: Sequence[int],
+    hot_cols: Sequence[int],
+    kernel_size: int = 3,
+) -> list[float]:
+    """Estima T_bk localmente desde pixels adyacentes a cada hot pixel.
+
+    Implementa Coppola 2024 chapter L1129 literal: "T_bk is retrieved from
+    the pixels adjacent to the hot one". Para cada hot pixel, promedia los
+    vecinos en una ventana NxN centrada, excluyendo (a) el centro mismo y
+    (b) cualquier otro pixel marcado como hot (lista hot_rows/hot_cols).
+    NaNs en vecinos son ignorados.
+
+    Esta es la variante S57 reemplazo de median(ring 5-25km) que sobre-estima
+    en Villarrica por contaminación del lago + nieve heterogénea — ver
+    HYPOTHESIS_LOG H_S57_LOCAL_KERNEL.
+
+    Args:
+        bt_grid: 2D array (rows, cols) con BT en K. NaN para pixels inválidos.
+        hot_rows: índices de fila de cada hot pixel.
+        hot_cols: índices de columna de cada hot pixel.
+        kernel_size: lado del kernel cuadrado (impar). Default 3 → ventana 3x3
+                    = 8 vecinos. Coppola 2024 sugiere "adjacent" = 8-conn.
+
+    Returns:
+        Lista de t_bk (float) en K, una entrada por hot pixel. NaN si todos
+        los vecinos válidos están ausentes (caller debe fallback).
+
+    Raises:
+        ValueError: si kernel_size es par o < 3.
+    """
+    if kernel_size < 3 or kernel_size % 2 == 0:
+        raise ValueError(
+            f"kernel_size debe ser impar >= 3, recibido {kernel_size}"
+        )
+    if len(hot_rows) != len(hot_cols):
+        raise ValueError("hot_rows y hot_cols deben tener mismo largo")
+
+    grid = np.asarray(bt_grid, dtype=float)
+    n_rows, n_cols = grid.shape
+    half = kernel_size // 2
+
+    # Máscara de hot pixels para excluir del background
+    hot_set = set(zip(hot_rows, hot_cols))
+
+    t_bks: list[float] = []
+    for r, c in zip(hot_rows, hot_cols):
+        r0 = max(0, r - half)
+        r1 = min(n_rows, r + half + 1)
+        c0 = max(0, c - half)
+        c1 = min(n_cols, c + half + 1)
+
+        # Recolectar vecinos no-hot, no-NaN
+        neighbors: list[float] = []
+        for rr in range(r0, r1):
+            for cc in range(c0, c1):
+                if (rr, cc) in hot_set:
+                    continue  # excluye centro y otros hot
+                val = grid[rr, cc]
+                if not np.isnan(val):
+                    neighbors.append(float(val))
+
+        if not neighbors:
+            t_bks.append(float("nan"))
+        else:
+            t_bks.append(float(np.mean(neighbors)))
+
+    return t_bks
 
 
 def _planck_spectral_radiance(t_k: float, lambda_um: float) -> float:

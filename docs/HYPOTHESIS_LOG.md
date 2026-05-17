@@ -434,6 +434,70 @@
 
 ---
 
+## H_S57_PAPERS_RE_READ + EXCELS_OLVIDADOS + LOCAL_KERNEL_TDD — meta-leccion + hallazgos masivos
+
+- **Formulada**: S57 (2026-05-17) tras Nicolás señalar dos olvidos críticos:
+  1. "¿por qué encontramos esa información ahora? no hemos revisado todos los papers al máximo detalle"
+  2. "los excels que has estado olvidando, eso no debería pasar"
+
+### Subagente A — extracción exhaustiva citas LITERALES papers (`docs/MIROVA_DETAILED_CITATIONS.md`, 320 líneas)
+
+Lectura sistemática de 7 papers core. **Confirmado triple en TRES papers que el background MIROVA es kernel local, NO ring**:
+- `[sp426_5.txt:357-359]`: "L4bk is estimated from the **arithmetic mean of all the pixels surrounding the active one** (or around the active cluster)"
+- `[coppola2024_chapter.txt:1129]`: "T_bk is retrieved from the pixels adjacent to the hot one"
+- `[campus2024_extracted.txt:119-124]`: "Lpixbk computed from the arithmetic mean of the radiance of the **pixels surrounding the alerted one(s)**"
+
+**Y cluster aggregation = sum scene-wide en TRES papers**:
+- Coppola 2016a Eq.8, Coppola 2024 Eq.13, Campus 2024 Eq.1: TODOS Σ sobre alerted pixels. NO hay "primary cluster" en MIROVA core.
+
+**Tabla 1 SP426.5 thresholds verbatim**: K1 night=−0.8, C1 ROI1=0.003 / ROI2=0.01, C2 ROI1=5σ / ROI2=10σ. Nuestro pipeline usa 3σ universal → drift D2 documental.
+
+### Subagente B — archivos olvidados (`docs/EXCELS_INVENTORY_S57.md`)
+
+**Hallazgo más grave: OSF v2.5 archive ignorado**. `data/mirova_reference/VRP_GLOBAL_ARCHIVE_2025.csv`:
+- 615,470 filas globales, **5211 Villarrica (2005-2024)** con `LAT/LON` exactos del hotspot MIROVA, `VRP` en Watts, `Max_Dist` real, `class` (1=alerta, 0=otro).
+- 48,360 filas Chile en 10 volcanes.
+- En S45 traté de auditar coord vent + cluster MIROVA usando TIFs cuando tenía LAT/LON exactos del hotspot histórico aquí mismo. Habría resuelto D9 sin TIF.
+- Verificado: Villarrica 2025-12-06 06:00 NOAA20 → VRP=48543W=0.048 MW, Max_Dist=838.5m → **patrón 838m constante = 1 pixel I-band centrado**, idéntico al CSV scraper 0.84km. Confirma snap pixel.
+
+**6 CSVs adicionales olvidados**: registro_vrp_ocr (con 6 cols validación humana extra), Historial_Puyehue_Cordon_Caulle (curado), per-volcán snapshots.
+
+### Subagente C — TDD local kernel (`pipeline/vrp_regimes.py` + `tests/test_local_kernel_background.py`)
+
+Implementación MISSION-compliant (Coppola 2024 L1129 literal):
+
+```python
+def compute_local_background(bt_grid, hot_rows, hot_cols, kernel_size=3):
+    # Coppola 2024 L1129: "T_bk is retrieved from pixels adjacent to hot one"
+    # Para cada hot pixel: mean de vecinos 3x3, excluyendo (a) centro (b) otros hot.
+    # NaNs ignorados.
+```
+
+8 tests sintéticos TDD estrictos PASSED. Suite total: **330 passed / 16 skipped** (era 322, +8).
+
+NO INTEGRADO en `process_viirs.py` aún — solo módulo standalone. Próximo paso S58: flag profile experimental.
+
+### Lección meta-meta (anti-olvido permanente)
+
+**Regla S57+ obligatoria** al iniciar cada sesión:
+
+1. **Leer `docs/MIROVA_DETAILED_CITATIONS.md`** (citas verbatim 7 papers core).
+2. **Auditar disponibilidad**: `find data/ -name "*.csv"` antes de cualquier audit. No re-scrape lo que ya tengo.
+3. **OSF v2.5 archive es PRIMARY ground truth histórico** (no CSV scraper de Nicolás que solo cubre últimos meses). Cargar siempre que se valide algo.
+4. **Anti-patrón documentado**: "asumir que ya leí el paper" sin verificar línea-por-línea. Para hipótesis críticas, releer la sección relevante.
+
+### Estado pipeline post-S57
+
+- Sin cambios operacionales (solo módulo nuevo + tests)
+- `compute_local_background` listo para integración S58
+- 4 documentos canónicos nuevos disponibles:
+  - `docs/MIROVA_DETAILED_CITATIONS.md` (citas verbatim)
+  - `docs/EXCELS_INVENTORY_S57.md` (archivos olvidados)
+  - `pipeline/vrp_regimes.py:compute_local_background` (implementación)
+  - `tests/test_local_kernel_background.py` (8 tests TDD)
+
+---
+
 ## H_S56_BACKGROUND_PERCENTILE_BAJO_REPLICA_MIROVA — p01-p05 del ring resuelve gap MW
 
 - **Formulada**: S56 (2026-05-17) tras A/B offline 5 variantes de background.
