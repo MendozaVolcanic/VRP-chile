@@ -24,7 +24,7 @@ on:
 jobs:
   reproc:
     runs-on: ubuntu-latest
-    timeout-minutes: 110
+    timeout-minutes: 300
     permissions:
       contents: write
 
@@ -49,7 +49,7 @@ jobs:
         env:
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
-        timeout-minutes: 100
+        timeout-minutes: 280
         run: |
           python scripts/run_pipeline.py \
             --profile _local_kernel_bg_enabled \
