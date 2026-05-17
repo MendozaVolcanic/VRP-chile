@@ -360,6 +360,51 @@
 
 ---
 
+## H_S48_AUDIT_SPATIAL_MISMATCH — Audit matcher confunde clusters distintos del mismo granule
+
+- **Formulada**: S48 (2026-05-17) post-investigación 8 FPs Isluga + 5 FPs Lascar.
+- **Síntoma observado**: audit S47 contó 51 FP(a) en window 30d. Isluga 16, Lascar 5 (zona cráter <1.6 km del vent). Investigación per-caso reveló que MIROVA en esos timestamps reportó FALSO_POSITIVO de clusters a 16-29 km del vent (chimney lejano, masas de agua), no en summit.
+- **Hipótesis**: el matcher `experiments/88_audit_s47_fps_distribution.py` clasifica como FP(a) cualquier detección nuestra que tenga entry MIROVA `Tipo_Registro=FALSO_POSITIVO` en ±30min mismo sensor, **sin chequear distancia espacial**. Cuando MIROVA marca FP de un cluster lejano mientras nosotros detectamos correctamente el summit cráter, ambos son entradas legítimas pero **eventos distintos del mismo granule** — no nuestro FP.
+- **Caso paradigmático**: Isluga 2026-04-16 05:18 VIIRS375. MIROVA reportó FP con `Distancia_km=21.14`, nuestro pc `centroid_dist_km=1.04`. Diferencia espacial 20 km → mismo granule, clusters distintos.
+- **Estado**: **CONFIRMADA y FIX APLICADO**.
+- **Fix S48** (`experiments/88_audit_s47_fps_distribution.py`):
+  - Antes de clasificar como FP(a) o FP(c), exigir `abs(MIROVA.Distancia_km - ours.centroid_dist_km) <= 5 km` (`SPATIAL_TOL_KM`).
+  - Si MIROVA tuvo entry temporal pero `mirova_diff_cluster==True`, reclasificar a FP(b) `b_no_mirova_entry` con flag explícito.
+  - Fallback conservador: si alguna distancia es None, mantener comportamiento legacy (no agravar).
+- **Impacto cuantitativo**:
+  | Métrica | Pre-fix | Post-fix |
+  |---|---:|---:|
+  | TP | 329 | 329 |
+  | FP(a) drift real | 51 | **2** |
+  | FP(b) huérfanos | 180 | 360 |
+  | FP(c) RUTINA | 1374 | 1243 |
+  | Precision (vs FP(a)) | 86.6% | **99.4%** |
+  | F1 | 90.1% | **96.6%** |
+
+  De los 49 casos reclasificados, `mirova_diff_cluster=True`: PCC 102, Tupungatito 37, Isluga 15. PCC concentra el patrón — consistente con H_S48_PCC_COORD (otro fix de esta sesión).
+- **Caveat**: el F1=96.6% es bajo convención "MIROVA vio nuestro cluster y lo marcó FP". Los 178 nuevos `mirova_diff_cluster` siguen siendo casos donde ambos sistemas detectan en zonas distintas del mismo granule — merecen investigación caso a caso (algunos pueden ser nuestros drifts cluster selection, otros pueden ser MIROVA disparando a ruido lejano).
+- **Lección metodológica**: matchers de auditoría que cruzan solo por timestamp+sensor son insuficientes en escenas con múltiples clusters térmicos. El criterio espacial debe ser obligatorio para cualquier conclusión sobre drift.
+
+---
+
+## H_S48_PCC_COORD — PCC vent_anchored ancla en cone, MIROVA centra en lacolito
+
+- **Formulada**: S48 (2026-05-17) en deep dive D9 MODIS sub-issue post-S47 R2 expansion.
+- **Síntoma**: 4/4 casos PCC MODIS del R2 expansion mostraron drift centroid 11-18 km entre TIF MIROVA y nuestro `primary_cluster`. Mismo patrón en cluster selection diff de S48 audit (102 PCC reclasificados a `mirova_diff_cluster`).
+- **Causa raíz**: `volcanoes.yaml` PCC tenía `vent_lat=-40.5255, vent_lon=-72.1461` = cone morfológico Puyehue. Sin `mirova_center_*` set, `get_effective_vent()` devolvía el cone. Pero el TIF MIROVA centra en lacolito Cordón Caulle 2011 (~6 km SE del cone). `cluster_hotspots(strategy=vent_anchored)` ordenaba por proximidad al cone, eligiendo clusters al N del cone cuando el hotspot real está al SE en lacolito.
+- **Verificación empírica**: centroides ponderados de 2 TIFs MODIS PCC `n_pixels>2500` → promedio `(-40.582, -72.131)`.
+- **Estado**: **CONFIRMADA y FIX APLICADO**.
+- **Fix S48** (`volcanoes.yaml`):
+  - Agregadas líneas `mirova_center_lat: -40.582` y `mirova_center_lon: -72.131` al config PCC.
+  - `get_effective_vent()` (que ya prioriza mirova_center_*) ahora retorna `(-40.582, -72.131)` para PCC.
+  - Cluster selection ancla en lacolito, no en cone.
+- **Validación pendiente**: A/B reproc PCC MODIS 30d para confirmar:
+  - 102 casos `mirova_diff_cluster` reclasifiquen a TP o `b` benigno.
+  - Recall PCC no regresa (radius_km=25 cubre ambos cone+lacolito).
+- **Generalización pendiente**: revisar para otros 10 Tier A si `mirova_center_*` debería poblarse desde KMZ MIROVA. Caso obvio futuro: Villarrica (lava lake summit, no vent morfológico oficial) y Planchón-Peteroa (offset 1.87 km N ya documentado S15).
+
+---
+
 ## H_S47_NASA_TIMEOUT_10S — NRT cron falla por connect timeout interno earthaccess
 
 - **Formulada**: S47 (2026-05-16) al verificar deploy drift234. 9 runs NRT

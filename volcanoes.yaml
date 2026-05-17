@@ -16,6 +16,15 @@ volcanoes:
   vent_lat: -40.525499
   vent_lon: -72.146137
   vent_radius_km: 3
+  # S48 D9-MODIS fix: centroide MIROVA derivado empíricamente de TIFs MODIS
+  # archive (`mirova-tif-archive/data/tif/PuyehueCordonCaulle/*MODIS*.tif`,
+  # promedio de scenes con n>2500 pixels = -40.582, -72.131 → zona del
+  # lacolito 2011 SE del cone). vent_lat/vent_lon (cone morfológico) queda
+  # 6.7 km al N del centroide térmico real. get_effective_vent() prioriza
+  # mirova_center_* → cluster_hotspots(vent_anchored) ahora ancla en lacolito.
+  # Resuelve drift 11-18 km MODIS observado en S47 R2 expansion.
+  mirova_center_lat: -40.582
+  mirova_center_lon: -72.131
 - name: Villarrica
   mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
   display_name: Villarrica
