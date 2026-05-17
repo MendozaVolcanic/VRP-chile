@@ -255,7 +255,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                   inner_radius_km: float | None = None,
                   exclude_zones: list = None,
                   active_water_bodies: list = None,
-                  lbg_global_compatible: bool = False) -> dict | None:
+                  lbg_global_compatible: bool = False,
+                  local_kernel_bg_compatible: bool = False) -> dict | None:
     """
     Calculate VRP from a single VIIRS L1B granule.
 
@@ -788,7 +789,13 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 # kernel 3x3 alrededor de cada hot pixel (Coppola 2024 L1129
                 # literal). Caso contrario fallback al t_bg_i04 global del ring
                 # 5-25km (comportamiento legacy).
-                if ENABLE_LOCAL_KERNEL_BG:
+                # S59 H_S58_PER_VOL: combinar profile flag con field per-vol
+                # local_kernel_bg_compatible. Solo aplica si AMBOS true. Evita
+                # regresion Tupungatito (ring frio por glaciar — kernel local
+                # empeoraria, gradiente p10 < BT_hot). Vols candidatos opt-in:
+                # Villarrica (lago N), Copahue (El Agrio activo), Planchon
+                # (laguna crater), Llaima (lago Conguillio).
+                if ENABLE_LOCAL_KERNEL_BG and local_kernel_bg_compatible:
                     # Lista de t_bk per hot pixel (NaN si todos vecinos invalidos)
                     t_bk_local = compute_local_background(
                         bt, list(hot_rows), list(hot_cols), kernel_size=3

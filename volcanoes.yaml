@@ -42,6 +42,10 @@ volcanoes:
   vent_lat: -39.420227
   vent_lon: -71.939876
   vent_radius_km: 2
+  # S58 H_S57/S58 audit: median(ring 5-25km) sesgado caliente por lago
+  # Villarrica al N. Local kernel 3x3 (Coppola 2024 L1129) compensa.
+  # Solo aplica con profile flag enable_local_kernel_bg ON.
+  local_kernel_bg: true
   # S26: cuerpos de agua nocturnos generan FPs masivos verano (lagos ~9°C
   # vs ambiente nevado ~0°C → ΔBT 5-15K trigger eruption-path). En jan-mar
   # 2026 se observaron 88 records con vrp_mw > 100 MW clusterizados aquí.
@@ -115,6 +119,9 @@ volcanoes:
   vent_lat: -37.856
   vent_lon: -71.183
   vent_radius_km: 2
+  # S58 H_S58_PER_VOL: ratio 50× inflación (audit S58). Lago El Agrio
+  # cráter activo sesga ring 5-25km hacia caliente. Local kernel cura.
+  local_kernel_bg: true
   # S26: Lago Caviahue / Laguna del Agrio ~14 km SE del vent (lado Argentina).
   # Auditoría empírica S26 sobre data fresca: 107 hotspots clusterizados
   # @(-37.876,-71.025). Radio 4 km cubre cluster sin tocar summit
@@ -250,6 +257,10 @@ volcanoes:
   vent_lat: -38.692
   vent_lon: -71.729
   vent_radius_km: 2
+  # S58 H_S58_PER_VOL: Lago Conguillío al N sesga ring caliente. Patrón
+  # Villarrica-like según audit S58 (gradiente negativo ΔBT max-median).
+  # Local kernel 3x3 compensa.
+  local_kernel_bg: true
   # S26: Lago Conguillío ~10 km NE genera FPs ya documentados
   # (project_llaima_thermal.md: 139 FPs ruido térmico). Auditoría empírica
   # S26 sobre data fresca: 184 hotspots clusterizados @(-38.634,-71.639).
@@ -499,6 +510,9 @@ volcanoes:
   vent_lat: -35.241099
   vent_lon: -70.573345
   vent_radius_km: 3
+  # S58 H_S58_PER_VOL: ratio 5.1x inflación (audit S58). Laguna del cráter
+  # + valles glaciares sesgan ring caliente. Local kernel cura.
+  local_kernel_bg: true
   # MIROVA scene center (KMZ GroundOverlay LatLonBox) offset 1.87 km N of
   # Nicolas vent; MIROVA anchors on old Planchon crater, not new Peteroa SW.
   mirova_center_lat: -35.2232
