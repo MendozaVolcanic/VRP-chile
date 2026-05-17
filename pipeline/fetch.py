@@ -27,6 +27,37 @@ def _ipv4_only_getaddrinfo(host, *args, **kwargs):
     return res4 if res4 else res  # fallback al original si no hay IPv4
 socket.getaddrinfo = _ipv4_only_getaddrinfo
 
+# H7b (S47): Override connect/read timeout para hosts NASA Earthdata.
+# earthaccess.auth._find_or_create_token() pasa timeout=10s hardcoded en su
+# session.post() → si urs.earthdata.nasa.gov tarda >10s en TLS handshake
+# (carga alta o degradación intermitente, observado 9 runs consecutivos
+# fallidos 2026-05-16), el connect timeout dispara ANTES de cualquier
+# retry de nuestro auth(). Solución: monkeypatch requests.Session.request
+# para forzar timeout mínimo 60s en hosts NASA. Tests reales (S47): NASA
+# responde en 200-800ms cuando OK, falla limpio cuando down — pero cuando
+# está saturada puede tardar 15-30s. 60s es defensivo.
+try:
+    import requests as _requests
+    _NASA_HOSTS = ("urs.earthdata.nasa.gov", "cmr.earthdata.nasa.gov",
+                   "data.lpdaac.earthdatacloud.nasa.gov", "ladsweb.modaps.eosdis.nasa.gov",
+                   "nrt3.modaps.eosdis.nasa.gov")
+    _MIN_TIMEOUT = 60.0
+    _orig_session_request = _requests.Session.request
+    def _request_with_nasa_timeout(self, method, url, **kwargs):
+        if any(h in url for h in _NASA_HOSTS):
+            t = kwargs.get("timeout")
+            if t is None:
+                kwargs["timeout"] = _MIN_TIMEOUT
+            elif isinstance(t, (int, float)) and t < _MIN_TIMEOUT:
+                kwargs["timeout"] = _MIN_TIMEOUT
+            elif isinstance(t, tuple) and len(t) == 2:
+                connect_t, read_t = t
+                kwargs["timeout"] = (max(connect_t, 30.0), max(read_t, _MIN_TIMEOUT))
+        return _orig_session_request(self, method, url, **kwargs)
+    _requests.Session.request = _request_with_nasa_timeout
+except ImportError:
+    pass  # requests no instalado (entornos de test sin red)
+
 
 def _solar_elevation(lat_deg: float, lon_deg: float, dt_utc: datetime) -> float:
     """Approximate solar elevation angle (degrees). Negative = nighttime."""
@@ -111,6 +142,12 @@ def auth():
     H7 S35 extended retry: subido a 6 intentos con waits hasta 180s para
     mitigar transients de hasta ~5 min observados en runs 9-10 mayo. Combinar
     con IPv4 force (top of file) que apunta al root cause más probable.
+
+    H7b S47 extended further: 9 runs consecutivos fallidos 2026-05-16 por
+    ConnectTimeout en urs.earthdata.nasa.gov:443 — degradación >5 min.
+    Subido a 8 intentos hasta 480s (waits 0/10/30/60/120/240/360/480, ~22 min
+    total) + override de timeout requests a 60s (top of file). Si NASA tarda
+    en recuperarse >22 min, el job falla y el siguiente cron (cada 2h) reintenta.
     """
     import os
     import time
@@ -118,7 +155,7 @@ def auth():
     netrc_path_win = os.path.expanduser("~/_netrc")
     has_netrc = os.path.exists(netrc_path_unix) or os.path.exists(netrc_path_win)
 
-    delays = [0, 5, 15, 45, 90, 180]  # 6 attempts, ~5.5 min total max
+    delays = [0, 10, 30, 60, 120, 240, 360, 480]  # 8 attempts, ~22 min total max
     last_err = None
     for delay in delays:
         if delay:
