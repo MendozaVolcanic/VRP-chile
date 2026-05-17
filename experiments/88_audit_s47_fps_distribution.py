@@ -87,6 +87,36 @@ def vrp_mirovaEq(rec, inner):
     return v
 
 
+def is_test1_summit_detection(rec, inner):
+    """S48: detección Test 1 con cluster summit aunque pc.vrp_mw==0.
+
+    Caso D4 documentado CLAUDE.md: en volcanes con domo activo (NdC Nicanor,
+    Lascar fumarola summit, Lastarria geotermal), el L_bg local sale alto
+    porque el ring 1-3km está contaminado por calor crónico. ΔL - L_bg ≈ 0 →
+    pc.vrp=0 aunque Test 1 dispare. MIROVA reporta estos como ALERTA legítima
+    con vrp 0.02-0.06 MW (verificado NdC 3 alertas window 30d).
+
+    Estos records son DETECCIONES REALES — el cluster summit existe, MIROVA
+    lo confirma. La magnitud queda como issue separado (lbg_global per-vol).
+    Para audit purposes contar como TP.
+    """
+    if not isinstance(rec, dict):
+        return False
+    if rec.get("final_hotspot_source") != "test1":
+        return False
+    if rec.get("distance_class") != "summit":
+        return False
+    dist = rec.get("final_hotspot_dist_km")
+    if dist is None or dist > inner:
+        return False
+    return True
+
+
+def is_detected(rec, inner):
+    """Unified detection check: TP si vrp_mirovaEq > 0 O test1 summit válido."""
+    return vrp_mirovaEq(rec, inner) > 0 or is_test1_summit_detection(rec, inner)
+
+
 def parse_dt(s):
     if not s:
         return None
@@ -140,7 +170,9 @@ def main():
             t_o = parse_dt(r.get("datetime_utc") or r.get("timestamp_utc"))
             if t_o is None or not (window_start <= t_o < window_end):
                 continue
-            if vrp_mirovaEq(r, inner) <= 0:
+            # S48: contar TP también cuando Test 1 dispara summit aunque pc.vrp=0
+            # (patrón D4 NdC + Lascar + Lastarria documentado).
+            if not is_detected(r, inner):
                 continue
             sens_r = r.get("sensor", "")
             sens_label = None
@@ -236,7 +268,8 @@ def main():
                     continue
                 if not sensor_match(r.get("sensor", ""), sens_label):
                     continue
-                if vrp_mirovaEq(r, inner) > 0:
+                # S48: misma lógica unificada de detección
+                if is_detected(r, inner):
                     matched = True
                     break
             if not matched:
