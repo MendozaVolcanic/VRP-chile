@@ -99,7 +99,11 @@ def parse_dt(s):
 
 def main():
     repo = Path(__file__).parent.parent
-    csv_path = repo / "01_05_2026_registro_vrp_consolidado.csv"
+    # S47 update 2026-05-16: usar snapshot fresh (window 30d real)
+    csv_path = repo / "data" / "mirova_reference" / "mirova_v1_snapshot" / "registro_vrp_consolidado.csv"
+    if not csv_path.exists():
+        # Fallback al snapshot histórico embebido
+        csv_path = repo / "01_05_2026_registro_vrp_consolidado.csv"
     df = pd.read_csv(csv_path)
     df["ts"] = pd.to_datetime(df["Fecha_Satelite_UTC"], errors="coerce", utc=True)
     df = df.dropna(subset=["ts"])

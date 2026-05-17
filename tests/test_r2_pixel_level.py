@@ -49,49 +49,25 @@ SENSOR_VRP_PREFIXES = {
 }
 
 
-# 5 casos canónicos del handoff S46
+# Casos canónicos R2 pixel-level.
 # (volcano, sensor_label, granule_ts, expected_dist_km, expected_vrp_mw, hipotesis)
+#
+# S46 dejó 5 casos de abril 2026 pero el archive mirova-tif-archive empieza
+# 2026-05-08, todos skipearon. S47 expansion: scan 591 TIFs (window
+# 2026-05-08→2026-05-11) cruzados con records mirova_equivalent → propone 8
+# casos válidos con dist ≤ 1.6 km (validados en experiments/89_r2_candidates_scan.py).
+# Mantenemos Puyehue lacolito como ancla canónica original S35.
 R2_CASES = [
-    (
-        "PuyehueCordonCaulle",
-        "VIIRS375",
-        "2026-05-09 05:42",
-        7.73,
-        0.18,
-        "lacolito vs cráter",
-    ),
-    (
-        "Lascar",
-        "MODIS",
-        "2026-04-30 07:30",
-        1.0,
-        0.99,
-        "Salar vs cráter sub-MW",
-    ),
-    (
-        "Tupungatito",
-        "VIIRS375",
-        "2026-04-27 05:18",
-        5.41,
-        0.11,
-        "Test1+VRP=0 case",
-    ),
-    (
-        "Isluga",
-        "VIIRS375",
-        "2026-04-29 05:24",
-        0.84,
-        0.10,
-        "VJ202IMG fetch gap",
-    ),
-    (
-        "Lastarria",
-        "VIIRS375",
-        "2026-04-30 06:00",
-        0.5,
-        0.30,
-        "control sin regresión",
-    ),
+    # Ancla histórica S35/S46 — PASS (lacolito Puyehue, inner=20 km)
+    ("PuyehueCordonCaulle", "VIIRS375", "2026-05-09 05:42", 7.73, 0.18, "lacolito vs cráter"),
+    # S47 expansion (válidos contra TIF post-drift234)
+    ("Isluga",      "VIIRS750", "2026-05-11 05:54", 0.5, 6.81,  "Isluga cráter sumario"),
+    ("Isluga",      "VIIRS375", "2026-05-11 05:54", 0.5, 0.86,  "Isluga VIIRS-I sub-MW"),
+    ("Lastarria",   "VIIRS375", "2026-05-10 06:12", 0.5, 0.15,  "Lastarria centroid match"),
+    ("Villarrica",  "VIIRS375", "2026-05-09 06:36", 1.0, 1.19,  "Villarrica lava lake"),
+    ("Llaima",      "VIIRS375", "2026-05-09 06:36", 1.0, 1.00,  "Llaima cráter activo"),
+    ("Tupungatito", "VIIRS375", "2026-05-10 06:12", 1.5, 2.17,  "Tupungatito glaciar"),
+    ("Isluga",      "MODIS",    "2026-05-10 07:15", 2.0, 23.70, "Isluga MODIS hot"),
 ]
 
 
@@ -323,12 +299,12 @@ def test_tif_archive_index_loadable():
 
 
 def test_r2_cases_documented():
-    """Smoke: los 5 casos R2 están bien estructurados."""
-    assert len(R2_CASES) == 5
+    """Smoke: los casos R2 están bien estructurados."""
+    assert len(R2_CASES) >= 5
     for case in R2_CASES:
         assert len(case) == 6
         volcano, sensor, ts_str, dist, vrp, hipotesis = case
-        # Sanity: dist < 30 km, vrp < 100 MW (casos sub-MW)
+        # Sanity: dist < 30 km, vrp < 100 MW
         assert 0 <= dist < 30
         assert 0 < vrp < 100
         # Sensor válido
