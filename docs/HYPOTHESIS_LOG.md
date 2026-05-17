@@ -360,6 +360,27 @@
 
 ---
 
+## H_S49_TEST1_INTEGRATED_VRP_MISSING — Wooster pixel-level no extrae VRP de sub-pixel summit
+
+- **Formulada**: S49 (2026-05-17) tras investigar NdC pc.vrp=0 sistemático post-fix audit S48.
+- **Síntoma**: en NdC y otros volcanes con domo persistente, `pc.vrp_mw=0` aunque `vrp_mir_mw>0` (con lbg_global aplicado) y Test 1 dispara summit con 50-100 pixels.
+- **Causa raíz INVESTIGADA**: caso paradigmático NdC 2026-05-01 04:54 NOAA21:
+  - 70 anomaly_pixels reportados, solo 2 con `vrp>0` y están a **22-23 km del vent** (background warm valley, bt=271K)
+  - 61 pixels summit cráter (bt 251-257K), todos con `vrp_individual=0` porque L_hot - L_bg_global ≤ 0
+  - L_bg_global (ring 5-25km) también frío (invierno chileno, nieve circundante summit + bajada) → ΔL ≈ 0
+  - vent_anchored cluster selecciona summit (correcto), pero suma de los 61 pixels = 0
+- **NO es bug de pipeline**: `effective_L_bg` se propaga bien desde S33/S39 (verificado `pipeline/process_viirs.py:1069`). El lbg_global_compatible flag funciona como diseñado.
+- **Causa raíz REAL — divergencia metodológica MIROVA**: MIROVA detecta sub-pixel summit con Coppola 2015 Eq.1 **integrated VRP** (asume fracción f_hot del pixel, calcula radiancia total integrada). VRP-chile usa Wooster pixel-level (ΔL × área × k) que físicamente no puede extraer señal sub-pixel cuando el pixel completo tiene BT promediada con background nieve.
+- **Estado**: **CONFIRMADA, NO FIX POSIBLE con Wooster pixel-level. Pendiente S50: Test 1 integrated VRP implementación.**
+- **Cobertura operacional actual**: fix audit S48 (H_S48_AUDIT_VRP_ZERO_FALSE_FN) cuenta correctamente TP por `test1+summit+dist<=inner` independientemente de `pc.vrp_mw`. Recall 97.2% logrado. El issue de **magnitud reportada** (pc.vrp=0 cuando MIROVA reporta 0.02-0.30 MW) queda como pendiente cosmético — no afecta operativa.
+- **Volcanes afectados**: NdC (89 records 30d), Lascar (15), Lastarria (9), Copahue/Isluga/Planchón/Villarrica (1-2 cada uno). Total 118 records con `test1+summit+pc.vrp=0`.
+- **Acción S50**: implementar `Test 1 integrated VRP` per Coppola 2015 Eq.1. Pasa MISSION.md las 3 preguntas:
+  1. ¿En papers core? SÍ — Coppola 2015 Eq.1 explícito sobre Stromboli para detección sub-pixel summit.
+  2. (no necesita pregunta 2) — cubre Q1.
+- **Complejidad estimada**: medio. Requiere agregar path `vrp_integrated_test1` en `pipeline/process_viirs.py` + tests sintéticos + A/B reproc validation.
+
+---
+
 ## H_S48_AUDIT_VRP_ZERO_FALSE_FN — Audit cuenta FN cuando Test 1 dispara summit pero pc.vrp=0
 
 - **Formulada**: S48 (2026-05-17) post-comentario usuario "MODIS no detecta lava lake Villarrica, VIIRS-I sí — ¿qué pasa con VIIRS?".
