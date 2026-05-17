@@ -434,6 +434,83 @@
 
 ---
 
+## H_S58_LOCAL_KERNEL_BG_OPT_IN_PER_VOL — fix per-vol, no universal
+
+- **Formulada**: S58 (2026-05-17) tras análisis offline 3 subagentes paralelos: OSF v2.5 Villarrica + extensión MODIS + audit otros 10 Tier A.
+
+### Hallazgo Subagente A — OSF v2.5 Villarrica (5211 filas 2000-2025)
+
+- Magnitudes históricas VIIRS-I: **mediana 0.92 MW**, p25=0.27 MW, p10=0.09 MW
+- Rango "0.1-0.3 MW" del CSV scraper NRT corresponde a **p10-p25 histórico OSF**
+- Ratio bg/hot mediano = 0.52 (señal 48% sobre bg)
+- **Snap 838m confirmado** = diagonal pixel I-band 375×√5 = 838.5m
+- 2025 solo 18 detecciones full year (bajón vs 2023=110)
+- OSF NO cubre 2026 (termina 2025-12), sirve como **target estadístico**, no día-a-día
+
+### Hallazgo Subagente B — MODIS extension TDD
+
+- `compute_local_background` extendido a `process_modis.py:636-653`
+- 5 tests TDD nuevos pass
+- Suite total: **335 passed** (era 330, +5 MODIS)
+- MODIS B21 λ=3.929μm, Planck inline (no helper) — paridad metodológica con VIIRS
+
+### Hallazgo Subagente C — bug per-vol, NO universal
+
+| Vol | ALERTAs MIROVA | ΔBT_max−median | ¿Bug aplica? |
+|---|---:|---:|---|
+| **Villarrica** | 0 (15d) | -1.29 K | SÍ (caso canónico) |
+| **Copahue** | 1 | -1.68 K | **SÍ (ratio 50×, lago El Agrio activo)** |
+| **Planchón** | 7 | -2.88 K | **SÍ (ratio 5.1×, laguna cráter)** |
+| **Llaima** | 0 | -0.96 K | SÍ (lago Conguillío) |
+| Tupungatito | 14 | **-5.04 K** | NO — ring FRÍO por glaciar, kernel empeoraría |
+| Lascar | 58 | +16 K | NO — gradiente positivo, sano |
+| Lastarria | 18 | +3 K | NO — gradiente positivo |
+| Isluga | 16 | +2.84 K | NO — ratio ~1 |
+| NdC | 2 | -4 K | NO — sin señal robusta |
+| PCC | 8 | +4.5 K | NO — gradiente positivo (inflación es de cluster selection D8/D9) |
+| Chaitén | 0 | +2.31 K | NO — gradiente positivo |
+
+**Bug aplica específicamente** donde hay **fuente de calor extensa dentro del ring 5-25km que NO es el cráter**:
+- Villarrica: lago Villarrica al N
+- Copahue: lago El Agrio cráter activo  
+- Planchón: laguna cráter
+- Llaima: lago Conguillío
+
+**Tupungatito es caso OPUESTO**: ring FRÍO por glaciar → kernel local agregaría FPs.
+
+### Recomendación implementación
+
+**Activar flag per-vol, NO global**:
+
+```yaml
+# volcanoes.yaml
+- name: Villarrica
+  local_kernel_bg: true  # S58 fix
+- name: Copahue
+  local_kernel_bg: true  # S58 fix
+- name: PlanchonPeteroa  
+  local_kernel_bg: true  # S58 fix
+- name: Llaima
+  local_kernel_bg: true  # S58 fix (sin alertas pero patrón similar)
+# Resto: default false (mantiene legacy median ring)
+```
+
+Profile flag `enable_local_kernel_bg` se queda como **gate global on/off para el feature**, y `local_kernel_bg` per-vol controla aplicación específica.
+
+### Caveats fuertes
+
+- CSV ground truth solo cubre 15/30d nominales (termina 2026-05-01)
+- `p10 = median - 1.282σ` es proxy estadístico, no implementación real kernel
+- Ratio inflación usa "pc.vrp>1MW" como proxy de "alerta", no réplica exacta
+
+### Estado
+
+- Pipeline integrado (VIIRS + MODIS) — flag global ON/OFF funciona
+- Per-vol flag PENDIENTE S59 (requiere cambio en `compute_local_background` callsite para pasar `volcano_config`)
+- Reproc Villarrica en progreso (run 25990074670)
+
+---
+
 ## H_S57_PAPERS_RE_READ + EXCELS_OLVIDADOS + LOCAL_KERNEL_TDD — meta-leccion + hallazgos masivos
 
 - **Formulada**: S57 (2026-05-17) tras Nicolás señalar dos olvidos críticos:
