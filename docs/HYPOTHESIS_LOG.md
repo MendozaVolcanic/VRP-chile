@@ -434,6 +434,44 @@
 
 ---
 
+## H_S54_CLUSTER_SUM_INFLATES_VS_MIROVA — pc.vrp_mw=Wooster sum NN pixels vs MIROVA single-cluster
+
+- **Formulada**: S54 (2026-05-17) tras investigación pixel-a-pixel granules nuestros vs imágenes Mirova-v1 + análisis distribución espacial cluster.
+- **Plot twist S54**: H_S53 era PARCIALMENTE incorrecta. La premisa "MIROVA captura cluster lake/valley en casos sin emergencia summit" fue REFUTADA por imágenes Mirova-v1 (20 PNGs descargados): **MIROVA marca CRÁTER en TODAS las 5 fechas**, incluyendo 2026-04-09 y 2026-03-08.
+- **Hallazgo verdadero**:
+
+  | Caso | MIROVA MW | pc.vrp_mw (Wooster sum) | pc.n_pixels | Ratio |
+  |---|---:|---:|---:|---:|
+  | 2026-05-11 06:00 | 0.31 | **0.385** | **1** | **1.24× ✓** |
+  | 2026-05-14 05:48 | 0.31 | 3.744 | 87 | 12.08× |
+  | 2026-04-09 06:00 | 0.11 | 7.141 | 71 | 64.92× |
+  | 2026-03-08 06:00 | 0.21 | 6.633 | 69 | 31.59× |
+  | 2026-02-26 05:42 | 0.12 | 10.105 | 84 | 84.21× |
+
+- **Patrón claro**: cuando cluster tiene 1 pixel (caso 1 lava lake emergente puro), ratio perfecto. Cuando cluster tiene 60-90 pixels conectados (casos 2-5), ratio inflado 12-84×.
+- **Distribución espacial pixels** (anomaly_pixels top-100 dentro de 5km del centroide vs >5km):
+  - Caso 2026-02-26: 39 pixels <5km del centroide pero suma vrp_individual=0.01 MW; 10 pixels >5km suma 4.83 MW
+  - **pc.vrp_mw = 10.1 MW NO es la suma de anomaly_pixels visible** — cluster real tiene más pixels (84 total) que el top-100 anomaly_pixels muestra (porque scene tiene pixels más calientes en otra parte)
+- **Causa raíz**: `cluster_hotspots(vent_anchored)` agrupa pixels conectados 8-vec en grid 2D. 70-90 pixels conectados ~30×30 px (~11×11 km) cerca del cráter forman cluster contiguo. **Wooster sum de Tantos pixels infla 30-80× vs MIROVA**.
+- **MIROVA NO usa cluster selection** (Subagente B S54 + Coppola 2016a línea 387-398 + Coppola 2024 Eq.13). Sum scene-wide pero **MIROVA reporta menos magnitud** porque:
+  - (a) Probable usa Eq.16 two-component sub-pixel (Coppola 2024 §Lava lakes)
+  - (b) O usa threshold más estricto que descarta pixels marginales del cluster
+  - (c) O reporta solo top-1 pixel del cluster (no sum total)
+- **Estado**: CONFIRMADA causa, AGREGACIÓN distinta es el problema, no detección.
+- **Plan S55+**: profile experimental `_villarrica_aggregation_test` con estrategias diferentes:
+  1. `top_pixel`: reportar solo top-1 pixel del cluster
+  2. `eq16_two_component`: usar Eq.16 R2 ya implementado S53 (T_e=1000K asumido)
+  3. `threshold_strict`: solo pixels >N×σ del centroide
+  4. `summit_radius_filter`: solo pixels dentro de X km del centroide del cluster
+- **MISSION.md compliance check**:
+  - Opción 1 (top_pixel): ⚠️ NO en papers literal — divergencia
+  - Opción 2 (Eq.16): ✓ Coppola 2024 §Lava lakes, asumiendo T_e=1000K Burgi-Coppola
+  - Opción 3 (threshold strict): ✓ Coppola 2016a Tests 2/3 N·σ threshold
+  - Opción 4 (radius filter): ⚠️ NO en papers literal — divergencia
+- **Imágenes Mirova-v1 descargadas** en `data/mirova_reference/mirova_v1_images/Villarrica_<5_fechas>/`: 20 PNGs RGB + plots logVRP/Dist. Disponibles para investigaciones futuras.
+
+---
+
 ## H_S53_R2_LAVA_LAKE_PARTIAL_REPLICATES_MIROVA — Eq.16 funciona solo cuando lava lake emerge
 
 - **Formulada**: S53 (2026-05-17) tras implementación R2 Eq.16 (TDD) + calibración empírica.
