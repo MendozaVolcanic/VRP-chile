@@ -31,6 +31,7 @@ except ImportError:
 from .scan_geometry import modis_pixel_areas, roi_mask_bbox
 from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots, cluster_pixels_geographic
+from .vrp_regimes import compute_local_background
 from .test1_integrated import compute_test1_mir
 
 
@@ -115,6 +116,7 @@ from pipeline.profile import (
     ENABLE_FIRST_PASS_TESTS_2_AND_3,
     ENABLE_DUAL_ROI_FIRST_PASS,
     ENABLE_DUAL_ROI_SECOND_PASS,
+    ENABLE_LOCAL_KERNEL_BG,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -638,13 +640,32 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         # Use L_bg derived from BT median (not direct radiance median) to avoid
         # inconsistency when background annulus has heterogeneous terrain/clouds.
         # Planck is nonlinear: median(radiance) != radiance(median(BT)).
-        L_bg = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bg)) - 1)))
+        L_bg_global = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bg)) - 1)))
 
         hotpix_bt = bt_mir[hot_rows, hot_cols]
         # Convert hot pixel BT to radiance for consistent VRP calculation
         hotpix_rad = C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * hotpix_bt)) - 1))
         # Per-pixel area accounts for scan-angle elongation
         hotpix_area = pixel_areas[hot_rows, hot_cols]
+
+        # S58 — Coppola 2024 L1129 literal: "T_bk is retrieved from the pixels
+        # adjacent to the hot one". Cuando ENABLE_LOCAL_KERNEL_BG ON, calcular
+        # L_bg per-pixel desde kernel 3x3 alrededor de cada hot pixel (excluye
+        # otros hot + NaNs). Fallback al L_bg_global derivado del ring 5-25km
+        # cuando todos los vecinos son NaN. Paridad con VIIRS (process_viirs.py
+        # ~791-802).
+        if ENABLE_LOCAL_KERNEL_BG:
+            t_bk_local = compute_local_background(
+                bt_mir, list(hot_rows), list(hot_cols), kernel_size=3
+            )
+            t_bk_arr = np.array(t_bk_local, dtype=np.float64)
+            # Fallback a t_bg global cuando local es NaN
+            if t_bg is not None and not np.isnan(t_bg):
+                t_bk_arr = np.where(np.isnan(t_bk_arr), t_bg, t_bk_arr)
+            L_bg = C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bk_arr)) - 1))
+        else:
+            L_bg = L_bg_global
+
         # S26: clip ΔL ≥ 0 — Wooster requiere excess radiancia positivo.
         # Pixels marcados hot por Path D dNTI o Test 1 pueden tener BT < t_bg
         # global (vs L_bg local). Sin clip, VRP_MIR sale negativo y rompe sumas.
