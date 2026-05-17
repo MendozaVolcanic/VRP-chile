@@ -174,14 +174,48 @@ def main():
                 "n_pixels": pc.get("n_pixels"),
             }
 
-            if (candidates["Tipo_Registro"] == "FALSO_POSITIVO").any():
+            # S48 fix: el matching temporal+sensor crudo confunde clusters
+            # distintos del mismo granule. Lascar caso paradigmático: MIROVA
+            # reporta FP de cluster a 16-29 km del vent, nuestro pc está a
+            # <1.6 km del vent (summit cráter real). Eran eventos distintos.
+            # Fix: para clasificar FP_a/FP_c, exigir además que la distancia
+            # nuestra y la de MIROVA al vent estén dentro de 5 km
+            # (= mismo cluster espacial del granule).
+            our_dist = pc.get("centroid_dist_km")
+            SPATIAL_TOL_KM = 5.0
+
+            def _same_cluster(mirova_dist_km):
+                if our_dist is None or mirova_dist_km is None:
+                    return True  # ante duda, comportamiento legacy (no agrava)
+                try:
+                    return abs(float(mirova_dist_km) - float(our_dist)) <= SPATIAL_TOL_KM
+                except (TypeError, ValueError):
+                    return True
+
+            # Spatial-aware FP classification
+            fp_match = candidates[candidates["Tipo_Registro"] == "FALSO_POSITIVO"]
+            rt_match = candidates[candidates["Tipo_Registro"] == "RUTINA"]
+
+            same_cluster_fp = any(_same_cluster(d) for d in fp_match["Distancia_km"]) if len(fp_match) > 0 else False
+            same_cluster_rt = any(_same_cluster(d) for d in rt_match["Distancia_km"]) if len(rt_match) > 0 else False
+
+            if same_cluster_fp:
                 fp_info["category"] = "a_mirova_fp"
                 per_vol[vol_key]["FP_a"] += 1
                 per_vol[vol_key]["by_sensor"][sens_label]["FP_a"] += 1
-            elif (candidates["Tipo_Registro"] == "RUTINA").any():
+            elif same_cluster_rt:
                 fp_info["category"] = "c_mirova_rutina"
                 per_vol[vol_key]["FP_c"] += 1
                 per_vol[vol_key]["by_sensor"][sens_label]["FP_c"] += 1
+            elif len(fp_match) > 0 or len(rt_match) > 0:
+                # MIROVA tuvo entry temporal pero cluster distinto del nuestro
+                # → ambos vieron el granule pero detectaron en zonas distintas.
+                # Lo más honesto: huérfano de nuestra detección (no contó
+                # MIROVA como FP del SAME cluster).
+                fp_info["category"] = "b_no_mirova_entry"
+                fp_info["mirova_diff_cluster"] = True
+                per_vol[vol_key]["FP_b"] += 1
+                per_vol[vol_key]["by_sensor"][sens_label]["FP_b"] += 1
             else:
                 fp_info["category"] = "b_no_mirova_entry"
                 per_vol[vol_key]["FP_b"] += 1
