@@ -434,6 +434,46 @@
 
 ---
 
+## H_S51_PCC_COORD_VALIDATED — Validación empírica fix mirova_center PCC
+
+- **Formulada**: S51 (2026-05-17) post-reproc PCC --overwrite (run 25981141120).
+- **Contexto**: H_S48_PCC_COORD fixed via mirova_center_lat=-40.582,
+  mirova_center_lon=-72.131 (lacolito) en `volcanoes.yaml`. Validación
+  pendiente reproc empírico hasta S51.
+- **Método validación**:
+  - Disparado `nrt.yml` workflow_dispatch con volcano=PuyehueCordonCaulle,
+    start=2026-05-10, end=2026-05-17, overwrite=true.
+  - Run 25981141120 completed success (commit `d90993e`, JSON reescrito
+    +12310/-28863 líneas).
+  - Comparación par-a-par (timestamp, sensor) records pre-fix
+    (commit `21fe097`) vs post-fix (commit `d90993e`).
+- **Resultado**:
+  | Métrica | Resultado |
+  |---|---:|
+  | Records comparados (window 7d) | 69 |
+  | Mejoraron (>0.5 km más cerca lacolito) | **48/69 (70%)** |
+  | Igual (±0.5 km) | 18/69 (26%) |
+  | Empeoraron (>0.5 km más lejos) | 3/69 (4%) |
+  | **Mediana shift** | **+1.65 km más cerca lacolito** |
+  | Promedio shift | +2.90 km más cerca |
+  | Máximo acercamiento | 13.06 km |
+- **Casos paradigmáticos**:
+  - 2026-05-15 07:15 MODIS_AQUA: pre 5.11 km → post **2.10 km** (-3.01 km)
+  - 2026-05-16 02:00 MODIS_TERRA: pre 8.11 km → post **5.39 km** (-2.72 km)
+  - 2026-05-16 06:54 VIIRS_NOAA21: pre 6.78 km → post **0.95 km** (-5.83 km)
+- **Estado**: **CONFIRMADA EMPÍRICAMENTE**.
+- **Lección**: fix de coord vent → centroide térmico es de alto impacto
+  cuando existe offset documentado por TIFs MIROVA. Approach reproducible:
+  (1) calcular centroide ponderado TIFs MODIS con n_pixels>2500, (2) verificar
+  consistencia entre múltiples TIFs, (3) agregar mirova_center_lat/lon al
+  yaml. Para vols con TIFs dispersos (Planchón, NdC, Villarrica) NO replicar
+  sin evidencia empírica.
+- **3 casos empeoraron (4%)**: investigar S52 si tienen patrón común
+  (posible cluster legítimo en zona del cone que ahora se descarta por
+  estar lejos del lacolito).
+
+---
+
 ## H_S48_PCC_COORD — PCC vent_anchored ancla en cone, MIROVA centra en lacolito
 
 - **Formulada**: S48 (2026-05-17) en deep dive D9 MODIS sub-issue post-S47 R2 expansion.
