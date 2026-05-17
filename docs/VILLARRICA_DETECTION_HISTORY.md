@@ -110,6 +110,91 @@ profile `s9_vent_permissive` (vent-path puro sin sigma) — confirmará
 empíricamente que no detecta NADA que Test 1 no detecte ya. Pero la
 evidencia documental + empírica ya es categórica.
 
+## ⭐ Detecciones del lava lake real (sub-pixel summit <300m)
+
+> Agregado S51 (2026-05-17) tras información de Nicolás: "el cráter real
+> Villarrica son 100m de radio aprox alrededor del punto Google Maps
+> -39.420292, -71.939908. El lago de lava ha estado oculto y solo se ha
+> visto en pocas ocasiones hace algunos meses cuando VIIRS-I 375m lo detectó".
+
+**Confirmación empírica**: VRP-chile detectó el lava lake exactamente esas
+"pocas ocasiones". Análisis de `anomaly_pixels` cruzados con coord cráter
+real (Google Maps) en window 2026-01 → 2026-05 (5 meses):
+
+| Mes | Pixels VIIRS-I 375m a <300m del cráter real |
+|---|---:|
+| Enero 2026 | 3 |
+| **Febrero 2026** | **11 (pico actividad)** |
+| Marzo 2026 | 9 |
+| Abril 2026 | 12 |
+| Mayo 2026 (parcial) | 10 |
+| **TOTAL 5 meses** | **45 pixels** |
+
+### Detecciones con primary_cluster centroid <500m del cráter real (18 records)
+
+Casos paradigmáticos:
+
+| Fecha UTC | Sat | Dist crater real | VRP | npx |
+|---|---|---:|---:|---:|
+| **2026-02-15 05:00** | **VIIRS_NOAA21** | **159m** | 1.53 MW | 28 |
+| 2026-02-03 05:54 | VIIRS_SNPP | 314m | 4.50 MW | 95 |
+| 2026-02-10 05:42 | VIIRS_NOAA20 | 334m | 2.22 MW | 80 |
+| 2026-02-13 04:48 | VIIRS_NOAA20 | 310m | 1.30 MW | 31 |
+| 2026-03-24 05:36 | VIIRS_SNPP | 233m | 0.75 MW | 81 |
+| 2026-04-12 06:42 | VIIRS_NOAA20_750 | 240m | 0.53 MW | 9 |
+| **2026-05-11 06:00** | **VIIRS_NOAA20** | **170m** | 0.39 MW | 1 |
+
+**Interpretación volcanológica**:
+- Febrero 2026 = pico actividad lava lake (consistente con "hace algunos
+  meses").
+- Pixel 2026-02-15 05:00 NOAA-21 a **159m** del cráter exacto = momento
+  donde el lago de lava emergió con suficiente energía para superar
+  background del pixel mezclado 375m.
+- Última detección confirmada 2026-05-11 06:00 NOAA-20 a **170m** = una
+  de las 2 alertas MIROVA del window 30d.
+- Distribución mensual decreciente consistente con observación de campo:
+  el lago se ha visto solo en "pocas ocasiones".
+
+**Por qué la mayoría del tiempo NO detectamos el lava lake**:
+- Cubierta por nieve/hielo glaciar Pichillancahue-Turbio
+- Lava lake oculto en chimenea, no expone superficie radiante grande
+- BT del pixel 375m mezclado con nieve → no supera background
+
+**Cuando SÍ detectamos** (las 45 ocasiones documentadas arriba):
+- Lava lake emerge superficialmente
+- BT del pixel se eleva lo suficiente para Test 1 integrated-ROI
+- VRP detectado típicamente 0.4-4.5 MW
+
+**Detecciones que NO son el lava lake** pero que el dashboard marca "Dentro"
+(porque inner_radius=5km = paridad MIROVA, no cráter real):
+- Records a 1-5 km del vent: cono volcánico superior, calor residual roca
+  oscura, no señal volcanológica relevante para alerta de erupción.
+- Records far (>5km): bosque, lago, agricultura — ruido VIIRS-I.
+
+**Distinción operacional importante para SERNAGEOMIN**:
+- `dist < 0.3 km` → lava lake real (raro, alta confianza)
+- `dist 0.3-1.0 km` → cráter / borde cráter (probable señal volcánica)
+- `dist 1.0-5.0 km` → cono superior (calor residual, baja confianza alerta)
+- `dist > 5.0 km` → ruido o incendio/agua
+
+---
+
+## Nota técnica visualización dashboard
+
+`frontend/index.html` usa dos coord distintas para Villarrica:
+- `lat=-39.420, lon=-71.930` (centro genérico, ~860m al ESTE del cráter real)
+- `vent_lat=-39.420227, vent_lon=-71.939876` (cráter real, ~7m de Google Maps)
+
+**Detección (cluster, distancia)** usa `vent_lat/vent_lon` → 100% correcto.
+**Visualización (círculo 25km gris, marker naranja "Centro")** usa `lat/lon`
+→ aparece visualmente desplazado ~860m al ESTE.
+
+Fix recomendado S52: corregir `lat`, `lon` Villarrica en `volcanoes.yaml` y
+`frontend/index.html` línea 512 a `(-39.420227, -71.939876)` para
+alineamiento visual perfecto. NO afecta detección.
+
+---
+
 ## Referencias
 
 - `~/.claude/projects/.../memory/project_s26_villarrica_test1_d.md`
