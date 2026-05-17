@@ -38,37 +38,52 @@ fase (2) "herramienta independiente", no como fase (1) clon MIROVA.
 Lascar 15, Lastarria 9). Hipótesis original H_S49_TEST1_INTEGRATED_VRP_MISSING
 asumía existencia de "Coppola 2015 Eq.1 integrated VRP".
 
-**Razón descarte (S50)**:
-- Verificación literal Coppola 2016a SP426.5: Equations 1-5 son sobre
-  NTI/NTIbk/ETI/dNTI — **solo detección, no cálculo VRP**.
-- Verificación Coppola 2024 chapter Springer:
-  - Eq.17 VRP = ΔL_MIR × c × A_pix (Wooster 2003): **inadecuada para
-    low-temperature VTFs** (línea 1163-1164).
-  - Eq.14 Two-component model: requiere asumir T_hot O f_hot (no observable).
-  - Eq.16 Stefan-Boltzmann TIRVolcH: ya implementado como `vrp_tir_mw`.
-- Verificación empírica TIRVolcH en NdC: **solo 2/79 records (2.5%) tienen
-  vrp_tir_mw>0**. Y uno con 99 MW patológico. NO viable como fallback.
-- **No hay fórmula pública en papers core MIROVA** que extraiga magnitud sub-MW
-  summit cuando el background ambient (ring 5-25km) está frío similar al
-  pixel mezclado. MIROVA reporta 0.02-0.06 MW pero su método interno es
-  privado.
+### Estado S52 (2026-05-17): **REVALIDADO — fórmula EXISTE en paper core MIROVA**
 
-**Q1: ¿fórmula en papers core?** NO. Wooster (Eq.17) explícitamente no aplica,
-TIRVolcH no funciona empíricamente para estos casos, y no hay tercera fórmula
-documentada.
+Skill `investigacion` S52 + búsqueda APIs gratis encontró:
 
-**Veredicto**: DESCARTADO sin fórmula documentada. Re-introducir solo si:
-- (a) Surge nuevo paper MIROVA core con fórmula sub-pixel summit explícita
-- (b) MIROVA hace público el método interno
-- (c) Decisión explícita de Nicolás de implementar Two-component model
-  (Eq.14) asumiendo T_hot fija (ej. 600K) — esto sería divergencia
-  metodológica documentada en MIROVA_DIVERGENCES.md
+**Aveni 2025 GRL** (DOI 10.1029/2024GL113324) — "Volcanic Radiative Power
+Retrieval From Moderate-to-Low-Temperature Features Using a Single TIR Band"
+— **autoría Aveni + Coppola + Harris + Rouwet** (Torino + Sapienza + LMV +
+INGV = **MIROVA core**, ya disponible local en
+`documentacion/Geophysical Research Letters - 2025 - Aveni - *.pdf`).
 
-**Cobertura operacional actual**: fix audit S48 (H_S48_AUDIT_VRP_ZERO_FALSE_FN)
-cuenta TP por `test1+summit+dist≤inner` independientemente de `pc.vrp_mw`.
-Recall 97.2% logrado. El issue de magnitud reportada (pc.vrp=0 cuando MIROVA
-reporta 0.02-0.30 MW) queda como **limitación conocida del método pixel-level
-Wooster**, no como bug del pipeline.
+**Equation 9 — VRPTIR**:
+```
+VRPTIR = A_pix × k_TIR × Σ_j=1..N (L_TIR_hot_j − L_TIR_bg)
+```
+
+Con `k_TIR = 60.17 μm·sr` para banda 11.45 μm (VIIRS I05 + MODIS B31
+aprox). Válido T 300-600 K (crater lakes, fumarolas, hidrotermales).
+Uncertainty ±35%.
+
+**Cita clave p3**: "the MIR method [Wooster] undergoes a sharp breakdown
+when T < 600 K. This results in a substantial underestimation of VRP at
+active volcanic systems associated with low-to-moderate temperature
+surfaces, such as fumarole fields, crater lakes or cooling lava flows".
+
+→ **Aveni 2025 GRL es la fórmula MIROVA para magnitud sub-MW summit** que
+no encontrábamos. Pasa MISSION.md Q1 (paper core MIROVA, autoría Coppola).
+
+**Plan S53-S56** documentado en `docs/PLAN_S53_VRPTIR_AVENI2025.md`.
+
+**Razones descarte previas S49-S50 — RESUELTAS**:
+- ~~"Eq.17 Wooster inadecuada"~~ → Correcto, por eso usar Eq.9 Aveni 2025.
+- ~~"Two-component Dozier requiere asumir T_hot"~~ → Aveni 2025 simplifica
+  con k_TIR único calibrado.
+- ~~"TIRVolcH no funciona empíricamente NdC"~~ → Nuestro vrp_tir_mw actual
+  usa **Stefan-Boltzmann** (Eq.16 Coppola 2024 chapter), NO Eq.9 Aveni 2025.
+  Implementar Eq.9 podría dar resultados distintos.
+- ~~"No hay fórmula pública"~~ → SÍ HAY (Aveni 2025 GRL).
+
+### Cobertura operacional actual mantiene
+
+Fix audit S48 (H_S48_AUDIT_VRP_ZERO_FALSE_FN) sigue válido: cuenta TP por
+`test1+summit+dist≤inner`. Implementar VRPTIR Eq.9 resuelve **adicionalmente**
+el reporte de magnitud (~30× over-estimation actual confirmado S52
+Villarrica VIIRS-I 375m vs MIROVA real).
+
+**Status nuevo**: **ADOPTABLE en S53-S56**, con plan claro y MISSION-compliant.
 
 ---
 
