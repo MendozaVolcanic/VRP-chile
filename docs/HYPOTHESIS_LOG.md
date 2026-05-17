@@ -434,6 +434,58 @@
 
 ---
 
+## H_S56_BACKGROUND_PERCENTILE_BAJO_REPLICA_MIROVA — p01-p05 del ring resuelve gap MW
+
+- **Formulada**: S56 (2026-05-17) tras A/B offline 5 variantes de background.
+- **Hipótesis original**: nuestro `median(ring 5-25km)` está sesgado hacia caliente por incluir lake/valley adyacentes en Villarrica. MIROVA usa background más frío.
+- **Implementación**: `experiments/101_background_variants_offline.py` con proxy de percentiles via `t_bg = median - k·σ` (asumiendo distribución normal del ring).
+
+- **Resultado A/B**:
+
+  | Variant | Mediana ratio | Promedio | Casos rango [0.3, 3.0] |
+  |---|---:|---:|---:|
+  | p50 (current) | 0.10× | 0.09× | **0/5** ✗ |
+  | p25 | 0.39× | 0.25× | 2/5 |
+  | p10 | 0.50× | 0.46× | 3/5 |
+  | p05 | 0.56× | 0.58× | **4/5** ✓ |
+  | **p01** | **0.73×** | **0.79×** | **4/5** ✓ (caso 02-26: 1.20× casi perfecto) |
+
+- **Análisis matemático** (despejando Eq.16 hacia atrás caso 2026-02-26 MIROVA 0.12 MW):
+  - T_bg implícito ≈ **275K**
+  - Nuestro median actual = 281.25K → desfase **+6K**
+  - p05 del ring = **275.51K** ← coincide ✓
+- **Causa raíz física**: median(ring 5-25km) incluye **lake Villarrica al N + valles agrícolas E** (más cálidos que summit nevado en invierno chileno). Sesga `t_bg` hacia caliente → ΔL clipped → vrp=0 en pixels summit que MIROVA SÍ detecta.
+- **Estado**: HIPÓTESIS CONFIRMADA por A/B offline. Background distinto resuelve el gap MW.
+
+### Approach MISSION-compliant identificado
+
+**Coppola 2024 chapter línea 1129** dice literal:
+> "T_bk is retrieved from the pixels adjacent to the hot one"
+
+Esto es **kernel local 3×3 o 5×5** alrededor de cada hot pixel, NO median del ring 5-25km. **MISSION-COMPLIANT** (Coppola 2024 paper core MIROVA).
+
+### Plan S57+ (3 approaches A/B/C)
+
+1. **Approach A (más simple, MISSION-compliant Coppola 2024)**: `t_bg local` = mean/median del kernel 3×3 alrededor de cada hot pixel
+   - ✓ Coppola 2024 línea 1129 literal
+   - Aplica per-pixel, no scene-wide
+   - Físicamente correcto (background inmediato no contaminado por lake remoto)
+
+2. **Approach B (más conservador)**: ring background más pequeño (3-8 km en vez de 5-25)
+   - ⚠️ NO explícito en papers
+   - Pero más cerca del summit = más frío en Villarrica
+
+3. **Approach C (más reciente)**: usar percentil 5 del ring 5-25km actual
+   - ⚠️ NO en papers Coppola
+   - Más rápido implementar (1 línea cambio)
+   - Probable hack más que solución metodológica
+
+### Pre-recomendación: Approach A (Coppola 2024 local kernel)
+
+Pasa MISSION.md Q1 literal. Implementación scope mediano (kernel filter per hot pixel). Tests TDD obligatorios para validar conservación de detección + magnitud realista en los 5 casos paradigmáticos.
+
+---
+
 ## H_S55_AGGREGATION_OFFLINE_NEGATIVE — 4 estrategias agregación NO replican MIROVA en casos no-emergentes
 
 - **Formulada**: S55 (2026-05-17) tras A/B offline 4 estrategias contra 5 casos paradigmáticos.
