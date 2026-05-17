@@ -434,6 +434,42 @@
 
 ---
 
+## H_S55_AGGREGATION_OFFLINE_NEGATIVE — 4 estrategias agregación NO replican MIROVA en casos no-emergentes
+
+- **Formulada**: S55 (2026-05-17) tras A/B offline 4 estrategias contra 5 casos paradigmáticos.
+- **Implementación**: `experiments/100_aggregation_strategies_offline.py` con 4 estrategias:
+  1. `top_pixel`: pixel más caliente del cluster summit
+  2. `eq16_two_component`: R2 Eq.16 con T_e=1000K aplicado a top pixel
+  3. `threshold_strict`: pixels con vrp_individual > 0.05 MW dentro 2km
+  4. `summit_radius_filter`: sum pixels dentro 1km del centroide
+
+- **Resultado A/B**:
+
+  | Estrategia | Mediana ratio | Caso 1 emergente | Casos 2-5 no emergentes |
+  |---|---:|---:|---|
+  | pc.vrp_mw (sum actual) | 31.59× | 1.24× ✓ | 12-84× inflado |
+  | top_pixel | 0.00× | 0.61× | **0.00× todos** |
+  | eq16 (R2) | 0.00× | 0.26× | **0.00× todos** |
+  | thresh strict | 0.00× | 0.61× | 0.00× todos |
+  | radius 1km | 0.00× | 0.61× | 0.00× todos |
+
+- **Hallazgo crítico**: en 4/5 casos los pixels summit tienen `vrp_individual=0` (patrón D4: L_bg local contaminado clipped). **Las 4 estrategias offline reducen a 0** porque trabajan sobre `anomaly_pixels` que ya tienen vrp clipped.
+- **MIROVA aún reporta 0.11-0.21 MW** en esos 4 casos → **MIROVA NO usa el mismo background que nosotros**. El problema es UPSTREAM, no en agregación.
+- **Posibles backgrounds MIROVA distintos**:
+  - (a) Percentil bajo (25%) del ring summit, no median → bg más frío → ΔL positivo
+  - (b) Background del bbox 50×50 km completo (incluye lake/valley más fríos en mediana)
+  - (c) Background DUAL ring (combinación summit + scene) según Coppola 2016a Tabla 2
+  - (d) Aplicar Eq.16 sobre cluster como UNIDAD (no por pixel) con BT_efectiva integrada
+- **Estado**: AGGREGATION offline NEGATIVA. Problema es BACKGROUND, no agregación.
+- **Plan S56+**: requiere reproc (no offline) con diferentes background strategies:
+  1. Variar percentil background (median/p25/p75)
+  2. Variar dual_roi summit vs scene
+  3. Probar Eq.16 sobre cluster como unidad (BT_efectiva = mean del cluster)
+- **MISSION.md gate**: dual_roi summit/scene está en Coppola 2016a Tabla 2 ✓ MISSION-compliant. Percentil bajo NO está en papers explícito ⚠️.
+- **Lección metodológica**: cuando los anomaly_pixels reportados tienen vrp=0 globalmente pero MIROVA reporta algo, el problema es upstream (background) no downstream (agregación). Verificar siempre el upstream antes de probar agregaciones.
+
+---
+
 ## H_S54_CLUSTER_SUM_INFLATES_VS_MIROVA — pc.vrp_mw=Wooster sum NN pixels vs MIROVA single-cluster
 
 - **Formulada**: S54 (2026-05-17) tras investigación pixel-a-pixel granules nuestros vs imágenes Mirova-v1 + análisis distribución espacial cluster.
