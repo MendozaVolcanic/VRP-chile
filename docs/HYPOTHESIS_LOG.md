@@ -360,6 +360,42 @@
 
 ---
 
+## H_S47_NASA_TIMEOUT_10S — NRT cron falla por connect timeout interno earthaccess
+
+- **Formulada**: S47 (2026-05-16) al verificar deploy drift234. 9 runs NRT
+  consecutivos fallidos post-adopción S46.
+- **Síntoma**: `requests.exceptions.ConnectTimeout` en
+  `urs.earthdata.nasa.gov:443` durante `earthaccess.login(strategy="environment")`
+  → `pipeline/fetch.py:127 auth()` levanta y aborta el job.
+- **Hipótesis inicial descartada**: regresión por adopción drift234 commit
+  `3d25ea1` (14:55 UTC). **Refutada**: primer fallo NRT 02:50 UTC del mismo día
+  (~12h ANTES del commit). El fallo es pre-existente, no causado por S46.
+- **Hipótesis confirmada**: `earthaccess.auth._find_or_create_token` pasa
+  `timeout=10` hardcoded al `session.post()`. Cuando NASA Earthdata responde
+  con latencia 15-30s (carga alta o degradación intermitente), el connect
+  timeout dispara antes que cualquier retry de nuestro `auth()`. El monkey-patch
+  IPv4 (H7 S35) no resuelve esto — IPv4 ya está activo, el problema es la
+  ventana de 10s para handshake TLS.
+- **Evidencia**: run 25974930327 (cron 22:43 UTC) terminó "failure" con
+  jobs mezclados — algunos volcanes pasan, otros timeout-ean. Confirma
+  intermitencia, no caída total.
+- **Estado**: **CONFIRMADA y FIX APLICADO** (H7b).
+- **Fix S47** (`pipeline/fetch.py`):
+  1. Monkey-patch `requests.Session.request` para forzar `timeout>=60s` en
+     hosts NASA (urs.earthdata, cmr.earthdata, ladsweb, nrt3.modaps,
+     lpdaac.earthdatacloud). Tuplas `(connect, read)` normalizadas a
+     `max(30, connect)` y `max(60, read)`. Hosts no-NASA intactos.
+  2. Backoff `auth()` extendido de 6 → 8 intentos, waits hasta 480s
+     (`[0,10,30,60,120,240,360,480]`, ~22 min total).
+- **Tests**: `tests/test_fetch_nasa_timeout_override.py` 6/6 PASS (no_timeout,
+  low_timeout, high_timeout, tuple, non-NASA-untouched, non-NASA-default).
+- **Suite total post-fix**: 304 passed / 21 skipped (era 298/21), 0 regresiones.
+- **Pendiente verificación R8**: próximos 1-2 ciclos cron NRT deberían tener
+  tasa de éxito >>0 post-deploy. Si NASA degrada >22 min seguidos, el siguiente
+  cron reintenta automáticamente.
+
+---
+
 ## H_S24_DIBELLA_OUT_OF_OSF — Campus k=18 correcto también out-of-OSF
 
 - **Formulada**: S24 (2026-04-26) ejecutando P3 del handoff S24.
