@@ -434,6 +434,63 @@
 
 ---
 
+## H_S58_LOCAL_KERNEL_BG_REPROC_VALIDATED — A/B reproc Villarrica VALIDA fix
+
+- **Formulada**: S58 (2026-05-17) tras reproc Villarrica window 30d run 25990074670 SUCCESS (76 min).
+- **Reproc setup**: profile `_local_kernel_bg_enabled` con `enable_local_kernel_bg=true` + per-vol `local_kernel_bg=true` Villarrica. Window 2026-04-16 → 2026-05-15.
+
+### Resultados casos paradigmáticos
+
+| Caso | MIROVA | LEGACY pc.vrp | NEW pc.vrp | LEGACY ratio | NEW ratio | Mejora |
+|---|---:|---:|---:|---:|---:|---|
+| 2026-05-11 06:00 NOAA20 | 0.31 | 0.385 | 0.498 | 1.24× | 1.61× | ≈ (cambio marginal dentro tolerancia Aveni ±35%) |
+| **2026-05-14 05:48 NOAA21** | **0.31** | **3.744** | **0.672** | **12.08×** | **2.17×** | **-82% inflación** ✓ |
+| 2026-04-09 / 2026-03-08 / 2026-02-26 | — | — | — | — | — | Fuera window reproc (start=04-16) |
+
+### Stats agregados (todos records VIIRS-I summit window 30d)
+
+| Métrica | LEGACY | NEW | Cambio | Target OSF v2.5 |
+|---|---:|---:|---|---:|
+| N records summit pc.vrp>0 | 321 | **111** | -65% | — |
+| Mediana | 2.52 MW | **1.41 MW** | -44% | 0.92 MW |
+| Max | 18.34 MW | **6.59 MW** | -64% | — |
+
+### Interpretación
+
+**Funciona estructuralmente**:
+- Mediana cae 44% acercándose a target OSF (1.41 vs target 0.92, gap reducido 6× → 1.5×)
+- Max cae 64% (eliminando outliers patológicos)
+- N records baja 65% (los sub-pixel marginales que antes pasaban por background contaminado ahora se filtran correctamente)
+- Caso 2026-05-14 cura inflación 12× → 2.17×
+
+**Caveats**:
+- N=2 casos comparables (otros 3 fuera del window 30d reproc)
+- Mediana 1.41 MW vs target OSF 0.92 MW sigue 1.5× arriba. Posibles refinamientos S60+:
+  - `kernel_size=5` (más vecinos, bg menos sensible a outliers)
+  - Percentile (p25-p50) en lugar de mean del kernel
+  - Combinar con threshold strict adicional
+- Reducción 65% records summit puede incluir algunos TPs MIROVA RUTINA legítimos
+  (auditar contra CSV scraper antes de adopción operacional)
+
+### Estado pipeline
+
+- ✅ Fix funcionando en path opt-in `_local_kernel_bg_enabled` profile
+- ✅ Per-vol flag aplica solo Villarrica/Copahue/Llaima/Planchón (no universal)
+- ✅ Operacional `mirova_equivalent` sin afectar (flag profile OFF)
+- ⏸️ Adopción operacional **pendiente**: requiere R6 (cuestionar mejora >30% antes adoptar)
+  + audit recall recall sin regresión + R2 pixel-level vs `mirova-tif-archive`
+
+### Próximos pasos S60+
+
+1. Auditar recall Villarrica NEW vs MIROVA CSV (no perder TPs)
+2. Comparar con OSF v2.5 mediana estadística
+3. R2 pixel-level validation 5+ casos canónicos
+4. Considerar refinamientos (kernel 5×5, percentile)
+5. Si R6 valida: adopción operacional `mirova_equivalent.yaml` con `enable_local_kernel_bg: true`
+6. Extender A/B reproc a Copahue/Planchón/Llaima (otros 3 vols opt-in S59)
+
+---
+
 ## H_S58_LOCAL_KERNEL_BG_OPT_IN_PER_VOL — fix per-vol, no universal
 
 - **Formulada**: S58 (2026-05-17) tras análisis offline 3 subagentes paralelos: OSF v2.5 Villarrica + extensión MODIS + audit otros 10 Tier A.
