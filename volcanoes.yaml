@@ -119,9 +119,15 @@ volcanoes:
   vent_lat: -37.856
   vent_lon: -71.183
   vent_radius_km: 2
-  # S58 H_S58_PER_VOL: ratio 50× inflación (audit S58). Lago El Agrio
-  # cráter activo sesga ring 5-25km hacia caliente. Local kernel cura.
-  local_kernel_bg: true
+  # S58 H_S58_PER_VOL: ratio 50× inflación (audit S58, basado en OSF agregado).
+  # Lago El Agrio cráter activo sesga ring 5-25km hacia caliente.
+  # S61 REVERTIDO: audit window-aligned vs MIROVA CSV NRT (window 04-16/05-15)
+  # mostró ratio LEGACY/MIROVA mediano = 1.14× = ya calibrado.
+  # El target real es MIROVA NRT (no OSF agregado histórico). Aplicar fix
+  # kernel local bajaría magnitudes ya correctas → riesgo under-detection.
+  # Agente lagos S60 confirmó: Caviahue tibio aporta contaminación moderada
+  # pero ya alineada con MIROVA NRT actual.
+  local_kernel_bg: false
   # S26: Lago Caviahue / Laguna del Agrio ~14 km SE del vent (lado Argentina).
   # Auditoría empírica S26 sobre data fresca: 107 hotspots clusterizados
   # @(-37.876,-71.025). Radio 4 km cubre cluster sin tocar summit
@@ -260,7 +266,13 @@ volcanoes:
   # S58 H_S58_PER_VOL: Lago Conguillío al N sesga ring caliente. Patrón
   # Villarrica-like según audit S58 (gradiente negativo ΔBT max-median).
   # Local kernel 3x3 compensa.
-  local_kernel_bg: true
+  # S61 REVERTIDO: audit window-aligned vs MIROVA CSV NRT (window 04-16/05-15)
+  # mostró ratio LEGACY/MIROVA mediano = 1.01× = calibradísimo.
+  # Agente lagos S60 confirmó: Conguillío es lago frío de alta montaña (5-15°C
+  # de deshielo), sin geotermia. Contraste térmico bajo vs terreno andino frío
+  # → no contamina ring relevantemente. Fix kernel bajaría magnitudes ya
+  # correctas → dañino.
+  local_kernel_bg: false
   # S26: Lago Conguillío ~10 km NE genera FPs ya documentados
   # (project_llaima_thermal.md: 139 FPs ruido térmico). Auditoría empírica
   # S26 sobre data fresca: 184 hotspots clusterizados @(-38.634,-71.639).
