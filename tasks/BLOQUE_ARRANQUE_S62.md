@@ -82,8 +82,8 @@ profile flag false → comportamiento idéntico a pre-S61.
 | Lascar | 43 | 1.04× ✓ calibrado | mantener `false` (no fix) |
 | Copahue | 7 | 1.14× ✓ | mantener `false` (S61 PR #71) |
 | Llaima | 10 | 1.01× ✓ | mantener `false` (S61 PR #71) |
-| **Lastarria** | **35** | **3.99×** | A/B candidato — fumarolas crónicas, ring posiblemente contaminado |
-| **Isluga** | **26** | **4.80×** | A/B candidato — actividad permanente, ring posiblemente afectado |
+| **Lastarria** | **35** | **3.99×** | **NO kernel-bg** — patrón Test 1 sobre-detección (n_pix median 71) |
+| **Isluga** | **26** | **4.80×** | **NO kernel-bg** — patrón Test 1 sobre-detección (n_pix median 69) |
 | **Tupungatito** | **22** | **9.80×** | A/B revisar S59 ("ring frío glaciar empeoraría") |
 | Nevados de Chillán | 3 | 10.9× | n bajo — esperar más alertas, no A/B aún |
 | **PCC** | **22** | **52.77×** ‼️ | **NO kernel-bg** — mecanismo distinto (ver sección PCC abajo) |
@@ -98,7 +98,39 @@ Tupungatito, PCC):
    - Cambiar `local_kernel_bg: true` en `volcanoes.yaml` per vol
 5. Resultado esperado: ratio mediano global Tier A cerca de 1.5× post-adopción
 
-**Costo total** (sin PCC, ver abajo): 3 vols × ~3h GH Actions = 9h (en paralelo: 1 día calendario).
+**Plan revisado S62** (post-investigación paralela S61): solo **Tupungatito** queda como
+candidato A/B kernel-bg legítimo (gap 9.8× con mecanismo a confirmar). Lastarria, Isluga,
+PCC tienen mecanismo distinto (Test 1 path sobre-detección — ver sección abajo).
+
+**Costo total revisado**: 1 vol Tupungatito × ~3h GH Actions = 3h (vs 12h del plan inicial).
+
+### Prioridad ALTA — Test 1 path sobre-detección (afecta Lastarria, Isluga, PCC y posiblemente más)
+
+Análisis paralelo S61 reveló **patrón común** entre Lastarria, Isluga, PCC:
+
+| Vol | n_anomalous_pixels median (summit anom records) | gap LEGACY/MIROVA |
+|---|---:|---:|
+| Lastarria | 71 | 3.99× |
+| Isluga | 69 | 4.80× |
+| PCC VIIRS_I (lacolito) | 200-470 | 28-34 MW vs MIROVA 0.23 (factor ~130×) |
+
+**Hipótesis dominante (S62 H_S62_TEST1_OVERDETECTION)**:
+- MIROVA Coppola 2015 §2.2 Eq.1 Test 1 integrated-ROI tiene threshold pixel-level que
+  nuestro código no replica fielmente. Aceptamos 70-470 pixels donde MIROVA filtra a 1-5.
+- Esto infla la suma VRP del cluster summit aún con localización correcta.
+- Mismo mecanismo en 3 vols Tier A (Lastarria, Isluga, PCC). Posiblemente Tupungatito también.
+
+**Plan S62 investigación Test 1**:
+1. Leer `pipeline/process_viirs.py` función Test 1 integrated-ROI. Comparar con
+   Coppola 2015 §2.2 línea por línea.
+2. Identificar el threshold pixel-level específico que diferencia "anomalous" vs
+   "background" según paper.
+3. Test sintético con cluster conocido (28 px MIROVA vs nuestro 71 px) — verificar
+   si threshold más estricto reduce n_anomalous a rango MIROVA.
+4. Si confirma: fix arquitectural a Test 1 que beneficia 3-4 vols simultáneamente.
+
+**NO disparar A/B kernel-bg para Lastarria/Isluga/PCC** — gastaría 9h GH Actions
+sin curar el problema real.
 
 ### Prioridad ALTA — PCC inflación 52× requiere fix DISTINTO (NO kernel-bg)
 
