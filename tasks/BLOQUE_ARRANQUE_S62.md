@@ -82,11 +82,11 @@ profile flag false → comportamiento idéntico a pre-S61.
 | Lascar | 43 | 1.04× ✓ calibrado | mantener `false` (no fix) |
 | Copahue | 7 | 1.14× ✓ | mantener `false` (S61 PR #71) |
 | Llaima | 10 | 1.01× ✓ | mantener `false` (S61 PR #71) |
-| **Lastarria** | **35** | **3.99×** | **NO kernel-bg** — patrón Test 1 sobre-detección (n_pix median 71) |
-| **Isluga** | **26** | **4.80×** | **NO kernel-bg** — patrón Test 1 sobre-detección (n_pix median 69) |
-| **Tupungatito** | **22** | **9.80×** | **NO kernel-bg** — patrón Test 1 sobre-detección (n_pix median 76, src test1 87%) |
+| **Lastarria** | **35** | **3.99× / pc 2.3×** | borderline tolerable (criterio ≤2.0× CLAUDE.md) — investigar opcional |
+| **Isluga** | **26** | **4.80× / pc 1.5×** | ✓ **calibrado con pc.vrp_mw** — no requiere fix |
+| **Tupungatito** | **22** | **9.80× / pc 7.0×** | gap moderado — investigar pixel BT edge mixing |
 | Nevados de Chillán | 3 | 10.9× | n bajo — esperar más alertas, no A/B aún |
-| **PCC** | **22** | **52.77×** ‼️ | **NO kernel-bg** — mecanismo distinto (ver sección PCC abajo) |
+| **PCC** | **22** | **52.77× / pc 6.9×** | mecanismo distinto (ver sección PCC abajo, NO kernel-bg) |
 | Chaiten | 1 | 28× | n=1 no representativo |
 
 **Plan A/B sistemático S62** para los 4 candidatos prioritarios (Lastarria, Isluga,
@@ -216,6 +216,16 @@ comportamiento actual), pero es deuda técnica clara.
 ---
 
 ## 4. Errores S61 a NO repetir S62
+
+0. **USAR `pc.vrp_mw` (NO `record.vrp_mw`) para comparar con MIROVA NRT**:
+   - `record.vrp_mw` = sum scene-wide de todos los hot_pixels del granule
+   - `record.primary_cluster.vrp_mw` = solo del cluster summit selected (igual que MIROVA)
+   - Dashboard usa `pc.vrp_mw` (frontend/index.html:680). REAUDITORIA_S52 documentó esto, S61 lo olvidé.
+   - Gap real de los 4 vols controvertidos S61 con `pc.vrp_mw`:
+     - Tupungatito 7.0× (no 9.8×)
+     - Lastarria 2.3× (no 3.99×)
+     - Isluga 1.5× ✓ calibrado (no 4.80×)
+     - PCC 6.9× (no 52.77×)
 
 1. **Buscar nombre vol en CSV con TODAS las variantes**: S60 perdió PlanchonPeteroa
    porque busqué `'Planchon-Peteroa'` (con guión). El correcto es `'PlanchonPeteroa'`

@@ -6,6 +6,42 @@
 
 ---
 
+## H_S61_AUDIT_FIELD_FIX — Gaps inflados S60-S61 fueron artefacto de usar record.vrp_mw en lugar de pc.vrp_mw
+
+- **Formulada**: S61 (2026-05-18) durante investigación paralela Test 1 path.
+- **Hipótesis (refutada parcialmente)**: el patrón "Test 1 over-detection 70+ pixels" en Lastarria/Isluga/Tupungatito/PCC implica fix arquitectural Test 1 path.
+- **Hipótesis revisada (CONFIRMADA)**: el problema NO es over-detection del pipeline. Es que mi audit window-aligned usó `record.vrp_mw` (scene-wide sum de todos los hot_pixels del granule) cuando el dashboard y MIROVA usan `primary_cluster.vrp_mw` (solo cluster summit).
+- **Evidencia decisiva**:
+  - Comparativa `record.vrp_mw` vs `pc.vrp_mw` mediano window 04-16/05-15:
+
+    | Vol | record.vrp | pc.vrp | MIROVA NRT | Gap pc | % reducción |
+    |---|---:|---:|---:|---:|---:|
+    | Tupungatito | 1.87 | **1.33** | 0.19 | 7.0× | -28% |
+    | Lastarria | 0.36 | **0.21** | 0.09 | 2.3× | -43% |
+    | Isluga | 1.39 | **0.44** | 0.29 | **1.5×** | -69% (calibrado) |
+    | PCC | 12.14 | **1.59** | 0.23 | 6.9× | -87% |
+    | Villarrica | (variable) | (variable) | (variable) | (sin cambio) | adopción NEW válida |
+
+  - `frontend/index.html:680` confirma dashboard usa `pc.vrp_mw`
+  - `REAUDITORIA_S52.md`: "Schema: pc.vrp_mw ≠ record.vrp_mw" documentado, lo olvidé
+- **Implicación**:
+  - **NO hay over-detection de Test 1 path** que afecte el dashboard/MIROVA comparison
+  - Mi audit S61 window-aligned offline era incorrecto por usar `record.vrp_mw`
+  - Audit C Villarrica (5 ALERTAS) re-verificado con `pc.vrp_mw`: LEGACY mediano 31.59× → NEW 2.16× **(adopción sigue justificada)**
+  - **Lecciones**: ALWAYS usar `pc.vrp_mw` para comparar con MIROVA NRT (no `record.vrp_mw`)
+- **Plan S62 simplificado AÚN MÁS**:
+  - Isluga ya está calibrado (1.5×) — NO requiere fix de ningún tipo
+  - Lastarria gap 2.3× moderado — opcional fix (borderline tolerable según criterios CLAUDE.md ≤2.0×)
+  - Tupungatito 7.0× y PCC 6.9× requieren investigación pero NO kernel-bg ni Test 1 over-detection
+  - **Causa más probable Tupungatito/PCC**: pixel hot incluye edge mixing (BT inflado del pixel hot mismo), no Test 1 over-counting. Investigar pixel BT vs MIROVA reportado
+- **Estado**: **CONFIRMADA**.
+- **Resolución**:
+  - Fixear todos los audit scripts S61 para usar `pc.vrp_mw`
+  - Documentar regla en BLOQUE_ARRANQUE_S62 (TOP 5 antes de cualquier audit)
+  - Re-evaluar prioridades S62 con números correctos
+
+---
+
 ## H_S61_PCC_INFLATION_NOT_KERNEL — PCC 52× NO es por contaminación ring (gradient positivo)
 
 - **Formulada**: S61 (2026-05-18) durante investigación paralela a workflow PP (ver `experiments/107_*` pendiente).

@@ -84,7 +84,11 @@ def match_records(refs, recs_path, label):
             candidates.append(rec)
         if candidates:
             best = max(candidates, key=lambda x: x.get('vrp_mw') or 0)
-            vrp_ours = best.get('vrp_mw') or 0
+            # CRITICO S61: usar primary_cluster.vrp_mw (alineado con MIROVA NRT)
+            # y NO record.vrp_mw (scene-wide sum con clusters lejanos). El dashboard
+            # frontend/index.html usa pc.vrp_mw (linea 680). REAUDITORIA_S52 documentado.
+            pc = best.get('primary_cluster') or {}
+            vrp_ours = pc.get('vrp_mw', best.get('vrp_mw') or 0)
             dist_ours = best.get('final_hotspot_dist_km') or best.get('hotspot_dist_km') or -1
             ratio = vrp_ours / r['vrp'] if r['vrp'] > 0 else 0
             results.append({
