@@ -73,6 +73,26 @@ profile flag false → comportamiento idéntico a pre-S61.
    - NEW SOBRE target 1.51 vs 1.06 → bajar t_bk con p25 ampliaría gap, no lo cerraría.
    - Razonamiento subagent S61 (sección D) confirma anti-recomendación.
 
+### Prioridad MEDIA-ALTA — revisar Tupungatito (hallazgo S61)
+
+⚠️ **Audit window-aligned 04-16/05-15 reveló**:
+- Tupungatito: 22 ALERTA MIROVA VIIRS375 con median **0.19 MW**
+- LEGACY summit VIIRS375 window: n=93, median **1.87 MW**
+- **Gap LEGACY/MIROVA mediano = 9.8×** (sobre-estima, similar a Villarrica 5.68×)
+
+Pero S59 PR #65 lo excluyó con `local_kernel_bg: false` ("ring frío glaciar empeoraría").
+La razón S59 asumió kernel 3×3 sobre vecinos glaciar fríos → ΔL inflado. Pero si el pixel
+hot está EN el cráter, sus 8 vecinos directos pueden ser roca caliente residual (no
+glaciar), por lo que L_bg sería ALTO y ΔL bajo (corrigiendo la inflación 9.8×).
+
+**Pendiente S62**:
+- Confirmar geometría real Tupungatito: ¿cráter rodeado por glaciar o por roca?
+- Si hay roca adyacente: A/B Tupungatito local_kernel_bg=true. Costo ~3h GH Actions.
+- Si pure glaciar: confirmar S59 decisión, investigar otro mecanismo.
+
+NO PRIORITARIO S61 porque mantener Tupungatito en false no es regresión (mantiene
+comportamiento actual), pero es deuda técnica clara.
+
 ### Prioridad BAJA
 
 4. **R2 pixel-level validation Villarrica casos paradigmáticos**
