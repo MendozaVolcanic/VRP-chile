@@ -1,0 +1,72 @@
+name: A/B reproceso local kernel background — PlanchonPeteroa (S61)
+
+# S61: Validar enable_local_kernel_bg=true en PlanchonPeteroa.
+# Audit S60 mostro ratio mediano LEGACY/MIROVA 15.03x sobre 18 ALERTAS
+# window 04-16/05-15. Hipotesis: glaciar heterogeneo en ring 5-25km infla
+# background median. Kernel 3x3 local debe curar (mismo mecanismo que
+# Villarrica pero por causa fisica distinta: nieve heterogenea, no lago).
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-16"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-05-15"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — _local_kernel_bg_enabled / PlanchonPeteroa
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 280
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _local_kernel_bg_enabled \
+            --volcano PlanchonPeteroa \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed A/B data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/_local_kernel_bg_enabled/PlanchonPeteroa.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S61 A/B local kernel bg — PlanchonPeteroa ${{ github.event.inputs.start }}→${{ github.event.inputs.end }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
