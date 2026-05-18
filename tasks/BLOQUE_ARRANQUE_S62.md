@@ -73,6 +73,33 @@ profile flag false → comportamiento idéntico a pre-S61.
    - NEW SOBRE target 1.51 vs 1.06 → bajar t_bk con p25 ampliaría gap, no lo cerraría.
    - Razonamiento subagent S61 (sección D) confirma anti-recomendación.
 
+### Prioridad ALTA — extender A/B a 4 vols adicionales (hallazgo offline S61)
+
+⚠️ **Audit completo Tier A VIIRS375 window 04-16/05-15 reveló gaps significativos**:
+
+| Vol | MIROVA n | LEGACY/MIROVA gap | Acción S62 |
+|---|---:|---:|---|
+| Lascar | 43 | 1.04× ✓ calibrado | mantener `false` (no fix) |
+| Copahue | 7 | 1.14× ✓ | mantener `false` (S61 PR #71) |
+| Llaima | 10 | 1.01× ✓ | mantener `false` (S61 PR #71) |
+| **Lastarria** | **35** | **3.99×** | A/B candidato — fumarolas crónicas, ring posiblemente contaminado |
+| **Isluga** | **26** | **4.80×** | A/B candidato — actividad permanente, ring posiblemente afectado |
+| **Tupungatito** | **22** | **9.80×** | A/B revisar S59 ("ring frío glaciar empeoraría") |
+| Nevados de Chillán | 3 | 10.9× | n bajo — esperar más alertas, no A/B aún |
+| **PCC** | **22** | **52.77×** ‼️ | **A/B alto impacto** — lacolito + lago Caulle norte |
+| Chaiten | 1 | 28× | n=1 no representativo |
+
+**Plan A/B sistemático S62** para los 4 candidatos prioritarios (Lastarria, Isluga,
+Tupungatito, PCC):
+1. Crear workflows análogos a `reproc-ab-local-kernel-bg-pp.yml` per vol
+2. Reproc window 02-20/05-15 cada uno (~3h GH Actions)
+3. Audit pre/post con script `experiments/105_*` adaptado
+4. Si valida (recall sin regresión + ratio mediano <50% del LEGACY):
+   - Cambiar `local_kernel_bg: true` en `volcanoes.yaml` per vol
+5. Resultado esperado: ratio mediano global Tier A cerca de 1.5× post-adopción
+
+**Costo total**: 4 vols × ~3h GH Actions = 12h (en paralelo: 1 día calendario).
+
 ### Prioridad MEDIA-ALTA — revisar Tupungatito (hallazgo S61)
 
 ⚠️ **Audit window-aligned 04-16/05-15 reveló**:
