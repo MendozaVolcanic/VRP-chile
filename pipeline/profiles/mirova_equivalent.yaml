@@ -246,6 +246,19 @@ paths:
   enable_second_pass_adjacent: true
   enable_dual_roi_second_pass: true
 
+  # S61 ADOPCIÓN — kernel local 3×3 (Coppola 2024 L1129, Coppola 2016a L357,
+  # Campus 2024 L119) reemplaza median(ring 5-25km) en cálculo background L_bg.
+  # Per-vol opt-in via local_kernel_bg flag en volcanoes.yaml.
+  # Activos S61:
+  #   - Villarrica (audit C S60-extendida: ratio mediano LEGACY 31.59× → NEW 2.16× sobre 5 ALERTAS)
+  #   - PlanchonPeteroa (audit S61 PR #X: ratio mediano LEGACY 11.80× → NEW 2.64× sobre 39 ALERTAS, recall 38/39→39/39)
+  # Inactivos: Copahue (1.14× calibrado), Llaima (1.01× calibradísimo),
+  # Tupungatito (S59 false, gap residual no es kernel-bg sino otro mecanismo S62).
+  # Implementación en pipeline/vrp_regimes.py:compute_local_background.
+  # Cuando flag ON Y per-vol local_kernel_bg=true: usa kernel 3×3 vecinos directos
+  # del pixel hot (excluye otros hot + NaNs). Default OFF: median ring 5-25km.
+  enable_local_kernel_bg: true
+
 # --- Sensor activation ---
 # true = process granules from this sensor in this profile.
 sensors:

@@ -6,6 +6,112 @@
 
 ---
 
+## H_S61_AUDIT_FIELD_FIX — Gaps inflados S60-S61 fueron artefacto de usar record.vrp_mw en lugar de pc.vrp_mw
+
+- **Formulada**: S61 (2026-05-18) durante investigación paralela Test 1 path.
+- **Hipótesis (refutada parcialmente)**: el patrón "Test 1 over-detection 70+ pixels" en Lastarria/Isluga/Tupungatito/PCC implica fix arquitectural Test 1 path.
+- **Hipótesis revisada (CONFIRMADA)**: el problema NO es over-detection del pipeline. Es que mi audit window-aligned usó `record.vrp_mw` (scene-wide sum de todos los hot_pixels del granule) cuando el dashboard y MIROVA usan `primary_cluster.vrp_mw` (solo cluster summit).
+- **Evidencia decisiva**:
+  - Comparativa `record.vrp_mw` vs `pc.vrp_mw` mediano window 04-16/05-15:
+
+    | Vol | record.vrp | pc.vrp | MIROVA NRT | Gap pc | % reducción |
+    |---|---:|---:|---:|---:|---:|
+    | Tupungatito | 1.87 | **1.33** | 0.19 | 7.0× | -28% |
+    | Lastarria | 0.36 | **0.21** | 0.09 | 2.3× | -43% |
+    | Isluga | 1.39 | **0.44** | 0.29 | **1.5×** | -69% (calibrado) |
+    | PCC | 12.14 | **1.59** | 0.23 | 6.9× | -87% |
+    | Villarrica | (variable) | (variable) | (variable) | (sin cambio) | adopción NEW válida |
+
+  - `frontend/index.html:680` confirma dashboard usa `pc.vrp_mw`
+  - `REAUDITORIA_S52.md`: "Schema: pc.vrp_mw ≠ record.vrp_mw" documentado, lo olvidé
+- **Implicación**:
+  - **NO hay over-detection de Test 1 path** que afecte el dashboard/MIROVA comparison
+  - Mi audit S61 window-aligned offline era incorrecto por usar `record.vrp_mw`
+  - Audit C Villarrica (5 ALERTAS) re-verificado con `pc.vrp_mw`: LEGACY mediano 31.59× → NEW 2.16× **(adopción sigue justificada)**
+  - **Lecciones**: ALWAYS usar `pc.vrp_mw` para comparar con MIROVA NRT (no `record.vrp_mw`)
+- **Plan S62 simplificado AÚN MÁS**:
+  - Isluga ya está calibrado (1.5×) — NO requiere fix de ningún tipo
+  - Lastarria gap 2.3× moderado — opcional fix (borderline tolerable según criterios CLAUDE.md ≤2.0×)
+  - Tupungatito 7.0× y PCC 6.9× requieren investigación pero NO kernel-bg ni Test 1 over-detection
+  - **Causa más probable Tupungatito/PCC**: pixel hot incluye edge mixing (BT inflado del pixel hot mismo), no Test 1 over-counting. Investigar pixel BT vs MIROVA reportado
+- **Estado**: **CONFIRMADA**.
+- **Resolución**:
+  - Fixear todos los audit scripts S61 para usar `pc.vrp_mw`
+  - Documentar regla en BLOQUE_ARRANQUE_S62 (TOP 5 antes de cualquier audit)
+  - Re-evaluar prioridades S62 con números correctos
+
+---
+
+## H_S61_PCC_INFLATION_NOT_KERNEL — PCC 52× NO es por contaminación ring (gradient positivo)
+
+- **Formulada**: S61 (2026-05-18) durante investigación paralela a workflow PP (ver `experiments/107_*` pendiente).
+- **Hipótesis inicial (refutada)**: PCC gap 52.77× LEGACY/MIROVA es similar a Villarrica (lago en ring) o PlanchonPeteroa (glaciar heterogéneo), por tanto kernel-bg lo curaría.
+- **Hipótesis revisada (CONFIRMADA)**: PCC inflación 52× tiene mecanismo DISTINTO — cluster selection lejano residual + magnitud sobre-estimada Test 1 path.
+- **Evidencia decisiva**:
+  - **Ring gradient PCC +4.5 K POSITIVO** (S60 audit línea 588 HYPOTHESIS_LOG): el ring 5-25 km está MÁS caliente que el cráter. Kernel local no aplica.
+  - Records summit MODIS recientes muestran clusters a 16-20 km del lacolito (no en lacolito 2011): vrp 159-522 MW, 100-450 pixels, classified `summit` por `inner_radius_km=20`.
+  - VIIRS_I Test 1 path ancla en lacolito (<2 km, OK) pero suma 200-470 pixels anómalos → 28-34 MW vs MIROVA ~0.23 MW (factor ~130× residual incluso con localización correcta).
+  - `inner_radius_km=20` PCC es extremadamente permisivo (otros Tier A: 3-7 km).
+- **Mecanismo doble**:
+  - **D-PCC-1**: Cluster selection lejano residual D8/D9. vent_anchored S38 elige lacolito pero entre 2 clusters dentro de 20 km, el más grande gana. Records dispersos en escena ancha (probable Antillanca, Mocho-Choshuenco, ground burns, Lago Ranco thermal).
+  - **D-PCC-2**: Test 1 path acepta más pixels marginales que MIROVA filtra con threshold más estricto (Coppola 2016a fixed-ROI sum literal vs implementación nuestra).
+- **Criterio testable**:
+  - Reducir `inner_radius_km` 20→7-10 PCC en `volcanoes.yaml`. Si magnitud baja a <3× MIROVA: confirma D-PCC-1.
+  - Audit pixel-level VIIRS_I Test 1 vs MIROVA TIF (R2). Si pixel count nuestro >> MIROVA: confirma D-PCC-2.
+- **Estado**: **CONFIRMADA** (hipótesis revisada).
+- **Resolución**: NO disparar A/B kernel-bg PCC en S61. Plan S62:
+  1. Reducir `inner_radius_km` PCC a 7-10 km (cambio mínimo, bajo riesgo)
+  2. Auditar `cluster_hotspots(vent_anchored)` PCC con dump clusters[]
+  3. Investigar pixel-counting Test 1 path vs MIROVA literal
+- **Lección metodológica**: NO asumir que "vol con gap alto" → "kernel-bg lo soluciona". Verificar mecanismo físico (gradient ring) antes de extender fix.
+
+---
+
+## H_S61_TUPUNGATITO_KERNEL_BG_REVIEW — Tupungatito gap 9.8× NO es kernel-bg, es Test 1 over-detection
+
+- **Formulada**: S61 (2026-05-18) durante audit offline mientras corre workflow PP.
+- **Hipótesis inicial (refutada paralelo S61)**: Tupungatito debería tener `local_kernel_bg: true` porque gap LEGACY/MIROVA NRT es 9.8× similar a Villarrica.
+- **Hipótesis revisada (CONFIRMADA)**: Tupungatito gap 9.8× tiene el MISMO mecanismo que PCC/Lastarria/Isluga (Test 1 path sobre-detección), NO kernel-bg.
+- **Evidencia decisiva**:
+  - Inspección records window 04-16/05-15 VIIRS375 summit anom (n=93):
+    - Top 5 vrp 5-6 MW vs MIROVA median 0.19 MW (top ratio ~30×, mediano 9.8×)
+    - **n_anomalous_pixels median = 76** (max 117) — mucho más que cluster MIROVA típico
+    - **`final_hotspot_source: test1` en 81/93 records (87%)** — Test 1 path dominante
+  - Patrón idéntico a Lastarria (n_pix 71, src test1 89%), Isluga (n_pix 69, test1 56%) y PCC (n_pix 200-470, test1 dominante).
+  - S59 razón teórica "ring frío glaciar empeoraría con kernel local" sigue siendo correcta físicamente — kernel-bg NO es la solución.
+- **Mecanismo común con PCC/Lastarria/Isluga**:
+  - Test 1 path integrated-ROI (Coppola 2015 §2.2 Eq.1) en nuestro pipeline acepta 70-470 pixels anómalos por cluster summit.
+  - MIROVA cluster típico es 1-5 pixels (según TIF visual).
+  - El threshold pixel-level específico del paper Coppola 2015 puede no estar replicado fielmente en nuestro código.
+- **Criterio testable**: lectura `pipeline/process_viirs.py` función Test 1 + comparación línea por línea con Coppola 2015 §2.2 Eq.1. Test sintético con cluster conocido.
+- **Estado**: **CONFIRMADA** (refutada hipótesis kernel-bg, confirmada Test 1 over-detection).
+- **Resolución**:
+  - NO modificar S61 (mantener Tupungatito false y NO A/B kernel-bg).
+  - NO A/B kernel-bg en S62 (no curaría el problema).
+  - **Investigar Test 1 path en S62** — fix arquitectural cura 4 vols simultáneamente (Lastarria, Isluga, Tupungatito, PCC).
+- **Costo S62 ahorrado**: ~9-12h GH Actions evitadas (no A/B Tupungatito/Lastarria/Isluga/PCC).
+- **Posible extensión**: Villarrica también puede tener Test 1 over-detection residual. NEW post-kernel-bg median 1.51 MW vs target 1.06 MW (42% sobre). Si fix Test 1 cierra ese 42% restante, mejor que refinamiento kernel_size=5.
+
+---
+
+## H_S61_PLANCHON_KERNEL_BG — Fix kernel-bg también necesario en PlanchonPeteroa (glaciar heterogéneo)
+
+- **Formulada**: S61 (2026-05-18) tras audit C Villarrica y descubrimiento error S60 (scraper sí cubre PlanchonPeteroa como 'PlanchonPeteroa' sin guión).
+- **Hipótesis**: el ratio LEGACY/MIROVA 15.03× en PlanchonPeteroa NO es por lago cálido (no hay lago grande en ring), sino por heterogeneidad glaciar en el ring 5-25km. Kernel local 3×3 cura igual por mecanismo distinto.
+- **Evidencia a favor**:
+  - 18 ALERTAS window 04-16/05-15 con LEGACY ratio mediano 15.03× (min 0.23, max 130×)
+  - 39 ALERTAS window 02-20/05-15 (audit S61 extendido)
+  - Agente lagos S60 confirmó: complejo glaciar grande, sin lago contaminante en ring
+  - Fix kernel mecánicamente actúa contra heterogeneidad del background, no requiere lago específico
+- **Evidencia en contra / pendiente** (post-Task 3 workflow PP):
+  - Recall NEW <X>/39 vs LEGACY (TBD)
+  - Ratio mediano NEW <Y>× vs LEGACY 15.03× (TBD)
+- **Criterio testable**: workflow run 26035918192 + audit `experiments/105_s61_audit_planchon_kernel_bg.py`. Adoptar si recall sin regresión Y ratio mediano <5× (objetivo: rango similar Villarrica 2.16×).
+- **Estado**: <CONFIRMADA / REFUTADA> tras Task 3.
+- **Resolución**: <adoptado per-vol + global / mantener solo Villarrica>.
+
+---
+
 ## H_S60_KERNEL_BG_HELPS_MIROVA_DAYS — Fix local kernel bg cura calibración solo en días MIROVA reportó
 
 - **Formulada**: S60 (2026-05-17) tras audit A+B+B2 sobre reproc S58 Villarrica window 2026-04-16 → 2026-05-15.
