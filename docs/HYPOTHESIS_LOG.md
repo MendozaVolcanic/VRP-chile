@@ -6,6 +6,41 @@
 
 ---
 
+## H_S61_TUPUNGATITO_KERNEL_BG_REVIEW — Tupungatito gap 9.8× sugiere reconsiderar exclusión S59
+
+- **Formulada**: S61 (2026-05-18) durante audit ofline mientras corre workflow PP.
+- **Hipótesis**: Tupungatito debería tener `local_kernel_bg: true` (no false como S59 PR #65). La razón S59 fue "ring frío glaciar empeoraría con kernel local", pero el gap empírico LEGACY/MIROVA NRT es 9.8× sobre target, indicando que LEGACY sobre-estima (no sub-estima como predecía la teoría S59).
+- **Evidencia a favor**:
+  - Audit window-aligned 04-16/05-15 VIIRS375: 22 ALERTA MIROVA median = 0.19 MW vs LEGACY summit median = 1.87 MW → gap 9.8×
+  - Pattern similar a Villarrica (5.68×) y PlanchonPeteroa (15.03×, S60 audit) que NEW cura efectivamente
+  - Hipótesis físca actualizada: pixel hot en cráter Tupungatito puede tener vecinos directos de roca caliente residual (no glaciar) → kernel 3×3 daría L_bg alto → ΔL bajo → VRP más cercano a target MIROVA
+- **Evidencia en contra**:
+  - S59 razonó que vecinos del cráter Tupungatito son hielo glaciar (Coppola 2024 menciona riesgo en glaciares)
+  - Si los 8 vecinos del hot pixel son efectivamente fríos, el kernel 3×3 daría L_bg bajo → ΔL alto → VRP inflado (lo opuesto al objetivo)
+- **Criterio testable**: A/B Tupungatito local_kernel_bg=true vs false con workflow similar a Villarrica/PP. Si NEW recall ≥ LEGACY Y ratio mediano NEW < LEGACY, adoptar. Si NEW peor: confirmar S59 decisión.
+- **Estado**: **ACTIVE** (pendiente A/B S62).
+- **Resolución**: NO modificar S61 (mantener false). Documentar como pendiente prioridad MEDIA-ALTA en `tasks/BLOQUE_ARRANQUE_S62.md`. NO es regresión mantener false porque preserva comportamiento operacional actual.
+
+---
+
+## H_S61_PLANCHON_KERNEL_BG — Fix kernel-bg también necesario en PlanchonPeteroa (glaciar heterogéneo)
+
+- **Formulada**: S61 (2026-05-18) tras audit C Villarrica y descubrimiento error S60 (scraper sí cubre PlanchonPeteroa como 'PlanchonPeteroa' sin guión).
+- **Hipótesis**: el ratio LEGACY/MIROVA 15.03× en PlanchonPeteroa NO es por lago cálido (no hay lago grande en ring), sino por heterogeneidad glaciar en el ring 5-25km. Kernel local 3×3 cura igual por mecanismo distinto.
+- **Evidencia a favor**:
+  - 18 ALERTAS window 04-16/05-15 con LEGACY ratio mediano 15.03× (min 0.23, max 130×)
+  - 39 ALERTAS window 02-20/05-15 (audit S61 extendido)
+  - Agente lagos S60 confirmó: complejo glaciar grande, sin lago contaminante en ring
+  - Fix kernel mecánicamente actúa contra heterogeneidad del background, no requiere lago específico
+- **Evidencia en contra / pendiente** (post-Task 3 workflow PP):
+  - Recall NEW <X>/39 vs LEGACY (TBD)
+  - Ratio mediano NEW <Y>× vs LEGACY 15.03× (TBD)
+- **Criterio testable**: workflow run 26035918192 + audit `experiments/105_s61_audit_planchon_kernel_bg.py`. Adoptar si recall sin regresión Y ratio mediano <5× (objetivo: rango similar Villarrica 2.16×).
+- **Estado**: <CONFIRMADA / REFUTADA> tras Task 3.
+- **Resolución**: <adoptado per-vol + global / mantener solo Villarrica>.
+
+---
+
 ## H_S60_KERNEL_BG_HELPS_MIROVA_DAYS — Fix local kernel bg cura calibración solo en días MIROVA reportó
 
 - **Formulada**: S60 (2026-05-17) tras audit A+B+B2 sobre reproc S58 Villarrica window 2026-04-16 → 2026-05-15.
