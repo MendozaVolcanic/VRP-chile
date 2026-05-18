@@ -31,20 +31,30 @@
 
 ---
 
-## H_S61_TUPUNGATITO_KERNEL_BG_REVIEW — Tupungatito gap 9.8× sugiere reconsiderar exclusión S59
+## H_S61_TUPUNGATITO_KERNEL_BG_REVIEW — Tupungatito gap 9.8× NO es kernel-bg, es Test 1 over-detection
 
-- **Formulada**: S61 (2026-05-18) durante audit ofline mientras corre workflow PP.
-- **Hipótesis**: Tupungatito debería tener `local_kernel_bg: true` (no false como S59 PR #65). La razón S59 fue "ring frío glaciar empeoraría con kernel local", pero el gap empírico LEGACY/MIROVA NRT es 9.8× sobre target, indicando que LEGACY sobre-estima (no sub-estima como predecía la teoría S59).
-- **Evidencia a favor**:
-  - Audit window-aligned 04-16/05-15 VIIRS375: 22 ALERTA MIROVA median = 0.19 MW vs LEGACY summit median = 1.87 MW → gap 9.8×
-  - Pattern similar a Villarrica (5.68×) y PlanchonPeteroa (15.03×, S60 audit) que NEW cura efectivamente
-  - Hipótesis físca actualizada: pixel hot en cráter Tupungatito puede tener vecinos directos de roca caliente residual (no glaciar) → kernel 3×3 daría L_bg alto → ΔL bajo → VRP más cercano a target MIROVA
-- **Evidencia en contra**:
-  - S59 razonó que vecinos del cráter Tupungatito son hielo glaciar (Coppola 2024 menciona riesgo en glaciares)
-  - Si los 8 vecinos del hot pixel son efectivamente fríos, el kernel 3×3 daría L_bg bajo → ΔL alto → VRP inflado (lo opuesto al objetivo)
-- **Criterio testable**: A/B Tupungatito local_kernel_bg=true vs false con workflow similar a Villarrica/PP. Si NEW recall ≥ LEGACY Y ratio mediano NEW < LEGACY, adoptar. Si NEW peor: confirmar S59 decisión.
-- **Estado**: **ACTIVE** (pendiente A/B S62).
-- **Resolución**: NO modificar S61 (mantener false). Documentar como pendiente prioridad MEDIA-ALTA en `tasks/BLOQUE_ARRANQUE_S62.md`. NO es regresión mantener false porque preserva comportamiento operacional actual.
+- **Formulada**: S61 (2026-05-18) durante audit offline mientras corre workflow PP.
+- **Hipótesis inicial (refutada paralelo S61)**: Tupungatito debería tener `local_kernel_bg: true` porque gap LEGACY/MIROVA NRT es 9.8× similar a Villarrica.
+- **Hipótesis revisada (CONFIRMADA)**: Tupungatito gap 9.8× tiene el MISMO mecanismo que PCC/Lastarria/Isluga (Test 1 path sobre-detección), NO kernel-bg.
+- **Evidencia decisiva**:
+  - Inspección records window 04-16/05-15 VIIRS375 summit anom (n=93):
+    - Top 5 vrp 5-6 MW vs MIROVA median 0.19 MW (top ratio ~30×, mediano 9.8×)
+    - **n_anomalous_pixels median = 76** (max 117) — mucho más que cluster MIROVA típico
+    - **`final_hotspot_source: test1` en 81/93 records (87%)** — Test 1 path dominante
+  - Patrón idéntico a Lastarria (n_pix 71, src test1 89%), Isluga (n_pix 69, test1 56%) y PCC (n_pix 200-470, test1 dominante).
+  - S59 razón teórica "ring frío glaciar empeoraría con kernel local" sigue siendo correcta físicamente — kernel-bg NO es la solución.
+- **Mecanismo común con PCC/Lastarria/Isluga**:
+  - Test 1 path integrated-ROI (Coppola 2015 §2.2 Eq.1) en nuestro pipeline acepta 70-470 pixels anómalos por cluster summit.
+  - MIROVA cluster típico es 1-5 pixels (según TIF visual).
+  - El threshold pixel-level específico del paper Coppola 2015 puede no estar replicado fielmente en nuestro código.
+- **Criterio testable**: lectura `pipeline/process_viirs.py` función Test 1 + comparación línea por línea con Coppola 2015 §2.2 Eq.1. Test sintético con cluster conocido.
+- **Estado**: **CONFIRMADA** (refutada hipótesis kernel-bg, confirmada Test 1 over-detection).
+- **Resolución**:
+  - NO modificar S61 (mantener Tupungatito false y NO A/B kernel-bg).
+  - NO A/B kernel-bg en S62 (no curaría el problema).
+  - **Investigar Test 1 path en S62** — fix arquitectural cura 4 vols simultáneamente (Lastarria, Isluga, Tupungatito, PCC).
+- **Costo S62 ahorrado**: ~9-12h GH Actions evitadas (no A/B Tupungatito/Lastarria/Isluga/PCC).
+- **Posible extensión**: Villarrica también puede tener Test 1 over-detection residual. NEW post-kernel-bg median 1.51 MW vs target 1.06 MW (42% sobre). Si fix Test 1 cierra ese 42% restante, mejor que refinamiento kernel_size=5.
 
 ---
 

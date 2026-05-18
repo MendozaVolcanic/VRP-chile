@@ -84,7 +84,7 @@ profile flag false → comportamiento idéntico a pre-S61.
 | Llaima | 10 | 1.01× ✓ | mantener `false` (S61 PR #71) |
 | **Lastarria** | **35** | **3.99×** | **NO kernel-bg** — patrón Test 1 sobre-detección (n_pix median 71) |
 | **Isluga** | **26** | **4.80×** | **NO kernel-bg** — patrón Test 1 sobre-detección (n_pix median 69) |
-| **Tupungatito** | **22** | **9.80×** | A/B revisar S59 ("ring frío glaciar empeoraría") |
+| **Tupungatito** | **22** | **9.80×** | **NO kernel-bg** — patrón Test 1 sobre-detección (n_pix median 76, src test1 87%) |
 | Nevados de Chillán | 3 | 10.9× | n bajo — esperar más alertas, no A/B aún |
 | **PCC** | **22** | **52.77×** ‼️ | **NO kernel-bg** — mecanismo distinto (ver sección PCC abajo) |
 | Chaiten | 1 | 28× | n=1 no representativo |
@@ -98,11 +98,13 @@ Tupungatito, PCC):
    - Cambiar `local_kernel_bg: true` en `volcanoes.yaml` per vol
 5. Resultado esperado: ratio mediano global Tier A cerca de 1.5× post-adopción
 
-**Plan revisado S62** (post-investigación paralela S61): solo **Tupungatito** queda como
-candidato A/B kernel-bg legítimo (gap 9.8× con mecanismo a confirmar). Lastarria, Isluga,
-PCC tienen mecanismo distinto (Test 1 path sobre-detección — ver sección abajo).
+**Plan revisado S62 (POST-investigación completa S61)**: **NINGÚN vol adicional necesita
+kernel-bg**. Tupungatito también muestra patrón Test 1 sobre-detección (n_pix median 76,
+src test1 87%). Los 4 vols con gap moderado-alto (Lastarria 4×, Isluga 5×, Tupungatito
+10×, PCC 53×) comparten **1 problema arquitectural común**: Test 1 path sobre-detección.
 
-**Costo total revisado**: 1 vol Tupungatito × ~3h GH Actions = 3h (vs 12h del plan inicial).
+**Costo total revisado**: 0 GH Actions adicionales kernel-bg. Solo investigación código
+Test 1 + test sintético (estimado 1-2h trabajo local, sin reproc).
 
 ### Prioridad ALTA — Test 1 path sobre-detección (afecta Lastarria, Isluga, PCC y posiblemente más)
 
@@ -112,6 +114,7 @@ Análisis paralelo S61 reveló **patrón común** entre Lastarria, Isluga, PCC:
 |---|---:|---:|
 | Lastarria | 71 | 3.99× |
 | Isluga | 69 | 4.80× |
+| **Tupungatito** | **76** | **9.80×** |
 | PCC VIIRS_I (lacolito) | 200-470 | 28-34 MW vs MIROVA 0.23 (factor ~130×) |
 
 **Hipótesis dominante (S62 H_S62_TEST1_OVERDETECTION)**:
