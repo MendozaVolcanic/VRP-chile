@@ -86,7 +86,7 @@ profile flag false → comportamiento idéntico a pre-S61.
 | **Isluga** | **26** | **4.80×** | A/B candidato — actividad permanente, ring posiblemente afectado |
 | **Tupungatito** | **22** | **9.80×** | A/B revisar S59 ("ring frío glaciar empeoraría") |
 | Nevados de Chillán | 3 | 10.9× | n bajo — esperar más alertas, no A/B aún |
-| **PCC** | **22** | **52.77×** ‼️ | **A/B alto impacto** — lacolito + lago Caulle norte |
+| **PCC** | **22** | **52.77×** ‼️ | **NO kernel-bg** — mecanismo distinto (ver sección PCC abajo) |
 | Chaiten | 1 | 28× | n=1 no representativo |
 
 **Plan A/B sistemático S62** para los 4 candidatos prioritarios (Lastarria, Isluga,
@@ -98,7 +98,48 @@ Tupungatito, PCC):
    - Cambiar `local_kernel_bg: true` en `volcanoes.yaml` per vol
 5. Resultado esperado: ratio mediano global Tier A cerca de 1.5× post-adopción
 
-**Costo total**: 4 vols × ~3h GH Actions = 12h (en paralelo: 1 día calendario).
+**Costo total** (sin PCC, ver abajo): 3 vols × ~3h GH Actions = 9h (en paralelo: 1 día calendario).
+
+### Prioridad ALTA — PCC inflación 52× requiere fix DISTINTO (NO kernel-bg)
+
+⚠️ **Subagent investigation S61** refutó hipótesis "PCC necesita kernel-bg como Villarrica/PP".
+
+**Razón**: gradient ring +4.5 K POSITIVO (S60 audit línea 588 HYPOTHESIS_LOG). Es decir,
+nuestro ring 5-25 km está MÁS CALIENTE que el cráter, no más frío. El kernel local no
+ayudaría (subiría background → bajaría VRP → no resuelve inflación 52×).
+
+**Mecanismo real de la inflación 52×** (doble):
+
+1. **D-PCC-1: Cluster selection lejano residual**. `inner_radius_km=20` en `volcanoes.yaml`
+   (vs Villarrica=5, Lascar=5, Lastarria=3) clasifica clusters hasta 20 km del lacolito
+   como `summit`. Records ejemplo MODIS:
+   - 2026-05-17 06:55 AQUA: vrp=311 MW @ 19.83 km (109 px)
+   - 2026-05-15 07:15 AQUA: vrp=312 MW @ 17.79 km (436 px)
+   - 2026-05-15 03:00 TERRA: vrp=522 MW @ 19.59 km (105 px)
+
+   Estos no son el lacolito 2011 (que está a <2 km). Son clusters dispersos en escena
+   ancha (probable Antillanca/Mocho/ground burns/Lago Ranco signatures).
+
+2. **D-PCC-2: Magnitud sobre-estimada VIIRS_I Test 1**. Aún con vent_anchored eligiendo
+   lacolito correctamente, Test 1 path acepta 200-470 pixels anómalos en el cluster
+   summit. vrp 28-34 MW vs MIROVA ~0.23 MW. Probable: nuestro Test 1 path suma pixels
+   marginales que MIROVA filtra con threshold más estricto (Coppola 2016a fixed-ROI sum
+   literal vs nuestro implementación).
+
+**Plan S62 para PCC** (NO disparar A/B kernel-bg):
+
+1. **Reducir `inner_radius_km` 20 → 7-10** en `volcanoes.yaml`. Reclasifica clusters
+   >7-10 km como `far` (gris en dashboard, no infla summit median). Bajo riesgo:
+   reverte fácil si rompe recall.
+2. **Auditar `cluster_hotspots(vent_anchored)` PCC**: extraer 5 records MODIS summit
+   y dump `clusters[]` completo. Verificar si vent_anchored elige el cluster correcto
+   o si por tamaño gana lejano. Si bug: fix similar a D8.
+3. **Investigar pixel-counting VIIRS_I Test 1**: 200-470 pixels anómalos sobre lacolito
+   es mucho vs MIROVA. Comparar pixel-by-pixel contra TIF MIROVA (R2). Posible reducir
+   sensibilidad Test 1 o aplicar second-pass más estricto.
+
+**NO modificar S61** (mantener PCC config actual). Es problema arquitectural distinto
+que merece sesión propia S62.
 
 ### Prioridad MEDIA-ALTA — revisar Tupungatito (hallazgo S61)
 

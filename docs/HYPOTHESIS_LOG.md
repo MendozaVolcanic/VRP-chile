@@ -6,6 +6,31 @@
 
 ---
 
+## H_S61_PCC_INFLATION_NOT_KERNEL — PCC 52× NO es por contaminación ring (gradient positivo)
+
+- **Formulada**: S61 (2026-05-18) durante investigación paralela a workflow PP (ver `experiments/107_*` pendiente).
+- **Hipótesis inicial (refutada)**: PCC gap 52.77× LEGACY/MIROVA es similar a Villarrica (lago en ring) o PlanchonPeteroa (glaciar heterogéneo), por tanto kernel-bg lo curaría.
+- **Hipótesis revisada (CONFIRMADA)**: PCC inflación 52× tiene mecanismo DISTINTO — cluster selection lejano residual + magnitud sobre-estimada Test 1 path.
+- **Evidencia decisiva**:
+  - **Ring gradient PCC +4.5 K POSITIVO** (S60 audit línea 588 HYPOTHESIS_LOG): el ring 5-25 km está MÁS caliente que el cráter. Kernel local no aplica.
+  - Records summit MODIS recientes muestran clusters a 16-20 km del lacolito (no en lacolito 2011): vrp 159-522 MW, 100-450 pixels, classified `summit` por `inner_radius_km=20`.
+  - VIIRS_I Test 1 path ancla en lacolito (<2 km, OK) pero suma 200-470 pixels anómalos → 28-34 MW vs MIROVA ~0.23 MW (factor ~130× residual incluso con localización correcta).
+  - `inner_radius_km=20` PCC es extremadamente permisivo (otros Tier A: 3-7 km).
+- **Mecanismo doble**:
+  - **D-PCC-1**: Cluster selection lejano residual D8/D9. vent_anchored S38 elige lacolito pero entre 2 clusters dentro de 20 km, el más grande gana. Records dispersos en escena ancha (probable Antillanca, Mocho-Choshuenco, ground burns, Lago Ranco thermal).
+  - **D-PCC-2**: Test 1 path acepta más pixels marginales que MIROVA filtra con threshold más estricto (Coppola 2016a fixed-ROI sum literal vs implementación nuestra).
+- **Criterio testable**:
+  - Reducir `inner_radius_km` 20→7-10 PCC en `volcanoes.yaml`. Si magnitud baja a <3× MIROVA: confirma D-PCC-1.
+  - Audit pixel-level VIIRS_I Test 1 vs MIROVA TIF (R2). Si pixel count nuestro >> MIROVA: confirma D-PCC-2.
+- **Estado**: **CONFIRMADA** (hipótesis revisada).
+- **Resolución**: NO disparar A/B kernel-bg PCC en S61. Plan S62:
+  1. Reducir `inner_radius_km` PCC a 7-10 km (cambio mínimo, bajo riesgo)
+  2. Auditar `cluster_hotspots(vent_anchored)` PCC con dump clusters[]
+  3. Investigar pixel-counting Test 1 path vs MIROVA literal
+- **Lección metodológica**: NO asumir que "vol con gap alto" → "kernel-bg lo soluciona". Verificar mecanismo físico (gradient ring) antes de extender fix.
+
+---
+
 ## H_S61_TUPUNGATITO_KERNEL_BG_REVIEW — Tupungatito gap 9.8× sugiere reconsiderar exclusión S59
 
 - **Formulada**: S61 (2026-05-18) durante audit ofline mientras corre workflow PP.
