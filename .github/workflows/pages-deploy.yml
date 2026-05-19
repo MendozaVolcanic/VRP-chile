@@ -35,8 +35,19 @@ concurrency:
 
 jobs:
   build:
-    # Skip the workflow_run trigger if the upstream run failed.
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    # S62 (2026-05-19): deploy aunque NRT pipeline tenga failures parciales.
+    # El NRT cron tiene matrix 45 vols con fail-fast=false. Cuando un vol
+    # NO-Tier-A (ej. SanJose, Antillanca) sufre NASA timeout intermitente,
+    # workflow_run.conclusion = 'failure' aunque los Tier A (Villarrica,
+    # PCC, etc.) hayan committed data nuevos a main.
+    # Previa condición `== 'success'` causaba skip deploy → dashboard live
+    # 12-36h desactualizado. Cambio: deploy si NO está cancelled.
+    # Casos cubiertos:
+    #   - workflow_run conclusion=success → deploy ✓
+    #   - workflow_run conclusion=failure → deploy ✓ (Tier A pueden estar OK)
+    #   - workflow_run conclusion=cancelled → skip (no hay artefactos válidos)
+    #   - event != workflow_run → siempre deploy (push, manual dispatch)
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion != 'cancelled' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
