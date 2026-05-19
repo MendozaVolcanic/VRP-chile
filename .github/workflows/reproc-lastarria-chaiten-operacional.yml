@@ -1,0 +1,85 @@
+name: Reproc operacional Lastarria + Chaiten (S63 dashboard refresh)
+
+# S63 post-adopción Lastarria (S62) + Chaiten (S63 PR #88) con
+# local_kernel_bg=true. Cron NRT cada 2h aplica fix solo a día corriente.
+# Records históricos en data/mirova_equivalent/Lastarria.json y Chaiten.json
+# siguen LEGACY (sin kernel-bg) → dashboard muestra ratios inflados 7-10×
+# para ALERTAS pasadas.
+#
+# Este workflow reprocesa Lastarria + Chaiten en perfil mirova_equivalent
+# operacional (con kernel-bg activo post-merge volcanoes.yaml) para
+# refrescar dashboard. Sobreescribe data/mirova_equivalent/*.json.
+#
+# Esperado post-reproc:
+# - Lastarria: ratio mediano 1.07× (vs LEGACY 6.78×)
+# - Chaiten: ratio mediano 2.23× (vs LEGACY 9.78×)
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-01"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-05-19"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        volcano: [Lastarria, Chaiten]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — mirova_equivalent / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 280
+        run: |
+          python scripts/run_pipeline.py \
+            --profile mirova_equivalent \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit refreshed operational data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/mirova_equivalent/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S63 reproc operacional — ${{ matrix.volcano }} con kernel-bg ${{ github.event.inputs.start }}→${{ github.event.inputs.end }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
