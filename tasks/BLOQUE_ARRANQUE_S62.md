@@ -256,11 +256,30 @@ CONS + OCR (universo MIROVA real ~2-3× mayor que solo consolidado), window 80 d
 
 CSV OCR (`registro_vrp_ocr.csv` Mirova-v1) tiene **457 ALERTA_TERMICA_OCR + 19 FALSO_POSITIVO_OCR**. Casi 3× más data que solo consolidado.
 
-**Distribución FP_OCR** (19 records donde MIROVA publicó VRP pero OCR dice "píxeles negros / sin pixels en ROI"):
-- Cross-check con pipeline: 1/19 correctamente ignorado, 7/19 reproducidos (mismo error MIROVA), 11/19 sin granule (data antigua).
-- **Interpretación**: MIROVA NRT no es perfecto. Compartimos algunos de sus errores. NO contar como FPs nuestros.
+### Significado correcto OCR (clarificación Nicolás S61)
 
-**Implicación para S62 audits**: usar **CONS + OCR** como universo MIROVA, no solo CONS.
+**El OCR NO captura errores de MIROVA**. Es un complemento del consolidado:
+- MIROVA publica en `latest.php` con VRP + distancia (→ CSV consolidado)
+- MIROVA muestra en imágenes individuales por volcán datos adicionales (sin distancia)
+- El OCR de Nicolás extrae VRP de esas imágenes → ALERTA_TERMICA_OCR
+- **Tipo FALSO_POSITIVO_OCR** = el OCR no pudo confirmar visualmente que era volcánico (píxeles negros, sin pixels rojos claros). Es etiqueta del scraper, NO de MIROVA.
+
+**Implicaciones operacionales**:
+- **OCR ALERTA**: tenemos VRP MW pero NO distancia. Para usar en audit: filtrar nuestros records donde pc.dist <= inner_radius_km (asume que MIROVA OCR también es cráter, validable post-hoc).
+- **OCR FP**: NO son errores MIROVA. Son detecciones donde el OCR visual dudó. Si nuestro pipeline también detecta, podría ser señal real débil que el OCR no validó visualmente.
+
+**Audit OCR ALERTAS por vol (window 80d, pc.dist <= inner_km)**:
+
+| Vol | OCR ALERTAS | OCR-matched cráter | Ratio pc.vrp/OCR | En rango [0.5-2.0] |
+|---|---:|---:|---:|---:|
+| **Lascar** | 180 | 124 | **1.32×** ✓ | **80%** |
+| **Isluga** | 48 | 41 | **1.11×** ✓ | **66%** |
+| PCC (inner=20) | 37 | 31 | 3.19× | 23% |
+| Lastarria | 64 | 33 | 7.67× | 15% |
+| Chaiten | 10 | 10 | 11.97× | 20% |
+| Tupungatito | 21 | 13 | 20.91× | 23% |
+
+Combinado CONS+OCR Lascar = **525 ALERTAS** validadas, 80% en rango. Robustez estadística enorme para confirmar adopción S61 + plan S62.
 
 ## 4. Errores S61 a NO repetir S62
 
