@@ -441,6 +441,15 @@ volcanoes:
   vent_lat: -42.8344815
   vent_lon: -72.6528875
   vent_radius_km: 3
+  # S63 ADOPCIÓN: A/B kernel-bg validó cura masiva del gap (run 26094823809).
+  # Audit 20 ALERTAS (10 CONS + 10 OCR) window 80d con pc.vrp_mw:
+  #   LEGACY ratio mediano 9.78× → NEW 2.23× (-77%)
+  #   Recall 20/20 mantenido
+  #   Aceptable ≤3×: 35% → 60%
+  # Patrón térmico Muy Bajo (ΔT 10.5K) + ring bosque Patagónico frío
+  # cura con kernel local 3×3 (Coppola 2024 L1129). Mismo mecanismo
+  # Villarrica/PP/Lastarria.
+  local_kernel_bg: true
 - name: CorcovadoYanteles
   display_name: Corcovado-Yanteles
   lat: -43.183
