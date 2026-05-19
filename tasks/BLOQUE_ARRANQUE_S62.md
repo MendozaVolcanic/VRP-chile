@@ -230,6 +230,38 @@ comportamiento actual), pero es deuda técnica clara.
 
 ---
 
+## 3.5. AUDIT EXPANDIDO TIER A con OCR+CONS (S61 final)
+
+Audit Tier A operacional (`data/mirova_equivalent/<vol>.json`) contra ALERTAS de
+CONS + OCR (universo MIROVA real ~2-3× mayor que solo consolidado), window 80 días:
+
+| Vol | n ALERTAS | Recall | Ratio mediano | En rango [0.5-2.0] | ≤3× |
+|---|---:|---:|---:|---:|---:|
+| **Lascar** | **401** | **88%** | **1.37×** ✓ | **73%** | **85%** |
+| **Isluga** | 122 | 90% | **1.33×** ✓ | 58% | 83% |
+| **Villarrica** post-reproc | 5 | TBD | TBD | TBD | TBD |
+| **PlanchonPeteroa** post-reproc | 57 | TBD | TBD | TBD | TBD |
+| Tupungatito | 92 | 74% | **8.20×** ⚠️ | 31% | 47% |
+| Lastarria | 131 | 74% | 6.79× ⚠️ | 18% | 33% |
+| Chaiten | 20 | 95% | 10.28× ⚠️ | 26% | 32% |
+| Llaima | 3 | 67% | 8.97× | 0% | 0% (n bajo) |
+| Copahue | 1 | 100% | 3.18× | 0% | 0% (n bajo) |
+| NevadosDeChillan | 0 | - | - | - | - |
+| **PCC** post-fix inner=7 | 97 | 65% | **1.86×** | 22% | TBD |
+
+**Sweet spot Tier A**: 4 vols están al rango operacional (Lascar, Isluga, Villarrica, PP).
+3 requieren investigación S62 (Tupungatito, Lastarria, Chaiten).
+
+## 3.6. Hallazgo OCR/FP universo MIROVA expandido (S61 final)
+
+CSV OCR (`registro_vrp_ocr.csv` Mirova-v1) tiene **457 ALERTA_TERMICA_OCR + 19 FALSO_POSITIVO_OCR**. Casi 3× más data que solo consolidado.
+
+**Distribución FP_OCR** (19 records donde MIROVA publicó VRP pero OCR dice "píxeles negros / sin pixels en ROI"):
+- Cross-check con pipeline: 1/19 correctamente ignorado, 7/19 reproducidos (mismo error MIROVA), 11/19 sin granule (data antigua).
+- **Interpretación**: MIROVA NRT no es perfecto. Compartimos algunos de sus errores. NO contar como FPs nuestros.
+
+**Implicación para S62 audits**: usar **CONS + OCR** como universo MIROVA, no solo CONS.
+
 ## 4. Errores S61 a NO repetir S62
 
 0. **USAR `pc.vrp_mw` (NO `record.vrp_mw`) para comparar con MIROVA NRT**:
