@@ -6,6 +6,57 @@
 
 ---
 
+## H_S62_LASTARRIA_TUPUNGATITO_AB_RESULTS — A/B kernel-bg S62 resultados
+
+- **Formulada**: S62 ejecución (2026-05-19) tras audit Task 6 run 26072884472.
+- **Resultados Lastarria (A/B kernel-bg)**:
+  - LEGACY ratio mediano 6.78× → NEW **1.07×** (-84%)
+  - Recall 98 → 99 (+1, sin regresión)
+  - En rango [0.5, 2.0]: 17/98 (17%) → **58/99 (59%)**
+  - Aceptable ≤3×: 34% → **81%**
+  - **VEREDICTO: ✅ ADOPTAR**. local_kernel_bg=true en volcanoes.yaml.
+- **Resultados Tupungatito (A/B kernel-bg) — REFUTA hipótesis S61**:
+  - LEGACY ratio mediano 10.37× → NEW **18.46×** (EMPEORA +78%)
+  - Recall 70 → 87 (+17, mejora pero ratio empeora)
+  - En rango [0.5, 2.0]: 30% → 22% (peor)
+  - **VEREDICTO: ❌ NO ADOPTAR**. Decisión S59 (kernel-bg false) era CORRECTA.
+  - **Refutación de H_S61_TUPUNGATITO_KERNEL_BG_REVIEW**: Investigation H S61
+    asumió mismo patrón Villarrica pero el reproc real refuta. Glaciar
+    Tupungatito tiene comportamiento opuesto: kernel local DA L_bg más alto
+    que ring (porque vecinos directos son pixels glaciar relativamente
+    "calientes" para escena, no pure ice), entonces ΔL no se reduce.
+- **Lección S62**: Audit con `pc.vrp_mw` + universo CONS+OCR + reproc real
+  empírico = única validación confiable. Investigation H profundamente
+  hipotética (basada en BT estadísticas agregadas) no predijo Tupungatito
+  correctamente.
+- **Acción S62**: Lastarria adoptado, Tupungatito mantiene false, H_S61_TUPUNGATITO
+  marcada REFUTADA (decisión S59 confirmada).
+
+---
+
+## H_S62_PCC_INNER_REPROC — Preview offline inner_radius es engañoso
+
+- **Formulada**: S62 ejecución (2026-05-19) tras reproc PCC inner=7 (run 26072886354).
+- **Preview offline S61** (filtró records existentes con pc.dist <= inner_test):
+  predicción ratio mediano 3.51× → **1.86×** (-47%) con inner=7.
+- **Reproc real S62** (pipeline ejecutado desde cero con inner=7):
+  ratio mediano 3.64× (peor que baseline 3.51× con inner=20).
+- **Discrepancia explicada**: el preview offline solo descartaba records
+  existentes donde el primary_cluster ya seleccionado (con inner=20) estaba
+  más lejos que el nuevo inner. PERO el reproc REAL rerunnea
+  `cluster_hotspots(vent_anchored)` con el nuevo inner_km, lo cual cambia
+  CUÁL cluster es seleccionado como primary. Con inner=7, vent_anchored
+  prefiere clusters más cercanos al lacolito, pero esos clusters pueden
+  ser pequeños/menos representativos vs los mejores que estaban entre 7-20km.
+- **Acción S62**: REVERTIR PCC inner_radius_km a 20 (MIROVA KML oficial).
+- **Lección A18 (incorporada a CLAUDE.md S62)**: preview offline ES útil para
+  ver impacto de descartar records (filtrar post-hoc), pero NO predice
+  comportamiento de parámetros que afectan cluster selection dentro del
+  pipeline. Validar SIEMPRE con reproc real para inner_radius_km, threshold
+  cambios, etc.
+
+---
+
 ## H_S61_LASTARRIA_KERNEL_BG_NEEDED — Lastarria necesita kernel-bg (decisión S61 false fue incorrecta)
 
 - **Formulada**: S61 (2026-05-18 noche) durante investigación H Test 1 path mecanismo.

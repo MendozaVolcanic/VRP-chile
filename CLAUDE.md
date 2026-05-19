@@ -193,6 +193,20 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   fresca: descargar latest desde
   `https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_consolidado.csv`
   y reemplazar el local. Misma URL para `registro_vrp_ocr.csv`.
+- **A18. Preview offline NO predice cluster selection real** (S62 lección dura):
+  para parámetros que afectan `cluster_hotspots(vent_anchored)` o cualquier path
+  de selección (inner_radius_km, exclude_zones, vent_radius_km), validar SIEMPRE
+  con reproc REAL (workflow GH Actions). Preview offline filtra records ya
+  seleccionados con el parámetro viejo, pero el reproc real rerunnea cluster
+  selection desde cero — puede elegir cluster DIFERENTE. S62 PCC: preview offline
+  predijo inner=7 → ratio 1.86× pero reproc real dio 3.64× (peor que baseline).
+- **A19. Patrón térmico no es universal: Tupungatito refuta kernel-bg** (S62):
+  Lastarria (ΔT 12K, ring desierto frío) responde a kernel-bg = 6.78× → 1.07×.
+  Pero Tupungatito (similar ΔT pero ring **glaciar**) EMPEORA con kernel-bg
+  10.37× → 18.46×. Mecanismo opuesto: vecinos directos del hot pixel en glaciar
+  son "warm relativo" para escena gigante (no pure ice) → L_bg local sube → ΔL
+  no se reduce → magnitud no cura. Decisión per-vol DEBE validar empíricamente
+  con A/B, NO extrapolar de patrón ΔT solo.
 
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
