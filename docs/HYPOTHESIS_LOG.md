@@ -6,6 +6,33 @@
 
 ---
 
+## H_S61_LASTARRIA_KERNEL_BG_NEEDED — Lastarria necesita kernel-bg (decisión S61 false fue incorrecta)
+
+- **Formulada**: S61 (2026-05-18 noche) durante investigación H Test 1 path mecanismo.
+- **Hipótesis inicial S61 (refutada parcialmente)**: Lastarria gap LEGACY/MIROVA 1.04× con CONS y `record.vrp_mw` → no necesita fix kernel-bg.
+- **Hipótesis revisada (CONFIRMADA)**: Lastarria gap 7.67× con CONS+OCR universo expandido y `pc.vrp_mw` correcto. Mecanismo: ΔT bajo (12.6K mediano) + ring background frío desierto Atacama (264.3K mediano) → Test 1 integrated-ROI suma 37 pixels marginales con ΔL grande → magnitud inflada.
+- **Patrón térmico identificado** (cross-vol):
+
+  | Vol | ΔT median | Status calibración |
+  |---|---:|---|
+  | Lascar | **21.6K** (fuerte) | ✅ calibrado 1.32× |
+  | Villarrica + fix | 10.6K (débil) | ✅ 2.17× post-fix |
+  | Villarrica sin fix | 11.3K | ❌ 15× legacy |
+  | **Lastarria** | **12.6K** | ❌ 7.67× actual |
+
+- **Mecanismo**: cuando ΔT es bajo (Muy Bajo regime, ~10-12K), los pixels marginales contribuyen significativamente al sum integrated → inflación. Cuando ΔT alto (Bajo-Medio regime, ~20K+), pixel cráter domina → no inflación.
+- **Validación cuantitativa**:
+  - Outlier 2026-04-03 05:48: MIROVA 0.06 MW, nuestro 4.22 MW (ratio 70×), 75 pixels cluster, BT mean 267.3K, BT max 281K (apenas warm above bg 264K).
+- **Criterio testable**: A/B Lastarria `local_kernel_bg: true` similar a Villarrica/PP. Si NEW recall ≥ LEGACY Y ratio mediano < LEGACY 7.67×, adoptar.
+- **Estado**: **CONFIRMADA** (hipótesis revisada).
+- **Resolución S62**:
+  - Disparar A/B Lastarria con `local_kernel_bg: true` (workflow nuevo similar a PP).
+  - Si valida (ratio mediano <3×), agregar Lastarria a per-vol true en `volcanoes.yaml`.
+  - Posiblemente Tupungatito y Chaiten siguen mismo patrón — investigar.
+- **Lección S61**: usar `record.vrp_mw` en audits oculta el problema en vols con cluster lejano que dominan el record. Usar `pc.vrp_mw` siempre. Y validar con universo CONS+OCR expandido.
+
+---
+
 ## H_S61_MIROVA_DIST_FIXED_VILLARRICA — Las 9 ALERTAS Villarrica reportan dist=0.84km idéntico, MIROVA usa coord nominal NO el centroide del cluster
 
 - **Formulada**: S61 (2026-05-18) tras Nicolás pidió revisar CSV actualizado y notar que todas las ALERTAS Villarrica recientes están "a 0.8 km, dentro del cráter".
