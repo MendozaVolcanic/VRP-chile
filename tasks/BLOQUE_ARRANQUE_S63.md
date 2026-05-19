@@ -24,9 +24,9 @@
 |---|---|---:|---|
 | Villarrica | true (S61) | 5 | ✅ 2.16× |
 | PlanchonPeteroa | true (S61) | 5 | ✅ 2.84× |
-| **Lastarria** | **<true/false>** (S62) | 3 | **<X>×** post-S62 |
-| **Tupungatito** | **<true/false>** (S62) | 7 | **<X>×** post-S62 |
-| **PCC** | false | **7** (S62 nuevo) | **<X>×** post-reproc |
+| **Lastarria** | **true** (S62 ADOPTED) | 3 | **1.07× post-fix** ✓ |
+| **Tupungatito** | **false** (S62 refuta S61, S59 correcto) | 7 | 18.46× con fix (PEOR), 10.37× sin fix |
+| **PCC** | false | **20** (S62 revertido) | 3.64× con inner=7 (REVERTIDO), 3.51× con inner=20 |
 | Lascar | false | 5 | ✅ 1.32× (no fix needed) |
 | Isluga | false | 5 | ✅ 1.11× |
 | Copahue | false | 4 | calibrado (n=1) |
@@ -34,11 +34,24 @@
 | NdC | false | 5 | sin data |
 | **Chaiten** | **false** (S63 candidato) | 5 | **LEGACY 10.28×** |
 
-### Métricas S62 (post-workflows)
+### Métricas S62 (post-workflows REAL)
 
-- Lastarria: LEGACY 7.67× → NEW <Y>× (decisión adopción <SÍ/NO>)
-- Tupungatito: LEGACY 8.20× → NEW <Y>× (decisión adopción <SÍ/NO>)
-- PCC: LEGACY 3.51× → post-inner=7 <Y>× (decisión revertir/mantener)
+- **Lastarria**: LEGACY 6.78× → NEW **1.07×** ✅ ADOPTADO (en rango 17%→59%)
+- **Tupungatito**: LEGACY 10.37× → NEW 18.46× ❌ NO ADOPTAR (decisión S59 confirmada)
+- **PCC inner=7 intento**: LEGACY 3.51× → real 3.64× ❌ REVERTIDO a inner=20
+
+### Lecciones S62 críticas (incorporadas a CLAUDE.md A18 + HYPOTHESIS_LOG)
+
+1. **Preview offline NO predice cluster selection real** — para parámetros que
+   afectan vent_anchored (inner_radius_km, exclude_zones, etc.) validar SIEMPRE
+   con reproc real. Preview offline solo predice impacto de filtros post-hoc.
+
+2. **Tupungatito patrón distinto de Villarrica** — kernel-bg empeora ratio en
+   Tupungatito porque glaciar vecinos del hot pixel son "calientes relativos"
+   a la escena gigante. Decisión S59 (false) era CORRECTA.
+
+3. **Lastarria adopción es la más fuerte hasta hoy** — ratio 1.07× con 99/131
+   ALERTAS calibradas. Casi 0.0× off del clon literal MIROVA.
 
 ### Tests + git
 - 335 passed / 16 skipped
