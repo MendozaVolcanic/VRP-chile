@@ -623,3 +623,101 @@ Caso PCC 2026-05-09 (lacolito 0.18 MW @ 7.7km reportado, cráter 4.94 MW
 @ 0.69km ignorado por MIROVA): probablemente nuestro "cráter @ 0.69km"
 es FP que MIROVA habría descartado vía Tests 2∧3 + second-pass. No es que
 MIROVA "prefiera" lacolito — es que cráter no pasa filtros estrictos.
+
+
+---
+
+## S60-S62 — Consolidación divergencias resueltas + universo expandido OCR
+
+**Cierre maratón 3 sesiones** (S60: audit per-vol kernel-bg, S61: adopción
+operacional Villarrica+PP, S62: PCC inner_radius + A/B Lastarria/Tup +
+Chaiten pendiente S63).
+
+### D8 Background ring contaminado — RESUELTO
+
+**Hipótesis inicial S52-S58** (refutada): "Lascar/Lastarria ring 5-25 km
+sesgado por desierto Atacama frío → ΔL inflado en cráter".
+
+**Hipótesis revisada S62** (CONFIRMADA): el problema NO es desierto en
+general, es **régimen Muy Bajo (ΔT 10-12K)** + **ring background frío
+local** → Test 1 integrated-ROI suma pixels marginales acumulándose en
+suma VRP inflada.
+
+**Patrón térmico Tier A identificado**:
+
+| Régimen | ΔT mediano | Vols | Necesita fix |
+|---|---:|---|---|
+| Bajo-Medio | >20K | Lascar, Isluga | NO (calibrado natural) |
+| Muy Bajo | 10-12K | Villarrica, PP, Lastarria, Tupungatito, Chaiten, PCC | SÍ (kernel-bg + opt) |
+
+**Fix adoptado**: kernel local 3×3 (Coppola 2024 L1129 literal). Reemplaza
+`median(ring 5-25km)` con `mean(8 vecinos directos del hot pixel)`.
+
+**Resultados validados empíricamente**:
+- Villarrica audit C 5 ALERTAS reales: 31.59× → **2.16×** (-93%)
+- PlanchonPeteroa 39 ALERTAS: 11.80× → **2.64×** (-78%)
+- Lastarria/Tupungatito A/B corriendo S62
+- Chaiten pendiente S63
+
+### Per-vol `local_kernel_bg` flag estado S62
+
+| Vol | Flag | Razón |
+|---|---|---|
+| Villarrica | true | Lago norte cálido + cráter activo (S61 adopción) |
+| PlanchonPeteroa | true | Glaciar heterogéneo + cráter (S61 adopción) |
+| Lastarria | <pendiente A/B S62> | Patrón Muy Bajo confirmado |
+| Tupungatito | <pendiente A/B S62> | Patrón Muy Bajo confirmado |
+| Chaiten | false (S63 candidato) | Patrón Muy Bajo confirmado |
+| Lascar | false | Calibrado natural (ratio 1.32×) |
+| Isluga | false | Calibrado natural (ratio 1.11×) |
+| Copahue | false | Calibrado (1.14×) — lago Caviahue dentro cráter |
+| Llaima | false | Calibrado (1.01×) — Conguillío frío deshielo |
+| NdC | false | Sin data MIROVA |
+
+### D-PCC: inner_radius_km demasiado permisivo — RESUELTO S62
+
+**Hipótesis previa**: PCC gap 52× porque cluster lejano (Salar/Antillanca)
+ganaba selección summit con inner=20 km.
+
+**Validado**: PCC ratio mediano 3.51× con inner=20. Preview offline
+inner=7 → 1.86× (-47%). Adoptado en `volcanoes.yaml` S62. Reproc
+operacional corriendo.
+
+### Hallazgo dist=0.84 km fijo Villarrica — METADATO no error
+
+**MIROVA reporta `Distancia_km`** desde coord nominal Smithsonian GVP, NO
+desde centroide variable del cluster. Para Villarrica (cráter ~150m, lava
+lake muy localizado): coord Smithsonian (-39.42, -71.93) está a 0.85 km
+del cráter actual (-39.420292, -71.939908). Por tanto MIROVA siempre
+reporta dist=0.84 km. Es idiosincrasia metadato, NO bug nuestro.
+
+Otros vols (Lascar, Lastarria, Isluga, etc.) muestran distancias variables
+porque sus cráteres son grandes y centroides de cluster varían.
+
+### Universo MIROVA NRT expandido OCR + CONS
+
+S62 descubrimiento: el CSV OCR (`registro_vrp_ocr.csv`) tiene **457
+ALERTA_TERMICA_OCR + 19 FALSO_POSITIVO_OCR**. Universo MIROVA real es
+~2-3× mayor que solo consolidado.
+
+**Significado correcto** (clarificación Nicolás S62):
+- OCR NO captura errores de MIROVA.
+- Es **complemento** del consolidado: MIROVA publica datos en `latest.php`
+  (CSV consolidado) y otros datos solo visibles en imágenes por volcán
+  (OCR los extrae).
+- `FALSO_POSITIVO_OCR` es etiqueta del scraper Nicolás cuando OCR no pudo
+  confirmar visualmente que era volcánico, NO etiqueta MIROVA.
+
+**Para audits**: usar CONS+OCR como universo expandido. Validar que ratio
+mediano de OCR coincide con CONS (S62 consistency check Lascar: CONS
+1.31× / OCR 1.47×; Isluga: CONS 1.44× / OCR 1.11×).
+
+### Universo audit Tier A consolidado (window 80 días)
+
+**944 ALERTAS** total Tier A (CONS+OCR window 80d), recall global 85%.
+
+Cuando S62+S63 completen:
+- 3 vols ya calibrados: Lascar, Isluga, Villarrica
+- 5-6 vols post-fix esperados ratio 2-3×: PP, Lastarria, Tupungatito, Chaiten, PCC, Tupungatito
+- Total esperado: **~99% del universo Tier A en ratio ≤3×** = clon literal MIROVA NRT logrado.
+
