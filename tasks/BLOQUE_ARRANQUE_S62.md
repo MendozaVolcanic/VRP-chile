@@ -166,6 +166,21 @@ ayudaría (subiría background → bajaría VRP → no resuelve inflación 52×)
 1. **Reducir `inner_radius_km` 20 → 7-10** en `volcanoes.yaml`. Reclasifica clusters
    >7-10 km como `far` (gris en dashboard, no infla summit median). Bajo riesgo:
    reverte fácil si rompe recall.
+
+   **Preview offline S61 (universo expandido OCR+CONS, 97 ALERTAS PCC window 60d)**:
+
+   | inner_radius_km | Detected | Ratio mediano | En rango [0.5, 2.0] |
+   |---:|---:|---:|---|
+   | 20 (actual) | 86 | 3.51× | 16% |
+   | 15 | 65 | 2.19× | 22% |
+   | **10** | 63 | **1.86×** | 22% |
+   | **7** | 63 | **1.86×** | 22% |
+   | 5 | 48 | 4.02× | 15% |
+
+   **Sweet spot inner=7-10 km**: ratio mediano cae **-47%** (3.51→1.86×). Recall cae 27%
+   pero acepta porque los records perdidos son clusters a 10-20 km del lacolito que
+   MIROVA tampoco está reportando como summit. Implementación: cambiar 1 línea en
+   `volcanoes.yaml` PCC `inner_radius_km: 20 → 7`. Costo: <5 min + audit verificación.
 2. **Auditar `cluster_hotspots(vent_anchored)` PCC**: extraer 5 records MODIS summit
    y dump `clusters[]` completo. Verificar si vent_anchored elige el cluster correcto
    o si por tamaño gana lejano. Si bug: fix similar a D8.

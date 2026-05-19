@@ -6,6 +6,27 @@
 
 ---
 
+## H_S61_MIROVA_DIST_FIXED_VILLARRICA — Las 9 ALERTAS Villarrica reportan dist=0.84km idéntico, MIROVA usa coord nominal NO el centroide del cluster
+
+- **Formulada**: S61 (2026-05-18) tras Nicolás pidió revisar CSV actualizado y notar que todas las ALERTAS Villarrica recientes están "a 0.8 km, dentro del cráter".
+- **Hallazgo empírico**: las 9 ALERTAS_TERMICA históricas de Villarrica en CSV consolidado tienen TODAS `Distancia_km=0.84` exactamente (1 valor único). Otros Tier A varían: Lascar 22 únicas en 294, Lastarria 9 en 96, Isluga 12 en 93, PlanchonPeteroa 6 en 48, PCC 19 en 114.
+- **Hipótesis inicial (parcialmente refutada)**: MIROVA reporta dist desde coord Smithsonian GVP a centroide del cluster MIROVA. Verificación: vent Nicolás Villarrica (-39.420292, -71.939908) a Smithsonian (-39.42, -71.93) = 0.85 km ≈ 0.84 km MIROVA. **Sin embargo**, si MIROVA midiera desde centroide variable a Smithsonian, esperaríamos dist variable también (nuestros centroides a Smithsonian dan rango 0.79-2.06 km). Como Villarrica es fijo a 0.84, MIROVA NO usa centroide variable para esa dist.
+- **Hipótesis revisada (CONFIRMADA)**: MIROVA reporta `Distancia_km` para Villarrica como **constante de metadato** (probable dist entre coord nominal interna MIROVA y Smithsonian GVP). NO es la dist real del cluster detectado.
+- **Otros vols con cráter grande** (Lascar, Lastarria, Isluga, etc.) sí varían porque los centroides de cluster realmente varían entre eventos. Villarrica tiene cráter chico (~150m lava lake) → centroide siempre el mismo punto → dist nominal fija.
+- **Implicación para nuestro pipeline**:
+  - **Magnitud VRP MW**: no afectada por el sistema de coord MIROVA (es función de pixels BT, no de dist).
+  - **Cluster selection**: afectada SI `mirova_center` está mal definido para algún vol. Villarrica usa `vent_lat/lon` (cráter actual real, donde aparece la actividad VIIRS) → correcto.
+  - **dashboard**: nuestra dist (centroid_dist_km al vent Nicolás) es la dist REAL del cluster. NO debemos imitar el 0.84km MIROVA porque es metadato fijo, no físico.
+  - **audit**: comparar dist nuestra vs MIROVA es ENGAÑOSO para Villarrica. Comparar magnitudes (pc.vrp_mw vs MIROVA VRP_MW) sigue siendo correcto.
+- **Estado**: **CONFIRMADA**.
+- **Resolución**:
+  - NO modificar pipeline (sistema de coord nuestro es correcto).
+  - Documentar en `docs/MIROVA_DIVERGENCES.md` (pendiente S62).
+  - Auditoría TIF Tier A offline (Approach B S62) para confirmar que otros vols sin `mirova_center` definido están bien alineados.
+  - Para Villarrica específicamente: nuestros centroides cráter están a 0.16-1.82 km del vent Nicolás (cráter actual). Son la dist REAL. MIROVA reporta 0.84 km fijo metadato.
+
+---
+
 ## H_S61_AUDIT_FIELD_FIX — Gaps inflados S60-S61 fueron artefacto de usar record.vrp_mw en lugar de pc.vrp_mw
 
 - **Formulada**: S61 (2026-05-18) durante investigación paralela Test 1 path.
