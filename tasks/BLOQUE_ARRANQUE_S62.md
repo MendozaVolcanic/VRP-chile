@@ -89,6 +89,23 @@ profile flag false → comportamiento idéntico a pre-S61.
 | **PCC** | **22** | **52.77× / pc 6.9×** | mecanismo distinto (ver sección PCC abajo, NO kernel-bg) |
 | Chaiten | 1 | 28× | n=1 no representativo |
 
+### Hallazgo S61 (final) — Lastarria SÍ necesita kernel-bg (investigación H)
+
+Investigación profunda Test 1 path Lastarria reveló:
+- ΔT median = 12.6K (régimen Muy Bajo similar a Villarrica)
+- t_bg_k mediano = 264K (desierto Atacama nocturno frío)
+- Top outlier 2026-04-03 05:48: MIROVA 0.06 MW, nuestro 4.22 MW (ratio 70×), 75 pixels marginales BT 264-281K
+- Mismo mecanismo que Villarrica/PP: ring background frío sub-estima magnitud → fix kernel-bg cura
+
+Patrón térmico explica gaps:
+- ΔT >20K (Lascar): pixel cráter domina suma → calibrado natural
+- ΔT 10-12K (Villarrica/Lastarria/PP): pixels marginales contribuyen → inflación → necesita kernel-bg
+
+**Acción S62 modificada**: agregar Lastarria a A/B kernel-bg.
+**S62 plan A/B prioritario**: Lastarria + Tupungatito (gap 8.20×, posible mismo patrón).
+
+---
+
 **Plan A/B sistemático S62** para los 4 candidatos prioritarios (Lastarria, Isluga,
 Tupungatito, PCC):
 1. Crear workflows análogos a `reproc-ab-local-kernel-bg-pp.yml` per vol
