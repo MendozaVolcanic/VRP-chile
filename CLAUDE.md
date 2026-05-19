@@ -156,6 +156,44 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     → sistema NHI.
   - Lista completa en `~memory/reference_papers_mirova_canonical.md`.
 
+## Reglas operacionales S60-S62 (aprendizajes adicionales)
+- **A10. Audit vs MIROVA usar `pc.vrp_mw` (NO `record.vrp_mw`)**: `record.vrp_mw` es sum
+  scene-wide de todos hot_pixels; `pc.vrp_mw` (primary_cluster.vrp_mw) es solo cluster summit
+  = lo que MIROVA reporta. Dashboard (frontend/index.html:680) usa pc.vrp_mw. Audits con
+  campo equivocado ocultaron problemas: Lastarria 1.04× → real 7.67×, Llaima 1.01× → real
+  11.82×, PCC 52.77× → real 6.9×.
+- **A11. Universo MIROVA = CONS + OCR**: `registro_vrp_ocr.csv` (Mirova-v1) tiene 457
+  ALERTA_TERMICA_OCR adicionales (~2-3× más data que solo consolidado). OCR es COMPLEMENTO
+  (no validación) — MIROVA publica en `latest.php` (CONS) y otros datos solo en imágenes
+  por vol (OCR extrae). `FALSO_POSITIVO_OCR` es etiqueta del scraper Nicolás (no MIROVA),
+  significa que el OCR no pudo confirmar visualmente.
+- **A12. Patrón térmico Tier A — qué necesita kernel-bg**: vols con ΔT mediano (t_max - t_bg)
+  <12K en régimen Muy Bajo + ring background frío sufren ΔL inflado en Test 1 integrated-ROI
+  → magnitud 8-15× MIROVA. Vols con ΔT >20K (Lascar 21.6K, Isluga ~20K) calibrados
+  naturalmente sin fix. Fix kernel-bg (Coppola 2024 L1129) reduce 70-90% del gap en Muy
+  Bajo (validado Villarrica/PP S61).
+- **A13. `Distancia_km` MIROVA Villarrica fija 0.84 km = idiosincrasia**: MIROVA mide dist
+  desde coord Smithsonian GVP nominal (no centroide variable). Smithsonian Villarrica
+  (-39.42,-71.93) está a 0.85 km del cráter actual (-39.420292,-71.939908). NO afecta
+  nuestra magnitud VRP. Otros vols con cráter grande sí muestran dist variable. NO
+  interpretar como bug.
+- **A14. Nombre vol en CSV — TODAS las variantes**: el scraper Mirova-v1 normaliza algunos
+  nombres. `PlanchonPeteroa` (sin guión), `Puyehue-Cordon Caulle` (con guión), `Nevados de
+  Chillan` (espacios). S60 perdió 46 ALERTAS PlanchonPeteroa por buscar con
+  `Planchon-Peteroa`. Siempre verificar variantes.
+- **A15. Workflow timeout vs duración**: reproc Villarrica 90 días tarda ~175 min, timeout
+  default 110 min era too tight (PR #68 lo extendió a 300 min). Patrón seguro:
+  `timeout >= duración_esperada × 1.3`.
+- **A16. Pre-escribir audit scripts mientras corren workflows**: patrón productivo S61-S62.
+  Cuando audit script + bloque arranque + hipótesis log entries están pre-escritos, el
+  cierre post-workflow toma <15 min en lugar de 1-2h. Workflow de 3h se "amortiza" haciendo
+  trabajo paralelo offline.
+- **A17. CSV consolidado del scraper Nicolás actualizable**: el CSV en
+  `data/mirova_reference/mirova_v1_snapshot/` tiene fecha de snapshot. Para audits con data
+  fresca: descargar latest desde
+  `https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_consolidado.csv`
+  y reemplazar el local. Misma URL para `registro_vrp_ocr.csv`.
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:

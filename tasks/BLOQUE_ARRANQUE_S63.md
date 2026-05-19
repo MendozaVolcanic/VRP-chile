@@ -65,12 +65,30 @@
 
 ### Prioridad MEDIA
 
-3. **NdC (Nevados de Chillán)** sigue sin data MIROVA — esperar más actividad
+3. **Revisar Llaima/Copahue con `pc.vrp_mw`** (S62 finding paralelo):
+   - Llaima 3 ALERTAS (1 CONS + 2 OCR) ratios 6.12-11.82× con pc.vrp_mw
+     (S60 dijo 1.01× con record.vrp_mw — campo incorrecto ocultó problema)
+   - Copahue 1 ALERTA ratio 3.18× con pc.vrp_mw (S60 dijo 1.14×)
+   - Régimen Muy Bajo (VRP MIROVA 0.08-0.29 MW)
+   - Si más ALERTAS aparecen 2026-05/06: considerar A/B kernel-bg
+   - NO modificar S63 sin más data (n=1-3 no representativo)
+
+4. **NdC (Nevados de Chillán)** sigue sin data MIROVA — esperar más actividad
    térmica futura para auditar.
 
-4. **Coord MIROVA validación TIF/KMZ** para vols sin `mirova_center`
+5. **Coord MIROVA validación TIF/KMZ** para vols sin `mirova_center`
    definido — investigar si vent_lat/lon coinciden con donde MIROVA centra
    clusters reportados.
+
+### Predicción S63 Chaiten post-fix
+
+Extrapolación basada en S61 fixes Villarrica/PP:
+- Villarrica: LEGACY 15× → NEW 2.17× (-86%)
+- PP: LEGACY 11.80× → NEW 2.84× (-76%)
+- Chaiten esperado: LEGACY 10.28× → NEW **1.5-2.5×** (extrapolación lineal)
+
+Si valida (recall mantenido, ratio <3×): adopción `local_kernel_bg: true`
+Chaiten en `volcanoes.yaml`.
 
 ### Prioridad BAJA (refinamientos S64+)
 
