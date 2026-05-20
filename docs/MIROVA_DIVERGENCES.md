@@ -200,6 +200,37 @@ pixels del TIF como VRP. El patrón replicable de 5 pasos está documentado en
 
 **Referencias**: `experiments/120_audit_tif_vrp_sumable/`, `experiments/122-125/`, H_S70_R2_RETROACTIVO_4VOLS.
 
+### D8 — Path D (dNTI contextual) dispara FPs y amplifica magnitud en cirrus alto frío
+
+> Nota nomenclatura: el ID "D8" se usa también en la sección S60-S62 (`### D8 Background ring contaminado — RESUELTO`, RESUELTO operacionalmente vía kernel-bg). Esta entrada D8 documenta una divergencia **distinta y vigente** (bug abierto, sin fix). Ambas conviven en el doc por trazabilidad histórica. Para evitar ambigüedad en referencias cruzadas, citar como "D8 path D cirrus" o "D8 (S70-2 T4)".
+
+**Fenómeno físico**: en invierno austral, los volcanes del norte de Chile (Lastarria, Lascar, Isluga) sufren cobertura frecuente de **cirrus alto** (nubes finas a -25/-30°C, ~10 km altitud). Estas nubes son transparentes a la radiación térmica del volcán pero **enfrían el background MODIS** de los pixels vecinos a 245-270 K. El pixel del cráter (que irradia a su temperatura normal ~270 K) aparece **+25 K relativo al fondo enfriado**, disparando el path D dNTI contextual como anomalía. La fórmula Wooster `vrp_mw = 18.9 × A_pix × BT⁸` aplicada sobre BT=270 K produce un número grande **aunque NO hay radiación volcánica anómala** — es contraste térmico nube-roca amplificado por la potencia 8 de Wooster.
+
+**Evidencia (S70-2 T4, cross-check 32 records Lastarria summit eqVrp>5 vs MIROVA NRT)**:
+- 22/32 (68.8%) son **FPs nuestros confirmados** — MIROVA NO reporta ALERTA en esos timestamps (6 RUTINA explícita, 16 sin record MIROVA del granule).
+- 10/32 (31.2%) son TPs reales pero **amplificados 21-150× sobre MIROVA** (ratio mediano 62×). Sugiere que path D suma pixels marginales que MIROVA descarta del cluster.
+- **100% de los 32 records** disparan exclusivamente por path D (`diag_n_bt_path=0, diag_n_nti_path=0, diag_n_dnti_ctx_path` en 8-49).
+- **91% (20/22) FPs** tienen `t_bg < 270K` (cirrus frío). Mediana FPs t_bg = 268.5 K.
+
+**Doble modo de falla**:
+1. **Firing espurio** sobre cirrus (predominante 91% FPs).
+2. **Amplificación en TPs** (10 casos donde MIROVA y nosotros coincidimos en detección, pero magnitud nuestra 21-150× sobre MIROVA).
+
+**Reconciliación con adopción S62 Lastarria**: la mediana global S62 (ratio 1.07× sobre 99 ALERTAS) es válida — la distribución es bimodal y la cola baja domina la mediana. La cola alta (32 records con path D firing) NO está calibrada y es lo que aparece en el dashboard como 20-30 MW.
+
+**Generalización**: Lascar e Isluga comparten granules MODIS con Lastarria en algunos casos cirrus regional (S69 H_S69_MODIS_OUTLIERS_05_17 documentó patrón similar para Villarrica+Chaiten). PP/Tupungatito/PCC probable similar en granules con t_bg <270K.
+
+**Path D es S15 P3.2** (`enable_dnti_contextual_path: true` en `mirova_equivalent.yaml`). Coppola 2016a §SP 426.5 introduce dNTI contextual como gate adicional, **sin discutir comportamiento en cirrus**. Nuestra implementación carece de gate atmosférico.
+
+**Cómo fixear** (NO implementado — regla S33 vinculante, brainstorming obligatorio antes de tocar `enable_*`):
+- **Opción 1**: gate atmosférico — `if t_bg_k < 260 K, skip path D` (o umbral a calibrar empíricamente).
+- **Opción 2**: requerir co-validación — path D solo cuenta si BT path O NTI path también dispararon (no path D solo).
+- **Opción 3**: cap de magnitud — limitar `pc.vrp_mw` a un máximo razonable cuando solo path D firing.
+
+Cualquier fix requiere A/B test con profile flag aislado (`mirova_equivalent_path_d_atm_gate_v1.yaml` o similar) sobre Tier A completo + R2 pixel-level vs MIROVA antes de adoptar.
+
+**Referencias**: `experiments/121_nrt_cron_diagnosis/diagnosis.md` (T1 NRT cron), `H_S70_PATH_D_CIRRUS_FP` (HYPOTHESIS_LOG), CSV cross-check `/tmp/cross_check_results.json`.
+
 ## Auditoría visual S27 (post-render fix, 90d)
 
 Conteo de markers en hotspot-map por Tier A (toggle "Solo principal" + "Solo cráter"):

@@ -237,6 +237,21 @@ Cuándo basta un solo caso vs cuándo requiere mediana sobre N:
 
 ---
 
+## Edge case: path D dNTI contextual en cirrus alto
+
+Independiente del régimen (A/B1/B2/C), si el background es muy frío (t_bg <270K) por cobertura cirrus alta, el path D (dNTI contextual S15 P3.2) puede disparar espuriamente — el contraste local entre el pixel del cráter (270K normal) y los vecinos enfriados (245-270K) supera 3σ aunque no haya calor volcánico real.
+
+**Síntomas**:
+- pc.vrp_mw alto (5-30 MW) con `diag_n_bt_path=0, diag_n_nti_path=0, diag_n_dnti_ctx_path>0`.
+- t_bg <270K y t_max <280K (pixels fríos, no calientes).
+- MIROVA NO reporta ALERTA en el mismo timestamp.
+
+**Verdict R2 en estos casos**: NO usar el record para validar adopción — flagear como path-D-solo y referir a D8.
+
+**Pendiente arquitectural**: gate atmosférico sobre path D (ver D8 opciones 1-3). S71+.
+
+---
+
 ## 9. Referencias
 
 **Divergencias documentadas**:
@@ -244,6 +259,8 @@ Cuándo basta un solo caso vs cuándo requiere mediana sobre N:
   S70-0 T3 Parte 1).
 - `docs/MIROVA_DIVERGENCES.md` **D7** — Método R2 retroactivo tiene aplicabilidad
   limitada por régimen del vol (S70-1 T5).
+- `docs/MIROVA_DIVERGENCES.md` **D8 path D cirrus** — Path D dNTI contextual genera FPs +
+  amplificación en cirrus alto (S70-2 T4, bug abierto, fix DIFERIDO S71).
 
 **Hipótesis log**:
 - `docs/HYPOTHESIS_LOG.md` **H_S70_TIF_VRP_SUMABILITY** — TIF es campo radiancia +
@@ -252,6 +269,8 @@ Cuándo basta un solo caso vs cuándo requiere mediana sobre N:
   Tier A R2 evaluados.
 - `docs/HYPOTHESIS_LOG.md` **H_S69_R2_RETROACTIVO_LASTARRIA** — adopción S62 Lastarria
   validada R2 pixel-level (caso fundacional del método).
+- `docs/HYPOTHESIS_LOG.md` **H_S70_PATH_D_CIRRUS_FP** — Path D dNTI contextual genera
+  FPs masivos + amplificación VRP en cirrus alto (S70-2 T4, CONFIRMADA + fix DIFERIDO S71).
 
 **Experimentos**:
 - `experiments/120_audit_tif_vrp_sumable/` — Lastarria template + sensitivity (S70-0 T3

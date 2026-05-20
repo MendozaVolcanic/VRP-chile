@@ -6,6 +6,25 @@
 
 ---
 
+## H_S70_PATH_D_CIRRUS_FP — Path D dNTI contextual genera FPs masivos + amplificación VRP en cirrus alto
+
+- **Formulada**: S70-2 (2026-05-20) tras Nicolás reportar "MW altos 20 en dashboard Lastarria" y diagnóstico empírico confirmar mecanismo.
+- **Pregunta**: ¿Los picos 20-30 MW que muestra el dashboard Lastarria son señal real, FPs nuestros, o señal real amplificada?
+- **Investigación S70-2 T4** (commits `b1c4c21` + diagnóstico `/tmp/cross_check_results.json`):
+  - 32 records Lastarria summit eqVrp>5 cross-checked vs MIROVA NRT
+  - 22/32 (68.8%) FPs (MIROVA no reporta)
+  - 10/32 (31.2%) TPs pero amplificados 62× mediano
+  - 100% disparan SOLO por path D (BT=0, NTI=0)
+  - 91% FPs con t_bg <270K (cirrus alto frío)
+- **Verdict**: **CONFIRMADA**. Path D tiene dos modos de falla simultáneos en cirrus: (1) firing espurio (FPs por heterogeneidad de campo enfriado por nube) y (2) amplificación de magnitud en TPs (suma pixels marginales que MIROVA descarta). Ver D8 para detalles.
+- **Implicación operacional**: la adopción Lastarria S62 (ratio mediano 1.07×) es válida en mediana pero falla en cola alta. El dashboard muestra honestamente lo que el pipeline produce — el bug está en el pipeline, no en el dashboard.
+- **Severidad**: generalizable a Tier A en invierno austral con cirrus persistente. Lascar+Isluga confirmados afectados al mismo timestamp por granules MODIS compartidos.
+- **Acción S70-2**: documentar como D8 + flagear como bloqueo para S71.
+- **Pendiente S71**: brainstorming + A/B test (profile flag aislado) con una de las 3 opciones de gate atmosférico propuestas en D8.
+- **Estado**: CONFIRMADA + fix DIFERIDO a S71.
+
+---
+
 ## H_S70_R2_RETROACTIVO_4VOLS — Cierre audit S67 con 5/5 Tier A R2 evaluados
 
 - **Formulada**: S70-1 (2026-05-20) tras audit S67 reclamar "R2 no aplicado a adopciones S62-S65" y S70-0 T3 Step 8 validar el método R2 verdadero en Lastarria.
