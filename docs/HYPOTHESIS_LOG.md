@@ -6,6 +6,25 @@
 
 ---
 
+## H_S68_ANTIPATRONES_AUDIT — Anti-patrones MISSION.md mitigados operacionalmente, NO drift crítico
+
+- **Formulada**: S68 (2026-05-20) tras audit integral S60-S67 levantó alarma sobre anti-patrones MISSION.md re-introducidos.
+- **Hipótesis inicial (refutada)**: `exclude_zones` y `min_vrp_mw_*` por sensor son violación activa de MISSION.md.
+- **Hipótesis revisada (CONFIRMADA)**: anti-patrones están **mitigados operacionalmente**, no hay drift crítico.
+- **Evidencia**:
+  - `exclude_zones`: data poblada en yaml (5 vols) pero `enable_exclude_zones: false` en profile → **NO se aplica operacional**. Mantenido como infraestructura desactivada.
+  - `min_vrp_mw_*` por sensor: `min_vrp_mw_viirs375: 0.02, viirs750: 0.15, modis: 0.27`. **Valores son mínimos empíricos MIROVA NRT observados** (no thresholds algorítmicos arbitrarios). Coppola 2023 anti-patrón se refiere al algoritmo de DETECCIÓN (~1MW genérico), nuestros valores son **floor de REPORTE para paridad MIROVA**.
+  - Impacto cuantitativo: solo **14/2282 records (0.6%)** afectados por floors en últimos 30d. Negligible.
+- **Conclusión**: NO hay violación crítica. Drift mínimo a documentar (no revertir).
+- **Acción S68**:
+  - Actualizar comentario inline en `mirova_equivalent.yaml:50-61` clarificando que floors son paridad observacional MIROVA NRT (no threshold algorítmico)
+  - Actualizar comentario `exclude_zones` en `volcanoes.yaml` clarificando que está desactivado operacionalmente
+  - NO actualizar MISSION.md tabla (sigue siendo verdad operacional)
+- **Estado**: **CONFIRMADA (no drift crítico)**.
+- **Lección S68**: agente audit puede exagerar gravedad. Verificar SIEMPRE con conteo empírico antes de actuar.
+
+---
+
 ## H_S67_DASHBOARD_AUDIT_FINDINGS — 11 inconsistencias frontend + MODIS over-detection sistémica
 
 - **Formulada**: S67 (2026-05-20) tras audit completo dashboard data + frontend.
@@ -247,6 +266,12 @@ Otros 6: stat "Detecciones" ≠ tabla events count, fallback legacy sin distance
 
 ## H_S61_PCC_INFLATION_NOT_KERNEL — PCC 52× NO es por contaminación ring (gradient positivo)
 
+**ACTUALIZACIÓN S68 (cierre formal)**: Hipótesis **REFUTADA por reproc S63**. El A/B kernel-bg PCC (run 26115708153) probó empíricamente que SÍ responde a kernel-bg: ratio LEGACY 3.64× → NEW **0.29×** (-92%). Mi análisis S61 "ring gradient +4.5K positivo PCC → kernel local no aplicaría" estaba basado en 1 día de observación, no en pruebas empíricas. El reproc de 80 días con kernel-bg cura masivamente, confirmando que PCC tiene patrón Muy Bajo igual que Villarrica/Lastarria/Chaiten. La intuición especulativa sobre "ring gradient positivo" no se sostuvo. **REFUTADA. Adoptada operacional S63 PR #88.**
+
+---
+
+
+
 - **Formulada**: S61 (2026-05-18) durante investigación paralela a workflow PP (ver `experiments/107_*` pendiente).
 - **Hipótesis inicial (refutada)**: PCC gap 52.77× LEGACY/MIROVA es similar a Villarrica (lago en ring) o PlanchonPeteroa (glaciar heterogéneo), por tanto kernel-bg lo curaría.
 - **Hipótesis revisada (CONFIRMADA)**: PCC inflación 52× tiene mecanismo DISTINTO — cluster selection lejano residual + magnitud sobre-estimada Test 1 path.
@@ -271,6 +296,12 @@ Otros 6: stat "Detecciones" ≠ tabla events count, fallback legacy sin distance
 ---
 
 ## H_S61_TUPUNGATITO_KERNEL_BG_REVIEW — Tupungatito gap 9.8× NO es kernel-bg, es Test 1 over-detection
+
+**ACTUALIZACIÓN S68 (cierre formal)**: Hipótesis **PARCIALMENTE REFUTADA**. La predicción "fix Test 1 cura 4 vols simultáneamente (Lastarria, Isluga, Tupungatito, PCC)" fue refutada cuando S62-S63 adoptaron kernel-bg para Lastarria/Chaiten/PCC con éxito SIN tocar Test 1 path. La intuición "Test 1 acepta demasiados pixels" era especulativa. El gap real era contaminación ring por background frío (kernel-bg lo cura). Tupungatito sigue siendo caso especial: ΔT 15K intermedio, ring glaciar — fix mirova_center S65 cura 56% records pero 43% siguen con cluster lejano (mecanismo distinto, problema arquitectural cluster selection S69+ pendiente). **Hipótesis Test 1 over-detection: REFUTADA. Adopciones kernel-bg validaron mecanismo correcto.**
+
+---
+
+
 
 - **Formulada**: S61 (2026-05-18) durante audit offline mientras corre workflow PP.
 - **Hipótesis inicial (refutada paralelo S61)**: Tupungatito debería tener `local_kernel_bg: true` porque gap LEGACY/MIROVA NRT es 9.8× similar a Villarrica.
