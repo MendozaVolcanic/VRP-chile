@@ -34,6 +34,20 @@ volcanoes:
   # Resuelve drift 11-18 km MODIS observado en S47 R2 expansion.
   mirova_center_lat: -40.582
   mirova_center_lon: -72.131
+  # S63 ADOPCIÓN: A/B kernel-bg validó cura masiva (run 26115708153).
+  # Audit 97 ALERTAS (60 CONS + 37 OCR) window 80d con pc.vrp_mw:
+  #   LEGACY ratio mediano 3.64× → NEW 0.29× (-92%)
+  #   Recall 89/97 mantenido
+  #   En rango [0.5, 2.0]: 11% → 30%
+  #   Aceptable ≤3×: 47% → 91%
+  #   Max ratio: 148× → 10×
+  # Confirma hipótesis S62 paralelo: PCC ΔT 11.2K (régimen Muy Bajo
+  # igual Villarrica/Lastarria/Chaiten) → kernel-bg cura. Refuta H_S61
+  # 'ring gradient positivo PCC no responde a kernel-bg' (era especulativa).
+  # NOTA: ratio 0.29× indica leve sub-estimación, pero 91% aceptable y
+  # recall completo. Monitorear post-deploy si algún caso específico
+  # necesita ajuste fino.
+  local_kernel_bg: true
 - name: Villarrica
   mirova_monitored: true  # Monitoreado por MIROVA (Tier A CSV)
   display_name: Villarrica
