@@ -6,6 +6,33 @@
 
 ---
 
+## H_S66_TUPUNGATITO_FIX_VALIDATED_PARTIAL — Fix mirova_center cura 56% de ALERTAS Tupungatito
+
+- **Formulada**: S66 (2026-05-20) tras audit reproc operacional Tupungatito (run 26143572382).
+- **Resultados POST-fix S65 (quitar mirova_center)**:
+  - Recall: 70/92 (LEGACY) → **82/92 (89%)** (+12 records, +17%)
+  - Ratio mediano global: 10.37× → 11.19× (+8% peor, engañoso por mezcla)
+  - **Bin top centroides INVERTIDO**: antes (-33.43,-69.79) FP, ahora (-33.39,-69.83) cráter activo
+- **Descomposición POR DISTANCIA al cráter activo (-33.388686, -69.826254)**:
+  - Cluster <1 km del cráter: **46 records (56%)**, ratio mediano **0.67×** ✅ clon literal
+  - Cluster 1-3 km del cráter: 35 records (43%), ratio mediano 27.02× ⚠️
+  - Cluster ≥3 km: 1 record, ratio 0.52×
+- **Interpretación**:
+  - **Fix funcionó al 100% para 56% de ALERTAS** — esos records ahora tienen cluster centrado en cráter activo con ratio dentro tolerable.
+  - El 43% restante tiene cluster en 1-3 km — problema **distinto** (cluster selection residual): cuando hay múltiples clusters térmicos en escena, vent_anchored a veces elige uno cerca del cráter pero NO el más cercano. Esos clusters distantes 1-3km tienen pixels glaciar adicional → magnitud inflada.
+- **Top 5 mejor calibradas post-fix** (ratios 0.08-0.28×):
+  - 2026-03-17: MIROVA 0.13 → ours 0.01 (dist 0.04km cráter)
+  - 2026-03-13: 0.19 → 0.02 (dist 0.24km)
+  - 2026-03-01: 0.59 → 0.09 (dist 0.19km)
+  - 2026-04-09: 0.24 → 0.07 (dist 0.15km)
+  - 2026-03-07: 0.11 → 0.02 (dist 0.32km)
+- **Estado**: **CONFIRMADA PARCIAL**. Fix mantenido (mejora real). Gap residual 43% records es problema distinto S67+.
+- **Resolución**: NO revertir. Documentar éxito parcial. S67+ investigar cluster selection: agregar `min_pc_centroid_dist_km` o ajuste vent_anchored para preferir cluster MÁS CERCANO al vent (no solo dentro del inner_radius).
+- **Lección S66**: ratio mediano global puede ocultar éxito parcial cuando hay heterogeneidad cluster selection. Descomponer SIEMPRE por dist cluster al vent.
+- **Adopción operacional**: ✅ kept. Fix S65 PR #93 mantiene Tupungatito sin mirova_center.
+
+---
+
 ## H_S64_TUPUNGATITO_MIROVA_CENTER_OFFSET — `mirova_center` Tupungatito apunta a bbox center, no a actividad real
 
 - **Formulada**: S64 (2026-05-20) tras Nicolás clarificó coord cráter activo (-33.388686, -69.826254) + validación visual PNGs Distance MIROVA.
