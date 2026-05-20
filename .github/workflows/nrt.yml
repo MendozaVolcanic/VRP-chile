@@ -163,6 +163,8 @@ jobs:
         # S26 D: Villarrica EXCLUIDA de este step. Usa profile dedicado
         # mirova_equivalent_villarrica_test1 con Test 1 activo (paths
         # actuales no captan lava lake sub-pixel <600K). Ver step siguiente.
+        # S70-0 T2: stdout/stderr a pipeline.log para que el step de detección
+        # NASA_DOWN pueda grep el mensaje NASA_AUTH_UNREACHABLE.
         if: ${{ steps.filter.outputs.skip != 'true'
              && (github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'mirova_equivalent')
              && contains(fromJson('["Lascar","PuyehueCordonCaulle","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","Chaiten","NevadosDeChillan","Llaima","Copahue"]'), matrix.volcano) }}
@@ -171,12 +173,13 @@ jobs:
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
         timeout-minutes: 50
         run: |
+          set -o pipefail
           python scripts/run_pipeline.py --profile mirova_equivalent \
             --volcano ${{ matrix.volcano }} \
             ${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }} \
             ${{ github.event.inputs.start != '' && format('--start {0}', github.event.inputs.start) || '' }} \
             ${{ github.event.inputs.end != '' && format('--end {0}', github.event.inputs.end) || '' }} \
-            ${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }}
+            ${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }} 2>&1 | tee -a pipeline.log
 
       - name: Run VRP pipeline — Villarrica con Test 1 (S26 D)
         # S26 D: Villarrica usa profile dedicado mirova_equivalent_villarrica_test1
@@ -191,12 +194,13 @@ jobs:
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
         timeout-minutes: 50
         run: |
+          set -o pipefail
           python scripts/run_pipeline.py --profile mirova_equivalent_villarrica_test1 \
             --volcano Villarrica \
             ${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }} \
             ${{ github.event.inputs.start != '' && format('--start {0}', github.event.inputs.start) || '' }} \
             ${{ github.event.inputs.end != '' && format('--end {0}', github.event.inputs.end) || '' }} \
-            ${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }}
+            ${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }} 2>&1 | tee -a pipeline.log
 
       - name: Run VRP pipeline — experimental profile
         if: ${{ steps.filter.outputs.skip != 'true' && (github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'experimental') }}
@@ -205,12 +209,32 @@ jobs:
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
         timeout-minutes: 50
         run: |
+          set -o pipefail
           python scripts/run_pipeline.py --profile experimental \
             --volcano ${{ matrix.volcano }} \
             ${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }} \
             ${{ github.event.inputs.start != '' && format('--start {0}', github.event.inputs.start) || '' }} \
             ${{ github.event.inputs.end != '' && format('--end {0}', github.event.inputs.end) || '' }} \
-            ${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }}
+            ${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }} 2>&1 | tee -a pipeline.log
+
+      # S70-0 T2: detectar NASA_AUTH_UNREACHABLE en pipeline.log para etiquetar
+      # el run como [NASA_DOWN]. NO cambia exit code — el badge sigue en rojo
+      # cuando NASA cae (política conservadora Nicolás S70-0). El marker en
+      # ::warning:: y GITHUB_STEP_SUMMARY lo lee nrt-retry.yml para decidir
+      # si retriggerea el cron 30 min después.
+      - name: Detect NASA_AUTH_UNREACHABLE (tag run as NASA_DOWN)
+        if: failure() && steps.filter.outputs.skip != 'true'
+        run: |
+          if [ -f pipeline.log ] && grep -q "NASA_AUTH_UNREACHABLE" pipeline.log; then
+            echo "::warning title=NASA_DOWN::NASA Earthdata auth endpoint inalcanzable — outage upstream. Job marcado como NASA_DOWN."
+            echo "## NASA_DOWN detected" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "El endpoint \`urs.earthdata.nasa.gov:443\` no respondió al probe TCP en 5s." >> "$GITHUB_STEP_SUMMARY"
+            echo "Pipeline abortó con \`NASA_AUTH_UNREACHABLE\` (budget corto, ~2 min)." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Volcán afectado: \`${{ matrix.volcano }}\`" >> "$GITHUB_STEP_SUMMARY"
+            echo "Workflow \`nrt-retry.yml\` reintentará automáticamente en ~30 min." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Commit updated data files
         if: steps.filter.outputs.skip != 'true'

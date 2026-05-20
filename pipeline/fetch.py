@@ -126,6 +126,36 @@ PRODUCTS = {
 }
 
 
+# S70-0 T2: probe rápido NASA Earthdata auth endpoint.
+# Cuando urs.earthdata.nasa.gov:443 está caído upstream (saturado, mantenimiento,
+# o balancer drop SYN-ACK), el handshake TLS no completa y cada attempt agota su
+# connect-timeout de 60s. Con 8 reintentos esto produce ~22 min de espera muerta
+# por job — 31 min totales en runners GitHub Actions. T1 (commit c6373aa) midió
+# 19/20 runs fallidos en este patrón. El probe TCP rápido (5s) detecta el outage
+# antes y permite acortar la budget a ~2 min, liberando los runners para el cron.
+NASA_AUTH_HOST = "urs.earthdata.nasa.gov"
+NASA_AUTH_PORT = 443
+_PROBE_FAIL_DELAYS = [0, 30, 90]  # 3 attempts, ~2 min total when probe fails
+
+
+def _probe_nasa_auth(timeout: float = 5.0) -> bool:
+    """Probe TCP rápido a NASA Earthdata auth endpoint.
+
+    Devuelve True si el handshake TCP a (NASA_AUTH_HOST, 443) completa en <timeout>
+    segundos, False en cualquier error (timeout, connection refused, OSError de red).
+
+    NOTA: solo testea reachability TCP/443. NO valida TLS handshake ni credenciales
+    — eso lo hace earthaccess.login() después. Es suficiente para distinguir
+    "NASA upstream caída" de "todo OK", que es la única decisión que necesitamos
+    tomar para escoger entre budget largo (22 min) y budget corto (2 min).
+    """
+    try:
+        with socket.create_connection((NASA_AUTH_HOST, NASA_AUTH_PORT), timeout=timeout):
+            return True
+    except (socket.timeout, OSError):
+        return False
+
+
 def auth():
     """Authenticate with NASA Earthdata.
 
@@ -148,6 +178,14 @@ def auth():
     Subido a 8 intentos hasta 480s (waits 0/10/30/60/120/240/360/480, ~22 min
     total) + override de timeout requests a 60s (top of file). Si NASA tarda
     en recuperarse >22 min, el job falla y el siguiente cron (cada 2h) reintenta.
+
+    S70-0 T2 fix outage upstream: probe TCP a urs.earthdata.nasa.gov:443 antes
+    del retry loop. Si el probe falla en 5s, la budget se acorta a _PROBE_FAIL_DELAYS
+    (~2 min) y al agotarse lanza RuntimeError("NASA_AUTH_UNREACHABLE: ...") con
+    mensaje distinguible para que el workflow nrt.yml pueda etiquetar el run
+    como [NASA_DOWN] sin cambiar el exit code (badge sigue rojo, decisión
+    conservadora Nicolás S70-0). Si el probe pasa, comportamiento normal con
+    budget largo de 22 min.
     """
     import os
     import time
@@ -155,7 +193,14 @@ def auth():
     netrc_path_win = os.path.expanduser("~/_netrc")
     has_netrc = os.path.exists(netrc_path_unix) or os.path.exists(netrc_path_win)
 
-    delays = [0, 10, 30, 60, 120, 240, 360, 480]  # 8 attempts, ~22 min total max
+    # Probe TCP rápido. Si NASA upstream está caída, acortamos budget de 22 min
+    # a ~2 min para no desperdiciar minutos de GitHub Actions × 9 vols × cada cron.
+    probe_ok = _probe_nasa_auth(timeout=5.0)
+    if probe_ok:
+        delays = [0, 10, 30, 60, 120, 240, 360, 480]  # 8 attempts, ~22 min total
+    else:
+        delays = list(_PROBE_FAIL_DELAYS)  # ~2 min total
+
     last_err = None
     for delay in delays:
         if delay:
@@ -171,8 +216,18 @@ def auth():
                 return
             except Exception as e:
                 last_err = e
-    # Si aquí, todos los attempts fallaron. Reraise el último error
-    # (será environment error en CI, netrc error solo si netrc existe).
+
+    # Si aquí, todos los attempts fallaron. Si la causa fue probe failure,
+    # marcamos el error como NASA_AUTH_UNREACHABLE para que nrt.yml lo detecte.
+    if not probe_ok:
+        raise RuntimeError(
+            f"NASA_AUTH_UNREACHABLE: NASA Earthdata auth ({NASA_AUTH_HOST}:{NASA_AUTH_PORT}) "
+            f"no responde a probe TCP en 5s ni a {len(delays)} reintentos cortos "
+            f"(budget {sum(_PROBE_FAIL_DELAYS)}s). Upstream outage. Última excepción: {last_err}"
+        )
+    # Caso probe OK pero login falló igualmente — credencial inválida, glitch
+    # transient o similar. Reraise el último error original (será environment
+    # error en CI, netrc error solo si netrc existe).
     raise last_err if last_err else RuntimeError("auth failed")
 
 
