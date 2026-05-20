@@ -1,0 +1,186 @@
+{
+  "version": 2,
+  "method": "R2_S69_verdadero_ampliado_S70_1_T3",
+  "case": {
+    "volcano": "PlanchonPeteroa",
+    "datetime_utc": "2026-05-18 05:24",
+    "sensor": "VIIRS_NOAA20",
+    "distance_class": "summit",
+    "mirova_csv_timestamp": "2026-05-18 05:24:01",
+    "mirova_sensor": "VIIRS375",
+    "tipo_registro": "ALERTA_TERMICA",
+    "tif_path": "mirova-tif-archive\\data\\tif\\PlanchonPeteroa\\20260518_052401_VIIRS375.tif"
+  },
+  "vent": {
+    "lat": -35.241099,
+    "lon": -70.573345
+  },
+  "pipeline_primary_cluster": {
+    "vrp_mw": 0.333,
+    "centroid_lat": -35.24104,
+    "centroid_lon": -70.57527,
+    "centroid_dist_km": 2.052,
+    "n_pixels": 2
+  },
+  "mirova_csv": {
+    "vrp_mw": 0.16,
+    "distancia_km": 1.91
+  },
+  "magnitude_r2": {
+    "ratio_pc_vrp_vs_mirova_vrp": 2.0812500000000003,
+    "reference_s61_aggregate_ratio": 2.84,
+    "reference_s61_aggregate_drift_km": null
+  },
+  "geometry_r2_principal": {
+    "top_n": 10,
+    "max_km": 3.0,
+    "tif_top10_within_3km_centroid_lat": -35.23254852355715,
+    "tif_top10_within_3km_centroid_lon": -70.59713548437777,
+    "tif_top10_within_3km_sum_mw_informative": 0.9096312770266249,
+    "tif_top10_within_3km_n_used": 10,
+    "tif_positive_pixels_full": 17927,
+    "tif_positive_pixels_within_3km": 200,
+    "tif_top_values_min": 0.08605503751640618,
+    "tif_top_values_max": 0.09805239781109618,
+    "drift_km_tif_top10_vs_pc_centroid": 2.19889244908892
+  },
+  "gates": {
+    "g1_ratio_in_band_strict": false,
+    "g2_drift_under_2km_strict": false,
+    "g3_ratio_close_to_target_strict": false,
+    "g4_drift_close_to_target_strict": null,
+    "g5_ratio_in_band_revised": false,
+    "g6_drift_under_3km_revised": true
+  },
+  "verdict_dual": {
+    "strict": {
+      "result": "FAIL",
+      "n_pass": 0,
+      "n_total": 3,
+      "gate_keys": [
+        "g1_ratio_in_band_strict",
+        "g2_drift_under_2km_strict",
+        "g3_ratio_close_to_target_strict",
+        "g4_drift_close_to_target_strict"
+      ],
+      "note": "4 gates referencia Lastarria S69 original (banda + drift<2km + close-to-target ratio + close-to-target drift). g4 N/A para PlanchonPeteroa (sin drift S61 per-record)."
+    },
+    "revised": {
+      "result": "FAIL",
+      "n_pass": 1,
+      "n_total": 2,
+      "gate_keys": [
+        "g5_ratio_in_band_revised",
+        "g6_drift_under_3km_revised"
+      ],
+      "note": "2 gates operacionales: ratio en banda + drift<3km (coherente con max_km del filtro espacial)"
+    }
+  },
+  "sensitivity_analysis": {
+    "grid_top_n": [
+      5,
+      10,
+      20
+    ],
+    "grid_max_km": [
+      2.0,
+      3.0,
+      5.0
+    ],
+    "matrix": [
+      {
+        "top_n": 5,
+        "max_km": 2.0,
+        "n_pixels_available_within_max_km": 85,
+        "n_pixels_used": 5,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -35.24073870796958,
+        "centroid_lon": -70.57945067418181,
+        "drift_km": 0.3811498537300492
+      },
+      {
+        "top_n": 5,
+        "max_km": 3.0,
+        "n_pixels_available_within_max_km": 200,
+        "n_pixels_used": 5,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -35.23325174709496,
+        "centroid_lon": -70.59546977587952,
+        "drift_km": 2.0286916369930883
+      },
+      {
+        "top_n": 5,
+        "max_km": 5.0,
+        "n_pixels_available_within_max_km": 546,
+        "n_pixels_used": 5,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -35.22703184479698,
+        "centroid_lon": -70.6230523485883,
+        "drift_km": 4.610864152529429
+      },
+      {
+        "top_n": 10,
+        "max_km": 2.0,
+        "n_pixels_available_within_max_km": 85,
+        "n_pixels_used": 10,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -35.24195973732672,
+        "centroid_lon": -70.57961657751538,
+        "drift_km": 0.40777150825275493
+      },
+      {
+        "top_n": 10,
+        "max_km": 3.0,
+        "n_pixels_available_within_max_km": 200,
+        "n_pixels_used": 10,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -35.23254852355715,
+        "centroid_lon": -70.59713548437777,
+        "drift_km": 2.19889244908892
+      },
+      {
+        "top_n": 10,
+        "max_km": 5.0,
+        "n_pixels_available_within_max_km": 546,
+        "n_pixels_used": 10,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -35.225332421124875,
+        "centroid_lon": -70.61977306840053,
+        "drift_km": 4.403225645537733
+      },
+      {
+        "top_n": 20,
+        "max_km": 2.0,
+        "n_pixels_available_within_max_km": 85,
+        "n_pixels_used": 20,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -35.24246130346795,
+        "centroid_lon": -70.57772950987118,
+        "drift_km": 0.2736197232233442
+      },
+      {
+        "top_n": 20,
+        "max_km": 3.0,
+        "n_pixels_available_within_max_km": 200,
+        "n_pixels_used": 20,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -35.23334037105116,
+        "centroid_lon": -70.5957927219923,
+        "drift_km": 2.0511194715196908
+      },
+      {
+        "top_n": 20,
+        "max_km": 5.0,
+        "n_pixels_available_within_max_km": 546,
+        "n_pixels_used": 20,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -35.22419215488493,
+        "centroid_lon": -70.6177440846103,
+        "drift_km": 4.288567137868124
+      }
+    ],
+    "drift_km_min": 0.2736197232233442,
+    "drift_km_median": 2.0511194715196908,
+    "drift_km_max": 4.610864152529429
+  }
+}
