@@ -1,20 +1,32 @@
 # BLOQUE DE ARRANQUE S71 — VRP Chile
 
-> Continuación tras cierre S70 (S70-0 + S70-1 + S70-2). PRs #103, #104, #105 abiertos.
+> Continuación tras cierre S70 (S70-0 + S70-1 + S70-2). PRs **#103 + #106 + #107 ya mergeados a `main`** (2026-05-20).
 > Hallazgo crítico abierto: **D9 — bug path D dNTI ctx en cirrus alto**.
 
 ---
 
 ## 1. Pre-condición antes de arrancar S71
 
-Confirmar que **PRs #103/#104/#105 fueron mergeados** (o si están abiertos, decidir si trabajamos sobre `main` actual o sobre `s70-2-refinamientos`). Si #103 no mergeó, el fix NRT cron del bloque cero no está en producción → posible que NRT siga al 5% éxito.
+**Estado main al cierre S70**: commits S70-0 + S70-1 + S70-2 integrados. Verificar:
 
 ```bash
-gh pr list --state merged --limit 5
-gh run list --workflow nrt.yml --limit 5 --json conclusion
+git fetch origin && git log origin/main --oneline -5
+# Debe mostrar merges 103/106/107
 ```
 
-Si NRT success rate post-#103 ≥80% → fix validado, seguir. Si <80% → diagnóstico nuevo antes de S71 (algo no funcionó).
+Validar **NRT cron post-fix** (PR #103 incorporó probe atmosférico + workflow retry):
+
+```bash
+gh run list --workflow nrt.yml --limit 10 --json conclusion,createdAt | python -c "import json,sys; d=json.load(sys.stdin); s=sum(1 for r in d if r['conclusion']=='success'); print(f'Success: {s}/{len(d)} ({100*s/len(d):.0f}%)')"
+```
+
+Si NRT success rate ≥80% → fix validado, seguir T1. Si <80% → **T0 prioritario: diagnóstico nuevo** antes de T1 (el probe atmosférico no resolvió, hipótesis distinta a NASA timeout).
+
+Cerrar **issue #1** cuando ≥80% confirmado:
+
+```bash
+gh issue close 1 --comment "Fix S70-0 validado post-merge. Success rate: X/10."
+```
 
 ---
 
@@ -71,18 +83,7 @@ Adoptar el winner en `mirova_equivalent.yaml` operacional. Documentar D9 como RE
 
 ---
 
-### T2 — Validación NRT cron post-#103 — **PRIORIDAD ALTA si no validado**
-
-Si NRT cron no llegó a ≥80% éxito post-merge #103, diagnóstico forense. Si llegó, cerrar issue #1.
-
-```bash
-gh run list --workflow nrt.yml --limit 10 --json conclusion,createdAt | python -c "import json,sys; d=json.load(sys.stdin); print(f'Success: {sum(1 for r in d if r[\"conclusion\"]==\"success\")}/{len(d)}')"
-gh issue close 1 --comment "Fix S70-0 validado: success rate X/10 post-merge."
-```
-
----
-
-### T3 — Cluster selection residual (PP Modo B + Tupungatito 43%) — **PRIORIDAD MEDIA**
+### T2 — Cluster selection residual (PP Modo B + Tupungatito 43%) — **PRIORIDAD MEDIA**
 
 S70-2 T1 (PP multi-caso) identificó distribución bimodal: pipeline a veces aísla cráter (Modo A ratio ~1×), a veces se va al halo regional del complejo (Modo B ratio 10×). Mismo mecanismo subyacente que Tupungatito 43% residual (S66+).
 
@@ -92,19 +93,19 @@ Por ahora dejar como pendiente arquitectural — requiere investigación dedicad
 
 ---
 
-### T4 — MODIS final_hotspot fix — **PRIORIDAD BAJA**
+### T3 — MODIS final_hotspot fix — **PRIORIDAD BAJA**
 
-Identificado S62 paralelo. `final_hotspot.lat/lon` asigna al pixel más caliente individual de la escena MODIS, no al cluster summit. Diferente de D9 (D9 es path D, T4 es selección de hotspot post-cluster). Abordar después de D9 resuelto.
+Identificado S62 paralelo. `final_hotspot.lat/lon` asigna al pixel más caliente individual de la escena MODIS, no al cluster summit. Diferente de D9 (D9 es path D, T3 es selección de hotspot post-cluster). Abordar después de D9 resuelto.
 
 ---
 
-### T5 — Frontend bugs 6-11 — **PRIORIDAD BAJA**
+### T4 — Frontend bugs 6-11 — **PRIORIDAD BAJA**
 
 Plan ya escrito en `tasks/frontend_bugs_s67_remaining.md`. Implementación es polish UX, no afecta correctness del pipeline. Sesión dedicada cuando bandwidth.
 
 ---
 
-### T6 — Goldens regenerar (16 tests skipped) — **DESPUÉS DE T1**
+### T5 — Goldens regenerar (16 tests skipped) — **DESPUÉS DE T1**
 
 Bloqueado por T1: regenerar goldens contra pipeline con bug path D conocido los atraparía como "golden". Esperar fix path D adoptado.
 
@@ -124,32 +125,37 @@ Bloqueado por T1: regenerar goldens contra pipeline con bug path D conocido los 
 
 ---
 
-## 4. Control de tokens (S71+)
+## 4. Control de costo de sesión (S71+)
 
 Feedback Nicolás S70-2: "estamos usando una cantidad grande de tokens en cada sesión, tenemos que controlar eso e ir descartando cosas".
 
-**Aplicar en S71**:
-- Menos subagentes por tarea (1 implementer + 1 reviewer combinado, no 1+1+1).
-- Decisiones directas del controller cuando son obvias (no preguntar "¿procedo?" para cada paso).
-- Plan compacto inline, no docs largos.
-- Skill triggers solo cuando aportan (no `superpowers-brainstorming` para tareas mecánicas).
-- Cerrar tareas que no tienen valor inmediato (frontend bugs menores → esperar bandwidth).
+**Subagentes SE SIGUEN USANDO** (decisión Nicolás S70-2 cierre). Los costos a controlar son distintos:
+
+- **Plans compactos inline**, no docs largos de 400+ líneas.
+- **Decisiones directas del controller** cuando son obvias (no preguntar "¿procedo?" para cada paso evidente).
+- **Skill triggers solo cuando aportan** — `superpowers-brainstorming` antes de adopciones metodológicas SÍ, para tareas mecánicas NO.
+- **Subagentes con scope acotado** — prompts concisos sin redundancia, pedido de reporte <500-800 tokens explícito.
+- **Cerrar tareas que no tienen valor inmediato** (frontend bugs menores → esperar bandwidth).
+- **No regenerar contexto** — releer docs solo si cambiaron desde el último Read en la sesión.
 
 ---
 
 ## 5. Quick start S71
 
 ```bash
-# 1. Sync con main post-merge
+# 1. Sync con main
 cd C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP-Chile-s70
 git fetch origin --prune
 git checkout main && git pull
 git checkout -b s71-path-d-fix
 
-# 2. Validar NRT cron (T2)
+# 2. Validar NRT cron post-#103 merge (pre-condición sección 1)
 gh run list --workflow nrt.yml --limit 10
 
 # 3. Arrancar T1 Fase 1 — papers
-# Leer Coppola 2016a §SP 426.5, Campus 2024, Coppola 2024 cap Springer, Aveni 2024 RSE
-# Anotar en /tmp/papers_path_d_cirrus.md
+# Despachar subagente Explore con scope:
+# "Leer Coppola 2016a §SP 426.5 + Campus 2024 + Coppola 2024 cap Springer + Aveni 2024 RSE
+#  buscando dNTI contextual + cirrus / t_bg cold / gate atmosférico.
+#  Reporte <800 tokens con verdict: hay método explícito SÍ/NO + cita textual."
+# Si SÍ → implementar literal. Si NO → fase 2 A/B con 3 alternativas (gate atm, co-validación, cap).
 ```
