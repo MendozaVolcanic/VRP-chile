@@ -1470,10 +1470,13 @@ function renderDetail() {
       const ourDaily = new Map();
       for (const r of ours) {
         const d = r.datetime_utc.slice(0,10);
-        // Usar primary_cluster.vrp_mw (MIROVA-equiv) cuando exista; sino vrp_mw.
-        const v = (r.primary_cluster?.vrp_mw && r.primary_cluster.vrp_mw > 0)
-          ? r.primary_cluster.vrp_mw
-          : (r.vrp_mw ?? 0);
+        // S68 fix bug S33 regression: usar eqVrp (= mirovaEqVrp con innerKm + includeFarDistance)
+        // que valida pc.centroid_dist_km > innerKm. Antes usaba pc.vrp_mw sin validar →
+        // clusters far inflaban VRP en comparación con MIROVA (= bug original S33 que llevó a
+        // adoptar Driver B Phase 1 falsamente). Esto unifica source-of-truth con alert bar,
+        // stat boxes y cards: TODO usa la misma lógica de magnitud.
+        const v = eqVrp(r);
+        if (v <= 0) continue;
         if (!ourDaily.has(d) || v > ourDaily.get(d)) ourDaily.set(d, v);
       }
       ds.push({

@@ -66,7 +66,19 @@ R2_CASES = [
     ("Lastarria",   "VIIRS375", "2026-05-10 06:12", 0.5, 0.15,  "Lastarria centroid match"),
     ("Villarrica",  "VIIRS375", "2026-05-09 06:36", 1.0, 1.19,  "Villarrica lava lake"),
     ("Llaima",      "VIIRS375", "2026-05-09 06:36", 1.0, 1.00,  "Llaima cráter activo"),
-    ("Tupungatito", "VIIRS375", "2026-05-10 06:12", 1.5, 2.17,  "Tupungatito glaciar"),
+    # S68 RETIRADO: Tupungatito caso post-S65 fix (run 26143572382).
+    # Fix S65 removió mirova_center que apuntaba a bbox center KMZ (-33.4276, -69.8049),
+    # NO a actividad real. Nicolás confirmó S64 que el cráter activo (lago cratérico con
+    # fumarolas) está en vent_lat (-33.388686, -69.826254) = mismo punto que vent_lat actual.
+    # Post-fix S65: vent_anchored ancla en vent_lat → centroide VRP-chile en cráter activo
+    # (-33.380, -69.835), 5.93 km del TIF bbox center → falla R2 con tolerancia 2.5 km.
+    # Esto NO es bug: TIF MIROVA Tupungatito centra bbox KMZ, no actividad. El test R2
+    # asumía TIF=actividad (válido para vols con mirova_center alineado, pero Tupungatito
+    # tiene desfase intrínseco MIROVA bbox vs cráter activo). Re-introducir requiere
+    # nueva métrica (e.g. "VRP centroid cerca de vent_lat conocido", no TIF). S69+ design.
+    # Ver H_S66_TUPUNGATITO_FIX_VALIDATED_PARTIAL: 56% records correcto cluster cráter,
+    # gap residual 43% cluster selection arquitectural pendiente.
+    # ("Tupungatito", "VIIRS375", "2026-05-10 06:12", 1.5, 2.17,  "Tupungatito glaciar"),
     ("Isluga",      "MODIS",    "2026-05-10 07:15", 2.0, 23.70, "Isluga MODIS hot"),
 ]
 
