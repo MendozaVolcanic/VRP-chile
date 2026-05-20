@@ -1,0 +1,80 @@
+name: Reproc operacional Tupungatito (S65 vent_lat anchoring fix)
+
+# S65 (2026-05-20): PR #93 quitó mirova_center Tupungatito (apuntaba a
+# bbox center, no actividad). vent_anchored ahora ancla en vent_lat
+# = cráter activo correcto.
+#
+# Cron NRT solo procesa día actual → records históricos en
+# data/mirova_equivalent/Tupungatito.json siguen con clusters seleccionados
+# por mirova_center incorrecto (bin FP flanco SE).
+#
+# Este workflow reprocesa Tupungatito operacional para refresh dashboard
+# con el nuevo anchoring. Sobreescribe data/mirova_equivalent/Tupungatito.json.
+#
+# Predicción: gap LEGACY 10.37× → fix esperado ~1-3× similar
+# Lastarria post-fix (1.07×) o Chaiten (2.23×).
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-03-01"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-05-20"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — mirova_equivalent / Tupungatito
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 280
+        run: |
+          python scripts/run_pipeline.py \
+            --profile mirova_equivalent \
+            --volcano Tupungatito \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit refreshed operational data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/mirova_equivalent/Tupungatito.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S65 reproc operacional Tupungatito sin mirova_center ${{ github.event.inputs.start }}→${{ github.event.inputs.end }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
