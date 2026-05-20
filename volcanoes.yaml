@@ -734,10 +734,19 @@ volcanoes:
   vent_lat: -33.389044
   vent_lon: -69.826374
   vent_radius_km: 5
-  # MIROVA scene center (KMZ GroundOverlay LatLonBox) offset 2.99 km SE of
-  # Nicolas vent; MIROVA likely anchored on SE crater field, not main summit.
-  mirova_center_lat: -33.4269
-  mirova_center_lon: -69.8004
+  # S65 REMOVED mirova_center: análisis exhaustivo S64 reveló que el cráter
+  # activo (lago cratérico con fumarolas, coord confirmada Nicolás
+  # -33.388686, -69.826254) coincide con vent_lat actual (~40m off).
+  # MIROVA reporta dist ≈5km (banda densa en PNG Distance MIROVA) que matchea
+  # exactamente dist(mirova_center_S16, vent_lat) = 4.87 km — confirma cráter
+  # activo Nicolás es lo que MIROVA reporta.
+  # El mirova_center_lat=-33.4269 (S16) era bbox center KMZ, NO centroide de
+  # actividad. Causaba que vent_anchored eligiera FPs del flanco SE (bin
+  # 108 records 49% nuestros = falsos positivos sistemáticos por nieve/glaciar).
+  # Predicción S65: removiendo mirova_center, vent_anchored ancla en
+  # vent_lat=cráter activo → gap LEGACY 10.37× cura a ~1-3× (similar Lastarria
+  # post-fix 1.07× / Chaiten 2.23×).
+  # Ver H_S64_TUPUNGATITO_MIROVA_CENTER_OFFSET en HYPOTHESIS_LOG.md
   # S16 P3.6: Embalse El Yeso a 25-27 km SE del vent. Bbox lo incluye ->
   # FPs 58-205 MW en abril 2026.
   exclude_zones:
