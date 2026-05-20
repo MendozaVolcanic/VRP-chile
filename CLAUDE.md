@@ -258,19 +258,36 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   main` refleja origin/main. Si hay desfase grande: crear worktree limpio
   sobre `origin/main` para la sesión (`git worktree add ../proyecto-sNN
   origin/main`) y dejar el local viejo como red de seguridad.
-- **A26. Control de costo de sesión** (feedback Nicolás S70-2):
-  subagentes se **siguen usando** (no recortar). Costos a controlar:
-  - Plans compactos inline, no docs 400+ líneas.
-  - Decisiones directas del controller cuando son obvias (no preguntar
-    "¿procedo?" para cada paso evidente — pero SÍ preguntar en decisiones
-    metodológicas como adopciones de threshold).
-  - Skill triggers selectivos: `superpowers-brainstorming` ANTES de adopciones
-    metodológicas SÍ; tareas mecánicas NO.
-  - Subagentes con scope acotado: prompts concisos sin redundancia, pedido
-    explícito de reporte <500-800 tokens.
-  - No regenerar contexto: releer docs solo si cambiaron desde el último
-    Read en la sesión.
-  - Cerrar tareas sin valor inmediato (frontend bugs menores → bandwidth).
+- **A26. Calidad sobre tokens** (feedback Nicolás S70-2 cierre):
+  **gastar los tokens que sean necesarios para hacer buen trabajo**. NO
+  optimizar costo si compromete calidad. Las herramientas se usan cuando
+  aportan valor, no se recortan por presupuesto:
+  - **Subagentes**: usar libremente para investigaciones independientes,
+    paralelización, dispatching-parallel-agents. El costo de un fix mal
+    hecho > costo de una sesión cara.
+  - **Skills**: invocar todas las que apliquen — `superpowers-brainstorming`,
+    `systematic-debugging`, `writing-plans`, `verification-before-completion`,
+    `test-driven-development`. Regla meta de CLAUDE.md global ("si dudás,
+    invocala igual") se mantiene.
+  - **Brainstorming + design docs** antes de adopciones metodológicas:
+    paso ineludible. Aunque tome 30 min y muchos tokens, evita refactors
+    posteriores que cuestan 10×.
+  - **Auditoría integral** cuando Nicolás lo pide: despachar 5-7 agentes
+    en paralelo cubriendo todos los ejes (misión, código, docs, git,
+    ground truth) es la forma correcta. No recortar a 2 agentes por
+    economía.
+  - **Verificación pixel-level + audit independiente** antes de declarar
+    "listo": obligatorios en adopciones (regla S33). NO saltarlos.
+  - **Persistencia in-vivo**: documentar hallazgos INMEDIATAMENTE en docs
+    cuando aparecen, no al cierre. La memoria viva vale los tokens.
+
+  Costos que SÍ vale evitar (no comprometen calidad):
+  - Re-leer un archivo que ya leíste en la sesión sin que haya cambiado.
+  - Loops de polling con `sleep` cuando se puede usar `run_in_background`
+    + notificación automática.
+  - Tool output gigantes pegados al contexto (snapshots, listados largos):
+    delegar a subagente con pedido de resumen, o escribir a JSON.
+  - Decisiones obvias preguntadas innecesariamente al usuario.
 
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,

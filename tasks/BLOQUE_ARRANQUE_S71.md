@@ -125,18 +125,26 @@ Bloqueado por T1: regenerar goldens contra pipeline con bug path D conocido los 
 
 ---
 
-## 4. Control de costo de sesión (S71+)
+## 4. Calidad sobre tokens (S71+)
 
-Feedback Nicolás S70-2: "estamos usando una cantidad grande de tokens en cada sesión, tenemos que controlar eso e ir descartando cosas".
+**Regla operativa final S70-2** (Nicolás): "olvida la restricción de tokens, tenemos que gastar lo que corresponda para que podamos hacer un buen trabajo".
 
-**Subagentes SE SIGUEN USANDO** (decisión Nicolás S70-2 cierre). Los costos a controlar son distintos:
+**Gastar los tokens que sean necesarios para hacer buen trabajo**. NO optimizar costo si compromete calidad. Las herramientas se usan cuando aportan valor:
 
-- **Plans compactos inline**, no docs largos de 400+ líneas.
-- **Decisiones directas del controller** cuando son obvias (no preguntar "¿procedo?" para cada paso evidente).
-- **Skill triggers solo cuando aportan** — `superpowers-brainstorming` antes de adopciones metodológicas SÍ, para tareas mecánicas NO.
-- **Subagentes con scope acotado** — prompts concisos sin redundancia, pedido de reporte <500-800 tokens explícito.
-- **Cerrar tareas que no tienen valor inmediato** (frontend bugs menores → esperar bandwidth).
-- **No regenerar contexto** — releer docs solo si cambiaron desde el último Read en la sesión.
+- **Subagentes**: usar libremente para investigaciones independientes, paralelización (dispatching-parallel-agents), auditorías cross-eje. El costo de un fix mal hecho > costo de una sesión cara.
+- **Skills**: invocar todas las que apliquen (superpowers-brainstorming, systematic-debugging, writing-plans, verification-before-completion, TDD). Regla meta CLAUDE.md global ("si dudás, invocala igual") se mantiene.
+- **Brainstorming + design docs** antes de adopciones metodológicas: paso ineludible. Toma 30 min y muchos tokens pero evita refactors 10× peores después.
+- **Auditoría integral** cuando se solicita: 5-7 agentes en paralelo cubriendo misión + código + docs + git + ground truth. No recortar a 2 por economía.
+- **Verificación pixel-level + audit independiente** antes de "listo": obligatorios en adopciones (regla S33). NO saltarlos.
+- **Persistencia in-vivo**: documentar hallazgos INMEDIATAMENTE en docs cuando aparecen.
+
+**Costos que SÍ vale evitar** (no comprometen calidad):
+- Re-leer archivo ya leído en la sesión sin cambio.
+- Loops de polling con `sleep` cuando se puede usar `run_in_background` + notificación.
+- Tool outputs gigantes pegados al contexto (snapshots, listados): delegar a subagente con resumen o escribir a JSON.
+- Decisiones obvias preguntadas innecesariamente al usuario.
+
+Ver A26 en `CLAUDE.md` proyecto.
 
 ---
 
