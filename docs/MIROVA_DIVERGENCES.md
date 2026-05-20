@@ -126,6 +126,54 @@ todavía no replicamos.
 **Estado**: ✅ Calibración de magnitud lograda. Ratio 1.35× es excelente para
 paridad MIROVA estricta.
 
+### D6 — TIFs `mirova-tif-archive` son visualización de campo, no VRP per-pixel sumable
+
+**Fenómeno físico**: los TIFs publicados por el repo `MendozaVolcanic/mirova-tif-archive`
+(scraper paralelo que cada 5 min levanta los productos visualizables de la web MIROVA)
+contienen el **campo continuo de radiancia/anomalía** sobre el ROI 50×50 km del volcán,
+no un raster sparse donde cada pixel sea VRP per-pixel sumable. Pensar el TIF como "lo
+que el dashboard MIROVA pinta en el mapa" — gradiente del campo térmico, no lista de
+hotspots discretos.
+
+**Observación operacional**: si uno suma ingenuamente todos los pixels del TIF (o
+incluso el top-N global), obtiene una magnitud que sobrepasa lo que MIROVA publica en
+el header del producto por **un factor de ~10×**, y el centroide así calculado cae a
+distancias muy lejos del cráter porque el campo se extiende por el ROI completo.
+
+**Evidencia (S70-0 T3 Parte 1, commit `b8408ac`)**: 5 ALERTAs Lastarria recientes
+auditadas:
+- Ratio mediano `top10_pixels_sum / MIROVA_CSV_VRP` = **11.5×** (rango 7.9-21.9×, n=5).
+- Drift mediano centroide top10 (sin filtro espacial) vs coordenadas CSV NRT =
+  **10.9 km** (vs distancias MIROVA típicas 1-3 km del vent).
+- Los TIFs tienen **>99% de pixels positivos** en rango 0.035-0.10 (campo continuo,
+  no raster sparse de hotspots).
+
+**Origen del hallazgo**: commit local s15-dev `64bd37d` (S33+ cierre) sobre Lascar
+detectó un TIF con 17,911 pixels positivos sumando 1680 MW, mientras el header MIROVA
+del mismo producto reportaba "VRP: 0.2 MW @ 9.7 km". El factor ~10⁴× sobre Lascar y el
+factor ~10× sobre Lastarria son consistentes con la lectura "campo de radiancia
+visualizable, no scene-wide sumable".
+
+**Cómo usar el TIF correctamente** (S70-0 T3 Parte 2, commit `3ead58d`):
+- Para **magnitud**: NO sumar pixels del TIF. Usar `pc.vrp_mw` (output de NUESTRO
+  pipeline, ya filtrado a `primary_cluster`) vs `MIROVA CSV NRT`. Ambos son productos
+  ya filtrados, comparables 1:1.
+- Para **geometría**: usar TIF top10 pixels ponderado **con filtro espacial obligatorio
+  `<3km del vent`**. El filtro espacial es lo que convierte un TIF "no sumable
+  globalmente" en un ground truth útil para validar el centroide LOCAL del cráter.
+  Sin ese filtro, el field bleed scene-wide contamina el centroide.
+
+**Caso replicado contra S69**: Lastarria 2026-05-14 05:48 UTC VIIRS375 (el mismo caso
+del agente S69):
+- Ratio magnitud `pc.vrp_mw / MIROVA_CSV` = **1.05×** exacto.
+- Drift centroide TIF top10 (<3 km del vent) vs `pc.centroid` = **1.04 km**.
+- Target S69: ratio 1.05× y drift 0.752 km. Ambos drifts <2 km tolerancia.
+
+**Implicación operacional**: el R2 retroactivo Chaiten/PCC/Villarrica/PP planeado para
+S70-1 puede usar con confianza el método R2 S69 verdadero, porque ese método NO suma
+pixels del TIF como VRP. El patrón replicable de 5 pasos está documentado en
+`experiments/120_audit_tif_vrp_sumable/README.md` Parte 2.
+
 ## Auditoría visual S27 (post-render fix, 90d)
 
 Conteo de markers en hotspot-map por Tier A (toggle "Solo principal" + "Solo cráter"):

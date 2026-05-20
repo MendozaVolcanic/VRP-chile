@@ -6,6 +6,29 @@
 
 ---
 
+## H_S70_TIF_VRP_SUMABILITY — TIF MIROVA es campo de radiancia, R2 verdadero no afectado
+
+- **Formulada**: S70-0 (2026-05-20) bloque cero de saneamiento, tras detectar que el hallazgo del commit s15-dev `64bd37d` (S33+ cierre, Lascar TIF Salar Atacama 17,911 px = 1680 MW vs header 0.2 MW) vivía solo en local y podía afectar el método R2 retroactivo del agente S69 antes de replicarlo a Chaiten/PCC/Villarrica/PP.
+- **Pregunta dual**:
+  1. ¿El TIF de `mirova-tif-archive` es VRP per-pixel sumable scene-wide?
+  2. ¿El método R2 S69 verdadero (descrito en `H_S69_R2_RETROACTIVO_LASTARRIA`) se ve afectado por este hallazgo?
+- **Experimento S70-0 T3** (commits `b8408ac` + `3ead58d`): `experiments/120_audit_tif_vrp_sumable/` — Parte 1 audita ingenuamente 5 ALERTAs Lastarria sumando top10/top100 pixels del TIF y comparando con MIROVA CSV NRT. Parte 2 replica el método R2 S69 sobre el mismo caso Lastarria 2026-05-14 05:48 UTC con filtro espacial `<3km del vent`.
+- **Verdict 1 (Parte 1) — el TIF NO es VRP per-pixel sumable**:
+  - Ratio mediano `top10_pixels_sum / MIROVA_CSV_VRP` = **11.5×** (rango 7.9-21.9×) sobre 5 ALERTAs Lastarria.
+  - Drift mediano centroide top10 sin filtro espacial = **10.9 km** vs coordenadas CSV.
+  - Los TIFs tienen >99% pixels positivos en rango 0.035-0.10 → son **campo continuo de radiancia/anomalía visualizable**, no raster sparse de hotspots discretos.
+  - **CONFIRMADO**: los TIFs del repo `mirova-tif-archive` son productos de visualización del campo del MIROVA NRT, no rasters donde cada pixel sea VRP individual sumable.
+- **Verdict 2 (Parte 2) — el método R2 S69 verdadero NO se ve afectado y es REPLICABLE**:
+  - Caso Lastarria 2026-05-14 05:48 UTC VIIRS375 replicado: ratio magnitud `pc.vrp_mw / MIROVA_CSV` = **1.05× exacto** (target S69 1.05×).
+  - Drift centroide TIF top10 **<3km del vent** vs `pc.centroid` = **1.04 km** (target S69 0.752 km, ambos <2 km tolerancia).
+  - El patrón de 5 pasos del método quedó documentado en `experiments/120_audit_tif_vrp_sumable/README.md` Parte 2.
+- **Por qué los 2 verdicts no son contradictorios**: el R2 S69 NO suma pixels del TIF para magnitud — usa `pc.vrp_mw` (output de NUESTRO pipeline ya filtrado a primary_cluster) vs MIROVA CSV NRT. Usa el TIF solo para validar la geometría del centroide, y con filtro espacial `<3km del vent`. Ese filtro convierte un TIF "no sumable globalmente" en un ground truth de centroide útil localmente. Las dos partes del verdict viven en planos distintos (sumabilidad global vs ground truth de centroide local).
+- **Documentación operacional**: D6 agregado a `docs/MIROVA_DIVERGENCES.md` con detalle del fenómeno + criterio de uso correcto del TIF.
+- **Implicación S70-1**: R2 retroactivo Chaiten/PCC/Villarrica/PP procede con el patrón de 5 pasos documentado en `experiments/120_audit_tif_vrp_sumable/README.md` Parte 2. NO replantear método; está validado.
+- **Estado**: **CONFIRMADA** (ambas partes).
+
+---
+
 ## H_S69_R2_RETROACTIVO_LASTARRIA — Adopción S62 Lastarria validada R2 pixel-level
 
 - **Formulada**: S69 (2026-05-20) tras audit S67 reclamó "R2 NO aplicado en adopciones S62-S65".
