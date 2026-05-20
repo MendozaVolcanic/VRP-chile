@@ -323,6 +323,33 @@ C2_SUMMIT_OVERRIDE = _p.get("c2_summit_override", None)
 if C2_SUMMIT_OVERRIDE is not None:
     C2_SUMMIT_OVERRIDE = float(C2_SUMMIT_OVERRIDE)
 
+# S71 D9 fix — 3 alternativas A/B para mitigar FPs path D contextual en cirrus
+# (fondo frío t_bg < ~265K). Ver experiments/127_path_d_tbg_calibration/ y
+# docs/MIROVA_DIVERGENCES.md D9. Las 3 son ortogonales — cualquier combinación
+# válida; defaults OFF preservan operacional.
+#
+# Opción A: gate atmosférico. Si t_bg < min_k, omitir el firing contextual
+# (first_pass Tests 2&3 + path D legacy dnti_ctx). Default None = OFF.
+PATH_D_ATM_GATE_TBG_MIN_K = _p.get("path_d_atm_gate_tbg_min_k", None)
+if PATH_D_ATM_GATE_TBG_MIN_K is not None:
+    PATH_D_ATM_GATE_TBG_MIN_K = float(PATH_D_ATM_GATE_TBG_MIN_K)
+
+# Opción B: co-validación. Cuando ON, el firing contextual (first_pass o path
+# D legacy) solo cuenta si BT path O NTI path también dispararon en la escena.
+# Si solo first_pass/dnti_ctx fired aislado → descartar contribución contextual.
+PATH_D_REQUIRES_COVALIDATION: bool = bool(
+    _p.get("path_d_requires_covalidation", False)
+)
+
+# Opción C: cap magnitud. Cuando el firing es solo contextual (BT/NTI = 0) AND
+# t_bg < cap_tbg_max_k, capear pc.vrp_mw a cap_mw. Ambos defaults None = OFF.
+PATH_D_ONLY_CAP_MW = _p.get("path_d_only_cap_mw", None)
+if PATH_D_ONLY_CAP_MW is not None:
+    PATH_D_ONLY_CAP_MW = float(PATH_D_ONLY_CAP_MW)
+PATH_D_ONLY_CAP_TBG_MAX_K = _p.get("path_d_only_cap_tbg_max_k", None)
+if PATH_D_ONLY_CAP_TBG_MAX_K is not None:
+    PATH_D_ONLY_CAP_TBG_MAX_K = float(PATH_D_ONLY_CAP_TBG_MAX_K)
+
 # S46 Task 5 Drift #4 — Coppola 2016a SP426.5:347-356 dice literalmente:
 #   "active pixels may strongly modify the average values of their surroundings,
 #    with a consequent decrease in the dNTI and dETI values of adjacent pixels.
