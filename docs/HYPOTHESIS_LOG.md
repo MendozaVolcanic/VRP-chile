@@ -16,11 +16,11 @@
   - 10/32 (31.2%) TPs pero amplificados 62× mediano
   - 100% disparan SOLO por path D (BT=0, NTI=0)
   - 91% FPs con t_bg <270K (cirrus alto frío)
-- **Verdict**: **CONFIRMADA**. Path D tiene dos modos de falla simultáneos en cirrus: (1) firing espurio (FPs por heterogeneidad de campo enfriado por nube) y (2) amplificación de magnitud en TPs (suma pixels marginales que MIROVA descarta). Ver D8 para detalles.
+- **Verdict**: **CONFIRMADA**. Path D tiene dos modos de falla simultáneos en cirrus: (1) firing espurio (FPs por heterogeneidad de campo enfriado por nube) y (2) amplificación de magnitud en TPs (suma pixels marginales que MIROVA descarta). Ver D9 para detalles.
 - **Implicación operacional**: la adopción Lastarria S62 (ratio mediano 1.07×) es válida en mediana pero falla en cola alta. El dashboard muestra honestamente lo que el pipeline produce — el bug está en el pipeline, no en el dashboard.
 - **Severidad**: generalizable a Tier A en invierno austral con cirrus persistente. Lascar+Isluga confirmados afectados al mismo timestamp por granules MODIS compartidos.
-- **Acción S70-2**: documentar como D8 + flagear como bloqueo para S71.
-- **Pendiente S71**: brainstorming + A/B test (profile flag aislado) con una de las 3 opciones de gate atmosférico propuestas en D8.
+- **Acción S70-2**: documentar como D9 + flagear como bloqueo para S71.
+- **Pendiente S71**: brainstorming + A/B test (profile flag aislado) con una de las 3 opciones de gate atmosférico propuestas en D9.
 - **Estado**: CONFIRMADA + fix DIFERIDO a S71.
 
 ---

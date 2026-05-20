@@ -200,9 +200,9 @@ pixels del TIF como VRP. El patrón replicable de 5 pasos está documentado en
 
 **Referencias**: `experiments/120_audit_tif_vrp_sumable/`, `experiments/122-125/`, H_S70_R2_RETROACTIVO_4VOLS.
 
-### D8 — Path D (dNTI contextual) dispara FPs y amplifica magnitud en cirrus alto frío
+### D9 — Path D (dNTI contextual) dispara FPs y amplifica magnitud en cirrus alto frío
 
-> Nota nomenclatura: el ID "D8" se usa también en la sección S60-S62 (`### D8 Background ring contaminado — RESUELTO`, RESUELTO operacionalmente vía kernel-bg). Esta entrada D8 documenta una divergencia **distinta y vigente** (bug abierto, sin fix). Ambas conviven en el doc por trazabilidad histórica. Para evitar ambigüedad en referencias cruzadas, citar como "D8 path D cirrus" o "D8 (S70-2 T4)".
+> Nota: D8 está reservado en este doc para la entrada histórica "Background ring contaminado — RESUELTO" (S60-S62). Esta es D9.
 
 **Fenómeno físico**: en invierno austral, los volcanes del norte de Chile (Lastarria, Lascar, Isluga) sufren cobertura frecuente de **cirrus alto** (nubes finas a -25/-30°C, ~10 km altitud). Estas nubes son transparentes a la radiación térmica del volcán pero **enfrían el background MODIS** de los pixels vecinos a 245-270 K. El pixel del cráter (que irradia a su temperatura normal ~270 K) aparece **+25 K relativo al fondo enfriado**, disparando el path D dNTI contextual como anomalía. La fórmula Wooster `vrp_mw = 18.9 × A_pix × BT⁸` aplicada sobre BT=270 K produce un número grande **aunque NO hay radiación volcánica anómala** — es contraste térmico nube-roca amplificado por la potencia 8 de Wooster.
 
