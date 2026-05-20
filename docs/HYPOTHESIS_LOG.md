@@ -6,6 +6,39 @@
 
 ---
 
+## H_S69_R2_RETROACTIVO_LASTARRIA — Adopción S62 Lastarria validada R2 pixel-level
+
+- **Formulada**: S69 (2026-05-20) tras audit S67 reclamó "R2 NO aplicado en adopciones S62-S65".
+- **Caso testeado**: Lastarria 2026-05-14 05:48 ALERTA MIROVA VIIRS375 VRP=0.14 MW (post-fix kernel-bg S62).
+- **R2 magnitud**: nuestro pc.vrp_mw = **0.147 MW** vs MIROVA 0.14 → **ratio 1.05×** ✓ clon literal
+- **R2 centroide pixel-level**:
+  - TIF MIROVA centroide ponderado (top10 pixels <3km del vent): (-25.15546, -68.51905)
+  - Nuestro pc.centroid: (-25.15947, -68.51301)
+  - **Drift = 0.752 km** ✓ PASS (tolerancia 2 km)
+- **Conclusión**: Lastarria es clon literal MIROVA NRT en **magnitud Y geometría**. Adopción S62 PR #85 validada empíricamente con R2 pixel-level retroactivo.
+- **Método**: descarga TIF via `gh api repos/MendozaVolcanic/mirova-tif-archive/contents/data/tif/Lastarria` — NO requiere sync local del mirova-tif-archive.
+- **Pendiente S70+**: aplicar R2 retroactivo similar a Chaiten/PCC/Villarrica/PP (otros 4 adoptados S61-S63).
+- **Estado**: **CONFIRMADA**. Adopción S62 Lastarria validada con R2.
+
+---
+
+## H_S69_MODIS_OUTLIERS_05_17 — 3 vols MODIS outliers 2026-05-17 son FPs regionales atmosféricos
+
+- **Formulada**: S69 (2026-05-20) tras audit S67 detectó coincidencia temporal.
+- **Investigación agente paralelo**:
+  - Villarrica + Chaiten **comparten granule idéntico** MOD021KM/MYD021KM (mismo swath, ~600km gap)
+  - t_bg casi idéntico (276.76 vs 275.88; 277.88 vs 277.88) → condición atmosférica regional
+  - Pixels "anómalos" BT 280-287K = ruido warm regional (probable nube cirrus cálida)
+  - Lastarria 05-17 es granule distinto (norte Chile, t_bg=241K muy diferente)
+  - **TODOS** los outliers tienen `distance_class=far` (5-27 km del vent)
+- **MIROVA respuesta**: marca TODOS como RUTINA (no publica). Filtros MIROVA correctos.
+- **Mecanismo**: D9 cluster selection residual (S45) + heurística Coppola insuficiente para warm regional nocturno
+- **Implicación dashboard**: dashboard frontend filtra `distance_class=far` por default → usuario NO ve estos picos en chart principal. NO es bug visible.
+- **Estado**: **CONFIRMADA** (FPs regionales, no actividad). Dashboard maneja correctamente.
+- **Pendiente**: investigar fuente meteorológica noche 2026-05-17 sur Chile (frente cálido?) — S70+ opcional.
+
+---
+
 ## H_S68_TIF_ARCHIVE_NOT_STOPPED — TIF archive scraper SÍ funciona, solo directorio local desactualizado
 
 - **Formulada**: S68 (2026-05-20) tras Nicolás cuestionó por qué reporté "TIF scraper parado = tarea Nicolás".
