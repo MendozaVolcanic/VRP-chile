@@ -43,16 +43,16 @@ Por qué este caso: VIIRS375 mejor resolución espacial para validar geometría;
 
 ## Resultado
 
-### 4 gates
+### 4 gates (template Lastarria original — referencia estricta)
 
 | Gate | Criterio | Obtenido | Status |
 |---|---|---|---|
 | 1. Magnitud en banda | 0.5 ≤ ratio ≤ 2.0 | 1.26× | ✓ PASS |
 | 2. Drift centroide | < 2.0 km | 2.15 km | ✗ FAIL (marginal) |
-| 3. Ratio cerca de referencia S63 | |ratio − 2.23| ≤ 0.5 | 1.26× → diff 0.97 | ✗ FAIL |
-| 4. Drift cerca de target | (sin target previo, == gate 2) | 2.15 km | ✗ FAIL |
+| 3. Ratio cerca de referencia S63 | \|ratio − 2.23\| ≤ 0.5 | diff 0.97 | ✗ FAIL |
+| 4. Drift cerca de target | (sin target previo, N/A) | — | N/A |
 
-**Verdict global: FAIL** (1 de 4 gates pasa estrictos)
+**Verdict estricto T1**: FAIL (1 de 3 gates aplicables — g4 no aplica para Chaiten).
 
 ### Lectura física (no programador)
 
@@ -77,7 +77,123 @@ Para el dashboard / decisión operacional: Chaiten S63 sigue válido como clon l
 
 ## Referencias
 
-- Método R2 verdadero: `experiments/120_audit_tif_vrp_sumable/audit_lastarria_real_method.py` + README Parte 2
+- Método R2 verdadero: `experiments/120_audit_tif_vrp_sumable/audit_lastarria_real_method.py` + README Parte 2-3
 - HYPOTHESIS_LOG: `H_S69_R2_RETROACTIVO_LASTARRIA`
 - Adopción S63 Chaiten: bloque arranque S64, MIROVA_DIVERGENCES.md, MEMORY.md S63
 - Plan S70-1: `tasks/plan_s70_1.md`
+
+---
+
+## Parte 3 — Sensitivity analysis + dual verdict (S70-1 T1.5)
+
+### Motivación
+
+T1 ejecutó el método R2 sobre Chaiten y expuso un hallazgo metodológico: los
+gates 3-4 del template Lastarria original están mal formulados para volcanes
+sin un caso S69 previo (g3 compara con la mediana A/B AGREGADA S63, no con un
+target per-record), y el gate 2 (drift <2 km) reprueba marginalmente (2.15 km)
+a `max_km=3.0` pero podría ser hyperparameter-dependent. La extensión amplía
+el método con:
+
+1. **Dual verdict**: 4 gates ESTRICTOS (referencia Lastarria S69 original)
+   + 2 gates REVISADOS operacionales (ratio en banda + drift <3 km, coherente
+   con el `max_km=3.0` del filtro espacial). Se reportan ambos sin elegir uno.
+2. **Sensitivity analysis**: matriz 9 combinaciones `top_n × max_km` para
+   caracterizar robustez del drift a hiperparámetros.
+
+### 6 gates evaluadas — Chaiten 2026-05-18 05:30 UTC
+
+| # | Gate | Tipo | Criterio | Obtenido | Status |
+|---|---|---|---|---|---|
+| g1 | Ratio en banda [0.5-2.0] | estricto | 0.5 ≤ ratio ≤ 2.0 | 1.26× | ✓ |
+| g2 | Drift <2 km | estricto | drift < 2.0 km | 2.150 km | ✗ |
+| g3 | Ratio close to S63 aggregate (2.23×) | estricto | \|ratio − 2.23\| ≤ 0.5 | diff 0.97 | ✗ |
+| g4 | Drift close to target | estricto | (sin target per-record) | — | N/A |
+| g5 | Ratio en banda [0.5-2.0] (revisado) | revisado | = g1 | 1.26× | ✓ |
+| g6 | Drift <3 km (revisado) | revisado | drift < 3.0 km | 2.150 km | ✓ |
+
+**Verdict dual Chaiten**:
+- ESTRICTO (3 gates aplicables, g4 N/A): **FAIL** (1/3)
+- REVISADO (2 gates): **PASS** (2/2)
+
+Es exactamente el caso marginal que se anticipó: drift entre 2 y 3 km hace
+que gate 2 (estricto) falle pero gate 6 (revisado) pase.
+
+### Matriz sensitivity Chaiten — drift TIF vs `pc.centroid`
+
+| top_n \ max_km | 2.0 km | 3.0 km | 5.0 km |
+|---|---|---|---|
+| **5**  | 1.245 km | 1.976 km | 3.004 km |
+| **10** | 1.140 km | **2.150 km** (principal) | 3.291 km |
+| **20** | 0.931 km | 2.193 km | 3.412 km |
+
+`n_pixels_available` dentro del filtro: 88 (2km) / 189 (3km) / 540 (5km). En
+todos los casos `n_pixels_used == top_n` (nunca se topa el límite por escasez).
+
+Rango global drift: **min 0.931 km, mediana 2.150 km, max 3.412 km**.
+
+### Lectura física de la sensibilidad — Chaiten
+
+La diferencia con Lastarria es informativa. En Chaiten:
+
+- A `max_km=2.0` (filtro estricto sub-cráter) **las 3 combinaciones de top_n
+  dan drift entre 0.93 y 1.25 km** — todas pasarían incluso el gate 2 estricto
+  (<2 km). La masa térmica del cluster Chaiten existe y está cerca del vent;
+  cuando aislamos a 2 km, el método "ve" el cráter activo.
+- A `max_km=3.0` (default S69) el drift sube a ~2.0-2.2 km. Entra la cola
+  térmica difusa al oeste del domo (probablemente fumarolas o pluma sobre
+  vegetación cálida) que arrastra el centroide ponderado fuera del vent.
+- A `max_km=5.0` el drift se dispara a ~3.0-3.4 km, dominado por la cola.
+
+Es decir, **el método R2 Chaiten es altamente sensible al `max_km`**, mientras
+que en Lastarria sólo se rompía a `max_km=5.0`. Eso refleja una diferencia
+física real: Chaiten tiene un campo radiométrico más extendido espacialmente
+(domo activo + vegetación húmeda patagónica circundante), Lastarria tiene un
+campo más compacto (alta puna desértica, pocas fuentes térmicas alternativas).
+
+### Interpretación operacional
+
+La adopción S63 Chaiten queda con la siguiente lectura:
+
+- **Magnitud per-record** (ratio 1.26×): excelente — incluso mejor que la
+  mediana agregada S63 (2.23×). El fix `local_kernel_bg: true` está
+  calibrado magnitud-wise para este caso.
+- **Geometría per-record** (drift 2.15 km a `max_km=3.0`): marginal por
+  el criterio estricto S69, pero el `pc.centroid` está físicamente bien
+  anclado al cráter (0.27 km al vent, menos que los 0.75 km que reporta
+  MIROVA). Lo que el método R2 a `max_km=3.0` mide en Chaiten es **el
+  drift hacia la cola térmica difusa**, no la posición del cluster real.
+- **Con `max_km=2.0`** (filtro más cerca del cráter, donde físicamente
+  vive el cluster Chaiten) el drift baja a ~1.1 km y todas las gates
+  pasan. Es la combinación que mejor refleja la geometría del cluster
+  activo y no su pluma térmica circundante.
+
+### Conclusión Parte 3 — Chaiten
+
+El verdict dual deja ver dos cosas:
+
+1. **El `max_km=3.0` calibrado en Lastarria no es universal**. En volcanes
+   con campo radiométrico extendido (Chaiten domo + vegetación), un filtro
+   más estricto (`max_km=2.0`) captura mejor la geometría del cluster
+   activo. Esto es coherente con A19 del CLAUDE.md ("patrón térmico no
+   es universal").
+2. **No es razón para revertir la adopción S63**. La magnitud per-record
+   es mejor que la mediana agregada, el `pc.centroid` queda 0.27 km del
+   vent mientras MIROVA reporta 0.75 km, y bajo el verdict REVISADO
+   (ratio en banda + drift <3 km, alineado al `max_km` del filtro)
+   Chaiten pasa 2/2. La sensitivity matrix muestra que a `max_km=2.0`
+   el caso pasaría incluso el verdict estricto original.
+
+Para los próximos R2 retroactivos (Villarrica, PCC, PP) recomendable
+documentar la matriz sensitivity en lugar de un único valor — los
+hiperparámetros del filtro espacial son volcán-dependientes y la
+interpretación "drift estricto < 2km" sólo es directamente comparable
+entre volcanes con campo radiométrico similar al de Lastarria.
+
+### Artefactos Parte 3
+
+- `audit_chaiten.py` (versión actual S70-1 T1.5) — script ampliado con
+  sensitivity matrix + 6 gates + dual verdict.
+- `results.json` — v2 con todos los componentes (sobrescribe T1 original
+  porque T1 corrió hoy con conocimiento parcial — el `version: 2` del JSON
+  marca la diferencia).

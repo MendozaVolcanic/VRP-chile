@@ -1,0 +1,187 @@
+{
+  "version": 2,
+  "method": "R2_S69_verdadero_ampliado_S70_1_T1_5",
+  "case": {
+    "datetime_utc": "2026-05-14 05:48",
+    "sensor": "VIIRS_NOAA21",
+    "mirova_csv_timestamp": "2026-05-14 05:48:02",
+    "tipo_registro": "ALERTA_TERMICA",
+    "tif_path": "mirova-tif-archive\\data\\tif\\Lastarria\\20260514_054802_VIIRS375.tif"
+  },
+  "vent": {
+    "lat": -25.168,
+    "lon": -68.507
+  },
+  "pipeline_primary_cluster": {
+    "vrp_mw": 0.147,
+    "centroid_lat": -25.15947,
+    "centroid_lon": -68.51301,
+    "centroid_dist_km": 1.125,
+    "n_pixels": 1
+  },
+  "mirova_csv": {
+    "vrp_mw": 0.14,
+    "distancia_km": 2.4
+  },
+  "magnitude_r2": {
+    "ratio_pc_vrp_vs_mirova_vrp": 1.0499999999999998,
+    "target_s69_ratio": 1.05,
+    "target_s69_drift_km": 0.752
+  },
+  "geometry_r2_principal": {
+    "top_n": 10,
+    "max_km": 3.0,
+    "tif_top10_within_3km_centroid_lat": -25.15130187250722,
+    "tif_top10_within_3km_centroid_lon": -68.51799705518256,
+    "tif_top10_within_3km_sum_mw_informative": 0.841369108538282,
+    "tif_top10_within_3km_n_used": 10,
+    "tif_positive_pixels_full": 17906,
+    "tif_positive_pixels_within_3km": 206,
+    "tif_top_values_min": 0.07904966295363061,
+    "tif_top_values_max": 0.1003799478228059,
+    "drift_km_tif_top10_vs_pc_centroid": 1.0377243818004547,
+    "target_s69_tif_top10_centroid": [
+      -25.15546,
+      -68.51905
+    ]
+  },
+  "gates": {
+    "g1_ratio_in_band_strict": true,
+    "g2_drift_under_2km_strict": true,
+    "g3_ratio_close_to_target_strict": true,
+    "g4_drift_close_to_target_strict": true,
+    "g5_ratio_in_band_revised": true,
+    "g6_drift_under_3km_revised": true
+  },
+  "verdict_dual": {
+    "strict": {
+      "result": "PASS",
+      "n_pass": 4,
+      "n_total": 4,
+      "gate_keys": [
+        "g1_ratio_in_band_strict",
+        "g2_drift_under_2km_strict",
+        "g3_ratio_close_to_target_strict",
+        "g4_drift_close_to_target_strict"
+      ],
+      "note": "4 gates referencia Lastarria S69 original (banda + drift<2km + close-to-target ratio + close-to-target drift)"
+    },
+    "revised": {
+      "result": "PASS",
+      "n_pass": 2,
+      "n_total": 2,
+      "gate_keys": [
+        "g5_ratio_in_band_revised",
+        "g6_drift_under_3km_revised"
+      ],
+      "note": "2 gates operacionales: ratio en banda + drift<3km (coherente con max_km del filtro espacial)"
+    }
+  },
+  "sensitivity_analysis": {
+    "grid_top_n": [
+      5,
+      10,
+      20
+    ],
+    "grid_max_km": [
+      2.0,
+      3.0,
+      5.0
+    ],
+    "matrix": [
+      {
+        "top_n": 5,
+        "max_km": 2.0,
+        "n_pixels_available_within_max_km": 88,
+        "n_pixels_used": 5,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -25.15602993936601,
+        "centroid_lon": -68.51484899496836,
+        "drift_km": 0.4249442060338813
+      },
+      {
+        "top_n": 5,
+        "max_km": 3.0,
+        "n_pixels_available_within_max_km": 206,
+        "n_pixels_used": 5,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -25.153283576183114,
+        "centroid_lon": -68.51668134426663,
+        "drift_km": 0.7808621388535704
+      },
+      {
+        "top_n": 5,
+        "max_km": 5.0,
+        "n_pixels_available_within_max_km": 555,
+        "n_pixels_used": 5,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -25.1545170187383,
+        "centroid_lon": -68.5460802872324,
+        "drift_km": 3.3737052223900856
+      },
+      {
+        "top_n": 10,
+        "max_km": 2.0,
+        "n_pixels_available_within_max_km": 88,
+        "n_pixels_used": 10,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -25.15810099420046,
+        "centroid_lon": -68.51119756983526,
+        "drift_km": 0.237587575389988
+      },
+      {
+        "top_n": 10,
+        "max_km": 3.0,
+        "n_pixels_available_within_max_km": 206,
+        "n_pixels_used": 10,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -25.15130187250722,
+        "centroid_lon": -68.51799705518256,
+        "drift_km": 1.0377243818004547
+      },
+      {
+        "top_n": 10,
+        "max_km": 5.0,
+        "n_pixels_available_within_max_km": 555,
+        "n_pixels_used": 10,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -25.16598688244451,
+        "centroid_lon": -68.54680510220398,
+        "drift_km": 3.4775760996154124
+      },
+      {
+        "top_n": 20,
+        "max_km": 2.0,
+        "n_pixels_available_within_max_km": 88,
+        "n_pixels_used": 20,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -25.160480344568878,
+        "centroid_lon": -68.50590519759608,
+        "drift_km": 0.7238360339597246
+      },
+      {
+        "top_n": 20,
+        "max_km": 3.0,
+        "n_pixels_available_within_max_km": 206,
+        "n_pixels_used": 20,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -25.15415449603373,
+        "centroid_lon": -68.51867133669606,
+        "drift_km": 0.8209884106395091
+      },
+      {
+        "top_n": 20,
+        "max_km": 5.0,
+        "n_pixels_available_within_max_km": 555,
+        "n_pixels_used": 20,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -25.172066049367153,
+        "centroid_lon": -68.54645198111153,
+        "drift_km": 3.6454214635759574
+      }
+    ],
+    "drift_km_min": 0.237587575389988,
+    "drift_km_median": 0.8209884106395091,
+    "drift_km_max": 3.6454214635759574
+  }
+}

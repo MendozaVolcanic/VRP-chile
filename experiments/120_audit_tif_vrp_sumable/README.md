@@ -290,5 +290,84 @@ S62/S69 estaba mal apoyada.
 ### Archivos Parte 2
 
 - `audit_lastarria_real_method.py` — replicación del R2 S69 verdadero sobre el
-  caso Lastarria 2026-05-14 05:48 UTC.
-- `results_real_method.json` — resultados estructurados de la replicación.
+  caso Lastarria 2026-05-14 05:48 UTC. Versión actual (S70-1 T1.5) incluye
+  además sensitivity analysis + dual verdict (ver Parte 3).
+- `results_real_method.json` — resultados v1 (Parte 2 original, sólo principal).
+- `results_real_method_v2.json` — resultados v2 con 6 gates + matriz 9 combinaciones (S70-1 T1.5).
+
+---
+
+## Parte 3 — Sensitivity analysis + dual verdict (S70-1 T1.5)
+
+### Motivación
+
+El método R2 verdadero (Parte 2) usa por convención `top_n=10, max_km=3.0`. T1
+sobre Chaiten (`experiments/122_r2_chaiten/`) expuso un hallazgo metodológico:
+los gates 3-4 originales del template Lastarria asumen un target previo
+per-record que no existe para volcanes sin caso S69 previo, y el gate 2
+(drift <2 km) puede ser sensible al `max_km` del filtro espacial. Ampliamos
+el método con dos extensiones:
+
+1. **Dual verdict (estricto + revisado)** — se reportan AMBOS sin elegir uno:
+   - **Estricto (4 gates)**: referencia original Lastarria S69 (banda
+     [0.5,2.0×] + drift <2km + ratio cerca de target + drift cerca de target).
+   - **Revisado (2 gates operacionales)**: ratio en banda [0.5,2.0×] + drift
+     <3km. El drift relajado es coherente con `max_km=3.0` del filtro: si
+     filtramos pixels a 3 km del vent, el centroide ponderado físicamente
+     puede caer hasta a ese mismo radio.
+2. **Sensitivity analysis** — matriz 9 combinaciones `top_n ∈ {5,10,20}` ×
+   `max_km ∈ {2.0, 3.0, 5.0}` km. Caracteriza cuánto cambia el drift al
+   variar los hiperparámetros del método.
+
+### 6 gates evaluadas — Lastarria 2026-05-14 05:48 UTC
+
+| # | Gate | Tipo | Criterio | Obtenido | Status |
+|---|---|---|---|---|---|
+| g1 | Ratio en banda [0.5-2.0] | estricto | 0.5 ≤ ratio ≤ 2.0 | 1.05× | ✓ |
+| g2 | Drift <2 km | estricto | drift < 2.0 km | 1.038 km | ✓ |
+| g3 | Ratio close to S69 target (1.05×) | estricto | \|ratio − 1.05\| ≤ 0.5 | 0.00 | ✓ |
+| g4 | Drift close to S69 target (0.752 km) | estricto | \|drift − 0.752\| ≤ 0.5 | 0.286 | ✓ |
+| g5 | Ratio en banda [0.5-2.0] (revisado) | revisado | = g1 | 1.05× | ✓ |
+| g6 | Drift <3 km (revisado) | revisado | drift < 3.0 km | 1.038 km | ✓ |
+
+**Verdict dual Lastarria**:
+- ESTRICTO: **PASS** (4/4)
+- REVISADO: **PASS** (2/2)
+
+### Matriz sensitivity Lastarria — drift TIF vs `pc.centroid`
+
+| top_n \ max_km | 2.0 km | 3.0 km | 5.0 km |
+|---|---|---|---|
+| **5**  | 0.425 km | 0.781 km | 3.374 km |
+| **10** | 0.238 km | **1.038 km** (principal) | 3.478 km |
+| **20** | 0.724 km | 0.821 km | 3.645 km |
+
+`n_pixels_available` dentro del filtro: 88 (2km) / 206 (3km) / 555 (5km). En
+todos los casos `n_pixels_used == top_n` (nunca se topa el límite por escasez).
+
+Rango global drift: **min 0.238 km, mediana 0.821 km, max 3.645 km**.
+
+### Lectura física de la sensibilidad — Lastarria
+
+El drift se mantiene **bajo 1.1 km en 6 de 9 combinaciones** (las que filtran
+a 2 o 3 km del vent). Las únicas 3 combinaciones donde el drift supera 3 km
+son las que abren el filtro a 5 km — entran pixels a la cola occidental del
+campo radiométrico del TIF que arrastran el centroide ponderado fuera del
+cráter. Eso no es una falla del método sino una característica conocida del
+TIF MIROVA: es un campo continuo que pinta valores positivos sobre todo el
+bbox de 50×50 km, así que el `max_km` actúa como la máscara espacial que
+aísla la región físicamente coherente con el cráter. La regla operacional
+del S69 (`max_km=3.0`) es la más conservadora razonable.
+
+### Conclusión Parte 3 — Lastarria
+
+Lastarria pasa **los 6 gates** con el `top_n=10, max_km=3.0` principal, y
+con cualquier combinación `(top_n, max_km≤3.0)` el drift se mantiene en
+banda. El método es robusto en este volcán a la elección de hiperparámetros
+mientras el filtro espacial se mantenga en el rango sub-cráter (≤3 km).
+
+Verdict estricto y revisado coinciden — no hay divergencia porque Lastarria
+2026-05-14 es un caso donde el cluster del pipeline y el campo radiométrico
+del TIF están bien alineados. La divergencia estricto vs revisado debería
+aparecer sólo en casos marginales donde drift cae entre 2 y 3 km (gate 2
+falla, gate 6 pasa). Ver `experiments/122_r2_chaiten/` para un ejemplo.
