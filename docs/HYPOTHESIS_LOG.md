@@ -6,6 +6,26 @@
 
 ---
 
+## H_S68_TIF_ARCHIVE_NOT_STOPPED — TIF archive scraper SÍ funciona, solo directorio local desactualizado
+
+- **Formulada**: S68 (2026-05-20) tras Nicolás cuestionó por qué reporté "TIF scraper parado = tarea Nicolás".
+- **Hipótesis inicial (refutada)**: TIF archive scraper parado desde 2026-05-11 (agente C audit S67).
+- **Hipótesis revisada (CONFIRMADA)**: el scraper TIF corre perfectamente. Lo que está desactualizado es el **directorio LOCAL** `mirova-tif-archive/` (no se sincroniza con `git pull`).
+- **Evidencia**:
+  - Repo `MendozaVolcanic/mirova-tif-archive` GH Actions workflow `poll.yml` corriendo cada 5 min.
+  - Último commit remoto: 2026-05-20 12:51:36 UTC (success, "46 new MIROVA snapshot(s)").
+  - 10 últimas runs todas success.
+  - 175 TIFs Tupungatito remoto (último 2026-05-20 09:28).
+  - Directorio LOCAL: 38 TIFs Tupungatito, último 2026-05-11 (9 días gap solo en sync local).
+- **Origen del error**: agente C miró fechas en directorio local sin checkear repo remoto. Yo asumí su reporte sin verificar.
+- **Solución**: `cd mirova-tif-archive && git pull` cuando Nicolás quiera sincronizar (operación local de su PC). Alternativamente, descargar TIFs específicos vía `gh api repos/MendozaVolcanic/mirova-tif-archive/contents/data/tif/...` cuando se necesite uno puntual para R2 audit.
+- **NO es tarea de Nicolás** mantener el scraper — está automatizado en GH Actions.
+- **Estado**: **CONFIRMADA**.
+- **Lección S68 #2**: agente audit puede reportar "scraper parado" cuando es "directorio local desactualizado". Verificar SIEMPRE estado remoto antes de declarar gap.
+- **Impacto**: R2 forensic audits NO están bloqueados — TIFs disponibles vía gh API.
+
+---
+
 ## H_S68_ANTIPATRONES_AUDIT — Anti-patrones MISSION.md mitigados operacionalmente, NO drift crítico
 
 - **Formulada**: S68 (2026-05-20) tras audit integral S60-S67 levantó alarma sobre anti-patrones MISSION.md re-introducidos.
