@@ -61,6 +61,8 @@
 
 ### Prioridad MEDIA — R2 retroactivos (replicar método Lastarria)
 
+> **Nota S70-0 T3 (2026-05-20)**: el método R2 S69 fue auditado y validado en S70-0 T3. Ver `docs/MIROVA_DIVERGENCES.md` D6 y `docs/HYPOTHESIS_LOG.md` H_S70_TIF_VRP_SUMABILITY. El TIF de `mirova-tif-archive` NO se debe sumar como VRP per-pixel (es campo de radiancia visualizable), pero el método R2 S69 NO suma TIF — usa `pc.vrp_mw` (pipeline) vs MIROVA CSV para magnitud y TIF top10 **<3km del vent** para geometría. Patrón replicable de 5 pasos documentado en `experiments/120_audit_tif_vrp_sumable/README.md` Parte 2.
+
 **1. R2 retroactivo Chaiten/PCC/Villarrica/PP** (cierra deuda audit S67)
 
 Método validado S69 (experiments/115_r2 implícito):

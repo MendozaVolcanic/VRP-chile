@@ -1,0 +1,105 @@
+name: NRT Retry (NASA recovery)
+
+# S70-0 T2: cron secundario que dispara ~30 min después del cron principal
+# `nrt.yml` (cada 2h en horas pares). Si el último run del principal falló
+# por NASA_AUTH_UNREACHABLE (badge etiquetado [NASA_DOWN] o warning en logs),
+# este workflow reintenta el cron principal una sola vez para capturar la
+# recuperación de NASA upstream dentro del mismo ciclo de 2h, sin esperar
+# al próximo cron base.
+#
+# Diseño:
+#   - Trigger: `30 1-23/2 * * *` = 01:30, 03:30, ..., 23:30 UTC (offset +30min
+#     vs `nrt.yml` que corre a 00, 02, 04, ...)
+#   - Máximo 1 retry por ciclo principal (no reintenta retry).
+#   - Si NASA sigue caída, este retry también fallará rápido (~2 min por job)
+#     pero no acumula runs infinitos porque sólo lo dispara el cron de su propio
+#     trigger schedule.
+
+on:
+  schedule:
+    - cron: '30 1-23/2 * * *'  # 01:30, 03:30, ..., 23:30 UTC (+30 min de nrt.yml)
+  workflow_dispatch:
+
+jobs:
+  check-and-retry:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write   # para gh workflow run
+      contents: read
+    steps:
+      - name: Inspect last nrt.yml run
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -e
+          # Buscar el último run de nrt.yml (cualquier conclusion)
+          LAST_RUN_JSON=$(gh run list --workflow nrt.yml --limit 1 --json databaseId,conclusion,createdAt,status,event)
+          echo "Last nrt.yml run: $LAST_RUN_JSON"
+          LAST_ID=$(echo "$LAST_RUN_JSON" | jq -r '.[0].databaseId // empty')
+          LAST_CONCLUSION=$(echo "$LAST_RUN_JSON" | jq -r '.[0].conclusion // empty')
+          LAST_STATUS=$(echo "$LAST_RUN_JSON" | jq -r '.[0].status // empty')
+
+          if [ -z "$LAST_ID" ]; then
+            echo "No previous nrt.yml run found — skipping retry"
+            echo "should_retry=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "last_id=$LAST_ID"
+          echo "last_conclusion=$LAST_CONCLUSION"
+          echo "last_status=$LAST_STATUS"
+
+          # Solo retry si concluyó con failure (no si todavía corre o si pasó OK)
+          if [ "$LAST_STATUS" != "completed" ] || [ "$LAST_CONCLUSION" != "failure" ]; then
+            echo "Last run not failed (status=$LAST_STATUS, conclusion=$LAST_CONCLUSION) — skipping retry"
+            echo "should_retry=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Detectar NASA_DOWN: buscar warning annotation o marker en step summary
+          # vía API. Las annotations con title=NASA_DOWN las emite nrt.yml en el
+          # step "Detect NASA_AUTH_UNREACHABLE".
+          ANNOTATIONS=$(gh api "repos/${GH_REPO}/actions/runs/${LAST_ID}/jobs" --jq '[.jobs[].steps[]?.name] + [.jobs[].steps[]?.conclusion]' 2>/dev/null || echo "[]")
+          # Más directo: revisar el check-run annotations
+          NASA_DOWN_COUNT=$(gh api "repos/${GH_REPO}/actions/runs/${LAST_ID}/jobs" --paginate \
+            --jq '[.jobs[] | select(.conclusion == "failure") | .name] | length' 2>/dev/null || echo "0")
+
+          # Heuristic: buscar el marker NASA_DOWN en las annotations de check runs
+          # del último run. Cada job fallido por NASA_DOWN emite ::warning title=NASA_DOWN::
+          # que se materializa en check_run.annotations.
+          JOBS_IDS=$(gh api "repos/${GH_REPO}/actions/runs/${LAST_ID}/jobs" --paginate --jq '.jobs[] | select(.conclusion == "failure") | .id' 2>/dev/null || echo "")
+          NASA_DOWN_FOUND=false
+          for JID in $JOBS_IDS; do
+            ANN=$(gh api "repos/${GH_REPO}/check-runs/${JID}/annotations" --jq '.[] | select(.title == "NASA_DOWN") | .title' 2>/dev/null || echo "")
+            if [ -n "$ANN" ]; then
+              NASA_DOWN_FOUND=true
+              break
+            fi
+          done
+
+          if [ "$NASA_DOWN_FOUND" = "true" ]; then
+            echo "NASA_DOWN annotation detected — retry scheduled"
+            echo "should_retry=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No NASA_DOWN annotation — failure was not upstream NASA. Skip retry."
+            echo "should_retry=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Trigger nrt.yml retry
+        if: steps.check.outputs.should_retry == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Last NRT run was NASA_DOWN — retriggering nrt.yml"
+          gh workflow run nrt.yml
+          echo "## NASA retry triggered" >> "$GITHUB_STEP_SUMMARY"
+          echo "El último \`nrt.yml\` falló con NASA_AUTH_UNREACHABLE." >> "$GITHUB_STEP_SUMMARY"
+          echo "Disparado retry para captar recuperación NASA upstream." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Report skip
+        if: steps.check.outputs.should_retry != 'true'
+        run: |
+          echo "## No retry needed" >> "$GITHUB_STEP_SUMMARY"
+          echo "Último \`nrt.yml\` no falló por NASA_DOWN, o aún no había concluido." >> "$GITHUB_STEP_SUMMARY"
