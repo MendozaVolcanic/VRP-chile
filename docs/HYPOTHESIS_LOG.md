@@ -6,6 +6,30 @@
 
 ---
 
+## H_S64_TUPUNGATITO_MIROVA_CENTER_OFFSET — `mirova_center` Tupungatito apunta a bbox center, no a actividad real
+
+- **Formulada**: S64 (2026-05-20) tras Nicolás clarificó coord cráter activo (-33.388686, -69.826254) + validación visual PNGs Distance MIROVA.
+- **Hipótesis inicial S62-S63 (refutada)**: anomalía Tupungatito en (-33.43, -69.79) (bin top 49% records). Era considerada actividad persistente flanco SE.
+- **Hipótesis revisada (CONFIRMADA)**: el cráter activo Tupungatito está en `vent_lat` actual (-33.388686, -69.826254). El bin (-33.43, -69.79) son FPs sistemáticos del pipeline causados por `mirova_center` mal posicionado (S16 puso offset 2.99 km SE basado en bbox center KMZ, NO en centroide de actividad).
+- **Evidencia decisiva**:
+  - **Nicolás confirmó**: "es un lago cratérico que se calienta y tiene fumarolas, coords (-33.388686, -69.826254)" — coincide casi exactamente con `vent_lat` Nicolás actual (~40m diferencia)
+  - **PNG MIROVA Distance Tupungatito**: muestra banda densa horizontal detecciones <7km **pegada a 5 km** todo el año (cientos de puntos rojos)
+  - **Cálculo dist**: mirova_center (-33.4269, -69.8004) → cráter Nicolás (-33.388, -69.826) = **4.87 km** ≈ banda 5 km MIROVA
+  - **Cluster MIROVA NRT**: actividad real está EN el cráter (vent_lat), MIROVA reporta dist 5 km desde su mirova_center (que NO es coord de actividad)
+- **Por qué pipeline elige FPs (bin SE)**:
+  - vent_anchored ancla en `mirova_center` (-33.4269, -69.8004) por default cuando está definido
+  - inner_radius=7 desde mirova_center incluye TANTO cráter activo (4.87 km al N) COMO flanco SE (~3 km del mirova_center)
+  - Cluster glaciar heterogéneo del flanco SE tiene más pixels Test 1 → vence al cluster cráter real pequeño
+- **Fix correcto (NO implementado S64 — diferido)**:
+  - Quitar o cambiar `mirova_center` Tupungatito al vent_lat (-33.388686, -69.826254)
+  - vent_anchored anclará en cráter activo correcto
+  - Cluster bin SE se reclasifica `far` automáticamente
+  - Predicción: gap LEGACY 10.37× → fix esperado ~2-3× (similar Lastarria post-fix)
+- **Diferimiento**: Nicolás decidió pausar Tupungatito S65+ para mover focus a otros pendientes (MODIS final_hotspot fix, monitoring NRT). Aplicable cuando se revise S65+.
+- **Estado**: **CONFIRMADA (diagnóstico)**, **DIFERIDA (implementación)**.
+
+---
+
 ## H_S62_LASTARRIA_TUPUNGATITO_AB_RESULTS — A/B kernel-bg S62 resultados
 
 - **Formulada**: S62 ejecución (2026-05-19) tras audit Task 6 run 26072884472.
