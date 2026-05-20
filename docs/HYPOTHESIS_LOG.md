@@ -6,6 +6,59 @@
 
 ---
 
+## H_S67_DASHBOARD_AUDIT_FINDINGS — 11 inconsistencias frontend + MODIS over-detection sistémica
+
+- **Formulada**: S67 (2026-05-20) tras audit completo dashboard data + frontend.
+
+### Hallazgo 1: MODIS over-detection sistémica (51% records inflados)
+
+- **51% MODIS records últimos 10d >5 MW** (22/43) sin match MIROVA NRT
+- 80% Villarrica, 50-67% otros vols Muy Bajo
+- Lascar/Copahue 0% inflados (calibrados natural)
+- **Outlier extremo**: Tupungatito 82.52 MW MODIS_TERRA 2026-05-17 01:05
+  - Cluster correcto (1.09km cráter) pero 7 pixels MODIS × ΔL=14K sobre ring 257K extremo frío
+  - vrp_mir_mw scene-wide 274 MW total
+- **Mecanismo**: MODIS 1km resolución con cluster_hotspots agrupa pixels lago/glaciar/cráter. Sin kernel-bg local (Tupungatito false, S62 refutó), ring background extremo glaciar (250-260K) infla ΔL × pixel.
+- **MIROVA NO publica MODIS** para vols Muy Bajo consistentemente (su threshold NRT más estricto)
+- **Implicación dashboard**: usuario ve picos 27/82 MW que MIROVA NO reporta → confusión
+
+### Hallazgo 2: 11 inconsistencias frontend identificadas
+
+Top 5 críticas:
+1. **VRE chart `buildVREData` NO usa `mirovaEqVrp`** → diverge de stat box VRE
+2. **MIROVA Comparison chart NO valida `pc.centroid_dist_km > innerKm`** → potencial regresión bug S33
+3. **Toggle "Solo cráter" parcial**: NO se propaga a VRE/Distance/MIROVA Comp/overview hotspot/cards counts
+4. **About modal desactualizado** (cita S48 F1 98.3%, no menciona kernel-bg adoptions S61-S65 Villarrica/PP/Lastarria/Chaiten/PCC)
+5. **No label visual** distinguiendo vols con kernel-bg adoptado vs sin fix
+
+Otros 6: stat "Detecciones" ≠ tabla events count, fallback legacy sin distance check, marker size lineal (no log), hotspot layer stale 5min auto-refresh, sensor legend toggle parcial, toggles no persisten sessionStorage.
+
+### Plan S68 (no implementado S67)
+
+**Críticos**:
+- A. Unificar source-of-truth VRP frontend: 1 función `getReportableVrp` reemplaza 4+ fallback chains
+- B. Filtrar/etiquetar MODIS over-detection sub-MIROVA en dashboard
+
+**Importantes**:
+- C. About modal con métricas S66-S67
+- D. Label visual kernel-bg adoptado
+
+**Bajos**:
+- E-K. Bugs menores
+
+### Estado adopciones operacionales sin cambios S67
+
+7-8/9 vols Tier A clon literal MIROVA NRT logrado (Lascar, Isluga, Villarrica, PP, Lastarria, Chaiten, PCC + Tupungatito 56% records). Pipeline operacional intacto. Dashboard live sirve data correcta, solo presenta con bugs visuales documentados.
+
+### Estado: **CONFIRMADA**.
+
+### Resolución: 
+- NO implementar fixes S67 (Nicolás decisión: persistir + planificar)
+- Bloque arranque S68 con plan priorizado A+B críticos
+- Implementación S68 con TDD + design doc según protocolo
+
+---
+
 ## H_S66_TUPUNGATITO_FIX_VALIDATED_PARTIAL — Fix mirova_center cura 56% de ALERTAS Tupungatito
 
 - **Formulada**: S66 (2026-05-20) tras audit reproc operacional Tupungatito (run 26143572382).
