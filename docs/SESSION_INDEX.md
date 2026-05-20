@@ -80,3 +80,9 @@ del cráter) en lugar del anillo bbox global. Eso debería:
 - SWIR pipeline Massimetti 2020 (Sentinel-2 MSI + Landsat-8/9 OLI) — scope grande.
 - `scripts/preflight_cmr_coverage.py` — chequeo CMR antes de afirmar "sin data".
 - Investigar granule MODIS Lastarria dañado (BT=566K) — requiere pyhdf en Linux.
+
+---
+
+## S70-1 (2026-05-20)
+
+R2 retroactivo 5/5 Tier A. Deuda audit S67 cerrada. Hallazgos metodológicos: bandas gates por régimen del vol, R2 con centroide no aplica a anomalías difusas (PCC lacolito).

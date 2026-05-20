@@ -82,6 +82,27 @@ Casos sugeridos:
 
 Costo: ~15 min cada uno con método validado.
 
+---
+
+### S70-1 RESUELTO (2026-05-20): R2 retroactivo completado 5/5 Tier A
+
+**Resultados**:
+- Lastarria: PASS limpio (focal Tier A Alto)
+- Chaiten: PASS revisado (focal + cola térmica)
+- Villarrica: PASS revisado (focal + halo lava lake)
+- PP: marginal (ratio 2.08× sobre límite 2.0 por 0.08, drift 2.20 km — patrón Tier A Muy Bajo)
+- PCC: R2 con drift no aplica (lacolito difuso); magnitud valida adopción S63
+
+**Documentación**:
+- H_S70_R2_RETROACTIVO_4VOLS en HYPOTHESIS_LOG (cierre formal)
+- D7 en MIROVA_DIVERGENCES.md (bandas gates por régimen)
+- Experimentos individuales: `experiments/122-125/`
+
+**Pendientes S70-2+** (no bloqueantes):
+- Multi-caso PP (3-5 ALERTAs) para validación robusta del marginal.
+- Formalizar bandas gates por régimen en `docs/MISSION.md` o doc dedicado.
+- Métrica alternativa para vols no focales (PCC, Tupungatito 43% residual).
+
 ### Prioridad MEDIA — limpieza técnica
 
 **2. Regenerar 16 goldens pre-S27**

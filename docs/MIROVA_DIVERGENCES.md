@@ -174,6 +174,32 @@ S70-1 puede usar con confianza el método R2 S69 verdadero, porque ese método N
 pixels del TIF como VRP. El patrón replicable de 5 pasos está documentado en
 `experiments/120_audit_tif_vrp_sumable/README.md` Parte 2.
 
+### D7 — Método R2 retroactivo tiene aplicabilidad limitada por régimen del vol
+
+**Fenómeno físico**: el método R2 retroactivo S69 calcula un centroide ponderado de los top-N pixels TIF dentro de un radio del vent y compara contra `pc.centroid` (output del pipeline). Esto funciona bien cuando el "cluster activo" del vol es **focal y puntiforme** (un cráter compacto con señal térmica concentrada). Cuando el cluster es **difuso o extendido**, el centroide ponderado del campo no representa ningún cluster discreto y el "drift" resultante es artefacto del método, no error del pipeline.
+
+**Casos observados (S70-1 T1-T4)**:
+- **Focales puros (Lastarria)**: R2 PASS limpio. Drift <1.1 km.
+- **Focales con cola térmica difusa (Chaiten, Villarrica, PP)**: R2 PASS bajo gates revisadas. Drift 2.0-2.2 km — el ruido es el halo termal del lava lake / domo activo, no error del cluster.
+- **No focales / difusos (PCC lacolito Cordón Caulle)**: R2 con drift NO APLICA. La intrusión 2011 cubre ~707 km² sin pico claro; el centroide del campo está a 9-10 km del cluster MIROVA (que también es difuso).
+
+**Cómo identificar régimen del vol antes de aplicar R2**:
+- ΔT máxima del vol >20 K + cluster típico <2 km² → focal puro, R2 con drift `<2 km` aplicable.
+- ΔT <12 K + cluster <5 km² → focal con halo, R2 con drift `<3 km` aplicable (gates revisadas).
+- ΔT bajo + cluster >50 km² (intrusión, lacolito, domo extendido) → NO focal, R2 con drift NO aplica. Validar adopción por magnitud (ratio per-record vs agregado) + confirmar geometría (cluster nuestro EN la zona difusa).
+
+**Bandas gates por régimen** (referencia operacional):
+
+| Régimen | Ratio in band | Drift |
+|---|---|---|
+| Focal Tier A Alto (Lastarria, Lascar, Isluga) | [0.5, 2.0] | <2 km |
+| Focal Tier A Muy Bajo (Chaiten, Villarrica, PP) | [0.5, 2.0] preferida | <3 km |
+| No focal (PCC lacolito) | — | R2 no aplica; usar magnitud agregada |
+
+**Implicación**: R2 retroactivo es herramienta válida pero NO universal. Antes de aplicarla a vols nuevos en S70+ o futuras adopciones, clasificar régimen.
+
+**Referencias**: `experiments/120_audit_tif_vrp_sumable/`, `experiments/122-125/`, H_S70_R2_RETROACTIVO_4VOLS.
+
 ## Auditoría visual S27 (post-render fix, 90d)
 
 Conteo de markers en hotspot-map por Tier A (toggle "Solo principal" + "Solo cráter"):
