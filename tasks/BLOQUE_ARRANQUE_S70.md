@@ -240,3 +240,24 @@ curl -sL https://mendozavolcanic.github.io/VRP-chile/data/mirova_equivalent/Last
 gh pr create --title "..." --body "..."
 gh pr merge <PR#> --squash --delete-branch -R MendozaVolcanic/VRP-chile
 ```
+
+---
+
+## S70-2 T4-T5 hallazgo crítico (2026-05-20): bug path D dNTI ctx en cirrus
+
+**Severidad**: ALTA — afecta dashboard live (picos 20-30 MW Lastarria visibles en "Solo cráter" mode).
+
+**Confirmado empíricamente** (cross-check 32 records Lastarria vs MIROVA NRT):
+- 68.8% FPs nuestros (path D dispara espuriamente en cirrus alto, t_bg<270K)
+- 31.2% TPs amplificados 62× sobre MIROVA (path D suma pixels marginales)
+- 100% path D solo, BT=0, NTI=0
+
+Detalles: `docs/MIROVA_DIVERGENCES.md` D9 + `docs/HYPOTHESIS_LOG.md` H_S70_PATH_D_CIRRUS_FP.
+
+**Próximo bloque S71** (prioridad ALTA):
+1. Brainstorming opción gate atmosférico (3 opciones en D9: gate t_bg, co-validación, cap magnitud).
+2. A/B test profile flag aislado (`mirova_equivalent_path_d_atm_gate_v1.yaml`).
+3. R2 pixel-level vs MIROVA por régimen.
+4. Si fix valida → adoptar en operacional.
+
+**Mientras tanto**: dashboard muestra honestamente los datos del pipeline. Comunicar a usuarios externos (SERNAGEOMIN) que los picos altos en cirrus pueden no ser actividad volcánica real, fix en curso S71.

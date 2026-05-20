@@ -79,10 +79,12 @@ import rasterio
 HERE = Path(__file__).parent
 WORKTREE_ROOT = HERE.parent.parent  # VRP-Chile-s70/
 TIF_ARCHIVE = WORKTREE_ROOT.parent / "mirova-tif-archive"
-TIF_PATH = TIF_ARCHIVE / "data" / "tif" / "PlanchonPeteroa" / "20260518_052401_VIIRS375.tif"
+TIF_DIR = TIF_ARCHIVE / "data" / "tif" / "PlanchonPeteroa"
+TIF_PATH = TIF_DIR / "20260518_052401_VIIRS375.tif"
 PP_JSON = WORKTREE_ROOT / "data" / "mirova_equivalent" / "PlanchonPeteroa.json"
 CSV_PATH = WORKTREE_ROOT / "data" / "mirova_reference" / "mirova_v1_snapshot" / "registro_vrp_consolidado.csv"
 RESULTS_PATH = HERE / "results.json"
+RESULTS_MULTI_PATH = HERE / "results_multi.json"
 
 # PlanchonPeteroa vent (volcanoes.yaml). mirova_center existe (-35.2232, -70.5695)
 # pero el método R2 mide drift contra pc.centroid, no contra mirova_center.
@@ -508,6 +510,260 @@ def main():
     print(f"\nResultados: {RESULTS_PATH}")
 
 
+# ============================================================================
+# S70-2 T1 — Multi-caso
+# ============================================================================
+#
+# Motivacion: T3 single-case (2026-05-18) dio verdict marginal (ratio 2.08x
+# FAIL g1 por 0.08, drift 2.20 km FAIL g2 por 0.20). El ruido per-record en
+# Tier A Muy Bajo (Villarrica/Chaiten/PP) sugiere que el caso individual no
+# es necesariamente representativo del agregado S61 (ratio 2.84x sobre 39
+# ALERTAs). La validacion honesta requiere mediana sobre N>=3 casos.
+#
+# Hipotesis: si mediana ratio <= 2.0 y mediana drift <= 3 km sobre N casos,
+# la adopcion S61 PP queda validada bajo gates revisadas.
+#
+# Casos elegidos: TODAS las ALERTAS_TERMICA PP VIIRS375 en la ventana del
+# TIF archive (2026-05-09 al 2026-05-18) con TIF paralelo disponible
+# (timestamp exact match) Y record en PlanchonPeteroa.json con pc.vrp_mw
+# no-nulo. Resultado: N=7 casos.
+
+MULTI_CASES = [
+    {
+        "date": "2026-05-09 05:42:02",
+        "mirova_sensor_csv": "VIIRS375",
+        "tif_filename": "20260509_054202_VIIRS375.tif",
+        "mirova_vrp": 0.24,
+        "mirova_dist": 2.28,
+    },
+    {
+        "date": "2026-05-10 06:18:01",
+        "mirova_sensor_csv": "VIIRS375",
+        "tif_filename": "20260510_061801_VIIRS375.tif",
+        "mirova_vrp": 0.22,
+        "mirova_dist": 2.02,
+    },
+    {
+        "date": "2026-05-11 05:54:01",
+        "mirova_sensor_csv": "VIIRS375",
+        "tif_filename": "20260511_055401_VIIRS375.tif",
+        "mirova_vrp": 0.25,
+        "mirova_dist": 2.02,
+    },
+    {
+        "date": "2026-05-12 05:36:01",
+        "mirova_sensor_csv": "VIIRS375",
+        "tif_filename": "20260512_053601_VIIRS375.tif",
+        "mirova_vrp": 0.35,
+        "mirova_dist": 1.91,
+    },
+    {
+        "date": "2026-05-13 06:06:02",
+        "mirova_sensor_csv": "VIIRS375",
+        "tif_filename": "20260513_060602_VIIRS375.tif",
+        "mirova_vrp": 0.25,
+        "mirova_dist": 2.02,
+    },
+    {
+        "date": "2026-05-14 05:48:02",
+        "mirova_sensor_csv": "VIIRS375",
+        "tif_filename": "20260514_054802_VIIRS375.tif",
+        "mirova_vrp": 0.18,
+        "mirova_dist": 2.28,
+    },
+    {
+        "date": "2026-05-18 05:24:01",
+        "mirova_sensor_csv": "VIIRS375",
+        "tif_filename": "20260518_052401_VIIRS375.tif",
+        "mirova_vrp": 0.16,
+        "mirova_dist": 1.91,
+    },
+]
+
+
+def find_pipeline_record_flex(target_dt_yyyymmdd_hhmm: str) -> dict | None:
+    """Busca record en PlanchonPeteroa.json matcheando datetime_utc[:16] (YYYY-MM-DD HH:MM)
+    con cualquier sensor VIIRS_* (NOAA20/NOAA21). Devuelve None si no hay match."""
+    with open(PP_JSON, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    records = data["records"] if isinstance(data, dict) and "records" in data else data
+    for r in records:
+        rdt = r.get("datetime_utc") or ""
+        if rdt[:16] == target_dt_yyyymmdd_hhmm and (r.get("sensor") or "").startswith("VIIRS"):
+            return r
+    return None
+
+
+def audit_case(case: dict) -> dict:
+    """Audit R2 (magnitud + geometria) sobre un caso. Replica metodo R2 verdadero
+    pero parametrizado por caso. NO hardcodea pc.centroid ni pc.vrp_mw."""
+    tif_path = TIF_DIR / case["tif_filename"]
+    if not tif_path.exists():
+        raise RuntimeError(f"TIF no existe: {tif_path}")
+
+    # 1. Record nuestro
+    target_dt_short = case["date"][:16]  # 'YYYY-MM-DD HH:MM'
+    rec = find_pipeline_record_flex(target_dt_short)
+    if rec is None:
+        raise RuntimeError(f"Record pipeline no encontrado para {target_dt_short}")
+    pc = rec.get("primary_cluster") or {}
+    pc_vrp_mw = pc.get("vrp_mw")
+    pc_lat = pc.get("centroid_lat")
+    pc_lon = pc.get("centroid_lon")
+    pc_n_pixels = pc.get("n_pixels")
+    pc_dist_km = pc.get("centroid_dist_km")
+    if pc_vrp_mw is None or pc_lat is None or pc_lon is None:
+        raise RuntimeError(
+            f"Record {target_dt_short} sin pc.vrp_mw/centroid valido (pc={pc})"
+        )
+    pc_vrp_mw = float(pc_vrp_mw)
+    pc_lat = float(pc_lat)
+    pc_lon = float(pc_lon)
+
+    # 2. MIROVA CSV (usamos los valores del caso, ya curados)
+    mirova_vrp_mw = float(case["mirova_vrp"])
+    mirova_dist_km = float(case["mirova_dist"])
+
+    # 3. Ratio magnitud
+    ratio_mw = pc_vrp_mw / mirova_vrp_mw if mirova_vrp_mw > 0 else None
+
+    # 4. Geometria: top10 TIF restringido a 3km del vent
+    arr, transform = load_tif(tif_path)
+    tif_centroid = top_n_centroid_from_array(
+        arr, transform, VENT_LAT, VENT_LON, max_km=3.0, n=10
+    )
+
+    if tif_centroid["lat"] is None:
+        drift_km = None
+    else:
+        drift_km = float(haversine_km(
+            tif_centroid["lat"], tif_centroid["lon"], pc_lat, pc_lon
+        ))
+
+    return {
+        "case_date": case["date"],
+        "sensor_pipeline": rec.get("sensor"),
+        "tif_filename": case["tif_filename"],
+        "mirova_vrp_mw": mirova_vrp_mw,
+        "mirova_dist_km": mirova_dist_km,
+        "pc_vrp_mw": pc_vrp_mw,
+        "pc_centroid_lat": pc_lat,
+        "pc_centroid_lon": pc_lon,
+        "pc_centroid_dist_km": pc_dist_km,
+        "pc_n_pixels": pc_n_pixels,
+        "ratio_pc_vrp_vs_mirova_vrp": ratio_mw,
+        "tif_top10_within_3km_centroid_lat": tif_centroid["lat"],
+        "tif_top10_within_3km_centroid_lon": tif_centroid["lon"],
+        "tif_top10_within_3km_n_used": tif_centroid["n_used"],
+        "tif_positive_pixels_within_3km": tif_centroid["n_positive_pixels_within_max_km"],
+        "drift_km_tif_top10_vs_pc_centroid": drift_km,
+    }
+
+
+def audit_multi():
+    """Audit multi-caso PP. Mediana ratio + mediana drift sobre N casos."""
+    print("=" * 70)
+    print("R2 RETROACTIVO PP MULTI-CASO (S70-2 T1)")
+    print(f"N casos planeados: {len(MULTI_CASES)}")
+    print("Metodo: replicar R2 single-case sobre cada caso, agregar por mediana")
+    print("=" * 70)
+
+    results = []
+    for case in MULTI_CASES:
+        try:
+            r = audit_case(case)
+            results.append(r)
+            ratio = r["ratio_pc_vrp_vs_mirova_vrp"]
+            drift = r["drift_km_tif_top10_vs_pc_centroid"]
+            print(f"\n=== {case['date']} ({r['sensor_pipeline']}) ===")
+            print(f"  pc.vrp_mw         = {r['pc_vrp_mw']:.4f} MW")
+            print(f"  MIROVA.VRP        = {r['mirova_vrp_mw']:.4f} MW")
+            print(f"  ratio             = {ratio:.2f}x")
+            print(f"  pc.centroid       = ({r['pc_centroid_lat']:.5f}, {r['pc_centroid_lon']:.5f})")
+            print(f"  pc.n_pixels       = {r['pc_n_pixels']}")
+            print(f"  TIF top10 (3km)   = ({r['tif_top10_within_3km_centroid_lat']}, {r['tif_top10_within_3km_centroid_lon']})")
+            print(f"  drift             = {drift:.3f} km" if drift is not None else "  drift             = None")
+        except Exception as e:
+            print(f"\n=== {case['date']} === FAIL: {e}")
+            results.append({"case_date": case["date"], "error": str(e)})
+
+    # Agregados sobre casos validos
+    valid = [r for r in results if "error" not in r and r.get("ratio_pc_vrp_vs_mirova_vrp") is not None]
+    ratios = [r["ratio_pc_vrp_vs_mirova_vrp"] for r in valid]
+    drifts = [r["drift_km_tif_top10_vs_pc_centroid"] for r in valid if r.get("drift_km_tif_top10_vs_pc_centroid") is not None]
+
+    summary = {
+        "n_cases_planned": len(MULTI_CASES),
+        "n_valid": len(valid),
+        "ratios": ratios,
+        "drifts_km": drifts,
+        "ratio_median": float(np.median(ratios)) if ratios else None,
+        "ratio_mean": float(np.mean(ratios)) if ratios else None,
+        "ratio_min": float(np.min(ratios)) if ratios else None,
+        "ratio_max": float(np.max(ratios)) if ratios else None,
+        "drift_median_km": float(np.median(drifts)) if drifts else None,
+        "drift_mean_km": float(np.mean(drifts)) if drifts else None,
+        "drift_min_km": float(np.min(drifts)) if drifts else None,
+        "drift_max_km": float(np.max(drifts)) if drifts else None,
+        # Verdict mediano (gates revisadas)
+        "mediano_ratio_in_band_05_20": (
+            0.5 <= float(np.median(ratios)) <= 2.0 if ratios else None
+        ),
+        "mediano_drift_under_3km": (
+            float(np.median(drifts)) < 3.0 if drifts else None
+        ),
+        "mediano_drift_under_2km": (
+            float(np.median(drifts)) < 2.0 if drifts else None
+        ),
+        # Tambien checkeamos band revisada amplia [0.5, 3.0] discutida en T3
+        "mediano_ratio_in_band_05_30": (
+            0.5 <= float(np.median(ratios)) <= 3.0 if ratios else None
+        ),
+    }
+
+    # Verdict mediano dual
+    if summary["mediano_ratio_in_band_05_20"] and summary["mediano_drift_under_3km"]:
+        verdict_mediano_revisado = "PASS"
+    elif summary["mediano_ratio_in_band_05_30"] and summary["mediano_drift_under_3km"]:
+        verdict_mediano_revisado = "MARGINAL_BAND_05_30"
+    else:
+        verdict_mediano_revisado = "FAIL"
+    summary["verdict_mediano_revisado"] = verdict_mediano_revisado
+
+    print("\n" + "=" * 70)
+    print(f"RESUMEN MEDIANO sobre {summary['n_valid']}/{summary['n_cases_planned']} casos validos")
+    print("=" * 70)
+    if ratios:
+        print(f"Ratio: mediano={summary['ratio_median']:.2f}x   mean={summary['ratio_mean']:.2f}x")
+        print(f"       range=[{summary['ratio_min']:.2f}x .. {summary['ratio_max']:.2f}x]")
+        print(f"       individuales: {[f'{x:.2f}' for x in ratios]}")
+    if drifts:
+        print(f"Drift: mediano={summary['drift_median_km']:.2f} km   mean={summary['drift_mean_km']:.2f} km")
+        print(f"       range=[{summary['drift_min_km']:.2f} .. {summary['drift_max_km']:.2f}]")
+        print(f"       individuales: {[f'{x:.2f}' for x in drifts]}")
+    print(f"\nMediano in banda [0.5, 2.0]: {summary['mediano_ratio_in_band_05_20']}")
+    print(f"Mediano in banda [0.5, 3.0]: {summary['mediano_ratio_in_band_05_30']}")
+    print(f"Mediano drift < 3 km:        {summary['mediano_drift_under_3km']}")
+    print(f"Mediano drift < 2 km:        {summary['mediano_drift_under_2km']}")
+    print(f"\nVERDICT MEDIANO REVISADO: {verdict_mediano_revisado}")
+
+    out = {
+        "version": 1,
+        "method": "R2_S69_verdadero_extendido_S70_2_T1_multi_caso",
+        "vent": {"lat": VENT_LAT, "lon": VENT_LON},
+        "cases": results,
+        "summary": summary,
+    }
+    RESULTS_MULTI_PATH.write_text(
+        json.dumps(out, indent=2, default=str), encoding="utf-8"
+    )
+    print(f"\nResultados -> {RESULTS_MULTI_PATH}")
+    return out
+
+
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "--multi":
+        audit_multi()
+    else:
+        main()

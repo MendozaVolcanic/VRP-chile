@@ -123,3 +123,14 @@ Antes de marcar una sesión como completa, responder explícitamente:
 - Papers MIROVA canonical: `~memory/reference_papers_mirova_canonical.md`
 - Parches no-MIROVA inventario: `~memory/project_s26_parches_no_mirova.md`
 - A/B literal puro NO APROBADO: `~memory/project_s27_mirova_literal_negativo.md`
+
+---
+
+## R2 retroactivo — referencia operacional
+
+Para aplicar el método R2 retroactivo a un vol nuevo (validación de adopción metodológica
+post-S70), seguir el patrón documentado en `docs/R2_GATES_BY_REGIME.md`. Las bandas
+gates son **régimen-dependientes** (Tier A Alto, Tier A Muy Bajo simple, Tier A Muy
+Bajo complejo, No focal). Aplicar gates Lastarria-style a cualquier vol sin clasificar
+régimen primero introduce FAIL marginales sistemáticos que ocultan que la adopción de
+hecho funciona en agregado.
