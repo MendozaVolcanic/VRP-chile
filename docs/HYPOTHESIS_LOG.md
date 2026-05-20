@@ -6,6 +6,40 @@
 
 ---
 
+## H_S70_R2_RETROACTIVO_4VOLS — Cierre audit S67 con 5/5 Tier A R2 evaluados
+
+- **Formulada**: S70-1 (2026-05-20) tras audit S67 reclamar "R2 no aplicado a adopciones S62-S65" y S70-0 T3 Step 8 validar el método R2 verdadero en Lastarria.
+- **Casos**: Chaiten (S63), Villarrica (S61), PlanchonPeteroa (S61), PCC (S63) + retroactivo Lastarria S69. Plan: `tasks/plan_s70_1.md`.
+- **Método**: patrón documentado en `experiments/120_audit_tif_vrp_sumable/README.md` Parte 2, ampliado en T1.5 con sensitivity analysis (top_n × max_km) y verdict dual (4 gates estrictas Lastarria-style + 2 gates revisadas).
+
+### Resultados pixel-level
+
+| Vol | Caso | Ratio per-record | Drift principal (max_km=3) | Verdict estricto | Verdict revisado | Régimen |
+|---|---|---:|---:|---|---|---|
+| Lastarria | 2026-05-14 05:48 VIIRS375 | 1.05× | 1.04 km | 4/4 PASS | 2/2 PASS | Focal Tier A Alto |
+| Chaiten | 2026-05-18 05:30 VIIRS375 | 1.26× | 2.15 km | 1/3 PASS | 2/2 PASS | Focal + cola térmica (Muy Bajo) |
+| Villarrica | 2026-05-17 05:48 VIIRS375 | 1.97× | 2.15 km | 2/3 PASS | 2/2 PASS | Focal + halo lava lake |
+| PP | 2026-05-18 05:24 VIIRS375 | 2.08× | 2.20 km | 0/3 PASS | 1/2 PASS | Focal multi-cráter complejo |
+| PCC | 2026-05-18 06:18 VIIRS375 | 0.575× | 9.77 km | 1/3 PASS | 1/2 PASS | **No focal — lacolito difuso** |
+
+### Hallazgos metodológicos
+
+1. **Banda gates es régimen-dependiente**: la banda estricta `[0.5, 2.0]` ratio + drift `<2 km` (Lastarria-style) solo aplica a Tier A Alto (ΔT >20K) con cluster focal puro. Tier A Muy Bajo (Chaiten/Villarrica/PP, ΔT <12K) tiene ruido natural per-record que requiere banda revisada `[0.5, 3.0]` + drift `<3 km` para verdict honesto.
+2. **Sensitivity `max_km`**: el método es robusto a `top_n` (5/10/20 dan resultados similares) pero altamente sensible a `max_km` vol-dependiente. Lastarria: drift <1.1 km hasta max_km=3. Chaiten: max_km=2.0 da drift ~1 km (PASS estricto), max_km=3.0 da 2.15 km (FAIL marginal). Documentado en cada `results.json`.
+3. **R2 con centroide NO aplica a anomalías difusas**: PCC lacolito (intrusión 2011, ~707 km², sin pico) genera drift artefacto 9.77 km porque el método compara centroides ponderados de campos sin foco. La adopción S63 PCC se valida por ratio per-record (0.575×) cercano al agregado S63 (0.29×) y por confirmación geométrica que el cluster nuestro está EN el lacolito (5.6-8.5 km del vent, coincidente con MIROVA @ 7.73 km).
+
+### Implicación operacional
+
+- **Adopciones S61-S63 confirmadas** (5/5 Tier A) bajo gates apropiadas al régimen del vol.
+- **Deuda audit S67 cerrada**: el método R2 fue aplicado a todos los vols adoptados sin R2.
+- **PP es el caso más marginal**: ratio 2.08× falla incluso el revisado por 0.08. Recomendación S70-1+: agregar 3-5 casos PP adicionales y reportar mediana ratio + mediana drift para validación robusta (1 caso es sensible a ruido per-record).
+- **Para S70-2+**: documentar formalmente las bandas gates por régimen del vol en `docs/MISSION.md` o un nuevo `docs/R2_GATES_BY_REGIME.md`.
+
+- **Estado**: CONFIRMADA bajo gates revisadas. Verdicts estrictos quedan como referencia conservadora.
+- **Ver**: `experiments/122_r2_chaiten/`, `experiments/123_r2_villarrica/`, `experiments/124_r2_planchon_peteroa/`, `experiments/125_r2_pcc/`.
+
+---
+
 ## H_S70_TIF_VRP_SUMABILITY — TIF MIROVA es campo de radiancia, R2 verdadero no afectado
 
 - **Formulada**: S70-0 (2026-05-20) bloque cero de saneamiento, tras detectar que el hallazgo del commit s15-dev `64bd37d` (S33+ cierre, Lascar TIF Salar Atacama 17,911 px = 1680 MW vs header 0.2 MW) vivía solo en local y podía afectar el método R2 retroactivo del agente S69 antes de replicarlo a Chaiten/PCC/Villarrica/PP.

@@ -1,0 +1,186 @@
+{
+  "version": 2,
+  "method": "R2_S69_verdadero_ampliado_S70_1_T1_5",
+  "case": {
+    "volcano": "Chaiten",
+    "datetime_utc": "2026-05-18 05:30",
+    "sensor": "VIIRS_NOAA20",
+    "distance_class": "summit",
+    "mirova_csv_timestamp": "2026-05-18 05:30:01",
+    "mirova_sensor": "VIIRS375",
+    "tipo_registro": "ALERTA_TERMICA",
+    "tif_path": "mirova-tif-archive\\data\\tif\\Chaiten\\20260518_053001_VIIRS375.tif"
+  },
+  "vent": {
+    "lat": -42.8344815,
+    "lon": -72.6528875
+  },
+  "pipeline_primary_cluster": {
+    "vrp_mw": 0.277,
+    "centroid_lat": -42.83691,
+    "centroid_lon": -72.6523,
+    "centroid_dist_km": 0.274,
+    "n_pixels": 2
+  },
+  "mirova_csv": {
+    "vrp_mw": 0.22,
+    "distancia_km": 0.75
+  },
+  "magnitude_r2": {
+    "ratio_pc_vrp_vs_mirova_vrp": 1.2590909090909093,
+    "reference_s63_aggregate_ratio": 2.23,
+    "reference_s63_aggregate_drift_km": null
+  },
+  "geometry_r2_principal": {
+    "top_n": 10,
+    "max_km": 3.0,
+    "tif_top10_within_3km_centroid_lat": -42.835301561965856,
+    "tif_top10_within_3km_centroid_lon": -72.67857351453722,
+    "tif_top10_within_3km_sum_mw_informative": 1.8460381833517934,
+    "tif_top10_within_3km_n_used": 10,
+    "tif_positive_pixels_full": 17944,
+    "tif_positive_pixels_within_3km": 189,
+    "tif_top_values_min": 0.17920246559679537,
+    "tif_top_values_max": 0.2037022504577616,
+    "drift_km_tif_top10_vs_pc_centroid": 2.1497795505102992
+  },
+  "gates": {
+    "g1_ratio_in_band_strict": true,
+    "g2_drift_under_2km_strict": false,
+    "g3_ratio_close_to_target_strict": false,
+    "g4_drift_close_to_target_strict": null,
+    "g5_ratio_in_band_revised": true,
+    "g6_drift_under_3km_revised": true
+  },
+  "verdict_dual": {
+    "strict": {
+      "result": "FAIL",
+      "n_pass": 1,
+      "n_total": 3,
+      "gate_keys": [
+        "g1_ratio_in_band_strict",
+        "g2_drift_under_2km_strict",
+        "g3_ratio_close_to_target_strict",
+        "g4_drift_close_to_target_strict"
+      ],
+      "note": "4 gates referencia Lastarria S69 original (banda + drift<2km + close-to-target ratio + close-to-target drift). g4 N/A para Chaiten (sin drift S63 per-record)."
+    },
+    "revised": {
+      "result": "PASS",
+      "n_pass": 2,
+      "n_total": 2,
+      "gate_keys": [
+        "g5_ratio_in_band_revised",
+        "g6_drift_under_3km_revised"
+      ],
+      "note": "2 gates operacionales: ratio en banda + drift<3km (coherente con max_km del filtro espacial)"
+    }
+  },
+  "sensitivity_analysis": {
+    "grid_top_n": [
+      5,
+      10,
+      20
+    ],
+    "grid_max_km": [
+      2.0,
+      3.0,
+      5.0
+    ],
+    "matrix": [
+      {
+        "top_n": 5,
+        "max_km": 2.0,
+        "n_pixels_available_within_max_km": 88,
+        "n_pixels_used": 5,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -42.832294482477806,
+        "centroid_lon": -72.66621056225212,
+        "drift_km": 1.2449912530681033
+      },
+      {
+        "top_n": 5,
+        "max_km": 3.0,
+        "n_pixels_available_within_max_km": 189,
+        "n_pixels_used": 5,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -42.83629394400043,
+        "centroid_lon": -72.67651569244379,
+        "drift_km": 1.9757054111053904
+      },
+      {
+        "top_n": 5,
+        "max_km": 5.0,
+        "n_pixels_available_within_max_km": 540,
+        "n_pixels_used": 5,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -42.83290308417323,
+        "centroid_lon": -72.68873258850982,
+        "drift_km": 3.003975081817268
+      },
+      {
+        "top_n": 10,
+        "max_km": 2.0,
+        "n_pixels_available_within_max_km": 88,
+        "n_pixels_used": 10,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -42.83159753823894,
+        "centroid_lon": -72.66425268329267,
+        "drift_km": 1.1396839896928685
+      },
+      {
+        "top_n": 10,
+        "max_km": 3.0,
+        "n_pixels_available_within_max_km": 189,
+        "n_pixels_used": 10,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -42.835301561965856,
+        "centroid_lon": -72.67857351453722,
+        "drift_km": 2.1497795505102992
+      },
+      {
+        "top_n": 10,
+        "max_km": 5.0,
+        "n_pixels_available_within_max_km": 540,
+        "n_pixels_used": 10,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -42.83596450934812,
+        "centroid_lon": -72.69264041376961,
+        "drift_km": 3.290995709337934
+      },
+      {
+        "top_n": 20,
+        "max_km": 2.0,
+        "n_pixels_available_within_max_km": 88,
+        "n_pixels_used": 20,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -42.83122534494137,
+        "centroid_lon": -72.66068652828758,
+        "drift_km": 0.9312434385885381
+      },
+      {
+        "top_n": 20,
+        "max_km": 3.0,
+        "n_pixels_available_within_max_km": 189,
+        "n_pixels_used": 20,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -42.83177026663532,
+        "centroid_lon": -72.67827018007378,
+        "drift_km": 2.193418248168772
+      },
+      {
+        "top_n": 20,
+        "max_km": 5.0,
+        "n_pixels_available_within_max_km": 540,
+        "n_pixels_used": 20,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -42.83766467313634,
+        "centroid_lon": -72.69413564207456,
+        "drift_km": 3.4122204547489097
+      }
+    ],
+    "drift_km_min": 0.9312434385885381,
+    "drift_km_median": 2.1497795505102992,
+    "drift_km_max": 3.4122204547489097
+  }
+}

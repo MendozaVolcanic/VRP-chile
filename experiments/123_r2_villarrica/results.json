@@ -1,0 +1,186 @@
+{
+  "version": 2,
+  "method": "R2_S69_verdadero_ampliado_S70_1_T2",
+  "case": {
+    "volcano": "Villarrica",
+    "datetime_utc": "2026-05-17 05:48",
+    "sensor": "VIIRS_NOAA20",
+    "distance_class": "summit",
+    "mirova_csv_timestamp": "2026-05-17 05:48:01",
+    "mirova_sensor": "VIIRS375",
+    "tipo_registro": "ALERTA_TERMICA",
+    "tif_path": "mirova-tif-archive\\data\\tif\\Villarrica\\20260517_054801_VIIRS375.tif"
+  },
+  "vent": {
+    "lat": -39.420227,
+    "lon": -71.939876
+  },
+  "pipeline_primary_cluster": {
+    "vrp_mw": 0.413,
+    "centroid_lat": -39.42008,
+    "centroid_lon": -71.94179,
+    "centroid_dist_km": 0.165,
+    "n_pixels": 1
+  },
+  "mirova_csv": {
+    "vrp_mw": 0.21,
+    "distancia_km": 0.84
+  },
+  "magnitude_r2": {
+    "ratio_pc_vrp_vs_mirova_vrp": 1.9666666666666666,
+    "reference_s61_aggregate_ratio": 2.17,
+    "reference_s61_aggregate_drift_km": null
+  },
+  "geometry_r2_principal": {
+    "top_n": 10,
+    "max_km": 3.0,
+    "tif_top10_within_3km_centroid_lat": -39.40088367697833,
+    "tif_top10_within_3km_centroid_lon": -71.93887425915175,
+    "tif_top10_within_3km_sum_mw_informative": 1.380451036869268,
+    "tif_top10_within_3km_n_used": 10,
+    "tif_positive_pixels_full": 15004,
+    "tif_positive_pixels_within_3km": 195,
+    "tif_top_values_min": 0.13509602825205214,
+    "tif_top_values_max": 0.14226605460506125,
+    "drift_km_tif_top10_vs_pc_centroid": 2.1491816577679783
+  },
+  "gates": {
+    "g1_ratio_in_band_strict": true,
+    "g2_drift_under_2km_strict": false,
+    "g3_ratio_close_to_target_strict": true,
+    "g4_drift_close_to_target_strict": null,
+    "g5_ratio_in_band_revised": true,
+    "g6_drift_under_3km_revised": true
+  },
+  "verdict_dual": {
+    "strict": {
+      "result": "FAIL",
+      "n_pass": 2,
+      "n_total": 3,
+      "gate_keys": [
+        "g1_ratio_in_band_strict",
+        "g2_drift_under_2km_strict",
+        "g3_ratio_close_to_target_strict",
+        "g4_drift_close_to_target_strict"
+      ],
+      "note": "4 gates referencia Lastarria S69 original (banda + drift<2km + close-to-target ratio + close-to-target drift). g4 N/A para Villarrica (sin drift S61 per-record)."
+    },
+    "revised": {
+      "result": "PASS",
+      "n_pass": 2,
+      "n_total": 2,
+      "gate_keys": [
+        "g5_ratio_in_band_revised",
+        "g6_drift_under_3km_revised"
+      ],
+      "note": "2 gates operacionales: ratio en banda + drift<3km (coherente con max_km del filtro espacial)"
+    }
+  },
+  "sensitivity_analysis": {
+    "grid_top_n": [
+      5,
+      10,
+      20
+    ],
+    "grid_max_km": [
+      2.0,
+      3.0,
+      5.0
+    ],
+    "matrix": [
+      {
+        "top_n": 5,
+        "max_km": 2.0,
+        "n_pixels_available_within_max_km": 84,
+        "n_pixels_used": 5,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -39.41394838099071,
+        "centroid_lon": -71.94709348423997,
+        "drift_km": 0.8200099235517327
+      },
+      {
+        "top_n": 5,
+        "max_km": 3.0,
+        "n_pixels_available_within_max_km": 195,
+        "n_pixels_used": 5,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -39.399911342771574,
+        "centroid_lon": -71.94283805675818,
+        "drift_km": 2.244459151317939
+      },
+      {
+        "top_n": 5,
+        "max_km": 5.0,
+        "n_pixels_available_within_max_km": 536,
+        "n_pixels_used": 5,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -39.38388314899366,
+        "centroid_lon": -71.94309308770251,
+        "drift_km": 4.026463169893448
+      },
+      {
+        "top_n": 10,
+        "max_km": 2.0,
+        "n_pixels_available_within_max_km": 84,
+        "n_pixels_used": 10,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -39.414831042326774,
+        "centroid_lon": -71.95238641176628,
+        "drift_km": 1.0813080212899395
+      },
+      {
+        "top_n": 10,
+        "max_km": 3.0,
+        "n_pixels_available_within_max_km": 195,
+        "n_pixels_used": 10,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -39.40088367697833,
+        "centroid_lon": -71.93887425915175,
+        "drift_km": 2.1491816577679783
+      },
+      {
+        "top_n": 10,
+        "max_km": 5.0,
+        "n_pixels_available_within_max_km": 536,
+        "n_pixels_used": 10,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -39.38288371955732,
+        "centroid_lon": -71.93725649248081,
+        "drift_km": 4.154339962917339
+      },
+      {
+        "top_n": 20,
+        "max_km": 2.0,
+        "n_pixels_available_within_max_km": 84,
+        "n_pixels_used": 20,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -39.41424686163342,
+        "centroid_lon": -71.95033191085996,
+        "drift_km": 0.9793506189508033
+      },
+      {
+        "top_n": 20,
+        "max_km": 3.0,
+        "n_pixels_available_within_max_km": 195,
+        "n_pixels_used": 20,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -39.40036922636095,
+        "centroid_lon": -71.93643785974012,
+        "drift_km": 2.2394510420185356
+      },
+      {
+        "top_n": 20,
+        "max_km": 5.0,
+        "n_pixels_available_within_max_km": 536,
+        "n_pixels_used": 20,
+        "n_pixels_used_lt_top_n_requested": false,
+        "centroid_lat": -39.38443996190872,
+        "centroid_lon": -71.93804065618573,
+        "drift_km": 3.976063451699651
+      }
+    ],
+    "drift_km_min": 0.8200099235517327,
+    "drift_km_median": 2.2394510420185356,
+    "drift_km_max": 4.154339962917339
+  }
+}

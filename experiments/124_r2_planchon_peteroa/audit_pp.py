@@ -1,44 +1,70 @@
-"""Replicación del método R2 S69 VERDADERO sobre Lastarria 2026-05-14 05:48 UTC.
+"""R2 retroactivo PlanchonPeteroa (S70-1 T3) sobre 2026-05-18 05:24 UTC VIIRS_NOAA20.
 
-Diferencia clave vs `audit_lastarria.py` (Parte 1):
+Aplicación del método R2 S69 VERDADERO (validado en
+`experiments/120_audit_tif_vrp_sumable/audit_lastarria_real_method.py` y
+ampliado en `experiments/122_r2_chaiten/audit_chaiten.py` +
+`experiments/123_r2_villarrica/audit_villarrica.py`) a un caso
+ALERTA_TERMICA reciente de PlanchonPeteroa (PP), post-adopción S61 de
+`local_kernel_bg: true`.
 
-- Parte 1 sumaba los top-10 pixels del TIF y comparaba esa suma contra el VRP
-  MIROVA. Verdict: CONFIRMADO_TIF_NO_ES_SUMABLE (ratio mediana 11.5×).
-- Esto es válido como observación sobre el campo de radiancia del TIF, pero
-  NO es el método que el agente S69 usó (HYPOTHESIS_LOG H_S69_R2_RETROACTIVO_LASTARRIA).
+Contexto físico (geólogo)
+-------------------------
 
-Método R2 S69 verdadero:
+PP no es un volcán único: es un COMPLEJO volcánico transfronterizo
+Chile-Argentina con múltiples centros eruptivos a pocos km uno del otro:
+Planchón Norte (apagado), Planchón Sur, Peteroa (cráter activo principal,
+fumarolas, ácido sulfúrico) y Azufre. El `vent_lat/lon` (-35.241099,
+-70.573345) apunta nominalmente al cráter activo Peteroa. La actividad
+térmica monitoreada por MIROVA típicamente corresponde a fumarolas / lago
+ácido en el cráter Peteroa.
 
-1. Magnitud: comparar `pc.vrp_mw` (output de NUESTRO pipeline, ya filtrado a
-   cluster persistido en `data/mirova_equivalent/Lastarria.json`) contra el
-   `VRP_MW` del MIROVA CSV NRT. NO sumar pixels del TIF.
+Implicación para R2: si MIROVA detectó actividad en el mismo cráter que
+nuestro pipeline → drift esperado <1 km. Pero si MIROVA detectó actividad
+en un cráter vecino del complejo (Planchón Sur a ~3 km al N, por ejemplo)
+mientras nuestro pipeline pegó en otro pixel del mismo halo termal, el
+drift puede ser 1-3 km SIN que indique error metodológico — sería sólo
+multi-cráter en un complejo activo.
 
-2. Geometría: del TIF, tomar SOLO los pixels positivos dentro de un radio de
-   3 km del vent (el rango físicamente plausible de actividad volcánica
-   inmediata), y calcular el centroide ponderado de los top-10 pixels DENTRO
-   de ese filtro. Comparar ese centroide contra `pc.centroid_lat/lon` del
-   pipeline para medir drift geométrico.
+Adopción S61: ratio LEGACY 11.80x → NEW 2.84x con `local_kernel_bg: true`
+sobre 39 ALERTAS A/B, recall 39/39 (no degradó cobertura). PP es el
+volcán con la SEGUNDA mejora más fuerte del fix kernel-bg (después de
+Lastarria -84%). La hipótesis física del fix: el background regional
+sobre-estimaba el calor de fondo porque promediaba sobre nieve heterogénea
++ valles + pixels parcialmente contaminados por la propia fumarola, dejando
+el cráter Peteroa sub-umbral. El kernel local fuera del cráter aisla el
+fondo no contaminado.
 
-Extensión S70-1 T1.5 (este script v2):
+Caso elegido
+------------
 
-- Parte 3 — sensitivity analysis sobre la matriz (top_n × max_km) ∈
-  {5, 10, 20} × {2.0, 3.0, 5.0} km, total 9 evaluaciones. Caracteriza
-  robustez del drift a la elección de hiperparámetros del filtro.
-- Dual verdict: 4 gates ESTRICTOS (referencia original Lastarria S69) + 2
-  gates REVISADOS (operacional: drift relajado a <3 km coherente con el
-  filtro espacial del método). NO se elige uno; se reportan ambos.
+- Volcán: PlanchonPeteroa (vent -35.241099, -70.573345)
+- ALERTA MIROVA: 2026-05-18 05:24:01 VIIRS375 VRP=0.16 MW dist=1.91 km
+- Nuestro record: 2026-05-18 05:24 VIIRS_NOAA20
+  pc.vrp_mw=0.333 pc.n_pixels=2 pc.centroid_dist≈2.05 km (lee dinámico)
+- TIF paralelo: `mirova-tif-archive/data/tif/PlanchonPeteroa/20260518_052401_VIIRS375.tif`
+  (timestamp coincide exactamente con MIROVA CSV)
 
-Caso a replicar:
+Razón de elección de este caso: ratio pc.vrp_mw / MIROVA = 2.08x, cercano
+a la media agregada S61 (2.84x). Es el caso más representativo de la
+adopción dentro de la ventana del TIF archive (2026-05-09 al 2026-05-20).
+Otros candidatos (e.g., 2026-05-09 ratio 1.51x, 2026-05-11 ratio 1.94x)
+también validan el fix; este es el representativo cercano al agregado.
 
-- Lastarria 2026-05-14 05:48 UTC VIIRS375 (ALERTA_TERMICA MIROVA)
-- Targets S69 documentados en HYPOTHESIS_LOG:
-  - pc.vrp_mw = 0.147 MW vs MIROVA 0.14 MW => ratio 1.05x
-  - TIF top10 <3km centroide = (-25.15546, -68.51905)
-  - pc.centroid = (-25.15947, -68.51301)
-  - drift = 0.752 km
+Método (replicado S70-1 T1.5)
+-----------------------------
 
-Si replicamos: R2 método verdadero validado, S70-1 puede aplicarlo a
-Chaiten/PCC/Villarrica/PP. Si no: hay un factor no documentado en el log.
+1. Magnitud: ratio `pc.vrp_mw / MIROVA.VRP_MW`. Banda [0.5, 2.0] aceptable.
+2. Geometría: centroide ponderado de los top-10 pixels del TIF restringidos
+   a <=3 km del vent (filtro principal). Drift vs `pc.centroid_lat/lon`.
+   Tolerancia ESTRICTA: drift < 2 km. REVISADA: drift < 3 km.
+3. Sensitivity: matriz (top_n × max_km) ∈ {5,10,20} × {2,3,5} km para
+   caracterizar robustez. Para PP esperamos que max_km=5km arrastre
+   pixels de cráteres vecinos del complejo (Planchón Sur, Azufre) si
+   tienen señal residual; max_km=2km debería aislar al cráter Peteroa
+   y dar drift más pequeño si el cluster coincide.
+
+NO hardcodeamos `pc.centroid` ni `pc.vrp_mw`: se leen dinámicamente del
+JSON. La validación es independiente.
 """
 from __future__ import annotations
 
@@ -53,30 +79,28 @@ import rasterio
 HERE = Path(__file__).parent
 WORKTREE_ROOT = HERE.parent.parent  # VRP-Chile-s70/
 TIF_ARCHIVE = WORKTREE_ROOT.parent / "mirova-tif-archive"
-TIF_PATH = TIF_ARCHIVE / "data" / "tif" / "Lastarria" / "20260514_054802_VIIRS375.tif"
-LASTARRIA_JSON = WORKTREE_ROOT / "data" / "mirova_equivalent" / "Lastarria.json"
+TIF_PATH = TIF_ARCHIVE / "data" / "tif" / "PlanchonPeteroa" / "20260518_052401_VIIRS375.tif"
+PP_JSON = WORKTREE_ROOT / "data" / "mirova_equivalent" / "PlanchonPeteroa.json"
 CSV_PATH = WORKTREE_ROOT / "data" / "mirova_reference" / "mirova_v1_snapshot" / "registro_vrp_consolidado.csv"
-RESULTS_PATH_V1 = HERE / "results_real_method.json"  # no se sobreescribe
-RESULTS_PATH_V2 = HERE / "results_real_method_v2.json"
+RESULTS_PATH = HERE / "results.json"
 
-# Lastarria vent (volcanoes.yaml)
-VENT_LAT = -25.168
-VENT_LON = -68.507
+# PlanchonPeteroa vent (volcanoes.yaml). mirova_center existe (-35.2232, -70.5695)
+# pero el método R2 mide drift contra pc.centroid, no contra mirova_center.
+# Usamos vent_lat/lon como referencia espacial para el filtro top_n.
+VENT_LAT = -35.241099
+VENT_LON = -70.573345
 
-# Caso a replicar
-TARGET_DATETIME = "2026-05-14 05:48"
-TARGET_SENSOR = "VIIRS_NOAA21"  # VIIRS375 en MIROVA CSV
-MIROVA_CSV_TIMESTAMP = "2026-05-14 05:48:02"
+# Caso a auditar
+TARGET_DATETIME = "2026-05-18 05:24"
+TARGET_SENSOR = "VIIRS_NOAA20"  # VIIRS375 en MIROVA CSV
+MIROVA_CSV_TIMESTAMP = "2026-05-18 05:24:01"
+MIROVA_SENSOR_CSV = "VIIRS375"
 
-# Targets S69 (HYPOTHESIS_LOG H_S69_R2_RETROACTIVO_LASTARRIA)
-TARGET_PC_VRP_MW = 0.147
-TARGET_MIROVA_VRP_MW = 0.14
-TARGET_PC_CENTROID = (-25.15947, -68.51301)
-TARGET_TIF_TOP10_3KM_CENTROID = (-25.15546, -68.51905)
-TARGET_DRIFT_KM = 0.752
-TARGET_RATIO_MW = 1.05
+# Referencia agregada S61 (no es target per-record, sólo informativa)
+TARGET_S61_AGGREGATE_RATIO = 2.84  # ratio mediano A/B post-adopción 39 ALERTAS
+TARGET_S61_AGGREGATE_DRIFT_KM = None  # no había drift S61 per-record
 
-# Sensitivity grid (S70-1 T1.5)
+# Sensitivity grid (heredado de S70-1 T1.5)
 SENSITIVITY_N = [5, 10, 20]
 SENSITIVITY_KM = [2.0, 3.0, 5.0]
 
@@ -109,11 +133,7 @@ def top_n_centroid_from_array(
     max_km: float = 3.0,
     n: int = 10,
 ) -> dict:
-    """Centroide ponderado top-N pixels (arr ya cargado) restringido a max_km del vent.
-
-    Si los pixels positivos disponibles dentro del radio son menos que `n`, se
-    usan todos los disponibles y se reporta el `n_used` real.
-    """
+    """Centroide ponderado top-N pixels (arr ya cargado) restringido a max_km del vent."""
     rows, cols = np.where(arr > 0)
     if len(rows) == 0:
         return {
@@ -144,7 +164,6 @@ def top_n_centroid_from_array(
     vals_n = vals_all[near]
     dists_n = dists[near]
 
-    # Top-N por valor (si hay menos pixels disponibles que n, usa todos)
     n_used = min(n, len(vals_n))
     top_idx = np.argsort(vals_n)[-n_used:]
     xs_t = xs_n[top_idx]
@@ -168,18 +187,6 @@ def top_n_centroid_from_array(
     }
 
 
-def top_n_centroid_near_vent(
-    tif_path: Path,
-    vent_lat: float,
-    vent_lon: float,
-    max_km: float = 3.0,
-    n: int = 10,
-) -> dict:
-    """Wrapper compatible con v1: carga el TIF y llama a top_n_centroid_from_array."""
-    arr, transform = load_tif(tif_path)
-    return top_n_centroid_from_array(arr, transform, vent_lat, vent_lon, max_km, n)
-
-
 def sensitivity_matrix(
     arr: np.ndarray,
     transform,
@@ -188,11 +195,7 @@ def sensitivity_matrix(
     pc_centroid_lat: float,
     pc_centroid_lon: float,
 ) -> list[dict]:
-    """Calcular drift para cada combinación (top_n × max_km) ∈ SENSITIVITY_N × SENSITIVITY_KM.
-
-    Devuelve lista de 9 dicts con top_n, max_km, n_pixels_used, centroide, drift_km.
-    Si el filtro no contiene pixels positivos, drift_km=None y n_pixels_used=0.
-    """
+    """Drift para cada combinacion (top_n x max_km) en SENSITIVITY_N x SENSITIVITY_KM."""
     matrix = []
     for n in SENSITIVITY_N:
         for max_km in SENSITIVITY_KM:
@@ -235,15 +238,7 @@ def evaluate_gates(
     ratio_target_tol: float = 0.5,
     drift_target_tol: float = 0.5,
 ) -> dict:
-    """Devuelve dict con 6 gates evaluadas (4 ESTRICTOS + 2 REVISADOS).
-
-    - g1: ratio en banda [0.5, 2.0] (estricto, magnitud bien calibrada)
-    - g2: drift < 2 km (estricto, tolerancia plan S69 original)
-    - g3: ratio cerca de target previo (estricto; None si no aplica)
-    - g4: drift cerca de target previo (estricto; None si no aplica)
-    - g5: ratio en banda [0.5, 2.0] (revisado — igual a g1, exposed por simetría)
-    - g6: drift < 3 km (revisado — coherente con max_km del filtro)
-    """
+    """Devuelve dict con 6 gates evaluadas (4 ESTRICTOS + 2 REVISADOS)."""
     gates: dict[str, bool | None] = {}
     gates["g1_ratio_in_band_strict"] = (
         ratio_mag is not None and 0.5 <= ratio_mag <= 2.0
@@ -267,10 +262,11 @@ def evaluate_gates(
 
 
 def find_pipeline_record() -> dict:
-    """Encuentra el record de Lastarria.json para 2026-05-14 05:48 VIIRS_NOAA21."""
-    with open(LASTARRIA_JSON, "r", encoding="utf-8") as f:
+    """Encuentra el record de PlanchonPeteroa.json para 2026-05-18 05:24 VIIRS_NOAA20."""
+    with open(PP_JSON, "r", encoding="utf-8") as f:
         data = json.load(f)
-    for r in data["records"]:
+    records = data["records"] if isinstance(data, dict) and "records" in data else data
+    for r in records:
         if r.get("datetime_utc") == TARGET_DATETIME and r.get("sensor") == TARGET_SENSOR:
             return r
     raise RuntimeError(
@@ -279,11 +275,11 @@ def find_pipeline_record() -> dict:
 
 
 def find_mirova_csv_row() -> dict:
-    """Encuentra la fila MIROVA CSV para 2026-05-14 05:48:02 VIIRS375 Lastarria."""
+    """Encuentra la fila MIROVA CSV para 2026-05-18 05:24:01 VIIRS375 PlanchonPeteroa."""
     df = pd.read_csv(CSV_PATH)
-    last = df[df["Volcan"].str.contains("Lastarria", case=False, na=False)]
-    last = last[last["Sensor"] == "VIIRS375"]
-    m = last[last["Fecha_Satelite_UTC"] == MIROVA_CSV_TIMESTAMP]
+    pp = df[df["Volcan"].astype(str).str.contains("Planch", case=False, na=False)]
+    pp = pp[pp["Sensor"] == MIROVA_SENSOR_CSV]
+    m = pp[pp["Fecha_Satelite_UTC"] == MIROVA_CSV_TIMESTAMP]
     if len(m) == 0:
         raise RuntimeError(f"MIROVA CSV: no hay match para {MIROVA_CSV_TIMESTAMP}")
     r = m.iloc[0]
@@ -297,22 +293,22 @@ def find_mirova_csv_row() -> dict:
 
 def main():
     print("=" * 70)
-    print("REPLICACION METODO R2 S69 VERDADERO — Lastarria 2026-05-14 05:48 UTC")
-    print("Extension S70-1 T1.5: dual verdict (estricto + revisado) + sensitivity")
+    print("R2 RETROACTIVO PLANCHONPETEROA - 2026-05-18 05:24 UTC (S70-1 T3)")
+    print("Dual verdict (estricto + revisado) + sensitivity analysis")
     print("=" * 70)
 
     # 0. Verificar paths
-    print(f"\nTIF:           {TIF_PATH}")
-    print(f"               exists: {TIF_PATH.exists()}")
-    print(f"Lastarria.json: {LASTARRIA_JSON}")
-    print(f"                exists: {LASTARRIA_JSON.exists()}")
-    print(f"MIROVA CSV:    {CSV_PATH}")
-    print(f"               exists: {CSV_PATH.exists()}")
+    print(f"\nTIF:                {TIF_PATH}")
+    print(f"                    exists: {TIF_PATH.exists()}")
+    print(f"PlanchonPeteroa JSON: {PP_JSON}")
+    print(f"                    exists: {PP_JSON.exists()}")
+    print(f"MIROVA CSV:         {CSV_PATH}")
+    print(f"                    exists: {CSV_PATH.exists()}")
 
     if not TIF_PATH.exists():
         raise SystemExit("BLOCKED: TIF no existe")
-    if not LASTARRIA_JSON.exists():
-        raise SystemExit("BLOCKED: Lastarria.json no existe")
+    if not PP_JSON.exists():
+        raise SystemExit("BLOCKED: PlanchonPeteroa.json no existe")
     if not CSV_PATH.exists():
         raise SystemExit("BLOCKED: MIROVA CSV no existe")
 
@@ -322,10 +318,12 @@ def main():
     pc_vrp_mw = float(pc["vrp_mw"])
     pc_lat = float(pc["centroid_lat"])
     pc_lon = float(pc["centroid_lon"])
-    pc_dist_km = float(pc["centroid_dist_km"])
-    print(f"\n--- Pipeline record (Lastarria.json) ---")
+    pc_dist_km = pc.get("centroid_dist_km")
+    pc_dist_km = float(pc_dist_km) if pc_dist_km is not None else None
+    print(f"\n--- Pipeline record (PlanchonPeteroa.json) ---")
     print(f"  datetime_utc:        {rec['datetime_utc']}")
     print(f"  sensor:              {rec['sensor']}")
+    print(f"  distance_class:      {rec.get('distance_class')}")
     print(f"  vrp_mw (record):     {rec.get('vrp_mw')}")
     print(f"  pc.vrp_mw:           {pc_vrp_mw}")
     print(f"  pc.centroid:         ({pc_lat}, {pc_lon})")
@@ -342,17 +340,17 @@ def main():
     print(f"  Distancia_km:        {mirova_dist_km}")
     print(f"  Tipo_Registro:       {csv_row['Tipo_Registro']}")
 
-    # 3. Ratio magnitud (R2 método verdadero — pc.vrp_mw vs MIROVA CSV)
+    # 3. Ratio magnitud
     ratio_mw = pc_vrp_mw / mirova_vrp_mw if mirova_vrp_mw > 0 else None
-    print(f"\n--- Magnitud (R2 método verdadero) ---")
+    print(f"\n--- Magnitud (R2 metodo verdadero) ---")
     print(f"  pc.vrp_mw / MIROVA.VRP_MW = {pc_vrp_mw} / {mirova_vrp_mw}")
     print(f"  ratio = {ratio_mw}")
-    print(f"  target S69 ratio: {TARGET_RATIO_MW}")
+    print(f"  referencia agregada S61 (informativa): {TARGET_S61_AGGREGATE_RATIO}x")
 
     # 4. Cargar TIF una sola vez para principal + sensitivity
     arr, transform = load_tif(TIF_PATH)
 
-    # 5. Cálculo principal (top_n=10, max_km=3.0)
+    # 5. Calculo principal (top_n=10, max_km=3.0)
     print(f"\n--- Geometria principal: top10 TIF restringido a 3km del vent ---")
     print(f"  vent: ({VENT_LAT}, {VENT_LON})")
     tif_centroid = top_n_centroid_from_array(
@@ -363,10 +361,9 @@ def main():
     print(f"  top10 centroide:        ({tif_centroid['lat']}, {tif_centroid['lon']})")
     print(f"  top10 sum_mw (informativo, NO la magnitud R2): {tif_centroid['sum_mw']:.4f}")
     print(f"  n_used: {tif_centroid['n_used']}")
-    if tif_centroid["n_used"] > 0:
+    if tif_centroid['n_used'] > 0:
         print(f"  top vals: [{tif_centroid.get('top_values_min'):.4f} .. {tif_centroid.get('top_values_max'):.4f}]")
         print(f"  top dists km: [{tif_centroid.get('top_dists_km_min'):.3f} .. {tif_centroid.get('top_dists_km_max'):.3f}]")
-    print(f"  target S69 centroide:   {TARGET_TIF_TOP10_3KM_CENTROID}")
 
     # 6. Drift geometrico principal
     if tif_centroid["lat"] is None:
@@ -378,14 +375,13 @@ def main():
         ))
     print(f"\n--- Drift geometrico principal (TIF top10 <3km vs pc.centroid) ---")
     print(f"  drift = {drift_km} km")
-    print(f"  target S69 drift: {TARGET_DRIFT_KM} km")
 
     # 7. 6 gates (4 estrictos + 2 revisados)
     gates = evaluate_gates(
         ratio_mag=ratio_mw,
         drift_km=drift_km,
-        ratio_target=TARGET_RATIO_MW,
-        drift_target=TARGET_DRIFT_KM,
+        ratio_target=TARGET_S61_AGGREGATE_RATIO,
+        drift_target=TARGET_S61_AGGREGATE_DRIFT_KM,  # None -> g4 = None
         ratio_target_tol=0.5,
         drift_target_tol=0.5,
     )
@@ -413,11 +409,11 @@ def main():
     verdict_strict = "PASS" if strict_pass else "FAIL"
     verdict_revised = "PASS" if revised_pass else "FAIL"
     print(f"\n--- Verdict dual ---")
-    print(f"  ESTRICTO (4 gates):  {verdict_strict} ({strict_n_pass}/{len(strict_results)} gates)")
-    print(f"  REVISADO (2 gates):  {verdict_revised} ({revised_n_pass}/{len(revised_results)} gates)")
+    print(f"  ESTRICTO ({len(strict_results)} gates aplicables): {verdict_strict} ({strict_n_pass}/{len(strict_results)} gates)")
+    print(f"  REVISADO ({len(revised_results)} gates):           {verdict_revised} ({revised_n_pass}/{len(revised_results)} gates)")
 
     # 8. Sensitivity analysis (matriz 9 combinaciones)
-    print(f"\n--- Parte 3: sensitivity analysis (top_n × max_km) ---")
+    print(f"\n--- Parte 3: sensitivity analysis (top_n x max_km) ---")
     matrix = sensitivity_matrix(arr, transform, VENT_LAT, VENT_LON, pc_lat, pc_lon)
     print(f"  top_n  max_km  n_avail  n_used  drift_km")
     for row in matrix:
@@ -436,14 +432,17 @@ def main():
     else:
         drift_min = drift_max = drift_median = None
 
-    # 9. Persistir resultados v2
+    # 9. Persistir resultados
     summary = {
         "version": 2,
-        "method": "R2_S69_verdadero_ampliado_S70_1_T1_5",
+        "method": "R2_S69_verdadero_ampliado_S70_1_T3",
         "case": {
+            "volcano": "PlanchonPeteroa",
             "datetime_utc": rec["datetime_utc"],
             "sensor": rec["sensor"],
+            "distance_class": rec.get("distance_class"),
             "mirova_csv_timestamp": csv_row["Fecha_Satelite_UTC"],
+            "mirova_sensor": MIROVA_SENSOR_CSV,
             "tipo_registro": csv_row["Tipo_Registro"],
             "tif_path": str(TIF_PATH.relative_to(WORKTREE_ROOT.parent)),
         },
@@ -461,8 +460,8 @@ def main():
         },
         "magnitude_r2": {
             "ratio_pc_vrp_vs_mirova_vrp": ratio_mw,
-            "target_s69_ratio": TARGET_RATIO_MW,
-            "target_s69_drift_km": TARGET_DRIFT_KM,
+            "reference_s61_aggregate_ratio": TARGET_S61_AGGREGATE_RATIO,
+            "reference_s61_aggregate_drift_km": TARGET_S61_AGGREGATE_DRIFT_KM,
         },
         "geometry_r2_principal": {
             "top_n": 10,
@@ -476,7 +475,6 @@ def main():
             "tif_top_values_min": tif_centroid.get("top_values_min"),
             "tif_top_values_max": tif_centroid.get("top_values_max"),
             "drift_km_tif_top10_vs_pc_centroid": drift_km,
-            "target_s69_tif_top10_centroid": list(TARGET_TIF_TOP10_3KM_CENTROID),
         },
         "gates": gates,
         "verdict_dual": {
@@ -485,7 +483,7 @@ def main():
                 "n_pass": strict_n_pass,
                 "n_total": len(strict_results),
                 "gate_keys": strict_keys,
-                "note": "4 gates referencia Lastarria S69 original (banda + drift<2km + close-to-target ratio + close-to-target drift)",
+                "note": "4 gates referencia Lastarria S69 original (banda + drift<2km + close-to-target ratio + close-to-target drift). g4 N/A para PlanchonPeteroa (sin drift S61 per-record).",
             },
             "revised": {
                 "result": verdict_revised,
@@ -504,10 +502,10 @@ def main():
             "drift_km_max": drift_max,
         },
     }
-    RESULTS_PATH_V2.write_text(
+    RESULTS_PATH.write_text(
         json.dumps(summary, indent=2, default=str), encoding="utf-8"
     )
-    print(f"\nResultados v2: {RESULTS_PATH_V2}")
+    print(f"\nResultados: {RESULTS_PATH}")
 
 
 if __name__ == "__main__":
