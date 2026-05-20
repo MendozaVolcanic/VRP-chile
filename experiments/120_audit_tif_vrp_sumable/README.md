@@ -190,3 +190,105 @@ Commit `64bd37d` de la rama `s15-dev` (backup local, no en `origin/main`):
 
 Ahí quedó documentada la sospecha de que el TIF MIROVA no era directamente sumable.
 Este experimento la convierte en hallazgo confirmado con números reproducibles.
+
+---
+
+## Parte 2 — Método R2 S69 verdadero replicado (Step 8 S70-0)
+
+### Aclaración importante
+
+El verdict "CONFIRMADO_TIF_NO_ES_SUMABLE" de la Parte 1 es válido sobre el campo de
+radiancia del TIF MIROVA — el TIF NO se debe interpretar como un raster donde cada
+pixel sea VRP individual sumable. El campo es continuo, casi todo el bbox tiene
+valor positivo, y la suma directa da magnitudes 8-22× la VRP MIROVA. Eso sigue en
+pie.
+
+**PERO esto NO invalida el método R2 S69**, porque al re-leer
+`docs/HYPOTHESIS_LOG.md` entry `H_S69_R2_RETROACTIVO_LASTARRIA` se aclaró que el
+método R2 S69 verdadero NO suma pixels del TIF para medir magnitud. El R2 S69 usa:
+
+- **Magnitud**: `pc.vrp_mw` (output del nuestro pipeline, ya filtrado a cluster
+  y persistido en `data/mirova_equivalent/Lastarria.json`) vs `MIROVA CSV NRT`
+  (`registro_vrp_consolidado.csv`). NO tocamos el TIF para esto.
+
+- **Geometría**: del TIF, tomamos solo los pixels positivos dentro de 3 km del
+  vent — el rango físicamente plausible donde puede sentarse el cluster térmico
+  inmediato de un cráter en actividad — y calculamos el centroide ponderado de
+  los top-10 dentro de ese filtro. Eso lo comparamos contra `pc.centroid` del
+  pipeline.
+
+El filtro <3 km del vent es lo que hace al método válido: aísla la región
+físicamente coherente con actividad volcánica del cráter, separándola del
+campo continuo de fondo del TIF que pinta todo el bbox de 50×50 km.
+
+### Caso replicado
+
+Lastarria 2026-05-14 05:48 UTC VIIRS375 (TIF `20260514_054802_VIIRS375.tif`,
+MIROVA CSV registro 773, ALERTA_TERMICA).
+
+### Resultados de la replicación
+
+| Componente | Valor S69 (HYPOTHESIS_LOG) | Valor obtenido S70-0 | Tolerancia | Status |
+|---|---|---|---|---|
+| ratio `pc.vrp_mw / MIROVA.VRP_MW` | 1.05× | **1.05×** (0.147 / 0.14) | ±0.20 | ✓ exact match |
+| TIF top10 <3 km vent — centroide | (-25.15546, -68.51905) | (-25.15130, -68.51800) | — | ~0.5 km off |
+| `pc.centroid` | (-25.15947, -68.51301) | **(-25.15947, -68.51301)** | exact (mismo record) | ✓ exact match |
+| drift TIF top10 vs `pc.centroid` | 0.752 km | **1.04 km** | ±0.50 | ✓ dentro de tolerancia |
+
+Detalles operacionales del run:
+
+- TIF pixels positivos totales: 17,906 (de 17,956 — bbox 134×134, prácticamente
+  todo el bbox tiene valor positivo, consistente con campo continuo).
+- TIF pixels positivos dentro de 3 km del vent: 206 (los relevantes para el R2).
+- top-10 valores dentro de 3 km: rango 0.079–0.100, distancias 1.07–2.74 km.
+- `pc.n_pixels = 1` (cluster de 1 pixel granule VIIRS375 — actividad sub-pixel
+  típica de Lastarria, consistente con que el TIF muestra un campo difuso de
+  varios pixels con valores similares pero el pipeline aísla un solo pixel
+  granule como cluster).
+
+El centroide TIF obtenido difiere del de S69 en ~0.5 km (0.4 km en lat, 0.001 lon).
+Las dos hipótesis principales son: (a) S69 puede haber usado una versión del TIF
+descargada en momento distinto antes de que el archivo se estabilizara, o (b) un
+detalle de implementación menor — `>0` vs `>= threshold`, redondeo del centroide,
+o ponderación distinta. Lo crítico es que la magnitud del drift contra
+`pc.centroid` (1.04 km) está dentro del mismo orden que el target S69 (0.752 km)
+y dentro de la tolerancia operacional <2 km del plan. Ambos confirman que el
+cluster que persiste el pipeline está geométricamente alineado con la región
+térmica que MIROVA pinta en el TIF, dentro del rango sub-cráter.
+
+### Verdict Parte 2
+
+**REPLICADO — método R2 S69 verdadero validado y replicable.**
+
+El ratio de magnitud es exactamente el reportado en HYPOTHESIS_LOG (1.05×) y el
+drift geométrico es del mismo orden y dentro de tolerancia. La separación
+conceptual entre "magnitud desde nuestro pipeline" y "geometría desde el TIF
+filtrado al vent" es el método correcto, y replicarlo a otros volcanes de Tier A
+en S70-1 es metodológicamente defendible.
+
+### Implicación operacional
+
+Bajo este resultado, **S70-1 puede proceder** a aplicar el método R2 S69 verdadero
+a Chaiten, PCC, Villarrica y PP. El plan operacional para cada volcán es:
+
+1. Tomar la ALERTA MIROVA más reciente con TIF disponible en
+   `mirova-tif-archive/data/tif/<Volcan>/`.
+2. Sacar `pc.vrp_mw` y `pc.centroid` del record correspondiente en
+   `data/mirova_equivalent/<Volcan>.json`.
+3. Cruzar contra `registro_vrp_consolidado.csv` por `Fecha_Satelite_UTC` exacto
+   para sacar `VRP_MW` MIROVA y `Distancia_km`.
+4. Cargar TIF, filtrar pixels positivos a <=3 km del vent del volcán
+   (`volcanoes.yaml`), top-10 ponderado, calcular centroide.
+5. Computar ratio magnitud y drift centroide, validar contra bandas operacionales
+   (ratio 0.5-2.0×, drift <2 km).
+
+Adicionalmente, los hallazgos de Parte 1 (TIF no es sumable como VRP/pixel) deben
+quedar documentados en el handoff S70-0 → S70-1 para evitar que un agente futuro
+vuelva a intentar sumar pixels del TIF y concluya falsamente que la calibración
+S62/S69 estaba mal apoyada.
+
+### Archivos Parte 2
+
+- `audit_lastarria_real_method.py` — replicación del R2 S69 verdadero sobre el
+  caso Lastarria 2026-05-14 05:48 UTC.
+- `results_real_method.json` — resultados estructurados de la replicación.
