@@ -208,6 +208,70 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   no se reduce → magnitud no cura. Decisión per-vol DEBE validar empíricamente
   con A/B, NO extrapolar de patrón ΔT solo.
 
+## Reglas operacionales S70 (aprendizajes A20-A26)
+- **A20. R2 con centroide NO aplica a anomalías difusas** (S70-1 T4 PCC):
+  el método R2 retroactivo (centroide ponderado top-N pixels TIF) asume cluster
+  focal puntiforme. Para vols con anomalía extendida (lacolito PCC ~707 km²,
+  domos extensos, intrusiones) el centroide del campo sin foco no representa
+  cluster discreto — drift resultante es artefacto del método (PCC 9.77 km),
+  NO error del pipeline. Validar adopción por **magnitud agregada** (ratio
+  per-record vs agregado S6X) + **confirmación geométrica** (cluster nuestro
+  está EN la zona difusa, ej. PCC 5.6-8.5 km del vent coincide con MIROVA
+  @ 7.73 km). Ver D7 en MIROVA_DIVERGENCES.md.
+- **A21. Bandas gates R2 son régimen-dependientes** (S70-1 cross-vol):
+  banda estricta `[0.5-2.0]` ratio + drift `<2 km` (Lastarria-style) solo
+  aplica a **Tier A Alto** (ΔT >20K) con cluster focal puro. **Tier A Muy Bajo**
+  (Chaiten/Villarrica/PP, ΔT <12K) requiere banda revisada con drift `<3 km`
+  porque la cola térmica del halo difuso del lava lake/domo es físicamente
+  real (no error del cluster). **Vols no focales**: R2 no aplica.
+  Doc operacional: `docs/R2_GATES_BY_REGIME.md`.
+- **A22. PP es bimodal en cluster selection** (S70-2 T1 multi-caso N=7):
+  pipeline a veces aísla cráter Peteroa (Modo A ratio ~1×), a veces se va al
+  halo regional del complejo multi-cráter Planchón+Peteroa+Azufre (Modo B
+  ratio 10×). Mediana N=7 dio 2.08× pero **varianza alta** = single record es
+  ruidoso. Para verdict robusto Tier A Muy Bajo: **multi-caso (3-5 ALERTAs)** +
+  reportar moda + frecuencia, no single record. Mismo mecanismo que Tupungatito
+  43% residual. Pendiente arquitectural S71+.
+- **A23. Path D dNTI ctx tiene FPs sistémicos en cirrus alto** (D9 ABIERTO, S70-2 T4):
+  cuando `t_bg_k <260K` (cirrus alto frío) el path D dNTI contextual puede
+  dispararse falsamente e inflar `pc.vrp_mw` **20-150×** vs ground truth. Trigger
+  mecánico: kernel local 8-vecinos sobre cirrus uniforme da `dNTI` artificial
+  altísimo aun sin actividad volcánica real. **Co-validación con BT path o
+  NTI absoluto requerida** antes de adoptar record path D-only en condiciones
+  atmosféricas frías. Fix S71+: papers-first (Coppola 2016a §SP 426.5,
+  Campus 2024, Coppola 2024) → si no resuelven, A/B test 3 alternativas
+  (gate atm `t_bg ≥260K`, co-validación obligatoria, cap magnitud).
+- **A24. TIF MIROVA NO es VRP per-pixel sumable** (D6, S70-0 T3):
+  el TIF "Last" descargado público de mirovaweb tiene ~17,911 pixels positivos
+  sumando ~1680 MW pero el header MIROVA reporta solo "VRP: 0.2 MW @ 9.7 km".
+  El TIF es **producto de visualización del campo de radiancia** — el "VRP
+  reportado" viene de **selección de cluster específica**, no suma del TIF.
+  **No usar suma de pixels TIF como ground truth de magnitud**. El método R2
+  S69 verdadero (centroide ponderado top10 pixels <3km del vent) sí valida
+  contra el cluster MIROVA específico cuando es focal.
+- **A25. Worktrees Claude no contaminan main pero filesystem local queda desfasado**:
+  sesiones Claude con `isolation: worktree` corren en branches aislados
+  (`claude/sNN-*`) que mergean directo a `origin/main` sin tocar el filesystem
+  local de Nicolás. Resultado: `git log main` local puede mostrar S33 mientras
+  `git log origin/main` ya está en S69. **Hacer `git fetch origin --prune` al
+  inicio de cada sesión** para detectar trabajo nuevo. NO asumir que `git log
+  main` refleja origin/main. Si hay desfase grande: crear worktree limpio
+  sobre `origin/main` para la sesión (`git worktree add ../proyecto-sNN
+  origin/main`) y dejar el local viejo como red de seguridad.
+- **A26. Control de costo de sesión** (feedback Nicolás S70-2):
+  subagentes se **siguen usando** (no recortar). Costos a controlar:
+  - Plans compactos inline, no docs 400+ líneas.
+  - Decisiones directas del controller cuando son obvias (no preguntar
+    "¿procedo?" para cada paso evidente — pero SÍ preguntar en decisiones
+    metodológicas como adopciones de threshold).
+  - Skill triggers selectivos: `superpowers-brainstorming` ANTES de adopciones
+    metodológicas SÍ; tareas mecánicas NO.
+  - Subagentes con scope acotado: prompts concisos sin redundancia, pedido
+    explícito de reporte <500-800 tokens.
+  - No regenerar contexto: releer docs solo si cambiaron desde el último
+    Read en la sesión.
+  - Cerrar tareas sin valor inmediato (frontend bugs menores → bandwidth).
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
