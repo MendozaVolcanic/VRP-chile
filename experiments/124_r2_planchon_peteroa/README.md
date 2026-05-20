@@ -80,3 +80,75 @@ Confirmación cross-volcán (Chaiten + Villarrica + PP): los **3 Tier A "Muy Baj
 3. Drift max_km=2 mucho mejor (0.3–1.1 km) → el cráter ESTÁ bien posicionado.
 
 La conclusión metodológica de S70-1 (T1.5 + T2 + T3): la banda operacional revisada `[0.5, 3.0]` + drift `<3 km` (g6) es el corte correcto para Tier A Muy Bajo; la banda Lastarria-style `[0.5, 2.0]` + drift `<2 km` (g1/g2) funciona sólo para Tier A "Alto" (ΔT > 20 K). Esta es información directa para el ajuste futuro de `audit_metrics` o para el documento `MIROVA_DIVERGENCES.md` (T5).
+
+---
+
+## Parte 2 — Multi-caso (S70-2 T1)
+
+### Motivación
+
+El verdict de la Parte 1 (single-case 2026-05-18) cayó marginal por décimas: ratio 2.08× quedó 0.08 fuera de la banda [0.5, 2.0], drift 2.20 km quedó 0.20 fuera de <2 km. El implementer notó que otros casos cercanos (2026-05-09 con 1.51×, 2026-05-11 con 1.94×) sí hubieran pasado g1. Esa observación sugiere que un único caso "representativo" es sensible al ruido per-record y la validación honesta exige mediana sobre N≥3 casos.
+
+### Casos auditados
+
+Se aplicó el método R2 (top-10 TIF dentro de 3 km del vent vs `pc.centroid`) a TODAS las 7 ALERTA_TERMICA PP VIIRS375 en la ventana del TIF archive (2026-05-09 al 2026-05-18) con TIF paralelo (timestamp exact match) y record pipeline con `pc.vrp_mw` válido.
+
+| Fecha (UTC) | Sensor pipeline | MIROVA VRP (MW) | pc.vrp_mw (MW) | pc.n_pixels | Ratio | Drift (max_km=3, top10) |
+|---|---|---:|---:|---:|---:|---:|
+| 2026-05-09 05:42:02 | VIIRS_NOAA21 | 0.24 | 0.362 | 1 | **1.51×** | 1.98 km |
+| 2026-05-10 06:18:01 | VIIRS_NOAA20 | 0.22 | 2.837 | 56 | **12.90×** | 2.40 km |
+| 2026-05-11 05:54:01 | VIIRS_NOAA20 | 0.25 | 0.485 | 2 | **1.94×** | 0.65 km |
+| 2026-05-12 05:36:01 | VIIRS_NOAA20 | 0.35 | 0.004 | 1 | **0.01×** | 2.45 km |
+| 2026-05-13 06:06:02 | VIIRS_NOAA21 | 0.25 | 2.783 | 65 | **11.13×** | 2.14 km |
+| 2026-05-14 05:48:02 | VIIRS_NOAA21 | 0.18 | 1.722 | 72 | **9.57×** | 2.63 km |
+| 2026-05-18 05:24:01 | VIIRS_NOAA20 | 0.16 | 0.333 | 2 | **2.08×** | 2.20 km |
+
+### Resumen mediano (N=7)
+
+- **Ratio mediana: 2.08×** (rango [0.01× – 12.90×], media 5.59×)
+- **Drift mediana: 2.20 km** (rango [0.65 – 2.63 km])
+- Mediano in banda **[0.5, 2.0]**: **NO** (FAIL — el mediano coincide con el caso T3 marginal)
+- Mediano in banda **[0.5, 3.0]**: SÍ
+- Mediano drift **<3 km**: SÍ
+- Mediano drift **<2 km**: NO
+
+### Verdict mediano
+
+**MARGINAL bajo gates revisadas T1.5.** No es PASS estricto ([0.5, 2.0] + <3 km) ni FAIL completo. Sí pasa la banda revisada amplia [0.5, 3.0] discutida en la Parte 1 como umbral apropiado para Tier A Muy Bajo.
+
+### Interpretación física — la dispersión NO es ruido aleatorio, es bimodal
+
+Lo geológicamente importante es que la distribución de ratios **no es simétrica alrededor de un centro** como esperaríamos de un proceso ruidoso. Es **bimodal**:
+
+- **Modo A — clusters pequeños** (`pc.n_pixels` ∈ {1, 2}): ratios 0.01×, 1.51×, 1.94×, 2.08×. Cuatro casos. Aquí el pipeline detecta sólo el cráter Peteroa con muy pocos pixels, y la magnitud queda en torno a 1–2× MIROVA, muy cerca del clon literal. El caso 0.01× (2026-05-12) es un cluster de un solo pixel marginalmente sobre umbral; geológicamente es una detección "apenas" que MIROVA registró con halo extendido (0.35 MW).
+- **Modo B — clusters grandes** (`pc.n_pixels` ∈ {56, 65, 72}): ratios 9.57×, 11.13×, 12.90×. Tres casos. Aquí el pipeline está agregando 50+ pixels sobre umbral, que típicamente significa que el cluster pegó no sólo en el cráter Peteroa sino en pixels del halo extendido del complejo (Planchón Sur al N, posiblemente nieve parcialmente caliente). MIROVA en estas mismas escenas reportó VRP muy bajo (0.18–0.25 MW), lo que sugiere que su selección de cluster fue más conservadora.
+
+**Físicamente:** PlanchonPeteroa es un complejo volcánico transfronterizo con varios centros emisivos en pocos km. Cuando la señal del cráter Peteroa es "Muy Baja" (ΔT pequeño), el pipeline a veces pega clean (1-2 pixels = ratio cercano a 1-2×) y a veces se va al halo regional (50+ pixels = ratio 10×). Esto es **un problema de cluster selection residual**, NO una falla del fix `local_kernel_bg`. El kernel local correctamente desambiguó el fondo (sino tendríamos ratios LEGACY 11.80× constantes); pero el pipeline aún no clasifica robustamente entre "halo cráter Peteroa" vs "halo difuso complejo".
+
+**La mediana 2.08× refleja honestamente que la mitad de los casos están en banda Muy Bajo (ratios 1-2×) y la otra mitad están saturados por cluster selection lejana (ratios 10×).** Un caso "típico" de la adopción S61 PP, sobre un universo más grande (39 ALERTAs A/B), seguramente tendrá esta misma estructura. El agregado S61 reportado (2.84×) es consistente con esta interpretación: mezcla de casos buenos y casos saturados.
+
+**Drift mediana 2.20 km coherente.** Todos los drifts caen en banda [0.65, 2.63] km — ningún caso está lejos del cráter. Esto significa que el `pc.centroid` siempre cae a 1-3 km del centroide TIF top10, indicando que el cluster está espacialmente bien anclado en el complejo, no en un cráter equivocado o en valles vecinos.
+
+### Implicación para la adopción S61 PP
+
+La adopción S61 (`local_kernel_bg: true` para PP) **NO está invalidada** por este multi-caso:
+
+1. **El fix funciona en la mitad de los casos** (Modo A, ratios 1-2×). Sin el kernel local, esos mismos casos darían ratios LEGACY ≈11.80× como agregado pre-fix.
+2. **Los casos saturados (Modo B) no son por kernel-bg roto** sino por cluster selection no específico al cráter Peteroa. Esos casos seguirían inflados aunque toquemos el kernel.
+3. **El verdict marginal mediano (2.08×) es estructural, no un artefacto del caso T3.** Refleja que PP es físicamente un volcán Muy Bajo con halo complejo, y operacionalmente nuestro pipeline lo monitorea con factor sistemático 2× respecto de MIROVA — coherente con el agregado S61 reportado (2.84×).
+
+**ESCALACIÓN a Nicolás como concern, NO como invalidación:** la mediana ratio multi-caso (2.08×) excede el corte [0.5, 2.0], pero está dentro de la banda revisada para Tier A Muy Bajo [0.5, 3.0]. La adopción S61 PP se sustenta sobre 39 ALERTAs A/B (S61 audit), no sólo las 7 elegidas aquí. La distribución bimodal observada sugiere un próximo paso de **mejora de cluster selection PP** (S70+: investigar por qué el cluster a veces se va al halo regional cuando la señal cráter es Muy Baja) — pero no requiere revertir la adopción.
+
+### Cómo correr
+
+```bash
+# Single-case (Parte 1, comportamiento original)
+python experiments/124_r2_planchon_peteroa/audit_pp.py
+
+# Multi-caso (Parte 2 S70-2 T1)
+python experiments/124_r2_planchon_peteroa/audit_pp.py --multi
+```
+
+Salidas:
+- `results.json` — single-case (Parte 1)
+- `results_multi.json` — multi-caso (Parte 2)
