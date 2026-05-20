@@ -115,6 +115,10 @@ from pipeline.profile import (
     ENABLE_DUAL_ROI_FIRST_PASS,
     ENABLE_DUAL_ROI_SECOND_PASS,
     VIIRS_C2_OVERRIDE_NIGHT,
+    PATH_D_ATM_GATE_TBG_MIN_K,
+    PATH_D_REQUIRES_COVALIDATION,
+    PATH_D_ONLY_CAP_MW,
+    PATH_D_ONLY_CAP_TBG_MAX_K,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -412,6 +416,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # compute_bg_stats retorna n_bg directamente. Default 0 evita
     # UnboundLocalError en return dict línea 1125 cuando I04 ausente.
     n_bg_i04 = 0
+    # S71 D9 Opción C — default OFF cuando I04 no está presente (sin t_bg_i04
+    # válido no se puede gatear). Mismo patrón que n_bt_path / n_nti_path.
+    _path_d_cap_active = False
 
     if "I04" in bands:
         bt = bands["I04"]
@@ -510,6 +517,16 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             else:
                 nti_rel_hot = np.zeros_like(bt_path_hot)
 
+            # S71 D9 Opción A — gate atmosférico path D contextual.
+            # Cirrus alto enfría t_bg_i04 → infla dNTI/dETI artificialmente.
+            # Omitir el firing contextual (legacy path D + first-pass Tests 2&3)
+            # cuando t_bg_i04 < min_k. Ver experiments/127_path_d_tbg_calibration/.
+            _path_d_atm_gate_skip = (
+                PATH_D_ATM_GATE_TBG_MIN_K is not None
+                and not np.isnan(t_bg_i04)
+                and t_bg_i04 < PATH_D_ATM_GATE_TBG_MIN_K
+            )
+
             # Path D — dNTI contextual 8-vecinos (P3.2 + P3.1 S15, Coppola 2016a).
             # P3.2: anomaly requires the pixel to stand out from its immediate
             # neighbors, not from the ring average -- immune to uniformly warm
@@ -521,7 +538,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             # n_dnti_ctx_path ya inicializado a 0 antes del bloque (S16 fix).
             if (ENABLE_DNTI_CONTEXTUAL_PATH
                     and "I05" in bands
-                    and not np.isnan(nti_bg)):
+                    and not np.isnan(nti_bg)
+                    and not _path_d_atm_gate_skip):
                 if ENABLE_DNTI_DUAL_ROI and inner_radius_km is not None:
                     dnti_ctx_hot = dual_roi_contextual_dnti_hot_mask(
                         nti=nti, bt=bt, roi_mask=roi_mask,
@@ -653,7 +671,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             n_first_pass = 0
             if (ENABLE_FIRST_PASS_TESTS_2_AND_3
                     and inner_radius_km is not None
-                    and not np.isnan(t_bg_i04)):
+                    and not np.isnan(t_bg_i04)
+                    and not _path_d_atm_gate_skip):
                 _, nti_app_fp = compute_nti_and_nti_app(
                     rad_mir=L_mir,
                     bt_tir=bt5,
@@ -758,6 +777,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 )
                 hot_mask_2d = hot_mask_2d & final_thr_mask
 
+            # S71 D9 Opción B — co-validación path D contextual. Cuando ON, el
+            # firing contextual (first_pass / dnti_ctx / Test 1) solo cuenta si
+            # BT path O NTI path también dispararon. Si los paths "duros" no
+            # vieron nada → descartar la contribución contextual (probable cirrus FP).
+            if PATH_D_REQUIRES_COVALIDATION:
+                _ctx_only = (not np.any(bt_path_hot)) and (not np.any(nti_path_hot))
+                if _ctx_only:
+                    hot_mask_2d = np.zeros_like(hot_mask_2d)
+
             # S16 P3.6: filtrar pixels en exclude_zones (cuerpos de agua/salares
             # irradiando calor nocturno que bbox 50x50 km incluye -> FPs masivos).
             # Whitelist active_water_bodies preserva (lagos crateres activos).
@@ -772,6 +800,19 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
 
             n_bt_path = int(np.sum(bt_path_hot))
             n_nti_path = int(np.sum(nti_path_hot))
+
+            # S71 D9 Opción C — predicado para cap magnitud path D contextual-only.
+            # Activo cuando firing solo contextual (BT/NTI duros = 0) AND t_bg
+            # bajo umbral cirrus. Se aplica en cada sitio donde primary_cluster
+            # se asigna (eruption inicial + Test 1 recompute).
+            _path_d_cap_active = (
+                PATH_D_ONLY_CAP_MW is not None
+                and PATH_D_ONLY_CAP_TBG_MAX_K is not None
+                and not np.isnan(t_bg_i04)
+                and n_bt_path == 0
+                and n_nti_path == 0
+                and t_bg_i04 < PATH_D_ONLY_CAP_TBG_MAX_K
+            )
 
             hot_rows, hot_cols = np.where(hot_mask_2d)
             n_anomalous = len(hot_rows)
@@ -864,13 +905,21 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 n_hotspots_clustered = len(_clusters)
                 if _clusters:
                     _c = _clusters[0]
+                    _vrp_c = float(_c["vrp_mw"])
+                    # S71 D9 Opción C — cap si firing contextual-only en cirrus.
+                    _d9_capped = False
+                    if _path_d_cap_active and _vrp_c > PATH_D_ONLY_CAP_MW:
+                        _vrp_c = PATH_D_ONLY_CAP_MW
+                        _d9_capped = True
                     primary_cluster = {
                         "n_pixels": _c["n_pixels"],
-                        "vrp_mw": round(_c["vrp_mw"], 3),
+                        "vrp_mw": round(_vrp_c, 3),
                         "centroid_lat": round(_c["centroid_lat"], 5),
                         "centroid_lon": round(_c["centroid_lon"], 5),
                         "centroid_dist_km": round(_c["centroid_dist_km"], 3),
                     }
+                    if _d9_capped:
+                        primary_cluster["d9_capped"] = True
 
             valid_roi = roi_bt_full[~np.isnan(roi_bt_full)]
             t_max_i04 = float(np.max(valid_roi)) if len(valid_roi) else float("nan")
@@ -1147,13 +1196,21 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             )
             if t1_clusters:
                 top = t1_clusters[0]  # mayor VRP (helper ordena desc cuando vrp dado)
+                _vrp_t = float(top["vrp_mw"])
+                # S71 D9 Opción C — cap si firing contextual-only en cirrus.
+                _d9_capped_t = False
+                if _path_d_cap_active and _vrp_t > PATH_D_ONLY_CAP_MW:
+                    _vrp_t = PATH_D_ONLY_CAP_MW
+                    _d9_capped_t = True
                 primary_cluster = {
                     "n_pixels": top["n_pixels"],
-                    "vrp_mw": round(top["vrp_mw"], 3),
+                    "vrp_mw": round(_vrp_t, 3),
                     "centroid_lat": round(top["centroid_lat"], 5),
                     "centroid_lon": round(top["centroid_lon"], 5),
                     "centroid_dist_km": round(top["centroid_dist_km"], 3),
                 }
+                if _d9_capped_t:
+                    primary_cluster["d9_capped"] = True
                 n_hotspots_clustered = len(t1_clusters)
 
     return {

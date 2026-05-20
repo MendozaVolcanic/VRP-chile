@@ -1,0 +1,80 @@
+# VRP-Chile — profile: mirova_equivalent_path_d_atm_gate_v1 (S71 D9 Opción A)
+#
+# A/B aislado para validar fix path D contextual FPs sistémicos en cirrus.
+# Idéntico a mirova_equivalent (operacional S70) EXCEPTO:
+#   - path_d_atm_gate_tbg_min_k: 265.0 → omitir firing contextual
+#     (first_pass Tests 2&3 + dnti_ctx legacy) cuando t_bg < 265K.
+#
+# Hipótesis (experiments/127_path_d_tbg_calibration/): cirrus alto enfría el
+# background → infla dNTI/dETI artificialmente, gatillando FPs sin actividad
+# volcánica real. Gate atmosférico elimina 22% FPs sin perder >10% TPs en
+# calibración empírica.
+#
+# data_subdir: mirova_equivalent_path_d_atm_gate_v1 (aislado del operacional).
+
+profile: mirova_equivalent_path_d_atm_gate_v1
+description: >
+  A/B S71 D9 Opción A — gate atmosférico path D contextual (t_bg < 265K skip).
+
+thresholds:
+  anomaly_threshold_k: 5.0
+  tir_threshold_k: 0.5
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  cloud_mask_bt_k: 0.0
+  max_sigma_component_k: 999.0
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
+  min_vent_pixels: 1
+  max_vent_sigma_contrib_k: 999.0
+  nti_rel_n_sigma: 3.0
+  nti_rel_min_floor: 0.005
+  dnti_contextual_c1: 0.003
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
+  modis_vent_threshold_k: 1.0
+  modis_vent_vrp_floor_mw: 0.0
+  n_sigma_mir_summit: 5.0
+  n_sigma_mir_scene: 10.0
+
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+paths:
+  enable_eruption_path: true
+  enable_vent_path: false
+  enable_vent_path_modis: false
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
+  enable_nti_relative_path: false
+  enable_dnti_contextual_path: true
+  enable_dnti_dual_roi: true
+  enable_test1_path: true
+  enable_dual_roi_bt: true
+  enable_exclude_zones: false
+  enable_test1_pixel_filter: false
+  enable_vent_anchored_clustering: true
+  enable_pixel_level_distance_filter: true
+  enable_test1_lbg_global: true
+  enable_bt_path_hot: false
+  enable_first_pass_tests_2_and_3: true
+  enable_dual_roi_first_pass: true
+  enable_second_pass_adjacent: true
+  enable_dual_roi_second_pass: true
+  enable_local_kernel_bg: true
+  # S71 D9 Opción A — el cambio clave
+  path_d_atm_gate_tbg_min_k: 265.0
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: mirova_equivalent_path_d_atm_gate_v1

@@ -231,6 +231,22 @@ Cualquier fix requiere A/B test con profile flag aislado (`mirova_equivalent_pat
 
 **Referencias**: `experiments/121_nrt_cron_diagnosis/diagnosis.md` (T1 NRT cron), `H_S70_PATH_D_CIRRUS_FP` (HYPOTHESIS_LOG), CSV cross-check `/tmp/cross_check_results.json`.
 
+#### S71 T1 Fase 1 — verdict papers-first (2026-05-20)
+
+Subagente Explore revisó 5 papers MIROVA canónicos buscando tratamiento explícito de cirrus / fondo frío / cloud mask previo a path D dNTI ctx:
+
+| Paper | ¿Resuelve D9? | Hallazgo |
+|---|---|---|
+| Coppola 2016a §SP 426.5 | NO | Define dNTI ctx + umbrales C1/C2 + filtro `dNTI<−0.1`. Sin cloud mask previo, sin gate t_bg. Caso Gaua p.17: "<2% FPs, siempre <5 MW" — interpretativo post-hoc, no gate algorítmico. |
+| Coppola 2016b enhanced | NO | Sin discusión cirrus / fondo frío. |
+| Campus 2024 thermal | NO | MIR captura solo 1-2% flujo hidrotermal real; no toca FPs dNTI sobre fondo frío. |
+| Coppola 2024 cap Springer | NO | "MIROVA uses spectral + contextual" sin detalle de adaptación a escenas anómalas. Tabla 3 lista 19 sistemas NRT sin paso cloud mask explícito. |
+| Aveni 2024 RSE TIRVolcH | NO | Problema TIR baja-T, no MIR cirrus. VSROI + R²>0.5 son filtros distintos. |
+
+**Verdict**: papers MIROVA **NO resuelven D9 explícitamente**. Ningún cloud mask documentado, ningún gate t_bg, ninguna co-validación obligatoria. La única pista publicada es interpretativa (Coppola 2016a Gaua: <5 MW Tier A sospechoso).
+
+**Implicación operacional**: proceder a Fase 2 — A/B test 3 alternativas (Opción 1 atm gate, Opción 2 co-validación, Opción 3 cap magnitud) con profile flag aislado. Decisión metodológica Nicolás S70-2: "probar diferentes alternativas hasta llegar a la réplica de MIROVA".
+
 ## Auditoría visual S27 (post-render fix, 90d)
 
 Conteo de markers en hotspot-map por Tier A (toggle "Solo principal" + "Solo cráter"):
