@@ -553,6 +553,11 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         _c1_sum = C1_SUMMIT_OVERRIDE if C1_SUMMIT_OVERRIDE is not None else DNTI_CONTEXTUAL_C1_SUMMIT
         _c2_sum = C2_SUMMIT_OVERRIDE if C2_SUMMIT_OVERRIDE is not None else C2_DNTI_SUMMIT_NIGHT
         _c2_det_sum = C2_SUMMIT_OVERRIDE if C2_SUMMIT_OVERRIDE is not None else C2_DETI_SUMMIT_NIGHT
+        # S72 F1.2 — pasar Test 1 K1 mask como unsuitable bg si flag retire ON
+        # (Coppola 2016a SP 426.5 §298-300). Si flag OFF mantiene legacy bg.
+        _test1_mask_for_fp = (
+            nti_path_hot if ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK else None
+        )
         fp_hot, fp_diag = first_pass_tests_2_and_3(
             nti=nti, nti_app=nti_app_fp, bt=bt_mir,
             roi_mask=roi_mask, dist_km=vent_dist_per_pixel,
@@ -570,6 +575,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                            if ENABLE_DUAL_ROI_FIRST_PASS else None),
             c2_deti_scene=(C2_DETI_SCENE_NIGHT
                            if ENABLE_DUAL_ROI_FIRST_PASS else None),
+            test1_mask=_test1_mask_for_fp,
         )
         hot_mask_2d = fp_hot
         n_first_pass = fp_diag["n_first_pass_pixels"]

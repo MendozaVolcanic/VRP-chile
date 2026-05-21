@@ -692,6 +692,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 else:
                     _c2_summit_v13 = C2_DNTI_SUMMIT_NIGHT
                     _c2_scene_v13 = C2_DNTI_SCENE_NIGHT
+                # S72 F1.2 — pasar Test 1 K1 mask como unsuitable bg si flag
+                # retire ON (Coppola 2016a SP 426.5 §298-300).
+                _test1_mask_for_fp = (
+                    nti_path_hot if ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK else None
+                )
                 fp_hot, fp_diag = first_pass_tests_2_and_3(
                     nti=nti, nti_app=nti_app_fp, bt=bt,
                     roi_mask=roi_mask, dist_km=vent_dist_per_pixel,
@@ -709,6 +714,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                                    if ENABLE_DUAL_ROI_FIRST_PASS else None),
                     c2_deti_scene=(_c2_scene_v13
                                    if ENABLE_DUAL_ROI_FIRST_PASS else None),
+                    test1_mask=_test1_mask_for_fp,
                 )
                 hot_mask_2d = fp_hot
                 n_first_pass = fp_diag["n_first_pass_pixels"]

@@ -22,6 +22,113 @@ from scipy.ndimage import generic_filter, convolve
 from .constants import C1 as _PLANCK_C1, C2 as _PLANCK_C2
 
 
+# ---------------------------------------------------------------------------
+# S72 F1.2 — Unsuitable-pixel filters (Coppola 2016a SP 426.5).
+#
+# Paper §267-273 ("Spatial analysis") textual:
+#   "all the pixels at the edge of the resampled matrices ... all the pixels
+#    with dNTI ... < -0.1 ... and all the pixels with dETI < -0.1 are
+#    considered unsuitable for the analysis"
+#
+# Paper §298-300 ("Spectral analysis"):
+#   "Pixels that satisfy Test 1 are flagged as 'active' and subsequently
+#    discarded (unsuitable) for further steps"
+#
+# Estos pixels NO deben contaminar el cómputo de μ/σ de dNTI/dETI usados como
+# rama estadística de Tests 2 y 3 (paper §316-325). Drift histórico VRP Chile:
+# computábamos μ/σ sobre TODOS los pixels ROI válidos, inflando el desvío
+# estándar con outliers negativos (sombras de nube, bordes de granule) y
+# pixels Test 1 ya marcados active. Resultado: thresholds estadísticos más
+# laxos en escenas con cirrus / edges / hotspots adyacentes → más FPs path D.
+# ---------------------------------------------------------------------------
+
+# Default unsuitable floors (Coppola 2016a §267-273, hardcoded del paper).
+UNSUITABLE_DNTI_FLOOR_DEFAULT: float = -0.1
+UNSUITABLE_DETI_FLOOR_DEFAULT: float = -0.1
+
+
+def _edge_unsuitable_mask(shape: tuple) -> np.ndarray:
+    """Mark 1-pixel border of the matrix as unsuitable.
+
+    Coppola 2016a §267-273: "all the pixels at the edge of the resampled
+    matrices are considered unsuitable". El kernel 8-vecinos en el borde
+    promedia contra NaN/cval virtual, sesgando dNTI/dETI.
+    """
+    edge = np.zeros(shape, dtype=bool)
+    if shape[0] >= 1:
+        edge[0, :] = True
+        edge[-1, :] = True
+    if shape[1] >= 1:
+        edge[:, 0] = True
+        edge[:, -1] = True
+    return edge
+
+
+def build_unsuitable_mask(
+    roi_mask: np.ndarray,
+    dnti: np.ndarray,
+    deti: np.ndarray,
+    *,
+    test1_mask: Optional[np.ndarray] = None,
+    dnti_floor: float = UNSUITABLE_DNTI_FLOOR_DEFAULT,
+    deti_floor: float = UNSUITABLE_DETI_FLOOR_DEFAULT,
+) -> np.ndarray:
+    """Coppola 2016a SP 426.5 §267-273 + §298-300 — pixels SUITABLE para μ/σ bg.
+
+    Devuelve la mask de pixels que SÍ entran al cálculo de μ/σ de la rama
+    estadística de Tests 2 y 3 (no es la mask de "unsuitable" en sí — es su
+    complemento dentro del ROI, conveniente para indexar bg_vals).
+
+    Filtros aplicados (todos del paper, §267-273):
+      - Edge pixels (1 píxel de margen)        → unsuitable
+      - dNTI < dnti_floor (default -0.1)       → unsuitable
+      - dETI < deti_floor (default -0.1)       → unsuitable
+      - Test 1 K1 active (§298-300)            → unsuitable (si test1_mask provisto)
+
+    Args:
+        roi_mask: bool 2D, True dentro del ROI volcánico.
+        dnti: 2D float, dNTI per pixel (puede contener NaN).
+        deti: 2D float, dETI per pixel (puede contener NaN).
+        test1_mask: bool 2D opcional, pixels que satisfacen Test 1 K1
+            (NTI > -0.8 noche). Si None → no se filtran por Test 1
+            (backward-compat con callers que no propaguen el flag).
+        dnti_floor: umbral dNTI < floor → unsuitable. Default -0.1 (paper).
+        deti_floor: umbral dETI < floor → unsuitable. Default -0.1 (paper).
+
+    Returns:
+        bool 2D, True donde el pixel ES suitable para entrar a μ/σ bg.
+        Pixels que sean NaN en dnti o deti también quedan False
+        (no se pueden usar para estadísticas).
+    """
+    if dnti.shape != deti.shape or dnti.shape != roi_mask.shape:
+        raise ValueError(
+            f"shape mismatch dnti={dnti.shape} deti={deti.shape} "
+            f"roi={roi_mask.shape}"
+        )
+
+    edge = _edge_unsuitable_mask(roi_mask.shape)
+    # Tratamos NaN como "unsuitable" (no se puede comparar). El operador < con
+    # NaN devuelve False — así que dnti<floor solo marca pixels con valor real
+    # negativo, no NaN. Igualmente filtramos NaN en el AND final via isfinite.
+    dnti_neg = dnti < dnti_floor
+    deti_neg = deti < deti_floor
+    unsuitable = edge | dnti_neg | deti_neg
+    if test1_mask is not None:
+        if test1_mask.shape != roi_mask.shape:
+            raise ValueError(
+                f"test1_mask shape {test1_mask.shape} != roi {roi_mask.shape}"
+            )
+        unsuitable = unsuitable | test1_mask
+
+    suitable = (
+        roi_mask
+        & ~unsuitable
+        & np.isfinite(dnti)
+        & np.isfinite(deti)
+    )
+    return suitable
+
+
 # 8-neighbor footprint (3x3 excluyendo centro)
 _FOOTPRINT_8N = np.array(
     [[1, 1, 1],
@@ -91,6 +198,12 @@ def contextual_dnti_hot_mask(
     t_bg: float,
     c1: float,
     bt_sanity_k: float,
+    *,
+    test1_mask: Optional[np.ndarray] = None,
+    apply_unsuitable_filters: bool = False,
+    unsuitable_dnti_floor: float = UNSUITABLE_DNTI_FLOOR_DEFAULT,
+    unsuitable_deti_floor: float = UNSUITABLE_DETI_FLOOR_DEFAULT,
+    deti: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """Contextual dNTI hot-pixel mask (Coppola 2016a, 8-neighbor median).
 
@@ -141,6 +254,19 @@ def contextual_dnti_hot_mask(
         & (dnti > c1)
         & (bt > t_bg + bt_sanity_k)
     )
+
+    # S72 F1.2 — Coppola 2016a SP 426.5 §267-273 + §298-300: pixels unsuitable
+    # NO deben aparecer en el hot mask. Para path D contextual los filtros
+    # son: borde de matriz, dNTI<-0.1 (irrelevante: el gate (dnti>c1) ya lo
+    # excluye), dETI<-0.1 (si deti se provee), y Test 1 K1 active (si flag).
+    if apply_unsuitable_filters:
+        edge = _edge_unsuitable_mask(roi_mask.shape)
+        unsuitable = edge | (dnti < unsuitable_dnti_floor)
+        if deti is not None:
+            unsuitable = unsuitable | (deti < unsuitable_deti_floor)
+        if test1_mask is not None:
+            unsuitable = unsuitable | test1_mask
+        hot = hot & ~unsuitable
     return hot
 
 
@@ -154,6 +280,12 @@ def dual_roi_contextual_dnti_hot_mask(
     c1_scene: float,
     inner_km: float,
     bt_sanity_k: float,
+    *,
+    test1_mask: Optional[np.ndarray] = None,
+    apply_unsuitable_filters: bool = False,
+    unsuitable_dnti_floor: float = UNSUITABLE_DNTI_FLOOR_DEFAULT,
+    unsuitable_deti_floor: float = UNSUITABLE_DETI_FLOOR_DEFAULT,
+    deti: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """Dual-ROI contextual dNTI mask (Coppola 2016a SP 426.5, P3.1 S15).
 
@@ -180,11 +312,19 @@ def dual_roi_contextual_dnti_hot_mask(
         raise ValueError(f"dist_km shape {dist_km.shape} != nti {nti.shape}")
     summit_mask = roi_mask & (dist_km <= inner_km)
     scene_mask = roi_mask & (dist_km > inner_km)
+    # S72 F1.2 — forward unsuitable filters a las dos llamadas contextuales.
+    _kwargs = dict(
+        test1_mask=test1_mask,
+        apply_unsuitable_filters=apply_unsuitable_filters,
+        unsuitable_dnti_floor=unsuitable_dnti_floor,
+        unsuitable_deti_floor=unsuitable_deti_floor,
+        deti=deti,
+    )
     hot_summit = contextual_dnti_hot_mask(
-        nti, bt, summit_mask, t_bg, c1_summit, bt_sanity_k,
+        nti, bt, summit_mask, t_bg, c1_summit, bt_sanity_k, **_kwargs,
     )
     hot_scene = contextual_dnti_hot_mask(
-        nti, bt, scene_mask, t_bg, c1_scene, bt_sanity_k,
+        nti, bt, scene_mask, t_bg, c1_scene, bt_sanity_k, **_kwargs,
     )
     return hot_summit | hot_scene
 
@@ -226,6 +366,9 @@ def first_pass_tests_2_and_3(
     c2_dnti_scene: Optional[float] = None,
     c2_deti_scene: Optional[float] = None,
     min_bg_pixels: int = 10,
+    test1_mask: Optional[np.ndarray] = None,
+    unsuitable_dnti_floor: float = UNSUITABLE_DNTI_FLOOR_DEFAULT,
+    unsuitable_deti_floor: float = UNSUITABLE_DETI_FLOOR_DEFAULT,
 ) -> tuple:
     """Coppola 2016a SP426.5 first-pass — Tests 2 ∧ 3 conjunción + dual-ROI.
 
@@ -250,6 +393,13 @@ def first_pass_tests_2_and_3(
         inner_km: radio split summit/scene.
         c1_*_scene, c2_*_scene: thresholds ROI2 si dual; None → uniforme.
         min_bg_pixels: mínimo para μ, σ confiable.
+        test1_mask: bool 2D opcional con pixels que satisfacen Test 1 K1
+            (NTI > -0.8 noche). Si se provee, esos pixels se filtran del pool
+            μ/σ por ser "unsuitable" según Coppola 2016a SP 426.5 §298-300.
+            Default None → backward-compat (Test 1 NO filtra el pool bg).
+        unsuitable_dnti_floor: pixels con dNTI < floor se excluyen del pool
+            μ/σ (Coppola 2016a §267-273). Default -0.1 (paper literal).
+        unsuitable_deti_floor: ídem para dETI. Default -0.1.
 
     Returns:
         (hot_mask: bool 2D, diag: dict con n_first_pass_pixels, mu_dnti,
@@ -265,8 +415,18 @@ def first_pass_tests_2_and_3(
     dnti = nti - mean_nti
     deti = eti - mean_eti
 
-    # 3) μ, σ bg regional
-    bg_mask = roi_mask & np.isfinite(dnti) & np.isfinite(deti)
+    # 3) S72 F1.2 — pool bg "suitable" Coppola 2016a §267-273 + §298-300.
+    # Excluye edge pixels, dNTI<-0.1, dETI<-0.1, y opcionalmente Test 1 K1 active.
+    # Drift previo: bg_mask = roi & isfinite(dnti) & isfinite(deti) — incluía
+    # outliers negativos que inflaban σ y aflojaban thresholds μ+C2·σ.
+    bg_mask = build_unsuitable_mask(
+        roi_mask=roi_mask,
+        dnti=dnti,
+        deti=deti,
+        test1_mask=test1_mask,
+        dnti_floor=unsuitable_dnti_floor,
+        deti_floor=unsuitable_deti_floor,
+    )
     n_bg = int(np.count_nonzero(bg_mask))
     if n_bg < min_bg_pixels:
         return np.zeros_like(roi_mask, dtype=bool), {

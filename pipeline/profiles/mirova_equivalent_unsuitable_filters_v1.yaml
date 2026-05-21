@@ -1,0 +1,93 @@
+# VRP-Chile — profile: mirova_equivalent_unsuitable_filters_v1 (S72 F1.2)
+#
+# A/B aislado para validar fix F1.2 unsuitable pixels (Coppola 2016a SP 426.5).
+# Idéntico a mirova_equivalent (operacional S70) EXCEPTO:
+#   - enable_test1_k1_retire_from_hot_mask: true (activa filtro Test 1 K1 en
+#     el pool μ/σ bg de first_pass_tests_2_and_3, paper §298-300).
+#   - unsuitable_dnti_floor / unsuitable_deti_floor: -0.1 (paper §267-273,
+#     hardcoded a -0.1 dentro de detection_context.py; el override aquí es
+#     declarativo y documental).
+#
+# Hipótesis: el pool μ/σ bg de la rama estadística de Tests 2/3 está contaminado
+# por (a) edge pixels donde el kernel 8-vecinos toca NaN, (b) pixels con dNTI/dETI
+# muy negativos (sombras/nubes), y (c) pixels Test 1 K1 ya marcados active. Esa
+# contaminación infla σ y aflojan los thresholds μ+C2·σ, generando FPs path D
+# adicionales en escenas con cirrus (D9 S71). El fix F1.2 alinea con paper
+# literal y debería reducir FPs sin tocar TPs reales.
+#
+# data_subdir: mirova_equivalent_unsuitable_filters_v1 (aislado del operacional).
+
+profile: mirova_equivalent_unsuitable_filters_v1
+description: >
+  A/B S72 F1.2 — unsuitable filters (edge + dNTI/dETI<-0.1 + Test 1 K1)
+  aplicados al pool μ/σ bg de Tests 2/3. Hipótesis D9 deep fix.
+
+thresholds:
+  anomaly_threshold_k: 5.0
+  tir_threshold_k: 0.5
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  cloud_mask_bt_k: 0.0
+  max_sigma_component_k: 999.0
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
+  min_vent_pixels: 1
+  max_vent_sigma_contrib_k: 999.0
+  nti_rel_n_sigma: 3.0
+  nti_rel_min_floor: 0.005
+  dnti_contextual_c1: 0.003
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
+  modis_vent_threshold_k: 1.0
+  modis_vent_vrp_floor_mw: 0.0
+  n_sigma_mir_summit: 5.0
+  n_sigma_mir_scene: 10.0
+  # S72 F1.2 — floors documentales (hardcoded en detection_context.py).
+  unsuitable_dnti_floor: -0.1
+  unsuitable_deti_floor: -0.1
+
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+paths:
+  enable_eruption_path: true
+  enable_vent_path: false
+  enable_vent_path_modis: false
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
+  enable_nti_relative_path: false
+  enable_dnti_contextual_path: true
+  enable_dnti_dual_roi: true
+  enable_test1_path: true
+  enable_dual_roi_bt: true
+  enable_exclude_zones: false
+  enable_test1_pixel_filter: false
+  enable_vent_anchored_clustering: true
+  enable_pixel_level_distance_filter: true
+  enable_test1_lbg_global: true
+  enable_bt_path_hot: false
+  enable_first_pass_tests_2_and_3: true
+  enable_dual_roi_first_pass: true
+  enable_second_pass_adjacent: true
+  enable_dual_roi_second_pass: true
+  enable_local_kernel_bg: true
+  # S71 D9 Opción C — mantenido idéntico al operacional para aislar el efecto
+  # de F1.2 (si quitamos el cap, no podemos diferenciar mejora de F1.2 vs cap).
+  path_d_only_cap_mw: 5.0
+  path_d_only_cap_tbg_max_k: 270.0
+  # S72 F1.2 — el cambio clave: Test 1 K1 active queda fuera del pool μ/σ bg.
+  enable_test1_k1_retire_from_hot_mask: true
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: mirova_equivalent_unsuitable_filters_v1
