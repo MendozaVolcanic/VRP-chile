@@ -259,6 +259,24 @@ ENABLE_BT_PATH_HOT: bool = bool(_p.get("enable_bt_path_hot", True))
 # para diagnóstico. Default OFF (backward-compat).
 ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK: bool = bool(_p.get("enable_test1_k1_retire_from_hot_mask", False))
 
+# S72 F2.3 — Coppola 2016a SP 426.5 §267-273 dice que pixels "unsuitable"
+# (edge de matriz + dNTI<-0.1 + dETI<-0.1) NO entran al pool μ/σ de la rama
+# estadística de Tests 2/3 ni al hot mask path D contextual. Previo a S72 F1.2
+# (PR #115) los floors estaban hardcoded -0.1 dentro de build_unsuitable_mask
+# y se aplicaban siempre que first_pass_tests_2_and_3 corría. Ese fix entró
+# en mirova_equivalent operacional sin gating explícito.
+#
+# Cuando ON (default True post-F1.2.a): floors dNTI/dETI = -0.1 y, en los
+# procesadores, apply_unsuitable_filters=True en contextual_dnti_hot_mask /
+# dual_roi_contextual_dnti_hot_mask. Cuando OFF: floors = -inf (no filtran)
+# y path D contextual no aplica filtros — comportamiento pre-F1.2.a.
+#
+# Independiente de ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK (§298-300 K1 retire)
+# para permitir A/B aislados S72 F2.3.
+ENABLE_UNSUITABLE_FILTERS_267_273: bool = bool(
+    _p.get("enable_unsuitable_filters_267_273", True)
+)
+
 # S46 Drift #1b — Coppola 2016a SP426.5:352-356 dice "step 2 is performed a
 # second time, being particularly careful to eliminate all of the 'active'
 # pixels already detected". Nuestro bg_vals NO excluye pixels Test 1 K1 active,
