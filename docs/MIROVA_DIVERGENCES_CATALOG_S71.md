@@ -103,3 +103,34 @@ Cada drift se adopta si:
 ---
 
 **Próximo paso ejecutable**: arrancar Fase 1.1 (HT1.5-NEW-4 audit coords vent vs MIROVA centroids). Es el más barato + más alto impacto + más alta confianza bibliográfica.
+
+---
+
+## Update Fase 1 — verdicts cerrados (2026-05-21)
+
+5 audits ejecutados en paralelo. Resultados:
+
+| Audit | Hipótesis | Verdict | Status |
+|---|---|---|---|
+| F1.1 | HT1.5-NEW-4 coord vent vs MIROVA | ❌ Refutada 4/5 vols; Tupungatito sí 5.21 km SE | Cerrado — F1.6 follow-up |
+| F1.2 | NEW-7+8 unsuitable filters | 🚨 4 GAPS detectados | **Top P1 — F2.1 en implementación** |
+| F1.3 | HT1.5-NEW-2 kernel L_bk | ✅ PASS | Descartado |
+| F1.4 | NEW-5 geofencing 5km | ❌ Refutado, mantener 25km | Cerrado |
+| F1.5 | NEW-6 benchmark Villarrica 2009 | ⏸️ Gap operativo | Aplazado |
+
+**Hallazgo cabeza**: los 4 gaps F1.2 (Test 1 K1 retire flag OFF + edge + dNTI<-0.1 + dETI<-0.1) son la **causa más probable del drift remanente**. SP 426.5 §267-273 cita literal: *"the second condition eliminates the negative outliers that would alter the contextual thresholds"*. Filtros faltantes inflan σ → threshold m+C2·σ alto → pixels que MIROVA descarta entran a nuestro firing.
+
+**Acciones derivadas en paralelo S72**:
+- **F2.1** — implementar 4 filtros + flag (subagente activo, bibliografía ⭐⭐⭐)
+- **F1.6** — Tupungatito coord re-eval (subagente activo)
+
+**Refutaciones documentadas** (no perseguir):
+- C2 distinto Muy Bajo régimen (Laiolo 2017 refuta)
+- Two-component Eq.14-16 en NRT (Coppola 2024 explícito)
+- Percentil bajo ring vs kernel local (S58)
+- Aveni 2025 Eq.9 Villarrica (S24)
+- Geofencing 5km Andes (F1.4 empírico)
+- Fumarole rim hypothesis 4/5 vols (F1.1 empírico)
+- Kernel L_bk solo central (F1.3 code review)
+
+**Estado catálogo**: 13 hipótesis evaluadas, 2 abiertas activas (F2.1 + F1.6), 7 refutadas con cita, 4 cerradas pendientes activación operacional (F2.1 audit).
