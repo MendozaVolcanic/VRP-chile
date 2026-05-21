@@ -169,6 +169,11 @@ jobs:
              && (github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'mirova_equivalent')
              && contains(fromJson('["Lascar","PuyehueCordonCaulle","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","Chaiten","NevadosDeChillan","Llaima","Copahue"]'), matrix.volcano) }}
         env:
+          # S72 EARTHDATA_TOKEN: si está seteado en GH Secrets, earthaccess lo
+          # prefiere automáticamente y bypassea el endpoint /api/users/find_or_create_token
+          # que NASA throttle desde IPs Azure (ver docs/EARTHDATA_TOKEN_SETUP.md).
+          # Si no está, fallback a USERNAME/PASSWORD legacy (sujeto a throttling).
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
         timeout-minutes: 50
@@ -190,6 +195,11 @@ jobs:
              && (github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'mirova_equivalent')
              && matrix.volcano == 'Villarrica' }}
         env:
+          # S72 EARTHDATA_TOKEN: si está seteado en GH Secrets, earthaccess lo
+          # prefiere automáticamente y bypassea el endpoint /api/users/find_or_create_token
+          # que NASA throttle desde IPs Azure (ver docs/EARTHDATA_TOKEN_SETUP.md).
+          # Si no está, fallback a USERNAME/PASSWORD legacy (sujeto a throttling).
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
         timeout-minutes: 50
@@ -205,6 +215,11 @@ jobs:
       - name: Run VRP pipeline — experimental profile
         if: ${{ steps.filter.outputs.skip != 'true' && (github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'experimental') }}
         env:
+          # S72 EARTHDATA_TOKEN: si está seteado en GH Secrets, earthaccess lo
+          # prefiere automáticamente y bypassea el endpoint /api/users/find_or_create_token
+          # que NASA throttle desde IPs Azure (ver docs/EARTHDATA_TOKEN_SETUP.md).
+          # Si no está, fallback a USERNAME/PASSWORD legacy (sujeto a throttling).
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
         timeout-minutes: 50

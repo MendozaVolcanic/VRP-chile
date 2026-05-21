@@ -164,6 +164,17 @@ def auth():
     (Unix) sin requerir env vars. CI sigue usando env vars (secrets GitHub
     Actions); netrc se skipea automáticamente si no existe.
 
+    S72 EARTHDATA_TOKEN bypass (fix throttling NASA-Azure):
+    earthaccess 0.17.0 `_get_credentials` prefiere automáticamente
+    `EARTHDATA_TOKEN` env var sobre `EARTHDATA_USERNAME`+`EARTHDATA_PASSWORD`.
+    Cuando `EARTHDATA_TOKEN` está seteado: setea `self.token = {"access_token":
+    user_token}` + `self.authenticated = True` directamente, SIN llamar
+    `_find_or_create_token` (el endpoint que NASA throttle desde rango IP /16
+    de Azure GH-hosted runners — DoS-mitigation colateral confirmado en
+    forum.earthdata.nasa.gov t=2764). Esto resuelve el issue NRT cron post-#103
+    que en S71-S72 fallaba 100% por ConnectTimeout al endpoint token-creation.
+    Setup: ver `docs/EARTHDATA_TOKEN_SETUP.md`. Token vida 60 días, rotar c/50.
+
     H6 S22 retry+backoff: 4 intentos con waits 5s/15s/45s para mitigar
     "Network is unreachable" intermitente. Bug fix S22 (run 07:14 failure):
     netrc fallback solo si archivo existe — antes lanzaba FileNotFoundError
