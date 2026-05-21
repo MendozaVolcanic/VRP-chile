@@ -1,0 +1,95 @@
+# VRP-Chile — profile: mirova_equivalent_unsuitable_only_v1 (S72 F2.3)
+#
+# A/B aislado #1 para identificar culpable de Lascar regression S72 F2.2.
+# Activa SOLO los 3 filtros §267-273 (edge + dNTI<-0.1 + dETI<-0.1) en
+# first_pass_tests_2_and_3 AND path D contextual. K1 retire §298-300 OFF.
+#
+# Coppola 2016a SP 426.5 §267-273:
+#   "all the pixels at the edge of the resampled matrices ... all the pixels
+#    with dNTI < -0.1 ... and all the pixels with dETI < -0.1 are considered
+#    unsuitable for the analysis"
+#
+# Diferencia clave vs mirova_equivalent operacional: extiende los §267-273
+# filters también al path D contextual (dnti_ctx_hot). Pre-F2.3 los floors
+# §267-273 sólo se aplicaban dentro de first_pass; path D los ignoraba.
+#
+# Hipótesis: si Lascar OK + D9 elim → §267-273 es la solución.
+# data_subdir: mirova_equivalent_unsuitable_only_v1 (aislado del operacional).
+
+profile: mirova_equivalent_unsuitable_only_v1
+description: >
+  A/B S72 F2.3 — §267-273 SOLO (edge + dNTI<-0.1 + dETI<-0.1 en first_pass
+  + path D contextual). K1 retire §298-300 OFF. Aislar culpable Lascar
+  regression F2.2.
+
+thresholds:
+  anomaly_threshold_k: 5.0
+  tir_threshold_k: 0.5
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  cloud_mask_bt_k: 0.0
+  max_sigma_component_k: 999.0
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
+  min_vent_pixels: 1
+  max_vent_sigma_contrib_k: 999.0
+  nti_rel_n_sigma: 3.0
+  nti_rel_min_floor: 0.005
+  dnti_contextual_c1: 0.003
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
+  modis_vent_threshold_k: 1.0
+  modis_vent_vrp_floor_mw: 0.0
+  n_sigma_mir_summit: 5.0
+  n_sigma_mir_scene: 10.0
+  # S72 F2.3 — documental (floors hardcoded paper).
+  unsuitable_dnti_floor: -0.1
+  unsuitable_deti_floor: -0.1
+
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+paths:
+  enable_eruption_path: true
+  enable_vent_path: false
+  enable_vent_path_modis: false
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
+  enable_nti_relative_path: false
+  enable_dnti_contextual_path: true
+  enable_dnti_dual_roi: true
+  enable_test1_path: true
+  enable_dual_roi_bt: true
+  enable_exclude_zones: false
+  enable_test1_pixel_filter: false
+  enable_vent_anchored_clustering: true
+  enable_pixel_level_distance_filter: true
+  enable_test1_lbg_global: true
+  enable_bt_path_hot: false
+  enable_first_pass_tests_2_and_3: true
+  enable_dual_roi_first_pass: true
+  enable_second_pass_adjacent: true
+  enable_dual_roi_second_pass: true
+  enable_local_kernel_bg: true
+  # S71 D9 Opción C — mantenido idéntico al operacional para aislar el efecto
+  # de §267-273 puro (sin cap no sabríamos si mejora viene de §267-273 vs cap).
+  path_d_only_cap_mw: 5.0
+  path_d_only_cap_tbg_max_k: 270.0
+  # S72 F2.3 — §267-273 ON (default). Path D contextual ahora también aplica.
+  enable_unsuitable_filters_267_273: true
+  # S72 F2.3 — K1 retire §298-300 OFF — la diferencia clave vs test1_retire_only.
+  enable_test1_k1_retire_from_hot_mask: false
+
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: mirova_equivalent_unsuitable_only_v1
