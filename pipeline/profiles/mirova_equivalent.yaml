@@ -259,6 +259,31 @@ paths:
   # del pixel hot (excluye otros hot + NaNs). Default OFF: median ring 5-25km.
   enable_local_kernel_bg: true
 
+  # S71 ADOPCIÓN — Opción C cap magnitud path D D9 (defensa intermedia).
+  # Cuando el firing es contextual-only (BT/NTI duros = 0) Y t_bg <270K (cirrus
+  # alto), capear pc.vrp_mw a 5 MW. Resuelve el bug D9 (path D contextual infla
+  # magnitudes 20-150× en escenas con cirrus por gradiente nube-roca aplicado
+  # sobre Wooster BT⁸). NO resuelve causa raíz arquitectural — los ratios siguen
+  # extremos (24-83×) en cirrus, pero quedan acotados a 5 MW techo.
+  #
+  # Validaciones S71 T1 F2 (regla S33 vinculante cumplida):
+  #   R1 — tests sintéticos: 20/20 PASS (tests/test_path_d_d9_fix.py)
+  #   R2 — pixel-level vs TIFs MIROVA archive (20 records): 0 cap leaks. Máx
+  #        MIROVA en records capped = 0.21 MW. El cap NO enmascara magnitudes
+  #        reales MIROVA. Ver experiments/131_r2_pixel_level_optC/.
+  #   R3 — audit independiente sensor-aware ±60min: COINCIDE con primario
+  #        (4/11 vols en ratio target vs 2/11 primario más estricto). Ver
+  #        experiments/130_r3_audit_independent_optC/.
+  # Calibración empírica: experiments/127_path_d_tbg_calibration/ (n=2639).
+  # Cap=5MW basado en Coppola 2016a Gaua "<5 MW Tier A sospechosos" + S70-2 T4
+  # cross-check Lastarria (max MIROVA en cirrus FPs = 0.21 MW).
+  #
+  # Drift remanente abierto (T1.5 S72): Villarrica/Chaiten/PP/Tupungatito/NdC
+  # siguen ratios 6-12× post-cap. NO es D9 — investigar causa arquitectural
+  # papers-first (probable cluster selection / first_pass re-firing).
+  path_d_only_cap_mw: 5.0
+  path_d_only_cap_tbg_max_k: 270.0
+
 # --- Sensor activation ---
 # true = process granules from this sensor in this profile.
 sensors:

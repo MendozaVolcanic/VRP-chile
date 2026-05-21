@@ -247,6 +247,32 @@ Subagente Explore revisó 5 papers MIROVA canónicos buscando tratamiento explí
 
 **Implicación operacional**: proceder a Fase 2 — A/B test 3 alternativas (Opción 1 atm gate, Opción 2 co-validación, Opción 3 cap magnitud) con profile flag aislado. Decisión metodológica Nicolás S70-2: "probar diferentes alternativas hasta llegar a la réplica de MIROVA".
 
+#### S71 T1 Fase 2 — A/B + adopción Opción C (2026-05-21)
+
+3 reprocs A/B sobre 11 vols Tier A ventana 2026-02-20 → 2026-05-20 (PRs #103-#111, merged). Cada opción en profile aislado + audit cruzado vs MIROVA NRT CONS+OCR.
+
+| Opción | Bug D9 count (vrp>5MW pD-only @ t_bg<260K) | Recall preservado | Adopción |
+|---|---|---|---|
+| baseline | 237 | — | (anterior) |
+| A — atm gate t_bg<265K | **0** ✅ | 7/7 (NdC pierde 1 noche) | NO (ortogonal a C) |
+| B — co-validación BT/NTI | 1 (Copahue residual) | **NdC colapsa 1.00→0.33**, Lastarria 0.99, PCC 0.96 | NO (rompe recall) |
+| **C — cap 5MW @ t_bg<270K** | **0** ✅ | **7/7** sin perder ninguna noche | **SÍ — adoptado S71** |
+
+**Validaciones regla S33 vinculante (cumplidas antes del push)**:
+- **R1** tests sintéticos: 20/20 PASS (`tests/test_path_d_d9_fix.py`).
+- **R2** pixel-level vs TIFs MIROVA archive sobre 20 records muestreados: **0 cap leaks**. Máximo MIROVA en records capeados = 0.21 MW. El cap NO enmascara magnitudes reales MIROVA >5MW. Detalle en `experiments/131_r2_pixel_level_optC/`.
+- **R3** audit independiente sensor-aware ±60min (vs ±3h del primario): **COINCIDE**. C winner con 4/11 vols en ratio target (más fuerte que 2/11 primario). Detalle en `experiments/130_r3_audit_independent_optC/`.
+
+**Adopción S71** en `pipeline/profiles/mirova_equivalent.yaml`: `path_d_only_cap_mw: 5.0` + `path_d_only_cap_tbg_max_k: 270.0`.
+
+**Cobertura física**: el cap acota magnitudes en cirrus alto (Wooster BT⁸ sobre fondo frío inflaba 20-150×). Ahora la magnitud máxima publicable en escena contextual-only + cirrus es 5 MW, alineado con Coppola 2016a Gaua "<5 MW Tier A sospechosos" y con el máximo MIROVA empírico en records que el cap atrapa (0.21 MW).
+
+**Estado D9 — PARCIALMENTE RESUELTO**: mitigación defensiva adoptada. Cubre 100% del bug original (records con magnitud absurda en cirrus). **Causa raíz arquitectural sigue ABIERTA** — ratios post-cap siguen 24-83× cuando MIROVA presente en cirrus. Drift remanente afecta Villarrica/Chaiten/PP/Tupungatito/NdC con ratios 6-12× independiente del cap. Hipótesis preliminar: cluster selection / first_pass re-firing. Investigación papers-first → **T1.5 abierta S72**.
+
+**Aprendizaje S71 — A27 (regla operacional)**: el matching audit ±3h por noche oculta pérdidas de recall que aparecen con matching sensor-aware ±60min. Lascar y PCC pierden recall significativo (0.72→0.43, 0.96→0.87) post-fix path D — no detectado por audit primario, sí por R3. Para vols con muchas alertas MIROVA, usar matching estricto sensor-aware en auditorías futuras.
+
+**Referencias**: `experiments/127_path_d_tbg_calibration/`, `experiments/128_path_d_ab_audit/`, `experiments/130_r3_audit_independent_optC/`, `experiments/131_r2_pixel_level_optC/`.
+
 ## Auditoría visual S27 (post-render fix, 90d)
 
 Conteo de markers en hotspot-map por Tier A (toggle "Solo principal" + "Solo cráter"):
