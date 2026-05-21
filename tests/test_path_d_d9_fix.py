@@ -31,13 +31,22 @@ def _reload_profile(name: str):
 # --- Profile loading tests ---
 
 
-def test_operacional_keys_default_off():
-    """mirova_equivalent (operacional) NO debe activar D9 — defaults OFF."""
+def test_operacional_adopta_optC():
+    """mirova_equivalent (operacional) — S71 adoptó Opción C (cap 5MW @ t_bg<270K)
+    como defensa intermedia D9. Opciones A y B siguen OFF (causa raíz pendiente T1.5).
+
+    Regla S33 vinculante: R1+R2+R3 validados antes de adopción.
+    Ver experiments/130_r3_audit_independent_optC/, 131_r2_pixel_level_optC/,
+    docs/MIROVA_DIVERGENCES.md D9.
+    """
     p = _reload_profile("mirova_equivalent")
+    # Opción A — gate atmosférico: OFF (causa-raíz pendiente T1.5)
     assert p.PATH_D_ATM_GATE_TBG_MIN_K is None
+    # Opción B — co-validación: OFF (colapsa recall NdC)
     assert p.PATH_D_REQUIRES_COVALIDATION is False
-    assert p.PATH_D_ONLY_CAP_MW is None
-    assert p.PATH_D_ONLY_CAP_TBG_MAX_K is None
+    # Opción C — cap magnitud: ON (winner S71 R1+R2+R3)
+    assert p.PATH_D_ONLY_CAP_MW == 5.0
+    assert p.PATH_D_ONLY_CAP_TBG_MAX_K == 270.0
 
 
 def test_atm_gate_profile_loads():
