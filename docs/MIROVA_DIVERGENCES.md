@@ -406,6 +406,50 @@ Laiolo 2017 prueba que MIROVA detecta fumaroles 1.6 MW con threshold standard. *
 
 **Conclusión bibliográfica S71**: tenemos cobertura MIROVA-canónica funcional para todas las decisiones T1.5+. Refs externas Valade 2019 (MOUNTS ML) bajadas para "futuras implementaciones" no-MIROVA; Koeppen 2011 paywall pero no es paper de cloud-filter exclusivo (es time-series hybrid, ya cubierto conceptualmente por Method-2 Coppola 2023).
 
+#### S71 Fase 1 audits — verdicts cerrados (2026-05-21)
+
+Ejecución sistemática del catálogo de divergencias (`docs/MIROVA_DIVERGENCES_CATALOG_S71.md`). 5 subagentes paralelos sobre 5 hipótesis priorizadas:
+
+| Audit | Hipótesis | Verdict | Acción derivada |
+|---|---|---|---|
+| **F1.1** | HT1.5-NEW-4 coord vent vs centroide MIROVA fumarole rim | ❌ **REFUTADA 4/5 vols** (Villarrica/Chaiten/PCC/PP: p50 < 1 km del vent yaml; rumbo coincidente con cráter activo). Único caso real: **Tupungatito (CONS NRT p50 = 5.21 km SE)** → re-abrir decisión S65 PR #93 | F1.6 — propuesta de coord nueva |
+| **F1.2** | NEW-7 + NEW-8 — Test 1 K1 retire + edge/dNTI<-0.1/dETI<-0.1 unsuitable | 🚨 **4 GAPS DOCUMENTALES detectados**: (1) `enable_test1_k1_retire_from_hot_mask` OFF default en `mirova_equivalent.yaml` (paper SP 426.5 §298-300 lo exige); (2) edge pixels NO filtrados §267-273; (3) dNTI<-0.1 NO descartado §267-273; (4) dETI<-0.1 NO descartado §267-273 | F2.1 — fix implementable, bibliografía ⭐⭐⭐ |
+| **F1.3** | HT1.5-NEW-2 — L_bk kernel excluye TODOS hot pixels del cluster | ✅ **PASS** — `pipeline/vrp_regimes.py:compute_local_background` (líneas 21-89) excluye correctamente `hot_set = set(zip(hot_rows, hot_cols))`. Test sintético `test_two_adjacent_hot_pixels_each_excludes_the_other_hot` confirma | Descartado como causa drift |
+| **F1.4** | NEW-5 — geofencing 5 km Stromboli aplica en Andes | ❌ **REFUTADO**. 21.79% records OSF v2.5 chilenos > 5 km del vent; cap empírico ~30 km coincide con `r_circunscrito` box MIROVA 51×51 km. La regla S14 (`radius_km=25 km` uniforme) cubre 98.27% records — empíricamente óptima. Stromboli 5 km es contexto isla pequeña, NO transferible | NO cambiar geofencing actual |
+| **F1.5** | NEW-6 — reproducir Villarrica 24-Jun-2009 Fig. A6 SP 426.5 | ⏸️ **GAP OPERATIVO**: granule MODIS Terra/Aqua 2009-06-24 04:10/05:55 UTC disponible vía Earthdata pero pyhdf roto en Windows + falta instrumentación dump rasters NTI/NTIbk/dNTI/ETI. Costo: ~2h instrumentación + workflow GH Actions | Aplazado — no urgente |
+
+##### Causa MÁS PROBABLE del drift remanente (post-Fase 1)
+
+Los **4 gaps documentales F1.2** explican mejor el drift remanente Villarrica/Chaiten/PCC/PP que las otras hipótesis (descartadas):
+
+- HT1.5-NEW-4 (coord) → descartada para 4 de 5 vols.
+- HT1.5-NEW-2 (kernel L_bk) → ya correcto.
+- NEW-5 (geofencing) → ya óptimo.
+
+**Razonamiento físico-algorítmico**: si pixels con dNTI<-0.1 o dETI<-0.1 (típicamente cirrus o lagos fríos con anomalía NEGATIVA) entran al cálculo de `m` y `σ` de Tests 2/3, **inflan σ artificialmente**. El threshold `m + C2·σ` queda alto, permitiendo que pixels que MIROVA descarta entren a nuestro firing. Esto es exactamente consistente con D9 Lastarria/Lascar/Tier A Muy Bajo en cirrus invernal Atacama.
+
+**Bibliografía**: SP 426.5 §267-273: *"these unsuitable pixels are: all the pixels at the edge of the resampled matrices; all the pixels with dNTI or dETI < -0.1 ... the second condition eliminates the negative outliers that would alter the contextual thresholds"*. Cita directa.
+
+##### Plan ejecutivo S72 derivado
+
+**F2.1 (top P1, en implementación)**: 4 filtros + flag wireados en `first_pass_tests_2_and_3` y `contextual_dnti_hot_mask`. Profile aislado `mirova_equivalent_unsuitable_filters_v1.yaml`. Workflow A/B `reproc-ab-unsuitable-filters.yml`. R1+R2+R3 antes de adopción (regla S33).
+
+**F1.6 (top P2, en análisis)**: Tupungatito restaurar/ajustar `mirova_center_lat/lon` basado en centroide CONS NRT (5.21 km SE del vent yaml actual). Re-evaluar decisión S65 con evidencia post-S65.
+
+**Reservado P3 (post-F2.1)**: HT1.5-NEW-1 scene-wide aggregation. Solo si F2.1 no resuelve completo. Refactor mayor con riesgo regresión recall.
+
+#### Refutaciones bibliográficamente argumentadas (no perseguir)
+
+| Hipótesis | Refutación | Fuente |
+|---|---|---|
+| C2 distinto per-régimen Muy Bajo | MIROVA detecta fumaroles 1.6 MW con Tabla 1 estándar | Laiolo 2017 §208-213 |
+| Two-component model Eq.14-16 en NRT | MIROVA NRT NO lo usa (requiere assumption T_hot) | Coppola 2024 §1159-1171 |
+| Percentil bajo (p01-p05) ring vs kernel local | Kernel local lo supera empíricamente | S58 adopción `local_kernel_bg` |
+| Aveni 2025 Eq.9 para Villarrica recall 0% | Refutado empíricamente S24 | H_S24_AVENI_NEGATIVE |
+| Geofencing 5 km Stromboli en Andes | 21.79% OSF >5 km — pérdida masiva recall | F1.4 empírico |
+| Fumarole rim vs lago cráter (Laiolo 2017) | 4/5 vols Tier A Muy Bajo centroide térmico p50 <1 km vent | F1.1 empírico |
+| Kernel L_bk excluye solo central | YA excluye TODOS hot pixels del cluster | F1.3 code review |
+
 ## Auditoría visual S27 (post-render fix, 90d)
 
 Conteo de markers en hotspot-map por Tier A (toggle "Solo principal" + "Solo cráter"):
