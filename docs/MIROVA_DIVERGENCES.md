@@ -271,7 +271,140 @@ Subagente Explore revisó 5 papers MIROVA canónicos buscando tratamiento explí
 
 **Aprendizaje S71 — A27 (regla operacional)**: el matching audit ±3h por noche oculta pérdidas de recall que aparecen con matching sensor-aware ±60min. Lascar y PCC pierden recall significativo (0.72→0.43, 0.96→0.87) post-fix path D — no detectado por audit primario, sí por R3. Para vols con muchas alertas MIROVA, usar matching estricto sensor-aware en auditorías futuras.
 
+#### S71 revisión exhaustiva papers MIROVA — citas bibliográficas directas para D9 (2026-05-21)
+
+> Trigger: Nicolás reportó que la Fase 1 leyó solo notas Vault, no PDFs completos. Esta sub-sección documenta las citas exactas que validan el cap S71 y reformulan D9 con autoridad bibliográfica.
+
+**Coppola 2016 SP 426.5 §247-249** (book chapter Geological Society of London):
+> *"the presence of clouds is not taken into account by the algorithm and all eight neighbouring pixels are used to compute the spatial average. This is a simple spatial filtering that does not take into account the type of surface imaged by each pixels (e.g. land, sea, clouds), just 'its variability with respect to the surroundings'."*
+
+**Coppola 2016 SP 426.5 §675-696** (sección "False alerts" — base bibliográfica directa del cap 5 MW):
+> *"these false detections typically radiate **less than 5 MW** and can be easily identified by a visual inspection of the associated NTI map ... reducing the false detection rate will cause numerous genuine alerts of low intensity (<10 MW) to be missed"*
+
+**Coppola 2016 SP 426.5 §712-728** (sección "Meteorological and volcanic clouds"):
+> *"there is, as yet, **no robust method** to evaluate the amount of thermal radiation attenuated by clouds, or volcanic plumes, so that visual inspection of the image still remains the best solution ... the RP time series obtained by MIROVA are provided **'as they are'**"*
+
+**Coppola 2016 SP 426.5 Fig. A6** (caso Villarrica explícito en paper):
+> *"Villarrica volcano (Chile) ... The clear thermal contrast between the ice-covered summit ... and the Villarrica lake ... is clearly visible on the NTI and NTIbk. However, a very small thermal anomaly (NTI ≤ -0.93) at the summit of Villarrica is easily detected after performing the spatial filtering (dNTI and dETI). **Note how the warm lake surface almost disappears in the ETI map**"*
+
+→ Demuestra el mecanismo de defensa MIROVA: ETI = NTI − NTIbk (con regresión cuadrática per-imagen) absorbe contrastes regionales (lago, cirrus). Implementado en VRP Chile vía `pipeline/detection_context.py:compute_nti_and_nti_app` (`np.polyfit(x, y, 2)` + iterative re-fit, Eq.4 SP426.5). ✅
+
+**Coppola 2019 Frontiers §1283-1288** (tasa empírica FPs MIROVA):
+> *"a smaller but variable percentage of false alerts, **generally comprised between 0 and 3%** ... at different volcanoes (Coppola et al., 2016b). These false alerts depend on the regional and local environmental conditions as climate, elevation, topography and land cover type"*
+
+**Coppola 2019 Frontiers §1443-1480** (sección "Image Quality Assessment"):
+> *"any hot spot detection system should be able to quantify the effects of clouds and viewing geometry condition, within each acquired image. **This fundamental step is currently absent in all available algorithms** ... Quantification of cloud attenuation on a pixel per pixel basis would be an ideal solution **(Koeppen et al., 2011)**, but this would require the collection and analysis of many more bands ... A promising solution is provided by **machine learning (i.e., Valade et al., 2019)**"*
+
+**Coppola 2023 Frontiers §554-558** (base de datos 2000-2019 "as-are"):
+> *"the VRP data provided by MIROVA are provided **'as-are', i.e., without atmospheric corrections and cloud fraction estimates** accompanying the measurement"*
+
+**Coppola 2023 Frontiers §530-540** (mecanismo MIROVA Method-2 — NO implementado en VRP Chile):
+> *"**local VRP minima are removed from the weekly subset**, before performing the weekly energy calculation ... tends to **reduce the effect of cloud contamination**"*
+
+→ MIROVA tiene **post-processing temporal** (Method-2) que VRP Chile NO replica. Es candidato para T1.5 S72 (drift remanente).
+
+#### D9 — verdict reforzado con bibliografía directa
+
+El cap 5 MW (Opción C) **NO es un parche** — es la implementación programática del trade-off explícitamente documentado en Coppola 2016a §675-696: *"these false detections typically radiate less than 5 MW"*. La adopción S71 está respaldada por:
+
+1. **Cita literal**: FPs MIROVA típicos <5 MW (SP 426.5 §687).
+2. **Confesión MIROVA**: cloud filter per-scene "ausente en todos los algoritmos" (Coppola 2019 §1449).
+3. **Database 2023**: data MIROVA OSF v2.5 entregada "as-are" sin atmospheric corrections (Coppola 2023 §554).
+4. **Mecanismos MIROVA que SÍ tenemos implementados**: NTIbk regresión cuadrática (Eq.4), ETI = NTI − NTIbk (Eq.5), Tests 2 ∧ 3 (dNTI ∧ dETI) con C2·σ auto-adaptive (Tabla 1: C2=5 summit / 10 scene).
+5. **Mecanismos MIROVA que NO tenemos**: Method-2 weekly local minima removal (Coppola 2023 §537), QC visual a posteriori (Coppola 2016a §367, 2019 §1444). El cap 5 MW reemplaza programáticamente el QC visual que MIROVA hace manualmente.
+
+#### Drift remanente — hipótesis nuevas derivables de la lit (T1.5 S72)
+
+**HT1.5-NEW-1 (cluster selection)**: MIROVA agrega Σ ALL alerted pixels scene-wide (SP 426.5 Eq.8: `RP = Σ RP_PIX`, Coppola 2024 Eq.13: `ΔL_tot = Σ_{k=1}^{N_pix} ΔL_k`). Nuestro pipeline selecciona `primary_cluster` cerca del vent. En escenas Muy Bajo régimen donde MIROVA agrega N pixels distribuidos, nosotros podemos amplificar al elegir el cluster más brillante.
+
+**HT1.5-NEW-2 (background del kernel)**: aunque `enable_local_kernel_bg: true` adoptado S61 (kernel 3×3 vecinos), verificar que excluye **todos** los hot pixels del cluster (SP 426.5 §357-359: *"L4bk is estimated from the arithmetic mean of all the pixels surrounding the active one (or **around the active cluster**)"*). Si solo excluye el alerted central pero no los otros del cluster, el background queda contaminado.
+
+**HT1.5-NEW-3 (post-processing temporal)**: implementar Method-2 MIROVA — descartar mínimos locales semanales antes de publicar al dashboard. No es algorítmico per-scene, es post-processing per-vol per-semana.
+
+#### Refs externas para perseguir (T1.5 / S72+)
+
+| Ref | Aporte declarado | Relevancia D9/drift |
+|---|---|---|
+| **Koeppen et al. (2011)** | Quantification cloud attenuation pixel-per-pixel | Alta — solución ideal según Coppola 2019 (no implementada por MIROVA) |
+| **Valade et al. (2019)** | ML cloud filter sistema MOUNTS | Alta — alternativa moderna (no implementada por MIROVA) |
+| **Coppola et al. (2010)** | Effect of unfavorable geometric conditions on VRP | Media — viewing geometry |
+| **Coppola et al. (2013)** | Cloud contamination effect on time series | Media |
+| **Galetto et al. (2023)** | Database global eruptions vs MIROVA detection | Media — validation |
+
+Status doc: vivo. Síntesis exhaustiva completa en `docs/PAPERS_MIROVA_SYNTHESIS_S71.md`.
+
+#### A28 (aprendizaje meta de proceso S71)
+
+Cuando un subagente reporte "papers NO resuelven X", verificar antes de aceptar:
+1. ¿Procesó PDFs completos o solo notas Vault síntesis (~100-200 líneas)?
+2. ¿Cubrió TODOS los papers que el usuario citó por URL?
+3. ¿Buscó supplementary material?
+4. ¿Cubrió refs externas que los papers citan?
+
+Si alguna respuesta es NO → la conclusión es prematura. Releer directo el PDF antes de tomar decisión arquitectural. El verdict S71 T1 Fase 1 era correcto en lo nominal pero subutilizó información que estaba a 1 grep de distancia (FPs MIROVA <5 MW, trade-off C2 documentado, caso Villarrica en paper, Method-2 temporal).
+
 **Referencias**: `experiments/127_path_d_tbg_calibration/`, `experiments/128_path_d_ab_audit/`, `experiments/130_r3_audit_independent_optC/`, `experiments/131_r2_pixel_level_optC/`.
+
+#### S71 expansión revisión — Massimetti 2024 + Laiolo 2017 procesados (2026-05-21)
+
+Procesamiento exhaustivo de 2 papers MIROVA-canónicos adicionales identificados en auditoría:
+
+**Massimetti et al. 2024** JGR Solid Earth "Thermal Emissions of Active Craters at Stromboli — Spatio-Temporal Insights" (`documentacion/massimetti2024_stromboli.md`, 1966 líneas):
+
+- **VTF definida** (`:230-232`): *"the magnitude and spatial information of any **Volcanic Thermal Feature (VTF; hereby defined as a sub-pixel spatial element with temperatures above the background)**"*. Unidad operativa MIROVA: sub-pixel element, NO cluster ni pixel.
+
+- **MIROVA MIR usa geofencing 5 km + sum scene-wide** (`:561-562`): *"considering only alerts within a maximum distance of **5 km from volcano summit**"*. Confirmado para Stromboli. Para Andes los KMZ MIROVA usan box 50×50 km — pregunta abierta sobre filtro exacto en volcanes grandes.
+
+- **MIR sin ROI per-crater** (`:801-832`): los 3 ROIs Stromboli (NE, C, SW) **se definen exclusivamente con SWIR 20m** (Sentinel-2/Landsat). En MIR (MODIS/VIIRS) el crater terrace se trata como una sola unidad. **→ HT1.5-NEW-1 VALIDADA**: MIROVA no selecciona primary_cluster en MIR.
+
+- **MIROVA NO filtra cirrus en MIR** (`:573-575`): *"VIIRS MIR images represent a data set that is **not corrected for the acquisition conditions**, but it simply expresses a measurement of the thermal radiation reaching the MIR sensor as it is, **possibly including clouds and geometry effects**"*. **CONFIRMA D9 como limitación heredada, no bug propio**.
+
+- **Threshold MIR uniforme** (no per-crater) — algoritmo Coppola 2016/Campus 2022 sin modificación per-vent.
+
+- **Alert rate Stromboli MIR 39.8%** (`:597-598`): 2,696 / 6,772 overpasses. Reference rate para volcán muy activo.
+
+**Laiolo et al. 2017** JVGR 340 "Evidences of volcanic unrest on high-temperature fumaroles by satellite thermal monitoring: The case of Santa Ana, El Salvador" (`documentacion/laiolo2017.md`, 988 líneas):
+
+- **Sensibilidad nativa MIROVA = 1 MW floor** (`:208-213`): *"MIROVA combines a moderate temporal and spatial resolution (4 images per day; 1 km pixel resolution) with a **high efficiency in detecting small hotspots (~1 MW)**"*. Confirma que **NO se requiere C2 distinto per-régimen Muy Bajo** — sensibilidad nativa ya cubre fumaroles.
+
+- **Detección fumaroles 1.6 MW** (`:325-330`): primer thermal alert Santa Ana = **1.6 MW** (Sept 21, 2004). Detectable desde **fumarole field** (NO lava, NO magma).
+
+- **🚨 HALLAZGO CRÍTICO — lago cráter NO emite señal MIR detectable** (`:336-338`): *"In spite of the persistence of moderately high level of activity at the adjacent fumaroles (e.g. degassing), **no significant anomalous signals were observed in the temperature of the water lake**"*. En Santa Ana, MIROVA detecta los fumaroles laterales del rim, no el lago central.
+
+**HT1.5-NEW-4 (NUEVA, derivada de Laiolo 2017)**: en volcanes Tier A Muy Bajo con lago cráter / lacolito / dome cooling (Villarrica, PCC, Chaiten), nuestro `vent_lat/lon` puede apuntar al **lago/dome geométrico** mientras la señal MIROVA real viene de **fumaroles del rim/flanco adyacente**. Si esto se confirma con un audit de coords vent vs centroides MIROVA observados, **el drift remanente sería geométrico, no algorítmico** — fix sería actualizar coords (similar S62 Tupungatito mirova_center fix). Verificable barato: cruzar coord vent con centroide records MIROVA NRT en cada vol Tier A Muy Bajo.
+
+#### Orden de implementación T1.5 (decisión metodológica derivada)
+
+Subagente identificó dependencia crítica:
+
+> *"el orden correcto es **fix D9 primero (filtrar cirrus) → después adoptar scene-wide aggregation**. NO al revés."*
+
+Razón: aplicar scene-wide aggregation sin filtro cirrus = D9 amplificado (sumamos más pixels FP scene-wide). El cap S71 debe seguir activo antes/durante migración a scene-wide. Esto valida la secuencia S71 (cap primero) → T1.5 (scene-wide después).
+
+#### Refutación: thresholds NO son el problema
+
+Laiolo 2017 prueba que MIROVA detecta fumaroles 1.6 MW con threshold standard. **Si nuestro pipeline falla en detectar señales 1-2 MW en Villarrica/PCC/Chaiten, el problema NO es C2/σ ni umbral — es geometría del cluster o cálculo de background o coord vent**. Esto descarta el sub-camino "tunear thresholds per-régimen" del plan T1.5.
+
+#### Validación HT1.5-NEW-1/2/3/4 vs literatura
+
+| Hipótesis | Veredicto post-Massimetti/Laiolo | Cita |
+|---|---|---|
+| HT1.5-NEW-1 (scene-wide vs primary cluster) | **VALIDADA** | massimetti2024:561-562, 801-832 |
+| HT1.5-NEW-2 (L_bk excluye TODOS hot pixels) | PARCIAL — requiere lectura Campus 2022 detallada | massimetti2024:620 (referencia genérica) |
+| HT1.5-NEW-3 (Method-2 weekly local minima) | SOPORTADA INDIRECTAMENTE | massimetti2024:914-916 (weekly aggregation) |
+| **HT1.5-NEW-4 (coord vent vs fumarole rim)** | **NUEVA — verificar audit** | laiolo2017:336-338 (Santa Ana lake vs fumaroles) |
+
+#### Auditoría Vault MIROVA-canónicos — verdict global
+
+8 autores canónicos (Coppola, Laiolo, Massimetti, Campus, Aveni, Cigolini, Ripepe, Delle Donne):
+- **6 papers procesados exhaustivos**: Coppola 2025 book, Coppola 2023, Campus 2024, Aveni 2025, Coppola 2022 Sabancaya, Campus 2022 transición VIIRS.
+- **2 papers procesados S71** (este bloque): Massimetti 2024, Laiolo 2017.
+- **3 Frontiers/SP426.5/2019/2023 procesados S71**: cubre core MIROVA NRT algorithm.
+- **Sin gap real Cigolini**: retirado del frontline desde 2022 (confirmado triangulación Crossref+S2+OpenAlex). Papers 2022 Sabancaya y EPSL ya cubiertos.
+- **Supplementary Coppola 2019 bajado**: Data_Sheet_1.pdf + Table_1.xlsx + Table_2.xlsx (665KB + 16KB + 20KB).
+- **Supplementary Coppola 2023**: NO hay on Frontiers — apunta a OSF zm62w que YA tenemos en `data/mirova_reference/`.
+
+**Conclusión bibliográfica S71**: tenemos cobertura MIROVA-canónica funcional para todas las decisiones T1.5+. Refs externas Valade 2019 (MOUNTS ML) bajadas para "futuras implementaciones" no-MIROVA; Koeppen 2011 paywall pero no es paper de cloud-filter exclusivo (es time-series hybrid, ya cubierto conceptualmente por Method-2 Coppola 2023).
 
 ## Auditoría visual S27 (post-render fix, 90d)
 
