@@ -345,6 +345,67 @@ Si alguna respuesta es NO → la conclusión es prematura. Releer directo el PDF
 
 **Referencias**: `experiments/127_path_d_tbg_calibration/`, `experiments/128_path_d_ab_audit/`, `experiments/130_r3_audit_independent_optC/`, `experiments/131_r2_pixel_level_optC/`.
 
+#### S71 expansión revisión — Massimetti 2024 + Laiolo 2017 procesados (2026-05-21)
+
+Procesamiento exhaustivo de 2 papers MIROVA-canónicos adicionales identificados en auditoría:
+
+**Massimetti et al. 2024** JGR Solid Earth "Thermal Emissions of Active Craters at Stromboli — Spatio-Temporal Insights" (`documentacion/massimetti2024_stromboli.md`, 1966 líneas):
+
+- **VTF definida** (`:230-232`): *"the magnitude and spatial information of any **Volcanic Thermal Feature (VTF; hereby defined as a sub-pixel spatial element with temperatures above the background)**"*. Unidad operativa MIROVA: sub-pixel element, NO cluster ni pixel.
+
+- **MIROVA MIR usa geofencing 5 km + sum scene-wide** (`:561-562`): *"considering only alerts within a maximum distance of **5 km from volcano summit**"*. Confirmado para Stromboli. Para Andes los KMZ MIROVA usan box 50×50 km — pregunta abierta sobre filtro exacto en volcanes grandes.
+
+- **MIR sin ROI per-crater** (`:801-832`): los 3 ROIs Stromboli (NE, C, SW) **se definen exclusivamente con SWIR 20m** (Sentinel-2/Landsat). En MIR (MODIS/VIIRS) el crater terrace se trata como una sola unidad. **→ HT1.5-NEW-1 VALIDADA**: MIROVA no selecciona primary_cluster en MIR.
+
+- **MIROVA NO filtra cirrus en MIR** (`:573-575`): *"VIIRS MIR images represent a data set that is **not corrected for the acquisition conditions**, but it simply expresses a measurement of the thermal radiation reaching the MIR sensor as it is, **possibly including clouds and geometry effects**"*. **CONFIRMA D9 como limitación heredada, no bug propio**.
+
+- **Threshold MIR uniforme** (no per-crater) — algoritmo Coppola 2016/Campus 2022 sin modificación per-vent.
+
+- **Alert rate Stromboli MIR 39.8%** (`:597-598`): 2,696 / 6,772 overpasses. Reference rate para volcán muy activo.
+
+**Laiolo et al. 2017** JVGR 340 "Evidences of volcanic unrest on high-temperature fumaroles by satellite thermal monitoring: The case of Santa Ana, El Salvador" (`documentacion/laiolo2017.md`, 988 líneas):
+
+- **Sensibilidad nativa MIROVA = 1 MW floor** (`:208-213`): *"MIROVA combines a moderate temporal and spatial resolution (4 images per day; 1 km pixel resolution) with a **high efficiency in detecting small hotspots (~1 MW)**"*. Confirma que **NO se requiere C2 distinto per-régimen Muy Bajo** — sensibilidad nativa ya cubre fumaroles.
+
+- **Detección fumaroles 1.6 MW** (`:325-330`): primer thermal alert Santa Ana = **1.6 MW** (Sept 21, 2004). Detectable desde **fumarole field** (NO lava, NO magma).
+
+- **🚨 HALLAZGO CRÍTICO — lago cráter NO emite señal MIR detectable** (`:336-338`): *"In spite of the persistence of moderately high level of activity at the adjacent fumaroles (e.g. degassing), **no significant anomalous signals were observed in the temperature of the water lake**"*. En Santa Ana, MIROVA detecta los fumaroles laterales del rim, no el lago central.
+
+**HT1.5-NEW-4 (NUEVA, derivada de Laiolo 2017)**: en volcanes Tier A Muy Bajo con lago cráter / lacolito / dome cooling (Villarrica, PCC, Chaiten), nuestro `vent_lat/lon` puede apuntar al **lago/dome geométrico** mientras la señal MIROVA real viene de **fumaroles del rim/flanco adyacente**. Si esto se confirma con un audit de coords vent vs centroides MIROVA observados, **el drift remanente sería geométrico, no algorítmico** — fix sería actualizar coords (similar S62 Tupungatito mirova_center fix). Verificable barato: cruzar coord vent con centroide records MIROVA NRT en cada vol Tier A Muy Bajo.
+
+#### Orden de implementación T1.5 (decisión metodológica derivada)
+
+Subagente identificó dependencia crítica:
+
+> *"el orden correcto es **fix D9 primero (filtrar cirrus) → después adoptar scene-wide aggregation**. NO al revés."*
+
+Razón: aplicar scene-wide aggregation sin filtro cirrus = D9 amplificado (sumamos más pixels FP scene-wide). El cap S71 debe seguir activo antes/durante migración a scene-wide. Esto valida la secuencia S71 (cap primero) → T1.5 (scene-wide después).
+
+#### Refutación: thresholds NO son el problema
+
+Laiolo 2017 prueba que MIROVA detecta fumaroles 1.6 MW con threshold standard. **Si nuestro pipeline falla en detectar señales 1-2 MW en Villarrica/PCC/Chaiten, el problema NO es C2/σ ni umbral — es geometría del cluster o cálculo de background o coord vent**. Esto descarta el sub-camino "tunear thresholds per-régimen" del plan T1.5.
+
+#### Validación HT1.5-NEW-1/2/3/4 vs literatura
+
+| Hipótesis | Veredicto post-Massimetti/Laiolo | Cita |
+|---|---|---|
+| HT1.5-NEW-1 (scene-wide vs primary cluster) | **VALIDADA** | massimetti2024:561-562, 801-832 |
+| HT1.5-NEW-2 (L_bk excluye TODOS hot pixels) | PARCIAL — requiere lectura Campus 2022 detallada | massimetti2024:620 (referencia genérica) |
+| HT1.5-NEW-3 (Method-2 weekly local minima) | SOPORTADA INDIRECTAMENTE | massimetti2024:914-916 (weekly aggregation) |
+| **HT1.5-NEW-4 (coord vent vs fumarole rim)** | **NUEVA — verificar audit** | laiolo2017:336-338 (Santa Ana lake vs fumaroles) |
+
+#### Auditoría Vault MIROVA-canónicos — verdict global
+
+8 autores canónicos (Coppola, Laiolo, Massimetti, Campus, Aveni, Cigolini, Ripepe, Delle Donne):
+- **6 papers procesados exhaustivos**: Coppola 2025 book, Coppola 2023, Campus 2024, Aveni 2025, Coppola 2022 Sabancaya, Campus 2022 transición VIIRS.
+- **2 papers procesados S71** (este bloque): Massimetti 2024, Laiolo 2017.
+- **3 Frontiers/SP426.5/2019/2023 procesados S71**: cubre core MIROVA NRT algorithm.
+- **Sin gap real Cigolini**: retirado del frontline desde 2022 (confirmado triangulación Crossref+S2+OpenAlex). Papers 2022 Sabancaya y EPSL ya cubiertos.
+- **Supplementary Coppola 2019 bajado**: Data_Sheet_1.pdf + Table_1.xlsx + Table_2.xlsx (665KB + 16KB + 20KB).
+- **Supplementary Coppola 2023**: NO hay on Frontiers — apunta a OSF zm62w que YA tenemos en `data/mirova_reference/`.
+
+**Conclusión bibliográfica S71**: tenemos cobertura MIROVA-canónica funcional para todas las decisiones T1.5+. Refs externas Valade 2019 (MOUNTS ML) bajadas para "futuras implementaciones" no-MIROVA; Koeppen 2011 paywall pero no es paper de cloud-filter exclusivo (es time-series hybrid, ya cubierto conceptualmente por Method-2 Coppola 2023).
+
 ## Auditoría visual S27 (post-render fix, 90d)
 
 Conteo de markers en hotspot-map por Tier A (toggle "Solo principal" + "Solo cráter"):
