@@ -134,3 +134,72 @@ Cada drift se adopta si:
 - Kernel L_bk solo central (F1.3 code review)
 
 **Estado catálogo**: 13 hipótesis evaluadas, 2 abiertas activas (F2.1 + F1.6), 7 refutadas con cita, 4 cerradas pendientes activación operacional (F2.1 audit).
+
+---
+
+## Update Fase 1 follow-ups (2026-05-21 cont)
+
+### F1.6 + F1.7 Tupungatito — re-interpretado
+
+- F1.6 audit espacial: cluster térmico p50 = 5.21 km SE del vent yaml actual. Centroide (-33.40642, -69.78945).
+- Nicolás verificó geológicamente: **NO hay cráter activo allá**.
+- **F1.7 audit magnitud**: 64 ALERTA Tupungatito CONS son **TODAS sub-MW** (mean 0.21 MW, max 0.59 MW, 100% <1 MW). **Consistente con Coppola 2016 §687 (FPs <5 MW)**.
+- **Re-interpretación**: el problema NO es MIROVA. Es que nuestro `primary_cluster` no converge al cluster ESE que MIROVA escoge.
+- **Solución**: restaurar `mirova_center: (-33.40642, -69.78945)` como **anchor empírico** (no verdad geológica) — re-abrir decisión S65 PR #93.
+- **Aprendizaje A30**: el `mirova_center` es anchor empírico, no verdad geológica. Para clon literal MIROVA, ancla donde MIROVA puntea independiente de interpretación geológica.
+
+Detalle: `docs/TUPUNGATITO_FINDING_S72.md` (commit/PR #116).
+
+### F1.8 backlog bibliográfico — 5 hallazgos clave
+
+Procesados: THESIS_MASSIMETTI, Coppola 2022 Sabancaya. NO bajado: Laiolo 2022 EPSL (Cloudflare 4 fuentes).
+
+1. **🚨 THESIS Ch2 cita literal**: cluster selection **per-cluster CONTEXTUAL** (TIthresh evaluado por cada cluster con su propia distribución). **NO scene-wide single threshold**. **Tensión con interpretación previa de Massimetti 2024 §561-562**.
+
+2. **Thesis Ch4 §3.2.1 cita literal**: *"alerts into a 5 km from the volcano summit, always fine to exclude any other unwanted and possible heat source"*. **Confirma geofence 5 km MIROVA NRT** — pero F1.4 mostró 21.79% records OSF >5 km del vent yaml. Tensión interna MIROVA NRT vs OSF archive.
+
+3. **L_bk MODIS sigue caja negra** — todos los papers refieren a Coppola 2016 SP 426.5. HT1.5-NEW-2 sin respuesta nueva (pero F1.3 ya validó implementación correcta).
+
+4. **Error VRP MODIS/VIIRS ~30% nominal** atribuido a Wooster T>500K assumption. Nuestra calibración S14 empírica (error ≤0.17%) ya está sesgo-compensada.
+
+5. **VIIRS-I 375m detecta Sabancaya 10 años antes que MODIS** — validación arquitectural para sub-pixel <1 MW.
+
+### F1.9 Perplexity Deep Research — 3 game-changers
+
+1. **🚨 NO existe clon MIROVA open source publicado**. VRP Chile sería pionero si publicamos. Valor científico significativo.
+
+2. **🚨 EMSEV 2012 BTD multi-band cirrus filter MODIS** existe — bandas 31-32, 20-31, 31-27, 34-35. **MIROVA NO lo usa**. Referencia más concreta para fix D9 "beyond MIROVA literal". F1.10 verifica accesibilidad.
+
+3. **HotLINK CNN Frontiers 2024** — benchmark independiente más fuerte: +22% detecciones, -12% FPs vs MIROVA en Alaska.
+
+**Otros hallazgos**:
+- **Cluster selection state-of-the-art = primary_cluster, NO scene-wide**. Sumado a F1.8 Thesis Ch2 → **HT1.5-NEW-1 puede haber sido mal-interpretada**. Nuestro `primary_cluster` puede ser correcto. Re-evaluar pendiente A/B unsuitable filters.
+- **Tupungatito glaciado** — hueco real en literatura. Trabajo VRP Chile pionero.
+- **OSF v2.5 quality** — NO hay auditoría externa independiente. Nuestra calibración S14 (error ≤0.17%) sería primera externa cuantitativa.
+
+### Re-interpretación HT1.5-NEW-1
+
+**Hipótesis original**: "MIROVA usa Σ scene-wide; nosotros usamos primary_cluster → drift".
+
+**Re-interpretación post F1.8 + F1.9**:
+- MIROVA SÍ tiene **selección primary_cluster** (state-of-the-art, F1.9).
+- Doctrina Torino dice TIthresh **per-cluster contextual** (Thesis Ch2, F1.8).
+- "5 km radius + sum" Massimetti 2024 §561-562 se refiere a **agregación final** (sumar pixels alerted del primary_cluster dentro 5 km), NO a método de selección.
+- Nuestro `primary_cluster` actual probablemente correcto conceptualmente.
+- **Drift remanente sigue explicable por 4 gaps F1.2 (filtros unsuitable faltantes)**.
+
+**Implicación**: si A/B unsuitable filters (PR #115) valida resolución del drift, **NO necesitamos HT1.5-NEW-1 scene-wide refactor** (que parecía riesgoso). Bajar prioridad HT1.5-NEW-1.
+
+### Tasks abiertas S72
+
+- **F2.1 A/B reproc unsuitable filters** — corriendo, 1/11 jobs completados.
+- **F1.10 descarga Tier 1** (EMSEV 2012 + HotLINK + verify TIRVolcH) — subagente corriendo.
+- **F1.11 Perplexity ronda 2** (queries específicas) — subagente corriendo.
+- **F2.2 Tupungatito A/B reproc** con `mirova_center` restaurado — pendiente decisión Nicolás.
+
+### Aprendizajes A30 + A31
+
+- **A30**: `mirova_center` es anchor empírico de cluster selection MIROVA paridad, NO verdad geológica.
+- **A31**: Perplexity Pro Deep Research complementario a APIs gratis (no sustituto). Confirma AP20 S17 Papers (69% overlap). ROI alto cuando se busca gaps post-APIs.
+
+**Estado catálogo S72 (cierre Fase 1+followups)**: 16 hipótesis evaluadas (13 originales + HT1.5-NEW-4 + 3 Perplexity refs), 4 abiertas activas, 9 refutadas con cita, 3 pendientes adopción.
