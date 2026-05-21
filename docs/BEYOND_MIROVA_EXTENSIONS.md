@@ -10,9 +10,11 @@
 
 MIROVA admite explícitamente que su cloud handling per-scene está **ausente** (Coppola 2016 SP 426.5 §247-249 + §712-728, Coppola 2019 §1443-1480). El cap S71 (5 MW @ t_bg<270K) es la mitigación clon-MIROVA-compatible. Pero hay alternativas publicadas:
 
-### EXT-1 — Zhu et al. 2023 BTD cirrus filter MODIS
+### EXT-1 — Fan, Tang, Wu 2015 LST extraction under cirrus MODIS
 
-**Source**: Zhu et al. 2023 "Daytime LST Extraction from MODIS TIR under Cirrus Clouds" — Remote Sensing MDPI, DOI `10.3390/rs150509942`, **OA**.
+> **Corrección S72 F1.12**: Perplexity (F1.9) citó como "Zhu et al. 2023 DOI 10.3390/rs150509942". Validación Crossref reveló que el paper REAL es **Fan, Tang, Wu 2015** "Daytime Land Surface Temperature Extraction from MODIS Thermal Infrared Data under Cirrus Clouds" en MDPI **Sensors** (no Remote Sensing). DOI canónico: `10.3390/s150509942` (sin la "r"). AP21 confirmado: Perplexity hallucina autores+años. Paper descargado como `documentacion/Fan_2015_DaytimeLST_Cirrus.pdf`.
+
+**Source corregido**: Fan, Tang, Wu 2015 "Daytime Land Surface Temperature Extraction from MODIS Thermal Infrared Data under Cirrus Clouds" — MDPI Sensors 15(5):9942-9962, DOI `10.3390/s150509942`, **OA**.
 
 **Mecanismo**: fórmulas y thresholds BTD (Brightness Temperature Difference) específicos para filtrar falsos hotspots por cirrus en MODIS bandas 31-32.
 
@@ -35,7 +37,7 @@ MIROVA admite explícitamente que su cloud handling per-scene está **ausente** 
 
 **Mecanismo**: tests BTD operacionales producto MOD35: split-window cirrus (BT31-BT32), high-cloud tests (BT35-BT33, BT35-BT34), water-vapor channels (banda 27).
 
-**Decisión**: Backlog. Referencia canónica MODIS BTD. Útil como soporte teórico de Zhu 2023.
+**Decisión**: Backlog. Referencia canónica MODIS BTD. Útil como soporte teórico de Fan 2015.
 
 ### EXT-3 — Valade 2019 MOUNTS ML cloud filter
 
@@ -171,20 +173,21 @@ Estos sí son parte del clon MIROVA literal, sólo que pendientes de implementar
 
 | Ref | Status | Aplicabilidad |
 |---|---|---|
-| Zhu 2023 BTD cirrus | 🔄 F1.12 descarga | EXT-1 cirrus filter "beyond MIROVA" |
+| **Fan 2015 LST cirrus** ⭐⭐⭐ | ✅ F1.12 descargado `Fan_2015_DaytimeLST_Cirrus.pdf` | EXT-1 cirrus filter "beyond MIROVA" (corrige hallucinación "Zhu 2023") |
 | Frey 2008 MOD35 | ✅ Descargado F1.10 | EXT-2 base teórica BTD |
-| MOD06 ATBD Platnick | 🔄 F1.12 descarga | EXT-2 soporte canónico |
-| AVTOD Reath 2019 | 🔄 F1.12 descarga (paywall) | EXT-8 ground truth secundario |
+| MOD06 ATBD Platnick | ✅ F1.12 descargado `Platnick_MODIS_MOD06_ATBD.pdf` | EXT-2 soporte canónico |
+| **AVTOD Reath 2019** ⭐⭐⭐ | ✅ Ya teníamos (`1-s2.0-S0377027318304165-main.pdf` → renamed `AVTOD_Reath_2019.pdf`) | EXT-8 ground truth secundario CRÍTICO |
 | HotLINK paper | ✅ Descargado F1.10 | EXT-6 ML benchmark |
-| HotLINK GitHub | 🔄 F1.14 exploración | EXT-6 técnicas comparativas |
-| TIRVolcH Aveni 2024 | ✅ Ya teníamos (`1-s2.0-S0034425724004140-main.pdf`) | EXT-12 sub-MW low-T |
-| Pallister 2013 Chaitén | 🔄 F1.12 descarga | EXT-9 validation field-based |
+| HotLINK GitHub | ✅ F1.14 exploración (5 conceptos transferibles identificados) | EXT-6 técnicas comparativas |
+| TIRVolcH Aveni 2024 | ✅ Ya teníamos (`1-s2.0-S0034425724004140-main.pdf` → renamed `Aveni_2024_TIRVolcH_RSE.pdf`) | EXT-12 sub-MW low-T |
+| Pallister 2013 Chaitén | ✅ F1.12 descargado `Pallister_2013_Chaiten_rhyolite_dome.pdf` (secuencia eruptiva, NO FLIR como Perplexity citaba) | EXT-9 context Chaitén |
+| **Bernstein 2013 Chaitén FLIR** ⭐ (bonus) | ✅ F1.12 descargado `Bernstein_2013_Chaiten_FLIR_thermal.pdf` | EXT-9 validation field-based REAL FLIR paper |
 | Valade 2019 MOUNTS | ✅ Descargado F1.10 | EXT-3 ML cloud + EXT-4 multi-sensor |
 
 ### Prioridad orden post-clon-literal
 
 1. **EXT-8 AVTOD** (cross-validation ground truth) — más crítico para paper publication.
-2. **EXT-1 Zhu 2023 BTD cirrus** — fix D9 "beyond MIROVA" con base bibliográfica directa.
+2. **EXT-1 Fan 2015 BTD cirrus** — fix D9 "beyond MIROVA" con base bibliográfica directa.
 3. **EXT-12 TIRVolcH** — sub-MW detection enhancement.
 4. **EXT-6 HotLINK study** (no implementación, estudio).
 5. **EXT-9 Pallister 2013** — campañas field validation (cuando tengamos colaboración SERNAGEOMIN).
@@ -215,7 +218,7 @@ Este doc `BEYOND_MIROVA_EXTENSIONS.md` consolida ese tercer territorio. Tres cat
 Cuando termine el clon literal (post adopción F2.1 unsuitable filters + Tupungatito mirova_center):
 
 1. **Paper open source VRP Chile**: describir clon MIROVA + listar extensions documentadas en este doc como "future work".
-2. **Iteración EXT-1 Zhu 2023**: implementar BTD cirrus filter como primera extension experimental.
+2. **Iteración EXT-1 Fan 2015**: implementar BTD cirrus filter como primera extension experimental.
 3. **EXT-8 AVTOD cross-validation**: integrar al workflow validation antes de publication.
 
 Cuando Nicolás decida priorizar alguna extension específica → mover de "backlog" a "in_progress" + abrir tarea + iniciar implementación.
