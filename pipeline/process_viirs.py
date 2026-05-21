@@ -109,6 +109,7 @@ from pipeline.profile import (
     ENABLE_LOCAL_KERNEL_BG,
     ENABLE_BT_PATH_HOT,
     ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK,
+    ENABLE_UNSUITABLE_FILTERS_267_273,
     ENABLE_TEST1_K1_BG_EXCLUDE,
     ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS,
     ENABLE_FIRST_PASS_TESTS_2_AND_3,
@@ -540,6 +541,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     and "I05" in bands
                     and not np.isnan(nti_bg)
                     and not _path_d_atm_gate_skip):
+                # S72 F2.3 — Coppola 2016a SP 426.5 §267-273 también aplican a
+                # path D contextual cuando el flag está ON. Default mantiene
+                # comportamiento post-F1.2.a operacional.
                 if ENABLE_DNTI_DUAL_ROI and inner_radius_km is not None:
                     dnti_ctx_hot = dual_roi_contextual_dnti_hot_mask(
                         nti=nti, bt=bt, roi_mask=roi_mask,
@@ -549,6 +553,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         c1_scene=DNTI_CONTEXTUAL_C1_SCENE,
                         inner_km=inner_radius_km,
                         bt_sanity_k=NTI_BT_SANITY_K,
+                        apply_unsuitable_filters=ENABLE_UNSUITABLE_FILTERS_267_273,
                     )
                 else:
                     dnti_ctx_hot = contextual_dnti_hot_mask(
@@ -556,6 +561,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         t_bg=t_bg_i04,
                         c1=DNTI_CONTEXTUAL_C1,
                         bt_sanity_k=NTI_BT_SANITY_K,
+                        apply_unsuitable_filters=ENABLE_UNSUITABLE_FILTERS_267_273,
                     )
                 n_dnti_ctx_path = int(np.sum(dnti_ctx_hot))
             else:
@@ -697,6 +703,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 _test1_mask_for_fp = (
                     nti_path_hot if ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK else None
                 )
+                # S72 F2.3 — floors §267-273 controlables vía flag.
+                _unsuit_dnti = -0.1 if ENABLE_UNSUITABLE_FILTERS_267_273 else -np.inf
+                _unsuit_deti = -0.1 if ENABLE_UNSUITABLE_FILTERS_267_273 else -np.inf
                 fp_hot, fp_diag = first_pass_tests_2_and_3(
                     nti=nti, nti_app=nti_app_fp, bt=bt,
                     roi_mask=roi_mask, dist_km=vent_dist_per_pixel,
@@ -715,6 +724,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     c2_deti_scene=(_c2_scene_v13
                                    if ENABLE_DUAL_ROI_FIRST_PASS else None),
                     test1_mask=_test1_mask_for_fp,
+                    unsuitable_dnti_floor=_unsuit_dnti,
+                    unsuitable_deti_floor=_unsuit_deti,
                 )
                 hot_mask_2d = fp_hot
                 n_first_pass = fp_diag["n_first_pass_pixels"]

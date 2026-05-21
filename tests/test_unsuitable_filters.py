@@ -216,3 +216,93 @@ def test_first_pass_dnti_negative_outlier_filtered_from_bg():
         f"σ_dnti inflado: {diag['sd_dnti']:.4f} — el filtro dNTI<-0.1 "
         f"no excluyó al outlier"
     )
+
+
+# ---------------------------------------------------------------------------
+# S72 F2.3 — split flags: profiles aislados cargan los 2 flags independientes.
+# ---------------------------------------------------------------------------
+
+
+def _reload_profile(monkeypatch, profile_name):
+    """Helper: re-importa pipeline.profile con VRP_PROFILE = profile_name."""
+    import importlib
+    import pipeline.profile as profile_mod
+    monkeypatch.setenv("VRP_PROFILE", profile_name)
+    importlib.reload(profile_mod)
+    return profile_mod
+
+
+def test_profile_unsuitable_only_loads_correct_flags(monkeypatch):
+    """unsuitable_only_v1: §267-273 ON + K1 retire OFF."""
+    profile = _reload_profile(monkeypatch, "mirova_equivalent_unsuitable_only_v1")
+    assert profile.PROFILE_NAME == "mirova_equivalent_unsuitable_only_v1"
+    assert profile.ENABLE_UNSUITABLE_FILTERS_267_273 is True, (
+        "unsuitable_only debe activar §267-273 (edge + dNTI/dETI<-0.1)"
+    )
+    assert profile.ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK is False, (
+        "unsuitable_only debe DESACTIVAR K1 retire para aislar §267-273"
+    )
+
+
+def test_profile_test1_retire_only_loads_correct_flags(monkeypatch):
+    """test1_retire_only_v1: §267-273 OFF + K1 retire ON."""
+    profile = _reload_profile(monkeypatch, "mirova_equivalent_test1_retire_only_v1")
+    assert profile.PROFILE_NAME == "mirova_equivalent_test1_retire_only_v1"
+    assert profile.ENABLE_UNSUITABLE_FILTERS_267_273 is False, (
+        "test1_retire_only debe DESACTIVAR §267-273 (floors=-inf)"
+    )
+    assert profile.ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK is True, (
+        "test1_retire_only debe activar K1 retire §298-300"
+    )
+
+
+def test_profile_default_unsuitable_filters_true_for_operational(monkeypatch):
+    """Default ENABLE_UNSUITABLE_FILTERS_267_273=True preserva post-F1.2.a."""
+    profile = _reload_profile(monkeypatch, "mirova_equivalent")
+    # mirova_equivalent operacional no setea el flag explícito — usa default True
+    # (preserva comportamiento post-F1.2.a: §267-273 floors -0.1 en first_pass).
+    assert profile.ENABLE_UNSUITABLE_FILTERS_267_273 is True, (
+        "mirova_equivalent operacional default debe ser True (backward compat)"
+    )
+
+
+def test_first_pass_floor_neg_inf_disables_filter():
+    """unsuitable_dnti_floor=-inf efectivamente desactiva §267-273 en pool bg."""
+    from pipeline.detection_context import first_pass_tests_2_and_3
+
+    shape = (20, 20)
+    rng = np.random.default_rng(204)
+    nti, nti_app = _make_bg_pair(shape, rng)
+    # Outlier dNTI muy negativo que ANTES era filtrado por floor -0.1.
+    nti[10, 10] = -1.5
+    bt = np.full(shape, 268.0)
+    roi = np.ones(shape, dtype=bool)
+    dist = np.full(shape, 2.0)
+
+    # Run con floor -inf: outlier entra al pool → σ_dnti se infla.
+    _hot, diag_off = first_pass_tests_2_and_3(
+        nti=nti, nti_app=nti_app, bt=bt,
+        roi_mask=roi, dist_km=dist,
+        t_bg=268.0, bt_sanity_k=3.0,
+        c1_dnti_summit=0.003, c1_deti_summit=0.003,
+        c2_dnti_summit=5, c2_deti_summit=5,
+        inner_km=5.0,
+        unsuitable_dnti_floor=-np.inf,
+        unsuitable_deti_floor=-np.inf,
+    )
+    # Run con floor -0.1 (default): outlier excluido → σ_dnti modesto.
+    _hot, diag_on = first_pass_tests_2_and_3(
+        nti=nti, nti_app=nti_app, bt=bt,
+        roi_mask=roi, dist_km=dist,
+        t_bg=268.0, bt_sanity_k=3.0,
+        c1_dnti_summit=0.003, c1_deti_summit=0.003,
+        c2_dnti_summit=5, c2_deti_summit=5,
+        inner_km=5.0,
+        unsuitable_dnti_floor=-0.1,
+        unsuitable_deti_floor=-0.1,
+    )
+    # Con floor desactivado, σ debe ser mayor (outlier contamina).
+    assert diag_off["sd_dnti"] > diag_on["sd_dnti"], (
+        f"floor -inf debería inflar σ vs floor -0.1: "
+        f"off={diag_off['sd_dnti']:.4f} on={diag_on['sd_dnti']:.4f}"
+    )
