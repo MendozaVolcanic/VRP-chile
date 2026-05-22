@@ -1,0 +1,94 @@
+# VRP-Chile — profile: mirova_equivalent_no_cap_v1 (S72 F2.6.b A/B baseline cap-OFF)
+#
+# Copia exacta de mirova_equivalent.yaml (operacional S71 con cap Opción C ON)
+# EXCEPTO:
+#   - path_d_only_cap_mw: null   (cap S71 OFF)
+#   - path_d_only_cap_tbg_max_k: null   (cap S71 OFF)
+#
+# Pregunta científica F2.6.b: ¿el cap S71 (PR #112) realmente aporta algo en
+# pipeline actual, o la deriva acumulada S38-S61 (vent_anchored + pixel-level
+# filter + test1_lbg_global + cleanup bt_path_hot + drift234 first/second pass
+# + local_kernel_bg) ya resuelve D9 sola?
+#
+# F2.6.a confirmó que el cap S71 funciona como diseñado (no hay bug). F2.5.b
+# reportó falsamente comparar S26-vintage vs S71-actual. F2.6.b corre el mismo
+# pipeline SHA con cap-on (operacional actual) vs cap-off (este profile) en
+# la misma ventana 2026-02-20 → 2026-05-20 sobre los 11 Tier A.
+#
+# data_subdir: mirova_equivalent_no_cap_v1 (aislado del operacional).
+
+profile: mirova_equivalent_no_cap_v1
+description: >
+  A/B S72 F2.6.b — baseline cap S71 OFF para aislar aporte del cap en pipeline
+  actual (resto de la deriva S38-S61 intacta).
+
+# --- Detection thresholds ---
+thresholds:
+  anomaly_threshold_k: 5.0
+  tir_threshold_k: 0.5
+  n_sigma_mir: 3.0
+  n_sigma_tir: 4.0
+  vent_threshold_k: 1.0
+  n_sigma_vent: 2.0
+  nti_k1_night: -0.8
+  nti_bt_sanity_k: 3.0
+  cloud_mask_bt_k: 0.0
+  max_sigma_component_k: 999.0
+  min_vrp_mw_viirs375: 0.02
+  min_vrp_mw_viirs750: 0.15
+  min_vrp_mw_modis:    0.27
+  min_vent_pixels: 1
+  max_vent_sigma_contrib_k: 999.0
+  nti_rel_n_sigma: 3.0
+  nti_rel_min_floor: 0.005
+  dnti_contextual_c1: 0.003
+  dnti_contextual_c1_summit: 0.003
+  dnti_contextual_c1_scene: 0.010
+  modis_vent_threshold_k: 1.0
+  modis_vent_vrp_floor_mw: 0.0
+  n_sigma_mir_summit: 5.0
+  n_sigma_mir_scene: 10.0
+
+# --- Background annulus geometry (km) ---
+background:
+  inner_km: 5.0
+  outer_km: 25.0
+
+# --- Detection paths ---
+paths:
+  enable_eruption_path: true
+  enable_vent_path: false
+  enable_vent_path_modis: false
+  modis_vent_threshold_k: 2.5
+  modis_vent_vrp_floor_mw: 0.3
+  enable_nti_relative_path: false
+  enable_dnti_contextual_path: true
+  enable_dnti_dual_roi: true
+  enable_test1_path: true
+  enable_dual_roi_bt: true
+  enable_exclude_zones: false
+  enable_test1_pixel_filter: false
+  enable_vent_anchored_clustering: true
+  enable_pixel_level_distance_filter: true
+  enable_test1_lbg_global: true
+  enable_bt_path_hot: false
+  enable_first_pass_tests_2_and_3: true
+  enable_dual_roi_first_pass: true
+  enable_second_pass_adjacent: true
+  enable_dual_roi_second_pass: true
+  enable_local_kernel_bg: true
+
+  # S72 F2.6.b — cap S71 D9 OFF (override del operacional 5.0 / 270.0).
+  # Mismo pipeline SHA, solo cap removido para aislar su aporte.
+  path_d_only_cap_mw: null
+  path_d_only_cap_tbg_max_k: null
+
+# --- Sensor activation ---
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+
+# --- Output location ---
+output:
+  data_subdir: mirova_equivalent_no_cap_v1
