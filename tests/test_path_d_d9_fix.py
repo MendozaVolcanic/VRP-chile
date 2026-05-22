@@ -79,6 +79,22 @@ def test_cap_profile_loads():
     assert p.PATH_D_ONLY_CAP_TBG_MAX_K == 270.0
 
 
+def test_no_cap_profile_loads_with_null_cap():
+    """profile mirova_equivalent_no_cap_v1 (S72 F2.6.b) — copia exacta del
+    operacional con cap S71 OFF (null). Resto de la deriva S38-S61 intacta.
+    Permite A/B aislado cap-on (operacional) vs cap-off (este profile) mismo SHA.
+    """
+    p = _reload_profile("mirova_equivalent_no_cap_v1")
+    # Cap S71 D9 OFF — override del operacional 5.0 / 270.0
+    assert p.PATH_D_ONLY_CAP_MW is None
+    assert p.PATH_D_ONLY_CAP_TBG_MAX_K is None
+    # Opciones A y B siguen OFF (idem operacional)
+    assert p.PATH_D_ATM_GATE_TBG_MIN_K is None
+    assert p.PATH_D_REQUIRES_COVALIDATION is False
+    # data_subdir aislado
+    assert p.DATA_SUBDIR == "mirova_equivalent_no_cap_v1"
+
+
 # --- Option A — atm gate predicate ---
 
 
