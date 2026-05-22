@@ -210,6 +210,78 @@ def test_optC_off_when_keys_none():
     assert active is False
 
 
+# --- F2.6.a anti-regresión: el cap NO debe aniquilar records sub-cap ---
+# Diagnóstico F2.5.b reportó Lascar VIIRS 2026-03-19 06:36 con pc.vrp_mw
+# 0.667 → 0.008 (-83x) atribuido al cap. Análisis F2.6.a probó que el cap
+# NO disparó (d9_capped=None en cap_v1 reproc; capped records muestran
+# pc.vrp_mw=5.0 exacto en 100% de los casos). La reducción es deriva
+# arquitectural entre el reproc S26 que produjo el record operacional
+# y el reproc S71 cap_v1, no el cap. Estos tests blindan la semántica
+# esperada para evitar futura confusión.
+
+
+def test_optC_strict_gt_no_cap_at_exact_threshold():
+    """vrp_mw = cap_mw exacto (5.0) → no se modifica (cap usa `>` estricto).
+
+    Sin este guard, un cap con `>=` reduciría a 5.0 records ya en 5.0
+    sin marca d9_capped (no-op silencioso) o marcaría flag falso.
+    """
+    active = _cap_active(265.0, 0, 0, 5.0, 270.0)
+    assert active is True
+    vrp_out, flag = _apply_cap(5.0, active, 5.0)
+    assert vrp_out == 5.0
+    assert flag is False  # `>` estricto: 5.0 no es > 5.0
+
+
+def test_optC_no_cap_for_sub_mw_record_ctx_only_cold_bg():
+    """Record con vrp_mw=0.5 + t_bg=265K + ctx-only → preserved (NO aniquilado).
+
+    Replica el escenario F2.5.b reportado (Lascar VIIRS 06:36 pc=0.667
+    cirrus). El cap NO debe tocar records sub-cap independientemente del
+    régimen atmosférico. Si este test falla, el cap se aplica fuera del
+    if `> cap_mw` (bug grave).
+    """
+    active = _cap_active(265.0, 0, 0, 5.0, 270.0)
+    assert active is True  # predicate activo (ctx-only + cold bg)
+    vrp_out, flag = _apply_cap(0.5, active, 5.0)
+    assert vrp_out == 0.5  # intacto
+    assert flag is False
+
+
+def test_optC_no_cap_for_record_2_5_mw_ctx_only_cold_bg():
+    """vrp_mw=2.5 sub-cap → preserved. Replica F2.5.b MODIS 71.6→0.40 (que
+    si fuese causado por cap habría que ver pc=5.0, no 0.40)."""
+    active = _cap_active(260.0, 0, 0, 5.0, 270.0)
+    assert active is True
+    vrp_out, flag = _apply_cap(2.5, active, 5.0)
+    assert vrp_out == 2.5
+    assert flag is False
+
+
+def test_optC_caps_exactly_to_cap_value_no_truncation():
+    """vrp_mw=8.0 supra-cap → pc.vrp_mw exact 5.0 (no aproximaciones float)."""
+    active = _cap_active(268.0, 0, 0, 5.0, 270.0)
+    vrp_out, flag = _apply_cap(8.0, active, 5.0)
+    assert vrp_out == 5.0  # equality estricta
+    assert flag is True
+
+
+def test_optC_no_cap_at_tbg_max_boundary():
+    """t_bg = cap_tbg_max exacto (270.0) → no activo (`<` estricto).
+
+    Sin este guard, un cap con `<=` en t_bg afectaría escenas justo en
+    el límite warm/cold que MIROVA típicamente clasifica diferente.
+    """
+    active = _cap_active(270.0, 0, 0, 5.0, 270.0)
+    assert active is False  # `<` estricto: 270.0 no es < 270.0
+
+
+def test_optC_no_cap_when_bt_and_nti_both_fire():
+    """bt_path=5 + nti_path=3 (firing co-validado) → no cap (no es ctx-only)."""
+    active = _cap_active(265.0, 5, 3, 5.0, 270.0)
+    assert active is False
+
+
 # --- Sanity: keys importables desde procesadores ---
 
 
