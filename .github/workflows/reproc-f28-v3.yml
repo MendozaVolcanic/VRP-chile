@@ -26,6 +26,10 @@ jobs:
           pip install pyhdf earthaccess numpy h5py scipy pyyaml
       - name: Run reproc
         env:
+          # S74 fix: agregar EARTHDATA_TOKEN para bypass NASA-Azure throttling
+          # (S72 PR #121). NRT cron lo usa. Sin esto USERNAME/PASSWORD pueden
+          # fallar "Invalid user credentials" como pasó en run 26344795930.
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
         run: |
