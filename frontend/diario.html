@@ -174,7 +174,12 @@ let mirovaCsvCache = null;
 async function loadMirovaCsv() {
   if (mirovaCsvCache) return mirovaCsvCache;
   try {
-    const r = await fetch(`${BASE_PATH}01_05_2026_registro_vrp_consolidado.csv`);
+    // S73: usa latest_consolidado.csv (copia del CSV más reciente del scraper
+    // Mirova-v1). Fallback al snapshot fechado si latest no existe.
+    let r = await fetch(`${BASE_PATH}latest_consolidado.csv`);
+    if (!r.ok) {
+      r = await fetch(`${BASE_PATH}01_05_2026_registro_vrp_consolidado.csv`);
+    }
     if (!r.ok) return [];
     const text = await r.text();
     const lines = text.split("\n");

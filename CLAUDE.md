@@ -210,6 +210,15 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   fresca: descargar latest desde
   `https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_consolidado.csv`
   y reemplazar el local. Misma URL para `registro_vrp_ocr.csv`.
+  - **S73 dehardcode (root del repo)**: `frontend/diario.html` y
+    `.github/workflows/pages-deploy.yml` ya NO referencian el archivo fechado.
+    Consumen `latest_consolidado.csv` (copia del CSV más reciente en root del
+    repo). **Cuando llegue un nuevo consolidado**: `cp <nuevo>_registro_vrp_consolidado.csv
+    latest_consolidado.csv`, `git add -f latest_consolidado.csv && git commit && git push`.
+    El frontend tiene fallback al snapshot fechado `01_05_2026_*.csv` si `latest`
+    no existe (deploys históricos siguen funcionando). Los experimentos
+    históricos en `experiments/` mantienen el path fechado adrede (snapshot
+    reproducible).
 - **A18. Preview offline NO predice cluster selection real** (S62 lección dura):
   para parámetros que afectan `cluster_hotspots(vent_anchored)` o cualquier path
   de selección (inner_radius_km, exclude_zones, vent_radius_km), validar SIEMPRE
