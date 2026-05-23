@@ -266,6 +266,8 @@
     </div>
     <span id="utc-clock"></span>
     <span id="updated-label"></span>
+    <!-- F30 Bug 8 fix (S74): timestamp visible del último auto-refresh global. -->
+    <span id="last-refresh-ts" style="font-size: 0.72rem; color: var(--muted); margin-left: 8px;" title="Último refresh automático global (15 min interval)"></span>
     <a href="diario.html" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">📊 Vista Diaria</a>
     <a href="experimental/" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">🧪 Laboratorio</a>
     <button id="btn-about" style="background:transparent;color:#7a8fa6;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;cursor:pointer;">ℹ️ Acerca de</button>
@@ -2149,7 +2151,19 @@ async function init() {
   buildNRTTable();
   renderDetail();
 
-  // Auto-refresh every 5 minutes
+  // F30 Bug 8 fix (S74): auto-refresh cada 15 min (antes 5 min). NRT cron
+  // corre cada 2h — polling 5min generaba ~540 fetches/h al CDN GitHub Pages
+  // sin data nueva ~98% del tiempo. 15 min reduce 3× sin perder freshness útil.
+  // Timestamp visible "last-refresh-ts" en audit-bar permite al operador saber
+  // cuán fresco es lo que ve.
+  function _updateRefreshTimestamp() {
+    const el = document.getElementById("last-refresh-ts");
+    if (el) {
+      const t = new Date();
+      el.textContent = "🔄 " + t.toISOString().slice(11, 16) + " UTC";
+    }
+  }
+  _updateRefreshTimestamp();  // initial mount
   setInterval(async () => {
     await Promise.all(VOLCANOES.map(v => loadVolcano(v)));
     buildAlertSummary();
@@ -2157,7 +2171,8 @@ async function init() {
     buildOverviewMap();
     buildNRTTable();
     renderDetail();
-  }, 5 * 60 * 1000);
+    _updateRefreshTimestamp();
+  }, 15 * 60 * 1000);
 }
 
 // ── CSV Export ────────────────────────────────────────────────────────────────
