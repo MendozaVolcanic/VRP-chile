@@ -154,6 +154,13 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
     if not H5_AVAILABLE:
         raise ImportError("h5py required. pip install h5py")
 
+    # F2.8 fix (S73 Task 3 H2+H10): VIIRS M-band saturation guard simétrico a I-band.
+    # M13 (4.05 µm low-gain fire channel) sat ~634 K per Coppola 2025 Cap.11 Table 1.
+    # M15 (10.76 µm TIR) sat ~423 K análogo a I05. Quality flags bit-2 schema
+    # idéntico al de I-band (VIIRS L1B UserGuide Aug 2021 Tabla C.1).
+    SAT_BIT_MASK = 0b100
+    BT_LUT_MAX_MBAND = {"M13": 634.0, "M15": 423.0}
+
     result = {}
     with h5py.File(l1b_path, "r") as f:
         obs = f["observation_data"]
@@ -164,6 +171,9 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
             return result
 
         dn = obs[band_key][:]
+        # F2.8 H2: leer quality_flags M13
+        qf_key = f"{band_key}_quality_flags"
+        qf = obs[qf_key][:] if qf_key in obs else None
 
         lut_key = "M13_brightness_temperature_lut"
         if lut_key in obs:
@@ -172,6 +182,11 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
             flag_mask = np.isin(dn, list(FLAG_DNS))
             bt[flag_mask] = np.nan
             bt[bt < 0] = np.nan
+            if qf is not None:
+                bt[(qf & SAT_BIT_MASK) != 0] = np.nan
+            lut_max = BT_LUT_MAX_MBAND.get(band_key)
+            if lut_max is not None:
+                bt[bt >= lut_max - 0.5] = np.nan
         else:
             ds = obs[band_key]
             scale  = float(ds.attrs.get("scale_factor", 1.0))
@@ -179,6 +194,8 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
             rad = dn.astype(np.float32) * scale + offset
             flag_mask = np.isin(dn, list(FLAG_DNS))
             rad[flag_mask] = np.nan
+            if qf is not None:
+                rad[(qf & SAT_BIT_MASK) != 0] = np.nan
             # Planck inversion
             C1, C2 = 1.191042e8, 14388.0
             with np.errstate(invalid="ignore", divide="ignore"):
@@ -190,6 +207,9 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
         band_key_15 = "M15"
         if band_key_15 in obs:
             dn15 = obs[band_key_15][:]
+            # F2.8 H2: leer quality_flags M15
+            qf15_key = f"{band_key_15}_quality_flags"
+            qf15 = obs[qf15_key][:] if qf15_key in obs else None
             lut_key_15 = "M15_brightness_temperature_lut"
             if lut_key_15 in obs:
                 lut15 = obs[lut_key_15][:]
@@ -197,6 +217,11 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
                 flag_mask_15 = np.isin(dn15, list(FLAG_DNS))
                 bt15[flag_mask_15] = np.nan
                 bt15[bt15 < 0] = np.nan
+                if qf15 is not None:
+                    bt15[(qf15 & SAT_BIT_MASK) != 0] = np.nan
+                lut_max_15 = BT_LUT_MAX_MBAND.get(band_key_15)
+                if lut_max_15 is not None:
+                    bt15[bt15 >= lut_max_15 - 0.5] = np.nan
             else:
                 ds15 = obs[band_key_15]
                 scale15  = float(ds15.attrs.get("scale_factor", 1.0))
@@ -204,6 +229,8 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
                 rad15 = dn15.astype(np.float32) * scale15 + offset15
                 flag_mask_15 = np.isin(dn15, list(FLAG_DNS))
                 rad15[flag_mask_15] = np.nan
+                if qf15 is not None:
+                    rad15[(qf15 & SAT_BIT_MASK) != 0] = np.nan
                 # Planck inversion for M15
                 C1, C2 = 1.191042e8, 14388.0
                 with np.errstate(invalid="ignore", divide="ignore"):
