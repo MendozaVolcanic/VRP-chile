@@ -34,6 +34,33 @@ Borrarlos perdería la traza de las hipótesis exploradas (H_D8_*, H8, P3.1, Tes
 | reproc-vent-anchored-30d-preview.yml | S38 Bloque B | Reproc 30d preview pre-adopción operacional sobre _d8_vent_anchored | Pre-adopción ya completado — vent_anchored adoptado operacional |
 | reproc-failed-tier-a.yml | S26 | Re-correr Chaitén/Villarrica/Lascar fallidos por timeout 220min en run 24994055814 (2 chunks paralelos) | One-shot S26 ya consumido |
 
+## Lista archivada S73 cleanup F2.8 (20 archivos, 2026-05-23)
+
+Audit S73 F2.8 confirmó que estos workflows ya cumplieron su propósito (features adoptadas/refutadas/cerradas documentado en `MEMORY.md` y `MIROVA_DIVERGENCES.md`):
+
+| Workflow | Sesión | A/B testeaba | Estado |
+|---|---|---|---|
+| reproc-ab-mirova-literal.yml | S27 | Mirova-literal A/B | Cerrado |
+| reproc-ab-local-kernel-bg.yml | S58 | Kernel-bg global | Adoptado per-vol |
+| reproc-ab-local-kernel-bg-pp.yml | S61 | PP kernel-bg | Adoptado |
+| reproc-ab-lastarria-tupungatito.yml | S62 | Lastarria/Tupungatito kernel-bg | Lastarria adoptado; Tupungatito refutado |
+| reproc-ab-chaiten.yml | S63 | Chaiten kernel-bg | Adoptado |
+| reproc-ab-pcc-kernel.yml | S63 | PCC kernel-bg | Adoptado |
+| reproc-ab-dual-roi-bt.yml | S26 | Dual-ROI BT fix | Adoptado en main |
+| reproc-ab-lbg-global.yml | S33 D4 | lbg_global_compatible | Refutado empíricamente |
+| reproc-ab-phase2.yml | S33 | Driver B Phase 2 | Revertido (bug mirovaEqVrp) |
+| reproc-ab-path-d-atm-gate.yml | S71 D9-A | Path D atm gate | Cerrado S72 |
+| reproc-ab-path-d-covalidation.yml | S71 D9-B | Path D co-validation | Cerrado S72 |
+| reproc-ab-path-d-cap.yml | S71 D9-C | Path D cap | Adoptado vía S71 cap |
+| reproc-ab-bt-path-on-v1.yml | S72 F2.6.e | bt_path_on reactivation | Refutado empíricamente |
+| reproc-ab-no-cap-v1.yml | S72 F2.6.b | No-cap S71 | Falsa alarma cerrada |
+| reproc-ab-test1-retire-only.yml | S72 F2.3 | Test 1 retire only | Cerrado |
+| reproc-ab-unsuitable-only.yml | S72 F1.2 | Unsuitable filter only | Cerrado |
+| reproc-ab-unsuitable-filters.yml | S72 F2.4 | Unsuitable filters combo | Cerrado |
+| reproc-s46-coppola-literal-ab.yml | S46 | Coppola literal A/B | Cerrado |
+| reproc-mirova-literal-extend.yml | histórico | Mirova-literal extend | Completado |
+| reproc-villarrica-refs.yml | histórico | Villarrica refs scrape | Completado |
+
 ## Cómo restaurar uno si se necesita
 
 ```bash
