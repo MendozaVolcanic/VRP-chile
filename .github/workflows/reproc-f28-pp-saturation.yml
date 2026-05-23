@@ -75,36 +75,9 @@ jobs:
 
       - name: A/B audit — fossil eliminated?
         run: |
-          python <<'PYEOF'
-          import json
-          from pathlib import Path
-          before = json.loads(Path("experiments/138_f28_saturation_ab/PlanchonPeteroa.before_f28.json").read_text(encoding="utf-8"))["records"]
-          after  = json.loads(Path("data/${{ github.event.inputs.profile }}/PlanchonPeteroa.json").read_text(encoding="utf-8"))["records"]
-
-          def stats(recs, label):
-              foss = [r for r in recs if (r.get("primary_cluster") or {}).get("vrp_mw", 0) > 50000]
-              pc_vals = [(r.get("primary_cluster") or {}).get("vrp_mw", 0) for r in recs]
-              pc_max = max(pc_vals) if pc_vals else 0
-              # 2026-03-18 specific
-              targets = [r for r in recs if str(r.get("datetime_utc","")).startswith("2026-03-18")]
-              print(f"{label}: total={len(recs)}, fossils>50K={len(foss)}, pc_max={pc_max:,.2f}")
-              print(f"  2026-03-18 records: {len(targets)}")
-              for t in targets:
-                  pc = t.get("primary_cluster") or {}
-                  print(f"    {t.get('datetime_utc')} {t.get('sensor'):25s} vrp_mw={t.get('vrp_mw',0):8.2f} pc.vrp_mw={pc.get('vrp_mw',0):10.2f} n_anom={t.get('n_anomalous_pixels',0):4d} dist_class={t.get('distance_class','')}")
-              print()
-
-          stats(before, "BEFORE (pre-F2.8 fix)")
-          stats(after,  "AFTER  (post-F2.8 fix)")
-
-          # Assertions de éxito
-          after_foss = [r for r in after if (r.get("primary_cluster") or {}).get("vrp_mw", 0) > 50000]
-          if after_foss:
-              print(f"FAIL: still {len(after_foss)} fossils > 50K MW")
-              exit(1)
-          else:
-              print("PASS: 0 fossils > 50K MW after fix ✓")
-          PYEOF
+          python experiments/138_f28_saturation_ab/audit_ab.py \
+            ${{ github.event.inputs.profile }} \
+            experiments/138_f28_saturation_ab/PlanchonPeteroa.before_f28.json
 
       - name: Save A/B results
         run: |
