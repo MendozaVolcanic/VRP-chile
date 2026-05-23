@@ -323,16 +323,29 @@
         database.</i> Frontiers in Earth Science 11:1240107.
         <a href="https://doi.org/10.3389/feart.2023.1240107" style="color:#4fc3f7;" target="_blank">DOI</a> —
         base de datos pública OSF sobre la que calibramos paridad.</li>
-      <li><b>Di Bella G.S., Corradino C., Cariello S., Torrisi F., Del Negro C. (2024)</b>. <i>Advancing
-        volcanic activity monitoring: NRT RSDF for VRP estimation.</i> Remote Sensing 16(16):2879.
-        <a href="https://doi.org/10.3390/rs16162879" style="color:#4fc3f7;" target="_blank">DOI</a> —
-        fusión multi-sensor de referencia.</li>
+      <li><b>Coppola D. (2025)</b>. <i>Thermal Monitoring of Volcanoes from Space.</i>
+        Capítulo 11, Modern Volcano Monitoring (Spica & Caudron eds., Springer Advances in Volcanology).
+        <a href="https://doi.org/10.1007/978-3-031-86841-2_11" style="color:#4fc3f7;" target="_blank">DOI</a> —
+        review canónico sensores + thresholds saturación por sensor (Tabla 1).</li>
     </ol>
 
-    <h3 style="color:#ffab91;margin:20px 0 8px 0;">Métricas de desempeño (S68 — 89 % Tier A clon literal MIROVA NRT)</h3>
+    <h3 style="color:#ffab91;margin:20px 0 8px 0;">Trabajos relacionados (NO MIROVA, referencias para contraste)</h3>
+    <ol style="padding-left:22px;margin:0;font-size:0.88rem;">
+      <li><b>Di Bella G.S., Corradino C., Cariello S., Torrisi F., Del Negro C. (2024)</b>. <i>Advancing
+        volcanic activity monitoring: NRT RSDF for VRP estimation.</i> Remote Sensing 16(16):2879.
+        <a href="https://doi.org/10.3390/rs16162879" style="color:#4fc3f7;" target="_blank">DOI</a>.
+        <i>Grupo INGV Catania (Del Negro), sistema RSDF — NO es MIROVA. Citado para comparación
+        metodológica, no como autoridad MIROVA. Ver A9 en CLAUDE.md.</i></li>
+      <li><b>Marchese F., Genzano N., Filizzola C., Pergola N., Tramutoli V.</b> — sistema NHI
+        (CNR-IMAA Potenza). NO MIROVA.</li>
+      <li><b>Aufaristama M., Hjörleifsdóttir V., Hoskuldsson Á.</b> — TEI Landsat-8 SWIR. NO MIROVA.</li>
+    </ol>
+
+    <h3 style="color:#ffab91;margin:20px 0 8px 0;">Métricas de desempeño (S73 — deriva S26→S71 validada por 3 fuentes independientes)</h3>
     <div style="background:#0a1320;border-left:3px solid #ffc107;padding:12px 16px;margin:12px 0;border-radius:0 4px 4px 0;font-size:0.92rem;">
       <b>Algoritmo operacional acumulado:</b> drift234 (Coppola 2016a Tests 2∧3 + dual-ROI + second-pass)
-      + kernel local 3×3 background (Coppola 2024 L1129) adoptado per-vol S61-S65.<br><br>
+      + kernel local 3×3 background (Coppola 2024 L1129) adoptado per-vol S61-S65 + cap path D dNTI ctx 5 MW (S71)
+      + saturation guard L1B sentinel filter (S73 F2.8, en PR).<br><br>
 
       <b>Clon literal logrado: 7 / 9 volcanes Tier A</b> con ratio mediano ≤ 3× MIROVA NRT (audit ALERTAS reales CONS+OCR ~80d):
       <ul style="margin:6px 0 6px 18px;padding:0;font-size:0.88rem;">
@@ -343,13 +356,26 @@
         <li>Llaima / Copahue / NdC: n baja (esperar más actividad MIROVA)</li>
       </ul>
 
+      <b>Validación deriva S26→S71 (S72)</b> — confirmada por 3 fuentes independientes:
+      <ul style="margin:6px 0 6px 18px;padding:0;font-size:0.88rem;">
+        <li><b>AVTOD ASTER</b> (Reath et al. 2019, Coppola coautor): Tupungatito identificado FP MIROVA, régimen Muy Bajo justificado físicamente</li>
+        <li><b>MIROVA NRT CONS + OCR</b> (F2.6.h): 16/16 records "lost summit &gt;500 MW" inflados 1000× sobre MIROVA NRT (mediana 1910×) — confirma que features S38-S71 son mejora, no regresión</li>
+        <li><b>Geográfico Salar Atacama</b> (F2.6.g): 67 % "lost summit far" en zona Salar — eran FPs, no detecciones reales</li>
+      </ul>
+
+      <b>F2.8 saturation guard (S73, en PR #133)</b>: identificado MODIS L1B sentinel filter incompleto
+      (solo enmascarábamos <code>65535</code> de los 14 sentinels Tabla 5.6.1) y VIIRS quality_flags SDS no leído.
+      Causa raíz del record patológico PP 2026-03-18 <code>pc.vrp_mw=695,431 MW</code>: 113 pixels saturados
+      pasaron calibración estándar produciendo BT=575 K extrapolado. Fix: 1 línea MODIS + lectura quality_flags VIIRS.
+      Match matemático 99.86 % con record observado.<br><br>
+
       <b>Adopciones operacionales:</b> 5 vols con <code>local_kernel_bg=true</code> (Villarrica/PP/Lastarria/Chaiten/PCC).
       Cron NRT cada 2h aplica fix automáticamente; <code>pages-deploy</code> tolerante a fails parciales (PR #87).<br>
       <span style="color:#9bb4cc;font-size:0.85rem;">Universo de referencia: CSV consolidado + OCR (Mirova-v1, 17 966 + 476 records). Comparación
       con <code>pc.vrp_mw</code> (primary_cluster summit) vs MIROVA <code>VRP_MW</code>. Ratios match-only en ALERTAS específicas;
       records RUTINA-MIROVA sub-publicados pueden aparecer como sobre-detección. Ver
       <a href="https://github.com/MendozaVolcanic/VRP-chile/blob/main/docs/HYPOTHESIS_LOG.md" style="color:#4fc3f7;" target="_blank">HYPOTHESIS_LOG</a>
-      para 17 hipótesis acumuladas S60-S68.</span>
+      para 28+ hipótesis acumuladas S60-S73 + <a href="https://github.com/MendozaVolcanic/VRP-chile/blob/main/docs/F28_SATURATION_INVESTIGATION.md" style="color:#4fc3f7;" target="_blank">F28_SATURATION_INVESTIGATION</a> (S73).</span>
     </div>
 
     <h3 style="color:#ffab91;margin:20px 0 8px 0;">Links</h3>
@@ -586,13 +612,8 @@ let onlyPrimaryPixel = true;
 // con primary_cluster equivocado (Salar lejano, lago lateral, etc.) se ocultan
 // del dashboard, dejando solo los datos del operacional actual con cluster
 // vent-anchored correcto. Persiste en sessionStorage para sobrevivir reloads.
-// S42: applyS38Filter neutralizado. Tras reproc completo 30d, todos los
-// records ya vienen del modelo S42. Mantenemos passthrough para no romper
-// call sites (filterDays/latestVRP/latestSensors/lastEventTime/distanceCounts).
-let postS38Only = false;  // unused, kept para evitar ReferenceError residual
-function applyS38Filter(records) {
-  return records || [];
-}
+// S73 cleanup: applyS38Filter passthrough removido (era no-op desde S42).
+// 5 call sites limpiados. postS38Only flag eliminado (era unused).
 let charts = {};
 let allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
 
@@ -625,7 +646,6 @@ async function loadVolcano(v) {
 // ── Data helpers ─────────────────────────────────────────────────────────────
 function filterDays(records, days) {
   // S38: aplicar primero el filtro post-S38 (oculta records pre-adopción).
-  records = applyS38Filter(records);
   if (!days) return records;
   const cutoff = Date.now() - days * 86400000;
   return records.filter(r => new Date(r.datetime_utc).getTime() >= cutoff);
@@ -708,7 +728,6 @@ function latestVRP(records, includeFar = false, innerKm = 10) {
   // S33: usa mirovaEqVrp con validación pc.centroid_dist_km contra innerKm.
   // S36: pasa includeFar a mirovaEqVrp también para que respete el toggle.
   // S38: aplicar filtro post-S38 al inicio.
-  records = applyS38Filter(records);
   const cutoff = Date.now() - 48 * 3600000;
   let max = 0;
   for (const r of records) {
@@ -723,7 +742,6 @@ function latestVRP(records, includeFar = false, innerKm = 10) {
 
 function latestSensors(records, includeFar = false) {
   // S38: aplicar filtro post-S38 al inicio.
-  records = applyS38Filter(records);
   const cutoff = Date.now() - 48 * 3600000;
   const seen = new Set();
   for (const r of records) {
@@ -747,7 +765,6 @@ function sensorGroup(sensor) {
 
 function lastEventTime(records) {
   // S38: aplicar filtro post-S38 al inicio.
-  records = applyS38Filter(records);
   let latest = null;
   for (const r of records) {
     if (!latest || r.datetime_utc > latest) latest = r.datetime_utc;
@@ -762,7 +779,6 @@ function lastEventTime(records) {
 // Solo cuenta detecciones reales (vrp > 0) para no inflar con records-0.
 function distanceCounts(records, days = 7) {
   // S38: aplicar filtro post-S38 al inicio.
-  records = applyS38Filter(records);
   const cutoff = Date.now() - days * 86400000;
   let summit = 0, far = 0;
   for (const r of records) {

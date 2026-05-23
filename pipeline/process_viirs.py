@@ -174,6 +174,16 @@ def read_viirs_l1b(l1b_path: Path) -> dict:
     if not H5_AVAILABLE:
         raise ImportError("h5py required. Install: pip install h5py")
 
+    # F2.8 fix (S73 Task 2 H2+H10): VIIRS L1B UserGuide Aug 2021 Tabla C.1.
+    # Saturated pixels NO usan sentinel uint16 (distinto a MODIS); el L1B clampea
+    # la radiancia al "Reported Range" y setea bit-2 (=4) del SDS de quality flags.
+    # Pre-fix solo filtrábamos FLAG_DNS {65532-65535}; sat pixels pasaban con BT
+    # clampeado al LUT max (I04=361.77K, I05=423.33K). Esto explica los outliers
+    # vrp_tir_mw 1000-4000 MW (4-16 pixels I5 @ Stefan-Boltzmann × 423K). Ver
+    # docs/F28_SATURATION_INVESTIGATION.md sec 1.3, 3.2.
+    SAT_BIT_MASK = 0b100   # bit-2 = Saturation per Tabla C.1
+    BT_LUT_MAX = {"I04": 361.77, "I05": 423.33}  # UserGuide verbatim LUT max
+
     result = {}
     with h5py.File(l1b_path, "r") as f:
         obs = f["observation_data"]
@@ -181,16 +191,27 @@ def read_viirs_l1b(l1b_path: Path) -> dict:
             if band not in obs:
                 continue
             dn = obs[band][:]                                   # uint16, shape (lines, pixels)
+            # F2.8 H2 — leer quality_flags SDS si está disponible
+            qf_key = f"{band}_quality_flags"
+            qf = obs[qf_key][:] if qf_key in obs else None
             lut_key = f"{band}_brightness_temperature_lut"
             if lut_key in obs:
                 # Direct LUT lookup: bt[i,j] = lut[dn[i,j]]
                 lut = obs[lut_key][:]                           # float32, 65536 values
                 bt = lut[dn].astype(np.float32)
-                # Mask flag values
+                # Mask flag values (sentinels DN)
                 flag_mask = np.isin(dn, list(FLAG_DNS))
                 bt[flag_mask] = np.nan
                 # LUT fill value is -999.9
                 bt[bt < 0] = np.nan
+                # F2.8 H2 Opción A: enmascarar bit-2 Saturation del quality_flags SDS
+                if qf is not None:
+                    sat_mask = (qf & SAT_BIT_MASK) != 0
+                    bt[sat_mask] = np.nan
+                # F2.8 H10 Opción B (defensa secundaria): bt clampeado al LUT max
+                lut_max = BT_LUT_MAX.get(band)
+                if lut_max is not None:
+                    bt[bt >= lut_max - 0.5] = np.nan
             else:
                 # Fallback: manual radiance conversion
                 ds = obs[band]
@@ -199,6 +220,9 @@ def read_viirs_l1b(l1b_path: Path) -> dict:
                 rad = dn.astype(np.float32) * scale + offset
                 flag_mask = np.isin(dn, list(FLAG_DNS))
                 rad[flag_mask] = np.nan
+                # F2.8 H2: aplicar quality_flag bit-2 también en path fallback
+                if qf is not None:
+                    rad[(qf & SAT_BIT_MASK) != 0] = np.nan
                 bt = _radiance_to_bt_viirs(rad, band)
             result[band] = bt
     return result

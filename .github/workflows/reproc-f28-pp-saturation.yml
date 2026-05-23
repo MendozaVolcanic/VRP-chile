@@ -1,0 +1,133 @@
+name: F2.8 reproc PP 2026-03-18 saturation guard (S73)
+
+# S73 F2.8: reproc el granule MYD021KM.A2026077.0805.061 que generó el fósil
+# PP 2026-03-18 pc.vrp_mw = 695,431 MW. Pre-fix: 113 pixels SI=65533 pasaban
+# el L1B filter `dn >= 65535` y producían BT=575K extrapolado. Post-fix:
+# `dn > 32767` enmascara los 14 sentinels Tabla 5.6.1 + defensa BT > 500K.
+#
+# Validar que post-fix:
+# - 9 records PP 2026-03-18 procesan limpios
+# - MODIS_AQUA 08:05 NO produce el fósil (pc.vrp_mw saneado)
+# - Distribuciones n_anomalous_pixels preservadas (no FN nuevos)
+#
+# Lanzar contra branch `claude/s73-f28-saturation-guard` ANTES del merge para
+# validación empírica. Run: gh workflow run reproc-f28-pp-saturation.yml \
+#   --ref claude/s73-f28-saturation-guard
+
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-03-18"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-03-18"
+      profile:
+        description: "Profile (mirova_equivalent recommended)"
+        required: true
+        default: "mirova_equivalent"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60  # Solo 1 día / 1 volcán → mucho menos que 300 min default
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Snapshot JSON pre-reproc (for A/B audit)
+        run: |
+          mkdir -p experiments/138_f28_saturation_ab
+          cp "data/${{ github.event.inputs.profile }}/PlanchonPeteroa.json" \
+             "experiments/138_f28_saturation_ab/PlanchonPeteroa.before_f28.json" || true
+
+      - name: Run reproc — PP 2026-03-18
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 50
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ github.event.inputs.profile }} \
+            --volcano PlanchonPeteroa \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: A/B audit — fossil eliminated?
+        run: |
+          python <<'PYEOF'
+          import json
+          from pathlib import Path
+          before = json.loads(Path("experiments/138_f28_saturation_ab/PlanchonPeteroa.before_f28.json").read_text(encoding="utf-8"))["records"]
+          after  = json.loads(Path("data/${{ github.event.inputs.profile }}/PlanchonPeteroa.json").read_text(encoding="utf-8"))["records"]
+
+          def stats(recs, label):
+              foss = [r for r in recs if (r.get("primary_cluster") or {}).get("vrp_mw", 0) > 50000]
+              pc_vals = [(r.get("primary_cluster") or {}).get("vrp_mw", 0) for r in recs]
+              pc_max = max(pc_vals) if pc_vals else 0
+              # 2026-03-18 specific
+              targets = [r for r in recs if str(r.get("datetime_utc","")).startswith("2026-03-18")]
+              print(f"{label}: total={len(recs)}, fossils>50K={len(foss)}, pc_max={pc_max:,.2f}")
+              print(f"  2026-03-18 records: {len(targets)}")
+              for t in targets:
+                  pc = t.get("primary_cluster") or {}
+                  print(f"    {t.get('datetime_utc')} {t.get('sensor'):25s} vrp_mw={t.get('vrp_mw',0):8.2f} pc.vrp_mw={pc.get('vrp_mw',0):10.2f} n_anom={t.get('n_anomalous_pixels',0):4d} dist_class={t.get('distance_class','')}")
+              print()
+
+          stats(before, "BEFORE (pre-F2.8 fix)")
+          stats(after,  "AFTER  (post-F2.8 fix)")
+
+          # Assertions de éxito
+          after_foss = [r for r in after if (r.get("primary_cluster") or {}).get("vrp_mw", 0) > 50000]
+          if after_foss:
+              print(f"FAIL: still {len(after_foss)} fossils > 50K MW")
+              exit(1)
+          else:
+              print("PASS: 0 fossils > 50K MW after fix ✓")
+          PYEOF
+
+      - name: Save A/B results
+        run: |
+          mkdir -p experiments/138_f28_saturation_ab
+          cp data/${{ github.event.inputs.profile }}/PlanchonPeteroa.json \
+             experiments/138_f28_saturation_ab/PlanchonPeteroa.after_f28.json
+
+      - name: Commit A/B snapshot + reprocessed data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add data/${{ github.event.inputs.profile }}/PlanchonPeteroa.json
+          git add experiments/138_f28_saturation_ab/
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "reproc(f28): PP ${{ github.event.inputs.start }} post fix saturation guard
+
+A/B snapshot before+after saved en experiments/138_f28_saturation_ab/.
+Profile: ${{ github.event.inputs.profile }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin "$GITHUB_REF_NAME" && git push origin "$GITHUB_REF_NAME" && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1

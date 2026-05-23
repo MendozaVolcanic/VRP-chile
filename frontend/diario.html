@@ -224,7 +224,13 @@ function mirovaEqVrp(r, volcanoName) {
   // S36: cuando includeFarDistance=true, saltar este filtro (clon literal).
   const innerKm = INNER_RADIUS_KM[volcanoName] ?? 5;
   if (!includeFarDistance && pc.centroid_dist_km != null && pc.centroid_dist_km > innerKm) return 0;
-  return pc.vrp_mw ?? 0;
+  // F2.8 S73 H5: defensa frontend post sanity cap upstream (pipeline/store.py
+  // SANITY_CAP_VRP_MW=50000). Fósiles pre-S41 en JSONs operacionales históricos
+  // pueden tener pc.vrp_mw > 50K (caso PP 2026-03-18 pre-fix = 695,431 MW).
+  // Coherente con index.html mirovaEqVrp + cap pipeline.
+  const vmw = pc.vrp_mw ?? 0;
+  if (vmw > 50000) return 0;
+  return vmw;
 }
 
 function sensorBucket(s) {

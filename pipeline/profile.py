@@ -259,6 +259,15 @@ ENABLE_BT_PATH_HOT: bool = bool(_p.get("enable_bt_path_hot", True))
 # para diagnóstico. Default OFF (backward-compat).
 ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK: bool = bool(_p.get("enable_test1_k1_retire_from_hot_mask", False))
 
+# F2.8 S73 — Defensa secundaria BT-level post Planck-inversion.
+# Coppola 2025 Cap.11 Table 1: MODIS B21 fire channel saturation ≈ 500 K (low-gain).
+# Cualquier BT > 500K en B21 indica L1B sentinel-extrapolation o anomalía física
+# fuera del rango Wooster (que requiere 600-1500 K para error ±30%). Default ON
+# como defense in depth complementaria al fix L1B (calibrate() filter dn > 32767).
+# Ver docs/F28_SATURATION_INVESTIGATION.md sec 5.3.
+ENABLE_BT_SAT_SECONDARY_GUARD: bool = bool(_p.get("enable_bt_sat_secondary_guard", True))
+BT_SAT_MIR_K_MODIS: float = float(_p.get("bt_sat_mir_k_modis", 500.0))
+
 # S72 F2.3 — Coppola 2016a SP 426.5 §267-273 dice que pixels "unsuitable"
 # (edge de matriz + dNTI<-0.1 + dETI<-0.1) NO entran al pool μ/σ de la rama
 # estadística de Tests 2/3 ni al hot mask path D contextual. Previo a S72 F1.2
