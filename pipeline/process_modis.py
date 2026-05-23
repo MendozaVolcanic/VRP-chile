@@ -175,13 +175,21 @@ def read_modis_l1b(hdf_path: Path) -> dict:
     attrs = emissive_sds.attributes()
     scales = np.array(attrs["radiance_scales"])     # (16,) — one per band
     offsets = np.array(attrs["radiance_offsets"])   # (16,)
-    fill = attrs.get("_FillValue", 65535)
+    # F2.8 fix (S73): MODIS L1B C7 UserGuide Sec 5.6 (Toller & Isaacman 2025,
+    # MCST PUB-01-U-0202-REV E) — "valid science data lie only in the range
+    # [0, 32767]. Specific values greater than 32767 are reserved to indicate
+    # why data cannot be calibrated" (Table 5.6.1). Los 14 sentinels documentados
+    # son 65500-65535, incluyendo 65533 = "Detector is saturated".
+    # Pre-fix: solo enmascarábamos `dn >= 65535` (1 sentinel). Causó el record
+    # PP 2026-03-18 pc.vrp_mw=695,431 MW (45 pixels SI=65533 → BT=575K, sec³(50°)
+    # scan-angle elongation, Wooster k=18.9). Ver docs/F28_SATURATION_INVESTIGATION.md
+    INVALID_SI_THRESHOLD = 32767
     emissive_sds.endaccess()
 
     def calibrate(band_idx, wavelength):
         dn = emissive_data[band_idx].astype(np.float32)
         rad = (dn - offsets[band_idx]) * scales[band_idx]
-        rad[dn >= fill] = np.nan
+        rad[dn > INVALID_SI_THRESHOLD] = np.nan
         return rad
 
     band21 = calibrate(BAND21_IDX, BAND21_LAMBDA)
