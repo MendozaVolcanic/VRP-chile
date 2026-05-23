@@ -345,6 +345,27 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   con un sensor L1B nuevo, leé el UserGuide específico de ese sensor — NO
   extrapoles de MODIS asumiendo que VIIRS hace lo mismo.
 
+- **A38. Tag git defensivo antes de cleanup destructivo** (S73 data/_*/ audit):
+  cualquier `git rm`/borrado masivo (>10 archivos o >50 MB) requiere PRIMERO:
+  (a) inventario clasificatorio en `docs/<F##>_<scope>_INVENTORY.md` con
+  recomendación archivar/conservar por item, (b) `git tag -a pre-<scope>-cleanup
+  -m "snapshot defensivo..."` + `git push --tags`, (c) confirmación explícita
+  del usuario si tiene dudas. Recovery: `git checkout <tag> -- path/` o
+  navegar el tag en GitHub.com UI. Costo: 1 comando. Beneficio: recovery 100 %
+  si dudas surgen después. **Anti-pattern S73**: casi lanzo subagente para
+  `git rm` masivo data/_*/ sin pensar bien beyond-MIROVA value — Nicolás me
+  paró. La regla nació de ahí.
+
+- **A39. Claude es responsable de mergear PRs cuando CI/review OK** (S73): NO
+  esperar a Nicolás. Verificación pre-merge obligatoria:
+  (a) `gh pr view <N> --json mergeStateStatus,statusCheckRollup,reviewDecision`,
+  (b) si `mergeStateStatus=CLEAN` y checks pasados (o no requeridos) y tests
+  locales 0 regresiones → ejecutar `gh pr merge <N> --squash --delete-branch`
+  (o el strategy del repo), (c) si hay conflicts/fails → reportar y pedir
+  instrucciones, NO mergear a ciegas. Excepción: PRs con cambios de alta
+  criticidad (data destructiva, security, breaking changes) → pedir
+  confirmación explícita aunque CI esté verde.
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
@@ -528,6 +549,10 @@ Para minimizar compactaciones automáticas ("session continued..."):
   vol×profile (`reproc-ab-*.yml`) NO afecta porque cada job toca archivo único.
 - **earthaccess granule API**: `g["umm"]` (dict-like, no `g.umm`).
   Estructura: `g["umm"]["TemporalExtent"]["RangeDateTime"]["BeginningDateTime"]`.
+- **GH Actions `workflow_dispatch` limitation** (S73): solo es invocable si el yml
+  está en la default branch (`main`). En feature branches retorna HTTP 422
+  "Workflow does not have 'workflow_dispatch' trigger" aunque el yml SÍ lo tenga
+  configurado. Solución: mergear PR primero, después `gh workflow run --ref main ...`.
 
 ## Estado
 

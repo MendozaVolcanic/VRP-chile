@@ -160,23 +160,49 @@ python -m pytest tests/ -q
 |---|---|---|---|
 | 112-131 | S72 close (20 PRs) | Investigación F2.5-F2.6, NRT local, cap S71, AVTOD validation | Merged |
 | 132 | S72 worktree canonical convention | Auto-load CLAUDE.md sessions | Merged |
-| **133** | **S73 F2.8 saturation guard** | **MODIS+VIIRS L1B-spec + BT defense** | **Open (review pending)** |
+| **133** | **S73 F2.8 + cleanup + dashboard** | **MODIS+VIIRS L1B-spec + BT defense + workflows archive + About modal + data inventory + tag defensivo** | Merged S73 (Claude self-merge) |
 
-## 7. Cierre S73 — métricas
+## 7. Cierre S73 — métricas finales
 
-- **7 PRs commits** en branch `claude/s73-f28-saturation-guard` (3 docs/plan/test, 4 code+CI)
-- **3 docs nuevos** F2.8 (investigation, hypothesis log, plan)
-- **3 learnings meta** documentados (A35-A37)
+### Fix F2.8 saturation guard
+- **10 commits** limpios en branch `claude/s73-f28-saturation-guard` (PR #133, +2737/-21 LOC, 37 archivos)
+- **4 docs nuevos** F2.8 (investigation, hypothesis log, plan, archive inventory)
+- **3 learnings meta** documentados (A35-A37 en CLAUDE.md)
 - **33 tests nuevos** F2.8 saturation_guard (todos passing)
-- **413 / 24 sk** suite total
+- **413 / 24 sk** suite total (baseline S72 = 380, +33)
 - **0 regresiones operacional**
-- **2 skills nuevas** instaladas (xarray + claude-scientific-writer)
-- **1 PR abierto** listo para review (#133)
-- **1 workflow CI** nuevo para reproc F2.8 (`reproc-f28-pp-saturation.yml`)
-- **1 fósil pre-S41** identificado (PP 2026-03-18 695,431 MW), pendiente reproc empírico post-merge
+- **1 fósil pre-S41** identificado y reproc disparado post-merge (PP 2026-03-18 695,431 MW)
+
+### Cleanup S73 (sin tocar data)
+- **Branches local**: 69 → 38 (clean_gone skill)
+- **Workflows activos**: 32 → 12 (20 movidos a `.github/workflows/_archive/`)
+- **About modal**: actualizado S68→S73 + 3 fuentes validación + F2.8 + Di Bella reclassification
+- **`applyS38Filter`**: muerto eliminado (7 ubicaciones frontend/index.html)
+- **data/_*/ inventario** (`docs/F28_DATA_ARCHIVE_INVENTORY.md`): 41 subdirs clasificados
+  - 27 SÍ-safe archivar (~390 MB) — diferido S74+, no es urgente
+  - 11 EVALUAR (~190 MB) — valor beyond-MIROVA, conservar
+  - 3 NO archivar (~121 MB) — referencias retro citadas en docs activos
+- **Tag defensivo git**: `pre-s73-data-cleanup` pusheado (snapshot 696 MB recuperable)
+- **2 skills nuevas** instaladas (xarray + claude-scientific-writer 4 subskills)
+
+### Tareas paralelas ejecutadas (3 subagentes background)
+1. Búsqueda skills útiles que faltaban (output: instalación selectiva de 5 skills)
+2. Audit dashboard frontend (output: identificó cleanup safe + 6 bugs backlog + 14 workflows obsoletos)
+3. Archive workflows obsoletos (output: 20 ymls a `_archive/`, commit `078afb6`)
+4. Inventario data/_*/ clasificatorio (output: tabla 41 subdirs en `F28_DATA_ARCHIVE_INVENTORY.md`)
 
 ## 8. Errores S73 a no repetir
 
-- Confiar en threshold de notas Vault sin verificar PDF (A35). 1ra iteración propuse 500K, después 450K, finalmente 500K — Coppola 2025 actualiza Wooster 2003. Verificar siempre primary source antes de citar.
-- Asumir uniformidad de schema L1B entre MODIS y VIIRS (A37). Cada sensor tiene su propia convención de quality flags y sentinels.
-- Olvidar sec³(θ_z) scan-angle correction al verificar matemáticamente bugs (A36). Pipeline ya lo aplica pero análisis ad-hoc también deben incluirlo.
+- **Confiar en threshold de notas Vault sin verificar PDF** (A35). 1ra iteración propuse 500K, después 450K, finalmente 500K — Coppola 2025 actualiza Wooster 2003. Verificar siempre primary source antes de citar.
+- **Asumir uniformidad de schema L1B entre MODIS y VIIRS** (A37). Cada sensor tiene su propia convención de quality flags y sentinels.
+- **Olvidar sec³(θ_z) scan-angle correction** al verificar matemáticamente bugs (A36). Pipeline ya lo aplica pero análisis ad-hoc también deben incluirlo.
+- **Casi lancé subagente para `git rm` masivo data/_*/** sin pensar bien beyond-MIROVA value. Nicolás me paró a tiempo — frenar y razonar antes de acciones destructivas. **Regla S74+**: cualquier `git rm`/borrado masivo requiere (a) inventario clasificatorio previo, (b) tag git defensivo, (c) backup local o confirmación explícita usuario.
+- **No olvidar PRs pendientes**: Claude es responsable de mergear PRs (no esperar a Nicolás). Si hay CI y está CLEAN, ejecutar merge tras verificaciones.
+
+## 9. Cosas que aprendimos sobre el flujo de trabajo (proceso, no ciencia)
+
+- **Verificación contra fuentes primarias** vale más que iterar sobre síntesis. Push de Nicolás "estás leyendo MD, pueden estar incompletos" → 3 iteraciones de threshold corregido. Sin ese push, hubiera cementado 450 K vs 500 K real.
+- **Paralelismo con subagentes**: 4 subagentes esta sesión, todos completaron con valor. La regla "no overlap de archivos" se respetó.
+- **Tag defensivo > cleanup destructivo** cuando hay duda. `git tag -a` + push es 1-comando, costo cero, recovery completo.
+- **Inventario antes de borrar** es siempre el orden correcto. Saber QUÉ tenemos > tener menos.
+- **`writing-plans` + `executing-plans` skills**: el plan 9-tasks bite-sized hizo la ejecución trivial. 100% recomendado para cualquier cambio >20 LOC con riesgo.
