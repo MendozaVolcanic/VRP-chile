@@ -592,15 +592,41 @@ function getLevel(vrp) {
   return LEVELS[LEVELS.length - 1];
 }
 
-const sensorVisible = { MODIS: true, VIIRS375: true, VIIRS750: true, MIROVA: true };
+// F30 Bug 10 fix (S74): sessionStorage helpers para persistir toggles UI.
+// Operador SERNAGEOMIN entra/sale del dashboard varias veces por turno —
+// "Solo cráter on + MODIS oculto + escala log" es config favorita; perderla
+// cada F5 molesta. Persistencia per-tab (sessionStorage), nueva pestaña =
+// defaults intencionalmente.
+function persistedFlag(key, defaultValue) {
+  try {
+    const v = sessionStorage.getItem(key);
+    if (v === null) return defaultValue;
+    return v === "true";
+  } catch (e) { return defaultValue; }
+}
+function setPersistedFlag(key, value) {
+  try { sessionStorage.setItem(key, String(!!value)); } catch (e) {}
+}
+function persistedJSON(key, defaultValue) {
+  try {
+    const v = sessionStorage.getItem(key);
+    if (v === null) return defaultValue;
+    return JSON.parse(v);
+  } catch (e) { return defaultValue; }
+}
+function setPersistedJSON(key, value) {
+  try { sessionStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
+}
+
+const sensorVisible = persistedJSON("vrp_sensors", { MODIS: true, VIIRS375: true, VIIRS750: true, MIROVA: true });
 let currentVolcano = VOLCANOES[0];
 let currentDays = 30;  // S26 D: default 30 días (antes 7). Las refs MIROVA Villarrica históricas necesitan al menos 30d para visibilidad. Toggle a 90d/180d para historia completa.
-let logScale = false;
+let logScale = persistedFlag("vrp_log_scale", false);
 // S18: por defecto el dashboard solo cuenta detecciones dentro del radio del
 // cráter (summit). Las lejanas (far) siguen visibles en los conteos 🎯/📍, en
 // el mapa y en la tabla (atenuadas), pero no inflan el valor "48h max" ni el
 // nivel de alerta. El usuario puede prender "Incluir lejanas" desde el header.
-let includeFarDistance = false;
+let includeFarDistance = persistedFlag("vrp_include_far", false);
 // S27 — render solo el pixel primario (más caliente) por record. MIROVA reporta
 // UN registro por (timestamp, volcán, sensor); replicamos esa visualización.
 // PCC sin esto saturaba el mapa con 86,655 pixels en 90 días vs ~800 records.
@@ -1048,8 +1074,13 @@ function renderDetail() {
       return r.primary_cluster.vrp_mw;
     return r.vrp_mw ?? r.vrp_mir_mw ?? 0;
   };
+  // F30 Bug 6 fix (S74): tabla NRT usa eqVrp > 0 (MIROVA-equiv strict, respeta
+  // innerKm + distance_class) — mismo filtro que stat "Detecciones" (línea 955)
+  // y chart timeline (eqVrp en toDailyMax). Antes usaba getDisplayVrp que no
+  // aplica filter de distance → tabla mostraba más rows que stat/chart.
+  // getDisplayVrp sigue usándose para el VALOR mostrado por row (cluster pref).
   const recent = filtered
-    .filter(r => getDisplayVrp(r) > 0)
+    .filter(r => eqVrp(r) > 0)
     .sort((a,b) => b.datetime_utc.localeCompare(a.datetime_utc))
     .slice(0, 20);
 
@@ -1463,6 +1494,10 @@ function renderDetail() {
       if (vrp <= 0 && !r.triggered_test1) continue;
       const dist = r.hotspot_dist_km ?? r.final_hotspot_dist_km ?? (r.anomaly_pixels && r.anomaly_pixels.length ? r.anomaly_pixels[0].dist_km : null);
       if (dist == null) continue;
+      // F30 Bug 11a fix (S74): respetar toggle "Solo cráter" / "Incluir lejanas".
+      // Antes el scatter mostraba todos los puntos incluso con toggle activo —
+      // promesa rota del toggle (Bug 9 pattern). Ahora consistente con resto del panel.
+      if (!includeFarDistance && dist > innerKm) continue;
       pts.push({ x: r.datetime_utc.slice(0,10), y: dist, vrp: vrp || (r.primary_cluster?.vrp_mw ?? 0), sensor: r.sensor });
     }
     return pts;
@@ -1699,6 +1734,7 @@ function buildLegend() {
     item.addEventListener("click", () => {
       sensorVisible[s.key] = !sensorVisible[s.key];
       item.classList.toggle("dim", !sensorVisible[s.key]);
+      setPersistedJSON("vrp_sensors", sensorVisible);  // F30 Bug 10
       renderDetail();
     });
     legend.appendChild(item);
@@ -1857,7 +1893,11 @@ function buildOverviewMap() {
     const vrp = latestVRP(d.records, includeFarDistance, innerKm);
     const lv = getLevel(vrp);
     const color = alertColors[lv.key] || "#7a8fa6";
-    const size = lv.key === "nd" ? 6 : Math.max(7, Math.min(16, 7 + vrp * 2));
+    // F30 Bug 7 fix (S74): marker size log10 (alineado con detail panel línea
+    // 1330, distance scatter 1586, popup 1805). Antes vrp*2 lineal: 0.5 MW y
+    // 5 MW se veían casi igual (8 vs 9 px) — rango Bajo/Moderado MIROVA invisible.
+    // Ahora: 0.1 MW ≈ 3 px (cap 7), 1 MW = 7 px, 10 MW = 11 px, ≥100 MW = 16 px (cap).
+    const size = lv.key === "nd" ? 6 : Math.max(7, Math.min(16, 7 + Math.log10(Math.max(vrp, 0.01)) * 4));
 
     const marker = L.circleMarker([v.lat, v.lon], {
       radius: size, color: "#fff", weight: 1.5,
@@ -1980,12 +2020,14 @@ async function init() {
   // Scale
   document.getElementById("btn-linear").addEventListener("click", () => {
     logScale = false;
+    setPersistedFlag("vrp_log_scale", false);  // F30 Bug 10
     document.getElementById("btn-linear").classList.add("active");
     document.getElementById("btn-log").classList.remove("active");
     renderDetail();
   });
   document.getElementById("btn-log").addEventListener("click", () => {
     logScale = true;
+    setPersistedFlag("vrp_log_scale", true);  // F30 Bug 10
     document.getElementById("btn-log").classList.add("active");
     document.getElementById("btn-linear").classList.remove("active");
     renderDetail();
@@ -2000,6 +2042,7 @@ async function init() {
   // Cambia buildCards, overview map, chart y tabla del detalle.
   document.getElementById("btn-summit-only").addEventListener("click", () => {
     includeFarDistance = false;
+    setPersistedFlag("vrp_include_far", false);  // F30 Bug 10
     document.getElementById("btn-summit-only").classList.add("active");
     document.getElementById("btn-include-far").classList.remove("active");
     buildCards();
@@ -2008,6 +2051,7 @@ async function init() {
   });
   document.getElementById("btn-include-far").addEventListener("click", () => {
     includeFarDistance = true;
+    setPersistedFlag("vrp_include_far", true);  // F30 Bug 10
     document.getElementById("btn-include-far").classList.add("active");
     document.getElementById("btn-summit-only").classList.remove("active");
     buildCards();
@@ -2029,6 +2073,18 @@ async function init() {
     document.getElementById("btn-primary-pixel").classList.remove("active");
     renderDetail();
   });
+
+  // F30 Bug 10 (S74): sync UI button state con persisted flags al cargar.
+  // HTML default tiene "btn-linear" + "btn-summit-only" con class "active",
+  // pero si sessionStorage persistió otro estado, hay que reflejarlo.
+  if (logScale) {
+    document.getElementById("btn-log").classList.add("active");
+    document.getElementById("btn-linear").classList.remove("active");
+  }
+  if (includeFarDistance) {
+    document.getElementById("btn-include-far").classList.add("active");
+    document.getElementById("btn-summit-only").classList.remove("active");
+  }
 
   // Load all volcanoes in parallel
   await Promise.all(VOLCANOES.map(v => loadVolcano(v)));
