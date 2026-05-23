@@ -612,6 +612,41 @@ Para minimizar compactaciones automáticas ("session continued..."):
   está en la default branch (`main`). En feature branches retorna HTTP 422
   "Workflow does not have 'workflow_dispatch' trigger" aunque el yml SÍ lo tenga
   configurado. Solución: mergear PR primero, después `gh workflow run --ref main ...`.
+- **GH Actions YAML 1.1 "Norway Problem"** (S74 F2.8.f breakthrough, A43): tokens
+  como `on`, `off`, `yes`, `no`, `true`, `false` (case-insensitive, SIN quotes)
+  parsean como **booleans** en YAML 1.1 estricto. GitHub Actions normalmente trata
+  `on:` como special key, pero bajo ciertas condiciones de cache/indexing aplica
+  parse YAML 1.1 estricto y ve la key como `True` → rechaza el workflow con
+  HTTP 422 "Workflow does not have workflow_dispatch trigger" aunque el yml SÍ
+  lo tenga configurado.
+
+  **Fix universal**: quote la key como `"on":` string explícito. **Defensivo gratis**:
+
+  ```yaml
+  # ✗ Puede fallar HTTP 422 random:
+  on:
+    workflow_dispatch:
+      inputs: ...
+
+  # ✓ Siempre funciona:
+  "on":
+    workflow_dispatch:
+      inputs: ...
+  ```
+
+  S74 F2.8.f: 2 workflows previos (`reproc-f28-pp-saturation.yml`,
+  `reproc-f28-pp-sat-v2.yml`) fallaron HTTP 422 13+ horas hasta que v3
+  (`reproc-f28-v3.yml`, PR #143 commit `d2ea629`) usó `"on":` y dispatched al
+  primer intento. Diferencias adicionales que **pudieron** contribuir (no
+  aislado, no vale el ROI determinar cuál): bloque comentarios largo encima de
+  `on:`, `cache: "pip"` sin lockfile (silently fails), inputs múltiples + commit
+  messages multilínea con literal newlines en `-m`.
+
+  **Anti-pattern S75+**: cualquier yml nuevo de GH Actions con `on:` debe usar
+  `"on":` quoted. También vale para otros tokens YAML 1.1 problemáticos (no,
+  off, false). Verificar pre-merge con `python -c "import yaml;
+  print(list(yaml.safe_load(open(<path>)).keys()))"` — si la key aparece como
+  `True`/`False`/`None` en vez de string, falla.
 
 ## Estado
 
