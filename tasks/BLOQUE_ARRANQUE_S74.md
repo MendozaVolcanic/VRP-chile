@@ -40,11 +40,23 @@ Commits: 7 (76227da → a9b40fa).
 
 ## 2. Priorización S74
 
-### P1 — F2.8.f reproc empírico (URGENTE post-merge)
+### P1 — F2.8.f reproc empírico (BLOCKER GH Actions)
 
-**Pre-requisito**: PR #133 merged a main.
+**Estado S73**: PR #133 + #134 (workflow hotfix) AMBOS mergeados a main.
+El fix F2.8 está operacional. NRT cron lo recogerá en próxima corrida automática (cada 2h).
 
-**Comando**:
+**Blocker conocido**: el workflow `reproc-f28-pp-saturation.yml` está en main pero
+GH Actions API rechaza `workflow_dispatch` con HTTP 422 ("Workflow does not have
+'workflow_dispatch' trigger") incluso post-merge y post-re-index 60s+.
+Hipótesis: GH Actions caching del workflow state ID 282130246 después de runs
+fallidos previos. **Workaround S74 a probar** (en orden de simplicidad):
+1. **Trigger manual via GitHub web UI** (Actions tab → "F2.8 reproc PP..." → Run workflow).
+   Frecuentemente funciona cuando la API CLI falla.
+2. **Rename del archivo** (`mv reproc-f28-pp-saturation.yml reproc-f28-pp-sat-v2.yml`)
+   fuerza GH Actions a crear nuevo workflow ID, bypasseando cache estado roto.
+3. **Esperar 24h** y reintentar — GH Actions Reindex cron de bajada frecuencia.
+
+**Comando target post-fix**:
 ```bash
 gh workflow run reproc-f28-pp-saturation.yml \
   --ref main \
