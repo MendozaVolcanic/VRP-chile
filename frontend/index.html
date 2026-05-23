@@ -754,12 +754,14 @@ function latestVRP(records, includeFar = false, innerKm = 10) {
   // S33: usa mirovaEqVrp con validación pc.centroid_dist_km contra innerKm.
   // S36: pasa includeFar a mirovaEqVrp también para que respete el toggle.
   // S38: aplicar filtro post-S38 al inicio.
+  // S74 F30 Bug 9: respetar sensorVisible — apagar MODIS oculta alertas MODIS.
   const cutoff = Date.now() - 48 * 3600000;
   let max = 0;
   for (const r of records) {
     if (new Date(r.datetime_utc).getTime() < cutoff) continue;
     if (!includeFar && !isSummitDetection(r)) continue;
     if ((r.vrp_mw ?? 0) === 0 && !r.triggered_test1) continue;
+    if (!isSensorVisible(r)) continue;
     const v = mirovaEqVrp(r, innerKm, includeFar);
     if (v > max) max = v;
   }
@@ -776,6 +778,8 @@ function latestSensors(records, includeFar = false) {
     // S29 fix: requerir vrp_mw>0 o triggered_test1 (no vrp_mir_mw que mete
     // records descartados).
     if ((r.vrp_mw ?? 0) === 0 && !r.triggered_test1) continue;
+    // S74 F30 Bug 9: ocultar pills cuando el sensor está deshabilitado.
+    if (!isSensorVisible(r)) continue;
     seen.add(sensorGroup(r.sensor));
   }
   return seen;
@@ -787,6 +791,18 @@ function sensorGroup(sensor) {
   if (sensor.includes("750")) return "VIIRS750";
   if (sensor.startsWith("VIIRS")) return "VIIRS375";
   return null;
+}
+
+// S74 F30 Bug 9: helper único para que TODOS los paneles respeten el toggle de
+// sensores. Antes solo lo respetaba el chart principal (buildDatasets) — el
+// distance scatter, VRE chart, MIROVA comparison, hotspot map y alert summary
+// ignoraban el toggle, rompiendo la promesa de la leyenda interactiva. Si el
+// sensor de un record no está en sensorVisible, lo tratamos como visible (no
+// regresión sobre records sin sensor reconocible — ej. Test1 sintético).
+function isSensorVisible(r) {
+  const g = sensorGroup(r?.sensor);
+  if (!g) return true;
+  return sensorVisible[g] !== false;
 }
 
 function lastEventTime(records) {
@@ -811,6 +827,8 @@ function distanceCounts(records, days = 7) {
     if (new Date(r.datetime_utc).getTime() < cutoff) continue;
     const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
     if (v <= 0) continue;
+    // S74 F30 Bug 9: el conteo cráter/lejanas también respeta el toggle.
+    if (!isSensorVisible(r)) continue;
     // S18: usar el mismo criterio summit/far que el resto del dashboard
     // (isSummitDetection). Sin eso, records legacy pre-S14 con vrp_vent>0
     // pero sin distance_class quedaban sin contar — Nicolás notó que en
@@ -1490,6 +1508,9 @@ function renderDetail() {
   function buildDistanceData() {
     const pts = [];
     for (const r of filtered) {
+      // S74 F30 Bug 9: scatter respeta toggle de sensores (antes solo lo
+      // hacía el chart principal — apagar MODIS no quitaba sus puntos).
+      if (!isSensorVisible(r)) continue;
       const vrp = r.vrp_mw ?? 0;
       if (vrp <= 0 && !r.triggered_test1) continue;
       const dist = r.hotspot_dist_km ?? r.final_hotspot_dist_km ?? (r.anomaly_pixels && r.anomaly_pixels.length ? r.anomaly_pixels[0].dist_km : null);
@@ -1505,8 +1526,11 @@ function renderDetail() {
 
   // ── VRE cumulative data ──
   function buildVREData() {
+    // S74 F30 Bug 9: VRE cumulativa respeta toggle (apagar VIIRS750 saca su
+    // aporte energético del integrado).
     const sorted = [...filtered]
       .filter(r => (r.vrp_mw ?? r.vrp_mir_mw ?? 0) > 0)
+      .filter(isSensorVisible)
       .sort((a,b) => a.datetime_utc.localeCompare(b.datetime_utc));
     let cumulative = 0;
     return sorted.map(r => {
@@ -1523,7 +1547,9 @@ function renderDetail() {
     // S29 fix bug 6: filtrar records descartados (vrp_mw=0 con discarded_reason).
     // Antes usaba `?? r.vrp_mir_mw` que metía records donde el pipeline ya
     // descartó la detección — distorsionaba la comparación con MIROVA.
-    const ours = filtered.filter(r => (r.vrp_mw ?? 0) > 0 || r.triggered_test1);
+    // S74 F30 Bug 9: comparación MIROVA respeta toggle de sensores (apagar
+    // MODIS recalcula el max diario solo con VIIRS).
+    const ours = filtered.filter(r => ((r.vrp_mw ?? 0) > 0 || r.triggered_test1) && isSensorVisible(r));
     if (ours.length) {
       const ourDaily = new Map();
       for (const r of ours) {
@@ -1545,8 +1571,8 @@ function renderDetail() {
         borderRadius: 2, borderSkipped: false, order: 1,
       });
     }
-    // MIROVA reference
-    if (mFiltered.length) {
+    // MIROVA reference (S74 F30 Bug 9: respeta toggle MIROVA del legend)
+    if (mFiltered.length && sensorVisible.MIROVA !== false) {
       ds.push({
         label: "MIROVA (referencia)",
         data: toMirovaDaily(mFiltered),
@@ -1735,7 +1761,14 @@ function buildLegend() {
       sensorVisible[s.key] = !sensorVisible[s.key];
       item.classList.toggle("dim", !sensorVisible[s.key]);
       setPersistedJSON("vrp_sensors", sensorVisible);  // F30 Bug 10
+      // S74 F30 Bug 9: propagar el toggle a los 5 paneles dependientes.
+      // Antes solo se refrescaba el detail (chart principal + secundario).
+      // Ahora también: cards (pills + VRP card-level), alert summary bar,
+      // overview map (volcano markers + hotspot layer).
       renderDetail();
+      buildCards();
+      buildAlertSummary();
+      buildOverviewMap();
     });
     legend.appendChild(item);
   });
@@ -1831,6 +1864,9 @@ function updateHotspotLayer() {
     withCoords.sort((a, b) => a.datetime_utc.localeCompare(b.datetime_utc));
 
     withCoords.forEach((r, i) => {
+      // S74 F30 Bug 9: capa de hotspots respeta toggle (apagar MODIS quita
+      // sus markers naranjas del mapa overview).
+      if (!isSensorVisible(r)) return;
       const vrpFinal = r.vrp_mw ?? 0;
       const vrpRaw = r.vrp_mir_mw ?? r.vrp_tir_mw ?? 0;
       const vrpVent = r.vrp_vent_mw ?? 0;
