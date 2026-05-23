@@ -306,6 +306,45 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     delegar a subagente con pedido de resumen, o escribir a JSON.
   - Decisiones obvias preguntadas innecesariamente al usuario.
 
+- **A35. Notas Vault `ai_generated: true` necesitan verificación verbatim para
+  valores numéricos críticos** (S73 F2.8): cuando un threshold, fórmula o
+  constante entra a un test/PR/código, cotejar contra el PDF original del paper
+  antes de citarlo como autoridad. La nota Vault `wooster2003fire.md` decía
+  "Saturación MODIS B21 ~57.6 W/m²/sr/µm como criterio operacional" — pero el
+  PDF Wooster muestra que ese 57.6 W es **valor de ejemplo de Figure 4** (un
+  caso que YA satura MODIS, BT=473 K), no el threshold mismo (que es BT≈450 K
+  per Wooster, actualizado a 500 K por Coppola 2025 Cap.11). El costo de la
+  confusión sería 50 K de drift en el umbral del fix.
+
+  **Jerarquía de autoridad cuando hay conflicto**:
+  1. UserGuide oficial del sensor (Toller & Isaacman 2025 MODIS L1B C7, VIIRS
+     L1B UserGuide Aug 2021) — autoritativo absoluto para sentinels / LUT max.
+  2. Paper canon-MIROVA reciente (Coppola 2025 Cap.11 Springer) — autoritativo
+     para thresholds operacionales actualizados (vs valores nominales históricos).
+  3. Paper algorithm-MIROVA histórico (Coppola 2016, Wooster 2003) — referencia
+     fundacional para mecanismos y rangos.
+  4. Notas Vault `ai_generated` — síntesis útil para ideas, NO para valores
+     numéricos sin verificación cruzada.
+
+- **A36. sec³(θ_z) scan-angle elongation puede multiplicar discrepancias
+  factor 1-5×** (S73 F2.8): MODIS pixels off-nadir tienen área efectiva mucho
+  mayor que nominal 1km². Para sensor angle θ_z = 50° → factor 3.74. Cualquier
+  análisis manual o script de verificación que ignore esto produce
+  discrepancias factor 1-5× (S73: cálculo inicial dio 185K MW, real fue 695K).
+  El pipeline ya lo aplica via `modis_pixel_areas()` con sec³ correction;
+  análisis manuales/audits ad-hoc también deben.
+
+- **A37. VIIRS L1B y MODIS L1B usan esquemas distintos para saturation flagging**
+  (S73 F2.8 audit cross-sensor): MODIS reporta `SI=65533` sentinel para
+  "Detector saturated" (Tabla 5.6.1 L1B C7 UserGuide), parte de un esquema
+  general donde `SI > 32767 = invalid` (14 sentinels en 65500-65535). VIIRS NO
+  usa sentinel uint16 para saturation: clampea la radiancia al "Reported Range"
+  value y setea bit-2 (=4) del SDS de quality flags separado (Tabla C.1 L1B
+  UserGuide Aug 2021). Code que asume uniformidad de esquema entre sensores
+  produce gaps de protección distintos. **Regla operacional**: cuando trabajés
+  con un sensor L1B nuevo, leé el UserGuide específico de ese sensor — NO
+  extrapoles de MODIS asumiendo que VIIRS hace lo mismo.
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
