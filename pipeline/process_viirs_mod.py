@@ -252,7 +252,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                   inner_radius_km: float | None = None,
                   exclude_zones: list = None,
                   active_water_bodies: list = None,
-                  lbg_global_compatible: bool = False) -> dict | None:
+                  lbg_global_compatible: bool = False,
+                  local_kernel_bg_compatible: bool = False) -> dict | None:
     """
     Calculate VRP from VIIRS 750m M-band granule (VNP02MOD / VJ102MOD).
 
@@ -261,6 +262,14 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         vent_radius_km: Radius for vent-scale search.
         inner_radius_km: MIROVA-style visual classification radius (S14 D1).
             If None, distance_class is None.
+        local_kernel_bg_compatible: per-vol opt-in para kernel local 3x3
+            background (Coppola 2024 §1129). **NOTA F2.9 S72**: aceptado en
+            signature para evitar TypeError en `scripts/run_pipeline.py:276`,
+            pero la implementación kernel-local para M-band aún no existe
+            (a diferencia de process_viirs.py I-band 375m). Para vols opt-in
+            (Villarrica/PP/Lastarria/Chaiten/PCC), M-band sigue usando t_bg
+            global del ring 5-25km mientras se implementa T1.5+ S73. TODO:
+            replicar `compute_local_background` block de process_viirs.py:856.
 
     Returns dict with VRP or None if granule does not cover volcano.
     """
