@@ -3,6 +3,23 @@
 Sistema VRP independiente para volcanes chilenos (equivalente MIROVA, propio).
 Repo: https://github.com/MendozaVolcanic/VRP-chile
 
+## ⚡ Working worktree canónico (LEER PRIMERO en cada sesión nueva)
+
+**Path canónico**: `C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP-Chile-s70/`
+
+**Primer comando obligatorio de cualquier sesión Claude**:
+
+```bash
+cd "C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP-Chile-s70"
+git fetch origin --prune
+git checkout main && git pull --ff-only
+ls tasks/BLOQUE_ARRANQUE_S*.md | tail -1   # leer el último bloque de arranque
+```
+
+**Razón**: las sesiones S71-S72 (PRs #112-#131) mergearon desde este worktree. Otros worktrees (`VRP Chile/` raíz + `.claude/worktrees/*`) pueden estar desactualizados respecto a `origin/main`. Cada worktree git requiere su propio `git pull`.
+
+**Bloques de arranque por sesión**: cada cierre de sesión persiste `tasks/BLOQUE_ARRANQUE_S{N+1}.md` con el plan ejecutivo de la siguiente. Leer ese archivo **antes** de empezar trabajo. Última actualización: ver `MEMORY.md` index.
+
 ## Misión vinculante (LEER ANTES DE TOCAR PIPELINE)
 
 **Objetivo: clon literal MIROVA NRT.** Antes de implementar cualquier feature,
