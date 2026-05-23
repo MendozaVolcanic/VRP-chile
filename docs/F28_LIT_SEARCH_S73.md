@@ -7,62 +7,89 @@
 
 ¿Hay literatura POST-2024 que (a) actualice el algoritmo MIROVA o thresholds, o (b) discuta saturation handling en sistemas VRP-like más allá de Wooster 2003?
 
-## Experimento 3-way A/B/C
+## Experimento 4-way A/B/C/D
 
-3 búsquedas paralelas con misma query target, distintos approaches:
+4 búsquedas paralelas con misma query target, distintos approaches:
 
 | ID | Approach | Skill / Tool |
 |---|---|---|
 | **A** | Workflow viejo (control) | `investigacion` skill manual + Crossref + OpenAlex + arXiv MCP |
 | **B** | Skill nueva orchestrator | `deep-research` skill (13-agent pipeline) |
 | **C** | External web search | WebSearch built-in tool |
+| **D** | Perplexity Academic vía Chrome | `Claude_in_Chrome` MCP + `/search/new?q=...&sources=scholar` |
 
 ## Resultados comparativos
 
-| Approach | Cobertura | DOIs verified | Speed | Recommendation |
-|---|---|---|---|---|
-| **A (investigacion manual)** | 9 papers — Coppola author-ID OpenAlex barre TODA su biblio post-2024 | ✓ Crossref-verified | 6 min | **Default para queries dirigidas** |
-| **B (deep-research skill)** | 6 papers, 5 overlap A | WebSearch paraphrased | 1.5 min | **Solo full mode synthesis, NO para lookups** |
-| **C (WebSearch)** | 3 papers únicos — captura arxiv pre-prints que A/B miss | WebSearch | 3 min | **Complemento arxiv para A** |
+| Approach | Papers nuevos | DOIs verified | Discovery | Synthesis | Speed |
+|---|---|---|---|---|---|
+| **A (investigacion manual)** | **9** (todos Crossref-verified) | ✓ | 🏆 Best | ❌ | 6 min |
+| **B (deep-research skill)** | 6 (5 overlap A) | Parcial parafraseado | ⚠️ Mediano | ⚠️ Mediano | 1.5 min |
+| **C (WebSearch + WebFetch)** | 3 únicos (incluye arxiv pre-prints) | ✓ | 🎯 Best arxiv | ❌ | 3 min |
+| **D (Perplexity Academic vía Chrome)** | **0 nuevos específicos** | ✗ solo hostnames | ❌ Worst | 🏆 **Best synthesis narrative** | ~30s |
 
-### Verdict sobre skills nuevas
+**D (Perplexity)** detalle: sesión Nicolás activa (login OK). Query enviada vía `/search/new?q=...&sources=scholar` URL pattern. Respuesta synthesis-style estructurada por sub-pregunta. Confirma independientemente "no newer canonical replacement of Wooster 2003". Pero NO encontró Dhage 2025 ni Coppola 2026 Lascar ni Aveni 2025 GRL específicos — cita 6 fuentes pero solo da hostnames ("mdpi", "frontiersin") no DOIs.
 
-**Las skills nuevas (B) NO aportaron exclusividad** para búsquedas bibliográficas dirigidas. Su backend es el mismo WebSearch que C, y no tienen acceso a `paperzilla` ni `bgpt-paper-search` cargados. La skill `deep-research` brilla en **full mode synthesis (reportes APA-7 completos)**, no en lookups.
+### Verdict sobre skills/tools nuevas
 
-**Combo operacional óptimo para queries bibliográficas dirigidas**: **A + C**
-- A barre la bibliografía completa de un autor via OpenAlex author IDs
-- C complementa con arxiv pre-prints fuera de Crossref
+**Las skills nuevas (B, D) NO aportaron exclusividad** para búsquedas bibliográficas dirigidas. Su backend es WebSearch (B) o Perplexity API (D), y no tienen acceso a `paperzilla` ni `bgpt-paper-search` cargados. La skill `deep-research` y Perplexity Academic brillan en **synthesis narrative**, no en discovery.
 
-**NO usar B `deep-research` para "encontrame N papers"** — overhead alto, ganancia baja.
+**Combo operacional óptimo según use case**:
+
+| Use case | Tool/Skill ganadora |
+|---|---|
+| **Discovery dirigido** (encontrame N papers) | **A** (`investigacion` manual + OpenAlex author IDs) + **C** (WebSearch arxiv) |
+| **Synthesis narrative** (paragraph para paper) | **D** (Perplexity Academic vía Chrome) ó **B** (`deep-research` full mode) |
+| **Verificación post-discovery** | `citation-audit` skill (no probado en S73) |
+
+**NO usar B/D `deep-research`/`Perplexity` para "encontrame N papers"** — overhead alto, ganancia baja en discovery. Útiles para writing-mode.
 
 ## Hallazgos prioritarios (3 papers nuevos críticos)
 
-### 🎯 1. Dhage 2025 — VIIRS undocumented filtering
+### 🎯 1. Dhage 2025 — VIIRS undocumented filtering [DESCARGADO Y LEÍDO S73]
 
-- **DOI/Source**: arxiv:2510.26816 (Nov 2025)
-- **Autor**: Rohit Rajendra Dhage
-- **Aporte**: documenta filtering no documentado en VIIRS Active Fire Product. Low-confidence nighttime detections systematically excluded.
-- **Relevancia VRP Chile**: **VALIDACIÓN INDEPENDIENTE A37** (VIIRS y MODIS L1B usan esquemas distintos, downstream consumers deben leer quality flags + ser defensivos). Recomendaciones del paper coinciden 1:1 con nuestro fix F2.8 H2.
-- **Encontrado solo por C** (arxiv pre-print fuera de Crossref)
-- **Acción S74**: download + procesar + considerar citar en paper VRP Chile P5
+- **DOI/Source**: arxiv:2510.26816 (Oct 28, 2025)
+- **Autor**: Rohit Rajendra Dhage (Independent Researcher)
+- **Status**: **PDF descargado + .md procesado** (`documentacion/dhage2025_viirs_filtering.pdf`, 257 KB, 461 líneas .md). Nota Vault skeleton creada (`Vault/10_Bibliografia/99_por_clasificar/dhage2025viirs.md`).
+- **Aporte verbatim del abstract**:
+  - Analiza **21,540,921 fire detections** ene 2023-ene 2024 desde NASA FIRMS Active Fire Product
+  - **Ausencia COMPLETA de "low confidence" classifications en nighttime** observations: 6,007,831 nighttime fires, **CERO low-confidence** (vs 696,908 esperados)
+  - χ² = 1,474,795, **p < 10⁻¹⁵**, Z = −833 — bulletproof estadísticamente
+  - Persiste global: todos los meses, latitudes, NOAA-20 + Suomi-NPP
+  - ML reverse-engineering 88.9% accuracy confirma constraint algorítmico (no geofísico)
+  - **Detecciones nocturnas con BT<~295K se excluyen completamente** del producto
+  - **Afecta 27.9% de todas las detecciones VIIRS**
+- **Implicancia exacta VRP Chile** (post-lectura S73):
 
-### 🎯 2. Aveni 2025 — VRPTIR crater lakes + hydrothermal
+| Aspecto | Status |
+|---|---|
+| ¿Nuestro pipeline sufre el bug? | ❌ **NO** — consumimos VNP02IMG/VJ102IMG **L1B directo**, no FIRMS |
+| ¿MIROVA NRT sufre? | ⚠️ Probable NO — MIROVA consume L1B directo per Coppola 2025 cap.11 |
+| ¿Afecta comparaciones contra FIRMS? | ✅ **SÍ** — FIRMS sesgado nocturno (no nuestro pipeline) |
+| ¿Refuerza A37? | ✅ **SÍ** — documenta "undocumented algorithmic constraints" como **patrón general** |
+| ¿Worth citing en paper VRP Chile P5? | ✅ **SÍ** — sustenta decisión "L1B directo en lugar de FIRMS" |
+
+- **Veredicto**: paper **complementario a F2.8**, no superpuesto. Nuestro bug F2.8 H2 era en *nuestra* lectura L1B. Dhage encontró bug en *FIRMS* derived product. Ambos confirman A37 patrón general.
+- **Encontrado solo por C** (arxiv pre-print, fuera de Crossref)
+
+### 🎯 2. Aveni 2025 — VRPTIR crater lakes + hydrothermal [YA LOCAL DESDE S72]
 
 - **DOI**: 10.1029/2024GL113324 (GRL, 2025)
 - **Autores**: Aveni S. (Sapienza Roma) — grupo MIROVA canónico
-- **Aporte**: extension TIRVolcH (Aveni 2024 RSE) a crater lakes + hydrothermal systems usando single TIR band
-- **Relevancia VRP Chile**: **Primer update canónico post-Coppola 2025 cap.11**. Validación contra Ruapehu (precedente para PCC laguna lacolito). **ALTA relevancia P3 T1.5** (drift remanente Villarrica lava lake, PCC, Chaiten crater lake).
+- **Status**: **YA local desde S72** en `Vault/10_Bibliografia/99_por_clasificar/aveni2025_crater_lakes.md` (1,064 líneas). Subagente de descargas confirmó (principio rector §1 lit search), no re-descargó. Nota Vault adicional creada para sync (`aveni2025grl.md` marked as `already_local`).
+- **Aporte**: extension TIRVolcH (Aveni 2024 RSE) a crater lakes + hydrothermal systems usando single TIR band. Validación contra Ruapehu, etc.
+- **Relevancia VRP Chile**: **Primer update canónico post-Coppola 2025 cap.11**. **ALTA relevancia P3 T1.5** (drift remanente Villarrica lava lake, PCC laguna lacolito, Chaiten crater lake).
 - **Encontrado por A + B + C** (DOI verificado)
-- **Acción S74**: download (AGU paywalled, probar preprint EarthArXiv) + procesar
+- **Acción S74**: leer el `.md` ya local (1064 líneas) y extraer fórmulas/thresholds operacionales para integrar a fix VRP Chile baja-T régimen
 
-### 🎯 3. Coppola 2026 — Lascar SO2 multiparametric
+### 🎯 3. Coppola 2026 — Lascar SO2 multiparametric [BLOCKED, descarga manual]
 
 - **DOI**: 10.2139/ssrn.6481652 (SSRN preprint open access)
 - **Autor**: Coppola
+- **Status**: **Cloudflare challenge** bloqueó curl en SSRN landing + mirror Sapienza IRIS. Unpaywall reporta `oa_status=green` pero `best_oa_location` es loop al DOI sin `url_for_pdf` directa. Nota Vault skeleton creada (`coppola2026lascar.md` con status `blocked_paywall`).
 - **Aporte**: VRP+SO2 integrado Lascar 2017-2021 — **volcán chileno Tier A NUESTRO**
 - **Relevancia VRP Chile**: integración futura con OVDAS, dataset extension
 - **Encontrado solo por A** (OpenAlex barrido autor)
-- **Acción S74**: download cuando se trabaje P5 (paper VRP Chile)
+- **Acción S74**: **descarga manual** Nicolás con sesión SSRN (web UI directa, navegador con cookies), o esperar mirror Torino IRIS. Después procesar con `markitdown`.
 
 ## Hallazgos secundarios (11 papers)
 
@@ -97,7 +124,9 @@ Sin update saturation handling per se, hay **vías alternativas** que valen vigi
 
 ## A40 — aprendizaje meta
 
-**A40. Para queries bibliográficas dirigidas, manual `investigacion` > skill orchestrators** (S73 búsqueda 3-way). OpenAlex permite barrer toda la biblio de un autor por ID, con metadata Crossref-verified. Skills tipo `deep-research` orquestan pero usan WebSearch como backend (parafrasea DOIs → riesgo "vibe citing"). **Combo óptimo: A (manual) + C (WebSearch dirigido a arxiv pre-prints)**.
+**A40. Para queries bibliográficas dirigidas, manual `investigacion` > skill orchestrators** (S73 búsqueda 4-way A/B/C/D actualizado). OpenAlex permite barrer toda la biblio de un autor por ID con metadata Crossref-verified. Skills tipo `deep-research` (B) orquestan pero usan WebSearch como backend → parafrasea DOIs → riesgo "vibe citing". Perplexity Academic vía Chrome (D) genera synthesis bien estructurada pero **0 papers nuevos específicos**. **Combo óptimo discovery: A + C** (manual + WebSearch arxiv). **Combo óptimo synthesis writing**: B (`deep-research` full mode) o D (Perplexity Academic).
+
+**A41. `Claude_in_Chrome` MCP funciona para Perplexity Pro con sesión activa del usuario** (S73). Workflow validado: `list_connected_browsers` → `select_browser` → `tabs_context_mcp createIfEmpty:true` → **navegar directo URL pattern** `/search/new?q=<URL_ENCODED>&sources=scholar`. Evita problemas typing en contenteditable divs de Perplexity (textbox NO es `<input>`/`<textarea>` — `form_input` falla con error "DIV not supported"). Usar `computer` action `type` con `ref` post-click, o URL navigate directo (más confiable). No requiere `PERPLEXITY_API_KEY` env var — usa cookies de la sesión Chrome activa de Nicolás.
 
 ## Sincronización con BIBLIOGRAPHY_SYNTHESIS
 
