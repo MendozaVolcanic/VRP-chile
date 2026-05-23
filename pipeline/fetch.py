@@ -11,9 +11,42 @@ Granules are saved to a temp directory, processed, then deleted.
 import math
 import os
 import socket
-import earthaccess
 from datetime import datetime, timedelta
 from pathlib import Path
+
+
+# S72 — local NRT testing support: cargar `.env` del repo root si existe.
+# Permite correr pipeline local sin setear env vars en cada shell. El `.env`
+# está en `.gitignore` (no se commitea). Parse manual minimal — NO requiere
+# python-dotenv para minimizar dependencias en CI. Si la variable ya está
+# definida en el ambiente (e.g. CI con GH Secrets), tiene prioridad sobre `.env`.
+# Ver docs/LOCAL_NRT_SETUP.md para setup.
+def _load_dotenv_if_present() -> None:
+    env_path = Path(__file__).resolve().parent.parent / ".env"
+    if not env_path.exists():
+        return
+    try:
+        with env_path.open("r", encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                if "=" not in line:
+                    continue
+                key, _, val = line.partition("=")
+                key = key.strip()
+                val = val.strip().strip("'").strip('"')
+                # Solo seteamos si NO está ya en env (GH Secrets prioridad).
+                if key and key not in os.environ:
+                    os.environ[key] = val
+    except OSError:
+        pass  # archivo ilegible — silenciamos para no romper CI.
+
+
+_load_dotenv_if_present()
+
+
+import earthaccess  # noqa: E402 — debe ir después de _load_dotenv para que earthaccess vea el token
 
 # H7 (S35): Force IPv4 for NASA Earthdata DNS resolution. Errno 101
 # "Network is unreachable" en GitHub-hosted runners es típicamente IPv6
