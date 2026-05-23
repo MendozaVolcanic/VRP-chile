@@ -375,6 +375,56 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   criticidad (data destructiva, security, breaking changes) → pedir
   confirmación explícita aunque CI esté verde.
 
+  **Workaround S74 cuando `gh pr merge` falla porque `main` está en otro
+  worktree**: `gh api --method PUT repos/<owner>/<repo>/pulls/<N>/merge -f
+  merge_method=merge`. Esto bypassa el local checkout y mergea via GitHub API
+  directo. Probado funcional en PRs #133-#142.
+
+- **A40. Para queries bibliográficas dirigidas, manual `investigacion` >
+  skill orchestrators** (S73 4-way A/B/C/D). OpenAlex permite barrer toda la
+  biblio de un autor por ID con metadata Crossref-verified. Skills tipo
+  `deep-research` orquestan pero usan WebSearch como backend (parafrasea DOIs
+  → riesgo "vibe citing"). Perplexity Academic vía Chrome genera synthesis
+  bien estructurada pero **0 papers nuevos específicos**.
+
+  **Combo óptimo por use case**:
+  - **Discovery dirigido**: A (manual investigacion) + C (WebSearch arxiv
+    pre-prints)
+  - **Synthesis writing (paper P5)**: D (Perplexity Academic vía Chrome) o B
+    (`deep-research` full mode)
+  - **Verificación post-discovery**: `citation-audit` skill (no probado, pre-
+    submission)
+
+- **A41. `Claude_in_Chrome` MCP funciona para Perplexity Pro con sesión
+  activa** (S73). Workflow validado:
+  1. `list_connected_browsers` → `select_browser <deviceId>`
+  2. `tabs_context_mcp createIfEmpty:true` → tab disponible
+  3. **Navegar directo URL pattern**:
+     `https://www.perplexity.ai/search/new?q=<URL_ENCODED>&sources=scholar`
+  4. `get_page_text` para extraer respuesta
+
+  **Caveats**:
+  - Textbox de Perplexity es `<div contenteditable>` (no `<input>`/`<textarea>`)
+    → `form_input` falla con "DIV not supported". Usar `computer` action `type`
+    con `ref` post-click, **o URL navigate directo (más confiable)**.
+  - No requiere `PERPLEXITY_API_KEY` env var — usa cookies de la sesión Chrome
+    activa de Nicolás.
+  - El MCP `perplexity` server-side configurado en `~/.claude/settings.json`
+    requiere `PERPLEXITY_API_KEY` env var — si no está seteada, fallback a
+    Chrome MCP es la opción.
+
+- **A42. GH Actions `workflow_dispatch` puede rechazar workflows con HTTP 422
+  incluso post-merge a default branch** (S73 F2.8.f). Workarounds intentados:
+  (1) extract Python heredoc a script externo (PR #134, no resolvió),
+  (2) rename del archivo yml para forzar nuevo workflow ID (PR #138, no resolvió),
+  (3) yml minimal scratch desde cero (PR pendiente S74). El parser puede ser
+  más estricto de lo documentado — posibles culprits: encoding (BOM/CRLF/UTF-8
+  con tildes en comments), formato `on:` multi-líneas, indent específico.
+
+  **Si falla post-3-intentos**: el fix mergeado a main sigue siendo aplicado
+  por NRT cron automático. El reproc histórico empírico es nice-to-have, no
+  bloqueante operacional.
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
