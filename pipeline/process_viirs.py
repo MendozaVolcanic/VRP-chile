@@ -120,6 +120,7 @@ from pipeline.profile import (
     PATH_D_REQUIRES_COVALIDATION,
     PATH_D_ONLY_CAP_MW,
     PATH_D_ONLY_CAP_TBG_MAX_K,
+    ENABLE_VRPTIR_AVENI,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -274,6 +275,82 @@ def read_viirs_geo(geo_path: Path) -> dict:
 
 # S23 Task 2: haversine_km centralizado en pipeline/scan_geometry.py
 from pipeline.scan_geometry import haversine_km
+
+
+def _compute_vrptir_aveni_diagnostic(bt5_2d, hot5_mask_2d, t_bg_i05):
+    """F31 Task A2 — VRPTIR Aveni 2025 GRL diagnostic-only.
+
+    Calcula VRP_TIR per Aveni 2025 GRL Eq.9 sobre los pixels ya detectados
+    como hot por nuestro pipeline TIR (subset de `hot5_mask_2d`). Es un
+    proxy de TIRVolcH real (Aveni 2024 RSE requeriría baseline 10yr
+    cloud-free pre-computed — pendiente plan F31 Task A1+ futuro).
+
+    Solo cuenta pixels dentro del rango validez Aveni 300-600 K (features
+    moderate-to-low-temperature: crater lakes, fumarole fields, hydrotermal).
+    Pixels >600 K son responsabilidad de Wooster MIR. Pixels <300 K se
+    descartan (sin señal volcánica detectable en este método).
+
+    Args:
+        bt5_2d: array 2D BT VIIRS I5 (K)
+        hot5_mask_2d: máscara bool 2D — pixels detectados como hot
+                      por nuestro pipeline TIR (proxy TIRVolcH).
+        t_bg_i05: BT background I5 (K), median del ring de fondo.
+
+    Returns:
+        None si ENABLE_VRPTIR_AVENI=False (default operacional). Dict con
+        {vrptir_aveni_mw, vrptir_aveni_n_pixels, vrptir_aveni_caveat} si
+        flag ON (incluso con n=0 / mw=0 cuando no hay pixels in-range).
+
+    Refs:
+        - pipeline/vrptir.py (Eq.8/9 verbatim Aveni 2025 GRL PR #156)
+        - docs/F31_AVENI_GRL_2025_EXTRACT.md
+    """
+    if not ENABLE_VRPTIR_AVENI:
+        return None
+
+    # Import lazy: solo carga la dependencia si el flag está activo.
+    from pipeline.vrptir import (
+        vrp_tir_mw as _aveni_vrp_tir_mw,
+        filter_t_range as _aveni_filter_t_range,
+        LAMBDA_VIIRS_I5,
+        A_PIX_VIIRS_I,
+    )
+
+    caveat = "Aveni 2025 GRL piloto S76, +/-35%, no operacional"
+
+    if bt5_2d is None or hot5_mask_2d is None:
+        return {
+            "vrptir_aveni_mw": 0.0,
+            "vrptir_aveni_n_pixels": 0,
+            "vrptir_aveni_caveat": caveat,
+        }
+
+    bt_hot = bt5_2d[hot5_mask_2d]
+    bt_hot = bt_hot[~np.isnan(bt_hot)]
+    if bt_hot.size == 0:
+        return {
+            "vrptir_aveni_mw": 0.0,
+            "vrptir_aveni_n_pixels": 0,
+            "vrptir_aveni_caveat": caveat,
+        }
+
+    in_range = _aveni_filter_t_range(bt_hot)
+    bt_hot_inrange = bt_hot[in_range]
+    if bt_hot_inrange.size == 0 or np.isnan(t_bg_i05):
+        return {
+            "vrptir_aveni_mw": 0.0,
+            "vrptir_aveni_n_pixels": 0,
+            "vrptir_aveni_caveat": caveat,
+        }
+
+    mw = _aveni_vrp_tir_mw(
+        bt_hot_inrange, float(t_bg_i05), LAMBDA_VIIRS_I5, A_PIX_VIIRS_I
+    )
+    return {
+        "vrptir_aveni_mw": round(float(mw), 4),
+        "vrptir_aveni_n_pixels": int(bt_hot_inrange.size),
+        "vrptir_aveni_caveat": caveat,
+    }
 
 
 def calculate_vrp(l1b_path: Path, geo_path: Path,
@@ -968,6 +1045,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # --- TIR channel I05 (11.45 um) — TIRVolcH, low-temperature features ---
     vrp_tir_mw = 0.0
     t_max_i05 = float("nan")
+    vrptir_aveni_diag = None  # F31 A2 — populated solo si ENABLE_VRPTIR_AVENI
 
     if "I05" in bands:
         bt5 = bands["I05"]
@@ -987,6 +1065,14 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             roi_bt5 = bt5[roi_mask]
             valid_roi5 = roi_bt5[~np.isnan(roi_bt5)]
             t_max_i05 = float(np.max(valid_roi5)) if len(valid_roi5) else float("nan")
+
+            # F31 A2 — VRPTIR Aveni 2025 GRL diagnostic-only (opt-in).
+            # Devuelve None salvo que ENABLE_VRPTIR_AVENI=True. NO entra a
+            # clasificación summit/far ni a final_hotspot_*. Pixels usados =
+            # subset del hot_mask TIR existente ∩ rango 300-600 K. Proxy
+            # TIRVolcH para piloto S76 (Lastarria/Copahue/PP, A5).
+            vrptir_aveni_diag = _compute_vrptir_aveni_diagnostic(
+                bt5, hot5_mask_2d, t_bg_i05)
 
     # --- Vent-scale detection (weak fumarolic signals, VIIRS only) ---
     # Designed to match MIROVA VIIRS375 sensitivity for point-source fumarolic
@@ -1254,7 +1340,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     primary_cluster["d9_capped"] = True
                 n_hotspots_clustered = len(t1_clusters)
 
-    return {
+    record = {
         "vrp_mir_mw": round(vrp_mir_mw, 3),
         "vrp_tir_mw": round(vrp_tir_mw, 3),
         "vrp_vent_mw": round(vrp_vent_mw, 3),
@@ -1330,6 +1416,14 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "product_version": "nrt" if "_NRT" in name else "standard",
         "datetime_utc": _parse_datetime(name),
     }
+
+    # F31 A2 — merge diagnostic VRPTIR Aveni si flag ON. Con flag OFF
+    # (default operacional mirova_equivalent) los 3 campos NO aparecen en el
+    # record y el frontend / store / audit no los ve. Backward-compat estricto.
+    if vrptir_aveni_diag is not None:
+        record.update(vrptir_aveni_diag)
+
+    return record
 
 
 def _parse_datetime(filename: str) -> str:
