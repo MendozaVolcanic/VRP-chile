@@ -1,0 +1,41 @@
+# VRP-Chile — profile: experimental_lowT (S75 piloto VRPTIR Aveni 2025)
+#
+# Perfil experimental para piloto VRPTIR Aveni 2025 GRL (doi:10.1029/2024GL113324).
+# Hereda configuración operacional de mirova_equivalent + activa
+# enable_vrptir_aveni para retrieval de RP en features moderate-to-low-T
+# (300-600 K) — crater lakes, fumaroles, hydrothermal.
+#
+# **STATUS S75**: experimental opt-in. NO operacional. Default flag OFF en
+# mirova_equivalent. Activar SOLO para piloto en volcanes candidatos:
+# - Lastarria (fumarolas)
+# - Copahue (crater lake)
+# - Planchón-Peteroa (crater lake — Aguilera 2021 ground truth Qvolc 7-59 MW)
+# - Villarrica (lava lake — boundary case, monitorear T_eff)
+#
+# **EXCLUIR** volcanes:
+# - PCC (no-focal A20, invalida single-pixel TIRVolcH)
+# - Lascar / Isluga (Tier A Alto >600K — Wooster MIR es mejor)
+#
+# **Pre-requisito operacional**: TIRVolcH detector (Aveni 2024 RSE, PR #153
+# Plan F31 Task A1 mergeado S75). Falta Task A2 — integrar a process_viirs.py.
+# Hasta que A2 esté, este perfil sólo activa el flag pero la pipeline NO
+# llama VRPTIR (el módulo pipeline/vrptir.py es standalone, llamable directo
+# en experimentos, pero NO conectado al run).
+
+extends: mirova_equivalent
+profile: experimental_lowT
+description: >
+  Piloto VRPTIR Aveni 2025 GRL — retrieval RP single-band TIR para
+  moderate-to-low-T features (300-600 K). NO operacional, solo piloto.
+
+# --- F31 VRPTIR Aveni 2025 opt-in (S75) ---
+# Coeficientes verificados verbatim contra PDF (A35 confidence:HIGH, S74 PR #150).
+# Ver docs/F31_AVENI_GRL_2025_EXTRACT.md.
+enable_vrptir_aveni: true
+vrptir_t_min_k: 300.0        # rango validez inferior (Aveni 2025 §3.1)
+vrptir_t_max_k: 600.0        # rango validez superior (sobre eso: usar Wooster)
+vrptir_k_tir_i5: 60.17       # μm·sr para VIIRS I5 11.45 μm (Eq.8 verbatim)
+
+# --- Output location ---
+output:
+  data_subdir: experimental_lowT
