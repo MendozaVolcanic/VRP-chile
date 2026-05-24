@@ -878,6 +878,21 @@ function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
   return { tp, fn, fp, pairs: ratios.length, recall, precision, f1, ratio_med };
 }
 
+// H3 (S77 audit, PR #170 follow-up): helper global único para "este record
+// representa una detección operacional válida". Antes el predicate vivía
+// inline en distanceCounts (~970), buildVREData (~1814), buildComparisonData
+// (~1834), buildNRTTable (~2281), renderRecentTable (~1269 local), etc.
+// y cada call site lo escribía a mano `(r.vrp_mw ?? 0) > 0 || r.triggered_test1`
+// — fácil drift cuando se agrega un nuevo path de detección (ej: Test1 S29,
+// triggered_test1 S29+, vrp_vent edge cases). Centralizar acá evita que
+// fallbacks tipo `r.vrp_mir_mw ?? 0` re-aparezcan en nuevos paneles y
+// re-inflen records descartados por el pipeline (`vrp_mw=0 + discarded_reason`).
+function isValidDetection(r) {
+  if ((r?.vrp_mw ?? 0) > 0) return true;        // detección eruption-path / suma indistinta legacy
+  if (r?.triggered_test1 === true) return true;  // detección Test 1 integrated-ROI (Coppola 2015)
+  return false;
+}
+
 function isSummitDetection(r) {
   // S29 fix bug 8: si el record fue descartado por el pipeline (vrp_mw=0 y
   // discarded_reason no nulo), NO contar como detección summit aunque el
@@ -899,7 +914,7 @@ function latestVRP(records, includeFar = false, innerKm = 10) {
   for (const r of records) {
     if (new Date(r.datetime_utc).getTime() < cutoff) continue;
     if (!includeFar && !isSummitDetection(r)) continue;
-    if ((r.vrp_mw ?? 0) === 0 && !r.triggered_test1) continue;
+    if (!isValidDetection(r)) continue;  // H3 (S77): helper global
     if (!isSensorVisible(r)) continue;
     const v = mirovaEqVrp(r, innerKm, includeFar);
     if (v > max) max = v;
@@ -914,9 +929,8 @@ function latestSensors(records, includeFar = false) {
   for (const r of records) {
     if (new Date(r.datetime_utc).getTime() < cutoff) continue;
     if (!includeFar && !isSummitDetection(r)) continue;
-    // S29 fix: requerir vrp_mw>0 o triggered_test1 (no vrp_mir_mw que mete
-    // records descartados).
-    if ((r.vrp_mw ?? 0) === 0 && !r.triggered_test1) continue;
+    // S29 fix + H3 (S77): helper global isValidDetection — no vrp_mir_mw fallback.
+    if (!isValidDetection(r)) continue;
     // S74 F30 Bug 9: ocultar pills cuando el sensor está deshabilitado.
     if (!isSensorVisible(r)) continue;
     seen.add(sensorGroup(r.sensor));
@@ -974,7 +988,8 @@ function distanceCounts(records, days = 7) {
     // NO deben contarse — el pipeline ya los descartó. Antes el fallback
     // `r.vrp_mw ?? r.vrp_mir_mw` los metía inflando "Lejanas" (~79 records
     // estimados, sobre todo Antuco/Callaqui no-Tier-A).
-    if ((r.vrp_mw ?? 0) <= 0 && !r.triggered_test1) continue;
+    // H3 (S77): predicate centralizado isValidDetection — sin fallback a vrp_mir_mw.
+    if (!isValidDetection(r)) continue;
     // S74 F30 Bug 9: el conteo cráter/lejanas también respeta el toggle.
     if (!isSensorVisible(r)) continue;
     // S18: usar el mismo criterio summit/far que el resto del dashboard
@@ -1266,11 +1281,8 @@ function renderDetail() {
   // S29 fix bugs 1+2: si record fue descartado (vrp_mw=0 con discarded_reason),
   // NO mostrar el primary_cluster.vrp_mw como si fuera detección real — ese
   // cluster fue justamente el que disparó el descarte (eruption_hotspot_too_far).
-  const isValidDetection = (r) => {
-    if ((r.vrp_mw ?? 0) > 0) return true;  // detección eruption-path
-    if (r.triggered_test1) return true;     // detección Test 1 (vrp_mw puede ser 0 por edge case S28+)
-    return false;
-  };
+  // H3 (S77): isValidDetection ahora vive global (~882). Local removido para evitar
+  // shadowing y drift cuando se agregue un nuevo path de detección.
   const getDisplayVrp = (r) => {
     if (!isValidDetection(r)) return 0;
     if (r.primary_cluster && r.primary_cluster.vrp_mw != null && r.primary_cluster.vrp_mw > 0)
@@ -1789,8 +1801,8 @@ function renderDetail() {
       // S74 F30 Bug 9: scatter respeta toggle de sensores (antes solo lo
       // hacía el chart principal — apagar MODIS no quitaba sus puntos).
       if (!isSensorVisible(r)) continue;
+      if (!isValidDetection(r)) continue;  // H3 (S77): helper global
       const vrp = r.vrp_mw ?? 0;
-      if (vrp <= 0 && !r.triggered_test1) continue;
       const dist = r.hotspot_dist_km ?? r.final_hotspot_dist_km ?? (r.anomaly_pixels && r.anomaly_pixels.length ? r.anomaly_pixels[0].dist_km : null);
       if (dist == null) continue;
       // F30 Bug 11a fix (S74): respetar toggle "Solo cráter" / "Incluir lejanas".
@@ -1811,7 +1823,7 @@ function renderDetail() {
     // a la energía radiativa cumulativa. Antes el fallback inflaba la
     // integral con records que el operacional ya filtró.
     const sorted = [...filtered]
-      .filter(r => (r.vrp_mw ?? 0) > 0 || r.triggered_test1)
+      .filter(isValidDetection)  // H3 (S77): helper global, evita drift de fallbacks
       .filter(isSensorVisible)
       .sort((a,b) => a.datetime_utc.localeCompare(b.datetime_utc));
     let cumulative = 0;
@@ -1831,7 +1843,7 @@ function renderDetail() {
     // descartó la detección — distorsionaba la comparación con MIROVA.
     // S74 F30 Bug 9: comparación MIROVA respeta toggle de sensores (apagar
     // MODIS recalcula el max diario solo con VIIRS).
-    const ours = filtered.filter(r => ((r.vrp_mw ?? 0) > 0 || r.triggered_test1) && isSensorVisible(r));
+    const ours = filtered.filter(r => isValidDetection(r) && isSensorVisible(r));  // H3 (S77)
     if (ours.length) {
       const ourDaily = new Map();
       for (const r of ours) {
@@ -2154,6 +2166,12 @@ function updateHotspotLayer() {
       // S74 F30 Bug 9: capa de hotspots respeta toggle (apagar MODIS quita
       // sus markers naranjas del mapa overview).
       if (!isSensorVisible(r)) return;
+      // H3 (S77 audit): records que NO son detecciones válidas (vrp_mw=0 sin
+      // triggered_test1, ej. descartados por discarded_reason="eruption_hotspot_too_far"
+      // pero con vrp_mir_mw>0 o vrp_tir_mw>0) NO deben aparecer en la capa
+      // overview de hotspots. Antes vrpRaw=vrp_mir_mw + fallback vrpShow los
+      // renderizaba con tamaño no nulo, sugiriendo actividad real.
+      if (!isValidDetection(r)) return;
       const vrpFinal = r.vrp_mw ?? 0;
       // F46 (S76 hotfix): vrp_tir_mw puede estar inflado por Stefan-Boltzmann
       // absoluto sobre mask 4σ generoso en terreno heterogéneo (nieve/lago/cirrus).
@@ -2277,8 +2295,8 @@ function buildNRTTable() {
       // S29 fix bug 7: filtrar records descartados. Antes `?? r.vrp_mir_mw`
       // metía records con vrp_mw=0 + discarded_reason (eruption_hotspot_too_far),
       // mostrándolos como "detecciones" recientes en la tabla NRT global.
+      if (!isValidDetection(r)) continue;  // H3 (S77): helper global
       const vrpFinal = r.vrp_mw ?? 0;
-      if (vrpFinal <= 0 && !r.triggered_test1) continue;
       const t = new Date(r.datetime_utc).getTime();
       if (t < cutoff) continue;
       // Reportar VRP MIROVA-equiv (cluster contiguo) cuando exista.
@@ -2477,7 +2495,7 @@ function exportCSV(volcano, records) {
   // discarded_reason, triggered_test1, n_test1_pixels, distance_class) y
   // vrp_vent_mw (ya estaba pero sin distance_class para diagnosticarlo).
   const headers = [
-    "datetime_utc","sensor","vrp_mw","vrp_mir_mw","vrp_tir_mw","vrp_vent_mw",
+    "datetime_utc","sensor","vrp_mw","vrp_mir_mw","vrp_tir_mw","vrp_tir_caveat","vrp_vent_mw",
     "n_anomalous_pixels","hotspot_lat","hotspot_lon","hotspot_dist_km",
     "t_bg_k","t_max_k","t_max_i04_k","t_max_i05_k",
     "nti_max","nti_bg","n_nti_anomalous",
@@ -2491,8 +2509,19 @@ function exportCSV(volcano, records) {
   for (const r of records) {
     // Aplanar primary_cluster (objeto anidado) para el CSV
     const pc = r.primary_cluster || {};
+    // M5 (S77 audit): flag F46 — vrp_tir_mw alto sin soporte MIR ni pixels
+    // anómalos es espurio (Stefan-Boltzmann sobre mask 4σ generoso en terreno
+    // heterogéneo: nieve/lago/cirrus). 143 records afectados ventana
+    // 2026-01-31..2026-05-17, hasta 9606 MW Lascar / 6872 MW Chaitén.
+    // Marcar como "F46_susp" para que el consumidor del CSV pueda excluir/auditar.
+    // Ver docs/F46_VRP_TIR_BUG_S76.md.
+    const vrpTir = r.vrp_tir_mw ?? 0;
+    const vrpMir = r.vrp_mir_mw ?? 0;
+    const nAnom = r.n_anomalous_pixels ?? 0;
+    const vrpTirCaveat = (vrpTir > 1000 && vrpMir < 10 && nAnom <= 0) ? "F46_susp" : "";
     const flat = {
       ...r,
+      vrp_tir_caveat: vrpTirCaveat,
       primary_cluster_n_pixels: pc.n_pixels,
       primary_cluster_vrp_mw: pc.vrp_mw,
       primary_cluster_dist_km: pc.centroid_dist_km,
