@@ -6,9 +6,15 @@ Generalisation of rebuild_mirova_lascar.py (kept for history). Use this for
 any new volcano before trusting it as a validation reference.
 
 Usage:
-    python scripts/rebuild_mirova_from_consolidado.py <JsonName> <CsvName>
+    python scripts/rebuild_mirova_from_consolidado.py <JsonName> <CsvName> [--source PATH]
     python scripts/rebuild_mirova_from_consolidado.py PuyehueCordonCaulle "Puyehue-Cordon Caulle"
     python scripts/rebuild_mirova_from_consolidado.py Tupungatito Tupungatito
+    python scripts/rebuild_mirova_from_consolidado.py Llaima Llaima --source data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado.csv
+
+S77 (2026-05-24): hardcoded 14042026 CSV no longer exists. Default source is now
+the canonical 'latest_consolidado.csv' at repo root (refreshed by Mirova-v1
+scraper). For historical rescue use --source pointing at
+mirova_v1_snapshot/registro_vrp_consolidado.csv (longer history, 17,966 rows).
 
 The first arg is the JSON stem used by data/mirova/<stem>.json (matching
 volcanoes.yaml 'name' field). The second is the 'Volcan' value as it appears
@@ -31,14 +37,14 @@ REPO = Path(__file__).parent.parent
 # (12437 rows, +769 rows, +4 days of coverage through Apr 14 including 37
 # new refs in the Apr 10-14 window previously missing from our NRT gap).
 # Older CSVs preserved on disk for historical reproducibility.
-SOURCE = Path(
-    r"C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\14042026 registro_vrp_consolidado.csv"
-)
+DEFAULT_SOURCE = REPO / "latest_consolidado.csv"
 
 
-def rebuild(json_stem: str, csv_volcano: str) -> None:
+def rebuild(json_stem: str, csv_volcano: str, source: Path = None) -> None:
+    SOURCE = Path(source) if source else DEFAULT_SOURCE
     if not SOURCE.exists():
         raise FileNotFoundError(f"Source CSV not found: {SOURCE}")
+    print(f"Source: {SOURCE}")
 
     dest = REPO / "data" / "mirova" / f"{json_stem}.json"
 
@@ -150,8 +156,9 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("json_stem", help="JSON stem (e.g. PuyehueCordonCaulle)")
     p.add_argument("csv_volcano", help="Volcano name as it appears in the CSV")
+    p.add_argument("--source", default=None, help="Path to consolidado CSV (default: repo/latest_consolidado.csv)")
     args = p.parse_args()
-    rebuild(args.json_stem, args.csv_volcano)
+    rebuild(args.json_stem, args.csv_volcano, source=args.source)
 
 
 if __name__ == "__main__":
