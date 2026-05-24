@@ -2,24 +2,38 @@
 
 Implementación de Aveni 2025 GRL (doi:10.1029/2024GL113324) Eq.8 + Eq.9.
 
-**STATUS S74**: EXPERIMENTAL — coeficientes derivados de notas Vault
-`aveni2025volcanic.md` (confidence:medium per A35). Antes de adoptación
-operacional verificar contra PDF original (BLOQUEANTE: PDF AGU paywalled,
-ver docs/F31_AVENI_VRPTIR_PLAN_S74.md §6 Task A6).
+**STATUS S74**: VERIFICADO contra PDF original Aveni 2025 GRL (open access AGU).
+Coeficientes confidence:HIGH. Task F31 A6 (PDF verify) COMPLETADA S74.
 
-Coeficientes pendientes verificación:
-- k_TIR(λ) = 1.0575·λ² − 14.3139·λ + 85.4239 (Eq.8)
-- k_TIR(11.45 µm I5) = 60.17 m·sr (cited in Vault note)
-- Rango validez: 300-600 K (complementario Wooster MIR 600-1500 K)
+Coeficientes verbatim (Aveni 2025 GRL):
+- Eq.8: k_TIR(λ) = 1.0575·λ² − 14.3139·λ + 85.4239  [μm·sr]
+- k_TIR(λ=11.45 µm, VIIRS I5) = 60.17 μm·sr (verbatim p.4, Fig.2b)
+- Rango validez: ~300-600 K (Wooster MIR vale 600-1500 K — complementarios)
+- Uncertainty método: ±35% (vs ±30% Wooster MIR)
+- Componente hot >600 K tolerado si ≤0.0025% del área anómala total
 
-**Pre-requisito operacional**: requiere TIRVolcH detector (Aveni 2024 RSE)
-para identificar pixels candidatos. Este módulo provee SOLO la función VRP,
-no la detección. Ver Plan F31 Task A1.
+**Pre-requisito operacional** (Aveni 2025 §3.2): requiere TIRVolcH detector
+(Aveni 2024 RSE doi:10.1016/j.rse.2024.114388) para identificar pixels
+candidatos. TIRVolcH usa "temporal and contextual analysis" con sensibilidad
+0.5 K above background. Este módulo provee SOLO la función VRP, no la
+detección. Ver Plan F31 Task A1 para implementar TIRVolcH.
+
+**Validación paper**: 7 volcanes (Ruapehu, El Chichón, Taal, Vulcano, Puracé,
+Poás, White Island) — ninguno chileno. Mt Ruapehu ground truth 12-yr:
+ρ=0.93, R²=0.87, deviations <±35%.
+
+**Assumptions**:
+- Emisividad ε = 1 (paper §3.1).
+- Solo nighttime VIIRS I5 (excluye solar diurna).
+- T_bg_noise ≤2.5 K asumido (lapse rate 6 K/km × pendiente 40° × 1 km).
+  Probablemente VIOLADO en Andes nevados — caveat operacional VRP Chile.
 
 Refs:
+- Paper PDF: Aveni S., Pailot-Bonnétat S., Rouwet D., Harris A.J.L.,
+  Coppola D. (2025). GRL 52, e2024GL113324. https://doi.org/10.1029/2024GL113324
 - docs/F31_AVENI_VRPTIR_PLAN_S74.md — plan integración VRP Chile
 - Vault/10_Bibliografia/99_por_clasificar/aveni2025volcanic.md
-- CLAUDE.md A35 (jerarquía autoridad fuentes)
+- CLAUDE.md A35 (jerarquía autoridad fuentes — UPGRADED a HIGH para esto)
 """
 from __future__ import annotations
 
@@ -29,9 +43,9 @@ import numpy as np
 _C1 = 1.1910429e8  # W·µm⁴/(m²·sr)
 _C2 = 1.4387752e4  # µm·K
 
-# Aveni 2025 GRL Eq.8 verbatim de notas Vault (confidence:medium)
-# k_TIR(λ) = 1.0575·λ² − 14.3139·λ + 85.4239 [m·sr]
-# **A35 caveat**: verificar contra PDF original antes de adoptación operacional
+# Aveni 2025 GRL Eq.8 VERIFICADO contra PDF original S74 (open access AGU).
+# k_TIR(λ) = 1.0575·λ² − 14.3139·λ + 85.4239 [μm·sr]
+# Holds en rango 10.5-12 μm. confidence:HIGH (A35 verification completada).
 _AVENI_EQ8_A = 1.0575
 _AVENI_EQ8_B = -14.3139
 _AVENI_EQ8_C = 85.4239
