@@ -361,3 +361,310 @@ por qué sigue produciendo `vrp_mw=0` rollup.
   S25 Villarrica (sub-pixel) — ambos casos también empezaron con
   recall <0.10 y se resolvieron sin bajar thresholds globales, con
   fixes localizados.
+
+---
+
+## 9. H4 ROOT CAUSE CONFIRMADO (S77 investigación read-only)
+
+**Veredicto**: H4 confirmada y refinada. **No es** la condicional hipotética
+`vrp_mw = pc.vrp_mw if summit else 0` (esa nunca existió). Es una asimetría
+arquitectónica más sutil entre dos sistemas de "qué hotspot representa al
+record" que conviven en el pipeline desde S38 y nunca se reconciliaron.
+
+### 9.1 El gate exacto
+
+**Archivo:línea**: `pipeline/store.py:183-195`
+
+```python
+# pipeline/store.py L175-197
+vrp_eruption = record.get("vrp_mw", 0) or 0
+hotspot_dist = record.get("hotspot_dist_km")
+vrp_vent = record.get("vrp_vent_mw", 0) or 0
+
+# Safety net (legacy + H8): si después del pixel-level filter, hotspot_dist
+# sigue indicando un hotspot lejano (...), aplicar el zero-out histórico.
+# Garantiza que vrp_mw=0 cuando solo hay señal far.
+if hotspot_dist is not None and hotspot_dist > MAX_HOTSPOT_DIST_KM:
+    record["discarded_hotspot_lat"] = record.get("hotspot_lat")
+    record["discarded_hotspot_lon"] = record.get("hotspot_lon")
+    record["discarded_hotspot_dist_km"] = hotspot_dist
+    record.setdefault("discarded_reason", "eruption_hotspot_too_far")
+    if record.get("anomaly_pixels"):
+        record["discarded_anomaly_pixels"] = record["anomaly_pixels"]
+    record["hotspot_lat"] = None
+    record["hotspot_lon"] = None
+    record["hotspot_dist_km"] = None
+    record["anomaly_pixels"] = []
+    vrp_eruption = 0
+
+record["vrp_mw"] = round(max(vrp_eruption, vrp_vent), 3)
+```
+
+El gate decide sobre `hotspot_dist_km`. Ese campo se asigna en
+`pipeline/process_modis.py:771-774` (y análogo VIIRS) como **el pixel
+individual con max VRP**:
+
+```python
+# pipeline/process_modis.py L771-774
+# Primary hotspot = highest VRP pixel
+hotspot_lat = anomaly_pixels[0]["lat"]
+hotspot_lon = anomaly_pixels[0]["lon"]
+hotspot_dist_km = anomaly_pixels[0]["dist_km"]
+```
+
+Es decir: `hotspot_*` mira **un solo pixel** (el más caliente del scene),
+mientras que `primary_cluster.*` (asignado en `process_modis.py:805-811`,
+estrategia `vent_anchored` desde S38) mira el **cluster contiguo más
+cercano al vent**. Cuando esos dos disienten — y el caso bandera muestra
+que disienten dramáticamente — `store.py` cree al pixel individual y mata
+el rollup, ignorando al cluster que el resto del pipeline ya seleccionó.
+
+### 9.2 Reproducción mínima
+
+Granule MODIS_TERRA NdC 2026-02-01 02:55:
+
+| Campo | Valor | Origen |
+|---|---|---|
+| `primary_cluster.n_pixels` | 21 | vent-anchored cluster S38 |
+| `primary_cluster.centroid_dist_km` | **0.536 km** | dentro inner=5 |
+| `primary_cluster.vrp_mw` | **332.756 MW** | cluster válido cráter |
+| `hotspot_lat/lon` | top pixel single | max VRP individual |
+| `hotspot_dist_km` | **26.58 km** | pixel hottest cae lejos |
+| `final_hotspot_source` | `eruption` | rama L915-919 |
+| `final_hotspot_dist_km` | **26.58 km** | hereda hotspot_dist_km |
+| `distance_class` | **`far`** | L939: 26.58 > 5 |
+| `discarded_reason` | `eruption_hotspot_too_far` | gate store.py:183 |
+| **`vrp_mw` top-level** | **0** | zero-out aplicado |
+
+Resultado: el dashboard publica `vrp_mw=0` para una noche donde el cráter
+mismo está emitiendo 332 MW comprobables (21 pixels contiguos). El audit
+S76 cuenta esto como FN ante el record MIROVA del mismo timestamp.
+
+### 9.3 Distribución empírica en NdC (1.218 records)
+
+Audit `experiments/141_f47_h4_rootcause/audit.py` sobre los 121 records
+mismatch:
+
+```
+Breakdown distance_class:       far=88   summit=33
+Breakdown final_hotspot_source: eruption=90  test1=31
+Breakdown discarded_reason:     eruption_hotspot_too_far=116  None=5
+
+pc.centroid_dist_km <= 5:  38 / 121
+  └─ de esos, final_hotspot_dist_km > 5:  5  (clasificación inconsistente)
+pc cerca (<5) Y hotspot_dist_km lejos (>5): 1
+```
+
+**Lectura del breakdown**:
+
+- **116 de 121** entran al gate L183 con `hotspot_dist > 5 km` y se les anula
+  `vrp_eruption`. La rama L915-919 (`final_hotspot_source='eruption'`) hereda
+  el dist del top pixel y por eso `distance_class='far'` en 88 casos.
+- Los **31 con `final_hotspot_source='test1'`** sí dispararon Test 1 y
+  reescribieron `final_hotspot` al centroide Test 1 cercano (L905-908 o
+  L911-914). Pero igual quedan con `vrp_mw=0` porque el gate
+  `hotspot_dist > 5` ya disparó antes en store.py — Test 1 reescribe
+  `final_hotspot_*` pero **no toca `hotspot_dist_km`**, así que el gate
+  store.py sigue viendo el top pixel lejano.
+- Los 33 `distance_class='summit'` del breakdown son los casos donde Test 1
+  rescató el clasificador pero el rollup VRP siguió en 0 igual — exactamente
+  el síntoma S42 ya documentado en `volcanoes.yaml:231-234` ("Test 1 dispara,
+  primary cráter cercano, vrp=0"). La nota S42 lo atribuyó a `L_bg` local;
+  el dato empírico S77 muestra que es por el gate store.py, no por L_bg.
+
+### 9.4 Por qué la asimetría existe
+
+Recorrido histórico:
+
+1. **Pre-S26/S27**: el pipeline solo tenía `hotspot_*` (top pixel) y la
+   regla "si está lejos, anula" tenía sentido — no había noción de cluster.
+2. **S27**: se agregó cluster aggregation (Coppola 2016a, `n_hotspots`)
+   con `primary_cluster`. Pero `hotspot_*` se mantuvo por backward compat.
+3. **S38 D8** (`docs/MIROVA_DIVERGENCES.md` y comentarios en
+   `process_modis.py:785-794`): se cambió la **selección del cluster** a
+   `vent_anchored` (cluster más cercano al vent dentro de inner_radius).
+   Esto resolvió el caso Lascar Salar de Atacama donde el cluster por
+   `vrp_max` caía a 25 km del vent. **Pero `hotspot_*` (top pixel single)
+   siguió sin actualizarse.**
+4. **S30 + S44** agregaron Test 1-priority para reescribir
+   `final_hotspot_*` cuando Test 1 detecta cerca y eruption lejos —
+   parche que cubre solo el sub-caso "Test 1 dispara".
+5. **S35 H8** (pixel-level distance filter) atacó el problema parcial
+   (descartar pixels lejos individualmente) pero el gate scene-level
+   `hotspot_dist > max_dist` se mantuvo como **safety net** y sigue
+   ahí. Cuando `enable_pixel_level_distance_filter=True` (default) los
+   pixels lejos ya están fuera de `anomaly_pixels`, pero **`hotspot_dist_km`
+   se asigna ANTES** del filtro en process_modis.py:774 — preservando el
+   top pixel original. El comentario "Safety net (legacy + H8)" de
+   store.py:179 muestra que el autor del filter sabía del solapamiento
+   pero conservó el zero-out por compat.
+
+En síntesis: el código tiene **dos representaciones del hotspot** que
+evolucionaron por separado. El gate de store.py se quedó conectado a la
+representación vieja (top pixel single, scene-wide).
+
+### 9.5 Fix propuesto (pseudocódigo, NO implementar acá)
+
+**Opción A — mínima, alineada al espíritu S38**: que el gate store.py
+mire `primary_cluster.centroid_dist_km` en vez de `hotspot_dist_km`
+cuando hay cluster vent-anchored disponible. Si el cluster principal
+está dentro del radio, NO anular `vrp_eruption` aunque haya un pixel
+individual lejano (ese pixel es un FP aislado o señal secundaria, no la
+"verdad del scene").
+
+```python
+# pipeline/store.py L175-197 reemplazo propuesto
+vrp_eruption = record.get("vrp_mw", 0) or 0
+hotspot_dist = record.get("hotspot_dist_km")
+vrp_vent = record.get("vrp_vent_mw", 0) or 0
+pc = record.get("primary_cluster") or {}
+pc_cdist = pc.get("centroid_dist_km")
+
+# S77 F47 fix: si el cluster vent-anchored cae dentro del radio, ese es
+# la verdad del scene — NO anular por un top pixel single lejano (FP aislado).
+# El gate legacy solo aplica cuando no hay cluster cercano que rescate.
+cluster_rescues = (pc_cdist is not None
+                    and pc_cdist <= MAX_HOTSPOT_DIST_KM
+                    and (pc.get("vrp_mw") or 0) > 0)
+
+if (not cluster_rescues
+        and hotspot_dist is not None
+        and hotspot_dist > MAX_HOTSPOT_DIST_KM):
+    # ... zero-out histórico igual que hoy ...
+    vrp_eruption = 0
+elif cluster_rescues and hotspot_dist is not None and hotspot_dist > MAX_HOTSPOT_DIST_KM:
+    # Cluster cráter rescata: usar pc.vrp_mw como vrp_eruption efectivo y
+    # reescribir hotspot_* al centroide del cluster (paridad con final_hotspot).
+    vrp_eruption = pc["vrp_mw"]
+    record["hotspot_lat"] = pc.get("centroid_lat")
+    record["hotspot_lon"] = pc.get("centroid_lon")
+    record["hotspot_dist_km"] = pc_cdist
+    record["discarded_anomaly_pixels_outside_cluster"] = ... # opcional, auditoría
+    record["discarded_reason"] = "single_pixel_far_overridden_by_cluster"
+
+record["vrp_mw"] = round(max(vrp_eruption, vrp_vent), 3)
+```
+
+**Opción B — más estructural**: que `process_modis.py:771-774` y análogo
+VIIRS asignen `hotspot_*` desde el `primary_cluster` (centroide del
+cluster vent-anchored) en vez del top pixel single. Resuelve el problema
+en origen pero cambia el contrato del campo `hotspot_*` (más invasivo,
+afecta auditorías y frontend que consuman hotspot_* en vez de
+final_hotspot_*).
+
+**Opción C — solo classifier, sin tocar VRP**: en process_modis.py:902-919
+priorizar `primary_cluster.centroid_dist_km` para asignar
+`final_hotspot_dist_km` cuando eruption es la fuente y hay cluster cerca.
+Esto corrige `distance_class` pero **no** el `vrp_mw=0` (porque el gate
+store.py es independiente). **Insuficiente solo**.
+
+**Recomendación**: Opción A. Aísla el cambio al rollup, preserva el
+campo `hotspot_*` como "top pixel single" (backward compat para audits
+que lo usen), y el comportamiento legacy sigue activo cuando NO hay
+cluster cercano que rescate. Es el cambio de menor superficie que
+resuelve el síntoma observado.
+
+**Pre-condición A38+A45 (S75)**: tocar `store.py` afecta pipeline NRT
+crítico — requiere tag defensivo `pre-s77-f47-store-cluster-rescue` y
+confirmación explícita Nicolás antes de mergear. Test obligatorio: caso
+sintético con `pc.cdist=0.5` + `hotspot_dist=26` + `pc.vrp_mw=332` →
+record final `vrp_mw=332` (no 0).
+
+### 9.6 Impacto esperado más allá de NdC
+
+Spot-check `experiments/141_f47_h4_rootcause/spotcheck_tierA.py` sobre los
+11 Tier A. Columnas:
+
+- `pc>0 & v=0`: records con primary_cluster.vrp_mw > 0 PERO vrp_mw == 0.
+- `pc<=in & disc=far`: subset con primary cerca del vent (dentro inner) Y
+  discarded_reason='eruption_hotspot_too_far' (el gate store.py disparó).
+
+| Volcán | Records totales | pc>0&v=0 | pc<=inner & disc=far |
+|---|---:|---:|---:|
+| Lascar | 1065 | 112 | 20 |
+| Lastarria | 1064 | 71 | 13 |
+| PuyehueCordonCaulle | 1306 | 122 | 110 |
+| Llaima | 1255 | 83 | 27 |
+| Villarrica | 1262 | 147 | 59 |
+| Copahue | 1240 | 211 | 79 |
+| Chaiten | 1312 | 119 | 49 |
+| Isluga | 1021 | 133 | 29 |
+| Tupungatito | 1173 | 65 | 23 |
+| PlanchónPeteroa | 1190 | 101 | 22 |
+| **NevadosDeChillan** | **1218** | **121** | **33** |
+
+**Lectura geológica**: el patrón existe en los 11. NdC se siente más por
+tener pocos refs MIROVA absolutos (5 en horizonte audit, vs 50-200 en
+otros), pero Copahue (79 casos), Villarrica (59), Chaitén (49) y
+PuyehueCordonCaulle (110, beneficiado por inner_radius=20) son los que
+más records cráter-céntricos legítimos están perdiendo en el rollup. El
+fix Opción A debería:
+
+- **Recuperar 200-400 records VRP** distribuidos entre los 11 Tier A.
+- **Recall NdC**: alza esperada de 0.20 → 0.60-0.80 (depende de cuántos
+  de los 4 FN MIROVA coincidan en timestamp con records "pc<=inner &
+  disc=far"). Verificación post-fix obligatoria.
+- **Recall otros Tier A**: alza marginal porque ya están en 0.82-0.98 (la
+  saturación contra MIROVA es por otros factores, no este). Pero
+  `vrp_mw` distinto de 0 en records actualmente censurados mejora la
+  serie temporal del dashboard y reduce el sesgo a la baja del ratio
+  mediano `our/mirova` en esos volcanes.
+- **Precision**: leve baja esperada en volcanes con vent_radius muy
+  permisivo (Copahue 79 records expone más a FPs cráter cercanos). Hay
+  que medirla. PCC con 110 candidatos es el spot a vigilar — su
+  inner=20 km cubre el lacolito Cordón Caulle entero y puede absorber
+  clusters que no son del vent.
+
+### 9.7 Conexión con S42 y F46
+
+La nota interna en `volcanoes.yaml:231-234` (S42) ya había identificado
+el patrón "Test 1 dispara, primary cluster cráter cercano, vrp=0". S42
+lo atribuyó a `L_bg` local del ring 1-3km contaminado por calor crónico
+del domo Nicanor, y propuso activar D4 selectivo. Pero el dato empírico
+S77 muestra que `lbg_global_compatible: true` **ya está activado** en el
+yaml de NdC y `effective_L_bg` global se está usando (`process_modis.py:
+970-974` rama afirmativa). Aun así los 121 records persisten en
+`vrp_mw=0`. **D4 ya está operativo y no resuelve el síntoma** porque el
+zero-out de store.py ocurre **después** de cualquier recompute por L_bg
+y antes del rollup final. El L_bg recompute de S30/S33 corrige el valor
+de `vrp_mw` calculado en process_modis, pero store.py lo anula
+silenciosamente cuando el top pixel está lejos.
+
+F46 (drift VRP_TIR Stefan-Boltzmann sobre mask 4σ) es un problema
+distinto en `vrp_tir_mw`, no toca este rollup VRP_MIR. F46 y F47 deben
+mergearse independientes y ambos pueden coexistir sin conflicto en
+store.py (rutas distintas del record).
+
+### 9.8 Lecciones meta (candidatas CLAUDE.md S77)
+
+- **A46 propuesta**: cuando el código mantiene dos representaciones del
+  mismo concepto físico (acá "hotspot del scene"), todo gate/filter
+  debe declarar explícitamente sobre cuál opera. Asimetrías silenciosas
+  (gate sobre A, classifier sobre B) producen bugs como F47 que tardan
+  ~5 sesiones (S42 → S77) en diagnosticarse porque el síntoma vive en
+  el rollup y la causa en otra capa.
+- **A47 propuesta**: nota inline tipo S42 en `volcanoes.yaml` con
+  hipótesis sobre causa pero sin verificación empírica → necesita
+  flag "**hipótesis pendiente verificación**" o equivalente. La nota
+  S42 culpó al L_bg local; F47 demuestra que era el gate scene-level.
+  Sin marcador, futuras sesiones pueden creer la hipótesis y aplicar
+  fixes (D4 más selectivo) que no resuelven el problema real.
+
+### 9.9 Próximo paso S77 (decisión Nicolás)
+
+Antes de cualquier implementación:
+
+1. Confirmar fix Opción A vs B vs combinación (A para store.py + C para
+   classifier — coherencia full).
+2. Aplicar A38: tag defensivo `pre-s77-f47-store-cluster-rescue` antes
+   de tocar store.py.
+3. Test sintético TDD primero (`tests/test_store_cluster_rescue.py`).
+4. Reprocesar 11 Tier A en profile A/B (`mirova_equivalent_f47_{on,off}`)
+   sobre 30 días mínimo. Medir recall, precision, ratio mediano,
+   nuevos FPs.
+5. Si métricas validan en A/B, push a `mirova_equivalent` default y
+   reproc histórico full vía local (no GitHub Actions, A1 timeout).
+
+Esta investigación es **read-only** — el fix queda como propuesta hasta
+que Nicolás autorice (regla A45 — pipeline NRT crítico requiere
+confirmación explícita).

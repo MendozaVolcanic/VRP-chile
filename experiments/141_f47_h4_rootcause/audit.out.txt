@@ -1,0 +1,56 @@
+Total records: 1218
+Mismatch (pc.vrp_mw>0 & vrp_mw==0): 121
+
+=== Primeros 10 records mismatch ===
+          dt        sensor    dist_class       fh_dist        fh_src       hs_dist      pc.cdist      pc.n_pix     pc.vrp_mw       discard
+ 01-29 02:35    MODIS_TERR           far         25.36      eruption          None        25.357             1         8.088  eruption_hotspot_t
+ 01-30 05:48    VIIRS_NOAA        summit         0.045         test1          None         1.978            40         2.239  eruption_hotspot_t
+ 01-31 02:15    MODIS_TERR        summit         0.753         test1          None         0.557            11         5.907  eruption_hotspot_t
+ 01-31 05:12    VIIRS_SNPP        summit         1.129         test1          None         1.993            20          1.54  eruption_hotspot_t
+ 01-31 05:30    VIIRS_NOAA           far          27.7      eruption          None        27.702             1          0.27  eruption_hotspot_t
+ 02-01 02:55    MODIS_TERR           far         26.58      eruption          None         0.536            21       332.756  eruption_hotspot_t
+ 02-01 07:15    MODIS_AQUA           far         33.49      eruption          None        25.409             6        15.242  eruption_hotspot_t
+ 02-02 04:30    VIIRS_SNPP           far         33.04      eruption          None        33.042             1         0.318  eruption_hotspot_t
+ 02-02 05:42    VIIRS_NOAA        summit         1.035         test1          None         0.653            87         4.624  eruption_hotspot_t
+ 02-02 06:12    VIIRS_SNPP           far          26.1      eruption          None        21.202             3         6.686  eruption_hotspot_t
+
+=== Breakdown distance_class de los 121 ===
+Counter({'far': 88, 'summit': 33})
+
+=== Breakdown final_hotspot_source de los 121 ===
+Counter({'eruption': 90, 'test1': 31})
+
+=== Breakdown discarded_reason de los 121 ===
+Counter({'eruption_hotspot_too_far': 116, None: 5})
+
+Mismatch con pc.centroid_dist_km <= 5.0: 38 / 121
+  ... de esos, con final_hotspot_dist_km > 5.0 (inconsistencia summit/far): 5
+Mismatch con pc cerca (<5.0) y hotspot_dist_km lejos (>5.0): 1
+
+=== Caso bandera (pc.vrp_mw entre 330-335, MODIS_TERRA) ===
+{
+  "datetime_utc": "2026-02-01 02:55",
+  "sensor": "MODIS_TERRA",
+  "vrp_mw": 0,
+  "vrp_vent_mw": 0.0,
+  "n_anomalous_pixels": 68,
+  "triggered_test1": false,
+  "distance_class": "far",
+  "hotspot_lat": null,
+  "hotspot_lon": null,
+  "hotspot_dist_km": null,
+  "final_hotspot_lat": -37.07565,
+  "final_hotspot_lon": -71.24036,
+  "final_hotspot_dist_km": 26.58,
+  "final_hotspot_source": "eruption",
+  "primary_cluster": {
+    "n_pixels": 21,
+    "vrp_mw": 332.756,
+    "centroid_lat": -36.86433,
+    "centroid_lon": -71.37121,
+    "centroid_dist_km": 0.536
+  },
+  "discarded_reason": "eruption_hotspot_too_far",
+  "discarded_hotspot_dist_km": 26.58,
+  "discarded_n_pixels": null
+}
