@@ -1,0 +1,69 @@
+# F49/S77 — Sync auto del CSV consolidado MIROVA desde Mirova-v1.
+#
+# Por qué existe:
+# - El scraper Mirova-v1 corre cada 5 min en su propio repo y commitea data
+#   fresca a su rama main (https://github.com/MendozaVolcanic/Mirova-v1).
+# - VRP Chile consume `latest_consolidado.csv` que es un hard-copy del CSV
+#   remoto. Se commiteó por última vez S73 (PR #139, A17) y nunca se
+#   re-actualizó por 23 días → dashboard mostraba ground truth congelado.
+# - Bug arquitectural detectado F49 (PR #186). Fix: cron 1h que copia el
+#   CSV remoto, hace diff, y si cambió, commitea + push.
+#
+# Cadencia 1h elegida como trade-off:
+# - Mirova-v1 commitea cada 5 min → cron 5 min sería noise excesivo.
+# - MIROVA NRT mismo tiene ~3h latencia → cron 1h da freshness útil.
+# - Si el dashboard ve refs <3h stale en máximo, el banner F49 stale
+#   (PR #184, threshold 14d) nunca dispara.
+#
+# Trigger workflow_run a pages-deploy para que GH Pages publique inmediato.
+
+# NOTE: yaml "on:" parsea como booleano True (Norway problem, A43 CLAUDE.md)
+# → usar "on:" con comillas para forzar string. PYAML/GH Actions ambos lo aceptan.
+"on":
+  schedule:
+    - cron: "12 * * * *"   # cada hora minuto 12 (offset random vs otros workflows)
+  workflow_dispatch: {}   # permitir trigger manual
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-mirova-csv
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download fresh CSV from Mirova-v1
+        run: |
+          set -e
+          curl -fsSL \
+            "https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_consolidado.csv" \
+            -o latest_consolidado.csv.new
+
+      - name: Check if changed
+        id: changed
+        run: |
+          if cmp -s latest_consolidado.csv latest_consolidado.csv.new; then
+            echo "CSV sin cambios, skip commit"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            rm latest_consolidado.csv.new
+          else
+            mv latest_consolidado.csv.new latest_consolidado.csv
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Rows: $(wc -l < latest_consolidado.csv)"
+            echo "Latest date: $(awk -F, 'NR==2{print $2}' latest_consolidado.csv | head -c 16)"
+          fi
+
+      - name: Commit and push if changed
+        if: steps.changed.outputs.changed == 'true'
+        run: |
+          git config user.name "vrp-mirova-sync-bot"
+          git config user.email "noreply@github.com"
+          git add latest_consolidado.csv
+          git commit -m "data(mirova): sync latest_consolidado.csv from Mirova-v1 (auto)"
+          git push
