@@ -217,6 +217,15 @@ def append_record(volcano_name: str, record: dict,
             record["final_hotspot_lon"] = pc.get("centroid_lon")
             record["final_hotspot_dist_km"] = pc_cdist
             record["final_hotspot_source"] = "cluster_rescue"
+            # F47 follow-up S77 (audit dashboard CRITICAL): forzar
+            # distance_class='summit'. Por construccion del rescate
+            # (pc.centroid_dist_km <= MAX_HOTSPOT_DIST_KM Y pc.vrp_mw > 0),
+            # el cluster esta cerca del vent — es summit por definicion.
+            # Sin este set, el procesador upstream dejo 'far' basado en el
+            # pixel single hottest del scene (que apuntaba al FP), y el
+            # frontend filtraba el record via mirovaEqVrp:743 -> invisible.
+            # Asegura que los ~400 records rescatados sean visibles en UI.
+            record["distance_class"] = "summit"
             # Forzar la etiqueta diagnóstica de rescate (puede pisar una previa
             # de H8 — eso es correcto: rescate gana al descarte por hotspot far).
             record["discarded_reason"] = "single_pixel_far_overridden_by_cluster"
