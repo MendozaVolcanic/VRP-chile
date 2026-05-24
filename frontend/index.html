@@ -1165,6 +1165,32 @@ function renderDetail() {
   addStat("Total granules", String(filtered.length), "procesados");
   dp.appendChild(sr);
 
+  // ── F48 (S77) — banner refs MIROVA escasas ─────────────────────────────────
+  // MIROVA scrapea Llaima/Copahue pero clasifica ~99.94% como NULO (volcanes
+  // térmicamente quietos en la ventana audit). El subagente F48 (PR #172)
+  // recuperó 1 record c/u del histórico. La card métricas live abajo se
+  // comporta correctamente con N=1 (recall/precision N/A o ruidosos), pero
+  // Nicolás puede confundir "0 refs MIROVA" con "MIROVA tampoco vio nada"
+  // cuando en realidad MIROVA reportó "NULO" en cientos de pasadas. Banner
+  // explícito evita esa lectura errónea.
+  // Threshold N=10 sobre la ventana actual: pocos records reales pero suficiente
+  // para distinguir "sin scrape" de "scrape activo y mayormente NULO".
+  if (mFiltered.length < 10 && v.hasMirova) {
+    const banner = el("div", "mirova-sparse-banner");
+    banner.style.cssText = "background: rgba(255,193,7,0.08); border-left: 3px solid #ffc107; " +
+                           "padding: 8px 12px; margin: 0 0 12px 0; border-radius: 4px; " +
+                           "font-size: 0.85rem; color: #c5a574;";
+    const why = (v.name === "Llaima" || v.name === "Copahue")
+      ? " (F48 doc: ambos térmicamente quietos en ventana auditada — MIROVA scrapea pero clasifica ~99.94% como NULO)"
+      : (mFiltered.length === 0
+          ? " — MIROVA puede no estar scrapando este volcán hoy, o el volcán está completamente inactivo en la ventana."
+          : "");
+    banner.innerHTML = "<b>Refs MIROVA escasas:</b> " + mFiltered.length +
+                       " records en ventana." + why +
+                       "<br><small style='color:#9bb4cc'>Métricas recall/precision abajo tienen baja potencia estadística — interpretar con cuidado. Refs canónicas en docs/F48_LLAIMA_COPAHUE_REFS_GAP.md.</small>";
+    dp.appendChild(banner);
+  }
+
   // ── S77 F30 P4 — Card métricas live recall/precision/F1/ratio vs MIROVA ──
   // Calculado client-side al cargar volcán o al togglear includeFarDistance.
   // Sensor toggle NO afecta (métricas son globales por bucket).
