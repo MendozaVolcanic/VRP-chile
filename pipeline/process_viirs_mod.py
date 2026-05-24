@@ -28,6 +28,7 @@ except ImportError:
 from .scan_geometry import viirs_pixel_areas, roi_mask_bbox
 from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots, cluster_pixels_geographic
+from .path_d_cap import apply_d9_scene_cap  # F50/S77
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
 from pipeline.constants import SIGMA  # kept for reference, not used in MIR VRP
@@ -799,6 +800,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         delta_L = np.maximum(L_hot - L_bg_rad, 0.0)
         per_pixel_vrp_mw = hotpix_area * WOOSTER_COEFF * delta_L / 1e6
         vrp_mw = float(np.nansum(per_pixel_vrp_mw))
+        # F50/S77 fix Opción A: cap D9 también a vrp_mw scene-wide M-band.
+        vrp_mw = apply_d9_scene_cap(vrp_mw, _path_d_cap_active, PATH_D_ONLY_CAP_MW)
 
         # Build list of TOP-100 anomalous pixels sorted by VRP (descending).
         # S26: cap a 100 (paridad MODIS/VIIRS 375m) para evitar bloat JSON
