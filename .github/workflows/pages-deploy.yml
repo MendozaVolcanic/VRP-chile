@@ -16,6 +16,7 @@ on:
     paths:
       - "frontend/**"
       - "data/**"
+      - "imagenes/**"
       - "01_05_2026_registro_vrp_consolidado.csv"
       - "latest_consolidado.csv"
       - ".github/workflows/pages-deploy.yml"
@@ -68,6 +69,12 @@ jobs:
           # código ni este workflow.
           cp latest_consolidado.csv _site/ 2>/dev/null || true
           cp 01_05_2026_registro_vrp_consolidado.csv _site/ 2>/dev/null || true
+          # S77 F30 P3 — galería imágenes MIROVA. PNGs scrape de mirovaweb
+          # (live snapshots por volcán/sensor/plot), consumidos por
+          # frontend/index.html sección "Imágenes MIROVA". TIFs/KMZs viven
+          # en mirova-tif-archive/ (fuera del repo, sólo máquina local) —
+          # GH Pages no los publica; el dashboard muestra fallback.
+          cp -r imagenes _site/imagenes 2>/dev/null || true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

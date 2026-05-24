@@ -234,6 +234,80 @@
     .map-legend-item { display: flex; align-items: center; gap: 4px; }
     .map-legend-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid; }
 
+    /* ── S77 F30 P3 — Galería imágenes MIROVA ── */
+    .gallery-header {
+      display: flex; align-items: center; gap: 10px; margin-top: 24px; margin-bottom: 8px;
+    }
+    .gallery-header h3 { font-size: 0.88rem; font-weight: 600; }
+    .gallery-meta { font-size: 0.68rem; color: var(--muted); margin-left: auto; }
+    .gallery-subtabs { display: flex; gap: 6px; margin-bottom: 10px; }
+    .gallery-subtab {
+      padding: 5px 12px; border-radius: 5px; border: 1px solid var(--border);
+      background: transparent; color: var(--muted); font-size: 0.72rem; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .gallery-subtab.active { background: var(--card); color: var(--text); border-color: var(--blue); }
+    .gallery-subtab:hover { color: var(--text); }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .gallery-item {
+      background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+      overflow: hidden; cursor: pointer; transition: transform 0.15s, border-color 0.15s;
+    }
+    .gallery-item:hover { transform: translateY(-2px); border-color: var(--blue); }
+    .gallery-item img {
+      display: block; width: 100%; height: 130px; object-fit: cover; background: #000;
+    }
+    .gallery-item .caption {
+      padding: 5px 8px; font-size: 0.65rem; color: var(--muted);
+      display: flex; justify-content: space-between; gap: 4px;
+    }
+    .gallery-item .caption .sensor { color: var(--text); font-weight: 600; }
+    .gallery-empty {
+      padding: 20px; text-align: center; color: var(--muted); font-size: 0.78rem;
+      background: var(--card); border: 1px dashed var(--border); border-radius: 6px;
+    }
+    .gallery-list {
+      max-height: 320px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px;
+      background: var(--card); font-size: 0.72rem;
+    }
+    .gallery-list-row {
+      display: grid; grid-template-columns: 1fr 90px 80px 110px; gap: 8px;
+      padding: 6px 10px; border-bottom: 1px solid var(--border); align-items: center;
+    }
+    .gallery-list-row:last-child { border-bottom: none; }
+    .gallery-list-row .when { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .gallery-list-row .sensor { color: var(--text); font-weight: 600; font-size: 0.68rem; }
+    .gallery-list-row a {
+      color: var(--blue); text-decoration: none; font-size: 0.68rem;
+      padding: 3px 8px; border: 1px solid var(--border); border-radius: 4px;
+      text-align: center; transition: all 0.15s;
+    }
+    .gallery-list-row a:hover { background: var(--blue); color: #fff; }
+    .lightbox-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999; cursor: zoom-out; padding: 20px;
+    }
+    .lightbox-overlay img {
+      max-width: 95vw; max-height: 90vh; object-fit: contain;
+      border: 1px solid var(--border); border-radius: 6px;
+    }
+    .lightbox-caption {
+      position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.6); color: var(--text); padding: 6px 14px;
+      border-radius: 5px; font-size: 0.78rem;
+    }
+    .lightbox-close {
+      position: absolute; top: 14px; right: 18px;
+      background: rgba(0,0,0,0.5); color: var(--text); border: 1px solid var(--border);
+      width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; cursor: pointer;
+    }
+
     /* ── Action buttons ── */
     .action-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
     .action-btn {
@@ -659,6 +733,21 @@ async function fetchJSON(url) {
   } catch { return null; }
 }
 
+// S77 F30 P3 — Galería imágenes MIROVA: índice global, cargado una vez.
+// Estructura: { tifs: {Volcano: [{path,datetime,sensor}]}, kmz:{...}, pngs:{...} }
+// Null = no se pudo cargar (404). Frontend renderiza fallback.
+let mirovaImgsIndex = null;
+async function loadMirovaImgsIndex() {
+  if (mirovaImgsIndex !== null) return mirovaImgsIndex;
+  // El JSON está SIEMPRE junto a index.html (frontend/mirova_imgs_index.json).
+  // GH Pages: deploy copia frontend/. → root, JSON queda en /mirova_imgs_index.json.
+  // Local http.server desde repo root: index.html en /frontend/, fetch relativo
+  // resuelve a /frontend/mirova_imgs_index.json. Path relativo simple cubre ambos.
+  const data = await fetchJSON("mirova_imgs_index.json");
+  mirovaImgsIndex = data || { tifs: {}, kmz: {}, pngs: {} };
+  return mirovaImgsIndex;
+}
+
 async function loadVolcano(v) {
   // Solo los 11 Tier A (hasMirova=true) tienen data operacional. Los 34 restantes
   // quedan como tarjetas "sin datos" — ni data propia ni refs MIROVA.
@@ -1007,6 +1096,205 @@ function el(tag, cls) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
   return e;
+}
+
+// ── S77 F30 P3 — Galería imágenes MIROVA ─────────────────────────────────────
+// Tres orígenes:
+//   1. PNGs scrape mirovaweb (capturas estáticas, ~80 archivos en imagenes/)
+//      → thumbnails clickeables con lightbox full-size.
+//   2. TIFs georef del archivo MIROVA (~2000 archivos en mirova-tif-archive/,
+//      fuera del repo) → lista con link de descarga. No se renderizan inline
+//      (son geoTIFFs, browser no los muestra).
+//   3. KMZs paralelos → link "Abrir en Google Earth".
+// Lazy-load obligatorio: 80 PNGs caben, 2000 TIFs no. Para TIFs lista finita.
+function openLightbox(src, caption) {
+  // Modal full-size sobre overlay oscuro. Click overlay o tecla ESC cierra.
+  const ov = el("div", "lightbox-overlay");
+  const img = document.createElement("img");
+  img.src = src;
+  img.alt = caption || "";
+  ov.appendChild(img);
+  if (caption) {
+    const cap = el("div", "lightbox-caption");
+    cap.textContent = caption;
+    ov.appendChild(cap);
+  }
+  const closeBtn = el("button", "lightbox-close");
+  closeBtn.textContent = "×";  // ×
+  closeBtn.setAttribute("aria-label", "Cerrar");
+  ov.appendChild(closeBtn);
+  function close() {
+    ov.remove();
+    document.removeEventListener("keydown", onKey);
+  }
+  function onKey(e) { if (e.key === "Escape") close(); }
+  ov.addEventListener("click", (e) => { if (e.target === ov || e.target === closeBtn) close(); });
+  document.addEventListener("keydown", onKey);
+  document.body.appendChild(ov);
+}
+
+async function renderGallery(volcanoName, host) {
+  const idx = await loadMirovaImgsIndex();
+  while (host.firstChild) host.removeChild(host.firstChild);
+
+  // Header con conteos resumidos.
+  const hdr = el("div", "gallery-header");
+  const h3 = el("h3"); h3.textContent = "Imágenes MIROVA";
+  hdr.appendChild(h3);
+  const pngs = (idx.pngs || {})[volcanoName] || [];
+  const tifs = (idx.tifs || {})[volcanoName] || [];
+  const kmzs = (idx.kmz  || {})[volcanoName] || [];
+  const meta = el("div", "gallery-meta");
+  meta.textContent = `${pngs.length} PNGs · ${tifs.length} TIFs · ${kmzs.length} KMZs`;
+  hdr.appendChild(meta);
+  host.appendChild(hdr);
+
+  // Sub-tabs (PNGs / TIFs / KMZs). PNGs default si existen, si no TIFs.
+  const subtabs = el("div", "gallery-subtabs");
+  const tabSpec = [
+    { key: "pngs", label: "PNGs mirovaweb", count: pngs.length },
+    { key: "tifs", label: "TIFs georef",    count: tifs.length },
+    { key: "kmz",  label: "KMZs",           count: kmzs.length },
+  ];
+  const content = el("div");
+  let activeKey = pngs.length ? "pngs" : (tifs.length ? "tifs" : (kmzs.length ? "kmz" : "pngs"));
+  const tabBtns = {};
+  tabSpec.forEach(t => {
+    const b = el("button", "gallery-subtab");
+    b.textContent = `${t.label} (${t.count})`;
+    if (t.key === activeKey) b.classList.add("active");
+    b.addEventListener("click", () => {
+      activeKey = t.key;
+      Object.values(tabBtns).forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      renderTab();
+    });
+    tabBtns[t.key] = b;
+    subtabs.appendChild(b);
+  });
+  host.appendChild(subtabs);
+  host.appendChild(content);
+
+  function renderTab() {
+    while (content.firstChild) content.removeChild(content.firstChild);
+    if (activeKey === "pngs") renderPngs();
+    else if (activeKey === "tifs") renderTifs();
+    else renderKmzs();
+  }
+
+  function renderPngs() {
+    if (pngs.length === 0) {
+      const empty = el("div", "gallery-empty");
+      empty.textContent = "Sin snapshots PNG para este volcán. Ver TIFs georef si disponibles.";
+      content.appendChild(empty);
+      return;
+    }
+    const grid = el("div", "gallery-grid");
+    pngs.forEach(p => {
+      const item = el("div", "gallery-item");
+      const img = document.createElement("img");
+      // BASE_PATH para que funcione tanto en /frontend/ local como en GH Pages root.
+      const src = BASE_PATH + p.path;
+      img.src = src;
+      img.alt = `${volcanoName} ${p.sensor} ${p.type} ${p.date}`;
+      img.loading = "lazy";
+      item.appendChild(img);
+      const cap = el("div", "caption");
+      const left = el("span"); left.className = "sensor";
+      left.textContent = `${p.sensor} · ${p.type}`;
+      const right = el("span"); right.textContent = p.date;
+      cap.append(left, right);
+      item.appendChild(cap);
+      item.addEventListener("click", () => openLightbox(src, `${volcanoName} — ${p.sensor} ${p.type} (${p.date})`));
+      grid.appendChild(item);
+    });
+    content.appendChild(grid);
+  }
+
+  function renderTifs() {
+    if (tifs.length === 0) {
+      const empty = el("div", "gallery-empty");
+      empty.textContent = "Sin TIFs georef para este volcán.";
+      content.appendChild(empty);
+      return;
+    }
+    const note = el("div", "gallery-empty");
+    note.style.padding = "8px 12px";
+    note.style.textAlign = "left";
+    note.style.fontSize = "0.7rem";
+    note.innerHTML = "Archivo MIROVA original (geoTIFF). Browser no los renderiza inline — " +
+                     "descargar para abrir en QGIS/ArcGIS. Disponibles localmente sólo si " +
+                     "<code>mirova-tif-archive/</code> está montado (no se publica en GH Pages).";
+    content.appendChild(note);
+    const list = el("div", "gallery-list");
+    // Cap a 200 para no inflar DOM. La lista está ordenada datetime desc así
+    // que los primeros 200 son los más recientes.
+    const CAP = 200;
+    const shown = tifs.slice(0, CAP);
+    shown.forEach(t => {
+      const row = el("div", "gallery-list-row");
+      const when = el("div", "when"); when.textContent = t.datetime;
+      const sensor = el("div", "sensor"); sensor.textContent = t.sensor;
+      const fname = el("div"); fname.style.fontSize = "0.66rem"; fname.style.color = "var(--muted)";
+      fname.textContent = t.path.split("/").pop();
+      fname.title = t.path;
+      const dl = el("a"); dl.href = t.path; dl.download = t.path.split("/").pop(); dl.textContent = "Descargar";
+      row.append(when, sensor, fname, dl);
+      list.appendChild(row);
+    });
+    if (tifs.length > CAP) {
+      const more = el("div", "gallery-list-row");
+      more.style.gridTemplateColumns = "1fr";
+      more.style.textAlign = "center";
+      more.style.color = "var(--muted)";
+      more.textContent = `+ ${tifs.length - CAP} TIFs anteriores no listados (ver mirova-tif-archive/)`;
+      list.appendChild(more);
+    }
+    content.appendChild(list);
+  }
+
+  function renderKmzs() {
+    if (kmzs.length === 0) {
+      const empty = el("div", "gallery-empty");
+      empty.textContent = "Sin KMZs para este volcán.";
+      content.appendChild(empty);
+      return;
+    }
+    const note = el("div", "gallery-empty");
+    note.style.padding = "8px 12px";
+    note.style.textAlign = "left";
+    note.style.fontSize = "0.7rem";
+    note.innerHTML = "Overlays MIROVA en formato Google Earth. Click \"Descargar\" y abrir el .kmz en " +
+                     "Google Earth Pro / Desktop. Disponibles localmente sólo si " +
+                     "<code>mirova-tif-archive/</code> está montado.";
+    content.appendChild(note);
+    const list = el("div", "gallery-list");
+    const CAP = 200;
+    const shown = kmzs.slice(0, CAP);
+    shown.forEach(t => {
+      const row = el("div", "gallery-list-row");
+      const when = el("div", "when"); when.textContent = t.datetime;
+      const sensor = el("div", "sensor"); sensor.textContent = t.sensor;
+      const fname = el("div"); fname.style.fontSize = "0.66rem"; fname.style.color = "var(--muted)";
+      fname.textContent = t.path.split("/").pop();
+      fname.title = t.path;
+      const dl = el("a"); dl.href = t.path; dl.download = t.path.split("/").pop();
+      dl.textContent = "Google Earth";
+      row.append(when, sensor, fname, dl);
+      list.appendChild(row);
+    });
+    if (kmzs.length > CAP) {
+      const more = el("div", "gallery-list-row");
+      more.style.gridTemplateColumns = "1fr";
+      more.style.textAlign = "center";
+      more.style.color = "var(--muted)";
+      more.textContent = `+ ${kmzs.length - CAP} KMZs anteriores no listados`;
+      list.appendChild(more);
+    }
+    content.appendChild(list);
+  }
+
+  renderTab();
 }
 
 // ── Volcano cards ─────────────────────────────────────────────────────────────
@@ -1447,6 +1735,14 @@ function renderDetail() {
   const mapDiv = el("div", "map-container");
   mapDiv.id = "hotspot-map";
   dp.appendChild(mapDiv);
+
+  // ── S77 F30 P3 — Galería imágenes MIROVA ─────────────────────────────────
+  // Placeholder con id estable; renderGallery() lo puebla async cuando el
+  // índice JSON termina de cargar. Esto evita bloquear el resto del detail.
+  const galleryHost = el("div");
+  galleryHost.id = "mirova-gallery-host";
+  dp.appendChild(galleryHost);
+  renderGallery(v.name, galleryHost);
 
   panel.appendChild(dp);
 
