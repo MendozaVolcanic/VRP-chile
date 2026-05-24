@@ -33,12 +33,13 @@ REQUIRED_DIAG_FIELDS = (
 def _return_dict_text(src: str) -> str:
     """Extrae el bloque del return dict de calculate_vrp para mirar solo ahí.
 
-    Heurística: tomar desde el último 'return {' hasta el siguiente '\n}\n'
-    (el cierre del dict). Es robusto para los archivos actuales que tienen
-    un solo dict literal de retorno.
+    Heurística: tomar desde el último `return {` o `record = {` (S76 F31 A2
+    introdujo el patrón "build record then return record" en process_viirs
+    para permitir merge condicional de diag VRPTIR) hasta el siguiente
+    cierre `\n}\n`. Es robusto para los archivos actuales que tienen un
+    solo dict literal en el retorno final.
     """
-    # Match último 'return {' antes del fin de calculate_vrp
-    matches = list(re.finditer(r"return \{", src))
+    matches = list(re.finditer(r"(?:return|record\s*=)\s*\{", src))
     if not matches:
         return src
     start = matches[-1].start()
