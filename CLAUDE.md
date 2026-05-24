@@ -453,6 +453,24 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   cuando yo iba a empezar A2 — fue el sanity check correcto, y por eso
   hoy existe el tag `pre-s75-vrptir-a2-integration` que respalda PR #158.
 
+- **A46. Schema asimétrico hotspot single vs primary_cluster es vector de bugs
+  sistémicos** (S77, lección F47 H4): cuando un record tiene dos representaciones
+  del "punto caliente" computadas por paths distintos del pipeline (e.g.
+  `hotspot_*` del pixel hottest scene-wide vs `primary_cluster.*` vent-anchored),
+  cualquier gate posterior que use UNA sola de las representaciones para tomar
+  decisiones binarias (rollup vs zero-out) es candidato directo a producir
+  resultados incoherentes con la otra. El bug F47 H4 hizo invisible ~400 records
+  VRP en 11 Tier A durante meses por exactamente este patrón.
+  - **How to apply**: cuando agregues una nueva representación del hotspot al
+    schema (S20 vent_hotspot, S14 final_hotspot, S27 primary_cluster, S25 Test1
+    integrated, etc.), audit los gates downstream que evalúen otras
+    representaciones del mismo concepto. Si un gate puede dar VRP=0 con cluster
+    válido cerca, es un F47-style bug latente.
+  - **Etiqueta diagnóstica**: el fix S77 introdujo `final_hotspot_source =
+    "cluster_rescue"` cuando el cluster vent-anchored gana al pixel single far.
+    Auditorías posteriores pueden contar `records con source='cluster_rescue'`
+    para medir impacto del bug y exposure.
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
