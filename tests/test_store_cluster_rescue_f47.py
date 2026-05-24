@@ -212,11 +212,6 @@ def _save_and_load(rec, basic_setup, volcano="NdCTest",
 # Test 1 — caso bandera NdC: cluster cerca + hotspot single lejos (RED)
 # ===========================================================================
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="F47 H4 fix pending — Opción A en docs/F47_NDC_RECALL_S76.md §9.5. "
-           "A45+A38: requiere tag pre-s77-f47-store-cluster-rescue antes del fix.",
-)
 def test_rescue_cluster_near_vent_with_hotspot_far_fp(basic_setup):
     """RED: NdC 2026-02-01 03:35 MODIS_TERRA. Cluster cráter (21 px @ 0.536 km,
     332.756 MW) debe RESCATAR el rollup aunque un FP aislado a 26.58 km sea el
@@ -307,10 +302,6 @@ def test_no_rescue_when_no_primary_cluster(basic_setup):
 # Test 4 — rescate reescribe hotspot/final_hotspot al centroide cluster (RED)
 # ===========================================================================
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="F47 H4 fix pending — paridad final_hotspot con cluster centroid post-rescate.",
-)
 def test_rescue_preserves_cluster_centroid_as_hotspot(basic_setup):
     """RED: tras el rescate, los campos hotspot_* y final_hotspot_* deben
     apuntar al centroide del cluster (no al pixel single lejano que
@@ -356,10 +347,6 @@ def test_rescue_preserves_cluster_centroid_as_hotspot(basic_setup):
 # Test 5 — discarded_reason post-rescate ya no es 'eruption_hotspot_too_far' (RED)
 # ===========================================================================
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="F47 H4 fix pending — discarded_reason debe reflejar rescate, no descarte.",
-)
 def test_rescue_changes_discarded_reason(basic_setup):
     """RED: tras el rescate, `discarded_reason` no debe ser
     'eruption_hotspot_too_far' (porque NO se descartó — se rescató). El fix

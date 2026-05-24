@@ -176,23 +176,64 @@ def append_record(volcano_name: str, record: dict,
     hotspot_dist = record.get("hotspot_dist_km")
     vrp_vent = record.get("vrp_vent_mw", 0) or 0
 
+    # F47 H4 rescate (S77, A45 autorizado, tag pre-s77-f47-store-cluster-rescue):
+    # Si el primary_cluster vent-anchored está DENTRO de MAX_HOTSPOT_DIST_KM
+    # con VRP > 0 (= anomalía real del cráter) pero hotspot_dist apunta a un
+    # pixel single far (FP aislado tipo salar térmico, incendio, etc.), el
+    # gate legacy de líneas siguientes destruía el rollup. La regla del rescate:
+    # cuando cluster_rescues=True, NO disparar el zero-out — usar pc.vrp_mw
+    # como vrp_eruption y reescribir hotspot/final_hotspot al centroide cluster.
+    #
+    # Caso bandera empírico: NdC 2026-02-01 03:35 MODIS_TERRA, pc.vrp_mw=332.756
+    # @ 0.536 km del vent (21 px), pero hotspot_dist=26.58 km (salar). Pre-fix
+    # vrp_mw=0; post-fix vrp_mw=332.756.
+    #
+    # Impacto sistémico: ~200-400 records VRP recuperados en los 11 Tier A
+    # (PCC 110, Copahue 79, Villarrica 59, Chaitén 49, NdC 33, Llaima 27,
+    # Lascar 20...). Verificado experiments/141_f47_h4_rootcause/.
+    pc = record.get("primary_cluster") or {}
+    pc_cdist = pc.get("centroid_dist_km")
+    pc_vrp = pc.get("vrp_mw") or 0
+    cluster_rescues = (
+        pc_cdist is not None
+        and pc_cdist <= MAX_HOTSPOT_DIST_KM
+        and pc_vrp > 0
+    )
+
     # Safety net (legacy + H8): si después del pixel-level filter, hotspot_dist
     # sigue indicando un hotspot lejano (caso típico legacy: anomaly_pixels
     # vacío pero record["hotspot_dist_km"] fue seteado por upstream), aplicar
     # el zero-out histórico. Garantiza que vrp_mw=0 cuando solo hay señal far.
+    # F47 H4 modificación: si cluster_rescues, en vez de zero-out el rollup
+    # gana el cluster vent-anchored y se reescriben los campos hotspot/final.
     if hotspot_dist is not None and hotspot_dist > MAX_HOTSPOT_DIST_KM:
-        record["discarded_hotspot_lat"] = record.get("hotspot_lat")
-        record["discarded_hotspot_lon"] = record.get("hotspot_lon")
-        record["discarded_hotspot_dist_km"] = hotspot_dist
-        # Solo seteamos discarded_reason si no fue ya seteado por H8
-        record.setdefault("discarded_reason", "eruption_hotspot_too_far")
-        if record.get("anomaly_pixels"):
-            record["discarded_anomaly_pixels"] = record["anomaly_pixels"]
-        record["hotspot_lat"] = None
-        record["hotspot_lon"] = None
-        record["hotspot_dist_km"] = None
-        record["anomaly_pixels"] = []
-        vrp_eruption = 0
+        if cluster_rescues:
+            # F47 rescate — cluster vent-anchored gana al FP single far.
+            vrp_eruption = pc_vrp
+            record["hotspot_lat"] = pc.get("centroid_lat")
+            record["hotspot_lon"] = pc.get("centroid_lon")
+            record["hotspot_dist_km"] = pc_cdist
+            record["final_hotspot_lat"] = pc.get("centroid_lat")
+            record["final_hotspot_lon"] = pc.get("centroid_lon")
+            record["final_hotspot_dist_km"] = pc_cdist
+            record["final_hotspot_source"] = "cluster_rescue"
+            # Forzar la etiqueta diagnóstica de rescate (puede pisar una previa
+            # de H8 — eso es correcto: rescate gana al descarte por hotspot far).
+            record["discarded_reason"] = "single_pixel_far_overridden_by_cluster"
+        else:
+            # Comportamiento legacy: zero-out completo.
+            record["discarded_hotspot_lat"] = record.get("hotspot_lat")
+            record["discarded_hotspot_lon"] = record.get("hotspot_lon")
+            record["discarded_hotspot_dist_km"] = hotspot_dist
+            # Solo seteamos discarded_reason si no fue ya seteado por H8
+            record.setdefault("discarded_reason", "eruption_hotspot_too_far")
+            if record.get("anomaly_pixels"):
+                record["discarded_anomaly_pixels"] = record["anomaly_pixels"]
+            record["hotspot_lat"] = None
+            record["hotspot_lon"] = None
+            record["hotspot_dist_km"] = None
+            record["anomaly_pixels"] = []
+            vrp_eruption = 0
 
     record["vrp_mw"] = round(max(vrp_eruption, vrp_vent), 3)
 
