@@ -730,7 +730,14 @@ function toMirovaDaily(records) {
 function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
   if (!r) return 0;
   // Records pre-S27 (sin primary_cluster) → mantener vrp_mw global como fallback.
-  if (!r.primary_cluster) return r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+  if (!r.primary_cluster) {
+    const vfb = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+    // M1 (S76 audit): paridad sanity cap con diario.html:237. Defensa contra
+    // fósil F2.8 pre-S41 que pueda reaparecer (race condition reproc / restore
+    // de tag). Pipeline ya tiene SANITY_CAP_VRP_MW=50000 en store.py; esto
+    // es defensa-en-profundidad si un JSON viejo se cuela al frontend.
+    return vfb > 50000 ? 0 : vfb;
+  }
   // Records modernos: si dist_class no es summit, MIROVA no reportaría → 0
   // (a menos que el toggle "incluir lejanas" esté activo).
   if (r.distance_class && r.distance_class !== "summit" && !includeFar) return 0;
@@ -738,7 +745,9 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
   // (saltado si includeFar = true).
   const pc = r.primary_cluster;
   if (!includeFar && pc.centroid_dist_km != null && pc.centroid_dist_km > innerKm) return 0;
-  return pc.vrp_mw ?? 0;
+  // M1: sanity cap también sobre el cluster path (coherente con diario.html).
+  const vmw = pc.vrp_mw ?? 0;
+  return vmw > 50000 ? 0 : vmw;
 }
 
 // S18: clasifica una detección como "cráter" (summit). Criterios, en orden:
@@ -961,8 +970,11 @@ function distanceCounts(records, days = 7) {
   let summit = 0, far = 0;
   for (const r of records) {
     if (new Date(r.datetime_utc).getTime() < cutoff) continue;
-    const v = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
-    if (v <= 0) continue;
+    // H1 (S76 audit): records con `vrp_mw=0` + `discarded_reason` + `vrp_mir_mw>0`
+    // NO deben contarse — el pipeline ya los descartó. Antes el fallback
+    // `r.vrp_mw ?? r.vrp_mir_mw` los metía inflando "Lejanas" (~79 records
+    // estimados, sobre todo Antuco/Callaqui no-Tier-A).
+    if ((r.vrp_mw ?? 0) <= 0 && !r.triggered_test1) continue;
     // S74 F30 Bug 9: el conteo cráter/lejanas también respeta el toggle.
     if (!isSensorVisible(r)) continue;
     // S18: usar el mismo criterio summit/far que el resto del dashboard
@@ -1535,8 +1547,8 @@ function renderDetail() {
 
     const colorMap = {
       "MODIS_TERRA": "#ff8c00", "MODIS_AQUA": "#ffb347",
-      "VIIRS_SNPP": "#e91e63", "VIIRS_NOAA20": "#f06292",
-      "VIIRS_SNPP_750": "#00bcd4", "VIIRS_NOAA20_750": "#4dd0e1",
+      "VIIRS_SNPP": "#e91e63", "VIIRS_NOAA20": "#f06292", "VIIRS_NOAA21": "#f8bbd0",
+      "VIIRS_SNPP_750": "#00bcd4", "VIIRS_NOAA20_750": "#4dd0e1", "VIIRS_NOAA21_750": "#b2ebf2",
     };
 
     const allPts = [];
@@ -1705,14 +1717,21 @@ function renderDetail() {
     if (sensorVisible.VIIRS750 && v750.length) {
       const snpp750   = v750.filter(r => r.sensor === "VIIRS_SNPP_750");
       const noaa750   = v750.filter(r => r.sensor === "VIIRS_NOAA20_750");
-      if (snpp750.length)  ds.push({ label:"VIIRS SNPP 750m",   data:toDailyMax(snpp750, eqVrp), backgroundColor:"#00bcd4cc", borderColor:"#00bcd4", borderWidth:1, borderRadius:2, borderSkipped:false });
-      if (noaa750.length)  ds.push({ label:"VIIRS NOAA-20 750m",data:toDailyMax(noaa750, eqVrp), backgroundColor:"#4dd0e1cc", borderColor:"#4dd0e1", borderWidth:1, borderRadius:2, borderSkipped:false });
+      // C1 (S76 audit): NOAA-21 750m faltaba en filtros + colorMaps. 27% del
+      // dataset invisible en chart. Fix recupera la serie completa.
+      const noaa21_750 = v750.filter(r => r.sensor === "VIIRS_NOAA21_750");
+      if (snpp750.length)   ds.push({ label:"VIIRS SNPP 750m",    data:toDailyMax(snpp750,   eqVrp), backgroundColor:"#00bcd4cc", borderColor:"#00bcd4", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (noaa750.length)   ds.push({ label:"VIIRS NOAA-20 750m", data:toDailyMax(noaa750,   eqVrp), backgroundColor:"#4dd0e1cc", borderColor:"#4dd0e1", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (noaa21_750.length) ds.push({ label:"VIIRS NOAA-21 750m",data:toDailyMax(noaa21_750,eqVrp), backgroundColor:"#b2ebf2cc", borderColor:"#b2ebf2", borderWidth:1, borderRadius:2, borderSkipped:false });
     }
     if (sensorVisible.VIIRS375 && v375.length) {
       const snpp375   = v375.filter(r => r.sensor === "VIIRS_SNPP");
       const noaa375   = v375.filter(r => r.sensor === "VIIRS_NOAA20");
-      if (snpp375.length)  ds.push({ label:"VIIRS SNPP 375m",   data:toDailyMax(snpp375, eqVrp), backgroundColor:"#e91e63cc", borderColor:"#e91e63", borderWidth:1, borderRadius:2, borderSkipped:false });
-      if (noaa375.length)  ds.push({ label:"VIIRS NOAA-20 375m",data:toDailyMax(noaa375, eqVrp), backgroundColor:"#f06292cc", borderColor:"#f06292", borderWidth:1, borderRadius:2, borderSkipped:false });
+      // C1: idem para I-band 375m.
+      const noaa21_375 = v375.filter(r => r.sensor === "VIIRS_NOAA21");
+      if (snpp375.length)   ds.push({ label:"VIIRS SNPP 375m",    data:toDailyMax(snpp375,   eqVrp), backgroundColor:"#e91e63cc", borderColor:"#e91e63", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (noaa375.length)   ds.push({ label:"VIIRS NOAA-20 375m", data:toDailyMax(noaa375,   eqVrp), backgroundColor:"#f06292cc", borderColor:"#f06292", borderWidth:1, borderRadius:2, borderSkipped:false });
+      if (noaa21_375.length) ds.push({ label:"VIIRS NOAA-21 375m",data:toDailyMax(noaa21_375,eqVrp), backgroundColor:"#f8bbd0cc", borderColor:"#f8bbd0", borderWidth:1, borderRadius:2, borderSkipped:false });
     }
     if (sensorVisible.MIROVA && mFiltered.length) {
       // S76 P1 — separar referencia MIROVA por sensor con paleta apareada a la
@@ -1787,13 +1806,17 @@ function renderDetail() {
   function buildVREData() {
     // S74 F30 Bug 9: VRE cumulativa respeta toggle (apagar VIIRS750 saca su
     // aporte energético del integrado).
+    // H2 (S76 audit): no usar `vrp_mir_mw` como fallback — records descartados
+    // por el pipeline (`vrp_mw=0` + `discarded_reason`) NO deben contribuir
+    // a la energía radiativa cumulativa. Antes el fallback inflaba la
+    // integral con records que el operacional ya filtró.
     const sorted = [...filtered]
-      .filter(r => (r.vrp_mw ?? r.vrp_mir_mw ?? 0) > 0)
+      .filter(r => (r.vrp_mw ?? 0) > 0 || r.triggered_test1)
       .filter(isSensorVisible)
       .sort((a,b) => a.datetime_utc.localeCompare(b.datetime_utc));
     let cumulative = 0;
     return sorted.map(r => {
-      const vrp = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+      const vrp = r.vrp_mw ?? 0;
       cumulative += vrp * DT_HOURS * 3.6; // GJ
       return { x: r.datetime_utc.slice(0,10), y: parseFloat(cumulative.toFixed(2)) };
     });
@@ -1900,8 +1923,8 @@ function renderDetail() {
       const distData = buildDistanceData();
       const sensorColors = {
         "MODIS_TERRA":"#ff8c00","MODIS_AQUA":"#ffb347",
-        "VIIRS_SNPP":"#e91e63","VIIRS_NOAA20":"#f06292",
-        "VIIRS_SNPP_750":"#00bcd4","VIIRS_NOAA20_750":"#4dd0e1"
+        "VIIRS_SNPP":"#e91e63","VIIRS_NOAA20":"#f06292","VIIRS_NOAA21":"#f8bbd0",
+        "VIIRS_SNPP_750":"#00bcd4","VIIRS_NOAA20_750":"#4dd0e1","VIIRS_NOAA21_750":"#b2ebf2"
       };
       charts["sec-chart"] = new Chart(secC.getContext("2d"), {
         type: "scatter",
@@ -2098,8 +2121,8 @@ let overviewHotspotGroup = null;
 
 const HOTSPOT_COLORS = {
   "MODIS_TERRA": "#ff8c00", "MODIS_AQUA": "#ffb347",
-  "VIIRS_SNPP": "#e91e63", "VIIRS_NOAA20": "#f06292",
-  "VIIRS_SNPP_750": "#00bcd4", "VIIRS_NOAA20_750": "#4dd0e1",
+  "VIIRS_SNPP": "#e91e63", "VIIRS_NOAA20": "#f06292", "VIIRS_NOAA21": "#f8bbd0",
+  "VIIRS_SNPP_750": "#00bcd4", "VIIRS_NOAA20_750": "#4dd0e1", "VIIRS_NOAA21_750": "#b2ebf2",
 };
 
 function updateHotspotLayer() {
