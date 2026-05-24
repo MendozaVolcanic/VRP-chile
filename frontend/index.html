@@ -1501,12 +1501,47 @@ function renderDetail() {
       if (noaa375.length)  ds.push({ label:"VIIRS NOAA-20 375m",data:toDailyMax(noaa375, eqVrp), backgroundColor:"#f06292cc", borderColor:"#f06292", borderWidth:1, borderRadius:2, borderSkipped:false });
     }
     if (sensorVisible.MIROVA && mFiltered.length) {
-      ds.push({
-        label:"MIROVA VIIRS375 (ref.)", data:toMirovaDaily(mFiltered),
-        type:"line", order:0,
-        borderColor:"#ffc107", backgroundColor:"transparent",
-        borderWidth:2, pointRadius:3, pointBackgroundColor:"#ffc107", tension:0,
-      });
+      // S76 P1 — separar referencia MIROVA por sensor con paleta apareada a la
+      // nuestra + dash + triángulos. Permite leer side-by-side: "MODIS Aqua
+      // naranja sólida" (nuestro) vs "MIROVA MODIS naranja discontinua con
+      // triángulos" (referencia mismo sensor). El toggle de sensor por banda
+      // también apaga la referencia MIROVA correspondiente (coherencia).
+      // Sensor labels en CSV consolidado: "MODIS", "VIIRS375" (I-band),
+      // "VIIRS" (= M-band 750m, naming histórico MIROVA).
+      const mByS = { MODIS: [], VIIRS375: [], VIIRS750: [] };
+      for (const r of mFiltered) {
+        const s = r.sensor || r.Sensor || "";
+        if (s === "MODIS") mByS.MODIS.push(r);
+        else if (s === "VIIRS375") mByS.VIIRS375.push(r);
+        else if (s === "VIIRS") mByS.VIIRS750.push(r);
+      }
+      if (sensorVisible.MODIS && mByS.MODIS.length) {
+        ds.push({
+          label:"MIROVA MODIS (ref.)", data:toMirovaDaily(mByS.MODIS),
+          type:"line", order:0,
+          borderColor:"#ff8c00", borderDash:[5,3], backgroundColor:"transparent",
+          borderWidth:2, pointRadius:4, pointStyle:"triangle",
+          pointBackgroundColor:"#ff8c00", tension:0,
+        });
+      }
+      if (sensorVisible.VIIRS375 && mByS.VIIRS375.length) {
+        ds.push({
+          label:"MIROVA VIIRS 375m (ref.)", data:toMirovaDaily(mByS.VIIRS375),
+          type:"line", order:0,
+          borderColor:"#e91e63", borderDash:[5,3], backgroundColor:"transparent",
+          borderWidth:2, pointRadius:4, pointStyle:"triangle",
+          pointBackgroundColor:"#e91e63", tension:0,
+        });
+      }
+      if (sensorVisible.VIIRS750 && mByS.VIIRS750.length) {
+        ds.push({
+          label:"MIROVA VIIRS 750m (ref.)", data:toMirovaDaily(mByS.VIIRS750),
+          type:"line", order:0,
+          borderColor:"#00bcd4", borderDash:[5,3], backgroundColor:"transparent",
+          borderWidth:2, pointRadius:4, pointStyle:"triangle",
+          pointBackgroundColor:"#00bcd4", tension:0,
+        });
+      }
     }
     return ds;
   }
@@ -1581,14 +1616,19 @@ function renderDetail() {
         borderRadius: 2, borderSkipped: false, order: 1,
       });
     }
-    // MIROVA reference (S74 F30 Bug 9: respeta toggle MIROVA del legend)
+    // MIROVA reference — S76 P1: split por sensor para comparación side-by-side.
+    // Aquí mantengo un único agregado además, porque el panel "comparison"
+    // ya muestra nuestra serie agregada (max diario all-sensors) y conviene
+    // una sola línea MIROVA de referencia agregada para no saturar el panel
+    // secundario. El detalle per-sensor vive en el chart principal.
     if (mFiltered.length && sensorVisible.MIROVA !== false) {
       ds.push({
-        label: "MIROVA (referencia)",
+        label: "MIROVA (referencia, max diario all-sensors)",
         data: toMirovaDaily(mFiltered),
         type: "line", order: 0,
-        borderColor: "#ffc107", backgroundColor: "transparent",
-        borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: "#ffc107", tension: 0,
+        borderColor: "#ffc107", borderDash:[5,3], backgroundColor: "transparent",
+        borderWidth: 2.5, pointRadius: 4, pointStyle:"triangle",
+        pointBackgroundColor: "#ffc107", tension: 0,
       });
     }
     return ds;
