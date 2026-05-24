@@ -439,6 +439,17 @@ ENABLE_DUAL_ROI_SECOND_PASS: bool = bool(
     _p.get("enable_dual_roi_second_pass", False)
 )
 
+# --- F46 S77 (A45) — gate consistencia MIR/NTI + threshold subido sobre vrp_tir_mw.
+# Helper `pipeline.process_viirs._compute_vrp_tir_with_gate` (Opción A+B
+# combinada). Default ON post-fix. Cuando OFF, comportamiento legacy
+# `max(0.5, 4σ)` sin gate. Ver docs/F46_VRP_TIR_BUG_S76.md §5.3 y
+# tests/test_vrp_tir_consistency_gate_f46.py.
+ENABLE_VRP_TIR_CONSISTENCY_GATE: bool = bool(
+    _cfg.get("enable_vrp_tir_consistency_gate", True)
+)
+VRP_TIR_FLOOR_K: float = float(_cfg.get("vrp_tir_floor_k", 3.0))
+VRP_TIR_N_SIGMA: float = float(_cfg.get("vrp_tir_n_sigma", 6.0))
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))

@@ -291,6 +291,18 @@ sensors:
   viirs_375: true
   viirs_750: true
 
+# --- F46 S77 (A45) — gate consistencia MIR/NTI + threshold subido sobre vrp_tir_mw ---
+# Opción A+B combinada del docs/F46_VRP_TIR_BUG_S76.md §5.3. Cuando ON:
+#   1. Si hot_mask_mir (post-paths MIR/NTI) está vacío → vrp_tir_mw=0.
+#   2. threshold = max(3K, 6σ) en lugar de max(0.5K, 4σ).
+#   3. vrp_tir Stefan-Boltzmann sobre hot5_mask ∩ dilate(hot_mask_mir, k=3).
+# Cura 143 outliers con vrp_tir_mw>1000 MW por gradiente espacial (cirrus,
+# nieve parcial, lago) sin coherencia espacial con detección MIR/NTI.
+# Ver tests/test_vrp_tir_consistency_gate_f46.py (5/5 TDD specs).
+enable_vrp_tir_consistency_gate: true
+vrp_tir_floor_k: 3.0
+vrp_tir_n_sigma: 6.0
+
 # --- F2.8 S73 saturation guard secundario (defense in depth) ---
 # Fix L1B-spec (process_modis.py:184 dn>32767, process_viirs.py qf bit-2) ya cubre
 # la causa raíz. Esta capa post-Planck es redundancia contra cualquier caso edge

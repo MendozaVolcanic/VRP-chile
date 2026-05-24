@@ -121,6 +121,9 @@ from pipeline.profile import (
     PATH_D_ONLY_CAP_MW,
     PATH_D_ONLY_CAP_TBG_MAX_K,
     ENABLE_VRPTIR_AVENI,
+    ENABLE_VRP_TIR_CONSISTENCY_GATE,
+    VRP_TIR_FLOOR_K,
+    VRP_TIR_N_SIGMA,
 )
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -157,6 +160,95 @@ def bt_to_spectral_radiance(bt: np.ndarray, wavelength_um: float) -> np.ndarray:
     """Convert brightness temperature (K) to spectral radiance (W/m²/sr/µm) via Planck."""
     with np.errstate(invalid="ignore", divide="ignore", over="ignore"):
         return C1 / (wavelength_um ** 5 * (np.exp(C2 / (wavelength_um * bt)) - 1))
+
+
+def _binary_dilate_3(mask: np.ndarray, iterations: int = 3) -> np.ndarray:
+    """Dilatación binaria 4-conectividad N iteraciones, sin dependencia de scipy.
+
+    Equivalente a `scipy.ndimage.binary_dilation(mask, iterations=N)` con el
+    structuring element por defecto (cross 3x3). Implementación numpy con
+    desplazamientos vecinos N veces. Para N=3 vecindad efectiva = radio 3.
+    """
+    if mask is None or not mask.any():
+        return np.zeros_like(mask, dtype=bool) if mask is not None else mask
+    cur = mask.astype(bool, copy=True)
+    for _ in range(int(iterations)):
+        # Cruz 3x3: pixel hot si self o vecino (up/down/left/right) hot.
+        nxt = cur.copy()
+        nxt[1:, :]  |= cur[:-1, :]
+        nxt[:-1, :] |= cur[1:, :]
+        nxt[:, 1:]  |= cur[:, :-1]
+        nxt[:, :-1] |= cur[:, 1:]
+        cur = nxt
+    return cur
+
+
+def _compute_vrp_tir_with_gate(
+    bt5: np.ndarray,
+    roi_mask: np.ndarray,
+    pixel_areas: np.ndarray,
+    t_bg_i05: float,
+    std_bg5: float,
+    hot_mask_mir: np.ndarray,
+    *,
+    tir_floor_k: float = 3.0,
+    n_sigma_tir: float = 6.0,
+    enable_gate: bool = True,
+    legacy_floor_k: float = 0.5,
+    legacy_n_sigma: float = 4.0,
+) -> float:
+    """F46 (S77, A45) — Computa vrp_tir_mw con gate de consistencia MIR/NTI.
+
+    Opción A+B combinada del docs/F46_VRP_TIR_BUG_S76.md §5.3:
+
+    - **A (gate consistencia)**: si `hot_mask_mir.sum()==0` o el solapamiento
+      espacial entre hot5_mask y dilate(hot_mask_mir, k=3) es vacío,
+      `vrp_tir_mw=0`. Razón física: TIR aislado sin MIR/NTI coincidente es
+      ruido de gradiente espacial (cirrus, nieve parcial, lago caliente
+      post-atardecer), no anomalía volcánica.
+    - **B (threshold subido)**: `threshold = max(tir_floor_k=3K, n_sigma_tir=6σ)`
+      en lugar del legacy `max(0.5K, 4σ)`. Protege contra el caso "MIR detecta
+      cluster pequeño pero TIR alrededor está inflado por σ_bg de heterogeneidad".
+
+    Cuando `enable_gate=False`: comportamiento legacy `max(0.5, 4σ)` sin gate.
+
+    Returns:
+        float — vrp_tir en MW (Stefan-Boltzmann sobre máscara efectiva).
+    """
+    if not enable_gate:
+        # Legacy: solo threshold, sin gate de consistencia.
+        threshold = max(legacy_floor_k, legacy_n_sigma * std_bg5)
+        hot5 = roi_mask & ~np.isnan(bt5) & (bt5 > (t_bg_i05 + threshold))
+        if not hot5.any():
+            return 0.0
+        rows, cols = np.where(hot5)
+        hotpix = bt5[rows, cols]
+        hot_area = pixel_areas[rows, cols]
+        vrp_w = float(np.sum(hot_area * SIGMA * (hotpix ** 4 - t_bg_i05 ** 4)))
+        return vrp_w / 1e6
+
+    # Opción A: si MIR/NTI no detectó nada en la escena → vrp_tir=0.
+    if hot_mask_mir is None or not np.asarray(hot_mask_mir).any():
+        return 0.0
+
+    # Opción B: threshold subido.
+    threshold = max(tir_floor_k, n_sigma_tir * std_bg5)
+    hot5_mask = roi_mask & ~np.isnan(bt5) & (bt5 > (t_bg_i05 + threshold))
+    if not hot5_mask.any():
+        return 0.0
+
+    # Gate consistencia espacial: dilatar hot_mask_mir 3 pixeles (tolerar
+    # desalineamiento inter-band) e intersectar con hot5_mask.
+    dilated_mir = _binary_dilate_3(hot_mask_mir, iterations=3)
+    effective_mask = hot5_mask & dilated_mir
+    if not effective_mask.any():
+        return 0.0
+
+    rows, cols = np.where(effective_mask)
+    hotpix = bt5[rows, cols]
+    hot_area = pixel_areas[rows, cols]
+    vrp_w = float(np.sum(hot_area * SIGMA * (hotpix ** 4 - t_bg_i05 ** 4)))
+    return vrp_w / 1e6
 
 
 def read_viirs_l1b(l1b_path: Path) -> dict:
@@ -1053,15 +1145,34 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         if len(bg_vals5) >= 10:
             t_bg_i05 = float(np.median(bg_vals5))
             std_bg5 = float(np.std(bg_vals5))
-            threshold_tir = max(TIR_THRESHOLD_K, N_SIGMA_TIR * std_bg5)
+            # F46 (S77, A45) — Opción A+B: gate consistencia MIR/NTI sobre
+            # hot_mask_2d (MIR/NTI final post-paths) + threshold subido a
+            # max(3K, 6σ). Cuando flag OFF, comportamiento legacy max(0.5, 4σ)
+            # sin gate. Ver docs/F46_VRP_TIR_BUG_S76.md §5.3.
+            threshold_tir = max(VRP_TIR_FLOOR_K, VRP_TIR_N_SIGMA * std_bg5) \
+                if ENABLE_VRP_TIR_CONSISTENCY_GATE \
+                else max(TIR_THRESHOLD_K, N_SIGMA_TIR * std_bg5)
             # Use 2D mask so we can pull per-pixel areas (scan-angle corrected)
             hot5_mask_2d = roi_mask & ~np.isnan(bt5) & (bt5 > (t_bg_i05 + threshold_tir))
-            hot5_rows, hot5_cols = np.where(hot5_mask_2d)
-            if len(hot5_rows) > 0:
-                hotpix5 = bt5[hot5_rows, hot5_cols]
-                hotpix5_area = pixel_areas[hot5_rows, hot5_cols]
-                vrp_w5 = float(np.sum(hotpix5_area * SIGMA * (hotpix5 ** 4 - t_bg_i05 ** 4)))
-                vrp_tir_mw = vrp_w5 / 1e6
+            # hot_mask_mir = hot_mask_2d post-paths MIR/NTI (post exclusion_zones,
+            # before clustering). Si el bloque eruption-path no se ejecutó (no
+            # I04 / no eruption_path) usar máscara vacía → triggera gate A.
+            hot_mask_mir_ref = locals().get(
+                "hot_mask_2d", np.zeros_like(hot5_mask_2d, dtype=bool)
+            )
+            vrp_tir_mw = _compute_vrp_tir_with_gate(
+                bt5=bt5,
+                roi_mask=roi_mask,
+                pixel_areas=pixel_areas,
+                t_bg_i05=t_bg_i05,
+                std_bg5=std_bg5,
+                hot_mask_mir=hot_mask_mir_ref,
+                tir_floor_k=VRP_TIR_FLOOR_K,
+                n_sigma_tir=VRP_TIR_N_SIGMA,
+                enable_gate=ENABLE_VRP_TIR_CONSISTENCY_GATE,
+                legacy_floor_k=TIR_THRESHOLD_K,
+                legacy_n_sigma=N_SIGMA_TIR,
+            )
             roi_bt5 = bt5[roi_mask]
             valid_roi5 = roi_bt5[~np.isnan(roi_bt5)]
             t_max_i05 = float(np.max(valid_roi5)) if len(valid_roi5) else float("nan")
