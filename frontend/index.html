@@ -1878,9 +1878,20 @@ function updateHotspotLayer() {
       // sus markers naranjas del mapa overview).
       if (!isSensorVisible(r)) return;
       const vrpFinal = r.vrp_mw ?? 0;
-      const vrpRaw = r.vrp_mir_mw ?? r.vrp_tir_mw ?? 0;
+      // F46 (S76 hotfix): vrp_tir_mw puede estar inflado por Stefan-Boltzmann
+      // absoluto sobre mask 4σ generoso en terreno heterogéneo (nieve/lago/cirrus).
+      // 143 records afectados ventana 2026-01-31..2026-05-17, hasta 9606 MW
+      // Lascar / 6872 MW Chaitén con n_anomalous_pixels=0 (MIR no detectó nada).
+      // Removido de fallback de visualización del mapa hasta el gate de
+      // consistencia MIR del fix pipeline. Ver `docs/F46_VRP_TIR_BUG_S76.md`.
+      const vrpRaw = r.vrp_mir_mw ?? 0;
+      const vrpTir = r.vrp_tir_mw ?? 0;
       const vrpVent = r.vrp_vent_mw ?? 0;
-      const vrpShow = vrpFinal || vrpRaw || vrpVent || 0.001;
+      // Si vrpTir está claramente desacoplado de MIR (espurio bug F46), no
+      // dejarlo dominar tamaño marker: solo permitir TIR como fallback si MIR
+      // también ve algo o si es razonablemente bajo (<1000 MW).
+      const vrpTirSane = (vrpRaw > 0 || vrpTir < 1000) ? vrpTir : 0;
+      const vrpShow = vrpFinal || vrpRaw || vrpTirSane || vrpVent || 0.001;
       const isFiltered = vrpFinal === 0 && (vrpRaw > 0 || vrpVent > 0);
       const color = HOTSPOT_COLORS[r.sensor] || "#ffffff";
       const recency = 0.35 + 0.65 * (i / Math.max(1, withCoords.length - 1));
