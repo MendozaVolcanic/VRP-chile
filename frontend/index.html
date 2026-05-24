@@ -354,6 +354,9 @@
   </div>
 </header>
 
+<!-- F49/S77 — Banner global MIROVA stale. Render condicional desde JS (renderMirovaFreshness) cuando la fecha más reciente del CSV consolidado es >14d atrás. Sin esto, el dashboard muestra "MIROVA referencia" como si fuera ground truth fresco, induciendo lectura errónea ("MIROVA no detecta esto"). En realidad el scraper Mirova-v1 puede estar caído — el ground truth visible no refleja la realidad MIROVA actual. Ver docs/F49_SCRAPER_MIROVA_DOWN_S77.md cuando exista. -->
+<div id="mirova-stale-banner" style="display:none;"></div>
+
 <!-- S14: About modal — credits to MIROVA / D. Coppola and canonical papers -->
 <div id="about-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:9999;overflow-y:auto;padding:40px 20px;">
   <div style="max-width:780px;margin:0 auto;background:#0f1a2a;color:#e0e7f0;border:1px solid #1a3a5c;border-radius:8px;padding:28px 32px;font-size:0.92rem;line-height:1.55;">
@@ -2661,6 +2664,60 @@ function buildNRTTable() {
   });
 }
 
+// ── F49/S77 — Banner global MIROVA stale ────────────────────────────────────
+// Computa la fecha más reciente entre todos los `mirovaRecords` cargados (CSV
+// consolidado parseado a JSON per volcán por loadVolcano). Si esa fecha es
+// >14d atrás respecto a now(), inserta un banner rojo arriba del dashboard.
+// Razón: el dashboard expone "MIROVA referencia" como ground truth. Si el
+// scraper Mirova-v1 está caído, los gráficos overlay (PR #164) + card métricas
+// live (PR #167) reportan recall/precision contra un universo congelado —
+// lectura "MIROVA no detecta esto" puede ser falsa porque MIROVA no scrapeó.
+function renderMirovaFreshness() {
+  const banner = document.getElementById("mirova-stale-banner");
+  if (!banner) return;
+  let latest = null;
+  for (const v of VOLCANOES) {
+    const d = allData[v.name];
+    if (!d || !d.mirovaRecords) continue;
+    for (const r of d.mirovaRecords) {
+      const dt = r.datetime_utc;
+      if (dt && (latest === null || dt > latest)) latest = dt;
+    }
+  }
+  if (!latest) {
+    banner.style.display = "block";
+    banner.style.cssText = "display:block;background:#3a1818;color:#ffcccc;" +
+      "padding:10px 16px;border-bottom:2px solid #e91e63;font-size:0.9rem;";
+    banner.innerHTML = "<b>⚠️ MIROVA referencia vacía</b> — no hay registros del " +
+      "scraper Mirova-v1. La línea/triángulos amarillos del chart y la card " +
+      "métricas live abajo NO reflejan MIROVA actual. Ver " +
+      "<code>docs/F49_SCRAPER_MIROVA_DOWN_S77.md</code>.";
+    return;
+  }
+  const latestTs = new Date(latest.replace(" ", "T") + "Z").getTime();
+  const ageMs = Date.now() - latestTs;
+  const ageDays = ageMs / (1000 * 86400);
+  if (ageDays > 14) {
+    banner.style.display = "block";
+    banner.style.cssText = "display:block;background:#3a1818;color:#ffcccc;" +
+      "padding:10px 16px;border-bottom:2px solid #e91e63;font-size:0.9rem;";
+    banner.innerHTML = "<b>⚠️ MIROVA referencia stale</b> — última fecha del CSV " +
+      "consolidado: <code>" + latest.slice(0, 16) + " UTC</code> (" +
+      Math.floor(ageDays) + " días atrás). El scraper Mirova-v1 puede estar " +
+      "caído. La comparación con MIROVA (overlay chart + card métricas) NO " +
+      "refleja actividad MIROVA actual. Ver <code>docs/F49_SCRAPER_MIROVA_DOWN_S77.md</code>.";
+  } else if (ageDays > 3) {
+    banner.style.display = "block";
+    banner.style.cssText = "display:block;background:#3a2e10;color:#ffd97a;" +
+      "padding:8px 16px;border-bottom:1px solid #ffc107;font-size:0.85rem;";
+    banner.innerHTML = "<b>MIROVA referencia con " + Math.floor(ageDays) +
+      "d de retraso</b> (última: " + latest.slice(0, 16) + " UTC). " +
+      "Refs operacionales pueden no reflejar últimas pasadas MIROVA.";
+  } else {
+    banner.style.display = "none";
+  }
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
   buildLegend();
@@ -2762,6 +2819,12 @@ async function init() {
 
   // Load all volcanoes in parallel
   await Promise.all(VOLCANOES.map(v => loadVolcano(v)));
+
+  // F49/S77 — Mostrar banner global si MIROVA (ground truth) está stale.
+  // Si latest fecha del CSV consolidado es >14d atrás, el dashboard expone
+  // refs MIROVA desactualizadas como si fueran fresh, induciendo "MIROVA
+  // no detecta X" cuando en realidad el scraper Mirova-v1 está caído.
+  renderMirovaFreshness();
 
   // Populate volcano filter now that data is loaded
   VOLCANOES.forEach(v => {
