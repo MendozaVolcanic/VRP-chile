@@ -821,6 +821,12 @@ function lastEventTime(records) {
 // si la detección cae dentro del inner_radius del volcán (3-7 km oficial
 // MIROVA), "far" si queda entre el inner y el radio total (~25 km).
 // Solo cuenta detecciones reales (vrp > 0) para no inflar con records-0.
+//
+// F30 Bug 11b decisión Nicolás (S75): mantener ventana fija 7 días en cards
+// (NO dinamizar al rango global). Razón: cards son "turno operacional" — el
+// operador SERNAGEOMIN quiere snapshot reciente que no infle a 200+ events
+// con 90d. Tooltip + constante nombrada documentan la intención sin código.
+const CARD_COUNT_WINDOW_DAYS = 7;
 function distanceCounts(records, days = 7) {
   // S38: aplicar filtro post-S38 al inicio.
   const cutoff = Date.now() - days * 86400000;
@@ -895,7 +901,7 @@ function buildCards() {
 
     // Conteo cráter vs lejanas (últimos 7 días). Solo mostramos si hay al menos
     // 1 detección real — evita filas vacías en las 34 tarjetas no-Tier-A.
-    const dc = distanceCounts(d.records, 7);
+    const dc = distanceCounts(d.records, CARD_COUNT_WINDOW_DAYS);
     const dcRow = el("div", "vc-distance");
     if (dc.summit + dc.far > 0) {
       const sSummit = el("span"); sSummit.style.color = "#f44336"; sSummit.style.fontWeight = "600";
@@ -904,7 +910,9 @@ function buildCards() {
       const sFar = el("span"); sFar.style.color = "#7a8fa6";
       sFar.textContent = "📍 Lejanas: " + dc.far;
       const sLabel = el("span"); sLabel.style.color = "#556"; sLabel.style.fontSize = "0.7em";
-      sLabel.textContent = " (7d)";
+      sLabel.textContent = " (" + CARD_COUNT_WINDOW_DAYS + "d)";
+      // F30 Bug 11b (S75): tooltip explica que el conteo es fijo 7d intencional
+      dcRow.title = "Conteo de los últimos " + CARD_COUNT_WINDOW_DAYS + " días, fijo intencionalmente para no inflar cards con rangos largos. Rango global del selector solo afecta el detail panel.";
       dcRow.append(sSummit, sep, sFar, sLabel);
     }
 
@@ -1943,9 +1951,9 @@ function buildOverviewMap() {
     }).addTo(overviewMap);
 
     // Conteo summit/far 7d consistente con las tarjetas del grid (cambio C S18).
-    const dc = distanceCounts(d.records, 7);
+    const dc = distanceCounts(d.records, CARD_COUNT_WINDOW_DAYS);
     const dcLine = (dc.summit + dc.far > 0)
-      ? `<br><span style="color:#f44336">🎯 ${dc.summit}</span> · <span style="color:#7a8fa6">📍 ${dc.far}</span> <small style="color:#556">(7d)</small>`
+      ? `<br><span style="color:#f44336">🎯 ${dc.summit}</span> · <span style="color:#7a8fa6">📍 ${dc.far}</span> <small style="color:#556" title="Fijo ${CARD_COUNT_WINDOW_DAYS} días intencional">(${CARD_COUNT_WINDOW_DAYS}d)</small>`
       : "";
     marker.bindPopup(
       "<b>" + v.display + "</b><br>" +
