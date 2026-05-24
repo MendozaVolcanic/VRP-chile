@@ -257,6 +257,39 @@ outliers >1000 MW — porque su ROI es desierto altiplánico relativamente
 homogéneo (sin lagos, sin glaciares grandes, σ_bg típicamente <2 K). Es el
 ejemplo natural de "lo que el path TIR debería ver".
 
+### 4.5 Scope reducido — el bug es exclusivo de VIIRS I-band (S76 verificación)
+
+Verificación cruzada S76 (post-redacción inicial del doc):
+
+| Procesador | Tiene `vrp_tir_mw`? | Tiene path TIR Stefan-Boltzmann? |
+|---|---|---|
+| `pipeline/process_modis.py` | NO | NO (MODIS no calcula vrp_tir separado) |
+| `pipeline/process_viirs.py` (I-band 375m) | **SÍ** | **SÍ — bloque líneas 968-986 (post-PR #158)** |
+| `pipeline/process_viirs_mod.py` (M-band 750m) | NO | NO |
+
+Distribución de los 143 outliers por sensor (snapshot del audit
+`experiments/138_audit_mw_outliers_s76/outliers.json`):
+
+| Sensor | N outliers |
+|---|---|
+| VIIRS_SNPP (I-band) | 56 |
+| VIIRS_NOAA20 (I-band) | 43 |
+| VIIRS_NOAA21 (I-band) | 44 |
+| MODIS_TERRA | 0 |
+| MODIS_AQUA | 0 |
+| VIIRS_*_750 (M-band) | 0 |
+
+**Implicación operativa**: el fix toca un único archivo
+(`pipeline/process_viirs.py`) y un único bloque (líneas 968-986). Reduce
+significativamente el riesgo de regresión y el alcance del A45 obligatorio.
+No hace falta tocar MODIS ni M-band.
+
+**Implicación para opciones A/B**: ambas opciones del §5 se aplican
+exclusivamente a `process_viirs.py:968-986`. La estrategia A/B testing del §6
+puede usar un solo perfil derivado de `mirova_equivalent` con el cambio
+solo a los flags TIR de VIIRS I-band — más simple que lo que el §6
+sugiere por defecto.
+
 ## 5. Opciones de fix
 
 Las dos opciones siguientes son **mutuamente combinables**. El AB de validación
