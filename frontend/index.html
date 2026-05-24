@@ -116,6 +116,12 @@
     .stat-box .label { font-size: 0.68rem; color: var(--muted); margin-bottom: 2px; }
     .stat-box .val   { font-size: 1.3rem; font-weight: 700; }
     .stat-box .unit  { font-size: 0.65rem; color: var(--muted); }
+    .metrics-header {
+      font-size: 0.78rem; color: var(--muted); margin: 6px 0 6px;
+      text-transform: uppercase; letter-spacing: 0.5px; cursor: help;
+    }
+    .metric-box { min-width: 110px; border-color: rgba(122,143,166,0.35); }
+    .metric-box .val { font-size: 1.15rem; }
 
     /* ── Energy bands (like MIROVA background) ── */
     .energy-bands { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
@@ -741,6 +747,128 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
 //   3. Record legacy sin distance_class pero con vrp_vent_mw > 0: el
 //      vent-path solo dispara dentro del radio del vent → trátalo como summit.
 //   4. Otros casos sin metadato claro → no es summit (evita contar ruido).
+// S77 F30 P4 — métricas live recall/precision/F1/ratio contra MIROVA.
+//
+// Algoritmo (client-side, recomputado al cargar volcán / cambiar includeFar):
+//   - Para cada record MIROVA con VRP_MW > 0 y clasificacion != "NULO" (RUTINA
+//     filtering descarta records sin VRP útil → no cuentan como FN), buscar
+//     match en nuestros records con mismo sensor bucket (MODIS ↔ MODIS,
+//     VIIRS375 ↔ VIIRS_SNPP/NOAA20/NOAA21 I-band 375m, VIIRS ↔ VIIRS_*_750
+//     M-band 750m) dentro de ±60 min.
+//   - Match con mirovaEqVrp(r) > 0  → TP.
+//   - MIROVA sin match (o match sin VRP nuestro > 0) → FN.
+//   - Nuestros con mirovaEqVrp > 0 sin alerta MIROVA en ventana ±60 min en
+//     el mismo sensor bucket → FP.
+//   - ratio_med = mediana de (ours/mirova) sobre pares matcheados (calibración).
+//
+// Caveat: se calcula sobre la ventana actual del chart (currentDays) — los
+// números varían según el rango seleccionado. Records MIROVA con clasificación
+// RUTINA / NULO se excluyen para no penalizar falsos negativos triviales.
+function ourSensorBucket(sensor) {
+  // Reusa sensorGroup() pero estandariza naming hacia los buckets MIROVA del CSV.
+  const g = sensorGroup(sensor);
+  if (g === "MODIS") return "MODIS";
+  if (g === "VIIRS375") return "VIIRS375";   // I-band 375m
+  if (g === "VIIRS750") return "VIIRS750";   // M-band 750m
+  return null;
+}
+function mirovaSensorBucket(sensor) {
+  // CSV consolidado usa: "MODIS", "VIIRS375" (I-band), "VIIRS" (M-band 750m).
+  if (!sensor) return null;
+  const s = String(sensor).toUpperCase();
+  if (s === "MODIS") return "MODIS";
+  if (s === "VIIRS375") return "VIIRS375";
+  if (s === "VIIRS") return "VIIRS750";
+  return null;
+}
+function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
+  const eqVrp = (r) => mirovaEqVrp(r, innerKm, includeFar);
+  // Index nuestros por bucket → array de {t, r} ordenados por tiempo
+  const ourByBucket = { MODIS: [], VIIRS375: [], VIIRS750: [] };
+  for (const r of ourRecords) {
+    const b = ourSensorBucket(r.sensor);
+    if (!b) continue;
+    const t = new Date(r.datetime_utc).getTime();
+    if (!Number.isFinite(t)) continue;
+    ourByBucket[b].push({ t, r });
+  }
+  for (const k of Object.keys(ourByBucket)) ourByBucket[k].sort((a,b) => a.t - b.t);
+
+  // Index MIROVA por bucket
+  const mByBucket = { MODIS: [], VIIRS375: [], VIIRS750: [] };
+  for (const m of mirovaRecords) {
+    const cls = String(m.clasificacion || m.Clasificacion || m["Clasificacion Mirova"] || "").toUpperCase();
+    if (cls === "NULO" || cls === "RUTINA") continue;
+    const vrp = parseFloat(m.VRP_MW ?? m.vrp_mw ?? 0);
+    if (!(vrp > 0)) continue;
+    const b = mirovaSensorBucket(m.sensor);
+    if (!b) continue;
+    const t = new Date(String(m.datetime_utc).replace(" ", "T") + (String(m.datetime_utc).includes("T") ? "" : "Z")).getTime();
+    if (!Number.isFinite(t)) continue;
+    mByBucket[b].push({ t, m, vrp });
+  }
+  for (const k of Object.keys(mByBucket)) mByBucket[k].sort((a,b) => a.t - b.t);
+
+  const TOL_MS = 60 * 60000;
+  function findNearest(list, t) {
+    // búsqueda binaria + chequeo de vecinos (lista ordenada por t)
+    if (!list.length) return -1;
+    let lo = 0, hi = list.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (list[mid].t < t) lo = mid + 1; else hi = mid;
+    }
+    let best = -1, bestDt = TOL_MS + 1;
+    for (let i = Math.max(0, lo - 1); i <= Math.min(list.length - 1, lo + 1); i++) {
+      const dt = Math.abs(list[i].t - t);
+      if (dt <= TOL_MS && dt < bestDt) { best = i; bestDt = dt; }
+    }
+    return best;
+  }
+
+  let tp = 0, fn = 0, fp = 0;
+  const ratios = [];
+  const matchedOurIdx = { MODIS: new Set(), VIIRS375: new Set(), VIIRS750: new Set() };
+
+  // Loop MIROVA → buscar nuestro con eqVrp > 0
+  for (const bucket of Object.keys(mByBucket)) {
+    const ours = ourByBucket[bucket];
+    for (const { t, vrp: mVrp } of mByBucket[bucket]) {
+      const idx = findNearest(ours, t);
+      if (idx >= 0 && eqVrp(ours[idx].r) > 0) {
+        tp++;
+        matchedOurIdx[bucket].add(idx);
+        ratios.push(eqVrp(ours[idx].r) / mVrp);
+      } else {
+        fn++;
+      }
+    }
+  }
+  // Loop nuestros → FP si tienen eqVrp > 0 y no hay MIROVA cercano
+  for (const bucket of Object.keys(ourByBucket)) {
+    const mirovas = mByBucket[bucket];
+    const ours = ourByBucket[bucket];
+    for (let i = 0; i < ours.length; i++) {
+      if (matchedOurIdx[bucket].has(i)) continue;
+      if (!(eqVrp(ours[i].r) > 0)) continue;
+      const idx = findNearest(mirovas, ours[i].t);
+      if (idx < 0) fp++;
+    }
+  }
+
+  const recall    = (tp + fn) > 0 ? tp / (tp + fn) : null;
+  const precision = (tp + fp) > 0 ? tp / (tp + fp) : null;
+  const f1 = (recall != null && precision != null && (recall + precision) > 0)
+    ? 2 * recall * precision / (recall + precision) : null;
+  let ratio_med = null;
+  if (ratios.length) {
+    const s = ratios.slice().sort((a,b) => a - b);
+    const mid = s.length >> 1;
+    ratio_med = (s.length % 2) ? s[mid] : 0.5 * (s[mid - 1] + s[mid]);
+  }
+  return { tp, fn, fp, pairs: ratios.length, recall, precision, f1, ratio_med };
+}
+
 function isSummitDetection(r) {
   // S29 fix bug 8: si el record fue descartado por el pipeline (vrp_mw=0 y
   // discarded_reason no nulo), NO contar como detección summit aunque el
@@ -1009,6 +1137,41 @@ function renderDetail() {
   addStat("Detecciones", String(allVrp.length), "granules");
   addStat("Total granules", String(filtered.length), "procesados");
   dp.appendChild(sr);
+
+  // ── S77 F30 P4 — Card métricas live recall/precision/F1/ratio vs MIROVA ──
+  // Calculado client-side al cargar volcán o al togglear includeFarDistance.
+  // Sensor toggle NO afecta (métricas son globales por bucket).
+  const metrics = computeMetrics(filtered, mFiltered, innerKm, includeFarDistance);
+  const mr = el("div", "stats-row metrics-row");
+  const tipText = "Calculado contra CONS+OCR del CSV consolidado MIROVA en la ventana actual del chart (" +
+                  (currentDays ? currentDays + "d" : "todo") + "). " +
+                  "Records MIROVA con clasificación RUTINA o NULO no cuentan como FN. " +
+                  "Match por sensor bucket (MODIS↔MODIS, VIIRS375↔I-band 375m, VIIRS↔M-band 750m) " +
+                  "con tolerancia temporal ±60 min.";
+  function addMetric(label, val, unit, color) {
+    const box = el("div", "stat-box metric-box");
+    box.title = tipText;
+    const l = el("div", "label"); l.textContent = label;
+    const vEl = el("div", "val"); vEl.textContent = val;
+    if (color) vEl.style.color = color;
+    const u = el("div", "unit"); u.textContent = unit;
+    box.append(l, vEl, u);
+    mr.appendChild(box);
+  }
+  const hdr = el("div", "metrics-header");
+  hdr.textContent = "Métricas vs MIROVA (live)";
+  hdr.title = tipText;
+  dp.appendChild(hdr);
+  const fmt = (x) => (x == null ? "—" : x.toFixed(2));
+  addMetric("Recall",    fmt(metrics.recall),    `TP=${metrics.tp} FN=${metrics.fn}`,
+            metrics.recall    != null && metrics.recall    >= 0.6 ? "var(--green)" : null);
+  addMetric("Precision", fmt(metrics.precision), `TP=${metrics.tp} FP=${metrics.fp}`,
+            metrics.precision != null && metrics.precision >= 0.5 ? "var(--green)" : null);
+  addMetric("F1",        fmt(metrics.f1),        "armónica");
+  addMetric("Ratio med", metrics.ratio_med != null ? metrics.ratio_med.toFixed(2) + "×" : "—",
+            `N=${metrics.pairs} pares`,
+            metrics.ratio_med != null && metrics.ratio_med >= 0.7 && metrics.ratio_med <= 1.4 ? "var(--green)" : null);
+  dp.appendChild(mr);
 
   // ── Export CSV buttons ──
   const actionRow = el("div", "action-row");
