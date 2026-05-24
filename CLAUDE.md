@@ -425,6 +425,34 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   por NRT cron automático. El reproc histórico empírico es nice-to-have, no
   bloqueante operacional.
 
+- **A44. Worktrees dedicados por subagente paralelo** (S75 cierre, 3 race
+  conditions documentadas): cuando lances 2+ subagentes en background que
+  toquen git en el mismo repo, cada uno debe trabajar en su propio worktree.
+  Mecanismo: `git worktree add ../VRP-Chile-s76-<task> origin/main` previo
+  al spawn. Razón: `git checkout -b` cambia la branch global del worktree
+  compartido; otros procesos atrapan branch incorrecta. Mitigaciones
+  reactivas (stash + cherry-pick + branch v2) funcionan pero comen tiempo
+  y carga mental. Caveat espacio: cada worktree es checkout completo
+  (~hundred MB). Para disco al 98% considerar shallow clone o sparse-checkout.
+  Cleanup post-merge con `git worktree remove`.
+
+- **A45. Tag defensivo + confirmación explícita son OBLIGATORIOS antes de
+  modificar pipeline NRT operacional** (S75 lección aplicada por Nicolás):
+  refuerzo de A38+A39 cuando el target es `pipeline/process_modis.py`,
+  `pipeline/process_viirs.py`, `pipeline/process_viirs_mod.py`,
+  `pipeline/store.py` o cualquier `pipeline/profiles/mirova_equivalent.yaml`.
+  Pasos no-opcionales:
+  1. `git tag pre-s<NN>-<feature>-integration <sha>` antes del primer edit
+     y `git push origin <tag>`.
+  2. Pedirle a Nicolás confirmación explícita aunque los tests baseline
+     estén verdes y el plan parezca seguro.
+  Razón: NRT cron corre 12 veces/día sobre 11+ volcanes. Un bug que pasa
+  tests pero rompe semántica VRP se replica a 132+ records antes de
+  detectarlo. Lección concreta S75: Nicolás preguntó *"no tienes que salvar
+  la configuración actual antes? eso no sería más conservador?"* justo
+  cuando yo iba a empezar A2 — fue el sanity check correcto, y por eso
+  hoy existe el tag `pre-s75-vrptir-a2-integration` que respalda PR #158.
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
