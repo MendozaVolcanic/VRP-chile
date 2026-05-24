@@ -43,6 +43,29 @@ def _load_profile() -> dict:
         raise FileNotFoundError(f"Profile YAML not found: {path}")
     with open(path, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
+
+    # F31 S75 — soporte `extends: <parent_profile>` para herencia simple.
+    # Útil para perfiles experimentales que clonan operacional + cambian 1-2
+    # flags (ej: experimental_lowT extends mirova_equivalent + activa
+    # enable_vrptir_aveni). Merge deep: child overrides parent al mismo key.
+    if isinstance(cfg, dict) and "extends" in cfg:
+        parent_name = cfg.pop("extends")
+        parent_path = PROFILES_DIR / f"{parent_name}.yaml"
+        if not parent_path.exists():
+            raise FileNotFoundError(
+                f"Profile '{name}' extends '{parent_name}' but parent YAML not found: {parent_path}"
+            )
+        with open(parent_path, "r", encoding="utf-8") as fp:
+            parent_cfg = yaml.safe_load(fp)
+        def _deep_merge(base, override):
+            if isinstance(base, dict) and isinstance(override, dict):
+                merged = dict(base)
+                for k, v in override.items():
+                    merged[k] = _deep_merge(merged.get(k), v) if k in merged else v
+                return merged
+            return override
+        cfg = _deep_merge(parent_cfg, cfg)
+
     cfg["_name"] = name
     return cfg
 
@@ -267,6 +290,31 @@ ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK: bool = bool(_p.get("enable_test1_k1_retire
 # Ver docs/F28_SATURATION_INVESTIGATION.md sec 5.3.
 ENABLE_BT_SAT_SECONDARY_GUARD: bool = bool(_p.get("enable_bt_sat_secondary_guard", True))
 BT_SAT_MIR_K_MODIS: float = float(_p.get("bt_sat_mir_k_modis", 500.0))
+
+# F31 S75 — VRPTIR Aveni 2025 GRL doi:10.1029/2024GL113324 opt-in feature flag.
+# Permite usar el método VRPTIR (TIR single-band 10.5-12 μm) para retrieval de
+# RP de features moderate-to-low-temperature (300-600 K): crater lakes,
+# fumarole fields, hydrothermal systems. Complementario a Wooster MIR
+# (válido 600-1500 K). Coeficientes verificados verbatim contra PDF S74 (A35
+# confidence:HIGH, PR #150). Ver docs/F31_AVENI_GRL_2025_EXTRACT.md.
+#
+# Default: OFF. Habilitar solo en perfil experimental_lowT.yaml para piloto
+# en volcanes candidatos (Lastarria, Copahue, Planchón-Peteroa, Villarrica
+# lava lake). EXCLUIR PCC (A20 no-focal — invalida single-pixel TIRVolcH).
+#
+# Pre-requisito operacional: TIRVolcH detector (Aveni 2024 RSE) — Plan F31
+# Task A1 (subagente paralelo S75). Sin TIRVolcH activo, flag no tiene efecto
+# operacional — la función vrptir.vrp_tir es standalone llamable directo
+# en experimentos pero NO se integra a process_viirs por defecto.
+#
+# NOTA: flags top-level del yaml usan _cfg.get() (no _p.get()). _p=_cfg["paths"]
+# solo lee sub-section. Refactor profile loader S75+ recomendado para
+# normalizar a una sola fuente top-level. Mismo bug latente en
+# enable_bt_sat_secondary_guard pero su default True coincide con yaml.
+ENABLE_VRPTIR_AVENI: bool = bool(_cfg.get("enable_vrptir_aveni", False))
+VRPTIR_T_MIN_K: float = float(_cfg.get("vrptir_t_min_k", 300.0))    # rango validez inferior
+VRPTIR_T_MAX_K: float = float(_cfg.get("vrptir_t_max_k", 600.0))    # rango validez superior
+VRPTIR_K_TIR_I5: float = float(_cfg.get("vrptir_k_tir_i5", 60.17))  # μm·sr VIIRS I5 11.45 μm
 
 # S72 F2.3 — Coppola 2016a SP 426.5 §267-273 dice que pixels "unsuitable"
 # (edge de matriz + dNTI<-0.1 + dETI<-0.1) NO entran al pool μ/σ de la rama
