@@ -530,7 +530,7 @@ const VOLCANOES_ALL = [
   // FPs. El pipeline ahora descarta esos hotspots correctamente como "far".
   { name: "SanJose",              display: "San José",               region: "Metropolitana",  lat: -33.789, lon: -69.897, radius_km: 10 },
   { name: "Tinguiririca",         display: "Tinguiririca",           region: "O'Higgins",     lat: -34.814, lon: -70.352, radius_km: 10 },
-  { name: "PlanchonPeteroa",      display: "Planchón-Peteroa",       region: "Maule",         lat: -35.240, lon: -70.568, radius_km: 25, inner_radius_km: 3, vent_radius_km: 3, hasMirova: true,  vent_lat: -35.241099, vent_lon: -70.573345 },
+  { name: "PlanchonPeteroa",      display: "Planchón-Peteroa",       region: "Maule",         lat: -35.240, lon: -70.568, radius_km: 25, inner_radius_km: 3, vent_radius_km: 3, hasMirova: true,  vent_lat: -35.241099, vent_lon: -70.573345, mirova_center_lat: -35.2232, mirova_center_lon: -70.5695 },
   { name: "DescabezadoGrande",    display: "Descabezado Grande",     region: "Maule",         lat: -35.580, lon: -70.750, radius_km: 10 },
   { name: "CerroAzulQuizapu",     display: "Cerro Azul-Quizapu",     region: "Maule",         lat: -35.653, lon: -70.761, radius_km: 10 },
   { name: "LagunaDelMaule",       display: "Laguna del Maule",       region: "Maule",         lat: -36.020, lon: -70.580, radius_km: 15 },
@@ -549,7 +549,7 @@ const VOLCANOES_ALL = [
   { name: "Lanin",                display: "Lanín",                  region: "Araucanía",     lat: -39.633, lon: -71.503, radius_km: 10 },
   { name: "MochoChoshuenco",      display: "Mocho-Choshuenco",       region: "Los Ríos",      lat: -39.927, lon: -72.027, radius_km: 10 },
   { name: "CarranLosVenados",     display: "Carrán-Los Venados",     region: "Los Ríos",      lat: -40.350, lon: -72.070, radius_km: 10 },
-  { name: "PuyehueCordonCaulle",  display: "Puyehue–Cordón Caulle",  region: "Los Ríos",      lat: -40.590, lon: -72.117, radius_km: 25, inner_radius_km: 20, vent_radius_km: 3, hasMirova: true,  vent_lat: -40.525499, vent_lon: -72.146137 },
+  { name: "PuyehueCordonCaulle",  display: "Puyehue–Cordón Caulle",  region: "Los Ríos",      lat: -40.590, lon: -72.117, radius_km: 25, inner_radius_km: 20, vent_radius_km: 3, hasMirova: true,  vent_lat: -40.525499, vent_lon: -72.146137, mirova_center_lat: -40.582, mirova_center_lon: -72.131 },
   { name: "AntillancaCasablanca", display: "Antillanca-Casablanca",  region: "Los Lagos",     lat: -40.770, lon: -72.150, radius_km: 10 },
   { name: "Osorno",               display: "Osorno",                 region: "Los Lagos",     lat: -41.100, lon: -72.493, radius_km: 10 },
   { name: "Calbuco",              display: "Calbuco",                region: "Los Lagos",     lat: -41.330, lon: -72.614, radius_km: 10 },
@@ -1250,13 +1250,25 @@ function renderDetail() {
       attribution: "Esri World Imagery", maxZoom: 18,
     }).addTo(map);
 
-    // S14: outer search radius (grilla MIROVA 51×51 km efectiva)
+    // S77 P5: capas de referencia espacial agrupadas + toggle.
+    // Cada una refleja una construcción geométrica del workflow MIROVA:
+    //   - Summit (inner_radius_km): clasificación summit vs far por volcán (KML oficial).
+    //   - Scene (radius_km=25): grilla MIROVA UTM 51×51 km (radio inscrito 25.5 km).
+    //   - Bbox 50×50 km: GroundOverlay LatLonBox de los KMZ MIROVA (donde se publica).
+    // Default: Summit ON (era always-on), Scene + Bbox OFF para no saturar visualmente.
+    const sceneLayer = L.layerGroup();
+    const summitLayer = L.layerGroup();
+    const bboxLayer = L.layerGroup();
+    const ventPathLayer = L.layerGroup();
+
+    // S14 → S77: outer search radius (grilla MIROVA 51×51 km efectiva).
     L.circle([v.lat, v.lon], {
       radius: v.radius_km * 1000, color: "#7a8fa6", weight: 1,
       fillColor: "#7a8fa6", fillOpacity: 0.05, dashArray: "5,5",
-    }).addTo(map).bindTooltip(`Radio detección ${v.radius_km} km`, { sticky: true });
+    }).bindTooltip(`Scene ${v.radius_km} km (grilla MIROVA UTM 51×51)`, { sticky: true })
+      .addTo(sceneLayer);
 
-    // S14: inner radius MIROVA oficial — clasificación visual summit/far.
+    // S14 → S77: inner radius MIROVA oficial — clasificación visual summit/far.
     // Detecciones dentro de este círculo se consideran "anomalía volcánica real"
     // (rojo); fuera se consideran posibles pero menor confianza (gris).
     // Valores extraídos de los KML oficiales MIROVA por volcán.
@@ -1264,17 +1276,56 @@ function renderDetail() {
       L.circle([v.vent_lat || v.lat, v.vent_lon || v.lon], {
         radius: v.inner_radius_km * 1000, color: "#ff5252", weight: 1.5,
         fillColor: "#ff5252", fillOpacity: 0.08, dashArray: "3,3",
-      }).addTo(map).bindTooltip(`Radio cráter MIROVA ${v.inner_radius_km} km (summit/far)`, { sticky: true });
+      }).bindTooltip(`Summit (cráter MIROVA ${v.inner_radius_km} km)`, { sticky: true })
+        .addTo(summitLayer);
     }
 
-    // S18: vent_radius — círculo más chico para el vent-path sub-pixel
+    // S77 P5: bbox 50×50 km MIROVA (GroundOverlay LatLonBox de los KMZ oficiales).
+    // Centro = mirova_center_lat/lon si está en el yaml (PCC, PlanchonPeteroa);
+    // fallback al vent o al centro de referencia. Caveat: aproximación rectangular
+    // en CRS geográfico — 25 km en latitud ≈ 0.2252°, en longitud varía con
+    // cos(lat) (~0.293° a -40°, ~0.273° a -33°). MIROVA publica el GroundOverlay
+    // en proyección equirectangular sobre WGS84, así que para latitudes chilenas
+    // (18-46°S) el error de visualización es <2% y aceptable.
+    const bboxCenterLat = v.mirova_center_lat ?? v.vent_lat ?? v.lat;
+    const bboxCenterLon = v.mirova_center_lon ?? v.vent_lon ?? v.lon;
+    const halfKm = 25; // mitad del lado 50 km
+    const dLat = halfKm / 111.0;
+    const dLon = halfKm / (111.0 * Math.cos(bboxCenterLat * Math.PI / 180));
+    const bboxLabel = v.mirova_center_lat
+      ? `Bbox MIROVA 50×50 km (centro KMZ ${bboxCenterLat.toFixed(4)}, ${bboxCenterLon.toFixed(4)})`
+      : `Bbox MIROVA 50×50 km (≈ vent, sin KMZ específico)`;
+    L.rectangle(
+      [[bboxCenterLat - dLat, bboxCenterLon - dLon],
+       [bboxCenterLat + dLat, bboxCenterLon + dLon]],
+      {
+        color: "#4fc3f7", weight: 1.5, fillColor: "#4fc3f7",
+        fillOpacity: 0.04, dashArray: "6,6",
+      }
+    ).bindTooltip(bboxLabel, { sticky: true }).addTo(bboxLayer);
+
+    // Defaults: summit ON; scene + bbox OFF (toggle por usuario).
+    summitLayer.addTo(map);
+
+    // S18 → S77: vent_radius — círculo más chico para el vent-path sub-pixel
     // (pixels dentro de este anillo se evalúan con umbral permisivo BT > t_bg+1K).
+    // Movido a layer toggleable junto con summit/scene/bbox.
     if (v.vent_radius_km && v.vent_lat && v.vent_lon) {
       L.circle([v.vent_lat, v.vent_lon], {
         radius: v.vent_radius_km * 1000, color: "#ffc107", weight: 1,
         fillColor: "#ffc107", fillOpacity: 0.06, dashArray: "2,4",
-      }).addTo(map).bindTooltip(`Radio vent-path ${v.vent_radius_km} km`, { sticky: true });
+      }).bindTooltip(`Vent-path ${v.vent_radius_km} km`, { sticky: true })
+        .addTo(ventPathLayer);
+      ventPathLayer.addTo(map);
     }
+
+    // S77 P5: control de capas — overlays toggleables MIROVA-equivalent.
+    L.control.layers(null, {
+      "Summit (cráter)": summitLayer,
+      "Vent-path": ventPathLayer,
+      "Scene (25 km)": sceneLayer,
+      "Bbox MIROVA 50×50 km": bboxLayer,
+    }, { collapsed: true, position: "topright" }).addTo(map);
 
     // Volcano center marker
     L.circleMarker([v.lat, v.lon], {
