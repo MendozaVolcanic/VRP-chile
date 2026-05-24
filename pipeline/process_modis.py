@@ -33,6 +33,7 @@ from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots, cluster_pixels_geographic
 from .vrp_regimes import compute_local_background
 from .test1_integrated import compute_test1_mir
+from .path_d_cap import apply_d9_scene_cap  # F50/S77
 
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
@@ -751,6 +752,12 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         delta_L = np.maximum(hotpix_rad - L_bg, 0.0)
         per_pixel_vrp_mw = hotpix_area * WOOSTER_COEFF * delta_L / 1e6
         vrp_mw = float(np.nansum(per_pixel_vrp_mw))
+        # F50/S77 fix Opción A: aplicar cap D9 también a vrp_mw scene-wide.
+        # Antes solo se aplicaba al primary_cluster (líneas 802 + 1017). En
+        # cirrus extendido la suma scene-wide alcanzaba 80-510 MW mientras
+        # el cluster era 0.6-5 MW. 715 records afectados pre-fix. Ver doc
+        # F50_MODIS_07_25_AUDIT_S77.md. Helper compartida con VIIRS.
+        vrp_mw = apply_d9_scene_cap(vrp_mw, _path_d_cap_active, PATH_D_ONLY_CAP_MW)
 
         # Build list of TOP-100 anomalous pixels sorted by VRP (descending).
         # S26: cap a 100 para evitar bloat JSON (>100MB GitHub limit). Records
