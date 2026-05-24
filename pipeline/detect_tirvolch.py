@@ -31,8 +31,10 @@ GRL Eq.8) cuantifica VRP sobre esos pixels en rango 300-600 K.
 - 4 ROIs concéntricas: 1, 5, 12.5, 25 km del vent.
 
 **Validación paper**: Vulcano 2021-22 fumarólica, Agung 2017 pre-dome,
-La Palma 2021 lava cooling. Volcán chileno mencionado: **Copahue**
-(casos adicionales). Sin volcán chileno Tier A formal — caveat operacional.
+La Palma 2021 lava cooling. Sin volcán chileno Tier A formal en la
+validación del paper — caveat operacional para VRP Chile (S76 verify
+post-PR #156: el paper Aveni 2024 RSE no menciona Copahue; corrige una
+referencia incorrecta del docstring previo).
 
 **Caveat A35 (jerarquía fuentes)**: valores extraídos de Vault note
 confidence:high. PDF disponible localmente — pending verbatim cross-check
