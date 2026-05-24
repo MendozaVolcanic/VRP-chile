@@ -1,0 +1,434 @@
+{
+  "meta": {
+    "session": "S77",
+    "task": "F46 fix impact verification on Lastarria",
+    "fix_pr": 177,
+    "fix_logic": "Opci\u00f3n A (gate consistencia MIR/NTI dilate k=3) + Opci\u00f3n B (threshold max(3K, 6\u03c3) vs legacy max(0.5K, 4\u03c3))",
+    "heuristic_A": "paths_sum := n_bt_path + n_nti_path + n_nti_rel_path + n_dnti_ctx_path. Si == 0 \u2192 record cae bajo gate A.",
+    "heuristic_B": "Conservador: records con vrp_tir > 100 MW que sobreviven A se marcan B_likely_red (probablemente el threshold los reduce mucho). No se cuantifica magnitud exacta sin BT raw.",
+    "match_window_min": 60,
+    "scope": "Solo VIIRS I-band (process_viirs.py). MODIS y VIIRS-M no tienen path TIR Stefan-Boltzmann separado."
+  },
+  "by_volcano": [
+    {
+      "volcano": "Lastarria",
+      "total_records": 1064,
+      "viirs_iband_with_vrp_tir": 309,
+      "A_killed": 36,
+      "A_killed_pct": 11.7,
+      "B_likely_reduced": 121,
+      "B_likely_reduced_pct": 39.2,
+      "survives_low_tir": 152,
+      "survives_low_tir_pct": 49.2,
+      "no_tir": 755,
+      "not_iband": 0,
+      "recall": {
+        "viirs_refs_total": 157,
+        "tp_pre_fix": 78,
+        "tp_post_fix": 78,
+        "recall_pre": 0.4968152866242038,
+        "recall_post": 0.4968152866242038,
+        "delta_tp": 0
+      },
+      "a_killed_examples": [
+        {
+          "datetime_utc": "2026-02-17 05:12",
+          "sensor": "VIIRS_NOAA20",
+          "vrp_tir_mw": 20.343,
+          "vrp_mir_mw": 0.0,
+          "n_anomalous_pixels": 0,
+          "paths_sum": 0
+        },
+        {
+          "datetime_utc": "2026-02-23 06:36",
+          "sensor": "VIIRS_NOAA20",
+          "vrp_tir_mw": 13.719,
+          "vrp_mir_mw": 0.0,
+          "n_anomalous_pixels": 33,
+          "paths_sum": 0
+        },
+        {
+          "datetime_utc": "2026-02-27 06:42",
+          "sensor": "VIIRS_SNPP",
+          "vrp_tir_mw": 12.369,
+          "vrp_mir_mw": 0.151,
+          "n_anomalous_pixels": 52,
+          "paths_sum": 0
+        }
+      ],
+      "b_likely_examples": [
+        {
+          "datetime_utc": "2026-01-31 05:30",
+          "sensor": "VIIRS_NOAA20",
+          "vrp_tir_mw": 160.161,
+          "vrp_mir_mw": 2.679,
+          "n_anomalous_pixels": 73
+        },
+        {
+          "datetime_utc": "2026-02-01 05:06",
+          "sensor": "VIIRS_NOAA20",
+          "vrp_tir_mw": 148.054,
+          "vrp_mir_mw": 1.173,
+          "n_anomalous_pixels": 47
+        },
+        {
+          "datetime_utc": "2026-02-01 06:00",
+          "sensor": "VIIRS_NOAA21",
+          "vrp_tir_mw": 169.322,
+          "vrp_mir_mw": 2.156,
+          "n_anomalous_pixels": 63
+        }
+      ]
+    },
+    {
+      "volcano": "Chaiten",
+      "total_records": 1312,
+      "viirs_iband_with_vrp_tir": 110,
+      "A_killed": 44,
+      "A_killed_pct": 40.0,
+      "B_likely_reduced": 57,
+      "B_likely_reduced_pct": 51.8,
+      "survives_low_tir": 9,
+      "survives_low_tir_pct": 8.2,
+      "no_tir": 1202,
+      "not_iband": 0,
+      "recall": {
+        "viirs_refs_total": 19,
+        "tp_pre_fix": 0,
+        "tp_post_fix": 0,
+        "recall_pre": 0.0,
+        "recall_post": 0.0,
+        "delta_tp": 0
+      },
+      "a_killed_examples": [
+        {
+          "datetime_utc": "2026-01-31 05:12",
+          "sensor": "VIIRS_SNPP",
+          "vrp_tir_mw": 227.583,
+          "vrp_mir_mw": 0.891,
+          "n_anomalous_pixels": 56,
+          "paths_sum": 0
+        },
+        {
+          "datetime_utc": "2026-01-31 06:54",
+          "sensor": "VIIRS_SNPP",
+          "vrp_tir_mw": 580.153,
+          "vrp_mir_mw": 0.0,
+          "n_anomalous_pixels": 0,
+          "paths_sum": 0
+        },
+        {
+          "datetime_utc": "2026-02-02 06:12",
+          "sensor": "VIIRS_SNPP",
+          "vrp_tir_mw": 19.795,
+          "vrp_mir_mw": 0.0,
+          "n_anomalous_pixels": 73,
+          "paths_sum": 0
+        }
+      ],
+      "b_likely_examples": [
+        {
+          "datetime_utc": "2026-02-04 05:36",
+          "sensor": "VIIRS_SNPP",
+          "vrp_tir_mw": 4415.596,
+          "vrp_mir_mw": 0.866,
+          "n_anomalous_pixels": 3
+        },
+        {
+          "datetime_utc": "2026-02-05 07:00",
+          "sensor": "VIIRS_SNPP",
+          "vrp_tir_mw": 150.889,
+          "vrp_mir_mw": 1.738,
+          "n_anomalous_pixels": 55
+        },
+        {
+          "datetime_utc": "2026-02-06 04:30",
+          "sensor": "VIIRS_NOAA21",
+          "vrp_tir_mw": 1435.263,
+          "vrp_mir_mw": 0.305,
+          "n_anomalous_pixels": 1
+        }
+      ]
+    },
+    {
+      "volcano": "Villarrica",
+      "total_records": 1262,
+      "viirs_iband_with_vrp_tir": 80,
+      "A_killed": 24,
+      "A_killed_pct": 30.0,
+      "B_likely_reduced": 41,
+      "B_likely_reduced_pct": 51.2,
+      "survives_low_tir": 15,
+      "survives_low_tir_pct": 18.8,
+      "no_tir": 1182,
+      "not_iband": 0,
+      "recall": {
+        "viirs_refs_total": 12,
+        "tp_pre_fix": 1,
+        "tp_post_fix": 0,
+        "recall_pre": 0.08333333333333333,
+        "recall_post": 0.0,
+        "delta_tp": -1
+      },
+      "a_killed_examples": [
+        {
+          "datetime_utc": "2026-01-30 05:48",
+          "sensor": "VIIRS_NOAA20",
+          "vrp_tir_mw": 87.18,
+          "vrp_mir_mw": 0.0,
+          "n_anomalous_pixels": 84,
+          "paths_sum": 0
+        },
+        {
+          "datetime_utc": "2026-01-30 06:42",
+          "sensor": "VIIRS_NOAA21",
+          "vrp_tir_mw": 335.339,
+          "vrp_mir_mw": 0.0,
+          "n_anomalous_pixels": 0,
+          "paths_sum": 0
+        },
+        {
+          "datetime_utc": "2026-02-09 06:54",
+          "sensor": "VIIRS_NOAA21",
+          "vrp_tir_mw": 530.488,
+          "vrp_mir_mw": 0.0,
+          "n_anomalous_pixels": 0,
+          "paths_sum": 0
+        }
+      ],
+      "b_likely_examples": [
+        {
+          "datetime_utc": "2026-02-03 05:54",
+          "sensor": "VIIRS_SNPP",
+          "vrp_tir_mw": 1451.191,
+          "vrp_mir_mw": 4.537,
+          "n_anomalous_pixels": 105
+        },
+        {
+          "datetime_utc": "2026-02-03 06:18",
+          "sensor": "VIIRS_NOAA20",
+          "vrp_tir_mw": 155.599,
+          "vrp_mir_mw": 1.837,
+          "n_anomalous_pixels": 63
+        },
+        {
+          "datetime_utc": "2026-02-09 05:12",
+          "sensor": "VIIRS_NOAA21",
+          "vrp_tir_mw": 2840.465,
+          "vrp_mir_mw": 4.172,
+          "n_anomalous_pixels": 63
+        }
+      ]
+    },
+    {
+      "volcano": "Lascar",
+      "total_records": 1065,
+      "viirs_iband_with_vrp_tir": 25,
+      "A_killed": 13,
+      "A_killed_pct": 52.0,
+      "B_likely_reduced": 10,
+      "B_likely_reduced_pct": 40.0,
+      "survives_low_tir": 2,
+      "survives_low_tir_pct": 8.0,
+      "no_tir": 1040,
+      "not_iband": 0,
+      "recall": {
+        "viirs_refs_total": 223,
+        "tp_pre_fix": 12,
+        "tp_post_fix": 6,
+        "recall_pre": 0.053811659192825115,
+        "recall_post": 0.026905829596412557,
+        "delta_tp": -6
+      },
+      "a_killed_examples": [
+        {
+          "datetime_utc": "2026-01-29 05:12",
+          "sensor": "VIIRS_NOAA21",
+          "vrp_tir_mw": 241.772,
+          "vrp_mir_mw": 0.0,
+          "n_anomalous_pixels": 84,
+          "paths_sum": 0
+        },
+        {
+          "datetime_utc": "2026-01-29 06:06",
+          "sensor": "VIIRS_NOAA20",
+          "vrp_tir_mw": 110.415,
+          "vrp_mir_mw": 0.0,
+          "n_anomalous_pixels": 81,
+          "paths_sum": 0
+        },
+        {
+          "datetime_utc": "2026-02-13 06:06",
+          "sensor": "VIIRS_SNPP",
+          "vrp_tir_mw": 17.724,
+          "vrp_mir_mw": 0.0,
+          "n_anomalous_pixels": 0,
+          "paths_sum": 0
+        }
+      ],
+      "b_likely_examples": [
+        {
+          "datetime_utc": "2026-02-02 04:48",
+          "sensor": "VIIRS_NOAA20",
+          "vrp_tir_mw": 767.687,
+          "vrp_mir_mw": 2.128,
+          "n_anomalous_pixels": 7
+        },
+        {
+          "datetime_utc": "2026-02-02 05:42",
+          "sensor": "VIIRS_NOAA21",
+          "vrp_tir_mw": 275.199,
+          "vrp_mir_mw": 5.154,
+          "n_anomalous_pixels": 103
+        },
+        {
+          "datetime_utc": "2026-02-08 05:54",
+          "sensor": "VIIRS_SNPP",
+          "vrp_tir_mw": 9606.885,
+          "vrp_mir_mw": 4.949,
+          "n_anomalous_pixels": 108
+        }
+      ]
+    },
+    {
+      "volcano": "PlanchonPeteroa",
+      "total_records": 1190,
+      "viirs_iband_with_vrp_tir": 28,
+      "A_killed": 16,
+      "A_killed_pct": 57.1,
+      "B_likely_reduced": 8,
+      "B_likely_reduced_pct": 28.6,
+      "survives_low_tir": 4,
+      "survives_low_tir_pct": 14.3,
+      "no_tir": 1162,
+      "not_iband": 0,
+      "recall": {
+        "viirs_refs_total": 56,
+        "tp_pre_fix": 3,
+        "tp_post_fix": 1,
+        "recall_pre": 0.05357142857142857,
+        "recall_post": 0.017857142857142856,
+        "delta_tp": -2
+      },
+      "a_killed_examples": [
+        {
+          "datetime_utc": "2026-03-15 05:06",
+          "sensor": "VIIRS_SNPP",
+          "vrp_tir_mw": 4020.885,
+          "vrp_mir_mw": 3.049,
+          "n_anomalous_pixels": 62,
+          "paths_sum": 0
+        },
+        {
+          "datetime_utc": "2026-03-15 05:24",
+          "sensor": "VIIRS_NOAA20",
+          "vrp_tir_mw": 2536.342,
+          "vrp_mir_mw": 0.066,
+          "n_anomalous_pixels": 67,
+          "paths_sum": 0
+        },
+        {
+          "datetime_utc": "2026-03-15 06:12",
+          "sensor": "VIIRS_NOAA21",
+          "vrp_tir_mw": 915.273,
+          "vrp_mir_mw": 0.0,
+          "n_anomalous_pixels": 0,
+          "paths_sum": 0
+        }
+      ],
+      "b_likely_examples": [
+        {
+          "datetime_utc": "2026-03-13 05:12",
+          "sensor": "VIIRS_NOAA21",
+          "vrp_tir_mw": 154.955,
+          "vrp_mir_mw": 3.583,
+          "n_anomalous_pixels": 94
+        },
+        {
+          "datetime_utc": "2026-03-15 04:36",
+          "sensor": "VIIRS_NOAA21",
+          "vrp_tir_mw": 511.494,
+          "vrp_mir_mw": 0.108,
+          "n_anomalous_pixels": 1
+        },
+        {
+          "datetime_utc": "2026-03-17 05:36",
+          "sensor": "VIIRS_NOAA21",
+          "vrp_tir_mw": 746.307,
+          "vrp_mir_mw": 4.382,
+          "n_anomalous_pixels": 88
+        }
+      ]
+    },
+    {
+      "volcano": "Copahue",
+      "total_records": 1240,
+      "viirs_iband_with_vrp_tir": 155,
+      "A_killed": 39,
+      "A_killed_pct": 25.2,
+      "B_likely_reduced": 83,
+      "B_likely_reduced_pct": 53.5,
+      "survives_low_tir": 33,
+      "survives_low_tir_pct": 21.3,
+      "no_tir": 1085,
+      "not_iband": 0,
+      "recall": {
+        "viirs_refs_total": 14,
+        "tp_pre_fix": 2,
+        "tp_post_fix": 2,
+        "recall_pre": 0.14285714285714285,
+        "recall_post": 0.14285714285714285,
+        "delta_tp": 0
+      },
+      "a_killed_examples": [
+        {
+          "datetime_utc": "2026-01-30 05:30",
+          "sensor": "VIIRS_SNPP",
+          "vrp_tir_mw": 26.347,
+          "vrp_mir_mw": 0.0,
+          "n_anomalous_pixels": 86,
+          "paths_sum": 0
+        },
+        {
+          "datetime_utc": "2026-02-14 06:12",
+          "sensor": "VIIRS_NOAA20",
+          "vrp_tir_mw": 345.636,
+          "vrp_mir_mw": 0.0,
+          "n_anomalous_pixels": 0,
+          "paths_sum": 0
+        },
+        {
+          "datetime_utc": "2026-02-27 04:36",
+          "sensor": "VIIRS_NOAA21",
+          "vrp_tir_mw": 14.282,
+          "vrp_mir_mw": 0.0,
+          "n_anomalous_pixels": 52,
+          "paths_sum": 0
+        }
+      ],
+      "b_likely_examples": [
+        {
+          "datetime_utc": "2026-02-04 05:36",
+          "sensor": "VIIRS_SNPP",
+          "vrp_tir_mw": 118.135,
+          "vrp_mir_mw": 2.473,
+          "n_anomalous_pixels": 100
+        },
+        {
+          "datetime_utc": "2026-02-04 05:54",
+          "sensor": "VIIRS_NOAA20",
+          "vrp_tir_mw": 165.747,
+          "vrp_mir_mw": 2.037,
+          "n_anomalous_pixels": 99
+        },
+        {
+          "datetime_utc": "2026-02-04 06:48",
+          "sensor": "VIIRS_NOAA21",
+          "vrp_tir_mw": 346.233,
+          "vrp_mir_mw": 2.887,
+          "n_anomalous_pixels": 36
+        }
+      ]
+    }
+  ]
+}
