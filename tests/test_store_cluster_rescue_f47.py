@@ -302,6 +302,41 @@ def test_no_rescue_when_no_primary_cluster(basic_setup):
 # Test 4 — rescate reescribe hotspot/final_hotspot al centroide cluster (RED)
 # ===========================================================================
 
+def test_rescue_sets_distance_class_summit(basic_setup):
+    """RED→GREEN (S77 follow-up): tras el rescate, `distance_class` debe ser
+    'summit'. Sin esto, el frontend (`mirovaEqVrp`, `isSummitDetection`) filtra
+    los records rescatados → quedan invisibles en chart, tabla, card métricas.
+
+    El procesador setea `distance_class` ANTES del rescue en store basado en
+    `final_hotspot_dist_km` del pixel single hottest (que apunta al FP far),
+    quedando 'far'. Post-rescue, los campos `final_hotspot_*` se reescribieron
+    al centroide del cluster (test_rescue_preserves_cluster_centroid_as_hotspot)
+    pero `distance_class` quedaba stale.
+
+    Por construcción del rescate (pc.centroid_dist_km <= MAX_HOTSPOT_DIST_KM
+    Y pc.vrp_mw > 0), el cluster está cerca del vent — es summit por
+    definición. El fix setea 'summit' incondicional dentro del rescue branch.
+
+    Audit S77 confirma que sin este fix, los ~400 records que F47 fix rescata
+    son invisibles en UI (mirovaEqVrp:743 / isSummitDetection:902).
+    """
+    rec = _ndc_flag_record(
+        pc_vrp_mw=332.756,
+        pc_cdist_km=0.536,
+        hotspot_dist_km=26.58,
+    )
+    # Pre-rescue distance_class='far' (set por el procesador upstream).
+    assert rec.get("distance_class") == "far"
+
+    saved = _save_and_load(rec, basic_setup, max_hotspot=5.0)
+
+    assert saved.get("distance_class") == "summit", (
+        f"Post-rescate distance_class debe ser 'summit' (cluster por construccion "
+        f"dentro inner_radius). got={saved.get('distance_class')}. Sin esto el "
+        f"frontend filtra estos records via mirovaEqVrp -> recall mejora invisible."
+    )
+
+
 def test_rescue_preserves_cluster_centroid_as_hotspot(basic_setup):
     """RED: tras el rescate, los campos hotspot_* y final_hotspot_* deben
     apuntar al centroide del cluster (no al pixel single lejano que
