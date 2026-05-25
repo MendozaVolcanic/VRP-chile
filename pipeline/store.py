@@ -134,7 +134,8 @@ def append_record(volcano_name: str, record: dict,
                    volcano_lat: float = None, volcano_lon: float = None,
                    overwrite: bool = False,
                    max_hotspot_dist_km: float = None,
-                   enable_pixel_level_distance_filter: bool = False):
+                   enable_pixel_level_distance_filter: bool = False,
+                   max_cluster_pixels: int = None):
     """
     Append a VRP record to the volcano's JSON file.
     Deduplicates by (datetime_utc, sensor) — safe to re-run.
@@ -243,6 +244,24 @@ def append_record(volcano_name: str, record: dict,
             record["hotspot_dist_km"] = None
             record["anomaly_pixels"] = []
             vrp_eruption = 0
+
+    # F52-A/S77 (A45) — Per-volcano cap sobre n_pixels del cluster.
+    # Villarrica tiene clusters glaciares (Pichillancahue NW) de 16-86 pixels
+    # con ΔT 5-11K (snow/ice marginal, no lava real). MIROVA los filtra,
+    # nosotros los sumábamos → ratio mediano 10.91× vs MIROVA. Otros Tier A
+    # con clusters grandes (Lastarria/Llaima/Copahue mediana 35-46 px) están
+    # BIEN calibrados porque sus pixels tienen ΔT alto (lava real) — por eso
+    # el cap es per-volcano (yaml override `max_cluster_pixels: 12` solo
+    # Villarrica). Sin override (None ó 0) → comportamiento legacy.
+    # Ver docs/F52_VILLARRICA_OVER_ESTIMATION_S77.md.
+    if max_cluster_pixels is not None and max_cluster_pixels > 0:
+        pc_for_cap = record.get("primary_cluster") or {}
+        pc_n_pixels = pc_for_cap.get("n_pixels") or 0
+        if pc_n_pixels > max_cluster_pixels:
+            vrp_eruption = 0
+            record["discarded_reason"] = "cluster_too_large_for_volcano"
+            record["discarded_max_cluster_pixels"] = max_cluster_pixels
+            record["discarded_actual_cluster_pixels"] = pc_n_pixels
 
     record["vrp_mw"] = round(max(vrp_eruption, vrp_vent), 3)
 
