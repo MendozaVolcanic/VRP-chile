@@ -48,6 +48,53 @@ _load_dotenv_if_present()
 
 import earthaccess  # noqa: E402 — debe ir después de _load_dotenv para que earthaccess vea el token
 
+
+# ── F55/S77 — Profile-bypass para earthaccess.Store ───────────────────────────
+# Bug F55 (PR #199 investigation): earthaccess >= 0.17.0 `Store.__init__`
+# llama `set_requests_session("https://urs.earthdata.nasa.gov/profile")` para
+# sembrar cookies URS, AUNQUE haya EARTHDATA_TOKEN seteado. En runners Azure
+# de GH Actions ese host está bloqueado/timea-out → ConnectTimeoutError →
+# NRT cron caído. F51 fix anterior (probe-gate) eliminó el primer síntoma
+# pero el GET a /profile sigue pasando dentro de Store.__init__.
+#
+# Fix: monkey-patch `Store.set_requests_session` para no-op cuando URL
+# contiene "/profile" Y EARTHDATA_TOKEN está seteado. Las cookies URS
+# NO son necesarias para granule downloads (la session ya lleva
+# Authorization: Bearer <token>).
+#
+# Idempotente: instalar 2 veces = 1 patch efectivo (no recursión).
+_profile_bypass_installed = False
+
+
+def _install_profile_bypass():
+    """F55: monkey-patch earthaccess.Store.set_requests_session bypass /profile."""
+    global _profile_bypass_installed
+    if _profile_bypass_installed:
+        return
+    import earthaccess.store as eastore  # local import para evitar circular
+    if hasattr(eastore.Store, "_original_set_requests_session"):
+        # Ya parcheado antes (test fixture reset puede haberlo dejado a medias)
+        eastore.Store.set_requests_session = (
+            eastore.Store._original_set_requests_session
+        )
+        delattr(eastore.Store, "_original_set_requests_session")
+    original = eastore.Store.set_requests_session
+
+    def _patched_set_requests_session(self, url, *args, **kwargs):
+        if "/profile" in (url or "") and os.environ.get("EARTHDATA_TOKEN", "").strip():
+            # F55 bypass: skip GET a /profile cuando hay token. Las cookies
+            # URS no son necesarias — el token lleva Authorization: Bearer.
+            return None
+        return original(self, url, *args, **kwargs)
+
+    eastore.Store._original_set_requests_session = original
+    eastore.Store.set_requests_session = _patched_set_requests_session
+    _profile_bypass_installed = True
+
+
+# Instalar el patch ANTES de cualquier earthaccess.login() en este módulo.
+_install_profile_bypass()
+
 # H7 (S35): Force IPv4 for NASA Earthdata DNS resolution. Errno 101
 # "Network is unreachable" en GitHub-hosted runners es típicamente IPv6
 # routing degradado — el runner resuelve urs.earthdata.nasa.gov a una
@@ -233,6 +280,10 @@ def auth():
     """
     import os
     import time
+    # F55/S77 defensa-en-profundidad: re-instalar el profile-bypass por si
+    # algún caller (test fixture, monkey-patch ajeno) lo deshizo entre
+    # imports. Idempotente — no-op si ya está instalado.
+    _install_profile_bypass()
     netrc_path_unix = os.path.expanduser("~/.netrc")
     netrc_path_win = os.path.expanduser("~/_netrc")
     has_netrc = os.path.exists(netrc_path_unix) or os.path.exists(netrc_path_win)
