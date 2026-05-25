@@ -471,6 +471,42 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     Auditorías posteriores pueden contar `records con source='cluster_rescue'`
     para medir impacto del bug y exposure.
 
+- **A47. Reproc paralelo sobre `data/mirova_equivalent/` corrompe JSONs por
+  race condition** (S77, lección 2026-05-25): 4 procesos `run_pipeline.py`
+  concurrentes sobre el mismo volcán o sobre directorio compartido produjeron
+  JSON parse error "Expecting ',' delimiter" en Tupungatito.json (escritura
+  interleaved del mismo archivo). Reglas:
+  - **Reproc local NUNCA paralelo** sobre el mismo `data_subdir`. Usar
+    `for V in $VOLS; do python ... --volcano $V; done` (loop bash secuencial)
+    dentro de UN solo background process.
+  - **Paralelo sí seguro** cuando cada proceso usa profile distinto con
+    `data_subdir` aislado (patrón A/B test S24/S25 — perfiles
+    `_f46_disabled/_enabled` con dirs distintos).
+  - **GH Actions matrix NRT** ya tiene `max-parallel:1` global por workflow,
+    cron cada 2h, sin race observado — el race es local solamente.
+  - Si race ocurre y JSON queda corrupto: `git checkout origin/main -- data/mirova_equivalent/<vol>.json` restaura.
+
+- **A48. Subagentes pueden inventar regex/heurísticas que parecen razonables
+  pero rompen la convención real del proyecto** (S77, lección 2026-05-25):
+  el subagente F49 audit comprehensivo PR #196 escribió
+  `sensor_bucket_ours(sensor)` con regex `"375" in s` ó `"_I" in s` para
+  detectar VIIRS I-band. PERO la convención real es:
+  - `VIIRS_SNPP`/`VIIRS_NOAA20`/`VIIRS_NOAA21` (sin sufijo) = I-band 375m.
+  - `VIIRS_*_750` = M-band 750m.
+  - El regex del subagente clasificó nuestros I-band como M-band → audit
+    concluyó "pipeline no procesa VIIRS375" (FALSO). Conclusión #1 del PR
+    inválida. Corregido en addendum v2 PR #197.
+
+  Mitigaciones aplicables a sesiones futuras con subagentes:
+  - **Validar convención del proyecto antes** de inventar regex/heurísticas:
+    `grep ^sensor data/mirova_equivalent/*.json` o ver `Counter(r['sensor'])`.
+  - **Cross-check conclusión "alto impacto"** del subagente con sanity test
+    rápido antes de aceptarla. Si dice "pipeline no procesa X", un
+    `python -c "import json; ..."` debería confirmarlo en 30 segundos.
+  - Subagentes son útiles para investigaciones de alto volumen pero NO
+    son source-of-truth metodológica. Sus regex/heurísticas reflejan
+    educated guess, no convenciones verificadas.
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
