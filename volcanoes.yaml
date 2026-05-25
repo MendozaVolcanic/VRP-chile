@@ -55,6 +55,12 @@ volcanoes:
   lon: -71.93
   radius_km: 25
   inner_radius_km: 5  # MIROVA KML oficial — summit/far visual
+  # F52-A/S77 (A45) — cap n_pixels del cluster para descartar agregaciones
+  # glaciares marginales (Pichillancahue NW del cráter). Audit S77 confirmó
+  # ratio mediano 10.91× vs MIROVA por clusters 16-86 px con ΔT 5-11K
+  # (nieve/glaciar, no lava real). Otros Tier A NO necesitan cap (sus
+  # clusters grandes son lava legítima). Ver docs/F52_VILLARRICA_OVER_ESTIMATION_S77.md.
+  max_cluster_pixels: 12
   gvp_id: 357120
   country: Chile
   active: true
