@@ -237,13 +237,28 @@ def auth():
     netrc_path_win = os.path.expanduser("~/_netrc")
     has_netrc = os.path.exists(netrc_path_unix) or os.path.exists(netrc_path_win)
 
+    # F51/S77 fix — Token bypass debe saltar el probe-gate S70-0.
+    # earthaccess >= 0.17.0 con EARTHDATA_TOKEN seteado NUNCA toca el host
+    # problemático urs.earthdata.nasa.gov (skip _find_or_create_token). El
+    # probe TCP S70-0 a ese mismo host NO aporta info útil cuando hay token,
+    # y el raise NASA_AUTH_UNREACHABLE final aborta el cron sin razón.
+    # Pre-fix: NRT 100% caído 2026-05-23+ aunque token OK en workflow.
+    # Whitespace-only treated as no token (defensa vs templating yaml).
+    has_token = bool((os.environ.get("EARTHDATA_TOKEN") or "").strip())
+
     # Probe TCP rápido. Si NASA upstream está caída, acortamos budget de 22 min
     # a ~2 min para no desperdiciar minutos de GitHub Actions × 9 vols × cada cron.
-    probe_ok = _probe_nasa_auth(timeout=5.0)
-    if probe_ok:
-        delays = [0, 10, 30, 60, 120, 240, 360, 480]  # 8 attempts, ~22 min total
+    if has_token:
+        # Con token, skip probe completamente (no aporta info — bypass evita
+        # el host). Budget largo para retries de otros transients (granule DL).
+        probe_ok = True
+        delays = [0, 10, 30, 60, 120, 240, 360, 480]
     else:
-        delays = list(_PROBE_FAIL_DELAYS)  # ~2 min total
+        probe_ok = _probe_nasa_auth(timeout=5.0)
+        if probe_ok:
+            delays = [0, 10, 30, 60, 120, 240, 360, 480]
+        else:
+            delays = list(_PROBE_FAIL_DELAYS)
 
     last_err = None
     for delay in delays:
@@ -261,9 +276,12 @@ def auth():
             except Exception as e:
                 last_err = e
 
-    # Si aquí, todos los attempts fallaron. Si la causa fue probe failure,
-    # marcamos el error como NASA_AUTH_UNREACHABLE para que nrt.yml lo detecte.
-    if not probe_ok:
+    # Si aquí, todos los attempts fallaron. Si la causa fue probe failure
+    # (y NO había token bypass), marcamos NASA_AUTH_UNREACHABLE para que
+    # nrt.yml lo detecte. Con token la etiqueta sería engañosa — el bypass
+    # no toca el host del probe, así que un fallo con token es OTRA cosa
+    # (credencial inválida, glitch del granule download, etc).
+    if not probe_ok and not has_token:
         raise RuntimeError(
             f"NASA_AUTH_UNREACHABLE: NASA Earthdata auth ({NASA_AUTH_HOST}:{NASA_AUTH_PORT}) "
             f"no responde a probe TCP en 5s ni a {len(delays)} reintentos cortos "
