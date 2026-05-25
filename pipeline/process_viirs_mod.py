@@ -107,7 +107,11 @@ from pipeline.profile import (
     PATH_D_REQUIRES_COVALIDATION,
     PATH_D_ONLY_CAP_MW,
     PATH_D_ONLY_CAP_TBG_MAX_K,
+    ENABLE_SINGLE_PIXEL_SUB_MW_MODE,
+    SUB_MW_REGIME_THRESHOLD_MW,
+    SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
 )
+from .single_pixel_mode import apply_single_pixel_mode
 from .detection_context import (
     contextual_dnti_hot_mask,
     dual_roi_contextual_dnti_hot_mask,
@@ -859,6 +863,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             }
             if _d9_capped:
                 primary_cluster["d9_capped"] = True
+            # F52-B S77 (A45) — single-pixel mode régimen sub-MW.
+            _pix_vrps = [float(vrp_per_pixel_2d[i, j])
+                         for (i, j) in _c["pixel_indices"]]
+            primary_cluster = apply_single_pixel_mode(
+                primary_cluster, _pix_vrps,
+                enabled=ENABLE_SINGLE_PIXEL_SUB_MW_MODE,
+                threshold_mw=SUB_MW_REGIME_THRESHOLD_MW,
+                max_pixels=SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
+            )
         hotspot_dist_km = anomaly_pixels[0]["dist_km"]
 
     valid_roi = roi_bt_full[~np.isnan(roi_bt_full)]
@@ -1048,6 +1061,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 }
                 if _d9_capped_t:
                     primary_cluster["d9_capped"] = True
+                # F52-B S77 (A45) — single-pixel mode régimen sub-MW.
+                _pix_vrps_t = [float(t1_vrp_2d[i, j])
+                               for (i, j) in top["pixel_indices"]]
+                primary_cluster = apply_single_pixel_mode(
+                    primary_cluster, _pix_vrps_t,
+                    enabled=ENABLE_SINGLE_PIXEL_SUB_MW_MODE,
+                    threshold_mw=SUB_MW_REGIME_THRESHOLD_MW,
+                    max_pixels=SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
+                )
                 n_hotspots_clustered = len(t1_clusters)
 
     return {

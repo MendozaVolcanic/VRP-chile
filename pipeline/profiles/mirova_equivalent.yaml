@@ -278,11 +278,35 @@ paths:
   # Cap=5MW basado en Coppola 2016a Gaua "<5 MW Tier A sospechosos" + S70-2 T4
   # cross-check Lastarria (max MIROVA en cirrus FPs = 0.21 MW).
   #
-  # Drift remanente abierto (T1.5 S72): Villarrica/Chaiten/PP/Tupungatito/NdC
-  # siguen ratios 6-12× post-cap. NO es D9 — investigar causa arquitectural
-  # papers-first (probable cluster selection / first_pass re-firing).
+  # Drift T1.5 S72 — F52-B CERRADO S77 (PRs #191 + #192 audit, A45):
+  # Tupungatito 30.15×, Chaitén 2.53×, PP 2.10×, PCC 0.48× — todos eran
+  # régimen sub-MW con path D contextual reportando sum(2-3 pixels) cuando
+  # MIROVA NRT reporta single-pixel. Fix arquitectural: single_pixel_mode
+  # bajo bloque dedicado más abajo. Villarrica/NdC restantes diagnosticados
+  # F52-A (otro fix, no único único cluster sum/max).
   path_d_only_cap_mw: 5.0
   path_d_only_cap_tbg_max_k: 270.0
+
+# --- F52-B S77 (A45) — Single-pixel mode régimen sub-MW (drift T1.5 S72 fix) ---
+# Cuando primary_cluster cae en régimen sub-MW (vrp_mw_sum < threshold AND
+# n_pixels <= max_pixels), reportar `pc.vrp_mw = max(per_pixel_vrp)` (pixel
+# más caliente) en vez de la suma. Alinea con MIROVA NRT single-pixel
+# reporting en sub-MW (0.21-0.45 MW canónicos).
+#
+# Causa raíz: path D dNTI-contextual produce 2-3 pixels marginales cuando
+# MIROVA reporta single-pixel. Sum infla por factor 2-30× (Tupungatito 30.15×,
+# Chaitén 2.53×, PP 2.10×). PCC con ratio 0.48× sub-estimaba por el mismo
+# bug arquitectural manifestado al revés (cluster contiguo nuestro vs single
+# pixel MIROVA). El fix corrige ambos sentidos del drift.
+#
+# Volcanes NO afectados (régimen alto-MW o sin path D dominante): Villarrica
+# (F52-A), Copahue, Isluga, Lascar, Lastarria, Llaima, NdC.
+#
+# Default ON post-fix. Ver pipeline/single_pixel_mode.py +
+# tests/test_single_pixel_mode_f52b.py (11/11 PASS) + docs/F52B_SINGLE_PIXEL_MODE.md.
+enable_single_pixel_sub_mw_mode: true
+sub_mw_regime_threshold_mw: 5.0
+single_pixel_max_cluster_pixels: 3
 
 # --- Sensor activation ---
 # true = process granules from this sensor in this profile.
