@@ -602,6 +602,12 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     test1_centroid_lat = None
     test1_centroid_lon = None
     test1_L_bg_local = None  # S26 default outside I04 block
+    # F53/S78 fix: test1_hot también necesita default. Sin esto, alguna rama
+    # interna del bloque I04 puede llegar al hot_paths combiner kwarg test1_hot
+    # antes de la asignación dentro del bloque, produciendo UnboundLocalError.
+    # Detectado en sanity test S77 (1/14 granules VNP02IMG.A2026143.0648).
+    # Inicialización efectiva (np.zeros_like) se hace defensivamente más abajo.
+    test1_hot = None
     n_excluded_water = 0
     hotspot_lat = None
     hotspot_lon = None
@@ -859,6 +865,13 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                                 & (bt > (t_bg_i04 + NTI_BT_SANITY_K)))
                 n_eti_path = int(np.sum(eti_path_hot))
 
+            # F53/S78 guard: si alguna rama interna saltó la asignación de
+            # test1_hot dentro del bloque I04, reinicializar a zeros con la
+            # shape de bt_path_hot (garantizado initialized aquí por flow).
+            # Sin esto: UnboundLocalError o pasar None a combine_hot_paths
+            # (cuya firma exige np.ndarray).
+            if test1_hot is None:
+                test1_hot = np.zeros_like(bt_path_hot)
             hot_mask_2d = combine_hot_paths(
                 bt_path_hot=bt_path_hot,
                 nti_path_hot=nti_path_hot,
