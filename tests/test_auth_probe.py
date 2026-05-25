@@ -66,9 +66,15 @@ def test_probe_fast_returns_false_on_os_error(monkeypatch):
 def test_auth_raises_nasa_unreachable_when_probe_fails(monkeypatch):
     """auth() debe lanzar RuntimeError con 'NASA_AUTH_UNREACHABLE' si probe falla
     y los reintentos cortos tampoco logran login.
+
+    F51 (S77): el fix introdujo `has_token` gate — con EARTHDATA_TOKEN seteado
+    el probe NO corre y NO se levanta NASA_AUTH_UNREACHABLE (bypass total).
+    Este test cubre el flujo legacy "sin token, NASA caída", así que limpia
+    explícitamente la env var.
     """
     from pipeline import fetch
 
+    monkeypatch.delenv("EARTHDATA_TOKEN", raising=False)  # F51: forzar legacy path
     monkeypatch.setattr(fetch, "_probe_nasa_auth", lambda timeout=5.0: False)
     # Acortar delays mock para no esperar minutos en test
     monkeypatch.setattr(fetch, "_PROBE_FAIL_DELAYS", [0, 0, 0])  # 3 retries quick
