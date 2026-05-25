@@ -59,11 +59,57 @@ jobs:
             echo "Latest date: $(awk -F, 'NR==2{print $2}' latest_consolidado.csv | head -c 16)"
           fi
 
+      - name: Setup Python
+        if: steps.changed.outputs.changed == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install minimal deps for rebuild
+        if: steps.changed.outputs.changed == 'true'
+        run: |
+          pip install pyyaml
+
+      - name: Rebuild data/mirova/<Vol>.json from CSV (F54 fix)
+        if: steps.changed.outputs.changed == 'true'
+        run: |
+          set -e
+          # F54/S77 — el dashboard frontend NO lee latest_consolidado.csv
+          # directamente. Lee data/mirova/<Volcano>.json (records filtrados
+          # por volcán) generados por scripts/rebuild_mirova_from_consolidado.py.
+          # Sin este step, sync del CSV mantenía latest_consolidado fresh pero
+          # data/mirova/*.json quedaban congelados meses → banner stale F49
+          # aparecía aunque el sync funcionaba. Detectado S77 2026-05-25.
+          #
+          # Mapping JSON_stem → "Volcan" en CSV (verificado 2026-05-25).
+          # 11 Tier A según volcanoes.yaml mirova_monitored=true.
+          for entry in \
+            "PuyehueCordonCaulle|Puyehue-Cordon Caulle" \
+            "Villarrica|Villarrica" \
+            "Lascar|Lascar" \
+            "Copahue|Copahue" \
+            "NevadosDeChillan|Nevados de Chillan" \
+            "Llaima|Llaima" \
+            "Chaiten|Chaiten" \
+            "PlanchonPeteroa|PlanchonPeteroa" \
+            "Lastarria|Lastarria" \
+            "Isluga|Isluga" \
+            "Tupungatito|Tupungatito"
+          do
+            stem="${entry%%|*}"
+            csvname="${entry##*|}"
+            echo "Rebuilding data/mirova/${stem}.json from CSV (Volcan='${csvname}')"
+            python scripts/rebuild_mirova_from_consolidado.py \
+              "$stem" "$csvname" \
+              --source latest_consolidado.csv \
+              || echo "  WARN: rebuild $stem failed (continuing)"
+          done
+
       - name: Commit and push if changed
         if: steps.changed.outputs.changed == 'true'
         run: |
           git config user.name "vrp-mirova-sync-bot"
           git config user.email "noreply@github.com"
-          git add latest_consolidado.csv
-          git commit -m "data(mirova): sync latest_consolidado.csv from Mirova-v1 (auto)"
+          git add latest_consolidado.csv data/mirova/
+          git commit -m "data(mirova): sync CSV + regenerate per-volcano JSONs (auto, F54)"
           git push
