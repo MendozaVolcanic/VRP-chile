@@ -130,6 +130,16 @@ def cluster_hotspots(
         # lejos. Fix: si hay clusters con vrp>0, ignorar los con vrp=0 al
         # rankear. Solo si todos vrp=0, fallback al menor dist (preserva
         # comportamiento previo cuando no hay señal real).
+        # F63/S78 — fix intentado, RECHAZADO post-TDD por trade-off legítimo.
+        # docs/F63_CLUSTER_CONNECTIVITY_BRAINSTORM_S78.md (PR #209).
+        # El fix simple (filtrar S43 solo cuando hay vrp>0 inside) ROMPE el
+        # caso legítimo Tup/Last/PP donde cluster inside vrp=0 es ruido y
+        # outside vrp>0 es lava real (test_d8_vent_anchored.py:163-216).
+        # F63 propio = ambos casos indistinguibles sin más metadata
+        # (triggered_test1 flag, vent_anchored explícito, etc).
+        # Approach correcto S79+ = F66 híbrido (bg kernel local dual-gate)
+        # que resuelve ambos físicamente sin trade-off.
+        # docs/F66_BG_KERNEL_LOCAL_DEEP_S78.md (PR #214).
         if has_vrp:
             with_vrp = [c for c in clusters if c.get("vrp_mw", 0.0) > 0]
             ranking_set = with_vrp if with_vrp else clusters
