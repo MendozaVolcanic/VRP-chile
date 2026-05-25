@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VRP Chile — Mosaico panorámico Tier A</title>
+<!--
+  F1/S78 — Vista panorámica multi-volcán (paridad Mirova-v1).
+
+  Paradigma distinto a `index.html` (drill-down mono-volcán) y `diario.html`
+  (calendario diario por volcán). Acá: 11 mini-cards Chart.js en grilla,
+  ordenadas N→S (panorámico geográfico), cada una con sparkline 30d del VRP
+  MIROVA-equivalente (cluster summit-only). Click → drill-down al index.html.
+
+  No modifica index.html ni diario.html — es página standalone. Reusa la
+  lógica científica clave (`mirovaEqVrp`, `getLevel`, `latestVRP`,
+  `renderMirovaFreshness`) re-implementada acá para minimizar coupling.
+  Cualquier divergencia futura en esas funciones requiere sincronización
+  manual entre las 3 páginas (igual que diario.html hoy).
+-->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<style>
+:root {
+  --bg: #1a1a2e; --surface: #16213e; --card: #0f3460;
+  --border: #1a3a5c; --text: #e0e6f0; --muted: #7a8fa6;
+  --green: #00d084; --yellow: #ffc107; --orange: #ff7043; --red: #f44336;
+  --blue: #2196f3; --cyan: #00bcd4; --purple: #9c27b0;
+  --modis: #ff8c00; --v375: #e91e63; --v750: #00bcd4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+/* ── Header ── */
+header {
+  background: linear-gradient(135deg, #0d1b2a 0%, #1a2744 100%);
+  border-bottom: 2px solid #1e3a5f;
+  padding: 14px 24px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.logo { font-size: 1.4rem; font-weight: 700; letter-spacing: 1px; }
+.logo span { color: var(--orange); }
+.header-sub { font-size: 0.78rem; color: var(--muted); }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; display: inline-block; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.status-label { font-size: 0.75rem; color: var(--green); display: flex; align-items: center; gap: 6px; }
+#updated-label { font-size: 0.72rem; color: var(--muted); }
+
+/* ── Nav (triple link) ── */
+.nav-links { display: flex; gap: 6px; }
+.nav-link {
+  background: var(--card); color: var(--muted); border: 1px solid var(--border);
+  padding: 5px 12px; border-radius: 4px; font-size: 0.78rem; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s;
+}
+.nav-link:hover { color: var(--text); border-color: var(--blue); }
+.nav-link.active { background: #1e3a5f; color: var(--cyan); border-color: var(--cyan); }
+
+/* ── Stale banner (F49 reuse) ── */
+#mirova-stale-banner { display: none; }
+
+/* ── Intro ── */
+.intro {
+  padding: 14px 24px 8px; max-width: 1600px; margin: 0 auto;
+  color: var(--muted); font-size: 0.83rem; line-height: 1.5;
+}
+.intro b { color: var(--text); }
+
+/* ── Mosaico grid ── */
+main { padding: 12px 24px 32px; max-width: 1600px; margin: 0 auto; }
+.mosaico {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 14px;
+}
+.mini-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px 10px; cursor: pointer;
+  transition: all 0.15s; display: flex; flex-direction: column; min-height: 240px;
+}
+.mini-card:hover { border-color: var(--blue); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(33,150,243,0.2); }
+.mini-card.alert-high { border-left: 4px solid var(--red); }
+.mini-card.alert-mod  { border-left: 4px solid var(--orange); }
+.mini-card.alert-low  { border-left: 4px solid var(--yellow); }
+.mini-card.alert-vlow { border-left: 4px solid var(--green); }
+.mini-card.alert-none { border-left: 4px solid var(--border); }
+
+.mc-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+.mc-name { font-size: 0.95rem; font-weight: 700; line-height: 1.15; }
+.mc-region { font-size: 0.66rem; color: var(--muted); margin-top: 2px; }
+.mc-zone {
+  font-size: 0.58rem; font-weight: 700; padding: 2px 6px; border-radius: 3px;
+  letter-spacing: 0.4px; background: rgba(0,188,212,0.15); color: var(--cyan);
+  border: 1px solid rgba(0,188,212,0.35); white-space: nowrap;
+}
+
+.mc-metrics { display: flex; gap: 14px; align-items: baseline; margin: 2px 0 6px; }
+.mc-vrp { font-size: 1.4rem; font-weight: 700; line-height: 1; }
+.mc-vrp.lvl-vlow  { color: var(--green); }
+.mc-vrp.lvl-low   { color: var(--yellow); }
+.mc-vrp.lvl-mod   { color: var(--orange); }
+.mc-vrp.lvl-high  { color: var(--red); }
+.mc-vrp.lvl-vhigh { color: var(--red); }
+.mc-vrp.lvl-nd    { color: var(--muted); }
+.mc-vrp-unit { font-size: 0.62rem; color: var(--muted); margin-left: 3px; }
+.mc-level {
+  font-size: 0.62rem; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.lvl-badge-vlow  { background: rgba(0,208,132,0.15);  color: var(--green);  border: 1px solid var(--green); }
+.lvl-badge-low   { background: rgba(255,193,7,0.15);  color: var(--yellow); border: 1px solid var(--yellow); }
+.lvl-badge-mod   { background: rgba(255,112,67,0.15); color: var(--orange); border: 1px solid var(--orange); }
+.lvl-badge-high  { background: rgba(244,67,54,0.15); color: var(--red);    border: 1px solid var(--red); }
+.lvl-badge-vhigh { background: rgba(244,67,54,0.25); color: var(--red);    border: 1px solid var(--red); }
+.lvl-badge-nd    { background: rgba(122,143,166,0.1); color: var(--muted); border: 1px solid var(--border); }
+
+.mc-chart-wrap { flex: 1; position: relative; height: 90px; margin-top: 4px; }
+.mc-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border);
+  font-size: 0.66rem; color: var(--muted);
+}
+.mc-footer .last { color: var(--text); }
+.mc-no-data {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  color: var(--muted); font-size: 0.8rem; font-style: italic;
+}
+
+footer {
+  text-align: center; padding: 20px; color: var(--muted); font-size: 0.78rem;
+  border-top: 1px solid var(--border); line-height: 1.7;
+}
+footer a { color: var(--cyan); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+@media (max-width: 720px) {
+  .mosaico { grid-template-columns: 1fr; }
+  header { flex-direction: column; align-items: flex-start; }
+  .header-right { margin-left: 0; width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div id="mirova-stale-banner"></div>
+
+<header>
+  <div>
+    <div class="logo">VRP<span>·</span>Chile</div>
+    <div class="header-sub">Mosaico panorámico · 11 volcanes Tier A · norte → sur</div>
+  </div>
+  <div class="header-right">
+    <span class="status-label"><span class="status-dot"></span><span id="updated-label">Cargando…</span></span>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">🏠 Detallado</a>
+      <a href="diario.html" class="nav-link">📊 Diario</a>
+      <a href="mosaico.html" class="nav-link active">🗺️ Mosaico</a>
+    </div>
+  </div>
+</header>
+
+<div class="intro">
+  <b>Vista panorámica</b> al estilo Mirova-v1: un volcán por tarjeta, ordenados de norte a sur
+  por latitud (CVZ → SVZ → Austral). Cada tarjeta muestra la serie del VRP MIROVA-equivalente
+  (cluster <i>summit-only</i>, dentro del <code>inner_radius_km</code> oficial) en los últimos 30 días.
+  Click en una tarjeta abre el dashboard detallado de ese volcán.
+</div>
+
+<main>
+  <div id="mosaico" class="mosaico"></div>
+</main>
+
+<footer>
+  <div><b>VRP Chile</b> · Sistema independiente clon MIROVA · 11 volcanes Tier A NRT · auto-refresh 15 min</div>
+  <div style="margin-top: 6px;">
+    <a href="https://github.com/MendozaVolcanic/VRP-chile" target="_blank">GitHub</a> ·
+    <a href="https://www.mirovaweb.it/" target="_blank">MIROVA Web</a> ·
+    <a href="https://www.sernageomin.cl/" target="_blank">SERNAGEOMIN</a>
+  </div>
+  <div style="margin-top: 6px; font-size: 0.78em;">
+    © 2026 Nicolás Mendoza · Asistencia: Claude AI (Anthropic) · Metodología: Coppola et al. (Università di Torino)
+  </div>
+</footer>
+
+<script>
+// ─── Path helper (paridad con index.html línea 585) ──────────────────────────
+const BASE_PATH = (() => {
+  const path = window.location.pathname;
+  if (path.includes('/frontend/')) return '/';
+  return '';
+})();
+
+// ─── 11 volcanes Tier A ordenados N→S por latitud ────────────────────────────
+// Fuente: index.html VOLCANOES_ALL (hasMirova: true). Ordenado por lat desc
+// (N negativo más cerca de 0 → S latitud más negativa).
+const TIER_A = [
+  { name: "Isluga",              display: "Isluga",              region: "Tarapacá",       lat: -19.150, lon: -68.830, inner_radius_km: 5 },
+  { name: "Lascar",              display: "Láscar",              region: "Antofagasta",    lat: -23.369, lon: -67.732, inner_radius_km: 5 },
+  { name: "Lastarria",           display: "Lastarria",           region: "Atacama",        lat: -25.168, lon: -68.507, inner_radius_km: 3 },
+  { name: "Tupungatito",         display: "Tupungatito",         region: "Valparaíso",     lat: -33.400, lon: -69.800, inner_radius_km: 7 },
+  { name: "PlanchonPeteroa",     display: "Planchón-Peteroa",    region: "Maule",          lat: -35.240, lon: -70.568, inner_radius_km: 3 },
+  { name: "NevadosDeChillan",    display: "Nevados de Chillán",  region: "Ñuble",          lat: -36.863, lon: -71.377, inner_radius_km: 5 },
+  { name: "Copahue",             display: "Copahue",             region: "Biobío",         lat: -37.856, lon: -71.183, inner_radius_km: 4 },
+  { name: "Llaima",              display: "Llaima",              region: "Araucanía",      lat: -38.692, lon: -71.729, inner_radius_km: 5 },
+  { name: "Villarrica",          display: "Villarrica",          region: "Araucanía",      lat: -39.420, lon: -71.940, inner_radius_km: 5 },
+  { name: "PuyehueCordonCaulle", display: "Puyehue–Cordón Caulle",region: "Los Ríos",      lat: -40.590, lon: -72.117, inner_radius_km: 20 },
+  { name: "Chaiten",             display: "Chaitén",             region: "Los Lagos",      lat: -42.833, lon: -72.646, inner_radius_km: 5 },
+];
+
+// Clasificación geográfica MIROVA: CVZ (~14-27°S), SVZ (~33-46°S), Austral (>46°S).
+// Para los 11 Tier A: 3 CVZ, 8 SVZ, ningún Austral todavía.
+function zoneOf(lat) {
+  if (lat > -28) return "CVZ";
+  if (lat > -46) return "SVZ";
+  return "Austral";
+}
+
+// ─── Niveles de alerta (sync con index.html L665) ────────────────────────────
+const LEVELS = [
+  { key: "nd",   label: "Sin datos",   max: 0,        cls: "lvl-badge-nd",    cardCls: "alert-none" },
+  { key: "vlow", label: "Muy Bajo",    max: 1,        cls: "lvl-badge-vlow",  cardCls: "alert-vlow" },
+  { key: "low",  label: "Bajo",        max: 10,       cls: "lvl-badge-low",   cardCls: "alert-low"  },
+  { key: "mod",  label: "Moderado",    max: 100,      cls: "lvl-badge-mod",   cardCls: "alert-mod"  },
+  { key: "high", label: "Alto",        max: 1000,     cls: "lvl-badge-high",  cardCls: "alert-high" },
+  { key: "vhigh",label: "Muy Alto",    max: Infinity, cls: "lvl-badge-vhigh", cardCls: "alert-high" },
+];
+function getLevel(vrp) {
+  if (!vrp || vrp <= 0) return LEVELS[0];
+  for (const l of LEVELS.slice(1)) if (vrp < l.max) return l;
+  return LEVELS[LEVELS.length - 1];
+}
+
+// ─── VRP MIROVA-equivalente (sync con index.html L822) ───────────────────────
+// Cluster summit-only, con sanity cap F2.8 (50 MW × 1000 = 50,000 MW).
+function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
+  if (!r) return 0;
+  if (!r.primary_cluster) {
+    const vfb = r.vrp_mw ?? r.vrp_mir_mw ?? 0;
+    return vfb > 50000 ? 0 : vfb;
+  }
+  if (r.distance_class && r.distance_class !== "summit" && !includeFar) return 0;
+  const pc = r.primary_cluster;
+  if (!includeFar && pc.centroid_dist_km != null && pc.centroid_dist_km > innerKm) return 0;
+  const vmw = pc.vrp_mw ?? 0;
+  return vmw > 50000 ? 0 : vmw;
+}
+
+// ─── Latest 48h max (sync con index.html L998) ───────────────────────────────
+function latestVRP(records, innerKm) {
+  const cutoff = Date.now() - 48 * 3600000;
+  let max = 0, ts = null;
+  for (const r of records) {
+    const t = new Date(r.datetime_utc).getTime();
+    if (!Number.isFinite(t) || t < cutoff) continue;
+    const v = mirovaEqVrp(r, innerKm, false);
+    if (v > max) { max = v; ts = r.datetime_utc; }
+  }
+  return { max, ts };
+}
+
+// ─── Fetch JSON con cache-bust (sync con index.html L732) ────────────────────
+async function fetchJSON(url) {
+  try {
+    const r = await fetch(url + "?_=" + Date.now());
+    return r.ok ? r.json() : null;
+  } catch { return null; }
+}
+
+const allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
+
+async function loadVolcano(v) {
+  const [data, mirova] = await Promise.all([
+    fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json"),
+    fetchJSON(BASE_PATH + "data/mirova/" + v.name + ".json"),
+  ]);
+  allData[v.name] = {
+    records:       data?.records   || [],
+    mirovaRecords: mirova?.records || [],
+    updated:       data?.updated   || null,
+  };
+}
+
+// ─── Banner stale F49 (sync con index.html L2675) ────────────────────────────
+function renderMirovaFreshness() {
+  const banner = document.getElementById("mirova-stale-banner");
+  if (!banner) return;
+  let latest = null;
+  for (const v of TIER_A) {
+    const d = allData[v.name];
+    if (!d || !d.mirovaRecords) continue;
+    for (const r of d.mirovaRecords) {
+      const dt = r.datetime_utc;
+      if (dt && (latest === null || dt > latest)) latest = dt;
+    }
+  }
+  if (!latest) {
+    banner.style.cssText = "display:block;background:#3a1818;color:#ffcccc;" +
+      "padding:10px 16px;border-bottom:2px solid #e91e63;font-size:0.88rem;";
+    banner.innerHTML = "<b>⚠️ MIROVA referencia vacía</b> — no hay registros del " +
+      "scraper Mirova-v1. La comparación con MIROVA mostrada arriba/abajo no refleja " +
+      "MIROVA actual.";
+    return;
+  }
+  const latestTs = new Date(latest.replace(" ", "T") + "Z").getTime();
+  const ageDays = (Date.now() - latestTs) / (1000 * 86400);
+  if (ageDays > 14) {
+    banner.style.cssText = "display:block;background:#3a1818;color:#ffcccc;" +
+      "padding:10px 16px;border-bottom:2px solid #e91e63;font-size:0.88rem;";
+    banner.innerHTML = "<b>⚠️ MIROVA referencia stale</b> — última fecha del CSV " +
+      "consolidado: <code>" + latest.slice(0, 16) + " UTC</code> (" +
+      Math.floor(ageDays) + " días atrás). El scraper Mirova-v1 puede estar caído.";
+  } else if (ageDays > 3) {
+    banner.style.cssText = "display:block;background:#3a2e10;color:#ffd97a;" +
+      "padding:8px 16px;border-bottom:1px solid #ffc107;font-size:0.85rem;";
+    banner.innerHTML = "<b>MIROVA referencia con " + Math.floor(ageDays) +
+      "d de retraso</b> (última: " + latest.slice(0, 16) + " UTC).";
+  } else {
+    banner.style.display = "none";
+  }
+}
+
+// ─── Helpers DOM ─────────────────────────────────────────────────────────────
+function el(tag, props = {}, children = []) {
+  const e = document.createElement(tag);
+  Object.assign(e, props);
+  for (const c of children) {
+    if (c == null) continue;
+    e.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  }
+  return e;
+}
+
+function fmtVRP(v) {
+  if (!v || v <= 0) return "—";
+  if (v < 1) return v.toFixed(2);
+  if (v < 10) return v.toFixed(1);
+  if (v < 100) return v.toFixed(1);
+  if (v < 1000) return Math.round(v).toString();
+  return (v / 1000).toFixed(1) + "k";
+}
+
+function fmtRelativeTime(iso) {
+  if (!iso) return "sin detecciones";
+  const t = new Date(iso.replace(" ", "T") + (iso.endsWith("Z") ? "" : "Z")).getTime();
+  if (!Number.isFinite(t)) return "—";
+  const ageMin = (Date.now() - t) / 60000;
+  if (ageMin < 60) return Math.round(ageMin) + " min";
+  const ageH = ageMin / 60;
+  if (ageH < 48) return ageH.toFixed(1) + " h";
+  return Math.round(ageH / 24) + " d";
+}
+
+// ─── Construir sparkline 30d ──────────────────────────────────────────────────
+// Series: máximo diario de mirovaEqVrp (summit) sobre los últimos 30 días.
+// Bins simples por día UTC; render con Chart.js bar para visual MIROVA-like.
+function buildSparklineData(records, innerKm) {
+  const ms = 86400000;
+  const days = 30;
+  const now = Date.now();
+  const t0 = now - days * ms;
+  const bins = new Array(days).fill(0);
+  const dayStart = Math.floor(t0 / ms) * ms;
+  for (const r of records) {
+    const t = new Date(r.datetime_utc).getTime();
+    if (!Number.isFinite(t) || t < t0 || t > now) continue;
+    const v = mirovaEqVrp(r, innerKm, false);
+    if (v <= 0) continue;
+    const idx = Math.floor((t - dayStart) / ms);
+    if (idx < 0 || idx >= days) continue;
+    if (v > bins[idx]) bins[idx] = v;
+  }
+  const labels = [];
+  for (let i = 0; i < days; i++) {
+    labels.push(new Date(dayStart + i * ms));
+  }
+  return { labels, values: bins };
+}
+
+function renderSparkline(canvas, sparkData, level) {
+  // Color barras según nivel actual (último valor>0 o max). Bajo = mute.
+  const maxV = Math.max(...sparkData.values);
+  const color = level.key === "vhigh" || level.key === "high"
+    ? "rgba(244,67,54,0.85)"
+    : level.key === "mod"
+      ? "rgba(255,112,67,0.85)"
+      : level.key === "low"
+        ? "rgba(255,193,7,0.85)"
+        : level.key === "vlow"
+          ? "rgba(0,208,132,0.85)"
+          : "rgba(122,143,166,0.6)";
+  return new Chart(canvas, {
+    type: "bar",
+    data: {
+      labels: sparkData.labels,
+      datasets: [{
+        data: sparkData.values,
+        backgroundColor: color,
+        borderColor: color,
+        borderWidth: 0,
+        barPercentage: 0.95,
+        categoryPercentage: 1.0,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          mode: "index",
+          intersect: false,
+          displayColors: false,
+          callbacks: {
+            title: (ctx) => {
+              const d = sparkData.labels[ctx[0].dataIndex];
+              return d.toISOString().slice(0, 10);
+            },
+            label: (ctx) => {
+              const v = ctx.parsed.y;
+              return v > 0 ? "VRP: " + fmtVRP(v) + " MW" : "sin detecciones";
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          type: "time",
+          time: { unit: "day" },
+          display: false,
+          grid: { display: false },
+        },
+        y: {
+          display: false,
+          grid: { display: false },
+          beginAtZero: true,
+          suggestedMax: maxV > 0 ? maxV * 1.1 : 1,
+        },
+      },
+    },
+  });
+}
+
+// ─── Render mosaico ──────────────────────────────────────────────────────────
+function renderMosaico() {
+  const grid = document.getElementById("mosaico");
+  grid.innerHTML = "";
+  for (const v of TIER_A) {
+    const d = allData[v.name];
+    const records = d?.records || [];
+    const { max: vrp48, ts: latestTs } = latestVRP(records, v.inner_radius_km);
+    const level = getLevel(vrp48);
+
+    const card = el("div", { className: "mini-card " + level.cardCls });
+    card.addEventListener("click", () => {
+      window.location.href = "index.html?volcano=" + encodeURIComponent(v.name);
+    });
+
+    // Header
+    const header = el("div", { className: "mc-header" }, [
+      el("div", {}, [
+        el("div", { className: "mc-name", textContent: v.display }),
+        el("div", { className: "mc-region", textContent: v.region }),
+      ]),
+      el("div", { className: "mc-zone", textContent: zoneOf(v.lat) }),
+    ]);
+    card.appendChild(header);
+
+    // Métricas (VRP 48h + badge nivel)
+    const metrics = el("div", { className: "mc-metrics" }, [
+      el("div", {}, [
+        el("span", { className: "mc-vrp lvl-" + level.key, textContent: fmtVRP(vrp48) }),
+        el("span", { className: "mc-vrp-unit", textContent: vrp48 > 0 ? " MW (48h)" : "" }),
+      ]),
+      el("span", { className: "mc-level " + level.cls, textContent: level.label }),
+    ]);
+    card.appendChild(metrics);
+
+    if (records.length === 0) {
+      card.appendChild(el("div", { className: "mc-no-data", textContent: "Sin datos cargados" }));
+    } else {
+      // Sparkline 30d
+      const wrap = el("div", { className: "mc-chart-wrap" });
+      const canvas = el("canvas");
+      wrap.appendChild(canvas);
+      card.appendChild(wrap);
+
+      const sparkData = buildSparklineData(records, v.inner_radius_km);
+      // Defer render hasta DOM attach
+      requestAnimationFrame(() => renderSparkline(canvas, sparkData, level));
+    }
+
+    // Footer
+    const footer = el("div", { className: "mc-footer" }, [
+      el("span", { textContent: "Últ. detección:" }),
+      el("span", { className: "last", textContent: fmtRelativeTime(latestTs) }),
+    ]);
+    card.appendChild(footer);
+
+    grid.appendChild(card);
+  }
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  document.getElementById("updated-label").textContent = "Cargando…";
+  await Promise.all(TIER_A.map(v => loadVolcano(v)));
+  renderMirovaFreshness();
+  renderMosaico();
+  document.getElementById("updated-label").textContent =
+    "Actualizado " + new Date().toISOString().slice(11, 16) + " UTC";
+
+  // Auto-refresh 15 min (sync con index.html L2853).
+  setInterval(async () => {
+    await Promise.all(TIER_A.map(v => loadVolcano(v)));
+    renderMirovaFreshness();
+    renderMosaico();
+    document.getElementById("updated-label").textContent =
+      "Actualizado " + new Date().toISOString().slice(11, 16) + " UTC";
+  }, 15 * 60 * 1000);
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
