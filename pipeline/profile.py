@@ -439,6 +439,25 @@ ENABLE_DUAL_ROI_SECOND_PASS: bool = bool(
     _p.get("enable_dual_roi_second_pass", False)
 )
 
+# --- F52-B S77 (A45) — Single-pixel mode régimen sub-MW (drift T1.5 S72 fix).
+# Cuando un cluster cae en régimen sub-MW (vrp_mw_sum < threshold Y n_pixels
+# <= max_pixels), reportar `pc.vrp_mw = max(per_pixel_vrp)` (single pixel
+# hottest) en vez de la suma. Alinea con MIROVA NRT single-pixel reporting en
+# sub-MW (0.21-0.45 MW canónicos). Volcanes corregidos:
+#   - Tupungatito (ratio 30.15× pre-fix), Chaitén (2.53×), PP (2.10×),
+#     PCC (0.48× sub-estimación, patrón opuesto misma causa raíz).
+# Default ON. Ver pipeline/single_pixel_mode.py + tests/test_single_pixel_mode_f52b.py.
+# Tag defensivo: pre-s77-f52b-single-pixel-sub-mw. Refs PRs #191 + #192, A45.
+ENABLE_SINGLE_PIXEL_SUB_MW_MODE: bool = bool(
+    _cfg.get("enable_single_pixel_sub_mw_mode", False)
+)
+SUB_MW_REGIME_THRESHOLD_MW: float = float(
+    _cfg.get("sub_mw_regime_threshold_mw", 5.0)
+)
+SINGLE_PIXEL_MAX_CLUSTER_PIXELS: int = int(
+    _cfg.get("single_pixel_max_cluster_pixels", 3)
+)
+
 # --- F46 S77 (A45) — gate consistencia MIR/NTI + threshold subido sobre vrp_tir_mw.
 # Helper `pipeline.process_viirs._compute_vrp_tir_with_gate` (Opción A+B
 # combinada). Default ON post-fix. Cuando OFF, comportamiento legacy
