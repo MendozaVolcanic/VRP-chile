@@ -73,7 +73,7 @@ done
 
 | branch | commits únicos | hipótesis |
 |---|---|---|
-| `claude/nostalgic-aryabhata-e05d1e` | **40** | Branch de subagente claude largo trabajo, no mergeado. Investigar contenido antes de borrar |
+| ~~`claude/nostalgic-aryabhata-e05d1e`~~ | ~~40~~ | **CERRADA S81 (2026-05-26)** — investigada en A1. Solo 2 archivos novedosos vs merge-base (`docs/HYPOTHESIS_LOG.md` H_S58 entry + `tasks/BLOQUE_ARRANQUE_S60.md`), ambos **ya en main bit-exact**. Los 40 commits eran merges desde main + commits S47-S58 mergeados por otras vías. Tag defensivo `pre-s81-discard-nostalgic-aryabhata` + branch eliminada de origin. Cero contenido perdido. |
 | `claude/sweet-austin-b5413b` | 16 | Branch del worktree main-tracking, no es trabajo distinto |
 | `claude/hardcore-gauss-68c3db` | 1 | research-workflow-refactor activo? |
 | `claude/research-workflow-refactor` | 1 | research-workflow-refactor activo? |
