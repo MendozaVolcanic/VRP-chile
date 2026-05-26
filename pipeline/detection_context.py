@@ -1014,4 +1014,3 @@ def apply_f66_consistency_gate(
         "n_nan_fallback": int(nan_fallback.sum()),
     }
     return hot_mask_out, diag
-    return t_bg, std_bg, n_bg
