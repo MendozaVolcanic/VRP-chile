@@ -123,6 +123,7 @@ from pipeline.profile import (
     PATH_D_ONLY_CAP_TBG_MAX_K,
     ENABLE_VRPTIR_AVENI,
     ENABLE_VRP_TIR_CONSISTENCY_GATE,
+    ENABLE_VRP_TIR_OUTPUT,
     VRP_TIR_FLOOR_K,
     VRP_TIR_N_SIGMA,
     ENABLE_SINGLE_PIXEL_SUB_MW_MODE,
@@ -201,8 +202,15 @@ def _compute_vrp_tir_with_gate(
     enable_gate: bool = True,
     legacy_floor_k: float = 0.5,
     legacy_n_sigma: float = 4.0,
+    enable_output: bool = True,
 ) -> float:
     """F46 (S77, A45) — Computa vrp_tir_mw con gate de consistencia MIR/NTI.
+
+    **F46 provisional S81**: si `enable_output=False`, retorna 0.0 inmediato
+    (silencia el campo hasta que el fix Coppola 2024 Eq.16 con background
+    subtraction esté implementado — auditoría S81 detectó 726 records >1000×
+    vs vrp_mir_mw post-S77 gate, evidenciando que el gate Opción A+B
+    actual no es suficiente). Ver docs/F46_VRP_TIR_GATE_S81.md.
 
     Opción A+B combinada del docs/F46_VRP_TIR_BUG_S76.md §5.3:
 
@@ -220,6 +228,9 @@ def _compute_vrp_tir_with_gate(
     Returns:
         float — vrp_tir en MW (Stefan-Boltzmann sobre máscara efectiva).
     """
+    if not enable_output:
+        return 0.0
+
     if not enable_gate:
         # Legacy: solo threshold, sin gate de consistencia.
         threshold = max(legacy_floor_k, legacy_n_sigma * std_bg5)
@@ -1204,6 +1215,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 enable_gate=ENABLE_VRP_TIR_CONSISTENCY_GATE,
                 legacy_floor_k=TIR_THRESHOLD_K,
                 legacy_n_sigma=N_SIGMA_TIR,
+                enable_output=ENABLE_VRP_TIR_OUTPUT,
             )
             roi_bt5 = bt5[roi_mask]
             valid_roi5 = roi_bt5[~np.isnan(roi_bt5)]

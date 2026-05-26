@@ -327,6 +327,17 @@ enable_vrp_tir_consistency_gate: true
 vrp_tir_floor_k: 3.0
 vrp_tir_n_sigma: 6.0
 
+# --- F46 provisional gate S81 (A45 Nicolás explícito) ---
+# Silenciar vrp_tir_mw hasta que el fix completo Coppola 2024 Eq.16
+# (unmixing A_hot + background subtraction T_bk⁴) esté implementado.
+# La auditoría S81 frente #3 detectó 726 records con vrp_tir_mw /
+# vrp_mir_mw > 1000× POST-S77 gate Opción A+B (top: Villarrica 2026-02-11
+# mir=0.98 MW vs tir=5680 MW, ratio 5802×). Evidencia: el gate Opción A+B
+# mitigó pero no curó. Mientras F46 espera, emitimos vrp_tir_mw=0 — honesto
+# en vez de inflado. Cuando F46 esté listo, volver enable_vrp_tir_output a
+# true. Plan completo: docs/F46_VRP_TIR_BUG_S76.md. Mitigación: docs/F46_VRP_TIR_GATE_S81.md.
+enable_vrp_tir_output: false
+
 # --- F2.8 S73 saturation guard secundario (defense in depth) ---
 # Fix L1B-spec (process_modis.py:184 dn>32767, process_viirs.py qf bit-2) ya cubre
 # la causa raíz. Esta capa post-Planck es redundancia contra cualquier caso edge
