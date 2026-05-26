@@ -25,15 +25,18 @@ volcanoes:
   vent_lat: -40.525499
   vent_lon: -72.146137
   vent_radius_km: 3
-  # S48 D9-MODIS fix: centroide MIROVA derivado empíricamente de TIFs MODIS
-  # archive (`mirova-tif-archive/data/tif/PuyehueCordonCaulle/*MODIS*.tif`,
-  # promedio de scenes con n>2500 pixels = -40.582, -72.131 → zona del
-  # lacolito 2011 SE del cone). vent_lat/vent_lon (cone morfológico) queda
-  # 6.7 km al N del centroide térmico real. get_effective_vent() prioriza
-  # mirova_center_* → cluster_hotspots(vent_anchored) ahora ancla en lacolito.
-  # Resuelve drift 11-18 km MODIS observado en S47 R2 expansion.
-  mirova_center_lat: -40.582
-  mirova_center_lon: -72.131
+  # S81 ADOPTADO clon MIROVA literal (Nicolás explícito): coords del KMZ
+  # oficial VIIRS375 parsing fresco S80/S81 = centro bbox UTM 51×51 km que
+  # MIROVA web usa para definir su ROI. Auditoría S81 frente #10 detectó
+  # 1.39 km de diferencia con el valor previo empírico S48 (centroide
+  # térmico MODIS). En PCC ~98% de detecciones son VIIRS, así que el
+  # alineamiento bit-a-bit con MIROVA web pesa más que el ancla MODIS al
+  # lacolito. Idea preservada como "centroide térmico empírico" en
+  # docs/BEYOND_MIROVA_EXTENSIONS.md §PCC_VENT_ANCHOR para eventual
+  # adopción dual-anchor cuando hacks no-MIROVA estén autorizados.
+  # Tag defensivo: pre-s81-pcc-mirova-center.
+  mirova_center_lat: -40.5903
+  mirova_center_lon: -72.1187
   # S63 ADOPCIÓN: A/B kernel-bg validó cura masiva (run 26115708153).
   # Audit 97 ALERTAS (60 CONS + 37 OCR) window 80d con pc.vrp_mw:
   #   LEGACY ratio mediano 3.64× → NEW 0.29× (-92%)

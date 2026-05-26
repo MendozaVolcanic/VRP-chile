@@ -469,6 +469,15 @@ ENABLE_VRP_TIR_CONSISTENCY_GATE: bool = bool(
 VRP_TIR_FLOOR_K: float = float(_cfg.get("vrp_tir_floor_k", 3.0))
 VRP_TIR_N_SIGMA: float = float(_cfg.get("vrp_tir_n_sigma", 6.0))
 
+# --- F46 provisional gate S81 (A45) — vrp_tir_mw silenciado hasta fix completo.
+# Default True (legacy behavior); profiles operacionales setean False para
+# evitar exposición de outliers Stefan-Boltzmann sobre máscara contaminada
+# (726 records >1000× vs vrp_mir_mw detectados en auditoría S81 frente #3).
+# Cuando False, _compute_vrp_tir_with_gate retorna 0.0 incondicionalmente.
+# Ver docs/F46_VRP_TIR_GATE_S81.md (mitigación) y docs/F46_VRP_TIR_BUG_S76.md
+# (plan completo Coppola 2024 Eq.16 background subtraction).
+ENABLE_VRP_TIR_OUTPUT: bool = bool(_cfg.get("enable_vrp_tir_output", True))
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))

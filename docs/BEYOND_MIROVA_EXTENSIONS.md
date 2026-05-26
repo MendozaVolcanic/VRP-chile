@@ -213,7 +213,61 @@ Este doc `BEYOND_MIROVA_EXTENSIONS.md` consolida ese tercer territorio. Tres cat
 - **MIROVA_DIVERGENCES_CATALOG_S71.md**: hipótesis priorizadas para investigar.
 - **BEYOND_MIROVA_EXTENSIONS.md** (este doc): mejoras potencialmente publicables como contribución propia.
 
-## 10. Aplicación futura
+## 10. EXT-12 PCC_VENT_ANCHOR — centroide térmico empírico como ancla dual (S81)
+
+**Origen**: S48 D9-MODIS fix derivó un centroide térmico empírico para
+PuyehueCordonCaulle promediando scenes MODIS con n_pixels>2500 del archive
+`mirova-tif-archive/data/tif/PuyehueCordonCaulle/*MODIS*.tif`. Resultado:
+`(-40.582, -72.131)` — aproximadamente la zona del **lacolito 2011 SE**
+del cone morfológico. El vent canonical (`vent_lat/vent_lon`) queda a
+~6.7 km al N del centroide térmico.
+
+**Por qué se descartó S81 como `mirova_center_lat/lon`**: el clon MIROVA
+literal exige usar las coords del KMZ oficial MIROVA VIIRS375
+(`-40.5903, -72.1187` — centro del bbox UTM 51×51 km). Diferencia 1.39 km.
+Adoptado S81 Nicolás explícito; preserva paridad bit-a-bit con MIROVA web
+para R2 pixel-level. Tag `pre-s81-pcc-mirova-center`.
+
+**Por qué vale guardar el centroide térmico como extension**: en PCC
+~98% detecciones son VIIRS (donde el clon literal pesa más). Pero MODIS
+del lacolito queda ~11-18 km off del `mirova_center` KMZ (el centroide
+real térmico está al SE del bbox MIROVA, no en su centro). Para MODIS
+específicamente, anclar `vent_anchored_clustering` al lacolito térmico
+mejoraría recall + reduciría drift documentado S47.
+
+**Idea EXT-12 — dual anchor MIROVA + empírico**:
+
+```yaml
+# Hipótesis: usar mirova_center para ROI bbox (paridad MIROVA) y un
+# vent_anchor distinto para cluster anchoring (centroide térmico).
+volcanoes:
+  PuyehueCordonCaulle:
+    mirova_center_lat: -40.5903   # KMZ MIROVA — define ROI bbox
+    mirova_center_lon: -72.1187
+    vent_anchor_modis_lat: -40.582   # NUEVO — centroide térmico empírico
+    vent_anchor_modis_lon: -72.131   # solo para vent_anchored_clustering MODIS
+```
+
+**Implementación** (cuando se priorice EXT-12):
+1. Agregar `vent_anchor_<sensor>_lat/lon` opcionales a `volcanoes.yaml`.
+2. En `get_effective_vent(sensor)`: si `vent_anchor_<sensor>_*` existe,
+   priorizarlo sobre `mirova_center_*` solo para clustering, no para ROI.
+3. A/B test PCC MODIS 30d profile baseline vs dual-anchor. Métrica: recall
+   MODIS + ratio vs MIROVA + drift centroide cluster.
+4. R2 pixel-level: confirmar que el bbox ROI sigue alineado con MIROVA web
+   (el cambio es interno al clustering, no afecta el bbox).
+5. Generalizar a otros volcanes con offset vent-térmico documentado
+   (Tupungatito 4.86 km SE del KMZ, Planchon-Peteroa 2.02 km N).
+
+**Por qué es "beyond MIROVA"**: MIROVA usa un solo centro por volcán.
+Dual-anchor es una innovación nuestra que reconoce que el vent
+morfológico y la zona caliente real pueden diverger en volcanes complejos
+(lacolitos, fisuras, lagos). Citable como contribución metodológica.
+
+**Estado**: idea preservada S81. NO accionar hasta clon MIROVA literal
+completo (post F2.1 + F46 completo + reproc histórico Tier A).
+
+## 11. Aplicación futura
 
 Cuando termine el clon literal (post adopción F2.1 unsuitable filters + Tupungatito mirova_center):
 
