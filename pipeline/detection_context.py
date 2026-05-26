@@ -935,4 +935,83 @@ def compute_bg_stats(
 
     t_bg = float(np.median(bg_vals))
     std_bg = float(np.std(bg_vals))
+
+
+# ---------------------------------------------------------------------------
+# F66 Dual-bg consistency gate (S79 P1, design doc 2026-05-26)
+#
+# Filtra pixels donde el "calor" es un artefacto del background ring 5-25 km
+# (lago tibio rodeado de terreno frío distante) vs señal espacial real.
+#
+# MIROVA-faithful: Coppola 2024 L1129 + Coppola 2016a L240-249 + L357-359 +
+# Campus 2024 L119-124 verbatim usan background local (vecinos inmediatos
+# 3×3 = 8-conn) — nuestro pipeline usa ring annular, que es un drift.
+# Este helper actúa como gate de consistencia secundario PRESERVANDO la
+# arquitectura ring (gate primario sin cambios).
+#
+# Edge cases:
+#   - Todos vecinos hot/NaN → t_bg_local = NaN → fallback ring (no vetar)
+#   - Algunos vecinos NaN → mean(válidos)
+#   - Pixel borde imagen → vecinos truncados, mismo fallback
+# ---------------------------------------------------------------------------
+
+
+def apply_f66_consistency_gate(
+    bt: np.ndarray,
+    hot_mask: np.ndarray,
+    *,
+    kernel_size: int = 3,
+    dt_min: float = 5.0,
+) -> tuple[np.ndarray, dict]:
+    """Apply F66 dual-bg consistency gate sobre hot_mask del ring.
+
+    Para cada pixel marcado hot por gate primario (ring 5-25 km), computa
+    t_bg_local con kernel 3×3 (vecinos inmediatos) excluyendo otros hot y
+    NaN. Si ΔT_local = bt - t_bg_local < dt_min → vetar.
+
+    Política edge case: si t_bg_local es NaN (todos vecinos hot o NaN) →
+    fallback ring (no vetar) para preservar recall en lava extendida.
+
+    Args:
+        bt: 2D array BT en K.
+        hot_mask: bool 2D, True para pixels marcados hot por gate primario.
+        kernel_size: lado kernel cuadrado (impar). Default 3 = 8 vecinos.
+        dt_min: ΔT_local mínimo en K para que pixel pase el gate.
+
+    Returns:
+        (hot_mask_filtered, diag_dict) donde diag_dict tiene:
+            n_evaluated: pixels que entraron al gate (= hot_mask.sum())
+            n_vetoed: pixels rechazados por ΔT < dt_min
+            n_nan_fallback: pixels con t_bg_local NaN (passed por fallback)
+    """
+    from pipeline.vrp_regimes import compute_local_background
+
+    hot_rows_arr, hot_cols_arr = np.where(hot_mask)
+    n_evaluated = int(hot_rows_arr.size)
+
+    if n_evaluated == 0:
+        return hot_mask.copy(), {
+            "n_evaluated": 0,
+            "n_vetoed": 0,
+            "n_nan_fallback": 0,
+        }
+
+    t_bg_locals = compute_local_background(
+        bt, hot_rows_arr.tolist(), hot_cols_arr.tolist(),
+        kernel_size=kernel_size,
+    )
+    t_bg_locals_arr = np.asarray(t_bg_locals, dtype=float)
+    delta_t_local = bt[hot_rows_arr, hot_cols_arr] - t_bg_locals_arr
+    nan_fallback = np.isnan(t_bg_locals_arr)
+    passes = (delta_t_local >= dt_min) | nan_fallback
+
+    hot_mask_out = np.zeros_like(hot_mask)
+    hot_mask_out[hot_rows_arr[passes], hot_cols_arr[passes]] = True
+
+    diag = {
+        "n_evaluated": n_evaluated,
+        "n_vetoed": int((~passes).sum()),
+        "n_nan_fallback": int(nan_fallback.sum()),
+    }
+    return hot_mask_out, diag
     return t_bg, std_bg, n_bg
