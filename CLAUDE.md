@@ -507,6 +507,63 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     son source-of-truth metodológica. Sus regex/heurísticas reflejan
     educated guess, no convenciones verificadas.
 
+- **A49. Insertar código entre dos funciones no debe comer el `return`
+  final de la función anterior** (S80, lección regresión `compute_bg_stats`):
+  el commit `a73775cd` (F66 Task 1) insertó el helper
+  `apply_f66_consistency_gate` inmediatamente después de
+  `compute_bg_stats`, borrando accidentalmente la línea
+  `return t_bg, std_bg, n_bg` final. Como el return temprano por
+  `n_bg < min_bg_pixels` SÍ retornaba tupla, la función "parecía
+  funcionar" pero retornaba `None` implícito en el camino exitoso.
+  `process_modis.py:316` desempaca `None` → `TypeError`. Pasó 1 sesión
+  sin detección porque S79 etiquetó los 6 tests fallidos como
+  "pre-existing" sin verificar contra `origin/main`.
+
+  Mitigación: antes de commitear cualquier `Edit`/`Write` que **inserte
+  código entre dos estructuras existentes** (funciones, clases, bloques),
+  verificar con `git diff` que la última línea de la estructura anterior
+  y la primera de la siguiente siguen intactas. Para inserciones >20
+  líneas, usar `Edit` con `old_string` incluyendo 5 líneas de contexto
+  antes y después.
+
+- **A50. "Pre-existing fails" requiere verificación cross-source con
+  `origin/main`** (S80, complemento A49): antes de etiquetar un test
+  fallido como "pre-existing" (sugiriendo bug histórico), correr
+  `git show origin/main:<archivo>` y comparar el cuerpo de la función
+  afectada. Si la función fue modificada en algún commit del branch
+  actual, es candidato a regresión. Costo verificación = 30 segundos;
+  costo de no verificar = 1 sesión perdida (S79 S80).
+
+- **A51. Auditoría completa cada 20 sesiones** (S80, regla M8 de
+  `docs/META_RULES_S80.md`): la velocidad de cambio del proyecto
+  (117 PRs en S70–S80) supera la capacidad de `MEMORY.md` para
+  trackear. Cada 20 sesiones ejecutar el protocolo de 5 subagentes
+  paralelos (inventario sesiones / drifts+hipótesis / git activity /
+  profile flags / estado operacional) y producir `docs/AUDIT_S<N>.md`.
+  Si detecta >3 contradicciones cross-source, **pausar features
+  nuevas y consolidar primero**.
+
+- **A52. Worktrees no-main pueden estar atrasados (siempre `git fetch +
+  pull`)** (S80, lección worktree `VRP-Chile-s70/` en branch huérfano):
+  el worktree canónico declarado en CLAUDE.md estaba en branch
+  `work-s78-bloque-arranque-s79` sin remote, mostrando 17 workflows
+  reproc-* activos cuando `origin/main` ya los había archivado (PR
+  #217). Confundió a un subagente. Política: al entrar a worktree,
+  verificar siempre `git fetch origin --prune && git log --oneline
+  HEAD..origin/main`. Si la branch local no es `main` y diverge por
+  >10 commits, **no asumir que el estado del worktree refleja el
+  proyecto**.
+
+- **A53. Cap PRs/sesión y persistencia in-vivo agresiva** (S80, regla
+  M1+M2): pasado **12 PRs por sesión** (cap soft) Claude debe pausar
+  y proponer consolidación + actualización `MEMORY.md` antes de seguir
+  abriendo PRs. Pasado **20 PRs** (cap hard) bloquear merges hasta
+  ejecutar `SESSION_CLOSE_CHECKLIST` y revisar el batch. Excepción:
+  cleanups masivos de cosas equivalentes (ej. archive workflows),
+  documentar en el PR. Y todo hallazgo no trivial (schema gap, source
+  externa, regresión, default operacional cambiado) → persistir
+  **inmediatamente** en doc/memoria, no esperar al cierre.
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
