@@ -935,6 +935,7 @@ def compute_bg_stats(
 
     t_bg = float(np.median(bg_vals))
     std_bg = float(np.std(bg_vals))
+    return t_bg, std_bg, n_bg
 
 
 # ---------------------------------------------------------------------------
