@@ -128,6 +128,9 @@ from pipeline.profile import (
     ENABLE_SINGLE_PIXEL_SUB_MW_MODE,
     SUB_MW_REGIME_THRESHOLD_MW,
     SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
+    ENABLE_BG_KERNEL_CONSISTENCY_GATE,
+    KERNEL_CONSISTENCY_DT_K,
+    KERNEL_CONSISTENCY_SIZE,
 )
 from pipeline.single_pixel_mode import apply_single_pixel_mode
 from .detection_context import (
@@ -140,6 +143,7 @@ from .detection_context import (
     combine_hot_paths,
     compute_bg_stats,
     first_pass_tests_2_and_3,
+    apply_f66_consistency_gate,
 )
 
 # Indices of bands 21 and 22 within EV_1KM_Emissive
@@ -686,6 +690,27 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     if exclude_zones:
         hot_mask_2d, n_excluded_water = filter_hot_mask(
             hot_mask_2d, lat, lon, exclude_zones, active_water_bodies)
+
+    # F66 dual-bg consistency gate (S79 P1, design doc 2026-05-26) — MODIS B21/22 1km.
+    # Filtra pixels donde gate ring marcó hot pero kernel local 3×3 muestra
+    # ΔT_local < dt_min (heterogeneidad regional 1km: nieve parcial, sombra,
+    # gradiente zenith MODIS). Fallback ring para vecinos NaN/hot (preserva
+    # lava extendida). Variable BT: bt_mir (band 21 primary, 22 fallback).
+    # Sin cambio de comportamiento cuando flag OFF (mirova_equivalent default).
+    f66_n_evaluated = 0
+    f66_n_vetoed = 0
+    f66_n_nan_fallback = 0
+    if ENABLE_BG_KERNEL_CONSISTENCY_GATE:
+        hot_mask_2d, _f66_diag = apply_f66_consistency_gate(
+            bt_mir,
+            hot_mask_2d,
+            kernel_size=KERNEL_CONSISTENCY_SIZE,
+            dt_min=KERNEL_CONSISTENCY_DT_K,
+        )
+        f66_n_evaluated = _f66_diag["n_evaluated"]
+        f66_n_vetoed = _f66_diag["n_vetoed"]
+        f66_n_nan_fallback = _f66_diag["n_nan_fallback"]
+
     hot_rows, hot_cols = np.where(hot_mask_2d)
     n_anomalous = len(hot_rows)
     n_bt_path = int(np.sum(bt_path_hot))
@@ -1112,6 +1137,10 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             fp_diag["n_bg_used"] if fp_diag is not None else 0),
         # S46 Task 5 — second_pass_adjacent recapture diag (Drift #4).
         "diag_n_second_pass_recapture": n_second_pass_recapture,
+        # F66 dual-bg consistency gate diag (S79 P1). Cero cuando flag OFF.
+        "diag_f66_n_evaluated": f66_n_evaluated,
+        "diag_f66_n_vetoed": f66_n_vetoed,
+        "diag_f66_n_nan_fallback": f66_n_nan_fallback,
         "sensor": "MODIS_TERRA" if "MOD0" in hdf_path.name else "MODIS_AQUA",
         "granule": hdf_path.name,
         "product_version": "nrt" if "_NRT" in hdf_path.name else "standard",
