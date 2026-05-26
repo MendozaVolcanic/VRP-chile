@@ -492,6 +492,47 @@ Conteo de markers en hotspot-map por Tier A (toggle "Solo principal" + "Solo cr�
 | **D8** | **Cluster selection diverge de MIROVA** | ⚠️ **NUEVO S35** (2026-05-10) — VRP-chile elige `primary_cluster` por VRP máximo / pixel count máximo, NO por relevancia volcánica. Caso Puyehue 2026-05-09 05:42: VRP-chile elige cluster cráter principal (99 px, vrp=4.94 MW) cuando MIROVA reporta lacolito (0.18 MW @ 7.7 km). Confirmado pixel-level con TIF mirova-tif-archive. | Pendiente: investigar criterio de cluster selection MIROVA (Coppola 2016a §). Opcional fase Z. |
 | **H8** | **Filtro distance pixel-por-pixel en store.py** | ✅ **Implementado S35** (2026-05-10) — fix con flag `enable_pixel_level_distance_filter`. A/B en `_h8_pixel_filter_enabled` profile. Pre-fix descarta TODA `anomaly_pixels` cuando pixel más caliente individual > radius_km, perdía clusters summit válidos. Reach 13.7% records Tier A en 30d, 20+ ALERTA MIROVA confirmadas perdidas. | Esperar A/B 25d, R2 pixel-level, decisión adopción operacional. |
 
+## S33+ — Análisis TIF MIROVA "Last" Lascar 2026-05-08 + decisión revert fix S33
+
+### Hallazgo TIF MIROVA real (2026-05-08)
+
+`Pruebas/mirova_real/Lascar_VIIRS375_I04.tif` (descargado público sin login):
+- 134×134 float64 EPSG:4326. **17,911 pixels >0** (99.7% del raster).
+- Valores 0.04-0.19 MW. **Sum total 1680 MW**. Pico 0.187 MW a 23-24 km del vent.
+- Header MIROVA reporta **VRP: 0.2 MW @ Distance 9.7 km**.
+
+**Implicación**: el TIF NO es VRP per-pixel sumable. Es producto de visualización
+del campo de radiancia completo. El "VRP: 0.2 MW" del header viene de un cluster
+específico (a 9.7 km) seleccionado por algún criterio MIROVA, NO la suma del TIF.
+
+### Hallazgo crítico — MIROVA reporta clusters far como detecciones válidas
+
+Plot Distance MIROVA Lascar (Last Year) muestra cientos de detecciones rojas
+(<5km, summit) Y grises (>5km, far). **MIROVA NO descarta clusters far** — los
+etiqueta con su clase de distancia y reporta VRP normal. La pasada actual
+(estrella verde) está a 9 km y MIROVA la reporta válida.
+
+### Decisión usuario: objetivo A (clon literal) + visualización C (toggle dual)
+
+Mi fix S33 (descartar clusters con `pc.centroid_dist_km > inner_radius`)
+**diverge de MIROVA real**. MIROVA reporta esos clusters; nosotros los
+filtramos a 0.
+
+### Plan próxima sesión (S34)
+
+1. **Revertir fix S33** en `pipeline/audit_metrics.py` y `frontend/{index,diario}.html`.
+   `mirova_eq_vrp` ya no descarta por `pc.centroid_dist_km` — solo respeta
+   `distance_class === 'far'` heredado del pipeline.
+2. **Tests actualizados**: el caso "Lascar Salar 19389 MW" YA devuelve 19389
+   (no 0). Documentar como comportamiento esperado clon MIROVA literal.
+3. **Toggle dual en `diario.html`** (replicar `includeFarDistance` que ya
+   existe en `index.html` desde S26).
+4. **Re-audit con métrica revertida** — esperado recall global subir a ~80%+,
+   ratio reaparece outlier Lascar 19389 (síntoma D5 magnitud, no bug S33).
+5. **D5 magnitud queda abierto**: la suma per-pixel inflada en clusters far
+   (Salar 19389 MW) es problema separado. Hipótesis Eq.1 integrated a investigar
+   con TIF reales MIROVA descargados (otros volcanes activos cráter — PCC, etc.).
+
 ## S33 — Refutación Driver B Phase 1 + D4 (sub-pixel L_bg global)
 
 ### Bug `mirovaEqVrp` (S33)
