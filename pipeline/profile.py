@@ -469,6 +469,25 @@ ENABLE_VRP_TIR_CONSISTENCY_GATE: bool = bool(
 VRP_TIR_FLOOR_K: float = float(_cfg.get("vrp_tir_floor_k", 3.0))
 VRP_TIR_N_SIGMA: float = float(_cfg.get("vrp_tir_n_sigma", 6.0))
 
+# S79 F66 — BG kernel local consistency gate (dual-bg S79 P1).
+# Veta pixels hot cuyo ΔT vs vecinos locales 3×3 sea < dt_min (default 5K).
+# Diseño: FP típicos (lagos, salares) tienen ΔT_local 1-3K (gradiente mínimo);
+# anomalías volcánicas reales tienen ΔT_local ≥ 5K (contraste real con entorno).
+# Fallback: si todos los vecinos son NaN o hot, el pixel pasa (no se veta).
+# Default OFF (backward-compat). Activar solo en profiles experimentales _f66_*.
+# Ver pipeline/detection_context.py:apply_f66_consistency_gate + docs/F66_*.md.
+ENABLE_BG_KERNEL_CONSISTENCY_GATE: bool = bool(
+    _cfg.get("enable_bg_kernel_consistency_gate", False)
+)
+# ΔT mínimo entre el pixel hot y la mediana de sus vecinos 3×3 para pasar el gate.
+# Default = anomaly_threshold_k del profile (5.0 en mirova_equivalent).
+KERNEL_CONSISTENCY_DT_K: float = float(
+    _cfg.get("kernel_consistency_dt_k", ANOMALY_THRESHOLD_K)
+)
+# Tamaño del kernel cuadrado (lado impar) para el contexto local.
+# 3 = kernel 3×3 = 8 vecinos (8-conectividad, Coppola 2016a SP 426.5).
+KERNEL_CONSISTENCY_SIZE: int = int(_cfg.get("kernel_consistency_size", 3))
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))
@@ -477,6 +496,79 @@ SENSOR_VIIRS_750: bool = bool(_s.get("viirs_750", True))
 
 # --- Data output subdirectory under data/ ---
 DATA_SUBDIR: str = str(_cfg["output"]["data_subdir"])
+
+
+class Profile:
+    """Thin object wrapper around the module-level profile globals.
+
+    Allows tests and callers to do `Profile.load("mirova_equivalent")` and
+    access attributes via `p.enable_bg_kernel_consistency_gate` etc.  The
+    actual parsing always goes through `_load_profile()` + module globals;
+    this class just re-exposes them as instance attributes for a given profile
+    name, swapping the VRP_PROFILE env-var temporarily.
+
+    Usage:
+        p = Profile.load("mirova_equivalent")
+        assert p.enable_bg_kernel_consistency_gate == False
+    """
+
+    def __init__(self, cfg: dict) -> None:
+        t = cfg["thresholds"]
+        p = cfg.get("paths", {})
+
+        # Identity
+        self.profile_name: str = cfg["_name"]
+
+        # F66 BG kernel consistency gate
+        self.enable_bg_kernel_consistency_gate: bool = bool(
+            cfg.get("enable_bg_kernel_consistency_gate", False)
+        )
+        _anomaly_k: float = float(t.get("anomaly_threshold_k", 5.0))
+        self.kernel_consistency_dt_k: float = float(
+            cfg.get("kernel_consistency_dt_k", _anomaly_k)
+        )
+        self.kernel_consistency_size: int = int(cfg.get("kernel_consistency_size", 3))
+
+    @classmethod
+    def load(cls, name: str) -> "Profile":
+        """Load a profile by name from the profiles/ directory.
+
+        This does NOT mutate VRP_PROFILE env var — it re-uses the same
+        `_load_profile` logic directly so it is safe to call from tests
+        regardless of what the module-level globals were loaded with.
+        """
+        import os
+        import yaml
+
+        path = PROFILES_DIR / f"{name}.yaml"
+        if not path.exists():
+            raise FileNotFoundError(f"Profile YAML not found: {path}")
+        with open(path, "r", encoding="utf-8") as f:
+            cfg = yaml.safe_load(f)
+
+        # Handle `extends:` inheritance (same logic as _load_profile)
+        if isinstance(cfg, dict) and "extends" in cfg:
+            parent_name = cfg.pop("extends")
+            parent_path = PROFILES_DIR / f"{parent_name}.yaml"
+            if not parent_path.exists():
+                raise FileNotFoundError(
+                    f"Profile '{name}' extends '{parent_name}' but parent not found: {parent_path}"
+                )
+            with open(parent_path, "r", encoding="utf-8") as fp:
+                parent_cfg = yaml.safe_load(fp)
+
+            def _deep_merge(base, override):
+                if isinstance(base, dict) and isinstance(override, dict):
+                    merged = dict(base)
+                    for k, v in override.items():
+                        merged[k] = _deep_merge(merged.get(k), v) if k in merged else v
+                    return merged
+                return override
+
+            cfg = _deep_merge(parent_cfg, cfg)
+
+        cfg["_name"] = name
+        return cls(cfg)
 
 
 def describe() -> str:

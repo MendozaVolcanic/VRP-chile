@@ -147,3 +147,14 @@ def test_dnti_dual_roi_path_d_compat():
 
     assert hot_mask_out[10, 10] == True, "Path D pixel debe sobrevivir F66 gate"
     assert diag["n_vetoed"] == 0
+
+
+def test_profile_defaults_f66_off():
+    """Profile mirova_equivalent debe tener F66 default OFF."""
+    from pipeline.profile import Profile
+
+    p = Profile.load("mirova_equivalent")
+
+    assert p.enable_bg_kernel_consistency_gate == False
+    assert p.kernel_consistency_dt_k == 5.0  # default = anomaly_threshold_k
+    assert p.kernel_consistency_size == 3
