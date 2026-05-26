@@ -5,6 +5,44 @@
 
 ---
 
+## ⚠️ S82-prep ejecutado (sesión 2026-05-26, branch `claude/s33-rescate-pre-s82` + PR #222)
+
+Antes de arrancar S82 substantivo se hizo cleanup pre-sesión:
+
+- **Worktree raíz** (`VRP Chile/`) reapuntado de `s15-dev` (S33 stale, 18d atrás) a `main`
+  HEAD `81c38e7b` (S80 consolidación + .gitignore S82). Esto resuelve el "cada arranque
+  aterriza en s15-dev" reportado por Nicolás. El badge `VRP-chile s15-dev` ya no aparece.
+- **Tag defensivo** `pre-s82-worktree-switch` → `64bd37d8` (s15-dev HEAD pre-switch).
+- **Branch rescate** `claude/s33-rescate-pre-s82` con 7 archivos únicos del worktree raíz
+  preservados → [PR #222](https://github.com/MendozaVolcanic/VRP-chile/pull/222)
+  **abierto pendiente merge**.
+  - 3 docs preservados: `docs/MIROVA_IMG_READING_GUIDE.md` (121L), `docs/papers_mirova_processed_S72_backlog.md` (300L), `docs/superpowers/plans/2026-04-28-mirova-literal-puro.md` (722L).
+  - 2 experiments: `experiments/102_osf_villarrica_deep.{py,json}`, `experiments/129_nrt_cron_nasa_azure_diagnosis/diagnosis.md`.
+  - 1 modificado: `experiments/76_audit_independent.out.md` (+18 líneas fila profile D4).
+- **.gitignore extendido** para data forense local (`Pruebas/`, `experiments/57-60`, etc.).
+- **Worktree harness** `sweet-austin-b5413b` (`main` 129 commits atrás) desregistrado para
+  liberar branch. Stashes del repo (4) preservados — no son del worktree.
+- **Tests post-switch**: 513 passed, 24 skipped ✅.
+- **`nostalgic-aryabhata`** (40 commits únicos): auditado, declarado descartable
+  conscientemente en S81 (tag `pre-s81-discard-nostalgic-aryabhata` apunta al HEAD).
+  **Archivado diferido** — decisión Nicolás en S82+.
+
+### Cambios en "Primer comando obligatorio" para S82
+
+Ahora `cd "VRP Chile"` también es válido (main al día) pero la sesión de trabajo S82
+sigue siendo `VRP-Chile-s80-consolidation/` porque acá vive el branch `claude/s81-vrp-tir-gate`
+con `BLOQUE_ARRANQUE_S82.md`, `AUDIT_INTEGRAL_S81.md`, `MIROVA_INTRA_RADIO_GATE_S81.md`,
+`F46_VRP_TIR_GATE_S81.md` y los outputs `experiments/_s81_v2_out/`.
+
+### Recomendación operativa para Nicolás (de la sesión prep)
+
+Cuando abras Claude Code para S82, abrí directamente la carpeta
+`VRP-Chile-s80-consolidation/`. El badge te mostrará `claude/s81-vrp-tir-gate` correcto.
+El worktree raíz `VRP Chile/` queda como "hogar limpio" (main al día) para lectura,
+NRT operacional, exploración general.
+
+---
+
 ## Copy-paste para Claude al inicio de S82
 
 ```
