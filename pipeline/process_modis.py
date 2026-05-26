@@ -34,6 +34,7 @@ from .clustering import cluster_hotspots, cluster_pixels_geographic
 from .vrp_regimes import compute_local_background
 from .test1_integrated import compute_test1_mir
 from .path_d_cap import apply_d9_scene_cap  # F50/S77
+from .path_d_intra_radio import apply_intra_radio_gate  # S83 F-S81-A Fase 2
 
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
@@ -88,6 +89,7 @@ from pipeline.profile import (
     DNTI_CONTEXTUAL_C1_SCENE,
     ENABLE_DNTI_CONTEXTUAL_PATH,
     ENABLE_DNTI_DUAL_ROI,
+    ENABLE_PATH_D_INTRA_RADIO_GATE,
     ENABLE_DUAL_ROI_BT,
     ENABLE_TEST1_PIXEL_FILTER,
     ENABLE_FINAL_PIXEL_FILTER,
@@ -449,6 +451,19 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                 apply_unsuitable_filters=ENABLE_UNSUITABLE_FILTERS_267_273,
             )
         n_dnti_ctx_path = int(np.sum(dnti_ctx_hot))
+        # S83 F-S81-A Fase 2 (A-simplificada): gate Path D MODIS intra-radio.
+        # Mascarea pixels dnti_ctx fuera del inner_radius_km del KMZ MIROVA.
+        # Motivación: 99.5% FPs MODIS Tier A audit S81/S82 son Path D puro lejos
+        # del cráter; MIROVA tagged RUTINA 98% → gate intra-ROI no replicado.
+        # Default OFF en operacional; ON solo via profile A/B. Ver docs/F_S81_A_*.
+        if ENABLE_PATH_D_INTRA_RADIO_GATE:
+            dnti_ctx_hot = apply_intra_radio_gate(
+                dnti_ctx_hot=dnti_ctx_hot,
+                vent_dist_per_pixel=vent_dist_per_pixel,
+                inner_radius_km=inner_radius_km,
+                enabled=True,
+            )
+            n_dnti_ctx_path = int(np.sum(dnti_ctx_hot))
     else:
         dnti_ctx_hot = np.zeros_like(bt_path_hot)
 

@@ -145,6 +145,13 @@ ENABLE_DNTI_CONTEXTUAL_PATH: bool = bool(_p.get("enable_dnti_contextual_path", F
 # S15 P3.1: dual-ROI (summit vs scene C1 distintos). On = Path D usa
 # C1_SUMMIT cerca del vent y C1_SCENE lejos. Off = usa C1 unico (P3.2 solo).
 ENABLE_DNTI_DUAL_ROI: bool = bool(_p.get("enable_dnti_dual_roi", False))
+# S83 F-S81-A Fase 2: gate Path D MODIS intra-radio. On = mascarea
+# dnti_ctx_hot fuera del inner_radius_km per-volcán (KMZ MIROVA oficial).
+# Motivación: 99.5% FPs MODIS Tier A audit S81/S82 son Path D puro lejos
+# del cráter; MIROVA tagged RUTINA en 98% de los casos → gate intra-ROI
+# no replicado. Ver docs/F_S81_A_FASE1_DIAGNOSIS.md +
+# docs/F_S81_A_FASE1B_SANITY_P95.md. Default false hasta validación A/B.
+ENABLE_PATH_D_INTRA_RADIO_GATE: bool = bool(_p.get("enable_path_d_intra_radio_gate", False))
 # S25: Path Test 1 integrated-ROI (Coppola 2015 Eq.1). Suma exceso de radiancia
 # MIR sobre toda la ROI vent (default 3 km radio); detecta señales sub-pixel
 # espacialmente extendidas que paths per-pixel pierden. POC S25 6/6 refs
