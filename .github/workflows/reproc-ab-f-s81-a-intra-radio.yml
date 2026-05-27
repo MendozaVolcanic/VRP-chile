@@ -45,7 +45,7 @@ jobs:
       contents: write
     strategy:
       fail-fast: false
-      max-parallel: 3
+      max-parallel: 8
       matrix:
         volcano: [Lascar, Lastarria, Tupungatito, PuyehueCordonCaulle, Isluga, PlanchonPeteroa, Villarrica, Llaima, Copahue, NevadosDeChillan, Chaiten]
         profile: [_f_s81_a_intra_radio_enabled, _f_s81_a_intra_radio_disabled]
@@ -68,6 +68,13 @@ jobs:
 
       - name: Run reprocess — mirova_equivalent${{ matrix.profile }} / ${{ matrix.volcano }}
         env:
+          # S84 fix: agregar EARTHDATA_TOKEN para bypass del endpoint
+          # /api/users/find_or_create_token que NASA throttle desde IPs Azure
+          # (mismo fix que NRT desde S72, ver docs/EARTHDATA_TOKEN_SETUP.md).
+          # Sin token caímos al path legacy USER/PASSWORD que se autolockea
+          # bajo bursts paralelos. Runs 26465457074/26469275033/26509990527
+          # fallaron 100% por este bug.
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
         timeout-minutes: 50
