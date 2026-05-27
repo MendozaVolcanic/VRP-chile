@@ -82,8 +82,16 @@ def _install_profile_bypass():
 
     def _patched_set_requests_session(self, url, *args, **kwargs):
         if "/profile" in (url or "") and os.environ.get("EARTHDATA_TOKEN", "").strip():
-            # F55 bypass: skip GET a /profile cuando hay token. Las cookies
-            # URS no son necesarias — el token lleva Authorization: Bearer.
+            # F55 bypass refined (S84): skip GET a /profile cuando hay token,
+            # PERO preservar setup de _http_session — el original lo hacía
+            # como side-effect (línea `if not hasattr(self, "_http_session"):
+            # self._http_session = self.auth.get_session()`). Sin esto,
+            # download() después falla "session hasn't been set up yet" y
+            # el NRT termina exit 0 sin records desde 2026-05-23 (bug F55
+            # pre-S84). Las cookies URS siguen sin ser necesarias — el token
+            # lleva Authorization: Bearer.
+            if not hasattr(self, "_http_session"):
+                self._http_session = self.auth.get_session()
             return None
         return original(self, url, *args, **kwargs)
 
