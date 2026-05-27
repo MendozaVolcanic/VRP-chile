@@ -105,6 +105,68 @@ def test_profile_url_with_token_is_noop():
     fake_store._http_session.request.assert_not_called()
 
 
+def test_profile_bypass_preserves_http_session_setup():
+    """Regression S84 (bug F55 silent download fail 2026-05-23+).
+
+    Pre-S84: el bypass retornaba None sin setear _http_session, así que
+    download() después fallaba con "session hasn't been set up yet". El
+    workflow exit 0 silenciaba el problema.
+
+    Post-fix: el bypass debe llamar self._http_session = self.auth.get_session()
+    como hacía el original (línea `if not hasattr(self, "_http_session"):
+    self._http_session = self.auth.get_session()`) antes del GET que
+    sí queremos saltar.
+    """
+    import earthaccess.store as eastore
+    from pipeline import fetch
+
+    os.environ["EARTHDATA_TOKEN"] = "fake-token-123"
+    fetch._install_profile_bypass()
+
+    # Store fresco SIN _http_session previo — el bypass debe crearlo.
+    # MagicMock(spec=...) crea atributos auto, así que removemos primero.
+    fake_store = MagicMock(spec=eastore.Store)
+    if hasattr(fake_store, "_http_session"):
+        del fake_store._http_session
+    fake_auth_session = MagicMock(name="auth_session")
+    fake_store.auth = MagicMock()
+    fake_store.auth.get_session.return_value = fake_auth_session
+    fake_store._requests_cookies = {}
+
+    eastore.Store.set_requests_session(
+        fake_store, "https://urs.earthdata.nasa.gov/profile"
+    )
+
+    fake_store.auth.get_session.assert_called_once()
+    assert fake_store._http_session is fake_auth_session, (
+        "F55 bypass debe preservar _http_session = self.auth.get_session() "
+        "(side-effect del original) — sin esto download() falla silencioso"
+    )
+
+
+def test_profile_bypass_no_double_session_setup():
+    """Si _http_session ya existe, el bypass NO debe re-llamar get_session()
+    (eficiencia + preservar session activa)."""
+    import earthaccess.store as eastore
+    from pipeline import fetch
+
+    os.environ["EARTHDATA_TOKEN"] = "fake-token-123"
+    fetch._install_profile_bypass()
+
+    fake_store = MagicMock(spec=eastore.Store)
+    existing_session = MagicMock(name="existing_session")
+    fake_store._http_session = existing_session
+    fake_store.auth = MagicMock()
+    fake_store._requests_cookies = {}
+
+    eastore.Store.set_requests_session(
+        fake_store, "https://urs.earthdata.nasa.gov/profile"
+    )
+
+    fake_store.auth.get_session.assert_not_called()
+    assert fake_store._http_session is existing_session
+
+
 def test_profile_url_without_token_calls_original():
     """Sin token, comportamiento original: hace HTTP request a /profile."""
     import earthaccess.store as eastore
