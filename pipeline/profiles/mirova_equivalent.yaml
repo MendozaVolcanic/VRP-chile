@@ -119,6 +119,17 @@ paths:
   # P3.2 S15: habilitar gate contextual dNTI 8-vecinos (Path D).
   # Coppola 2016a SP 426.5 — sí está en papers MIROVA, mantener.
   enable_dnti_contextual_path: true
+  # S84 adopción F-S81-A Fase 2 (A-simplificada): gate Path D MODIS
+  # intra-radio. Mascarea pixels dnti_ctx_hot fuera del inner_radius_km
+  # del KMZ MIROVA. Validado run 26540794992 A/B (45d, 22 jobs success):
+  # -93 a -98% pixels dnti_ctx fuera del cono en TODOS los Tier A
+  # (Lascar -94.5%, Lastarria -98.1%, PP -98.5%, Copahue -97.7%, etc).
+  # NO regresiona TPs MIROVA (Lascar 25/25 mantenido), 0 daño a métricas.
+  # Caveat: R3 violators a nivel cluster final NO bajan (gate solo cubre
+  # Path D; Path A/B/C también producen pixels fuera-cono). Fase B
+  # backlog: docs/F_S81_B_BACKLOG_PATH_ABC_GATES.md. Ver evidencia
+  # completa: docs/F_S81_A_ADOPTION_S84.md + experiments/_s83_f_s81_a/.
+  enable_path_d_intra_radio_gate: true
   # P3.1 S15: dual-ROI dNTI summit/scene — Coppola 2016a Table 2.
   # Validado A/B S24 (mantener).
   enable_dnti_dual_roi: true

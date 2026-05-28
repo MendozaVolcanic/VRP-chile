@@ -188,13 +188,16 @@ def test_gate_preserves_dtype_and_shape():
 # --- Profile loading tests ---
 
 
-def test_operacional_default_off():
-    """mirova_equivalent (operacional) — flag por defecto OFF.
+def test_operacional_adopted_S84():
+    """mirova_equivalent (operacional) — flag ADOPTADO ON desde S84.
 
-    Hasta que el audit A/B valide, el operacional NO cambia (regla S33+A45).
+    Audit run A/B 26540794992 (45d, 22/22 success) validó -93 a -98%
+    reducción de pixels dnti_ctx fuera del cono en TODOS los Tier A,
+    cero regresión de TPs MIROVA. Adopción documentada en
+    docs/F_S81_A_ADOPTION_S84.md. Tag defensivo pre-s84-f-s81-a-adoption.
     """
     p = _reload_profile("mirova_equivalent")
-    assert p.ENABLE_PATH_D_INTRA_RADIO_GATE is False
+    assert p.ENABLE_PATH_D_INTRA_RADIO_GATE is True
 
 
 def test_profile_enabled_sets_flag_true():
