@@ -152,6 +152,22 @@ ENABLE_DNTI_DUAL_ROI: bool = bool(_p.get("enable_dnti_dual_roi", False))
 # no replicado. Ver docs/F_S81_A_FASE1_DIAGNOSIS.md +
 # docs/F_S81_A_FASE1B_SANITY_P95.md. Default false hasta validación A/B.
 ENABLE_PATH_D_INTRA_RADIO_GATE: bool = bool(_p.get("enable_path_d_intra_radio_gate", False))
+# S85 Fase B' (F-S81-B'): gate intra-radio sobre pixels NUEVOS del
+# second_pass_recapture (`pipeline/detection_context.py:second_pass_adjacent`).
+# Motivación: audit B0 (docs/R3_RESIDUAL_BY_PATH.md) mostró que 87.7% de los
+# 106 R3 violators del operacional post-S84 NO tienen ningún path 1er pase
+# activo. Volcanes con más R3 (NdC/Llaima/Copahue/PP) son los que más
+# recapturan (NdC=1247, PP=776). El second pass no tiene restricción
+# espacial (paper Coppola 2016a §347-356 no la exige) — recaptura cualquier
+# pixel de la escena. En cirrus uniforme/glaciar parcialmente cálido,
+# rescata ruido distribuido lejos del cono → arma cluster fuera del
+# inner_radius → R3 violator.
+# Sanity: 1332 ALERTAs MIROVA Tier A (CSV+OCR) caen 100% intra-radio
+# (docs/F_S81_B_SANITY_VIIRS.md). Pérdida de TPs esperada = 0.
+# El gate solo toca pixels NUEVOS del 2nd pass (los del 1er pase, intactos).
+# Diseño completo: docs/F_S81_B_PRIME_SECOND_PASS_GATE.md. Default false
+# hasta validación A/B (S85).
+ENABLE_SECOND_PASS_INTRA_RADIO_GATE: bool = bool(_p.get("enable_second_pass_intra_radio_gate", False))
 # S25: Path Test 1 integrated-ROI (Coppola 2015 Eq.1). Suma exceso de radiancia
 # MIR sobre toda la ROI vent (default 3 km radio); detecta señales sub-pixel
 # espacialmente extendidas que paths per-pixel pierden. POC S25 6/6 refs

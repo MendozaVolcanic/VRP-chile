@@ -1,0 +1,154 @@
+name: NRT Healthcheck (Tier A staleness)
+
+# S85 A58: healthcheck diario que detecta Tier A con records stale.
+# Complemento del assertion per-step A57 (nrt.yml): si un Tier A no se
+# actualiza por >48h y el step de assertion no fired (porque pipeline
+# legítimamente fallaba por NASA outage, o el workflow no corrió), este
+# cron lo detecta y abre un issue automático.
+#
+# Diferencia con assertion A57:
+#   - A57 (per-step) detecta T+72h "live" dentro del NRT cron. Falla el
+#     step y deja badge rojo.
+#   - A58 (este healthcheck) detecta T+48h "pasivo" 1×/día independiente
+#     del NRT, y abre issue con resumen de qué vols están stale. Más
+#     visible que un badge rojo intermitente.
+#
+# Idempotencia: si ya hay issue abierto con label `nrt-stale`, agrega
+# comment en vez de duplicar.
+
+"on":
+  schedule:
+    - cron: "0 12 * * *"  # 12:00 UTC diario
+  workflow_dispatch:
+
+jobs:
+  healthcheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Detect stale Tier A
+        id: detect
+        run: |
+          python - <<'PYEOF'
+          import json, os
+          from datetime import datetime, timezone, timedelta
+          from pathlib import Path
+
+          TIER_A = [
+              "Lascar", "PuyehueCordonCaulle", "Lastarria", "Isluga",
+              "Tupungatito", "PlanchonPeteroa", "Chaiten", "Villarrica",
+              "NevadosDeChillan", "Llaima", "Copahue",
+          ]
+          THRESHOLD_H = 48
+          now = datetime.now(timezone.utc)
+          stale = []
+          ok = []
+          missing = []
+
+          for vol in TIER_A:
+              p = Path(f"data/mirova_equivalent/{vol}.json")
+              if not p.exists():
+                  missing.append(vol)
+                  continue
+              try:
+                  d = json.loads(p.read_text())
+              except Exception as e:
+                  stale.append((vol, f"PARSE_ERROR: {e}", None))
+                  continue
+              records = d.get("records", [])
+              if not records:
+                  stale.append((vol, "0 records", None))
+                  continue
+              last = records[-1].get("datetime_utc") or records[-1].get("acq_datetime_utc")
+              if not last:
+                  stale.append((vol, "schema sin datetime_utc", None))
+                  continue
+              try:
+                  s = last.replace("Z", "+00:00")
+                  last_dt = datetime.fromisoformat(s)
+                  if last_dt.tzinfo is None:
+                      last_dt = last_dt.replace(tzinfo=timezone.utc)
+              except Exception:
+                  stale.append((vol, f"datetime parse error: {last}", None))
+                  continue
+              age_h = (now - last_dt).total_seconds() / 3600
+              if age_h > THRESHOLD_H:
+                  stale.append((vol, last, age_h))
+              else:
+                  ok.append((vol, last, age_h))
+
+          # Generar reporte
+          lines = []
+          lines.append(f"# NRT Healthcheck — {now.strftime('%Y-%m-%d %H:%M UTC')}")
+          lines.append("")
+          lines.append(f"Threshold: **{THRESHOLD_H}h**")
+          lines.append("")
+          if stale:
+              lines.append(f"## STALE ({len(stale)}/{len(TIER_A)} Tier A)")
+              lines.append("")
+              lines.append("| Volcán | last_record | edad (h) |")
+              lines.append("|---|---|---:|")
+              for vol, last, age in stale:
+                  age_str = f"{age:.1f}" if age is not None else "—"
+                  lines.append(f"| {vol} | `{last}` | {age_str} |")
+              lines.append("")
+          if missing:
+              lines.append(f"## MISSING ({len(missing)} JSONs no encontrados)")
+              lines.append("")
+              for v in missing:
+                  lines.append(f"- {v}")
+              lines.append("")
+          if ok:
+              lines.append(f"## OK ({len(ok)}/{len(TIER_A)})")
+              lines.append("")
+              lines.append("| Volcán | last_record | edad (h) |")
+              lines.append("|---|---|---:|")
+              for vol, last, age in sorted(ok, key=lambda x: x[2]):
+                  lines.append(f"| {vol} | `{last}` | {age:.1f} |")
+
+          report = "\n".join(lines)
+          Path("healthcheck_report.md").write_text(report)
+          print(report)
+
+          # Output flags para steps siguientes
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"stale_count={len(stale)}\n")
+              f.write(f"missing_count={len(missing)}\n")
+              f.write(f"ok_count={len(ok)}\n")
+
+          # Step summary
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write(report)
+          PYEOF
+
+      - name: Open or update issue if stale
+        if: steps.detect.outputs.stale_count != '0' || steps.detect.outputs.missing_count != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -e
+          REPORT=$(cat healthcheck_report.md)
+          TITLE="NRT staleness — Tier A con records >48h"
+          # Buscar issue abierto con label nrt-stale
+          EXISTING=$(gh issue list --repo "$GH_REPO" --label nrt-stale --state open --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+              echo "Issue existente #$EXISTING — agregando comment"
+              gh issue comment "$EXISTING" --repo "$GH_REPO" --body "$REPORT"
+          else
+              echo "No hay issue abierto — creando uno nuevo"
+              # Asegurar que label existe (crear si no)
+              gh label create nrt-stale --repo "$GH_REPO" --color FF6B6B --description "NRT healthcheck detectó vols Tier A stale" 2>/dev/null || true
+              gh issue create --repo "$GH_REPO" --title "$TITLE" --label nrt-stale --body "$REPORT"
+          fi

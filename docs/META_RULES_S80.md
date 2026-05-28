@@ -336,6 +336,15 @@ de contexto comprobada).
   Implementación sugerida B9 backlog: un workflow cron `nrt-healthcheck.yml`
   que corra 1×/día y abra un issue automático si detecta staleness.
 
+- **A60. Workflows archivados en `_archive/` no requieren fix de TOKEN
+  porque no se ejecutan**, pero si alguno se desarchiva (movido de
+  `.github/workflows/_archive/` a `.github/workflows/`) DEBE incluir
+  `EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}` además de USERNAME/
+  PASSWORD. Patrón: ver `nrt.yml` o `reproc-ab-f-s81-a-intra-radio.yml`.
+  Sin TOKEN, NASA Azure throttle endpoint `/profile` rompe earthaccess
+  download silenciosamente. Audit S85 P3 confirmó que los 2 workflows
+  reproc activos (post fix S84) ya están OK.
+
 - **A59. Reproc 45d × 8 sensores × N vols requiere timeout-minutes ≥ 140**
   (no 50 del NRT). Run 26537938176 (S84, post fix F55) demostró que jobs
   Tier A pesados (Lascar/Lastarria/PCC/Tupungatito) requieren ~125 min

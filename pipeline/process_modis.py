@@ -35,6 +35,7 @@ from .vrp_regimes import compute_local_background
 from .test1_integrated import compute_test1_mir
 from .path_d_cap import apply_d9_scene_cap  # F50/S77
 from .path_d_intra_radio import apply_intra_radio_gate  # S83 F-S81-A Fase 2
+from .second_pass_intra_radio import apply_second_pass_intra_radio_gate  # S85 F-S81-B'
 
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
@@ -90,6 +91,7 @@ from pipeline.profile import (
     ENABLE_DNTI_CONTEXTUAL_PATH,
     ENABLE_DNTI_DUAL_ROI,
     ENABLE_PATH_D_INTRA_RADIO_GATE,
+    ENABLE_SECOND_PASS_INTRA_RADIO_GATE,
     ENABLE_DUAL_ROI_BT,
     ENABLE_TEST1_PIXEL_FILTER,
     ENABLE_FINAL_PIXEL_FILTER,
@@ -663,6 +665,17 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                 c2_deti_scene=(C2_DETI_SCENE_NIGHT
                                if ENABLE_DUAL_ROI_SECOND_PASS else None),
             )
+            # S85 F-S81-B' — gate intra-radio sobre pixels NUEVOS del second
+            # pass. Default OFF; ON via profile A/B. Solo afecta pixels nuevos
+            # recapturados; first pass intacto. Ver docs/F_S81_B_PRIME_SECOND_PASS_GATE.md.
+            if ENABLE_SECOND_PASS_INTRA_RADIO_GATE:
+                final_active_mask = apply_second_pass_intra_radio_gate(
+                    first_pass_mask=hot_mask_2d,
+                    final_active_mask=final_active_mask,
+                    vent_dist_per_pixel=vent_dist_per_pixel,
+                    inner_radius_km=inner_radius_km,
+                    enabled=True,
+                )
             n_second_pass_recapture = int(np.sum(final_active_mask & ~hot_mask_2d))
             hot_mask_2d = final_active_mask
 

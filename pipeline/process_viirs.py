@@ -100,6 +100,7 @@ from pipeline.profile import (
     ENABLE_EXCLUDE_ZONES,
     ENABLE_ETI_QUADRATIC_SCENE,
     ENABLE_SECOND_PASS_ADJACENT,
+    ENABLE_SECOND_PASS_INTRA_RADIO_GATE,
     C1_SUMMIT_OVERRIDE,
     C2_SUMMIT_OVERRIDE,
     C2_DNTI_SUMMIT_NIGHT,
@@ -131,6 +132,7 @@ from pipeline.profile import (
     SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
 )
 from .single_pixel_mode import apply_single_pixel_mode
+from .second_pass_intra_radio import apply_second_pass_intra_radio_gate  # S85 F-S81-B'
 from .detection_context import (
     contextual_dnti_hot_mask,
     dual_roi_contextual_dnti_hot_mask,
@@ -992,6 +994,17 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         c2_deti_scene=(_c2_scene_sp
                                        if ENABLE_DUAL_ROI_SECOND_PASS else None),
                     )
+                    # S85 F-S81-B' — gate intra-radio sobre pixels NUEVOS del
+                    # second pass. Default OFF; ON via profile A/B. Ver
+                    # docs/F_S81_B_PRIME_SECOND_PASS_GATE.md.
+                    if ENABLE_SECOND_PASS_INTRA_RADIO_GATE:
+                        final_active_mask = apply_second_pass_intra_radio_gate(
+                            first_pass_mask=hot_mask_2d,
+                            final_active_mask=final_active_mask,
+                            vent_dist_per_pixel=vent_dist_per_pixel,
+                            inner_radius_km=inner_radius_km,
+                            enabled=True,
+                        )
                     n_second_pass_recapture = int(
                         np.sum(final_active_mask & ~hot_mask_2d))
                     hot_mask_2d = final_active_mask
