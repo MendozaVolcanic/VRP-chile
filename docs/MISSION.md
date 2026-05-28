@@ -1,19 +1,39 @@
-# Misión VRP Chile — Clon literal MIROVA
+# Misión VRP Chile — Clon literal MIROVA + extensión volcánica documentada
 
 > **Documento vinculante.** Leer al inicio de cada sesión. Aplica las 3
-> preguntas antes de proponer o implementar cualquier cosa.
+> preguntas antes de proponer o implementar cualquier cosa que toque el
+> pipeline algorítmico.
 
-## Misión
+## Misión (objetivos simultáneos, post-S86)
 
-Reproducir lo más fielmente posible el comportamiento de **MIROVA NRT** sobre
-volcanes chilenos, usando **únicamente** la metodología documentada en los
+VRP Chile cumple dos objetivos que comparten la misma infraestructura de
+detección pero se reportan distinto:
+
+**Objetivo (1) — Clon literal MIROVA NRT** (PRIMARIO algorítmico).
+Reproducir lo más fielmente posible el comportamiento de MIROVA NRT sobre
+volcanes chilenos, usando **únicamente** la metodología documentada en
 papers core MIROVA. El objetivo no es "mejor que MIROVA" — es "igual que
 MIROVA, en infraestructura propia para SERNAGEOMIN, con dashboard limpio".
-
 Si encontramos que MIROVA tiene un comportamiento que no queremos (FPs en
 lagos, sub-detección sub-pixel, etc.), eso queda como hallazgo documentado
-pero **NO** es licencia para divergir metodológicamente. Si MIROVA falla en
-algo, nosotros también fallamos en lo mismo. Esa es la definición de "clon".
+pero **NO** es licencia para divergir metodológicamente.
+
+**Objetivo (2) — Extensión volcánica documentada** (SECUNDARIO reporte).
+Reportar las detecciones que el algoritmo Coppola 2016a captura pero que
+MIROVA NRT no publica por scope operacional (sub-complejos volcánicos,
+cráteres secundarios, lava lakes sub-pixel, lacolitos difusos, fumarolas
+crónicas catalogadas Smithsonian GVP). El hallazgo S86 (auditoría
+profunda) mostró empíricamente que **95.4% de las "FPs" del cruce estricto
+contra MIROVA son anomalías térmicas físicamente reales** — 49.1%
+publicaciones MIROVA que el cruce nuestro perdió por bugs del loader local
++ 46.3% features volcánicas reales no publicadas por MIROVA. Solo 4.6%
+son artefactos espurios. Reportar (2) honestamente como valor agregado
+SERNAGEOMIN — no eliminarlo.
+
+**Importante**: el algoritmo de detección es ÚNICO (el de papers MIROVA
+core). La distinción (1) vs (2) vive en el campo derivado `pc.classification`
+(diseño S87 Bloque 3) + en el frontend que separa visualmente las
+categorías. No se introducen gates adicionales para "limpiar" (2).
 
 ## Las 3 preguntas vinculantes
 
@@ -75,10 +95,23 @@ Estas fueron las desviaciones históricas. Nunca repetir.
 | Path C NTI relativo (default ON) | No en papers | Default OFF mantenido |
 | Subir `inner_radius_km` ad-hoc | Parche para recuperar recall; no es metodológico MIROVA | Rechazado S27 |
 | N·σ Di Bella 2024 (12σ noche VIIRS) | Di Bella es INGV Catania, NO MIROVA | Identificado S26 |
+| **Gate intra-radio por path** (S83-S85 PRs #224, #229) | No en papers; el frontend `mirovaEqVrp` ya hacía exactamente eso desde S33 → adopciones redundantes | Identificado S86 |
 
 **El patrón común**: cada parche resolvía el síntoma de un drift previo, no la
 causa raíz. Cuando se acumulaban, anulaban la diferenciación summit/scene de
 MIROVA. Volver a literal puro es la forma de detener el ciclo.
+
+**Familia "gate intra-radio" (S86)**: las adopciones S83-S85 (path D
+restringido a intra-radio + second pass restringido a intra-radio)
+pasaron las 3 preguntas solo por puerta 3 GRIS "alineación infraestructural",
+pero la auditoría S86 reveló que el gate intra-radio ya existía en el
+frontend desde S33 — eran adopciones redundantes que además, si se
+hubieran combinado con G1 (`sensor != VIIRS_M_750`) propuesto S86,
+habrían suprimido categoría (b) "features volcánicas reales no publicadas
+por MIROVA". **Cualquier PR futuro que proponga otro gate "intra-radio por
+path" requiere primero**: (a) verificar que el frontend no hace ya esa
+supresión, (b) clasificar la categoría físicamente (E S86) de los
+records que el gate filtraría, (c) confirmar que ninguno pertenece a (b).
 
 ## Cuándo SÍ se puede divergir
 
