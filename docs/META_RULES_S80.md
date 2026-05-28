@@ -260,3 +260,86 @@ Detalle completo en `docs/SESSION_CLOSE_CHECKLIST.md`. Bloques obligatorios:
 debe invocarlas proactivamente sin que Nicolás las nombre. Si dudás si
 aplicar una, aplicala (costo invocar bajo, costo de no invocar = pérdida
 de contexto comprobada).
+
+---
+
+## Lecciones durables agregadas S84 (2026-05-28)
+
+- **A56. Bypass parcial de funciones de tercero requiere preservar
+  responsabilidades no-target**. Cuando se monkeypatch una función de
+  biblioteca externa (earthaccess, requests, etc) para evitar un efecto
+  colateral (un GET problemático, un timeout, una validación), hay que
+  leer la implementación entera del original e identificar QUÉ MÁS hace
+  esa función. Si el bypass se hace simplemente con `return None`, todas
+  las otras responsabilidades del original quedan deshabilitadas.
+
+  Caso concreto S77→S84: el bypass F55 a
+  `earthaccess.store.Store.set_requests_session` se hizo `return None` para
+  skipear el GET a `/profile` que NASA Azure throttle. Pero el original ANTES
+  de ese GET inicializaba `self._http_session = self.auth.get_session()`.
+  Sin esa inicialización, `download()` posterior fallaba silencioso con
+  "session hasn't been set up yet". NRT 100% caído 4 días sin detectar.
+
+  Fix correcto: bypass quirúrgico que preserva el setup:
+  ```python
+  if not hasattr(self, "_http_session"):
+      self._http_session = self.auth.get_session()
+  return None
+  ```
+
+  Ref: PR #225 + `pipeline/fetch.py:_patched_set_requests_session`.
+
+- **A57. `set +e` + script Python tolerante + workflow exit 0 = "success"
+  engañoso**. Cuando un GH Actions step usa `set +e` y el script Python
+  no propaga errores con `sys.exit(1)`, el workflow termina exit 0 aunque
+  CERO trabajo útil se haya hecho. Hay que validar **contenido**, no solo
+  exit code.
+
+  Anti-pattern detectado S84:
+  ```yaml
+  - name: Reproc
+    run: |
+      set +e
+      python script.py  # falla silencioso, no exit
+      git add data/...  # nada que add
+      git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+  ```
+
+  Workflow marca success. Pero NO procesó nada. Bug propio de NRT desde
+  2026-05-23 hasta detección S84 (~4 días con dashboard stale).
+
+  Mitigación futura: agregar **assertion de contenido** post-script. Ej.:
+  ```yaml
+  - name: Assert records produced
+    run: |
+      python -c "
+      import json, sys
+      d = json.load(open('data/<subdir>/<vol>.json'))
+      last_dt = d['records'][-1]['datetime_utc']
+      assert last_dt.startswith('2026'), f'records stale: {last_dt}'
+      "
+  ```
+
+  Pendiente B8 backlog: implementar este pattern en `nrt.yml` y reproc-ab*.
+
+- **A58. NRT necesita health-check de staleness de records, no solo de
+  file_updated**. El campo `updated` del JSON refleja el último commit
+  del scraper Mirova-v1 (que actualiza `data/mirova/` paralelo) y no
+  garantiza que nuestro pipeline haya procesado granules. Para detectar
+  fallos silenciosos del pipeline hay que verificar:
+
+  - `max(record.datetime_utc for record in records)` > `now() - 48h`
+    para TODOS los Tier A.
+
+  Si algún Tier A tiene `last_record` más antiguo que 48h, **alertar**.
+
+  Implementación sugerida B9 backlog: un workflow cron `nrt-healthcheck.yml`
+  que corra 1×/día y abra un issue automático si detecta staleness.
+
+- **A59. Reproc 45d × 8 sensores × N vols requiere timeout-minutes ≥ 140**
+  (no 50 del NRT). Run 26537938176 (S84, post fix F55) demostró que jobs
+  Tier A pesados (Lascar/Lastarria/PCC/Tupungatito) requieren ~125 min
+  para 45 días. NRT 1 día cabe en 50 min holgado pero reproc no. Default
+  workflows `reproc-ab-*` debe ser **timeout-minutes: 140 step + 150
+  job-level**. Doc operacional: ver workflow `reproc-ab-f-s81-a-intra-radio.yml`
+  como template.
