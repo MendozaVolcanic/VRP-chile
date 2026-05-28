@@ -1,0 +1,98 @@
+name: A/B reproceso F-S81-B' gate intra-radio second_pass_recapture (S85)
+
+# Workflow dispatch-only para validación cuantitativa del gate
+# enable_second_pass_intra_radio_gate.
+#
+# Motivación: audit B0 (docs/R3_RESIDUAL_BY_PATH.md) mostró que 87.7% de los
+# 106 R3 violators del operacional post-S84 NO tienen ningún path 1er pase
+# activo. Volcanes con más R3 (NdC=24, Llaima=18, Copahue=14, PP=11) son los
+# que más recapturan (NdC=1247, PP=776). El second_pass_adjacent no tiene
+# restricción espacial — recaptura ruido en cirrus uniforme/glaciar fuera
+# del cono. Diseño completo: docs/F_S81_B_PRIME_SECOND_PASS_GATE.md.
+#
+# Profiles paralelos (data_subdir aislado, NO contamina operacional):
+#   _f_s81_b_prime_2nd_pass_gate_enabled  → gate ON
+#   _f_s81_b_prime_2nd_pass_gate_disabled → gate OFF explícito (baseline)
+#
+# Criterios de aceptación:
+# - R3 violators (eruption fuera inner_radius en `enabled`): ≤30 (vs 106
+#   actual).
+# - Cero regresión TPs MIROVA en cualquier volcán (especialmente Lascar 25/25).
+# - Recall y precision sin regresión >5pp per-vol vs disabled.
+# - Reducción `diag_n_second_pass_recapture` esperada: >50% per-vol en
+#   volcanes con cirrus/glaciar frecuente (NdC, PP, Copahue, Chaiten).
+#
+# A43 Norway problem: `"on":` quoted.
+# A59: timeout-minutes 140 (suficiente para 45d × 8 sensores).
+# A56: EARTHDATA_TOKEN preservado (sin él falla silencioso).
+
+"on":
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD (default 45d window)"
+        required: true
+        default: "2026-04-12"
+      end:
+        description: "End date YYYY-MM-DD inclusive"
+        required: true
+        default: "2026-05-26"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano: [Lascar, Lastarria, Tupungatito, PuyehueCordonCaulle, Isluga, PlanchonPeteroa, Villarrica, Llaima, Copahue, NevadosDeChillan, Chaiten]
+        profile: [_f_s81_b_prime_2nd_pass_gate_enabled, _f_s81_b_prime_2nd_pass_gate_disabled]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — mirova_equivalent${{ matrix.profile }} / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 140
+        run: |
+          python scripts/run_pipeline.py \
+            --profile mirova_equivalent${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed A/B data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/mirova_equivalent${{ matrix.profile }}/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S85 A/B F-S81-B' 2nd pass gate — ${{ matrix.profile }} / ${{ matrix.volcano }} ${{ github.event.inputs.start }}→${{ github.event.inputs.end }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1

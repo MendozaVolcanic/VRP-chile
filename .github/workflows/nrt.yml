@@ -251,6 +251,52 @@ jobs:
             echo "Workflow \`nrt-retry.yml\` reintentará automáticamente en ~30 min." >> "$GITHUB_STEP_SUMMARY"
           fi
 
+      # S85 A57: assertion de contenido post-pipeline para Tier A. Detecta
+      # bugs silenciosos donde el step termina exit 0 pero NO escribió records
+      # nuevos (caso F55 S84: bypass earthaccess rompió session setup, pipeline
+      # exit 0, 4 días NRT stale sin detectar). Criterio: max(record.datetime_utc)
+      # en el JSON del volcán debe ser < 72h. Si más viejo → FAIL.
+      # Aplica SOLO a 11 Tier A (mirova_equivalent), no a los 34 exploration
+      # que pueden estar legítimamente quietos por meses.
+      - name: Assert Tier A records fresh (A57)
+        # success(): solo correr si pipeline steps previos pasaron. Si NASA cayó
+        # (NASA_AUTH_UNREACHABLE) y el step falló, no queremos doble-FAIL.
+        if: ${{ success() && steps.filter.outputs.skip != 'true'
+             && (github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'mirova_equivalent')
+             && contains(fromJson('["Lascar","PuyehueCordonCaulle","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","Chaiten","Villarrica","NevadosDeChillan","Llaima","Copahue"]'), matrix.volcano) }}
+        run: |
+          python - <<'PYEOF'
+          import json, sys
+          from datetime import datetime, timezone, timedelta
+          from pathlib import Path
+          vol = "${{ matrix.volcano }}"
+          p = Path(f"data/mirova_equivalent/{vol}.json")
+          if not p.exists():
+              print(f"WARN {p}: no existe (primera corrida)")
+              sys.exit(0)
+          d = json.loads(p.read_text())
+          records = d.get("records", [])
+          if not records:
+              print(f"FAIL {p}: 0 records")
+              sys.exit(1)
+          last = records[-1].get("datetime_utc") or records[-1].get("acq_datetime_utc")
+          if not last:
+              print(f"FAIL {p}: último record sin datetime_utc — schema corrupto")
+              sys.exit(1)
+          s = last.replace("Z", "+00:00")
+          last_dt = datetime.fromisoformat(s)
+          if last_dt.tzinfo is None:
+              last_dt = last_dt.replace(tzinfo=timezone.utc)
+          age = datetime.now(timezone.utc) - last_dt
+          hours = age.total_seconds() / 3600
+          if age > timedelta(hours=72):
+              print(f"FAIL {p}: stale, last_dt={last} ({hours:.1f}h > 72h)")
+              print(f"   Probable bug silencioso en pipeline o NASA outage prolongado.")
+              print(f"   Ver A57+A58 en docs/META_RULES_S80.md.")
+              sys.exit(1)
+          print(f"OK {p}: last_dt={last} ({hours:.1f}h)")
+          PYEOF
+
       - name: Commit updated data files
         if: steps.filter.outputs.skip != 'true'
         # S22 H_S22_NRT_PUSH_CONFLICT: el git add con *.json agarraba

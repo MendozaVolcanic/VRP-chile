@@ -1,3 +1,25 @@
+> **ACTUALIZACIÓN S85 (2026-05-28) — el plan original quedó refutado por el audit B0**.
+>
+> Audit `experiments/_s85_f_s81_b/audit_r3_by_path.py` sobre los 106 R3 residuales del
+> profile operacional `mirova_equivalent_f_s81_a_intra_radio_enabled` mostró:
+>
+> - Path A activo en 0/106 R3 (0.0%)
+> - Path B activo en 1/106 R3 (0.9%)
+> - Path C activo en 0/106 R3 (0.0%)
+> - Path D activo en 12/106 R3 (11.3%) — posible leak del gate F-S81-A (revisar)
+> - **NINGÚN path 1er pase activo en 93/106 R3 (87.7%)** ← causa real
+>
+> Implementar gates A/B/C según este doc atacaría 1 de 106 violators → no-op.
+>
+> La causa real del 87.7% es el **`second_pass_recapture`** (volcanes con más
+> R3 tienen n_2nd masivo: NDC=1247, PP=776, Copahue=648) y posibles
+> `cluster_rescue`/`vent_anchored rescue` (S77).
+>
+> **Nuevo plan**: ver `docs/R3_RESIDUAL_BY_PATH.md` sección "Recomendación
+> priorización Fase B" + reorientación a Fase B' (gate sobre second pass) y
+> Fase C (rescue mechanisms). Backlog Fase B original queda como referencia
+> histórica de qué NO atacar primero.
+
 # Backlog Fase B — gates intra-radio Path A/B/C MODIS
 
 **Origen**: cierre S84. Adopción F-S81-A redujo 93-98% pixels Path D fuera del
