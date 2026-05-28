@@ -267,10 +267,16 @@ def test_many_pixels_mixed():
 # --- Profile loading tests ---
 
 
-def test_operacional_default_off():
-    """mirova_equivalent (operacional) — flag default OFF hasta validación A/B."""
+def test_operacional_adopted_S85():
+    """mirova_equivalent (operacional) — flag ADOPTADO ON desde S85.
+
+    Audit A/B run 26557588067 (45d, 22/22 success) validó cero pérdida
+    TPs MIROVA + reducción -59% n_2nd_pass_recapture MODIS. Adopción
+    documentada en pipeline/profiles/mirova_equivalent.yaml. Tag
+    defensivo pre-s85-f-s81-b-prime-adoption.
+    """
     p = _reload_profile("mirova_equivalent")
-    assert p.ENABLE_SECOND_PASS_INTRA_RADIO_GATE is False
+    assert p.ENABLE_SECOND_PASS_INTRA_RADIO_GATE is True
 
 
 def test_profile_enabled_sets_flag_true():
