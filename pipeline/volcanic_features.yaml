@@ -1,0 +1,65 @@
+# volcanic_features.yaml — catálogo de features volcánicas catalogadas por volcán
+# para el campo `geo_class` (S88 Frente B, diseño:
+# docs/superpowers/specs/2026-05-29-s88-pc-classification-design.md).
+#
+# Propósito: un cluster `primary_cluster` que cae FUERA del inner_radius_km del
+# vent pero DENTRO de ext_km de una de estas features se etiqueta
+# `geo_class="extension"` (feature volcánica real no publicada por MIROVA —
+# categoría b del marco S86, docs/AUDIT_S86.md). Sin feature cercana → "far".
+# El cluster dentro del inner_radius siempre gana → "summit".
+#
+# REGLA DE INTEGRIDAD (S88): las coordenadas aquí DEBEN ser verificadas contra
+# Smithsonian GVP / KMZ MIROVA / archivo del repo. NO inventar. Una feature sin
+# coord verificada se deja como TODO comentado, NO con un número falso. Por eso
+# este archivo arranca casi vacío: S86 IDENTIFICÓ los nombres de las features
+# (Cerro Blanco, Lazufre, Pichi-Llaima, El Agrio, Planchón N) pero el repo NO
+# tiene sus coords GVP. Conseguirlas es una tarea de investigación (S89).
+#
+# Estado S88: summit/far operativo para los 11 Tier A (geometría inner_radius
+# pura, ya verificada). "extension" solo dispara donde hay coord verificada.
+#
+# Estructura por volcán:
+#   <VolcanName>:
+#     - name: <descripción de la feature>
+#       lat: <float>
+#       lon: <float>
+#       ext_km: <float>   # radio alrededor de la feature para contar "extension"
+#       source: <cita de dónde viene la coord>
+
+# --- Features con coordenada VERIFICADA ---
+
+PuyehueCordonCaulle:
+  # Centroide térmico empírico del lacolito 2011 SE, derivado S48 promediando
+  # scenes MODIS con n_pixels>2500 del mirova-tif-archive. Documentado en
+  # docs/BEYOND_MIROVA_EXTENSIONS.md §10 (EXT-12). El lacolito difuso 707 km²
+  # (A20/A24) se extiende al SE del cone; este punto marca su foco térmico.
+  # NOTA: inner_radius_km de PCC = 20 km, así que casi todo el campo del
+  # lacolito ya cae como "summit". Esta feature captura los focos MODIS más
+  # lejanos (~11-18 km off del mirova_center) que igual quedan dentro de 20 km.
+  # Se mantiene por completitud; su efecto marginal es chico dado el inner=20.
+  - name: "Lacolito Cordón Caulle 2011 (centroide térmico empírico)"
+    lat: -40.582
+    lon: -72.131
+    ext_km: 4.0
+    source: "docs/BEYOND_MIROVA_EXTENSIONS.md §10 (S48 MODIS tif-archive centroid)"
+
+# --- Features IDENTIFICADAS por S86 pero SIN coord verificada (TODO S89) ---
+# NO se listan con coords inventadas (regla integridad S88). Conseguir coord
+# Smithsonian GVP verificada antes de activar. Mientras tanto, sus clusters
+# caen como "far" si están fuera del inner_radius (honesto: no afirmamos que
+# es extensión sin tener la ubicación catalogada).
+#
+# Lastarria:
+#   - Lazufre (complejo regional ~10 km S del vent). TODO: coord GVP.
+# NevadosDeChillan:
+#   - Cerro Blanco (sub-complejo). TODO: coord GVP.
+# Llaima:
+#   - Pichi-Llaima (cráter secundario). TODO: coord GVP.
+# Copahue:
+#   - Cráter El Agrio + alineación E-W (probablemente dentro de inner=4 →
+#     ya sería summit; verificar). TODO: coord GVP.
+# PlanchonPeteroa:
+#   - Cráter Planchón N + Azufre (complejo multi-cráter). TODO: coord GVP.
+#
+# Villarrica (lava lake) y Tupungatito (cráter cumbre): son el vent mismo →
+# caen como "summit" por inner_radius, NO necesitan entrada aquí.
