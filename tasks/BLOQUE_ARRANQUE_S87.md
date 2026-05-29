@@ -95,17 +95,28 @@ Ver `experiments/_s86_exp_huella/L_dominant_anomaly_match_PRELIM.md`.
 
 ### Bloque 2 — Fix loader CSV + rehacer cruce TP/FP (PRIORITARIO, habilita el bloque central)
 
-**ETA**: 1-2h, 1 PR ~30 líneas. **Toca**: scripts de audit + posible nuevo módulo `pipeline/mirova_csv_loader.py`. **NO toca pipeline NRT** (cero riesgo A45, ningún tag defensivo requerido).
+**ETA**: 1-2h. **Toca**: scripts de audit + módulo `pipeline/mirova_csv_loader.py`. **NO toca pipeline NRT** (cero riesgo A45, ningún tag defensivo requerido).
 
-#### Fixes a aplicar (todos del Subagente F)
+#### ✅ PARTE 1 HECHA (PR #232 mergeado, commit `a4a22f4e`)
 
-1. **F-B1**: cargar universo MIROVA como CONS ∪ OCR dedup por `(timestamp, vol_norm, sensor_norm)`. Recupera 344 ALERTAs únicas OCR.
-2. **F-B2**: parsear `Distancia_km` real desde `Nota_Validacion` con regex `dist[≈~=]\s*(\d+\.?\d*)\s*km`. OCR registers `Distancia_km=0` en 100% de filas — la verdadera distancia vive en texto libre.
-3. **F-B3**: documentar que Tupungatito CONS arranca 2026-02-14 (35d después del resto). Recortar ventanas de audit a coverage real o reportar separado.
-4. **F-B4**: alias `Peteroa → PlanchonPeteroa` para CSV CONS pre-2026-01-16 (rename histórico del scraper).
-5. **F-I2**: política `Tipo_Registro=FALSO_POSITIVO` CONS (363 filas): tratar como detección MIROVA lejana (path `far`) en volcanes con anomalía extendida (PCC), NO descartar ciegamente. El scraper las marca FP por `limite_km` propio, pero la detección MIROVA es real.
+`pipeline/mirova_csv_loader.py` creado con TDD (20 tests, suite 558 passed 0 regresiones). Resuelve:
+- ✅ **F-B1** CONS∪OCR dedup por `(timestamp, vol, sensor)` priorizando CONS.
+- ✅ **F-B2** distancia OCR parseada de `Nota_Validacion` (`parse_ocr_distance`).
+- ✅ **F-B4** alias `Peteroa → PlanchonPeteroa` + todas las variantes A14 (`normalize_volcano_name`).
+- ✅ **A48** sensor bucket (`normalize_sensor`).
 
-#### Validación post-fix
+**Verificado contra datos reales**: 977 ALERTAs Tier A (654 CONS + 323 OCR únicas) = **+49% sobre solo-CONS**, 100% con `dist_km` resuelta. Confirma subconteo ~45% del Subagente F.
+
+API: `load_mirova_alertas(cons_path, ocr_path, volcano=None)` → lista de dicts `{timestamp, volcano, sensor_bucket, vrp_mw, dist_km, tipo, source, clasificacion, fecha_utc, fecha_local}`.
+
+#### ⏳ PARTE 2 PENDIENTE (arranque próxima sesión)
+
+1. **Refactorizar los ~15 scripts de audit** para consumir `load_mirova_alertas` en vez de reimplementar la carga (el Explore S87 detectó VOL_CSV_MAP + sensor_family replicados 10-15 veces). Eliminar duplicación.
+2. **F-B3**: documentar que Tupungatito CONS arranca 2026-02-14 (35d después). Recortar ventanas de audit a coverage real o reportar separado. (Pendiente — el loader no lo maneja, es decisión del script de audit.)
+3. **F-I2**: política `Tipo_Registro=FALSO_POSITIVO` CONS (363 filas): decidir si tratarlas como detección MIROVA lejana (`far`) en vols con anomalía extendida (PCC). (Pendiente — el loader actual las descarta; reconsiderar.)
+4. **Rehacer el cruce TP/FP** con el loader nuevo → medir nuevo gap precisión.
+
+#### Validación post-fix (Parte 2)
 
 Re-ejecutar cruce TP/FP con loader corregido sobre mismo 117d window. Comparar:
 - TPs antes vs después (esperado: ↑)
