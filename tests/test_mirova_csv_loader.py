@@ -162,3 +162,37 @@ def test_load_sensor_bucket_normalizado(tmp_path):
     rows = load_mirova_alertas(cons_path=cons, ocr_path=ocr)
     pcc = next(r for r in rows if r["volcano"] == "PuyehueCordonCaulle")
     assert pcc["sensor_bucket"] == "VIIRS375"
+
+
+def test_load_ocr_sin_distancia_es_none(tmp_path):
+    """F-B2 completo: OCR sin patrón de distancia en la nota → dist_km None.
+
+    Las filas OCR traen Distancia_km=0 siempre; ese 0 es 'no informado', no
+    'distancia cero'. Si la nota no parsea, dist_km debe quedar None — NO
+    heredar el 0.0 de Distancia_km, que daría matches espurios al vent.
+    """
+    cons = tmp_path / "cons.csv"
+    ocr = tmp_path / "ocr.csv"
+    cons.write_text(
+        "timestamp,Fecha_Satelite_UTC,Fecha_Captura_Chile,Volcan,Sensor,VRP_MW,"
+        "Distancia_km,Tipo_Registro,Clasificacion Mirova,Nota_Validacion\n",
+        encoding="utf-8",
+    )
+    ocr.write_text(
+        "timestamp,Fecha_Satelite_UTC,Fecha_Captura_Chile,Volcan,Sensor,VRP_MW,"
+        "Distancia_km,Tipo_Registro,Clasificacion Mirova,Nota_Validacion\n"
+        '3000,2026-02-03 06:00:00,2026-02-03 02:00:00,Lascar,VIIRS375,0.4,0.0,'
+        'ALERTA_TERMICA_OCR,Bajo,"Pixel rojo sin distancia reportada"\n',
+        encoding="utf-8",
+    )
+    rows = load_mirova_alertas(cons_path=cons, ocr_path=ocr)
+    assert len(rows) == 1
+    assert rows[0]["dist_km"] is None
+
+
+def test_load_cons_usa_distancia_km(tmp_path):
+    """CONS sí usa Distancia_km como fuente de distancia (no la nota)."""
+    cons, ocr = _write_csvs(tmp_path)
+    rows = load_mirova_alertas(cons_path=cons, ocr_path=ocr)
+    lascar = next(r for r in rows if r["volcano"] == "Lascar")  # CONS gana dedup
+    assert lascar["dist_km"] == 1.2
