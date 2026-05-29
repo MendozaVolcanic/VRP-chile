@@ -76,25 +76,34 @@ comparables, **10 son no-match** con el primary stale:
 
 ### Mecanismo físico de los 8 detection-loss (confirmado pixel-level, `loss_chars.txt`)
 
+Record ganador (mayor VRP de escena, el que entra a la comparación) por noche
+detection-loss, distancias desde `mirova_center` (`dmin` = pixel más cercano al cráter):
+
 ```
-2026-02-08 01:40 MODIS_TERRA npx=31 dmin=6.4  dmax=31.5 btmax=312K vrp_scene=205
-2026-02-12 01:00 MODIS_TERRA npx=22 dmin=9.5  dmax=31.9 btmax=302K vrp_scene=140
-2026-02-14 02:30 MODIS_TERRA npx=6  dmin=13.9 dmax=24.6 btmax=296K vrp_scene=51
-2026-02-15 01:40 MODIS_TERRA npx=25 dmin=6.7  dmax=32.5 btmax=315K vrp_scene=156
-2026-02-28 01:20 MODIS_TERRA npx=26 dmin=7.7  dmax=31.4 btmax=309K vrp_scene=140
+2026-02-08 06:45 MODIS_AQUA  npx=43 dmin=8.3  dmax=33.0 btmax=288K sum_vrp=1059
+2026-02-10 08:00 MODIS_AQUA  npx=17 dmin=7.4  dmax=31.7 btmax=286K sum_vrp=177
+2026-02-15 07:55 MODIS_AQUA  npx=20 dmin=7.4  dmax=32.4 btmax=286K sum_vrp=122
+2026-02-28 01:00 MODIS_TERRA npx=11 dmin=9.5  dmax=28.2 btmax=288K sum_vrp=302
 ```
 
-Todos los detection-loss son **MODIS_TERRA en órbita ~01-02:30 GMT**. Durante la
-erupción de febrero, los pixeles MODIS detectados se concentran en el Salar a 6-32 km
-(`dmin` nunca baja de 5.9 km en estas noches; ni un pixel dentro de 5 km del cráter). El
+Son **MODIS — Terra Y Aqua** (corregido S88: una versión previa del doc decía "todos
+TERRA ~01-02:30 GMT"; la auditoría adversarial mostró que los records *ganadores* de
+varias noches son AQUA ~06-08 GMT — ver nota de integridad arriba). En todas, durante la
+erupción de febrero, los pixeles MODIS se concentran en el Salar a 7-33 km (`dmin` nunca
+baja de 5 km en estas noches; ni un pixel dentro del inner_radius de 5 km del cráter). El
 pipeline viejo (`bt_path_hot` ON + sin gates intra-radio S84/S85 + `vrp_max`) llenó el
 top-100 `anomaly_pixels` con esos pixeles lejanos (off-nadir, elongación sec³ A36),
 **y el cráter literalmente no quedó en la lista persistida**. Esto NO se puede arreglar
 offline — la información del cráter se perdió al persistir solo el top-N.
 
+> Nota de definición: `sum_vrp` aquí es la suma de TODOS los anomaly_pixels de la escena
+> (no el cluster dominante) — por eso 02-08 da 1059 MW. El `scene_vrp` que el script usa
+> para elegir el record ganador es el VRP del cluster mayor (`cluster_pixels_geographic`),
+> un valor menor. Dos definiciones distintas; ninguna afecta las métricas del JSON.
+
 > Contraste con VIIRS-I 375m las MISMAS noches: casi todas matchean (stale_ok=True), con
 > el cráter presente a <2 km. VIIRS-I, con su menor footprint y los gates actuales, sí
-> retuvo el cráter. El problema es específico de MODIS-TERRA durante la erupción.
+> retuvo el cráter. El problema es específico de **MODIS** durante la erupción.
 
 El pipeline ACTUAL no produciría el detection-loss: `bt_path_hot=False` (S40), gates
 intra-radio Path D (S84) y second-pass (S85) cortan los pixeles lejanos espurios antes del

@@ -1,0 +1,29 @@
+# S88 Frente A — perfil de reproceso de VALIDACIÓN (no operacional).
+#
+# Propósito: reprocesar la ventana eruptiva de Lascar feb-2026 con la config
+# operacional ACTUAL (vent_anchored + bt_path OFF S40 + gates intra-radio
+# S84/S85) para medir cuánto match real recupera el pipeline de hoy sobre los
+# 8 detection-loss + 2 borde que S88 identificó. Es VALIDACIÓN documentable,
+# NO un fix — el NRT ya hace esto desde S38-S40; este reproceso solo confirma
+# con datos limpios lo que el atajo offline no pudo (ver
+# experiments/_s88_lascar_reselect/RESULTS_reselect.md).
+#
+# `extends: mirova_equivalent` hereda EXACTAMENTE la config operacional
+# (todos los flags, thresholds, geometría). Solo cambia el data_subdir para
+# aislar el output y NO contaminar data/mirova_equivalent/ (A47: profile
+# distinto con dir aislado es el patrón seguro para reproc paralelo). El NRT
+# operacional sigue intacto.
+#
+# Uso: el workflow reproc-s88-lascar-validation.yml lo corre en GH Actions
+# (MODIS no corre local por pyhdf roto en Windows, regla S15) sobre la ventana
+# eruptiva, solo Lascar, con timeout chunked.
+
+extends: mirova_equivalent
+
+profile: _s88_reproc_validation
+description: >
+  Validación S88: reproceso Lascar feb-2026 con config operacional actual
+  (heredada de mirova_equivalent vía extends) en data_subdir aislado.
+
+output:
+  data_subdir: _s88_reproc_validation
