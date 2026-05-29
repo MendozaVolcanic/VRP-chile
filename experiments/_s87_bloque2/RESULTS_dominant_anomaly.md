@@ -41,6 +41,13 @@ mezclar — el script recalcula todo desde mirova_center.
 **Global ponderado (n=529)**: vent_anchored **74.7%** · vrp_max 47.7%.
 **Global sin PCC (difuso) y n≥10 (n=457)**: vent_anchored **81.8%**.
 
+> **Nota (ver §4)**: el 74.7% es un **piso**. La columna vent_anchored lee el
+> `primary_cluster` persistido, que mezcla records pre-S38 (estrategia vieja
+> `vrp_max`, no reprocesados) y post-S38 (`vent_anchored` real). Los records
+> históricos con bug `vrp_max` (Lascar feb eruptivo) tiran el promedio hacia
+> abajo. El pipeline **actual** matchea mejor; validación limpia requiere
+> reproceso histórico con config vigente (S88).
+
 ## Conclusiones
 
 ### 1. El criterio de selección actual (vent_anchored) es el correcto — A/B con datos
@@ -75,14 +82,34 @@ pixels en 6+ clusters a 6-20 km; el de mayor VRP a 18.8 km, MIROVA a 7.7 km.
 No forzar un fix (violaría clon + A55). El experimento L preliminar (0%) era un
 artefacto de comparar radialmente solo OCR/VIIRS sin reconstruir escena.
 
-### 4. Hallazgo nuevo — Lascar (67.3%): erupciones MODIS febrero 2026
+### 4. Lascar (67.3%): NO es bug del pipeline actual — es deuda de datos históricos pre-S38
 
 De 52 no-match Lascar: 13 son MIROVA-halo ~3.3 km vs nuestro cráter ~0.5 km
-(divergencia física menor); **31 son eventos eruptivos MODIS feb-2026** donde nuestro
-`primary` salta a 18-29 km con VRP inflado (142, 109 MW) mientras MIROVA reporta el
-cráter a ~1 km. Patrón MODIS off-nadir durante saturación/erupción (A36 scan-angle +
-saturación): pixels calientes dispersos que el clustering agrupa lejos. **Candidato
-S88** a investigar (no rompe el cuadro general: Lascar VIIRS375 matchea bien).
+(divergencia física menor); **31 son eventos eruptivos MODIS feb-2026** donde el
+`primary` en disco está a 18-29 km con VRP inflado (142, 109 MW) mientras MIROVA
+reporta el cráter a ~1 km.
+
+**Causa raíz (investigada S87, NO es el pipeline actual)**: `vent_anchored` se adoptó
+en `mirova_equivalent.yaml` el **2026-05-12 (S38 Bloque B)**. Los records de febrero
+son anteriores → se generaron con la estrategia vieja `vrp_max` (elige el cluster de
+mayor VRP de escena, que durante una erupción MODIS off-nadir cae lejos del cráter por
+pixels saturados dispersos, A36). El NRT solo procesa el día actual, así que esos
+records históricos **nunca se reprocesaron** y conservan el primary lejano.
+
+**Verificación con corte temporal** (records post-2026-05-12 = pipeline actual):
+los 5 no-match post-S38 de Lascar tienen `vent_anchored` eligiendo correctamente el
+cráter/borde (3.6, 5.8 km en MODIS; 0.8-0.9 km en VIIRS) — **NO** los 18-29 km de
+febrero. El bug catastrófico desaparece con la config actual; los residuales son gaps
+chicos (~2-4 km, MIROVA reporta un halo a ~3.5 km mientras nosotros apuntamos al
+cráter).
+
+**Lección metodológica**: el experimento lee el `primary_cluster` tal como quedó
+persistido, que **mezcla épocas de estrategia** (pre/post-S38). El "67% de Lascar" es
+un piso contaminado por records históricos con bug `vrp_max`, NO un problema del
+pipeline actual. Para una validación limpia del estado actual haría falta **reprocesar
+la ventana completa con la config vigente** (reproceso histórico local, no GH Actions
+por timeout — regla S15). **Candidato S88**: reproc histórico Lascar feb-2026 con
+config actual → los 31 records eruptivos pasarían a apuntar al cráter.
 
 ## Premisa del plan refutada (Bloque 2 parte 2)
 
