@@ -1,0 +1,163 @@
+"""G-R2 (S88 Frente C) — Coverage tests: invariants of pipeline.profile and the
+operational ``mirova_equivalent`` profile.
+
+Why this test exists
+--------------------
+``mirova_equivalent`` is the ONE profile the NRT cron + dashboard consume. Every
+feature flag in it is an operational/methodological decision (CLAUDE.md "Skill
+triggers": flipping any flag requires brainstorming + R2 pixel-level validation
++ a defensive tag). An accidental flip — a stray edit, a bad merge — would
+silently change what the whole system detects. These tests are a tripwire for
+*accidental* flag changes.
+
+How pipeline.profile actually works (verified S88, NOT a class API)
+-------------------------------------------------------------------
+``pipeline.profile`` is a module that, AT IMPORT TIME, reads the ``VRP_PROFILE``
+environment variable (default ``mirova_equivalent``), loads the matching YAML,
+and exposes its values as module-level constants (``ENABLE_*``, ``BG_INNER_KM``,
+etc.). To test a specific profile you set ``VRP_PROFILE`` then
+``importlib.reload(pipeline.profile)`` — the same pattern as the existing
+tests/test_enable_exclude_zones_flag.py. An unknown profile raises ``ValueError``
+at load time.
+
+Where a value is genuinely policy-mutable, the test reads the YAML as source of
+truth and only checks structural invariants, so a *deliberate* documented change
+does not fail the test for the wrong reason.
+
+Pure offline: only reloads the module + reads the YAML. No pipeline run.
+"""
+import importlib
+import os
+
+import pytest
+import yaml
+
+
+PROFILE_NAME = "mirova_equivalent"
+_YAML_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "pipeline",
+    "profiles",
+    f"{PROFILE_NAME}.yaml",
+)
+
+
+@pytest.fixture(autouse=True)
+def _restore_default_profile():
+    """After each test reload pipeline.profile back to mirova_equivalent so the
+    module-level global state cannot leak into other tests (same rationale as
+    tests/test_enable_exclude_zones_flag.py)."""
+    yield
+    os.environ["VRP_PROFILE"] = PROFILE_NAME
+    import pipeline.profile
+    importlib.reload(pipeline.profile)
+
+
+def _load_operational():
+    os.environ["VRP_PROFILE"] = PROFILE_NAME
+    import pipeline.profile as profile
+    importlib.reload(profile)
+    return profile
+
+
+@pytest.fixture()
+def yaml_raw():
+    with open(_YAML_PATH, "r", encoding="utf-8") as fh:
+        return yaml.safe_load(fh) or {}
+
+
+# --------------------------------------------------------------------------
+# (a) The operational profile loads without error and identifies itself.
+# --------------------------------------------------------------------------
+def test_mirova_equivalent_loads():
+    profile = _load_operational()
+    assert profile.PROFILE_NAME == PROFILE_NAME
+
+
+def test_default_profile_is_mirova_equivalent():
+    """With no VRP_PROFILE set, the module defaults to mirova_equivalent."""
+    os.environ.pop("VRP_PROFILE", None)
+    import pipeline.profile as profile
+    importlib.reload(profile)
+    assert profile.PROFILE_NAME == PROFILE_NAME
+    assert profile.DEFAULT_PROFILE == PROFILE_NAME
+
+
+# --------------------------------------------------------------------------
+# (b) Safety-relevant flags hold their operational values. These are the flags
+# whose accidental flip would change detections. Asserted explicitly so a stray
+# edit fails CI. (Mirrors current mirova_equivalent.yaml, S88.)
+# --------------------------------------------------------------------------
+EXPECTED_OPERATIONAL_FLAGS = {
+    "ENABLE_VENT_ANCHORED_CLUSTERING": True,
+    "ENABLE_PIXEL_LEVEL_DISTANCE_FILTER": True,
+    "ENABLE_BT_PATH_HOT": False,
+    "ENABLE_EXCLUDE_ZONES": False,
+    "ENABLE_TEST1_PATH": True,
+    "ENABLE_DNTI_CONTEXTUAL_PATH": True,
+    "ENABLE_DNTI_DUAL_ROI": True,
+    "ENABLE_VENT_PATH": False,
+}
+
+
+@pytest.mark.parametrize("const,expected", sorted(EXPECTED_OPERATIONAL_FLAGS.items()))
+def test_operational_flag_value(const, expected):
+    profile = _load_operational()
+    actual = getattr(profile, const)
+    assert actual is expected, (
+        f"{const} changed operational value -> {actual} (expected {expected}). "
+        f"If intentional, see CLAUDE.md flag-change rule (defensive tag + "
+        f"brainstorming) and update EXPECTED_OPERATIONAL_FLAGS."
+    )
+
+
+def test_profile_constants_match_yaml_paths(yaml_raw):
+    """Each ENABLE_* flag we pin must match the YAML 'paths' section, so a
+    silent default cannot mask a missing/typo'd YAML key."""
+    profile = _load_operational()
+    paths = yaml_raw.get("paths", {})
+    const_to_yaml = {
+        "ENABLE_VENT_ANCHORED_CLUSTERING": "enable_vent_anchored_clustering",
+        "ENABLE_PIXEL_LEVEL_DISTANCE_FILTER": "enable_pixel_level_distance_filter",
+        "ENABLE_BT_PATH_HOT": "enable_bt_path_hot",
+        "ENABLE_EXCLUDE_ZONES": "enable_exclude_zones",
+        "ENABLE_TEST1_PATH": "enable_test1_path",
+        "ENABLE_DNTI_CONTEXTUAL_PATH": "enable_dnti_contextual_path",
+        "ENABLE_DNTI_DUAL_ROI": "enable_dnti_dual_roi",
+        "ENABLE_VENT_PATH": "enable_vent_path",
+    }
+    for const, ykey in const_to_yaml.items():
+        assert ykey in paths, f"{ykey} missing from YAML paths"
+        assert getattr(profile, const) is bool(paths[ykey])
+
+
+# --------------------------------------------------------------------------
+# (c) Background-ring geometry. inner/outer radii define the cold-background
+# annulus. Read YAML as source of truth + pin the documented values + invariant.
+# --------------------------------------------------------------------------
+def test_background_geometry_matches_yaml(yaml_raw):
+    profile = _load_operational()
+    assert profile.BG_INNER_KM == float(yaml_raw["background"]["inner_km"])
+    assert profile.BG_OUTER_KM == float(yaml_raw["background"]["outer_km"])
+
+
+def test_background_geometry_operational_values():
+    profile = _load_operational()
+    assert profile.BG_INNER_KM == 5.0
+    assert profile.BG_OUTER_KM == 25.0
+
+
+def test_background_inner_less_than_outer():
+    profile = _load_operational()
+    assert 0.0 < profile.BG_INNER_KM < profile.BG_OUTER_KM
+
+
+# --------------------------------------------------------------------------
+# (d) Robustness of the loader: an unknown profile must raise ValueError, not
+# silently fall back to a default (which would hide a typo'd --profile flag).
+# --------------------------------------------------------------------------
+def test_unknown_profile_raises_value_error():
+    os.environ["VRP_PROFILE"] = "definitely_not_a_real_profile_xyz_s88"
+    import pipeline.profile as profile
+    with pytest.raises(ValueError):
+        importlib.reload(profile)
