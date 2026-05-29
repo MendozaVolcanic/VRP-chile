@@ -76,10 +76,13 @@ summit_unconfirmed / artifact_candidate) en `store.py` + rendering frontend.
 G-R1 (`process_viirs_mod.py` paridad), G-R2 (`profile.py` invariantes), G-R3 (MIR
 solo nocturno). Offline, mejora robustez.
 
-### Frente D — Chaitén/Tupungatito divergencia residual (offline)
+### Frente D — Chaitén/Tupungatito divergencia residual — ✅ CERRADO S87
 
-Match 77-94% con gaps ~3km tipo "MIROVA-halo" (MIROVA reporta a ~3.3 km, nosotros al
-cráter). Investigar 2D qué hay a ~3km (actividad dispersa real vs centroide).
+Investigado offline (bearing de nuestra anomalía vs mirova_center). **Tupungatito**: el
+gap es por el punto de referencia (mirova_center a 4.86 km del cráter, offset KMZ
+confirmado S81 = A30), nuestro primary ancla bien en el cráter — **resuelve C3**.
+**Chaitén**: mc centrado, divergencias = dispersión real del domo (categoría b). No hay
+acción de pipeline. Detalle: `RESULTS_dominant_anomaly.md` §5.
 
 ## §3 — Escudo anti-drift (vigente, NO hacer)
 

@@ -92,7 +92,7 @@ El scraper Mirova-v1 es ground truth confiable (NRT ~2.5h, encoding limpio, time
 | **C2** | ALTA | Reglas A54-A60 huérfanas (A54/A55 nunca existieron, A56-A60 viven solo en META_RULES_S80) | Migrar/renumerar a CLAUDE.md proyecto |
 | **C4** | ALTA | Drift D8 (cluster selection factor 27× Puyehue S35) huérfano: ausente de MIROVA_DIVERGENCES y SESSION_INDEX_S80 | Cerrar formalmente |
 | **C6** | ALTA | **Anti-patrón emergente** (CRÍTICO ver §"Reideación") | **§ aparte** |
-| C3 | MEDIA | Offset Tupungatito 3km S vs 2.99 km SE | Confirmar con KMZ |
+| C3 | MEDIA | Offset Tupungatito 3km S vs 2.99 km SE | **RESUELTO S87**: ya confirmado en `AUDIT_INTEGRAL_S81.md:154` — offset real vent→mirova_center = **4.86 km** (KMZ exacto; "3 km SE" era subestimación humana). Frente D S87 verificó: nuestro primary ancla en el cráter (bearing 322°≈vent 330°); el gap de distancia vs MIROVA es por el punto de referencia (centro de grilla/GVP, A13), no error de ubicación. |
 | C5 | MEDIA | Lista papers MIROVA con/sin Cigolini | Estandarizar |
 | C7 | MEDIA | MEMORY.md sin entrada S86 (viola M2) | Persistir en cierre |
 
