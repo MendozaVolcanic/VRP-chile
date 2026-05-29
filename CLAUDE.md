@@ -5,18 +5,20 @@ Repo: https://github.com/MendozaVolcanic/VRP-chile
 
 ## ⚡ Working worktree canónico (LEER PRIMERO en cada sesión nueva)
 
-**Path canónico**: `C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP-Chile-s70/`
+**Path canónico post-S82-prep**: `C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile/` (raíz del repo).
 
 **Primer comando obligatorio de cualquier sesión Claude**:
 
 ```bash
-cd "C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP-Chile-s70"
+cd "C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile"
 git fetch origin --prune
-git checkout main && git pull --ff-only
+git pull --ff-only
 ls tasks/BLOQUE_ARRANQUE_S*.md | tail -1   # leer el último bloque de arranque
+cat docs/SESSION_INDEX_CONSOLIDATED_S80.md  # ancla canónica post-S80
+cat docs/AUDIT_S86.md                       # marco fundacional post-S86 (95% FPs son realidad física)
 ```
 
-**Razón**: las sesiones S71-S72 (PRs #112-#131) mergearon desde este worktree. Otros worktrees (`VRP Chile/` raíz + `.claude/worktrees/*`) pueden estar desactualizados respecto a `origin/main`. Cada worktree git requiere su propio `git pull`.
+**Razón actualización S86 (resuelve C1 auditoría I)**: S82-prep reapuntó la raíz `VRP Chile/` a `main` (commit `81c38e7b`) tras detectar que estaba quedada en branch `s15-dev` stale (S33). La raíz es el worktree principal y se mantiene siempre en main al día. El worktree antiguo `VRP-Chile-s70/` quedó en branch huérfano `work-s78-bloque-arranque-s79` y NO se debe usar como canónico (regla A52: worktrees no-main pueden estar atrasados). Otros worktrees (`VRP-Chile-s80-consolidation/`, `VRP-Chile-s79-f66/`) sirven para trabajo específico de sus branches pero NO son canónicos.
 
 **Bloques de arranque por sesión**: cada cierre de sesión persiste `tasks/BLOQUE_ARRANQUE_S{N+1}.md` con el plan ejecutivo de la siguiente. Leer ese archivo **antes** de empezar trabajo. Última actualización: ver `MEMORY.md` index.
 
@@ -563,6 +565,49 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   documentar en el PR. Y todo hallazgo no trivial (schema gap, source
   externa, regresión, default operacional cambiado) → persistir
   **inmediatamente** en doc/memoria, no esperar al cierre.
+
+- **A54. El gap precisión vs MIROVA es mayormente artefacto metodológico,
+  no bug del pipeline** (S86 auditoría profunda Subagentes E+F+G):
+  composición real de los "FPs" del cruce estricto contra MIROVA CONS:
+  49.1% MIROVA SÍ publicó pero el cruce falló por bugs del loader local
+  (OCR no consumido, distancias OCR mal parseadas, alias nombres
+  variantes, Tupungatito coverage start date, FALSO_POSITIVO filtrados
+  por `limite_km` scraper); 46.3% son features volcánicas reales no
+  publicadas por MIROVA (Cerro Blanco NdC, Pichi-Llaima Llaima,
+  Lazufre Lastarria, cráter El Agrio Copahue, complejo multi-cráter PP,
+  lacolito difuso PCC, lava lake Villarrica); 0% geotermal/lacustre no
+  volcánico (el gate `inner_radius_km` del frontend ya los filtra desde
+  S33); **4.6% artefactos reales** (cirrus path D PCC + ring glaciar
+  Tupungatito). 95.4% de los "FPs" son anomalías térmicas físicamente
+  reales. **How to apply**: antes de proponer cualquier "fix de
+  precisión" o gate adicional, primero clasificar la categoría (a/b/c/d)
+  de los records que el fix filtraría. Si filtra (b), eso es destruir
+  valor agregado VRP Chile. El "bug a cerrar" reside en el loader CSV
+  + en la metodología de evaluación + en el etiquetado del dashboard,
+  NO en los algoritmos del pipeline.
+
+- **A55. Anti-patrón emergente "gate intra-radio por path"** (S86
+  hallazgo I-C6): PRs #224 (S83 path D intra-radio) + #229 (S85
+  second_pass intra-radio) pasaron MISSION 3-preguntas solo por puerta 3
+  GRIS "infra alineación" pero el hallazgo S85 (`frontend mirovaEqVrp`
+  desde S33) reveló que **eran redundantes** — el frontend ya aplicaba
+  exactamente esa supresión. Patrón análogo al S22-S26 que MISSION.md
+  documenta como anti-patrones (acumulación de parches que parecían
+  justificados individualmente pero anulaban diferenciación
+  summit/scene MIROVA). **How to apply**: cualquier PR que proponga un
+  gate "intra-radio por path X" requiere verificar primero (a) que el
+  frontend no hace ya esa supresión, (b) clasificar categoría
+  físicamente (A54 / E S86) de los records filtrados, (c) confirmar
+  que no se está destruyendo categoría (b). Si entra un PR más sin
+  estas verificaciones, se reabre el ciclo cerrado S27.
+
+- **A56-A60. Reglas preventivas NRT (S82)**: viven en
+  [docs/META_RULES_S80.md](docs/META_RULES_S80.md). Consultar ahí cuando
+  se mencionen en bloques de arranque o handoffs. **Nota S86 (resuelve
+  C2 auditoría I)**: A54 y A55 antes eran gap numérico — ahora llenas
+  por las reglas S86. A56-A60 quedan en META_RULES_S80 por ahora;
+  migración a CLAUDE.md proyecto pendiente para S87+ si se vuelve a
+  citar mucho.
 
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,

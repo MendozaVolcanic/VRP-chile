@@ -1,0 +1,175 @@
+{
+  "subagent": "H",
+  "session": "S86",
+  "audit_timestamp_utc": "2026-05-28T18:40Z",
+  "repo": "MendozaVolcanic/VRP-chile",
+  "verdict": "REPO SALUDABLE con drifts menores (workflows reproc obsoletos sin archivar, branches claude/* acumuladas, 2 yml sin on-quote)",
+
+  "nrt_health": {
+    "last_30_runs": {
+      "success": 23,
+      "failure": 6,
+      "in_progress": 1,
+      "success_rate_pct": 79.3,
+      "success_rate_pct_excluding_inprogress": 79.3
+    },
+    "last_successful_run_utc": "2026-05-28T15:55Z",
+    "last_failure_burst": {
+      "window": "2026-05-24 15:03Z to 2026-05-25 08:20Z",
+      "consecutive_failures": 7,
+      "root_cause": "NASA_AUTH_UNREACHABLE (LANCE/Earthdata DNS timeout, budget ~2 min)",
+      "auto_recovery": "nrt-retry.yml + F51/F55 fixes (PRs #190, #199, #225) — vuelve a success desde 2026-05-25 13:28Z"
+    },
+    "cron_frequency_real_h": "2.5-4.5h promedio (cron declarado: cada 2h)",
+    "cron_drift_explanation": "GitHub Actions cron schedule no garantiza latencia exacta — drift habitual <30 min, picos hasta 2.5h observados (normal)",
+    "issue_abierto_relacionado": "#1 'NRT cron: 3+ corridas consecutivas fallaron' (2026-05-25, label nrt-alert/priority-high — autogenerado por nrt-monitor.yml durante el burst, ya resuelto operacionalmente pero el issue sigue OPEN)"
+  },
+
+  "workflows": {
+    "active_on_disk": 8,
+    "archived_in_underscore_archive": "9 (legacy reproc-* archivados en PR #217 S78)",
+    "operational": [
+      {"name": "nrt.yml", "purpose": "NRT cron cada 2h matrix por volcán", "status": "active", "last_run": "in_progress", "health": "OK"},
+      {"name": "pages-deploy.yml", "purpose": "Deploy dashboard GitHub Pages", "status": "active", "last_run": "2026-05-28T17:32Z success", "health": "OK"},
+      {"name": "nrt-monitor.yml", "purpose": "Alerta si 3+ NRT runs fallan consecutivos", "status": "active", "last_run": "2026-05-28T16:38Z success", "health": "OK"},
+      {"name": "nrt-retry.yml", "purpose": "Reintentar NRT post NASA recovery", "status": "active", "last_run": "2026-05-28T18:22Z success", "health": "OK"},
+      {"name": "nrt-healthcheck.yml", "purpose": "Detecta Tier A staleness", "status": "active", "last_run": "2026-05-28T15:24Z success", "health": "OK (solo 1 run en 5 — verificar frecuencia cron)"},
+      {"name": "sync-mirova-csv.yml", "purpose": "Sync CSV ground truth Mirova-v1", "status": "active", "last_run": "2026-05-28T19:44Z success", "health": "OK"}
+    ],
+    "reproc_legacy_obsolete_pendiente_archivar": [
+      {"name": "reproc-f28-pp-saturation.yml", "drift": "S73-S74 F2.8 fix Planchón-Peteroa saturation. Workflow_dispatch falló HTTP 422 (A43 Norway YAML). NO ha sido archivado en .github/workflows/_archive/."},
+      {"name": "reproc-ab-f-s81-a-intra-radio.yml", "context": "S83 — A/B disparado, fue 'adoptado' (PR #226). Ya cumplió su rol pero sigue activo."},
+      {"name": "reproc-ab-f-s81-b-prime.yml", "context": "S85 — A/B disparado, adoptado (PR #229). Sigue activo."}
+    ],
+    "on_quote_check_a43": {
+      "compliant_with_quoted_on": 6,
+      "non_compliant_unquoted_on": 2,
+      "violators": [
+        {"file": "nrt.yml", "risk": "Históricamente nunca falló HTTP 422 — workflow estable desde S0. Bajo el patrón Norway YAML 1.1, falla NO es determinístico (cache/index dependiente). Riesgo latente."},
+        {"file": "nrt-monitor.yml", "risk": "Mismo escenario. Schedule-triggered, no usa workflow_dispatch — riesgo bajo en práctica."}
+      ],
+      "recommendation": "Defensivo gratis: cambiar `on:` → `\"on\":` en ambos archivos. ~5 min PR."
+    }
+  },
+
+  "branches": {
+    "total_remote": 72,
+    "claude_namespace_count": 42,
+    "categorizacion": {
+      "active_with_open_PRs": 1,
+      "merged_to_main_safe_delete": "~30 (estimación — la mayoría de claude/s7X-* y claude/s8X-* corresponde a PRs mergeados según gh pr list)",
+      "stale_no_PR_no_recent_activity_30d_plus": "~10 (claude/s7X experimentales sin PR final)"
+    },
+    "branches_no_claude_namespace_stale": [
+      "origin/s15-dev (S33, base histórica — Nicolás puede descartar tras S82-prep reapuntó worktree raíz)",
+      "origin/s70-2-refinamientos, s70-final-persistence, s70-revise-tokens, s71-*, s72-*: legado pre-namespace claude/, no mergeados visibles"
+    ],
+    "recommended_cleanup_doc": "docs/BRANCHES_CLEANUP_S80.md ya identifica 24 safe-delete + 12 con commits únicos. PRsendiente ejecutar."
+  },
+
+  "pull_requests": {
+    "ultimos_50_overview": "PRs #181-#230 todos S77-S85. 49/50 MERGED, 1 OPEN (#223)",
+    "open_actualmente": [
+      {"number": 223, "title": "S82: F-S81-A Fase 1 diagnostico gate intra-radio MIROVA MODIS", "created": "2026-05-26", "estado": "Pendiente review/merge — F-S81-A ya fue adoptado vía Fase 2 simplificada (PR #226). PR #223 es diagnóstico Fase 1 superado por Fase 2.", "accion": "Cerrar como superseded o mergear como docs si Nicolás quiere preservar diagnóstico."}
+    ],
+    "closed_sin_merge_ultimos_30d": "0 detectados en sample reciente (todos los cerrados son MERGED)",
+    "top_5_recientes_mergeados": [
+      {"n": 230, "title": "docs(s85): cierre Fase C investigada+descartada con datos + bloque arranque S86", "merged": "2026-05-28T17:57Z"},
+      {"n": 229, "title": "feat(s85): adoptar F-S81-B' gate intra-radio second_pass_recapture", "merged": "2026-05-28T16:39Z"},
+      {"n": 228, "title": "chore(s85): audit script F-S81-B' pre-escrito", "merged": "2026-05-28T15:50Z"},
+      {"n": 227, "title": "feat(s85): preventivos NRT + Fase B' gate intra-radio", "merged": "2026-05-28T05:57Z"},
+      {"n": 226, "title": "feat(s84): adoptar F-S81-A gate Path D MODIS intra-radio", "merged": "2026-05-28T04:44Z"}
+    ],
+    "claude_bot_abandonados": "0 (todos los PRs son author=MendozaVolcanic; el bot Claude commitea pero PRs los abre Nicolás)"
+  },
+
+  "issues": {
+    "open_total": 1,
+    "open_detail": [
+      {"number": 1, "title": "NRT cron: 3+ corridas consecutivas fallaron", "labels": ["nrt-alert", "priority-high"], "created": "2026-05-25", "estado_real": "Resuelto operacionalmente (F51+F55 fixes PRs #190/#199/#225 + NASA recovery). Issue autogenerado por nrt-monitor.yml durante el burst, pero monitor no auto-cierra.", "accion": "Cerrar manualmente con comentario referenciando PRs de fix."}
+    ],
+    "labels_canonicos_observados": ["nrt-alert", "priority-high"],
+    "lecciones_aprendidas_cerrados_30d": "No accesibles directo sin paginar — el listado solo mostró el único OPEN"
+  },
+
+  "github_pages": {
+    "url": "https://api.github.com/repos/MendozaVolcanic/VRP-chile/pages (build_type=workflow)",
+    "live": true,
+    "ultimo_deploy_exitoso": "2026-05-28T17:32Z (5/5 últimos deploys success, ~2-2.5 min cada uno)",
+    "frecuencia_real": "~4 deploys/día (post-cada workflow_run de nrt.yml)",
+    "latest_consolidado_csv": {
+      "local_path": "latest_consolidado.csv",
+      "mtime_local": "2026-05-28T13:57Z",
+      "size_bytes": 2963896,
+      "sync_workflow": "sync-mirova-csv.yml corre cron y commitea — última corrida success 2026-05-28T19:44Z",
+      "estado": "OK — A17 satisfecho, dehardcoded S73 funcional"
+    }
+  },
+
+  "worktrees_locales": {
+    "total": 8,
+    "raiz_main_OK": "VRP Chile/ → main fb291e30 (post-S82-prep)",
+    "huerfanos_sin_branch_remota_explicita": [
+      "VRP-Chile-s70/ branch 'work-s78-bloque-arranque-s79' — A52 anti-pattern, no usar como canónico",
+      ".claude/worktrees/sweet-austin-b5413b/ — MEMORY.md indica desregistrado S82-prep pero filesystem físico sigue (file-lock Windows)"
+    ],
+    "activos_legitimos": [
+      "VRP-Chile-s79-f66/ (F66 work pending S82+)",
+      "VRP-Chile-s80-consolidation/ (S81-S82-S85 work, claude/s81-vrp-tir-gate)",
+      "VRP-Chile-s74-frontend-plan/",
+      ".claude/worktrees/nostalgic-aryabhata-e05d1e/ (Nicolás declaró descartable S81 — tag defensivo ya existe)",
+      ".claude/worktrees/funny-mendeleev-99b1f4/",
+      ".claude/worktrees/hardcore-gauss-68c3db/"
+    ]
+  },
+
+  "drifts_top5": [
+    {
+      "n": 1,
+      "drift": "Issue #1 NRT-alert OPEN pero ya resuelto operacionalmente (NRT corre verde desde 2026-05-25 13:28Z, F51+F55 fixes mergeados)",
+      "severidad": "BAJA (no compromete operación, solo ruido de inbox)",
+      "fix_min": 2
+    },
+    {
+      "n": 2,
+      "drift": "PR #223 OPEN superseded por PR #226 (Fase 2 ya adoptada). Confusión potencial sobre estado real.",
+      "severidad": "BAJA",
+      "fix_min": 3
+    },
+    {
+      "n": 3,
+      "drift": "Workflows reproc obsoletos (`reproc-f28-pp-saturation.yml`, `reproc-ab-f-s81-a-intra-radio.yml`, `reproc-ab-f-s81-b-prime.yml`) siguen activos post-adopción. Ya cumplieron su rol — análogo al cleanup que hizo PR #217 con 9 reproc-* legacy.",
+      "severidad": "BAJA-MEDIA (ruido en gh workflow list, sin runtime cost)",
+      "fix_min": 10
+    },
+    {
+      "n": 4,
+      "drift": "2 workflows yml sin `\"on\":` quoted (A43 anti-pattern Norway YAML 1.1): nrt.yml, nrt-monitor.yml. Riesgo HTTP 422 latente no-determinístico.",
+      "severidad": "MEDIA (riesgo bajo en práctica para schedule-triggered, pero defensivo gratis)",
+      "fix_min": 5
+    },
+    {
+      "n": 5,
+      "drift": "42 branches `claude/*` remotas acumuladas + 7 worktrees locales con branches no-main + 30+ branches stale documentadas en BRANCHES_CLEANUP_S80.md pendiente ejecutar",
+      "severidad": "BAJA (cosmético — no afecta operación; pero ruido para nuevas sesiones)",
+      "fix_min": 30
+    }
+  ],
+
+  "acciones_recomendadas": [
+    {"accion": "Cerrar issue #1 manualmente con referencia a fixes PRs #190/#199/#225", "esfuerzo_min": 2, "prioridad": "alta (housekeeping rápido)"},
+    {"accion": "Cerrar PR #223 como superseded por #226 (o mergear como docs)", "esfuerzo_min": 3, "prioridad": "media"},
+    {"accion": "Defensivo A43: cambiar `on:` → `\"on\":` en nrt.yml + nrt-monitor.yml", "esfuerzo_min": 5, "prioridad": "media"},
+    {"accion": "Archivar 3 reproc workflows obsoletos (mv a _archive/) — patrón PR #217", "esfuerzo_min": 10, "prioridad": "baja"},
+    {"accion": "Ejecutar BRANCHES_CLEANUP_S80.md plan: borrar 24 safe-delete + auditar 12 con commits únicos", "esfuerzo_min": 30, "prioridad": "baja"},
+    {"accion": "Cleanup worktrees locales huérfanos (VRP-Chile-s70, sweet-austin filesystem, nostalgic-aryabhata)", "esfuerzo_min": 15, "prioridad": "baja"},
+    {"accion": "Verificar nrt-healthcheck.yml frecuencia (solo 1 run en 5 — ¿cron correcto?)", "esfuerzo_min": 5, "prioridad": "media"}
+  ],
+
+  "seguridad": {
+    "tokens_cleartext_detectados": "No revisado settings.json en esta auditoría (CLAUDE.md global ya marca pendiente rotar GitHub PAT en settings.json — recordar a Nicolás al cierre)",
+    "alerta": "Nicolás debe rotar GitHub PAT actual en settings.json y moverlo a env var (CLAUDE.md global lo marca pendiente desde sesión anterior)"
+  },
+
+  "veredicto_final": "Repo OPERACIONALMENTE SALUDABLE. NRT verde 79% (los 6 fails fueron 1 burst NASA outage 2026-05-24-25 ya recuperado vía F51/F55). Pages live deploy continuo. CSV sync OK. Drifts son cosméticos/housekeeping — ninguno compromete confiabilidad NRT. Las 7 acciones recomendadas suman ~70 min y son opcionales: el repo no está roto, solo acumuló cruft post-117-PRs como predice regla M1 cap PRs/sesión."
+}

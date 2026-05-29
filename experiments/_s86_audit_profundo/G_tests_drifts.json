@@ -1,0 +1,115 @@
+{
+  "subagent": "G",
+  "scope": "tests + coverage + drifts D1-D9 + reglas MISSION.md + path D deep dive + riesgos no documentados",
+  "fecha": "2026-05-28",
+  "metricas_globales": {
+    "total_test_files": 70,
+    "total_pipeline_modules": 22,
+    "total_loc_pipeline": 8342,
+    "funciones_def_pipeline": 89
+  },
+  "coverage_por_modulo": [
+    {"modulo": "process_modis.py", "loc": 1163, "funciones": 6, "tests_directos": ["test_process_modis_core", "test_drift1_test1_k1_saturation", "test_modis_path_d_intra_radio_gate", "test_local_kernel_modis", "test_drift7_nadir_fixed_pixel", "test_coefficients", "test_d4_per_volcano", "test_saturation_guard_f28", "test_pipeline_integration_f28"], "cobertura_estimada_pct": 60, "gaps": "calculate_vrp() es el core (920 LOC), tests integran pero no cubren branchs path A/B/C/D in isolation; sin test que verifique cap path_d_only_cap_mw=5 en MODIS específicamente; sin test verificando enable_nadir_fixed_pixel_area_modis afecta vrp_mw end-to-end"},
+    {"modulo": "process_viirs.py", "loc": 1623, "funciones": 10, "tests_directos": ["test_viirs_path_d", "test_viirs_diag_schema", "test_drift13_dibella_n12_viirs", "test_vrp_tir_provisional_gate_s81", "test_coefficients", "test_d4_per_volcano", "test_vrptir_a2_integration", "test_tirvolch_f31"], "cobertura_estimada_pct": 50, "gaps": "1623 LOC es el módulo más grande, calculate_vrp() pasa de 800 LOC; tests integration-style, sin unit tests dedicados al Test1 pipeline VIIRS_I (críticos S27); función _compute_vrp_tir_with_gate solo tiene 1 test (S81)"},
+    {"modulo": "process_viirs_mod.py", "loc": 1170, "funciones": 6, "tests_directos": ["test_coefficients", "test_d4_per_volcano"], "cobertura_estimada_pct": 25, "gaps": "MÓDULO CON PEOR COBERTURA. Casi clon de process_viirs.py pero sin tests dedicados. Sin tests específicos para path D VIIRS_M, sin tests Test1 M-band aunque adopción S28 fue mergeada, sin tests sanity cap por sensor"},
+    {"modulo": "store.py", "loc": 427, "funciones": 6, "tests_directos": ["test_store_append_record", "test_store_cluster_rescue_f47", "test_store_eruption_filter_bug", "test_store_max_cluster_pixels_f52a", "test_store_regla_d_edge", "test_sanity_cap", "test_sanity_cap_pc", "test_vent_priority"], "cobertura_estimada_pct": 85, "gaps": "BIEN CUBIERTO. Falta test específico de _solar_elevation (MIR night-only gate)"},
+    {"modulo": "clustering.py", "loc": 247, "funciones": 3, "tests_directos": ["test_cluster_hotspots", "test_cluster_pixels_geographic", "test_d8_vent_anchored", "test_d8_h_d8_5"], "cobertura_estimada_pct": 80, "gaps": "Cluster selection criterion (D8 abierto) no tiene test que verifique 'MIROVA usa otro criterio'"},
+    {"modulo": "scan_geometry.py", "loc": 225, "funciones": 6, "tests_directos": ["test_scan_geometry", "test_roi_bbox", "test_haversine_robust", "test_drift7_nadir_fixed_pixel"], "cobertura_estimada_pct": 95, "gaps": "Bien cubierto"},
+    {"modulo": "audit_metrics.py", "loc": 90, "funciones": 1, "tests_directos": ["test_audit_metrics"], "cobertura_estimada_pct": 90, "gaps": "Bien cubierto post-S33 (8 tests)"},
+    {"modulo": "path_d_intra_radio.py", "loc": 49, "funciones": 1, "tests_directos": ["test_modis_path_d_intra_radio_gate"], "cobertura_estimada_pct": 95, "gaps": "Bien cubierto (S83)"},
+    {"modulo": "path_d_cap.py", "loc": 50, "funciones": 1, "tests_directos": ["test_path_d_scene_cap_f50", "test_path_d_d9_fix"], "cobertura_estimada_pct": 95, "gaps": "Bien cubierto (S71 D9)"},
+    {"modulo": "fetch.py", "loc": 570, "funciones": 12, "tests_directos": ["test_fetch_noaa21", "test_fetch_nasa_timeout_override", "test_fetch_profile_bypass_f55", "test_fetch_token_bypass_probe_f51", "test_auth_probe"], "cobertura_estimada_pct": 60, "gaps": "Tests integration; sin tests específicos del retry IPv4 monkey-patch (H7 S35)"},
+    {"modulo": "detection_context.py", "loc": 938, "funciones": 13, "tests_directos": ["test_detection_context", "test_drift23_first_pass_tests_2_3", "test_drift4_second_pass_enabled", "test_unsuitable_filters", "test_dual_roi_bt", "test_no_bt_path", "test_nti_relative_path", "test_path_d_d9_fix", "test_viirs_path_d", "test_local_kernel_background", "test_second_pass_intra_radio_gate"], "cobertura_estimada_pct": 75, "gaps": "Core de Coppola 2016a, bien cubierto. compute_bg_stats (regresión S79/S80) tiene fix verificado en main (line 938 retorna correctamente). Falta test que cubra path D dNTI sobre t_bg<260K (cirrus)"},
+    {"modulo": "vrp_regimes.py", "loc": 169, "funciones": 3, "tests_directos": ["test_local_kernel_background", "test_local_kernel_modis", "test_vrp_regimes_lava_lake"], "cobertura_estimada_pct": 85, "gaps": "Bien cubierto"},
+    {"modulo": "test1_integrated.py", "loc": 188, "funciones": 2, "tests_directos": ["test_test1_integrated", "test_test1_lbg_global", "test_test1_pixel_filter", "test_test1_hot_unbound_f53"], "cobertura_estimada_pct": 85, "gaps": "Bien cubierto"},
+    {"modulo": "vrptir.py", "loc": 177, "funciones": 5, "tests_directos": ["test_vrptir_f31", "test_vrptir_profile_flag_f31", "test_vrptir_a2_integration", "test_vrp_tir_consistency_gate_f46"], "cobertura_estimada_pct": 80, "gaps": "Bien cubierto"},
+    {"modulo": "exclusion_zones.py", "loc": 137, "funciones": 5, "tests_directos": ["test_exclusion_zones", "test_enable_exclude_zones_flag"], "cobertura_estimada_pct": 85, "gaps": "Bien cubierto"},
+    {"modulo": "single_pixel_mode.py", "loc": 138, "funciones": 2, "tests_directos": ["test_single_pixel_mode_f52b"], "cobertura_estimada_pct": 75, "gaps": "Cubierto"},
+    {"modulo": "second_pass_intra_radio.py", "loc": 72, "funciones": 1, "tests_directos": ["test_second_pass_intra_radio_gate"], "cobertura_estimada_pct": 90, "gaps": "Bien cubierto (S85 adopción)"},
+    {"modulo": "profile.py", "loc": 530, "funciones": 2, "tests_directos": [], "cobertura_estimada_pct": 0, "gaps": "SIN TESTS DEDICADOS. 530 LOC de configuración con 80+ flags; cambio de default puede pasar inadvertido. Riesgo regresión silenciosa."},
+    {"modulo": "constants.py", "loc": 26, "funciones": 0, "tests_directos": [], "cobertura_estimada_pct": 0, "gaps": "Sin test pero solo constantes Planck"},
+    {"modulo": "geo_utils.py", "loc": 35, "funciones": 1, "tests_directos": ["test_effective_vent"], "cobertura_estimada_pct": 95, "gaps": "Bien cubierto"},
+    {"modulo": "detect_tirvolch.py", "loc": 318, "funciones": 3, "tests_directos": ["test_tirvolch_f31"], "cobertura_estimada_pct": 70, "gaps": "Cubierto, en investigación experimental"}
+  ],
+  "drifts_estado": [
+    {"id": "D1", "concepto": "kernel 8-vec median vs mean", "estado": "RESUELTO S17 (commit f78ad5d)", "ultima_vista": "S17 2026-04-23", "test_que_lo_cubre": "test_detection_context::test_kernel_uses_arithmetic_mean_not_median", "verificacion_main": "detection_context.py:191 usa np.mean confirmed"},
+    {"id": "D2", "concepto": "N_SIGMA_MIR=3.0 uniforme vs Coppola 5/10/15", "estado": "RESUELTO ESTRUCTURALMENTE — default ahora N_SIGMA_MIR_SUMMIT=5.0 / N_SIGMA_MIR_SCENE=10.0 (profile.py:187-188) alineado a Coppola 2016a Tabla 1", "ultima_vista": "S19 (cap=7K cura)", "test_que_lo_cubre": "test_drift23_first_pass_tests_2_3, test_drift13_dibella_n12_viirs (parcial)", "verificacion_main": "OK"},
+    {"id": "D3", "concepto": "VRP TIR Stefan-Boltzmann vs Aveni Eq.9", "estado": "RESUELTO S17 (mantener SB)", "ultima_vista": "S17", "test_que_lo_cubre": "test_vrptir_f31, test_vrp_tir_consistency_gate_f46, test_vrp_tir_provisional_gate_s81", "verificacion_main": "OK"},
+    {"id": "D4", "concepto": "feature parity escala Low/Medium/.../Extreme", "estado": "ABIERTO feature gap (recall sub-pixel CERRADO S27 via Test1 integrated)", "ultima_vista": "S27", "test_que_lo_cubre": "test_test1_integrated (rescate), no escala visual", "verificacion_main": "Test1 path activo en operacional"},
+    {"id": "D5", "concepto": "magnitud ratio VRP", "estado": "RE-ABIERTO S33 (post bug mirovaEqVrp): ratio Driver A solo 2.53× dentro tolerancia", "ultima_vista": "S33", "test_que_lo_cubre": "test_audit_metrics, test_r2_pixel_level", "verificacion_main": "OK"},
+    {"id": "D6", "concepto": "background no localizado", "estado": "REFUTADO S21 (std_bg local ≈ global)", "ultima_vista": "S21", "test_que_lo_cubre": "test_local_kernel_background, test_local_kernel_modis (adoptado S61)", "verificacion_main": "OK"},
+    {"id": "D7", "concepto": "local ROI threshold solo MODIS+VIIRS_M, ausente en VIIRS_I", "estado": "DOCUMENTADO ABIERTO (decisión diferida S24+)", "ultima_vista": "S23", "test_que_lo_cubre": "test_local_roi_paridad (alerta diferencia, no fix)", "verificacion_main": "process_modis.py:285, process_viirs_mod.py:309 SI tienen; process_viirs.py NO"},
+    {"id": "D8", "concepto": "cluster selection MIROVA diverge — usa VRP máx o pixel count, MIROVA criterio distinto", "estado": "ABIERTO S35 (caso Puyehue lacolito documentado)", "ultima_vista": "S35-S77 (cluster_rescue F47 mitigó parcial)", "test_que_lo_cubre": "test_d8_vent_anchored, test_d8_h_d8_5, test_store_cluster_rescue_f47", "verificacion_main": "primary_cluster sigue eligiendo por vrp_mw/n_pixels en clustering.py"},
+    {"id": "D9", "concepto": "path D dNTI dispara FPs en cirrus t_bg<260K", "estado": "PARCIALMENTE RESUELTO S71 (Opción C: cap 5MW @ t_bg<270K); causa raíz arquitectural ABIERTA", "ultima_vista": "S85 audit confirmó 184 FPs / 0 TPs en cirrus", "test_que_lo_cubre": "test_path_d_d9_fix (20 tests sintéticos), test_path_d_scene_cap_f50", "verificacion_main": "OK cap activo, ratios post-cap siguen 24-83× en cirrus → drift remanente"}
+  ],
+  "reglas_mission_vs_codigo": [
+    {"regla": "VRP MIR Wooster MODIS k=18.9", "implementado": "process_modis.py:56 WOOSTER_COEFF=18.9", "test": "test_coefficients", "flag_riesgo": null, "estado": "OK"},
+    {"regla": "VRP MIR Wooster VIIRS_M k=19.7", "implementado": "process_viirs_mod.py:47 WOOSTER_COEFF=19.7", "test": "test_coefficients", "flag_riesgo": null, "estado": "OK"},
+    {"regla": "VRP MIR Wooster VIIRS_I k=18.0", "implementado": "process_viirs.py:54 WOOSTER_COEFF=18.0", "test": "test_coefficients", "flag_riesgo": null, "estado": "OK"},
+    {"regla": "A_pix nadir fijo (sin corrección zenithal)", "implementado": "scan_geometry.py:modis_pixel_areas(nadir_fixed=...)", "test": "test_drift7_nadir_fixed_pixel", "flag_riesgo": "ENABLE_NADIR_FIXED_PIXEL_AREA_MODIS/VIIRS — flag dual default; verificar profile operacional", "estado": "OK con flag — riesgo de drift si flag cambia en profile sin tests E2E"},
+    {"regla": "MIR solo nocturno", "implementado": "store.py:_solar_elevation safety net (línea 378-385)", "test": "NINGUNO específico", "flag_riesgo": null, "estado": "RIESGO BAJO — implementado pero sin test directo de la lógica solar"},
+    {"regla": "Kernel 8-vec arithmetic mean", "implementado": "detection_context.py:191 np.mean", "test": "test_detection_context::kernel_uses_arithmetic_mean", "flag_riesgo": null, "estado": "OK"},
+    {"regla": "VRP TIR Stefan-Boltzmann puro", "implementado": "process_viirs.py SIGMA=5.67e-8", "test": "test_vrptir_f31", "flag_riesgo": "enable_vrp_tir_provisional_gate_s81 (path A2 alternativo no operacional)", "estado": "OK"},
+    {"regla": "5σ summit / 10σ scene Coppola 2016a Tabla 1", "implementado": "profile.py defaults N_SIGMA_MIR_SUMMIT=5.0 / SCENE=10.0", "test": "test_drift23_first_pass_tests_2_3", "flag_riesgo": "profile yaml puede override; verificar mirova_equivalent.yaml", "estado": "OK estructuralmente"},
+    {"regla": "Test 1 integrated (Coppola 2015 Eq.1)", "implementado": "test1_integrated.py + path en process_viirs/process_viirs_mod", "test": "test_test1_integrated (+3 más)", "flag_riesgo": "enable_test1_path operacional ON; si OFF colapsa recall Lastarria 8%", "estado": "OK"},
+    {"regla": "path D dNTI contextual 8-vec", "implementado": "detection_context.py:contextual_dnti_hot_mask, llamado por 3 procesadores", "test": "test_viirs_path_d, test_path_d_d9_fix", "flag_riesgo": "enable_dnti_contextual_path operacional ON; cap D9 path_d_only_cap_mw activo", "estado": "OK con cap"},
+    {"regla": "MIROVA no usa cloud mask BT<260K (Laiolo 2026)", "implementado": "ausente en código operacional", "test": "n/a", "flag_riesgo": null, "estado": "OK literal — pero D9 expone que MIROVA acepta FPs cirrus, nosotros también"}
+  ],
+  "path_d_deep_dive": {
+    "consistencia_cross_sensor": "OK — los 3 procesadores llaman contextual_dnti_hot_mask / dual_roi_contextual_dnti_hot_mask centralizado en detection_context.py. No hay drift cross-sensor.",
+    "cobertura_caso_cirrus_frio": "PARCIAL — test_path_d_d9_fix tiene 20 tests sintéticos del cap (Opción C); cobertura comportamiento bajo t_bg<260K específicamente cubierta indirectamente vía cap_tbg_max_k=270",
+    "proteccion_a23_cirrus": "Implementada como cap defensivo (Opción C S71). NO bloquea path D firing, solo cap de magnitud a 5 MW. Causa raíz arquitectural ABIERTA — path D sigue firing 82.5% records publishable según Subagente B.",
+    "f66_consistency_gate_estado": "NO mergeada a main (rama F66 huérfana). Verificación: grep apply_f66_consistency_gate en pipeline/ → 0 resultados. compute_bg_stats en main retorna correctamente (línea 938: return t_bg, std_bg, n_bg) — no presenta bug A49.",
+    "tests_cobertura_path_d": ["test_path_d_d9_fix (336 LOC, 20 tests)", "test_path_d_scene_cap_f50", "test_viirs_path_d (55 LOC, mínimo)", "test_modis_path_d_intra_radio_gate (218 LOC, S83)"]
+  },
+  "schema_regresion_tests": {
+    "test_pc_vrp_present": "test_sanity_cap_pc cubre presencia/cap de pc.vrp_mw",
+    "test_pc_centroid_dist_km": "test_audit_metrics cubre uso de pc.centroid_dist_km en mirova_eq_vrp",
+    "test_final_hotspot_source": "test_store_cluster_rescue_f47 (F47 H4 verifica cluster_rescue source)",
+    "test_t_bg_k_presente": "AUSENTE — no hay test schema-regresión que verifique t_bg_k siempre presente",
+    "test_schema_asimetrico_a46": "test_store_cluster_rescue_f47 mitiga pero no audit schema-wide; sin test que cubra 'todos los gates que evalúan hotspot single deben coincidir con primary_cluster'"
+  },
+  "riesgos_no_documentados": [
+    {
+      "id": "R1",
+      "titulo": "process_viirs_mod.py es CLON parcial de process_viirs.py con cobertura test 25%",
+      "severidad": "ALTA",
+      "evidencia": "process_viirs_mod.py 1170 LOC, 6 funciones, solo 2 tests directos (test_coefficients, test_d4_per_volcano). Comparte ~80% lógica con process_viirs.py via copy-paste. Cualquier fix aplicado a process_viirs.py puede no propagarse a process_viirs_mod.py — patrón histórico (Test1 fue agregado S28 después de S27 a process_viirs.py).",
+      "mitigacion_sugerida": "Auditoría cross-file pre-cada PR que toque process_*.py + refactor a base class compartida"
+    },
+    {
+      "id": "R2",
+      "titulo": "profile.py 530 LOC sin tests dedicados — 80+ flags con defaults críticos",
+      "severidad": "ALTA",
+      "evidencia": "profile.py contiene defaults de N_SIGMA_MIR_SUMMIT, ENABLE_NADIR_FIXED, PATH_D_ONLY_CAP_MW, ENABLE_DNTI_CONTEXTUAL_PATH, ENABLE_TEST1_PATH etc. Un cambio de default operacional puede pasar inadvertido — la única protección es revisión humana del yaml. No hay test que asegure 'mirova_equivalent.yaml + profile.py defaults producen N_SIGMA_SUMMIT=5.0'",
+      "mitigacion_sugerida": "test_profile_operational_invariants.py: pinea valores críticos del profile mirova_equivalent contra constantes documentadas en MISSION.md/CLAUDE.md"
+    },
+    {
+      "id": "R3",
+      "titulo": "MIR night-only gate (regla científica crítica) sin test directo",
+      "severidad": "MEDIA-ALTA",
+      "evidencia": "store.py:_solar_elevation calcula elevación solar y rechaza records day en línea 378-385. La función solar es matemáticamente delicada (NOAA SPA simplificada). Ningún test verifica: (a) que records day son rechazados, (b) que la función solar produce valores correctos vs ephemeris, (c) que el threshold de elevación está en valor correcto. Si cambia silenciosamente, contamina records con radiación solar — fuente histórica de drifts de magnitud.",
+      "mitigacion_sugerida": "test_store_solar_night_gate.py con 4 casos: noche clara reject day, día reject night, transición twilight, edge case polar"
+    },
+    {
+      "id": "R4",
+      "titulo": "Drift D7 (local ROI threshold ausente en VIIRS_I) abierto desde S23 sin acción",
+      "severidad": "MEDIA",
+      "evidencia": "MEMORY/DRIFTS_S17 documentan que VIIRS_I (375m) NO aplica filtro local p95 que MODIS y VIIRS_M sí aplican. Implicancia: en VIIRS_I (sensor crítico, donde Test1 captura sub-pixel summit) hay menos filtro restrictivo. Posible contribuyente al patrón 82.5% records publishable activan path D solo (Subagente B), porque la cola difusa que MODIS/M-band filtran, en I-band entra al cluster.",
+      "mitigacion_sugerida": "A/B test S86+ con local_roi_threshold también en VIIRS_I; tests TDD primero"
+    },
+    {
+      "id": "R5",
+      "titulo": "D8 cluster selection diverge MIROVA — abierto desde S35, mitigado parcial con F47 cluster_rescue pero criterio no alineado",
+      "severidad": "MEDIA-ALTA",
+      "evidencia": "clustering.py sigue eligiendo primary_cluster por vrp_mw desc o n_pixels desc. MIROVA usa criterio distinto (caso Puyehue lacolito: VRP-chile elige cráter 99px, MIROVA reporta lacolito 35px). F47 cluster_rescue (etiqueta final_hotspot_source='cluster_rescue') mitigó schema asimétrico pero no resolvió selección de cluster correcta. Caso latente para 11 Tier A con doble centro térmico.",
+      "mitigacion_sugerida": "Investigar literatura — Coppola 2016a no especifica criterio cluster selection en NRT. Posible: el cluster más cercano al vent dentro de threshold físico, no el más brillante."
+    }
+  ],
+  "conclusion_confianza_mission": {
+    "veredicto": "Confianza ALTA en core algorítmico (paths A/B/D + Test1 + Stefan-Boltzmann + Wooster coefs alineados a papers MIROVA core). Confianza MEDIA en proteccion contra drifts laterales (cluster selection D8, path D cirrus D9 mitigado pero no resuelto, R4 D7 inconsistencia I-band).",
+    "fortalezas": "70 tests, 30+ específicos drift/path/store con TDD documentado; drifts D1/D3/D6 cerrados con evidencia; D9 cap con R1+R2+R3 vinculantes cumplidos S71; F47 cluster_rescue documentado con A46.",
+    "gaps_estructurales": "process_viirs_mod.py infra-testeado (25%), profile.py sin test invariantes, MIR night-only sin test directo, schema asimétrico A46 sin audit programático sistematizado, F66 hybrid gate huérfano sin merge",
+    "tres_riesgos_top": "R1 (process_viirs_mod clon poco testeado) + R2 (profile.py defaults sin test pin) + R5 (D8 cluster selection)"
+  }
+}

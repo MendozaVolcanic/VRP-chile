@@ -1086,3 +1086,17 @@ Cuando S62+S63 completen:
 - 5-6 vols post-fix esperados ratio 2-3×: PP, Lastarria, Tupungatito, Chaiten, PCC, Tupungatito
 - Total esperado: **~99% del universo Tier A en ratio ≤3×** = clon literal MIROVA NRT logrado.
 
+---
+
+## D8' Cluster selection Puyehue (S35) — RESUELTO S38
+
+**Cierre formal S86** (resuelve auditoría I-C4).
+
+**Hipótesis S35** (descrita en CLAUDE.md sección "Estado S35"): el pipeline elegía un cluster distinto al que MIROVA reportaba en PCC. Caso de referencia: nuestro pipeline elegía cluster cráter principal (99 px, vrp=4.94 MW) cuando MIROVA reportaba el lacolito (35 px, vrp=0.18 MW). Ratio inflado 27×. Hipótesis: criterio de selección MIROVA es proximity-al-vent o anomaly-score-relativo, no `vrp_mw desc` ni `n_pixels desc` como hacía `pipeline/clustering.py`.
+
+**Resolución S38**: implementado `enable_vent_anchored_clustering` que selecciona el cluster más cercano al vent_lat/lon como `primary_cluster`. Verificado contra PCC + Lascar + otros Tier A con caída de ratio dentro de banda 0.5-2.0 para los vols focales (régimen Tier A Alto) y dentro de banda 0.5-3.0 para Tier A Muy Bajo.
+
+**Verificación retroactiva S86** (Subagentes A+B+C+E): el cruce TP/FP con metodología corregida muestra que el cluster vent-anchored coincide con el reportado por MIROVA en los casos focales (Lascar 100% match) y en los casos difusos (PCC 7.99 km lacolito) cae dentro de la "cola térmica" del feature volcánico real que MIROVA también publica como ALERTA. Patrón A20 (anomalía difusa extendida — el centroide del cluster nuestro coincide con la región MIROVA aunque sea no-focal).
+
+**Schema check**: la nomenclatura "D8" se usó dos veces en el proyecto — una en S35 (cluster selection PCC, resuelto S38) y otra en S52-S62 (background ring contaminado, resuelto S62). Ambas RESUELTAS al cierre S86. Próximas divergencias deben seguir desde D9 (`docs/D9_PATH_D_CIRRUS_FP.md`).
+

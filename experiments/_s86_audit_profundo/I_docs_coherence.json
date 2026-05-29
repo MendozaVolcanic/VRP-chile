@@ -1,0 +1,180 @@
+{
+  "subagente": "I",
+  "fecha": "2026-05-28",
+  "sesion": "S86",
+  "scope": "Coherencia cross-source de docs vivos VRP Chile",
+  "veredicto_global": "PARCIALMENTE INCOHERENTE — proyecto funcional pero con 7 contradicciones cross-source acumuladas que ya están confundiendo decisiones operacionales (subagente E del propio S86 reporta cuál usar como worktree canónico distinto a CLAUDE.md). Aplica regla M8: >3 contradicciones detectadas, debería pausarse features nuevas para consolidar.",
+  "inventario": {
+    "docs_md_total": 86,
+    "docs_modificados_S81_S86": 24,
+    "tasks_bloque_arranque_activos": 10,
+    "tasks_bloque_arranque_ultimo": "S86",
+    "memory_md_lineas": 282,
+    "memory_md_cap": 500,
+    "memory_md_estado": "OK bajo cap, pero supera el aviso 200 lineas del system reminder",
+    "memory_subdocs": 34,
+    "perfiles_profile_yaml": 30,
+    "perfil_operacional": "mirova_equivalent.yaml"
+  },
+  "contradicciones_cross_source": [
+    {
+      "id": "C1",
+      "severidad": "ALTA",
+      "tema": "Worktree canonico",
+      "fuentes": ["CLAUDE.md raiz proyecto §Working worktree", "memory/MEMORY.md §Worktree canonico", "tasks/BLOQUE_ARRANQUE_S86.md §0"],
+      "discrepancia": "CLAUDE.md proyecto declara VRP-Chile-s70/ como canonico. MEMORY.md S80 recomienda VRP-Chile-s80-consolidation/ y marca s70 con WARNING branch huerfano. BLOQUE_ARRANQUE_S86 declara 'VRP Chile/' raiz como canonico. Tres docs vivos, tres paths distintos.",
+      "impacto": "Cualquier nueva sesion Claude lee CLAUDE.md primero y aterriza en worktree atrasado/huerfano. S82-prep ya documento el problema pero CLAUDE.md no fue actualizado."
+    },
+    {
+      "id": "C2",
+      "severidad": "ALTA",
+      "tema": "Reglas A54-A60 huerfanas en CLAUDE.md",
+      "fuentes": ["CLAUDE.md proyecto (A40-A53 definidas)", "docs/META_RULES_S80.md (A56-A60 definidas)", "tasks/BLOQUE_ARRANQUE_S86.md §3 (las referencia como activas)"],
+      "discrepancia": "CLAUDE.md proyecto solo define hasta A53. A54 y A55 NUNCA existieron (gap numerico). A56-A60 viven solo en META_RULES_S80.md §'Lecciones durables S84'. BLOQUE_ARRANQUE_S86 las cita como activas asumiendo que estan en CLAUDE.md.",
+      "impacto": "Cualquier sesion que ignore META_RULES_S80.md pierde reglas operacionales criticas (bypass parcial earthaccess A56, healthcheck staleness A58, TOKEN en workflows A60). Ya costaron 4 dias NRT caido (S84 incident)."
+    },
+    {
+      "id": "C3",
+      "severidad": "MEDIA",
+      "tema": "inner_radius_km Tupungatito",
+      "fuentes": ["CLAUDE.md proyecto §Reglas geometricas (tabla inner=7)", "volcanoes.yaml (inner=7)"],
+      "discrepancia": "Consistente entre los dos. Pero CLAUDE.md proyecto §A13 'Aprendizajes S60-S62' menciona Tupungatito mirova_center offset 3km S, mientras MEMORY.md §Sesion S80 dice offset 3.00 km S, mientras SESSION_INDEX_S80 §Fase B dice 'offset 2.99 km SE del vent'. Tres valores: 3.00 S, 3.00 km S, 2.99 SE. Geometricamente distintos (S vs SE).",
+      "impacto": "Bajo (calculo aproximado interno), pero ejemplo del tipo de drift que se acumula."
+    },
+    {
+      "id": "C4",
+      "severidad": "ALTA",
+      "tema": "Drift D8 cluster selection",
+      "fuentes": ["CLAUDE.md proyecto §Estado §S35 (D8 NUEVO en investigacion)", "docs/MIROVA_DIVERGENCES.md (lista D1-D7 + D9, salta D8)", "docs/SESSION_INDEX_CONSOLIDATED_S80.md Tabla §2 (lista D1-D7, no menciona D8)"],
+      "discrepancia": "D8 fue planteado S35 como bug critico (factor 27x Puyehue). MIROVA_DIVERGENCES.md tiene D6, D7, salta a D9 sin D8. SESSION_INDEX_S80 tabla §2 no incluye D8. CLAUDE.md proyecto sigue describiendolo como pendiente. No queda claro si fue resuelto, refutado o sigue abierto.",
+      "impacto": "Hipotesis colgada con consecuencias operacionales serias (factor 27x en magnitud). Si fue resuelto, debe persistirse. Si no, es prioridad."
+    },
+    {
+      "id": "C5",
+      "severidad": "MEDIA",
+      "tema": "Estado misiones papers MIROVA core",
+      "fuentes": ["docs/MISSION.md §3 preguntas (lista 10 papers core)", "memory/reference_papers_mirova_canonical.md (referenciado, no leido aqui)", "CLAUDE.md proyecto §A9 (lista distinta autores MIROVA)"],
+      "discrepancia": "MISSION.md lista 'Coppola 2015, 2016a SP426.5, 2020 Frontiers, 2024 cap Springer, 2025 Fernandina, 2022 Sabancaya, Campus 2022/2024, Aveni 2024, Laiolo 2026, Massimetti 2024+2020'. CLAUDE.md A9 lista 'Coppola, Laiolo, Massimetti, Campus, Aveni, Cigolini'. Cigolini esta en CLAUDE.md pero no en MISSION.md lista de papers core.",
+      "impacto": "Bajo (los conjuntos se solapan), pero ambiguedad para futuras decisiones papers-first."
+    },
+    {
+      "id": "C6",
+      "severidad": "ALTA",
+      "tema": "Gate R3 intra-radio: PR #224 + #229 vs MISSION.md 3 preguntas",
+      "fuentes": ["docs/MISSION.md (3 preguntas)", "docs/F_S81_A_ADOPTION_S84.md (PR #224 adoptado)", "docs/F_S81_B_PRIME_ADOPTION_S85.md (PR #229 adoptado)", "docs/F_S81_C_R3_NATURE_AUDIT.md cabecera S85"],
+      "discrepancia": "F_S81_C_R3_NATURE_AUDIT.md cabecera S85 reconoce que el gate intra-radio YA EXISTIA en frontend desde S33 y nunca fue mostrado al usuario. Las hipotesis Fase B/C fueron REFUTADAS por datos (367/367 MIROVA intra-radio). Pero PR #224 y #229 fueron mergeados y adoptados ANTES de esa refutacion, con justificacion 'mejora interna -59% pixels MODIS'. La regla MISSION.md pregunta 1 (¿lo hace MIROVA?) tiene respuesta empirica: MIROVA NO procesa pixels fuera del inner_radius porque su KMZ los recorta. ¿Nuestros gates son redundantes con esa misma logica que ya existia en frontend?",
+      "impacto": "Si los gates son redundantes operacionalmente, son ruido arquitectural que complica el debugging futuro. Si son utiles para schema consistency (objetivo Frente 1.A), justificacion deberia rewritearse explicita. Riesgo: parches no-MIROVA acumulandose otra vez (anti-patron MISSION.md §Anti-patrones)."
+    },
+    {
+      "id": "C7",
+      "severidad": "MEDIA",
+      "tema": "MEMORY.md sin entrada S86",
+      "fuentes": ["memory/MEMORY.md ultima entrada = S85", "docs/F_PRECISION_GAP_INVESTIGATION_S86.md (sesion en curso)", "experiments/_s86_f_precision_gap/ (4 subagentes A/B/C/D outputs)"],
+      "discrepancia": "S86 esta en curso con outputs concretos (Mec 1 propuesto adoptable, Mec 2 y Mec 3 refutados con datos). MEMORY.md aun esta en S85. Regla M2 'persistencia in-vivo' no aplicada todavia. Bloque arranque S87 todavia no generado.",
+      "impacto": "Si la sesion S86 se corta abruptamente, los hallazgos Mec 2 y Mec 3 REFUTADOS se pierden y podrian re-investigarse en S87+ (costo: 3-4h cada uno)."
+    }
+  ],
+  "reglas_status": {
+    "A1_A39_aplicables": "Vigentes operacionalmente. No detectadas obsoletas.",
+    "A40_perplexity_chrome": "Vigente, validada S73. OK.",
+    "A41_Claude_in_Chrome": "Vigente. OK.",
+    "A42_workflow_dispatch_422": "Vigente. Mitigacion estable A43 quoted on:.",
+    "A43_yaml_norway_quoted_on": "Vigente. Aplicado consistentemente en workflows reproc-ab-*.yml.",
+    "A44_worktrees_dedicados": "Vigente. Aplicada S75+.",
+    "A45_tag_defensivo_OK_Nicolas": "Vigente. Aplicada consistentemente (tags pre-s80, pre-s83, pre-s84, pre-s85-*).",
+    "A46_schema_asimetrico_hotspot": "Vigente. F47 cerrado S77.",
+    "A47_no_paralelo_data_mirova_equivalent": "Vigente. Aplicada en bloque arranque S86 §3.",
+    "A48_subagentes_inventan_regex": "Vigente. OK.",
+    "A49_insert_no_comer_return": "Vigente. Origen regresion S80.",
+    "A50_pre_existing_cross_source": "Vigente. Origen regresion S80.",
+    "A51_auditoria_20_sesiones": "Vigente. Proxima S100.",
+    "A52_worktrees_pueden_atrasarse": "Vigente. Aplicada S82-prep.",
+    "A53_cap_PRs_persistencia_in_vivo": "Vigente. S85 acumulo 4 PRs OK.",
+    "A54_A55_NO_DEFINIDAS": "GAP NUMERICO. No existen. Posiblemente reservadas o saltadas.",
+    "A56_A60_huerfanas_en_META_RULES_S80": "Definidas en META_RULES_S80.md NO migradas a CLAUDE.md proyecto. Citadas como activas en BLOQUE_ARRANQUE_S86. Recomendacion: migrar a CLAUDE.md o linkear explicito.",
+    "M1_cap_PRs_sesion": "Vigente. S85 dentro de cap soft.",
+    "M2_persistencia_in_vivo": "Vigente PERO NO APLICADA S86 (sin entrada MEMORY.md aun).",
+    "M3_verify_cross_source_pre_existing": "Vigente. Aplicada S80.",
+    "M4_auditoria_flags_trimestral": "Programada S100/2026-08-15.",
+    "M5_post_insert_verify": "Vigente.",
+    "M6_worktrees_no_main_atrasados": "Vigente. Aplicada S82-prep. Pero CLAUDE.md proyecto sigue declarando worktree canonico s70/ desactualizado.",
+    "M7_bloque_arranque_self_contained": "Vigente. BLOQUE_ARRANQUE_S86 cumple parcialmente (linkea a F_S81_C, F_S81_B_PRIME, feedback_*, pero no a SESSION_INDEX_S80).",
+    "M8_auditoria_20_sesiones": "S86 = sesion 86, S80 fue ultima auditoria completa. Quedan ~14 sesiones para proxima programada S100. Pero este propio mensaje de Nicolas pidiendo auditoria profunda S86 sugiere que el intervalo deberia ser menor."
+  },
+  "mision_vs_realidad": {
+    "ultimas_PRs_S81_S85_revision_3_preguntas": [
+      {
+        "PR": "#221 (F46 VRP_TIR gate S81)",
+        "pregunta_1_papers": "SI — Coppola 2024 Springer Eq.16 + Aveni 2024 RSE Eq.5 (D3 resuelto).",
+        "pregunta_2_divergencia": "N/A",
+        "pregunta_3_alineacion_interna": "N/A",
+        "veredicto": "OK"
+      },
+      {
+        "PR": "#224 (F-S81-A gate Path D intra-radio MODIS)",
+        "pregunta_1_papers": "NO — gate no documentado en Coppola 2016a SP426.5.",
+        "pregunta_2_divergencia": "NO — no cierra D1-D9 explicito.",
+        "pregunta_3_alineacion_interna": "PARCIAL — 'alineacion con geometria KMZ MIROVA inner_radius'. Justificable como alineacion infra (frontend mirovaEqVrp ya lo hacia).",
+        "veredicto": "GRIS — pasa por la puerta 3 con la lectura mas amplia, pero S85 demostro que es redundante con frontend desde S33. MISSION.md anti-patron 'Subir inner_radius_km ad-hoc' es analogo (rechazado S27). Marcarlo gris no implica revertirlo, implica auditar la justificacion al cierre S86."
+      },
+      {
+        "PR": "#229 (F-S81-B' second_pass intra-radio gate)",
+        "pregunta_1_papers": "NO — second_pass es Coppola 2016a §347-356, pero el gate intra-radio sobre el second_pass no esta documentado.",
+        "pregunta_2_divergencia": "NO.",
+        "pregunta_3_alineacion_interna": "SI por adopcion S85 doc — '-59% pixels MODIS recapturados ruidosos mejora visualizacion'. PERO afecta calculo VRP MODIS aggregado, no solo render.",
+        "veredicto": "GRIS — adoptado por mejora interna que SI afecta el campo termico publicado al dashboard. Justificable pero merece nota explicita en MISSION.md §Cuando SI se puede divergir."
+      }
+    ],
+    "anti_patron_detectado": "Riesgo emergente de 'gates intra-radio acumulando' (PR #224 + PR #229) que no estan en papers MIROVA pero parecen mejorar el output. MISSION.md §Anti-patrones tabla deberia agregar fila 'gate intra-radio por path' para frenar la pendiente. Si se acumulan 3-4 mas, se cae en el ciclo de drift descrito S27."
+  },
+  "hipotesis_colgadas": [
+    {"id": "D8", "tema": "Cluster selection (factor 27x Puyehue)", "status": "Mencionado CLAUDE.md S35 como en investigacion, ausente de MIROVA_DIVERGENCES.md, ausente SESSION_INDEX_S80 tabla §2", "accion": "Determinar si fue resuelto por adopcion enable_vent_anchored_clustering S38 (probable) y cerrar formalmente en MIROVA_DIVERGENCES.md o reabrir si sigue activo"},
+    {"id": "H_S70_PATH_D_CIRRUS_FP", "tema": "D9 path D cirrus alto", "status": "CONFIRMADA + fix DIFERIDO S71. Reportada en HYPOTHESIS_LOG.md. S86 Mec 2 (gate t_bg ≥260K) lo confirmaria + refutaria como gate unico", "accion": "Persistir resolution S86 Mec 2 refutado por costar 3 TPs Lascar"},
+    {"id": "D7", "tema": "Local ROI threshold p95 VIIRS375", "status": "diferido. Sin actualizar S80+", "accion": "Confirmar si quedo cerrado o sigue diferido"},
+    {"id": "Frente 1.A schema mirova_publishable", "tema": "S86 Frente recomendado", "status": "Disenado en F_PRECISION_GAP_INVESTIGATION_S86 §Proximo paso recomendado. Tag defensivo planeado", "accion": "Si Nicolas lo aprueba S87, ejecutar"},
+    {"id": "Frente 3 magnitud PCC/Tupu/PP", "tema": "Drifts magnitud per-vol", "status": "Bloque S86 §Frente 3, sin asignar prioridad", "accion": "Frente media prioridad, requiere 4-5h por vol"},
+    {"id": "F66 dual-bg consistency gate", "tema": "Tasks 7-15 pendientes", "status": "SESSION_INDEX_S80 lo declara prioritario para S81+. NO mencionado en BLOQUE_ARRANQUE_S86", "accion": "Determinar si F66 sigue activo o fue abandonado al pivot S81 hacia gates intra-radio"}
+  ],
+  "memory_md_health": {
+    "lineas": 282,
+    "cap_M9": 500,
+    "estado": "OK respecto a cap M9",
+    "warning_system_reminder_200": "SUPERA — pero contexto general del usuario permite mas. Decision usuario.",
+    "ultima_sesion_documentada": "S85",
+    "S86_en_memory": false,
+    "S86_outputs_existentes": "docs/F_PRECISION_GAP_INVESTIGATION_S86.md + experiments/_s86_f_precision_gap/* + experiments/_s86_audit_profundo/* (este reporte)",
+    "candidatos_archivar": [],
+    "entries_a_apuntar_a_docs_inexistentes": "ninguna detectada — links son a docs presentes",
+    "gap_principal": "S86 entry pendiente (regla M2 violada parcialmente)"
+  },
+  "hallazgos_S86_integrados": {
+    "Mec_1_VIIRS_M_750": "Documentado F_PRECISION_GAP_INVESTIGATION_S86.md §Mecanismo 1. SI integrado.",
+    "Mec_2_t_bg_260K_REFUTADO": "Documentado en mismo doc §Mecanismo 2 como 'cuesta hasta 3 TPs Lascar 2026-02-17, no compensa'. SI integrado pero persistir en HYPOTHESIS_LOG.md como cierre de H_S70_PATH_D_CIRRUS_FP fix.",
+    "Mec_3_persistencia_temporal_REFUTADO": "Documentado en mismo doc §Mecanismo 3. SI integrado. Insight clave: 'gate verdadero MIROVA no es persistencia sola, es persistencia EN ZONA VOLCANICA' enlaza con Frente 4 (exclude_zones cartografia C.1 S85).",
+    "MODIS_Lascar_recall_0.125_hallazgo_paralelo": "Documentado §Hallazgo paralelo. NO esta en MEMORY.md ni HYPOTHESIS_LOG.md. Persistir.",
+    "memory_S86_entry": "PENDIENTE — ningun doc memoria tiene S86 todavia"
+  },
+  "recomendaciones_priorizadas": {
+    "criticas_resolver_antes_S87": [
+      "R1 (5 min): actualizar CLAUDE.md proyecto §Working worktree para declarar 'VRP Chile/' raiz o nuevo worktree main-tracking como canonico. La declaracion actual (s70/) contradice MEMORY.md + BLOQUE_ARRANQUE_S86. Resuelve C1.",
+      "R2 (10 min): migrar A56-A60 desde docs/META_RULES_S80.md hacia CLAUDE.md proyecto §'Reglas operacionales S70 (aprendizajes A20-A26)' como nueva subseccion 'Aprendizajes S84-S85 (A56-A60)'. O alternativamente, agregar nota en CLAUDE.md 'A54-A60 viven en docs/META_RULES_S80.md'. Resuelve C2.",
+      "R3 (15 min): cerrar formalmente D8 en docs/MIROVA_DIVERGENCES.md. Verificar si enable_vent_anchored_clustering S38 lo cierra (probable). Si no, reabrir con plan. Resuelve C4.",
+      "R4 (5 min): agregar fila a MISSION.md §Anti-patrones tabla: 'Gate intra-radio sin respaldo paper' con nota 'PR #224 y PR #229 fueron adoptados por justificacion infra (alineacion frontend) — si se proponen 3-4 mas, revisar como anti-patron acumulado'. Resuelve C6 prevencion."
+    ],
+    "altas_para_cierre_S86": [
+      "R5: persistir entrada S86 en MEMORY.md con: (a) hallazgo central Mec 1 G1 sensor_bucket != VIIRS_M_750 propuesto, (b) Mec 2 t_bg ≥260K REFUTADO con datos (cuesta 3 TPs Lascar), (c) Mec 3 persistencia temporal REFUTADO con datos (FPs nuestros tambien persisten 79%), (d) hallazgo paralelo MODIS Lascar recall 0.125, (e) referencias a docs F_PRECISION_GAP_INVESTIGATION_S86.md + experiments/_s86_f_precision_gap/. Resuelve C7.",
+      "R6: actualizar HYPOTHESIS_LOG.md cerrando H_S70_PATH_D_CIRRUS_FP con resolution 'Mec 2 propuesto S86, refutado como gate unico por costar 3 TPs Lascar evento 2026-02-17 capturado solo por path D'.",
+      "R7: generar tasks/BLOQUE_ARRANQUE_S87.md con plan Frente 1.A (G1 implementation) o Frente 4 (exclude_zones extendido)."
+    ],
+    "medias_consolidar_post_S87": [
+      "R8: actualizar SESSION_INDEX_CONSOLIDATED_S80.md a SESSION_INDEX_CONSOLIDATED_S86.md o agregar §Fase D — S81-S86 con tabla resumen sesiones + cierre F-S81-A/B/C.",
+      "R9: ejecutar audit flags M4 (programada S100 pero ya hay 30 perfiles, varios huerfanos). Detectaria flags enable_path_d_intra_radio_gate + enable_second_pass_intra_radio_gate ahora activos sin documentar en CLAUDE.md.",
+      "R10: aclarar status F66 (Tasks 7-15 pendientes desde S80, ausente BLOQUE_S86). Decidir si abandonado/diferido/abierto."
+    ],
+    "bajas_archivar": [
+      "R11: archivar tasks/BLOQUE_ARRANQUE_S74/76/78/79/80/81/82/84/85.md a tasks/_archive/ (regla S80 ya creo _archive_s80/, falta extender)."
+    ]
+  },
+  "veredicto_final": "Documentacion NO es coherente en estado actual S86. 7 contradicciones detectadas (3 ALTAS, 4 MEDIAS). El proyecto sigue funcional porque cada doc individualmente es coherente con su scope, pero al leerlos juntos un agente nuevo entra en confusion (ejemplo concreto: este propio subagente recibio worktree distinto en CLAUDE.md vs MEMORY.md vs BLOQUE_S86). Regla M8 dispara: >3 contradicciones — pausar features nuevas y consolidar. Recomendacion practica: ejecutar R1-R4 ahora (30 min total) + R5-R7 al cierre S86 (45 min total) + R8-R10 al inicio S87 antes de tocar pipeline. Si esto no se hace, el ciclo de drift documentado en MISSION.md §Anti-patrones puede repetirse para gates intra-radio (S82-S85 ya muestra 3 PRs en la pendiente).",
+  "tono_geologo": "El proyecto esta en un estado analogo a un volcan en monitoreo intensivo con instrumentos divergentes: cada paper individual (CLAUDE.md, MEMORY.md, MISSION.md) reporta correctamente lo que mide, pero el operador que sintetiza la imagen general (Claude o Nicolas leyendo entre sesiones) recibe senales contradictorias sobre el estado del sistema. No es falla, es desincronizacion. La consolidacion S80 fue eso mismo, y el intervalo de 6 sesiones (S80-S86) ya muestra acumulacion suficiente para requerir otra mini-consolidacion. La regla M8 'cada 20 sesiones' es demasiado laxa con la velocidad actual de cambio (~3 PRs/sesion sostenido); reformular como 'cada 10 sesiones O 25 PRs, lo primero'."
+}

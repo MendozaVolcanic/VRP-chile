@@ -1,0 +1,331 @@
+{
+  "window": {
+    "start": "2026-01-28",
+    "end": "2026-05-25"
+  },
+  "params": {
+    "cluster_radius_km": 2.0,
+    "window_days_3": 3,
+    "window_days_7": 7
+  },
+  "n_publishable_records": 5337,
+  "n_tp_records": 1650,
+  "n_fp_records": 3687,
+  "n_spatial_clusters": 197,
+  "analysis1_ours_TP_vs_FP_persistence": {
+    "TP": {
+      "n_same_3d": {
+        "n": 1650,
+        "mean": 17.37818181818182,
+        "median": 19.0,
+        "p25": 10.0,
+        "p75": 24.0,
+        "p95": 31.0,
+        "min": 0.0,
+        "max": 41.0
+      },
+      "n_same_7d": {
+        "n": 1650,
+        "mean": 35.97212121212121,
+        "median": 39.0,
+        "p25": 20.0,
+        "p75": 51.0,
+        "p95": 65.0,
+        "min": 0.0,
+        "max": 77.0
+      },
+      "n_consec_nights": {
+        "n": 1650,
+        "mean": 33.53393939393939,
+        "median": 18.0,
+        "p25": 6.0,
+        "p75": 43.0,
+        "p95": 112.0,
+        "min": 1.0,
+        "max": 112.0
+      },
+      "frac_singleton_7d": 0.018787878787878787,
+      "frac_consec_ge_2": 0.9096969696969697,
+      "frac_consec_ge_3": 0.8612121212121212
+    },
+    "FP": {
+      "n_same_3d": {
+        "n": 3687,
+        "mean": 13.402224030377,
+        "median": 13.0,
+        "p25": 5.0,
+        "p75": 21.0,
+        "p95": 30.0,
+        "min": 0.0,
+        "max": 41.0
+      },
+      "n_same_7d": {
+        "n": 3687,
+        "mean": 27.668022782750203,
+        "median": 28.0,
+        "p25": 9.0,
+        "p75": 43.0,
+        "p95": 60.0,
+        "min": 0.0,
+        "max": 77.0
+      },
+      "n_consec_nights": {
+        "n": 3687,
+        "mean": 18.461893138052616,
+        "median": 8.0,
+        "p25": 2.0,
+        "p75": 26.0,
+        "p95": 60.0,
+        "min": 1.0,
+        "max": 112.0
+      },
+      "frac_singleton_7d": 0.06292378627610523,
+      "frac_consec_ge_2": 0.790073230268511,
+      "frac_consec_ge_3": 0.7130458367236235
+    }
+  },
+  "analysis2_mirova_alerta_persistence": {
+    "n_alertas": 1189,
+    "n_same_3d": {
+      "n": 1189,
+      "mean": 4.623212783851977,
+      "median": 5.0,
+      "p25": 4.0,
+      "p75": 6.0,
+      "p95": 6.0,
+      "min": 0.0,
+      "max": 6.0
+    },
+    "n_consec_nights": {
+      "n": 1189,
+      "mean": 20.101766190075693,
+      "median": 10.0,
+      "p25": 4.0,
+      "p75": 35.0,
+      "p95": 51.0,
+      "min": 1.0,
+      "max": 51.0
+    },
+    "frac_singleton_7d": 0.007569386038687973,
+    "frac_consec_ge_2": 0.9142136248948697
+  },
+  "analysis3_candidate_gates": [
+    {
+      "gate": "P1: n_same_cluster_within_3d >= 1",
+      "tp_pass": 1594,
+      "tp_total": 1650,
+      "fp_pass": 3339,
+      "fp_total": 3687,
+      "recall_kept_pct": 96.6,
+      "fp_filtered_pct": 9.4,
+      "precision_before": 0.309,
+      "precision_after": 0.323
+    },
+    {
+      "gate": "P1b: n_same_cluster_within_3d >= 2",
+      "tp_pass": 1543,
+      "tp_total": 1650,
+      "fp_pass": 3117,
+      "fp_total": 3687,
+      "recall_kept_pct": 93.5,
+      "fp_filtered_pct": 15.5,
+      "precision_before": 0.309,
+      "precision_after": 0.331
+    },
+    {
+      "gate": "P2: n_consecutive_nights >= 2",
+      "tp_pass": 1501,
+      "tp_total": 1650,
+      "fp_pass": 2913,
+      "fp_total": 3687,
+      "recall_kept_pct": 91.0,
+      "fp_filtered_pct": 21.0,
+      "precision_before": 0.309,
+      "precision_after": 0.34
+    },
+    {
+      "gate": "P3: NOT singleton (cluster has >=2 records in \u00b17d)",
+      "tp_pass": 1619,
+      "tp_total": 1650,
+      "fp_pass": 3455,
+      "fp_total": 3687,
+      "recall_kept_pct": 98.1,
+      "fp_filtered_pct": 6.3,
+      "precision_before": 0.309,
+      "precision_after": 0.319
+    },
+    {
+      "gate": "P4: n_same_cluster_within_3d >= 3",
+      "tp_pass": 1516,
+      "tp_total": 1650,
+      "fp_pass": 2955,
+      "fp_total": 3687,
+      "recall_kept_pct": 91.9,
+      "fp_filtered_pct": 19.9,
+      "precision_before": 0.309,
+      "precision_after": 0.339
+    },
+    {
+      "gate": "G1 (sensor != VIIRS750) \u2014 baseline",
+      "tp_pass": 1650,
+      "tp_total": 1650,
+      "fp_pass": 2343,
+      "fp_total": 3687,
+      "recall_kept_pct": 100.0,
+      "fp_filtered_pct": 36.5,
+      "precision_before": 0.309,
+      "precision_after": 0.413
+    },
+    {
+      "gate": "G1 AND P1 (sensor!=VIIRS750 AND n_same_3d>=1)",
+      "tp_pass": 1594,
+      "tp_total": 1650,
+      "fp_pass": 2195,
+      "fp_total": 3687,
+      "recall_kept_pct": 96.6,
+      "fp_filtered_pct": 40.5,
+      "precision_before": 0.309,
+      "precision_after": 0.421
+    },
+    {
+      "gate": "G1 AND P2 (sensor!=VIIRS750 AND consec>=2)",
+      "tp_pass": 1501,
+      "tp_total": 1650,
+      "fp_pass": 1966,
+      "fp_total": 3687,
+      "recall_kept_pct": 91.0,
+      "fp_filtered_pct": 46.7,
+      "precision_before": 0.309,
+      "precision_after": 0.433
+    },
+    {
+      "gate": "G1 AND P3 (sensor!=VIIRS750 AND NOT singleton)",
+      "tp_pass": 1619,
+      "tp_total": 1650,
+      "fp_pass": 2247,
+      "fp_total": 3687,
+      "recall_kept_pct": 98.1,
+      "fp_filtered_pct": 39.1,
+      "precision_before": 0.309,
+      "precision_after": 0.419
+    },
+    {
+      "gate": "G1 AND (P1 OR vrp>=50 MW)  -- preserva picos magnitud",
+      "tp_pass": 1594,
+      "tp_total": 1650,
+      "fp_pass": 2208,
+      "fp_total": 3687,
+      "recall_kept_pct": 96.6,
+      "fp_filtered_pct": 40.1,
+      "precision_before": 0.309,
+      "precision_after": 0.419
+    }
+  ],
+  "analysis4_lascar_2026_02_17_sanity": {
+    "records_found": 0,
+    "records": [],
+    "mirova_alertas_feb15_20": 14,
+    "mirova_nights": [
+      "2026-02-15",
+      "2026-02-16",
+      "2026-02-17",
+      "2026-02-19",
+      "2026-02-20"
+    ]
+  },
+  "analysis5_villarrica_sub_pixel": {
+    "n_tp_records": 34,
+    "frac_n_pixels_eq_1": 0.11764705882352941,
+    "frac_consec_ge_2": 1.0,
+    "frac_singleton_7d": 0.0,
+    "n_consec_nights_dist": {
+      "n": 34,
+      "mean": 26.352941176470587,
+      "median": 18.0,
+      "p25": 18.0,
+      "p75": 37.0,
+      "p95": 41.0,
+      "min": 2.0,
+      "max": 41.0
+    },
+    "n_same_3d_dist": {
+      "n": 34,
+      "mean": 20.823529411764707,
+      "median": 21.0,
+      "p25": 18.0,
+      "p75": 24.5,
+      "p95": 32.0,
+      "min": 1.0,
+      "max": 32.0
+    },
+    "clusters_used": 2
+  },
+  "analysis6_per_volcano_TP_persistence": {
+    "Chaiten": {
+      "n_tp": 64,
+      "frac_consec_ge_2": 1.0,
+      "frac_singleton_7d": 0.0,
+      "median_consec": 26.0
+    },
+    "Copahue": {
+      "n_tp": 4,
+      "frac_consec_ge_2": 0.75,
+      "frac_singleton_7d": 0.0,
+      "median_consec": 11.5
+    },
+    "Isluga": {
+      "n_tp": 220,
+      "frac_consec_ge_2": 0.9136363636363637,
+      "frac_singleton_7d": 0.01818181818181818,
+      "median_consec": 12.0
+    },
+    "Lascar": {
+      "n_tp": 335,
+      "frac_consec_ge_2": 0.9194029850746268,
+      "frac_singleton_7d": 0.008955223880597015,
+      "median_consec": 22.0
+    },
+    "Lastarria": {
+      "n_tp": 290,
+      "frac_consec_ge_2": 0.9379310344827586,
+      "frac_singleton_7d": 0.013793103448275862,
+      "median_consec": 112.0
+    },
+    "Llaima": {
+      "n_tp": 7,
+      "frac_consec_ge_2": 0.8571428571428571,
+      "frac_singleton_7d": 0.0,
+      "median_consec": 12.0
+    },
+    "NevadosDeChillan": {
+      "n_tp": 1,
+      "frac_consec_ge_2": 1.0,
+      "frac_singleton_7d": 0.0,
+      "median_consec": 3.0
+    },
+    "PlanchonPeteroa": {
+      "n_tp": 181,
+      "frac_consec_ge_2": 0.9447513812154696,
+      "frac_singleton_7d": 0.0055248618784530384,
+      "median_consec": 16.0
+    },
+    "PuyehueCordonCaulle": {
+      "n_tp": 287,
+      "frac_consec_ge_2": 0.7804878048780488,
+      "frac_singleton_7d": 0.05574912891986063,
+      "median_consec": 4.0
+    },
+    "Tupungatito": {
+      "n_tp": 227,
+      "frac_consec_ge_2": 0.9559471365638766,
+      "frac_singleton_7d": 0.013215859030837005,
+      "median_consec": 42.0
+    },
+    "Villarrica": {
+      "n_tp": 34,
+      "frac_consec_ge_2": 1.0,
+      "frac_singleton_7d": 0.0,
+      "median_consec": 18.0
+    }
+  }
+}
