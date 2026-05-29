@@ -59,6 +59,17 @@ def _solar_elevation(lat: float, lon: float, dt_utc: datetime) -> float:
     return math.degrees(math.asin(max(-1.0, min(1.0, sin_elev))))
 
 
+def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Distancia haversine en km. Usado por geo_class (S88 Frente B)."""
+    R = 6371.0
+    lat1r, lat2r = math.radians(lat1), math.radians(lat2)
+    dlat = lat2r - lat1r
+    dlon = math.radians(lon2 - lon1)
+    a = (math.sin(dlat / 2) ** 2
+         + math.cos(lat1r) * math.cos(lat2r) * math.sin(dlon / 2) ** 2)
+    return 2 * R * math.asin(math.sqrt(a))
+
+
 def _load(volcano_name: str) -> dict:
     path = DATA_DIR / f"{volcano_name}.json"
     if path.exists():
@@ -135,7 +146,9 @@ def append_record(volcano_name: str, record: dict,
                    overwrite: bool = False,
                    max_hotspot_dist_km: float = None,
                    enable_pixel_level_distance_filter: bool = False,
-                   max_cluster_pixels: int = None):
+                   max_cluster_pixels: int = None,
+                   inner_radius_km: float = None,
+                   volcanic_features: list = None):
     """
     Append a VRP record to the volcano's JSON file.
     Deduplicates by (datetime_utc, sensor) — safe to re-run.
@@ -349,6 +362,37 @@ def append_record(volcano_name: str, record: dict,
     # Normalize t_max_k for VIIRS 375m (uses t_max_i04_k internally)
     if "t_max_i04_k" in record and "t_max_k" not in record:
         record["t_max_k"] = record["t_max_i04_k"]
+
+    # S88 Frente B — geo_class: etiqueta GEOMÉTRICA descriptiva del
+    # primary_cluster respecto al cono volcánico. NO cambia detección, VRP ni
+    # filtra nada — solo describe (diseño:
+    # docs/superpowers/specs/2026-05-29-s88-pc-classification-design.md):
+    #   "summit"    cluster dentro del inner_radius_km (es el cráter).
+    #   "extension" fuera del inner pero <= ext_km de una feature volcánica
+    #               catalogada (lacolito PCC, Lazufre, El Agrio... features
+    #               reales no publicadas por MIROVA — categoría b del marco S86).
+    #   "far"       ni cráter ni feature catalogada cerca.
+    # Solo se computa si inner_radius_km provisto (legacy intacto sin él). NO
+    # usa el gate t_bg<260K (refutado S86 — perdería Lascar 02-17 eruptivo). El
+    # cruce con MIROVA (mirova_confirmed) vive en el frontend, NO acá (no
+    # acoplar el NRT a un CSV externo de scraping).
+    if inner_radius_km is not None:
+        pc_geo = record.get("primary_cluster") or {}
+        pcd = pc_geo.get("centroid_dist_km")
+        if pcd is not None:
+            if pcd <= inner_radius_km:
+                pc_geo["geo_class"] = "summit"
+            else:
+                geo = "far"
+                plat = pc_geo.get("centroid_lat")
+                plon = pc_geo.get("centroid_lon")
+                if volcanic_features and plat is not None and plon is not None:
+                    for feat in volcanic_features:
+                        d = _haversine_km(plat, plon, feat["lat"], feat["lon"])
+                        if d <= feat.get("ext_km", 2.0):
+                            geo = "extension"
+                            break
+                pc_geo["geo_class"] = geo
 
     # S37 H_D8_5 — sum VRP reporting (Coppola 2016a eq 8 + líneas 510-513).
     # Cuando ENABLE_SUM_VRP_REPORTING=True, el record persiste dos campos
