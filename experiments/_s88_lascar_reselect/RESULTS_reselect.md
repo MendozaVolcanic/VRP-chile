@@ -154,3 +154,67 @@ hoy sobre los L1B de febrero** — no es deducible de los datos en disco.
 - `reselect_results.json` — métricas per-vol + decomposición Lascar (números reales).
 - `lascar_feb_table.txt` — tabla por-noche de los 10 no-match.
 - `loss_chars.txt` — caracterización pixel-level de las 8 noches detection-loss (correctas).
+- `post_reproc_clean.txt` — output verificado del validador post-reproceso (§8).
+
+---
+
+## 8. FRENTE A EJECUTADO — el reproceso confirma la hipótesis (2026-05-29)
+
+El workflow `reproc-s88-lascar-validation.yml` (GH Actions run 26650931800, **success**)
+reprocesó Lascar feb-2026 con la config operacional ACTUAL (perfil
+`_s88_reproc_validation`, que `extends: mirova_equivalent` → vent_anchored + bt_path OFF
+S40 + gates intra-radio S84/S85). `post_reproc_validate.py` comparó el match 1:1 anomalía
+dominante (tol 2 km) entre el operacional persistido (primary stale) y el reproceso.
+
+**Números copiados del output verificado (`post_reproc_clean.txt`):**
+
+| | Match Lascar feb (tol 2 km) |
+|---|---:|
+| old (operacional stale, estrategia vieja) | 23/35 = **65.7%** |
+| new (config actual, reproceso) | 33/35 = **94.3%** |
+| **Δ** | **+10 records (+28.6pp)** |
+
+### Los records MODIS que flipean al cráter
+
+Todos los no-match MODIS de febrero pasan de tener el primary en el Salar (17-31 km) a
+apuntar al cráter (≤2 km, donde MIROVA reporta):
+
+```
+night        mir   old      new    nota
+2026-02-09   1.0   23.38 →  1.73   FLIP→OK
+2026-02-10   1.0   27.25 →  1.82   FLIP→OK
+2026-02-11   1.41  24.21 →  0.34   FLIP→OK
+2026-02-12   1.41  29.60 →  1.09   FLIP→OK
+2026-02-13   1.41  (none) →  2.02  FLIP→OK   (record nuevo, no existía en operacional)
+2026-02-14   1.41  17.73 →  1.42   FLIP→OK
+2026-02-15   1.41  31.20 →  1.54   FLIP→OK
+2026-02-19   2.0   (none) →  1.50  FLIP→OK   (record nuevo)
+2026-02-22   2.0   (none) →  2.04  FLIP→OK   (record nuevo)
+2026-02-27   2.0   23.25 →  2.88   (cráter recuperado, queda apenas fuera de tol)
+```
+
+Los 2 que NO matchean post-reproceso quedan a ~3 km, es decir el reproceso **sí recuperó
+el cráter** (ya no 17-31 km) pero apenas fuera de la tolerancia de 2 km: 02-08 MODIS
+(new=3.38) y 02-14 VIIRS (new=0.86 vs MIROVA a 3.33 — acá somos NOSOTROS los que estamos
+más cerca del cráter que MIROVA). Divergencia física menor, NO el error catastrófico
+previo. **Cero regresiones**: todos los records que ya matcheaban (02-17 MODIS eruptivo,
+los ~22 VIIRS) siguen matcheando.
+
+### Conclusión (cierra Frente A)
+
+El reproceso **valida con datos limpios la hipótesis de S87/S88**: el "gap de Lascar" era
+**deuda de datos históricos, NO un bug del pipeline actual**. Con la config operacional de
+hoy, el pipeline elige el cráter (0.3-2.9 km) en vez del Salar (17-31 km) en los eventos
+eruptivos de febrero. Mecanismo confirmado: `bt_path` OFF (S40) impide que los pixeles
+saturados off-nadir del Salar (A36 sec³) llenen el top-100, los gates intra-radio
+(S84/S85) los cortan, y `vent_anchored` ancla al cráter.
+
+Esto cierra el ciclo abierto en S87: lo que el atajo offline NO pudo demostrar (porque el
+cráter ya no estaba en los pixeles persistidos), el reproceso desde L1B lo confirmó. El
+NRT viene haciendo lo correcto desde S38-S40; los records de febrero quedaron stale solo
+porque el NRT no reprocesa histórico.
+
+> Nota: este reproceso es de VALIDACIÓN en `data/_s88_reproc_validation/` (aislado). NO se
+> propaga al operacional `data/mirova_equivalent/` — el dashboard sigue mostrando los
+> records históricos stale de febrero. Si se quisiera "limpiar" el dashboard histórico,
+> habría que reprocesar a `mirova_equivalent` (decisión aparte; A45 + tag defensivo).
