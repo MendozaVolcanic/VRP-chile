@@ -58,17 +58,26 @@ mecanismo más preciso: no es selección, es pérdida de detección.
    config actual → Lascar sube de ~67% a ~76%, valida que el gap es deuda histórica.
 6. Documentar resultado en `experiments/_s88_lascar_reselect/` + cerrar.
 
-### Frente B — implementar tras decisión Nicolás (diseño listo, PR #241)
+### Frente B — COMPLETO S88 (diseño #241 + backend #245 + frontend #246)
 
-Diseño en `docs/superpowers/specs/2026-05-29-s88-pc-classification-design.md`.
-**Espera 3 decisiones** (§7 del doc):
-1. ¿`geo_class` en store.py (geometría) + `mirova_confirmed` en frontend (cruce CSV)?
-2. ¿`EXT_KM` 2 km global o per-vol (PCC/PP necesitan más)?
-3. ¿Fase 2 (artefacto físico PCC/Tupungatito) en roadmap, o 3 categorías honestas basta?
+geo_class implementado end-to-end: `pc.geo_class` (summit/extension/far) en store.py
+con TDD (7/7), `volcanic_features.yaml` + caller wiring, frontend render naranja
+#ff9800 para extension + leyenda. Las 3 decisiones de diseño resueltas (geo_class
+geometría en store + mirova_confirmed en frontend; ext_km per-vol; Fase 2 diferida).
+NO usa el gate `t_bg<260K` (refutado S86). Verificación: suite 605 passed, node
+--check ALL_OK (preview MCP no disponible este entorno).
 
-Tras decisión: TDD → tag `pre-s89-geo-class` (A45) → `volcanic_features.yaml` →
-`store.py` geo_class ~15 líneas → frontend render → verificación. **NO usar gate
-`t_bg<260K` (refutado S86).**
+**Pendiente S89 Frente B (NO bloqueante)**:
+1. **Decisión UX de Nicolás**: ¿mostrar extensions POR DEFECTO? hoy son
+   distance_class="far" → ocultas bajo toggle "Solo cráter"; el naranja solo aplica
+   cuando se muestran. Si visibles por defecto: excluir isExtension del gate
+   `if (isFar && !includeFarDistance) return;`.
+2. **Coords GVP verificadas** de sub-features S86 (Lazufre, Cerro Blanco, Pichi-Llaima,
+   El Agrio, Planchón N) → poblar `volcanic_features.yaml` (hoy solo lacolito PCC).
+   Investigación, NO inventar coords.
+3. `mirova_confirmed` (cruce CSV en frontend) — otra mitad del etiquetado.
+4. Verificación visual con preview cuando el entorno lo permita + cuando el NRT cron
+   pueble data geo_class real.
 
 ### Frente C — coverage tests ampliable (opcional, sin riesgo)
 
