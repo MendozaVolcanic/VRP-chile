@@ -111,6 +111,24 @@ la ventana completa con la config vigente** (reproceso histórico local, no GH A
 por timeout — regla S15). **Candidato S88**: reproc histórico Lascar feb-2026 con
 config actual → los 31 records eruptivos pasarían a apuntar al cráter.
 
+### 5. Tupungatito (77%) y Chaitén (94%) — Frente D: gaps ~3 km son referencia/dispersión, no error
+
+Investigación de la dirección (bearing) de nuestra anomalía dominante desde el
+`mirova_center`:
+
+- **Tupungatito**: nuestro primary apunta consistentemente al cráter (bearing
+  mediano 322° ≈ el del vent 330°), pero queda a ~5.4 km del `mirova_center`
+  **porque el mirova_center está a 4.86 km del cráter activo** (offset KMZ confirmado
+  en `AUDIT_INTEGRAL_S81.md:154` — "3 km SE" era subestimación humana). El
+  `mirova_center` ≈ coord GVP nominal (-33.4,-69.8); el cráter activo está al NW. El
+  gap de distancia vs MIROVA es por **qué punto se usa para medir** (centro de
+  grilla/GVP, regla A13), NO por error de ubicación. **Resuelve C3 de la auditoría
+  S86.** Las divergencias residuales son su régimen Muy Bajo (ΔT chico) + ring
+  glaciar (A19).
+- **Chaitén**: `mirova_center` bien centrado (0.24 km del vent). Los pocos no-match
+  son dispersión real del domo (bearing variable, MIROVA reporta a ~2.8-3.1 km
+  actividad dispersa del complejo) — categoría (b), no offset.
+
 ## Premisa del plan refutada (Bloque 2 parte 2)
 
 El bloque de arranque predijo "rehacer el cruce TP/FP con el loader → gap precisión
