@@ -63,6 +63,21 @@ from pipeline.geo_utils import get_effective_vent
 
 TMP_DIR = Path(__file__).parent.parent / "tmp"
 VOLCANOES_FILE = Path(__file__).parent.parent / "volcanoes.yaml"
+VOLCANIC_FEATURES_FILE = Path(__file__).parent.parent / "pipeline" / "volcanic_features.yaml"
+
+
+def _load_volcanic_features() -> dict:
+    """S88 Frente B — catálogo de features volcánicas catalogadas por volcán,
+    usado por store.append_record para el campo geo_class ('extension'). Si el
+    archivo no existe o está vacío, devuelve {} (geo_class cae a summit/far por
+    geometría inner_radius pura). Ver pipeline/volcanic_features.yaml."""
+    if not VOLCANIC_FEATURES_FILE.exists():
+        return {}
+    with open(VOLCANIC_FEATURES_FILE, encoding="utf-8") as f:
+        return yaml.safe_load(f) or {}
+
+
+VOLCANIC_FEATURES = _load_volcanic_features()
 
 
 def solar_elevation(lat_deg: float, lon_deg: float, dt_utc: datetime) -> float:
@@ -198,7 +213,9 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                                                 overwrite=overwrite,
                                                 max_hotspot_dist_km=volcano.get("radius_km"),
                                                 enable_pixel_level_distance_filter=vrp_profile.ENABLE_PIXEL_LEVEL_DISTANCE_FILTER,
-                                                max_cluster_pixels=volcano.get("max_cluster_pixels"))
+                                                max_cluster_pixels=volcano.get("max_cluster_pixels"),
+                                                inner_radius_km=volcano.get("inner_radius_km"),
+                                                volcanic_features=VOLCANIC_FEATURES.get(volcano["name"]))
                             vent_str = (f" | VRP_VENT={result.get('vrp_vent_mw', 0)} MW"
                                         if eff_vent_lat is not None and result.get('vrp_vent_mw', 0) > 0 else "")
                             print(f"  {result['sensor']} | VRP={result['vrp_mw']} MW | "
@@ -240,7 +257,9 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                                                 overwrite=overwrite,
                                                 max_hotspot_dist_km=volcano.get("radius_km"),
                                                 enable_pixel_level_distance_filter=vrp_profile.ENABLE_PIXEL_LEVEL_DISTANCE_FILTER,
-                                                max_cluster_pixels=volcano.get("max_cluster_pixels"))
+                                                max_cluster_pixels=volcano.get("max_cluster_pixels"),
+                                                inner_radius_km=volcano.get("inner_radius_km"),
+                                                volcanic_features=VOLCANIC_FEATURES.get(volcano["name"]))
                             vent_str = (f" | VRP_VENT={result['vrp_vent_mw']} MW "
                                         f"({result['n_vent_pixels']}px)"
                                         if eff_vent_lat is not None else "")
@@ -283,7 +302,9 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                                                 overwrite=overwrite,
                                                 max_hotspot_dist_km=volcano.get("radius_km"),
                                                 enable_pixel_level_distance_filter=vrp_profile.ENABLE_PIXEL_LEVEL_DISTANCE_FILTER,
-                                                max_cluster_pixels=volcano.get("max_cluster_pixels"))
+                                                max_cluster_pixels=volcano.get("max_cluster_pixels"),
+                                                inner_radius_km=volcano.get("inner_radius_km"),
+                                                volcanic_features=VOLCANIC_FEATURES.get(volcano["name"]))
                             vent_str = (f" | VRP_VENT={result.get('vrp_vent_mw', 0)} MW"
                                         if volcano.get("vent_lat") and result.get('vrp_vent_mw', 0) > 0 else "")
                             print(f"  {result['sensor']} (750m) | VRP={result['vrp_mw']} MW | "
