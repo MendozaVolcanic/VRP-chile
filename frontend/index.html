@@ -1769,6 +1769,7 @@ function renderDetail() {
   [
     ["#e91e63", "VIIRS 375m"], ["#00bcd4", "VIIRS 750m"], ["#ff8c00", "MODIS"],
     ["#ff5252", "Radio cráter (🎯 summit)"], ["#8a8a8a", "Detección lejana (📍 far)"],
+    ["#ff9800", "Extensión volcánica no-MIROVA"],
     ["#7c4dff", "Vent-path / POI investigación"], ["#ffc107", "Radio vent-path"], ["#7a8fa6", "Radio búsqueda 25 km"]
   ].forEach(([color, label]) => {
     const item = el("div", "map-legend-item");
@@ -1977,6 +1978,16 @@ function renderDetail() {
       }
       const isFar = distClass === "far";
 
+      // S88 Frente B — geo_class: cuando el primary_cluster es una feature
+      // volcánica catalogada no publicada por MIROVA (geo_class="extension",
+      // categoría b del marco S86 — lacolito PCC, Lazufre, etc.), colorearla
+      // naranja en vez de gris-far. Es un cuerpo térmico volcánico REAL, no una
+      // detección lejana espuria. Cambio puramente visual: NO altera qué
+      // markers se renderizan (sigue el mismo toggle far) ni la magnitud.
+      // Solo poblado por records post-S88 (NRT cron); records viejos sin
+      // geo_class caen al comportamiento previo (gris si far).
+      const isExtension = (r.primary_cluster && r.primary_cluster.geo_class === "extension");
+
       // S26 B: cuando toggle "Solo cráter" activo (default), NO renderizar markers
       // far en el mapa para reducir ruido visual. La tabla los mantiene atenuados
       // (preserva evidencia, pedido S18 Nicolás). Toggle "Incluir lejanas" los
@@ -2021,7 +2032,13 @@ function renderDetail() {
         // S14 D1: si distance_class="far" → gris/outline, si "summit" → color sensor
         // normal. Matches MIROVA visual convention (rojo=real, gris=posible-lejano).
         const farColor = "#8a8a8a";
-        const markerStyle = isFar ? {
+        const extColor = "#ff9800";  // S88 geo_class extension — naranja
+        const markerStyle = (isExtension && isFar) ? {
+          // Feature volcánica catalogada no-MIROVA: naranja, visible como real.
+          radius: Math.max(4, size * 0.85),
+          color: "#fff", weight: 1.2, fillColor: extColor,
+          fillOpacity: Math.max(pxOpacity * 0.75, 0.45), dashArray: null,
+        } : (isFar ? {
           radius: Math.max(3, size * 0.75),
           color: "#ddd", weight: 0.8, fillColor: farColor,
           fillOpacity: Math.max(pxOpacity * 0.5, 0.3), dashArray: "2,3",
@@ -2034,7 +2051,7 @@ function renderDetail() {
           color: isPrimary ? "#fff" : "#aaa",
           weight: isPrimary ? 1.5 : 0.8,
           fillColor: color, fillOpacity: pxOpacity, dashArray: null,
-        });
+        }));
         // S18: popup distingue VRP total del record (suma) vs VRP del pixel
         // individual (este punto). Antes el popup decía solo "VRP: X MW" sin
         // aclarar que es el pixel, y la tabla muestra el total — generaba
