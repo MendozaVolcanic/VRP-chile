@@ -146,12 +146,15 @@ def load_mirova_alertas(
         source = row["_source"]
 
         # Distancia: CONS usa Distancia_km; OCR la trae en Nota_Validacion.
-        dist_km = None
+        # F-B2 completo: las filas OCR traen Distancia_km=0 siempre — ese 0 es
+        # "no informado", no "distancia cero". Si la nota no parsea, dist_km
+        # queda None; NO heredar el 0.0 de Distancia_km (daría matches espurios
+        # al vent en los cruces de auditoría).
         if source == "OCR":
             dist_km = parse_ocr_distance(row.get("Nota_Validacion", ""))
-        if dist_km is None:
+        else:  # CONS
             try:
-                dist_km = float(row.get("Distancia_km") or 0.0)
+                dist_km = float(row.get("Distancia_km"))
             except (TypeError, ValueError):
                 dist_km = None
 
