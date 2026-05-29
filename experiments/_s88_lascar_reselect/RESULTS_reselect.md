@@ -1,109 +1,147 @@
-# S88 — Re-selección offline + decomposición Lascar febrero
+# S88 — Re-selección offline (refutada como proxy) + decomposición Lascar febrero
 
 **Fecha**: 2026-05-29 (S88). **Script**: `reselect_offline.py` (100% offline, no toca pipeline NRT).
 **Datos**: `anomaly_pixels` persistidos en `data/mirova_equivalent/*.json` (11 Tier A) +
 loader canónico `load_mirova_alertas` (CONS∪OCR). **Ventana**: igual que S87.
 
+> **NOTA DE CORRECCIÓN (integridad)**: una primera versión de este documento (commit
+> inicial PR #238) reportó números ANTICIPADOS, no los del script (decía resel 75.4%
+> global, Lascar +4.4pp, 7 recuperables). Eran **incorrectos**. Esta versión corrige con
+> el output real del script. La conclusión cambió de signo (ver §1). La lección está en
+> la sección final.
+
 ## Pregunta
 
-S87 dejó el 74.7% de match 1:1 como **piso contaminado**: la columna `vent_anchored`
-leía el `primary_cluster` PERSISTIDO, que mezcla épocas de estrategia (pre-S38 `vrp_max`
-vs post-S38 `vent_anchored`). Dos preguntas, ambas sin reproceso:
+S87 dejó el 74.7% de match 1:1 anomalía dominante como **piso contaminado**: la columna
+`vent_anchored` leía el `primary_cluster` PERSISTIDO, que mezcla épocas de estrategia
+(pre-S38 `vrp_max` vs post-S38 `vent_anchored`). Dos preguntas, ambas sin reproceso:
 
-1. **¿Cuánto sube el match si re-aplico la lógica `vent_anchored` ACTUAL a los pixeles
-   persistidos** (en vez de leer el primary stale)?
-2. **De los no-match eruptivos de Lascar feb, ¿cuántos son recuperables en disco
-   (cráter presente, mala selección vieja) y cuántos necesitan reproceso real desde L1B
-   (cráter ausente de los pixeles persistidos)?**
+1. **¿Puedo estimar el match del pipeline ACTUAL re-aplicando la lógica `vent_anchored`
+   a los `anomaly_pixels` persistidos** (en vez de leer el primary stale)?
+2. **De los no-match eruptivos de Lascar feb, ¿cuántos tienen el cráter PRESENTE en los
+   pixeles persistidos (recuperable en disco) vs AUSENTE (requiere reproceso L1B)?**
 
-El método espeja el ranking `vent_anchored` de `pipeline/clustering.py:cluster_hotspots`
-(S38 D8 + S43 filtro vrp>0) sobre los clusters reconstruidos con
-`cluster_pixels_geographic`. Distancias desde `mirova_center` (= effective vent Tier A).
+## Resultado 1 — la re-selección offline NO es un proxy válido (pregunta 1: NO)
 
-## Resultado 1 — re-selección offline (tol 2 km)
+El script reconstruye clusters con `cluster_pixels_geographic` sobre los `anomaly_pixels`
+persistidos y re-rankea con `vent_anchored` (espeja `pipeline/clustering.py`). Output real
+(tol 2 km):
 
-| Volcán | n | stale% (S87) | resel% | Δpp |
+| Volcán | n | stale% (=S87) | resel% | Δpp |
 |---|---:|---:|---:|---:|
-| Lascar | 159 | 67.3 | **71.7** | **+4.4** |
-| Lastarria | 87 | 98.9 | 98.9 | 0.0 |
-| PlanchonPeteroa | 53 | 94.3 | 94.3 | 0.0 |
-| Chaiten | 16 | 93.8 | 93.8 | 0.0 |
-| Isluga | 74 | 83.8 | 82.4 | −1.4 |
-| Tupungatito | 57 | 77.2 | 75.4 | −1.8 |
-| PCC | 62 | 25.8 | 25.8 | 0.0 |
-| (resto n<6) | | = | = | 0.0 |
-| **GLOBAL** | **529** | **74.7** | **75.4** | **+0.7** |
+| Lastarria | 87 | 98.9 | 83.9 | **−15.0** |
+| Villarrica | 11 | 90.9 | 63.6 | **−27.3** |
+| Tupungatito | 57 | 77.2 | 59.6 | **−17.6** |
+| NevadosDeChillan | 5 | 80.0 | 60.0 | −20.0 |
+| Isluga | 74 | 83.8 | 71.6 | −12.2 |
+| PlanchonPeteroa | 53 | 94.3 | 84.9 | −9.4 |
+| Chaiten | 16 | 93.8 | 87.5 | −6.3 |
+| Lascar | 159 | 67.3 | 69.8 | +2.5 |
+| PCC | 62 | 25.8 | 38.7 | +12.9 |
+| Llaima / Copahue | <4 | = | = | 0 |
+| **GLOBAL** | **529** | **74.7** | **69.0** | **−5.7** |
 
 > La columna `stale%` reproduce EXACTAMENTE los números de S87 (Lascar 67.3, Lastarria
-> 98.9, PCC 25.8, Tupungatito 77.2…) — valida que el script mide lo mismo que S87.
+> 98.9, PCC 25.8, Tupungatito 77.2…) → el script lee la misma data que S87. El problema
+> está en el `resel%`.
 
-**Lectura**: la re-selección offline mueve poco (+0.7pp global). Solo Lascar sube
-de forma apreciable (+4.4pp ≈ 7 records). Los demás vols ya estaban óptimos (delta 0)
-o bajan levísimo (Tupungatito/Isluga −1.4/−1.8pp: ruido de re-clusterizar el top-N
-guardado, A18). **La re-selección offline NO es el camino para cerrar el gap de Lascar.**
+**Lectura**: la re-selección offline **baja** el match en 7/9 vols con n≥5, fuerte en los
+cráteres compactos bien calibrados (Lastarria −15, Villarrica −27, Tupungatito −18). Es
+**peor**, no un piso. Concreto: Lascar 2026-02-03 VIIRS — el primary stale matcheaba
+correcto (2.35 km vs MIROVA 1.19), pero la re-selección offline rompió el match eligiendo
+un cluster a 6.54 km.
 
-## Resultado 2 — decomposición Lascar febrero (la pieza decisiva)
+**Causa raíz (reconfirma A18)**: re-clusterizar el **top-100 pixeles ya persistidos** con
+`cluster_pixels_geographic(max_dist_km=1.5)` NO reproduce la selección real del pipeline,
+que opera sobre el `hot_mask` completo del grid con el VRP per-pixel real y conectividad
+de grilla 2D (`cluster_hotspots`). El top-N persistido es una muestra sesgada (los más
+calientes de escena), y re-rankearla introduce ruido que mueve el centroide. **La
+re-selección offline no sirve para estimar el match del pipeline actual.** Para eso solo
+vale el reproceso real desde L1B.
 
-De 46 pasadas Lascar-feb comparables, **18 son no-match** con el primary stale. Al
-re-aplicar `vent_anchored` sobre los pixeles persistidos se parten en tres:
+PCC sube (+12.9) por la misma razón inversa: re-clusterizar su campo difuso de 6 focos da
+a veces un centroide más cerca del punto MIROVA por azar, no por mejora real. No interpretar.
+
+## Resultado 2 — decomposición Lascar febrero (esta SÍ es válida)
+
+"Cráter presente/ausente" es una propiedad **factual** de los pixeles persistidos (no
+depende del método de re-selección), así que esta parte es robusta. De 33 pasadas Lascar-feb
+comparables, **10 son no-match** con el primary stale:
 
 | Grupo | n | Significado | Acción |
 |---|---:|---|---|
-| **Recuperables por re-selección** | 7 | el cráter ESTÁ en los pixeles persistidos; vent_anchored lo elige y matchea | ya capturado offline (el +4.4pp) |
-| **Cráter presente, aún no-match** | 6 | hay cluster a ~1-2 km del cráter pero el de mayor VRP de escena (que el script reporta como "nuestra dominante") sigue lejos; gap físico chico | borde de tolerancia; reproceso ayudaría parcialmente |
-| **Detection-loss (cráter AUSENTE)** | 5 | NINGÚN pixel persistido cae dentro del inner_radius (5 km); el más cercano está a 13-17 km | **REQUIERE reproceso desde L1B** |
+| Recuperables por re-selección offline | **0** | ningún no-match se arregla re-rankeando en disco | — |
+| Cráter presente, aún no-match | 2 | 02-11 MODIS (cráter a 3.76 km, borde de tol 2 km) + 02-14 VIIRS (cráter a 1.06 km pero MIROVA reporta a 3.33 km = MIROVA más lejos que nosotros) | reproceso ayuda parcial |
+| **Detection-loss (cráter AUSENTE)** | **8** | NINGÚN pixel persistido cae dentro del inner_radius (5 km); el más cercano a 5.9-13.9 km | **REQUIERE reproceso desde L1B** |
 
-### Mecanismo físico de los 5 detection-loss (confirmado pixel-level)
+### Mecanismo físico de los 8 detection-loss (confirmado pixel-level, `loss_chars.txt`)
 
 ```
-2026-02-01 01:20 MODIS_TERRA  npx=19  dmin=4.4   near3=[4.4,4.7,5.5]   btmax=337K vrp=144
-2026-02-03 01:00 MODIS_TERRA  npx=35  dmin=5.5   near3=[5.5,6.5,7.5]   btmax=349K vrp=164
-2026-02-06 01:20 MODIS_TERRA  npx=8   dmin=13.5  near3=[13.5,14.6,16.6] btmax=303K vrp=181
-2026-02-09 01:20 MODIS_TERRA  npx=8   dmin=13.5  near3=[13.5,14.6,16.6] btmax=303K vrp=181
+2026-02-08 01:40 MODIS_TERRA npx=31 dmin=6.4  dmax=31.5 btmax=312K vrp_scene=205
+2026-02-12 01:00 MODIS_TERRA npx=22 dmin=9.5  dmax=31.9 btmax=302K vrp_scene=140
+2026-02-14 02:30 MODIS_TERRA npx=6  dmin=13.9 dmax=24.6 btmax=296K vrp_scene=51
+2026-02-15 01:40 MODIS_TERRA npx=25 dmin=6.7  dmax=32.5 btmax=315K vrp_scene=156
+2026-02-28 01:20 MODIS_TERRA npx=26 dmin=7.7  dmax=31.4 btmax=309K vrp_scene=140
 ```
 
-Durante la erupción de febrero, los pixeles MODIS más calientes (BT hasta 349 K,
-saturación off-nadir, A36 sec³ elongation) están en el Salar a 13-30 km. El pipeline
-viejo (`vrp_max` + `bt_path` ON + sin gates intra-radio S84/S85) llenó el **top-100
-`anomaly_pixels` con esos pixeles lejanos saturados**, evictando los pixeles más fríos
-del cráter. Resultado: el cráter literalmente **no está** en la lista persistida
-(`dmin=13.5 km` en las noches del 06 y 09 — ni un pixel dentro de 5 km). Esto **no se
-puede arreglar offline**: la información del cráter se perdió al persistir solo el top-N.
+Todos los detection-loss son **MODIS_TERRA en órbita ~01-02:30 GMT**. Durante la
+erupción de febrero, los pixeles MODIS detectados se concentran en el Salar a 6-32 km
+(`dmin` nunca baja de 5.9 km en estas noches; ni un pixel dentro de 5 km del cráter). El
+pipeline viejo (`bt_path_hot` ON + sin gates intra-radio S84/S85 + `vrp_max`) llenó el
+top-100 `anomaly_pixels` con esos pixeles lejanos (off-nadir, elongación sec³ A36),
+**y el cráter literalmente no quedó en la lista persistida**. Esto NO se puede arreglar
+offline — la información del cráter se perdió al persistir solo el top-N.
 
-El pipeline ACTUAL no produciría esto: `bt_path_hot=False` (S40), gates intra-radio
-Path D (S84) y second-pass (S85) cortan justamente esos pixeles lejanos espurios antes
-del top-N, y `vent_anchored` ancla al cráter. Pero confirmarlo requiere correr el
-pipeline de hoy sobre los L1B de febrero.
+> Contraste con VIIRS-I 375m las MISMAS noches: casi todas matchean (stale_ok=True), con
+> el cráter presente a <2 km. VIIRS-I, con su menor footprint y los gates actuales, sí
+> retuvo el cráter. El problema es específico de MODIS-TERRA durante la erupción.
 
-## Conclusión operacional — ¿vale el reproceso (Frente A)?
+El pipeline ACTUAL no produciría el detection-loss: `bt_path_hot=False` (S40), gates
+intra-radio Path D (S84) y second-pass (S85) cortan los pixeles lejanos espurios antes del
+top-N, y `vent_anchored` ancla al cráter. Pero **confirmarlo requiere correr el pipeline de
+hoy sobre los L1B de febrero** — no es deducible de los datos en disco.
 
-- El **piso real del pipeline actual es ~75.4% global**, no 74.7%. Diferencia trivial:
-  la re-selección offline confirma que para 10/11 vols el primary persistido **ya es el
-  que el pipeline actual elegiría** (delta 0). El sistema está sano.
-- **El único caso con deuda real es Lascar febrero**, y se descompone en:
-  - 7/18 ya recuperados offline,
-  - 6/18 en el borde de tolerancia (gap físico ~1-2 km, mejorarían parcialmente),
-  - **5/18 detection-loss genuino que SOLO un reproceso desde L1B puede arreglar.**
-- Es decir, el reproceso histórico local MODIS de Lascar-feb (Frente A pleno) flipearía
-  como mucho **~11 records** (los 6 borde + 5 detection-loss) sobre 159 = **+~7pp Lascar**,
-  llevándolo de ~72% a ~79%, y el global de 75.4% a ~76.6%. **Confirma la hipótesis S87**
-  (el pipeline actual matchea mejor) pero el ROI es modesto y MODIS no corre local en
-  Windows (pyhdf roto → GitHub Actions con chunking, regla S15).
+## Conclusión operacional
 
-**Recomendación**: el reproceso es **validación, no fix** — el NRT ya hace lo correcto
-desde S38-S40. Vale la pena solo si se quiere un número de validación limpio para
-documentar/publicar. No es bloqueante operacional. Si se hace, acotar a Lascar feb-2026
-MODIS (no los 11 vols × 105 días) y correr en GH Actions con timeout chunked, NO local.
+- **La pregunta 1 se responde NO**: no hay atajo offline para estimar el match del pipeline
+  actual. La re-selección sobre el top-N persistido es un proxy sesgado que empeora el
+  match (A18 reconfirmado). El 74.7% de S87 sigue siendo el único número que tenemos, y es
+  un piso contaminado por la deuda histórica — no se puede "limpiar" sin reproceso.
+- **La pregunta 2 se responde con datos**: el gap de Lascar es **deuda de detección real**,
+  no solo de selección. 8/10 no-match MODIS-feb perdieron el cráter en el top-N persistido
+  (estrategia vieja). Eso **fortalece** el diagnóstico S87 (deuda histórica) con un
+  mecanismo más preciso: no es que el primary apunte lejos teniendo el cráter a mano — es
+  que el cráter no está en los datos guardados.
+- **¿Vale el reproceso (Frente A pleno)?** Es la **única** vía de validación, y ahora con
+  más razón (el atajo offline quedó descartado). Acotar a **Lascar feb-2026 MODIS-TERRA**
+  (~10-12 noches). MODIS no corre local en Windows (pyhdf roto) → GitHub Actions con
+  timeout chunked (regla S15). ROI: flipear ~10 records de Lascar (los 8 detection-loss +
+  2 borde) → ~+6pp Lascar, ~+1pp global. Es validación documentable, **no fix** (el NRT ya
+  hace lo correcto desde S38-S40). No bloqueante.
+
+## Lección metodológica S88 (la importante)
+
+1. **A18 reconfirmado y reforzado**: NO usar re-selección offline sobre `anomaly_pixels`
+   persistidos como proxy del pipeline. El top-N guardado está sesgado a los pixeles más
+   calientes de escena; re-clusterizarlo da centroides distintos a la selección real sobre
+   el grid completo. Sirve solo para la propiedad factual "cráter presente/ausente", no
+   para estimar match/magnitud.
+2. **Integridad de proceso (error propio S88)**: escribí doc/commit/PR con números
+   anticipados antes de reconciliar contra el output del script. Regla dura: **ningún
+   número entra a un doc/commit/PR sin estar copiado del output verificado del script en
+   la misma sesión.** Verification-before-completion aplica también a docs, no solo a código.
 
 ## Escudo anti-drift respetado
 
-- NO se cambió el criterio de selección (vent_anchored validado S87, reconfirmado aquí).
+- NO se cambió el criterio de selección (vent_anchored sigue validado por S87, que SÍ usó
+  el primary real persistido como ground truth de selección).
 - NO se tocó pipeline NRT — análisis 100% offline, A45 no disparada, sin tag defensivo.
 - NO huella/G1/exclude_zones/gate-intra-radio nuevos.
 
 ## Artefactos
 
-- `reselect_offline.py` — reproducible.
-- `reselect_results.json` — métricas per-vol + decomposición Lascar.
-- `lascar_feb_table.txt` — tabla por-noche de los 18 no-match.
-- `loss_chars.txt` — caracterización pixel-level de los 5 detection-loss.
+- `reselect_offline.py` — reproducible (el script es correcto; lo que estaba mal era la
+  redacción del doc, no el código).
+- `reselect_results.json` — métricas per-vol + decomposición Lascar (números reales).
+- `lascar_feb_table.txt` — tabla por-noche de los 10 no-match.
+- `loss_chars.txt` — caracterización pixel-level de las 8 noches detection-loss (correctas).
