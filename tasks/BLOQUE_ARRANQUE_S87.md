@@ -62,9 +62,38 @@ PRs #224 (S83 path D intra-radio) + #229 (S85 second_pass intra-radio) son **red
 
 [Ver descripción del PR — generado al cierre con tag commit S86]
 
-## §2 — Plan S87
+## §1.5 — HALLAZGO CENTRAL S86 tardío (el foco real de S87)
 
-### Bloque 2 — Fix loader CSV + rehacer cruce TP/FP (PRIORITARIO)
+Nicolás refinó el objetivo a fin de S86: **lo que importa es si la anomalía que MIROVA reporta como la mayor en cada pasada satelital es también la que nosotros detectamos como la mayor. Si no coincide, descubrir cómo arreglarlo.**
+
+### Corrección conceptual (vinculante)
+
+**NO usar "huella canónica" como gate ni como área fija.** MIROVA no fija un área canónica — estudia toda la escena, reporta la mayor anomalía, y entrega la distancia para clasificación visual (summit/far). Imponer una huella violaría objetivo (1) clon + anti-patrón A55. La huella (experimento J) queda SOLO como **instrumento de auditoría** — mide divergencia con MIROVA, no filtra.
+
+El criterio correcto sigue siendo: **la mayor anomalía de la escena + su distancia** (esquema dual S14 + frontend mirovaEqVrp).
+
+### Validación preliminar L (3 vols control, solo OCR)
+
+Ver `experiments/_s86_exp_huella/L_dominant_anomaly_match_PRELIM.md`.
+
+| Volcán | Match nuestra-mayor = MIROVA-mayor | Diagnóstico |
+|---|---|---|
+| Tupungatito | 92% (24/26) | Sano |
+| Chaitén | 62% (5/8) | Divergencia moderada |
+| **PCC** | **0% (0/34)** | 🔴 Reportamos punto totalmente distinto |
+
+**PCC es el bug**: MIROVA reporta el lacolito Cordón Caulle a ~12-14 km del vent Puyehue (la mayor anomalía real, fisura erupción 2011). Nosotros reportamos a ~0.4-1 km (pegados al vent Puyehue). Causa raíz: fix D8 `vent_anchored` ancla al vent nominal (Puyehue) + el vent está en el centro equivocado. El lacolito está dentro del `inner_radius=20km` pero vent_anchored prioriza proximidad sobre magnitud → nunca lo elige. MIROVA hace lo opuesto (reporta la mayor).
+
+### Bloque CENTRAL S87 — Validación 1:1 anomalía dominante
+
+1. Tras Bloque 2 (fix loader → distancia MIROVA limpia CONS+OCR), correr validación completa los 11 Tier A: % pasadas donde nuestra-mayor = MIROVA-mayor.
+2. **Reproceso con flag diagnóstico** que persista TODOS los clusters por escena (hoy el JSON solo guarda el primary ya elegido — no sabemos si detectamos la mayor pero la descartamos).
+3. **A/B criterio de selección**: `vent_anchored` (actual) vs `vrp_max_inner` (la mayor dentro del inner) vs mover ancla PCC al Cordón Caulle. Métrica: % match anomalía dominante. Controles: Tupungatito (92%, no romper), Lascar (compacto), PCC (0%, arreglar).
+4. **Cuidado** (experimento K): `vrp_max` puede empeorar sobre-reporte de MAGNITUD per-vol. Ubicación (qué punto) y magnitud (cuántos MW) son problemas separados — el A/B mide ambos.
+
+## §2 — Plan S87 (detalle)
+
+### Bloque 2 — Fix loader CSV + rehacer cruce TP/FP (PRIORITARIO, habilita el bloque central)
 
 **ETA**: 1-2h, 1 PR ~30 líneas. **Toca**: scripts de audit + posible nuevo módulo `pipeline/mirova_csv_loader.py`. **NO toca pipeline NRT** (cero riesgo A45, ningún tag defensivo requerido).
 

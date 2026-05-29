@@ -1,0 +1,1221 @@
+{
+  "window": {
+    "start": "2026-01-28",
+    "end": "2026-05-25"
+  },
+  "method_note": "Huella = nube de centroides primary_cluster de NUESTROS records TP (publishable & MIROVA alerto esa noche-sensor). r95 = radio que contiene 95% de los centroides TP respecto al centroide medio de la huella.",
+  "limitations": [
+    "JSON solo guarda primary_cluster (criterio vent_anchored S38). No clusters alternativos.",
+    "MIROVA CSV sin lat/lon (solo Distancia_km radial; OCR en Nota como dist~XX km).",
+    "Loader hereda bugs F-B1/B2 (OCR distancia no consumida, alias). Huella construida con cruce exacto C.",
+    "Categorias FP a/b/c/d via heuristica geografica replicada de script_E (no verificacion humana)."
+  ],
+  "footprints": {
+    "Chaiten": {
+      "n_tp_with_coords": 64,
+      "mean_lat": -42.83227,
+      "mean_lon": -72.6584,
+      "spread_std_km": 0.316,
+      "r50_km": 0.746,
+      "r90_km": 1.191,
+      "r95_km": 1.28,
+      "max_km": 1.708,
+      "d_footprint_to_vent_km": 0.512,
+      "d_footprint_to_mirova_center_km": 0.744,
+      "inner_radius_km": 5.0,
+      "compactness": "compacta"
+    },
+    "Copahue": {
+      "n_tp_with_coords": 4,
+      "mean_lat": -37.86854,
+      "mean_lon": -71.17317,
+      "spread_std_km": 0.532,
+      "r50_km": 1.379,
+      "r90_km": 2.127,
+      "r95_km": 2.216,
+      "max_km": 2.305,
+      "d_footprint_to_vent_km": 1.64,
+      "d_footprint_to_mirova_center_km": 1.702,
+      "inner_radius_km": 4.0,
+      "compactness": "intermedia"
+    },
+    "Isluga": {
+      "n_tp_with_coords": 220,
+      "mean_lat": -19.1575,
+      "mean_lon": -68.8334,
+      "spread_std_km": 0.813,
+      "r50_km": 0.87,
+      "r90_km": 1.741,
+      "r95_km": 2.576,
+      "max_km": 4.107,
+      "d_footprint_to_vent_km": 0.907,
+      "d_footprint_to_mirova_center_km": 0.603,
+      "inner_radius_km": 5.0,
+      "compactness": "compacta"
+    },
+    "Lascar": {
+      "n_tp_with_coords": 335,
+      "mean_lat": -23.36096,
+      "mean_lon": -67.73787,
+      "spread_std_km": 0.45,
+      "r50_km": 0.745,
+      "r90_km": 1.272,
+      "r95_km": 1.424,
+      "max_km": 5.112,
+      "d_footprint_to_vent_km": 0.694,
+      "d_footprint_to_mirova_center_km": 1.262,
+      "inner_radius_km": 5.0,
+      "compactness": "compacta"
+    },
+    "Lastarria": {
+      "n_tp_with_coords": 290,
+      "mean_lat": -25.15983,
+      "mean_lon": -68.51185,
+      "spread_std_km": 0.727,
+      "r50_km": 0.962,
+      "r90_km": 2.69,
+      "r95_km": 2.902,
+      "max_km": 3.201,
+      "d_footprint_to_vent_km": 1.031,
+      "d_footprint_to_mirova_center_km": 1.023,
+      "inner_radius_km": 3.0,
+      "compactness": "intermedia"
+    },
+    "Llaima": {
+      "n_tp_with_coords": 7,
+      "mean_lat": -38.67974,
+      "mean_lon": -71.72943,
+      "spread_std_km": 0.973,
+      "r50_km": 0.722,
+      "r90_km": 2.3,
+      "r95_km": 2.698,
+      "max_km": 3.096,
+      "d_footprint_to_vent_km": 1.364,
+      "d_footprint_to_mirova_center_km": 1.384,
+      "inner_radius_km": 5.0,
+      "compactness": "intermedia"
+    },
+    "NevadosDeChillan": {
+      "n_tp_with_coords": 1,
+      "mean_lat": -36.86943,
+      "mean_lon": -71.39545,
+      "spread_std_km": 0.0,
+      "r50_km": 0.0,
+      "r90_km": 0.0,
+      "r95_km": 0.0,
+      "max_km": 0.0,
+      "d_footprint_to_vent_km": 1.79,
+      "d_footprint_to_mirova_center_km": 1.41,
+      "inner_radius_km": 5.0,
+      "compactness": "compacta"
+    },
+    "PlanchonPeteroa": {
+      "n_tp_with_coords": 181,
+      "mean_lat": -35.22259,
+      "mean_lon": -70.56877,
+      "spread_std_km": 0.55,
+      "r50_km": 1.565,
+      "r90_km": 2.274,
+      "r95_km": 2.343,
+      "max_km": 2.532,
+      "d_footprint_to_vent_km": 2.1,
+      "d_footprint_to_mirova_center_km": 0.095,
+      "inner_radius_km": 3.0,
+      "compactness": "intermedia"
+    },
+    "PuyehueCordonCaulle": {
+      "n_tp_with_coords": 287,
+      "mean_lat": -40.52493,
+      "mean_lon": -72.11244,
+      "spread_std_km": 5.104,
+      "r50_km": 5.254,
+      "r90_km": 14.484,
+      "r95_km": 16.886,
+      "max_km": 21.951,
+      "d_footprint_to_vent_km": 2.849,
+      "d_footprint_to_mirova_center_km": 7.288,
+      "inner_radius_km": 20.0,
+      "compactness": "extendida/difusa"
+    },
+    "Tupungatito": {
+      "n_tp_with_coords": 227,
+      "mean_lat": -33.38586,
+      "mean_lon": -69.83005,
+      "spread_std_km": 1.031,
+      "r50_km": 0.637,
+      "r90_km": 0.946,
+      "r95_km": 1.333,
+      "max_km": 6.515,
+      "d_footprint_to_vent_km": 0.492,
+      "d_footprint_to_mirova_center_km": 5.333,
+      "inner_radius_km": 7.0,
+      "compactness": "compacta"
+    },
+    "Villarrica": {
+      "n_tp_with_coords": 34,
+      "mean_lat": -39.41335,
+      "mean_lon": -71.94366,
+      "spread_std_km": 0.508,
+      "r50_km": 0.65,
+      "r90_km": 1.664,
+      "r95_km": 1.811,
+      "max_km": 1.938,
+      "d_footprint_to_vent_km": 0.831,
+      "d_footprint_to_mirova_center_km": 1.256,
+      "inner_radius_km": 5.0,
+      "compactness": "compacta"
+    }
+  },
+  "temporal_stability": {
+    "Chaiten": {
+      "months": [
+        {
+          "month": "2026-01",
+          "n": 4,
+          "lat": -42.83514,
+          "lon": -72.65208
+        },
+        {
+          "month": "2026-02",
+          "n": 13,
+          "lat": -42.8288,
+          "lon": -72.66568
+        },
+        {
+          "month": "2026-03",
+          "n": 8,
+          "lat": -42.82883,
+          "lon": -72.66741
+        },
+        {
+          "month": "2026-04",
+          "n": 21,
+          "lat": -42.8328,
+          "lon": -72.65536
+        },
+        {
+          "month": "2026-05",
+          "n": 18,
+          "lat": -42.83505,
+          "lon": -72.65409
+        }
+      ],
+      "n_months": 5,
+      "max_inter_month_drift_km": 1.433,
+      "mean_inter_month_drift_km": 0.819
+    },
+    "Copahue": {
+      "months": [
+        {
+          "month": "2026-04",
+          "n": 4,
+          "lat": -37.86854,
+          "lon": -71.17317
+        }
+      ],
+      "n_months": 1,
+      "max_inter_month_drift_km": null,
+      "mean_inter_month_drift_km": null
+    },
+    "Isluga": {
+      "months": [
+        {
+          "month": "2026-01",
+          "n": 4,
+          "lat": -19.14814,
+          "lon": -68.83628
+        },
+        {
+          "month": "2026-02",
+          "n": 40,
+          "lat": -19.15928,
+          "lon": -68.83352
+        },
+        {
+          "month": "2026-03",
+          "n": 70,
+          "lat": -19.16069,
+          "lon": -68.83134
+        },
+        {
+          "month": "2026-04",
+          "n": 49,
+          "lat": -19.155,
+          "lon": -68.83387
+        },
+        {
+          "month": "2026-05",
+          "n": 57,
+          "lat": -19.15513,
+          "lon": -68.83525
+        }
+      ],
+      "n_months": 5,
+      "max_inter_month_drift_km": 1.489,
+      "mean_inter_month_drift_km": 0.718
+    },
+    "Lascar": {
+      "months": [
+        {
+          "month": "2026-01",
+          "n": 3,
+          "lat": -23.36179,
+          "lon": -67.7369
+        },
+        {
+          "month": "2026-02",
+          "n": 69,
+          "lat": -23.35798,
+          "lon": -67.7365
+        },
+        {
+          "month": "2026-03",
+          "n": 105,
+          "lat": -23.36115,
+          "lon": -67.73961
+        },
+        {
+          "month": "2026-04",
+          "n": 89,
+          "lat": -23.36202,
+          "lon": -67.73823
+        },
+        {
+          "month": "2026-05",
+          "n": 69,
+          "lat": -23.36223,
+          "lon": -67.73617
+        }
+      ],
+      "n_months": 5,
+      "max_inter_month_drift_km": 0.483,
+      "mean_inter_month_drift_km": 0.312
+    },
+    "Lastarria": {
+      "months": [
+        {
+          "month": "2026-01",
+          "n": 3,
+          "lat": -25.15584,
+          "lon": -68.51636
+        },
+        {
+          "month": "2026-02",
+          "n": 59,
+          "lat": -25.15819,
+          "lon": -68.51484
+        },
+        {
+          "month": "2026-03",
+          "n": 77,
+          "lat": -25.161,
+          "lon": -68.51014
+        },
+        {
+          "month": "2026-04",
+          "n": 84,
+          "lat": -25.15982,
+          "lon": -68.51161
+        },
+        {
+          "month": "2026-05",
+          "n": 67,
+          "lat": -25.16013,
+          "lon": -68.51129
+        }
+      ],
+      "n_months": 5,
+      "max_inter_month_drift_km": 0.848,
+      "mean_inter_month_drift_km": 0.425
+    },
+    "Llaima": {
+      "months": [
+        {
+          "month": "2026-04",
+          "n": 3,
+          "lat": -38.67186,
+          "lon": -71.72973
+        },
+        {
+          "month": "2026-05",
+          "n": 4,
+          "lat": -38.68565,
+          "lon": -71.72921
+        }
+      ],
+      "n_months": 2,
+      "max_inter_month_drift_km": 1.535,
+      "mean_inter_month_drift_km": 1.535
+    },
+    "NevadosDeChillan": {
+      "months": [
+        {
+          "month": "2026-04",
+          "n": 1,
+          "lat": -36.86943,
+          "lon": -71.39545
+        }
+      ],
+      "n_months": 1,
+      "max_inter_month_drift_km": null,
+      "mean_inter_month_drift_km": null
+    },
+    "PlanchonPeteroa": {
+      "months": [
+        {
+          "month": "2026-02",
+          "n": 23,
+          "lat": -35.2174,
+          "lon": -70.57106
+        },
+        {
+          "month": "2026-03",
+          "n": 45,
+          "lat": -35.22072,
+          "lon": -70.56441
+        },
+        {
+          "month": "2026-04",
+          "n": 54,
+          "lat": -35.22467,
+          "lon": -70.57134
+        },
+        {
+          "month": "2026-05",
+          "n": 59,
+          "lat": -35.22413,
+          "lon": -70.56884
+        }
+      ],
+      "n_months": 4,
+      "max_inter_month_drift_km": 0.809,
+      "mean_inter_month_drift_km": 0.642
+    },
+    "PuyehueCordonCaulle": {
+      "months": [
+        {
+          "month": "2026-01",
+          "n": 13,
+          "lat": -40.51224,
+          "lon": -72.11487
+        },
+        {
+          "month": "2026-02",
+          "n": 79,
+          "lat": -40.48068,
+          "lon": -72.07359
+        },
+        {
+          "month": "2026-03",
+          "n": 55,
+          "lat": -40.50303,
+          "lon": -72.09165
+        },
+        {
+          "month": "2026-04",
+          "n": 65,
+          "lat": -40.5643,
+          "lon": -72.12962
+        },
+        {
+          "month": "2026-05",
+          "n": 75,
+          "lat": -40.55568,
+          "lon": -72.15331
+        }
+      ],
+      "n_months": 5,
+      "max_inter_month_drift_km": 10.721,
+      "mean_inter_month_drift_km": 6.056
+    },
+    "Tupungatito": {
+      "months": [
+        {
+          "month": "2026-02",
+          "n": 18,
+          "lat": -33.40535,
+          "lon": -69.81379
+        },
+        {
+          "month": "2026-03",
+          "n": 82,
+          "lat": -33.38617,
+          "lon": -69.82993
+        },
+        {
+          "month": "2026-04",
+          "n": 81,
+          "lat": -33.38385,
+          "lon": -69.83175
+        },
+        {
+          "month": "2026-05",
+          "n": 46,
+          "lat": -33.38124,
+          "lon": -69.83364
+        }
+      ],
+      "n_months": 4,
+      "max_inter_month_drift_km": 3.254,
+      "mean_inter_month_drift_km": 1.678
+    },
+    "Villarrica": {
+      "months": [
+        {
+          "month": "2026-02",
+          "n": 7,
+          "lat": -39.41012,
+          "lon": -71.94419
+        },
+        {
+          "month": "2026-03",
+          "n": 6,
+          "lat": -39.41478,
+          "lon": -71.9498
+        },
+        {
+          "month": "2026-04",
+          "n": 3,
+          "lat": -39.41506,
+          "lon": -71.94506
+        },
+        {
+          "month": "2026-05",
+          "n": 18,
+          "lat": -39.41385,
+          "lon": -71.94117
+        }
+      ],
+      "n_months": 4,
+      "max_inter_month_drift_km": 0.748,
+      "mean_inter_month_drift_km": 0.545
+    }
+  },
+  "separation_by_category": {
+    "Chaiten": {
+      "tp_within_r95_pct": 93.8,
+      "tp_n": 64,
+      "fp_b_within_r95_pct": 68.2,
+      "fp_b_n": 415,
+      "fp_d_within_r95_pct": 16.5,
+      "fp_d_n": 91
+    },
+    "Copahue": {
+      "tp_within_r95_pct": 75.0,
+      "tp_n": 4,
+      "fp_b_within_r95_pct": 74.3,
+      "fp_b_n": 373,
+      "fp_d_within_r95_pct": 48.4,
+      "fp_d_n": 31
+    },
+    "Isluga": {
+      "tp_within_r95_pct": 95.0,
+      "tp_n": 220,
+      "fp_b_within_r95_pct": 95.4,
+      "fp_b_n": 175,
+      "fp_d_within_r95_pct": 22.4,
+      "fp_d_n": 49
+    },
+    "Lascar": {
+      "tp_within_r95_pct": 94.9,
+      "tp_n": 335,
+      "fp_b_within_r95_pct": 91.9,
+      "fp_b_n": 234,
+      "fp_d_within_r95_pct": 25.0,
+      "fp_d_n": 8
+    },
+    "Lastarria": {
+      "tp_within_r95_pct": 94.8,
+      "tp_n": 290,
+      "fp_b_within_r95_pct": 97.1,
+      "fp_b_n": 173,
+      "fp_d_within_r95_pct": 90.9,
+      "fp_d_n": 22
+    },
+    "Llaima": {
+      "tp_within_r95_pct": 85.7,
+      "tp_n": 7,
+      "fp_b_within_r95_pct": 92.6,
+      "fp_b_n": 296,
+      "fp_d_within_r95_pct": 31.4,
+      "fp_d_n": 70
+    },
+    "NevadosDeChillan": {
+      "tp_within_r95_pct": 100.0,
+      "tp_n": 1,
+      "fp_b_within_r95_pct": 22.5,
+      "fp_b_n": 142,
+      "fp_d_within_r95_pct": 5.4,
+      "fp_d_n": 37
+    },
+    "PlanchonPeteroa": {
+      "tp_within_r95_pct": 95.0,
+      "tp_n": 181,
+      "fp_b_within_r95_pct": 99.1,
+      "fp_b_n": 220,
+      "fp_d_within_r95_pct": 100.0,
+      "fp_d_n": 29
+    },
+    "PuyehueCordonCaulle": {
+      "tp_within_r95_pct": 94.8,
+      "tp_n": 287,
+      "fp_b_within_r95_pct": 96.8,
+      "fp_b_n": 533,
+      "fp_d_within_r95_pct": 78.1,
+      "fp_d_n": 160
+    },
+    "Tupungatito": {
+      "tp_within_r95_pct": 94.7,
+      "tp_n": 227,
+      "fp_b_within_r95_pct": 88.6,
+      "fp_b_n": 88,
+      "fp_d_within_r95_pct": 6.4,
+      "fp_d_n": 109
+    },
+    "Villarrica": {
+      "tp_within_r95_pct": 94.1,
+      "tp_n": 34,
+      "fp_b_within_r95_pct": 78.1,
+      "fp_b_n": 389,
+      "fp_d_within_r95_pct": 37.2,
+      "fp_d_n": 43
+    }
+  },
+  "pooled_within_footprint": {
+    "tp": [
+      94.7,
+      1650
+    ],
+    "fp_b": [
+      83.3,
+      3038
+    ],
+    "fp_d": [
+      40.7,
+      649
+    ]
+  },
+  "inner_radius_vs_footprint_r95": {
+    "Chaiten": {
+      "inner_radius_km": 5.0,
+      "footprint_r95_km": 1.28,
+      "footprint_finer_by_km": 3.72
+    },
+    "Copahue": {
+      "inner_radius_km": 4.0,
+      "footprint_r95_km": 2.216,
+      "footprint_finer_by_km": 1.784
+    },
+    "Isluga": {
+      "inner_radius_km": 5.0,
+      "footprint_r95_km": 2.576,
+      "footprint_finer_by_km": 2.424
+    },
+    "Lascar": {
+      "inner_radius_km": 5.0,
+      "footprint_r95_km": 1.424,
+      "footprint_finer_by_km": 3.576
+    },
+    "Lastarria": {
+      "inner_radius_km": 3.0,
+      "footprint_r95_km": 2.902,
+      "footprint_finer_by_km": 0.098
+    },
+    "Llaima": {
+      "inner_radius_km": 5.0,
+      "footprint_r95_km": 2.698,
+      "footprint_finer_by_km": 2.302
+    },
+    "NevadosDeChillan": {
+      "inner_radius_km": 5.0,
+      "footprint_r95_km": 0.0,
+      "footprint_finer_by_km": 5.0
+    },
+    "PlanchonPeteroa": {
+      "inner_radius_km": 3.0,
+      "footprint_r95_km": 2.343,
+      "footprint_finer_by_km": 0.657
+    },
+    "PuyehueCordonCaulle": {
+      "inner_radius_km": 20.0,
+      "footprint_r95_km": 16.886,
+      "footprint_finer_by_km": 3.114
+    },
+    "Tupungatito": {
+      "inner_radius_km": 7.0,
+      "footprint_r95_km": 1.333,
+      "footprint_finer_by_km": 5.667
+    },
+    "Villarrica": {
+      "inner_radius_km": 5.0,
+      "footprint_r95_km": 1.811,
+      "footprint_finer_by_km": 3.189
+    }
+  },
+  "special_cases": {
+    "PuyehueCordonCaulle": {
+      "footprint": {
+        "n_tp_with_coords": 287,
+        "mean_lat": -40.52493,
+        "mean_lon": -72.11244,
+        "spread_std_km": 5.104,
+        "r50_km": 5.254,
+        "r90_km": 14.484,
+        "r95_km": 16.886,
+        "max_km": 21.951,
+        "d_footprint_to_vent_km": 2.849,
+        "d_footprint_to_mirova_center_km": 7.288,
+        "inner_radius_km": 20.0,
+        "compactness": "extendida/difusa"
+      },
+      "stability": {
+        "months": [
+          {
+            "month": "2026-01",
+            "n": 13,
+            "lat": -40.51224,
+            "lon": -72.11487
+          },
+          {
+            "month": "2026-02",
+            "n": 79,
+            "lat": -40.48068,
+            "lon": -72.07359
+          },
+          {
+            "month": "2026-03",
+            "n": 55,
+            "lat": -40.50303,
+            "lon": -72.09165
+          },
+          {
+            "month": "2026-04",
+            "n": 65,
+            "lat": -40.5643,
+            "lon": -72.12962
+          },
+          {
+            "month": "2026-05",
+            "n": 75,
+            "lat": -40.55568,
+            "lon": -72.15331
+          }
+        ],
+        "n_months": 5,
+        "max_inter_month_drift_km": 10.721,
+        "mean_inter_month_drift_km": 6.056
+      },
+      "candidates_outside_footprint": [
+        {
+          "night": "2026-02-16",
+          "sensor": "MODIS",
+          "pc_vrp_mw": 48.258,
+          "dist_to_footprint_km": 19.31,
+          "pc_centroid_dist_km": 17.76,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-03-16",
+          "sensor": "MODIS",
+          "pc_vrp_mw": 38.957,
+          "dist_to_footprint_km": 21.83,
+          "pc_centroid_dist_km": 19.66,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-01-29",
+          "sensor": "MODIS",
+          "pc_vrp_mw": 29.988,
+          "dist_to_footprint_km": 17.92,
+          "pc_centroid_dist_km": 15.97,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-02-20",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 25.333,
+          "dist_to_footprint_km": 17.63,
+          "pc_centroid_dist_km": 14.83,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-04-05",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 23.139,
+          "dist_to_footprint_km": 18.38,
+          "pc_centroid_dist_km": 16.88,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-03-06",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 19.799,
+          "dist_to_footprint_km": 18.43,
+          "pc_centroid_dist_km": 17.41,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-02-20",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 19.12,
+          "dist_to_footprint_km": 17.75,
+          "pc_centroid_dist_km": 14.98,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-03-06",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 18.38,
+          "dist_to_footprint_km": 19.31,
+          "pc_centroid_dist_km": 17.97,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-03-31",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 18.096,
+          "dist_to_footprint_km": 19.89,
+          "pc_centroid_dist_km": 17.7,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-04-08",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 14.996,
+          "dist_to_footprint_km": 20.18,
+          "pc_centroid_dist_km": 17.8,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-02-14",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 14.038,
+          "dist_to_footprint_km": 20.52,
+          "pc_centroid_dist_km": 17.67,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-04-10",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 12.263,
+          "dist_to_footprint_km": 19.27,
+          "pc_centroid_dist_km": 18.22,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-03-30",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 11.69,
+          "dist_to_footprint_km": 17.72,
+          "pc_centroid_dist_km": 19.13,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-04-09",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 11.083,
+          "dist_to_footprint_km": 18.46,
+          "pc_centroid_dist_km": 15.66,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-02-17",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 10.262,
+          "dist_to_footprint_km": 19.67,
+          "pc_centroid_dist_km": 17.49,
+          "is_tp": false,
+          "fp_category": "b"
+        }
+      ]
+    },
+    "Lascar": {
+      "footprint": {
+        "n_tp_with_coords": 335,
+        "mean_lat": -23.36096,
+        "mean_lon": -67.73787,
+        "spread_std_km": 0.45,
+        "r50_km": 0.745,
+        "r90_km": 1.272,
+        "r95_km": 1.424,
+        "max_km": 5.112,
+        "d_footprint_to_vent_km": 0.694,
+        "d_footprint_to_mirova_center_km": 1.262,
+        "inner_radius_km": 5.0,
+        "compactness": "compacta"
+      },
+      "stability": {
+        "months": [
+          {
+            "month": "2026-01",
+            "n": 3,
+            "lat": -23.36179,
+            "lon": -67.7369
+          },
+          {
+            "month": "2026-02",
+            "n": 69,
+            "lat": -23.35798,
+            "lon": -67.7365
+          },
+          {
+            "month": "2026-03",
+            "n": 105,
+            "lat": -23.36115,
+            "lon": -67.73961
+          },
+          {
+            "month": "2026-04",
+            "n": 89,
+            "lat": -23.36202,
+            "lon": -67.73823
+          },
+          {
+            "month": "2026-05",
+            "n": 69,
+            "lat": -23.36223,
+            "lon": -67.73617
+          }
+        ],
+        "n_months": 5,
+        "max_inter_month_drift_km": 0.483,
+        "mean_inter_month_drift_km": 0.312
+      },
+      "candidates_outside_footprint": [
+        {
+          "night": "2026-02-02",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 8.82,
+          "dist_to_footprint_km": 1.6,
+          "pc_centroid_dist_km": 1.09,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-02-08",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 7.676,
+          "dist_to_footprint_km": 1.44,
+          "pc_centroid_dist_km": 0.76,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-02-02",
+          "sensor": "VIIRS375",
+          "pc_vrp_mw": 5.134,
+          "dist_to_footprint_km": 1.52,
+          "pc_centroid_dist_km": 0.99,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-03-10",
+          "sensor": "MODIS",
+          "pc_vrp_mw": 5.037,
+          "dist_to_footprint_km": 1.61,
+          "pc_centroid_dist_km": 1.94,
+          "is_tp": true,
+          "fp_category": null
+        },
+        {
+          "night": "2026-03-17",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 4.511,
+          "dist_to_footprint_km": 1.56,
+          "pc_centroid_dist_km": 1.41,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-03-31",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 4.045,
+          "dist_to_footprint_km": 1.53,
+          "pc_centroid_dist_km": 0.86,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-05-07",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 3.96,
+          "dist_to_footprint_km": 2.39,
+          "pc_centroid_dist_km": 1.69,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-02-02",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 2.472,
+          "dist_to_footprint_km": 2.59,
+          "pc_centroid_dist_km": 2.04,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-04-11",
+          "sensor": "VIIRS375",
+          "pc_vrp_mw": 2.285,
+          "dist_to_footprint_km": 2.38,
+          "pc_centroid_dist_km": 1.88,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-04-09",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 2.219,
+          "dist_to_footprint_km": 2.51,
+          "pc_centroid_dist_km": 2.12,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-02-12",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 2.093,
+          "dist_to_footprint_km": 1.45,
+          "pc_centroid_dist_km": 1.81,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-02-24",
+          "sensor": "VIIRS375",
+          "pc_vrp_mw": 1.778,
+          "dist_to_footprint_km": 1.79,
+          "pc_centroid_dist_km": 1.24,
+          "is_tp": true,
+          "fp_category": null
+        },
+        {
+          "night": "2026-04-15",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 1.478,
+          "dist_to_footprint_km": 1.66,
+          "pc_centroid_dist_km": 1.22,
+          "is_tp": false,
+          "fp_category": "b"
+        },
+        {
+          "night": "2026-02-24",
+          "sensor": "VIIRS375",
+          "pc_vrp_mw": 1.347,
+          "dist_to_footprint_km": 2.2,
+          "pc_centroid_dist_km": 1.58,
+          "is_tp": true,
+          "fp_category": null
+        },
+        {
+          "night": "2026-02-02",
+          "sensor": "VIIRS375",
+          "pc_vrp_mw": 1.284,
+          "dist_to_footprint_km": 2.71,
+          "pc_centroid_dist_km": 2.09,
+          "is_tp": false,
+          "fp_category": "b"
+        }
+      ]
+    },
+    "Tupungatito": {
+      "footprint": {
+        "n_tp_with_coords": 227,
+        "mean_lat": -33.38586,
+        "mean_lon": -69.83005,
+        "spread_std_km": 1.031,
+        "r50_km": 0.637,
+        "r90_km": 0.946,
+        "r95_km": 1.333,
+        "max_km": 6.515,
+        "d_footprint_to_vent_km": 0.492,
+        "d_footprint_to_mirova_center_km": 5.333,
+        "inner_radius_km": 7.0,
+        "compactness": "compacta"
+      },
+      "stability": {
+        "months": [
+          {
+            "month": "2026-02",
+            "n": 18,
+            "lat": -33.40535,
+            "lon": -69.81379
+          },
+          {
+            "month": "2026-03",
+            "n": 82,
+            "lat": -33.38617,
+            "lon": -69.82993
+          },
+          {
+            "month": "2026-04",
+            "n": 81,
+            "lat": -33.38385,
+            "lon": -69.83175
+          },
+          {
+            "month": "2026-05",
+            "n": 46,
+            "lat": -33.38124,
+            "lon": -69.83364
+          }
+        ],
+        "n_months": 4,
+        "max_inter_month_drift_km": 3.254,
+        "mean_inter_month_drift_km": 1.678
+      },
+      "candidates_outside_footprint": [
+        {
+          "night": "2026-03-09",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 19.781,
+          "dist_to_footprint_km": 6.44,
+          "pc_centroid_dist_km": 1.25,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-02-04",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 15.039,
+          "dist_to_footprint_km": 6.57,
+          "pc_centroid_dist_km": 1.26,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-02-03",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 14.169,
+          "dist_to_footprint_km": 6.46,
+          "pc_centroid_dist_km": 1.27,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-05-15",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 13.492,
+          "dist_to_footprint_km": 6.14,
+          "pc_centroid_dist_km": 1.17,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-03-17",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 13.329,
+          "dist_to_footprint_km": 6.43,
+          "pc_centroid_dist_km": 1.16,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-02-15",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 12.603,
+          "dist_to_footprint_km": 6.62,
+          "pc_centroid_dist_km": 1.38,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-04-25",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 12.414,
+          "dist_to_footprint_km": 6.66,
+          "pc_centroid_dist_km": 1.37,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-04-12",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 12.341,
+          "dist_to_footprint_km": 6.47,
+          "pc_centroid_dist_km": 1.25,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-04-14",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 12.211,
+          "dist_to_footprint_km": 6.88,
+          "pc_centroid_dist_km": 1.55,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-04-26",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 12.19,
+          "dist_to_footprint_km": 6.58,
+          "pc_centroid_dist_km": 1.33,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-03-27",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 11.93,
+          "dist_to_footprint_km": 6.51,
+          "pc_centroid_dist_km": 1.31,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-04-13",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 11.778,
+          "dist_to_footprint_km": 6.57,
+          "pc_centroid_dist_km": 1.36,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-04-24",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 11.198,
+          "dist_to_footprint_km": 6.42,
+          "pc_centroid_dist_km": 1.23,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-04-24",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 11.122,
+          "dist_to_footprint_km": 6.62,
+          "pc_centroid_dist_km": 1.37,
+          "is_tp": false,
+          "fp_category": "d"
+        },
+        {
+          "night": "2026-05-14",
+          "sensor": "VIIRS750",
+          "pc_vrp_mw": 10.979,
+          "dist_to_footprint_km": 6.48,
+          "pc_centroid_dist_km": 1.33,
+          "is_tp": false,
+          "fp_category": "d"
+        }
+      ]
+    }
+  }
+}
