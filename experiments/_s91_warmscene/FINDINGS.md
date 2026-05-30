@@ -12,13 +12,40 @@ metodológico para el paper.
 Los "645 / 338 / 222 MW" del bloque S91 son `mirova_eq_vrp` (primary_cluster
 summit, lo que muestra el dashboard), NO el scene-wide `vrp_mw`.
 
-Record pico (verificado con `pipeline.audit_metrics.mirova_eq_vrp`):
+**CORRECCIÓN DE INTEGRIDAD (auditoría S91)**: una primera versión llamó "Record
+pico" al de 2026-01-31 (644.8 MW). Eso es el **top de los warm-scene con
+t_max≥273K** (lo que pide el bloque #2), NO el pico absoluto de PCC. Los números
+de abajo se reproducen con `audit_warmscene.py` (ver §6); NO transcribir a mano
+(en S91 hubo 2 transcripciones erróneas — correr el script es la fuente de verdad).
 
-| datetime_utc | mirova_eq_vrp | vrp_mw escena | t_max | t_bg | dnti_ctx px | class | sensor |
-|---|---|---|---|---|---|---|---|
-| 2026-01-31 08:15 | 644.7 MW | 1609.5 MW | 288 K | 272 K | 107 | summit | MODIS_AQUA |
+Snapshot `data/mirova_equivalent/PuyehueCordonCaulle.json` (n=1374 records;
+189 con t_max≥273K & meq>10; 14 con t_max<273K & meq>10):
 
-(los otros dos picos 338/222 MW siguen el mismo patrón — top por mirova_eq_vrp).
+**Warm-scene t_max≥273K** (categoría #2, NO los toca el filtro display #259):
+
+| datetime_utc | mirova_eq_vrp | t_max | t_bg | dnti_ctx px | sensor |
+|---|---|---|---|---|---|
+| 2026-01-31 08:15 | 644.8 MW | 288.0 K | 272.1 K | 107 | MODIS_AQUA |
+| 2026-05-05 07:30 | 337.7 MW | 275.0 K | 242.9 K | 362 | MODIS_AQUA |
+| 2026-03-09 01:50 | 221.8 MW | 285.3 K | 248.8 K | 256 | MODIS_TERRA |
+| 2026-03-01 01:35 | 146.8 MW | 287.6 K | 274.3 K | 71  | MODIS_TERRA |
+
+(El bloque S91 citaba "645/338/222": los TRES se reproducen — 644.8 / 337.7 /
+221.8. Mi primera "corrección" puso filas equivocadas; descartada.)
+
+**Picos ABSOLUTOS de PCC tienen t_max<273K** (caen en la categoría cirrus/A23
+que maneja el frente display #259, NO son #2):
+
+| datetime_utc | mirova_eq_vrp | t_max | t_bg | dnti_ctx px | sensor |
+|---|---|---|---|---|---|
+| 2026-04-16 08:30 | 1362.0 MW | 272.8 K | 255.1 K | 107 | MODIS_AQUA |
+| 2026-05-04 06:50 | 892.0 MW | 265.9 K | 252.5 K | 153 | MODIS_AQUA |
+
+**Hallazgo de la auditoría**: los warm-scene (≥273K) y los cirrus-cold (<273K)
+comparten el mismo mecanismo (path D dNTI-ctx puro: bt/nti/eti=0, campo difuso
+71-362 px, MODIS Aqua y Terra sobre el lacolito). La frontera 273K que separa
+"atenuado por #259" de "no atenuado" es de DISPLAY, no física — el fenómeno
+subyacente (campo difuso del lacolito sumado por MODIS 1km) es el mismo.
 
 ## 2. Mecanismo físico (verificado)
 
