@@ -238,6 +238,22 @@ function mirovaEqVrp(r, volcanoName) {
   return vmw;
 }
 
+// S92 — artefacto cirrus: píxel más caliente bajo 0 °C con VRP alto = nube fría
+// sin fuente térmica (path D contextual sobre cirrus), no actividad real. Mismo
+// criterio físico que index.html (validado S90: 0 detecciones MIROVA reales
+// atrapadas). El `_mirova_confirmed` es cinturón extra; acá no se puebla (esta
+// vista no cruza per-record), así que opera el criterio físico puro, que ya es
+// limpio por sí solo. Display-only: el record se conserva, solo no se grafica.
+function isCirrusArtifact(r, volcanoName) {
+  if (!r || r._mirova_confirmed) return false;
+  if (r.t_max_k == null || r.t_max_k >= 273.15) return false;
+  return mirovaEqVrp(r, volcanoName) > 10;
+}
+// VRP para DISPLAY (chart/stats): 0 si es artefacto cirrus (no infla la escala).
+function eqVrpDisplay(r, volcanoName) {
+  return isCirrusArtifact(r, volcanoName) ? 0 : mirovaEqVrp(r, volcanoName);
+}
+
 function sensorBucket(s) {
   if (!s) return "?";
   if (s.startsWith("MODIS")) return "MODIS";
@@ -266,7 +282,7 @@ function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
   const cutoff = Date.now() - WINDOW_DAYS * 86400000;
   const recs = (jsonData?.records || []).filter(r => {
     const t = new Date(r.datetime_utc).getTime();
-    return t >= cutoff && mirovaEqVrp(r, volcanoName) > 0;
+    return t >= cutoff && eqVrpDisplay(r, volcanoName) > 0;  // S92: excluir artefacto cirrus
   });
 
   const buckets = { MODIS: [], VIIRS750: [], VIIRS375: [] };
@@ -278,7 +294,7 @@ function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
     if (buckets[b].length === 0) continue;
     ds.push({
       label: SENSOR_LABEL[b], type: "bar",
-      data: aggregateDailyMax(buckets[b], r => mirovaEqVrp(r, volcanoName)),
+      data: aggregateDailyMax(buckets[b], r => eqVrpDisplay(r, volcanoName)),  // S92: cirrus→0
       backgroundColor: SENSOR_COLOR[b] + "cc",
       borderColor: SENSOR_COLOR[b], borderWidth: 1, borderRadius: 2,
     });
@@ -342,12 +358,12 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
   // S38: aplicar filtro post-S38 antes del filtro de ventana temporal.
   const baseRecs = applyS38Filter(jsonData?.records || []);
   const recs = baseRecs.filter(r => new Date(r.datetime_utc).getTime() >= cutoff);
-  const detRecs = recs.filter(r => mirovaEqVrp(r, volcanoName) > 0);
+  const detRecs = recs.filter(r => eqVrpDisplay(r, volcanoName) > 0);  // S92: excluir cirrus
   const mirovaWindowed = mirovaForVolc.filter(r => {
     const t = new Date(r.dt).getTime();
     return t >= cutoff && r.vrp > 0;
   });
-  const ourMaxVrp = detRecs.reduce((a, r) => Math.max(a, mirovaEqVrp(r, volcanoName)), 0);
+  const ourMaxVrp = detRecs.reduce((a, r) => Math.max(a, eqVrpDisplay(r, volcanoName)), 0);
   return {
     n_det_us: detRecs.length, n_det_mirova: mirovaWindowed.length, max_us: ourMaxVrp,
   };

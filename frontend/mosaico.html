@@ -246,6 +246,22 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
   return vmw > 50000 ? 0 : vmw;
 }
 
+// S92 — artefacto cirrus: píxel más caliente bajo 0 °C con VRP alto = nube fría
+// sin fuente térmica (path D contextual sobre cirrus), no actividad real. Mismo
+// criterio físico que index.html (validado S90: 0 detecciones MIROVA reales
+// atrapadas). `_mirova_confirmed` es cinturón extra; acá no se puebla → opera el
+// criterio físico puro, que ya es limpio por sí solo. Display-only.
+function isCirrusArtifact(r, innerKm = 10) {
+  if (!r || r._mirova_confirmed) return false;
+  if (r.t_max_k == null || r.t_max_k >= 273.15) return false;
+  return mirovaEqVrp(r, innerKm, false) > 10;
+}
+// VRP para DISPLAY (VRP 48h, nivel de alerta, sparkline): 0 si es artefacto cirrus
+// → no dispara una falsa alerta "Alta" por nube fría.
+function eqVrpDisplay(r, innerKm) {
+  return isCirrusArtifact(r, innerKm) ? 0 : mirovaEqVrp(r, innerKm, false);
+}
+
 // ─── Latest 48h max (sync con index.html L998) ───────────────────────────────
 function latestVRP(records, innerKm) {
   const cutoff = Date.now() - 48 * 3600000;
@@ -253,7 +269,7 @@ function latestVRP(records, innerKm) {
   for (const r of records) {
     const t = new Date(r.datetime_utc).getTime();
     if (!Number.isFinite(t) || t < cutoff) continue;
-    const v = mirovaEqVrp(r, innerKm, false);
+    const v = eqVrpDisplay(r, innerKm);  // S92: excluir artefacto cirrus
     if (v > max) { max = v; ts = r.datetime_utc; }
   }
   return { max, ts };
@@ -364,7 +380,7 @@ function buildSparklineData(records, innerKm) {
   for (const r of records) {
     const t = new Date(r.datetime_utc).getTime();
     if (!Number.isFinite(t) || t < t0 || t > now) continue;
-    const v = mirovaEqVrp(r, innerKm, false);
+    const v = eqVrpDisplay(r, innerKm);  // S92: excluir artefacto cirrus del sparkline
     if (v <= 0) continue;
     const idx = Math.floor((t - dayStart) / ms);
     if (idx < 0 || idx >= days) continue;
