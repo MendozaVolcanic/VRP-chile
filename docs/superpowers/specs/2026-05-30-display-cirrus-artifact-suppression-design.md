@@ -110,6 +110,17 @@ lo deja; subir el umbral arriesgaría detecciones reales (validación lo mostró
   opacity 0.5 + badge + VRP muted; filas normales opacity 1 + color de nivel; sin
   errores de consola. Nota: hoy 0 artefactos caen en la ventana de 7 días de la
   tabla → en producción solo se marcan cuando aparezca uno reciente.
+- **diario.html + mosaico.html (S92)**: estas vistas también graficaban nuestro VRP
+  con `mirovaEqVrp` SIN el filtro cirrus → mostraban picos de cientos de MW espurios
+  (PCC 13 artefactos en 90d). Se portó `isCirrusArtifact` + wrapper `eqVrpDisplay`
+  (criterio físico puro t_max<273 & meq>10; estas vistas no pueblan
+  `_mirova_confirmed`, que es cinturón extra — el criterio físico ya da 0 reales
+  atrapadas, validación S90). Cableado: diario `buildDatasets`+`computeStats`
+  (chart+Max VRP), mosaico `latestVRP`+`buildSparklineData` (VRP 48h+sparkline).
+  **Verificado en preview**: diario PCC max 90d 1362→337.7 MW; mosaico sparkline 30d
+  892→337.7 MW; VRP 48h real (3.6) preservado; warm-scene real (337.7, t_max≥273) NO
+  se toca; 0 errores. Display-only (los records se conservan; diario/mosaico no
+  tienen tabla, así que se ocultan del chart como en index.html).
 
 ## 6. Fuera de alcance
 
