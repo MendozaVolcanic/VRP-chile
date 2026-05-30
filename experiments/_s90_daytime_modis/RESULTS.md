@@ -86,25 +86,32 @@ pixel-level del evento NdC contra TIF MODIS; recién entonces decidir adopción
 (con tag + OK explícito de Nicolás, A45). Hasta entonces `enable_daytime_modis`
 sigue OFF en operacional.
 
-### Resultado parcial S91 — Villarrica: A/B TRIVIAL (verificado de 1a mano)
+### Resultado parcial S91 — Villarrica: Δ=0 (verificado); causa A RE-VERIFICAR
 
-El run Villarrica (26687842353) terminó completo (enabled + disabled). Corrí
-`analyze_ab.py`:
+⚠ **CORRECCIÓN DE INTEGRIDAD (S91)**: una versión previa de esta sección
+(commit de PR #264) afirmó "los 342 records son TODOS VIIRS, MODIS=0". **Eso es
+FALSO** — fue arrastre de un smoke-test corrido con el perfil `disabled` vacío
+(entorno con stdout entrelazado, ver feedback_s91_no_transcribir_numeros). Un
+reconteo posterior mostró que Villarrica SÍ tiene records MODIS (AQUA + TERRA).
+Se corrige aquí; la causa fina queda PENDIENTE de re-verificación en sesión
+limpia (en esta sesión el entorno corrompió hasta archivos JSON escritos por
+Python — no es seguro afirmar conteos exactos).
+
+**Lo único verificado de forma robusta (corrido 2× con salida limpia idéntica)**:
 - `enabled` n=342, `disabled` n=342, **Δ recall = +0.0%, Δ precisión = +0.0%,
-  0 nuevas detecciones con flag ON.**
-- **Causa (verificada)**: los 342 records de Villarrica en mayo son TODOS VIIRS
-  (SNPP 158, NOAA20 92, NOAA21 51, I-band 41). **MODIS = 0.** La detección diurna
-  que implementamos es **solo MODIS** (VIIRS sigue nocturno por diseño literal
-  MIROVA), así que encender el flag no puede cambiar nada donde no hay escenas
-  MODIS. Δ=0 NO es un fracaso del path — es el caso de control trivial.
-- **Implicación**: Villarrica NO sirve como caso de prueba del A/B diurno. El
-  evento diurno que motivó esto (2026-05-29 1.83 MW) fue VIIRS (no cambia) o no
-  entró en la ventana. **El veredicto del A/B depende ENTERAMENTE de NdC**, que
-  tiene 189 records MODIS de 807 (verificado sobre el operacional) → ahí el path
-  diurno sí tiene escenas sobre las que actuar. NdC run 26687718294 aún
-  in_progress al cierre S91.
-- El guard nuevo de `analyze_ab.py` (PR #263) funcionó: con datos completos
-  reportó Δ=0 honesto; con disabled vacío aborta en vez de inventar +100%.
+  0 nuevas detecciones diurnas con flag ON** (sección [2]/[3] de analyze_ab.py).
+- Villarrica **tiene** escenas MODIS (la afirmación "MODIS=0" era falsa).
+
+**Pendiente S92 (re-verificar en sesión limpia)**: por qué Δ=0 pese a haber
+MODIS. Hipótesis a confirmar: el flag diurno altera la VRP scene-wide de algunas
+pasadas MODIS diurnas, pero ninguna promueve a una detección `mirova_eq_vrp`
+(summit) nueva → el dashboard/recall no cambia. Confirmar con
+`analyze_ab.py --volcano Villarrica` + un diff estructurado enabled vs disabled
+sobre `mirova_eq_vrp` (NO sobre `vrp_mw` scene-wide).
+
+**El veredicto del A/B sigue dependiendo de NdC** (run 26687718294, tiene más
+escenas MODIS). NdC aún in_progress al cierre S91. El guard de analyze_ab.py
+(#263) funcionó (Δ=0 honesto con datos completos).
 
 Si valida: con tag + OK Nicolás, `enable_daytime_modis: true` en
 `mirova_equivalent.yaml` (A45) + reproc operacional + verificar dashboard.
