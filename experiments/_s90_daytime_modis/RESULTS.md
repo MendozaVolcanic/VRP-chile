@@ -113,5 +113,33 @@ sobre `mirova_eq_vrp` (NO sobre `vrp_mw` scene-wide).
 escenas MODIS). NdC aún in_progress al cierre S91. El guard de analyze_ab.py
 (#263) funcionó (Δ=0 honesto con datos completos).
 
-Si valida: con tag + OK Nicolás, `enable_daytime_modis: true` en
+### Resultado NdC S91 — Δ=0 con 0 escenas diurnas (path SIN validar)
+
+Ambos runs terminaron `success`; corrí `analyze_ab.py` sobre NdC mar-abr:
+- `enabled` n=657, `disabled` n=657. **Δ recall=0, Δ precisión=0, 0 detecciones
+  nuevas.**
+- Diagnóstico (verificado de 1ª mano): NdC tiene **135 records MODIS, de los
+  cuales 0 son diurnos** según `_solar_elevation` sobre el record (134 nocturnos,
+  1 sin coord). Los dos JSON NO son byte-idénticos (md5 distinto) → el flag
+  cambió algo, pero NADA que afecte las detecciones summit (`mirova_eq_vrp`).
+
+**Interpretación honesta**: el A/B, tal como corrió, **NO probó el path diurno**
+— no hay escenas MODIS diurnas en el resultado sobre las que el path pudiera
+actuar. Igual que Villarrica (trivial por ser todo VIIRS), NdC dio Δ=0 pero por
+una pregunta ABIERTA: ¿por qué 0 diurnos si el evento motivante (2026-03-17
+~13:15 UTC, mediodía solar) es diurno?
+
+**Pendiente S92 (verificar en sesión limpia — entorno S91 degradado)**:
+1. ¿La escena MODIS diurna del 2026-03-17 se descargó/procesó en la ventana?
+   (revisar logs del run 26687718294 o `fetch.py` para esa fecha).
+2. ¿`_scene_is_day` en `process_modis.py` está clasificando bien las pasadas, o
+   el path diurno nunca se activa? (test directo sobre el granule del 03-17).
+3. El bug-VIIRS de Villarrica (§2.2 BLOQUE_ARRANQUE_S92) sigue pendiente: en NdC
+   ¿también cambian records VIIRS entre enabled/disabled? (los JSON difieren en
+   md5 pero el A/B no lo mostró porque mide summit).
+
+**`enable_daytime_modis` sigue OFF**: el path NO está validado (ni a favor ni en
+contra) — el A/B no tuvo escenas diurnas para probarlo. NO adoptar.
+
+Si (tras S92) valida: con tag + OK Nicolás, `enable_daytime_modis: true` en
 `mirova_equivalent.yaml` (A45) + reproc operacional + verificar dashboard.
