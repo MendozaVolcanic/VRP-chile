@@ -97,9 +97,19 @@ extender el criterio bajando t_max ni metiendo t_bg (gate refutado S86). El caso
 (t_bg 243 cirrus, t_max 275) es borderline cirrus pero su píxel supera 0°C → conservador
 lo deja; subir el umbral arriesgaría detecciones reales (validación lo mostró a 273).
 
-## 5c. Pendiente (no en v1)
-- **Tabla**: marcar los artefactos con etiqueta "artefacto cirrus" + atenuar (hoy se
-  conservan visibles pero sin marca). Preserva evidencia (ya); falta el rótulo visual.
+## 5c. Implementado en v2 (S92)
+- **Tabla**: los artefactos cirrus ahora se **atenúan** (`tr.row-cirrus-artifact td
+  { opacity: 0.5 }`) y llevan el badge **"artefacto cirrus"** (con tooltip
+  explicativo) en la celda de sensor; el VRP se pinta en `--muted` (no con color de
+  alerta). Se conserva el record (trazabilidad). `buildNRTTable` evalúa
+  `isCirrusArtifact(r, v.inner_radius_km ?? 10)` por record (innerKm per-volcán,
+  crítico para PCC inner=20). Display-only, NO toca pipeline ni `mirovaEqVrp`.
+- **Verificado en preview** (navegador del entorno): 26 artefactos en data (idéntico
+  al criterio S90: PCC 15, Chaitén 3, Copahue/Villarrica 2, Isluga/Lastarria/NdC/
+  Tupungatito 1). Render confirmado forzando un caso de prueba: filas artefacto
+  opacity 0.5 + badge + VRP muted; filas normales opacity 1 + color de nivel; sin
+  errores de consola. Nota: hoy 0 artefactos caen en la ventana de 7 días de la
+  tabla → en producción solo se marcan cuando aparezca uno reciente.
 
 ## 6. Fuera de alcance
 
