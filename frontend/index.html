@@ -891,6 +891,24 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
   return vmw > 50000 ? 0 : vmw;
 }
 
+// S90 — artefacto cirrus físicamente incoherente (DISPLAY-only, no toca pipeline).
+// Un cluster cuyo píxel MÁS caliente está bajo cero (t_max_k < 273.15 K) NO tiene
+// fuente térmica real; si aun así reporta VRP alto (>10 MW), ese VRP viene del
+// path D contextual (dNTI 8-vecinos) inflando sobre cirrus uniforme (drift A23/D9).
+// Se oculta del gráfico (se conserva en la tabla, marcado). Criterio VALIDADO
+// empíricamente contra MIROVA CONS+OCR: 0 detecciones reales atrapadas, oculta 26
+// (incl. PCC 1362/892 MW). Ver experiments/_s90_display_artifact/test_criterion.py
+// y docs/superpowers/specs/2026-05-30-display-cirrus-artifact-suppression-design.md.
+// NO usa t_bg (eso replicaría el gate refutado S86 que mata Láscar bajo nube fría):
+// t_max distingue "nube sin fuente" (frío) de "lava bajo nube" (caliente). Nunca
+// toca un record confirmado por MIROVA (cinturón extra; el criterio físico ya es
+// limpio por sí solo). Una feature volcánica real (categoría b) emite → t_max>0°C.
+function isCirrusArtifact(r, innerKm = 10) {
+  if (!r || r._mirova_confirmed) return false;
+  if (r.t_max_k == null || r.t_max_k >= 273.15) return false;
+  return mirovaEqVrp(r, innerKm, false) > 10;
+}
+
 // S18: clasifica una detección como "cráter" (summit). Criterios, en orden:
 //   1. distance_class === "summit" (asignado por los procesadores S14+).
 //   2. distance_class === "far" → no es summit.
@@ -945,7 +963,9 @@ function mirovaSensorBucket(sensor) {
   return null;
 }
 function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
-  const eqVrp = (r) => mirovaEqVrp(r, innerKm, includeFar);
+  // S90: los artefactos cirrus incoherentes no cuentan como detección nuestra
+  // (mejora la precisión reportada hacia el valor real; no son FP genuinos).
+  const eqVrp = (r) => isCirrusArtifact(r, innerKm) ? 0 : mirovaEqVrp(r, innerKm, includeFar);
   // Index nuestros por bucket → array de {t, r} ordenados por tiempo
   const ourByBucket = { MODIS: [], VIIRS375: [], VIIRS750: [] };
   for (const r of ourRecords) {
@@ -1132,6 +1152,7 @@ function latestDetection(records, includeFar = false, innerKm = 10) {
     if (!includeFar && !isSummitDetection(r)) continue;
     if (!isValidDetection(r)) continue;
     if (!isSensorVisible(r)) continue;
+    if (isCirrusArtifact(r, innerKm)) continue;  // S90: no titular con artefacto cirrus
     const v = mirovaEqVrp(r, innerKm, includeFar);
     if (v <= 0) continue;
     // Desempate: ante igual timestamp (dos sensores en la misma pasada), mostrar
@@ -1535,7 +1556,9 @@ function renderDetail() {
   // como summit (final_hotspot Test1 cerca pero pc real lejos).
   const innerKm = v.inner_radius_km ?? 10;
   // S36: eqVrp captura includeFarDistance para que charts/stats respeten toggle.
-  const eqVrp = (rec) => mirovaEqVrp(rec, innerKm, includeFarDistance);
+  // S90: el gráfico NO grafica artefactos cirrus incoherentes (se conservan en la
+  // tabla, marcados). Display-only; isCirrusArtifact valida t_max bajo cero + VRP alto.
+  const eqVrp = (rec) => isCirrusArtifact(rec, innerKm) ? 0 : mirovaEqVrp(rec, innerKm, includeFarDistance);
 
   if (d.updated) {
     document.getElementById("updated-label").textContent =

@@ -79,6 +79,28 @@ Patrón S18 ("ocultar far por defecto, no borrar — preservar evidencia"):
 - **No es categoría (b)**: confirmado — el criterio exige t_max bajo cero, donde no
   hay feature volcánica real (que emite sobre cero).
 
+## 5b. Resultado verificado (preview, S90)
+
+`isCirrusArtifact` flaggea **26 records** (idéntico al test): PCC 15, Chaitén 3,
+Copahue/Villarrica 2, Isluga/Lastarria/NdC/Tupungatito 1. Verificado en preview:
+- PCC 1362 MW (t_max 272.8) y 892 MW (t_max 265.9) → `artifact=true` → removidos del
+  gráfico. Chart max PCC: **1362 → 644.8 MW**.
+- Record MIROVA-confirmado de control (t_max 290) → `artifact=false` (intacto).
+- `latestDetection`, chart `eqVrp`, y `computeMetrics` `eqVrp` cablean el filtro.
+
+**CAVEAT — valores altos WARM-scene quedan (fuera de scope)**: tras el filtro persisten
+picos PCC de 645/338/222 MW con **t_max ≥ 273 K** (288/275/285) — tienen píxel caliente,
+NO son cirrus. Causa probable: off-nadir MODIS área inflada (A36) o contextual sobre
+terreno cálido, o señal real no-publicada (categoría b). Este criterio NO los toca a
+propósito (no son físicamente incoherentes). Quedan como **investigación aparte** — NO
+extender el criterio bajando t_max ni metiendo t_bg (gate refutado S86). El caso 338
+(t_bg 243 cirrus, t_max 275) es borderline cirrus pero su píxel supera 0°C → conservador
+lo deja; subir el umbral arriesgaría detecciones reales (validación lo mostró a 273).
+
+## 5c. Pendiente (no en v1)
+- **Tabla**: marcar los artefactos con etiqueta "artefacto cirrus" + atenuar (hoy se
+  conservan visibles pero sin marca). Preserva evidencia (ya); falta el rótulo visual.
+
 ## 6. Fuera de alcance
 
 - NO toca pipeline/detección (los records se siguen generando/guardando).
