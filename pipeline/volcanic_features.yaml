@@ -43,23 +43,42 @@ PuyehueCordonCaulle:
     ext_km: 4.0
     source: "docs/BEYOND_MIROVA_EXTENSIONS.md §10 (S48 MODIS tif-archive centroid)"
 
-# --- Features IDENTIFICADAS por S86 pero SIN coord verificada (TODO S89) ---
-# NO se listan con coords inventadas (regla integridad S88). Conseguir coord
-# Smithsonian GVP verificada antes de activar. Mientras tanto, sus clusters
-# caen como "far" si están fuera del inner_radius (honesto: no afirmamos que
-# es extensión sin tener la ubicación catalogada).
+Lastarria:
+  # Lazufre / Cordón del Azufre — sistema regional: inflación InSAR persistente
+  # + flujos de azufre, a ~12 km al SW del vent (inner_radius Lastarria = 3 km).
+  # Categoría (a) "feature volcánica REAL del complejo" del catálogo S85
+  # (F_S81_C_1_ZONES_CATALOG.md cluster 17, confianza "alta"). Es la ÚNICA
+  # sub-feature S86 que merece entrada propia: vive GENUINAMENTE fuera del
+  # inner_radius. Las otras 4 quedaron resueltas SIN entrada (ver bloque abajo).
+  # INTEGRIDAD (S88): la coord es el centroide EMPÍRICO del cluster de detección
+  # (archivo del repo = fuente aceptada por este header), NO una coord GVP de
+  # catálogo — mismo estándar que el lacolito PCC arriba. La coord GVP del
+  # Cordón del Azufre (-25.333,-68.517) está ~18 km del vent; la anomalía térmica
+  # real está en el extremo N del sistema (cerca de Lastarria) = lo que captura
+  # el centroide. ext_km=5 según la acción sugerida en el catálogo S85.
+  - name: "Lazufre / Cordón del Azufre (centroide empírico cluster 17 S85)"
+    lat: -25.174
+    lon: -68.627
+    ext_km: 5.0
+    source: "docs/F_S81_C_1_ZONES_CATALOG.md cluster 17 (S85, centroide de detección; confianza alta; ref Frontiers Earth Sci 2023 DOI 10.3389/feart.2023.1197363 sulfur flows Lastarria)"
+
+# --- Features S86 RESUELTAS SIN entrada (investigación S89) ---
+# Las 4 restantes que S86 nombró NO necesitan entrada en este catálogo. El
+# fenómeno de fondo: la grilla MIROVA (inner_radius circular) ya abraza la
+# mayoría de estas sub-features porque están pegadas al cráter principal.
 #
-# Lastarria:
-#   - Lazufre (complejo regional ~10 km S del vent). TODO: coord GVP.
-# NevadosDeChillan:
-#   - Cerro Blanco (sub-complejo). TODO: coord GVP.
-# Llaima:
-#   - Pichi-Llaima (cráter secundario). TODO: coord GVP.
-# Copahue:
-#   - Cráter El Agrio + alineación E-W (probablemente dentro de inner=4 →
-#     ya sería summit; verificar). TODO: coord GVP.
-# PlanchonPeteroa:
-#   - Cráter Planchón N + Azufre (complejo multi-cráter). TODO: coord GVP.
+# - Cerro Blanco (NevadosDeChillan): centroide empírico (-36.831,-71.397) a
+#   4.0 km del vent < inner_radius 5 km → YA cae "summit". No hace falta entrada.
+# - Pichi-Llaima (Llaima): centroide empírico (-38.696,-71.743) a 1.28 km del
+#   vent << inner_radius 5 km → YA cae "summit". No hace falta entrada.
+# - Cráter El Agrio (Copahue): ES el cráter principal (GVP: "recent activity
+#   focused at the Agrio crater"). El vent de Copahue en volcanoes.yaml ya es
+#   El Agrio → "summit" por inner_radius 4 km. No es sub-feature.
+# - Planchón N (PlanchonPeteroa): NO se halló coord verificada distinta del
+#   centro del complejo (Wikipedia/GVP colapsan "Planchón" al centro PP). El
+#   catálogo S85 no tiene cluster categoría (a) para Planchón N. Regla S88:
+#   no inventar coord → queda como TODO genuino hasta conseguir coord catalogada.
+# (Fuentes: F_S81_C_1_ZONES_CATALOG.md S85; GVP Copahue vn=357090 / PP vn=357040.)
 #
 # Villarrica (lava lake) y Tupungatito (cráter cumbre): son el vent mismo →
-# caen como "summit" por inner_radius, NO necesitan entrada aquí.
+# "summit" por inner_radius, NO necesitan entrada aquí.
