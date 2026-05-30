@@ -1,0 +1,14 @@
+# A/B S90 — detección diurna MODIS ON. data_subdir aislado (NO toca operacional).
+# Replica params día MIROVA (Coppola 2016a SP426.5 Tabla 1): K1=-0.6, N·σ=15,
+# C1=0.02. VIIRS sigue nocturno (gate store). Ver design doc
+# docs/superpowers/specs/2026-05-30-daytime-modis-detection-design.md.
+# Deep-merge sobre mirova_equivalent (solo override estos keys).
+extends: mirova_equivalent
+output:
+  data_subdir: _daytime_modis_enabled
+paths:
+  enable_daytime_modis: true
+thresholds:
+  nti_k1_day: -0.6
+  n_sigma_mir_day: 15.0
+  dnti_contextual_c1_day: 0.02
