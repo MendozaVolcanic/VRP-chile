@@ -161,6 +161,17 @@ def main():
     print(f"  records enabled={len(en)}  disabled={len(di)}  |  noches ALERTA MIROVA={len(alertas)}")
     print('='*64)
 
+    # Guard (lección S91): sin AMBOS perfiles poblados el A/B no es válido — un
+    # disabled vacío produce un Δ ilusorio (enabled 100% vs disabled 0%). NO
+    # interpretar como resultado hasta que el reproc del control haya terminado.
+    if not en or not di:
+        falta = "enabled" if not en else "disabled"
+        print(f"\n⚠ A/B INCOMPLETO: el perfil '{falta}' no tiene records en la "
+              f"ventana.\n  El reproc GH Actions de ese perfil aún no terminó/"
+              f"commiteó.\n  NO concluir el A/B con esta corrida (el Δ sería "
+              f"engañoso). Reintentar cuando ambos JSON existan.")
+        return
+
     # --- Métricas globales A/B ---
     m_en = recall_precision(en, alertas, vol)
     m_di = recall_precision(di, alertas, vol)
