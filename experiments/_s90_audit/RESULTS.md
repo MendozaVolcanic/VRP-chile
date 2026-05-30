@@ -59,3 +59,38 @@ tarjetas + barra de alertas + markers overview. Bug TZ corregido de paso
 (`new Date` → `parseUtcMs` en el corte de 48h). Verificado en preview (navegador
 Santiago UTC-4): PCC 5.00→0.51, Chaitén 5.00→0.91, Copahue 1.68→0.68; barra de
 estado 8 Bajo/3 Muy Bajo → 4 Bajo/7 Muy Bajo. Solo display, no toca detección/VRP.
+
+## Recall 11 Tier A vs MIROVA (CONS y CONS+OCR) — S90
+
+Medido con la `computeMetrics` real del dashboard (modo Solo cráter, full histórico).
+Referencia: `data/mirova/<vol>.json` es **solo CONS** (858 records, 0 OCR). El OCR
+(`registro_vrp_ocr.csv`, snapshot S70 ene20–mar28, 216 ALERTA) agrega **61 detecciones
+nuevas** tras excluir FALSO_POSITIVO/NULO/RUTINA y dedup ±30min contra CONS.
+
+| Volcán | recall CONS | recall CONS+OCR | ratio MW | Δdist (km) |
+|---|---|---|---|---|
+| Planchón-Peteroa | 0.90 | 0.88 | 7.6–8.4× | 0.22 |
+| Lastarria | 0.89 | 0.85 | 2.6–2.7× | 0.58 |
+| Isluga | 0.84 | 0.84 | 1.19× | 0.27 |
+| Tupungatito | 0.81 | 0.80 | 11.8–12.4× | 4.12 (offset KMZ A13) |
+| Puyehue-CC | 0.77 | 0.77 | 2.2–2.5× | 6.59 (lacolito A20) |
+| Chaitén | 0.76 | 0.73 | 2.83× | 0.35 |
+| Láscar | 0.66 | 0.65 | 1.14× | 0.53 |
+| Villarrica | 0.55 | 0.57 | 2.2–4.6× | 0.68 |
+| Copahue | 1.00 (n=1) | 1.00 | 3.18× | — |
+| Llaima | 1.00 (n=1) | 1.00 | 6.13× | — |
+| **Nevados de Chillán** | **0.00 (n=6)** | **0.00 (n=6)** | — | — |
+
+**Recall global: 75.8% (CONS, 650/858) → 75.0% (CONS+OCR, 689/919).** OCR no cambia
+el recall → el número del dashboard es robusto, el gap es genuino (no artefacto de
+falta-OCR). NdC suma 0 OCR (los 2 duplican CONS) → su recall=0 NO mejora.
+
+**NdC recall=0 diagnosticado**: los 6 refs CONS son todos faint (≤1 MW). En 3
+detectamos el cluster summit <1km en hora correcta pero `pc.vrp_mw` floorea a 0.0
+(señal sub-0.1 MW bajo nuestro piso de ruido) → no cuenta recall. Los otros 3 son
+gaps de pasada (1 MODIS diurno 13:15 excluido por sol, 1 VIIRS 19:00 sin granule, 1
+I-band sin VRP). NO es ceguera de ubicación; es conservadurismo en el piso sub-MW.
+
+**Lección**: OCR sí importa para PRECISIÓN/FP (A54: ~49% de "FPs" son MIROVA-publicado
+vía OCR no consumido) pero NO para recall en este snapshot. El lever real de recall es
+el piso sub-MW (NdC/Villarrica), no cargar más ground truth.
