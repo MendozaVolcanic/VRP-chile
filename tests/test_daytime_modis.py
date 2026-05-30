@@ -34,3 +34,17 @@ def test_threshold_set_selection():
     # día pero flag OFF → noche (no se aplican params día; operacional intacto)
     off = _select_thresholds(is_day=True, enable_day=False)
     assert off["nti_k1"] == -0.8 and off["n_sigma_summit"] == 5.0
+
+
+def test_scene_is_day_from_modis_filename():
+    """_scene_is_day clasifica día/noche por elevación solar desde el nombre del
+    granule MODIS (formato <prod>.A<YYYY><DDD>.<HHMM>...) + coords del volcán.
+    Casos reales NdC (lat -36.83, lon -71.4):
+    - 2026-03-17 13:15 UTC (doy 076) → solar ~08:30 local → DÍA.
+    - 2026-05-14 05:48 UTC (doy 134) → solar ~01:00 local → NOCHE.
+    """
+    from pipeline.process_modis import _scene_is_day
+    assert _scene_is_day("MOD021KM.A2026076.1315.061.hdf", -36.83, -71.4) is True
+    assert _scene_is_day("MOD021KM.A2026134.0548.061.hdf", -36.83, -71.4) is False
+    # nombre no parseable → asumir noche (conservador, no procesar diurno dudoso)
+    assert _scene_is_day("garbage.hdf", -36.83, -71.4) is False

@@ -269,6 +269,23 @@ def _select_thresholds(is_day: bool, enable_day: bool) -> dict:
     }
 
 
+def _scene_is_day(filename: str, lat: float, lon: float) -> bool:
+    """S90 — True si la pasada MODIS es diurna (elevación solar > 0) sobre el
+    volcán. Parsea la fecha del nombre del granule (formato MODIS) y reusa
+    `_solar_elevation` de store.py (DRY, sin ciclo: store no importa process_*).
+    Nombre no parseable → False (noche conservadora: no procesar diurno dudoso)."""
+    from datetime import datetime as _dt
+    from pipeline.store import _solar_elevation
+    iso = _parse_datetime(filename)
+    if iso == "unknown":
+        return False
+    try:
+        dt = _dt.strptime(iso, "%Y-%m-%d %H:%M")
+    except (ValueError, TypeError):
+        return False
+    return _solar_elevation(lat, lon, dt) > 0
+
+
 def calculate_vrp(hdf_path: Path, geo_path: Path,
                   volcano_lat: float, volcano_lon: float,
                   radius_km: float = 15.0,
@@ -294,6 +311,28 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
 
     Returns dict or None if granule does not cover volcano.
     """
+    # S90 — set de thresholds día/noche MODIS según elevación solar de la pasada
+    # (Coppola 2016a Tabla 1). Con ENABLE_DAYTIME_MODIS=False (operacional) SIEMPRE
+    # devuelve noche → idéntico al baseline (y el gate de store.py rechaza el
+    # diurno igual). Con el flag ON, las pasadas diurnas usan K1=-0.6/C1=0.02/15σ.
+    #
+    # Implementación por REBINDING LOCAL (scoping Python): re-asignamos los mismos
+    # nombres de las constantes globales a variables locales con el valor día/noche.
+    # Así los ~20 call-sites de detección dentro de calculate_vrp (first-pass,
+    # second-pass, dual-ROI, vent, Test1) toman el valor correcto SIN editarlos
+    # uno por uno (minimiza riesgo de regresión A49). Estas locales NO afectan a
+    # _select_thresholds ni a otras funciones (cada una tiene su propio scope).
+    _TH = _select_thresholds(
+        is_day=_scene_is_day(hdf_path.name, volcano_lat, volcano_lon),
+        enable_day=ENABLE_DAYTIME_MODIS,
+    )
+    NTI_K1_NIGHT = _TH["nti_k1"]                  # noche -0.8 / día -0.6
+    N_SIGMA_MIR_SUMMIT = _TH["n_sigma_summit"]    # noche 5 / día 15
+    N_SIGMA_MIR_SCENE = _TH["n_sigma_scene"]      # noche 10 / día 15
+    DNTI_CONTEXTUAL_C1_SUMMIT = _TH["c1_summit"]  # noche 0.003 / día 0.02
+    DNTI_CONTEXTUAL_C1_SCENE = _TH["c1_scene"]    # noche 0.010 / día 0.02
+    DNTI_CONTEXTUAL_C1 = _TH["c1_summit"]         # single-ROI: noche 0.003 / día 0.02
+
     data = read_modis_l1b(hdf_path)
 
     lat = data["lat"]
