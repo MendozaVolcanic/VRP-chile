@@ -91,6 +91,14 @@ El diff S91 enabled vs disabled de Villarrica habría mostrado ~108 records con
 **Veredicto: no hay fuga de scope. La sospecha #2.2 fue un artefacto del diff
 degradado de S91** (reordenamiento de claves / timestamp leídos como "diff").
 
+> Nota de versionado (S92, post-pivote): los números 342/657 y "0 diferencias"
+> son del A/B **mar-abr** (sin pasadas diurnas → enabled==disabled). Tras el reproc
+> de **mayo** (pivote, §5) el JSON de NdC cambió a **812/846 records** y enabled≠
+> disabled **en MODIS** (las pasadas diurnas, esperado). La afirmación #2.2 se
+> **re-confirmó** con la data de mayo: `verify_findings.py` chequea ahora que
+> **0 records VIIRS comunes difieren** (con tolerancia de redondeo) → el flag sigue
+> sin tocar VIIRS. Villarrica (no reprocesado) mantiene 342/0-difieren.
+
 ---
 
 ## Implicación para S92
@@ -140,3 +148,33 @@ concordancia del pico, no suma.
    validado pixel-level. Si FP solares dominan → NO adoptar, documentar.
 5. Si valida → `enable_daytime_modis:true` en mirova_equivalent.yaml con TAG + OK
    explícito Nicolás (A45) + reproc operacional + dashboard.
+
+## 6. VEREDICTO A/B (NdC mayo 08-21) — NO ADOPTAR (inconcluso, path inocuo)
+Fuente reproducible: `analyze_ab.py` + `close_ab.py` (este dir).
+
+**Composición**: enabled MODIS=63 vs disabled MODIS=29 (+34 pasadas diurnas
+bajadas por `--no-night-filter` → el fix #2.1 funcionó, el path por fin tuvo
+escenas diurnas). De ellas **23 son MODIS diurnas** (elev>0).
+
+**Resultado**:
+- **22 de 23 pasadas diurnas → meq=0.00** (sin detección), incluso con t_max
+  280–298 K (terreno calentado por sol). Los umbrales diurnos (K1=-0.6, 15σ) NO
+  se dispararon → **el path NO genera FP solares masivos** (el riesgo central de
+  la detección diurna NO se materializó).
+- **1 sola detección diurna**: 2026-05-20 20:45 (elev 10°=atardecer, MODIS_AQUA,
+  3.91 MW, 3.44 km=summit). NO matchea ALERTA MIROVA (CONS ni OCR).
+- **MIROVA OCR = 0 ALERTAS de NdC en toda la ventana** → NO hubo eventos diurnos
+  reales que capturar. Δrecall=0, Δprecisión=−8.3% (la única detección suma 1 FP).
+- **R2 pixel-level INVIABLE**: las pasadas de mediodía (donde hay TIF MODIS, p.ej.
+  05-09 13:25) dan meq=0 → no hay detección nuestra que comparar contra el TIF. La
+  única detección (05-20 atardecer) no tiene TIF de su pasada.
+
+**Criterio §7 NO se cumple**: recall diurno no subió (no había eventos MIROVA
+diurnos), 0 eventos validados pixel-level. → **enable_daytime_modis se mantiene
+OFF.** El A/B fue **inconcluso por ventana inadecuada** (mayo NdC sin actividad
+diurna MIROVA), NO por fallo del path. Lo único demostrado (valioso): el path es
+**inocuo** (no inunda de FP solares). Para un veredicto DEFINITIVO se necesita una
+ventana con actividad diurna MIROVA confirmada + TIF de esa pasada (el evento
+motivante 03-17 mediodía sería ideal, pero NO tiene TIF — A24 scraping empezó may).
+El 05-20 (3.91 MW, sol bajo, no publicado) es indistinguible entre FP solar y
+señal real débil no-publicada (A54) sin TIF/OCR.

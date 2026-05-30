@@ -69,23 +69,48 @@ def loadfull(p):
     return json.load(open(p, encoding="utf-8"))
 
 
-for vol, n_expected in [("Villarrica", 342), ("NevadosDeChillan", 657)]:
-    fe = loadfull(ROOT / f"data/_daytime_modis_enabled/{vol}.json")
-    fd = loadfull(ROOT / f"data/_daytime_modis_disabled/{vol}.json")
-    en = {key(r): r for r in fe["records"]}
-    di = {key(r): r for r in fd["records"]}
-    common = set(en) & set(di)
-    n_field_diffs = 0
-    for k in common:
-        re_, rd = en[k], di[k]
-        for f in set(re_) | set(rd):
-            a, b = re_.get(f), rd.get(f)
-            if json.dumps(a, sort_keys=True) != json.dumps(b, sort_keys=True):
-                n_field_diffs += 1
-    check(f"{vol}: records == {n_expected}", len(common) == n_expected, f"(={len(common)})")
-    check(f"{vol}: 0 campos de record difieren", n_field_diffs == 0, f"(={n_field_diffs})")
-    check(f"{vol}: solo 'updated' top-level difiere",
-          fe.get("updated") != fd.get("updated"))
+def _sbucket(r):
+    s = str(r.get("sensor", ""))
+    return "MODIS" if s.startswith("MODIS") else ("VIIRS" if s.startswith("VIIRS") else "OTHER")
+
+
+def _deep_ne(a, b):
+    # tolerancia de redondeo float (el reproc no es bit-determinista, A18)
+    if isinstance(a, float) or isinstance(b, float):
+        try:
+            return abs(float(a) - float(b)) > 1e-9
+        except (TypeError, ValueError):
+            return a != b
+    return json.dumps(a, sort_keys=True) != json.dumps(b, sort_keys=True)
+
+
+# Villarrica: NO reprocesado en S92 (sigue en estado mar-abr S91) → enabled==disabled.
+fe = loadfull(ROOT / "data/_daytime_modis_enabled/Villarrica.json")
+fd = loadfull(ROOT / "data/_daytime_modis_disabled/Villarrica.json")
+en = {key(r): r for r in fe["records"]}
+di = {key(r): r for r in fd["records"]}
+common = set(en) & set(di)
+nfd = sum(1 for k in common for f in (set(en[k]) | set(di[k])) if _deep_ne(en[k].get(f), di[k].get(f)))
+check("Villarrica: records == 342", len(common) == 342, f"(={len(common)})")
+check("Villarrica: 0 campos difieren (sin diurnas, flag no toca nada)", nfd == 0, f"(={nfd})")
+
+# NdC: REPROCESADO en mayo (pivote S92). El flag agrega MODIS diurno → enabled≠disabled
+# en MODIS (esperado). La afirmación #2.2 que importa: el flag NO toca VIIRS →
+# 0 records VIIRS comunes deben diferir (con tolerancia de redondeo).
+fe = loadfull(ROOT / "data/_daytime_modis_enabled/NevadosDeChillan.json")
+fd = loadfull(ROOT / "data/_daytime_modis_disabled/NevadosDeChillan.json")
+en = {key(r): r for r in fe["records"]}
+di = {key(r): r for r in fd["records"]}
+common = set(en) & set(di)
+viirs_diff = 0
+for k in common:
+    if _sbucket(en[k]) != "VIIRS":
+        continue
+    for f in set(en[k]) | set(di[k]):
+        if _deep_ne(en[k].get(f), di[k].get(f)):
+            viirs_diff += 1
+check("NdC: 0 campos VIIRS comunes difieren (flag no toca VIIRS, #2.2 re-confirmado mayo)",
+      viirs_diff == 0, f"(={viirs_diff})")
 
 print()
 print("ALL_VERIFIED" if ok else "VERIFICATION_FAILED")
