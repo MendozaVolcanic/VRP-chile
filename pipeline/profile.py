@@ -187,6 +187,19 @@ ENABLE_DUAL_ROI_BT: bool = bool(_p.get("enable_dual_roi_bt", False))
 N_SIGMA_MIR_SUMMIT: float = float(_t.get("n_sigma_mir_summit", 5.0))
 N_SIGMA_MIR_SCENE: float = float(_t.get("n_sigma_mir_scene", 10.0))
 
+# S90 — parámetros DÍA MODIS (Coppola 2016a SP426.5 Tabla 1, verbatim; confirmado
+# Coppola 2024 cap.11 Tabla 2). MIROVA procesa MODIS de día con umbrales más
+# estrictos (no corrección solar): K1=-0.6, C1=0.02 (ambos ROIs), N·σ=15 (ambos).
+# Solo se aplican cuando ENABLE_DAYTIME_MODIS=True y la escena es diurna; el
+# default deja los valores listos pero el flag OFF los mantiene inertes.
+NTI_K1_DAY: float = float(_t.get("nti_k1_day", -0.6))
+N_SIGMA_MIR_DAY: float = float(_t.get("n_sigma_mir_day", 15.0))
+DNTI_CONTEXTUAL_C1_DAY: float = float(_t.get("dnti_contextual_c1_day", 0.02))
+# S90 — detección diurna MODIS (opt-in). OFF (default) = excluir diurno
+# (comportamiento histórico "MIR solo nocturno"). ON = procesar MODIS diurno con
+# params día + dejar pasar el gate de store.py. NO toca operacional hasta validar A/B.
+ENABLE_DAYTIME_MODIS: bool = bool(_p.get("enable_daytime_modis", False))
+
 # S32 P2 Driver B — Test 1 pixel-level filter (Coppola 2016a Tabla 1 aplicado
 # a la mask Test 1 antes de sumar VRP). Cuando Test 1 integrated-ROI dispara,
 # nuestra mask test1_hot incluye TODOS los pixels que contribuyeron al

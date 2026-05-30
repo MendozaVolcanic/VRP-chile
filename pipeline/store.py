@@ -31,6 +31,7 @@ from pipeline.profile import (
     MIN_VRP_MW_VIIRS750,
     MIN_VRP_MW_MODIS,
     ENABLE_SUM_VRP_REPORTING,
+    ENABLE_DAYTIME_MODIS,
 )
 
 
@@ -57,6 +58,20 @@ def _solar_elevation(lat: float, lon: float, dt_utc: datetime) -> float:
     sin_elev = (math.sin(lat_r) * math.sin(decl)
                 + math.cos(lat_r) * math.cos(decl) * math.cos(hour_angle))
     return math.degrees(math.asin(max(-1.0, min(1.0, sin_elev))))
+
+
+def _reject_daytime(sensor: str, solar_elev_deg: float, enable_daytime_modis: bool) -> bool:
+    """S90 — ¿rechazar este record diurno? (clon literal MIROVA).
+
+    De noche (solar_elev <= 0) NUNCA se rechaza. De día se rechaza salvo que sea
+    MODIS con el flag ON: MIROVA procesa MODIS de día (Coppola 2016a Tabla 1) pero
+    VIIRS solo de noche (sin fuente MIROVA-core diurna; el n=8 diurno es Di Bella,
+    NO MIROVA — regla A9). Con el flag OFF se rechaza todo el diurno (histórico)."""
+    if solar_elev_deg <= 0:
+        return False
+    if enable_daytime_modis and str(sensor).startswith("MODIS"):
+        return False
+    return True
 
 
 def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -419,13 +434,15 @@ def append_record(volcano_name: str, record: dict,
             record["vrp_mw_sum_active"] = 0.0
             record["hotspot_dist_km_furthest"] = None
 
-    # Safety net: reject daytime records (solar contamination → false VRP)
+    # Safety net: reject daytime records (solar contamination → false VRP).
+    # S90: con ENABLE_DAYTIME_MODIS, MODIS diurno SÍ se acepta (Coppola 2016a
+    # params día); VIIRS diurno sigue rechazado. Flag OFF = rechazo histórico.
     if volcano_lat is not None and volcano_lon is not None:
         dt_str = record.get("datetime_utc", "")
         try:
             dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
             elev = _solar_elevation(volcano_lat, volcano_lon, dt)
-            if elev > 0:
+            if _reject_daytime(record.get("sensor", ""), elev, ENABLE_DAYTIME_MODIS):
                 print(f"  STORE REJECT daytime: {dt_str} {record.get('sensor')} "
                       f"(solar elev={elev:.1f}°)")
                 return
