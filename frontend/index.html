@@ -1111,23 +1111,46 @@ function isSummitDetection(r) {
   return (r.vrp_vent_mw ?? 0) > 0;
 }
 
-function latestVRP(records, includeFar = false, innerKm = 10) {
-  // Max VRP de las últimas 48h. Por defecto solo detecciones del cráter.
-  // S33: usa mirovaEqVrp con validación pc.centroid_dist_km contra innerKm.
-  // S36: pasa includeFar a mirovaEqVrp también para que respete el toggle.
-  // S38: aplicar filtro post-S38 al inicio.
-  // S74 F30 Bug 9: respetar sensorVisible — apagar MODIS oculta alertas MODIS.
+function latestDetection(records, includeFar = false, innerKm = 10) {
+  // S90: devuelve la detección summit MÁS RECIENTE de las últimas 48h (no el
+  // máximo del período) como {vrp, datetime_utc, ts}, o null si no hay ninguna.
+  // Razón (pedido Nicolás S90): la tarjeta debe mostrar la ÚLTIMA pasada con
+  // detección, no un pico viejo del período — un máximo desacopla el número del
+  // timestamp "Último" y puede dejar fijo un valor de hace 40h (incluido un
+  // eventual artefacto A23 de cirrus). Mantiene la ventana de 48h ("actividad
+  // actual"). Usa parseUtcMs, NO new Date(): un string "YYYY-MM-DD HH:MM" sin
+  // 'Z' se parsea como hora LOCAL del navegador y desfasa el corte de 48h en
+  // visores fuera de UTC (mismo bug TZ latente que el cierre S89).
+  // Conserva las mismas guardas que antes: summit (salvo includeFar),
+  // isValidDetection (H3 S77), isSensorVisible (F30 Bug 9 S74), y la validación
+  // pc.centroid_dist_km vs innerKm dentro de mirovaEqVrp (S33).
   const cutoff = Date.now() - 48 * 3600000;
-  let max = 0;
+  let best = null;
   for (const r of records) {
-    if (new Date(r.datetime_utc).getTime() < cutoff) continue;
+    const ts = parseUtcMs(r.datetime_utc);
+    if (!(ts >= cutoff)) continue;
     if (!includeFar && !isSummitDetection(r)) continue;
-    if (!isValidDetection(r)) continue;  // H3 (S77): helper global
+    if (!isValidDetection(r)) continue;
     if (!isSensorVisible(r)) continue;
     const v = mirovaEqVrp(r, innerKm, includeFar);
-    if (v > max) max = v;
+    if (v <= 0) continue;
+    // Desempate: ante igual timestamp (dos sensores en la misma pasada), mostrar
+    // la lectura más fuerte de ese momento — NO es el máximo del período, es la
+    // mejor detección del instante más reciente (evita depender del orden del array).
+    if (!best || ts > best.ts || (ts === best.ts && v > best.vrp)) {
+      best = { vrp: v, datetime_utc: r.datetime_utc, ts };
+    }
   }
-  return max;
+  return best;
+}
+
+function latestVRP(records, includeFar = false, innerKm = 10) {
+  // S90: ahora delega en latestDetection → VRP de la ÚLTIMA detección (antes era
+  // el máximo de las últimas 48h). Mantiene firma (devuelve número) para que
+  // tarjetas, barra de alertas y markers del overview queden consistentes con un
+  // solo cambio. 0 si no hay detección en la ventana.
+  const d = latestDetection(records, includeFar, innerKm);
+  return d ? d.vrp : 0;
 }
 
 function latestSensors(records, includeFar = false) {
@@ -1424,7 +1447,9 @@ function buildCards() {
   VOLCANOES.forEach(v => {
     const d = allData[v.name] || { records: [], mirovaRecords: [] };
     const innerKm = v.inner_radius_km ?? 10;
-    const vrp = latestVRP(d.records, includeFarDistance, innerKm);
+    // S90: última detección (no máximo de 48h) → valor y timestamp acoplados.
+    const det = latestDetection(d.records, includeFarDistance, innerKm);
+    const vrp = det ? det.vrp : 0;
     const level = getLevel(vrp);
     const sensors = latestSensors(d.records, includeFarDistance);
     const lastTime = lastEventTime(d.records);
@@ -1453,7 +1478,7 @@ function buildCards() {
                                    level.key === "low"  ? "var(--yellow)" :
                                    level.key === "mod"  ? "var(--orange)" : "var(--red)") : "var(--muted)";
     vrpEl.textContent = vrp > 0 ? vrp.toFixed(2) : "—";
-    const vrpSub = el("div", "vc-vrp-sub"); vrpSub.textContent = vrp > 0 ? "MW (48h max)" : "sin detección";
+    const vrpSub = el("div", "vc-vrp-sub"); vrpSub.textContent = vrp > 0 ? "MW (última detección)" : "sin detección";
 
     // Sensor pills
     const pills = el("div", "vc-sensors");
@@ -1478,9 +1503,15 @@ function buildCards() {
       dcRow.append(sSummit, sep, sFar, sLabel);
     }
 
-    // Last update
+    // Last update — S90: si hay detección, el timestamp es el de ESA detección
+    // (acoplado al número mostrado). Si no, se muestra la última pasada satelital
+    // como contexto de frescura de datos, aclarando que no hubo detección.
     const time = el("div", "vc-time");
-    time.textContent = lastTime ? "Último: " + lastTime.slice(0, 16) + " UTC" : "Sin datos";
+    if (det) {
+      time.textContent = "Última detección: " + det.datetime_utc.slice(0, 16) + " UTC";
+    } else {
+      time.textContent = lastTime ? "Última pasada: " + lastTime.slice(0, 16) + " UTC (sin detección)" : "Sin datos";
+    }
 
     card.append(hdr, vrpEl, vrpSub, pills, dcRow, time);
     grid.appendChild(card);
