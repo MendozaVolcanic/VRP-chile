@@ -9,6 +9,12 @@ name: S90 A/B detección diurna MODIS (enabled vs disabled)
 # Por qué reproceso: la detección diurna cambia qué granules se procesan; no es
 # deducible offline (los records diurnos hoy ni existen — gate store los rechaza).
 #
+# S92 FIX #2.1 (ver experiments/_s92_daytime_diag/FINDINGS.md): la 1ª corrida
+# (S91) dio Δ=0 porque el perfil enabled NO bajaba las pasadas diurnas — el
+# filtro nighttime_only de fetch.py las descartaba antes de descargar. Ahora el
+# perfil enabled corre con --no-night-filter (abre la 1ª compuerta). El disabled
+# sigue solo-noche (baseline operacional). enabled∖disabled = detecciones diurnas.
+#
 # Aislamiento (A47): cada perfil escribe data/_daytime_modis_{enabled,disabled}/
 # <vol>.json — archivos DISTINTOS, sin race de datos. max-parallel:1 serializa
 # los pushes a main (backup: rebase-retry). NO toca data/mirova_equivalent/.
@@ -71,12 +77,25 @@ jobs:
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
         timeout-minutes: 320
         run: |
+          # S92 fix #2.1: el A/B necesita DOS compuertas abiertas para ejercer el
+          # path diurno. El perfil (enable_daytime_modis) abre la 2ª (thresholds +
+          # gate store), pero la 1ª está en fetch.py (nighttime_only=True descarta
+          # las pasadas diurnas ANTES de descargar). Sin --no-night-filter el
+          # enabled solo baja noche y el path diurno nunca tiene escena (S91 dio
+          # Δ=0 con 0 escenas diurnas). Por eso SOLO el perfil enabled corre con
+          # --no-night-filter: baja día+noche y procesa el día con thresholds
+          # diurnos. El disabled sigue solo-noche = baseline operacional actual.
+          # enabled∖disabled = exactamente las detecciones diurnas nuevas.
+          EXTRA=""
+          if [ "${{ matrix.profile }}" = "_daytime_modis_enabled" ]; then
+            EXTRA="--no-night-filter"
+          fi
           python scripts/run_pipeline.py \
             --profile ${{ matrix.profile }} \
             --volcano ${{ github.event.inputs.volcano }} \
             --start ${{ github.event.inputs.start }} \
             --end ${{ github.event.inputs.end }} \
-            --overwrite
+            --overwrite $EXTRA
 
       - name: Commit reprocessed A/B data
         run: |
