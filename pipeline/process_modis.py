@@ -98,6 +98,10 @@ from pipeline.profile import (
     ENABLE_TEST1_LBG_GLOBAL,
     N_SIGMA_MIR_SUMMIT,
     N_SIGMA_MIR_SCENE,
+    NTI_K1_DAY,
+    N_SIGMA_MIR_DAY,
+    DNTI_CONTEXTUAL_C1_DAY,
+    ENABLE_DAYTIME_MODIS,
     ENABLE_EXCLUDE_ZONES,
     ENABLE_TEST1_PATH,
     TEST1_K_SIGMA,
@@ -238,6 +242,31 @@ def _interp_geo(coarse: np.ndarray, target_lines: int, target_samples: int) -> n
 # S23 Task 2: haversine_km centralizado en pipeline/scan_geometry.py
 # (era duplicado en 3 archivos process_*.py).
 from pipeline.scan_geometry import haversine_km
+
+
+def _select_thresholds(is_day: bool, enable_day: bool) -> dict:
+    """S90 — set de thresholds día/noche para MODIS (Coppola 2016a Tabla 1).
+
+    Día (SOLO si enable_day y is_day): K1=-0.6, C1=0.02 ambos ROIs, N·σ=15 ambos.
+    Noche (cualquier otro caso): K1=-0.8, C1=0.003/0.010 summit/scene,
+    N·σ=5/10 summit/scene. Con enable_day=False el comportamiento es idéntico
+    al histórico (siempre noche) → no toca operacional.
+    """
+    if enable_day and is_day:
+        return {
+            "nti_k1": NTI_K1_DAY,
+            "n_sigma_summit": N_SIGMA_MIR_DAY,
+            "n_sigma_scene": N_SIGMA_MIR_DAY,
+            "c1_summit": DNTI_CONTEXTUAL_C1_DAY,
+            "c1_scene": DNTI_CONTEXTUAL_C1_DAY,
+        }
+    return {
+        "nti_k1": NTI_K1_NIGHT,
+        "n_sigma_summit": N_SIGMA_MIR_SUMMIT,
+        "n_sigma_scene": N_SIGMA_MIR_SCENE,
+        "c1_summit": DNTI_CONTEXTUAL_C1_SUMMIT,
+        "c1_scene": DNTI_CONTEXTUAL_C1_SCENE,
+    }
 
 
 def calculate_vrp(hdf_path: Path, geo_path: Path,
