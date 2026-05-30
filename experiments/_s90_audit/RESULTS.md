@@ -94,3 +94,30 @@ I-band sin VRP). NO es ceguera de ubicación; es conservadurismo en el piso sub-
 **Lección**: OCR sí importa para PRECISIÓN/FP (A54: ~49% de "FPs" son MIROVA-publicado
 vía OCR no consumido) pero NO para recall en este snapshot. El lever real de recall es
 el piso sub-MW (NdC/Villarrica), no cargar más ground truth.
+
+## Re-auditoría data cruda NdC + Villarrica — S90 (pedido Nicolás)
+
+**Pregunta**: ¿hay algo que no estamos viendo? MIROVA tiene varias lecturas VIIRS375
+y casi ninguna MODIS en estos dos volcanes.
+
+**1. Data cargada COMPLETA (no hay bug de loader).** CSV consolidado crudo (todas las
+variantes de nombre): NdC 1885 filas, Villarrica 1906 — pero **~1836/1881 son RUTINA
+(NULO = MIROVA no vio nada)**. Alertas reales (VRP>0, no RUTINA/NULO): NdC **6**,
+Villarrica **11** — coinciden EXACTO con data/mirova/<vol>.json. No perdimos filas.
+
+**2. Observación de Nicolás confirmada y cuantificada.** Alertas reales por sensor:
+- NdC: VIIRS375=4, VIIRS750=1, **MODIS=1**.
+- Villarrica: VIIRS375=10, **MODIS=1**.
+De ~585 pasadas MODIS que MIROVA procesó por volcán, solo 1 dio alerta. **Razón
+física**: anomalías chicas/débiles (domo NdC, lava lake Villarrica) → sub-píxel para
+MODIS 1km, resueltas solo por VIIRS 375m (~7× más resolución de área). Los gráficos
+MIROVA por sensor (experiments/59) lo muestran: VIIRS375 decenas de detecciones/año
+(~0.2–1.2 MW), MODIS 3–4/año todas lejanas. **MIROVA misma casi no los ve con MODIS**
+→ el "no estamos cerca" es porque son volcanes intrínsecamente faint, no un fallo nuestro.
+
+**3. HALLAZGO accionable — TIFs de NdC invisibles en el dashboard.** El archivo
+mirova-tif-archive nombra la carpeta de NdC **"ChillanNevadosde"** (variante A14), pero
+`build_mirova_imgs_index.py` usaba el nombre de carpeta como clave → el frontend (busca
+"NevadosDeChillan") mostraba **0 imágenes MIROVA de NdC aunque hay 179 TIFs + 179 KMZ
+en disco** (47 MODIS, 58 VIIRS375, 74 VIIRS750). Fix: `ARCHIVE_DIR_TO_VOLCANO` mapea la
+clave conservando el path real. Regenerado: dashboard ahora muestra "TIFs georef (179)".

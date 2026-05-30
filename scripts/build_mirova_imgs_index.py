@@ -79,6 +79,18 @@ TIF_REL_PREFIX = "../../mirova-tif-archive/data/tif"
 KMZ_REL_PREFIX = "../../mirova-tif-archive/data/kmz"
 PNG_REL_PREFIX_REPO = "imagenes"
 
+# --- Normalización de nombre de carpeta del archivo -> nombre de volcán del
+# dashboard (S90). El archivo mirova-tif-archive usa para Nevados de Chillán la
+# carpeta "ChillanNevadosde" (variante del scraper, A14), pero el frontend busca
+# las imágenes por `v.name` = "NevadosDeChillan" (clave de data/mirova_equivalent
+# y volcanoes.yaml). Sin este map el dashboard mostraba 0 imágenes MIROVA de NdC
+# aunque hay 179 TIFs en disco. Es el único volcán con la carpeta nombrada
+# distinto; el resto coincide 1:1. El `path` del item conserva el nombre REAL de
+# la carpeta (para que el fetch resuelva el archivo); solo se normaliza la CLAVE.
+ARCHIVE_DIR_TO_VOLCANO = {
+    "ChillanNevadosde": "NevadosDeChillan",
+}
+
 # --- Regex parsing -----------------------------------------------------
 # TIF/KMZ filename: 20260509_034733_VIIRS750.tif   o  ..._lm.kmz
 RE_TIFKMZ = re.compile(
@@ -121,7 +133,10 @@ def scan_tif_or_kmz(root: Path, rel_prefix: str, ext: str) -> dict[str, list[dic
         print(f"[warn] {root} no existe — saltando .{ext}", file=sys.stderr)
         return out
     for vol_dir in sorted(p for p in root.iterdir() if p.is_dir()):
-        volcano = vol_dir.name
+        dir_name = vol_dir.name
+        # S90: la CLAVE se normaliza al nombre de volcán del dashboard, pero el
+        # `path` conserva el nombre REAL de la carpeta para que el fetch resuelva.
+        volcano = ARCHIVE_DIR_TO_VOLCANO.get(dir_name, dir_name)
         items: list[dict] = []
         for f in vol_dir.iterdir():
             if not f.is_file() or f.suffix.lower() != f".{ext}":
@@ -131,7 +146,7 @@ def scan_tif_or_kmz(root: Path, rel_prefix: str, ext: str) -> dict[str, list[dic
                 continue
             iso, sensor = parsed
             items.append({
-                "path": f"{rel_prefix}/{volcano}/{f.name}",
+                "path": f"{rel_prefix}/{dir_name}/{f.name}",
                 "datetime": iso,
                 "sensor": sensor,
             })
