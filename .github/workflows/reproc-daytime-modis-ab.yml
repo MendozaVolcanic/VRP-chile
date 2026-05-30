@@ -1,0 +1,96 @@
+name: S90 A/B detección diurna MODIS (enabled vs disabled)
+
+# Workflow dispatch-only. Valida la detección diurna MODIS (S90, design doc
+# 2026-05-30): reprocesa un volcán en una ventana que cubra eventos diurnos
+# MODIS, con los dos perfiles A/B (_daytime_modis_enabled vs _disabled), para
+# comparar recall/precisión vs MIROVA con y sin el path diurno.
+#
+# Por qué GH Actions: MODIS depende de pyhdf, roto en Windows (regla S15).
+# Por qué reproceso: la detección diurna cambia qué granules se procesan; no es
+# deducible offline (los records diurnos hoy ni existen — gate store los rechaza).
+#
+# Aislamiento (A47): cada perfil escribe data/_daytime_modis_{enabled,disabled}/
+# <vol>.json — archivos DISTINTOS, sin race de datos. max-parallel:1 serializa
+# los pushes a main (backup: rebase-retry). NO toca data/mirova_equivalent/.
+#
+# Defaults: Nevados de Chillán mar-abr 2026 (cubre los eventos diurnos MODIS
+# 2026-03-17 1.06 MW y 2026-04-20). Para Villarrica: volcano=Villarrica,
+# start=2026-05-01 end=2026-05-30 (cubre el 2026-05-29 1.83 MW diurno).
+#
+# A43 Norway problem: `"on":` quoted.
+
+"on":
+  workflow_dispatch:
+    inputs:
+      volcano:
+        description: "Volcán (nombre exacto: NevadosDeChillan, Villarrica, ...)"
+        required: true
+        default: "NevadosDeChillan"
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-03-01"
+      end:
+        description: "End date YYYY-MM-DD inclusive"
+        required: true
+        default: "2026-04-30"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    permissions:
+      contents: write
+    strategy:
+      max-parallel: 1
+      fail-fast: false
+      matrix:
+        profile:
+          - _daytime_modis_enabled
+          - _daytime_modis_disabled
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Reprocess ${{ matrix.profile }} / ${{ github.event.inputs.volcano }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 320
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ github.event.inputs.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed A/B data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          VOL="${{ github.event.inputs.volcano }}"
+          git add "data/${{ matrix.profile }}/${VOL}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S90 A/B diurno — ${{ matrix.profile }} ${VOL} ${{ github.event.inputs.start }}->${{ github.event.inputs.end }}"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
