@@ -99,3 +99,44 @@ cerrada). Para obtenerlo hay que re-correr con la 1ª compuerta abierta en el
 perfil enabled. `enable_daytime_modis` sigue **OFF**; sin A/B válido no se adopta
 (escudo anti-drift §3.5). Opciones de implementación a decidir con Nicolás (no
 tocar pipeline sin tag+OK, A45).
+
+## 5. Cierre del A/B (S92) — pivote a mayo por disponibilidad de TIF
+
+El fix del workflow (PR #269, `--no-night-filter` en el perfil enabled) abre la
+compuerta. Pero al planificar el cierre apareció un **desajuste de ventanas**:
+
+- Los TIF de MIROVA para NdC (`../mirova-tif-archive/data/tif/ChillanNevadosde/`)
+  solo existen **2026-05-09 → 05-20** (inicio del scraping de TIF). El evento
+  motivante 03-17 **no tiene TIF** → el **R2 pixel-level (§7.3) es imposible** en
+  mar-abr.
+- Mayo tiene **10 TIF MODIS diurnos** de NdC (13:25/14:00 UTC, etc.).
+
+→ **Decisión**: cancelar el reproc mar-abr (26694976220) y disparar **mayo**
+(run **26695436240**, NdC 2026-05-08→05-21). Una sola ventana cierra §7: A/B
+recall + R3 CSV + R2 pixel-level. Sin TIF, mar-abr solo daba R3 (correlación a
+nivel evento), que NO descarta FP solar — y la regla S33 prohíbe adoptar sin R2.
+
+### Hallazgo TIF MODIS diurno (afecta el diseño del R2)
+El TIF MIROVA MODIS diurno de NdC NO es un mapa de hotspots: `20260509_132500_MODIS`
+tiene **2582/2601 píxeles positivos** (casi toda la grilla 51×51), valores
+0.13–0.51 MW; `20260517_134000` 2581 pos, 0.16–0.51. Es el **campo de radiancia
+diurno completo** — de día el sol calienta toda la escena en el MIR (A24: el TIF
+"Last" es producto de visualización, no VRP-per-pixel sumable). Implicación: el R2
+MODIS diurno NO puede medir "concordancia de todos los píxeles" (daría "solo
+MIROVA" ≈ toda la grilla). Debe medir si el **pico** del TIF MIROVA (el cráter,
+~0.51) coincide ESPACIALMENTE con nuestro hotspot. `compare_tif_mirova_vs_ours.py`
+(hoy VIIRS-only) necesita adaptación: (1) buscar record MODIS, (2) apuntar al TIF
+MODIS de mayo, (3) leer del perfil `_daytime_modis_enabled`, (4) métrica de
+concordancia del pico, no suma.
+
+### Plan de cierre (cuando termine run 26695436240)
+1. `git pull` (traer los 2 JSON de mayo).
+2. `python experiments/_s90_daytime_modis/analyze_ab.py --volcano NevadosDeChillan
+   --start 2026-05-08 --end 2026-05-21` → [1] Δrecall/precisión, [2] nuevas
+   diurnas, [3] R3 TP-MIROVA vs FP-solar. OJO: usa CONS (latest_consolidado.csv);
+   el GT diurno de NdC puede estar en OCR (A11) → cruzar también OCR si CONS=0.
+3. R2 pixel-level de ≥1 evento MODIS diurno vs su TIF (concordancia del pico).
+4. Criterio §7: recall diurno ↑ en ≥1 vol SIN precisión global <0.50 + ≥1 evento
+   validado pixel-level. Si FP solares dominan → NO adoptar, documentar.
+5. Si valida → `enable_daytime_modis:true` en mirova_equivalent.yaml con TAG + OK
+   explícito Nicolás (A45) + reproc operacional + dashboard.
