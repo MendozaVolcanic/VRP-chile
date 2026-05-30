@@ -48,3 +48,20 @@ def test_scene_is_day_from_modis_filename():
     assert _scene_is_day("MOD021KM.A2026134.0548.061.hdf", -36.83, -71.4) is False
     # nombre no parseable → asumir noche (conservador, no procesar diurno dudoso)
     assert _scene_is_day("garbage.hdf", -36.83, -71.4) is False
+
+
+def test_store_daytime_gate_decision():
+    """_reject_daytime: literal MIROVA. De noche nunca rechaza. De día rechaza
+    salvo MODIS con el flag ON (VIIRS diurno SIEMPRE rechazado — sin fuente
+    MIROVA-core diurna para VIIRS)."""
+    from pipeline.store import _reject_daytime
+    # Noche (elev <= 0): nunca rechaza, sin importar sensor/flag.
+    assert _reject_daytime("MODIS_AQUA", -10.0, True) is False
+    assert _reject_daytime("VIIRS_NOAA20", -5.0, True) is False
+    # Día + flag OFF: rechaza todo (comportamiento histórico).
+    assert _reject_daytime("MODIS_AQUA", 12.0, False) is True
+    assert _reject_daytime("VIIRS_NOAA20", 12.0, False) is True
+    # Día + flag ON: MODIS pasa, VIIRS sigue rechazado (literal MIROVA).
+    assert _reject_daytime("MODIS_TERRA", 12.0, True) is False
+    assert _reject_daytime("VIIRS_NOAA20", 12.0, True) is True
+    assert _reject_daytime("VIIRS_NOAA20_750", 12.0, True) is True
