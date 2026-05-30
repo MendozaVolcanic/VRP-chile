@@ -157,6 +157,16 @@
     }
     .events-table tr.row-selected td:first-child { border-left-width: 3px; }
     .vrp-cell { font-weight: 700; }
+    /* S92 — artefacto cirrus marcado en tabla (display-only; criterio isCirrusArtifact:
+       píxel más caliente bajo 0 °C + VRP>10 MW + no confirmado por MIROVA). Se conserva
+       el record (trazabilidad) pero se atenúa y rotula para que no se lea como alerta. */
+    tr.row-cirrus-artifact td { opacity: 0.5; }
+    .cirrus-badge {
+      display: inline-block; margin-left: 6px; padding: 1px 6px;
+      font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.3px;
+      border-radius: 3px; background: rgba(255,255,255,0.06);
+      color: var(--muted); border: 1px solid var(--border); vertical-align: middle;
+    }
 
     .msg { text-align: center; padding: 60px; color: var(--muted); font-size: 0.88rem; }
 
@@ -2819,6 +2829,7 @@ function buildNRTTable() {
   const allDetections = [];
   for (const v of VOLCANOES) {
     const d = allData[v.name] || { records: [] };
+    const innerKm = v.inner_radius_km ?? 10;  // S92: criterio cirrus per-volcán (PCC=20)
     for (const r of d.records) {
       // S29 fix bug 7: filtrar records descartados. Antes `?? r.vrp_mir_mw`
       // metía records con vrp_mw=0 + discarded_reason (eruption_hotspot_too_far),
@@ -2831,7 +2842,8 @@ function buildNRTTable() {
       const vrpShow = (r.primary_cluster?.vrp_mw && r.primary_cluster.vrp_mw > 0)
         ? r.primary_cluster.vrp_mw
         : vrpFinal;
-      allDetections.push({ volcano: v, record: r, vrp: vrpShow });
+      // S92: marcar artefacto cirrus (display-only, mismo criterio que chart/cards/métricas).
+      allDetections.push({ volcano: v, record: r, vrp: vrpShow, isArtifact: isCirrusArtifact(r, innerKm) });
     }
   }
 
@@ -2849,6 +2861,7 @@ function buildNRTTable() {
   show.forEach(det => {
     const lv = getLevel(det.vrp);
     const row = el("tr");
+    if (det.isArtifact) row.className = "row-cirrus-artifact";  // S92: atenúa la fila
     row.addEventListener("click", () => {
       currentVolcano = det.volcano;
       buildCards();
@@ -2859,8 +2872,16 @@ function buildNRTTable() {
     const tdVolc = el("td"); tdVolc.textContent = det.volcano.display; tdVolc.style.fontWeight = "600";
     const tdVrp = el("td"); tdVrp.textContent = det.vrp.toFixed(3);
     tdVrp.style.fontWeight = "700";
-    tdVrp.style.color = "var(--" + (lv.key === "vlow" ? "green" : lv.key === "low" ? "yellow" : lv.key === "mod" ? "orange" : lv.key === "nd" ? "muted" : "red") + ")";
+    // S92: VRP de artefacto en muted (no se pinta con color de alerta — no es detección real).
+    tdVrp.style.color = det.isArtifact
+      ? "var(--muted)"
+      : "var(--" + (lv.key === "vlow" ? "green" : lv.key === "low" ? "yellow" : lv.key === "mod" ? "orange" : lv.key === "nd" ? "muted" : "red") + ")";
     const tdSensor = el("td"); tdSensor.textContent = det.record.sensor; tdSensor.style.color = "var(--muted)";
+    if (det.isArtifact) {
+      const badge = el("span"); badge.className = "cirrus-badge"; badge.textContent = "artefacto cirrus";
+      badge.title = "Píxel más caliente bajo 0 °C con VRP alto: incoherencia térmica tipo cirrus, no detección real.";
+      tdSensor.appendChild(badge);
+    }
 
     row.append(tdDate, tdVolc, tdVrp, tdSensor);
     tbody.appendChild(row);
