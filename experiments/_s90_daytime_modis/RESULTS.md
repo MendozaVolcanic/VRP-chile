@@ -86,5 +86,25 @@ pixel-level del evento NdC contra TIF MODIS; recién entonces decidir adopción
 (con tag + OK explícito de Nicolás, A45). Hasta entonces `enable_daytime_modis`
 sigue OFF en operacional.
 
+### Resultado parcial S91 — Villarrica: A/B TRIVIAL (verificado de 1a mano)
+
+El run Villarrica (26687842353) terminó completo (enabled + disabled). Corrí
+`analyze_ab.py`:
+- `enabled` n=342, `disabled` n=342, **Δ recall = +0.0%, Δ precisión = +0.0%,
+  0 nuevas detecciones con flag ON.**
+- **Causa (verificada)**: los 342 records de Villarrica en mayo son TODOS VIIRS
+  (SNPP 158, NOAA20 92, NOAA21 51, I-band 41). **MODIS = 0.** La detección diurna
+  que implementamos es **solo MODIS** (VIIRS sigue nocturno por diseño literal
+  MIROVA), así que encender el flag no puede cambiar nada donde no hay escenas
+  MODIS. Δ=0 NO es un fracaso del path — es el caso de control trivial.
+- **Implicación**: Villarrica NO sirve como caso de prueba del A/B diurno. El
+  evento diurno que motivó esto (2026-05-29 1.83 MW) fue VIIRS (no cambia) o no
+  entró en la ventana. **El veredicto del A/B depende ENTERAMENTE de NdC**, que
+  tiene 189 records MODIS de 807 (verificado sobre el operacional) → ahí el path
+  diurno sí tiene escenas sobre las que actuar. NdC run 26687718294 aún
+  in_progress al cierre S91.
+- El guard nuevo de `analyze_ab.py` (PR #263) funcionó: con datos completos
+  reportó Δ=0 honesto; con disabled vacío aborta en vez de inventar +100%.
+
 Si valida: con tag + OK Nicolás, `enable_daytime_modis: true` en
 `mirova_equivalent.yaml` (A45) + reproc operacional + verificar dashboard.
