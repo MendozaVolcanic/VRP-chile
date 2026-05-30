@@ -813,6 +813,9 @@ async function loadVolcano(v) {
     mirovaRecords: mirova?.records || [],
     updated:       data?.updated   || null,
   };
+  // S89 #3: etiquetar mirova_confirmed por-record (cruce con CSV MIROVA, capa
+  // de presentación). Idempotente; campos transitorios "_" no persistidos.
+  enrichWithMirovaConfirmation(allData[v.name].records, allData[v.name].mirovaRecords);
 }
 
 // ── Data helpers ─────────────────────────────────────────────────────────────
@@ -911,6 +914,19 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
 // Caveat: se calcula sobre la ventana actual del chart (currentDays) — los
 // números varían según el rango seleccionado. Records MIROVA con clasificación
 // RUTINA / NULO se excluyen para no penalizar falsos negativos triviales.
+// S89 — parseo UTC robusto de timestamps "YYYY-MM-DD HH:MM". Los campos
+// datetime_utc (pipeline y CSV MIROVA) son UTC, pero new Date("YYYY-MM-DD HH:MM")
+// SIN 'Z' los interpreta como hora LOCAL del navegador. En un visor en Chile
+// (UTC-3/-4) eso desfasaba el match temporal ours↔MIROVA varias horas → cero
+// matches (computeMetrics daba recall=0 / mirova_confirmed=0; bug latente
+// descubierto vía preview S89). Centraliza el parse para que ours y MIROVA usen
+// la MISMA convención UTC. Idempotente si el string ya trae 'Z' u offset.
+function parseUtcMs(s) {
+  if (s == null) return NaN;
+  let str = String(s).replace(" ", "T");
+  if (!/[zZ]$|[+-]\d\d:?\d\d$/.test(str)) str += "Z";
+  return new Date(str).getTime();
+}
 function ourSensorBucket(sensor) {
   // Reusa sensorGroup() pero estandariza naming hacia los buckets MIROVA del CSV.
   const g = sensorGroup(sensor);
@@ -935,7 +951,7 @@ function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
   for (const r of ourRecords) {
     const b = ourSensorBucket(r.sensor);
     if (!b) continue;
-    const t = new Date(r.datetime_utc).getTime();
+    const t = parseUtcMs(r.datetime_utc);
     if (!Number.isFinite(t)) continue;
     ourByBucket[b].push({ t, r });
   }
@@ -950,7 +966,7 @@ function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
     if (!(vrp > 0)) continue;
     const b = mirovaSensorBucket(m.sensor);
     if (!b) continue;
-    const t = new Date(String(m.datetime_utc).replace(" ", "T") + (String(m.datetime_utc).includes("T") ? "" : "Z")).getTime();
+    const t = parseUtcMs(m.datetime_utc);
     if (!Number.isFinite(t)) continue;
     mByBucket[b].push({ t, m, vrp });
   }
@@ -1014,6 +1030,60 @@ function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
     ratio_med = (s.length % 2) ? s[mid] : 0.5 * (s[mid - 1] + s[mid]);
   }
   return { tp, fn, fp, pairs: ratios.length, recall, precision, f1, ratio_med };
+}
+
+// S89 #3 — mirova_confirmed: etiqueta por-record "MIROVA también vio esto".
+// Cruce con el ground truth EXTERNO (CSV consolidado MIROVA); por eso vive en
+// el frontend y NO en el pipeline (no acoplar el NRT a un CSV de scraping de
+// otro repo — design §4.2). Definición CONSISTENTE con el TP de computeMetrics:
+// existe ALERTA MIROVA (clasificacion != NULO/RUTINA, VRP>0) en el mismo bucket
+// de sensor dentro de ±60 min. NO se gatea por distancia: las distancias del
+// CSV (sobre todo OCR) son poco confiables, y un gate de 2 km haría
+// mirova_confirmed MÁS estricto que el recall que el dashboard ya reporta →
+// incoherente. La distancia MIROVA matcheada se guarda solo para el tooltip
+// (_mirova_dist_km). Campos transitorios prefijo "_" (derivados en cliente, no
+// persistidos). Excluyente con geo_class=extension por construcción (extension
+// = sin alerta MIROVA → no confirmado).
+function enrichWithMirovaConfirmation(ourRecords, mirovaRecords) {
+  const mByBucket = { MODIS: [], VIIRS375: [], VIIRS750: [] };
+  for (const m of mirovaRecords) {
+    const cls = String(m.clasificacion || m.Clasificacion || m["Clasificacion Mirova"] || "").toUpperCase();
+    if (cls === "NULO" || cls === "RUTINA") continue;
+    const vrp = parseFloat(m.VRP_MW ?? m.vrp_mw ?? 0);
+    if (!(vrp > 0)) continue;
+    const b = mirovaSensorBucket(m.sensor || m.Sensor);
+    if (!b) continue;
+    const t = parseUtcMs(m.datetime_utc);
+    if (!Number.isFinite(t)) continue;
+    const dist = parseFloat(m.distancia_km ?? m.Distancia_km ?? "");
+    mByBucket[b].push({ t, dist: Number.isFinite(dist) ? dist : null });
+  }
+  for (const k of Object.keys(mByBucket)) mByBucket[k].sort((a, b) => a.t - b.t);
+  const TOL_MS = 60 * 60000;
+  function nearest(list, t) {
+    if (!list.length) return -1;
+    let lo = 0, hi = list.length - 1;
+    while (lo < hi) { const mid = (lo + hi) >> 1; if (list[mid].t < t) lo = mid + 1; else hi = mid; }
+    let best = -1, bestDt = TOL_MS + 1;
+    for (let i = Math.max(0, lo - 1); i <= Math.min(list.length - 1, lo + 1); i++) {
+      const dt = Math.abs(list[i].t - t);
+      if (dt <= TOL_MS && dt < bestDt) { best = i; bestDt = dt; }
+    }
+    return best;
+  }
+  for (const r of ourRecords) {
+    r._mirova_confirmed = false;
+    r._mirova_dist_km = null;
+    const b = ourSensorBucket(r.sensor);
+    if (!b) continue;
+    const t = parseUtcMs(r.datetime_utc);
+    if (!Number.isFinite(t)) continue;
+    const idx = nearest(mByBucket[b], t);
+    if (idx >= 0) {
+      r._mirova_confirmed = true;
+      r._mirova_dist_km = mByBucket[b][idx].dist;
+    }
+  }
 }
 
 // H3 (S77 audit, PR #170 follow-up): helper global único para "este record
@@ -1770,6 +1840,7 @@ function renderDetail() {
     ["#e91e63", "VIIRS 375m"], ["#00bcd4", "VIIRS 750m"], ["#ff8c00", "MODIS"],
     ["#ff5252", "Radio cráter (🎯 summit)"], ["#8a8a8a", "Detección lejana (📍 far)"],
     ["#ff9800", "Extensión volcánica no-MIROVA"],
+    ["#00e676", "✓ Confirmado por MIROVA (anillo)"],
     ["#7c4dff", "Vent-path / POI investigación"], ["#ffc107", "Radio vent-path"], ["#7a8fa6", "Radio búsqueda 25 km"]
   ].forEach(([color, label]) => {
     const item = el("div", "map-legend-item");
@@ -2052,6 +2123,15 @@ function renderDetail() {
           weight: isPrimary ? 1.5 : 0.8,
           fillColor: color, fillOpacity: pxOpacity, dashArray: null,
         }));
+        // S89 #3: anillo verde si MIROVA confirmó esta detección (mismo bucket
+        // de sensor ±60 min). Convención: anillo verde = MIROVA-backed (TP que
+        // el dashboard ya cuenta en recall); relleno naranja = extensión real
+        // no-MIROVA. Excluyentes por construcción. Solo sobrescribe el borde,
+        // el relleno (sensor/summit/far/extension) queda intacto.
+        if (r._mirova_confirmed) {
+          markerStyle.color = "#00e676";
+          markerStyle.weight = Math.max(markerStyle.weight || 1, 2.2);
+        }
         // S18: popup distingue VRP total del record (suma) vs VRP del pixel
         // individual (este punto). Antes el popup decía solo "VRP: X MW" sin
         // aclarar que es el pixel, y la tabla muestra el total — generaba
@@ -2071,6 +2151,10 @@ function renderDetail() {
           (ventOnly ? " (vent-path)" : "") +
           (isFar ? ' <span style="color:#888">(far)</span>' : (distClass === "summit" ? ' <span style="color:#ff5252">(summit)</span>' : '')) + `<br>` +
           `${r.datetime_utc} UTC<br>` +
+          (r._mirova_confirmed
+            ? `<span style="color:#00e676">✓ Confirmado por MIROVA</span>` +
+              (r._mirova_dist_km != null ? ` <small style="color:#888">(MIROVA @ ${r._mirova_dist_km.toFixed(2)} km)</small>` : '') + `<br>`
+            : (isExtension ? `<span style="color:#ff9800">Extensión volcánica (no publicada por MIROVA)</span><br>` : '')) +
           (hasPC
             ? `<b style="color:#ffc107">VRP MIROVA-equiv:</b> ${pc.vrp_mw.toFixed(3)} MW <small style="color:#888">(cluster ${pc.n_pixels} pix)</small><br>`
             : '') +
