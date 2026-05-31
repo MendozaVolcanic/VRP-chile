@@ -635,7 +635,7 @@ decisiones de umbrales, o cambios metodológicos:
 
 ## Arquitectura
 - `pipeline/`: fetch.py (earthaccess), process_modis.py, process_viirs.py, process_viirs_mod.py, store.py, scan_geometry.py
-- `frontend/index.html` (Chart.js + Leaflet, GitHub Pages)
+- `frontend/` — **3 vistas standalone, cada una con su copia de helpers** (`mirovaEqVrp`, etc.): `index.html` (dashboard Chart.js+Leaflet), `diario.html` (tendencia 90d/volcán), `mosaico.html` (overview 48h/30d). **Un cambio de display/filtro (ej. supresión cirrus) debe replicarse en las 3** (S92 L5). Verificación = preview real navegador (no `node --check`): sirven desde `/frontend/`, `BASE_PATH=/`, data en `/data/...`. GitHub Pages (deploy on push a `frontend/**`).
 - `volcanoes.yaml` (45 configurados, 11 con data, 34 sin pull)
 - `.github/workflows/nrt.yml` (cron cada 2h, matrix por volcán, **timeout 50 min per-step**)
 
