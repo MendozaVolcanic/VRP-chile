@@ -32,6 +32,8 @@ TIER_A = ["PuyehueCordonCaulle", "Villarrica", "Lascar", "Copahue", "NevadosDeCh
           "Llaima", "Chaiten", "PlanchonPeteroa", "Lastarria", "Isluga", "Tupungatito"]
 CONS = os.path.join(REPO, "latest_consolidado.csv")
 OCR = os.path.join(REPO, "data/mirova_reference/registro_vrp_ocr.csv")
+# S94 F2: VRP_DATA_DIR permite apuntar a data/_s94_reproc tras el reproc (default operacional).
+DATA_DIR = os.path.join(REPO, os.environ.get("VRP_DATA_DIR", "data/mirova_equivalent"))
 
 
 def our_bucket(s):
@@ -75,7 +77,7 @@ def focus_vrp(rec):
 def main():
     res = {b: {} for b in ("VIIRS375", "VIIRS750")}
     for vol in TIER_A:
-        d = json.load(open(os.path.join(REPO, f"data/mirova_equivalent/{vol}.json"), encoding="utf-8"))
+        d = json.load(open(os.path.join(DATA_DIR, f"{vol}.json"), encoding="utf-8"))
         recs = d["records"] if isinstance(d, dict) and "records" in d else d
         cov = [parse(r.get("datetime_utc")) for r in recs if parse(r.get("datetime_utc"))]
         cmin, cmax = min(cov), max(cov)
