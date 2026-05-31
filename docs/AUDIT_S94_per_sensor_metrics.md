@@ -201,7 +201,66 @@ resolución ubicando mal el centroide**, no de un campo difuso extendido (salvo 
   con cuidado (A19: el ring glaciar de Tupungatito refuta kernel-bg; co-validación es otro
   mecanismo, hay que medirlo, no extrapolarlo).
 
-## 7. Escudo anti-drift (vigente)
+## 7. RE-CENTRADO EN VIIRS (corrección de foco, Nicolás) — el hallazgo decisivo
+
+> Nicolás: *"estamos muy centrados en MODIS, cuando es VIIRS el que más usamos."*
+> Tiene razón: MIROVA publica **627–746 alertas VIIRS375** vs **80 MODIS** (77=Láscar).
+> VIIRS375 es el sensor operacional; MODIS casi no lo usa ni MIROVA. Re-enfoque con
+> datos: `experiments/_s94_audit/viirs_magnitude_diag.py` (+`.json`).
+
+### La detección VIIRS375 ya está bien — el problema es la MAGNITUD
+La auditoría espacial (§6) mostró VIIRS375 centrado en el cráter (90 %). Lo que queda
+es el **ratio de magnitud**, y NO es parejo — depende brutalmente del fondo:
+
+**VIIRS375 — ratio vs MIROVA (suma del cluster) por volcán:**
+| Volcán | n | ratio SUMA | ratio FOCO (max píxel) | t_bg_med |
+|---|---|---|---|---|
+| Lascar (cráter caliente) | 286 | **0.93×** | 0.74× | 267K |
+| Isluga | 218 | 1.24× | 0.62× | 270K |
+| PuyehueCordonCaulle | 242 | 2.56× | 1.00× | 276K |
+| Lastarria | 251 | 3.60× | 1.15× | 264K |
+| PlanchonPeteroa | 173 | 6.52× | 0.60× | 274K |
+| Tupungatito (glaciar) | 213 | **10.78×** | 0.57× | 267K |
+| Villarrica | 27 | 15.89× | 0.16× | 279K |
+| **mediana cross-vol** | | **3.44×** | **0.61×** | |
+
+### El fenómeno
+**Láscar (cráter caliente, roca expuesta) calibra perfecto a 0.93×.** El sobre-estimado
+NO es de calibración — es **el mismo mecanismo de campo frío que MODIS, pero en VIIRS
+375 m**: sobre fondo glaciar/frío, el path D contextual suma decenas de píxeles
+débiles del halo y Wooster infla la magnitud. Es por eso que los volcanes de fondo
+frío (Tupungatito glaciar 10.78×, Villarrica 15.89×) se disparan y el cráter caliente
+no. **Mismo mecanismo, ahora en el sensor que importa.**
+
+### El fix y su caveat
+Reportar el **foco** (máximo píxel) en vez de la **suma** baja el ratio de 3.44× a
+0.61× — confirma que la inflación viene de sumar el campo. PERO el foco puro
+**sub-estima** (Villarrica 0.16×, mediana 0.61× <1): pierde píxeles genuinamente
+calientes de una erupción extendida real. **El fix correcto NO es "reportar max", es
+un blend/cap que aterrice cerca de 1× sin sub-contar erupciones reales** (PCC 1.00×,
+Lastarria 1.15× ya aterrizan bien; los <1 son señal de over-corrección). El cap D9
+actual (5 MW plano) es demasiado grueso para señal débil VIIRS (P2 de AUDIT_S93:
+Tupungatito ~0.5 MW capeado a 5 sigue 10× alto).
+> Caveat A18: el `ratio FOCO` usa una aproximación del cluster (píxeles a ±1km del
+> centroid) — es DIRECCIONAL, no predicción exacta. La implementación real necesita
+> los píxeles reales del cluster + calibración + reproc.
+
+### Re-priorización del plan (VIIRS primero)
+| Antes (MODIS-céntrico) | Ahora (VIIRS-céntrico) |
+|---|---|
+| F3 co-validación MODIS = "la raíz" | **F5' magnitud campo-frío VIIRS = la prioridad** (sensor operacional) |
+| MODIS alta prioridad | MODIS **baja** (MIROVA usa 80 alertas; el dashboard ya oculta sus artefactos §2) |
+
+**Nuevo orden recomendado:**
+1. **F5' (VIIRS magnitud campo-frío)** — diseñar un reporte de magnitud para clusters
+   de campo frío que aterrice cerca de 1× sin sub-contar erupciones reales (blend
+   foco/suma o cap calibrado por señal, NO los 5 MW planos). Toca `process_viirs.py`
+   → A45 (tag+OK+TDD+reproc+R2). Es el cambio de mayor impacto operacional.
+2. **F2 (reproc)** — limpia la deuda histórica una vez definido F5'.
+3. **F3 (MODIS co-validación)** — opcional, baja prioridad; el dashboard ya tapa MODIS.
+4. **VIIRS750** — mismo tratamiento de magnitud que VIIRS375 (NO ocultar; MIROVA lo usa).
+
+## 8. Escudo anti-drift (vigente)
 NO gate t_bg ciego (S86). NO ocultar VIIRS750 (refutado §5). NO tocar detección
 VIIRS375 (recall). NO co-validación global (mata 93 % recall, S93). NO tocar
 pipeline sin tag+OK (A45). La co-validación distingue por COHERENCIA (foco duro
