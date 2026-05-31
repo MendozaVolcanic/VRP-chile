@@ -256,10 +256,28 @@ function isCirrusArtifact(r, innerKm = 10) {
   if (r.t_max_k == null || r.t_max_k >= 273.15) return false;
   return mirovaEqVrp(r, innerKm, false) > 10;
 }
-// VRP para DISPLAY (VRP 48h, nivel de alerta, sparkline): 0 si es artefacto cirrus
-// → no dispara una falsa alerta "Alta" por nube fría.
+// S93 — artefacto "campo difuso (fondo frío)": misma familia A23/D9 que el cirrus
+// (path D contextual sobre fondo gélido) pero con el píxel más caliente apenas
+// SOBRE 0 °C (se escapa al gate cirrus t_max<273.15). Firma = campo amplio +
+// radiancia dispersa (n_px≥100 ∧ VRP/px<1.0 ∧ t_max<5 °C ∧ VRP≥50), opuesto a un
+// foco real. Usa t_max + geometría, NUNCA t_bg (escudo §3.2). Validado 45 vols:
+// 0 reales atrapadas. Ver index.html y el design doc S93.
+function isDiffuseFieldArtifact(r, innerKm = 10) {
+  if (!r || r._mirova_confirmed) return false;
+  const pc = r.primary_cluster;
+  if (!pc || r.t_max_k == null || r.t_max_k >= 278.15) return false;
+  const npx = pc.n_pixels ?? 0;
+  if (npx < 100) return false;
+  const eq = mirovaEqVrp(r, innerKm, false);
+  return eq >= 50 && (eq / npx) < 1.0;
+}
+function isThermalArtifact(r, innerKm = 10) {
+  return isCirrusArtifact(r, innerKm) || isDiffuseFieldArtifact(r, innerKm);
+}
+// VRP para DISPLAY (VRP 48h, nivel de alerta, sparkline): 0 si es artefacto térmico
+// → no dispara una falsa alerta "Alta" por nube fría / campo difuso.
 function eqVrpDisplay(r, innerKm) {
-  return isCirrusArtifact(r, innerKm) ? 0 : mirovaEqVrp(r, innerKm, false);
+  return isThermalArtifact(r, innerKm) ? 0 : mirovaEqVrp(r, innerKm, false);
 }
 
 // ─── Latest 48h max (sync con index.html L998) ───────────────────────────────

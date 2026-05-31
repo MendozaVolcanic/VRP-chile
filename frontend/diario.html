@@ -249,9 +249,27 @@ function isCirrusArtifact(r, volcanoName) {
   if (r.t_max_k == null || r.t_max_k >= 273.15) return false;
   return mirovaEqVrp(r, volcanoName) > 10;
 }
-// VRP para DISPLAY (chart/stats): 0 si es artefacto cirrus (no infla la escala).
+// S93 — artefacto "campo difuso (fondo frío)": misma familia A23/D9 que el cirrus
+// (path D contextual sobre fondo gélido) pero con el píxel más caliente apenas
+// SOBRE 0 °C (se escapa al gate cirrus t_max<273.15). Firma = campo amplio +
+// radiancia dispersa (n_px≥100 ∧ VRP/px<1.0 ∧ t_max<5 °C ∧ VRP≥50), opuesto a un
+// foco real. Usa t_max + geometría, NUNCA t_bg (escudo §3.2). Validado 45 vols:
+// 0 reales atrapadas. Ver index.html y el design doc S93.
+function isDiffuseFieldArtifact(r, volcanoName) {
+  if (!r || r._mirova_confirmed) return false;
+  const pc = r.primary_cluster;
+  if (!pc || r.t_max_k == null || r.t_max_k >= 278.15) return false;
+  const npx = pc.n_pixels ?? 0;
+  if (npx < 100) return false;
+  const eq = mirovaEqVrp(r, volcanoName);
+  return eq >= 50 && (eq / npx) < 1.0;
+}
+function isThermalArtifact(r, volcanoName) {
+  return isCirrusArtifact(r, volcanoName) || isDiffuseFieldArtifact(r, volcanoName);
+}
+// VRP para DISPLAY (chart/stats): 0 si es artefacto térmico (no infla la escala).
 function eqVrpDisplay(r, volcanoName) {
-  return isCirrusArtifact(r, volcanoName) ? 0 : mirovaEqVrp(r, volcanoName);
+  return isThermalArtifact(r, volcanoName) ? 0 : mirovaEqVrp(r, volcanoName);
 }
 
 function sensorBucket(s) {
