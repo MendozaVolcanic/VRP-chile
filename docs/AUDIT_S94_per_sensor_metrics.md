@@ -149,7 +149,59 @@ seguridad de F3 SOLO se puede medir tras el reproc F2 con el pipeline vigente.**
 
 ---
 
-## 6. Escudo anti-drift (vigente)
+## 6. Auditoría ESPACIAL — ¿caen las detecciones en la laguna cratérica?
+
+Pregunta de Nicolás (Tupungatito). La auditoría §1–§3 es **temporal** (¿vimos algo
+esa noche?); ésta es **espacial** (¿el punto cae en el cráter?). Fuentes
+reproducibles: `experiments/_s94_audit/tupungatito_spatial.py` (+`.json`) y
+`spatial_audit.py` (+`.json`, los 11 vols).
+
+### El fenómeno
+El cráter de Tupungatito es una **laguna chica** cuya emisión térmica es **sub-píxel**
+(~0.3 MW, lo que MIROVA ve con VIIRS 375 m). El fondo es **glaciar a −32 °C**. Dos
+sensores cuentan historias distintas:
+- **VIIRS 375 m** resuelve el foco: **336 de 373 detecciones (90 %) tienen el centroide
+  del cluster a <2 km del cráter**. Coincide con MIROVA (que reporta su foco a ~0.5 km
+  del cráter, una vez corregido su offset de medición). **Este sensor funciona.**
+- **MODIS 1 km** NO resuelve el foco. Sobre el glaciar helado, el path D contextual
+  enciende afloramientos de roca apenas sobre cero (−0.3 °C, "tibios" relativos al
+  hielo) y Wooster lee el contraste hielo↔roca como fondo↔lava.
+
+### La evidencia que responde la observación de Nicolás
+El **record de mayor VRP** de Tupungatito (2026-05-14, **190.9 MW, MODIS_AQUA**) tiene
+**0 de 77 píxeles anómalos dentro de 2 km del cráter** — están todos a **7–27 km** sobre
+el glaciar/altiplano. La magnitud NO sale de la laguna; sale del campo frío disperso.
+Y el sesgo es sistemático: el VRP mediano del **glaciar (>7 km) es 5.05 MW**, MAYOR que
+el del **cráter (0–2 km), 2.62 MW** — el artefacto brilla más que el foco real.
+
+| Geometría Tupungatito | valor |
+|---|---|
+| cráter ↔ mirova_center | 4.86 km (offset A13/A30) |
+| VIIRS375 con centroide <2 km del cráter | 336 / 373 (90 %) |
+| VRP mediano cráter (0–2 km) | 2.62 MW |
+| VRP mediano glaciar (>7 km) | 5.05 MW |
+| Record top: 190.9 MW MODIS, píxeles <2 km del cráter | 0 / 77 |
+
+### Cross-volcán (los 11, `spatial_audit.py`)
+El patrón es **por sensor, universal**: **VIIRS375 siempre centrado** (mediana ~1 km en
+10/11; única excepción PCC 4.94 km = lacolito extendido genuino, cat. b A20/A24). **MODIS
+y VIIRS750 dispersos** (medianas 3–18 km) por baja resolución + elongación off-nadir sec³θ
+(A36). La firma de "campo difuso disperso" (n_px≥100 ∧ vrp/px<1) es **rara** incluso en
+glaciares (Tupungatito 4/442 summit) — la dispersión viene del **sensor de baja
+resolución ubicando mal el centroide**, no de un campo difuso extendido (salvo PCC).
+
+### Qué significa operacionalmente
+- **La señal canónica (VIIRS375) reproduce el foco de MIROVA.** El clon, en el sensor que
+  importa, está bien.
+- **La dispersión "fuera del cráter" es enteramente MODIS + VIIRS750.** El dashboard ya
+  oculta lo `far` (gate summit → VRP=0 en "solo cráter") + el filtro de campo difuso, pero
+  el MAPA los dibuja en gris e históricamente inflaban el chart.
+- **Tupungatito es exactamente el caso para F3** (co-validación MODIS): sin foco térmico
+  duro sobre el glaciar, MODIS no debería reportar. Pero F3 solo se valida tras F2 (§4) y
+  con cuidado (A19: el ring glaciar de Tupungatito refuta kernel-bg; co-validación es otro
+  mecanismo, hay que medirlo, no extrapolarlo).
+
+## 7. Escudo anti-drift (vigente)
 NO gate t_bg ciego (S86). NO ocultar VIIRS750 (refutado §5). NO tocar detección
 VIIRS375 (recall). NO co-validación global (mata 93 % recall, S93). NO tocar
 pipeline sin tag+OK (A45). La co-validación distingue por COHERENCIA (foco duro
