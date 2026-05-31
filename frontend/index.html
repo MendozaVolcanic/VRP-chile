@@ -919,6 +919,33 @@ function isCirrusArtifact(r, innerKm = 10) {
   return mirovaEqVrp(r, innerKm, false) > 10;
 }
 
+// S93 — artefacto "campo difuso (fondo frío)" (DISPLAY-only, no toca pipeline).
+// Misma familia física que el cirrus (path D dNTI contextual sobre fondo gélido,
+// drift A23/D9), pero con el píxel más caliente apenas SOBRE 0 °C (se escapa al
+// gate cirrus t_max<273.15). Mecanismo (ej. PCC 2026-05-05): t_bg≈243 K (−30 °C),
+// t_max +1.8 °C, 670 px todos por path D → la suma de cientos de píxeles apenas
+// tibios da 337 MW, pero NO hay foco volcánico (MODIS 1 km no resuelve el lacolito
+// 0.3 MW que MIROVA ve con VIIRS 375 m). Firma del artefacto = campo amplio +
+// radiancia DISPERSA, lo opuesto a un foco real (pocos px, mucha radiancia c/u).
+// Discriminante (usa t_max + geometría, NUNCA t_bg → no replica el gate refutado
+// S86 que mata Láscar bajo nube fría): n_px≥100 ∧ VRP/px<1.0 ∧ t_max<5 °C ∧ VRP≥50.
+// Validado en 45 vols (experiments/_s93_warmscene/validate_criterion.py): 0 reales
+// atrapadas; solo agrega 2 picos PCC a los que el filtro cirrus no llega.
+// Ver docs/superpowers/specs/2026-05-30-display-diffuse-field-artifact-design.md.
+function isDiffuseFieldArtifact(r, innerKm = 10) {
+  if (!r || r._mirova_confirmed) return false;
+  const pc = r.primary_cluster;
+  if (!pc || r.t_max_k == null || r.t_max_k >= 278.15) return false;
+  const npx = pc.n_pixels ?? 0;
+  if (npx < 100) return false;
+  const eq = mirovaEqVrp(r, innerKm, false);
+  return eq >= 50 && (eq / npx) < 1.0;
+}
+// Artefacto térmico = cualquiera de los dos (mismo mecanismo, distinto umbral t_max).
+function isThermalArtifact(r, innerKm = 10) {
+  return isCirrusArtifact(r, innerKm) || isDiffuseFieldArtifact(r, innerKm);
+}
+
 // S18: clasifica una detección como "cráter" (summit). Criterios, en orden:
 //   1. distance_class === "summit" (asignado por los procesadores S14+).
 //   2. distance_class === "far" → no es summit.
@@ -975,7 +1002,7 @@ function mirovaSensorBucket(sensor) {
 function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
   // S90: los artefactos cirrus incoherentes no cuentan como detección nuestra
   // (mejora la precisión reportada hacia el valor real; no son FP genuinos).
-  const eqVrp = (r) => isCirrusArtifact(r, innerKm) ? 0 : mirovaEqVrp(r, innerKm, includeFar);
+  const eqVrp = (r) => isThermalArtifact(r, innerKm) ? 0 : mirovaEqVrp(r, innerKm, includeFar);
   // Index nuestros por bucket → array de {t, r} ordenados por tiempo
   const ourByBucket = { MODIS: [], VIIRS375: [], VIIRS750: [] };
   for (const r of ourRecords) {
@@ -1162,7 +1189,7 @@ function latestDetection(records, includeFar = false, innerKm = 10) {
     if (!includeFar && !isSummitDetection(r)) continue;
     if (!isValidDetection(r)) continue;
     if (!isSensorVisible(r)) continue;
-    if (isCirrusArtifact(r, innerKm)) continue;  // S90: no titular con artefacto cirrus
+    if (isThermalArtifact(r, innerKm)) continue;  // S90/S93: no titular con artefacto térmico
     const v = mirovaEqVrp(r, innerKm, includeFar);
     if (v <= 0) continue;
     // Desempate: ante igual timestamp (dos sensores en la misma pasada), mostrar
@@ -1567,8 +1594,8 @@ function renderDetail() {
   const innerKm = v.inner_radius_km ?? 10;
   // S36: eqVrp captura includeFarDistance para que charts/stats respeten toggle.
   // S90: el gráfico NO grafica artefactos cirrus incoherentes (se conservan en la
-  // tabla, marcados). Display-only; isCirrusArtifact valida t_max bajo cero + VRP alto.
-  const eqVrp = (rec) => isCirrusArtifact(rec, innerKm) ? 0 : mirovaEqVrp(rec, innerKm, includeFarDistance);
+  // tabla, marcados). Display-only; isThermalArtifact = cirrus (t_max<0) ∨ campo difuso (S93).
+  const eqVrp = (rec) => isThermalArtifact(rec, innerKm) ? 0 : mirovaEqVrp(rec, innerKm, includeFarDistance);
 
   if (d.updated) {
     document.getElementById("updated-label").textContent =
@@ -2842,8 +2869,10 @@ function buildNRTTable() {
       const vrpShow = (r.primary_cluster?.vrp_mw && r.primary_cluster.vrp_mw > 0)
         ? r.primary_cluster.vrp_mw
         : vrpFinal;
-      // S92: marcar artefacto cirrus (display-only, mismo criterio que chart/cards/métricas).
-      allDetections.push({ volcano: v, record: r, vrp: vrpShow, isArtifact: isCirrusArtifact(r, innerKm) });
+      // S92/S93: marcar artefacto térmico (display-only, mismo criterio que chart/cards/métricas).
+      const artifactKind = isCirrusArtifact(r, innerKm) ? "cirrus"
+        : (isDiffuseFieldArtifact(r, innerKm) ? "diffuse" : null);
+      allDetections.push({ volcano: v, record: r, vrp: vrpShow, artifactKind });
     }
   }
 
@@ -2861,7 +2890,7 @@ function buildNRTTable() {
   show.forEach(det => {
     const lv = getLevel(det.vrp);
     const row = el("tr");
-    if (det.isArtifact) row.className = "row-cirrus-artifact";  // S92: atenúa la fila
+    if (det.artifactKind) row.className = "row-cirrus-artifact";  // S92/S93: atenúa la fila
     row.addEventListener("click", () => {
       currentVolcano = det.volcano;
       buildCards();
@@ -2872,14 +2901,20 @@ function buildNRTTable() {
     const tdVolc = el("td"); tdVolc.textContent = det.volcano.display; tdVolc.style.fontWeight = "600";
     const tdVrp = el("td"); tdVrp.textContent = det.vrp.toFixed(3);
     tdVrp.style.fontWeight = "700";
-    // S92: VRP de artefacto en muted (no se pinta con color de alerta — no es detección real).
-    tdVrp.style.color = det.isArtifact
+    // S92/S93: VRP de artefacto en muted (no se pinta con color de alerta — no es detección real).
+    tdVrp.style.color = det.artifactKind
       ? "var(--muted)"
       : "var(--" + (lv.key === "vlow" ? "green" : lv.key === "low" ? "yellow" : lv.key === "mod" ? "orange" : lv.key === "nd" ? "muted" : "red") + ")";
     const tdSensor = el("td"); tdSensor.textContent = det.record.sensor; tdSensor.style.color = "var(--muted)";
-    if (det.isArtifact) {
-      const badge = el("span"); badge.className = "cirrus-badge"; badge.textContent = "artefacto cirrus";
-      badge.title = "Píxel más caliente bajo 0 °C con VRP alto: incoherencia térmica tipo cirrus, no detección real.";
+    if (det.artifactKind) {
+      const badge = el("span"); badge.className = "cirrus-badge";
+      if (det.artifactKind === "diffuse") {
+        badge.textContent = "campo difuso (fondo frío)";
+        badge.title = "Magnitud alta = suma de cientos de píxeles apenas tibios (>0 °C) sobre fondo gélido (path D). No es un foco volcánico real: MODIS 1 km no resuelve el lacolito; MIROVA lo ve a ~0,3 MW con VIIRS 375 m.";
+      } else {
+        badge.textContent = "artefacto cirrus";
+        badge.title = "Píxel más caliente bajo 0 °C con VRP alto: incoherencia térmica tipo cirrus, no detección real.";
+      }
       tdSensor.appendChild(badge);
     }
 
