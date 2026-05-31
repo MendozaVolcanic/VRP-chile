@@ -97,6 +97,9 @@
     .pill-v375  { background: rgba(233,30,99,0.2);  color: var(--v375);  }
     .pill-v750  { background: rgba(0,188,212,0.2);  color: var(--v750);  }
     .vc-time { font-size: 0.62rem; color: var(--muted); margin-top: 6px; }
+    .vc-time-lbl { font-size: 0.62rem; color: var(--muted); }
+    .vc-time-date { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-top: 1px; letter-spacing: 0.2px; }
+    .vc-time-nodet { color: var(--muted); font-weight: 600; }
 
     /* ── Detail panel ── */
     .detail-panel {
@@ -1591,11 +1594,19 @@ function buildCards() {
     // Last update — S90: si hay detección, el timestamp es el de ESA detección
     // (acoplado al número mostrado). Si no, se muestra la última pasada satelital
     // como contexto de frescura de datos, aclarando que no hubo detección.
+    // S94 (pedido Nicolás): mostrar la fecha de la medición prominente como MIROVA.
+    // Etiqueta chica + fecha grande/resaltada en su propia línea.
     const time = el("div", "vc-time");
     if (det) {
-      time.textContent = "Última detección: " + det.datetime_utc.slice(0, 16) + " UTC";
+      const lbl = el("span", "vc-time-lbl"); lbl.textContent = "Última detección";
+      const dateEl = el("div", "vc-time-date"); dateEl.textContent = det.datetime_utc.slice(0, 16) + " UTC";
+      time.append(lbl, dateEl);
+    } else if (lastTime) {
+      const lbl = el("span", "vc-time-lbl"); lbl.textContent = "Última pasada (sin detección)";
+      const dateEl = el("div", "vc-time-date vc-time-nodet"); dateEl.textContent = lastTime.slice(0, 16) + " UTC";
+      time.append(lbl, dateEl);
     } else {
-      time.textContent = lastTime ? "Última pasada: " + lastTime.slice(0, 16) + " UTC (sin detección)" : "Sin datos";
+      time.textContent = "Sin datos";
     }
 
     card.append(hdr, vrpEl, vrpSub, pills, dcRow, time);
