@@ -33,6 +33,7 @@ from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots, cluster_pixels_geographic
 from .vrp_regimes import compute_local_background
 from .test1_integrated import compute_test1_mir
+from .anomaly_pixels import build_anomaly_pixels
 from .path_d_cap import apply_d9_scene_cap  # F50/S77
 from .path_d_intra_radio import apply_intra_radio_gate  # S83 F-S81-A Fase 2
 from .second_pass_intra_radio import apply_second_pass_intra_radio_gate  # S85 F-S81-B'
@@ -1115,6 +1116,13 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp_arr = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             t1_vrp_2d[t1_rows, t1_cols] = t1_vrp_arr
+            # S95 (A45) — gap A07: el path Test1 calculaba la magnitud pero dejaba
+            # anomaly_pixels=[] vacío → bloqueaba F5' display y rompía el mapa de
+            # píxeles del dashboard para records MODIS pure-Test1. Espejo del fix
+            # S94 (PR #294) en process_viirs.py:1486. Poblar desde t1_vrp_2d (los
+            # mismos píxeles que ya alimentan pc.vrp_mw). NO cambia detección ni
+            # magnitud — solo serializa píxeles ya calculados.
+            anomaly_pixels = build_anomaly_pixels(t1_vrp_2d, lat, lon, dist, bt_mir)
             # S38: aplicar también strategy vent-anchored al cluster Test 1.
             _t1_strategy = ("vent_anchored" if (ENABLE_VENT_ANCHORED_CLUSTERING
                                                  and inner_radius_km is not None)
