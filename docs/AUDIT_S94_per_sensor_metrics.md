@@ -260,6 +260,32 @@ Tupungatito ~0.5 MW capeado a 5 sigue 10× alto).
 3. **F3 (MODIS co-validación)** — opcional, baja prioridad; el dashboard ya tapa MODIS.
 4. **VIIRS750** — mismo tratamiento de magnitud que VIIRS375 (NO ocultar; MIROVA lo usa).
 
+## 7b. F5' BLOQUEADO por F2 — inconsistencia de `anomaly_pixels` (hallazgo S94)
+
+Al explorar el diseño de F5' (display primero, decisión de Nicolás) intenté recomputar
+la magnitud-foco desde `anomaly_pixels[].vrp_mw` de cada record. Descubrí que **ese
+campo está poblado INCONSISTENTEMENTE entre épocas del pipeline** y NO se puede usar:
+
+| Tupungatito VIIRS375 | pc.vrp_mw | suma anomaly_pixels | ratio |
+|---|---|---|---|
+| 2026-01-29 | 0.13 | 0.13 | 1.0 (consistente) |
+| 2026-01-30 | 8.24 | 0.78 | 10.5× (off) |
+| 2026-05-29 (reciente) | 2.27 | **0.00** | ∞ (píxeles con vrp=0) |
+
+74/373 records Tupungatito tienen `pc.vrp_mw` > 2× la suma de sus propios píxeles.
+En el código actual (`process_viirs.py:1112-1158`) el mismo `per_pixel_vrp_mw`
+alimenta tanto `anomaly_pixels` como el clustering → deberían ser consistentes; la
+inconsistencia es de **records históricos procesados por versiones distintas**.
+
+**Conclusión (4ª manifestación del confound A18/A50/S88 esta sesión): F5' —display o
+pipeline— necesita per-píxel VRP consistente, que solo da la data reprocesada. F5' está
+BLOQUEADO por F2.** El reproc (`reproc-s94-f2-validation.yml`, run 26701975812, subdir
+`data/_s94_reproc/`) es el prerrequisito de F3 Y F5'. Cuando termine, re-correr
+`f5_magnitude_candidates.py` + `viirs_magnitude_diag.py` sobre `data/_s94_reproc/` y
+recién entonces diseñar F5' (brainstorming). **Pendiente de validar en la data
+reprocesada**: si los records recientes con `anomaly_pixels.vrp_mw=0` son un schema gap
+del código ACTUAL (A07) o solo histórico.
+
 ## 8. Escudo anti-drift (vigente)
 NO gate t_bg ciego (S86). NO ocultar VIIRS750 (refutado §5). NO tocar detección
 VIIRS375 (recall). NO co-validación global (mata 93 % recall, S93). NO tocar
