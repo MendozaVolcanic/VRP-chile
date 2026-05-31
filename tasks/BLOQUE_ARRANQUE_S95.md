@@ -54,6 +54,44 @@ Elegir la variante (D1/D2/D3 — ver design doc §3-4) que cumpla: Láscar 0.9-1
 → ~1×, ningún confirmado a 0, R2 pixel-level. Barrer params. Después: implementar F5' display
 (brainstorming gate ya pasado; calibración decide la forma). A45 si baja a pipeline.
 
+## §1.5 — AUDITORÍA de errores similares (PRIORITARIO, antes de cerrar el reproc)
+
+Pedido de Nicolás (cierre S94): los gaps que descubrimos suelen ser **sistémicos**.
+Auditar errores del mismo patrón Y el impacto más amplio de los que ya encontramos.
+**Hacer ANTES de dar el reproc por bueno** — puede cambiar el alcance.
+
+1. **¿El gap Test1 anomaly_pixels existe TAMBIÉN en los otros 2 procesadores?**
+   El fix #294 fue SOLO en `process_viirs.py`. `process_modis.py` y
+   `process_viirs_mod.py` (VIIRS750) tienen su propio path Test1 — muy probable que
+   dejen `anomaly_pixels=[]` igual. **Verificar** (grep del path Test1 + revisar un
+   record MODIS/VIIRS750 Test1 reprocesado: ¿n_aps=0 con pc.vrp>0?). Si sí:
+   - Aplicar el mismo helper `build_anomaly_pixels` (ya existe) en esos paths (A45,
+     TDD, tag).
+   - **El reproc MODIS ya está hecho (data/_s94_reproc_modis/) — re-reproc MODIS** si
+     tiene el gap (afecta el mapa de píxeles MODIS del dashboard + cualquier análisis).
+
+2. **Otros "calculado pero no persistido" (patrón A07)** en los 3 procesadores:
+   buscar variables que se computan pero no entran al return dict / record (como
+   S21 H_S21_11: std_bg_i04/threshold_mir/nti_std). Grep de asignaciones locales
+   vs campos del record.
+
+3. **Otros campos con punto de referencia engañoso** (A48/A3): `anomaly_pixels.dist_km`
+   es desde el CENTRO del volcán, no el vent. ¿Hay otros campos `*_dist_km` /
+   coords medidos desde un punto que no coincide con su nombre? (revisar store.py +
+   los 3 procesadores).
+
+4. **Impacto más amplio del gap Test1** (ya fijado pero verificar arrastre): ¿qué
+   scripts/audits/R2 leyeron `anomaly_pixels` de records Test1 y dieron resultados
+   FALSOS por la lista vacía? (ej. cualquier audit pixel-level, el mapa del dashboard,
+   experiments que sumen anomaly_pixels). Listar y re-verificar.
+
+5. **Asimetría de esquema hotspot single vs primary_cluster** (A46): ¿hay gates
+   downstream que usen una representación del hotspot y den incoherencia con la otra,
+   como el bug F47 H4? Revisar gates que decidan rollup vs zero-out.
+
+Producir `docs/AUDIT_S95_gaps_sistemicos.md` con lo encontrado + clasificación
+(real/falso, impacto, fix needed). Usar subagentes en paralelo (A26) si hay >3 ejes.
+
 ## §2 — Estado del reproc S94 (qué hay)
 - **MODIS GitHub COMPLETO** (11 vols full window, `data/_s94_reproc_modis/`). ✓
 - **VIIRS recent PRE-FIX** (Tupun/PCC/Lascar local, ~completo; Villarrica/PP/Lastarria GitHub
