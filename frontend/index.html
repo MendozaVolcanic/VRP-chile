@@ -763,10 +763,10 @@ function setPersistedJSON(key, value) {
   try { sessionStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
 }
 
-// S93 F1: VIIRS750 (M-band) oculto por DEFAULT — MIROVA no lo usa para volcanes
-// chilenos (0 alertas en CSV); su señal aquí es 0 TP / puro artefacto. El toggle
-// sigue disponible para inspección. Key v2 para aplicar el nuevo default.
-const sensorVisible = persistedJSON("vrp_sensors_v2", { MODIS: true, VIIRS375: true, VIIRS750: false, MIROVA: true });
+// S93: los 3 sensores visibles por default. (El "VIIRS750 oculto" de F1 fue un
+// error: se basó en un bug del loader que daba 0 alertas VIIRS750; MIROVA SÍ
+// publica VIIRS750, detecta menos que VIIRS375. Key v3 revierte el default v2.)
+const sensorVisible = persistedJSON("vrp_sensors_v3", { MODIS: true, VIIRS375: true, VIIRS750: true, MIROVA: true });
 let currentVolcano = VOLCANOES[0];
 let currentDays = 30;  // S26 D: default 30 días (antes 7). Las refs MIROVA Villarrica históricas necesitan al menos 30d para visibilidad. Toggle a 90d/180d para historia completa.
 let logScale = persistedFlag("vrp_log_scale", false);
@@ -1105,9 +1105,11 @@ function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
   }
   const byBucket = {};
   for (const b of Object.keys(per)) byBucket[b] = metricsOf(per[b]);
-  // Global operacional = MODIS + VIIRS375 (excluye VIIRS750, fuera del alcance MIROVA).
+  // Global = los 3 sensores. MIROVA publica MODIS, VIIRS375 (I-band) y VIIRS750
+  // (M-band); este último detecta MENOS pero NO es nulo (fix S93: el loader
+  // buggeado lo daba en 0 → falso "MIROVA no usa VIIRS750").
   const agg = { tp: 0, fn: 0, fp: 0, ratios: [] };
-  for (const b of ["MODIS", "VIIRS375"]) {
+  for (const b of ["MODIS", "VIIRS375", "VIIRS750"]) {
     agg.tp += per[b].tp; agg.fn += per[b].fn; agg.fp += per[b].fp;
     agg.ratios.push(...per[b].ratios);
   }
@@ -1724,15 +1726,18 @@ function renderDetail() {
                   (currentDays ? currentDays + "d" : "todo") + "). " +
                   "Records MIROVA con clasificación RUTINA o NULO no cuentan como FN. " +
                   "Match por sensor bucket con tolerancia temporal ±60 min. " +
-                  "VIIRS 750m excluido: MIROVA no lo usa para volcanes chilenos.";
+                  "MIROVA publica los 3 sensores (VIIRS375 I-band detecta más; " +
+                  "VIIRS750 M-band menos; MODIS solo anomalías grandes).";
   const hdr = el("div", "metrics-header");
   hdr.textContent = "Métricas vs MIROVA (live) — por sensor";
   hdr.title = tipText;
   dp.appendChild(hdr);
   const fmt = (x) => (x == null ? "—" : x.toFixed(2));
-  // VIIRS375 primero (fuente principal MIROVA), luego MODIS (solo lo grande).
+  // Orden por sensibilidad: VIIRS375 (I-band, más detecciones), VIIRS750 (M-band),
+  // MODIS (1km, solo lo grande). Los 3 los publica MIROVA (fix S93).
   const SENSOR_ROWS = [
-    { key: "VIIRS375", label: "VIIRS 375m", note: "fuente principal" },
+    { key: "VIIRS375", label: "VIIRS 375m", note: "I-band · más sensible" },
+    { key: "VIIRS750", label: "VIIRS 750m", note: "M-band · menos sensible" },
     { key: "MODIS",    label: "MODIS 1km",  note: "solo anomalías grandes" },
   ];
   for (const s of SENSOR_ROWS) {

@@ -61,19 +61,25 @@ def normalize_volcano_name(csv_label: str) -> Optional[str]:
 # === Normalización de sensor (CSV → bucket, regla A48) ===
 
 def normalize_sensor(sensor_raw: str) -> str:
-    """Mapea el sensor del CSV a un bucket canónico.
+    """Mapea el sensor del CSV MIROVA a un bucket canónico.
 
+    Convención del CSV consolidado (= frontend mirovaSensorBucket, confirmada por
+    Nicolás autor del scraper Mirova-v1):
     - MODIS → "MODIS"
-    - VIIRS / VIIRS375 (I-band 375m, sin sufijo) → "VIIRS375"
-    - VIIRS750 (M-band 750m) → "VIIRS750"
+    - "VIIRS375" (I-band 375m, etiqueta explícita) → "VIIRS375"
+    - "VIIRS" (a secas) o "VIIRS750" → "VIIRS750" (M-band 750m)
+
+    S93 fix (regla A48): la versión S86 mapeaba "VIIRS" → "VIIRS375", mandando las
+    alertas VIIRS750 (M-band) al cajón equivocado → falso "MIROVA no usa VIIRS750".
+    El orden importa: "375" explícito ANTES del genérico "VIIRS".
     """
     s = str(sensor_raw).strip().upper()
     if "MODIS" in s:
         return "MODIS"
-    if "750" in s:
-        return "VIIRS750"
-    if "VIIRS" in s:
+    if "375" in s:
         return "VIIRS375"
+    if "VIIRS" in s:  # "VIIRS" a secas o "VIIRS750" = M-band 750m
+        return "VIIRS750"
     return s
 
 

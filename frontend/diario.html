@@ -268,10 +268,8 @@ function isThermalArtifact(r, volcanoName) {
   return isCirrusArtifact(r, volcanoName) || isDiffuseFieldArtifact(r, volcanoName);
 }
 // VRP para DISPLAY (chart/stats): 0 si es artefacto térmico (no infla la escala).
-// S93 F1: VIIRS 750m (M-band) fuera del alcance MIROVA (no lo usa para volcanes
-// chilenos; 0 TP / puro artefacto) → no cuenta en el display operacional.
+// (S93: el filtro VIIRS750→0 de F1 se revirtió — MIROVA sí publica VIIRS750.)
 function eqVrpDisplay(r, volcanoName) {
-  if (r && /_750$/.test(r.sensor || "")) return 0;
   return isThermalArtifact(r, volcanoName) ? 0 : mirovaEqVrp(r, volcanoName);
 }
 
@@ -311,9 +309,7 @@ function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
     const b = sensorBucket(r.sensor);
     if (buckets[b]) buckets[b].push(r);
   }
-  // S93 F1: VIIRS 750m (M-band) NO se grafica — MIROVA no lo usa para volcanes
-  // chilenos (0 alertas; 0 TP / puro artefacto en nuestro pipeline). Ver AUDIT_S93.
-  for (const b of ["MODIS", "VIIRS375"]) {
+  for (const b of ["MODIS", "VIIRS750", "VIIRS375"]) {
     if (buckets[b].length === 0) continue;
     ds.push({
       label: SENSOR_LABEL[b], type: "bar",
