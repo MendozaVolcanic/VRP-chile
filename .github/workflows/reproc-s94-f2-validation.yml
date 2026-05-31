@@ -1,0 +1,93 @@
+name: S94 F2 reproc histórico validación (config actual, aislado)
+
+# Workflow dispatch-only. F2 de S94: regenera el histórico de los 11 Tier A con la
+# config operacional ACTUAL (perfil _s94_reproc, que `extends: mirova_equivalent`)
+# para limpiar la deuda histórica que el NRT no reprocesa (Láscar Salar feb-2026 +
+# picos de campo frío pre-cap-D9). Es VALIDACIÓN + BASELINE para el A/B de F5'.
+#
+# Por qué GH Actions y no local: MODIS depende de pyhdf, roto en Windows (regla S15).
+# Aislamiento (A47): data_subdir=_s94_reproc, NO toca data/mirova_equivalent/.
+# Matrix POR VOLCÁN (no por fecha) → cada job escribe su propio JSON, sin race.
+# Promoción a operacional = decisión explícita de Nicolás tras validar (A45).
+#
+# A43 Norway problem: `"on":` quoted.
+
+"on":
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-01-29"
+      end:
+        description: "End date YYYY-MM-DD inclusive"
+        required: true
+        default: "2026-05-29"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        volcano:
+          - Lascar
+          - Tupungatito
+          - PuyehueCordonCaulle
+          - PlanchonPeteroa
+          - Lastarria
+          - Villarrica
+          - Isluga
+          - Copahue
+          - NevadosDeChillan
+          - Llaima
+          - Chaiten
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — _s94_reproc / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 340
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _s94_reproc \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed validation data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/_s94_reproc/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S94 F2 — reproc validación ${{ matrix.volcano }} _s94_reproc ${{ github.event.inputs.start }}->${{ github.event.inputs.end }}"
+          for attempt in 1 2 3 4 5 6; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
