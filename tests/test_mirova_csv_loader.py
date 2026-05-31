@@ -52,9 +52,15 @@ def test_normalize_sensor_modis():
     assert normalize_sensor("MODIS") == "MODIS"
 
 
-def test_normalize_sensor_viirs_sin_sufijo_es_375():
-    """CSV 'VIIRS' (sin sufijo) = I-band 375m."""
-    assert normalize_sensor("VIIRS") == "VIIRS375"
+def test_normalize_sensor_viirs_sin_sufijo_es_750():
+    """CSV 'VIIRS' (sin sufijo) = M-band 750m (convención MIROVA canónica).
+
+    S93 fix: el test original (S86) asumía 'VIIRS' = I-band 375m, contradiciendo
+    el frontend (mirovaSensorBucket: 'VIIRS' → VIIRS750) y la realidad del CSV
+    (etiquetas: 'MODIS', 'VIIRS375' explícito I-band, 'VIIRS' = M-band 750m).
+    El bug mandaba las 158 alertas VIIRS750 Tier A al cajón VIIRS375 (→ "MIROVA
+    no usa VIIRS750", falso). Confirmado por Nicolás (autor scraper Mirova-v1)."""
+    assert normalize_sensor("VIIRS") == "VIIRS750"
 
 
 def test_normalize_sensor_viirs375_explicito():

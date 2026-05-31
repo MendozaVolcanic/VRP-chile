@@ -103,3 +103,33 @@ MEZCLADAS (un número global) → engañoso (mezcla MODIS 2.6% con VIIRS375 38%)
 por sensor. VIIRS750 se grafica en las 3 vistas pese a que MIROVA no lo usa.
 
 → Diseño en `docs/superpowers/specs/2026-05-30-clon-mirova-por-sensor-design.md`.
+
+## 7. ⚠️ CORRECCIÓN (fin de S93) — BUG del loader invalida la división VIIRS
+
+**Nicolás detectó el error**: "MIROVA publica todos los sensores, no es que no use
+VIIRS750 — detecta menos, igual que VIIRS375." Tenía razón. El loader
+`mirova_csv_loader.normalize_sensor` mapeaba mal la etiqueta CSV **`VIIRS`** (a secas,
+= M-band 750m) → la bucketizaba como **VIIRS375** (orden de `if` equivocado, regla A48:
+heurística S86 no verificada contra el frontend). El CSV tiene 7185 filas `VIIRS`.
+
+**Conteo CORRECTO de alertas MIROVA Tier A (CONS, VRP>0):**
+| Sensor | Correcto | Lo que decía la tabla §6 (buggeado) |
+|---|---|---|
+| MODIS | 79 | 80 ✓ |
+| VIIRS 375m | 627 | 787 ✗ |
+| **VIIRS 750m** | **158** | **0 ✗✗** |
+
+**Qué se INVALIDA de §6** (pendiente re-análisis sesión nueva): toda la división
+VIIRS375 vs VIIRS750 (TP/FP/precisión/ratio por esos dos buckets). La conclusión #1
+("MIROVA no usa VIIRS750") es **FALSA**.
+
+**Qué SIGUE válido**: el diagnóstico raíz físico (Wooster sobre fondo gélido); la
+conclusión **MODIS** (79 alertas, 77 Lascar → "solo ve lo grande"; el bug era del VIIRS,
+no del MODIS); co-validación-solo-MODIS sigue como candidata (re-verificar recall por
+sensor con datos correctos).
+
+**Reparado en S93** (fix loader + revert F1): `normalize_sensor` corregido + test
+`test_normalize_sensor_viirs_sin_sufijo_es_750` (TDD, suite 613 passed); F1 revierte la
+exclusión de VIIRS750 (ahora se muestra como 3.er sensor en las métricas y el chart).
+**Pendiente sesión nueva**: re-correr todo el análisis por-sensor con el bucketing
+correcto y replantear F2–F5 con esos números. NO usar los números VIIRS de §6.
