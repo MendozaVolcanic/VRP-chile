@@ -61,7 +61,11 @@ from pipeline import profile as vrp_profile
 from pipeline.geo_utils import get_effective_vent
 
 
-TMP_DIR = Path(__file__).parent.parent / "tmp"
+# Granules crudos (L1B/HDF) — se descargan, procesan y borran por día. Override
+# VRP_TMP_DIR para sacarlo de carpetas sincronizadas (OneDrive): la sync a la nube
+# desperdicia banda y los file-locks bloquean el rmtree del cleanup (S94). Default
+# = repo/tmp (sin cambio en GitHub Actions, que no setea la var).
+TMP_DIR = Path(os.environ.get("VRP_TMP_DIR", str(Path(__file__).parent.parent / "tmp")))
 VOLCANOES_FILE = Path(__file__).parent.parent / "volcanoes.yaml"
 VOLCANIC_FEATURES_FILE = Path(__file__).parent.parent / "pipeline" / "volcanic_features.yaml"
 
