@@ -1,0 +1,26 @@
+# S94 F2 — perfil de reproceso MODIS-only para GitHub Actions (no operacional).
+#
+# Hereda la config operacional ACTUAL (extends mirova_equivalent) pero procesa
+# SOLO MODIS (viirs apagado), porque MODIS es el único sensor que REQUIERE GitHub
+# (pyhdf roto en Windows, regla S15). VIIRS va local (perfil _s94_reproc_viirs).
+#
+# Composición: store.py deduplica por (datetime_utc, sensor) → los records MODIS
+# (subdir _s94_reproc_modis) y VIIRS (subdir _s94_reproc_viirs) se unen luego por
+# un merge sin pisarse.
+#
+# Aislado en data_subdir propio (A47). Promoción a operacional = OK Nicolás (A45).
+
+extends: mirova_equivalent
+
+profile: _s94_reproc_modis
+description: >
+  Reproceso MODIS-only en GH Actions (pyhdf) de validación S94 F2, config
+  operacional heredada, en data_subdir aislado. Se combina luego con VIIRS local.
+
+sensors:
+  modis: true
+  viirs_375: false
+  viirs_750: false
+
+output:
+  data_subdir: _s94_reproc_modis

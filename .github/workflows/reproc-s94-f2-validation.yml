@@ -1,12 +1,12 @@
-name: S94 F2 reproc histórico validación (config actual, aislado)
+name: S94 F2 reproc MODIS-only (GitHub, aislado)
 
-# Workflow dispatch-only. F2 de S94: regenera el histórico de los 11 Tier A con la
-# config operacional ACTUAL (perfil _s94_reproc, que `extends: mirova_equivalent`)
-# para limpiar la deuda histórica que el NRT no reprocesa (Láscar Salar feb-2026 +
-# picos de campo frío pre-cap-D9). Es VALIDACIÓN + BASELINE para el A/B de F5'.
+# Workflow dispatch-only. F2 de S94, brazo MODIS: regenera SOLO los records MODIS
+# de los 11 Tier A con la config operacional ACTUAL (perfil _s94_reproc_modis, que
+# `extends: mirova_equivalent`). VIIRS va LOCAL (perfil _s94_reproc_viirs) porque
+# solo MODIS requiere GitHub (pyhdf roto en Windows, regla S15). Los dos brazos se
+# combinan luego por merge (store.py deduplica por (fecha, sensor)).
 #
-# Por qué GH Actions y no local: MODIS depende de pyhdf, roto en Windows (regla S15).
-# Aislamiento (A47): data_subdir=_s94_reproc, NO toca data/mirova_equivalent/.
+# Aislamiento (A47): data_subdir=_s94_reproc_modis, NO toca data/mirova_equivalent/.
 # Matrix POR VOLCÁN (no por fecha) → cada job escribe su propio JSON, sin race.
 # Promoción a operacional = decisión explícita de Nicolás tras validar (A45).
 #
@@ -62,7 +62,7 @@ jobs:
           pip install pyhdf
           pip install earthaccess numpy h5py scipy pyyaml
 
-      - name: Run reprocess — _s94_reproc / ${{ matrix.volcano }}
+      - name: Run reprocess — _s94_reproc_modis / ${{ matrix.volcano }}
         env:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
@@ -70,7 +70,7 @@ jobs:
         timeout-minutes: 340
         run: |
           python scripts/run_pipeline.py \
-            --profile _s94_reproc \
+            --profile _s94_reproc_modis \
             --volcano ${{ matrix.volcano }} \
             --start ${{ github.event.inputs.start }} \
             --end ${{ github.event.inputs.end }} \
@@ -81,9 +81,9 @@ jobs:
           set +e
           git config user.name  "vrp-bot"
           git config user.email "vrp-bot@github-actions"
-          git add "data/_s94_reproc/${{ matrix.volcano }}.json" 2>/dev/null
+          git add "data/_s94_reproc_modis/${{ matrix.volcano }}.json" 2>/dev/null
           git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
-          git commit -m "S94 F2 — reproc validación ${{ matrix.volcano }} _s94_reproc ${{ github.event.inputs.start }}->${{ github.event.inputs.end }}"
+          git commit -m "S94 F2 — reproc MODIS-only ${{ matrix.volcano }} _s94_reproc_modis ${{ github.event.inputs.start }}->${{ github.event.inputs.end }}"
           for attempt in 1 2 3 4 5 6; do
             git pull --rebase -X theirs origin main && git push && exit 0
             echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
