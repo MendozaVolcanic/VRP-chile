@@ -4,6 +4,22 @@
 `docs/AUDIT_S93_artefactos_sobreestimacion.md`. Datos: `experiments/_s93_audit/`.
 **Estado: DISEÑO. NO implementado. Implementación = sesión(es) con tag + OK + TDD + reproc + R2 (A45).**
 
+> ⚠️ **CORRECCIÓN S94 (2026-05-30).** Los números por-sensor de §2/§3 abajo
+> provienen del loader buggeado (bug VIIRS750, §7 de AUDIT_S93). El re-análisis
+> con el loader corregido vive en **`docs/AUDIT_S94_per_sensor_metrics.md`** +
+> `experiments/_s94_audit/`. Cambios vinculantes:
+> - **§3.2 "VIIRS750 — no reportar" → REFUTADO.** MIROVA SÍ publica VIIRS750
+>   (158 CONS / 179 CONS∪OCR), recall 83–87 %. NO ocultarlo (destruye recall real,
+>   A54). Tratarlo como sensor de pleno derecho: conservar detección, atacar
+>   precisión de campo frío como en MODIS.
+> - **§3.1 MODIS co-validación → sigue candidata, orden vinculante:** el dashboard
+>   ya oculta los artefactos MODIS (summit-gate + filtro térmico); el problema real
+>   de MODIS es el recall-al-cráter (11.8 %) = deuda histórica Salar (S88) → la
+>   limpia el reproc F2. La seguridad de F3 SOLO se mide tras F2 (bt_path OFF S40 +
+>   clúster histórico hacen inválido el split contextual-only offline; ver §4 de
+>   AUDIT_S94). **F2 antes que F3.**
+> - Plan F2–F5 replanteado en AUDIT_S94 §5. Lo de abajo queda como contexto histórico.
+
 ## 1. Objetivo (criterio de Nicolás, verificable)
 
 Replicar el comportamiento de MIROVA, que **reporta cada satélite por separado**:
