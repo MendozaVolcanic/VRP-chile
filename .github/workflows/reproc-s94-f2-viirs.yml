@@ -1,0 +1,85 @@
+name: S94 F2 reproc VIIRS (GitHub, tanda 2, aislado)
+
+# Workflow dispatch-only. Brazo VIIRS de S94 corrido en GitHub para los volcanes
+# que NO están corriendo localmente (paralelización idea de Nicolás S94): mientras
+# local hace Tupungatito/PCC/Láscar, GitHub hace Villarrica/Planchón/Lastarria.
+# VIIRS no requiere GitHub (corre local sin pyhdf), pero GitHub paraleliza sin tocar
+# la máquina de Nicolás. store.py deduplica por (fecha, sensor) → no choca con el
+# brazo MODIS (_s94_reproc_modis) ni con los VIIRS locales (volcanes distintos).
+#
+# Perfil _s94_reproc_viirs (modis:false), data_subdir=_s94_reproc_viirs, ventana
+# RECIENTE (default 2026-05-01→05-29). Matrix POR VOLCÁN (sin race). Token: secret.
+#
+# A43 Norway problem: "on": quoted.
+
+"on":
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-05-01"
+      end:
+        description: "End date YYYY-MM-DD inclusive"
+        required: true
+        default: "2026-05-29"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        volcano:
+          - Villarrica
+          - PlanchonPeteroa
+          - Lastarria
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — _s94_reproc_viirs / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 190
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _s94_reproc_viirs \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Commit reprocessed validation data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/_s94_reproc_viirs/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
+          git commit -m "S94 F2 — reproc VIIRS GitHub ${{ matrix.volcano }} _s94_reproc_viirs ${{ github.event.inputs.start }}->${{ github.event.inputs.end }}"
+          for attempt in 1 2 3 4 5 6; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
