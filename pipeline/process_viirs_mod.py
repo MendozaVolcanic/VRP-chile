@@ -125,6 +125,7 @@ from .detection_context import (
     first_pass_tests_2_and_3,
 )
 from .test1_integrated import compute_test1_mir
+from .anomaly_pixels import build_anomaly_pixels
 from .second_pass_intra_radio import apply_second_pass_intra_radio_gate  # S85 F-S81-B'
 
 # M-band wavelengths (µm)
@@ -1045,6 +1046,13 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp_arr = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             t1_vrp_2d[t1_rows, t1_cols] = t1_vrp_arr
+            # S95 (A45) — gap A07: el path Test1 calculaba la magnitud pero dejaba
+            # anomaly_pixels=[] vacío → bloqueaba F5' display y rompía el mapa de
+            # píxeles del dashboard para records VIIRS750 pure-Test1. Espejo del fix
+            # S94 (PR #294) en process_viirs.py:1486. Poblar desde t1_vrp_2d (los
+            # mismos píxeles que ya alimentan pc.vrp_mw). NO cambia detección ni
+            # magnitud — solo serializa píxeles ya calculados.
+            anomaly_pixels = build_anomaly_pixels(t1_vrp_2d, lat, lon, dist, bt)
             # S38: vent-anchored strategy también al cluster Test 1.
             _t1_strategy = ("vent_anchored"
                              if (ENABLE_VENT_ANCHORED_CLUSTERING
