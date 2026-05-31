@@ -276,7 +276,10 @@ function isThermalArtifact(r, innerKm = 10) {
 }
 // VRP para DISPLAY (VRP 48h, nivel de alerta, sparkline): 0 si es artefacto térmico
 // → no dispara una falsa alerta "Alta" por nube fría / campo difuso.
+// S93 F1: VIIRS 750m (M-band) fuera del alcance MIROVA (no lo usa para volcanes
+// chilenos; 0 TP / puro artefacto) → no cuenta en el display operacional.
 function eqVrpDisplay(r, innerKm) {
+  if (r && /_750$/.test(r.sensor || "")) return 0;
   return isThermalArtifact(r, innerKm) ? 0 : mirovaEqVrp(r, innerKm, false);
 }
 

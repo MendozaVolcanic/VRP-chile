@@ -122,6 +122,10 @@
     }
     .metric-box { min-width: 110px; border-color: rgba(122,143,166,0.35); }
     .metric-box .val { font-size: 1.15rem; }
+    .metrics-sensor-label {
+      font-size: 0.8rem; font-weight: 600; color: var(--text);
+      margin: 8px 0 2px;
+    }
 
     /* ── Energy bands (like MIROVA background) ── */
     .energy-bands { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
@@ -759,7 +763,10 @@ function setPersistedJSON(key, value) {
   try { sessionStorage.setItem(key, JSON.stringify(value)); } catch (e) {}
 }
 
-const sensorVisible = persistedJSON("vrp_sensors", { MODIS: true, VIIRS375: true, VIIRS750: true, MIROVA: true });
+// S93 F1: VIIRS750 (M-band) oculto por DEFAULT — MIROVA no lo usa para volcanes
+// chilenos (0 alertas en CSV); su señal aquí es 0 TP / puro artefacto. El toggle
+// sigue disponible para inspección. Key v2 para aplicar el nuevo default.
+const sensorVisible = persistedJSON("vrp_sensors_v2", { MODIS: true, VIIRS375: true, VIIRS750: false, MIROVA: true });
 let currentVolcano = VOLCANOES[0];
 let currentDays = 30;  // S26 D: default 30 días (antes 7). Las refs MIROVA Villarrica históricas necesitan al menos 30d para visibilidad. Toggle a 90d/180d para historia completa.
 let logScale = persistedFlag("vrp_log_scale", false);
@@ -1046,8 +1053,15 @@ function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
     return best;
   }
 
-  let tp = 0, fn = 0, fp = 0;
-  const ratios = [];
+  // S93 F1 — acumular POR SENSOR (MIROVA reporta cada satélite por separado).
+  // El global agrega SOLO MODIS+VIIRS375: MIROVA no usa VIIRS750 (M-band) para
+  // estos volcanes (0 alertas en 5 meses), así que incluirlo en la precisión la
+  // hundía con FP de un sensor que el clon no debe reportar. Ver AUDIT_S93.
+  const per = {
+    MODIS:    { tp: 0, fn: 0, fp: 0, ratios: [] },
+    VIIRS375: { tp: 0, fn: 0, fp: 0, ratios: [] },
+    VIIRS750: { tp: 0, fn: 0, fp: 0, ratios: [] },
+  };
   const matchedOurIdx = { MODIS: new Set(), VIIRS375: new Set(), VIIRS750: new Set() };
 
   // Loop MIROVA → buscar nuestro con eqVrp > 0
@@ -1056,11 +1070,11 @@ function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
     for (const { t, vrp: mVrp } of mByBucket[bucket]) {
       const idx = findNearest(ours, t);
       if (idx >= 0 && eqVrp(ours[idx].r) > 0) {
-        tp++;
+        per[bucket].tp++;
         matchedOurIdx[bucket].add(idx);
-        ratios.push(eqVrp(ours[idx].r) / mVrp);
+        per[bucket].ratios.push(eqVrp(ours[idx].r) / mVrp);
       } else {
-        fn++;
+        per[bucket].fn++;
       }
     }
   }
@@ -1072,21 +1086,32 @@ function computeMetrics(ourRecords, mirovaRecords, innerKm, includeFar) {
       if (matchedOurIdx[bucket].has(i)) continue;
       if (!(eqVrp(ours[i].r) > 0)) continue;
       const idx = findNearest(mirovas, ours[i].t);
-      if (idx < 0) fp++;
+      if (idx < 0) per[bucket].fp++;
     }
   }
 
-  const recall    = (tp + fn) > 0 ? tp / (tp + fn) : null;
-  const precision = (tp + fp) > 0 ? tp / (tp + fp) : null;
-  const f1 = (recall != null && precision != null && (recall + precision) > 0)
-    ? 2 * recall * precision / (recall + precision) : null;
-  let ratio_med = null;
-  if (ratios.length) {
-    const s = ratios.slice().sort((a,b) => a - b);
-    const mid = s.length >> 1;
-    ratio_med = (s.length % 2) ? s[mid] : 0.5 * (s[mid - 1] + s[mid]);
+  function metricsOf(o) {
+    const recall    = (o.tp + o.fn) > 0 ? o.tp / (o.tp + o.fn) : null;
+    const precision = (o.tp + o.fp) > 0 ? o.tp / (o.tp + o.fp) : null;
+    const f1 = (recall != null && precision != null && (recall + precision) > 0)
+      ? 2 * recall * precision / (recall + precision) : null;
+    let ratio_med = null;
+    if (o.ratios.length) {
+      const s = o.ratios.slice().sort((a, b) => a - b);
+      const mid = s.length >> 1;
+      ratio_med = (s.length % 2) ? s[mid] : 0.5 * (s[mid - 1] + s[mid]);
+    }
+    return { tp: o.tp, fn: o.fn, fp: o.fp, pairs: o.ratios.length, recall, precision, f1, ratio_med };
   }
-  return { tp, fn, fp, pairs: ratios.length, recall, precision, f1, ratio_med };
+  const byBucket = {};
+  for (const b of Object.keys(per)) byBucket[b] = metricsOf(per[b]);
+  // Global operacional = MODIS + VIIRS375 (excluye VIIRS750, fuera del alcance MIROVA).
+  const agg = { tp: 0, fn: 0, fp: 0, ratios: [] };
+  for (const b of ["MODIS", "VIIRS375"]) {
+    agg.tp += per[b].tp; agg.fn += per[b].fn; agg.fp += per[b].fp;
+    agg.ratios.push(...per[b].ratios);
+  }
+  return { ...metricsOf(agg), byBucket };
 }
 
 // S89 #3 — mirova_confirmed: etiqueta por-record "MIROVA también vio esto".
@@ -1689,40 +1714,53 @@ function renderDetail() {
     dp.appendChild(banner);
   }
 
-  // ── S77 F30 P4 — Card métricas live recall/precision/F1/ratio vs MIROVA ──
-  // Calculado client-side al cargar volcán o al togglear includeFarDistance.
-  // Sensor toggle NO afecta (métricas son globales por bucket).
+  // ── S77 F30 P4 / S93 F1 — Métricas live POR SENSOR vs MIROVA ──
+  // MIROVA reporta cada satélite por separado; nosotros también. Un número
+  // agregado mezclaba MODIS (precisión ~3%, ciego a lo débil → casi todo
+  // artefacto) con VIIRS375 (fuente real, precisión ~38%) y resultaba engañoso.
+  // VIIRS750 (M-band) NO lo usa MIROVA para estos volcanes → no se reporta acá.
   const metrics = computeMetrics(filtered, mFiltered, innerKm, includeFarDistance);
-  const mr = el("div", "stats-row metrics-row");
   const tipText = "Calculado contra CONS+OCR del CSV consolidado MIROVA en la ventana actual del chart (" +
                   (currentDays ? currentDays + "d" : "todo") + "). " +
                   "Records MIROVA con clasificación RUTINA o NULO no cuentan como FN. " +
-                  "Match por sensor bucket (MODIS↔MODIS, VIIRS375↔I-band 375m, VIIRS↔M-band 750m) " +
-                  "con tolerancia temporal ±60 min.";
-  function addMetric(label, val, unit, color) {
-    const box = el("div", "stat-box metric-box");
-    box.title = tipText;
-    const l = el("div", "label"); l.textContent = label;
-    const vEl = el("div", "val"); vEl.textContent = val;
-    if (color) vEl.style.color = color;
-    const u = el("div", "unit"); u.textContent = unit;
-    box.append(l, vEl, u);
-    mr.appendChild(box);
-  }
+                  "Match por sensor bucket con tolerancia temporal ±60 min. " +
+                  "VIIRS 750m excluido: MIROVA no lo usa para volcanes chilenos.";
   const hdr = el("div", "metrics-header");
-  hdr.textContent = "Métricas vs MIROVA (live)";
+  hdr.textContent = "Métricas vs MIROVA (live) — por sensor";
   hdr.title = tipText;
   dp.appendChild(hdr);
   const fmt = (x) => (x == null ? "—" : x.toFixed(2));
-  addMetric("Recall",    fmt(metrics.recall),    `TP=${metrics.tp} FN=${metrics.fn}`,
-            metrics.recall    != null && metrics.recall    >= 0.6 ? "var(--green)" : null);
-  addMetric("Precision", fmt(metrics.precision), `TP=${metrics.tp} FP=${metrics.fp}`,
-            metrics.precision != null && metrics.precision >= 0.5 ? "var(--green)" : null);
-  addMetric("F1",        fmt(metrics.f1),        "armónica");
-  addMetric("Ratio med", metrics.ratio_med != null ? metrics.ratio_med.toFixed(2) + "×" : "—",
-            `N=${metrics.pairs} pares`,
-            metrics.ratio_med != null && metrics.ratio_med >= 0.7 && metrics.ratio_med <= 1.4 ? "var(--green)" : null);
-  dp.appendChild(mr);
+  // VIIRS375 primero (fuente principal MIROVA), luego MODIS (solo lo grande).
+  const SENSOR_ROWS = [
+    { key: "VIIRS375", label: "VIIRS 375m", note: "fuente principal" },
+    { key: "MODIS",    label: "MODIS 1km",  note: "solo anomalías grandes" },
+  ];
+  for (const s of SENSOR_ROWS) {
+    const m = (metrics.byBucket && metrics.byBucket[s.key]) || { recall: null, precision: null, f1: null, ratio_med: null, tp: 0, fn: 0, fp: 0, pairs: 0 };
+    const slab = el("div", "metrics-sensor-label");
+    slab.innerHTML = `${s.label} <span style="color:var(--muted);font-weight:400">· ${s.note}</span>`;
+    dp.appendChild(slab);
+    const mr = el("div", "stats-row metrics-row");
+    const addMetric = (label, val, unit, color) => {
+      const box = el("div", "stat-box metric-box");
+      box.title = tipText;
+      const l = el("div", "label"); l.textContent = label;
+      const vEl = el("div", "val"); vEl.textContent = val;
+      if (color) vEl.style.color = color;
+      const u = el("div", "unit"); u.textContent = unit;
+      box.append(l, vEl, u);
+      mr.appendChild(box);
+    };
+    addMetric("Recall",    fmt(m.recall),    `TP=${m.tp} FN=${m.fn}`,
+              m.recall    != null && m.recall    >= 0.6 ? "var(--green)" : null);
+    addMetric("Precision", fmt(m.precision), `TP=${m.tp} FP=${m.fp}`,
+              m.precision != null && m.precision >= 0.5 ? "var(--green)" : null);
+    addMetric("F1",        fmt(m.f1),        "armónica");
+    addMetric("Ratio med", m.ratio_med != null ? m.ratio_med.toFixed(2) + "×" : "—",
+              `N=${m.pairs} pares`,
+              m.ratio_med != null && m.ratio_med >= 0.7 && m.ratio_med <= 1.4 ? "var(--green)" : null);
+    dp.appendChild(mr);
+  }
 
   // ── Export CSV buttons ──
   const actionRow = el("div", "action-row");
