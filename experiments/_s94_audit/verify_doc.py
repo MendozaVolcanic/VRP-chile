@@ -75,6 +75,17 @@ tr = tup["top_record"]
 check("tup.top_vrp", f"{tr['vrp_mw']} MW")
 check("tup.top_pixels", f"{tr['pixels_within_2km']} / {tr['n_anomaly_pixels']}")
 
+# --- §7 magnitud VIIRS ---
+subprocess.run([sys.executable, os.path.join(HERE, "viirs_magnitude_diag.py")],
+               check=True, capture_output=True)
+vm = json.load(open(os.path.join(HERE, "viirs_magnitude_diag.json"), encoding="utf-8"))
+v375 = vm["VIIRS375"]
+for vol in ("Lascar", "Tupungatito", "Villarrica", "PuyehueCordonCaulle", "Lastarria"):
+    m = v375[vol]
+    check(f"v375.{vol}.sum", f"{m['ratio_sum_med']:.2f}×")
+# foco de los robustos
+check("v375.PCC.focus", f"{v375['PuyehueCordonCaulle']['ratio_focus_med']:.2f}×")
+
 if fails:
     print("✗ VERIFICACIÓN FALLÓ:")
     for f in fails:
