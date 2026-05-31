@@ -129,6 +129,37 @@ medir el **ratio mediano vs MIROVA por volcán**. Criterio de aceptación:
 Elegir la variante (o híbrido) que cumpla las 4. Si dos empatan, preferir la de menos
 parámetros (navaja de Occam) y menos riesgo en los extremos (D3 anclado-vent candidata).
 
+## 5b. ⚠️ HALLAZGO S94 (pre-corrida de variantes) — el path Test1 NO persiste píxeles
+
+Al pre-correr `f5_variants.py` sobre data REPROCESADA (código actual), Tupungatito da
+0× en todas las variantes incl. baseline: la **suma de sus `anomaly_pixels` es 0**.
+Causa (verificado `process_viirs.py:1500-1517`): los records `final_hotspot_source=test1`
+(50/67 matched Tupungatito) arman `primary_cluster` con la magnitud pero dejan
+**`anomaly_pixels=[]` vacío** — aunque los datos por-píxel existen ahí mismo
+(`_pix_vrps_t`, `top["pixel_indices"]`, `t1_vrp_2d`). Patrón A07 ("calculado pero no
+persistido"). NO es histórico: es el código ACTUAL.
+
+**Implicación crítica:** el path Test1 es justo el que usan los volcanes de campo frío
+sub-píxel (Tupungatito, Villarrica) — los que F5' apunta. Sin `anomaly_pixels`, el
+**F5' display-first NO puede recomputar la magnitud** en esos volcanes. (También
+explica el "vrp=0 por-píxel" visto antes, y rompe el mapa de píxeles del dashboard
+para records Test1.)
+
+**Redirección del plan (prerequisito de F5'):**
+1. **Gap-fix Test1 (pequeño, aditivo, A45):** poblar `anomaly_pixels` en el path Test1
+   desde `top["pixel_indices"]` + `t1_vrp_2d` + lat/lon/bt (igual que el path
+   line-1128). NO cambia detección ni magnitud (`pc.vrp_mw` queda igual) — solo
+   persiste datos ya calculados. Beneficio extra: arregla el mapa de píxeles del
+   dashboard para Test1. Requiere tag+OK+TDD+reproc.
+2. **Recién entonces** el F5' display-first (variantes D1/D2/D3) es viable sobre
+   `anomaly_pixels` poblados.
+- Alternativa: hacer F5' directo en el pipeline (el path Test1 tiene los píxeles en
+  tiempo de cómputo) — un solo cambio pero más grande.
+
+**Lección:** el "display-first" era correcto en espíritu, pero el prerequisito de datos
+(píxeles persistidos) no se cumple para los volcanes target → F5' necesita un toque
+de pipeline mínimo primero.
+
 ## 6. Implementación (display primero, A45)
 - Réplica de la variante elegida en `frontend/` (3 vistas) como `mirovaEqVrpCore(r)` —
   recomputa la magnitud desde `anomaly_pixels` del record (post-reproc consistente).
