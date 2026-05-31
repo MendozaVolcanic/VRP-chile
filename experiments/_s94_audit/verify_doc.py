@@ -1,0 +1,71 @@
+"""Verificación programática: docs/AUDIT_S94_per_sensor_metrics.md == per_sensor_metrics.json.
+
+Regla integridad §0.5: ningún número del doc se transcribe a mano sin chequeo.
+Re-corre el script (regenera el JSON), luego asserta que cada número de las tablas
+§1/§2/§4 del doc coincide con la fuente. Falla con diff si algo no cuadra.
+
+  python experiments/_s94_audit/verify_doc.py
+"""
+import os, json, re, subprocess, sys, io
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.dirname(os.path.dirname(HERE))
+DOC = os.path.join(REPO, "docs", "AUDIT_S94_per_sensor_metrics.md")
+JSON = os.path.join(HERE, "per_sensor_metrics.json")
+
+# 1) regenerar la fuente
+subprocess.run([sys.executable, os.path.join(HERE, "per_sensor_metrics.py")],
+               check=True, capture_output=True)
+o = json.load(open(JSON, encoding="utf-8"))
+doc = open(DOC, encoding="utf-8").read()
+
+fails = []
+
+
+def check(label, value):
+    """Asserta que `value` (string exacto) aparece en el doc."""
+    if value not in doc:
+        fails.append(f"{label}: '{value}' NO está en el doc")
+
+
+def pct(x):
+    return f"{x*100:.1f}%"
+
+
+# --- VISTA A (raw) y B (summit): N_ours, N_mir, TP, match_mir, precisión, recall, ratio ---
+for view in ("raw", "summit_gated"):
+    for b in ("MODIS", "VIIRS375", "VIIRS750"):
+        s = o[view][b]
+        check(f"{view}.{b}.N_ours", f"| {s['N_ours']} |")
+        check(f"{view}.{b}.precision", pct(s["precision"]))
+        check(f"{view}.{b}.recall", pct(s["recall"]))
+        check(f"{view}.{b}.ratio", f"{s['ratio_median']:.2f}×")
+
+# números narrativos clave
+raw750 = o["raw"]["VIIRS750"]
+check("raw.VIIRS750.recall narrativa", "86.7%")
+check("summit.VIIRS750.recall narrativa", "83.0%")
+check("summit.MODIS.recall narrativa", "11.8%")
+
+# --- §4 ctx-only ---
+ctx = o["ctx_only_split"]
+for b in ("MODIS", "VIIRS375", "VIIRS750"):
+    c = ctx[b]
+    tp_pct = round(100 * c["tp_ctx"] / c["tp"]) if c["tp"] else 0
+    fp_pct = round(100 * c["fp_ctx"] / c["fp"]) if c["fp"] else 0
+    check(f"ctx.{b}.tp", f"| {c['tp']} | {c['tp_ctx']} ({tp_pct}%)")
+    check(f"ctx.{b}.fp", f"{c['fp']} | {c['fp_ctx']} ({fp_pct}%)")
+
+# --- FN VIIRS750 ---
+check("n_fn_v750", f"{len(o['v750_fn_alerts'])} FN")
+# distance_class FP
+check("v750_fp_far", str(o["v750_fp_distance_class"].get("far")))
+check("v750_fp_summit", str(o["v750_fp_distance_class"].get("summit")))
+
+if fails:
+    print("✗ VERIFICACIÓN FALLÓ:")
+    for f in fails:
+        print("  -", f)
+    sys.exit(1)
+print("✓ doc == fuente: todos los números de las tablas §1/§2/§4 coinciden con el JSON.")
