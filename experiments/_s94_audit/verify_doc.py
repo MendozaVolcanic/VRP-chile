@@ -63,6 +63,18 @@ check("n_fn_v750", f"{len(o['v750_fn_alerts'])} FN")
 check("v750_fp_far", str(o["v750_fp_distance_class"].get("far")))
 check("v750_fp_summit", str(o["v750_fp_distance_class"].get("summit")))
 
+# --- §6 espacial Tupungatito ---
+subprocess.run([sys.executable, os.path.join(HERE, "tupungatito_spatial.py")],
+               check=True, capture_output=True)
+tup = json.load(open(os.path.join(HERE, "tupungatito_spatial.json"), encoding="utf-8"))
+check("tup.crater_offset", f"{tup['crater_to_mirova_center_km']} km")
+check("tup.v375_close", f"{tup['v375_centroid_within_2km']} / {tup['v375_total']}")
+check("tup.vrp_crater", f"{tup['vrp_med_crater_0_2km']} MW")
+check("tup.vrp_glacier", f"{tup['vrp_med_glacier_gt7km']} MW")
+tr = tup["top_record"]
+check("tup.top_vrp", f"{tr['vrp_mw']} MW")
+check("tup.top_pixels", f"{tr['pixels_within_2km']} / {tr['n_anomaly_pixels']}")
+
 if fails:
     print("✗ VERIFICACIÓN FALLÓ:")
     for f in fails:
