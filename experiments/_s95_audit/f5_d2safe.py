@@ -22,23 +22,23 @@ R_GRID=[0.75,1.0,1.25,1.5]
 BT_EXT=295.0
 
 def d2_safe(pixels, vent, r_core, bt_ext=BT_EXT):
-    """D2 + el píxel más cercano al vent (foco) y su vecindad <=0.5km siempre quedan."""
+    """D2 anclado al píxel de MÁXIMA energía (foco real en VRP), no al vent.
+
+    Razón (S95): el vent-anchor falla cuando la energía está off-vent — caso Lascar
+    2026-05-08 (px en cráter vrp=0, energía real a 2.69km). Para MAGNITUD (no
+    selección de cluster) el foco es el píxel de mayor VRP, esté donde esté. Núcleo =
+    píxeles dentro de r_core del foco o con bt>=bt_ext (lava real). Excepción de
+    seguridad: el foco energético + su vecindad <=0.5km SIEMPRE quedan (nunca cae a 0
+    si hay algún píxel con vrp>0)."""
     n=len(pixels)
     if n==0: return 0.0
-    top=sorted(range(n),key=lambda i:-(pixels[i].get("vrp_mw") or 0))[:5]
-    peak=min(top,key=lambda i:hav(pixels[i]["lat"],pixels[i]["lon"],*vent))
+    peak=max(range(n),key=lambda i:pixels[i].get("vrp_mw") or 0)
     pc=(pixels[peak]["lat"],pixels[peak]["lon"])
-    keep=set()
+    keep={peak}
     for i,p in enumerate(pixels):
         d=hav(p["lat"],p["lon"],*pc)
         if d<=r_core or (p.get("bt_k") or 0)>=bt_ext:
             keep.add(i)
-    # excepción foco: el píxel más cercano al VENT + su vecindad inmediata <=0.5km
-    vnear=min(range(n),key=lambda i:hav(pixels[i]["lat"],pixels[i]["lon"],*vent))
-    keep.add(vnear); keep.add(peak)
-    for j in range(n):
-        if hav(pixels[j]["lat"],pixels[j]["lon"],pixels[vnear]["lat"],pixels[vnear]["lon"])<=0.5:
-            keep.add(j)
     return sum(pixels[i].get("vrp_mw") or 0 for i in keep)
 
 vents=load_vents()
