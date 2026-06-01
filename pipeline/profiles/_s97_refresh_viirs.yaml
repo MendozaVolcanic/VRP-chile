@@ -1,0 +1,29 @@
+# S97 — perfil de reproceso VIIRS para REFRESH OPERACIONAL (no operacional aún).
+#
+# Hereda la config operacional ACTUAL (extends mirova_equivalent) y procesa SOLO
+# VIIRS375 + VIIRS750 (modis: false). El MODIS del refresh se reusa del staging ya
+# generado (_s94_reproc_modis, post-#297, verificado), porque MODIS solo corre en
+# GH Actions (pyhdf) y re-correrlo no aporta (sin cambios de detección/magnitud
+# desde que se generó — verificado S97 git log).
+#
+# PROCEDENCIA LIMPIA (S97): dir nuevo _s97_refresh_viirs, una sola corrida, rango
+# completo, código actual main (#294 + #297). NO se reusa _s94_reproc_viirs (que
+# tenía mods locales sin commitear de procedencia turbia).
+#
+# store.py deduplica por (datetime_utc, sensor) → al ensamblar con MODIS no se pisan.
+# Aislado en data_subdir propio (A47). Promoción a operacional = OK Nicolás + tag (A45).
+
+extends: mirova_equivalent
+
+profile: _s97_refresh_viirs
+description: >
+  Reproceso VIIRS-only (375+750) para el refresh operacional S97, config operacional
+  heredada, en data_subdir aislado. Se ensambla luego con el MODIS de staging.
+
+sensors:
+  modis: false
+  viirs_375: true
+  viirs_750: true
+
+output:
+  data_subdir: _s97_refresh_viirs
