@@ -250,6 +250,8 @@
     .map-legend { display: flex; gap: 12px; margin-left: auto; font-size: 0.68rem; color: var(--muted); }
     .map-legend-item { display: flex; align-items: center; gap: 4px; }
     .map-legend-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid; }
+    /* S97: símbolo de volcán en el mapa general (sin la caja blanca default de divIcon) */
+    .volcano-icon { background: none !important; border: none !important; }
 
     /* ── S77 F30 P3 — Galería imágenes MIROVA ── */
     .gallery-header {
@@ -1426,6 +1428,35 @@ function distanceCounts(records, days = 7) {
   return { summit, far };
 }
 
+// S97 (pedido Nicolás): en vez del CONTEO cráter/lejanas, mostrar por área la
+// distancia al centroide del cluster + su extensión (nº de píxeles). Para cada
+// clase (summit / far) devuelve la ÚLTIMA detección válida de la ventana con
+// {dist_km, n_px, ts}, o null si no hubo. Mismas guardas que latestDetection
+// (parseUtcMs TZ-safe, isValidDetection, isSensorVisible) pero SIN filtrar
+// artefactos (acá solo describimos geometría, no titulamos el número).
+function latestByArea(records, days = 7, innerKm = 10) {
+  const cutoff = Date.now() - days * 86400000;
+  let summit = null, far = null;
+  for (const r of records) {
+    const ts = parseUtcMs(r.datetime_utc);
+    if (!(ts >= cutoff)) continue;
+    if (!isValidDetection(r)) continue;
+    if (!isSensorVisible(r)) continue;
+    const pc = r.primary_cluster;
+    if (!pc) continue;
+    const dist = pc.centroid_dist_km;
+    const npx = pc.n_pixels;
+    if (dist === undefined || dist === null) continue;
+    const entry = { dist, npx: npx ?? null, ts };
+    if (isSummitDetection(r)) {
+      if (!summit || ts > summit.ts) summit = entry;
+    } else {
+      if (!far || ts > far.ts) far = entry;
+    }
+  }
+  return { summit, far };
+}
+
 // ── DOM helpers ──────────────────────────────────────────────────────────────
 function el(tag, cls) {
   const e = document.createElement(tag);
@@ -1671,7 +1702,7 @@ function buildCards() {
                                    level.key === "low"  ? "var(--yellow)" :
                                    level.key === "mod"  ? "var(--orange)" : "var(--red)") : "var(--muted)";
     vrpEl.textContent = vrp > 0 ? vrp.toFixed(2) : "—";
-    const vrpSub = el("div", "vc-vrp-sub"); vrpSub.textContent = vrp > 0 ? "MW (última detección)" : "sin detección";
+    const vrpSub = el("div", "vc-vrp-sub"); vrpSub.textContent = vrp > 0 ? "MW" : "sin detección";
 
     // Sensor pills
     const pills = el("div", "vc-sensors");
@@ -1681,19 +1712,29 @@ function buildCards() {
 
     // Conteo cráter vs lejanas (últimos 7 días). Solo mostramos si hay al menos
     // 1 detección real — evita filas vacías en las 34 tarjetas no-Tier-A.
-    const dc = distanceCounts(d.records, CARD_COUNT_WINDOW_DAYS);
+    // S97 (pedido Nicolás): distancia al centroide + extensión (px) por área,
+    // en vez del conteo. Acoplado a la última detección de cada área.
+    const ba = latestByArea(d.records, CARD_COUNT_WINDOW_DAYS, innerKm);
     const dcRow = el("div", "vc-distance");
-    if (dc.summit + dc.far > 0) {
-      const sSummit = el("span"); sSummit.style.color = "#f44336"; sSummit.style.fontWeight = "600";
-      sSummit.textContent = "🎯 Cráter: " + dc.summit;
-      const sep = document.createTextNode(" · ");
-      const sFar = el("span"); sFar.style.color = "#7a8fa6";
-      sFar.textContent = "📍 Lejanas: " + dc.far;
+    if (ba.summit || ba.far) {
+      const parts = [];
+      if (ba.summit) {
+        const s = el("span"); s.style.color = "#f44336"; s.style.fontWeight = "600";
+        s.textContent = "🎯 Cráter: " + ba.summit.dist.toFixed(1) + " km" +
+                        (ba.summit.npx != null ? " · " + ba.summit.npx + " px" : "");
+        parts.push(s);
+      }
+      if (ba.far) {
+        const f = el("span"); f.style.color = "#7a8fa6";
+        f.textContent = "📍 Lejana: " + ba.far.dist.toFixed(1) + " km" +
+                        (ba.far.npx != null ? " · " + ba.far.npx + " px" : "");
+        parts.push(f);
+      }
+      parts.forEach((p, i) => { if (i > 0) dcRow.append(document.createTextNode(" · ")); dcRow.append(p); });
       const sLabel = el("span"); sLabel.style.color = "#556"; sLabel.style.fontSize = "0.7em";
       sLabel.textContent = " (" + CARD_COUNT_WINDOW_DAYS + "d)";
-      // F30 Bug 11b (S75): tooltip explica que el conteo es fijo 7d intencional
-      dcRow.title = "Conteo de los últimos " + CARD_COUNT_WINDOW_DAYS + " días, fijo intencionalmente para no inflar cards con rangos largos. Rango global del selector solo afecta el detail panel.";
-      dcRow.append(sSummit, sep, sFar, sLabel);
+      dcRow.title = "Distancia del punto de referencia del volcán al centroide del cluster de la última detección de cada área (cráter/lejana), y su extensión en píxeles. Ventana últimos " + CARD_COUNT_WINDOW_DAYS + " días.";
+      dcRow.append(sLabel);
     }
 
     // Last update — S90: si hay detección, el timestamp es el de ESA detección
@@ -2975,10 +3016,20 @@ function buildOverviewMap() {
     // Ahora: 0.1 MW ≈ 3 px (cap 7), 1 MW = 7 px, 10 MW = 11 px, ≥100 MW = 16 px (cap).
     const size = lv.key === "nd" ? 6 : Math.max(7, Math.min(16, 7 + Math.log10(Math.max(vrp, 0.01)) * 4));
 
-    const marker = L.circleMarker([v.lat, v.lon], {
-      radius: size, color: "#fff", weight: 1.5,
-      fillColor: color, fillOpacity: 0.85,
-    }).addTo(overviewMap);
+    // S97 (pedido Nicolás): símbolo de volcán en vez de círculo. SVG con cráter,
+    // coloreado por nivel de alerta y dimensionado por VRP (mismo `size` que antes).
+    const triW = Math.round(size * 2.6), triH = Math.round(size * 2.3);
+    const vIcon = L.divIcon({
+      className: "volcano-icon",
+      html: '<svg width="' + triW + '" height="' + triH + '" viewBox="0 0 24 22" ' +
+            'style="filter:drop-shadow(0 1px 1px rgba(0,0,0,0.5))">' +
+            '<path d="M2 20 L8 6 L10 9 L14 9 L16 6 L22 20 Z" ' +
+            'fill="' + color + '" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+      iconSize: [triW, triH],
+      iconAnchor: [triW / 2, triH],
+      popupAnchor: [0, -triH],
+    });
+    const marker = L.marker([v.lat, v.lon], { icon: vIcon }).addTo(overviewMap);
 
     // Conteo summit/far 7d consistente con las tarjetas del grid (cambio C S18).
     const dc = distanceCounts(d.records, CARD_COUNT_WINDOW_DAYS);
