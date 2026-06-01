@@ -89,6 +89,7 @@ footer a:hover { text-decoration: underline; }
     <!-- S42: filtro post-S38 removido tras reproc completo 30d. Todos los
          records ya tienen modelo S42. -->
     <button id="btn-scale" class="btn-ui">📈 Escala: Lineal</button>
+    <button id="btn-mag" class="btn-ui" title="Magnitud (solo el número, NO la detección): 'Cluster' = pc.vrp_mw actual. 'Núcleo F5'' = D2-safe v2 (S95): suma solo el núcleo de 0.75 km del píxel de máxima energía + lava real (bt≥295K), curando la sobre-estimación del halo glaciar. Ver docs/F5_CALIBRATION_S95.md.">▣ Magnitud: Cluster</button>
     <a href="index.html" class="btn-ui">🏠 Dashboard principal</a>
   </div>
 </div>
@@ -238,6 +239,73 @@ function mirovaEqVrp(r, volcanoName) {
   return vmw;
 }
 
+// ============================================================================
+// S96 F5' — magnitud "núcleo" D2-safe v2 (DISPLAY-only; detección INTACTA).
+// Sobre fondo glaciar el path D marca el halo de roca tibia vs nieve e infla la
+// magnitud 3-16× (campo frío). F5' recomputa la magnitud sumando solo el núcleo
+// de R_core alrededor del píxel de máxima energía + lava real (bt≥bt_ext), sin
+// tocar la detección. Ancla = píxel de máxima energía (regla Eje3/A48: desde
+// lat/lon, NUNCA dist_km). Calibración: docs/F5_CALIBRATION_S95.md (D2-safe v2,
+// mediana 5.64→1.74×, 0 eventos confirmados a magnitud 0). Toggle USE_F5_CORE.
+// ============================================================================
+let USE_F5_CORE = false;
+const F5_R_CORE_KM = 0.75;
+const F5_BT_EXT_K = 295.0;
+
+function _havKm(lat1, lon1, lat2, lon2) {
+  const R = 6371.0, rad = Math.PI / 180;
+  const p1 = lat1 * rad, p2 = lat2 * rad;
+  const dp = (lat2 - lat1) * rad, dl = (lon2 - lon1) * rad;
+  const a = Math.sin(dp / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function f5CoreMagnitude(r, innerKm) {
+  const pixels = r && r.anomaly_pixels;
+  if (!pixels || !pixels.length) return null;
+  // Candidatos = pixels dentro de innerKm del centroide del cluster summit
+  // validado (no del máximo global de la escena, que podría ser una fuente
+  // lejana ajena — fuego, off-nadir). Preserva Láscar energía-off-vent, excluye
+  // incendios. Eje3/A48: distancia desde lat/lon, NO dist_km. Ver index.html.
+  // Asimetría de schema A46/A07: anomaly_pixels a veces NO cubre el cluster
+  // summit. Si no hay píxeles dentro de innerKm del centroide del cluster, NO
+  // recomputar (return null → fallback a pc.vrp_mw). Ver index.html.
+  const pc = r.primary_cluster;
+  if (!pc || pc.centroid_lat == null || pc.centroid_lon == null) return null;
+  const cand = pixels.filter(p => p.lat != null && p.lon != null && _havKm(p.lat, p.lon, pc.centroid_lat, pc.centroid_lon) <= innerKm);
+  if (!cand.length) return null;
+  let peak = 0;
+  for (let i = 1; i < cand.length; i++)
+    if ((cand[i].vrp_mw ?? 0) > (cand[peak].vrp_mw ?? 0)) peak = i;
+  const plat = cand[peak].lat, plon = cand[peak].lon;
+  if (plat == null || plon == null) return null;
+  let sum = 0;
+  for (const p of cand) {
+    const keep = (p === cand[peak])
+      || ((p.lat != null && p.lon != null) && _havKm(p.lat, p.lon, plat, plon) <= F5_R_CORE_KM)
+      || ((p.bt_k ?? 0) >= F5_BT_EXT_K);
+    if (keep) sum += (p.vrp_mw ?? 0);
+  }
+  return sum;
+}
+
+// Núcleo: mantiene EXACTO el gating de mirovaEqVrp (detección no se mueve); solo
+// recomputa la magnitud desde anomaly_pixels. Fallback a pc.vrp_mw si no hay
+// pixels (legacy pre-#297).
+function mirovaEqVrpCore(r, volcanoName) {
+  const base = mirovaEqVrp(r, volcanoName);
+  if (base <= 0) return base;
+  // F5' calibrado SOLO sobre VIIRS375 (I-band). MODIS/VIIRS750 conservan el
+  // cluster (el ancla energía-máxima puede caer en un píxel coarse lejano e
+  // inflar — caso PCC MODIS). Ver docs/F5_CALIBRATION_S95.md y A48.
+  const s = String((r && r.sensor) || "").toUpperCase();
+  if (!(s.startsWith("VIIRS") && !s.endsWith("_750"))) return base;
+  const innerKm = INNER_RADIUS_KM[volcanoName] ?? 5;
+  const core = f5CoreMagnitude(r, innerKm);
+  if (core == null) return base;
+  return core > 50000 ? 0 : core;
+}
+
 // S92 — artefacto cirrus: píxel más caliente bajo 0 °C con VRP alto = nube fría
 // sin fuente térmica (path D contextual sobre cirrus), no actividad real. Mismo
 // criterio físico que index.html (validado S90: 0 detecciones MIROVA reales
@@ -270,7 +338,8 @@ function isThermalArtifact(r, volcanoName) {
 // VRP para DISPLAY (chart/stats): 0 si es artefacto térmico (no infla la escala).
 // (S93: el filtro VIIRS750→0 de F1 se revirtió — MIROVA sí publica VIIRS750.)
 function eqVrpDisplay(r, volcanoName) {
-  return isThermalArtifact(r, volcanoName) ? 0 : mirovaEqVrp(r, volcanoName);
+  if (isThermalArtifact(r, volcanoName)) return 0;
+  return USE_F5_CORE ? mirovaEqVrpCore(r, volcanoName) : mirovaEqVrp(r, volcanoName);
 }
 
 function sensorBucket(s) {
@@ -507,6 +576,22 @@ document.getElementById("btn-summit-only").addEventListener("click", () => {
 document.getElementById("btn-include-far").addEventListener("click", () => {
   if (includeFarDistance) return;
   sessionStorage.setItem("diario_include_far", "true");
+  location.reload();
+});
+
+// S96 F5' — toggle Magnitud: Cluster (pc.vrp_mw) vs Núcleo F5' (D2-safe v2).
+// Solo cambia el número de magnitud (chart/stats vía eqVrpDisplay); detección y
+// gating intactos. Re-render por reload (patrón diario, igual que includeFar).
+if (sessionStorage.getItem("diario_f5_core") === "true") {
+  USE_F5_CORE = true;
+  window.addEventListener("DOMContentLoaded", () => {
+    const b = document.getElementById("btn-mag");
+    b.textContent = "◎ Magnitud: Núcleo F5'";
+    b.classList.add("btn-active");
+  });
+}
+document.getElementById("btn-mag").addEventListener("click", () => {
+  sessionStorage.setItem("diario_f5_core", USE_F5_CORE ? "false" : "true");
   location.reload();
 });
 
