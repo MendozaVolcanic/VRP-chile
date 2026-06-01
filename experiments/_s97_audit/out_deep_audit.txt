@@ -1,0 +1,87 @@
+========================================================================================================================
+AUDITORÍA PROFUNDA S97 — dashboard vs MIROVA (CONS ∪ OCR). Match ±60min por bucket de sensor.
+Recall=TP/(TP+FN) [cuánto de MIROVA captamos] · Precision=TP/(TP+FP) [cuánto de lo nuestro confirma MIROVA].
+Marco A54: 'FP' alto NO = error; ~95% son features volcánicas reales no publicadas por MIROVA CONS.
+========================================================================================================================
+
+### Sensor VIIRS375
+Volcán                 TP   FN   FP   Recall    Prec  medCl/MIR  medCo/MIR
+--------------------------------------------------------------------------------
+PuyehueCordonCaulle   102    1  408      99%     20%      0.51x      1.89x
+Villarrica             10    0  455     100%      2%     18.97x      2.50x
+Lascar                146   17  228      90%     39%      0.55x      0.75x
+Copahue                 1    0  422     100%      0%      0.03x      2.95x
+NevadosDeChillan        0    4   63       0%      0%          —          —
+Llaima                  1    0  409     100%      0%     45.10x      9.83x
+Chaiten                22    0  429     100%      5%      4.30x      3.33x
+PlanchonPeteroa        64    0  344     100%     16%      6.40x      2.73x
+Lastarria             111    6  280      95%     28%      1.23x      1.13x
+Isluga                108    1  261      99%     29%      1.00x      1.28x
+Tupungatito            97    0  340     100%     22%     11.11x      2.87x
+--------------------------------------------------------------------------------
+GLOBAL VIIRS375       662   29 3639      96%     15%      1.07x      1.51x
+
+### Sensor MODIS
+Volcán                 TP   FN   FP   Recall    Prec  medCl/MIR  medCo/MIR
+--------------------------------------------------------------------------------
+PuyehueCordonCaulle     0    0  213        —      0%          —        n/a
+Villarrica              0    1   14       0%      0%          —        n/a
+Lascar                  7   69    0       9%    100%      0.72x        n/a
+Copahue                 0    0    6        —      0%          —        n/a
+NevadosDeChillan        0    1   10       0%      0%          —        n/a
+Llaima                  0    0   10        —      0%          —        n/a
+Chaiten                 0    1   37       0%      0%          —        n/a
+PlanchonPeteroa         0    0   13        —      0%          —        n/a
+Lastarria               0    0    9        —      0%          —        n/a
+Isluga                  0    0   15        —      0%          —        n/a
+Tupungatito             0    0    8        —      0%          —        n/a
+--------------------------------------------------------------------------------
+GLOBAL MODIS            7   72  335       9%      2%      0.72x        n/a
+
+### Sensor VIIRS750
+Volcán                 TP   FN   FP   Recall    Prec  medCl/MIR  medCo/MIR
+--------------------------------------------------------------------------------
+PuyehueCordonCaulle    14    2  356      88%      4%      0.93x        n/a
+Villarrica              0    0  131        —      0%          —        n/a
+Lascar                110    6  122      95%     47%      0.85x        n/a
+Copahue                 0    0   68        —      0%          —        n/a
+NevadosDeChillan        0    1   32       0%      0%          —        n/a
+Llaima                  0    0  104        —      0%          —        n/a
+Chaiten                 0    0  151        —      0%          —        n/a
+PlanchonPeteroa         0    3   42       0%      0%          —        n/a
+Lastarria               0    0  119        —      0%          —        n/a
+Isluga                 16    5  114      76%     12%      2.28x        n/a
+Tupungatito             7    5   77      58%      8%     19.23x        n/a
+--------------------------------------------------------------------------------
+GLOBAL VIIRS750       147   22 1316      87%     10%      0.98x        n/a
+
+### Acuerdo de distancia (nuestro centroid_dist_km vs MIROVA dist_km, en TP con ambas)
+Sensor       n_pares  medianΔ(km)  med_ours  med_miro
+--------------------------------------------------------
+MODIS              7         0.27      0.92      1.41
+VIIRS375         658         0.71      1.22      2.02
+VIIRS750         145         0.75      0.91      1.68
+
+### Titular del dashboard hoy (última detección summit ≤48h del último dato) por volcán
+Volcán                VRP(MW)    Nivel          Sensor         Fecha UTC
+------------------------------------------------------------------------
+PuyehueCordonCaulle      0.79  MuyBajoVIIRS_NOAA21_750  2026-06-01 06:54
+Villarrica               1.16     Bajo    VIIRS_NOAA21  2026-06-01 06:54
+Lascar                   1.39     Bajo    VIIRS_NOAA20  2026-06-01 06:00
+Copahue                  2.47     Bajo    VIIRS_NOAA20  2026-06-01 06:06
+NevadosDeChillan         5.00     Bajo     MODIS_TERRA  2026-06-01 02:35
+Llaima                   4.08     Bajo    VIIRS_NOAA20  2026-06-01 06:06
+Chaiten                  1.18     Bajo    VIIRS_NOAA20  2026-06-01 06:06
+PlanchonPeteroa          0.25  MuyBajo    VIIRS_NOAA20  2026-06-01 06:06
+Lastarria                0.12  MuyBajo    VIIRS_NOAA20  2026-06-01 06:00
+Isluga                   0.28  MuyBajo    VIIRS_NOAA20  2026-06-01 06:00
+Tupungatito              0.80  MuyBajo    VIIRS_NOAA20  2026-06-01 06:00
+
+### Contraste con expectativas (CLAUDE.md S15: recall≥60%, precision≥50%, ratio 0.5–2.0)
+VIIRS375 es el caballo de batalla (decide recall real). Banderas:
+  [ratio Cluster fuera 0.5-2.0] Villarrica VIIRS375 medCl=18.97x
+  [ratio Cluster fuera 0.5-2.0] Copahue VIIRS375 medCl=0.03x
+  [ratio Cluster fuera 0.5-2.0] Llaima VIIRS375 medCl=45.10x
+  [ratio Cluster fuera 0.5-2.0] Chaiten VIIRS375 medCl=4.30x
+  [ratio Cluster fuera 0.5-2.0] PlanchonPeteroa VIIRS375 medCl=6.40x
+  [ratio Cluster fuera 0.5-2.0] Tupungatito VIIRS375 medCl=11.11x
