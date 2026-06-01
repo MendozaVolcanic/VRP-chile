@@ -56,11 +56,44 @@ al fallback (cluster). Por eso el **máximo** 48h de varios vols no cambia aunqu
 **grueso** de records VIIRS375 sí reduce (nReduced alto). El cure completo de la
 calibración se vio sobre data reprocesada con `anomaly_pixels` completo.
 
+## Validación contra MIROVA + guard de seguridad (S96, pedido Nicolás)
+
+`experiments/_s96_audit/f5_display_vs_mirova.py` cruza, record por record, **Cluster vs
+Núcleo vs MIROVA** (ground truth CONS+OCR, VIIRS375 matcheado ±60 min) sobre data live.
+Resultado (1653 records matcheados):
+
+| | Cluster | Núcleo F5' (con guard) |
+|---|---|---|
+| Mediana ratio vs MIROVA (donde Núcleo>0) | 2.00× | **1.59×** (más cerca de 1.0) |
+| Tupungatito | 11.19× | **5.66×** |
+| Lastarria | 3.60× | **1.65×** |
+| Isluga | 1.24× | **1.00×** |
+| Láscar (cráter caliente) | 0.92× | 0.95× (sin cambio) |
+| **Regresiones (Cluster>0 → Núcleo 0)** | — | **0** |
+
+**El Núcleo aproxima mejor a MIROVA** (gana en 8/11 vols, mediana global 1.59 vs 2.00).
+
+### Guard de seguridad (el "→0" que vio Nicolás)
+Sin guard, **73/1653 records (4.4%) confirmados por MIROVA caían de un valor positivo en
+Cluster a 0 en Núcleo** (concentrados en PP 42, Tupungatito 10, Isluga 9, Villarrica 6).
+Causa: asimetría A46/A07 — `anomaly_pixels` cerca del cráter no cargan la energía del
+cluster (el cluster agrega VRP real pero los píxeles guardados dan ~0) → el Núcleo
+recompone ~0. **En monitoreo, borrar una detección real es el peor error.**
+
+**Fix (1 línea por vista)**: `if (core <= 0 && base > 0) return base` — el Núcleo NUNCA
+borra una detección del Cluster; solo REDUCE el halo glaciar donde tiene datos. Con el
+guard: **0 regresiones**, Núcleo "mejor o igual, nunca peor". Distingue reducción
+genuina (Tupungatito 6.35→0.35, anomaly_pixels con energía) de regresión (Villarrica
+6.149→6.149 fallback, anomaly_pixels vacíos).
+
 ## Pendiente antes de bajar a pipeline (NO hecho — requiere decisión Nicolás)
 
-F5' display NO toca pipeline. Para adoptarlo en `process_viirs.py` (segundo umbral de
-magnitud, detección intacta) hace falta, con A45 completo:
-1. Re-validar D2-safe v2 con el **anclaje centroide-restringido** (el script S95 usa
+El guard hace el display **seguro** pero NO cura la raíz: el beneficio pleno requiere
+que `anomaly_pixels` cargue la energía del cluster. Para adoptar F5' en `process_viirs.py`
+(segundo umbral de magnitud, detección intacta), con A45 completo:
+1. **Raíz A46/A07**: que el pipeline persista en `anomaly_pixels` los píxeles reales del
+   cluster con su VRP (completar lo que #297/#294 empezó). Sin esto, ~30% de records
+   VIIRS375 caen al fallback y F5' no aporta. Es el bloqueante real.
+2. Re-validar D2-safe v2 con el **anclaje centroide-restringido** (el script S95 usa
    ancla global) — confirmar que no degrada los ratios validados.
-2. Resolver/considerar la asimetría A46/A07 (que `anomaly_pixels` cubra el cluster).
 3. R2 pixel-level vs TIF MIROVA.

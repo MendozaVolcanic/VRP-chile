@@ -1000,7 +1000,12 @@ function mirovaEqVrpCore(r, innerKm = 10, includeFar = false) {
   const s = String((r && r.sensor) || "").toUpperCase();
   if (!(s.startsWith("VIIRS") && !s.endsWith("_750"))) return base;
   const core = f5CoreMagnitude(r, innerKm);
-  if (core == null) return base;
+  // Guard de seguridad (S96): el Núcleo NUNCA borra una detección que el Cluster
+  // muestra. Si core ≤ 0 con base > 0, los anomaly_pixels no cargan la energía del
+  // cluster (asimetría A46/A07: cluster agrega VRP real pero los píxeles guardados
+  // dan ~0) → mostrar el Cluster. F5' solo REDUCE el halo glaciar; jamás erradica
+  // señal real (validado: 73/1653 records confirmados por MIROVA caían a 0 sin esto).
+  if (core == null || core <= 0) return base;
   return core > 50000 ? 0 : core;
 }
 
@@ -3027,7 +3032,9 @@ function buildNRTTable() {
         : vrpFinal;
       const _s = String(r.sensor || "").toUpperCase();
       const _useCore = USE_F5_CORE && _s.startsWith("VIIRS") && !_s.endsWith("_750");
-      const vrpShow = _useCore ? (f5CoreMagnitude(r, innerKm) ?? vrpCluster) : vrpCluster;
+      // Guard S96: core ≤ 0 (anomaly_pixels no cargan la energía) → mostrar cluster, no borrar.
+      const _core = _useCore ? f5CoreMagnitude(r, innerKm) : null;
+      const vrpShow = (_core != null && _core > 0) ? _core : vrpCluster;
       // S92/S93: marcar artefacto térmico (display-only, mismo criterio que chart/cards/métricas).
       const artifactKind = isCirrusArtifact(r, innerKm) ? "cirrus"
         : (isDiffuseFieldArtifact(r, innerKm) ? "diffuse" : null);

@@ -302,7 +302,9 @@ function mirovaEqVrpCore(r, volcanoName) {
   if (!(s.startsWith("VIIRS") && !s.endsWith("_750"))) return base;
   const innerKm = INNER_RADIUS_KM[volcanoName] ?? 5;
   const core = f5CoreMagnitude(r, innerKm);
-  if (core == null) return base;
+  // Guard S96: el Núcleo nunca borra una detección del Cluster (core ≤ 0 con
+  // base > 0 = anomaly_pixels no cargan la energía, A46/A07 → mostrar cluster).
+  if (core == null || core <= 0) return base;
   return core > 50000 ? 0 : core;
 }
 

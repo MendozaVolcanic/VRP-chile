@@ -1,0 +1,66 @@
+============================================================================================================
+F5' DISPLAY (Núcleo) vs Cluster vs MIROVA — data LIVE, VIIRS375 matcheado ±60min
+REGRESIÓN = Cluster>0 pero Núcleo=0 (señal real que el Núcleo BORRA). FN_pre = Cluster YA era 0.
+Ratios medianos calculados SOLO sobre records donde Núcleo>0 (excluye los ceros).
+============================================================================================================
+Volcán                 n  REGRES  FN_pre  n(Co>0)  medCl/MIR  medCo/MIR   mejor
+------------------------------------------------------------------------------------------------------------
+PuyehueCordonCaulle  249       0       6      243      2.31×      2.68× Cluster
+Villarrica            37       6      12       19     13.61×     10.60×  Núcleo
+Lascar               325       1      38      286      0.93×      0.95×  Núcleo
+Copahue                3       1       0        2      1.60×      1.65× Cluster
+NevadosDeChillan      11       0      11        0          —          —       —
+Llaima                 3       2       0        1      6.12×      1.34×  Núcleo
+Chaiten               68       0       6       62      3.28×      2.84×  Núcleo
+PlanchonPeteroa      187      42      22      123      2.97×      2.25×  Núcleo
+Lastarria            269       2      19      248      3.60×      1.64×  Núcleo
+Isluga               247       9      33      205      1.21×      0.95×  Núcleo
+Tupungatito          254      10      41      203     10.41×      4.16×  Núcleo
+------------------------------------------------------------------------------------------------------------
+GLOBAL              1653      73     188     1392      1.79×      1.50×  Núcleo
+
+Regresiones (Cluster>0 → Núcleo 0): 73/1653 = 4.4% de los matcheados.  FN pre-existentes (Cluster ya 0): 188.
+
+REGRESIONES (Cluster>0 → Núcleo 0, MIROVA>0) — señal real que el Núcleo borraría:
+  Villarrica           2026-02-24 06:24  cluster=3.086  MIROVA=0.370
+  Villarrica           2026-02-26 04:54  cluster=4.980  MIROVA=0.120
+  Villarrica           2026-02-26 05:24  cluster=6.149  MIROVA=0.120
+  Villarrica           2026-03-08 05:36  cluster=8.355  MIROVA=0.210
+  Villarrica           2026-03-08 06:00  cluster=6.633  MIROVA=0.210
+  Villarrica           2026-05-22 05:00  cluster=2.648  MIROVA=0.550
+  Lascar               2026-02-05 06:24  cluster=0.005  MIROVA=0.320
+  Copahue              2026-04-22 06:00  cluster=1.717  MIROVA=0.210
+  Llaima               2026-05-15 05:30  cluster=3.428  MIROVA=0.080
+  Llaima               2026-05-15 06:06  cluster=1.870  MIROVA=0.080
+  PlanchonPeteroa      2026-02-08 06:18  cluster=1.240  MIROVA=0.060
+  PlanchonPeteroa      2026-02-10 04:54  cluster=2.638  MIROVA=0.070
+  PlanchonPeteroa      2026-02-10 05:24  cluster=2.379  MIROVA=0.070
+  PlanchonPeteroa      2026-02-10 05:42  cluster=3.266  MIROVA=0.070
+  PlanchonPeteroa      2026-02-10 06:36  cluster=1.448  MIROVA=0.070
+  PlanchonPeteroa      2026-02-15 06:42  cluster=2.281  MIROVA=0.180
+  PlanchonPeteroa      2026-02-16 06:18  cluster=1.593  MIROVA=0.120
+  PlanchonPeteroa      2026-02-24 05:30  cluster=3.735  MIROVA=0.090
+  PlanchonPeteroa      2026-02-24 06:00  cluster=2.752  MIROVA=0.090
+  PlanchonPeteroa      2026-02-24 06:18  cluster=3.328  MIROVA=0.090
+  PlanchonPeteroa      2026-02-25 05:12  cluster=1.484  MIROVA=0.420
+  PlanchonPeteroa      2026-02-25 06:00  cluster=1.215  MIROVA=0.080
+  PlanchonPeteroa      2026-02-26 05:24  cluster=2.808  MIROVA=0.080
+  PlanchonPeteroa      2026-02-27 05:06  cluster=2.894  MIROVA=0.050
+  PlanchonPeteroa      2026-02-27 05:24  cluster=1.721  MIROVA=0.050
+  PlanchonPeteroa      2026-03-01 06:06  cluster=0.943  MIROVA=0.080
+  PlanchonPeteroa      2026-03-01 06:30  cluster=2.502  MIROVA=0.080
+  PlanchonPeteroa      2026-03-06 05:42  cluster=4.745  MIROVA=0.140
+  PlanchonPeteroa      2026-03-06 06:12  cluster=3.838  MIROVA=0.140
+  PlanchonPeteroa      2026-03-06 06:36  cluster=2.182  MIROVA=0.140
+  PlanchonPeteroa      2026-03-07 06:12  cluster=1.415  MIROVA=0.170
+  PlanchonPeteroa      2026-03-19 05:00  cluster=1.761  MIROVA=0.270
+  PlanchonPeteroa      2026-03-19 05:30  cluster=1.284  MIROVA=0.270
+  PlanchonPeteroa      2026-03-19 05:48  cluster=1.304  MIROVA=0.270
+  PlanchonPeteroa      2026-03-19 06:42  cluster=0.579  MIROVA=0.270
+  PlanchonPeteroa      2026-03-23 05:24  cluster=1.451  MIROVA=0.040
+  PlanchonPeteroa      2026-03-23 05:54  cluster=1.561  MIROVA=0.040
+  PlanchonPeteroa      2026-03-23 06:18  cluster=0.907  MIROVA=0.040
+  PlanchonPeteroa      2026-03-24 05:06  cluster=0.856  MIROVA=0.090
+  PlanchonPeteroa      2026-03-24 05:36  cluster=1.756  MIROVA=0.090
+
+Total matcheados: 1653 | REGRESIONES: 73
