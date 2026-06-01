@@ -565,6 +565,7 @@
             <option value="">Todos los volcanes</option>
           </select>
           <button id="hotspot-layer-btn" class="scale-btn">🔥 Anomalías</button>
+          <button id="footprint-btn" class="scale-btn" title="Dibujar cada detección como el cuadrado del footprint del píxel del sensor (375m VIIRS-I / 750m VIIRS-M / 1km MODIS) en vez del punto. Comunica que la anomalía es sub-píxel.">⬚ Footprint</button>
         </div>
       </div>
       <div class="overview-map-container" id="overview-map"></div>
@@ -789,6 +790,33 @@ let includeFarDistance = persistedFlag("vrp_include_far", false);
 // UN registro por (timestamp, volcán, sensor); replicamos esa visualización.
 // PCC sin esto saturaba el mapa con 86,655 pixels en 90 días vs ~800 records.
 let onlyPrimaryPixel = true;
+// S97 (idea FIRMS): opción para dibujar cada detección como el CUADRADO del
+// footprint del píxel del sensor (375m VIIRS-I / 750m VIIRS-M / 1km MODIS) en vez
+// del punto. Comunica que la anomalía es sub-píxel (no un punto exacto). Default
+// OFF (puntos, comportamiento actual) — es una opción "para ver cómo se vería".
+let useFootprintMarkers = persistedFlag("vrp_footprint_markers", false);
+
+// S97 (idea FIRMS): tamaño nominal del footprint del píxel por sensor [km de lado,
+// en el nadir]. El footprint real crece off-nadir (sec³, A36) pero el frontend no
+// tiene el ángulo de barrido por píxel — refinamiento futuro (requiere que el
+// pipeline exponga scan/track). Por ahora nominal, igual que FIRMS.
+function sensorFootprintKm(sensor) {
+  const s = String(sensor || "").toUpperCase();
+  if (s.includes("MODIS")) return 1.0;
+  if (s.endsWith("_750")) return 0.75;
+  if (s.startsWith("VIIRS")) return 0.375;
+  return 0.5;
+}
+// Devuelve un L.circleMarker (punto, default) o un L.rectangle (footprint del
+// píxel) según el toggle useFootprintMarkers. Mismo `style` (rectangle ignora
+// `radius`; usa color/weight/fillColor/fillOpacity/dashArray).
+function makeHotspotMarker(lat, lon, style, sensor) {
+  if (!useFootprintMarkers) return L.circleMarker([lat, lon], style);
+  const half = sensorFootprintKm(sensor) / 2;
+  const dLat = half / 111.32;
+  const dLon = half / (111.32 * Math.cos(lat * Math.PI / 180));
+  return L.rectangle([[lat - dLat, lon - dLon], [lat + dLat, lon + dLon]], style);
+}
 
 // S38 — toggle "🆕 Solo post-S38" para ocultar records procesados antes de la
 // adopción operacional vent_anchored + H8 (PR #28 mergeado 2026-05-13 03:05
@@ -2407,7 +2435,7 @@ function renderDetail() {
         // pasa a ser secundario (suma indistinta de todos los pixels).
         const pc = r.primary_cluster;
         const hasPC = pc && pc.vrp_mw != null;
-        const marker = L.circleMarker([mLat, mLon], markerStyle).addTo(map).bindPopup(
+        const marker = makeHotspotMarker(mLat, mLon, markerStyle, r.sensor).addTo(map).bindPopup(
           `<b>${r.sensor}</b>` +
           (ventOnly ? " (vent-path)" : "") +
           (isFar ? ' <span style="color:#888">(far)</span>' : (distClass === "summit" ? ' <span style="color:#ff5252">(summit)</span>' : '')) + `<br>` +
@@ -2930,11 +2958,11 @@ function updateHotspotLayer() {
       const distRaw = r.hotspot_dist_km ?? r.final_hotspot_dist_km;
       const dist = distRaw != null ? distRaw.toFixed(1) + " km" : "—";
 
-      L.circleMarker([r.hotspot_lat, r.hotspot_lon], {
+      makeHotspotMarker(r.hotspot_lat, r.hotspot_lon, {
         radius, color: isFiltered ? "#555" : "#000", weight: isFiltered ? 1 : 0.5,
         fillColor: color, fillOpacity: isFiltered ? recency * 0.5 : recency,
         dashArray: isFiltered ? "3,3" : null,
-      }).addTo(overviewHotspotGroup).bindPopup(
+      }, r.sensor).addTo(overviewHotspotGroup).bindPopup(
         `<b>${v.display}</b>${isFiltered ? ' <span style="color:#f44;font-size:.8em">(filtrado)</span>' : ''}<br>` +
         `${r.datetime_utc} UTC<br>` +
         `<span style="color:${color}">${r.sensor}</span><br>` +
@@ -3193,6 +3221,21 @@ async function init() {
   hotspotFilter.addEventListener("change", () => {
     if (showHotspots) updateHotspotLayer();
   });
+
+  // S97 (idea FIRMS): toggle footprint del píxel (cuadrado) vs punto. Afecta el
+  // mapa de hotspots del detalle y el overlay de anomalías del mapa general.
+  // Display-only, detección/magnitud intactas. Default punto (estado actual).
+  const footprintBtn = document.getElementById("footprint-btn");
+  if (footprintBtn) {
+    footprintBtn.classList.toggle("active", useFootprintMarkers);
+    footprintBtn.addEventListener("click", () => {
+      useFootprintMarkers = !useFootprintMarkers;
+      setPersistedFlag("vrp_footprint_markers", useFootprintMarkers);
+      footprintBtn.classList.toggle("active", useFootprintMarkers);
+      renderDetail();          // mapa de hotspots del detalle
+      if (showHotspots) updateHotspotLayer();  // overlay del mapa general
+    });
+  }
 
   // Scale
   document.getElementById("btn-linear").addEventListener("click", () => {
