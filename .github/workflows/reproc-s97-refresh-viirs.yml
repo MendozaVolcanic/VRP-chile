@@ -25,6 +25,14 @@ name: S97 refresh reproc VIIRS (operacional, staging aislado)
         description: "End date YYYY-MM-DD inclusive"
         required: true
         default: "2026-05-31"
+      profile:
+        description: "Profile (data_subdir = same name). For parallel chunks use _s97_refresh_viirs_{feb,mar,apr,may}."
+        required: true
+        default: "_s97_refresh_viirs"
+      subdir:
+        description: "data/ subdir to commit (must equal the profile's data_subdir)."
+        required: true
+        default: "_s97_refresh_viirs"
 
 jobs:
   reproc:
@@ -72,7 +80,7 @@ jobs:
         timeout-minutes: 340
         run: |
           python scripts/run_pipeline.py \
-            --profile _s97_refresh_viirs \
+            --profile ${{ github.event.inputs.profile }} \
             --volcano ${{ matrix.volcano }} \
             --start ${{ github.event.inputs.start }} \
             --end ${{ github.event.inputs.end }} \
@@ -83,9 +91,9 @@ jobs:
           set +e
           git config user.name  "vrp-bot"
           git config user.email "vrp-bot@github-actions"
-          git add "data/_s97_refresh_viirs/${{ matrix.volcano }}.json" 2>/dev/null
+          git add "data/${{ github.event.inputs.subdir }}/${{ matrix.volcano }}.json" 2>/dev/null
           git diff --staged --quiet && { echo "No changes to commit"; exit 0; }
-          git commit -m "S97 refresh — reproc VIIRS ${{ matrix.volcano }} ${{ github.event.inputs.start }}->${{ github.event.inputs.end }}"
+          git commit -m "S97 refresh — reproc VIIRS ${{ matrix.volcano }} ${{ github.event.inputs.start }}->${{ github.event.inputs.end }} (${{ github.event.inputs.subdir }})"
           for attempt in 1 2 3 4 5 6; do
             git pull --rebase -X theirs origin main && git push && exit 0
             echo "push attempt $attempt failed, sleeping $((attempt * 10))s"

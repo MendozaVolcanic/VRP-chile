@@ -1,0 +1,14 @@
+# S97 — perfil de reproceso VIIRS para el chunk paralelo "apr" del refresh operacional.
+# Idéntico a _s97_refresh_viirs pero a un data_subdir aislado, para correr los meses
+# en paralelo sin race de git (S25). Se ensamblan todos al promover (A45).
+extends: mirova_equivalent
+profile: _s97_refresh_viirs_apr
+description: >
+  Reproceso VIIRS-only (375+750) chunk apr del refresh operacional S97, config
+  operacional heredada, data_subdir aislado para paralelizar.
+sensors:
+  modis: false
+  viirs_375: true
+  viirs_750: true
+output:
+  data_subdir: _s97_refresh_viirs_apr
