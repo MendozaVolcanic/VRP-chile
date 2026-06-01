@@ -348,6 +348,22 @@ def date_range(start: datetime, end: datetime):
         current += timedelta(days=1)
 
 
+def default_date_window(today: datetime, lookback_days: int = 7):
+    """Fechas NRT por defecto: día en curso (día 0) + lookback_days atrás.
+
+    S96: incluye el DÍA EN CURSO (día 0). Las pasadas nocturnas chilenas
+    (UTC-4, las más valiosas para VRP-MIR sin contaminación solar) caen en la
+    madrugada UTC del día en curso (~03:00-07:00 UTC); LANCE las publica ~3 h
+    después. Procesar solo hasta ayer las perdía por ~24 h → dashboard 1 día
+    atrás (decisión Nicolás S95: inaceptable para monitoreo operacional). Si
+    la pasada de hoy aún no se publicó, process_date no halla granules y la
+    corrida siguiente (cron cada 2h) la levanta — idempotente vía dedup
+    (datetime_utc, sensor) de store.py. Orden cronológico ascendente (día más
+    viejo primero) para que el último record persistido sea el más reciente.
+    """
+    return [today - timedelta(days=d) for d in range(lookback_days, -1, -1)]
+
+
 def main():
     parser = argparse.ArgumentParser(description="VRP Chile pipeline")
     parser.add_argument("--profile", default=None, choices=_VALID_PROFILES,
@@ -356,7 +372,7 @@ def main():
                              "data subdirectory. Already consumed before "
                              "imports — this arg exists here only for --help.")
     parser.add_argument("--volcano", help="Volcano name (default: all active)")
-    parser.add_argument("--date", help="Single date YYYY-MM-DD (default: yesterday)")
+    parser.add_argument("--date", help="Single date YYYY-MM-DD (default: today + last 7 days)")
     parser.add_argument("--start", help="Start date YYYY-MM-DD for range")
     parser.add_argument("--end", help="End date YYYY-MM-DD for range")
     parser.add_argument("--no-night-filter", action="store_true",
@@ -383,18 +399,11 @@ def main():
     elif args.date:
         dates = [datetime.strptime(args.date, "%Y-%m-%d")]
     else:
-        # Default: last 7 days. Two reasons:
-        # 1. NASA LANCE NRT can have multi-day publishing gaps; store.py
-        #    dedups by (datetime_utc, sensor) so re-processing is safe.
-        # 2. Standard L1B products (MOD021KM, VNP02IMG) are published 3-5
-        #    days after the overpass, replacing the LANCE NRT version.
-        #    A 7-day lookback gives the auto-upgrade logic in store.py
-        #    (NRT -> standard replacement) a full window to catch every
-        #    Standard granule when it lands, without needing a separate
-        #    weekly cron. Result: the historical archive converges to
-        #    100% Standard automatically.
+        # Default: día en curso + últimos 7 días (8 fechas). Ver
+        # default_date_window() para el razonamiento (S96 día 0 + ventana
+        # 7d para convergencia NRT->Standard del auto-upgrade de store.py).
         today = datetime.utcnow()
-        dates = [today - timedelta(days=d) for d in range(7, 0, -1)]
+        dates = default_date_window(today)
 
     nighttime_only = not args.no_night_filter
     if nighttime_only:
