@@ -38,6 +38,10 @@ bt≥295K) muerde el campo frío sin romper el cráter caliente.
 
 ## Resultado 2 — el PARÁMETRO: R_core=0.75 km
 
+> Nota: esta tabla es de **D2 puro** (sin excepción de seguridad) — paso intermedio.
+> La fila "records a magnitud 0 = 1" expone la falla que se resuelve abajo con
+> D2-safe v2. El resultado adoptado es el de la sección "Intento 2 / Veredicto".
+
 `f5_d2_sweep.py` — barrido de R_core (bt_ext=295K fijo):
 
 | Volcán | base | **R=0.75** | R=1.0 | R=1.25 | R=1.5 | R=2.0 |
@@ -75,24 +79,48 @@ Es exactamente el modo de falla "foco real débil de 1-2 píxeles" que el design
 anticipó para D1 — y que su **mitigación** resuelve: *"siempre conservar el píxel pico
 y sus 8-vecinos inmediatos (el foco nunca se anula)"*.
 
-**Fix aplicado — D2-safe** (`experiments/_s95_audit/f5_d2safe.py`): D2 + excepción
-del píxel-pico (el píxel más cercano al vent y su vecindad ≤0.5 km SIEMPRE se
-conservan). Re-barrido R_core con la métrica de seguridad:
+**Intento 1 — D2-safe (excepción píxel-más-cercano-al-vent)** (`f5_d2safe.py`):
+re-barrido R_core, columna de seguridad `records MIR a 0`:
+
+| Volcán | base | R=0.75 | R=1.0 | R=1.25 | R=1.5 |
+|---|---|---|---|---|---|
+| Tupungatito | 15.85× | 3.17× | 4.62× | 6.12× | 8.26× |
+| Villarrica | 9.83× | 2.07× | 2.52× | 3.22× | 3.66× |
+| Láscar | 0.88× | 0.79× | 0.82× | 0.82× | 0.82× |
+| PCC | 3.94× | 1.75× | 1.80× | 1.80× | 1.80× |
+| PP | 7.34× | 1.44× | 1.56× | 1.57× | 1.78× |
+| Lastarria | 1.78× | 0.97× | 1.02× | 1.44× | 1.64× |
+| **mediana** | | **1.60×** | 1.68× | 1.69× | 1.79× |
+| **records MIR a 0** | | **1** | **1** | **1** | **1** |
+
+⚠️ **El intento 1 NO resolvió la falla de seguridad** (sigue 1 record a 0). Diagnóstico
+(`_zero2.py`): el record Láscar 2026-05-08 04:48 tiene 2 píxeles —
+`px1: vrp=0.0 @0.20km del vent` y `px2: vrp=0.3385 @2.69km`. **Toda la energía está en
+px2, lejos del vent; el píxel en el cráter tiene VRP=0.** La excepción "conservar el
+píxel más cercano al vent" salvó px1 (vacío) y descartó px2 (la energía real, fuera de
+R_core y con bt<295) → magnitud 0. La excepción estaba anclada al punto equivocado.
+
+**Intento 2 — D2-safe v2 (ancla = píxel de MÁXIMA energía)** (`f5_d2safe.py` actual):
+para MAGNITUD (no selección de cluster) el foco es el píxel de mayor VRP, esté donde
+esté; el núcleo se mide desde ahí y ese píxel siempre se conserva. Re-barrido:
 
 | Volcán | base | **R=0.75** | R=1.0 | R=1.25 | R=1.5 |
 |---|---|---|---|---|---|
-| Tupungatito | 15.85× | 2.87× | 4.59× | 5.95× | 7.92× |
-| Villarrica | 9.83× | 1.99× | 2.46× | 3.15× | 3.59× |
-| Láscar | 0.88× | 0.82× | 0.82× | 0.82× | 0.82× |
-| PCC | 3.94× | 1.75× | 1.80× | 1.80× | 1.80× |
-| PP | 7.34× | 1.34× | 1.51× | 1.56× | 1.72× |
-| Lastarria | 1.78× | 0.97× | 1.02× | 1.44× | 1.64× |
-| **mediana** | | **1.55×** | 1.65× | 1.68× | 1.76× |
+| Tupungatito | 15.85× | 2.52× | 3.91× | 5.20× | 6.52× |
+| Villarrica | 9.83× | 2.07× | 2.47× | 3.39× | 3.91× |
+| Láscar | 0.88× | 0.84× | 0.84× | 0.84× | 0.84× |
+| PCC | 3.94× | 1.93× | 1.93× | 1.93× | 1.96× |
+| Planchón-Peteroa | 7.34× | 1.55× | 1.61× | 1.88× | 1.98× |
+| Lastarria | 1.78× | 1.33× | 1.33× | 1.59× | 1.64× |
+| **mediana** | | **1.74×** | 1.77× | 1.91× | 1.97× |
 | **records MIR a 0** | | **0** | **0** | **0** | **0** |
 
-**Criterio de seguridad → CUMPLIDO**: 0 eventos con match MIROVA caen a magnitud 0
-(antes 1: el Láscar 0.62 MW, ahora conservado por la excepción). El campo frío sigue
-curado (Tupungatito 15.85→2.87×, Villarrica 9.83→1.99×, mediana 5.6→1.55×).
+**Criterio de seguridad → CUMPLIDO**: 0 eventos con match MIROVA caen a magnitud 0 en
+todos los R_core. El record Láscar 2026-05-08 (energía en píxel off-vent, cráter con
+vrp=0) ahora se conserva al anclar a la energía. Campo frío sigue curado: Tupungatito
+15.85→2.52×, Villarrica 9.83→2.07×, mediana 5.64→1.74×. La mediana es algo mayor que
+en el intento-1 fallido (1.74 vs 1.60) porque ahora se conservan correctamente píxeles
+de energía que antes se perdían — precio justo de no sub-contar señal real.
 
 **Lección de método (integridad §0.5)**: escribí "NINGUNO a magnitud 0" en la primera
 versión de este doc ANTES de leer el output de `_zerocheck.py` (lo lancé en el mismo
@@ -112,14 +140,14 @@ turno). El dato lo refutó. Conclusión nunca antes del dato — corregido aquí
    dentro del núcleo. Bajar R_core más sub-contaría Láscar — de ahí la tensión
    estructural cráter-caliente ↔ halo-glaciar. El barrido 2D bt_ext debería ayudar.
 
-**Veredicto S95**: **D2-safe con R_core=0.75 km es el punto de operación recomendado.**
-Forma D2 (radial desde el pico, anclado al vent) + excepción del píxel-pico. Cumple:
-(a) campo frío curado (mediana 5.6×→1.55×, Tupungatito 15.85→2.87×, Villarrica
-9.83→1.99×); (b) Láscar conservado 0.82×; (c) **0 eventos confirmados a magnitud 0**.
+**Veredicto S95**: **D2-safe v2 (ancla energía-máxima) con R_core=0.75 km es el punto
+de operación recomendado.** Cumple: (a) campo frío curado (mediana 5.64×→1.74×,
+Tupungatito 15.85→2.52×, Villarrica 9.83→2.07×); (b) Láscar conservado 0.84×;
+(c) **0 eventos confirmados a magnitud 0** (criterio de seguridad).
 
-Residuales de segundo orden (opcionales, no bloquean): Láscar 0.82× apenas bajo el
-rango ideal 0.9-1.1× (dentro del ±30% que MIROVA declara); Tupungatito 2.87× /
-Villarrica 1.99× aún sobre 1× (halo glaciar denso <0.75 km del foco). Un barrido 2D
+Residuales de segundo orden (opcionales, no bloquean): Láscar 0.84× apenas bajo el
+rango ideal 0.9-1.1× (dentro del ±30% que MIROVA declara); Tupungatito 2.52× /
+Villarrica 2.07× aún sobre 1× (halo glaciar denso <0.75 km del foco). Un barrido 2D
 de bt_ext podría afinarlos pero la tensión cráter-caliente↔halo-glaciar es estructural;
 no vale forzarla a costa de sub-contar Láscar (A55: no sobre-ajustar).
 
