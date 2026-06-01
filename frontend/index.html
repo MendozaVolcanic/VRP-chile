@@ -803,8 +803,15 @@ let allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
 
 // ── Fetch ───────────────────────────────────────────────────────────────────
 async function fetchJSON(url) {
+  // S97 (item 2 perf): SIN cache-bust `?_=Date.now()`. Antes cada carga y cada
+  // poll re-descargaban ~12 MB (gzip) aunque el dato no hubiera cambiado, porque
+  // la query única forzaba cache miss. Ahora dejamos que el navegador use su
+  // caché (Cache-Control max-age=600 de GitHub Pages) + revalidación condicional
+  // (ETag/If-None-Match → 304 barato si no cambió). Resultado: re-entradas casi
+  // instantáneas y polls baratos. La frescura la garantiza el auto-refresh
+  // detector de cambios (NRT actualiza cada 2h; staleness ≤10 min es irrelevante).
   try {
-    const r = await fetch(url + "?_=" + Date.now());
+    const r = await fetch(url);
     return r.ok ? r.json() : null;
   } catch { return null; }
 }
@@ -3399,15 +3406,32 @@ async function init() {
     }
   }
   _updateRefreshTimestamp();  // initial mount
+  // S97 (item 1): auto-refresh DETECTOR DE CAMBIOS. Antes re-renderizaba siempre
+  // cada 15 min (saltaba la vista del operador aunque no hubiera dato nuevo) y
+  // re-descargaba todo (cache-bust, ver fetchJSON). Ahora: recarga (barata, vía
+  // caché/304), compara los timestamps `updated` por volcán y SOLO re-renderiza
+  // si alguno cambió → "refresh cada vez que se actualizan los datos" (pedido
+  // Nicolás), sin molestar cuando no hay novedad. Poll cada 5 min ahora que es
+  // barato (304s); el render solo ocurre en cambio real.
   setInterval(async () => {
+    const prev = {};
+    for (const v of VOLCANOES) prev[v.name] = allData[v.name] ? allData[v.name].updated : null;
     await Promise.all(VOLCANOES.map(v => loadVolcano(v)));
+    _updateRefreshTimestamp();
+    const changed = VOLCANOES.filter(v => (allData[v.name] ? allData[v.name].updated : null) !== prev[v.name]);
+    if (changed.length === 0) return;  // sin datos nuevos → no re-renderizar
     buildAlertSummary();
     buildCards();
     buildOverviewMap();
     buildNRTTable();
     renderDetail();
-    _updateRefreshTimestamp();
-  }, 15 * 60 * 1000);
+    const el = document.getElementById("last-refresh-ts");
+    if (el) {
+      el.textContent = "🔄 datos actualizados " + new Date().toISOString().slice(11, 16) + " UTC";
+      el.style.color = "var(--green)";
+      setTimeout(() => { el.style.color = ""; }, 8000);
+    }
+  }, 5 * 60 * 1000);
 }
 
 // ── CSV Export ────────────────────────────────────────────────────────────────
