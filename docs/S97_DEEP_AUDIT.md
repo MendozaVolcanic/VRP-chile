@@ -77,6 +77,48 @@ FP, 1 TP) son volcanes de baja actividad — ese volumen de detecciones merece u
 categorización A54 dedicada (¿señal real débil o artefacto cirrus/campo frío?). Candidato a
 sub-auditoría.
 
+## 7. Tupungatito — detecciones al SE, NO en el lago cratérico (pedido Nicolás)
+
+Nicolás observó en el mapa que Tupungatito no muestra puntos en el lago cratérico pero sí
+muchos al sur. Confirmado y diagnosticado:
+- Cráter (vent) en -33.389,-69.826 (N); mirova_center en -33.427,-69.800 (SE, **4.86 km**).
+- De 116 detecciones VIIRS375 (mayo): **103 al SE**, mediana **5.86 km del cráter**, solo
+  2/116 a <1.5 km del lago. Caen a 1.15 km del mirova_center.
+- **BT del píxel MÁS caliente = 259–265 K (−8 a −14 °C), 100% bajo cero**. NO es lava ni
+  fumarola → **artefacto del anillo glaciar (A19)**: el algoritmo contextual marca píxeles
+  de hielo "relativamente tibios" como anomalía. El lago cratérico real es sub-píxel/débil
+  y queda tapado.
+- No hay TIF de Tupungatito para R2 (verificación de radiancia MIROVA).
+- **Card engañosa**: muestra `centroid_dist_km` (desde mirova_center) → "0.8 km del cráter"
+  cuando físicamente está a ~7.5 km del lago. Issue A3/Eje3, egregio acá por el offset.
+
+## 8. Sub-auditoría Copahue/Llaima (cold-pixel BT lens) — sus "FP" son artefacto frío
+
+| Volcán | n | BT píxel+caliente | %bajo cero | dist cráter |
+|---|---|---|---|---|
+| Tupungatito | 115 | −14 °C | **100%** | 7.5 km |
+| Copahue | 121 | −1 °C | **69%** | 2.9 km |
+| Planchón | 114 | −3 °C | 69% | 3.1 km |
+| Villarrica | 122 | −0.5 °C | 51% | 2.6 km |
+| Llaima | 110 | 0 °C | 49% | 2.9 km |
+| **Lascar** | 92 | **+4.5 °C** | 36% | **0.9 km** |
+
+**Corrige el marco A54 para estos volcanes**: el alto volumen de "FP" de Copahue (69%) y
+Llaima (49%) NO son features volcánicas reales (categoría b) sino **artefactos de píxel
+frío** (categoría d): glaciar/nieve que el path-D contextual lee como anomalía. Lascar es
+el único genuino (píxel caliente +4.5 °C, pegado al cráter).
+
+**Discriminante**: píxel más caliente bajo cero + lejos del cráter = artefacto. PERO un
+gate "matar sub-cero" es PELIGROSO (A55/A19): Villarrica tiene lava lake real cuyo píxel
+integrado promedia bajo cero (roca caliente sub-píxel + hielo) → un gate duro daría FN en
+Villarrica. El Núcleo F5' baja la MAGNITUD pero no mueve la UBICACIÓN del artefacto.
+
+## Acción tomada (S97)
+- **Núcleo F5' = default** (PR pendiente): cura la magnitud de campo frío en la vista del
+  operador. Trade-off: global Cluster 1.07× vs Núcleo 1.51× (los high-count ya estaban
+  bien en Cluster); gana en los casos visibles malos, empeora levemente PCC/Isluga.
+  Reversible (1 línea). Detección intacta + guard S96.
+
 ## Veredicto
 
 - **Detección sana**: recall VIIRS375 96%, VIIRS750 87%. El refresh S97 no rompió nada.
