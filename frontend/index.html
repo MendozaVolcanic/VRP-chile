@@ -549,8 +549,8 @@
   </div>
   <div style="display:flex;gap:6px;align-items:center;" title="Magnitud (solo cambia el número, NO la detección): 'Cluster' = VRP del cluster contiguo (pc.vrp_mw, actual). 'Núcleo F5'' = D2-safe v2 (S95): recomputa la magnitud sumando solo el núcleo de 0.75 km alrededor del píxel de máxima energía + lava real (bt≥295K), curando la sobre-estimación del halo glaciar (campo frío). Ver docs/F5_CALIBRATION_S95.md.">
     <label>Magnitud </label>
-    <button class="scale-btn active" id="btn-mag-cluster">▣ Cluster</button>
-    <button class="scale-btn" id="btn-mag-core">◎ Núcleo F5'</button>
+    <button class="scale-btn" id="btn-mag-cluster">▣ Cluster</button>
+    <button class="scale-btn active" id="btn-mag-core">◎ Núcleo F5'</button>
   </div>
   <div class="sensor-legend" id="sensor-legend"></div>
 </div>
@@ -968,7 +968,12 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
 // Toggle USE_F5_CORE: false = "Cluster (actual)" (pc.vrp_mw, sin cambio);
 // true = "Núcleo F5'". El toggle SOLO cambia el número de magnitud mostrado;
 // el gating (detección/visibilidad) es idéntico en ambos modos.
-let USE_F5_CORE = persistedFlag("vrp_f5_core", false);
+// S97: Núcleo F5' pasa a ser el DEFAULT (pedido Nicolás tras deep audit). Cura la
+// sobre-estimación de campo frío en la magnitud que ve el operador (Villarrica
+// 19×→2.5×, Tupungatito 11×→2.9× vs MIROVA). Detección INTACTA + guard S96 (nunca
+// borra una detección). Trade-off: sube levemente los ya-bien-calibrados (PCC
+// 0.51×→1.89×). Reversible: cambiar el default a false. El toggle Cluster sigue.
+let USE_F5_CORE = persistedFlag("vrp_f5_core", true);
 const F5_R_CORE_KM = 0.75;
 const F5_BT_EXT_K = 295.0;
 
@@ -3327,6 +3332,10 @@ async function init() {
   if (USE_F5_CORE) {
     document.getElementById("btn-mag-core").classList.add("active");
     document.getElementById("btn-mag-cluster").classList.remove("active");
+  } else {
+    // S97: default ahora es Núcleo (HTML). Si el usuario persistió Cluster, reflejarlo.
+    document.getElementById("btn-mag-cluster").classList.add("active");
+    document.getElementById("btn-mag-core").classList.remove("active");
   }
 
   // Load all volcanoes in parallel
