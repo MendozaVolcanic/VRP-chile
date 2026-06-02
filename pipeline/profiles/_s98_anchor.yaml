@@ -1,0 +1,19 @@
+# S98 — perfil de validación del fix del ancla de detección (enfoque B).
+# Idéntico a mirova_equivalent (config operacional heredada) salvo el
+# data_subdir aislado. Se corre con el CÓDIGO de la branch s98-detection-anchor
+# (get_detection_anchor = cráter), para A/B contra data/mirova_equivalent
+# (baseline operacional, ancla = mirova_center). A18: reproc real desde L1B,
+# NO promover sin OK Nicolás (A45). Los 3 sensores para validación completa.
+extends: mirova_equivalent
+profile: _s98_anchor
+description: >
+  Reproceso de validación del fix del ancla de detección S98. Config operacional
+  heredada de mirova_equivalent; data_subdir aislado _s98_anchor. Compara el
+  efecto de anclar detección/clustering/distancia al cráter (vent_lat) vs al
+  centro del grid (mirova_center) sobre Tupun/PCC/PP + controles.
+sensors:
+  modis: true
+  viirs_375: true
+  viirs_750: true
+output:
+  data_subdir: _s98_anchor
