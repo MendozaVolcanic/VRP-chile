@@ -119,6 +119,50 @@ Villarrica. El Núcleo F5' baja la MAGNITUD pero no mueve la UBICACIÓN del arte
   bien en Cluster); gana en los casos visibles malos, empeora levemente PCC/Isluga.
   Reversible (1 línea). Detección intacta + guard S96.
 
+## 9. Auditoría espacial R2 vs TIF MIROVA (2da ronda — el eje que faltó)
+
+Nicolás señaló (con razón) que la 1ra auditoría no miró la UBICACIÓN física, solo
+métricas agregadas. Y que SÍ hay TIF (estaban en `../mirova-tif-archive/`, sibling del
+repo — mi búsqueda interna falló). 2da ronda con `r2_spatial_audit.py`: por pasada
+matcheada (record ↔ TIF mismo sensor ±90min, ventana mayo), centroide de radiancia del
+TIF (dónde ve el calor MIROVA) vs nuestro cluster vs cráter real.
+
+| Volcán | nPares | d_tif_cráter | d_ours_cráter | d_ours_tif | offset mc | lectura |
+|---|---|---|---|---|---|---|
+| Tupungatito | 49 | 4.85 | 5.88 | **1.76** | 4.86 | **coincidimos con MIROVA**; ambos ~5km SE del cráter |
+| PCC | 106 | 7.16 | 3.04 | 6.15 | 7.57 | campo difuso 707km² (A20): centroide TIF no aplica |
+| Lascar | 45 | 3.67 | **0.26** | 3.40 | 0.83 | **NOSOTROS en el cráter**; el TIF se estira (Salar off-nadir) |
+| Planchón | 42 | 4.53 | 2.77 | 3.22 | 2.02 | complejo multi-cráter (A22), ambos dispersos |
+| Villarrica | 53 | 1.13 | 0.90 | 1.04 | 0.54 | ambos en el cráter (lava lake) ✓ |
+| Chaitén | 62 | 0.97 | 0.49 | 1.04 | 0.24 | ambos en el cráter ✓ |
+| Copahue | 50 | 2.24 | 1.45 | 1.70 | 0.14 | cerca del cráter |
+| Llaima | 44 | 1.19 | 1.24 | 1.75 | 0.14 | cerca del cráter |
+| Lastarria | 39 | 0.88 | 1.49 | 1.34 | 0.12 | en el cráter ✓ |
+| Isluga | 54 | 0.89 | 1.04 | 1.46 | 0.37 | en el cráter ✓ |
+| NdC | 1 | — | — | — | 0.39 | n=1, no concluyente |
+
+**CORRECCIÓN clave (vs lo que dije S97 turno previo):**
+- **Tupungatito NO es nuestro error de ubicación**: `d_ours_tif=1.76 km` → coincidimos con
+  el TIF de MIROVA. **AMBOS** ven el calor ~5 km SE del cráter mapeado. El desplazamiento
+  es del CAMPO TÉRMICO (señal glaciar-relativa SE, BT bajo cero) + la coord del cráter, NO
+  un bug nuestro. MIROVA reporta lo mismo.
+- **Lascar: nosotros somos MÁS precisos** que el centroide del TIF (0.26 km vs 3.67 km) —
+  el TIF se estira por el Salar off-nadir; nuestro cluster clava el cráter.
+- **El "error de Tupungatito" NO está en todos los volcanes**: la mayoría (Villarrica,
+  Chaitén, Lastarria, Isluga, Llaima, Copahue) ubican el calor a <2 km del cráter,
+  coincidiendo con MIROVA. Solo Tupungatito (offset 4.86 km) y los difusos PCC/PP se
+  apartan, y por razones documentadas (A20 difuso, A22 multi-cráter), no por bug.
+
+**Caveat metodológico (A24)**: el centroide ponderado del TIF sobre TODO el campo se
+estira con píxeles dispersos (Lascar→Salar, PCC→lacolito). Por eso `d_tif_crater` se
+infla en campos extendidos. El cruce contra la distancia REPORTADA por MIROVA (CSV, §4
+arriba) da acuerdo sub-km — esa es la referencia autoritativa de ubicación, y ahí estamos
+bien. El TIF-centroide es complementario, no la última palabra.
+
+**Conclusión del eje espacial**: nuestras detecciones están bien ubicadas vs lo que MIROVA
+reporta. Tupungatito es un caso especial (offset cráter-señal de 4.86 km que MIROVA
+también tiene), no un patrón de error generalizado.
+
 ## Veredicto
 
 - **Detección sana**: recall VIIRS375 96%, VIIRS750 87%. El refresh S97 no rompió nada.
