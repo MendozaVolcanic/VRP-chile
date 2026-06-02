@@ -49,13 +49,37 @@ bash experiments/_s98_anchor/fetch_and_audit.sh 26830238766
 ```
 (descarga artifacts → data/_s98_anchor/ → corre audit_spatial.py + audit_ratio.py)
 
-| Volcán | det→cráter fix | ratio fix | recall fix | ¿cumple? |
+**Run 26830238766 (success, 5 vols, 05-01..05-18). Audits: experiments/_s98_anchor/.**
+
+| Volcán | det→cráter base→fix | ratio base→fix | recall (vs MIROVA) | veredicto |
 |---|---|---|---|---|
-| Tupungatito | _pend_ | _pend_ | _pend_ | _pend_ |
-| PuyehueCordonCaulle | _pend_ | _pend_ | _pend_ | _pend_ |
-| PlanchonPeteroa | _pend_ | _pend_ | _pend_ | _pend_ |
-| Lascar (control) | _pend_ | _pend_ | _pend_ | sin cambio? |
-| Villarrica (control) | _pend_ | _pend_ | _pend_ | sin cambio? |
+| Tupungatito | 5.76 → **1.25 km** ✓ | 20.0 → 18.9× ✗ | 15/15 → 15/15 ✓ | espacial CURADO; magnitud = 2º problema |
+| PuyehueCordonCaulle | 7.23 → **0.69 km** ✓ | 0.63 → **1.24×** ✓ | 37 → 37 ✓ | CURADO (espacial + magnitud) |
+| PlanchonPeteroa | 2.69 → **1.14 km** ✓ | 2.43 → **1.50×** ✓ | 22 → 22 ✓ | CURADO (espacial + magnitud) |
+| Lascar (control) | 0.36 → 0.37 km ✓ | 0.82 → 0.85× ✓ | 77 → 77 ✓ | SIN CAMBIO ✓ |
+| Villarrica (control) | 1.47 → 1.33 km ✓ | 1.90 → 1.90× ✓ | 4 → 4 ✓ | SIN CAMBIO ✓ |
+
+**Confirmación espacial (A61, ubicación no número):** las detecciones de Tupungatito
+pasaron del glaciar sur (centroides lat ~-33.43, bin dominante (-33.43,-69.79)) al
+**cráter** (lat ~-33.38, bin dominante (-33.38,-69.83)). Es exactamente el bug que
+veía Nicolás (MIROVA en el cráter, nosotros en el glaciar) → RESUELTO.
+
+### Veredicto
+- **Criterio 1 (det→cráter <2 km): CUMPLE en los 3 afectados** (Tupun 1.25, PCC 0.69,
+  PP 1.14). Controles sin cambio.
+- **Criterio 3 (controles/recall): CUMPLE** — recall vs MIROVA intacto en los 5;
+  espacial estable (PP incluso sube 110→125).
+- **Criterio 2 (ratio 0.5-2.0): CUMPLE en PCC y PP** (los lleva a rango), **NO en
+  Tupungatito** (sigue ~19×).
+- **Hallazgo clave (A62 adversarial):** Tupungatito ahora detecta EN el cráter pero
+  la magnitud sigue ~19× → la inflación NO venía de elegir el cluster del glaciar
+  (ambos clusters dan ~19-20×), es **sistémica del cómputo de VRP sobre el campo
+  glaciar frío** (A12 ΔL inflado Test1 / VRP sumado). Es el "segundo problema" que
+  el diseño anticipó y difirió (§2). El fix B NO lo empeora (18.9 ≤ 20).
+
+→ **El fix hace lo que prometía** (anclar al cráter): resuelve el bug espacial
+reportado, mejora PCC/PP en magnitud, no rompe controles ni recall. La magnitud de
+Tupungatito es un frente separado (§2, post-fix).
 
 ## Pendiente DESPUÉS (no en este fix)
 - El 44% que S65 no curó: selección de cluster por VRP sumado vs pico NTI. Medir
