@@ -609,6 +609,34 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   migración a CLAUDE.md proyecto pendiente para S87+ si se vuelve a
   citar mucho.
 
+- **A61. AUDIT-SPATIAL: auditar detección SIEMPRE incluye el eje espacial**
+  (S97, lección dura — fallé 2 auditorías por saltarlo). Comparar la
+  **lat/lon** de nuestras detecciones contra (a) el cráter físico (`vent_lat`)
+  y (b) la radiancia LOCAL del TIF MIROVA alrededor del cráter — NUNCA solo
+  números de distancia. Las distancias nuestra y de MIROVA pueden compartir el
+  mismo ancla (centro del grid) y "coincidir" estando ambas corridas del cráter
+  físico. El bug Tupungatito (detecciones 5 km al sur del lago) era invisible a
+  una auditoría de número-vs-número; solo aparece comparando ubicaciones.
+
+- **A62. AUDIT-ADVERSARIAL: la insistencia del experto de dominio es señal, no
+  ruido** (S97, pedido explícito Nicolás "qué hacer para que te fijes"). Al
+  concluir "estamos bien", y MÁS aún cuando Nicolás (geólogo, conoce el volcán)
+  disiente, **asumir que hay un error y refutarlo con datos** antes de reafirmar.
+  No defender la propia conclusión. S97: estuve sobreconfiado, me contradije
+  varias veces, y solo cavé hondo cuando Nicolás insistió. Herramientas que SÍ
+  tengo y debo usar antes de decir "no puedo": **Chrome MCP** (mirovaweb/Maps),
+  **TIF en `../mirova-tif-archive`** (sibling del repo, NO interno).
+
+- **A63. Consolidar config NO debe revertir fixes deliberados** (S97, regresión
+  S65→S80 git-confirmada). S65 (PR #93) quitó deliberadamente el `mirova_center`
+  de Tupungatito (ancla al cráter, validado S66 56%). S80 (PR #220, "consolidación
+  post-pérdida-contexto, 11/11 mirova_center") regeneró los 11 desde el KMZ y
+  **revirtió el fix sin saberlo**. Regla: al regenerar/consolidar config
+  (mirova_center, coords, flags), revisar `git log -S`/comentarios por excepciones
+  deliberadas previas ANTES de sobrescribir. Defensa durable: un **test de
+  regresión** que asegure la intención (ej. `get_detection_anchor` ancla al
+  cráter en Tupun/PCC/PP) — falla si una consolidación lo revierte.
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
