@@ -31,7 +31,7 @@ name: S98 anchor validation reproc (artifacts)
 jobs:
   reproc:
     runs-on: ubuntu-latest
-    timeout-minutes: 200
+    timeout-minutes: 350
     strategy:
       fail-fast: false
       max-parallel: 5
@@ -65,7 +65,7 @@ jobs:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
-        timeout-minutes: 190
+        timeout-minutes: 340
         run: |
           python scripts/run_pipeline.py \
             --profile ${{ github.event.inputs.profile }} \
