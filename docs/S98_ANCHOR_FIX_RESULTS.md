@@ -39,12 +39,15 @@ inflada (cluster glaciar grande, VRP sumado). Diagnóstico S97 reconfirmado con
 datos en ambos ejes.
 
 ## Resultado FIX (data/_s98_anchor, ancla=cráter) — PENDIENTE reproc
-Run GH Actions: 26824615190 (11 vols × mayo, código branch s98). Al terminar:
+Run GH Actions: **26830238766** (workflow `reproc-s98-anchor.yml` con artifacts;
+5 vols × 05-01..05-18; checkout code_ref=s98). El 1er intento (run 26824615190,
+reuse del workflow refresh S97) procesó OK pero falló en el commit step (race A47
++ branch feature) → cancelado y reemplazado por el workflow con artifacts.
+Al terminar — un solo comando:
 ```
-git pull origin s98-detection-anchor    # trae data/_s98_anchor/*.json
-PYTHONIOENCODING=utf-8 python experiments/_s98_anchor/audit_spatial.py
-PYTHONIOENCODING=utf-8 python experiments/_s98_anchor/audit_ratio.py
+bash experiments/_s98_anchor/fetch_and_audit.sh 26830238766
 ```
+(descarga artifacts → data/_s98_anchor/ → corre audit_spatial.py + audit_ratio.py)
 
 | Volcán | det→cráter fix | ratio fix | recall fix | ¿cumple? |
 |---|---|---|---|---|
