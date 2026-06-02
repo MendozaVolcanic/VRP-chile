@@ -1,0 +1,83 @@
+name: S98 anchor validation reproc (artifacts)
+
+# Validación del fix del ancla de detección (S98, enfoque B). Corre el código de
+# una branch (code_ref) y sube los JSONs resultantes como ARTIFACTS — NO commitea
+# a git (evita el race A47 + el problema de correr sobre branch feature que rompió
+# el reuse del workflow de refresh S97). Se descargan con `gh run download` y se
+# auditan localmente (experiments/_s98_anchor/audit_*.py).
+#
+# A43 Norway problem: "on": quoted. Dispatch-only; no toca data operacional.
+
+"on":
+  workflow_dispatch:
+    inputs:
+      code_ref:
+        description: "Branch/ref con el código del fix a validar"
+        required: true
+        default: "s98-detection-anchor"
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-05-01"
+      end:
+        description: "End date YYYY-MM-DD inclusive"
+        required: true
+        default: "2026-05-18"
+      profile:
+        description: "Profile (data_subdir aislado)"
+        required: true
+        default: "_s98_anchor"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        volcano:
+          - Tupungatito
+          - PuyehueCordonCaulle
+          - PlanchonPeteroa
+          - Lascar
+          - Villarrica
+    steps:
+      - name: Checkout fix code (code_ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.code_ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — ${{ github.event.inputs.profile }} / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 190
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ github.event.inputs.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Upload result JSON as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: s98-anchor-${{ matrix.volcano }}
+          path: data/${{ github.event.inputs.profile }}/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7
