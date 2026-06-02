@@ -1,8 +1,10 @@
-"""Test effective vent coordinate resolution.
+"""Test get_effective_vent — DEPRECATED grid-center resolver (S98 alias).
 
-Covers the micro-fix to align our vent-path detection and distance reporting
-with MIROVA's scene center, which for Tupungatito (~3 km SE) and
-Planchon-Peteroa (~1.9 km N) does NOT coincide with the morphological vent.
+Since S98 `get_effective_vent` is an alias of `get_grid_center`
+(mirova_center-priority); it is NO LONGER the detection anchor. Detection,
+clustering and distance now use `get_detection_anchor` (crater-priority) —
+see tests/test_detection_anchor.py. These tests pin the legacy grid-center
+behavior so offline experiment scripts that still import it keep working.
 Priority: mirova_center_lat/lon > vent_lat/vent_lon > lat/lon.
 """
 

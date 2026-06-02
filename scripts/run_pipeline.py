@@ -58,7 +58,7 @@ if _early_args.profile:
 
 from pipeline import fetch, process_modis, process_viirs, process_viirs_mod, store
 from pipeline import profile as vrp_profile
-from pipeline.geo_utils import get_effective_vent
+from pipeline.geo_utils import get_detection_anchor
 
 
 # Granules crudos (L1B/HDF) — se descargan, procesan y borran por día. Override
@@ -199,7 +199,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         print(f"  No geolocation match for {l1b.name}")
                         continue
                     try:
-                        eff_vent_lat, eff_vent_lon = get_effective_vent(volcano)
+                        eff_vent_lat, eff_vent_lon = get_detection_anchor(volcano)
                         result = process_modis.calculate_vrp(
                             l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"],
                             vent_lat=eff_vent_lat,
@@ -242,7 +242,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         print(f"  No geolocation match for {l1b.name}")
                         continue
                     try:
-                        eff_vent_lat, eff_vent_lon = get_effective_vent(volcano)
+                        eff_vent_lat, eff_vent_lon = get_detection_anchor(volcano)
                         result = process_viirs.calculate_vrp(
                             l1b, geo,
                             volcano["lat"], volcano["lon"], volcano["radius_km"],
@@ -288,7 +288,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                         print(f"  No geolocation match for {l1b.name}")
                         continue
                     try:
-                        eff_vent_lat, eff_vent_lon = get_effective_vent(volcano)
+                        eff_vent_lat, eff_vent_lon = get_detection_anchor(volcano)
                         result = process_viirs_mod.calculate_vrp(
                             l1b, geo, volcano["lat"], volcano["lon"], volcano["radius_km"],
                             vent_lat=eff_vent_lat,

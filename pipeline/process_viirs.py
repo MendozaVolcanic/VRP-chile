@@ -508,8 +508,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
 
     dist = haversine_km(volcano_lat, volcano_lon, lat, lon)
 
-    # P3.1 S15: per-pixel distance from effective vent (mirova_center if set,
-    # else vent_lat/lon, else volcano center). Used for dual-ROI summit/scene.
+    # P3.1 S15 / S98: per-pixel distance from the detection anchor (the crater
+    # vent_lat/lon; see geo_utils.get_detection_anchor). Used for dual-ROI
+    # summit/scene. The grid/ROI extent below uses volcano_lat/lon, not this.
     if vent_lat is not None and vent_lon is not None:
         vent_dist_per_pixel = haversine_km(vent_lat, vent_lon, lat, lon)
     else:
