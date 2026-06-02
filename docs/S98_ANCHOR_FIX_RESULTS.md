@@ -81,12 +81,49 @@ veía Nicolás (MIROVA en el cráter, nosotros en el glaciar) → RESUELTO.
 reportado, mejora PCC/PP en magnitud, no rompe controles ni recall. La magnitud de
 Tupungatito es un frente separado (§2, post-fix).
 
+## El 19× de Tupungatito: diagnóstico físico (investigación post-veredicto)
+Pregunta de Nicolás: ¿desde cuándo el 19× y por qué solo Tupungatito? Respuesta con
+datos (snapshot MIROVA CONS+OCR + data mirova_equivalent):
+
+- **Desde abril 2026.** Ratio mediano pc.vrp/MIROVA por mes: feb 4.2×, **mar 1.04×**,
+  **abr 20.8×**, may 20.0×. En marzo era perfecto (como Lascar, estable ~1× siempre).
+- **MIROVA estable ~0.2 MW** todos los meses (fumarólico "Muy Bajo", actividad real
+  constante). No bajó. Lo que cambió es NUESTRA magnitud en los records matcheados.
+- **Mecanismo (datos de los matcheados):** el cluster explotó de **2 px (marzo,
+  nuestro vrp 0.23 ≈ MIROVA) a 58 px (abril, nuestro vrp 3.99 = 20×)**. Mismo sensor
+  VIIRS375. single_pixel_mode cayó 19/33 → 7/39. n_pixels global subió 8→16→23
+  (mar→abr→may).
+- **Física:** Tupungatito = cráter fumarólico muy débil (~0.2 MW) sobre glaciar a
+  5682 m. En otoño-invierno austral cae nieve fresca → mosaico nieve/roca de alto
+  contraste local. El path **dNTI contextual** (8 vecinos) no distingue lava de ese
+  mosaico → marca decenas de píxeles. Como VRP = SUMA del cluster, se infla a ~4 MW.
+  MIROVA usa el pico/NTI, no la suma del campo → se queda en 0.2. Lascar no sufre
+  esto (señal fuerte ~1-2 MW sobre desierto seco, sin manto de nieve).
+- **Por qué el fix del ancla NO lo tocó:** movió el cluster al cráter (correcto), pero
+  el cluster del cráter en invierno igual incorpora el halo nival de 58 px → magnitud
+  sigue inflada. Confirma que es problema separado (§2).
+- **Mitigación operacional ya existente:** el dashboard usa **Núcleo F5'** por defecto
+  (#313, R_core 0.75 km), que recorta el halo → S95 lo calibró a ~2.5× (no 20×).
+- **Vías de fix (frente §2, con OK):** gate path dNTI ctx con t_bg muy frío (A23);
+  cap n_pixels del cluster en régimen Muy Bajo; usar pico NTI estilo MIROVA.
+
+## PROMOCIÓN A OPERACIONAL (S98, completada)
+- Fix de código mergeado a main (PR #318, commit 588cc8fc) → NRT ancla al cráter.
+- Tag defensivo `pre-s98-promote-operational`.
+- Reproc histórico 90 días (2026-03-04..06-02, decisión Nicolás) de Tupun/PCC/PP a
+  mirova_equivalent (runs 26839962842/67867/73072, código con fix), ensamblado con
+  pre-90d intacto (merge_promote.py).
+- **Verificación preview (3 vistas, S92 L5):** tarjetas Tupun "0.4 km del cráter",
+  PCC "2.1 km", PP "0.4 km"; controles Lascar 1.0 / Villarrica 1.5 sin cambio.
+  diario/mosaico cargan sin error. det→cráter 90d: 1.25/1.33/1.17 km.
+- pre-90d (ene-mar) queda con ancla viejo (decisión 90d); coherente para las vistas
+  del dashboard (90d/30d/48h).
+
 ## Pendiente DESPUÉS (no en este fix)
-- El 44% que S65 no curó: selección de cluster por VRP sumado vs pico NTI. Medir
-  cuánto cura B (este fix); si queda gap, brainstorm propio.
+- **§2 — magnitud Tupungatito (19× estacional):** recortar el halo nival del cluster
+  (ver vías arriba). Brainstorm propio.
 - Gates intra-radio redundantes (A55).
-- Promoción a operacional: ensamblar mirova_equivalent + display distancia desde
-  cráter + OK Nicolás.
+- Reproc del histórico pre-90d (ene-mar) si se quiere coherencia total (opcional).
 
 ## Notas
 - Ground truth MIROVA acotado a 05-01..05-18 (snapshot CONS). A17: actualizable.
