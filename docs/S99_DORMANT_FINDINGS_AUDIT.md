@@ -84,6 +84,16 @@ papers (`experiments/_s99_audit/dormant/papers_per_sensor.md`):
 - **Mecanismo anti-recurrencia aplicado**: DF-1/DF-2 quedan marcados "investigado
   S99: NO fiel a MIROVA, no adoptar operacional". Que una sesión futura no los
   resucite creyéndolos buena idea dormida.
+- **Pero NO se descartan: se MUEVEN a beyond-MIROVA** (fase 2 "herramienta
+  independiente", MISSION.md objetivo 2). Eq.16 es el método físicamente correcto para
+  lava lakes sub-píxel donde el Wooster del clon subestima → valor agregado citable.
+  Registrado en `docs/BEYOND_MIROVA_EXTENSIONS.md` EXT-11 (código ya construido +
+  cableado flag-OFF, solo falta calibrar T_e). Drift-del-clon ≠ sin valor.
+- **Regla de guía nueva (MISSION.md, raíz de la confusión)**: responder "SÍ está en
+  papers" a la Pregunta 1 exige cita verbatim de que el SISTEMA NRT *aplica* X (verbo
+  activo), no que un paper lo *mencione*; las afirmaciones de design docs sobre MIROVA
+  no son autoritativas sin cotejo verbatim. Hecho canónico registrado: MIROVA = 1
+  algoritmo por sensor, uniforme entre volcanes.
 
 ## Veredicto
 Sí hay valor dormido, pero **acotado y coherente**: gira alrededor de la magnitud

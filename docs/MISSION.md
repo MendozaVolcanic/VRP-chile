@@ -58,6 +58,26 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
 
    **Si SÍ está en papers core → puede implementarse.**
 
+   **⚠️ Regla de verificación verbatim (S99, raíz de la confusión Eq.16):**
+   responder "SÍ está en papers" exige una **cita verbatim del paper** (archivo +
+   línea) que muestre que el **sistema MIROVA NRT automático APLICA** ese mecanismo —
+   NO basta que el paper lo *mencione* o lo *discuta*. Distinguir SIEMPRE:
+   - *"el sistema MIROVA computes/applies automatically X"* (verbo activo, sistema) →
+     SÍ, parte del clon.
+   - *"X can be estimated / was applied to volcano Y / requires calibration"* (voz
+     pasiva, sección "Applications", caso de estudio manual) → NO es el pipeline NRT;
+     va a `BEYOND_MIROVA_EXTENSIONS.md`, no a `pipeline/`.
+   - Las afirmaciones de **design docs internos sobre "qué hace MIROVA" NO son
+     autoritativas** hasta cotejarse contra la fuente primaria verbatim. La confusión
+     Eq.16 (S53→S99) nació de tomar la interpretación de un design doc como hecho.
+
+   **Hecho canónico (verificado S99):** MIROVA NRT = **UN algoritmo por SENSOR**
+   (MODIS / VIIRS750 / VIIRS375), **uniforme entre volcanes**. La única variación
+   por-objetivo es (a) geometría ROI/summit (centro GVP) y (b) sensor (bandas + α +
+   umbrales). **NO conmuta de método por volcán ni por régimen térmico.** Cualquier fix
+   de magnitud fiel debe ser uniforme por sensor (Coppola 2016a §98-119, §431-441,
+   §689-695; Coppola 2024 §1148-1155).
+
 2. **Si NO está en papers**, ¿cierra una divergencia ya documentada en
    `docs/MIROVA_DIVERGENCES.md`?**
    - D1: granularidad (1 punto/pasada).
@@ -96,6 +116,7 @@ Estas fueron las desviaciones históricas. Nunca repetir.
 | Subir `inner_radius_km` ad-hoc | Parche para recuperar recall; no es metodológico MIROVA | Rechazado S27 |
 | N·σ Di Bella 2024 (12σ noche VIIRS) | Di Bella es INGV Catania, NO MIROVA | Identificado S26 |
 | **Gate intra-radio por path** (S83-S85 PRs #224, #229) | No en papers; el frontend `mirovaEqVrp` ya hacía exactamente eso desde S33 → adopciones redundantes | Identificado S86 |
+| **Eq.16 lava lake / Eq.25 crater lake POR-VOLCÁN** (design S53, casi adoptado S99) | El capítulo Coppola 2024 las presenta en sección "Applications" como productos de 2º nivel MANUALES y calibrados caso por caso ("requires specific calibrations", "valid only within the limits of the assumptions") — **NO el pipeline NRT automático**. MIROVA NRT es UN algoritmo por SENSOR uniforme (Coppola 2016a: "completely autonomous", "self-adapting thresholds independent of local conditions"). Conmutar de método por volcán es un drift. | Identificado S99 — movido a beyond-MIROVA (`docs/BEYOND_MIROVA_EXTENSIONS.md` EXT-11). Citas verbatim: `experiments/_s99_audit/dormant/papers_per_sensor.md` |
 
 **El patrón común**: cada parche resolvía el síntoma de un drift previo, no la
 causa raíz. Cuando se acumulaban, anulaban la diferenciación summit/scene de

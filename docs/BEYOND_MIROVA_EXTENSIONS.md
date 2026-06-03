@@ -125,15 +125,42 @@ MIROVA admite explícitamente que su cloud handling per-scene está **ausente** 
 
 ## 5. Sub-pixel signal recovery
 
-### EXT-11 — Two-component model Coppola 2024 Eq.14-16
+### EXT-11 — Two-component model Coppola 2024 Eq.14-16 (lava lake sub-píxel)
 
-**Source**: Coppola 2024 Springer book chapter §1132-1141.
+**Source**: Coppola 2024 Springer book chapter §1132-1141 (two-component) + §"Lava
+lakes" (Burgi-Coppola, Eq.15-16, T_e asumido).
 
-**Mecanismo**: `L_hotpix(λ, T_hotpix) = f_hot · B(λ, T_hot) + (1 − f_hot) · B(λ, T_bk) (Eq. 14)`. Permite recovery A_hot dado assumption sobre T_hot.
+**Mecanismo**: `L_hotpix(λ, T_hotpix) = f_hot · B(λ, T_hot) + (1 − f_hot) · B(λ, T_bk) (Eq. 14)`.
+Despeja A_hot asumiendo T_e (1000 K lava lake) → φ_rad = A_hot σε (T_e⁴ − T_bk⁴) (Eq.16).
 
-**Caveat**: **MIROVA NRT NO usa Eq.14-16** (Coppola 2024 §1159-1171: "requires assuming T_hot"). Es teoría no operacional.
+**Caveat (reconfirmado S99 contra fuente primaria)**: **MIROVA NRT NO usa Eq.14-16**.
+El capítulo lo presenta en sección "Applications" como **producto de 2º nivel manual,
+calibrado caso por caso** ("requires specific calibrations", "valid only within the
+limits of the assumptions"). MIROVA NRT es UN algoritmo por SENSOR uniforme (ver
+MISSION.md hecho canónico S99). Por eso es **beyond-MIROVA, NO clon literal**.
 
-**Decisión**: Backlog descartado para operacional. Útil para discussion paper.
+**Estado S99 (importante)**: la función **`compute_vrp_lava_lake_eq16` YA está
+construida + 10 tests** (`pipeline/vrp_regimes.py:105`, `tests/test_vrp_regimes_lava_lake.py`)
+y **cableada flag-OFF** (S99 PR #326: `enable_test1_lava_lake_eq16`, gate per-vol
+`lava_lake_magmatic` en Villarrica). Era un hallazgo dormido (DF-1 de
+`docs/S99_DORMANT_FINDINGS_AUDIT.md`) — construida S57, nunca conectada. **Medida en el
+A/B S99 por completitud** (perfil `_s99_test1_eq16`), pero **NO adoptable a
+`mirova_equivalent`** (sería drift; MISSION.md anti-patrón S99).
+
+**Caveat de calibración**: con T_e=1000 K el test canónico Villarrica da ~0.05 MW vs
+MIROVA 0.31 (subestima ~6×). El A/B S54 que debía calibrar T_e (600-1400 K) nunca se
+corrió → por eso quedó dormida. Si se prioriza para la fase independiente: calibrar
+T_e empíricamente vs CSV MIROVA Villarrica.
+
+**Valor beyond-MIROVA**: para la fase (2) "herramienta independiente / mejor que
+MIROVA", Eq.16 es el método físicamente correcto para magnitud de lava lakes sub-píxel
+(Villarrica, Erebus-tipo) — donde el Wooster del clon literal subestima por estar fuera
+de rango (<600 K). Citable como contribución propia. NO encender en operacional clon.
+
+**Decisión**: beyond-MIROVA priorizado para fase post-clon. Código ya listo (solo falta
+calibrar T_e + decidir reporte dual "VRP Wooster" + "VRP lava lake"). Diseño completo en
+`docs/superpowers/specs/2026-05-17-vrp-three-regimes-design.md` (incluye R3 crater lake
+Eq.25 — NO escrito aún). Hermano: EXT-12 TIRVolcH (otra vía sub-MW low-T).
 
 ### EXT-12 — TIRVolcH Aveni 2024 single-band TIR low-T
 
