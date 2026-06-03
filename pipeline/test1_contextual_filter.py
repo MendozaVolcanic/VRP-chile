@@ -18,17 +18,21 @@ import numpy as np
 
 
 def apply_contextual_test1_filter(test1_mask: np.ndarray,
-                                  dnti_ctx_mask) -> np.ndarray:
+                                  dnti_ctx_mask,
+                                  keep_peak_rc=None) -> np.ndarray:
     """Intersecta la máscara Test 1 con la máscara contextual dNTI.
 
     Args:
         test1_mask: bool 2-D, píxeles del Test 1 (test1_hot_filtered).
         dnti_ctx_mask: bool 2-D de píxeles contextualmente anómalos (dnti_ctx_hot),
             o None si no disponible (paths sin dNTI contextual).
+        keep_peak_rc: (row, col) opcional del píxel pico (cráter = más caliente). Si se
+            da y está en test1_mask, se CONSERVA aunque no sea contextualmente anómalo
+            (guard anti-FN del cráter embebido). Híbrido C+keep-peak.
 
     Returns:
-        bool 2-D = test1_mask ∩ dnti_ctx_mask. Si dnti_ctx_mask es None → passthrough
-        (devuelve test1_mask sin cambios; el caller decide).
+        bool 2-D = (test1_mask ∩ dnti_ctx_mask) ∪ {peak}. Si dnti_ctx_mask es None →
+        passthrough (devuelve test1_mask sin cambios; el caller decide).
     """
     test1_mask = np.asarray(test1_mask, dtype=bool)
     if dnti_ctx_mask is None:
@@ -36,4 +40,10 @@ def apply_contextual_test1_filter(test1_mask: np.ndarray,
     dnti_ctx_mask = np.asarray(dnti_ctx_mask, dtype=bool)
     if dnti_ctx_mask.shape != test1_mask.shape:
         return test1_mask  # defensa: formas incompatibles → no filtrar
-    return test1_mask & dnti_ctx_mask
+    out = test1_mask & dnti_ctx_mask
+    if keep_peak_rc is not None:
+        r, c = int(keep_peak_rc[0]), int(keep_peak_rc[1])
+        if test1_mask[r, c]:
+            out = out.copy()
+            out[r, c] = True  # conservar el pico (cráter) — anti-FN
+    return out

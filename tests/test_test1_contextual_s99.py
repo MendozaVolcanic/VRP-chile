@@ -51,6 +51,44 @@ def test_embedded_crater_dropped_is_FN_risk():
     assert int(out.sum()) == 0, "cráter embebido sin señal contextual → cae (FN, esperado)"
 
 
+def test_keep_peak_rescues_embedded_crater():
+    """Híbrido C+keep-peak: el cráter embebido (en test1, NO en contextual) SOBREVIVE
+    si se pasa su (r,c) como peak. Es el guard anti-FN que salva al recall del veto C."""
+    from pipeline.test1_contextual_filter import apply_contextual_test1_filter
+    test1 = np.zeros((6, 6), dtype=bool)
+    test1[3, 3] = True            # cráter (pico)
+    test1[3, 4] = True            # halo vecino
+    dnti_ctx = np.zeros((6, 6), dtype=bool)  # nada contextualmente anómalo (embebido)
+    # sin keep_peak → se cae (FN)
+    out0 = apply_contextual_test1_filter(test1, dnti_ctx)
+    assert int(out0.sum()) == 0
+    # con keep_peak=(3,3) → el cráter sobrevive
+    out1 = apply_contextual_test1_filter(test1, dnti_ctx, keep_peak_rc=(3, 3))
+    assert out1[3, 3] and int(out1.sum()) == 1, "el pico debe conservarse (anti-FN)"
+
+
+def test_keep_peak_plus_contextual_union():
+    """keep-peak conserva el pico Y los contextualmente anómalos (unión)."""
+    from pipeline.test1_contextual_filter import apply_contextual_test1_filter
+    test1 = np.zeros((6, 6), dtype=bool)
+    for rc in [(3, 3), (1, 1), (4, 4)]:
+        test1[rc] = True
+    dnti_ctx = np.zeros((6, 6), dtype=bool)
+    dnti_ctx[1, 1] = True  # un vecino-anómalo aparte del pico
+    out = apply_contextual_test1_filter(test1, dnti_ctx, keep_peak_rc=(3, 3))
+    assert out[1, 1] and out[3, 3], "contextual ∪ pico"
+    assert not out[4, 4]
+    assert int(out.sum()) == 2
+
+
+def test_profile_flag_keep_peak(monkeypatch):
+    monkeypatch.setenv("VRP_PROFILE", "_s99_test1_ctxpeak")
+    import pipeline.profile as profile
+    importlib.reload(profile)
+    assert profile.ENABLE_TEST1_CONTEXTUAL_FILTER is True
+    assert profile.ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK is True
+
+
 def test_none_contextual_is_passthrough():
     """Si la máscara contextual no está disponible (None), NO filtrar (passthrough);
     el caller decide. Defensa contra paths sin dNTI contextual."""

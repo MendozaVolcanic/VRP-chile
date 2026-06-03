@@ -1,0 +1,16 @@
+# VRP-Chile — profile: _s99_test1_ctxpeak (S99 A/B — Candidato C+keep-peak híbrido)
+#
+# Híbrido: filtro contextual (flagging fiel MIROVA, corta el halo) + conservar SIEMPRE
+# el píxel pico (cráter). El contextual puro (Cand C) dio el mejor ratio (1.22×) pero
+# 31 FN en Tupungatito por borrar el cráter embebido; el keep-peak lo rescata. Busca
+# lo mejor de los dos: ratio bueno + recall garantizado.
+# Diseño: docs/S99_TEST1_AB_RESULTS.md.
+extends: mirova_equivalent
+profile: _s99_test1_ctxpeak
+description: >
+  Candidato C+keep-peak A/B S99: contextual filter + conservar el pico (anti-FN).
+paths:
+  enable_test1_contextual_filter: true
+  enable_test1_contextual_keep_peak: true
+output:
+  data_subdir: _s99_test1_ctxpeak
