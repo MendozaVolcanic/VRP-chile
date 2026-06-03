@@ -288,9 +288,14 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                   exclude_zones: list = None,
                   active_water_bodies: list = None,
                   lbg_global_compatible: bool = False,
-                  local_kernel_bg_compatible: bool = False) -> dict | None:
+                  local_kernel_bg_compatible: bool = False,
+                  lava_lake_magmatic: bool = False) -> dict | None:
     """
     Calculate VRP from VIIRS 750m M-band granule (VNP02MOD / VJ102MOD).
+
+    Nota S99: `lava_lake_magmatic` se acepta por paridad de firma con
+    process_viirs (GR1) pero NO se usa aquí — Eq.16 lava lake es régimen
+    sub-píxel I-band 375m, no M-band 750m.
 
     Args:
         vent_lat/vent_lon: Optional vent coordinates for weak-signal detection.

@@ -134,9 +134,13 @@ from pipeline.profile import (
     ENABLE_TEST1_SPATIAL_CORE,
     TEST1_CORE_R_KM,
     TEST1_CORE_BT_EXT_K,
+    ENABLE_TEST1_LAVA_LAKE_EQ16,
+    TEST1_LAVA_LAKE_TE_K,
+    TEST1_LAVA_LAKE_EPS,
 )
 from .single_pixel_mode import apply_single_pixel_mode
 from .test1_spatial_core import spatial_core_filter  # S99 Candidato B
+from .vrp_regimes import compute_vrp_lava_lake_eq16  # S99 DF-1 (Candidato Eq.16)
 from .second_pass_intra_radio import apply_second_pass_intra_radio_gate  # S85 F-S81-B'
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -477,7 +481,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                   exclude_zones: list = None,
                   active_water_bodies: list = None,
                   lbg_global_compatible: bool = False,
-                  local_kernel_bg_compatible: bool = False) -> dict | None:
+                  local_kernel_bg_compatible: bool = False,
+                  lava_lake_magmatic: bool = False) -> dict | None:
     """
     Calculate VRP from a single VIIRS L1B granule.
 
@@ -1549,6 +1554,32 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     max_pixels=SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
                 )
                 n_hotspots_clustered = len(t1_clusters)
+
+    # S99 DF-1 — Eq.16 lava lake sub-píxel (Coppola 2024). Para volcanes lava lake
+    # magmático (Villarrica), la fuente Test 1 trae señal sub-píxel cuyo VRP Wooster/
+    # suma está fuera de rango. Recomputar pc.vrp_mw desde el píxel pico vía Eq.15+16
+    # (despeja A_hot asumiendo T_e, Stefan-Boltzmann) = magnitud estilo MIROVA. Flag
+    # OFF default + gate per-vol lava_lake_magmatic. NO aplica a Tupungatito (cráter
+    # fumarólico, no lava lake) → ese se cura por compacidad espacial (Candidato B).
+    if (ENABLE_TEST1_LAVA_LAKE_EQ16 and lava_lake_magmatic
+            and final_hotspot_source == "test1" and "I04" in bands
+            and primary_cluster is not None and not np.isnan(t_bg_i04)
+            and bool(test1_hot_filtered.any())):
+        _ll_rows, _ll_cols = np.where(test1_hot_filtered)
+        _ll_k = int(np.argmax(bt[_ll_rows, _ll_cols]))
+        _ll_pr, _ll_pc = int(_ll_rows[_ll_k]), int(_ll_cols[_ll_k])
+        _ll = compute_vrp_lava_lake_eq16(
+            bt_hot_k=float(bt[_ll_pr, _ll_pc]),
+            bt_bg_k=float(t_bg_i04),
+            t_bk_k=float(t_bg_i04),
+            t_e_k=TEST1_LAVA_LAKE_TE_K,
+            epsilon=TEST1_LAVA_LAKE_EPS,
+            a_pix_m2=float(pixel_areas[_ll_pr, _ll_pc]),
+            lambda_mir_um=I04_LAMBDA,
+        )
+        primary_cluster["vrp_mw"] = round(_ll["vrp_mw"], 3)
+        primary_cluster["vrp_method"] = "lava_lake_eq16"
+        vrp_mir_mw = _ll["vrp_mw"]
 
     record = {
         "vrp_mir_mw": round(vrp_mir_mw, 3),

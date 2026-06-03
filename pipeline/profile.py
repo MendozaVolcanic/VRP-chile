@@ -226,6 +226,18 @@ ENABLE_TEST1_SPATIAL_CORE: bool = bool(_p.get("enable_test1_spatial_core", False
 TEST1_CORE_R_KM: float = float(_t.get("test1_core_r_km", 0.75))
 TEST1_CORE_BT_EXT_K: float = float(_t.get("test1_core_bt_ext_k", 295.0))
 
+# S99 DF-1 — Candidato Eq.16 lava lake sub-píxel (Coppola 2024 §Lava lakes,
+# Burgi-Coppola). Hallazgo dormido: compute_vrp_lava_lake_eq16 estaba construido +
+# testeado (test_vrp_regimes_lava_lake.py) pero nunca conectado. Cuando la fuente es
+# Test 1 y el volcán es lava lake magmático (gate per-vol `lava_lake_magmatic` en
+# volcanoes.yaml, Villarrica), Wooster/suma está fuera de rango (señal sub-píxel con
+# BT mezclado); Eq.15+16 despeja el área caliente asumiendo T_e y aplica
+# Stefan-Boltzmann → magnitud estilo MIROVA. Default OFF; A/B S99 (la validación S54
+# que el diseño 2026-05-17 dejó pendiente). T_e=1000K es el riesgo a calibrar.
+ENABLE_TEST1_LAVA_LAKE_EQ16: bool = bool(_p.get("enable_test1_lava_lake_eq16", False))
+TEST1_LAVA_LAKE_TE_K: float = float(_t.get("test1_lava_lake_te_k", 1000.0))
+TEST1_LAVA_LAKE_EPS: float = float(_t.get("test1_lava_lake_eps", 0.95))
+
 # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene aplicado a
 # la mask final combinada (post-OR de todos los paths) antes de calcular
 # n_anomalous_pixels, cluster_hotspots y vrp_mw.
