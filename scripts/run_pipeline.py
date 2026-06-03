@@ -254,6 +254,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                             active_water_bodies=volcano.get("active_water_bodies"),
                             lbg_global_compatible=volcano.get("lbg_global_compatible", False),
                             local_kernel_bg_compatible=volcano.get("local_kernel_bg", False),
+                            lava_lake_magmatic=volcano.get("lava_lake_magmatic", False),
                         )
                         if result:
                             store.append_record(volcano["name"], result,

@@ -1,0 +1,20 @@
+# VRP-Chile — profile: _s99_test1_eq16 (S99 A/B — Candidato Eq.16, DF-1)
+#
+# Candidato Eq.16: recomputa la magnitud Test 1 vía Coppola 2024 Eq.15+16 (lava lake
+# sub-píxel) para volcanes con lava_lake_magmatic=true (Villarrica). Despeja el área
+# caliente asumiendo T_e=1000K y aplica Stefan-Boltzmann → magnitud estilo MIROVA.
+# Hallazgo dormido DF-1 (función construida + 10 tests, nunca conectada); este perfil
+# corre por fin la validación A/B S54 que el diseño 2026-05-17 dejó pendiente.
+# NO aplica a Tupungatito (cráter fumarólico) → ese se cura por Candidato B (espacial).
+# Diseño: docs/superpowers/specs/2026-05-17-vrp-three-regimes-design.md + 2026-06-03-*.
+extends: mirova_equivalent
+profile: _s99_test1_eq16
+description: >
+  Candidato Eq.16 A/B S99: enable_test1_lava_lake_eq16 (lava lake sub-píxel Villarrica).
+thresholds:
+  test1_lava_lake_te_k: 1000.0
+  test1_lava_lake_eps: 0.95
+paths:
+  enable_test1_lava_lake_eq16: true
+output:
+  data_subdir: _s99_test1_eq16
