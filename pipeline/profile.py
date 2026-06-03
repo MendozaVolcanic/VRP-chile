@@ -249,6 +249,13 @@ TEST1_LAVA_LAKE_EPS: float = float(_t.get("test1_lava_lake_eps", 0.95))
 # per-pixel mata recall S99. Ver docs/S99_TEST1_AB_RESULTS.md.
 ENABLE_TEST1_CONTEXTUAL_FILTER: bool = bool(_p.get("enable_test1_contextual_filter", False))
 
+# S99 Candidato C+keep-peak (híbrido) — el filtro contextual da el mejor ratio pero
+# borra el cráter embebido (31 FN Tupun, A/B S99). Con este flag, tras intersectar con
+# dnti_ctx_hot se CONSERVA siempre el píxel pico (cráter = más caliente entre los Test1)
+# → guard anti-FN. Combina flagging fiel MIROVA (corta halo) + recall garantizado.
+# Requiere enable_test1_contextual_filter=True. Default OFF.
+ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK: bool = bool(_p.get("enable_test1_contextual_keep_peak", False))
+
 # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene aplicado a
 # la mask final combinada (post-OR de todos los paths) antes de calcular
 # n_anomalous_pixels, cluster_hotspots y vrp_mw.

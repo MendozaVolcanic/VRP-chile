@@ -138,6 +138,7 @@ from pipeline.profile import (
     TEST1_LAVA_LAKE_TE_K,
     TEST1_LAVA_LAKE_EPS,
     ENABLE_TEST1_CONTEXTUAL_FILTER,
+    ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK,
 )
 from .single_pixel_mode import apply_single_pixel_mode
 from .test1_spatial_core import spatial_core_filter  # S99 Candidato B
@@ -1450,7 +1451,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     if (ENABLE_TEST1_CONTEXTUAL_FILTER and final_hotspot_source == "test1"
             and "I04" in bands and dnti_ctx_hot is not None
             and test1_hot_filtered is not None and bool(test1_hot_filtered.any())):
-        test1_hot_filtered = apply_contextual_test1_filter(test1_hot_filtered, dnti_ctx_hot)
+        _ctx_peak_rc = None
+        if ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK:
+            # pico = píxel más caliente (cráter) entre los Test 1; se conserva siempre
+            # (guard anti-FN del cráter embebido que veta al contextual puro).
+            _cp_rows, _cp_cols = np.where(test1_hot_filtered)
+            _cp_k = int(np.argmax(bt[_cp_rows, _cp_cols]))
+            _ctx_peak_rc = (int(_cp_rows[_cp_k]), int(_cp_cols[_cp_k]))
+        test1_hot_filtered = apply_contextual_test1_filter(
+            test1_hot_filtered, dnti_ctx_hot, keep_peak_rc=_ctx_peak_rc)
 
     # S33 D4 fix — effective L_bg para Test 1 VRP recompute. En volcanes con
     # geotermal crónico ring 1-3km cráter (Lascar cráter permanente, Lastarria

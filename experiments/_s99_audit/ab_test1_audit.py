@@ -38,8 +38,7 @@ CSV_OCR = _REPO / "data/mirova_reference/registro_vrp_ocr.csv"
 ART = _REPO / "experiments/_s99_audit/_ab_art"
 
 VOLS = ["Tupungatito", "Villarrica", "Lascar"]
-PROFILES = ["_s99_test1_baseline", "_s99_test1_pixfilter",
-            "_s99_test1_core", "_s99_test1_eq16"]
+PROFILES = ["_s99_test1_baseline", "_s99_test1_core", "_s99_test1_ctxpeak"]
 # A14: variantes de nombre CSV (estos 3 son simples).
 CSV_NAME = {"Tupungatito": "Tupungatito", "Villarrica": "Villarrica", "Lascar": "Lascar"}
 
@@ -173,7 +172,8 @@ def main():
         return d.get(k, default) if d and d.get("present") else "NA"
 
     short = {"_s99_test1_baseline": "baseline", "_s99_test1_pixfilter": "pixfilter",
-             "_s99_test1_core": "core(esp)", "_s99_test1_eq16": "eq16(LL)"}
+             "_s99_test1_core": "core(esp)", "_s99_test1_eq16": "eq16(LL)",
+             "_s99_test1_ctx": "ctx(MIR)", "_s99_test1_ctxpeak": "ctx+peak"}
     L = [f"=== S99 A/B Test1 magnitude vs MIROVA (CONS+OCR latest) — {WIN_START.date()}..{WIN_END.date()} ==="]
     L.append("rec=ALERTAS detectadas pc.vrp>0 | rat=mediana pc.vrp/MIROVA | in%=ratios en [0.5,2] | z=FN magnitud (record existe, pc.vrp=0)")
     L.append(f"{'volcano':<13} {'profile':<11} {'alert':>5} {'rec':>4} {'ratio':>8} {'in%':>5} {'z(FN)':>5}")
