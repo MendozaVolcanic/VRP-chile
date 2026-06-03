@@ -38,7 +38,8 @@ CSV_OCR = _REPO / "data/mirova_reference/registro_vrp_ocr.csv"
 ART = _REPO / "experiments/_s99_audit/_ab_art"
 
 VOLS = ["Tupungatito", "Villarrica", "Lascar"]
-PROFILES = ["_s99_test1_baseline", "_s99_test1_pixfilter", "_s99_test1_core"]
+PROFILES = ["_s99_test1_baseline", "_s99_test1_pixfilter",
+            "_s99_test1_core", "_s99_test1_eq16"]
 # A14: variantes de nombre CSV (estos 3 son simples).
 CSV_NAME = {"Tupungatito": "Tupungatito", "Villarrica": "Villarrica", "Lascar": "Lascar"}
 
@@ -158,28 +159,23 @@ def main():
     outp = _REPO / "experiments/_s99_audit/ab_test1_result.json"
     json.dump(results, open(outp, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
 
-    L = [f"=== S99 A/B Test1 magnitude vs MIROVA (CONS+OCR latest) — {WIN_START.date()}..{WIN_END.date()} ==="]
-    L.append(f"{'volcano':<14} {'alert':>5} | "
-             f"{'base_rec':>8} {'base_rat':>8} {'base_z':>6} | "
-             f"{'pix_rec':>7} {'pix_rat':>7} {'pix_z':>5} | "
-             f"{'core_rec':>8} {'core_rat':>8} {'core_z':>6}")
-
     def g(d, k, default="-"):
         return d.get(k, default) if d and d.get("present") else "NA"
 
+    short = {"_s99_test1_baseline": "baseline", "_s99_test1_pixfilter": "pixfilter",
+             "_s99_test1_core": "core(esp)", "_s99_test1_eq16": "eq16(LL)"}
+    L = [f"=== S99 A/B Test1 magnitude vs MIROVA (CONS+OCR latest) — {WIN_START.date()}..{WIN_END.date()} ==="]
+    L.append("rec=ALERTAS detectadas pc.vrp>0 | rat=mediana pc.vrp/MIROVA | in%=ratios en [0.5,2] | z=FN magnitud (record existe, pc.vrp=0)")
+    L.append(f"{'volcano':<13} {'profile':<11} {'alert':>5} {'rec':>4} {'ratio':>8} {'in%':>5} {'z(FN)':>5}")
     for r in results:
-        bp = r["by_profile"]
-        b = bp.get("_s99_test1_baseline", {})
-        p = bp.get("_s99_test1_pixfilter", {})
-        c = bp.get("_s99_test1_core", {})
-        L.append(
-            f"{r['volcano']:<14} {r['n_alertas']:>5} | "
-            f"{str(g(b,'recall_detected')):>8} {str(g(b,'ratio_median')):>8} {str(g(b,'n_zeroed')):>6} | "
-            f"{str(g(p,'recall_detected')):>7} {str(g(p,'ratio_median')):>7} {str(g(p,'n_zeroed')):>5} | "
-            f"{str(g(c,'recall_detected')):>8} {str(g(c,'ratio_median')):>8} {str(g(c,'n_zeroed')):>6}")
-    L.append("")
-    L.append("rec=ALERTAS detectadas pc.vrp>0 | rat=mediana pc.vrp/MIROVA | z=FN de magnitud (record existe, pc.vrp=0)")
-    L.append("CRITERIO: core baja ratio Tupun a [0.5,2.0] SIN subir z de Villarrica vs baseline (canario FN).")
+        for prof in PROFILES:
+            d = r["by_profile"].get(prof, {})
+            L.append(f"{r['volcano']:<13} {short[prof]:<11} {r['n_alertas']:>5} "
+                     f"{str(g(d,'recall_detected')):>4} {str(g(d,'ratio_median')):>8} "
+                     f"{str(g(d,'pct_in_0p5_2p0')):>5} {str(g(d,'n_zeroed')):>5}")
+        L.append("")
+    L.append("CRITERIOS: core baja ratio Tupungatito a [0.5,2.0]; eq16 baja ratio Villarrica;")
+    L.append("NINGUN candidato sube z(FN) de Villarrica vs baseline (canario veto).")
     txt = "\n".join(L)
     print(txt)
     (_REPO / "experiments/_s99_audit/ab_test1_summary.txt").write_text(txt, encoding="utf-8")

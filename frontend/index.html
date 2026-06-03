@@ -2452,8 +2452,14 @@ function renderDetail() {
           (hasPC
             ? `<b style="color:#ffc107">VRP MIROVA-equiv:</b> ${pc.vrp_mw.toFixed(3)} MW <small style="color:#888">(cluster ${pc.n_pixels} pix)</small><br>`
             : '') +
-          `<small style="color:#888">VRP total record (suma): ${recordTotalVrp.toFixed(3)} MW` +
-          (multiPixel ? ` (${nPix} pixels)` : '') + `</small><br>` +
+          // S99: la suma scene-wide NO es un VRP reportable (MIROVA reporta el
+          // cluster, no la suma de todos los píxeles de la escena). Antes se
+          // rotulaba "VRP total record (suma)" y daba >1000 MW en PCC/MODIS sobre
+          // campo difuso → confundía. Se rotula explícito como diagnóstico, y solo
+          // cuando difiere del cluster (multi-píxel). El VRP reportado es el de arriba.
+          (multiPixel
+            ? `<small style="color:#888">Σ escena (diagnóstico, NO es el VRP): ${recordTotalVrp.toFixed(3)} MW (${nPix} pixels)</small><br>`
+            : '') +
           (multiPixel ? `<b>Este pixel:</b> ${px.vrp_mw.toFixed(4)} MW (pixel #${pxIdx+1})<br>` : '') +
           `BT max: ${tempC(px.bt_k)}<br>` +
           `Distancia al cráter: ${px.dist_km != null ? px.dist_km.toFixed(2) + " km" + (ventOnly && px.real_coord ? " (del vent)" : "") : (ventOnly ? "vent (legacy)" : "?")}`
