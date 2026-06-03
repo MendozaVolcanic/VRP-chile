@@ -25,7 +25,7 @@ repetir el error de abandono sobre el mismo problema.
 ### Tier 1 — alto valor, construido/diseñado, MISMO tema que S99
 | ID | Hallazgo | Estado | Verificado | Impacto | Recomendación |
 |---|---|---|---|---|---|
-| **DF-1** | `compute_vrp_lava_lake_eq16` (Coppola 2024 Eq.15+16, lava lake sub-píxel) en `pipeline/vrp_regimes.py:105` | **Construido + 10 tests** (`test_vrp_regimes_lava_lake.py`), **NUNCA conectado** (solo se importó `compute_local_background`) | ✅ por mí | Método físicamente correcto para sub-píxel (Villarrica/Erebus) = **de-riskea el canario FN del fix S99** | **Folar al A/B de magnitud como 4º candidato / régimen complementario** |
+| **DF-1** | `compute_vrp_lava_lake_eq16` (Coppola 2024 Eq.15+16, lava lake sub-píxel) en `pipeline/vrp_regimes.py:105` | Construido + 10 tests, conectado flag-OFF S99 (PR #326) | ✅ por mí | ⚠️ **NO fiel a MIROVA NRT — ver "Verificación fuente primaria" abajo** | **NO adoptar operacional (drift per-volcán). Solo experimental.** Medido en A/B por completitud |
 | **DF-2** | VRP integrated Eq.1 textual (`docs/superpowers/specs/2026-05-06-*`) | Diseño completo, **0 código** | doc | Ataca la suma Test1 en su raíz conceptual; **hipótesis rival** del recorte espacial S99 | Comparar en el mismo A/B antes de descartar |
 | **DF-3** | `enable_test1_k1_retire_from_hot_mask` (NEW-7) `profile.py:335` | Flag codificado, **ausente del yaml operacional**, cita SP426.5 §298-300; A/B "S72 F2.3" nunca corrido | ✅ por mí (ausente) | Señalado S72 como causa más probable del drift Muy Bajo remanente | A/B barato; retomar junto a S99 |
 
@@ -59,6 +59,31 @@ de schema. (A46 ya lo recoge.)
 3. **Al diseñar un fix, revisar primero este registro** por enfoques rivales/dormidos
    del mismo problema (lo que DF-1/DF-2 son para S99). Evita reimplementar o abandonar
    por segunda vez.
+
+## Verificación fuente primaria (S99, post-auditoría — A62)
+Nicolás cuestionó la premisa de DF-1/DF-2: ¿MIROVA NRT conmuta de método por
+volcán/régimen, o es UN algoritmo por SENSOR uniforme? Auditoría verbatim de los
+papers (`experiments/_s99_audit/dormant/papers_per_sensor.md`):
+- **Coppola 2016a (paper del sistema NRT)**: el objetivo declarado fue NO calibrar
+  por volcán — *"does not require... case by case determination of adapted
+  thresholds"*, *"self-adapting thresholds... independent of local conditions"*,
+  *"completely autonomous... easily exportable to several target volcanoes"*. La
+  única variación por-objetivo es ROI/summit (centro GVP) + **SENSOR** (bandas + α +
+  umbrales). Wooster Eq.17 *"can be applied to any sensor... by adapting Apix and α"*.
+- **Coppola 2024 chapter**: lava lake (Eq.15-16/Burgi) y crater lake (Eq.25) están en
+  la sección *"Applications"* como **productos de segundo nivel, manuales, calibrados
+  caso por caso** (*"requires specific calibrations"*, *"valid only within the limits
+  of the assumptions"*), NO el pipeline NRT automático. *"VRP is inadequate for
+  low-T VTFs"* es un caveat de validez de Wooster (600-1500 K), no un cambio de
+  algoritmo.
+- **Conclusión**: DF-1 (Eq.16 por-volcán) y DF-2 (integrated Eq.1 por-régimen) son
+  **drifts del clon MIROVA**, no fidelidad. El fix de magnitud correcto es **uniforme
+  por sensor, sobre el conjunto de píxeles alertados** (Candidatos A/B del A/B S99).
+  MIROVA llega a ~0.2 MW en Villarrica Y Tupungatito con el MISMO Wooster-Σ uniforme
+  porque alerta POCOS píxeles; nosotros inflamos por sobre-marcado del Test 1.
+- **Mecanismo anti-recurrencia aplicado**: DF-1/DF-2 quedan marcados "investigado
+  S99: NO fiel a MIROVA, no adoptar operacional". Que una sesión futura no los
+  resucite creyéndolos buena idea dormida.
 
 ## Veredicto
 Sí hay valor dormido, pero **acotado y coherente**: gira alrededor de la magnitud
