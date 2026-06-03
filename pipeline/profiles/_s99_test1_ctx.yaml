@@ -1,0 +1,18 @@
+# VRP-Chile — profile: _s99_test1_ctx (S99 A/B — Candidato C, filtro contextual)
+#
+# Candidato C: filtro CONTEXTUAL del path Test 1 = la vía más fiel a MIROVA. Cuando
+# Test 1 dispara, el VRP suma solo los píxeles que también están en dnti_ctx_hot
+# (anómalos vs sus 8 vecinos inmediatos, Tests 2/3 SP426.5) → corta el halo nival
+# (roca-tibia-entre-roca-tibia) conservando el cráter. Forma PURA (sin keep-peak) para
+# que el A/B revele si el mecanismo fiel preserva el recall o cae en FN del cráter
+# embebido. Alternativas previas: fondo-local refutado S62/A19, per-pixel mata recall
+# S99 (Cand A), spatial-core es proxy validado (Cand B).
+# Diseño: docs/S99_TEST1_AB_RESULTS.md + docs/superpowers/specs/2026-06-03-*.
+extends: mirova_equivalent
+profile: _s99_test1_ctx
+description: >
+  Candidato C A/B S99: enable_test1_contextual_filter (intersección Test1 ∩ dNTI ctx).
+paths:
+  enable_test1_contextual_filter: true
+output:
+  data_subdir: _s99_test1_ctx

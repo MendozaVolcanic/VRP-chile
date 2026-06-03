@@ -238,6 +238,17 @@ ENABLE_TEST1_LAVA_LAKE_EQ16: bool = bool(_p.get("enable_test1_lava_lake_eq16", F
 TEST1_LAVA_LAKE_TE_K: float = float(_t.get("test1_lava_lake_te_k", 1000.0))
 TEST1_LAVA_LAKE_EPS: float = float(_t.get("test1_lava_lake_eps", 0.95))
 
+# S99 Candidato C — filtro CONTEXTUAL del path Test 1 (la vía más fiel a MIROVA).
+# El Test 1 integrado marca por exceso vs la mediana del anillo regional (1-3 km), que
+# sobre glaciar está sesgada fría → marca el halo nival entero. MIROVA marca por
+# criterio contextual (Tests 2/3, SP426.5: anómalo = supera a sus 8 vecinos). Cuando
+# ON: el VRP del Test 1 suma solo los píxeles que también están en dnti_ctx_hot
+# (intersección) = comportamiento MIROVA. Es el mecanismo de flagging LITERAL (no un
+# proxy espacial). Riesgo: cráter embebido en roca tibia puede caer → FN (medir en A/B
+# con canario). Default OFF. Alternativas previas: fondo-local refutado S62/A19,
+# per-pixel mata recall S99. Ver docs/S99_TEST1_AB_RESULTS.md.
+ENABLE_TEST1_CONTEXTUAL_FILTER: bool = bool(_p.get("enable_test1_contextual_filter", False))
+
 # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene aplicado a
 # la mask final combinada (post-OR de todos los paths) antes de calcular
 # n_anomalous_pixels, cluster_hotspots y vrp_mw.

@@ -56,10 +56,20 @@ def sensor_family(s):
 
 
 def _parse_dt(s):
-    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
+    s = str(s).replace("Z", "").strip()
+    if not s:
+        return None
+    # fromisoformat (Py3.11+) acepta espacio o 'T', con o sin segundos.
+    try:
+        return datetime.fromisoformat(s)
+    except ValueError:
+        pass
+    # nuestros records vienen SIN segundos ('2026-04-01 04:48'); refs MIROVA CON.
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S",
+                "%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M"):
         try:
-            return datetime.strptime(str(s)[:19], fmt)
-        except ValueError:
+            return datetime.strptime(s[:len("2026-01-01 00:00:00") if ":" in s[14:] else 16], fmt)
+        except (ValueError, IndexError):
             continue
     return None
 
