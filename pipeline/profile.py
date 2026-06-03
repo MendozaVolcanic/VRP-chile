@@ -210,6 +210,22 @@ ENABLE_DAYTIME_MODIS: bool = bool(_p.get("enable_daytime_modis", False))
 # Default OFF (backward compat). Activar en profile experimental para A/B.
 ENABLE_TEST1_PIXEL_FILTER: bool = bool(_p.get("enable_test1_pixel_filter", False))
 
+# S99 Candidato B — recorte de compacidad ESPACIAL del path Test 1.
+# El Test 1 integrado-ROI (Coppola 2015) es un test de DETECCIÓN: su
+# mask_contributing marca todo píxel del ROI sobre la mediana del fondo. Sobre el
+# glaciar nevado de Tupungatito en invierno eso es el mosaico nieve/roca entero
+# (anillo difuso 1-3 km) → VRP suma el halo → factor ~8-30× MIROVA (que reporta el
+# foco compacto, ~0.2 MW estable). El discriminante correcto es ESPACIAL (foco vs
+# halo), NO térmico (gate t_bg refutado A54/S86). spatial_core_filter conserva solo
+# el foco compacto alrededor del pico de energía (TEST1_CORE_R_KM), conservando
+# SIEMPRE el pico (guard anti-FN: un foco sub-píxel genuino como Villarrica lava lake
+# nunca queda en VRP=0), + lava extendida real (bt ≥ TEST1_CORE_BT_EXT_K). Análogo en
+# pipeline del Núcleo F5' display (S95). Default OFF (backward compat). Activar en
+# perfil A/B para validación (A18) antes de adopción operacional (A45).
+ENABLE_TEST1_SPATIAL_CORE: bool = bool(_p.get("enable_test1_spatial_core", False))
+TEST1_CORE_R_KM: float = float(_t.get("test1_core_r_km", 0.75))
+TEST1_CORE_BT_EXT_K: float = float(_t.get("test1_core_bt_ext_k", 295.0))
+
 # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene aplicado a
 # la mask final combinada (post-OR de todos los paths) antes de calcular
 # n_anomalous_pixels, cluster_hotspots y vrp_mw.

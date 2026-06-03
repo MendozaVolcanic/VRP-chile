@@ -1,0 +1,19 @@
+# VRP-Chile — profile: _s99_test1_core (S99 A/B — Candidato B)
+#
+# Candidato B: recorte de compacidad ESPACIAL del path Test 1. Cuando Test 1
+# dispara, conserva solo el foco compacto alrededor del píxel de máxima energía
+# (test1_core_r_km=0.75), SIEMPRE conservando el pico (guard anti-FN), + lava
+# extendida real (bt ≥ test1_core_bt_ext_k=295). Análogo en pipeline del Núcleo
+# F5' display (S95). Discriminante espacial (no térmico, t_bg refutado A54/S86).
+# Diseño: docs/superpowers/specs/2026-06-03-test1-magnitude-compactness-design.md
+extends: mirova_equivalent
+profile: _s99_test1_core
+description: >
+  Candidato B A/B S99: enable_test1_spatial_core (recorte compacidad espacial).
+thresholds:
+  test1_core_r_km: 0.75
+  test1_core_bt_ext_k: 295.0
+paths:
+  enable_test1_spatial_core: true
+output:
+  data_subdir: _s99_test1_core

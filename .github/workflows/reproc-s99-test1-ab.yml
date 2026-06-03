@@ -1,0 +1,81 @@
+name: S99 Test1 magnitude A/B reproc (artifacts)
+
+# A/B del fix de magnitud Test 1 (S99 §2, 19x Tupungatito). Corre 3 perfiles
+# aislados (baseline / Candidato A pixfilter / Candidato B spatial-core) sobre
+# 3 volcanes VIIRS375: Tupungatito (cura), Villarrica (canario FN), Lascar
+# (control). Sube los JSON como ARTIFACTS — NO commitea (evita race A47). Se
+# descargan con `gh run download` y se auditan localmente
+# (experiments/_s99_audit/ab_test1_audit.py).
+#
+# A43 Norway problem: "on": quoted. Dispatch-only; no toca data operacional.
+# Diseno: docs/superpowers/specs/2026-06-03-test1-magnitude-compactness-design.md
+
+"on":
+  workflow_dispatch:
+    inputs:
+      code_ref:
+        description: "Branch/ref con el codigo (flag spatial-core)"
+        required: true
+        default: "main"
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-01"
+      end:
+        description: "End date YYYY-MM-DD inclusive"
+        required: true
+        default: "2026-05-31"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        volcano:
+          - Tupungatito
+          - Villarrica
+          - Lascar
+        profile:
+          - _s99_test1_baseline
+          - _s99_test1_pixfilter
+          - _s99_test1_core
+    steps:
+      - name: Checkout code (code_ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.code_ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — ${{ matrix.profile }} / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 340
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Upload result JSON as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: s99-${{ matrix.profile }}-${{ matrix.volcano }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7
