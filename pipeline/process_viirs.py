@@ -137,9 +137,11 @@ from pipeline.profile import (
     ENABLE_TEST1_LAVA_LAKE_EQ16,
     TEST1_LAVA_LAKE_TE_K,
     TEST1_LAVA_LAKE_EPS,
+    ENABLE_TEST1_CONTEXTUAL_FILTER,
 )
 from .single_pixel_mode import apply_single_pixel_mode
 from .test1_spatial_core import spatial_core_filter  # S99 Candidato B
+from .test1_contextual_filter import apply_contextual_test1_filter  # S99 Candidato C
 from .vrp_regimes import compute_vrp_lava_lake_eq16  # S99 DF-1 (Candidato Eq.16)
 from .second_pass_intra_radio import apply_second_pass_intra_radio_gate  # S85 F-S81-B'
 from .detection_context import (
@@ -632,6 +634,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # Detectado en sanity test S77 (1/14 granules VNP02IMG.A2026143.0648).
     # Inicialización efectiva (np.zeros_like) se hace defensivamente más abajo.
     test1_hot = None
+    dnti_ctx_hot = None  # S99 default fuera del bloque I04 (Candidato C contextual)
     n_excluded_water = 0
     hotspot_lat = None
     hotspot_lon = None
@@ -1438,6 +1441,16 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             max_sigma_cap_k=MAX_SIGMA_COMPONENT_K,
         )
         test1_hot_filtered = test1_hot & pixel_thr_mask
+
+    # S99 Candidato C — filtro CONTEXTUAL (la vía más fiel a MIROVA). Intersecta los
+    # píxeles del Test 1 con la máscara contextual dNTI (anómalos vs sus 8 vecinos,
+    # Tests 2/3 SP426.5). Corta el halo nival (roca-tibia-entre-roca-tibia, no anómala
+    # vs vecinos) conservando el cráter (anómalo vs vecinos). Flag OFF default. Riesgo
+    # FN del cráter embebido — medido en A/B con canario. NO usa keep-peak (forma pura).
+    if (ENABLE_TEST1_CONTEXTUAL_FILTER and final_hotspot_source == "test1"
+            and "I04" in bands and dnti_ctx_hot is not None
+            and test1_hot_filtered is not None and bool(test1_hot_filtered.any())):
+        test1_hot_filtered = apply_contextual_test1_filter(test1_hot_filtered, dnti_ctx_hot)
 
     # S33 D4 fix — effective L_bg para Test 1 VRP recompute. En volcanes con
     # geotermal crónico ring 1-3km cráter (Lascar cráter permanente, Lastarria
