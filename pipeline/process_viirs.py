@@ -131,8 +131,12 @@ from pipeline.profile import (
     ENABLE_SINGLE_PIXEL_SUB_MW_MODE,
     SUB_MW_REGIME_THRESHOLD_MW,
     SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
+    ENABLE_TEST1_SPATIAL_CORE,
+    TEST1_CORE_R_KM,
+    TEST1_CORE_BT_EXT_K,
 )
 from .single_pixel_mode import apply_single_pixel_mode
+from .test1_spatial_core import spatial_core_filter  # S99 Candidato B
 from .second_pass_intra_radio import apply_second_pass_intra_radio_gate  # S85 F-S81-B'
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -1442,6 +1446,27 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         effective_L_bg = float(bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA))
     else:
         effective_L_bg = test1_L_bg_local
+
+    # S99 Candidato B — recorte de compacidad ESPACIAL del path Test 1 (flag OFF
+    # default). El Test 1 integrado marca el anillo nival difuso entero sobre el
+    # glaciar; el VRP suma ese halo → factor ~8-30× MIROVA. Recortar al foco
+    # compacto alrededor del píxel de máxima energía (conservando SIEMPRE el pico
+    # → anti-FN sub-píxel) replica lo que MIROVA reporta. Discriminante espacial,
+    # no térmico (t_bg refutado A54/S86). Reasigna test1_hot_filtered para que los
+    # dos bloques downstream (vrp_mir_mw + primary_cluster) usen el foco recortado.
+    if (ENABLE_TEST1_SPATIAL_CORE and final_hotspot_source == "test1"
+            and "I04" in bands and effective_L_bg is not None
+            and not np.isnan(effective_L_bg) and bool(test1_hot_filtered.any())):
+        _sc_rows, _sc_cols = np.where(test1_hot_filtered)
+        _sc_L = bt_to_spectral_radiance(bt[_sc_rows, _sc_cols], I04_LAMBDA)
+        _sc_dL = np.maximum(_sc_L - effective_L_bg, 0.0)
+        _sc_vrp2d = np.zeros_like(bt, dtype=np.float64)
+        _sc_vrp2d[_sc_rows, _sc_cols] = (
+            pixel_areas[_sc_rows, _sc_cols] * WOOSTER_COEFF * _sc_dL / 1e6)
+        _sc_res = spatial_core_filter(
+            test1_hot_filtered, _sc_vrp2d, lat, lon, bt,
+            r_core_km=TEST1_CORE_R_KM, bt_ext_k=TEST1_CORE_BT_EXT_K)
+        test1_hot_filtered = _sc_res["mask"]
 
     if (final_hotspot_source == "test1" and "I04" in bands
             and test1_n_contrib > 0 and effective_L_bg is not None
