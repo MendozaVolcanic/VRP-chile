@@ -23,21 +23,11 @@ cat docs/S98_ANCHOR_FIX_RESULTS.md   # veredicto + diagnóstico del 19× + estad
 - A45: tag defensivo + OK Nicolás antes de tocar pipeline/process_*.py, store.py,
   clustering.py, profiles/mirova_equivalent.yaml.
 
-## §1 — PRIMERO: completar el backfill histórico (mecánico, ~15 min)
-S98 reprocesó los 90 días (2026-03-04..06-02) al cráter y los promovió. El histórico
-**pre-90d (2026-01-29..2026-03-03)** se reprocesó al cierre de S98 — **run GH Actions
-26851227816** (reproc-s98-anchor.yml, code_ref=main, profile=mirova_equivalent).
-Verificar que terminó OK y ensamblar:
-```bash
-gh run view 26851227816 --json status,conclusion   # debe ser success
-python experiments/_s98_anchor/merge_backfill.py    # reemplaza SOLO ene-mar, mantiene resto
-# verificar det→cráter ene-mar <2km (Tupun/PCC/PP) — ver merge_backfill stdout
-git add data/mirova_equivalent/{Tupungatito,PuyehueCordonCaulle,PlanchonPeteroa}.json
-git commit + push (branch desde main) + merge → deploy Pages
-# verificar público (R8): det→cráter ene-mar <2km en mendozavolcanic.github.io
-```
-Si el run falló/expiró artifacts (retención 7d): re-disparar con la misma ventana.
-Tras esto, el dashboard queda 100% coherente (todo el histórico al cráter).
+## §1 — Backfill histórico: ✅ COMPLETADO en S98 (no queda nada)
+El histórico pre-90d (2026-01-29..2026-03-03) de Tupun/PCC/PP se reprocesó al cráter
+(run 26851227816, success) y se promovió a operacional (PR #322, merge_backfill.py).
+Verificado público R8: ene-mar det→cráter 1.21/1.26/1.56 km; histórico completo al
+cráter. **El dashboard quedó 100% coherente.** S99 arranca directo en §2.
 
 ## §2 — TAREA PRINCIPAL S99: el 19× de Tupungatito (magnitud sobre glaciar)
 **Diagnóstico ya hecho S98 (NO re-investigar, ver docs/S98_ANCHOR_FIX_RESULTS.md
