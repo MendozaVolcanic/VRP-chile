@@ -413,10 +413,32 @@ Ejecución sistemática del catálogo de divergencias (`docs/MIROVA_DIVERGENCES_
 | Audit | Hipótesis | Verdict | Acción derivada |
 |---|---|---|---|
 | **F1.1** | HT1.5-NEW-4 coord vent vs centroide MIROVA fumarole rim | ❌ **REFUTADA 4/5 vols** (Villarrica/Chaiten/PCC/PP: p50 < 1 km del vent yaml; rumbo coincidente con cráter activo). Único caso real: **Tupungatito (CONS NRT p50 = 5.21 km SE)** → re-abrir decisión S65 PR #93 | F1.6 — propuesta de coord nueva |
-| **F1.2** | NEW-7 + NEW-8 — Test 1 K1 retire + edge/dNTI<-0.1/dETI<-0.1 unsuitable | 🚨 **4 GAPS DOCUMENTALES detectados**: (1) `enable_test1_k1_retire_from_hot_mask` OFF default en `mirova_equivalent.yaml` (paper SP 426.5 §298-300 lo exige); (2) edge pixels NO filtrados §267-273; (3) dNTI<-0.1 NO descartado §267-273; (4) dETI<-0.1 NO descartado §267-273 | F2.1 — fix implementable, bibliografía ⭐⭐⭐ |
+| **F1.2** | NEW-7 + NEW-8 — Test 1 K1 retire + edge/dNTI<-0.1/dETI<-0.1 unsuitable | ⚠️ **PARCIALMENTE RECLASIFICADO S100**: el gap (1) NEW-7 (`enable_test1_k1_retire_from_hot_mask`) era una **LECTURA EQUIVOCADA** — ver nota S100 abajo: "discarded (unsuitable) for further steps" (SP 426.5 §298-300) = sacar los Test 1 del **pool estadístico** (los `suitable pixels` de §326-329 que alimentan m,σ de Tests 2/3), NO del **reporte de detecciones**. Nuestro código (flag OFF, los Test 1 entran al hot_mask reportable) **ya es fiel**. **Mantener OFF permanentemente.** Los gaps (2)(3)(4) NEW-8 (edge/dNTI<-0.1/dETI<-0.1) **siguen vigentes** — esos sí son sobre el pool estadístico de m,σ (§267-273), naturaleza distinta del malentendido | NEW-7 cerrado; NEW-8 (gaps 2-4) sin cambio |
 | **F1.3** | HT1.5-NEW-2 — L_bk kernel excluye TODOS hot pixels del cluster | ✅ **PASS** — `pipeline/vrp_regimes.py:compute_local_background` (líneas 21-89) excluye correctamente `hot_set = set(zip(hot_rows, hot_cols))`. Test sintético `test_two_adjacent_hot_pixels_each_excludes_the_other_hot` confirma | Descartado como causa drift |
 | **F1.4** | NEW-5 — geofencing 5 km Stromboli aplica en Andes | ❌ **REFUTADO**. 21.79% records OSF v2.5 chilenos > 5 km del vent; cap empírico ~30 km coincide con `r_circunscrito` box MIROVA 51×51 km. La regla S14 (`radius_km=25 km` uniforme) cubre 98.27% records — empíricamente óptima. Stromboli 5 km es contexto isla pequeña, NO transferible | NO cambiar geofencing actual |
 | **F1.5** | NEW-6 — reproducir Villarrica 24-Jun-2009 Fig. A6 SP 426.5 | ⏸️ **GAP OPERATIVO**: granule MODIS Terra/Aqua 2009-06-24 04:10/05:55 UTC disponible vía Earthdata pero pyhdf roto en Windows + falta instrumentación dump rasters NTI/NTIbk/dNTI/ETI. Costo: ~2h instrumentación + workflow GH Actions | Aplazado — no urgente |
+
+##### Nota S100 (2026-06-03) — NEW-7 / Drift #1 reclasificado: lectura equivocada
+
+Verificación verbatim (A35) del texto SP 426.5 durante S99/S100, concordada con
+Nicolás. El gap (1) de F1.2 (`enable_test1_k1_retire_from_hot_mask`) nació de leer
+SP 426.5 §298-300 — *"Pixels that satisfy Test 1 are flagged as `active' and
+subsequently discarded (unsuitable) for further steps"* — como "los Test 1 NO se
+reportan". **Es incorrecto.** La frase clave está en §326-329: *"m and s are the
+arithmetic mean and standard deviation **of all the suitable pixels** within the
+image"*. "discarded (unsuitable) for further steps" significa que los pixels Test 1
+quedan **fuera del pool estadístico** que alimenta m y σ de los tests contextuales
+(Tests 2/3) — exactamente el mismo mecanismo, y con la misma palabra "unsuitable",
+que §267-273 aplica a edge/dNTI<-0.1/dETI<-0.1 (NEW-8) y que el kernel de fondo ya
+aplica a los hot pixels (F1.3, PASS). Los pixels Test 1 **son** las detecciones
+fuertes y SÍ se reportan; sacarlos del `hot_mask` reportable (lo que haría el flag)
+sería un drift, no un fix. **Decisión: `enable_test1_k1_retire_from_hot_mask` queda
+OFF permanentemente; el código actual ya es fiel.** Esto NO afecta a NEW-8 (gaps
+2-4), que sí es sobre el pool estadístico de m,σ y sigue su propio curso.
+
+Lección de método (regla verbatim MISSION.md S99): un paper que *menciona* un paso
+no implica que el SISTEMA NRT de MIROVA lo aplique al reporte; y "for further steps"
+en SP 426.5 se refiere a los pasos estadísticos subsiguientes (m,σ), no al output.
 
 ##### Causa MÁS PROBABLE del drift remanente (post-Fase 1)
 
@@ -938,7 +960,7 @@ parches S33-S44 para compensar.
 
 | # | Drift | Localización pipeline | Paper |
 |---|---|---|---|
-| #1 | Test 1 K1 → `hot_mask` reportable | `process_*.py` nti_path_hot | sp426_5.txt:298: "discarded for further steps" — debe ser saturation mask |
+| ~~#1~~ | ~~Test 1 K1 → `hot_mask` reportable~~ — ❌ **NO ES DRIFT (S100)**: lectura equivocada de sp426_5.txt:298-300. "discarded (unsuitable) for further steps" = sacar del **pool estadístico** (m,σ de Tests 2/3, §326-329 "all the suitable pixels"), NO del **reporte**. Los Test 1 SÍ se reportan (son las detecciones fuertes). Código actual (flag OFF) ya fiel. Ver nota S100 arriba | `process_*.py` nti_path_hot | sp426_5.txt:298-300 + 326-329 |
 | #2+3 | Path D usa solo Test 2 (dNTI), falta Test 3 (dETI) + conjunción AND | `detection_context.py:85-142` | sp426_5.txt:316-325: Tests 2∧3 obligatorios |
 | #4 | Second-pass adyacente OFF operacionalmente | `enable_second_pass_adjacent=false` | sp426_5.txt:347-356: Step obligatorio |
 | #5 | `primary_cluster.vrp_mw` vs Σ alerted | `store.py` + dashboard | sp426_5.txt:374-398 Eq.8 — pero ver reinterpretación arriba |
