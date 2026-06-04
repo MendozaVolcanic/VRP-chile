@@ -1,0 +1,111 @@
+name: S100 Test1 A/B paired (baseline+ctxpeak mismo runner)
+
+# Re-run LIMPIO del A/B Test1 (S100). El run previo (26921561612) sufrió un
+# confounder: baseline y ctxpeak corrían como JOBS SEPARADOS en runners distintos,
+# cada uno fetcheando NASA por su cuenta; con los timeouts de CMR del 03-jun
+# bajaron sets de granules DISTINTOS → el recall por-volcán quedó contaminado por
+# disponibilidad de datos, no por el flag (ver docs/S100_TEST1_FULL_AB.md).
+#
+# Fix: matrix por VOLCÁN (no volcán×perfil). Cada job corre baseline y ctxpeak
+# SECUENCIALMENTE en el MISMO runner, consecutivos (minutos), con NASA estable.
+# La búsqueda CMR es determinística por volcán/fecha → ambas corridas ven el mismo
+# set de granules. Elimina el confounder sin tocar el pipeline. La auditoría
+# (ab_test1_fair.py) verifica la identidad (pares comunes deben subir a ~99%).
+#
+# A43 Norway: "on": quoted. Artifacts (no commitea data, A47).
+
+"on":
+  workflow_dispatch:
+    inputs:
+      code_ref:
+        description: "Branch/ref con el codigo"
+        required: true
+        default: "main"
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-01"
+      end:
+        description: "End date YYYY-MM-DD inclusive"
+        required: true
+        default: "2026-05-31"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 11
+      matrix:
+        volcano:
+          - Tupungatito
+          - Villarrica
+          - Lascar
+          - Lastarria
+          - Isluga
+          - Llaima
+          - NevadosDeChillan
+          - PlanchonPeteroa
+          - PuyehueCordonCaulle
+          - Chaiten
+          - Copahue
+    steps:
+      - name: Checkout code (code_ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.code_ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Reproc baseline (primero, baja los granules)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 165
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _s99_test1_baseline \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Reproc ctxpeak (mismo runner, NASA estable → mismos granules)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 165
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _s99_test1_ctxpeak \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Upload baseline JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: s100p-_s99_test1_baseline-${{ matrix.volcano }}
+          path: data/_s99_test1_baseline/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload ctxpeak JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: s100p-_s99_test1_ctxpeak-${{ matrix.volcano }}
+          path: data/_s99_test1_ctxpeak/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7
