@@ -1,0 +1,91 @@
+name: S100 Test1 magnitude A/B full (11 Tier A, artifacts)
+
+# A/B ampliado del fix de magnitud Test 1 (ctxpeak) sobre LOS 11 Tier A, no solo
+# los 3 del A/B S99. Pregunta de Nicolas (S100): el flag enable_test1_contextual_*
+# se aplica a todos los Tier A (path test1 activo en los 11, 166-469 records c/u),
+# asi que la adopcion debe validarse contra toda la base, no contra 3 vols.
+#
+# Corre 2 perfiles aislados (baseline / ctxpeak=Cand C+keep-peak) x 11 vols.
+# Sube los JSON como ARTIFACTS — NO commitea (evita race A47). Se descargan con
+# `gh run download` y se auditan con experiments/_s99_audit/ab_test1_audit_full.py.
+# Criterio adopcion (por-volcan): ctxpeak no baja recall ni suma FN en NINGUN vol.
+#
+# core (Cand B) queda como fallback: si ctxpeak falla en algun vol, correr core
+# para esos en un follow-up. A43 Norway: "on": quoted. Dispatch-only, no toca data.
+
+"on":
+  workflow_dispatch:
+    inputs:
+      code_ref:
+        description: "Branch/ref con el codigo (flags contextual ya en main)"
+        required: true
+        default: "main"
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-01"
+      end:
+        description: "End date YYYY-MM-DD inclusive"
+        required: true
+        default: "2026-05-31"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 11
+      matrix:
+        volcano:
+          - Tupungatito
+          - Villarrica
+          - Lascar
+          - Lastarria
+          - Isluga
+          - Llaima
+          - NevadosDeChillan
+          - PlanchonPeteroa
+          - PuyehueCordonCaulle
+          - Chaiten
+          - Copahue
+        profile:
+          - _s99_test1_baseline
+          - _s99_test1_ctxpeak
+    steps:
+      - name: Checkout code (code_ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.code_ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess — ${{ matrix.profile }} / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 340
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Upload result JSON as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: s100-${{ matrix.profile }}-${{ matrix.volcano }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7
