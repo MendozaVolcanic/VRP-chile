@@ -106,15 +106,57 @@ vistas — `diario.html:251` y `mosaico.html:258` a `true` (idealmente vía un h
 `persistedFlag` compartido con la misma key para que el toggle sea global). Bajo
 riesgo, display-only.
 
-## Resumen ejecutivo (3 hallazgos)
+## 🔴 Hallazgo 4 (S100, observación Nicolás "veo MODIS en Chaitén") — MODIS artefacto sistémico no cubierto
+
+Barrido de records MODIS recientes en los 11 Tier A (`_diag` ad-hoc) revela que el
+problema MODIS es MUCHO más grande que #1:
+
+1. **`distance_class="far"` está corrupto en CASI TODOS los MODIS** (no ocasional):
+   prácticamente cada record MODIS reciente sale "far" con el cluster a <inner del
+   cráter ("far pero CERCA"). El fix #2 (gate tabla NRT) en consecuencia oculta casi
+   todos los MODIS de la tabla (0 MODIS en el top-30 live) — bien para los artefactos,
+   pero es un parche sobre `distance_class` roto, no la cura.
+
+2. **Los MODIS que SÍ pasan como "summit" son campo difuso / cirrus sobre escena
+   gélida, y los filtros de artefacto display (S92/S93) NO los atrapan.** Caso Chaitén
+   (inner 5 km), 5 MODIS contados como summit en 10 días:
+   - 05-29 21:30: vrp_mw **206 MW**, t_bg −3 °C, 41 px → no marcado.
+   - 06-03 02:15: **545 px**, t_bg **−48 °C**, vrp 2.5 → no marcado (n_px≥100 ∧ t_max<5°C
+     pero vrp<50 → falla el AND del filtro difuso).
+   - 06-02 07:15: 102 px, t_bg −16 °C, vrp 5 (cap D9) → no marcado.
+   Ninguno es foco real: MODIS 1 km no resuelve el domo de Chaitén en calma (vlow);
+   captura el contraste nube/nieve fría que el path D lee como anomalía. Efecto visible:
+   **pill "MODIS" engañoso en la tarjeta** + **picos de 50–206 MW en la serie de
+   `diario.html`**. (El NIVEL de alerta NO se infla: la tarjeta usa la última detección
+   VIIRS, vlow 0.16 — pero el sensor MODIS y los picos del chart sí confunden.)
+
+3. **Es sistémico en los 11**, no solo Chaitén: Villarrica (MODIS far 20–30 km, vrp
+   60–185 MW), Llaima (far 13–20 km, hasta 250 MW), NdC (140–280 MW), PCC (campo
+   difuso masivo, 180–630 MW, n_px hasta 800), Lascar/Isluga/Tupun/Lastarria/Copahue
+   (mayoría far-pero-cerca capeados a 5 MW por D9). Casi todo MODIS reciente en reposo
+   es campo difuso/cirrus, no foco.
+
+**Alcance honesto de la auditoría**: la coherencia entre vistas (hallazgos 1-3) cubrió
+los 11. La VALIDEZ registro-a-registro (¿real o artefacto?) NO se había hecho; este
+barrido (disparado por la observación de Nicolás) la inicia y muestra que el frente
+MODIS es grande. NO se arregló nada aquí — entra al frente MODIS (brainstorming + A45).
+
+**Pendiente frente MODIS (ampliado)**: (a) `distance_class` derivar del cluster (#1);
+(b) magnitud campo difuso (§2); (c) **ampliar los filtros de artefacto display** para
+cubrir estos casos (criterio espacial: campo disperso n_px alto + fondo gélido, sin el
+AND restrictivo actual que los deja pasar). Todo MODIS, mismo reproc.
+
+## Resumen ejecutivo (4 hallazgos)
 1. **`distance_class` corrupto en MODIS** (pipeline, A46/Eje5-S95): etiqueta
    cráter/lejos no concuerda con el cluster. Raíz de los hallazgos 2. Reabrir con
    A45 (espejo del fix de ancla S98).
 2. **Tabla NRT sin gate de distancia** (display): muestra 7/30 filas que las
    tarjetas descartan (Villarrica 7.5 MW fantasma a 21.7 km).
 3. **Default de magnitud divergente entre vistas** (display, S92 L5): index=Núcleo,
-   diario/mosaico=Cluster → mismo volcán, números distintos.
+   diario/mosaico=Cluster → mismo volcán, números distintos. **[FIXEADO PR #335]**
+4. **MODIS artefacto sistémico** (pipeline+display): distance_class corrupto en ~todos
+   los MODIS + campo difuso/cirrus sobre escena gélida pasa como summit (Chaitén 206 MW,
+   545 px −48°C; los 11 afectados). Filtros artefacto display no lo cubren. = frente MODIS.
 
-Prioridad sugerida: #3 y #2 son parches de display de bajo riesgo (alta visibilidad
-para el operador). #1 es la raíz (pipeline, requiere A45 + reproc) y de paso
-mejora #2.
+Estado: #2 y #3 FIXEADOS (PR #335). #1 y #4 = **frente MODIS** pendiente (pipeline +
+display, brainstorming + A45 + reproc MODIS, junto con §2 campo difuso). Afecta los 11.
