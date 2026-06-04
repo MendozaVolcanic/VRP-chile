@@ -1,0 +1,96 @@
+name: S100 Test1 A/B paired heavy3 (PCC/Copahue/Chaiten, 1 mes)
+
+# Re-run de los 3 vols pesados que fallaron en el paired full (26950573600) por
+# timeout (2 perfiles × 2 meses rozaban el límite 6h GH). Acá: ventana 1 MES (mayo),
+# que cabe sobrado. Mismo esquema apareado (baseline+ctxpeak mismo runner, granules
+# compartidos, sin confounder). Estos 3 tienen poca actividad Test1 (matched=eruption),
+# así que 1 mes confirma igual. Artifacts s100p- (mismo prefijo → audita junto con
+# ab_test1_fair.py VRP_AB_ART=_ab_paired_art VRP_AB_PREFIX=s100p). A43 Norway.
+
+"on":
+  workflow_dispatch:
+    inputs:
+      code_ref:
+        description: "Branch/ref"
+        required: true
+        default: "main"
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-05-01"
+      end:
+        description: "End date YYYY-MM-DD inclusive"
+        required: true
+        default: "2026-05-31"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        volcano:
+          - PuyehueCordonCaulle
+          - Copahue
+          - Chaiten
+    steps:
+      - name: Checkout code (code_ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.code_ref }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Reproc baseline
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 165
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _s99_test1_baseline \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Reproc ctxpeak (mismo runner)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 165
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _s99_test1_ctxpeak \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+
+      - name: Upload baseline JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: s100p-_s99_test1_baseline-${{ matrix.volcano }}
+          path: data/_s99_test1_baseline/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload ctxpeak JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: s100p-_s99_test1_ctxpeak-${{ matrix.volcano }}
+          path: data/_s99_test1_ctxpeak/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7

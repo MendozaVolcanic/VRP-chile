@@ -35,6 +35,7 @@ def refs(vol):
     return out
 def load(prof,vol):
     p=ART/f"{PREFIX}-{prof}-{vol}"/f"{vol}.json"
+    if not p.exists(): return None
     d=json.load(open(p,encoding="utf-8")); return d if isinstance(d,list) else d.get("records",[])
 def keyset(recs): return set((r.get("datetime_utc",""),str(r.get("sensor",""))) for r in recs)
 def best(recs,r,common):
@@ -48,6 +49,9 @@ print(f"{'volcano':20} {'pares':>6} {'rec_bl':>7} {'rec_cp':>7} {'d_rec':>6} {'F
 tot={'pares':0,'dr':0,'dfn':0}
 for vol in VOLS:
     bl=load("_s99_test1_baseline",vol); cp=load("_s99_test1_ctxpeak",vol)
+    if bl is None or cp is None:
+        print(f"{vol:20} {'(sin artifacts — job falló, ver run separado)':>50}")
+        continue
     common=keyset(bl)&keyset(cp)
     rb=cb=fb=fc=0; ratb=[]; ratc=[]; pares=0
     for r in refs(vol):
