@@ -3081,6 +3081,12 @@ function buildNRTTable() {
       // metía records con vrp_mw=0 + discarded_reason (eruption_hotspot_too_far),
       // mostrándolos como "detecciones" recientes en la tabla NRT global.
       if (!isValidDetection(r)) continue;  // H3 (S77): helper global
+      // S100 coherencia: aplicar el MISMO gate de distancia que tarjetas/resumen/
+      // mapa (mirovaEqVrp = distance_class==summit && centroid<=inner, salvo
+      // toggle "incluir lejanas"). Sin esto la tabla mostraba clusters lejanos
+      // que el resto del dashboard descarta (ej. Villarrica 7.5 MW @21.7km por
+      // distance_class corrupto en MODIS, A46/Eje5). Ver docs/S100_DASHBOARD_AUDIT.md.
+      if (mirovaEqVrp(r, innerKm, includeFarDistance) <= 0) continue;
       const vrpFinal = r.vrp_mw ?? 0;
       const t = new Date(r.datetime_utc).getTime();
       if (t < cutoff) continue;
