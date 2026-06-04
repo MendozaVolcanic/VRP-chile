@@ -9,8 +9,14 @@ name: Deploy GitHub Pages
 #   - workflow_dispatch (manual fire from the Actions tab)
 #   - workflow_run after the NRT pipeline finishes successfully
 #     (because GITHUB_TOKEN-authored commits do not re-trigger `push`)
+#   - schedule (S100): red de seguridad cada 2h. Republica main aunque el NRT
+#     falle/cancele (NASA CMR timeouts intermitentes dejaban el sitio congelado
+#     6-36h porque el deploy via workflow_run depende de NRT success/failure y
+#     se salta en cancelled). El cron desacopla la publicacion de NASA.
+#
+# A43 Norway: "on": quoted para que YAML 1.1 no lo parsee como boolean True.
 
-on:
+"on":
   push:
     branches: [main]
     paths:
@@ -24,6 +30,8 @@ on:
   workflow_run:
     workflows: ["NRT VRP Pipeline (both profiles)"]
     types: [completed]
+  schedule:
+    - cron: "50 */2 * * *"  # cada 2h a :50 — red de seguridad independiente del NRT
 
 permissions:
   contents: read
