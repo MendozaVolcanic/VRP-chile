@@ -96,10 +96,16 @@
     .pill-modis { background: rgba(255,140,0,0.2);  color: var(--modis); }
     .pill-v375  { background: rgba(233,30,99,0.2);  color: var(--v375);  }
     .pill-v750  { background: rgba(0,188,212,0.2);  color: var(--v750);  }
-    .vc-time { font-size: 0.62rem; color: var(--muted); margin-top: 6px; }
-    .vc-time-lbl { font-size: 0.62rem; color: var(--muted); }
-    .vc-time-date { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-top: 1px; letter-spacing: 0.2px; }
+    .vc-time { font-size: 0.62rem; color: var(--muted); margin-top: 8px;
+      border-top: 1px solid var(--border); padding-top: 6px; }
+    .vc-time-lbl { font-size: 0.58rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .vc-time-local { font-size: 0.8rem; font-weight: 700; color: var(--text); margin-top: 2px; letter-spacing: 0.2px; }
+    .vc-time-utc { font-size: 0.66rem; font-weight: 600; color: var(--muted); margin-top: 1px; }
     .vc-time-nodet { color: var(--muted); font-weight: 600; }
+    .vc-distance { font-size: 0.72rem; color: #9fb3c8; margin-top: 6px; }
+    .vc-dist-ic { font-weight: 700; }
+    .vc-dist-ic.is-summit { color: var(--green); }
+    .vc-dist-ic.is-far { color: var(--muted); }
 
     /* ── Detail panel ── */
     .detail-panel {
@@ -1681,6 +1687,18 @@ async function renderGallery(volcanoName, host) {
 }
 
 // ── Volcano cards ─────────────────────────────────────────────────────────────
+// S100: hora local de Chile desde un timestamp UTC ("YYYY-MM-DD HH:MM").
+// Usa timeZone America/Santiago → maneja el cambio invierno/verano (DST) solo,
+// sin hardcodear offset (regla: no adivinar valores).
+function fmtLocalCL(s) {
+  const ms = Date.parse(String(s).replace(" ", "T") + "Z");
+  if (isNaN(ms)) return String(s).slice(0, 16) + " (Chile)";
+  return new Date(ms).toLocaleString("es-CL", {
+    timeZone: "America/Santiago", day: "2-digit", month: "short",
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  }).replace(",", "") + " (Chile)";
+}
+
 function buildCards() {
   const grid = document.getElementById("volcano-grid");
   while (grid.firstChild) grid.removeChild(grid.firstChild);
@@ -1733,11 +1751,14 @@ function buildCards() {
     // acoplada al número MW y al timestamp de arriba. Sin "(7d)", sin split.
     const dcRow = el("div", "vc-distance");
     if (det && det.dist != null) {
-      const s = el("span"); s.style.color = "#9fb3c8";
-      s.textContent = (det.summit ? "🎯 " : "📍 ") + det.dist.toFixed(1) + " km del cráter" +
+      // S100: icono más sobrio que 🎯 — ◉ (en el cráter) / ○ (lejana).
+      const ic = el("span", "vc-dist-ic" + (det.summit ? " is-summit" : " is-far"));
+      ic.textContent = det.summit ? "◉" : "○";
+      const s = el("span", "vc-dist-txt");
+      s.textContent = " " + det.dist.toFixed(1) + " km del cráter" +
                       (det.npx != null ? " · " + det.npx + " px" : "");
-      dcRow.title = "Distancia del centroide del cluster de la última detección al punto de referencia del volcán, y su extensión en píxeles.";
-      dcRow.append(s);
+      dcRow.title = "Distancia del centroide del cluster de la última detección al cráter, y su extensión en píxeles.";
+      dcRow.append(ic, s);
     }
 
     // Last update — S90: si hay detección, el timestamp es el de ESA detección
@@ -1748,12 +1769,14 @@ function buildCards() {
     const time = el("div", "vc-time");
     if (det) {
       const lbl = el("span", "vc-time-lbl"); lbl.textContent = "Última detección";
-      const dateEl = el("div", "vc-time-date"); dateEl.textContent = det.datetime_utc.slice(0, 16) + " UTC";
-      time.append(lbl, dateEl);
+      const loc = el("div", "vc-time-local"); loc.textContent = fmtLocalCL(det.datetime_utc);
+      const utc = el("div", "vc-time-utc"); utc.textContent = det.datetime_utc.slice(0, 16) + " UTC";
+      time.append(lbl, loc, utc);
     } else if (lastTime) {
       const lbl = el("span", "vc-time-lbl"); lbl.textContent = "Última pasada (sin detección)";
-      const dateEl = el("div", "vc-time-date vc-time-nodet"); dateEl.textContent = lastTime.slice(0, 16) + " UTC";
-      time.append(lbl, dateEl);
+      const loc = el("div", "vc-time-local vc-time-nodet"); loc.textContent = fmtLocalCL(lastTime);
+      const utc = el("div", "vc-time-utc"); utc.textContent = lastTime.slice(0, 16) + " UTC";
+      time.append(lbl, loc, utc);
     } else {
       time.textContent = "Sin datos";
     }
