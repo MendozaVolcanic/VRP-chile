@@ -255,7 +255,8 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
 // = píxel de máxima energía (regla Eje3/A48: desde lat/lon, NUNCA dist_km).
 // Calibración: docs/F5_CALIBRATION_S95.md. Toggle USE_F5_CORE.
 // ============================================================================
-let USE_F5_CORE = false;
+// S100: default Núcleo F5' (coherencia con index.html; S92 L5). Usuario puede apagarlo.
+let USE_F5_CORE = sessionStorage.getItem("mosaico_f5_core") !== "false";
 const F5_R_CORE_KM = 0.75;
 const F5_BT_EXT_K = 295.0;
 
@@ -614,7 +615,7 @@ function _syncMagBtn() {
   b.textContent = USE_F5_CORE ? "◎ Núcleo F5'" : "▣ Cluster";
 }
 function setupMagToggle() {
-  if (sessionStorage.getItem("mosaico_f5_core") === "true") USE_F5_CORE = true;
+  USE_F5_CORE = sessionStorage.getItem("mosaico_f5_core") !== "false";  // S100: default Núcleo F5'
   _syncMagBtn();
   document.getElementById("btn-mag").addEventListener("click", () => {
     USE_F5_CORE = !USE_F5_CORE;

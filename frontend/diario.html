@@ -248,7 +248,9 @@ function mirovaEqVrp(r, volcanoName) {
 // lat/lon, NUNCA dist_km). Calibración: docs/F5_CALIBRATION_S95.md (D2-safe v2,
 // mediana 5.64→1.74×, 0 eventos confirmados a magnitud 0). Toggle USE_F5_CORE.
 // ============================================================================
-let USE_F5_CORE = false;
+// S100: default Núcleo F5' (coherencia con index.html; S97 lo cambió allí pero no
+// aquí — S92 L5). El usuario puede apagarlo y se recuerda (storage "false").
+let USE_F5_CORE = sessionStorage.getItem("diario_f5_core") !== "false";
 const F5_R_CORE_KM = 0.75;
 const F5_BT_EXT_K = 295.0;
 
@@ -584,14 +586,13 @@ document.getElementById("btn-include-far").addEventListener("click", () => {
 // S96 F5' — toggle Magnitud: Cluster (pc.vrp_mw) vs Núcleo F5' (D2-safe v2).
 // Solo cambia el número de magnitud (chart/stats vía eqVrpDisplay); detección y
 // gating intactos. Re-render por reload (patrón diario, igual que includeFar).
-if (sessionStorage.getItem("diario_f5_core") === "true") {
-  USE_F5_CORE = true;
-  window.addEventListener("DOMContentLoaded", () => {
-    const b = document.getElementById("btn-mag");
-    b.textContent = "◎ Magnitud: Núcleo F5'";
-    b.classList.add("btn-active");
-  });
-}
+// S100: sincronizar el botón con el estado actual (default Núcleo F5').
+window.addEventListener("DOMContentLoaded", () => {
+  const b = document.getElementById("btn-mag");
+  if (!b) return;
+  b.textContent = USE_F5_CORE ? "◎ Magnitud: Núcleo F5'" : "▣ Magnitud: Cluster";
+  b.classList.toggle("btn-active", USE_F5_CORE);
+});
 document.getElementById("btn-mag").addEventListener("click", () => {
   sessionStorage.setItem("diario_f5_core", USE_F5_CORE ? "false" : "true");
   location.reload();
