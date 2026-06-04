@@ -1122,3 +1122,20 @@ Cuando S62+S63 completen:
 
 **Schema check**: la nomenclatura "D8" se usó dos veces en el proyecto — una en S35 (cluster selection PCC, resuelto S38) y otra en S52-S62 (background ring contaminado, resuelto S62). Ambas RESUELTAS al cierre S86. Próximas divergencias deben seguir desde D9 (`docs/D9_PATH_D_CIRRUS_FP.md`).
 
+
+---
+
+## D10 — Magnitud Test 1 sobre glaciar: ctxpeak (filtro contextual + keep-peak) — ADOPTADO S100
+
+**Fenómeno**: el Test 1 integrado-ROI (Coppola 2015 §2.2 Eq.1) suma TODOS los píxeles del ROI sobre la mediana del fondo. Sobre el glaciar nevado de Tupungatito (5.682 m), en invierno, eso es el mosaico nieve/roca entero (anillo difuso 1-3 km) con un fondo regional sesgado frío → la magnitud se infla **8-19×** vs MIROVA, que reporta el foco compacto (~0.2 MW estable). Empezó abril 2026 (marzo daba 1.04× perfecto): mosaico nieve/roca invernal sobre el glaciar.
+
+**Divergencia respecto al literal MIROVA**: el flagging contextual literal (dNTI/dETI vs vecinos, Coppola 2016a Tests 2/3) probado solo (`enable_test1_contextual_filter` sin keep-peak) da el mejor ratio (1.22×) PERO **crea 31 FN en Tupungatito** porque el cráter está EMBEBIDO en su halo de roca tibia y no es anómalo vs sus vecinos → MIROVA-literal lo borra. Nuestra detección no es idéntica a la de MIROVA (resolución/granule/embebido), así que aplicar el criterio literal píxel-a-píxel destruye el recall.
+
+**Solución JUSTIFICADA (MISSION "cuándo SÍ divergir")**: `enable_test1_contextual_filter` + `enable_test1_contextual_keep_peak` — aplica el filtro contextual (recorta el halo) PERO conserva siempre el píxel pico (= cráter). Cura sin FN.
+
+**Evidencia A/B paired 11 Tier A (S100, sin confounder, 416 pares; `docs/S100_TEST1_FULL_AB.md`)**:
+- Tupungatito 18.94× → **1.33×** | Lastarria 1.31→1.02 | PP 2.23→1.83 | Llaima 6.12→2.01
+- **d_recall +0 y d_FN +0 en los 11** (ninguna detección perdida, ningún FN nuevo)
+- Controles intactos (Lascar 0.86→0.83); vols no-Test1 sin cambio (matched = path eruption)
+
+**Alternativas descartadas** (S99): pixfilter (41 FN, recall 59→22); kernel-bg local (refutado S62/A19, empeora glaciar denso 10→18×); eq16 lava lake (anula sub-píxel, 192 Villarrica→0); contextual puro (31 FN cráter embebido). ctxpeak es el ÚNICO que cura sin destruir recall. Flag previo (default OFF) ya en código; adoptado a `mirova_equivalent.yaml` S100. Tag: `pre-s100-test1-magnitude-adopt`.

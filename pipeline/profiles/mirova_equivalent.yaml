@@ -185,6 +185,24 @@ paths:
   # Ver docs/PROCESS_RULES_S33.md y experiments/74-76 audit completo.
   enable_test1_pixel_filter: false
 
+  # **ADOPTADO S100 (2026-06-04)** — fix magnitud Test 1 (19× Tupungatito) vía
+  # filtro contextual + keep-peak (ctxpeak). El Test 1 integrado-ROI suma el anillo
+  # nival entero (fondo regional sesgado frío) → infla 8-19× sobre glaciar. El
+  # filtro contextual (dNTI vs vecinos, flagging literal MIROVA Coppola 2016a
+  # Tests 2/3) recorta el halo difuso; el keep-peak conserva SIEMPRE el píxel pico
+  # (cráter), evitando el FN del cráter embebido que vetó al contextual puro.
+  #
+  # A/B paired 11 Tier A (runs 26950573600 + 26972236648, sin confounder, 416 pares
+  # comunes baseline vs ctxpeak; docs/S100_TEST1_FULL_AB.md):
+  #   - Tupungatito 18.94× → 1.33× | Lastarria 1.31→1.02 | PP 2.23→1.83 | Llaima 6.12→2.01
+  #   - d_recall +0 y d_FN +0 en LOS 11 (cero detecciones perdidas, cero FN nuevo)
+  #   - Controles intactos (Lascar 0.86→0.83); no-test1 sin cambio (matched=eruption)
+  # Divergencia JUSTIFICADA (MISSION): el contextual literal puro crea 31 FN por
+  # cráter embebido (probado); keep-peak cura sin FN. Ver docs/MIROVA_DIVERGENCES.md.
+  # Tag defensivo: pre-s100-test1-magnitude-adopt.
+  enable_test1_contextual_filter: true
+  enable_test1_contextual_keep_peak: true
+
   # **ADOPTADO S38 Bloque B (2026-05-12)** — vent_anchored cluster selection
   # + H8 pixel-level filter.
   #
