@@ -1,0 +1,61 @@
+name: S100 reproc-promote ctxpeak (4 vols Test1, chunks 1 mes)
+
+# Reproc histórico para que la serie de Diario muestre la magnitud curada (ctxpeak,
+# adoptado #340) en abr-may. SOLO los 4 vols cuya magnitud Test1 cambia con el flag
+# (Tupungatito/Lastarria/PP/Llaima; los otros 7 no cambian — matched=eruption).
+# Chunks de 1 MES (baja carga → no timeout + exhaustivo con NASA estable, evita el
+# under-fetch del A/B que perdía detecciones). Perfil mirova_equivalent (ctxpeak ya
+# ON en main). Artifacts s100promo- → merge local con verificación (no perder
+# detecciones) vía experiments/_s99_audit/merge_promote_ctxpeak.py. A43 Norway.
+
+"on":
+  workflow_dispatch:
+    inputs:
+      code_ref:
+        description: "ref"
+        required: true
+        default: "main"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano: [Tupungatito, Lastarria, PlanchonPeteroa, Llaima]
+        chunk:
+          - { start: "2026-04-01", end: "2026-04-30" }
+          - { start: "2026-05-01", end: "2026-05-31" }
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.code_ref }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml
+      - name: Reproc ${{ matrix.volcano }} ${{ matrix.chunk.start }}..${{ matrix.chunk.end }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 170
+        run: |
+          python scripts/run_pipeline.py \
+            --profile mirova_equivalent \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ matrix.chunk.start }} \
+            --end ${{ matrix.chunk.end }} \
+            --overwrite
+      - name: Upload JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: s100promo-${{ matrix.volcano }}-${{ matrix.chunk.start }}
+          path: data/mirova_equivalent/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7
