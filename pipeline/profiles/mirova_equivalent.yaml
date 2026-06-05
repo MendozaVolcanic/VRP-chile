@@ -58,7 +58,12 @@ thresholds:
   # investigación de señales sub-MIROVA).
   min_vrp_mw_viirs375: 0.02
   min_vrp_mw_viirs750: 0.15
-  min_vrp_mw_modis:    0.27
+  # S102 (A45): bajado 0.27 -> 0.05 junto con nadir-fijo MODIS (ver paths).
+  # El area nadir-fija reduce la magnitud VRP MODIS; a 0.27 la validacion
+  # (run 27022484062) perdia 5 detecciones confirmadas MIROVA-MODIS de Lascar
+  # (FN). El barrido de pisos {0.27,0.15,0.10,0.05} mostro 0.05 = unico con
+  # FN=0 (analyze_nadir_validation.py). Los pisos VIIRS NO se tocan en S102.
+  min_vrp_mw_modis:    0.05
   # S12 E4: mirova_equivalent mantiene min_vent_pixels=1 (actual).
   # Experimental prueba con 2 para medir impacto en FPs.
   min_vent_pixels: 1
@@ -106,6 +111,18 @@ background:
 # --- Detection paths ---
 paths:
   enable_eruption_path: true
+  # S102 (A45) — nadir-fijo MODIS (Drift #7 sec^3 resuelto). MIROVA resamplea
+  # el granule a una grid UTM 50x50 km de area constante 1 km^2 (Coppola 2016a
+  # SP426.5 L201-202 + Eq.7) — NO usa el area real off-nadir. El factor sec^3(z)
+  # activo (default False) inflaba el campo termico difuso de los vols del sur
+  # (PCC/Tupun, off-nadir) 3-5x -> artefactos de 60-342 MW que MIROVA no publica.
+  # La calibracion empirica S14 (experiments/21_results.json a_pix_mode=nadir_fijo)
+  # demostro que el WOOSTER_COEFF YA es para area nadir => activar nadir-fijo
+  # RESTAURA el clon literal, no rompe calibracion. Validado: A/B sec^3 (run
+  # 27012025326) + reproc 11 vols (run 27022484062): Lascar 0.92x MIROVA (era
+  # 2.79x), 0 FN con piso 0.05, residuo path D acotado (PCC 60 MW, resto <=19).
+  # VIIRS tiene el mismo drift pero es frente posterior (su propio A/B).
+  enable_nadir_fixed_pixel_area_modis: true
   # S27 MIROVA literal: vent-path NO existe en papers MIROVA.
   # Coppola 2015 §2.2 Test 1 integrated-ROI cumple rol equivalente
   # para sub-pixel cuando aplica. Vent-path entero queda como infra

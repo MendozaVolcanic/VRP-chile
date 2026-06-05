@@ -97,6 +97,16 @@ EXPECTED_OPERATIONAL_FLAGS = {
     "ENABLE_DNTI_CONTEXTUAL_PATH": True,
     "ENABLE_DNTI_DUAL_ROI": True,
     "ENABLE_VENT_PATH": False,
+    # S102 (A45): nadir-fijo MODIS adoptado. MIROVA resamplea a grid 1km de
+    # area constante; el sec^3(theta) off-nadir era un DRIFT que inflaba el
+    # campo difuso de los vols del sur (PCC/Tupun) 3-5x. Calibracion S14
+    # (experiments/21_results.json a_pix_mode=nadir_fijo) + A/B sec^3 (run
+    # 27012025326) + validacion (run 27022484062: Lascar 0.92x MIROVA, 0 FN
+    # con piso 0.05). Activar nadir-fijo RESTAURA el clon literal.
+    "ENABLE_NADIR_FIXED_PIXEL_AREA_MODIS": True,
+    # VIIRS NO se toca en S102 (frente posterior, su propio A/B). Guard
+    # anti-confusion MODIS/VIIRS: este flag debe seguir False.
+    "ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS": False,
 }
 
 
@@ -125,6 +135,7 @@ def test_profile_constants_match_yaml_paths(yaml_raw):
         "ENABLE_DNTI_CONTEXTUAL_PATH": "enable_dnti_contextual_path",
         "ENABLE_DNTI_DUAL_ROI": "enable_dnti_dual_roi",
         "ENABLE_VENT_PATH": "enable_vent_path",
+        "ENABLE_NADIR_FIXED_PIXEL_AREA_MODIS": "enable_nadir_fixed_pixel_area_modis",
     }
     for const, ykey in const_to_yaml.items():
         assert ykey in paths, f"{ykey} missing from YAML paths"
@@ -161,3 +172,34 @@ def test_unknown_profile_raises_value_error():
     import pipeline.profile as profile
     with pytest.raises(ValueError):
         importlib.reload(profile)
+
+
+# --------------------------------------------------------------------------
+# (e) S102 (A45) — MODIS VRP floor lowered 0.27 -> 0.05 as part of the
+# nadir-fixed adoption. The nadir-fixed area reduction shrinks the MODIS VRP
+# of weak real signals; at 0.27 the validation lost 5 confirmed MIROVA-MODIS
+# detections of Lascar (FN). The floor sweep {0.27,0.15,0.10,0.05} (run
+# 27022484062, analyze_nadir_validation.py) showed 0.05 is the ONLY floor with
+# FN=0. The VIIRS floors are NOT touched in S102. Read YAML as source of truth
+# and pin the documented value so a stray edit fails CI.
+# --------------------------------------------------------------------------
+def test_min_vrp_mw_modis_floor_matches_yaml(yaml_raw):
+    profile = _load_operational()
+    assert profile.MIN_VRP_MW_MODIS == float(yaml_raw["thresholds"]["min_vrp_mw_modis"])
+
+
+def test_min_vrp_mw_modis_operational_value():
+    profile = _load_operational()
+    assert profile.MIN_VRP_MW_MODIS == 0.05, (
+        "MODIS VRP floor must be 0.05 (S102 nadir-fixed adoption, only FN=0 "
+        "floor per run 27022484062). If intentional, see CLAUDE.md flag-change "
+        "rule and update this test + the nadir-fixed adoption record."
+    )
+
+
+def test_viirs_floors_unchanged_by_s102(yaml_raw):
+    """Guard anti-confusion MODIS/VIIRS: S102 only touched the MODIS floor.
+    The VIIRS floors stay at their pre-S102 operational values."""
+    th = yaml_raw["thresholds"]
+    assert float(th["min_vrp_mw_viirs375"]) == 0.02
+    assert float(th["min_vrp_mw_viirs750"]) == 0.15
