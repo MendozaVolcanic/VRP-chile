@@ -255,6 +255,31 @@ interactúa con ctxpeak/F5' (ya adoptados) → implementar por etapas: **MODIS p
 4. Recién entonces A45 (tag + OK Nicolás + TDD) para flip en mirova_equivalent.
 5. Residuo path D y scope VIIRS = frentes posteriores.
 
+### 10.6 VEREDICTO DE VALIDACIÓN (run 27022484062, 11/11 success) — ÉXITO
+`analyze_nadir_validation.py` + `recalibrate_display_filters.py` (data nadir, abril):
+- **Magnitud**: Lascar nadir = **0.92× MIROVA** (n=33; era 2.79× con sec³). Clava.
+- **Piso**: a `min_vrp_mw_modis=0.27` → 5 FN (Lascar); a **0.05 → 0 FN** en los 11 (recupera
+  los 5 confirmados; +~100 records totales, ruido a monitorear).
+- **Residuo path D**: con nadir TODOS ≤60 MW; solo **PCC 1 record=60** (era 342),
+  Chaiten 19, Tupun 14, resto ≤9. El sec³ era el grueso; el residuo path D es la 2ª palanca.
+- **Filtros display** (sorpresa favorable): con la magnitud curada los artefactos bajan
+  tanto que `isDiffuseFieldArtifact` (≥50) **no atrapa nada** (queda inocuo); `isCirrusArtifact`
+  opcional bajar 10→3 (atrapa 29 cirrus residuales, **0 reales**). Casi sin recalibración.
+
+**Conclusión**: nadir-fijo + piso 0.05 es seguro y efectivo. NO rompe recall (área no
+afecta detección; piso 0.05 recupera la cola débil). Acerca los 3 sensores a MIROVA.
+
+### 10.7 ADOPCIÓN (S102, A45 — pendiente OK Nicolás)
+1. `git tag pre-s102-nadir-fixed-modis <sha>` + push.
+2. TDD: test que asegure nadir-fijo MODIS (área uniforme 1km²) + piso 0.05.
+3. Flip en `pipeline/profiles/mirova_equivalent.yaml`:
+   `paths.enable_nadir_fixed_pixel_area_modis: true` + `thresholds.min_vrp_mw_modis: 0.05`.
+4. Reproc histórico MODIS 11 vols (GH Actions) → promover a `data/mirova_equivalent/`.
+5. Verificación pixel-level (R2 vs TIF) + audit independiente (R3) + R8 público.
+6. (Opcional) bajar umbral `isCirrusArtifact` 10→3 en las 3 vistas (S92 L5).
+7. Frentes posteriores: residuo path D (PCC 60 MW), scope VIIRS (mismo drift sec³),
+   PR dashboard display (#1 desglose MIROVA por sensor, #3/#4/#5 — ver S101_DASHBOARD_AUDIT).
+
 ## 9. Pendiente de decisión (para revisión de Nicolás)
 
 - **Enfoque del 5.2**: ¿suprimir la magnitud (→0/cap) del cluster difuso, o solo
