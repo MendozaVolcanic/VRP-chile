@@ -1522,6 +1522,16 @@ function openLightbox(src, caption) {
   document.body.appendChild(ov);
 }
 
+// S101: los TIFs/KMZs del índice apuntan a ../../mirova-tif-archive/ (sibling fuera
+// del repo, NO publicado en GH Pages). En el sitio público los botones "Descargar"
+// fallaban con "archivo no disponible". Detectamos el sitio público por hostname y
+// mostramos "solo local" en vez de un link roto. (Un HEAD fetch sería más preciso
+// pero cuelga con paths ../ fuera del document root; hostname es robusto y suficiente
+// — el archivo solo existe en la máquina local de Nicolás, nunca en github.io.)
+function archiveAvailable() {
+  return !/github\.io$/i.test(location.hostname);
+}
+
 async function renderGallery(volcanoName, host) {
   const idx = await loadMirovaImgsIndex();
   while (host.firstChild) host.removeChild(host.firstChild);
@@ -1564,11 +1574,11 @@ async function renderGallery(volcanoName, host) {
   host.appendChild(subtabs);
   host.appendChild(content);
 
-  function renderTab() {
+  async function renderTab() {
     while (content.firstChild) content.removeChild(content.firstChild);
     if (activeKey === "pngs") renderPngs();
-    else if (activeKey === "tifs") renderTifs();
-    else renderKmzs();
+    else if (activeKey === "tifs") await renderTifs();
+    else await renderKmzs();
   }
 
   function renderPngs() {
@@ -1600,20 +1610,23 @@ async function renderGallery(volcanoName, host) {
     content.appendChild(grid);
   }
 
-  function renderTifs() {
+  async function renderTifs() {
     if (tifs.length === 0) {
       const empty = el("div", "gallery-empty");
       empty.textContent = "Sin TIFs georef para este volcán.";
       content.appendChild(empty);
       return;
     }
+    const avail = await archiveAvailable(tifs[0].path);  // S101: ¿mirova-tif-archive montado?
     const note = el("div", "gallery-empty");
     note.style.padding = "8px 12px";
     note.style.textAlign = "left";
     note.style.fontSize = "0.7rem";
-    note.innerHTML = "Archivo MIROVA original (geoTIFF). Browser no los renderiza inline — " +
-                     "descargar para abrir en QGIS/ArcGIS. Disponibles localmente sólo si " +
-                     "<code>mirova-tif-archive/</code> está montado (no se publica en GH Pages).";
+    note.innerHTML = avail
+      ? "Archivo MIROVA original (geoTIFF). Browser no los renderiza inline — descargar para abrir en QGIS/ArcGIS."
+      : "Archivo MIROVA original (geoTIFF). <b>No descargables en el sitio público</b> — son ~2000 archivos del " +
+        "archivo MIROVA fuera del repo (<code>mirova-tif-archive/</code>, no se publica en GH Pages). Lista de " +
+        "referencia; para descargarlos, montar el archivo localmente.";
     content.appendChild(note);
     const list = el("div", "gallery-list");
     // Cap a 200 para no inflar DOM. La lista está ordenada datetime desc así
@@ -1627,7 +1640,14 @@ async function renderGallery(volcanoName, host) {
       const fname = el("div"); fname.style.fontSize = "0.66rem"; fname.style.color = "var(--muted)";
       fname.textContent = t.path.split("/").pop();
       fname.title = t.path;
-      const dl = el("a"); dl.href = t.path; dl.download = t.path.split("/").pop(); dl.textContent = "Descargar";
+      let dl;
+      if (avail) {
+        dl = el("a"); dl.href = t.path; dl.download = t.path.split("/").pop(); dl.textContent = "Descargar";
+      } else {
+        dl = el("span"); dl.textContent = "solo local"; dl.style.color = "var(--muted)";
+        dl.style.fontSize = "0.66rem"; dl.style.fontStyle = "italic";
+        dl.title = "TIF disponible sólo con mirova-tif-archive/ montado (no se publica en GH Pages)";
+      }
       row.append(when, sensor, fname, dl);
       list.appendChild(row);
     });
@@ -1642,20 +1662,22 @@ async function renderGallery(volcanoName, host) {
     content.appendChild(list);
   }
 
-  function renderKmzs() {
+  async function renderKmzs() {
     if (kmzs.length === 0) {
       const empty = el("div", "gallery-empty");
       empty.textContent = "Sin KMZs para este volcán.";
       content.appendChild(empty);
       return;
     }
+    const avail = await archiveAvailable(kmzs[0].path);  // S101: ¿mirova-tif-archive montado?
     const note = el("div", "gallery-empty");
     note.style.padding = "8px 12px";
     note.style.textAlign = "left";
     note.style.fontSize = "0.7rem";
-    note.innerHTML = "Overlays MIROVA en formato Google Earth. Click \"Descargar\" y abrir el .kmz en " +
-                     "Google Earth Pro / Desktop. Disponibles localmente sólo si " +
-                     "<code>mirova-tif-archive/</code> está montado.";
+    note.innerHTML = avail
+      ? "Overlays MIROVA en formato Google Earth. Click \"Descargar\" y abrir el .kmz en Google Earth Pro / Desktop."
+      : "Overlays MIROVA (Google Earth). <b>No descargables en el sitio público</b> — están en el archivo MIROVA " +
+        "fuera del repo (<code>mirova-tif-archive/</code>, no se publica en GH Pages). Lista de referencia.";
     content.appendChild(note);
     const list = el("div", "gallery-list");
     const CAP = 200;
@@ -1667,8 +1689,14 @@ async function renderGallery(volcanoName, host) {
       const fname = el("div"); fname.style.fontSize = "0.66rem"; fname.style.color = "var(--muted)";
       fname.textContent = t.path.split("/").pop();
       fname.title = t.path;
-      const dl = el("a"); dl.href = t.path; dl.download = t.path.split("/").pop();
-      dl.textContent = "Google Earth";
+      let dl;
+      if (avail) {
+        dl = el("a"); dl.href = t.path; dl.download = t.path.split("/").pop(); dl.textContent = "Google Earth";
+      } else {
+        dl = el("span"); dl.textContent = "solo local"; dl.style.color = "var(--muted)";
+        dl.style.fontSize = "0.66rem"; dl.style.fontStyle = "italic";
+        dl.title = "KMZ disponible sólo con mirova-tif-archive/ montado (no se publica en GH Pages)";
+      }
       row.append(when, sensor, fname, dl);
       list.appendChild(row);
     });
