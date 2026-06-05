@@ -99,11 +99,17 @@ def test_none_contextual_is_passthrough():
     assert np.array_equal(out, test1)
 
 
-def test_profile_flag_default_off(monkeypatch):
+def test_profile_flag_adopted_on(monkeypatch):
+    """S100 (#340) ADOPTO ctxpeak en mirova_equivalent: la magnitud Test1
+    contextual + keep-peak cierra el inflado 18.9x de Tupungatito (A/B paired
+    416 pares, d_recall+0/d_FN+0 en los 11). Este test era 'default_off' en S99;
+    se actualizo al estado adoptado. Guard anti-revert: si una consolidacion lo
+    apaga, falla CI."""
     monkeypatch.setenv("VRP_PROFILE", "mirova_equivalent")
     import pipeline.profile as profile
     importlib.reload(profile)
-    assert profile.ENABLE_TEST1_CONTEXTUAL_FILTER is False
+    assert profile.ENABLE_TEST1_CONTEXTUAL_FILTER is True
+    assert profile.ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK is True
 
 
 def test_profile_flag_on_in_ctx_profile(monkeypatch):
