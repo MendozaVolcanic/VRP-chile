@@ -1,0 +1,71 @@
+name: S101 validación nadir-fijo MODIS (11 Tier A)
+
+# Reprocesa los 11 Tier A con nadir-fijo MODIS (perfil _nadir_modis_validation, sin
+# piso) para validar el fix antes de adoptar (A45). Mide en los 11 (el A/B sec³ fue
+# solo 3): FN vs MIROVA, residuo path D, distribución de magnitud para elegir el piso.
+# Artifacts (NO commitea a main; análisis local). MODIS necesita pyhdf (GH Linux).
+# NO toca operacional (A47). Design doc 2026-06-05-frente-modis-campo-difuso §10.5.
+# A43 Norway: "on": quoted.
+
+"on":
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-01"
+      end:
+        description: "End date YYYY-MM-DD inclusive"
+        required: true
+        default: "2026-04-30"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        volcano:
+          - Lascar
+          - PuyehueCordonCaulle
+          - Tupungatito
+          - Chaiten
+          - Villarrica
+          - Llaima
+          - PlanchonPeteroa
+          - Copahue
+          - Isluga
+          - Lastarria
+          - NevadosDeChillan
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps (pyhdf for MODIS)
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reprocess nadir-fixed / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 190
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _nadir_modis_validation \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+      - name: Upload JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: nadir-val-${{ matrix.volcano }}
+          path: data/_nadir_modis_validation/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7

@@ -205,6 +205,56 @@ frágil pero funcional); no es bloqueante. Calidad > velocidad.
 
 ---
 
+## 10. RESULTADOS S101 — A/B sec³ medido + auditoría de seguridad (actualiza §4bis/§5)
+
+### 10.1 La palanca sec³ es DOMINANTE y nadir-fijo es el clon literal (CONFIRMADO)
+A/B `nadir_off`(sec³) vs `nadir_on`(nadir) sobre los mismos granules, abril, PCC/Tupun/Lascar
+(run 27012025326, `analyze_sec3_ab.py`):
+- Ratio sec³ (off/on) en records inflados: PCC **5.7×**, Tupun **16×**, Lascar **9×**.
+- Records top: PCC 342→**60 MW**, Tupun 67.8→**6.3**, Tupun 27.8→1.3.
+- **Lascar nadir-on vs MIROVA-MODIS = 0.85×** (n=33) — clava el ground truth.
+
+**Calibración S14 (`experiments/21_results.json`) RESUELVE la duda de A63**: el coeficiente
+se calibró sobre OSF v2.5 (oficial MIROVA) y el test explícito de A_pix dio
+**`a_pix_mode: nadir_fijo`** para los 3 sensores (zenith_stddev ~0, error ~1e-14). O sea:
+**MIROVA usa nadir-fijo; el coeficiente Wooster YA es para nadir; el sec³ activo (default
+`enable_nadir_fixed_pixel_area_modis: False`) es el DRIFT.** El comentario del código
+(profile.py:432 "preservar calibración S14 = sec³") está EQUIVOCADO. Activar nadir-fijo
+RESTAURA el clon literal, NO rompe la calibración. (sec³ es físicamente correcto para el
+área real, pero MIROVA no lo usa → para clonar MIROVA, nadir-fijo.)
+
+### 10.2 nadir-fijo NO es un flag aislado — es un FIX COMPUESTO (auditoría conservadora)
+`audit_nadir_safety.py` + subagente de gates VRP-dependientes:
+- **A/B válido**: brazo off reproduce el operacional 72/72 PCC, 63/63 Tupun.
+- **FN RIESGO**: 5/33 confirmados MIROVA-MODIS de Lascar caen bajo el piso
+  `min_vrp_mw_modis=0.27` con nadir (quedan 0.06–0.24) → se zero-outean → **perder
+  detecciones reales**. → bajar el piso proporcionalmente.
+- **Filtros display** (`isCirrusArtifact >10`, `isDiffuseFieldArtifact ≥50`,
+  index/diario/mosaico): umbrales ABSOLUTOS calibrados con sec³. Al bajar la magnitud
+  pueden dejar de atrapar artefactos (cirrus fríos) → reaparecen. En abril/3vols el test
+  dio 0 reapariciones (los difusos tibios ya están visibles, no ocultos), pero el riesgo
+  es real en otros meses → recalibrar umbrales en las 3 vistas (S92 L5).
+- **Cap D9 (5 MW)**: se vuelve inocuo (neutral). **Niveles de alerta** MODIS bajan de
+  banda (efecto deseado, avisar).
+
+### 10.3 Residuo path D (segunda palanca, pendiente)
+Con nadir-fijo, PCC 342→60 MW SIGUE artefacto (MIROVA=0); records cerca-nadir (Tupun
+14.2→13.6, factor 1.0×) son 100% path D. nadir-fijo cura la mayor parte pero queda
+residuo path D que necesita la 2ª palanca (acotar path D/second-pass o gate dispersión).
+
+### 10.4 Scope VIIRS (decisión pendiente)
+La calibración S14 dice los **3 sensores** son nadir-fijo → VIIRS (375 y 750) también
+tiene el drift sec³ activo. El fix completo (clon literal) es 3-sensores. PERO VIIRS375
+interactúa con ctxpeak/F5' (ya adoptados) → implementar por etapas: **MODIS primero**
+(frente claro, precisión 4.7%), VIIRS después con su propio A/B + recalibración.
+
+### 10.5 Plan conservador de adopción (NO adoptar sin completar)
+1. Reproc de validación nadir-fijo MODIS de los **11 vols** (piso bajado), perfil aislado.
+2. Recalibrar filtros display sobre la data nadir (3 vistas).
+3. Verificar: 0 FN vs MIROVA, artefactos contenidos, Lascar ~MIROVA.
+4. Recién entonces A45 (tag + OK Nicolás + TDD) para flip en mirova_equivalent.
+5. Residuo path D y scope VIIRS = frentes posteriores.
+
 ## 9. Pendiente de decisión (para revisión de Nicolás)
 
 - **Enfoque del 5.2**: ¿suprimir la magnitud (→0/cap) del cluster difuso, o solo
