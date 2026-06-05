@@ -11,25 +11,18 @@ cd "C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile"
 git fetch origin --prune && git pull --ff-only
 ```
 
-## §1 — PRIORIDAD: terminar de promover el reproc histórico ctxpeak (EN CURSO al cierre)
-El fix de magnitud ctxpeak YA está adoptado en `mirova_equivalent` (#340, NRT cura
-desde ahora). Falta promover el HISTÓRICO abr-may para que la serie de **Diario**
-muestre Tupungatito/Lastarria/PP/Llaima curados (hoy esos picos siguen inflados en
-la vista 90d).
+## §1 — Reproc histórico ctxpeak: CASI COMPLETO (solo falta Llaima + R8)
+El fix ctxpeak adoptado (#340) + histórico abr-may promovido (#343): **Tupun/Lastarria/PP
+curados** (Tupun mediana Test1 2.68→0.27 MW, detecciones conservadas). Reproc fresco
+run 26984922901 (4×2 chunks) + `merge_promote_ctxpeak.py` con guard anti-underfetch.
 
-**Reproc lanzado al cierre: run `26984922901`** (4 vols × 2 chunks abril/mayo, perfil
-mirova_equivalent con ctxpeak ON). **Pickup cuando termine:**
-```bash
-gh run download 26984922901 -D experiments/_s99_audit/_promo_art
-python experiments/_s99_audit/merge_promote_ctxpeak.py   # tiene GUARD anti-underfetch
-git diff --stat data/mirova_equivalent/   # ver qué cambió
-```
-El script NO escribe un vol si el reproc trae menos detecciones que el base (guard:
-hoy el A/B parcial habría borrado ~130 det/vol — verificado y revertido a tiempo).
-Si el guard SKIPea algún vol → ese chunk hizo under-fetch (NASA), re-disparar.
-**Tras merge OK**: verif preview 3 vistas (Diario: que el pico de Tupun abr-may baje
-a ~1-2 MW) → commit+push data/mirova_equivalent → deploy → R8 público.
-Junio (1-4) se cura solo con el NRT cron (ya usa ctxpeak).
+**Pendiente §1**:
+1. **Llaima** quedó SKIP (guard: reproc trajo 416<421 det base = under-fetch en un chunk).
+   Re-reproc Llaima abr-may (re-disparar `reproc-s100-promote-ctxpeak.yml`, o solo Llaima)
+   y promover (el guard lo deja pasar si esta vez baja todas las det). Es menor (poca
+   actividad Test1). Su pico viejo 6.12× sigue en Diario hasta entonces.
+2. **R8 público**: verificar en el sitio live (post-deploy #343) que la serie de Diario
+   de Tupungatito abr-may bajó (pico ~7→~0.3 MW). Junio se cura solo con NRT cron.
 
 ## §2 — FRENTE MODIS (próximo gran tema, acordado tras cerrar magnitud)
 Auditoría S100 lo dejó mapeado (`docs/S100_DASHBOARD_AUDIT.md` hallazgos #1+#4 +
