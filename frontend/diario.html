@@ -89,7 +89,7 @@ footer a:hover { text-decoration: underline; }
     <!-- S42: filtro post-S38 removido tras reproc completo 30d. Todos los
          records ya tienen modelo S42. -->
     <button id="btn-scale" class="btn-ui">📈 Escala: Lineal</button>
-    <button id="btn-mag" class="btn-ui" title="Magnitud (solo el número, NO la detección): 'Cluster' = pc.vrp_mw actual. 'Núcleo F5'' = D2-safe v2 (S95): suma solo el núcleo de 0.75 km del píxel de máxima energía + lava real (bt≥295K), curando la sobre-estimación del halo glaciar. Ver docs/F5_CALIBRATION_S95.md.">▣ Magnitud: Cluster</button>
+    <button id="btn-mag" class="btn-ui" title="Magnitud (solo el número, NO la detección): 'Cluster' = pc.vrp_mw actual. 'Núcleo F5'' = D2-safe v2 (S95): suma solo el núcleo de 0.75 km del píxel de máxima energía + lava real (bt≥295K), curando la sobre-estimación del halo glaciar. APLICA SOLO a VIIRS 375m (I-band): MODIS y VIIRS 750m conservan el Cluster en ambos modos (el ancla energía-máxima en píxeles coarse puede inflar). Ver docs/F5_CALIBRATION_S95.md.">▣ Magnitud: Cluster</button>
     <a href="index.html" class="btn-ui">🏠 Dashboard principal</a>
   </div>
 </div>
@@ -480,8 +480,25 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
     return t >= cutoff && r.vrp > 0;
   });
   const ourMaxVrp = detRecs.reduce((a, r) => Math.max(a, eqVrpDisplay(r, volcanoName)), 0);
+  // S102 #5 — mediana del máximo DIARIO (robusta a un pico aislado, p.ej. un
+  // residuo path D MODIS capado a 5.00 MW que el "Max VRP" sí toma). Da el nivel
+  // térmico típico de la ventana, comparable con la lectura de MIROVA.
+  const dailyMax = new Map();
+  for (const r of detRecs) {
+    const v = eqVrpDisplay(r, volcanoName);
+    if (v <= 0) continue;
+    const d = (r.datetime_utc || "").slice(0, 10);
+    if (!d) continue;
+    if (!dailyMax.has(d) || v > dailyMax.get(d)) dailyMax.set(d, v);
+  }
+  const vals = [...dailyMax.values()].sort((a, b) => a - b);
+  const medianVrp = vals.length
+    ? (vals.length % 2 ? vals[(vals.length - 1) / 2]
+       : (vals[vals.length / 2 - 1] + vals[vals.length / 2]) / 2)
+    : 0;
   return {
-    n_det_us: detRecs.length, n_det_mirova: mirovaWindowed.length, max_us: ourMaxVrp,
+    n_det_us: detRecs.length, n_det_mirova: mirovaWindowed.length,
+    max_us: ourMaxVrp, median_us: medianVrp,
   };
 }
 
@@ -533,11 +550,24 @@ function renderCard(volc, jsonData, mirovaForVolc) {
 
   // Max VRP
   const s3 = el("span", "stat");
+  s3.title = "Máximo diario de la ventana. Puede estar dominado por un pico aislado " +
+    "(p.ej. un residuo path D MODIS capado a 5.00 MW). La mediana da el nivel típico.";
   s3.appendChild(document.createTextNode("Max VRP: "));
   const b3 = el("b"); b3.textContent = stats.max_us > 0 ? stats.max_us.toFixed(2) : "—";
   s3.appendChild(b3);
   s3.appendChild(document.createTextNode(" MW"));
   stRow.appendChild(s3);
+  stRow.appendChild(document.createTextNode(" · "));
+
+  // S102 #5 — Mediana VRP (nivel térmico típico, robusto a picos capados)
+  const s4 = el("span", "stat");
+  s4.title = "Mediana del máximo diario en la ventana — nivel térmico típico, " +
+    "robusto a un pico aislado. Más comparable con la lectura de MIROVA.";
+  s4.appendChild(document.createTextNode("mediana: "));
+  const b4 = el("b"); b4.textContent = stats.median_us > 0 ? stats.median_us.toFixed(2) : "—";
+  s4.appendChild(b4);
+  s4.appendChild(document.createTextNode(" MW"));
+  stRow.appendChild(s4);
 
   hdr.appendChild(h2);
   hdr.appendChild(region);
@@ -614,7 +644,7 @@ document.getElementById("btn-include-far").addEventListener("click", () => {
 window.addEventListener("DOMContentLoaded", () => {
   const b = document.getElementById("btn-mag");
   if (!b) return;
-  b.textContent = USE_F5_CORE ? "◎ Magnitud: Núcleo F5'" : "▣ Magnitud: Cluster";
+  b.textContent = USE_F5_CORE ? "◎ Magnitud: Núcleo F5' (solo VIIRS375)" : "▣ Magnitud: Cluster";
   b.classList.toggle("btn-active", USE_F5_CORE);
 });
 document.getElementById("btn-mag").addEventListener("click", () => {
