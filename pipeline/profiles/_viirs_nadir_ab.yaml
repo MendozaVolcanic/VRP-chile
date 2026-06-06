@@ -1,0 +1,12 @@
+# S102 — A/B de MEDICIÓN nadir-fijo VIIRS (NO adopción, A45 pendiente).
+# Hereda mirova_equivalent (MODIS nadir YA ON tras #354) y agrega nadir-fijo VIIRS.
+# Así el DIFF vs operacional aísla EXACTAMENTE el efecto del nadir VIIRS (MODIS
+# igual en ambos brazos). Calibración S14 (experiments/21_results.json) confirma
+# a_pix_mode=nadir_fijo para VIIRS750 Y VIIRS375 → el sec³ VIIRS activo es drift.
+# CUIDADO: VIIRS375 interactúa con ctxpeak/F5' (ya adoptados) — este A/B mide ese
+# acople. data_subdir aislado (NO toca operacional, A47).
+extends: mirova_equivalent
+output:
+  data_subdir: _viirs_nadir_ab
+paths:
+  enable_nadir_fixed_pixel_area_viirs: true
