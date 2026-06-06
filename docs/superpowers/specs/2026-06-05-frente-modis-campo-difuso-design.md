@@ -269,7 +269,15 @@ interactúa con ctxpeak/F5' (ya adoptados) → implementar por etapas: **MODIS p
 **Conclusión**: nadir-fijo + piso 0.05 es seguro y efectivo. NO rompe recall (área no
 afecta detección; piso 0.05 recupera la cola débil). Acerca los 3 sensores a MIROVA.
 
-### 10.7 ADOPCIÓN (S102, A45 — pendiente OK Nicolás)
+### 10.8 ADOPTADO Y PROMOVIDO (S102, 2026-06-06) — COMPLETO
+PR #354 (flip operacional) + #355 (infra) + #356 (data) mergeados. Reproc run
+27035142954 (22/22) → merge solo-MODIS (VIIRS byte-idéntico) → R3 + R8 live OK.
+PCC 342→60 MW (residuo path D), Tupun 133→0, Lascar 2.87→1.38×, 0 FN. R8 público
+verificado: PCC 60.2 / Tupun 13.6 / Lascar 5.7 MW. Detalle:
+`docs/S102_NADIR_PROMOTE_RESULTS.md`. Tag `pre-s102-nadir-fixed-modis`.
+**Frentes posteriores**: residuo path D PCC 60 MW, scope VIIRS, PR dashboard display.
+
+### 10.7 ADOPCIÓN (S102, A45 — procedimiento, EJECUTADO ver §10.8)
 1. `git tag pre-s102-nadir-fixed-modis <sha>` + push.
 2. TDD: test que asegure nadir-fijo MODIS (área uniforme 1km²) + piso 0.05.
 3. Flip en `pipeline/profiles/mirova_equivalent.yaml`:
