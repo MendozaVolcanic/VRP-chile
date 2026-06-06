@@ -104,7 +104,7 @@ footer a:hover { text-decoration: underline; }
   <div class="legend-item"><span class="legend-box" style="background: #ff8c00;"></span> MODIS (1 km)</div>
   <div class="legend-item"><span class="legend-box" style="background: #00bcd4;"></span> VIIRS 750m (M13)</div>
   <div class="legend-item"><span class="legend-box" style="background: #e91e63;"></span> VIIRS 375m (I04)</div>
-  <div class="legend-item"><span class="legend-box" style="background: transparent; border-color: #ffc107;"></span> MIROVA NRT (referencia)</div>
+  <div class="legend-item"><span class="legend-box" style="background: transparent; border: 1px dashed #7a8fa6;"></span> ▲ MIROVA NRT (línea discontinua, mismo color por sensor)</div>
 </div>
 
 <div id="grid" class="grid"></div>
@@ -356,6 +356,20 @@ function sensorBucket(s) {
 
 const SENSOR_COLOR = { MODIS: "#ff8c00", VIIRS750: "#00bcd4", VIIRS375: "#e91e63" };
 const SENSOR_LABEL = { MODIS: "MODIS (1 km)", VIIRS750: "VIIRS 750m", VIIRS375: "VIIRS 375m" };
+// Label corto para la referencia MIROVA por sensor (evita "MODIS (1 km) (ref.)").
+const MIROVA_SENSOR_LABEL = { MODIS: "MODIS", VIIRS750: "VIIRS 750m", VIIRS375: "VIIRS 375m" };
+
+// S102 #1 — bucket del campo Sensor del CSV consolidado MIROVA. Naming MIROVA
+// (verificado A48 en latest_consolidado.csv): "MODIS", "VIIRS375" (I-band 375m),
+// "VIIRS" (= M-band 750m, naming histórico MIROVA). Permite desglosar la
+// referencia MIROVA por sensor (3 líneas) en vez de 1 agregada — comparación
+// justa contra nuestras 3 barras. Paridad con index.html buildDatasets (S76 P1).
+function mirovaBucket(s) {
+  if (s === "MODIS") return "MODIS";
+  if (s === "VIIRS375") return "VIIRS375";
+  if (s === "VIIRS") return "VIIRS750";
+  return "?";
+}
 
 function aggregateDailyMax(records, getter) {
   const m = new Map();
@@ -392,17 +406,27 @@ function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
     });
   }
 
+  // S102 #1 — referencia MIROVA DESGLOSADA por sensor (3 líneas discontinuas, mismo
+  // color que nuestras barras) en vez de 1 línea agregada all-sensors. Comparación
+  // justa: "MODIS naranja sólida" (nuestro) vs "MIROVA MODIS naranja discontinua con
+  // triángulos" (referencia mismo sensor). Paridad con index.html (S76 P1).
   const mirovaWindowed = mirovaForVolc.filter(r => {
     const t = new Date(r.dt).getTime();
     return t >= cutoff && r.vrp > 0;
   });
-  if (mirovaWindowed.length) {
+  const mBuckets = { MODIS: [], VIIRS750: [], VIIRS375: [] };
+  for (const r of mirovaWindowed) {
+    const b = mirovaBucket(r.sensor);
+    if (mBuckets[b]) mBuckets[b].push(r);
+  }
+  for (const b of ["MODIS", "VIIRS750", "VIIRS375"]) {
+    if (mBuckets[b].length === 0) continue;
     ds.push({
-      label: "MIROVA NRT (ref.)", type: "line",
-      data: aggregateDailyMax(mirovaWindowed, r => r.vrp),
-      borderColor: "#ffc107", backgroundColor: "transparent",
-      borderWidth: 2, borderDash: [4, 3], pointRadius: 3,
-      pointBackgroundColor: "#ffc107", tension: 0.15, order: 0,
+      label: `MIROVA ${MIROVA_SENSOR_LABEL[b]} (ref.)`, type: "line",
+      data: aggregateDailyMax(mBuckets[b], r => r.vrp),
+      borderColor: SENSOR_COLOR[b], backgroundColor: "transparent",
+      borderWidth: 2, borderDash: [5, 3], pointRadius: 3.5, pointStyle: "triangle",
+      pointBackgroundColor: SENSOR_COLOR[b], tension: 0.15, order: 0,
     });
   }
   return { datasets: ds, n_records: recs.length };
