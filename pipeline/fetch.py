@@ -425,23 +425,71 @@ def _diag(msg: str) -> None:
     print(f"[diag {_t.strftime('%H:%M:%S', _t.gmtime())}Z] {msg}", flush=True)
 
 
+# ── S102 — circuit-breaker por host de descarga ───────────────────────────────
+# Root cause incidente NRT (run 27085208578, prueba instrumentada): el host LANCE
+# `nrt3.modaps.eosdis.nasa.gov` da ConnectTimeout a 183s; reintentar 4× por cada
+# granule × varias plataformas VIIRS NRT acumula >50min → timeout del job. Un host
+# caído NO se cura reintentando. Patrón análogo a _probe_nasa_auth (S70-0) pero para
+# el host de descarga: al 1er ConnectTimeout marcamos el host caído PARA ESTA CORRIDA
+# y las descargas siguientes de ese host fallan al instante (devolvemos lo de LAADS,
+# que sí responde). El reintento real lo da nrt-retry.yml (~30min después, host puede
+# haberse recuperado). Estado por-proceso → cada job de GH Actions arranca limpio.
+_DOWN_DOWNLOAD_HOSTS: set = set()
+
+# ConnectTimeout/ConnectionError = el host no acepta la conexión (caído/bloqueado).
+# Se distingue de ReadTimeout u otros transients (esos SÍ se reintentan).
+try:
+    from requests.exceptions import ConnectTimeout as _ConnectTimeout, \
+        ConnectionError as _ConnectionError
+    _CONNECT_ERRORS = (_ConnectTimeout, _ConnectionError)
+except Exception:  # pragma: no cover — requests siempre está, defensa
+    _CONNECT_ERRORS = ()
+
+
+def _granule_hosts(granules: list) -> set:
+    """Hosts (netloc) de los data_links de los granules. Vacío si no se puede
+    determinar (degradación segura: no se hace skip). earthaccess DataGranule
+    expone .data_links()."""
+    from urllib.parse import urlparse
+    hosts = set()
+    for g in granules:
+        try:
+            for url in g.data_links():
+                h = urlparse(url).netloc
+                if h:
+                    hosts.add(h)
+        except Exception:
+            pass
+    return hosts
+
+
 def download_granules(granules: list, dest_dir: Path) -> list[Path]:
     """Download a list of granules to dest_dir. Returns list of local file paths.
 
-    H6 S22 retry+backoff: 3 intentos con waits 10s/30s/60s para mitigar
-    fallos intermitentes red GitHub→NASA. Cada intento llama earthaccess.download
-    completo; si parcialmente exitoso (algunos files OK), retorna lo que pudo.
+    H6 S22 retry+backoff: para errores transitorios (ReadTimeout, etc.) reintenta
+    con waits 10s/30s/60s. Cada intento llama earthaccess.download completo; si
+    parcialmente exitoso (algunos files OK), retorna lo que pudo.
 
-    S102 instrumentación: markers DOWNLOAD_START/DONE/ERR por intento. Si el log
-    muestra DOWNLOAD_START sin DOWNLOAD_DONE antes del kill a 50min, confirma que
-    earthaccess.download() se cuelga sin timeout de pared (root cause candidata).
+    S102 circuit-breaker (root cause NRT, run 27085208578): para ConnectTimeout
+    /ConnectionError (host caído) NO reintenta 4× (no se cura) — falla rápido y
+    marca el host caído para la corrida, de modo que las descargas siguientes de
+    ese host se saltan al instante. Esto evita acumular 4×183s × N granules > 50min.
+    Markers _diag para diagnóstico continuo.
     """
     import time
     dest_dir.mkdir(parents=True, exist_ok=True)
-    delays = [0, 10, 30, 60]
-    last_err = None
     names = ",".join(str(g.get("umm", {}).get("GranuleUR", "?"))[:40] for g in granules) \
         if all(hasattr(g, "get") for g in granules) else f"{len(granules)} items"
+    hosts = _granule_hosts(granules)
+
+    # Circuit-breaker: si TODOS los hosts destino ya fallaron ConnectTimeout en
+    # esta corrida, fallar al instante (no quemar otro connect-timeout largo).
+    if hosts and hosts <= _DOWN_DOWNLOAD_HOSTS:
+        _diag(f"DOWNLOAD_SKIP host caído {sorted(hosts)} [{names}]")
+        raise RuntimeError(f"download host(s) down this run: {sorted(hosts)}")
+
+    delays = [0, 10, 30, 60]
+    last_err = None
     for attempt, delay in enumerate(delays):
         if delay:
             time.sleep(delay)
@@ -451,6 +499,15 @@ def download_granules(granules: list, dest_dir: Path) -> list[Path]:
             paths = earthaccess.download(granules, local_path=str(dest_dir))
             _diag(f"DOWNLOAD_DONE attempt={attempt} elapsed={time.time()-t0:.1f}s n_files={len(paths)}")
             return [Path(p) for p in paths if Path(p).exists()]
+        except _CONNECT_ERRORS as e:
+            # Host caído: marcar + fallar rápido (no reintentar). nrt-retry.yml
+            # reintenta la corrida ~30min después con el circuit-breaker reseteado.
+            if hosts:
+                _DOWN_DOWNLOAD_HOSTS.update(hosts)
+            _diag(f"DOWNLOAD_CONNFAIL attempt={attempt} elapsed={time.time()-t0:.1f}s "
+                  f"host_down={sorted(hosts) or 'unknown'} err={type(e).__name__}: {str(e)[:90]}")
+            last_err = e
+            break
         except Exception as e:
             _diag(f"DOWNLOAD_ERR attempt={attempt} elapsed={time.time()-t0:.1f}s err={type(e).__name__}: {str(e)[:120]}")
             last_err = e
