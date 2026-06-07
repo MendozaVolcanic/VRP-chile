@@ -104,9 +104,15 @@ EXPECTED_OPERATIONAL_FLAGS = {
     # 27012025326) + validacion (run 27022484062: Lascar 0.92x MIROVA, 0 FN
     # con piso 0.05). Activar nadir-fijo RESTAURA el clon literal.
     "ENABLE_NADIR_FIXED_PIXEL_AREA_MODIS": True,
-    # VIIRS NO se toca en S102 (frente posterior, su propio A/B). Guard
-    # anti-confusion MODIS/VIIRS: este flag debe seguir False.
-    "ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS": False,
+    # S103 (A45): nadir-fijo VIIRS adoptado (espejo de MODIS S102). Mismo drift
+    # off-nadir (factor lineal cap 2x en VIIRS, scan_geometry.viirs_pixel_areas);
+    # calibracion S14 (a_pix_mode=nadir_fijo) confirma ambos sensores VIIRS. A/B
+    # 3-way (runs 27069747395 + 27079762282, design doc 2026-06-06 §5bis): la
+    # hipotesis "ctxpeak=parche sec^3" fue REFUTADA (nadir-SIN-ctx 2.43x peor) ->
+    # se adopta nadir + se MANTIENE ctxpeak (mecanismos ortogonales A66). Global
+    # VIIRS375 1.95->0.78x, VIIRS750 1.63->0.80x, 0 FN VIIRS375. Tag defensivo:
+    # pre-s103-nadir-fixed-viirs.
+    "ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS": True,
 }
 
 
@@ -136,6 +142,7 @@ def test_profile_constants_match_yaml_paths(yaml_raw):
         "ENABLE_DNTI_DUAL_ROI": "enable_dnti_dual_roi",
         "ENABLE_VENT_PATH": "enable_vent_path",
         "ENABLE_NADIR_FIXED_PIXEL_AREA_MODIS": "enable_nadir_fixed_pixel_area_modis",
+        "ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS": "enable_nadir_fixed_pixel_area_viirs",
     }
     for const, ykey in const_to_yaml.items():
         assert ykey in paths, f"{ykey} missing from YAML paths"
