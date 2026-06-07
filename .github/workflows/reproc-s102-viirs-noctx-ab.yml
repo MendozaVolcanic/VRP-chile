@@ -1,0 +1,69 @@
+name: S102 A/B 3er brazo nadir VIIRS + ctxpeak OFF (11 Tier A)
+
+# 3er brazo del A/B VIIRS: perfil _viirs_nadir_noctx_ab (nadir VIIRS ON + ctxpeak OFF).
+# Aísla si ctxpeak era un parche del drift sec³ (ver design doc 2026-06-06). Misma
+# ventana que el A/B nadir+ctxpeak (abr-may) para comparación 3-way. Artifacts, NO
+# commitea (A47). A43 Norway: "on": quoted.
+
+"on":
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-01"
+      end:
+        description: "End date YYYY-MM-DD inclusive"
+        required: true
+        default: "2026-05-31"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        volcano:
+          - Lascar
+          - PuyehueCordonCaulle
+          - Tupungatito
+          - Chaiten
+          - Villarrica
+          - Llaima
+          - PlanchonPeteroa
+          - Copahue
+          - Isluga
+          - Lastarria
+          - NevadosDeChillan
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps (pyhdf for MODIS, h5py for VIIRS)
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reprocess viirs-noctx-AB / ${{ matrix.volcano }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 290
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _viirs_nadir_noctx_ab \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+      - name: Upload JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: viirs-noctx-ab-${{ matrix.volcano }}
+          path: data/_viirs_nadir_noctx_ab/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7
