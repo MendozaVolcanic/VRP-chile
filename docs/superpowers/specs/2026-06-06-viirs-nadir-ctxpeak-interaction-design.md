@@ -44,6 +44,25 @@ nadir igual en los 3 brazos. Comparación 3-way (mismo script extendido):
 - **Si arm2 undershoot también (<0.7)** → el coeficiente/método tiene otro sesgo;
   NO adoptar, investigar WOOSTER vs Test1 antes (frente nuevo).
 
+## 5bis. VEREDICTO (run 27079762282, parcial 8/11 pero DECISIVO) — 2026-06-07
+Resultado 3-way VIIRS375 global: base 2.08 → nadir+ctx **0.78** → **nadir-SIN-ctx 2.43**.
+Quitar ctxpeak EMPEORA (Tupun 0.73→13.77, Villarrica 0.94→8.32, Llaima 1.02→21.85).
+→ **Cae en el caso 2 (arm2 >1.4)**: ctxpeak NO era parche del sec³ — cura el anillo
+nival del Test1 integrado (mecanismo distinto). **Hipótesis central REFUTADA** por datos
+(A62). Láscar 0.66(ctx)≈0.70(no-ctx): el undershoot leve es del área nadir misma, NO
+doble corrección; dentro de tolerancia 0.7-1.4, mejora enorme desde 1.28.
+
+**DECISIÓN**: adoptar nadir-fijo VIIRS + **MANTENER ctxpeak** (arm1, 0.76-0.78 global,
+0 FN VIIRS375). VIIRS750 glaciar residuo (Tupun/PP 16.6, Isluga 8.2) persiste = path D
+2ª palanca, frente aparte.
+
+**SECUENCIA recomendada (NO adoptado aún, S102)**: el hang de descarga del NRT (root
+cause confirmada esta sesión, fetch.py download_granules sin timeout de pared) hace que
+los reprocs históricos sean NO confiables AHORA (colgó 3/11 de este mismo arm-3). Por eso:
+1º arreglar el NRT download-timeout (tras confirmar con la instrumentación PR #362),
+2º recién entonces VIIRS nadir end-to-end (flip + reproc histórico confiable + promoción +
+R2/R3/R8), como MODIS. Adoptar antes = reproc parcial/sucio. A45 (tag+OK+TDD) pendiente.
+
 ## 6. Restricciones (A45 / no-revertir)
 - ctxpeak está adoptado en operacional (S100, paired A/B d_recall+0). Retirarlo es A45
   (tag + OK + TDD + reproc). Solo si arm2 lo justifica con datos.
