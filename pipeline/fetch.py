@@ -414,24 +414,45 @@ def search_granules(product_key: str, lat: float, lon: float,
     return []
 
 
+def _diag(msg: str) -> None:
+    """S102 — diagnostic boundary log (timestamped, flushed). print-only, sin
+    cambio de comportamiento. Sirve para ubicar EXACTAMENTE dónde se cuelga el
+    NRT cron cuando un job timeoutea a 50 min (hipótesis: earthaccess.download
+    sin timeout de pared). flush=True es crítico: el stdout debe llegar al log
+    de GitHub ANTES de que el timeout mate el proceso. Ver
+    docs/superpowers/specs (incidente NRT) + project_s102_estado."""
+    import time as _t
+    print(f"[diag {_t.strftime('%H:%M:%S', _t.gmtime())}Z] {msg}", flush=True)
+
+
 def download_granules(granules: list, dest_dir: Path) -> list[Path]:
     """Download a list of granules to dest_dir. Returns list of local file paths.
 
     H6 S22 retry+backoff: 3 intentos con waits 10s/30s/60s para mitigar
     fallos intermitentes red GitHub→NASA. Cada intento llama earthaccess.download
     completo; si parcialmente exitoso (algunos files OK), retorna lo que pudo.
+
+    S102 instrumentación: markers DOWNLOAD_START/DONE/ERR por intento. Si el log
+    muestra DOWNLOAD_START sin DOWNLOAD_DONE antes del kill a 50min, confirma que
+    earthaccess.download() se cuelga sin timeout de pared (root cause candidata).
     """
     import time
     dest_dir.mkdir(parents=True, exist_ok=True)
     delays = [0, 10, 30, 60]
     last_err = None
-    for delay in delays:
+    names = ",".join(str(g.get("umm", {}).get("GranuleUR", "?"))[:40] for g in granules) \
+        if all(hasattr(g, "get") for g in granules) else f"{len(granules)} items"
+    for attempt, delay in enumerate(delays):
         if delay:
             time.sleep(delay)
+        t0 = time.time()
+        _diag(f"DOWNLOAD_START attempt={attempt} n={len(granules)} dest={dest_dir.name} [{names}]")
         try:
             paths = earthaccess.download(granules, local_path=str(dest_dir))
+            _diag(f"DOWNLOAD_DONE attempt={attempt} elapsed={time.time()-t0:.1f}s n_files={len(paths)}")
             return [Path(p) for p in paths if Path(p).exists()]
         except Exception as e:
+            _diag(f"DOWNLOAD_ERR attempt={attempt} elapsed={time.time()-t0:.1f}s err={type(e).__name__}: {str(e)[:120]}")
             last_err = e
     raise last_err if last_err else RuntimeError("download failed")
 
@@ -485,7 +506,9 @@ def fetch_for_volcano(volcano: dict, date: datetime,
           "VIIRS_NOAA20":[l1b_path, geo_path],
         }
     """
+    _diag(f"AUTH_START volcano={volcano.get('name','?')} date={date:%Y-%m-%d}")
     auth()
+    _diag("AUTH_OK")
     lat, lon = volcano["lat"], volcano["lon"]
     radius = volcano.get("radius_km", 30)
     sensors = sensors or volcano.get("sensors", ["MODIS", "VIIRS"])
@@ -516,7 +539,9 @@ def fetch_for_volcano(volcano: dict, date: datetime,
 
     for platform, l1b_key, geo_key in all_platforms:
         try:
+            _diag(f"SEARCH_START {platform}")
             l1b_granules = search_granules(l1b_key, lat, lon, radius, date)
+            _diag(f"SEARCH_DONE {platform} n_l1b={len(l1b_granules)}")
             if not l1b_granules:
                 continue
 
