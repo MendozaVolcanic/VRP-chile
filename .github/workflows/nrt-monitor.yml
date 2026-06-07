@@ -5,7 +5,10 @@ name: NRT Monitor — alerta si fallan 3+ corridas
 # automático en el repo. Sin esto, una caída del cron solo se notaba viendo
 # que el dashboard se quedaba viejo — falta de alerta proactiva.
 
-on:
+# A43 (S103): key quoteada como "on" para evitar el "Norway problem" de YAML 1.1
+# (on/off/yes/no/true/false sin comillas parsean como booleano → HTTP 422 en
+# workflow_dispatch). Ver CLAUDE.md proyecto, sección GH Actions YAML 1.1.
+"on":
   schedule:
     # Corre cada 6 horas, offsetted (minuto 30) para no chocar con el cron principal (minuto 0).
     - cron: "30 */6 * * *"

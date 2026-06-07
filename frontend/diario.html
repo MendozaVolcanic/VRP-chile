@@ -339,6 +339,16 @@ function isDiffuseFieldArtifact(r, volcanoName) {
 function isThermalArtifact(r, volcanoName) {
   return isCirrusArtifact(r, volcanoName) || isDiffuseFieldArtifact(r, volcanoName);
 }
+// S89/S103 (S92 L5) — parseo UTC robusto, replicado de index.html. Los timestamps
+// datetime_utc "YYYY-MM-DD HH:MM" son UTC pero new Date() sin 'Z' los lee como hora
+// LOCAL del navegador → desfasa el corte de ventana varias horas en visores fuera de
+// UTC (Chile UTC-3/-4). Idempotente si el string ya trae 'Z' u offset.
+function parseUtcMs(s) {
+  if (s == null) return NaN;
+  let str = String(s).replace(" ", "T");
+  if (!/[zZ]$|[+-]\d\d:?\d\d$/.test(str)) str += "Z";
+  return new Date(str).getTime();
+}
 // VRP para DISPLAY (chart/stats): 0 si es artefacto térmico (no infla la escala).
 // (S93: el filtro VIIRS750→0 de F1 se revirtió — MIROVA sí publica VIIRS750.)
 function eqVrpDisplay(r, volcanoName) {
@@ -387,7 +397,7 @@ function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
   const ds = [];
   const cutoff = Date.now() - WINDOW_DAYS * 86400000;
   const recs = (jsonData?.records || []).filter(r => {
-    const t = new Date(r.datetime_utc).getTime();
+    const t = parseUtcMs(r.datetime_utc);
     return t >= cutoff && eqVrpDisplay(r, volcanoName) > 0;  // S92: excluir artefacto cirrus
   });
 
@@ -473,7 +483,7 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
   const cutoff = Date.now() - WINDOW_DAYS * 86400000;
   // S38: aplicar filtro post-S38 antes del filtro de ventana temporal.
   const baseRecs = applyS38Filter(jsonData?.records || []);
-  const recs = baseRecs.filter(r => new Date(r.datetime_utc).getTime() >= cutoff);
+  const recs = baseRecs.filter(r => parseUtcMs(r.datetime_utc) >= cutoff);
   const detRecs = recs.filter(r => eqVrpDisplay(r, volcanoName) > 0);  // S92: excluir cirrus
   const mirovaWindowed = mirovaForVolc.filter(r => {
     const t = new Date(r.dt).getTime();

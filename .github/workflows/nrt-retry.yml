@@ -15,7 +15,10 @@ name: NRT Retry (NASA recovery)
 #     pero no acumula runs infinitos porque sólo lo dispara el cron de su propio
 #     trigger schedule.
 
-on:
+# A43 (S103): key quoteada como "on" para evitar el "Norway problem" de YAML 1.1
+# (on/off/yes/no/true/false sin comillas parsean como booleano → HTTP 422 en
+# workflow_dispatch). Ver CLAUDE.md proyecto, sección GH Actions YAML 1.1.
+"on":
   schedule:
     - cron: '30 1-23/2 * * *'  # 01:30, 03:30, ..., 23:30 UTC (+30 min de nrt.yml)
   workflow_dispatch:

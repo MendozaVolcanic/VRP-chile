@@ -340,6 +340,16 @@ function isDiffuseFieldArtifact(r, innerKm = 10) {
 function isThermalArtifact(r, innerKm = 10) {
   return isCirrusArtifact(r, innerKm) || isDiffuseFieldArtifact(r, innerKm);
 }
+// S89/S103 (S92 L5) — parseo UTC robusto, replicado de index.html. Los timestamps
+// datetime_utc "YYYY-MM-DD HH:MM" son UTC pero new Date() sin 'Z' los lee como hora
+// LOCAL del navegador → desfasa el corte de ventana varias horas en visores fuera de
+// UTC (Chile UTC-3/-4). Idempotente si el string ya trae 'Z' u offset.
+function parseUtcMs(s) {
+  if (s == null) return NaN;
+  let str = String(s).replace(" ", "T");
+  if (!/[zZ]$|[+-]\d\d:?\d\d$/.test(str)) str += "Z";
+  return new Date(str).getTime();
+}
 // VRP para DISPLAY (VRP 48h, nivel de alerta, sparkline): 0 si es artefacto térmico
 // → no dispara una falsa alerta "Alta" por nube fría / campo difuso.
 // (S93: el filtro VIIRS750→0 de F1 se revirtió — MIROVA sí publica VIIRS750.)
@@ -353,7 +363,7 @@ function latestVRP(records, innerKm) {
   const cutoff = Date.now() - 48 * 3600000;
   let max = 0, ts = null;
   for (const r of records) {
-    const t = new Date(r.datetime_utc).getTime();
+    const t = parseUtcMs(r.datetime_utc);
     if (!Number.isFinite(t) || t < cutoff) continue;
     const v = eqVrpDisplay(r, innerKm);  // S92: excluir artefacto cirrus
     if (v > max) { max = v; ts = r.datetime_utc; }
@@ -464,7 +474,7 @@ function buildSparklineData(records, innerKm) {
   const bins = new Array(days).fill(0);
   const dayStart = Math.floor(t0 / ms) * ms;
   for (const r of records) {
-    const t = new Date(r.datetime_utc).getTime();
+    const t = parseUtcMs(r.datetime_utc);
     if (!Number.isFinite(t) || t < t0 || t > now) continue;
     const v = eqVrpDisplay(r, innerKm);  // S92: excluir artefacto cirrus del sparkline
     if (v <= 0) continue;
