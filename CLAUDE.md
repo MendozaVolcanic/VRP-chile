@@ -637,6 +637,47 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   regresión** que asegure la intención (ej. `get_detection_anchor` ancla al
   cráter en Tupun/PCC/PP) — falla si una consolidación lo revierte.
 
+- **A64. NRT timeout = hang de fetch a un host caído; circuit-breaker por host, no
+  solo por auth** (S102, incidente resuelto). El cron NRT fallaba ~50% desde 2026-06-04
+  por timeout 50min en vol aleatorio. Root cause (probado con instrumentación, run
+  27089474584): el host LANCE NRT `nrt3.modaps.eosdis.nasa.gov` da ConnectTimeout a
+  183s; `download_granules` reintentaba 4× por granule × N plataformas VIIRS NRT →
+  acumulaba >50min. El auth ya estaba blindado (probe S70-0, budget ≤22min) pero la
+  DESCARGA no. Fix (`pipeline/fetch.py`, #364): circuit-breaker por host — al 1er
+  ConnectTimeout/ConnectionError marcar el host caído PARA LA CORRIDA y saltar sus
+  descargas siguientes al instante (devuelve lo de LAADS). Errores genéricos
+  (ReadTimeout) conservan retries. Degrada con gracia (nunca peor que el hang). Patrón
+  análogo a `_probe_nasa_auth`. **How to apply**: cualquier blindaje de red NASA debe
+  cubrir AUTH **y** DOWNLOAD por separado; LANCE (`nrt3.modaps`) es flaky para fechas
+  recientes (Standard/LAADS no existe aún → cae a LANCE). Distinguir ConnectTimeout
+  (host caído, no reintentar) de ReadTimeout (transient, reintentar).
+
+- **A65. Instrumentación-primero para hangs de CI con timeout-kill** (S102, método
+  validado). Cuando un job de GH Actions timeoutea, GitHub NO flushea el stdout del
+  proceso al matarlo → los logs `--log-failed` solo muestran el cleanup, no dónde se
+  colgó. El argumento por eliminación (budgets acotados vs duración real) es fuerte pero
+  no definitivo. La prueba definitiva: agregar markers de borde **print-only con
+  `flush=True`** (timestamped) en las etapas (auth/search/download/process), mergear
+  (bajo riesgo), y la próxima falla muestra EXACTO dónde se cuelga (ej: `DOWNLOAD_START`
+  sin `DOWNLOAD_DONE`). S102: la instrumentación convirtió "download sin timeout" en el
+  diagnóstico preciso "LANCE host ConnectTimeout 183s × 4 retries × N granules". Vale 1
+  ciclo de cron; barato vs adivinar el fix.
+
+- **A66. nadir-fijo es el modo de área clon-literal de MIROVA para los 3 sensores; un
+  parche de magnitud previo puede estar parcheando el mismo drift** (S102). El sec³(θ)
+  off-nadir activo era un DRIFT; MIROVA resamplea a grid 1km de área constante
+  (calibración S14 `experiments/21_results.json` a_pix_mode=nadir_fijo para MODIS+
+  VIIRS750+VIIRS375). El WOOSTER_COEFF ya es para área nadir → activar nadir-fijo
+  RESTAURA la calibración, NO la rompe. **MODIS adoptado S102** (#354: PCC 342→60MW,
+  Lascar 0.92×, 0 FN con piso 0.05). **VIIRS decidido S102** (adoptar + mantener
+  ctxpeak). Lección de método clave: sospeché que ctxpeak (adoptado S100 para curar
+  Tupun 18.9×) era un parche redundante del sec³ → lo testée con un **A/B de 3 brazos
+  con criterio pre-registrado** (base / nadir+ctx / nadir-SIN-ctx). Los datos REFUTARON
+  la hipótesis (nadir-sin-ctx = 2.43× peor; ctxpeak cura el anillo nival del Test1, otro
+  mecanismo). **How to apply**: antes de apilar dos correcciones de magnitud, aislar con
+  un A/B de 3 brazos + criterio pre-registrado (evita confirmation bias, A62). El sec³
+  afecta el ÁREA; ctxpeak/Test1 afecta el FONDO del ROI — son ortogonales.
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
