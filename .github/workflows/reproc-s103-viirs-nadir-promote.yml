@@ -1,0 +1,66 @@
+name: S103 reproc promoción nadir-fijo VIIRS (11 Tier A)
+
+# Reprocesa los 11 Tier A con el perfil _s103_viirs_nadir_promote (hereda
+# mirova_equivalent YA flipeado: nadir-fijo VIIRS + ctxpeak + pisos VIIRS) sobre
+# la historia completa (2026-01-29 .. 2026-06-07), en 2 chunks. Artifacts (NO
+# commitea a main, A47): el merge a data/mirova_equivalent se hace LOCAL con guard
+# anti-underfetch (merge_promote_viirs_nadir.py, SOLO records VIIRS; MODIS queda
+# byte-idéntico, ya nadir desde S102). MODIS igual corre (sensores operacionales)
+# y necesita pyhdf (GH Linux). A43 Norway: "on": quoted.
+
+"on":
+  workflow_dispatch:
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        volcano:
+          - Lascar
+          - PuyehueCordonCaulle
+          - Tupungatito
+          - Chaiten
+          - Villarrica
+          - Llaima
+          - PlanchonPeteroa
+          - Copahue
+          - Isluga
+          - Lastarria
+          - NevadosDeChillan
+        chunk:
+          - { start: "2026-01-29", end: "2026-03-31" }
+          - { start: "2026-04-01", end: "2026-06-07" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps (pyhdf for MODIS)
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reprocess viirs-nadir-promote / ${{ matrix.volcano }} / ${{ matrix.chunk.start }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 290
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _s103_viirs_nadir_promote \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ matrix.chunk.start }} \
+            --end ${{ matrix.chunk.end }} \
+            --overwrite
+      - name: Upload JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: s103viirspromo-${{ matrix.volcano }}-${{ matrix.chunk.start }}
+          path: data/_s103_viirs_nadir_promote/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7

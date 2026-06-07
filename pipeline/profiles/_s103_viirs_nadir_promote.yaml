@@ -1,0 +1,10 @@
+# S103 — Promoción nadir-fijo VIIRS. Hereda mirova_equivalent (YA flipeado en main
+# tras #368: enable_nadir_fixed_pixel_area_viirs:true; ctxpeak y pisos VIIRS intactos;
+# nadir MODIS ya ON desde S102) => reproc con la config operacional EXACTA, en un
+# data_subdir aislado para el merge con guard anti-underfetch (#345). Solo se
+# promueven los records VIIRS (375+750); MODIS queda byte-idéntico (ya nadir desde
+# S102). MODIS igual se procesa (sensores operacionales todos ON) pero su salida no
+# se mergea. MODIS necesita pyhdf (GH Linux). NO toca operacional durante el reproc (A47).
+extends: mirova_equivalent
+output:
+  data_subdir: _s103_viirs_nadir_promote
