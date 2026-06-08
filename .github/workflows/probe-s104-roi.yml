@@ -1,0 +1,36 @@
+name: Probe S104 ROI Villarrica
+
+# A43: "on" quoted (Norway problem). One-off diagnóstico S104: baja 1 granule
+# VIIRS I-band de Villarrica (noche ALERTA 05-17) y vuelca el campo crudo de BT
+# I04 para confirmar si el calor real está en el cráter o corrido (offset NW).
+# NO toca pipeline operacional. Archivar tras usar.
+"on":
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml matplotlib
+      - name: Run ROI probe
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        run: |
+          mkdir -p experiments/_s104_roi_probe/out
+          python experiments/_s104_roi_probe/probe_villarrica_roi.py | tee experiments/_s104_roi_probe/out/report.txt
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s104-roi-probe
+          path: experiments/_s104_roi_probe/out/
