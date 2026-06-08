@@ -678,6 +678,38 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   un A/B de 3 brazos + criterio pre-registrado (evita confirmation bias, A62). El sec³
   afecta el ÁREA; ctxpeak/Test1 afecta el FONDO del ROI — son ortogonales.
 
+- **A67. nadir-fijo VIIRS ADOPTADO+PROMOVIDO; el área nadir afecta también la DETECCIÓN
+  Test1, no solo la magnitud** (S103). Ciclo A45 completo: tag `pre-s103-nadir-fixed-viirs`
+  → TDD (GR2 + `test_nadir_fixed_vrp_integration_s103`) → flip #368 → reproc (runs
+  27098410956 + re-reproc PCC/Tupun 27140784929) → promoción #373 → R3 (VIIRS375 global
+  2.27×→**0.78×**, VIIRS750 1.59×→**0.80×**, 0 FN nuevos VIIRS375) → R8 live. Curados
+  Villarrica 18.3→1.0×, Tupun 11.2→0.71×, PCC 2.4→0.95×. **Hallazgo de método**: el área
+  es multiplicador en la integral de radiancia del Test1 → reducirla (nadir) **baja la
+  energía integrada y puede hacer que el Test1 DEJE de disparar** para señales sub-píxel
+  borderline (Isluga VIIRS750: 2 detecciones glaciar 5.0/2.56 MW → 0; eran sobre-detecciones
+  vs MIROVA 0.19/0.25). Efecto colateral: el nadir **reduce la cantidad de detecciones**
+  (Villarrica 636→602) y el footprint de anomaly_pixels (los JSON se achican). **How to
+  apply**: al adoptar un cambio de área/escala, NO asumir "solo magnitud" — verificar FN a
+  nivel record (triggered_test1) y distinguir efecto-magnitud de efecto-detección. Detalle:
+  `docs/MIROVA_DIVERGENCES.md` S103 + `docs/S103_VIIRS_NADIR_PROMOTE_RESULTS.md`.
+
+- **A68. "Sobre-detección" reportada por el experto: separar display de over-detección real
+  ANTES de tocar pipeline** (S103, re-auditoría PCC/Villarrica pedida por Nicolás). Cuando
+  Nicolás marca "hay demasiado" en el mapa (A62 = señal), el cruce de 4 ejes (display, espacial
+  A61, cruce-MIROVA, código) reveló: (1) los **núcleos son calor real** (t_max−t_bg +10K, 0%
+  más fríos que el fondo — REFUTÉ el claim de un subagente de "70% píxel frío"; miró el footprint
+  crudo, no el record); (2) PCC "lejos del cráter" (mediana 10.5km) **NO es error** — es el
+  lacolito Cordón Caulle offset real (~7km, 707km²); el `inner_radius_km=20` lo pinta todo
+  "summit-rojo" → parece cráter denso (problema de DISPLAY); (3) la sobre-detección vs MIROVA
+  es **SISTÉMICA** (3-241× en los 11; PCC 5×/Villarrica 37× son medios, Copahue/Llaima 238-241×
+  peores) = **recall real sub-umbral** (A54, MIROVA lo llama RUTINA) + drift D9/A23 path-D, NO
+  un bug. Loader sano. **How to apply**: ante "sobre-detección", (a) verificá los núcleos a
+  nivel record (no el footprint); (b) chequeá si `inner_radius_km` grande o la ventana
+  acumulada del mapa amplifican el visual; (c) cruzá si es localizado o sistémico; (d) el proxy
+  cirrus `t_bg<270K` está **contaminado por altitud** (Láscar 5592m marca 85%) — NO usar solo.
+  Doc: `docs/AUDIT_S103_OVERDETECTION_PCC_VILLARRICA.md`. Acciones derivadas (futuras): display
+  PCC (extensión naranja, no summit) + D9/A23 co-validación path-D.
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
