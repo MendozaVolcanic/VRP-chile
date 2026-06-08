@@ -1139,3 +1139,36 @@ Cuando S62+S63 completen:
 - Controles intactos (Lascar 0.86→0.83); vols no-Test1 sin cambio (matched = path eruption)
 
 **Alternativas descartadas** (S99): pixfilter (41 FN, recall 59→22); kernel-bg local (refutado S62/A19, empeora glaciar denso 10→18×); eq16 lava lake (anula sub-píxel, 192 Villarrica→0); contextual puro (31 FN cráter embebido). ctxpeak es el ÚNICO que cura sin destruir recall. Flag previo (default OFF) ya en código; adoptado a `mirova_equivalent.yaml` S100. Tag: `pre-s100-test1-magnitude-adopt`.
+
+
+---
+
+## S103 — nadir-fijo VIIRS adoptado + FN Isluga 750 (interacción Test1)
+
+**Adopción** (espejo de nadir-fijo MODIS S102, A45): `enable_nadir_fixed_pixel_area_viirs:true`
+en `mirova_equivalent`. VIIRS arrastra el mismo drift off-nadir que MODIS — el factor lineal
+1-2× de `scan_geometry.viirs_pixel_areas` infla la magnitud VRP de los vols off-nadir del sur.
+La calibración S14 (`a_pix_mode=nadir_fijo`) confirma que el WOOSTER_COEFF de los 2 sensores
+VIIRS ya es para área nadir → activar nadir-fijo RESTAURA el clon, no rompe calibración.
+Decisión A/B 3-way pre-registrada (runs 27069747395 + 27079762282, design doc 2026-06-06 §5bis):
+adoptar nadir + **MANTENER ctxpeak** (hipótesis "ctxpeak=parche sec³" REFUTADA por datos:
+nadir-sin-ctxpeak = 2.43× peor; mecanismos ortogonales A66 — área vs fondo del ROI).
+
+**Resultado R3** (reproc histórico runs 27098410956 + 27140784929, `audit_viirs_nadir_promote_r3.py`):
+VIIRS375 global **2.27×→0.78×**, VIIRS750 **1.59×→0.80×**, **0 FN nuevos VIIRS375**. Curados
+PCC 2.38→0.95×, Tupun 11.19→0.71×, Villarrica 18.3→1.0×, Chaitén 6.9→1.2×, PP 7.3→1.1×.
+MODIS byte-idéntico (promoción solo-VIIRS, `merge_promote_viirs_nadir.py`). Tag: `pre-s103-nadir-fixed-viirs`.
+
+**Divergencia/costo aceptado (Nicolás S103): Isluga VIIRS750 +2 FN** (2026-03-09, 2026-04-07).
+Mecanismo investigado (records crudos): el área nadir **no solo escala la magnitud — también
+reduce la energía integrada del Test1** (el área es multiplicador en la integral de la radiancia
+del ROI). Para 2 señales sub-píxel glaciar borderline, la energía cae bajo el umbral de disparo
+→ `triggered_test1` True→False, la detección desaparece. Eran **sobre-detecciones pre-nadir**
+(pc.vrp 5.0 y 2.56 MW vs MIROVA 0.19/0.25 MW) = el residuo glaciar Test1 de VIIRS750 (=§2 path D,
+frente aparte). VIIRS375 quedó con 0 FN. Aceptado: 2 señales tiny glaciar VIIRS750 vs la cura
+masiva de magnitud + reducción de sobre-detección en los 11.
+
+**Nota (corrige registros previos)**: el nadir-fijo **reduce la CANTIDAD de detecciones**, no
+solo la magnitud (vía el Test1): Villarrica 636→602, Isluga 550→535, Llaima 557→540. Es decir,
+ayuda parcialmente a la sobre-detección. El residuo glaciar VIIRS750 (Tupun/PP 16.6×, Isluga 4.76×)
+**persiste** y se ataca en §2 (portar ctxpeak a VIIRS750 + co-validación path D, A45).
