@@ -744,6 +744,24 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   (secrets válidos, el NRT funciona ahí). NUNCA manipular credenciales de Nicolás vos
   mismo (acción prohibida). Pendiente: el .netrc local necesita actualización (Nicolás).
 
+- **A72. Fix de ALGORITMO sobre fix de DISPLAY — si hay algo que arreglar del
+  algoritmo, se prefiere eso antes que solo arreglar el display** (S104, principio
+  vinculante de Nicolás). El discriminante es ¿el dato es REAL o ARTEFACTO?:
+  - **Artefacto** (no-volcánico, MIROVA NO lo entrega, lo generamos NOSOTROS — ej.
+    campo difuso MODIS, FP topográfico, cirrus path-D): la raíz es **no generarlo en
+    la detección** (pipeline, A45). Ocultarlo en el frontend es un parche que esconde
+    el problema — el dato sigue en los JSON/datos crudos. Va contra "No Laziness".
+  - **Señal REAL sub-umbral** (cat-b: lava lake, fumarolas, lacolito — MIROVA no
+    PUBLICA pero existe físicamente, A54): acá el display SÍ es legítimo para
+    distinguir/atenuar SIN borrar del pipeline (borrarla destruiría el valor agregado
+    VRP Chile). El display no esconde un error, separa señal real de la alerta.
+  - **How to apply**: antes de proponer un fix de display, clasificar el dato
+    (artefacto vs cat-b real, marco A54/A68). Si es artefacto → atacar la raíz en el
+    pipeline. Si es real → display ok. El error S104 (proponer ocultar el MODIS difuso
+    en display cuando es artefacto que no deberíamos generar) lo atrapó Nicolás. Nota:
+    los display-suppression previos de artefactos (ej. cirrus S90) son candidatos a
+    migrar a fix de algoritmo cuando se reabra ese frente.
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
