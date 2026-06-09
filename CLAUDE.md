@@ -710,6 +710,40 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   Doc: `docs/AUDIT_S103_OVERDETECTION_PCC_VILLARRICA.md`. Acciones derivadas (futuras): display
   PCC (extensión naranja, no summit) + D9/A23 co-validación path-D.
 
+- **A69. El gradiente topográfico nocturno contamina los paths que usan MIR ABSOLUTO;
+  MIROVA es inmune porque detecta por NTI** (S104, causa raíz del sesgo espacial de los
+  nevados, confirmada con 2 probes ground truth). En volcanes con cumbre nevada (cráter
+  frío ~272K) y valle tibio de baja altitud (~281K), el campo crudo de BT MIR (I04) está
+  dominado por el gradiente de altitud, NO por actividad volcánica. Cualquier método que
+  mida "exceso sobre el fondo" en **radiancia/BT MIR absoluta** (nuestro `Test1 integrado`,
+  `compute_test1_mir`) capta el valle tibio como anomalía y sesga la detección/centroide
+  ~1 km al N del cráter. **El NTI = (L_MIR−L_TIR)/(L_MIR+L_TIR) cancela la topografía**
+  (MIR y TIR suben juntos sobre terreno tibio → la diferencia normalizada se anula);
+  verificado: (I04−I05) es plano (mediana 0.01-0.14K) donde I04 tiene gradiente de 15K.
+  La lava sí rompe la simetría (sub-pixel brilla en MIR, no en TIR). **How to apply**: al
+  auditar o diseñar un path de detección, preguntá SIEMPRE ¿usa MIR absoluto o NTI? Los
+  MIR-absolutos son vulnerables a falsos positivos topográficos en los nevados. (Matiza A54
+  para nevados: parte del "extra" sobre MIROVA son FP topográficos, no solo cat-b real.)
+  Lastarria NO entra (su offset N es el campo fumarólico Lazufre, real — dato de campo).
+  Ground truth + rediseño (Test1 integra NTI, núcleo `compute_test1_nti` #379):
+  `docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md`.
+
+- **A70. Auditar el offset DIRECCIONAL con MEDIANA, no la distancia con media** (S104,
+  refuerzo A61). La distancia mediana al cráter (Villarrica 1.87 km) OCULTÓ un sesgo
+  direccional sistemático (todas las detecciones al N). Y la MEDIA del offset (1836 m con
+  std 7 km) me engañó por outliers lejanos — la mediana robusta contó la historia real.
+  **How to apply**: computá el offset medio (Δlat, Δlon) + la distribución de rumbos
+  (N/E/S/W), no solo |dist|; usá MEDIANA, no media; y desglosá por sensor y por path
+  (Test1 vs dNTI vs cluster tienen sesgos espaciales distintos — en S104 el Test1 estaba
+  a 1.45 km y el cluster a 4.63 km del cráter).
+
+- **A71. Probes de red con reintentos pueden BLOQUEAR la cuenta Earthdata** (S104,
+  incidente): el `.netrc` local tenía credenciales inválidas; `auth()` + earthaccess
+  reintentan → la cuenta se bloqueó 10 min. Verificá la validez ANTES de un camino con
+  reintentos; si las credenciales locales son dudosas, corré el probe en GitHub Actions
+  (secrets válidos, el NRT funciona ahí). NUNCA manipular credenciales de Nicolás vos
+  mismo (acción prohibida). Pendiente: el .netrc local necesita actualización (Nicolás).
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
