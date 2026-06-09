@@ -1,0 +1,16 @@
+# VRP-Chile — profile: _test1_nti_integral (S104 V2 A/B)
+#
+# Brazo NTI-INTEGRAL del A/B del rediseño V2: el Test1 integra exceso de NTI
+# (MIR−TIR) en vez de MIR absoluto → cancela el gradiente topográfico de los
+# nevados. Se compara contra el baseline MIR (= brazo disabled del A/B V1,
+# data/_test1_nti_covalidation_disabled, idéntico a mirova_equivalent).
+# Diseño: docs/superpowers/specs/2026-06-09-test1-nti-covalidation-design.md §V2.
+# k_sigma = default (TEST1_K_SIGMA); a calibrar si el recall cae (SNR bajo lava débil).
+extends: mirova_equivalent
+profile: _test1_nti_integral
+description: >
+  A/B S104 V2: Test1 integra exceso de NTI (no MIR). Realineamiento MIROVA.
+paths:
+  enable_test1_nti_integral: true
+output:
+  data_subdir: _test1_nti_integral

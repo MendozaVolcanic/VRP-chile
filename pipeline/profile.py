@@ -267,6 +267,14 @@ ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK: bool = bool(_p.get("enable_test1_contextual_k
 # docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md + docs/superpowers/specs/2026-06-09-*.
 ENABLE_TEST1_NTI_COVALIDATION: bool = bool(_p.get("enable_test1_nti_covalidation", False))
 
+# S104 V2 — el Test1 integra exceso de NTI (MIR−TIR) en vez de MIR absoluto. Cancela
+# el gradiente topográfico de los nevados (V1 per-píxel refutada por A/B porque apaga
+# el Test1; V2 valida por ground truth de 2 probes). Captura lava débil (NTI elevado
+# en cráter, sin firma per-píxel) y rechaza el valle tibio (NTI plano). El VRP usa
+# L_bg_mir sobre los píxeles NTI-elegidos. Default OFF (A/B pendiente, k_sigma a
+# calibrar por SNR bajo). Ver docs/superpowers/specs/2026-06-09-*.md §V2.
+ENABLE_TEST1_NTI_INTEGRAL: bool = bool(_p.get("enable_test1_nti_integral", False))
+
 # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene aplicado a
 # la mask final combinada (post-OR de todos los paths) antes de calcular
 # n_anomalous_pixels, cluster_hotspots y vrp_mw.

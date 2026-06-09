@@ -89,3 +89,18 @@ def test_shape_mismatch_raises():
     bt_mir, bt_tir, lat, lon = _weak_lava()
     with pytest.raises(ValueError):
         compute_test1_nti(bt_mir, bt_tir[:3, :3], lat, lon, VLAT, VLON, LMIR, LTIR)
+
+
+# 5. Devuelve L_bg_mir (mediana de radiancia MIR del anillo) para que el caller
+#    compute el VRP Wooster sobre los píxeles NTI-elegidos (V2.5 del diseño).
+def test_returns_l_bg_mir_for_vrp():
+    bt_mir, bt_tir, lat, lon = _weak_lava()
+    r = compute_test1_nti(bt_mir, bt_tir, lat, lon, VLAT, VLON, LMIR, LTIR)
+    assert "L_bg_mir" in r
+    assert r["L_bg_mir"] is not None and r["L_bg_mir"] > 0
+    # debe coincidir con la mediana de la radiancia MIR del anillo 1-3 km
+    from pipeline.scan_geometry import haversine_km
+    dist = haversine_km(VLAT, VLON, lat, lon)
+    ring = (dist > 1.0) & (dist <= 3.0) & np.isfinite(bt_mir)
+    expected = float(np.median(bt_to_radiance_um(bt_mir, LMIR)[ring]))
+    assert r["L_bg_mir"] == pytest.approx(expected, rel=1e-6)
