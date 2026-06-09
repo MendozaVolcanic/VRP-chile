@@ -98,7 +98,8 @@ def compute_test1_nti(
         "delta_nti_integrated": 0.0, "sigma_delta_nti": 0.0,
         "k_sigma_observed": 0.0, "mask_roi": roi_mask,
         "mask_contributing": np.zeros_like(bt_mir, dtype=bool),
-        "centroid_lat": None, "centroid_lon": None, "reason": "",
+        "centroid_lat": None, "centroid_lon": None,
+        "L_bg_mir": None, "reason": "",
     }
     if n_bg < min_bg_pixels:
         empty["reason"] = f"insufficient_bg_pixels (n_bg={n_bg}<{min_bg_pixels})"
@@ -111,6 +112,12 @@ def compute_test1_nti(
     L5 = bt_to_radiance_um(bt_tir, lambda_tir_um)
     denom = L4 + L5
     nti = np.where(denom > 0, (L4 - L5) / denom, np.nan)
+
+    # L_bg MIR (mediana de radiancia MIR del anillo) — para que el caller compute el
+    # VRP Wooster sobre los píxeles NTI-elegidos (V2.5: el VRP usa MIR, no NTI).
+    L4_bg_vals = L4[bg_mask]
+    L4_bg_vals = L4_bg_vals[np.isfinite(L4_bg_vals)]
+    L_bg_mir = float(np.median(L4_bg_vals)) if L4_bg_vals.size else float("nan")
 
     nti_bg_vals = nti[bg_mask]
     nti_bg_vals = nti_bg_vals[np.isfinite(nti_bg_vals)]
@@ -155,7 +162,8 @@ def compute_test1_nti(
         "delta_nti_integrated": delta_nti, "sigma_delta_nti": sigma_delta_nti,
         "k_sigma_observed": delta_nti / sigma_delta_nti if sigma_delta_nti > 0 else 0.0,
         "mask_roi": roi_mask, "mask_contributing": mask_contributing,
-        "centroid_lat": centroid_lat, "centroid_lon": centroid_lon, "reason": "",
+        "centroid_lat": centroid_lat, "centroid_lon": centroid_lon,
+        "L_bg_mir": L_bg_mir, "reason": "",
     }
 
 

@@ -140,6 +140,7 @@ from pipeline.profile import (
     ENABLE_TEST1_CONTEXTUAL_FILTER,
     ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK,
     ENABLE_TEST1_NTI_COVALIDATION,
+    ENABLE_TEST1_NTI_INTEGRAL,
 )
 from .single_pixel_mode import apply_single_pixel_mode
 from .test1_spatial_core import spatial_core_filter  # S99 Candidato B
@@ -157,7 +158,7 @@ from .detection_context import (
     compute_bg_stats,
     first_pass_tests_2_and_3,
 )
-from .test1_integrated import compute_test1_mir
+from .test1_integrated import compute_test1_mir, compute_test1_nti
 
 
 def _sensor_label_from_filename(filename: str) -> str:
@@ -816,24 +817,37 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             test1_L_bg_local = None  # S26 para recompute VRP test1-only
             if (ENABLE_TEST1_PATH
                     and vent_lat is not None and vent_lon is not None):
-                # S104 — co-validación NTI: solo los píxeles que pasaron un path NTI
-                # relativo (Path C nti_rel ∪ Path D dNTI contextual) cuentan para el
-                # Test1, excluyendo el terreno tibio topográfico (NTI plano). Coppola
-                # 2024 Eq.13. Gateado por flag; default None = comportamiento legacy.
-                test1_nti_mask = None
-                if ENABLE_TEST1_NTI_COVALIDATION:
-                    test1_nti_mask = np.asarray(nti_rel_hot, dtype=bool) | np.asarray(
-                        dnti_ctx_hot, dtype=bool)
-                test1_res = compute_test1_mir(
-                    bt=bt, lat=lat, lon=lon,
-                    vent_lat=vent_lat, vent_lon=vent_lon,
-                    lambda_um=I04_LAMBDA,
-                    roi_km=TEST1_ROI_KM,
-                    inner_ring_km=TEST1_INNER_RING_KM,
-                    k_sigma=TEST1_K_SIGMA,
-                    mir_relative=TEST1_MIR_RELATIVE,
-                    nti_hot_mask=test1_nti_mask,
-                )
+                if ENABLE_TEST1_NTI_INTEGRAL:
+                    # S104 V2 — Test1 integra exceso de NTI (MIR−TIR), no MIR absoluto.
+                    # Cancela el gradiente topográfico de los nevados (valle tibio = NTI
+                    # plano → no dispara; lava débil = NTI elevado en cráter → dispara
+                    # ahí). El VRP usa L_bg_mir sobre los píxeles NTI-elegidos.
+                    # docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md.
+                    test1_res = compute_test1_nti(
+                        bt_mir=bt, bt_tir=bt5, lat=lat, lon=lon,
+                        vent_lat=vent_lat, vent_lon=vent_lon,
+                        lambda_mir_um=I04_LAMBDA, lambda_tir_um=11.450,
+                        roi_km=TEST1_ROI_KM,
+                        inner_ring_km=TEST1_INNER_RING_KM,
+                        k_sigma=TEST1_K_SIGMA,
+                    )
+                else:
+                    # S104 V1 (REFUTADO por A/B, flag default OFF) — co-validación NTI
+                    # per-píxel: apaga el Test1 (señal difusa sin firma per-píxel).
+                    test1_nti_mask = None
+                    if ENABLE_TEST1_NTI_COVALIDATION:
+                        test1_nti_mask = np.asarray(nti_rel_hot, dtype=bool) | np.asarray(
+                            dnti_ctx_hot, dtype=bool)
+                    test1_res = compute_test1_mir(
+                        bt=bt, lat=lat, lon=lon,
+                        vent_lat=vent_lat, vent_lon=vent_lon,
+                        lambda_um=I04_LAMBDA,
+                        roi_km=TEST1_ROI_KM,
+                        inner_ring_km=TEST1_INNER_RING_KM,
+                        k_sigma=TEST1_K_SIGMA,
+                        mir_relative=TEST1_MIR_RELATIVE,
+                        nti_hot_mask=test1_nti_mask,
+                    )
                 test1_triggered = test1_res["triggered"]
                 test1_k_obs = test1_res["k_sigma_observed"]
                 if test1_triggered:
@@ -841,10 +855,12 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     test1_n_contrib = test1_res["n_contributing"]
                     test1_centroid_lat = test1_res.get("centroid_lat")
                     test1_centroid_lon = test1_res.get("centroid_lon")
-                    # L_bg local del ring 1-3km, NO el anillo global 5-25km.
-                    # En Villarrica el global está MÁS caliente (lago lateral)
-                    # que el cráter (glaciar). Usar global → todos los ΔL clip a 0.
-                    test1_L_bg_local = test1_res.get("L_bg")
+                    # L_bg local del ring 1-3km para recompute del VRP Wooster. En modo
+                    # NTI (V2) el VRP usa L_bg_mir (radiancia MIR del anillo) sobre los
+                    # píxeles NTI-elegidos; en modo MIR usa L_bg.
+                    test1_L_bg_local = (test1_res.get("L_bg_mir")
+                                        if ENABLE_TEST1_NTI_INTEGRAL
+                                        else test1_res.get("L_bg"))
 
             # S37 H_D8_5 — path ETI cuadrático scene-wide VIIRS I04/I05.
             # I04 (3.74 μm MIR) + I05 (11.45 μm TIR) entran al cómputo de
