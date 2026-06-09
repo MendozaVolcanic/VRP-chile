@@ -48,6 +48,117 @@ def bt_to_radiance_um(bt_K: np.ndarray, lambda_um: float) -> np.ndarray:
     return out
 
 
+def compute_test1_nti(
+    bt_mir: np.ndarray,
+    bt_tir: np.ndarray,
+    lat: np.ndarray,
+    lon: np.ndarray,
+    vent_lat: float,
+    vent_lon: float,
+    lambda_mir_um: float,
+    lambda_tir_um: float,
+    roi_km: float = 3.0,
+    inner_ring_km: float = 1.0,
+    k_sigma: float = 3.0,
+    nti_relative: float = 0.0,
+    min_bg_pixels: int = 20,
+) -> dict:
+    """Test 1 integrado sobre exceso de NTI (S104 V2, realineamiento MIROVA).
+
+    A diferencia de `compute_test1_mir` (integra radiancia MIR absoluta, sesgable por
+    gradiente topográfico), integra el exceso del índice normalizado
+    NTI = (L_MIR − L_TIR)/(L_MIR + L_TIR), que cancela la topografía (MIR y TIR suben
+    juntos sobre terreno tibio). Detecta lava sub-pixel débil (NTI levemente elevado y
+    concentrado en el cráter) y rechaza el valle tibio (NTI plano). Ground truth:
+    docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md (2 probes Actions).
+
+    Returns dict análogo a compute_test1_mir con `delta_nti_integrated` en vez de
+    `delta_L_integrated`, más `triggered`, `n_contributing`, `mask_contributing`,
+    `centroid_lat/lon`, `nti_bg`, `sigma_bg`, `k_sigma_observed`, `reason`.
+    """
+    bt_mir = np.asarray(bt_mir, dtype=np.float64)
+    bt_tir = np.asarray(bt_tir, dtype=np.float64)
+    lat = np.asarray(lat, dtype=np.float64)
+    lon = np.asarray(lon, dtype=np.float64)
+    for name, arr in (("bt_tir", bt_tir), ("lat", lat), ("lon", lon)):
+        if arr.shape != bt_mir.shape:
+            raise ValueError(f"shape mismatch: {name}={arr.shape} bt_mir={bt_mir.shape}")
+
+    dist = haversine_km(vent_lat, vent_lon, lat, lon)
+    valid = np.isfinite(bt_mir) & np.isfinite(bt_tir)
+    roi_mask = (dist <= roi_km) & valid
+    bg_mask = (dist > inner_ring_km) & (dist <= roi_km) & valid
+    n_roi = int(np.sum(roi_mask))
+    n_bg = int(np.sum(bg_mask))
+
+    empty = {
+        "triggered": False, "abs_criterion": False, "rel_criterion": False,
+        "n_roi": n_roi, "n_bg": n_bg, "n_contributing": 0,
+        "nti_bg": float("nan"), "sigma_bg": float("nan"),
+        "delta_nti_integrated": 0.0, "sigma_delta_nti": 0.0,
+        "k_sigma_observed": 0.0, "mask_roi": roi_mask,
+        "mask_contributing": np.zeros_like(bt_mir, dtype=bool),
+        "centroid_lat": None, "centroid_lon": None, "reason": "",
+    }
+    if n_bg < min_bg_pixels:
+        empty["reason"] = f"insufficient_bg_pixels (n_bg={n_bg}<{min_bg_pixels})"
+        return empty
+    if n_roi == 0:
+        empty["reason"] = "empty_roi"
+        return empty
+
+    L4 = bt_to_radiance_um(bt_mir, lambda_mir_um)
+    L5 = bt_to_radiance_um(bt_tir, lambda_tir_um)
+    denom = L4 + L5
+    nti = np.where(denom > 0, (L4 - L5) / denom, np.nan)
+
+    nti_bg_vals = nti[bg_mask]
+    nti_bg_vals = nti_bg_vals[np.isfinite(nti_bg_vals)]
+    if nti_bg_vals.size < min_bg_pixels:
+        empty["reason"] = "insufficient_finite_nti_bg"
+        return empty
+    nti_bg = float(np.median(nti_bg_vals))
+    sigma_bg = 1.4826 * float(np.median(np.abs(nti_bg_vals - nti_bg)))
+    if sigma_bg <= 0:
+        empty["reason"] = "zero_sigma_bg"
+        return empty
+
+    nti_roi = nti[roi_mask]
+    excess_roi = np.where(np.isfinite(nti_roi), np.maximum(0.0, nti_roi - nti_bg), 0.0)
+    delta_nti = float(np.sum(excess_roi))
+    sigma_delta_nti = sigma_bg * math.sqrt(n_roi)
+
+    contributing_in_roi = excess_roi > 0
+    n_contributing = int(np.sum(contributing_in_roi))
+    abs_criterion = delta_nti > k_sigma * sigma_delta_nti
+    rel_criterion = delta_nti > nti_relative * n_roi if nti_relative > 0 else True
+    triggered = bool(abs_criterion and rel_criterion)
+
+    mask_contributing = np.zeros_like(bt_mir, dtype=bool)
+    roi_idx = np.where(roi_mask)
+    for k in range(len(roi_idx[0])):
+        if contributing_in_roi[k]:
+            mask_contributing[roi_idx[0][k], roi_idx[1][k]] = True
+
+    centroid_lat = centroid_lon = None
+    if n_contributing > 0:
+        w = excess_roi[contributing_in_roi]
+        wsum = float(np.sum(w))
+        if wsum > 0:
+            centroid_lat = float(np.sum(lat[mask_contributing] * w) / wsum)
+            centroid_lon = float(np.sum(lon[mask_contributing] * w) / wsum)
+
+    return {
+        "triggered": triggered, "abs_criterion": bool(abs_criterion),
+        "rel_criterion": bool(rel_criterion), "n_roi": n_roi, "n_bg": n_bg,
+        "n_contributing": n_contributing, "nti_bg": nti_bg, "sigma_bg": sigma_bg,
+        "delta_nti_integrated": delta_nti, "sigma_delta_nti": sigma_delta_nti,
+        "k_sigma_observed": delta_nti / sigma_delta_nti if sigma_delta_nti > 0 else 0.0,
+        "mask_roi": roi_mask, "mask_contributing": mask_contributing,
+        "centroid_lat": centroid_lat, "centroid_lon": centroid_lon, "reason": "",
+    }
+
+
 def compute_test1_mir(
     bt: np.ndarray,
     lat: np.ndarray,

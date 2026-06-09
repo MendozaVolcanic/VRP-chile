@@ -1,4 +1,74 @@
-# Design — Co-validación NTI del Test1 integrado (realineamiento con MIROVA)
+# ⚠️ V1 REFUTADA POR A/B (run 27186289487) — ver V2 abajo
+
+**La co-validación per-píxel (V1, abajo) se REFUTÓ:** apaga el Test1 siempre
+(triggered_test1→0) porque el Test1 capta señal difusa SIN firma per-píxel. Ver
+`docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md` §"A/B del fix". **Reemplazada por V2.**
+
+---
+
+# Design V2 — Test1 integra exceso de NTI (no de MIR) — REALINEAMIENTO MIROVA
+
+**Fecha**: 2026-06-09 (S104) · Estado: DISEÑO validado por ground truth ·
+Gate: A45 + TDD + A/B.
+
+## V2.1 — Ground truth que valida el enfoque (2 probes Actions)
+- **Lava FUERTE** (05-22, MIROVA 0.55 MW): NTI **17.4σ @ 0.19 km** (cráter), firma
+  per-píxel. El dNTI ya la capta. PNG `out_nti/nti_VIIRS_NOAA20.png`: campo NTI plano
+  + punto de lava en el cráter.
+- **Lava DÉBIL** (04-09, MIROVA 0.11 MW): NTI **1.8σ @ 0.13 km** (cráter), **0 píxeles
+  per-píxel**. El dNTI la PIERDE → el Test1 integral es NECESARIO (sin él = FN, lo más
+  grave en monitoreo). Pero el NTI está **levemente elevado y centrado en el cráter**.
+- **Topografía** (05-17, sin lava): NTI **plano** en todo el ROI (mediana 0.01-0.14 K en
+  la diferencia MIR−TIR), aunque el MIR tiene gradiente de 15 K.
+
+**Conclusión**: integrar el exceso de **NTI** (no MIR) suma la leve elevación de la lava
+débil concentrada en el cráter y rechaza el valle tibio (NTI plano). El centroide
+ponderado por exceso de NTI ancla al cráter. Es lo que MIROVA hace de fondo.
+
+## V2.2 — Mecanismo
+`compute_test1_nti(bt_mir, bt_tir, lat, lon, vent, λ_mir, λ_tir, ...)`:
+- NTI = (L_MIR − L_TIR)/(L_MIR + L_TIR) con radiancias Planck (igual que el resto del
+  pipeline / Coppola).
+- NTI_bg = mediana del anillo (inner_ring..roi); σ_bg = MAD·1.4826 sobre el anillo.
+- excess_nti = max(0, NTI − NTI_bg) sobre el ROI.
+- ΔNTI_integrado = Σ excess_nti; σ propagado = σ_bg·√N_roi.
+- Trigger si ΔNTI_integrado > k_sigma·σ_prop (criterio absoluto) [y opcional criterio
+  relativo]. **k_sigma a CALIBRAR en el A/B** (riesgo: SNR bajo de la lava débil, 1.8σ).
+- Centroide ponderado por excess_nti → ancla al cráter.
+
+Flag `enable_test1_nti_integral` (reemplaza el modo MIR cuando ON). Default OFF.
+Mantiene `compute_test1_mir` (MIR) como fallback/baseline para el A/B.
+
+## V2.3 — Riesgos
+- **SNR bajo de la lava débil** (R-principal): ΔNTI de 0.0094 (1.8σ) por píxel. Integrar
+  sobre el ROI puede acumular ruido NTI. Mitiga: k_sigma calibrado + el ROI del Test1 es
+  chico (3 km) → pocos píxeles, menos ruido acumulado. El A/B mide recall (0 FN noches
+  ALERTA) y precision (offset→cráter, %<3km↑).
+- **Necesita banda TIR** (I05): el caller debe pasar bt5. Disponible (paths NTI ya la usan).
+- Scope: VIIRS375 primero (A37).
+
+## V2.5 — Punto abierto del caller: el VRP (descubierto al implementar, S104)
+El núcleo `compute_test1_nti` (detección + posición) está implementado y TDD-verde
+(tests/test_test1_nti_integral.py, 687 suite passed). PERO el caller
+(process_viirs.py:818) usa `test1_res["L_bg"]` (radiancia MIR del anillo) para
+recomputar el VRP del Test1 (línea 837, S26). El modo NTI NO devuelve L_bg de MIR.
+**El VRP necesita la radiancia MIR de los píxeles contribuyentes**, no el NTI. Opciones:
+- (a) `compute_test1_nti` devuelve también `L_bg_mir` (mediana MIR del anillo) +
+  `mask_contributing` → el caller computa el VRP con la radiancia MIR de esos píxeles
+  (Wooster) igual que ahora, solo que los píxeles los elige el NTI.
+- (b) separar detección (NTI) de cuantificación (MIR) en dos pasos explícitos.
+Recomendado (a): un solo cambio, reusa el VRP existente sobre los píxeles NTI-elegidos.
+**No implementar el caller apurado** (lección S104: V1 se refutó por apurar; A49 return).
+El caller + perfiles A/B + workflow = primer tarea S105.
+
+## V2.4 — A/B criterios (vs baseline MIR y vs disabled)
+0 FN en noches ALERTA (Villarrica/Tupun/Llaima) + offset N→0 + %<3km sube + Lascar/
+Lastarria control sin cambio + ground truth de muestra. **3 brazos**: MIR (actual),
+NTI-integral (nuevo), off.
+
+---
+
+# Design V1 (REFUTADA) — Co-validación NTI per-píxel del Test1 integrado
 
 **Fecha**: 2026-06-09 · **Sesión**: S104 · **Estado**: DISEÑO (no implementado) ·
 **Gate**: A45 (pipeline operacional) + brainstorming (este doc) + TDD + A/B + R2/R3/R8.

@@ -189,6 +189,42 @@ con **fondo local**, y/o **co-validar la posición del Test1 con NTI** (un píxe
 cuenta si su NTI también destaca). Eso mataría el sesgo topográfico sin perder el
 recall sub-pixel.
 
+## ⭐⭐⭐ A/B del fix co-validación NTI (run 27186289487) — REFUTA el fix per-píxel
+
+El fix implementado (gate NTI per-píxel, flag OFF) se midió en A/B (5 vols × 2 brazos
+× 2 chunks, 130 d). **Veredicto: NO adoptar — el gate apaga el Test1 y empeora la
+posición.** Hallazgos (con mediana robusta, A70):
+
+| vol | offN_med dis→en | dist_med dis→en | %<3km dis→en | triggered_test1 dis→en |
+|---|---|---|---|---|
+| Villarrica | 748→781 | 1.6→4.2 | 89→27% | 462→**0** |
+| Tupungatito | 1047→79 | 1.8→3.1 | 90→44% | 465→**0** |
+| Llaima | 1097→446 | 1.6→4.5 | 87→21% | — |
+
+1. **El gate apaga el Test1 SIEMPRE** (triggered_test1 → 0). Razón física: el Test1
+   se diseñó (S25) para captar señal **difusa sub-pixel sin firma per-píxel**. Exigir
+   que sus píxeles pasen dNTI le pide lo único que por diseño no tiene → lo mata. NO es
+   co-validación, es desactivación. Los ~388 records Test1 de Villarrica caen a
+   source=None (434) o al path eruption disperso.
+2. **El Test1 NO era el principal culpable** — está MEJOR anclado que el cluster. En las
+   pasadas con ambos (n=75 Villarrica): **Test1 centroid offN 691m, dist 1.45km** vs
+   **cluster hotspot offN 1962m, dist 4.63km**. El Test1 (ROI 3km) resiste mejor el
+   gradiente que el cluster (ROI 25km, capta outliers lejanos). Apagar el Test1 deja el
+   cluster, que es PEOR → la concentración (%<3km) se desploma.
+3. **Recall vs MIROVA preservado** (8/8 Villarrica, 75/75 Tupun, 1/1 Llaima) — las
+   noches ALERTA tienen otros paths. Pero se pierden las detecciones Test1-only (el
+   "extra" cat-b/topográfico, no separable sin ground truth).
+4. **Tupun "mejoró" por casualidad per-vol** (su cluster resultó más centrado), no por
+   una mejora sistemática del método.
+
+**Conclusión**: el diagnóstico físico (gradiente topográfico sesga la detección,
+afecta AMBOS paths) es correcto, pero (a) el Test1 no es el único culpable, (b) la
+co-validación per-píxel es el enfoque equivocado. **El camino correcto** (si el probe
+NTI confirma firma de lava integrada): el Test1 debería **integrar (L_MIR − L_TIR)**
+en vez de L_MIR sola — cancela la topografía a nivel INTEGRAL sin exigir píxeles dNTI,
+preservando la sensibilidad sub-pixel. Eso es lo que MIROVA hace de fondo. Flag OFF;
+nada operacional tocado. El A/B cumplió su función: refutar antes de adoptar.
+
 ## Acciones (NO implementadas — requieren A45 + brainstorming + TDD)
 1. **Fix Capa 2 (raíz) = atacar D9/A23 en su eje espacial.** El prototipo offline
    descartó los fixes de "anclar al foco" (el píxel detectado mismo está corrido,
