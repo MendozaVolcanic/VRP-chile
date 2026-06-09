@@ -1,0 +1,15 @@
+# VRP-Chile — profile: _test1_nti_covalidation_disabled (S104 A/B)
+#
+# Brazo DISABLED (baseline) del A/B de co-validación NTI del Test1. Idéntico a
+# mirova_equivalent con enable_test1_nti_covalidation: false explícito y
+# data_subdir aislado, para comparar limpio contra el brazo enabled sin
+# contaminar el operacional (patrón S24/S25, A47 — cada brazo escribe a su
+# propio data_subdir).
+extends: mirova_equivalent
+profile: _test1_nti_covalidation_disabled
+description: >
+  A/B S104 brazo DISABLED (baseline): Test1 sin co-validación NTI (comportamiento actual).
+paths:
+  enable_test1_nti_covalidation: false
+output:
+  data_subdir: _test1_nti_covalidation_disabled

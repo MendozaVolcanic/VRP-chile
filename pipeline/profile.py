@@ -256,6 +256,17 @@ ENABLE_TEST1_CONTEXTUAL_FILTER: bool = bool(_p.get("enable_test1_contextual_filt
 # Requiere enable_test1_contextual_filter=True. Default OFF.
 ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK: bool = bool(_p.get("enable_test1_contextual_keep_peak", False))
 
+# S104 — co-validación NTI del Test1 integrado (realineamiento MIROVA). El Test1
+# integra exceso de radiancia MIR ABSOLUTA → en volcanes nevados el terreno tibio
+# de baja altitud (gradiente topográfico, NTI plano) supera la mediana del anillo,
+# dispara el Test1 y arrastra el centroide ~9 km al N del cráter (Tupun/Villarrica/
+# Llaima). Con este flag, solo los píxeles que también pasaron un path NTI relativo
+# (Path C nti_rel ∪ Path D dNTI contextual) cuentan para disparar/integrar/posicionar
+# (Coppola 2024 Eq.13). El valle tibio queda fuera; el lava lake real (que pasa dNTI)
+# se conserva → recall protegido. Default OFF (A/B pendiente). Ver
+# docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md + docs/superpowers/specs/2026-06-09-*.
+ENABLE_TEST1_NTI_COVALIDATION: bool = bool(_p.get("enable_test1_nti_covalidation", False))
+
 # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene aplicado a
 # la mask final combinada (post-OR de todos los paths) antes de calcular
 # n_anomalous_pixels, cluster_hotspots y vrp_mw.
