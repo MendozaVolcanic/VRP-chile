@@ -1,0 +1,35 @@
+name: Probe S104 NTI Villarrica (noche ALERTA)
+
+# A43 "on" quoted. One-off diagnóstico S104: vuelca el campo NTI (MIR−TIR) de una
+# noche de ALERTA REAL de Villarrica (05-22) para confirmar si la lava produce
+# firma espectral integrada en el cráter. NO toca pipeline. Archivar tras usar.
+"on":
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml matplotlib
+      - name: Run NTI probe
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        run: |
+          mkdir -p experiments/_s104_roi_probe/out_nti
+          python experiments/_s104_roi_probe/probe_villarrica_nti.py | tee experiments/_s104_roi_probe/out_nti/report.txt
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s104-nti-probe
+          path: experiments/_s104_roi_probe/out_nti/
