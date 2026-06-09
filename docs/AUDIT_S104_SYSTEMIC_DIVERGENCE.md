@@ -81,14 +81,20 @@ falta de dato). Esto REFUERZA: la sobre-detección VIIRS375 (cat-b real) y el MO
 noche y MIROVA no publicó ALERTA", NO "MIROVA la clasificó RUTINA".
 
 ## Acciones priorizadas (NINGUNA implementada — A45/brainstorming)
-| # | Frente | Qué | Riesgo | Impacto |
+**Regla A72 (Nicolás): fix de ALGORITMO sobre display.** Lo que es artefacto (MIROVA no
+lo entrega, lo generamos nosotros) se ataca en la DETECCIÓN, no se oculta en el frontend.
+
+| # | Frente | Naturaleza | Fix RAÍZ (algoritmo) | Impacto |
 |---|---|---|---|---|
-| 1 | **MODIS difuso** | cap D9 no atrapa escena tibia (77%) → discriminante display tibio o co-validación VIIRS375 | bajo (display) / medio (pipeline) | alto — el grueso del "resto" |
-| 2 | **VIIRS750 disperso** | bajar a peso bajo / display secundario (no aporta recall) | bajo (display) | medio |
-| 3 | **NdC sub-detección** | detección diurna MODIS (S90 flag OFF) | medio (A45) | alto (FN) |
-| 4 | **Cirrus D9/A23** | discriminante mejor que t_bg (contaminado por altitud A68) | medio | medio |
-| 5 | **Test1-NTI nevados** | V2 en A/B (run 27223821692) | — | en curso |
+| 1 | **MODIS difuso** | **artefacto** (~0% real) | pipeline: que el path-D no genere el campo difuso — co-validación VIIRS375 cercano / compacidad espacial / t_max absoluto. NO display. | alto — el "resto" universal |
+| 2 | **NdC sub-detección** | **FN** (señal real perdida) | pipeline: detección diurna MODIS (S90) o bajar umbral. A45 | alto (FN = lo más grave) |
+| 3 | **Cirrus path-D (D9/A23)** | **artefacto** | pipeline: discriminante mejor que t_bg (contaminado por altitud A68) — co-validación BT/NTI | medio |
+| 4 | **VIIRS750 disperso** | mis-localización | pipeline: replicar Test1-NTI a V750 (process_viirs_mod.py) / mejorar localización; evaluar si aporta. NO solo "ocultar" | medio |
+| 5 | **Test1-NTI nevados** | sesgo topográfico | V2 en A/B (run 27223821692) — algoritmo | en curso |
 
 **El instinto de Nicolás es correcto**: hay divergencia sistémica real. La mayor y más
-universal es el **MODIS difuso** (artefacto, no real), seguida de **VIIRS750 disperso**
-(redundante). La sobre-detección VIIRS375 es mayormente cat-b real (valor agregado, no bug).
+universal es el **MODIS difuso** (artefacto). Por A72, TODOS estos frentes son de
+ALGORITMO (no display) porque son artefactos o sub-detección, no señal cat-b real. El
+display-suppression solo aplicaría a la sobre-detección VIIRS375 (cat-b real) — pero ahí
+NO se borra ni oculta, es el valor agregado. (Corrección S104: mi encuadre inicial de
+"MODIS difuso en display" era erróneo — A72.)
