@@ -5,6 +5,11 @@ name: Probe S104 NTI Villarrica (noche ALERTA)
 # firma espectral integrada en el cráter. NO toca pipeline. Archivar tras usar.
 "on":
   workflow_dispatch:
+    inputs:
+      date:
+        description: "Noche a sondear (YYYY-MM-DD)"
+        required: false
+        default: "2026-05-22"
 
 jobs:
   probe:
@@ -24,6 +29,7 @@ jobs:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          PROBE_DATE: ${{ github.event.inputs.date }}
         run: |
           mkdir -p experiments/_s104_roi_probe/out_nti
           python experiments/_s104_roi_probe/probe_villarrica_nti.py | tee experiments/_s104_roi_probe/out_nti/report.txt
