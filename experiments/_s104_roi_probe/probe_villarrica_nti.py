@@ -7,7 +7,7 @@ co-validar per-píxel (que lo apaga, ver A/B run 27186289487).
 Corre en GitHub Actions (secrets EARTHDATA). Vuelca: campo NTI, integral de
 (L_MIR − L_TIR) sobre ROI 3km vs el resto, dónde está el NTI máx, PNG del NTI.
 """
-import sys, io, math
+import sys, io, math, os
 from pathlib import Path
 from datetime import datetime
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
@@ -23,8 +23,9 @@ VLAT, VLON = -39.420227, -71.939876
 HERE = Path(__file__).parent
 DEST = HERE / "granules_nti"; DEST.mkdir(exist_ok=True)
 OUT = HERE / "out_nti"; OUT.mkdir(exist_ok=True)
-DATE = datetime(2026, 5, 22)
+DATE = datetime.strptime(os.environ.get("PROBE_DATE", "2026-05-22"), "%Y-%m-%d")
 I04_L, I05_L = 3.74, 11.45
+print(f"PROBE_DATE = {DATE.date()}", flush=True)
 
 
 def gname(g):
