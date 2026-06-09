@@ -139,6 +139,7 @@ from pipeline.profile import (
     TEST1_LAVA_LAKE_EPS,
     ENABLE_TEST1_CONTEXTUAL_FILTER,
     ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK,
+    ENABLE_TEST1_NTI_COVALIDATION,
 )
 from .single_pixel_mode import apply_single_pixel_mode
 from .test1_spatial_core import spatial_core_filter  # S99 Candidato B
@@ -815,6 +816,14 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             test1_L_bg_local = None  # S26 para recompute VRP test1-only
             if (ENABLE_TEST1_PATH
                     and vent_lat is not None and vent_lon is not None):
+                # S104 — co-validación NTI: solo los píxeles que pasaron un path NTI
+                # relativo (Path C nti_rel ∪ Path D dNTI contextual) cuentan para el
+                # Test1, excluyendo el terreno tibio topográfico (NTI plano). Coppola
+                # 2024 Eq.13. Gateado por flag; default None = comportamiento legacy.
+                test1_nti_mask = None
+                if ENABLE_TEST1_NTI_COVALIDATION:
+                    test1_nti_mask = np.asarray(nti_rel_hot, dtype=bool) | np.asarray(
+                        dnti_ctx_hot, dtype=bool)
                 test1_res = compute_test1_mir(
                     bt=bt, lat=lat, lon=lon,
                     vent_lat=vent_lat, vent_lon=vent_lon,
@@ -823,6 +832,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     inner_ring_km=TEST1_INNER_RING_KM,
                     k_sigma=TEST1_K_SIGMA,
                     mir_relative=TEST1_MIR_RELATIVE,
+                    nti_hot_mask=test1_nti_mask,
                 )
                 test1_triggered = test1_res["triggered"]
                 test1_k_obs = test1_res["k_sigma_observed"]

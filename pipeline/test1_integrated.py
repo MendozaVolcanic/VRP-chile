@@ -60,6 +60,7 @@ def compute_test1_mir(
     k_sigma: float = 3.0,
     mir_relative: float = 0.02,
     min_bg_pixels: int = 20,
+    nti_hot_mask: "np.ndarray | None" = None,
 ) -> dict:
     """Coppola 2015 Test 1 integrated-ROI on a MIR brightness temperature array.
 
@@ -73,6 +74,12 @@ def compute_test1_mir(
         k_sigma: absolute trigger multiplier (Coppola default 3.0).
         mir_relative: relative trigger threshold per-pixel (Coppola default 0.02 = 2%).
         min_bg_pixels: minimum valid pixels in bg ring to compute statistics.
+        nti_hot_mask: optional 2-D bool array (bt shape). When provided (S104
+            co-validación NTI, Coppola 2024 Eq.13), only pixels that ALSO passed an
+            NTI-relative path count toward delta_L, n_contributing and the centroid.
+            Excludes warm low-altitude terrain (topographic gradient, NTI-flat) that
+            would otherwise inflate the Test1 and drag the centroid off the crater in
+            snow-capped volcanoes. None → legacy behavior (no gate).
 
     Returns:
         dict with keys:
@@ -91,6 +98,12 @@ def compute_test1_mir(
     lon = np.asarray(lon, dtype=np.float64)
     if bt.shape != lat.shape or bt.shape != lon.shape:
         raise ValueError(f"shape mismatch: bt={bt.shape} lat={lat.shape} lon={lon.shape}")
+    if nti_hot_mask is not None:
+        nti_hot_mask = np.asarray(nti_hot_mask, dtype=bool)
+        if nti_hot_mask.shape != bt.shape:
+            raise ValueError(
+                f"nti_hot_mask shape mismatch: {nti_hot_mask.shape} != bt {bt.shape}"
+            )
 
     dist = haversine_km(vent_lat, vent_lon, lat, lon)
     valid = np.isfinite(bt)
@@ -139,6 +152,14 @@ def compute_test1_mir(
 
     L_roi = L[roi_mask]
     excess_roi = np.maximum(0.0, L_roi - L_bg)
+    if nti_hot_mask is not None:
+        # Co-validación NTI (Coppola 2024 Eq.13, S104): solo los píxeles que también
+        # pasaron un path NTI relativo cuentan para disparar/integrar/posicionar. El
+        # terreno tibio de baja altitud (gradiente topográfico) tiene NTI plano →
+        # queda fuera de la máscara → su exceso MIR no infla el Test1 ni arrastra el
+        # centroide. Ver docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md.
+        nti_roi = nti_hot_mask[roi_mask]
+        excess_roi = np.where(nti_roi, excess_roi, 0.0)
     delta_L = float(np.sum(excess_roi))
     sigma_delta_L = sigma_bg * math.sqrt(n_roi)
 

@@ -87,6 +87,108 @@ Chaiten 0.06→0.09 · Copahue 0.76→0.58 · Isluga 0.96→0.74 · Lascar 0.15�
 Lastarria 1.06→1.11 · Llaima 1.11→1.12 · **NdC 0.83→0.06** · PP 0.23→0.23 ·
 PCC 0.33→0.36 · Tupun 1.18→1.21 · **Villarrica 0.74→1.07**.
 
+## ⭐ GROUND TRUTH — campo crudo de BT I04 (reproc instrumentado, Actions run 27173150500)
+Probe `experiments/_s104_roi_probe/` sobre 2 granules VIIRS I-band de Villarrica
+2026-05-17 (SNPP 05:24, NOAA21 04:54). Carga el campo CRUDO de BT I04 con las
+funciones del pipeline (`read_viirs_l1b/geo`) — sin paths de detección (no-A48).
+
+**Resultado contundente (ambos satélites coinciden):**
+- BT_max de todo el ROI = **281.5 K @ ~9 km al NORTE** del cráter.
+- BT_max dentro de 2 km del cráter = **272 K** → el cráter está **9 K MÁS FRÍO**
+  que el terreno de afuera.
+- Imágenes `out/roi_*.png`: el cráter (vent_lat) cae en el centro de la zona
+  **más fría** de la escena (el **cono nevado/glaciar**, ~266-270 K); el terreno
+  tibio (~278-281 K) está en las **laderas bajas y valles** alrededor.
+
+**Reformulación de la causa raíz (la definitiva):**
+- En estas pasadas **el lava lake sub-pixel NO produce señal térmica detectable**
+  — el píxel de 375 m sobre la cumbre está dominado por el **glaciar frío**. El
+  campo crudo nocturno está gobernado por el **gradiente topográfico de altitud**
+  (cumbre nevada fría ↔ valle tibio), NO por actividad volcánica.
+- Los métodos de detección **relativos/integrales** (dNTI 8-vec, Test1 con fondo =
+  mediana del ROI) miden "exceso sobre el fondo". El terreno tibio del valle (281 K)
+  tiene exceso sobre la mediana del ROI (274 K) → **se detecta como anomalía** y
+  arrastra el centroide hacia el terreno bajo (N). El lava lake real (cráter frío)
+  no destaca.
+- → Una fracción de las detecciones VIIRS375 de Villarrica (y probablemente
+  Tupun/Lastarria/Llaima, los nevados) son **falsos positivos topográficos**, NO
+  el lava lake. Esto MATIZA el marco A54 ("95% de FP = realidad física"): acá hay
+  realidad física TÉRMICA (valle tibio) pero NO realidad VOLCÁNICA. El instinto de
+  Nicolás ("hay demasiadas detecciones") era correcto en lo esencial.
+- Por qué Láscar (árido) NO se afecta: sin gradiente topográfico nieve/valle, el
+  fondo del ROI es homogéneo → el foco (cuando lo hay) destaca limpio.
+
+**Implicación para el fix (D9/A23, eje físico real):** el `background` del ROI
+(mediana global) NO modela el gradiente topográfico → mezcla cumbre fría + valle
+tibio en una sola mediana, y todo lo que supera esa mediana "es anomalía". El fix
+correcto ataca el FONDO: un background que capture la estructura topográfica
+(kernel local / bandas de altitud / co-validación con BT absoluto), de modo que un
+píxel solo sea anómalo respecto a su entorno topográfico inmediato, no respecto a
+la mezcla cumbre+valle. Conecta con `ENABLE_LOCAL_KERNEL_BG` (process_viirs.py:1106,
+ya intentado per-vol; Tupun lo refutó por ring glaciar, A19) — hay que rediseñarlo
+con este ground truth.
+
+**Caveat honesto:** 2 pasadas de 1 noche (05-17); la ALERTA MIROVA de esa fecha
+fue otra pasada (05:48 NOAA20, que dio 0 px válidos en el ROI = NaN/cobertura). El
+MECANISMO está demostrado; cuantificar qué fracción de detecciones es topográfica
+vs lava-lake-real requiere más pasadas (incluyendo noches con señal fuerte real).
+
+## ⭐⭐ CAUSA RAÍZ CONFIRMADA — triple auditoría (papers + código + tests previos)
+
+**La pregunta de Nicolás: ¿por qué MIROVA NO se sesga y nosotros sí?**
+Respuesta (Coppola 2016a SP426.5 + Coppola 2024, leídos en `documentacion/`):
+
+**MIROVA detecta sobre NTI = índice normalizado (L_MIR − L_TIR)/(L_MIR + L_TIR).**
+El NTI **cancela el gradiente topográfico por construcción**: el terreno tibio del
+valle sube MIR *y* TIR juntos → el cociente normalizado queda estable. El paper lo
+dice literal: el NTI "saca la variabilidad natural cualquiera sea el tipo de
+superficie" (sp426_5.txt l.367-373) y dETI "independiza de topografía y clima
+local". El "Test 1" REAL de Coppola 2016a es **NTI_pix > K1** (umbral de índice,
+l.300), NO una integral de radiancia MIR. La suma integrada (Coppola 2024 Eq.13)
+suma el exceso ΔL de píxeles **ya detectados por NTI/dNTI**, con fondo **local al
+cluster** (media de los píxeles que rodean el cluster activo, l.357-359). Verificado
+con datos: (I04−I05) en el ROI es **plano (mediana 0.01–0.14 K)** mientras I04 solo
+tiene gradiente de 15 K → la diferencia MIR−TIR mata la topografía.
+
+**Nuestro "Test1 integrado" (`pipeline/test1_integrated.py`) NO es el de MIROVA — es
+un drift:**
+- Integra **exceso de radiancia MIR ABSOLUTA (I04)**, no NTI (`test1_integrated.py:140-142`).
+- Background = **mediana del anillo 5–25 km** (mezcla cumbre fría + valle tibio),
+  no fondo local al cluster (líneas 98, 133).
+- **Centroide ponderado por el exceso de radiancia MIR** (líneas 162-167) → el valle
+  tibio (281 K) supera la mediana del anillo (274 K), aporta "exceso" y **arrastra el
+  centroide hacia el terreno bajo**.
+- En Villarrica/Tupun/Llaima (señal sub-pixel, `triggered_test1` domina,
+  `final_hotspot_source="test1"`) este es el path que posiciona la detección → sesgo
+  topográfico directo.
+
+**Los paths NTI son inmunes** (auditoría código): Path B `n_nti_path` (NTI>K1), Path C
+`n_nti_rel_path` (NTI>bg+3σ), Path D `n_dnti_ctx_path` (dNTI 8-vec) usan NTI → cancelan
+topografía. Path A `n_bt_path` usa MIR absoluto pero está **OFF** por default. **El
+culpable es el Test1 integrado MIR.**
+
+**Por qué Lastarria NO entra acá** (dato de campo de Nicolás): su offset Norte es el
+**campo fumarólico real** (Lazufre), NO artefacto topográfico. Tupun/Villarrica/Llaima
+SÍ son artefacto. El fix no debe tocar Lastarria.
+
+**Conexión con trabajo previo:**
+- ctxpeak (S100, `S100_TEST1_FULL_AB.md`) curó la MAGNITUD del Test1 (Tupun 18.9→2.46×)
+  pero **no la posición/detección** — el centroide sigue ponderado por MIR absoluto.
+- kernel-bg local (A12/A19, `F66_BG_KERNEL_LOCAL_DEEP_S78.md`): ON Villarrica, OFF
+  Tupun/Llaima (glaciar lo empeora). Solo afecta magnitud, no posición.
+- D9/A23 (`MIROVA_DIVERGENCES.md`): path D cirrus, eje relacionado pero distinto.
+- **MISSION.md 3-preguntas**: ¿MIROVA integra MIR crudo del ROID? NO → el Test1 MIR es
+  un drift a realinear (NTI-based o co-validación), NO a parchar más.
+
+**Por qué el Test1 integrado existe igual**: se introdujo (S13/S25) para curar
+Villarrica recall 0% (MIROVA ve el lava lake integrando el ROI, nosotros no lo
+veíamos pixel-level). El problema que resuelve es REAL (sensibilidad sub-pixel). El
+defecto es la IMPLEMENTACIÓN (MIR absoluto + fondo anillo + centroide MIR). El fix
+raíz: realinear con Coppola 2016a/2024 — integrar el exceso de píxeles **NTI-detectados**
+con **fondo local**, y/o **co-validar la posición del Test1 con NTI** (un píxel solo
+cuenta si su NTI también destaca). Eso mataría el sesgo topográfico sin perder el
+recall sub-pixel.
+
 ## Acciones (NO implementadas — requieren A45 + brainstorming + TDD)
 1. **Fix Capa 2 (raíz) = atacar D9/A23 en su eje espacial.** El prototipo offline
    descartó los fixes de "anclar al foco" (el píxel detectado mismo está corrido,
