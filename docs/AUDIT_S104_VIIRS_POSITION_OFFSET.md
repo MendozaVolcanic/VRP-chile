@@ -252,3 +252,59 @@ nada operacional tocado. El A/B cumplió su función: refutar antes de adoptar.
 - **A6x NADIR-POSICIÓN**: ampliar A67 — un cambio de área/escala puede mover la
   POSICIÓN del hotspot vía composición de detecciones; auditar posición además de
   magnitud/FN.
+
+## ⭐⭐⭐⭐ A/B V2 (Test1-NTI integral, run 27223821692) — S105: efecto MARGINAL en posición
+
+Análisis de los 3 nevados (controles Lascar/Lastarria aún corriendo al momento).
+Brazo NTI-integral vs baseline MIR (= disabled del A/B V1). Mediana robusta (A70),
+VIIRS375. Script: `experiments/_s104_roi_probe/audit_ab_test1_nti_v2.py`.
+
+| vol | offN MIR→NTI | dist MIR→NTI | %<3km | trig_t1 | recall ALERTA |
+|---|---|---|---|---|---|
+| Tupungatito | 1047→972 m | 1.50→1.42 km | 96→96 | 465→465 | 75/75 ✓ |
+| Villarrica | 748→693 m | 1.56→1.52 km | 90→91 | 462→469 | 8/11 ✓ |
+| Llaima | 1097→1051 m | 1.64→1.55 km | 87→88 | 428→446 | 1/1 ✓ |
+
+Aislando solo los records `source=test1` (donde el Test1 posiciona): de los que se
+mueven >100 m, la mayoría se ACERCA al cráter (Tupun 50/6, Villarrica 50/17, Llaima
+52/22) y el VRP mediano NO cambia (0.069-0.096 MW idéntico). **Dirección correcta,
+magnitud insuficiente**: la mediana de distancia baja solo ~50 m de los ~1000-1500 m
+de sesgo.
+
+**Diagnóstico físico (por qué tan poco)**: el NTI cancela el gradiente topográfico de
+GRAN escala (cumbre-9km-valle, lo que midió el probe), pero el sesgo de posición del
+Test1 nace DENTRO del ROI de 3 km del cráter. A esa escala fina el campo NTI todavía
+tiene estructura residual (ruido I04−I05, bordes de nieve, micro-relieve) que no se
+cancela → el centroide ponderado por exceso de NTI sigue cayendo ~1 km al N, casi
+igual que el ponderado por exceso de MIR. El caller SÍ conecta el centroide NTI
+(verificado A48/A49, process_viirs.py:856), no es bug — el efecto es genuinamente
+marginal. k_sigma afecta el trigger, no el peso del centroide → calibrarlo no re-ancla.
+
+**Veredicto preliminar**: V2 ataca el mecanismo correcto (MIR→NTI) pero NO resuelve el
+offset (efecto ~50 m). NO promover tal cual. Recall y magnitud preservados (inocuo).
+El fix de posición necesita un enfoque más directo (candidato doc Acciones §1: anclar
+el final_hotspot al píxel de mayor BT/NTI dentro del inner-radius), o aceptar el offset
+como limitación cosmética conocida (no afecta detección ni magnitud VRP, línea 61-64).
+
+### S105 — k_sigma NO rescata V2 + qué ancla recupera el cráter (offline, A2)
+**k_sigma refutado con datos**: entre los source=test1 del brazo NTI, los de señal NTI
+más fuerte (test1_k_observed alto) NO están mejor anclados — Tupun k<5:1.53 / 5-10:1.56
+/ 10-20:1.66 km; Llaima 1.36/1.62/1.79 km (PEOR). El sesgo topográfico afecta igual a
+señal débil y fuerte (el centroide se computa igual, k_sigma solo mueve el gatillo).
+Calibrar k_sigma bajaría recall sin ganar posición. → V2 cerrado: no promover.
+
+**Qué ancla recupera el cráter (source=test1 nevados, dist mediana)**:
+| ancla | Tupun | Villarrica | Llaima |
+|---|---|---|---|
+| centroide Test1 (actual) | 1.55 | 1.48 | 1.42 |
+| BT máx scene (hotspot) | 12.16 | 4.81 | 4.64 |
+| dist del BT máx I04 (t_max) | 26.45 | 23.29 | 17.70 |
+| vent nominal (vent_hotspot) | 0.00 | 0.00 | 0.00 |
+
+Anclar al pico de BRILLO es catastrófico (el pico es el valle/escena tibia, 12-26 km) —
+refuta la opción "anclar al BT máx" del doc Acciones §1. vent_hotspot=0.00 es circular
+(es el cráter nominal por definición). **Ningún ancla basada en el campo de BRILLO
+recupera el cráter**: todo el campo está dominado por topografía. El fix de posición
+necesita el campo de NTI dentro del inner-radius (el NTI realza la lava sub-pixel sobre
+la nieve, probes: lava fuerte 17.4σ / débil 1.8σ, ambas EN el cráter) → requiere probe
+instrumentado para confirmar dónde cae el NTI-máx vs el cráter. = Fase 2 S105.
