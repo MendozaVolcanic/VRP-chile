@@ -1,0 +1,19 @@
+# VRP-Chile — profile: _test1_nti_local (S105 A45, fondo LOCAL sobre NTI)
+#
+# Brazo NTI-LOCAL del A/B del realineamiento MIROVA uniforme (Coppola 2024 Eq.13):
+# el Test1 integra exceso de NTI con FONDO LOCAL por píxel (mediana del NTI en el
+# anillo local in..out km), no la mediana del anillo entero. Cancela la estructura
+# topográfica residual del centroide sin per-vol. Se compara contra:
+#   - baseline MIR-anillo  = data/_test1_nti_covalidation_disabled (A/B V1, en disco)
+#   - NTI-anillo (V2)      = data/_test1_nti_integral (A/B V2, en disco)
+# Diseño: docs/superpowers/specs/2026-06-10-test1-local-bg-nti-design.md.
+# k_sigma/anillo local default (a calibrar si el recall cae — criterio 0 FN).
+extends: mirova_equivalent
+profile: _test1_nti_local
+description: >
+  A/B S105: Test1 integra exceso de NTI con fondo LOCAL por píxel. Realineamiento MIROVA.
+paths:
+  enable_test1_nti_integral: true
+  enable_test1_local_bg_nti: true
+output:
+  data_subdir: _test1_nti_local

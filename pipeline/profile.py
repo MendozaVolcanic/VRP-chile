@@ -177,6 +177,13 @@ TEST1_K_SIGMA: float = float(_t.get("test1_k_sigma", 3.0))
 TEST1_MIR_RELATIVE: float = float(_t.get("test1_mir_relative", 0.02))
 TEST1_ROI_KM: float = float(_t.get("test1_roi_km", 3.0))
 TEST1_INNER_RING_KM: float = float(_t.get("test1_inner_ring_km", 1.0))
+# S105 — Test1 con FONDO LOCAL sobre NTI (realineamiento MIROVA Coppola 2024 Eq.13).
+# Reemplaza el fondo del anillo entero por la mediana del NTI en un anillo local por
+# píxel (in..out km) → cancela la estructura topográfica residual uniformemente, sin
+# per-vol. Solo aplica junto a enable_test1_nti_integral. Ver design doc 2026-06-10.
+TEST1_LOCAL_BG_RING_IN_KM: float = float(_t.get("test1_local_bg_ring_in_km", 0.5))
+TEST1_LOCAL_BG_RING_OUT_KM: float = float(_t.get("test1_local_bg_ring_out_km", 1.5))
+TEST1_MIN_LOCAL_BG_PIXELS: int = int(_t.get("test1_min_local_bg_pixels", 8))
 # S26 Dual-ROI N·σ en eruption-path BT (Coppola 2016a Tabla 1).
 # Path BT (eruption) usa thresholds N·σ distintos summit vs scene.
 # - summit (dist <= inner_radius_km): N·σ_summit = 5 (sensible).
@@ -274,6 +281,11 @@ ENABLE_TEST1_NTI_COVALIDATION: bool = bool(_p.get("enable_test1_nti_covalidation
 # L_bg_mir sobre los píxeles NTI-elegidos. Default OFF (A/B pendiente, k_sigma a
 # calibrar por SNR bajo). Ver docs/superpowers/specs/2026-06-09-*.md §V2.
 ENABLE_TEST1_NTI_INTEGRAL: bool = bool(_p.get("enable_test1_nti_integral", False))
+# S105 — fondo LOCAL sobre NTI en el Test1 (realineamiento MIROVA uniforme, Coppola
+# 2024 Eq.13). Solo surte efecto junto a enable_test1_nti_integral. Cancela el sesgo
+# topográfico residual del centroide del Test1 sin per-vol. Default OFF (A/B pendiente).
+# Ver docs/superpowers/specs/2026-06-10-test1-local-bg-nti-design.md.
+ENABLE_TEST1_LOCAL_BG_NTI: bool = bool(_p.get("enable_test1_local_bg_nti", False))
 
 # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene aplicado a
 # la mask final combinada (post-OR de todos los paths) antes de calcular

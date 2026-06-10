@@ -1,0 +1,52 @@
+name: S105 reproc Test1-NTI fondo LOCAL (A45)
+
+# A43 "on" quoted. Brazo NTI-LOCAL del A/B del realineamiento MIROVA uniforme (fondo
+# local sobre NTI, Coppola 2024 Eq.13). Se compara contra los baselines ya en disco:
+# MIR-anillo (_test1_nti_covalidation_disabled) y NTI-anillo V2 (_test1_nti_integral).
+# 5 vols (3 nevados + Lascar arido + Lastarria fumarolico control). Artifacts, NO
+# commitea (A47). Analisis: experiments/_s104_roi_probe/audit_ab_test1_nti_v2.py.
+"on":
+  workflow_dispatch:
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        volcano: [Tupungatito, Villarrica, Llaima, Lascar, Lastarria]
+        chunk:
+          - { start: "2026-01-29", end: "2026-03-31" }
+          - { start: "2026-04-01", end: "2026-06-08" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reprocess _test1_nti_local / ${{ matrix.volcano }} / ${{ matrix.chunk.start }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 290
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _test1_nti_local \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ matrix.chunk.start }} \
+            --end ${{ matrix.chunk.end }} \
+            --overwrite
+      - name: Upload JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: s105local-${{ matrix.volcano }}-${{ matrix.chunk.start }}
+          path: data/_test1_nti_local/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7
