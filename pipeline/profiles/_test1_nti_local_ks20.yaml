@@ -1,0 +1,16 @@
+# VRP-Chile — profile: _test1_nti_local_ks20 (S105 A45, barrido k_sigma del fondo-local)
+#
+# Brazo del barrido de calibracion del fondo LOCAL sobre NTI: k_sigma=2.0 (trigger del
+# Test1). k_sigma mas bajo = mas sensible (menos FN, mas FP topografico residual). Barrido
+# para elegir el optimo sobre el criterio 0-FN (design doc 2026-06-10 §4).
+extends: mirova_equivalent
+profile: _test1_nti_local_ks20
+description: >
+  A/B S105 barrido: fondo LOCAL sobre NTI, k_sigma=2.0.
+thresholds:
+  test1_k_sigma: 2.0
+paths:
+  enable_test1_nti_integral: true
+  enable_test1_local_bg_nti: true
+output:
+  data_subdir: _test1_nti_local_ks20
