@@ -141,6 +141,10 @@ from pipeline.profile import (
     ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK,
     ENABLE_TEST1_NTI_COVALIDATION,
     ENABLE_TEST1_NTI_INTEGRAL,
+    ENABLE_TEST1_LOCAL_BG_NTI,
+    TEST1_LOCAL_BG_RING_IN_KM,
+    TEST1_LOCAL_BG_RING_OUT_KM,
+    TEST1_MIN_LOCAL_BG_PIXELS,
 )
 from .single_pixel_mode import apply_single_pixel_mode
 from .test1_spatial_core import spatial_core_filter  # S99 Candidato B
@@ -823,6 +827,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     # plano → no dispara; lava débil = NTI elevado en cráter → dispara
                     # ahí). El VRP usa L_bg_mir sobre los píxeles NTI-elegidos.
                     # docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md.
+                    # S105 — fondo LOCAL sobre NTI (realineamiento MIROVA Eq.13) cuando
+                    # el flag está ON; si no, fondo del anillo entero (V2). A49.
+                    _local_bg = ((TEST1_LOCAL_BG_RING_IN_KM, TEST1_LOCAL_BG_RING_OUT_KM)
+                                 if ENABLE_TEST1_LOCAL_BG_NTI else None)
                     test1_res = compute_test1_nti(
                         bt_mir=bt, bt_tir=bt5, lat=lat, lon=lon,
                         vent_lat=vent_lat, vent_lon=vent_lon,
@@ -830,6 +838,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         roi_km=TEST1_ROI_KM,
                         inner_ring_km=TEST1_INNER_RING_KM,
                         k_sigma=TEST1_K_SIGMA,
+                        local_bg_ring_km=_local_bg,
+                        min_local_bg_pixels=TEST1_MIN_LOCAL_BG_PIXELS,
                     )
                 else:
                     # S104 V1 (REFUTADO por A/B, flag default OFF) — co-validación NTI

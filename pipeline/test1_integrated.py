@@ -48,6 +48,37 @@ def bt_to_radiance_um(bt_K: np.ndarray, lambda_um: float) -> np.ndarray:
     return out
 
 
+def _local_background_nti(
+    nti: np.ndarray, lat: np.ndarray, lon: np.ndarray,
+    vent_lat: float, vent_lon: float, roi_km: float,
+    r_in_km: float, r_out_km: float, min_local: int, nti_bg_fallback: float,
+) -> np.ndarray:
+    """Fondo LOCAL de NTI por píxel (S105, realineamiento MIROVA Coppola 2024 Eq.13).
+
+    Para cada píxel del ROI, el fondo es la mediana del NTI en su anillo local
+    [r_in, r_out] km — no la mediana del anillo entero. Cancela la estructura
+    topográfica residual del NTI uniformemente: el valle tibio se compara con su
+    propio entorno (no destaca), la lava se compara con la cumbre fría (destaca).
+    Fallback al fondo escalar del anillo donde hay < min_local vecinos válidos
+    (borde de granule). Uniforme para todos los volcanes (sin per-vol).
+
+    Devuelve un array 2D (mismo shape que nti) con el fondo local; NaN fuera del ROI.
+    """
+    dist_vent = haversine_km(vent_lat, vent_lon, lat, lon)
+    # región fuente: ROI + margen r_out, para que cada píxel del ROI tenga vecinos
+    region = (dist_vent <= roi_km + r_out_km) & np.isfinite(nti)
+    rlat = lat[region]; rlon = lon[region]; rnti = nti[region]
+    out = np.full(nti.shape, np.nan, dtype=np.float64)
+    roi_idx = np.where((dist_vent <= roi_km) & np.isfinite(nti))
+    for k in range(len(roi_idx[0])):
+        iy, ix = roi_idx[0][k], roi_idx[1][k]
+        d = haversine_km(lat[iy, ix], lon[iy, ix], rlat, rlon)
+        local = (d >= r_in_km) & (d <= r_out_km)
+        n = int(np.sum(local))
+        out[iy, ix] = float(np.median(rnti[local])) if n >= min_local else nti_bg_fallback
+    return out
+
+
 def compute_test1_nti(
     bt_mir: np.ndarray,
     bt_tir: np.ndarray,
@@ -62,6 +93,8 @@ def compute_test1_nti(
     k_sigma: float = 3.0,
     nti_relative: float = 0.0,
     min_bg_pixels: int = 20,
+    local_bg_ring_km: tuple[float, float] | None = None,
+    min_local_bg_pixels: int = 8,
 ) -> dict:
     """Test 1 integrado sobre exceso de NTI (S104 V2, realineamiento MIROVA).
 
@@ -131,7 +164,18 @@ def compute_test1_nti(
         return empty
 
     nti_roi = nti[roi_mask]
-    excess_roi = np.where(np.isfinite(nti_roi), np.maximum(0.0, nti_roi - nti_bg), 0.0)
+    # S105 — fondo escalar (anillo entero, legacy) o LOCAL por píxel (realineamiento
+    # MIROVA Coppola 2024 Eq.13). El fondo local cancela la estructura topográfica
+    # residual del NTI sin per-vol. local_bg_ring_km=None preserva el comportamiento.
+    if local_bg_ring_km is not None:
+        r_in_km, r_out_km = local_bg_ring_km
+        nti_bg_field = _local_background_nti(
+            nti, lat, lon, vent_lat, vent_lon, roi_km,
+            r_in_km, r_out_km, min_local_bg_pixels, nti_bg)
+        nti_bg_roi = nti_bg_field[roi_mask]
+    else:
+        nti_bg_roi = nti_bg  # escalar (broadcast)
+    excess_roi = np.where(np.isfinite(nti_roi), np.maximum(0.0, nti_roi - nti_bg_roi), 0.0)
     delta_nti = float(np.sum(excess_roi))
     sigma_delta_nti = sigma_bg * math.sqrt(n_roi)
 
