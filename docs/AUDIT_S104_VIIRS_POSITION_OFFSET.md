@@ -308,3 +308,39 @@ recupera el cráter**: todo el campo está dominado por topografía. El fix de p
 necesita el campo de NTI dentro del inner-radius (el NTI realza la lava sub-pixel sobre
 la nieve, probes: lava fuerte 17.4σ / débil 1.8σ, ambas EN el cráter) → requiere probe
 instrumentado para confirmar dónde cae el NTI-máx vs el cráter. = Fase 2 S105.
+
+## ⭐⭐⭐⭐⭐ S105 Fase 2 — EL DISCRIMINANTE EXISTE (probe run 27243090277)
+
+probe_discriminant.py sobre 6 noches LAVA (ALERTA Villarrica) + 4 TOPO (sin ALERTA),
+3 sats c/u. Métrica DISC(core-ring) = cuánto destaca el pico de NTI del núcleo (<1km)
+sobre el mejor punto del anillo (1-3km), en σ del fondo.
+
+| noche | grupo | mejor DISC | pico NTI núcleo @ |
+|---|---|---|---|
+| 02-26 | lava | +1.4σ | 0.15 km |
+| 03-08 | lava | +2.8σ | 0.30 km |
+| 04-09 (débil 0.11MW) | lava | +0.3σ | 0.13 km |
+| 05-11 | lava | +4.3σ | 0.16 km |
+| 05-14 | lava | +8.7σ | 0.19 km |
+| 05-22 | lava | +16.1σ | 0.19 km |
+| 02-06 | topo | -2.4σ | 0.58 km |
+| 02-28 | topo | -1.0σ | 0.92 km |
+| 03-09 | topo | -1.5σ | 0.93 km |
+| 04-27 | topo | -1.0σ | 0.83 km |
+
+**SEPARACIÓN LIMPIA en DISC=0**: LAVA todas >0 (mín +0.3), TOPO todas <0 (máx -1.0).
+Margen ~1.3σ. En pasadas-lava el pico de NTI cae a <0.3km del cráter (resuelve POSICIÓN);
+en topo el "pico del núcleo" es débil y disperso a 0.58-0.93km.
+
+**Por qué funciona donde V1 falló**: V1 exigía firma per-píxel (dNTI 8-vec, umbral absoluto)
+→ la lava difusa no la tiene → apagaba el Test1. Este discriminante usa el PICO RELATIVO
+del núcleo vs anillo — la lava débil (1.8σ @ 0.13km) SÍ produce un pico en el núcleo sin
+romper umbral absoluto. El anillo tibio del valle tiene NTI elevado pero DISPERSO (ring_max
++1.3-3.6σ en un punto cualquiera del anillo); el núcleo solo destaca cuando hay lava.
+
+**Caveats (A62)**: n=10, solo Villarrica; margen de la lava débil FINO (+0.3σ) → el umbral
+exacto y la generalización a Tupun/Llaima los valida el A/B a escala (criterio: 0 FN noches
+ALERTA). Recall por-noche preservado: cada noche LAVA tiene ≥1 pasada DISC>0.
+
+→ HABILITA el fix de DETECCIÓN+POSICIÓN: el Test1 dispara solo si DISC>umbral (suprime
+topografía) y ancla al NTI_core_max (re-ancla al cráter). = diseño Fase 2.

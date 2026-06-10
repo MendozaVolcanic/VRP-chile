@@ -27,7 +27,13 @@ from pipeline.process_viirs import read_viirs_l1b, read_viirs_geo
 from pipeline.test1_integrated import bt_to_radiance_um
 
 auth()
-VLAT, VLON = -39.420227, -71.939876
+VENTS = {  # vent_lat, vent_lon (volcanoes.yaml) — nevados
+    "Villarrica": (-39.420227, -71.939876),
+    "Tupungatito": (-33.389044, -69.826374),
+    "Llaima": (-38.692, -71.729),
+}
+VOLCANO = os.environ.get("PROBE_VOLCANO", "Villarrica")
+VLAT, VLON = VENTS[VOLCANO]
 HERE = Path(__file__).parent
 DEST = HERE / "granules_disc"; DEST.mkdir(exist_ok=True)
 DATE = datetime.strptime(os.environ.get("PROBE_DATE", "2026-05-22"), "%Y-%m-%d")
@@ -36,7 +42,7 @@ TIMES = [t for t in os.environ.get(
     "PROBE_TIMES", ".0548.,.0554.,.0600.,.0542.,.0530.,.0536.,.0524.,.0506.,.0648.,.0642.").split(",") if t]
 I04_L, I05_L = 3.74, 11.45
 INNER_KM, ROI_KM = 1.0, 3.0
-print(f"PROBE_DATE={DATE.date()} GROUP={GROUP}", flush=True)
+print(f"PROBE_VOLCANO={VOLCANO} PROBE_DATE={DATE.date()} GROUP={GROUP}", flush=True)
 
 
 def gname(g):
