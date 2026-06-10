@@ -80,11 +80,21 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
 
 2. **Si NO está en papers**, ¿cierra una divergencia ya documentada en
    `docs/MIROVA_DIVERGENCES.md`?**
-   - D1: granularidad (1 punto/pasada).
-   - D2: cobertura CSV ground truth.
-   - D3: FP explícito MIROVA.
-   - D4: recall sub-pixel summit.
-   - D5: magnitud (resuelto).
+   **El catálogo VIVO es el doc — esta lista es resumen (actualizada S105, AUDIT_S105):**
+   - Resueltas (no justifican features nuevas): D1 granularidad, D4 recall sub-pixel
+     (S27), D5 magnitud (nadir S102/103 + ctxpeak D10 S100), D8/D8' cluster selection
+     (S38/S62), sec³ off-nadir (S102/103), fix del ancla de detección (S98).
+   - **Abiertas**: D2 cobertura CSV ground truth · D3 FP explícito MIROVA ·
+     **D9 path D cirrus/escena tibia** (cap 5MW = mitigación, causa raíz abierta;
+     residuo MODIS ~131 records pc.vrp>5, 0% confirmados MIROVA — AUDIT S105) ·
+     **D11 sesgo topográfico de paths MIR-absolutos (A69, S104)** — el Test1 integrado
+     MIR/NTI-anillo se sesga ~1 km al valle tibio en nevados; MIROVA inmune (NTI +
+     fondo local). Fix candidato fondo-local-NTI en A/B S105 (V1 y V2 refutados) ·
+     VIIRS750 disperso glaciar (Tupun/PP, pendiente portar ctxpeak S102§2) ·
+     NEW-8 gaps 2-4 (pool estadístico m,σ).
+   - **Pendiente de decisión** (S105, Nicolás): gates intra-radio S84/S85 (veredicto
+     anti-patrón A55 en AUDIT_S86 §C6; siguen ON; decidir con más datos al cerrar el
+     frente Test1/fondo-local).
 
    Cerrar divergencia = alinear comportamiento con MIROVA, no agregar
    funcionalidad nueva. **Si SÍ cierra divergencia → puede implementarse.**

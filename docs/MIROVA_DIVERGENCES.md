@@ -1172,3 +1172,62 @@ masiva de magnitud + reducción de sobre-detección en los 11.
 solo la magnitud (vía el Test1): Villarrica 636→602, Isluga 550→535, Llaima 557→540. Es decir,
 ayuda parcialmente a la sobre-detección. El residuo glaciar VIIRS750 (Tupun/PP 16.6×, Isluga 4.76×)
 **persiste** y se ataca en §2 (portar ctxpeak a VIIRS750 + co-validación path D, A45).
+
+## S98 — Fix del ancla de detección (regresión S65→S80 cerrada) — RESUELTO S98
+
+`geo_utils.py` separa `get_grid_center` (mirova_center, grilla 50×50) de
+`get_detection_anchor` (vent_lat = cráter físico). Detección dual-ROI, clustering
+vent-anchored y distance_class anclan al CRÁTER. Cierra la regresión git-confirmada
+S65→S80 (PR #220 regeneró mirova_center y revirtió el fix S65 sin saberlo, regla A63).
+Guard anti-revert: `tests/test_detection_anchor.py`. Resultados: det→cráter Tupun
+5.76→1.25 km, PCC 7.23→0.69, PP 2.69→1.14. Detalle: `docs/S98_ANCHOR_FIX_RESULTS.md`.
+(Entrada agregada retroactivamente en S105 — AUDIT_S105 detectó que faltaba acá.)
+
+## D11 — Sesgo topográfico de los paths MIR-absolutos (A69) — ABIERTA (fix en A/B S105)
+
+**Divergencia formal** (S104, formalizada S105 por AUDIT_S105): en volcanes nevados
+(Villarrica/Tupungatito/Llaima) el campo nocturno BT MIR está dominado por el gradiente
+topográfico de altitud (cumbre nevada fría ~272K vs valle tibio ~281K). Nuestro Test1
+integrado mide "exceso sobre fondo de anillo" → capta el valle tibio como anomalía →
+detecciones/centroides sesgados ~1 km al N del cráter + FP topográficos puros en noches
+sin lava. **MIROVA es inmune** porque detecta por NTI con fondo local al cluster
+(Coppola 2016a Tests; Coppola 2024 Eq.13) — la topografía se cancela por construcción.
+
+Cronología del cierre (S104→S105, ground truth probe-based):
+- **V1 co-validación NTI per-píxel — REFUTADO** (run 27186289487): apaga el Test1
+  (la señal difusa sub-pixel no tiene firma per-píxel). Flag OFF.
+- **V2 Test1 integra NTI con fondo de anillo — REFUTADO** (run 27223821692): corrige
+  solo ~50 m de ~1000–1500 m. El NTI cancela el gradiente de gran escala pero el fondo
+  de anillo entero deja pasar la estructura residual dentro del ROI 3 km. Inocuo
+  (recall/magnitud preservados, controles sin cambio) pero insuficiente. Flag OFF.
+- **k_sigma — REFUTADO offline**: la señal fuerte no está mejor anclada (el gatillo no
+  mueve el centroide). **Anclas de brillo — REFUTADAS**: BT máx = valle (12–26 km).
+- **Discriminante núcleo-anillo** (probes 27243090277 + 27244013547): separa lava/topo
+  sin error en Villarrica pero NO generaliza como gate (Tupun cat-b real casi continuo,
+  confirmado por Nicolás; Llaima lava débil con pico al lago). Pista, no fix.
+- **Fondo LOCAL sobre NTI (Coppola 2024 Eq.13, uniforme) — EN A/B** (S105, PR #386,
+  flag `enable_test1_local_bg_nti` OFF): cada píxel vs la mediana del NTI de su anillo
+  local 0.5–1.5 km. Predicciones pre-registradas (design 2026-06-10 §12, A66). A/B
+  runs 27275241269 (k=3.0) + 27276651420 (k=2.0/2.5).
+
+Implicación al marco A54: el "extra" sobre MIROVA en nevados incluye FP topográficos
+(cat-d), no solo cat-b real. Ver `docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md` (completo) y
+`docs/superpowers/specs/2026-06-10-test1-local-bg-nti-design.md`.
+
+## S105 — Nota de decisión pendiente: gates intra-radio S84/S85 (A55)
+
+AUDIT_S86 §C6 los declaró anti-patrón emergente (redundantes con la supresión
+`mirovaEqVrp` del frontend desde S33). Siguen ON en `mirova_equivalent.yaml`.
+**Decisión de Nicolás (S105): decidir con más datos al cerrar el frente Test1/
+fondo-local** (toca la misma zona del pipeline). No revertir ni re-justificar aún.
+Registrado para que no se pierda (AUDIT_S105 contradicción #1).
+
+## S105 — Residuo path D MODIS re-dimensionado (corrige diagnóstico inflado)
+
+Un diagnóstico de subagente reportó "campo difuso MODIS universal ~280 recs/volcán a
+16-24 km" — REFUTADO (usaba `final_hotspot_dist_km` corrupto + vrp scene-wide, A48/A10).
+Cuadro real con `primary_cluster`: el cluster MODIS está al cráter (mediana 1.3–3.3 km)
+y calibrado (pc.vrp mediana 0.6–1.9 MW). El residuo path D real = **131/3072 records
+(4.3%) con pc.vrp>5 MW, 80% path-D-only, 0% confirmados MIROVA** (cruce loader
+canónico) → artefacto de MAGNITUD acotado cerca del cráter, frente SECUNDARIO.
+Detalle: design doc 2026-06-05 §11.

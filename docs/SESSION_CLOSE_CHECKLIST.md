@@ -10,8 +10,9 @@
 
 - [ ] ¿Hubo H# (hipótesis) nuevos en la sesión?
   - SÍ → entrada en `docs/HYPOTHESIS_LOG.md` con criterio testable + estado.
-- [ ] ¿Hubo D# (drifts vs papers) nuevos?
-  - SÍ → sección en `docs/DRIFTS_S17.md` con evidencia + decisión + sesión esperada.
+- [ ] ¿Hubo D# (drifts vs papers / divergencias vs MIROVA) nuevos?
+  - SÍ → sección en `docs/MIROVA_DIVERGENCES.md` (catálogo VIVO) con evidencia +
+    decisión + sesión esperada. (`DRIFTS_S17.md` quedó histórico-cerrado — AUDIT_S105.)
 - [ ] ¿Hubo schema/data gaps detectados (ej: campo no guardado, source externa)?
   - SÍ → entrada en `~memory/project_sNN_findings.md` (NN=número sesión).
 - [ ] ¿Cualquier otro learning durable (no específico de la sesión)?
@@ -32,9 +33,15 @@
   - Verificar entrada nueva en `~memory/MEMORY.md` index.
   - Verificar que cada hallazgo tiene su archivo `~memory/project_sNN_findings.md`.
 - [ ] ¿Docs vivos sincronizados?
-  - `docs/SESSION_INDEX.md`: fila nueva con sesión + hallazgo principal + artefacto.
+  - `docs/MIROVA_DIVERGENCES.md`: si hubo divergencia nueva/cerrada (catálogo vivo).
+  - `docs/INDEX.md`: si se crearon docs nuevos (índice maestro, S105).
   - `docs/DATA_SOURCES.md`: si data sources cambiaron.
   - `docs/PAPERS_AUDIT.md`: si paper nuevo procesado.
+  - (`SESSION_INDEX.md` quedó superseded por `SESSION_INDEX_CONSOLIDATED_S80.md` —
+    el índice de sesiones vivo es MEMORY.md + bloques de arranque.)
+- [ ] **Bloque de arranque + prompt copy-paste (regla S79)**:
+  - `tasks/BLOQUE_ARRANQUE_S{N+1}.md` con plan ejecutivo de la próxima sesión.
+  - Prompt copy-paste-able para Nicolás al final del bloque.
 - [ ] ¿Vault Obsidian crosslinks vigentes?
   - Frontmatter `proyecto: "[[VRP Chile]]"` en papers nuevos auditados esta sesión.
 
