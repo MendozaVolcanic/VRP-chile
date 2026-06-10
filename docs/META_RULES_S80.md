@@ -207,14 +207,16 @@ silenciosamente. Sin auditoría regular, el proyecto entra en estado
 
 ---
 
-## M9 — Versionado de MEMORY.md (rotación al llegar a 800 líneas)
+## M9 — Versionado de MEMORY.md (rotación al llegar a 500 líneas — unificado S105)
 
 **Por qué**: MEMORY.md llegó a 762 líneas y solo cargaron las primeras al
 contexto inicial. El warning del sistema lo enunció pero Claude lo había
 ignorado. La pérdida de memoria estaba indexada en el propio MEMORY.md.
+(S105/AUDIT_S105 #4: este doc decía "rotar a 800" mientras MEMORY.md se
+autoimponía cap 500 — unificado a **500**, el valor estricto.)
 
 **Regla**:
-- Cuando MEMORY.md pase de **800 líneas**, rotar:
+- Cuando MEMORY.md pase de **500 líneas**, rotar:
   1. Mover detalle de sesiones cerradas (>10 sesiones atrás) a
      `docs/MEMORY_ARCHIVE_S<N1>_S<N2>.md`
   2. Mantener en MEMORY.md solo el índice (1 línea por sesión) + sesiones
