@@ -127,3 +127,33 @@ VRP       = Wooster sobre L_MIR de los píxeles contribuyentes (igual que V2.5, 
 - No toca Lastarria (offset fumarólico Lazufre real).
 - No promete resolver el offset — lo PRUEBA el A/B. Si el fondo local uniforme no cancela
   la topografía en los 11 con 0 FN, se documenta el límite y se decide con datos.
+
+---
+
+## 12. Predicciones PRE-REGISTRADAS del A/B (A66, escritas ANTES del resultado)
+
+Hipótesis por volcán, derivadas de la física + los probes S105. Pre-registradas para
+evitar confirmation bias (A62) y como material de Validation del paper. El A/B
+(run 27275241269 k=3.0 + barrido 27276651420 k=2.0/2.5) las confirma o refuta.
+
+| vol | régimen | predicción fondo-local vs MIR-anillo | criterio de éxito |
+|---|---|---|---|
+| **Villarrica** | nevado intermitente (11 ALERTA) | offN ↓ fuerte (suprime noches topográficas puras); las noches ALERTA tienen lava que destaca sobre cumbre fría → recall preservado | offN→0, %<3km↑, recall 8/11 igual |
+| **Tupungatito** | nevado, cat-b casi continuo (94 ALERTA) | el calor real del cráter destaca sobre su entorno glaciar → trig_t1 CONSERVADO, offN ↓ (el cat-b está EN el cráter, no en el valle) | trig_t1 no se desploma, offN↓, recall 75/75 |
+| **Llaima** | nevado, lago Conguillío N | offN ↓ (suprime el sesgo del lago); RIESGO: la lava débil 05-15 dio pico al lago (DISC<0) → posible FN de esa noche | offN↓; vigilar recall 1/1 (riesgo FN) |
+| **Lascar** | árido control | sin gradiente topográfico → fondo-local ≈ fondo-anillo → SIN cambio | offN/dist/recall sin cambio (117/127) |
+| **Lastarria** | fumarólico Lazufre (offset N REAL) | RIESGO CLAVE: si el campo fumarólico es EXTENDIDO/uniforme, el fondo-local lo trata como "entorno" y NO destaca → podría SUPRIMIR señal real (FN, viola A54). Si es un foco con gradiente, se conserva. | recall 94/105 PRESERVADO. Si cae → el fondo-local borra cat-b extendido = límite del método |
+
+**Lo que CADA resultado significaría (decisión pre-comprometida)**:
+- Si Villarrica/Tupun/Llaima offN↓ con 0 FN y Lascar/Lastarria sin cambio → **éxito uniforme**,
+  promover (A45). El fondo local uniforme cancela la topografía sin tocar señal real.
+- Si Lastarria pierde recall → el fondo-local borra señal fumarólica EXTENDIDA → NO es
+  uniformemente seguro. Documentar el límite (el método asume foco con gradiente local; falla
+  en señal espacialmente uniforme). NO promover sin resolver.
+- Si Llaima pierde la noche ALERTA → calibrar k_sigma (barrido) o aceptar como límite SNR.
+- Si Tupun trig_t1 se desploma → el fondo-local sobre NTI tampoco separa en glaciar (como el
+  kernel-MIR, A19) → refuta la hipótesis central; documentar.
+
+**k_sigma esperado**: a menor k_sigma (2.0) más sensible → menos FN (mejor para Llaima/lava
+débil) pero más FP topográfico residual. El óptimo = el menor k_sigma que aún dé offN↓ en
+los nevados (la curva del barrido lo muestra).
