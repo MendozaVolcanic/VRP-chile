@@ -1,0 +1,62 @@
+name: Probe S105 discriminante Tupungatito + Llaima
+
+# A43 "on" quoted. Generalizacion del discriminante lava-vs-topografia (Fase 2) a los
+# otros 2 nevados (A19: no extrapolar entre volcanes; Tupun tiene glaciar distinto).
+# probe_discriminant.py parametrizado por PROBE_VOLCANO. NO toca pipeline. Archivar (A38).
+"on":
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          # Tupungatito LAVA (ALERTA VIIRS375, VRP variado)
+          - { vol: "Tupungatito", date: "2026-02-23", group: "lava", times: ".0500.,.0506.,.0454." }
+          - { vol: "Tupungatito", date: "2026-02-28", group: "lava", times: ".0506.,.0500.,.0512." }
+          - { vol: "Tupungatito", date: "2026-02-26", group: "lava", times: ".0542.,.0548.,.0536." }
+          - { vol: "Tupungatito", date: "2026-02-20", group: "lava", times: ".0554.,.0548.,.0600." }
+          - { vol: "Tupungatito", date: "2026-02-17", group: "lava", times: ".0630.,.0624.,.0636." }
+          - { vol: "Tupungatito", date: "2026-02-14", group: "lava", times: ".0606.,.0600.,.0612." }
+          # Tupungatito TOPO (sin ALERTA, test1 lejano)
+          - { vol: "Tupungatito", date: "2026-04-19", group: "topo", times: ".0548.,.0554.,.0542." }
+          - { vol: "Tupungatito", date: "2026-02-13", group: "topo", times: ".0624.,.0618.,.0630." }
+          - { vol: "Tupungatito", date: "2026-05-25", group: "topo", times: ".0636.,.0630.,.0642." }
+          - { vol: "Tupungatito", date: "2026-05-26", group: "topo", times: ".0618.,.0612.,.0624." }
+          # Llaima LAVA (unica ALERTA VIIRS375) + TOPO
+          - { vol: "Llaima", date: "2026-05-15", group: "lava", times: ".0624.,.0618.,.0630." }
+          - { vol: "Llaima", date: "2026-04-10", group: "topo", times: ".0700.,.0654.,.0648." }
+          - { vol: "Llaima", date: "2026-03-16", group: "topo", times: ".0506.,.0500.,.0512." }
+          - { vol: "Llaima", date: "2026-04-16", group: "topo", times: ".0506.,.0500.,.0512." }
+          - { vol: "Llaima", date: "2026-03-05", group: "topo", times: ".0600.,.0554.,.0606." }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml
+      - name: Run discriminant probe
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          PROBE_VOLCANO: ${{ matrix.vol }}
+          PROBE_DATE: ${{ matrix.date }}
+          PROBE_GROUP: ${{ matrix.group }}
+          PROBE_TIMES: ${{ matrix.times }}
+        run: |
+          python experiments/_s104_roi_probe/probe_discriminant.py | tee report_${{ matrix.vol }}_${{ matrix.group }}_${{ matrix.date }}.txt
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s105disc-${{ matrix.vol }}-${{ matrix.group }}-${{ matrix.date }}
+          path: report_${{ matrix.vol }}_${{ matrix.group }}_${{ matrix.date }}.txt
+          if-no-files-found: warn
