@@ -157,3 +157,24 @@ evitar confirmation bias (A62) y como material de Validation del paper. El A/B
 **k_sigma esperado**: a menor k_sigma (2.0) más sensible → menos FN (mejor para Llaima/lava
 débil) pero más FP topográfico residual. El óptimo = el menor k_sigma que aún dé offN↓ en
 los nevados (la curva del barrido lo muestra).
+
+## 13. Límite de escala del fondo-local (test sintético offline, S105) — riesgo Lastarria REVISADO
+
+Test sintético (no requiere Earthdata): foco de NTI elevado de radio R, fondo NTI con
+ruido realista, modo local (anillo 0.5-1.5km). Resultado:
+- **Foco gaussiano (borde suave, como lava/fumarola con gradiente)** R=0.5/1.0/2.0 km:
+  el fondo-local DISPARA y ancla al centro del foco (0.02-0.08 km). Detecta bien.
+- **Foco escalón** R=1/2/4 km: dispara también (el borde, aunque a 4 km, cae en el anillo
+  local de los píxeles del ROI cercanos al borde → excess).
+
+**Conclusión (límite de escala)**: el fondo-local detecta cualquier foco con borde o
+gradiente espacial. Solo una señal PERFECTAMENTE UNIFORME sobre un área >> ROI+anillo+r_out
+(>~5 km, físicamente irreal) se auto-cancelaría (cada píxel ≈ su entorno). Las señales
+volcánicas reales (lava sub-pixel, campos fumarólicos) tienen gradiente → se detectan.
+
+**Riesgo Lastarria REVISADO a la baja**: el campo fumarólico Lazufre, aunque extendido,
+tiene borde/gradiente → el fondo-local lo detecta y ancla a SU centro real (al N, el
+fumarólico) → CONSERVA el offset N real de Lastarria (no lo borra). Predicción §12
+actualizada: Lastarria probablemente "sin cambio" (offset fumarólico preservado), riesgo
+FN bajo. El A/B lo confirma empíricamente. (Material de Discussion del paper: el método es
+robusto a señal con estructura espacial; el único límite es la señal uniforme infinita.)
