@@ -296,3 +296,44 @@ verificado: PCC 60.2 / Tupun 13.6 / Lascar 5.7 MW. Detalle:
   el record) o también la detección (que path D/second-pass no detecten el campo difuso
   en escena fría)? Lo segundo es más raíz pero más riesgoso para recall.
 - **Umbral de dispersión**: a determinar con reproc multi-valor.
+
+---
+
+## 11. RE-DIAGNÓSTICO S105 (campos correctos primary_cluster) — el frente es MUCHO menor
+
+**A48/A10 — un subagente infló el problema 10× con campos corruptos.** Un diagnóstico
+offline S105 (subagente) reportó "MODIS difuso universal: ~280 recs/volcán a 16-24 km,
+path-D-only 32-95%". REFUTADO al re-verificar con los campos correctos:
+- Usaba `final_hotspot_dist_km` (CORRUPTO en MODIS, S101 §5.1: deriva del hotspot suelto
+  scene-wide, no del cluster) → Lascar aparecía 230/248 "far" cuando su cluster está a
+  0.78 km. Y `record.vrp_mw` (scene-wide) en vez de `pc.vrp_mw` (A10).
+
+**Cuadro REAL (data post-nadir S102, primary_cluster.centroid_dist_km + pc.vrp_mw)**:
+- El cluster MODIS que MIROVA reporta está CERCA del cráter en los 11 (dist mediana
+  1.3-3.3 km), magnitud baja (pc.vrp mediana 0.6-1.9 MW) ≈ MIROVA-MODIS (≤4 MW). **No
+  existe el "campo difuso a 16-24 km".**
+- Solo **131 de 3072 records (4.3%)** tienen pc.vrp>5 MW. De esos, **105 (80%) son
+  path-D-only** (diag_n_dnti_ctx_path>0, resto 0, triggered_test1=False) — el residuo
+  path D ya conocido (S101 §10.3). Pero están CERCA del cráter (Chaiten 30/30 <3 km),
+  NO difusos lejanos. Es un problema de MAGNITUD (path D + second-pass scene infla
+  pc.vrp), no de posición masiva.
+- vrp_max por vol: PCC 60.2 (1 record, el conocido), Villarrica 21, Chaiten/Isluga 18.6,
+  Tupun 13.6, resto ≤11. Acotado.
+
+**Implicación**: el "frente MODIS difuso de mayor impacto universal" NO existe. El nadir
+S102 ya curó el grueso. Queda el residuo path D = ~131 records (4.3%) con magnitud
+inflada cerca del cráter, 80% path-D-only. PENDIENTE verificar cat-b real vs artefacto
+(cruce MIROVA) antes de cualquier fix (A54/A55). Prioridad REVISADA: menor que la Fase 2
+(fondo-local). Lección de método A48: verificar el nombre de campo y usar pc.* (no
+record.* ni final_hotspot_* corrupto) ANTES de dimensionar un frente.
+
+### 11.1 Cruce MIROVA canónico (loader pipeline/mirova_csv_loader.py) — residuo path D = artefacto
+De los 105 records MODIS path-D-only con pc.vrp>5 MW: **0 (0%) caen en una noche con
+ALERTA MODIS de MIROVA** (loader canónico, CONS). MIROVA publica MODIS solo en Lascar
+(80 noches), Chaiten/Villarrica/NdC (1 c/u); PCC/Tupun/Llaima/Isluga/Lastarria/PP/Copahue
+= 0 ALERTAS MODIS. Combinado con TIF sin foco al cráter (A24) + MIROVA-MODIS ≤4 MW → los
+105 son **artefacto de magnitud** (path D + second-pass inflan el cluster sobre escena
+tibia ~272-286 K cerca del cráter), NO cat-b real. Residuo path D dimensionado: 3.4% de
+records MODIS, magnitud 5-60 MW, artefacto. Fix candidato (A55): capar/suprimir magnitud
+del cluster path-D-only (sin Test1/BT/NTI/ETI) cuando MIROVA-MODIS=0 — frente SECUNDARIO
+a Fase 2 (fondo-local). Verificación cat-b ya hecha (0% MIROVA) → no destruye señal real.

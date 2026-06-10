@@ -74,19 +74,21 @@ def analyze(sat, l1b_path, geo_path):
     if nti_std <= 0:
         print(f"  {sat}: sigma_bg=0"); return
 
-    # NTI máx en el núcleo y en el anillo (con su posición)
+    # NTI máx en el núcleo y en el anillo (con su posición + rumbo dN/dE)
+    dN = (lat - VLAT) * 111320
+    dE = (lon - VLON) * 111320 * math.cos(VLAT * math.pi / 180)
     def maxat(mask):
         m = np.where(mask, nti, -np.inf)
         iy, ix = np.unravel_index(np.argmax(m), m.shape)
-        return nti[iy, ix], dist[iy, ix]
-    nc, dc = maxat(core)   # pico del núcleo
-    nr, dr = maxat(ring)   # pico del anillo
+        return nti[iy, ix], dist[iy, ix], dN[iy, ix], dE[iy, ix]
+    nc, dc, ncN, ncE = maxat(core)   # pico del núcleo
+    nr, dr, nrN, nrE = maxat(ring)   # pico del anillo
     sig_core = (nc - nti_bg) / nti_std   # cuántos σ destaca el pico del núcleo
     sig_ring = (nr - nti_bg) / nti_std
     # discriminante: el núcleo destaca Y supera al anillo
     disc = sig_core - sig_ring
-    print(f"  {sat}: NTI_core_max={nc:.4f}@{dc:.2f}km ({sig_core:+.1f}sig) | "
-          f"NTI_ring_max={nr:.4f}@{dr:.2f}km ({sig_ring:+.1f}sig) | "
+    print(f"  {sat}: NTI_core_max={nc:.4f}@{dc:.2f}km ({ncN:+.0f}N,{ncE:+.0f}E) ({sig_core:+.1f}sig) | "
+          f"NTI_ring_max={nr:.4f}@{dr:.2f}km ({nrN:+.0f}N,{nrE:+.0f}E) ({sig_ring:+.1f}sig) | "
           f"DISC(core-ring)={disc:+.1f}sig | bg={nti_bg:.4f} std={nti_std:.4f}", flush=True)
     # contraste integral (Enfoque 2): Σ exceso NTI núcleo vs anillo, normalizado por área
     exc = np.maximum(0.0, nti - nti_bg)

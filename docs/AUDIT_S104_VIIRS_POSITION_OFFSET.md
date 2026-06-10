@@ -344,3 +344,36 @@ ALERTA). Recall por-noche preservado: cada noche LAVA tiene ≥1 pasada DISC>0.
 
 → HABILITA el fix de DETECCIÓN+POSICIÓN: el Test1 dispara solo si DISC>umbral (suprime
 topografía) y ancla al NTI_core_max (re-ancla al cráter). = diseño Fase 2.
+
+## ⭐⭐⭐⭐⭐ S105 Fase 2b — el discriminante NO generaliza limpio (probe Tupun/Llaima run 27244013547)
+
+A19 confirmado (Nicolás pidió generalizar antes de implementar). DISC(core-ring) mejor pasada/noche:
+
+| vol | LAVA (DISC) | TOPO (DISC) | ¿separa@0? |
+|---|---|---|---|
+| Villarrica | +0.3 a +16.1 | -2.4 a -1.0 | SÍ (limpio) |
+| Tupungatito | +1.6 a +2.8 | -2.0, -0.8, **+1.8**, **+0.8** | NO (solape) |
+| Llaima (n=1) | **-2.0** | -3.0 a -1.7 | NO (lava no destaca) |
+
+**El discriminante NO falla — mi etiquetado TOPO está contaminado**:
+- **Tupun**: las 2 "TOPO" positivas (05-25 NOAA21 +1.8 con pico **+4.3σ @ 0.09km**; 05-26 +3.4σ
+  @ 0.21km) son **calor REAL concentrado en el cráter**, NO topografía. Tupun tiene **94 noches
+  ALERTA** (casi siempre activo) → no hay noches genuinamente "sin actividad"; las fechas
+  sin-ALERTA igual tienen cat-b real sub-umbral (A54). El discriminante detecta calor real,
+  no se equivoca. (Villarrica funcionó porque tiene solo 11 ALERTA = muchas noches inactivas.)
+- **Llaima** (única ALERTA VIIRS375, 0.08 MW): el pico de NTI está en el **anillo @ 2.03km
+  (+7.8σ)**, no en el cráter (núcleo +0.3σ). La actividad parece **descentrada del vent
+  nominal** (¿Pichi-Llaima, SE del cráter principal? A54 lista "Pichi-Llaima Llaima" como
+  feature real). El discriminante núcleo<1km no la capta porque NO ESTÁ ahí — problema de
+  ubicación del cráter activo, no del discriminante.
+
+**Implicaciones (a discutir con Nicolás, A62 dominio)**:
+1. El discriminante mide "¿hay calor concentrado en el cráter nominal?" — sirve como
+   confirmador de POSICIÓN (Villarrica limpio), NO como gate universal de supresión
+   (suprimiría cat-b real en Tupun → viola A54/A72).
+2. El "offset topográfico" de Tupun puede ser MEZCLA de cat-b real (cráter) + topografía
+   glaciar — no solo artefacto (matiza el diagnóstico S104).
+3. Llaima: el vent nominal puede estar mal (actividad en Pichi-Llaima) → el offset sería
+   parcialmente REAL. Requiere confirmar coords con Nicolás.
+4. Validar el discriminante en Tupun necesitaría noches genuinamente sin actividad (difícil,
+   vol muy activo) o ground truth independiente.
