@@ -1,0 +1,53 @@
+name: S105 reproc Test1-NTI-local barrido k_sigma (A45)
+
+# A43 "on" quoted. Barrido de calibracion del fondo LOCAL sobre NTI: k_sigma 2.0 y 2.5
+# (el 3.0 lo corre reproc-s105-test1-nti-local.yml). Para elegir el optimo sobre el
+# criterio 0-FN sin iterar (un solo ciclo). Artifacts, NO commitea (A47). Cada brazo
+# escribe a su propio data_subdir (_test1_nti_local_ks20/_ks25). Analisis:
+# experiments/_s104_roi_probe/audit_ab_test1_nti_v2.py.
+"on":
+  workflow_dispatch:
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        profile: [_test1_nti_local_ks20, _test1_nti_local_ks25]
+        volcano: [Tupungatito, Villarrica, Llaima, Lascar, Lastarria]
+        chunk:
+          - { start: "2026-01-29", end: "2026-03-31" }
+          - { start: "2026-04-01", end: "2026-06-08" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reprocess ${{ matrix.profile }} / ${{ matrix.volcano }} / ${{ matrix.chunk.start }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 290
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ matrix.chunk.start }} \
+            --end ${{ matrix.chunk.end }} \
+            --overwrite
+      - name: Upload JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: s105sweep-${{ matrix.profile }}-${{ matrix.volcano }}-${{ matrix.chunk.start }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7
