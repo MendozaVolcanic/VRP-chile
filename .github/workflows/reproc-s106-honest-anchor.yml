@@ -1,0 +1,52 @@
+name: S106 reproc ancla espacial honesta A/B (A45)
+
+# A43 "on" quoted. A/B del ancla honesta (design 2026-06-11): brazo A (test1->vent)
+# y brazo B (test1->NTI-peak). Solo POSICION; deteccion/magnitud identicas a baseline
+# (criterio duro pre-registrado: trig_t1 y recall IDENTICOS o hay bug). Artifacts,
+# NO commitea (A47). Analisis: experiments/_s104_roi_probe/audit_honest_anchor.py.
+"on":
+  workflow_dispatch:
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        profile: [_honest_anchor_a, _honest_anchor_b]
+        volcano: [Tupungatito, Villarrica, Llaima, Lascar, Lastarria]
+        chunk:
+          - { start: "2026-01-29", end: "2026-03-31" }
+          - { start: "2026-04-01", end: "2026-06-08" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reprocess ${{ matrix.profile }} / ${{ matrix.volcano }} / ${{ matrix.chunk.start }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 290
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ matrix.chunk.start }} \
+            --end ${{ matrix.chunk.end }} \
+            --overwrite
+      - name: Upload JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: s106anchor-${{ matrix.profile }}-${{ matrix.volcano }}-${{ matrix.chunk.start }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7

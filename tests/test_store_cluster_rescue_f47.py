@@ -409,3 +409,30 @@ def test_rescue_changes_discarded_reason(basic_setup):
     assert reason in (None, "single_pixel_far_overridden_by_cluster"), (
         f"discarded_reason inesperado: {reason}"
     )
+
+
+# ===========================================================================
+# Test 7 — S106 ancla honesta: el rescate NO pisa anclas deliberadas
+# ===========================================================================
+
+def test_rescue_no_pisa_ancla_honesta(basic_setup):
+    """S106: si final_hotspot_source es un ancla honesta (ctx_cluster/test1_roi/
+    test1_nti_peak), el rescate F47 conserva el rollup vrp (magnitud intacta)
+    pero NO reescribe final_hotspot_*/distance_class — el upstream ya fijó la
+    posición deliberadamente (design 2026-06-11 §6 riesgo store.py)."""
+    rec = _ndc_flag_record()
+    # upstream honesto: Test1-dominante anclado al vent
+    rec["final_hotspot_lat"] = -37.851
+    rec["final_hotspot_lon"] = -71.169
+    rec["final_hotspot_dist_km"] = 0.0
+    rec["final_hotspot_source"] = "test1_roi"
+    rec["distance_class"] = "summit"
+
+    saved = _save_and_load(rec, basic_setup, max_hotspot=5.0)
+
+    # posición honesta intacta (no "cluster_rescue")
+    assert saved["final_hotspot_source"] == "test1_roi"
+    assert saved["final_hotspot_dist_km"] == 0.0
+    assert saved["distance_class"] == "summit"
+    # el rollup de magnitud F47 sigue ganando (no zero-out)
+    assert saved["vrp_mw"] == pytest.approx(332.756)

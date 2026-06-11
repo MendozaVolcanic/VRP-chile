@@ -145,7 +145,10 @@ from pipeline.profile import (
     TEST1_LOCAL_BG_RING_IN_KM,
     TEST1_LOCAL_BG_RING_OUT_KM,
     TEST1_MIN_LOCAL_BG_PIXELS,
+    ENABLE_HONEST_ANCHOR,
+    HONEST_ANCHOR_TEST1_MODE,
 )
+from .anchor import resolve_honest_anchor  # S106 ancla espacial honesta
 from .single_pixel_mode import apply_single_pixel_mode
 from .test1_spatial_core import spatial_core_filter  # S99 Candidato B
 from .test1_contextual_filter import apply_contextual_test1_filter  # S99 Candidato C
@@ -628,6 +631,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # si rama "I04" no se ejecuta).
     n_hotspots_clustered = 0
     primary_cluster = None
+    ctx_cluster_anchor = None  # S106 ancla honesta (snapshot cluster contextual)
     # S25 Path Test 1 — defaults antes del bloque I04 (mismo patrón S16)
     test1_triggered = False
     test1_n_contrib = 0
@@ -1237,6 +1241,13 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         threshold_mw=SUB_MW_REGIME_THRESHOLD_MW,
                         max_pixels=SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
                     )
+                    # S106 ancla honesta — snapshot del cluster CONTEXTUAL.
+                    # Con first-pass ON, hot_mask_2d = Tests 2∧3 (+second pass)
+                    # SIN píxeles Test1 → este cluster es la posición MIROVA-real.
+                    # El recompute S31+ (src=test1) pisa primary_cluster más
+                    # abajo; preservamos la copia para la cascada del ancla.
+                    if ENABLE_HONEST_ANCHOR and primary_cluster is not None:
+                        ctx_cluster_anchor = dict(primary_cluster)
 
             valid_roi = roi_bt_full[~np.isnan(roi_bt_full)]
             t_max_i04 = float(np.max(valid_roi)) if len(valid_roi) else float("nan")
@@ -1639,6 +1650,48 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         primary_cluster["vrp_method"] = "lava_lake_eq16"
         vrp_mir_mw = _ll["vrp_mw"]
 
+    # S106 — ancla espacial honesta (design 2026-06-11 §3.1). SOLO posición:
+    # todos los bloques de magnitud de arriba ya corrieron con la semántica
+    # legacy (final_hotspot_source interno). Acá se pisa la POSICIÓN del
+    # record con la cascada honesta y se recalcula distance_class.
+    _ha_nti_peak = None
+    if ENABLE_HONEST_ANCHOR:
+        if (HONEST_ANCHOR_TEST1_MODE == "nti_peak" and nti is not None
+                and vent_dist_per_pixel is not None):
+            _roi3 = (vent_dist_per_pixel <= TEST1_ROI_KM) & ~np.isnan(nti)
+            if bool(_roi3.any()):
+                _pk_flat = np.nanargmax(np.where(_roi3, nti, -np.inf))
+                _pk_r, _pk_c = np.unravel_index(int(_pk_flat), nti.shape)
+                _ha_nti_peak = {
+                    "lat": round(float(lat[_pk_r, _pk_c]), 5),
+                    "lon": round(float(lon[_pk_r, _pk_c]), 5),
+                    "dist_km": round(float(vent_dist_per_pixel[_pk_r, _pk_c]), 3),
+                }
+        _ha_vent_hs = None
+        if vent_hotspot_lat is not None and vent_hotspot_lon is not None:
+            _ha_vent_hs = {"lat": vent_hotspot_lat, "lon": vent_hotspot_lon,
+                           "dist_km": vent_hotspot_dist_km}
+        _ha_loose = None
+        if hotspot_lat is not None and hotspot_lon is not None:
+            _ha_loose = {"lat": hotspot_lat, "lon": hotspot_lon,
+                         "dist_km": hotspot_dist_km}
+        (final_hotspot_lat, final_hotspot_lon, final_hotspot_dist_km,
+         final_hotspot_source) = resolve_honest_anchor(
+            ctx_cluster=ctx_cluster_anchor,
+            test1_triggered=bool(test1_triggered),
+            test1_summit_hit=bool(test1_summit_hit),
+            vent_lat=vent_lat, vent_lon=vent_lon,
+            nti_peak=_ha_nti_peak,
+            vent_hotspot=_ha_vent_hs,
+            loose_pixel=_ha_loose,
+            inner_radius_km=inner_radius_km,
+            mode=HONEST_ANCHOR_TEST1_MODE,
+        )
+        distance_class = None
+        if final_hotspot_dist_km is not None and inner_radius_km is not None:
+            distance_class = ("summit" if final_hotspot_dist_km <= inner_radius_km
+                              else "far")
+
     record = {
         "vrp_mir_mw": round(vrp_mir_mw, 3),
         "vrp_tir_mw": round(vrp_tir_mw, 3),
@@ -1721,6 +1774,13 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # record y el frontend / store / audit no los ve. Backward-compat estricto.
     if vrptir_aveni_diag is not None:
         record.update(vrptir_aveni_diag)
+
+    # S106 ancla honesta — diag del NTI-peak (solo modo nti_peak con peak hallado;
+    # backward-compat: con flag OFF los campos no aparecen).
+    if ENABLE_HONEST_ANCHOR and _ha_nti_peak is not None:
+        record["nti_peak_lat"] = _ha_nti_peak["lat"]
+        record["nti_peak_lon"] = _ha_nti_peak["lon"]
+        record["nti_peak_dist_km"] = _ha_nti_peak["dist_km"]
 
     return record
 
