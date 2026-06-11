@@ -178,3 +178,75 @@ fumarólico) → CONSERVA el offset N real de Lastarria (no lo borra). Predicci�
 actualizada: Lastarria probablemente "sin cambio" (offset fumarólico preservado), riesgo
 FN bajo. El A/B lo confirma empíricamente. (Material de Discussion del paper: el método es
 robusto a señal con estructura espacial; el único límite es la señal uniforme infinita.)
+
+## 14. RESULTADOS S106 — brazo k=3.0 (run 27275241269, 10/10 jobs OK; barrido pendiente)
+
+Audit: `audit_local_sweep.py` sobre `local_k30/` (merge de 2 chunks, verificado sin gap
+de frontera: el día 2026-03-31 SÍ fue procesado — los otros 4 vols tienen records ese día).
+
+| vol | offN_m (MIR→local) | %<3km | trig_t1 | recall | veredicto vs §12 |
+|---|---|---|---|---|---|
+| Tupungatito | 1047→**130** ✓ | 96→69 | 465→**95 (−80%)** ✗ | **74/75 (1 FN)** ✗ | **FALLA criterio duro** |
+| Villarrica | 748→**261** ✓ | 90→**57** ✗ | 462→88 | 8/11 ✓ | PARCIAL |
+| Llaima | 1097→**278** ✓ | 87→48 | 428→79 | 1/1 ✓ (riesgo FN NO se materializó) | PASA offN |
+| Lascar (ctrl) | 23→36 ~✓ | 99→91 | 446→**329 (−26%)** | 117/127 ✓ | PARCIAL (no predicho) |
+| Lastarria (ctrl) | 886→**931** ✓ conservado | 99→88 | 441→**289 (−34%)** | 94/105 ✓✓ | PASA (§13 acertó) |
+
+**Lectura contra la decisión pre-comprometida (§12, sin racionalizar)**:
+- El sesgo topográfico N **SE CURA** en los 3 nevados (offN 1047/748/1097 → 130/261/278 m).
+- PERO **Tupun trig_t1 se desploma** (465→95) + 1 FN real (2026-03-31, 5 pasadas baseline
+  con 0.04-0.14 MW a 0.03-0.3 km del cráter, Test1-only). Per §12 pre-comprometido:
+  **a k=3.0 la hipótesis queda refutada — NO promover k=3.0**.
+- Mecanismo (no anticipado en §13): el fondo local no "cancela" la señal débil extendida,
+  la ATENÚA — los vecinos del píxel del cráter están templados por la misma fuente
+  sub-pixel + σ local más ruidoso (menos píxeles de fondo) → umbral k·σ sube → el exceso
+  integrado cae bajo umbral. Es pérdida de SENSIBILIDAD transversal (también Lascar −26%
+  y Lastarria −34% en trig_t1, aunque ahí el recall lo cubren los triggers sobrevivientes),
+  no confusión lava/topografía.
+- El %<3km bajó en Villarrica/Llaima porque al apagarse el Test1 (el ancla precisa), las
+  detecciones restantes vienen de paths con anclas más dispersas.
+
+## 15. RESULTADOS S106 — barrido completo (run 27276651420, 20/20 OK) → VEREDICTO: REFUTADO
+
+Curva completa k=2.0/2.5/3.0 (audit_local_sweep.py, 5 brazos):
+
+| vol | métrica | MIR-anillo | k=2.0 | k=2.5 | k=3.0 |
+|---|---|---|---|---|---|
+| Tupungatito | offN_m / trig_t1 / recall | 1047 / 465 / 75-75 | 182 / 220 / 75-75 | 141 / 129 / 75-75 | 130 / 95 / 74-75 |
+| Villarrica | offN_m / trig_t1 / recall | 748 / 462 / 8-11 | 170 / 177 / 8-11 | 182 / 128 / 8-11 | 261 / 88 / 8-11 |
+| Llaima | offN_m / trig_t1 / recall | 1097 / 428 / 1-1 | 206 / 209 / 1-1 | 236 / 133 / 1-1 | 278 / 79 / 1-1 |
+| Lascar (ctrl) | offN_m / trig_t1 / recall | 23 / 446 / 117-127 | 43 / 409 / 117-127 | 38 / 369 / 117-127 | 36 / 329 / 117-127 |
+| Lastarria (ctrl) | offN_m / trig_t1 / recall | 886 / 441 / 94-105 | 742 / 424 / 94-105 | 821 / 372 / 94-105 | 931 / 289 / 94-105 |
+
+**La verificación decisiva (anti-racionalización A66): Test1 disparado EN noches ALERTA
+MIROVA** (proxy de cat-b real — si lo perdido fuera solo FP topográfico, esta columna no
+debería caer):
+
+| vol | MIR-anillo | k=2.0 | k=2.5 | k=3.0 |
+|---|---|---|---|---|
+| Tupungatito | 75/75 | **59/75 (−16)** | 31/75 | 17/75 |
+| Villarrica | 8/11 | **3/11 (−5 de 8 noches de lava real)** | 2/11 | 1/11 |
+| Llaima | 1/1 | 1/1 | 1/1 | 1/1 |
+| Lascar | 117/127 | 117/127 | 117/127 | 116/127 |
+| Lastarria | 94/105 | 94/105 | 94/105 | 87/105 |
+
+**Veredicto (decisión pre-comprometida §12): REFUTADO en todo el barrido. NO promover.**
+- Aun al k más sensible (2.0), el fondo local apaga el Test1 en noches de actividad REAL:
+  Tupungatito pierde el trigger en 16/75 noches ALERTA y Villarrica en 5/8 noches de lava
+  confirmada. El recall global se sostiene solo porque otros paths rescatan esas noches —
+  pero el Test1 ES el detector sensible para cat-b débil (S25-S27); degradarlo en las
+  noches reales adelgaza la redundancia y dispersa el ancla (%<3km cae 96→81 / 90→71).
+- **Mecanismo de la refutación (= límite del método, refina §13)**: a escala del anillo
+  local (0.5-1.5 km), la señal volcánica DÉBIL es espacialmente suave — la fuente sub-pixel
+  templa a sus propios vecinos — y resulta INDISTINGUIBLE de la suavidad topográfica. El
+  fondo local solo conserva señal con contraste sub-pixel fuerte (Láscar −8% apenas). El
+  test sintético §13 falló en anticiparlo porque modeló focos con borde nítido sobre fondo
+  de ruido blanco, no señal débil + vecindario auto-templado + σ local ruidoso.
+- Cadena completa del frente D11: V1 (co-validación per-pixel) refutado S104 → V2
+  (NTI-anillo) cerrado S105 (corrige ~50m de ~1000) → fondo-local-NTI refutado S106 en
+  todo el barrido. Los tres compartían el supuesto de que el sesgo es separable de la
+  señal débil a alguna escala espacial; la evidencia dice que a escala local NO lo es.
+- `enable_test1_local_bg_nti` queda **OFF** (nunca se promovió). Destino del flag/rama:
+  decisión de purga en S106+ (AUDIT_S105 P2-8).
+- Material para el paper: secuencia completa V1→V2→local con predicciones pre-registradas
+  y refutación limpia por criterio duro (Validation/Discussion).
