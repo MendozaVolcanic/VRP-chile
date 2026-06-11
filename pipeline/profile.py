@@ -287,6 +287,13 @@ ENABLE_TEST1_NTI_INTEGRAL: bool = bool(_p.get("enable_test1_nti_integral", False
 # Ver docs/superpowers/specs/2026-06-10-test1-local-bg-nti-design.md.
 ENABLE_TEST1_LOCAL_BG_NTI: bool = bool(_p.get("enable_test1_local_bg_nti", False))
 
+# S106 — ancla espacial honesta (design 2026-06-11). Solo POSICIÓN del record
+# (final_hotspot_*), nunca magnitud/detección. OFF = comportamiento legacy.
+ENABLE_HONEST_ANCHOR: bool = bool(_p.get("enable_honest_anchor", False))
+# Destino de los records Test1-dominantes: "vent" (cráter, semántica integral)
+# o "nti_peak" (píxel de NTI máximo del ROI — conserva fuente real offset).
+HONEST_ANCHOR_TEST1_MODE: str = str(_p.get("honest_anchor_test1_mode", "vent"))
+
 # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene aplicado a
 # la mask final combinada (post-OR de todos los paths) antes de calcular
 # n_anomalous_pixels, cluster_hotspots y vrp_mw.
