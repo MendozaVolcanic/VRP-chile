@@ -1183,7 +1183,7 @@ Guard anti-revert: `tests/test_detection_anchor.py`. Resultados: det→cráter T
 5.76→1.25 km, PCC 7.23→0.69, PP 2.69→1.14. Detalle: `docs/S98_ANCHOR_FIX_RESULTS.md`.
 (Entrada agregada retroactivamente en S105 — AUDIT_S105 detectó que faltaba acá.)
 
-## D11 — Sesgo topográfico de los paths MIR-absolutos (A69) — ABIERTA (fix en A/B S105)
+## D11 — Sesgo topográfico de los paths MIR-absolutos (A69) — ABIERTA (3 fixes refutados; sin candidato activo S106)
 
 **Divergencia formal** (S104, formalizada S105 por AUDIT_S105): en volcanes nevados
 (Villarrica/Tupungatito/Llaima) el campo nocturno BT MIR está dominado por el gradiente
@@ -1205,10 +1205,24 @@ Cronología del cierre (S104→S105, ground truth probe-based):
 - **Discriminante núcleo-anillo** (probes 27243090277 + 27244013547): separa lava/topo
   sin error en Villarrica pero NO generaliza como gate (Tupun cat-b real casi continuo,
   confirmado por Nicolás; Llaima lava débil con pico al lago). Pista, no fix.
-- **Fondo LOCAL sobre NTI (Coppola 2024 Eq.13, uniforme) — EN A/B** (S105, PR #386,
-  flag `enable_test1_local_bg_nti` OFF): cada píxel vs la mediana del NTI de su anillo
-  local 0.5–1.5 km. Predicciones pre-registradas (design 2026-06-10 §12, A66). A/B
-  runs 27275241269 (k=3.0) + 27276651420 (k=2.0/2.5).
+- **Fondo LOCAL sobre NTI (Coppola 2024 Eq.13, uniforme) — REFUTADO S106** (S105 PR
+  #386 flag OFF; A/B runs 27275241269 k=3.0 + 27276651420 barrido k=2.0/2.5, 30/30 jobs
+  OK; predicciones pre-registradas design 2026-06-10 §12, A66): el sesgo SÍ se cura
+  (offN nevados 1047/748/1097 → 182/170/206 m a k=2.0, Lastarria fumarólico conservado)
+  PERO a TODO k del barrido el Test1 se apaga en noches de actividad REAL — Tupungatito
+  pierde el trigger en 16/75 noches ALERTA (k=2.0; 58/75 a k=3.0 + 1 FN total el
+  2026-03-31), Villarrica en 5/8 noches de lava confirmada. Mecanismo del límite: a
+  escala del anillo local (0.5–1.5 km) la señal débil real es espacialmente SUAVE (la
+  fuente sub-pixel templa a sus propios vecinos) e indistinguible de la suavidad
+  topográfica; solo el contraste sub-pixel fuerte sobrevive (Láscar −8%). Veredicto por
+  decisión pre-comprometida §12: NO promover a ningún k. Flag queda OFF (candidato a
+  purga P2-8). Detalle: design doc §14–15.
+
+**Estado S106**: los 3 fixes candidatos (V1, V2, fondo-local) compartían el supuesto de
+que el sesgo topográfico es separable de la señal débil a alguna escala espacial — la
+evidencia acumulada dice que a escala local NO lo es. La divergencia queda ABIERTA sin
+candidato activo; el costo operacional es de POSICIÓN del ancla (~1–1.5 km N mediano en
+nevados, A70), no de recall ni de magnitud (calibración 0.78–0.80× intacta S103).
 
 Implicación al marco A54: el "extra" sobre MIROVA en nevados incluye FP topográficos
 (cat-d), no solo cat-b real. Ver `docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md` (completo) y
