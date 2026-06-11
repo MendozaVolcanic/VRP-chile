@@ -169,3 +169,39 @@ re-diseñar; el ancla VIIRS puede promoverse sola (el destape es MODIS-específi
   intra-radio por path — clasificación física hecha (S105 §5). No reabre el ciclo.
 - **Schema**: `final_hotspot_source` ya existe (F47); valores nuevos son aditivos.
   Frontend usa distance_class + pc.* — sin breaking change (A46).
+
+## 7. Preparación Fase 2 (S106, mientras corría el A/B run 27343409067) — descartes con datos
+
+Probes sobre `data/mirova_equivalent/` en disco (`experiments/_s106_fase2/`):
+
+**C1 (cap D9 270→273K) REFUTADO**: los 132 records MODIS inflados (pc.vrp>5) NO son
+cirrus — `t_bg` mediana 279-288K (escena tibia), campos path legacy en None, la
+detección viene del **first-pass contextual** (Tests 2∧3, 15-78 píxeles). Un cap por
+`t_bg<273K` atraparía **0** de los 132. El framing "cirrus" de S103 §2 era de la era
+pre-first-pass; estos artefactos son otro mecanismo.
+
+**Piso de energía-por-píxel (variante C2) REFUTADO — discriminante INVERTIDO**:
+
+| población | n | npx cluster med | vrp/px med | dist med |
+|---|---|---|---|---|
+| Inflados pc>5 (11 vols, 0% MIROVA) | 132 | 11 | **0.687 MW/px** | 1.66 km |
+| Láscar real (control 0.92×) | 248 | 4 | **0.213 MW/px** | 1.92 km |
+
+La señal MODIS real es de clusters chicos y débiles; el artefacto es un blob de
+píxeles MÁS calientes. Cualquier piso por píxel conserva el artefacto y mata lo real
+(thr=0.5: 89% inflados escapan, Láscar pierde 83%). El tamaño (npx 11 vs 4) separa
+parcialmente pero solapa (p90 Láscar = 11). "ctxpeak port" no aplica (no son records
+Test1).
+
+**Estado**: el fix de magnitud del destape MODIS queda como pregunta de diseño
+ABIERTA para la Fase 2 (candidatos restantes: dispersión/compactez espacial del
+design 2026-06-05 §5.2 — ahora con first-pass framing —, co-validación, o el
+análogo algorítmico del descarte visual MIROVA sp426_5 L689-696 "typically <5 MW").
+Mientras tanto la decisión pre-comprometida §4 rige: **el ancla MODIS NO se mergea
+sin este fix** (el ancla VIIRS puede promoverse sola).
+
+**Recon de inserción MODIS/V750** (agente Explore, verificar líneas al implementar,
+A48): cascada MODIS 1020-1052 / V750 965-993 (espejo exacto de VIIRS); cluster build
+MODIS 913-930 / V750 876-893; recompute test1 MODIS 1144-1162 / V750 1081-1099;
+first-pass existe en ambos (`hot_mask_2d = fp_hot` MODIS:702, V750:692); NTI y
+vent_dist_per_pixel existen en ambos; sin Eq.16 ni ctxpeak (solo VIIRS375).
