@@ -250,3 +250,24 @@ debería caer):
   decisión de purga en S106+ (AUDIT_S105 P2-8).
 - Material para el paper: secuencia completa V1→V2→local con predicciones pre-registradas
   y refutación limpia por criterio duro (Validation/Discussion).
+
+## 16. Verificación S106 pedida por Nicolás — estratificación por sensor (A62)
+
+Nicolás objetó (con razón) que el audit §15 contaba noches ALERTA del CSV MIROVA de
+CUALQUIER sensor contra nuestros records VIIRS375. El CSV tiene 3 valores de `Sensor`:
+MODIS / VIIRS / VIIRS375. Re-audit manzanas-con-manzanas (`audit_sensor_strat.py`,
+noches ALERTA **VIIRS375** vs records VIIRS375 nuestros):
+
+| vol | universo ALERTA (M/V/V375) | Test1 vivo: MIR-anillo | k=2.0 | k=2.5 | k=3.0 |
+|---|---|---|---|---|---|
+| Tupungatito | 0/12/**72** | 72/72 | 58/72 | 30/72 | 17/72 |
+| Villarrica | 1/0/**10** | 7/10 | **2/10** | 1/10 | **0/10** |
+| Llaima | 0/0/**1** | 1/1 | 1/1 | 1/1 | 1/1 |
+| Lascar (ctrl) | 66/93/**113** | 104/113 | 104/113 (sin cambio) | 104/113 | 104/113 |
+| Lastarria (ctrl) | 0/0/**105** | 94/105 | 94/105 | 94/105 | 87/105 |
+
+**La refutación SE CONFIRMA y se endurece**: en universo puro VIIRS375, Villarrica pierde
+el Test1 en 5 de sus 7 noches de lava a k=2.0 y en TODAS a k=3.0. El control Láscar queda
+idéntico en los 4 brazos (104/113) — la pérdida es específica de señal débil en nevados,
+no del método de conteo. El veredicto §15 (NO promover) queda verificado contra la
+objeción de mezcla de sensores.
