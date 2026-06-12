@@ -2141,6 +2141,34 @@ function renderDetail() {
           const latlng = marker.getLatLng();
           window._mapRefs.map.setView(latlng, 14, { animate: true });
           marker.openPopup();
+          return;
+        }
+        // S106 (pedido Nicolás): la fila puede NO tener marker en el registro
+        // (record con rollup 0 filtrado del mapa, far oculto por "Solo cráter",
+        // re-render parcial, etc.) — antes el click moría en silencio. Ahora
+        // volamos igual a la posición honesta del record y mostramos un popup
+        // transitorio con los datos de la fila.
+        if (window._mapRefs.map) {
+          const honest = ["ctx_cluster", "test1_roi", "test1_nti_peak"]
+            .includes(r.final_hotspot_source);
+          const fLat = (honest ? r.final_hotspot_lat : null)
+            ?? r.final_hotspot_lat ?? r.hotspot_lat ?? r.vent_hotspot_lat
+            ?? (r.anomaly_pixels && r.anomaly_pixels.length ? r.anomaly_pixels[0].lat : null);
+          const fLon = (honest ? r.final_hotspot_lon : null)
+            ?? r.final_hotspot_lon ?? r.hotspot_lon ?? r.vent_hotspot_lon
+            ?? (r.anomaly_pixels && r.anomaly_pixels.length ? r.anomaly_pixels[0].lon : null);
+          if (fLat != null && fLon != null) {
+            window._mapRefs.map.setView([fLat, fLon], 14, { animate: true });
+            L.popup({ autoClose: true })
+              .setLatLng([fLat, fLon])
+              .setContent(
+                `<b>${r.sensor}</b><br>${r.datetime_utc} UTC<br>` +
+                `VRP: ${(vrp ?? 0).toFixed(3)} MW<br>` +
+                (dist != null ? `Distancia al cráter: ${dist.toFixed(2)} km<br>` : "") +
+                `<small>(sin marker en el mapa: registro filtrado de la vista actual)</small>`
+              )
+              .openOn(window._mapRefs.map);
+          }
         }
       });
       // S18: clasificar fila como summit/far. Si está "far" y el toggle está
