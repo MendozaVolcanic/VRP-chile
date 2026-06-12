@@ -205,3 +205,37 @@ A48): cascada MODIS 1020-1052 / V750 965-993 (espejo exacto de VIIRS); cluster b
 MODIS 913-930 / V750 876-893; recompute test1 MODIS 1144-1162 / V750 1081-1099;
 first-pass existe en ambos (`hot_mask_2d = fp_hot` MODIS:702, V750:692); NTI y
 vent_dist_per_pixel existen en ambos; sin Eq.16 ni ctxpeak (solo VIIRS375).
+
+## 8. RESULTADOS S106 del A/B (run 27343409067, 20/20 + reruns) — vs predicciones §4
+
+**Incidente de cobertura (lección operacional)**: 2 jobs del brazo A salieron truncados
+con conclusion=success (Lastarria ch1: 4 días de 62; Llaima ch1: hasta 03-20) — el
+circuit-breaker A64 degrada con gracia en NRT pero en REPROC produce data parcial
+SILENCIOSA. Detectado por audit de cobertura de fechas pre-análisis (verificar SIEMPRE
+rangos de fechas de cada chunk antes de auditar un A/B). Reruns seriales con
+`gh run rerun --job` (GitHub no permite 2 reruns simultáneos del mismo run).
+
+**Verificación pareada al granule (criterio duro 1)**: en la intersección exacta de
+(sensor, datetime) base∩A — Tupungatito 540, Villarrica 592, Láscar 486, Lastarria
+488 granules — **trig_t1 difiere en 0 granules** en los 4 vols completos. Los deltas
+agregados (Villarrica 461 vs 462, Lastarria 448 vs 441) son variabilidad de
+disponibilidad NASA entre corridas (granules extra/faltantes), NO lógica. ✓ EL ANCLA
+NO TOCA LA DETECCIÓN, exactamente como se diseñó.
+
+| vol | offN base→A (m) | dist base→A (km) | recall | veredicto §4 |
+|---|---|---|---|---|
+| Tupungatito | 1047 → **0** | 1.50 → 0.00 | 75/75 ✓ | **PASA** (≤300 ✓) |
+| Villarrica | 748 → **0** | 1.56 → 0.00 | 8/11 ✓ | **PASA** (≤200 ✓) |
+| Llaima | 1097 → **0** | 1.64 → 0.00 | 1/1 ✓ | PASA (pendiente rerun ch1 para cifras finales) |
+| Láscar (ctrl) | 23 → 1 | 0.32 → 0.16 | 117/127 ✓ | **PASA** (sin cambio) |
+| Lastarria (ctrl) | 886 → **960 conservado** | 1.22 → 1.12 | 94/105 ✓ | **PASA** (NW fumarólico vivo vía ctx_cluster 300/453) |
+
+**Discriminador A-vs-B (§3.2, Lastarria test1-only n=153 brazo B)**: NTI-peaks
+NW 70 / SW 42 / SE 23 / resto 18 — NW es moda (46%) pero con dispersión alta; y en
+los nevados el brazo B EMPEORA el offN (Villarrica 884 vs 748 base; Llaima 2263):
+en noches débiles el campo NTI es plano y su máximo cae en ruido o en el lago.
+**Decisión pre-comprometida: GANA EL BRAZO A (vent)** — B no conserva señal con
+suficiente fidelidad para justificar su ruido.
+
+**Estado**: pendiente SOLO el rerun Llaima-A ch1 (attempt 3) para cifras finales.
+Promoción A45 (OK Nicolás + flip + reproc 11 + R2/R3/R8 + frontend Fase 2) después.
