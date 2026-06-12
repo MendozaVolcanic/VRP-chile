@@ -1382,9 +1382,17 @@ function latestDetection(records, includeFar = false, innerKm = 10) {
       // S97: acoplar distancia + extensión (px) de ESTA detección, para que la
       // tarjeta muestre solo la última/más importante (estilo MIROVA), no un
       // resumen de áreas.
+      // S106 ancla honesta: si el pipeline ancló el record deliberadamente
+      // (ctx_cluster/test1_roi/test1_nti_peak), la distancia oficial es la del
+      // ancla — el pc de los records test1 es el cluster del footprint de la
+      // integral (arrastre topográfico A69), no la posición del record.
       const pc = r.primary_cluster || {};
+      const _honestSrc = ["ctx_cluster", "test1_roi", "test1_nti_peak"]
+        .includes(r.final_hotspot_source);
       best = { vrp: v, datetime_utc: r.datetime_utc, ts,
-               dist: pc.centroid_dist_km ?? null, npx: pc.n_pixels ?? null,
+               dist: (_honestSrc ? r.final_hotspot_dist_km : null)
+                     ?? pc.centroid_dist_km ?? null,
+               npx: pc.n_pixels ?? null,
                summit: isSummitDetection(r) };
     }
   }
@@ -2107,7 +2115,13 @@ function renderDetail() {
       // S29 fix bug 3: cuando Test 1 dispara solo (sin eruption-path),
       // hotspot_dist_km queda en None pero final_hotspot_dist_km tiene el
       // valor real. Fallback a final_hotspot_dist_km antes de anomaly_pixels.
-      const dist = r.hotspot_dist_km
+      // S106 ancla honesta: si el record trae un ancla deliberada del pipeline
+      // (ctx_cluster / test1_roi / test1_nti_peak), esa ES la distancia oficial
+      // — el píxel suelto (hotspot_dist_km) ya no representa al record.
+      const honestAnchor = ["ctx_cluster", "test1_roi", "test1_nti_peak"]
+        .includes(r.final_hotspot_source);
+      const dist = (honestAnchor ? r.final_hotspot_dist_km : null)
+        ?? r.hotspot_dist_km
         ?? r.final_hotspot_dist_km
         ?? (r.anomaly_pixels && r.anomaly_pixels.length > 0 ? r.anomaly_pixels[0].dist_km : null)
         ?? r.vent_hotspot_dist_km;
@@ -2366,7 +2380,22 @@ function renderDetail() {
       const isVentOnly = r.hotspot_lat == null && (!r.anomaly_pixels || r.anomaly_pixels.length === 0);
       const hasRealVentCoord = r.vent_hotspot_lat != null;
       const hasFinal = r.final_hotspot_lat != null;
-      const pixels = (r.anomaly_pixels && r.anomaly_pixels.length > 0)
+      // S106 ancla honesta: cuando el pipeline ancló el record por semántica
+      // Test1-integral (test1_roi → cráter, test1_nti_peak → pico NTI), el
+      // marker PRIMARIO del mapa es esa ancla — los anomaly_pixels de estos
+      // records son el FOOTPRINT de la integral (soporte de cómputo con
+      // arrastre topográfico A69, no detecciones puntuales reclamadas).
+      // El footprint sigue disponible bajo el toggle "Todos los pixels"
+      // (evidencia preservada, regla S18).
+      const isHonestTest1 = hasFinal &&
+        (r.final_hotspot_source === "test1_roi" || r.final_hotspot_source === "test1_nti_peak");
+      const pixels = isHonestTest1
+        ? [{
+            lat: r.final_hotspot_lat, lon: r.final_hotspot_lon,
+            dist_km: r.final_hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
+            vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0, real_coord: true
+          }].concat(r.anomaly_pixels || [])
+        : (r.anomaly_pixels && r.anomaly_pixels.length > 0)
         ? r.anomaly_pixels
         : (hasFinal ? [{
             lat: r.final_hotspot_lat, lon: r.final_hotspot_lon,
@@ -2626,7 +2655,12 @@ function renderDetail() {
       if (!isSensorVisible(r)) continue;
       if (!isValidDetection(r)) continue;  // H3 (S77): helper global
       const vrp = r.vrp_mw ?? 0;
-      const dist = r.hotspot_dist_km ?? r.final_hotspot_dist_km ?? (r.anomaly_pixels && r.anomaly_pixels.length ? r.anomaly_pixels[0].dist_km : null);
+      // S106 ancla honesta: preferir el ancla oficial cuando existe (ver tabla).
+      const _honest = ["ctx_cluster", "test1_roi", "test1_nti_peak"]
+        .includes(r.final_hotspot_source);
+      const dist = (_honest ? r.final_hotspot_dist_km : null)
+        ?? r.hotspot_dist_km ?? r.final_hotspot_dist_km
+        ?? (r.anomaly_pixels && r.anomaly_pixels.length ? r.anomaly_pixels[0].dist_km : null);
       if (dist == null) continue;
       // F30 Bug 11a fix (S74): respetar toggle "Solo cráter" / "Incluir lejanas".
       // Antes el scatter mostraba todos los puntos incluso con toggle activo —
