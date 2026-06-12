@@ -1,0 +1,53 @@
+name: S106 reproc ancla honesta VIIRS750 A/B (A45)
+
+# A43 "on" quoted. Validacion del espejo V750 del ancla honesta (PR #401, flag
+# separado): profile _honest_anchor_v750 (= produccion + enable_honest_anchor_viirs750).
+# 5 vols del set A/B canonico x 2 chunks. Artifacts, NO commitea (A47).
+# Criterio duro: deteccion identica pareada al granule + posiciones V750 al cluster.
+# Destape pre-verificado limpio (experiments/_s106_fase2/probe_v750_destape.py).
+# NO despachar mientras corre reproc-s106-anchor-rest (no competir por runners).
+"on":
+  workflow_dispatch:
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        volcano: [Tupungatito, Villarrica, Llaima, Lascar, Lastarria]
+        chunk:
+          - { start: "2026-01-29", end: "2026-03-31" }
+          - { start: "2026-04-01", end: "2026-06-08" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reprocess _honest_anchor_v750 / ${{ matrix.volcano }} / ${{ matrix.chunk.start }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 290
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _honest_anchor_v750 \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ matrix.chunk.start }} \
+            --end ${{ matrix.chunk.end }} \
+            --overwrite
+      - name: Upload JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: s106v750-${{ matrix.volcano }}-${{ matrix.chunk.start }}
+          path: data/_honest_anchor_v750/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7
