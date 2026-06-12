@@ -137,7 +137,10 @@ from pipeline.profile import (
     ENABLE_SINGLE_PIXEL_SUB_MW_MODE,
     SUB_MW_REGIME_THRESHOLD_MW,
     SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
+    ENABLE_HONEST_ANCHOR_MODIS,
+    HONEST_ANCHOR_TEST1_MODE,
 )
+from pipeline.anchor import resolve_honest_anchor  # S106 ancla espacial honesta
 from pipeline.single_pixel_mode import apply_single_pixel_mode
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -805,6 +808,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     # para incluir vrp_mw del cluster contiguo principal.
     n_hotspots_clustered = 0
     primary_cluster = None
+    ctx_cluster_anchor = None  # S106 ancla honesta (snapshot cluster contextual)
 
     vrp_mw = 0.0
     hotspot_lat = None
@@ -928,6 +932,12 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                 threshold_mw=SUB_MW_REGIME_THRESHOLD_MW,
                 max_pixels=SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
             )
+            # S106 ancla honesta — snapshot del cluster CONTEXTUAL (con
+            # first-pass ON el hot_mask no incluye píxeles Test1; el recompute
+            # S30 pisa primary_cluster más abajo para src=test1). Espejo del
+            # patrón process_viirs.py.
+            if ENABLE_HONEST_ANCHOR_MODIS and primary_cluster is not None:
+                ctx_cluster_anchor = dict(primary_cluster)
 
     valid_roi = roi_bt_full[~np.isnan(roi_bt_full)]
     t_max = float(np.max(valid_roi)) if len(valid_roi) else float("nan")
@@ -1160,6 +1170,48 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                     max_pixels=SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
                 )
                 n_hotspots_clustered = len(t1_clusters)
+
+    # S106 — ancla espacial honesta MODIS (design 2026-06-11 §3.1, espejo de
+    # process_viirs.py). SOLO posición: los bloques de magnitud de arriba ya
+    # corrieron con la semántica legacy. Flag SEPARADO del de VIIRS375
+    # (enable_honest_anchor_modis) — NO activar sin el fix del destape (§4/§7).
+    _ha_nti_peak = None
+    if ENABLE_HONEST_ANCHOR_MODIS:
+        if (HONEST_ANCHOR_TEST1_MODE == "nti_peak" and nti is not None
+                and vent_dist_per_pixel is not None):
+            _roi3 = (vent_dist_per_pixel <= TEST1_ROI_KM) & ~np.isnan(nti)
+            if bool(_roi3.any()):
+                _pk_flat = np.nanargmax(np.where(_roi3, nti, -np.inf))
+                _pk_r, _pk_c = np.unravel_index(int(_pk_flat), nti.shape)
+                _ha_nti_peak = {
+                    "lat": round(float(lat[_pk_r, _pk_c]), 5),
+                    "lon": round(float(lon[_pk_r, _pk_c]), 5),
+                    "dist_km": round(float(vent_dist_per_pixel[_pk_r, _pk_c]), 3),
+                }
+        _ha_vent_hs = None
+        if vent_hotspot_lat is not None and vent_hotspot_lon is not None:
+            _ha_vent_hs = {"lat": vent_hotspot_lat, "lon": vent_hotspot_lon,
+                           "dist_km": vent_hotspot_dist_km}
+        _ha_loose = None
+        if hotspot_lat is not None and hotspot_lon is not None:
+            _ha_loose = {"lat": hotspot_lat, "lon": hotspot_lon,
+                         "dist_km": hotspot_dist_km}
+        (final_hotspot_lat, final_hotspot_lon, final_hotspot_dist_km,
+         final_hotspot_source) = resolve_honest_anchor(
+            ctx_cluster=ctx_cluster_anchor,
+            test1_triggered=bool(test1_triggered),
+            test1_summit_hit=bool(test1_summit_hit),
+            vent_lat=vent_lat, vent_lon=vent_lon,
+            nti_peak=_ha_nti_peak,
+            vent_hotspot=_ha_vent_hs,
+            loose_pixel=_ha_loose,
+            inner_radius_km=inner_radius_km,
+            mode=HONEST_ANCHOR_TEST1_MODE,
+        )
+        distance_class = None
+        if final_hotspot_dist_km is not None and inner_radius_km is not None:
+            distance_class = ("summit" if final_hotspot_dist_km <= inner_radius_km
+                              else "far")
 
     return {
         "vrp_mw": round(vrp_mw, 3),
