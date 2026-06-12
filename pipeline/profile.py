@@ -293,6 +293,11 @@ ENABLE_HONEST_ANCHOR: bool = bool(_p.get("enable_honest_anchor", False))
 # Destino de los records Test1-dominantes: "vent" (cráter, semántica integral)
 # o "nti_peak" (píxel de NTI máximo del ROI — conserva fuente real offset).
 HONEST_ANCHOR_TEST1_MODE: str = str(_p.get("honest_anchor_test1_mode", "vent"))
+# S106 Fase 2 — espejos del ancla por sensor, flags SEPARADOS del de VIIRS375.
+# MODIS NO puede activarse hasta resolver el fix de magnitud del destape (131
+# records path-D first-pass inflados, design 2026-06-11 §4/§7 pre-comprometido).
+ENABLE_HONEST_ANCHOR_MODIS: bool = bool(_p.get("enable_honest_anchor_modis", False))
+ENABLE_HONEST_ANCHOR_VIIRS750: bool = bool(_p.get("enable_honest_anchor_viirs750", False))
 
 # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene aplicado a
 # la mask final combinada (post-OR de todos los paths) antes de calcular
