@@ -237,5 +237,25 @@ en noches débiles el campo NTI es plano y su máximo cae en ruido o en el lago.
 **Decisión pre-comprometida: GANA EL BRAZO A (vent)** — B no conserva señal con
 suficiente fidelidad para justificar su ruido.
 
-**Estado**: pendiente SOLO el rerun Llaima-A ch1 (attempt 3) para cifras finales.
-Promoción A45 (OK Nicolás + flip + reproc 11 + R2/R3/R8 + frontend Fase 2) después.
+**CIFRAS FINALES (rerun Llaima attempt 3 completo)**: Llaima trig_t1 428=428 exacto,
+0 diffs pareados, offN 1097→0, recall 1/1. **Los 5 vols pasan TODOS los criterios
+duros** (0 diffs de trig_t1 pareados en los 5; offN nevados → 0; controles intactos;
+Lastarria NW conservado). Brazo B descartado formalmente (Villarrica 884/Llaima 2263 m
+— el pico NTI cae en ruido/lago en noches débiles; discriminador Lastarria 46% NW
+insuficiente).
+
+## 9. PROMOCIÓN S106 (OK Nicolás "confirmo... continua con todo")
+
+- **Flip**: `enable_honest_anchor: true` (modo vent) en mirova_equivalent.yaml — NRT
+  produce anclas honestas desde el merge. Espejos MODIS/V750 implementados con flags
+  SEPARADOS OFF (PR #401; MODIS gateado por fix destape §7).
+- **Data promovida** (merge_promote_honest_anchor.py, semántica de UNIÓN S101): los 5
+  vols del A/B desde los artifacts del brazo A (Villarrica +1 granule legacy
+  conservado). R3 sobre data/mirova_equivalent: offN 0/0/0/1/948(NW) ✓.
+- **6 Tier A restantes**: reproc flag-ON en vuelo (run 27422803708, 12 jobs,
+  workflow reproc-s106-anchor-rest.yml) → promoción al aterrizar (mismo script).
+- Los records NRT post-2026-06-08 quedan con ancla legacy hasta que el cron los
+  regenere (transitorio aceptado, patrón S103).
+- Rollback completo: tag `pre-s106-honest-anchor`.
+- **Pendiente Fase 2**: fix magnitud destape MODIS (§7, pregunta abierta) → activar
+  espejo MODIS; validación V750; frontend 3 vistas (sync diario.html); cierre D11.
