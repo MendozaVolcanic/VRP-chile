@@ -200,6 +200,35 @@ análogo algorítmico del descarte visual MIROVA sp426_5 L689-696 "typically <5 
 Mientras tanto la decisión pre-comprometida §4 rige: **el ancla MODIS NO se mergea
 sin este fix** (el ancla VIIRS puede promoverse sola).
 
+### §7b — Barrido COMPLETO de discriminantes per-record (S106 post-promoción): 6 refutados
+
+Probes en `experiments/_s106_fase2/` sobre data operacional, población = 132-134
+inflados MODIS (pc.vrp>5, 0% MIROVA) vs Láscar real (~250, calibrado 0.92×):
+
+| # | candidato | resultado | dato clave |
+|---|---|---|---|
+| 1 | C1 cap cirrus t_bg<273K | REFUTADO | inflados son warm-scene 279-288K; atrapa 0/132 |
+| 2 | piso energía/píxel | REFUTADO (invertido) | real=0.21 MW/px < artefacto=0.69 MW/px |
+| 3 | compactez/dispersión cluster | REFUTADO (débil) | compact 0.43 vs 0.61, solapa; mejor punto mata 20% real |
+| 4 | co-validación V375 misma noche | REFUTADO | 99% de inflados co-validan (V375 detecta a diario) |
+| 5 | ΔT píxel pico vs bg | REFUTADO (invertido) | real=3.2K < artefacto=4.6K; cualquier umbral mata real 1º |
+| 6 | recurrencia espacial del centroide | REFUTADO | spread inflados 1.2-2.4 km ≈ real 1.93 km (cuantización 1 km) |
+
+**Síntesis (el hallazgo)**: a nivel de record, el blob tibio first-pass y la señal
+volcánica débil real son **observacionalmente equivalentes** en MODIS 1 km — la señal
+real débil es sistemáticamente MÁS fría/débil/pequeña que el artefacto, así que todo
+filtro ingenuo la mata primero. La diferencia no está en el record: está en el MÉTODO
+DE MAGNITUD. El inflado proviene de SUMAR 11 píxeles marginales (vs 4 del real); MIROVA
+reporta sus FPs análogos "typically <5 MW" porque no suma blobs.
+
+**Candidato que queda en pie (uniformidad, NO gate nuevo — A55-safe)**: portar a MODIS
+(y V750) la magnitud contextual keep-peak que VIIRS375 YA usa operacionalmente desde
+S100 (`enable_test1_contextual_filter` + keep_peak — curó Tupun 18.9×). Es el mismo
+algoritmo uniforme (principio Nicolás "MIROVA = 1 algoritmo"), cierra la asimetría
+documentada (AUDIT_S105 eje 2, S102§2) y ataca la raíz: la suma del blob marginal,
+no la detección. Requiere diseño de detalle (el ctxpeak V375 filtra píxeles Test1;
+acá el blob es first-pass) + A/B con criterio pre-registrado.
+
 **Recon de inserción MODIS/V750** (agente Explore, verificar líneas al implementar,
 A48): cascada MODIS 1020-1052 / V750 965-993 (espejo exacto de VIIRS); cluster build
 MODIS 913-930 / V750 876-893; recompute test1 MODIS 1144-1162 / V750 1081-1099;
