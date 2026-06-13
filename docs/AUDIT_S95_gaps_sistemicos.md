@@ -23,13 +23,33 @@ a mano — todos salen del script.
 | 2 | Otros "calculado pero no persistido" (A07) | Real pero menor | `nti` per-pixel = OPCIONAL (no lo pide F5'); `vrp_mir_mw_test1_only` diag barato |
 | 3 | Campos `*_dist_km` con ancla engañosa (centro vs eff_vent) | **Real, estructural** | Documentar + regla de cálculo para F5' (recomputar desde lat/lon) |
 | 4 | Arrastre del gap Test1 | Real, acotado | Re-correr 4 análisis S94 tras el reproc; métricas por-sensor NO contaminadas |
-| **5** | F47-style: `distance_class` gatea antes que el cluster, oculta 1401 records | **REAL pero 0 pérdida de recall** | Documentar; raíz = ancla variable (Eje 3); brainstorming antes de tocar. NO reactivo |
+| **5** | F47-style: `distance_class` gatea antes que el cluster, oculta 1401 records | ⚠️ **"0 pérdida" REFUTADO S106 — ver corrección abajo** | Reproc F2 Láscar MODIS (AUDIT_S106 P1.1) |
 
 **El único cambio operacional al pipeline que sale de esta auditoría es el Eje 1**
 (portar el helper a los otros 2 procesadores). El Eje 5 es una incoherencia de esquema
-real pero sin pérdida medible (0 records MIROVA-confirmados ocultados); su raíz es el
+real ~~pero sin pérdida medible (0 records MIROVA-confirmados ocultados)~~; su raíz es el
 ancla variable del Eje 3 y se decide aparte con brainstorming. Lo demás es documentación
 y método de análisis.
+
+> ## ⚠️ CORRECCIÓN S106 (AUDIT_S106 P1.2) — el "0 pérdida de recall" del Eje 5 era un artefacto de método, NO un hecho
+>
+> La conclusión "0 pérdida de recall, 0 records MIROVA-confirmados ocultados" estaba
+> **metodológicamente viciada**: `experiments/_s95_audit/verify_eje5.py:132` contaba los
+> confirmados vía `r.get('_mirova_confirmed')` — un flag que **solo existe en runtime del
+> frontend y está vacío en disco** (0/18616 records). El "0" estaba garantizado por
+> construcción, no medido contra el ground truth (`latest_consolidado.csv`).
+>
+> El cruce correcto (AUDIT_S106, estratificado por sensor Y por volcán) da: **MODIS Láscar
+> pierde ~70/79 alertas que MIROVA SÍ publica** — el píxel suelto cae en el Salar de
+> Atacama (16-32 km) y vuelve `distance_class='far'` aunque el `primary_cluster` está en
+> el cráter (mediana 1.46 km, coincide con MIROVA 1.41 km). El rescate F47 no dispara
+> porque `hotspot_dist<25 km`. NO es categoría A54 (real-no-publicada): MIROVA las publica.
+> Es un FN sobre señal confirmada. **Número canónico: ~70 Láscar MODIS** (no 0).
+>
+> Acción: reproc histórico F2 de Láscar MODIS con el pipeline actual (nadir-fijo) para que
+> `distance_class` derive del `primary_cluster`, no del hotspot del Salar — espejo MODIS
+> del fix de ancla honesta S106. Discriminador: estratificar por sensor Y por volcán (solo
+> Láscar tiene MODIS publicado con regularidad). Ver AUDIT_S106 §2 P1.1/P1.2.
 
 > **NOTA DE INTEGRIDAD (queda registrado, pedido de Nicolás).** En la primera pasada
 > declaré el Eje 5 "REFUTADO" basándome en una lectura del frontend que el stdout

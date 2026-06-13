@@ -1228,6 +1228,34 @@ Implicación al marco A54: el "extra" sobre MIROVA en nevados incluye FP topogr�
 (cat-d), no solo cat-b real. Ver `docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md` (completo) y
 `docs/superpowers/specs/2026-06-10-test1-local-bg-nti-design.md`.
 
+### D11-bis — El ancla honesta reporta `dist=0.0` para records Test1-only (divergencia formal, AUDIT_S106 P2.3)
+
+El fix adoptado S106 (`enable_honest_anchor`, VIIRS375) ancla al **vent** los records
+cuya única fuente es el Test1 integrado (`final_hotspot_source='test1_roi'`), reportando
+`final_hotspot_dist_km=0.0` exacto. En producción son **2365 records** (Llaima 350,
+Villarrica 343, Copahue 341, NdC 309, Tupungatito 259...). MIROVA **nunca** publica 0.0:
+su `Distancia_km` es un offset variable volcán-específico (mediana global 1.68 km; de 969
+ALERTAS solo 10 = 1.03% dan 0.0; Tupungatito mediana 5.21 km; incluso Villarrica "al
+cráter" da 0.84 km fijo, A13). **Es divergencia literal de POSICIÓN** — trade-off
+deliberado (evita el sesgo topográfico A69/D11; A/B run 27343409067 refutó la variante
+NTI-peak), MIROVA-consistente en intención ("publicar el cráter") pero distinta en el
+valor numérico. **NO toca magnitud (`pc.vrp_mw`) ni detección** (trig_t1 0-diffs pareados).
+Pendiente (P2.3): tooltip en las 3 vistas declarando "dist=0.0 = posición = cráter por
+semántica del Test1 integrado, no una medición" (hoy solo en comentario de código
+index.html). Severidad: deuda de documentación + frontend, no rompe outputs primarios.
+
+### D12 — MODIS Láscar pierde ~70/79 alertas MIROVA-confirmadas por `distance_class` del píxel Salar (AUDIT_S106 P1.1, ABIERTA)
+
+Distinta de D11 (que es posición de nevados) y de A54 (real-no-publicada): acá **MIROVA SÍ
+publica** y nosotros lo perdemos. El `primary_cluster` MODIS está en el cráter (mediana
+1.46 km ≈ MIROVA 1.41 km) pero el píxel suelto más caliente cae en el **Salar de Atacama**
+(16-32 km) → `distance_class='far'` → el gate `mirovaEqVrp`/`audit_metrics.py:79` lo anula.
+El rescate F47 no dispara (`hotspot_dist<25 km`). Es el **espejo MODIS** del bug que el
+ancla honesta resolvió en VIIRS375 — el espejo MODIS del ancla está flag-OFF, gateado por
+el fix de magnitud fondo-local (design 2026-06-13). FN sobre señal confirmada = lo más
+grave en monitoreo. Fix: reproc histórico F2 Láscar MODIS (pipeline actual nadir-fijo) →
+`distance_class` desde el cluster. Corrige el "0 pérdida" fabricado de AUDIT_S95 (P1.2).
+
 ## S105 — Nota de decisión pendiente: gates intra-radio S84/S85 (A55)
 
 AUDIT_S86 §C6 los declaró anti-patrón emergente (redundantes con la supresión
