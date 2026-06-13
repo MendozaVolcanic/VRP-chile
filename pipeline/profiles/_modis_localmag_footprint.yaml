@@ -1,0 +1,15 @@
+# VRP-Chile — profile: _modis_localmag_footprint (S107 §2 A/B, V-B recomendada)
+#
+# Brazo V-B: fondo-local de magnitud MODIS = corona 8-conexa del footprint del
+# cluster contiguo (Coppola 2016a Eq.6 "around the active cluster"). Solo MAGNITUD
+# (recompute de pc.vrp_mw POST-selección → detección idéntica al base). data_subdir
+# aislado (A47). MODIS necesita pyhdf (GH Linux). NO toca operacional.
+extends: mirova_equivalent
+profile: _modis_localmag_footprint
+description: >
+  A/B S107 fondo-local magnitud MODIS, brazo V-B (corona footprint, recomendada).
+paths:
+  enable_local_cluster_magnitude: true
+  local_cluster_mag_mode: footprint
+output:
+  data_subdir: _modis_localmag_footprint
