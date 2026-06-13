@@ -1244,6 +1244,17 @@ Pendiente (P2.3): tooltip en las 3 vistas declarando "dist=0.0 = posición = cr�
 semántica del Test1 integrado, no una medición" (hoy solo en comentario de código
 index.html). Severidad: deuda de documentación + frontend, no rompe outputs primarios.
 
+**Actualización S108 (A45, OK Nicolás): el ancla honesta se EXTENDIÓ a VIIRS750**
+(flip `enable_honest_anchor_viirs750`, PR #416, A/B run 27468739388). Mismo `anchor.py`,
+mismo trade-off de posición: nevados offN 753/125/562 → 0 m al cráter; Lastarria conserva
+el NW de Lazufre (real); 32 flips far→summit (0 inflados pc.vrp>5). Detección/magnitud
+intactas (diff del path-magnitud V750 = +157/−0; el único delta C1 fue 1 granule borderline
+Villarrica 2026-06-07 lava lake = artefacto NRT-vs-Standard del producto L1B, NO el flag —
+auditado en `experiments/_s106_fase2/audit_v750_paired.py`, A18-adyacente). Promovidos los
+5 vols del A/B (`merge_promote_v750.py`); los 6 Tier A restantes en reproc (run 27482258622).
+El espejo MODIS sigue OFF (D12, gateado por el fix de magnitud fondo-local §2). Tag rollback:
+`pre-s108-honest-anchor-v750`.
+
 ### D12 — MODIS Láscar pierde ~70/79 alertas MIROVA-confirmadas por `distance_class` del píxel Salar (AUDIT_S106 P1.1, ABIERTA)
 
 Distinta de D11 (que es posición de nevados) y de A54 (real-no-publicada): acá **MIROVA SÍ
