@@ -891,7 +891,9 @@ function filterDays(records, days) {
   // S38: aplicar primero el filtro post-S38 (oculta records pre-adopción).
   if (!days) return records;
   const cutoff = Date.now() - days * 86400000;
-  return records.filter(r => new Date(r.datetime_utc).getTime() >= cutoff);
+  // S106 P2.9: parseUtcMs (no new Date crudo) — un string "YYYY-MM-DD HH:MM" sin 'Z'
+  // se parsea como hora LOCAL y desfasa el corte ~3-4h en Chile (bug TZ, PR #250).
+  return records.filter(r => parseUtcMs(r.datetime_utc) >= cutoff);
 }
 
 function toDailyMax(records, keyOrFn) {
@@ -1413,7 +1415,7 @@ function latestSensors(records, includeFar = false) {
   const cutoff = Date.now() - 48 * 3600000;
   const seen = new Set();
   for (const r of records) {
-    if (new Date(r.datetime_utc).getTime() < cutoff) continue;
+    if (parseUtcMs(r.datetime_utc) < cutoff) continue;  // S106 P2.9: TZ-safe
     if (!includeFar && !isSummitDetection(r)) continue;
     // S29 fix + H3 (S77): helper global isValidDetection — no vrp_mir_mw fallback.
     if (!isValidDetection(r)) continue;
@@ -1469,7 +1471,7 @@ function distanceCounts(records, days = 7) {
   const cutoff = Date.now() - days * 86400000;
   let summit = 0, far = 0;
   for (const r of records) {
-    if (new Date(r.datetime_utc).getTime() < cutoff) continue;
+    if (parseUtcMs(r.datetime_utc) < cutoff) continue;  // S106 P2.9: TZ-safe
     // H1 (S76 audit): records con `vrp_mw=0` + `discarded_reason` + `vrp_mir_mw>0`
     // NO deben contarse — el pipeline ya los descartó. Antes el fallback
     // `r.vrp_mw ?? r.vrp_mir_mw` los metía inflando "Lejanas" (~79 records
@@ -2069,12 +2071,13 @@ function renderDetail() {
   // cluster fue justamente el que disparó el descarte (eruption_hotspot_too_far).
   // H3 (S77): isValidDetection ahora vive global (~882). Local removido para evitar
   // shadowing y drift cuando se agregue un nuevo path de detección.
-  const getDisplayVrp = (r) => {
-    if (!isValidDetection(r)) return 0;
-    if (r.primary_cluster && r.primary_cluster.vrp_mw != null && r.primary_cluster.vrp_mw > 0)
-      return r.primary_cluster.vrp_mw;
-    return r.vrp_mw ?? r.vrp_mir_mw ?? 0;
-  };
+  // S106 P1.4 (AUDIT_S106): el valor de la tabla DEBE coincidir con el del chart /
+  // tarjeta / alerta — todos usan eqVrp (= mirovaEqVrpDisplay, que respeta el toggle
+  // Cluster/Núcleo USE_F5_CORE). Antes la tabla mostraba pc.vrp_mw CRUDO mientras el
+  // resto mostraba el núcleo F5' → hasta 10× de diferencia para la MISMA pasada en el
+  // halo glaciar (Villarrica). No se suprime el crudo (A72/A54: señal cat-b real): el
+  // toggle "Cluster" (USE_F5_CORE=false) lo recupera. Unifica la magnitud del entregable.
+  const getDisplayVrp = (r) => isValidDetection(r) ? eqVrp(r) : 0;
   // F30 Bug 6 fix (S74): tabla NRT usa eqVrp > 0 (MIROVA-equiv strict, respeta
   // innerKm + distance_class) — mismo filtro que stat "Detecciones" (línea 955)
   // y chart timeline (eqVrp en toDailyMax). Antes usaba getDisplayVrp que no
@@ -3041,10 +3044,24 @@ function updateHotspotLayer() {
     const d = allData[v.name];
     if (!d) return;
     const recs = filterDays(d.records, currentDays);
-    // Show any record with hotspot coordinates — use vrp_mw if available,
-    // fallback to vrp_mir_mw (pre-filter VRP), then vrp_vent_mw.
-    // This reveals where the pipeline is detecting signal, even if filtered out.
-    const withCoords = recs.filter(r => r.hotspot_lat != null);
+    // S106 P1.5 (AUDIT_S106): el overview multi-volcán reproducía el sesgo
+    // topográfico que S106 vino a corregir — filtraba por hotspot_lat (píxel
+    // suelto) y excluía los records con ancla honesta (test1_roi sin hotspot_lat).
+    // Ahora usa la MISMA cascada honesta que el mapa de detalle: posición = ancla
+    // honesta cuando la fuente es deliberada (ctx_cluster/test1_roi/test1_nti_peak),
+    // con fallback al píxel suelto/vent para records legacy.
+    const honestPos = (r) => {
+      const honest = ["ctx_cluster", "test1_roi", "test1_nti_peak"].includes(r.final_hotspot_source);
+      const lat = (honest ? r.final_hotspot_lat : null) ?? r.hotspot_lat ?? r.final_hotspot_lat ?? r.vent_hotspot_lat;
+      const lon = (honest ? r.final_hotspot_lon : null) ?? r.hotspot_lon ?? r.final_hotspot_lon ?? r.vent_hotspot_lon;
+      return (lat != null && lon != null) ? [lat, lon] : null;
+    };
+    const honestDist = (r) => {
+      const honest = ["ctx_cluster", "test1_roi", "test1_nti_peak"].includes(r.final_hotspot_source);
+      return (honest ? r.final_hotspot_dist_km : null) ?? r.hotspot_dist_km ?? r.final_hotspot_dist_km;
+    };
+    // Show any record with a resolvable position (honest anchor or legacy fallback).
+    const withCoords = recs.filter(r => honestPos(r) != null);
 
     // Sort oldest→newest so newest renders on top
     withCoords.sort((a, b) => a.datetime_utc.localeCompare(b.datetime_utc));
@@ -3078,11 +3095,12 @@ function updateHotspotLayer() {
       const color = HOTSPOT_COLORS[r.sensor] || "#ffffff";
       const recency = 0.35 + 0.65 * (i / Math.max(1, withCoords.length - 1));
       const radius = Math.max(4, Math.min(14, 4 + Math.log10(Math.max(vrpShow, 0.001)) * 4.5));
-      // S29 fix: fallback final_hotspot_dist_km para Test 1 solo paths.
-      const distRaw = r.hotspot_dist_km ?? r.final_hotspot_dist_km;
+      // S106 P1.5: posición y distancia desde la cascada honesta (no el píxel suelto).
+      const [mLat, mLon] = honestPos(r);
+      const distRaw = honestDist(r);
       const dist = distRaw != null ? distRaw.toFixed(1) + " km" : "—";
 
-      makeHotspotMarker(r.hotspot_lat, r.hotspot_lon, {
+      makeHotspotMarker(mLat, mLon, {
         radius, color: isFiltered ? "#555" : "#000", weight: isFiltered ? 1 : 0.5,
         fillColor: color, fillOpacity: isFiltered ? recency * 0.5 : recency,
         dashArray: isFiltered ? "3,3" : null,
@@ -3097,7 +3115,7 @@ function updateHotspotLayer() {
         `Píxeles: ${r.n_anomalous_pixels ?? '—'}`
       );
 
-      bounds.push([r.hotspot_lat, r.hotspot_lon]);
+      bounds.push([mLat, mLon]);
       count++;
     });
   });
@@ -3201,7 +3219,7 @@ function buildNRTTable() {
       // distance_class corrupto en MODIS, A46/Eje5). Ver docs/S100_DASHBOARD_AUDIT.md.
       if (mirovaEqVrp(r, innerKm, includeFarDistance) <= 0) continue;
       const vrpFinal = r.vrp_mw ?? 0;
-      const t = new Date(r.datetime_utc).getTime();
+      const t = parseUtcMs(r.datetime_utc);  // S106 P2.9: TZ-safe (no new Date crudo)
       if (t < cutoff) continue;
       // Reportar VRP MIROVA-equiv (cluster contiguo) cuando exista.
       // S96 F5': el toggle solo cambia el número (magnitud núcleo), no la
