@@ -14,6 +14,7 @@ import math
 from typing import Sequence
 
 import numpy as np
+from scipy.ndimage import binary_dilation
 
 from pipeline.constants import SIGMA, C1, C2
 
@@ -87,6 +88,111 @@ def compute_local_background(
             t_bks.append(float(np.mean(neighbors)))
 
     return t_bks
+
+
+def cluster_corona_background(
+    bt_grid: np.ndarray,
+    cluster_indices: Sequence[tuple[int, int]],
+    scene_hot_mask: np.ndarray | None,
+    *,
+    mode: str = "footprint",
+    ring_px: int = 1,
+    min_corona: int = 4,
+) -> tuple[float, bool]:
+    """Fondo LOCAL de la corona que rodea al cluster CONTIGUO (Coppola 2016a Eq.6
+    "around the active cluster"). Frente §2 / D12 destape.
+
+    A diferencia de `compute_local_background` (per-pixel "adjacent to the hot
+    one", Coppola 2024 L1129), calcula UN solo t_bk para todo el cluster desde
+    el anillo de píxeles que lo rodean, excluyendo TODOS los hot pixels de la
+    escena y NaN. Esto desinfla los píxeles INTERIORES de un blob compacto (que
+    el per-pixel deja en NaN → fallback regional → re-inflación; gap A48).
+
+    Design: docs/superpowers/specs/2026-06-13-magnitud-modis-fondo-local-design.md
+
+    Args:
+        bt_grid: 2D array BT en K (NaN para inválidos).
+        cluster_indices: lista de (row, col) del footprint del cluster contiguo
+            (la `pixel_indices` que devuelve `cluster_hotspots`).
+        scene_hot_mask: 2D bool con TODOS los hot pixels de la escena (para
+            excluirlos de la corona — evita que un blob adyacente la contamine).
+            None → solo se excluye el footprint propio.
+        mode: "footprint" (V-B, recomendada): corona = dilatación 8-conexa del
+            footprint, grosor `ring_px` píxeles. "ring" (V-A): anillo geométrico
+            `[r_foot+0.5, r_foot+0.5+ring_px]` alrededor del centroide.
+        ring_px: grosor de la corona en píxeles.
+        min_corona: mínimo de píxeles válidos; bajo eso → (NaN, True) para que
+            el caller caiga al fondo regional explícitamente (no silencioso).
+
+    Returns:
+        (t_bk_corona_K, corona_degraded). degraded=True ⟺ t_bk es NaN.
+    """
+    grid = np.asarray(bt_grid, dtype=float)
+    n_rows, n_cols = grid.shape
+    cluster_mask = np.zeros((n_rows, n_cols), dtype=bool)
+    for (i, j) in cluster_indices:
+        cluster_mask[i, j] = True
+
+    if scene_hot_mask is None:
+        scene_hot = cluster_mask
+    else:
+        scene_hot = np.asarray(scene_hot_mask, dtype=bool)
+
+    if mode == "footprint":
+        structure = np.ones((3, 3), dtype=bool)
+        dilated = binary_dilation(
+            cluster_mask, structure=structure, iterations=int(ring_px)
+        )
+        corona_region = dilated & ~cluster_mask
+    elif mode == "ring":
+        ii = np.array([i for (i, j) in cluster_indices], dtype=float)
+        jj = np.array([j for (i, j) in cluster_indices], dtype=float)
+        ci, cj = float(ii.mean()), float(jj.mean())
+        r_foot = float(np.sqrt((ii - ci) ** 2 + (jj - cj) ** 2).max()) if ii.size else 0.0
+        r_in = r_foot + 0.5
+        r_out = r_foot + 0.5 + int(ring_px)
+        rows_i, cols_i = np.mgrid[0:n_rows, 0:n_cols]
+        dist = np.sqrt((rows_i - ci) ** 2 + (cols_i - cj) ** 2)
+        corona_region = (dist >= r_in) & (dist <= r_out) & ~cluster_mask
+    else:
+        raise ValueError(f"mode debe ser 'footprint' o 'ring', got {mode!r}")
+
+    corona = corona_region & ~scene_hot & ~np.isnan(grid)
+    vals = grid[corona]
+    if vals.size < int(min_corona):
+        return (float("nan"), True)
+    return (float(np.mean(vals)), False)
+
+
+def cluster_vrp_mw_with_bg(
+    bt_grid: np.ndarray,
+    pixel_areas: np.ndarray,
+    cluster_indices: Sequence[tuple[int, int]],
+    t_bk_bg_k: float,
+    wooster_coeff: float,
+    lambda_um: float,
+) -> float:
+    """VRP (MW) del cluster = suma de ΔL·área·Wooster sobre sus píxeles, usando
+    un único fondo `t_bk_bg_k` (típicamente la corona del cluster, Eq.6).
+
+    Misma fórmula Planck/Wooster que process_modis.py:824-858, scoped al cluster
+    contiguo. ΔL clip a 0 (Wooster requiere exceso positivo). NaN se saltan.
+    """
+    grid = np.asarray(bt_grid, dtype=float)
+    areas = np.asarray(pixel_areas, dtype=float)
+    lam = float(lambda_um)
+    l_bg = C1 / (lam ** 5 * (math.exp(C2 / (lam * float(t_bk_bg_k))) - 1))
+    total = 0.0
+    for (i, j) in cluster_indices:
+        bt = grid[i, j]
+        if np.isnan(bt):
+            continue
+        l_pix = C1 / (lam ** 5 * (math.exp(C2 / (lam * float(bt))) - 1))
+        delta = l_pix - l_bg
+        if delta < 0.0:
+            delta = 0.0
+        total += float(areas[i, j]) * float(wooster_coeff) * delta / 1e6
+    return float(total)
 
 
 def _planck_spectral_radiance(t_k: float, lambda_um: float) -> float:

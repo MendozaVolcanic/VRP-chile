@@ -123,6 +123,12 @@ EXPECTED_OPERATIONAL_FLAGS = {
     "ENABLE_HONEST_ANCHOR": True,
     "ENABLE_HONEST_ANCHOR_MODIS": False,
     "ENABLE_HONEST_ANCHOR_VIIRS750": False,
+    # S107 §2 (A45/P2.4): fondo-local de magnitud MODIS (corona del cluster contiguo,
+    # Coppola 2016a Eq.6). OFF hasta cerrar el A/B V-A/V-B. ES el fix que GATEA el
+    # destape del ancla MODIS (ENABLE_HONEST_ANCHOR_MODIS): un flip de este flag sin
+    # el A/B cambiaria la magnitud publicada (pc.vrp_mw) de los 11 Tier A. Pinear OFF
+    # para que un flip accidental falle CI. Design 2026-06-13 (revision S107, gap A48).
+    "ENABLE_LOCAL_CLUSTER_MAGNITUDE": False,
 }
 
 

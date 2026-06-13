@@ -391,6 +391,20 @@ ENABLE_VENT_ANCHORED_CLUSTERING: bool = bool(_p.get("enable_vent_anchored_cluste
 # Tests sinteticos en tests/test_local_kernel_background.py (8 PASS).
 ENABLE_LOCAL_KERNEL_BG: bool = bool(_p.get("enable_local_kernel_bg", False))
 
+# S107 §2 / D12 destape — fondo LOCAL de magnitud: corona del cluster CONTIGUO
+# (Coppola 2016a Eq.6 "around the active cluster"). Recomputa pc.vrp_mw del
+# cluster primario con la media BT del anillo que rodea TODO el cluster (NO el
+# kernel per-pixel compute_local_background, que re-infla los INTERIORES de un
+# blob compacto — gap A48). Cura los ~134 inflados warm-scene sin tocar detección.
+# Default OFF (flag-OFF + A/B antes de adoptar, A45). Gatea el destape del ancla
+# MODIS. Helpers pipeline/vrp_regimes.py:cluster_corona_background +
+# cluster_vrp_mw_with_bg. Tests tests/test_cluster_corona_magnitude.py. Design
+# docs/superpowers/specs/2026-06-13-magnitud-modis-fondo-local-design.md.
+ENABLE_LOCAL_CLUSTER_MAGNITUDE: bool = bool(_p.get("enable_local_cluster_magnitude", False))
+LOCAL_CLUSTER_MAG_MODE: str = str(_p.get("local_cluster_mag_mode", "footprint"))  # "footprint" (V-B) | "ring" (V-A)
+LOCAL_CLUSTER_MAG_RING_PX: int = int(_p.get("local_cluster_mag_ring_px", 1))
+LOCAL_CLUSTER_MAG_MIN_CORONA: int = int(_p.get("local_cluster_mag_min_corona", 4))
+
 # S40 cleanup paths viejos — flag para desactivar bt_path_hot path.
 # Análisis empírico S39 (records operacional 30d): bt_path_hot solo
 # contribuye EXCLUSIVAMENTE en 0-6 records de 1846 TPs totales en 11 vol
