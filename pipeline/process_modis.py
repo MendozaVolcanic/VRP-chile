@@ -31,7 +31,11 @@ except ImportError:
 from .scan_geometry import modis_pixel_areas, roi_mask_bbox
 from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots, cluster_pixels_geographic
-from .vrp_regimes import compute_local_background
+from .vrp_regimes import (
+    compute_local_background,
+    cluster_corona_background,
+    cluster_vrp_mw_with_bg,
+)
 from .test1_integrated import compute_test1_mir
 from .anomaly_pixels import build_anomaly_pixels
 from .path_d_cap import apply_d9_scene_cap  # F50/S77
@@ -139,6 +143,10 @@ from pipeline.profile import (
     SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
     ENABLE_HONEST_ANCHOR_MODIS,
     HONEST_ANCHOR_TEST1_MODE,
+    ENABLE_LOCAL_CLUSTER_MAGNITUDE,
+    LOCAL_CLUSTER_MAG_MODE,
+    LOCAL_CLUSTER_MAG_RING_PX,
+    LOCAL_CLUSTER_MAG_MIN_CORONA,
 )
 from pipeline.anchor import resolve_honest_anchor  # S106 ancla espacial honesta
 from pipeline.single_pixel_mode import apply_single_pixel_mode
@@ -909,6 +917,25 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         if _clusters:
             _c = _clusters[0]
             _vrp_c = float(_c["vrp_mw"])
+            # S107 §2 (D12 destape) — fondo LOCAL de magnitud Eq.6: recomputar el
+            # VRP del cluster PRIMARIO con la corona del cluster CONTIGUO en vez del
+            # anillo regional 5-25km. Desinfla los blobs warm-scene (corona tibia →
+            # ΔL≈0) y preserva lava real (corona fría → ΔL grande). Flag-OFF default
+            # (A45). Si la corona degrada (<min_corona válidos) → conserva el VRP
+            # regional (fallback explícito, no silencioso). Va ANTES del cap D9.
+            _corona_degraded = None
+            if ENABLE_LOCAL_CLUSTER_MAGNITUDE:
+                _t_bk_corona, _corona_degraded = cluster_corona_background(
+                    bt_mir, _c["pixel_indices"], hot_mask_2d,
+                    mode=LOCAL_CLUSTER_MAG_MODE,
+                    ring_px=LOCAL_CLUSTER_MAG_RING_PX,
+                    min_corona=LOCAL_CLUSTER_MAG_MIN_CORONA,
+                )
+                if not _corona_degraded:
+                    _vrp_c = cluster_vrp_mw_with_bg(
+                        bt_mir, pixel_areas, _c["pixel_indices"],
+                        _t_bk_corona, WOOSTER_COEFF, BAND21_LAMBDA,
+                    )
             # S71 D9 Opción C — cap si firing contextual-only en cirrus.
             _d9_capped = False
             if _path_d_cap_active and _vrp_c > PATH_D_ONLY_CAP_MW:
@@ -923,6 +950,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             }
             if _d9_capped:
                 primary_cluster["d9_capped"] = True
+            if _corona_degraded is not None:
+                primary_cluster["corona_degraded"] = bool(_corona_degraded)
             # F52-B S77 (A45) — single-pixel mode régimen sub-MW.
             _pix_vrps = [float(vrp_per_pixel_2d[i, j])
                          for (i, j) in _c["pixel_indices"]]
