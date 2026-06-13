@@ -116,13 +116,14 @@ EXPECTED_OPERATIONAL_FLAGS = {
     # S106 (AUDIT_S106 P2.2/P2.4): ancla espacial honesta. enable_honest_anchor
     # esta LIVE en VIIRS375 (cura el sesgo topografico D11/A69 de la posicion del
     # record; no toca deteccion ni magnitud, A/B run 27343409067 0-diffs trig_t1).
-    # Los espejos MODIS/V750 estan OFF A PROPOSITO: el espejo MODIS reclasificaria
-    # 134 records-artefacto far->summit (destape) hasta cerrar el fix de magnitud
-    # fondo-local Eq.6 (design 2026-06-13). Pinear los 3 para que un flip accidental
-    # falle CI (el de MODIS es un landmine de destape, P2.4).
+    # El espejo MODIS sigue OFF A PROPOSITO: reclasificaria 134 records-artefacto
+    # far->summit (destape) hasta cerrar el fix de magnitud fondo-local Eq.6
+    # (design 2026-06-13). VIIRS750 ADOPTADO S108 (A/B run 27468739388, A45 OK
+    # Nicolas): el ancla solo toca posicion (probado +157/-0 en path magnitud).
+    # Pinear MODIS OFF para que un flip accidental falle CI (landmine destape, P2.4).
     "ENABLE_HONEST_ANCHOR": True,
     "ENABLE_HONEST_ANCHOR_MODIS": False,
-    "ENABLE_HONEST_ANCHOR_VIIRS750": False,
+    "ENABLE_HONEST_ANCHOR_VIIRS750": True,
     # S107 §2 (A45/P2.4): fondo-local de magnitud MODIS (corona del cluster contiguo,
     # Coppola 2016a Eq.6). OFF hasta cerrar el A/B V-A/V-B. ES el fix que GATEA el
     # destape del ancla MODIS (ENABLE_HONEST_ANCHOR_MODIS): un flip de este flag sin
