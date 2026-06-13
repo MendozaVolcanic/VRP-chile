@@ -200,10 +200,13 @@ paths:
   enable_honest_anchor: true
   honest_anchor_test1_mode: vent
   # S106 Fase 2 — espejos del ancla por sensor (flags separados). MODIS NO
-  # activar sin el fix de magnitud del destape (design 2026-06-11 §4/§7);
-  # VIIRS750 pendiente de validacion propia.
+  # activar sin el fix de magnitud del destape (design 2026-06-11 §4/§7).
+  # VIIRS750 ADOPTADO S108 (A45, OK Nicolas): A/B run 27468739388 — posicion
+  # nevados offN 753/125/562 -> 0 m, Lastarria NW Lazufre conservado, 32 flips
+  # far->summit 0 inflados; deteccion/magnitud intactas (anchor.py solo posicion,
+  # diff path-magnitud +157/-0). Tag rollback: pre-s108-honest-anchor-v750.
   enable_honest_anchor_modis: false
-  enable_honest_anchor_viirs750: false
+  enable_honest_anchor_viirs750: true
   # S27 MIROVA literal: dual-ROI BT ACTIVADO. Aplica thresholds
   # N_SIGMA_MIR_SUMMIT=5σ vs N_SIGMA_MIR_SCENE=10σ según distancia
   # al vent (Coppola 2016a Tabla 1).
