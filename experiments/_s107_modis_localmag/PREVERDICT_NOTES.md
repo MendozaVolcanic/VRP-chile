@@ -99,3 +99,17 @@ Condiciones para activar: (a) §2 cura los 84 inflados (A/B en curso), (b) inves
 destape NdC (128 candidato-ruido), (c) reproc real con flag ON (A18 offline sobre-estima),
 (d) OK explícito Nicolás (A45, alto impacto dashboard). Caveat confirmación: el cruce es
 TEMPORAL (misma noche VIIRS summit), no espacial pareado — suficiente como señal, no prueba.
+
+### NdC: caso especial del flip §1 (MIROVA 0 en 2026, no calibrable)
+Investigación del outlier: **NdC tiene 0 alertas MIROVA en 2026** (ni VIIRS ni MODIS). Sus
+196 destape (67 con VIIRS-nuestro, 129 sin) son sobre-detección sin ground truth MIROVA.
+Los 129 candidato-ruido: clusters AL CRÁTER (dist 2.87 km; lat/lon med -36.865/-71.380 =
+cráter Nuevo/Arrau, NO Cerro Blanco), **ΔT muy bajo (8.4 K)**, **pc.vrp muy bajo (0.42 MW
+med, max 5.77)**. VIIRS 375m (más sensible que MODIS 1km) NO los ve → muy probablemente
+**ruido térmico al cráter** (gradiente/sub-pixel), no foco real.
+**Decisión del flip §1 para NdC, pendiente**: (a) §2 V-B podría bajar la magnitud (0.42 MW)
+bajo el umbral de display → mitiga el destape; (b) sin MIROVA no hay paridad que romper
+(ni a favor ni en contra); (c) requiere ground truth NdC (TIF/Chrome A61/A62) o criterio
+de Nicolás (geólogo). **NO bloquea el flip en los otros 10** (93–100% señal real). El flip
+es global (un flag); si NdC resulta ruido, el gate de magnitud/§2 es la mitigación correcta
+(NO un gate per-vol, anti-MISSION).
