@@ -28,6 +28,9 @@
 | AUDIT_S104_SYSTEMIC_DIVERGENCE.md | Diagnóstico vivo divergencia sistémica | S104 |
 | AUDIT_S104_VIIRS_POSITION_OFFSET.md | Diagnóstico vivo sesgo topográfico MIR (A69) | S104 |
 | S103_S2_VIIRS750_PATHD_PREP.md | Prep frente path D (§2, abierto) | S103 |
+| AUDIT_S108_AB_MODIS_VEREDICTO.md | Veredicto vivo: fix §2 magnitud MODIS (fondo-local) REFUTADO | S108 |
+| AUDIT_S108_ESTADO.md | Estado global vivo vs MIROVA por sensor (gap MODIS 10.8%, ratio VIIRS 0.5×) | S108 |
+| AUDIT_S108_DASHBOARD.md | Auditoría dashboard/frontend (0 bugs, display dist=cráter) | S108 |
 | LOCAL_NRT_SETUP.md | Guía setup NRT local (operacional) | — |
 | EARTHDATA_TOKEN_SETUP.md | Guía setup credenciales Earthdata | — |
 | superpowers/specs/2026-06-10-test1-local-bg-nti-design.md | Design frente ABIERTO fondo-local NTI | S105 |
