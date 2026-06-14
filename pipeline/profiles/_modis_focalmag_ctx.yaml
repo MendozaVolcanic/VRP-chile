@@ -1,0 +1,16 @@
+# VRP-Chile — profile: _modis_focalmag_ctx (S109 §1 A/B, brazo RECOMENDADO)
+#
+# Núcleo focal/contextual del cluster con keep-peak (anti-FN del cráter embebido).
+# Restringe pc.vrp_mw a los píxeles contextualmente anómalos (dnti_ctx ∪ {pico}) del
+# cluster YA seleccionado → corta el campo difuso topográfico (A69/D11), conserva el
+# foco discreto (cráter/lava/incendio). Solo MAGNITUD (recompute POST-selección →
+# detección/posición idénticas al base). NO es fondo-local. data_subdir aislado (A47).
+extends: mirova_equivalent
+profile: _modis_focalmag_ctx
+description: >
+  A/B S109 magnitud núcleo-focal MODIS, brazo ctx + keep-peak (recomendado).
+paths:
+  enable_focal_cluster_magnitude: true
+  focal_cluster_keep_peak: true
+output:
+  data_subdir: _modis_focalmag_ctx

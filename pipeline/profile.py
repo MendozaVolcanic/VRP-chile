@@ -405,6 +405,20 @@ LOCAL_CLUSTER_MAG_MODE: str = str(_p.get("local_cluster_mag_mode", "footprint"))
 LOCAL_CLUSTER_MAG_RING_PX: int = int(_p.get("local_cluster_mag_ring_px", 1))
 LOCAL_CLUSTER_MAG_MIN_CORONA: int = int(_p.get("local_cluster_mag_min_corona", 4))
 
+# S109 §1 — magnitud NÚCLEO FOCAL/CONTEXTUAL del cluster MODIS. Restringe la suma
+# de pc.vrp_mw a los píxeles contextualmente anómalos (dnti_ctx ∪ {pico}) del cluster
+# YA seleccionado — el campo difuso topográfico (tibio uniforme, no anómalo vs sus 8
+# vecinos = A69/D11) se cae; el foco discreto (cráter activo / lava / incendio) se
+# conserva. Generaliza ctxpeak (VIIRS S100) a la magnitud del cluster eruption+test1.
+# NO es fondo-local (no toca L_bg ni la radiancia per-pixel — solo SELECCIONA píxeles;
+# guard A48). Cura los ~121 inflados MODIS donde MIROVA no publica MODIS (campo difuso,
+# Coppola 2023 "insensitive to diffuse heat") y gatea el flip del ancla MODIS. Default
+# OFF (flag-OFF + A/B antes de adoptar, A45). Helper vrp_regimes.cluster_focal_vrp_mw.
+# Tests tests/test_focal_cluster_magnitude.py. Design
+# docs/superpowers/specs/2026-06-14-magnitud-modis-nucleo-focal-design.md.
+ENABLE_FOCAL_CLUSTER_MAGNITUDE: bool = bool(_p.get("enable_focal_cluster_magnitude", False))
+FOCAL_CLUSTER_KEEP_PEAK: bool = bool(_p.get("focal_cluster_keep_peak", True))
+
 # S40 cleanup paths viejos — flag para desactivar bt_path_hot path.
 # Análisis empírico S39 (records operacional 30d): bt_path_hot solo
 # contribuye EXCLUSIVAMENTE en 0-6 records de 1846 TPs totales en 11 vol
