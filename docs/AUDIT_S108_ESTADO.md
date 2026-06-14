@@ -30,9 +30,19 @@ Es el espejo exacto de lo que el ancla ya hizo en V375/V750. **Confirma que el A
 el fix de magnitud §2 para no destapar los 121 inflados como artefacto — ver PREVERDICT_NOTES.)
 
 ## Otros frentes (secundarios)
-- **Sub-estimación de magnitud VIIRS**: ratio_med 0.52× (V375) / 0.54× (V750). Dentro de
-  paridad (0.5–2.0) pero en el borde bajo. (Nota: S103 R3 reportó 0.78× post-nadir; la
-  diferencia con 0.52× puede ser de método de medición — verificar antes de accionar, A62.)
+- **Sub-estimación de magnitud VIIRS ~0.5× (verificado S108, frente candidato)**:
+  `ratio_viirs_cons_vs_ocr.py` confirma que NO es artefacto del OCR — CONS-only **0.49×**
+  (V375, n=1336) / **0.53×** (V750, n=225); OCR-only 0.48×/0.62×; CONS∪OCR 0.49×/0.54×.
+  Consistente en ambos universos y sensores = **sub-estimación sistemática real** (mostramos
+  ~la mitad de la magnitud MIROVA en pasadas pareadas ±60min). Está en el borde bajo de la
+  paridad (0.5–2.0), no crítico, pero el objetivo es ratio→1.0.
+  - **Discrepancia con S103 R3 (0.78×)** = método de agregación (por-pasada ±60min aquí vs
+    el subconjunto/criterio de R3), NO cambio de data (nada tocó la magnitud VIIRS post-S103;
+    el ancla S106/S108 solo mueve posición). Resolver el método antes de accionar (A62).
+  - **Causa a investigar** (post-MODIS): el nadir-fijo (S103) corrigió la sobre-estimación
+    pre-nadir (1.95×) — ¿se pasó hacia abajo? Candidatos: área nadir vs MIROVA, fondo local
+    Test1 sobre-resta, o pc.vrp (cluster) < suma MIROVA. El coeficiente Wooster está validado
+    S14 (error ≤0.17% vs OSF), así que la causa NO es el coeficiente sino área/ΔL/agregación.
 - **MODIS precision 2.5%** (sobre-detección): N_ours crudo 3153 vs N_mir 83. MIROVA casi
   no publica MODIS (83, mayoría Lascar). El grueso de nuestros MODIS son cat-b real no
   publicada (A54, 95% física real S86) o cat-d artefacto. El gate summit del frontend ya
