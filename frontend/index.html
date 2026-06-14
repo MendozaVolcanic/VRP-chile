@@ -2197,7 +2197,11 @@ function renderDetail() {
         r.sensor,
         zoneLabel,
         vrp.toFixed(3),
-        isVentLegacy ? "vent" : (dist != null ? dist.toFixed(2) : "—"),
+        // S108: dist=0.0 de records anclados por Test1 integrado (final_hotspot_source
+        // =test1_roi) = posición AL CRÁTER por construcción, no una medición de píxel.
+        // Mostrar "cráter" elimina la ambigüedad de "0.00" (deuda P2.3/D11-bis). El
+        // resto de honest-anchor (ctx_cluster, dist>0) y eruption-path muestran el km real.
+        isVentLegacy ? "vent" : (dist != null ? (honestAnchor && dist === 0 ? "cráter" : dist.toFixed(2)) : "—"),
         k2c(tmax),
         k2c(tbg),
         npxLabel,
