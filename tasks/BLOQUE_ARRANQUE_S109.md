@@ -43,12 +43,12 @@ con Nicolás + papers-first ANTES de implementar.**
   10.8%→~96% (D12 Láscar). El flip recupera 93% señal real cross-confirmada (NdC = caso
   especial, MIROVA 0, probable ruido — investigar con ground truth/TIF antes).
 
-## §2 — Confirmar el A/B §2 completo (run 27480234385)
-Quedó corriendo S108 (~16/36, lento ~12h: Villarrica/PCC/Chaiten ~150 min c/u). Solo
-CONFIRMA la refutación (Chaiten 0/37 + Villarrica 2/11 ya decisivos; PCC/Tupun/Llaima
-faltan). Al completar: `gh run download 27480234385 -D experiments/_s107_modis_localmag/_staging`
-→ `audit_localmag_ab.py` (OJO: C1 cuenta cobertura como diff — usar el check de granules
-COMUNES; ver veredicto). NO cambia la decisión (no adoptar).
+## §2 — A/B §2 CONFIRMADO DEFINITIVO (run 27480234385, 36/36 success)
+Completó al cierre de S108: **footprint 4% / ring 20% inflados curados** (<<85%) en los 6
+vols → **fix §2 REFUTADO definitivo**, NO adoptar (Tupun 0/18 en ambos brazos, A19; el
+brazo recomendado footprint es el peor). C1 detección intacta (0 det-diffs en granules
+COMUNES), C3 Lascar preservado. Ver `AUDIT_S108_AB_MODIS_VEREDICTO.md`. **Ya confirmado —
+S109 arranca DIRECTO con §1 (replanteo del enfoque de magnitud).**
 
 ## §3 — (Opcional) frente magnitud VIIRS ~0.5×
 `ratio_viirs_cons_vs_ocr.py`: sub-estimación real ~0.5× (CONS+OCR), dentro de paridad pero
@@ -80,6 +80,6 @@ campo difuso de 1km que no es foco real (MIROVA no ve foco MODIS salvo Lascar). 
 ΔT al cluster, co-validación cross-sensor VIIRS (93% del destape ya cross-confirmado), cap físico,
 o revisar qué píxeles entran al cluster. Curar la magnitud desbloquea el flip ancla MODIS → cura
 el gap recall summit-gated 10.8%→~96% (D12 Láscar). RECORDÁ: A45 (flip → tag + OK), MISSION
-3-preguntas, A62 adversarial, explicame como geólogo. El A/B §2 (run 27480234385) puede seguir
-corriendo — solo confirma la refutación, no cambia la decisión.
+3-preguntas, A62 adversarial, explicame como geólogo. El A/B §2 (run 27480234385) ya completó
+al cierre de S108: REFUTADO definitivo (footprint 4% / ring 20% inflados curados en los 6 vols).
 ```

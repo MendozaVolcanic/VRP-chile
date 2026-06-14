@@ -1,16 +1,28 @@
-# AUDIT_S108 — Veredicto (PARCIAL) del A/B fondo-local de magnitud MODIS
+# AUDIT_S108 — Veredicto (DEFINITIVO) del A/B fondo-local de magnitud MODIS
 
-**Run**: 27480234385 (S107 §2, disparado 2026-06-13). **Estado**: parcial — completos
-**Chaiten** (37 inflados) + **Lascar** (control); **Villarrica** parcial (footprint chunk1).
-Faltan PCC/Tupungatito/Llaima (A/B lento ~12h total; Villarrica/PCC ~150 min c/u).
-**Veredicto preliminar con señal decisiva en 2 vols con inflados.**
+**Run**: 27480234385 (S107 §2). **Estado**: COMPLETO — 36/36 jobs success, 0 fallos
+(6 vols × 3 brazos × 2 chunks). **Veredicto DEFINITIVO** (confirma el preliminar de 2 vols).
+
+## Curación por volcán (inflados pc.vrp>5 → ≤5; det-diffs en granules COMUNES = C1)
+| Vol | footprint (V-B) curados | ring (V-A) curados | det-diffs (C1) |
+|---|---|---|---|
+| Lascar (control) | 0/1 | 1/1 | 0 |
+| Chaiten | 0/37 | 6/37 | 0 |
+| Villarrica | 3/19 | 8/19 | 0 |
+| PuyehueCordonCaulle | 1/27 | 7/27 | 0 |
+| Tupungatito | 0/18 | 0/18 | 0 |
+| Llaima | 1/9 | 1/9 | 0 |
+| **TOTAL** | **5/111 (4%)** | **23/111 (20%)** | **0** |
+
+Más records SUBEN que se curan (footprint 56 suben, ring 49). Tupungatito **0/18 en ambos**
+(A19, ring glaciar). El brazo recomendado por el design (footprint V-B) es el PEOR (4%).
 
 ## Criterios A66 (pre-registrados)
 | Criterio | Resultado | Detalle |
 |---|---|---|
 | **C1** detección 0-diffs | **PASS** (real) | 0 det-diffs en granules COMUNES (Chaiten/Lascar). El "FAIL" del audit script era 100% cobertura NASA distinta por corrida (only_base/only_on = 1-2 granules; cada brazo es un reproc separado). El fix es POST-selección, no toca detección. |
 | **C3** Lascar control | **PASS** | mediana ON/base = 1.000 (n=252). El foco MODIS real (único con MIROVA-MODIS) se preserva. |
-| **C2** inflados curados ≥85% | **REFUTADO** | Chaiten footprint **0/37 curados** (20 SUBIERON); ring 6/37 (15 subieron). Villarrica footprint 2/11 (4 subieron). Muy por debajo del 85%. |
+| **C2** inflados curados ≥85% | **REFUTADO** | footprint **5/111 (4%)**, ring **23/111 (20%)** — ambos << 85% (tabla por vol arriba). Más records suben que se curan. |
 
 ## Mecanismo de la refutación (por qué no cura — y a veces empeora)
 El fix V-B/V-A recalcula `pc.vrp = coef × area × (L_cluster − L_bg_corona)`. El design
@@ -37,9 +49,9 @@ otra variante de fondo-local que NO funciona para los inflados MODIS.
    (VIIRS confirma magnitud), o el método de selección de pixels del cluster (¿incluye
    campo difuso que no debería?).
 
-## Caveats (A62)
-- Parcial: faltan PCC/Tupungatito/Llaima. PCC (cirrus D9) y Tupun (glaciar) podrían diferir,
-  pero el fix ya falló en 2 vols representativos (Chaiten boscoso + Villarrica nevado) y el
-  mecanismo (corona vs fondo regional) es general. Confirmar con el A/B completo.
-- C1 del audit script cuenta cobertura como diff — usar el check de granules comunes
-  (`0 det-diffs`) como C1 real.
+## Notas (A62)
+- DEFINITIVO: los 6 vols confirman la refutación (footprint 4%, ring 20% << 85%). PCC y
+  Tupungatito —los que podrían haber diferido— también fallan (Tupun 0/18 en ambos brazos, A19).
+- C1 del audit script cuenta la cobertura NASA como diff; el check de granules COMUNES da
+  **0 det-diffs en los 6 vols** → C1 real PASS (el fix es POST-selección, no toca detección).
+- C3 (Lascar) PASS en ambos brazos (foco MODIS-MIROVA real preservado).
