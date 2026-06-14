@@ -82,3 +82,20 @@ far→summit** (offline sobre-estima, ref V750: 93→32 real). Desglose:
 (ancla MODIS) es un paso SEPARADO de alto impacto — su veredicto necesita evaluar el
 destape completo (~2476), no solo los 84 inflados. Reproc real con el flag ON dará el
 conteo exacto.
+
+## Cross-sensor del destape (classify_destape_modis.py): 93% es señal REAL
+De los ~2476 flips far→summit del flip §1, cuántos están confirmados cross-sensor (esa
+noche NUESTRO VIIRS vio summit con pc.vrp>0, o MIROVA publicó):
+- **REAL (cross-confirmado) = 2318 (93%)** — el flip recupera señal real (VIIRS la ve;
+  MIROVA la publica en VIIRS) = cat-b/TP. **Refuerza el flip §1**: cura el gap MODIS
+  summit-gated (10.8%) recuperando mayormente señal real, NO inflando ruido.
+- candidato-ruido = 156 (6%), **concentrado en NevadosDeChillan (128 de 196 destape =
+  65%)**. NdC es el OUTLIER a investigar antes del flip §1 (¿Cerro Blanco difuso captado
+  por el inner? ¿ruido MODIS?). Los otros 10 vols: 0–10 ruido c/u (~93–100% confirmado).
+- landmine pc.vrp>5 = 84 (§2 V-B cura).
+
+**Veredicto §1 (flip ancla MODIS)**: recupera 93% señal real cross-confirmada → SÓLIDO.
+Condiciones para activar: (a) §2 cura los 84 inflados (A/B en curso), (b) investigar el
+destape NdC (128 candidato-ruido), (c) reproc real con flag ON (A18 offline sobre-estima),
+(d) OK explícito Nicolás (A45, alto impacto dashboard). Caveat confirmación: el cruce es
+TEMPORAL (misma noche VIIRS summit), no espacial pareado — suficiente como señal, no prueba.
