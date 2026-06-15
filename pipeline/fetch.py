@@ -436,6 +436,15 @@ def _diag(msg: str) -> None:
 # haberse recuperado). Estado por-proceso → cada job de GH Actions arranca limpio.
 _DOWN_DOWNLOAD_HOSTS: set = set()
 
+# S109 — resiliencia a timeouts TRANSITORIOS: antes de marcar un host caído para TODA
+# la corrida (S102 all-or-nothing), probe TCP rápido (5s). Si responde = blip ya
+# recuperado → reintentar; si no = caído de verdad → marcar + saltar (S102). Acota el
+# caso "un blip de 60s en la 1ª descarga pierde el día del volcán" (incidente S109:
+# Láscar/Isluga/Villarrica ~1 día atrás por `nrt3.modaps` intermitente). El loop de 4
+# intentos acota el peor caso (NO reintroduce el cuelgue de 50min). Kill-switch: env
+# VRP_HOST_REPROBE=0 desactiva y vuelve al comportamiento S102. Default ON.
+ENABLE_DOWNLOAD_HOST_REPROBE: bool = os.environ.get("VRP_HOST_REPROBE", "1") != "0"
+
 # ConnectTimeout/ConnectionError = el host no acepta la conexión (caído/bloqueado).
 # Se distingue de ReadTimeout u otros transients (esos SÍ se reintentan).
 try:
@@ -461,6 +470,22 @@ def _granule_hosts(granules: list) -> set:
         except Exception:
             pass
     return hosts
+
+
+def _probe_download_host(host: str, timeout: float = 5.0) -> bool:
+    """Probe TCP rápido a un host de descarga (puerto 443). True si el connect TCP
+    completa en <timeout>s, False en timeout/refused/OSError de red. Espejo de
+    _probe_nasa_auth (S70-0): distingue 'host caído' de 'blip transitorio ya
+    recuperado' ANTES de tripear el circuit-breaker para toda la corrida (S109).
+    Solo testea reachability TCP/443 (no el download) — suficiente para la decisión
+    retry-vs-skip, igual que el probe de auth para la decisión budget-largo-vs-corto."""
+    if not host:
+        return False
+    try:
+        with socket.create_connection((host, 443), timeout=timeout):
+            return True
+    except (socket.timeout, OSError):
+        return False
 
 
 def download_granules(granules: list, dest_dir: Path) -> list[Path]:
@@ -500,13 +525,25 @@ def download_granules(granules: list, dest_dir: Path) -> list[Path]:
             _diag(f"DOWNLOAD_DONE attempt={attempt} elapsed={time.time()-t0:.1f}s n_files={len(paths)}")
             return [Path(p) for p in paths if Path(p).exists()]
         except _CONNECT_ERRORS as e:
+            last_err = e
+            # S109 — resiliencia a blip transitorio: antes de marcar el host caído PARA
+            # LA CORRIDA, probe TCP rápido (5s). Si el host responde = fue un timeout
+            # transitorio (ya recuperado) → reintentar (continue, sin marcar caído). Si
+            # no responde, o ya es el último intento → caído de verdad → marcar + fallar
+            # rápido (comportamiento S102). El loop de 4 intentos acota el peor caso →
+            # NO reintroduce el cuelgue de 50min (probe 5s << ConnectTimeout 60s).
+            if (ENABLE_DOWNLOAD_HOST_REPROBE and hosts
+                    and attempt < len(delays) - 1
+                    and all(_probe_download_host(h) for h in hosts)):
+                _diag(f"DOWNLOAD_REPROBE_OK attempt={attempt} elapsed={time.time()-t0:.1f}s "
+                      f"host={sorted(hosts)} → blip transitorio, reintentando")
+                continue
             # Host caído: marcar + fallar rápido (no reintentar). nrt-retry.yml
             # reintenta la corrida ~30min después con el circuit-breaker reseteado.
             if hosts:
                 _DOWN_DOWNLOAD_HOSTS.update(hosts)
             _diag(f"DOWNLOAD_CONNFAIL attempt={attempt} elapsed={time.time()-t0:.1f}s "
                   f"host_down={sorted(hosts) or 'unknown'} err={type(e).__name__}: {str(e)[:90]}")
-            last_err = e
             break
         except Exception as e:
             _diag(f"DOWNLOAD_ERR attempt={attempt} elapsed={time.time()-t0:.1f}s err={type(e).__name__}: {str(e)[:120]}")

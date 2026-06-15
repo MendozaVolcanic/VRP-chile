@@ -32,9 +32,16 @@ class FakeGranule(dict):
 
 @pytest.fixture(autouse=True)
 def _reset_breaker_and_sleep(monkeypatch):
-    """Resetea el circuit-breaker entre tests + anula sleeps de retry."""
+    """Resetea el circuit-breaker entre tests + anula sleeps de retry.
+
+    S109: el breaker ahora hace un probe TCP antes de tripear (resiliencia a blips).
+    Estos tests S102 fijan el comportamiento de 'host caído de verdad' → forzamos el
+    probe a False (host no responde) para que el trip sea determinista y sin red real.
+    El camino de recuperación (probe True) se cubre en test_fetch_breaker_reprobe_s109.
+    """
     fetch._DOWN_DOWNLOAD_HOSTS.clear()
     monkeypatch.setattr("time.sleep", lambda *a, **k: None)
+    monkeypatch.setattr(fetch, "_probe_download_host", lambda *a, **k: False)
     yield
     fetch._DOWN_DOWNLOAD_HOSTS.clear()
 
