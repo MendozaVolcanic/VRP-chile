@@ -103,6 +103,15 @@
     .vc-time-utc { font-size: 0.66rem; font-weight: 600; color: var(--muted); margin-top: 1px; }
     .vc-time-nodet { color: var(--muted); font-weight: 600; }
     .vc-distance { font-size: 0.72rem; color: #9fb3c8; margin-top: 6px; }
+    /* S109 — frescura de monitoreo (última pasada procesada, estilo MIROVA) */
+    .vc-monitor { font-size: 0.64rem; margin-top: 7px; display: flex; align-items: center;
+                  gap: 4px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.07); }
+    .vc-mon-dot { font-size: 0.7rem; line-height: 1; }
+    .mon-none .vc-mon-dot, .mon-none .vc-mon-txt { color: var(--muted); opacity: 0.65; }
+    .mon-fresh .vc-mon-dot { color: var(--green); }
+    .mon-fresh .vc-mon-txt { color: var(--muted); }
+    .mon-lagging .vc-mon-dot, .mon-lagging .vc-mon-txt { color: var(--orange); font-weight: 600; }
+    .mon-stale .vc-mon-dot, .mon-stale .vc-mon-txt { color: var(--red); font-weight: 600; }
     .vc-dist-ic { font-weight: 700; }
     .vc-dist-ic.is-summit { color: var(--green); }
     .vc-dist-ic.is-far { color: var(--muted); }
@@ -1455,6 +1464,27 @@ function lastEventTime(records) {
   return latest;
 }
 
+// S109 (pedido Nicolás): frescura del MONITOREO = última pasada satelital
+// PROCESADA (cualquier record, haya o no detección), distinta de la última
+// DETECCIÓN. Un volcán tranquilo se procesa cada noche sin anomalía → debe verse
+// "monitoreado", no "sin datos" (estilo MIROVA: separar "se procesó la pasada" de
+// "hubo evento térmico"). Surfacea además el gap real de adquisición cuando el host
+// NRT (LANCE) está intermitente y una pasada no llega. Umbrales: un volcán sano
+// recibe pasadas nocturnas ~diarias; >30h sin pasada = atrasado; >72h = sin datos.
+function monitoringFreshness(lastTimeStr) {
+  // Sin ningún registro = volcán sin pull de datos (no monitoreado), NO una caída
+  // del NRT → estado NEUTRO (gris), no rojo de alarma. El rojo se reserva para un
+  // Tier A que SÍ se monitorea pero quedó stale (problema real de adquisición).
+  if (!lastTimeStr) return { cls: "mon-none", txt: "sin datos (no monitoreado)", h: null };
+  const h = (Date.now() - parseUtcMs(lastTimeStr)) / 3600000;
+  const ago = h < 1 ? Math.round(h * 60) + " min"
+            : h < 48 ? Math.round(h) + " h"
+            : Math.round(h / 24) + " d";
+  if (h <= 30) return { cls: "mon-fresh",   txt: "monitoreado · última pasada hace " + ago, h };
+  if (h <= 72) return { cls: "mon-lagging", txt: "datos atrasados · última pasada hace " + ago, h };
+  return { cls: "mon-stale", txt: "sin pasadas hace " + ago, h };
+}
+
 // Conteo de detecciones dentro vs fuera del cráter en la ventana reciente.
 // Usa el campo distance_class asignado por los procesadores (S14): "summit"
 // si la detección cae dentro del inner_radius del volcán (3-7 km oficial
@@ -1819,7 +1849,18 @@ function buildCards() {
       time.textContent = "Sin datos";
     }
 
-    card.append(hdr, vrpEl, vrpSub, pills, dcRow, time);
+    // S109 (pedido Nicolás) — frescura de MONITOREO SIEMPRE visible: distingue
+    // "monitoreado · tranquilo" de "datos atrasados", independiente de si hubo
+    // detección. Estilo MIROVA: ver que las últimas pasadas se procesaron aunque
+    // no haya evento térmico. Surfacea el gap de adquisición (LANCE intermitente).
+    const fresh = monitoringFreshness(lastTime);
+    const mon = el("div", "vc-monitor " + fresh.cls);
+    const mdot = el("span", "vc-mon-dot"); mdot.textContent = "●";
+    const mtxt = el("span", "vc-mon-txt"); mtxt.textContent = " " + fresh.txt;
+    mon.title = "Frescura del MONITOREO: última pasada satelital procesada (haya o no detección térmica). Verde = procesado recientemente; ámbar = falta data reciente (host NRT LANCE intermitente); rojo = sin pasadas.";
+    mon.append(mdot, mtxt);
+
+    card.append(hdr, vrpEl, vrpSub, pills, dcRow, time, mon);
     grid.appendChild(card);
   });
 }

@@ -122,6 +122,14 @@ main { padding: 12px 24px 32px; max-width: 1600px; margin: 0 auto; }
   font-size: 0.66rem; color: var(--muted);
 }
 .mc-footer .last { color: var(--text); }
+/* S109 — frescura de monitoreo (última pasada procesada, estilo MIROVA) */
+.mc-monitor { font-size: 0.68rem; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+.mc-mon-dot { font-size: 0.7rem; line-height: 1; }
+.mon-none .mc-mon-dot, .mon-none .mc-mon-txt { color: var(--muted); opacity: 0.6; }
+.mon-fresh .mc-mon-dot { color: var(--green); }
+.mon-fresh .mc-mon-txt { color: var(--muted); }
+.mon-lagging .mc-mon-dot, .mon-lagging .mc-mon-txt { color: var(--orange); font-weight: 600; }
+.mon-stale .mc-mon-dot, .mon-stale .mc-mon-txt { color: var(--red); font-weight: 600; }
 .mc-no-data {
   flex: 1; display: flex; align-items: center; justify-content: center;
   color: var(--muted); font-size: 0.8rem; font-style: italic;
@@ -463,6 +471,24 @@ function fmtRelativeTime(iso) {
   return Math.round(ageH / 24) + " d";
 }
 
+// S109 (pedido Nicolás): frescura del MONITOREO = última pasada PROCESADA (cualquier
+// record, haya o no detección), distinta de la última DETECCIÓN. Un volcán tranquilo
+// se procesa cada noche sin anomalía → debe verse "monitoreado", no "sin data" (estilo
+// MIROVA). Surfacea el gap de adquisición cuando el host NRT (LANCE) está intermitente.
+// Espejo de index.html buildCards. Umbrales: >30h atrasado, >72h sin pasadas.
+function monitoringFreshness(records) {
+  let last = null;
+  for (const r of records) {
+    if (!last || r.datetime_utc > last) last = r.datetime_utc;
+  }
+  if (!last) return { cls: "mon-none", txt: "no monitoreado" };
+  const h = (Date.now() - parseUtcMs(last)) / 3600000;
+  const ago = h < 1 ? Math.round(h * 60) + " min" : h < 48 ? Math.round(h) + " h" : Math.round(h / 24) + " d";
+  if (h <= 30) return { cls: "mon-fresh",   txt: "monitoreado · " + ago };
+  if (h <= 72) return { cls: "mon-lagging", txt: "datos atrasados · " + ago };
+  return { cls: "mon-stale", txt: "sin pasadas · " + ago };
+}
+
 // ─── Construir sparkline 30d ──────────────────────────────────────────────────
 // Series: máximo diario de mirovaEqVrp (summit) sobre los últimos 30 días.
 // Bins simples por día UTC; render con Chart.js bar para visual MIROVA-like.
@@ -610,6 +636,16 @@ function renderMosaico() {
       el("span", { className: "last", textContent: fmtRelativeTime(latestTs) }),
     ]);
     card.appendChild(footer);
+
+    // S109 — frescura de MONITOREO (última pasada procesada), separada de la última
+    // detección: que un volcán tranquilo no se lea como "sin data" + surfacea LANCE.
+    const fresh = monitoringFreshness(records);
+    const monRow = el("div", { className: "mc-monitor " + fresh.cls }, [
+      el("span", { className: "mc-mon-dot", textContent: "●" }),
+      el("span", { className: "mc-mon-txt", textContent: " " + fresh.txt }),
+    ]);
+    monRow.title = "Frescura del MONITOREO: última pasada satelital procesada (haya o no detección). Verde = reciente; ámbar = datos atrasados (host NRT LANCE intermitente); rojo = sin pasadas.";
+    card.appendChild(monRow);
 
     grid.appendChild(card);
   }
