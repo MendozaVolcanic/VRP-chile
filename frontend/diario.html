@@ -45,6 +45,14 @@ header .ts-note { color: #6e7681; margin-top: 8px; font-size: 0.75em; font-style
         padding: 0; position: relative; overflow: hidden; }
 .card-header { text-align: center; padding: 10px 12px 6px; border-bottom: 1px solid var(--border); }
 .card-header h2 { margin: 0; font-size: 1.05em; color: #58a6ff; display: inline-block; }
+/* S109 — frescura de monitoreo (última pasada procesada, estilo MIROVA) */
+.card-monitor { font-size: 0.72em; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.cm-dot { font-size: 0.8em; line-height: 1; }
+.mon-none .cm-dot, .mon-none .cm-txt { color: var(--muted); opacity: 0.6; }
+.mon-fresh .cm-dot { color: var(--green); }
+.mon-fresh .cm-txt { color: var(--muted); }
+.mon-lagging .cm-dot, .mon-lagging .cm-txt { color: var(--orange); font-weight: 600; }
+.mon-stale .cm-dot, .mon-stale .cm-txt { color: var(--red); font-weight: 600; }
 .region-tag { font-size: 0.78em; color: var(--muted); margin-left: 6px; font-style: italic; }
 .card-stats { font-size: 0.72em; color: var(--muted); margin-top: 4px; }
 .card-stats .stat { display: inline-block; margin: 0 6px; }
@@ -512,6 +520,22 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
   };
 }
 
+// S109 (pedido Nicolás): frescura del MONITOREO = última pasada PROCESADA (cualquier
+// record), distinta de la última DETECCIÓN. Estilo MIROVA: que un volcán tranquilo se
+// lea "monitoreado", no "sin data"; surfacea el gap LANCE. Espejo de index/mosaico.
+function monitoringFreshness(records) {
+  let last = null;
+  for (const r of (records || [])) {
+    if (!last || r.datetime_utc > last) last = r.datetime_utc;
+  }
+  if (!last) return { cls: "mon-none", txt: "no monitoreado" };
+  const h = (Date.now() - parseUtcMs(last)) / 3600000;
+  const ago = h < 1 ? Math.round(h * 60) + " min" : h < 48 ? Math.round(h) + " h" : Math.round(h / 24) + " d";
+  if (h <= 30) return { cls: "mon-fresh",   txt: "monitoreado · última pasada hace " + ago };
+  if (h <= 72) return { cls: "mon-lagging", txt: "datos atrasados · última pasada hace " + ago };
+  return { cls: "mon-stale", txt: "sin pasadas hace " + ago };
+}
+
 function renderCard(volc, jsonData, mirovaForVolc) {
   const grid = document.getElementById("grid");
   const card = el("div", "card");
@@ -582,6 +606,16 @@ function renderCard(volc, jsonData, mirovaForVolc) {
   hdr.appendChild(h2);
   hdr.appendChild(region);
   hdr.appendChild(stRow);
+
+  // S109 — frescura de MONITOREO (última pasada procesada), separada de la última
+  // detección: que un volcán tranquilo no se lea como "sin data" + surfacea LANCE.
+  const fresh = monitoringFreshness(jsonData?.records);
+  const monRow = el("div", "card-monitor " + fresh.cls);
+  const cmDot = el("span", "cm-dot"); cmDot.textContent = "●";
+  const cmTxt = el("span", "cm-txt"); cmTxt.textContent = " " + fresh.txt;
+  monRow.title = "Frescura del MONITOREO: última pasada satelital procesada (haya o no detección térmica). Verde = reciente; ámbar = datos atrasados (host NRT LANCE intermitente).";
+  monRow.appendChild(cmDot); monRow.appendChild(cmTxt);
+  hdr.appendChild(monRow);
 
   const wrap = el("div", "chart-wrap");
   const canvas = el("canvas");
