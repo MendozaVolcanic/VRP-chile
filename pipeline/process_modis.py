@@ -35,6 +35,7 @@ from .vrp_regimes import (
     compute_local_background,
     cluster_corona_background,
     cluster_vrp_mw_with_bg,
+    cluster_focal_vrp_mw,
 )
 from .test1_integrated import compute_test1_mir
 from .anomaly_pixels import build_anomaly_pixels
@@ -147,6 +148,8 @@ from pipeline.profile import (
     LOCAL_CLUSTER_MAG_MODE,
     LOCAL_CLUSTER_MAG_RING_PX,
     LOCAL_CLUSTER_MAG_MIN_CORONA,
+    ENABLE_FOCAL_CLUSTER_MAGNITUDE,
+    FOCAL_CLUSTER_KEEP_PEAK,
 )
 from pipeline.anchor import resolve_honest_anchor  # S106 ancla espacial honesta
 from pipeline.single_pixel_mode import apply_single_pixel_mode
@@ -936,6 +939,19 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                         bt_mir, pixel_areas, _c["pixel_indices"],
                         _t_bk_corona, WOOSTER_COEFF, BAND21_LAMBDA,
                     )
+            # S109 §1 — magnitud NÚCLEO FOCAL/CONTEXTUAL: recomputar pc.vrp_mw sumando
+            # SOLO los píxeles del cluster contextualmente anómalos (dnti_ctx ∪ {pico}).
+            # Corta el campo difuso topográfico (A69/D11, ~10K sobre fondo frío) que
+            # MIROVA ignora ("insensitive to diffuse heat") y conserva el foco discreto
+            # (cráter activo / lava / incendio). Solo magnitud — posición y detección
+            # intactas (recompute post-selección). Flag-OFF default (A45). NO es
+            # fondo-local (no toca L_bg). Va ANTES del cap D9.
+            _focal_degraded = None
+            if ENABLE_FOCAL_CLUSTER_MAGNITUDE:
+                _vrp_c, _focal_n, _focal_degraded = cluster_focal_vrp_mw(
+                    _c["pixel_indices"], vrp_per_pixel_2d, dnti_ctx_hot,
+                    keep_peak=FOCAL_CLUSTER_KEEP_PEAK,
+                )
             # S71 D9 Opción C — cap si firing contextual-only en cirrus.
             _d9_capped = False
             if _path_d_cap_active and _vrp_c > PATH_D_ONLY_CAP_MW:
@@ -952,6 +968,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                 primary_cluster["d9_capped"] = True
             if _corona_degraded is not None:
                 primary_cluster["corona_degraded"] = bool(_corona_degraded)
+            if _focal_degraded is not None:
+                primary_cluster["focal_magnitude"] = True
+                primary_cluster["focal_degraded"] = bool(_focal_degraded)
             # F52-B S77 (A45) — single-pixel mode régimen sub-MW.
             _pix_vrps = [float(vrp_per_pixel_2d[i, j])
                          for (i, j) in _c["pixel_indices"]]
@@ -1175,6 +1194,13 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             if t1_clusters:
                 top = t1_clusters[0]
                 _vrp_t = float(top["vrp_mw"])
+                # S109 §1 — magnitud núcleo focal/contextual (espejo del bloque eruption).
+                _focal_degraded_t = None
+                if ENABLE_FOCAL_CLUSTER_MAGNITUDE:
+                    _vrp_t, _focal_n_t, _focal_degraded_t = cluster_focal_vrp_mw(
+                        top["pixel_indices"], t1_vrp_2d, dnti_ctx_hot,
+                        keep_peak=FOCAL_CLUSTER_KEEP_PEAK,
+                    )
                 # S71 D9 Opción C — cap si firing contextual-only en cirrus.
                 _d9_capped_t = False
                 if _path_d_cap_active and _vrp_t > PATH_D_ONLY_CAP_MW:
@@ -1189,6 +1215,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                 }
                 if _d9_capped_t:
                     primary_cluster["d9_capped"] = True
+                if _focal_degraded_t is not None:
+                    primary_cluster["focal_magnitude"] = True
+                    primary_cluster["focal_degraded"] = bool(_focal_degraded_t)
                 # F52-B S77 (A45) — single-pixel mode régimen sub-MW.
                 _pix_vrps_t = [float(t1_vrp_2d[i, j])
                                for (i, j) in top["pixel_indices"]]

@@ -195,6 +195,49 @@ def cluster_vrp_mw_with_bg(
     return float(total)
 
 
+def cluster_focal_vrp_mw(
+    cluster_indices: Sequence[tuple[int, int]],
+    vrp_per_pixel_2d: np.ndarray,
+    dnti_ctx_mask: np.ndarray,
+    keep_peak: bool = True,
+) -> tuple[float, int, bool]:
+    """Magnitud del cluster sumando SOLO píxeles contextualmente anómalos ∪ {pico}.
+
+    S109 §1 — el campo difuso tibio uniforme (no anómalo vs sus 8 vecinos) se cae;
+    el foco discreto (cráter activo / lava / incendio, anómalo vs vecinos) se conserva.
+    Generaliza a la magnitud del cluster el filtro contextual de Test 1 ya adoptado en
+    VIIRS (ctxpeak, test1_contextual_filter.apply_contextual_test1_filter, S100).
+    Fundamento: Coppola 2016a SP426.5 Tests 2/3 (dNTI contextual) + Coppola 2023 Eq.1
+    ("VRP fundamentally insensitive to the diffuse heat dispersed from the crater area
+    at a few degrees above the background"). NO es fondo-local (guard A48): no toca L_bg
+    ni la radiancia per-pixel — solo SELECCIONA qué píxeles ya-computados entran a la suma.
+
+    Args:
+        cluster_indices: píxeles (i, j) del cluster primario YA seleccionado.
+        vrp_per_pixel_2d: VRP (MW) por píxel ya computado (Wooster), 0 fuera de hot.
+        dnti_ctx_mask: bool 2-D, píxeles contextualmente anómalos (dnti_ctx_hot).
+        keep_peak: si True, conserva SIEMPRE el píxel de mayor VRP del cluster
+            (anti-FN del cráter embebido no-contextual). Si False (canario), puede
+            dar 0 cuando ningún píxel del cluster es contextual.
+
+    Returns:
+        (vrp_mw, n_focal, degraded). degraded=True ⟺ ningún píxel del cluster era
+        contextual (se cayó al solo-pico con keep_peak, o a 0 sin él) — transparencia,
+        no fallback silencioso.
+    """
+    ctx = np.asarray(dnti_ctx_mask, dtype=bool)
+    vrp2d = np.asarray(vrp_per_pixel_2d, dtype=float)
+    focal = [(int(i), int(j)) for (i, j) in cluster_indices if ctx[int(i), int(j)]]
+    degraded = len(focal) == 0
+    if keep_peak and len(cluster_indices) > 0:
+        peak = max(cluster_indices, key=lambda rc: vrp2d[int(rc[0]), int(rc[1])])
+        peak = (int(peak[0]), int(peak[1]))
+        if peak not in focal:
+            focal.append(peak)
+    vrp_mw = float(sum(vrp2d[i, j] for (i, j) in focal))
+    return vrp_mw, len(focal), degraded
+
+
 def _planck_spectral_radiance(t_k: float, lambda_um: float) -> float:
     """Planck spectral radiance B(λ, T) en W/m²/sr/μm."""
     if t_k <= 0 or lambda_um <= 0:

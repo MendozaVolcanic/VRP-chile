@@ -1,0 +1,67 @@
+name: S109 §1 A/B magnitud núcleo-focal MODIS
+
+# A/B del fix de magnitud MODIS (frente §1, núcleo focal/contextual del cluster):
+# 6 vols (5 alto-inflado + Lascar control) x 3 brazos (base flag-OFF / ctx+keep-peak /
+# ctx-puro canario) x 2 chunks = 36 jobs. Artifacts (NO commitea a main, A47); el audit
+# es LOCAL con experiments/_s109_modis_mag/audit_focalmag_ab.py tras gh run download +
+# reproc_coverage_gate.py (A64 success != completo). Flag-OFF en operacional; los brazos
+# ON viven en profiles aislados con data_subdir propio. El fix es POST-selección →
+# detección/posición idénticas al base (C1 en granules COMUNES). MODIS necesita pyhdf
+# (GH Linux). A43 Norway: "on": quoted. Design
+# docs/superpowers/specs/2026-06-14-magnitud-modis-nucleo-focal-design.md.
+
+"on":
+  workflow_dispatch:
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        volcano:
+          - Lascar
+          - Chaiten
+          - Villarrica
+          - PuyehueCordonCaulle
+          - Tupungatito
+          - Llaima
+        profile:
+          - _modis_focalmag_base
+          - _modis_focalmag_ctx
+          - _modis_focalmag_ctxpure
+        chunk:
+          - { start: "2026-01-29", end: "2026-03-31" }
+          - { start: "2026-04-01", end: "2026-06-13" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps (pyhdf for MODIS)
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reproc ${{ matrix.profile }} / ${{ matrix.volcano }} / ${{ matrix.chunk.start }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 290
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ matrix.chunk.start }} \
+            --end ${{ matrix.chunk.end }} \
+            --overwrite
+      - name: Upload JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: s109focalmag-${{ matrix.profile }}-${{ matrix.volcano }}-${{ matrix.chunk.start }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7
