@@ -3303,6 +3303,12 @@ function buildNRTTable() {
       currentVolcano = det.volcano;
       buildCards();
       renderDetail();
+      // S109 (pedido Nicolás): la tabla NRT está arriba pero el detalle/mapa del
+      // volcán clickeado queda ~15000px abajo (fuera de vista) → el click "no parecía
+      // hacer nada". Llevar el navegador al mapa de anomalías del volcán seleccionado.
+      const _target = document.getElementById("hotspot-map")
+                   || document.getElementById("detail");
+      if (_target) _target.scrollIntoView({ behavior: "smooth", block: "center" });
     });
 
     const tdDate = el("td"); tdDate.textContent = det.record.datetime_utc;
