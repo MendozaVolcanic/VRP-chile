@@ -138,6 +138,16 @@ paths:
   # mecanismos ortogonales (area vs fondo del ROI, A66). NO se tocan ctxpeak ni
   # los pisos VIIRS (0.02/0.15). Tag defensivo: pre-s103-nadir-fixed-viirs.
   enable_nadir_fixed_pixel_area_viirs: true
+  # S109 (A45, OK Nicolas) — magnitud NUCLEO FOCAL/CONTEXTUAL MODIS adoptada. El cluster
+  # MODIS sumaba el campo difuso topografico (A69/D11) que MIROVA ignora por diseno
+  # ("insensitive to diffuse heat", Coppola 2023). Este filtro restringe pc.vrp_mw a los
+  # pixeles contextualmente anomalos (dnti_ctx U {pico}) -> de-infla los blobs difusos sin
+  # tocar el foco real. A/B 36/36 (run 27521928757, doc AUDIT_S109_MODIS_FOCAL_VEREDICTO):
+  # C1 deteccion 0-diffs (0/1791), C3 Lascar 1.000, C4 foco 1.000, C2 71% curados (med 0.42x).
+  # Tag pre-s109-focal-magnitude-promote. SOLO magnitud (deteccion intacta). El ancla MODIS
+  # (enable_honest_anchor_modis) sigue OFF -> espera el fix de deteccion D11 (NdC 71% artefacto A69).
+  enable_focal_cluster_magnitude: true
+  focal_cluster_keep_peak: true
   # S27 MIROVA literal: vent-path NO existe en papers MIROVA.
   # Coppola 2015 §2.2 Test 1 integrated-ROI cumple rol equivalente
   # para sub-pixel cuando aplica. Vent-path entero queda como infra
