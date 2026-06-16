@@ -3,6 +3,12 @@
 Sistema VRP independiente para volcanes chilenos (equivalente MIROVA, propio).
 Repo: https://github.com/MendozaVolcanic/VRP-chile
 
+> ⚖️ **SDA en producción (Resolución CPLT N°372).** Este proyecto es un Sistema de Decisiones
+> Automatizadas en scope de transparencia algorítmica. Al crear/editar código que participe en la
+> detección/clasificación, aplicar la **cabecera FICHA** y el comentario "POR QUÉ" por bloque, y
+> mantener [`docs/FICHA_SDA_VRP_CHILE.md`](docs/FICHA_SDA_VRP_CHILE.md) al día. Estándar:
+> [`../../GUIA_MAESTRA_TRANSPARENCIA_ALGORITMICA.md`](../../GUIA_MAESTRA_TRANSPARENCIA_ALGORITMICA.md).
+
 ## ⚡ Working worktree canónico (LEER PRIMERO en cada sesión nueva)
 
 **Path canónico post-S82-prep**: `C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile/` (raíz del repo).
