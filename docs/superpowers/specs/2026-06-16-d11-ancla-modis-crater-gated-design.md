@@ -42,29 +42,32 @@ Láscar D12 (cluster real al cráter) → flip → `summit` → recall curado.
 - Cura (c) NO apaga cat-b: la detección no se toca; el cat-b real débil con señal summit genuina SÍ
   flipea (las 49/199 noches reales VIIRS-confirmadas tienen señal summit).
 
-## 3. ⚠️ Pregunta ABIERTA del spec (resolver ANTES de implementar) — A48
+## 3. ✅ Pregunta del spec RESUELTA (tarea #1, probe_ndc_assembly run 27625289232)
 
-**¿De qué path vienen los píxeles near-crater (1-5 km) del cluster artefacto de NdC?** El probe
-run-1 mostró **0 seeds summit del first-pass** en noches-artefacto, pero los records tienen
-`anomaly_pixels` a 1.0-4.9 km y `primary_cluster` n_pixels=1-2 cerca del cráter. La definición de
-"señal-summit genuina" depende de esto:
-- **Sospechoso primario**: `second_pass_adjacent` + `apply_second_pass_intra_radio_gate` (S85
-  F-S81-B', `ENABLE_SECOND_PASS_INTRA_RADIO_GATE`) — recapturan con umbrales summit relajados
-  (C1=0.003) y **A55 ya los marcó como posible anti-patrón redundante**. Si los píxeles near-crater
-  son recaptura intra-radio del second-pass (no first-pass genuino), "señal-summit" debe **excluir**
-  esa recaptura.
-- Otros candidatos: dnti_ctx path, vent-path, Test1 (todos verificables).
+**¿De qué etapa vienen los píxeles near-crater (≤5 km) del cluster artefacto de NdC?**
+**RESPUESTA (definitiva, atribución por etapa):**
 
-**Tarea spec #1**: probe instrumentado que capture el hot_mask FINAL + atribución por-píxel a través
-de TODO el ensamblado (first-pass / second-pass / intra-radio gate / dnti_ctx), para los granules
-NdC artefacto vs Láscar D12. Decide la definición exacta del gate. Espejo de los probes S110.
+| | first-pass summit | 2pass-recapture summit | gate S85 quitó near-crater |
+|---|---|---|---|
+| **ARTEFACTO** (5 noches) | **0** | **31** | 0 |
+| **REAL** (3 noches) | **57** | 50 | 0 |
 
-## 4. Definición candidata del gate (a confirmar con tarea #1)
+**Los píxeles near-crater de noches-artefacto son 100% recaptura del `second_pass_adjacent` que el
+gate intra-radio S85 PRESERVA** (los mantiene por caer dentro del inner_radius; quita 0). **CERO
+seeds genuinos del first-pass.** Las noches reales SÍ tienen first-pass genuino (57 vs 0).
+**Confirma A55**: el gate S85 fabrica el cluster near-crater artefacto manteniendo recaptura sin
+soporte de first-pass. El gate del ancla lo esquiva sin tocar detección.
 
-"Señal-summit MODIS genuina" = existe ≥1 píxel hot **del first-pass Tests 2&3** (NO de la recaptura
-intra-radio S85) dentro de `inner_radius_km`, con dETI > C1_summit. Alternativas si la tarea #1
-refuta esto: (a) cráter ETI absoluto > umbral; (b) cluster con seed summit del first-pass; (c)
-excluir la contribución del intra-radio gate del cómputo del cluster cuando decide el flip.
+## 4. ✅ Definición del gate (CONFIRMADA por tarea #1)
+
+**"Señal-summit MODIS genuina" = existe ≥1 píxel hot del FIRST-PASS Tests 2&3 dentro de
+`inner_radius_km`** (`first_pass_summit > 0`), **excluyendo la recaptura del second-pass / gate S85**.
+- NdC artefacto: `first_pass_summit = 0` → NO flip. ✓ (probe: 0/5 noches)
+- Láscar / cat-b real: `first_pass_summit > 0` → flip. ✓ (probe: 57 en 3 noches reales)
+
+Implementación: el ancla MODIS necesita acceso a la máscara first-pass restringida al inner_radius
+(o un flag/contador `n_first_pass_summit` persistido por el pipeline) para gatear el flip. NO usar
+`primary_cluster.centroid` ni `n_anomalous_pixels` (contaminados por la recaptura S85).
 
 ## 5. Plan de validación (A/B, A45)
 
