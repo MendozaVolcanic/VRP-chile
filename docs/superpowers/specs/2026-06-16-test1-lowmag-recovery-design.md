@@ -44,6 +44,15 @@ Solo afecta records donde el Test1 es la señal real y el cluster no aporta magn
 Flag `enable_test1_priority_weak_cluster` (default OFF). NO toca detección (triggered_*).
 
 ### Parte B — Calibración de la cuantificación (A/B multi-brazo, "intentemos todo")
+
+**CORRECCIÓN CLAVE (verificación adversarial S111)**: NdC/Lascar/Lastarria YA tienen
+`lbg_global_compatible=true` + `enable_test1_lbg_global` ON en el operacional. Por tanto,
+con la Parte A ON, el recompute de esos 3 nevados **ya usa el fondo GLOBAL**, no el local.
+Consecuencia: la Parte A ON sola **no da ~0; da ~0.26 MW (4.4× alto) y puede inflar RUTINA**.
+El problema de la Parte B NO es "destapar la magnitud" (la Parte A + global ya lo hace),
+sino **bajar del 0.26 hacia el 0.06 de MIROVA SIN inflar las noches RUTINA**. El brazo Q1
+(fondo local) NO aplica a estos 3 (ya usan global); el baseline de Parte A ON = Q2 (global).
+
 Con la Parte A ON, comparar candidatas de cuantificación del VRP Test1 contra las 6
 ALERTAS MIROVA. Candidatas (la mayoría ya existen como flags):
 | Brazo | Cuantificación | Flag(s) |
@@ -67,8 +76,13 @@ fixeable). Frente menor, se cierra con el probe del A/B.
 ## 3. Plan de validación (A45)
 - Tag `pre-s111-test1-lowmag`. Implementar Parte A + exponer brazos B (flags), default OFF.
 - A/B: reprocesar NdC (+ validación Villarrica/Lastarria/Lascar para no-regresión) sobre
-  la ventana de las 6 ALERTAS. Audit pre-escrito: VRP por brazo vs ALERTAS MIROVA +
-  conteo de RUTINA inflada. Captura k_observed (Parte C).
+  la ventana de las 6 ALERTAS. **Targeted a las fechas ALERTA + una muestra de RUTINA**
+  (no 2 meses) → rápido (minutos). Audit pre-escrito: VRP por brazo vs ALERTAS MIROVA +
+  **conteo de RUTINA inflada ESTRATIFICADO por NdC/Lascar/Lastarria** (los 3
+  lbg_global_compatible, donde el riesgo de inflación se concentra — verificación
+  adversarial S111). Criterio A66: noches MIROVA=0 → nuestro brazo <0.01 MW. Captura
+  k_observed (Parte C). Si la inflación RUTINA aparece en el brazo ganador → mitigar con
+  Q5 (fondo NTI) / Q6 (compacidad) o restringir el flag a vols sin lbg_global_compatible.
 - R2 pixel-level + R3 + preview antes de adoptar. Si ningún brazo reproduce sin inflar →
   no adoptar, documentar (la señal puede estar bajo el límite de nuestra cuantificación).
 

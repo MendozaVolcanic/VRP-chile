@@ -340,6 +340,13 @@ ENABLE_TEST1_LBG_GLOBAL: bool = bool(_p.get("enable_test1_lbg_global", False))
 # (y con él el recompute de magnitud) cuando detectó summit pero el cluster rival es
 # trivialmente débil (vrp < eps). Destapa la magnitud Muy Bajo (FN reactivación NdC
 # 0.06 MW) que un cluster de 1 píxel con radiancia nula tapaba. Default OFF.
+# SCOPE: solo VIIRS (process_viirs usa el helper resolve_test1_source_priority).
+# process_modis NO está cubierto (mantiene su cascada inline) — el caso NdC es VIIRS375.
+# INTERACCIÓN (verificación adversarial S111): NdC/Lascar/Lastarria tienen
+# lbg_global_compatible=true + enable_test1_lbg_global ON → con este flag ON, su recompute
+# usa el fondo GLOBAL (no local), que SOBRE-estima (~0.26 vs MIROVA 0.06) y puede inflar
+# noches RUTINA. La calibración (Parte B) debe medir RUTINA inflada estratificada por
+# esos 3 volcanes (criterio A66) antes de adoptar.
 ENABLE_TEST1_PRIORITY_WEAK_CLUSTER: bool = bool(
     _p.get("enable_test1_priority_weak_cluster", False))
 TEST1_WEAK_CLUSTER_EPS_MW: float = float(
