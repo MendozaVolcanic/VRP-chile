@@ -1,0 +1,36 @@
+name: Probe S110 NdC assembly attribution (D11 spec task #1)
+
+# A43 "on" quoted. One-off: atribuye los píxeles near-crater del cluster artefacto MODIS de NdC
+# por ETAPA del ensamblado (first-pass genuino vs second-pass recapture vs gate intra-radio S85),
+# para definir el gate del ancla (D11 design 2026-06-16, opción B). Read-only (monkeypatch).
+"on":
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py pyhdf scipy pyyaml
+      - name: Run NdC assembly attribution probe
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_PROFILE: mirova_equivalent
+        run: |
+          mkdir -p experiments/_s110_ndc_probe/out_asm
+          python experiments/_s110_ndc_probe/probe_ndc_assembly.py | tee experiments/_s110_ndc_probe/out_asm/report.txt
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s110-ndc-assembly-probe
+          path: experiments/_s110_ndc_probe/out_asm/
