@@ -148,9 +148,15 @@ def test_regla_d_test1_priority_logic_present_in_process_viirs():
     # Marker comment del fix
     assert "Regla D Test 1-priority" in src, \
         "Regla D Test 1 lógica removida — recall Villarrica regresaría a 0"
-    # Lógica clave: test1_summit_hit AND eruption_far → forzar test1 source
-    assert "test1_summit_hit and eruption_far" in src, \
-        "Combinación test1_summit_hit + eruption_far rota"
+    # S111: la lógica de prioridad Test1 se centralizó en el helper puro
+    # resolve_test1_source_priority (test1_integrated.py). process_viirs lo USA;
+    # el helper contiene la Regla D clásica. Anti-regresión adaptado al refactor.
+    assert "resolve_test1_source_priority" in src, \
+        "Helper de prioridad Test1 (Regla D + cluster débil) no usado en process_viirs"
+    from pathlib import Path as _P
+    _t1src = _P("pipeline/test1_integrated.py").read_text(encoding="utf-8")
+    assert "test1_summit_hit and eruption_far" in _t1src, \
+        "Combinación test1_summit_hit + eruption_far rota en el helper"
     assert 'final_hotspot_source = "test1"' in src, \
         "Asignación final_hotspot_source=\"test1\" rota"
 

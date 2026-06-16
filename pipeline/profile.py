@@ -336,6 +336,15 @@ ENABLE_PIXEL_LEVEL_DISTANCE_FILTER: bool = bool(_p.get("enable_pixel_level_dista
 # Default OFF (backward-compat). Activar via profile A/B.
 ENABLE_TEST1_LBG_GLOBAL: bool = bool(_p.get("enable_test1_lbg_global", False))
 
+# S111 Parte A (design 2026-06-16-test1-lowmag) — el Test1 gana final_hotspot_source
+# (y con él el recompute de magnitud) cuando detectó summit pero el cluster rival es
+# trivialmente débil (vrp < eps). Destapa la magnitud Muy Bajo (FN reactivación NdC
+# 0.06 MW) que un cluster de 1 píxel con radiancia nula tapaba. Default OFF.
+ENABLE_TEST1_PRIORITY_WEAK_CLUSTER: bool = bool(
+    _p.get("enable_test1_priority_weak_cluster", False))
+TEST1_WEAK_CLUSTER_EPS_MW: float = float(
+    _t.get("test1_weak_cluster_eps_mw", 0.01))
+
 # S27 MIROVA literal: flag para deshabilitar exclude_zones (parche nuestro).
 # MIROVA NO usa máscaras geográficas (verificado vs Coppola 2016a, Coppola 2020,
 # Laiolo 2026). Default true (operacional mantiene comportamiento actual);

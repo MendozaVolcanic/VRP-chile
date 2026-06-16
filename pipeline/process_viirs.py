@@ -93,6 +93,8 @@ from pipeline.profile import (
     ENABLE_TEST1_PIXEL_FILTER,
     ENABLE_FINAL_PIXEL_FILTER,
     ENABLE_TEST1_LBG_GLOBAL,
+    ENABLE_TEST1_PRIORITY_WEAK_CLUSTER,
+    TEST1_WEAK_CLUSTER_EPS_MW,
     ENABLE_TEST1_PATH,
     TEST1_K_SIGMA,
     TEST1_MIR_RELATIVE,
@@ -165,7 +167,8 @@ from .detection_context import (
     compute_bg_stats,
     first_pass_tests_2_and_3,
 )
-from .test1_integrated import compute_test1_mir, compute_test1_nti
+from .test1_integrated import (compute_test1_mir, compute_test1_nti,
+                               resolve_test1_source_priority)
 
 
 def _sensor_label_from_filename(filename: str) -> str:
@@ -1417,17 +1420,23 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         and (n_eti_path or 0) == 0
     )
 
+    # S111 Parte A (design 2026-06-16-test1-lowmag) — ¿el Test1 gana la fuente (y con
+    # ella el recompute de magnitud del Test1 integrado, gateado por source=='test1')?
+    # Unifica Regla D (S30) + only_test1 (S44) + cluster-rival-débil (S111). Con el flag
+    # ENABLE_TEST1_PRIORITY_WEAK_CLUSTER OFF, el helper devuelve True solo para las dos
+    # primeras → comportamiento legacy IDÉNTICO. El guard test1_centroid_lat is not None
+    # ya estaba implícito (test1_summit_hit/only_test1_source lo garantizan).
+    _cluster_vrp_legacy = (primary_cluster.get("vrp_mw")
+                           if primary_cluster is not None else None)
+    _test1_wins = (test1_centroid_lat is not None and resolve_test1_source_priority(
+        test1_summit_hit=test1_summit_hit, eruption_far=eruption_far,
+        only_test1_source=only_test1_source, cluster_vrp_mw=_cluster_vrp_legacy,
+        weak_cluster_enabled=ENABLE_TEST1_PRIORITY_WEAK_CLUSTER,
+        weak_cluster_eps=TEST1_WEAK_CLUSTER_EPS_MW))
+
     if hotspot_lat is not None and hotspot_lon is not None:
-        if test1_summit_hit and eruption_far:
-            # Regla D Test 1-priority: eruption far + Test 1 summit → Test 1 gana.
-            final_hotspot_lat = test1_centroid_lat
-            final_hotspot_lon = test1_centroid_lon
-            final_hotspot_dist_km = test1_hotspot_dist_km
-            final_hotspot_source = "test1"
-        elif only_test1_source:
-            # S44: Test 1 es la única fuente — eruption hotspot existe pero
-            # viene desde pixels Test 1 (que están en hot_mask vía OR).
-            # source="test1" garantiza que D4 VRP recompute aplique correctamente.
+        if _test1_wins:
+            # Test 1 es la señal real (Regla D / única fuente / cluster rival débil).
             final_hotspot_lat = test1_centroid_lat
             final_hotspot_lon = test1_centroid_lon
             final_hotspot_dist_km = test1_hotspot_dist_km
