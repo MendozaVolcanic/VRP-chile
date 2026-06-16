@@ -117,6 +117,7 @@ def attribute(kw, hot):
     b_dnti_sce = branch(c1_dnti_sce, mu_dnti, c2_dnti_sce, sd_dnti) if dual else b_dnti_sum
     b_deti_sce = branch(c1_deti_sce, mu_deti, c2_deti_sce, sd_deti) if dual else b_deti_sum
 
+    nti_bk = nti - eti  # NTI_bk = regresión cuadrática (eq 4); ETI = NTI - NTI_bk
     ys, xs = np.where(hot)
     pixels = []
     for y, x in zip(ys.tolist(), xs.tolist()):
@@ -128,15 +129,35 @@ def attribute(kw, hot):
             "region": "summit" if is_sum else "scene",
             "bt_k": round(float(bt[y, x]), 2),
             "bt_excess_k": round(float(bt[y, x] - t_bg), 2),
+            # S110b refinado — cadena espectral ABSOLUTA (¿el ETI cancela el valle?)
             "nti": round(float(nti[y, x]), 5),
+            "nti_app": round(float(nti_app[y, x]), 5),
+            "nti_bk": round(float(nti_bk[y, x]), 5),
+            "eti": round(float(eti[y, x]), 5),       # ABSOLUTO: si ~0 -> ETI cancela; si >>0 -> no
             "dnti": round(float(dnti[y, x]), 5),
             "deti": round(float(deti[y, x]), 5),
             "thr_dnti": round(bd[1], 5), "branch_dnti": bd[0],
             "thr_deti": round(be[1], 5), "branch_deti": be[0],
-            # rama que efectivamente dejó pasar dNTI: pasó C1 y/o STAT
             "dnti_pass_C1": bool(float(dnti[y, x]) > bd[2]),
             "dnti_pass_STAT": bool(float(dnti[y, x]) > bd[3]),
         })
+
+    # S110b — resumen ETI ABSOLUTO del VALLE entero (no solo seeds): ¿el grueso
+    # del valle tiene ETI~0 (regresión cancela, leak=textura) o ETI corrido (regresión falla)?
+    def _stats(arr):
+        a = arr[np.isfinite(arr)]
+        if a.size == 0:
+            return None
+        return {"n": int(a.size), "med": round(float(np.median(a)), 5),
+                "p10": round(float(np.percentile(a, 10)), 5),
+                "p90": round(float(np.percentile(a, 90)), 5)}
+    valley = roi & (dist > inner) & (dist <= 25.0) & np.isfinite(eti)
+    crater = roi & (dist <= inner) & np.isfinite(eti)
+    valley_bg = {
+        "valley_eti_abs": _stats(eti[valley]), "valley_nti_abs": _stats(nti[valley]),
+        "valley_nti_app": _stats(nti_app[valley]),
+        "crater_eti_abs": _stats(eti[crater]), "crater_nti_abs": _stats(nti[crater]),
+    }
     return {
         "t_bg": round(float(t_bg), 3), "inner_km": inner, "dual_roi": dual,
         "mu_dnti": round(mu_dnti, 6), "sd_dnti": round(sd_dnti, 6),
@@ -146,6 +167,7 @@ def attribute(kw, hot):
                             "binding": b_dnti_sum[0], "eff": round(b_dnti_sum[1], 5)},
         "thr_scene_dnti": ({"C1": c1_dnti_sce, "stat": round(mu_dnti + c2_dnti_sce * sd_dnti, 5),
                             "binding": b_dnti_sce[0], "eff": round(b_dnti_sce[1], 5)} if dual else None),
+        "valley_bg": valley_bg,
         "pixels": pixels,
     }
 
@@ -236,6 +258,13 @@ def main():
         if dn_sum:
             print(f"    dNTI semillas summit: min={min(dn_sum):.5f} max={max(dn_sum):.5f} "
                   f"(C1 summit=0.003)", flush=True)
+        vb = attr.get("valley_bg", {})
+        ve = vb.get("valley_eti_abs"); ce = vb.get("crater_eti_abs")
+        if ve:
+            print(f"    ETI ABS valle (5-25km): med={ve['med']} p10={ve['p10']} p90={ve['p90']} "
+                  f"  <- si ~0 el ETI cancela el valle (leak=textura); si >>0 la regresión NO cancela", flush=True)
+        if ce:
+            print(f"    ETI ABS cráter (<={INNER_KM}km): med={ce['med']} p90={ce['p90']}", flush=True)
         png_night(label, date, attr, OUT / f"{label}_{date}_{sensor}.png")
         out = {"date": date, "label": label, "sensor": sensor, "granule": granule,
                "first_pass_ran": True, "dT_json": dT, "pcvrp_json": pcvrp,

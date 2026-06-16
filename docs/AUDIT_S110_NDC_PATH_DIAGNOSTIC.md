@@ -93,3 +93,30 @@ MODIS solo corre en Actions. Barato (1 corrida), definitivo para no apuntar al p
 3. La separación REAL↔ARTEFACTO existe pero es **blanda** (ΔT 8.6 vs 12.6 K solapado) → cualquier
    gate duro arriesga apagar el cat-b real (lección D11 S104-S106). El candidato debe atacar el
    **mecanismo de detección** (piso/background), no un umbral post-hoc de magnitud o ΔT.
+
+## RESULTADO del probe run-1 (27617831259, 10/10 noches OK) — rama DEFINITIVA = C1
+
+`experiments/_s110_ndc_probe/out/ndc_firstpass_attribution.json` (artifact GH). 5 noches ARTEFACTO
+(ΔT 4.5-5.1K) + 5 REAL (ΔT 18.9-22.9K).
+
+- **El leak entra 100% por el piso absoluto C1, NUNCA por μ+C2σ** (binding=C1 en las 10 noches;
+  dNTI vía-STAT = 0 de 896 semillas). μ+C2σ siempre queda por encima de C1.
+- **Esto explica por qué el fondo-local se refutó en S106**: atacaba μ/σ, que nunca es la restricción
+  que ata → no podía curar el leak (y sí apagaba la señal real). Confirmado con datos.
+- El valle (scene) dispara TODAS las noches apenas sobre C1_scene=0.010 (real 2026-06-10: 285/306
+  seeds en el valle). Lo que distingue real de artefacto es el cráter (summit): real tiene seeds
+  summit (dNTI > C1_summit=0.003, BT excess 7.6K); artefacto extremo tiene 0 (cráter sin calor,
+  confirmado Nicolás "artefacto puro").
+- **dETI del valle = 0.0125 (artefacto) / 0.0143 (real), NO ~0** → el ETI contextual NO está
+  cancelando el valle. Si lo cancelara (dETI→0), el Test 3 fallaría y mataría la detección.
+- Caveat (A66): las 5 artefacto son la cola extrema de ΔT (1-10 seeds, 100% scene); el cluster cerca
+  del cráter en ellas viene del ensamblado downstream (second-pass/clustering), no de seeds summit.
+
+## Síntesis papers-first (4 agentes) + verificación de código → `AUDIT_S110_NDC_PAPERS_SYNTHESIS.md`
+
+Coppola 2016a: la supresión de topografía es ESPECTRAL (NTI→ETI; valle homogéneo → ETI≈0). Nuestro
+`compute_eti_scene_quadratic`/`compute_nti_and_nti_app` se ven FIELES al paper (A48 verificado) → el
+dETI≠0 del valle puede ser textura real, no un bug. **Probe run-2 (refinado)** vuelca el ETI ABSOLUTO
+del valle vs cráter para decidir: ETI≈0 → leak=textura contextual (afinar test, familia A clon-literal);
+ETI corrido → la regresión NO cancela (arreglar normalización). Familia B fallback = fondo persistente
+por píxel (TIRVolcH/RST, convergencia Agent 2+4, departure documentada).
