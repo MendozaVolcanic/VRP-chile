@@ -79,6 +79,35 @@ def _local_background_nti(
     return out
 
 
+def resolve_test1_source_priority(*, test1_summit_hit, eruption_far, only_test1_source,
+                                  cluster_vrp_mw, weak_cluster_enabled, weak_cluster_eps):
+    """S111 — ¿el Test1 debe ganar `final_hotspot_source` (y con él el recompute de
+    magnitud del Test1 integrado)?
+
+    POR QUÉ: el recompute del VRP Test1 (process_viirs/process_modis) está gateado por
+    source=='test1'. Cuando el Test1 detecta una señal sub-píxel real al cráter pero
+    coexiste un cluster cercano DÉBIL (1 píxel, vrp≈0 por fondo MIR contaminado), la
+    cascada elige `eruption` y la magnitud colapsa a 0 — el FN de la reactivación de
+    Nevados de Chillán (MIROVA 0.06 MW). Este helper centraliza las condiciones bajo
+    las que el Test1 es la señal real dominante.
+
+    Las dos primeras ramas son las clásicas (Regla D S30 + only_test1 S44), invariantes
+    al flag. La tercera (S111, `weak_cluster_enabled`) añade: si el Test1 detectó summit
+    y el cluster rival no aporta magnitud real (None o vrp < ε), el Test1 gana. NO le
+    roba la fuente a un cluster con magnitud genuina (guard cluster_vrp_mw >= ε).
+
+    Returns bool de Python (JSON-safe).
+    """
+    if test1_summit_hit and eruption_far:
+        return True
+    if only_test1_source:
+        return True
+    if weak_cluster_enabled and test1_summit_hit:
+        if cluster_vrp_mw is None or float(cluster_vrp_mw) < weak_cluster_eps:
+            return True
+    return False
+
+
 def compute_test1_nti(
     bt_mir: np.ndarray,
     bt_tir: np.ndarray,
