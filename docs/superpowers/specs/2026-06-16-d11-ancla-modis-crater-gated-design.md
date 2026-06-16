@@ -104,3 +104,49 @@ merge_promote pattern. NRT no afectado mientras el flag esté OFF.
 - NO toca el test de detección (first-pass, C1, ETI) — explícitamente fuera de scope (decisión Nicolás).
 - NO el fondo temporal por píxel (familia B) — reservado como fallback de último recurso (departure MISSION).
 - NO el re-reproc de PCC/Chaitén focal (§1 follow-up, frente separado).
+
+## 10. ✅ IMPLEMENTACIÓN S111 (M1, OK Nicolás + tag pre-s111-ancla-modis-crater-gated)
+
+**Mecánica M1 elegida** (menor riesgo): gatear la APLICACIÓN del override del ancla
+honesta MODIS en el wiring, NO dentro del helper puro `resolve_honest_anchor` (que
+queda intacto y no afecta a VIIRS, ya validado S108).
+
+1. `pipeline/anchor.py` — helper puro nuevo `honest_anchor_applies(enabled,
+   first_pass_gate_enabled, n_first_pass_summit)`: True si el override se aplica.
+   Con gate ON requiere `n_first_pass_summit > 0`. Testeado sin pyhdf
+   (`tests/test_honest_anchor_modis_gate.py`, 6 tests).
+2. `pipeline/process_modis.py` — tras el first-pass:
+   `n_first_pass_summit = int(np.sum(fp_hot & (vent_dist_per_pixel <= inner_radius_km)))`
+   (idéntico al probe assembly). Persistido como `diag_n_first_pass_summit`. El
+   bloque del ancla se gatea con `honest_anchor_applies(...)` en vez de
+   `if ENABLE_HONEST_ANCHOR_MODIS`. Cuando el gate bloquea → queda la cascada
+   legacy (far, como hoy) → **comportamiento operacional byte-idéntico con master OFF**.
+3. `pipeline/profile.py` — flag `ENABLE_HONEST_ANCHOR_MODIS_FIRST_PASS_GATE`
+   (default True). El brazo A/B "ancla-sin-gate" lo pone False.
+
+**Por qué M1 y no M2** (gate dentro del helper): M1 preserva la clasificación legacy
+EXACTA cuando el gate bloquea (199/199 NdC quedan far, no 196), no toca el helper
+compartido con VIIRS, y la decisión del gate es una función pura trivialmente testeable.
+
+**Verificación adversarial (A62)**: caracterización offline de los 11 Tier A
+(`char_current_state.py`) confirmó que los candidatos a flip (105-289/vol) tienen
+**0 `triggered_test1`** → la rama Test1 de la cascada NO es vía de escape del
+artefacto; el gate sobre la cláusula ctx_cluster es completo. **Razón ESTRUCTURAL**
+(no solo el conteo, verificación adversarial S111): el centroide del Test1 está
+acotado a `TEST1_ROI_KM`=3 km alrededor del vent → cuando Test1 dispara,
+`test1_hotspot_dist_km` ≤ inner (inner ≥ 3 km en los 11) → `test1_summit_hit`=True →
+la cascada legacy (Regla D / `only_test1_source`) ya clasifica summit. Por eso ningún
+record `far` alcanza la rama test1 del ancla, con o sin gate — es invariante de la
+geometría del ROI de Test1, robusto ante reproc futuros, no un hallazgo frágil.
+
+**Verificación adversarial M1 (4 revisores, S111)**: 0 críticos/altos/medios. La
+invariancia operacional (master OFF) y la detección invariante (C4) verificadas
+CLEAN. Hallazgos LOW aplicados: `bool()` wrap en `honest_anchor_applies`; doc del
+acoplamiento `_path_d_atm_gate_skip` (no combinar el gate con path_d_atm_gate); doc
+de que `n_first_pass_summit` se mide sobre fp_hot crudo (A73, más permisivo nunca
+menos); limpieza gather. VIIRS no afectado (`honest_anchor_applies` solo en MODIS).
+
+**A/B 3 brazos** (`reproc-s111-d11-ab.yml`, 44 jobs, base=operacional):
+`_d11_modis_nogate` (master ON, gate OFF) vs `_d11_modis_gated` (master ON, gate ON).
+Audit: `experiments/_s111_d11/audit_d11_ab.py` (criterios C1-C4 + MECANISMO,
+pre-registrados A66). Gather: `gather_ab_artifacts.py <RUN_ID>`.

@@ -1,0 +1,53 @@
+name: S111 D11 A/B gate ancla MODIS (nogate vs gated) - 11 Tier A (A45)
+
+# A43 "on" quoted. A/B del gate del ancla honesta MODIS (D11, design 2026-06-16).
+# Brazos: _d11_modis_nogate (master ON, gate OFF) y _d11_modis_gated (master ON,
+# gate ON). Base = operacional (master OFF, ya en disco). Solo POSICIÓN; detección
+# byte-idéntica al granule. Artifacts, NO commitea (A47). Tras completar: gather
+# (descargar artifacts → data/_d11_modis_*/) + audit_d11_ab.py (criterios A66).
+"on":
+  workflow_dispatch:
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        arm: [_d11_modis_nogate, _d11_modis_gated]
+        volcano: [Lastarria, PlanchonPeteroa, Copahue, Lascar, Isluga, NevadosDeChillan, Llaima, Villarrica, Chaiten, Tupungatito, PuyehueCordonCaulle]
+        chunk:
+          - { start: "2026-01-29", end: "2026-03-31" }
+          - { start: "2026-04-01", end: "2026-06-08" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reprocess ${{ matrix.arm }} / ${{ matrix.volcano }} / ${{ matrix.chunk.start }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 320
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.arm }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ matrix.chunk.start }} \
+            --end ${{ matrix.chunk.end }} \
+            --overwrite
+      - name: Upload JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: s111d11-${{ matrix.arm }}-${{ matrix.volcano }}-${{ matrix.chunk.start }}
+          path: data/${{ matrix.arm }}/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7

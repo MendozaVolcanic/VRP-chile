@@ -13,6 +13,41 @@ del ROI (modo "vent") o el píxel de NTI máximo del ROI (modo "nti_peak").
 """
 
 
+def honest_anchor_applies(*, enabled, first_pass_gate_enabled, n_first_pass_summit):
+    """S111 D11 — ¿se aplica el override de posición del ancla honesta MODIS?
+
+    FICHA SDA — Nivel 2 (decisión de clasificación). POR QUÉ: el ancla honesta
+    MODIS, si se aplicara sin condición, promovería a ``summit`` los artefactos
+    topográficos del valle de Nevados de Chillán (A69/D11). Esos clusters
+    near-crater son 100% recaptura del ``second_pass_adjacent`` que el gate
+    intra-radio S85 preserva (A55, probe assembly run 27625289232: first_pass_
+    summit ARTEFACTO=0 / REAL=57), NO señal volcánica del primer pase. El gate
+    condiciona el override a que exista señal-summit PROPIA genuina: ≥1 píxel del
+    FIRST-PASS (Tests 2&3 de Coppola 2016a, contextuales/espectrales, inmunes a
+    topografía vía ETI) dentro del ``inner_radius_km``.
+
+    Args:
+        enabled: flag maestro ``ENABLE_HONEST_ANCHOR_MODIS``.
+        first_pass_gate_enabled: sub-flag ``ENABLE_HONEST_ANCHOR_MODIS_FIRST_PASS_GATE``.
+            Con False (brazo A/B "ancla-sin-gate"), el override se aplica siempre
+            que ``enabled`` (comportamiento S106). Con True, requiere first-pass summit.
+        n_first_pass_summit: nº de píxeles del first-pass Tests 2&3 dentro del
+            inner_radius (excluye recaptura second-pass / gate S85).
+
+    Returns:
+        True si process_modis debe sobrescribir final_hotspot_* con el ancla
+        honesta; False si debe conservar la cascada legacy (clasificación de hoy).
+    """
+    if not enabled:
+        return False
+    if not first_pass_gate_enabled:
+        return True
+    # bool() normaliza el tipo: n_first_pass_summit puede llegar como escalar numpy
+    # de un caller futuro; sin esto el retorno sería numpy.bool_ (no JSON-safe, rompe
+    # `is True`/`is False` aguas abajo). En el pipeline real ya viene int()-wrapped.
+    return bool((n_first_pass_summit or 0) > 0)
+
+
 def resolve_honest_anchor(ctx_cluster, test1_triggered, test1_summit_hit,
                           vent_lat, vent_lon, nti_peak, vent_hotspot,
                           loose_pixel, inner_radius_km, mode="vent"):

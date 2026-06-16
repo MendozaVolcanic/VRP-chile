@@ -297,6 +297,14 @@ HONEST_ANCHOR_TEST1_MODE: str = str(_p.get("honest_anchor_test1_mode", "vent"))
 # MODIS NO puede activarse hasta resolver el fix de magnitud del destape (131
 # records path-D first-pass inflados, design 2026-06-11 §4/§7 pre-comprometido).
 ENABLE_HONEST_ANCHOR_MODIS: bool = bool(_p.get("enable_honest_anchor_modis", False))
+# S111 D11 — gate del ancla honesta MODIS por señal-summit propia (design
+# 2026-06-16). El override del ancla MODIS solo se aplica si hay ≥1 píxel del
+# FIRST-PASS Tests 2&3 dentro del inner_radius (excluye la recaptura second-pass
+# que el gate S85 preserva, A55). Default True: cuando el maestro se prenda, el
+# gate evita promover el artefacto topográfico de NdC (A69). El brazo A/B
+# "ancla-sin-gate" lo pone False para reproducir el ancla S106 puro.
+ENABLE_HONEST_ANCHOR_MODIS_FIRST_PASS_GATE: bool = bool(
+    _p.get("enable_honest_anchor_modis_first_pass_gate", True))
 ENABLE_HONEST_ANCHOR_VIIRS750: bool = bool(_p.get("enable_honest_anchor_viirs750", False))
 
 # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene aplicado a
