@@ -1,0 +1,37 @@
+name: Probe S110 NdC first-pass attribution (D11)
+
+# A43 "on" quoted. One-off diagnóstico S110 (frente D11): atribuye por qué rama
+# (piso C1 vs μ+C2·σ) y región (summit/scene) pasan los píxeles-semilla del
+# first-pass MODIS que generan el artefacto topográfico A69 en Nevados de Chillán.
+# Reprocesa 5 noches ARTEFACTO + 5 REAL. Read-only sobre pipeline (monkeypatch en
+# el probe). NO toca data/. Archivar tras usar. Ver AUDIT_S110_NDC_PATH_DIAGNOSTIC.md.
+"on":
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py pyhdf scipy pyyaml matplotlib
+      - name: Run NdC first-pass attribution probe
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_PROFILE: mirova_equivalent
+        run: |
+          python experiments/_s110_ndc_probe/probe_ndc_firstpass.py | tee experiments/_s110_ndc_probe/out/report.txt
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s110-ndc-firstpass-probe
+          path: experiments/_s110_ndc_probe/out/
