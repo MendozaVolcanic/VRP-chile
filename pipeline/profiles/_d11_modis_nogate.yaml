@@ -1,0 +1,16 @@
+# VRP-Chile — profile: _d11_modis_nogate (S111 D11 A/B, brazo "ancla-sin-gate")
+#
+# Contrafactual: ancla honesta MODIS encendido SIN el gate first-pass (= ancla
+# S106 puro aplicado a MODIS). Promueve a summit TODOS los clusters near-crater,
+# incluido el artefacto topográfico de NdC (A69, recaptura second-pass/gate S85,
+# A55). Demuestra por qué el gate es necesario. Solo POSICIÓN (detección y
+# magnitud idénticas a base). Design: 2026-06-16-d11-ancla-modis-crater-gated.
+extends: mirova_equivalent
+profile: _d11_modis_nogate
+description: >
+  A/B S111 D11 brazo ancla-sin-gate (master ON, gate OFF).
+paths:
+  enable_honest_anchor_modis: true
+  enable_honest_anchor_modis_first_pass_gate: false
+output:
+  data_subdir: _d11_modis_nogate

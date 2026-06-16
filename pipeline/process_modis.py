@@ -143,6 +143,7 @@ from pipeline.profile import (
     SUB_MW_REGIME_THRESHOLD_MW,
     SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
     ENABLE_HONEST_ANCHOR_MODIS,
+    ENABLE_HONEST_ANCHOR_MODIS_FIRST_PASS_GATE,
     HONEST_ANCHOR_TEST1_MODE,
     ENABLE_LOCAL_CLUSTER_MAGNITUDE,
     LOCAL_CLUSTER_MAG_MODE,
@@ -151,7 +152,7 @@ from pipeline.profile import (
     ENABLE_FOCAL_CLUSTER_MAGNITUDE,
     FOCAL_CLUSTER_KEEP_PEAK,
 )
-from pipeline.anchor import resolve_honest_anchor  # S106 ancla espacial honesta
+from pipeline.anchor import resolve_honest_anchor, honest_anchor_applies  # S106/S111
 from pipeline.single_pixel_mode import apply_single_pixel_mode
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -665,6 +666,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     # rama OR estadística μ+C2σ + dual-ROI Tabla 2 (summit/scene).
     # Paths legacy se calcularon arriba pero no contribuyen al hot_mask cuando ON.
     n_first_pass = 0
+    n_first_pass_summit = 0  # S111 D11 — seeds first-pass dentro del inner (gate ancla)
     fp_diag = None
     if (ENABLE_FIRST_PASS_TESTS_2_AND_3
             and inner_radius_km is not None
@@ -715,6 +717,11 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         )
         hot_mask_2d = fp_hot
         n_first_pass = fp_diag["n_first_pass_pixels"]
+        # S111 D11 — señal-summit propia: píxeles del FIRST-PASS (Tests 2&3) dentro
+        # del inner_radius, ANTES del second_pass_adjacent. Excluye la recaptura que
+        # el gate S85 preserva (A55): ese cluster near-crater es artefacto topográfico
+        # (valle NdC). El ancla honesta MODIS solo promueve a summit si esto es >0.
+        n_first_pass_summit = int(np.sum(fp_hot & (vent_dist_per_pixel <= inner_radius_km)))
 
     # S46 Task 5 Drift #4 — second_pass_adjacent recapture (paper SP426.5:347-356).
     # Tras el first-pass, recompute dNTI/dETI excluyendo active pixels del 8-vecino
@@ -1232,9 +1239,19 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     # S106 — ancla espacial honesta MODIS (design 2026-06-11 §3.1, espejo de
     # process_viirs.py). SOLO posición: los bloques de magnitud de arriba ya
     # corrieron con la semántica legacy. Flag SEPARADO del de VIIRS375
-    # (enable_honest_anchor_modis) — NO activar sin el fix del destape (§4/§7).
+    # (enable_honest_anchor_modis).
+    # S111 D11 (M1, design 2026-06-16) — el override solo se aplica si el MODIS
+    # tiene señal-summit propia (first_pass_summit>0). Sin ella, el cluster
+    # near-crater es artefacto topográfico A69 (recaptura second-pass/gate S85,
+    # A55) → NO override → queda la clasificación legacy (far, como hoy). Cura el
+    # FN D12 Láscar (first-pass genuino) sin promover el artefacto NdC.
+    _apply_honest_anchor_modis = honest_anchor_applies(
+        enabled=ENABLE_HONEST_ANCHOR_MODIS,
+        first_pass_gate_enabled=ENABLE_HONEST_ANCHOR_MODIS_FIRST_PASS_GATE,
+        n_first_pass_summit=n_first_pass_summit,
+    )
     _ha_nti_peak = None
-    if ENABLE_HONEST_ANCHOR_MODIS:
+    if _apply_honest_anchor_modis:
         if (HONEST_ANCHOR_TEST1_MODE == "nti_peak" and nti is not None
                 and vent_dist_per_pixel is not None):
             _roi3 = (vent_dist_per_pixel <= TEST1_ROI_KM) & ~np.isnan(nti)
@@ -1314,6 +1331,10 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         # en la regla μ+C2σ. Ausentes (0/None) si flag OFF o sin background válido.
         "diag_n_first_pass_pixels": (
             fp_diag["n_first_pass_pixels"] if fp_diag is not None else 0),
+        # S111 D11 — seeds del first-pass dentro del inner_radius (señal-summit
+        # propia). Gate del ancla honesta MODIS: >0 → ancla al cráter; 0 →
+        # artefacto topográfico (recaptura S85, A55) → no se promueve.
+        "diag_n_first_pass_summit": n_first_pass_summit,
         "diag_mu_dnti": (
             fp_diag["mu_dnti"] if fp_diag is not None else None),
         "diag_sd_dnti": (

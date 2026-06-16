@@ -1,0 +1,17 @@
+# VRP-Chile — profile: _d11_modis_gated (S111 D11 A/B, brazo "ancla-con-gate")
+#
+# Candidato a adoptar: ancla honesta MODIS encendido CON el gate first-pass. El
+# override de posición solo se aplica si hay señal-summit propia genuina
+# (first_pass_summit > 0, Tests 2&3 dentro del inner_radius, excluye recaptura
+# second-pass/gate S85). Cura el FN D12 Láscar (first-pass genuino) sin promover
+# el artefacto NdC (first_pass_summit=0). Solo POSICIÓN; detección y magnitud
+# idénticas a base. Design: 2026-06-16-d11-ancla-modis-crater-gated.
+extends: mirova_equivalent
+profile: _d11_modis_gated
+description: >
+  A/B S111 D11 brazo ancla-con-gate (master ON, gate ON).
+paths:
+  enable_honest_anchor_modis: true
+  enable_honest_anchor_modis_first_pass_gate: true
+output:
+  data_subdir: _d11_modis_gated
