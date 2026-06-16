@@ -768,6 +768,46 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     los display-suppression previos de artefactos (ej. cirrus S90) son candidatos a
     migrar a fix de algoritmo cuando se reabra ese frente.
 
+- **A73. Gatear decisiones binarias sobre la señal de DETECCIÓN genuina, no sobre
+  agregados contaminados** (S110, diseño D11 + probe ensamblado): cuando una decisión
+  binaria (flip far→summit del ancla; rollup vs zero-out) necesita "¿hay señal real al
+  cráter?", usar la salida del FIRST-PASS restringida al inner_radius, NO el
+  `primary_cluster.centroid` ni `n_anomalous_pixels` — esos están contaminados por la
+  recaptura `second_pass_adjacent` + el gate intra-radio S85, que PRESERVA recaptura sin
+  soporte de first-pass dentro del inner. Probado (probe_ndc_assembly run 27625289232):
+  NdC artefacto first_pass_summit=0 / 2pass_recapture=31; REAL first_pass_summit=57.
+  Confirma A55 (S85 fabrica el cluster near-crater artefacto). Análogo a A46 (schema
+  asimétrico hotspot = vector de bugs).
+
+- **A74. Verificar el índice ABSOLUTO antes de concluir "normalización rota"** (S110,
+  probe ETI run-2): un diferencial contextual ≠0 (dETI del valle ≈0.0125) NO implica que
+  la normalización espectral (ETI = NTI − NTI_bk, Coppola Eq 4-5) falle. El probe mostró
+  el ETI **absoluto** del valle ≈0 → la regresión SÍ cancela el gradiente topográfico de
+  gran escala; el leak era textura residual cruzando el piso absoluto C1. Verificar el
+  valor absoluto (no solo el diferencial) antes de "arreglar" código fiel al paper (A48).
+  Un subagente propuso "tu ETI está roto" — el dato lo refutó.
+
+- **A75. Probe de atribución por ETAPA del ensamblado (monkeypatch read-only)** (S110,
+  método A65-adyacente): para diagnosticar qué etapa del pipeline genera ciertos
+  píxeles/records SIN tocar el pipeline (A45), monkeypatchear en el probe las funciones de
+  cada etapa (`first_pass_tests_2_and_3` / `second_pass_adjacent` / `apply_second_pass_
+  intra_radio_gate`) y capturar sus masks de entrada/salida; luego atribuir los píxeles
+  objetivo por etapa. Reusa el preámbulo real del pipeline (fiel), es read-only, y
+  resuelve "¿de qué path viene esto?" que el JSON persistido no puede.
+
+- **A76. MIROVA publica artefactos solares diurnos en su producto per-volcán; los limpia
+  por supervisión MANUAL, no gate automático** (S110, caso Láscar 760 MW verificado):
+  VIIRS375 diurno cerca del mediodía solar sobre nube → la nube refleja sol en MIR (I04
+  3.74µm) brillante + TIR (I05) frío → NTI enorme → VRP fantasma (760 MW ≈ 100× el máx de
+  Láscar). MIROVA lo mostró "HIGH" en la imagen per-volcán, pero su consolidado (latest.php)
+  Y nuestro pipeline (night-only) dieron ~0 → ambos inmunes. Confirma con caso real Coppola
+  2023 §2.5 (FP removidos a mano, ~5% tolerados "aleatorios en espacio/tiempo"). **How to
+  apply** (refina A11/A54): la ground-truth OCR contiene estos artefactos marcados "alta
+  confianza" por el scraper (validación geométrica no distingue reflexión solar de lava) →
+  en auditorías de recall, valores OCR VIIRS375 ALTOS en pasadas DIURNAS cerca del mediodía
+  solar = sospechosos; NO contar como FN si los "perdemos" (perderlos es correcto). Detalle:
+  `~memory/reference_mirova_daytime_cloud_artifact.md`.
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
