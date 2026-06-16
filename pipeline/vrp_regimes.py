@@ -1,3 +1,19 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · vrp_regimes.py  ·  SDA: VRP Chile (clon MIROVA)  ·  ID: VRP-CL
+# Objetivo      : Cuantificar la potencia radiada volcánica (VRP) para apoyar
+#                 la clasificación de actividad térmica (alerta volcánica OVDAS).
+# Lógica        : Para cada anomalía térmica, estima el fondo local y aplica la
+#                 ecuación de Wooster/Coppola según el régimen del rasgo térmico
+#                 (lava fresca, lava lake sub-pixel, lago hidrotermal).
+# Modelo/método : Reglas físicas determinísticas (Planck/Wooster, Coppola 2016/2024).
+#                 NO es caja negra — la lógica es auditable (cumple punto 5.5 Res. 372).
+# Datos entrada : Radiancia MODIS (MOD14/MYD14) y VIIRS. SIN datos personales.
+# Variables     : VRP (MW), BT del píxel, T de fondo (corona/local), área del píxel.
+# Limitaciones  : Saturación de píxel, contaminación por lago/nieve, falsos positivos
+#                 por incendios; fondo regional como fallback degrada explícitamente.
+# Refs/datos    : Coppola et al. 2016a, Coppola 2024 (Springer). Datos de
+#                 entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """VRP regímenes diferenciados según Coppola 2024 chapter Springer.
 
 3 regímenes según rango T del VTF (volcanic thermal feature):
