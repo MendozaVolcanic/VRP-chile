@@ -721,6 +721,15 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         # del inner_radius, ANTES del second_pass_adjacent. Excluye la recaptura que
         # el gate S85 preserva (A55): ese cluster near-crater es artefacto topográfico
         # (valle NdC). El ancla honesta MODIS solo promueve a summit si esto es >0.
+        # Deliberado (A73): se mide sobre fp_hot CRUDO (pre dual_roi_final_filter y
+        # pre co-validación path-D) = la señal de DETECCIÓN genuina del first-pass, no
+        # el hot_mask contaminado por la recaptura. Efecto: el gate puede ser
+        # ligeramente MÁS permisivo (un fp_hot summit que un filtro posterior elimine
+        # igual abre el ancla), nunca menos — borde inocuo (señal real débil), jamás
+        # apaga una cura. CAVEAT: n_first_pass_summit también queda 0 si el first-pass
+        # NO corrió (ENABLE_FIRST_PASS_TESTS_2_AND_3 OFF o _path_d_atm_gate_skip). NO
+        # combinar el gate del ancla con path_d_atm_gate sin re-validar el régimen
+        # cirrus (D9/A23): ahí el gate bloquearía el ancla aunque hubiera señal real.
         n_first_pass_summit = int(np.sum(fp_hot & (vent_dist_per_pixel <= inner_radius_km)))
 
     # S46 Task 5 Drift #4 — second_pass_adjacent recapture (paper SP426.5:347-356).

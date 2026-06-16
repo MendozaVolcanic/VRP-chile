@@ -57,3 +57,15 @@ def test_negativos_o_none_se_tratan_como_cero():
     # Robustez: conteos inválidos no deben habilitar el override bajo gate ON.
     assert honest_anchor_applies(enabled=True, first_pass_gate_enabled=True,
                                  n_first_pass_summit=None) is False
+
+
+def test_retorno_es_bool_python_con_escalares_numpy():
+    # Contrato: el retorno debe ser bool de Python (JSON-safe, `is True`/`is False`),
+    # incluso si un caller pasa un escalar numpy. Verificación adversarial S111.
+    import numpy as np
+    r0 = honest_anchor_applies(enabled=True, first_pass_gate_enabled=True,
+                               n_first_pass_summit=np.int64(0))
+    r1 = honest_anchor_applies(enabled=True, first_pass_gate_enabled=True,
+                               n_first_pass_summit=np.int64(57))
+    assert r0 is False and r1 is True
+    assert isinstance(r0, bool) and isinstance(r1, bool)

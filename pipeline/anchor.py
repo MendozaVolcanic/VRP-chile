@@ -42,7 +42,10 @@ def honest_anchor_applies(*, enabled, first_pass_gate_enabled, n_first_pass_summ
         return False
     if not first_pass_gate_enabled:
         return True
-    return (n_first_pass_summit or 0) > 0
+    # bool() normaliza el tipo: n_first_pass_summit puede llegar como escalar numpy
+    # de un caller futuro; sin esto el retorno sería numpy.bool_ (no JSON-safe, rompe
+    # `is True`/`is False` aguas abajo). En el pipeline real ya viene int()-wrapped.
+    return bool((n_first_pass_summit or 0) > 0)
 
 
 def resolve_honest_anchor(ctx_cluster, test1_triggered, test1_summit_hit,

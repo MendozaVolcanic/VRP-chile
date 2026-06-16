@@ -131,7 +131,20 @@ compartido con VIIRS, y la decisión del gate es una función pura trivialmente 
 **Verificación adversarial (A62)**: caracterización offline de los 11 Tier A
 (`char_current_state.py`) confirmó que los candidatos a flip (105-289/vol) tienen
 **0 `triggered_test1`** → la rama Test1 de la cascada NO es vía de escape del
-artefacto; el gate sobre la cláusula ctx_cluster es completo.
+artefacto; el gate sobre la cláusula ctx_cluster es completo. **Razón ESTRUCTURAL**
+(no solo el conteo, verificación adversarial S111): el centroide del Test1 está
+acotado a `TEST1_ROI_KM`=3 km alrededor del vent → cuando Test1 dispara,
+`test1_hotspot_dist_km` ≤ inner (inner ≥ 3 km en los 11) → `test1_summit_hit`=True →
+la cascada legacy (Regla D / `only_test1_source`) ya clasifica summit. Por eso ningún
+record `far` alcanza la rama test1 del ancla, con o sin gate — es invariante de la
+geometría del ROI de Test1, robusto ante reproc futuros, no un hallazgo frágil.
+
+**Verificación adversarial M1 (4 revisores, S111)**: 0 críticos/altos/medios. La
+invariancia operacional (master OFF) y la detección invariante (C4) verificadas
+CLEAN. Hallazgos LOW aplicados: `bool()` wrap en `honest_anchor_applies`; doc del
+acoplamiento `_path_d_atm_gate_skip` (no combinar el gate con path_d_atm_gate); doc
+de que `n_first_pass_summit` se mide sobre fp_hot crudo (A73, más permisivo nunca
+menos); limpieza gather. VIIRS no afectado (`honest_anchor_applies` solo en MODIS).
 
 **A/B 3 brazos** (`reproc-s111-d11-ab.yml`, 44 jobs, base=operacional):
 `_d11_modis_nogate` (master ON, gate OFF) vs `_d11_modis_gated` (master ON, gate ON).

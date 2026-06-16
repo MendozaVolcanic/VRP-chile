@@ -31,8 +31,8 @@ def gather(run_id):
         if arm is None:
             print(f"  ?? no arm match: {art_dir.name}", flush=True); continue
         tail = rest[len(arm) + 1:]
-        vol = tail.rsplit("-", 1)[0]  # quita chunkstart (YYYY-MM-DD → último -)
-        # chunkstart es 2026-01-29 (3 guiones); vol no tiene guiones → rsplit 3 veces
+        # chunkstart es YYYY-MM-DD (3 guiones); los 11 nombres de volcán no tienen
+        # guión → rsplit 3 veces aísla el volcán del chunkstart.
         vol = tail.rsplit("-", 3)[0]
         jf = art_dir / f"{vol}.json"
         if not jf.exists():
