@@ -100,3 +100,39 @@ fixeable). Frente menor, se cierra con el probe del A/B.
 - NO toca el path de detección del Test1 (triggered_*) — solo magnitud + source + el FN
   de detección como investigación.
 - NO cambia la cuantificación de los regímenes Bajo/Medio/Alto (>0.5 MW) — solo Muy Bajo.
+
+## 7. ADDENDUM S112 (implementación + review adversarial)
+
+### 7.1 Predicción PRE-REGISTRADA (A66) — reframea la expectativa
+Cálculo del VRP esperado en el pico NdC 06-16 (t_max=287.06, t_bg_global=275.79 K):
+- **Píxel pico SOLO, fondo global, Wooster = 0.26 MW = 4.4× MIROVA (0.06).** Q2 (suma) ≥ esto.
+- **Eq.16 (Q4) = 0.22-0.36 MW INSENSIBLE a T_e** (600→0.36, 700→0.27, 800→0.24, 1000→0.22;
+  el A_hot se ajusta). También ~4× alto PORQUE arrastra el mismo fondo global frío en L_pix−L_bg.
+- **El lever real es la TEMPERATURA DEL FONDO**, no #píxeles ni T_e. Para 0.26→0.06 en el pico
+  hace falta un fondo ~284 K (más cálido/cercano que el global 275.79). Anillos [2,4]/[3,5]
+  reducen pero quizá NO lleguen a 0.06 → se agregó el brazo **Q3c [1.5,3] km** (bracket cálido).
+  La terna [1.5,3]/[2,4]/[3,5] mapea el crossover local(→0)↔global(→0.26).
+- Expectativa honesta: si NINGÚN anillo da 0.06 sin clipar → la señal está bajo el piso de
+  nuestra cuantificación Wooster → NO adoptar, documentar (no forzar).
+
+### 7.2 Brazos finales del A/B (9): `_t1lm_q{0,2,3_ring15,3_ring24,3_ring35,4_te700,4_te1000,5_ntilocal,6_spatialcore}`.
+Todos Parte A ON salvo q0_control. 9 brazos × 4 vols (NdC/Lascar/Lastarria/Villarrica) × 3 chunks
+(03-15→04-18 / 04-19→05-21 / 05-22→06-17) = 108 jobs. Workflow `reproc-s112-t1lm-ab.yml`.
+
+### 7.3 Review adversarial 4 revisores (Workflow wf_1bd874d5-5f3): 0 CRITICAL, 3 HIGH, 2 MEDIUM, 10 LOW.
+- **invariance CLEAN** (única divergencia legacy: t_bg=±inf, INALCANZABLE, código nuevo más robusto).
+- **ab_design CLEAN**.
+- **MEDIUM pipeline (cloud-mask)**: el anillo intermedio usaba BT crudo sin máscara de nubes
+  mientras el fondo global excluye nubes (I05≥260K) → en cirrus inflaría (al revés del objetivo).
+  **FIX**: `valid_mask=cloud_free` en `intermediate_ring_bg_bt` (apples-to-apples). TDD test.
+- **3 HIGH (audit verdict)**: el veredicto podía coronar un ganador falso. **FIX** (audit reescrito):
+  (HIGH-A) gate de banda ABSOLUTA (mediana err|log|≤0.3); (HIGH-B) gate de outlier (max err|log|≤0.7
+  → atrapa la falsa "HIGH" de varios MW que la mediana escondía); (HIGH-C) gate de recall
+  (n_detect≥baseline — FN es el peor error). + match ±12 min (no cruza pasadas adyacentes),
+  RUTINA por-pasada con elevación solar (`store._solar_elevation`, idéntico al pipeline).
+- **LOW aplicados**: validación len/orden de ring_km en profile.py; tests inf + halo-overlap;
+  noche/día por elevación solar. **Nota anclaje (LOW)**: el anillo intermedio se ancla al VENT
+  (consistente con Test1/dual_roi), el fondo global al centro del grid — offset despreciable en
+  los 4 vols del A/B (vent≈centro). Interpretación de fallback: si Q3==Q2 en un record, el anillo
+  cayó al global (min_pixels) — leer comparando filas Q3 vs Q2 en el output del audit.
+- Suite **760 passed, 0 regresiones**. Operacional INERTE (flags OFF, byte-idéntico legacy).

@@ -1,0 +1,63 @@
+name: S112 reproc Test1-lowmag A/B (Parte B, A45)
+
+# A43: "on" quoted (Norway Problem). A/B de calibracion de la magnitud "Muy Bajo" del
+# Test1 (reactivacion NdC). 8 brazos de cuantificacion (Q0-Q6) x 4 vols x 3 chunks de
+# ~5 semanas (A15). Cada job es 1 contenedor aislado que sube su artifact (sin race
+# A47/S25 — no comparte filesystem ni commitea). Junta con gather_ab_artifacts.py,
+# audita con audit_t1lm_ab.py. Todos los brazos llevan Parte A ON (weak-cluster).
+"on":
+  workflow_dispatch:
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        profile:
+          - _t1lm_q0_control
+          - _t1lm_q2_global
+          - _t1lm_q3_ring24
+          - _t1lm_q3_ring35
+          - _t1lm_q3_ring15
+          - _t1lm_q4_te700
+          - _t1lm_q4_te1000
+          - _t1lm_q5_ntilocal
+          - _t1lm_q6_spatialcore
+        volcano: [NevadosDeChillan, Lascar, Lastarria, Villarrica]
+        chunk:
+          - { start: "2026-03-15", end: "2026-04-18" }
+          - { start: "2026-04-19", end: "2026-05-21" }
+          - { start: "2026-05-22", end: "2026-06-17" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reprocess ${{ matrix.profile }} / ${{ matrix.volcano }} / ${{ matrix.chunk.start }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 290
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ matrix.chunk.start }} \
+            --end ${{ matrix.chunk.end }} \
+            --overwrite
+      - name: Upload JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: s112t1lm-${{ matrix.profile }}-${{ matrix.volcano }}-${{ matrix.chunk.start }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7

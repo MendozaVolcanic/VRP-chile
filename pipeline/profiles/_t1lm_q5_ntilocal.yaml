@@ -1,0 +1,16 @@
+# VRP-Chile — profile: _t1lm_q5_ntilocal (S112 Parte B, brazo Q5 = NTI integral + fondo local NTI)
+#
+# Parte A ON + Test1 sobre exceso de NTI (S104 V2) con fondo LOCAL sobre NTI (S105). La vía
+# más fiel a MIROVA: el NTI cancela la topografía (MIR y TIR suben juntos sobre terreno
+# tibio) y el fondo local separa la lava débil del valle. NOTA: cambia detección Y posición,
+# no solo magnitud → vigilar FN en el audit. data_subdir aislado (A47).
+extends: mirova_equivalent
+profile: _t1lm_q5_ntilocal
+description: >
+  A/B S112 Test1-lowmag — Q5 NTI integral + fondo local NTI.
+paths:
+  enable_test1_priority_weak_cluster: true
+  enable_test1_nti_integral: true
+  enable_test1_local_bg_nti: true
+output:
+  data_subdir: _t1lm_q5_ntilocal
