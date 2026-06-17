@@ -105,6 +105,26 @@ def test_select_effective_lbg_intermediate_takes_precedence():
     assert chosen == 5.0
 
 
+def test_select_effective_lbg_intermediate_gated_by_lbg_global_compatible():
+    """S112 adopción (A45 scope): el anillo intermedio SOLO aplica a vols
+    lbg_global_compatible (los 3 nevados con calor crónico Lascar/NdC/Lastarria, donde el
+    fondo global se contamina con valles tibios). En un vol NO compatible, intermedio ON
+    NO debe usarse → cae al local (legacy). Evita cambiar la magnitud de vols no validados
+    en el A/B."""
+    # vol NO compatible: intermedio ON pero se ignora → local
+    chosen = select_test1_effective_lbg(
+        intermediate_enabled=True, intermediate_lbg=5.0,
+        global_enabled=True, lbg_global_compatible=False, global_lbg=2.0,
+        local_lbg=9.0)
+    assert chosen == 9.0, "intermedio NO debe aplicar a vol no-compatible"
+    # vol compatible: intermedio ON → se usa
+    chosen_c = select_test1_effective_lbg(
+        intermediate_enabled=True, intermediate_lbg=5.0,
+        global_enabled=True, lbg_global_compatible=True, global_lbg=2.0,
+        local_lbg=9.0)
+    assert chosen_c == 5.0, "intermedio SÍ aplica a vol compatible"
+
+
 def test_select_effective_lbg_intermediate_none_falls_to_global():
     """Intermedio ON pero None/NaN → cae al global (si habilitado y compatible)."""
     chosen = select_test1_effective_lbg(
@@ -180,9 +200,22 @@ def test_intermediate_ring_robust_to_halo_overlap_at_3km():
     assert abs(val35 - 272.0) < 1e-9, f"[3,5] fuera del halo = terreno 272; got {val35}"
 
 
-def test_profile_intermediate_bg_default_off_operacional(monkeypatch):
-    """El operacional NO activa el anillo intermedio (flag default OFF)."""
-    monkeypatch.setenv("VRP_PROFILE", "mirova_equivalent")
+def test_profile_intermediate_bg_default_off_unset(monkeypatch):
+    """El flag es default OFF cuando un perfil no lo activa (un perfil base sin el flag)."""
+    monkeypatch.setenv("VRP_PROFILE", "_baseline_s44")
     import pipeline.profile as profile
     importlib.reload(profile)
     assert profile.ENABLE_TEST1_INTERMEDIATE_BG is False
+
+
+def test_profile_intermediate_bg_ADOPTED_operacional_s112(monkeypatch):
+    """S112 ADOPTADO (2026-06-17): recuperar la magnitud Muy Bajo VIIRS375 (reactivación
+    NdC, paridad MIROVA 0.06 corroborada por Sentinel-2). El operacional activa Parte A
+    (weak-cluster) + anillo intermedio, gateado per-vol por lbg_global_compatible
+    (Lascar/NdC/Lastarria). Ring default [2,4] km. Tag pre-s112-intermediate-bg-adoption."""
+    monkeypatch.setenv("VRP_PROFILE", "mirova_equivalent")
+    import pipeline.profile as profile
+    importlib.reload(profile)
+    assert profile.ENABLE_TEST1_PRIORITY_WEAK_CLUSTER is True
+    assert profile.ENABLE_TEST1_INTERMEDIATE_BG is True
+    assert tuple(profile.TEST1_INTERMEDIATE_BG_RING_KM) == (2.0, 4.0)
