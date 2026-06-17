@@ -123,9 +123,14 @@ def select_test1_effective_lbg(*, intermediate_enabled, intermediate_lbg,
     nuevos OFF el resultado es BYTE-IDÉNTICO al legacy (global cuando enabled+compatible+
     finito, sino local).
 
+    SCOPE (S112 adopción, A45): tanto el anillo intermedio como el global están gateados
+    por `lbg_global_compatible` (per-vol, volcanoes.yaml) — solo los 3 nevados de calor
+    crónico (Lascar/NdC/Lastarria) donde el fondo global se contamina con valles tibios.
+    Así la adopción no cambia la magnitud de vols no validados en el A/B.
+
     Devuelve float (radiancia) o el local_lbg tal cual (puede ser None fuera del bloque I04).
     """
-    if (intermediate_enabled and intermediate_lbg is not None
+    if (intermediate_enabled and lbg_global_compatible and intermediate_lbg is not None
             and math.isfinite(float(intermediate_lbg))):
         return float(intermediate_lbg)
     if (global_enabled and lbg_global_compatible and global_lbg is not None
