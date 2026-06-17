@@ -218,4 +218,5 @@ def test_profile_intermediate_bg_ADOPTED_operacional_s112(monkeypatch):
     importlib.reload(profile)
     assert profile.ENABLE_TEST1_PRIORITY_WEAK_CLUSTER is True
     assert profile.ENABLE_TEST1_INTERMEDIATE_BG is True
-    assert tuple(profile.TEST1_INTERMEDIATE_BG_RING_KM) == (2.0, 4.0)
+    # [1.5,3] recupera los 3 ALERTAS NdC incl. trigger 06-16 (0.068); [2,4] lo perdía.
+    assert tuple(profile.TEST1_INTERMEDIATE_BG_RING_KM) == (1.5, 3.0)
