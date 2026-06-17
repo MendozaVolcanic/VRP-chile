@@ -1,0 +1,19 @@
+# VRP-Chile — profile: _t1lm_q4_te700 (S112 Parte B, brazo Q4a = Eq.16 lava lake, T_e=700K)
+#
+# Parte A ON + Eq.16 lava lake sub-píxel (Coppola 2024 §Lava lakes): despeja el área
+# caliente asumiendo T_e y aplica Stefan-Boltzmann sobre el píxel pico → magnitud estilo
+# MIROVA para fuentes magmáticas expuestas. T_e=700K = prior "domo en enfriamiento / gas
+# alta-T" (Nicolás: naturaleza de la fuente NdC incierta → calibramos T_e). Requiere
+# lava_lake_magmatic=true en NdC (volcanoes.yaml, inerte sin este flag). data_subdir
+# aislado (A47).
+extends: mirova_equivalent
+profile: _t1lm_q4_te700
+description: >
+  A/B S112 Test1-lowmag — Q4a Eq.16 lava lake T_e=700K.
+thresholds:
+  test1_lava_lake_te_k: 700.0
+paths:
+  enable_test1_priority_weak_cluster: true
+  enable_test1_lava_lake_eq16: true
+output:
+  data_subdir: _t1lm_q4_te700

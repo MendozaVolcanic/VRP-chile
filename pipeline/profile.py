@@ -352,6 +352,30 @@ ENABLE_TEST1_PRIORITY_WEAK_CLUSTER: bool = bool(
 TEST1_WEAK_CLUSTER_EPS_MW: float = float(
     _t.get("test1_weak_cluster_eps_mw", 0.01))
 
+# S112 Parte B Q3 (design 2026-06-16-test1-lowmag) — fondo de ANILLO INTERMEDIO para el
+# recompute de magnitud del Test1. PRECEDENCIA sobre el global per-vol (S33 D4). En un
+# cráter con calor crónico (NdC Nicanor, domo + lava reciente) el local 1-3 km está
+# contaminado (→ exceso 0, FN) y el global 5-25 km es nieve fría de altura (→ exceso
+# inflado ~4.4× MIROVA). El anillo intermedio [r_in, r_out] km queda fuera del halo
+# crónico pero sobre terreno de altitud similar → fondo "Goldilocks". Default OFF
+# (operacional inerte); se prueba en el A/B de calibración Muy Bajo (S112) contra las 6
+# ALERTAS VIIRS375 NdC. NaN-safe: si el anillo no tiene min_pixels válidos cae al global/
+# local (select_test1_effective_lbg). Helpers puros en pipeline/test1_integrated.py.
+ENABLE_TEST1_INTERMEDIATE_BG: bool = bool(
+    _p.get("enable_test1_intermediate_bg", False))
+# (r_in_km, r_out_km) del anillo intermedio. 2-4 km y 3-5 km son los candidatos del A/B.
+# Validación defensiva (S112 review LOW): un perfil mal escrito debe fallar con mensaje
+# claro al cargar, no con un IndexError opaco dentro del loop de granules.
+_ring_int = list(_t.get("test1_intermediate_bg_ring_km", [2.0, 4.0]))
+if len(_ring_int) != 2 or not (float(_ring_int[0]) < float(_ring_int[1])):
+    raise ValueError(
+        "test1_intermediate_bg_ring_km debe ser [r_in, r_out] con r_in<r_out; "
+        f"got {_ring_int}")
+TEST1_INTERMEDIATE_BG_RING_KM: tuple[float, float] = (
+    float(_ring_int[0]), float(_ring_int[1]))
+TEST1_INTERMEDIATE_BG_MIN_PIXELS: int = int(
+    _t.get("test1_intermediate_bg_min_pixels", 20))
+
 # S27 MIROVA literal: flag para deshabilitar exclude_zones (parche nuestro).
 # MIROVA NO usa máscaras geográficas (verificado vs Coppola 2016a, Coppola 2020,
 # Laiolo 2026). Default true (operacional mantiene comportamiento actual);

@@ -79,6 +79,61 @@ def _local_background_nti(
     return out
 
 
+def intermediate_ring_bg_bt(
+    bt: np.ndarray, dist_km: np.ndarray,
+    r_in_km: float, r_out_km: float, min_pixels: int = 20,
+    valid_mask: "np.ndarray | None" = None,
+) -> float:
+    """S112 Q3 — mediana de BT del anillo INTERMEDIO [r_in, r_out] km del cráter.
+
+    POR QUÉ: en un cráter con calor crónico (NdC Nicanor, domo activo + lava reciente)
+    el fondo local 1-3 km está contaminado por la propia anomalía (→ exceso recortado a
+    0, FN de magnitud) y el fondo global 5-25 km es nieve/roca de altura fría (→ exceso
+    inflado ~4.4× MIROVA). Un anillo intermedio queda FUERA del halo de calor crónico
+    pero sobre terreno de altitud similar → fondo "Goldilocks" para el recompute.
+
+    valid_mask (S112 review MEDIUM): máscara 2D opcional para igualar el criterio del
+    fondo GLOBAL, que excluye nubes (cloud_free = I05 ≥ 260 K). Sin ella, topes de nube
+    fríos dentro del anillo bajarían la mediana → exceso MIR mayor → magnitud INFLADA
+    (al revés del objetivo del A/B), justo en las noches de cirrus de la reactivación NdC.
+    El caller pasa el mismo cloud_free que alimenta bg_mask → apples-to-apples.
+
+    NaN-safe; devuelve NaN si hay < min_pixels válidos en el anillo (fallback aguas
+    arriba al global/local). Función pura, sin I/O.
+    """
+    bt = np.asarray(bt, dtype=np.float64)
+    dist_km = np.asarray(dist_km, dtype=np.float64)
+    ring = (dist_km >= r_in_km) & (dist_km <= r_out_km) & np.isfinite(bt)
+    if valid_mask is not None:
+        ring = ring & np.asarray(valid_mask, dtype=bool)
+    vals = bt[ring]
+    if vals.size < min_pixels:
+        return float("nan")
+    return float(np.median(vals))
+
+
+def select_test1_effective_lbg(*, intermediate_enabled, intermediate_lbg,
+                               global_enabled, lbg_global_compatible, global_lbg,
+                               local_lbg):
+    """S112 — elige el L_bg (radiancia MIR) efectivo para el recompute de magnitud Test1.
+
+    PRECEDENCIA: anillo intermedio (S112 Q3) > global per-vol (S33 D4) > local (S26).
+    Cada nivel solo gana si su flag está habilitado Y su valor es finito; si no, cae al
+    siguiente. Centraliza la cascada para que sea unit-testeable; con todos los flags
+    nuevos OFF el resultado es BYTE-IDÉNTICO al legacy (global cuando enabled+compatible+
+    finito, sino local).
+
+    Devuelve float (radiancia) o el local_lbg tal cual (puede ser None fuera del bloque I04).
+    """
+    if (intermediate_enabled and intermediate_lbg is not None
+            and math.isfinite(float(intermediate_lbg))):
+        return float(intermediate_lbg)
+    if (global_enabled and lbg_global_compatible and global_lbg is not None
+            and math.isfinite(float(global_lbg))):
+        return float(global_lbg)
+    return local_lbg
+
+
 def resolve_test1_source_priority(*, test1_summit_hit, eruption_far, only_test1_source,
                                   cluster_vrp_mw, weak_cluster_enabled, weak_cluster_eps):
     """S111 — ¿el Test1 debe ganar `final_hotspot_source` (y con él el recompute de

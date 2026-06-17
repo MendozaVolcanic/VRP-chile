@@ -95,6 +95,9 @@ from pipeline.profile import (
     ENABLE_TEST1_LBG_GLOBAL,
     ENABLE_TEST1_PRIORITY_WEAK_CLUSTER,
     TEST1_WEAK_CLUSTER_EPS_MW,
+    ENABLE_TEST1_INTERMEDIATE_BG,
+    TEST1_INTERMEDIATE_BG_RING_KM,
+    TEST1_INTERMEDIATE_BG_MIN_PIXELS,
     ENABLE_TEST1_PATH,
     TEST1_K_SIGMA,
     TEST1_MIR_RELATIVE,
@@ -168,7 +171,9 @@ from .detection_context import (
     first_pass_tests_2_and_3,
 )
 from .test1_integrated import (compute_test1_mir, compute_test1_nti,
-                               resolve_test1_source_priority)
+                               resolve_test1_source_priority,
+                               intermediate_ring_bg_bt,
+                               select_test1_effective_lbg)
 
 
 def _sensor_label_from_filename(filename: str) -> str:
@@ -557,6 +562,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # This is a simple threshold approach — no extra download needed.
     CLOUD_BT_THRESHOLD = 260.0  # K — pixels colder than this are likely cloudy
     n_cloud_masked = 0
+    cloud_free = None  # S112 default fuera del bloque I05 (lo consume el anillo Q3)
     if "I05" in bands:
         cloud_free = bands["I05"] >= CLOUD_BT_THRESHOLD
         cloud_free = cloud_free | np.isnan(bands["I05"])  # keep pixels without I05
@@ -1525,10 +1531,35 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # S39 D4 per-volcano: combinar profile flag con field lbg_global_compatible
     # de volcanoes.yaml — solo aplica si AMBOS son true. Evita regresión
     # Tupungatito glaciar (combo C.1 S38 mostró -1 TP con D4 universal).
-    if ENABLE_TEST1_LBG_GLOBAL and lbg_global_compatible and not np.isnan(t_bg_i04):
-        effective_L_bg = float(bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA))
-    else:
-        effective_L_bg = test1_L_bg_local
+    # S112 Q3 — anillo INTERMEDIO con PRECEDENCIA sobre el global (design
+    # 2026-06-16-test1-lowmag). El global 5-25km sobre-estima la magnitud Muy Bajo
+    # (~4.4× MIROVA en NdC); un anillo [r_in,r_out] fuera del halo crónico pero a
+    # altitud similar es el fondo "Goldilocks". NaN-safe (cae al global/local).
+    # select_test1_effective_lbg centraliza la cascada (unit-testeada, byte-idéntica
+    # al legacy con los flags S112 OFF).
+    _t1_intermediate_lbg = None
+    if ENABLE_TEST1_INTERMEDIATE_BG and "I04" in bands:
+        # valid_mask = cloud_free (S112 review MEDIUM): igualar el criterio del fondo
+        # global (excluye nubes I05<260K) para no inflar la magnitud con topes de nube
+        # fríos dentro del anillo en noches de cirrus.
+        _t1_int_bt = intermediate_ring_bg_bt(
+            bt, vent_dist_per_pixel,
+            float(TEST1_INTERMEDIATE_BG_RING_KM[0]),
+            float(TEST1_INTERMEDIATE_BG_RING_KM[1]),
+            min_pixels=TEST1_INTERMEDIATE_BG_MIN_PIXELS,
+            valid_mask=cloud_free)
+        if not np.isnan(_t1_int_bt):
+            _t1_intermediate_lbg = float(
+                bt_to_spectral_radiance(np.float64(_t1_int_bt), I04_LAMBDA))
+    _t1_global_lbg = (float(bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA))
+                      if not np.isnan(t_bg_i04) else None)
+    effective_L_bg = select_test1_effective_lbg(
+        intermediate_enabled=ENABLE_TEST1_INTERMEDIATE_BG,
+        intermediate_lbg=_t1_intermediate_lbg,
+        global_enabled=ENABLE_TEST1_LBG_GLOBAL,
+        lbg_global_compatible=lbg_global_compatible,
+        global_lbg=_t1_global_lbg,
+        local_lbg=test1_L_bg_local)
 
     # S99 Candidato B — recorte de compacidad ESPACIAL del path Test 1 (flag OFF
     # default). El Test 1 integrado marca el anillo nival difuso entero sobre el

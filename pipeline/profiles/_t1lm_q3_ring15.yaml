@@ -1,0 +1,19 @@
+# VRP-Chile — profile: _t1lm_q3_ring15 (S112 Parte B, brazo Q3c = anillo intermedio 1.5-3 km)
+#
+# Bracket CÁLIDO del Goldilocks (insight pre-registrado S112): el píxel pico solo con fondo
+# global ya da 4.4× MIROVA → para llegar a 0.06 hace falta un fondo MÁS CÁLIDO (cercano).
+# El anillo [1.5, 3] km está más cerca del cráter (más tibio) que [2,4]/[3,5] → fondo más
+# alto → exceso menor → magnitud menor. Riesgo: solapa el halo crónico 1-3 km → puede
+# clipar a 0 (bracket inferior). La terna [1.5,3]/[2,4]/[3,5] mapea el crossover
+# local→global. Código nuevo S112. data_subdir aislado (A47).
+extends: mirova_equivalent
+profile: _t1lm_q3_ring15
+description: >
+  A/B S112 Test1-lowmag — Q3c fondo anillo intermedio 1.5-3 km (bracket cálido).
+thresholds:
+  test1_intermediate_bg_ring_km: [1.5, 3.0]
+paths:
+  enable_test1_priority_weak_cluster: true
+  enable_test1_intermediate_bg: true
+output:
+  data_subdir: _t1lm_q3_ring15

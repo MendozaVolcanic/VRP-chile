@@ -1,0 +1,16 @@
+# VRP-Chile — profile: _t1lm_q4_te1000 (S112 Parte B, brazo Q4b = Eq.16 lava lake, T_e=1000K)
+#
+# Igual que Q4a pero T_e=1000K = prior "lava/incandescencia expuesta" (Burgi-Coppola lava
+# lake, valor por defecto). Dos puntos de T_e (700/1000) acotan el rango incierto; si hace
+# falta se agrega un tercero. Requiere lava_lake_magmatic=true en NdC. data_subdir aislado (A47).
+extends: mirova_equivalent
+profile: _t1lm_q4_te1000
+description: >
+  A/B S112 Test1-lowmag — Q4b Eq.16 lava lake T_e=1000K.
+thresholds:
+  test1_lava_lake_te_k: 1000.0
+paths:
+  enable_test1_priority_weak_cluster: true
+  enable_test1_lava_lake_eq16: true
+output:
+  data_subdir: _t1lm_q4_te1000
