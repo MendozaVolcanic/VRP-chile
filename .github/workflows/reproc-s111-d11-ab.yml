@@ -11,16 +11,22 @@ name: S111 D11 A/B gate ancla MODIS (nogate vs gated) - 11 Tier A (A45)
 jobs:
   reproc:
     runs-on: ubuntu-latest
-    timeout-minutes: 330
+    timeout-minutes: 250
     strategy:
       fail-fast: false
       max-parallel: 6
+      # REDISEÑO S111: el A/B anterior (2 meses x 11 vols x todos los sensores)
+      # timeouteaba en los vols pesados (>5h20min). Acotado a los 4 vols de los
+      # criterios (NdC C1, Lascar C2, Villarrica/Tupungatito C3 cat-b) x chunks de
+      # 1 MES (caben holgado en el timeout; abr-may concentra los candidatos: NdC 92,
+      # Lascar 96, Villarrica 124, Tupun 120 far-cluster-cercano). C4 invariante por
+      # construccion (verificado adversarialmente). 16 jobs livianos.
       matrix:
         arm: [_d11_modis_nogate, _d11_modis_gated]
-        volcano: [Lastarria, PlanchonPeteroa, Copahue, Lascar, Isluga, NevadosDeChillan, Llaima, Villarrica, Chaiten, Tupungatito, PuyehueCordonCaulle]
+        volcano: [NevadosDeChillan, Lascar, Villarrica, Tupungatito]
         chunk:
-          - { start: "2026-01-29", end: "2026-03-31" }
-          - { start: "2026-04-01", end: "2026-06-08" }
+          - { start: "2026-04-01", end: "2026-04-30" }
+          - { start: "2026-05-01", end: "2026-05-31" }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -36,7 +42,7 @@ jobs:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
-        timeout-minutes: 320
+        timeout-minutes: 240
         run: |
           python scripts/run_pipeline.py \
             --profile ${{ matrix.arm }} \
