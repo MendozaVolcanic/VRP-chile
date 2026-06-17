@@ -1,10 +1,12 @@
 name: S112 reproc Test1-lowmag A/B (Parte B, A45)
 
 # A43: "on" quoted (Norway Problem). A/B de calibracion de la magnitud "Muy Bajo" del
-# Test1 (reactivacion NdC). 8 brazos de cuantificacion (Q0-Q6) x 4 vols x 3 chunks de
-# ~5 semanas (A15). Cada job es 1 contenedor aislado que sube su artifact (sin race
-# A47/S25 — no comparte filesystem ni commitea). Junta con gather_ab_artifacts.py,
-# audita con audit_t1lm_ab.py. Todos los brazos llevan Parte A ON (weak-cluster).
+# Test1 (reactivacion NdC). 9 brazos (Q0-Q6) x 3 nevados (NdC/Lascar/Lastarria) x 2
+# VENTANAS ESTRECHAS = 54 jobs. TARGETED a las fechas ALERTA + muestra RUTINA (NO 3
+# meses — A15/A26: el v1 con chunks de 5 semanas tardaba ~87min/job=~20h por bajar
+# cientos de granules NASA; LANCE lento en fechas recientes A64). w1 captura NdC ALERTAS
+# 05-02+05-14 + RUTINA; w2 captura NdC 06-16 + RUTINA. Cada job aislado sube su artifact
+# (sin race A47). Todos los brazos llevan Parte A ON salvo q0_control.
 "on":
   workflow_dispatch:
 
@@ -14,7 +16,7 @@ jobs:
     timeout-minutes: 300
     strategy:
       fail-fast: false
-      max-parallel: 8
+      max-parallel: 12
       matrix:
         profile:
           - _t1lm_q0_control
@@ -26,11 +28,10 @@ jobs:
           - _t1lm_q4_te1000
           - _t1lm_q5_ntilocal
           - _t1lm_q6_spatialcore
-        volcano: [NevadosDeChillan, Lascar, Lastarria, Villarrica]
+        volcano: [NevadosDeChillan, Lascar, Lastarria]
         chunk:
-          - { start: "2026-03-15", end: "2026-04-18" }
-          - { start: "2026-04-19", end: "2026-05-21" }
-          - { start: "2026-05-22", end: "2026-06-17" }
+          - { start: "2026-05-01", end: "2026-05-15" }
+          - { start: "2026-06-12", end: "2026-06-17" }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
