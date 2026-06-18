@@ -113,9 +113,12 @@ from pipeline.profile import (
     SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
     ENABLE_HONEST_ANCHOR_VIIRS750,
     HONEST_ANCHOR_TEST1_MODE,
+    ENABLE_FOCAL_CLUSTER_MAGNITUDE_VIIRS750,
+    FOCAL_CLUSTER_KEEP_PEAK,
 )
 from .anchor import resolve_honest_anchor  # S106 ancla espacial honesta
 from .single_pixel_mode import apply_single_pixel_mode
+from .vrp_regimes import cluster_focal_vrp_mw  # S112 magnitud núcleo-focal (A69/D11)
 from .detection_context import (
     contextual_dnti_hot_mask,
     dual_roi_contextual_dnti_hot_mask,
@@ -1082,6 +1085,19 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             if t1_clusters:
                 top = t1_clusters[0]
                 _vrp_t = float(top["vrp_mw"])
+                # S112 §A69/D11 — magnitud núcleo focal/contextual (espejo de
+                # process_modis.py:1213-1219). VIIRS750 era el único path Test1 sin la
+                # cura: integra el gradiente topográfico MIR sobre píxeles grandes (562.500
+                # m²) → infla 10-25× sobre MIROVA en nevados (excepto Lascar, foco real).
+                # cluster_focal_vrp_mw suma SOLO píxeles dnti_ctx ∪ {pico} (keep_peak protege
+                # el cráter real de Lascar / lava lake Villarrica). dnti_ctx_hot ya en scope.
+                # Flag SEPARADO del global (ON en MODIS) para A/B independiente (A45).
+                _focal_degraded_t = None
+                if ENABLE_FOCAL_CLUSTER_MAGNITUDE_VIIRS750:
+                    _vrp_t, _focal_n_t, _focal_degraded_t = cluster_focal_vrp_mw(
+                        top["pixel_indices"], t1_vrp_2d, dnti_ctx_hot,
+                        keep_peak=FOCAL_CLUSTER_KEEP_PEAK,
+                    )
                 # S71 D9 Opción C — cap si firing contextual-only en cirrus.
                 _d9_capped_t = False
                 if _path_d_cap_active and _vrp_t > PATH_D_ONLY_CAP_MW:
@@ -1096,6 +1112,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 }
                 if _d9_capped_t:
                     primary_cluster["d9_capped"] = True
+                if _focal_degraded_t is not None:
+                    primary_cluster["focal_magnitude"] = True
+                    primary_cluster["focal_degraded"] = bool(_focal_degraded_t)
                 # F52-B S77 (A45) — single-pixel mode régimen sub-MW.
                 _pix_vrps_t = [float(t1_vrp_2d[i, j])
                                for (i, j) in top["pixel_indices"]]
