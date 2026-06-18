@@ -18,23 +18,24 @@ Leer en memoria: `project_s113_estado` + `reference_s113_cirrus_d9_scope` (refra
    re-derivar 2527 far→summit.
 2. **A77-A81** en CLAUDE.md proyecto (#445).
 
-## §1 — PRIORIDAD S114: #2 cirrus D9/A23 — EMPEZAR POR EL GATE DE BRAINSTORMING
-**Reframe de S113 (read-only, `reference_s113_cirrus_d9_scope`) — leer ANTES de diseñar:**
-- **El impacto operacional-visible YA está mitigado**: cirrus FAR genuino (path-D + t_bg<262 + far) =
-  199 records, **0 fugan** al dashboard (gate `far` de mirovaEqVrp) y **0 con pc.vrp>5MW** (cap D9 5MW
-  activo). Por eso el "problema" es de pureza clon-literal / data-hygiene, NO daño operacional.
-- **El candidato del bloque viejo "gate path-D si t_bg<262/270K" es un TRAP** (A68/A80 verificado en
-  vivo): 207/214 records cold+path-D VISIBLES son MIROVA-CONFIRMADOS reales = fondo frío por ALTITUD
-  (Láscar 5592m, Lastarria, Tupun), NO cirrus. Un gate por t_bg los MATARÍA (mismo trap que el V1
-  NTI-per-píxel refutado S104). **El discriminante NO puede ser t_bg.**
+## §1 — #2 cirrus D9/A23 — EL GATE DE DETECCIÓN YA ESTÁ RESUELTO (S71). NO re-abrir A/B.
+**Hallazgo S113 (papers-first cruzado con D9 + verificación en vivo, `reference_s113_cirrus_d9_scope`
++ `docs/MIROVA_DIVERGENCES.md` §S113):**
+- **La cara FP de detección está RESUELTA y verificada en vivo**: cirrus FAR genuino (path-D + t_bg<262
+  + far) = 199 records, **0 fugan** al dashboard (gate `far`) y **0 con pc.vrp>5MW** (cap C de S71 activo).
+- **Los 3 candidatos que el bloque viejo listaba para #2 = exactamente las 3 opciones A/B-testeadas en
+  S71**: atm-gate t_bg y co-validación BT/NTI fueron **RECHAZADAS** (A = cloud-mask anti-MIROVA removido
+  S27, Coppola 2016a §247 / 2023 §554; B rompe recall NdC 1.00→0.33); el **cap 5MW (C) fue ADOPTADO y
+  está LIVE**, respaldado verbatim (Coppola 2016a §687 "FPs typically radiate <5 MW"). **NO abrir un A/B
+  de cirrus nuevo — sería redo de S71 (anti-A8).**
+- **TRAP confirmado (A68/A80)**: el candidato "gate si t_bg<262/270K" mataría 207/214 detecciones
+  MIROVA-confirmadas reales de fondo-frío-por-altitud (Láscar 5592m). El discriminante NO puede ser t_bg.
 
-**Decisión de diseño (gate brainstorming, Nicolás):** ¿vale un cambio de detección delicado dado que
-la mitigación (cap 5MW + far-hide) ya neutraliza el impacto visible? Trade-off recall/pureza explícito.
-- Si **NO** → documentar D9 como "mitigado, causa raíz aceptada" y mover a #4/#5/#6.
-- Si **SÍ** → ciclo completo: **papers-first** (Coppola 2016a §SP426.5 dNTI 8-vec + Campus 2024: cómo
-  manejan el contextual dNTI en fondos fríos) + **MISSION 3 preguntas** + **superpowers-brainstorming**
-  (definir discriminante NO-t_bg: co-validación BT/NTI absoluto, textura espacial del dNTI, estructura
-  del campo) + **A/B 3 brazos** + **A45**. NO meter código sin pasar el gate de diseño.
+**Lo único genuinamente abierto de D9** = la **amplificación de MAGNITUD** (ratios 6-12× cuando MIROVA
+también detecta en cirrus) → hipótesis HT1.5-NEW-1/2/3 (cluster selection / kernel bg / Method-2 temporal
+weekly-minima). **Es un frente de MAGNITUD, no de detección de cirrus** → fusionar con #4 (MODIS difuso
+A69) + reevaluar si persiste tras las adopciones nadir/focal S102-S109. Si se aborda: papers-first ya
+hecho (S71/S72, `docs/PAPERS_MIROVA_SYNTHESIS_S71.md`) + MISSION + A45.
 
 ## §2 — Frentes menores (backlog, de AUDIT_S112)
 - #4 MODIS difuso A69 (sobre-detección RUTINA; focal MODIS + co-val; frente abierto).
