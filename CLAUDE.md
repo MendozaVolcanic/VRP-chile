@@ -808,6 +808,48 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   solar = sospechosos; NO contar como FN si los "perdemos" (perderlos es correcto). Detalle:
   `~memory/reference_mirova_daytime_cloud_artifact.md`.
 
+- **A77. Ante "el volcán erupciona pero VRP no lo ve", revisar MIROVA OLI/MSI (alta-res SWIR),
+  no solo MIR** (S112, refuerzo A62 — el experto insistió 5× y tenía razón). Si hay hot pixels
+  en alta-res (Landsat OLI 30m / Sentinel-2 MSI 20m, campo `NPixHot`) pero ~0 en VIIRS/MODIS MIR,
+  el foco incandescente es **SUB-PÍXEL** para 375m-1km → el canal correcto es **SWIR de alta
+  resolución (método NHI: Landsat-v1 / NHI-v1)**, NO VRP Chile (instrumento equivocado por física
+  de resolución). Caso NdC junio 2026: Sentinel-2 NPixHot=6 (16-jun, mismo día que la ALERTA
+  VIIRS375 0.06), Landsat OLI 8-9 (mayo); VIIRS375/MODIS marginales/NONE. NO forzar el número
+  térmico en VIIRS (amplifica A69). Detalle: [[project_s112_estado]].
+
+- **A78. Erupción explosiva/freática (ceniza/gas) ≠ efusiva (lava expuesta) en firma térmica MIR;
+  escanear `nti_max` multi-sensor** (S112). Si el `nti_max` máximo de TODO el período nunca sube
+  de ~−0.9 (piso ~−1.0) en ningún sensor (VIIRS375/750/MODIS) ni día/noche → NO hay material
+  caliente expuesto resoluble en MIR = fase no-efusiva → el VRP térmico no aplica (la erupción es
+  real pero invisible al MIR). Distinguir explosiva (térmicamente invisible) de efusiva (visible)
+  ANTES de concluir FN o de forzar una magnitud.
+
+- **A79. Al adoptar un parámetro (anillo, umbral, gate), verificar el EVENTO ESPECÍFICO objetivo,
+  no solo la métrica agregada del A/B** (S112). El anillo [2,4] tenía buen med_err agregado pero
+  PERDÍA el trigger del evento objetivo (NdC 06-16); [1.5,3] lo recupera. Antes de commitear data
+  de una adopción, correr el caso concreto que motivó el cambio y confirmar que aparece. (Mismo
+  espíritu que A18/A8: la métrica agregada puede ocultar la falla del caso que importa.)
+
+- **A80. Detecciones V750/MODIS con `nti_max` plano (~−0.9) = artefacto topográfico A69
+  amplificado por área de píxel grande, NO señal** (S112). Los píxeles grandes (750m/1km) amplifican
+  el gradiente cráter-vs-nieve. Cruzar `nti_max` antes de creer una magnitud "summit" de 1-5 MW al
+  cráter en un nevado: si el NTI está en el piso, es el gradiente topográfico, no lava. Complementa
+  A69/A68/D11.
+
+- **A81. El bug A46 (schema asimétrico hotspot↔cluster) es BIDIRECCIONAL; la cara dominante puede
+  ser la OPUESTA a la del handoff** (S113, frente #3). `distance_class` se deriva de `final_hotspot`
+  pero el dashboard reporta `primary_cluster.vrp` → pueden discrepar en AMBAS direcciones: (a)
+  summit→far espurio (final cerca, pc lejos: 2 records Villarrica artefacto) y (b) far→summit oculto
+  (final lejos por un Salar/fuego que roba el hotspot, pero pc crateriana real: **2527 records**).
+  La cara (b) es ~1000× más grande pero re-derivar simétrico es **trap A48/A18**: 98.8% MIROVA-
+  confirmadas pero impacto NETO recall = 84 noches, 73 de NdC = artefacto A69 (NO destapar); el resto
+  redundantes (otra pasada summit cubre la noche); el gate conservador S100 es correcto. **How to
+  apply**: al cerrar una incoherencia de clasificación medí AMBAS direcciones del flip y crúzalas vs
+  MIROVA (A62/A10) ANTES de elegir el predicado; preferí el fix UNIDIRECCIONAL que toca solo la cara
+  espuria. Además A8 reforzada: el flagship del handoff ("75MW@28km") ya se había auto-curado por el
+  ancla honesta — verificar data fresca antes de asumir el problema. Detalle:
+  [[reference_s113_a46_bidirectional]] + `docs/S113_A46_COHERENCE_GUARD.md`.
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
