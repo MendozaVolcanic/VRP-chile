@@ -1,0 +1,14 @@
+# VRP-Chile — profile: _v750focal_on (S112 A/B focal V750, brazo FOCAL = el fix)
+#
+# Magnitud núcleo-focal portada a VIIRS750 (cluster_focal_vrp_mw, keep_peak): suma SOLO los
+# píxeles del cluster Test1 contextualmente anómalos (dnti_ctx ∪ {pico}). De-infla el campo
+# topográfico difuso (nevados) y conserva el foco real (Lascar cráter, Villarrica lava lake
+# vía keep_peak). Flag SEPARADO del global MODIS (ya ON). data_subdir aislado (A47).
+extends: mirova_equivalent
+profile: _v750focal_on
+description: >
+  A/B S112 focal V750 — FOCAL ON (keep_peak), cura artefacto topográfico A69/D11.
+paths:
+  enable_focal_cluster_magnitude_viirs750: true
+output:
+  data_subdir: _v750focal_on

@@ -466,6 +466,14 @@ LOCAL_CLUSTER_MAG_MIN_CORONA: int = int(_p.get("local_cluster_mag_min_corona", 4
 # docs/superpowers/specs/2026-06-14-magnitud-modis-nucleo-focal-design.md.
 ENABLE_FOCAL_CLUSTER_MAGNITUDE: bool = bool(_p.get("enable_focal_cluster_magnitude", False))
 FOCAL_CLUSTER_KEEP_PEAK: bool = bool(_p.get("focal_cluster_keep_peak", True))
+# S112 — magnitud núcleo-focal portada a VIIRS750 (M13), frente A69/D11. process_viirs_mod.py
+# era el ÚNICO path Test1 sin la cura (MODIS la tiene S109, VIIRS375 el contextual filter);
+# su VRP al cráter está inflado 10-25× sobre MIROVA en los nevados por integrar el gradiente
+# topográfico MIR sobre píxeles grandes (562.500 m²), EXCEPTO Lascar (foco real). Flag SEPARADO
+# del global (que ya está ON para MODIS, #423) para mantener el port INERTE hasta su propio A/B
+# con Lascar de canario (A45). Usa el mismo helper cluster_focal_vrp_mw + FOCAL_CLUSTER_KEEP_PEAK.
+ENABLE_FOCAL_CLUSTER_MAGNITUDE_VIIRS750: bool = bool(
+    _p.get("enable_focal_cluster_magnitude_viirs750", False))
 
 # S40 cleanup paths viejos — flag para desactivar bt_path_hot path.
 # Análisis empírico S39 (records operacional 30d): bt_path_hot solo

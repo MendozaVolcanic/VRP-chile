@@ -1,0 +1,54 @@
+name: S112 reproc focal V750 A/B (A69/D11, A45)
+
+# A43: "on" quoted. A/B del fix magnitud núcleo-focal portado a VIIRS750 (A69/D11). 2 brazos
+# (base OFF / focal ON keep_peak) x 6 vols x 2 ventanas estrechas = 24 jobs. Vols: Lascar
+# (CANARIO anti-FN — no debe perder sus records ni caer de ~2MW), Tupungatito+Isluga+NdC
+# (artefacto a curar), Villarrica+PCC (cat-b a NO matar). Cada job aislado sube su artifact
+# (sin race A47). Junta con gather, audita con audit_v750focal_ab.py (cruce pc.vrp vs MIROVA
+# por sensor V750, A10/A67).
+"on":
+  workflow_dispatch:
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        profile: [_v750focal_base, _v750focal_on]
+        volcano: [Lascar, Tupungatito, Isluga, NevadosDeChillan, Villarrica, PuyehueCordonCaulle]
+        chunk:
+          - { start: "2026-05-01", end: "2026-05-15" }
+          - { start: "2026-06-12", end: "2026-06-17" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reprocess ${{ matrix.profile }} / ${{ matrix.volcano }} / ${{ matrix.chunk.start }}
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 290
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ matrix.chunk.start }} \
+            --end ${{ matrix.chunk.end }} \
+            --overwrite
+      - name: Upload JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: s112v750-${{ matrix.profile }}-${{ matrix.volcano }}-${{ matrix.chunk.start }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7
