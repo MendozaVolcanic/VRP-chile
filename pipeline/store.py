@@ -332,6 +332,38 @@ def append_record(volcano_name: str, record: dict,
             record["final_hotspot_dist_km"] = vh_dist
             record["final_hotspot_source"] = "vent"
 
+    # S113 #3 — Guard de coherencia A46 (decisión Nicolás, tag pre-s113-a46-coherence-guard).
+    #
+    # POR QUÉ (fenómeno + mecanismo): en una pasada el sensor puede ver a la vez una
+    # señal débil del cráter y un incendio/Salar lejano. La etiqueta visual
+    # `distance_class` (summit=rojo / far=gris) se deriva de `final_hotspot_dist_km`,
+    # pero el dashboard reporta la MAGNITUD desde `primary_cluster.vrp_mw` y su gate
+    # efectivo (`mirovaEqVrp`, frontend) YA exige summit AND pc.centroid<=inner. Dos
+    # forzados de arriba pueden setear "summit" sin respetar inner_radius_km:
+    #   (a) cluster_rescue (F47): rescata si pc_cdist <= MAX_HOTSPOT_DIST_KM, pero MAX =
+    #       geofence radius_km (~25 km) >> inner_radius_km (3-7 km) → la suposición
+    #       "cerca por construcción" es falsa cuando MAX >> inner.
+    #   (b) Regla D vent (S20): vrp_vent>0 fuerza summit, pero el primary_cluster que
+    #       lleva pc.vrp puede ser un cluster regional lejano.
+    # Resultado: un punto rojo "summit" cuya magnitud (pc.vrp) viene de 15-34 km
+    # (Villarrica regional fires, NTI piso, MIROVA silente). Alineamos el campo con el
+    # gate del frontend: si la magnitud reportada (pc.vrp>0) viene de fuera del inner,
+    # la detección NO es summit.
+    #
+    # UNIDIRECCIONAL a propósito: NO re-derivamos far→summit (eso flipearía ~2527 records
+    # — clusters crateriana reales tapados por un píxel lejano; 73 noches de NdC = artefacto
+    # topográfico A69 sub-píxel que NO hay que destapar; el resto son redundantes. Trap
+    # A48/A18, ver reference_s113_a46_bidirectional). Solo corregimos la cara summit→far.
+    # NO toca detección, cluster selection (A18), magnitud ni paths — alineación interna
+    # del campo de clasificación visual (MISSION Q3).
+    if record.get("distance_class") == "summit" and inner_radius_km is not None:
+        _pc = record.get("primary_cluster") or {}
+        _pc_cdist = _pc.get("centroid_dist_km")
+        _pc_vrp = _pc.get("vrp_mw") or 0
+        if _pc_vrp > 0 and _pc_cdist is not None and _pc_cdist > inner_radius_km:
+            record["distance_class"] = "far"
+            record["diag_a46_relabel"] = "summit_to_far_pc_beyond_inner"
+
     # S19 M4 2026-04-24: sanity cap físico antes del piso por sensor.
     # 50,000 MW = 1.3x el P99.99 del archivo OSF v2.5 (615k filas globales
     # 2000-2025) y 0.71x el récord histórico documentado por MIROVA (~70 GW

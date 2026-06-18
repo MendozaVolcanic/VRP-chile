@@ -28,7 +28,7 @@ pcc_final.py, probe_weird_records.py + weird_records_result.json).
 |---|---|---|---|
 | 1 | EN CURSO | VIIRS750 inflado 8-20× (Tupun/PP/Isluga) | A/B focal V750 (run 27762249160) |
 | 2 | ALTA | **D9/A23 cirrus path-D** (56 lejanas PCC + ~210 records cirrus en los 11) | Co-validación / gate atm t_bg<270K al path-D — raíz A72 |
-| 3 | ALTA | **Incoherencia A46**: 60 records (54 PCC + 6 Villarrica) cluster 16-34km pero distance_class="summit" (ej. Villarrica 06-15 **75.62 MW @ 28km "summit"**) | Gate: summit ⟹ centroid_dist ≤ inner_radius |
+| 3 | ✅ RESUELTO S113 | **Incoherencia A46**: el flagship se auto-curó (ancla honesta); bug genuino = 2 records Villarrica (artefacto). PCC 54 = efecto inner=20 (issue #5, no A46). | Guard unidireccional store.py summit→far. Ver `docs/S113_A46_COHERENCE_GUARD.md` |
 | 4 | MEDIA | Campo difuso MODIS A69 (91-98% sobre-detección) | Frente MODIS abierto (focal MODIS + co-val) |
 | 5 | MEDIA | inner_radius=20 PCC infla visual | Evaluar bajar a ~10km (lacolito real ≤8.5km) |
 | 6 | BAJA | 20 MODIS PCC clavados en 5.0 MW (¿cap?); diario:432 datetime sin Z (S89) | Revisar / parseUtcMs |
