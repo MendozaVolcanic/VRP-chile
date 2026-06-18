@@ -472,6 +472,26 @@ Los **4 gaps documentales F1.2** explican mejor el drift remanente Villarrica/Ch
 | Fumarole rim vs lago cráter (Laiolo 2017) | 4/5 vols Tier A Muy Bajo centroide térmico p50 <1 km vent | F1.1 empírico |
 | Kernel L_bk excluye solo central | YA excluye TODOS hot pixels del cluster | F1.3 code review |
 
+#### S113 — re-verificación en vivo + aclaración de scope (2026-06-18)
+
+Caracterización fresca (read-only) sobre data actual, raíz del frente "#2 cirrus" del bloque S113:
+- **El impacto OPERACIONAL-VISIBLE está RESUELTO** (la cara FP de detección): cirrus FAR genuino
+  (path-D dominante + `t_bg<262K` + far) = **199 records**, con **0 fuga al dashboard** (el gate
+  `far` de `mirovaEqVrp` los esconde) y **0 con pc.vrp>5MW** (el cap C de S71 está activo, max=5.0).
+- **Los 3 "candidatos" del bloque S113 para #2 = exactamente las 3 opciones A/B-testeadas en S71**
+  (atm gate t_bg / co-validación BT-NTI / cap). A y B ya **rechazadas** (A = el cloud-mask
+  anti-MIROVA removido S27, Coppola 2016a §247 / 2023 §554; B rompe recall NdC 1.00→0.33); C
+  **adoptada y LIVE**. El bloque S112 reframeó como pendiente algo ya decidido — **no abrir un A/B
+  de cirrus nuevo** (sería redo de S71, anti-A8).
+- **TRAP confirmado en vivo (A68/A80)**: de los 214 records cold+path-D **visibles** (summit), 207
+  (96.7%) son MIROVA-CONFIRMADOS reales = fondo frío por **altitud** (Láscar 5592m, Lastarria,
+  Tupun), NO cirrus. Un gate por `t_bg` los mataría — por eso A fue (correctamente) rechazada.
+- **Lo único genuinamente abierto de D9** = la **amplificación de MAGNITUD** (ratios 6-12× cuando
+  MIROVA también detecta en cirrus), que son las hipótesis HT1.5-NEW-1/2/3 (cluster selection /
+  kernel bg / Method-2 temporal). Es un **frente de magnitud** (solapa con #4 MODIS difuso A69 +
+  las adopciones nadir/focal S102-S109), NO un gate de detección de cirrus. Reevaluar si persiste
+  post-S109. Detalle: `~memory/reference_s113_cirrus_d9_scope`.
+
 ## Auditoría visual S27 (post-render fix, 90d)
 
 Conteo de markers en hotspot-map por Tier A (toggle "Solo principal" + "Solo cráter"):
