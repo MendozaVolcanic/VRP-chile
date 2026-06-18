@@ -486,11 +486,19 @@ Caracterización fresca (read-only) sobre data actual, raíz del frente "#2 cirr
 - **TRAP confirmado en vivo (A68/A80)**: de los 214 records cold+path-D **visibles** (summit), 207
   (96.7%) son MIROVA-CONFIRMADOS reales = fondo frío por **altitud** (Láscar 5592m, Lastarria,
   Tupun), NO cirrus. Un gate por `t_bg` los mataría — por eso A fue (correctamente) rechazada.
-- **Lo único genuinamente abierto de D9** = la **amplificación de MAGNITUD** (ratios 6-12× cuando
-  MIROVA también detecta en cirrus), que son las hipótesis HT1.5-NEW-1/2/3 (cluster selection /
-  kernel bg / Method-2 temporal). Es un **frente de magnitud** (solapa con #4 MODIS difuso A69 +
-  las adopciones nadir/focal S102-S109), NO un gate de detección de cirrus. Reevaluar si persiste
-  post-S109. Detalle: `~memory/reference_s113_cirrus_d9_scope`.
+- **La amplificación de MAGNITUD (la otra cara de D9) — CURADA por las adopciones nadir/focal
+  S102-S109** (verificado S113, ratio nuestro/MIROVA con pc.vrp_mw, A10, sobre 610 TP path-D-dominante
+  visibles mayo-jun): **mediana 0.53×** (p25-p75 0.30-0.85), levemente sub-reportando = calibración
+  clon-literal sana. S71 dejó "6-12× sistemático en cirrus"; hoy quedan **solo 2 records >5×** de 610,
+  ambos VIIRS750 en cirrus (Tupungatito 05-24 4.41 vs MIROVA 0.19; PP 05-09 2.99 vs 0.18) — magnitud
+  absoluta chica (3-4 MW, bajo el cap), = el "~30% residual VIIRS750 cirrus/glaciar" que la adopción
+  focal V750 S112 ya documentó. NO es frente, es cola documentada.
+
+**Estado D9 (actualizado S113) — EFECTIVAMENTE RESUELTA en sus dos caras**: (1) FP de detección
+capeado (C, S71) + oculto por el gate `far` (0 fuga verificada S113); (2) amplificación de magnitud
+curada por nadir+focal S102-S109 (mediana 0.53×, residuo = 2 records VIIRS750 cirrus a 3-4 MW). El
+candidato t_bg-gate quedó descartado (anti-MIROVA + trap A68/A80: mataría 207 detecciones reales de
+fondo-frío-por-altitud). **No quedan acciones abiertas en D9.** Detalle: `~memory/reference_s113_cirrus_d9_scope`.
 
 ## Auditoría visual S27 (post-render fix, 90d)
 
