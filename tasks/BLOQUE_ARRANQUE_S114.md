@@ -31,11 +31,11 @@ Leer en memoria: `project_s113_estado` + `reference_s113_cirrus_d9_scope` (refra
 - **TRAP confirmado (A68/A80)**: el candidato "gate si t_bg<262/270K" mataría 207/214 detecciones
   MIROVA-confirmadas reales de fondo-frío-por-altitud (Láscar 5592m). El discriminante NO puede ser t_bg.
 
-**Lo único genuinamente abierto de D9** = la **amplificación de MAGNITUD** (ratios 6-12× cuando MIROVA
-también detecta en cirrus) → hipótesis HT1.5-NEW-1/2/3 (cluster selection / kernel bg / Method-2 temporal
-weekly-minima). **Es un frente de MAGNITUD, no de detección de cirrus** → fusionar con #4 (MODIS difuso
-A69) + reevaluar si persiste tras las adopciones nadir/focal S102-S109. Si se aborda: papers-first ya
-hecho (S71/S72, `docs/PAPERS_MIROVA_SYNTHESIS_S71.md`) + MISSION + A45.
+**La otra cara de D9 (amplificación de MAGNITUD) — REEVALUADA Y CURADA S113**: el "6-12× sistemático
+en cirrus" de S71 ya NO existe tras las adopciones nadir/focal S102-S109. Ratio nuestro/MIROVA (pc.vrp,
+A10) sobre 610 TP path-D visibles = **mediana 0.53×**; solo 2 records >5× (VIIRS750 cirrus a 3-4 MW =
+cola documentada del ~30% residual focal V750 S112). **D9 efectivamente RESUELTA en ambas caras — no
+quedan acciones abiertas.** Ver `docs/MIROVA_DIVERGENCES.md` §S113.
 
 ## §2 — Frentes menores (backlog, de AUDIT_S112)
 - #4 MODIS difuso A69 (sobre-detección RUTINA; focal MODIS + co-val; frente abierto).

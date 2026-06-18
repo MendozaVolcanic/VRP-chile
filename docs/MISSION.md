@@ -83,10 +83,10 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
    **El catálogo VIVO es el doc — esta lista es resumen (actualizada S105, AUDIT_S105):**
    - Resueltas (no justifican features nuevas): D1 granularidad, D4 recall sub-pixel
      (S27), D5 magnitud (nadir S102/103 + ctxpeak D10 S100), D8/D8' cluster selection
-     (S38/S62), sec³ off-nadir (S102/103), fix del ancla de detección (S98).
+     (S38/S62), sec³ off-nadir (S102/103), fix del ancla de detección (S98),
+     **D9 path-D cirrus** (cap C S71 + magnitud curada por nadir/focal S102-S109;
+     verificado S113: 0 fuga al dashboard + mediana 0.53×; t_bg-gate descartado anti-MIROVA/trap A68).
    - **Abiertas**: D2 cobertura CSV ground truth · D3 FP explícito MIROVA ·
-     **D9 path D cirrus/escena tibia** (cap 5MW = mitigación, causa raíz abierta;
-     residuo MODIS ~131 records pc.vrp>5, 0% confirmados MIROVA — AUDIT S105) ·
      **D11 sesgo topográfico de paths MIR-absolutos (A69, S104)** — el Test1 integrado
      MIR/NTI-anillo se sesga ~1 km al valle tibio en nevados; MIROVA inmune (NTI +
      fondo local). Fix candidato fondo-local-NTI en A/B S105 (V1 y V2 refutados) ·
