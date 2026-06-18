@@ -94,14 +94,24 @@ def test_modis_still_has_focal():
         "process_modis.py (S109) NO debe perder la magnitud focal"
 
 
-def test_v750_focal_flag_default_off(monkeypatch):
-    """El flag NUEVO ENABLE_FOCAL_CLUSTER_MAGNITUDE_VIIRS750 es default OFF (A45 inerte:
-    el port V750 NO aplica hasta su propio A/B + OK Nicolás)."""
-    monkeypatch.setenv("VRP_PROFILE", "mirova_equivalent")
+def test_v750_focal_flag_default_off_unset(monkeypatch):
+    """El flag es default OFF cuando un perfil no lo activa (perfil base)."""
+    monkeypatch.setenv("VRP_PROFILE", "_baseline_s44")
     import importlib
     import pipeline.profile as profile
     importlib.reload(profile)
     assert profile.ENABLE_FOCAL_CLUSTER_MAGNITUDE_VIIRS750 is False
+
+
+def test_v750_focal_ADOPTED_operacional_s112(monkeypatch):
+    """S112 ADOPTADO (2026-06-17): la magnitud núcleo-focal V750 está ON en operacional
+    (cura el artefacto topográfico A69 inflado 8-20×; A/B run 27762249160 24/24, Lascar
+    canario preservado). Tag pre-s112-focal-v750."""
+    monkeypatch.setenv("VRP_PROFILE", "mirova_equivalent")
+    import importlib
+    import pipeline.profile as profile
+    importlib.reload(profile)
+    assert profile.ENABLE_FOCAL_CLUSTER_MAGNITUDE_VIIRS750 is True
 
 
 def test_modis_focal_flag_still_on(monkeypatch):

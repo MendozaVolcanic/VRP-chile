@@ -153,6 +153,15 @@ paths:
   # (enable_honest_anchor_modis) sigue OFF -> espera el fix de deteccion D11 (NdC 71% artefacto A69).
   enable_focal_cluster_magnitude: true
   focal_cluster_keep_peak: true
+  # **ADOPTADO S112 (2026-06-17)** — magnitud núcleo-focal portada a VIIRS750 (M13), cura el
+  # artefacto topográfico A69/D11 (V750 inflado 8-20× sobre MIROVA en nevados por integrar el
+  # gradiente cráter-vs-nieve sobre píxeles grandes). process_viirs_mod.py era el ÚNICO path
+  # Test1 sin la cura. Flag SEPARADO del global (mismo helper cluster_focal_vrp_mw + keep_peak).
+  # A/B run 27762249160 (24/24): C1 Lascar CANARIO preservado (0.42, n=47=47, ratio 0.59), Tupun
+  # 3.3×→1.1× / NdC / Villarrica artefacto de-inflados, PCC cat-b preservado (0.28≥0.21), MODIS+
+  # VIIRS375 byte-idénticos. Isluga 57% (queda residual cirrus A23/D9 = frente #2). Tag
+  # pre-s112-focal-v750. Verif. adversarial 3 revisores (port CLEAN; HIGH del audit C3 corregido).
+  enable_focal_cluster_magnitude_viirs750: true
   # S27 MIROVA literal: vent-path NO existe en papers MIROVA.
   # Coppola 2015 §2.2 Test 1 integrated-ROI cumple rol equivalente
   # para sub-pixel cuando aplica. Vent-path entero queda como infra
