@@ -9,7 +9,22 @@ cd "C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile"
 git fetch origin --prune && git pull --ff-only
 ```
 Leer en memoria: `project_s113_estado` + `reference_s113_cirrus_d9_scope` (reframe #2) +
-`reference_s113_a46_bidirectional`.
+`reference_s113_a46_bidirectional` (incluye el hallazgo MODIS far→summit de abajo).
+
+## ⭐ PRIORIDAD S114 — re-auditoría de paridad por sensor + frente MODIS far→summit (A46 inverso)
+El cierre de S113 (re-audit pedido por Nicolás) destapó esto sobre data fresca, gate dashboard
+(summit && centroid≤inner = lo que ve el operador): **VIIRS375 recall 99% · VIIRS750 85% · MODIS 17%**.
+La caída MODIS es la cara **far→summit** del bug A46 (la S112 reportó 94% con un "detectamos algo", no
+el gate del dashboard): para Láscar, de 16 ALERTAS MODIS, **23 records quedan `far` con `geo_class=
+"summit"`** (cluster crateriano 1.2-3.1km) porque el `final_hotspot` apunta al **Salar de Atacama 18-24km**
+que le roba el hotspot; `cluster_rescue` F47 NO dispara (Salar dentro del geofence, hotspot_dist<MAX 25km).
+- **Es recuperación LEGÍTIMA** (MIROVA confirma, cráter real), distinta del NdC A69. Matiz A62:
+  cobertura por-noche sana (VIIRS375 cubre), falla la COMPLETITUD por-sensor (serie MODIS Láscar vacía).
+- **Plan**: (1) re-auditoría completa por sensor — refrescar CSV ground-truth (A17, los actuales son del
+  16-jun) + subagentes paralelos por sensor (A26). (2) Frente far→summit = guard unidireccional ESPEJO
+  del de S113: promover SOLO clusters crateriana genuinos (geo=summit + cerca + no-nti-piso), NO los A69
+  de NdC (trap A48 de los 2527). El discriminante real-vs-A69 es el mismo problema duro que D11 →
+  MISSION 3-preguntas + brainstorming + TDD + A45 (tag, OK Nicolás). Detalle: `reference_s113_a46_bidirectional`.
 
 ## ✅ Cerrado en S113 (LIVE)
 1. **#3 coherencia A46** (#444, A45, tag `pre-s113-a46-coherence-guard`): guard unidireccional en
