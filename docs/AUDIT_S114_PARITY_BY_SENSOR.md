@@ -227,14 +227,25 @@ adversarial, verificada `file:line`). **Veredicto: la detección MODIS es FIEL a
 | Second Run (excluye activos, recomputa μ/σ, §323-325) | `second_pass_adjacent` (:773/786) | **full** |
 | ETI regresión cuadrática (Eq.4-5) | `compute_eti_scene_quadratic` | **full** |
 | Kernel 8-vecinos media aritmética | `_nanmean_8neighbors_fast` (D1 resuelto S17) | **full** |
-| **§298-300 (retiro Test 1 K1 del pool μ/σ)** | `ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK`=False (default) | **partial = GAP #A** |
+| **§298-300 (Test 1 K1 fuera del pool μ/σ)** | pool: second-run lo excluye (`second_pass_adjacent`, full); reporte: `ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK`=False = **fiel** | **full** (corregido S115) |
 
-**GAP #A — único gap de fidelidad literal real**: no aplicamos el retiro de los píxeles Test 1 K1
-del pool μ/σ (§298-300, flag OFF). PERO: (1) **no ataca el difuso** — al contrario, retirar
-outliers positivos del pool BAJA σ → umbral `μ+C2·σ` más permisivo; (2) **irrelevante para el
-difuso nevado** (NTI≈−0.91, lejos de K1=−0.8, casi nada que retirar); (3) merece su propio A/B
-como **fidelidad literal independiente**, NO como solución al difuso. (El §323-325, retiro de
-activos Tests 2/3, SÍ se cumple vía second-pass — la síntesis lo había omitido, la crítica lo corrigió.)
+**GAP #A — RESUELTO S115: era un MISLABEL, no un gap de fidelidad.** Verificado contra el paper
+(sp426_5.txt §298-300 + Eq.6) y el código file:line:
+- **Lectura correcta de §298-300**: "Pixels that satisfy Test 1 are flagged as 'active' and
+  subsequently discarded (unsuitable) for further steps." Dos párrafos abajo, Eq.6: "Once a pixel
+  is flagged as active, the 'above background' radiance ΔL4 = L4alert − L4bk is calculated". → Los
+  píxeles Test 1 activos **SÍ entran al reporte y SÍ reciben VRP**. "Discarded for further steps" =
+  salen del **pool estadístico** de "suitable pixels" que computa m,σ para Tests 2/3, **NO del reporte**.
+- **El flag nombrado era el equivocado**: `ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK`
+  (`detection_context.py:869-873`) saca `nti_path_hot` del **hot_mask reportable**, no del pool.
+  Prenderlo borraría los focos más fuertes del reporte = **drift, no fix**. OFF es lo fiel (reafirma
+  S100, `MIROVA_DIVERGENCES.md` F1.2: "mantener OFF permanentemente"). El mecanismo del pool es otro
+  flag, `ENABLE_TEST1_K1_BG_EXCLUDE` (drift #1b).
+- **El concepto pool-μ/σ sí es legítimo, pero ya está cubierto**: el second-run (§323-325,
+  `second_pass_adjacent`, fidelidad **full**) excluye todos los activos y recomputa m,σ. La única
+  diferencia literal es que la **primera** pasada incluye los Test 1 activos en el pool — matiz que
+  (1) la segunda pasada corrige; (2) ajusta la permisividad del gate (ortogonal al difuso, A82); (3)
+  no toca el far→summit. **No amerita A/B.** Conclusión §6d intacta: la detección MODIS es FIEL.
 
 **Veredicto: el difuso pasa GENUINAMENTE, no por bug.** A 1 km el gradiente cumbre-fría/valle-tibio
 produce outliers espaciales reales en dNTI **y** dETI (un píxel 272 K rodeado de 281 K es, a escala
@@ -260,9 +271,11 @@ no de tocar C1/C2/μ/σ (alto riesgo de matar cat-b — el KILLER ya verificado)
 5. **La detección MODIS es FIEL a Coppola 2016a** (§6d, auditoría file:line + adversarial): la
    arquitectura dual-ROI 5σ/10σ + Tests 2∧3 OR + second-run + ETI cuadrático YA está implementada
    y activada, y es fiel. **El difuso pasa GENUINAMENTE, no por bug** — es la física de 1 km
-   (outlier espacial real sobre topografía nival). Único gap de fidelidad literal: **GAP #A**
-   (§298-300 retiro Test 1 K1 del pool μ/σ, flag OFF) — irrelevante para el difuso (lo afloja),
-   merece su propio A/B como fidelidad independiente.
+   (outlier espacial real sobre topografía nival). **GAP #A RESUELTO S115 como mislabel** (ver §6d):
+   §298-300 + Eq.6 → los Test 1 activos SÍ se reportan y reciben VRP; "discarded for further steps" =
+   fuera del pool m,σ, ya cubierto por el second-run (full). El flag citado
+   (`ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK`) era el equivocado (controla el reporte, OFF = fiel). **No
+   queda gap de fidelidad literal accionable.**
 6. **D11-MODIS far→summit es IRREDUCIBLE** dentro del clon literal: agotadas TODAS las vías —
    detección (gate post-hoc, N·σ Tabla 1, arquitectura completa, todas fieles/refutadas) Y los
    tres ejes ortogonales: ancla `first_pass_summit` (NO ADOPTAR S111), cross-sensor VIIRS375

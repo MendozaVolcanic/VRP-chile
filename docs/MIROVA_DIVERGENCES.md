@@ -1270,8 +1270,12 @@ y **se descartó TODO con datos**:
 - **Auditoría de fidelidad file:line + adversarial**: la detección MODIS YA es FIEL a Coppola 2016a
   (dual-ROI 5/10 enable_dual_roi_bt, Tests 2∧3 OR `min(C1,μ+C2σ)`, σ global, second-run, ETI
   cuadrático, kernel 8-vec). **El difuso pasa GENUINAMENTE** (outlier espacial real a 1 km sobre
-  topografía nival), no por bug. Único gap de fidelidad literal: **GAP #A** (§298-300 retiro Test 1 K1
-  del pool μ/σ, flag OFF) — irrelevante para el difuso (lo afloja), backlog con A/B propio.
+  topografía nival), no por bug. ~~Único gap de fidelidad literal: GAP #A (§298-300 retiro Test 1 K1
+  del pool μ/σ, flag OFF) — backlog con A/B propio.~~ **GAP #A RESUELTO S115 = mislabel** (no es gap):
+  §298-300 + Eq.6 → los Test 1 activos SÍ se reportan y reciben VRP; "discarded for further steps" =
+  fuera del pool m,σ, **ya cubierto por el second-run** (full). El flag citado
+  `ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK` controla el REPORTE (OFF = fiel, reafirma F1.2 S100), no el
+  pool. **No queda gap de fidelidad literal accionable; no amerita A/B.** Ver `AUDIT_S114` §6d.
 - **Ejes ortogonales**: cap de magnitud REFUTADO (AUC 0.45; difuso entre Láscar y cat-b) y contexto
   temporal Method-2 REFUTADO (difuso tan variable como el foco, CV 0.84-1.22).
 
