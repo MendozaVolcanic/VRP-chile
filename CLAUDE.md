@@ -103,9 +103,16 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   RSE (TIRVolcH, mismo grupo MIROVA) usa Stefan-Boltzmann igual que Coppola 2024 y nuestro código.
   La Eq.9 con k_TIR=60.17 de Aveni 2025 GRL es investigación no adoptada operacionalmente. Referencia
   correcta ahora: Coppola 2024 cap Springer Eq.16 + Aveni 2024 RSE Eq.5. Ver `docs/DRIFTS_S17.md`.
-- **NTI**: umbral 3σ sobre background, mínimo 0.005. **DRIFT D2 S17**: ningún paper autoritativo
-  respalda 3σ uniforme. Coppola 2016a Tabla 1 dice 5σ summit / 10σ scene / 15σ diurno para MODIS.
-  Di Bella 2024 §3.3 dice VIIRS 12σ noche / 8σ día. Test A/B pendiente S18 — ver `docs/DRIFTS_S17.md`.
+- **NTI / dNTI contextual**: el gate de detección usa los umbrales **N·σ de Coppola 2016a Tabla 1
+  por dual-ROI** (NO 3σ uniforme — eso era el drift D2 histórico, ya resuelto). Verificado por
+  auditoría de fidelidad file:line S114: el profile `mirova_equivalent.yaml` tiene
+  `enable_dual_roi_bt: true` (**N·σ = 5 summit / 10 scene** noche, 15 día) + `enable_dnti_dual_roi:
+  true` (**C1 = 0.003 summit / 0.010 scene**, 0.02 día), Tests 2∧3 con la rama OR completa
+  `min(C1, μ+C2·σ)`, σ **global per-imagen** (no del anillo), second-run (excluye activos, recomputa
+  μ/σ), ETI por regresión cuadrática, kernel 8-vec aritmético. **La detección MODIS es FIEL a
+  Coppola 2016a** (S114). Único gap de fidelidad literal pendiente: **GAP #A** (§298-300, retiro de
+  píxeles Test 1 K1 del pool μ/σ; flag `enable_test1_k1_retire_from_hot_mask` OFF) — backlog,
+  evaluar con A/B propio (afloja el gate, no ataca el difuso). NTI absoluto floor 0.005 legacy.
 - **Kernel 8-vecinos dNTI contextual**: `np.mean` aritmética (Coppola 2016a + Campus 2024). **Drift D1
   RESUELTO S17** — previamente usábamos `np.median` sin respaldo documental.
 - **MIR solo nocturno** (contaminación solar diurna).
@@ -849,6 +856,25 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   espuria. Además A8 reforzada: el flagship del handoff ("75MW@28km") ya se había auto-curado por el
   ancla honesta — verificar data fresca antes de asumir el problema. Detalle:
   [[reference_s113_a46_bidirectional]] + `docs/S113_A46_COHERENCE_GUARD.md`.
+
+- **A82. El far→summit MODIS / sobre-detección difusa A69 es FÍSICAMENTE IRREDUCIBLE a 1 km dentro
+  del clon literal; a esa resolución el foco sub-píxel débil y el gradiente topográfico difuso son
+  el mismo objeto en TODOS los ejes medibles** (S114, cierre exhaustivo de D11-MODIS). La
+  re-auditoría por sensor con data fresca dio recall dashboard VIIRS375 99% / VIIRS750 86% / **MODIS
+  16%** — pero el "16%" NO es falta de detección (el pipeline encuentra el cráter 90%), es el bug de
+  etiquetado A46 far→summit (el `final_hotspot` por MIR absoluto salta a un Salar/valle no-volcánico).
+  Se probó y descartó TODO con datos: 8 discriminantes per-record (barrido AUC~0.5), N·σ Tabla 1
+  (frente B: no separa, a 5σ apaga Láscar), y los 3 ejes ortogonales — ancla `first_pass_summit`
+  (NO ADOPTAR S111), cross-sensor VIIRS-magnitud (AUC 0.88 pero MISSION lo prohíbe), cap de magnitud
+  (AUC 0.45) y contexto temporal Method-2 (difuso tan variable como el foco, CV 0.84-1.22). La
+  auditoría de fidelidad file:line+adversarial confirmó que **la detección MODIS YA es fiel a Coppola
+  2016a** (dual-ROI 5/10, Tests 2∧3 OR, second-run, ETI cuadrático) → el difuso pasa GENUINAMENTE, no
+  por bug. **How to apply**: NO reabrir el far→summit MODIS buscando un gate/discriminante/cap
+  post-hoc — está agotado (anti-A8). El KILLER recurrente: los focos cat-b reales en nevado
+  (Villarrica lava-lake, Chaitén domo) son espectralmente idénticos al difuso a 1 km → cualquier
+  umbral que corte el difuso mata cat-b. El recall MODIS lo cubre VIIRS375 (A77: a 1 km el instrumento
+  es el equivocado para sub-píxel). Detalle: `docs/AUDIT_S114_PARITY_BY_SENSOR.md` +
+  [[project_s114_estado]].
 
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,

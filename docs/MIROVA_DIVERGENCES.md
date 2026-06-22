@@ -1211,7 +1211,7 @@ Guard anti-revert: `tests/test_detection_anchor.py`. Resultados: det→cráter T
 5.76→1.25 km, PCC 7.23→0.69, PP 2.69→1.14. Detalle: `docs/S98_ANCHOR_FIX_RESULTS.md`.
 (Entrada agregada retroactivamente en S105 — AUDIT_S105 detectó que faltaba acá.)
 
-## D11 — Sesgo topográfico de los paths MIR-absolutos (A69) — ABIERTA (3 fixes refutados; sin candidato activo S106)
+## D11 — Sesgo topográfico de los paths MIR-absolutos (A69) — **CERRADA S114** (irreducible a 1 km; detección fiel a Coppola; todos los ejes agotados)
 
 **Divergencia formal** (S104, formalizada S105 por AUDIT_S105): en volcanes nevados
 (Villarrica/Tupungatito/Llaima) el campo nocturno BT MIR está dominado por el gradiente
@@ -1255,6 +1255,32 @@ nevados, A70), no de recall ni de magnitud (calibración 0.78–0.80× intacta S
 Implicación al marco A54: el "extra" sobre MIROVA en nevados incluye FP topográficos
 (cat-d), no solo cat-b real. Ver `docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md` (completo) y
 `docs/superpowers/specs/2026-06-10-test1-local-bg-nti-design.md`.
+
+**CIERRE S114 (la cara MODIS far→summit; `docs/AUDIT_S114_PARITY_BY_SENSOR.md`)**: la
+re-auditoría por sensor con data fresca destapó que el recall dashboard MODIS es 16% (vs 90%
+pipeline-cráter) = bug de etiquetado A46 far→summit (el `final_hotspot` por MIR absoluto salta a
+Salar/valle). Se exploró exhaustivamente cómo separar el foco real (Láscar) del difuso A69 (nevados)
+y **se descartó TODO con datos**:
+- **Discriminantes per-record** (barrido de 8 + escéptico ~17 single/~45 pares): AUC ~0.5; ninguno
+  MISSION-puro separa. El único con AUC>0.8 (co-val VIIRS375-magnitud, 0.88) es cross-sensor (MISSION
+  lo prohíbe). El hallazgo nuevo `roi95_nsigma` (0.87) lo mata el KILLER cat-b (focos reales en nevado
+  Villarrica/Chaitén caen en la banda del difuso → cualquier umbral mata 40% de cat-b).
+- **Frente B (N·σ Tabla 1)**: el N·σ canónico no separa (Láscar 3.5σ vs nevados 3.1σ, solapan); a 5σ
+  literal Láscar-ALERTA queda 0/23 (apaga el foco real).
+- **Auditoría de fidelidad file:line + adversarial**: la detección MODIS YA es FIEL a Coppola 2016a
+  (dual-ROI 5/10 enable_dual_roi_bt, Tests 2∧3 OR `min(C1,μ+C2σ)`, σ global, second-run, ETI
+  cuadrático, kernel 8-vec). **El difuso pasa GENUINAMENTE** (outlier espacial real a 1 km sobre
+  topografía nival), no por bug. Único gap de fidelidad literal: **GAP #A** (§298-300 retiro Test 1 K1
+  del pool μ/σ, flag OFF) — irrelevante para el difuso (lo afloja), backlog con A/B propio.
+- **Ejes ortogonales**: cap de magnitud REFUTADO (AUC 0.45; difuso entre Láscar y cat-b) y contexto
+  temporal Method-2 REFUTADO (difuso tan variable como el foco, CV 0.84-1.22).
+
+**Veredicto (A82)**: a 1 km el foco sub-píxel débil y el gradiente topográfico difuso son el mismo
+objeto en todos los ejes medibles (espectral, magnitud, espacial, temporal); su única diferencia
+(origen) no deja huella en el dato. **Irreducible dentro del clon literal.** Sin pérdida de alerta:
+VIIRS375 (375 m) resuelve el foco y cubre el recall (A77). **NO reabrir** el far→summit MODIS con un
+gate/discriminante/cap post-hoc (anti-A8). La cara POSICIÓN del ancla en nevados (~1-1.5 km N, A70)
+queda como costo residual conocido, no de recall ni magnitud.
 
 ### D11-bis — El ancla honesta reporta `dist=0.0` para records Test1-only (divergencia formal, AUDIT_S106 P2.3)
 

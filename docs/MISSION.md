@@ -87,10 +87,12 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
      **D9 path-D cirrus** (cap C S71 + magnitud curada por nadir/focal S102-S109;
      verificado S113: 0 fuga al dashboard + mediana 0.53×; t_bg-gate descartado anti-MIROVA/trap A68).
    - **Abiertas**: D2 cobertura CSV ground truth · D3 FP explícito MIROVA ·
-     **D11 sesgo topográfico de paths MIR-absolutos (A69, S104)** — el Test1 integrado
-     MIR/NTI-anillo se sesga ~1 km al valle tibio en nevados; MIROVA inmune (NTI +
-     fondo local). Fix candidato fondo-local-NTI en A/B S105 (V1 y V2 refutados) ·
-     VIIRS750 disperso glaciar (Tupun/PP, pendiente portar ctxpeak S102§2) ·
+     **D11 sesgo topográfico de paths MIR-absolutos (A69, S104)** — cara MODIS far→summit
+     **CERRADA S114** (irreducible a 1 km; detección fiel a Coppola verificada file:line;
+     todos los ejes agotados — A82, `docs/AUDIT_S114_PARITY_BY_SENSOR.md`); queda abierta solo
+     la cara POSICIÓN del ancla en nevados (~1-1.5 km N, A70, costo residual no de recall) ·
+     D2 N·σ Tabla 1 ya implementado (dual-ROI 5/10, S114) — único gap literal pendiente GAP #A
+     (§298-300 retiro Test1 K1, flag OFF) · VIIRS750 disperso glaciar (Tupun/PP, ctxpeak S102§2) ·
      NEW-8 gaps 2-4 (pool estadístico m,σ).
    - **Pendiente de decisión** (S105, Nicolás): gates intra-radio S84/S85 (veredicto
      anti-patrón A55 en AUDIT_S86 §C6; siguen ON; decidir con más datos al cerrar el
