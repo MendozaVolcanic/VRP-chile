@@ -429,7 +429,7 @@ function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
   // justa: "MODIS naranja sólida" (nuestro) vs "MIROVA MODIS naranja discontinua con
   // triángulos" (referencia mismo sensor). Paridad con index.html (S76 P1).
   const mirovaWindowed = mirovaForVolc.filter(r => {
-    const t = new Date(r.dt).getTime();
+    const t = parseUtcMs(r.dt);  // S115 #6: Fecha_Satelite_UTC sin 'Z' → parseUtcMs (no new Date crudo = hora local)
     return t >= cutoff && r.vrp > 0;
   });
   const mBuckets = { MODIS: [], VIIRS750: [], VIIRS375: [] };
@@ -494,7 +494,7 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
   const recs = baseRecs.filter(r => parseUtcMs(r.datetime_utc) >= cutoff);
   const detRecs = recs.filter(r => eqVrpDisplay(r, volcanoName) > 0);  // S92: excluir cirrus
   const mirovaWindowed = mirovaForVolc.filter(r => {
-    const t = new Date(r.dt).getTime();
+    const t = parseUtcMs(r.dt);  // S115 #6: Fecha_Satelite_UTC sin 'Z' → parseUtcMs (no new Date crudo = hora local)
     return t >= cutoff && r.vrp > 0;
   });
   const ourMaxVrp = detRecs.reduce((a, r) => Math.max(a, eqVrpDisplay(r, volcanoName)), 0);
