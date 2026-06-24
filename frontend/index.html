@@ -3176,9 +3176,19 @@ function buildOverviewMap() {
   if (!container) return;
 
   if (!overviewMap) {
-    overviewMap = L.map("overview-map", { zoomControl: true }).setView([-33.5, -70.5], 4);
+    // S115: limitar a UN solo mapa-mundi al hacer zoom out (antes Leaflet repetía
+    // el mundo 3× horizontalmente). noWrap en el tile corta la repetición; maxBounds
+    // + maxBoundsViscosity confinan la vista a un mundo; minZoom evita el mundo
+    // diminuto rodeado de vacío. worldCopyJump:false (default) no salta entre copias.
+    overviewMap = L.map("overview-map", {
+      zoomControl: true,
+      minZoom: 2,
+      worldCopyJump: false,
+      maxBounds: [[-85, -180], [85, 180]],
+      maxBoundsViscosity: 1.0,
+    }).setView([-33.5, -70.5], 4);
     L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
-      attribution: "Esri", maxZoom: 18,
+      attribution: "Esri", maxZoom: 18, noWrap: true,
     }).addTo(overviewMap);
     overviewHotspotGroup = L.layerGroup().addTo(overviewMap);
   }
