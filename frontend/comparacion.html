@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VRP Chile — Comparación vs MIROVA (preview S115)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root { --bg:#0a1929; --panel:#0e2236; --blue:#4fc3f7; --muted:#7a8fa6; --line:#1a3a5c; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:#cfe3f5; font-family:system-ui,Segoe UI,Roboto,sans-serif; font-size:14px; }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); }
+  h1 { margin:0; font-size:1.1rem; color:#fff; }
+  h1 small { color:var(--muted); font-weight:normal; font-size:0.72rem; }
+  .preview-badge { background:#5b3a00; color:#ffc107; border:1px solid #ffc107; border-radius:4px; padding:2px 8px; font-size:0.66rem; margin-left:8px; }
+  nav.tabs { display:flex; gap:4px; padding:10px 20px 0; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .tab-btn { background:var(--panel); color:var(--muted); border:1px solid var(--line); border-bottom:none;
+             padding:8px 14px; border-radius:6px 6px 0 0; cursor:pointer; font-size:0.82rem; }
+  .tab-btn.active { background:var(--bg); color:var(--blue); border-color:var(--blue); border-bottom:1px solid var(--bg); margin-bottom:-1px; font-weight:600; }
+  .pane { display:none; padding:18px 20px; }
+  .pane.active { display:block; }
+  .controls { display:flex; gap:10px; align-items:center; margin-bottom:12px; flex-wrap:wrap; }
+  select, .toggle-btn { background:var(--panel); color:#cfe3f5; border:1px solid var(--line); border-radius:5px; padding:6px 10px; font-size:0.82rem; cursor:pointer; }
+  .toggle-btn.active { border-color:var(--blue); color:var(--blue); }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px; }
+  .chart-wrap { height:420px; position:relative; }
+  #pcc-map { height:520px; border-radius:8px; border:1px solid var(--line); }
+  .stat { color:var(--muted); font-size:0.78rem; margin:8px 2px; line-height:1.5; }
+  .stat b { color:#cfe3f5; }
+  .explain { color:var(--muted); font-size:0.78rem; line-height:1.55; margin:6px 0 14px; max-width:980px; }
+  .explain b { color:#cfe3f5; }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; font-size:0.74rem; color:var(--muted); margin:8px 0; }
+  .legend span { display:inline-flex; align-items:center; gap:5px; }
+  .dot { width:11px; height:11px; border-radius:50%; display:inline-block; border:1px solid #0008; }
+  a.back { color:var(--muted); text-decoration:none; border:1px solid var(--line); padding:4px 10px; border-radius:4px; font-size:0.78rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>VRP Chile — Comparación vs MIROVA <span class="preview-badge">PREVIEW S115 · no es el dashboard live</span></h1>
+  <div style="margin-top:6px;"><small>Vistas de validación contra el CSV consolidado MIROVA NRT (latest.php). Distancias re-ancladas al GVP (apples-to-apples). Decidí cuáles promover al dashboard.</small>
+  &nbsp; <a class="back" href="index.html">← Dashboard</a></div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="dist">1 · Histograma de distancia</button>
+  <button class="tab-btn" data-tab="scatter">2 · Scatter de acuerdo 1:1</button>
+  <button class="tab-btn" data-tab="pcc">3 · Preview extensión PCC</button>
+</nav>
+
+<!-- TAB 1 — distance histogram -->
+<section class="pane active" id="pane-dist">
+  <div class="explain"><b>¿Detectamos en el mismo lugar que MIROVA?</b> Distribución de distancia al cráter
+  (GVP) de nuestras detecciones (cluster summit, VRP&gt;0, <b>re-ancladas al GVP</b>) vs la
+  <code>Distancia_km</code> que reporta MIROVA (ALERTA_TÉRMICA). Si las dos distribuciones se solapan,
+  estamos espacialmente alineados. Caso PCC: ambas deberían caer en ~7-8 km (el lacolito Cordón Caulle).</div>
+  <div class="controls">
+    <label>Volcán:</label>
+    <select id="dist-volc"></select>
+  </div>
+  <div class="card"><div class="chart-wrap"><canvas id="dist-canvas"></canvas></div></div>
+  <div class="stat" id="dist-stat"></div>
+</section>
+
+<!-- TAB 2 — agreement scatter -->
+<section class="pane" id="pane-scatter">
+  <div class="explain"><b>¿Estamos calibrados en magnitud?</b> VRP nuestro (<code>pc.vrp_mw</code>, máximo
+  diario) vs VRP de MIROVA (máximo diario), por día y sensor donde AMBOS detectan. La nube debe caer
+  sobre la recta <b>1:1</b>; por encima = sobre-estimamos, por debajo = sub-estimamos. Escala log-log.</div>
+  <div class="controls">
+    <label>Volcán:</label>
+    <select id="scatter-volc"></select>
+  </div>
+  <div class="legend">
+    <span><span class="dot" style="background:#ff8c00"></span>MODIS</span>
+    <span><span class="dot" style="background:#00bcd4"></span>VIIRS 750m</span>
+    <span><span class="dot" style="background:#e91e63"></span>VIIRS 375m</span>
+    <span>— recta 1:1 (calibración perfecta)</span>
+  </div>
+  <div class="card"><div class="chart-wrap"><canvas id="scatter-canvas"></canvas></div></div>
+  <div class="stat" id="scatter-stat"></div>
+</section>
+
+<!-- TAB 3 — PCC extension preview -->
+<section class="pane" id="pane-pcc">
+  <div class="explain"><b>Preview de display para PCC (#3).</b> Nuestro cluster ubica honestamente la
+  anomalía en el lacolito Cordón Caulle (~7.8 km NNW, paridad con MIROVA). Pero el
+  <code>inner_radius=20 km</code> pinta TODO de summit-rojo, mezclando el lacolito real (cat-b) con la
+  cola de ruido de dispersión VIIRS750. Acá podés comparar el render <b>actual</b> (todo rojo) contra un
+  <b>propuesto</b> que separa zonas: rojo = proximal Puyehue, naranja = lacolito Cordón Caulle (extensión
+  cat-b real), gris = cola dispersa (ruido que el centroide ya ignora). <i>Es un preview — la detección no
+  cambia.</i></div>
+  <div class="controls">
+    <button class="toggle-btn active" id="pcc-actual">Actual (todo summit-rojo)</button>
+    <button class="toggle-btn" id="pcc-prop">Propuesto (3 zonas)</button>
+  </div>
+  <div class="legend" id="pcc-legend"></div>
+  <div id="pcc-map"></div>
+  <div class="stat" id="pcc-stat"></div>
+</section>
+
+<script>
+// ===========================================================================
+// VRP Chile — página de comparación (PREVIEW S115). Standalone, NO toca el
+// dashboard live. Reutiliza convenciones de index.html/diario.html.
+// ===========================================================================
+const BASE_PATH = (() => {
+  const p = window.location.pathname;
+  if (p.includes('/frontend/')) return '/';
+  return '';
+})();
+
+// Tier A con GVP (lat/lon, = ancla MIROVA Distancia_km), vent (ancla detección
+// nuestra) y nombre CSV. Copiado de index.html VOLCANOES_ALL + diario TIER_A.
+const TIER_A = [
+  { name:"Lascar",            display:"Láscar",              csv:"Lascar",                lat:-23.369, lon:-67.732, inner:5,  vent_lat:-23.362930, vent_lon:-67.731416 },
+  { name:"Lastarria",         display:"Lastarria",           csv:"Lastarria",             lat:-25.168, lon:-68.507, inner:3,  vent_lat:-25.168,    vent_lon:-68.507 },
+  { name:"Tupungatito",       display:"Tupungatito",         csv:"Tupungatito",           lat:-33.400, lon:-69.800, inner:7,  vent_lat:-33.389044, vent_lon:-69.826374 },
+  { name:"PlanchonPeteroa",   display:"Planchón-Peteroa",    csv:"PlanchonPeteroa",       lat:-35.240, lon:-70.568, inner:3,  vent_lat:-35.240,    vent_lon:-70.568 },
+  { name:"NevadosDeChillan",  display:"Nevados de Chillán",  csv:"Nevados de Chillan",    lat:-36.863, lon:-71.377, inner:5,  vent_lat:-36.863,    vent_lon:-71.377 },
+  { name:"Copahue",           display:"Copahue",             csv:"Copahue",               lat:-37.856, lon:-71.183, inner:4,  vent_lat:-37.856,    vent_lon:-71.183 },
+  { name:"Llaima",            display:"Llaima",              csv:"Llaima",                lat:-38.692, lon:-71.729, inner:5,  vent_lat:-38.692,    vent_lon:-71.729 },
+  { name:"Villarrica",        display:"Villarrica",          csv:"Villarrica",            lat:-39.420, lon:-71.930, inner:5,  vent_lat:-39.420292, vent_lon:-71.939908 },
+  { name:"PuyehueCordonCaulle", display:"Puyehue-Cordón Caulle", csv:"Puyehue-Cordon Caulle", lat:-40.590, lon:-72.117, inner:20, vent_lat:-40.525499, vent_lon:-72.146137 },
+  { name:"Chaiten",           display:"Chaitén",             csv:"Chaiten",               lat:-42.833, lon:-72.646, inner:5,  vent_lat:-42.833,    vent_lon:-72.646 },
+  { name:"Isluga",            display:"Isluga",              csv:"Isluga",                lat:-19.150, lon:-68.830, inner:5,  vent_lat:-19.150,    vent_lon:-68.830 },
+];
+
+function parseUtcMs(s) {
+  if (s == null) return NaN;
+  let str = String(s).replace(" ", "T");
+  if (!/[zZ]$|[+-]\d\d:?\d\d$/.test(str)) str += "Z";
+  return new Date(str).getTime();
+}
+function sensorBucket(s) {
+  if (!s) return "?";
+  if (s.startsWith("MODIS")) return "MODIS";
+  if (s.endsWith("_750")) return "VIIRS750";
+  if (s.startsWith("VIIRS")) return "VIIRS375";
+  return "?";
+}
+function mirovaBucket(s) {
+  if (s === "MODIS") return "MODIS";
+  if (s === "VIIRS375") return "VIIRS375";
+  if (s === "VIIRS") return "VIIRS750";
+  return "?";
+}
+const SENSOR_COLOR = { MODIS:"#ff8c00", VIIRS750:"#00bcd4", VIIRS375:"#e91e63" };
+
+function havKm(lat1, lon1, lat2, lon2) {
+  const R = 6371, rad = Math.PI/180;
+  const p1 = lat1*rad, p2 = lat2*rad, dp = (lat2-lat1)*rad, dl = (lon2-lon1)*rad;
+  const a = Math.sin(dp/2)**2 + Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+  return 2*R*Math.asin(Math.sqrt(a));
+}
+function bearingDeg(lat1, lon1, lat2, lon2) {
+  const rad = Math.PI/180;
+  const dl = (lon2-lon1)*rad, p1 = lat1*rad, p2 = lat2*rad;
+  const y = Math.sin(dl)*Math.cos(p2);
+  const x = Math.cos(p1)*Math.sin(p2) - Math.sin(p1)*Math.cos(p2)*Math.cos(dl);
+  return (Math.atan2(y,x)*180/Math.PI + 360) % 360;
+}
+
+let _mirovaCache = null;
+async function loadMirovaCsv() {
+  if (_mirovaCache) return _mirovaCache;
+  try {
+    let r = await fetch(`${BASE_PATH}latest_consolidado.csv`);
+    if (!r.ok) r = await fetch(`${BASE_PATH}01_05_2026_registro_vrp_consolidado.csv`);
+    if (!r.ok) return [];
+    const lines = (await r.text()).split("\n");
+    const h = lines[0].split(",");
+    const idx = (n) => h.indexOf(n);
+    const out = [];
+    for (let i = 1; i < lines.length; i++) {
+      const c = lines[i].split(",");
+      if (c.length < 8) continue;
+      if (c[idx("Tipo_Registro")] !== "ALERTA_TERMICA") continue;
+      out.push({
+        dt: c[idx("Fecha_Satelite_UTC")],
+        volc: c[idx("Volcan")],
+        sensor: c[idx("Sensor")],
+        vrp: parseFloat(c[idx("VRP_MW")]) || 0,
+        dist: parseFloat(c[idx("Distancia_km")]),
+      });
+    }
+    _mirovaCache = out;
+    return out;
+  } catch (e) { return []; }
+}
+async function loadVolcanoData(name) {
+  try {
+    const r = await fetch(`${BASE_PATH}data/mirova_equivalent/${encodeURIComponent(name)}.json`);
+    if (!r.ok) return null;
+    return await r.json();
+  } catch (e) { return null; }
+}
+
+// ---- summit + vrp>0 records de un volcán, con dist GVP re-anclada ----
+function ourSummitDetections(data, volc) {
+  const out = [];
+  for (const r of (data?.records || [])) {
+    if (r.distance_class !== "summit") continue;
+    const pc = r.primary_cluster || {};
+    const vrp = pc.vrp_mw || 0;
+    if (vrp <= 0) continue;
+    const cl = pc.centroid_lat, co = pc.centroid_lon;
+    out.push({
+      dt: r.datetime_utc, sensor: sensorBucket(r.sensor), vrp,
+      cl, co,
+      distGVP: (cl != null && co != null) ? havKm(cl, co, volc.lat, volc.lon) : null,
+      distVent: (cl != null && co != null) ? havKm(cl, co, volc.vent_lat, volc.vent_lon) : null,
+      brg: (cl != null && co != null) ? bearingDeg(volc.lat, volc.lon, cl, co) : null,
+    });
+  }
+  return out;
+}
+
+const charts = {};
+function el(id) { return document.getElementById(id); }
+
+// ============================ TAB 1: HISTOGRAMA ============================
+const BINS = [0,2,4,6,8,10,12,14,16,18,20];
+function histo(values, max) {
+  const h = new Array(BINS.length).fill(0);
+  for (const v of values) {
+    if (v == null || isNaN(v)) continue;
+    let placed = false;
+    for (let i = 0; i < BINS.length-1; i++) { if (v >= BINS[i] && v < BINS[i+1]) { h[i]++; placed=true; break; } }
+    if (!placed && v >= BINS[BINS.length-1]) h[BINS.length-1]++;
+  }
+  const n = h.reduce((a,b)=>a+b,0) || 1;
+  return { counts: h, pct: h.map(x => 100*x/n), n };
+}
+function median(arr) {
+  const a = arr.filter(x => x != null && !isNaN(x)).sort((x,y)=>x-y);
+  if (!a.length) return null;
+  return a.length % 2 ? a[(a.length-1)/2] : (a[a.length/2-1]+a[a.length/2])/2;
+}
+async function renderDist(name) {
+  const volc = TIER_A.find(v => v.name === name);
+  const [data, mirova] = await Promise.all([loadVolcanoData(name), loadMirovaCsv()]);
+  const ours = ourSummitDetections(data, volc);
+  const ourDist = ours.map(d => d.distGVP).filter(d => d != null);
+  const mirDist = mirova.filter(r => r.volc === volc.csv && !isNaN(r.dist)).map(r => r.dist);
+  const ho = histo(ourDist), hm = histo(mirDist);
+  const labels = BINS.map((b,i) => i < BINS.length-1 ? `${b}-${BINS[i+1]}` : `${b}+`);
+  if (charts.dist) charts.dist.destroy();
+  charts.dist = new Chart(el("dist-canvas").getContext("2d"), {
+    type: "bar",
+    data: { labels, datasets: [
+      { label:`Nosotros (re-anclado GVP, n=${ho.n})`, data: ho.pct, backgroundColor:"#4fc3f7cc", borderColor:"#4fc3f7", borderWidth:1 },
+      { label:`MIROVA (Distancia_km, n=${hm.n})`, data: hm.pct, backgroundColor:"#ffc10788", borderColor:"#ffc107", borderWidth:1 },
+    ]},
+    options: { responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ color:"#cfe3f5" } },
+        tooltip:{ callbacks:{ label:(it)=>`${it.dataset.label.split(" (")[0]}: ${it.parsed.y.toFixed(1)}%` } } },
+      scales:{ x:{ title:{display:true,text:"Distancia al cráter GVP (km)",color:"#7a8fa6"}, ticks:{color:"#7a8fa6"}, grid:{color:"#1a3a5c55"} },
+               y:{ title:{display:true,text:"% de detecciones",color:"#7a8fa6"}, ticks:{color:"#7a8fa6"}, grid:{color:"#1a3a5c55"} } } }
+  });
+  el("dist-stat").innerHTML = `<b>${volc.display}</b> · mediana nuestra (GVP) <b>${median(ourDist)?.toFixed(2) ?? "—"} km</b> · `
+    + `mediana MIROVA <b>${median(mirDist)?.toFixed(2) ?? "—"} km</b>. `
+    + `Si las barras se solapan, estamos alineados espacialmente con MIROVA.`;
+}
+
+// ============================ TAB 2: SCATTER 1:1 ============================
+function dailyMaxBySensor(items, getDt, getSensor, getVrp) {
+  const m = new Map(); // key day|sensor -> max vrp
+  for (const it of items) {
+    const day = (getDt(it) || "").slice(0,10); const s = getSensor(it); const v = getVrp(it);
+    if (!day || s === "?" || !(v > 0)) continue;
+    const k = day + "|" + s;
+    if (!m.has(k) || v > m.get(k)) m.set(k, v);
+  }
+  return m;
+}
+async function renderScatter(name) {
+  const volc = TIER_A.find(v => v.name === name);
+  const [data, mirova] = await Promise.all([loadVolcanoData(name), loadMirovaCsv()]);
+  const ours = ourSummitDetections(data, volc);
+  const ourMap = dailyMaxBySensor(ours, d=>d.dt, d=>d.sensor, d=>d.vrp);
+  const mirRows = mirova.filter(r => r.volc === volc.csv);
+  const mirMap = dailyMaxBySensor(mirRows, r=>r.dt, r=>mirovaBucket(r.sensor), r=>r.vrp);
+  const bySensor = { MODIS:[], VIIRS750:[], VIIRS375:[] };
+  let lo = Infinity, hi = 0, nMatch = 0, sumLogRatio = 0;
+  for (const [k, ov] of ourMap.entries()) {
+    if (!mirMap.has(k)) continue;
+    const mv = mirMap.get(k); const sensor = k.split("|")[1];
+    if (!bySensor[sensor]) continue;
+    bySensor[sensor].push({ x: mv, y: ov });
+    lo = Math.min(lo, mv, ov); hi = Math.max(hi, mv, ov); nMatch++;
+    sumLogRatio += Math.log10(ov/mv);
+  }
+  if (!isFinite(lo) || lo <= 0) lo = 0.01;
+  const ds = Object.keys(bySensor).filter(s=>bySensor[s].length).map(s => ({
+    label:s, data:bySensor[s], backgroundColor:SENSOR_COLOR[s], pointRadius:4, showLine:false,
+  }));
+  // recta 1:1
+  ds.push({ label:"1:1", data:[{x:lo,y:lo},{x:hi||1,y:hi||1}], type:"line", borderColor:"#7a8fa6",
+            borderDash:[6,4], pointRadius:0, borderWidth:1.5, fill:false });
+  if (charts.scatter) charts.scatter.destroy();
+  charts.scatter = new Chart(el("scatter-canvas").getContext("2d"), {
+    type:"scatter",
+    data:{ datasets: ds },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ color:"#cfe3f5" } },
+        tooltip:{ callbacks:{ label:(it)=>`MIROVA ${it.parsed.x.toFixed(2)} → nuestro ${it.parsed.y.toFixed(2)} MW` } } },
+      scales:{ x:{ type:"logarithmic", title:{display:true,text:"VRP MIROVA (MW, máx diario)",color:"#7a8fa6"}, ticks:{color:"#7a8fa6"}, grid:{color:"#1a3a5c55"} },
+               y:{ type:"logarithmic", title:{display:true,text:"VRP nuestro (MW, máx diario)",color:"#7a8fa6"}, ticks:{color:"#7a8fa6"}, grid:{color:"#1a3a5c55"} } } }
+  });
+  const medRatio = nMatch ? Math.pow(10, sumLogRatio/nMatch) : null;
+  el("scatter-stat").innerHTML = `<b>${volc.display}</b> · <b>${nMatch}</b> días-sensor matcheados · `
+    + `ratio mediano geométrico nuestro/MIROVA = <b>${medRatio ? medRatio.toFixed(2)+"×" : "—"}</b> `
+    + `(1.0× = calibración perfecta). Puntos sobre la recta = sobre-estimamos; debajo = sub-estimamos.`;
+}
+
+// ============================ TAB 3: PCC EXTENSION PREVIEW ============================
+let pccMap = null, pccLayer = null, pccMode = "actual", pccDets = null;
+function classifyPcc(d) {
+  // Zonas propuestas (GVP-dist + vent-dist desde el lacolito):
+  //  proximal Puyehue: dist GVP < 4 km                          -> rojo (summit)
+  //  lacolito Cordón Caulle (cat-b real): vent-dist <= 5 km y GVP 4-11 km -> naranja (extensión)
+  //  dispersión (ruido): vent-dist > 8.5 km                     -> gris (far)
+  if (d.distVent != null && d.distVent > 8.5) return "disp";
+  if (d.distGVP != null && d.distGVP < 4) return "prox";
+  return "ext";
+}
+const PCC_COLORS = { prox:"#e53935", ext:"#ff9800", disp:"#9e9e9e", summit:"#e53935" };
+async function renderPcc() {
+  const volc = TIER_A.find(v => v.name === "PuyehueCordonCaulle");
+  if (!pccMap) {
+    pccMap = L.map("pcc-map", { zoomControl:true }).setView([volc.lat, volc.lon], 11);
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      { attribution:"Esri", maxZoom:18, noWrap:true }).addTo(pccMap);
+    pccLayer = L.layerGroup().addTo(pccMap);
+    // anclas + inner_radius
+    L.circle([volc.lat, volc.lon], { radius: volc.inner*1000, color:"#e57373", weight:1, fill:false, dashArray:"5 5" }).addTo(pccMap);
+    L.marker([volc.lat, volc.lon], { title:"GVP Puyehue (ancla MIROVA)" }).addTo(pccMap).bindTooltip("GVP Puyehue");
+    L.circleMarker([volc.vent_lat, volc.vent_lon], { radius:5, color:"#fff", fillColor:"#ff9800", fillOpacity:1, weight:1 }).addTo(pccMap).bindTooltip("Lacolito Cordón Caulle (ancla detección)");
+  }
+  if (!pccDets) {
+    const data = await loadVolcanoData("PuyehueCordonCaulle");
+    pccDets = ourSummitDetections(data, volc).filter(d => d.cl != null && d.co != null);
+  }
+  drawPcc();
+}
+function drawPcc() {
+  pccLayer.clearLayers();
+  const counts = { prox:0, ext:0, disp:0 };
+  for (const d of pccDets) {
+    const cls = classifyPcc(d); counts[cls]++;
+    const color = pccMode === "actual" ? PCC_COLORS.summit : PCC_COLORS[cls];
+    L.circleMarker([d.cl, d.co], { radius:3.5, color:"#0008", weight:0.5, fillColor:color, fillOpacity:0.78 })
+      .addTo(pccLayer)
+      .bindTooltip(`${d.sensor} · ${d.vrp.toFixed(2)} MW · GVP ${d.distGVP?.toFixed(1)}km / lacolito ${d.distVent?.toFixed(1)}km`);
+  }
+  const leg = pccMode === "actual"
+    ? `<span><span class="dot" style="background:#e53935"></span>summit (todo dentro de 20 km, n=${pccDets.length})</span>`
+    : `<span><span class="dot" style="background:#e53935"></span>proximal Puyehue (${counts.prox})</span>`
+      + `<span><span class="dot" style="background:#ff9800"></span>lacolito Cordón Caulle / extensión cat-b (${counts.ext})</span>`
+      + `<span><span class="dot" style="background:#9e9e9e"></span>cola dispersa / ruido VIIRS750 (${counts.disp})</span>`;
+  el("pcc-legend").innerHTML = leg;
+  el("pcc-stat").innerHTML = pccMode === "actual"
+    ? `Render <b>actual</b>: las ${pccDets.length} detecciones summit se pintan rojas sin distinción — el lacolito real y la cola de ruido se ven igual.`
+    : `Render <b>propuesto</b>: separa el lacolito real (naranja, ${counts.ext}) de la cola de ruido de dispersión (gris, ${counts.disp}). La detección NO cambia; solo el color.`;
+}
+
+// ============================ TABS + INIT ============================
+function setupTabs() {
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll(".pane").forEach(p=>p.classList.remove("active"));
+      btn.classList.add("active");
+      const t = btn.dataset.tab;
+      el("pane-"+t).classList.add("active");
+      if (t === "pcc") { renderPcc(); setTimeout(()=>pccMap && pccMap.invalidateSize(), 80); }
+    });
+  });
+}
+function populateSelectors() {
+  for (const sel of [el("dist-volc"), el("scatter-volc")]) {
+    for (const v of TIER_A) {
+      const o = document.createElement("option");
+      o.value = v.name; o.textContent = v.display;
+      sel.appendChild(o);
+    }
+  }
+  el("dist-volc").value = "PuyehueCordonCaulle";
+  el("scatter-volc").value = "Villarrica";
+  el("dist-volc").addEventListener("change", e => renderDist(e.target.value));
+  el("scatter-volc").addEventListener("change", e => renderScatter(e.target.value));
+}
+el("pcc-actual").addEventListener("click", () => { pccMode="actual"; el("pcc-actual").classList.add("active"); el("pcc-prop").classList.remove("active"); drawPcc(); });
+el("pcc-prop").addEventListener("click", () => { pccMode="prop"; el("pcc-prop").classList.add("active"); el("pcc-actual").classList.remove("active"); drawPcc(); });
+
+setupTabs();
+populateSelectors();
+renderDist("PuyehueCordonCaulle");
+renderScatter("Villarrica");
+</script>
+</body>
+</html>
