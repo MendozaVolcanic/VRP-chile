@@ -14,12 +14,20 @@ Razón "no cumple regla MIROVA literal":
   ad-hoc — Rechazado S27"; H_S27_5 "RECHAZADA"). Las 3 preguntas dan NO en la cara pipeline.
 - Toca `store.py` (`distance_class` + guard A46 S113) → A18 (reproc real obligatorio, el
   inner_radius afecta `cluster_hotspots`) + A45 (tag + OK Nicolás).
-- Por **A72**: la cola 8.5–20 km es **artefacto cirrus** (A23/D9) → la raíz se ataca en el
-  **algoritmo (D9)**, no escondiéndola con un radio de display.
+- Por **A72**: la cola >8.5 km es mayormente **artefacto de dispersión VIIRS750** (A19/A66, el
+  centroide vaga sobre glaciar/bosque) — NO cirrus MODIS (solo 3 de 219 son MODIS). El centroide
+  del cluster YA la ignora (no contamina posición ni magnitud) → el residuo es cosmético en el mapa.
 
-**Datos S115** (PCC summit+vrp>0, n=1229, mediana 1.41 km): 82.7% del lacolito real cae ≤8.5 km
-(0–5: 920; 5–8.5: 95); cola 8.5–20 km = 214 records (17.4%, cirrus/distante). Confirma el
-constraint "lacolito real ≤8.5 km".
+**Datos S115 (CORREGIDO post-verificación adversarial — ver `reference_s115_pcc_anchor_parity`)**:
+PCC summit+vrp>0 n=1254. **⚠️ El `centroid_dist_km` se mide desde el ancla LACOLITO**
+(`vent_lat/lon` PCC = −40.5255,−72.1461), NO desde el GVP Puyehue. Por eso la "mediana 1.41 km"
+NO significa que detectemos proximal — re-anclado al GVP (apples-to-apples con MIROVA `Distancia_km`)
+nuestra mediana es **7.78 km ≈ MIROVA 7.83 km**, y el centroide cae a 0.39 km del píxel-pico MIROVA
+en el TIF. **Nuestro cluster está ALINEADO con MIROVA en el lacolito Cordón Caulle (~7.8 km NNW de
+Puyehue); NO desalineado.** La cola >8.5 km (del ancla lacolito) = 219 records: ~73% artefacto
+dispersión VIIRS750, 21% cat-b plausible NW, 6% MIROVA-confirmada. 72/119 días de cola sin ALERTA
+MIROVA. Lección A3/A61: comparar distancias vs MIROVA EXIGE re-anclar al GVP (esto confundió la
+lectura preliminar).
 
 **Alternativa MISSION-compliant SI se quiere atacar el display** (frontend puro, MISSION
 pregunta 3): el mecanismo `geo_class="extension"` (naranja #ff9800, S88/S90) **hoy NO se aplica
