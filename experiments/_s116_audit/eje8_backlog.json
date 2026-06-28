@@ -1,0 +1,196 @@
+{
+  "eje": 8,
+  "scope": "Backlog / deuda tecnica / decisiones pendientes",
+  "fecha": "2026-06-27",
+  "sesion_actual": "S116",
+  "fuentes": [
+    "tasks/backlog_s115.md",
+    "tasks/backlog_s27.md",
+    "tasks/backlog_data_integrity_session.md",
+    "tasks/backlog_s32_schema_gap_anomaly_pixels.md",
+    "tasks/backlog_s93_pipeline_diffuse_field_gate.md",
+    "tasks/BLOQUE_ARRANQUE_S116.md",
+    "docs/META_RULES_S80.md",
+    "docs/MIROVA_DIVERGENCES.md (D2,D4,D9,NEW-8)",
+    "docs/AUDIT_S105.md (contradicciones cross-source)",
+    "pipeline/profiles/mirova_equivalent.yaml (flags verificados)"
+  ],
+  "items": [
+    {
+      "id": "INTRA-RADIO-GATES",
+      "titulo": "Gates intra-radio S84/S85 ON sin decision (path_d + second_pass)",
+      "origen_sesion": "S84/S85",
+      "edad_sesiones": 31,
+      "razon_diferido": "AUDIT_S86 (eje C6, A55) los marco anti-patron y redundantes con el gate 'far' del frontend (mirovaEqVrp). AUDIT_S105 los listo como CONTRADICCION #1 cross-source (yaml ON vs veredicto A55) con pregunta pendiente explicita 'revertir o re-justificar'. Verificado en S116: enable_path_d_intra_radio_gate:true (yaml:188) y enable_second_pass_intra_radio_gate:true (yaml:207) SIGUEN ON. Ninguna sesion S106-S115 decidio.",
+      "riesgo": "medio",
+      "bloquea": "Cierre de la contradiccion #1 de AUDIT_S105 (gatillo A51 ya disparado con >3 contradicciones); MISSION.md catalogo de anti-patrones",
+      "recomendacion": "Decision binaria en S116/S117: o (a) documentar la re-justificacion (que aportan que el frontend NO hace) con A/B que muestre delta de records, o (b) revertir a OFF con tag defensivo A45 + reproc. NO dejar en limbo otra auditoria. Tocar yaml mirova_equivalent => A45 (tag + OK Nicolas). Riesgo medio no alto: el frontend ya suprime, asi que operacionalmente inerte; el riesgo es de deriva silenciosa/anti-patron acumulado (ciclo S27 reabierto)."
+    },
+    {
+      "id": "FICHA-SDA-HEADERS",
+      "titulo": "Cabeceras FICHA SDA en codigo nucleo (CPLT N372)",
+      "origen_sesion": "S115",
+      "edad_sesiones": 1,
+      "razon_diferido": "Decision Nicolas S115: sesion dedicada de transparencia. process_modis.py, process_viirs.py, process_viirs_mod.py, store.py NO tienen cabecera FICHA (solo anchor.py + vrp_regimes.py). Solo comentarios pero toca pipeline => A45.",
+      "riesgo": "medio",
+      "bloquea": "Cumplimiento legal CPLT N372 (transparencia algoritmica SDA en produccion). La ficha publicable docs/FICHA_SDA_VRP_CHILE.md ya esta v1.0 al dia, asi que NO bloquea publicacion; es trazabilidad de codigo.",
+      "recomendacion": "Sesion corta dedicada: solo comentarios (sin logica), bajo riesgo tecnico, pero A45 obligatorio (tag pre-s<NN>-ficha-headers + suite verde + OK Nicolas). Es deuda LEGAL no tecnica => no envejece a fallo de pipeline pero si a incumplimiento normativo. Subir prioridad si hay auditoria/fiscalizacion CPLT pendiente."
+    },
+    {
+      "id": "DATA-INTEGRITY-SESSION",
+      "titulo": "Sesion dedicada data integrity (dedup PCC, store.upsert hardening, vrp_zero_reason, sigma_bg guard, M11)",
+      "origen_sesion": "S81",
+      "edad_sesiones": 35,
+      "razon_diferido": "Nicolas S81 explicito ('recuerda la sesion de data integrity'). 7 items: dedup PCC 15 filas, endurecer store.upsert_record con dedup key, vrp_mw=0 con n_pixels>0 (2117 records=16% sin flag de razon), n_hotspots_clustered>n_anomalous_pixels (228 records fisicamente imposible), sigma_bg=149K patologico, schema gaps diag_*, regla M11. ~5-7h.",
+      "riesgo": "medio",
+      "bloquea": "Calidad de data/mirova_equivalent/ y robustez del schema. NO expone bug al operador (interno), por eso se difirio. PERO: store.upsert sin dedup hardening es causa raiz no atacada de las race conditions A47 (corrupcion JSON). El sigma_bg=149K detectaria granules corrupted.",
+      "recomendacion": "Envejecio 35 sesiones. Items 1/2/5/7 (core, ~2h) ya deberian estar hechos: dedup PCC + store hardening + sigma guard + M11 son baratos y previenen corrupcion recurrente. Recomendar al menos el core en S116/S117 con A45. Items 3/4 (vrp_zero_reason, n_hotspots invariante) son investigacion mas profunda, diferibles. El riesgo subio: cada race A47 nueva re-corrompe data sin el hardening."
+    },
+    {
+      "id": "BACKFILL-VIIRS",
+      "titulo": "Backfill historico VIIRS375 + VIIRS750",
+      "origen_sesion": "S112",
+      "edad_sesiones": 4,
+      "razon_diferido": "De AUDIT_S112: el NRT llena forward; falta backfill de historia VIIRS para tener serie completa. No urgente porque la operacion live esta cubierta.",
+      "riesgo": "bajo",
+      "bloquea": "Completitud de serie historica para calibracion/paper. No bloquea operacional NRT.",
+      "recomendacion": "Mantener bajo. Backfill es reproc historico LOCAL (no GH Actions, timeout S15/A15). Cuando se quiera analisis de serie larga o paper. Sin urgencia."
+    },
+    {
+      "id": "PARTE-C-TEST1-LOWMAG-NDC",
+      "titulo": "Parte C Test1-lowmag NdC 22-mar (FN sub-pixel 0.49)",
+      "origen_sesion": "S111/S112",
+      "edad_sesiones": 4,
+      "razon_diferido": "Sub-pixel para VIIRS375 => el canal correcto es alta-res SWIR (Landsat OLI 30m / Sentinel-2 MSI 20m, metodo NHI). A77: instrumento equivocado por fisica de resolucion. Pertenece a OTRO repo (Landsat-v1 / NHI-v1), NO VRP Chile.",
+      "riesgo": "bajo",
+      "bloquea": "Nada en VRP Chile. Forzar el numero en VIIRS amplificaria A69 (artefacto topografico).",
+      "recomendacion": "CERRAR como fuera-de-scope-VRP-Chile en vez de dejar como backlog VRP. Es trabajo de Landsat-v1/NHI-v1. Mantener solo como nota cruzada (A77). No es deuda de este repo."
+    },
+    {
+      "id": "NEW-8-POOL-MSIGMA",
+      "titulo": "NEW-8 gaps 2-4: pool estadistico m,sigma (SP426.5 §267-273 unsuitable pixels)",
+      "origen_sesion": "S71/S72",
+      "edad_sesiones": 45,
+      "razon_diferido": "Filtros de pixels 'unsuitable' (edge + dNTI/dETI < -0.1) que MIROVA saca del pool de m,sigma de Tests 2/3. Hipotesis: inflan sigma artificialmente => threshold m+C2*sigma alto => entran pixels que MIROVA descarta (consistente con D9 cirrus). Plan F2.1 con profile aislado + A/B (R1+R2+R3) escrito S72 pero nunca ejecutado/aterrizado.",
+      "riesgo": "medio",
+      "bloquea": "Causa raiz mas probable del drift remanente D9 (cirrus Villarrica/Chaiten/PCC/PP) post-Fase 1. NEW-7 ya reclasificado/cerrado (flag OFF permanente, S100); NEW-8 sigue su curso.",
+      "recomendacion": "Item algoritmico real con respaldo bibliografico directo (cita verbatim §267-273). Envejecio 45 sesiones SIN ejecutarse el A/B planeado. Re-evaluar relevancia: S113 reporto que la cara MAGNITUD de D9 ya esta CURADA por nadir/focal (mediana 0.53x), y la cara FP-deteccion RESUELTA (0 fuga frontend). Si D9 esta efectivamente resuelto en ambas caras (S113), NEW-8 puede degradar a 'bajo' o cerrarse. DECISION pendiente: confirmar si NEW-8 todavia aporta o quedo obsoleto por las adopciones S102-S113."
+    },
+    {
+      "id": "DISPLAY-PCC-EXTENSION",
+      "titulo": "Display PCC geo_class=extension (cola lacolito naranja en vez de summit-rojo)",
+      "origen_sesion": "S115",
+      "edad_sesiones": 1,
+      "razon_diferido": "Nicolas eligio 'no tocar' en S115 (inner_radius PCC rechazado). Alternativa MISSION-compliant (frontend puro, pregunta 3): render naranja para la extension cat-b del lacolito Cordon Caulle. Preview no hecho aun para PCC; el mecanismo existe (S88/S90) pero hoy NO se aplica a PCC.",
+      "riesgo": "bajo",
+      "bloquea": "Nada. Solo cosmetico de display. PCC ya alineado con MIROVA (S115 reference_s115_pcc_anchor_parity).",
+      "recomendacion": "DECISION PENDIENTE DE NICOLAS: solo avanzar si Nicolas lo pide. Frontend puro (3 vistas), sin tocar deteccion. Bajo riesgo, bajo valor. No es prioridad declarada."
+    },
+    {
+      "id": "GOLDEN-RECORDS-S27",
+      "titulo": "7 golden records desfasados con metodologia MIROVA literal",
+      "origen_sesion": "S27",
+      "edad_sesiones": 89,
+      "razon_diferido": "Tests test_golden_records.py validan valores de metodologia pre-S27 (vent-path, cap=7K, exclude_zones) que ya no aplican (enable_vent_path:false, etc). Decidido NO fixear en S27: reescribir requiere verificar fisica de nuevos records (~30-60min). Workaround: no bloquean dashboard ni NRT.",
+      "riesgo": "medio",
+      "bloquea": "Cobertura de tests sobre casos fisicos especificos (vent-path, Regla D). La suite reporta verde-con-asterisco; estos 7 miden 'la cosa equivocada'.",
+      "recomendacion": "Envejecio 89 sesiones (el MAS viejo del backlog). Riesgo: o estos goldens fueron silenciosamente eliminados/skippeados (entonces se perdio cobertura sin registro), o todavia fallan y la suite '776 passed' los excluye. VERIFICAR estado real en tests/test_golden_records.py antes de S117: si siguen rotos => reescribir con valores literal (A50: no etiquetar pre-existing sin cross-check). Si fueron borrados => documentar la perdida de cobertura. Item zombie que merece cierre formal."
+    },
+    {
+      "id": "DEAD-CODE-BRANCHES",
+      "titulo": "~14 ramas if de flags refutados/muertos en process_*.py",
+      "origen_sesion": "S105",
+      "edad_sesiones": 11,
+      "razon_diferido": "AUDIT_S105 Eje2 detecto ~14 ramas de flags refutados/muertos (nti_covalidation V1, nti_integral V2 standalone, test1_pixel_filter vetado S99, lava_lake_eq16, spatial_core, daytime_modis A/B nunca concluido, nti_relative_path) + calculate_vrp triplicada (~3060 lineas, anidamiento 5-6) como vector estructural de bugs A37/A49.",
+      "riesgo": "medio",
+      "bloquea": "Mantenibilidad. La triplicacion calculate_vrp es el vector estructural de los bugs A37/A49/A46 (asimetria cross-sensor, comer return adyacente). Cada edit nuevo en pipeline navega 3 copias de ~1000 lineas.",
+      "recomendacion": "Deuda estructural real. Cleanup de flags muertos es bajo riesgo (borrar ramas inalcanzables) con A45. La de-triplicacion de calculate_vrp es refactor mayor (alto riesgo de regresion) => requiere TDD pesado + brainstorming. Recomendar: (1) borrar flags muertos confirmados primero (barato), (2) la de-triplicacion como proyecto dedicado solo si se acumula otro bug del patron A49."
+    },
+    {
+      "id": "BUG-FINAL-HOTSPOT-ERUPTION",
+      "titulo": "final_hotspot_* = pixel suelto scene-wide en rama eruption (3 sensores)",
+      "origen_sesion": "S101",
+      "edad_sesiones": 15,
+      "razon_diferido": "AUDIT_S105 Eje2 §5.1: bug sin arreglar en process_modis.py:1033, process_viirs.py:1428, process_viirs_mod.py:978. Mitigacion PARCIAL: cluster_rescue F47 en store.py. Mismo patron A46 (schema asimetrico hotspot vs cluster).",
+      "riesgo": "medio",
+      "bloquea": "Coherencia de clasificacion distance_class. Es la familia del bug A46 (cerrado UNIDIRECCIONAL en S113 via guard store.py, pero la causa en process_*.py sigue). El guard S113 mitiga la cara espuria pero la raiz persiste.",
+      "recomendacion": "Cruzar con Eje 2 (codigo) de esta auditoria. El guard A46 S113 es mitigacion downstream; la raiz (final_hotspot = pixel suelto) sigue en los 3 procesadores. A46 es bidireccional (A81) => evaluar si la cara no-cubierta por el guard puede reaparecer. Riesgo medio: cubierto parcialmente, no urgente pero es bug latente confirmado."
+    },
+    {
+      "id": "SCHEMA-GAP-ANOMALY-PIXELS",
+      "titulo": "anomaly_pixels vs primary_cluster.vrp_mw (diff mediano 60%)",
+      "origen_sesion": "S32",
+      "edad_sesiones": 84,
+      "razon_diferido": "anomaly_pixels se construye del hot_mask global (top-100); pc.vrp_mw se recalcula sobre test1_hot cuando source=test1. Arrays divergen. Recomendacion S32: Opcion C (no hacer nada, documentar drift) ahora; Opcion A solo si dashboard agrega exploracion pixel-level del cluster.",
+      "riesgo": "bajo",
+      "bloquea": "Solo reconstruccion pixel-level del cluster Test1 desde JSON (analisis, no operacional). La metrica que importa (pc.vrp_mw) es correcta.",
+      "recomendacion": "Mantener Opcion C (documentado). Bajo riesgo. Solo accionar si se agrega feature 'explorar pixels del cluster' al dashboard. No envejecio a riesgo (es detalle de schema, no afecta magnitud reportada)."
+    },
+    {
+      "id": "DIFFUSE-FIELD-GATE-PIPELINE",
+      "titulo": "Gate de coherencia campo difuso en PIPELINE (no solo display)",
+      "origen_sesion": "S93",
+      "edad_sesiones": 23,
+      "razon_diferido": "Decision Nicolas S93: hacer display ahora (mergeado), dejar el fix de pipeline documentado para sesion dedicada SI se decide avanzar. El display ya resuelve el problema operacional (atenua+etiqueta artefactos A23/D9 cirrus). El pipeline los sigue generando en data cruda.",
+      "riesgo": "bajo",
+      "bloquea": "Nada operacional (display ya oculta el numero enganoso). Es 'data cruda mas limpia' para provenance/paper.",
+      "recomendacion": "Mantener bajo. Riesgo de NO hacerlo = nulo operacional. PERO nota A72 (S104): si el dato es ARTEFACTO (no cat-b real), la regla vinculante prefiere fix de algoritmo sobre display. Este caso PCC es cat-d artefacto => candidato a migrar a fix de pipeline cuando se reabra el frente. Por ahora display es aceptable. Cruzar con A72 al revisar."
+    },
+    {
+      "id": "DASHBOARD-BUGS-LOW-S29",
+      "titulo": "Bugs LOW frontend S29 (bugs 9-18)",
+      "origen_sesion": "S29",
+      "edad_sesiones": 87,
+      "razon_diferido": "Auditoria visual S29: 7 criticos fixeados (commit 12384af), 10 bugs LOW diferidos (exclude_zones invisibles, schema VRP_MW vs vrp_mw, limite render pixels PCC 86k markers, VOLCANOES_ALL hardcoded, CSV export incompleto, etc).",
+      "riesgo": "bajo",
+      "bloquea": "Pulido de frontend. Algunos pueden estar ya resueltos por refactors posteriores (3 vistas S92).",
+      "recomendacion": "Envejecio 87 sesiones. Probable que varios ya esten obsoletos/resueltos por las reescrituras frontend S88-S96 (3 vistas, F5' toggle, datetime fixes). VERIFICAR cuales sobreviven antes de tratarlos como backlog activo. Item candidato a depuracion (cerrar los obsoletos). Cruzar con Eje 5 (frontend)."
+    }
+  ],
+  "items_envejecidos_a_riesgo": [
+    {
+      "id": "INTRA-RADIO-GATES",
+      "edad_sesiones": 31,
+      "por_que_envejecio": "Anti-patron A55 identificado en AUDIT_S86, escalado a contradiccion #1 en AUDIT_S105 con pregunta pendiente explicita, y AUN ON en S116 sin decision. Es exactamente el ciclo S27 (acumulacion de gates redundantes que anulan diferenciacion summit/scene) que MISSION.md documenta como anti-patron. Dos auditorias seguidas (S86, S105) lo marcaron sin resolucion."
+    },
+    {
+      "id": "DATA-INTEGRITY-SESSION",
+      "edad_sesiones": 35,
+      "por_que_envejecio": "store.upsert sin dedup hardening (item 2) es causa raiz NO atacada de las race conditions A47 que corrompen JSON. Cada nueva race re-corrompe data. El sigma_bg=149K guard (item 5) detectaria granules corrupted. 35 sesiones sin tocar el core barato (~2h)."
+    },
+    {
+      "id": "GOLDEN-RECORDS-S27",
+      "edad_sesiones": 89,
+      "por_que_envejecio": "El item MAS viejo del backlog. Si los 7 goldens fueron skippeados/borrados para que la suite reporte verde, se perdio cobertura de casos fisicos (vent-path, Regla D) sin registro formal. Item zombie de 89 sesiones que nunca recibio el cierre prometido en S28."
+    },
+    {
+      "id": "NEW-8-POOL-MSIGMA",
+      "edad_sesiones": 45,
+      "por_que_envejecio": "Plan A/B F2.1 escrito en S72 con respaldo bibliografico directo, nunca ejecutado en 45 sesiones. Riesgo INVERSO: puede haber quedado OBSOLETO por las adopciones nadir/focal S102-S113 que ya curaron D9 (su justificacion original). Necesita decision de relevancia, no solo ejecucion."
+    }
+  ],
+  "decisiones_pendientes_nicolas": [
+    {
+      "id": "INTRA-RADIO-GATES",
+      "decision": "Revertir los gates intra-radio a OFF (veredicto A55/S86) O re-justificar y documentar que aportan sobre el frontend. Cierra contradiccion #1 de AUDIT_S105."
+    },
+    {
+      "id": "FICHA-SDA-HEADERS",
+      "decision": "Agendar sesion dedicada de transparencia para cabeceras FICHA en process_*.py + store.py (deuda legal CPLT N372). Ya diferido por Nicolas a 'sesion dedicada' en S115."
+    },
+    {
+      "id": "DISPLAY-PCC-EXTENSION",
+      "decision": "Solo avanzar si Nicolas lo pide (eligio 'no tocar' en S115). Render geo_class=extension naranja para cola lacolito PCC."
+    },
+    {
+      "id": "DATA-INTEGRITY-SESSION",
+      "decision": "Agendar sesion data integrity (diferida explicitamente por Nicolas en S81). Recomendacion: al menos el core (dedup PCC + store hardening + sigma guard + M11, ~2h) ya."
+    },
+    {
+      "id": "NEW-8-POOL-MSIGMA",
+      "decision": "Decidir relevancia: ejecutar el A/B F2.1 planeado, O cerrar como obsoleto si D9 ya esta resuelto por adopciones S102-S113."
+    }
+  ],
+  "veredicto": "con_deuda",
+  "veredicto_justificacion": "No hay frente urgente que rompa operacional (NRT sano, deteccion fiel S114, display cubre artefactos). PERO hay deuda estructural y de proceso que envejecio: 4 items >30 sesiones sin revision (gates intra-radio 31, data-integrity 35, NEW-8 45, golden records 89). El mas accionable y riesgoso es INTRA-RADIO-GATES: anti-patron flagged por DOS auditorias seguidas (S86, S105) sin decision, manteniendo viva la contradiccion #1 que disparo el gatillo A51. Recomendacion macro: S116 debe forzar decision binaria sobre los gates intra-radio (revertir o documentar) y al menos el core de data-integrity; el resto (backfill, parte C, display PCC, schema gaps) puede seguir diferido sin riesgo. Items zombie (golden records, dashboard bugs LOW S29) merecen cierre formal o verificacion de obsolescencia, no perpetuarse."
+}
