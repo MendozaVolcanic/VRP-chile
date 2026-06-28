@@ -1,0 +1,68 @@
+name: S118 reproc A/B gates intra-radio C2 (A45)
+
+# A/B estratificado de los gates intra-radio C2 (enable_path_d_intra_radio_gate +
+# enable_second_pass_intra_radio_gate). 4 brazos (baseline/pathd_off/2pass_off/both_off)
+# x 11 Tier A x ventanas dirigidas (≤14d, anti-timeout A15/A64) = ~180 jobs.
+# El matrix se genera de experiments/_s118_c2ab/windows.json (fuente reproducible,
+# scripts/build_c2ab_windows.py). Cada job sube su artifact (sin race A47/A25).
+# Diseño: docs/superpowers/specs/2026-06-28-c2-gates-intra-radio-ab-design.md.
+# A43: "on" quoted (Norway Problem).
+"on":
+  workflow_dispatch:
+
+jobs:
+  gen-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: build
+        name: Construir matrix desde windows.json
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          inc = json.load(open("experiments/_s118_c2ab/windows.json"))["include"]
+          print("matrix=" + json.dumps({"include": inc}, separators=(",", ":")))
+          print(f"n_jobs={len(inc)}", flush=True)
+          assert len(inc) <= 256, f"matrix {len(inc)} > 256 (cap GH Actions)"
+          PY
+
+  reproc:
+    needs: gen-matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix: ${{ fromJson(needs.gen-matrix.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reprocess ${{ matrix.profile }} / ${{ matrix.volcano }} / ${{ matrix.start }} (${{ matrix.kind }})
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 290
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ matrix.profile }} \
+            --volcano ${{ matrix.volcano }} \
+            --start ${{ matrix.start }} \
+            --end ${{ matrix.end }} \
+            --overwrite
+      - name: Upload JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: s118c2ab-${{ matrix.profile }}-${{ matrix.volcano }}-${{ matrix.start }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 7
