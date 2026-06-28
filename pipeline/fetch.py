@@ -373,13 +373,46 @@ def product_version_from_granule(filename: str) -> str:
     return "nrt" if "_NRT" in filename else "standard"
 
 
+# ── S116 — circuit-breaker por host de BÚSQUEDA CMR (espejo de A64 para search) ──
+# POR QUÉ: el breaker S102/S109 protege el host de DESCARGA (ConnectTimeout). La
+# búsqueda de metadata va a `cmr.earthdata.nasa.gov` vía earthaccess.search_data, y
+# ese host puede dar ReadTimeout: acepta la conexión TCP pero responde lento. Incidente
+# Copahue (run 28244166333, 26-jun-2026): ReadTimeout 60s (el override de timeout del
+# top del file) repetido en los 8 sensores → >50min → timeout del job. A diferencia de
+# la descarga, ReadTimeout NO se cura con un probe TCP (el connect SÍ completa; el
+# problema es la lentitud de respuesta), así que NO replicamos el reprobe S109: al 1er
+# Timeout/ConnectionError de CMR marcamos la búsqueda degradada PARA ESTA CORRIDA y las
+# búsquedas siguientes devuelven [] al instante. Degradación segura: sin granules ese
+# día → la corrida nrt-retry (~30min después) reintenta con el breaker reseteado (estado
+# por-proceso). Kill-switch: env VRP_CMR_BREAKER=0 → comportamiento previo (sin breaker).
+_CMR_SEARCH_DOWN: bool = False
+ENABLE_CMR_SEARCH_BREAKER: bool = os.environ.get("VRP_CMR_BREAKER", "1") != "0"
+try:
+    # requests.Timeout = base de ReadTimeout y ConnectTimeout; ConnectionError aparte.
+    from requests.exceptions import Timeout as _Timeout, \
+        ConnectionError as _ReqConnErr
+    _CMR_SEARCH_ERRORS = (_Timeout, _ReqConnErr)
+except Exception:  # pragma: no cover — requests siempre presente
+    _CMR_SEARCH_ERRORS = _CONNECT_ERRORS or (Exception,)
+
+
 def search_granules(product_key: str, lat: float, lon: float,
                     radius_km: float, date: datetime) -> list:
     """
     Search for granules covering a given location on a given date.
 
     Returns a list of earthaccess granule objects.
+
+    S116 circuit-breaker (incidente Copahue): si CMR (`cmr.earthdata.nasa.gov`)
+    ya dio Timeout/ConnectionError en esta corrida, devuelve [] al instante (no
+    quema otro ReadTimeout de 60s por cada sensor restante). Ver bloque arriba.
     """
+    global _CMR_SEARCH_DOWN
+    # Breaker CMR-search: si ya tripeó en esta corrida, fast-fail (degrada a []).
+    if ENABLE_CMR_SEARCH_BREAKER and _CMR_SEARCH_DOWN:
+        _diag(f"SEARCH_SKIP CMR degradada esta corrida [{product_key}]")
+        return []
+
     p = PRODUCTS[product_key]
     # Bounding box from radius (rough approximation: 1 degree lat ~ 111 km)
     delta = radius_km / 111.0
@@ -402,13 +435,23 @@ def search_granules(product_key: str, lat: float, lon: float,
 
     for attempt in attempts:
         for ver in attempt["versions"]:
-            results = earthaccess.search_data(
-                short_name=attempt["short_name"],
-                version=ver,
-                bounding_box=bbox,
-                temporal=(date_str, date_str),
-                count=20,
-            )
+            try:
+                results = earthaccess.search_data(
+                    short_name=attempt["short_name"],
+                    version=ver,
+                    bounding_box=bbox,
+                    temporal=(date_str, date_str),
+                    count=20,
+                )
+            except _CMR_SEARCH_ERRORS as e:
+                # S116: CMR caído/lento → tripear el breaker para la corrida y
+                # degradar a [] (no reintentar versiones ni quemar 60s × sensores).
+                if ENABLE_CMR_SEARCH_BREAKER:
+                    _CMR_SEARCH_DOWN = True
+                    _diag(f"SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov → breaker ON "
+                          f"esta corrida [{product_key}] err={type(e).__name__}: {str(e)[:90]}")
+                    return []
+                raise  # breaker OFF → comportamiento previo (propaga)
             if results:
                 return results
     return []
