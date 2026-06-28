@@ -29,8 +29,15 @@ git fetch origin --prune && git pull --ff-only
 ## Backlog S117 (sin frente urgente — el sistema está sano y consolidado)
 1. **C2 — A/B gates intra-radio**: SOLO cuando se reabra el frente Test1/fondo-local (tocan la misma
    zona, orden S105). Diseño: A/B gate-ON vs gate-OFF, brazos aislados (A47), comparar JSON crudos no
-   dashboard (A18), estratificado focal vs nevado, cruzar lo REMOVIDO vs MIROVA (A10/A61). Desenlace
-   probable: gate per-volcán (ON nevados / OFF focales) o discriminante no-geométrico. **A45 + MISSION.**
+   dashboard (A18), **estratificado focal vs nevado** (clave), cruzar lo REMOVIDO vs MIROVA (A10/A61),
+   medir FN sobre cat-b real no solo FP. **NO buscar un discriminante físico universal** — refutado S116
+   (A83, `docs/AUDIT_S116_FOLLOWUP.md`): no existe escalar físico que separe cat-b real de artefacto sin
+   geometría; un cut "físico" que funcione es régimen-estratificado = gate per-volcán disfrazado.
+   Desenlace probable: gate per-volcán (ON nevados / OFF focales). **A45 + MISSION.**
+1b. **Llaima / `ctx_cluster` re-ancla (A46-adyacente)** (NEW S116, Hilo 3): el ancla honesta cura el
+   sesgo topográfico N cuando `final_hotspot_source=test1_roi` pero NO cuando hereda `ctx_cluster`
+   (VIIRS750 solo 49% al cráter). El `ctx_cluster` debería re-anclarse al cráter cuando hay señal Test1
+   al cráter, igual que `test1_roi`. Toca pipeline → **A/B + A45**. Bajo (afecta posición display, no detección).
 2. **Cabeceras FICHA — pasada exhaustiva opcional** a ~11 módulos de detección secundarios (`test1_*`,
    `path_d_*`, `second_pass_*`, `exclusion_zones`, `single_pixel_mode`). Menor prioridad (el gap crítico
    = 6 núcleo ya hecho). A45.
