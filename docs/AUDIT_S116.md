@@ -98,11 +98,17 @@ en §5.
   `eje6_transparencia.json`. **La ficha publicable v1.0 SÍ está al día** — esto no bloquea publicación,
   es trazabilidad de código. Aplicar = solo comentarios, pero toca pipeline → **A45, sesión dedicada**.
 
-- **[C2 — Eje 1/8] Gates intra-radio S84/S85 ON, redundantes, sin decisión hace 31 sesiones.**
-  Es el ciclo S27 reabierto (A55). Decisión binaria pendiente de Nicolás: revertir (limpiar el
-  anti-patrón) o re-justificar y documentar formalmente. Antes de tocar: clasificar la categoría física
-  (marco E-S86/A54) de los records que filtran, para confirmar que no se destruye categoría-b. Toca
-  pipeline → **A45**.
+- **[C2 — Eje 1/8] Gates intra-radio S84/S85 ON. INVESTIGADO S116** → ver
+  [`AUDIT_S116_C2_GATES.md`](AUDIT_S116_C2_GATES.md) (workflow 4 ángulos read-only). El framing
+  "redundante → revertir" se **refina**: (1) **parcialmente** redundante con el frontend (mismo umbral
+  espacial, pero el gate cambia el DATO persistido y el frontend solo la VISTA); (2) MISSION: ambos
+  anti-patrón; (3) **impacto BIMODAL** — de 4560 records summit-intra preservados, solo 26.7%
+  MIROVA-confirmados, pero en focales/desérticos es **cat-b REAL** (Láscar 49%, Lastarria 46% → revertir
+  destruiría recall) y en nevados ~puro artefacto A55/A69 (Llaima 0.4%, Villarrica 2%). **NO revertir
+  global.** Decisión informada: **diferir** (respeta la orden S105 — atados al frente Test1/fondo-local)
+  + **A/B reproc estratificado** cuando ese frente reabra (desenlace probable: gate per-volcán o
+  discriminante no-geométrico). El read-only mide lo que el gate PRESERVA, no lo que REMUEVE (exige
+  reproc). Toca pipeline → **A45**.
 
 - **[C3 — Eje 2] Golden records S27 + R2 pixel-level skipped (cobertura perdida).**
   16 goldens skipped como "obsoletos post-S31", nunca regenerados (89 sesiones). El protocolo de
@@ -167,9 +173,10 @@ Cada item con pipeline lleva A45 (tag + OK Nicolás) en su propia sesión.
    estado real de NEW-8 (C4: premisa D9 curada → ¿obsoleto?). *(docs).*
 
 **Prioridad 2 — Decisión pendiente de Nicolás (C2):**
-4. **Gates intra-radio S84/S85.** Forzar la decisión binaria que dos auditorías dejaron abierta:
-   clasificar categoría física de los records filtrados → revertir (A55) o re-justificar/documentar.
-   *(pipeline → A45 + MISSION).*
+4. **Gates intra-radio S84/S85.** ✅ **INVESTIGADO S116** ([`AUDIT_S116_C2_GATES.md`](AUDIT_S116_C2_GATES.md)):
+   NO revertir (impacto bimodal — destruiría cat-b real en focales) + respetar orden S105. La decisión
+   pasó de "standing sin decisión" a "diferir con razón + A/B reproc estratificado cuando reabra el
+   frente Test1/fondo-local". *(pipeline → A45 + MISSION, en ese frente).*
 
 **Prioridad 3 — Robustez operacional + housekeeping (sin urgencia):**
 5. Blindaje CMR-search (espejo A64) en `fetch.py`. *(pipeline → A45).*
