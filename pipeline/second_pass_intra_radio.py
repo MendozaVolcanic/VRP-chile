@@ -1,3 +1,17 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · second_pass_intra_radio.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Evitar que el segundo pase (recaptura de vecinos) rescate ruido distribuido lejos
+#                 del cono en cirrus/glaciar parcialmente calido (NdC=1247 recapturas, PP=776).
+# Lógica        : Aplica el gate intra-radio SOLO a los pixeles NUEVOS del second pass; los del primer
+#                 pase NO se tocan (ya pasaron sus propios filtros). Mismo principio que path_d_intra_radio.
+# Modelo/método : Regla determinista (gate geometrico por inner_radius). Funcion pura, sin I/O.
+# Datos entrada : Mascara newly_active del second pass + distancia al vent. SIN datos personales.
+# Variables     : inner_radius_km (KMZ MIROVA), flag enable_second_pass_intra_radio_gate (default OFF).
+# Limitaciones  : Drift vs Coppola 2016a §347-356 (el paper no exige restriccion espacial al second
+#                 pass); justificacion empirica identica a F-S81-A (1332 ALERTA Tier A dentro del inner).
+# Refs/datos    : docs/R3_RESIDUAL_BY_PATH.md; KMZ MIROVA. Entrenamiento: No aplica (sin ML).
+#                 Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """S85 Fase B' — Gate intra-radio sobre pixels NUEVOS del second_pass_recapture.
 
 Motivación: audit B0 (docs/R3_RESIDUAL_BY_PATH.md) mostró que 87.7% de los

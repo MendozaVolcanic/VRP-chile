@@ -1,3 +1,17 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · path_d_cap.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Acotar la magnitud (VRP) cuando el path D (dNTI contextual) dispara sobre cirrus
+#                 alto frio, donde la suma scene-wide se infla 80-510 MW sin actividad real (D9/A23).
+# Lógica        : Si el predicado de cirrus del procesador esta activo, capa el vrp_mw scene-wide al
+#                 mismo umbral ya usado en el primary_cluster (evita la incoherencia cluster vs scene).
+# Modelo/método : Regla determinista (cap por umbral). Funcion pura, sin I/O. NO es caja negra (5.5).
+# Datos entrada : vrp_mw scene-wide pre-cap + predicado cirrus (radiancia/BT derivada). SIN datos personales.
+# Variables     : path_d_cap_active (predicado cirrus del procesador), cap_mw (PATH_D_ONLY_CAP_MW).
+# Limitaciones  : Capa magnitud, no detecion: el registro sigue existiendo. Es mitigacion del FP de
+#                 cirrus (D9 ABIERTO), no su eliminacion en deteccion.
+# Refs/datos    : docs/F50_MODIS_07_25_AUDIT_S77.md §5; D9/A23 (MIROVA_DIVERGENCES.md). No aplica ML.
+#                 Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """F50/S77 — Helper compartida para el cap D9 sobre vrp_mw scene-wide.
 
 Bug F50 (PR #185): el cap `PATH_D_ONLY_CAP_MW` se aplicaba SOLO al

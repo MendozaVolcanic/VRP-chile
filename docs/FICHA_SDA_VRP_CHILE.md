@@ -4,7 +4,7 @@
 > generado por el equipo; los campos legales/institucionales marcados `<completar>` los
 > debe validar SERNAGEOMIN antes de cualquier publicación. Plantilla: `GUIA_MAESTRA_TRANSPARENCIA_ALGORITMICA.md`.
 
-**Identificador interno:** VRP-CL  ·  **Versión:** v1.1 — 2026-06-27  ·  **Estado:** producción (NRT)
+**Identificador interno:** VRP-CL  ·  **Versión:** v1.2 — 2026-06-28  ·  **Estado:** producción (NRT)
 
 ---
 
@@ -45,6 +45,7 @@ información mensualmente (primeros 10 días hábiles).
 
 | Versión | Fecha | Cambios sustantivos | Traz. interna |
 |---|---|---|---|
+| v1.2 | 2026-06-28 | Trazabilidad de código (pasada secundaria): se agregaron cabeceras FICHA SDA Nivel-1 a los **8 módulos de detección/clasificación secundarios** que participan en la decisión (`test1_integrated.py`, `test1_contextual_filter.py`, `test1_spatial_core.py`, `path_d_cap.py`, `path_d_intra_radio.py`, `second_pass_intra_radio.py`, `exclusion_zones.py`, `single_pixel_mode.py`). **Sin cambios de lógica** (comment-only; suite 797 passed, 0 fail). Criterio de alcance (Res.372 §4.8): se documentan los módulos que **clasifican/deciden/optimizan** la detección o la magnitud; se excluyen los de **serialización/agregación** (`anomaly_pixels.py` serializa píxeles ya calculados; `clustering.py` cuenta regiones contiguas estilo MIROVA) y los **no productivos** (`vrptir.py` diagnóstico `ENABLE_VRPTIR_AVENI=False`; `detect_tirvolch.py` sin referencias en producción). Cierra el backlog S117 #2. | S117 |
 | v1.1 | 2026-06-27 | Trazabilidad de código: se agregaron las cabeceras FICHA SDA Nivel-1 a los archivos núcleo que participan en la decisión (`process_modis.py`, `process_viirs.py`, `process_viirs_mod.py`, `store.py`, `anchor.py`, `detection_context.py`) — cierra la deuda de cabeceras detectada en AUDIT_S116 (C1; el inventario previo daba `anchor.py` por hecho, era falso). Sin cambios de lógica. Se re-confirmó (S114) que la detección MODIS es fiel a Coppola 2016a (dual-ROI 5σ/10σ, Tests 2∧3, second-run, ETI cuadrático) y que no queda gap literal accionable (GAP #A resuelto S115 como mislabel). | S116 (AUDIT_S116) |
 | v1.0 | 2026-06-22 | Primera versión estampada (reemplaza el borrador `<vX.Y>` de origen). Documenta la cuantificación foco-vs-difuso (la magnitud suma sólo el foco contextualmente anómalo, no el campo difuso topográfico), la recuperación de focos sub-píxel débiles en régimen de muy baja energía (anillo de fondo intermedio condicionado), la verificación de coherencia espacial de la etiqueta "cumbre", y los tres límites físicos caracterizados (sesgo topográfico en nevados, sobre-detección difusa irreducible a 1 km en MODIS, artefacto solar diurno). | S109–S114 |
 | `<vX.Y>` | (origen) | Borrador técnico inicial de la ficha. | S110 (#428) |

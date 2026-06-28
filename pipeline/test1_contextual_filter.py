@@ -1,3 +1,17 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · test1_contextual_filter.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Restringir los pixeles del Test 1 a los CONTEXTUALMENTE anomalos (que superan a
+#                 sus 8 vecinos), para que la magnitud sume solo el foco y no el halo nival difuso.
+# Lógica        : Intersecta la mascara del Test 1 con la mascara contextual dNTI (Tests 2/3). La roca
+#                 tibia rodeada de roca tibia NO es contextualmente anomala → se descarta del VRP.
+# Modelo/método : Regla determinista (Coppola 2016a SP426.5, criterio contextual). Funcion pura, sin I/O.
+# Datos entrada : Mascara Test 1 + mascara dNTI contextual (radiancia derivada). SIN datos personales.
+# Variables     : keep_peak_rc (conserva el pixel pico anti-FN aunque no sea contextual).
+# Limitaciones  : Un crater EMBEBIDO en roca tibia puede no ser contextualmente anomalo → FN
+#                 (trade-off medido en A/B, no oculto; la forma pura existe para revelarlo).
+# Refs/datos    : Coppola 2016a SP426.5; docs/S99_AUDIT_SYNTHESIS.md. Entrenamiento: No aplica.
+#                 Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """S99 Candidato C — filtro contextual del path Test 1 (la vía más fiel a MIROVA).
 
 El Test 1 integrado marca todo píxel sobre la mediana del anillo regional (1-3 km),

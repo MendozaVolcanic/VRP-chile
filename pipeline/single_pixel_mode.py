@@ -1,3 +1,17 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · single_pixel_mode.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Alinear la magnitud reportada con MIROVA NRT en regimen sub-MW, donde MIROVA reporta
+#                 single-pixel y nuestra suma de cluster inflaba el VRP (Tupungatito 30×, Chaiten 2.5×).
+# Lógica        : Si un cluster cae en regimen sub-MW (vrp_mw < threshold Y n_pixels ≤ max_pixels),
+#                 reporta vrp_mw = max(per_pixel_vrp) (pixel mas caliente) en vez de la suma del cluster.
+# Modelo/método : Regla determinista (seleccion de magnitud por umbral). Funcion pura, sin I/O.
+# Datos entrada : VRP por pixel del cluster (radiancia derivada). SIN datos personales.
+# Variables     : threshold (vrp_mw sub-MW), max_pixels, flag de activacion (mirova_equivalent.yaml).
+# Limitaciones  : Solo corrige magnitud (no deteccion ni posicion); mantiene n_pixels y marca
+#                 single_pixel_mode=True para auditoria. No aplica a regimen alto-MW (Villarrica F52-A).
+# Refs/datos    : mirova_equivalent.yaml:281-283; audit PRs #191/#192. Entrenamiento: No aplica.
+#                 Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """F52-B (S77, A45) — Single-pixel mode para régimen sub-MW.
 
 Causa raíz F52-B (drift T1.5 S72, documentado en
