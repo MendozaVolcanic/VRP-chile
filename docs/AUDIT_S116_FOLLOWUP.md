@@ -85,6 +85,42 @@ método que sale de esta ronda.
 ## Acciones backlog S117 (todas no-urgentes)
 1. **C2**: A/B estratificado focal/nevado cuando reabra el frente Test1/fondo-local (A45). NO buscar más un escalar físico universal (anti-A8).
 2. **NEW-8**: cerrado como baja prioridad (dato cuantitativo anotado en MIROVA_DIVERGENCES). 
-3. **Llaima/ctx_cluster**: candidato A46-adyacente (re-anclar ctx_cluster al cráter con señal Test1) — A/B + A45.
+3. **Llaima/ctx_cluster**: ~~candidato A46-adyacente~~ → **CERRADO S117 (ver addendum abajo, A84): no existe fix seguro.**
 4. **Regla**: refinar A80 en CLAUDE.md — `nti_max` plano NO discrimina cat-b real de artefacto (piso compartido); el eje espacial es el único separador (refuerza A82).
+
+---
+
+## Addendum S117 (2026-06-28) — Hilo 3 / acción 3 CERRADA: NO existe fix seguro para el re-ancla ctx_cluster
+
+Nicolás eligió investigar #1b a fondo ("podemos probar todo"). Antes de implementar (gate de
+brainstorming + A45), se ejecutó un **probe read-only** y se cruzó con la data de S106. **Convergen en
+que no hay fix seguro** → #1b cerrado (regla **A84**). No se tocó pipeline.
+
+**Dimensionado del problema.** El sesgo es solo de POSICIÓN: los records `ctx_cluster` de Llaima V750
+(57/122) reportan la posición ~1.4 km al N del cráter pero **ya están clasificados `summit`** (dentro
+del inner). No afecta detección, magnitud ni summit/far — es cosmético (el punto en el mapa cae 1.4 km
+al N).
+
+**El riesgo (A82/A83).** El `ctx_cluster_anchor` es el `primary_cluster` (todos los paths del hot_mask),
+por eso arrastra el sesgo topográfico. Un override global "si hay Test1 al summit → preferir cráter"
+también re-anclaría offsets within-inner **reales** — **Lastarria** (campo fumarólico Lazufre) es el
+caso textbook: snap-a-cráter destruye señal cat-b real.
+
+**Evidencia convergente (dos vías independientes):**
+1. **Probe read-only S117** (`scratchpad/probe_ctx_cluster_s117.py`, sobre data persistida): los
+   `ctx_cluster` de Llaima (artefacto N) y Lastarria (Lazufre real) son **indistinguibles** —
+   Llaima medNpx=1 / medVRP=0.043 / 83% single-pixel; Lastarria medNpx=1 / medVRP=0.051 / 93%
+   single-pixel. No hay eje físico (n_pixels, VRP) que los separe (A83).
+2. **Reproc real S106** (`docs/superpowers/specs/2026-06-11-ancla-espacial-honesta-design.md` §8): el
+   A/B vent (A) vs nti_peak (B) ya se corrió, 5 vols × 90 d. **Brazo B (nti_peak) descartado
+   formalmente**: en nevados de señal débil el campo NTI es plano → su máximo cae en ruido/lago →
+   offN EMPEORA (Villarrica 884 vs 748 base; **Llaima 2263 m**). El offset NW real de Lastarria se
+   **conserva vía `ctx_cluster`** (300/453 records).
+
+**Conclusión.** Las dos únicas anclas alternativas están agotadas: snap-a-vent rompe Lastarria (cat-b
+real); nti_peak es ruido en NTI plano (S106). El `ctx_cluster` es lo que preserva el cat-b real. → es
+el **instance-en-posición de A82**: a 1 km, en régimen débil, foco real ≡ ruido topográfico. Cerrado
+como resultado negativo con datos. Lección A50: la respuesta (el A/B de S106) ya estaba en el repo —
+casi se re-corre el mismo experimento. El único "fix" restante sería un hack per-volcán (solo Llaima),
+descartado por A83 (gate per-volcán disfrazado, menos clon-literal) para una mejora cosmética.
 </content>

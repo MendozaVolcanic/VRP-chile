@@ -899,6 +899,25 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   cualquier gate de este tipo (ej. intra-radio C2) debe ser **estratificado focal/nevado**, midiendo FN
   sobre cat-b real, no solo FP. (4) `nti_max` plano NO discrimina (A80 refinada: piso compartido).
 
+- **A84. La POSICIÓN within-inner del `ctx_cluster` es irreducible igual que el far→summit (A82); NO
+  re-anclar — instance-en-posición de A82/A83** (S117, cierre del backlog #1b con evidencia convergente).
+  El sesgo topográfico N del `ctx_cluster` en nevados de señal débil (Llaima A69) NO se puede separar del
+  offset within-inner **REAL** (Lastarria, campo fumarólico Lazufre, que el `ctx_cluster` justamente
+  conserva) por ningún eje físico: probe read-only S117 (`scratchpad/probe_ctx_cluster_s117.py`) mostró
+  que los `ctx_cluster` de Llaima (artefacto) y Lastarria (real) son **indistinguibles** en n_pixels
+  (mediana 1, ~83-93% single-pixel) y VRP (~0.04-0.05 MW) — A83. Las dos únicas anclas alternativas YA
+  están agotadas: (a) snap-a-vent (`test1_roi`) **destruye el cat-b real** (Lastarria); (b) el `nti_peak`
+  es **RUIDO en NTI plano de noches débiles** — S106 ya corrió el A/B vent-vs-nti_peak (brazo B) con
+  reproc real y lo **descartó formalmente** (Villarrica offN 884>748 base, **Llaima 2263 m** PEOR; el pico
+  de un campo NTI plano cae aleatorio/lago; `docs/superpowers/specs/2026-06-11-ancla-espacial-honesta-design.md`
+  §8). El `ctx_cluster` (modo vent) CONSERVA el Lazufre real (S106: 300/453 records). **How to apply**:
+  (1) NO reabrir el re-ancla `ctx_cluster` (anti-A8) — es cosmético (los records ya están bien
+  clasificados *summit*; el sesgo es solo de posición dentro del inner). (2) Antes de cualquier
+  reproc de ancla/posición, revisar el A/B vent-vs-nti_peak de S106 — ya está hecho (A50: la respuesta
+  estaba en el repo; casi re-corrí el mismo experimento). (3) El `ctx_cluster` arrastra el sesgo porque
+  es el `primary_cluster` (todos los paths del hot_mask), no solo Tests 2/3 — pero quitarlo o snapearlo
+  rompe Lastarria.
+
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
