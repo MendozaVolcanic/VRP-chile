@@ -73,6 +73,16 @@ Pero la confirmación se **parte por firma física del volcán**:
 el gate **PRESERVA** (intra-radio sobreviviente), NO lo que **REMUEVE** (extra-radio, enmascarado
 antes del conteo → invisible en el JSON). Cuantificar la remoción exige un reproc gate-ON vs gate-OFF.
 
+> **Seguimiento S116 (`docs/AUDIT_S116_FOLLOWUP.md` Hilo 1 — precursor read-only del A/B):** se buscó
+> un **discriminante FÍSICO per-record** que reemplace el gate geométrico (la "vía MISSION-preferida").
+> **Resultado negativo:** NO existe escalar físico universal. El mejor candidato (`test1_k_observed`,
+> energía MIR integrada del Test1) da AUC 0.859 pero su cut es régimen-dependiente (focal ~4-5 K /
+> nevado ~2,8-3,9 K) y cualquier cut global que rechace ~70 % del artefacto nevado destruye 14-16 % del
+> cat-b real. La hipótesis A80 (`nti_max` en el piso) quedó **refutada** (AUC 0.251, inverso — el cat-b
+> real está MÁS frío, el piso es compartido). → El A/B futuro **debe ser estratificado focal/nevado**;
+> NO seguir buscando un escalar físico universal (frente agotado, anti-A8). El eje espacial es la única
+> dimensión que separa las clases (refuerza A82).
+
 ---
 
 ## Recomendación: **(d) NO revertir ahora — A/B reproc estratificado cuando se reabra el frente Test1/fondo-local**

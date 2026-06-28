@@ -1,0 +1,497 @@
+{
+  "population": {
+    "definition": "recapture>0 & distance_class==summit & pc.centroid_dist_km<=inner_radius (lo que el gate preserva)",
+    "n_records": 4560,
+    "n_tp_mirova_alerta": 1690,
+    "n_ntp": 2870,
+    "tp_rate_pct": 37.1,
+    "tp_label": "ALERTA_TERMICA (vol,noche,sensor-bucket) +/-1 dia, A11 RUTINA/FP no cuentan",
+    "csv": "cons_fresh.csv"
+  },
+  "per_volcano": {
+    "Chaiten": {
+      "regime": "nevado",
+      "n": 374,
+      "n_tp": 127,
+      "tp_rate_pct": 34.0
+    },
+    "Copahue": {
+      "regime": "nevado",
+      "n": 141,
+      "n_tp": 4,
+      "tp_rate_pct": 2.8
+    },
+    "Isluga": {
+      "regime": "focal",
+      "n": 496,
+      "n_tp": 235,
+      "tp_rate_pct": 47.4
+    },
+    "Lascar": {
+      "regime": "focal",
+      "n": 548,
+      "n_tp": 309,
+      "tp_rate_pct": 56.4
+    },
+    "Lastarria": {
+      "regime": "focal",
+      "n": 343,
+      "n_tp": 228,
+      "tp_rate_pct": 66.5
+    },
+    "Llaima": {
+      "regime": "nevado",
+      "n": 224,
+      "n_tp": 1,
+      "tp_rate_pct": 0.4
+    },
+    "NevadosDeChillan": {
+      "regime": "nevado",
+      "n": 204,
+      "n_tp": 21,
+      "tp_rate_pct": 10.3
+    },
+    "PlanchonPeteroa": {
+      "regime": "focal",
+      "n": 350,
+      "n_tp": 150,
+      "tp_rate_pct": 42.9
+    },
+    "PuyehueCordonCaulle": {
+      "regime": "focal",
+      "n": 1143,
+      "n_tp": 441,
+      "tp_rate_pct": 38.6
+    },
+    "Tupungatito": {
+      "regime": "nevado",
+      "n": 490,
+      "n_tp": 156,
+      "tp_rate_pct": 31.8
+    },
+    "Villarrica": {
+      "regime": "nevado",
+      "n": 247,
+      "n_tp": 18,
+      "tp_rate_pct": 7.3
+    }
+  },
+  "global": {
+    "label": "ALL 11 Tier A",
+    "n_total": 4560,
+    "n_tp": 1690,
+    "n_ntp": 2870,
+    "features": {
+      "nti_max": {
+        "auc": 0.251,
+        "n_tp_valid": 1676,
+        "n_ntp_valid": 2468,
+        "median_tp": -0.9413,
+        "median_ntp": -0.9188,
+        "best_cut": {
+          "cut": -0.876936,
+          "direction": "high",
+          "catb_retention": 0.066,
+          "artifact_rejection": 0.991,
+          "youden_j": 0.057
+        }
+      },
+      "pc_vrp_mw": {
+        "auc": 0.56,
+        "n_tp_valid": 1690,
+        "n_ntp_valid": 2870,
+        "median_tp": 0.075,
+        "median_ntp": 0.055,
+        "best_cut": {
+          "cut": 0.001,
+          "direction": "high",
+          "catb_retention": 0.953,
+          "artifact_rejection": 0.354,
+          "youden_j": 0.308
+        }
+      },
+      "dT": {
+        "auc": 0.597,
+        "n_tp_valid": 1690,
+        "n_ntp_valid": 2870,
+        "median_tp": 12.555,
+        "median_ntp": 10.695,
+        "best_cut": {
+          "cut": 11.28000000000003,
+          "direction": "high",
+          "catb_retention": 0.592,
+          "artifact_rejection": 0.543,
+          "youden_j": 0.135
+        }
+      },
+      "n_dnti_ctx_path": {
+        "auc": 0.538,
+        "n_tp_valid": 1690,
+        "n_ntp_valid": 2870,
+        "median_tp": 3.0,
+        "median_ntp": 2.0,
+        "best_cut": {
+          "cut": 1.0,
+          "direction": "high",
+          "catb_retention": 0.82,
+          "artifact_rejection": 0.283,
+          "youden_j": 0.103
+        }
+      },
+      "nti_std": {
+        "auc": 0.246,
+        "n_tp_valid": 1690,
+        "n_ntp_valid": 2870,
+        "median_tp": 0.0047,
+        "median_ntp": 0.0065,
+        "best_cut": {
+          "cut": 0.0017,
+          "direction": "high",
+          "catb_retention": 0.999,
+          "artifact_rejection": 0.002,
+          "youden_j": 0.001
+        }
+      },
+      "sigma_bg_k": {
+        "auc": 0.56,
+        "n_tp_valid": 1690,
+        "n_ntp_valid": 2870,
+        "median_tp": 3.284,
+        "median_ntp": 3.598,
+        "best_cut": {
+          "cut": 4.693,
+          "direction": "low",
+          "catb_retention": 0.892,
+          "artifact_rejection": 0.226,
+          "youden_j": 0.118
+        }
+      },
+      "test1_k_observed": {
+        "auc": 0.859,
+        "n_tp_valid": 1690,
+        "n_ntp_valid": 2870,
+        "median_tp": 5.44,
+        "median_ntp": 2.89,
+        "best_cut": {
+          "cut": 3.99,
+          "direction": "high",
+          "catb_retention": 0.841,
+          "artifact_rejection": 0.744,
+          "youden_j": 0.585
+        }
+      }
+    }
+  },
+  "by_regime": {
+    "focal": {
+      "label": "focal/desertico",
+      "n_total": 2880,
+      "n_tp": 1363,
+      "n_ntp": 1517,
+      "features": {
+        "nti_max": {
+          "auc": 0.21,
+          "n_tp_valid": 1352,
+          "n_ntp_valid": 1238,
+          "median_tp": -0.9412,
+          "median_ntp": -0.916,
+          "best_cut": {
+            "cut": -0.878188,
+            "direction": "high",
+            "catb_retention": 0.081,
+            "artifact_rejection": 0.988,
+            "youden_j": 0.069
+          }
+        },
+        "pc_vrp_mw": {
+          "auc": 0.459,
+          "n_tp_valid": 1363,
+          "n_ntp_valid": 1517,
+          "median_tp": 0.079,
+          "median_ntp": 0.151,
+          "best_cut": {
+            "cut": 0.001,
+            "direction": "high",
+            "catb_retention": 0.972,
+            "artifact_rejection": 0.276,
+            "youden_j": 0.248
+          }
+        },
+        "dT": {
+          "auc": 0.613,
+          "n_tp_valid": 1363,
+          "n_ntp_valid": 1517,
+          "median_tp": 12.57,
+          "median_ntp": 10.62,
+          "best_cut": {
+            "cut": 10.629999999999995,
+            "direction": "high",
+            "catb_retention": 0.662,
+            "artifact_rejection": 0.501,
+            "youden_j": 0.163
+          }
+        },
+        "n_dnti_ctx_path": {
+          "auc": 0.484,
+          "n_tp_valid": 1363,
+          "n_ntp_valid": 1517,
+          "median_tp": 3.0,
+          "median_ntp": 5.0,
+          "best_cut": {
+            "cut": 1.0,
+            "direction": "high",
+            "catb_retention": 0.829,
+            "artifact_rejection": 0.227,
+            "youden_j": 0.056
+          }
+        },
+        "nti_std": {
+          "auc": 0.223,
+          "n_tp_valid": 1363,
+          "n_ntp_valid": 1517,
+          "median_tp": 0.0045,
+          "median_ntp": 0.0067,
+          "best_cut": {
+            "cut": 0.0015,
+            "direction": "high",
+            "catb_retention": 1.0,
+            "artifact_rejection": 0.001,
+            "youden_j": 0.001
+          }
+        },
+        "sigma_bg_k": {
+          "auc": 0.563,
+          "n_tp_valid": 1363,
+          "n_ntp_valid": 1517,
+          "median_tp": 3.055,
+          "median_ntp": 3.493,
+          "best_cut": {
+            "cut": 5.103,
+            "direction": "low",
+            "catb_retention": 0.945,
+            "artifact_rejection": 0.179,
+            "youden_j": 0.124
+          }
+        },
+        "test1_k_observed": {
+          "auc": 0.896,
+          "n_tp_valid": 1363,
+          "n_ntp_valid": 1517,
+          "median_tp": 5.67,
+          "median_ntp": 2.74,
+          "best_cut": {
+            "cut": 4.02,
+            "direction": "high",
+            "catb_retention": 0.861,
+            "artifact_rejection": 0.79,
+            "youden_j": 0.651
+          }
+        }
+      }
+    },
+    "nevado": {
+      "label": "cumbre nevada",
+      "n_total": 1680,
+      "n_tp": 327,
+      "n_ntp": 1353,
+      "features": {
+        "nti_max": {
+          "auc": 0.266,
+          "n_tp_valid": 324,
+          "n_ntp_valid": 1230,
+          "median_tp": -0.9414,
+          "median_ntp": -0.9259,
+          "best_cut": {
+            "cut": -0.95493,
+            "direction": "high",
+            "catb_retention": 0.991,
+            "artifact_rejection": 0.031,
+            "youden_j": 0.022
+          }
+        },
+        "pc_vrp_mw": {
+          "auc": 0.63,
+          "n_tp_valid": 327,
+          "n_ntp_valid": 1353,
+          "median_tp": 0.065,
+          "median_ntp": 0.026,
+          "best_cut": {
+            "cut": 0.005,
+            "direction": "high",
+            "catb_retention": 0.872,
+            "artifact_rejection": 0.447,
+            "youden_j": 0.319
+          }
+        },
+        "dT": {
+          "auc": 0.54,
+          "n_tp_valid": 327,
+          "n_ntp_valid": 1353,
+          "median_tp": 12.19,
+          "median_ntp": 10.78,
+          "best_cut": {
+            "cut": 15.579999999999984,
+            "direction": "high",
+            "catb_retention": 0.336,
+            "artifact_rejection": 0.814,
+            "youden_j": 0.151
+          }
+        },
+        "n_dnti_ctx_path": {
+          "auc": 0.549,
+          "n_tp_valid": 327,
+          "n_ntp_valid": 1353,
+          "median_tp": 2.0,
+          "median_ntp": 1.0,
+          "best_cut": {
+            "cut": 1.0,
+            "direction": "high",
+            "catb_retention": 0.78,
+            "artifact_rejection": 0.346,
+            "youden_j": 0.126
+          }
+        },
+        "nti_std": {
+          "auc": 0.304,
+          "n_tp_valid": 327,
+          "n_ntp_valid": 1353,
+          "median_tp": 0.0051,
+          "median_ntp": 0.0063,
+          "best_cut": {
+            "cut": 0.0031,
+            "direction": "high",
+            "catb_retention": 0.969,
+            "artifact_rejection": 0.052,
+            "youden_j": 0.021
+          }
+        },
+        "sigma_bg_k": {
+          "auc": 0.519,
+          "n_tp_valid": 327,
+          "n_ntp_valid": 1353,
+          "median_tp": 3.816,
+          "median_ntp": 3.734,
+          "best_cut": {
+            "cut": 4.421,
+            "direction": "low",
+            "catb_retention": 0.924,
+            "artifact_rejection": 0.302,
+            "youden_j": 0.226
+          }
+        },
+        "test1_k_observed": {
+          "auc": 0.762,
+          "n_tp_valid": 327,
+          "n_ntp_valid": 1353,
+          "median_tp": 4.76,
+          "median_ntp": 3.07,
+          "best_cut": {
+            "cut": 3.81,
+            "direction": "high",
+            "catb_retention": 0.81,
+            "artifact_rejection": 0.657,
+            "youden_j": 0.467
+          }
+        }
+      }
+    }
+  },
+  "combos_2feature": {
+    "nti_max_AND_dT": {
+      "cut_a": -0.9507,
+      "cut_b": 15.79,
+      "catb_retention": 0.282,
+      "artifact_rejection": 0.861,
+      "youden_j": 0.143
+    },
+    "nti_max_AND_pc_vrp_mw": {
+      "cut_a": -0.9507,
+      "cut_b": 0.02,
+      "catb_retention": 0.76,
+      "artifact_rejection": 0.48,
+      "youden_j": 0.24
+    },
+    "dT_AND_pc_vrp_mw": {
+      "cut_a": 6.2,
+      "cut_b": 0.027,
+      "catb_retention": 0.824,
+      "artifact_rejection": 0.464,
+      "youden_j": 0.288
+    }
+  },
+  "cross_regime_separation": {
+    "best_global_feature": "test1_k_observed",
+    "best_global_auc": 0.859,
+    "applied_per_regime": {
+      "global_cut": {
+        "cut": 3.99,
+        "direction": "high",
+        "catb_retention": 0.841,
+        "artifact_rejection": 0.744,
+        "youden_j": 0.585
+      },
+      "focal": {
+        "n": 2880,
+        "n_tp": 1363,
+        "n_ntp": 1517,
+        "catb_retention": 0.864,
+        "artifact_rejection": 0.784
+      },
+      "nevado": {
+        "n": 1680,
+        "n_tp": 327,
+        "n_ntp": 1353,
+        "catb_retention": 0.749,
+        "artifact_rejection": 0.698
+      }
+    },
+    "nti_max_per_regime": {
+      "global_cut": {
+        "cut": -0.876936,
+        "direction": "high",
+        "catb_retention": 0.066,
+        "artifact_rejection": 0.991,
+        "youden_j": 0.057
+      },
+      "focal": {
+        "n": 2590,
+        "n_tp": 1352,
+        "n_ntp": 1238,
+        "catb_retention": 0.079,
+        "artifact_rejection": 0.989
+      },
+      "nevado": {
+        "n": 1554,
+        "n_tp": 324,
+        "n_ntp": 1230,
+        "catb_retention": 0.009,
+        "artifact_rejection": 0.993
+      }
+    }
+  },
+  "a62_refutation": {
+    "nti_max_A80_hypothesis": "REFUTED. AUC 0.251 (inverse): confirmed cat-b sits LOWER (med -0.941) than artifact (-0.919). nti_max does NOT discriminate; the floor ~-0.9 is shared by both classes (altitude/cold-bg contamination, A68/A80 caveat confirmed).",
+    "best_discriminator": "test1_k_observed (integrated Test1 MIR excess, K; Coppola 2015 Eq.1). Global AUC 0.859, NOT tautological with triggered_test1 (overlap: triggered=False up to 11.19K, triggered=True from 3.0K).",
+    "clean_cut_test": {
+      "global_cut_K": 3.99,
+      "focal_catb_lost_pct": 13.6,
+      "nevado_artifact_rejected_pct": 69.8,
+      "global_confirmed_real_lost_pct": 15.9,
+      "verdict": "NOT a clean >80%/>80% cut. Rejects only ~70% nevado artifact while sacrificing ~14-16% confirmed cat-b real (faint sub-pixel MIROVA quantifies = A54/A82 the exact value VRP Chile must preserve)."
+    },
+    "generalization": {
+      "per_vol_best_cut_range_K": [
+        2.76,
+        5.02
+      ],
+      "spread_K": 2.26,
+      "verdict": "Does NOT generalize cross-volcano. Optimal cut is regime/volcano-dependent (focal centers higher 4-5K, nevado lower 2.8-3.9K). A single global physical threshold cannot separate both regimes cleanly."
+    },
+    "within_nevado_failure": "Within the nevado regime test1_k AUC drops to 0.762 and the rare real signals (Llaima n=1, Copahue n=4, Villarrica n=18) overlap with artifact: there is no faint-signal floor that distinguishes real lava-lake/dome cat-b from topographic artifact at the same energy."
+  },
+  "conclusion": {
+    "clean_physical_cut_exists": false,
+    "summary": "No single non-geometric PHYSICAL discriminant separates cat-b real from nevado artifact at >80%/>80%. The best candidate (test1_k_observed, AUC 0.859) is regime-dependent (per-vol cut 2.76-5.02K) and any global cut that rejects >70% nevado artifact also destroys 14-16% of confirmed cat-b real (faint sub-pixel = A54/A82 the protected value). nti_max (A80) is refuted (AUC 0.251). The fundamental physics (A82): faint real foci in snow and the diffuse topographic artifact are spectrally/energetically the SAME object per-record; only the SPATIAL/temporal-context dimension separates them.",
+    "recommendation": "Confirms the C2 conclusion: the clean separator is NOT a per-record physical scalar. Either the geometric gate (distance) or a per-volcano/per-regime approach remains the only viable path. A physical discriminant could only work stratified by regime (focal cut ~4-5K vs nevado), which is operationally a per-volcano gate dressed as physics."
+  }
+}
