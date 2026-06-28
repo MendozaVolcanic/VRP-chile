@@ -6,6 +6,7 @@
 <title>VRP Chile — Beyond MIROVA (experimental)</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 <style>
   :root { --bg:#0a1929; --panel:#0e2236; --blue:#4fc3f7; --muted:#7a8fa6; --line:#1a3a5c;
           --prox:#e53935; --ext:#ff9800; --disp:#9e9e9e; }
@@ -38,6 +39,13 @@
   .note b { color:#cfe3f5; }
   .pill { display:inline-block; background:#13314d; border:1px solid var(--line); border-radius:4px; padding:1px 6px; font-size:0.72rem; color:var(--blue); }
   @media(max-width:820px){ .layout{ grid-template-columns:1fr; } #map{ height:420px; } }
+  nav.tabs { display:flex; gap:4px; margin:0 0 16px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .tab-btn { background:var(--panel); color:var(--muted); border:1px solid var(--line); border-bottom:none;
+             padding:8px 14px; border-radius:6px 6px 0 0; cursor:pointer; font-size:0.82rem; }
+  .tab-btn.active { background:var(--bg); color:var(--blue); border-color:var(--blue); border-bottom:1px solid var(--bg); margin-bottom:-1px; font-weight:600; }
+  .pane { display:none; } .pane.active { display:block; }
+  .chart-wrap { height:300px; position:relative; }
+  .soon { color:var(--muted); font-size:0.84rem; border:1px dashed var(--line); border-radius:8px; padding:24px; text-align:center; }
 </style>
 </head>
 <body>
@@ -51,6 +59,13 @@
 </header>
 
 <main>
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="ext">2a · Extensión cat-b</button>
+    <button class="tab-btn" data-tab="fid">1 · Fidelidad vs MIROVA</button>
+    <button class="tab-btn" data-tab="eq16">2b · Eq.16 (próximo)</button>
+  </nav>
+
+  <section class="pane active" id="pane-ext">
   <div class="explain">
     <b>Panel 2a · separá la señal real de la cola de ruido.</b> El dashboard operacional muestra solo el cráter
     (summit) y oculta lo de afuera. Acá ves <b>todas</b> las detecciones, incluidas las que MIROVA no publica.
@@ -98,6 +113,36 @@
       </div>
     </div>
   </div>
+  </section>
+
+  <section class="pane" id="pane-fid">
+    <div class="explain">
+      <b>Panel 1 · ¿seguimos la curva de MIROVA?</b> Nuestra serie (<code>pc.vrp_mw</code> máximo diario, summit) y la de
+      MIROVA (CSV consolidado NRT, máximo diario) superpuestas, mismo volcán y ventana, escala log MW. Si las dos líneas
+      van juntas, somos fieles en magnitud y tiempo. El <b>ratio mediano</b> resume el sesgo (1.0× = perfecto).
+      <span class="pill">se nutre del A/B de robo de cluster en curso</span>
+    </div>
+    <div class="controls">
+      <div><label style="font-size:0.78rem;color:var(--muted)">Volcán</label><br><select id="fid-volc"></select></div>
+      <div><label style="font-size:0.78rem;color:var(--muted)">Ventana</label><br>
+        <select id="fid-win"><option value="90">90 días</option><option value="180" selected>180 días</option><option value="365">1 año</option></select></div>
+    </div>
+    <div class="legend" style="display:flex;gap:14px;font-size:0.76rem;color:var(--muted);margin:0 0 8px">
+      <span><span class="dot" style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#4fc3f7"></span> VRP Chile</span>
+      <span><span class="dot" style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#ffb74d"></span> MIROVA</span>
+    </div>
+    <div class="card"><div class="chart-wrap"><canvas id="fid-canvas"></canvas></div></div>
+    <div class="note" id="fid-stat" style="margin-top:10px"></div>
+  </section>
+
+  <section class="pane" id="pane-eq16">
+    <div class="explain">
+      <b>Panel 2b · magnitud recuperada (Eq.16 Coppola 2024).</b> Física que MIROVA NRT no aplica → recupera la magnitud
+      real de un lava lake sub-píxel que el cálculo crudo subestima. Implementada flag-OFF en el pipeline.
+    </div>
+    <div class="soon">Pendiente: requiere generar la data del perfil experimental con <code>enable_test1_lava_lake_eq16</code>
+      (reproc) y enchufarla acá. Es el siguiente paso tras validar Paneles 2a y 1.</div>
+  </section>
 </main>
 
 <script>
@@ -231,6 +276,82 @@ function redraw(){
   el("z-disp").textContent=fmt(c.disp,mw.disp);
 }
 
+// ====================== PANEL 1 — FIDELIDAD vs MIROVA ======================
+// Nombre del volcán tal cual aparece en el CSV consolidado MIROVA (variantes A14).
+const CSV_NAME = { Lascar:"Lascar", Lastarria:"Lastarria", Tupungatito:"Tupungatito",
+  PlanchonPeteroa:"PlanchonPeteroa", NevadosDeChillan:"Nevados de Chillan", Copahue:"Copahue",
+  Llaima:"Llaima", Villarrica:"Villarrica", PuyehueCordonCaulle:"Puyehue-Cordon Caulle",
+  Chaiten:"Chaiten", Isluga:"Isluga" };
+let _mirovaCsv=null;
+async function loadMirovaCsv(){
+  if(_mirovaCsv) return _mirovaCsv;
+  try{
+    let r=await fetch(`${BASE_PATH}latest_consolidado.csv`);
+    if(!r.ok) r=await fetch(`${BASE_PATH}01_05_2026_registro_vrp_consolidado.csv`);
+    if(!r.ok){ _mirovaCsv=[]; return _mirovaCsv; }
+    const lines=(await r.text()).split("\n"); const h=lines[0].split(","); const ix=(n)=>h.indexOf(n);
+    const out=[];
+    for(let i=1;i<lines.length;i++){ const c=lines[i].split(","); if(c.length<8) continue;
+      if(c[ix("Tipo_Registro")]!=="ALERTA_TERMICA") continue;
+      out.push({ volc:c[ix("Volcan")], dt:c[ix("Fecha_Satelite_UTC")], vrp:parseFloat(c[ix("VRP_MW")])||0 }); }
+    _mirovaCsv=out; return out;
+  }catch(e){ _mirovaCsv=[]; return _mirovaCsv; }
+}
+const dayKey=(s)=>{ const t=parseUtcMs(s); return isNaN(t)?null:new Date(t).toISOString().slice(0,10); };
+function dailyMaxOurs(data){ const m={}; for(const r of (data?.records||[])){ if(r.distance_class!=="summit")continue;
+  const v=(r.primary_cluster||{}).vrp_mw||0; if(v<=0)continue; const k=dayKey(r.datetime_utc); if(!k)continue;
+  if(!(k in m)||v>m[k]) m[k]=v; } return m; }
+function dailyMaxMirova(rows){ const m={}; for(const r of rows){ const v=r.vrp||0; if(v<=0)continue;
+  const k=dayKey(r.dt); if(!k)continue; if(!(k in m)||v>m[k]) m[k]=v; } return m; }
+
+let fidChart=null;
+async function renderFid(){
+  const volc=TIER_A.find(v=>v.name===el("fid-volc").value); if(!volc) return;
+  const winDays=parseInt(el("fid-win").value,10);
+  const [data,csv]=await Promise.all([loadVolcanoData(volc.name), loadMirovaCsv()]);
+  const ours=dailyMaxOurs(data);
+  const mir=dailyMaxMirova(csv.filter(r=>r.volc===CSV_NAME[volc.name]));
+  // eje temporal: últimos winDays desde el último dato de cualquier fuente
+  const allDays=[...Object.keys(ours),...Object.keys(mir)].sort();
+  if(!allDays.length){ el("fid-stat").innerHTML="Sin datos para este volcán."; if(fidChart){fidChart.destroy();fidChart=null;} return; }
+  const lastMs=parseUtcMs(allDays[allDays.length-1]+"T00:00Z");
+  const cutMs=lastMs - winDays*86400000;
+  const days=[]; for(let t=cutMs;t<=lastMs;t+=86400000) days.push(new Date(t).toISOString().slice(0,10));
+  const sOurs=days.map(d=>ours[d]!=null?ours[d]:null);
+  const sMir =days.map(d=>mir[d]!=null?mir[d]:null);
+  // ratio mediano geométrico en días donde ambos detectan
+  const ratios=[]; for(const d of days){ if(ours[d]>0&&mir[d]>0) ratios.push(Math.log10(ours[d]/mir[d])); }
+  ratios.sort((a,b)=>a-b); const medR=ratios.length?Math.pow(10,ratios[Math.floor(ratios.length/2)]):null;
+  const nBoth=ratios.length;
+
+  if(fidChart) fidChart.destroy();
+  fidChart=new Chart(el("fid-canvas").getContext("2d"),{ type:"line",
+    data:{ labels:days, datasets:[
+      { label:"VRP Chile", data:sOurs, borderColor:"#4fc3f7", backgroundColor:"#4fc3f7", pointRadius:2, spanGaps:false, borderWidth:1.6, tension:0 },
+      { label:"MIROVA", data:sMir, borderColor:"#ffb74d", backgroundColor:"#ffb74d", pointRadius:2, spanGaps:false, borderWidth:1.6, tension:0 } ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{ x:{ ticks:{ color:"#7a8fa6", maxTicksLimit:8 }, grid:{ color:"#1a3a5c55" } },
+               y:{ type:"logarithmic", title:{display:true,text:"VRP (MW, máx diario)",color:"#7a8fa6"}, ticks:{color:"#7a8fa6"}, grid:{color:"#1a3a5c55"} } } } });
+  el("fid-stat").innerHTML = `<b>${volc.display}</b> · <b>${nBoth}</b> días donde ambos detectan · `
+    + `ratio mediano nuestro/MIROVA = <b>${medR?medR.toFixed(2)+"×":"—"}</b> (1.0× = calibración perfecta). `
+    + `Sobre la línea de MIROVA = sobre-estimamos; debajo = sub-estimamos.`;
+}
+
+// ====================== TABS ======================
+function setupTabs(){
+  document.querySelectorAll(".tab-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll(".pane").forEach(p=>p.classList.remove("active"));
+      btn.classList.add("active");
+      const t=btn.dataset.tab; el("pane-"+t).classList.add("active");
+      if(t==="ext" && map) setTimeout(()=>map.invalidateSize(),60);
+      if(t==="fid") renderFid();
+    });
+  });
+}
+
 function init(){
   const sel=el("volc");
   for(const v of TIER_A){ const o=document.createElement("option"); o.value=v.name; o.textContent=v.display; sel.appendChild(o); }
@@ -238,6 +359,13 @@ function init(){
   sel.addEventListener("change", ()=>selectVolcano(sel.value));
   el("prox-r").addEventListener("input", redraw);
   el("ext-r").addEventListener("input", redraw);
+  // fidelidad
+  const fs=el("fid-volc");
+  for(const v of TIER_A){ const o=document.createElement("option"); o.value=v.name; o.textContent=v.display; fs.appendChild(o); }
+  fs.value="Lascar";
+  fs.addEventListener("change", renderFid);
+  el("fid-win").addEventListener("change", renderFid);
+  setupTabs();
   selectVolcano("PuyehueCordonCaulle");
 }
 init();
