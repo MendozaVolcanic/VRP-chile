@@ -1,3 +1,20 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · store.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Persistir los records VRP y producir la CLASIFICACION final por record (etiqueta de
+#                 cercania al crater) que apoya la vigilancia volcanica.
+# Lógica        : Ensambla el hotspot final (cascada de posicion), deriva distance_class='summit'/'far'
+#                 segun inner_radius_km por volcan, y aplica el guard de coherencia (la etiqueta 'summit'
+#                 debe ser consistente con la ubicacion del cluster reportado). Escribe un JSON por volcan,
+#                 con auto-upgrade NRT->Standard.
+# Modelo/método : Reglas deterministicas geometricas/de coherencia. NO es caja negra (punto 5.5 Res.372).
+# Datos entrada : Records de VRP de los process_*.py (radiancia derivada). SIN datos personales.
+# Variables     : distance_class, inner_radius_km (dato oficial KML MIROVA por volcan),
+#                 final_hotspot_lat/lon/dist_km, guard A46 (summit con cluster lejano -> far).
+# Limitaciones  : La etiqueta de cercania depende del ancla; bug schema asimetrico hotspot vs cluster (A46)
+#                 mitigado por guard unidireccional.
+# Refs/datos    : Coppola 2016a (grilla UTM); volcanoes.yaml (radios KML oficiales MIROVA). Entrenamiento:
+#                 No aplica. Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """
 store.py — Persist VRP results as JSON time series, one file per volcano.
 

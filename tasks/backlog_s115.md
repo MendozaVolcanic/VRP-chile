@@ -35,7 +35,13 @@ a PCC** (sus records tienen `geo_class` = summit/None). Esa sería la palanca de
 render naranja para la extensión cat-b, sin tocar clasificación ni zeroing. Requiere diseño
 frontend dedicado. NO es prioridad (Nicolás eligió "no tocar" en S115).
 
-## Deuda — cabeceras FICHA SDA en archivos núcleo (CPLT N°372)
+## Deuda — cabeceras FICHA SDA en archivos núcleo (CPLT N°372) — ✅ RESUELTO S116
+
+**RESUELTO S116** (sprint de consolidación AUDIT_S116, OK explícito de Nicolás, A45 con tag
+`pre-s116-ficha-headers`): se agregaron las 6 cabeceras FICHA SDA Nivel-1 (comment-only, 0 lógica,
+suite 791 passed). Ficha publicable → v1.1. Pendiente solo la pasada exhaustiva opcional a los ~11
+módulos de detección secundarios (`test1_*`, `path_d_*`, `second_pass_*`, `exclusion_zones`,
+`single_pixel_mode`) — backlog de menor prioridad. El registro histórico abajo se conserva.
 
 **Decisión Nicolás (S115): backlog para sesión dedicada de transparencia.**
 

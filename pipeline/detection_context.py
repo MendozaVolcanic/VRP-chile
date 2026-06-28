@@ -1,3 +1,17 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · detection_context.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Detectar pixeles que destacan de su entorno inmediato (gate contextual dNTI) para apoyar
+#                 la deteccion termica robusta a heterogeneidad regional.
+# Lógica        : (NTI_pixel - media(NTI 8-vecinos)) > C1 marca un pixel anomalo, inmune al sigma del anillo
+#                 que se infla en terreno heterogeneo (Lastarria hidrotermal, Tupungatito glaciar).
+# Modelo/método : Regla determinista (kernel aritmetico 8-vecinos, Coppola 2016a + Campus 2024). NO es caja
+#                 negra.
+# Datos entrada : NTI por pixel (radiancia MIR/TIR). SIN datos personales.
+# Variables     : C1 (umbral dNTI dual-ROI), kernel 8-vecinos.
+# Limitaciones  : FPs sistemicos en cirrus alto frio (D9/A23), mitigado por co-validacion y cap de magnitud.
+# Refs/datos    : Coppola 2016a SP426.5, Campus 2024. Entrenamiento: No aplica. Ficha:
+#                 docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """detection_context.py — Contextual (8-neighbor) detection gates.
 
 Currently contains the dNTI contextual hot-mask used by P3.2 S15.
