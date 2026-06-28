@@ -12,6 +12,15 @@ git fetch origin --prune && git pull --ff-only
 ```
 Leer en memoria: `project_s115_estado` + `MEMORY.md` index.
 
+## ⭐ PRIORIDAD S116 — AUDITORÍA INTEGRAL (pedido explícito de Nicolás)
+Ejecutar el plan **[`docs/AUDIT_S116_PLAN.md`](../docs/AUDIT_S116_PLAN.md)** (protocolo A51, última
+fue AUDIT_S105): 8 ejes en subagentes paralelos (A26) + síntesis → `docs/AUDIT_S116.md`. Read-only/
+diagnóstico (los fixes salen como plan priorizado, cada uno con A45 en su sesión). Ejes: 1 Misión/
+fidelidad · 2 Código (regresiones, A46 bidireccional, dual-anchor S115) · 3 Data/loader · 4
+Divergencias+recall por sensor (re-anclar GVP, A61) · 5 Frontend (paridad 3 vistas, datetime) · 6
+Transparencia SDA (cabeceras) · 7 Git/NRT · 8 Backlog. Adversarial (A62) embebido. Gatillo A51: >3
+contradicciones cross-source → pausar features y consolidar.
+
 ## ✅ Cerrado en S115 (no reabrir)
 - **#6 datetime diario.html** — `parseUtcMs` sobre la referencia MIROVA (LIVE, verificado preview).
 - **#1 FICHA SDA** → v1.0 — 2026-06-22 (`docs/FICHA_SDA_VRP_CHILE.md`, publicable al día).
