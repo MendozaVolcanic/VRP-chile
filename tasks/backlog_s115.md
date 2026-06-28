@@ -40,10 +40,20 @@ frontend dedicado. NO es prioridad (Nicolás eligió "no tocar" en S115).
 **Decisión Nicolás (S115): backlog para sesión dedicada de transparencia.**
 
 La regla SDA (CLAUDE.md raíz Volcanologia + `GUIA_MAESTRA_TRANSPARENCIA_ALGORITMICA.md`) exige
-cabecera FICHA en todo archivo que participe en la detección/clasificación. Estado S115:
-- **Con cabecera FICHA**: `pipeline/anchor.py`, `pipeline/vrp_regimes.py`.
-- **SIN cabecera (gap)**: `pipeline/process_modis.py`, `pipeline/process_viirs.py`,
-  `pipeline/process_viirs_mod.py`, `pipeline/store.py` — son el núcleo de detección/clasificación.
+cabecera FICHA Nivel-1 (la caja `════ FICHA SDA ════`) en todo archivo que participe en la
+detección/clasificación. Estado **CORREGIDO S116** (AUDIT_S116 C1 — el inventario S115 era
+erróneo):
+- **Con cabecera FICHA Nivel-1**: **solo `pipeline/vrp_regimes.py`** (formato canónico, líneas 1-16).
+  ⚠️ `pipeline/anchor.py` **NO la tiene** — el inventario S115 la dio por presente, pero solo tiene
+  un docstring + un comentario etiquetado "Nivel 2" interno (`honest_anchor_applies`). El grep
+  `FICHA SDA` matcheó por substring. `anchor.py` participa en la clasificación (cascada de posición
+  → `distance_class`) → **necesita Nivel-1**.
+- **SIN cabecera (gap real = 6 archivos núcleo)**: `pipeline/process_modis.py`, `pipeline/process_viirs.py`,
+  `pipeline/process_viirs_mod.py`, `pipeline/store.py`, **`pipeline/anchor.py`**, `pipeline/detection_context.py`
+  (gate dNTI contextual — decide si un píxel se detecta). El contenido propuesto de cada cabecera
+  está en `experiments/_s116_audit/eje6_transparencia.json`.
+- **NO requieren Nivel-1** (logística/IO/auditoría, excluidos Res.372 4.8): `fetch.py`, `scan_geometry.py`,
+  `clustering.py`, `audit_metrics.py`, loaders/constantes/utils.
 
 Agregarlas = solo comentarios (sin lógica), pero toca `pipeline/` → requiere **A45** (tag
 defensivo + verificar suite). La **ficha publicable** (`docs/FICHA_SDA_VRP_CHILE.md`) ya está al

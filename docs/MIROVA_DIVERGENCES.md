@@ -456,6 +456,15 @@ Los **4 gaps documentales F1.2** explican mejor el drift remanente Villarrica/Ch
 
 **F2.1 (top P1, en implementación)**: 4 filtros + flag wireados en `first_pass_tests_2_and_3` y `contextual_dnti_hot_mask`. Profile aislado `mirova_equivalent_unsuitable_filters_v1.yaml`. Workflow A/B `reproc-ab-unsuitable-filters.yml`. R1+R2+R3 antes de adopción (regla S33).
 
+> **Nota S116 (AUDIT_S116 C4 — re-evaluar urgencia, NO declarar obsoleto):** NEW-8 (gaps 2-4,
+> §267-273) sigue siendo un gap de **fidelidad literal** del pool m,σ. Pero su síntoma operacional
+> principal (FPs contextuales por outliers negativos, p.ej. cirrus) ya está **mitigado por otros
+> frentes** adoptados después de escribir F2.1: D9 cap path-D 5 MW @ t_bg<270K (S71) + gate/guard
+> A46 (0 fuga al dashboard, S113) + nadir/focal (S102-S109, mediana ratio ~0.53×). Por eso la
+> **urgencia bajó**: antes de correr el A/B F2.1, re-evaluar si todavía aporta sobre el estado
+> curado (medir si quedan FPs contextuales atribuibles a outliers negativos no cubiertos por D9).
+> NO se declara cerrado/obsoleto sin ese dato (A48/A50). Sigue abierto, prioridad rebajada.
+
 **F1.6 (top P2, en análisis)**: Tupungatito restaurar/ajustar `mirova_center_lat/lon` basado en centroide CONS NRT (5.21 km SE del vent yaml actual). Re-evaluar decisión S65 con evidencia post-S65.
 
 **Reservado P3 (post-F2.1)**: HT1.5-NEW-1 scene-wide aggregation. Solo si F2.1 no resuelve completo. Refactor mayor con riesgo regresión recall.
