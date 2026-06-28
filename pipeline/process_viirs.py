@@ -1,3 +1,22 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · process_viirs.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Detectar y cuantificar anomalias termicas en granulos VIIRS I-band 375m
+#                 (VNP02IMG/VJ102IMG) — el sensor de mayor resolucion espacial, clave para focos sub-pixel
+#                 debiles.
+# Lógica        : Misma cascada MIROVA-style que MODIS adaptada a 375m: deteccion contextual/ROI sobre I04,
+#                 fondo local por anillo, VRP por Wooster. En regimen de muy baja energia recupera focos
+#                 sub-pixel con anillo de fondo intermedio condicionado.
+# Modelo/método : Reglas fisicas deterministicas (Wooster MIR; adaptacion TIRVolcH Aveni 2024 / Campus
+#                 2022). NO es caja negra (punto 5.5 Res.372).
+# Datos entrada : Radiancia/BT VIIRS I04 (3.74um) e I05 (11.45um) via LUT del producto L1B. SIN datos
+#                 personales.
+# Variables     : NTI/dNTI, T de fondo (anillo/intermedio), umbrales N·sigma, area de pixel (nadir-fijo),
+#                 distancia al crater.
+# Limitaciones  : Artefacto solar diurno (mitigado: solo noche), contaminacion por nieve/nube, falsos
+#                 positivos sub-umbral.
+# Refs/datos    : Coppola 2016a, Aveni et al. 2024 (RSE), Campus et al. 2022 (Sensors). Entrenamiento: No
+#                 aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """
 process_viirs.py — Calculate VRP from VIIRS VNP02IMG / VJ102IMG L1B granules.
 

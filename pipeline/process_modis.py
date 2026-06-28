@@ -1,3 +1,21 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · process_modis.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Detectar y cuantificar anomalias termicas en granulos MODIS L1B (Terra/Aqua) para apoyar
+#                 la vigilancia de actividad volcanica (alerta tecnica OVDAS).
+# Lógica        : En cada escena nocturna se buscan pixeles 'calientes' (Tests contextuales y de ROI
+#                 integrado de Coppola 2016a), se estima la temperatura de fondo local por anillo, y se
+#                 calcula la potencia radiada (VRP) con la ecuacion de Wooster/Planck.
+# Modelo/método : Reglas fisicas deterministicas (Planck/Wooster; Coppola 2015/2016a/2024). NO es caja negra
+#                 — logica auditable (punto 5.5 Res.372).
+# Datos entrada : Radiancia/temperatura de brillo MODIS MOD021KM/MYD021KM (bandas 21/22 MIR, 31 TIR). SIN
+#                 datos personales.
+# Variables     : BT del pixel, T de fondo (anillo/contextual), umbrales N·sigma dual-ROI (5 summit / 10
+#                 scene), area de pixel (nadir-fijo), distancia al crater.
+# Limitaciones  : Sesgo topografico en cumbres nevadas (MIR absoluto), sobre-deteccion difusa irreducible a
+#                 1 km, saturacion de pixel, contaminacion por lago/nieve, falsos positivos por incendios.
+# Refs/datos    : Coppola et al. 2015 (BV 77:55), Coppola 2016a (GS SP426.5), Coppola 2024 (Springer).
+#                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """
 process_modis.py — Calculate VRP from MODIS MOD021KM / MYD021KM L1B granules.
 

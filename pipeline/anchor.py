@@ -1,3 +1,19 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · anchor.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Determinar la POSICION reportada de la anomalia (final_hotspot), insumo de la
+#                 clasificacion summit/far. No decide magnitud ni deteccion.
+# Lógica        : Cuando solo disparo el Test1 integrado (sin posicion por pixel) la posicion honesta es el
+#                 vent del ROI o el pixel de NTI maximo. El override far->summit del ancla MODIS solo aplica
+#                 si hay >=1 pixel del first-pass al crater (excluye recaptura second-pass A55/D11).
+# Modelo/método : Reglas deterministicas. NO es caja negra (punto 5.5 Res.372).
+# Datos entrada : Mascaras de pixeles flaggeados (radiancia derivada). SIN datos personales.
+# Variables     : first_pass_summit, inner_radius_km, modo de ancla (vent/nti_peak), flag
+#                 ENABLE_HONEST_ANCHOR_MODIS (OFF).
+# Limitaciones  : El ancla MIR-absoluta es vulnerable al sesgo topografico A69; por eso el override esta
+#                 hard-gated y OFF.
+# Refs/datos    : Coppola 2016a (Tests 2/3 contextuales). Design: docs/superpowers/specs/2026-06-11.
+#                 Entrenamiento: No aplica. Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """S106 — Ancla espacial honesta (design 2026-06-11 §3.1).
 
 Cascada de POSICIÓN del record (final_hotspot_*). Nunca decide magnitud ni

@@ -1,3 +1,19 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · process_viirs_mod.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Detectar y cuantificar anomalias termicas en granulos VIIRS M-band 750m
+#                 (VNP02MOD/VJ102MOD) — equivalente al canal 'VIIRS' por defecto de MIROVA.
+# Lógica        : Misma formula VRP MIROVA-style que process_viirs.py pero sobre banda M13 (4.05um, area
+#                 750x750m), con su coeficiente Wooster propio.
+# Modelo/método : Reglas fisicas deterministicas (Wooster MIR; Coppola 2016a). NO es caja negra (punto 5.5
+#                 Res.372).
+# Datos entrada : Radiancia/BT VIIRS M13 (MIR) y M15 (TIR). SIN datos personales.
+# Variables     : NTI/dNTI, T de fondo, umbrales N·sigma, area de pixel 750m (nadir-fijo), distancia al
+#                 crater.
+# Limitaciones  : Mayor area de pixel amplifica el gradiente topografico crater-nieve (A69/A80); dispersion
+#                 del centroide; solo noche por contaminacion solar.
+# Refs/datos    : Coppola 2016a, Massimetti tesis (adaptacion VIIRS). Entrenamiento: No aplica (sin ML).
+#                 Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """
 process_viirs_mod.py — Calculate VRP from VIIRS VNP02MOD / VJ102MOD L1B granules.
 

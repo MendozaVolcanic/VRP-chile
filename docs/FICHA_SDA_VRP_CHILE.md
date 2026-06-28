@@ -4,7 +4,7 @@
 > generado por el equipo; los campos legales/institucionales marcados `<completar>` los
 > debe validar SERNAGEOMIN antes de cualquier publicación. Plantilla: `GUIA_MAESTRA_TRANSPARENCIA_ALGORITMICA.md`.
 
-**Identificador interno:** VRP-CL  ·  **Versión:** v1.0 — 2026-06-22  ·  **Estado:** producción (NRT)
+**Identificador interno:** VRP-CL  ·  **Versión:** v1.1 — 2026-06-27  ·  **Estado:** producción (NRT)
 
 ---
 
@@ -45,5 +45,6 @@ información mensualmente (primeros 10 días hábiles).
 
 | Versión | Fecha | Cambios sustantivos | Traz. interna |
 |---|---|---|---|
+| v1.1 | 2026-06-27 | Trazabilidad de código: se agregaron las cabeceras FICHA SDA Nivel-1 a los archivos núcleo que participan en la decisión (`process_modis.py`, `process_viirs.py`, `process_viirs_mod.py`, `store.py`, `anchor.py`, `detection_context.py`) — cierra la deuda de cabeceras detectada en AUDIT_S116 (C1; el inventario previo daba `anchor.py` por hecho, era falso). Sin cambios de lógica. Se re-confirmó (S114) que la detección MODIS es fiel a Coppola 2016a (dual-ROI 5σ/10σ, Tests 2∧3, second-run, ETI cuadrático) y que no queda gap literal accionable (GAP #A resuelto S115 como mislabel). | S116 (AUDIT_S116) |
 | v1.0 | 2026-06-22 | Primera versión estampada (reemplaza el borrador `<vX.Y>` de origen). Documenta la cuantificación foco-vs-difuso (la magnitud suma sólo el foco contextualmente anómalo, no el campo difuso topográfico), la recuperación de focos sub-píxel débiles en régimen de muy baja energía (anillo de fondo intermedio condicionado), la verificación de coherencia espacial de la etiqueta "cumbre", y los tres límites físicos caracterizados (sesgo topográfico en nevados, sobre-detección difusa irreducible a 1 km en MODIS, artefacto solar diurno). | S109–S114 |
 | `<vX.Y>` | (origen) | Borrador técnico inicial de la ficha. | S110 (#428) |
