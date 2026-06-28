@@ -1,3 +1,17 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · test1_spatial_core.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Conservar solo el foco compacto del Test 1 (no el halo difuso de 1-3 km), para que
+#                 la magnitud no se infle ~8-30× vs MIROVA sobre glaciar nevado.
+# Lógica        : Discriminante ESPACIAL (no termico): conserva el pixel de maxima energia (anti-FN),
+#                 los pixeles a ≤ r_core_km de ese pico, y la lava extendida genuina (bt ≥ bt_ext_k).
+# Modelo/método : Regla determinista (analogo pipeline del Nucleo F5' display). Funcion pura, sin I/O.
+# Datos entrada : Mascara hot, VRP por pixel, lat/lon/bt (radiancia derivada). SIN datos personales.
+# Variables     : r_core_km (radio del foco), bt_ext_k (umbral lava extendida).
+# Limitaciones  : Asume foco compacto; una anomalia genuinamente extendida (lacolito PCC) se recorta
+#                 — por eso el gate por t_bg fue refutado (A54/S86) y el discriminante es espacial.
+# Refs/datos    : docs/S99_AUDIT_SYNTHESIS.md; Coppola 2015 (Test 1). Entrenamiento: No aplica.
+#                 Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """S99 Candidato B — recorte de compacidad espacial para el path Test 1.
 
 Problema (causa raíz S99, `docs/S99_AUDIT_SYNTHESIS.md`): el Test 1 integrado-ROI

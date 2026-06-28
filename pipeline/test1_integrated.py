@@ -1,3 +1,17 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · test1_integrated.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Detectar anomalias termicas sub-pixel espacialmente extendidas que los tests
+#                 pixel-a-pixel pierden (lava lake debil, domo). Uno de los 3 criterios MIROVA.
+# Lógica        : Integra el exceso de radiancia MIR sobre el fondo en todo el ROI; dispara si el
+#                 exceso supera N·sigma del fondo Y un piso relativo. Es DETECCION, no posicion ni magnitud.
+# Modelo/método : Regla determinista (Coppola 2015 Eq.1). Funcion pura, sin I/O. NO es caja negra (5.5).
+# Datos entrada : Radiancia MIR derivada de BT (Planck) + geometria del ROI. SIN datos personales.
+# Variables     : k_sigma (umbral N·sigma), mir_rel (piso relativo), inner_km/roi_km (anillo de fondo).
+# Limitaciones  : Sobre glaciar el fondo del anillo se sesga frio → puede marcar el halo nival
+#                 (sobre-deteccion difusa A82); por eso se acota con los filtros contextual/espacial.
+# Refs/datos    : Coppola et al. 2015 Bull.Volc. 77:55 §2.2. Validado S25 (6/6 ALERTA Villarrica).
+#                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """Coppola 2015 Eq.1 — Test 1 integrated-ROI MIR detection.
 
 Reference: Coppola et al. 2015, "MIROVA: a new hotspot detection system based

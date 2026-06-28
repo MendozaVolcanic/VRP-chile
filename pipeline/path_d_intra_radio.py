@@ -1,3 +1,17 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · path_d_intra_radio.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Evitar que el path D (dNTI contextual) clasifique como deteccion ruido lejano al
+#                 crater (89% de FPs MODIS a >10 km), que MIROVA tagea RUTINA(vrp=0).
+# Lógica        : Restringe SOLO los pixeles del path D al inner_radius_km del KMZ MIROVA. Paths A
+#                 (BT clasico) y B (NTI absoluto) NO se tocan — una erupcion real lejana pasa por A/B.
+# Modelo/método : Regla determinista (gate geometrico por inner_radius). Funcion pura, sin I/O.
+# Datos entrada : Mascara dNTI contextual + distancia al vent por pixel. SIN datos personales.
+# Variables     : inner_radius_km (oficial KMZ MIROVA por volcan), flag enable_path_d_intra_radio_gate.
+# Limitaciones  : Drift documentado vs Coppola 2016a (el paper no exige restriccion espacial al path D);
+#                 justificado empiricamente (las 1332 ALERTA MIROVA Tier A caen 100% dentro del inner).
+# Refs/datos    : docs/F_S81_A_FASE1_DIAGNOSIS.md; KMZ MIROVA (volcanoes.yaml). No aplica ML.
+#                 Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """S83 F-S81-A Fase 2 — Gate Path D MODIS intra-radio per-volcán.
 
 Motivación: 99.5% de FPs MODIS Tier A son Path D (dNTI contextual 8-vecinos)

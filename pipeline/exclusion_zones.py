@@ -1,3 +1,17 @@
+# ════════════════════════════════════════════════════════════════════
+# FICHA SDA · exclusion_zones.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
+# Objetivo      : Descartar pixeles de cuerpos de agua/salares conocidos que irradian calor nocturno
+#                 y generan VRP fantasma (Salar de Atacama 1437 MW vs MIROVA real 4 MW en Lascar).
+# Lógica        : Tras el hot_mask, descarta pixeles dentro de cualquier exclude_zone del volcan
+#                 (coordenadas hardcoded en volcanoes.yaml), salvo whitelist active_water_bodies.
+# Modelo/método : Regla determinista (geofencing por bbox/radio). Funcion pura. NO es caja negra (5.5).
+# Datos entrada : Mascara hot + lat/lon por pixel + exclude_zones del yaml. SIN datos personales.
+# Variables     : exclude_zones (name/lat/lon/radius_km por volcan), whitelist active_water_bodies.
+# Limitaciones  : Lista curada manualmente por volcan; una fuente termica nueva fuera de la lista no
+#                 se filtra. No aplica water mask global (se simplifico S16 para evitar geopandas).
+# Refs/datos    : Identificacion S16 (Salar Atacama, Embalse El Yeso). Entrenamiento: No aplica.
+#                 Ficha: docs/FICHA_SDA_VRP_CHILE.md
+# ════════════════════════════════════════════════════════════════════
 """exclusion_zones.py — Filtro post-deteccion de zonas geograficas conocidas.
 
 S16 P3.6 simplificado: en vez de water mask global Natural Earth (requiere
