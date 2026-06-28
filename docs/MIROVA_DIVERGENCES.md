@@ -464,6 +464,15 @@ Los **4 gaps documentales F1.2** explican mejor el drift remanente Villarrica/Ch
 > **urgencia bajó**: antes de correr el A/B F2.1, re-evaluar si todavía aporta sobre el estado
 > curado (medir si quedan FPs contextuales atribuibles a outliers negativos no cubiertos por D9).
 > NO se declara cerrado/obsoleto sin ese dato (A48/A50). Sigue abierto, prioridad rebajada.
+>
+> **MEDIDO S116 (investigación read-only, `docs/AUDIT_S116_FOLLOWUP.md` Hilo 2):** de 17 464 records
+> Tier A solo **832** sobreviven el filtro path-D-dominante ∧ frío ∧ no-confirmado ∧ visible-en-dashboard,
+> todos en 4 volcanes de baja altitud (Copahue 123, Villarrica 129, PCC 532, Chaitén 229). Al
+> inspeccionarlos (A62): ~99 % ya con `pc.vrp ≤ 5 MW` (D9 los capa) y re-anclados al GVP (A61) caen
+> **SOBRE el cráter** (Villarrica 129/129, Copahue 123/123) — son **cat-b real sub-umbral** (A54), NO
+> outliers negativos de borde. **0 FPs contextuales residuales** no cubiertos por D9. Veredicto: **A/B
+> F2.1 = baja prioridad / no accionable** (aplicarlo removería señal real, killer A82); NO obsoleto (el
+> gap de fidelidad literal del pool m,σ persiste). Lever real de cirrus = discriminante NO-`t_bg` (S113).
 
 **F1.6 (top P2, en análisis)**: Tupungatito restaurar/ajustar `mirova_center_lat/lon` basado en centroide CONS NRT (5.21 km SE del vent yaml actual). Re-evaluar decisión S65 con evidencia post-S65.
 
