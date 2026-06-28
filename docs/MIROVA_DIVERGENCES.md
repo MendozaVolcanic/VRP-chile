@@ -1342,6 +1342,21 @@ AUDIT_S86 §C6 los declaró anti-patrón emergente (redundantes con la supresió
 fondo-local** (toca la misma zona del pipeline). No revertir ni re-justificar aún.
 Registrado para que no se pierda (AUDIT_S105 contradicción #1).
 
+> **Actualización S116 (AUDIT_S116 C2 — investigado, ver `docs/AUDIT_S116_C2_GATES.md`):**
+> workflow read-only de 4 ángulos. Hallazgos que **refinan** el framing "redundante → revertir":
+> (1) son **PARCIALMENTE** redundantes con el frontend — mismo umbral espacial pero plano distinto
+> (el gate cambia el DATO persistido `n_anomalous`/`pc.vrp_mw`/footprint/`distance_class`; el frontend
+> solo la VISTA, devolviendo 0). (2) `path_d_intra_radio` es **MODIS-only** y SUPRIME path-D fuera del
+> inner; `second_pass_intra_radio` (MODIS+VIIRS) PRESERVA el first-pass y solo recorta recaptura nueva
+> fuera del inner (NO elimina el cluster near-crater artefacto A55 dentro del inner). (3) **Impacto
+> BIMODAL**: de 4560 records summit-intra preservados, solo 26.7% MIROVA-confirmados, pero en
+> focales/desérticos es **cat-b REAL** (Láscar 49%, Lastarria 46% → revertir destruiría recall) y en
+> nevados ~puro artefacto A55/A69 (Llaima 0.4%, Villarrica 2%, cola pesada hasta 60 MW). **Veredicto:
+> NO revertir global; respetar S105; A/B reproc estratificado por volcán cuando reabra el frente
+> Test1/fondo-local** (desenlace probable: gate per-volcán ON-nevados/OFF-focales o discriminante
+> no-geométrico, no flip global). El read-only mide lo que el gate PRESERVA, no lo que REMUEVE (exige
+> reproc, A18). La contradicción C2 pasa de "standing sin decisión" a **decisión informada + plan**.
+
 ## S105 — Residuo path D MODIS re-dimensionado (corrige diagnóstico inflado)
 
 Un diagnóstico de subagente reportó "campo difuso MODIS universal ~280 recs/volcán a
