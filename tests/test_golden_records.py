@@ -1,29 +1,38 @@
-"""tests/test_golden_records.py — anti-regresión M1 (instalado S18 2026-04-24).
+"""tests/test_golden_records.py — anti-regresión M1 (instalado S18; REGENERADO S116 2026-06-27).
 
-4 records canónicos de la ventana S18 2026-04-08 a 04-22 que cubren los casos
-físicos representativos. Si el JSON de los volcanes Tier A pierde alguno o sus
-valores caen fuera de las tolerancias, los tests fallan y bloquean el merge.
+Records canónicos que capturan casos físicos representativos del pipeline ACTUAL.
+Si el JSON de los volcanes Tier A pierde alguno o sus valores caen fuera de las
+tolerancias, los tests fallan y bloquean el merge.
 
-Casos cubiertos:
-  1. Lascar 2026-04-12 05:48 VIIRS_NOAA21 — "detección summit fuerte" (1164 MW @ 0.58 km).
-     Si baja >5% → regresión de detección eruption-path.
-  2. Lascar 2026-04-08 05:18 VIIRS_NOAA21 — "summit con NOAA-21" (931 MW).
-     Si vrp=0 o sensor!=VIIRS_NOAA21 → regresión integración NOAA-21 S18.
-  3. Chaitén 2026-04-12 04:42 VIIRS_SNPP_750 — "vent-path summit débil" (2.58 MW).
-     Si vrp_vent → 0 → regresión vent-path o piso store.
-  4. Tupungatito 2026-04-08 05:24 VIIRS_NOAA21 — "vent sub-pixel" (0.168 MW).
-     Si vrp_vent → 0 → regresión vent-path para señales sub-pixel débiles.
+S116 (regeneración, cierra contradicción C3 de AUDIT_S116): los 8 goldens previos
+fueron capturados S18 con pipeline pre-S27 (vent-path activo, dual-ROI BT off,
+exclude_zones on, cap=7K, magnitudes pre-nadir/focal infladas ~1000×) y quedaron
+SKIPPED desde S32 sin regenerar — la suite "verde" enmascaraba la pérdida de
+cobertura. Re-derivados contra el estado actual: se descartaron los casos que
+probaban mecanismos REMOVIDOS (vent-path `vrp_vent_mw`, Regla D vent-priority
+`final_hotspot_source="vent"`), un record que ya no se detecta (Chaitén V750,
+cat-b sub-umbral → ~0, como MIROVA) y otro que ya no existe en la ventana de datos
+(Tupungatito Jan). Los reemplazan casos del pipeline vigente:
+  1. Lascar 2026-04-12 05:48 VIIRS_NOAA21 — summit fuerte VIIRS375 (~1.19 MW post de-inflación nadir/focal).
+  2. Lascar 2026-04-08 05:18 VIIRS_NOAA21 — integración NOAA-21 (H10): si vrp=0/sensor!=NOAA21 → regresión.
+  3. Lastarria 2026-04-08 05:18 VIIRS_NOAA21 — clasificación ancla-honesta `ctx_cluster` summit (Lazufre/A69).
+  4. Villarrica 2026-05-09 06:36 VIIRS_NOAA20 — sub-pixel lava lake `test1_roi` (guard FN sub-umbral).
+La geometría MODIS (far→summit/D12, A82) queda cubierta por test_r2_pixel_level
+(caso "Isluga MODIS hot"), no se fuerza un golden MODIS-summit limpio (no existe
+por el bug de etiquetado A46 irreducible a 1 km, AUDIT_S114).
 
 Tolerancias (no comparamos bit-equivalence — los reprocesos pueden variar
 ligeramente por pixel area + scan angle + orden de pixels):
-  - vrp_mw, vrp_vent_mw: ±5% del valor de referencia.
-  - t_max_k: ±0.5 K.
-  - final_hotspot_dist_km: ±0.2 km.
-  - distance_class, sensor: igual exacto.
-  - n_anomalous_pixels: ±20% (varía con pixel area corrections).
+  - vrp_mw: ~±10% del valor de referencia (captura drift estructural tipo
+    de-inflación 1000×, tolera jitter de reproceso).
+  - t_max_i04_k / t_max_k: ±1.5 K.
+  - final_hotspot_dist_km: ±0.3 km.
+  - distance_class, sensor, final_hotspot_source: igual exacto.
+  - diag_n_dnti_ctx_path: rango (captura si el path se apaga/cambia).
 
 Ejecutar: pytest tests/test_golden_records.py -v
-Regenerar snapshots cuando un cambio sea intencional: editar GOLDEN dict abajo.
+Regenerar snapshots cuando un cambio sea INTENCIONAL: editar GOLDEN dict abajo
+(documentando en el commit por qué cambió el valor de referencia).
 """
 
 import json
@@ -31,34 +40,28 @@ from pathlib import Path
 
 import pytest
 
-# S32 2026-05-04: goldens marcados como skip — fueron capturados S18 con
-# pipeline pre-S27 (vent-path activo, dual-ROI BT off, exclude_zones on,
-# cap=7K). Post-S27/S29/S30/S31+ los valores cambiaron significativamente
-# por cascada Test 1 + cluster_hotspots 8-conn + remoción parches. Regenerar
-# requiere reproc Tier A 90d con código actual y snapshot manual de records
-# físicamente representativos. Ver tasks/backlog para regeneración.
-pytestmark = pytest.mark.skip(reason="goldens pre-S27 obsoletos — regenerar post-S31+")
-
-
 ROOT = Path(__file__).parent.parent
 DATA_DIR = ROOT / "data" / "mirova_equivalent"
 
 # Cada entrada: identidad del record + expected con rangos.
+# Valores de referencia capturados S116 2026-06-27 del estado actual de
+# data/mirova_equivalent/ (todos product_version=standard).
 GOLDEN = [
     {
         "id": "lascar_strong_summit_noaa21_2026_04_12",
         "volcano": "Lascar",
         "datetime_utc": "2026-04-12 05:48",
         "sensor": "VIIRS_NOAA21",
-        "why": "Detección summit fuerte cerca del cráter Lascar — eruption-path I-band.",
+        "why": "Detección summit fuerte VIIRS375 cerca del cráter Lascar. Magnitud "
+               "post de-inflación nadir/focal (~1.19 MW; pre-S102 reportaba ~1164). "
+               "Si baja a ~0 o sube ~1000× → regresión de magnitud o detección eruption-path.",
         "expected": {
             # Rangos: (min, max) para floats; o valor exacto para strings.
-            "vrp_mw":             (1100.0, 1230.0),
-            "vrp_vent_mw":        (1.85, 2.30),
-            "t_max_i04_k":        (302.8, 303.8),
-            "final_hotspot_dist_km": (0.45, 0.75),
-            "distance_class":     "summit",
-            "sensor":             "VIIRS_NOAA21",
+            "vrp_mw":                (1.07, 1.31),
+            "t_max_i04_k":           (302.0, 304.5),
+            "final_hotspot_dist_km": (0.0, 0.45),
+            "distance_class":        "summit",
+            "sensor":                "VIIRS_NOAA21",
         },
     },
     {
@@ -66,97 +69,47 @@ GOLDEN = [
         "volcano": "Lascar",
         "datetime_utc": "2026-04-08 05:18",
         "sensor": "VIIRS_NOAA21",
-        "why": "Caso clave de validación H10 — sin NOAA-21 antes este record no existía.",
+        "why": "Caso clave de validación H10 — sin la integración NOAA-21 (S18) este "
+               "record no existía. Si vrp=0 o sensor!=VIIRS_NOAA21 → regresión NOAA-21.",
         "expected": {
-            "vrp_mw":             (880.0, 985.0),
-            "vrp_vent_mw":        (1.40, 1.65),
-            "t_max_i04_k":        (296.5, 298.5),
-            "final_hotspot_dist_km": (0.05, 0.85),  # S26: rango ampliado tras reproceso fresco
-            "distance_class":     "summit",
-            "sensor":             "VIIRS_NOAA21",
+            "vrp_mw":                (0.72, 0.89),
+            "t_max_i04_k":           (296.0, 299.0),
+            "final_hotspot_dist_km": (0.0, 0.45),
+            "distance_class":        "summit",
+            "sensor":                "VIIRS_NOAA21",
         },
     },
     {
-        "id": "chaiten_vent_summit_v750_2026_04_12",
-        "volcano": "Chaiten",
-        "datetime_utc": "2026-04-12 04:42",
-        "sensor": "VIIRS_SNPP_750",
-        "why": "Vent-path summit débil — sensible a piso VRP store.py y vent threshold.",
-        "expected": {
-            "vrp_mw":             (2.40, 2.75),
-            "vrp_vent_mw":        (0.65, 0.78),
-            "t_max_k":            (270.5, 271.8),
-            "final_hotspot_dist_km": (2.2, 2.6),
-            "distance_class":     "summit",
-            "sensor":             "VIIRS_SNPP_750",
-        },
-    },
-    {
-        "id": "tupungatito_vent_subpixel_noaa21_2026_04_08",
-        "volcano": "Tupungatito",
-        "datetime_utc": "2026-04-08 05:24",
-        "sensor": "VIIRS_NOAA21",
-        "why": "Vent sub-pixel ~0.17 MW — caso límite de detección. Si se pierde, perdimos sensibilidad sub-pixel.",
-        "expected": {
-            "vrp_vent_mw":        (0.14, 0.20),
-            "t_max_i04_k":        (283.7, 284.7),
-            "sensor":             "VIIRS_NOAA21",
-            # No verificamos distance_class porque hotspot principal del record cae far por H17.
-            # No verificamos vrp_mw porque varía con qué path dispara.
-        },
-    },
-    # === S23 Task 8 — expand M1 a 9 records canónicos ===
-    {
-        "id": "tupungatito_regla_d_modis_2026_04_16",
-        "volcano": "Tupungatito",
-        "datetime_utc": "2026-04-16 06:50",
-        "sensor": "MODIS_AQUA",
-        "why": "Regla D vent-priority S20 funciona en MODIS — vrp_vent>0 promueve summit + final_hotspot=vent.",
-        "expected": {
-            "vrp_vent_mw":            (11.5, 13.5),
-            "final_hotspot_dist_km":  (2.3, 2.8),
-            "distance_class":         "summit",
-            "final_hotspot_source":   "vent",
-            "sensor":                 "MODIS_AQUA",
-        },
-    },
-    {
-        "id": "lascar_path_d_contextual_modis_2026_04_19",
-        "volcano": "Lascar",
-        "datetime_utc": "2026-04-19 07:05",
-        "sensor": "MODIS_AQUA",
-        "why": "Path D dNTI contextual S15 P3.2 dispara — diag_n_dnti_ctx_path>0 confirma que el path está activo.",
-        "expected": {
-            "diag_n_dnti_ctx_path":   (35, 50),
-            "n_anomalous_pixels":     (30, 50),
-            "sensor":                 "MODIS_AQUA",
-        },
-    },
-    {
-        "id": "lastarria_path_d_contextual_viirs_2026_04_08",
+        "id": "lastarria_honest_anchor_ctxcluster_2026_04_08",
         "volcano": "Lastarria",
         "datetime_utc": "2026-04-08 05:18",
         "sensor": "VIIRS_NOAA21",
-        "why": "Path D contextual + vent-path en Lastarria hidrotermal — combinación P3.2 + Regla D resuelve el caso S22.5.",
+        "why": "Clasificación por ancla honesta: el dNTI contextual (Path D, "
+               "diag_n_dnti_ctx_path>0) ancla en ctx_cluster y clasifica summit el "
+               "campo fumarólico Lazufre (A69 extensión real). Anti-regresión de la "
+               "cascada de posición S106-S111. No verificamos magnitud (sub-MW volátil).",
         "expected": {
-            "vrp_vent_mw":            (0.10, 0.15),
-            "diag_n_dnti_ctx_path":   (1, 8),
-            "distance_class":         "summit",
-            "final_hotspot_source":   "vent",
-            "sensor":                 "VIIRS_NOAA21",
+            "distance_class":       "summit",
+            "final_hotspot_source": "ctx_cluster",
+            "diag_n_dnti_ctx_path": (1, 8),
+            "sensor":               "VIIRS_NOAA21",
         },
     },
     {
-        "id": "tupungatito_regla_d_edge_no_coords_2026_01_08",
-        "volcano": "Tupungatito",
-        "datetime_utc": "2026-01-08 06:35",
-        "sensor": "MODIS_AQUA",
-        "why": "Regla D edge S23 T1 — vrp_vent>0 sin vent_hotspot_dist_km debe quedar summit (legacy S20). Anti-regresión del fix S23 T1. Record actualizado S26 tras reproceso histórico (record S23 original 2026-01-01 04:54 quedó sin vrp_vent>0 con código S25).",
+        "id": "villarrica_subpixel_test1roi_noaa20_2026_05_09",
+        "volcano": "Villarrica",
+        "datetime_utc": "2026-05-09 06:36",
+        "sensor": "VIIRS_NOAA20",
+        "why": "Lava lake sub-pixel (~0.04 MW) capturado por Test1-ROI con ancla "
+               "honesta (final_hotspot_source=test1_roi, dist 0.0 al cráter). Caso "
+               "límite de detección: si vrp→0 perdimos sensibilidad sub-pixel (FN). "
+               "Reemplaza el viejo golden vent-sub-pixel (vent-path removido post-S27).",
         "expected": {
-            "vrp_vent_mw":     (0.05, 0.10),
-            "distance_class":  "summit",
-            "sensor":          "MODIS_AQUA",
-            # vent_hotspot_dist_km es None — no testeamos
+            "vrp_mw":                (0.01, 0.12),
+            "distance_class":        "summit",
+            "final_hotspot_source":  "test1_roi",
+            "final_hotspot_dist_km": (0.0, 0.05),
+            "sensor":                "VIIRS_NOAA20",
         },
     },
 ]
