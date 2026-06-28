@@ -199,11 +199,16 @@ async function loadMirovaCsv() {
       const cols = lines[i].split(",");
       if (cols.length < 8) continue;
       if (cols[idx("Tipo_Registro")] !== "ALERTA_TERMICA") continue;
+      // S117 #3 — distancia al cráter que reporta MIROVA (col Distancia_km, antes
+      // descartada). Validación de posición (A61): desde la coord nominal del
+      // cráter (A13), no desde un centroide variable. null si la fila no la trae.
+      const mDist = parseFloat(cols[idx("Distancia_km")]);
       out.push({
         dt: cols[idx("Fecha_Satelite_UTC")],
         volc: cols[idx("Volcan")],
         sensor: cols[idx("Sensor")],
         vrp: parseFloat(cols[idx("VRP_MW")]) || 0,
+        dist: Number.isFinite(mDist) ? mDist : null,
       });
     }
     mirovaCsvCache = out;
@@ -514,9 +519,18 @@ function computeStats(jsonData, mirovaForVolc, volcanoName) {
     ? (vals.length % 2 ? vals[(vals.length - 1) / 2]
        : (vals[vals.length / 2 - 1] + vals[vals.length / 2]) / 2)
     : 0;
+  // S117 #3 — distancia mediana al cráter reportada por MIROVA en la ventana
+  // (validación de posición, A61). Robusta a una alerta lejana aislada.
+  const mDistVals = mirovaWindowed
+    .map(r => r.dist).filter(d => d != null && d >= 0).sort((a, b) => a - b);
+  const mirovaDistMed = mDistVals.length
+    ? (mDistVals.length % 2 ? mDistVals[(mDistVals.length - 1) / 2]
+       : (mDistVals[mDistVals.length / 2 - 1] + mDistVals[mDistVals.length / 2]) / 2)
+    : null;
   return {
     n_det_us: detRecs.length, n_det_mirova: mirovaWindowed.length,
     max_us: ourMaxVrp, median_us: medianVrp,
+    mirova_dist_med: mirovaDistMed,
   };
 }
 
@@ -580,6 +594,20 @@ function renderCard(volc, jsonData, mirovaForVolc) {
   s2.appendChild(b2);
   s2.appendChild(document.createTextNode(" alertas"));
   stRow.appendChild(s2);
+  stRow.appendChild(document.createTextNode(" · "));
+
+  // S117 #3 — distancia reportada por MIROVA (validación de posición, A61). El CSV
+  // trae Distancia_km (desde la coord nominal del cráter, A13) y antes se descartaba.
+  const sD = el("span", "stat");
+  sD.title = "Mediana de la distancia al cráter que MIROVA reporta en sus alertas de la " +
+    "ventana (columna Distancia_km del CSV, medida desde la coordenada nominal del cráter, " +
+    "no desde un centroide variable). Confirma que MIROVA ubica la anomalía en la cumbre; " +
+    "un valor que crece en el tiempo señala posible actividad de flanco.";
+  sD.appendChild(document.createTextNode("MIROVA dist: "));
+  const bD = el("b");
+  bD.textContent = stats.mirova_dist_med != null ? stats.mirova_dist_med.toFixed(2) + " km" : "—";
+  sD.appendChild(bD);
+  stRow.appendChild(sD);
   stRow.appendChild(document.createTextNode(" · "));
 
   // Max VRP
