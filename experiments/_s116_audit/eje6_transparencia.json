@@ -1,0 +1,91 @@
+{
+  "eje": 6,
+  "titulo": "Transparencia / SDA CPLT N°372",
+  "fecha": "2026-06-27",
+  "metodo": "READ-ONLY. Grep cabecera FICHA en pipeline/, clasificacion participa-decision por archivo, cotejo ficha v1.0 vs codigo + git log desde 2026-06-22.",
+
+  "convencion": "Nivel 1 = cabecera bloque-comentario 'FICHA SDA · <archivo> · SDA · ID' con 7 campos (Objetivo/Logica/Modelo/Datos/Variables/Limitaciones/Refs). Nivel 2 = comentario 'POR QUE' por bloque no trivial. Formato canonico exacto: pipeline/vrp_regimes.py:1-16.",
+
+  "cabeceras_presentes": [
+    {
+      "archivo": "pipeline/vrp_regimes.py",
+      "nivel": "1-completa",
+      "nota": "Cabecera FICHA bloque-comentario completa con los 7 campos. Es el formato canonico de referencia."
+    },
+    {
+      "archivo": "pipeline/anchor.py",
+      "nivel": "2-parcial",
+      "nota": "HALLAZGO ADVERSARIAL: NO tiene la cabecera FICHA Nivel-1 de bloque. Solo tiene un comentario docstring etiquetado 'FICHA SDA — Nivel 2' dentro de honest_anchor_applies (anchor.py:19). El grep 'FICHA SDA' matcheo por substring y por eso S115/backlog lo dieron por 'con cabecera'. Participa en la decision (cascada de POSICION del record, deriva distance_class). DEBE recibir cabecera Nivel-1 igual que los process_*."
+    }
+  ],
+
+  "cabeceras_faltantes": [
+    {
+      "archivo": "pipeline/process_modis.py",
+      "participa_decision": true,
+      "rol": "Nucleo de deteccion/cuantificacion MODIS (Tests 1/2/3 Coppola, VRP). Solo docstring tecnico en ingles, sin cabecera FICHA.",
+      "contenido_propuesto": "FICHA SDA · process_modis.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL\nObjetivo: Detectar y cuantificar anomalias termicas en granulos MODIS L1B (Terra/Aqua) para apoyar la vigilancia de actividad volcanica (alerta tecnica OVDAS).\nLogica: En cada escena nocturna se buscan pixeles 'calientes' (Tests contextuales y de ROI integrado de Coppola 2016a), se estima la temperatura de fondo local por anillo, y se calcula la potencia radiada (VRP) con la ecuacion de Wooster/Planck.\nModelo/metodo: Reglas fisicas deterministicas (Planck/Wooster; Coppola 2015/2016a/2024). NO es caja negra — logica auditable (punto 5.5 Res.372).\nDatos entrada: Radiancia/temperatura de brillo MODIS MOD021KM/MYD021KM (bandas 21/22 MIR, 31 TIR). SIN datos personales.\nVariables: BT del pixel, T de fondo (anillo/contextual), umbrales N·sigma dual-ROI (5 summit / 10 scene), area de pixel (nadir-fijo), distancia al crater.\nLimitaciones: Sesgo topografico en cumbres nevadas (MIR absoluto), sobre-deteccion difusa irreducible a 1 km, saturacion de pixel, contaminacion por lago/nieve, falsos positivos por incendios.\nRefs/datos: Coppola et al. 2015 (BV 77:55), Coppola 2016a (GS SP426.5), Coppola 2024 (Springer). Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md"
+    },
+    {
+      "archivo": "pipeline/process_viirs.py",
+      "participa_decision": true,
+      "rol": "Nucleo de deteccion/cuantificacion VIIRS I-band 375m (I04 MIR, I05 TIR). Solo docstring tecnico en ingles.",
+      "contenido_propuesto": "FICHA SDA · process_viirs.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL\nObjetivo: Detectar y cuantificar anomalias termicas en granulos VIIRS I-band 375m (VNP02IMG/VJ102IMG) — el sensor de mayor resolucion espacial, clave para focos sub-pixel debiles.\nLogica: Misma cascada MIROVA-style que MODIS adaptada a 375m: deteccion contextual/ROI sobre I04, fondo local por anillo, VRP por Wooster. En regimen de muy baja energia recupera focos sub-pixel con anillo de fondo intermedio condicionado.\nModelo/metodo: Reglas fisicas deterministicas (Wooster MIR; adaptacion TIRVolcH Aveni 2024 / Campus 2022). NO es caja negra (punto 5.5 Res.372).\nDatos entrada: Radiancia/BT VIIRS I04 (3.74um) e I05 (11.45um) via LUT del producto L1B. SIN datos personales.\nVariables: NTI/dNTI, T de fondo (anillo/intermedio), umbrales N·sigma, area de pixel (nadir-fijo), distancia al crater.\nLimitaciones: Artefacto solar diurno (mitigado: solo noche), contaminacion por nieve/nube, falsos positivos sub-umbral.\nRefs/datos: Coppola 2016a, Aveni et al. 2024 (RSE), Campus et al. 2022 (Sensors). Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md"
+    },
+    {
+      "archivo": "pipeline/process_viirs_mod.py",
+      "participa_decision": true,
+      "rol": "Nucleo de deteccion/cuantificacion VIIRS M-band 750m (M13 MIR). Es el canal 'VIIRS' por defecto que MIROVA muestra. Solo docstring tecnico.",
+      "contenido_propuesto": "FICHA SDA · process_viirs_mod.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL\nObjetivo: Detectar y cuantificar anomalias termicas en granulos VIIRS M-band 750m (VNP02MOD/VJ102MOD) — equivalente al canal 'VIIRS' por defecto de MIROVA.\nLogica: Misma formula VRP MIROVA-style que process_viirs.py pero sobre banda M13 (4.05um, area 750x750m), con su coeficiente Wooster propio.\nModelo/metodo: Reglas fisicas deterministicas (Wooster MIR; Coppola 2016a). NO es caja negra (punto 5.5 Res.372).\nDatos entrada: Radiancia/BT VIIRS M13 (MIR) y M15 (TIR). SIN datos personales.\nVariables: NTI/dNTI, T de fondo, umbrales N·sigma, area de pixel 750m (nadir-fijo), distancia al crater.\nLimitaciones: Mayor area de pixel amplifica el gradiente topografico crater-nieve (A69/A80); dispersion del centroide; solo noche por contaminacion solar.\nRefs/datos: Coppola 2016a, Massimetti tesis (adaptacion VIIRS). Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md"
+    },
+    {
+      "archivo": "pipeline/store.py",
+      "participa_decision": true,
+      "rol": "Persistencia + clasificacion final: deriva distance_class (summit/far), aplica guard de coherencia A46, ensambla final_hotspot. Solo docstring de formato JSON.",
+      "contenido_propuesto": "FICHA SDA · store.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL\nObjetivo: Persistir los records VRP y producir la CLASIFICACION final por record (etiqueta de cercania al crater) que apoya la vigilancia volcanica.\nLogica: Ensambla el hotspot final (cascada de posicion), deriva distance_class='summit'/'far' segun inner_radius_km por volcan, y aplica el guard de coherencia (la etiqueta 'summit' debe ser consistente con la ubicacion del cluster reportado). Escribe un JSON por volcan, con auto-upgrade NRT->Standard.\nModelo/metodo: Reglas deterministicas geometricas/de coherencia. NO es caja negra (punto 5.5 Res.372).\nDatos entrada: Records de VRP de los process_*.py (radiancia derivada). SIN datos personales.\nVariables: distance_class, inner_radius_km (dato oficial KML MIROVA por volcan), final_hotspot_lat/lon/dist_km, guard A46 (summit con cluster lejano -> far).\nLimitaciones: La etiqueta de cercania depende del ancla; bug schema asimetrico hotspot vs cluster (A46) mitigado por guard unidireccional.\nRefs/datos: Coppola 2016a (grilla UTM); volcanoes.yaml (radios KML oficiales MIROVA). Entrenamiento: No aplica. Ficha: docs/FICHA_SDA_VRP_CHILE.md"
+    },
+    {
+      "archivo": "pipeline/anchor.py",
+      "participa_decision": true,
+      "rol": "Cascada de POSICION del record (final_hotspot_*) — alimenta distance_class. Tiene comentario Nivel-2 pero NO cabecera Nivel-1. (Backlog S115 lo dio erroneamente por 'con cabecera'.)",
+      "contenido_propuesto": "FICHA SDA · anchor.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL\nObjetivo: Determinar la POSICION reportada de la anomalia (final_hotspot), insumo de la clasificacion summit/far. No decide magnitud ni deteccion.\nLogica: Cuando solo disparo el Test1 integrado (sin posicion por pixel) la posicion honesta es el vent del ROI o el pixel de NTI maximo. El override far->summit del ancla MODIS solo aplica si hay >=1 pixel del first-pass al crater (excluye recaptura second-pass A55/D11).\nModelo/metodo: Reglas deterministicas. NO es caja negra (punto 5.5 Res.372).\nDatos entrada: Mascaras de pixeles flaggeados (radiancia derivada). SIN datos personales.\nVariables: first_pass_summit, inner_radius_km, modo de ancla (vent/nti_peak), flag ENABLE_HONEST_ANCHOR_MODIS (OFF).\nLimitaciones: El ancla MIR-absoluta es vulnerable al sesgo topografico A69; por eso el override esta hard-gated y OFF.\nRefs/datos: Coppola 2016a (Tests 2/3 contextuales). Design: docs/superpowers/specs/2026-06-11. Entrenamiento: No aplica. Ficha: docs/FICHA_SDA_VRP_CHILE.md"
+    },
+    {
+      "archivo": "pipeline/detection_context.py",
+      "participa_decision": true,
+      "rol": "Gate de deteccion contextual dNTI 8-vecinos (Path C/D). Tiene docstring rico con 'Fenomeno fisico' pero sin cabecera FICHA Nivel-1. Participa directamente en si un pixel se detecta.",
+      "contenido_propuesto": "FICHA SDA · detection_context.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL\nObjetivo: Detectar pixeles que destacan de su entorno inmediato (gate contextual dNTI) para apoyar la deteccion termica robusta a heterogeneidad regional.\nLogica: (NTI_pixel - media(NTI 8-vecinos)) > C1 marca un pixel anomalo, inmune al sigma del anillo que se infla en terreno heterogeneo (Lastarria hidrotermal, Tupungatito glaciar).\nModelo/metodo: Regla determinista (kernel aritmetico 8-vecinos, Coppola 2016a + Campus 2024). NO es caja negra.\nDatos entrada: NTI por pixel (radiancia MIR/TIR). SIN datos personales.\nVariables: C1 (umbral dNTI dual-ROI), kernel 8-vecinos.\nLimitaciones: FPs sistemicos en cirrus alto frio (D9/A23), mitigado por co-validacion y cap de magnitud.\nRefs/datos: Coppola 2016a SP426.5, Campus 2024. Entrenamiento: No aplica. Ficha: docs/FICHA_SDA_VRP_CHILE.md"
+    }
+  ],
+
+  "no_requieren_cabecera_nivel1": [
+    {"archivo": "pipeline/fetch.py", "razon": "Descarga de granulos NASA (logistica/IO). No clasifica ni decide. Es 'mero almacenamiento/recuperacion' (excluido por guia §1 / Res.372 4.8). Cabecera Nivel-1 opcional/no-obligatoria."},
+    {"archivo": "pipeline/scan_geometry.py", "razon": "Correccion geometrica de area de pixel (sec3). Es un termino fisico de la formula VRP, no una decision; queda cubierto por la cabecera de los process_*. Comentario Nivel-2 suficiente."},
+    {"archivo": "pipeline/clustering.py", "razon": "Agregacion de pixeles contiguos (n_hotspots) — reporte, no clasificacion. Nivel-2 suficiente."},
+    {"archivo": "pipeline/audit_metrics.py", "razon": "Metricas de auditoria interna (TP/FP/recall vs MIROVA). No es parte del pipeline de decision operacional; es evaluacion. Fuera de scope obligatorio."},
+    {"archivo": "pipeline/mirova_csv_loader.py", "razon": "Carga ground-truth MIROVA para auditoria. No decide."},
+    {"archivo": "pipeline/constants.py / geo_utils.py / profile.py / __init__.py", "razon": "Constantes, utilidades y config. No clasifican."}
+  ],
+
+  "modulos_deteccion_secundarios_a_evaluar": {
+    "nota": "Estos modulos participan en la deteccion/clasificacion y son candidatos a cabecera Nivel-1 en una pasada exhaustiva, aunque el gap critico declarado S115 son los 4 nucleo + anchor. Decision de alcance para la sesion dedicada (A45).",
+    "archivos": ["test1_integrated.py", "test1_spatial_core.py", "test1_contextual_filter.py", "exclusion_zones.py", "path_d_cap.py", "path_d_intra_radio.py", "second_pass_intra_radio.py", "single_pixel_mode.py", "anomaly_pixels.py", "vrptir.py", "detect_tirvolch.py"]
+  },
+
+  "ficha_aldia": true,
+  "ficha_gaps": [
+    "MENOR (no desactualiza): la ficha v1.0 (2026-06-22) refleja el estado del codigo. No hubo cambios de logica de pipeline desde esa fecha (git log pipeline/ desde 2026-06-22 vacio; el unico commit posterior f7b24733 es el handoff S115 docs-only). Los 3 limites fisicos (sesgo topografico A69 §sub-1, difuso irreducible 1km A82 §sub-2, artefacto solar diurno A76 §sub-3), la cuantificacion foco-vs-difuso, y la coherencia espacial A46 ESTAN presentes en Subitem 3. VERIFICADO presente.",
+    "MENOR: campos institucionales/legales con '<completar>' (canal reclamacion, titularidad, acto que lo establecio, enlace institucional) pendientes de SERNAGEOMIN — esperado, no es deuda del equipo tecnico.",
+    "TRAZABILIDAD: el historial v1.0 referencia 'S109-S114'. S115 cerro GAP #A como mislabel (no gap) corrigiendo AUDIT_S114 — la ficha no necesita cambio por esto (no era un limite ni una logica), pero conviene anotar en proxima version que la fidelidad MODIS a Coppola 2016a fue re-confirmada S114 (dual-ROI 5/10, sin gap literal accionable)."
+  ],
+
+  "hallazgos": [
+    {"severidad": "media", "desc": "anchor.py figura como 'con cabecera FICHA' en backlog_s115.md y CLAUDE.md por un falso match del grep 'FICHA SDA' (solo tiene comentario Nivel-2, no la cabecera Nivel-1 de bloque). Es archivo que participa en la decision (deriva posicion->distance_class). Gap real, no contabilizado. Refuta parcialmente 'solo faltan 4 archivos'."},
+    {"severidad": "media", "desc": "El gap de cabeceras Nivel-1 es de 5 archivos nucleo (4 declarados + anchor.py), no 4. Adicionalmente detection_context.py participa en deteccion y carece de cabecera Nivel-1 (6 total). Posibles ~11 modulos de deteccion secundarios (test1_*, path_d_*, second_pass_*, exclusion_zones, single_pixel_mode) sin cabecera — candidatos para pasada exhaustiva."},
+    {"severidad": "baja", "desc": "Aplicar las cabeceras toca pipeline/ -> A45 obligatorio (tag defensivo pre-edit + OK Nicolas + suite verde), aunque sean solo comentarios sin logica. Backlog S115 ya lo documenta correctamente."},
+    {"severidad": "info", "desc": "La ficha publicable v1.0 NO esta desactualizada: refleja el codigo actual y contiene los 3 limites fisicos + foco-vs-difuso + coherencia A46. La publicacion no esta bloqueada por el gap de cabeceras (son complemento de trazabilidad de codigo)."}
+  ],
+
+  "veredicto": "con_deuda",
+  "veredicto_detalle": "La ficha publicable esta SANA y al dia (publicable salvo campos legales <completar> de SERNAGEOMIN). La DEUDA es de cabeceras FICHA Nivel-1 en el codigo: gap real de 5 archivos nucleo (process_modis/viirs/viirs_mod, store, ANCHOR — este ultimo mal contabilizado como completo) + detection_context, mas ~11 modulos de deteccion secundarios candidatos. No bloquea publicacion. Aplicar = comentarios sin logica, requiere A45 en sesion dedicada."
+}

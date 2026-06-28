@@ -1,0 +1,45 @@
+{
+  "eje": "5 - Frontend / display coherence",
+  "fecha": "2026-06-27",
+  "metodo": "estatico (grep helpers) + preview real puerto 8091 sirviendo desde raiz repo (index/diario/mosaico/comparacion)",
+  "paridad_vistas": true,
+  "asimetrias": [
+    {
+      "tipo": "documentada_intencional",
+      "severidad": "baja",
+      "desc": "_mirova_confirmed solo se ASIGNA en index.html (computeMetrics L1327/1335). diario.html y mosaico.html lo LEEN en el guard de isCirrusArtifact/isDiffuseFieldArtifact pero nunca lo pueblan (siempre undefined). El cinturon de 'no suprimir record confirmado por MIROVA' es inerte en diario/mosaico; alli opera SOLO el criterio fisico (t_max<0C & VRP>10), validado empiricamente 0 reales atrapadas. Comentado explicitamente en diario L324 y mosaico L326 ('aca no se puebla -> opera el criterio fisico solo'). Es deuda-por-diseno, no bug silencioso."
+    },
+    {
+      "tipo": "toggle_scope",
+      "severidad": "cosmetica",
+      "desc": "Persistencia del toggle F5' Nucleo/Cluster usa store distinto por vista: index = persistedFlag('vrp_f5_core') (localStorage), diario = sessionStorage('diario_f5_core'), mosaico = sessionStorage('mosaico_f5_core'). Los 3 default a Core=true (coherente en default). Cambiar el toggle en una vista no se propaga a las otras. Cada vista es standalone por diseno (S92); no afecta el numero por-record."
+    }
+  ],
+  "filtros_display_replicados": {
+    "isCirrusArtifact": ["index", "diario", "mosaico"],
+    "isDiffuseFieldArtifact": ["index", "diario", "mosaico"],
+    "isThermalArtifact_wired_en_eqVrpDisplay": ["index", "diario", "mosaico"],
+    "geo_class_extension_naranja": ["index (L2511/2557)"],
+    "nota_geo_class": "geo_class=extension (render naranja) solo aparece en index.html (vista mapa). diario/mosaico no dibujan mapa con clasificacion espacial -> no aplica; no es asimetria de filtro de magnitud."
+  },
+  "datetime_bugs": [],
+  "datetime_verificacion": "0 'new Date(' crudo sobre campos UTC. Todos los datetime_utc/dt/Fecha_ pasan por parseUtcMs (que appende 'Z' si falta) en las 4 vistas. Casos new Date() restantes son legitimos: (a) dentro de parseUtcMs mismo; (b) sobre strings con 'Z' ya appendido (index L3381, mosaico L425/465); (c) Chart.js parsed.x que ya es ms-timestamp (diario L464); (d) new Date() para hora actual (index L3014/3624/3650/3707, mosaico L513/681/689). El fix S115 #6 (diario buildDatasets+computeStats: new Date(r.dt) -> parseUtcMs(r.dt)) esta presente y correcto (diario L432/L497). comparacion.html usa parseUtcMs (L131-136).",
+  "magnitud_coherente": true,
+  "magnitud_nota": "Las 3 vistas live (index/diario/mosaico) canalizan TODA la magnitud de display por eqVrpDisplay/mirovaEqVrpDisplay que respeta USE_F5_CORE (Core vs Cluster) y aplica isThermalArtifact->0. Tabla, chart, tarjeta y mapa usan la misma funcion (fix S96 vigente: index L2118 comenta que la tabla antes mostraba pc.vrp_mw crudo). HALLAZGO MENOR: comparacion.html (preview S115, NO live) usa pc.vrp_mw CRUDO (L207) sin F5'/artifact-filter para su scatter de calibracion 'VRP nuestro vs MIROVA'. Es intencional (compara cluster crudo vs MIROVA) y la pagina esta badgeada 'PREVIEW S115 - no es el dashboard live', pero el eje 'VRP nuestro' puede inflarse por artefactos cirrus/difuso que las vistas live suprimen.",
+  "preview_errors": [],
+  "preview_ok": true,
+  "preview_detalle": {
+    "index": "carga OK, sin warn/error, USE_F5_CORE=true, selector volcanes presente",
+    "diario": "carga OK, 12 charts renderizados, sin warn/error, USE_F5_CORE=true",
+    "mosaico": "carga OK, 11 cards, sin warn/error, USE_F5_CORE=true",
+    "comparacion": "carga OK, sin warn/error. Tab1 (histograma dist) stat poblada (149 chars). Tab3 (mapa PCC) renderiza tras click: 520px alto, 3 tiles, 1288 vectores (1286 detecciones + 2 anclas), stat poblada. Canvas Chart.js reportan width=0 en panes display:none (quirk responsive Chart.js en tabs ocultos), no es error de datos."
+  },
+  "hallazgos": [
+    {"severidad": "baja", "desc": "comparacion.html (preview, no-live) usa pc.vrp_mw crudo sin F5'/artifact-filter -> 'VRP nuestro' del scatter puede diferir de las vistas live. Intencional (calibracion cluster vs MIROVA) + badgeado preview. Si se promueve a live, debe pasar por mirovaEqVrpDisplay (trampa S96)."},
+    {"severidad": "baja", "desc": "_mirova_confirmed solo poblado en index; cinturon inerte en diario/mosaico (documentado, criterio fisico cubre, 0 reales atrapadas empiricamente)."},
+    {"severidad": "cosmetica", "desc": "Toggle F5' no comparte estado entre vistas (localStorage index vs sessionStorage diario/mosaico); default Core=true en las 3."},
+    {"severidad": "cosmetica", "desc": "Charts Chart.js de comparacion en tab oculto reportan width 0 hasta activar el tab (lazy render); datos OK. Pagina preview standalone."}
+  ],
+  "adversarial_refutacion": "Intente refutar 'el frontend esta coherente'. Resultado: las 3 VISTAS LIVE (index/diario/mosaico) SON coherentes en magnitud (todo via eqVrpDisplay+F5'+artifact->0), datetime (0 new Date crudo sobre UTC, fix S115 presente) y filtros (cirrus + difuso replicados en las 3). 0 errores de consola en las 4 vistas. Las 2 asimetrias halladas estan documentadas/intencionales y de impacto acotado. La unica magnitud divergente real (comparacion.html pc.vrp_mw crudo) esta en una pagina preview explicitamente fuera del dashboard live.",
+  "veredicto": "sano"
+}

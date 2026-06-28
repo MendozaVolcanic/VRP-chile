@@ -1,0 +1,42 @@
+{
+  "eje": 2,
+  "scope": "Integridad del codigo del pipeline (READ-ONLY, S116 A51)",
+  "fecha": "2026-06-27",
+  "suite": {
+    "pass": 775,
+    "fail": 0,
+    "skipped": 24,
+    "duracion_s": 14.08,
+    "fallos_detalle": []
+  },
+  "regresiones": [],
+  "a49_missing_return": {
+    "metodo": "Mapeo de defs y returns top-level en detection_context.py (350-938) + verificacion de fall-through en combine_hot_paths",
+    "funciones_verificadas": [
+      "first_pass_tests_2_and_3 (def 350 -> return 479)",
+      "dual_roi_bt_threshold (def 482 -> return 527)",
+      "compute_nti_and_nti_app (def 536 -> return 594)",
+      "compute_eti_scene_quadratic (def 610 -> return 705, ambos early-returns 669/678 retornan eti)",
+      "second_pass_adjacent (def 708 -> return 820, early-return 788 retorna copy)",
+      "combine_hot_paths (def 841 -> if/else 871/873, sin fall-through implicito None)",
+      "compute_bg_stats (def 895 -> return 938 + early-return 934 (None,None,n_bg) intactos; regresion S80 corregida y estable)"
+    ],
+    "hallazgo": "0 funciones de deteccion con return faltante en camino exitoso. La regresion historica A49 (compute_bg_stats S80) sigue corregida."
+  },
+  "schema_gaps": [],
+  "guard_a46_live": true,
+  "guard_a46_detalle": "store.py:359-365 LIVE. Predicado unidireccional: distance_class=='summit' AND inner_radius_km is not None AND pc.vrp_mw>0 AND pc.centroid_dist_km>inner_radius_km -> relabel summit->far + diag_a46_relabel. Test tests/test_store_a46_coherence_s113.py 7 passed. Coincide con docs/S113_A46_COHERENCE_GUARD.md y reference_s113_a46_bidirectional. Mantiene la cara far->summit SIN re-derivar (trap A48/A18 evitado).",
+  "dual_anchor_impact": "acotado_display",
+  "dual_anchor_detalle": "geo_utils.py define 3 roles separados: get_grid_center (mirova_center, FRAME de la imagen), get_detection_anchor (vent_lat=crater/lacolito, prioridad), get_effective_vent (DEPRECATED alias de grid_center, solo scripts offline). Produccion (scripts/run_pipeline.py:202/245/292) usa SOLO get_detection_anchor para los 3 sensores. centroid_dist_km (clustering.py:104) = haversine desde vent_lat. TODOS los gates binarios downstream (inner_radius gate clustering.py:150, A46 guard store.py:363, geo_class store.py:437) comparan ese MISMO centroid_dist_km contra inner_radius_km -> un solo ancla coherente. PCC: vent_lat(-40.525,-72.146)=lacolito; mirova_center(-40.590,-72.119)=grid frame; lat/lon(-40.59,-72.117)=GVP. El offset ~7.5km entre frame y crater NO entra a ningun gate. El 'artefacto 1.4km' de S115 fue confusion de ancla en AUDITORIA (centroid_dist desde lacolito vs MIROVA desde GVP), NO incoherencia de gate del pipeline. Guard de regresion tests/test_detection_anchor.py 29 passed (asegura que consolidaciones futuras no reviertan el ancla al crater, A63).",
+  "hallazgos": [
+    {
+      "severidad": "bajo",
+      "desc": "get_effective_vent sigue presente como alias DEPRECATED de get_grid_center (mirova_center-priority). Produccion ya no lo usa (solo scripts offline), pero es un foot-gun latente: si un caller nuevo de deteccion lo importara por error, anclaria al grid frame y reintroduciria el bug pre-S98 (crater reportado 'far'). El docstring lo advierte explicitamente. Riesgo bajo, mitigado por test_detection_anchor.py."
+    },
+    {
+      "severidad": "bajo",
+      "desc": "combine_hot_paths usa if/else exhaustivo (no fall-through), pero retorna por dos ramas sin un return final defensivo. Robusto hoy; cualquier insercion futura de codigo entre el if y el else seria un vector A49. Solo nota preventiva, no defecto actual."
+    }
+  ],
+  "veredicto": "sano"
+}

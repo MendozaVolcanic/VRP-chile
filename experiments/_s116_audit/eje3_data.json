@@ -1,0 +1,49 @@
+{
+  "json_ok": true,
+  "json_note": "45/45 data/mirova_equivalent/*.json parsean sin excepcion (A47 race: sin corrupcion).",
+  "loader_bugs": [
+    {
+      "severidad": "media",
+      "file": "frontend/diario.html:202-207",
+      "desc": "El loader del CSV consolidado ignora 'Distancia_km' (solo extrae dt/volc/sensor/vrp). La distancia de referencia MIROVA nunca se parsea. No afecta recall (el cruce es por fecha+sensor), pero impide validar geometria contra MIROVA en la vista diario."
+    },
+    {
+      "severidad": "baja",
+      "file": "frontend/diario.html:199 / index.html",
+      "desc": "Parseo CSV por split(',') ingenuo (sin manejo de comas embebidas/quotes). Bajo riesgo: los campos consumidos (dt/sensor/VRP_MW) son numericos/enum. Solo fragil si el scraper agregara campos con comas."
+    }
+  ],
+  "ocr_status": {
+    "consumido_por_frontend": false,
+    "consumido_por_audits": true,
+    "desc": "Ninguna vista frontend (index/diario/mosaico) carga registro_vrp_ocr.csv ni filtra ALERTA_TERMICA_OCR. diario.html solo consume Tipo_Registro=='ALERTA_TERMICA' (1070 filas), ignora 602 FALSO_POSITIVO y 22902 RUTINA. Los scripts de experiments/*audit*.py SI consumen OCR (A11/A54 OK para auditoria). Conclusion: OCR-no-consumido es por diseno en display, NO un bug de loader; cubierto en audits."
+  },
+  "alias_check": {
+    "estado": "OK",
+    "desc": "frontend/diario.html TIER_A[].csv mapea EXACTAMENTE las 11 variantes A14: PlanchonPeteroa (sin guion), 'Nevados de Chillan' (espacios), 'Puyehue-Cordon Caulle' (con guion), Chaiten/Tupungatito/etc. El match r.volc===volc.csv (linea 724) es correcto. index.html NO carga el CSV (solo JSON), no aplica. Sin perdida por alias en la vista que usa el CSV."
+  },
+  "stale": false,
+  "frescura": "latest_consolidado.csv repo=24575 lineas vs fresco=24581 (mtime repo HOY 2026-06-27 21:08, ~al dia). JSON NRT Tier A frescos: Lascar/Villarrica/Copahue ultimo record HOY 2026-06-27 06:12-08:20 UTC. NRT corriendo normal.",
+  "data_dirs_inventory": [
+    {"path": "data/_*/ (60+ dirs, A/B y drift histor.)", "size": "~757 MB total", "recomendacion": "archivar", "razon": "Outputs de A/B tests y drift historicos (drift1a..drift7, r2_*, d8_*, dual_roi, test1_*, t1lm_q*, v750focal, d11_modis). Reproducibles via reproc; ninguno es operacional. Mover a archivo/tag antes de borrar (A38). NO borrar sin tag defensivo + confirmacion."},
+    {"path": "data/_mirova_literal/", "size": "78 MB", "recomendacion": "archivar", "razon": "El mas grande; output de experimento clon-literal. Reproducible."},
+    {"path": "experiments/_s109_modis_mag/", "size": "163 MB", "recomendacion": "archivar", "razon": "Outputs A/B magnitud focal MODIS S109 (_promo_art/_staging untracked). Trabajo cerrado/adoptado; conservar como evidencia o archivar."},
+    {"path": "experiments/_s104_roi_probe/ + _s114_audit/ + _s111_d11/ + _s110_*", "size": "~223 MB (todos _s1*)", "recomendacion": "conservar", "razon": "Evidencia de auditorias recientes (S104-S114) que respaldan decisiones vivas (D11, far->summit A82). Conservar al menos hasta cierre de los frentes; muchos ya commiteados parcialmente."},
+    {"path": "experiments/_s116_audit/", "size": "0 (esta auditoria)", "recomendacion": "conservar", "razon": "Salida de la auditoria S116 en curso."}
+  ],
+  "vrp_fuera_del_repo": [
+    {"path": "Volcanologia/_s76_experiments_pending/", "size": "115 MB", "es_vrp": true, "recomendacion": "archivar (no mover al repo)", "razon": "Experiments S76 pendientes (132-145: unsuitable filters A/B, lascar cap/cat-a, recall_precision, pilot a5). Son VRP Chile pero outputs de experimentos cerrados; no son operacionales. Comprimir a un .zip de archivo. Confirmar con Nicolas antes de mover/borrar (A38)."},
+    {"path": "Volcanologia/backup-s15-dev-untracked-2026-05-20/", "size": "32 MB", "es_vrp": true, "recomendacion": "conservar (backup defensivo)", "razon": "Snapshot defensivo S70 de untracked de la rama stale s15-dev (TIFs/PNGs MIROVA Lascar/PCC/Villarrica/Lastarria, audits 60_*, OSF villarrica). Tiene BACKUP_README.md + tag git backup-s15-dev-pre-s70. Las imagenes MIROVA tienen valor para R2 retroactivo. Dejar tal cual; es la red de seguridad."},
+    {"path": "Volcanologia/mirova-tif-archive/", "size": "(sibling intencional)", "es_vrp": true, "recomendacion": "dejar (NO mover)", "razon": "Sibling INTENCIONAL del repo por regla A62 (ground truth TIF MIROVA fuera del repo a proposito). No tocar."},
+    {"path": "Volcanologia/IDEAS_CROSS_SENSOR.md / IDEAS_MEJORAS_DASHBOARDS.md", "size": "pequeno", "es_vrp": true, "recomendacion": "evaluar mover a VRP Chile/docs/ o tasks/backlog", "razon": "Notas de ideas relacionadas a VRP. Viven en el padre; candidatos a integrar al backlog del repo para no perderlas. Bajo riesgo."}
+  ],
+  "hallazgos": [
+    {"severidad": "media", "desc": "Distancia_km MIROVA nunca se parsea en el loader del CSV (diario.html). No rompe recall pero deja sin usar el unico dato de geometria de referencia MIROVA en el CSV."},
+    {"severidad": "info", "desc": "OCR (602 FALSO_POSITIVO / ALERTA_TERMICA_OCR) NO se consume en ninguna vista frontend; SI en audits. Es comportamiento de display por diseno, no bug. Confirma A11/A54: el OCR es complemento usado en auditoria, no en el dashboard de recall."},
+    {"severidad": "info", "desc": "Alias de nombres A14 manejados correctamente en diario.html (mapeo csv: exacto para las 11 Tier A). Sin perdida por alias."},
+    {"severidad": "baja", "desc": "~757 MB en data/_*/ + ~223 MB en experiments/_s1*/ + 115 MB en _s76_experiments_pending (padre) son scratch/A-B reproducibles acumulados. Candidatos a archivar bajo tag defensivo (A38). No operacional."},
+    {"severidad": "info", "desc": "5 archivos modificados (M) en git status son resultados de audits viejos (s90/s99/s112), no datos operacionales. Sin riesgo."}
+  ],
+  "adversarial": "Intente refutar 'datos sanos': (1) corrupcion JSON A47 -> NO, 45/45 parsean; (2) alias A14 perdiendo conteos -> NO en la vista que usa CSV (mapeo exacto); (3) CSV stale -> NO, al dia HOY; (4) NRT congelado -> NO, records de hoy presentes. El unico defecto real es Distancia_km sin parsear (deuda menor) y OCR no en display (por diseno). No hay perdida de datos ni fallas de integridad.",
+  "veredicto": "con_deuda"
+}

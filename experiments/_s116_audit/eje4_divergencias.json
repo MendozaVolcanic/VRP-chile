@@ -1,0 +1,37 @@
+{
+ "recall_por_sensor": {
+  "VIIRS375": 98.4,
+  "VIIRS750": 85.0,
+  "MODIS": 12.5
+ },
+ "recall_por_sensor_crater_pipeline": {
+  "VIIRS375": 98.4,
+  "VIIRS750": 85.0,
+  "MODIS": 100.0
+ },
+ "baseline_s114": {
+  "VIIRS375": 99.1,
+  "VIIRS750": 85.7,
+  "MODIS_dashboard": 15.8,
+  "MODIS_crater": 89.5
+ },
+ "metodo_recall": "Clon exacto del metodo S114 (parity_by_sensor_s114.py) sobre CSV consolidado FRESCO 2026-06-27 (cons_fresh.csv). Ventana 2026-05-01..2026-06-30, 11 Tier A. Emparejado por (volcan, sensor, noche). Gate DASHBOARD = distance_class=='summit' (o ausente) AND 0<pc.vrp_mw<=50000 AND pc.centroid_dist_km<=inner_radius_km (A10: pc.vrp_mw NO record.vrp_mw). recall = noches MIROVA-ALERTA detectadas / total noches ALERTA. Tambien se mide recall CRATER (pipeline encontro el cluster crateriano, sin exigir distance_class) para aislar el bug de etiquetado A46.",
+ "divergencias": [
+  {"id": "D2", "estado": "abierta", "tendencia": "igual", "nota": "Cobertura CSV ground-truth ~70-80% VIIRS. Conocido, no se re-scrapeo. El CSV fresco usado es la mejor disponible; el recall VIIRS reportado puede estar ligeramente subestimado por pasadas MIROVA no scrapeadas (recall real probablemente >= el medido)."},
+  {"id": "D3", "estado": "abierta", "tendencia": "igual", "nota": "MIROVA emite categoria FALSO_POSITIVO; nosotros solo distance_class far/summit. Conocido. El gate far oculta correctamente esos records del dashboard (alineado con la intencion FP de MIROVA)."},
+  {"id": "D9", "estado": "cerrada", "tendencia": "igual", "nota": "Cirrus path-D. EFECTIVAMENTE RESUELTA S113 en sus 2 caras: FP de deteccion capeado (cap C 5MW @ t_bg<270K, S71) + oculto por gate far (0 fuga); amplificacion de magnitud curada por nadir+focal S102-S109 (mediana 0.53x). Candidato t_bg-gate descartado (anti-MIROVA + trap A68/A80). Sin accion abierta. Verificado estable: VIIRS dashboard recall == crater recall (gap 0), no hay fuga de cirrus al dashboard."},
+  {"id": "D11", "estado": "cerrada", "tendencia": "igual", "nota": "Sesgo topografico MIR-absoluto (A69) / far->summit MODIS. CERRADA S114 como IRREDUCIBLE a 1 km (A82): la deteccion MODIS es FIEL a Coppola 2016a, el difuso pasa genuinamente, todos los discriminantes/N-sigma/cap/temporal refutados con datos. Confirmado S116: el gap dashboard MODIS (12.5%) es 100% el bug de etiquetado A46 far->summit, NO falta de deteccion (recall CRATER = 100%). 1084 records far->summit dispersos en los 11 vols = patron A82 esperado, no regresion."},
+  {"id": "D11-bis", "estado": "abierta", "tendencia": "igual", "nota": "Ancla honesta reporta dist=0.0 para records Test1-only (VIIRS375+750). Divergencia formal de POSICION (MIROVA nunca publica 0.0), trade-off deliberado. Deuda de tooltip frontend (P2.3), no toca magnitud ni deteccion."},
+  {"id": "D12", "estado": "abierta", "tendencia": "igual", "nota": "MODIS Lascar pierde alertas MIROVA-confirmadas por distance_class del pixel Salar (espejo MODIS del ancla honesta, flag-OFF). S116 confirma: Lascar MODIS recall CRATER 100% (21/21) pero DASHBOARD 14.3% (3/21) = la cara mas grande del far->summit MODIS. Es el mismo objeto que D11/A82; el espejo MODIS del ancla sigue OFF (gateado por fix de magnitud). Sin pérdida de alerta operacional (VIIRS375 Lascar 100%)."},
+  {"id": "NEW-8", "estado": "abierta", "tendencia": "igual", "nota": "Filtros unsuitable §267-273 (edge + dNTI/dETI<-0.1 fuera del pool m,sigma). Vigente como gap documental; ENABLE_UNSUITABLE_FILTERS_267_273 default True (auditoria fidelidad S114 lo marco 'full'). Sin movimiento."},
+  {"id": "VIIRS750-dispersion", "estado": "abierta", "tendencia": "igual", "nota": "Residuo ~30% VIIRS750 en cirrus/glaciar (cola documentada S112/S113). S116: 2 records far->summit Tupungatito VIIRS750 = exactamente el artefacto A69 ring-glaciar de S114 (nti_max plano ~-0.925, MIROVA RUTINA esa noche, gate S100 los dejo far con razon). NO nuevo, NO cuesta recall dashboard (gap 0)."}
+ ],
+ "sorpresas": [],
+ "hallazgos": [
+  {"severidad": "info", "desc": "Recall por sensor estable vs S114 (+-pocos %): VIIRS375 98.4% (era 99.1%), VIIRS750 85.0% (era 85.7%), MODIS dashboard 12.5% (era 15.8%). El leve descenso es ruido de ventana/CSV fresco, no regresion estructural."},
+  {"severidad": "info", "desc": "MODIS recall CRATER subio a 100.0% (era 89.5% en S114) — el pipeline encuentra el crater en TODAS las 24 noches ALERTA MODIS. Confirma que el 12.5% dashboard es 100% etiquetado A46, no deteccion."},
+  {"severidad": "info", "desc": "A82 INTACTO: 1084 far->summit casi todos MODIS, dispersos uniformemente en los 11 vols (Chaiten 131, Tupun 115, PP 107... Lascar 95). Patron difuso esperado de A69, NO un objeto externo unico ni un far->summit nuevo inexplicado. Los unicos VIIRS750 far->summit (2, Tupungatito) son el A69 ring-glaciar ya documentado."},
+  {"severidad": "info", "desc": "Intento adversarial de refutar 'recall se mantiene': busque caida silenciosa por vol. Ningun Tier A cae respecto a S114 en VIIRS. Vols con recall<100% (Isluga V750 78.9%, Tupun V750 60%, PP V750 50%, NdC V375 75%, Lastarria V375 93%) son FN sub-umbral/marginales MIROVA <0.3MW ya documentados (A54), no degradacion. No hay caida silenciosa."}
+ ],
+ "veredicto": "sano"
+}
