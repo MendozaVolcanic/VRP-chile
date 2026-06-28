@@ -842,6 +842,14 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   el gradiente cráter-vs-nieve. Cruzar `nti_max` antes de creer una magnitud "summit" de 1-5 MW al
   cráter en un nevado: si el NTI está en el piso, es el gradiente topográfico, no lava. Complementa
   A69/A68/D11.
+  - **⚠️ REFINAMIENTO S116 (investigación read-only, `docs/AUDIT_S116_FOLLOWUP.md` Hilo 1): `nti_max`
+    plano NO es un DISCRIMINANTE real-vs-artefacto.** El piso es **COMPARTIDO** por ambas clases: el
+    cat-b REAL MIROVA-confirmado se sienta INCLUSO MÁS ABAJO (mediana −0.941) que el artefacto (−0.919);
+    como discriminante da AUC 0.251 (inverso). Es decir: "nti_max en el piso" indica "señal sub-umbral
+    a esta resolución" (real o artefacto, no distingue), contaminado además por fondo frío de altitud
+    (A68). Usar `nti_max` plano como **sanity check** de "no creas una magnitud summit grande" (uso
+    original A80) sigue válido; usarlo para **separar** cat-b de artefacto NO. Solo el eje espacial
+    separa (ver A83).
 
 - **A81. El bug A46 (schema asimétrico hotspot↔cluster) es BIDIRECCIONAL; la cara dominante puede
   ser la OPUESTA a la del handoff** (S113, frente #3). `distance_class` se deriva de `final_hotspot`
@@ -875,6 +883,21 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   umbral que corte el difuso mata cat-b. El recall MODIS lo cubre VIIRS375 (A77: a 1 km el instrumento
   es el equivocado para sub-píxel). Detalle: `docs/AUDIT_S114_PARITY_BY_SENSOR.md` +
   [[project_s114_estado]].
+
+- **A83. No existe un discriminante FÍSICO per-record universal que separe el foco débil real
+  (cat-b) del artefacto topográfico a resolución gruesa; el único eje que separa es el ESPACIAL**
+  (S116, investigación read-only `docs/AUDIT_S116_FOLLOWUP.md`, precursor del A/B de gates intra-radio).
+  Sobre 4560 records summit-intra (37% MIROVA-confirmados) se barrieron todos los candidatos físicos:
+  el mejor (`test1_k_observed`, energía MIR integrada del Test1) da AUC 0.859 PERO (a) su cut óptimo es
+  **régimen-dependiente** (focal ~4-5 K / nevado ~2,8-3,9 K), y (b) cualquier cut **global** que rechace
+  ~70% del artefacto nevado **destruye 14-16% del cat-b real**. En régimen nevado el discriminante
+  colapsa (AUC 0.762). Mecanismo (A82): a 1 km el foco sub-píxel real y el ruido topográfico difuso son
+  el MISMO objeto en energía/NTI/magnitud; solo la posición (espacial/contextual) los separa. **How to
+  apply**: (1) NO buscar un escalar físico mágico para gatear cat-b-vs-artefacto — está agotado (anti-A8).
+  (2) Un criterio "físico" que SÍ funcione será **régimen-estratificado** = un gate per-volcán disfrazado
+  de física, NO más clon-literal que la máscara por distancia (MISSION lo evalúa igual). (3) El A/B de
+  cualquier gate de este tipo (ej. intra-radio C2) debe ser **estratificado focal/nevado**, midiendo FN
+  sobre cat-b real, no solo FP. (4) `nti_max` plano NO discrimina (A80 refinada: piso compartido).
 
 ## Regla de comunicación con Nicolás
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
