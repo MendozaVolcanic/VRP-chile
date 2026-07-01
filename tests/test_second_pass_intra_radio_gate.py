@@ -267,16 +267,18 @@ def test_many_pixels_mixed():
 # --- Profile loading tests ---
 
 
-def test_operacional_adopted_S85():
-    """mirova_equivalent (operacional) — flag ADOPTADO ON desde S85.
+def test_operacional_flipped_off_S118():
+    """mirova_equivalent (operacional) — flag REMOVIDO (OFF) desde S118.
 
-    Audit A/B run 26557588067 (45d, 22/22 success) validó cero pérdida
-    TPs MIROVA + reducción -59% n_2nd_pass_recapture MODIS. Adopción
-    documentada en pipeline/profiles/mirova_equivalent.yaml. Tag
-    defensivo pre-s85-f-s81-b-prime-adoption.
+    Guard de intención (A63): el A/B S118 (run 28312968093, 180/180 success,
+    docs/AUDIT_S118_C2_GATES_AB.md) midió CERO robos de cluster con el gate
+    OFF (la recaptura extra-radio vuelve 4-6× y el cráter conserva el primario
+    igual) → anti-patrón A55 sin protección real. La adopción S85 (run
+    26557588067) se revierte deliberadamente. Tag pre-s118-c2-flip.
+    Si una consolidación futura re-enciende el flag, este test la detecta.
     """
     p = _reload_profile("mirova_equivalent")
-    assert p.ENABLE_SECOND_PASS_INTRA_RADIO_GATE is True
+    assert p.ENABLE_SECOND_PASS_INTRA_RADIO_GATE is False
 
 
 def test_profile_enabled_sets_flag_true():

@@ -185,7 +185,15 @@ paths:
   # Path D; Path A/B/C también producen pixels fuera-cono). Fase B
   # backlog: docs/F_S81_B_BACKLOG_PATH_ABC_GATES.md. Ver evidencia
   # completa: docs/F_S81_A_ADOPTION_S84.md + experiments/_s83_f_s81_a/.
-  enable_path_d_intra_radio_gate: true
+  # ⚠ S118 FLIP OFF (revierte adopción S84): el A/B real de 4 brazos (run
+  # 28312968093, 180/180 success, docs/AUDIT_S118_C2_GATES_AB.md) midió CERO
+  # robos de cluster en 214 noches focales MIROVA-confirmadas con el gate OFF.
+  # Anti-patrón A55 sin protección real (MIROVA no cerca por geografía,
+  # MISSION l.130): el cluster del cráter gana siempre. Costo medido: cola
+  # inflada 0.5% de records, 16/19 far (el frontend ya los filtra).
+  # Tag: pre-s118-c2-flip. Guard de intención (A63):
+  # tests/test_modis_path_d_intra_radio_gate.py::test_operacional_flipped_off_S118.
+  enable_path_d_intra_radio_gate: false
   # S85 F-S81-B' ADOPTADO — gate intra-radio sobre pixels NUEVOS del
   # second_pass_recapture. A/B run 26557588067 (45d, 22/22 success) validó:
   #   - Cero pérdida TPs MIROVA (MODIS 25/25, VIIRS 68/68).
@@ -204,7 +212,16 @@ paths:
   # pendiente) con lente supresión MIROVA contextual no-volcánica.
   # Diseño Fase B': `docs/F_S81_B_PRIME_SECOND_PASS_GATE.md`. Tag defensivo:
   # pre-s85-f-s81-b-prime-adoption.
-  enable_second_pass_intra_radio_gate: true
+  # ⚠ S118 FLIP OFF (revierte adopción S85): mismo A/B run 28312968093 —
+  # con el gate OFF la recaptura extra-radio vuelve 4-6× (Láscar 1829→7197 px)
+  # y AUN ASÍ hay CERO robos de cluster (el cráter conserva el primario en
+  # 214/214 noches focales MIROVA-conf). Ratio de magnitud mediano 1.000.
+  # Costo medido: cola inflada 0.6% de records, 19/20 far (frontend filtra).
+  # Anti-patrón A55 removido → detección más clon-literal (2ª pasada Coppola
+  # 2016a §347-356 sin restricción geográfica, como MIROVA).
+  # Tag: pre-s118-c2-flip. Guard de intención (A63):
+  # tests/test_second_pass_intra_radio_gate.py::test_operacional_flipped_off_S118.
+  enable_second_pass_intra_radio_gate: false
   # P3.1 S15: dual-ROI dNTI summit/scene — Coppola 2016a Table 2.
   # Validado A/B S24 (mantener).
   enable_dnti_dual_roi: true
