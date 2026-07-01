@@ -188,16 +188,18 @@ def test_gate_preserves_dtype_and_shape():
 # --- Profile loading tests ---
 
 
-def test_operacional_adopted_S84():
-    """mirova_equivalent (operacional) — flag ADOPTADO ON desde S84.
+def test_operacional_flipped_off_S118():
+    """mirova_equivalent (operacional) — flag REMOVIDO (OFF) desde S118.
 
-    Audit run A/B 26540794992 (45d, 22/22 success) validó -93 a -98%
-    reducción de pixels dnti_ctx fuera del cono en TODOS los Tier A,
-    cero regresión de TPs MIROVA. Adopción documentada en
-    docs/F_S81_A_ADOPTION_S84.md. Tag defensivo pre-s84-f-s81-a-adoption.
+    Guard de intención (A63): el A/B S118 (run 28312968093, 180/180 success,
+    docs/AUDIT_S118_C2_GATES_AB.md) midió CERO robos de cluster en 214 noches
+    focales MIROVA-confirmadas con el gate OFF → el gate era anti-patrón A55
+    sin protección real (MISSION: MIROVA no cerca por geografía). La adopción
+    S84 (run 26540794992) se revierte deliberadamente. Tag pre-s118-c2-flip.
+    Si una consolidación futura re-enciende el flag, este test la detecta.
     """
     p = _reload_profile("mirova_equivalent")
-    assert p.ENABLE_PATH_D_INTRA_RADIO_GATE is True
+    assert p.ENABLE_PATH_D_INTRA_RADIO_GATE is False
 
 
 def test_profile_enabled_sets_flag_true():
