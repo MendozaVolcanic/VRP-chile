@@ -38,11 +38,15 @@ Los scripts ya existen en `experiments/_s119_audit/` — es empaquetarlos (~1 se
 
 ## §3 — Batch higiene (bajo riesgo, puede ir sin Nicolás salvo el tag)
 
-- Archivar 28 workflows one-shot (lista `eje4_workflows_profiles.json`; destino
-  `.github/workflows/_archive/`) + ~90 profiles huérfanos (tag defensivo A38).
-- Fix encoding 7 scripts (`eje6_2_encoding_scan.json`) + `→`→`->` en mensajes runtime
-  `fetch.py` (ciclo A45 conjunto con cualquier próximo cambio de fetch).
-- R2 pixel-level post-flip cuando haya TIF MIROVA comparable (6.5).
+- ✅ **HECHO (PR #477, 2026-07-01)**: 28 workflows one-shot → `.github/workflows/_archive/`
+  + 90 profiles huérfanos → `pipeline/profiles/_archive/` (tag defensivo A38
+  `pre-s120-hygiene-archive`; cross-check 0 refs activas; suite 796 passed).
+- ✅ **HECHO (PR #477)**: guard utf-8 stdout en los 7 scripts del scan
+  (`eje6_2_encoding_scan.json`, patrón reconfigure S118). **Sigue diferido**:
+  `→`→`->` en mensajes runtime `fetch.py` (ciclo A45 conjunto con próximo cambio de fetch).
+- ⏸ R2 pixel-level post-flip **BLOQUEADO**: `mirova-tif-archive` tiene último TIF
+  2026-05-20 (~6 semanas stale) — sin TIF comparable post-flip. ⚠ Revisar del lado
+  Mirova-v1 si el poll de TIFs se estancó (el poll de snapshots PNG sí sigue vivo).
 
 ## 🚫 NO reabrir (anti-A8) — sin cambios
 far→summit MODIS/D11/A69-como-bug (A82) · re-ancla ctx_cluster (A84) · inner PCC ·
