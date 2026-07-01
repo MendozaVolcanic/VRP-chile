@@ -1,0 +1,954 @@
+{
+ "workflows": {
+  "activos_necesarios": [
+   {
+    "file": "nrt-healthcheck.yml",
+    "rol": "monitoreo NRT"
+   },
+   {
+    "file": "nrt-monitor.yml",
+    "rol": "monitoreo NRT"
+   },
+   {
+    "file": "nrt-retry.yml",
+    "rol": "retry NRT"
+   },
+   {
+    "file": "nrt.yml",
+    "rol": "cron NRT cada 2h (core)"
+   },
+   {
+    "file": "pages-deploy.yml",
+    "rol": "deploy dashboard GitHub Pages"
+   },
+   {
+    "file": "sync-mirova-csv.yml",
+    "rol": "sync CSV ground truth Mirova-v1"
+   }
+  ],
+  "candidatos_archive": [
+   {
+    "file": "probe-s104-nti.yml",
+    "ultima_corrida": "2026-06-09",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "probe-s104-roi.yml",
+    "ultima_corrida": "2026-06-08",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "probe-s105-disc-tl.yml",
+    "ultima_corrida": "2026-06-10",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "probe-s105-disc.yml",
+    "ultima_corrida": "2026-06-09",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "probe-s110-ndc-assembly.yml",
+    "ultima_corrida": "2026-06-16",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "probe-s110-ndc-firstpass.yml",
+    "ultima_corrida": "2026-06-16",
+    "conclusion": "failure (superado por assembly)",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s101-nadir-validation.yml",
+    "ultima_corrida": "2026-06-05",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s101-sec3-ab.yml",
+    "ultima_corrida": "2026-06-05",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s102-nadir-promote.yml",
+    "ultima_corrida": "2026-06-05",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s102-viirs-nadir-ab.yml",
+    "ultima_corrida": "2026-06-06",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s102-viirs-noctx-ab.yml",
+    "ultima_corrida": "2026-06-07",
+    "conclusion": "cancelled (A/B 3 brazos cerrado S102)",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s103-viirs-nadir-promote.yml",
+    "ultima_corrida": "2026-06-07",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s103-viirs-pcc-tupun.yml",
+    "ultima_corrida": "2026-06-08",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s104-test1-nti-ab.yml",
+    "ultima_corrida": "2026-06-09",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s104-test1-nti-integral.yml",
+    "ultima_corrida": "2026-06-09",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s105-test1-nti-local-sweep.yml",
+    "ultima_corrida": "2026-06-10",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s105-test1-nti-local.yml",
+    "ultima_corrida": "2026-06-10",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s106-anchor-rest.yml",
+    "ultima_corrida": "2026-06-12",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s106-anchor-v750.yml",
+    "ultima_corrida": "2026-06-13",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s106-honest-anchor.yml",
+    "ultima_corrida": "2026-06-11",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s107-modis-localmag-ab.yml",
+    "ultima_corrida": "2026-06-13",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s108-anchor-v750-rest.yml",
+    "ultima_corrida": "2026-06-13",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s109-focal-promote.yml",
+    "ultima_corrida": "2026-06-15",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s109-modis-focalmag-ab.yml",
+    "ultima_corrida": "2026-06-15",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s111-d11-ab.yml",
+    "ultima_corrida": "2026-06-17",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s112-t1lm-ab.yml",
+    "ultima_corrida": "2026-06-17",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s112-v750focal-ab.yml",
+    "ultima_corrida": "2026-06-18",
+    "conclusion": "success",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   },
+   {
+    "file": "reproc-s118-c2-gates-ab.yml",
+    "ultima_corrida": "2026-06-28",
+    "conclusion": "success (run 28312968093, flip S118 cerrado)",
+    "razon": "one-shot probe/reproc de sesion cerrada; sin corridas desde su sesion"
+   }
+  ],
+  "archive_dir_existente": true
+ },
+ "profiles": {
+  "operacionales": [
+   {
+    "file": "experimental.yaml",
+    "en_tests": true,
+    "en_workflows_activos": true
+   },
+   {
+    "file": "mirova_equivalent.yaml",
+    "en_tests": true,
+    "en_workflows_activos": true
+   }
+  ],
+  "c2ab_quedarse": [
+   {
+    "file": "_c2ab_2pass_off.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "reproducibilidad flip S118 C2 (quedan por decision de tarea)"
+   },
+   {
+    "file": "_c2ab_baseline.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "reproducibilidad flip S118 C2 (quedan por decision de tarea)"
+   },
+   {
+    "file": "_c2ab_both_off.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "reproducibilidad flip S118 C2 (quedan por decision de tarea)"
+   },
+   {
+    "file": "_c2ab_pathd_off.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "reproducibilidad flip S118 C2 (quedan por decision de tarea)"
+   }
+  ],
+  "baseline_s81": [
+   {
+    "file": "mirova_equivalent_f_s81_a_intra_radio_disabled.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "baseline A/B S81 gates intra-radio; experimento cerrado (S118 flip OFF). Candidato archive PERO referenciado por tests — mover requiere tocar tests"
+   },
+   {
+    "file": "mirova_equivalent_f_s81_a_intra_radio_enabled.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "baseline A/B S81 gates intra-radio; experimento cerrado (S118 flip OFF). Candidato archive PERO referenciado por tests — mover requiere tocar tests"
+   },
+   {
+    "file": "mirova_equivalent_f_s81_b_prime_2nd_pass_gate_disabled.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "baseline A/B S81 gates intra-radio; experimento cerrado (S118 flip OFF). Candidato archive PERO referenciado por tests — mover requiere tocar tests"
+   },
+   {
+    "file": "mirova_equivalent_f_s81_b_prime_2nd_pass_gate_enabled.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "baseline A/B S81 gates intra-radio; experimento cerrado (S118 flip OFF). Candidato archive PERO referenciado por tests — mover requiere tocar tests"
+   }
+  ],
+  "referenciados_por_tests": [
+   {
+    "file": "_baseline_s44.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "_d8_d4_per_vol.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "_d8_vent_anchored.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "_dual_roi_bt_enabled.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "_h_d8_5_full.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "_mirova_literal.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "_no_bt_path.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "_s99_test1_core.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "_s99_test1_ctx.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "_s99_test1_ctxpeak.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "_s99_test1_eq16.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "experimental_lowT.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "mirova_equivalent_bt_path_on_v1.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "mirova_equivalent_lbg_global.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "mirova_equivalent_no_cap_v1.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "mirova_equivalent_path_d_atm_gate_v1.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "mirova_equivalent_path_d_cap_v1.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "mirova_equivalent_path_d_covalidation_v1.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "mirova_equivalent_phase2.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "mirova_equivalent_test1_retire_only_v1.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "mirova_equivalent_test1pix_filter.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   },
+   {
+    "file": "mirova_equivalent_unsuitable_only_v1.yaml",
+    "en_tests": true,
+    "en_workflows_activos": false,
+    "razon": "profile A/B historico PERO cargado por la suite de tests — NO archivar sin refactor de tests"
+   }
+  ],
+  "huerfanos_candidatos_archive": [
+   {
+    "file": "_coppola_full.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_d11_modis_gated.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_d11_modis_nogate.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_d8_combo_disabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_d8_combo_full.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_d8_vent_anchored_disabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_daytime_modis_disabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_daytime_modis_enabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_dibella_n12_viirs_only.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_drift1a_only.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_drift1ab_only.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_drift1b_only.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_drift234_only.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_drift23_dual_only.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_drift23_only.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_drift4_only.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_drift7_both_only.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_drift7_modis_only.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_drift7_viirs_only.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_dual_roi_bt_disabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_h8_pixel_filter_disabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_h8_pixel_filter_enabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_h_d8_5_disabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_honest_anchor_a.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_honest_anchor_b.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_honest_anchor_v750.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_local_kernel_bg_enabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_modis_focalmag_base.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_modis_focalmag_ctx.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_modis_focalmag_ctxpure.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_modis_localmag_base.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_modis_localmag_footprint.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_modis_localmag_ring.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_nadir_modis_validation.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_p3_1_disabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_p3_1_enabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_r2_C1_001_summit.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_r2_C2_3_summit.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_r2_C2_4_summit.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_r2_C2_8_summit.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_r2_baseline_drift234.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_r2_drift234_modis_only.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_r2_drift234_viirs_only.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_r2_drift4_alone.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_r2_uniform_no_dual.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_s102_nadir_promote.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_s103_viirs_nadir_promote.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_s109_focal_promote.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_s88_reproc_validation.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_s94_reproc.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_s94_reproc_modis.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_s94_reproc_viirs.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_s97_refresh_viirs.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_s97_refresh_viirs_apr.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_s97_refresh_viirs_mar.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_s97_refresh_viirs_may.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_s98_anchor.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_s99_test1_baseline.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_s99_test1_pixfilter.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_sec3_modis_nadir_off.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_sec3_modis_nadir_on.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_t1lm_q0_control.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_t1lm_q2_global.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_t1lm_q3_ring15.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_t1lm_q3_ring24.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_t1lm_q3_ring35.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_t1lm_q4_te1000.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_t1lm_q4_te700.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_t1lm_q5_ntilocal.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_t1lm_q6_spatialcore.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_test1_disabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_test1_enabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_test1_nti_covalidation_disabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_test1_nti_covalidation_enabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_test1_nti_integral.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_test1_nti_local.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_test1_nti_local_ks20.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_test1_nti_local_ks25.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_v750focal_base.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_v750focal_on.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_viirs_nadir_ab.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "_viirs_nadir_noctx_ab.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "low_vent_cap.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "mirova_equivalent_backfill_nov2025.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "mirova_equivalent_test1pix_disabled.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "mirova_equivalent_unsuitable_filters_v1.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "mirova_equivalent_villarrica_test1.yaml",
+    "en_tests": false,
+    "en_workflows_activos": true,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "nsigma_mir_12.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "nsigma_mir_5.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   },
+   {
+    "file": "s9_vent_permissive.yaml",
+    "en_tests": false,
+    "en_workflows_activos": false,
+    "razon": "A/B/probe historico sin referencias en tests ni workflows activos"
+   }
+  ]
+ },
+ "resumen": {
+  "wf_total": 34,
+  "wf_activos": 6,
+  "wf_candidatos_archive": 28,
+  "prof_total": 122,
+  "prof_operacionales": 2,
+  "prof_c2ab": 4,
+  "prof_s81": 4,
+  "prof_ref_tests": 22,
+  "prof_huerfanos": 90
+ }
+}

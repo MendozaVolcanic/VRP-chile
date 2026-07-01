@@ -1,0 +1,18 @@
+{
+  "task": "S119 audit Eje 6.4 - breakers NRT semana 2026-06-30/07-01",
+  "method": "gh run list --workflow=nrt.yml --limit 12 + gh run view <id> --log | grep -iE 'CIRCUIT|BREAKER|ConnectTimeout|host caido|tripped|fast-fail' sobre 4 runs muestreados",
+  "runs_semana": {
+    "n": 12,
+    "conclusion": "12/12 success (2026-06-30 07:52Z a 2026-07-01 19:53Z)"
+  },
+  "runs_muestreados": [
+    {"id": 28543806295, "created": "2026-07-01T19:53:47Z", "lance_breaker_tripped": true,
+     "detalle": "Tupungatito: DOWNLOAD_CONNFAIL ConnectTimeout nrt3.modaps.eosdis.nasa.gov (188s) -> DOWNLOAD_SKIP host caido para el resto de granules LANCEMODIS (fast-fail ~1-2s c/u). Repetido en profiles mirova_equivalent y experimental. Job success."},
+    {"id": 28517738219, "created": "2026-07-01T12:32:24Z", "lance_breaker_tripped": true,
+     "detalle": "Mismo patron: Tupungatito, ConnectTimeout nrt3.modaps -> DOWNLOAD_SKIP en cascada. Job success."},
+    {"id": 28492017489, "created": "2026-07-01T03:45:08Z", "lance_breaker_tripped": false, "detalle": "0 marcadores."},
+    {"id": 28451158064, "created": "2026-06-30T14:16:11Z", "lance_breaker_tripped": false, "detalle": "0 marcadores."}
+  ],
+  "cmr_breaker_tripped": 0,
+  "veredicto": "LANCE (nrt3.modaps) flaky intermitente el 2026-07-01 (2/4 runs muestreados tripean, solo VIIRS_SNPP NRT reciente); el breaker A64 degrada con gracia (skip instantaneo post-primer ConnectTimeout, 0 hangs, 0 timeouts de workflow). CMR breaker S116 sin trips observados. Salud NRT: 12/12 success."
+}

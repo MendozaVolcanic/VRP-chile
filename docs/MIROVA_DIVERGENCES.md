@@ -1366,6 +1366,21 @@ Registrado para que no se pierda (AUDIT_S105 contradicción #1).
 > no-geométrico, no flip global). El read-only mide lo que el gate PRESERVA, no lo que REMUEVE (exige
 > reproc, A18). La contradicción C2 pasa de "standing sin decisión" a **decisión informada + plan**.
 
+> **✅ RESUELTO S118 (flip OFF, PR #474, tag `pre-s118-c2-flip`).** El A/B real con reproc
+> (`docs/AUDIT_S118_C2_GATES_AB.md`, run 28312968093, 180/180, criterio pre-registrado A66
+> "robo de cluster espacial") midió lo que el read-only S116 no podía (la REMOCIÓN, A18):
+> **0 robos de cluster en 214 noches focales MIROVA-confirmadas** en los 3 brazos — la cerca
+> no protegía nada; el cráter conserva el cluster primario por sí solo (selección vent-anchored
+> robusta). Ratio de magnitud mediano 1.000; costo = cola inflada 0.5-1.3% (mayormente far,
+> 42/46 filtradas por frontend; peor caso difuso A69/A82 no-MIROVA-conf). El temor S116
+> "revertir destruiría recall focal" no se materializó: el gate ON/OFF no cambia los records
+> summit focales (el A/B los midió idénticos). El desenlace "gate per-volcán" quedó EXCLUIDO
+> por MISSION l.77 (no conmuta método por régimen — mismo trap que Eq.16 por-volcán S99).
+> Ambos gates → `false` en `mirova_equivalent.yaml`; guards de intención
+> `test_operacional_flipped_off_S118` ×2 protegen contra re-encendido por consolidación (A63).
+> Verificación post-flip S119 Eje 1: NRT 100% verde, recaptura estable, sin inflación summit
+> sistemática, JSONs contenidos (`docs/AUDIT_S119.md` §1) → **MANTENER OFF, cerrado**.
+
 ## S105 — Residuo path D MODIS re-dimensionado (corrige diagnóstico inflado)
 
 Un diagnóstico de subagente reportó "campo difuso MODIS universal ~280 recs/volcán a

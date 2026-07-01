@@ -94,9 +94,10 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
      D2 N·σ Tabla 1 ya implementado (dual-ROI 5/10, S114) — único gap literal pendiente GAP #A
      (§298-300 retiro Test1 K1, flag OFF) · VIIRS750 disperso glaciar (Tupun/PP, ctxpeak S102§2) ·
      NEW-8 gaps 2-4 (pool estadístico m,σ).
-   - **Pendiente de decisión** (S105, Nicolás): gates intra-radio S84/S85 (veredicto
-     anti-patrón A55 en AUDIT_S86 §C6; siguen ON; decidir con más datos al cerrar el
-     frente Test1/fondo-local).
+   - **Resuelto S118**: gates intra-radio S84/S85 → **OFF** (A/B real run 28312968093:
+     0 robos de cluster en 214 noches focales; PR #474, tag `pre-s118-c2-flip`;
+     verificación post-flip verde `docs/AUDIT_S119.md` §1). El operacional volvió a
+     clon-literal sin cercas; la separación clon/beyond vive en el display.
 
    Cerrar divergencia = alinear comportamiento con MIROVA, no agregar
    funcionalidad nueva. **Si SÍ cierra divergencia → puede implementarse.**
@@ -127,7 +128,7 @@ Estas fueron las desviaciones históricas. Nunca repetir.
 | Path C NTI relativo (default ON) | No en papers | Default OFF mantenido |
 | Subir `inner_radius_km` ad-hoc | Parche para recuperar recall; no es metodológico MIROVA | Rechazado S27 |
 | N·σ Di Bella 2024 (12σ noche VIIRS) | Di Bella es INGV Catania, NO MIROVA | Identificado S26 |
-| **Gate intra-radio por path** (S83-S85 PRs #224, #229) | No en papers; el frontend `mirovaEqVrp` ya hacía exactamente eso desde S33 → adopciones redundantes | Identificado S86 |
+| **Gate intra-radio por path** (S83-S85 PRs #224, #229) | No en papers; el frontend `mirovaEqVrp` ya hacía exactamente eso desde S33 → adopciones redundantes | **Removido S118** (A/B 0 robos de cluster, PR #474) |
 | **Eq.16 lava lake / Eq.25 crater lake POR-VOLCÁN** (design S53, casi adoptado S99) | El capítulo Coppola 2024 las presenta en sección "Applications" como productos de 2º nivel MANUALES y calibrados caso por caso ("requires specific calibrations", "valid only within the limits of the assumptions") — **NO el pipeline NRT automático**. MIROVA NRT es UN algoritmo por SENSOR uniforme (Coppola 2016a: "completely autonomous", "self-adapting thresholds independent of local conditions"). Conmutar de método por volcán es un drift. | Identificado S99 — movido a beyond-MIROVA (`docs/BEYOND_MIROVA_EXTENSIONS.md` EXT-11). Citas verbatim: `experiments/_s99_audit/dormant/papers_per_sensor.md` |
 
 **El patrón común**: cada parche resolvía el síntoma de un drift previo, no la
@@ -145,6 +146,14 @@ por MIROVA". **Cualquier PR futuro que proponga otro gate "intra-radio por
 path" requiere primero**: (a) verificar que el frontend no hace ya esa
 supresión, (b) clasificar la categoría físicamente (E S86) de los
 records que el gate filtraría, (c) confirmar que ninguno pertenece a (b).
+
+**Cierre de la familia (S118)**: el A/B real con reproc (run 28312968093,
+criterio pre-registrado "robo de cluster espacial") demostró que las cercas
+no protegían nada — 0 robos en 214 noches focales MIROVA-confirmadas; la
+selección de cluster vent-anchored es robusta a los píxeles extra-radio por
+sí sola. Ambos gates se flipearon a OFF (PR #474) y el post-flip se verificó
+verde en S119. La lección quedó destilada como regla A85 en CLAUDE.md: medir
+el robo real ANTES de cercar.
 
 ## Cuándo SÍ se puede divergir
 

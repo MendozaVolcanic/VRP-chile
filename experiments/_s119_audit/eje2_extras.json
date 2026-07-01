@@ -1,0 +1,148 @@
+{
+ "villarrica_post16_por_sensor": {
+  "MODIS": {
+   "n": 3,
+   "med_vrp_mw": 5.139,
+   "med_dist_vent_km": 2.11,
+   "frac_dist_lt1km": 0.0
+  },
+  "VIIRS375": {
+   "n": 56,
+   "med_vrp_mw": 1.442,
+   "med_dist_vent_km": 1.29,
+   "frac_dist_lt1km": 0.21
+  },
+  "VIIRS750": {
+   "n": 20,
+   "med_vrp_mw": 1.817,
+   "med_dist_vent_km": 1.91,
+   "frac_dist_lt1km": 0.15
+  }
+ },
+ "s118_ab_limits": {
+  "ventana_temporal": [
+   "2026-01-09",
+   "2026-05-20"
+  ],
+  "n_windows_include": 180,
+  "kinds": {
+   "alerta": 152,
+   "rutina": 28
+  },
+  "por_volcan": {
+   "Lascar": {
+    "alerta_dates_total": 108,
+    "chunks_kept": 4,
+    "chunks_candidate": 10,
+    "chunks_dropped": 6
+   },
+   "Lastarria": {
+    "alerta_dates_total": 91,
+    "chunks_kept": 4,
+    "chunks_candidate": 10,
+    "chunks_dropped": 6
+   },
+   "Isluga": {
+    "alerta_dates_total": 73,
+    "chunks_kept": 4,
+    "chunks_candidate": 10,
+    "chunks_dropped": 6
+   },
+   "PlanchonPeteroa": {
+    "alerta_dates_total": 50,
+    "chunks_kept": 4,
+    "chunks_candidate": 10,
+    "chunks_dropped": 6
+   },
+   "PuyehueCordonCaulle": {
+    "alerta_dates_total": 74,
+    "chunks_kept": 4,
+    "chunks_candidate": 10,
+    "chunks_dropped": 6
+   },
+   "Llaima": {
+    "alerta_dates_total": 1,
+    "chunks_kept": 1,
+    "chunks_candidate": 1,
+    "chunks_dropped": 0
+   },
+   "Copahue": {
+    "alerta_dates_total": 1,
+    "chunks_kept": 1,
+    "chunks_candidate": 1,
+    "chunks_dropped": 0
+   },
+   "Villarrica": {
+    "alerta_dates_total": 12,
+    "chunks_kept": 4,
+    "chunks_candidate": 5,
+    "chunks_dropped": 1
+   },
+   "NevadosDeChillan": {
+    "alerta_dates_total": 6,
+    "chunks_kept": 4,
+    "chunks_candidate": 4,
+    "chunks_dropped": 0
+   },
+   "Tupungatito": {
+    "alerta_dates_total": 63,
+    "chunks_kept": 4,
+    "chunks_candidate": 8,
+    "chunks_dropped": 4
+   },
+   "Chaiten": {
+    "alerta_dates_total": 18,
+    "chunks_kept": 4,
+    "chunks_candidate": 8,
+    "chunks_dropped": 4
+   }
+  },
+  "config": {
+   "CLUSTER_GAP_DAYS": 7,
+   "PAD_DAYS": 2,
+   "MAX_CHUNK_DAYS": 14,
+   "MAX_ALERTA_CHUNKS": 4,
+   "profiles": [
+    "_c2ab_baseline",
+    "_c2ab_pathd_off",
+    "_c2ab_2pass_off",
+    "_c2ab_both_off"
+   ]
+  }
+ },
+ "magnitud_outliers": {
+  "Lastarria": {
+   "por_sensor": {
+    "VIIRS375": {
+     "n": 114,
+     "ratio_mediano": 0.466
+    }
+   },
+   "pares": "114 pares (ver ratios por sensor)"
+  },
+  "Llaima": {
+   "por_sensor": {
+    "VIIRS375": {
+     "n": 2,
+     "ratio_mediano": 0.357
+    }
+   },
+   "pares": [
+    {
+     "sensor": "VIIRS375",
+     "date": "2026-05-15",
+     "mirova_mw": 0.29,
+     "ours_mw": 0.082,
+     "ratio": 0.283
+    },
+    {
+     "sensor": "VIIRS375",
+     "date": "2026-05-29",
+     "mirova_mw": 0.99,
+     "ours_mw": 0.427,
+     "ratio": 0.431
+    }
+   ]
+  }
+ }
+}
