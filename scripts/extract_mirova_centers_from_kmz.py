@@ -27,6 +27,11 @@ from pathlib import Path
 
 import yaml
 
+# stdout Windows default cp1252 no imprime Unicode (regla encoding del proyecto);
+# reconfigure no re-envuelve el stream (patrón S118 analyze.py).
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 KMZ_DIR = Path(__file__).resolve().parent.parent / "kmz"
 VOLCANOES_YAML = Path(__file__).resolve().parent.parent / "volcanoes.yaml"
 
