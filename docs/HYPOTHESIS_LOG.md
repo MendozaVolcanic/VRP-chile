@@ -6,6 +6,28 @@
 
 ---
 
+## H_S118_C2_GATES_NO_THEFT — "La cerca intra-radio protege al cráter de robo de cluster"
+
+- **Formulada**: implícita desde S83-S85 (justificación de los gates PRs #224/#229); explicitada
+  y pre-registrada como criterio A66 en el design S118
+  (`docs/superpowers/specs/2026-06-28-c2-gates-intra-radio-ab-design.md`).
+- **Hipótesis**: sin los gates intra-radio (path D + second-pass), los píxeles extra-radio
+  re-entrantes le "roban" el cluster primario al cráter (el `pc.centroid` vent-anchored se va
+  fuera del inner) en noches focales con señal real.
+- **Criterio testable (pre-registrado)**: A/B reproc 4 brazos × 11 Tier A × ventanas dirigidas;
+  robo = `pc.centroid` re-anclado al vent sale del inner en noches focales MIROVA-confirmadas.
+- **Evidencia**: run 28312968093 (180/180 jobs) → **0 robos de cluster en 214 noches focales**
+  en los 3 brazos de apagado; ratio de magnitud mediano 1.000; costo apagado = cola inflada
+  0.5-1.3% (mayormente far, 42/46 ya filtradas por frontend). `docs/AUDIT_S118_C2_GATES_AB.md`.
+- **Estado**: **REFUTADA**.
+- **Resolución**: FLIP OFF operacional (PR #474, tag `pre-s118-c2-flip`) + guards de intención
+  A63 (`test_operacional_flipped_off_S118` ×2). Verificación post-flip S119 Eje 1 verde
+  (`docs/AUDIT_S119.md` §1): NRT 100%, recaptura estable, sin inflación summit, JSONs contenidos.
+  Lección destilada como regla A85 (CLAUDE.md): la selección de cluster vent-anchored es robusta
+  por sí sola — medir el robo real ANTES de cercar.
+
+---
+
 ## H_S70_PATH_D_CIRRUS_FP — Path D dNTI contextual genera FPs masivos + amplificación VRP en cirrus alto
 
 - **Formulada**: S70-2 (2026-05-20) tras Nicolás reportar "MW altos 20 en dashboard Lastarria" y diagnóstico empírico confirmar mecanismo.

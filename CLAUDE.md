@@ -918,7 +918,18 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   es el `primary_cluster` (todos los paths del hot_mask), no solo Tests 2/3 — pero quitarlo o snapearlo
   rompe Lastarria.
 
-## Regla de comunicación con Nicolás
+- **A85. La selección de cluster vent-anchored es robusta a píxeles extra-radio; una cerca
+  geométrica que "protege" la selección es carga sin beneficio — medir el robo real ANTES de
+  cercar** (S118, A/B run 28312968093 + flip PR #474 + post-flip verde S119). Con las cercas
+  intra-radio S84/S85 apagadas, la recaptura extra-radio volvió 4-6× al dato persistido y aun
+  así hubo **0 robos de cluster en 214 noches focales MIROVA-confirmadas** — el cráter conserva
+  el cluster primario por sí solo (el anclaje al vent ya hace ese trabajo). El costo real fue
+  solo cola inflada 0.5-1.3% (mayormente far, filtrada por el frontend). **How to apply**:
+  (1) ante la tentación de agregar una cerca/gate geométrico "protector", primero medir con A/B
+  reproc + criterio pre-registrado espacial (robo de cluster, A61/A66) si el daño que la cerca
+  evitaría EXISTE; (2) si el A/B da 0 daño, la cerca es anti-patrón A55 (carga que puede
+  destruir cat-b) y no se implementa; (3) el criterio de la decisión es binario clon-literal
+  ON/OFF uniforme — per-régimen/per-volcán está EXCLUIDO por MISSION l.77 (trap S99).
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
 
