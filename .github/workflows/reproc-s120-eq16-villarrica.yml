@@ -1,0 +1,64 @@
+name: S120 reproc Eq.16 Villarrica (Panel 2b)
+
+# Genera la data del perfil aislado _s99_test1_eq16 (enable_test1_lava_lake_eq16,
+# Coppola 2024 Eq.15-16, T_e=1000K) para el Panel 2b de beyond-mirova.html.
+# NO toca el operacional (data_subdir aislado). Ventana default: jun-2026 = lago de
+# lava Villarrica reactivado (confirmado MIROVA-OCR 0.28-0.54 MW al cráter, S119).
+# Single job (sin matrix) — un solo archivo destino, sin race A47.
+# A43: "on" quoted.
+"on":
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Inicio ventana (YYYY-MM-DD)"
+        default: "2026-06-01"
+        required: false
+      end:
+        description: "Fin ventana (YYYY-MM-DD)"
+        default: "2026-07-02"
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reprocess Villarrica _s99_test1_eq16
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 330
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _s99_test1_eq16 \
+            --volcano Villarrica \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+      - name: Commit result
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add data/_s99_test1_eq16/Villarrica.json
+          git diff --staged --quiet && { echo "no changes"; exit 0; }
+          git commit -m "data(s120): reproc Eq.16 Villarrica ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (Panel 2b)"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1

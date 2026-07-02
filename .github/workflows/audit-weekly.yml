@@ -1,0 +1,68 @@
+name: Auto-audit semanal paridad MIROVA
+
+# S120 (propuesta §8 AUDIT_S119): convierte la auditoría episódica A51 en monitoreo
+# continuo. Cron semanal: refresca ground truth (A17), corre scripts/auto_audit_weekly.py
+# (criterios eje2 S119: recall crater A10 + magnitud + integridad, ventana rodante 60d),
+# committea data/audit_continuous/ y abre issue si el veredicto sale FUERA_DE_BANDA.
+# A43: "on" quoted (Norway Problem YAML 1.1).
+"on":
+  workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * 1"   # lunes 09:00 UTC (~05-06 AM Chile)
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install pyyaml
+
+      - name: Refresh ground truth MIROVA (A17)
+        run: |
+          curl -fsSL -o data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado.csv \
+            https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_consolidado.csv
+          curl -fsSL -o data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv \
+            https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_ocr.csv
+
+      - name: Run weekly audit
+        run: python scripts/auto_audit_weekly.py
+
+      - name: Commit results
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add data/audit_continuous/ data/mirova_reference/mirova_v1_snapshot/
+          git diff --staged --quiet && { echo "no changes"; exit 0; }
+          git commit -m "audit(auto): paridad semanal vs MIROVA (auto-audit S120)"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
+
+      - name: Open issue if out of band
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERDICT=$(python -c "import json; print(json.load(open('data/audit_continuous/latest.json'))['verdict'])")
+          echo "verdict: $VERDICT"
+          if [ "$VERDICT" = "FUERA_DE_BANDA" ]; then
+            python -c "import json; print('\n'.join('- '+f for f in json.load(open('data/audit_continuous/latest.json'))['flags']))" > /tmp/flags.txt
+            gh issue create \
+              --title "⚠ Auto-audit semanal FUERA DE BANDA — $(date -u +%F)" \
+              --body "$(printf 'El auto-audit semanal (criterios eje2 S119, ventana rodante 60d) detectó paridad fuera de banda:\n\n%s\n\nDetalle: `data/audit_continuous/latest.json` · Bandas: recall crater ref-5pp, magnitud [0.5-2.0]x.\nProtocolo: verificar data fresca primero (A8), clasificar categoría física (A54) antes de proponer fix.' "$(cat /tmp/flags.txt)")"
+          fi
