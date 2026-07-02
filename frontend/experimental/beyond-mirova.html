@@ -263,7 +263,11 @@ async function selectVolcano(name){
 
 function redraw(){
   if(!curVolc) return;
-  const proxR=parseFloat(el("prox-r").value), extR=Math.max(parseFloat(el("ext-r").value), proxR);
+  // clamp extR>=proxR solo para zonas CONCÉNTRICAS; PCC es bicéntrico (proximal desde
+  // GVP, extensión desde el vent 2011) y su extR=2 < proxR=4 es legítimo (Castro 2016).
+  const proxR=parseFloat(el("prox-r").value);
+  const extRraw=parseFloat(el("ext-r").value);
+  const extR=(curVolc && curVolc.name==="PuyehueCordonCaulle") ? extRraw : Math.max(extRraw, proxR);
   el("prox-val").textContent=proxR.toFixed(1); el("ext-val").textContent=extR.toFixed(1);
 
   // anillos guía
