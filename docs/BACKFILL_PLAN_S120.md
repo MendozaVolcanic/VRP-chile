@@ -49,6 +49,12 @@ con inputs `start`/`end` (≤ ~3 meses, A15: 90 días ≈ 175 min/vol) y `volcan
 
 ## Estado
 
-- [x] Workflow `backfill-tier-a.yml` creado (S120).
-- [ ] P0 piloto Lascar despachado → verificar gate.
-- [ ] P1-P4 olas.
+- [x] Workflow `backfill-tier-a.yml` creado (S120; fix matrix dinámico PR #481).
+- [x] **P0 piloto Lascar sep-2025: GATE APROBADO** (run 28567857281, 2026-07-02).
+  Números: 279 records nuevos (8 sensores completos), 0 duplicados, 153 noches
+  summit vrp>0 (mediana 0.845 / máx 4.26 MW). **Cruce vs OSF v2.5: 25/26 noches
+  detectadas (96%), ratio mediano nuestro/OSF 0.761× (n=25, en banda [0.5-2.0]),**
+  consistente con la serie viva (Láscar 0.70×). Parseo OSF: nombre con tilde
+  "Láscar", fecha DD/MM/YYYY, VRP en watts (÷1e6).
+- [x] P1 ola 1 (11 Tier A, 2025-08-15 → 2025-11-15) despachada 2026-07-02.
+- [ ] P1 verificación → P2 (2025-05-15 → 2025-08-15) → P3 → P4.
