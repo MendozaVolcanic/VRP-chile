@@ -28,16 +28,15 @@ permissions:
 
 jobs:
   backfill:
-    if: ${{ github.event.inputs.volcano == 'all' || github.event.inputs.volcano == matrix.volcano }}
     runs-on: ubuntu-latest
     timeout-minutes: 340
     strategy:
       fail-fast: false
       max-parallel: 8
+      # matrix dinámico: 'all' → 11 Tier A; nombre exacto → solo ese volcán (piloto).
+      # (el contexto matrix no existe en jobs.<id>.if — HTTP 422 al dispatch; fix S120)
       matrix:
-        volcano: [Lascar, Lastarria, Isluga, Llaima, Villarrica, Chaiten,
-                  Tupungatito, Copahue, PlanchonPeteroa, PuyehueCordonCaulle,
-                  NevadosDeChillan]
+        volcano: ${{ github.event.inputs.volcano == 'all' && fromJSON('["Lascar","Lastarria","Isluga","Llaima","Villarrica","Chaiten","Tupungatito","Copahue","PlanchonPeteroa","PuyehueCordonCaulle","NevadosDeChillan"]') || fromJSON(format('["{0}"]', github.event.inputs.volcano)) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
