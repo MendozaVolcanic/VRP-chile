@@ -85,14 +85,18 @@ def normalize_sensor(sensor_raw: str) -> str:
 
 # === Parseo de distancia OCR (F-B2) ===
 
-_OCR_DIST_RE = re.compile(r"dist[≈~=]\s*(\d+\.?\d*)\s*km")
+# S120: el scraper cambió el formato de Nota_Validacion — ahora es
+# 'Estrella verde en Y=283 -> 1.49 km (límite 3.0 km, geometría medida)'.
+# El regex acepta ambos formatos (dist≈X km histórico y '-> X km' actual).
+_OCR_DIST_RE = re.compile(r"(?:dist[≈~=]|->|→)\s*(\d+\.?\d*)\s*km")
 
 
 def parse_ocr_distance(nota: str) -> Optional[float]:
     """Extrae la distancia en km del texto libre `Nota_Validacion`.
 
-    Formato real OCR: 'Grupo píxeles rojos (área=50 px², dist≈12.94 km)'.
-    Devuelve None si no hay patrón de distancia.
+    Formatos reales OCR: 'Grupo píxeles rojos (área=50 px², dist≈12.94 km)'
+    (histórico) y 'Estrella verde en Y=283 -> 1.49 km (límite 3.0 km, ...)'
+    (scraper 2026-06+). Devuelve None si no hay patrón de distancia.
     """
     if not nota:
         return None
@@ -157,7 +161,14 @@ def load_mirova_alertas(
         # queda None; NO heredar el 0.0 de Distancia_km (daría matches espurios
         # al vent en los cruces de auditoría).
         if source == "OCR":
-            dist_km = parse_ocr_distance(row.get("Nota_Validacion", ""))
+            # S120: el scraper actual SÍ puebla Distancia_km real en algunas
+            # filas OCR (geometría medida). Preferirla cuando >0; el 0 sigue
+            # siendo "no informado" (F-B2), NUNCA distancia cero.
+            try:
+                _dk = float(row.get("Distancia_km") or 0.0)
+            except (TypeError, ValueError):
+                _dk = 0.0
+            dist_km = _dk if _dk > 0 else parse_ocr_distance(row.get("Nota_Validacion", ""))
         else:  # CONS
             try:
                 dist_km = float(row.get("Distancia_km"))

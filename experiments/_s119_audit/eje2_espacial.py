@@ -34,7 +34,7 @@ VOLS = ["Lascar", "Lastarria", "Isluga", "Llaima", "Villarrica", "Chaiten",
 INNER = {"Lascar": 5, "Lastarria": 3, "Tupungatito": 7, "PlanchonPeteroa": 3,
          "NevadosDeChillan": 5, "Chaiten": 5, "Villarrica": 5, "Llaima": 5,
          "Copahue": 4, "Isluga": 5, "PuyehueCordonCaulle": 20}
-POST_FLIP = "2026-06-28T21:00"
+POST_FLIP = "2026-06-28 21:00"
 LAST30 = "2026-06-01"
 
 

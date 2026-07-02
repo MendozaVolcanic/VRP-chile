@@ -19,9 +19,9 @@ TIER_A = [
     "NevadosDeChillan",
 ]
 
-FLIP = "2026-06-28T21:00"          # primer NRT run post-merge #474
-PRE_WEEK_START = "2026-06-21T00:00"  # semana pre-flip comparable (1.2)
-HIST_START = "2026-05-28T00:00"      # ventana 30d histórica para magnitud (1.3)
+FLIP = "2026-06-28 21:00"          # primer NRT run post-merge #474
+PRE_WEEK_START = "2026-06-21 00:00"  # semana pre-flip comparable (1.2)
+HIST_START = "2026-05-28 00:00"      # ventana 30d histórica para magnitud (1.3)
 
 
 def night(dt: str) -> str:
