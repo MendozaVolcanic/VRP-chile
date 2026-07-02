@@ -91,6 +91,10 @@
         Radio extensión <b id="ext-val">—</b> km</div>
       <input type="range" id="ext-r" min="1" max="30" step="0.5">
     </div>
+    <div class="slider-box">
+      <label style="font-size:0.8rem;color:#cfe3f5"><input type="checkbox" id="hide-disp"> ocultar dispersión (gris)</label>
+      <div style="font-size:0.7rem;color:var(--muted);max-width:340px">los grises de decenas-cientos de MW son calor scene-wide NO volcánico (incendios, salares) que el dashboard operacional ya filtra — acá se muestran a propósito (audit S120: 99.8% de los &gt;50 MW son de esta clase)</div>
+    </div>
   </div>
 
   <div class="layout">
@@ -176,8 +180,12 @@ const TIER_A = [
 //  proxR = radio del foco proximal (km desde el vent); extR = límite externo de la
 //  extensión cat-b (más allá = dispersión/ruido).
 const ZONE_PRESETS = {
-  // PCC: lacolito Cordón Caulle ~7.8 km NNW; cola dispersión VIIRS750 >8.5 km (classifyPcc S115).
-  PuyehueCordonCaulle: { proxR:4, extR:8.5, note:"Lacolito Cordón Caulle (cat-b real) ~7.8 km; cola dispersión >8.5 km. Documentado S115." },
+  // PCC: el lacolito 2011 es un cuerpo CHICO — ~0.8 km³ emplazado a 20-200 m de
+  // profundidad, con área de uplift ~2 km² (Castro et al. 2016, Nat. Comms.
+  // ncomms13585). Extensión = cuerpo + halo térmico al píxel 375 m ≈ 2 km desde el
+  // vent 2011. S120: Nicolás corrigió el preset previo 8.5 km (venía del quiebre de
+  // dispersión S115, no del cuerpo físico — quedaba grande).
+  PuyehueCordonCaulle: { proxR:4, extR:2, note:"Lacolito Cordón Caulle 2011: ~2 km² de uplift, 0.8 km³, 20-200 m de profundidad (Castro et al. 2016, Nat. Comms.). Extensión ≈ cuerpo + halo térmico, ~2 km del vent 2011; más allá = dispersión." },
   // Lastarria: campo fumarólico Lazufre, offset N (geo_class=extension presente). Distancia a afinar.
   Lastarria: { proxR:3, extR:6, note:"Campo fumarólico Lazufre al N (cat-b real, dato de campo A69). Radio a afinar con tu criterio." },
   // Villarrica: lava lake en el cráter (sub-píxel proximal); halo cercano. A afinar.
@@ -265,8 +273,10 @@ function redraw(){
   // detecciones
   layer.clearLayers();
   const c={prox:0,ext:0,disp:0}, mw={prox:0,ext:0,disp:0};
+  const hideDisp = el("hide-disp") && el("hide-disp").checked;
   for(const d of curDets){
     const cls=classify(d,proxR,extR); c[cls]++; mw[cls]+=d.vrp;
+    if(hideDisp && cls==="disp") continue;   // se ocultan del mapa, siguen contadas
     L.circleMarker([d.cl,d.co],{radius:3.6,color:"#0008",weight:0.5,fillColor:ZC[cls],fillOpacity:0.8}).addTo(layer)
       .bindTooltip(`${d.sensor} · ${d.vrp.toFixed(2)} MW · cráter ${d.distVent.toFixed(1)} km`);
   }
@@ -359,6 +369,7 @@ function init(){
   sel.addEventListener("change", ()=>selectVolcano(sel.value));
   el("prox-r").addEventListener("input", redraw);
   el("ext-r").addEventListener("input", redraw);
+  el("hide-disp").addEventListener("change", redraw);
   // fidelidad
   const fs=el("fid-volc");
   for(const v of TIER_A){ const o=document.createElement("option"); o.value=v.name; o.textContent=v.display; fs.appendChild(o); }

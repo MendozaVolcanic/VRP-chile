@@ -1,7 +1,10 @@
-# PAPER VRP CHILE — DRAFT ESQUEMÁTICO (S72)
+# PAPER VRP CHILE — DRAFT ESQUEMÁTICO (S72, actualizado S120)
 
-> **Estado**: skeleton inicial para iteración. NO es draft final. Nicolás decide venue,
-> authorship y scope antes de redactar secciones completas.
+> **Estado S120 (2026-07-01)**: skeleton actualizado con los números de la auditoría
+> integral S119 (`docs/AUDIT_S119.md`) y las DECISIONES DE NICOLÁS ya tomadas (§0).
+> Los números viejos S72 (7/9, ratios S61-S63) quedaron obsoletos — la fuente de
+> verdad de validación es AUDIT_S119 + `experiments/_s119_audit/*.json` (regla S91:
+> ningún número transcrito a mano; regenerar tablas desde los scripts).
 >
 > **Hallazgo motivador (F1.9 + F1.11 Perplexity Deep Research, 2026-05-21)**:
 > no existe a la fecha ninguna implementación open source publicada del algoritmo MIROVA.
@@ -10,11 +13,22 @@
 
 ---
 
-## 0. Decisiones que Nicolás debe tomar antes de redactar
+## 0. Decisiones — TOMADAS (Nicolás, S120, 2026-07-01)
 
-1. **Venue** (ver §A abajo). Recomendación tentativa: **Frontiers in Earth Science / Volcanology** (OA, audiencia MIROVA-friendly, Coppola publica ahí), o **Remote Sensing (MDPI)** si se prioriza componente técnica/sensor. Evitar JVGR salvo paywall aceptable.
-2. **Authorship** (ver §B). ¿Co-autores SERNAGEOMIN / OVDAS? ¿Coppola u otro miembro MIROVA team como co-autor por validación/colaboración? ¿Claude/Anthropic mencionado en Acknowledgments substancial vs co-author (la mayoría de journals no aceptan AI co-author en 2026)?
-3. **Scope del paper**: ¿literal-clone validation only (más corto, ~6-8 figuras), o incluir extensiones D9 cap + cirrus BTD + Tupungatito anchor + cross-validation AVTOD (más ambicioso, ~10-14 figuras)? Decisión condiciona timeline.
+1. **Venue: DECIDIDO — sin presupuesto para APC.** Restricción vinculante: no hay
+   dinero para publicar. Recomendación primaria: **Volcanica** (volcanica.org,
+   diamond OA — sin costo para autores ni lectores, revista de la comunidad
+   volcanológica, publica methods/software). Journal of Applied Volcanology
+   (sugerencia inicial de Nicolás) queda descartado por APC £1,390/US$1,990
+   (SpringerOpen, sin waiver para Chile). Ver §A actualizado.
+2. **Authorship: contactar a Coppola DESPUÉS** — "cuando tengamos más seguridad y
+   más pulido el trabajo" (Nicolás S120). Por ahora: Mendoza lead + co-autores
+   SERNAGEOMIN/OVDAS por confirmar. Claude en Acknowledgments con disclosure (no
+   co-author, policy journals 2026).
+3. **Scope: DECIDIDO — clon + beyond MIROVA.** El paper cubre (a) la validación del
+   clon literal (core) y (b) las extensiones beyond-MIROVA como sección propia
+   (§7bis): lo que el algoritmo de Coppola captura y MIROVA NRT no publica
+   (extensión cat-b clasificada geológicamente, Eq.16 lava lake, vista experimental).
 
 ---
 
@@ -49,12 +63,16 @@ Skeleton:
 > coefficients empirically calibrated against the MIROVA OSF v2.5 database (median
 > error ≤0.17% across 48,360 records).
 >
-> Validation against MIROVA NRT (consolidated CSV + OCR-scraped from mirovaweb.it) and
-> the OSF v2.5 algorithmic ground truth shows median per-volcano VRP ratios within the
-> ±30% tolerance declared by MIROVA for 7/9 Tier A volcanoes (78%). We additionally
-> identify and document a systemic false-positive mode in contextual dNTI under high
-> cirrus (Atacama winter conditions) and propose a Coppola-2016-§687-grounded 5 MW cap,
-> validated under pixel-level R1+R2+R3 criteria.
+> Validation against MIROVA NRT (consolidated CSV, 25,210 rows + 737 OCR-extracted
+> per-volcano records from mirovaweb.it) shows [UPDATE S119, regenerar de
+> experiments/_s119_audit/]: nightly detection recall of 98.4% (VIIRS 375 m), 84.5%
+> (VIIRS 750 m) and 100% at-crater (MODIS); median per-volcano VRP ratios within
+> [0.5–2.0]× for 9/11 Tier A volcanoes, with no volcano over-estimating — the two
+> below-band cases are physically attributable (Lastarria: MIROVA integrates the
+> extended Lazufre fumarole field while our primary cluster anchors the crater).
+> A directional-median spatial audit (per volcano, per sensor) shows no systematic
+> bias beyond the documented ~1 km northward residual on snow-covered edifices,
+> which we show to be physically irreducible at 375 m–1 km pixel scale.
 >
 > The pipeline runs on GitHub Actions free tier (cron 2h, public repo) and is published
 > under MIT license at github.com/MendozaVolcanic/VRP-chile. It provides a replicable
@@ -171,7 +189,7 @@ Skeleton:
 > operacionalmente.
 >
 > ¶6 — Reproducibility: profiles YAML (`pipeline/profiles/mirova_equivalent.yaml`),
-> tests 334 passed, golden files versionados (`tests/golden/`), constants and feature
+> tests 796 passed (S119), golden files versionados (`tests/golden/`), constants and feature
 > flags documented (`docs/MISSION.md` con regla "3 preguntas" antes de cualquier cambio
 > metodológico).
 
@@ -194,10 +212,15 @@ Skeleton:
 > (TP/TP+FP), F1. Tolerancia operacional: ratio individual 0.5-2.0, mediano 0.7-1.4
 > (MIROVA declara ±30% en publicación), recall ≥0.60, precision ≥0.50.
 >
-> ¶3 — Resultados Tier A (7/9 calibrados en rango operacional, "clon literal" 78%):
-> Lascar 1.37×, Isluga 1.33×, Lastarria 1.07×, Villarrica 2.17×, Planchón-Peteroa
-> 2.84×, Chaitén 2.23×, PCC 0.29×. Tupungatito 10× (caso especial mirova_center
-> anchor, ver §7). 2 vols con n insuficiente (Llaima 3 ALERTAS, Copahue 1).
+> ¶3 — Resultados Tier A [ACTUALIZADO S119 — fuente: docs/AUDIT_S119.md §2 +
+> experiments/_s119_audit/eje2_recall_magnitud.json; regenerar tabla del script]:
+> recall de noches ALERTA por sensor: VIIRS375 98.4% / VIIRS750 84.5% / MODIS-cráter
+> 100%. Magnitud (mediana pc.vrp/MIROVA, noches comunes 2026): **9/11 en banda
+> [0.5–2.0]×, ninguno sobre-estima**. Fuera de banda solo por abajo: Lastarria 0.466×
+> (cat-b Lazufre: MIROVA integra el campo, nuestro cluster ancla el cráter) y Llaima
+> 0.357× (n=2, sin significancia). Los ratios per-vol S61-S63 del skeleton original
+> quedaron obsoletos tras nadir-fijo (S102-S103) + magnitud focal (S109-S112) +
+> gates OFF (S118).
 
 **Tabla 4**: per-vol validation metrics (ratio mediano, recall, precision, n, sensor coverage).
 **Figura 6**: scatter ours vs MIROVA VRP per-vol (4 ejemplos Lascar/Villarrica/Lastarria/PP).
@@ -240,6 +263,36 @@ Skeleton:
 
 ---
 
+## 7bis. Beyond MIROVA — extensiones (scope confirmado S120)
+
+Sección nueva del scope decidido (clon + beyond). Skeleton:
+
+> ¶1 — Motivación: la auditoría integral mostró que ~95% de las detecciones nuestras
+> "extra" sobre MIROVA son **anomalías térmicas físicamente reales que MIROVA captura
+> pero no publica** (AUDIT_S86/S119): campo fumarólico Lazufre (Lastarria), lacolito
+> Cordón Caulle en enfriamiento (PCC), lava lake sub-umbral (Villarrica), Cerro Blanco
+> (NdC). El clon literal las hereda; el valor agregado es CLASIFICARLAS, no filtrarlas.
+>
+> ¶2 — Extensión cat-b clasificada geológicamente: zonas por volcán (proximal /
+> extensión / dispersión) ancladas en literatura de deformación y datos de campo —
+> ej. lacolito PCC: ~0.8 km³, uplift ~2 km², 20-200 m de profundidad (Castro et al.
+> 2016, Nat. Comms. 10.1038/ncomms13585) → radio de extensión ~2 km del vent 2011.
+> Separación display-only: la detección (clon) no se toca (regla MISSION).
+>
+> ¶3 — Magnitud recuperada de lava lake (Coppola 2024 Eq.16): implementada flag-OFF,
+> validación dirigida sobre Villarrica (lago reactivado jun-2026, confirmado por
+> MIROVA-OCR 0.28-0.54 MW al cráter) — perfil experimental aislado `_s99_test1_eq16`.
+> [Pendiente reproc — Panel 2b]
+>
+> ¶4 — Vigilancia continua de paridad: auto-audit semanal (recall/magnitud/espacial
+> vs MIROVA como job cron) — convierte la validación de episódica en monitoreo.
+> [Si está implementado al momento de redactar, citarlo como feature]
+
+**Figura 13**: Panel 2a beyond-mirova (zonas geológicas PCC/Lastarria con detecciones).
+**Figura 14**: serie Villarrica cruda vs Eq.16 (cuando exista el reproc).
+
+---
+
 ## 8. Discussion
 
 Skeleton:
@@ -277,8 +330,13 @@ Skeleton:
 ## 9. Conclusions
 
 > - Primer clon open source publicado del algoritmo MIROVA NRT.
-> - 7/9 volcanes Tier A chilenos calibrados en rango operacional ±30%.
-> - Identificación y resolución de drift D9 cirrus FPs grounded en Coppola 2016 §687.
+> - Recall de noches ALERTA 98.4% (VIIRS375) / 84.5% (VIIRS750) / 100% MODIS-cráter;
+>   magnitud 9/11 Tier A en banda [0.5–2.0]× sin sobre-estimación (audit S119).
+> - Caracterización del límite físico de resolución: el foco sub-píxel débil y el
+>   gradiente topográfico nevado son indistinguibles a 375 m–1 km (A82/A83) — el eje
+>   espacial es el único discriminante.
+> - Beyond MIROVA: clasificación geológica de la señal real que MIROVA no publica
+>   (Lazufre, lacolito PCC, lava lake) sin tocar la detección.
 > - Framework replicable: GitHub Actions free tier + Earthdata + KMZ oficiales.
 > - Integración operacional SERNAGEOMIN OVDAS en curso.
 > - Código MIT en github.com/MendozaVolcanic/VRP-chile.
@@ -289,7 +347,7 @@ Skeleton:
 
 - **Code**: github.com/MendozaVolcanic/VRP-chile (MIT license recomendado — confirmar con SERNAGEOMIN).
 - **Data**: per-vol JSON committed bajo `data/mirova_equivalent/`. Raw L1B HDF NO committed (NASA Earthdata reproducible via fetch.py).
-- **Reproducibility**: profiles YAML + workflows + tests (334 passed) + goldens versionados.
+- **Reproducibility**: profiles YAML + workflows + tests (796 passed S119) + goldens versionados.
 - **Reference data**: OSF v2.5 (Coppola 2023, DOI por confirmar) + MIROVA NRT scraper en github.com/MendozaVolcanic/Mirova-v1.
 
 ---
@@ -348,7 +406,18 @@ A completar con DOIs. Lista mínima inicial (~30-40 refs):
 | **Bulletin of Volcanology** | Prestigio comunidad | Paywall; revisión lenta; menos methods-friendly | Descartar |
 | **JGR Solid Earth / Geophys. Res. Lett.** | Alto impact factor | Scope amplio earth sciences, methods OSS poco frecuente | Descartar salvo case study fuerte |
 
-**Recomendación final**: targeteamos Frontiers Earth Sci — Volcanology si SERNAGEOMIN cubre APC OA. Plan B: Remote Sensing MDPI por velocidad. Plan C: GMD si se reescribe como "software paper".
+**Recomendación final — ACTUALIZADA S120 (restricción: sin presupuesto APC)**:
+
+| Venue | APC | Veredicto |
+|---|---|---|
+| **Volcanica** (volcanica.org) | **US$ 0** (diamond OA, comunidad volcanológica) | **ELEGIDA** — sin costo, peer review serio, publica methods/software/monitoring, indexada (Scopus). Audiencia exacta |
+| Journal of Applied Volcanology (SpringerOpen) | £1,390 / US$1,990 | Descartada por costo (sugerencia inicial; sin waiver para Chile) |
+| Frontiers Earth Sci — Volcanology | ~US$2,950 | Descartada por costo |
+| Remote Sensing (MDPI) | ~US$2,700 | Descartada por costo |
+| JVGR / Bull Volc (suscripción, OA opcional) | 0 si se publica cerrado | Plan B solo si se acepta paywall (contra el espíritu open del proyecto) |
+
+Decisión S120 (delegada por Nicolás): **Volcanica**. Encaja además con la identidad
+del proyecto: revista open de la comunidad para un pipeline open de una agencia pública.
 
 ---
 
