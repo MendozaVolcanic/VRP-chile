@@ -144,8 +144,14 @@
       <b>Panel 2b · magnitud recuperada (Eq.16 Coppola 2024).</b> Física que MIROVA NRT no aplica → recupera la magnitud
       real de un lava lake sub-píxel que el cálculo crudo subestima. Implementada flag-OFF en el pipeline.
     </div>
-    <div class="soon">Pendiente: requiere generar la data del perfil experimental con <code>enable_test1_lava_lake_eq16</code>
-      (reproc) y enchufarla acá. Es el siguiente paso tras validar Paneles 2a y 1.</div>
+    <div class="soon" id="eq16-status">Cargando data del perfil <code>_s99_test1_eq16</code>…</div>
+    <div class="card"><div class="chart-wrap"><canvas id="eq16-canvas"></canvas></div></div>
+    <div class="explain" style="font-size:0.8rem">Serie <b>Villarrica</b>, máx diario summit del cluster primario.
+      <span style="color:#4fc3f7">Azul = operacional fiel (crudo)</span> ·
+      <span style="color:#ff9800">naranja = Eq.16</span>: mismo pipeline con
+      <code>enable_test1_lava_lake_eq16</code> (T_e = 1000 K, Coppola 2024 Eq. 15-16) en el perfil aislado
+      <code>_s99_test1_eq16</code> — la detección NO cambia, solo la magnitud del Test 1 para lava lake sub-píxel.
+      Contexto físico: MIROVA-OCR vio el lago reactivado jun-2026 en 0.28–0.54 MW al cráter.</div>
   </section>
 </main>
 
@@ -348,6 +354,32 @@ async function renderFid(){
     + `Sobre la línea de MIROVA = sobre-estimamos; debajo = sub-estimamos.`;
 }
 
+// ====================== PANEL 2b — Eq.16 (magnitud recuperada) ======================
+let eqChart=null, _eqTried=false;
+async function renderEq16(){
+  if(_eqTried && eqChart) return;
+  _eqTried=true;
+  const box=el("eq16-status");
+  let eq=null;
+  try{ const r=await fetch(`${BASE_PATH}data/_s99_test1_eq16/Villarrica.json`); if(r.ok) eq=await r.json(); }catch(e){}
+  if(!eq){ box.innerHTML="Aún sin data: corré el workflow <code>reproc-s120-eq16-villarrica</code> (Actions) y recargá. La detección operacional no se toca — perfil aislado."; return; }
+  const op=await loadVolcanoData("Villarrica");
+  const mOp=dailyMaxOurs(op), mEq=dailyMaxOurs(eq);
+  const d0=Object.keys(mEq).sort()[0];
+  if(!d0){ box.textContent="El perfil _s99_test1_eq16 existe pero no tiene días summit con VRP>0 en la ventana reprocesada."; return; }
+  const shown=[...new Set([...Object.keys(mOp),...Object.keys(mEq)])].sort().filter(d=>d>=d0);
+  box.innerHTML=`<b>${Object.keys(mEq).length}</b> días con Eq.16 (ventana desde ${d0}). Donde el naranja supera al azul, la Eq.16 recupera magnitud de lava lake que el crudo subestima.`;
+  if(eqChart) eqChart.destroy();
+  eqChart=new Chart(el("eq16-canvas").getContext("2d"),{ type:"line",
+    data:{ labels:shown, datasets:[
+      { label:"Operacional (crudo)", data:shown.map(d=>mOp[d]??null), borderColor:"#4fc3f7", backgroundColor:"#4fc3f7", pointRadius:2.5, spanGaps:true, borderWidth:1.6, tension:0 },
+      { label:"Eq.16 (recuperada)",  data:shown.map(d=>mEq[d]??null), borderColor:"#ff9800", backgroundColor:"#ff9800", pointRadius:2.5, spanGaps:true, borderWidth:1.6, tension:0 } ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ color:"#cfe3f5" } } },
+      scales:{ x:{ ticks:{ color:"#7a8fa6", maxTicksLimit:10 }, grid:{ color:"#1a3a5c55" } },
+               y:{ type:"logarithmic", title:{display:true,text:"VRP (MW, máx diario summit)",color:"#7a8fa6"}, ticks:{color:"#7a8fa6"}, grid:{color:"#1a3a5c55"} } } } });
+}
+
 // ====================== TABS ======================
 function setupTabs(){
   document.querySelectorAll(".tab-btn").forEach(btn=>{
@@ -358,6 +390,7 @@ function setupTabs(){
       const t=btn.dataset.tab; el("pane-"+t).classList.add("active");
       if(t==="ext" && map) setTimeout(()=>map.invalidateSize(),60);
       if(t==="fid") renderFid();
+      if(t==="eq16") renderEq16();
     });
   });
 }

@@ -44,9 +44,14 @@ Los scripts ya existen en `experiments/_s119_audit/` — es empaquetarlos (~1 se
 - ✅ **HECHO (PR #477)**: guard utf-8 stdout en los 7 scripts del scan
   (`eje6_2_encoding_scan.json`, patrón reconfigure S118). **Sigue diferido**:
   `→`→`->` en mensajes runtime `fetch.py` (ciclo A45 conjunto con próximo cambio de fetch).
-- ⏸ R2 pixel-level post-flip **BLOQUEADO**: `mirova-tif-archive` tiene último TIF
-  2026-05-20 (~6 semanas stale) — sin TIF comparable post-flip. ⚠ Revisar del lado
-  Mirova-v1 si el poll de TIFs se estancó (el poll de snapshots PNG sí sigue vivo).
+- ✅ R2 pixel-level post-flip **DESBLOQUEADO** (corrección S120, diagnóstico subagente):
+  el poll TIF NUNCA estuvo estancado — el repo remoto `mirova-tif-archive` está verde
+  (runs cada 5 min, TIFs de 2026-07-02 en index.csv, mirovaweb HTTP 200). Era el **clon
+  LOCAL** desactualizado desde 2026-05-20 (patrón A25: repo 9.2 GB, `git fetch` local
+  timeoutea). Para R2: bajar TIFs puntuales vía
+  `https://raw.githubusercontent.com/MendozaVolcanic/mirova-tif-archive/main/data/tif/<Vol>/<file>.tif`
+  (catálogo = index.csv remoto); NO hacer `git pull` pelado (baja GB). Clon local:
+  re-clonar con `--filter=blob:none` cuando se necesite completo.
 
 ## 🚫 NO reabrir (anti-A8) — sin cambios
 far→summit MODIS/D11/A69-como-bug (A82) · re-ancla ctx_cluster (A84) · inner PCC ·
