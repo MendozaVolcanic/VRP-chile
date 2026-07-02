@@ -437,6 +437,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         roi_valid = bt[p95_mask]
     else:
         roi_valid = roi_bt_full[~np.isnan(roi_bt_full)]
+    # S120 (cacería): inicializar — la rama dual-ROI BT (más abajo) referencia
+    # local_threshold incondicionalmente; con roi_valid<10 era UnboundLocalError.
+    local_threshold = float("nan")
     if len(roi_valid) >= 10:
         roi_p95 = float(np.percentile(roi_valid, 95))
         roi_std = float(np.std(roi_valid))

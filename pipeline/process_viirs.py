@@ -982,7 +982,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             # Reemplaza hot_mask_2d con la conjunción Test 2 ∧ Test 3 + dual-ROI Tabla 2.
             # Paths legacy se calcularon arriba (diag) pero no contribuyen cuando ON.
             n_first_pass = 0
+            # S120 (cacería): L_mir/bt5 solo existen si el granule trae I04 e I05
+            # (bloque línea ~613); este gate estaba dentro de `if "I04" in bands`
+            # solo → NameError con granule I04-sin-I05.
             if (ENABLE_FIRST_PASS_TESTS_2_AND_3
+                    and "I05" in bands
                     and inner_radius_km is not None
                     and not np.isnan(t_bg_i04)
                     and not _path_d_atm_gate_skip):

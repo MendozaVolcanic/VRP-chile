@@ -387,6 +387,17 @@ def product_version_from_granule(filename: str) -> str:
 # por-proceso). Kill-switch: env VRP_CMR_BREAKER=0 → comportamiento previo (sin breaker).
 _CMR_SEARCH_DOWN: bool = False
 ENABLE_CMR_SEARCH_BREAKER: bool = os.environ.get("VRP_CMR_BREAKER", "1") != "0"
+
+
+def reset_transient_breakers():
+    """S120 (cacería): los breakers (CMR search + hosts de descarga) se diseñaron
+    para corridas de 1 día NRT (estado por-proceso, el retry ~30min los resetea).
+    Pero run_pipeline loopea rangos multi-día en UN proceso (backfill/reproc):
+    un timeout transitorio del día 1 degradaba TODOS los días restantes a []
+    silencioso. run_pipeline llama esto al inicio de cada fecha."""
+    global _CMR_SEARCH_DOWN
+    _CMR_SEARCH_DOWN = False
+    _DOWN_DOWNLOAD_HOSTS.clear()
 try:
     # requests.Timeout = base de ReadTimeout y ConnectTimeout; ConnectionError aparte.
     from requests.exceptions import Timeout as _Timeout, \
@@ -448,7 +459,7 @@ def search_granules(product_key: str, lat: float, lon: float,
                 # degradar a [] (no reintentar versiones ni quemar 60s × sensores).
                 if ENABLE_CMR_SEARCH_BREAKER:
                     _CMR_SEARCH_DOWN = True
-                    _diag(f"SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov → breaker ON "
+                    _diag(f"SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON "
                           f"esta corrida [{product_key}] err={type(e).__name__}: {str(e)[:90]}")
                     return []
                 raise  # breaker OFF → comportamiento previo (propaga)

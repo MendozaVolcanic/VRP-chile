@@ -436,6 +436,10 @@ def main():
 
     for volcano in volcanoes:
         for date in dates:
+            # S120 (cacería): los breakers de fetch son per-día; sin reset, un
+            # timeout transitorio del día 1 silenciaba todos los días restantes
+            # de un reproceso multi-día (backfill).
+            fetch.reset_transient_breakers()
             process_date(volcano, date, nighttime_only=nighttime_only,
                         skip_noaa20=args.skip_noaa20, overwrite=args.overwrite)
 
