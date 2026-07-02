@@ -56,5 +56,11 @@ con inputs `start`/`end` (≤ ~3 meses, A15: 90 días ≈ 175 min/vol) y `volcan
   detectadas (96%), ratio mediano nuestro/OSF 0.761× (n=25, en banda [0.5-2.0]),**
   consistente con la serie viva (Láscar 0.70×). Parseo OSF: nombre con tilde
   "Láscar", fecha DD/MM/YYYY, VRP en watts (÷1e6).
-- [x] P1 ola 1 (11 Tier A, 2025-08-15 → 2025-11-15) despachada 2026-07-02.
-- [ ] P1 verificación → P2 (2025-05-15 → 2025-08-15) → P3 → P4.
+- [x] **P1 ola 1 (11 Tier A, 2025-08-15 → 2025-11-15): GATE APROBADO** (run
+  28571054684, 11/11 success). Integridad: 0 parse errors, 0 dupes, 0
+  summit-fuera-de-inner. Cruce OSF v2.5 (6 vols con actividad, en banda todos):
+  Láscar 0.825× (85 noches), Villarrica 0.841×, Isluga 0.743×, Copahue 0.866×,
+  Llaima 0.890×, Lastarria 0.606×. Los 5 sin noches comunes = OSF sin actividad
+  publicada en el período (quietos), esperado.
+- [x] P2 ola 2 (11 Tier A, 2025-05-15 → 2025-08-15) despachada 2026-07-02.
+- [ ] P2 verificación → P3 (2025-02-15 → 2025-05-15) → P4 (2025-01-01 → 2025-02-15).
