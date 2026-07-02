@@ -202,3 +202,41 @@ def test_load_cons_usa_distancia_km(tmp_path):
     rows = load_mirova_alertas(cons_path=cons, ocr_path=ocr)
     lascar = next(r for r in rows if r["volcano"] == "Lascar")  # CONS gana dedup
     assert lascar["dist_km"] == 1.2
+
+
+# === S120: formato nuevo del scraper (hallazgo cacería de bugs) ===
+
+def test_parse_ocr_distance_formato_flecha_2026():
+    """S120: el scraper 2026-06+ escribe '-> X.XX km (límite ...)' en la nota."""
+    assert parse_ocr_distance(
+        "Estrella verde en Y=283 -> 1.49 km (límite 3.0 km, geometría medida)"
+    ) == 1.49
+
+
+def test_parse_ocr_distance_formato_historico_sigue_ok():
+    """El formato histórico dist≈X km no se rompe con el regex ampliado."""
+    assert parse_ocr_distance(
+        "Grupo píxeles rojos (área=50 px², dist≈12.94 km)") == 12.94
+
+
+def test_load_ocr_prefiere_distancia_km_poblada(tmp_path):
+    """S120: si la fila OCR trae Distancia_km>0 (geometría medida), se usa esa;
+    el 0 sigue significando 'no informado' (F-B2) y cae a la nota."""
+    import textwrap as _tw
+    cons = tmp_path / "cons.csv"
+    ocr = tmp_path / "ocr.csv"
+    cons.write_text(
+        "timestamp,Fecha_Satelite_UTC,Fecha_Captura_Chile,Volcan,Sensor,VRP_MW,"
+        "Distancia_km,Tipo_Registro,Clasificacion Mirova,Nota_Validacion\n",
+        encoding="utf-8")
+    ocr.write_text(_tw.dedent("""\
+        timestamp,Fecha_Satelite_UTC,Fecha_Captura_Chile,Volcan,Sensor,VRP_MW,Distancia_km,Tipo_Registro,Clasificacion Mirova,Nota_Validacion
+        3000,2026-06-15 05:00:00,2026-06-15 01:00:00,Villarrica,VIIRS375,0.54,0.81,ALERTA_TERMICA_OCR,Bajo,"Estrella verde en Y=289 -> 0.81 km (límite 5.0 km, geometría medida)"
+        3001,2026-06-16 05:00:00,2026-06-16 01:00:00,Villarrica,VIIRS375,0.46,0.0,ALERTA_TERMICA_OCR,Bajo,"Estrella gris en Y=286 -> 1.22 km (límite 3.0 km, geometría medida)"
+        3002,2026-06-17 05:00:00,2026-06-17 01:00:00,Villarrica,VIIRS375,0.30,0.0,ALERTA_TERMICA_OCR,Bajo,
+        """), encoding="utf-8")
+    rows = load_mirova_alertas(cons_path=cons, ocr_path=ocr)
+    by_ts = {r["timestamp"]: r for r in rows}
+    assert by_ts["3000"]["dist_km"] == 0.81   # Distancia_km poblada gana
+    assert by_ts["3001"]["dist_km"] == 1.22   # 0 = no informado → nota (formato nuevo)
+    assert by_ts["3002"]["dist_km"] is None   # sin dato en ningún lado → None, no 0

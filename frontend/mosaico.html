@@ -497,7 +497,11 @@ function buildSparklineData(records, innerKm) {
   const days = 30;
   const now = Date.now();
   const t0 = now - days * ms;
-  const bins = new Array(days).fill(0);
+  // S120 (cacería de bugs): los records de HOY caían en idx=days (dayStart es la
+  // medianoche de hace 30 días) y el guard los descartaba — el sparkline nunca
+  // mostraba el día en curso. nBins = days+1 incluye el día parcial de hoy.
+  const nBins = days + 1;
+  const bins = new Array(nBins).fill(0);
   const dayStart = Math.floor(t0 / ms) * ms;
   for (const r of records) {
     const t = parseUtcMs(r.datetime_utc);
@@ -505,11 +509,11 @@ function buildSparklineData(records, innerKm) {
     const v = eqVrpDisplay(r, innerKm);  // S92: excluir artefacto cirrus del sparkline
     if (v <= 0) continue;
     const idx = Math.floor((t - dayStart) / ms);
-    if (idx < 0 || idx >= days) continue;
+    if (idx < 0 || idx >= nBins) continue;
     if (v > bins[idx]) bins[idx] = v;
   }
   const labels = [];
-  for (let i = 0; i < days; i++) {
+  for (let i = 0; i < nBins; i++) {
     labels.push(new Date(dayStart + i * ms));
   }
   return { labels, values: bins };

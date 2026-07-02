@@ -144,6 +144,10 @@ def verdict_overall(results: list[dict], days: int) -> dict:
     alive_count = sum(1 for r in results if r["status"] == "alive")
     muted_count = sum(1 for r in results if r["status"] == "muted")
     nodata_count = sum(1 for r in results if r["status"] == "no_data")
+    # S120 (cacería de bugs): un JSON corrupto (escenario race A47) caía en un
+    # bucket que nadie contaba → "Health check OK" con data rota.
+    parse_err_count = sum(
+        1 for r in results if str(r["status"]).startswith("parse_error"))
 
     nrt = "PASS" if alive_count >= 6 else ("PARTIAL" if alive_count > 0 else "FAIL")
 
@@ -167,6 +171,7 @@ def verdict_overall(results: list[dict], days: int) -> dict:
         "alive": alive_count,
         "muted": muted_count,
         "no_data": nodata_count,
+        "parse_errors": parse_err_count,
     }
 
 
@@ -202,6 +207,11 @@ def main() -> int:
         print(f"F46 fix   : {v['f46_fix']}")
         print()
 
+    if v["parse_errors"] > 0:
+        print(f"[EXIT 2] {v['parse_errors']} JSON con parse error (posible race "
+              "A47 — restaurar con git checkout origin/main -- <archivo>).",
+              file=sys.stderr)
+        return 2
     if v["nrt_alive"] == "FAIL":
         print("[EXIT 2] NRT mute — 0 volcanes con records en ventana.", file=sys.stderr)
         return 2

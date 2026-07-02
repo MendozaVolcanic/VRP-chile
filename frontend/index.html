@@ -796,6 +796,13 @@ function setPersistedJSON(key, value) {
 // publica VIIRS750, detecta menos que VIIRS375. Key v3 revierte el default v2.)
 const sensorVisible = persistedJSON("vrp_sensors_v3", { MODIS: true, VIIRS375: true, VIIRS750: true, MIROVA: true });
 let currentVolcano = VOLCANOES[0];
+// S120 (cacería de bugs): mosaico.html linkea index.html?volcano=<name> pero el
+// param era letra muerta — honrarlo como selección inicial.
+{
+  const qsVol = new URLSearchParams(location.search).get("volcano");
+  const qsMatch = qsVol && VOLCANOES.find(v => v.name === qsVol);
+  if (qsMatch) currentVolcano = qsMatch;
+}
 let currentDays = 30;  // S26 D: default 30 días (antes 7). Las refs MIROVA Villarrica históricas necesitan al menos 30d para visibilidad. Toggle a 90d/180d para historia completa.
 let logScale = persistedFlag("vrp_log_scale", false);
 // S18: por defecto el dashboard solo cuenta detecciones dentro del radio del
@@ -2996,7 +3003,7 @@ function buildLegend() {
     item.addEventListener("click", () => {
       sensorVisible[s.key] = !sensorVisible[s.key];
       item.classList.toggle("dim", !sensorVisible[s.key]);
-      setPersistedJSON("vrp_sensors", sensorVisible);  // F30 Bug 10
+      setPersistedJSON("vrp_sensors_v3", sensorVisible);  // F30 Bug 10 (S120: key corregida — escribía 'vrp_sensors' y se leía '_v3', la persistencia nunca funcionó)
       // S74 F30 Bug 9: propagar el toggle a los 5 paneles dependientes.
       // Antes solo se refrescaba el detail (chart principal + secundario).
       // Ahora también: cards (pills + VRP card-level), alert summary bar,

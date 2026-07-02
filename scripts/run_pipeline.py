@@ -389,6 +389,11 @@ def main():
                         help="Overwrite existing records (use when reprocessing with corrected algorithms)")
     args = parser.parse_args()
 
+    # S120 (cacería de bugs): --start sin --end (o viceversa) caía en silencio
+    # a la ventana NRT default de 8 días — fechas equivocadas sin aviso.
+    if bool(args.start) != bool(args.end):
+        parser.error("--start y --end deben usarse juntos (rango de fechas)")
+
     print(f"=== {vrp_profile.describe()} ===")
 
     volcanoes = load_volcanoes(args.volcano)
