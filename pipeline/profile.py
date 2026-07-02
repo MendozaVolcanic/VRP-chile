@@ -497,8 +497,12 @@ ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK: bool = bool(_p.get("enable_test1_k1_retire
 # fuera del rango Wooster (que requiere 600-1500 K para error ±30%). Default ON
 # como defense in depth complementaria al fix L1B (calibrate() filter dn > 32767).
 # Ver docs/F28_SATURATION_INVESTIGATION.md sec 5.3.
-ENABLE_BT_SAT_SECONDARY_GUARD: bool = bool(_p.get("enable_bt_sat_secondary_guard", True))
-BT_SAT_MIR_K_MODIS: float = float(_p.get("bt_sat_mir_k_modis", 500.0))
+# S120 (cacería): estos dos viven TOP-LEVEL en los yaml (mirova_equivalent.yaml
+# y derivados) pero se leían solo de _p (sección paths:) → el yaml se ignoraba y
+# regían los defaults (hoy coinciden true/500.0 — bomba latente si se editaba el
+# yaml). Se leen de ambos niveles, top-level gana.
+ENABLE_BT_SAT_SECONDARY_GUARD: bool = bool(_cfg.get("enable_bt_sat_secondary_guard", _p.get("enable_bt_sat_secondary_guard", True)))
+BT_SAT_MIR_K_MODIS: float = float(_cfg.get("bt_sat_mir_k_modis", _p.get("bt_sat_mir_k_modis", 500.0)))
 
 # F31 S75 — VRPTIR Aveni 2025 GRL doi:10.1029/2024GL113324 opt-in feature flag.
 # Permite usar el método VRPTIR (TIR single-band 10.5-12 μm) para retrieval de

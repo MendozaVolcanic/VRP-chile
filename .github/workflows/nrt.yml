@@ -285,10 +285,13 @@ jobs:
           set +e  # No abortar en errores intermedios — manejamos exit codes
           git config user.name  "vrp-bot"
           git config user.email "vrp-bot@github-actions"
-          # Solo el archivo del volcán de este job (cada matrix tiene volcano único)
-          git add "data/mirova_equivalent/${{ matrix.volcano }}.json" \
-                  "data/experimental/${{ matrix.volcano }}.json" \
-                  "data/mirova/${{ matrix.volcano }}.json" 2>/dev/null
+          # Solo el archivo del volcán de este job (cada matrix tiene volcano único).
+          # S120 (cacería, verificado empírico): git add con N pathspecs fatalea y
+          # NO stagea NADA si UNO falta → data fresca descartada en silencio.
+          # Un add por archivo aísla el que falte.
+          git add "data/mirova_equivalent/${{ matrix.volcano }}.json" 2>/dev/null
+          git add "data/experimental/${{ matrix.volcano }}.json" 2>/dev/null
+          git add "data/mirova/${{ matrix.volcano }}.json" 2>/dev/null
           git diff --staged --quiet && { echo "No changes to commit for ${{ matrix.volcano }}"; exit 0; }
           git commit -m "NRT update ${{ matrix.volcano }} $(date -u '+%Y-%m-%d %H:%M UTC')"
           for attempt in 1 2 3 4 5; do

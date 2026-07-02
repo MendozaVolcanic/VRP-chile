@@ -39,6 +39,7 @@ Format: data/{volcano_name}.json
 
 import json
 import math
+import os
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -114,8 +115,13 @@ def _save(volcano_name: str, store: dict):
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     store["updated"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     path = DATA_DIR / f"{volcano_name}.json"
-    with open(path, "w") as f:
+    # S120 (cacería): escritura atómica tmp+os.replace — _save corre una vez por
+    # record y un kill a mitad de escritura truncaba el JSON del volcán (el
+    # escenario de corrupción A47 que _load no sabe recuperar).
+    tmp = path.with_suffix(".json.tmp")
+    with open(tmp, "w") as f:
         json.dump(store, f, indent=2)
+    os.replace(tmp, path)
 
 
 def _filter_pixels_by_distance(record: dict, max_dist_km: float) -> tuple[bool, int, int]:
