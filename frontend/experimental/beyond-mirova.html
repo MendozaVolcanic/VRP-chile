@@ -62,7 +62,7 @@
   <nav class="tabs">
     <button class="tab-btn active" data-tab="ext">2a · Extensión cat-b</button>
     <button class="tab-btn" data-tab="fid">1 · Fidelidad vs MIROVA</button>
-    <button class="tab-btn" data-tab="eq16">2b · Eq.16 (próximo)</button>
+    <button class="tab-btn" data-tab="eq16">2b · Eq.16 lava lake</button>
   </nav>
 
   <section class="pane active" id="pane-ext">
@@ -141,17 +141,22 @@
 
   <section class="pane" id="pane-eq16">
     <div class="explain">
-      <b>Panel 2b · magnitud recuperada (Eq.16 Coppola 2024).</b> Física que MIROVA NRT no aplica → recupera la magnitud
-      real de un lava lake sub-píxel que el cálculo crudo subestima. Implementada flag-OFF en el pipeline.
+      <b>Panel 2b · magnitud del lava lake con Eq.16 (Coppola 2024).</b> La Eq.16 despeja el <b>área</b> del
+      exceso MIR puro asumiendo un cuerpo pequeño a ~1000 K — ignora el anillo de nieve "tibia" que el
+      Test 1 crudo integra alrededor del cráter en invierno. Resultado medido (jun-2026, lago reactivado):
+      la Eq.16 <b>no recupera hacia arriba, corrige hacia abajo</b> el sobre-registro invernal y aterriza
+      en la banda que MIROVA-OCR observó al cráter. Implementada flag-OFF (perfil aislado, no toca el operacional).
     </div>
     <div class="soon" id="eq16-status">Cargando data del perfil <code>_s99_test1_eq16</code>…</div>
     <div class="card"><div class="chart-wrap"><canvas id="eq16-canvas"></canvas></div></div>
     <div class="explain" style="font-size:0.8rem">Serie <b>Villarrica</b>, máx diario summit del cluster primario.
       <span style="color:#4fc3f7">Azul = operacional fiel (crudo)</span> ·
-      <span style="color:#ff9800">naranja = Eq.16</span>: mismo pipeline con
-      <code>enable_test1_lava_lake_eq16</code> (T_e = 1000 K, Coppola 2024 Eq. 15-16) en el perfil aislado
-      <code>_s99_test1_eq16</code> — la detección NO cambia, solo la magnitud del Test 1 para lava lake sub-píxel.
-      Contexto físico: MIROVA-OCR vio el lago reactivado jun-2026 en 0.28–0.54 MW al cráter.</div>
+      <span style="color:#ff9800">naranja = Eq.16</span> (mismo pipeline con
+      <code>enable_test1_lava_lake_eq16</code>, T_e = 1000 K, Coppola 2024 Eq. 15-16; la detección NO cambia,
+      solo la magnitud del Test 1) ·
+      <span style="color:#9e9e9e">banda gris = MIROVA-OCR jun-2026 (0.28–0.54 MW al cráter)</span>, el ground
+      truth del lago reactivado. Donde el azul se dispara sobre la banda gris, es la nieve del ROI, no el lago;
+      el naranja cae dentro de la banda.</div>
   </section>
 </main>
 
@@ -372,12 +377,21 @@ async function renderEq16(){
   const d0=Object.keys(mEq).sort()[0];
   if(!d0){ box.textContent="El perfil _s99_test1_eq16 existe pero no tiene días summit con VRP>0 en la ventana reprocesada."; return; }
   const shown=[...new Set([...Object.keys(mOp),...Object.keys(mEq)])].sort().filter(d=>d>=d0);
-  box.innerHTML=`<b>${Object.keys(mEq).length}</b> días con Eq.16 (ventana desde ${d0}). Donde el naranja supera al azul, la Eq.16 recupera magnitud de lava lake que el crudo subestima.`;
+  // banda de referencia MIROVA-OCR jun-2026 (lago reactivado, medido al cráter — verificado S119)
+  const OCR_LO=0.28, OCR_HI=0.54;
+  const medEq=Object.values(mEq).sort((a,b)=>a-b)[Math.floor(Object.keys(mEq).length/2)];
+  const medOp=Object.values(mOp).filter((_,i,a)=>true).sort((a,b)=>a-b);
+  const medOpV=medOp.length?medOp[Math.floor(medOp.length/2)]:null;
+  box.innerHTML=`<b>${Object.keys(mEq).length}</b> días con Eq.16 (ventana desde ${d0}). `
+    +`Mediana diaria: crudo <b>${medOpV?medOpV.toFixed(2):"—"} MW</b> vs Eq.16 <b>${medEq?medEq.toFixed(2):"—"} MW</b> `
+    +`vs MIROVA-OCR 0.28–0.54 MW. El crudo sobre-registra por la nieve del ROI invernal; la Eq.16 aterriza en la banda MIROVA.`;
   if(eqChart) eqChart.destroy();
   eqChart=new Chart(el("eq16-canvas").getContext("2d"),{ type:"line",
     data:{ labels:shown, datasets:[
       { label:"Operacional (crudo)", data:shown.map(d=>mOp[d]??null), borderColor:"#4fc3f7", backgroundColor:"#4fc3f7", pointRadius:2.5, spanGaps:true, borderWidth:1.6, tension:0 },
-      { label:"Eq.16 (recuperada)",  data:shown.map(d=>mEq[d]??null), borderColor:"#ff9800", backgroundColor:"#ff9800", pointRadius:2.5, spanGaps:true, borderWidth:1.6, tension:0 } ]},
+      { label:"Eq.16",  data:shown.map(d=>mEq[d]??null), borderColor:"#ff9800", backgroundColor:"#ff9800", pointRadius:2.5, spanGaps:true, borderWidth:1.6, tension:0 },
+      { label:"MIROVA-OCR ↑", data:shown.map(()=>OCR_HI), borderColor:"#9e9e9e", borderDash:[4,4], pointRadius:0, borderWidth:1, fill:false, tension:0 },
+      { label:"MIROVA-OCR ↓", data:shown.map(()=>OCR_LO), borderColor:"#9e9e9e", borderDash:[4,4], pointRadius:0, borderWidth:1, fill:"-1", backgroundColor:"rgba(158,158,158,0.15)", tension:0 } ]},
     options:{ responsive:true, maintainAspectRatio:false,
       plugins:{ legend:{ labels:{ color:"#cfe3f5" } } },
       scales:{ x:{ ticks:{ color:"#7a8fa6", maxTicksLimit:10 }, grid:{ color:"#1a3a5c55" } },
