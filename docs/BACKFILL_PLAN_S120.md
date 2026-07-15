@@ -62,5 +62,18 @@ con inputs `start`/`end` (≤ ~3 meses, A15: 90 días ≈ 175 min/vol) y `volcan
   Láscar 0.825× (85 noches), Villarrica 0.841×, Isluga 0.743×, Copahue 0.866×,
   Llaima 0.890×, Lastarria 0.606×. Los 5 sin noches comunes = OSF sin actividad
   publicada en el período (quietos), esperado.
-- [x] P2 ola 2 (11 Tier A, 2025-05-15 → 2025-08-15) despachada 2026-07-02.
-- [ ] P2 verificación → P3 (2025-02-15 → 2025-05-15) → P4 (2025-01-01 → 2025-02-15).
+- [x] **P2 ola 2 (11 Tier A, 2025-05-15 → 2025-08-15): GATE APROBADO** (run
+  28599538452, 11/11 success). Integridad: 0 parse errors, 0 dupes. Cruce OSF:
+  4/6 en banda (Láscar 0.766× n=83, Lastarria 0.851× n=67, Isluga 0.743× n=83,
+  Llaima 0.578× n=9). **2 sub-banda que NO son regresión** (verificado file:line):
+  - **Copahue 0.206× (n=9)**: artefacto del gate crudo, no del backfill. Las noches
+    de junio son régimen **D9/A23 cirrus** (100% path-D, t_bg 262-269 K, VRP capeado
+    a 5.00 MW exacto) + cara b del bug A46 (clusters crateriano-cercanos etiquetados
+    `far` porque el final_hotspot scene-wide saltó a ~30 km). OSF mismo reporta a
+    20-26 km esas noches. El VIIRS summit real (0.05 MW) es lo único que el gate contó.
+  - **Villarrica 0.348× (n=5)**: n bajo, régimen no-invernal, sin significancia.
+  Lección: el gate OSF "máx diario summit-intra-inner" es demasiado crudo para
+  volcanes en régimen path-D cirrus — sirve para detectar regresión gruesa, no para
+  magnitud fina. La data P2 es tan clon-literal como la serie viva.
+- [x] P3 ola 3 (11 Tier A, 2025-02-15 → 2025-05-15) despachada 2026-07-02.
+- [ ] P3 verificación → P4 (2025-01-01 → 2025-02-15) → cierre backfill 2025.
