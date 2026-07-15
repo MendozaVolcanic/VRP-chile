@@ -1,14 +1,20 @@
-name: S120 reproc Eq.16 Villarrica (Panel 2b)
+name: S120 reproc Eq.16 (Panel 2b)
 
 # Genera la data del perfil aislado _s99_test1_eq16 (enable_test1_lava_lake_eq16,
 # Coppola 2024 Eq.15-16, T_e=1000K) para el Panel 2b de beyond-mirova.html.
 # NO toca el operacional (data_subdir aislado). Ventana default: jun-2026 = lago de
 # lava Villarrica reactivado (confirmado MIROVA-OCR 0.28-0.54 MW al cráter, S119).
-# Single job (sin matrix) — un solo archivo destino, sin race A47.
+# S120: parametrizado por volcán (era Villarrica-only) — extender el Panel 2b a
+# otros cuerpos sub-píxel (PCC lacolito, Chaitén domo). Single job por dispatch
+# (un archivo destino, sin race A47).
 # A43: "on" quoted.
 "on":
   workflow_dispatch:
     inputs:
+      volcano:
+        description: "Volcán (nombre canónico, ej. Villarrica, PuyehueCordonCaulle, Chaiten)"
+        default: "Villarrica"
+        required: true
       start:
         description: "Inicio ventana (YYYY-MM-DD)"
         default: "2026-06-01"
@@ -35,7 +41,7 @@ jobs:
           pip install --upgrade pip
           sudo apt-get install -y libhdf4-dev
           pip install pyhdf earthaccess numpy h5py scipy pyyaml
-      - name: Reprocess Villarrica _s99_test1_eq16
+      - name: Reprocess ${{ github.event.inputs.volcano }} _s99_test1_eq16
         env:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
@@ -44,7 +50,7 @@ jobs:
         run: |
           python scripts/run_pipeline.py \
             --profile _s99_test1_eq16 \
-            --volcano Villarrica \
+            --volcano "${{ github.event.inputs.volcano }}" \
             --start ${{ github.event.inputs.start }} \
             --end ${{ github.event.inputs.end }} \
             --overwrite
@@ -53,9 +59,9 @@ jobs:
           set +e
           git config user.name  "vrp-bot"
           git config user.email "vrp-bot@github-actions"
-          git add data/_s99_test1_eq16/Villarrica.json
+          git add "data/_s99_test1_eq16/${{ github.event.inputs.volcano }}.json"
           git diff --staged --quiet && { echo "no changes"; exit 0; }
-          git commit -m "data(s120): reproc Eq.16 Villarrica ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (Panel 2b)"
+          git commit -m "data(s120): reproc Eq.16 ${{ github.event.inputs.volcano }} ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (Panel 2b)"
           for attempt in 1 2 3 4 5; do
             git pull --rebase -X theirs origin main && git push && exit 0
             git rebase --abort 2>/dev/null
