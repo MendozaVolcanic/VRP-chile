@@ -172,8 +172,13 @@ const BASE_PATH = (() => {
 })();
 
 async function loadVolcanoData(volc) {
+  // S120: diario usa ventana 90d → el JSON liviano _recent (100d) la cubre. Evita bajar
+  // el completo por volcán (13-17 MB post-backfill) que timeoutea en red real. Fallback
+  // al completo si el deploy aún no generó _recent (nunca romper).
+  const name = encodeURIComponent(volc.name);
   try {
-    const r = await fetch(`${BASE_PATH}data/mirova_equivalent/${encodeURIComponent(volc.name)}.json`);
+    let r = await fetch(`${BASE_PATH}data/mirova_equivalent/${name}_recent.json`);
+    if (!r.ok) r = await fetch(`${BASE_PATH}data/mirova_equivalent/${name}.json`);
     if (!r.ok) return null;
     return await r.json();
   } catch (e) { return null; }

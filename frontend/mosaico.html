@@ -390,10 +390,15 @@ async function fetchJSON(url) {
 const allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
 
 async function loadVolcano(v) {
-  const [data, mirova] = await Promise.all([
-    fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json"),
+  // S120: mosaico solo muestra 30 días → el JSON liviano _recent (100d, ~27 MB los 11)
+  // cubre de sobra. Evita bajar los completos post-backfill (~171 MB) que timeoutean en
+  // red real (mismo modo de falla que se arregló en index.html). Fallback al completo si
+  // el deploy aún no generó _recent (nunca romper).
+  const [dataRecent, mirova] = await Promise.all([
+    fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + "_recent.json"),
     fetchJSON(BASE_PATH + "data/mirova/" + v.name + ".json"),
   ]);
+  const data = dataRecent || await fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json");
   allData[v.name] = {
     records:       data?.records   || [],
     mirovaRecords: mirova?.records || [],
