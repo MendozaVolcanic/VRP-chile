@@ -183,8 +183,8 @@ Con Ejes 1-6 verdes, candidatos ordenados por mi recomendación (decide Nicolás
 **Clon MIROVA:**
 1. **Backfill histórico VIIRS375+V750** (AUDIT_S112) — con gates OFF la data backfilled
    nace ya clon-literal; es el momento natural. Corre local (A15/GH 6h limit).
-2. **GAP #A** (retiro píxeles Test1 K1 del pool μ/σ, flag OFF) — único gap literal
-   restante; A/B propio antes de flip (afloja el gate).
+2. ~~**GAP #A** (retiro píxeles Test1 K1 del pool μ/σ)~~ — **RESUELTO S115 = mislabel, NO
+   es gap** (corregido S121; ver DIVERGENCES:1292 + AUDIT_S114:232). NO reabrir.
 3. **NEW-8 pool m,σ** — re-evaluar contra data post-flip (D9 curada la rebajó).
 
 **Beyond MIROVA:**
