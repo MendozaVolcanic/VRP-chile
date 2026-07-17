@@ -67,6 +67,13 @@ jobs:
           mkdir -p _site
           cp -r frontend/. _site/
           cp -r data _site/data
+          # S120: generar los JSON "recientes" livianos (100 días) que el dashboard
+          # carga por defecto. El backfill histórico llevó los completos a 13-17 MB
+          # c/u (~171 MB los 11 Tier A) → en red real el navegador timeoutea y el
+          # dashboard queda vacío. Los _recent (~27 MB total) se sirven en la carga
+          # inicial; la historia completa se baja bajo demanda (>90 días). NO toca
+          # los JSON completos del repo ni el pipeline — solo el artefacto publicado.
+          python scripts/build_recent_json.py --data-dir _site/data/mirova_equivalent
           # S33: copiar CSV consolidado MIROVA NRT para que diario.html pueda
           # mostrar la curva de referencia MIROVA en el chart timeline.
           # S73 (dehardcode): copiar latest_consolidado.csv (alias al CSV más
