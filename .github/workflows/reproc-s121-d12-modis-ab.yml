@@ -1,0 +1,57 @@
+name: Reproc S121 D12 MODIS honest-anchor A/B
+
+# POR QUÉ: A/B del ancla honesta MODIS (design 2026-07-17). Mide si el gate S111
+# first_pass_summit>0 cura el FN D12 Láscar SIN destapar los 131 path-D artefacto.
+# Profile AISLADO _d12_honest_anchor_modis (no toca operacional, puerta 3 MISSION).
+# Sube la data como ARTIFACT (NO commitea — no re-infla el repo post-poda S121).
+
+"on":
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Fecha inicio YYYY-MM-DD"
+        required: true
+        default: "2025-02-15"
+      end:
+        description: "Fecha fin YYYY-MM-DD"
+        required: true
+        default: "2025-05-15"
+
+permissions:
+  contents: read
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        volcano: [Lascar, NevadosDeChillan, PuyehueCordonCaulle, Tupungatito]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install -r requirements.txt
+      - name: Reproc ${{ matrix.volcano }} (profile _d12_honest_anchor_modis)
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          START_INPUT: ${{ github.event.inputs.start }}
+          END_INPUT: ${{ github.event.inputs.end }}
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _d12_honest_anchor_modis \
+            --volcano "${{ matrix.volcano }}" \
+            --start "$START_INPUT" \
+            --end "$END_INPUT"
+      - name: Upload data artifact (no commit — respeta poda S121)
+        uses: actions/upload-artifact@v4
+        with:
+          name: d12-ab-${{ matrix.volcano }}
+          path: data/_d12_honest_anchor_modis/${{ matrix.volcano }}.json
+          if-no-files-found: warn
+          retention-days: 14
