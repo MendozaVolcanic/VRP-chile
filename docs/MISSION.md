@@ -91,8 +91,9 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
      **CERRADA S114** (irreducible a 1 km; detección fiel a Coppola verificada file:line;
      todos los ejes agotados — A82, `docs/AUDIT_S114_PARITY_BY_SENSOR.md`); queda abierta solo
      la cara POSICIÓN del ancla en nevados (~1-1.5 km N, A70, costo residual no de recall) ·
-     D2 N·σ Tabla 1 ya implementado (dual-ROI 5/10, S114) — único gap literal pendiente GAP #A
-     (§298-300 retiro Test1 K1, flag OFF) · VIIRS750 disperso glaciar (Tupun/PP, ctxpeak S102§2) ·
+     D2 N·σ Tabla 1 ya implementado (dual-ROI 5/10, S114); GAP #A (§298-300 retiro Test1 K1) fue
+     **RESUELTO S115 = mislabel, NO es gap** (DIVERGENCES:1292) — NO reabrir · VIIRS750 disperso
+     glaciar (Tupun/PP, ctxpeak S102§2) ·
      NEW-8 gaps 2-4 (pool estadístico m,σ).
    - **Resuelto S118**: gates intra-radio S84/S85 → **OFF** (A/B real run 28312968093:
      0 robos de cluster en 214 noches focales; PR #474, tag `pre-s118-c2-flip`;

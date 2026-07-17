@@ -110,9 +110,10 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   true` (**C1 = 0.003 summit / 0.010 scene**, 0.02 día), Tests 2∧3 con la rama OR completa
   `min(C1, μ+C2·σ)`, σ **global per-imagen** (no del anillo), second-run (excluye activos, recomputa
   μ/σ), ETI por regresión cuadrática, kernel 8-vec aritmético. **La detección MODIS es FIEL a
-  Coppola 2016a** (S114). Único gap de fidelidad literal pendiente: **GAP #A** (§298-300, retiro de
-  píxeles Test 1 K1 del pool μ/σ; flag `enable_test1_k1_retire_from_hot_mask` OFF) — backlog,
-  evaluar con A/B propio (afloja el gate, no ataca el difuso). NTI absoluto floor 0.005 legacy.
+  Coppola 2016a** (S114). **NO quedan gaps de fidelidad literal pendientes**: el antiguo GAP #A
+  (§298-300, retiro de píxeles Test 1 K1 del pool μ/σ) fue **RESUELTO S115 = MISLABEL** — no era un
+  gap real (ver `docs/MIROVA_DIVERGENCES.md:1292` + `docs/AUDIT_S114_PARITY_BY_SENSOR.md:232`). NO
+  reabrir como trabajo pendiente (anti-A8/A50). NTI absoluto floor 0.005 legacy.
 - **Kernel 8-vecinos dNTI contextual**: `np.mean` aritmética (Coppola 2016a + Campus 2024). **Drift D1
   RESUELTO S17** — previamente usábamos `np.median` sin respaldo documental.
 - **MIR solo nocturno** (contaminación solar diurna).

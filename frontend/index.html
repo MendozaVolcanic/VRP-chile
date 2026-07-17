@@ -883,17 +883,30 @@ async function loadMirovaImgsIndex() {
   return mirovaImgsIndex;
 }
 
-async function loadVolcano(v) {
+// S120: el dashboard arranca con la ventana reciente (100 días, `_recent.json`,
+// ~27 MB los 11 Tier A) en vez de la historia completa post-backfill (~171 MB, que
+// en red real timeoutea >30s por archivo y deja el mapa/tabla vacíos). La historia
+// completa se baja bajo demanda cuando el usuario pide >90 días. `_fullHistoryLoaded`
+// evita que el auto-refresh pise la historia completa con la ventana reciente.
+let _fullHistoryLoaded = false;
+
+async function loadVolcano(v, opts = {}) {
+  const full = opts.full || false;
   // Solo los 11 Tier A (hasMirova=true) tienen data operacional. Los 34 restantes
   // quedan como tarjetas "sin datos" — ni data propia ni refs MIROVA.
   if (!v.hasMirova) {
     allData[v.name] = { records: [], mirovaRecords: [], updated: null };
     return;
   }
-  const [data, mirova] = await Promise.all([
-    fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json"),
+  const suffix = full ? "" : "_recent";
+  const [dataPrimary, mirova] = await Promise.all([
+    fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + suffix + ".json"),
     fetchJSON(BASE_PATH + "data/mirova/" + v.name + ".json"),
   ]);
+  // Fallback robusto: deploy viejo sin `_recent` → usar el completo (nunca romper).
+  const data = (!dataPrimary && !full)
+    ? await fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json")
+    : dataPrimary;
   allData[v.name] = {
     records:       data?.records   || [],
     mirovaRecords: mirova?.records || [],
@@ -3417,8 +3430,19 @@ async function init() {
   setInterval(updateClock, 1000);
 
   // Days
-  document.getElementById("days-select").addEventListener("change", e => {
+  document.getElementById("days-select").addEventListener("change", async e => {
     currentDays = parseInt(e.target.value);
+    // S120: la ventana liviana cubre 100 días. Si el usuario pide más historia
+    // (>90 días o "Todo"=0), bajar los JSON completos una sola vez, bajo demanda.
+    if (!_fullHistoryLoaded && (currentDays === 0 || currentDays > 90)) {
+      const sel = e.target;
+      sel.disabled = true;
+      document.body.style.cursor = "progress";
+      await Promise.all(VOLCANOES.map(v => loadVolcano(v, { full: true })));
+      _fullHistoryLoaded = true;
+      sel.disabled = false;
+      document.body.style.cursor = "";
+    }
     buildCards();
     renderDetail();
     updateHotspotLayer();
@@ -3644,7 +3668,9 @@ async function init() {
   setInterval(async () => {
     const prev = {};
     for (const v of VOLCANOES) prev[v.name] = allData[v.name] ? allData[v.name].updated : null;
-    await Promise.all(VOLCANOES.map(v => loadVolcano(v)));
+    // S120: respetar el nivel cargado — si el usuario ya pidió historia completa,
+    // el poll no debe pisarla con la ventana reciente (y viceversa).
+    await Promise.all(VOLCANOES.map(v => loadVolcano(v, { full: _fullHistoryLoaded })));
     _updateRefreshTimestamp();
     const changed = VOLCANOES.filter(v => (allData[v.name] ? allData[v.name].updated : null) !== prev[v.name]);
     if (changed.length === 0) return;  // sin datos nuevos → no re-renderizar
