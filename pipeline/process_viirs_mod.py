@@ -41,7 +41,7 @@ try:
 except ImportError:
     H5_AVAILABLE = False
 
-from .scan_geometry import viirs_pixel_areas, roi_mask_bbox, observation_geometry
+from .scan_geometry import viirs_pixel_areas, roi_mask_bbox, observation_geometry, attr_scale_factor
 from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots, cluster_pixels_geographic
 from .path_d_cap import apply_d9_scene_cap  # F50/S77
@@ -297,8 +297,7 @@ def read_viirs_mod_geo(geo_path: Path) -> dict:
         def _scaled(name):
             try:
                 ds = geo[name]
-                a = ds[:].astype(np.float32) * float(
-                    ds.attrs.get("scale_factor", 1.0))
+                a = ds[:].astype(np.float32) * attr_scale_factor(ds.attrs)
                 a[np.isnan(lat)] = np.nan
                 return a
             except Exception:

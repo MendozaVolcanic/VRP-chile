@@ -47,7 +47,7 @@ except ImportError:
     H5_AVAILABLE = False
     print("WARNING: h5py not found. Install: pip install h5py")
 
-from .scan_geometry import viirs_pixel_areas, roi_mask_bbox, observation_geometry
+from .scan_geometry import viirs_pixel_areas, roi_mask_bbox, observation_geometry, attr_scale_factor
 from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots, cluster_pixels_geographic
 from .anomaly_pixels import build_anomaly_pixels
@@ -437,8 +437,7 @@ def read_viirs_geo(geo_path: Path) -> dict:
         def _scaled(name):
             try:
                 ds = geo[name]
-                a = ds[:].astype(np.float32) * float(
-                    ds.attrs.get("scale_factor", 1.0))
+                a = ds[:].astype(np.float32) * attr_scale_factor(ds.attrs)
                 a[np.isnan(lat)] = np.nan
                 return a
             except Exception:

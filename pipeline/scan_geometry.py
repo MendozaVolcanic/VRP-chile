@@ -290,3 +290,26 @@ def observation_geometry(lat, lon, angles: dict,
         except Exception:
             continue
     return out
+
+
+def attr_scale_factor(attrs, key: str = "scale_factor", default: float = 1.0) -> float:
+    """Extrae un scale_factor de atributos HDF5/HDF4 de forma robusta.
+
+    POR QUÉ existe: h5py devuelve los atributos como arrays de numpy
+    (`array([0.01], dtype=float32)`), y en numpy >=2.0 `float()` sobre un array
+    de 1 elemento con ndim>0 lanza TypeError. Un try/except alrededor de eso
+    convierte silenciosamente el ángulo en None (bug S122, detectado por el
+    piloto real: VIIRS quedó sin geometría). pyhdf en cambio devuelve floats.
+    """
+    try:
+        raw = attrs.get(key, default)
+    except Exception:
+        return float(default)
+    try:
+        arr = np.asarray(raw).ravel()
+        if arr.size == 0:
+            return float(default)
+        val = float(arr[0])
+        return val if np.isfinite(val) and val != 0.0 else float(default)
+    except Exception:
+        return float(default)

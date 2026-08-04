@@ -84,3 +84,30 @@ def test_nan_angle_value_yields_none():
     got = observation_geometry(lat, lon, ang, 1.0, 11.0)
     assert got["sensor_zenith_deg"] is None
     assert got["sensor_azimuth_deg"] == 121.0  # las demás siguen resolviendo
+
+
+# --- attr_scale_factor: el bug que dejó VIIRS sin geometría en el piloto S122 ---
+
+class _Attrs(dict):
+    """Imita h5py.AttributeManager (devuelve arrays, no floats)."""
+
+
+def test_scale_factor_from_numpy_array_attr():
+    """h5py devuelve array([0.01]); float() sobre eso lanza en numpy>=2."""
+    from pipeline.scan_geometry import attr_scale_factor
+    assert attr_scale_factor(_Attrs(scale_factor=np.array([0.01], dtype=np.float32))) \
+        == pytest.approx(0.01, rel=1e-5)
+
+
+def test_scale_factor_plain_float_and_missing():
+    from pipeline.scan_geometry import attr_scale_factor
+    assert attr_scale_factor(_Attrs(scale_factor=0.01)) == pytest.approx(0.01)
+    assert attr_scale_factor(_Attrs()) == 1.0  # ausente → sin escalar
+
+
+def test_scale_factor_zero_or_garbage_falls_back_to_one():
+    """Un 0 escalaría todo a cero y borraría la geometría en silencio."""
+    from pipeline.scan_geometry import attr_scale_factor
+    assert attr_scale_factor(_Attrs(scale_factor=np.array([0.0]))) == 1.0
+    assert attr_scale_factor(_Attrs(scale_factor=np.array([]))) == 1.0
+    assert attr_scale_factor(_Attrs(scale_factor="basura")) == 1.0
