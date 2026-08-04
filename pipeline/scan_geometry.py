@@ -223,3 +223,70 @@ def viirs_pixel_areas(
     factor = 1.0 + (1.0 / cos_z - 1.0) * 0.5
     factor = np.minimum(factor, 2.0)
     return nadir_area_m2 * factor
+
+
+# ════════════════════════════════════════════════════════════════════
+# S122 — Geometría de observación persistida por record (research use).
+# POR QUÉ: el ángulo de visión condiciona lo que el sensor "ve" del cráter.
+# Un píxel muy oblicuo (zenith alto) es más grande y más elongado en el
+# terreno, promedia más superficie fría alrededor del foco y atraviesa más
+# atmósfera → una misma anomalía puede leerse más débil. El azimut solar y
+# el zenith solar permiten además separar efectos de iluminación/sombra de
+# ladera. NO participan de la detección ni de la magnitud (el pipeline usa
+# A_pix nadir-fijo, A66/A67); se persisten para estudiarlos después.
+# ════════════════════════════════════════════════════════════════════
+
+OBSERVATION_ANGLE_KEYS = (
+    "sensor_zenith_deg",
+    "sensor_azimuth_deg",
+    "solar_zenith_deg",
+    "solar_azimuth_deg",
+)
+
+
+def observation_geometry(lat, lon, angles: dict,
+                         target_lat: float, target_lon: float) -> dict:
+    """Ángulos de observación en el píxel más cercano a (target_lat, target_lon).
+
+    Args:
+        lat, lon: arrays 2-D de geolocalización de la escena.
+        angles: dict con cualquier subconjunto de OBSERVATION_ANGLE_KEYS →
+            array 2-D de la misma forma que lat/lon (o None si el producto
+            no lo trae).
+        target_lat, target_lon: punto de interés (hotspot final o cráter).
+
+    Returns:
+        dict con las claves de OBSERVATION_ANGLE_KEYS presentes y resolubles,
+        redondeadas a 2 decimales; None en las que no se puedan resolver.
+        Defensivo: nunca lanza — ante cualquier problema devuelve None por clave.
+    """
+    out = {k: None for k in OBSERVATION_ANGLE_KEYS}
+    if target_lat is None or target_lon is None or not angles:
+        return out
+    try:
+        la = np.asarray(lat, dtype=np.float64)
+        lo = np.asarray(lon, dtype=np.float64)
+        if la.shape != lo.shape or la.size == 0:
+            return out
+        # Distancia euclídea en grados: suficiente para elegir el píxel más
+        # cercano dentro de una escena (no es una medida de distancia real).
+        d2 = (la - float(target_lat)) ** 2 + (lo - float(target_lon)) ** 2
+        if not np.any(np.isfinite(d2)):
+            return out
+        idx = np.unravel_index(np.nanargmin(d2), la.shape)
+    except Exception:
+        return out
+    for key in OBSERVATION_ANGLE_KEYS:
+        arr = angles.get(key)
+        if arr is None:
+            continue
+        try:
+            a = np.asarray(arr, dtype=np.float64)
+            if a.shape != la.shape:
+                continue
+            v = float(a[idx])
+            if np.isfinite(v):
+                out[key] = round(v, 2)
+        except Exception:
+            continue
+    return out
