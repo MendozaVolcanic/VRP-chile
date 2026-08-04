@@ -204,7 +204,11 @@ def main() -> int:
         try:
             paths = fetch.download_granules(sel, tmp)
         except Exception as exc:
-            print(f"  {day} {geo_key}: download falló ({type(exc).__name__}) — se salta")
+            print(f"  {day} {geo_key}: download falló ({type(exc).__name__}: {exc}) — se salta")
+            continue
+        if not paths:
+            print(f"    DIAG {day} {geo_key}: download devolvió 0 archivos "
+                  f"para {len(sel)} granules seleccionados")
             continue
 
         by_tok = {}
@@ -212,9 +216,18 @@ def main() -> int:
             t = acq_token(p.name)
             if t:
                 by_tok[t] = p
+        if not by_tok:
+            # Fallar en silencio acá fue el bug de la 1a corrida (0 rellenados
+            # con exit 0). Ruidoso a propósito.
+            print(f"    DIAG {day} {geo_key}: {len(sel)} seleccionados → "
+                  f"{len(paths)} descargados, 0 con token reconocible. "
+                  f"names={[p.name for p in paths][:3]} want={sorted(want)[:3]}")
         for tok, rec in items:
             p = by_tok.get(tok)
             if p is None:
+                if by_tok:
+                    print(f"    DIAG {day} {geo_key}: token {tok} sin archivo "
+                          f"(descargados: {sorted(by_tok)[:3]})")
                 continue
             geo = read_geo_angles(p)
             if geo is None:
