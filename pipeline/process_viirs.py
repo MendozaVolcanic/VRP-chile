@@ -47,7 +47,7 @@ except ImportError:
     H5_AVAILABLE = False
     print("WARNING: h5py not found. Install: pip install h5py")
 
-from .scan_geometry import viirs_pixel_areas, roi_mask_bbox
+from .scan_geometry import viirs_pixel_areas, roi_mask_bbox, observation_geometry
 from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots, cluster_pixels_geographic
 from .anomaly_pixels import build_anomaly_pixels
@@ -428,7 +428,24 @@ def read_viirs_geo(geo_path: Path) -> dict:
             # standard VNP03/VJ103 products.
             sz = np.zeros_like(lat)
         sz[np.isnan(lat)] = np.nan
-    return {"lat": lat, "lon": lon, "sensor_zenith": sz}
+
+        # S122 — resto de la geometría de observación (mismo archivo ya abierto).
+        # Solo para estudio posterior; no entra en detección ni magnitud.
+        angles = {"sensor_zenith_deg": sz}
+        for key, cands in (("sensor_azimuth_deg", ("sensor_azimuth", "satellite_azimuth")),
+                           ("solar_zenith_deg", ("solar_zenith",)),
+                           ("solar_azimuth_deg", ("solar_azimuth",))):
+            arr = None
+            for name in cands:
+                if name in geo:
+                    try:
+                        arr = geo[name][:].astype(np.float32)
+                        arr[np.isnan(lat)] = np.nan
+                    except Exception:
+                        arr = None
+                    break
+            angles[key] = arr
+    return {"lat": lat, "lon": lon, "sensor_zenith": sz, "angles": angles}
 
 
 # S23 Task 2: haversine_km centralizado en pipeline/scan_geometry.py
@@ -1830,6 +1847,12 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "granule": name,
         "product_version": "nrt" if "_NRT" in name else "standard",
         "datetime_utc": _parse_datetime(name),
+        # S122 — geometría de observación en el punto reportado (research).
+        **observation_geometry(
+            geo["lat"], geo["lon"], geo.get("angles"),
+            final_hotspot_lat if final_hotspot_lat is not None else vent_lat,
+            final_hotspot_lon if final_hotspot_lon is not None else vent_lon,
+        ),
     }
 
     # F31 A2 — merge diagnostic VRPTIR Aveni si flag ON. Con flag OFF

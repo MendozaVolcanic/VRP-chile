@@ -46,7 +46,7 @@ except ImportError:
     HDF4_AVAILABLE = False
     print("WARNING: pyhdf not found. Install: conda install -c conda-forge pyhdf")
 
-from .scan_geometry import modis_pixel_areas, roi_mask_bbox
+from .scan_geometry import modis_pixel_areas, roi_mask_bbox, observation_geometry
 from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots, cluster_pixels_geographic
 from .vrp_regimes import (
@@ -249,14 +249,37 @@ def read_modis_l1b(hdf_path: Path) -> dict:
     lat_coarse = sd.select("Latitude").get().astype(np.float32)   # (406, 271) for 2030x1354
     lon_coarse = sd.select("Longitude").get().astype(np.float32)
 
+    # S122 — ángulos de observación (misma grilla 5km, ya abierta).
+    # POR QUÉ: el ángulo de visión condiciona lo que el sensor ve del cráter
+    # (píxel oblicuo = más grande, promedia más terreno frío, más atmósfera).
+    # NO entran en detección ni magnitud (A_pix es nadir-fijo, A66); se
+    # persisten para estudiarlos. Defensivo: si un SDS falta, queda None.
+    angles_coarse = {}
+    for key, sds_name in (("sensor_zenith_deg", "SensorZenith"),
+                          ("sensor_azimuth_deg", "SensorAzimuth"),
+                          ("solar_zenith_deg", "SolarZenith"),
+                          ("solar_azimuth_deg", "SolarAzimuth")):
+        try:
+            sds = sd.select(sds_name)
+            raw = sds.get().astype(np.float32)
+            # MODIS almacena los ángulos como enteros escalados (scale 0.01).
+            scale = sds.attributes().get("scale_factor", 1.0)
+            sds.endaccess()
+            angles_coarse[key] = raw * float(scale)
+        except Exception:
+            angles_coarse[key] = None
+
     sd.end()
 
     # Interpolate coarse lat/lon to full 1km resolution
     n_lines, n_samples = band21.shape
     lat = _interp_geo(lat_coarse, n_lines, n_samples)
     lon = _interp_geo(lon_coarse, n_lines, n_samples)
+    angles = {k: (_interp_geo(v, n_lines, n_samples) if v is not None else None)
+              for k, v in angles_coarse.items()}
 
-    return {"band21": band21, "band22": band22, "band31": band31, "lat": lat, "lon": lon}
+    return {"band21": band21, "band22": band22, "band31": band31,
+            "lat": lat, "lon": lon, "angles": angles}
 
 
 def _interp_geo(coarse: np.ndarray, target_lines: int, target_samples: int) -> np.ndarray:
@@ -1378,6 +1401,12 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "granule": hdf_path.name,
         "product_version": "nrt" if "_NRT" in hdf_path.name else "standard",
         "datetime_utc": _parse_datetime(hdf_path.name),
+        # S122 — geometría de observación en el punto reportado (research).
+        **observation_geometry(
+            data["lat"], data["lon"], data.get("angles"),
+            final_hotspot_lat if final_hotspot_lat is not None else vent_lat,
+            final_hotspot_lon if final_hotspot_lon is not None else vent_lon,
+        ),
     }
 
 
