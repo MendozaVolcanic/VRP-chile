@@ -1,6 +1,13 @@
 # C2 — fix de magnitud path-D MODIS (peak-of-kernel) — design S122
 
-> **Estado: DISEÑO. No ejecutado.** Prerequisito para destrabar D12 (AUDIT_S121_D12_AB.md).
+> **⛔ ESTADO S122: CERRADO POR EL PASO 0 — C2 NO VIABLE.** El Paso 0 (read-only,
+> `experiments/_s122_c2_paso0/paso0.py`, veredicto `docs/AUDIT_S122_C2_PASO0.md`) mostró
+> que el blob path-D MODIS **no tiene núcleo separable**: el píxel pico aporta ~2-3% del
+> total y solapa casi por completo entre la cura de Láscar [2.23,4.52] y el destape de los
+> nevados [1.42,4.26] MW. Un peak-of-kernel colapsa AMBOS <5 MW → destruiría la cura junto
+> con el artefacto. **D12 irreducible a 1 km (A82/A83 en magnitud); recall Láscar lo cubre
+> VIIRS375 (A77).** NO codear C2. El resto de este doc queda como registro del diseño.
+>
 > **CORRECCIÓN S121 (investigación ctxpeak)**: el plan original "portar ctxpeak a MODIS"
 > NO sirve — ver §"Por qué". C2 requiere LÓGICA NUEVA, no un flag flip.
 

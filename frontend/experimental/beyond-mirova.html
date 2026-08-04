@@ -137,6 +137,24 @@
     </div>
     <div class="card"><div class="chart-wrap"><canvas id="fid-canvas"></canvas></div></div>
     <div class="note" id="fid-stat" style="margin-top:10px"></div>
+    <div class="note" style="margin-top:10px;border-left:3px solid #ab47bc;padding-left:10px">
+      <b>Segundo ground truth independiente — AVTOD (Reath et al. 2019).</b> El catálogo
+      <b>ASTER Volcanic Thermal Output Database</b> (90 m, análisis manual, grupo Pritchard/Coppola)
+      es una fuente <b>independiente de MIROVA</b>. Establece correlación AVTOD↔MIROVA en 9 volcanes
+      latinoamericanos, de los cuales <b>5 son Tier A chilenos</b>: Villarrica, Láscar, Llaima, Chaitén,
+      Copahue (r²=0.87 global). AVTOD clasifica <b>Villarrica en la clase térmica más alta</b> (&gt;35 °C
+      sobre fondo, lava lake). Su métrica es <b>°C sobre fondo</b> (no VRP en watts); el máximo °C-AB fue
+      el mejor análogo del VRP de MIROVA. <span style="color:var(--muted)">El caveat físico de Reath —
+      "el píxel más caliente de ASTER cabe dentro del píxel más caliente de MODIS; el MIR-method es más
+      sensible sobre ~600 K"— coincide con nuestro hallazgo sub-píxel (MODIS reparte en 1 km lo que
+      VIIRS375 resuelve como un foco; ver <code>docs/AUDIT_S122_C2_PASO0.md</code>).</span>
+      <b>Máx °C sobre fondo AVTOD (ASTER, 2000-2017), verificado:</b> Villarrica/Llaima 120 (saturado,
+      lava lake) · Láscar 100 · Chaitén 80 · Copahue 57 · NdC 48 · PP 44 · PCC 35 · Isluga 31 ·
+      Tupungatito 24 · Lastarria 20. <b>Corroboración independiente:</b> AVTOD le da a PCC solo 35 °C
+      (su máx fue la erupción 2011) — confirma que nuestros records path-D de alta magnitud en PCC son
+      artefacto difuso, no un volcán de cientos de MW.
+      <span class="pill">Table S1 en data/mirova_reference/avtod_reath2019_chile.csv · overlay per-fecha pendiente de digitalizar Figs S11-S19</span>
+    </div>
   </section>
 
   <section class="pane" id="pane-eq16">
