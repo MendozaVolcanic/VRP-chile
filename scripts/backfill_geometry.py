@@ -182,6 +182,13 @@ def main() -> int:
     if args.dry_run or not n_pend:
         return 0
 
+    # La búsqueda en CMR es anónima, pero la DESCARGA exige credenciales: el
+    # pipeline autentica dentro de su función de alto nivel (fetch.py:658) y
+    # este script usa las de bajo nivel, así que hay que hacerlo explícito.
+    # Sin esto, download_granules devuelve [] al instante y el backfill termina
+    # en verde sin escribir nada (bug de la 1a corrida, run 30894743196).
+    fetch.auth()
+
     tmp = REPO / "data" / "_geo_tmp" / args.volcano
     tmp.mkdir(parents=True, exist_ok=True)
     filled = 0
