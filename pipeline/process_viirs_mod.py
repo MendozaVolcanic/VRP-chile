@@ -291,18 +291,28 @@ def read_viirs_mod_geo(geo_path: Path) -> dict:
 
         # S122 — resto de la geometría de observación (mismo archivo ya abierto).
         # Solo para estudio posterior; no entra en detección ni magnitud.
-        angles = {"sensor_zenith_deg": sz}
+        # VNP03/VJ103 guarda los angulos como enteros escalados (scale_factor
+        # 0.01): sin aplicarlo, 63.32 grados se leeria como 6332 (bug detectado
+        # por el piloto real S122; los tests unitarios no ejercitan el L1B).
+        def _scaled(name):
+            try:
+                ds = geo[name]
+                a = ds[:].astype(np.float32) * float(
+                    ds.attrs.get("scale_factor", 1.0))
+                a[np.isnan(lat)] = np.nan
+                return a
+            except Exception:
+                return None
+
+        angles = {"sensor_zenith_deg": _scaled("sensor_zenith")
+                  if "sensor_zenith" in geo else None}
         for key, cands in (("sensor_azimuth_deg", ("sensor_azimuth", "satellite_azimuth")),
                            ("solar_zenith_deg", ("solar_zenith",)),
                            ("solar_azimuth_deg", ("solar_azimuth",))):
             arr = None
             for nm in cands:
                 if nm in geo:
-                    try:
-                        arr = geo[nm][:].astype(np.float32)
-                        arr[np.isnan(lat)] = np.nan
-                    except Exception:
-                        arr = None
+                    arr = _scaled(nm)
                     break
             angles[key] = arr
     return {"lat": lat, "lon": lon, "sensor_zenith": sz, "angles": angles}
