@@ -239,9 +239,28 @@ jobs:
       # bugs silenciosos donde el step termina exit 0 pero NO escribió records
       # nuevos (caso F55 S84: bypass earthaccess rompió session setup, pipeline
       # exit 0, 4 días NRT stale sin detectar). Criterio: max(record.datetime_utc)
-      # en el JSON del volcán debe ser < 72h. Si más viejo → FAIL.
+      # en el JSON del volcán debe ser < 72h.
       # Aplica SOLO a 11 Tier A (mirova_equivalent), no a los 34 exploration
       # que pueden estar legítimamente quietos por meses.
+      #
+      # S123 — el stale AVISA pero ya NO hace fallar el run. Tres razones:
+      #
+      #  1. Redundancia: el healthcheck A58 detecta la MISMA condición antes
+      #     (48h vs 72h) y por un canal con deduplicación (issue). En la caída
+      #     del 23-jul→04-ago (13 días, token NASA expirado) este gate produjo
+      #     107 runs rojos ≈ 9 correos/día sin aportar un solo dato que A58 no
+      #     tuviera ya desde el 22-jul. Alertar por CORRIDA en vez de por
+      #     INCIDENTE entrena a ignorar los correos.
+      #  2. El badge mentía: "pipeline roto" cuando el pipeline funciona y
+      #     quien no entrega es NASA.
+      #  3. Auto-perpetuación: al fallar este step se saltaba el commit (no
+      #     tiene `if: always()`), así que un volcán stale que recibiera un
+      #     granule de >72h veía su dato DESCARTADO y no salía nunca del
+      #     estado stale. El gate sostenía la condición que denunciaba.
+      #
+      # Lo que SÍ sigue fallando el run: 0 records y schema sin datetime_utc.
+      # Esos son bugs NUESTROS, inmediatos y accionables — no falta de dato
+      # externo — y además conviene que aborten antes de commitear un JSON roto.
       - name: Assert Tier A records fresh (A57)
         # success(): solo correr si pipeline steps previos pasaron. Si NASA cayó
         # (NASA_AUTH_UNREACHABLE) y el step falló, no queremos doble-FAIL.
@@ -250,7 +269,7 @@ jobs:
              && contains(fromJson('["Lascar","PuyehueCordonCaulle","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","Chaiten","Villarrica","NevadosDeChillan","Llaima","Copahue"]'), matrix.volcano) }}
         run: |
           python - <<'PYEOF'
-          import json, sys
+          import json, os, sys
           from datetime import datetime, timezone, timedelta
           from pathlib import Path
           vol = "${{ matrix.volcano }}"
@@ -274,10 +293,18 @@ jobs:
           age = datetime.now(timezone.utc) - last_dt
           hours = age.total_seconds() / 3600
           if age > timedelta(hours=72):
-              print(f"FAIL {p}: stale, last_dt={last} ({hours:.1f}h > 72h)")
-              print(f"   Probable bug silencioso en pipeline o NASA outage prolongado.")
-              print(f"   Ver A57+A58 en docs/META_RULES_S80.md.")
-              sys.exit(1)
+              # S123: aviso, NO fallo. Anotación visible en la UI del run y en
+              # el summary; la alerta accionable la emite el healthcheck A58,
+              # que agrupa por incidente y no repite una vez por corrida.
+              msg = (f"{vol} stale: last_dt={last} ({hours:.1f}h > 72h). "
+                     f"Probable NASA outage prolongado o bug silencioso. "
+                     f"La alerta accionable la lleva nrt-healthcheck.yml (A58).")
+              print(f"::warning title=Tier A stale ({vol})::{msg}")
+              summary = os.environ.get("GITHUB_STEP_SUMMARY")
+              if summary:
+                  with open(summary, "a", encoding="utf-8") as f:
+                      f.write(f"\n### ⚠️ {vol}: records stale ({hours:.1f}h)\n\n{msg}\n")
+              sys.exit(0)
           print(f"OK {p}: last_dt={last} ({hours:.1f}h)")
           PYEOF
 

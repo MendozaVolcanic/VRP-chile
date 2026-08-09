@@ -122,33 +122,137 @@ jobs:
           print(report)
 
           # Output flags para steps siguientes
+          # S123: max_age_h alimenta el escalonamiento de notificaciones.
+          edades = [a for _, _, a in stale if a is not None]
+          max_age_h = max(edades) if edades else 0.0
           with open(os.environ["GITHUB_OUTPUT"], "a") as f:
               f.write(f"stale_count={len(stale)}\n")
               f.write(f"missing_count={len(missing)}\n")
               f.write(f"ok_count={len(ok)}\n")
+              f.write(f"max_age_h={max_age_h:.1f}\n")
 
           # Step summary
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
               f.write(report)
           PYEOF
 
-      - name: Open or update issue if stale
-        if: steps.detect.outputs.stale_count != '0' || steps.detect.outputs.missing_count != '0'
+      # S123 — notificar por INCIDENTE, no por corrida.
+      #
+      # El problema que resuelve: en la caída del 23-jul→04-ago (13 días) los
+      # tres canales de alerta juntos emitieron ~180 avisos para UN incidente
+      # (~9 correos/día del gate A57 + 4 comentarios/día de nrt-monitor + 1 de
+      # este healthcheck). Ese volumen entrena a ignorar los correos, que es
+      # exactamente lo contrario de lo que una alerta debe lograr.
+      #
+      # Regla: la información que cambia día a día (la edad en horas) NO merece
+      # una notificación — se refleja EDITANDO el cuerpo del issue, que no
+      # notifica. Solo se comenta (= se notifica) al CRUZAR un escalón, porque
+      # ahí cambia lo que hay que hacer. Escalones: 48h (apertura) → 72h →
+      # 7 días → 14 días → 30 días.
+      #
+      # El step corre SIEMPRE (no solo con stale) porque la otra mitad del
+      # problema es que ningún canal avisaba la RECUPERACIÓN: #498 quedó
+      # abierto 5 días con el sistema ya sano y #336 lleva abierto desde el
+      # 04-jun. Un semáforo que solo sabe ponerse en rojo deja de ser semáforo.
+      - name: Notificar por escalón (o cerrar si se recuperó)
+        if: always() && steps.detect.conclusion == 'success'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
+          STALE_COUNT: ${{ steps.detect.outputs.stale_count }}
+          MISSING_COUNT: ${{ steps.detect.outputs.missing_count }}
+          MAX_AGE_H: ${{ steps.detect.outputs.max_age_h }}
         run: |
-          set -e
-          REPORT=$(cat healthcheck_report.md)
-          TITLE="NRT staleness — Tier A con records >48h"
-          # Buscar issue abierto con label nrt-stale
-          EXISTING=$(gh issue list --repo "$GH_REPO" --label nrt-stale --state open --json number --jq '.[0].number // empty')
-          if [ -n "$EXISTING" ]; then
-              echo "Issue existente #$EXISTING — agregando comment"
-              gh issue comment "$EXISTING" --repo "$GH_REPO" --body "$REPORT"
-          else
-              echo "No hay issue abierto — creando uno nuevo"
-              # Asegurar que label existe (crear si no)
-              gh label create nrt-stale --repo "$GH_REPO" --color FF6B6B --description "NRT healthcheck detectó vols Tier A stale" 2>/dev/null || true
-              gh issue create --repo "$GH_REPO" --title "$TITLE" --label nrt-stale --body "$REPORT"
-          fi
+          python - <<'PYEOF'
+          import json, os, subprocess, sys
+          from pathlib import Path
+
+          REPO = os.environ["GH_REPO"]
+          TITLE = "NRT staleness — Tier A con records >48h"
+          LABEL = "nrt-stale"
+          MARK = "<!-- s123-escalon:"
+
+          stale = int(os.environ.get("STALE_COUNT") or 0)
+          missing = int(os.environ.get("MISSING_COUNT") or 0)
+          max_age = float(os.environ.get("MAX_AGE_H") or 0)
+          hay_problema = stale > 0 or missing > 0
+
+          def gh(*args, stdin=None):
+              r = subprocess.run(["gh", *args], capture_output=True, text=True,
+                                 encoding="utf-8", input=stdin)
+              if r.returncode != 0:
+                  print(f"WARN gh {' '.join(args[:3])}: {r.stderr.strip()}")
+              return r.stdout.strip()
+
+          # Escalones de MAYOR a menor: el primero que la edad alcanza.
+          ESCALONES = [(720, "30 días"), (336, "14 días"), (168, "7 días"),
+                       (72, "72 h"), (0, "48 h")]
+
+          def escalon(horas):
+              for umbral, nombre in ESCALONES:
+                  if horas >= umbral:
+                      return nombre
+              return "48 h"
+
+          raw = gh("issue", "list", "--repo", REPO, "--label", LABEL,
+                   "--state", "open", "--json", "number,body", "--jq", ".[0] // empty")
+          abierto = json.loads(raw) if raw else None
+
+          # --- Caso 1: todo sano. Cerrar el issue si quedó abierto. ---
+          if not hay_problema:
+              if not abierto:
+                  print("OK: sin stale y sin issue abierto — nada que hacer.")
+                  sys.exit(0)
+              num = str(abierto["number"])
+              cuerpo = (
+                  "## ✅ Recuperado\n\n"
+                  "El healthcheck encuentra **todos los Tier A frescos** (<48 h). "
+                  "Cierro el issue automáticamente para que el rojo signifique algo "
+                  "la próxima vez.\n\n"
+                  "<details><summary>Último reporte</summary>\n\n"
+                  + Path("healthcheck_report.md").read_text(encoding="utf-8")
+                  + "\n\n</details>"
+              )
+              gh("issue", "comment", num, "--repo", REPO, "--body-file", "-", stdin=cuerpo)
+              gh("issue", "close", num, "--repo", REPO,
+                 "--reason", "completed")
+              print(f"Issue #{num} cerrado: sistema recuperado.")
+              sys.exit(0)
+
+          # --- Caso 2: hay problema. Abrir, escalar o solo refrescar. ---
+          reporte = Path("healthcheck_report.md").read_text(encoding="utf-8")
+          actual = escalon(max_age)
+          cuerpo = f"{MARK} {actual} -->\n\n{reporte}\n"
+
+          if not abierto:
+              gh("label", "create", LABEL, "--repo", REPO, "--color", "FF6B6B",
+                 "--description", "NRT healthcheck detectó vols Tier A stale")
+              gh("issue", "create", "--repo", REPO, "--title", TITLE,
+                 "--label", LABEL, "--body-file", "-", stdin=cuerpo)
+              print(f"Issue creado (escalón {actual}).")
+              sys.exit(0)
+
+          num = str(abierto["number"])
+          previo = None
+          for linea in (abierto.get("body") or "").splitlines():
+              if linea.startswith(MARK):
+                  previo = linea[len(MARK):].replace("-->", "").strip()
+                  break
+
+          # El cuerpo se refresca siempre: editar NO genera notificación.
+          gh("issue", "edit", num, "--repo", REPO, "--body-file", "-", stdin=cuerpo)
+
+          if previo == actual:
+              print(f"Issue #{num}: sigue en escalón {actual} — cuerpo "
+                    f"actualizado, sin notificar.")
+              sys.exit(0)
+
+          aviso = (
+              f"## ⏫ Escaló a **{actual}**\n\n"
+              f"La caída pasó de `{previo or '48 h'}` a `{actual}` "
+              f"(peor caso: {max_age:.0f} h sin dato).\n\n"
+              f"{reporte}"
+          )
+          gh("issue", "comment", num, "--repo", REPO, "--body-file", "-", stdin=aviso)
+          print(f"Issue #{num}: escaló {previo} → {actual} (notificado).")
+          PYEOF
