@@ -46,14 +46,6 @@ jobs:
               return;
             }
 
-            const failures = runs.filter(r => r.conclusion === 'failure' || r.conclusion === 'timed_out');
-            if (failures.length < 3) {
-              console.log(`Solo ${failures.length}/${runs.length} fallaron — sin alerta.`);
-              return;
-            }
-
-            console.log('Las 3 últimas corridas fallaron — buscando issue abierto existente...');
-
             const TITLE = 'NRT cron: 3+ corridas consecutivas fallaron';
             const existing = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
@@ -62,18 +54,56 @@ jobs:
               labels: 'nrt-alert',
               per_page: 20,
             });
+            const abierto = existing.data.find(i => i.title === TITLE);
 
-            if (existing.data.some(i => i.title === TITLE)) {
-              console.log('Issue ya abierto con mismo título — no duplico. Agrego comentario con últimos runs.');
-              const issue = existing.data.find(i => i.title === TITLE);
-              const comment = 'Estado actual al ' + new Date().toISOString() + ':\n\n' +
-                failures.map(r => `- [${r.created_at}](${r.html_url}): ${r.conclusion}`).join('\n');
-              await github.rest.issues.createComment({
+            const failures = runs.filter(r => r.conclusion === 'failure' || r.conclusion === 'timed_out');
+            if (failures.length < 3) {
+              console.log(`Solo ${failures.length}/${runs.length} fallaron — sin alerta.`);
+              // S123: señal de RECUPERACIÓN. Si las 3 últimas salieron verdes y
+              // quedó un issue abierto, cerrarlo. Sin esto el issue queda en rojo
+              // para siempre y deja de significar algo: #336 lleva abierto desde
+              // el 2026-06-04 con 58 comentarios, atravesando varias caídas y
+              // recuperaciones. El rojo permanente es indistinguible del ruido.
+              if (abierto && failures.length === 0) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: abierto.number,
+                  body: '## ✅ Recuperado\n\nLas 3 últimas corridas del cron NRT salieron verdes:\n\n' +
+                    runs.map(r => `- [${r.created_at}](${r.html_url}): ${r.conclusion}`).join('\n') +
+                    '\n\nCierro automáticamente.',
+                });
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: abierto.number,
+                  state: 'closed',
+                  state_reason: 'completed',
+                });
+                console.log(`Issue #${abierto.number} cerrado: cron recuperado.`);
+              }
+              return;
+            }
+
+            console.log('Las 3 últimas corridas fallaron — buscando issue abierto existente...');
+
+            if (abierto) {
+              // S123: EDITAR el cuerpo en vez de comentar. Un comentario notifica;
+              // una edición no. El monitor corre cada 6 h, así que comentar cada
+              // vez producía 4 avisos diarios que repetían el mismo hecho — en la
+              // caída de julio fueron 58 comentarios sobre un incidente ya
+              // reportado. El estado queda igual de visible en el cuerpo del issue.
+              const cuerpo = 'Estado al ' + new Date().toISOString() + ' — las últimas corridas siguen fallando:\n\n' +
+                failures.map(r => `- [${r.created_at}](${r.html_url}): ${r.conclusion}`).join('\n') +
+                '\n\n(Este cuerpo se refresca en cada chequeo sin notificar. El escalonamiento ' +
+                'por antigüedad del dato lo lleva `nrt-healthcheck.yml`.)';
+              await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: issue.number,
-                body: comment,
+                issue_number: abierto.number,
+                body: cuerpo,
               });
+              console.log(`Issue #${abierto.number} — cuerpo actualizado, sin notificar.`);
               return;
             }
 
