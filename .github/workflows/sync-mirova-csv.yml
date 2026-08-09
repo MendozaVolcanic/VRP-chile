@@ -28,7 +28,13 @@ permissions:
   contents: write
 
 concurrency:
-  group: sync-mirova-csv
+  # S123: grupo COMPARTIDO por los 6 workflows que hacen `git push` a main.
+  # Serializa los pushes entre workflows distintos y evita la carrera
+  # "cannot lock ref 'refs/heads/main'" (ya ocurrida en Mirova-v1 el 2026-08-08).
+  # Colision concreta que motiva esto: nrt.yml (cron :00 cada 2h) vs
+  # sync-mirova-csv.yml (cron :12 de cada hora) cuando nrt tarda >12 min.
+  # cancel-in-progress: false -> nunca abortamos un push a medias; se encola.
+  group: push-main
   cancel-in-progress: false
 
 jobs:
@@ -36,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Download fresh CSV from Mirova-v1
         run: |
@@ -61,7 +67,7 @@ jobs:
 
       - name: Setup Python
         if: steps.changed.outputs.changed == 'true'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 

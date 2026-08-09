@@ -49,6 +49,16 @@ name: NRT VRP Pipeline (both profiles)
 # Now each volcano runs in its own job with 60-min timeout; one hang
 # does not block the others. Total scheduled runtime: ~20-40 min
 # (parallel) instead of 1-6 hours (sequential) or indefinite (stuck).
+concurrency:
+  # S123: grupo COMPARTIDO por los 6 workflows que hacen `git push` a main.
+  # Serializa los pushes entre workflows distintos y evita la carrera
+  # "cannot lock ref 'refs/heads/main'" (ya ocurrida en Mirova-v1 el 2026-08-08).
+  # Colision concreta que motiva esto: nrt.yml (cron :00 cada 2h) vs
+  # sync-mirova-csv.yml (cron :12 de cada hora) cuando nrt tarda >12 min.
+  # cancel-in-progress: false -> nunca abortamos un push a medias; se encola.
+  group: push-main
+  cancel-in-progress: false
+
 jobs:
   process:
     runs-on: ubuntu-latest
@@ -109,11 +119,11 @@ jobs:
 
       - name: Checkout repository
         if: steps.filter.outputs.skip != 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
         if: steps.filter.outputs.skip != 'true'
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: "pip"

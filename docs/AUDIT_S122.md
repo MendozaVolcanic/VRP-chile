@@ -9,7 +9,36 @@
 > atrás** de `origin/main` (A25/A52 en vivo). Se actualizó y se **re-corrieron** los análisis de
 > la sesión (Paso 0 D12 y cross-validation AVTOD) sobre data fresca: conclusiones intactas.
 
-## 🔴 P0 — CRÍTICO: el NRT está caído hace ~2 semanas (token NASA expirado)
+## ✅ P0 — RESUELTO el 2026-08-04 *(era: NRT caído ~2 semanas por token NASA expirado)*
+
+> **Addendum de cierre — 2026-08-09 (S123).** Verificado contra el remote (`gh api`, nunca contra
+> el checkout local). **La ingesta térmica propia se recuperó y la serie quedó sin hueco.**
+> El cuerpo original de este P0 se conserva abajo como registro de lo que se sabía el 02-ago.
+>
+> | Qué | Evidencia (remote) |
+> |---|---|
+> | NRT verde de nuevo | `nrt.yml` run **1135 = último `failure`** (04-ago 06:26 UTC); **1136 en adelante `success`** (04-ago 10:37 UTC) — 5 días corridos sin fallos |
+> | Ingesta viva hoy | Commits `NRT update` del **09-ago** para 10 de los 11 Tier A (Copahue, NdC, Chaitén, Villarrica, PCC, Lastarria, Planchón, Isluga, Láscar, Tupungatito). Llaima: último 08-ago 21:28 — dentro de cadencia, no es stale |
+> | **Serie sin hueco** | El backfill previsto en "Acciones (2)" **se ejecutó**: `data(backfill): Copahue 2026-07-21..2026-08-02 (S120)` el 04-ago 08:33, más `data(geometry)` S122. El hueco 21-jul → 02-ago quedó relleno; el NRT normal retoma el 04-ago 11:42 |
+> | Frescura Tier A | El healthcheck A58 **dejó de reportar stale** tras el 04-ago 13:44 (último comentario en #498) |
+>
+> **Alcance real de la caída**: 23-jul → 04-ago = **13 días, 107 runs fallidos** (no 9 días/81).
+> La ventana 26-jul–04-ago da exactamente 81; los 26 fallos del 23, 24 y 25 de julio quedaron
+> fuera de esa ventana. El primer fallo cae el 23-jul porque A57 dispara a las 72 h del último
+> dato bueno (20-jul).
+>
+> **Lo que sigue abierto de este P0** (no lo cierra la recuperación):
+> - **Acción (3)** — distinguir credencial-muerta de host-caído en `fetch.py` y abortar: *sin
+>   verificar en esta sesión*. La causa raíz del retraso en detectar sigue en pie.
+> - **Acción (4)** — canal de notificación: ver el diseño de escalonamiento de S123. El problema
+>   no fue falta de alerta sino **exceso**: ~9 correos/día por 13 días entrenan a ignorarlos.
+> - **Higiene de issues**: **#498** (`nrt-stale`) sigue **abierto** pese a que el sistema se
+>   recuperó el 04-ago, y **#336** (`nrt-alert`) sigue abierto **desde el 04-jun** con 58
+>   comentarios. Ningún canal emite señal de *recuperación*, así que los issues quedan en rojo
+>   permanente y pierden valor como semáforo.
+
+<details>
+<summary>Cuerpo original del P0, tal como se escribió el 2026-08-02 (registro histórico)</summary>
 
 **Verificado por el orquestador** en el log del run 30771155452 (job 91558429689):
 
@@ -36,6 +65,8 @@ el healthcheck abrió el issue **#498 el 22-jul** — pero quedó 11 días sin q
 `EARTHDATA_TOKEN` (Claude NO toca credenciales); (2) backfill de los ~14 días; (3) **fix de
 diseño**: distinguir credencial-muerta de host-caído en `fetch.py` y abortar; (4) canal de
 notificación que Nicolás vea (el issue solo no alcanzó).
+
+</details>
 
 ## P1 — Desempeño: la pérdida de MODIS es de ETIQUETA, no de detección (GT fresco)
 
