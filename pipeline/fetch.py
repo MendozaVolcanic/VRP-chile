@@ -10,6 +10,7 @@ Granules are saved to a temp directory, processed, then deleted.
 
 import math
 import os
+import re
 import socket
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -407,6 +408,66 @@ except Exception:  # pragma: no cover — requests siempre presente
     _CMR_SEARCH_ERRORS = _CONNECT_ERRORS or (Exception,)
 
 
+# ---------------------------------------------------------------------------
+# S123 — credencial muerta ≠ host caído.
+#
+# Todo lo de arriba (breakers A64/S102 y S116) asume fallas TRANSITORIAS de red:
+# degradar a [] y seguir es correcto porque la corrida siguiente recupera. Una
+# credencial rechazada es lo contrario: permanente hasta que un humano rote el
+# secret. Reintentarla no la cura y degradarla la esconde — el 2026-07-20 expiró
+# el token y el cron corrió 13 días "verde" sin producir un dato (107 runs),
+# porque el rechazo terminaba en el catch-all de fetch_for_volcano como un WARN.
+#
+# earthaccess ≥0.17 envuelve el rechazo HTTP en `RuntimeError(response.text)`,
+# perdiendo el tipo pero conservando el status en `__cause__.response`. Por eso
+# hay que mirar ambos, y caer al texto cuando ni eso sobrevive.
+# ---------------------------------------------------------------------------
+class EarthdataCredentialError(RuntimeError):
+    """Credencial NASA inválida/expirada: permanente, requiere intervención."""
+
+
+# Un 401 ya es inequívoco. Un 403 NO alcanza: NASA lo usa también para
+# colecciones sin EULA aceptada y para throttling, y abortar por eso mataría el
+# NRT entero por un solo sensor. Para 403 (o status ausente) exigimos que el
+# cuerpo hable explícitamente de la credencial.
+_CRED_DEAD_PAT = re.compile(
+    r"token .{0,40}?(expired|invalid|revoked)"
+    r"|invalid[_ ](credentials|token)"
+    r"|unauthorized",
+    re.I)
+
+
+def _is_credential_dead(exc: BaseException) -> tuple[bool, int | None]:
+    """¿Este error es 'la credencial no sirve' (y no 'la red falló')?
+
+    Devuelve (es_credencial_muerta, status_http_si_se_pudo_recuperar).
+    """
+    resp = (getattr(getattr(exc, "__cause__", None), "response", None)
+            or getattr(exc, "response", None))
+    code = getattr(resp, "status_code", None)
+    body = (str(exc) or "")[:400]
+    if code == 401:
+        return True, 401
+    if code == 403 and _CRED_DEAD_PAT.search(body):
+        return True, 403
+    if code is None and _CRED_DEAD_PAT.search(body):
+        return True, None
+    return False, code
+
+
+def _raise_if_credential_dead(exc: BaseException, where: str) -> None:
+    """Reclasifica y aborta si la causa es la credencial; si no, no hace nada."""
+    dead, code = _is_credential_dead(exc)
+    if not dead:
+        return
+    raise EarthdataCredentialError(
+        f"EARTHDATA_CREDENTIAL_INVALID [{where}]: NASA rechazó la credencial "
+        f"(HTTP {code if code is not None else '?'}). Hay que **rotar** el "
+        f"secret EARTHDATA (ver docs/EARTHDATA_TOKEN_SETUP.md) — no es un "
+        f"outage y reintentar no lo cura. Detalle: {str(exc)[:200]}"
+    ) from exc
+
+
 def search_granules(product_key: str, lat: float, lon: float,
                     radius_km: float, date: datetime) -> list:
     """
@@ -463,6 +524,14 @@ def search_granules(product_key: str, lat: float, lon: float,
                           f"esta corrida [{product_key}] err={type(e).__name__}: {str(e)[:90]}")
                     return []
                 raise  # breaker OFF → comportamiento previo (propaga)
+            except Exception as e:
+                # S123: acá llega el rechazo de credencial (earthaccess lo
+                # envuelve en RuntimeError, así que no cae en el except de
+                # arriba — y está bien que no caiga: no debe tripear el breaker
+                # de red). Si es la credencial, aborta; cualquier otra cosa
+                # sigue propagando como antes.
+                _raise_if_credential_dead(e, f"search:{product_key}")
+                raise
             if results:
                 return results
     return []
@@ -714,6 +783,13 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             for l1b_g, geo_g in matched:
                 paths += download_granules([l1b_g, geo_g], platform_dir)
             results[platform] = paths
+        except EarthdataCredentialError:
+            # S123: NO degradar. Este catch-all es justo donde el token expirado
+            # se convertía en un WARN inofensivo y el job terminaba exit 0 con
+            # cero granules — 13 días de cron "verde" sin datos. Si la credencial
+            # está muerta, todas las plataformas van a fallar igual: que el run
+            # muera ruidoso y con la causa en el mensaje.
+            raise
         except Exception as e:
             print(f"  WARN: Failed to fetch {platform}: {e}")
             results[platform] = []
