@@ -15,13 +15,25 @@ permissions:
   issues: write
 
 concurrency:
-  # S123: grupo COMPARTIDO por los 6 workflows que hacen `git push` a main.
-  # Serializa los pushes entre workflows distintos y evita la carrera
-  # "cannot lock ref 'refs/heads/main'" (ya ocurrida en Mirova-v1 el 2026-08-08).
-  # Colision concreta que motiva esto: nrt.yml (cron :00 cada 2h) vs
-  # sync-mirova-csv.yml (cron :12 de cada hora) cuando nrt tarda >12 min.
-  # cancel-in-progress: false -> nunca abortamos un push a medias; se encola.
-  group: push-main
+  # S123 corregido — este workflow SALE del grupo compartido `push-main`.
+  #
+  # Que paso: el 2026-08-17 (primer lunes con el grupo activo) este run quedo
+  # encolado esperando el lock que nrt.yml ocupa ~50 min de cada 2 h, llego otro
+  # run del grupo y GitHub descarto el pendiente -> `cancelled`. Perdio la
+  # auditoria de la semana entera. Para un cron horario perder el turno es
+  # inocuo (el siguiente recupera); para uno SEMANAL es una semana sin dato.
+  #
+  # Por que salir es seguro: el push de este workflow YA es robusto por si
+  # mismo — bucle de 4 intentos con `git pull --rebase -X theirs` (ver step
+  # "commit + push"). Esa es la proteccion REAL contra la carrera de refs; el
+  # grupo compartido no le agregaba nada y si le quitaba la corrida. Leccion
+  # A85 aplicada a infra: una cerca que protege algo ya robusto es carga sin
+  # beneficio — medir el dano real ANTES de cercar.
+  #
+  # Los workflows SIN retry propio (nrt-retry, backfill, reproc) SI siguen en
+  # `push-main`, donde el grupo si aporta. Frente pendiente: darles retry y
+  # evaluar si el grupo deja de hacer falta.
+  group: audit-weekly
   cancel-in-progress: false
 
 jobs:
