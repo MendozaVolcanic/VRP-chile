@@ -19,9 +19,9 @@ Repo: https://github.com/MendozaVolcanic/VRP-chile
 cd "C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile"
 git fetch origin --prune
 git pull --ff-only
-ls tasks/BLOQUE_ARRANQUE_S*.md | tail -1   # leer el último bloque de arranque
-cat docs/SESSION_INDEX_CONSOLIDATED_S80.md  # ancla canónica post-S80
-cat docs/AUDIT_S86.md                       # marco fundacional post-S86 (95% FPs son realidad física)
+ls tasks/BLOQUE_ARRANQUE_S*.md | sort -V | tail -1   # último bloque de arranque (sort -V, no alfabético)
+ls docs/AUDIT_S*.md | sort -V | tail -1              # última auditoría integral (hoy: AUDIT_S123.md)
+cat docs/MIROVA_DIVERGENCES.md                       # catálogo vivo: qué está abierto y qué NO reabrir
 ```
 
 **Razón actualización S86 (resuelve C1 auditoría I)**: S82-prep reapuntó la raíz `VRP Chile/` a `main` (commit `81c38e7b`) tras detectar que estaba quedada en branch `s15-dev` stale (S33). La raíz es el worktree principal y se mantiene siempre en main al día. El worktree antiguo `VRP-Chile-s70/` quedó en branch huérfano `work-s78-bloque-arranque-s79` y NO se debe usar como canónico (regla A52: worktrees no-main pueden estar atrasados). Otros worktrees (`VRP-Chile-s80-consolidation/`, `VRP-Chile-s79-f66/`) sirven para trabajo específico de sus branches pero NO son canónicos.
@@ -991,7 +991,7 @@ después hay que revertir.
 | Trabajo con HDF/NetCDF/DataFrames grandes de records satelitales | `pandas-pro` | Operaciones vectorizadas, no loops |
 | Audit script que tarda >5 min | `python-performance-optimization` | Perfilar antes de "optimizar a ojo" |
 | Diseñar nuevo experimento (`experiments/NN_*.py`) | `writing-plans` + `test-driven-development` | Mismo rigor que código de producción |
-| A/B test cuantitativo de un fix con profile flag | clonar `.github/workflows/reproc-ab-p3-1.yml` o `reproc-ab-test1.yml` como template + 2 profiles `_<feature>_{enabled,disabled}.yaml` con `data_subdir` aislado | Patrón validado S24+S25, no contamina operacional |
+| A/B test cuantitativo de un fix con profile flag | clonar `.github/workflows/_archive/reproc-ab-p3-1.yml` o `_archive/reproc-ab-test1.yml` como template + 2 profiles `_<feature>_{enabled,disabled}.yaml` con `data_subdir` aislado | Patrón validado S24+S25, no contamina operacional. **Los templates viven en `_archive/` desde S80** (PR #217 archivó 71 yml de reproc); copiarlos a `.github/workflows/` para usarlos y volver a archivarlos al terminar |
 | **Cerrar sesión con learnings nuevos** | **`revise-claude-md` + `anthropic-skills:consolidate-memory`** + seguir [`docs/SESSION_CLOSE_CHECKLIST.md`](docs/SESSION_CLOSE_CHECKLIST.md) bloque por bloque | El trigger sin checklist falló S20 (gaps redescubiertos S21). Checklist obligatorio bloques A-F |
 
 **Regla meta (reforzada S16)**: si Claude duda si una skill aplica, la invoca igual.
@@ -1094,8 +1094,18 @@ Para minimizar compactaciones automáticas ("session continued..."):
 - **volcanoes.yaml**: `yaml.safe_dump` destruye comentarios. Preferir `Edit`
   tool para cambios puntuales, no rewrite completo con Python.
 - **GitHub Actions**: repo público = minutos ilimitados. Matrix 45 volcanes,
-  max-parallel=8, fail-fast=false, cron cada 2h. Timeout 25 min/step puede
-  ser corto para reprocess full history (NdC timeout recurrente).
+  max-parallel=8, fail-fast=false, cron cada 2h. **Timeout real hoy: 50 min
+  per-step** en `nrt.yml` (el "25 min" que decía esta línea quedó obsoleto y
+  contradecía la sección Arquitectura — corregido S123). Sigue siendo corto
+  para reprocess full history; para eso usar máquina local (ver S15) o
+  `timeout >= duración_esperada × 1.3` (A15).
+- **Concurrency (S123)**: los 6 workflows que hacen `git push` a main comparten
+  `group: push-main` con `cancel-in-progress: false` — nrt, nrt-retry,
+  sync-mirova-csv, audit-weekly, backfill y reproc. Un yml nuevo que pushee a
+  main DEBE declarar ese mismo grupo, o reabre la carrera de `git push` que el
+  PR #502 cerró. En `nrt.yml` el grupo va a nivel **workflow**, nunca a nivel
+  job: los 11 volcanes son jobs de una matrix y GitHub solo mantiene 1 run
+  pendiente por grupo — a nivel job se perderían 9 volcanes por corrida.
 - **Radios geofencing MIROVA-OVDAS**: cada volcán tiene radius_km propio
   (3-15 km). store.py usa `max_hotspot_dist_km` per-volcano, no global 5km.
   Refs: https://github.com/MendozaVolcanic/Mirova-v1
@@ -1159,10 +1169,20 @@ Para minimizar compactaciones automáticas ("session continued..."):
 orden, de estas fuentes (regla AUDIT_S105 — la sección Estado anterior quedó congelada
 en S35 durante ~70 sesiones y confundía a las sesiones frías):
 
-1. `tasks/BLOQUE_ARRANQUE_S<N>.md` más reciente (`ls tasks/BLOQUE_ARRANQUE_S*.md | tail -1`)
+1. `tasks/BLOQUE_ARRANQUE_S<N>.md` más reciente (`ls tasks/BLOQUE_ARRANQUE_S*.md | sort -V | tail -1`
+   — ojo: `sort -V`, porque el orden alfabético pone S99 después de S122)
 2. `MEMORY.md` del proyecto (memoria del agente) — índice de últimas sesiones
-3. `docs/AUDIT_S105.md` — última auditoría integral (A51)
-4. `docs/MIROVA_DIVERGENCES.md` — catálogo VIVO de divergencias (abiertas: D2, D3, D9, D11)
+3. **La auditoría integral más reciente** — `ls docs/AUDIT_S*.md | sort -V | tail -1`.
+   NO hardcodear un número acá: este puntero quedó clavado en S105 durante 18
+   sesiones y mandaba leer una auditoría de junio como si fuera vigente (hallazgo
+   S123). Al 2026-08-09 la última es `docs/AUDIT_S123.md`.
+4. `docs/MIROVA_DIVERGENCES.md` — catálogo VIVO de divergencias. Estado al S123:
+   **abiertas D2 y D3** (ambas congeladas desde S27, sin plan activo; D2 quedó
+   mitigada de facto por el loader CONS∪OCR de S86 pero el doc nunca se actualizó)
+   y **D12** (FN MODIS; C2 peak-of-kernel refutado en S122, cierre formal pendiente
+   de Nicolás). **CERRADAS, no reabrir** (anti-A8): D9 (S113, sus dos caras),
+   D11 cara far→summit (S114, irreducible A82) y los gates intra-radio S84/S85
+   (flip OFF S118, verificado S119).
 5. `docs/SESSION_INDEX_CONSOLIDATED_S80.md` — ancla histórica S1-S80
 
 **Regla**: al cerrar sesión NO escribir estado acá — va al bloque de arranque + memoria.

@@ -1,6 +1,11 @@
 # ÍNDICE MAESTRO DE DOCS — VRP Chile
 > Creado S105 (AUDIT_S105 acción P1). Clasifica SIN mover (limpieza física pospuesta).
 > Regla: al crear un doc nuevo, agregarlo acá. Al cerrar un frente, mover su entrada a HISTÓRICO.
+>
+> **Puesto al día S123 (2026-08-09)** tras 18 sesiones sin mantención: este índice declaraba
+> AUDIT_S105 como "última auditoría vigente" mientras existían 6 auditorías integrales
+> posteriores, y ~25 docs S106-S123 no figuraban. Si vas a agregar un doc, agregá también
+> su fila acá **en la misma sesión** — la regla de arriba es vieja, lo que falló es cumplirla.
 
 ## CANÓNICOS (fuente de verdad — leer estos primero)
 
@@ -8,8 +13,11 @@
 |---|---|---|
 | MISSION.md | Misión vinculante: clon literal MIROVA, 3 preguntas | S22 |
 | MIROVA_DIVERGENCES.md | Catálogo vivo de divergencias vs MIROVA | S71+ |
-| AUDIT_S105.md | Última auditoría A51 (vigente) | S105 |
-| AUDIT_S86.md | Auditoría anterior, marco FPs (parcialmente matizada) | S86 |
+| **AUDIT_S123.md** | **Última auditoría integral (6 ejes) — VIGENTE** | **S123** |
+| AUDIT_S122.md | Auditoría previa (deuda docs, P0 token NASA) | S122 |
+| AUDIT_S121_MEJORA_INTEGRAL.md | Auditoría multi-modelo (refutó 2 hallazgos) | S121 |
+| AUDIT_S119.md · AUDIT_S116.md · AUDIT_S105.md | Auditorías integrales anteriores (históricas) | S105-S119 |
+| AUDIT_S86.md | Marco FPs: 95% son realidad física (A54) — matizado por A69/A82 | S86 |
 | META_RULES_S80.md | Reglas meta M1-M9 + A56-A60 | S80 |
 | SESSION_INDEX_CONSOLIDATED_S80.md | Ancla consolidada sesiones S1-S80 | S80 |
 | SESSION_CLOSE_CHECKLIST.md | Checklist obligatorio de cierre de sesión | S20 |
@@ -36,6 +44,36 @@
 | superpowers/specs/2026-06-10-test1-local-bg-nti-design.md | Design frente ABIERTO fondo-local NTI | S105 |
 | superpowers/specs/2026-06-09-test1-nti-covalidation-design.md | Design frente ABIERTO Test1-NTI co-validación | S104 |
 | superpowers/specs/2026-06-05-frente-modis-campo-difuso-design.md | Design frente ABIERTO MODIS campo difuso | S101 |
+
+### Agregados S123 — docs S106-S123 que faltaban en el índice
+
+**Veredictos y cierres (leer antes de reabrir cualquier frente — anti-A8):**
+
+| Doc | Qué cierra / concluye | Sesión |
+|---|---|---|
+| AUDIT_S114_PARITY_BY_SENSOR.md | far→summit MODIS **irreducible** (A82); detección MODIS fiel a Coppola file:line | S114 |
+| AUDIT_S116_FOLLOWUP.md | No existe discriminante físico universal cat-b vs artefacto (A83); refina A80 | S116 |
+| AUDIT_S116_C2_GATES.md · AUDIT_S118_C2_GATES_AB.md | Gates intra-radio: investigación → A/B real → **flip OFF** (A85) | S116-S118 |
+| AUDIT_S121_D12_AB.md | D12 ancla honesta MODIS: **NO ADOPTAR** (cura Láscar, destapa path-D) | S121 |
+| AUDIT_S122_C2_PASO0.md | C2 peak-of-kernel **no viable** (pico solapa nevados); D12 cerrable | S122 |
+| AUDIT_S109_MODIS_FOCAL_VEREDICTO.md · AUDIT_S108_AB_MODIS_VEREDICTO.md | Magnitud focal MODIS adoptada / fondo-local refutado | S108-S109 |
+| S103_VIIRS_NADIR_PROMOTE_RESULTS.md · S102_NADIR_PROMOTE_RESULTS.md | nadir-fijo adoptado y promovido (A66/A67) | S102-S103 |
+| S113_A46_COHERENCE_GUARD.md | Guard de coherencia A46 (summit→far) live | S113 |
+| S112_TEST1_LOWMAG_AB_RESULTS.md | Magnitud "Muy Bajo" VIIRS375, anillo [1.5,3] (A79) | S112 |
+
+**Diagnósticos y planes vivos:**
+
+| Doc | Qué es | Sesión |
+|---|---|---|
+| PLAN_EXPERIMENTAL_BEYOND_MIROVA_S122.md | Plan del modo experimental (M1 zonas, M2 AVTOD, backfill P4) | S122 |
+| M2_AVTOD_INTEGRATION_S122.md | AVTOD: premisa refutada (no publica VRP en watts) | S122 |
+| S121_GIT_FILTER_REPO_DESIGN.md | Diseño poda de historia git (autorizado, **sin ejecutar**) | S121 |
+| S122_ANGLE_BIAS_FINDING.md | Geometría de observación per-record | S122 |
+| BACKFILL_PLAN_S120.md | Plan de backfill (usado en la recuperación del 04-ago) | S120 |
+| AUDIT_S110_NDC_PATH_DIAGNOSTIC.md · AUDIT_S111_TEST1_LOWMAG_FN.md | Diagnósticos NdC / FN régimen bajo | S110-S111 |
+| AUDIT_S112_DASHBOARD_MIROVA.md · S101_DASHBOARD_AUDIT.md · S100_DASHBOARD_AUDIT.md | Auditorías de dashboard | S100-S112 |
+| AUDIT_S106.md · AUDIT_S109_VIIRS_FRENTES.md · S101_SENSOR_PERFORMANCE.md | Estado por sensor / frentes VIIRS | S106-S109 |
+| EARTHDATA_TOKEN_SETUP.md | Setup de credenciales NASA — **relevante tras el incidente 20-jul** | — |
 
 ## HISTÓRICO-CERRADO (referencia, NO fuente de verdad actual)
 
