@@ -389,7 +389,7 @@ async function renderEq16(){
   const box=el("eq16-status");
   let eq=null;
   try{ const r=await fetch(`${BASE_PATH}data/_s99_test1_eq16/Villarrica.json`); if(r.ok) eq=await r.json(); }catch(e){}
-  if(!eq){ box.innerHTML="Aún sin data: corré el workflow <code>reproc-s120-eq16-villarrica</code> (Actions) y recargá. La detección operacional no se toca — perfil aislado."; return; }
+  if(!eq){ box.innerHTML="<b>No se pudo cargar la data de este panel.</b> El archivo <code>data/_s99_test1_eq16/Villarrica.json</code> no respondió. Si falta, se regenera con el workflow <code>reproc-s120-eq16-villarrica</code> (Actions). La detección operacional no se toca — perfil aislado."; return; }
   const op=await loadVolcanoData("Villarrica");
   const mOp=dailyMaxOurs(op), mEq=dailyMaxOurs(eq);
   const d0=Object.keys(mEq).sort()[0];
