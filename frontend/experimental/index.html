@@ -404,7 +404,42 @@ async function loadVolcano(v) {
     records:       data?.records   || [],
     mirovaRecords: mirova?.records || [],
     updated:       data?.updated   || null,
+    // S124: `null` = el fetch falló (404, red, JSON roto). NO es lo mismo que
+    // "cargó y no hay detecciones". Sin esta distinción una serie faltante se
+    // muestra como "SIN DATOS / sin detección" en los 45 volcanes, que un
+    // operador lee como "no hay actividad volcánica" — el mismo modo de fallo
+    // engañoso que tuvo el panel Eq.16 durante dos meses.
+    loadFailed:    data === null,
   };
+}
+
+// S124 — decir la verdad cuando el dato no está.
+// Un panel que muestra "sin detección" porque no pudo bajar el archivo miente
+// en la dirección más peligrosa para monitoreo volcánico: hacia la calma.
+function reportDataAvailability() {
+  const fallidos = VOLCANOES.filter(v => allData[v.name]?.loadFailed).length;
+  const id = "data-availability-banner";
+  document.getElementById(id)?.remove();
+  if (!fallidos) return;
+
+  const todos = fallidos === VOLCANOES.length;
+  const el = document.createElement("div");
+  el.id = id;
+  el.style.cssText = "margin:8px 12px;padding:10px 14px;border-radius:8px;" +
+    "border:1px solid #b45309;background:#78350f;color:#fde68a;" +
+    "font-size:13px;line-height:1.5";
+  el.innerHTML = todos
+    ? "<b>No se pudo cargar la serie experimental.</b> Los volcanes aparecen sin " +
+      "datos porque falta el archivo, <b>no porque no haya actividad</b>. Esta vista " +
+      "consume <code>data/experimental_v2/</code>, que se genera desde el NRT del " +
+      "2026-08-25 en adelante; la serie anterior quedó en <code>data/experimental/</code> " +
+      "y no se mezcla con esta a propósito (se generó con otra configuración). " +
+      "Para tener historia acá hace falta un reproceso."
+    : "<b>Serie incompleta:</b> no se pudo cargar el dato de " + fallidos + " de " +
+      VOLCANOES.length + " volcanes. Los que aparecen sin datos pueden ser un " +
+      "archivo faltante, no ausencia de actividad.";
+  const anchor = document.querySelector("main") || document.body;
+  anchor.insertBefore(el, anchor.firstChild);
 }
 
 // ── Data helpers ─────────────────────────────────────────────────────────────
@@ -1284,6 +1319,7 @@ async function init() {
 
   // Load all volcanoes in parallel
   await Promise.all(VOLCANOES.map(v => loadVolcano(v)));
+  reportDataAvailability();
 
   buildAlertSummary();
   buildCards();

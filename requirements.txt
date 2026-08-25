@@ -2,6 +2,12 @@ earthaccess>=0.9.0
 numpy>=1.24
 h5py>=3.9
 pyproj>=3.5
+# S124: scipy es dependencia CORE del pipeline (scipy.ndimage en clustering.py,
+# detection_context.py, process_modis.py, vrp_regimes.py) y faltaba acá. Los
+# workflows de reproc la instalaban a mano, lo que enmascaró la omisión durante
+# meses; lo destapó el CI de tests al correr por primera vez con un entorno
+# limpio construido solo desde este archivo.
+scipy>=1.11
 pandas>=2.0
 pyyaml>=6.0
 matplotlib>=3.7
