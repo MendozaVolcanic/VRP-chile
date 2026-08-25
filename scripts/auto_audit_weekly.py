@@ -49,6 +49,21 @@ WINDOW_DAYS = 60
 MIN_N_RECALL = 15   # noches ALERTA mínimas para que el recall del bucket sea flaggeable
 MIN_N_RATIO = 5     # noches comunes mínimas para que el ratio per-vol sea flaggeable
 
+# --- S124: guarda de COBERTURA ---
+# Sin esto la auditoría tiene una asimetría perversa: grita cuando fallamos
+# nosotros y se calla cuando falla la REFERENCIA. Dos modos concretos, ambos
+# ya ocurridos:
+#   (a) el NRT se cae (20-jul→04-ago, token expirado) y MIROVA sigue publicando
+#       → las noches en que no miramos entran al DENOMINADOR del recall y el
+#       veredicto culpa a la detección. Abrió 3 issues seguidos por un problema
+#       que no era de detección (#499/#500/#504).
+#   (b) el scraper de mirovaweb se congela → en la ventana rodante `n` cae bajo
+#       los mínimos, los flags se SALTAN y el veredicto sale VERDE. La referencia
+#       muerta se lee como "todo bien".
+# Un veredicto solo es interpretable si la ventana tuvo cobertura de AMBOS lados.
+MAX_GT_STALE_DAYS = 7      # días sin ALERTA nueva de MIROVA → referencia sospechosa
+MIN_COVERAGE_PCT = 80.0    # % de días de la ventana con datos nuestros
+
 VOLS = ["Lascar", "Lastarria", "Isluga", "Llaima", "Villarrica", "Chaiten",
         "Tupungatito", "Copahue", "PlanchonPeteroa", "PuyehueCordonCaulle",
         "NevadosDeChillan"]
@@ -71,6 +86,22 @@ def our_bucket(sensor):
     if sensor.startswith("VIIRS"):
         return "VIIRS375"
     return None
+
+
+def _csv_ultima_fecha(path):
+    """Fecha más reciente registrada en el CSV MIROVA (cualquier Tipo_Registro).
+
+    Devuelve 'YYYY-MM-DD' o None si no se puede leer. Incluye RUTINA a
+    propósito: es lo que distingue "el scraper murió" de "no hubo actividad".
+    """
+    try:
+        import csv as _csv
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            fechas = [r.get("Fecha_Satelite_UTC") or "" for r in _csv.DictReader(fh)]
+        fechas = [f[:10] for f in fechas if f[:4].isdigit()]
+        return max(fechas) if fechas else None
+    except (OSError, KeyError):
+        return None
 
 
 def main():
@@ -167,20 +198,69 @@ def main():
     if integrity["duplicates_total"]:
         flags.append(f"integridad: {integrity['duplicates_total']} records duplicados (datetime,sensor)")
 
+    # --- S124: cobertura de la ventana, ANTES de interpretar los flags ---
+    dias_ventana = WINDOW_DAYS + 1
+    dias_nuestros = {d for (_v, _s, d) in ours.keys()}
+    cobertura_pct = round(100.0 * len(dias_nuestros) / dias_ventana, 1)
+
+    # Frescura del ground truth: se mide sobre TODO el CSV, no sobre las ALERTAS.
+    # Un período sin alertas es información legítima (los volcanes pueden estar
+    # tranquilos); lo que delata a un scraper muerto es que el archivo entero
+    # deje de crecer, y el CSV trae también los registros de RUTINA (los "miré y
+    # no había nada"), que se generan todos los días haya o no actividad.
+    gt_ultima, gt_stale_dias = _csv_ultima_fecha(CONS), None
+    if gt_ultima:
+        # ojo: `date` se usa como nombre de variable en los loops de este script,
+        # así que se parsea vía datetime para no depender del import sombreado.
+        gt_stale_dias = (today - datetime.fromisoformat(gt_ultima).date()).days
+
+    cobertura_avisos = []
+    if cobertura_pct < MIN_COVERAGE_PCT:
+        cobertura_avisos.append(
+            f"cobertura propia {cobertura_pct}% < {MIN_COVERAGE_PCT}% "
+            f"({len(dias_nuestros)}/{dias_ventana} días con datos): el recall de esta "
+            f"ventana NO es interpretable — las noches sin datos cuentan como fallos")
+    if gt_stale_dias is None:
+        cobertura_avisos.append("no se pudo leer la fecha del ground truth: referencia sospechosa")
+    elif gt_stale_dias > MAX_GT_STALE_DAYS:
+        cobertura_avisos.append(
+            f"ground truth stale: el CSV MIROVA no registra nada hace "
+            f"{gt_stale_dias} días (> {MAX_GT_STALE_DAYS}) — es el scraper, no los volcanes")
+
+    cobertura = {
+        "cobertura_propia_pct": cobertura_pct,
+        "dias_con_datos": len(dias_nuestros),
+        "dias_ventana": dias_ventana,
+        "gt_ultima_fecha_csv": gt_ultima,
+        "gt_stale_dias": gt_stale_dias,
+        "avisos": cobertura_avisos,
+    }
+
+    # DEGRADADO gana sobre todo: si no sabemos si la ventana es interpretable,
+    # decirlo es más honesto que un VERDE o un FUERA_DE_BANDA que no se sostiene.
+    if cobertura_avisos:
+        verdict = "DEGRADADO"
+    elif flags:
+        verdict = "FUERA_DE_BANDA"
+    else:
+        verdict = "VERDE"
+
     out = {
         "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "window": list(win),
+        "cobertura": cobertura,
         "criteria": "eje2 S119 (crater A10 + dash), loader canónico CONS∪OCR",
         "recall": recall,
         "magnitud_ratio_by_vol": magnitud,
         "integrity": integrity,
         "flags": flags,
-        "verdict": "FUERA_DE_BANDA" if flags else "VERDE",
+        "verdict": verdict,
     }
     os.makedirs(OUTDIR, exist_ok=True)
     with open(os.path.join(OUTDIR, "latest.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1, ensure_ascii=False)
     hist_line = {"date": out["generated_utc"][:10], "verdict": out["verdict"],
+                 "cobertura_pct": cobertura_pct, "gt_stale_dias": gt_stale_dias,
                  "recall": {s: recall[s]["recall_crater_pct"] for s in SENSORS},
                  "n_flags": len(flags)}
     with open(os.path.join(OUTDIR, "history.jsonl"), "a", encoding="utf-8") as f:
@@ -192,6 +272,8 @@ def main():
         print(f"  {s:<9} recall crater {r['recall_crater_pct']}% (n={r['n_noches']})")
     for v, m in magnitud.items():
         print(f"  ratio {v:<20} {m['ratio_mediano']}x (n={m['n_noches']})")
+    for av in cobertura_avisos:
+        print(f"COBERTURA: {av}")
     print(f"VEREDICTO: {out['verdict']}" + (f" — {len(flags)} flags" if flags else ""))
     for fl in flags:
         print("  ⚠", fl)
