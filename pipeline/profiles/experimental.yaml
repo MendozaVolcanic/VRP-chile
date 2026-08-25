@@ -1,87 +1,43 @@
 # VRP-Chile — profile: experimental
 #
-# Laboratory profile. Designed to probe weaker signals and try new detection
-# methods without affecting the operational product. During session 9 this
-# profile is BYTE-IDENTICAL to mirova_equivalent.yaml — the fork is purely
-# architectural for now.
+# REESCRITO EN S124. Antes de esto el perfil era una copia literal de la
+# configuración de S15 y se había quedado ~100 sesiones atrás: no tenía Test 1
+# integrado (S27), ni dual-ROI (S85), ni nadir-fijo (S102/S103), ni ancla al
+# cráter (S98), ni el guard de coherencia A46 (S113). Con los pisos de VRP en
+# 0.0 y sin nada de eso, el resultado no era "más sensible", era ruido:
 #
-# Divergence policy: do NOT tune anything here until the 11 MIROVA-reference
-# volcanoes are fully validated on the operational profile. When divergence
-# starts, document every change in experiments/experimental_tuning.md with
-# a before/after audit.
+#   Nevados de Chillán 2026, este perfil vs el operacional
+#     VRP mediano ............ 5.686 MW   vs  0.357 MW
+#     VRP máximo ............. 522 MW     vs  7.7 MW
+#     distancia mediana ...... 25.4 km    vs  2.77 km   (o sea: en el borde
+#                              del radio de búsqueda, no en el volcán)
+#     detecciones a ≤1 km .... 0 de 344   vs  87
+#
+# Un laboratorio sirve para ver señal que el producto operacional descarta, no
+# para ver cosas que no están. Ahora hereda TODO el operacional y diverge en una
+# sola dimensión deliberada: el piso de magnitud.
+#
+# La data histórica en data/experimental/ quedó obsoleta con este cambio (fue
+# generada con la configuración vieja). Hay que reprocesar antes de comparar.
 
+extends: mirova_equivalent
 profile: experimental
 description: >
-  Experimental laboratory profile. Same as mirova_equivalent today; will
-  diverge after the 11 volcanoes are validated.
+  Laboratorio. Hereda la detección operacional completa y baja únicamente el
+  piso de magnitud, para ver la señal débil real que MIROVA no publica.
 
 thresholds:
-  anomaly_threshold_k: 5.0
-  tir_threshold_k: 0.5
-  n_sigma_mir: 3.0
-  n_sigma_tir: 4.0
-  vent_threshold_k: 1.0
-  n_sigma_vent: 2.0
-  nti_k1_night: -0.8
-  nti_bt_sanity_k: 3.0
-  cloud_mask_bt_k: 260.0
-  max_sigma_component_k: 7.0
-  # S12 F1b: vent-path sigma cap. Experimental uses 5.0 (vs 3.0 in
-  # mirova_equivalent) to stay more precision-oriented. Will measure
-  # precision/recall trade-off in side-by-side comparison.
-  max_vent_sigma_contrib_k: 5.0
-  # S12 2026-04-15: sin piso VRP en experimental. Detección sensible
-  # para investigar señales sub-MIROVA (137 vent-only en PCC al
-  # lacolito son candidatos a fumarola real que MIROVA no consolida).
-  min_vrp_mw_viirs375: 0.0
-  min_vrp_mw_viirs750: 0.0
-  min_vrp_mw_modis:    0.0
-  # S12 E4: requerir >=2 pixeles calientes en el vent radius para
-  # declarar detección vent-path. Hipótesis: señales reales (domo,
-  # lava lake, fumarola) calientan 2+ pixeles contiguos a 375m,
-  # mientras que ruido térmico afecta 1 pixel aislado. Si reduce
-  # FPs sin matar TPs → candidato para mirova_equivalent.
-  min_vent_pixels: 2
-  # Session 12: Path C sigma multiplier — raised from 3.0 to 5.0 to reduce
-  # vent-only FPs (Villarrica audit: 90 FPs, 0 TPs with 3σ).
-  nti_rel_n_sigma: 5.0
-  nti_rel_min_floor: 0.008
-  # Session 12: MODIS-specific vent threshold (Lascar RF1 trade-off).
-  # MODIS 1km pixel needs higher ΔT to distinguish signal from noise (SNR 2.5×).
-  # Also applies a minimum VRP floor to reject noise-level vent detections.
-  modis_vent_threshold_k: 2.5
-  modis_vent_vrp_floor_mw: 0.3
-  # P3.2 S15: dNTI contextual C1 (schema parity; disabled en paths).
-  dnti_contextual_c1: 0.003
-  dnti_contextual_c1_summit: 0.003
-  dnti_contextual_c1_scene: 0.010
-
-background:
-  inner_km: 5.0
-  outer_km: 25.0
-
-paths:
-  enable_eruption_path: true
-  enable_vent_path: true
-  # Session 10: experimental mantiene vent_path para MODIS (Option C).
-  # Permite explorar si ajustes futuros de threshold pueden rescatar señal
-  # MODIS sin el ruido que hoy produce el vent-scale permisivo.
-  enable_vent_path_modis: true
-  # Session 11: NTI relative path (Path C) for weak fumarolic signals.
-  # Uses nti > nti_bg + max(0.005, 3*sigma_nti) instead of absolute NTI floor.
-  # Targets PP (recall 0.54) and Villarrica (recall 0/6). See plan_s11.
-  enable_nti_relative_path: true
-  # P3.2 S15: Path D (dNTI contextual) deshabilitado en experimental
-  # para preservar comportamiento baseline comparativo A/B con
-  # mirova_equivalent.
-  enable_dnti_contextual_path: false
-  # P3.1 S15: dual-ROI (schema parity; disabled in experimental).
-  enable_dnti_dual_roi: false
-
-sensors:
-  modis: true
-  viirs_375: true
-  viirs_750: true
+  # Referencia medida sobre 1295 ALERTAS del CSV MIROVA: el mínimo que MIROVA
+  # publica es 0.010 MW (p05 = 0.05, mediana = 0.26). Nuestros pisos
+  # operacionales (VIIRS375 0.02 / VIIRS750 0.15 / MODIS 0.05) están POR ENCIMA
+  # de ese mínimo, así que hoy descartamos señal que MIROVA sí publicaría.
+  # Acá bajamos por debajo del umbral de MIROVA — que es el punto del perfil.
+  #
+  # Los pisos NO se ponen en 0.0 (como hacía la versión vieja): sin piso, cada
+  # fluctuación del fondo entra como detección y el perfil deja de ser útil.
+  min_vrp_mw_viirs375: 0.005
+  min_vrp_mw_viirs750: 0.05
+  min_vrp_mw_modis: 0.02
 
 output:
   data_subdir: experimental

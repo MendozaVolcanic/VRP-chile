@@ -43,12 +43,30 @@ def test_flag_enabled_in_mirova_equivalent():
     assert prof.DNTI_CONTEXTUAL_C1 == 0.003
 
 
-def test_flag_disabled_in_experimental():
+def test_experimental_hereda_la_deteccion_operacional():
+    """S124: `experimental` HEREDA el path D del operacional.
+
+    Antes (S15) este test exigía el flag en False: el perfil era una copia
+    congelada del baseline de entonces y se lo mantenía divergente para
+    comparar A/B. Esa razón caducó — el perfil se quedó ~100 sesiones atrás y
+    dejó de ser un baseline útil para volverse ruido (en Nevados de Chillán
+    daba VRP mediano 5.7 MW contra 0.357 del operacional, con máximos de 522 MW
+    y distancia mediana de 25 km, o sea en el borde del radio de búsqueda y no
+    en el volcán).
+
+    Desde S124 `experimental` es `extends: mirova_equivalent` y diverge en UNA
+    sola dimensión deliberada: el piso de magnitud. Este test es el guard de esa
+    intención (A63) — si alguien vuelve a hacer divergir la detección, falla.
+    """
     import pipeline.profile as prof
     os.environ["VRP_PROFILE"] = "experimental"
     importlib.reload(prof)
     try:
-        assert prof.ENABLE_DNTI_CONTEXTUAL_PATH == False
+        # hereda la detección operacional...
+        assert prof.ENABLE_DNTI_CONTEXTUAL_PATH is True
+        assert prof.DNTI_CONTEXTUAL_C1 == 0.003
+        # ...y diverge SOLO en el piso de magnitud (0.02 operacional -> 0.005).
+        assert prof._cfg["thresholds"]["min_vrp_mw_viirs375"] == 0.005
     finally:
         # Restore for downstream tests
         os.environ["VRP_PROFILE"] = "mirova_equivalent"
