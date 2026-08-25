@@ -62,6 +62,60 @@ DATA_DIR = Path(__file__).parent.parent / "data" / DATA_SUBDIR
 # inverosímil → bug (típicamente flag DN no enmascarado en granule MODIS).
 SANITY_CAP_VRP_MW = 50000.0
 
+# S124 — límite físico de temperatura de brillo. Por encima de esto el dato no
+# es "una anomalía muy grande": es imposible. MODIS B21 satura cerca de 500 K
+# (Coppola 2025 Cap.11) y VIIRS clampea antes; una BT de 566 K como la del
+# granule de Lastarria del 2026-04-23 solo sale de un flag DN no enmascarado.
+BT_PHYSICAL_MAX_K = 500.0
+
+
+def _apply_sanity_cap(record: dict) -> None:
+    """Descarta magnitudes inverosímiles SIN anular erupciones reales.
+
+    El cap nació contra un caso concreto de basura (BT 566 K → 1.5 M MW) y la
+    forma de descartarlo era escribir 0.0. El problema es que el umbral (50 GW)
+    está DENTRO del rango físicamente posible — el récord documentado por MIROVA
+    es ~70 GW — así que el mismo mecanismo que filtra basura publicaba un CERO
+    para la erupción más grande imaginable, indistinguible de una noche
+    tranquila. En monitoreo volcánico ese es el error más caro que existe.
+
+    La discriminación correcta es por CAUSA, no por magnitud:
+      - BT sobre el límite físico del sensor → dato imposible, es saturación.
+        Se anula (comportamiento previo), con el crudo preservado en diag.
+      - BT plausible con VRP enorme → puede ser real. Se conserva y se marca
+        `vrp_exceeds_sanity_cap` para que alguien lo mire.
+      - Sin BT no se puede juzgar la causa → se mantiene lo conservador (anular).
+
+    Muta `record` in-place.
+    """
+    vrp = record.get("vrp_mw") or 0
+    pc = record.get("primary_cluster") or {}
+    pc_vrp = pc.get("vrp_mw", 0) or 0
+    if vrp <= SANITY_CAP_VRP_MW and pc_vrp <= SANITY_CAP_VRP_MW:
+        return
+
+    t_max = record.get("t_max_k")
+    bt_imposible = t_max is None or t_max > BT_PHYSICAL_MAX_K
+
+    if not bt_imposible:
+        # Magnitud enorme pero físicamente admisible: NO anular.
+        record["vrp_exceeds_sanity_cap"] = True
+        record["diag_sanity_cap_threshold_mw"] = SANITY_CAP_VRP_MW
+        return
+
+    if vrp > SANITY_CAP_VRP_MW:
+        record["diag_rejected_sanity_cap_mw"] = vrp
+        record["diag_sanity_cap_threshold_mw"] = SANITY_CAP_VRP_MW
+        record["vrp_mw"] = 0.0
+
+    # S41: el cap original solo miraba record.vrp_mw, y dejaba pasar el caso
+    # Lastarria donde pc.vrp_mw = 1.6 M MW llegaba al dashboard (que lee pc).
+    if pc_vrp > SANITY_CAP_VRP_MW:
+        record["diag_pc_rejected_sanity_cap_mw"] = pc_vrp
+        record["primary_cluster"]["vrp_mw"] = 0.0
+        if (record.get("vrp_mw") or 0) == 0 and not record.get("discarded_reason"):
+            record["discarded_reason"] = "sanity_cap_pc_garbage"
+
 
 def _solar_elevation(lat: float, lon: float, dt_utc: datetime) -> float:
     """Quick solar elevation check. Returns degrees (negative = night)."""
@@ -395,27 +449,7 @@ def append_record(volcano_name: str, record: dict,
     # caso Lastarria 2026-04-23 01:50 con BT=566 K que generó 1.5M MW).
     # Records sobre el cap se clampean a 0 con el valor crudo preservado
     # en diag_rejected_sanity_cap_mw para auditoría posterior.
-    if record["vrp_mw"] > SANITY_CAP_VRP_MW:
-        record["diag_rejected_sanity_cap_mw"] = record["vrp_mw"]
-        record["diag_sanity_cap_threshold_mw"] = SANITY_CAP_VRP_MW
-        record["vrp_mw"] = 0.0
-
-    # S41 fix: sanity cap también a primary_cluster.vrp_mw. El cap S19 M4
-    # original aplicaba solo a record.vrp_mw (sum total), dejando pasar el
-    # caso Lastarria 2026-04-23 01:50 MODIS_TERRA donde el granule tenía
-    # BT=566K (sensor saturado, flag DN no enmascarado) → pc.vrp_mw=1.6M MW
-    # pero record.vrp_mw=0 (post-floor) → cap original no aplicaba a pc.
-    # El dashboard usa pc.vrp_mw via mirovaEqVrp → values garbage llegaban
-    # al UI. Fix: aplicar mismo cap a pc.vrp_mw, marcar diag para auditoría.
-    pc = record.get("primary_cluster") or {}
-    pc_vrp = pc.get("vrp_mw", 0) or 0
-    if pc_vrp > SANITY_CAP_VRP_MW:
-        record["diag_pc_rejected_sanity_cap_mw"] = pc_vrp
-        record["primary_cluster"]["vrp_mw"] = 0.0
-        # Si record.vrp_mw también es 0 (caso Lastarria garbage), marcar
-        # discarded_reason explícito.
-        if record["vrp_mw"] == 0 and not record.get("discarded_reason"):
-            record["discarded_reason"] = "sanity_cap_pc_garbage"
+    _apply_sanity_cap(record)
 
     # S12 2026-04-15: piso VRP por sensor (paridad MIROVA).
     # Si vrp_mw < piso_sensor, se trata como no-detección (vrp_mw = 0).

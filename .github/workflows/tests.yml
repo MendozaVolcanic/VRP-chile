@@ -1,0 +1,49 @@
+name: Tests
+
+# S124 — red de seguridad que faltaba. Hasta ahora ningun workflow corria pytest:
+# la unica proteccion contra una regresion era acordarse de correr la suite a mano
+# antes de mergear (regla A39). Con 835 tests ya escritos, eso es dejar valor
+# sobre la mesa — y varias lecciones del proyecto (A49 la insercion que se comio
+# un `return`, A50 el "pre-existing fail" que era regresion) son exactamente lo
+# que un CI habria atrapado el mismo dia.
+#
+# Corre en PRs y en push a main. NO toca datos ni credenciales: los tests mockean
+# la red (no hay secrets acá a proposito).
+# A43: "on" quoted (Norway Problem YAML 1.1).
+"on":
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  # Por rama: un push nuevo cancela el chequeo viejo de ESA rama, que ya no
+  # interesa. `cancel-in-progress: true` es correcto aca (a diferencia de los
+  # workflows que pushean a main, donde cancelar dejaria un push a medias).
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          # libhdf4 + pyhdf solo para que `import pipeline.process_modis` no
+          # falle en la recoleccion. Los tests no leen HDF real.
+          sudo apt-get update -qq && sudo apt-get install -y -qq libhdf4-dev
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Run suite
+        run: |
+          # -W always::RuntimeWarning: los warnings numericos (overflow, divide,
+          # invalid) son la firma temprana de los bugs de NaN/cero que perseguimos
+          # en las formulas fisicas. Que aparezcan en el log del PR.
+          python -m pytest tests/ -q -W always::RuntimeWarning
