@@ -669,6 +669,13 @@ def download_granules(granules: list, dest_dir: Path) -> list[Path]:
                   f"host_down={sorted(hosts) or 'unknown'} err={type(e).__name__}: {str(e)[:90]}")
             break
         except Exception as e:
+            # S124: el token de NASA se usa en la DESCARGA — la busqueda CMR es
+            # publica. El guard S123 (#507) habia quedado solo en search_granules,
+            # o sea en el camino que NO necesita credencial: una credencial muerta
+            # seguia degradando en silencio por aca. Mismo criterio que alla: 401
+            # siempre aborta; 403/sin-status solo si el cuerpo habla de la credencial
+            # (un 403 de EULA o un throttling NO deben matar el NRT entero).
+            _raise_if_credential_dead(e, "download")
             _diag(f"DOWNLOAD_ERR attempt={attempt} elapsed={time.time()-t0:.1f}s err={type(e).__name__}: {str(e)[:120]}")
             last_err = e
     raise last_err if last_err else RuntimeError("download failed")

@@ -140,3 +140,41 @@ def test_permission_denied_does_not_abort(monkeypatch):
         fetch.search_granules(PKEY, -23.37, -67.73, 25.0, datetime(2026, 7, 25))
     assert not isinstance(ei.value, fetch.EarthdataCredentialError), (
         "un 403 de permisos NO debe clasificarse como credencial muerta")
+
+
+# --- S124: el camino de DESCARGA, que es el que realmente usa el token ---
+#
+# El guard de S123 quedó solo en `search_granules`. Pero la búsqueda CMR es
+# PÚBLICA: el token de NASA se usa en la descarga. O sea, el fix cubría el
+# camino que no necesita credencial, y una credencial muerta seguía degradando
+# en silencio por el otro — el mismo modo de falla del 20-jul, a medias.
+
+
+def test_download_aborta_con_credencial_muerta(monkeypatch, tmp_path):
+    """Una credencial rechazada en la descarga debe abortar, no reintentar 4×."""
+    def boom(*a, **k):
+        raise _earthaccess_style_error(*TOKEN_EXPIRED)
+
+    monkeypatch.setattr(fetch.earthaccess, "download", boom)
+    monkeypatch.setattr(fetch, "_granule_hosts", lambda g: set())
+    with pytest.raises(fetch.EarthdataCredentialError) as ei:
+        fetch.download_granules([{"fake": "granule"}], Path(tmp_path))
+    assert "EARTHDATA_CREDENTIAL_INVALID" in str(ei.value)
+
+
+def test_download_sigue_reintentando_errores_transitorios(monkeypatch, tmp_path):
+    """Anti-regresión: un fallo de red NO debe abortar; conserva sus retries."""
+    intentos = {"n": 0}
+
+    def boom(*a, **k):
+        intentos["n"] += 1
+        raise ReadTimeout("read timed out")
+
+    monkeypatch.setattr(fetch.earthaccess, "download", boom)
+    monkeypatch.setattr(fetch, "_granule_hosts", lambda g: set())
+    import time as _time
+    monkeypatch.setattr(_time, "sleep", lambda *_: None)
+    with pytest.raises(Exception) as ei:
+        fetch.download_granules([{"fake": "granule"}], Path(tmp_path))
+    assert not isinstance(ei.value, fetch.EarthdataCredentialError)
+    assert intentos["n"] > 1, "un error transitorio debe reintentarse, no abortar"
