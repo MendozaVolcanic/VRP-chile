@@ -131,13 +131,40 @@ def _parse_granule_datetime(filename: str) -> datetime | None:
         return None
 
 
+def apply_volcano_overrides(volcanoes: list) -> list:
+    """S124: aplica los overrides per-volcán del perfil activo.
+
+    `volcanoes.yaml` es compartido por todos los perfiles, así que un perfil
+    experimental no podía cambiar la geometría de un volcán sin arrastrar al
+    producto operacional. Esto lo permite sin tocar el archivo común.
+
+    Devuelve una lista NUEVA (copia superficial por volcán): mutar la entrada
+    contaminaría a cualquier otro consumidor que ya tenga la referencia.
+    """
+    overrides = getattr(vrp_profile, "VOLCANO_OVERRIDES", None) or {}
+    if not overrides:
+        return volcanoes
+    out = []
+    for v in volcanoes:
+        ov = overrides.get(v.get("name"))
+        if not ov:
+            out.append(v)
+            continue
+        merged = dict(v)
+        merged.update(ov)
+        print(f"  [perfil {vrp_profile.PROFILE_NAME}] override {v['name']}: "
+              f"{', '.join(f'{k}={val}' for k, val in ov.items())}")
+        out.append(merged)
+    return out
+
+
 def load_volcanoes(name_filter: str = None) -> list:
     with open(VOLCANOES_FILE) as f:
         cfg = yaml.safe_load(f)
     volcanoes = [v for v in cfg["volcanoes"] if v.get("active", True)]
     if name_filter:
         volcanoes = [v for v in volcanoes if v["name"] == name_filter]
-    return volcanoes
+    return apply_volcano_overrides(volcanoes)
 
 
 def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,

@@ -700,6 +700,24 @@ SENSOR_VIIRS_750: bool = bool(_s.get("viirs_750", True))
 # --- Data output subdirectory under data/ ---
 DATA_SUBDIR: str = str(_cfg["output"]["data_subdir"])
 
+# --- S124: overrides de configuración de volcán POR PERFIL ---
+# La geometría de cada volcán (vent_lat/lon, inner_radius_km, radius_km) vive en
+# volcanoes.yaml, que es ÚNICO y compartido por todos los perfiles. Sin esto, un
+# experimento que quiera mirar solo 1 km alrededor de un cráter tendría que
+# editar el archivo compartido y arrastrar al producto operacional (A45).
+#
+# Para qué sirve: acotar el radio de detección a un foco conocido permite BAJAR
+# umbrales sin inundarse de ruido, porque el área de búsqueda cae con el
+# cuadrado del radio (25 km → 1 km es 625× menos superficie donde puede
+# aparecer un falso positivo). Es lo que MIROVA no puede hacer —corre el mismo
+# algoritmo ciego en todo el planeta— y nosotros sí, porque conocemos el volcán.
+#
+# Forma: {NombreVolcan: {clave: valor, ...}}. Pisa SOLO las claves nombradas.
+# NO tocar `radius_km` a la ligera: define también la escena de la que sale el
+# anillo de fondo [inner_km, outer_km]; achicarlo deja el fondo sin píxeles.
+# Lo que acota la DETECCIÓN es `inner_radius_km` (+ el ancla vent_lat/lon).
+VOLCANO_OVERRIDES: dict = dict(_cfg.get("volcano_overrides") or {})
+
 
 def describe() -> str:
     return (
