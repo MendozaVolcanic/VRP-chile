@@ -177,11 +177,20 @@ jobs:
           max_age = float(os.environ.get("MAX_AGE_H") or 0)
           hay_problema = stale > 0 or missing > 0
 
+          fallos_gh = []
+
           def gh(*args, stdin=None):
+              # S124: este es el canal de alerta ACCIONABLE unico desde S123. Si
+              # `gh` falla (rate limit, permisos, GitHub caido) y solo imprimimos
+              # un WARN, el workflow termina success y la alerta se pierde sin que
+              # nadie se entere — un canal de alerta que puede fallar mudo no es un
+              # canal de alerta. Se acumulan los fallos y el step sale != 0 al final.
               r = subprocess.run(["gh", *args], capture_output=True, text=True,
                                  encoding="utf-8", input=stdin)
               if r.returncode != 0:
-                  print(f"WARN gh {' '.join(args[:3])}: {r.stderr.strip()}")
+                  msg = f"gh {' '.join(args[:3])}: {r.stderr.strip()[:200]}"
+                  print(f"WARN {msg}")
+                  fallos_gh.append(msg)
               return r.stdout.strip()
 
           # Escalones de MAYOR a menor: el primero que la edad alcanza.
@@ -193,6 +202,16 @@ jobs:
                   if horas >= umbral:
                       return nombre
               return "48 h"
+
+          def _fin():
+              """Sale != 0 si alguna llamada a gh fallo: la alerta no puede perderse."""
+              if fallos_gh:
+                  print(f"FAIL: {len(fallos_gh)} llamada(s) a gh fallaron; "
+                        f"la alerta pudo no haberse emitido.")
+                  for f in fallos_gh:
+                      print(f"  - {f}")
+                  sys.exit(1)
+              sys.exit(0)
 
           raw = gh("issue", "list", "--repo", REPO, "--label", LABEL,
                    "--state", "open", "--json", "number,body", "--jq", ".[0] // empty")
@@ -217,7 +236,7 @@ jobs:
               gh("issue", "close", num, "--repo", REPO,
                  "--reason", "completed")
               print(f"Issue #{num} cerrado: sistema recuperado.")
-              sys.exit(0)
+              _fin()
 
           # --- Caso 2: hay problema. Abrir, escalar o solo refrescar. ---
           reporte = Path("healthcheck_report.md").read_text(encoding="utf-8")
@@ -230,7 +249,7 @@ jobs:
               gh("issue", "create", "--repo", REPO, "--title", TITLE,
                  "--label", LABEL, "--body-file", "-", stdin=cuerpo)
               print(f"Issue creado (escalón {actual}).")
-              sys.exit(0)
+              _fin()
 
           num = str(abierto["number"])
           previo = None
@@ -245,7 +264,7 @@ jobs:
           if previo == actual:
               print(f"Issue #{num}: sigue en escalón {actual} — cuerpo "
                     f"actualizado, sin notificar.")
-              sys.exit(0)
+              _fin()
 
           aviso = (
               f"## ⏫ Escaló a **{actual}**\n\n"
@@ -255,4 +274,5 @@ jobs:
           )
           gh("issue", "comment", num, "--repo", REPO, "--body-file", "-", stdin=aviso)
           print(f"Issue #{num}: escaló {previo} → {actual} (notificado).")
+          _fin()
           PYEOF
