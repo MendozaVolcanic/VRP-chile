@@ -40,4 +40,11 @@ thresholds:
   min_vrp_mw_modis: 0.02
 
 output:
-  data_subdir: experimental
+  # S124 — subdir NUEVO a proposito. `data/experimental/` contiene la serie
+  # generada con la configuracion vieja (S15), que producia ruido: en Nevados
+  # de Chillan daba VRP mediano 5.686 MW y maximos de 522 MW a 25 km del
+  # crater. Mezclar en un mismo JSON registros de dos configuraciones
+  # distintas hace la serie ininterpretable — nada en el record dice con que
+  # config se genero. La serie vieja queda intacta como legacy y esta arranca
+  # limpia.
+  data_subdir: experimental_v2

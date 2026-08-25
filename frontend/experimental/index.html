@@ -397,7 +397,7 @@ async function fetchJSON(url) {
 
 async function loadVolcano(v) {
   const [data, mirova] = await Promise.all([
-    fetchJSON(BASE_PATH + "data/experimental/" + v.name + ".json"),
+    fetchJSON(BASE_PATH + "data/experimental_v2/" + v.name + ".json"),  // S124: serie nueva; data/experimental/ es legacy (config S15)
     v.hasMirova ? fetchJSON(BASE_PATH + "data/mirova/" + v.name + ".json") : Promise.resolve(null),
   ]);
   allData[v.name] = {
