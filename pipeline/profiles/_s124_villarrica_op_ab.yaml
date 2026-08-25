@@ -1,0 +1,22 @@
+# A/B S124 — Villarrica bajo el algoritmo operacional UNIFORME (issue #513).
+#
+# Villarrica es el unico Tier A que el cron procesa con un perfil dedicado
+# congelado en abril (mirova_equivalent_villarrica_test1): 32 constantes
+# efectivas distintas del operacional, escribiendo en la MISMA base que los
+# otros 10. Su serie publicada no es comparable con el resto.
+#
+# Decision de Nicolas (2026-08-25): lo que respete la mision de replicar
+# MIROVA. Eso es UN algoritmo uniforme para los 11 — este A/B mide que pasa
+# con Villarrica bajo el operacional puro antes de tocar el cron (A45).
+#
+# Brazo unico: mirova_equivalent sin modificar, data_subdir aislado.
+# El "brazo B" es la serie ya publicada (perfil congelado) — no hay que
+# recomputarla. Comparacion: recall/ratio vs MIROVA CONS∪OCR sobre la
+# misma ventana + el escalon de junio (0.06 -> 2.1 MW medianos).
+extends: mirova_equivalent
+profile: _s124_villarrica_op_ab
+description: >
+  A/B Villarrica bajo el operacional uniforme (issue 513). Aislado, no toca
+  ni el cron ni data/mirova_equivalent/.
+output:
+  data_subdir: _s124_villarrica_op_ab

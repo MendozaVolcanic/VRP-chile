@@ -1,0 +1,75 @@
+name: S124 A/B Villarrica operacional (issue 513)
+
+# Reprocesa Villarrica con el algoritmo operacional UNIFORME (perfil
+# _s124_villarrica_op_ab = extends mirova_equivalent puro) en data_subdir
+# aislado. NO toca el cron ni la serie publicada.
+#
+# Para que: Villarrica corre en produccion con un perfil congelado en abril
+# (32 constantes distintas — issue #513) y su serie no es comparable con los
+# otros 10 Tier A. Antes de migrarla al operacional (A45: tag + confirmacion)
+# hay que MEDIR que cambia: recall y ratio vs MIROVA en la misma ventana, y
+# si el escalon de junio (0.06 -> 2.1 MW medianos) persiste o desaparece.
+# A43: "on" quoted.
+"on":
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Inicio ventana (YYYY-MM-DD)"
+        default: "2026-04-01"
+        required: false
+      end:
+        description: "Fin ventana (YYYY-MM-DD)"
+        default: "2026-08-24"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  # Grupo propio (leccion S123/A85-infra): este workflow ya tiene retry de
+  # push robusto; el grupo compartido push-main solo arriesgaria que GitHub
+  # descarte un run encolado que alguien esta esperando.
+  group: reproc-villarrica-op-ab
+  cancel-in-progress: false
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reprocess Villarrica — operacional uniforme
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 330
+        run: |
+          python scripts/run_pipeline.py \
+            --profile _s124_villarrica_op_ab \
+            --volcano Villarrica \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+      - name: Commit result
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add -f "data/_s124_villarrica_op_ab/Villarrica.json"
+          git diff --staged --quiet && { echo "no changes"; exit 0; }
+          git commit -m "data(s124): A/B Villarrica operacional ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (issue 513)"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
