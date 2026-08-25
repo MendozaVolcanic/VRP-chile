@@ -1,0 +1,93 @@
+name: S124 reproc foco Nicanor (NdC)
+
+# Genera la serie del perfil experimental_ndc_focus: deteccion acotada a 1 km del
+# crater Nicanor (coordenada aportada por Nicolas, -36.867210/-71.378241), solo
+# VIIRS 375 m, con piso de magnitud 0.005 MW — por debajo del minimo que publica
+# MIROVA (0.010 MW medido sobre 1295 alertas del CSV).
+#
+# QUE SE BUSCA: el foco termico persistente del crater, que MIROVA solo publica
+# cuando sube lo suficiente. Analisis read-only S124 sobre los pixeles ya
+# guardados: una celda de ~500 m reaparece en 17 noches de 2026, y en las dos
+# noches con alerta MIROVA los valores casi coinciden (14-may 0.06 vs 0.075
+# nuestro; 16-jun 0.06 vs 0.079). Ese es el validador interno: cuando la fuente
+# sube, MIROVA la ve y medimos lo mismo que ella. Falta ver la parte BAJA de la
+# curva, que hoy queda bajo el piso operacional (0.02 MW) y por eso no se guarda.
+#
+# CRITERIO PRE-REGISTRADO (fijado ANTES de correr, para no interpretar a
+# posteriori):
+#   1. 2026-07-15 debe seguir dando ~0.05-0.10 MW. Si se dispara, el umbral bajo
+#      demasiado y estamos sumando ruido.
+#   2. Las detecciones nuevas deben caer EN el foco. Si aparecen dispersas
+#      alrededor, el piso quedo por debajo del ruido del fondo.
+#   3. Ojo con el pedestal A69 (#506): si `diag_n_bt_path` se dispara mes a mes,
+#      estariamos fabricando el mismo artefacto que tiene Villarrica.
+#
+# NO OPERACIONAL: data_subdir aislado (data/experimental_ndc_focus/). No toca
+# mirova_equivalent ni el dashboard operacional.
+# A43: "on" quoted.
+"on":
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Inicio ventana (YYYY-MM-DD)"
+        default: "2026-06-25"
+        required: false
+      end:
+        description: "Fin ventana (YYYY-MM-DD)"
+        default: "2026-08-24"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  # Grupo PROPIO, no el compartido `push-main`. Leccion S123: audit-weekly quedo
+  # encolado tras el lock que nrt.yml ocupa ~50 min de cada 2h, llego otro run
+  # del grupo y GitHub descarto el pendiente -> perdio su corrida. Un reproc
+  # manual que se descarta es peor: alguien lo esta esperando. El push de este
+  # workflow ya es robusto por si mismo (bucle de 5 intentos con pull --rebase),
+  # que es la proteccion real contra la carrera de refs.
+  group: reproc-ndc-focus
+  cancel-in-progress: false
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reprocess NevadosDeChillan — experimental_ndc_focus
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 330
+        run: |
+          python scripts/run_pipeline.py \
+            --profile experimental_ndc_focus \
+            --volcano NevadosDeChillan \
+            --start ${{ github.event.inputs.start }} \
+            --end ${{ github.event.inputs.end }} \
+            --overwrite
+      - name: Commit result
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/experimental_ndc_focus/NevadosDeChillan.json"
+          git diff --staged --quiet && { echo "no changes"; exit 0; }
+          git commit -m "data(s124): foco Nicanor NdC ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (experimental_ndc_focus)"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
