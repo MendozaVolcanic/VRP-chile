@@ -54,6 +54,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
+      - name: Install deps del plan
+        # pyyaml: el plan LEE el yaml del perfil para la guarda de data_subdir.
+        run: pip install --quiet pyyaml
       - name: Guardas + producto cruzado volcan x trozo
         id: split
         env:
@@ -135,10 +138,11 @@ jobs:
 
   merge:
     needs: [plan, reproc]
-    # `always()`: si un trozo falla, se conservan los que si terminaron y el
-    # resto se relanza sobre esa ventana. Es lo que no se pudo hacer cuando el
-    # primer intento murio por timeout.
-    if: always()
+    # `always()` acotado a que el PLAN haya salido bien: si un trozo falla, se
+    # conservan los que si terminaron y el resto se relanza sobre esa ventana
+    # (lo que no se pudo hacer cuando el primer intento murio por timeout). Pero
+    # si el plan fallo no hay nada que unir y el merge corria en vacio.
+    if: always() && needs.plan.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
