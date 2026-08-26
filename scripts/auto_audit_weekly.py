@@ -77,9 +77,42 @@ INNER = {"Lascar": 5, "Lastarria": 3, "Tupungatito": 7, "PlanchonPeteroa": 3,
 SENSORS = ["MODIS", "VIIRS750", "VIIRS375"]
 CAP = 50000
 RECALL_MIN = {"VIIRS375": 93.4, "VIIRS750": 79.5, "MODIS": 95.0}
-RATIO_BAND = (0.5, 2.0)
+# --- S124: DOS bandas, no una ---
+# `~memory/reference_paridad_mirova_umbrales.md` las distingue por una razón
+# física. MIROVA declara ±30 % de error en el método MIR, así que el ratio de una
+# noche PUNTUAL fluctúa naturalmente entre 0,54 y 1,85 sin que haya nada roto —
+# de ahí la banda ancha. Pero una MEDIANA sobre decenas de noches ya no fluctúa:
+# textual, *"más estricto que individual porque mide tendencia central, no
+# outliers puntuales. Mediana 2.0 = sesgo sistemático, no ruido"*.
+#
+# Hasta S124 este script aplicaba la banda ANCHA a la mediana: 4× de ancho donde
+# el criterio propio pide 2×. Con eso, cuatro volcanes sub-reportando 35-50 %
+# quedaban invisibles (Lascar 0,62 · Isluga 0,61 · Lastarria 0,47 · Llaima 0,36)
+# y dos selecciones de cluster que difieren 17 % "pasaban" las dos.
+# Ver docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md.
+RATIO_BAND_INDIVIDUAL = (0.5, 2.0)   # una detección suelta (referencia, no se usa acá)
+RATIO_BAND_MEDIAN = (0.7, 1.4)       # la mediana per-volcán: lo que este script juzga
+RATIO_BAND = RATIO_BAND_MEDIAN       # compat con lectores externos del módulo
 # Excepciones físicas documentadas (AUDIT_S119 §2.3): sub-banda esperada, no flaggear.
 UNDER_BAND_KNOWN = {"Lastarria"}
+
+
+def evaluar_ratio_mediano(volcan: str, ratio: float, n_noches: int):
+    """Veredicto del ratio mediano de un volcán. None = en banda / no concluyente.
+
+    Devuelve un texto que NOMBRA el hallazgo S124, para que el déficit de
+    régimen débil ya documentado no se lea como una regresión nueva cada semana.
+    """
+    if n_noches < MIN_N_RATIO:
+        return None
+    lo, hi = RATIO_BAND_MEDIAN
+    if ratio > hi:
+        return (f"magnitud {volcan} {ratio}x > {hi} (SOBRE-estima, n={n_noches})")
+    if ratio < lo and volcan not in UNDER_BAND_KNOWN:
+        return (f"magnitud {volcan} {ratio}x < {lo} (SUB-estima, n={n_noches}) "
+                f"— déficit de régimen débil S124, ver "
+                f"docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md")
+    return None
 
 
 # --- S124: no evaluarnos con pasadas DIURNAS de MIROVA ---
@@ -174,7 +207,7 @@ def main():
         mir[key] = max(mir[key], a["vrp_mw"] or 0.0)
 
     # 2. Nuestros records (mismos criterios crater/dash del eje2 S119) + integridad
-    ours = defaultdict(lambda: {"crater": [], "dash": []})
+    ours = defaultdict(lambda: {"crater": [], "dash": [], "npix": []})
     integrity = {"parse_errors": [], "duplicates_total": 0}
     for vol in VOLS:
         path = os.path.join(ROOT, "data", "mirova_equivalent", vol + ".json")
@@ -204,10 +237,14 @@ def main():
                 dclass = rec.get("distance_class")
                 if not dclass or dclass == "summit":
                     ours[key]["dash"].append(vrp)
+                    # S124: el conteo de pixeles es la variable que estratifica
+                    # los DOS modos de falla (ver bloque de estratificación).
+                    ours[key]["npix"].append(len(rec.get("anomaly_pixels") or []))
 
     # 3. Recall por sensor + magnitud per-vol
     agg = {s: {"n": 0, "c": 0, "d": 0} for s in SENSORS}
     ratios_by_vol = defaultdict(list)
+    ratios_by_npix = defaultdict(list)
     for (vol, s, date), mvrp in mir.items():
         if vol not in VOLS:
             continue
@@ -218,7 +255,25 @@ def main():
         if o and o["dash"]:
             agg[s]["d"] += 1
             if mvrp > 0:
-                ratios_by_vol[vol].append(max(o["dash"]) / mvrp)
+                _r = max(o["dash"]) / mvrp
+                ratios_by_vol[vol].append(_r)
+                # S124 — estratificación por conteo de píxeles. La mediana sola
+                # promedia dos modos de falla OPUESTOS y los vuelve invisibles:
+                # en régimen débil (1-2 px) sub-integramos y en campo difuso
+                # (6+ px) sobre-integramos. Publicar los bins es lo que impide
+                # que se vuelva a esconder.
+                #
+                # OJO al leerlo: acá los bins se agrupan sobre los 11 volcanes y
+                # sobre el valor del DASHBOARD (pc.vrp intra-inner, summit). El
+                # análisis de docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md es
+                # per-volcán y sobre la escena COMPLETA, por eso ahí el patrón
+                # sale monótono y acá no: agrupar mezcla regímenes distintos.
+                # Este bin sirve como señal de deriva semana a semana, no como
+                # medición del gap — para eso, el script per-volcán.
+                _n = max(o["npix"]) if o["npix"] else 0
+                _bin = ("1px" if _n == 1 else "2px" if _n == 2
+                        else "3-5px" if _n <= 5 else "6+px")
+                ratios_by_npix[_bin].append(_r)
 
     recall = {}
     for s in SENSORS:
@@ -238,13 +293,9 @@ def main():
             flags.append(f"recall {s} {r['recall_crater_pct']}% < banda {RECALL_MIN[s]}% "
                          f"(n={r['n_noches']})")
     for v, m in magnitud.items():
-        if m["n_noches"] < MIN_N_RATIO:
-            continue
-        lo, hi = RATIO_BAND
-        if m["ratio_mediano"] > hi:
-            flags.append(f"magnitud {v} {m['ratio_mediano']}x > {hi} (SOBRE-estima, n={m['n_noches']})")
-        elif m["ratio_mediano"] < lo and v not in UNDER_BAND_KNOWN:
-            flags.append(f"magnitud {v} {m['ratio_mediano']}x < {lo} (n={m['n_noches']})")
+        veredicto = evaluar_ratio_mediano(v, m["ratio_mediano"], m["n_noches"])
+        if veredicto:
+            flags.append(veredicto)
     if integrity["parse_errors"]:
         flags.append(f"integridad: {len(integrity['parse_errors'])} JSON con parse error")
     if integrity["duplicates_total"]:
@@ -307,6 +358,9 @@ def main():
         "criteria": ("eje2 S119 (crater A10 + dash), loader canónico CONS∪OCR, referencia filtrada a pasadas nocturnas con la misma regla del pipeline (_reject_daytime, S124)"),
         "recall": recall,
         "magnitud_ratio_by_vol": magnitud,
+        "magnitud_ratio_by_npix": {
+            b: {"n_noches": len(r), "ratio_mediano": round(statistics.median(r), 3)}
+            for b, r in sorted(ratios_by_npix.items()) if r},
         "integrity": integrity,
         "flags": flags,
         "verdict": verdict,
