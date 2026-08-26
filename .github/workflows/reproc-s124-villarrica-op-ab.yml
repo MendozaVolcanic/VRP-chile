@@ -70,7 +70,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      max-parallel: 4
+      # 8 y no mas: el free tier publico da 20 jobs concurrentes y el cron
+      # NRT (matrix de 11 volcanes) comparte ese techo. Con 8, la historia
+      # completa de un volcan (16 trozos) entra en 2 tandas.
+      max-parallel: 8
       matrix:
         chunk: ${{ fromJson(needs.plan.outputs.chunks) }}
     # ~2.6 min/dia * 37 dias = ~96 min; 180 deja margen y sigue MUY lejos
