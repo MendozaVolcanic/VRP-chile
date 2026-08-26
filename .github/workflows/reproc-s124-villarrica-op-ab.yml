@@ -9,6 +9,15 @@ name: S124 A/B Villarrica operacional (issue 513)
 # otros 10 Tier A. Antes de migrarla al operacional (A45: tag + confirmacion)
 # hay que MEDIR que cambia: recall y ratio vs MIROVA en la misma ventana, y
 # si el escalon de junio (0.06 -> 2.1 MW medianos) persiste o desaparece.
+#
+# POR QUE ESTA PARTIDO EN TROZOS (S124, tras el timeout del run 32885273954):
+# el volcan cuesta ~2.6 min por dia y la ventana pedida son ~146 dias => ~6h10m.
+# GitHub mata cualquier job a las 6 h (limite duro), asi que el intento anterior
+# murio en el dia 129 de 146 y, como el commit iba al final, se perdieron las
+# 5 h 29 min completas. Ahora cada trozo corre en su propio job (~1 h 40 min,
+# margen sobrado), sube su JSON como artifact, y un job final los une y hace UN
+# SOLO push. Un solo push = no se reabre la carrera de `git push` de S25
+# (`pull --rebase -X theirs` puede descartar records del commit anterior).
 # A43: "on" quoted.
 "on":
   workflow_dispatch:
@@ -20,6 +29,10 @@ name: S124 A/B Villarrica operacional (issue 513)
       end:
         description: "Fin ventana (YYYY-MM-DD)"
         default: "2026-08-24"
+        required: false
+      max_days:
+        description: "Dias por trozo (presupuesto de job; ver split_date_window.py)"
+        default: "37"
         required: false
 
 permissions:
@@ -33,9 +46,36 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  reproc:
+  plan:
     runs-on: ubuntu-latest
-    timeout-minutes: 340
+    outputs:
+      chunks: ${{ steps.split.outputs.chunks }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Partir la ventana en trozos
+        id: split
+        run: |
+          CHUNKS=$(python scripts/split_date_window.py \
+            --start "${{ github.event.inputs.start }}" \
+            --end "${{ github.event.inputs.end }}" \
+            --max-days "${{ github.event.inputs.max_days }}")
+          echo "chunks=$CHUNKS" >> "$GITHUB_OUTPUT"
+          echo "Trozos: $CHUNKS"
+
+  reproc:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        chunk: ${{ fromJson(needs.plan.outputs.chunks) }}
+    # ~2.6 min/dia * 37 dias = ~96 min; 180 deja margen y sigue MUY lejos
+    # del limite duro de 6 h que mato al run anterior.
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -51,14 +91,47 @@ jobs:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
-        timeout-minutes: 330
+        timeout-minutes: 170
         run: |
           python scripts/run_pipeline.py \
             --profile _s124_villarrica_op_ab \
             --volcano Villarrica \
-            --start ${{ github.event.inputs.start }} \
-            --end ${{ github.event.inputs.end }} \
+            --start ${{ matrix.chunk.start }} \
+            --end ${{ matrix.chunk.end }} \
             --overwrite
+      - name: Guardar el trozo
+        # Sin `if: always()` a proposito: si el trozo no termino, su JSON esta
+        # incompleto y subirlo haria pasar por "hecha" una ventana a medias.
+        uses: actions/upload-artifact@v4
+        with:
+          name: chunk-${{ matrix.chunk.idx }}
+          path: data/_s124_villarrica_op_ab/Villarrica.json
+          if-no-files-found: error
+          retention-days: 7
+
+  merge:
+    needs: reproc
+    # `always()`: si un trozo falla, igual se unen y commitean los que si
+    # terminaron — el resto se relanza despues sobre esa ventana. Es
+    # exactamente lo que no se pudo hacer cuando murio el run anterior.
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Bajar los trozos
+        uses: actions/download-artifact@v4
+        with:
+          pattern: chunk-*
+          path: chunks
+      - name: Unir los trozos
+        run: |
+          ls -R chunks || true
+          python scripts/merge_chunk_stores.py \
+            --out data/_s124_villarrica_op_ab/Villarrica.json \
+            chunks/chunk-*/Villarrica.json
       - name: Commit result
         run: |
           set +e
