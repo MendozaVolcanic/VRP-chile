@@ -53,7 +53,8 @@ def _utm_like_xy(lat, lon, clat, clon):
 
 def regrid_to_utm(lat2d, lon2d, bands: dict, center_lat: float,
                   center_lon: float, cell_km: float = 1.0,
-                  half_km: float = 25.5, method: str = "nearest") -> dict:
+                  half_km: float = 25.5, method: str = "nearest",
+                  required=None) -> dict:
     """Resamplea las bandas del swath a una grilla regular centrada en el volcán.
 
     Args:
@@ -66,6 +67,14 @@ def regrid_to_utm(lat2d, lon2d, bands: dict, center_lat: float,
         half_km: semiancho de la ventana (25.5 → grilla 51×51 de 1 km).
         method: "nearest" (default y única implementación por ahora — ver
             docstring del módulo).
+        required: nombres de las bandas que DEBEN traer valor finito para que
+            una muestra pueda representar a su celda. Default: todas.
+            POR QUÉ existe: en MODIS un NaN en la banda 21 no es dato ausente
+            sino SATURACIÓN — y un detector saturado es, por definición, el
+            píxel más caliente del granule (A37/F28). Si ese NaN descalificara
+            la muestra, el regrillado perdería justo el píxel que el algoritmo
+            busca. El llamador declara entonces `required=("band22","band31")`
+            y la banda 21 aterriza con su NaN intacto en la celda ganadora.
 
     Returns:
         dict con: una matriz (n×n, float64, NaN donde no hubo muestra) por
@@ -86,12 +95,17 @@ def regrid_to_utm(lat2d, lon2d, bands: dict, center_lat: float,
     iy = np.floor((half_km - y) / cell_km).astype(np.int64)
     dentro = (ix >= 0) & (ix < n) & (iy >= 0) & (iy < n)
 
-    # validez: la muestra debe traer valor finito en TODAS las bandas —
-    # así las matrices de salida comparten geometría exactamente.
+    # validez: la muestra debe traer valor finito en las bandas REQUERIDAS —
+    # así las matrices de salida comparten geometría exactamente. Por defecto
+    # se exigen todas; ver el argumento `required` para el caso saturación.
     flat = {k: np.asarray(v, dtype=np.float64).ravel() for k, v in bands.items()}
+    req = tuple(flat) if required is None else tuple(required)
+    faltan = [k for k in req if k not in flat]
+    if faltan:
+        raise KeyError(f"required nombra bandas ausentes: {faltan}")
     validas = dentro.copy()
-    for v in flat.values():
-        validas &= np.isfinite(v)
+    for k in req:
+        validas &= np.isfinite(flat[k])
 
     # distancia de cada muestra al centro de SU celda: en caso de duplicados
     # en una celda gana la más cercana (se escriben de peor a mejor, la
@@ -109,9 +123,12 @@ def regrid_to_utm(lat2d, lon2d, bands: dict, center_lat: float,
         g[iy[sel], ix[sel]] = v[sel]
         out[k] = g
 
+    # `suitable` se juzga con el mismo criterio que la selección: si se
+    # midiera sobre TODAS las bandas, la celda del píxel saturado quedaría
+    # marcada no-apta y el algoritmo la descartaría aguas abajo.
     suitable = np.ones((n, n), dtype=bool)
-    for g in out.values():
-        suitable &= np.isfinite(g)
+    for k in req:
+        suitable &= np.isfinite(out[k])
     out["suitable"] = suitable
     out["cell_area_km2"] = cell_km * cell_km
     out["n"] = n

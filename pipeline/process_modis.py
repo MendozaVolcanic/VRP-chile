@@ -60,6 +60,7 @@ from .anomaly_pixels import build_anomaly_pixels
 from .path_d_cap import apply_d9_scene_cap  # F50/S77
 from .path_d_intra_radio import apply_intra_radio_gate  # S83 F-S81-A Fase 2
 from .second_pass_intra_radio import apply_second_pass_intra_radio_gate  # S85 F-S81-B'
+from .regrid import regrid_to_utm  # F70.2 grilla UTM
 
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
@@ -93,6 +94,7 @@ WOOSTER_COEFF = 18.9
 # E2a — Cloud mask for the background annulus (CLOUD_MASK_BT_K).
 # E2b' — Sigma cap for detection threshold (MAX_SIGMA_COMPONENT_K).
 from pipeline.profile import (
+    ENABLE_UTM_REGRID,  # F70.2
     ANOMALY_THRESHOLD_K,
     N_SIGMA,
     BG_INNER_KM,
@@ -343,6 +345,60 @@ def _scene_is_day(filename: str, lat: float, lon: float) -> bool:
     return _solar_elevation(lat, lon, dt) > 0
 
 
+def _regrid_modis_granule(data: dict, center_lat: float, center_lon: float,
+                          cell_km: float = 1.0, half_km: float = 25.5) -> dict:
+    """Devuelve el granule MODIS resampleado a la grilla UTM regular de 1 km.
+
+    POR QUÉ (fenómeno): un píxel MODIS lejos del nadir se estira hasta ~10 km².
+    Cuando el algoritmo pregunta "¿este píxel está más caliente que sus ocho
+    vecinos?", la respuesta depende de la geometría de esos vecinos tanto como
+    de su temperatura: sobre un volcán con glaciar, un vecino elongado promedia
+    hielo, roca y valle en proporciones distintas en cada pasada. MIROVA elimina
+    eso ANTES de detectar, resampleando a una grilla regular de 1 km centrada en
+    la cumbre (Coppola 2016a ~L162: "cropped and resampled (into an equally
+    spaced 1 km grid)"; la razón, ~L150-160: "requires homogenous pixel scale").
+
+    POR QUÉ un wrapper y no una llamada directa: la banda 21 satura, y su NaN de
+    saturación es información — marca el píxel MÁS caliente del granule, con la
+    banda 22 como respaldo (A37/F28). Por eso solo se exigen `band22` y `band31`
+    para que una muestra represente a su celda: sin TIR no hay NTI, pero sin
+    banda 21 sí hay VRP.
+
+    El schema de salida es el mismo que `read_modis_l1b`, así que TODO el código
+    aguas abajo (máscaras, kernel 8-vecinos, second-pass, clustering) corre sin
+    cambios: lo único que cambia es el sustrato geométrico.
+    """
+    lat2d, lon2d = data["lat"], data["lon"]
+    bandas = {k: data[k] for k in ("band21", "band22", "band31")}
+
+    angles = data.get("angles") or {}
+    # los SDS de ángulos pueden faltar en un granule; los ausentes siguen
+    # ausentes (el schema los declara opcionales) y no entran al regrillado.
+    nombres_ang = [k for k, v in angles.items() if v is not None]
+    for k in nombres_ang:
+        bandas[f"__ang__{k}"] = angles[k]
+
+    g = regrid_to_utm(lat2d, lon2d, bandas, center_lat, center_lon,
+                      cell_km=cell_km, half_km=half_km,
+                      required=("band22", "band31"))
+
+    n = g["n"]
+    # lat/lon de salida = centros de celda exactos, no la geolocalización
+    # resampleada: las distancias al cráter y el ROI se miden contra la grilla.
+    ejes_km = (np.arange(n) + 0.5) * cell_km - half_km
+    dlat = ejes_km / 111.32
+    dlon = ejes_km / (111.32 * max(np.cos(np.radians(center_lat)), 1e-6))
+    out_lat = center_lat + dlat[::-1][:, None] * np.ones((1, n))   # Norte arriba
+    out_lon = center_lon + dlon[None, :] * np.ones((n, 1))
+
+    out = {k: g[k] for k in ("band21", "band22", "band31")}
+    out["lat"] = out_lat
+    out["lon"] = out_lon
+    out["angles"] = {k: (g[f"__ang__{k}"] if k in nombres_ang else None)
+                     for k in angles}
+    return out
+
+
 def calculate_vrp(hdf_path: Path, geo_path: Path,
                   volcano_lat: float, volcano_lon: float,
                   radius_km: float = 15.0,
@@ -391,6 +447,11 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     DNTI_CONTEXTUAL_C1 = _TH["c1_summit"]         # single-ROI: noche 0.003 / día 0.02
 
     data = read_modis_l1b(hdf_path)
+
+    # F70.2 — sustrato geométrico. Con el flag apagado (operacional hoy) esta
+    # rama no se ejecuta y el procesador es idéntico al anterior.
+    if ENABLE_UTM_REGRID:
+        data = _regrid_modis_granule(data, volcano_lat, volcano_lon)
 
     lat = data["lat"]
     lon = data["lon"]
