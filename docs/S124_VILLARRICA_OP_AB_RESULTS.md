@@ -95,3 +95,98 @@ Corre el Test 1 sobre el ROI completo [5, 25] km sin filtro contextual.
 
 **No flipea nada.** Tocar el cron de Villarrica es A45: requiere tag defensivo
 y confirmación explícita de Nicolás. Esto es la evidencia para esa decisión.
+
+---
+
+# ADENDA (misma sesión) — corrección de método y cierre del 08-17
+
+Nicolás preguntó qué causaba el 08-17 y si la comparación cubría todos los
+volcanes y los 3 sensores. Las dos preguntas destaparon un **defecto de mi
+cruce**, no del pipeline.
+
+## A. El 08-17 y el 29-05 NO eran detecciones perdidas: eran pasadas DIURNAS
+
+La ALERTA de MIROVA que reporté como perdida es de las **19:06 UTC** con el sol
+a **+27,8°** sobre el horizonte (verificado con `pipeline.store._solar_elevation`,
+la misma función del pipeline). Nuestro sistema es **nocturno por diseño**: de día
+la reflexión solar contamina la banda MIR de 3,7-4 µm y el NTI deja de significar
+lo que creemos. No hay nada que detectar ahí — y el **mismo 1,86 MW con la misma
+distancia 0,84 km** reaparece esa noche (08-18 05:48, sol −60,9°), donde el A/B
+lee 1,00 MW. Es la misma detección publicada dos veces por MIROVA.
+
+Igual el 29-05 MODIS (19:55 UTC, sol **+15,1°**). Las 5 ALERTAS diurnas de
+Villarrica en la ventana:
+
+| fecha UTC | sensor | VRP | elev. solar |
+|---|---|---|---|
+| 2026-05-29 19:55 | MODIS | 1,83 | +15,1° |
+| 2026-06-03 19:06 | VIIRS375 | 0,39 | +20,5° |
+| 2026-08-17 19:06 | VIIRS375 | 1,86 | +27,8° |
+| 2026-08-21 18:54 | VIIRS375 | 1,56 | +30,3° |
+| 2026-08-22 18:36 | VIIRS375 | 0,53 | +32,5° |
+
+Mi cruce binaba por fecha UTC y metía esas pasadas diurnas en el denominador,
+penalizándonos por no ver lo que decidimos no mirar. Esto es lo mismo que ya
+documenta **A76** (MIROVA publica artefactos solares diurnos en su producto
+per-volcán) llegando por otra puerta: el CSV consolidado.
+
+## B. Con referencia NOCTURNA: un solo FN en toda la ventana
+
+| serie | sensor | n | recall | ratio |
+|---|---|---|---|---|
+| producción (congelada) | VIIRS375 | 21 | 100 % | 0,99× |
+| **A/B (uniforme)** | VIIRS375 | 21 | **100 %** | **0,86×** |
+| producción (congelada) | VIIRS750 | 6 | 83,3 % | **4,86×** |
+| **A/B (uniforme)** | VIIRS750 | 6 | **83,3 %** | **0,88×** |
+
+**Único FN real de la ventana**: 2026-08-13 VIIRS750, MIROVA 0,41 MW — lo pierden
+**las dos** series. No es regresión del flip.
+
+## C. Los otros 10 ya corren el algoritmo destino
+
+`nrt.yml:158` corre `mirova_equivalent` para los 10; `nrt.yml:184-196` corre
+`mirova_equivalent_villarrica_test1` **solo** para Villarrica. No hay A/B que
+hacer para los demás: el flip mueve a Villarrica hacia lo que la flota ya usa.
+Paridad de la flota en la misma ventana, referencia nocturna:
+
+- **VIIRS375** (n=584): recall 95-100 % casi en todos. Ratios 0,36-1,29. El A/B
+  de Villarrica (0,86×) queda **en familia** con Lascar 0,53 / Isluga 0,55 /
+  Tupungatito 0,71 / PCC 0,76 / PP 0,89 / Chaitén 1,22.
+- **VIIRS750**: sensor sistemáticamente más débil en toda la flota — Isluga 2,26,
+  PP 6,78, Tupungatito 7,48 fuera de banda. El A/B de Villarrica (0,88×) sería
+  **de los mejores de la flota**; la serie congelada (4,86×) está entre los peores.
+- **MODIS**: **no hay evidencia para Villarrica**. Cero ALERTAS nocturnas MODIS
+  en la ventana (la única, 29-05, era diurna). El único volcán con MODIS nocturno
+  es Láscar (n=42, recall 14,3 % — el frente D12 abierto, ajeno a esta decisión).
+
+## D. MODIS de Villarrica: sin ground truth, pero el comportamiento espacial decide
+
+Sin referencia MIROVA se compara el comportamiento de los dos brazos. Las
+detecciones MODIS más fuertes del perfil congelado están **fuera del edificio**:
+
+| fecha | producción | A/B |
+|---|---|---|
+| 2026-06-17 06:55 | 89,8 MW @ **7,1 km** (4 px) | 4,2 MW @ **1,35 km** (7 px) |
+| 2026-07-12 21:35 | 52,7 MW @ **10,0 km** (4 px) | 3,0 MW @ **3,29 km** (13 px) |
+| 2026-06-29 02:50 | 45,6 MW @ **17,9 km** (3 px) | 0,3 MW @ **1,28 km** (1 px) |
+| 2026-06-21 21:25 | 43,1 MW @ **22,8 km** (3 px) | 4,8 MW @ **1,73 km** (14 px) |
+
+Máximo summit intra-5 km: producción **28,8 MW**, A/B **5,0 MW** (el máximo que
+MIROVA reportó en toda la ventana fue 2,21 MW). El uniforme ancla al edificio;
+el congelado se va al campo lejano. Es el patrón far→summit de **A46/A82**.
+
+## E. Hallazgo colateral: la auditoría semanal automática no filtra el sol
+
+`scripts/auto_audit_weekly.py` cruza contra CONS ∪ OCR **sin filtrar elevación
+solar**, así que arrastra el mismo defecto. En la flota son **82 de 1338 ALERTAS
+(6,1 %)** diurnas en la ventana; por volcán llega a 20 % (NdC) y 17,5 %
+(Lastarria). Impacto medido sobre la ventana rodante real de 60 días:
+
+| sensor | hoy | con filtro nocturno | banda |
+|---|---|---|---|
+| VIIRS375 | 95,7 % | 96,1 % | ≥93,4 |
+| VIIRS750 | 82,6 % | 84,1 % | ≥79,5 |
+
+**No da vuelta ningún veredicto hoy**, pero come ~1,5 pp de margen — y VIIRS750
+sólo tiene 3,1 pp de holgura sobre su banda. Es deuda latente: el día que se
+estreche, abre un issue por un problema que no existe. Fix barato y correcto.
