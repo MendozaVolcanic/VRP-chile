@@ -1,0 +1,184 @@
+name: Reproc por trozos (generico, cualquier perfil A/B)
+
+# Reprocesa N volcanes x una ventana de fechas, partiendo la ventana en trozos
+# que SI caben en un job de GitHub Actions (limite duro de 6 h, no configurable).
+#
+# POR QUE EXISTE (S124): el primer intento de reprocesar Villarrica murio por
+# timeout tras 5 h 29 min — proceso 129 de 146 dias y perdio TODO, porque el
+# commit iba al final del job. Un volcan cuesta ~2.6 min por dia, asi que
+# cualquier ventana de mas de ~130 dias no entra. Este workflow generaliza la
+# solucion: cada trozo corre en su propio job, sube su JSON como artifact, y un
+# job final los une por volcan y hace UN SOLO push.
+#
+# UN SOLO PUSH es el punto: un push por trozo reabriria la carrera de S25, donde
+# `pull --rebase -X theirs` entre jobs concurrentes puede descartar records del
+# commit anterior.
+#
+# NO usar contra `mirova_equivalent` — es para perfiles A/B con data_subdir
+# aislado. El cron operacional tiene su propio workflow.
+# A43: "on" quoted.
+"on":
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "Perfil (debe tener data_subdir aislado, NO mirova_equivalent)"
+        required: true
+      volcanoes:
+        description: "Volcanes separados por coma (ej. Lascar,Isluga,Copahue)"
+        required: true
+      start:
+        description: "Inicio ventana (YYYY-MM-DD)"
+        required: true
+      end:
+        description: "Fin ventana (YYYY-MM-DD)"
+        required: true
+      max_days:
+        description: "Dias por trozo (presupuesto de job; ver split_date_window.py)"
+        default: "37"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: reproc-chunked
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      jobs: ${{ steps.split.outputs.jobs }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Guardas + producto cruzado volcan x trozo
+        id: split
+        env:
+          PROFILE: ${{ github.event.inputs.profile }}
+          VOLCANOES: ${{ github.event.inputs.volcanoes }}
+          START: ${{ github.event.inputs.start }}
+          END: ${{ github.event.inputs.end }}
+          MAX_DAYS: ${{ github.event.inputs.max_days }}
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, sys, yaml
+          sys.path.insert(0, ".")
+          from scripts.split_date_window import split_window
+
+          profile = os.environ["PROFILE"].strip()
+          # Guarda dura: este workflow no debe poder pisar la serie operacional.
+          if profile == "mirova_equivalent":
+              raise SystemExit("REHUSADO: este workflow no corre contra mirova_equivalent")
+          ruta = f"pipeline/profiles/{profile}.yaml"
+          with open(ruta, encoding="utf-8") as fh:
+              cfg = yaml.safe_load(fh)
+          subdir = (cfg.get("output") or {}).get("data_subdir")
+          if not subdir or subdir == "mirova_equivalent":
+              raise SystemExit(f"REHUSADO: {profile} no tiene data_subdir aislado")
+
+          vols = [v.strip() for v in os.environ["VOLCANOES"].split(",") if v.strip()]
+          trozos = split_window(os.environ["START"], os.environ["END"],
+                                int(os.environ["MAX_DAYS"]))
+          jobs = [{"vol": v, "idx": t["idx"], "start": t["start"], "end": t["end"]}
+                  for v in vols for t in trozos]
+          print(f"jobs={json.dumps(jobs)}")
+          print(f"Perfil {profile} -> {subdir}; {len(vols)} volcanes x "
+                f"{len(trozos)} trozos = {len(jobs)} jobs", file=sys.stderr)
+          PY
+
+  reproc:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      # 8 y no mas: el free tier publico da 20 jobs concurrentes y el cron NRT
+      # (matrix de 11 volcanes) comparte ese techo.
+      max-parallel: 8
+      matrix:
+        job: ${{ fromJson(needs.plan.outputs.jobs) }}
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf earthaccess numpy h5py scipy pyyaml
+      - name: Reprocesar
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        timeout-minutes: 170
+        run: |
+          python scripts/run_pipeline.py \
+            --profile ${{ github.event.inputs.profile }} \
+            --volcano ${{ matrix.job.vol }} \
+            --start ${{ matrix.job.start }} \
+            --end ${{ matrix.job.end }} \
+            --overwrite
+      - name: Guardar el trozo
+        # Sin `if: always()` a proposito: un trozo incompleto no debe pasar por
+        # hecho — el merge lo reportaria como ventana cubierta cuando no lo esta.
+        uses: actions/upload-artifact@v4
+        with:
+          name: chunk-${{ matrix.job.vol }}-${{ matrix.job.idx }}
+          path: data/${{ github.event.inputs.profile }}/${{ matrix.job.vol }}.json
+          if-no-files-found: error
+          retention-days: 7
+
+  merge:
+    needs: [plan, reproc]
+    # `always()`: si un trozo falla, se conservan los que si terminaron y el
+    # resto se relanza sobre esa ventana. Es lo que no se pudo hacer cuando el
+    # primer intento murio por timeout.
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Bajar los trozos
+        uses: actions/download-artifact@v4
+        with:
+          pattern: chunk-*
+          path: chunks
+      - name: Unir por volcan
+        env:
+          PROFILE: ${{ github.event.inputs.profile }}
+          VOLCANOES: ${{ github.event.inputs.volcanoes }}
+        run: |
+          ls -R chunks || true
+          set -e
+          for VOL in $(echo "$VOLCANOES" | tr ',' ' '); do
+            FILES=$(ls chunks/chunk-"$VOL"-*/"$VOL".json 2>/dev/null || true)
+            if [ -z "$FILES" ]; then
+              echo "AVISO: $VOL no dejo ningun trozo, se omite"
+              continue
+            fi
+            python scripts/merge_chunk_stores.py \
+              --out "data/$PROFILE/$VOL.json" $FILES
+          done
+      - name: Commit
+        env:
+          PROFILE: ${{ github.event.inputs.profile }}
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add -f "data/$PROFILE"/*.json
+          git diff --staged --quiet && { echo "no changes"; exit 0; }
+          git commit -m "data(reproc): $PROFILE ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (${{ github.event.inputs.volcanoes }})"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1

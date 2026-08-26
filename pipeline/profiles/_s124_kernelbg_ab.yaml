@@ -1,0 +1,80 @@
+# A/B S124 — fondo del VRP: 8 vecinos (Coppola) vs anillo 5-25 km (lo que hacemos)
+#
+# QUÉ SE ENCONTRÓ (S124, lectura de código + Coppola 2016a Eq. 6):
+# El paper define el fondo del exceso de radiancia así, textual:
+#
+#     "L4bk is estimated from the arithmetic mean of all the pixels
+#      SURROUNDING the active one (or around the active cluster)"
+#
+# `process_viirs.py:1205` implementa las dos variantes:
+#
+#     if ENABLE_LOCAL_KERNEL_BG and local_kernel_bg_compatible:
+#         t_bk = compute_local_background(bt, ..., kernel_size=3)   # 8 vecinos
+#     else:
+#         L_bg = bt_to_spectral_radiance(t_bg_i04, ...)             # anillo 5-25 km
+#
+# El flag de perfil `enable_local_kernel_bg` está en TRUE, pero el campo
+# per-volcán `local_kernel_bg_compatible` está en FALSE para LOS 11. O sea:
+# la rama del kernel nunca corre en producción y toda la flota usa el anillo
+# lejano, no los vecinos que especifica el paper.
+#
+# POR QUÉ IMPORTA: si el anillo de 5-25 km es más tibio que el entorno inmediato
+# del cráter, el ΔL = L_hot − L_bk sale comprimido y el VRP sale chico. Eso
+# encaja con la sub-estimación sistemática medida en S124 (mediana global 0,71;
+# Lascar 0,62 · Isluga 0,61 · Lastarria 0,47) — pero NO está probado: el proxy
+# ΔT no correlaciona con el ratio (r = −0,002), así que la variación entre
+# volcanes tiene otra causa. Este A/B mide el efecto directamente.
+#
+# HISTORIA DEL FLAG: se introdujo en S59 (H_S58_PER_VOL) como opt-in per-volcán
+# para evitar una regresión en Tupungatito (anillo frío por glaciar; el kernel
+# local empeoraba). Quedó apagado en todos y nunca se volvió a evaluar.
+#
+# CRITERIO PRE-REGISTRADO (A66 — escrito ANTES de correr, no se ajusta después):
+#   PRIMARIO   — los sub-reportadores (Lascar, Isluga, Lastarria) deben mover su
+#                mediana HACIA 1,0. Éxito = los tres entran en banda [0,7-1,4].
+#   GUARDA 1   — los controles que hoy SOBRE-reportan (Chaitén 1,18, Copahue
+#                1,33) no deben salirse por arriba de 1,4.
+#   GUARDA 2   — espacial (A61/A85): el cluster no debe migrar. Si la mediana de
+#                `centroid_dist_km` se corre >1 km, el fondo local está cambiando
+#                la selección y no solo la magnitud.
+#   GUARDA 3   — recall no debe caer. El área y el fondo entran en la integral
+#                del Test 1, así que un cambio de fondo PUEDE apagar detecciones
+#                marginales (lección A67).
+#
+# NO OPERACIONAL. data_subdir aislado; no toca mirova_equivalent ni el cron.
+extends: mirova_equivalent
+profile: _s124_kernelbg_ab
+description: >
+  A/B S124: fondo del VRP con kernel 3x3 de vecinos (definición de Coppola
+  2016a Eq. 6) en lugar del anillo 5-25 km. Aislado, laboratorio.
+
+volcano_overrides:
+  # OJO al nombre (trampa A48, en la que caí y salí): el campo del YAML es
+  # `local_kernel_bg`; `local_kernel_bg_compatible` es el nombre del PARÁMETRO
+  # de la función. run_pipeline.py:244 lee `volcano.get("local_kernel_bg")`.
+  # Un override con el nombre equivocado no hace nada y el A/B saldría nulo.
+  #
+  # ESTADO ACTUAL de la flota (verificado con el nombre correcto):
+  #   CON kernel (5): Lastarria 0,47 · PCC 0,82 · PP 0,93 · Villarrica 1,02 ·
+  #                   Chaitén 1,18   → mediana 0,93
+  #   SIN kernel (6): Llaima 0,36 · Isluga 0,61 · Láscar 0,62 · Tupungatito
+  #                   0,74 · NdC 1,20 · Copahue 1,33   → mediana 0,68
+  # El grupo sin kernel sub-reporta más, en la dirección que predice el
+  # mecanismo. Confundido (la asignación no fue aleatoria), por eso el A/B.
+  #
+  # Brazo: encender el kernel en los SEIS que no lo tienen.
+  Lascar:            # sub-reporta 0,62 con n=228 — el caso principal
+    local_kernel_bg: true
+  Isluga:            # sub-reporta 0,61 con n=131
+    local_kernel_bg: true
+  Tupungatito:       # 0,74, al borde. OJO: S59 apagó el kernel acá por el
+    local_kernel_bg: true   # anillo frío del glaciar. Es el caso que puede empeorar.
+  NevadosDeChillan:  # control: hoy SOBRE-reporta 1,20
+    local_kernel_bg: true
+  Copahue:           # control: hoy SOBRE-reporta 1,33 — el más expuesto a salirse
+    local_kernel_bg: true
+  Llaima:            # 0,36 pero n=2: no concluyente, va como observación
+    local_kernel_bg: true
+
+output:
+  data_subdir: _s124_kernelbg_ab
