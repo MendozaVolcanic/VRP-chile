@@ -691,6 +691,14 @@ VRP_TIR_N_SIGMA: float = float(_cfg.get("vrp_tir_n_sigma", 6.0))
 # (plan completo Coppola 2024 Eq.16 background subtraction).
 ENABLE_VRP_TIR_OUTPUT: bool = bool(_cfg.get("enable_vrp_tir_output", True))
 
+# F70.2 — sustrato geométrico de la detección: swath crudo (False, actual) vs
+# grilla UTM regular resampleada (True). POR QUÉ: MIROVA recorta y resamplea a
+# 1 km ANTES de detectar porque su esquema "requires homogenous pixel scale"
+# (Coppola 2016a ~L162); sobre swath un vecino off-nadir se estira hasta ~10 km²
+# y "los 8 vecinos" son objetos distintos en cada pasada. Arranca APAGADO: el
+# operacional no cambia hasta el veredicto del A/B F70.3 (A45).
+ENABLE_UTM_REGRID: bool = bool(_cfg.get("enable_utm_regrid", False))
+
 # --- Sensor activation ---
 _s = _cfg["sensors"]
 SENSOR_MODIS: bool = bool(_s.get("modis", True))
