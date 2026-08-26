@@ -39,11 +39,15 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 from pipeline.mirova_csv_loader import load_mirova_alertas  # noqa: E402
+from pipeline.store import _reject_daytime, _solar_elevation  # noqa: E402
+from pipeline.profile import ENABLE_DAYTIME_MODIS  # noqa: E402
+import yaml  # noqa: E402
 
 SNAP = os.path.join(ROOT, "data", "mirova_reference", "mirova_v1_snapshot")
 CONS = os.path.join(SNAP, "registro_vrp_consolidado.csv")
 OCR = os.path.join(SNAP, "registro_vrp_ocr.csv")
 OUTDIR = os.path.join(ROOT, "data", "audit_continuous")
+VOLCANOES_YAML = os.path.join(ROOT, "volcanoes.yaml")
 
 WINDOW_DAYS = 60
 MIN_N_RECALL = 15   # noches ALERTA mínimas para que el recall del bucket sea flaggeable
@@ -76,6 +80,41 @@ RECALL_MIN = {"VIIRS375": 93.4, "VIIRS750": 79.5, "MODIS": 95.0}
 RATIO_BAND = (0.5, 2.0)
 # Excepciones físicas documentadas (AUDIT_S119 §2.3): sub-banda esperada, no flaggear.
 UNDER_BAND_KNOWN = {"Lastarria"}
+
+
+# --- S124: no evaluarnos con pasadas DIURNAS de MIROVA ---
+# De día el Sol reflejado en nube o nieve entra en la banda MIR de 3,7-4 µm con
+# intensidad comparable a la de un foco incandescente: el sensor no distingue
+# "caliente" de "brillante". MIROVA publica de vez en cuando alertas diurnas que
+# son reflexión (A76); nuestro pipeline las descarta por diseño. Sin este filtro
+# esas pasadas entraban al DENOMINADOR del recall y nos penalizaban por no ver
+# lo que decidimos no mirar (82 de 1338 alertas = 6,1 % en la ventana S124; en
+# Nevados de Chillán la alerta MÁS GRANDE del período era diurna).
+#
+# Se reusa `_reject_daytime` de store.py A PROPÓSITO en vez de un umbral propio:
+# la auditoría debe excluir EXACTAMENTE lo que el pipeline excluye. Si algún día
+# se activa MODIS diurno (ENABLE_DAYTIME_MODIS), la auditoría lo sigue sola.
+_BUCKET_SENSOR = {"MODIS": "MODIS_TERRA",
+                  "VIIRS375": "VIIRS_SNPP",       # sin sufijo = I-band 375 m (A48)
+                  "VIIRS750": "VIIRS_SNPP_750"}
+
+
+def bucket_representative_sensor(bucket: str) -> str:
+    """Nombre de sensor representativo del bucket, en la convención del proyecto."""
+    return _BUCKET_SENSOR.get(bucket, bucket)
+
+
+def es_pasada_diurna_descartada(bucket, lat, lon, dt_utc) -> bool:
+    """¿El pipeline habría descartado esta pasada por diurna?"""
+    elev = _solar_elevation(lat, lon, dt_utc)
+    return _reject_daytime(bucket_representative_sensor(bucket), elev,
+                           ENABLE_DAYTIME_MODIS)
+
+
+def _coords_por_volcan():
+    with open(VOLCANOES_YAML, encoding="utf-8") as fh:
+        return {v["name"]: (v["lat"], v["lon"])
+                for v in yaml.safe_load(fh)["volcanoes"] if "lat" in v}
 
 
 def our_bucket(sensor):
@@ -113,11 +152,24 @@ def main():
 
     # 1. MIROVA (loader canónico, CONS ∪ OCR): noches ALERTA por (vol, bucket, fecha)
     alertas = load_mirova_alertas(cons_path=CONS, ocr_path=OCR)
+    coords = _coords_por_volcan()
     mir = defaultdict(float)
+    n_diurnas_excluidas = 0
     for a in alertas:
         dt = a["fecha_utc"] or ""
         if not in_win(dt) or a["sensor_bucket"] not in SENSORS:
             continue
+        # S124: las pasadas diurnas no nos evalúan — el pipeline no las mira.
+        latlon = coords.get(a["volcano"])
+        if latlon:
+            try:
+                dt_obj = datetime.fromisoformat(dt).replace(tzinfo=timezone.utc)
+            except ValueError:
+                dt_obj = None
+            if dt_obj and es_pasada_diurna_descartada(a["sensor_bucket"],
+                                                      latlon[0], latlon[1], dt_obj):
+                n_diurnas_excluidas += 1
+                continue
         key = (a["volcano"], a["sensor_bucket"], dt[:10])
         mir[key] = max(mir[key], a["vrp_mw"] or 0.0)
 
@@ -233,6 +285,9 @@ def main():
         "dias_ventana": dias_ventana,
         "gt_ultima_fecha_csv": gt_ultima,
         "gt_stale_dias": gt_stale_dias,
+        # Transparencia: un filtro que descarta en silencio es tan malo como no
+        # tenerlo. Si este número se dispara, es señal de otra cosa (A76).
+        "alertas_diurnas_excluidas": n_diurnas_excluidas,
         "avisos": cobertura_avisos,
     }
 
@@ -249,7 +304,7 @@ def main():
         "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "window": list(win),
         "cobertura": cobertura,
-        "criteria": "eje2 S119 (crater A10 + dash), loader canónico CONS∪OCR",
+        "criteria": ("eje2 S119 (crater A10 + dash), loader canónico CONS∪OCR, referencia filtrada a pasadas nocturnas con la misma regla del pipeline (_reject_daytime, S124)"),
         "recall": recall,
         "magnitud_ratio_by_vol": magnitud,
         "integrity": integrity,
