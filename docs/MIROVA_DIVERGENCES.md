@@ -1390,3 +1390,50 @@ y calibrado (pc.vrp mediana 0.6–1.9 MW). El residuo path D real = **131/3072 r
 (4.3%) con pc.vrp>5 MW, 80% path-D-only, 0% confirmados MIROVA** (cruce loader
 canónico) → artefacto de MAGNITUD acotado cerca del cráter, frente SECUNDARIO.
 Detalle: design doc 2026-06-05 §11.
+
+---
+
+## D13 — La cerca `distance_class != summit` del frontend apaga el 31 % de la magnitud — **ABIERTA (documental)** S124
+
+**Qué hace MIROVA.** Publica el hotspot **esté donde esté** dentro de su grilla de
+51×51 km. Su producto per-volcán reporta la distancia (`Distancia_km`) como un
+atributo del dato, no como un filtro: una anomalía a 12 km del cráter aparece
+publicada, con su distancia al lado, y es el analista quien decide qué significa.
+
+**Qué hacemos nosotros.** Las 3 vistas del frontend comparten el helper
+`mirovaEqVrp` (`frontend/index.html:972`, replicado en `diario.html` y
+`mosaico.html`), que **pone la magnitud en cero** para todo record cuyo
+`distance_class` no sea `"summit"`. El dato sigue en el JSON; simplemente no se
+dibuja salvo que el usuario active el toggle "incluir lejanas".
+
+**Alcance medido** (script `experiments/_s124_observabilidad/`, sobre los 11 Tier A):
+
+| condición del helper | records apagados | magnitud |
+|---|---|---|
+| `distance_class != "summit"` | **10.773 / 34.763 (31,0 %)** | 17.678 MW |
+| `pc.centroid_dist_km > inner_radius` | **0 (0,0 %)** — no-op | — |
+
+Dos cosas que corrigen creencias previas de sesiones anteriores:
+
+1. **La segunda condición es un no-op hoy.** Existía para atrapar la asimetría
+   A46 (un record `summit` por `final_hotspot` pero con el cluster lejos). El
+   guard de coherencia de S113 (`store.py`) ya alinea ambas representaciones en
+   origen, así que la cerca del frontend no encuentra nada que apagar. No es
+   código muerto — es defensa en profundidad — pero **no** es la cerca que
+   importa.
+2. **La cerca que importa es la primera**, y es mucho más grande de lo que se
+   había estimado. El reparto por volcán es notablemente plano (897 a 1192 por
+   volcán), lo que apunta a un fondo sistémico de detecciones lejanas y no a una
+   idiosincrasia de algún volcán.
+
+**Por qué queda ABIERTA como documental y no se toca.** El 31 % apagado NO es
+error: es en buena parte la categoría (b) de A54 —anomalías térmicas físicamente
+reales que MIROVA no publica— más el artefacto topográfico A69 en los nevados,
+que a 1 km es irreducible (A82). Levantar la cerca destaparía ambas cosas
+mezcladas. Lo que se corrige acá es que **esta divergencia no estaba escrita en
+ningún lado**: una decisión de display que mueve el 31 % de la magnitud publicada
+merece estar en el catálogo, no vivir implícita en un helper de JavaScript.
+
+**Anti-A8**: no reabrir como "hay que levantar la cerca" sin antes clasificar por
+categoría A54 los records que se destaparían. Y ojo con A72: si lo que se destapa
+es artefacto, la raíz es no generarlo en la detección, no la cerca.

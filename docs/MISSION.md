@@ -125,7 +125,7 @@ Estas fueron las desviaciones históricas. Nunca repetir.
 | Regla D vent-priority | Parche de clasificación visual, no en papers | Removido S27 |
 | Regla D Test 1-priority | Parche de composición de paths, no en papers | Removido S27 |
 | Cloud mask BT<260K | Laiolo 2026 textual: "no atmospheric correction or cloud-contamination automatic filtering" | Removido S27 |
-| Pisos VRP por sensor | Coppola 2023 dice "floor ~1 MW" genérico, no por sensor | Removido S27 |
+| Pisos VRP por sensor | Coppola 2023 dice "floor ~1 MW" genérico, no por sensor | ⚠️ **SIGUEN ACTIVOS** (corregido S124). La fila decía "Removido S27" y era falsa: `pipeline/store.py:459-468` aplica `MIN_VRP_MW_VIIRS375=0.02`, `_VIIRS750=0.15`, `_MODIS=0.05` desde `mirova_equivalent.yaml:64-71`, y marca el record con `diag_vrp_floor_mw`. Alcance medido S124: **1564 de 23990 records summit (6,5%)**. Reintroducir un piso NO requiere pasar las 3 preguntas porque el piso ya está ahí — lo que hace falta es decidir si se retira. |
 | Path C NTI relativo (default ON) | No en papers | Default OFF mantenido |
 | Subir `inner_radius_km` ad-hoc | Parche para recuperar recall; no es metodológico MIROVA | Rechazado S27 |
 | N·σ Di Bella 2024 (12σ noche VIIRS) | Di Bella es INGV Catania, NO MIROVA | Identificado S26 |
