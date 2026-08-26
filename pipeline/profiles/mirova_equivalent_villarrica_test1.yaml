@@ -1,3 +1,20 @@
+# ============================================================================
+# DEPRECADO S124 (issue #513) — NO USAR EN OPERACIONAL.
+#
+# Villarrica corrio con este perfil desde S26 hasta S124. Quedo congelado en
+# abril 2026: 32 constantes distintas del operacional, incluidos los 5 parches
+# que MISSION.md declara no autorizados (MAX_SIGMA_COMPONENT_K=7, vent_path,
+# exclude_zones, cloud_mask 260K, piso MODIS 0.27) y con el area nadir-fija
+# APAGADA (la adopcion S102/S103 que globalmente llevo VIIRS375 de 2.27x a
+# 0.78x). Producia el escalon de junio-agosto 2026 y magnitud VIIRS750 4.86x.
+#
+# El A/B sobre la historia completa (run 32965363936) mostro que el operacional
+# uniforme mejora recall (VIIRS375 89.7% -> 100%) y magnitud (VIIRS750 4.86x ->
+# 0.88x). El cron se migro a `mirova_equivalent` en S124.
+#
+# Se conserva SOLO para reproducir la serie historica previa al flip
+# (tag: pre-s124-villarrica-flip). Cualquier uso nuevo es un error.
+# ============================================================================
 # VRP-Chile — profile: mirova_equivalent_villarrica_test1 (S26 D)
 #
 # Profile DEDICADO para reproceso Villarrica con Test 1 integrated-ROI activo.
