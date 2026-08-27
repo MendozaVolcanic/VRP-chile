@@ -75,8 +75,15 @@ for r in d["records"]:
     v = pc.get("vrp_mw") or 0
     if v <= 0 or r.get("distance_class") != "summit":
         continue
-    cd = pc.get("centroid_dist_km")
-    if cd is not None and cd > 5.0:
+    # MISMO RADIO que el experimental (1 km al cráter Nicanor). Antes se usaba
+    # el inner de 5 km del KML MIROVA, y comparar 5 km contra 1 km hacía que la
+    # réplica pareciera más sensible cuando lo único que tenía era más ÁREA: de
+    # sus 135 detecciones, 96 caían a 2-4 km del cráter (S124). Con el radio
+    # igualado la única diferencia que queda entre las dos series es el umbral,
+    # que es la variable del experimento.
+    if pc.get("centroid_lat") is None:
+        continue
+    if hav(NIC[0], NIC[1], pc["centroid_lat"], pc["centroid_lon"]) > 1.0:
         continue
     replica[f] = max(replica.get(f, 0), v)
 
@@ -106,12 +113,21 @@ for r in _d_op["records"]:
     sen = r.get("sensor") or ""
     if f < START or "VIIRS" not in sen or "750" in sen:
         continue
-    nc = r.get("n_cloud_masked")
-    if nc is None:
-        continue
-    # conteo crudo de píxeles fríos; la MENOR de la noche (la pasada más limpia)
+    # QUÉ SE MIDE: si hubo fondo, y qué tan estructurado estaba.
+    #   n_bg == 0  -> el pipeline no pudo establecer NINGÚN píxel de fondo:
+    #                 ceguera real, no "no detectamos". Medido: las 3 alertas de
+    #                 MIROVA que perdemos caen las 3 en noches así, y solo el
+    #                 17 % de las noches lo son.
+    #   sigma_bg   -> dispersión térmica del terreno. Noche despejada = hay
+    #                 estructura (roca, parches de nieve, valle) y la dispersión
+    #                 es alta; manto de nubes = escena uniforme y colapsa.
+    # Es mejor que el umbral de 260 K del pipeline (D14) porque NO mira la
+    # temperatura absoluta, así que no confunde nieve fría con nube.
+    sg = r.get("diag_sigma_bg_k")
+    nb = r.get("diag_n_bg_used_first_pass")
+    valor = 0.0 if (nb == 0 or sg is None) else float(sg)
     prev = despejado.get(f)
-    despejado[f] = nc if prev is None else min(prev, nc)
+    despejado[f] = valor if prev is None else max(prev, valor)
 
 # ── Foco experimental: summit a <=1 km del cráter Nicanor ───────────────────
 foco = {}
@@ -160,20 +176,29 @@ axA.set_ylim(-0.6, 2.6)
 axA.grid(True, axis="x", alpha=0.25)
 axA.tick_params(axis="y", length=0)
 
-# Panel intermedio — cuánto pudo ver el sensor esa noche
+# Panel intermedio — ¿se pudo ver el terreno esa noche?
 _of = sorted(despejado)
 _ox = [datetime.fromisoformat(f) for f in _of]
 _oy = [despejado[f] for f in _of]
-_col = ["#3a7d44" if v >= 70 else ("#d9a441" if v >= 30 else "#b0413e") for v in _oy]
-axC.bar(_ox, _oy, width=0.9, color=_col, linewidth=0)
-axC.axhline(50, color="#666", lw=0.8, ls=":")
-axC.set_ylim(0, 100)
-axC.set_yticks([0, 50, 100])
-axC.set_yticklabels(["tapado", "50%", "despejado"], fontsize=8.5)
+# Las noches CIEGAS tienen σ = 0, o sea barra de altura cero: invisibles, y son
+# justo las que hay que ver. Se dibujan a altura completa en rojo — la franja
+# llena significa "acá no sabemos", no "acá hubo mucha señal".
+_ciego = [v <= 0.01 for v in _oy]
+axC.bar([x for x, c in zip(_ox, _ciego) if c], [6.0] * sum(_ciego),
+        width=0.9, color="#b0413e", alpha=0.5, linewidth=0)
+_col = ["#d9a441" if v < 2.0 else "#3a7d44" for v in _oy]
+axC.bar([x for x, c in zip(_ox, _ciego) if not c],
+        [v for v, c in zip(_oy, _ciego) if not c],
+        width=0.9, color=[c for c, cc in zip(_col, _ciego) if not cc], linewidth=0)
+axC.axhline(2.0, color="#666", lw=0.8, ls=":")
+axC.set_ylim(0, 6)
+axC.set_yticks([0, 2, 4, 6])
+axC.set_ylabel("σ del fondo (K)", fontsize=8.5)
 axC.grid(True, axis="x", alpha=0.25)
-axC.set_title("¿Cuánto del área pudo ver el sensor? (nubosidad medida por el propio granule)"
-              "   —   barra corta = esa noche casi no vimos: un cero abajo no significa que el volcán estuviera tranquilo",
-              loc="left", fontsize=11)
+axC.set_title("¿Se pudo ver el terreno esa noche?   —   "
+              f"franja roja = CIEGO, no hubo fondo ({sum(_ciego)} noches)   ·   "
+              "ámbar = escena uniforme (nublado)   ·   verde = se vio el suelo",
+              loc="left", fontsize=10.5)
 
 # Panel B — cuánta energía
 axB.set_title("¿Cuánta energía? (misma noche, mismo sensor)", loc="left", fontsize=11)
