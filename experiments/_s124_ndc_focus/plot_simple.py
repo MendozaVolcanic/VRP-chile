@@ -34,6 +34,13 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 ROOT = Path(__file__).resolve().parents[2]
 NIC = (-36.867210, -71.378241)
+# Radio del foco: 500 m (pedido de Nicolás, S124). A 375 m de píxel VIIRS I,
+# 500 m son ~1,3 píxeles: es el círculo más ajustado que el sensor soporta sin
+# volverse un solo píxel. Medido antes de aplicarlo: bajar de 1 km a 500 m
+# cuesta 1 noche de la réplica y 0 del experimental, y las 3 alertas de MIROVA
+# que reproducimos sobreviven las 3 — las detecciones están en el cráter, no
+# desparramadas.
+FOCO_KM = 0.5
 START = "2026-06-01"
 FOCO_JSON = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "data/experimental_ndc_focus/NevadosDeChillan.json"
 
@@ -83,7 +90,7 @@ for r in d["records"]:
     # que es la variable del experimento.
     if pc.get("centroid_lat") is None:
         continue
-    if hav(NIC[0], NIC[1], pc["centroid_lat"], pc["centroid_lon"]) > 1.0:
+    if hav(NIC[0], NIC[1], pc["centroid_lat"], pc["centroid_lon"]) > FOCO_KM:
         continue
     replica[f] = max(replica.get(f, 0), v)
 
@@ -140,7 +147,7 @@ for r in d["records"]:
     v = pc.get("vrp_mw") or 0
     if v <= 0 or pc.get("centroid_lat") is None:
         continue
-    if hav(NIC[0], NIC[1], pc["centroid_lat"], pc["centroid_lon"]) <= 1.0:
+    if hav(NIC[0], NIC[1], pc["centroid_lat"], pc["centroid_lon"]) <= FOCO_KM:
         foco[f] = max(foco.get(f, 0), v)
 
 ventana_foco = (min(d["records"][0]["datetime_utc"][:10], START),
@@ -214,7 +221,7 @@ for f in sorted(foco):
         fx.append(prev); fy.append(float("nan"))
     fx.append(d_); fy.append(foco[f]); prev = d_
 axB.plot(fx, fy, "s-", ms=6, lw=1.4,
-         color=C_FOC, label="Experimental: radio 1 km al cráter + umbral 0.005 MW")
+         color=C_FOC, label="Experimental: radio 500 m al cráter + umbral 0.005 MW")
 xs = dts(mirova)
 axB.plot(xs, [mirova[x.strftime("%Y-%m-%d")] for x in xs], "*", ms=17, color=C_MIR,
          mec="k", mew=0.6, ls="none", zorder=5, label="MIROVA (las veces que publicó alerta)")
@@ -239,7 +246,7 @@ axB.xaxis.set_major_formatter(mdates.DateFormatter("%d-%b"))
 plt.setp(axB.get_xticklabels(), rotation=0, fontsize=8.5)
 
 nota = ("Cómo leerla: cada estrella roja es una noche en que MIROVA publicó alerta térmica; los cuadrados verdes son el foco del cráter\n"
-        "Nicanor visto por el perfil experimental (área acotada a 1 km + umbral bajo el mínimo de MIROVA); los puntos celestes, la réplica\n"
+        "Nicanor visto por el perfil experimental (área acotada a 500 m + umbral bajo el mínimo de MIROVA); los puntos celestes, la réplica\n"
         "operacional. Se muestra solo VIIRS 375 m: todas las alertas MIROVA de este período son de ese sensor.")
 if ventana_foco and ventana_foco[1] >= "2026-06-25" and min(foco, default="9999") >= "2026-06-25":
     nota += "\nEl experimental aún no cubre el 01–24 de junio (reproceso en curso); esa franja solo muestra réplica y MIROVA."

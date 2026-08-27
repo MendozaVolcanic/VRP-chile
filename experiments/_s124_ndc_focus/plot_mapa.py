@@ -24,6 +24,14 @@ from basemap import satelital_km, ATRIBUCION
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 ROOT = Path(__file__).resolve().parents[2]
 NIC = (-36.867210, -71.378241)
+# Radio del foco: 500 m (pedido de Nicolás, S124). A 375 m de píxel VIIRS I,
+# 500 m son ~1,3 píxeles: es el círculo más ajustado que el sensor soporta sin
+# volverse un solo píxel. Medido antes de aplicarlo: bajar de 1 km a 500 m
+# cuesta 1 noche de la réplica y 0 del experimental, y las 3 alertas de MIROVA
+# que reproducimos sobreviven las 3 — las detecciones están en el cráter, no
+# desparramadas.
+FOCO_KM = 0.5
+
 FOCO_JSON = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "data/experimental_ndc_focus/NevadosDeChillan.json"
 
 def hav(la1, lo1, la2, lo2):
@@ -54,7 +62,7 @@ dd = json.loads(FOCO_JSON.read_text(encoding="utf-8"))
 for r in dd["records"]:
     pc = r.get("primary_cluster") or {}
     v = pc.get("vrp_mw") or 0
-    if v > 0 and pc.get("centroid_lat") is not None and hav(NIC[0], NIC[1], pc["centroid_lat"], pc["centroid_lon"]) <= 1.0:
+    if v > 0 and pc.get("centroid_lat") is not None and hav(NIC[0], NIC[1], pc["centroid_lat"], pc["centroid_lon"]) <= FOCO_KM:
         foc.append((pc["centroid_lat"], pc["centroid_lon"], v))
 
 fig, ax = plt.subplots(figsize=(9.5, 9.5))
@@ -63,7 +71,7 @@ ax.set_title("¿Dónde detecta cada uno? — clusters VIIRS 375 m desde junio\n"
 
 # Fondo satelital: sin él no se puede juzgar si una anomalía cae sobre el
 # cráter, sobre el glaciar o sobre el valle. zorder bajo = debajo de todo.
-LIM = 1.5          # pedido de Nicolás: mostrar solo el entorno del cráter
+LIM = 1.0          # pedido de Nicolás: mostrar solo el entorno del cráter
 _img, _ext = satelital_km(NIC[0], NIC[1], LIM, zoom=16)   # más zoom: la ventana es chica
 if _img is not None:
     ax.imshow(_img, extent=_ext, origin="upper", zorder=0, interpolation="bilinear")
@@ -73,7 +81,7 @@ if _img is not None:
                                fc="white", alpha=0.22, zorder=1, ec="none"))
 
 # circulos de referencia
-for rkm, col, lab in ((1.0, "#1a7a33", "radio experimental (1 km)"),):
+for rkm, col, lab in ((FOCO_KM, "#1a7a33", f"radio experimental ({FOCO_KM*1000:.0f} m)"),):
     c = plt.Circle((0, 0), rkm, fill=False, color=col, lw=2.4,
                    ls="-" if rkm == 1 else "--", label=lab, zorder=2,
                    path_effects=[pe.withStroke(linewidth=4.2, foreground="white")])
