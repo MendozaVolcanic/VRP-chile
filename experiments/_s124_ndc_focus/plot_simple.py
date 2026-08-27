@@ -80,6 +80,27 @@ for r in d["records"]:
         continue
     replica[f] = max(replica.get(f, 0), v)
 
+# ── Observabilidad: ¿cuánto del ROI vio el sensor esa noche? ────────────────
+# POR QUÉ del propio sensor y no de un pronóstico meteorológico: lo que importa
+# no es "había nubes sobre el volcán" sino "¿esta pasada, con esta geometría,
+# vio el suelo?". La máscara de nube del granule responde exactamente eso, a
+# 375 m y en el instante del sobrevuelo. Un modelo meteorológico da cobertura
+# interpolada en celdas de ~28 km y por hora: no resuelve el ROI ni el momento.
+# Se toma la MEJOR pasada de cada noche: si alguna vio, la noche fue observable.
+PIX_ROI_I = (50.0 / 0.375) ** 2          # ROI 50x50 km en píxeles I-band nadir
+despejado = {}
+_d_op = json.loads((ROOT / "data/mirova_equivalent/NevadosDeChillan.json").read_text(encoding="utf-8"))
+for r in _d_op["records"]:
+    f = (r.get("datetime_utc") or "")[:10]
+    sen = r.get("sensor") or ""
+    if f < START or "VIIRS" not in sen or "750" in sen:
+        continue
+    nc = r.get("n_cloud_masked")
+    if nc is None:
+        continue
+    pct = max(0.0, 100.0 * (1.0 - nc / PIX_ROI_I))
+    despejado[f] = max(despejado.get(f, 0.0), pct)   # la mejor pasada de la noche
+
 # ── Foco experimental: summit a <=1 km del cráter Nicanor ───────────────────
 foco = {}
 d = json.loads(FOCO_JSON.read_text(encoding="utf-8"))
@@ -103,9 +124,9 @@ def dts(dd):
 
 
 # ── Figura ──────────────────────────────────────────────────────────────────
-fig, (axA, axB) = plt.subplots(
-    2, 1, figsize=(14, 8.5), sharex=True,
-    gridspec_kw={"height_ratios": [1, 2.6], "hspace": 0.12})
+fig, (axA, axC, axB) = plt.subplots(
+    3, 1, figsize=(14, 9.6), sharex=True,
+    gridspec_kw={"height_ratios": [1, 0.62, 2.6], "hspace": 0.16})
 fig.suptitle("Nevados de Chillán, cráter Nicanor — ¿qué mostró MIROVA y qué detectamos nosotros?\n"
              "(VIIRS 375 m, desde junio 2026)", fontsize=13.5, fontweight="bold")
 
@@ -126,6 +147,21 @@ axA.set_yticklabels(["Experimental\n(foco 1 km, umbral bajo)",
 axA.set_ylim(-0.6, 2.6)
 axA.grid(True, axis="x", alpha=0.25)
 axA.tick_params(axis="y", length=0)
+
+# Panel intermedio — cuánto pudo ver el sensor esa noche
+_of = sorted(despejado)
+_ox = [datetime.fromisoformat(f) for f in _of]
+_oy = [despejado[f] for f in _of]
+_col = ["#3a7d44" if v >= 70 else ("#d9a441" if v >= 30 else "#b0413e") for v in _oy]
+axC.bar(_ox, _oy, width=0.9, color=_col, linewidth=0)
+axC.axhline(50, color="#666", lw=0.8, ls=":")
+axC.set_ylim(0, 100)
+axC.set_yticks([0, 50, 100])
+axC.set_yticklabels(["tapado", "50%", "despejado"], fontsize=8.5)
+axC.grid(True, axis="x", alpha=0.25)
+axC.set_title("¿Cuánto del área pudo ver el sensor? (nubosidad medida por el propio granule)"
+              "   —   barra corta = esa noche casi no vimos: un cero abajo no significa que el volcán estuviera tranquilo",
+              loc="left", fontsize=11)
 
 # Panel B — cuánta energía
 axB.set_title("¿Cuánta energía? (misma noche, mismo sensor)", loc="left", fontsize=11)

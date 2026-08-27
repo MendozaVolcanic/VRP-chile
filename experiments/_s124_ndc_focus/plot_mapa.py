@@ -16,6 +16,10 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as pe
+
+sys.path.insert(0, str(Path(__file__).parent))
+from basemap import satelital_km, ATRIBUCION
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 ROOT = Path(__file__).resolve().parents[2]
@@ -57,11 +61,23 @@ fig, ax = plt.subplots(figsize=(9.5, 9.5))
 ax.set_title("¿Dónde detecta cada uno? — clusters VIIRS 375 m desde junio\n"
              "(coordenadas en km respecto del cráter Nicanor)", fontsize=12, fontweight="bold")
 
+# Fondo satelital: sin él no se puede juzgar si una anomalía cae sobre el
+# cráter, sobre el glaciar o sobre el valle. zorder bajo = debajo de todo.
+LIM = 5.6
+_img, _ext = satelital_km(NIC[0], NIC[1], LIM, zoom=14)
+if _img is not None:
+    ax.imshow(_img, extent=_ext, origin="upper", zorder=0, interpolation="bilinear")
+    # velo tenue: la imagen es oscura y contrastada; sin esto los puntos y los
+    # círculos se pierden encima del terreno.
+    ax.add_patch(plt.Rectangle((-LIM * 2, -LIM * 2), LIM * 4, LIM * 4,
+                               fc="white", alpha=0.22, zorder=1, ec="none"))
+
 # circulos de referencia
 for rkm, col, lab in ((1.0, "#1a7a33", "radio experimental (1 km)"),
                       (5.0, "#4477aa", 'radio "cumbre" de la réplica (5 km, KML MIROVA)')):
-    c = plt.Circle((0, 0), rkm, fill=False, color=col, lw=1.6,
-                   ls="-" if rkm == 1 else "--", label=lab)
+    c = plt.Circle((0, 0), rkm, fill=False, color=col, lw=2.4,
+                   ls="-" if rkm == 1 else "--", label=lab, zorder=2,
+                   path_effects=[pe.withStroke(linewidth=4.2, foreground="white")])
     ax.add_patch(c)
 
 xs, ys, vs = zip(*[(*km_xy(la, lo), v) for la, lo, v in rep])
@@ -77,14 +93,17 @@ ax.plot(0, 0, "^", ms=16, c="#cc3311", mec="k", zorder=5, label="cráter Nicanor
 
 ax.set_xlabel("km al Este del cráter")
 ax.set_ylabel("km al Norte del cráter")
-ax.set_xlim(-5.6, 5.6); ax.set_ylim(-5.6, 5.6)
+ax.set_xlim(-LIM, LIM); ax.set_ylim(-LIM, LIM)
 ax.set_aspect("equal")
-ax.grid(True, alpha=0.25)
+ax.grid(True, alpha=0.18, color="white", lw=0.6)
 ax.legend(loc="lower left", fontsize=8.5, framealpha=0.95)
 ax.text(0.02, 0.98, "El tamaño del punto crece con el VRP.\n"
         "Todo lo que cae dentro del círculo azul\nla réplica lo etiqueta «cumbre».",
         transform=ax.transAxes, va="top", fontsize=8.5, color="#444",
         bbox=dict(boxstyle="round,pad=0.35", fc="#f7f7f7", ec="#bbb"))
+ax.text(0.995, 0.005, ATRIBUCION, transform=ax.transAxes, ha="right", va="bottom",
+        fontsize=7.5, color="white", zorder=6,
+        path_effects=[pe.withStroke(linewidth=2.2, foreground="#00000088")])
 fig.tight_layout()
 out = Path(__file__).parent / "ndc_mapa_s124.png"
 fig.savefig(out, dpi=150)
