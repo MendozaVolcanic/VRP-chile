@@ -71,8 +71,8 @@ ax.set_title("¿Dónde detecta cada uno? — clusters VIIRS 375 m desde junio\n"
 
 # Fondo satelital: sin él no se puede juzgar si una anomalía cae sobre el
 # cráter, sobre el glaciar o sobre el valle. zorder bajo = debajo de todo.
-LIM = 1.0          # pedido de Nicolás: mostrar solo el entorno del cráter
-_img, _ext = satelital_km(NIC[0], NIC[1], LIM, zoom=16)   # más zoom: la ventana es chica
+LIM = 0.8          # pedido de Nicolás: mostrar solo el entorno del cráter
+_img, _ext = satelital_km(NIC[0], NIC[1], LIM, zoom=17)   # ventana de 800 m: máximo detalle
 if _img is not None:
     ax.imshow(_img, extent=_ext, origin="upper", zorder=0, interpolation="bilinear")
     # velo tenue: la imagen es oscura y contrastada; sin esto los puntos y los
@@ -90,7 +90,7 @@ for rkm, col, lab in ((FOCO_KM, "#1a7a33", f"radio experimental ({FOCO_KM*1000:.
 xs, ys, vs = zip(*[(*km_xy(la, lo), v) for la, lo, v in rep])
 ax.scatter(xs, ys, s=[28+260*v for v in vs], c="#88a8c8", alpha=0.7,
            edgecolors="#4477aa", lw=0.5, zorder=3,
-           label=f"réplica: cluster «summit» (n={len(rep)} en total; los de fuera de esta ventana, en el panel B)")
+           label=f"réplica: cluster «summit» ({len(rep)} en total; se ven los que caen en esta ventana)")
 if foc:
     xs, ys, vs = zip(*[(*km_xy(la, lo), v) for la, lo, v in foc])
     ax.scatter(xs, ys, s=[28+260*v for v in vs], c="#2ca02c", marker="s", alpha=0.85,
