@@ -127,10 +127,8 @@ ax.set_aspect("equal")
 ax.grid(True, alpha=0.18, color="white", lw=0.6)
 ax.legend(loc="lower left", fontsize=8.5, framealpha=0.95)
 ax.text(0.98, 0.98,
-        "MIROVA publicó además 3 alertas FUERA de esta ventana:
-"
-        "15-jul 0.02 MW @ 2.86 km  ·  26-ago 0.02 MW @ 3.02 km
-"
+        "MIROVA publicó además 3 alertas FUERA de esta ventana:\n"
+        "15-jul 0.02 MW @ 2.86 km  ·  26-ago 0.02 MW @ 3.02 km\n"
         "12-jun 0.32 MW @ 4.14 km (18:18 UTC, DIURNA — artefacto solar A76)",
         transform=ax.transAxes, ha="right", va="top", fontsize=8, color="#8a1f0e",
         bbox=dict(boxstyle="round,pad=0.35", fc="#fff6f4", ec="#cc8877", alpha=0.95),
