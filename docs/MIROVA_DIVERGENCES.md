@@ -1437,3 +1437,72 @@ merece estar en el catálogo, no vivir implícita en un helper de JavaScript.
 **Anti-A8**: no reabrir como "hay que levantar la cerca" sin antes clasificar por
 categoría A54 los records que se destaparían. Y ojo con A72: si lo que se destapa
 es artefacto, la raíz es no generarlo en la detección, no la cerca.
+
+---
+
+## D14 — La máscara de nube BT<260 K sigue ACTIVA (MISSION dice que se removió) y mide otra cosa — **ABIERTA** S124
+
+**Qué dice MIROVA.** No filtra nube. Laiolo 2026, textual: *"no atmospheric
+correction or cloud-contamination automatic filtering"*. Por eso
+[`MISSION.md`](MISSION.md) l.127 lista `Cloud mask BT<260K` en la tabla de
+parches **rechazados**, con estado *"Removido S27"*.
+
+**Qué hace el código.** `pipeline/process_viirs.py:674-682` la aplica:
+
+```python
+CLOUD_BT_THRESHOLD = 260.0                      # K
+cloud_free = bands["I05"] >= CLOUD_BT_THRESHOLD
+roi_mask   = roi_mask & cloud_free              # <- modifica la DETECCIÓN
+bg_mask    = bg_mask  & cloud_free              # <- y el FONDO
+```
+
+No es una anotación: saca píxeles del ROI donde se buscan anomalías **y** del
+anillo que fija el umbral. Es la segunda contradicción doc-vs-código encontrada
+en S124 (la otra, los pisos VRP, se corrigió en #523). Solo afecta a VIIRS
+375 m; MODIS y VIIRS 750 no la tienen.
+
+**Y además mide la cosa equivocada.** El hallazgo salió de que Nicolás no
+reconocía como despejadas semanas que él sabe que fueron de temporal (A62: la
+insistencia del experto es señal). Físicamente:
+
+- Un umbral único a 260 K (−13 °C) detecta nube **alta y fría** — cirros, topes
+  convectivos. La nube baja de una tormenta invernal tiene su tope entre −10 y
+  0 °C, o sea **263-273 K**: pasa como cielo despejado.
+- A la altitud de estos volcanes el **terreno nevado irradia en ese mismo
+  rango**. Medido sobre NdC: en el **76 %** de las pasadas que el proxy llama
+  despejadas el fondo está bajo 0 °C, donde nube baja y nieve son
+  indistinguibles para un umbral de temperatura único. Mismo mecanismo que A68
+  (el proxy cirrus `t_bg<270K` contaminado por altitud).
+
+**Lo que NO explica.** Se probó si la máscara causa el déficit de paridad de
+S124: la correlación entre el ratio per-volcán y los píxeles enmascarados es
+**r = −0,23**, débil. No es el driver del gap.
+
+**Por qué queda ABIERTA y no se toca todavía.** La máscara actúa sobre el
+**fondo**, y el frente F70 (grilla UTM) también. Decidir la máscara antes de
+saber qué hace la grilla sería apilar dos correcciones que interactúan — el
+error que A66 documenta. Orden correcto: veredicto de F70 primero, máscara
+después.
+
+**Cuando se retome, las opciones son tres**, y la decisión es de MISSION, no
+técnica:
+1. **Quitarla** — es lo que dice el clon literal (MIROVA no filtra) y lo que
+   `MISSION.md` ya declara hecho.
+2. **Reemplazarla por la máscara oficial del sensor** — `MOD35_L2` y
+   `CLDMSK_L2_VIIRS_{SNPP,NOAA20,NOAA21}`, verificadas disponibles en CMR con
+   versión NRT (S124). Usan ~15 tests espectrales diseñados justamente para
+   separar nube de nieve. Cuesta una descarga extra por granule. Sería
+   **beyond-MIROVA**: mejor que el original, no un clon.
+3. **Dejarla y corregir MISSION.md** — la salida honesta si se decide que el
+   filtro aporta, pero exige justificar por qué divergimos.
+
+**Lo que NO es la respuesta**: una API meteorológica (ERA5, GFS). Da cobertura
+en celdas de ~28 km y por hora — no resuelve un ROI de 50 km ni el instante del
+sobrevuelo, y es salida de modelo, no observación. La ventaja de la máscara del
+propio granule es que mide *ese* píxel en *ese* momento; el problema actual no
+es la fuente, es que el test es demasiado pobre.
+
+**Gap de schema asociado (A7).** El pipeline persiste `n_cloud_masked` (cuántos
+píxeles enmascaró) pero **no cuántos tenía el ROI**, así que del JSON no se
+puede reconstruir una fracción. La variable existe local (`np.sum(roi_mask)`);
+solo falta retornarla.
