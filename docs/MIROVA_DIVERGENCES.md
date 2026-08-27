@@ -1506,3 +1506,52 @@ es la fuente, es que el test es demasiado pobre.
 píxeles enmascaró) pero **no cuántos tenía el ROI**, así que del JSON no se
 puede reconstruir una fracción. La variable existe local (`np.sum(roi_mask)`);
 solo falta retornarla.
+
+---
+
+## D15 — `Distancia_km` de MIROVA está CUANTIZADO a celdas de su grilla — **HALLAZGO** S124
+
+**Origen.** Nicolás preguntó *"las distancias que me das de MIROVA, ¿respecto a
+qué punto son?"*. Yo había **asumido** que medían desde la coordenada GVP.
+Auditar en vez de asumir dio algo mejor que la respuesta buscada.
+
+**El hallazgo.** El `Distancia_km` que MIROVA publica **no es una distancia
+continua a un punto**: es el offset en **celdas enteras** de su grilla
+resampleada. Cada valor es `√(i²+j²)·celda` con `i, j` enteros:
+
+| sensor | celda | registros compatibles | valores distintos |
+|---|---|---|---|
+| MODIS | **1,000 km** | **10.085 / 10.085 = 100 %** | 40 |
+| VIIRS375 | **0,375 km** | **11.810 / 11.810 = 100 %** | 450 |
+
+Los valores crudos de MODIS lo muestran a simple vista:
+
+```
+0 · 1 · 1,41 · 2 · 2,24 · 3,16 · 3,61 · 6,40 · 7,81 · 8,06 · 9,06 · 9,49 · 10,63
+0 · 1 ·  √2  · 2 ·  √5  ·  √10 ·  √13 ·  √41 ·  √61 ·  √65 ·  √82 ·  √90 ·  √113
+```
+
+Control: con celdas arbitrarias el ajuste cae (VIIRS375 a 0,5 km → 89 %; a
+0,25 km → 93 %), así que el test no es trivial. Script:
+`experiments/_s124_cuantizacion/01_distancia_es_celdas.py`.
+
+**Por qué importa — tres consecuencias**
+
+1. **Confirmación independiente del frente F70.** La grilla de MIROVA no es
+   solo una afirmación de sus papers: está impresa en cada dato que publican, y
+   sus celdas son **exactamente** 1 km (MODIS) y 375 m (VIIRS I-band) — las que
+   F70.2 ya implementó (#525, #527). Esto vale como verificación externa del
+   diseño, obtenida de la ground truth y no de la bibliografía.
+2. **La referencia es una CELDA, no un punto.** *"Distancia 0,00 km"* NO
+   significa "en el cráter": significa **"en la misma celda que la
+   referencia"**, o sea en cualquier lugar de un cuadrado de 375 m. Coppola dice
+   que la grilla va *"centred on the volcano's summit"* pero no publica esa
+   coordenada, así que el centro exacto sigue siendo desconocido.
+3. **Toda comparación de distancias contra MIROVA arrastra ±media celda.** Un
+   ratio de distancias sub-celda no significa nada. Esto **matiza A13**
+   (Villarrica 0,84 km fija): esa idiosincrasia es consistente con una celda
+   fija de la grilla, no necesariamente con una coordenada GVP.
+
+**Aplicación inmediata.** El mapa de NdC (`experiments/_s124_ndc_focus/`) ya no
+dibuja un anillo fino sino la **celda de 375 m** más una banda de ±media celda:
+pretender más precisión sería inventarla.

@@ -98,25 +98,34 @@ if foc:
                label=f"experimental: foco al cráter (n={len(foc)})")
 ax.plot(0, 0, "^", ms=16, c="#cc3311", mec="k", zorder=5, label="cráter Nicanor (coordenada de Nicolás)")
 
-# MIROVA: publica VRP + DISTANCIA desde su coordenada de referencia (GVP
-# -36.863, -71.377), sin direccion. Cada alerta al crater se dibuja como anillo
-# rojo punteado centrado en ESA referencia: la anomalia esta en algun punto del
-# anillo. Las 3 alertas lejanas (2.86, 3.02 y 4.14 km — la ultima ademas DIURNA,
-# artefacto solar A76) caen fuera de esta ventana.
-GVP = (-36.863, -71.377)
-gx, gy = km_xy(*GVP)
-# 16-jun y 20-ago publican dist 0.0 (en la referencia misma); 18-ago y 20-ago
-# publican 0.38 km -> UN anillo compartido. Nota: la referencia GVP esta ~470 m
-# al N de Nicanor, o sea el anillo de 0.38 km pasa por el crater — sus alertas
-# son consistentes con anomalias AL crater medidas desde una referencia al N.
-ax.plot(gx, gy, "*", ms=15, c="#cc3311", mec="white", mew=0.9, zorder=6,
-        label="referencia MIROVA (GVP; 16-jun y 20-ago @ 0.0 km caen aquí)")
-c = plt.Circle((gx, gy), 0.38, fill=False, color="#cc3311", lw=1.6, ls=":",
-               zorder=6, alpha=0.9)
-ax.add_patch(c)
-ax.annotate("otras 2 alertas MIROVA @ 0.38 km (18-ago 0.07 MW, 20-ago 0.06 MW)\n"
-            "publican distancia SIN dirección → por eso anillo y no punto",
-            xy=(gx, gy - 0.38), xytext=(0, -6), textcoords="offset points",
+# ── MIROVA: lo que su Distancia_km REALMENTE dice ───────────────────────────
+# AUDITORIA S124 (Nicolás preguntó "¿respecto a qué punto mide?" y la respuesta
+# no era la que yo asumía). Su `Distancia_km` NO es una distancia continua a un
+# punto: está CUANTIZADA a celdas de su grilla resampleada. Verificado sobre el
+# consolidado completo — cada valor publicado es sqrt(i²+j²)·celda con i,j
+# enteros: 10.085/10.085 registros MODIS con celda 1 km (los valores son
+# 0, 1, √2, 2, √5, √10, √13, √41, √61, √65, √82, √90, √113…) y 11.810/11.810
+# VIIRS375 con celda 0,375 km sobre 450 valores distintos.
+#
+# Consecuencias para el dibujo:
+#   · La referencia es una CELDA, no un punto. No sabemos su centro exacto:
+#     Coppola dice que la grilla va "centred on the volcano's summit", pero no
+#     publica esa coordenada.
+#   · "0,00 km" NO significa "en el cráter": significa "en la MISMA celda que
+#     la referencia" — o sea en cualquier punto de un cuadrado de 375 m.
+#   · "0,38 km" = una celda de separación, con la misma incertidumbre.
+# Por eso se dibuja una BANDA de ±media celda alrededor del cráter, y no un
+# anillo fino: pretender más precisión sería inventarla.
+CELDA = 0.375
+ax.add_patch(plt.Rectangle((-CELDA/2, -CELDA/2), CELDA, CELDA, fill=False,
+                           color="#cc3311", lw=1.8, ls="-", zorder=6, alpha=0.9,
+                           label="celda MIROVA (375 m): 2 alertas @ «0,00 km» caen aquí dentro"))
+for rk in (CELDA - CELDA/2, CELDA + CELDA/2):
+    ax.add_patch(plt.Circle((0, 0), rk, fill=False, color="#cc3311", lw=1.2,
+                            ls=":", zorder=6, alpha=0.75))
+ax.annotate("banda de «0,38 km» = 1 celda de separación\n"
+            "(2 alertas: 18-ago 0.07 MW · 20-ago 0.06 MW)",
+            xy=(0, -(CELDA + CELDA/2)), xytext=(0, -6), textcoords="offset points",
             ha="center", va="top", fontsize=7.5, color="#8a1f0e", zorder=7,
             path_effects=[pe.withStroke(linewidth=2.4, foreground="white")])
 
