@@ -80,13 +80,24 @@ for r in d["records"]:
         continue
     replica[f] = max(replica.get(f, 0), v)
 
-# ── Observabilidad: ¿cuánto del ROI vio el sensor esa noche? ────────────────
-# POR QUÉ del propio sensor y no de un pronóstico meteorológico: lo que importa
-# no es "había nubes sobre el volcán" sino "¿esta pasada, con esta geometría,
-# vio el suelo?". La máscara de nube del granule responde exactamente eso, a
-# 375 m y en el instante del sobrevuelo. Un modelo meteorológico da cobertura
-# interpolada en celdas de ~28 km y por hora: no resuelve el ROI ni el momento.
-# Se toma la MEJOR pasada de cada noche: si alguna vio, la noche fue observable.
+# ── Píxeles FRÍOS por noche (proxy PARCIAL de nube) ─────────────────────────
+# ⚠️ QUÉ MIDE ESTO REALMENTE (S124, a raíz de que Nicolás no reconocía las
+# semanas de tormenta): `n_cloud_masked` cuenta los píxeles del ROI con
+# I05 < 260 K. Eso detecta nube ALTA Y FRÍA (cirros, topes convectivos) pero
+# NO la nube baja de una tormenta invernal, cuyo tope irradia entre −10 y 0 °C
+# (263–273 K) y por lo tanto pasa como "despejado". Encima, a esta altitud el
+# terreno nevado irradia en ese mismo rango: en el 76 % de las pasadas que este
+# proxy llama despejadas el fondo está bajo 0 °C, donde nube baja y nieve son
+# INDISTINGUIBLES para un umbral único de temperatura (mismo mecanismo que A68).
+#
+# Además el DENOMINADOR no se persiste: el pipeline guarda cuántos píxeles
+# enmascaró pero no cuántos tenía el ROI, así que un porcentaje exacto no se
+# puede reconstruir del JSON (por eso acá se grafica el CONTEO, no un %).
+#
+# El arreglo correcto NO es una API meteorológica (celdas de ~28 km, horaria,
+# modelo y no observación) sino la máscara de nube OFICIAL del propio sensor
+# —MOD35_L2 y CLDMSK_L2_VIIRS_*, que existen con versión NRT— que usa ~15
+# tests espectrales diseñados justamente para separar nube de nieve.
 PIX_ROI_I = (50.0 / 0.375) ** 2          # ROI 50x50 km en píxeles I-band nadir
 despejado = {}
 _d_op = json.loads((ROOT / "data/mirova_equivalent/NevadosDeChillan.json").read_text(encoding="utf-8"))
@@ -98,8 +109,9 @@ for r in _d_op["records"]:
     nc = r.get("n_cloud_masked")
     if nc is None:
         continue
-    pct = max(0.0, 100.0 * (1.0 - nc / PIX_ROI_I))
-    despejado[f] = max(despejado.get(f, 0.0), pct)   # la mejor pasada de la noche
+    # conteo crudo de píxeles fríos; la MENOR de la noche (la pasada más limpia)
+    prev = despejado.get(f)
+    despejado[f] = nc if prev is None else min(prev, nc)
 
 # ── Foco experimental: summit a <=1 km del cráter Nicanor ───────────────────
 foco = {}
