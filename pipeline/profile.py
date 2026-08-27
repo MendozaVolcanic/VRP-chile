@@ -697,7 +697,11 @@ ENABLE_VRP_TIR_OUTPUT: bool = bool(_cfg.get("enable_vrp_tir_output", True))
 # (Coppola 2016a ~L162); sobre swath un vecino off-nadir se estira hasta ~10 km²
 # y "los 8 vecinos" son objetos distintos en cada pasada. Arranca APAGADO: el
 # operacional no cambia hasta el veredicto del A/B F70.3 (A45).
-ENABLE_UTM_REGRID: bool = bool(_cfg.get("enable_utm_regrid", False))
+# OJO (S124, trampa A48 por segunda vez en la misma sesión): va en `_t`, no
+# en `_cfg`. Todos los `enable_*` viven bajo `thresholds:` en el YAML; leerlo
+# del nivel superior hacía que un perfil con el flag prendido igual arrancara
+# apagado, y el A/B de F70.3 habría salido nulo sin ningún síntoma.
+ENABLE_UTM_REGRID: bool = bool(_t.get("enable_utm_regrid", False))
 
 # --- Sensor activation ---
 _s = _cfg["sensors"]

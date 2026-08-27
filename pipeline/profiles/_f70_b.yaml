@@ -1,0 +1,117 @@
+# ============================================================================
+# F70.3 BRAZO B — grilla UTM resampleada + kernel de vecinos GLOBAL
+# ============================================================================
+# Este es el brazo que contesta la hipótesis central del frente F70. Los otros
+# tres existen para poder leerlo:
+#
+#   control  grilla OFF · kernel per-volcán  = la serie operacional (ya existe,
+#                                              no hace falta correrla)
+#   A        grilla ON  · kernel per-volcán  → ¿la grilla sola alcanza?
+#   B        grilla ON  · kernel GLOBAL      → ESTE
+#   C        grilla OFF · kernel GLOBAL      → ya corrido en S124 (run
+#                                              33006952492): Láscar 0,47→0,58,
+#                                              se mueve bien pero NO entra en
+#                                              banda. NO ADOPTAR.
+#
+# EL FENÓMENO (por qué esto puede curar lo que el brazo C no pudo)
+# ----------------------------------------------------------------------------
+# Un píxel de satélite no es un cuadrado fijo: lejos del nadir se estira hasta
+# ~10 km². Cuando el algoritmo pregunta "¿este píxel está más caliente que sus
+# ocho vecinos?", la respuesta depende de la GEOMETRÍA de esos vecinos tanto
+# como de su temperatura. Sobre un volcán nevado, un vecino elongado promedia
+# hielo, roca y valle en proporciones que cambian en cada pasada — el fondo que
+# se le resta al foco es un objeto distinto cada noche.
+#
+# MIROVA elimina eso ANTES de detectar. Coppola 2016a (~L162): "we cropped and
+# resampled (into an equally spaced 1 km grid) the MODIS Level 1B data"; y la
+# razón, ~L150-160: el esquema "requires homogenous pixel scale". Campus et al.
+# 2022 §3.2, verbatim (PDF local desde S124): "Resampling is performed in a UTM
+# 51 × 51 km grid, centered on the volcano summit... by keeping the nominal
+# resolution of 750 m. This results in matrices of 67 × 67 pixels rather than
+# 51 × 51 pixels obtained from MODIS."
+#
+# El brazo C probó que el kernel SOLO no alcanza: sobre swath crudo los ocho
+# vecinos siguen siendo objetos distintos en cada pasada. La hipótesis es que
+# la grilla es lo que hace que el kernel funcione — por eso van juntos acá.
+#
+# CRITERIO PRE-REGISTRADO (del diseño F70 §5, escrito el 2026-08-25, ANTES de
+# correr nada; no se ajusta después — A66)
+# ----------------------------------------------------------------------------
+#   JUEZ      — Tupungatito. B debe CURARLO (entrar en banda) donde el brazo C
+#               lo dejó igual. Si B también lo deja roto, la hipótesis se
+#               refuta y se documenta en MIROVA_DIVERGENCES.
+#   PRIMARIO  — los sub-reportadores (Láscar 0,47 · Isluga 0,70 · Lastarria ·
+#               Llaima) deben entrar en la banda de la MEDIANA [0,7-1,4].
+#   GUARDA 1  — Lastarria NO debe romperse: hoy está en banda CON kernel, y su
+#               offset al N es el campo fumarólico Lazufre, que es real (A84).
+#   GUARDA 2  — los que sobre-reportan (Copahue 1,33 · NdC 1,20 · Chaitén 1,18)
+#               no deben salirse por arriba de 1,4.
+#   GUARDA 3  — espacial (A61/A85): el offset MEDIANO al cráter no debe crecer.
+#               Medir con mediana y por rumbo, no con media (A70).
+#   GUARDA 4  — recall: sin caídas >2 pp por sensor. El área y el fondo entran
+#               en la integral del Test 1, así que cambiarlos PUEDE apagar
+#               detecciones marginales (lección A67, que ya pasó con nadir-fijo).
+#   A79       — verificar además el EVENTO concreto (NdC 16-jun, noches ancla),
+#               no solo los agregados: la mediana puede tapar la pérdida del
+#               caso que motivó el cambio.
+#
+# RIESGO CONOCIDO A VIGILAR (medido en S124, F70.2b)
+# ----------------------------------------------------------------------------
+# El resampleo es nearest-neighbor, así que cuando dos muestras caen en la misma
+# celda gana la más próxima al centro — aunque la otra sea la caliente. Al paso
+# nativo la pérdida es 0 %, pero con solapamiento de barrido llega al 37-78 %.
+# VIIRS borra los duplicados de borde en el producto (llegan como fill = NaN, y
+# un NaN nunca compite); MODIS NO. Si aparecen FN nuevos, MODIS es el primer
+# sospechoso. Script: experiments/_s124_f70/01_perdida_hot_pixel.py
+#
+# NO OPERACIONAL. data_subdir aislado; no toca mirova_equivalent ni el cron.
+# El flag llega OFF al operacional y solo se enciende acá (A45).
+# ============================================================================
+extends: mirova_equivalent
+profile: _f70_b
+description: >
+  F70.3 brazo B: grilla UTM resampleada (el sustrato que MIROVA usa antes de
+  detectar) + fondo del VRP por kernel de vecinos en los 11. Laboratorio.
+
+thresholds:
+  # El sustrato geométrico. Con esto en true los tres procesadores regrillan el
+  # granule a la grilla regular ANTES de detectar; Tests 1/2/3, kernel 8-vec,
+  # second-pass y clustering corren sin cambios sobre las matrices regulares.
+  # Resolución NATIVA por sensor: MODIS 51x51 @ 1 km, VIIRS M 67x67 @ 750 m,
+  # VIIRS I 134x134 @ 375 m.
+  enable_utm_regrid: true
+
+volcano_overrides:
+  # OJO al nombre (trampa A48): el campo del YAML es `local_kernel_bg`;
+  # `local_kernel_bg_compatible` es el nombre del PARÁMETRO de la función.
+  # run_pipeline.py:244 lee `volcano.get("local_kernel_bg")`. Un override con el
+  # nombre equivocado no hace nada y el brazo saldría nulo.
+  #
+  # Kernel GLOBAL = los 11. Los cinco que ya lo tenían (Lastarria, PCC, PP,
+  # Villarrica, Chaitén) se listan igual para que el brazo sea explícito y no
+  # dependa de lo que herede el padre.
+  Lascar:
+    local_kernel_bg: true
+  Isluga:
+    local_kernel_bg: true
+  Tupungatito:        # EL JUEZ del criterio pre-registrado
+    local_kernel_bg: true
+  NevadosDeChillan:
+    local_kernel_bg: true
+  Copahue:
+    local_kernel_bg: true
+  Llaima:
+    local_kernel_bg: true
+  Lastarria:          # GUARDA 1: no debe romperse (Lazufre es real, A84)
+    local_kernel_bg: true
+  PuyehueCordonCaulle:
+    local_kernel_bg: true
+  PlanchonPeteroa:
+    local_kernel_bg: true
+  Villarrica:
+    local_kernel_bg: true
+  Chaiten:
+    local_kernel_bg: true
+
+output:
+  data_subdir: _f70_b

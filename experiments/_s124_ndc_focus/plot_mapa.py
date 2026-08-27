@@ -45,7 +45,7 @@ for r in d["records"]:
     pc = r.get("primary_cluster") or {}
     v = pc.get("vrp_mw") or 0
     if v <= 0 or r.get("distance_class") != "summit" or pc.get("centroid_lat") is None: continue
-    if (pc.get("centroid_dist_km") or 0) > 5.0: continue
+    if (pc.get("centroid_dist_km") or 0) > 5.0: continue   # el resto se cuenta en el panel B
     rep.append((pc["centroid_lat"], pc["centroid_lon"], v))
 
 # experimental: clusters en el foco
@@ -63,8 +63,8 @@ ax.set_title("¿Dónde detecta cada uno? — clusters VIIRS 375 m desde junio\n"
 
 # Fondo satelital: sin él no se puede juzgar si una anomalía cae sobre el
 # cráter, sobre el glaciar o sobre el valle. zorder bajo = debajo de todo.
-LIM = 5.6
-_img, _ext = satelital_km(NIC[0], NIC[1], LIM, zoom=14)
+LIM = 1.5          # pedido de Nicolás: mostrar solo el entorno del cráter
+_img, _ext = satelital_km(NIC[0], NIC[1], LIM, zoom=16)   # más zoom: la ventana es chica
 if _img is not None:
     ax.imshow(_img, extent=_ext, origin="upper", zorder=0, interpolation="bilinear")
     # velo tenue: la imagen es oscura y contrastada; sin esto los puntos y los
@@ -73,8 +73,7 @@ if _img is not None:
                                fc="white", alpha=0.22, zorder=1, ec="none"))
 
 # circulos de referencia
-for rkm, col, lab in ((1.0, "#1a7a33", "radio experimental (1 km)"),
-                      (5.0, "#4477aa", 'radio "cumbre" de la réplica (5 km, KML MIROVA)')):
+for rkm, col, lab in ((1.0, "#1a7a33", "radio experimental (1 km)"),):
     c = plt.Circle((0, 0), rkm, fill=False, color=col, lw=2.4,
                    ls="-" if rkm == 1 else "--", label=lab, zorder=2,
                    path_effects=[pe.withStroke(linewidth=4.2, foreground="white")])
@@ -83,7 +82,7 @@ for rkm, col, lab in ((1.0, "#1a7a33", "radio experimental (1 km)"),
 xs, ys, vs = zip(*[(*km_xy(la, lo), v) for la, lo, v in rep])
 ax.scatter(xs, ys, s=[28+260*v for v in vs], c="#88a8c8", alpha=0.7,
            edgecolors="#4477aa", lw=0.5, zorder=3,
-           label=f"réplica: cluster «summit» de cada pasada (n={len(rep)})")
+           label=f"réplica: cluster «summit» (n={len(rep)} en total; los de fuera de esta ventana, en el panel B)")
 if foc:
     xs, ys, vs = zip(*[(*km_xy(la, lo), v) for la, lo, v in foc])
     ax.scatter(xs, ys, s=[28+260*v for v in vs], c="#2ca02c", marker="s", alpha=0.85,
@@ -97,8 +96,7 @@ ax.set_xlim(-LIM, LIM); ax.set_ylim(-LIM, LIM)
 ax.set_aspect("equal")
 ax.grid(True, alpha=0.18, color="white", lw=0.6)
 ax.legend(loc="lower left", fontsize=8.5, framealpha=0.95)
-ax.text(0.02, 0.98, "El tamaño del punto crece con el VRP.\n"
-        "Todo lo que cae dentro del círculo azul\nla réplica lo etiqueta «cumbre».",
+ax.text(0.02, 0.98, "El tamaño del punto crece con el VRP.",
         transform=ax.transAxes, va="top", fontsize=8.5, color="#444",
         bbox=dict(boxstyle="round,pad=0.35", fc="#f7f7f7", ec="#bbb"))
 ax.text(0.995, 0.005, ATRIBUCION, transform=ax.transAxes, ha="right", va="bottom",

@@ -202,3 +202,28 @@ def test_vecino_mas_cercano_puede_descartar_un_pico_sub_celda():
     assert b["I04"][ci, ci] == 275.0, (
         "hoy gana la más cercana al centro; si esto cambia, cambió el "
         "interpolador y hay que re-medir los FN")
+
+
+def test_el_flag_se_lee_del_lugar_correcto_del_yaml():
+    """Regresión S124: `ENABLE_UTM_REGRID` debe leerse de `thresholds:`.
+
+    Se escribió leyendo del nivel superior del YAML (`_cfg`) cuando TODOS sus
+    hermanos `enable_*` viven bajo `thresholds:` (`_t`). Con eso, un perfil de
+    laboratorio con el flag prendido arrancaba APAGADO y sin ningún síntoma: el
+    A/B de F70.3 habría corrido cuatro brazos idénticos y el resultado se habría
+    leído como "la grilla no cambia nada".
+
+    Es la misma clase de error que A48 (el nombre del campo `local_kernel_bg`),
+    dos veces en la misma sesión. Este test lo fija.
+    """
+    import pathlib
+    import yaml
+
+    raiz = pathlib.Path(__file__).resolve().parents[1]
+    for nombre in ("_f70_a", "_f70_b"):
+        cfg = yaml.safe_load((raiz / f"pipeline/profiles/{nombre}.yaml")
+                             .read_text(encoding="utf-8"))
+        assert cfg.get("thresholds", {}).get("enable_utm_regrid") is True, (
+            f"{nombre}: el flag debe estar bajo `thresholds:`, como sus hermanos")
+        assert "enable_utm_regrid" not in cfg, (
+            f"{nombre}: no debe estar ADEMÁS en el nivel superior (ambigüedad)")
