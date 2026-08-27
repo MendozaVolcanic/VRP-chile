@@ -28,7 +28,8 @@ def _key(record: dict) -> tuple:
     return (record.get("datetime_utc"), record.get("sensor"))
 
 
-def merge_stores(paths: list[Path]) -> tuple[dict, int]:
+def merge_stores(paths: list[Path], ventanas: list[tuple[str, str]] | None = None
+                 ) -> tuple[dict, int]:
     """Devuelve (store unido, n_duplicados). Orden estable por datetime_utc."""
     merged: dict[tuple, dict] = {}
     volcano = ""
@@ -42,17 +43,31 @@ def merge_stores(paths: list[Path]) -> tuple[dict, int]:
             cargados.append((json.load(f), p))
     cargados.sort(key=lambda t: t[0].get("updated", ""))
 
+    # ventana por archivo (misma posicion que en `paths`), si se declararon
+    vent_por_path = dict(zip([str(x) for x in paths], ventanas or []))
+
     for store, p in cargados:
         volcano = store.get("volcano") or volcano
         updated = max(updated, store.get("updated", ""))
-        n = 0
+        v = vent_por_path.get(str(p))
+        n = fuera = 0
         for rec in store.get("records", []):
+            # Un trozo aporta SOLO lo de SU ventana. Sin esto, el archivo que
+            # el job subio (completo, con los otros meses en su version vieja)
+            # resucita records que otro trozo acaba de reprocesar. Ver el
+            # comentario del workflow: paso de verdad en S124.
+            if v is not None:
+                f = (rec.get("datetime_utc") or "")[:10]
+                if not (v[0] <= f <= v[1]):
+                    fuera += 1
+                    continue
             k = _key(rec)
             if k in merged:
                 duplicados += 1
             merged[k] = rec
             n += 1
-        print(f"  {p}: {n} records")
+        extra = f"  (+{fuera} fuera de su ventana {v[0]}..{v[1]}, ignorados)" if v else ""
+        print(f"  {p}: {n} records{extra}")
 
     records = sorted(merged.values(), key=lambda r: r.get("datetime_utc", ""))
     return {"volcano": volcano, "updated": updated, "records": records}, duplicados
@@ -61,11 +76,25 @@ def merge_stores(paths: list[Path]) -> tuple[dict, int]:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", required=True, help="JSON de salida")
+    ap.add_argument("--ventanas", nargs="*", default=None, metavar="INI:FIN",
+                    help="ventana de cada trozo, en el MISMO orden que inputs "
+                         "(ej. 2026-05-01:2026-05-30). Con esto, cada trozo "
+                         "aporta solo sus records: sin ellas, el archivo "
+                         "completo que subio el job resucita meses viejos.")
     ap.add_argument("inputs", nargs="+", help="JSON de cada trozo")
     args = ap.parse_args(argv)
 
-    paths = [Path(p) for p in args.inputs if Path(p).exists()]
-    faltantes = [p for p in args.inputs if not Path(p).exists()]
+    paths_raw = args.inputs
+    vent_raw = args.ventanas
+    if vent_raw is not None and len(vent_raw) != len(paths_raw):
+        print(f"ERROR: {len(vent_raw)} ventanas para {len(paths_raw)} trozos",
+              file=sys.stderr)
+        return 1
+    existe = [Path(p).exists() for p in paths_raw]
+    paths = [Path(p) for p, e in zip(paths_raw, existe) if e]
+    ventanas = ([tuple(v.split(":")) for v, e in zip(vent_raw, existe) if e]
+                if vent_raw is not None else None)
+    faltantes = [p for p, e in zip(paths_raw, existe) if not e]
     for p in faltantes:
         print(f"AVISO: falta {p} (trozo sin resultado)", file=sys.stderr)
     if not paths:
@@ -73,7 +102,7 @@ def main(argv=None) -> int:
         return 1
 
     print(f"Uniendo {len(paths)} trozos:")
-    store, duplicados = merge_stores(paths)
+    store, duplicados = merge_stores(paths, ventanas)
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)

@@ -103,3 +103,48 @@ def test_particion_equivale_a_corrida_entera(tmp_path, n_trozos):
     store, _ = merge_stores(paths)
 
     assert store["records"] == sorted(completa, key=lambda r: r["datetime_utc"])
+
+
+def test_un_trozo_no_resucita_records_fuera_de_su_ventana(tmp_path):
+    """S124 — el bug que dejaba meses enteros sin reprocesar, con el run VERDE.
+
+    Cada job del reproceso hace checkout del archivo COMPLETO, reprocesa solo
+    su tramo de fechas, y sube el archivo entero como artifact — o sea, con los
+    otros meses en su version VIEJA adentro. El merge ordenaba por `updated` y
+    dejaba ganar al ultimo, asi que el trozo que terminaba mas tarde imponia SU
+    version de todos los meses y resucitaba lo que otro trozo acababa de
+    reprocesar.
+
+    Sintoma real: un reproceso 2026-05-01..08-27 dejo mayo fresco y junio,
+    julio y agosto 100 % identicos byte a byte a la corrida anterior.
+
+    Con `ventanas`, cada trozo aporta solo lo suyo.
+    """
+    import json
+
+    def store(updated, records):
+        p = tmp_path / f"{updated}.json"
+        p.write_text(json.dumps({"volcano": "V", "updated": updated,
+                                 "records": records}), encoding="utf-8")
+        return p
+
+    viejo = {"datetime_utc": "2026-06-10 05:00", "sensor": "VIIRS_SNPP", "vrp_mw": 0.0}
+    nuevo = {"datetime_utc": "2026-06-10 05:00", "sensor": "VIIRS_SNPP", "vrp_mw": 9.9}
+    mayo = {"datetime_utc": "2026-05-10 05:00", "sensor": "VIIRS_SNPP", "vrp_mw": 1.0}
+
+    # el trozo de JUNIO reproceso el record (vrp 9.9) y termino PRIMERO
+    junio = store("2026-08-27T10:00", [mayo, nuevo])
+    # el trozo de MAYO termino DESPUES y arrastra junio en su version vieja
+    may = store("2026-08-27T11:00", [mayo, viejo])
+
+    # sin ventanas: gana el ultimo y junio queda VIEJO (el bug)
+    sin, _ = merge_stores([junio, may])
+    j = [r for r in sin["records"] if r["datetime_utc"].startswith("2026-06")][0]
+    assert j["vrp_mw"] == 0.0, "reproduce el bug: el trozo tardio piso junio"
+
+    # con ventanas: cada trozo aporta solo lo suyo y junio queda REPROCESADO
+    con, _ = merge_stores([junio, may],
+                          [("2026-06-01", "2026-06-30"), ("2026-05-01", "2026-05-31")])
+    j = [r for r in con["records"] if r["datetime_utc"].startswith("2026-06")][0]
+    assert j["vrp_mw"] == 9.9, "el trozo de junio debe conservar su reproceso"
+    assert len(con["records"]) == 2, "mayo y junio, sin duplicados"

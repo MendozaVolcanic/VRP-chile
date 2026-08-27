@@ -131,7 +131,7 @@ jobs:
         # hecho — el merge lo reportaria como ventana cubierta cuando no lo esta.
         uses: actions/upload-artifact@v4
         with:
-          name: chunk-${{ matrix.job.vol }}-${{ matrix.job.idx }}
+          name: chunk-${{ matrix.job.vol }}-${{ matrix.job.idx }}-${{ matrix.job.start }}_${{ matrix.job.end }}
           path: data/${{ github.event.inputs.profile }}/${{ matrix.job.vol }}.json
           if-no-files-found: error
           retention-days: 7
@@ -167,8 +167,23 @@ jobs:
               echo "AVISO: $VOL no dejo ningun trozo, se omite"
               continue
             fi
+            # --ventanas: cada trozo aporta SOLO los records de SU ventana.
+            # POR QUE (bug encontrado S124): el job hace checkout del archivo
+            # completo y reprocesa solo su tramo, pero sube el archivo ENTERO
+            # -- con los otros meses en su version vieja adentro. El merge
+            # ordenaba por `updated` y ganaba el ultimo, asi que el trozo que
+            # terminaba al final imponia SU version de TODOS los meses,
+            # resucitando data que otro trozo acababa de reprocesar. Sintoma
+            # real: un reproceso 05-01..08-27 dejo mayo fresco y junio/julio/
+            # agosto 100% identicos a la corrida anterior, con el run en verde.
+            # Solo afecta subdirs que YA tenian data.
+            VENT=""
+            for F in $FILES; do
+              W=$(basename "$(dirname "$F")" | sed "s/^chunk-$VOL-[0-9]*-//")
+              VENT="$VENT ${W%%_*}:${W##*_}"
+            done
             python scripts/merge_chunk_stores.py \
-              --out "data/$PROFILE/$VOL.json" $FILES
+              --out "data/$PROFILE/$VOL.json" --ventanas $VENT -- $FILES
           done
       - name: Commit
         env:
