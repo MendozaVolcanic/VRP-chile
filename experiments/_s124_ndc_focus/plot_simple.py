@@ -231,15 +231,16 @@ axC.bar([x for x, c in zip(_ox, _ciego) if not c],
 axC.axhline(2.0, color="#666", lw=0.8, ls=":")
 axC.set_ylim(0, 6)
 axC.set_yticks([0, 2, 4, 6])
-axC.set_ylabel("σ del fondo (K)", fontsize=8.5)
+axC.set_ylabel("σ fondo (K)\n↑ más despejado", fontsize=8)
 axC.grid(True, axis="x", alpha=0.25)
 axC.set_title("¿Se pudo ver el terreno esa noche? (dispersión térmica del fondo, σ)",
               loc="left", fontsize=11)
-axC.text(0.998, 0.92,
-         f"■ rojo = CIEGO, sin fondo ({sum(_ciego)} noches: un cero abajo no es calma)   "
-         "■ ámbar = escena uniforme (nublado)   ■ verde = con estructura (probable suelo visto)",
-         transform=axC.transAxes, ha="right", va="top", fontsize=7.8, color="#444",
-         bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="#ccc", alpha=0.9))
+axC.text(0.995, 0.90,
+         "verde ALTO = despejado (se ve la estructura del terreno) · barra BAJA = escena uniforme, nube probable\n"
+         f"rojo LLENO = CIEGO ({sum(_ciego)} noches): ni el fondo pudo medirse — sin información, NO es calma",
+         transform=axC.transAxes, ha="right", va="top", fontsize=7.4, color="#444",
+         linespacing=1.4,
+         bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="#ccc", alpha=0.92))
 
 # Panel B — cuánta energía
 axB.set_title("¿Cuánta energía? (misma noche, mismo sensor)", loc="left", fontsize=11)
@@ -254,8 +255,8 @@ axB.plot(xs, [mirova[x.strftime("%Y-%m-%d")] for x in xs], "*", ms=17, color=C_M
 for i, f in enumerate(sorted(set(mirova) & set(foco))):
     x = datetime.fromisoformat(f)
     lado = -1 if i % 2 == 0 else 1          # alternar para que no se tapen
-    axB.annotate(f"MIROVA {mirova[f]:.2f}\nnosotros {foco[f]:.2f}",
-                 xy=(x, max(mirova[f], foco[f])), xytext=(46 * lado, 26),
+    axB.annotate(f"MIROVA {mirova[f]:.2f} ★\nnosotros {foco[f]:.2f} ■",
+                 xy=(x, mirova[f]), xytext=(46 * lado, 34),
                  textcoords="offset points", ha="center", fontsize=8,
                  arrowprops=dict(arrowstyle="-", color="#b8a24a", lw=0.7),
                  bbox=dict(boxstyle="round,pad=0.25", fc="#fffbe6", ec="#b8a24a", lw=0.6))
@@ -269,8 +270,15 @@ axB.set_ylim(bottom=0)
 axB.margins(y=0.30)
 axB.grid(True, alpha=0.25)
 axB.legend(loc="upper left", fontsize=9, framealpha=0.95)
-axB.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=0))
-axB.xaxis.set_major_formatter(mdates.DateFormatter("%d-%b"))
+for _ax in (axA, axC, axB):
+    _ax.xaxis.set_major_locator(mdates.WeekdayLocator(byweekday=0))
+    _ax.xaxis.set_major_formatter(mdates.DateFormatter("%d-%b"))
+    _ax.xaxis.set_minor_locator(mdates.DayLocator())
+    _ax.grid(True, axis="x", which="minor", alpha=0.10)
+    _ax.grid(True, axis="x", which="major", alpha=0.30)
+    # sharex oculta las fechas de los paneles de arriba; se reactivan para
+    # poder contar dias sin bajar la vista al panel B (pedido de Nicolas)
+    _ax.tick_params(axis="x", labelbottom=True, labelsize=7.2)
 plt.setp(axB.get_xticklabels(), rotation=0, fontsize=8.5)
 
 nota = ("Cómo leerla: cada estrella roja es una noche en que MIROVA publicó alerta térmica; los cuadrados verdes son el foco del cráter\n"
