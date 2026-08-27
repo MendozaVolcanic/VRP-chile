@@ -10,13 +10,20 @@ Contrato que fijan estos tests, análogo al de MODIS (`test_regrid_modis_f70.py`
      750 m (67×67). Resamplear la banda M a 1 km tiraría resolución real.
   4. Sin TIR no hay NTI: una muestra sin I05/M15 no puede representar su celda.
 
-Nota de trazabilidad (A35): la celda de 750 m para la banda M viene de
-`documentacion/BIBLIOGRAPHY_SYNTHESIS.md:73` citando **Campus et al. 2022**
-("UTM 51×51 km → 67×67 pixels a 750m nominal"). El PDF de Campus 2022 NO está
-en `documentacion/` — no se pudo cotejar verbatim. Campus 2024 (que sí está)
-confirma la ventana: *"an initial resampling of the original granule in a
-regular 50×50 km UTM grid"* (L102-104). El tamaño de celda queda parametrizado
-para que el A/B de F70.3 pueda moverlo si hace falta.
+Trazabilidad — las tres grillas están VERIFICADAS verbatim contra el paper
+(S124; el PDF de Campus 2022 se descargó de Europe PMC PMC8914890 y vive en
+`documentacion/campus2022_sensors_22_1713.pdf`):
+
+- **banda M y MODIS**, Campus et al. 2022 §3.2: *"Resampling is performed in a
+  UTM 51 × 51 km grid, centered on the volcano summit (consistent with
+  MODIS-MIROVA images) by keeping the nominal resolution of 750 m. This results
+  in matrices of 67 × 67 pixels rather than 51 × 51 pixels obtained from
+  MODIS."*
+- **banda I**, Campus 2024 (L102-104) da la ventana —*"an initial resampling of
+  the original granule in a regular 50×50 km UTM grid"*— pero NO la matriz. Los
+  134×134 salen de aplicar el mismo patrón: 134 = 67 × 2, o sea la misma
+  ventana de 50,25 km al doble de resolución. Es la única de las tres que se
+  deduce en vez de leerse; queda parametrizada.
 """
 import math
 

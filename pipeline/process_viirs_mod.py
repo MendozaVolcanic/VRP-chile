@@ -341,12 +341,16 @@ def _regrid_viirs_mod_granule(bands: dict, geo: dict, center_lat: float,
     elimina antes de detectar: Campus 2024 L102-104, *"an initial resampling of
     the original granule in a regular 50x50 km UTM grid"*.
 
-    Celda de 750 m = resolución NATIVA de la banda M. Trazabilidad (A35): el
-    tamaño sale de `documentacion/BIBLIOGRAPHY_SYNTHESIS.md:73` citando Campus
-    et al. 2022 ("UTM 51x51 km -> 67x67 pixels a 750m nominal"); ese PDF NO está
-    en `documentacion/`, así que no se pudo cotejar verbatim. Independiente de
-    la cita, llevar la banda M a 1 km para igualar a MODIS descartaría muestras
-    reales sin ganar nada. Queda parametrizado para que el A/B lo mueva.
+    Celda de 750 m y matriz 67x67 = lo que dice el paper, VERIFICADO verbatim
+    (S124) contra `documentacion/campus2022_sensors_22_1713.pdf` §3.2:
+
+    *"Resampling is performed in a UTM 51 x 51 km grid, centered on the
+    volcano summit (consistent with MODIS-MIROVA images) by keeping the
+    nominal resolution of 750 m. This results in matrices of 67 x 67 pixels
+    rather than 51 x 51 pixels obtained from MODIS."*
+
+    O sea: la banda M conserva su resolución nativa y NO se lleva a 1 km para
+    igualar a MODIS — hacerlo descartaría muestras reales sin ganar nada.
 
     El schema de salida es el mismo que el de los lectores: todo aguas abajo
     corre sin cambios, solo cambia el sustrato geométrico.
