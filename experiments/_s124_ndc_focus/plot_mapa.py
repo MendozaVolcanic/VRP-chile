@@ -88,15 +88,37 @@ for rkm, col, lab in ((FOCO_KM, "#1a7a33", f"radio experimental ({FOCO_KM*1000:.
     ax.add_patch(c)
 
 xs, ys, vs = zip(*[(*km_xy(la, lo), v) for la, lo, v in rep])
-ax.scatter(xs, ys, s=[28+260*v for v in vs], c="#88a8c8", alpha=0.7,
-           edgecolors="#4477aa", lw=0.5, zorder=3,
+ax.scatter(xs, ys, s=[22+180*v for v in vs], c="#88a8c8", alpha=0.9,
+           edgecolors="#1f4e79", lw=0.8, zorder=5,
            label=f"réplica: cluster «summit» ({len(rep)} en total; se ven los que caen en esta ventana)")
 if foc:
     xs, ys, vs = zip(*[(*km_xy(la, lo), v) for la, lo, v in foc])
-    ax.scatter(xs, ys, s=[28+260*v for v in vs], c="#2ca02c", marker="s", alpha=0.85,
+    ax.scatter(xs, ys, s=[60+320*v for v in vs], c="#2ca02c", marker="s", alpha=0.75,
                edgecolors="#14501f", lw=0.6, zorder=4,
                label=f"experimental: foco al cráter (n={len(foc)})")
 ax.plot(0, 0, "^", ms=16, c="#cc3311", mec="k", zorder=5, label="cráter Nicanor (coordenada de Nicolás)")
+
+# MIROVA: publica VRP + DISTANCIA desde su coordenada de referencia (GVP
+# -36.863, -71.377), sin direccion. Cada alerta al crater se dibuja como anillo
+# rojo punteado centrado en ESA referencia: la anomalia esta en algun punto del
+# anillo. Las 3 alertas lejanas (2.86, 3.02 y 4.14 km — la ultima ademas DIURNA,
+# artefacto solar A76) caen fuera de esta ventana.
+GVP = (-36.863, -71.377)
+gx, gy = km_xy(*GVP)
+# 16-jun y 20-ago publican dist 0.0 (en la referencia misma); 18-ago y 20-ago
+# publican 0.38 km -> UN anillo compartido. Nota: la referencia GVP esta ~470 m
+# al N de Nicanor, o sea el anillo de 0.38 km pasa por el crater — sus alertas
+# son consistentes con anomalias AL crater medidas desde una referencia al N.
+ax.plot(gx, gy, "*", ms=15, c="#cc3311", mec="white", mew=0.9, zorder=6,
+        label="referencia MIROVA (GVP; 16-jun y 20-ago @ 0.0 km caen aquí)")
+c = plt.Circle((gx, gy), 0.38, fill=False, color="#cc3311", lw=1.6, ls=":",
+               zorder=6, alpha=0.9)
+ax.add_patch(c)
+ax.annotate("MIROVA 18-ago 0.07 MW y 20-ago 0.06 MW @ 0.38 km\n"
+            "(publican distancia, no dirección: el anillo)",
+            xy=(gx, gy - 0.38), xytext=(0, -6), textcoords="offset points",
+            ha="center", va="top", fontsize=7.5, color="#8a1f0e", zorder=7,
+            path_effects=[pe.withStroke(linewidth=2.4, foreground="white")])
 
 ax.set_xlabel("km al Este del cráter")
 ax.set_ylabel("km al Norte del cráter")
