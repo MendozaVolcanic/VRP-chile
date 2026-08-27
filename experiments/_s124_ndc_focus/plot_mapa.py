@@ -114,8 +114,8 @@ ax.plot(gx, gy, "*", ms=15, c="#cc3311", mec="white", mew=0.9, zorder=6,
 c = plt.Circle((gx, gy), 0.38, fill=False, color="#cc3311", lw=1.6, ls=":",
                zorder=6, alpha=0.9)
 ax.add_patch(c)
-ax.annotate("MIROVA 18-ago 0.07 MW y 20-ago 0.06 MW @ 0.38 km\n"
-            "(publican distancia, no dirección: el anillo)",
+ax.annotate("otras 2 alertas MIROVA @ 0.38 km (18-ago 0.07 MW, 20-ago 0.06 MW)\n"
+            "publican distancia SIN dirección → por eso anillo y no punto",
             xy=(gx, gy - 0.38), xytext=(0, -6), textcoords="offset points",
             ha="center", va="top", fontsize=7.5, color="#8a1f0e", zorder=7,
             path_effects=[pe.withStroke(linewidth=2.4, foreground="white")])
