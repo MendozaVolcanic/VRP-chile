@@ -66,7 +66,9 @@ FLAG_DNS = {65532, 65533, 65534, 65535}
 
 # --- All detection thresholds come from the active profile ---
 # See pipeline/profiles/*.yaml. Profile selected via $VRP_PROFILE.
+from pipeline.regrid import regrid_to_utm  # F70.2 grilla UTM
 from pipeline.profile import (
+    ENABLE_UTM_REGRID,  # F70.2
     ANOMALY_THRESHOLD_K,
     N_SIGMA_MIR,
     BG_INNER_KM,
@@ -327,6 +329,60 @@ def bt_to_spectral_radiance(bt: np.ndarray, wavelength_um: float) -> np.ndarray:
 from pipeline.scan_geometry import haversine_km
 
 
+def _regrid_viirs_mod_granule(bands: dict, geo: dict, center_lat: float,
+                              center_lon: float, cell_km: float = 0.75,
+                              half_km: float = 25.125):
+    """Devuelve (bands, geo) resampleados a la grilla UTM regular de 750 m.
+
+    POR QUÉ (fenómeno): un píxel M-band lejos del nadir se estira varias veces
+    su tamaño nominal, y el píxel grande amplifica el gradiente topográfico
+    cráter-vs-nieve (A80). Al preguntar "¿está más caliente que sus vecinos?",
+    la geometría de esos vecinos pesa tanto como su temperatura. MIROVA lo
+    elimina antes de detectar: Campus 2024 L102-104, *"an initial resampling of
+    the original granule in a regular 50x50 km UTM grid"*.
+
+    Celda de 750 m y matriz 67x67 = lo que dice el paper, VERIFICADO verbatim
+    (S124) contra `documentacion/campus2022_sensors_22_1713.pdf` §3.2:
+
+    *"Resampling is performed in a UTM 51 x 51 km grid, centered on the
+    volcano summit (consistent with MODIS-MIROVA images) by keeping the
+    nominal resolution of 750 m. This results in matrices of 67 x 67 pixels
+    rather than 51 x 51 pixels obtained from MODIS."*
+
+    O sea: la banda M conserva su resolución nativa y NO se lleva a 1 km para
+    igualar a MODIS — hacerlo descartaría muestras reales sin ganar nada.
+
+    El schema de salida es el mismo que el de los lectores: todo aguas abajo
+    corre sin cambios, solo cambia el sustrato geométrico.
+    """
+    lat2d, lon2d = geo["lat"], geo["lon"]
+    juntas = dict(bands)
+    juntas["__sz__"] = geo["sensor_zenith"]
+
+    angulos = geo.get("angles") or {}
+    presentes = [k for k, v in angulos.items() if v is not None]
+    for k in presentes:
+        juntas[f"__ang__{k}"] = angulos[k]
+
+    # las bandas mandan: un ángulo faltante no descalifica una muestra buena.
+    g = regrid_to_utm(lat2d, lon2d, juntas, center_lat, center_lon,
+                      cell_km=cell_km, half_km=half_km,
+                      required=tuple(bands))
+
+    n = g["n"]
+    ejes = (np.arange(n) + 0.5) * cell_km - half_km
+    dlat = ejes / 111.32
+    dlon = ejes / (111.32 * max(np.cos(np.radians(center_lat)), 1e-6))
+    out_geo = {
+        "lat": center_lat + dlat[::-1][:, None] * np.ones((1, n)),
+        "lon": center_lon + dlon[None, :] * np.ones((n, 1)),
+        "sensor_zenith": g["__sz__"],
+        "angles": {k: (g[f"__ang__{k}"] if k in presentes else None)
+                   for k in angulos},
+    }
+    return {k: g[k] for k in bands}, out_geo
+
+
 def calculate_vrp(l1b_path: Path, geo_path: Path,
                   volcano_lat: float, volcano_lon: float,
                   radius_km: float = 30.0,
@@ -366,6 +422,12 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         return None
 
     geo = read_viirs_mod_geo(geo_path)
+
+    # F70.2 — sustrato geométrico. Con el flag apagado (operacional hoy) esta
+    # rama no se ejecuta y el procesador es idéntico al anterior.
+    if ENABLE_UTM_REGRID:
+        bands, geo = _regrid_viirs_mod_granule(bands, geo, volcano_lat, volcano_lon)
+
     lat, lon = geo["lat"], geo["lon"]
     # Per-pixel ground area corrected for off-nadir geometry
     pixel_areas = viirs_pixel_areas(

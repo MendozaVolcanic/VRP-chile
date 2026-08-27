@@ -82,7 +82,9 @@ FLAG_DNS = {65532, 65533, 65534, 65535}  # Missing_EV, Bowtie_Deleted, Cal_Fail,
 # --- All detection thresholds and path toggles come from the active profile ---
 # Profile is selected via $VRP_PROFILE (set by run_pipeline.py --profile).
 # Values documented in pipeline/profiles/*.yaml.
+from pipeline.regrid import regrid_to_utm  # F70.2 grilla UTM
 from pipeline.profile import (
+    ENABLE_UTM_REGRID,  # F70.2
     ANOMALY_THRESHOLD_K,
     TIR_THRESHOLD_K,
     N_SIGMA_MIR,
@@ -457,6 +459,65 @@ def read_viirs_geo(geo_path: Path) -> dict:
     return {"lat": lat, "lon": lon, "sensor_zenith": sz, "angles": angles}
 
 
+def _regrid_viirs_granule(bands: dict, geo: dict, center_lat: float,
+                          center_lon: float, cell_km: float = 0.375,
+                          half_km: float = 25.125):
+    """Devuelve (bands, geo) resampleados a la grilla UTM regular.
+
+    POR QUÉ (fenómeno): un píxel VIIRS lejos del nadir se estira varias veces su
+    tamaño nominal. Cuando el algoritmo pregunta "¿este píxel está más caliente
+    que sus ocho vecinos?", la respuesta depende de la geometría de esos vecinos
+    tanto como de su temperatura: sobre un volcán nevado, un vecino elongado
+    promedia nieve, roca y valle en proporciones distintas en cada pasada, y el
+    fondo que se le resta al foco es un objeto diferente cada noche. MIROVA lo
+    elimina ANTES de detectar — Campus 2024 (L102-104): *"after an initial
+    resampling of the original granule in a regular 50x50 km UTM grid"*.
+
+    El schema de salida es el mismo que el de los lectores, así que todo el
+    código aguas abajo (máscaras, kernel 8-vecinos, second-pass, clustering)
+    corre sin cambios: lo único que cambia es el sustrato geométrico.
+
+    Celda de 375 m = resolución NATIVA de la banda I. Llevarla a 1 km para
+    igualar a MODIS tiraría resolución real, que es justamente la ventaja del
+    sensor (Campus 2024 L105-107: *"the finer spatial resolution of VIIRS
+    I-bands allows the recognition of anomalies otherwise undetectable"*).
+
+    Todas las bandas son requeridas: a diferencia de MODIS, VIIRS no usa un
+    centinela NaN para saturación — clampea la radiancia y marca un bit de
+    calidad aparte (A37). Un NaN acá es dato ausente de verdad, y sin TIR no
+    hay NTI.
+    """
+    lat2d, lon2d = geo["lat"], geo["lon"]
+    juntas = dict(bands)
+    juntas["__sz__"] = geo["sensor_zenith"]
+
+    angulos = geo.get("angles") or {}
+    presentes = [k for k, v in angulos.items() if v is not None]
+    for k in presentes:
+        juntas[f"__ang__{k}"] = angulos[k]
+
+    # las bandas de radiancia mandan: un ángulo faltante no debe descalificar
+    # una muestra con MIR y TIR buenos.
+    g = regrid_to_utm(lat2d, lon2d, juntas, center_lat, center_lon,
+                      cell_km=cell_km, half_km=half_km,
+                      required=tuple(bands))
+
+    n = g["n"]
+    # lat/lon = centros de celda exactos: las distancias al cráter y el ROI se
+    # miden contra la grilla, no contra la geolocalización resampleada.
+    ejes = (np.arange(n) + 0.5) * cell_km - half_km
+    dlat = ejes / 111.32
+    dlon = ejes / (111.32 * max(np.cos(np.radians(center_lat)), 1e-6))
+    out_geo = {
+        "lat": center_lat + dlat[::-1][:, None] * np.ones((1, n)),
+        "lon": center_lon + dlon[None, :] * np.ones((n, 1)),
+        "sensor_zenith": g["__sz__"],
+        "angles": {k: (g[f"__ang__{k}"] if k in presentes else None)
+                   for k in angulos},
+    }
+    return {k: g[k] for k in bands}, out_geo
+
+
 # S23 Task 2: haversine_km centralizado en pipeline/scan_geometry.py
 from pipeline.scan_geometry import haversine_km
 
@@ -569,6 +630,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     """
     bands = read_viirs_l1b(l1b_path)
     geo = read_viirs_geo(geo_path)
+
+    # F70.2 — sustrato geométrico. Con el flag apagado (operacional hoy) esta
+    # rama no se ejecuta y el procesador es idéntico al anterior.
+    if ENABLE_UTM_REGRID:
+        bands, geo = _regrid_viirs_granule(bands, geo, volcano_lat, volcano_lon)
 
     lat = geo["lat"]
     lon = geo["lon"]
