@@ -192,7 +192,7 @@ def dts(dd):
 # ── Figura ──────────────────────────────────────────────────────────────────
 fig, (axA, axC, axB) = plt.subplots(
     3, 1, figsize=(14, 9.6), sharex=True,
-    gridspec_kw={"height_ratios": [1, 0.62, 2.6], "hspace": 0.16})
+    gridspec_kw={"height_ratios": [1, 0.62, 2.6], "hspace": 0.30})
 fig.suptitle("Nevados de Chillán, cráter Nicanor — ¿qué mostró MIROVA y qué detectamos nosotros?\n"
              "(VIIRS 375 m, desde junio 2026)", fontsize=13.5, fontweight="bold")
 
@@ -207,7 +207,7 @@ for y, (serie, color, marker, size) in enumerate([
     axA.scatter(dts(serie), [y] * len(serie), c=color, marker=marker, s=size,
                 edgecolors="k" if marker == "*" else "none", linewidths=0.5, zorder=3)
 axA.set_yticks([0, 1, 2])
-axA.set_yticklabels(["Experimental\n(foco 1 km, umbral bajo)",
+axA.set_yticklabels([f"Experimental\n(foco {FOCO_KM*1000:.0f} m, umbral bajo)",
                      "Réplica MIROVA\n(nuestro dashboard)",
                      "MIROVA publicó\n(alerta térmica)"], fontsize=9)
 axA.set_ylim(-0.6, 2.6)
@@ -233,26 +233,19 @@ axC.set_ylim(0, 6)
 axC.set_yticks([0, 2, 4, 6])
 axC.set_ylabel("σ del fondo (K)", fontsize=8.5)
 axC.grid(True, axis="x", alpha=0.25)
-axC.set_title("¿Se pudo ver el terreno esa noche?   —   "
-              f"franja roja = CIEGO, no hubo fondo ({sum(_ciego)} noches)   ·   "
-              "ámbar = escena uniforme (nublado)   ·   verde = escena con estructura (probable suelo visto)",
-              loc="left", fontsize=10.5)
+axC.set_title("¿Se pudo ver el terreno esa noche? (dispersión térmica del fondo, σ)",
+              loc="left", fontsize=11)
+axC.text(0.998, 0.92,
+         f"■ rojo = CIEGO, sin fondo ({sum(_ciego)} noches: un cero abajo no es calma)   "
+         "■ ámbar = escena uniforme (nublado)   ■ verde = con estructura (probable suelo visto)",
+         transform=axC.transAxes, ha="right", va="top", fontsize=7.8, color="#444",
+         bbox=dict(boxstyle="round,pad=0.25", fc="white", ec="#ccc", alpha=0.9))
 
 # Panel B — cuánta energía
 axB.set_title("¿Cuánta energía? (misma noche, mismo sensor)", loc="left", fontsize=11)
-xs = dts(replica)
-axB.plot(xs, [replica[x.strftime("%Y-%m-%d")] for x in xs], "o", ms=5, color=C_REP,
-         label="Réplica MIROVA (lo que ve el dashboard hoy)")
-# la línea se corta en huecos de observación >5 días: una línea continua sobre
-# un hueco de semanas dibujaría una continuidad que la observación no tiene
-fx, fy, prev = [], [], None
-for f in sorted(foco):
-    d_ = datetime.fromisoformat(f)
-    if prev is not None and (d_ - prev).days > 5:
-        fx.append(prev); fy.append(float("nan"))
-    fx.append(d_); fy.append(foco[f]); prev = d_
-axB.plot(fx, fy, "s-", ms=6, lw=1.4,
-         color=C_FOC, label="Experimental: radio 500 m al cráter + umbral 0.005 MW")
+ax_foco_x = dts(foco)
+axB.plot(ax_foco_x, [foco[x.strftime("%Y-%m-%d")] for x in ax_foco_x], "s", ms=7,
+         color=C_FOC, zorder=3, label=f"Experimental: radio {FOCO_KM*1000:.0f} m al cráter + umbral 0.005 MW")
 xs = dts(mirova)
 axB.plot(xs, [mirova[x.strftime("%Y-%m-%d")] for x in xs], "*", ms=17, color=C_MIR,
          mec="k", mew=0.6, ls="none", zorder=5, label="MIROVA (las veces que publicó alerta)")
@@ -266,6 +259,10 @@ for i, f in enumerate(sorted(set(mirova) & set(foco))):
                  textcoords="offset points", ha="center", fontsize=8,
                  arrowprops=dict(arrowstyle="-", color="#b8a24a", lw=0.7),
                  bbox=dict(boxstyle="round,pad=0.25", fc="#fffbe6", ec="#b8a24a", lw=0.6))
+
+xs = dts(replica)
+axB.plot(xs, [replica[x.strftime("%Y-%m-%d")] for x in xs], "o", ms=4.5, color=C_REP,
+         mec="#1f4e79", mew=0.7, zorder=4, label="Réplica MIROVA (lo que ve el dashboard hoy)")
 
 axB.set_ylabel("Potencia radiada VRP (MW)")
 axB.set_ylim(bottom=0)
