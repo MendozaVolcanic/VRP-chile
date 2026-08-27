@@ -1,65 +1,36 @@
-# VRP-Chile — profile: experimental_ndc_focus  (S124)
+# ============================================================================
+# experimental_ndc_focus — v2 (S124, corregido tras audit)
+# ============================================================================
+# UNA sola diferencia con la replica: el umbral (0.005 MW vs 0.02).
 #
-# OBJETIVO: seguir el foco térmico persistente del cráter Nicanor (Nevados de
-# Chillán) que MIROVA solo publica cuando sube lo suficiente.
+# La v1 ademas cambiaba el ancla (vent=Nicanor) y el inner (1 km), y esas dos
+# cosas alteran la DETECCION, no solo el filtro: el dual-ROI de Coppola aplica
+# 5 sigma dentro del inner y 10 sigma fuera, asi que con inner=1 km la zona de
+# 1-5 km exigia el doble de senal que en la replica, y el ROI del Test 1
+# integrado cambiaba de tamano. Resultado medido: noches marginales que la
+# replica detectaba y el experimental no (06-22, 06-23, 08-21...), con
+# radiometria IDENTICA (n_test1_pixels 0 vs 98 en la misma pasada). Eso
+# contaminaba la comparacion: diferencias de GEOMETRIA disfrazadas de
+# diferencias de UMBRAL.
 #
-# QUÉ SE OBSERVÓ (análisis read-only S124, sin reprocesar):
-#   - Con VIIRS 375 m hay una celda de ~500 m que reaparece en 17 noches
-#     distintas de 2026. El ruido se dispersa; una fuente vuelve al mismo lugar.
-#   - Está en ~(-36.8685, -71.3790), a 159 m de la coordenada que aportó Nicolás
-#     (-36.867210, -71.378241) — el mismo objeto, dentro de medio píxel VIIRS.
-#     Y a ~480 m del `vent_lat/lon` que tiene volcanoes.yaml.
-#   - Acotado a 750 m del foco: 15 noches con señal (may-ago 2026), 0.029-0.080 MW,
-#     con el pulso concentrado en JUNIO (10 de las 15 noches).
-#   - VALIDADOR INTERNO: en las dos noches en que MIROVA sí publicó alerta y
-#     teníamos señal en el foco, los valores casi coinciden — 14-may MIROVA 0.06
-#     vs 0.075 nuestro; 16-jun MIROVA 0.06 vs 0.079. Cuando la fuente sube,
-#     MIROVA la ve y medimos lo mismo que ella. Las otras 13 noches son la misma
-#     fuente por debajo del umbral de publicación de MIROVA. No hace falta ground
-#     truth externo: la calibración se prueba sola en los picos.
+# El "foco de 500 m al crater Nicanor" NO es del pipeline: se aplica en el
+# ANALISIS (experiments/_s124_ndc_focus/*, constante FOCO_KM), filtrando por
+# distancia del centroid al crater. Asi la deteccion es identica a la replica
+# y el foco es solo una lupa de lectura.
 #
-# POR QUÉ HOY SE PIERDE EN EL OPERACIONAL: con inner_radius_km=5 y radio de
-# escena 25 km, el 70% de las detecciones con VRP>0 cae a más de 2 km del cráter
-# y la magnitud se infla 3-250× contra MIROVA. Una señal de centésimas de MW
-# queda sepultada bajo ese campo difuso.
-#
-# NO OPERACIONAL. data_subdir aislado; no toca mirova_equivalent.
-
+# NO OPERACIONAL. data_subdir aislado; el reproceso debe cubrir la ventana
+# COMPLETA usada por las figuras para no mezclar configs v1/v2.
+# ============================================================================
 extends: mirova_equivalent
 profile: experimental_ndc_focus
 description: >
-  Foco persistente del cráter Nicanor (NdC): detección acotada al cráter con
-  umbral por debajo del mínimo que publica MIROVA. Laboratorio, no operacional.
-
+  Foco del crater Nicanor (NdC), v2: deteccion IDENTICA a la replica, solo el
+  umbral mas bajo (0.005 MW). El recorte espacial vive en el analisis.
 thresholds:
-  # MIROVA publica hasta 0.010 MW (mínimo medido sobre 1295 ALERTAS del CSV;
-  # p05=0.05, mediana=0.26). Nuestro piso operacional VIIRS375 es 0.02, o sea
-  # MÁS ALTO que el de MIROVA. El foco vive en 0.029-0.080 MW: estamos viendo
-  # apenas la punta de la curva. 0.005 nos deja mirar por debajo de MIROVA, que
-  # es justamente el objetivo de este perfil.
   min_vrp_mw_viirs375: 0.005
-
 sensors:
-  # SOLO VIIRS 375 m. MODIS a 1 km no localiza: sus celdas más recurrentes en el
-  # entorno de NdC están a ~4 km del cráter (campo difuso, A82). Incluyéndolo,
-  # las 15 noches limpias se vuelven 50 sucias con magnitudes de hasta 3 MW.
-  # VIIRS 750 m tampoco resuelve un foco de este tamaño.
   modis: false
   viirs_375: true
   viirs_750: false
-
-volcano_overrides:
-  NevadosDeChillan:
-    # Ancla al cráter real (coordenada de Nicolás, geólogo del volcán).
-    # El vent de volcanoes.yaml está ~480 m al NE de acá.
-    vent_lat: -36.867210
-    vent_lon: -71.378241
-    # 1 km de radio de detección. Área 25× menor que el inner=5 operacional
-    # (y 625× menor que la escena de 25 km): ese margen es lo que permite bajar
-    # el piso de VRP sin que vuelva a entrar el ruido difuso.
-    # OJO: `radius_km` (escena) se deja en 25 a propósito — de ahí sale el
-    # anillo de fondo [5, 25] km; achicarlo dejaría el fondo sin píxeles.
-    inner_radius_km: 1.0
-
 output:
   data_subdir: experimental_ndc_focus
