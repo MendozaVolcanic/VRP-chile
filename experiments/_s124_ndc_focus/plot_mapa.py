@@ -117,15 +117,25 @@ ax.plot(0, 0, "^", ms=16, c="#cc3311", mec="k", zorder=5, label="cráter Nicanor
 # Por eso se dibuja una BANDA de ±media celda alrededor del cráter, y no un
 # anillo fino: pretender más precisión sería inventarla.
 CELDA = 0.375
-ax.add_patch(plt.Rectangle((-CELDA/2, -CELDA/2), CELDA, CELDA, fill=False,
-                           color="#cc3311", lw=1.8, ls="-", zorder=6, alpha=0.9,
-                           label="celda MIROVA (375 m): 2 alertas @ «0,00 km» caen aquí dentro"))
-for rk in (CELDA - CELDA/2, CELDA + CELDA/2):
-    ax.add_patch(plt.Circle((0, 0), rk, fill=False, color="#cc3311", lw=1.2,
-                            ls=":", zorder=6, alpha=0.75))
-ax.annotate("banda de «0,38 km» = 1 celda de separación\n"
-            "(2 alertas: 18-ago 0.07 MW · 20-ago 0.06 MW)",
-            xy=(0, -(CELDA + CELDA/2)), xytext=(0, -6), textcoords="offset points",
+# Se dibuja la celda como REGLA DE ESCALA en una esquina, NO anclada al cráter.
+# Por qué (corrección tras la observación de Nicolás, S124): dibujarla centrada
+# en el cráter daba a entender que la grilla de MIROVA está alineada con el
+# cráter activo, y eso NO lo sabemos. Coppola dice que su grilla va "centred on
+# the volcano's summit", pero no publica esa coordenada, y aunque la
+# publicara, el borde de la celda podría caer en cualquier parte respecto del
+# cráter. Del dato solo se deduce el TAMAÑO de la celda; su POSICIÓN queda
+# indeterminada. Anclarla al cráter era volver a inventar precisión, solo que
+# de otra forma.
+_cx, _cy = -LIM + 0.16, -LIM + 0.42
+ax.add_patch(plt.Rectangle((_cx - CELDA/2, _cy - CELDA/2), CELDA, CELDA,
+                           fill=False, color="#cc3311", lw=1.8, zorder=6,
+                           label="tamaño de la celda MIROVA (375 m) — posición NO conocida"))
+ax.annotate("1 celda = 375 m\n"
+            "sus 4 alertas al cráter dicen\n"
+            "«0 celdas» (×2) y «1 celda» (×2)\n"
+            "de su referencia, cuya\n"
+            "ubicación no publican",
+            xy=(_cx, _cy - CELDA/2), xytext=(0, -8), textcoords="offset points",
             ha="center", va="top", fontsize=7.5, color="#8a1f0e", zorder=7,
             path_effects=[pe.withStroke(linewidth=2.4, foreground="white")])
 

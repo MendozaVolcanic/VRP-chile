@@ -1552,6 +1552,24 @@ Control: con celdas arbitrarias el ajuste cae (VIIRS375 a 0,5 km → 89 %; a
    (Villarrica 0,84 km fija): esa idiosincrasia es consistente con una celda
    fija de la grilla, no necesariamente con una coordenada GVP.
 
-**Aplicación inmediata.** El mapa de NdC (`experiments/_s124_ndc_focus/`) ya no
-dibuja un anillo fino sino la **celda de 375 m** más una banda de ±media celda:
-pretender más precisión sería inventarla.
+**Aplicación inmediata.** El mapa de NdC (`experiments/_s124_ndc_focus/`) dibuja
+la celda **como regla de escala en una esquina, NO anclada al cráter**. La
+primera versión la dibujó centrada en el cráter y Nicolás lo objetó con razón:
+eso da a entender que la grilla de MIROVA está alineada con el cráter activo, y
+**no lo sabemos**. Del dato se deduce el TAMAÑO de la celda; su POSICIÓN queda
+indeterminada. Anclarla al cráter era volver a inventar precisión, solo que de
+otra forma.
+
+**Frente que esto abre — determinar el origen de la grilla de MIROVA.** La
+pregunta *"¿dónde caen sus bordes de celda?"* es respondible con los datos que
+ya tenemos: hay **903 pares** (alerta MIROVA + detección nuestra en la misma
+pasada, ±3 min) sobre los 11 Tier A. Si su hotspot y nuestro cluster son el
+mismo objeto físico, cada par restringe el origen módulo el tamaño de celda; con
+903 restricciones el origen queda determinado.
+
+Importa para F70: **implementamos el tamaño de celda correcto, pero anclamos
+nuestra grilla al `mirova_center`/cumbre nuestra**. Si el origen de MIROVA está
+desplazado, nuestras celdas no coinciden con las suyas y el sustrato de
+detección difiere aunque la resolución sea idéntica — dos píxeles del mismo
+tamaño pero corridos median vecindarios distintos. Pendiente de diseñar; no
+bloquea el A/B de F70.3, pero puede explicar un residual.
