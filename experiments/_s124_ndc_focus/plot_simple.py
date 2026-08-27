@@ -54,6 +54,7 @@ def hav(la1, lo1, la2, lo2):
 
 # ── MIROVA: alertas VIIRS375 por noche ──────────────────────────────────────
 mirova = {}
+mirova_excluidas = []   # alertas no comparables (diurnas / lejos del foco)
 with open(ROOT / "latest_consolidado.csv", encoding="utf-8", errors="replace") as fh:
     for r in csv.DictReader(fh):
         if r.get("Volcan") != "Nevados de Chillan":
@@ -67,8 +68,32 @@ with open(ROOT / "latest_consolidado.csv", encoding="utf-8", errors="replace") a
             v = float(r.get("VRP_MW") or 0)
         except ValueError:
             continue
-        if v > 0:
+        # AUDIT S124 (hallazgo 3): solo son COMPARABLES las alertas que nuestro
+        # foco podria reproducir — nocturnas (nuestro pipeline es night-only) y
+        # al crater (Distancia_km <= 0.38, o sea <= 1 celda de la grilla MIROVA,
+        # ver D15). Las demas (diurnas A76 o a 2.9-4.1 km) se listan en la nota
+        # al pie: dibujarlas como estrellas "que no vimos" era comparar contra
+        # algo irreproducible por construccion.
+        try:
+            _D = float(r.get("Distancia_km"))
+        except (TypeError, ValueError):
+            _D = None
+        _hora = int((r.get("Fecha_Satelite_UTC") or "0000-00-00 12")[11:13] or 12)
+        _nocturna = 3 <= _hora <= 9
+        if v > 0 and _nocturna and _D is not None and _D <= 0.38:
             mirova[f] = max(mirova.get(f, 0), v)
+        elif v > 0:
+            mirova_excluidas.append((f, v, _D, "diurna" if not _nocturna else f"@{_D:.2f} km"))
+
+# ── Pasadas COMUNES (hallazgo 7 del audit): las dos corridas difieren en las
+# pasadas DESCARGADAS (16 solo-réplica desde junio). Sin esta restricción, el
+# panel A atribuye a "umbral" diferencias que son de descarga/cobertura.
+def _claves(path):
+    dd_ = json.loads((ROOT / path).read_text(encoding="utf-8"))
+    return {(r["datetime_utc"], r.get("sensor")) for r in dd_["records"]
+            if "VIIRS" in (r.get("sensor") or "") and "750" not in r["sensor"]}
+PASADAS_COMUNES = (_claves("data/mirova_equivalent/NevadosDeChillan.json")
+                   & _claves("data/experimental_ndc_focus/NevadosDeChillan.json"))
 
 # ── Réplica operacional: VIIRS375, filtro del dashboard ─────────────────────
 replica = {}
@@ -77,6 +102,8 @@ for r in d["records"]:
     f = (r.get("datetime_utc") or "")[:10]
     s = r.get("sensor") or ""
     if f < START or "VIIRS" not in s or "750" in s:
+        continue
+    if (r["datetime_utc"], r.get("sensor")) not in PASADAS_COMUNES:
         continue
     pc = r.get("primary_cluster") or {}
     v = pc.get("vrp_mw") or 0
@@ -143,6 +170,8 @@ for r in d["records"]:
     f = (r.get("datetime_utc") or "")[:10]
     if f < START:
         continue
+    if (r["datetime_utc"], r.get("sensor")) not in PASADAS_COMUNES:
+        continue
     pc = r.get("primary_cluster") or {}
     v = pc.get("vrp_mw") or 0
     if v <= 0 or pc.get("centroid_lat") is None:
@@ -150,8 +179,10 @@ for r in d["records"]:
     if hav(NIC[0], NIC[1], pc["centroid_lat"], pc["centroid_lon"]) <= FOCO_KM:
         foco[f] = max(foco.get(f, 0), v)
 
-ventana_foco = (min(d["records"][0]["datetime_utc"][:10], START),
-                d["records"][-1]["datetime_utc"][:10]) if d["records"] else None
+# cobertura REAL del experimental, de los RECORDS (audit h6: inferirla de las
+# detecciones confunde "no detecto" con "no hay data").
+_dias_exp = sorted(set(r["datetime_utc"][:10] for r in d["records"]))
+fin_exp = _dias_exp[-1] if _dias_exp else START
 
 
 def dts(dd):
@@ -204,7 +235,7 @@ axC.set_ylabel("σ del fondo (K)", fontsize=8.5)
 axC.grid(True, axis="x", alpha=0.25)
 axC.set_title("¿Se pudo ver el terreno esa noche?   —   "
               f"franja roja = CIEGO, no hubo fondo ({sum(_ciego)} noches)   ·   "
-              "ámbar = escena uniforme (nublado)   ·   verde = se vio el suelo",
+              "ámbar = escena uniforme (nublado)   ·   verde = escena con estructura (probable suelo visto)",
               loc="left", fontsize=10.5)
 
 # Panel B — cuánta energía
@@ -248,8 +279,12 @@ plt.setp(axB.get_xticklabels(), rotation=0, fontsize=8.5)
 nota = ("Cómo leerla: cada estrella roja es una noche en que MIROVA publicó alerta térmica; los cuadrados verdes son el foco del cráter\n"
         "Nicanor visto por el perfil experimental (área acotada a 500 m + umbral bajo el mínimo de MIROVA); los puntos celestes, la réplica\n"
         "operacional. Se muestra solo VIIRS 375 m: todas las alertas MIROVA de este período son de ese sensor.")
-if ventana_foco and ventana_foco[1] >= "2026-06-25" and min(foco, default="9999") >= "2026-06-25":
-    nota += "\nEl experimental aún no cubre el 01–24 de junio (reproceso en curso); esa franja solo muestra réplica y MIROVA."
+if fin_exp < "2026-08-27":
+    nota += ("\nCobertura del experimental hasta el " + fin_exp + ": después solo hay réplica y MIROVA "
+             "(reproceso en curso). Paneles restringidos a pasadas que AMBAS corridas procesaron.")
+if mirova_excluidas:
+    _exc = "  ·  ".join(x[0] + " " + format(x[1], ".2f") + " MW (" + x[3] + ")" for x in sorted(mirova_excluidas))
+    nota += "\nAlertas MIROVA NO comparables con el foco (fuera de las estrellas): " + _exc + "."
 fig.text(0.06, 0.005, nota, fontsize=8.2, color="#555", va="bottom")
 fig.tight_layout(rect=(0, 0.055, 1, 1))
 out = Path(__file__).parent / "ndc_simple_s124.png"

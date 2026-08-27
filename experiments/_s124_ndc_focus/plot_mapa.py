@@ -5,11 +5,10 @@ Responde la pregunta de Nicolas (2026-08-25): "como es posible que replica
 MIROVA tenga mas datos que el experimental? o lo que muestra mirova replica
 estan en sectores mas alejados?"
 
-Respuesta medida: de las 47 noches "summit" de la replica (VIIRS375, desde
-junio), solo 20 tienen su cluster mas cercano a <=1 km del crater Nicanor;
-la mediana esta a 1.80 km y 22 noches caen a 2-5 km. La replica acepta como
-"cumbre" todo lo que caiga dentro del inner de 5 km (KML MIROVA); el
-experimental solo cuenta el crater. Este mapa lo muestra.
+(Los numeros del docstring original quedaron obsoletos tras varios cambios de
+radio y filtros; los vigentes son los que imprime la leyenda al generar. La
+replica acepta como "cumbre" el inner de 5 km del KML MIROVA; el experimental
+solo cuenta el crater. Este mapa lo muestra sobre la grilla real de MIROVA.)
 """
 import json, io, math, sys
 from pathlib import Path
@@ -60,6 +59,11 @@ for r in d["records"]:
 foc = []
 dd = json.loads(FOCO_JSON.read_text(encoding="utf-8"))
 for r in dd["records"]:
+    # AUDIT S124 (subagente, hallazgo 2): el experimental arranca en mayo pero el
+    # titulo dice "desde junio" — sin este filtro, 7 de 30 verdes eran de MAYO y
+    # la densidad visual quedaba sesgada a favor del experimental.
+    if (r.get("datetime_utc") or "")[:10] < "2026-06-01":
+        continue
     pc = r.get("primary_cluster") or {}
     v = pc.get("vrp_mw") or 0
     if v > 0 and pc.get("centroid_lat") is not None and hav(NIC[0], NIC[1], pc["centroid_lat"], pc["centroid_lon"]) <= FOCO_KM:
@@ -83,7 +87,7 @@ if _img is not None:
 # circulos de referencia
 for rkm, col, lab in ((FOCO_KM, "#1a7a33", f"radio experimental ({FOCO_KM*1000:.0f} m)"),):
     c = plt.Circle((0, 0), rkm, fill=False, color=col, lw=2.4,
-                   ls="-" if rkm == 1 else "--", label=lab, zorder=2,
+                   ls="--", label=lab, zorder=2,
                    path_effects=[pe.withStroke(linewidth=4.2, foreground="white")])
     ax.add_patch(c)
 

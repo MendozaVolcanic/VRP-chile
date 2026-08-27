@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
-"""S124 — La mascara de nube <260 K nos deja CIEGOS, y ahi perdemos las alertas.
+"""S124 - Ceguera del pipeline (n_bg=0) en NdC. [CORREGIDO tras audit]
 
-POR QUE: Nicolas no reconocia como despejadas semanas que el sabe que fueron de
-temporal (A62). Investigando salio algo mas grave que un panel mal etiquetado.
+ADVERTENCIA (audit S124, subagente): la version original de este script
+concluia "las 3 alertas MIROVA que perdemos caen las 3 en noches ciegas -
+separacion perfecta, no es azar". Esa conclusion era ESPURIA por triple
+confusion: las 3 alertas eran irreproducibles POR CONSTRUCCION, independiente
+de la ceguera: 06-12 es DIURNA 18:18 UTC @ 4.14 km (artefacto solar A76;
+nuestro pipeline es night-only), 07-15 esta @ 2.86 km (fuera del foco) y 08-26
+@ 3.02 km (fuera del foco Y fuera de la cobertura del archivo experimental,
+que termina 08-24). La coincidencia con noches ciegas es real pero NO es la
+causa de "perderlas".
 
-CADENA CAUSAL (medida, no supuesta):
-  1. Noche fria de invierno sobre un volcan nevado -> gran parte del ROI cae
-     bajo 260 K.
-  2. process_viirs.py:681-682 hace `roi_mask &= cloud_free` Y
-     `bg_mask &= cloud_free`: los saca de la busqueda Y del anillo de fondo.
-  3. El anillo queda vacio -> n_bg = 0 -> no hay estadistica de fondo -> no hay
-     deteccion posible. La noche es CIEGA.
-  4. MIROVA no filtra nube (Laiolo 2026: "no atmospheric correction or
-     cloud-contamination automatic filtering"), conserva su fondo y publica.
-
-Y esa mascara es la que MISSION.md:127 declara "Removido S27". Ver D14.
-
-Fuente de verdad de los numeros del informe (regla S91).
+Lo que SI sigue valido de este script: la medicion de la ceguera misma
+(pasadas con n_bg=0 y su relacion con la mascara <260 K), que alimenta D14.
+El cruce contra alertas MIROVA se corrigio para comparar solo alertas
+COMPARABLES (nocturnas + al crater + dentro de cobertura): con ese filtro las
+alertas comparables son 3 y se reproducen las 3, todas en noches con fondo.
 """
 import csv, io, json, math, sys
 from pathlib import Path
