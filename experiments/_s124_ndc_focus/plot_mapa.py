@@ -107,37 +107,37 @@ ax.plot(0, 0, "^", ms=16, c="#cc3311", mec="k", zorder=5, label="cráter Nicanor
 # 0, 1, √2, 2, √5, √10, √13, √41, √61, √65, √82, √90, √113…) y 11.810/11.810
 # VIIRS375 con celda 0,375 km sobre 450 valores distintos.
 #
-# Consecuencias para el dibujo:
-#   · La referencia es una CELDA, no un punto. No sabemos su centro exacto:
-#     Coppola dice que la grilla va "centred on the volcano's summit", pero no
-#     publica esa coordenada.
-#   · "0,00 km" NO significa "en el cráter": significa "en la MISMA celda que
-#     la referencia" — o sea en cualquier punto de un cuadrado de 375 m.
-#   · "0,38 km" = una celda de separación, con la misma incertidumbre.
-# Por eso se dibuja una BANDA de ±media celda alrededor del cráter, y no un
-# anillo fino: pretender más precisión sería inventarla.
-CELDA = 0.375
-# Se dibuja la celda como REGLA DE ESCALA en una esquina, NO anclada al cráter.
-# Por qué (corrección tras la observación de Nicolás, S124): dibujarla centrada
-# en el cráter daba a entender que la grilla de MIROVA está alineada con el
-# cráter activo, y eso NO lo sabemos. Coppola dice que su grilla va "centred on
-# the volcano's summit", pero no publica esa coordenada, y aunque la
-# publicara, el borde de la celda podría caer en cualquier parte respecto del
-# cráter. Del dato solo se deduce el TAMAÑO de la celda; su POSICIÓN queda
-# indeterminada. Anclarla al cráter era volver a inventar precisión, solo que
-# de otra forma.
-_cx, _cy = -LIM + 0.16, -LIM + 0.42
-ax.add_patch(plt.Rectangle((_cx - CELDA/2, _cy - CELDA/2), CELDA, CELDA,
-                           fill=False, color="#cc3311", lw=1.8, zorder=6,
-                           label="tamaño de la celda MIROVA (375 m) — posición NO conocida"))
-ax.annotate("1 celda = 375 m\n"
-            "sus 4 alertas al cráter dicen\n"
-            "«0 celdas» (×2) y «1 celda» (×2)\n"
-            "de su referencia, cuya\n"
-            "ubicación no publican",
-            xy=(_cx, _cy - CELDA/2), xytext=(0, -8), textcoords="offset points",
-            ha="center", va="top", fontsize=7.5, color="#8a1f0e", zorder=7,
-            path_effects=[pe.withStroke(linewidth=2.4, foreground="white")])
+# ── La grilla REAL de MIROVA (de sus propios GeoTIFF) ───────────────────────
+# S124: los TIF del archivo (../mirova-tif-archive) estan georreferenciados.
+# De 20260520_044801_VIIRS375.tif: grilla 134x134 (confirma F70.2b), celdas
+# ~382x381 m, origen y extent FIJOS entre pasadas. Centro de la grilla:
+# (-36.863270, -71.378535) = a 140 m del GVP y 439 m al NORTE del crater
+# Nicanor. O sea: la grilla NO esta centrada en el crater activo — la sospecha
+# de Nicolas ("¿justo la celda cae simetrica sobre el crater?") era correcta.
+#
+# CAVEAT honesto: el TIF esta en EPSG:4326 (reproyeccion de visualizacion de su
+# grilla UTM), asi que estos bordes de celda aproximan los UTM reales a menos
+# de media celda. Se probo inferir la celda de referencia del Distancia_km
+# contra las 4 alertas al crater y NO cerro (0/4 con las dos candidatas): la
+# cuantizacion vive en la grilla UTM, no en esta reproyeccion. Por eso se
+# dibujan las lineas como "grilla publicada (reproyectada)" sin marcar celda
+# de referencia.
+LEFT, TOP, DXX, DYY = -71.665032, -36.633069, 0.004276, 0.003436
+import numpy as _np
+_kx = 111.32 * math.cos(math.radians(NIC[0]))
+for k in range(134 + 1):
+    x = (LEFT + k * DXX - NIC[1]) * _kx
+    if -LIM <= x <= LIM:
+        ax.axvline(x, color="#cc3311", lw=0.7, ls="-", alpha=0.45, zorder=2)
+    y = (TOP - k * DYY - NIC[0]) * 111.32
+    if -LIM <= y <= LIM:
+        ax.axhline(y, color="#cc3311", lw=0.7, ls="-", alpha=0.45, zorder=2)
+_cgx = (-71.378535 - NIC[1]) * _kx
+_cgy = (-36.863270 - NIC[0]) * 111.32
+ax.plot(_cgx, _cgy, "*", ms=15, c="#cc3311", mec="white", mew=0.9, zorder=6,
+        label="centro de la grilla MIROVA (de sus GeoTIFF): 439 m al N del cráter")
+ax.plot([], [], color="#cc3311", lw=0.9, alpha=0.6,
+        label="grilla MIROVA publicada (reproyectada; celdas ~375 m)")
 
 ax.set_xlabel("km al Este del cráter")
 ax.set_ylabel("km al Norte del cráter")

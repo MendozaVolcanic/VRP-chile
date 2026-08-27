@@ -1560,7 +1560,29 @@ eso da a entender que la grilla de MIROVA está alineada con el cráter activo, 
 indeterminada. Anclarla al cráter era volver a inventar precisión, solo que de
 otra forma.
 
-**Frente que esto abre — determinar el origen de la grilla de MIROVA.** La
+**RESUELTO en la misma sesión — los GeoTIFF del archivo TIENEN la grilla.**
+Nicolás sugirió explorar los TIF/KMZ no explotados y ahí estaba la respuesta:
+los TIF de `../mirova-tif-archive` están georreferenciados (EPSG:4326). De
+`20260520_044801_VIIRS375.tif` (NdC):
+
+- **Grilla 134×134** — confirma la deducción de F70.2b desde el producto real,
+  no desde los papers. MODIS: **51×51** con celda ~1 km. Origen y extent FIJOS
+  entre pasadas (grilla estática).
+- **Centro de la grilla: (-36.863270, -71.378535)** — a 140 m del GVP y a
+  **439 m al NORTE del cráter Nicanor**. La grilla NO está centrada en el
+  cráter activo, y el cráter cae al borde de una celda (a ~56 m del borde N de
+  la suya en la reproyección). La sospecha de Nicolás ("¿justo la celda cubre
+  simétricamente el cráter?") era correcta: no lo cubre.
+- **Caveat**: el TIF es una reproyección lat/lon de visualización de su grilla
+  UTM (celdas 382×381 m, no 375 exactos). Se probó inferir la celda de
+  referencia del `Distancia_km` contra las 4 alertas al cráter de NdC y **no
+  cerró (0/4)** con las dos candidatas — la cuantización vive en la grilla UTM
+  original, no en esta reproyección. Determinar la celda de referencia exacta
+  requiere trabajar en UTM (pendiente menor).
+- El KMZ es solo un PNG georreferenciado (GroundOverlay), mismo extent, sin
+  vectores: no agrega sobre el TIF.
+
+**Frente restante (menor) — la celda de referencia exacta del Distancia_km.** La
 pregunta *"¿dónde caen sus bordes de celda?"* es respondible con los datos que
 ya tenemos: hay **903 pares** (alerta MIROVA + detección nuestra en la misma
 pasada, ±3 min) sobre los 11 Tier A. Si su hotspot y nuestro cluster son el
