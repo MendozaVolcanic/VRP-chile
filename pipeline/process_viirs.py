@@ -95,6 +95,7 @@ from pipeline.profile import (
     MIN_VENT_PIXELS,
     BG_INNER_KM,
     BG_OUTER_KM,
+    CLOUD_MASK_BT_K,
     NTI_K1_NIGHT,
     NTI_BT_SANITY_K,
     ENABLE_VENT_PATH,
@@ -671,7 +672,27 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     #  (a) artificially low T_bg from cloudy background pixels
     #  (b) false negatives from cloudy ROI pixels hiding real anomalies
     # This is a simple threshold approach — no extra download needed.
-    CLOUD_BT_THRESHOLD = 260.0  # K — pixels colder than this are likely cloudy
+    #
+    # S125 — el umbral sale del PERFIL, no de un literal. Antes era
+    # `CLOUD_BT_THRESHOLD = 260.0` escrito a mano, así que este sensor ignoraba
+    # `cloud_mask_bt_k` mientras MODIS sí la leía (process_modis.py:505,715).
+    # Consecuencia: `MISSION.md` declara la máscara removida desde S27 (Laiolo
+    # 2026: MIROVA no aplica "cloud-contamination automatic filtering") y seguía
+    # viva en VIIRS 375 solamente.
+    #
+    # Medido en NdC jun-ago 2026: 15 de 88 noches quedaron CIEGAS — el filtro
+    # descartó 13.200-17.300 píxeles del ROI contra ~1.100 en una noche normal,
+    # dejando CERO fondo. En esas pasadas no queda registrado NI SIQUIERA el
+    # t_max del cráter: se aplica a `roi_mask` además de `bg_mask`. A 3.200 m en
+    # invierno austral la nieve irradia en el mismo rango que el tope de una nube
+    # baja, así que el criterio no los distingue.
+    #
+    # El cambio es NO-OP en producción a propósito: `mirova_equivalent.yaml` fija
+    # `cloud_mask_bt_k: 260.0` para preservar el comportamiento actual hasta que
+    # un A/B respalde apagarla. Lo que se gana ahora es que apagarla pase a ser
+    # una decisión de perfil —auditable y A/B-able— en vez de una edición de
+    # código. Guard: tests/test_cloud_mask_from_profile_s125.py
+    CLOUD_BT_THRESHOLD = CLOUD_MASK_BT_K
     n_cloud_masked = 0
     cloud_free = None  # S112 default fuera del bloque I05 (lo consume el anillo Q3)
     if "I05" in bands:

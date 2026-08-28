@@ -1,0 +1,39 @@
+# ============================================================================
+# _s125_cloudmask_off — A/B de la mascara de nube de VIIRS375
+# ============================================================================
+# tratamiento: mascara APAGADA, que es lo que el perfil operacional ya declara
+#
+# CONTEXTO (docs/AUDIT_S125_PROFUNDA.md §1 F3 + D14 del catalogo):
+# MISSION.md declara la mascara removida desde S27 (Laiolo 2026: MIROVA NRT no
+# aplica "cloud-contamination automatic filtering") y el perfil operacional ya
+# fija cloud_mask_bt_k: 0.0 — pero process_viirs.py tenia 260.0 HARDCODEADO y
+# lo ignoraba. MODIS y VIIRS750 si leen la perilla, o sea que la mascara vivia
+# en un solo sensor.
+#
+# ALCANCE MEDIDO en NevadosDeChillan jun-ago 2026: 15 de 88 noches CIEGAS. En
+# esas pasadas el filtro descarto 13.200-17.300 pixeles del ROI (contra ~1.100
+# en una noche normal) y no quedo NI el t_max del crater, porque se aplica a
+# roi_mask ademas de bg_mask. A 3.200 m en invierno la nieve irradia como el
+# tope de una nube baja: el umbral no los distingue.
+#
+# LO QUE EL A/B TIENE QUE MEDIR — apagarla no es gratis, tiene dos caras:
+#   (+) recupera las noches ciegas (hoy figuran "sin senal" cuando en realidad
+#       no se miro), y deja de sesgar el fondo en noches parcialmente nubladas.
+#   (-) puede meter topes de nube frios en el anillo de fondo, bajando t_bg,
+#       inflando dL y por lo tanto la magnitud. Ese es el riesgo a cuantificar.
+#
+# OJO: el fondo mas caliente de VIIRS375 (+2.49 K vs V750, 100% de 21.511 pares)
+# NO lo causa esta mascara — hipotesis REFUTADA en S125: sin mascara la brecha
+# es +2.77 K y con mascara +2.32 K. La causa es el anillo intermedio [1.5,3] km
+# (ver los brazos _s125_viirs_*). Son dos frentes distintos.
+#
+# NO OPERACIONAL. data_subdir aislado.
+# ============================================================================
+extends: mirova_equivalent
+profile: _s125_cloudmask_off
+description: >
+  tratamiento: mascara APAGADA, que es lo que el perfil operacional ya declara
+thresholds:
+  cloud_mask_bt_k: 0.0
+output:
+  data_subdir: _s125_cloudmask_off
