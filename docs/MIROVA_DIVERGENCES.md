@@ -117,6 +117,14 @@ todavía no replicamos.
 
 **Estado post-S27 literal puro**: ratio mediano = **1.35×**. Mejora drástica.
 
+> ⚠️ **SIN RESPALDO PARA HOY — S125.** Este "1.35×" (sobre-reporte) describe un estado
+> de S27, hace ~100 sesiones y antes de nadir-fijo (S102/S103), la ancla honesta (S98) y los
+> gates OFF (S118). La tabla de brazos de hoy (`experiments/_s124_f70/04_tabla_brazos.py`)
+> da mediana ≈**0,75×**, o sea **sub-reporte** — el signo opuesto. Esta divergencia marcada
+> como resuelta describe, invertido, el frente principal abierto de S125. Rebajada de
+> "calibración lograda" a **abierta pendiente de re-medición**. Ver
+> `docs/AUDIT_S125_PROFUNDA.md` §0 y §3.
+
 **Causas pre-S27 sobreestimación**:
 - Vent-path reportaba VRP de pixels marginales sub-umbral.
 - `MAX_SIGMA_COMPONENT_K=7K` mantenía thresholds bajos sobre detecciones que
@@ -1116,7 +1124,15 @@ ganaba selección summit con inner=20 km.
 inner=7 → 1.86× (-47%). Adoptado en `volcanoes.yaml` S62. Reproc
 operacional corriendo.
 
-### Hallazgo dist=0.84 km fijo Villarrica — METADATO no error
+### Hallazgo dist=0.84 km fijo Villarrica — ⚠️ **REFUTADO S124, corregido acá en S125**
+
+> El `Distancia_km` de Villarrica **no** es 0.84 fijo: sobre n=3338 vale **0.0 en 3284 casos
+> (98,4 %)** y 0.84 sólo 15 veces. Además el campo está **cuantizado a la celda de la grilla**
+> de MIROVA (D15), así que «0.0» significa «en la misma celda que su referencia», no «a 0 km
+> del cráter». `CLAUDE.md` ya lo corrigió en S124 (regla A13); este catálogo no se había
+> actualizado. Texto original abajo, conservado por historia:
+
+#### (texto original) Hallazgo dist=0.84 km fijo Villarrica — METADATO no error
 
 **MIROVA reporta `Distancia_km`** desde coord nominal Smithsonian GVP, NO
 desde centroide variable del cluster. Para Villarrica (cráter ~150m, lava
@@ -1331,7 +1347,14 @@ auditado en `experiments/_s106_fase2/audit_v750_paired.py`, A18-adyacente). Prom
 El espejo MODIS sigue OFF (D12, gateado por el fix de magnitud fondo-local §2). Tag rollback:
 `pre-s108-honest-anchor-v750`.
 
-### D12 — MODIS Láscar pierde ~70/79 alertas MIROVA-confirmadas por `distance_class` del píxel Salar (AUDIT_S106 P1.1, ABIERTA)
+### D12 — MODIS Láscar pierde ~70/79 alertas por `distance_class` del píxel Salar (AUDIT_S106 P1.1) — ⚠️ **SECCIÓN CONGELADA EN S106/S108; leer primero la nota S125**
+
+> **Nota S125 (anti-A8).** Lo que esta sección presenta como fix pendiente —reprocesar la
+> historia de Láscar MODIS derivando `distance_class` del cluster— **ya se probó y se
+> rechazó**: `docs/AUDIT_S121_D12_AB.md` = **VEREDICTO NO ADOPTAR** (cura 76 noches de
+> Láscar pero destapa el path-D, PCC 117 MW). El candidato siguiente (C2 peak-of-kernel)
+> quedó **refutado en S122**. La divergencia sigue abierta como fenómeno; el camino que
+> esta sección propone, no. Ejecutarlo sería reabrir trabajo cerrado.
 
 Distinta de D11 (que es posición de nevados) y de A54 (real-no-publicada): acá **MIROVA SÍ
 publica** y nosotros lo perdemos. El `primary_cluster` MODIS está en el cráter (mediana
@@ -1460,6 +1483,19 @@ No es una anotación: saca píxeles del ROI donde se buscan anomalías **y** del
 anillo que fija el umbral. Es la segunda contradicción doc-vs-código encontrada
 en S124 (la otra, los pisos VRP, se corrigió en #523). Solo afecta a VIIRS
 375 m; MODIS y VIIRS 750 no la tienen.
+
+> ⚠️ **Corrección S125 — la última frase es imprecisa y esconde el fix.** MODIS
+> **sí tiene** la máscara (`process_modis.py:505` y `:715`), sólo que la lee de la
+> perilla del perfil `CLOUD_MASK_BT_K`, hoy en `0.0` — o sea el predicado queda
+> tautológico y la máscara inerte. Lo mismo VIIRS 750. **El caso raro es VIIRS 375**:
+> `process_viirs.py:674` tiene `CLOUD_BT_THRESHOLD = 260.0` **hardcodeado** e ignora
+> la perilla, aplicándolo a `roi_mask` y `bg_mask` en `:678-681`.
+>
+> Consecuencia práctica que la sección no sacaba: **la perilla correcta ya existe y un
+> solo sensor no la usa**. Retirar la máscara no es la decisión metodológica abierta
+> que el texto plantea (opción 1) — es reemplazar un literal por la constante del
+> perfil, una línea. Sigue requiriendo A45 por tocar `pipeline/`.
+> Ver `docs/AUDIT_S125_PROFUNDA.md` §1 F3.
 
 **Y además mide la cosa equivocada.** El hallazgo salió de que Nicolás no
 reconocía como despejadas semanas que él sabe que fueron de temporal (A62: la

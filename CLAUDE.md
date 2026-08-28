@@ -160,7 +160,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   usa vent_lat nominal" — falso: `run_pipeline.py:220` pasa eff_vent_lat de
   `get_effective_vent()` que ya fallbackea a mirova_center. ~30 min perdidos
   en hipótesis ya implementada S15.
-- **A7. Schema gaps: "no calculado" ≠ "calculado pero no persistido" (S21)**:
+- **A7. ⚠️ El ejemplo quedó OBSOLETO — verificado S125.** Los tres campos que la regla
+  dice persistidos (`std_bg_i04`, `threshold_mir`, `nti_std`) **no existen** en ninguno de
+  los 2.547 records VIIRS de Villarrica; hoy se llaman `diag_sigma_bg_k`,
+  `diag_eff_threshold_k`, `diag_nti_std`. La lección de método sigue valiendo; el ejemplo
+  ya no se verifica tal como está escrito. Texto original:
+  **A7. Schema gaps: "no calculado" ≠ "calculado pero no persistido" (S21)**:
   cuando un campo aparece None en JSONs, ANTES de proponer "agregar cómputo"
   verificar si la variable local YA se calcula y solo falta el key en el return
   dict. H_S21_11: process_viirs.py calculaba `std_bg_i04`, `threshold_mir`,
@@ -226,7 +231,14 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   Cuando audit script + bloque arranque + hipótesis log entries están pre-escritos, el
   cierre post-workflow toma <15 min en lugar de 1-2h. Workflow de 3h se "amortiza" haciendo
   trabajo paralelo offline.
-- **A17. CSV consolidado del scraper Nicolás actualizable**: el CSV en
+- **A17. ⚠️ OBSOLETA desde S77 — verificado S125.** El procedimiento manual
+  (`cp … latest_consolidado.csv` + commit + push) está **automatizado** por
+  `.github/workflows/sync-mirova-csv.yml` (cron 1 h), que cita a esta misma regla como
+  el bug que vino a arreglar. ⚠️ **Pero ojo (S125 B1)**: el canal OCR quedó partido en
+  dos — `data/mirova_reference/registro_vrp_ocr.csv` está **congelado en 2026-03-28**
+  (235 filas) mientras `.../mirova_v1_snapshot/registro_vrp_ocr.csv` llega al 2026-08-24
+  (887 filas). `scripts/build_c2ab_windows.py:55` consume el congelado. Texto original:
+  **CSV consolidado del scraper Nicolás actualizable**: el CSV en
   `data/mirova_reference/mirova_v1_snapshot/` tiene fecha de snapshot. Para audits con data
   fresca: descargar latest desde
   `https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_consolidado.csv`
@@ -279,7 +291,11 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   ruidoso. Para verdict robusto Tier A Muy Bajo: **multi-caso (3-5 ALERTAs)** +
   reportar moda + frecuencia, no single record. Mismo mecanismo que Tupungatito
   43% residual. Pendiente arquitectural S71+.
-- **A23. Path D dNTI ctx tiene FPs sistémicos en cirrus alto** (D9 ABIERTO, S70-2 T4):
+- **A23. ⚠️ OBSOLETA desde S113 — verificado S125.** D9 quedó **CERRADA en sus dos
+  caras** (`docs/MIROVA_DIVERGENCES.md:515`: «No quedan acciones abiertas en D9»). El
+  A/B de 3 alternativas que esta regla manda correr sería reabrir trabajo cerrado
+  (viola anti-A8). Se conserva el texto por historia:
+  **Path D dNTI ctx tiene FPs sistémicos en cirrus alto** (D9 ABIERTO, S70-2 T4):
   cuando `t_bg_k <260K` (cirrus alto frío) el path D dNTI contextual puede
   dispararse falsamente e inflar `pc.vrp_mw` **20-150×** vs ground truth. Trigger
   mecánico: kernel local 8-vecinos sobre cirrus uniforme da `dNTI` artificial
@@ -438,7 +454,11 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     requiere `PERPLEXITY_API_KEY` env var — si no está seteada, fallback a
     Chrome MCP es la opción.
 
-- **A42. GH Actions `workflow_dispatch` puede rechazar workflows con HTTP 422
+- **A42. ⚠️ OBSOLETA desde S74 — verificado S125.** La causa raíz **sí se determinó**:
+  es el «Norway Problem» de YAML 1.1 documentado en **A43** (`on:` sin comillas parsea
+  como booleano, hay que quotearlo `"on":`), aplicado en producción. Esta regla dice «no
+  vale el ROI determinar cuál» y manda a dar vueltas sobre algo resuelto. Texto original:
+  **GH Actions `workflow_dispatch` puede rechazar workflows con HTTP 422
   incluso post-merge a default branch** (S73 F2.8.f). Workarounds intentados:
   (1) extract Python heredoc a script externo (PR #134, no resolvió),
   (2) rename del archivo yml para forzar nuevo workflow ID (PR #138, no resolvió),
@@ -750,6 +770,15 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   Lastarria NO entra (su offset N es el campo fumarólico Lazufre, real — dato de campo).
   Ground truth + rediseño (Test1 integra NTI, núcleo `compute_test1_nti` #379):
   `docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md`.
+  - ⚠️ **OBSOLETO el cierre — verificado S125.** El rediseño que esta regla cita como
+    desenlace **NO está en producción**: `ENABLE_TEST1_NTI_INTEGRAL = False` (verificado
+    con `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p;
+    print(p.ENABLE_TEST1_NTI_INTEGRAL)"`), y la rama `compute_test1_nti` existe **sólo en
+    `process_viirs.py:958`** — `process_modis.py:674` y `process_viirs_mod.py:665`
+    importan únicamente `compute_test1_mir`, sin alternativa. **La causa raíz que A69
+    describe sigue viva en los 3 sensores.** Ni encendiendo el flag se cura MODIS/V750,
+    que es donde el píxel grande amplifica el gradiente (A80). Caso de manual de A87:
+    el flag no es el fenómeno. Detalle: `docs/AUDIT_S125_PROFUNDA.md` §2 O1.
 
 - **A70. Auditar el offset DIRECCIONAL con MEDIANA, no la distancia con media** (S104,
   refuerzo A61). La distancia mediana al cráter (Villarrica 1.87 km) OCULTÓ un sesgo
@@ -947,6 +976,31 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   evitaría EXISTE; (2) si el A/B da 0 daño, la cerca es anti-patrón A55 (carga que puede
   destruir cat-b) y no se implementa; (3) el criterio de la decisión es binario clon-literal
   ON/OFF uniforme — per-régimen/per-volcán está EXCLUIDO por MISSION l.77 (trap S99).
+
+- **A86. Anclar "hoy" a la hora del SERVIDOR en sesiones largas** (S123). Una sesión puede
+  abarcar días; la memoria de la sesión no es un reloj. En S123 razoné 8 días con la fecha
+  del 09-ago porque seguí tratando timestamps leídos al principio como si fueran de ahora:
+  reporté "NRT verde hace 5 días" cuando eran 13. **How to apply**: antes de afirmar "hoy",
+  "hace N días" o "reciente", pedir la hora al servidor (`gh api -i <repo>` → header `Date`).
+  Un timestamp leído hace 20 mensajes no es "ahora".
+
+- **A87. Un flag que se apaga NO prueba que el problema se fue** (S123). El auto-audit dejó
+  de marcar Villarrica (antes 7.70×) porque la magnitud sólo se evalúa en noches donde MIROVA
+  también publicó, y ese `n` es chico. El mecanismo seguía vivo: 482 píxeles del path BT y
+  2.107 MW medianos en agosto contra 0 y 0.060 en abril-mayo. **How to apply**: antes de
+  cerrar un hallazgo porque la métrica volvió a banda, verificar el **mecanismo** directamente
+  en los records (serie mensual del diagnóstico relevante). Las métricas con ventana rodante y
+  `n` chico dejan de señalar fenómenos que persisten. *(S125: esta regla es la que habría
+  atrapado el cierre obsoleto de A69 — el rediseño citado como desenlace está flag-OFF.)*
+
+- **A88. Data que pasa a alimentar el frontend deja de ser descartable en el mismo PR** (S123).
+  Un archivo que un PR convierte en insumo del dashboard no puede seguir tratándose como
+  artefacto temporal borrable en ese mismo PR.
+
+  *(A86-A88 nacieron en S123 y vivían **sólo** en la memoria del agente pese a estar declaradas
+  vinculantes en `MEMORY.md`; se incorporaron al archivo en S125 — hallazgo B5 de
+  `docs/AUDIT_S125_PROFUNDA.md`.)*
+
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
 
@@ -1197,8 +1251,10 @@ en S35 durante ~70 sesiones y confundía a las sesiones frías):
    mitigada de facto por el loader CONS∪OCR de S86 pero el doc nunca se actualizó)
    y **D12** (FN MODIS; C2 peak-of-kernel refutado en S122, cierre formal pendiente
    de Nicolás). **CERRADAS, no reabrir** (anti-A8): D9 (S113, sus dos caras),
-   D11 cara far→summit (S114, irreducible A82) y los gates intra-radio S84/S85
-   (flip OFF S118, verificado S119).
+   D11 cara far→summit (**⚠️ S125: leer con la rebaja de A82 — la auditoría S114
+   en que se apoya nunca miró el eje geométrico del ROI, así que el "irreducible"
+   vale para la vía espectral/de magnitud, NO bloquea una llegada por geometría**)
+   y los gates intra-radio S84/S85 (flip OFF S118, verificado S119).
 5. `docs/SESSION_INDEX_CONSOLIDATED_S80.md` — ancla histórica S1-S80
 
 **Regla**: al cerrar sesión NO escribir estado acá — va al bloque de arranque + memoria.

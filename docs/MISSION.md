@@ -78,6 +78,13 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
    de magnitud fiel debe ser uniforme por sensor (Coppola 2016a §98-119, §431-441,
    §689-695; Coppola 2024 §1148-1155).
 
+   ⚠️ **Nota de realidad (S125)**: el principio es correcto como norte, pero el
+   operacional **hoy sí conmuta por volcán**: `enable_test1_lbg_global` está gateado por
+   `lbg_global_compatible` en `volcanoes.yaml` (Láscar, NdC y Lastarria usan fondo global;
+   los otros 8, local), decisión tomada en S38 ("queda como mejora per-volcano"). No es
+   una licencia para agregar más conmutación — es deuda declarada, para que nadie use este
+   párrafo creyendo que describe el estado actual. Ver `docs/AUDIT_S125_PROFUNDA.md` §1 F2.
+
 2. **Si NO está en papers**, ¿cierra una divergencia ya documentada en
    `docs/MIROVA_DIVERGENCES.md`?**
    **El catálogo VIVO es el doc — esta lista es resumen (actualizada S105, AUDIT_S105):**
@@ -119,12 +126,12 @@ Estas fueron las desviaciones históricas. Nunca repetir.
 
 | Parche histórico | Razón rechazo | Estado |
 |---|---|---|
-| `MAX_SIGMA_COMPONENT_K=7K` cap eruption | No en papers; anula 5σ/10σ MIROVA | Removido S27 |
+| `MAX_SIGMA_COMPONENT_K=7K` cap eruption | No en papers; anula 5σ/10σ MIROVA | ⚠️ **Neutralizado por VALOR, no removido del código (S125).** El bloque corre en cada pasada; el perfil operacional lo pone en `999.0`, pero el **default del código es `7.0`** — un perfil que omita la clave resucita el parche en silencio. |
 | Vent-path entero | No en papers; sub-pixel debe ir por Test 1 (Coppola 2015) | Removido S27 |
 | `exclude_zones` (Salar, lagos) | No en papers; MIROVA no usa máscaras geográficas | Removido S27 |
 | Regla D vent-priority | Parche de clasificación visual, no en papers | Removido S27 |
-| Regla D Test 1-priority | Parche de composición de paths, no en papers | Removido S27 |
-| Cloud mask BT<260K | Laiolo 2026 textual: "no atmospheric correction or cloud-contamination automatic filtering" | Removido S27 |
+| Regla D Test 1-priority | Parche de composición de paths, no en papers | ⚠️ **SIGUE ACTIVA (corregido S125).** La fila decía "Removido S27" y es falsa: el bloque está vivo y **sin flag** en los 3 procesadores (`process_viirs.py:1502-1568`, `process_modis.py:1167-1204`, `process_viirs_mod.py:1055`) y además se **amplió** después de S27 — port a MODIS en S30, y ajustes en S44 y S111. Ver `docs/AUDIT_S125_PROFUNDA.md` §1 F1. |
+| Cloud mask BT<260K | Laiolo 2026 textual: "no atmospheric correction or cloud-contamination automatic filtering" | ⚠️ **SIGUE ACTIVA en VIIRS 375 (corregido S125).** La perilla del perfil existe y está neutra (`CLOUD_MASK_BT_K = 0.0`, que apaga la máscara en MODIS y V750), pero `process_viirs.py:674` tiene `CLOUD_BT_THRESHOLD = 260.0` **hardcodeado**, ignorando la perilla, y en `:678-681` lo aplica a `roi_mask` **y** `bg_mask`. Ciega ~23 % de las pasadas del sensor que hoy carga el recall, y a 260 K no distingue tope de nube de cumbre nevada. Retirarla es cambiar el literal por la constante del perfil (una línea, requiere A45). Ver `docs/AUDIT_S125_PROFUNDA.md` §1 F3. |
 | Pisos VRP por sensor | Coppola 2023 dice "floor ~1 MW" genérico, no por sensor | ⚠️ **SIGUEN ACTIVOS** (corregido S124). La fila decía "Removido S27" y era falsa: `pipeline/store.py:459-468` aplica `MIN_VRP_MW_VIIRS375=0.02`, `_VIIRS750=0.15`, `_MODIS=0.05` desde `mirova_equivalent.yaml:64-71`, y marca el record con `diag_vrp_floor_mw`. Alcance medido S124: **1564 de 23990 records summit (6,5%)**. Reintroducir un piso NO requiere pasar las 3 preguntas porque el piso ya está ahí — lo que hace falta es decidir si se retira. |
 | Path C NTI relativo (default ON) | No en papers | Default OFF mantenido |
 | Subir `inner_radius_km` ad-hoc | Parche para recuperar recall; no es metodológico MIROVA | Rechazado S27 |
