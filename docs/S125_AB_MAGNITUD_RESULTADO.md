@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 # A/B de magnitud S125 — resultado
+=======
+# A/B de magnitud S125 — resultado (4 ramas)
+>>>>>>> Stashed changes
 
 > Criterio fijado **antes** de correr: `docs/S125_AB_MAGNITUD_PREREGISTRO.md`.
 > Números recomputados y persistidos por
@@ -81,3 +85,63 @@ parches sin encender la corona) ya diera lo mismo, la corona sobra.
   no alcanza es la evidencia, no el mecanismo.
 - No adoptar "porque va en la dirección correcta": ese fue exactamente el error
   que las auditorías de S124 tumbaron. El criterio se fijó antes y no se cumple.
+<<<<<<< Updated upstream
+=======
+
+
+---
+
+# Cierre con las 4 ramas — la atribución
+
+Los brazos A y B corrieron después del piloto. Números en `02_veredicto.json`,
+recomputados por `02_veredicto_ab.py`.
+
+| volcán | n | control | A (corona sola) | B (parches OFF) | C (ambas) |
+|---|---|---|---|---|---|
+| Villarrica | 15 | 0,725 | 0,725 | **0,860** | 0,860 |
+| Planchón-Peteroa | 15 | 1,067 | 1,067 | **1,100** | 1,100 |
+| Láscar | 57 | 0,480 | 0,480 | **0,566** | 0,566 |
+| Puyehue-Cordón Caulle | 31 | 0,734 | 0,734 | **0,878** | 0,878 |
+
+**A ≡ control y B ≡ C, exactamente.** Promediando los 4 volcanes: el efecto de la
+corona sola es **+0,000**; el de apagar los parches, **+0,100**; el conjunto,
+**+0,100**. Todo el efecto viene de dejar de recortar la suma del cluster.
+
+## Salvedad importante sobre el brazo A
+
+La corona **sí se computó** (138 records con `corona_degraded`, y A difiere del
+control en 603 de 683 registros) pero está cableada **sólo en MODIS**
+(`process_modis.py:1049`, único call site). En VIIRS no existe.
+
+Como el emparejamiento contra MIROVA en estos 4 volcanes está dominado por
+VIIRS, la corona nunca toca las noches que se comparan. **El brazo A no probó lo
+que se diseñó para probar**: no dice "la corona no sirve", dice "la corona no
+llega adonde se mide". Probarla de verdad exige cablearla en VIIRS — trabajo de
+pipeline, no un flag.
+
+## Veredicto final: NO ADOPTAR, con la causa aislada
+
+Sigue fallando lo mismo que en el piloto (ningún volcán nuevo entra en banda; los
+IC se solapan), pero ahora se sabe **qué** produce el efecto y qué no.
+
+Y encaja con el hallazgo del piso VRP (ver más abajo): en las noches donde MIROVA
+alerta y nosotros suprimimos por piso, medimos **0,014 MW contra sus 0,240** — 17
+veces menos. Un +0,10 en la mediana no arregla un factor 17 en la cola baja.
+**El sub-reporte grueso está en otra parte**; las dos reducciones son una capa.
+
+## Hallazgo de infraestructura: un reproceso puede perderse en silencio
+
+El brazo A corrió completo —sus 8 trozos en verde— pero el job `merge`, que hace
+el push, fue **cancelado**: comparte el grupo de concurrencia `push-main` con el
+brazo B, que terminó casi al mismo tiempo, y GitHub mantiene un solo pendiente
+por grupo.
+
+Resultado: el run figura `cancelled` y parece que no corrió, cuando el cómputo
+estaba hecho y sólo faltaba guardarlo. Se recuperó de los artifacts sin
+re-computar los 90 minutos, replicando el merge local con la misma receta del
+workflow (`merge_chunk_stores.py --ventanas`), y los conteos coinciden con los
+otros brazos (683/621/552/696, 0 trozos faltantes).
+
+**Pendiente**: que el job `merge` reintente en vez de cancelarse. Hoy dos A/B que
+terminan juntos pueden costar una corrida entera sin que nada avise.
+>>>>>>> Stashed changes

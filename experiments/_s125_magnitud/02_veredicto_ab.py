@@ -23,7 +23,8 @@ import csv, json, math, os, random, statistics as st
 from collections import defaultdict
 
 ROOT = os.path.join(os.path.dirname(__file__), "..", "..")
-BRAZOS = {"control": "_s125_mag_control", "C": "_s125_mag_c"}
+BRAZOS = {"control": "_s125_mag_control", "A": "_s125_mag_a",
+          "B": "_s125_mag_b", "C": "_s125_mag_c"}
 VOLS = ["Villarrica", "PlanchonPeteroa", "Lascar", "PuyehueCordonCaulle"]
 BANDA = (0.7, 1.4)          # banda de paridad para la MEDIANA (no la de una deteccion suelta)
 
