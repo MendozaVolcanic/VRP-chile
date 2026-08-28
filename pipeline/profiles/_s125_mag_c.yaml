@@ -1,0 +1,30 @@
+# ============================================================================
+# _s125_mag_c — A/B de magnitud S125 (brazo c)
+# ============================================================================
+# C: Eq.6 fiel completa — el candidato
+#
+# POR QUE: la auditoria S125 (docs/AUDIT_S125_PROFUNDA.md) encontro que la
+# fisica de la magnitud es correcta y que el sub-reporte viene de DOS
+# reducciones aguas abajo de Eq.8 (R1 cluster_focal_vrp_mw, 61% de records
+# degradados a 1 pixel; R2 apply_single_pixel_mode, 15% con la suma reemplazada
+# por el maximo). Ambas parchean un sesgo del FONDO (anillo regional 5-25 km
+# donde Eq.6 pide el entorno inmediato) sin tocar el fondo.
+#
+# Criterio PRE-REGISTRADO: docs/S125_AB_MAGNITUD_PREREGISTRO.md
+# NO OPERACIONAL. data_subdir aislado.
+#
+# OJO NIVEL DEL YAML (T2): los tres enable_*_magnitude se leen de `paths:`
+# (profile.py:451,467,476) y enable_single_pixel_sub_mw_mode de la RAIZ
+# (profile.py:665). Ponerlos en el nivel equivocado los apaga EN SILENCIO.
+# ============================================================================
+extends: mirova_equivalent
+profile: _s125_mag_c
+description: >
+  C: Eq.6 fiel completa — el candidato
+paths:
+  enable_focal_cluster_magnitude: false
+  enable_focal_cluster_magnitude_viirs750: false
+  enable_local_cluster_magnitude: true
+enable_single_pixel_sub_mw_mode: false
+output:
+  data_subdir: _s125_mag_c
