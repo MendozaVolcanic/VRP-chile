@@ -94,4 +94,14 @@ else
   log "\n  El reproceso de NdC no cerro bien: revisar el run.\n"
 fi
 
+# ── 3) Tarea 3d — origen de la grilla de MIROVA por volcan (read-only)
+log "
+## Origen de la grilla de MIROVA, volcan por volcan (tarea 3d)
+"
+log "De sus GeoTIFF. Offset grande = celdas desalineadas con nuestra ancla:"
+log "mismo tamano de celda, distinta particion del terreno, otros vecindarios."
+log '```'
+python experiments/_s124_cuantizacion/02_origen_grilla_por_volcan.py >> "$LOG" 2>&1
+log '```'
+
 log "\n---\n**Orquestador terminado $(date -u +'%H:%M UTC').** Pendiente de decision humana: el veredicto F70 (tarea 2.4 del plan) — nada se promueve sin confirmacion explicita (A45).\n"
