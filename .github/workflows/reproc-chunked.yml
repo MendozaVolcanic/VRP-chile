@@ -40,8 +40,22 @@ name: Reproc por trozos (generico, cualquier perfil A/B)
 permissions:
   contents: write
 
+# Concurrencia POR PERFIL, no global (S124). Antes el grupo era
+# `reproc-chunked` a secas, asi que dos A/B de perfiles DISTINTOS —que no se
+# pisan, porque cada uno escribe a su propio data_subdir— se serializaban sin
+# necesidad, y despachar un tercero EXPULSABA al pendiente (GitHub guarda 1
+# pendiente por grupo; nos costo 2 runs cancelados). Con el perfil en el nombre
+# del grupo, N perfiles corren en paralelo.
+#
+# El limite real pasa a ser el de GitHub: 20 jobs concurrentes en repo publico.
+# A `max-parallel: 8` por run, entran 2 brazos completos a la vez (16) dejando
+# holgura para el cron NRT.
+#
+# El push a main NO se paraleliza: ese riesgo (carrera S25, `pull --rebase -X
+# theirs` descartando records) se controla en el job `merge`, que declara el
+# grupo `push-main` compartido con los otros 6 workflows que pushean (CLAUDE.md).
 concurrency:
-  group: reproc-chunked
+  group: reproc-chunked-${{ github.event.inputs.profile }}
   cancel-in-progress: false
 
 jobs:
@@ -138,6 +152,10 @@ jobs:
 
   merge:
     needs: [plan, reproc]
+    # El push a main se serializa con los demas workflows que escriben al repo.
+    concurrency:
+      group: push-main
+      cancel-in-progress: false
     # `always()` acotado a que el PLAN haya salido bien: si un trozo falla, se
     # conservan los que si terminaron y el resto se relanza sobre esa ventana
     # (lo que no se pudo hacer cuando el primer intento murio por timeout). Pero
