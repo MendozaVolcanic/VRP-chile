@@ -42,6 +42,60 @@ timeout 180 min/job; `max_days=37` seguro. Brazos F70: 11 vols × 2 trozos =
 
 ---
 
+> ## ⏱️ ESTADO tras la noche del 27→28-ago (actualizado con resultados)
+>
+> | tarea | estado |
+> |---|---|
+> | 0 · NdC v2 | ✅ **hecha 2 veces**: la 1ª salió con el merge roto (meses sin reprocesar, run verde); la 2ª verificada — todos los meses cambiaron. Foco: 23 noches |
+> | 1 · brazo A | ✅ cerrado 24/24 · **ratio ≡ control**: la grilla sola es nula |
+> | 2 · brazo B | ✅ cerrado · **B ≡ C**: el efecto es del kernel, la grilla no aporta |
+> | 2.4 · veredicto | ✅ **NO ADOPTAR** — [`S124_F70_VEREDICTO.md`](../../S124_F70_VEREDICTO.md), D16 refutada |
+> | 3d · origen de grilla | ✅ hecha — **destapó D17**, la hipótesis viva |
+>
+> **Bug de infraestructura encontrado y arreglado en el camino**: el merge por
+> trozos resucitaba meses sin reprocesar dejando el run en verde. Con test de
+> regresión. Invalidaba silenciosamente cualquier reproceso sobre un subdir con
+> data previa.
+>
+> **Lo que cambia para adelante**: F70.5 (promoción) queda **cancelada** — no hay
+> qué promover. La tarea 3 se reordena: el brazo D (D17) pasa a ser la
+> prioridad, porque es la única hipótesis viva sobre el sub-reporte.
+
+---
+
+### Tarea 4 (NUEVA, prioridad) — Brazo D: la grilla alineada al centro de MIROVA
+
+**Pregunta:** ¿el sub-reporte viene de que nuestras celdas, del tamaño correcto,
+particionan el terreno en el lugar equivocado?
+
+**Por qué ahora:** D16 refutó la grilla *alineada a nuestra ancla*. D17 mostró
+que MIROVA centra la suya hasta 7,6 km más allá. Es la única explicación viva
+que queda tras descartar halo, cluster, second-run, piso, fondo del anillo y
+sustrato.
+
+- [ ] **4.1 Leer el centro de grilla de los 11 desde los GeoTIFF** y persistirlo
+  en `volcanoes.yaml` como campo nuevo `mirova_grid_center` (NO tocar
+  `mirova_center`, que tiene excepciones deliberadas — regla A63).
+
+- [ ] **4.2 Perfil `_f70_d.yaml`**: `extends: _f70_b` + el centro leído. El
+  regrid ya acepta `center_lat/center_lon` como parámetro (F70.2), así que el
+  cambio es de config, no de código.
+
+- [ ] **4.3 Criterio pre-registrado, a escribir en el yaml ANTES de correr:**
+  - **JUEZ**: PCC y Tupungatito (offsets de 7,6 y 4,8 km) deben moverse hacia
+    1,0 **más que en el brazo B**. Si no se mueven, D17 se refuta.
+  - **CONTROL INTERNO**: Isluga y Lastarria (offset 45-61 m) **no deben
+    cambiar** — su grilla ya estaba alineada. Si cambian, el efecto no es la
+    alineación sino otra cosa, y el brazo no prueba lo que dice.
+  - Guardas 2-4 y A79 idénticas al brazo B.
+
+- [ ] **4.4 Correr** con `reproc-chunked.yml`, misma ventana
+  (2026-06-25..2026-08-24), mismos 11, `max_days=37` (~2 h 45 min).
+
+- [ ] **4.5 Leer apareado + tabla de 5 brazos + veredicto.** Presentar a Nicolás.
+
+---
+
 ### Tarea 0 — NdC experimental v2 (CORRIENDO: run 33113486321)
 
 **Pregunta que responde:** ¿el experimental difiere de la réplica SOLO por el
@@ -255,7 +309,7 @@ print("Lastarria NO roto, recall sin caidas >2pp, offset espacial <= control.")
 
 ### Tarea 3 — Post-veredicto (decisiones separadas, UNA a la vez)
 
-- [ ] **3a. Si B pasa → diseño de promoción F70.5** (no ejecutar en esta
+- [x] ~~**3a. Si B pasa → diseño de promoción F70.5**~~ — **CANCELADA**: B no pasó (no ejecutar en esta
   tanda): tag defensivo `pre-s12X-f70-promote`, flip de `enable_utm_regrid` +
   kernel global en `mirova_equivalent`, reproc histórico **staged** (1 volcán
   piloto → verificar → los 11), actualización FICHA SDA (cambio metodológico
