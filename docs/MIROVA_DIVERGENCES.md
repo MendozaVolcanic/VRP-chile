@@ -1638,31 +1638,47 @@ cosa: ver D17.
 
 ---
 
-## D17 — Las grillas de MIROVA están DESALINEADAS de nuestra ancla — **ABIERTA** S124
+## D17 — Nuestra grilla F70 se centró en el punto equivocado — **ABIERTA** S124/S125
 
-**El hallazgo.** Leyendo el `transform` de los GeoTIFF del archivo (tarea 3d del
-plan de reprocesos), el centro de la grilla de MIROVA **no coincide con nuestra
-ancla** en la mayoría de los volcanes:
+> ⚠️ **CORREGIDA el 28-ago.** La primera versión midió el offset contra
+> `vent_lat/lon` (el cráter) y presentó como hallazgo algo que **ya estaba
+> documentado** en `pipeline/geo_utils.py:14-22` desde S98: que el frame de
+> MIROVA está lejos del cráter en Tupungatito (4,86 km), PCC (7,57 km) y PP
+> (2,02 km). Eso es una **separación deliberada de roles**, no un error —
+> `mirova_center` es el marco de la imagen, `vent` es donde está el calor.
+> Redescubrirlo fue una trampa A50: la respuesta estaba en el repo.
 
-| volcán | offset | | volcán | offset |
+**El hallazgo que SÍ queda en pie**, con la medición correcta:
+
+Nuestro regrid F70 se centró en `volcano["lat"]/["lon"]` (el centroide del
+volcán, lo que `run_pipeline` pasa como `volcano_lat/lon`). MIROVA centra en
+`mirova_center` (verificado: el `mirova_center_lat/lon` del yaml, derivado de
+los KMZ en S80, coincide con el centro de los GeoTIFF dentro de 10-408 m).
+
+| volcán | offset F70 vs MIROVA | | volcán | offset |
 |---|---|---|---|---|
-| **PuyehueCordonCaulle** | **7618 m** | | Láscar | 841 m |
-| **Tupungatito** | **4796 m** | | Villarrica | 705 m |
-| **Planchón-Peteroa** | **2013 m** | | Chaitén | 607 m |
-| Llaima · Copahue · NdC | 140-144 m | | Isluga · Lastarria | 45-61 m |
+| **Tupungatito** | **2996 m** | | Isluga | 368 m |
+| **Planchón-Peteroa** | **1873 m** | | Lascar | 186 m |
+| Chaitén | 396 m | | PuyehueCordonCaulle | 147 m |
+| Villarrica | 389 m | | Llaima | 142 m |
+| NevadosDeChillán | 385 m | | Copahue | 140 m |
+| | | | Lastarria | 115 m |
 
-**Por qué importa.** Implementamos el tamaño de celda correcto (verificado
-verbatim contra Campus 2022 y contra sus propios GeoTIFF), pero anclamos la
-grilla a *nuestra* cumbre. Con el origen desplazado, **las celdas no coinciden**:
-mismo tamaño, distinta partición del terreno. Los ocho vecinos de un píxel
-promedian un vecindario distinto, y el fondo del VRP sale distinto.
+Mediana **368 m**, máximo 2996 m. Con celda de 375 m, **un offset > 187 m ya
+desplaza la partición media celda**: eso ocurre en **6 de 11**.
 
-**Esto podría explicar por qué D16 salió nula**: probamos la grilla, pero
-alineada al lugar equivocado.
+**Y hay un cabo suelto que lo hace verosímil**: `pipeline/geo_utils.py` define
+`get_grid_center()` justamente para esto — devolver el centro de grilla de
+MIROVA con prioridad `mirova_center` → `vent` → `lat/lon`. **Nadie la llama.**
+Existe desde S98, sin uso.
 
-**Y ordena una vieja rareza**: los dos volcanes con mayor offset son PCC y
-Tupungatito — justo los dos casos históricamente más difíciles del proyecto
-(A19, A20, D7). Es una coincidencia que vale la pena mirar de frente.
+**Evidencia empírica a favor** (S124, brazo B): el efecto de la grilla
+correlaciona con la desalineación medida contra el cráter — PCC −0,104 ·
+Láscar +0,110 · Isluga +0,110 · r = −0,47 (n=8, p≈0,24). Sugestivo, sin poder.
+
+**Test (brazo D)**: regrid centrado en `get_grid_center()` en vez de
+`volcano["lat"/"lon"]`. Es un cambio de una línea en el llamador, y usa una
+función que ya existe y está testeada.
 
 **Test propuesto (brazo D)**: grilla ON + kernel global + centro de grilla
 tomado del GeoTIFF de MIROVA, en los 6 volcanes con offset >500 m. Reusa toda
