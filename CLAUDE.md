@@ -205,7 +205,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   → magnitud 8-15× MIROVA. Vols con ΔT >20K (Lascar 21.6K, Isluga ~20K) calibrados
   naturalmente sin fix. Fix kernel-bg (Coppola 2024 L1129) reduce 70-90% del gap en Muy
   Bajo (validado Villarrica/PP S61).
-- **A13. `Distancia_km` MIROVA Villarrica fija 0.84 km = idiosincrasia**: MIROVA mide dist
+- **A13. ⚠️ FALSA — corregida S124.** Villarrica NO tiene distancia fija 0.84:
+  sobre n=3338, el valor es **0.0 en 3284 casos** (98 %) y 0.84 solo 15 veces. El
+  mecanismo propuesto (coord GVP nominal) además quedó superado por **D15**: el
+  campo está **cuantizado a la celda de grilla** de MIROVA, así que «0.0» significa
+  «en la misma celda que su referencia», no «a 0 km del cráter». Texto original:
+  **`Distancia_km` MIROVA Villarrica fija 0.84 km = idiosincrasia**: MIROVA mide dist
   desde coord Smithsonian GVP nominal (no centroide variable). Smithsonian Villarrica
   (-39.42,-71.93) está a 0.85 km del cráter actual (-39.420292,-71.939908). NO afecta
   nuestra magnitud VRP. Otros vols con cráter grande sí muestran dist variable. NO
@@ -351,7 +356,11 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   4. Notas Vault `ai_generated` — síntesis útil para ideas, NO para valores
      numéricos sin verificación cruzada.
 
-- **A36. sec³(θ_z) scan-angle elongation puede multiplicar discrepancias
+- **A36. ⚠️ OBSOLETA desde S102/S103 — verificado S124.** El pipeline YA NO
+  aplica sec³: `ENABLE_NADIR_FIXED_PIXEL_AREA_{MODIS,VIIRS}=True` hacen que
+  `scan_geometry.py` devuelva área uniforme (A66/A67). Un audit que hoy siga esta
+  regla mete un factor 1-5× **espurio**. Se conserva el texto por historia:
+  **sec³(θ_z) scan-angle elongation puede multiplicar discrepancias
   factor 1-5×** (S73 F2.8): MODIS pixels off-nadir tienen área efectiva mucho
   mayor que nominal 1km². Para sensor angle θ_z = 50° → factor 3.74. Cualquier
   análisis manual o script de verificación que ignore esto produce
@@ -866,7 +875,14 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   ancla honesta — verificar data fresca antes de asumir el problema. Detalle:
   [[reference_s113_a46_bidirectional]] + `docs/S113_A46_COHERENCE_GUARD.md`.
 
-- **A82. El far→summit MODIS / sobre-detección difusa A69 es FÍSICAMENTE IRREDUCIBLE a 1 km dentro
+- **A82. ⚠️ REBAJADA S124: «agotado» ya no aplica.** La auditoría S114 en que se
+  apoya cubrió umbrales, tests, kernel y second-run — **NO la geometría del ROI**.
+  S124 mostró que la grilla UTM de MIROVA no está replicada y que
+  `geo_utils.get_grid_center()` (escrita en S98 justo para eso) **nunca se cableó**
+  (D17). Un eje no auditado ≠ eje agotado. Sigue valiendo todo lo que la regla
+  descartó por vía espectral/de magnitud; **NO** sigue valiendo el «no reabrir» si
+  alguien llega por la vía geométrica. Texto original:
+  **El far→summit MODIS / sobre-detección difusa A69 es FÍSICAMENTE IRREDUCIBLE a 1 km dentro
   del clon literal; a esa resolución el foco sub-píxel débil y el gradiente topográfico difuso son
   el mismo objeto en TODOS los ejes medibles** (S114, cierre exhaustivo de D11-MODIS). La
   re-auditoría por sensor con data fresca dio recall dashboard VIIRS375 99% / VIIRS750 86% / **MODIS
