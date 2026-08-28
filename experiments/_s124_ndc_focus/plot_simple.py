@@ -227,16 +227,8 @@ C_MIR, C_REP, C_FOC = "#cc3311", "#88a8c8", "#1a7a33"
 
 # Panel A — quién detectó cada noche
 axA.set_title("¿Quién detectó, cada noche?", loc="left", fontsize=11)
-# FEEDBACK NICOLAS (S125): "poner los umbrales de cada sensor, que tan bajo lee
-# MIROVA". Medido sobre el consolidado COMPLETO (todos los volcanes, todas las
-# alertas con VRP>0): el piso es practicamente el mismo en los 9 volcanes con
-# n>=5 (0,010 a 0,050 MW en VIIRS375), asi que no es un ajuste por volcan.
-axA.text(0.9955, 0.03,
-         "Lo más bajo que MIROVA llegó a publicar, en todos los volcanes:\n"
-         "VIIRS 375 m  0,010 MW   ·   VIIRS 750 m  0,090   ·   MODIS  0,140",
-         transform=axA.transAxes, ha="right", va="bottom", fontsize=7.2,
-         color="#444", linespacing=1.35, zorder=6,
-         bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="#bbb", lw=0.6, alpha=0.93))
+# El piso de MIROVA por sensor (medido sobre el consolidado COMPLETO, todos los
+# volcanes) va en la NOTA AL PIE, no en un recuadro flotante (feedback Nicolas).
 for y, (serie, color, marker, size) in enumerate([
         (foco,    C_FOC, "s", 42),
         (replica, C_REP, "o", 30),
@@ -247,9 +239,9 @@ for y, (serie, color, marker, size) in enumerate([
 # foco) no aportaban al analisis y agregaban un simbolo mas que descifrar. Se
 # quitan del grafico; siguen listadas en la nota al pie.
 axA.set_yticks([0, 1, 2])
-axA.set_yticklabels(["Experimental\n(umbral 0,005 MW)",
-                     "Réplica MIROVA\n(umbral 0,02 MW)",
-                     "MIROVA publicó\n(alerta térmica)"], fontsize=9)
+axA.set_yticklabels(["Experimental\n(piso 0,005 MW)",
+                     "Réplica\n(nuestro dashboard)",
+                     "MIROVA\n(publicó ese día)"], fontsize=9)
 axA.set_ylim(-0.85, 2.6)
 axA.grid(True, axis="x", alpha=0.25)
 axA.tick_params(axis="y", length=0)
@@ -269,10 +261,11 @@ _h0, _h1 = datetime.fromisoformat("2026-07-07"), datetime.fromisoformat("2026-08
 axA.annotate("", xy=(_h0, 0.35), xytext=(_h1, 0.35),
              arrowprops=dict(arrowstyle="<->", color="#8a6d3b", lw=1.1))
 axA.text(_h0 + (_h1 - _h0) / 2, 1.22,
-         "seis semanas sin señal EN EL CRÁTER — y MIROVA tampoco publicó nada acá.\n"
-         "No es que el volcán se apagara ni que faltaran pasadas: hubo 30 detecciones\n"
-         "nuestras a 1–3 km del cráter y sólo 1 dentro de los 500 m. El calor siguió,\n"
-         "repartido por el edificio volcánico, sin un foco concentrado en el cráter.",
+         "seis semanas sin señal en el cráter — MIROVA tampoco publicó nada acá.\n"
+         "No faltaron pasadas ni estuvo todo nublado: simplemente no hubo un foco\n"
+         "caliente que detectar. Lo que sí quedó fueron 35 detecciones sueltas a\n"
+         "1–3 km, de un solo píxel y con el índice térmico en su valor más bajo:\n"
+         "indistinguibles del ruido del terreno, no evidencia de calor volcánico.",
          ha="center", va="center", fontsize=6.9, color="#5c4a25", linespacing=1.3,
          zorder=6,
          bbox=dict(boxstyle="round,pad=0.28", fc="#fdf6e3", ec="#c9b458", lw=0.7, alpha=0.96))
@@ -311,10 +304,10 @@ axC.set_title("¿Se pudo ver el terreno esa noche?   —   barra ALTA = se vio b
 axB.set_title("¿Cuánta energía? (misma noche, mismo sensor)", loc="left", fontsize=11)
 ax_foco_x = dts(foco)
 axB.plot(ax_foco_x, [foco[x.strftime("%Y-%m-%d")] for x in ax_foco_x], "s", ms=7,
-         color=C_FOC, zorder=3, label=f"Experimental: radio {FOCO_KM*1000:.0f} m al cráter + umbral 0.005 MW")
+         color=C_FOC, zorder=3, label="Experimental (piso 0,005 MW)")
 xs = dts(mirova)
 axB.plot(xs, [mirova[x.strftime("%Y-%m-%d")] for x in xs], "*", ms=17, color=C_MIR,
-         mec="k", mew=0.6, ls="none", zorder=5, label="MIROVA (las veces que publicó alerta)")
+         mec="k", mew=0.6, ls="none", zorder=5, label="MIROVA")
 
 # anotar las noches en que MIROVA y el experimental coinciden
 for i, f in enumerate(sorted(set(mirova) & set(foco))):
@@ -328,7 +321,7 @@ for i, f in enumerate(sorted(set(mirova) & set(foco))):
 
 xs = dts(replica)
 axB.plot(xs, [replica[x.strftime("%Y-%m-%d")] for x in xs], "o", ms=4.5, color=C_REP,
-         mec="#1f4e79", mew=0.7, zorder=4, label="Réplica MIROVA (lo que ve el dashboard hoy)")
+         mec="#1f4e79", mew=0.7, zorder=4, label="Réplica (nuestro dashboard)")
 
 axB.set_ylabel("Potencia radiada VRP (MW)")
 axB.set_ylim(bottom=0)
@@ -351,16 +344,25 @@ plt.setp(axB.get_xticklabels(), rotation=0, fontsize=8.5)
 # concretas, en su orden natural, y la metodologia queda en los comentarios.
 _n_sin_radio = len(replica_sin_radio)
 nota = (
-    f"Las tres series miran lo mismo: el cráter, a menos de {FOCO_KM*1000:.0f} m. Réplica y experimental detectan las mismas "
-    f"{len(replica)} noches: bajar el umbral de 0,02 a 0,005 MW no agrega nada acá.\n"
-    f"Sin acotar al cráter, la réplica publicaría {_n_sin_radio} noches en el dashboard; las otras "
-    f"{_n_sin_radio - len(replica)} son señal del edificio volcánico a 1–3 km, no del cráter.\n\n"
-    "MIROVA vio esas noches y las llamó RUTINA, sin alerta: no le faltó el dato. Su umbral no es de energía sino de CONTRASTE contra el fondo, "
-    "así que una misma potencia puede pasar\n"
-    "o no según qué tan parejo esté el terreno. Por eso hay noches nuestras de 0,04–0,08 MW sin alerta suya, estando por encima de su mínimo publicado.\n\n"
-    "Barras: alta = terreno con contraste, se pudo medir · baja = escena pareja, probable nube · "
-    f"roja = no hubo fondo medible ({sum(_ciego)} noches, y ninguna tiene detección).\n"
-    "Es un proxy del terreno, no una medición de nubes: la máscara oficial del sensor (CLDMSK_L2_VIIRS) sería lo correcto."
+    f"Las tres series miran el cráter, a menos de {FOCO_KM*1000:.0f} m. Réplica y experimental detectan las mismas {len(replica)} noches: "
+    f"bajar el piso de 0,02 a 0,005 MW no agrega nada acá.\n"
+    f"Sin acotar al cráter, la réplica publicaría {_n_sin_radio} noches; las otras {_n_sin_radio - len(replica)} caen a 1–3 km, sobre el edificio, no en el cráter.\n\n"
+
+    "Lo más bajo que MIROVA llegó a publicar, en todos los volcanes:  VIIRS 375 m  0,010 MW  ·  VIIRS 750 m  0,090  ·  MODIS  0,140. "
+    "Nuestro piso es 0,02 y sólo 1 de sus 1000 alertas\n"
+    "VIIRS 375 m quedó por debajo, así que casi no perdemos nada por ahí. Igual acá se ven valores menores: el piso se aplica al VRP de toda la escena, "
+    "no al del cráter, que es el que se grafica.\n\n"
+
+    "Por qué MIROVA no alertó en noches donde nosotros medimos más que su mínimo: tuvo el dato en todas (nuestro scraper las archiva como RUTINA, "
+    "etiqueta nuestra, no de ellos) pero su\n"
+    "algoritmo no las marcó. Su criterio no es cuánta energía hay sino cuánto DESTACA el punto caliente sobre el terreno de esa noche, así que la misma "
+    "potencia puede pasar o no según el fondo.\n\n"
+
+    "Barras: la altura es cuánto contraste térmico tenía el terreno. Alta = se vio bien · baja = terreno parejo, probablemente nublado · "
+    f"roja = no se pudo medir el fondo ({sum(_ciego)} noches, ninguna\n"
+    "con detección). Las rojas ocurren cuando el filtro de nubes descarta casi todo el anillo de referencia: en esas noches descartó ~10.000 píxeles "
+    "contra ~1.100 en una noche normal.\n"
+    "El filtro corta por temperatura (260 K), y a esta altitud en invierno la nieve está igual de fría que una nube baja, así que también se lleva terreno."
 )
 if mirova_excluidas:
     _exc = "  ·  ".join(x[0] + " " + format(x[1], ".2f") + " MW " + x[3] for x in sorted(mirova_excluidas))

@@ -108,7 +108,7 @@ if foc:
                edgecolors="#14501f", lw=0.6, zorder=4,
                label=f"experimental: {len(foc)} clusters dentro del foco de {FOCO_KM*1000:.0f} m "
                  f"en {len(_foc_noches)} noches")
-ax.plot(0, 0, "^", ms=16, c="#cc3311", mec="k", zorder=5, label="cráter Nicanor (coordenada de Nicolás)")
+ax.plot(0, 0, "^", ms=16, c="#cc3311", mec="k", zorder=5, label="cráter Nicanor")
 
 # ── MIROVA: lo que su Distancia_km REALMENTE dice ───────────────────────────
 # AUDITORIA S124 (Nicolás preguntó "¿respecto a qué punto mide?" y la respuesta
@@ -147,7 +147,8 @@ for k in range(134 + 1):
 _cgx = (-71.378535 - NIC[1]) * _kx
 _cgy = (-36.863270 - NIC[0]) * 111.32
 ax.plot(_cgx, _cgy, "*", ms=15, c="#cc3311", mec="white", mew=0.9, zorder=6,
-        label="centro de la grilla MIROVA (de sus GeoTIFF): 439 m al N del cráter")
+        label=("centro de la grilla de MIROVA: cae sobre la coordenada de\n"
+               "catálogo del complejo (a 140 m), no sobre el cráter (a 439 m)"))
 ax.plot([], [], color="#cc3311", lw=0.9, alpha=0.6,
         label="grilla MIROVA publicada (reproyectada; celdas ~375 m)")
 
@@ -156,7 +157,21 @@ ax.set_ylabel("km al Norte del cráter")
 ax.set_xlim(-LIM, LIM); ax.set_ylim(-LIM, LIM)
 ax.set_aspect("equal")
 ax.grid(True, alpha=0.18, color="white", lw=0.6)
-ax.legend(loc="lower left", fontsize=8.5, framealpha=0.95)
+
+# Barra de escala (feedback Nicolas): el eje ya esta en km, pero una barra
+# permite estimar distancias sin leer los ticks.
+_sb = 0.25   # km
+_x0, _y0 = LIM - _sb - 0.10, -LIM + 0.10
+ax.plot([_x0, _x0 + _sb], [_y0, _y0], "-", color="white", lw=4.5, solid_capstyle="butt", zorder=9)
+ax.plot([_x0, _x0 + _sb], [_y0, _y0], "-", color="black", lw=2.0, solid_capstyle="butt", zorder=10)
+ax.text(_x0 + _sb / 2, _y0 + 0.035, f"{_sb*1000:.0f} m", ha="center", va="bottom",
+        fontsize=8.5, color="black", zorder=10,
+        bbox=dict(boxstyle="square,pad=0.12", fc="white", ec="none", alpha=0.8))
+# FEEDBACK NICOLAS (S125): los iconos se superponian. Mas interlineado,
+# handles mas separados y la leyenda ANCLADA DEBAJO del eje, no encima.
+ax.legend(loc="upper left", bbox_to_anchor=(0.0, -0.085), fontsize=8.2,
+          framealpha=0.95, labelspacing=0.85, handlelength=2.4,
+          handletextpad=0.9, borderpad=0.7, ncol=1)
 ax.text(0.98, 0.98,
         "MIROVA publicó además 3 alertas FUERA de esta ventana:\n"
         "15-jul 0.02 MW @ 2.86 km  ·  26-ago 0.02 MW @ 3.02 km\n"
@@ -164,8 +179,8 @@ ax.text(0.98, 0.98,
         transform=ax.transAxes, ha="right", va="top", fontsize=8, color="#8a1f0e",
         bbox=dict(boxstyle="round,pad=0.35", fc="#fff6f4", ec="#cc8877", alpha=0.95),
         zorder=8)
-ax.text(0.02, 0.98, "El tamaño del punto crece con el VRP.",
-        transform=ax.transAxes, va="top", fontsize=8.5, color="#444",
+ax.text(0.02, 0.02, "El tamaño del punto crece con el VRP.",
+        transform=ax.transAxes, va="bottom", fontsize=8.5, color="#444",
         bbox=dict(boxstyle="round,pad=0.35", fc="#f7f7f7", ec="#bbb"))
 ax.text(0.995, 0.005, ATRIBUCION, transform=ax.transAxes, ha="right", va="bottom",
         fontsize=7.5, color="white", zorder=6,
