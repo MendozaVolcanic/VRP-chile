@@ -1,0 +1,44 @@
+# ============================================================================
+# _s125_viirs_g — A/B del sub-reporte de VIIRS375 (brazo g)
+# ============================================================================
+# G: apaga ambas
+#
+# POR QUE (docs/S125_DIAGNOSTICO_SUBREPORTE_VIIRS.md): el ratio vs MIROVA es
+# MODIS 1.08 / V750 0.83 / V375 0.69 sobre 1049 pares nocturnos. El sub-reporte
+# vive en VIIRS375, y las dos piezas que solo ese sensor tiene son:
+#
+#   (1) enable_test1_contextual_filter (process_viirs.py:1628-1639) — recorta los
+#       pixeles del Test1 a los contextualmente anomalos + pico. Medido: 87% de
+#       los clusters VIIRS375 quedan de UN solo pixel (0.14 km2 integrados)
+#       contra 4 px / 4.0 km2 en MODIS. 28x menos area.
+#
+#   (2) enable_test1_intermediate_bg con anillo [1.5,3] km
+#       (process_viirs.py:1656-1678), CON PRECEDENCIA sobre el global. MODIS y
+#       V750 usan el global 5-25 km. Un anillo a 1.5-3 km cae SOBRE el edificio,
+#       dentro de la aureola termica — lo que Eq.6 de Coppola busca evitar.
+#       Medido: el fondo de V375 esta +2.49 K mas caliente que el de V750 en la
+#       MISMA pasada, en el 100% de 21.511 pares.
+#
+# El A/B de magnitud anterior (_s125_mag_*) NO toco ninguna de las dos: apago
+# cluster_focal (que ni siquiera aplica a VIIRS375), single_pixel_mode (el
+# menor) y la corona (cableada solo en MODIS). Por eso solo movio +0.10.
+#
+# CONTROL INTERNO del A/B: MODIS y VIIRS750 NO deben cambiar — ninguna de las dos
+# piezas los toca. Si cambian, el A/B esta mal montado.
+#
+# NIVEL DEL YAML (T2, verificado con pipeline.profile, no leyendo el archivo):
+# los dos enable_* se leen de `paths:` (profile.py:257,365); el anillo, de
+# `thresholds:` (profile.py:369). En el nivel equivocado quedan inertes EN
+# SILENCIO.
+#
+# NO OPERACIONAL. data_subdir aislado.
+# ============================================================================
+extends: mirova_equivalent
+profile: _s125_viirs_g
+description: >
+  G: apaga ambas
+paths:
+  enable_test1_contextual_filter: false
+  enable_test1_intermediate_bg: false
+output:
+  data_subdir: _s125_viirs_g
