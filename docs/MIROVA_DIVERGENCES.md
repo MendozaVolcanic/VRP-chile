@@ -1595,3 +1595,79 @@ desplazado, nuestras celdas no coinciden con las suyas y el sustrato de
 detección difiere aunque la resolución sea idéntica — dos píxeles del mismo
 tamaño pero corridos median vecindarios distintos. Pendiente de diseñar; no
 bloquea el A/B de F70.3, pero puede explicar un residual.
+
+---
+
+## D16 — La grilla UTM NO explica el sub-reporte — **CERRADA (refutada) S124**
+
+**Qué se probó.** El frente F70 postuló que nuestro sub-reporte de magnitud
+venía del sustrato geométrico: MIROVA detecta sobre una grilla UTM resampleada
+y nosotros sobre el swath crudo, donde "los ocho vecinos" son objetos distintos
+en cada pasada. A/B de 4 brazos con criterios pre-registrados (A66), 11 Tier A,
+ventana 2026-06-25..08-24.
+
+**Resultado: la hipótesis se refuta.** Detalle en
+[`S124_F70_VEREDICTO.md`](S124_F70_VEREDICTO.md).
+
+| | Láscar | Isluga | Lastarria | Tupungatito (juez) |
+|---|---|---|---|---|
+| control | 0,47 | 0,70 | 0,36 | 0,81 |
+| **A** (grilla sola) | 0,46 | 0,69 | 0,34 | 0,82 |
+| **B** (grilla + kernel) | 0,58 | 0,81 | 0,34 | **0,81** |
+| C (kernel solo) | 0,58 | 0,81 | — | 0,81 |
+
+Tres lecturas, todas con dato:
+
+1. **La grilla sola es nula**: A ≡ control.
+2. **B ≡ C**: todo el efecto viene del kernel de vecinos; la grilla no aporta
+   nada encima. La hipótesis era que la grilla haría funcionar al kernel — no lo
+   hace.
+3. **El kernel tampoco alcanza**: Láscar 0,47→0,58, dirección correcta,
+   insuficiente.
+
+**Verificación de que el regrid sí corrió** (no es un falso negativo por flag
+apagado): las coordenadas de los píxeles anómalos pasan de estar dispersas en
+el control (separaciones de 6-37 m, swath crudo) a estar **cuantizadas a 375 m
+exactos** en A y B.
+
+**Sin daño colateral**: recall VIIRS375 96 % → 96 %, sin migración de cluster
+(±0,08 km), 0 de 19 eventos ancla perdidos.
+
+**NO REABRIR** como "probemos la grilla" (anti-A8). Lo que queda vivo es otra
+cosa: ver D17.
+
+---
+
+## D17 — Las grillas de MIROVA están DESALINEADAS de nuestra ancla — **ABIERTA** S124
+
+**El hallazgo.** Leyendo el `transform` de los GeoTIFF del archivo (tarea 3d del
+plan de reprocesos), el centro de la grilla de MIROVA **no coincide con nuestra
+ancla** en la mayoría de los volcanes:
+
+| volcán | offset | | volcán | offset |
+|---|---|---|---|---|
+| **PuyehueCordonCaulle** | **7618 m** | | Láscar | 841 m |
+| **Tupungatito** | **4796 m** | | Villarrica | 705 m |
+| **Planchón-Peteroa** | **2013 m** | | Chaitén | 607 m |
+| Llaima · Copahue · NdC | 140-144 m | | Isluga · Lastarria | 45-61 m |
+
+**Por qué importa.** Implementamos el tamaño de celda correcto (verificado
+verbatim contra Campus 2022 y contra sus propios GeoTIFF), pero anclamos la
+grilla a *nuestra* cumbre. Con el origen desplazado, **las celdas no coinciden**:
+mismo tamaño, distinta partición del terreno. Los ocho vecinos de un píxel
+promedian un vecindario distinto, y el fondo del VRP sale distinto.
+
+**Esto podría explicar por qué D16 salió nula**: probamos la grilla, pero
+alineada al lugar equivocado.
+
+**Y ordena una vieja rareza**: los dos volcanes con mayor offset son PCC y
+Tupungatito — justo los dos casos históricamente más difíciles del proyecto
+(A19, A20, D7). Es una coincidencia que vale la pena mirar de frente.
+
+**Test propuesto (brazo D)**: grilla ON + kernel global + centro de grilla
+tomado del GeoTIFF de MIROVA, en los 6 volcanes con offset >500 m. Reusa toda
+la infraestructura de F70.2; solo cambia el centro. Pendiente de confirmación.
+
+**Caveat honesto**: el GeoTIFF es una reproyección lat/lon de su grilla UTM, así
+que el centro que leemos aproxima el real a menos de media celda. Suficiente
+para un A/B, no para afirmar el origen exacto.

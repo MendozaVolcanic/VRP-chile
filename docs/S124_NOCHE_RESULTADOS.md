@@ -107,3 +107,31 @@ foco: mediana 0.045 MW, max 0.105
   coinciden 2026-08-20: MIROVA 0.09 vs foco 0.100
 alertas MIROVA sin foco nuestro: []
 figura: C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\experiments\_s124_ndc_focus\ndc_mapa_s124.png
+
+## Origen de la grilla de MIROVA, volcan por volcan (tarea 3d)
+
+De sus GeoTIFF. Offset grande = celdas desalineadas con nuestra ancla:
+mismo tamano de celda, distinta particion del terreno, otros vecindarios.
+```
+carpeta TIF                 grilla  celda m            centro grilla   d(vent)
+--------------------------------------------------------------------------------
+Chaiten                   134x134       383  -42.833225, -72.645641     607 m
+ChillanNevadosde          134x134       382  -36.863270, -71.378535     140 m
+Copahue                   134x134       382  -37.856256, -71.184585     142 m
+Isluga                    134x134       375  -19.150428, -68.830364      61 m
+Lascar                    134x134       377  -23.370406, -67.730194     841 m
+Lastarria                 134x134       376  -25.168374, -68.507163      45 m
+Llaima                    134x134       384  -38.692253, -71.730633     144 m
+PlanchonPeteroa           134x134       379  -35.223279, -70.569452    2013 m
+PuyehueCordonCaulle       134x134       385  -40.590268, -72.116732    7618 m
+Tupungatito               134x134       377  -33.425289, -69.798369    4796 m
+Villarrica                134x134       385  -39.420246, -71.931674     705 m
+
+d(vent) = distancia del centro de SU grilla a NUESTRO ancla.
+Un offset grande significa celdas desalineadas: mismo tamano, distinta
+particion del terreno, y por lo tanto vecindarios distintos.
+```
+
+---
+**Orquestador terminado 08:17 UTC.** Pendiente de decision humana: el veredicto F70 (tarea 2.4 del plan) — nada se promueve sin confirmacion explicita (A45).
+
