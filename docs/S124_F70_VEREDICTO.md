@@ -49,6 +49,58 @@ Sí, y la prueba es geométrica. Las coordenadas de los píxeles anómalos:
 | **GUARDA 4** — recall sin caídas >2 pp | ✅ VIIRS375 **96 % → 96 %**; MODIS 0 % → 33 % (n=6, mejora) |
 | **A79** — los eventos ancla sobreviven | ✅ **0 perdidos** sobre las 19 alertas más fuertes de la ventana |
 
+## ⚠️ ADENDA (28-ago) — el poder estadístico, a pedido de Nicolás
+
+Preguntó si estos reprocesos bastaban para sostener el veredicto. **No para todo
+lo que afirmé.** Bootstrap (5000 remuestreos) + test de signos pareado:
+
+**Lo que NO se sostiene y queda corregido:**
+
+1. **«B ≡ C exacto» era falso.** Solo 3 volcanes tienen n≥3 en ambos brazos, y
+   las diferencias no son cero: |B−C| = 0,00068 (Láscar) · 0,00042 (Isluga) ·
+   0,000000 (Tupungatito) · 0,05 (Copahue, n=1). Son **indistinguibles**, no
+   idénticos. La «identidad exacta» era un artefacto de redondear a 2 decimales.
+2. **«La grilla no hace nada» era falso — el resultado es MIXTO.** El test
+   pareado da diferencia mediana +0,000 con p=1,00, pero eso *promedia efectos
+   opuestos*: Láscar **+0,11** e Isluga **+0,11** mejoran, PCC **−0,10** empeora.
+3. **Los veredictos por volcán no son concluyentes.** Los IC 95 % de control y B
+   **se solapan en los 10** volcanes, y en **6 de 10** el IC cruza el borde de la
+   banda. El juez Tupungatito: 0,81 **[0,65–0,92]** — el intervalo cruza el 0,7,
+   así que ni siquiera podemos afirmar con confianza que esté «dentro».
+
+**Lo que SÍ se sostiene** (son conteos y geometría, no medianas):
+
+- El regrid corrió: coordenadas cuantizadas a 375 m vs dispersas en el control.
+- Sin daño colateral: recall 96 %→96 %, sin migración de cluster, 0/19 eventos
+  ancla perdidos.
+- Los sub-reportadores siguen fuera de banda (aunque con IC anchos).
+
+**Hallazgo NUEVO que sale de la revisión — apoya D17:** el efecto de la grilla
+correlaciona con su desalineación. Ordenado por offset:
+
+| volcán | offset | B − control |
+|---|---|---|
+| PuyehueCordonCaulle | 7618 m | **−0,104** |
+| Tupungatito | 4796 m | 0,000 |
+| Planchón-Peteroa | 2013 m | 0,000 |
+| Láscar | 841 m | **+0,110** |
+| Chaitén | 607 m | −0,033 |
+| Isluga | 61 m | **+0,110** |
+| Lastarria | 45 m | −0,020 |
+
+**r = −0,47** (n=8): la grilla **daña donde está mal alineada y ayuda donde está
+alineada**, que es exactamente lo que D17 predice. Pero con n=8 eso no es
+significativo (p ≈ 0,24) — **sugestivo, no probado**.
+
+## Veredicto revisado
+
+**«NO ADOPTAR» se mantiene** — ningún criterio pre-registrado se cumple, y no
+hay caso para promover. Pero la razón cambia: no es que la grilla *no haga
+nada*, es que **ayuda o daña según esté alineada**, y con la ventana actual no
+podemos separar las dos cosas con confianza.
+
+---
+
 ## Veredicto: **NO ADOPTAR** — la hipótesis central queda refutada
 
 El diseño lo dejó escrito de antemano: *"Si B también lo deja roto, la hipótesis
