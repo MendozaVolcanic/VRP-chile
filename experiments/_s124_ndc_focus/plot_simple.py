@@ -42,16 +42,17 @@ NIC = (-36.867210, -71.378241)
 # desparramadas.
 FOCO_KM = 0.5
 START = "2026-06-01"
-# AUDIT S125 — ventana NO COMPARABLE. Los records del 01 al 11 de junio del JSON
-# operacional se procesaron con codigo anterior: les faltan los tres campos
-# `discarded_anomaly_pixels` / `discarded_n_pixels` / `discarded_reason` que si
-# tiene el resto de la serie (48 records sin ellos vs 336 con ellos). Efecto
-# medido: 21 pasadas donde el experimental da >=0.02 MW y la replica da 0 con el
-# MISMO pixel (misma lat/lon/bt_k, `anomaly_pixels: []`) — todas dentro de esos
-# 11 dias. Sin esto la figura atribuia al UMBRAL 3 noches (04/07/11-jun) que en
-# realidad son diferencia de VERSION DE CODIGO. Se sombrea y se excluye de la
-# afirmacion sobre el umbral; se arregla reprocesando esa ventana del operacional.
-NO_COMPARABLE = ("2026-06-01", "2026-06-11")
+# S125 — RESUELTO. Hubo una ventana no comparable: el 01-11 jun del JSON
+# operacional venia de una version anterior del codigo, con 21 pasadas donde el
+# experimental daba >=0.02 MW y la replica 0 CON EL MISMO PIXEL (misma
+# lat/lon/bt_k, `anomaly_pixels: []`). Se reproceso con --overwrite (run
+# 33179840122) y la discrepancia bajo de 21 a 0, verificado sobre las 380
+# pasadas comunes. Ya no hace falta sombrear nada.
+#
+# El `--overwrite` es el punto: sin el, `store.py:554-573` NO reemplaza un record
+# con la misma clave (datetime_utc, sensor) salvo upgrade NRT->standard, y esos
+# 119 records ya eran "standard" — el run habria cerrado en VERDE sin tocar nada.
+NO_COMPARABLE = None
 FOCO_JSON = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "data/experimental_ndc_focus/NevadosDeChillan.json"
 
 
@@ -238,13 +239,14 @@ axA.grid(True, axis="x", alpha=0.25)
 axA.tick_params(axis="y", length=0)
 
 # ── AUDIT S125: las dos zonas que la figura tiene que explicar ──────────────
-_nc0 = datetime.fromisoformat(NO_COMPARABLE[0])
-_nc1 = datetime.fromisoformat(NO_COMPARABLE[1])
-# (a) ventana no comparable: el operacional ahi es de codigo viejo
-for _ax in (axA, axC, axB):
-    _ax.axvspan(_nc0, _nc1, color="#999999", alpha=0.16, zorder=0, lw=0)
-axA.text(_nc0 + (_nc1 - _nc0) / 2, 2.45, "réplica\ndesactualizada", ha="center",
-         va="top", fontsize=6.6, color="#555", linespacing=1.15, zorder=4)
+# (a) ventana no comparable (hoy None: se reproceso, ver cabecera)
+if NO_COMPARABLE is not None:
+    _nc0 = datetime.fromisoformat(NO_COMPARABLE[0])
+    _nc1 = datetime.fromisoformat(NO_COMPARABLE[1])
+    for _ax in (axA, axC, axB):
+        _ax.axvspan(_nc0, _nc1, color="#999999", alpha=0.16, zorder=0, lw=0)
+    axA.text(_nc0 + (_nc1 - _nc0) / 2, 2.45, "réplica\ndesactualizada", ha="center",
+             va="top", fontsize=6.6, color="#555", linespacing=1.15, zorder=4)
 
 # (b) el silencio de julio: el crater se apaga en las TRES series a la vez
 _h0, _h1 = datetime.fromisoformat("2026-07-07"), datetime.fromisoformat("2026-08-16")
@@ -337,9 +339,16 @@ if mirova_excluidas:
     _exc = "  ·  ".join(x[0] + " " + format(x[1], ".2f") + " MW (" + x[3] + ")" for x in sorted(mirova_excluidas))
     nota += ("\nAlertas MIROVA fuera del foco de 500 m (estrellas HUECAS en el panel de arriba; no entran a la comparación de energía): "
              + _exc + ".")
-nota += ("\nFranja gris 01–11 jun: la serie operacional ahí es de una versión anterior del código (le faltan 3 campos que sí\n"
-         "tiene el resto), así que en esos días la diferencia entre réplica y experimental NO es atribuible al umbral.\n"
-         + _leyenda_C)
+if NO_COMPARABLE is not None:
+    nota += ("\nFranja gris: la serie operacional ahí viene de una versión anterior del código, así que en esos días la "
+             "diferencia\nentre réplica y experimental NO es atribuible al umbral.")
+else:
+    # S125: el resultado que quedó al reprocesar el 01-11 jun con --overwrite.
+    # Antes parecía que el umbral bajo aportaba 3 noches; era version de codigo.
+    nota += (f"\nRéplica y experimental detectan las MISMAS {len(replica)} noches en el foco: bajar el umbral de 0.02 a "
+             "0.005 MW no aporta ninguna noche acá. Las 3\nnoches que antes parecían ganadas por el umbral eran una "
+             "ventana del operacional sin reprocesar (01–11 jun), corregida el 2026-08-28 (21 discrepancias → 0).")
+nota += "\n" + _leyenda_C
 fig.text(0.055, 0.008, nota, fontsize=7.4, color="#555", va="bottom", linespacing=1.5)
 # AUDIT S125: tight_layout avisa 'Axes not compatible' por los axvspan/annotate
 # y deja el eje del panel B encima de la nota. Margenes explicitos en su lugar.
