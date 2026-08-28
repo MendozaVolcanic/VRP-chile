@@ -47,7 +47,28 @@
 6. **Chequear un evento fuera de la ventana del experimento** y leerlo como
    fallo del brazo.
 
-## 4. LA HIPÓTESIS VIVA — D17 corregida
+## 3-bis. Lo que las TRES auditorías de cierre corrigieron
+
+Nicolás pidió revisar todo hacia atrás. Tres auditorías adversariales
+independientes encontraron esto (verificado por mí antes de aceptarlo):
+
+| hallazgo | impacto |
+|---|---|
+| **PCC estaba escondido de la tabla del veredicto** por un bug de alias (trampa A14). Con él: control 0,75 ✓ → **B 0,64**, fuera de banda | **El brazo B sí hace daño**, y era el único caso. Invalida el «sin daño colateral» |
+| **La correlación que apoyaba D17 se evapora**: r = −0,47 usaba el offset vs cráter (la variable equivocada); con la correcta da **+0,054** | D17 pierde su respaldo empírico. La desalineación es real; que cause el sub-reporte, no |
+| «Recall 96→96 %», «0/19 eventos ancla», «MODIS 0→33 %» **no tienen script** | Rehacerlos antes de citarlos (regla S91) |
+| «ratio 1,00 = la grilla no cambia nada»: **190 de 274 pasadas de Láscar tienen ratio ≠1** (máx 13,8×) | La mediana tapando la distribución — el mismo error que la sesión denuncia |
+| `half_km=25.5` fijo: los KMZ muestran spans de **48,2 a 51,5 km**, no uniformes | Suposición contradicha por el dato |
+| **A13 FALSA** (Villarrica «0,84 fija»: es 0,0 en 98 % de 3338), **A36 OBSOLETA** (sec³ ya no se aplica), **A82 REBAJADA** (su «no reabrir» se apoya en una auditoría que nunca miró la geometría) | Corregidas en `CLAUDE.md` |
+| **15.606 PNG y 1.965 KMZ del archivo sin ningún lector**; el índice de imágenes del dashboard congelado desde S90 | Ground truth visual gratis, sin usar |
+| **Los 21 campos `diag_*` no los lee el frontend**; `solar_zenith_deg` se recomputa en vez de leerse | Diagnóstico invisible al operador |
+
+**Veredicto de la auditoría de afirmaciones: ~55 % de lo central de S124 está
+PROBADO.** Lo sólido son conteos y geometría (cuantización del `Distancia_km`,
+centro de grilla del GeoTIFF, el 31 % de D13, la bimodalidad, la banda mal
+aplicada, que el regrid corrió). Lo no probado es el aparato causal del veredicto.
+
+## 4. LA HIPÓTESIS VIVA — D17 corregida DOS veces
 
 Nuestro regrid F70 se centró en `volcano["lat"/"lon"]`; MIROVA centra en
 `mirova_center` (verificado: el campo del yaml, derivado de los KMZ en S80,

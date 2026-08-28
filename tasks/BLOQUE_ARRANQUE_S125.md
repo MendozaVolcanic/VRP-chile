@@ -80,7 +80,28 @@ Regenerar serie y mapa con los datos v2 **y** las mejoras anotadas:
   anterior encontró 9 problemas, 3 graves (entre ellos una conclusión mía que
   era espuria).
 
-### 2. Brazo D — la hipótesis viva (D17)
+### 2. ⚠️ ANTES del brazo D — rehacer el veredicto con PCC
+
+Las auditorías de cierre encontraron que **PCC estaba escondido** de la tabla
+por un bug de alias (ya corregido en `04_tabla_brazos.py`) y que **el brazo B lo
+saca de banda** (0,75 ✓ → 0,64). También que varios números del veredicto no
+tienen script detrás.
+
+- [ ] Recorrer los criterios pre-registrados **con PCC incluido**.
+- [ ] Escribir scripts que persistan recall por sensor y eventos ancla — hoy
+      esos números fueron ad-hoc (viola S91).
+- [ ] `03_leer_brazo.py` **no filtra sensor**: mezcla MODIS y V750 en una
+      conclusión sobre VIIRS375. Arreglar antes de reusarlo.
+- [ ] Reportar la **distribución**, no solo la mediana (190 de 274 pasadas de
+      Láscar tienen ratio ≠ 1).
+
+### 3. Brazo D — con la advertencia de que su respaldo se cayó
+
+**Ojo**: la correlación que motivaba D17 se evaporó al usar la variable correcta
+(r = +0,054, y PCC contradice la hipótesis). La desalineación es real
+(Tupungatito 2996 m, PP 1873 m) y `get_grid_center()` sigue sin cablear — pero
+**no hay evidencia de que sea la causa del sub-reporte**. Decidir con Nicolás si
+vale las ~9 h de CI o si conviene ir directo a la auditoría de magnitud.
 
 - Cablear `geo_utils.get_grid_center()` en `run_pipeline.py` tras un flag nuevo,
   con test que falle si se desconecta (patrón A63).
@@ -94,7 +115,7 @@ Regenerar serie y mapa con los datos v2 **y** las mejoras anotadas:
   perfil ya lo permite.
 - Veredicto con **IC bootstrap que no se solapen**.
 
-### 3. El 80 % del hueco (sin CI, en paralelo con la 2)
+### 4. El 80 % del hueco (sin CI, en paralelo) — SUBE DE PRIORIDAD
 
 - Descomponer la brecha por régimen (`n_anomalous_pixels`) en los 4
   sub-reportadores.

@@ -49,6 +49,76 @@ Sí, y la prueba es geométrica. Las coordenadas de los píxeles anómalos:
 | **GUARDA 4** — recall sin caídas >2 pp | ✅ VIIRS375 **96 % → 96 %**; MODIS 0 % → 33 % (n=6, mejora) |
 | **A79** — los eventos ancla sobreviven | ✅ **0 perdidos** sobre las 19 alertas más fuertes de la ventana |
 
+## 🔴 ADENDA 2 (28-ago, cierre) — TRES auditorías adversariales al veredicto
+
+Nicolás pidió revisar todo hacia atrás. Tres auditorías independientes
+encontraron que **el veredicto estaba mal en dos puntos**, uno por un bug mío.
+
+### (a) PCC estaba ESCONDIDO por un bug de alias — y es el único daño real
+
+`04_tabla_brazos.py` mapeaba `NevadosDeChillan` pero NO
+`PuyehueCordonCaulle` → `"Puyehue-Cordon Caulle"` (trampa **A14**, que el propio
+proyecto documenta). PCC quedaba fuera de la tabla en silencio. Corregido:
+
+| volcán | n | control | A | B |
+|---|---|---|---|---|
+| **PuyehueCordonCaulle** | **21** | **0,75** ✓ | **0,64** | **0,64** |
+
+**PCC es el único volcán con daño real: el brazo B lo SACA de banda.** Eso
+invalida el «sin daño colateral» que figuraba como sostenido, y refuerza el
+NO ADOPTAR por una razón que no habíamos visto.
+
+### (b) La correlación que «apoyaba D17» se evapora con la variable correcta
+
+Publiqué r = −0,47 (n=8) usando el offset **contra el cráter** — la medición que
+el propio D17 declara equivocada. Recalculado:
+
+| variable | r | n |
+|---|---|---|
+| offset vs cráter (**equivocada**) | −0,472 | 7 |
+| offset vs `mirova_center` (**correcta**) | **+0,054** | 7 |
+
+**No hay correlación.** Y el caso decisivo la contradice: PCC tiene el offset
+**más chico** (147 m) y sufre el **mayor daño** (−0,104). Además el r=−0,47/n=8
+que publiqué no sale de ninguna de las dos tablas — no había script detrás
+(violación de la regla S91 que el propio doc invoca).
+
+### (c) Lo que queda en pie de D17, con precisión
+
+- **La desalineación es REAL y está verificada dos veces**: nuestro regrid usa
+  `volcano["lat"/"lon"]`; Tupungatito queda a **2996 m** y Planchón-Peteroa a
+  **1873 m** del centro de MIROVA (3 y 2 celdas de 1 km). Y
+  `geo_utils.get_grid_center()` existe desde S98 sin cablear.
+- **Pero NO hay evidencia de que eso cause el sub-reporte.** Premisa probada,
+  consecuencia no.
+
+### (d) Otras correcciones de las auditorías
+
+- **«Recall 96 %→96 %», «0/19 eventos ancla» y «MODIS 0→33 %»**: ningún script
+  commiteado los produce. Fueron cálculos ad-hoc no persistidos — hay que
+  rehacerlos con script antes de citarlos.
+- **«ratio 1,00 = la grilla no cambia la magnitud»**: la mediana es 1,00 pero
+  **190 de 274 pasadas de Láscar tienen ratio ≠ 1** (p90 = 2,54, máx 13,8×).
+  Otra vez la mediana tapando la distribución. Además `03_leer_brazo.py` no
+  filtra sensor: mezcla MODIS y V750 en una conclusión sobre VIIRS375.
+- **`half_km = 25.5` fijo es una suposición contradicha por el dato**: los
+  `<LatLonBox>` de los 1.965 KMZ muestran spans de **48,2 a 51,5 km**, no
+  uniformes.
+- El texto de la sección siguiente («B ≡ C», «la grilla es nula») quedó
+  **refutado por la ADENDA 1** y se conserva solo como registro histórico.
+
+### Veredicto tras las tres auditorías
+
+**«NO ADOPTAR» se mantiene, y ahora con más fundamento**: el brazo B saca a PCC
+de banda. Lo que se retira es el aparato causal — no sabemos por qué la grilla
+no ayuda, y la explicación que habíamos adoptado (D17) no tiene respaldo
+empírico.
+
+**Antes de gastar un brazo D**: rehacer los criterios pre-registrados con PCC
+incluido y con scripts que persistan cada número.
+
+---
+
 ## ⚠️ ADENDA (28-ago) — el poder estadístico, a pedido de Nicolás
 
 Preguntó si estos reprocesos bastaban para sostener el veredicto. **No para todo

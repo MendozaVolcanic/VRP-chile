@@ -20,7 +20,10 @@ BANDA = (0.7, 1.4)
 VOLS = ["Lascar", "Isluga", "Lastarria", "Llaima", "Copahue", "Tupungatito",
         "NevadosDeChillan", "Villarrica", "Chaiten", "PlanchonPeteroa",
         "PuyehueCordonCaulle"]
-ALIAS = {"NevadosDeChillan": "Nevados de Chillan"}
+# A14: el scraper normaliza algunos nombres. Faltaba PCC y eso lo ESCONDIO de
+# la tabla del veredicto F70 — justo el unico volcan con dano real (0.75->0.64).
+ALIAS = {"NevadosDeChillan": "Nevados de Chillan",
+         "PuyehueCordonCaulle": "Puyehue-Cordon Caulle"}
 BRAZOS = [("control", "mirova_equivalent"), ("A", "_f70_a"),
           ("B", "_f70_b"), ("C", "_s124_kernelbg_ab")]
 

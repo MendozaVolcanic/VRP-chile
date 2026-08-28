@@ -1624,6 +1624,12 @@ Tres lecturas, todas con dato:
    hace.
 3. **El kernel tampoco alcanza**: Láscar 0,47→0,58, dirección correcta,
    insuficiente.
+4. 🔴 **CORRECCIÓN (cierre S124)**: la tabla original omitía a
+   **PuyehueCordonCaulle** por un bug de alias (trampa A14). Con PCC incluido:
+   **control 0,75 ✓ → B 0,64** — el brazo B lo **saca de banda**. Es el único
+   daño real del experimento, y refuerza el NO ADOPTAR. Las lecturas 1 y 2 de
+   arriba quedaron además matizadas por la ADENDA 1 del veredicto (el efecto es
+   MIXTO, no nulo).
 
 **Verificación de que el regrid sí corrió** (no es un falso negativo por flag
 apagado): las coordenadas de los píxeles anómalos pasan de estar dispersas en
@@ -1638,7 +1644,14 @@ cosa: ver D17.
 
 ---
 
-## D17 — Nuestra grilla F70 se centró en el punto equivocado — **ABIERTA** S124/S125
+## D17 — Nuestra grilla F70 se centró en el punto equivocado — **ABIERTA (premisa probada, consecuencia NO)** S124/S125
+
+> 🔴 **SEGUNDA CORRECCIÓN (28-ago, cierre).** La correlación que se citaba como
+> apoyo empírico (r = −0,47) usaba el offset **contra el cráter**, la variable
+> que esta misma sección declara equivocada. Con la correcta (vs
+> `mirova_center`): **r = +0,054** — no hay señal. Y el caso decisivo la
+> contradice: PCC tiene el offset más chico (147 m) y el mayor daño (−0,104).
+> **La desalineación es real y está verificada; que cause el sub-reporte NO.**
 
 > ⚠️ **CORREGIDA el 28-ago.** La primera versión midió el offset contra
 > `vent_lat/lon` (el cráter) y presentó como hallazgo algo que **ya estaba
