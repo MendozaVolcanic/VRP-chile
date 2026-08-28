@@ -22,6 +22,20 @@ name: S120 backfill histórico Tier A (por olas)
         description: "Volcán exacto (piloto) o 'all' (11 Tier A)"
         default: "all"
         required: false
+      overwrite:
+        # S125: sin esto, reprocesar una ventana que YA tiene records cierra en
+        # VERDE sin tocar nada. store.py:554-573 solo reemplaza un record con la
+        # misma clave (datetime_utc, sensor) si overwrite=True o si es upgrade
+        # NRT->standard; una ventana ya consolidada en "standard" no califica,
+        # asi que el merge la deja intacta. Es el bug T4 que costo a S124 tres
+        # meses de datos que se creian reprocesados.
+        # Default "false" = comportamiento historico intacto (backfill de
+        # historia NUEVA, que es para lo que nacio este workflow).
+        # Usar "true" solo para RE-procesar una ventana ya existente, y verificar
+        # despues con experiments/_s124_ndc_focus/05_verificar_reproceso.py.
+        description: "Reemplazar records existentes (true) — necesario para RE-procesar una ventana ya poblada"
+        default: "false"
+        required: false
 
 permissions:
   contents: write
@@ -64,11 +78,17 @@ jobs:
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
         timeout-minutes: 330
         run: |
+          OVERWRITE_FLAG=""
+          if [ "${{ github.event.inputs.overwrite }}" = "true" ]; then
+            OVERWRITE_FLAG="--overwrite"
+            echo "MODO OVERWRITE: se reemplazan los records existentes de la ventana"
+          fi
           python scripts/run_pipeline.py \
             --profile mirova_equivalent \
             --volcano ${{ matrix.volcano }} \
             --start ${{ github.event.inputs.start }} \
-            --end ${{ github.event.inputs.end }}
+            --end ${{ github.event.inputs.end }} \
+            $OVERWRITE_FLAG
       - name: Commit result (solo el archivo de este volcán — anti-race S22)
         run: |
           set +e
