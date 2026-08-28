@@ -55,8 +55,13 @@ for r in d["records"]:
     if (pc.get("centroid_dist_km") or 0) > 5.0: continue   # el resto se cuenta en el panel B
     rep.append((pc["centroid_lat"], pc["centroid_lon"], v))
 
+# AUDIT S125 — la leyenda comparaba 139 (radio 5 km) contra 29 (radio 500 m):
+# radios distintos, numeros no comparables. El par comparable es DENTRO del foco.
+rep_foco = [t for t in rep if hav(NIC[0], NIC[1], t[0], t[1]) <= FOCO_KM]
+
 # experimental: clusters en el foco
 foc = []
+_foc_noches = set()   # AUDIT S125: n=29 son CLUSTERS; las noches son menos
 dd = json.loads(FOCO_JSON.read_text(encoding="utf-8"))
 for r in dd["records"]:
     # AUDIT S124 (subagente, hallazgo 2): el experimental arranca en mayo pero el
@@ -68,6 +73,7 @@ for r in dd["records"]:
     v = pc.get("vrp_mw") or 0
     if v > 0 and pc.get("centroid_lat") is not None and hav(NIC[0], NIC[1], pc["centroid_lat"], pc["centroid_lon"]) <= FOCO_KM:
         foc.append((pc["centroid_lat"], pc["centroid_lon"], v))
+        _foc_noches.add((r.get("datetime_utc") or "")[:10])
 
 fig, ax = plt.subplots(figsize=(9.5, 9.5))
 ax.set_title("¿Dónde detecta cada uno? — clusters VIIRS 375 m desde junio\n"
@@ -94,12 +100,14 @@ for rkm, col, lab in ((FOCO_KM, "#1a7a33", f"radio experimental ({FOCO_KM*1000:.
 xs, ys, vs = zip(*[(*km_xy(la, lo), v) for la, lo, v in rep])
 ax.scatter(xs, ys, s=[22+180*v for v in vs], c="#88a8c8", alpha=0.9,
            edgecolors="#1f4e79", lw=0.8, zorder=5,
-           label=f"réplica: cluster «summit» ({len(rep)} en total; se ven los que caen en esta ventana)")
+           label=f"réplica: cluster «summit» — {len(rep_foco)} dentro del foco de {FOCO_KM*1000:.0f} m "
+                 f"(de {len(rep)} en un radio de 5 km)")
 if foc:
     xs, ys, vs = zip(*[(*km_xy(la, lo), v) for la, lo, v in foc])
     ax.scatter(xs, ys, s=[60+320*v for v in vs], c="#2ca02c", marker="s", alpha=0.75,
                edgecolors="#14501f", lw=0.6, zorder=4,
-               label=f"experimental: foco al cráter (n={len(foc)})")
+               label=f"experimental: {len(foc)} clusters dentro del foco de {FOCO_KM*1000:.0f} m "
+                 f"en {len(_foc_noches)} noches")
 ax.plot(0, 0, "^", ms=16, c="#cc3311", mec="k", zorder=5, label="cráter Nicanor (coordenada de Nicolás)")
 
 # ── MIROVA: lo que su Distancia_km REALMENTE dice ───────────────────────────

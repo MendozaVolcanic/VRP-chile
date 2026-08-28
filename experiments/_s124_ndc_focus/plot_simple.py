@@ -42,6 +42,16 @@ NIC = (-36.867210, -71.378241)
 # desparramadas.
 FOCO_KM = 0.5
 START = "2026-06-01"
+# AUDIT S125 — ventana NO COMPARABLE. Los records del 01 al 11 de junio del JSON
+# operacional se procesaron con codigo anterior: les faltan los tres campos
+# `discarded_anomaly_pixels` / `discarded_n_pixels` / `discarded_reason` que si
+# tiene el resto de la serie (48 records sin ellos vs 336 con ellos). Efecto
+# medido: 21 pasadas donde el experimental da >=0.02 MW y la replica da 0 con el
+# MISMO pixel (misma lat/lon/bt_k, `anomaly_pixels: []`) — todas dentro de esos
+# 11 dias. Sin esto la figura atribuia al UMBRAL 3 noches (04/07/11-jun) que en
+# realidad son diferencia de VERSION DE CODIGO. Se sombrea y se excluye de la
+# afirmacion sobre el umbral; se arregla reprocesando esa ventana del operacional.
+NO_COMPARABLE = ("2026-06-01", "2026-06-11")
 FOCO_JSON = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "data/experimental_ndc_focus/NevadosDeChillan.json"
 
 
@@ -54,6 +64,7 @@ def hav(la1, lo1, la2, lo2):
 
 # ── MIROVA: alertas VIIRS375 por noche ──────────────────────────────────────
 mirova = {}
+mirova_lejanas = {}     # alertas nocturnas fuera del foco (se dibujan huecas)
 mirova_excluidas = []   # alertas no comparables (diurnas / lejos del foco)
 with open(ROOT / "latest_consolidado.csv", encoding="utf-8", errors="replace") as fh:
     for r in csv.DictReader(fh):
@@ -84,6 +95,13 @@ with open(ROOT / "latest_consolidado.csv", encoding="utf-8", errors="replace") a
             mirova[f] = max(mirova.get(f, 0), v)
         elif v > 0:
             mirova_excluidas.append((f, v, _D, "diurna" if not _nocturna else f"@{_D:.2f} km"))
+            # AUDIT S125 — las alertas lejanas se dibujan como estrella HUECA en su
+            # fecha, no solo al pie. Desterrarlas dejaba el hueco de julio con las
+            # tres filas vacias, sugiriendo "MIROVA tampoco vio nada" cuando lo que
+            # pasa es que vio algo A 2,86 km del crater: la senal se corrio, no
+            # desaparecio. Solo las nocturnas (las diurnas son artefacto solar A76).
+            if _nocturna and _D is not None:
+                mirova_lejanas[f] = max(mirova_lejanas.get(f, 0), v)
 
 # ── Pasadas COMUNES (hallazgo 7 del audit): las dos corridas difieren en las
 # pasadas DESCARGADAS (16 solo-réplica desde junio). Sin esta restricción, el
@@ -109,9 +127,10 @@ for r in d["records"]:
     v = pc.get("vrp_mw") or 0
     if v <= 0 or r.get("distance_class") != "summit":
         continue
-    # MISMO RADIO que el experimental (1 km al cráter Nicanor). Antes se usaba
-    # el inner de 5 km del KML MIROVA, y comparar 5 km contra 1 km hacía que la
-    # réplica pareciera más sensible cuando lo único que tenía era más ÁREA: de
+    # MISMO RADIO que el experimental (FOCO_KM = 500 m al cráter Nicanor). Antes
+    # se usaba el inner de 5 km del KML MIROVA, y comparar 5 km contra el foco
+    # hacía que la réplica pareciera más sensible cuando lo único que tenía era
+    # más ÁREA: de
     # sus 135 detecciones, 96 caían a 2-4 km del cráter (S124). Con el radio
     # igualado la única diferencia que queda entre las dos series es el umbral,
     # que es la variable del experimento.
@@ -163,7 +182,7 @@ for r in _d_op["records"]:
     prev = despejado.get(f)
     despejado[f] = valor if prev is None else max(prev, valor)
 
-# ── Foco experimental: summit a <=1 km del cráter Nicanor ───────────────────
+# ── Foco experimental: summit a <= FOCO_KM (500 m) del cráter Nicanor ───────
 foco = {}
 d = json.loads(FOCO_JSON.read_text(encoding="utf-8"))
 for r in d["records"]:
@@ -191,7 +210,7 @@ def dts(dd):
 
 # ── Figura ──────────────────────────────────────────────────────────────────
 fig, (axA, axC, axB) = plt.subplots(
-    3, 1, figsize=(14, 9.6), sharex=True,
+    3, 1, figsize=(14, 11.4), sharex=True,
     gridspec_kw={"height_ratios": [1, 0.62, 2.6], "hspace": 0.30})
 fig.suptitle("Nevados de Chillán, cráter Nicanor — ¿qué mostró MIROVA y qué detectamos nosotros?\n"
              "(VIIRS 375 m, desde junio 2026)", fontsize=13.5, fontweight="bold")
@@ -206,6 +225,10 @@ for y, (serie, color, marker, size) in enumerate([
         (mirova,  C_MIR, "*", 150)]):
     axA.scatter(dts(serie), [y] * len(serie), c=color, marker=marker, s=size,
                 edgecolors="k" if marker == "*" else "none", linewidths=0.5, zorder=3)
+# estrellas HUECAS: MIROVA publico esa noche, pero lejos del crater (fuera del foco)
+if mirova_lejanas:
+    axA.scatter(dts(mirova_lejanas), [2] * len(mirova_lejanas), facecolors="none",
+                edgecolors=C_MIR, marker="*", s=150, linewidths=1.2, zorder=3)
 axA.set_yticks([0, 1, 2])
 axA.set_yticklabels([f"Experimental\n(foco {FOCO_KM*1000:.0f} m, umbral bajo)",
                      "Réplica MIROVA\n(nuestro dashboard)",
@@ -213,6 +236,27 @@ axA.set_yticklabels([f"Experimental\n(foco {FOCO_KM*1000:.0f} m, umbral bajo)",
 axA.set_ylim(-0.6, 2.6)
 axA.grid(True, axis="x", alpha=0.25)
 axA.tick_params(axis="y", length=0)
+
+# ── AUDIT S125: las dos zonas que la figura tiene que explicar ──────────────
+_nc0 = datetime.fromisoformat(NO_COMPARABLE[0])
+_nc1 = datetime.fromisoformat(NO_COMPARABLE[1])
+# (a) ventana no comparable: el operacional ahi es de codigo viejo
+for _ax in (axA, axC, axB):
+    _ax.axvspan(_nc0, _nc1, color="#999999", alpha=0.16, zorder=0, lw=0)
+axA.text(_nc0 + (_nc1 - _nc0) / 2, 2.45, "réplica\ndesactualizada", ha="center",
+         va="top", fontsize=6.6, color="#555", linespacing=1.15, zorder=4)
+
+# (b) el silencio de julio: el crater se apaga en las TRES series a la vez
+_h0, _h1 = datetime.fromisoformat("2026-07-07"), datetime.fromisoformat("2026-08-16")
+axA.annotate("", xy=(_h0, 0.35), xytext=(_h1, 0.35),
+             arrowprops=dict(arrowstyle="<->", color="#8a6d3b", lw=1.1))
+axA.text(_h0 + (_h1 - _h0) / 2, 1.05,
+         "seis semanas sin foco en el cráter, y MIROVA también calló:\n"
+         "su única alerta fue el 15-jul a 2,86 km (estrella hueca).\n"
+         "No se apagó, se corrió: 1 detección a ≤500 m contra 30 a 1–3 km.",
+         ha="center", va="center", fontsize=6.9, color="#5c4a25", linespacing=1.3,
+         zorder=6,
+         bbox=dict(boxstyle="round,pad=0.28", fc="#fdf6e3", ec="#c9b458", lw=0.7, alpha=0.96))
 
 # Panel intermedio — ¿se pudo ver el terreno esa noche?
 _of = sorted(despejado)
@@ -233,14 +277,16 @@ axC.set_ylim(0, 6)
 axC.set_yticks([0, 2, 4, 6])
 axC.set_ylabel("σ fondo (K)\n↑ más despejado", fontsize=8)
 axC.grid(True, axis="x", alpha=0.25)
-axC.set_title("¿Se pudo ver el terreno esa noche? (dispersión térmica del fondo, σ)",
+axC.set_title("¿Se pudo ver el terreno esa noche? (dispersión térmica del fondo, σ — proxy, no medición de nubosidad)",
               loc="left", fontsize=11)
-axC.text(0.995, 0.90,
-         "verde ALTO = despejado (se ve la estructura del terreno) · barra BAJA = escena uniforme, nube probable\n"
-         f"rojo LLENO = CIEGO ({sum(_ciego)} noches): ni el fondo pudo medirse — sin información, NO es calma",
-         transform=axC.transAxes, ha="right", va="top", fontsize=7.4, color="#444",
-         linespacing=1.4,
-         bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="#ccc", alpha=0.92))
+# AUDIT S125: esta leyenda estaba DENTRO del panel y tapaba las barras rojas de
+# julio-agosto, que son justo las que hay que ver. Baja a la nota al pie.
+_leyenda_C = (
+    "Panel del medio (σ del fondo): verde alto = despejado, se ve la estructura del terreno · barra baja = escena uniforme,\n"
+    f"nube probable · rojo lleno = CIEGO ({sum(_ciego)} noches), ni el fondo pudo medirse: sin información, NO es calma. Es un\n"
+    "PROXY, no una medición de nubosidad: mide cuán estructurado está el terreno, así que una nube estratiforme muy pareja\n"
+    "y un cielo limpio sobre nieve homogénea se parecen. La máscara oficial del sensor (CLDMSK_L2_VIIRS, disponible en NRT)\n"
+    "sería la medición real.")
 
 # Panel B — cuánta energía
 axB.set_title("¿Cuánta energía? (misma noche, mismo sensor)", loc="left", fontsize=11)
@@ -256,7 +302,7 @@ for i, f in enumerate(sorted(set(mirova) & set(foco))):
     x = datetime.fromisoformat(f)
     lado = -1 if i % 2 == 0 else 1          # alternar para que no se tapen
     axB.annotate(f"MIROVA {mirova[f]:.2f} ★\nnosotros {foco[f]:.2f} ■",
-                 xy=(x, mirova[f]), xytext=(46 * lado, 34),
+                 xy=(x, mirova[f]), xytext=(58 * lado, 40),
                  textcoords="offset points", ha="center", fontsize=8,
                  arrowprops=dict(arrowstyle="-", color="#b8a24a", lw=0.7),
                  bbox=dict(boxstyle="round,pad=0.25", fc="#fffbe6", ec="#b8a24a", lw=0.6))
@@ -289,9 +335,15 @@ if fin_exp < "2026-08-27":
              "(reproceso en curso). Paneles restringidos a pasadas que AMBAS corridas procesaron.")
 if mirova_excluidas:
     _exc = "  ·  ".join(x[0] + " " + format(x[1], ".2f") + " MW (" + x[3] + ")" for x in sorted(mirova_excluidas))
-    nota += "\nAlertas MIROVA NO comparables con el foco (fuera de las estrellas): " + _exc + "."
-fig.text(0.06, 0.005, nota, fontsize=8.2, color="#555", va="bottom")
-fig.tight_layout(rect=(0, 0.055, 1, 1))
+    nota += ("\nAlertas MIROVA fuera del foco de 500 m (estrellas HUECAS en el panel de arriba; no entran a la comparación de energía): "
+             + _exc + ".")
+nota += ("\nFranja gris 01–11 jun: la serie operacional ahí es de una versión anterior del código (le faltan 3 campos que sí\n"
+         "tiene el resto), así que en esos días la diferencia entre réplica y experimental NO es atribuible al umbral.\n"
+         + _leyenda_C)
+fig.text(0.055, 0.008, nota, fontsize=7.4, color="#555", va="bottom", linespacing=1.5)
+# AUDIT S125: tight_layout avisa 'Axes not compatible' por los axvspan/annotate
+# y deja el eje del panel B encima de la nota. Margenes explicitos en su lugar.
+fig.subplots_adjust(left=0.145, right=0.985, top=0.915, bottom=0.225, hspace=0.34)
 out = Path(__file__).parent / "ndc_simple_s124.png"
 fig.savefig(out, dpi=150)
 print(f"figura: {out}")
