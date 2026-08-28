@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
+# A/B de magnitud S125 — resultado
+=======
 # A/B de magnitud S125 — resultado (4 ramas)
+>>>>>>> Stashed changes
 
 > Criterio fijado **antes** de correr: `docs/S125_AB_MAGNITUD_PREREGISTRO.md`.
 > Números recomputados y persistidos por
@@ -81,6 +85,8 @@ parches sin encender la corona) ya diera lo mismo, la corona sobra.
   no alcanza es la evidencia, no el mecanismo.
 - No adoptar "porque va en la dirección correcta": ese fue exactamente el error
   que las auditorías de S124 tumbaron. El criterio se fijó antes y no se cumple.
+<<<<<<< Updated upstream
+=======
 
 
 ---
@@ -138,3 +144,4 @@ otros brazos (683/621/552/696, 0 trozos faltantes).
 
 **Pendiente**: que el job `merge` reintente en vez de cancelarse. Hoy dos A/B que
 terminan juntos pueden costar una corrida entera sin que nada avise.
+>>>>>>> Stashed changes
