@@ -23,11 +23,11 @@
 
 | hipótesis | cómo cayó |
 |---|---|
-| **La grilla UTM explica el sub-reporte** (frente F70, D16) | A/B de 4 brazos con criterios pre-registrados: brazo A ≡ control, brazo B ≈ C. Ningún criterio se cumple |
+| **La grilla UTM explica el sub-reporte** (frente F70, D16) | A/B de 4 brazos con criterios pre-registrados. Ningún criterio se cumple, y con PCC (que estaba escondido por un bug de alias) el brazo B además lo **saca de banda**: 0,75 ✓ → 0,64 |
 | La ceguera por máscara de nube nos cuesta recall | solo **6 de 276** alertas caen en noches ciegas (2 %) contra una tasa base de ceguera del 23 % — diez veces menos que el azar |
 | Las 3 alertas NdC "perdidas" se perdieron por ceguera | estaban a 2,86 · 3,02 · 4,14 km del cráter (una además diurna): irreproducibles **por construcción**, no por ceguera |
 | El déficit es atribución de cluster / second-run / piso VRP / fondo del anillo solo | medidos y descartados uno por uno en S124 |
-| «Julio en NdC fue un apagón por nube» | julio tuvo **más** detecciones summit (68) que ningún mes |
+| «Julio en NdC fue un apagón por nube» | julio tuvo **más** detecciones summit (68) que los meses vecinos. ⚠️ matizado por la auditoría: en `experimental_ndc_focus` julio es el **mínimo** (41) — el resultado depende del perfil, que el doc no declaraba |
 
 ## 3. Errores propios de esta sesión (patrones a vigilar)
 
@@ -89,8 +89,15 @@ desde S98 exactamente para esto (prioridad `mirova_center` → `vent` → `lat/l
 y **nadie la llama**. El brazo D es cablearla: una línea en el llamador, con
 función ya testeada.
 
-**Evidencia a favor, sugestiva**: el efecto de la grilla correlaciona con la
-desalineación (r = −0,47, n=8, p ≈ 0,24). No alcanza para probarla.
+🔴 **La evidencia que citaba se cayó**: el r = −0,47 usaba el offset contra el
+CRÁTER (variable equivocada) y no salía de ningún script. Con la variable
+correcta (vs `mirova_center`): **r = +0,054** — sin señal. Y PCC, con el offset
+más chico (147 m), sufre el mayor daño (−0,104): **contradice** la hipótesis.
+
+**Estado honesto: premisa PROBADA, consecuencia NO.** La desalineación existe y
+está verificada dos veces; que cause el sub-reporte no tiene respaldo. Decidir
+con Nicolás si el brazo D vale las ~9 h o si conviene ir directo a la auditoría
+de magnitud (§8.3).
 
 ## 5. El replanteo de prioridad
 
