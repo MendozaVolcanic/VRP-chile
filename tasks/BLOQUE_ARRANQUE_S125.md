@@ -3,41 +3,85 @@
 ## Prompt para pegar al inicio de la sesión
 
 ```
-Continuamos VRP Chile desde S124, que cerró con un frente refutado y una
-hipótesis viva.
+Continuamos VRP Chile desde S124. Esa sesión terminó con tres auditorías
+adversariales que encontraron que MI PROPIO veredicto estaba mal en dos puntos.
+Eso cambia cómo arrancamos: primero auditamos, después construimos.
 
-Antes de proponer nada, leé en este orden:
-  1. docs/S124_CIERRE.md               (estado completo: probado / refutado / pendiente)
-  2. docs/superpowers/plans/2026-08-28-plan-s125-brecha-de-magnitud.md
-  3. docs/MIROVA_DIVERGENCES.md        secciones D14 a D17 (al final)
+Leé en este orden:
+  1. docs/PROTOCOLO_AUDITORIA_PROFUNDA.md   (las 8 técnicas y las 4 fases)
+  2. docs/S124_CIERRE.md                    (§3-bis: qué tumbaron las auditorías)
+  3. tasks/BLOQUE_ARRANQUE_S125.md          (las tareas, en orden)
 
-Contexto en una línea: el A/B de 4 brazos de F70 REFUTÓ que la grilla UTM
-explique nuestro sub-reporte de magnitud. Queda D17 como única hipótesis viva
-—nuestra grilla se centró en volcano["lat"/"lon"] y MIROVA centra en
-mirova_center, con 6 de 11 volcanes desalineados más de media celda— y queda el
-replanteo de prioridad: los brazos mueven 0,11 cuando el hueco es 0,53.
+CONTEXTO EN TRES LÍNEAS. El A/B de 4 brazos de F70 dio NO ADOPTAR, y con
+PuyehueCordonCaulle —que estaba escondido de la tabla por un alias faltante— el
+brazo B además lo saca de banda. D17 (grillas desalineadas) tiene la premisa
+probada pero perdió su respaldo: la correlación era r=+0,054 con la variable
+correcta, y PCC la contradice. El hueco real sigue sin explicación: los brazos
+mueven 0,11 cuando el hueco es 0,53, y eso es un factor 2 de sesgo en la
+magnitud que reportamos.
 
-Tres cosas antes de tocar nada:
+═══════════════════════════════════════════════════════════════════════════
+TAREA 0 — AUDITORÍA PROFUNDA DE TODO LO CONSTRUIDO (antes que nada)
+═══════════════════════════════════════════════════════════════════════════
 
-a) Al final de S124 despaché 3 auditorías en paralelo (afirmaciones de S124 /
-   código huérfano no cableado / reglas A históricas verificables). Si sus
-   resultados quedaron sin revisar, revisalos PRIMERO: pueden invalidar algo de
-   lo que doy por cerrado.
+Nicolás pidió revisar sistemáticamente TODO lo hecho estos meses, buscando
+errores arrastrados. El terreno: 71 reglas A, 32 auditorías previas, 8
+divergencias catalogadas, 114 archivos de test, 102 experimentos, 39 perfiles.
 
-b) Regla de la sesión, pedida por Nicolás: todo debe estar probado. Si una
-   afirmación no tiene script reproducible detrás, decilo o volvé a hacerla.
-   Los seis patrones de error de S124 están en la memoria
-   (feedback_s124_verificar_antes_de_concluir): mediana ≠ efecto, nivel del
-   YAML, pasadas comunes, y el reproceso que cierra en verde sin tocar nada.
+El protocolo tiene 8 técnicas VALIDADAS —cada una encontró un error real en
+S124— y 4 fases ordenadas por rendimiento. No inventes técnicas nuevas antes de
+aplicar ésas; su tasa de acierto ya está medida.
 
-c) Antes de lanzar cualquier A/B, verificá que el flag realmente llegue:
-       VRP_PROFILE=<perfil> python -c "import pipeline.profile as p; print(p.<FLAG>)"
-   En S124 un flag leído del nivel equivocado del YAML casi deja 22 jobs en nulo
-   sin ningún síntoma.
+Cómo ejecutarla, en concreto:
 
-Arrancá por la tarea 8.1 del cierre: regenerar las figuras de Nevados de Chillán
-(serie + mapa) con los datos v2 ya reprocesados y las mejoras de visualización
-anotadas. Es tarea explícita de Nicolás. Después seguimos con el brazo D.
+  · Despachá subagentes EN PARALELO, uno por eje, con contexto autocontenido
+    (sin historial de conversación: el sesgo del autor es lo que se quiere
+    evitar). En S124 tres agentes en paralelo encontraron 16 hallazgos, 4 de
+    severidad alta.
+  · VERIFICÁ vos los hallazgos críticos antes de aceptarlos. En S124 un
+    subagente inventó un regex plausible que rompía la convención real del
+    proyecto (regla A48). Los subagentes no son fuente de verdad metodológica.
+  · Prioridad de la fase 1: las ~12 reglas que dicen "cerrado", "agotado" o
+    "no reabrir". Ésas apagan trabajo futuro; si una está mal, cuesta sesiones.
+  · Clasificá cada hallazgo como FALSO / OBSOLETO / SIN RESPALDO / CONFIRMADO y
+    actuá distinto según la clase (ver la regla de salida del protocolo). No
+    borres una conclusión por sonar mal, ni rehagas un experimento cuyo
+    resultado ya es reproducible.
+
+Entregable: un doc con los hallazgos clasificados, las correcciones aplicadas
+a CLAUDE.md / MISSION.md / MIROVA_DIVERGENCES.md citando evidencia, y la lista
+de lo que quedó marcado "sin respaldo, pendiente de prueba".
+
+═══════════════════════════════════════════════════════════════════════════
+DESPUÉS de la auditoría, en este orden
+═══════════════════════════════════════════════════════════════════════════
+
+  1. Regenerar las figuras de Nevados de Chillán (serie + mapa) con los datos
+     v2 y las mejoras anotadas, y correrles el audit adversarial (T7) antes de
+     darlas por buenas. Pedido explícito de Nicolás.
+  2. Rehacer el veredicto F70 con PCC incluido y con scripts que persistan cada
+     número (varios del veredicto S124 eran ad-hoc y hubo que retirarlos).
+  3. Decidir con Nicolás si el brazo D vale las ~9 h de CI, sabiendo que su
+     respaldo empírico se cayó.
+  4. La auditoría file:line de la cadena de MAGNITUD contra Coppola Eq. 6-8 —
+     nunca se hizo, y ahí vive el factor 2.
+
+═══════════════════════════════════════════════════════════════════════════
+REGLAS DE ESTA ETAPA (pedidas por Nicolás)
+═══════════════════════════════════════════════════════════════════════════
+
+  · Todo debe estar probado. Si una afirmación no tiene script reproducible
+    detrás, decilo o volvé a hacerla.
+  · Una mediana de 0,000 puede ser "sin efecto" o "efectos que se cancelan".
+    Reportá siempre la distribución.
+  · Antes de lanzar cualquier A/B:
+        VRP_PROFILE=<perfil> python -c "import pipeline.profile as p; print(p.<FLAG>)"
+  · Antes de leer cualquier reproceso sobre datos existentes:
+        python experiments/_s124_ndc_focus/05_verificar_reproceso.py <json>
+  · Toda comparación entre corridas va sobre la INTERSECCIÓN de pasadas
+    (datetime_utc + sensor), nunca sobre conteos de series completas.
+  · Los seis patrones de error de S124 están en la memoria del agente
+    (feedback_s124_verificar_antes_de_concluir).
 ```
 
 ---
