@@ -453,6 +453,22 @@ LOCAL_CLUSTER_MAG_MODE: str = str(_p.get("local_cluster_mag_mode", "footprint"))
 LOCAL_CLUSTER_MAG_RING_PX: int = int(_p.get("local_cluster_mag_ring_px", 1))
 LOCAL_CLUSTER_MAG_MIN_CORONA: int = int(_p.get("local_cluster_mag_min_corona", 4))
 
+# S126 — corona Eq.6 en VIIRS 375. El path Test 1 de este sensor estima el fondo con
+# un anillo fijo [1,5-3] km al cráter (TEST1_INTERMEDIATE_BG_RING_KM) mientras su ROI
+# es el disco de 3 km (TEST1_ROI_KM): el anillo es el 75 % del área que mide, así que
+# cada píxel se compara contra la media de sus propios tres cuartos exteriores y el
+# clip a cero de process_viirs.py:1729 suma la mitad de arriba del ruido de esa misma
+# corona. Coppola 2016a Eq.6 dice que L4bk sale de la media de los píxeles que RODEAN
+# al clúster activo, que por construcción no contiene a los medidos.
+# Flag propio del sensor (alcance acotado a VIIRS375 por decisión de Nicolás, S126),
+# OFF default → mirova_equivalent no cambia (A45). Mismos helpers que MODIS
+# (cluster_corona_background + cluster_vrp_mw_with_bg) y mismos parámetros
+# LOCAL_CLUSTER_MAG_{MODE,RING_PX,MIN_CORONA}.
+# Evidencia: docs/S126_COSTO_FILTRO_CONTEXTUAL.md · plan:
+# docs/superpowers/plans/2026-08-28-corona-eq6-viirs.md
+ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375: bool = bool(
+    _p.get("enable_local_cluster_magnitude_viirs375", False))
+
 # S109 §1 — magnitud NÚCLEO FOCAL/CONTEXTUAL del cluster MODIS. Restringe la suma
 # de pc.vrp_mw a los píxeles contextualmente anómalos (dnti_ctx ∪ {pico}) del cluster
 # YA seleccionado — el campo difuso topográfico (tibio uniforme, no anómalo vs sus 8

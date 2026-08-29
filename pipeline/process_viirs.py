@@ -96,6 +96,10 @@ from pipeline.profile import (
     BG_INNER_KM,
     BG_OUTER_KM,
     CLOUD_MASK_BT_K,
+    ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375,   # S126 corona Eq.6
+    LOCAL_CLUSTER_MAG_MODE,
+    LOCAL_CLUSTER_MAG_RING_PX,
+    LOCAL_CLUSTER_MAG_MIN_CORONA,
     NTI_K1_NIGHT,
     NTI_BT_SANITY_K,
     ENABLE_VENT_PATH,
@@ -180,6 +184,10 @@ from .single_pixel_mode import apply_single_pixel_mode
 from .test1_spatial_core import spatial_core_filter  # S99 Candidato B
 from .test1_contextual_filter import apply_contextual_test1_filter  # S99 Candidato C
 from .vrp_regimes import compute_vrp_lava_lake_eq16  # S99 DF-1 (Candidato Eq.16)
+from .vrp_regimes import (  # S126 corona Eq.6 (Coppola 2016a)
+    cluster_corona_background,
+    cluster_vrp_mw_with_bg,
+)
 from .second_pass_intra_radio import apply_second_pass_intra_radio_gate  # S85 F-S81-B'
 from .detection_context import (
     contextual_dnti_hot_mask,
@@ -597,6 +605,51 @@ def _compute_vrptir_aveni_diagnostic(bt5_2d, hot5_mask_2d, t_bg_i05):
         "vrptir_aveni_n_pixels": int(bt_hot_inrange.size),
         "vrptir_aveni_caveat": caveat,
     }
+
+
+def apply_corona_magnitude_v375(
+    vrp_mw: float,
+    bt_grid: np.ndarray,
+    pixel_areas: np.ndarray,
+    cluster_indices,
+    scene_hot_mask,
+    *,
+    enabled: bool,
+    mode: str = "footprint",
+    ring_px: int = 1,
+    min_corona: int = 4,
+) -> tuple:
+    """Recomputa el VRP del clúster con la corona Eq.6 (Coppola 2016a).
+
+    POR QUÉ: el fondo del Test 1 en VIIRS 375 sale hoy del anillo [1,5-3] km al
+    cráter, que es el 75 % del área del propio ROI de 3 km — cada píxel se compara
+    contra la media de sus propios tres cuartos exteriores, y el clip a cero se
+    queda con la mitad de arriba. Es un fondo autorreferente: la suma crece con la
+    cantidad de píxeles, no con la energía del volcán.
+
+    La Eq.6 usa en cambio la corona INMEDIATA al clúster, que por construcción no
+    contiene a los píxeles medidos. Eso la vuelve un discriminante espacial: una
+    fluctuación de fondo tiene vecinos a su misma temperatura (ΔL≈0, se desploma) y
+    un foco sub-píxel real los tiene fríos (ΔL grande, sobrevive).
+
+    Si la corona degrada (menos de `min_corona` píxeles válidos) NO se pisa el
+    valor: vuelve el VRP regional tal cual con `degraded=True`, para que el fallback
+    quede explícito en el record y se pueda contar después.
+
+    Returns:
+        (vrp_mw, corona_degraded). `corona_degraded` es None con el flag OFF.
+    """
+    if not enabled:
+        return vrp_mw, None
+    t_bk, degraded = cluster_corona_background(
+        bt_grid, cluster_indices, scene_hot_mask,
+        mode=mode, ring_px=ring_px, min_corona=min_corona,
+    )
+    if degraded:
+        return vrp_mw, True
+    return cluster_vrp_mw_with_bg(
+        bt_grid, pixel_areas, cluster_indices, t_bk, WOOSTER_COEFF, I04_LAMBDA
+    ), False
 
 
 def calculate_vrp(l1b_path: Path, geo_path: Path,
@@ -1788,6 +1841,22 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             if t1_clusters:
                 top = t1_clusters[0]  # mayor VRP (helper ordena desc cuando vrp dado)
                 _vrp_t = float(top["vrp_mw"])
+                # S126 — fondo de CORONA (Coppola 2016a Eq.6) en vez del anillo fijo
+                # [1,5-3] km al cráter, que solapa el 75 % del ROI de 3 km que mide
+                # (fondo autorreferente; ver docs/S126_COSTO_FILTRO_CONTEXTUAL.md).
+                # Sólo magnitud y post-selección: la detección y la posición ya
+                # quedaron fijadas arriba, así que el trigger de los eventos débiles
+                # que dependen del anillo (A79, NdC 06-16) NO se toca. Espejo de
+                # process_modis.py:1049. Flag-OFF default (A45).
+                _corona_degraded_t = None
+                _vrp_t, _corona_degraded_t = apply_corona_magnitude_v375(
+                    _vrp_t, bt, pixel_areas, top["pixel_indices"],
+                    test1_hot_filtered,
+                    enabled=ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375,
+                    mode=LOCAL_CLUSTER_MAG_MODE,
+                    ring_px=LOCAL_CLUSTER_MAG_RING_PX,
+                    min_corona=LOCAL_CLUSTER_MAG_MIN_CORONA,
+                )
                 # S71 D9 Opción C — cap si firing contextual-only en cirrus.
                 _d9_capped_t = False
                 if _path_d_cap_active and _vrp_t > PATH_D_ONLY_CAP_MW:
@@ -1802,6 +1871,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 }
                 if _d9_capped_t:
                     primary_cluster["d9_capped"] = True
+                if _corona_degraded_t is not None:
+                    primary_cluster["corona_degraded"] = bool(_corona_degraded_t)
                 # F52-B S77 (A45) — single-pixel mode régimen sub-MW.
                 _pix_vrps_t = [float(t1_vrp_2d[i, j])
                                for (i, j) in top["pixel_indices"]]
