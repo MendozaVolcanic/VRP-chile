@@ -2,9 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Cablear el fondo de corona de la Eq.6 de Coppola 2016a en los paths Test 1 de VIIRS 375 m y VIIRS 750 m, flag-OFF por defecto, para poder decidir por A/B si reemplaza al anillo fijo `[1,5–3] km` que hoy es autorreferente.
+**Goal:** Cablear el fondo de corona de la Eq.6 de Coppola 2016a en el path Test 1 de **VIIRS 375 m**, flag-OFF por defecto, para poder decidir por A/B si reemplaza al anillo fijo `[1,5–3] km` que hoy es autorreferente.
 
-**Architecture:** Se reusa el helper ya existente y testeado `cluster_corona_background` (`pipeline/vrp_regimes.py:109`) + `cluster_vrp_mw_with_bg` (`:183`), cableados hoy únicamente en `process_modis.py:1049`. Se replica ese patrón exacto en los dos archivos VIIRS: recomputar **sólo** `primary_cluster.vrp_mw` **después** de la selección del clúster. La detección, la posición y el resto del record quedan intactos. Dos flags separados por sensor (precedente: `ENABLE_FOCAL_CLUSTER_MAGNITUDE_VIIRS750`) para poder correr A/B independientes.
+**Alcance acotado (S126):** Nicolás limitó el trabajo a **VIIRS 375**. Es donde el problema está probado —87 % de clústeres de 1 píxel, Villarrica midiendo a 2,74 km del cráter, Planchón inflándose ×6,9— y así el A/B mueve una sola variable. VIIRS 750 queda para después, con este resultado a la vista; el port es mecánico (mismo helper, banda M13, coeficiente 19,7).
+
+**Architecture:** Se reusa el helper ya existente y testeado `cluster_corona_background` (`pipeline/vrp_regimes.py:109`) + `cluster_vrp_mw_with_bg` (`:183`), cableados hoy únicamente en `process_modis.py:1049`. Se replica ese patrón exacto en `process_viirs.py`: recomputar **sólo** `primary_cluster.vrp_mw` **después** de la selección del clúster. La detección, la posición y el resto del record quedan intactos. Un flag propio del sensor (precedente: `ENABLE_FOCAL_CLUSTER_MAGNITUDE_VIIRS750`), para dejar la puerta abierta al port sin arrastrar esta decisión.
 
 **Tech Stack:** Python 3.12, numpy, scipy.ndimage, pytest. Perfiles YAML en `pipeline/profiles/`.
 
@@ -38,7 +40,6 @@
 |---|---|---|
 | `pipeline/profile.py` | declarar los 2 flags nuevos leyendo de `paths:` | Modificar (~10 líneas) |
 | `pipeline/process_viirs.py` | corona en el path Test 1 de VIIRS 375 | Modificar (~20 líneas) |
-| `pipeline/process_viirs_mod.py` | corona en el path Test 1 de VIIRS 750 | Modificar (~20 líneas) |
 | `tests/test_corona_eq6_viirs_s126.py` | tests de las dos ramas + fallback degradado | Crear |
 | `pipeline/profiles/_s126_corona_off.yaml` | brazo control del A/B | Crear |
 | `pipeline/profiles/_s126_corona_on.yaml` | brazo tratamiento del A/B | Crear |
@@ -99,11 +100,10 @@ def _profile(monkeypatch, name="mirova_equivalent"):
     return importlib.reload(prof)
 
 
-def test_flags_corona_viirs_existen_y_estan_off_por_defecto(monkeypatch):
-    """Los dos flags existen y NO cambian el comportamiento operacional."""
+def test_flag_corona_v375_existe_y_esta_off_por_defecto(monkeypatch):
+    """El flag existe y NO cambia el comportamiento operacional."""
     prof = _profile(monkeypatch)
     assert prof.ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375 is False
-    assert prof.ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS750 is False
 ```
 
 - [ ] **Step 2: Correr el test para verificar que falla**
@@ -130,8 +130,6 @@ En `pipeline/profile.py`, inmediatamente después de la línea
 # Evidencia: docs/S126_COSTO_FILTRO_CONTEXTUAL.md.
 ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375: bool = bool(
     _p.get("enable_local_cluster_magnitude_viirs375", False))
-ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS750: bool = bool(
-    _p.get("enable_local_cluster_magnitude_viirs750", False))
 ```
 
 - [ ] **Step 4: Correr el test para verificar que pasa**
@@ -141,8 +139,8 @@ Expected: PASS
 
 - [ ] **Step 5: Verificar que no se rompió nada y que el nivel del YAML es el correcto**
 
-Run: `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p; print(p.ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375, p.ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS750)"`
-Expected: `False False`
+Run: `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p; print(p.ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375)"`
+Expected: `False`
 
 Run: `python -m pytest -q`
 Expected: `911 passed` (+1 nuevo = 912)
@@ -369,165 +367,7 @@ git commit -m "feat(s126): corona Eq.6 en el path Test 1 de VIIRS375 (flag-OFF)"
 
 ---
 
-### Task 3: Cablear la corona en VIIRS 750
-
-**Files:**
-- Modify: `pipeline/process_viirs_mod.py:1192-1210`
-- Test: `tests/test_corona_eq6_viirs_s126.py`
-
-- [ ] **Step 1: Escribir el test que falla**
-
-Agregar a `tests/test_corona_eq6_viirs_s126.py`:
-
-```python
-def test_corona_viirs750_usa_su_propia_banda_y_coeficiente():
-    """V750 debe usar M13 (4,050 um) y Wooster 19,7, no los de la banda I04."""
-    from pipeline.process_viirs_mod import apply_corona_magnitude_v750
-    from pipeline.vrp_regimes import cluster_vrp_mw_with_bg
-
-    bt = np.full((7, 7), 272.0)
-    bt[2:5, 2:5] = 262.0
-    bt[3, 3] = 285.0
-    areas = np.full((7, 7), 562500.0)     # M-band nadir
-    hot = np.zeros((7, 7), dtype=bool)
-    hot[3, 3] = True
-
-    out, deg = apply_corona_magnitude_v750(
-        9.99, bt, areas, [(3, 3)], hot, enabled=True)
-    assert deg is False
-    esperado = cluster_vrp_mw_with_bg(bt, areas, [(3, 3)], 262.0, 19.7, 4.050)
-    assert out == pytest.approx(esperado, rel=1e-9)
-
-
-def test_corona_viirs750_off_no_toca_nada():
-    from pipeline.process_viirs_mod import apply_corona_magnitude_v750
-
-    bt = np.full((5, 5), 270.0)
-    bt[2, 2] = 290.0
-    areas = np.full((5, 5), 562500.0)
-    hot = np.zeros((5, 5), dtype=bool)
-    hot[2, 2] = True
-
-    out, deg = apply_corona_magnitude_v750(
-        7.5, bt, areas, [(2, 2)], hot, enabled=False)
-    assert out == 7.5 and deg is None
-```
-
-- [ ] **Step 2: Correr los tests para verificar que fallan**
-
-Run: `python -m pytest tests/test_corona_eq6_viirs_s126.py -v`
-Expected: los dos nuevos FALLAN con `ImportError: cannot import name 'apply_corona_magnitude_v750'`
-
-- [ ] **Step 3: Agregar imports en process_viirs_mod.py**
-
-En la línea 139 ya existe `from .vrp_regimes import cluster_focal_vrp_mw`. Reemplazarla por:
-
-```python
-from .vrp_regimes import (  # S112 focal (A69/D11) + S126 corona Eq.6
-    cluster_corona_background,
-    cluster_focal_vrp_mw,
-    cluster_vrp_mw_with_bg,
-)
-```
-
-Y agregar al bloque que importa de `.profile`:
-
-```python
-    ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS750,
-    LOCAL_CLUSTER_MAG_MODE,
-    LOCAL_CLUSTER_MAG_RING_PX,
-    LOCAL_CLUSTER_MAG_MIN_CORONA,
-```
-
-- [ ] **Step 4: Escribir el helper**
-
-Agregar a `pipeline/process_viirs_mod.py`, a nivel de módulo, antes de la función que procesa el gránulo:
-
-```python
-def apply_corona_magnitude_v750(
-    vrp_mw: float,
-    bt_grid: np.ndarray,
-    pixel_areas: np.ndarray,
-    cluster_indices,
-    scene_hot_mask,
-    *,
-    enabled: bool,
-    mode: str = "footprint",
-    ring_px: int = 1,
-    min_corona: int = 4,
-) -> tuple[float, bool | None]:
-    """Corona Eq.6 para VIIRS 750 m — espejo de apply_corona_magnitude_v375.
-
-    POR QUÉ: mismo fondo autorreferente que en VIIRS375, agravado porque el píxel
-    de 562.500 m² integra más gradiente topográfico (A80). Banda M13 y coeficiente
-    Wooster 19,7, no los de I04.
-
-    Returns:
-        (vrp_mw, corona_degraded). `corona_degraded` es None cuando el flag está OFF.
-    """
-    if not enabled:
-        return vrp_mw, None
-    t_bk, degraded = cluster_corona_background(
-        bt_grid, cluster_indices, scene_hot_mask,
-        mode=mode, ring_px=ring_px, min_corona=min_corona,
-    )
-    if degraded:
-        return vrp_mw, True
-    return cluster_vrp_mw_with_bg(
-        bt_grid, pixel_areas, cluster_indices, t_bk, WOOSTER_COEFF, M13_LAMBDA
-    ), False
-```
-
-- [ ] **Step 5: Correr los tests para verificar que pasan**
-
-Run: `python -m pytest tests/test_corona_eq6_viirs_s126.py -v`
-Expected: 6 passed
-
-- [ ] **Step 6: Cablear en el bloque Test 1 de V750**
-
-En `pipeline/process_viirs_mod.py`, dentro de `if t1_clusters:` (≈1192), entre `_vrp_t = float(top["vrp_mw"])` y el comentario `# S112 §A69/D11`, insertar:
-
-```python
-                # S126 — corona Eq.6 ANTES del focal, igual que MODIS
-                # (process_modis.py:1049 corona → 1069 focal → cap D9).
-                _corona_degraded_t = None
-                _vrp_t, _corona_degraded_t = apply_corona_magnitude_v750(
-                    _vrp_t, bt_mir, pixel_areas, top["pixel_indices"],
-                    test1_hot_filtered,
-                    enabled=ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS750,
-                    mode=LOCAL_CLUSTER_MAG_MODE,
-                    ring_px=LOCAL_CLUSTER_MAG_RING_PX,
-                    min_corona=LOCAL_CLUSTER_MAG_MIN_CORONA,
-                )
-```
-
-Y junto a las otras asignaciones de diagnóstico del `primary_cluster` (después de `if _focal_degraded_t is not None:`):
-
-```python
-                if _corona_degraded_t is not None:
-                    primary_cluster["corona_degraded"] = bool(_corona_degraded_t)
-```
-
-- [ ] **Step 7: Verificar la inserción (A49) y el nombre del grid**
-
-Run: `git diff pipeline/process_viirs_mod.py`
-Expected: sólo líneas `+`. Confirmar que el grid que se pasa es `bt_mir` (definido en `:461` como `bands["M13"]`) y no `bt`.
-
-- [ ] **Step 8: Suite completa**
-
-Run: `python -m pytest -q`
-Expected: `917 passed`
-
-- [ ] **Step 9: Commit**
-
-```bash
-git add pipeline/process_viirs_mod.py tests/test_corona_eq6_viirs_s126.py
-git commit -m "feat(s126): corona Eq.6 en el path Test 1 de VIIRS750 (flag-OFF)"
-```
-
----
-
-### Task 4: Perfiles del A/B y pre-registro de criterios
+### Task 3: Perfiles del A/B y pre-registro de criterios
 
 **Files:**
 - Create: `pipeline/profiles/_s126_corona_off.yaml`
@@ -546,7 +386,9 @@ cab = ("# S126 A/B corona Eq.6 — BRAZO CONTROL.\n"
        "# Identico al operacional; existe para que el control sea un clon REPROCESADO\n"
        "# en la misma ventana y no el acumulado de mirova_equivalent (que mezcla\n"
        "# versiones de codigo distintas y mete diferencias espurias).\n")
-out = cab + re.sub(r"^data_subdir:.*$", "data_subdir: _s126_corona_off", src, flags=re.M)
+out = cab + re.sub(r"^(\s*)data_subdir:.*$", r"data_subdir: _s126_corona_off", src, flags=re.M)
+# OJO: la clave va INDENTADA bajo `output:`. Sin el `\s*` el regex no matchea
+# y el brazo queda apuntando a data/mirova_equivalent/ — a produccion.
 pathlib.Path("pipeline/profiles/_s126_corona_off.yaml").write_text(out, encoding="utf-8")
 PY
 ```
@@ -563,7 +405,6 @@ src = src.replace("# S126 A/B corona Eq.6 — BRAZO CONTROL.",
 # los enable_* de magnitud van bajo `paths:` (profile.py:131 `_p = _cfg["paths"]`)
 src = re.sub(r"^(paths:\s*\n)",
              r"\1  enable_local_cluster_magnitude_viirs375: true\n"
-             r"  enable_local_cluster_magnitude_viirs750: true\n",
              src, count=1, flags=re.M)
 pathlib.Path("pipeline/profiles/_s126_corona_on.yaml").write_text(src, encoding="utf-8")
 PY
@@ -576,16 +417,16 @@ Run:
 for P in _s126_corona_off _s126_corona_on; do
   VRP_PROFILE=$P python -c "
 import pipeline.profile as p
-print('$P', p.ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375, p.ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS750, p.DATA_SUBDIR)"
+print('$P', p.ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375, p.DATA_SUBDIR)"
 done
 ```
 Expected:
 ```
-_s126_corona_off False False _s126_corona_off
-_s126_corona_on True True _s126_corona_on
+_s126_corona_off False _s126_corona_off
+_s126_corona_on True _s126_corona_on
 ```
 
-Si el `on` sale `False False`, el flag quedó en el nivel equivocado del YAML — tiene que estar bajo `paths:`.
+Si el `on` sale `False`, el flag quedó en el nivel equivocado del YAML — tiene que estar bajo `paths:`.
 
 - [ ] **Step 4: Verificar que ningún otro flag difiere entre los brazos**
 
@@ -605,7 +446,8 @@ dif = {k:(a.get(k),b.get(k)) for k in set(a)|set(b) if a.get(k)!=b.get(k)}
 print(json.dumps(dif, indent=2, ensure_ascii=False))
 PY
 ```
-Expected: exactamente 3 diferencias — los 2 flags nuevos y `DATA_SUBDIR`. Cualquier otra cosa invalida el A/B.
+Expected: exactamente 2 diferencias — el flag nuevo y `DATA_SUBDIR` (ignorando
+`VALID_PROFILES` y `PROFILE_NAME`, que son metadatos). Cualquier otra cosa invalida el A/B.
 
 - [ ] **Step 5: Escribir el pre-registro ANTES de correr**
 
@@ -656,7 +498,7 @@ git commit -m "test(s126): perfiles del A/B de la corona + criterios pre-registr
 
 ---
 
-### Task 5: Correr el A/B
+### Task 4: Correr el A/B
 
 **Files:** ninguno de código.
 
@@ -716,5 +558,30 @@ git commit -m "exp(s126): veredicto del A/B de la corona Eq.6"
   gobernando la detección; sólo se le saca el rol de fondo de la magnitud.
 - **No cablea la corona en los paths contextuales de VIIRS.** El fondo
   autorreferente está en el path Test 1; ahí se ataca.
+- **No toca VIIRS 750.** Alcance acotado por Nicolás; el port queda para después.
 - **No promueve nada a `mirova_equivalent`.** El flip es una decisión separada, de
   Nicolás, con el resultado del A/B a la vista.
+
+
+---
+
+## Registro de ejecución (S126)
+
+- **Task 0** — tag `pre-s126-corona-viirs` en el remote + confirmación explícita. ✅
+- **Task 1** — flag `ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375`, OFF default. ✅
+- **Task 2** — helper `apply_corona_magnitude_v375` + cableado en el bloque Test 1.
+  A49 verificado: **71 líneas agregadas, 0 borradas**. Suite 919 verdes. ✅
+- **Task 3** — perfiles `_s126_corona_{off,on}` + `docs/S126_CORONA_PREREGISTRO.md`. ✅
+- **Task 4** — A/B: pendiente del merge de #539.
+
+### Lo que el plan atrapó y hay que recordar
+
+El paso de verificación de perfiles **por `pipeline.profile` en vez del YAML**
+evitó un accidente serio: el regex `^data_subdir:` no matcheó porque la clave va
+indentada bajo `output:`, así que los dos brazos quedaron apuntando a
+`data/mirova_equivalent/` y habrían **escrito sobre la data de producción**. El
+paso existía precisamente para eso y funcionó.
+
+El checkpoint de la Task 2 —"si el test de discriminación falla, parar, la
+hipótesis es falsa"— **pasó**: 8,8× de separación entre foco y fluctuación con el
+mismo píxel.
