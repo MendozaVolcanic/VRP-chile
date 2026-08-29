@@ -201,3 +201,33 @@ arregla en el algoritmo, no en el display.
   propio bloque de arranque mandaba estratificar; faltó hacerlo por volcán.
 - **No reabrir F**: `enable_test1_intermediate_bg` no mueve nada por sí solo
   (F ≡ control exacto). Sólo importa en interacción, y sólo en Láscar.
+
+---
+
+# Addendum — el artefacto de Villarrica está vivo en el dashboard
+
+> Verificado sobre `data/mirova_equivalent/` (lo que se publica), no sobre los brazos
+> del A/B. Filtro `mirova_eq_vrp > 0`, que es exactamente lo que el frontend grafica.
+
+| mes | detecciones mostradas | dist. mediana al cráter | % a más de 1,5 km | VRP mediana |
+|---|---|---|---|---|
+| 2026-05 | 116 | 2,81 km | 91 % | 0,062 |
+| 2026-06 | 104 | 2,80 | 91 % | 0,048 |
+| 2026-07 | 77 | 2,79 | 95 % | 0,046 |
+| 2026-08 | 83 | 2,81 | 92 % | 0,047 |
+
+**380 detecciones desde mayo, 349 (92 %) con el clúster a más de 1,5 km del cráter**, y
+todas etiquetadas `summit` —rojo en el mapa— porque `inner_radius_km = 5` y 2,8 < 5.
+
+Lo que cierra el caso es la **constancia**: la distancia mediana es 2,81 · 2,80 · 2,79 ·
+2,81 en cuatro meses seguidos, y la magnitud 0,062 · 0,048 · 0,046 · 0,047. Una fuente
+volcánica varía con la actividad; un rasgo fijo del terreno medido contra su propia
+corona, no. Es el mismo objeto todos los meses, a 2,8 km al oeste.
+
+Para el operador esto significa que Villarrica muestra actividad térmica persistente al
+cráter que, en su mayor parte, no está en el cráter. No es que el volcán esté quieto —
+MIROVA publica alertas ahí y hay lava lake— sino que **el número que graficamos no viene
+de ese foco**: viene del punto más alto de la fluctuación del anillo nival.
+
+Por A72 esto se arregla en el algoritmo, no ocultándolo en el display: es artefacto que
+no deberíamos generar, no señal real sub-umbral que convenga distinguir visualmente.
