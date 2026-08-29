@@ -128,3 +128,35 @@ def test_corona_v375_degradada_conserva_el_vrp_regional():
         base, bt, areas, [(1, 1)], hot, enabled=True)
     assert deg is True
     assert out == base
+
+
+def test_la_corona_esta_cableada_en_LOS_DOS_paths_de_viirs375():
+    """Guard del modo de falla que arruino el primer A/B (#539).
+
+    La corona se cableo primero SOLO en el bloque Test 1, y el A/B salio identico al
+    control en los 5 volcanes. Diagnostico: de las 80 noches que se comparan contra
+    MIROVA, 77 vienen del path CONTEXTUAL y solo 3 del Test 1 — la corona no llegaba
+    adonde se mide. Es el mismo modo de falla que el brazo A de S125 ("la corona no
+    dice que no sirve, dice que no llega adonde se mide"), y MODIS la tiene justamente
+    en el bloque contextual (process_modis.py:1049), no en su Test 1.
+
+    Este test es estructural a proposito: el bug no estaba en la funcion —que ya tenia
+    tests y andaba bien— sino en DONDE se la llamaba. Un test de comportamiento sobre
+    el helper no lo habria visto nunca.
+    """
+    from pathlib import Path
+
+    src = (Path(__file__).resolve().parents[1] / "pipeline" / "process_viirs.py"
+           ).read_text(encoding="utf-8")
+    llamadas = src.count("apply_corona_magnitude_v375(")
+    # 1 definicion + 2 call sites
+    assert llamadas >= 3, (
+        f"solo hay {llamadas - 1} call site(s) de la corona en process_viirs.py. "
+        "Tienen que ser 2: el bloque contextual (_clusters) y el bloque Test 1 "
+        "(t1_clusters). Con uno solo, el A/B mide un path que casi no se compara.")
+
+    # y las dos ramas deben marcar el record, para poder auditarlo despues
+    assert src.count('primary_cluster["corona_degraded"]') >= 2, (
+        "las dos ramas deben dejar `corona_degraded` en el record; sin esa marca no "
+        "se puede distinguir 'la corona corrio y no cambio nada' de 'la corona no corrio'."
+    )

@@ -1429,6 +1429,27 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 if _clusters:
                     _c = _clusters[0]
                     _vrp_c = float(_c["vrp_mw"])
+                    # S126 — corona Eq.6 (Coppola 2016a) en el path CONTEXTUAL.
+                    # POR QUÉ ACÁ Y NO SÓLO EN TEST 1: el primer cableado (#539) puso
+                    # la corona sólo en el bloque Test 1, y el A/B salió idéntico al
+                    # control en los 5 volcanes. El diagnóstico: de las 80 noches que
+                    # se comparan contra MIROVA, 77 vienen de ESTE path y sólo 3 del
+                    # Test 1, así que la corona no llegaba adonde se mide. Es el mismo
+                    # modo de falla que el brazo A de S125. MODIS la tiene justamente
+                    # acá (process_modis.py:1049), no en su bloque Test 1 — se había
+                    # replicado el bloque equivocado.
+                    # Acá el fondo es `t_bg_i04`, el anillo GLOBAL 5-25 km, que en los
+                    # nevados cae sobre el valle tibio de baja altitud y no representa
+                    # el entorno del cluster (A69). La Eq.6 usa la corona inmediata.
+                    # Flag-OFF default (A45), mismo flag que el bloque Test 1.
+                    _corona_degraded = None
+                    _vrp_c, _corona_degraded = apply_corona_magnitude_v375(
+                        _vrp_c, bt, pixel_areas, _c["pixel_indices"], hot_mask_2d,
+                        enabled=ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375,
+                        mode=LOCAL_CLUSTER_MAG_MODE,
+                        ring_px=LOCAL_CLUSTER_MAG_RING_PX,
+                        min_corona=LOCAL_CLUSTER_MAG_MIN_CORONA,
+                    )
                     # S71 D9 Opción C — cap si firing contextual-only en cirrus.
                     _d9_capped = False
                     if _path_d_cap_active and _vrp_c > PATH_D_ONLY_CAP_MW:
@@ -1443,6 +1464,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     }
                     if _d9_capped:
                         primary_cluster["d9_capped"] = True
+                    if _corona_degraded is not None:
+                        primary_cluster["corona_degraded"] = bool(_corona_degraded)
                     # F52-B S77 (A45) — single-pixel mode régimen sub-MW.
                     _pix_vrps = [float(vrp_per_pixel_2d[i, j])
                                  for (i, j) in _c["pixel_indices"]]
