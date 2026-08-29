@@ -687,11 +687,24 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # invierno austral la nieve irradia en el mismo rango que el tope de una nube
     # baja, así que el criterio no los distingue.
     #
-    # El cambio es NO-OP en producción a propósito: `mirova_equivalent.yaml` fija
-    # `cloud_mask_bt_k: 260.0` para preservar el comportamiento actual hasta que
-    # un A/B respalde apagarla. Lo que se gana ahora es que apagarla pase a ser
-    # una decisión de perfil —auditable y A/B-able— en vez de una edición de
-    # código. Guard: tests/test_cloud_mask_from_profile_s125.py
+    # ⚠️ S126 — CORRECCIÓN. La versión anterior de este comentario decía que el
+    # cambio era "NO-OP en producción a propósito" porque `mirova_equivalent.yaml`
+    # fijaría `cloud_mask_bt_k: 260.0`. Es FALSO: ese YAML declara `0.0` desde S29
+    # (`git log -S cloud_mask_bt_k`) y el PR #535 no lo tocó. O sea que al mergear
+    # #535 la máscara de VIIRS 375 quedó APAGADA EN PRODUCCIÓN, no preservada.
+    #
+    # Medido sobre la data operacional a las ~15 h del merge (2 ciclos NRT), los
+    # píxeles de fondo por pasada subieron y desaparecieron las noches ciegas:
+    #   NdC 8.204 → 13.388 (mín 0 → 1.259) · Villarrica 7.473 → 14.038 (mín 0 →
+    #   6.388) · Láscar 5.219 → 13.178 (mín 0 → 8.931).
+    #
+    # El destino es probablemente el correcto —`MISSION.md` y Laiolo 2026 dicen que
+    # MIROVA NRT no filtra nubes, y el perfil lo declara así desde S29— pero se
+    # llegó sin la compuerta: el A/B que debía decidirlo corre recién en S126
+    # (perfiles `_s125_cloudmask_{on,off}`), y ahora valida algo YA VIVO.
+    # Detalle: docs/S126_CLOUDMASK_YA_ESTA_VIVA.md
+    # Guards: tests/test_cloud_mask_from_profile_s125.py +
+    #         tests/test_cloud_mask_operacional_s126.py
     CLOUD_BT_THRESHOLD = CLOUD_MASK_BT_K
     n_cloud_masked = 0
     cloud_free = None  # S112 default fuera del bloque I05 (lo consume el anillo Q3)
