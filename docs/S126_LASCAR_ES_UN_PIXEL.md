@@ -140,3 +140,58 @@ refuta la corona** — refuta la corona *sin* el segundo píxel.
    comparten el grupo `push-main`, que ya costó una corrida en S125.
 3. Revisar `single_pixel_mode`: su docstring y su alcance real no coinciden. Decidir si
    Láscar y PCC deben estar dentro, con su propio A/B — no cambiarlo de prepo.
+
+---
+
+# Apéndice — `single_pixel_mode`: la justificación caducó, pero quitarlo no conviene
+
+> Números de `experiments/_s126_lascar/03_costo_single_pixel_mode.py`.
+
+El modo reporta `max(per_pixel_vrp)` en vez de la suma cuando el clúster cae en régimen
+sub-MW. Nació para **desinflar** volcanes que sobre-reportaban —Tupungatito 30×,
+Chaitén 2,5×— y su docstring dice textual: *"Volcanes NO afectados … Lascar …"*. Está
+activo en los **110 de 110** records de Láscar.
+
+**El cálculo es exacto, no un preview** (A18): el modo se aplica *después* de la
+selección del clúster y sólo cambia el número reportado — no toca detección, ni
+posición, ni qué clúster gana. Revertirlo sobre los records persistidos da el valor que
+habría salido. El método de identificar los píxeles del clúster (los `n_pixels` más
+cercanos al centroide) se validó contra los clústeres de un píxel: **525 de 525
+coinciden**, peor desvío 0,0005 MW.
+
+| volcán | noches | ratio hoy | ratio sin el modo | cambio | noches tocadas |
+|---|---|---|---|---|---|
+| Puyehue-Cordón Caulle | 21 | 0,722 | **0,860** | +0,138 | 7 |
+| Villarrica | 8 | 0,764 | 0,832 | +0,068 | 2 |
+| **Láscar** | 35 | 0,434 | **0,480** | +0,045 | 12 |
+| Isluga | 94 | 0,541 | 0,573 | +0,032 | 23 |
+| Planchón-Peteroa | 13 | 0,957 | 0,966 | +0,008 | 1 |
+| **Tupungatito** | 49 | 0,713 | **0,713** | **0,000** | **0** |
+| Lastarria | 74 | 0,417 | 0,417 | 0,000 | 2 |
+| **Chaitén** | 22 | 1,177 | **1,414** | **+0,237** | 13 |
+
+## Dos lecturas, y llevan a decisiones distintas
+
+**La justificación original caducó.** En **Tupungatito el modo no toca ni una sola
+noche** — y es el volcán para el que se construyó (30× de sobre-reporte). Lo curaron
+otras cosas en el camino (nadir-fijo S103, ctxpeak S100), y hoy ya no tiene clústeres
+multi-píxel en régimen sub-MW. La razón por la que existe se evaporó.
+
+**Pero quitarlo perdería un volcán de banda.** Chaitén pasa de 1,177 a **1,414** —
+cruza el techo de la banda \[0,7–1,4] por un pelo, y ahí el modo sí está haciendo su
+trabajo (13 de 22 noches tocadas). Contando volcanes en banda: **7/9 hoy contra 6/9 sin
+el modo**. Es el mismo criterio pre-registrado que hizo caer al brazo E, y da el mismo
+veredicto.
+
+## Recomendación
+
+**No quitarlo, y corregir su docstring.** El modo es hoy un neto casi nulo: le devuelve
+entre 0,03 y 0,14 de ratio a cinco volcanes y le saca 0,24 a Chaitén. No es la palanca
+de Láscar —le devuelve 0,045 de los 0,57 que le faltan— así que sacarlo no resuelve
+nada y cuesta un volcán.
+
+Lo que sí hay que arreglar es la **documentación**: el docstring afirma que Láscar y
+PCC no están afectados y están entre los que más toca (12 y 7 noches). Es la misma
+clase de defecto que la máscara de nube: una afirmación sobre el estado del sistema que
+nadie verificó. Y conviene registrar que **su justificación original ya no aplica**, por
+si en el futuro alguien lo evalúa creyendo que sigue sosteniendo a Tupungatito.
