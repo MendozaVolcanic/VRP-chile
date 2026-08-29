@@ -51,8 +51,17 @@ MAX_CHUNK_DAYS = 14      # cota dura por job (anti-timeout)
 # full ciega). 4 alerta + 1 rutina ≤ 5/vol × 11 × 4 profiles = ≤220 jobs (< 256).
 MAX_ALERTA_CHUNKS = 4
 
-CONS = REPO / "data" / "mirova_reference" / "mirova_v1_snapshot" / "registro_vrp_consolidado.csv"
-OCR = REPO / "data" / "mirova_reference" / "registro_vrp_ocr.csv"
+# S126 fix — los dos canales del ground truth tienen que salir del MISMO snapshot.
+# Antes `CONS` apuntaba al snapshot y `OCR` a una copia suelta un nivel más arriba que
+# quedó congelada el 2026-03-28 (236 filas) mientras el snapshot llega al 2026-08-24
+# (888 filas), porque `audit-weekly.yml:57` sólo refresca el del snapshot. El script
+# estaba construyendo las ventanas del A/B con cinco meses menos de canal OCR: 844
+# fechas ALERTA en vez de 903 sobre los 11 Tier A (+59, y +11 en Planchón-Peteroa).
+# El canal OCR NO es validación del consolidado sino COMPLEMENTO (A11), así que lo que
+# falta no se recupera por el otro lado. Guard: tests/test_ground_truth_mismo_snapshot_s126.py
+_SNAP = REPO / "data" / "mirova_reference" / "mirova_v1_snapshot"
+CONS = _SNAP / "registro_vrp_consolidado.csv"
+OCR = _SNAP / "registro_vrp_ocr.csv"
 OUT_DIR = REPO / "experiments" / "_s118_c2ab"
 
 
