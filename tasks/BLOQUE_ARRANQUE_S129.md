@@ -156,14 +156,25 @@ PENDIENTES QUE SON LA PUERTA DE ENTRADA (regla C)
 DECISIONES QUE ESPERAN A NICOLÁS
 ═══════════════════════════════════════════════════════════════════════════
 
-  1. **`git gc --prune=now`** — recupera 1,57 GiB de basura y consolida 33 packs. Es
-     mantenimiento estándar, no reescribe historia. No se corrió.
-  2. **Los duplicados de `documentacion/`**: 101,9 MB en 8 grupos byte-idénticos. Ojo:
-     ese directorio está gitignoreado, así que pesan sólo en disco local. Si el problema
-     es el 98 %, el candidato serio es `978-3-031-86841-2.pdf` (93 MB, del que sólo
-     usamos un capítulo ya extraído). Borrar exige A38.
-  3. **Los ~466 MB de `experiments/_s104_roi_probe/`** siguen sin trackear (heredado de
-     S128). `experiments/` completo son 1.428 MB, no 458.
+  ✅ **El `git gc` ya se corrió en S128** (autorizado): 33 packs → 1, 7,38 → 5,99 GiB,
+     basura 1,57 GiB → 0. Recuperó **8 GB**; el disco pasó de 98 % a **96 %** (21 GB
+     libres). `git fsck` limpio, 91 tags y todas las ramas intactos. No re-correrlo por
+     rutina.
+
+  1. **Los duplicados de `documentacion/`**: 101,9 MB en 8 grupos byte-idénticos. Ojo:
+     ese directorio está **gitignoreado**, así que pesan sólo en disco local. El candidato
+     serio si hace falta espacio es `978-3-031-86841-2.pdf` (93 MB, del que sólo usamos
+     un capítulo ya extraído). Borrar exige A38 (inventario + tag + confirmación).
+  2. **Los 6 papers conseguidos en S128 NO están en git**, por el mismo gitignore:
+     Coppola 2014 y 2012, **Wright 2002** (el origen del NTI), Schroeder 2014, Li 2018 y
+     el ATBD VIIRS 375 m. Viven sólo en el disco de Nicolás. Si se quiere respaldo, es
+     una decisión aparte.
+  3. **Los ~466 MB de `experiments/_s104_roi_probe/`** siguen sin trackear. `experiments/`
+     completo son 1.428 MB, no los 458 que decía S121.
+  4. **Quedó un racimo de la Fase 3 sin cubrir**: el agente de Aveni et al. 2023 (FY-3D
+     MERSI-II) murió dos veces por límite de sesión y no dejó informe. Es el precedente
+     de cómo el propio grupo MIROVA calibra un sensor nuevo — el molde de lo que
+     hacemos. `documentacion/The_Capabilities_of_FY-3DMERSI-II_Sensor_to_Detect.pdf`.
 
 ═══════════════════════════════════════════════════════════════════════════
 REGLAS DE ESTA ETAPA
