@@ -81,3 +81,30 @@ El flag queda en `False` y no se toca `mirova_equivalent`. El hallazgo del fondo
 autorreferente sigue en pie —está probado independientemente del A/B— y habría que
 buscar otra forma de sacarle el rol de fondo al anillo, por ejemplo moviéndolo
 fuera del ROI en vez de reemplazarlo por la corona.
+
+---
+
+## Verificación de validez del control (hecha con el control ya en disco)
+
+El brazo control **no** reproduce la data operacional de la misma ventana, y eso está
+bien — es justamente la razón por la que el control tiene que ser un clon reprocesado.
+Verificado el porqué, para descartar que fuera ruido:
+
+| volcán | grupo | n | mismo `n_bg` | Δ `n_bg` (control − operacional) |
+|---|---|---|---|---|
+| Villarrica | VRP idéntico | 592 | 74 % | 0 |
+| | VRP difiere | 90 | **0 %** | **+10.984** |
+| Láscar | VRP idéntico | 349 | 94 % | 0 |
+| | VRP difiere | 205 | **2 %** | **+4.514** |
+| Nevados de Chillán | VRP idéntico | 462 | 90 % | 0 |
+| | VRP difiere | 204 | **1 %** | **+7.520** |
+
+Los records que difieren son **exactamente** aquellos donde el control usó miles de
+píxeles de fondo más: son las pasadas en que la máscara de nube filtraba en la data
+operacional (producida **antes** del PR #535) y ya no filtra en el reproceso de hoy.
+
+**Consecuencia para este A/B**: los dos brazos de la corona se reprocesaron ahora, con
+el mismo código y la misma máscara, difiriendo sólo en el flag. Su comparación es
+limpia. Comparar cualquiera de los dos contra `mirova_equivalent` estaría contaminado
+por el cambio de máscara — que es precisamente el error que la regla del control-clon
+previene, acá cuantificado.

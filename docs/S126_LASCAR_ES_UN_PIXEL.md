@@ -195,3 +195,31 @@ PCC no están afectados y están entre los que más toca (12 y 7 noches). Es la 
 clase de defecto que la máscara de nube: una afirmación sobre el estado del sistema que
 nadie verificó. Y conviene registrar que **su justificación original ya no aplica**, por
 si en el futuro alguien lo evalúa creyendo que sigue sosteniendo a Tupungatito.
+
+---
+
+# Re-verificación con la máscara de nube apagada (A8)
+
+Todo el análisis de arriba usó `_s125_mag_control`, reprocesado en S125 — es decir **con
+la máscara de nube encendida**. Después del A/B de la máscara quedó disponible
+`_s126_corona_off`, un control fresco reprocesado **con la máscara apagada**, que es como
+corre producción hoy. Repetir el cálculo ahí es obligatorio antes de dar el hallazgo por
+bueno (A8: verificar con data fresca, no asumir).
+
+| volcán | n | ratio | fondo usado | fondo **necesario** | píxeles necesarios | fondo imposible en |
+|---|---|---|---|---|---|---|
+| **Láscar** | 11 | 0,64 | 261,59 K | **238,37 K** | **1,57** | 100 % |
+| Villarrica | 5 | 0,86 | 262,60 | 257,12 | 1,16 | 100 % |
+| Planchón-Peteroa | 10 | 1,02 | 259,30 | 258,10 | 0,99 | 70 % |
+
+**La conclusión no cambia y se refuerza.** El fondo que haría falta en Láscar baja a
+238,4 K contra un píxel más frío disponible de 272,8 K — 34 K de diferencia, aún más
+imposible que con la máscara encendida. Sigue siendo un problema de píxeles.
+
+Lo que sí cambia es el **tamaño** del déficit: Láscar pasa de necesitar 1,96 píxeles a
+1,57, y su ratio sube de 0,51 a 0,64. Eso es coherente con el veredicto de la máscara
+—apagarla ya lo acercó a MIROVA— y significa que el hueco que queda por cerrar con el
+segundo píxel es algo menor de lo que decía la primera medición.
+
+El `n` cae (Láscar 17 → 11) porque el control fresco tiene más detecciones y por lo
+tanto más clústeres multi-píxel, que este cálculo excluye por construcción.
