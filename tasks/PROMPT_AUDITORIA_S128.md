@@ -323,6 +323,132 @@ De los siete barridos que prepararon esta auditoría (todos con datos):
     que SÍ tuvieron A/B pareado no se revirtió ninguno.
 
 ═══════════════════════════════════════════════════════════════════════════
+FASE 3 — EL FRENTE BIBLIOGRÁFICO. Lanzar con AGENTES. Hay presupuesto.
+═══════════════════════════════════════════════════════════════════════════
+
+Nicolás lo marcó como primordial y autorizó agentes explícitamente. No es un
+anexo de la auditoría: es una fase con su propio entregable.
+
+── QUÉ SIGNIFICA "A PROFUNDIDAD" (definido, no adjetivo) ───────────────────
+
+Un paper está leído a profundidad cuando el informe contesta las SEIS:
+
+  1. **Qué mide y con qué fórmula**, con la ecuación numerada del paper y sus
+     constantes. Verbatim, entre comillas, con página.
+  2. **Qué decisiones de diseño toma y por qué** — el fondo, el umbral, la
+     ventana, la agregación. No el resultado: el CRITERIO.
+  3. **Qué dice sobre nuestros frentes abiertos**: magnitud sub-MW y piso VRP ·
+     fondo local vs regional · geometría de grilla y resampleo · filtrado de
+     nube · umbrales N·sigma y NTI · agregación temporal · saturación y
+     calibración · señal difusa vs foco discreto.
+  4. **En qué NOS CONTRADICE**, si nos contradice. Es la parte que más rinde y
+     la que más se omite.
+  5. **Qué cita que no tenemos** — su bibliografía es un mapa (así aparecieron
+     Coppola 2014 y Wright 2002).
+  6. **Qué NO dice**, contra lo que se le atribuye. El error de S127 fue
+     verificar que una cita existía sin verificar que decía lo que se le
+     atribuía. **Leer el párrafo entero, no la frase.**
+
+Cada informe termina con: **la cita verbatim + la página + qué implica para
+nuestro código, con archivo:línea**. Sin eso, no está leído: está hojeado.
+
+── LOTE A · leer lo que YA TENEMOS (prioridad sobre descargar) ─────────────
+
+Un agente por racimo temático, en paralelo. Los 24 sin sintetizar están en
+`docs/AUDIT_S127.md` y en la sección "EL CORPUS DE PAPERS" de arriba.
+
+  A1 · **Nubes** — `Frey_2008_MODIS_CloudMask_Collection5.pdf` (⭐ sus tests
+       NOCTURNOS son justo donde el umbral de 260 K hacía daño),
+       `Platnick_MODIS_MOD06_ATBD.pdf` (autores reales Menzel/Frey/Baum),
+       `Fan_2015_DaytimeLST_Cirrus.pdf`, `VNP14_User_Guide_v1.3.pdf`.
+       Pregunta que debe contestar: **¿qué test usaría MIROVA si filtrara?** —
+       para saber qué estamos aproximando con un umbral único.
+
+  A2 · **Magnitud** — `j.jvolgeores.2012.09.005.pdf` (Coppola 2013, *radiant
+       density*: ⭐ **fuente primaria de c_rad**, que hoy citamos de segunda mano
+       vía Galetto 2025) y `s00445-009-0320-8.pdf` (Coppola 2010, Piton:
+       validación contra terreno).
+       Pregunta: **¿nuestro c_rad y nuestro k son los del paper primario?**
+
+  A3 · **Difuso vs foco** — `s41561-021-00705-4.pdf` (Girona, Realmuto &
+       Lundgren 2021, **Nature Geoscience**). Es nuestro frente A69/D11 escrito
+       por otros. Pregunta: **¿lo que llamamos artefacto topográfico, ellos lo
+       llaman señal?**
+
+  A4 · **Precedente metodológico del grupo** — `The_Capabilities_of_FY-3D_
+       MERSI-II...pdf` (Aveni, Laiolo, Campus, Massimetti, Coppola 2023): el
+       grupo MIROVA calibrando k_MIR en un sensor nuevo. Es el molde de cómo
+       ellos hacen lo que nosotros hacemos.
+
+  A5 · **Geometría y sensor** — `THESIS_MASSIMETTI.pdf` (tutor Coppola),
+       `JPSS_ATBD_VIIRS_Imagery_RevE.pdf` (bow-tie y geometría de píxel).
+       Pregunta: **¿cómo resamplean ellos, y coincide con lo que vimos en los
+       TIF (borde oeste fijo, no centro)?**
+
+  A6 · **Relectura de los core ya sintetizados, con las SEIS preguntas** —
+       Coppola 2016a, Campus 2022, Campus 2024, Aveni 2024. Están sintetizados
+       de forma parcial, y la síntesis se hizo antes de que existieran la mitad
+       de nuestros frentes. Buscar específicamente el punto 4: en qué nos
+       contradicen.
+
+── LOTE B · conseguir los que faltan ───────────────────────────────────────
+
+Invocar la skill `investigacion` ANTES de buscar. Agotar local primero — el caso
+Laiolo probó que el PDF puede estar en el repo con nombre de DOI, y que
+`~/Zotero/zotero.sqlite` (tabla `itemAttachments`) resuelve la ruta en un paso.
+
+  B1 · **Canon MIROVA ausente** (máxima prioridad):
+       Coppola 2014 IJRS ⭐ `10.1080/01431161.2014.903354` — es LA autoridad del
+         sub-MW que Laiolo cita; sin ella el argumento del piso VRP no se sostiene
+       Coppola 2012 JVGR `10.1016/j.jvolgeores.2011.12.001` (6 de 9 citas)
+       Laiolo 2018 Bull Volcanol `10.1007/s00445-018-1242-0`
+  B2 · **Infraestructura conceptual**: Wright 2002 RSE
+       `10.1016/S0034-4257(02)00030-5` (7 de 9 — el ORIGEN del NTI) · Harris 2013
+       manual `10.1017/CBO9781139029346` · Steffke & Harris 2011
+       `10.1007/s00445-011-0487-7` (fondo local vs regional, nuestro frente)
+  B3 · **Frentes técnicos**: Schroeder 2014 `10.1016/j.rse.2013.12.008` ·
+       Li 2018 `10.1029/2017JD027823` · Dozier 1981 · Oppenheimer 1993a
+       (⭐ **caso Láscar, Chile** 1984-1992)
+
+  Verificar magic bytes y tamaño en CADA descarga: un PDF de menos de 100 KB
+  casi siempre es HTML de paywall. Ya hay dos casos en el repo
+  (`cigolini2022_epsl.pdf` es HTML; `laiolo2022_epsl_openvent.md` es un error de
+  Elsevier). Y un PDF de tamaño potencia-de-2 exacta está truncado por crawler.
+
+── LOTE C · el cruce, que es donde está el valor ───────────────────────────
+
+Leer no sirve si no se cruza. Por cada hallazgo de los lotes A y B:
+**¿nuestro código hace eso?** Con archivo:línea, el tratamiento S114 extendido a
+la magnitud y al filtrado. Las contradicciones van al catálogo de divergencias
+con su cita verbatim; las coincidencias también, porque una decisión nuestra que
+resulta respaldada por un paper deja de ser deuda.
+
+── QUÉ SE ENTREGA ──────────────────────────────────────────────────────────
+
+  1. `documentacion/BIBLIOGRAPHY_SYNTHESIS.md` actualizado, con la cobertura
+     RE-MEDIDA (hoy 44 de 70 = 63 %; el «54 %» de `RESEARCH_WORKFLOW.md:21` es
+     de S13 y está mal).
+  2. Los 4 archivos rotos o mal identificados, arreglados o marcados.
+  3. El ítem fantasma de `MISSION.md` corregido: «Coppola 2015» y «Coppola 2016a»
+     son el MISMO PDF (verificado por hash en la propia síntesis) — la lista
+     canónica tiene 11 entradas, no 12.
+  4. Las divergencias nuevas que salgan del Lote C, con cita verbatim y página.
+  5. Los 8 redundantes (~76 MB) resueltos — relevante con el disco al 98 %.
+
+── CÓMO LANZARLO ───────────────────────────────────────────────────────────
+
+Agentes en paralelo, uno por racimo. **Hay presupuesto de tokens: usalo.** Cada
+agente devuelve informe estructurado con las seis preguntas contestadas, verbatim
+con página, y menos de 1.200 palabras. Regla del proyecto: no pegar tool outputs
+gigantes al contexto principal — que cada agente escriba su informe a un archivo
+y devuelva el resumen.
+
+⚠️ Y la advertencia que vale para todo el lote: **un agente puede inventar una
+convención que suena razonable y no es la del proyecto** (A48). Cotejar toda
+conclusión de "alto impacto" con un chequeo propio de 30 segundos antes de
+aceptarla.
+
+═══════════════════════════════════════════════════════════════════════════
 REGLAS DE ESTA AUDITORÍA
 ═══════════════════════════════════════════════════════════════════════════
 
