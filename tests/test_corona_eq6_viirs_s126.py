@@ -80,13 +80,13 @@ def test_corona_v375_recomputa_el_vrp_solo_con_el_flag_on():
     hot[3, 3] = True
 
     base = 1.234
-    off, deg_off = apply_corona_magnitude_v375(
+    off, deg_off, pix_off = apply_corona_magnitude_v375(
         base, bt, areas, [(3, 3)], hot, enabled=False)
-    assert off == base and deg_off is None
+    assert off == base and deg_off is None and pix_off is None
 
-    on, deg_on = apply_corona_magnitude_v375(
+    on, deg_on, pix_on = apply_corona_magnitude_v375(
         base, bt, areas, [(3, 3)], hot, enabled=True)
-    assert deg_on is False
+    assert deg_on is False and pix_on is not None
     assert on != base and on > 0
 
 
@@ -102,7 +102,7 @@ def test_corona_v375_usa_la_banda_I04_y_su_coeficiente():
     hot = np.zeros((7, 7), dtype=bool)
     hot[3, 3] = True
 
-    out, deg = apply_corona_magnitude_v375(
+    out, deg, _ = apply_corona_magnitude_v375(
         9.99, bt, areas, [(3, 3)], hot, enabled=True)
     assert deg is False
     esperado = cluster_vrp_mw_with_bg(bt, areas, [(3, 3)], 262.0, 18.0, 3.74)
@@ -124,7 +124,7 @@ def test_corona_v375_degradada_conserva_el_vrp_regional():
     hot[1, 1] = True
 
     base = 1.234
-    out, deg = apply_corona_magnitude_v375(
+    out, deg, _ = apply_corona_magnitude_v375(
         base, bt, areas, [(1, 1)], hot, enabled=True)
     assert deg is True
     assert out == base

@@ -186,7 +186,8 @@ from .test1_contextual_filter import apply_contextual_test1_filter  # S99 Candid
 from .vrp_regimes import compute_vrp_lava_lake_eq16  # S99 DF-1 (Candidato Eq.16)
 from .vrp_regimes import (  # S126 corona Eq.6 (Coppola 2016a)
     cluster_corona_background,
-    cluster_vrp_mw_with_bg,
+    cluster_vrp_per_pixel_with_bg,
+    sum_cluster_vrp,
 )
 from .second_pass_intra_radio import apply_second_pass_intra_radio_gate  # S85 F-S81-B'
 from .detection_context import (
@@ -636,20 +637,30 @@ def apply_corona_magnitude_v375(
     valor: vuelve el VRP regional tal cual con `degraded=True`, para que el fallback
     quede explícito en el record y se pueda contar después.
 
+    S127 — devuelve TAMBIÉN los VRP por píxel bajo el fondo de la corona. Sin eso el
+    call site no tiene con qué alimentar a `apply_single_pixel_mode`, que corre después
+    y reemplaza el total por `max(per_pixel)`: con los valores del fondo regional ese
+    máximo revierte el recompute. Pasó en el A/B de S126 — la corona corrió en 1.179
+    records y sólo cambió el número publicado en 15; los 1.164 restantes tenían
+    `single_pixel_mode=True`. `None` significa "la corona no aplicó, seguí con los VRP
+    que ya tenías" y obliga al call site a ser explícito.
+
     Returns:
-        (vrp_mw, corona_degraded). `corona_degraded` es None con el flag OFF.
+        (vrp_mw, corona_degraded, per_pixel_vrp_mw). `corona_degraded` es None con el
+        flag OFF; `per_pixel_vrp_mw` es None salvo que la corona haya aplicado.
     """
     if not enabled:
-        return vrp_mw, None
+        return vrp_mw, None, None
     t_bk, degraded = cluster_corona_background(
         bt_grid, cluster_indices, scene_hot_mask,
         mode=mode, ring_px=ring_px, min_corona=min_corona,
     )
     if degraded:
-        return vrp_mw, True
-    return cluster_vrp_mw_with_bg(
+        return vrp_mw, True, None
+    per_pixel = cluster_vrp_per_pixel_with_bg(
         bt_grid, pixel_areas, cluster_indices, t_bk, WOOSTER_COEFF, I04_LAMBDA
-    ), False
+    )
+    return sum_cluster_vrp(per_pixel), False, per_pixel
 
 
 def calculate_vrp(l1b_path: Path, geo_path: Path,
@@ -1443,7 +1454,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     # el entorno del cluster (A69). La Eq.6 usa la corona inmediata.
                     # Flag-OFF default (A45), mismo flag que el bloque Test 1.
                     _corona_degraded = None
-                    _vrp_c, _corona_degraded = apply_corona_magnitude_v375(
+                    _vrp_c, _corona_degraded, _corona_pix = apply_corona_magnitude_v375(
                         _vrp_c, bt, pixel_areas, _c["pixel_indices"], hot_mask_2d,
                         enabled=ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375,
                         mode=LOCAL_CLUSTER_MAG_MODE,
@@ -1467,8 +1478,13 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     if _corona_degraded is not None:
                         primary_cluster["corona_degraded"] = bool(_corona_degraded)
                     # F52-B S77 (A45) — single-pixel mode régimen sub-MW.
-                    _pix_vrps = [float(vrp_per_pixel_2d[i, j])
-                                 for (i, j) in _c["pixel_indices"]]
+                    # S127: los VRP por píxel tienen que salir del MISMO fondo que
+                    # produjo `pc.vrp_mw`. Si la corona aplicó, el array regional
+                    # `vrp_per_pixel_2d` quedó obsoleto y alimentar al modo con él
+                    # revierte el recompute (1.164 de 1.179 records en el A/B S126).
+                    _pix_vrps = (_corona_pix if _corona_pix is not None else
+                                 [float(vrp_per_pixel_2d[_i, _j])
+                                  for (_i, _j) in _c["pixel_indices"]])
                     primary_cluster = apply_single_pixel_mode(
                         primary_cluster, _pix_vrps,
                         enabled=ENABLE_SINGLE_PIXEL_SUB_MW_MODE,
@@ -1872,7 +1888,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 # que dependen del anillo (A79, NdC 06-16) NO se toca. Espejo de
                 # process_modis.py:1049. Flag-OFF default (A45).
                 _corona_degraded_t = None
-                _vrp_t, _corona_degraded_t = apply_corona_magnitude_v375(
+                _vrp_t, _corona_degraded_t, _corona_pix_t = apply_corona_magnitude_v375(
                     _vrp_t, bt, pixel_areas, top["pixel_indices"],
                     test1_hot_filtered,
                     enabled=ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375,
@@ -1897,8 +1913,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 if _corona_degraded_t is not None:
                     primary_cluster["corona_degraded"] = bool(_corona_degraded_t)
                 # F52-B S77 (A45) — single-pixel mode régimen sub-MW.
-                _pix_vrps_t = [float(t1_vrp_2d[i, j])
-                               for (i, j) in top["pixel_indices"]]
+                # S127 — mismo fondo que produjo el total (ver bloque contextual).
+                _pix_vrps_t = (_corona_pix_t if _corona_pix_t is not None else
+                               [float(t1_vrp_2d[_i, _j])
+                                for (_i, _j) in top["pixel_indices"]])
                 primary_cluster = apply_single_pixel_mode(
                     primary_cluster, _pix_vrps_t,
                     enabled=ENABLE_SINGLE_PIXEL_SUB_MW_MODE,
