@@ -192,3 +192,24 @@ data/**/*_recent.json
 /data/mirova_equivalent_phase2/
 /data/mirova_equivalent_unsuitable_filters_v1/
 /data/mirova_equivalent_unsuitable_only_v1/
+
+# ── S127 · artefactos intermedios de experiments/, por PATRON y no por sesion ──
+# Hasta acá cada sesión agregaba su propia línea (_s98_anchor/_artifacts,
+# _s109_modis_mag/_staging, _s110_ndc_probe/_art*, _s118_c2ab/_artifacts…), así que
+# los artefactos de la sesión siguiente volvían a aparecer sin trackear hasta que
+# alguien se acordaba. Al abrir S127 había 38 entradas y 915 MB así.
+#
+# Qué son: descargas crudas de artefactos de GitHub Actions (`gh run download`) y
+# staging previo al merge — nombres tipo `s100promo-Lastarria-2026-04-01`. El
+# resultado que respalda una conclusión es el JSON por volcán ya mergeado, que sí
+# se commitea; esto es el paso intermedio.
+#
+# ⚠️ No son recuperables desde CI: los artefactos tienen `retention-days: 7`. Si
+# alguna vez hace falta conservar uno, va commiteado explícitamente con `git add -f`
+# y con una línea acá diciendo por qué — igual que la excepción de `_s99_test1_eq16`
+# más arriba.
+experiments/**/_art/
+experiments/**/*_art/
+experiments/**/_staging*/
+experiments/**/*_staging/
+experiments/**/_dl_*/
