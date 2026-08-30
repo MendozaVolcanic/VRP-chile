@@ -37,7 +37,18 @@ import pytest
 PERFILES = sorted((Path(__file__).resolve().parents[1] / "pipeline" / "profiles").glob("*.yaml"))
 
 # Deuda conocida (patron 2). Si una entra o sale de esta lista, el test lo dice.
-CROSS_CONOCIDAS = {"modis_vent_threshold_k", "modis_vent_vrp_floor_mw"}
+#
+# VACIA desde S127: `modis_vent_threshold_k` y `modis_vent_vrp_floor_mw` estaban
+# declaradas bajo `paths:` en 31 de 51 perfiles y el codigo nunca las leyo de ahi
+# (`profile.py:106-107` las lee de `thresholds:`, donde valen 1.0 y 0.0 y no 2.5 y 0.3).
+# Se quitaron. La limpieza se probo no-op como este test pedia: se comparo el valor
+# RESUELTO de los cuatro atributos en los 51 perfiles antes y despues, y no se movio
+# ninguno.
+#
+# El guard generico que impide que la clase vuelva -- cualquier clave, no solo estas --
+# esta en tests/test_guard_claves_fantasma_s127.py: deriva de profile.py de que seccion
+# se lee cada clave y falla si algun perfil la declara en otra.
+CROSS_CONOCIDAS = set()
 
 
 def _claves_por_seccion(path):

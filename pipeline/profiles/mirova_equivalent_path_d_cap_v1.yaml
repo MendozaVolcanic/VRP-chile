@@ -52,8 +52,11 @@ paths:
   enable_eruption_path: true
   enable_vent_path: false
   enable_vent_path_modis: false
-  modis_vent_threshold_k: 2.5
-  modis_vent_vrp_floor_mw: 0.3
+  # S127 — `modis_vent_threshold_k: 2.5` y `modis_vent_vrp_floor_mw: 0.3`
+  # estaban declaradas ACA y el codigo nunca las leyo: las lee de
+  # `thresholds:` (profile.py:106-107, `_t.get`), donde valen 1.0 y 0.0.
+  # Eran letra muerta en 31 de 51 perfiles. Se quitan para que nadie que
+  # encienda `enable_vent_path_modis` crea que corre con 2.5.
   enable_nti_relative_path: false
   enable_dnti_contextual_path: true
   enable_dnti_dual_roi: true
