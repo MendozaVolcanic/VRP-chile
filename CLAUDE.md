@@ -765,7 +765,13 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   dominado por el gradiente de altitud, NO por actividad volcánica. Cualquier método que
   mida "exceso sobre el fondo" en **radiancia/BT MIR absoluta** (nuestro `Test1 integrado`,
   `compute_test1_mir`) capta el valle tibio como anomalía y sesga la detección/centroide
-  ~1 km al N del cráter. **El NTI = (L_MIR−L_TIR)/(L_MIR+L_TIR) cancela la topografía**
+  ~1 km al N del cráter. **El NTI = (L_MIR−L_TIR)/(L_MIR+L_TIR) ~~cancela~~ ATENÚA FUERTEMENTE la topografía**
+  (⚠️ **matizado S128 contra el paper que inventó el NTI**: Wright et al. 2002 p. 141 dice
+  *«As the NTI is based on absolute radiance values, variations in geography and season
+  will influence its value»*. El NTI atenúa —lo bastante para que la medición empírica de
+  abajo siga siendo válida— pero **no cancela**. Lo que cancela es la forma **diferencial**,
+  el ETI = NTI − NTI_bk, que es aporte de Coppola, no de Wright. La lección vale entera;
+  la palabra no.)
   (MIR y TIR suben juntos sobre terreno tibio → la diferencia normalizada se anula);
   verificado: (I04−I05) es plano (mediana 0.01-0.14K) donde I04 tiene gradiente de 15K.
   La lava sí rompe la simetría (sub-pixel brilla en MIR, no en TIR). **How to apply**: al

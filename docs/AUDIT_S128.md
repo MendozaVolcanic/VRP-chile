@@ -554,6 +554,115 @@ y en pie (§6).
 
 ---
 
+## 6quater. La segunda tanda de lectura — el mecanismo confirmado por el canon
+
+Wright 2002, Schroeder 2014 y Aveni 2023 (FY-3D) se leyeron después de escribir §1. Dos
+de los tres tocan directamente lo que §1 propone, y uno obliga a matizar una regla
+vinculante.
+
+### El grupo MIROVA describe nuestro sesgo por ángulo, por escrito
+
+Aveni, Laiolo, Campus, Massimetti & Coppola 2023 —los cinco del canon— pp. 15-16:
+
+> *«the only increase in the satellite zenith corresponds to a decrease in the VRP …
+> **Although this is partially corrected during the resampling step**, residual
+> artefacts can hardly be removed entirely»*
+
+Es exactamente el gradiente que medimos (0,796 → 0,570), nombrado por ellos, con el
+remuestreo identificado como la corrección **parcial**. Y confirman que el remuestreo es
+parte de la cadena, no un detalle de ese paper (p. 8):
+
+> *«Following the MIROVA structure, MERSI-II bands 21 and 24 were resampled to a regular
+> **UTM 51 × 51 km grid, centred on the volcano's summit** as per coordinates provided by
+> the Global Volcanism Program»*
+
+Mismos parámetros que Campus 2022 para VIIRS 750 m. **Dos sensores, dos papers, la misma
+grilla.** Y antes de remuestrear **borran los píxeles bow-tie**, porque *«duplicate pixels
+might lead to overestimation»* — o sea la multiplicidad del remuestreo no son duplicados,
+son celdas reales. Eso cierra la duda de §1: el A/B del regrid es el camino, y el filtro
+de cenit es lo secundario. *(Su corte de análisis, dicho sea de paso, es **≤ 40°**, no 50°.)*
+
+### Una SEGUNDA autorreferencia del fondo, y ésta sí es del lado de la magnitud
+
+El paper define el fondo de la magnitud sin ambigüedad (Eq. 3, p. 8):
+
+> *«L_MIRbk is the radiance of the background, namely the average radiance of the
+> surrounding, **non-alerted** pixels»*
+
+Y Coppola 2016a Eq. 6 dice lo mismo: *«L4bk is estimated from the arithmetic mean of all
+the pixels **surrounding** the active one (or around the active cluster)»*.
+
+**Nuestro `t_bg` no excluye los píxeles alertados.** `ENABLE_TEST1_K1_BG_EXCLUDE = False`,
+leído de `pipeline.profile`. Ese flag alimenta `compute_bg_stats`, que produce el `t_bg`
+del que sale `L_bg`, que entra en `delta_L = max(hotpix_rad − L_bg, 0)` y por lo tanto en
+el VRP. El comentario del propio código cita la línea exacta del paper (`process_modis.py:504`,
+*«Test 1 K1 active … del bg per Coppola 2016a:352-356»*) y el flag está apagado.
+
+**La dirección es sub-reporte**: incluir los píxeles calientes sube `t_bg`, sube `L_bg`,
+baja `ΔL`, baja el VRP. Y eso explica lo que el mecanismo del regrid **no** explica — que
+incluso cerca del nadir estemos en 0,796 y no en ~1,0.
+
+> **Dos mecanismos, dos firmas.** El fondo autorreferente produce un déficit **uniforme**;
+> el regrid faltante produce el **gradiente con el cenit**. Los dos tienen respaldo
+> verbatim del canon. Es la primera vez que el gap de magnitud tiene una explicación
+> mecánica completa en lugar de un factor empírico.
+
+### Corrección a mi propio §6bis: son DOS pools, no uno
+
+`AUDIT_S114` (§243) decía que «el mecanismo del pool es otro flag,
+`ENABLE_TEST1_K1_BG_EXCLUDE`». Al revisarlo resultó que **hay dos fondos distintos, cada
+uno con su flag, y los dos apagados**:
+
+| fondo | qué es | flag | estado | lo pide |
+|---|---|---|---|---|
+| **detección** | μ y σ de dNTI/dETI para los Tests 2 y 3 | `ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK` | **False** | Coppola 2016a §326-329 («*all the suitable pixels*») |
+| **magnitud** | `t_bg` → `L_bg` → `ΔL` | `ENABLE_TEST1_K1_BG_EXCLUDE` | **False** | Coppola 2016a Eq. 6 + Aveni 2023 Eq. 3 («*non-alerted*») |
+
+§6bis se sostiene —el docstring de `first_pass_tests_2_and_3` dice literalmente que
+`test1_mask` filtra «el pool μ/σ», y `build_unsuitable_mask` devuelve el `bg_mask` que lo
+computa— pero S114 tenía razón en que existía **otro** flag, y ninguno de los dos vio que
+eran **dos problemas paralelos**. El de magnitud es el que importa para el 0,73.
+
+### Wright 2002 obliga a matizar A69
+
+A69 dice, como regla vinculante, que *«el NTI cancela la topografía»*. El paper que
+**inventó el NTI** dice lo contrario, p. 141:
+
+> *«As the NTI is based on **absolute radiance values**, variations in geography and
+> season will influence its value, as MODIS Bands 21, 22, and 32 are all sensitive to
+> variations in the ambient background temperature»*
+
+El NTI **atenúa** el gradiente —lo bastante como para que nuestra medición empírica de
+A69 (I04−I05 plano donde I04 tiene 15 K de gradiente) siga siendo válida— pero **no lo
+cancela**. Lo que cancela es la forma **diferencial**: el ETI = NTI − NTI_bk, que es
+aporte de Coppola, no de Wright. La lección de A69 vale entera; la palabra «cancela» no.
+Corregido en `CLAUDE.md`.
+
+*(Y el umbral: el −0,80 de Wright es empírico sobre histogramas globales y **sólo
+nocturno**. Nuestro `nti_k1_night = -0.8` coincide con el origen; el **−0,6 diurno no
+viene de Wright**, y habrá que rastrear de dónde salió.)*
+
+### Una divergencia real que resultó no importar
+
+Wright y Coppola 2016a construyen el NTI con la **banda 32** (12,02 µm); nosotros usamos
+la **31** (11,03 µm), y nunca quedó registrado. Antes de anotarlo como gap lo cuantifiqué
+con Planck: el corrimiento del NTI entre las dos bandas va de **0,0001** (250 K) a
+**0,0054** (290 K), contra un margen de ~0,14 entre el NTI típico de escena y el umbral
+K1. Y en el `dNTI` se cancela, porque el corrimiento es casi uniforme en la escena.
+**Real, nunca registrado, y numéricamente despreciable.** Queda anotado para no
+re-descubrirlo (regla B).
+
+### Y una que matiza A1
+
+Aveni 2023 deriva el `k` del sensor nuevo **teóricamente** —Planck más un ajuste del
+coeficiente α(λ)— no empíricamente. Nuestra regla A1 dice «calibración empírica > derivación
+teórica». Los números coinciden: σ/α da 19,155 (MODIS), 19,688 (M13) y ~17,99 (I04
+interpolado a 3,74 µm), o sea nuestros 19,7 y 18,0 caen dentro del 0,1 %; el 18,9 de MODIS
+queda 1,3 % por debajo. A1 acertó el resultado por otro camino, y eso vale como validación
+cruzada — pero la regla no debería decir que el camino teórico no sirve.
+
+---
+
 ## 7. Higiene del corpus bibliográfico
 
 Verificado y corregido (informe completo en `docs/s128/CORPUS_HIGIENE.md`):
