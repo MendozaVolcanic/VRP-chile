@@ -143,6 +143,13 @@ alcanza a arreglar. Orden sugerido:
    pre-registrado, midiendo la paridad **estratificada por cenit**: la predicción
    falsable es que el gradiente 0,796 → 0,570 se aplane. Si no se aplana, el mecanismo
    no es éste y hay que volver a mirar.
+   ⚠️ **El brazo tiene que ser bow-tie + regrid, no regrid solo.** Coppola 2012 §3.2 pone
+   la remoción del *bow-tie* como paso (i) y el remuestreo como paso (ii), en ese orden:
+   sobre 25° de barrido los barridos de MODIS se solapan, así que regridear sin
+   de-solapar primero **duplicaría píxeles calientes** y el A/B mediría el bug en vez del
+   fix. Para VIIRS el punto es menor —el sensor lo borra a bordo y leemos su relleno
+   (`FLAG_DNS` con 65533 `Bowtie_Deleted`)— pero **para MODIS no hacemos ninguno de los
+   dos**.
 2. Recién después, y sólo si queda residuo, evaluar el filtro de cenit.
 
 Los dos van al backlog con ciclo A45 completo, no al pipeline.

@@ -103,6 +103,22 @@ LO QUE CAMBIÓ DE VALOR (no volver a citar los números viejos)
     genuine hot-spot»* (pp. 3417-18) — **corrobora A54 desde la fuente primaria**.
     La recomendación de S126 sobre el piso (quitarlo, no aplicarlo a `pc.vrp_mw`) queda
     respaldada por el canon, no sólo por nuestros datos.
+    ⚠️ **Y una precisión sobre el piso, que S128 tuvo que corregirse a sí misma**: decir
+    que «hoy es un no-op» es engañoso. El piso **corre y está activo** — MODIS 0,05 ·
+    VIIRS375 0,02 · VIIRS750 0,15 MW, leídos de `pipeline.profile` — pero pone en cero
+    `record["vrp_mw"]`, que es la suma scene-wide, y **no toca `primary_cluster.vrp_mw`**,
+    que es lo que el dashboard reporta (A10). O sea: es no-op **para lo que publicamos**,
+    y a la vez deja un campo en cero mientras el reportado sigue distinto de cero. Ésa es
+    la parte de «además miente». Nuestro artefacto topográfico (0,04-0,06 MW) cae justo
+    en el borde del piso de MODIS.
+  · **Coppola 2012 §3.2 da un tercer requisito que no teníamos anotado**: el remuestreo es
+    el paso **(ii)**, y va **después** del paso (i), la remoción del *bow-tie*. Sobre 25°
+    de barrido los barridos de MODIS se solapan, así que **regridear sin de-solapar
+    primero duplicaría píxeles calientes**. Los dos pasos van juntos. Para VIIRS el punto
+    es discutible —el sensor borra el bow-tie a bordo y nosotros leemos su valor de
+    relleno (`FLAG_DNS` incluye 65533 `Bowtie_Deleted`, `process_viirs.py:80`)— pero
+    **para MODIS no hacemos ninguno de los dos**. Esto entra al diseño del A/B del regrid:
+    el brazo tiene que ser bow-tie + regrid, no regrid solo.
 
 ═══════════════════════════════════════════════════════════════════════════
 LO QUE NO HAY QUE REABRIR (anti-A8)
