@@ -6,7 +6,8 @@
   "brazos": [
     "control",
     "corona",
-    "ctx_off"
+    "ctx_off",
+    "corona+ctx_off"
   ],
   "banda": [
     0.7,
@@ -26,10 +27,10 @@
       },
       "corona": {
         "n": 8,
-        "mediana": 0.832,
+        "mediana": 0.877,
         "ic95": [
-          0.684,
-          0.908
+          0.687,
+          1.111
         ],
         "en_banda": true
       },
@@ -39,6 +40,15 @@
         "ic95": [
           0.538,
           7.283
+        ],
+        "en_banda": true
+      },
+      "corona+ctx_off": {
+        "n": 8,
+        "mediana": 0.912,
+        "ic95": [
+          0.86,
+          3.194
         ],
         "en_banda": true
       }
@@ -55,7 +65,7 @@
       },
       "corona": {
         "n": 13,
-        "mediana": 1.036,
+        "mediana": 1.0,
         "ic95": [
           0.807,
           1.287
@@ -68,6 +78,15 @@
         "ic95": [
           3.779,
           17.92
+        ],
+        "en_banda": false
+      },
+      "corona+ctx_off": {
+        "n": 13,
+        "mediana": 2.631,
+        "ic95": [
+          2.007,
+          9.6
         ],
         "en_banda": false
       }
@@ -84,10 +103,10 @@
       },
       "corona": {
         "n": 36,
-        "mediana": 0.501,
+        "mediana": 0.569,
         "ic95": [
-          0.469,
-          0.602
+          0.532,
+          0.681
         ],
         "en_banda": false
       },
@@ -99,6 +118,15 @@
           0.93
         ],
         "en_banda": false
+      },
+      "corona+ctx_off": {
+        "n": 36,
+        "mediana": 1.242,
+        "ic95": [
+          0.853,
+          1.739
+        ],
+        "en_banda": true
       }
     },
     "PuyehueCordonCaulle": {
@@ -113,9 +141,9 @@
       },
       "corona": {
         "n": 22,
-        "mediana": 0.733,
+        "mediana": 0.726,
         "ic95": [
-          0.58,
+          0.585,
           0.965
         ],
         "en_banda": true
@@ -126,6 +154,15 @@
         "ic95": [
           0.764,
           1.991
+        ],
+        "en_banda": true
+      },
+      "corona+ctx_off": {
+        "n": 22,
+        "mediana": 1.036,
+        "ic95": [
+          0.704,
+          1.281
         ],
         "en_banda": true
       }
@@ -142,10 +179,19 @@
       },
       "corona": {
         "n": 3,
-        "mediana": 1.543,
+        "mediana": 1.167,
         "ic95": [
-          1.122,
-          2.25
+          0.8,
+          1.571
+        ],
+        "en_banda": true
+      },
+      "corona+ctx_off": {
+        "n": 3,
+        "mediana": 16.467,
+        "ic95": [
+          12.814,
+          54.4
         ],
         "en_banda": false
       }
@@ -155,22 +201,23 @@
     "1_volcanes_en_banda": {
       "por_brazo": {
         "control": "3/5",
-        "corona": "3/5",
-        "ctx_off": "2/5"
+        "corona": "4/5",
+        "ctx_off": "2/5",
+        "corona+ctx_off": "3/5"
       },
       "salieron_de_banda": [],
       "cumple": true
     },
     "2_villarrica_baja": {
       "control": 0.832,
-      "corona": 0.832,
+      "corona": 0.877,
       "cumple": false
     },
     "3_lascar_canario": {
-      "caida_magnitud": 0.0,
+      "caida_magnitud": -0.136,
       "tope": 0.2,
       "detecciones_control": 377,
-      "detecciones_corona": 377,
+      "detecciones_corona": 380,
       "cumple": true
     },
     "4_evento_ndc_0616": {
@@ -179,21 +226,27 @@
       "cumple": true
     },
     "5_cero_detecciones_perdidas": {
-      "perdidas": {},
-      "cumple": true
+      "perdidas": {
+        "Villarrica": 2,
+        "PlanchonPeteroa": 3,
+        "Lascar": 1,
+        "NevadosDeChillan": 2
+      },
+      "cumple": false
     },
     "6_control_interno": {
       "movidos": {},
       "cumple": true
     },
     "7_corona_degradada": {
-      "records": 2180,
+      "records": 2179,
       "degradados": 0,
       "pct": 0.0
     }
   },
   "veredicto": "NO ADOPTAR",
   "criterios_que_fallan": [
-    "2_villarrica_baja"
+    "2_villarrica_baja",
+    "5_cero_detecciones_perdidas"
   ]
 }
