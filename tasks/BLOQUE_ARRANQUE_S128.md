@@ -14,51 +14,63 @@ Leé en este orden:
   4. tasks/BLOQUE_ARRANQUE_S128.md     (esto)
 
 ═══════════════════════════════════════════════════════════════════════════
-LO PRIMERO: LEER EL VEREDICTO DEL 2×2 (los datos ya están o casi)
+EL 2×2 YA SE LEYÓ — veredicto NO ADOPTAR, y Láscar tiene camino
 ═══════════════════════════════════════════════════════════════════════════
 
-Los dos brazos que faltaban se relanzaron en S127 SOBRE EL CÓDIGO ARREGLADO:
+Los dos brazos que faltaban corrieron sobre el código arreglado y el veredicto
+está en `docs/S127_CORONA_RESULTADO.md`. Resumen:
 
-    _s126_corona_on      corona ON  + filtro contextual ON
-    _s126_corona_ctxoff  corona ON  + filtro contextual OFF   <- la celda que nadie corrió
+| volcán | n | control | corona | ctx_off | corona+ctx_off |
+|---|---|---|---|---|---|
+| Villarrica | 8 | 0,832 ✓ | 0,877 ✓ | 1,315 ✓ | 0,912 ✓ |
+| Planchón-Peteroa | 13 | 1,036 ✓ | 1,000 ✓ | 6,636 ✗ | 2,631 ✗ |
+| Láscar | 36 | 0,501 ✗ | 0,569 ✗ | 0,635 ✗ | **1,242 ✓** |
+| PCC | 22 | 0,728 ✓ | 0,726 ✓ | 1,141 ✓ | 1,036 ✓ |
+| NdC | **3** | 1,543 ✗ | 1,167 ✓ | — | 16,467 ✗ |
+| **en banda** | | 3/5 | **4/5** | 2/5 | 3/5 |
 
-El control `_s126_corona_off` YA está en disco y NO se recomputa (ahí la corona
-nunca corrió, así que el bug no lo alcanza). El cuarto brazo del 2×2 —corona OFF
-+ filtro OFF— es el brazo E de S125, también en disco (`_s125_viirs_e`).
+**NO ADOPTAR el brazo corona**: falla el criterio 2 (Villarrica sube 0,045 en vez
+de bajar) y el 5 (8 detecciones perdidas de 2.179). El veredicto se lee, no se
+interpreta.
 
-Runs: 33299553238 (on) y 33299555453 (ctxoff), lanzados 2026-08-30 07:35 UTC.
+**Pero leelo completo antes de darlo por cerrado**, porque hay tres matices que no
+están en el titular:
 
-    git pull --ff-only
-    ls -d data/_s126_corona_on data/_s126_corona_ctxoff   # ¿llegaron?
-    python experiments/_s126_corona/01_veredicto.py
+  · Las 8 pérdidas son TODAS de un píxel, 0,021-0,042 MW, y **ninguna cae en noche
+    con contraparte MIROVA**. Mecánicamente es la corona haciendo lo suyo.
+  · El criterio 4 pasa **por empate en cero**: el evento NdC 06-16 no dispara en
+    ninguno de los dos brazos. No lo leas como «la corona lo preserva».
+  · La corona es el ÚNICO brazo que **sube** el conteo en banda (3/5 → 4/5) sin
+    sacar a nadie.
 
-El veredicto está PRE-ESCRITO con los 7 criterios codificados: se corre y se lee,
-no se interpreta. NO tocarle los criterios después de ver los números.
+**Lo nuevo de verdad**: la celda que nadie había corrido confirma el mecanismo de
+S126. Corona + filtro contextual apagado lleva **Láscar de 0,501 a 1,242** — en
+banda por primera vez en todo el frente de magnitud, exactamente como se predijo
+(bajo fondo local un píxel de terreno se autocancela, así que vuelve seguro
+incluir el segundo píxel que a Láscar le falta).
 
-Si los directorios no están: el job `merge` de `reproc-chunked` ya NO comparte el
-grupo `push-main` (se arregló en #546), así que no debería haberse cancelado. Si
-igual falta, recuperar con `gh run download <id>` + el loop de
-`scripts/merge_chunk_stores.py --ventanas`.
+No generaliza: Planchón queda en 2,631 (su problema es el complejo multi-cráter,
+A22, no el fondo autorreferente) y NdC da 16,467 con **n=3**, muestra demasiado
+chica para usar.
 
-⚠️ La hipótesis que el 2×2 pone a prueba, para leer el resultado con sentido:
-bajo un fondo LOCAL un píxel de terreno tiene vecinos a su misma temperatura, así
-que aporta ΔL ≈ 0 aunque se lo incluya. Es decir, la corona volvería seguro
-incluir más píxeles — y a Láscar le falta justamente el segundo píxel, mientras
-Villarrica y Planchón explotan cuando el filtro se apaga porque los píxeles extra
-son terreno. Ninguno de los dos ejes solo resuelve las dos cosas; la combinación
-podría. Es hipótesis, no resultado.
+**Frente abierto para S128**: acotar «corona + filtro apagado» para que cure a
+Láscar sin romper a Planchón. Eso pide **separar los dos mecanismos**, no un
+umbral más — y MISSION excluye lo per-volcán, así que el discriminante tiene que
+ser físico y uniforme.
 
-⚠️ Y el aviso del pre-registro: la corona SOLA probablemente falle su propio
-canario (Láscar cae ~20 %), y eso NO refuta la corona — refuta la corona SIN el
-segundo píxel.
+⚠️ Y una corrección al pre-registro que conviene recordar: predijo que la corona
+sola le bajaría ~20 % a Láscar. **Subió 13,6 %** y ganó 3 detecciones. Es A18: el
+preview read-only no predice el reproceso real.
 
 ═══════════════════════════════════════════════════════════════════════════
 LO QUE ESPERA AL VEREDICTO (no antes, a propósito)
 ═══════════════════════════════════════════════════════════════════════════
 
-  · **Piso VRP**: S126 recomienda quitarlo (hoy es un no-op que además miente) y
-    NO aplicarlo a `pc.vrp_mw`, porque cortaría el cráter de Láscar e Isluga.
-    Condicionado por escrito a leer antes el A/B de la corona.
+  · **Piso VRP — YA SE PUEDE DECIDIR**. Estaba condicionado a leer el A/B de la
+    corona, y el A/B está leído. La corona no desinfló el artefacto de los nevados
+    lo suficiente como para cambiar el análisis, así que la recomendación de S126
+    sigue en pie: **quitarlo** (hoy es un no-op que además miente) y **NO**
+    aplicarlo a `pc.vrp_mw`, porque cortaría el cráter de Láscar e Isluga.
   · **Villarrica**: mide a 2,8 km del cráter incluso con actividad confirmada, y
     VIIRS 375 no ve su lava lake (contraste −0,73 K en el campo de MIROVA). Es
     artefacto, no señal → por A72 se arregla en el algoritmo. Si la corona
@@ -102,7 +114,7 @@ REGLAS DE ESTA ETAPA (las de S126 siguen, más una)
 **Suite**: 998 tests verdes. **NRT**: sano. **Operacional intacto**:
 `corona375=False · corona_modis=False · ctx_filter=True · cloud_mask=0.0 · focal=True`.
 
-**PRs mergeados**: #546 … #555 (diez).
+**PRs mergeados**: #546 … #557 (trece).
 **Tags defensivos**: `pre-s126-corona-viirs` (ya existía) · `pre-s127-wipe-corona-arms`.
 
 ### Lo que quedó PROBADO
@@ -120,6 +132,8 @@ REGLAS DE ESTA ETAPA (las de S126 siguen, más una)
 | 9 de 13 mecanismos asimétricos entre sensores | matriz nueva; nadie la había hecho |
 | **D17 confirmada** | `get_grid_center()` sin llamador, regrid centrado en `volcano_lat/lon`, `ENABLE_UTM_REGRID` OFF |
 | El job `merge` que se cancelaba | `group: push-main` a nivel job + GitHub mantiene 1 run pendiente por grupo |
+| **El fix del merge FUNCIONA** | los dos `merge` corrieron a 8 min de distancia (09:50 y 09:58) y ninguno canceló al otro — primera prueba real |
+| **El fix de la corona FUNCIONA** | mismos 1.179 records con corona, pero cambia **925** en vez de 15; 910 de ellos con `single_pixel_mode=True`, la población que se anulaba |
 
 ### Guards nuevos
 
