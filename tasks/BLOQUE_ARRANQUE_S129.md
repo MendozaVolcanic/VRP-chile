@@ -146,7 +146,25 @@ LO QUE NO HAY QUE REABRIR (anti-A8)
 PENDIENTES QUE SON LA PUERTA DE ENTRADA (regla C)
 ═══════════════════════════════════════════════════════════════════════════
 
-  1. **A/B del GAP #A** — el de mayor valor. Ciclo A45.
+  0. ⭐ **SEPARAR LOS TRES MECANISMOS DEL DEFICIT DE MAGNITUD.** Es el trabajo que S128
+     dejó armado y no corrió, y reemplaza a «arreglar la magnitud» como frente. Los tres
+     tienen respaldo verbatim del canon y **firmas distinguibles entre sí**:
+
+     | mecanismo | firma esperada | respaldo |
+     |---|---|---|
+     | remuestreo faltante (+ bow-tie **primero**) | déficit que **crece con el cenit** | Coppola 2014 §2.2 · Aveni 2023 pp.15-16 · ya medido 1,41× |
+     | fondo autorreferente de magnitud (`ENABLE_TEST1_K1_BG_EXCLUDE=False`) | déficit **uniforme**, presente ya en el nadir | Coppola 2016a Eq.6 · Aveni 2023 Eq.3 |
+     | umbral inflado (GAP #A) | déficit **mayor en régimen débil** | Coppola 2016a §326-329 · Steffke & Harris p.1134 |
+
+     Steffke & Harris cuantifican el tercero sobre la misma escena: perder el 40 % de los
+     píxeles cuesta **12 %** de potencia en una anomalía intensa y **50 %** en una débil.
+     Nuestros once volcanes son todos débiles (ΔT 6,8–17 K), y nuestro déficit es 27 % —
+     **dentro** del rango normal de ese mecanismo. Eso cambia el diagnóstico: «perdemos
+     píxeles marginales» es al menos tan probable como «la fórmula está mal».
+     Las tres firmas se miden sobre el dato que YA hay, sin reprocesar.
+
+  1. **A/B del GAP #A** — el de mayor valor de los tres, porque toca recall **y** magnitud.
+     Ciclo A45.
   2. **A/B del regrid** (`ENABLE_UTM_REGRID` ON) con la paridad estratificada por cenit.
      Es el fix fiel del gap de magnitud y cierra D17 al mismo tiempo. El filtro de cenit
      va DESPUÉS, y sólo si queda residuo.
