@@ -82,3 +82,40 @@ volcán. Es exactamente lo que el A/B de la corona está probando.
   sólo agrega más terreno. El problema es de resolución espacial, no de umbral.
 - **No aplicar esto a los otros volcanes**: Láscar tiene foco real al cráter y Planchón
   lo tiene débil pero presente el 67 % de las pasadas. El diagnóstico es de Villarrica.
+
+---
+
+# Confirmación independiente: la propia imagen de MIROVA
+
+Todo lo anterior sale de **nuestro** pipeline. Es evidencia consistente pero endógena:
+si nuestro procesamiento tuviera un sesgo, todos esos números lo compartirían.
+
+El repositorio `mirova-tif-archive` guarda el campo de radiancia **I04 de MIROVA** en
+GeoTIFF (134×134, EPSG:4326, ~385 m/píxel) — la misma banda que usamos, procesada por
+ellos. Eso permite preguntarle a **su** imagen dónde está caliente.
+
+Contraste local (píxel contra la mediana de su corona de 0,8 km) sobre 105 TIFs de
+Villarrica y 86 de Láscar, mayo 2026:
+
+| volcán | TIFs | BT al cráter | contraste al **cráter** | contraste a **2,8 km O** |
+|---|---|---|---|---|
+| **Láscar** (control) | 86 | 292,80 K | **+1,34 K** | −0,06 K |
+| **Villarrica** | 105 | 269,83 K | **−0,73 K** | **+0,05 K** |
+
+**El control funciona**: el cráter de Láscar destaca +1,34 K en el campo de MIROVA, y
+su BT es 292,8 K — 23 K por encima del de Villarrica.
+
+**Villarrica queda confirmado desde fuera**: en la imagen de MIROVA el cráter tampoco
+destaca, está **−0,73 K** por debajo de su entorno. No es que nuestro pipeline pierda
+una señal que MIROVA sí ve: a 375 m no hay señal que perder.
+
+Y hay un dato adicional que refina el diagnóstico: **el punto que publicamos a 2,8 km al
+oeste tampoco es localmente caliente en el campo de MIROVA** (+0,05 K, cero). O sea que
+ese píxel no corresponde a ningún rasgo térmico real — es el **argmax de un campo plano**,
+seleccionado porque nuestro fondo autorreferente lo compara contra la media del mismo
+anillo al que pertenece. Sin esa comparación circular, no habría nada ahí.
+
+> **Advertencia de método (D6/A24)**: el TIF es el campo de radiancia para visualizar;
+> el VRP que MIROVA reporta sale de una selección de clúster, **no** de la suma del
+> raster. Acá se usó exclusivamente para la pregunta espacial —dónde está caliente—,
+> nunca como magnitud.
