@@ -1461,6 +1461,41 @@ merece estar en el catálogo, no vivir implícita en un helper de JavaScript.
 categoría A54 los records que se destaparían. Y ojo con A72: si lo que se destapa
 es artefacto, la raíz es no generarlo en la detección, no la cerca.
 
+### Clasificación cumplida — S126
+
+Esa consigna se cumple acá. Lo que la hizo posible es un hallazgo de S126: existe
+una **firma espacial** del artefacto topográfico — el clúster cae en el anillo
+`[1,5–3] km`, que es justo donde el fondo autorreferente lo fabrica.
+
+Sobre los 2.694 records que la cerca apaga (34 % de los 8.033 con VRP, 2026-05-01
+a 2026-08-28, script `experiments/_s126_d13/01_que_apaga_la_cerca.py`):
+
+| categoría | fracción |
+|---|---|
+| clúster en el anillo `[1,5–3] km` | **36,9 %** — misma firma que el artefacto documentado |
+| clúster a menos de 1 km del cráter | **14,8 %** — candidato a señal real (cat-b, A54) |
+| corroborados por una alerta de MIROVA | **41 de 2.694 (1,5 %)** |
+
+Y el dato que explica la etiqueta: **el `final_hotspot` de estos records está a
+19–24 km**, mientras su clúster está a **1,45–4,11 km**. Un salar, un lago o un
+incendio le roba el máximo de escena y arrastra el `distance_class`, pero el
+clúster sigue siendo crateriano. Es la asimetría A46/A81, no una detección lejana
+de verdad.
+
+**Lo que esto reencuadra.** La cerca **no protege del artefacto**: el mismo objeto
+pasa cuando queda etiquetado `summit`. Villarrica publica 380 detecciones desde
+mayo con el 92 % del clúster a más de 1,5 km del cráter, todas en rojo, porque
+2,8 km < `inner_radius` 5 (`docs/S126_COSTO_FILTRO_CONTEXTUAL.md`). La cerca es
+**ortogonal** al problema del artefacto.
+
+**Consecuencia para la decisión.** Levantarla destaparía sobre todo más del mismo
+artefacto (37 %) y corroboraría casi nada (1,5 %). Mantenerla tampoco resuelve
+nada, porque el artefacto entra por el otro lado. **D13 deja de ser una palanca**:
+la palanca es no generar el artefacto — el frente del fondo autorreferente.
+
+**Estado S126**: clasificación **CERRADA**; la divergencia queda como documental
+sin acción propia. No volver a plantearla como "levantar o no la cerca".
+
 ---
 
 ## D14 — La máscara de nube BT<260 K sigue ACTIVA (MISSION dice que se removió) y mide otra cosa — **ABIERTA** S124
