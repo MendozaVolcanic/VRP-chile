@@ -661,6 +661,48 @@ interpolado a 3,74 µm), o sea nuestros 19,7 y 18,0 caen dentro del 0,1 %; el 18
 queda 1,3 % por debajo. A1 acertó el resultado por otro camino, y eso vale como validación
 cruzada — pero la regla no debería decir que el camino teórico no sirve.
 
+### El test decisivo: la magnitud del efecto calza, la firma fina no alcanza
+
+Schroeder 2014 p. 86 da el número exacto que faltaba, verificado verbatim:
+
+> *«the effective footprint ranges from the nominal 375 m resolution (383 × 360 m) at
+> the sub-satellite point to **795 × 784 m at a maximum scan angle of 56.28°**»*
+
+Son **4,52×** de área en el extremo del barrido — muy lejos del ~25× que daría un
+barredor sin agregación, porque VIIRS agrega muestras a bordo (3× cerca del nadir, 2×
+después, 1× en el extremo). De ahí salió una **predicción pre-registrada**, hecha antes
+de mirar los bins: la razón del ratio entre cenit 0-15° y 35-50° debía ser **1,57×** si
+el área es la causa, **2,27×** si no hubiera agregación, y **1,00×** si el área no
+tuviera nada que ver.
+
+Medido (`experiments/_s128_tif/04_firma_del_area_de_pixel.py`, sólo VIIRS I-band):
+
+| | n | mediana | IC95 |
+|---|---|---|---|
+| cenit 0–15° | 301 | **0,804** | [0,759 – 0,840] |
+| cenit 35–50° | 118 | **0,570** | [0,506 – 0,643] |
+| **razón** | | **1,41×** | los IC **no se solapan** |
+
+**1,41 contra 1,57 predicho y 1,00 si no fuera el área.** Cae del lado correcto, en el
+orden de magnitud correcto, y por debajo de la predicción — que es lo esperable, porque
+el remuestreo de MIROVA corrige *parcialmente* (palabra de ellos) y porque el ratio es
+nuestro sobre el de ellos, no el factor geométrico crudo.
+
+**La segunda firma, en cambio, no se estableció.** El área no crece suave: cae de golpe
+en cada cambio de zona de agregación, y esa firma de diente de sierra no la puede imitar
+ningún otro mecanismo —ni el fondo autorreferente ni la topografía tienen razón para
+saltar en un ángulo de barrido concreto—. En bins de 5° aparecen cuatro subidas, incluida
+una de +0,114 justo pasando los 40°, **pero las cuatro caen dentro del ruido**: con 33 a
+44 pares por bin los intervalos se solapan. **No confirma ni refuta**: está sub-potenciada.
+Para resolverlo haría falta más ventana temporal, no más análisis.
+
+*(Y un error de nuestro código que sale de paso: el comentario de
+`pipeline/scan_geometry.py:193-195` afirma que el área I-band agregada varía «only
+between ~0.32 and ~0.6 km²» — un factor 1,9×. Schroeder da 0,138 → 0,623 km², que es
+**4,52×**. Está en la rama inactiva por `nadir_fixed=True`, así que no afecta ningún
+número publicado, pero desinformaría exactamente la decisión que viene. No lo toqué:
+`scan_geometry.py` está bajo A45.)*
+
 ---
 
 ## 7. Higiene del corpus bibliográfico
