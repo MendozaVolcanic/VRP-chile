@@ -49,10 +49,9 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
    - Coppola 2022 Sabancaya (k VIIRS I4).
    - Campus 2022 / Campus 2024 Vulcano (k VIIRS).
    - Aveni 2024 RSE TIRVolcH (Stefan-Boltzmann TIR).
-   - Laiolo 2026 Stromboli (sin cloud filter automático). ⚠️ **S128: el PDF NO está
-     en `documentacion/`** y la «cita textual» que se le atribuye es una retraducción
-     de una nota del Vault `ai_generated`. DOI `10.1007/s00445-025-01932-y`. Verificar
-     verbatim antes de volver a usarlo como autoridad — ver D14 reabierta.
+   - Laiolo 2026 Stromboli (sin cloud filter automático). ✅ **S128: verificado verbatim**
+     contra `documentacion/s00445-025-01932-y.pdf` (Bull. Volcanol. 88:11, p. 4). El PDF
+     estaba en el repo nombrado por DOI — buscarlo por «laiolo» daba cero (A89).
    - Massimetti 2024 Stromboli + 2020 Sentinel-2.
 
    Lista de papers **NO MIROVA** (no usar como autoridad): Di Bella 2024,
@@ -134,7 +133,7 @@ Estas fueron las desviaciones históricas. Nunca repetir.
 | `exclude_zones` (Salar, lagos) | No en papers; MIROVA no usa máscaras geográficas | Removido S27 |
 | Regla D vent-priority | Parche de clasificación visual, no en papers | Removido S27 |
 | Regla D Test 1-priority | Parche de composición de paths, no en papers | ⚠️ **SIGUE ACTIVA (corregido S125).** La fila decía "Removido S27" y es falsa: el bloque está vivo y **sin flag** en los 3 procesadores (`process_viirs.py:1502-1568`, `process_modis.py:1167-1204`, `process_viirs_mod.py:1055`) y además se **amplió** después de S27 — port a MODIS en S30, y ajustes en S44 y S111. Ver `docs/AUDIT_S125_PROFUNDA.md` §1 F1. |
-| Cloud mask BT<260K | ⚠️ **atribución NO verificada (S128)**: la frase entrecomillada no aparece en ningún PDF del repo; su origen es una nota Vault `ai_generated/confidence:medium` que dice, en español, «sin atmospheric correction ni cloud-filter automático (p. 5)». D14 REABIERTA hasta tener el paper. El apagado se sostiene por el A/B propio, no por esta cita. | ⚠️ **SIGUE ACTIVA en VIIRS 375 (corregido S125).** La perilla del perfil existe y está neutra (`CLOUD_MASK_BT_K = 0.0`, que apaga la máscara en MODIS y V750), pero `process_viirs.py:674` tiene `CLOUD_BT_THRESHOLD = 260.0` **hardcodeado**, ignorando la perilla, y en `:678-681` lo aplica a `roi_mask` **y** `bg_mask`. Ciega ~23 % de las pasadas del sensor que hoy carga el recall, y a 260 K no distingue tope de nube de cumbre nevada. Retirarla es cambiar el literal por la constante del perfil (una línea, requiere A45). Ver `docs/AUDIT_S125_PROFUNDA.md` §1 F3. |
+| Cloud mask BT<260K | ✅ **verificado verbatim S128** contra `documentacion/s00445-025-01932-y.pdf` p. 4: *"Importantly, no atmospheric correction or cloud-contamination automatic filtering is applied to the dataset"*. D14 CERRADA. ⚠️ Pero el mismo párrafo dice que MIROVA **sí filtra por distancia e intensidad y por doble conteo entre detectores**, quedándose con el 12 % (9.712 de 82.329), y que su mitigación de nube es tomar el **máximo diario** — eso último sigue sin implementarse. | ⚠️ **SIGUE ACTIVA en VIIRS 375 (corregido S125).** La perilla del perfil existe y está neutra (`CLOUD_MASK_BT_K = 0.0`, que apaga la máscara en MODIS y V750), pero `process_viirs.py:674` tiene `CLOUD_BT_THRESHOLD = 260.0` **hardcodeado**, ignorando la perilla, y en `:678-681` lo aplica a `roi_mask` **y** `bg_mask`. Ciega ~23 % de las pasadas del sensor que hoy carga el recall, y a 260 K no distingue tope de nube de cumbre nevada. Retirarla es cambiar el literal por la constante del perfil (una línea, requiere A45). Ver `docs/AUDIT_S125_PROFUNDA.md` §1 F3. |
 | Pisos VRP por sensor | Coppola 2023 dice "floor ~1 MW" genérico, no por sensor | ⚠️ **SIGUEN ACTIVOS** (corregido S124). La fila decía "Removido S27" y era falsa: `pipeline/store.py:459-468` aplica `MIN_VRP_MW_VIIRS375=0.02`, `_VIIRS750=0.15`, `_MODIS=0.05` desde `mirova_equivalent.yaml:64-71`, y marca el record con `diag_vrp_floor_mw`. Alcance medido S124: **1564 de 23990 records summit (6,5%)**. Reintroducir un piso NO requiere pasar las 3 preguntas porque el piso ya está ahí — lo que hace falta es decidir si se retira. |
 | Path C NTI relativo (default ON) | No en papers | Default OFF mantenido |
 | Subir `inner_radius_km` ad-hoc | Parche para recuperar recall; no es metodológico MIROVA | Rechazado S27 |

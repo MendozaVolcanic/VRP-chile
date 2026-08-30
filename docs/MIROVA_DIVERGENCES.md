@@ -1498,7 +1498,7 @@ sin acción propia. No volver a plantearla como "levantar o no la cerca".
 
 ---
 
-## D14 — La máscara de nube BT<260 K — **REABIERTA** S128 (la cita que la cerró no es verificable)
+## D14 — La máscara de nube BT<260 K — **CERRADA** S128 (cita verificada verbatim contra el PDF)
 
 **Qué dice MIROVA.** No filtra nube. Laiolo 2026, textual: *"no atmospheric
 correction or cloud-contamination automatic filtering"*. Por eso
@@ -1580,64 +1580,66 @@ solo falta retornarla.
 
 ---
 
-## ⚠️ REAPERTURA S128 — el fundamento documental no está verificado
+## ✅ VERIFICACIÓN S128 — la cita SÍ es textual; el PDF estaba en el repo
 
-**Decisión de Nicolás (S128): D14 vuelve a ABIERTA hasta tener el paper en mano.**
+**Desenlace: D14 se cierra. La cita era correcta.**
 
-El apagado de la máscara **no cambia**: sigue apagada en producción y el A/B con datos
-propios que lo respalda (176 de 181 noches ciegas recuperadas, costo de 0,5-2 K de fondo,
-nadie sale de banda) es evidencia empírica válida por sí sola. Lo que se reabre es la
-**justificación de fidelidad**, que es lo que convierte el apagado en «clon literal» en
-vez de en «decisión nuestra».
+`documentacion/s00445-025-01932-y.pdf` — *Bulletin of Volcanology* (2026) **88:11**,
+21 páginas — estaba en el repositorio todo el tiempo, **nombrado por DOI**. Buscar
+«laiolo» daba cero, y el cero se leyó como ausencia: es A89, cuarta instancia del día y
+otra vez del lado de quien auditaba. El adjunto de Zotero (`M7NUCUVL`) apuntaba
+directamente a esa ruta.
 
-**Qué se encontró (S128).** Esta sección, `MISSION.md:52` y `MISSION.md:134` citan:
+**Texto verificado, p. 4:**
 
-> *Laiolo 2026, textual: "no atmospheric correction or cloud-contamination automatic
-> filtering"*
+> *"The VRP time series (Fig. 2) coming from the different sensors/detectors are combined
+> and filtered in terms of distance and/or intensity of the thermal anomaly to minimize
+> the false alerts and the double counting (coming from different detectors acquiring at
+> the same time) thus resulting in 9712 data points (ca. 12%). **Importantly, no
+> atmospheric correction or cloud-contamination automatic filtering is applied to the
+> dataset.**"*
 
-Esa frase **no aparece en ningún archivo de `documentacion/`**, y el PDF de Laiolo 2026
-no está en el repositorio. Lo único que existe es una nota del Vault
-(`Vault/10_Bibliografia/laiolo2026switching.md`) con cabecera `ai_generated: true`,
-`confidence: medium`, cuya línea 59 dice, en español:
+La atribución era correcta y la nota del Vault fiel. **El apagado de la máscara es
+clon-literal**, con fundamento verificable. La reapertura queda anulada.
 
-> *"✅ Sin atmospheric correction ni cloud-filter automático (p. 5)"*
+### Pero el párrafo dice tres cosas más que sí nos faltaban
 
-O sea: **la «cita textual» en inglés es, con toda probabilidad, una retraducción de un
-resumen generado por IA**, presentada en itálicas como verbatim. Es exactamente el modo de
-falla que documenta A35 (*«notas Vault `ai_generated` necesitan verificación verbatim para
-valores numéricos críticos»*), aplicado esta vez a una cita en prosa que gobierna una
-decisión metodológica.
+**1. MIROVA SÍ filtra — por distancia y por intensidad — y se queda con el 12 %.** De
+82.329 imágenes salen **9.712 puntos**. Lo que no hace es filtrar *nube*; sí descarta por
+distancia, por intensidad, y por **doble conteo entre detectores que adquieren a la misma
+hora**. Ese último punto **valida por escrito nuestra convención** de un par por noche con
+el máximo de ambos lados, que hasta ahora era una decisión nuestra sin respaldo citado.
 
-El paper existe: **Laiolo et al., *Switching between ordinary and non-ordinary activity at
-Stromboli volcano*, DOI `10.1007/s00445-025-01932-y`** (Bull. Volcanol.). No lo tenemos.
+**2. Su mitigación de nube es tomar el MÁXIMO DIARIO, no enmascarar.** Textual:
+*"we first calculated the daily maximum VRP values. This step minimize potential
+underestimation due to cloud-contamination and unfavorable satellite viewing geometry"*.
+Nosotros publicamos por pasada. Es la misma familia que el Método-2 de agregación semanal
+ya documentado, y sigue sin implementarse.
 
-**Qué hace falta para volver a cerrarla**: el PDF, y la verificación verbatim de que el
-paper dice lo que le atribuimos. Si lo dice, D14 se cierra otra vez y esta sección queda
-como registro. Si no lo dice, hay que rehacer el argumento de fidelidad — el A/B empírico
-sobrevive igual, pero el apagado pasa a ser divergencia consciente y no clon literal.
+**3. La incertidumbre declarada del propio MIR-method es ±30 %**, sobre emisores con
+temperatura radiante efectiva **>600 K**. Nuestra banda de paridad es [0,5–2,0] y
+perseguimos diferencias de factor 2: conviene tener presente que la referencia declara
+±30 % de incertidumbre propia.
 
-**Y hay un segundo hallazgo en la misma nota, que vale más que el primero.** Su línea 57
-marca en rojo:
+### ⚠️ Corrección al hallazgo del corte de 0,1 MW
 
-> *"We do not consider minor inflections recognized at VRP<0.1 MW because these values are
-> likely associated to cloud and/or to bad geometry acquisition (Coppola et al. 2014; 2016)"*
+La frase existe y es **verbatim** (p. 8):
 
-Si eso es correcto, **MIROVA aplica de facto un corte a 0,1 MW** por nube y geometría. Y
-nuestro frente de artefacto vive justo debajo: las detecciones del anillo autorreferente
-están en 0,04-0,06 MW, y las 8 que el brazo corona perdió en S127 —las que hicieron fallar
-el criterio 5— estaban entre **0,021 y 0,042 MW**. Eso reencuadra dos decisiones abiertas
-a la vez:
+> *"We do not consider minor inflections recognized at VRP < 0.1 MW because these values
+> are likely associated to cloud and/or to bad geometry acquisition (Coppola et al. 2014;
+> 2016)."*
 
-- el **piso VRP** (hoy 0,02 VIIRS375 / 0,15 V750 / 0,05 MODIS), que S126 recomendó quitar
-  por ser un no-op — si MIROVA corta en 0,1 MW, el problema no es que el piso sobre, es que
-  está una vez y media por debajo del de la referencia;
-- la **sobre-detección** que A54 clasifica como «señal real sub-umbral»: parte de ella
-  sería material que MIROVA ve y decide no publicar, lo cual es distinto de material que
-  MIROVA no ve.
+**Pero yo la sobre-interpreté al reportarla.** No dice que MIROVA aplique un piso de
+0,1 MW a lo que publica. Está en el análisis de los **puntos de inflexión de la
+distribución de probabilidad de logVRP**, con el que definen cuatro niveles de actividad
+térmica: lo que descartan son *inflexiones menores como frontera de régimen*, no
+detecciones.
 
-⚠️ Esta cita viene de la MISMA nota no verificada, así que **no se actúa sobre ella hasta
-tener el PDF**. Queda anotada como la pregunta de mayor rendimiento esperado del eje
-«verificación verbatim» de la auditoría S128.
+Lo que **sí** sostiene, y no es poco: el propio grupo MIROVA considera que **los valores
+bajo 0,1 MW son probablemente nube o mala geometría**. Nuestro frente de artefacto vive en
+0,04-0,06 MW y las 8 detecciones que perdió el brazo corona en S127 estaban en
+0,021-0,042 MW. Es un argumento de autoridad para revisar el piso VRP — **no** una
+instrucción de implementar un corte a 0,1 MW.
 
 ---
 
