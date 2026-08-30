@@ -8,14 +8,22 @@
 # Datos entrada : VRP por pixel del cluster (radiancia derivada). SIN datos personales.
 # Variables     : threshold (vrp_mw sub-MW), max_pixels, flag de activacion (mirova_equivalent.yaml).
 # Limitaciones  : Solo corrige magnitud (no deteccion ni posicion); mantiene n_pixels y marca
-#                 single_pixel_mode=True para auditoria. No aplica a regimen alto-MW (Villarrica F52-A).
-# Refs/datos    : mirova_equivalent.yaml:281-283; audit PRs #191/#192. Entrenamiento: No aplica.
+#                 single_pixel_mode=True para auditoria. ALCANCE POR VOLCAN: no se declara aca — se
+#                 mide (experiments/_s127_declarado/02_single_pixel_mode_alcance.py). La version
+#                 previa afirmaba "no aplica a regimen alto-MW (Villarrica)" y era FALSA: Villarrica
+#                 tiene 3.025 records con el modo activo y 442 con el valor modificado (10,9%).
+#                 Corregido en S127; el alcance depende de los datos y se mueve solo.
+# Refs/datos    : claves `enable_single_pixel_sub_mw_mode`, `sub_mw_regime_threshold_mw` y
+#                 `single_pixel_max_cluster_pixels` de mirova_equivalent.yaml (se citan por NOMBRE:
+#                 la referencia por numero de linea que habia antes ya apuntaba a otro bloque);
+#                 audit PRs #191/#192, alcance medido en docs/AUDIT_S127.md. Entrenamiento: No aplica.
 #                 Ficha: docs/FICHA_SDA_VRP_CHILE.md
 # ════════════════════════════════════════════════════════════════════
 """F52-B (S77, A45) — Single-pixel mode para régimen sub-MW.
 
-Causa raíz F52-B (drift T1.5 S72, documentado en
-`pipeline/profiles/mirova_equivalent.yaml:281-283`): el path D dNTI-contextual
+Causa raíz F52-B (drift T1.5 S72, documentado en `mirova_equivalent.yaml` junto a
+la clave `enable_single_pixel_sub_mw_mode` — se cita por NOMBRE porque la referencia
+por número de línea que había acá ya apuntaba a otro bloque): el path D dNTI-contextual
 produce clusters de varios pixels en el cráter cuando MIROVA NRT reporta
 single-pixel en el mismo evento. La suma `pc.vrp_mw = Σ per_pixel_vrp_mw`
 inflaba el reporte vs MIROVA en régimen sub-MW (0.21-0.45 MW canónicos):
