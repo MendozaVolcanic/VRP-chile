@@ -275,5 +275,8 @@ def test_process_modis_integrates_local_cluster_magnitude_flag():
     src = inspect.getsource(pm)
     assert "ENABLE_LOCAL_CLUSTER_MAGNITUDE" in src, "flag no importado/usado"
     assert "cluster_corona_background" in src, "helper corona no usado"
-    assert "cluster_vrp_mw_with_bg" in src, "helper vrp no usado"
+    # S127: el recompute pasa por el helper POR PÍXEL, no por el que sólo devuelve el
+    # total. Con el total solo, todo lo que corre después (focal, single-pixel mode)
+    # seguía leyendo los VRP del fondo regional y anulaba la corona sin dejar rastro.
+    assert "cluster_vrp_per_pixel_with_bg" in src, "helper vrp por píxel no usado"
     assert "if ENABLE_LOCAL_CLUSTER_MAGNITUDE" in src, "flag no usado como guard"

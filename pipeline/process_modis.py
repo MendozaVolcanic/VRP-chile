@@ -52,8 +52,9 @@ from .clustering import cluster_hotspots, cluster_pixels_geographic
 from .vrp_regimes import (
     compute_local_background,
     cluster_corona_background,
-    cluster_vrp_mw_with_bg,
+    cluster_vrp_per_pixel_with_bg,
     cluster_focal_vrp_mw,
+    sum_cluster_vrp,
 )
 from .test1_integrated import compute_test1_mir
 from .anomaly_pixels import build_anomaly_pixels
@@ -1044,6 +1045,15 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             # ΔL≈0) y preserva lava real (corona fría → ΔL grande). Flag-OFF default
             # (A45). Si la corona degrada (<min_corona válidos) → conserva el VRP
             # regional (fallback explícito, no silencioso). Va ANTES del cap D9.
+            # S127 — el fondo es propiedad de la MEDICIÓN, no del total: si la corona
+            # aplica, los VRP por píxel del anillo regional quedan obsoletos y todo lo
+            # que venga después (focal, single-pixel mode) tiene que leer los nuevos.
+            # Sin esto la corona era un no-op silencioso en MODIS: `cluster_focal_vrp_mw`
+            # -que acá está ENCENDIDO- recomputa `_vrp_c` desde `vrp_per_pixel_2d` y
+            # pisaba el recompute al 100 %, sin dejar rastro en el record. Es la misma
+            # falla que en VIIRS375 (allá vía single-pixel mode, 1.164 de 1.179 records),
+            # y estaba latente acá sólo porque el flag de la corona está OFF.
+            _vrp_pp_eff = vrp_per_pixel_2d
             _corona_degraded = None
             if ENABLE_LOCAL_CLUSTER_MAGNITUDE:
                 _t_bk_corona, _corona_degraded = cluster_corona_background(
@@ -1053,10 +1063,14 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                     min_corona=LOCAL_CLUSTER_MAG_MIN_CORONA,
                 )
                 if not _corona_degraded:
-                    _vrp_c = cluster_vrp_mw_with_bg(
+                    _corona_pix = cluster_vrp_per_pixel_with_bg(
                         bt_mir, pixel_areas, _c["pixel_indices"],
                         _t_bk_corona, WOOSTER_COEFF, BAND21_LAMBDA,
                     )
+                    _vrp_c = sum_cluster_vrp(_corona_pix)
+                    _vrp_pp_eff = vrp_per_pixel_2d.copy()
+                    for _k, (_i, _j) in enumerate(_c["pixel_indices"]):
+                        _vrp_pp_eff[_i, _j] = _corona_pix[_k]
             # S109 §1 — magnitud NÚCLEO FOCAL/CONTEXTUAL: recomputar pc.vrp_mw sumando
             # SOLO los píxeles del cluster contextualmente anómalos (dnti_ctx ∪ {pico}).
             # Corta el campo difuso topográfico (A69/D11, ~10K sobre fondo frío) que
@@ -1067,7 +1081,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             _focal_degraded = None
             if ENABLE_FOCAL_CLUSTER_MAGNITUDE:
                 _vrp_c, _focal_n, _focal_degraded = cluster_focal_vrp_mw(
-                    _c["pixel_indices"], vrp_per_pixel_2d, dnti_ctx_hot,
+                    _c["pixel_indices"], _vrp_pp_eff, dnti_ctx_hot,
                     keep_peak=FOCAL_CLUSTER_KEEP_PEAK,
                 )
             # S71 D9 Opción C — cap si firing contextual-only en cirrus.
@@ -1090,8 +1104,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                 primary_cluster["focal_magnitude"] = True
                 primary_cluster["focal_degraded"] = bool(_focal_degraded)
             # F52-B S77 (A45) — single-pixel mode régimen sub-MW.
-            _pix_vrps = [float(vrp_per_pixel_2d[i, j])
-                         for (i, j) in _c["pixel_indices"]]
+            # S127 — desde el fondo EFECTIVO (corona si aplicó), no el regional.
+            _pix_vrps = [float(_vrp_pp_eff[_i, _j])
+                         for (_i, _j) in _c["pixel_indices"]]
             primary_cluster = apply_single_pixel_mode(
                 primary_cluster, _pix_vrps,
                 enabled=ENABLE_SINGLE_PIXEL_SUB_MW_MODE,

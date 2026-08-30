@@ -152,9 +152,24 @@ jobs:
 
   merge:
     needs: [plan, reproc]
-    # El push a main se serializa con los demas workflows que escriben al repo.
+    # S127 — grupo PROPIO por perfil, NO el compartido `push-main`.
+    #
+    # El sintoma: cuando dos A/B terminan casi juntos, uno de los dos jobs `merge`
+    # se cancela en silencio y su reproceso -horas de CI- queda solo en artefactos.
+    # Paso en S125 y volvio a pasar en S126.
+    #
+    # La causa: GitHub mantiene UN solo run pendiente por grupo de concurrencia. El
+    # grupo `push-main` lo ocupa nrt.yml ~50 min de cada 2 h, asi que el primer merge
+    # se encola detras y el segundo lo DESPLAZA. Es el mismo mecanismo que CLAUDE.md
+    # ya documenta para la matrix de nrt.yml ("a nivel job se perderian 9 volcanes").
+    #
+    # Por que es seguro salir del grupo compartido: el paso `Commit` de mas abajo ya
+    # reintenta `pull --rebase` + `push` cinco veces con backoff, que es la defensa
+    # real contra la carrera de refs que cerro el PR #502 -- el grupo compartido solo
+    # agregaba el riesgo de perder runs encolados. Mismo criterio y misma razon que
+    # reproc-s124-ndc-focus.yml y reproc-s124-villarrica-op-ab.yml.
     concurrency:
-      group: push-main
+      group: reproc-merge-${{ github.event.inputs.profile }}
       cancel-in-progress: false
     # `always()` acotado a que el PLAN haya salido bien: si un trozo falla, se
     # conservan los que si terminaron y el resto se relanza sobre esa ventana

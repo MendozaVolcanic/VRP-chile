@@ -180,6 +180,67 @@ def cluster_corona_background(
     return (float(np.mean(vals)), False)
 
 
+def cluster_vrp_per_pixel_with_bg(
+    bt_grid: np.ndarray,
+    pixel_areas: np.ndarray,
+    cluster_indices: Sequence[tuple[int, int]],
+    t_bk_bg_k: float,
+    wooster_coeff: float,
+    lambda_um: float,
+) -> list[float]:
+    """VRP (MW) de CADA píxel del cluster bajo un único fondo `t_bk_bg_k`.
+
+    POR QUÉ EXISTE (S127): el fondo no es una propiedad del cluster sino de la
+    medición entera — si se recomputa el total con la corona Eq.6 pero los consumidores
+    aguas abajo siguen leyendo los VRP por píxel del fondo REGIONAL, el recompute se
+    pierde. Eso es lo que pasó en el A/B de S126: `apply_single_pixel_mode` reemplazaba
+    el total de la corona por `max(per_pixel)` del fondo viejo y anulaba el recompute en
+    1.164 de los 1.179 records donde la corona sí había corrido.
+
+    El caso límite lo hace evidente: para un cluster de UN píxel, la suma y el máximo
+    son el mismo número; que difieran sólo puede significar dos fondos distintos.
+
+    Devuelve la lista alineada con `cluster_indices` (los NaN aportan 0.0, para que la
+    longitud y el orden se conserven). `cluster_vrp_mw_with_bg` es su suma — una sola
+    fórmula, para que no puedan divergir.
+    """
+    grid = np.asarray(bt_grid, dtype=float)
+    areas = np.asarray(pixel_areas, dtype=float)
+    lam = float(lambda_um)
+    l_bg = C1 / (lam ** 5 * (math.exp(C2 / (lam * float(t_bk_bg_k))) - 1))
+    out: list[float] = []
+    for (i, j) in cluster_indices:
+        bt = grid[i, j]
+        if np.isnan(bt):
+            out.append(0.0)
+            continue
+        l_pix = C1 / (lam ** 5 * (math.exp(C2 / (lam * float(bt))) - 1))
+        delta = l_pix - l_bg
+        if delta < 0.0:
+            delta = 0.0
+        out.append(float(areas[i, j]) * float(wooster_coeff) * delta / 1e6)
+    return out
+
+
+def sum_cluster_vrp(per_pixel_vrp_mw: Sequence[float]) -> float:
+    """Suma los VRP por píxel de un cluster con acumulación NAIVE, a propósito.
+
+    POR QUÉ NO `sum()` (S127): desde Python 3.12 el `sum()` builtin usa suma
+    compensada de Neumaier sobre floats, que es más exacta que un acumulador simple —
+    y por eso mismo NO da bit a bit lo que daba el loop `total += ...` histórico. La
+    diferencia es de un ULP (~2e-15 MW sobre 15 MW) y no tiene significado físico, pero
+    convierte un cambio que debía ser no-op en uno que mueve números. El test
+    `test_con_la_corona_apagada_el_total_es_identico_al_de_antes` lo detectó.
+
+    Preferimos reproducir la aritmética anterior exactamente: en un clon literal, un
+    refactor que no debe cambiar nada tiene que poder demostrarlo con igualdad estricta.
+    """
+    total = 0.0
+    for v in per_pixel_vrp_mw:
+        total += float(v)
+    return total
+
+
 def cluster_vrp_mw_with_bg(
     bt_grid: np.ndarray,
     pixel_areas: np.ndarray,
@@ -194,21 +255,10 @@ def cluster_vrp_mw_with_bg(
     Misma fórmula Planck/Wooster que process_modis.py:824-858, scoped al cluster
     contiguo. ΔL clip a 0 (Wooster requiere exceso positivo). NaN se saltan.
     """
-    grid = np.asarray(bt_grid, dtype=float)
-    areas = np.asarray(pixel_areas, dtype=float)
-    lam = float(lambda_um)
-    l_bg = C1 / (lam ** 5 * (math.exp(C2 / (lam * float(t_bk_bg_k))) - 1))
-    total = 0.0
-    for (i, j) in cluster_indices:
-        bt = grid[i, j]
-        if np.isnan(bt):
-            continue
-        l_pix = C1 / (lam ** 5 * (math.exp(C2 / (lam * float(bt))) - 1))
-        delta = l_pix - l_bg
-        if delta < 0.0:
-            delta = 0.0
-        total += float(areas[i, j]) * float(wooster_coeff) * delta / 1e6
-    return float(total)
+    return sum_cluster_vrp(cluster_vrp_per_pixel_with_bg(
+        bt_grid, pixel_areas, cluster_indices, t_bk_bg_k,
+        wooster_coeff, lambda_um,
+    ))
 
 
 def cluster_focal_vrp_mw(
