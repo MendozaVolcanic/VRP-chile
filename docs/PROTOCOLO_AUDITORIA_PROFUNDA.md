@@ -186,13 +186,23 @@ perfiles. S127 barrió el eje a propósito y encontró más:
 afirmaciones (221 en el repo, 123 en `pipeline/` y `.github/`); la verificación de cada
 una es manual y se persiste con su propio script.
 
-**El sub-patrón más traicionero: el nombre del parámetro no es el nombre de la clave.**
-Dos de las instancias de arriba nacieron de buscar en el YAML el nombre del *parámetro
-de la función* en vez del de la *clave de configuración* (`local_kernel_bg_compatible`
-vs `local_kernel_bg`; `enable_utm_regrid` leído de `thresholds:` cuando se escribía en el
-nivel superior). No da error: da cero resultados, que se lee como «no está en ninguno».
-**Antes de concluir «este flag no está puesto en ningún lado», trazá cómo lo lee el
-código** (A6), no cómo se llama en la firma.
+**El sub-patrón dominante: el nombre en el punto de uso no es el nombre en la
+definición.** No da error — da **cero resultados**, y el cero se lee como ausencia. En
+S127 apareció **cinco veces**, en tres formas distintas:
+
+| forma | ejemplo | el falso negativo |
+|---|---|---|
+| el parámetro no se llama como la clave | `local_kernel_bg_compatible` (firma) vs `local_kernel_bg` (YAML), con `run_pipeline.py:244` de puente | «el kernel no corre en ninguno» — corre en 5 de 11 |
+| la clave se lee de otra sección | `enable_utm_regrid` escrito en la raíz, leído de `thresholds:` (S124) | el flag arrancaba siempre apagado; el A/B habría corrido 4 brazos idénticos |
+| la llamada es calificada o renombrada | `store.append_record(`, `from pipeline.vrptir import vrp_tir_mw as _aveni_vrp_tir_mw` | «nadie la llama» sobre funciones que corren en cada granule |
+
+**Antes de concluir «esto no se usa en ningún lado», trazá cómo lo lee el código** (A6),
+no cómo se llama donde está definido. Un `grep` del nombre de la definición es
+justamente el instrumento que no sirve para esta pregunta.
+
+Y el corolario incómodo: las cinco veces el error fue de quien estaba **auditando**, no
+de quien escribió el código. La técnica se equivoca en la misma dirección que el defecto
+que busca.
 
 **Señal de que hay que aplicarla**: cualquier frase de la forma «esto no cambia nada»,
 «esto ya no se usa», «esto sólo afecta a X», «está apagado en todos». Las cuatro fueron

@@ -254,6 +254,15 @@ def cluster_vrp_mw_with_bg(
 
     Misma fórmula Planck/Wooster que process_modis.py:824-858, scoped al cluster
     contiguo. ΔL clip a 0 (Wooster requiere exceso positivo). NaN se saltan.
+
+    NOTA S127 — **no es la ruta operacional**. Desde el fix de la corona (#546) los
+    tres procesadores llaman a `cluster_vrp_per_pixel_with_bg` y suman con
+    `sum_cluster_vrp`, porque necesitan los valores POR PIXEL para alimentar
+    coherentemente lo que corre después (`cluster_focal_vrp_mw`,
+    `apply_single_pixel_mode`). Esta función queda como API pública y como
+    referencia de los tests, que la usan para fijar el invariante «la suma de los
+    por-píxel es el total». Se aclara acá para que nadie la lea como el camino que
+    produce el número que se publica.
     """
     return sum_cluster_vrp(cluster_vrp_per_pixel_with_bg(
         bt_grid, pixel_areas, cluster_indices, t_bk_bg_k,
