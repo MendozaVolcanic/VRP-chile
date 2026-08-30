@@ -1498,7 +1498,7 @@ sin acción propia. No volver a plantearla como "levantar o no la cerca".
 
 ---
 
-## D14 — La máscara de nube BT<260 K sigue ACTIVA (MISSION dice que se removió) y mide otra cosa — **ABIERTA** S124
+## D14 — La máscara de nube BT<260 K — **CERRADA** S127 (apagado ratificado con el A/B en la mano)
 
 **Qué dice MIROVA.** No filtra nube. Laiolo 2026, textual: *"no atmospheric
 correction or cloud-contamination automatic filtering"*. Por eso
@@ -1577,6 +1577,70 @@ es la fuente, es que el test es demasiado pobre.
 píxeles enmascaró) pero **no cuántos tenía el ROI**, así que del JSON no se
 puede reconstruir una fracción. La variable existe local (`np.sum(roi_mask)`);
 solo falta retornarla.
+
+---
+
+## Cierre S127 — se sostiene el apagado, y ahora con la compuerta puesta
+
+**Decisión de Nicolás (S127): sostener el apagado y documentarlo como decisión.**
+
+Estado del código, verificado leyendo `pipeline.profile` y no el YAML:
+`CLOUD_MASK_BT_K = 0.0` en el perfil operacional, o sea el predicado
+`bt > CLOUD_MASK_BT_K` es tautológico y la máscara está inerte en los tres
+sensores. El literal `260.0` que VIIRS 375 tenía hardcodeado —la anomalía que la
+corrección S125 de arriba señalaba— **ya está reemplazado por la perilla**
+(`process_viirs.py:772`), con dos guards: `tests/test_cloud_mask_from_profile_s125.py`
+y `tests/test_cloud_mask_operacional_s126.py`.
+
+**Por qué se sostiene el apagado**, en este orden:
+
+1. Es lo que dice el clon literal. Laiolo 2026, textual: *"no atmospheric
+   correction or cloud-contamination automatic filtering"*. `MISSION.md` ya lo
+   declaraba removido desde S27, y el perfil lo declara en 0 desde S29
+   (2026-05-01) — o sea el apagado no es una divergencia nueva, es alinear el
+   código con lo que la metodología decía hace cuatro meses.
+2. **Recupera 176 de 181 noches ciegas**, 157 de ellas con detección. El
+   problema mayor de la máscara no era filtrar de más: era que ocultaba el hecho
+   de que no estábamos mirando — esas noches figuraban como "sin señal" sin que
+   nadie hubiera visto nada.
+3. El costo medido es chico: el fondo baja entre medio grado y dos, y ningún
+   volcán sale de banda.
+4. Y mide la cosa equivocada de todos modos (sección de arriba): un umbral único
+   a 260 K ve nube alta y fría, pero la nube baja de temporal tiene su tope en
+   263-273 K y pasa como despejado — y a esta altitud el terreno nevado irradia
+   en ese mismo rango.
+
+**Cómo se llegó acá, que es la parte incómoda.** El apagado entró en producción
+por el PR #535, cuyo comentario decía «no-op». No lo era. El A/B que debía
+autorizarlo corrió después, en S126, y validó algo que ya estaba vivo. La
+decisión de S127 es ratificar con el resultado en la mano; la alternativa
+—revertir y re-encender formalmente— se evaluó y se descartó porque dejaría 181
+noches ciegas mientras tanto para llegar al mismo destino.
+
+Esa secuencia es la instancia #1 del eje T9 (`PROTOCOLO_AUDITORIA_PROFUNDA.md`)
+y el origen de la regla: *un no-op necesita un test detrás, o es una intención.*
+
+**Lo que esto NO cierra.** Apagar la máscara destapó 286 detecciones nuevas, de
+las cuales **sólo 21 caen en noches que MIROVA confirma**, con distancia mediana
+2,4-2,7 km al cráter — la firma exacta del artefacto del anillo autorreferente
+[1,5-3] km. Eso **no es recall nuevo**: es el artefacto que dejó de estar tapado.
+Se cierra por el frente del fondo, no por el de la máscara. Si el A/B de la
+corona Eq.6 sale bien, buena parte de esas 286 debería desaparecer sola, porque
+una fluctuación de terreno medida contra su corona inmediata da ΔL ≈ 0.
+
+**Lo que queda anotado como mejora posible (no clon-literal).** La máscara
+oficial del sensor —`MOD35_L2` y `CLDMSK_L2_VIIRS_{SNPP,NOAA20,NOAA21}`,
+verificadas disponibles en CMR con versión NRT (S124)— usa ~15 tests espectrales
+diseñados justamente para separar nube de nieve. Sería **beyond-MIROVA**: mejor
+que el original, no un clon. No se adopta acá.
+
+**Gap de schema que sigue abierto (A7)**: se persiste `n_cloud_masked` pero no el
+total del ROI, así que del JSON no se puede reconstruir una fracción. Con la
+máscara apagada `n_cloud_masked` es 0 siempre, así que hoy no molesta — pero si
+alguna vez se enciende algo, el gap vuelve.
+
+Evidencia: `docs/S126_CLOUDMASK_RESULTADO.md` (veredicto) y
+`docs/S126_CLOUDMASK_YA_ESTA_VIVA.md` (cómo se descubrió).
 
 ---
 
