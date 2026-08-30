@@ -218,11 +218,102 @@ confianza falsa, que es peor que no tenerlo.
   2,4-2,7 km — la firma del anillo autorreferente. Eso se cierra por el fondo, no por la
   máscara. PR #549.
 
+---
+
+# Fase 2 — auditoría general, acotada
+
+## Hallazgo 6 — la matriz sensor × tratamiento: **9 de 13 mecanismos son asimétricos**
+
+Nadie había auditado si los tres sensores reciben el mismo tratamiento metodológico. S126
+fue descubriendo el mosaico de a pedazos y siempre por accidente. La matriz completa
+(`experiments/_s127_sensores/01_paridad_de_tratamiento.py`, call sites por archivo):
+
+| mecanismo | MODIS | V375 | V750 |
+|---|---|---|---|
+| corona Eq.6 (fondo local) | 1 | 2 | **0** |
+| núcleo focal / contextual | 2 | **0** | 1 |
+| single-pixel sub-MW | 2 | 2 | 2 |
+| kernel 8-vecinos per-píxel | 1 | 1 | **0** |
+| Test 1 sobre MIR absoluto | 1 | 1 | 1 |
+| **Test 1 sobre NTI** | **0** | 1 | **0** |
+| filtro contextual del Test 1 | **0** | 1 | **0** |
+| anillo intermedio [1,5-3] km | **0** | 1 | **0** |
+| Eq.16 lava lake sub-píxel | **0** | 1 | **0** |
+| cerca intra-radio 2ª pasada | 1 | 1 | 1 |
+| cap D9 de escena | 1 | 1 | 1 |
+
+Tres lecturas, en orden de importancia:
+
+1. **`compute_test1_nti` existe sólo en VIIRS 375** — y su flag está OFF. O sea: el
+   rediseño que A69 cita como su desenlace no está en producción **en ningún sensor**, y
+   ni encendiéndolo se curaría MODIS ni V750, que es justamente donde el píxel grande
+   amplifica el gradiente topográfico (A80). El barrido confirma sistemáticamente lo que
+   la propia entrada A69 ya advertía como caveat.
+2. **El anillo intermedio y su filtro contextual viven los dos sólo en V375, y eso es
+   coherente**: el fondo autorreferente que S126 identificó como causa raíz es una
+   propiedad de ese anillo, y el filtro existe donde existe el problema. MODIS y V750
+   usan el anillo global 5-25 km, así que no tienen esa forma del defecto — tienen otra.
+3. **El núcleo focal está en MODIS y V750 pero no en V375**, y está ENCENDIDO. La
+   magnitud de V375 no recibe ninguna reducción focal mientras las otras dos sí. Es una
+   asimetría real de tratamiento entre sensores, no documentada en ningún lado.
+
+**La asimetría del kernel está honestamente documentada**: `process_viirs_mod.py:409-416`
+dice textual que el parámetro se acepta *«para evitar TypeError»* y que la implementación
+M-band «aún no existe», con un TODO fechado en S73. Sigue sin existir 54 sesiones después.
+Y ese docstring **nombra los cinco volcanes opt-in** — Villarrica, PP, Lastarria, Chaitén,
+PCC — exactamente los cinco que este barrido midió. **La verdad estaba escrita en el repo
+desde S72**; S124 afirmó lo contrario en la cabecera de un perfil sin comprobarla.
+
+## Hallazgo 7 — D17: la premisa se **CONFIRMA** con verificación fresca
+
+No se re-midió el offset —eso ya está hecho en S124/S125 y re-hacerlo sería la trampa
+A50—, sino que se verificó el cabo suelto:
+
+- `get_grid_center()` (`geo_utils.py:29`, S98) **sigue sin ningún llamador en producción**.
+  Su único uso es a través de `get_effective_vent()`, que a su vez sólo la llama un probe
+  offline de `experiments/`.
+- El regrid **se sigue centrando en `volcano_lat/lon`** (`process_modis.py:455`), no en el
+  centro de grilla de MIROVA.
+- `ENABLE_UTM_REGRID` está **OFF**, así que toda la rama duerme.
+
+D17 queda como estaba y correctamente: **premisa confirmada, consecuencia no**. El brazo D
+(regrid centrado en `get_grid_center()`) es trabajo de experimento, no de auditoría.
+
+**Nota sobre A6**: la regla cita `run_pipeline.py:220` pasando `eff_vent_lat` desde
+`get_effective_vent()`. Hoy son las líneas 234/277/324 y la función es
+`get_detection_anchor()`. La lección de A6 —trazar los callers— sigue valiendo entera; el
+ejemplo drifteó, como ya les pasó a A7 y A13.
+
+## Hallazgo 8 — capacidad dormida en `pipeline/`
+
+`04_capacidad_dormida.py` barre las funciones públicas de `pipeline/` sin call site fuera
+de su propio módulo. De 31 candidatas, las que además tienen **cero uso interno** son las
+que importan:
+
+- **`detect_tirvolch.py` entero** (318 líneas, S75 PR #153): ningún módulo lo importa. Su
+  docstring lo dice honestamente —*«módulo NUEVO standalone, NO integrado»*— y su
+  integración estaba prevista como Task A2. Lo que sí se integró fue `vrptir.py`, el
+  cuantificador, que el propio TIRVolcH declara que depende de él. En producción no
+  importa: `ENABLE_VRPTIR_AVENI` está **OFF** y toda la rama Aveni es diagnóstica.
+  Coherente, pero son 318 líneas testeadas dormidas hace 52 sesiones.
+- **`get_grid_center` / `get_effective_vent`** — el caso de D17, arriba.
+- **`cluster_vrp_mw_with_bg`** quedó dormida **por el fix de esta misma sesión** (#546):
+  los tres procesadores pasaron a `cluster_vrp_per_pixel_with_bg` + `sum_cluster_vrp`.
+  Se conserva porque los tests la usan para fijar el invariante «la suma de los por-píxel
+  es el total», y se le agregó al docstring que **no es la ruta operacional**, para que
+  nadie la lea como el camino que produce el número publicado.
+
+---
+
 ## Lo que falta
 
-**Fase 2**, sin empezar: eje geométrico (D17, el único drift sin barrer — y A82 fue rebajada
-en S125 justamente porque S114 nunca lo miró), matriz sensor × tratamiento, higiene de
-`experiments/` (37 directorios sin trackear al abrir S126).
+**Fase 2 hecha** salvo el brazo D de D17, que es experimento y no auditoría.
+
+**Higiene de `experiments/`**: de 38 entradas sin trackear (915 MB) quedan 13. Se pasó de
+ignorar sesión por sesión a ignorar por patrón. **No se borró nada** — quedan ~112 MB de
+resultados del probe S104 que respaldan A69, cuya conservación es decisión de Nicolás. Y
+una asimetría que conviene tener presente: **un tag defensivo (A38) no protege archivos sin
+trackear**, porque para eso tendrían que estar en git primero.
 
 **El frente científico** no es trabajo de auditoría y sigue abierto: el veredicto del 2×2
 corona × filtro contextual (los dos brazos relanzados en S127 sobre el código arreglado) y
