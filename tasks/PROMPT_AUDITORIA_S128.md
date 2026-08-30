@@ -34,9 +34,26 @@ Y hay dos fugas que explican por qué siempre queda inventario:
 FASE 1 — LA DEUDA. Es la puerta de entrada, no un anexo.
 ═══════════════════════════════════════════════════════════════════════════
 
-Los 28 hallazgos sin verificar: 19 en `docs/AUDIT_S121_MEJORA_INTEGRAL.md`
-("sin verificación individual") y 9 en `docs/AUDIT_S125_PROFUNDA.md`
-("sin respaldo").
+Los 28 hallazgos sin verificar, YA LOCALIZADOS (conteo verificado, no estimado):
+
+  · **19 en `docs/AUDIT_S121_MEJORA_INTEGRAL.md`** — cada uno marcado literal
+    con `- **Verificación**: sin verificación individual`. Sacalos con:
+        grep -n "sin verificación individual" docs/AUDIT_S121_MEJORA_INTEGRAL.md
+
+  · **9 en `docs/AUDIT_S125_PROFUNDA.md` §3 "SIN RESPALDO"**, y no son menores:
+        D5   "calibración lograda, ratio 1,35×" vs la tabla de hoy
+        D13  el script que la produce no está en el directorio citado
+        D14  el r = −0,23 que sostiene "la máscara no es el driver del gap" — SIN SCRIPT
+        D9   residuo "24-83× post-cap", anterior a nadir-fijo
+        A54  el 95,4 % de FP físicamente reales — la creencia más load-bearing del catálogo
+        A12  ΔT por volcán: NO reproduce
+        A84  su probe nunca entró a git
+        4 adopciones operacionales cuyo "doc de adopción" es un plan, no un resultado
+        R2   ratio suma/máximo
+
+⚠️ Dos de esos nueve —**D14 y A54**— son fundamento de decisiones vivas. D14 ya
+está REABIERTA por otra razón (la cita no verificable); que además su correlación
+no tenga script es la segunda pata floja de la misma divergencia.
 
 Cada uno termina en UNO de tres destinos, sin punto intermedio:
     CONFIRMADO con script · REFUTADO con script · IMPOSIBLE, y por qué.
@@ -85,17 +102,33 @@ P1 · LA GRILLA REAL. Los tres sensores comparten el BORDE OESTE idéntico pero
 
 P2 · CONTRASTE AL CRÁTER DONDE NO DEBERÍA HABERLO. En esos 11,6 días, Copahue,
      Lastarria y Tupungatito no tienen NINGUNA escena con contraste al cráter
-     sobre ~175 cada uno. Nuestras detecciones ahí en esa ventana serían falsos
-     positivos con evidencia EXTERNA. Primera vez que se puede afirmar eso.
+     sobre ~175 cada uno en la imagen de MIROVA. Y nosotros, en la MISMA ventana,
+     publicamos **Copahue 91 · Lastarria 79 · Tupungatito 87** detecciones con
+     vrp>0 (verificado sobre `data/mirova_equivalent/`). Son 257 detecciones que
+     la imagen de la referencia no respalda. **Es la primera vez en 127 sesiones
+     que un falso positivo nuestro se podría afirmar con evidencia EXTERNA** y no
+     con nuestro propio juicio.
+     Cobertura total de la ventana: 1.551 records nuestros, 970 con vrp>0, en los
+     11 Tier A. Material de sobra; el cuello es la ventana de 11,6 días, no el n.
 
 P3 · CUÁNTO PIERDE `latest.php`. Su README dice ~80 % de las pasadas. **D2
      ("el CSV cubre ~70 % de VIIRS") NUNCA SE MIDIÓ** y es la creencia más
      load-bearing del catálogo: toda métrica de recall se corrige mentalmente
      con ese número. El archivo tiene 1.966 pasadas con timestamp. Medirlo.
 
-P4 · RADIANCIA CONTRA RADIANCIA. Muestrear nuestra radiancia MIR en el
-     centroide de MIROVA para cada par que empate en tiempo; sesgo, RMSE, R².
-     Detecta errores de banda, calibración o unidades invisibles desde adentro.
+P4 · RADIANCIA CONTRA RADIANCIA. Detecta errores de banda, calibración o
+     unidades que son invisibles desde adentro. **Pero tiene dos costos que hay
+     que decidir ANTES de empezar, no a mitad:**
+     (a) no guardamos L1B crudo, así que comparar radiancia contra radiancia
+         exige RE-DESCARGAR los granules del 08-20 de mayo para 11 volcanes, con
+         el disco al 98 % (12 GB libres). Verificar espacio primero.
+     (b) la alternativa barata es comparar nuestro `bt_k` persistido contra la
+         radiancia del TIF vía Planck — pero **la unidad de la banda del TIF NO
+         está declarada en ningún tag**; que sea W m⁻² sr⁻¹ µm⁻¹ es una
+         inferencia por consistencia con Planck, no un dato. Si se toma ese
+         camino, la conclusión hereda esa incertidumbre y hay que escribirlo.
+     Recomendación: dejar P4 para el final y sólo si P1-P3 no consumieron la
+     sesión. Es la sonda de mayor costo y menor certeza de las cinco.
 
 P5 · VERIFICACIÓN VERBATIM DE LAS CITAS QUE GOBIERNAN DECISIONES.
      Empezar por las dos de D14, que S128 reabrió:
@@ -111,6 +144,14 @@ P5 · VERIFICACIÓN VERBATIM DE LAS CITAS QUE GOBIERNAN DECISIONES.
          0,021-0,042 MW.
      ⚠️ NO ACTUAR sobre (b) hasta tener el PDF. La fuente es la misma nota no
      verificada que originó el problema. Verificarla es la tarea; usarla, no.
+     **Cómo conseguir el PDF** (invocar la skill `investigacion` ANTES de buscar
+     a mano; agotar lo local primero, que es su regla): el DOI es
+     `10.1007/s00445-025-01932-y` (Bull. Volcanol., Springer). Orden: (1) el
+     Vault y `documentacion/nuevos/`; (2) Zotero — la nota trae
+     `zotero://select/library/items/M7NUCUVL`, así que puede estar ahí; (3)
+     Crossref / Semantic Scholar / OpenAlex por DOI; (4) recién entonces web.
+     Si no se consigue, D14 queda ABIERTA y se dice así — no se cierra con una
+     paráfrasis por segunda vez.
      Extender a TODA cita en itálicas de MISSION.md y MIROVA_DIVERGENCES.md:
      ¿existe el PDF? ¿dice eso?
 
@@ -169,3 +210,18 @@ de los hallazgos que tocaban decisiones vivas.
 
 La decisión de alcance (eje exógeno **sin** NHI, deuda primero, D14 reabierta) es de
 Nicolás.
+
+## Verificación de que esto se puede ejecutar (hecha en S127, no asumida)
+
+| requisito | estado |
+|---|---|
+| los 28 pendientes son localizables | **sí** — 19 por `grep` literal en S121, 9 enumerados en §3 de S125 |
+| `rasterio` instalado | **sí** (también numpy, scipy, pyproj; falta `osgeo`, no hace falta) |
+| el archivo de TIF está local | **sí**, `../mirova-tif-archive`, 1.966 TIF (133 MB de dato útil) |
+| nuestros records cubren la ventana del archivo | **sí** — 1.551 records, 970 con vrp>0, en los 11 Tier A |
+| espacio en disco | ⚠️ **12 GB libres, 98 % usado**. Alcanza para P1-P3 y P5; P4 exige re-descargar granules |
+| el PDF de Laiolo 2026 | **NO lo tenemos**. P5(b) depende de conseguirlo |
+
+**Lo único que puede trabar la sesión es P4** (re-descarga de granules con el disco al 98 %)
+y **P5(b)** (sin el PDF no se puede verificar el corte de 0,1 MW). Las dos están marcadas
+arriba con su alternativa. P1, P2, P3 y P5(a) corren con lo que ya hay en disco.
