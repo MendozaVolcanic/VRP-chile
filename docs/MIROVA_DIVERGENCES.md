@@ -1307,9 +1307,20 @@ y **se descartó TODO con datos**:
   topografía nival), no por bug. ~~Único gap de fidelidad literal: GAP #A (§298-300 retiro Test 1 K1
   del pool μ/σ, flag OFF) — backlog con A/B propio.~~ **GAP #A RESUELTO S115 = mislabel** (no es gap):
   §298-300 + Eq.6 → los Test 1 activos SÍ se reportan y reciben VRP; "discarded for further steps" =
-  fuera del pool m,σ, **ya cubierto por el second-run** (full). El flag citado
-  `ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK` controla el REPORTE (OFF = fiel, reafirma F1.2 S100), no el
-  pool. **No queda gap de fidelidad literal accionable; no amerita A/B.** Ver `AUDIT_S114` §6d.
+  fuera del pool m,σ. ~~ya cubierto por el second-run~~ **⚠️ REABIERTO S128: las dos
+  patas de este cierre son FALSAS, verificadas contra el código y el paper.** (a) El
+  second-run recibe `active_mask=hot_mask_2d` y `hot_mask_2d = fp_hot` (sólo Tests 2∧3):
+  los K1 (`nti_path_hot`) nunca entran, así que NO cubre el retiro del pool. (b) El flag
+  citado
+  `ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK` ~~controla el REPORTE (OFF = fiel), no el pool~~
+  **gobierna el POOL de μ/σ, verificado S128**: decide si `nti_path_hot` se pasa como
+  `test1_mask` a `first_pass_tests_2_and_3`, y adentro `build_unsuitable_mask` hace
+  `unsuitable = unsuitable | test1_mask`. Se lo juzgó por su NOMBRE y no por cómo lo lee
+  el código — A89. Está en `False`, así que hoy los píxeles más calientes de la escena
+  entran al fondo, inflan μ y σ, y suben el umbral `μ + C2·σ`: el error va hacia el
+  **falso negativo**. ~~No queda gap de fidelidad literal accionable; no amerita A/B.~~
+  **SÍ amerita A/B** (pendiente #8 de `AUDIT_S128.md`). Guard:
+  `tests/test_guard_gap_a_pool_musigma_s128.py`. Ver `AUDIT_S114` §6d y `AUDIT_S128.md` §6bis.
 - **Ejes ortogonales**: cap de magnitud REFUTADO (AUC 0.45; difuso entre Láscar y cat-b) y contexto
   temporal Method-2 REFUTADO (difuso tan variable como el foco, CV 0.84-1.22).
 

@@ -1,0 +1,637 @@
+{
+ "L69_h8_store": {
+  "afirmacion": "el filtro pixel-por-pixel de store.py no limpia vrp_mw para MODIS/VIIRS750; el VRP persistido sigue contaminado",
+  "lineas_filtro_distancia": [
+   221,
+   229,
+   239,
+   271,
+   282,
+   311,
+   321,
+   331,
+   349,
+   356,
+   395,
+   405,
+   409,
+   416,
+   513,
+   526,
+   531
+  ],
+  "lineas_que_tocan_vrp_mw": [
+   29,
+   59,
+   61,
+   91,
+   93,
+   109,
+   111,
+   112,
+   115,
+   116,
+   191,
+   197,
+   218,
+   223,
+   257,
+   258,
+   261,
+   263,
+   267,
+   269,
+   279,
+   280,
+   281,
+   290,
+   293,
+   295,
+   302,
+   312,
+   335,
+   378,
+   417,
+   439,
+   455,
+   466,
+   467,
+   469,
+   511,
+   516,
+   517,
+   522
+  ],
+  "n_lineas_store": 584
+ },
+ "L74_inyeccion_inputs": {
+  "afirmacion": "3 workflows activos interpolan inputs sin comillas en run: -> inyeccion de comandos con acceso a secrets NASA",
+  "n_workflows_activos": 15,
+  "ocurrencias": [
+   {
+    "wf": "backfill-geometry.yml",
+    "linea": 65,
+    "txt": "--start ${{ github.event.inputs.start }} \\"
+   },
+   {
+    "wf": "backfill-geometry.yml",
+    "linea": 66,
+    "txt": "--end ${{ github.event.inputs.end }}"
+   },
+   {
+    "wf": "backfill-geometry.yml",
+    "linea": 74,
+    "txt": "git commit -m \"data(geometry): ${{ matrix.volcano }} ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (S"
+   },
+   {
+    "wf": "backfill-tier-a.yml",
+    "linea": 82,
+    "txt": "if [ \"${{ github.event.inputs.overwrite }}\" = \"true\" ]; then"
+   },
+   {
+    "wf": "backfill-tier-a.yml",
+    "linea": 89,
+    "txt": "--start ${{ github.event.inputs.start }} \\"
+   },
+   {
+    "wf": "backfill-tier-a.yml",
+    "linea": 90,
+    "txt": "--end ${{ github.event.inputs.end }} \\"
+   },
+   {
+    "wf": "backfill-tier-a.yml",
+    "linea": 99,
+    "txt": "git commit -m \"data(backfill): ${{ matrix.volcano }} ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (S"
+   },
+   {
+    "wf": "nrt.yml",
+    "linea": 117,
+    "txt": "if [ \"${{ github.event.inputs.volcano }}\" != \"\" ] && [ \"${{ github.event.inputs.volcano }}\" != \"${{ matrix.volcano }}\" ]"
+   },
+   {
+    "wf": "nrt.yml",
+    "linea": 119,
+    "txt": "echo \"Skipping ${{ matrix.volcano }} (dispatch filter=${{ github.event.inputs.volcano }})\""
+   },
+   {
+    "wf": "nrt.yml",
+    "linea": 178,
+    "txt": "${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }} \\"
+   },
+   {
+    "wf": "nrt.yml",
+    "linea": 179,
+    "txt": "${{ github.event.inputs.start != '' && format('--start {0}', github.event.inputs.start) || '' }} \\"
+   },
+   {
+    "wf": "nrt.yml",
+    "linea": 180,
+    "txt": "${{ github.event.inputs.end != '' && format('--end {0}', github.event.inputs.end) || '' }} \\"
+   },
+   {
+    "wf": "nrt.yml",
+    "linea": 181,
+    "txt": "${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }} 2>&1 | tee -a pipeline.log"
+   },
+   {
+    "wf": "nrt.yml",
+    "linea": 198,
+    "txt": "${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }} \\"
+   },
+   {
+    "wf": "nrt.yml",
+    "linea": 199,
+    "txt": "${{ github.event.inputs.start != '' && format('--start {0}', github.event.inputs.start) || '' }} \\"
+   },
+   {
+    "wf": "nrt.yml",
+    "linea": 200,
+    "txt": "${{ github.event.inputs.end != '' && format('--end {0}', github.event.inputs.end) || '' }} \\"
+   },
+   {
+    "wf": "nrt.yml",
+    "linea": 201,
+    "txt": "${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }} 2>&1 | tee -a pipeline.log"
+   },
+   {
+    "wf": "reproc-chunked.yml",
+    "linea": 138,
+    "txt": "--profile ${{ github.event.inputs.profile }} \\"
+   },
+   {
+    "wf": "reproc-chunked.yml",
+    "linea": 230,
+    "txt": "git commit -m \"data(reproc): $PROFILE ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (${{ github.event"
+   },
+   {
+    "wf": "reproc-s120-eq16-villarrica.yml",
+    "linea": 63,
+    "txt": "--volcano \"${{ github.event.inputs.volcano }}\" \\"
+   },
+   {
+    "wf": "reproc-s120-eq16-villarrica.yml",
+    "linea": 64,
+    "txt": "--start ${{ github.event.inputs.start }} \\"
+   },
+   {
+    "wf": "reproc-s120-eq16-villarrica.yml",
+    "linea": 65,
+    "txt": "--end ${{ github.event.inputs.end }} \\"
+   },
+   {
+    "wf": "reproc-s120-eq16-villarrica.yml",
+    "linea": 72,
+    "txt": "git add \"data/_s99_test1_eq16/${{ github.event.inputs.volcano }}.json\""
+   },
+   {
+    "wf": "reproc-s120-eq16-villarrica.yml",
+    "linea": 74,
+    "txt": "git commit -m \"data(s120): reproc Eq.16 ${{ github.event.inputs.volcano }} ${{ github.event.inputs.start }}..${{ github."
+   },
+   {
+    "wf": "reproc-s124-ndc-focus.yml",
+    "linea": 77,
+    "txt": "--start ${{ github.event.inputs.start }} \\"
+   },
+   {
+    "wf": "reproc-s124-ndc-focus.yml",
+    "linea": 78,
+    "txt": "--end ${{ github.event.inputs.end }} \\"
+   },
+   {
+    "wf": "reproc-s124-ndc-focus.yml",
+    "linea": 87,
+    "txt": "git commit -m \"data(s124): foco Nicanor NdC ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (experiment"
+   },
+   {
+    "wf": "reproc-s124-villarrica-op-ab.yml",
+    "linea": 62,
+    "txt": "--start \"${{ github.event.inputs.start }}\" \\"
+   },
+   {
+    "wf": "reproc-s124-villarrica-op-ab.yml",
+    "linea": 63,
+    "txt": "--end \"${{ github.event.inputs.end }}\" \\"
+   },
+   {
+    "wf": "reproc-s124-villarrica-op-ab.yml",
+    "linea": 64,
+    "txt": "--max-days \"${{ github.event.inputs.max_days }}\")"
+   },
+   {
+    "wf": "reproc-s124-villarrica-op-ab.yml",
+    "linea": 145,
+    "txt": "git commit -m \"data(s124): A/B Villarrica operacional ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} ("
+   }
+  ],
+  "n_workflows_afectados": 7
+ },
+ "L79_cleanup_miente": {
+  "afirmacion": "imprime 'Cleaned up' aunque los 3 reintentos de borrado fallen",
+  "archivo": "scripts/run_pipeline.py",
+  "lineas": [
+   366
+  ],
+  "contexto": [
+   "                        print(f\"  ERROR processing {l1b.name}: {e}\")",
+   "",
+   "    finally:",
+   "        # Always delete raw granules after processing",
+   "        if volcano_tmp.exists():",
+   "            import time, stat",
+   "            def _remove_readonly(func, path, _):",
+   "                os.chmod(path, stat.S_IWRITE)",
+   "                func(path)",
+   "            for _ in range(3):",
+   "                try:",
+   "                    shutil.rmtree(volcano_tmp, onerror=_remove_readonly)",
+   "                    break",
+   "                except PermissionError:",
+   "                    time.sleep(1)",
+   "            print(f\"  Cleaned up {volcano_tmp}\")",
+   "",
+   "",
+   "def _time_key(filename: str) -> str:"
+  ]
+ },
+ "L84_unicode_fetch": {
+  "afirmacion": "queda una flecha Unicode en un mensaje runtime (_diag), no solo en comentarios",
+  "total": 15,
+  "en_runtime": [],
+  "solo_comentario": 12
+ },
+ "L106_mejoras_s119": {
+  "afirmacion": "8 de 10 mejoras de auditoria propuestas por Nicolas siguen sin construirse (solo el auto-audit semanal se hizo)",
+  "existe_audit_s119": true,
+  "auto_audit_script": true,
+  "workflows_de_audit": [
+   "audit-weekly.yml"
+  ]
+ },
+ "L111_data_peso": {
+  "afirmacion": "data/ tiene 2,0 GB de los cuales solo ~180 MB es operacional",
+  "data_total_mb": 1034.7,
+  "operacional_mirova_equivalent_mb": 274.6,
+  "subdirs": [
+   ".gitkeep",
+   "_d11_modis_gated",
+   "_d11_modis_nogate",
+   "_f70_a",
+   "_f70_b",
+   "_s124_kernelbg_ab",
+   "_s124_villarrica_op_ab",
+   "_s125_cloudmask_off",
+   "_s125_cloudmask_on",
+   "_s125_mag_a",
+   "_s125_mag_b",
+   "_s125_mag_c",
+   "_s125_mag_control",
+   "_s125_viirs_e",
+   "_s125_viirs_f",
+   "_s125_viirs_g",
+   "_s126_corona_ctxoff",
+   "_s126_corona_off",
+   "_s126_corona_on",
+   "_s98_anchor",
+   "_s99_test1_eq16",
+   "_t1lm_q0_control",
+   "_t1lm_q2_global",
+   "_t1lm_q3_ring15",
+   "_t1lm_q3_ring24",
+   "_t1lm_q3_ring35",
+   "_t1lm_q4_te1000",
+   "_t1lm_q4_te700",
+   "_t1lm_q5_ntilocal",
+   "_t1lm_q6_spatialcore",
+   "_v750focal_base",
+   "_v750focal_on",
+   "audit_continuous",
+   "experimental",
+   "experimental_ndc_focus",
+   "mirova",
+   "mirova_equivalent",
+   "mirova_equivalent_backfill_nov2025",
+   "mirova_equivalent_pre_s27",
+   "mirova_reference"
+  ]
+ },
+ "L131_experiments_peso": {
+  "afirmacion": "experiments/ 458 MB; 3 subdirs (S98/S104/S109) concentran 366 MB",
+  "experiments_total_mb": 1427.9,
+  "top8": [
+   [
+    465.8,
+    "_s104_roi_probe"
+   ],
+   [
+    336.6,
+    "_s99_audit"
+   ],
+   [
+    170.2,
+    "_s109_modis_mag"
+   ],
+   [
+    163.3,
+    "_s98_anchor"
+   ],
+   [
+    113.7,
+    "_s107_modis_localmag"
+   ],
+   [
+    88.6,
+    "_s106_fase2"
+   ],
+   [
+    18.2,
+    "51_p31_ab"
+   ],
+   [
+    16.8,
+    "_s122_geometry_backfill"
+   ]
+  ]
+ },
+ "L213_snapshots_ab": {
+  "afirmacion": "pre_s27 (195 MB) + ~10 subcarpetas mirova_equivalent_* = ~556 MB",
+  "por_subdir_mb": {
+   "mirova_equivalent_backfill_nov2025": 1.0,
+   "mirova_equivalent_pre_s27": 203.9
+  },
+  "suma_mb": 204.9,
+  "n_subdirs": 2
+ },
+ "L116_avtod": {
+  "afirmacion": "EXT-8 AVTOD (Reath 2019), ground truth independiente ya descargado, nunca integrado al workflow de validacion",
+  "pdf_en_repo": true,
+  "archivos_que_lo_mencionan": [
+   "docs/AUDIT_S121_MEJORA_INTEGRAL.md",
+   "docs/AUDIT_S122.md",
+   "docs/AUDIT_S122_C2_PASO0.md",
+   "docs/AUDIT_S123.md",
+   "docs/AVTOD_CROSS_VALIDATION_S72.md",
+   "docs/BEYOND_MIROVA_EXTENSIONS.md",
+   "docs/F26_VERDICT_CONSOLIDATED_S72.md",
+   "docs/F31_AGUILERA_2021_PETEROA.md",
+   "docs/INDEX.md",
+   "docs/M2_AVTOD_INTEGRATION_S122.md",
+   "docs/PAPER_VRP_CHILE_DRAFT_S72.md",
+   "docs/PLAN_EXPERIMENTAL_BEYOND_MIROVA_S122.md",
+   "docs/REFS_TIER1_S72.md",
+   "experiments/_s122_m2_avtod/crossval.py"
+  ],
+  "lo_usa_codigo": []
+ },
+ "L126_pdf_duplicado": {
+  "afirmacion": "PDF duplicado exacto en documentacion/ (26 MB desperdiciados)",
+  "grupos": [
+   {
+    "md5": "ab8addd8fd28",
+    "archivos": [
+     "1-s2.0-S0034425724004140-main.pdf",
+     "Aveni_2024_TIRVolcH_RSE.pdf"
+    ],
+    "bytes_c_u": 26807091,
+    "desperdicio_mb": 26.8
+   },
+   {
+    "md5": "ff4d2d4e3169",
+    "archivos": [
+     "1-s2.0-S0377027318304165-main.pdf",
+     "AVTOD_Reath_2019.pdf"
+    ],
+    "bytes_c_u": 3196682,
+    "desperdicio_mb": 3.2
+   },
+   {
+    "md5": "191b64649bbb",
+    "archivos": [
+     "Coppola_2023_GlobalRadiantFlux_MIROVA.pdf",
+     "feart-11-1240107.pdf"
+    ],
+    "bytes_c_u": 5131092,
+    "desperdicio_mb": 5.1
+   },
+   {
+    "md5": "0ad57d044320",
+    "archivos": [
+     "SaundersShultz_2024_HotLINK.pdf",
+     "feart-12-1345104.pdf"
+    ],
+    "bytes_c_u": 47249796,
+    "desperdicio_mb": 47.2
+   },
+   {
+    "md5": "877d18485125",
+    "archivos": [
+     "The_Transition_from_MODIS_to_VIIRS_for_Global_Volc.pdf",
+     "campus2022_sensors_22_1713.pdf"
+    ],
+    "bytes_c_u": 8357087,
+    "desperdicio_mb": 8.4
+   },
+   {
+    "md5": "3c001f28341c",
+    "archivos": [
+     "Valade_2019_MOUNTS_AI.pdf",
+     "rs11131528.pdf"
+    ],
+    "bytes_c_u": 10908310,
+    "desperdicio_mb": 10.9
+   }
+  ],
+  "desperdicio_total_mb": 101.7
+ },
+ "L136_gap_a": {
+  "afirmacion": "CLAUDE.md/MISSION.md dicen 'pendiente' del GAP #A; MIROVA_DIVERGENCES/AUDIT_S114 dicen 'resuelto S115 (mislabel)'",
+  "menciones": {
+   "CLAUDE.md": [
+    "Coppola 2016a** (S114). **NO quedan gaps de fidelidad literal pendientes**: el antiguo GAP #A"
+   ],
+   "docs/MISSION.md": [
+    "D2 N·σ Tabla 1 ya implementado (dual-ROI 5/10, S114); GAP #A (§298-300 retiro Test1 K1) fue"
+   ],
+   "docs/MIROVA_DIVERGENCES.md": [
+    "topografía nival), no por bug. ~~Único gap de fidelidad literal: GAP #A (§298-300 retiro Test 1 K1",
+    "del pool μ/σ, flag OFF) — backlog con A/B propio.~~ **GAP #A RESUELTO S115 = mislabel** (no es gap):"
+   ],
+   "docs/AUDIT_S114_PARITY_BY_SENSOR.md": [
+    "**GAP #A — RESUELTO S115: era un MISLABEL, no un gap de fidelidad.** Verificado contra el paper",
+    "(outlier espacial real sobre topografía nival). **GAP #A RESUELTO S115 como mislabel** (ver §6d):"
+   ]
+  }
+ },
+ "L178_git_peso": {
+  "afirmacion": "data/ = 83,8 % de los commits; .git ya es 3,1 GB",
+  "commits_totales": "8418",
+  "commits_que_tocan_data": "7341",
+  "pct": 87.2,
+  "count_objects": {
+   "count": "5371",
+   "size": "969.11 MiB",
+   "in-pack": "67585",
+   "packs": "33",
+   "size-pack": "7.38 GiB",
+   "prune-packable": "263",
+   "garbage": "4",
+   "size-garbage": "1.57 GiB"
+  },
+  "git_dir_mb": 10641.0
+ },
+ "L188_gt_fresco": {
+  "afirmacion": "el ground truth CSV (mirova_v1_snapshot) SI esta fresco",
+  "por_archivo": {
+   "latest_consolidado.csv": {
+    "filas_con_fecha": 34772,
+    "min": "2026-01-10",
+    "max": "2026-08-30"
+   },
+   "data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv": {
+    "filas_con_fecha": 887,
+    "min": "2026-01-20",
+    "max": "2026-08-24"
+   },
+   "data/mirova_reference/registro_vrp_ocr.csv": {
+    "filas_con_fecha": 235,
+    "min": "2026-01-20",
+    "max": "2026-03-28"
+   },
+   "data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado.csv": {
+    "filas_con_fecha": 34196,
+    "min": "2026-01-10",
+    "max": "2026-08-24"
+   }
+  }
+ },
+ "L193_L198_L203_workflows": {
+  "afirmacion": "nrt.yml sin concurrency a nivel workflow; nrt-retry.yml sin timeout-minutes; backfill y reproc-s120 sin concurrency",
+  "por_workflow": {
+   "audit-weekly.yml": {
+    "concurrency_nivel_workflow": true,
+    "concurrency_nivel_job": true,
+    "grupo": "audit-weekly",
+    "timeout_minutes": true,
+    "on_quoted": true,
+    "hace_push": true
+   },
+   "backfill-geometry.yml": {
+    "concurrency_nivel_workflow": true,
+    "concurrency_nivel_job": true,
+    "grupo": "push-main",
+    "timeout_minutes": true,
+    "on_quoted": true,
+    "hace_push": true
+   },
+   "backfill-tier-a.yml": {
+    "concurrency_nivel_workflow": true,
+    "concurrency_nivel_job": true,
+    "grupo": "push-main",
+    "timeout_minutes": true,
+    "on_quoted": true,
+    "hace_push": true
+   },
+   "nrt-healthcheck.yml": {
+    "concurrency_nivel_workflow": false,
+    "concurrency_nivel_job": false,
+    "grupo": null,
+    "timeout_minutes": true,
+    "on_quoted": true,
+    "hace_push": false
+   },
+   "nrt-monitor.yml": {
+    "concurrency_nivel_workflow": false,
+    "concurrency_nivel_job": false,
+    "grupo": null,
+    "timeout_minutes": true,
+    "on_quoted": true,
+    "hace_push": false
+   },
+   "nrt-retry.yml": {
+    "concurrency_nivel_workflow": false,
+    "concurrency_nivel_job": false,
+    "grupo": null,
+    "timeout_minutes": false,
+    "on_quoted": true,
+    "hace_push": false
+   },
+   "nrt.yml": {
+    "concurrency_nivel_workflow": true,
+    "concurrency_nivel_job": false,
+    "grupo": "push-main",
+    "timeout_minutes": true,
+    "on_quoted": true,
+    "hace_push": true
+   },
+   "pages-deploy.yml": {
+    "concurrency_nivel_workflow": true,
+    "concurrency_nivel_job": false,
+    "grupo": "\"pages\"",
+    "timeout_minutes": false,
+    "on_quoted": true,
+    "hace_push": false
+   },
+   "reproc-chunked.yml": {
+    "concurrency_nivel_workflow": true,
+    "concurrency_nivel_job": true,
+    "grupo": "reproc-chunked-${{",
+    "timeout_minutes": true,
+    "on_quoted": true,
+    "hace_push": true
+   },
+   "reproc-s120-eq16-villarrica.yml": {
+    "concurrency_nivel_workflow": true,
+    "concurrency_nivel_job": true,
+    "grupo": "push-main",
+    "timeout_minutes": true,
+    "on_quoted": true,
+    "hace_push": true
+   },
+   "reproc-s121-d12-modis-ab.yml": {
+    "concurrency_nivel_workflow": false,
+    "concurrency_nivel_job": false,
+    "grupo": null,
+    "timeout_minutes": true,
+    "on_quoted": true,
+    "hace_push": false
+   },
+   "reproc-s124-ndc-focus.yml": {
+    "concurrency_nivel_workflow": true,
+    "concurrency_nivel_job": true,
+    "grupo": "reproc-ndc-focus",
+    "timeout_minutes": true,
+    "on_quoted": true,
+    "hace_push": true
+   },
+   "reproc-s124-villarrica-op-ab.yml": {
+    "concurrency_nivel_workflow": true,
+    "concurrency_nivel_job": true,
+    "grupo": "reproc-villarrica-op-ab",
+    "timeout_minutes": true,
+    "on_quoted": true,
+    "hace_push": true
+   },
+   "sync-mirova-csv.yml": {
+    "concurrency_nivel_workflow": true,
+    "concurrency_nivel_job": true,
+    "grupo": "push-main",
+    "timeout_minutes": false,
+    "on_quoted": true,
+    "hace_push": true
+   },
+   "tests.yml": {
+    "concurrency_nivel_workflow": true,
+    "concurrency_nivel_job": true,
+    "grupo": "tests-${{",
+    "timeout_minutes": true,
+    "on_quoted": true,
+    "hace_push": false
+   }
+  }
+ },
+ "L208_secrets": {
+  "afirmacion": "sin echo/print de secrets en los workflows activos (eje sano)",
+  "n_workflows_revisados": 15,
+  "fugas": []
+ }
+}
