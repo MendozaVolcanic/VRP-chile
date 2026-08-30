@@ -13,9 +13,19 @@
 |---|---|---|
 | MISSION.md | Misión vinculante: clon literal MIROVA, 3 preguntas | S22 |
 | MIROVA_DIVERGENCES.md | Catálogo vivo de divergencias vs MIROVA | S71+ |
-| **AUDIT_S123.md** | **Última auditoría integral (6 ejes) — VIGENTE** | **S123** |
-| AUDIT_S122.md | Auditoría previa (deuda docs, P0 token NASA) | S122 |
-| AUDIT_S121_MEJORA_INTEGRAL.md | Auditoría multi-modelo (refutó 2 hallazgos) | S121 |
+| **AUDIT_S127.md** | **Última — eje «declarado ≠ efectivo» (T9): 4 afirmaciones falsas, 3 guards** | **S127** |
+| AUDIT_S125_PROFUNDA.md | Sub-reporte aislado en VIIRS375; rebaja de A82 | S125 |
+| AUDIT_S124.md | Banda de paridad, filtro solar, D15/D16/D17 | S124 |
+| PROTOCOLO_AUDITORIA_PROFUNDA.md | Las 9 técnicas validadas (T9 = declarado vs efectivo) | S124+ |
+| AUDIT_S123.md | Auditoría integral 6 ejes | S123 |
+| AUDIT_S122.md · AUDIT_S121_MEJORA_INTEGRAL.md | Anteriores (deuda docs; multi-modelo) | S121-S122 |
+
+> ⚠️ **No hardcodear cuál es «la vigente» acá.** Este índice marcó S123 como VIGENTE
+> durante cuatro sesiones mientras existían S124, S125 y S127, y ni S124 ni S125 estaban
+> listadas. Es el mismo defecto que la propia AUDIT_S127 audita. Para saber cuál es la
+> última: `ls docs/AUDIT_S*.md | sort -V | tail -1` (ojo, `sort -V`: el orden alfabético
+> pone S99 después de S122).
+
 | AUDIT_S119.md · AUDIT_S116.md · AUDIT_S105.md | Auditorías integrales anteriores (históricas) | S105-S119 |
 | AUDIT_S86.md | Marco FPs: 95% son realidad física (A54) — matizado por A69/A82 | S86 |
 | META_RULES_S80.md | Reglas meta M1-M9 + A56-A60 | S80 |
