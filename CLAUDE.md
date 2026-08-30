@@ -157,9 +157,14 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 - **A6. Trazar callers cuando concluyas comportamiento (S21)**: leer firma+cuerpo
   de un callee NO basta. El caller puede transformar args. S21 leí
   `process_viirs.py:518` (vent_dist=haversine(vent_lat,...)) y concluí "vent-path
-  usa vent_lat nominal" — falso: `run_pipeline.py:220` pasa eff_vent_lat de
-  `get_effective_vent()` que ya fallbackea a mirova_center. ~30 min perdidos
-  en hipótesis ya implementada S15.
+  usa vent_lat nominal" — falso: el caller ya pasaba un ancla resuelta. ~30 min
+  perdidos en hipótesis ya implementada S15.
+  - ⚠️ **El ejemplo drifteó — verificado S127.** La regla citaba
+    `run_pipeline.py:220` pasando `eff_vent_lat` desde `get_effective_vent()`.
+    Hoy son las líneas **234/277/324** y la función es **`get_detection_anchor()`**;
+    `get_effective_vent` quedó como alias sin llamador en producción (ver D17 y
+    `docs/AUDIT_S127.md` §Hallazgo 7). **La lección vale entera**; el ejemplo no,
+    como ya les pasó a A7, A13 y A17. Es la propia A6 aplicada a A6.
 - **A7. ⚠️ El ejemplo quedó OBSOLETO — verificado S125.** Los tres campos que la regla
   dice persistidos (`std_bg_i04`, `threshold_mir`, `nti_std`) **no existen** en ninguno de
   los 2.547 records VIIRS de Villarrica; hoy se llaman `diag_sigma_bg_k`,
@@ -1001,6 +1006,30 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   vinculantes en `MEMORY.md`; se incorporaron al archivo en S125 — hallazgo B5 de
   `docs/AUDIT_S125_PROFUNDA.md`.)*
 
+- **A89. «No aparece en ningún lado» casi nunca significa que no esté: el nombre en el
+  punto de uso no es el nombre en la definición** (S127, sub-patrón dominante de la
+  técnica T9). Buscar un identificador y no encontrarlo **no da error — da cero**, y el
+  cero se lee como ausencia. En una sola sesión apareció **cinco veces**, en tres formas:
+
+  | forma | ejemplo | el falso negativo que produjo |
+  |---|---|---|
+  | el parámetro no se llama como la clave | `local_kernel_bg_compatible` (firma) vs `local_kernel_bg` (YAML), con `run_pipeline.py:244` de puente | «el kernel no corre en producción» — corre en 5 de los 11 Tier A |
+  | la clave se lee de otra sección | `enable_utm_regrid` escrito en la raíz, leído de `thresholds:` (S124) | el flag arrancaba siempre apagado; su A/B habría corrido 4 brazos idénticos |
+  | la llamada es calificada o renombrada | `store.append_record(`, `from pipeline.vrptir import vrp_tir_mw as _aveni_vrp_tir_mw` | «nadie la llama» sobre funciones que corren en cada granule |
+
+  **How to apply**: antes de escribir «esto no se usa / no está puesto en ningún perfil»,
+  trazá **cómo lo lee el código** (A6) — el caller, el `.get()`, el import— y no cómo se
+  llama donde está definido. Un `grep` del nombre de la definición es justamente el
+  instrumento que no sirve para esa pregunta. Para flags: leer `pipeline.profile`, nunca
+  el YAML.
+
+  **El corolario incómodo**: las cinco veces el error fue de quien estaba **auditando**,
+  no de quien escribió el código — y dos de esas veces el texto correcto ya estaba en el
+  repo (el docstring de `process_viirs_mod.py:409` nombraba los 5 volcanes opt-in desde
+  S72). La técnica se equivoca en la misma dirección que el defecto que busca, así que un
+  hallazgo de la forma «esto está muerto» exige verificación cruzada antes de reportarse.
+  Detalle: `docs/AUDIT_S127.md` + T9 en `docs/PROTOCOLO_AUDITORIA_PROFUNDA.md`.
+
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
 
@@ -1026,7 +1055,7 @@ decisiones de umbrales, o cambios metodológicos:
 
 ## Arquitectura
 - `pipeline/`: fetch.py (earthaccess), process_modis.py, process_viirs.py, process_viirs_mod.py, store.py, scan_geometry.py
-- `frontend/` — **3 vistas standalone, cada una con su copia de helpers** (`mirovaEqVrp`, etc.): `index.html` (dashboard Chart.js+Leaflet), `diario.html` (tendencia 90d/volcán), `mosaico.html` (overview 48h/30d). **Un cambio de display/filtro (ej. supresión cirrus) debe replicarse en las 3** (S92 L5). Verificación = preview real navegador (no `node --check`): sirven desde `/frontend/`, `BASE_PATH=/`, data en `/data/...`. GitHub Pages (deploy on push a `frontend/**`).
+- `frontend/` — **3 vistas live + 1 preview**, cada una con su copia de helpers (`mirovaEqVrp`, etc.): `index.html` (dashboard Chart.js+Leaflet), `diario.html` (tendencia 90d/volcán), `mosaico.html` (overview 48h/30d). **Un cambio de display/filtro (ej. supresión cirrus) debe replicarse en esas 3** (S92 L5). La cuarta, `comparacion.html`, **también se despliega** (`cp -r frontend/.`) y está enlazada desde `index.html`, pero se rotula a sí misma *"PREVIEW S115 · no es el dashboard live"* y **no lleva `mirovaEqVrp`** (0 usos, contra 25/8/8) — es deliberado, no un olvido: no la "arregles" replicándole el helper. Verificado S127. Verificación = preview real navegador (no `node --check`): sirven desde `/frontend/`, `BASE_PATH=/`, data en `/data/...`. GitHub Pages (deploy on push a `frontend/**`).
 - `volcanoes.yaml` (45 configurados, 11 con data, 34 sin pull)
 - `.github/workflows/nrt.yml` (cron cada 2h, matrix por volcán, **timeout 50 min per-step**)
 
@@ -1172,8 +1201,16 @@ Para minimizar compactaciones automáticas ("session continued..."):
 - **Concurrency (S123)**: los 6 workflows que hacen `git push` a main comparten
   `group: push-main` con `cancel-in-progress: false` — nrt, nrt-retry,
   sync-mirova-csv, audit-weekly, backfill y reproc. Un yml nuevo que pushee a
-  main DEBE declarar ese mismo grupo, o reabre la carrera de `git push` que el
-  PR #502 cerró. En `nrt.yml` el grupo va a nivel **workflow**, nunca a nivel
+  main declara ese mismo grupo **salvo que implemente su propio retry de push**,
+  que es la defensa real contra la carrera de `git push` que el PR #502 cerró.
+  **Verificado S127: hay 3 excepciones deliberadas**, cada una con su razón en el
+  comentario — `reproc-s124-ndc-focus`, `reproc-s124-villarrica-op-ab` y el job
+  `merge` de `reproc-chunked` (#546). Todas tienen `pull --rebase` + `push` con 5
+  reintentos y backoff. El motivo de salirse: `nrt.yml` ocupa el lock ~50 min de
+  cada 2 h, y GitHub mantiene **un solo run pendiente por grupo**, así que el
+  segundo que llega **desplaza** al encolado — el job `merge` se perdió así en
+  S125 y en S126. O grupo compartido, o retry propio: las dos cosas juntas sólo
+  agregan el riesgo de perder corridas. En `nrt.yml` el grupo va a nivel **workflow**, nunca a nivel
   job: los 11 volcanes son jobs de una matrix y GitHub solo mantiene 1 run
   pendiente por grupo — a nivel job se perderían 9 volcanes por corrida.
 - **Radios geofencing MIROVA-OVDAS**: cada volcán tiene radius_km propio
