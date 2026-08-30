@@ -1,0 +1,209 @@
+{
+  "matriz": {
+    "cluster_corona_background": {
+      "glosa": "fondo local Eq.6 (magnitud)",
+      "call_sites": {
+        "MODIS": 1,
+        "VIIRS375": 1,
+        "VIIRS750": 0
+      }
+    },
+    "apply_corona_magnitude_v375": {
+      "glosa": "wrapper de la corona (magnitud)",
+      "call_sites": {
+        "MODIS": 0,
+        "VIIRS375": 2,
+        "VIIRS750": 0
+      }
+    },
+    "cluster_focal_vrp_mw": {
+      "glosa": "nucleo focal/contextual (magnitud)",
+      "call_sites": {
+        "MODIS": 2,
+        "VIIRS375": 0,
+        "VIIRS750": 1
+      }
+    },
+    "apply_single_pixel_mode": {
+      "glosa": "single-pixel sub-MW (magnitud)",
+      "call_sites": {
+        "MODIS": 2,
+        "VIIRS375": 2,
+        "VIIRS750": 2
+      }
+    },
+    "compute_local_background": {
+      "glosa": "kernel 8-vecinos per-pixel (magnitud)",
+      "call_sites": {
+        "MODIS": 1,
+        "VIIRS375": 1,
+        "VIIRS750": 0
+      }
+    },
+    "compute_test1_mir": {
+      "glosa": "Test 1 integrado sobre MIR absoluto (deteccion)",
+      "call_sites": {
+        "MODIS": 1,
+        "VIIRS375": 1,
+        "VIIRS750": 1
+      }
+    },
+    "compute_test1_nti": {
+      "glosa": "Test 1 integrado sobre NTI (deteccion)",
+      "call_sites": {
+        "MODIS": 0,
+        "VIIRS375": 1,
+        "VIIRS750": 0
+      }
+    },
+    "apply_contextual_test1_filter": {
+      "glosa": "filtro contextual del Test 1 (deteccion)",
+      "call_sites": {
+        "MODIS": 0,
+        "VIIRS375": 1,
+        "VIIRS750": 0
+      }
+    },
+    "spatial_core_filter": {
+      "glosa": "nucleo espacial (deteccion)",
+      "call_sites": {
+        "MODIS": 0,
+        "VIIRS375": 1,
+        "VIIRS750": 0
+      }
+    },
+    "intermediate_ring_bg_bt": {
+      "glosa": "anillo intermedio [1,5-3] km (fondo)",
+      "call_sites": {
+        "MODIS": 0,
+        "VIIRS375": 1,
+        "VIIRS750": 0
+      }
+    },
+    "apply_second_pass_intra_radio_gate": {
+      "glosa": "cerca intra-radio 2a pasada",
+      "call_sites": {
+        "MODIS": 1,
+        "VIIRS375": 1,
+        "VIIRS750": 1
+      }
+    },
+    "compute_vrp_lava_lake_eq16": {
+      "glosa": "Eq.16 lava lake sub-pixel (magnitud)",
+      "call_sites": {
+        "MODIS": 0,
+        "VIIRS375": 1,
+        "VIIRS750": 0
+      }
+    },
+    "apply_d9_scene_cap": {
+      "glosa": "cap D9 de escena",
+      "call_sites": {
+        "MODIS": 1,
+        "VIIRS375": 1,
+        "VIIRS750": 1
+      }
+    }
+  },
+  "asimetrias": [
+    {
+      "helper": "cluster_corona_background",
+      "glosa": "fondo local Eq.6 (magnitud)",
+      "presente_en": [
+        "MODIS",
+        "VIIRS375"
+      ],
+      "falta_en": [
+        "VIIRS750"
+      ]
+    },
+    {
+      "helper": "apply_corona_magnitude_v375",
+      "glosa": "wrapper de la corona (magnitud)",
+      "presente_en": [
+        "VIIRS375"
+      ],
+      "falta_en": [
+        "MODIS",
+        "VIIRS750"
+      ]
+    },
+    {
+      "helper": "cluster_focal_vrp_mw",
+      "glosa": "nucleo focal/contextual (magnitud)",
+      "presente_en": [
+        "MODIS",
+        "VIIRS750"
+      ],
+      "falta_en": [
+        "VIIRS375"
+      ]
+    },
+    {
+      "helper": "compute_local_background",
+      "glosa": "kernel 8-vecinos per-pixel (magnitud)",
+      "presente_en": [
+        "MODIS",
+        "VIIRS375"
+      ],
+      "falta_en": [
+        "VIIRS750"
+      ]
+    },
+    {
+      "helper": "compute_test1_nti",
+      "glosa": "Test 1 integrado sobre NTI (deteccion)",
+      "presente_en": [
+        "VIIRS375"
+      ],
+      "falta_en": [
+        "MODIS",
+        "VIIRS750"
+      ]
+    },
+    {
+      "helper": "apply_contextual_test1_filter",
+      "glosa": "filtro contextual del Test 1 (deteccion)",
+      "presente_en": [
+        "VIIRS375"
+      ],
+      "falta_en": [
+        "MODIS",
+        "VIIRS750"
+      ]
+    },
+    {
+      "helper": "spatial_core_filter",
+      "glosa": "nucleo espacial (deteccion)",
+      "presente_en": [
+        "VIIRS375"
+      ],
+      "falta_en": [
+        "MODIS",
+        "VIIRS750"
+      ]
+    },
+    {
+      "helper": "intermediate_ring_bg_bt",
+      "glosa": "anillo intermedio [1,5-3] km (fondo)",
+      "presente_en": [
+        "VIIRS375"
+      ],
+      "falta_en": [
+        "MODIS",
+        "VIIRS750"
+      ]
+    },
+    {
+      "helper": "compute_vrp_lava_lake_eq16",
+      "glosa": "Eq.16 lava lake sub-pixel (magnitud)",
+      "presente_en": [
+        "VIIRS375"
+      ],
+      "falta_en": [
+        "MODIS",
+        "VIIRS750"
+      ]
+    }
+  ]
+}

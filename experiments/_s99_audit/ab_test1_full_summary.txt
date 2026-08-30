@@ -1,0 +1,50 @@
+=== S100 A/B Test1 magnitude FULL (11 Tier A) vs MIROVA CONS+OCR — 2026-04-01..2026-05-31 ===
+rec=ALERTAS detectadas pc.vrp>0 | rat=mediana pc.vrp/MIROVA | in%=ratios en [0.5,2] | z=FN magnitud
+volcano                profile    alert  rec    ratio   in% z(FN)
+Tupungatito            baseline      63   39   18.935   7.7     4
+Tupungatito            ctx+peak      63   41    1.238  70.7     4
+
+Villarrica             baseline       6    2    2.002  50.0     0
+Villarrica             ctx+peak       6    4    1.903  75.0     0
+
+Lascar                 baseline     162   67     0.86  92.5     1
+Lascar                 ctx+peak     162   65    0.823  90.8     1
+
+Lastarria              baseline      62   36     1.21  61.1     1
+Lastarria              ctx+peak      62   35     1.28  68.6     1
+
+Isluga                 baseline      66   40    1.191  67.5     0
+Isluga                 ctx+peak      66   41    1.236  80.5     1
+
+Llaima                 baseline       1    0        -     -     0
+Llaima                 ctx+peak       1    1    2.013   0.0     0
+
+NevadosDeChillan       baseline       4    0        -     -     3
+NevadosDeChillan       ctx+peak       4    0        -     -     3
+
+PlanchonPeteroa        baseline      40   38     2.23  36.8     0
+PlanchonPeteroa        ctx+peak      40   38    1.701  57.9     0
+
+PuyehueCordonCaulle    baseline      63   57    1.297  70.2     0
+PuyehueCordonCaulle    ctx+peak      63   56    1.294  75.0     0
+
+Chaiten                baseline      14   10    1.905  60.0     0
+Chaiten                ctx+peak      14   11      1.9  63.6     0
+
+Copahue                baseline       1    1    3.176   0.0     0
+Copahue                ctx+peak       1    1    3.176   0.0     0
+
+--- VEREDICTO ctxpeak vs baseline (criterio: d_recall>=0 AND d_FN<=0) ---
+OK Tupungatito            d_recall=+2  d_FN=+0  ratio 18.935->1.238
+OK Villarrica             d_recall=+2  d_FN=+0  ratio 2.002->1.903
+!! Lascar                 d_recall=-2  d_FN=+0  ratio 0.86->0.823
+!! Lastarria              d_recall=-1  d_FN=+0  ratio 1.21->1.28
+!! Isluga                 d_recall=+1  d_FN=+1  ratio 1.191->1.236
+OK Llaima                 d_recall=+1  d_FN=+0  ratio None->2.013
+OK NevadosDeChillan       d_recall=+0  d_FN=+0  ratio None->None
+OK PlanchonPeteroa        d_recall=+0  d_FN=+0  ratio 2.23->1.701
+!! PuyehueCordonCaulle    d_recall=-1  d_FN=+0  ratio 1.297->1.294
+OK Chaiten                d_recall=+1  d_FN=+0  ratio 1.905->1.9
+OK Copahue                d_recall=+0  d_FN=+0  ratio 3.176->3.176
+
+ADOPCION GLOBAL: 4 vol(es) con regresion — revisar antes de adoptar
