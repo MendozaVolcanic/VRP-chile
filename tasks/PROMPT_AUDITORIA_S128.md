@@ -131,29 +131,170 @@ P4 · RADIANCIA CONTRA RADIANCIA. Detecta errores de banda, calibración o
      sesión. Es la sonda de mayor costo y menor certeza de las cinco.
 
 P5 · VERIFICACIÓN VERBATIM DE LAS CITAS QUE GOBIERNAN DECISIONES.
-     Empezar por las dos de D14, que S128 reabrió:
-     (a) "Laiolo 2026, textual: no atmospheric correction or cloud-contamination
-         automatic filtering" — esa frase NO existe en ningún PDF del repo. Su
-         origen es `Vault/10_Bibliografia/laiolo2026switching.md`, con cabecera
-         `ai_generated: true, confidence: medium`. DOI 10.1007/s00445-025-01932-y.
-     (b) EL CORTE DE 0,1 MW. La misma nota atribuye a MIROVA: "We do not consider
-         minor inflections at VRP<0.1 MW because these are likely cloud and/or
-         bad geometry". Si es cierto, reencuadra el piso VRP Y la mitad del
-         frente de sobre-detección: nuestras detecciones de artefacto están en
-         0,04-0,06 MW y las 8 que perdió el brazo corona en S127 estaban en
-         0,021-0,042 MW.
-     ⚠️ NO ACTUAR sobre (b) hasta tener el PDF. La fuente es la misma nota no
-     verificada que originó el problema. Verificarla es la tarea; usarla, no.
-     **Cómo conseguir el PDF** (invocar la skill `investigacion` ANTES de buscar
-     a mano; agotar lo local primero, que es su regla): el DOI es
-     `10.1007/s00445-025-01932-y` (Bull. Volcanol., Springer). Orden: (1) el
-     Vault y `documentacion/nuevos/`; (2) Zotero — la nota trae
-     `zotero://select/library/items/M7NUCUVL`, así que puede estar ahí; (3)
-     Crossref / Semantic Scholar / OpenAlex por DOI; (4) recién entonces web.
-     Si no se consigue, D14 queda ABIERTA y se dice así — no se cierra con una
-     paráfrasis por segunda vez.
-     Extender a TODA cita en itálicas de MISSION.md y MIROVA_DIVERGENCES.md:
-     ¿existe el PDF? ¿dice eso?
+     ✅ **El caso testigo YA SE RESOLVIÓ en S127** y conviene leer cómo, porque
+     define el método: la cita de Laiolo 2026 que sostiene D14 resultó **correcta
+     y textual**, y el PDF estaba en `documentacion/s00445-025-01932-y.pdf` —
+     nombrado por DOI. Buscar "laiolo" daba cero y el cero se leyó como ausencia
+     (A89, cuarta vez en el día). Zotero tenía el adjunto apuntando ahí.
+
+     **Lección de método para esta sonda**: buscá por DOI, por título y por
+     nombre de editorial (`1-s2.0-...`, `s00445-...`), NUNCA sólo por apellido.
+     Y consultá `~/Zotero/zotero.sqlite` (tabla `itemAttachments`), que resuelve
+     la ruta en un paso.
+
+     Lo que queda por hacer con esta sonda:
+     (a) **el resto de las citas en itálicas** de MISSION.md y
+         MIROVA_DIVERGENCES.md: ¿existe el PDF? ¿dice eso? Aplicar el mismo
+         método.
+     (b) **leer a fondo los papers core que NO están sintetizados** — ver la
+         sección "EL CORPUS DE PAPERS" más abajo. Nicolás lo marcó como
+         primordial.
+
+     ⚠️ Y una advertencia sobre cómo reportar: al verificar Laiolo 2026 se
+     encontró que YO había sobre-interpretado el corte de 0,1 MW. La frase es
+     verbatim, pero está en el análisis de puntos de inflexión de la
+     distribución de logVRP — NO dice que MIROVA aplique un piso de 0,1 MW a lo
+     que publica. Verificar que una cita existe NO es lo mismo que verificar que
+     dice lo que se le atribuye. Leer el párrafo entero, no la frase.
+
+═══════════════════════════════════════════════════════════════════════════
+LO QUE EL PAPER DE LAIOLO 2026 DIJO Y NO SABÍAMOS (verificado verbatim)
+═══════════════════════════════════════════════════════════════════════════
+
+Leerlo a fondo dio tres cosas que ninguna síntesis nuestra tenía:
+
+  1. **MIROVA SÍ filtra, y se queda con el 12 %.** De 82.329 imágenes salen
+     9.712 puntos. Filtra "in terms of distance and/or intensity of the thermal
+     anomaly to minimize the false alerts and the double counting (coming from
+     different detectors acquiring at the same time)". Lo que NO filtra es nube.
+     Ese "double counting" **valida por escrito nuestra convención** de un par
+     por noche con el máximo de ambos lados.
+
+  2. **Su mitigación de nube es el MÁXIMO DIARIO, no enmascarar**: "we first
+     calculated the daily maximum VRP values. This step minimize potential
+     underestimation due to cloud-contamination and unfavorable satellite viewing
+     geometry". Nosotros publicamos por pasada. **Sigue sin implementarse** y es
+     candidato directo a experimento.
+
+  3. **La incertidumbre declarada del MIR-method es ±30 %**, sobre emisores con
+     temperatura radiante efectiva >600 K. Nuestra banda de paridad es [0,5-2,0]
+     y perseguimos diferencias de factor 2: la referencia declara ±30 % de
+     incertidumbre propia.
+
+  4. Y el argumento de autoridad sobre el piso: el propio grupo MIROVA considera
+     que **los valores bajo 0,1 MW son probablemente nube o mala geometría**.
+     Nuestro artefacto vive en 0,04-0,06 MW y las 8 detecciones que perdió el
+     brazo corona en S127 estaban en 0,021-0,042 MW.
+
+═══════════════════════════════════════════════════════════════════════════
+EL CORPUS DE PAPERS — Nicolás lo marcó como PRIMORDIAL
+═══════════════════════════════════════════════════════════════════════════
+
+Se minaron las bibliografías de 9 papers del grupo MIROVA que ya tenemos, y se
+cruzaron por DOI y título (no por nombre de archivo) contra los 76 PDF de
+`documentacion/`. Resultado: **hay tres papers del CANON MIROVA que no tenemos**,
+y caen justo en los frentes abiertos.
+
+── PRIORIDAD 1 · canon MIROVA ausente ──────────────────────────────────────
+
+  · **Coppola et al. 2014** — "Hot-spot detection and characterization of
+    Strombolian activity from MODIS", IJRS 35. DOI 10.1080/01431161.2014.903354
+    ⭐ **Es LA autoridad del asunto sub-MW.** Laiolo 2026 cita justamente
+    "(Coppola et al. 2014; 2016)" como respaldo de que los valores bajo 0,1 MW
+    son probablemente nube o mala geometría. O sea: la fuente del argumento que
+    reencuadra nuestro piso VRP **es un paper que no tenemos**. Conseguirlo
+    primero.
+
+  · **Coppola et al. 2012** — "Radiative heat power at Stromboli 2000-2011",
+    JVGR. DOI 10.1016/j.jvolgeores.2011.12.001 — citado por **6 de 9**.
+    Frente: piso de VRP sub-MW y energía radiante acumulada.
+
+  · **Laiolo et al. 2018** — "Long-term eruptive trends: Stromboli, Batu Tara,
+    Tinakula", Bull Volcanol 80:9. DOI 10.1007/s00445-018-1242-0
+    Frente: agregación temporal.
+
+── PRIORIDAD 2 · infraestructura que todos citan y nadie escribió acá ──────
+
+  · **Wright et al. 2002** — "Automated volcanic eruption detection using
+    MODIS", RSE 82. DOI 10.1016/S0034-4257(02)00030-5 — citado por **7 de 9**,
+    el más citado de todos. Es el ORIGEN del NTI y del umbral fijo. No es canon
+    MIROVA (HIGP Hawái) pero es infraestructura ineludible.
+  · **Harris 2013** — "Thermal Remote Sensing of Active Volcanoes: A User's
+    Manual" (Cambridge, 728 pp). DOI 10.1017/CBO9781139029346 — 5 de 9.
+  · **Steffke & Harris 2011** — "A review of algorithms for detecting volcanic
+    hot spots". DOI 10.1007/s00445-011-0487-7 — 4 de 9. **Comparativa
+    sistemática de fondo local vs regional**, que es exactamente nuestro frente.
+
+── PRIORIDAD 0 · los que YA TENEMOS y nunca leímos a fondo ─────────────────
+
+Antes de descargar nada: **24 papers del repo no están sintetizados, y los huecos
+son exactamente los frentes abiertos**. Cobertura real medida: **44 de 70 archivos
+distintos = 63 %** (el «54 %» que citan `docs/RESEARCH_WORKFLOW.md:21` y
+`REAUDITORIA_S52.md:150` es de S13 y nunca se re-midió).
+
+  **Nubes** — las cuatro fuentes primarias, todas en el repo, ninguna leída:
+    `Frey_2008_MODIS_CloudMask_Collection5.pdf` (MOD35 C5, **tests nocturnos** —
+      justo donde el umbral de 260 K hacía daño)
+    `Platnick_MODIS_MOD06_ATBD.pdf` (⚠️ los autores reales son Menzel, Frey, Baum)
+    `Fan_2015_DaytimeLST_Cirrus.pdf` · `VNP14_User_Guide_v1.3.pdf`
+
+  **Magnitud** — las dos primarias:
+    `j.jvolgeores.2012.09.005.pdf` = Coppola, Laiolo, Piscopo, Cigolini 2013,
+      *Rheological control on the radiant density* — **fuente primaria de c_rad**,
+      que hoy citamos de segunda mano vía Galetto 2025
+    `s00445-009-0320-8.pdf` = Coppola et al. 2010, Piton de la Fournaise —
+      validación de VRP contra terreno
+
+  **Difuso vs foco** (nuestro frente A69/D11):
+    `s41561-021-00705-4.pdf` = Girona, Realmuto & Lundgren 2021, **Nature
+      Geoscience** — *Large-scale thermal unrest of volcanoes for years prior to
+      eruption*. Señal térmica difusa sub-MW, en el repo, sin leer.
+
+  **Precedente metodológico del propio grupo**:
+    `The_Capabilities_of_FY-3D_MERSI-II...pdf` = Aveni, Laiolo, Campus,
+      Massimetti, Coppola 2023 — el grupo MIROVA calibrando k_MIR en un sensor
+      nuevo. Es el molde de cómo ellos hacen lo que nosotros hacemos.
+
+── ARCHIVOS ROTOS O MAL IDENTIFICADOS (arreglar antes de citarlos) ─────────
+
+  🔴 `cigolini2022_epsl.pdf` (833 KB) — **no es un PDF**: empieza con `<!DOCTYPE
+     html>`. Segundo caso del mismo incidente que `laiolo2022_epsl_openvent.md`.
+  🔴 `coppola2025_cap11_extracted.pdf` — **no contiene el capítulo 11**: es
+     portada + índice + capítulo 1 (gravimetría). El texto real sí está en
+     `coppola2024_chapter.txt`.
+  🟠 `MCDWD_UserGuide_RevC.pdf` — la síntesis lo llama «máscara de nubes MODIS».
+     Es el **producto de inundaciones** de LANCE. No sirve para eso.
+  🟠 Cuatro atribuciones erradas en la síntesis (`remotesensing-16-02001` es
+     Corradino y no «Trasatti», etc.). Son grupos NO MIROVA, así que no
+     contaminaron el algoritmo — pero sí la trazabilidad.
+  🟡 8 archivos redundantes, ~76 MB. Relevante con el disco al 98 %.
+
+  ⚠️ **Y un ítem fantasma en la lista core de `MISSION.md`**: «Coppola 2015» y
+     «Coppola 2016a SP426.5» figuran como dos papers distintos, pero
+     `BIBLIOGRAPHY_SYNTHESIS.md:23-26` documenta que se verificó por hash que
+     son **el mismo PDF**. La lista canónica tiene 11 entradas, no 12.
+
+── PRIORIDAD 3 · frentes técnicos puntuales ────────────────────────────────
+
+  · Schroeder et al. 2014 (VIIRS 375 m active fire, base de Campus 2024) —
+    geometría de grilla y resampleo I-band. DOI 10.1016/j.rse.2013.12.008
+  · Li et al. 2018 (FRP VIIRS vs MODIS) — saturación y calibración cruzada.
+  · Dozier 1981 — sub-píxel, la raíz del régimen sub-MW.
+  · Oppenheimer et al. 1993a — **caso Láscar, Chile** 1984-1992, fondo local.
+
+⚠️ Marcados A9 (NO usar como autoridad metodológica): Pergola/Tramutoli y toda
+la línea Marchese/Filizzola/Genzano (CNR Potenza). Sirven para contrastar el
+fondo regional de anillo, no para justificar decisiones.
+
+**Método para conseguirlos**: skill `investigacion` (agotar local primero — el
+caso Laiolo demostró que el PDF puede estar en el repo con nombre de DOI, y que
+`~/Zotero/zotero.sqlite` resuelve la ruta en un paso). Después Crossref /
+Semantic Scholar / OpenAlex por DOI. Verificar magic bytes y tamaño: un PDF de
+menos de 100 KB casi siempre es HTML de paywall.
+
+**Y al leerlos, leer el PÁRRAFO, no la frase.** El error de S127 con el corte de
+0,1 MW fue verificar que la cita existía sin verificar que decía lo que se le
+atribuía.
 
 ═══════════════════════════════════════════════════════════════════════════
 LO QUE YA SE SABE Y NO HAY QUE REDESCUBRIR
