@@ -215,3 +215,86 @@ detrás, o no es una afirmación — es una intención.*
 envejecer de nuevo; el arreglo correcto es **borrarla y apuntar al script que la mide**
 (`tests/test_guard_afirmaciones_de_alcance_s127.py` prohíbe declararla y permite citarla
 como historia, distinguiendo por contexto).
+
+---
+
+# Cómo se audita, medido — las tres reglas que salieron de auditar las auditorías
+
+> S128. Se midió el rendimiento de las once auditorías del proyecto. Lo que sigue no es
+> opinión de método: es lo que dijeron los números.
+
+## El hallazgo: el rendimiento es del EJE, no de la profundidad
+
+Fracción de hallazgos provenientes de un **eje de comparación nunca usado antes**:
+
+| auditoría | eje nuevo | hallazgos que movieron el pipeline |
+|---|---|---|
+| S105 | **0 %** | ninguno |
+| S122 | ~8 % | ninguno |
+| S116 | ~17 % | ninguno |
+| S123 | ~20 % | ninguno |
+| S125 | ~35 % | el factor 2 en magnitud |
+| S119 | ~50 % | el mapa de gaps por etapa |
+| S114 | ~58 % | el cierre de D11 |
+| S121 | ~63 % | poda y arqueología de backlog |
+| S124 | ~70 % | la grilla UTM |
+| S127 | **~75 %** | la corona anulada aguas abajo |
+
+Las cuatro auditorías con menos del 20 % de eje nuevo produjeron **sólo deuda documental**.
+Las cinco con 50 % o más produjeron **todos** los veredictos que cambiaron el pipeline.
+
+**Regla A — está prohibido repetir el barrido general** de 6-8 ejes (misión / código /
+reglas / data / git / docs). Rindió 0 % en S105 y ~8 % en S122. Cada auditoría debe estrenar
+al menos un eje que ninguna haya usado, y declararlo al abrir.
+
+## Las dos fugas que explican por qué siempre queda inventario
+
+**Fuga 1 — cerrar con prosa.** Nueve hallazgos se redescubrieron en más de una auditoría:
+
+| hallazgo | veces |
+|---|---|
+| `diario.html` sin cap de 50.000 MW | **4** |
+| gates intra-radio S84/S85 encendidos | 3 |
+| `docs/INDEX.md` congelado | 3 |
+| poda de `data/` | 3 |
+| PAT en `settings.json` | 3 |
+| contradicción del GAP #A | 3 |
+| conmutación per-volcán vs MISSION | 3 |
+| «tif-archive stale» — **refutado en S121 y reafirmado igual en S125** | 3 |
+
+S127 fue la única que cerró con tests (3 guards) y es la única sin reincidencias.
+
+**Regla B — cierre por guard, obligatorio.** Ningún hallazgo pasa a CONFIRMADO / FALSO /
+OBSOLETO sin un test que lo mida, o la razón escrita de por qué no se puede medir.
+
+**Fuga 2 — declarar sin verificar.** S121 cerró con **19** hallazgos «sin verificación
+individual»; S125 con **9** «sin respaldo». Ese inventario es, literalmente, la materia
+prima que la auditoría siguiente reporta como nueva.
+
+**Regla C — los pendientes se publican y son la puerta de entrada.** Cada auditoría cierra
+con tres números —confirmados / refutados / pendientes— y la siguiente **empieza** por los
+pendientes antes de abrir eje nuevo.
+
+## Registro de ejes de comparación
+
+El protocolo listaba nueve *técnicas* y ningún *eje*. Los ejes son contra qué se compara:
+
+| eje | último uso | rendimiento |
+|---|---|---|
+| código vs código | S105, S116, S122 | bajo |
+| docs vs código | S123, S125, **S127 (T9)** | **alto** |
+| nuestros datos vs el CSV de MIROVA | continuo | medio, y es el único que se repite |
+| código vs paper, file:line | S114 (detección), S125 (magnitud) | **alto** |
+| figuras vs datos | S124 | **alto** |
+| clasificación física de FP | S86 | alto, **nunca recomputado** |
+| transparencia legal CPLT 372 | S116, S127 | medio |
+| matriz sensor × mecanismo | S127 | **alto** |
+| auditar las auditorías | S128 | **alto** (produjo esta sección) |
+| **evidencia exógena: TIF/KMZ por pasada** | S126 (2 usos puntuales) | **2 de 2 dieron vuelta una creencia** |
+| **evidencia exógena: papers verbatim** | A35 (1 uso) | 1 de 1 |
+| **evidencia exógena: otro sensor (NHI, Landsat)** | **nunca** | — |
+| idempotencia y estabilidad temporal | S128 | **alto** (93 % de pares con esquema mixto) |
+| ground truth end-to-end | S128 | **alto** (MODIS sólo existe en Láscar) |
+
+**El patrón de la última columna es el punto**: los tres ejes exógenos suman cuatro usos en
+127 sesiones, y los cuatro encontraron algo. Es el terreno menos explorado del proyecto.

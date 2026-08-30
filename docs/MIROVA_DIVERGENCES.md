@@ -1498,7 +1498,7 @@ sin acción propia. No volver a plantearla como "levantar o no la cerca".
 
 ---
 
-## D14 — La máscara de nube BT<260 K — **CERRADA** S127 (apagado ratificado con el A/B en la mano)
+## D14 — La máscara de nube BT<260 K — **REABIERTA** S128 (la cita que la cerró no es verificable)
 
 **Qué dice MIROVA.** No filtra nube. Laiolo 2026, textual: *"no atmospheric
 correction or cloud-contamination automatic filtering"*. Por eso
@@ -1580,7 +1580,68 @@ solo falta retornarla.
 
 ---
 
-## Cierre S127 — se sostiene el apagado, y ahora con la compuerta puesta
+## ⚠️ REAPERTURA S128 — el fundamento documental no está verificado
+
+**Decisión de Nicolás (S128): D14 vuelve a ABIERTA hasta tener el paper en mano.**
+
+El apagado de la máscara **no cambia**: sigue apagada en producción y el A/B con datos
+propios que lo respalda (176 de 181 noches ciegas recuperadas, costo de 0,5-2 K de fondo,
+nadie sale de banda) es evidencia empírica válida por sí sola. Lo que se reabre es la
+**justificación de fidelidad**, que es lo que convierte el apagado en «clon literal» en
+vez de en «decisión nuestra».
+
+**Qué se encontró (S128).** Esta sección, `MISSION.md:52` y `MISSION.md:134` citan:
+
+> *Laiolo 2026, textual: "no atmospheric correction or cloud-contamination automatic
+> filtering"*
+
+Esa frase **no aparece en ningún archivo de `documentacion/`**, y el PDF de Laiolo 2026
+no está en el repositorio. Lo único que existe es una nota del Vault
+(`Vault/10_Bibliografia/laiolo2026switching.md`) con cabecera `ai_generated: true`,
+`confidence: medium`, cuya línea 59 dice, en español:
+
+> *"✅ Sin atmospheric correction ni cloud-filter automático (p. 5)"*
+
+O sea: **la «cita textual» en inglés es, con toda probabilidad, una retraducción de un
+resumen generado por IA**, presentada en itálicas como verbatim. Es exactamente el modo de
+falla que documenta A35 (*«notas Vault `ai_generated` necesitan verificación verbatim para
+valores numéricos críticos»*), aplicado esta vez a una cita en prosa que gobierna una
+decisión metodológica.
+
+El paper existe: **Laiolo et al., *Switching between ordinary and non-ordinary activity at
+Stromboli volcano*, DOI `10.1007/s00445-025-01932-y`** (Bull. Volcanol.). No lo tenemos.
+
+**Qué hace falta para volver a cerrarla**: el PDF, y la verificación verbatim de que el
+paper dice lo que le atribuimos. Si lo dice, D14 se cierra otra vez y esta sección queda
+como registro. Si no lo dice, hay que rehacer el argumento de fidelidad — el A/B empírico
+sobrevive igual, pero el apagado pasa a ser divergencia consciente y no clon literal.
+
+**Y hay un segundo hallazgo en la misma nota, que vale más que el primero.** Su línea 57
+marca en rojo:
+
+> *"We do not consider minor inflections recognized at VRP<0.1 MW because these values are
+> likely associated to cloud and/or to bad geometry acquisition (Coppola et al. 2014; 2016)"*
+
+Si eso es correcto, **MIROVA aplica de facto un corte a 0,1 MW** por nube y geometría. Y
+nuestro frente de artefacto vive justo debajo: las detecciones del anillo autorreferente
+están en 0,04-0,06 MW, y las 8 que el brazo corona perdió en S127 —las que hicieron fallar
+el criterio 5— estaban entre **0,021 y 0,042 MW**. Eso reencuadra dos decisiones abiertas
+a la vez:
+
+- el **piso VRP** (hoy 0,02 VIIRS375 / 0,15 V750 / 0,05 MODIS), que S126 recomendó quitar
+  por ser un no-op — si MIROVA corta en 0,1 MW, el problema no es que el piso sobre, es que
+  está una vez y media por debajo del de la referencia;
+- la **sobre-detección** que A54 clasifica como «señal real sub-umbral»: parte de ella
+  sería material que MIROVA ve y decide no publicar, lo cual es distinto de material que
+  MIROVA no ve.
+
+⚠️ Esta cita viene de la MISMA nota no verificada, así que **no se actúa sobre ella hasta
+tener el PDF**. Queda anotada como la pregunta de mayor rendimiento esperado del eje
+«verificación verbatim» de la auditoría S128.
+
+---
+
+## Registro S127 — el A/B que respalda el apagado (evidencia empírica, intacta)
 
 **Decisión de Nicolás (S127): sostener el apagado y documentarlo como decisión.**
 
