@@ -195,3 +195,47 @@ PCC no están afectados y están entre los que más toca (12 y 7 noches). Es la 
 clase de defecto que la máscara de nube: una afirmación sobre el estado del sistema que
 nadie verificó. Y conviene registrar que **su justificación original ya no aplica**, por
 si en el futuro alguien lo evalúa creyendo que sigue sosteniendo a Tupungatito.
+
+---
+
+# Confirmación sobre la imagen de MIROVA: son 2 píxeles y sumamos 1
+
+> `experiments/_s126_lascar/04_cuantos_pixeles_ve_mirova.py`. Fuente: campo I04 de
+> MIROVA (`mirova-tif-archive`), 228 TIFs de Láscar y 269 de Villarrica en la ventana.
+
+Todo lo anterior era **inferencia sobre nuestros propios records**: el fondo necesario
+es imposible, luego tienen que ser píxeles. Con el campo de MIROVA se puede **contar**.
+
+| volcán | TIFs | σ del campo | pico al cráter | px >3σ | px >5σ | px **nuestro** |
+|---|---|---|---|---|---|---|
+| **Láscar** | 228 | 0,539 K | **+3,02 K** | **2,0** | 0 | **1** |
+| **Villarrica** (control) | 269 | 0,473 K | +0,91 K | **0,0** | 0 | 1 |
+
+El control separa: Villarrica no tiene ni un píxel sobre 3σ. **Láscar tiene 2 y nosotros
+sumamos 1** — la inversión aritmética había pedido 1,57. Dos métodos independientes, uno
+sobre nuestros datos y otro sobre la imagen de ellos, convergen en el mismo número.
+
+## Dos métodos que fallaron antes, y lo que enseñaron
+
+Vale registrarlos porque el segundo es un resultado por derecho propio.
+
+**(1) Extensión a media altura.** El control lo tumbó: Villarrica daba **143 píxeles** a
+media altura y **2.407** a un cuarto — la región inundaba la imagen. Con un fondo que no
+es plano y un pico que es ruido, una fracción de ese pico cae bajo la variabilidad del
+campo y el crecimiento de región se desborda.
+
+**(2) N·σ sobre el anillo [1,5–3] km**, el criterio del propio algoritmo. Dio **0 píxeles
+en los dos volcanes a 3, 5 y 10 σ** — ni el pico real de Láscar, +5,65 K sobre la mediana
+del anillo, cruza 3σ. Eso implica **σ(anillo) > 1,88 K**.
+
+Ese fracaso es la **tercera confirmación independiente** de que el anillo `[1,5–3] km` es
+una referencia pésima: su dispersión está dominada por el relieve, no por el ruido del
+sensor. Y esta vez medido sobre el campo de MIROVA, sin pasar por nuestro pipeline.
+
+El método que sí funciona es el que usa Coppola: **contraste contra los 8 vecinos**, con
+σ estimado por MAD sobre el campo entero. Ahí el umbral sale del ruido real y no de un
+anillo contaminado.
+
+> **Límite (D6/A24)**: el TIF es el campo de radiancia; el VRP que MIROVA publica sale de
+> una selección de clúster que no podemos ver. Esto es un proxy de cuántos píxeles
+> integrarían, no su clúster literal.
