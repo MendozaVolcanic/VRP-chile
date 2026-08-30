@@ -162,3 +162,46 @@ Cada hallazgo se clasifica y se actúa distinto:
 **Lo que NO se hace**: borrar una conclusión porque suene mal, o rehacer un
 experimento cuyo resultado ya es reproducible. La auditoría busca **errores**,
 no repetir trabajo válido.
+
+---
+
+### T9 · Verificar que lo declarado coincide con lo efectivo
+
+**Qué busca**: afirmaciones que el sistema hace sobre sí mismo —en comentarios,
+docstrings, cabeceras de perfil, mensajes de commit y notas de sesión— que nunca se
+contrastaron contra su comportamiento real.
+
+**Por qué existe**: S126 encontró **doce** instancias sin buscarlas, ocho de ellas
+persiguiendo otra cosa. Un comentario que decía «no-op» apagó la máscara de nube en
+producción; dos claves de YAML declaraban valores que el código nunca lee, en 31
+perfiles. S127 barrió el eje a propósito y encontró más:
+
+| lo declarado | lo efectivo |
+|---|---|
+| docstring: «Volcanes NO afectados … Láscar, Villarrica, Copahue, Isluga, Lastarria, Llaima, NdC» | falso para **los siete**; Láscar es el **más** afectado de la flota (33,9 %) y Tupungatito —para el que se construyó el modo— el **menos** (7,5 %). Copiado en 13 perfiles, incluido el operacional |
+| `_s124_kernelbg_ab.yaml`: «la rama del kernel nunca corre en producción» | corre en **5 de los 11** Tier A |
+| corona Eq.6 cableada en VIIRS375 y MODIS | anulada aguas abajo: 1.164 de 1.179 records en VIIRS375, y el **100 %** en MODIS |
+
+**Cómo se aplica**: los barridos de `experiments/_s127_declarado/`. El 01 inventaría las
+afirmaciones (221 en el repo, 123 en `pipeline/` y `.github/`); la verificación de cada
+una es manual y se persiste con su propio script.
+
+**El sub-patrón más traicionero: el nombre del parámetro no es el nombre de la clave.**
+Dos de las instancias de arriba nacieron de buscar en el YAML el nombre del *parámetro
+de la función* en vez del de la *clave de configuración* (`local_kernel_bg_compatible`
+vs `local_kernel_bg`; `enable_utm_regrid` leído de `thresholds:` cuando se escribía en el
+nivel superior). No da error: da cero resultados, que se lee como «no está en ninguno».
+**Antes de concluir «este flag no está puesto en ningún lado», trazá cómo lo lee el
+código** (A6), no cómo se llama en la firma.
+
+**Señal de que hay que aplicarla**: cualquier frase de la forma «esto no cambia nada»,
+«esto ya no se usa», «esto sólo afecta a X», «está apagado en todos». Las cuatro fueron
+falsas al menos una vez.
+
+**La regla que lo resume**: *una afirmación sobre el estado del sistema necesita un test
+detrás, o no es una afirmación — es una intención.*
+
+**Cómo se cierra**: con un guard, no con una corrección. Corregir la lista la deja
+envejecer de nuevo; el arreglo correcto es **borrarla y apuntar al script que la mide**
+(`tests/test_guard_afirmaciones_de_alcance_s127.py` prohíbe declararla y permite citarla
+como historia, distinguiendo por contexto).

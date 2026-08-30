@@ -13,10 +13,28 @@
 #     else:
 #         L_bg = bt_to_spectral_radiance(t_bg_i04, ...)             # anillo 5-25 km
 #
-# El flag de perfil `enable_local_kernel_bg` está en TRUE, pero el campo
-# per-volcán `local_kernel_bg_compatible` está en FALSE para LOS 11. O sea:
-# la rama del kernel nunca corre en producción y toda la flota usa el anillo
-# lejano, no los vecinos que especifica el paper.
+# ⚠️ CORREGIDO EN S127 — lo que decía acá era FALSO, y por la misma razón que
+# el propio S124 anotó después como A48. Texto original:
+#
+#     "El flag de perfil `enable_local_kernel_bg` está en TRUE, pero el campo
+#      per-volcán `local_kernel_bg_compatible` está en FALSE para LOS 11. O sea:
+#      la rama del kernel nunca corre en producción y toda la flota usa el
+#      anillo lejano, no los vecinos que especifica el paper."
+#
+# El parámetro de la función se llama `local_kernel_bg_compatible`, pero la clave
+# de `volcanoes.yaml` se llama `local_kernel_bg` — `run_pipeline.py:244` hace el
+# puente (`local_kernel_bg_compatible=volcano.get("local_kernel_bg", False)`).
+# Buscando el nombre del parámetro en el YAML no aparece nada, y de ahí salió el
+# "FALSE para LOS 11".
+#
+# Lo medido (S127, sobre volcanoes.yaml + los 11 con data):
+#     kernel ON  (5): PCC, Villarrica, Chaitén, Planchón-Peteroa, Lastarria
+#     kernel OFF (2): Copahue, Llaima          (explícitos)
+#     sin el campo (4): Isluga, Láscar, NdC, Tupungatito  (→ default False)
+#
+# O sea: la rama del kernel SÍ corre en producción, para 5 de los 11 Tier A.
+# Cualquier lectura de este A/B que asuma "el control es todo-anillo" está mal:
+# 5 de sus volcanes ya venían con el kernel puesto.
 #
 # POR QUÉ IMPORTA: si el anillo de 5-25 km es más tibio que el entorno inmediato
 # del cráter, el ΔL = L_hot − L_bk sale comprimido y el VRP sale chico. Eso

@@ -31,8 +31,39 @@ Nota PCC: ratio <1 ocurre porque MIROVA reporta single pixel hottest mientras
 nuestro pipeline sumaba el cluster contiguo. Mismo bug arquitectural,
 manifestación opuesta. El fix corrige ambos lados.
 
-Volcanes NO afectados (régimen alto-MW o sin path D dominante): Villarrica
-(es F52-A), Copahue, Isluga, Lascar, Lastarria, Llaima, NdC.
+ALCANCE — no se lista acá qué volcanes toca, y la razón importa
+---------------------------------------------------------------
+Este docstring decía: *"Volcanes NO afectados (régimen alto-MW o sin path D
+dominante): Villarrica (es F52-A), Copahue, Isluga, Lascar, Lastarria, Llaima,
+NdC"*. Medido en S127 sobre `data/mirova_equivalent/` (los records que el modo
+efectivamente CAMBIA, o sea clusters multi-píxel donde `max ≠ suma`), la frase
+era **falsa para los siete**, y el orden estaba **invertido** respecto de su
+propia justificación:
+
+    Lascar        33,9 %  <- el MÁS afectado de la flota, listado como "no afectado"
+    PCC           23,2 %
+    Isluga        15,9 %  <- listado como "no afectado"
+    Chaitén       15,7 %
+    ...
+    Tupungatito    7,5 %  <- el MENOS afectado, y es el volcán para el que se
+                             construyó el modo (30,15× de sobre-reporte)
+
+La lista sobrevivió además copiada en 13 perfiles, incluido el operacional, y
+dirigió decisiones durante sesiones (S126 la encontró primero, para Láscar).
+
+No se reescribe con los números de hoy porque volvería a envejecer sola: el
+alcance depende de los datos, no del código. Se **mide**, con
+`experiments/_s127_declarado/02_single_pixel_mode_alcance.py`.
+
+La regla que deja esto (S127, técnica T9): *una afirmación sobre el estado del
+sistema necesita un test detrás, o no es una afirmación — es una intención.*
+
+Nota sobre la justificación original: sigue siendo cierta que el modo nació para
+desinflar a Tupungatito y Chaitén, pero eso ya no describe lo que hace hoy. Su
+efecto neto actual se midió en S126 (`docs/S126_LASCAR_ES_UN_PIXEL.md`): devuelve
+entre 0,03 y 0,14 de ratio a cinco volcanes y le saca 0,24 a Chaitén, que es el
+único que lo necesita para quedar en banda (7/9 volcanes en banda con el modo,
+6/9 sin él). Por eso se conserva.
 
 Fix: cuando un cluster cae en régimen sub-MW (`vrp_mw < threshold` Y
 `n_pixels <= max_pixels`), reportar `vrp_mw = max(per_pixel_vrp)` (single
