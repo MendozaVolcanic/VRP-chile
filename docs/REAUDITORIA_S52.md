@@ -147,7 +147,7 @@ abruptamente.
 - `docs/MIROVA_DIVERGENCES.md` — D1-D5 documentadas
 - `docs/HYPOTHESIS_LOG.md` — H1-H_S52 todas las hipótesis
 - `docs/PROCESS_RULES_S33.md` — R1-R8
-- `documentacion/BIBLIOGRAPHY_SYNTHESIS.md` — síntesis 30/60 papers
+- `documentacion/BIBLIOGRAPHY_SYNTHESIS.md` — síntesis **46/70 documentos distintos (65.7 %)**, re-medido S128 por `scripts/audit_corpus_documentacion.py` (antes decía 30/60, cifra de S13 nunca re-medida)
 - `tasks/backlog_no_mirova.md` — propuestas descartadas
 - `~memory/feedback_*.md` — reglas Nicolás
 - `~memory/reference_mirova_csv_ground_truth.md` — convención CSV

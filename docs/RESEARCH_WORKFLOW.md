@@ -18,7 +18,7 @@
 |---|---|---|
 | **PDFs originales** | `VRP Chile/documentacion/` | Papers MIROVA, ATBDs MODIS/VIIRS, user guides, libros |
 | **Texto extraído** | `VRP Chile/documentacion/*.txt` | `pdftotext` o markitdown de secciones críticas |
-| **Síntesis ejecutiva** | `VRP Chile/documentacion/BIBLIOGRAPHY_SYNTHESIS.md` | **Source of truth bibliográfico** (429 líneas, 30/60 PDFs cubiertos) — leer ANTES de buscar online |
+| **Síntesis ejecutiva** | `VRP Chile/documentacion/BIBLIOGRAPHY_SYNTHESIS.md` | **Source of truth bibliográfico** (**46/70 documentos distintos = 65.7 %**, re-medido S128) — leer ANTES de buscar online. El número lo produce `scripts/audit_corpus_documentacion.py` → `docs/s128/corpus_inventory.json`; **no transcribirlo a mano** (S91). El «30/60 PDFs (54 %)» que decía acá era de S13 (abril) y nunca se había re-medido. |
 | **Auditoría papers** | `VRP Chile/docs/PAPERS_AUDIT.md` | Qué valida cada paper / qué no / gaps |
 | **Drifts código vs paper** | `VRP Chile/docs/DRIFTS_*.md` | Divergencias detectadas |
 | **Hipótesis log** | `VRP Chile/docs/HYPOTHESIS_LOG.md` | H-IDs, qué se probó/refutó |

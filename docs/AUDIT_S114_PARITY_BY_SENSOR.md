@@ -273,7 +273,9 @@ no de tocar C1/C2/μ/σ (alto riesgo de matar cat-b — el KILLER ya verificado)
    y activada, y es fiel. **El difuso pasa GENUINAMENTE, no por bug** — es la física de 1 km
    (outlier espacial real sobre topografía nival). **GAP #A RESUELTO S115 como mislabel** (ver §6d):
    §298-300 + Eq.6 → los Test 1 activos SÍ se reportan y reciben VRP; "discarded for further steps" =
-   fuera del pool m,σ, ya cubierto por el second-run (full). El flag citado
+   fuera del pool m,σ. ~~ya cubierto por el second-run~~ **⚠️ REABIERTO S128** — el
+   second-run recibe sólo Tests 2∧3 (`hot_mask_2d = fp_hot`), los K1 no entran. El flag
+   citado
    (`ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK`) era el equivocado (controla el reporte, OFF = fiel). **No
    queda gap de fidelidad literal accionable.**
 6. **D11-MODIS far→summit es IRREDUCIBLE** dentro del clon literal: agotadas TODAS las vías —

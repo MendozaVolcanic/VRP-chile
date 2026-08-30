@@ -40,9 +40,15 @@ categorías. No se introducen gates adicionales para "limpiar" (2).
 **Antes de implementar cualquier feature, fix, threshold, exclusion, path,
 filtro, agregación o transformación en el pipeline, responder en orden**:
 
-1. **¿Está documentado en papers MIROVA core?** Lista oficial:
-   - Coppola 2015 (Test 1, NTI).
-   - Coppola 2016a SP 426.5 (Tabla 1 N·σ summit/scene, dual-ROI, dNTI 8-vec).
+1. **¿Está documentado en papers MIROVA core?** Lista oficial (**11 papers**):
+   - Coppola 2016a SP 426.5 (Test 1 + NTI; Tabla 1 N·σ summit/scene, dual-ROI, dNTI 8-vec).
+     ✅ **S128: «Coppola 2015» y «Coppola 2016a» eran la MISMA entrada, no dos papers.**
+     El `Test 1` está dentro de `documentacion/sp426_5.txt` (`NTIPIX > K1 (Test 1)`, línea
+     300), y el único Coppola realmente de 2015 que hay en el repo —Vanuatu, JVGR
+     `10.1016/j.jvolgeores.2015.11.005`— no menciona NTI ni Test 1 ni K1 ni una vez.
+     El «2015» era la fecha de publicación online de SP426.5; el «2016», la del volumen
+     impreso (ya documentado en `documentacion/BIBLIOGRAPHY_SYNTHESIS.md:23-26`).
+     **No volver a desdoblarla.**
    - Coppola 2020 Frontiers (review sistema MIROVA).
    - Coppola 2024 cap Springer (review pedagógico).
    - Coppola 2025 Fernandina (NRT moderno).
@@ -129,7 +135,7 @@ Estas fueron las desviaciones históricas. Nunca repetir.
 | Parche histórico | Razón rechazo | Estado |
 |---|---|---|
 | `MAX_SIGMA_COMPONENT_K=7K` cap eruption | No en papers; anula 5σ/10σ MIROVA | ⚠️ **Neutralizado por VALOR, no removido del código (S125).** El bloque corre en cada pasada; el perfil operacional lo pone en `999.0`, pero el **default del código es `7.0`** — un perfil que omita la clave resucita el parche en silencio. |
-| Vent-path entero | No en papers; sub-pixel debe ir por Test 1 (Coppola 2015) | Removido S27 |
+| Vent-path entero | No en papers; sub-pixel debe ir por Test 1 (Coppola 2016a SP426.5) | Removido S27 |
 | `exclude_zones` (Salar, lagos) | No en papers; MIROVA no usa máscaras geográficas | Removido S27 |
 | Regla D vent-priority | Parche de clasificación visual, no en papers | Removido S27 |
 | Regla D Test 1-priority | Parche de composición de paths, no en papers | ⚠️ **SIGUE ACTIVA (corregido S125).** La fila decía "Removido S27" y es falsa: el bloque está vivo y **sin flag** en los 3 procesadores (`process_viirs.py:1502-1568`, `process_modis.py:1167-1204`, `process_viirs_mod.py:1055`) y además se **amplió** después de S27 — port a MODIS en S30, y ajustes en S44 y S111. Ver `docs/AUDIT_S125_PROFUNDA.md` §1 F1. |
@@ -188,7 +194,7 @@ respuesta correcta NO es agregar parche — es **investigar qué mecanismo
 documentado en papers MIROVA core estamos pasando por alto**.
 
 Hipótesis abiertas (S28+, ver `~memory/project_s27_mirova_literal_negativo.md`):
-- H_S27_1: Test 1 summit-only más agresivo (Coppola 2015 §2.2 Eq.1).
+- H_S27_1: Test 1 summit-only más agresivo (Coppola 2016a SP426.5 §2.2 Eq.1).
 - H_S27_2: dNTI con C1 negativo (cooling) además de positivo.
 - H_S27_3: path TIR-only Aveni 2024 RSE TIRVolcH.
 - H_S27_4: composición paths cascada vs OR (cómo MIROVA combina internamente).
