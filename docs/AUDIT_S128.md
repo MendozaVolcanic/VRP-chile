@@ -710,6 +710,93 @@ between ~0.32 and ~0.6 km²» — un factor 1,9×. Schroeder da 0,138 → 0,623 
 número publicado, pero desinformaría exactamente la decisión que viene. No lo toqué:
 `scan_geometry.py` está bajo A45.)*
 
+## 6quinquies. Steffke & Harris 2011 reencuadra el 0,73 — y une los tres mecanismos
+
+Nicolás consiguió este review por su acceso institucional después de que lo señalara como
+el de mayor valor de los que faltaban. Rindió más de lo esperado, y por una vía que no
+estaba en el encargo.
+
+### El desacuerdo entre definiciones de fondo, cuantificado
+
+El paper hace algo que ninguna fuente nuestra hacía: corre **algoritmos distintos sobre la
+misma escena** y compara la potencia radiada total. Verbatim, p. 1134:
+
+> *«the MODIS image acquired … for Etna on 8th October 2004 … was composed of ten
+> anomalous pixels which gave a total radiative power loss of 905 W m⁻². MODVOLC detected
+> six (60%) … which accounted for 797 W m⁻² or **88%** of the total … RST detected four
+> (40%) … **68%** of the total power loss. Therefore even though MODVOLC and RST missed
+> 40% and 60% of the pixels, respectively, this only resulted in an underestimation of the
+> total power loss by **12% and 32%**»*
+>
+> *«An example of such a case is the MODIS image acquired for Augustine on 8th February
+> 2006 … The thermal anomaly was composed of 10 pixels with a total radiative power loss
+> of 176 W m⁻². MODVOLC detected four (40%) … **50%** of the total power loss … nondetection
+> of 60% of the pixels by MODVOLC resulted in an **underestimation of the total radiative
+> power loss by 50%**, a result of the radiance being distributed…»*
+
+El mecanismo es el punto: en una anomalía **intensa** la potencia se concentra en un núcleo
+de pocos píxeles, así que perder los marginales cuesta poco (12 %). En una anomalía **débil**
+—un domo, una fumarola, un lago de lava chico— la radiancia está repartida entre muchos
+píxeles marginales, y perder píxeles cuesta desproporcionadamente (50 %).
+
+**Nuestros once volcanes son todos del segundo tipo.** La re-medición de A12 en §6 lo dice:
+ΔT mediano entre 6,8 y 17 K, ninguno por encima de 17. **Nuestro déficit del 27 % cae
+dentro del rango que un review independiente documenta como el costo normal de perder
+píxeles marginales en anomalías de baja intensidad.**
+
+Eso no es una excusa: es un **cambio de diagnóstico**. Dice que «perdemos píxeles» es al
+menos tan probable como «nuestra fórmula de magnitud está mal», y apunta a la
+**sensibilidad de detección** antes que al coeficiente.
+
+### Y ahí se cierra el círculo con el GAP #A
+
+Si el déficit de magnitud viene en parte de perder píxeles marginales, entonces **el GAP #A
+no es sólo un problema de recall: es también un problema de magnitud**. La cadena es
+directa: los píxeles del Test 1 quedan dentro del pool → μ y σ se inflan → el umbral
+`μ + C2·σ` sube → se pierden los píxeles marginales del borde del clúster → y en régimen
+débil, que es el nuestro, eso cuesta hasta la mitad de la potencia.
+
+> **Los tres mecanismos, con su firma y su respaldo:**
+>
+> | mecanismo | firma esperada | respaldo |
+> |---|---|---|
+> | remuestreo faltante (+ bow-tie) | déficit que **crece con el cenit** | Coppola 2014 §2.2 · Aveni 2023 pp. 15-16 · medido 1,41× |
+> | fondo autorreferente de magnitud | déficit **uniforme**, presente ya en el nadir | Coppola 2016a Eq. 6 · Aveni 2023 Eq. 3 |
+> | umbral inflado (GAP #A) | déficit **mayor en régimen débil** | Coppola 2016a §326-329 · Steffke & Harris p. 1134 |
+>
+> Las tres firmas son distinguibles entre sí, y las tres se pueden medir sobre el dato que
+> ya tenemos. **Ése es el diseño experimental de S129.**
+
+### La taxonomía que veníamos a buscar
+
+El eje con que el paper clasifica los algoritmos **es** el del fondo (p. 1112): en qué
+espacio se evalúa el píxel — espectral (MODVOLC: sin fondo espacial), espacial (contextual)
+o temporal (RST: el mismo píxel en el archivo). Y enuncia el trade-off como relación
+inversa: la precisión local y la sutileza detectable son inversas a la aplicabilidad global
+(p. 1131). Su Tabla 10 puntúa cinco criterios y da **empate**: no hay familia mejor.
+
+Lo más útil para nosotros: la familia contextual tiene tres sub-definiciones y **las tres
+son nuestras** — doble región de escena (nuestro dual-ROI), kernel de 8 vecinos (nuestro
+`local_kernel_bg`) y anillo regional. O sea que no estamos eligiendo mal: estamos usando
+las tres a la vez, y el paper avisa que cada una tiene su costo.
+
+### A69 estaba escrita en 2011, por otra escuela
+
+Lo encontramos en S104 midiendo, y creímos que era nuestro. Está en el paper, p. 1124:
+
+> *«False positives also frequently occurred at **lower elevations** on the volcano. At
+> these locations, the lower elevation pixels are **warmer than the adjacent higher,
+> cooler (sometimes snow covered) summit region** and are therefore flagged as anomalous»*
+
+Es exactamente A69 —el valle tibio de baja altitud contra la cumbre nevada fría— descrita
+once años antes, con la misma cura que nosotros terminamos usando: trabajar en ΔT en vez de
+en la banda absoluta. Una regla nuestra que resulta estar en la literatura deja de ser
+deuda y pasa a ser convergencia.
+
+*(Y dos cosas que el paper **no** apoya: no respalda un piso de VRP; y señala que un umbral
+**global** como el −0,80 de MODVOLC corriendo en un sistema **local** es un desajuste
+conocido — que es exactamente nuestro `nti_k1_night = -0.8`.)*
+
 ---
 
 ## 7. Higiene del corpus bibliográfico
