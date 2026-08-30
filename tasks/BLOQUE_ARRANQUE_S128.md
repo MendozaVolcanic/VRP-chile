@@ -9,9 +9,14 @@ auditoría que ninguna de las tres anteriores había tocado.
 
 Leé en este orden:
   1. docs/AUDIT_S127.md                (los 8 hallazgos, con sus guards)
-  2. docs/S126_COSTO_FILTRO_CONTEXTUAL.md   (la causa raíz: el fondo autorreferente)
-  3. docs/S126_LASCAR_ES_UN_PIXEL.md   (por qué el 2×2 y no un A/B simple)
+  2. docs/S127_CORONA_RESULTADO.md     (el veredicto del 2×2, ya leído)
+  3. docs/S126_COSTO_FILTRO_CONTEXTUAL.md   (la causa raíz: el fondo autorreferente)
   4. tasks/BLOQUE_ARRANQUE_S128.md     (esto)
+
+⚠️ **Y si vas a hacer la auditoría S128, el prompt completo es otro archivo:**
+`tasks/PROMPT_AUDITORIA_S128.md` — 494 líneas, tres fases, con el frente
+bibliográfico armado para lanzar con agentes. Diseño y justificación en
+`docs/superpowers/specs/2026-08-30-auditoria-s128-design.md`.
 
 ═══════════════════════════════════════════════════════════════════════════
 EL 2×2 YA SE LEYÓ — veredicto NO ADOPTAR, y Láscar tiene camino
@@ -88,6 +93,42 @@ DECISIONES QUE ESPERAN A NICOLÁS
      estar en git primero.
   2. **Disco C al 98 %** (15 GB libres). La higiene de S127 dejó de ensuciar
      `git status` pero no liberó espacio — no se borró nada a propósito.
+
+═══════════════════════════════════════════════════════════════════════════
+LA AUDITORÍA S128 — armada y verificada como ejecutable
+═══════════════════════════════════════════════════════════════════════════
+
+Prompt completo: `tasks/PROMPT_AUDITORIA_S128.md`. Tres fases:
+
+  **Fase 1 — la deuda, que es la puerta de entrada.** Los 28 pendientes (19 de
+  S121 + 9 de S125, ya enumerados en el prompt). Dos de ellos son fundamento de
+  decisiones vivas: el `r = −0,23` que sostiene «la máscara no es el driver del
+  gap» NO tiene script, y A54.
+
+  **Fase 2 — el eje exógeno**, que ninguna de las once auditorías usó: nuestros
+  datos contra el archivo de TIF de MIROVA. Cinco sondas. La más filosa (P2):
+  en los 11,6 días del archivo, Copahue, Lastarria y Tupungatito no tienen
+  NINGUNA escena con contraste al cráter, y nosotros publicamos **91, 79 y 87**
+  detecciones. Sería el primer falso positivo nuestro afirmado con evidencia
+  EXTERNA en 127 sesiones.
+
+  **Fase 3 — el frente bibliográfico**, marcado primordial por Nicolás y armado
+  para lanzar con agentes. Faltan **tres papers del canon MIROVA** —el crítico es
+  Coppola 2014, que es la autoridad que Laiolo cita para el sub-MW— y hay **24
+  papers en el repo sin leer** que caen justo en los frentes abiertos, incluidos
+  Frey 2008 (tests nocturnos de nube) y Coppola 2013 (fuente primaria de c_rad,
+  que hoy citamos de segunda mano).
+
+Verificado como ejecutable, no asumido: los 28 pendientes son localizables ·
+`rasterio` instalado · el archivo TIF está local · nuestros records cubren su
+ventana (1.551 records, 970 con vrp>0). Lo único que puede trabarse es la sonda
+P4 (re-descarga de granules con el disco al 98 %).
+
+**Y las tres reglas de método nuevas**, que salieron de medir las once auditorías
+previas y están en `docs/PROTOCOLO_AUDITORIA_PROFUNDA.md`:
+  A. prohibido repetir el barrido general de 6-8 ejes (rindió 0 % y 8 %);
+  B. cierre por GUARD, no por corrección (S127 es la única sin reincidencias);
+  C. los pendientes se publican y son la puerta de entrada de la siguiente.
 
 ═══════════════════════════════════════════════════════════════════════════
 REGLAS DE ESTA ETAPA (las de S126 siguen, más una)
