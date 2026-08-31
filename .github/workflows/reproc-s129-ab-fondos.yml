@@ -8,6 +8,14 @@ name: A/B S129 — los dos fondos autorreferentes
 # lo tocan).
 #
 # Los tres escriben a data_subdir aislados. NO tocan el operacional ni el dashboard.
+#
+# ⚠️ LA VENTANA VA POR CHUNKS, y no es opcional. El primer intento pidio 176 dias
+# con el timeout del template que usaba 89: 8 de 15 jobs murieron a los 321 min
+# contra el limite de 320. Es A15 — `timeout >= duracion_esperada x 1,3` — salteada
+# por copiar el numero en vez de recalcularlo. GitHub ademas corta a las 6 h por job,
+# asi que subir el reloj no es salida: hay que partir la ventana.
+#
+# Uso: primer chunk con overwrite=true (pisa), los siguientes con false (agregan).
 
 "on":
   workflow_dispatch:
@@ -19,7 +27,11 @@ name: A/B S129 — los dos fondos autorreferentes
       end:
         description: "End date YYYY-MM-DD (inclusive)"
         required: true
-        default: "2026-08-24"
+        default: "2026-05-28"
+      overwrite:
+        description: "true en el PRIMER chunk (pisa), false en los siguientes (agrega)"
+        required: true
+        default: "true"
 
 jobs:
   reproc:
@@ -58,18 +70,21 @@ jobs:
           # Las fechas pasan por env y NO se interpolan dentro del run:. S128
           # encontro 31 ocurrencias de esa inyeccion en 7 workflows; este no suma
           # una mas.
+          ARM_OVERWRITE: ${{ github.event.inputs.overwrite }}
           ARM_START: ${{ github.event.inputs.start }}
           ARM_END: ${{ github.event.inputs.end }}
           ARM_PROFILE: ${{ matrix.profile }}
           ARM_VOLCANO: ${{ matrix.volcano }}
-        timeout-minutes: 320
+        timeout-minutes: 330
         run: |
+          OW=""
+          if [ "$ARM_OVERWRITE" = "true" ]; then OW="--overwrite"; fi
           python scripts/run_pipeline.py \
             --profile "$ARM_PROFILE" \
             --volcano "$ARM_VOLCANO" \
             --start "$ARM_START" \
             --end "$ARM_END" \
-            --overwrite
+            $OW
 
       - name: Upload reprocessed JSON as artifact
         if: always()
