@@ -1,0 +1,81 @@
+name: A/B S129 — los dos fondos autorreferentes
+
+# Tres brazos que difieren en UN flag: control / pool (GAP #A) / bgmag (Eq.6).
+# Pre-registro: docs/s129/PREREGISTRO_AB_FONDOS.md
+# El control es un clon REPROCESADO, no el acumulado de mirova_equivalent — esa
+# data se fue armando con versiones distintas del codigo y mete diferencias
+# espurias ajenas al A/B (verificado S125: MODIS se movia +4,03 con piezas que ni
+# lo tocan).
+#
+# Los tres escriben a data_subdir aislados. NO tocan el operacional ni el dashboard.
+
+"on":
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-03-01"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-08-24"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano: [Lascar, Lastarria, Villarrica, Tupungatito, Chaiten]
+        profile: [_s129_ab_control, _s129_ab_pool, _s129_ab_bgmag]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          # Las fechas pasan por env y NO se interpolan dentro del run:. S128
+          # encontro 31 ocurrencias de esa inyeccion en 7 workflows; este no suma
+          # una mas.
+          ARM_START: ${{ github.event.inputs.start }}
+          ARM_END: ${{ github.event.inputs.end }}
+          ARM_PROFILE: ${{ matrix.profile }}
+          ARM_VOLCANO: ${{ matrix.volcano }}
+        timeout-minutes: 320
+        run: |
+          python scripts/run_pipeline.py \
+            --profile "$ARM_PROFILE" \
+            --volcano "$ARM_VOLCANO" \
+            --start "$ARM_START" \
+            --end "$ARM_END" \
+            --overwrite
+
+      - name: Upload reprocessed JSON as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s129ab-${{ matrix.profile }}-${{ matrix.volcano }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          retention-days: 14
+          if-no-files-found: warn
