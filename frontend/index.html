@@ -3510,6 +3510,7 @@ async function init() {
     buildCards();
     buildOverviewMap();
     renderDetail();
+    buildAlertSummary();   // S129 V3: la barra depende de includeFarDistance (:3053)
   });
   document.getElementById("btn-include-far").addEventListener("click", () => {
     includeFarDistance = true;
@@ -3519,6 +3520,7 @@ async function init() {
     buildCards();
     buildOverviewMap();
     renderDetail();
+    buildAlertSummary();   // S129 V3: la barra depende de includeFarDistance (:3053)
   });
 
   // S27: toggle "Solo principal" (default) vs "Todos los pixels". MIROVA
@@ -3539,7 +3541,12 @@ async function init() {
   // S96 F5' — toggle Magnitud: Cluster (pc.vrp_mw, actual) vs Núcleo F5' (D2-safe
   // v2). Solo cambia el número de magnitud en cards/chart/stats/tablas; detección,
   // mapa y gating intactos. Re-renderiza todas las superficies de magnitud.
-  const _rerenderMag = () => { buildCards(); buildOverviewMap(); buildNRTTable(); renderDetail(); };
+  // S129 V3: faltaba buildAlertSummary. La barra 'Estado actual' LEE los toggles
+  // (via latestVRP -> latestDetection) pero ningun handler la refrescaba, asi que
+  // al cambiar de metodo las tarjetas cambiaban de color y el contador de arriba
+  // no. Podia quedar mal por horas: el poll de 5 min solo re-renderiza si llego
+  // dato nuevo.
+  const _rerenderMag = () => { buildCards(); buildOverviewMap(); buildNRTTable(); renderDetail(); buildAlertSummary(); };
   document.getElementById("btn-mag-cluster").addEventListener("click", () => {
     USE_F5_CORE = false;
     setPersistedFlag("vrp_f5_core", false);
