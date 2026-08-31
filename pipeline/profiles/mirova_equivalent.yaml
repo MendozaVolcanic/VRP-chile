@@ -51,24 +51,45 @@ thresholds:
   # El cap=7K (S15 Tema F) anula la diferenciación summit/scene de MIROVA
   # porque clipea N·σ scene=10 cuando σ_bg>0.7K (común en escena).
   max_sigma_component_k: 999.0
-  # S12 2026-04-15: piso VRP por sensor para paridad MIROVA estricta.
-  # Cualquier detección por debajo del piso se trata como no-detección
-  # (vrp_mw = 0) en este perfil. Los valores coinciden exactamente con
-  # el mínimo VRP observado en MIROVA consolidado 14042026 por sensor,
-  # usando comparación >= para preservar TODAS las refs conocidas:
-  #   VIIRS375: min observado 0.02 MW (PCC, Lastarria, n=2)
-  #   VIIRS750: min observado 0.15 MW (Lascar, n=1)
-  #   MODIS:    min observado 0.27 MW (Lascar, n=1)
-  # El perfil experimental queda sin floor (detección más sensible para
-  # investigación de señales sub-MIROVA).
-  min_vrp_mw_viirs375: 0.02
-  min_vrp_mw_viirs750: 0.15
-  # S102 (A45): bajado 0.27 -> 0.05 junto con nadir-fijo MODIS (ver paths).
-  # El area nadir-fija reduce la magnitud VRP MODIS; a 0.27 la validacion
-  # (run 27022484062) perdia 5 detecciones confirmadas MIROVA-MODIS de Lascar
-  # (FN). El barrido de pisos {0.27,0.15,0.10,0.05} mostro 0.05 = unico con
-  # FN=0 (analyze_nadir_validation.py). Los pisos VIIRS NO se tocan en S102.
-  min_vrp_mw_modis:    0.05
+  # ─── PISO VRP: QUITADO EN S130 (decisión de Nicolás, ciclo A45) ───────────
+  # Los tres valen 0 = sin piso. Historia y razón:
+  #
+  # S12 (2026-04-15) lo puso "para paridad MIROVA estricta", calibrado al mínimo
+  # VRP observado en el consolidado por sensor (VIIRS375 0.02 · VIIRS750 0.15 ·
+  # MODIS 0.27, bajado a 0.05 en S102 junto con nadir-fijo porque a 0.27 se
+  # perdían 5 detecciones MIROVA-MODIS de Láscar). O sea: ya se había bajado dos
+  # veces porque cortaba señal real. S130 lo quita del todo.
+  #
+  # El canon no lo respalda — es lo que S129 encontró al leer los papers que
+  # faltaban:
+  #   · Coppola 2019, el paper del sistema MIROVA, NO declara ningún piso. El
+  #     "1 MW" que aparece es escala nominal, no umbral.
+  #   · Coppola 2014 EVALUÓ un corte equivalente (2 MW), midió que el acierto
+  #     caía de ~79 % a <59 %, y lo RECHAZÓ — prefirió conservar falsas alertas
+  #     antes que perder focos reales. Del régimen sub-MW dice que el 75 % son
+  #     fuentes genuinas.
+  #   · Un campo fumarólico entra a este pipeline en el orden de 0,07 MW: por
+  #     debajo del piso de VIIRS750 que regía.
+  #
+  # Lo que el piso hacía de verdad (medido S130, experiments/_s130_piso_vrp/):
+  # escribía sobre `vrp_mw`, que el dashboard no muestra directamente — pero
+  # `isValidDetection()` (frontend/index.html:1372) arranca con `vrp_mw > 0`, así
+  # que un record pisado sin `triggered_test1` DESAPARECÍA de todos los paneles.
+  # 1.633 records pisados sobre 57.730; 582 invisibles, 550 de ellos VIIRS750.
+  #
+  # Verificación de la condición que puso Nicolás ("ver si detectamos lo mismo
+  # que MIROVA en sus 3 sensores"), sobre 1.218 noches-ALERTA del loader
+  # canónico CONS ∪ OCR:
+  #   · noches confirmadas por MIROVA que se PIERDEN al quitarlo: 0
+  #   · VIIRS750 recall dashboard 82,52 % → 84,55 % (+5 noches)
+  #   · VIIRS375 93,93 % → 93,93 % · MODIS 12,20 % → 12,20 % (sin cambio)
+  #
+  # El mecanismo sigue vivo en store.py (_apply_vrp_floor) porque es
+  # configuración legítima: el perfil `experimental` usa pisos más bajos.
+  # Guard contra reposición accidental: tests/test_guard_piso_vrp_s130.py (A63).
+  min_vrp_mw_viirs375: 0.0
+  min_vrp_mw_viirs750: 0.0
+  min_vrp_mw_modis:    0.0
   # S12 E4: mirova_equivalent mantiene min_vent_pixels=1 (actual).
   # Experimental prueba con 2 para medir impacto en FPs.
   min_vent_pixels: 1

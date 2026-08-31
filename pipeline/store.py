@@ -69,6 +69,41 @@ SANITY_CAP_VRP_MW = 50000.0
 BT_PHYSICAL_MAX_K = 500.0
 
 
+def _apply_vrp_floor(record: dict) -> None:
+    """Piso VRP por sensor: bajo el mínimo del perfil, el VRP se lleva a cero.
+
+    APAGADO en el perfil operacional desde S130 (los tres pisos valen 0). La
+    decisión es de Nicolás y se apoya en el canon, no en conveniencia: Coppola
+    2019 no declara ningún piso, y Coppola 2014 evaluó cortar en 2 MW, midió que
+    el acierto caía de ~79 % a <59 %, y lo rechazó — prefirió conservar falsas
+    alertas antes que perder focos reales, de los que atribuye el 75 % del
+    régimen sub-MW a fuentes genuinas. Un campo fumarólico entra a este pipeline
+    en el orden de 0,07 MW, o sea por debajo del piso de VIIRS750 que regía.
+
+    Por qué importaba más de lo que parecía: el piso escribe sobre `vrp_mw`, que
+    el dashboard no muestra directamente — pero `isValidDetection()`
+    (frontend/index.html:1372) arranca con `vrp_mw > 0`, así que un record pisado
+    SIN `triggered_test1` desaparecía de todos los paneles. Medido en S130: 582
+    de 57.730 records quedaban invisibles por eso.
+
+    El mecanismo se conserva porque sigue siendo configuración legítima (el
+    perfil `experimental` usa pisos más bajos). Muta `record` in-place.
+    """
+    sensor = record.get("sensor", "")
+    if "375" in sensor or sensor in ("VIIRS_SNPP", "VIIRS_NOAA20", "VIIRS_NOAA21"):
+        floor = MIN_VRP_MW_VIIRS375
+    elif "750" in sensor:
+        floor = MIN_VRP_MW_VIIRS750
+    elif "MODIS" in sensor:
+        floor = MIN_VRP_MW_MODIS
+    else:
+        floor = 0.0
+    if floor > 0 and 0 < (record.get("vrp_mw") or 0) < floor:
+        record["diag_vrp_raw_mw"] = record["vrp_mw"]
+        record["diag_vrp_floor_mw"] = floor
+        record["vrp_mw"] = 0.0
+
+
 def _apply_sanity_cap(record: dict) -> None:
     """Descarta magnitudes inverosímiles SIN anular erupciones reales.
 
@@ -451,24 +486,7 @@ def append_record(volcano_name: str, record: dict,
     # en diag_rejected_sanity_cap_mw para auditoría posterior.
     _apply_sanity_cap(record)
 
-    # S12 2026-04-15: piso VRP por sensor (paridad MIROVA).
-    # Si vrp_mw < piso_sensor, se trata como no-detección (vrp_mw = 0).
-    # Preserva el valor original en diag_vrp_raw_mw para auditoría.
-    sensor = record.get("sensor", "")
-    if "375" in sensor or sensor in ("VIIRS_SNPP", "VIIRS_NOAA20", "VIIRS_NOAA21"):
-        floor = MIN_VRP_MW_VIIRS375
-    elif "750" in sensor:
-        floor = MIN_VRP_MW_VIIRS750
-    elif "MODIS" in sensor:
-        floor = MIN_VRP_MW_MODIS
-    else:
-        floor = 0.0
-    if floor > 0 and 0 < record["vrp_mw"] < floor:
-        record["diag_vrp_raw_mw"] = record["vrp_mw"]
-        record["diag_vrp_floor_mw"] = floor
-        record["vrp_mw"] = 0.0
-        # El operador sigue viendo el record (con vrp=0) pero no cuenta
-        # como detección en auditoría ni en dashboard "últimas VRP>0".
+    _apply_vrp_floor(record)
 
     # Normalize t_max_k for VIIRS 375m (uses t_max_i04_k internally)
     if "t_max_i04_k" in record and "t_max_k" not in record:
