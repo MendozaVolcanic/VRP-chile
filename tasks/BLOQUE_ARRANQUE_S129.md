@@ -163,8 +163,14 @@ PENDIENTES QUE SON LA PUERTA DE ENTRADA (regla C)
      píxeles marginales» es al menos tan probable como «la fórmula está mal».
      Las tres firmas se miden sobre el dato que YA hay, sin reprocesar.
 
-  1. **A/B del GAP #A** — el de mayor valor de los tres, porque toca recall **y** magnitud.
-     Ciclo A45.
+  1. **A/B del GAP #A** — el de mayor valor, porque toca recall **y** magnitud.
+     ✅ **PLAN ESCRITO Y LISTO PARA EJECUTAR**:
+     `docs/superpowers/plans/2026-08-30-ab-cuatro-mecanismos-etapa1.md`.
+     Cubre los DOS fondos autorreferentes en un solo reproceso —el pool μ/σ de
+     detección (GAP #A) y el `t_bg` de la magnitud— porque sus firmas son
+     distinguibles: el pool cambia el CONTEO de detecciones y el fondo NO. Tres
+     brazos × 5 volcanes, pre-registro congelado, script de lectura ya testeado
+     (A16). Falta el ciclo A45: tag + confirmación de Nicolás + lanzar.
   2. **A/B del regrid** (`ENABLE_UTM_REGRID` ON) con la paridad estratificada por cenit.
      Es el fix fiel del gap de magnitud y cierra D17 al mismo tiempo. El filtro de cenit
      va DESPUÉS, y sólo si queda residuo.
