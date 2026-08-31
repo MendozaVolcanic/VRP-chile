@@ -1909,3 +1909,46 @@ la infraestructura de F70.2; solo cambia el centro. Pendiente de confirmación.
 **Caveat honesto**: el GeoTIFF es una reproyección lat/lon de su grilla UTM, así
 que el centro que leemos aproxima el real a menos de media celda. Suficiente
 para un A/B, no para afirmar el origen exacto.
+
+---
+
+## D18 — El ROI1 del paper es una CAJA de 5 km igual para todos; el nuestro es un CÍRCULO de 3 a 20 km por volcán — **ABIERTA (medida, sin A/B)** S129
+
+**La cita**, Coppola 2016a SP426.5, verbatim:
+
+> *«the inner region (ROI1) consists of a **box (5 × 5 km)** centred on the volcano's
+> summit»*
+
+Caja de 25 km², **uniforme**. El criterio del paper para tener dos regiones es que
+tengan *«variable size and different chance of finding a thermal anomaly»*: el ROI1 es
+chico a propósito.
+
+**Lo nuestro**: círculo de radio `inner_radius_km`, per-volcán — 3 km (Lastarria, PP),
+4 (Copahue), 5 (seis), 7 (Tupungatito), **20 (PCC)**.
+
+**La medición** (`experiments/_s129_roi1/01_caja_vs_circulo.py`): de los **107.265**
+píxeles que hoy reciben el umbral laxo de *summit*, sólo **33.354** caerían dentro del
+ROI1 del paper. **El 68,9 % lo recibe por una geometría que el canon no respalda.**
+PCC es el extremo: su ROI1 es **50,3×** el área del paper y perdería el 91 %. Ni el
+radio «estándar» de 5 km se acerca — es 3,1×.
+
+**Por qué importa**: el ROI1 decide qué umbrales rigen (N·σ 5 / C1 0,003 adentro contra
+10 / 0,010 afuera). Agrandarlo afloja el umbral sobre más terreno. Y es **per-volcán**,
+que MISSION excluye.
+
+**Lo que NO dice**: esos píxeles no desaparecerían, pasarían a los umbrales de *scene*
+—más estrictos— y algunos dejarían de pasar. **La dirección es menos detecciones**, lo
+que choca con la prioridad declarada de `mirova_equivalent` (recall sobre precisión).
+Es una decisión de misión, no técnica.
+
+**Relación con A82**: A82 concluyó «irreducible» y S124 la rebajó porque la auditoría
+S114 nunca miró la geometría del ROI. Esto **mide** la divergencia pero **no prueba**
+que corregirla cure el far→summit. Es hipótesis falsable, no conclusión.
+
+**Estado**: registrada, sin A/B. Evaluarla junto con el remuestreo a malla fija, que es
+del mismo eje geométrico y ya tiene plan escrito
+(`docs/superpowers/plans/2026-08-30-ab-cuatro-mecanismos-etapa1.md`, etapa aparte). Si
+se evalúa, el brazo fiel es una **caja** de 5 × 5 km uniforme, no un círculo de radio
+uniforme: el paper dice caja y la forma importa en las esquinas.
+
+Detalle: `docs/s129/ROI1_CAJA_VS_CIRCULO.md`.
