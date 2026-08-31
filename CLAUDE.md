@@ -905,7 +905,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   ser la OPUESTA a la del handoff** (S113, frente #3). `distance_class` se deriva de `final_hotspot`
   pero el dashboard reporta `primary_cluster.vrp` → pueden discrepar en AMBAS direcciones: (a)
   summit→far espurio (final cerca, pc lejos: 2 records Villarrica artefacto) y (b) far→summit oculto
-  (final lejos por un Salar/fuego que roba el hotspot, pero pc crateriana real: **2527 records**).
+  (final lejos por un Salar/fuego que roba el hotspot, pero pc crateriana real: **2527 records**
+  ⚠️ **sobre el corpus de junio-2026 — verificado S130**: hoy son **9.196**, y NO porque el pipeline
+  haya cambiado sino porque S120 metió el backfill histórico de 2025 y casi triplicó el denominador.
+  La tasa es plana en **15-17 % de los records de cada mes** desde feb-2025, sin un solo quiebre;
+  reconstruyendo la ventana que S113 pudo ver dan 2.579 contra los 2.527 declarados. **La conclusión
+  de A81 vale entera**, el conteo absoluto no — ver A90 y `docs/s130/A81_DISCREPANCIA_RESUELTA.md`).
   La cara (b) es ~1000× más grande pero re-derivar simétrico es **trap A48/A18**: 98.8% MIROVA-
   confirmadas pero impacto NETO recall = 84 noches, 73 de NdC = artefacto A69 (NO destapar); el resto
   redundantes (otra pasada summit cubre la noche); el gate conservador S100 es correcto. **How to
@@ -1035,6 +1040,27 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   S72). La técnica se equivoca en la misma dirección que el defecto que busca, así que un
   hallazgo de la forma «esto está muerto» exige verificación cruzada antes de reportarse.
   Detalle: `docs/AUDIT_S127.md` + T9 en `docs/PROTOCOLO_AUDITORIA_PROFUNDA.md`.
+
+- **A90. Un conteo absoluto sobre un corpus vivo no es comparable consigo mismo entre sesiones,
+  y falla EN SILENCIO** (S130, tercera aparición del mismo problema). Nadie recibe un error: sólo
+  un número distinto, que se lee como hallazgo. Los tres casos, todos del mismo proyecto:
+
+  | número | parecía | era |
+  |---|---|---|
+  | far→summit 2.527 → **9.196** | el pipeline empeoró 3,6× | S120 metió el backfill de 2025 y triplicó el denominador; la tasa está plana en 15-17 % desde feb-2025 |
+  | `flags_true` 17 → **28** | flags nuevos encendidos | dos denominadores distintos (los escritos en el YAML vs todos los que evalúan True) |
+  | `recall_v750_dash` 84,55 → **85,06** | deriva | dos ventanas distintas (toda la data vs 2026) |
+
+  **How to apply**: cuando el número cuente elementos de un corpus que crece —records, detecciones,
+  píxeles, papers— registrar la **proporción** además del total, o pegarle la **ventana temporal**
+  al conteo. Y antes de tratar como hallazgo la diferencia entre un número de hoy y uno de un
+  informe viejo, **reconstruir el corpus que ese informe pudo ver** — en S130 eso convirtió una
+  discrepancia "bloqueante" en una nota al pie, en el tiempo de correr un script. El corpus puede
+  crecer **hacia atrás** (backfill histórico), que es el caso que menos se sospecha.
+
+  Es el mismo modo de olvido que persigue `scripts/libro_de_cuentas.py`, y por eso ese registro
+  exige la **definición DENTRO de la afirmación**: sin denominador, una afirmación numérica no es
+  una afirmación. Detalle: `docs/s130/A81_DISCREPANCIA_RESUELTA.md`.
 
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
