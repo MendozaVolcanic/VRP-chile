@@ -113,6 +113,83 @@ def r_delta_t(vol):
     return round(st.median(xs), 1) if xs else None
 
 
+def _tier_a_records():
+    """Los records de los 11 Tier A, que son los que alimentan el dashboard."""
+    from _s126_lib import VENTS
+    for vol in VENTS:
+        pth = os.path.join(ROOT, "data", "mirova_equivalent", vol + ".json")
+        if not os.path.exists(pth):
+            continue
+        for r in json.load(open(pth, encoding="utf-8"))["records"]:
+            yield r
+
+
+def r_piso_invisibles():
+    """Records que el dashboard NO cuenta como detección por tener vrp_mw = 0.
+
+    DEFINICIÓN: replica isValidDetection() de frontend/index.html:1372 — un
+    record cuenta si `vrp_mw > 0` O si trae `triggered_test1`. Se miran sólo los
+    que alguna vez pasaron por el piso (`diag_vrp_raw_mw` presente), porque son
+    los únicos que el piso pudo apagar.
+
+    Debe ser 0 desde S130. Si sube, el piso volvió — por una consolidación de
+    perfiles (A63) o porque el backfill se revirtió. Antes de quitarlo eran 582.
+    """
+    n = 0
+    for r in _tier_a_records():
+        if r.get("diag_vrp_raw_mw") is None:
+            continue
+        if not ((r.get("vrp_mw") or 0) > 0) and r.get("triggered_test1") is not True:
+            n += 1
+    return n
+
+
+def r_recall_v750_dash():
+    """Recall VIIRS750 del DASHBOARD contra noches-ALERTA de MIROVA, en %.
+
+    DEFINICIÓN: de las noches (volcán, fecha) en que MIROVA declaró ALERTA en
+    VIIRS750 —loader canónico CONS ∪ OCR, A11— el porcentaje en que nosotros
+    tenemos al menos un record que pasa isValidDetection() Y isSummitDetection()
+    del frontend. Es el predicado que el dashboard usa DE VERDAD, distinto del
+    de auto_audit_weekly, que mide sobre `primary_cluster.vrp_mw` y por eso era
+    ciego al piso VRP (hallazgo S130).
+
+    Cota superior: D2 acota la cobertura del CSV en 79,2 %.
+    """
+    from _s126_lib import VENTS, bucket, cargar_mirova
+    mir, _ = cargar_mirova(("2026-01-01", "2026-12-31"))
+    nuestras = set()
+    for vol in VENTS:
+        pth = os.path.join(ROOT, "data", "mirova_equivalent", vol + ".json")
+        if not os.path.exists(pth):
+            continue
+        for r in json.load(open(pth, encoding="utf-8"))["records"]:
+            if bucket(r.get("sensor")) != "v750":
+                continue
+            v = r.get("vrp_mw") or 0
+            valida = v > 0 or r.get("triggered_test1") is True
+            if not valida:
+                continue
+            # isSummitDetection(), frontend/index.html:1378
+            if v == 0 and r.get("discarded_reason") and not r.get("triggered_test1"):
+                continue
+            dc = r.get("distance_class")
+            if dc == "far":
+                continue
+            if dc != "summit" and not ((r.get("vrp_vent_mw") or 0) > 0):
+                continue
+            nuestras.add((vol, r.get("datetime_utc", "")[:10]))
+    total = aciertos = 0
+    for vol in VENTS:
+        for (d, b) in (mir.get(vol) or {}):
+            if b != "v750":
+                continue
+            total += 1
+            if (vol, d) in nuestras:
+                aciertos += 1
+    return round(100 * aciertos / total, 2) if total else None
+
+
 def r_git_mb():
     return du_mb(".git")
 
@@ -205,6 +282,20 @@ REGISTRO = [
      "CLAUDE.md Reglas geométricas",
      {"Lastarria": 3, "Copahue": 4, "Tupungatito": 7,
       "PuyehueCordonCaulle": 20, "Villarrica": 5}, r_inner_radius, None),
+    ("piso_invisibles", "records que el dashboard NO cuenta por vrp_mw = 0 — "
+     "DEFINICIÓN: los que pasaron por el piso VRP (diag_vrp_raw_mw presente) y "
+     "fallan isValidDetection() de frontend/index.html:1372. Antes de quitar el "
+     "piso en S130 eran 582; si vuelve a subir, el piso se repuso (A63) o el "
+     "backfill se revirtió",
+     "PR #571 / tests/test_guard_piso_vrp_s130.py", 0, r_piso_invisibles, (0, 0)),
+    ("recall_v750_dash", "recall VIIRS750 del DASHBOARD vs noches-ALERTA MIROVA, "
+     "en % — DEFINICIÓN: predicado isValidDetection ∧ isSummitDetection del "
+     "frontend, NO el de auto_audit_weekly (que mide sobre primary_cluster y por "
+     "eso era ciego al piso VRP). Ventana 2026 y volcanes de _s126_lib.VENTS. "
+     "⚠️ El PR #571 reporta 82,52 %→84,55 % con OTRO corte: toda la data y los 11 "
+     "Tier A explícitos. Los dos son correctos y NO son comparables entre sí — es "
+     "el mismo problema de denominador que flags_true. Cota superior por D2",
+     "PR #571 (con su propio corte)", 85.06, r_recall_v750_dash, (78.0, 92.0)),
     ("papers_leidos_pct", "% del corpus leído a fondo",
      "docs/s128/lectura_papers.json", 29.0, r_cobertura_papers, (20.0, 100.0)),
 ]

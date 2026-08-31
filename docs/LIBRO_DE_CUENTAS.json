@@ -5,7 +5,7 @@
    "afirma_y_define": "el ratio nuestro/MIROVA global",
    "donde": "docs/MIROVA_DIVERGENCES.md D5",
    "declarado": 0.73,
-   "hoy": 0.734,
+   "hoy": 0.732,
    "estado": "OK",
    "error": null
   },
@@ -14,7 +14,7 @@
    "afirma_y_define": "ratio en VIIRS375 — DEFINICIÓN: mediana sobre TODOS los pares noche-volcán juntos (no la mediana de las medianas por volcán, que da 0,60)",
    "donde": "docs/AUDIT_S128.md §6",
    "declarado": 0.69,
-   "hoy": 0.69,
+   "hoy": 0.689,
    "estado": "OK",
    "error": null
   },
@@ -41,7 +41,7 @@
    "afirma_y_define": "tamaño de .git — DEFINICIÓN: el directorio COMPLETO en disco, no el `size-pack` de git count-objects (5,99 GiB), que es sólo lo empaquetado. S121 declaraba 3.100 MB",
    "donde": "docs/AUDIT_S128.md §5",
    "declarado": 6507.8,
-   "hoy": 6507.8,
+   "hoy": 6692.1,
    "estado": "OK",
    "error": null
   },
@@ -50,8 +50,8 @@
    "afirma_y_define": "tamaño de data/ (S121 decía 2.000 MB)",
    "donde": "docs/AUDIT_S128.md §5",
    "declarado": 1034.7,
-   "hoy": 1034.9,
-   "estado": "OK",
+   "hoy": 1100.3,
+   "estado": "DERIVA",
    "error": null
   },
   {
@@ -59,7 +59,7 @@
    "afirma_y_define": "tests de la suite",
    "donde": "tasks/BLOQUE_ARRANQUE_S129.md",
    "declarado": 1003,
-   "hoy": 1003,
+   "hoy": 1031,
    "estado": "OK",
    "error": null
   },
@@ -105,6 +105,24 @@
     "PuyehueCordonCaulle": 20,
     "Villarrica": 5
    },
+   "estado": "OK",
+   "error": null
+  },
+  {
+   "id": "piso_invisibles",
+   "afirma_y_define": "records que el dashboard NO cuenta por vrp_mw = 0 — DEFINICIÓN: los que pasaron por el piso VRP (diag_vrp_raw_mw presente) y fallan isValidDetection() de frontend/index.html:1372. Antes de quitar el piso en S130 eran 582; si vuelve a subir, el piso se repuso (A63) o el backfill se revirtió",
+   "donde": "PR #571 / tests/test_guard_piso_vrp_s130.py",
+   "declarado": 0,
+   "hoy": 0,
+   "estado": "OK",
+   "error": null
+  },
+  {
+   "id": "recall_v750_dash",
+   "afirma_y_define": "recall VIIRS750 del DASHBOARD vs noches-ALERTA MIROVA, en % — DEFINICIÓN: predicado isValidDetection ∧ isSummitDetection del frontend, NO el de auto_audit_weekly (que mide sobre primary_cluster y por eso era ciego al piso VRP). Ventana 2026 y volcanes de _s126_lib.VENTS. ⚠️ El PR #571 reporta 82,52 %→84,55 % con OTRO corte: toda la data y los 11 Tier A explícitos. Los dos son correctos y NO son comparables entre sí — es el mismo problema de denominador que flags_true. Cota superior por D2",
+   "donde": "PR #571 (con su propio corte)",
+   "declarado": 85.06,
+   "hoy": 85.06,
    "estado": "OK",
    "error": null
   },
@@ -561,12 +579,6 @@
    "doc": "CLAUDE.md",
    "linea": 757,
    "valor": "270K",
-   "contexto": "cirrus `t_bg<270K` está **contaminado por altitud** (Láscar 5592m marca 85%) — NO usar solo."
-  },
-  {
-   "doc": "CLAUDE.md",
-   "linea": 757,
-   "valor": "85%",
    "contexto": "cirrus `t_bg<270K` está **contaminado por altitud** (Láscar 5592m marca 85%) — NO usar solo."
   },
   {
@@ -1873,12 +1885,6 @@
   },
   {
    "doc": "docs/MIROVA_DIVERGENCES.md",
-   "linea": 1166,
-   "valor": "85%",
-   "contexto": "**944 ALERTAS** total Tier A (CONS+OCR window 80d), recall global 85%."
-  },
-  {
-   "doc": "docs/MIROVA_DIVERGENCES.md",
    "linea": 1171,
    "valor": "99%",
    "contexto": "- Total esperado: **~99% del universo Tier A en ratio ≤3×** = clon literal MIROVA NRT logrado."
@@ -2440,12 +2446,42 @@
    "linea": 1849,
    "valor": "0,08 km",
    "contexto": "(±0,08 km), 0 de 19 eventos ancla perdidos."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1922,
+   "valor": "25 km",
+   "contexto": "Caja de 25 km², **uniforme**. El criterio del paper para tener dos regiones es que"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1931,
+   "valor": "68,9 %",
+   "contexto": "ROI1 del paper. **El 68,9 % lo recibe por una geometría que el canon no respalda.**"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1932,
+   "valor": "50,3×",
+   "contexto": "PCC es el extremo: su ROI1 es **50,3×** el área del paper y perdería el 91 %. Ni el"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1932,
+   "valor": "91 %",
+   "contexto": "PCC es el extremo: su ROI1 es **50,3×** el área del paper y perdería el 91 %. Ni el"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1933,
+   "valor": "3,1×",
+   "contexto": "radio «estándar» de 5 km se acerca — es 3,1×."
   }
  ],
  "resumen": {
-  "registradas": 11,
-  "ok": 11,
-  "con_deriva": 0,
-  "sin_instrumento": 387
+  "registradas": 13,
+  "ok": 12,
+  "con_deriva": 1,
+  "sin_instrumento": 390
  }
 }
