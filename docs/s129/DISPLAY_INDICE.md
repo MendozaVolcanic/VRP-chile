@@ -5,12 +5,12 @@ Seis dominios independientes sobre las cuatro vistas del dashboard. Contexto com
 
 | # | dominio | informe | estado |
 |---|---|---|---|
-| V1 | coherencia entre vistas | `DISPLAY_V1_COHERENCIA.md` | corriendo |
+| V1 | coherencia entre vistas | `DISPLAY_V1_COHERENCIA.md` | ✅ |
 | V2 | trazabilidad de cada número | `DISPLAY_V2_TRAZABILIDAD.md` | ✅ |
 | V3 | toggles y sus promesas | `DISPLAY_V3_TOGGLES.md` | ✅ |
-| V4 | filtros que ocultan dato | `DISPLAY_V4_FILTROS.md` | corriendo |
+| V4 | filtros que ocultan dato | `DISPLAY_V4_FILTROS.md` | ✅ |
 | V5 | carga y rendimiento | `DISPLAY_V5_CARGA.md` | ✅ |
-| V6 | transparencia CPLT 372 | `DISPLAY_V6_TRANSPARENCIA.md` | corriendo |
+| V6 | transparencia CPLT 372 | `DISPLAY_V6_TRANSPARENCIA.md` | ✅ |
 
 Anteriores del mismo frente: `AUDITORIA_TARJETAS.md` (las tarjetas de `index`) y
 `AUDITORIA_MAPAS.md` (el eje espacial de los 11 mapas).
@@ -20,6 +20,20 @@ Anteriores del mismo frente: `AUDITORIA_TARJETAS.md` (las tarjetas de `index`) y
 ## Los tres hallazgos que un operador puede sufrir hoy
 
 Ordenados por lo que le pasa a quien mira la pantalla, no por elegancia técnica.
+
+### 0 · El mismo volcán, dos niveles de alerta distintos — V1
+
+`index` muestra la **última** detección de 48 h (`:1387`, cambiado en S90 a pedido de
+Nicolás) y `mosaico` el **máximo** (`:370`). Medido con un barrido rodante de 2.640
+ventanas de 48 h: **73 % con número distinto y 19 % con NIVEL DE ALERTA distinto**. PCC
+discrepa de nivel el **50 %** del tiempo, Villarrica 34 %, Chaitén 29 %.
+
+Y lo que lo vuelve operacional: la tarjeta de `mosaico` **es un enlace a `index`**
+(`:605`). El operador hace clic en «Bajo» y aterriza en «Muy Bajo». En el instante de la
+auditoría, PCC se leía *0,43 MW · Muy Bajo* en una vista y *4,58 MW · Bajo* en la otra.
+
+Causa raíz: **S90 cambió `index` y `mosaico` nunca se actualizó** — su comentario
+`:369` todavía afirma estar sincronizado con la función que `index` dejó de usar.
 
 ### 1 · La barra «Estado actual» se congela — V3
 

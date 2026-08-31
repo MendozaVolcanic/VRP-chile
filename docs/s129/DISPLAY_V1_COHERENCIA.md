@@ -7,7 +7,7 @@ el mismo día. ¿Ve el mismo número? Y si no, ¿el dashboard le avisa?
 
 ---
 
-## Resumen (334 palabras)
+## Resumen
 
 **La divergencia de mayor impacto operacional es el nivel de alerta entre `index` y `mosaico`.**
 No es un desacuerdo de fórmula: las dos vistas calculan la magnitud con el **mismo código**
