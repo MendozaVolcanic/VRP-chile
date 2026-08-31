@@ -366,17 +366,50 @@ function eqVrpDisplay(r, innerKm) {
   return USE_F5_CORE ? mirovaEqVrpCore(r, innerKm) : mirovaEqVrp(r, innerKm, false);
 }
 
-// ─── Latest 48h max (sync con index.html L998) ───────────────────────────────
+// ─── Guardas de detección — réplica de index.html:1372 y :1378 ───────────────
+// S130: mosaico no las tenía porque tomaba el máximo crudo. Al pasar a "última
+// pasada" (abajo) hacen falta para que el nivel de alerta COINCIDA con index:
+// sin ellas, un record descartado por el pipeline titularía la tarjeta.
+function isValidDetection(r) {
+  if ((r?.vrp_mw ?? 0) > 0) return true;
+  return r?.triggered_test1 === true;
+}
+
+function isSummitDetection(r) {
+  if ((r.vrp_mw ?? 0) === 0 && r.discarded_reason && !r.triggered_test1) return false;
+  if (r.distance_class === "summit") return true;
+  if (r.distance_class === "far") return false;
+  return (r.vrp_vent_mw ?? 0) > 0;
+}
+
+// ─── Última detección de 48 h (sync con index.html:1387 latestDetection) ─────
+// S130 (decisión de Nicolás): mosaico mostraba el MÁXIMO de la ventana e index la
+// ÚLTIMA pasada desde S90 — también pedido suyo. Medido en S129: discrepaban de
+// NIVEL DE ALERTA en el 19 % de las ventanas de 48 h (PCC el 50 %), y como la
+// tarjeta de mosaico ENLAZA a index, se hacía clic en "Bajo" y se aterrizaba en
+// "Muy Bajo". Manda index: la tarjeta refleja el estado ACTUAL del volcán, no un
+// pico que ya pasó.
+//
+// No se porta isSensorVisible: mosaico no tiene toggle de sensores, así que en
+// index ese filtro es identidad para esta vista (A89 — trazar el efecto, no el
+// nombre).
 function latestVRP(records, innerKm) {
   const cutoff = Date.now() - 48 * 3600000;
-  let max = 0, ts = null;
+  let best = null;
   for (const r of records) {
     const t = parseUtcMs(r.datetime_utc);
     if (!Number.isFinite(t) || t < cutoff) continue;
+    if (!isSummitDetection(r)) continue;
+    if (!isValidDetection(r)) continue;
     const v = eqVrpDisplay(r, innerKm);  // S92: excluir artefacto cirrus
-    if (v > max) { max = v; ts = r.datetime_utc; }
+    if (v <= 0) continue;
+    // Desempate ante igual timestamp (dos sensores en la misma pasada): la
+    // lectura más fuerte de ESE instante. No es el máximo del período.
+    if (!best || t > best.t || (t === best.t && v > best.max)) {
+      best = { max: v, ts: r.datetime_utc, t };
+    }
   }
-  return { max, ts };
+  return best ? { max: best.max, ts: best.ts } : { max: 0, ts: null };
 }
 
 // ─── Fetch JSON con cache-bust (sync con index.html L732) ────────────────────
@@ -655,9 +688,11 @@ function renderMosaico() {
 
     // Footer
     const footer = el("div", { className: "mc-footer" }, [
-      // S129 V2: latestTs es el timestamp del MAXIMO de 48 h, no de la ultima
-      // pasada — la etiqueta era falsa en el 87,8 % de las ventanas medidas.
-      el("span", { textContent: "Máx. 48 h:" }),
+      // S129 V2 → S130: la etiqueta decía "Últ. detección" mostrando el timestamp
+      // del MÁXIMO (falso en el 87,8 % de las ventanas). S129 la renombró a
+      // "Máx. 48 h" para que dijera la verdad; ahora que latestVRP devuelve la
+      // ÚLTIMA detección, el nombre original vuelve a ser el correcto.
+      el("span", { textContent: "Últ. detección:" }),
       el("span", { className: "last", textContent: fmtRelativeTime(latestTs) }),
     ]);
     card.appendChild(footer);
