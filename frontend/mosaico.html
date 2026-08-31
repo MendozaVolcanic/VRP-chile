@@ -389,6 +389,20 @@ async function fetchJSON(url) {
 
 const allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
 
+// S129 V2: "Actualizado" mostraba el reloj DEL NAVEGADOR, no la fecha del dato — un
+// JSON congelado se leia fresco, que es justo lo contrario de lo que esa etiqueta
+// sirve. Ahora reporta el `updated` mas reciente de los once volcanes cargados.
+function _etiquetaActualizado() {
+  const stamps = Object.values(allData)
+    .map(d => d && d.updated).filter(Boolean).sort();
+  const el_ = document.getElementById("updated-label");
+  if (!stamps.length) { el_.textContent = "Sin fecha de dato"; return; }
+  const ultimo = stamps[stamps.length - 1];
+  const horas = (Date.now() - parseUtcMs(ultimo)) / 36e5;
+  el_.textContent = "Dato al " + String(ultimo).slice(0, 16).replace("T", " ") + " UTC"
+    + (horas > 6 ? " · " + horas.toFixed(0) + " h de antiguedad" : "");
+}
+
 async function loadVolcano(v) {
   // S120: mosaico solo muestra 30 días → el JSON liviano _recent (100d, ~27 MB los 11)
   // cubre de sobra. Evita bajar los completos post-backfill (~171 MB) que timeoutean en
@@ -641,7 +655,9 @@ function renderMosaico() {
 
     // Footer
     const footer = el("div", { className: "mc-footer" }, [
-      el("span", { textContent: "Últ. detección:" }),
+      // S129 V2: latestTs es el timestamp del MAXIMO de 48 h, no de la ultima
+      // pasada — la etiqueta era falsa en el 87,8 % de las ventanas medidas.
+      el("span", { textContent: "Máx. 48 h:" }),
       el("span", { className: "last", textContent: fmtRelativeTime(latestTs) }),
     ]);
     card.appendChild(footer);
@@ -686,16 +702,14 @@ async function init() {
   await Promise.all(TIER_A.map(v => loadVolcano(v)));
   renderMirovaFreshness();
   renderMosaico();
-  document.getElementById("updated-label").textContent =
-    "Actualizado " + new Date().toISOString().slice(11, 16) + " UTC";
+  _etiquetaActualizado();
 
   // Auto-refresh 15 min (sync con index.html L2853).
   setInterval(async () => {
     await Promise.all(TIER_A.map(v => loadVolcano(v)));
     renderMirovaFreshness();
     renderMosaico();
-    document.getElementById("updated-label").textContent =
-      "Actualizado " + new Date().toISOString().slice(11, 16) + " UTC";
+    _etiquetaActualizado();
   }, 15 * 60 * 1000);
 }
 
