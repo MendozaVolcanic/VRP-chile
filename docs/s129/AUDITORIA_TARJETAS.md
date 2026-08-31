@@ -5,8 +5,6 @@ botón que cambie las tarjetas por sensor. Audita la forma en que mostramos los 
 
 Auditoría read-only sobre `frontend/`. **No se implementó nada.**
 
----
-
 ## 1. Qué muestra cada tarjeta hoy, campo por campo
 
 | Vista | Campos de la tarjeta | Dice el sensor |
@@ -40,8 +38,7 @@ vistas pueden mostrar números diferentes sin que nada lo señale. El sparkline 
 máximo diario mezclando los tres sensores en una sola barra.
 
 **`diario.html`** — `computeStats` (l.500) calcula `Max VRP` y `mediana` sobre **todos los sensores
-juntos**, mientras el gráfico de abajo los separa en tres colores. El encabezado y el gráfico de la
-misma tarjeta hablan idiomas distintos.
+juntos**, mientras el gráfico de abajo los separa en tres colores.
 
 ## 3. Lo que el operador no puede saber mirando la tarjeta
 
