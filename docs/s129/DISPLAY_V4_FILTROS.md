@@ -38,18 +38,16 @@ dashboard pone en cero **por la etiqueta de otro campo**.
 ## F2 — «Solo cráter»: el más grande, y es un error de etiqueta
 
 **Qué suprime.** `mirovaEqVrp` devuelve 0 en cuanto `r.distance_class` no dice `"summit"`
-(`index.html:985`), **antes de mirar el cluster**. Y `distance_class` la fija el
-`final_hotspot`, que en MODIS viene del path de MIR absoluto: el gradiente topográfico lo
-lleva al salar o al valle (A69/A82). El cluster —de donde sale la magnitud— se queda en el
-cráter. Es A46 en su forma pura, con la magnitud y la clase discrepando.
+(`index.html:985`), **antes de mirar el cluster**. Y esa clase la fija el `final_hotspot`,
+que en MODIS sale del path de MIR absoluto: el gradiente topográfico lo lleva al salar o al
+valle (A69/A82) mientras el cluster —de donde sale la magnitud— se queda en el cráter. A46
+en su forma pura.
 
-Cuatro noches de Láscar, verificadas una a una en el JSON:
+Dos noches de Láscar, verificadas en el JSON:
 
 ```
-2026-02-09 01:40 MODIS_TERRA  final_hotspot 27,07 km → "far"   pc: 0,893 MW, 7 px, 3,52 km, geo_class summit
-2026-02-09 07:20 MODIS_AQUA   final_hotspot 26,61 km → "far"   pc: 1,179 MW, 10 px, 2,00 km, summit
-2026-02-12 02:00 MODIS_TERRA  final_hotspot 27,79 km → "far"   pc: 1,786 MW, 4 px, 2,95 km, summit
-2026-02-12 07:35 MODIS_AQUA   final_hotspot 33,33 km → "far"   pc: 0,393 MW, 9 px, 0,80 km, summit
+2026-02-09 07:20 MODIS_AQUA   final_hotspot 26,61 km → "far"   pc: 1,179 MW, 10 px, 2,00 km, geo_class summit
+2026-02-12 07:35 MODIS_AQUA   final_hotspot 33,33 km → "far"   pc: 0,393 MW,  9 px, 0,80 km, geo_class summit
 ```
 
 **El costo medido**: cruzando contra las alertas MIROVA (CONS ∪ OCR, nocturnas, alias
@@ -57,18 +55,17 @@ completo) hay **72 noches-sensor** con un record `far` oculto y alerta publicada
 huérfanas** — ninguna detección visible ese día en ese sensor. **46 son Láscar MODIS**, la
 única serie con ground truth MODIS real.
 
-**Categoría A72.** Hay que partir el conjunto en dos, y esto es lo importante:
+**Categoría A72.** El conjunto se parte en dos:
 
-- Los **1.163 MODIS con el cluster fuera del inner** (mediana 19–24 km del centro,
-  0 % de confirmación MIROVA en diez de once volcanes) son el **artefacto** A69/A82: el
-  campo difuso topográfico. Ocultarlos en el frontend es exactamente el parche que A72
-  prohíbe — la raíz es no generarlos.
+- Los **1.163 MODIS con el cluster fuera del inner** (mediana 19–24 km, 0 % de confirmación
+  MIROVA en diez de once volcanes) son el **artefacto** A69/A82: el campo difuso
+  topográfico. Ocultarlos en el frontend es el parche que A72 prohíbe — la raíz es no
+  generarlos.
 - Los **8.992 con el cluster en el cráter** no son artefacto ni señal sub-umbral: son
-  **detecciones correctas mal etiquetadas**. En Láscar la confirmación de MIROVA lo prueba
-  (84 noches). En los otros diez el ground truth MODIS **no existe** (88 de 96 alertas
-  MODIS de referencia son de Láscar), así que su realidad es **indefinida**, no «débil» —
-  pero la etiqueta `far` sigue siendo incorrecta por construcción, independientemente de
-  si la señal es real.
+  **detecciones mal etiquetadas**. En Láscar la confirmación de MIROVA lo prueba (84
+  noches). En los otros diez el ground truth MODIS **no existe**, así que su realidad es
+  **indefinida** — pero la etiqueta `far` es incorrecta por construcción, sea real o no
+  la señal.
 
 En VIIRS el problema casi no existe: sólo 2 de 90 records `far` de V375 y 2 de 395 de V750
 tienen el cluster intra-inner. **Es un defecto específico de MODIS.**
@@ -92,23 +89,23 @@ y, de esos, **562 tienen el cluster summit dentro del inner**: 547 caen por el *
 descartes correctos y quedan fuera de los 562 por su distancia).
 
 **Ni `diario.html` ni `mosaico.html` tienen este predicado** — cero apariciones de
-`isValidDetection`, `triggered_test1` o `discarded_reason` en ambos archivos. Su
-`eqVrpDisplay` (`diario:372`, `mosaico:364`) va directo a `mirovaEqVrp`. **Los 562 records
-aparecen en diario y mosaico y no en index**, 114 MW, 28 en noches con alerta MIROVA. El fix
-H3 de S77 (PR #170) nunca se replicó a las otras dos vistas.
+`isValidDetection`, `triggered_test1` o `discarded_reason` en ambos. Su `eqVrpDisplay`
+(`diario:372`, `mosaico:364`) va directo a `mirovaEqVrp`. **Los 562 records salen en diario
+y mosaico y no en index**: 114 MW, 28 en noches con alerta MIROVA. El fix H3 de S77
+(PR #170) nunca se replicó a las otras dos vistas.
 
-**Categoría A72**: señal real sub-umbral (cat-b). Cluster crateriano, mediana 0,45–4 km. El
-piso de VRP es una decisión del pipeline, defendible; lo que no es defendible es que tres
+**Categoría A72**: señal real sub-umbral (cat-b), cluster crateriano a 0,45–4 km de mediana.
+El piso de VRP es una decisión del pipeline y es defendible; lo que no lo es, es que tres
 vistas del mismo dato den tres respuestas distintas.
 
 ## F9 — «sólo el píxel primario»: 87,5 % de los píxeles no se dibujan
 
 `index.html:2546-2549`. Con el default se dibuja 1 píxel por record: **162.608 de 185.809
-píxeles quedan fuera**. El toggle «Todos los píxeles» no los recupera: el cap
+píxeles quedan fuera**. El toggle «Todos los píxeles» no los recupera — el cap
 `PIXEL_CAP_PER_RECORD = 10` (`index.html:2545`) deja **101.478 (54,6 %) permanentemente
-invisibles**. Es una decisión de legibilidad razonable — 86 mil marcadores en PCC no se
-pueden leer — pero **no hay ningún aviso de cuántos píxeles tiene el record**. `diario` y
-`mosaico` no dibujan mapa, así que no aplica.
+invisibles**. Es legibilidad razonable (86 mil marcadores en PCC no se leen), pero **no hay
+aviso de cuántos píxeles tiene el record**. Sólo aplica a `index`: las otras dos no tienen
+mapa.
 
 ## Los tres filtros inertes (declarado ≠ efectivo)
 
@@ -118,15 +115,15 @@ Verificados con un barrido independiente sobre los JSON, no con el script princi
   funciona; la defensa del frontend nunca dispara.
 - **`isCirrusArtifact`** (S90): **0 records**. Hay 13.626 con `t_max_k` bajo 0 °C, pero el
   `mirovaEqVrp` **máximo** entre ellos es 5,0 MW y el gate pide **> 10 MW**. El comentario de
-  `index.html:1105-1107` dice que oculta 26 records «incl. PCC 1362/892 MW» — **hoy oculta
-  cero**. La magnitud focal adoptada en S107-S112 (`focal_magnitude`, `single_pixel_mode`)
-  bajó `pc.vrp_mw` por debajo del umbral contra el que se calibró el filtro.
+  `index.html:1105-1107` dice que oculta 26 records «incl. PCC 1362/892 MW»: **hoy oculta
+  cero**. La magnitud focal de S107-S112 (`focal_magnitude`, `single_pixel_mode`) bajó
+  `pc.vrp_mw` por debajo del umbral contra el que se calibró.
 - **`isDiffuseFieldArtifact`** (S93): **0 records**. Sólo 293 tienen `pc.n_pixels ≥ 100`, y
   ninguno llega a los 50 MW que exige.
-- **`pc.centroid_dist_km > innerKm`** (el guard de S33): **0 records**.
+- **`pc.centroid_dist_km > innerKm`** (guard de S33): **0 records**.
 
-Esto es A87 al revés: los filtros dejaron de marcar, y eso no prueba que el fenómeno se
-haya ido — prueba que la magnitud contra la que se calibraron cambió de escala.
+A87 al revés: dejaron de marcar, y eso no prueba que el fenómeno se fuera — prueba que la
+magnitud contra la que se calibraron cambió de escala.
 
 ## Divergencias menores verificadas
 
@@ -137,11 +134,11 @@ haya ido — prueba que la magnitud contra la que se calibraron cambió de escal
   `index`** (`index.html:1346-1359`); `diario:334` y `mosaico:326` lo admiten. Con F5 inerte
   no cuesta nada hoy.
 - El mapa tiene **universo propio**: `(vrp_mw ?? vrp_mir_mw) > 0` (`index.html:2456`), sin
-  `isValidDetection` ni filtro de artefacto. 22 records se dibujan en el mapa y no aparecen
-  en el gráfico.
+  `isValidDetection` ni filtro de artefacto. 22 records se dibujan en el mapa y no salen en
+  el gráfico.
 - **`_recent.json` (100 días)**: el 79,7 % de los records no se descarga al abrir. No se
-  pierde nada —la ventana por defecto es de 30 días y el completo se baja a los >90 d— pero
-  ninguna vista dice que está mirando una ventana recortada.
+  pierde nada (la vista por defecto es de 30 días y el completo se baja a los >90 d), pero
+  ninguna vista avisa que mira una ventana recortada.
 
 ## Lo que no se puede decidir con lo que hay
 

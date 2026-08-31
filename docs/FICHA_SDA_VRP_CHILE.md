@@ -4,7 +4,7 @@
 > generado por el equipo; los campos legales/institucionales marcados `<completar>` los
 > debe validar SERNAGEOMIN antes de cualquier publicación. Plantilla: `GUIA_MAESTRA_TRANSPARENCIA_ALGORITMICA.md`.
 
-**Identificador interno:** VRP-CL  ·  **Versión:** v1.3 — 2026-08-09  ·  **Estado:** producción (NRT)
+**Identificador interno:** VRP-CL  ·  **Versión:** v1.4 — 2026-08-30  ·  **Estado:** producción (NRT)
 
 ---
 
