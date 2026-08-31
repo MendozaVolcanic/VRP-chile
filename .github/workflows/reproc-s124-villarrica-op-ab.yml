@@ -78,7 +78,7 @@ jobs:
         chunk: ${{ fromJson(needs.plan.outputs.chunks) }}
     # ~2.6 min/dia * 37 dias = ~96 min; 180 deja margen y sigue MUY lejos
     # del limite duro de 6 h que mato al run anterior.
-    timeout-minutes: 180
+    timeout-minutes: 355
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -94,7 +94,9 @@ jobs:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
-        timeout-minutes: 170
+        # S129: 145 dias x 2,4 min/dia (A15 calibrada) = 348 min. Antes
+        # declaraba 170 y habria muerto por timeout si se dispatchaba.
+        timeout-minutes: 350
         run: |
           python scripts/run_pipeline.py \
             --profile _s124_villarrica_op_ab \

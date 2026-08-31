@@ -1,0 +1,106 @@
+name: Reproc watchdog — avisa si un reproceso muere o se cuelga
+
+# POR QUE EXISTE
+# ==============
+# El proyecto ya vigilaba el cron NRT (nrt-monitor.yml abre un issue si fallan 3
+# corridas seguidas; nrt-healthcheck.yml detecta datos rancios). Ninguno de los dos
+# miraba los REPROCESOS, que son los que corren horas y son justamente donde el
+# modo de falla silencioso duele mas.
+#
+# En S129 un A/B de 15 jobs murio por timeout y nadie se entero durante seis horas,
+# porque quien lo lanzo dijo "te aviso" sin dejar nada que avisara. Este workflow es
+# ese algo.
+#
+# QUE MIRA
+# ========
+# Cada hora revisa los workflows cuyo nombre empieza con `reproc-` y abre un issue
+# cuando encuentra: (a) una corrida fallida sin issue previo, o (b) una corrida en
+# curso hace mas de 7 h — sobre el techo de 6 h por job de GitHub, o sea colgada.
+#
+# Cierra el issue solo cuando el mismo workflow vuelve a correr en verde.
+
+"on":
+  schedule:
+    - cron: "20 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+concurrency:
+  group: reproc-watchdog
+  cancel-in-progress: false
+
+jobs:
+  vigilar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Revisar los reprocesos y avisar
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const HORAS_COLGADO = 7;          // el techo de GitHub es 6 h por job
+            const TITULO = 'Reproc: corrida fallida o colgada';
+            const { owner, repo } = context.repo;
+
+            const wfs = (await github.rest.actions.listRepoWorkflows({
+              owner, repo, per_page: 100 })).data.workflows
+              .filter(w => w.path.includes('/reproc-')
+                        && !w.path.includes('/_archive/')
+                        && !w.path.includes('reproc-watchdog'));
+
+            const problemas = [];
+            for (const w of wfs) {
+              const runs = (await github.rest.actions.listWorkflowRuns({
+                owner, repo, workflow_id: w.id, per_page: 3 })).data.workflow_runs;
+              if (!runs.length) continue;
+              const r = runs[0];
+              const horas = (Date.now() - new Date(r.created_at)) / 36e5;
+              if (r.status === 'completed' && r.conclusion !== 'success'
+                  && r.conclusion !== 'cancelled') {
+                problemas.push(`- **${w.name}** — ultima corrida \`${r.conclusion}\` `
+                  + `hace ${horas.toFixed(1)} h · ${r.html_url}`);
+              } else if (r.status !== 'completed' && horas > HORAS_COLGADO) {
+                problemas.push(`- **${w.name}** — lleva ${horas.toFixed(1)} h en `
+                  + `\`${r.status}\`, sobre el techo de 6 h por job · ${r.html_url}`);
+              }
+            }
+
+            const abiertos = (await github.rest.issues.listForRepo({
+              owner, repo, state: 'open', per_page: 100 })).data
+              .filter(i => i.title === TITULO);
+
+            if (!problemas.length) {
+              for (const i of abiertos) {
+                await github.rest.issues.createComment({ owner, repo,
+                  issue_number: i.number,
+                  body: 'Los reprocesos volvieron a verde. Cerrando.' });
+                await github.rest.issues.update({ owner, repo,
+                  issue_number: i.number, state: 'closed' });
+              }
+              core.info('sin problemas');
+              return;
+            }
+
+            const cuerpo = [
+              'El watchdog encontro reprocesos que fallaron o llevan demasiado tiempo:',
+              '', ...problemas, '',
+              '**Antes de relanzar**, revisar si es el modo de falla de S129: la ventana',
+              'por defecto no entra en el `timeout-minutes`. El guard',
+              '`tests/test_guard_timeout_vs_ventana_s129.py` lo mide (regla A15: el costo',
+              'medido es ~2,4 min por dia de ventana, y GitHub corta a los 360 min por',
+              'job — pasada cierta ventana hay que partirla en chunks, no subir el reloj).',
+              '',
+              '_Abierto automaticamente por `reproc-watchdog.yml`._',
+            ].join('\n');
+
+            if (abiertos.length) {
+              await github.rest.issues.createComment({ owner, repo,
+                issue_number: abiertos[0].number, body: cuerpo });
+            } else {
+              await github.rest.issues.create({ owner, repo, title: TITULO,
+                body: cuerpo });
+            }
