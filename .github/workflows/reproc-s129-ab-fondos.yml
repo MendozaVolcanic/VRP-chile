@@ -9,6 +9,17 @@ name: A/B S129 — los dos fondos autorreferentes
 #
 # Los tres escriben a data_subdir aislados. NO tocan el operacional ni el dashboard.
 #
+# ⚠️ ESTE WORKFLOW NO COMMITEA NADA. A diferencia del template del que salio, no tiene
+# job `consolidate`: los resultados quedan SOLO como artefactos de GitHub, con 14 dias
+# de retencion. Fue una omision al escribirlo (S129) y se deja asi a proposito — un job
+# que pushea a main necesita el grupo push-main o su propio retry, y para data
+# experimental de un A/B no vale la pena. Pero HAY QUE BAJARLOS A MANO:
+#
+#     gh run download <run_id> --dir <destino>
+#
+# y copiarlos a data/_s129_ab_{control,pool,bgmag}/. Si la ventana va por chunks, los
+# rangos son disjuntos, asi que combinar es concatenar por volcan y brazo.
+#
 # ⚠️ LA VENTANA VA POR CHUNKS, y no es opcional. El primer intento pidio 176 dias
 # con el timeout del template que usaba 89: 8 de 15 jobs murieron a los 321 min
 # contra el limite de 320. Es A15 — `timeout >= duracion_esperada x 1,3` — salteada
