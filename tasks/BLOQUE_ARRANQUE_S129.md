@@ -175,6 +175,15 @@ PENDIENTES QUE SON LA PUERTA DE ENTRADA (regla C)
      Es el fix fiel del gap de magnitud y cierra D17 al mismo tiempo. El filtro de cenit
      va DESPUÉS, y sólo si queda residuo.
   3. **El ROI1 caja-vs-círculo** — eje geométrico sin auditar.
+  3b. ⭐ **EL PISO VRP YA SE PUEDE DECIDIR, y ahora con física.** El canon admite que
+     el método MIR **no mide** el calor de un campo fumarólico: Campus/Laiolo 2024 p.4
+     —el mismo paper que `process_viirs.py:74` cita para nuestro `k = 18,0`— dice que
+     los sistemas hidrotermales están *«below this range»* (600-1500 K) y que el método
+     sirve *«exclusively»* como proxy de la componente más caliente. Mannini 2019 mide
+     que eso es el **7 %** del calor; el 93 % es difuso. Un campo fumarólico de clase
+     mundial entraría a nuestro pipeline en ~0,07 MW (VIIRS375), o sea **dentro** del
+     rango que llamamos artefacto. Un piso de 0,1 MW borraría a Lazufre.
+     Ver `docs/s129/MIR_NO_VE_LO_DIFUSO.md`. Confirma la recomendación de S126: quitarlo.
   4. **A54 sigue sin respaldo reproducible** (el 95,4 % de FP físicamente reales). Para
      cerrarla hay que re-etiquetar una muestra estratificada con criterio explícito y
      **persistir la etiqueta en el record**. Hoy no hay etiqueta en el schema.
