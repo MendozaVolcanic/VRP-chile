@@ -650,10 +650,18 @@ def test_sum_vrp_reporting_off_does_not_add_fields(tmp_path, monkeypatch):
 def test_sum_vrp_reporting_zero_when_floor_zeros_out(tmp_path, monkeypatch):
     """Si el sensor floor llevó vrp_mw a 0 (señal sub-piso), reportar
     vrp_mw_sum_active=0 (no inventar suma de pixels descartados por floor).
+
+    S130: el perfil operacional ya no tiene piso (se quitó por decisión de
+    Nicolás; ver tests/test_guard_piso_vrp_s130.py), así que el piso se INYECTA
+    acá. El test pasa a probar el MECANISMO —que sigue siendo configuración
+    válida, el perfil `experimental` lo usa— en vez de depender del valor que
+    tenga hoy `mirova_equivalent`. Sin esto el test medía dos cosas a la vez y
+    un cambio de política lo rompía sin que el mecanismo tuviera nada malo.
     """
     import pipeline.store as store
     monkeypatch.setattr(store, 'ENABLE_SUM_VRP_REPORTING', True)
     monkeypatch.setattr(store, 'DATA_DIR', tmp_path)
+    monkeypatch.setattr(store, 'MIN_VRP_MW_VIIRS375', 0.02)
 
     record = {
         'datetime_utc': '2026-05-12 03:30',

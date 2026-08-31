@@ -212,18 +212,23 @@ def test_min_vrp_mw_modis_floor_matches_yaml(yaml_raw):
     assert profile.MIN_VRP_MW_MODIS == float(yaml_raw["thresholds"]["min_vrp_mw_modis"])
 
 
-def test_min_vrp_mw_modis_operational_value():
+def test_vrp_floors_removed_s130():
+    """S130: el perfil operacional ya NO tiene piso VRP — los tres valen 0.
+
+    Este test antes fijaba los valores vigentes (MODIS 0.05 tras S102, VIIRS375
+    0.02, VIIRS750 0.15) y decía "if intentional, update this test". Es el caso:
+    Nicolás decidió quitar el piso en S130, con el canon detrás — Coppola 2019 no
+    declara ninguno y Coppola 2014 evaluó un corte equivalente, midió que el
+    acierto caía de ~79 % a <59 %, y lo rechazó.
+
+    El razonamiento completo y la verificación por sensor viven en
+    tests/test_guard_piso_vrp_s130.py, que es el guard canónico de este hecho.
+    Acá se mantiene sólo la comprobación estructural para que el invariante siga
+    cubierto desde el archivo que vigila el perfil operacional.
+    """
     profile = _load_operational()
-    assert profile.MIN_VRP_MW_MODIS == 0.05, (
-        "MODIS VRP floor must be 0.05 (S102 nadir-fixed adoption, only FN=0 "
-        "floor per run 27022484062). If intentional, see CLAUDE.md flag-change "
-        "rule and update this test + the nadir-fixed adoption record."
-    )
-
-
-def test_viirs_floors_unchanged_by_s102(yaml_raw):
-    """Guard anti-confusion MODIS/VIIRS: S102 only touched the MODIS floor.
-    The VIIRS floors stay at their pre-S102 operational values."""
-    th = yaml_raw["thresholds"]
-    assert float(th["min_vrp_mw_viirs375"]) == 0.02
-    assert float(th["min_vrp_mw_viirs750"]) == 0.15
+    for nombre in ("MIN_VRP_MW_MODIS", "MIN_VRP_MW_VIIRS375", "MIN_VRP_MW_VIIRS750"):
+        assert getattr(profile, nombre) == 0.0, (
+            f"{nombre} != 0: el piso VRP se quitó en S130. Reponerlo requiere "
+            f"ciclo A45 y decisión explícita — ver tests/test_guard_piso_vrp_s130.py."
+        )
