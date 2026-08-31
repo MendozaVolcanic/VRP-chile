@@ -1963,6 +1963,12 @@ function renderDetail() {
   const DT_HOURS = 6;
   let vre_gj = 0;
   for (const r of filtered) {
+    // S130: mismos filtros que buildVREData (:2773). Alinear sólo el campo no
+    // alcanzaba — la curva respeta el toggle de sensores y el descarte del
+    // pipeline, y la caja no, así que al apagar un sensor volvían a discrepar.
+    // Con esto el último punto de la curva ES este número.
+    if (!isValidDetection(r)) continue;
+    if (!isSensorVisible(r)) continue;
     const v_mw = eqVrp(r);
     if (v_mw > 0) vre_gj += v_mw * DT_HOURS * 3.6; // MW * h * 3.6 = GJ
   }
@@ -2783,7 +2789,14 @@ function renderDetail() {
       .sort((a,b) => a.datetime_utc.localeCompare(b.datetime_utc));
     let cumulative = 0;
     return sorted.map(r => {
-      const vrp = r.vrp_mw ?? 0;
+      // S130 (decisión de Nicolás): era `r.vrp_mw`, la suma CRUDA de escena,
+      // mientras la caja de estadística "VRE acumulada" de esta misma pantalla
+      // usaba eqVrp (clúster summit). Los dos números decían "VRE" y diferían de
+      // 8× en Láscar a 220× en Nevados de Chillán (medido S129). El comentario de
+      // la caja (:1959) ya documentaba desde S32 por qué no usar el campo crudo
+      // —"con vrp_mw global la VRE quedaba inflada por anomalías térmicas
+      // no-volcánicas"—: S32 arregló la caja y dejó la curva. Ahora comparten campo.
+      const vrp = eqVrp(r);
       cumulative += vrp * DT_HOURS * 3.6; // GJ
       return { x: r.datetime_utc.slice(0,10), y: parseFloat(cumulative.toFixed(2)) };
     });
