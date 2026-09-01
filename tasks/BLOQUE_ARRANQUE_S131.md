@@ -4,44 +4,41 @@
 
 ```
 Continuamos VRP Chile desde S130. Esa sesión aplicó las cuatro decisiones que
-Nicolás tenía pendientes, refutó un A/B que llevaba dos sesiones abiertas, y dejó
-otro corriendo.
+Nicolás tenía pendientes y corrió DOS A/B hasta el veredicto: los dos dieron
+NO ADOPTAR, por razones distintas y ambas instructivas.
 
 Leé en este orden:
   1. tasks/BLOQUE_ARRANQUE_S131.md   (el bloque completo — esto es un resumen)
-  2. docs/s130/PREREGISTRO_AB_D18.md (los criterios del A/B que quedó corriendo)
-  3. docs/MIROVA_DIVERGENCES.md      (D18 y D17 tienen anotaciones nuevas)
+  2. docs/s130/VEREDICTO_AB_D18.md   (el A/B que se cerró, y por qué erré 50×)
+  3. docs/s130/GRADIENTE_CENITAL.md  (el frente que queda: el remuestreo)
+  4. docs/MIROVA_DIVERGENCES.md      (D18 y D17 tienen anotaciones nuevas)
 
 ═══════════════════════════════════════════════════════════════════
-LO PRIMERO: EL A/B DE D18, QUE QUEDÓ CORRIENDO
+NO HAY NADA CORRIENDO. S130 cerró sus dos A/B.
 ═══════════════════════════════════════════════════════════════════
 
-Run 33456630043 — seis volcanes × dos brazos, ventana 2026-05-29 a 08-24.
+EL A/B DE D18 SE CORRIÓ Y SE LEYÓ: NO ADOPTAR (docs/s130/VEREDICTO_AB_D18.md).
+Ni daño ni beneficio. El control pasó —366 de 5.551 records cambiaron, PCC 17,98 %—
+pero la caja da MÁS en 166 y MENOS en 200: redistribuye, no recorta.
 
-    gh run view 33456630043 --json status,conclusion
-    gh run download 33456630043 --dir <scratchpad>/d18
+  · ningún límite de no-adopción se cruza: Lastarria 0,0 %, PCC 0,8 %, CERO noches
+    MIROVA-confirmadas perdidas. La caja NO destruye cat-b.
+  · el criterio de adopción tampoco: el offset debía bajar en los tres nevados y
+    Villarrica SUBE 1 m sobre 2,63 km. Sólo se mueve la paridad, +0,040 en PCC y
+    +0,020 en Copahue, nulo en los otros cuatro.
 
-⚠️ EL WORKFLOW NO COMMITEA (heredado del de S129). Artefactos, 14 días. Vienen como
-`s130d18-<perfil>-<volcán>/`; hay que reordenarlos a `<dir>/<perfil>/<volcán>.json`
-antes de leerlos.
+⚠️ LA PREDICCIÓN PREVIA ERRÓ POR 50×. Se había medido «42 % de las detecciones summit
+en riesgo» y lo que se pierde es 0-0,8 %. El error fue de QUÉ SE CONTABA: dónde cae
+el clúster, no si la detección SOBREVIVE al umbral estricto. Casi todas sobreviven.
 
-LA LECTURA YA ESTÁ ESCRITA (A16): experiments/_s130_d18/veredicto_d18.py
-Arranca por el CONTROL DE INSTRUMENTO: si los brazos no difieren en ningún record,
-imprime INCONCLUSO y se detiene. No leas nada más si eso pasa.
+EL HALLAZGO REAL, más útil que el veredicto: EL UMBRAL LAXO DEL ROI1 CASI NUNCA ES LO
+QUE DECIDE. Las detecciones pasan con margen como para no depender de N·σ = 5 vs 10.
+La diferenciación summit/scene es fiel al paper en sus valores y casi INERTE en la
+práctica — por eso Llaima, Villarrica y Láscar, con círculos de 3,1× el área del
+paper, no cambian NADA.
 
-QUÉ PREGUNTA. Coppola 2016a dice que el ROI1 es una CAJA de 5×5 km igual para todos;
-el nuestro es un círculo de 3 a 20 km por volcán. El ROI1 decide qué umbrales rigen.
-
-EL CRITERIO NO ES «CERO PÉRDIDAS» — acá se ESPERA perder detecciones, esa es la
-dirección del cambio. La pregunta es cuáles. LA FIRMA QUE ARBITRA ES LA ESPACIAL:
-si la caja recorta ARTEFACTO topográfico, el clúster se ACERCA al cráter en los
-nevados; si recorta SEÑAL real, se pierden detecciones sin que la posición mejore.
-
-NO ADOPTAR si: el recall cae >3 puntos y el offset no mejora · Lastarria pierde >20 %
-(es el canario del cat-b: su offset N es el Lazufre, dato de campo, A84) · PCC
-pierde >50 % (su lacolito es feature real de 707 km²).
-
-ADOPTAR es decisión de Nicolás, no del A/B.
+D18 sigue ABIERTA como divergencia de fidelidad literal; lo que cambió es su
+PRIORIDAD. El flag queda OFF en el código con sus 7 tests.
 
 ═══════════════════════════════════════════════════════════════════
 LO QUE S130 CERRÓ — no reabrir (anti-A8)
@@ -102,7 +99,9 @@ NÚMEROS QUE CAMBIARON — no citar los viejos
     cuenta 12,2 %: esa brecha es ETIQUETADO (A46), no detección.
   · gradiente VIIRS375 en 35-50°: 0,389, no 0,570 como decía el bloque de S130.
   · sustrato K1: MODIS 0,09 % · V750 0,12 % · V375 1,36 %.
-  · el 42 % de las detecciones summit quedan fuera de la caja del paper.
+  · el 42 % de las detecciones summit tienen su clúster fuera de la caja del paper
+    — ⚠️ pero eso NO es lo que se pierde: el A/B midió 0-0,8 %. Contar el ámbito de
+    un mecanismo sobrestima cuánto DECIDE.
   · suite: 1033 tests.
 
 ═══════════════════════════════════════════════════════════════════
@@ -137,10 +136,10 @@ REGLAS DE ESTA ETAPA
 **Suite**: 1033 tests. **NRT**: sano. **Dashboard**: publicado y verificado en vivo —
 las once tarjetas coinciden entre `index` y `mosaico`.
 
-**PRs**: #569 a #578, todos mergeados. **Tags defensivos**: `pre-s130-quitar-piso-vrp`,
+**PRs**: #569 a #580, todos mergeados. **Tags defensivos**: `pre-s130-quitar-piso-vrp`,
 `pre-s130-d18-roi1-caja`.
 
-**Corriendo**: run `33456630043` (A/B de D18).
+**Nada corriendo**: los dos A/B de la sesión llegaron a veredicto.
 
 ### Lo que quedó probado
 
@@ -153,6 +152,7 @@ las once tarjetas coinciden entre `index` y `mosaico`.
 | **A81 era el denominador** | 8.038 de 9.196 anteriores a S113; backfill de S120 fechado en git |
 | **D18 es ortogonal al far→summit** | el píxel culpable está a 22 km de mediana; ninguno dentro del ROI1 |
 | **El sub-reporte es geométrico** | MIROVA plano con el ángulo, lo nuestro cayendo 2,7× |
+| **La caja del paper casi no cambia nada** | 0-0,8 % de detecciones perdidas, 0 noches MIROVA; el umbral laxo del ROI1 casi nunca decide |
 
 ### El patrón que ordena la sesión
 
@@ -165,3 +165,10 @@ Aplicada después, la lección rindió tres veces en la misma sesión: D18 pasó
 antes de lanzarse, su hipótesis sobre el far→summit se refutó en cinco minutos en vez
 de en un reproceso, y el gradiente cenital se convirtió en conclusión gracias a mirar
 numerador y denominador por separado.
+
+**Y el A/B de D18 agregó la otra mitad de la lección.** Ahí el sustrato sobraba —6,59 %
+de los records cambiaron— y el A/B salió vacío igual, porque el mecanismo **no era el
+que decidía**. Son dos formas distintas de que un experimento no mida nada, y sólo la
+primera se detecta contando ocurrencias. Para un A/B de umbrales, la pregunta correcta
+no es «¿cuántos casos caen bajo esta regla?» sino **«¿cuántos están lo bastante cerca
+del umbral como para que cambiarlo los mueva?»**.
