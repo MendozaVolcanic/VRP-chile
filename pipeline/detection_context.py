@@ -284,6 +284,35 @@ def contextual_dnti_hot_mask(
     return hot
 
 
+def roi1_summit_mask(dist_km, inner_km, roi1_mask=None):
+    """Que pixeles reciben el trato de *summit* (umbral laxo) — un solo lugar.
+
+    D18 (S130). Coppola 2016a SP426.5 dice, verbatim: *"the inner region (ROI1)
+    consists of a box (5 x 5 km) centred on the volcano's summit"*. Una caja de
+    25 km2, IGUAL para todos los volcanes. Lo nuestro es un circulo de radio
+    `inner_radius_km` que va de 3 km a 20 km segun el volcan, asi que el 68,9 %
+    de los pixeles que hoy reciben el umbral laxo lo reciben por una geometria
+    que el canon no respalda (medido, experiments/_s129_roi1/).
+
+    Antes esta decision estaba escrita como `dist_km <= inner_km` en tres lugares
+    distintos de este archivo. Centralizarla es lo que permite cambiar la
+    geometria en un punto y que el A/B mida lo que dice medir.
+
+    Args:
+        dist_km: distancia de cada pixel al centro, en km.
+        inner_km: radio del circulo per-volcan (la geometria actual).
+        roi1_mask: si viene, ES la geometria — el radio se ignora. La arma el
+            procesador con `roi_mask_bbox(..., half_km=ROI1_BOX_HALF_KM)` cuando
+            `ENABLE_ROI1_BOX_PAPER` esta ON.
+
+    Returns:
+        bool array: True donde rige el umbral de summit.
+    """
+    if roi1_mask is not None:
+        return roi1_mask
+    return dist_km <= inner_km
+
+
 def dual_roi_contextual_dnti_hot_mask(
     nti: np.ndarray,
     bt: np.ndarray,
@@ -295,6 +324,7 @@ def dual_roi_contextual_dnti_hot_mask(
     inner_km: float,
     bt_sanity_k: float,
     *,
+    roi1_mask: Optional[np.ndarray] = None,
     test1_mask: Optional[np.ndarray] = None,
     apply_unsuitable_filters: bool = False,
     unsuitable_dnti_floor: float = UNSUITABLE_DNTI_FLOOR_DEFAULT,
@@ -318,14 +348,19 @@ def dual_roi_contextual_dnti_hot_mask(
         c1_summit: C1 contextual para summit ROI.
         c1_scene: C1 contextual para scene ROI.
         inner_km: radio que separa summit de scene (inner_radius_km del vol).
+        roi1_mask: D18 (S130) — geometria explicita del ROI1. Si viene, ES el
+            ROI1 y `inner_km` se ignora; la arma el procesador con la caja
+            5x5 km del paper cuando ENABLE_ROI1_BOX_PAPER esta ON. None =
+            circulo de radio inner_km, el comportamiento historico.
 
     Returns:
         bool array True donde hot segun el C1 aplicable por distancia.
     """
     if dist_km.shape != nti.shape:
         raise ValueError(f"dist_km shape {dist_km.shape} != nti {nti.shape}")
-    summit_mask = roi_mask & (dist_km <= inner_km)
-    scene_mask = roi_mask & (dist_km > inner_km)
+    _is_summit = roi1_summit_mask(dist_km, inner_km, roi1_mask)
+    summit_mask = roi_mask & _is_summit
+    scene_mask = roi_mask & ~_is_summit
     # S72 F1.2 — forward unsuitable filters a las dos llamadas contextuales.
     _kwargs = dict(
         test1_mask=test1_mask,
@@ -375,6 +410,7 @@ def first_pass_tests_2_and_3(
     c2_dnti_summit: float = 5,
     c2_deti_summit: float = 5,
     inner_km: float,
+    roi1_mask: Optional[np.ndarray] = None,
     c1_dnti_scene: Optional[float] = None,
     c1_deti_scene: Optional[float] = None,
     c2_dnti_scene: Optional[float] = None,
@@ -405,6 +441,10 @@ def first_pass_tests_2_and_3(
         t_bg, bt_sanity_k: bg stats + floor.
         c1_*_summit, c2_*_summit: thresholds ROI1 (Tabla 1).
         inner_km: radio split summit/scene.
+        roi1_mask: D18 (S130) — geometria explicita del ROI1. Si viene, ES el
+            ROI1 y `inner_km` se ignora; la arma el procesador con la caja
+            5x5 km del paper cuando ENABLE_ROI1_BOX_PAPER esta ON. None =
+            circulo de radio inner_km, el comportamiento historico.
         c1_*_scene, c2_*_scene: thresholds ROI2 si dual; None → uniforme.
         min_bg_pixels: mínimo para μ, σ confiable.
         test1_mask: bool 2D opcional con pixels que satisfacen Test 1 K1
@@ -457,7 +497,7 @@ def first_pass_tests_2_and_3(
     # Paper Tests 2/3: `dNTI > C1 OR dNTI > μ + C2·σ` → threshold efectivo es
     # el MENOR de los dos (suficiente con que uno se supere). Equivalente:
     # ``thr = min(C1, μ + C2·σ)``.
-    is_summit = dist_km <= inner_km
+    is_summit = roi1_summit_mask(dist_km, inner_km, roi1_mask)
     dual = c1_dnti_scene is not None
 
     if dual:
@@ -504,6 +544,7 @@ def dual_roi_bt_threshold(
     n_sigma_scene: float,
     anomaly_floor_k: float,
     max_sigma_cap_k: float,
+    roi1_mask: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """Coppola 2016a Tabla 1 — dual-ROI N·sigma thresholds en eruption-path BT.
 
@@ -522,6 +563,10 @@ def dual_roi_bt_threshold(
         t_bg: median background.
         std_bg: sigma background.
         inner_km: radio del split summit/scene.
+        roi1_mask: D18 (S130) — geometria explicita del ROI1. Si viene, ES el
+            ROI1 y `inner_km` se ignora; la arma el procesador con la caja
+            5x5 km del paper cuando ENABLE_ROI1_BOX_PAPER esta ON. None =
+            circulo de radio inner_km, el comportamiento historico.
         n_sigma_summit, n_sigma_scene: multiplicadores N sigma por zona.
         anomaly_floor_k: floor delta-BT minimo.
         max_sigma_cap_k: cap del componente N sigma.
@@ -536,7 +581,7 @@ def dual_roi_bt_threshold(
     eff_summit = t_bg + threshold_summit
     eff_scene = t_bg + threshold_scene
 
-    is_summit = dist_km <= inner_km
+    is_summit = roi1_summit_mask(dist_km, inner_km, roi1_mask)
     eff_threshold = np.where(is_summit, eff_summit, eff_scene)
     return roi_mask & ~np.isnan(bt) & (bt > eff_threshold)
 
