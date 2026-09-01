@@ -1882,6 +1882,24 @@ cosa: ver D17.
 
 ## D17 — Nuestra grilla F70 se centró en el punto equivocado — **ABIERTA (premisa probada, consecuencia NO)** S124/S125
 
+> 🟢 **S130 — el mecanismo geométrico SÍ quedó probado, por otro eje: el ÁNGULO.**
+> S128 concluyó que D17 y el gap de magnitud eran el mismo problema, pero le faltaba
+> el control que separara «perdemos nosotros» de «MIROVA infla». Ese control ya está
+> (`docs/s130/GRADIENTE_CENITAL.md`): el ratio nuestro/MIROVA cae de **0,740 cerca del
+> nadir a 0,253 más allá de 50°** en VIIRS375 (n = 2.767, monótono en cinco bins), y
+> mirando numerador y denominador por separado, **MIROVA es plano** (0,23–0,27 en los
+> cinco) mientras **lo nuestro cae 2,7×**. VIIRS750 repite el patrón (n = 416). La
+> explicación es Coppola 2014 §2.2: MIROVA **remuestrea** a malla de área constante, así
+> que su magnitud no depende del ángulo; nosotros integramos sobre el píxel tal como
+> viene. ⚠️ **En MODIS NO está probado** — sus bins no son monótonos (0,778 · 0,828 ·
+> 0,862 · **1,253** · 0,400) y tienen 17-21 pares cada uno. Y ojo con el corolario:
+> **D5 = 0,73 no es parejo**; es 0,74 a nadir y 0,25 en oblicuo, así que la mediana
+> global promedia dos regímenes y esconde que el mecanismo es geométrico (A90 sobre el
+> eje angular). El brazo fiel sería **bow-tie + regrid en ese orden** — Coppola 2012
+> §3.2 pone el bow-tie como paso (i), y regridear sin de-solapar duplicaría píxeles
+> calientes, inflando en dirección contraria al error. Es cirugía de núcleo, no un flag:
+> S130 lo deja medido, no implementado.
+
 > 🔴 **SEGUNDA CORRECCIÓN (28-ago, cierre).** La correlación que se citaba como
 > apoyo empírico (r = −0,47) usaba el offset **contra el cráter**, la variable
 > que esta misma sección declara equivocada. Con la correcta (vs
@@ -1972,10 +1990,36 @@ Es una decisión de misión, no técnica.
 S114 nunca miró la geometría del ROI. Esto **mide** la divergencia pero **no prueba**
 que corregirla cure el far→summit. Es hipótesis falsable, no conclusión.
 
-**Estado**: registrada, sin A/B. Evaluarla junto con el remuestreo a malla fija, que es
-del mismo eje geométrico y ya tiene plan escrito
-(`docs/superpowers/plans/2026-08-30-ab-cuatro-mecanismos-etapa1.md`, etapa aparte). Si
-se evalúa, el brazo fiel es una **caja** de 5 × 5 km uniforme, no un círculo de radio
-uniforme: el paper dice caja y la forma importa en las esquinas.
+**Estado**: ~~registrada, sin A/B~~ → **MECANISMO IMPLEMENTADO Y A/B CORRIENDO — S130.**
+El brazo fiel es una **caja** de 5 × 5 km uniforme, no un círculo de radio equivalente:
+el paper dice caja y la forma importa en las esquinas (la esquina está a 3,54 km y un
+círculo de igual área tiene radio 2,82, así que hay píxeles que sólo la caja incluye).
+
+- **Implementación (PR #577)**: `roi1_summit_mask()` centraliza en un solo lugar la
+  decisión «quién recibe trato de summit», que estaba escrita a mano en tres puntos de
+  `detection_context.py`. Flag `enable_roi1_box_paper`, **default OFF y OFF en el
+  operacional** — la dirección es menos detecciones y `mirova_equivalent` prioriza
+  recall, así que adoptarlo es decisión de misión. Reusa `roi_mask_bbox`
+  (`scan_geometry.py:150`), que S15 escribió para el mismo cambio en el ROI **exterior**:
+  hay precedente. 7 tests, dos de ellos de **control de instrumento** (que la caja
+  cambie el resultado de `dual_roi_bt_threshold`, y que el cableado exista en los tres
+  sensores) — la lección del A/B de los fondos, hecha código.
+- **Cuánto está en juego, en DETECCIONES** (no sólo píxeles): el **42 %** de las summit
+  tienen su clúster fuera de la caja (11.116 de 26.446), concentradas en los nevados de
+  señal débil — **Llaima 71,6 % · Copahue 69,5 % · Villarrica 66,4 %**, justo donde vive
+  el sesgo topográfico A69. Pero también donde vive cat-b real: **Lastarria/Lazufre
+  22,9 % · PCC/lacolito 40,6 %**. Láscar, con foco compacto real, sólo 11,3 %.
+- **⚠️ D18 NO CURA EL far→summit — medido, no supuesto.** El píxel que roba la etiqueta
+  en los 9.203 far→summit está a una **mediana de 22 km** del cráter (p10 = 11,8 km); NI
+  UNO cae dentro del ROI1 actual ni de la caja. Ya reciben el umbral estricto de *scene*
+  y lo seguirían recibiendo. **D18 es ortogonal a esa brecha** — refuta la hipótesis de
+  que fuera la llave que A82 dejó abierta al no auditar la geometría.
+- **A/B**: run `33456630043`, seis volcanes × dos brazos, ventana 2026-05-29..08-24.
+  Pre-registro congelado en `docs/s130/PREREGISTRO_AB_D18.md`, con la firma espacial
+  (offset del clúster) como árbitro: si la caja recorta **artefacto**, el clúster se
+  acerca al cráter en los nevados; si recorta **señal**, se pierden detecciones sin que
+  la posición mejore. Límites de no-adopción fijados de antemano: Lastarria >20 %
+  (canario del cat-b, A84) y PCC >50 %.
+  ⚠️ **El workflow no commitea**: `gh run download`.
 
 Detalle: `docs/s129/ROI1_CAJA_VS_CIRCULO.md`.
