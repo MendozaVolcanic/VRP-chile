@@ -143,6 +143,8 @@ from pipeline.profile import (
     ENABLE_LOCAL_KERNEL_BG,
     ENABLE_BT_PATH_HOT,
     ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK,
+    ENABLE_ROI1_BOX_PAPER,
+    ROI1_BOX_HALF_KM,
     ENABLE_UNSUITABLE_FILTERS_267_273,
     ENABLE_TEST1_K1_BG_EXCLUDE,
     ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS,
@@ -721,6 +723,18 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     else:
         vent_dist_per_pixel = dist
 
+
+    # D18 (S130) — la geometria del ROI1. El paper dice CAJA de 5x5 km igual para
+    # todos (SP426.5: "the inner region (ROI1) consists of a box (5 x 5 km) centred
+    # on the volcano's summit"); nosotros usamos un circulo de radio inner_radius_km
+    # que va de 3 a 20 km segun el volcan. Con el flag OFF —el default y lo
+    # operacional— `_roi1_mask` queda en None y rige el circulo de siempre.
+    # Se centra en el MISMO punto que la distancia per-pixel de arriba (el vent
+    # efectivo), para que la caja y el circulo sean comparables en el A/B.
+    _roi1_mask = None
+    if ENABLE_ROI1_BOX_PAPER and vent_lat is not None and vent_lon is not None:
+        _roi1_mask = roi_mask_bbox(lat, lon, vent_lat, vent_lon, ROI1_BOX_HALF_KM)
+
     # S15 Tema E: bbox cuadrado (paridad MIROVA) en vez de circulo inscrito.
     # Recupera las esquinas del bbox 50x50 km (hasta ~35 km diagonal) donde
     # MIROVA publica detecciones que circulo radio 25 km perdia (Llaima
@@ -929,7 +943,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             if (ENABLE_DUAL_ROI_BT and inner_radius_km is not None
                     and vent_lat is not None and vent_lon is not None):
                 bt_path_hot = dual_roi_bt_threshold(
-                    bt=bt, roi_mask=roi_mask, dist_km=vent_dist_per_pixel,
+                    bt=bt, roi_mask=roi_mask, dist_km=vent_dist_per_pixel, roi1_mask=_roi1_mask,
                     t_bg=t_bg_i04, std_bg=std_bg, inner_km=inner_radius_km,
                     n_sigma_summit=N_SIGMA_MIR_SUMMIT,
                     n_sigma_scene=N_SIGMA_MIR_SCENE,
@@ -1007,7 +1021,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 if ENABLE_DNTI_DUAL_ROI and inner_radius_km is not None:
                     dnti_ctx_hot = dual_roi_contextual_dnti_hot_mask(
                         nti=nti, bt=bt, roi_mask=roi_mask,
-                        dist_km=vent_dist_per_pixel,
+                        dist_km=vent_dist_per_pixel, roi1_mask=_roi1_mask,
                         t_bg=t_bg_i04,
                         c1_summit=DNTI_CONTEXTUAL_C1_SUMMIT,
                         c1_scene=DNTI_CONTEXTUAL_C1_SCENE,
@@ -1209,7 +1223,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 _unsuit_deti = -0.1 if ENABLE_UNSUITABLE_FILTERS_267_273 else -np.inf
                 fp_hot, fp_diag = first_pass_tests_2_and_3(
                     nti=nti, nti_app=nti_app_fp, bt=bt,
-                    roi_mask=roi_mask, dist_km=vent_dist_per_pixel,
+                    roi_mask=roi_mask, dist_km=vent_dist_per_pixel, roi1_mask=_roi1_mask,
                     t_bg=t_bg_i04, bt_sanity_k=NTI_BT_SANITY_K,
                     c1_dnti_summit=_c1_sum,
                     c1_deti_summit=_c1_sum,
@@ -1296,7 +1310,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 final_thr_mask = dual_roi_bt_threshold(
                     bt=bt,
                     roi_mask=np.ones_like(bt, dtype=bool),
-                    dist_km=vent_dist_per_pixel,
+                    dist_km=vent_dist_per_pixel, roi1_mask=_roi1_mask,
                     t_bg=t_bg_i04, std_bg=std_bg_i04,
                     inner_km=inner_radius_km,
                     n_sigma_summit=N_SIGMA_MIR_SUMMIT,
@@ -1736,7 +1750,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         pixel_thr_mask = dual_roi_bt_threshold(
             bt=bt,
             roi_mask=np.ones_like(bt, dtype=bool),
-            dist_km=vent_dist_per_pixel,
+            dist_km=vent_dist_per_pixel, roi1_mask=_roi1_mask,
             t_bg=t_bg_i04, std_bg=std_bg_i04,
             inner_km=inner_radius_km,
             n_sigma_summit=N_SIGMA_MIR_SUMMIT,

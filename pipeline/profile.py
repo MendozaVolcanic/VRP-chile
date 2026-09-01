@@ -507,6 +507,27 @@ ENABLE_BT_PATH_HOT: bool = bool(_p.get("enable_bt_path_hot", True))
 # para diagnóstico. Default OFF (backward-compat).
 ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK: bool = bool(_p.get("enable_test1_k1_retire_from_hot_mask", False))
 
+# D18 (S130) — la geometria del ROI1. Coppola 2016a SP426.5, verbatim: "the inner
+# region (ROI1) consists of a box (5 x 5 km) centred on the volcano's summit".
+# Una CAJA de 25 km2 IGUAL para todos; lo nuestro es un circulo de radio
+# inner_radius_km que va de 3 km (Lastarria, PP) a 20 km (PCC). El ROI1 decide que
+# umbrales rigen (N.sigma 5 / C1 0,003 adentro contra 10 / 0,010 afuera), asi que
+# agrandarlo afloja el umbral sobre mas terreno.
+#
+# Medido: el 68,9 % de los pixeles que hoy reciben trato de summit no lo recibirian
+# con la caja del paper, y el 42 % de las detecciones summit tienen su cluster
+# fuera de ella — concentradas en los nevados de senal debil (Llaima 71,6 %,
+# Copahue 69,5 %, Villarrica 66,4 %), justo donde vive el sesgo topografico A69,
+# pero tambien donde vive cat-b real (Lastarria/Lazufre, PCC/lacolito).
+#
+# DEFAULT OFF y OFF en el operacional: la direccion del cambio es MENOS
+# detecciones y mirova_equivalent prioriza recall sobre precision. Adoptarlo es
+# decision de mision, no tecnica. Guard: tests/test_d18_roi1_caja_s130.py.
+ENABLE_ROI1_BOX_PAPER: bool = bool(_p.get("enable_roi1_box_paper", False))
+# Semilado de la caja en km. 2,5 => 5x5 km, la del paper. Parametrizado para que
+# el A/B pueda barrer semilados sin tocar codigo.
+ROI1_BOX_HALF_KM: float = float(_t.get("roi1_box_half_km", 2.5))
+
 # F2.8 S73 — Defensa secundaria BT-level post Planck-inversion.
 # Coppola 2025 Cap.11 Table 1: MODIS B21 fire channel saturation ≈ 500 K (low-gain).
 # Cualquier BT > 500K en B21 indica L1B sentinel-extrapolation o anomalía física
