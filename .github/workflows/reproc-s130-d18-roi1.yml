@@ -1,0 +1,109 @@
+name: A/B S130 — D18, la geometria del ROI1
+
+# Dos brazos que difieren en UN flag: circulo per-volcan (control, lo actual) contra
+# la CAJA de 5x5 km del paper (Coppola 2016a SP426.5: "the inner region (ROI1)
+# consists of a box (5 x 5 km) centred on the volcano's summit").
+#
+# Pre-registro CONGELADO: docs/s130/PREREGISTRO_AB_D18.md
+#
+# El control es un clon REPROCESADO, no el acumulado de mirova_equivalent — esa data
+# se fue armando con versiones distintas del codigo y mete diferencias espurias
+# ajenas al A/B (verificado S125).
+#
+# Los dos escriben a data_subdir aislados. NO tocan el operacional ni el dashboard.
+#
+# LOS SEIS VOLCANES cubren los tres regimenes a proposito (A83, A21):
+#   focal   Lascar, Lastarria  — Lastarria es el CANARIO del cat-b (Lazufre, A84)
+#   nevado  Llaima, Copahue, Villarrica — 66-72 % de sus detecciones summit quedan
+#           fuera de la caja; es donde vive el sesgo topografico A69
+#   difuso  PuyehueCordonCaulle — su ROI1 es 50,3x el del paper, pero el lacolito
+#           es una feature real (707 km2)
+# Nunca leer la mediana agrupada de los seis: promedia regimenes opuestos.
+#
+# ⚠️ ESTE WORKFLOW NO COMMITEA NADA — hereda esa decision del de S129. Los resultados
+# quedan SOLO como artefactos, 14 dias de retencion. Hay que bajarlos a mano:
+#
+#     gh run download <run_id> --dir <destino>
+#
+# ⚠️ LA VENTANA Y EL TIMEOUT VAN JUNTOS (A15). 87 dias x 2,4 min/dia = 209 min;
+# timeout-minutes 330 cubre 209 x 1,3 = 272. Si se agranda la ventana hay que
+# RECALCULAR el timeout, no copiarlo: en S129 copiarlo mato 8 de 15 jobs. El guard
+# tests/test_guard_timeout_vs_ventana_s129.py lo verifica.
+
+"on":
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-05-29"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-08-24"
+      overwrite:
+        description: "true en el PRIMER chunk (pisa), false en los siguientes (agrega)"
+        required: true
+        default: "true"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano: [Lascar, Lastarria, Llaima, Copahue, Villarrica, PuyehueCordonCaulle]
+        profile: [_s130_d18_circulo, _s130_d18_caja]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          # Las fechas pasan por env y NO se interpolan dentro del run:. S128
+          # encontro 31 ocurrencias de esa inyeccion en 7 workflows; este no suma
+          # una mas.
+          ARM_OVERWRITE: ${{ github.event.inputs.overwrite }}
+          ARM_START: ${{ github.event.inputs.start }}
+          ARM_END: ${{ github.event.inputs.end }}
+          ARM_PROFILE: ${{ matrix.profile }}
+          ARM_VOLCANO: ${{ matrix.volcano }}
+        timeout-minutes: 330
+        run: |
+          OW=""
+          if [ "$ARM_OVERWRITE" = "true" ]; then OW="--overwrite"; fi
+          python scripts/run_pipeline.py \
+            --profile "$ARM_PROFILE" \
+            --volcano "$ARM_VOLCANO" \
+            --start "$ARM_START" \
+            --end "$ARM_END" \
+            $OW
+
+      - name: Upload reprocessed JSON as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s130d18-${{ matrix.profile }}-${{ matrix.volcano }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          retention-days: 14
+          if-no-files-found: warn
