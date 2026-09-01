@@ -1321,6 +1321,33 @@ y **se descartó TODO con datos**:
   **falso negativo**. ~~No queda gap de fidelidad literal accionable; no amerita A/B.~~
   **SÍ amerita A/B** (pendiente #8 de `AUDIT_S128.md`). Guard:
   `tests/test_guard_gap_a_pool_musigma_s128.py`. Ver `AUDIT_S114` §6d y `AUDIT_S128.md` §6bis.
+  - **✅ EL A/B SE CORRIÓ Y NO PUDO MEDIR NADA — S130. Decisión de Nicolás: queda
+    DOCUMENTADO Y DIMENSIONADO, sin más inversión.** El A/B completo (dos chunks, 15 jobs,
+    882 noches comunes, 13.766 records) dio las cuatro firmas **idénticas**: `pool` no
+    movió **ninguna** de las suyas —conteo 883 vs 883, umbral 277,47 vs 277,47— y `bgmag`
+    hizo lo contrario de lo predicho, tocando el conteo en 3 de 883 y no el ratio. Ninguno
+    pierde noches MIROVA-confirmadas, pero eso no los salva: **no producen efecto**.
+    - **La causa no es el flag sino el sustrato**: los píxeles K1 (NTI > −0,8) sobre los
+      que el mecanismo opera aparecen en el **0,09 %** de las pasadas MODIS, **0,12 %** de
+      VIIRS750 y **1,36 %** de VIIRS375. Por volcán, **Láscar 4,82 %** es el único con
+      material y **Chaitén tiene CERO en 5.865 records** — el A/B eligió cinco volcanes de
+      los cuales cuatro no tenían sobre qué actuar.
+    - Se descartó primero lo barato: **no es A89** (los tres perfiles resuelven bien
+      leyendo `pipeline.profile`) ni código que ignore los flags (los tres procesadores
+      los consumen), y los brazos corrieron de verdad (hashes distintos).
+    - **Físicamente es A80**: el NTI vive pegado a su piso (~−0,9) en señal débil sobre
+      nieve; K1 = −0,8 fue calibrado contra volcanes con lava expuesta. Láscar —cráter
+      caliente persistente, sin cobertura nival— es el único que lo cruza seguido.
+    - **Esto NO cierra el GAP #A**: sigue siendo una divergencia real de fidelidad literal
+      contra §298-300, y el guard de S128 se mantiene. Lo que hace es **acotar su alcance
+      empírico** a menos del 0,1 % de las pasadas MODIS. Si algún volcán entra en fase
+      efusiva, el sustrato cambia y vuelve a ser medible.
+    - Si alguna vez se quisiera medir de verdad: **sólo tiene respuesta en Láscar**, con
+      n≈219 pasadas V375, y **no se extrapola** a los otros diez. No repetir el A/B sobre
+      más meses — el sustrato es estructural, no estacional.
+    - Detalle: `docs/s130/AB_FONDOS_SIN_SUSTRATO.md` ·
+      `experiments/_s130_ab_sustrato/medir_sustrato_k1.py` ·
+      `experiments/_s129_ab_fondos/veredicto.py`.
 - **Ejes ortogonales**: cap de magnitud REFUTADO (AUC 0.45; difuso entre Láscar y cat-b) y contexto
   temporal Method-2 REFUTADO (difuso tan variable como el foco, CV 0.84-1.22).
 
