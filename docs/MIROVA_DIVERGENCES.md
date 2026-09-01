@@ -2014,12 +2014,32 @@ círculo de igual área tiene radio 2,82, así que hay píxeles que sólo la caj
   UNO cae dentro del ROI1 actual ni de la caja. Ya reciben el umbral estricto de *scene*
   y lo seguirían recibiendo. **D18 es ortogonal a esa brecha** — refuta la hipótesis de
   que fuera la llave que A82 dejó abierta al no auditar la geometría.
-- **A/B**: run `33456630043`, seis volcanes × dos brazos, ventana 2026-05-29..08-24.
-  Pre-registro congelado en `docs/s130/PREREGISTRO_AB_D18.md`, con la firma espacial
-  (offset del clúster) como árbitro: si la caja recorta **artefacto**, el clúster se
-  acerca al cráter en los nevados; si recorta **señal**, se pierden detecciones sin que
-  la posición mejore. Límites de no-adopción fijados de antemano: Lastarria >20 %
-  (canario del cat-b, A84) y PCC >50 %.
-  ⚠️ **El workflow no commitea**: `gh run download`.
+- **✅ A/B CORRIDO Y LEÍDO — NO ADOPTAR** (run `33456630043`, 12/12 verdes; detalle en
+  `docs/s130/VEREDICTO_AB_D18.md`). No por daño —no lo hay— sino por **ausencia de
+  beneficio**.
+  - **El control de instrumento pasa**: 366 de 5.551 records comunes (**6,59 %**)
+    cambian de `pc.vrp_mw`; PCC llega al 17,98 %. Pero de esos 366 la caja da **más** en
+    166 y **menos** en 200: **redistribuye, no recorta**.
+  - **Ningún límite de no-adopción se cruza**: Lastarria pierde **0,0 %** (límite 20) y
+    PCC **0,8 %** (límite 50). **Cero noches MIROVA-confirmadas perdidas** en los seis.
+    La caja **no destruye cat-b**: el Lazufre y el lacolito sobreviven enteros.
+  - **Pero el criterio de adopción tampoco se cumple**: pedía que el offset bajara en
+    los tres nevados y Villarrica **sube** 1 m sobre 2,63 km; los otros dos bajan 9 y 14
+    metros sobre 2,7 km — ruido. Lo único que se mueve es la paridad: **+0,040 en PCC**
+    y **+0,020 en Copahue**, nulo en los otros cuatro.
+  - **⚠️ La predicción previa erró por 50×.** Se había medido que el 42 % de las
+    detecciones summit tienen su clúster fuera de la caja y se presentó como «lo que
+    está en juego»; lo que se pierde de verdad es 0-0,8 %. El error fue de **qué se
+    contaba**: dónde cae el clúster, no si la detección **sobrevive** al umbral más
+    estricto. Casi todas sobreviven.
+  - **El hallazgo real, más útil que el veredicto**: **el umbral laxo del ROI1 casi
+    nunca es lo que decide.** Las detecciones de estos volcanes pasan con margen
+    suficiente como para no depender de si el píxel recibe N·σ = 5 o N·σ = 10. La
+    diferenciación summit/scene es fiel al paper en sus valores y **casi inerte** en la
+    práctica — por eso Llaima, Villarrica y Láscar, con círculos de 3,1× el área del
+    paper, no cambian **nada**.
+  - **Estado**: D18 sigue abierta como divergencia de fidelidad literal; lo que cambia
+    es su **prioridad**, porque su consecuencia empírica está medida y es marginal —
+    igual que el GAP #A. El flag queda en el código, **OFF**, con sus 7 tests.
 
 Detalle: `docs/s129/ROI1_CAJA_VS_CIRCULO.md`.
