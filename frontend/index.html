@@ -1038,6 +1038,13 @@ function _havKm(lat1, lon1, lat2, lon2) {
 // píxeles dentro de R_core del foco O con bt>=bt_ext (lava real); el foco nunca
 // se descarta → ningún evento confirmado cae a 0. Devuelve null si no hay pixels.
 function f5CoreMagnitude(r, innerKm) {
+  // S132 — la magnitud del núcleo ahora la calcula y persiste el pipeline
+  // (`pipeline/f5_core.py`, campo `f5_core_vrp_mw`): lo que se publica es lo que se
+  // audita, y deja de depender de que el navegador rehaga la cuenta. El recálculo de
+  // abajo queda como respaldo para los records anteriores al backfill; la equivalencia
+  // entre las dos implementaciones está probada sobre 4.000 records reales en
+  // tests/test_f5_core_python_s132.py::test_paridad_con_el_javascript.
+  if (r && typeof r.f5_core_vrp_mw === "number") return r.f5_core_vrp_mw;
   const pixels = r && r.anomaly_pixels;
   if (!pixels || !pixels.length) return null;
   // Restringir candidatos al entorno del cluster summit VALIDADO (centroide del
