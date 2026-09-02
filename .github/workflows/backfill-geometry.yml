@@ -58,20 +58,25 @@ jobs:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_START: ${{ github.event.inputs.start }}
+          VRP_END: ${{ github.event.inputs.end }}
         timeout-minutes: 330
         run: |
           python scripts/backfill_geometry.py \
             --volcano ${{ matrix.volcano }} \
-            --start ${{ github.event.inputs.start }} \
-            --end ${{ github.event.inputs.end }}
+            --start "$VRP_START" \
+            --end "$VRP_END"
       - name: Commit result (solo el archivo de este volcan — anti-race A47)
+        env:
+          VRP_START: ${{ github.event.inputs.start }}
+          VRP_END: ${{ github.event.inputs.end }}
         run: |
           set +e
           git config user.name  "vrp-bot"
           git config user.email "vrp-bot@github-actions"
           git add "data/mirova_equivalent/${{ matrix.volcano }}.json" 2>/dev/null
           git diff --staged --quiet && { echo "sin cambios para ${{ matrix.volcano }}"; exit 0; }
-          git commit -m "data(geometry): ${{ matrix.volcano }} ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (S122)"
+          git commit -m "data(geometry): ${{ matrix.volcano }} $VRP_START..$VRP_END (S122)"
           for attempt in 1 2 3 4 5; do
             git pull --rebase -X theirs origin main && git push && exit 0
             git rebase --abort 2>/dev/null

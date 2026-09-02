@@ -290,9 +290,11 @@ El protocolo listaba nueve *técnicas* y ningún *eje*. Los ejes son contra qué
 | transparencia legal CPLT 372 | S116, S127 | medio |
 | matriz sensor × mecanismo | S127 | **alto** |
 | auditar las auditorías | S128 | **alto** (produjo esta sección) |
-| **evidencia exógena: TIF/KMZ por pasada** | S126 (2 usos puntuales) | **2 de 2 dieron vuelta una creencia** |
-| **evidencia exógena: papers verbatim** | A35 (1 uso) | 1 de 1 |
-| **evidencia exógena: otro sensor (NHI, Landsat)** | **nunca** | — |
+| **evidencia exógena: TIF/KMZ por pasada** | S126 (2 usos puntuales), **S131** (control de instrumento) | 2 de 2 dieron vuelta una creencia; **S131 refutó el GeoTIFF como árbitro de POSICIÓN** (error mediano 4,80 km vs `Distancia_km`, pierde contra el nulo «está en el cráter» en MODIS/V750) — sirve para confirmar, no para arbitrar |
+| **evidencia exógena: papers verbatim** | A35 (1 uso), **S131** (Coppola 2014 §2.2 + ATBD VIIRS Tabla 2.2-1) | 2 de 2: el remuestreo es una ley de área; el docstring de `viirs_pixel_areas` tenía el multiplicador por eje leído como área |
+| **evidencia exógena: otro sensor (NHI, Landsat)** | **S131** (1 uso, NHI-v1 SWIR S2+Landsat) | **medio**: confirmó el FN A77 de NdC con evidencia independiente y mostró que nuestras detecciones sin MIROVA no se distinguen de la actividad crónica (A54); basal demasiado alta para gate automático |
+| **ATBD del sensor vs código** | **S131** | **alto**: 4,38× vs tope 2,0× en `scan_geometry.py` |
+| **utilidad para el operador (dashboard como producto)** | **S131** (mitad B del eje dashboard) | **alto**: badge 100 % «Muy Bajo» en 4.279 ventanas; semáforo HTML fijo; 23,7 % de detecciones visibles con MIROVA de la misma pasada y el dato sólo en el popup |
 | idempotencia y estabilidad temporal | S128 | **alto** (93 % de pares con esquema mixto) |
 | ground truth end-to-end | S128 | **alto** (MODIS sólo existe en Láscar) |
 

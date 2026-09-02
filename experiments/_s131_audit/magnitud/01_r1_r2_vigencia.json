@@ -1,0 +1,473 @@
+{
+ "definicion": "S131 auditoria MAGNITUD - item 5: R1 (focal) y R2 (single-pixel) siguen vivos?\n\nPOR QUE. AUDIT_S125 s0 describio dos reducciones aguas abajo de la Eq. 8 de Coppola\n2016a: R1 `cluster_focal_vrp_mw` (suma un subconjunto del cluster) y R2\n`apply_single_pixel_mode` (maximo en vez de suma). El encargo pide verificarlo con el\nflag EFECTIVO y con un conteo sobre records recientes, no con el doc.\n\nDEFINICIONES (A90, dentro de la afirmacion):\n  - universo: records de los 11 Tier A en `data/mirova_equivalent/`, con\n    `primary_cluster` presente y `pc.vrp_mw > 0`, NOCTURNOS (solar_zenith_deg >= 90 o\n    ausente), ventana declarada en cada tabla (2026 completo y 2026-06-01..hoy).\n  - R1 \"aplicado\": `pc.focal_magnitude == True` (el bloque corrio).\n    R1 \"con efecto\": `pc.focal_degraded == True` (colapso al pixel pico) — es el unico\n    efecto observable en el JSON; el recorte parcial (algunos pixeles fuera) NO deja\n    rastro persistido.\n  - R2 \"aplicado\": `pc.single_pixel_mode == True`.\n    R2 \"con efecto\": aplicado Y `pc.n_pixels` en {2, 3} (con 1 pixel max == suma).\n  - Ratio suma/maximo de R2: reconstruido desde `anomaly_pixels` (top-100 por VRP,\n    lat/lon/vrp_mw por pixel) tomando los `n_pixels` pixeles mas cercanos al centroide\n    del cluster; se acepta SOLO si el maximo de esos pixeles coincide con pc.vrp_mw\n    (+-0.002 MW), que es la prueba de que se eligieron los pixeles correctos. Es una\n    reconstruccion, no el dato: S125 la dejo SIN RESPALDO porque `per_pixel_vrp` no se\n    persiste; aca se recupera con esa verificacion cruzada.\n",
+ "ventanas": {
+  "2026": {
+   "por_sensor": {
+    "modis": {
+     "n_pc": 5159,
+     "r2_aplicado": 2573,
+     "r2_con_efecto_n2_3": 1324,
+     "d9_capped": 640,
+     "r1_aplicado": 4549,
+     "r1_degradado_a_pico": 2523
+    },
+    "v750": {
+     "n_pc": 2685,
+     "r2_aplicado": 1426,
+     "r2_con_efecto_n2_3": 298,
+     "d9_capped": 23,
+     "r1_aplicado": 732,
+     "r1_degradado_a_pico": 631
+    },
+    "v375": {
+     "n_pc": 7169,
+     "r2_aplicado": 7115,
+     "r2_con_efecto_n2_3": 816
+    }
+   },
+   "por_sensor_y_path": {
+    "modis|cluster_rescue": {
+     "n_pc": 44,
+     "r1_aplicado": 42,
+     "r2_con_efecto_n2_3": 3,
+     "r1_degradado_a_pico": 15
+    },
+    "modis|eruption": {
+     "n_pc": 5008,
+     "r2_con_efecto_n2_3": 1312,
+     "r1_aplicado": 4412,
+     "r1_degradado_a_pico": 2474
+    },
+    "modis|test1": {
+     "n_pc": 107,
+     "r2_con_efecto_n2_3": 9,
+     "r1_aplicado": 95,
+     "r1_degradado_a_pico": 34
+    },
+    "v375|cluster_rescue": {
+     "n_pc": 10
+    },
+    "v375|ctx_cluster": {
+     "n_pc": 3238,
+     "r2_con_efecto_n2_3": 765
+    },
+    "v375|eruption": {
+     "n_pc": 100,
+     "r2_con_efecto_n2_3": 18
+    },
+    "v375|test1": {
+     "n_pc": 264,
+     "r2_con_efecto_n2_3": 3
+    },
+    "v375|test1_roi": {
+     "n_pc": 3557,
+     "r2_con_efecto_n2_3": 30
+    },
+    "v750|ctx_cluster": {
+     "n_pc": 1564,
+     "r2_con_efecto_n2_3": 272,
+     "r1_aplicado": 100,
+     "r1_degradado_a_pico": 87
+    },
+    "v750|eruption": {
+     "n_pc": 21,
+     "r2_con_efecto_n2_3": 1
+    },
+    "v750|test1": {
+     "n_pc": 24,
+     "r2_con_efecto_n2_3": 1
+    },
+    "v750|test1_roi": {
+     "n_pc": 1076,
+     "r2_con_efecto_n2_3": 24,
+     "r1_aplicado": 632,
+     "r1_degradado_a_pico": 544
+    }
+   },
+   "por_volcan": {
+    "Chaiten": {
+     "n_pc": 1560,
+     "r2_aplicado": 1106,
+     "r2_con_efecto_n2_3": 258,
+     "r1_aplicado": 272,
+     "r1_degradado_a_pico": 138
+    },
+    "Copahue": {
+     "n_pc": 1361,
+     "r1_aplicado": 546,
+     "r1_degradado_a_pico": 350,
+     "r2_aplicado": 1034,
+     "r2_con_efecto_n2_3": 142
+    },
+    "Isluga": {
+     "n_pc": 1310,
+     "r1_aplicado": 473,
+     "r2_aplicado": 973,
+     "r2_con_efecto_n2_3": 212,
+     "r1_degradado_a_pico": 296
+    },
+    "Lascar": {
+     "n_pc": 1318,
+     "r1_aplicado": 434,
+     "r2_aplicado": 1008,
+     "r2_con_efecto_n2_3": 467,
+     "r1_degradado_a_pico": 216
+    },
+    "Lastarria": {
+     "n_pc": 1131,
+     "r2_aplicado": 865,
+     "r2_con_efecto_n2_3": 167,
+     "r1_aplicado": 434,
+     "r1_degradado_a_pico": 266
+    },
+    "Llaima": {
+     "n_pc": 1334,
+     "r1_aplicado": 530,
+     "r1_degradado_a_pico": 322,
+     "r2_aplicado": 994,
+     "r2_con_efecto_n2_3": 145
+    },
+    "NevadosDeChillan": {
+     "n_pc": 851,
+     "r1_aplicado": 512,
+     "r1_degradado_a_pico": 290,
+     "r2_aplicado": 595,
+     "r2_con_efecto_n2_3": 125
+    },
+    "PlanchonPeteroa": {
+     "n_pc": 1319,
+     "r1_aplicado": 516,
+     "r1_degradado_a_pico": 362,
+     "r2_aplicado": 1031,
+     "r2_con_efecto_n2_3": 179
+    },
+    "PuyehueCordonCaulle": {
+     "n_pc": 1918,
+     "r2_aplicado": 1492,
+     "r2_con_efecto_n2_3": 452,
+     "r1_aplicado": 306,
+     "r1_degradado_a_pico": 170
+    },
+    "Tupungatito": {
+     "n_pc": 1270,
+     "r1_aplicado": 541,
+     "r1_degradado_a_pico": 232,
+     "r2_aplicado": 807,
+     "r2_con_efecto_n2_3": 114
+    },
+    "Villarrica": {
+     "n_pc": 1641,
+     "r1_aplicado": 717,
+     "r1_degradado_a_pico": 512,
+     "r2_aplicado": 1209,
+     "r2_con_efecto_n2_3": 177
+    }
+   },
+   "ratio_suma_sobre_max_R2": {
+    "modis": {
+     "n": 818,
+     "mediana": 1.634,
+     "p90": 2.34
+    },
+    "Chaiten": {
+     "n": 202,
+     "mediana": 1.836,
+     "p90": 2.391
+    },
+    "v375": {
+     "n": 760,
+     "mediana": 1.483,
+     "p90": 1.969
+    },
+    "v750": {
+     "n": 272,
+     "mediana": 1.358,
+     "p90": 2.0
+    },
+    "Copahue": {
+     "n": 102,
+     "mediana": 1.333,
+     "p90": 2.0
+    },
+    "Isluga": {
+     "n": 171,
+     "mediana": 1.113,
+     "p90": 2.0
+    },
+    "Lascar": {
+     "n": 406,
+     "mediana": 1.177,
+     "p90": 1.833
+    },
+    "Lastarria": {
+     "n": 107,
+     "mediana": 1.774,
+     "p90": 2.464
+    },
+    "Llaima": {
+     "n": 102,
+     "mediana": 1.294,
+     "p90": 2.0
+    },
+    "NevadosDeChillan": {
+     "n": 83,
+     "mediana": 1.0,
+     "p90": 2.0
+    },
+    "PlanchonPeteroa": {
+     "n": 142,
+     "mediana": 1.752,
+     "p90": 2.485
+    },
+    "PuyehueCordonCaulle": {
+     "n": 340,
+     "mediana": 1.624,
+     "p90": 2.127
+    },
+    "Tupungatito": {
+     "n": 81,
+     "mediana": 1.0,
+     "p90": 1.824
+    },
+    "Villarrica": {
+     "n": 114,
+     "mediana": 1.797,
+     "p90": 2.366
+    }
+   }
+  },
+  "reciente_2026-06..09": {
+   "por_sensor": {
+    "modis": {
+     "n_pc": 2244,
+     "d9_capped": 451,
+     "r2_aplicado": 897,
+     "r2_con_efecto_n2_3": 495,
+     "r1_aplicado": 2178,
+     "r1_degradado_a_pico": 916
+    },
+    "v750": {
+     "n_pc": 1115,
+     "r2_aplicado": 493,
+     "d9_capped": 3,
+     "r2_con_efecto_n2_3": 63,
+     "r1_aplicado": 593,
+     "r1_degradado_a_pico": 507
+    },
+    "v375": {
+     "n_pc": 2690,
+     "r2_aplicado": 2675,
+     "r2_con_efecto_n2_3": 211
+    }
+   },
+   "por_sensor_y_path": {
+    "modis|cluster_rescue": {
+     "n_pc": 23,
+     "r1_aplicado": 23,
+     "r2_con_efecto_n2_3": 3,
+     "r1_degradado_a_pico": 4
+    },
+    "modis|eruption": {
+     "n_pc": 2162,
+     "r2_con_efecto_n2_3": 488,
+     "r1_aplicado": 2097,
+     "r1_degradado_a_pico": 894
+    },
+    "modis|test1": {
+     "n_pc": 59,
+     "r1_aplicado": 58,
+     "r1_degradado_a_pico": 18,
+     "r2_con_efecto_n2_3": 4
+    },
+    "v375|cluster_rescue": {
+     "n_pc": 3
+    },
+    "v375|ctx_cluster": {
+     "n_pc": 983,
+     "r2_con_efecto_n2_3": 197
+    },
+    "v375|eruption": {
+     "n_pc": 12,
+     "r2_con_efecto_n2_3": 2
+    },
+    "v375|test1": {
+     "n_pc": 27
+    },
+    "v375|test1_roi": {
+     "n_pc": 1665,
+     "r2_con_efecto_n2_3": 12
+    },
+    "v750|ctx_cluster": {
+     "n_pc": 527,
+     "r1_aplicado": 77,
+     "r2_con_efecto_n2_3": 49,
+     "r1_degradado_a_pico": 68
+    },
+    "v750|eruption": {
+     "n_pc": 20,
+     "r2_con_efecto_n2_3": 1
+    },
+    "v750|test1": {
+     "n_pc": 22,
+     "r2_con_efecto_n2_3": 1
+    },
+    "v750|test1_roi": {
+     "n_pc": 546,
+     "r1_aplicado": 516,
+     "r1_degradado_a_pico": 439,
+     "r2_con_efecto_n2_3": 12
+    }
+   },
+   "por_volcan": {
+    "Chaiten": {
+     "n_pc": 653,
+     "r2_aplicado": 441,
+     "r2_con_efecto_n2_3": 96,
+     "r1_aplicado": 272,
+     "r1_degradado_a_pico": 138
+    },
+    "Copahue": {
+     "n_pc": 590,
+     "r1_aplicado": 275,
+     "r1_degradado_a_pico": 137,
+     "r2_aplicado": 399,
+     "r2_con_efecto_n2_3": 49
+    },
+    "Isluga": {
+     "n_pc": 580,
+     "r1_aplicado": 239,
+     "r1_degradado_a_pico": 143,
+     "r2_aplicado": 421,
+     "r2_con_efecto_n2_3": 95
+    },
+    "Lascar": {
+     "n_pc": 481,
+     "r1_aplicado": 199,
+     "r1_degradado_a_pico": 93,
+     "r2_aplicado": 336,
+     "r2_con_efecto_n2_3": 91
+    },
+    "Lastarria": {
+     "n_pc": 395,
+     "r1_aplicado": 213,
+     "r2_aplicado": 265,
+     "r2_con_efecto_n2_3": 53,
+     "r1_degradado_a_pico": 118
+    },
+    "Llaima": {
+     "n_pc": 553,
+     "r1_aplicado": 265,
+     "r2_aplicado": 373,
+     "r1_degradado_a_pico": 134,
+     "r2_con_efecto_n2_3": 49
+    },
+    "NevadosDeChillan": {
+     "n_pc": 432,
+     "r1_aplicado": 243,
+     "r2_aplicado": 275,
+     "r1_degradado_a_pico": 90,
+     "r2_con_efecto_n2_3": 49
+    },
+    "PlanchonPeteroa": {
+     "n_pc": 503,
+     "r1_aplicado": 244,
+     "r1_degradado_a_pico": 138,
+     "r2_aplicado": 354,
+     "r2_con_efecto_n2_3": 69
+    },
+    "PuyehueCordonCaulle": {
+     "n_pc": 752,
+     "r2_aplicado": 529,
+     "r2_con_efecto_n2_3": 143,
+     "r1_aplicado": 262,
+     "r1_degradado_a_pico": 141
+    },
+    "Tupungatito": {
+     "n_pc": 520,
+     "r1_aplicado": 269,
+     "r1_degradado_a_pico": 115,
+     "r2_aplicado": 274,
+     "r2_con_efecto_n2_3": 12
+    },
+    "Villarrica": {
+     "n_pc": 590,
+     "r1_aplicado": 290,
+     "r2_aplicado": 398,
+     "r1_degradado_a_pico": 176,
+     "r2_con_efecto_n2_3": 63
+    }
+   },
+   "ratio_suma_sobre_max_R2": {
+    "modis": {
+     "n": 244,
+     "mediana": 1.654,
+     "p90": 2.282
+    },
+    "Chaiten": {
+     "n": 72,
+     "mediana": 1.809,
+     "p90": 2.007
+    },
+    "v375": {
+     "n": 201,
+     "mediana": 1.563,
+     "p90": 1.938
+    },
+    "v750": {
+     "n": 59,
+     "mediana": 1.496,
+     "p90": 2.0
+    },
+    "Copahue": {
+     "n": 29,
+     "mediana": 1.496,
+     "p90": 2.751
+    },
+    "Isluga": {
+     "n": 74,
+     "mediana": 1.177,
+     "p90": 2.0
+    },
+    "Lascar": {
+     "n": 70,
+     "mediana": 1.231,
+     "p90": 1.877
+    },
+    "Lastarria": {
+     "n": 21,
+     "mediana": 1.867,
+     "p90": 2.6
+    },
+    "Llaima": {
+     "n": 28,
+     "mediana": 1.194,
+     "p90": 2.0
+    },
+    "NevadosDeChillan": {
+     "n": 26,
+     "mediana": 1.16,
+     "p90": 2.0
+    },
+    "PlanchonPeteroa": {
+     "n": 46,
+     "mediana": 1.857,
+     "p90": 2.573
+    },
+    "PuyehueCordonCaulle": {
+     "n": 102,
+     "mediana": 1.626,
+     "p90": 2.005
+    },
+    "Tupungatito": {
+     "n": 4,
+     "mediana": null
+    },
+    "Villarrica": {
+     "n": 32,
+     "mediana": 1.77,
+     "p90": 2.0
+    }
+   }
+  }
+ }
+}

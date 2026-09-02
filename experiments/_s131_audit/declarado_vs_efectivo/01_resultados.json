@@ -1,0 +1,425 @@
+[
+  {
+    "fuente": "FICHA_SDA",
+    "afirmacion": "Categorias de datos: MODIS (MOD14/MYD14)",
+    "estado": "FALSO",
+    "declarado": "MOD14/MYD14 (producto de incendios)",
+    "efectivo": "MOD021KM/MYD021KM + MOD03/MYD03 (radiancias L1B). MOD14 no se descarga nunca",
+    "evidencia": "pipeline/fetch.py:176-183 (short_name); pipeline/process_modis.py:10 ya lo dice bien",
+    "severidad": "ALTA"
+  },
+  {
+    "fuente": "FICHA_SDA",
+    "afirmacion": "Mitigacion de sesgos incluye \"zonas de exclusion\"",
+    "estado": "FALSO",
+    "declarado": "zonas de exclusion activas como mitigacion",
+    "efectivo": "ENABLE_EXCLUDE_ZONES=False. MISSION.md las lista como parche removido en S27",
+    "evidencia": "pipeline.profile ENABLE_EXCLUDE_ZONES",
+    "severidad": "ALTA"
+  },
+  {
+    "fuente": "FICHA_SDA",
+    "afirmacion": "Sesgo topografico \"mitigado normalizando por indice termico (NTI)\"",
+    "estado": "FALSO",
+    "declarado": "mitigado por NTI",
+    "efectivo": "ENABLE_TEST1_NTI_INTEGRAL=False; compute_test1_nti solo se importa en process_viirs.py:206. MODIS y V750 importan unicamente compute_test1_mir (MIR absoluto), que es justo el mecanismo que A69 senala como causa",
+    "evidencia": "pipeline/process_modis.py:59 y pipeline/process_viirs_mod.py:153",
+    "severidad": "ALTA"
+  },
+  {
+    "fuente": "FICHA_SDA",
+    "afirmacion": "Artefacto solar mitigado restringiendo MIR a pasadas nocturnas",
+    "estado": "CONFIRMADO",
+    "declarado": "solo noche",
+    "efectivo": "scripts/run_pipeline.py:170 nighttime_only=True por defecto; nrt.yml:176 y :196 no pasan --no-night-filter",
+    "evidencia": "scripts/run_pipeline.py:170,185-196,411,446",
+    "severidad": "n/a"
+  },
+  {
+    "fuente": "FICHA_SDA",
+    "afirmacion": "v1.4: parametros single-pixel (umbral 5,0 MW, max 3 px)",
+    "estado": "CONFIRMADO",
+    "declarado": "5,0 MW / 3 px",
+    "efectivo": "5.0 MW / 3 px",
+    "evidencia": "pipeline.profile",
+    "severidad": "n/a"
+  },
+  {
+    "fuente": "FICHA_SDA",
+    "afirmacion": "v1.3: path_d_intra_radio y second_pass_intra_radio desactivados",
+    "estado": "CONFIRMADO",
+    "declarado": "ambos OFF desde S118",
+    "efectivo": "path_d=False second_pass=False",
+    "evidencia": "pipeline.profile",
+    "severidad": "n/a"
+  },
+  {
+    "fuente": "FICHA_SDA",
+    "afirmacion": "v1.2: vrptir.py no productivo (ENABLE_VRPTIR_AVENI=False)",
+    "estado": "CONFIRMADO",
+    "declarado": "False",
+    "efectivo": "False",
+    "evidencia": "pipeline.profile",
+    "severidad": "n/a"
+  },
+  {
+    "fuente": "FICHA_SDA",
+    "afirmacion": "Historial declara 14 modulos con cabecera FICHA (6 nucleo v1.1 + 8 secundarios v1.2)",
+    "estado": "OBSOLETO",
+    "declarado": "14 modulos",
+    "efectivo": "16 modulos tienen la cabecera; no declarados en ninguna version: ['regrid.py', 'vrp_regimes.py']",
+    "evidencia": "grep -l \"FICHA SDA\" pipeline/*.py",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "FICHA_SDA",
+    "afirmacion": "Alcance de trazabilidad: scan_geometry.py",
+    "estado": "SIN RESPALDO",
+    "declarado": "no figura ni como incluido ni como excluido",
+    "efectivo": "scan_geometry.py fija A_pix, multiplicador directo del VRP -> cae bajo el criterio v1.2 (\"modulos que deciden la magnitud\"), pero no tiene cabecera FICHA y tampoco esta en la lista de exclusiones justificadas (serializacion / no productivos)",
+    "evidencia": "pipeline/scan_geometry.py (sin \"FICHA SDA\")",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "FICHA_SDA (codigo)",
+    "afirmacion": "Cabecera FICHA de vrp_regimes.py: \"Radiancia MODIS (MOD14/MYD14)\"",
+    "estado": "FALSO",
+    "declarado": "MOD14/MYD14",
+    "efectivo": "MOD021KM/MYD021KM",
+    "evidencia": "pipeline/vrp_regimes.py:10 contra pipeline/process_modis.py:10, que lo dice bien",
+    "severidad": "ALTA"
+  },
+  {
+    "fuente": "MISSION",
+    "afirmacion": "Pisos VRP por sensor: \"SIGUEN ACTIVOS\" (store.py:459-468, 0.02/0.15/0.05)",
+    "estado": "OBSOLETO",
+    "declarado": "activos 0.02/0.15/0.05; alcance 1564 de 23990 records summit (6,5 %)",
+    "efectivo": "pisos=(0.0, 0.0, 0.0): S130 los llevo a 0 en los tres sensores. Ademas la cita drifteo: el helper esta en store.py:72-103 y se llama en store.py:489; las lineas 459-468 son hoy el guard A46",
+    "evidencia": "pipeline.profile + pipeline/store.py:72,489",
+    "severidad": "ALTA"
+  },
+  {
+    "fuente": "MISSION",
+    "afirmacion": "Cloud mask BT<260 K: \"SIGUE ACTIVA en VIIRS 375\", literal en process_viirs.py:674",
+    "estado": "OBSOLETO",
+    "declarado": "literal 260.0 hardcodeado, ciega ~23 % de las pasadas del sensor",
+    "efectivo": "process_viirs.py:786 dice CLOUD_BT_THRESHOLD = CLOUD_MASK_BT_K y el perfil vale 0.0. El cambio de una linea que MISSION propone ya se hizo en S126 (#535)",
+    "evidencia": "pipeline/process_viirs.py:786,790",
+    "severidad": "ALTA"
+  },
+  {
+    "fuente": "pipeline/process_viirs.py",
+    "afirmacion": "Comentario del anillo intermedio: valid_mask=cloud_free \"excluye nubes I05<260K\"",
+    "estado": "OBSOLETO",
+    "declarado": "el anillo intermedio se calcula sobre pixeles sin nube",
+    "efectivo": "CLOUD_MASK_BT_K=0.0, asi que cloud_free = I05 >= 0.0 y no excluye nada: valid_mask es una mascara todo-True. El comentario quedo describiendo el comportamiento previo a S126 (#535). Importa porque el anillo intermedio es justo el mecanismo que la FICHA describe como recuperacion de focos sub-pixel",
+    "evidencia": "pipeline/process_viirs.py:1797-1799 y :786,790",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "MISSION",
+    "afirmacion": "Regla D Test 1-priority activa en process_viirs.py:1502-1568 / process_modis.py:1167-1204 / process_viirs_mod.py:1055",
+    "estado": "OBSOLETO",
+    "declarado": "esas lineas",
+    "efectivo": "hoy los bloques estan en process_viirs.py:1642-1710, process_modis.py:1196-1230 y process_viirs_mod.py:1069. La afirmacion de fondo (sigue activa) se mantiene; ademas ya no es \"sin flag\": process_viirs.py:1695 pasa ENABLE_TEST1_PRIORITY_WEAK_CLUSTER",
+    "evidencia": "grep -n \"Regla D\" pipeline/process_*.py",
+    "severidad": "BAJA"
+  },
+  {
+    "fuente": "MISSION",
+    "afirmacion": "MAX_SIGMA_COMPONENT_K neutralizado por valor, default del codigo 7.0",
+    "estado": "CONFIRMADO",
+    "declarado": "perfil 999.0, default 7.0",
+    "efectivo": "perfil=999.0",
+    "evidencia": "pipeline.profile",
+    "severidad": "n/a"
+  },
+  {
+    "fuente": "MISSION",
+    "afirmacion": "Resumen de divergencias: \"Abiertas D2, D3, D11-posicion\"",
+    "estado": "OBSOLETO",
+    "declarado": "tres abiertas",
+    "efectivo": "el catalogo declara ademas D13 (ABIERTA documental, S124), D17 (ABIERTA, S124/S125) y D18 (ABIERTA, S129/S130). El resumen de MISSION quedo en S105",
+    "evidencia": "docs/MIROVA_DIVERGENCES.md:1457, :1883, :1960",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "CLAUDE.md",
+    "afirmacion": "\"radius_km = 25 km uniforme para volcanes chilenos\"",
+    "estado": "FALSO",
+    "declarado": "25 km uniforme",
+    "efectivo": "volcanoes.yaml: {25: 11, 5: 34} -> 25 km solo en los 11 Tier A; los otros 34 tienen 5 km",
+    "evidencia": "volcanoes.yaml",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "CLAUDE.md",
+    "afirmacion": "Tabla inner_radius_km por volcan (Reglas geometricas S14)",
+    "estado": "CONFIRMADO",
+    "declarado": "{'Lastarria': 3, 'Lascar': 5, 'Isluga': 5, 'NevadosDeChillan': 5, 'Llaima': 5, 'Villarrica': 5, 'Chaiten': 5, 'PlanchonPeteroa': 3, 'Copahue': 4, 'Tupungatito': 7, 'PuyehueCordonCaulle': 20}",
+    "efectivo": "coincide en los 11",
+    "evidencia": "volcanoes.yaml",
+    "severidad": "n/a"
+  },
+  {
+    "fuente": "CLAUDE.md",
+    "afirmacion": "\"volcanoes.yaml (45 configurados, 11 con data, 34 sin pull)\"",
+    "estado": "FALSO",
+    "declarado": "11 con data / 34 sin pull",
+    "efectivo": "45 configurados y 45 con data en data/mirova_equivalent/. Los 34 no-TierA tienen entre 67 y 94 records cada uno (backfill 2026-04-17 a 2026-04-24)",
+    "evidencia": "data/mirova_equivalent/*.json",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "CLAUDE.md",
+    "afirmacion": "\"los 6 workflows que hacen git push a main comparten group: push-main - nrt, nrt-retry, sync-mirova-csv, audit-weekly, backfill y reproc\"",
+    "estado": "FALSO",
+    "declarado": "6 workflows, incluidos nrt-retry y audit-weekly",
+    "efectivo": "9 workflows hacen git push; 5 estan en push-main (['backfill-geometry.yml', 'backfill-tier-a.yml', 'nrt.yml', 'reproc-s120-eq16-villarrica.yml', 'sync-mirova-csv.yml']). nrt-retry.yml NO pushea (dispara nrt.yml con gh workflow run) y no declara concurrency alguna; audit-weekly.yml pushea con grupo propio \"audit-weekly\"",
+    "evidencia": ".github/workflows/*.yml",
+    "severidad": "ALTA"
+  },
+  {
+    "fuente": "CLAUDE.md",
+    "afirmacion": "\"hay 3 excepciones deliberadas\" al grupo push-main",
+    "estado": "FALSO",
+    "declarado": "3 excepciones",
+    "efectivo": "son 4: ['audit-weekly.yml', 'reproc-chunked.yml', 'reproc-s124-ndc-focus.yml', 'reproc-s124-villarrica-op-ab.yml']. audit-weekly.yml es la cuarta y no esta documentada; cumple el criterio (retry x5 con backoff en audit-weekly.yml:71-77) pero nadie lo escribio",
+    "evidencia": ".github/workflows/audit-weekly.yml:71-77",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "CLAUDE.md",
+    "afirmacion": "A43: todo yml nuevo con \"on\": entre comillas (Norway problem)",
+    "estado": "CONFIRMADO",
+    "declarado": "los 18 quoted",
+    "efectivo": "los 18 parsean la clave como string",
+    "evidencia": "yaml.safe_load sobre .github/workflows/*.yml",
+    "severidad": "n/a"
+  },
+  {
+    "fuente": "CLAUDE.md",
+    "afirmacion": "nrt.yml: cron 2h, matrix por volcan, timeout 50 min per-step, max-parallel 8",
+    "estado": "CONFIRMADO",
+    "declarado": "cron 0 */2, 50 min per-step, max-parallel 8",
+    "efectivo": "cron \"0 */2 * * *\" (l.12), timeout-minutes 50 en los dos pasos de proceso (l.173, l.193), job 60 (l.69), max-parallel 8 (l.80), fail-fast false (l.76)",
+    "evidencia": ".github/workflows/nrt.yml",
+    "severidad": "n/a"
+  },
+  {
+    "fuente": "CLAUDE.md",
+    "afirmacion": "A12: \"Lascar 21.6K, Isluga ~20K\" (dT > 20 K, calibrados naturalmente sin fix)",
+    "estado": "FALSO",
+    "declarado": "Lascar 21,6 K y Isluga ~20 K",
+    "efectivo": "medido: Lascar 16,9 K e Isluga 8,3 K. Isluga cae DEBAJO del corte de 12 K con el que la propia A12 define la clase que SI necesita kernel-bg, o sea el ejemplo contradice la regla. El libro de cuentas lo registra desde S128 y la regla sigue sin marcar",
+    "evidencia": "scripts/libro_de_cuentas.py:261-264 + docs/LIBRO_DE_CUENTAS.json",
+    "severidad": "ALTA"
+  },
+  {
+    "fuente": "CLAUDE.md",
+    "afirmacion": "frontend: 3 vistas live + comparacion.html preview sin mirovaEqVrp (25/8/8/0)",
+    "estado": "CONFIRMADO",
+    "declarado": "index 25, diario 8, mosaico 8, comparacion 0",
+    "efectivo": "{'comparacion.html': 0, 'diario.html': 9, 'index.html': 26, 'mosaico.html': 9}",
+    "evidencia": "frontend/*.html",
+    "severidad": "n/a"
+  },
+  {
+    "fuente": "CLAUDE.md",
+    "afirmacion": "Coeficientes Wooster 18.9 (MODIS) / 19.7 (V750) / 18.0 (V375)",
+    "estado": "CONFIRMADO",
+    "declarado": "18.9 / 19.7 / 18.0",
+    "efectivo": "process_modis.py:82 = 18.9; process_viirs_mod.py:63 = 19.7; process_viirs.py:74 = 18.0",
+    "evidencia": "grep -n WOOSTER_COEFF pipeline/*.py",
+    "severidad": "n/a"
+  },
+  {
+    "fuente": "CLAUDE.md",
+    "afirmacion": "N.sigma 5 summit / 10 scene / 15 dia; C1 0.003 / 0.010 / 0.02; NTI floor 0.005",
+    "estado": "CONFIRMADO",
+    "declarado": "5/10/15 y 0.003/0.010/0.02 y 0.005",
+    "efectivo": "perfil efectivo: 5.0/10.0/15.0, 0.003/0.01/0.02, 0.005",
+    "evidencia": "pipeline.profile con VRP_PROFILE=mirova_equivalent",
+    "severidad": "n/a"
+  },
+  {
+    "fuente": "CLAUDE.md",
+    "afirmacion": "Estado 4: \"abiertas D2, D3 y D12\" en el catalogo",
+    "estado": "OBSOLETO",
+    "declarado": "D2, D3, D12",
+    "efectivo": "el catalogo declara ademas D13, D17 y D18 abiertas; el puntero de CLAUDE.md no las nombra",
+    "evidencia": "docs/MIROVA_DIVERGENCES.md:1457, :1883, :1960",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "CLAUDE.md / docs",
+    "afirmacion": "Citas file:line: la linea citada contiene el simbolo que la afirmacion nombra (10 muestreadas)",
+    "estado": "FALSO",
+    "declarado": "10/10 apuntan bien",
+    "efectivo": "4/10 apuntan bien; 6 drifteadas -> A89 docstring 5 volcanes opt-in: pipeline/process_viirs_mod.py:409 dice \"inner_radius_km: MIROVA-style visual classification radius (S14 D1).\" | A69 nota: compute_test1_nti: pipeline/process_viirs.py:958 dice \"\" | A69 nota: import MODIS: pipeline/process_modis.py:674 dice \"# Banda 21 (3.929 µm). Coppola 2015 fue diseñado ORIGINALMENTE para MO\" | A69 nota: import V750: pipeline/process_viirs_mod.py:665 dice \"# S28 — Path Test 1 integrated-ROI MIR (Coppola 2015 §2.2 Eq.1) en VII\" | A10 dashboard pc.vrp_mw: frontend/index.html:680 dice \"{ name: \"Calbuco\",              display: \"Calbuco\",                reg\" | D17/S127: regrid centrado en volcano_lat: pipeline/process_modis.py:455 dice \"# rama no se ejecuta y el procesador es idéntico al anterior.\"",
+    "evidencia": "experiments/_s131_audit/declarado_vs_efectivo/01_verificar.py",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "README",
+    "afirmacion": "\"the 50x50 km grid uses the official MIROVA grid center - decoupled on purpose\"",
+    "estado": "FALSO",
+    "declarado": "la grilla se centra en el centro oficial de MIROVA",
+    "efectivo": "get_grid_center() (geo_utils.py:29) no tiene ningun llamador en produccion y ENABLE_UTM_REGRID=False. Es exactamente lo que D17 declara NO implementado y lo que AUDIT_S127 Hallazgo 7 re-verifico",
+    "evidencia": "docs/MIROVA_DIVERGENCES.md:1883 + docs/AUDIT_S127.md Hallazgo 7",
+    "severidad": "ALTA"
+  },
+  {
+    "fuente": "README",
+    "afirmacion": "Feature list: \"TIR VRP (VIIRS I05, 11.45 um): Stefan-Boltzmann (Aveni 2024, TIRVolcH)\"",
+    "estado": "FALSO",
+    "declarado": "feature entregada",
+    "efectivo": "ENABLE_VRP_TIR_OUTPUT=False y ENABLE_VRPTIR_AVENI=False: 24290 de 24318 records con el campo valen 0. Los 28 con valor son residuo de 2026-04 (max 4817 MW, la clase de outlier que motivo apagarlo). detect_tirvolch.py sigue sin importarlo nadie",
+    "evidencia": "pipeline/profiles/mirova_equivalent.yaml:521 + data/mirova_equivalent/*.json",
+    "severidad": "ALTA"
+  },
+  {
+    "fuente": "README",
+    "afirmacion": "\"34 additional volcanoes are configured under the experimental profile (outside the operational dashboard)\"",
+    "estado": "FALSO",
+    "declarado": "solo bajo experimental",
+    "efectivo": "los 34 tienen records dentro de data/mirova_equivalent/ (el subdir operacional), 67-94 cada uno",
+    "evidencia": "data/mirova_equivalent/Osorno.json, Hudson.json, Parinacota.json",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "README",
+    "afirmacion": "\"Dashboard (frontend - 3 standalone views)\"",
+    "estado": "OBSOLETO",
+    "declarado": "3 vistas",
+    "efectivo": "4 desplegadas: comparacion.html se rotula PREVIEW S115. CLAUDE.md se corrigio en S127; README no",
+    "evidencia": "frontend/*.html + docs/AUDIT_S127.md Hallazgo 5",
+    "severidad": "BAJA"
+  },
+  {
+    "fuente": "README",
+    "afirmacion": "\"Nadir-fixed pixel area: no sec3 off-nadir scaling\"",
+    "estado": "CONFIRMADO",
+    "declarado": "nadir-fijo en los 3 sensores",
+    "efectivo": "MODIS=True VIIRS=True",
+    "evidencia": "pipeline.profile",
+    "severidad": "n/a"
+  },
+  {
+    "fuente": "README",
+    "afirmacion": "\"Night-time only MIR processing (barrier at fetch, process and store stages)\"",
+    "estado": "CONFIRMADO",
+    "declarado": "noche en las 3 etapas",
+    "efectivo": "scripts/run_pipeline.py:170 default True + _check_night en las 3 ramas de sensor (l.227, 270, 317)",
+    "evidencia": "scripts/run_pipeline.py",
+    "severidad": "n/a"
+  },
+  {
+    "fuente": "pipeline/scan_geometry.py",
+    "afirmacion": "Docstring del modulo presenta sec3(theta) como lo que el modulo hace (\"Without correction ... underestimate\")",
+    "estado": "OBSOLETO",
+    "declarado": "sec3 es el modo de operacion",
+    "efectivo": "los dos flags nadir-fijo estan ON (A66/A67), asi que la rama sec3 no se ejecuta en produccion en ningun sensor. El aviso aparece recien en la linea 232, dentro de un bloque agregado en S122, no en la cabecera",
+    "evidencia": "pipeline/scan_geometry.py:1-28 contra :232",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "pipeline/scan_geometry.py",
+    "afirmacion": "Docstring de roi_mask_bbox: \"Cambiar a bbox recupera esas refs\" (bbox 50x50)",
+    "estado": "OBSOLETO",
+    "declarado": "el bbox 50x50 es la geometria de MIROVA y conviene adoptarlo",
+    "efectivo": "ENABLE_ROI1_BOX_PAPER=False y ROI1_BOX_HALF_KM=2.5 km, o sea la caja 5x5 del ROI1 (D18), no el bbox 50x50 del docstring. El A/B de D18 en S130 dio NO ADOPTAR",
+    "evidencia": "pipeline.profile + docs/MIROVA_DIVERGENCES.md:1960",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "pipeline/process_modis.py",
+    "afirmacion": "_select_thresholds: \"con enable_day=False el comportamiento es identico al historico\"",
+    "estado": "CONFIRMADO",
+    "declarado": "enable_day False",
+    "efectivo": "ENABLE_DAYTIME_MODIS=False",
+    "evidencia": "pipeline.profile",
+    "severidad": "n/a"
+  },
+  {
+    "fuente": "data/mirova_equivalent",
+    "afirmacion": "Invariante de store.py: diag_vrp_floor_mw presente => vrp_mw == 0",
+    "estado": "FALSO",
+    "declarado": "el sello solo existe cuando el piso actuo",
+    "efectivo": "1635 de 1635 records sellados tienen vrp_mw>0 (2.69 % de los 60694 records del corpus, 2025-02 a 2026-09). El reproceso de S130 restauro vrp_mw pero el sello quedo pegado: un audit futuro leeria \"el piso piso 1635 records\" y seria falso (A87/A90)",
+    "evidencia": "pipeline/store.py:99-103 escribe los dos campos juntos",
+    "severidad": "ALTA"
+  },
+  {
+    "fuente": "docs/INDEX.md",
+    "afirmacion": "AUDIT_S127.md marcada como \"Ultima\"",
+    "estado": "OBSOLETO",
+    "declarado": "S127 es la ultima",
+    "efectivo": "existen auditorias hasta S131; AUDIT_S128.md no figura en el indice. Es la 4a vez que se redescubre \"INDEX congelado\" (Fuga 1 del protocolo), y el propio indice trae el aviso de no hardcodear cual es la vigente",
+    "evidencia": "ls docs/AUDIT_S*.md | sort -V | tail -1",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "MIROVA_DIVERGENCES",
+    "afirmacion": "D2: \"cobertura ~70 % para VIIRS\" + pendiente re-scrapear",
+    "estado": "OBSOLETO",
+    "declarado": "~70 %",
+    "efectivo": "S128 la midio en 79,2 % y el loader CONS union OCR de S86 la mitigo de facto. La seccion no tiene ninguna nota posterior al 2026-04-29. CLAUDE.md ya avisa que \"el doc nunca se actualizo\", o sea el error esta identificado y sin corregir",
+    "evidencia": "docs/MIROVA_DIVERGENCES.md:42-65",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "MIROVA_DIVERGENCES",
+    "afirmacion": "D18 encabezado: \"ABIERTA (medida, sin A/B) S129\"",
+    "estado": "OBSOLETO",
+    "declarado": "sin A/B",
+    "efectivo": "el A/B se corrio en S130 y su veredicto (NO ADOPTAR) esta en el cuerpo de la misma seccion, lineas 2018-2043, citando docs/s130/VEREDICTO_AB_D18.md",
+    "evidencia": "docs/MIROVA_DIVERGENCES.md:1960 contra :2018",
+    "severidad": "BAJA"
+  },
+  {
+    "fuente": "MIROVA_DIVERGENCES",
+    "afirmacion": "D3: conteos de categorias MIROVA (13.378 RUTINA, 407 Muy Bajo, 253 FP)",
+    "estado": "SIN RESPALDO",
+    "declarado": "los conteos del 2026-04-29",
+    "efectivo": "la seccion no nombra ningun script que los recompute y no hay entrada de D3 en scripts/libro_de_cuentas.py. Son conteos absolutos sobre un corpus vivo (A90): el CSV crecio y los porcentajes ya no se pueden comparar contra nada",
+    "evidencia": "docs/MIROVA_DIVERGENCES.md:66-95 + docs/LIBRO_DE_CUENTAS.json",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "MIROVA_DIVERGENCES",
+    "afirmacion": "D12 (S105, nota de gates intra-radio): \"Siguen ON en mirova_equivalent.yaml\"",
+    "estado": "CONFIRMADO",
+    "declarado": "la frase esta pero corregida abajo",
+    "efectivo": "el parrafo de S105 sigue diciendo \"Siguen ON\" y el flag efectivo es False, pero la propia seccion trae el bloque \"RESUELTO S118 (flip OFF)\" a continuacion. Queda como riesgo de lectura parcial, no como afirmacion sin corregir",
+    "evidencia": "docs/MIROVA_DIVERGENCES.md:1407-1441",
+    "severidad": "BAJA"
+  },
+  {
+    "fuente": "MAPA_WORKSPACE.md",
+    "afirmacion": "Grafo de dependencias: \"VRP Chile / CAIDO\"",
+    "estado": "FALSO",
+    "declarado": "caido",
+    "efectivo": "el mismo documento declara arriba \"RECUPERADO (verificado 2026-08-09)\". El grafo ASCII no se actualizo: contradiccion interna dentro del doc",
+    "evidencia": "MAPA_WORKSPACE.md:18 contra :70-71",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "MAPA_WORKSPACE.md",
+    "afirmacion": "\"Latente en VRP-chile (5 de 6 sin grupo de concurrency)\"",
+    "estado": "FALSO",
+    "declarado": "5 de 6 sin grupo",
+    "efectivo": "9 workflows pushean; 5 tienen push-main y los 4 restantes tienen grupo propio con retry x5. Ninguno queda sin grupo Y sin retry",
+    "evidencia": ".github/workflows/*.yml",
+    "severidad": "MEDIA"
+  },
+  {
+    "fuente": "scripts/libro_de_cuentas.py",
+    "afirmacion": "Cobertura del instrumento de numeros",
+    "estado": "SIN RESPALDO",
+    "declarado": "n/a",
+    "efectivo": "13 afirmaciones con instrumento: 11 OK y 2 con deriva (git_mb 6507,8 -> 6930,6; data_mb 1034,7 -> 1100,8). El propio script reporta 415 numeros SIN instrumento en el repo. Ninguna de las afirmaciones falsas de esta auditoria tenia instrumento",
+    "evidencia": "python scripts/libro_de_cuentas.py",
+    "severidad": "MEDIA"
+  }
+]

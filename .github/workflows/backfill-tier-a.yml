@@ -76,27 +76,33 @@ jobs:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_START: ${{ github.event.inputs.start }}
+          VRP_END: ${{ github.event.inputs.end }}
+          VRP_OVERWRITE: ${{ github.event.inputs.overwrite }}
         timeout-minutes: 330
         run: |
           OVERWRITE_FLAG=""
-          if [ "${{ github.event.inputs.overwrite }}" = "true" ]; then
+          if [ "$VRP_OVERWRITE" = "true" ]; then
             OVERWRITE_FLAG="--overwrite"
             echo "MODO OVERWRITE: se reemplazan los records existentes de la ventana"
           fi
           python scripts/run_pipeline.py \
             --profile mirova_equivalent \
             --volcano ${{ matrix.volcano }} \
-            --start ${{ github.event.inputs.start }} \
-            --end ${{ github.event.inputs.end }} \
+            --start "$VRP_START" \
+            --end "$VRP_END" \
             $OVERWRITE_FLAG
       - name: Commit result (solo el archivo de este volcán — anti-race S22)
+        env:
+          VRP_START: ${{ github.event.inputs.start }}
+          VRP_END: ${{ github.event.inputs.end }}
         run: |
           set +e
           git config user.name  "vrp-bot"
           git config user.email "vrp-bot@github-actions"
           git add "data/mirova_equivalent/${{ matrix.volcano }}.json" 2>/dev/null
           git diff --staged --quiet && { echo "no changes for ${{ matrix.volcano }}"; exit 0; }
-          git commit -m "data(backfill): ${{ matrix.volcano }} ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (S120)"
+          git commit -m "data(backfill): ${{ matrix.volcano }} $VRP_START..$VRP_END (S120)"
           for attempt in 1 2 3 4 5; do
             git pull --rebase -X theirs origin main && git push && exit 0
             git rebase --abort 2>/dev/null

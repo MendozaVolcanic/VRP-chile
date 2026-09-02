@@ -1,0 +1,437 @@
+{
+ "definicion": "S131 auditoria MAGNITUD - item 4 bis: el gradiente cenital medido POR PASADA.\n\nPOR QUE. `02_correccion_area_por_angulo.py` (un par por NOCHE, maximo de cada lado,\nla regla de `_s126_lib`) dio un gradiente V375 de 0.80 -> 0.60 entre nadir y 50+,\nmientras S130/S131 (`factor_requerido.py`, que empareja CADA record contra el maximo\nde MIROVA de la noche) dieron 0.74 -> 0.25. Las dos definiciones son legitimas para\ncosas distintas, pero ninguna es la correcta para un eje ANGULAR: el maximo de la\nnoche mezcla pasadas de angulos distintos. La ground truth tiene hora al segundo\n(`Fecha_Satelite_UTC`), asi que se puede emparejar pasada con pasada.\n\nDEFINICION (A90): par = (record nuestro nocturno con pc.vrp_mw>0) x (fila ALERTA de\nMIROVA, CONS union OCR con alias A11/A14, mismo bucket de sensor, |dt| <= 20 min,\nVRP_MW>0, nocturna 03-09 UTC como en el loader canonico). Si hay varias filas\nMIROVA en la ventana se toma la mas cercana en tiempo. Ventana 2026, 11 Tier A.\nAngulo = |sensor_zenith_deg| del record. Brazos A/B/C identicos al script 02.\nCruce extra: donde la fila OCR trae `Zenith_Sat_deg`, se compara con nuestro angulo.\nCruce extra 2: records MODIS con `pc.d9_capped` (cap 5 MW del path D) vs MIROVA.\n",
+ "por_sensor": {
+  "v375": {
+   "bins": {
+    "0-15": {
+     "n": 297,
+     "zen_mediano": 7.22,
+     "ours_mediana_mw": 0.159,
+     "mirova_mediana_mw": 0.23,
+     "A_sin": 0.771,
+     "B_modelo": 0.786,
+     "C_lineal": 0.81
+    },
+    "15-25": {
+     "n": 248,
+     "zen_mediano": 21.7,
+     "ours_mediana_mw": 0.146,
+     "mirova_mediana_mw": 0.235,
+     "A_sin": 0.657,
+     "B_modelo": 0.797,
+     "C_lineal": 0.878
+    },
+    "25-35": {
+     "n": 221,
+     "zen_mediano": 31.9,
+     "ours_mediana_mw": 0.107,
+     "mirova_mediana_mw": 0.2,
+     "A_sin": 0.576,
+     "B_modelo": 0.872,
+     "C_lineal": 0.988
+    },
+    "35-50": {
+     "n": 351,
+     "zen_mediano": 42.58,
+     "ours_mediana_mw": 0.093,
+     "mirova_mediana_mw": 0.21,
+     "A_sin": 0.494,
+     "B_modelo": 0.813,
+     "C_lineal": 1.173
+    },
+    "50+": {
+     "n": 479,
+     "zen_mediano": 58.6,
+     "ours_mediana_mw": 0.076,
+     "mirova_mediana_mw": 0.17,
+     "A_sin": 0.447,
+     "B_modelo": 0.859,
+     "C_lineal": 1.502
+    }
+   },
+   "global": {
+    "A_sin": {
+     "mediana": 0.58,
+     "ic95": [
+      0.56,
+      0.6
+     ],
+     "n": 1596,
+     "n_sobre_2": 33,
+     "pct_sobre_2": 2.1,
+     "n_en_banda": 468,
+     "pct_en_banda": 29.3
+    },
+    "B_modelo": {
+     "mediana": 0.824,
+     "ic95": [
+      0.795,
+      0.846
+     ],
+     "n": 1596,
+     "n_sobre_2": 158,
+     "pct_sobre_2": 9.9,
+     "n_en_banda": 663,
+     "pct_en_banda": 41.5
+    },
+    "C_lineal": {
+     "mediana": 1.032,
+     "ic95": [
+      1.002,
+      1.06
+     ],
+     "n": 1596,
+     "n_sobre_2": 299,
+     "pct_sobre_2": 18.7,
+     "n_en_banda": 671,
+     "pct_en_banda": 42.0
+    }
+   }
+  },
+  "v750": {
+   "bins": {
+    "0-15": {
+     "n": 80,
+     "zen_mediano": 11.075,
+     "ours_mediana_mw": 0.75,
+     "mirova_mediana_mw": 1.0,
+     "A_sin": 0.759,
+     "B_modelo": 0.79,
+     "C_lineal": 0.802
+    },
+    "15-25": {
+     "n": 48,
+     "zen_mediano": 23.0,
+     "ours_mediana_mw": 0.587,
+     "mirova_mediana_mw": 1.0,
+     "A_sin": 0.646,
+     "B_modelo": 0.82,
+     "C_lineal": 0.918
+    },
+    "25-35": {
+     "n": 42,
+     "zen_mediano": 33.12,
+     "ours_mediana_mw": 0.497,
+     "mirova_mediana_mw": 1.01,
+     "A_sin": 0.393,
+     "B_modelo": 0.639,
+     "C_lineal": 0.718
+    },
+    "35-50": {
+     "n": 66,
+     "zen_mediano": 42.66,
+     "ours_mediana_mw": 0.442,
+     "mirova_mediana_mw": 0.89,
+     "A_sin": 0.499,
+     "B_modelo": 0.829,
+     "C_lineal": 1.246
+    },
+    "50+": {
+     "n": 19,
+     "zen_mediano": 54.8,
+     "ours_mediana_mw": 0.173,
+     "mirova_mediana_mw": 0.51,
+     "A_sin": 0.431,
+     "B_modelo": 0.622,
+     "C_lineal": 1.369
+    }
+   },
+   "global": {
+    "A_sin": {
+     "mediana": 0.562,
+     "ic95": [
+      0.525,
+      0.61
+     ],
+     "n": 255,
+     "n_sobre_2": 17,
+     "pct_sobre_2": 6.7,
+     "n_en_banda": 76,
+     "pct_en_banda": 29.8
+    },
+    "B_modelo": {
+     "mediana": 0.773,
+     "ic95": [
+      0.72,
+      0.825
+     ],
+     "n": 255,
+     "n_sobre_2": 20,
+     "pct_sobre_2": 7.8,
+     "n_en_banda": 111,
+     "pct_en_banda": 43.5
+    },
+    "C_lineal": {
+     "mediana": 0.881,
+     "ic95": [
+      0.833,
+      0.959
+     ],
+     "n": 255,
+     "n_sobre_2": 29,
+     "pct_sobre_2": 11.4,
+     "n_en_banda": 120,
+     "pct_en_banda": 47.1
+    }
+   }
+  },
+  "modis": {
+   "bins": {
+    "0-15": {
+     "n": 18,
+     "zen_mediano": 9.51,
+     "ours_mediana_mw": 1.244,
+     "mirova_mediana_mw": 1.01,
+     "A_sin": 0.92
+    }
+   },
+   "global": {
+    "A_sin": {
+     "mediana": 0.899,
+     "ic95": [
+      0.719,
+      1.234
+     ],
+     "n": 50,
+     "n_sobre_2": 12,
+     "pct_sobre_2": 24.0,
+     "n_en_banda": 16,
+     "pct_en_banda": 32.0
+    }
+   }
+  }
+ },
+ "por_volcan": {
+  "v375": {
+   "Villarrica": {
+    "n": 38,
+    "zen_mediano": 21.97,
+    "A_sin": 0.904,
+    "A_sin_sobre_2": 1,
+    "A_sin_en_banda": true,
+    "B_modelo": 1.0,
+    "B_modelo_sobre_2": 5,
+    "B_modelo_en_banda": true,
+    "C_lineal": 1.089,
+    "C_lineal_sobre_2": 6,
+    "C_lineal_en_banda": true
+   },
+   "PlanchonPeteroa": {
+    "n": 171,
+    "zen_mediano": 32.72,
+    "A_sin": 0.793,
+    "A_sin_sobre_2": 3,
+    "A_sin_en_banda": true,
+    "B_modelo": 1.069,
+    "B_modelo_sobre_2": 20,
+    "B_modelo_en_banda": true,
+    "C_lineal": 1.39,
+    "C_lineal_sobre_2": 48,
+    "C_lineal_en_banda": true
+   },
+   "Lascar": {
+    "n": 315,
+    "zen_mediano": 41.13,
+    "A_sin": 0.418,
+    "A_sin_sobre_2": 2,
+    "A_sin_en_banda": false,
+    "B_modelo": 0.619,
+    "B_modelo_sobre_2": 8,
+    "B_modelo_en_banda": false,
+    "C_lineal": 0.804,
+    "C_lineal_sobre_2": 16,
+    "C_lineal_en_banda": true
+   },
+   "PuyehueCordonCaulle": {
+    "n": 251,
+    "zen_mediano": 45.14,
+    "A_sin": 0.658,
+    "A_sin_sobre_2": 13,
+    "A_sin_en_banda": false,
+    "B_modelo": 0.998,
+    "B_modelo_sobre_2": 51,
+    "B_modelo_en_banda": true,
+    "C_lineal": 1.384,
+    "C_lineal_sobre_2": 80,
+    "C_lineal_en_banda": true
+   },
+   "NevadosDeChillan": {
+    "n": 8
+   },
+   "Copahue": {
+    "n": 7
+   },
+   "Llaima": {
+    "n": 5
+   },
+   "Lastarria": {
+    "n": 219,
+    "zen_mediano": 34.67,
+    "A_sin": 0.467,
+    "A_sin_sobre_2": 4,
+    "A_sin_en_banda": false,
+    "B_modelo": 0.648,
+    "B_modelo_sobre_2": 19,
+    "B_modelo_en_banda": false,
+    "C_lineal": 0.892,
+    "C_lineal_sobre_2": 36,
+    "C_lineal_en_banda": true
+   },
+   "Isluga": {
+    "n": 312,
+    "zen_mediano": 39.695,
+    "A_sin": 0.528,
+    "A_sin_sobre_2": 3,
+    "A_sin_en_banda": false,
+    "B_modelo": 0.733,
+    "B_modelo_sobre_2": 15,
+    "B_modelo_en_banda": true,
+    "C_lineal": 0.932,
+    "C_lineal_sobre_2": 41,
+    "C_lineal_en_banda": true
+   },
+   "Chaiten": {
+    "n": 61,
+    "zen_mediano": 29.4,
+    "A_sin": 0.986,
+    "A_sin_sobre_2": 2,
+    "A_sin_en_banda": true,
+    "B_modelo": 1.326,
+    "B_modelo_sobre_2": 14,
+    "B_modelo_en_banda": true,
+    "C_lineal": 1.48,
+    "C_lineal_sobre_2": 22,
+    "C_lineal_en_banda": false
+   },
+   "Tupungatito": {
+    "n": 209,
+    "zen_mediano": 41.19,
+    "A_sin": 0.644,
+    "A_sin_sobre_2": 5,
+    "A_sin_en_banda": false,
+    "B_modelo": 0.856,
+    "B_modelo_sobre_2": 22,
+    "B_modelo_en_banda": true,
+    "C_lineal": 1.163,
+    "C_lineal_sobre_2": 43,
+    "C_lineal_en_banda": true
+   }
+  },
+  "v750": {
+   "Villarrica": {
+    "n": 4
+   },
+   "PlanchonPeteroa": {
+    "n": 2
+   },
+   "Lascar": {
+    "n": 180,
+    "zen_mediano": 32.155,
+    "A_sin": 0.533,
+    "A_sin_sobre_2": 1,
+    "A_sin_en_banda": false,
+    "B_modelo": 0.727,
+    "B_modelo_sobre_2": 1,
+    "B_modelo_en_banda": true,
+    "C_lineal": 0.836,
+    "C_lineal_sobre_2": 6,
+    "C_lineal_en_banda": true
+   },
+   "PuyehueCordonCaulle": {
+    "n": 35,
+    "zen_mediano": 23.8,
+    "A_sin": 0.647,
+    "A_sin_sobre_2": 4,
+    "A_sin_en_banda": false,
+    "B_modelo": 0.819,
+    "B_modelo_sobre_2": 5,
+    "B_modelo_en_banda": true,
+    "C_lineal": 1.018,
+    "C_lineal_sobre_2": 7,
+    "C_lineal_en_banda": true
+   },
+   "NevadosDeChillan": {
+    "n": 0
+   },
+   "Copahue": {
+    "n": 2
+   },
+   "Llaima": {
+    "n": 0
+   },
+   "Lastarria": {
+    "n": 0
+   },
+   "Isluga": {
+    "n": 28,
+    "zen_mediano": 28.685,
+    "A_sin": 1.063,
+    "A_sin_sobre_2": 10,
+    "A_sin_en_banda": true,
+    "B_modelo": 1.381,
+    "B_modelo_sobre_2": 11,
+    "B_modelo_en_banda": true,
+    "C_lineal": 1.415,
+    "C_lineal_sobre_2": 13,
+    "C_lineal_en_banda": false
+   },
+   "Chaiten": {
+    "n": 1
+   },
+   "Tupungatito": {
+    "n": 3
+   }
+  },
+  "modis": {
+   "Villarrica": {
+    "n": 0
+   },
+   "PlanchonPeteroa": {
+    "n": 0
+   },
+   "Lascar": {
+    "n": 50,
+    "zen_mediano": 21.635,
+    "A_sin": 0.899,
+    "A_sin_sobre_2": 12,
+    "A_sin_en_banda": true
+   },
+   "PuyehueCordonCaulle": {
+    "n": 0
+   },
+   "NevadosDeChillan": {
+    "n": 0
+   },
+   "Copahue": {
+    "n": 0
+   },
+   "Llaima": {
+    "n": 0
+   },
+   "Lastarria": {
+    "n": 0
+   },
+   "Isluga": {
+    "n": 0
+   },
+   "Chaiten": {
+    "n": 0
+   },
+   "Tupungatito": {
+    "n": 0
+   }
+  }
+ },
+ "cruce_zenith_ocr": {
+  "n": 35,
+  "mediana_dif_deg": 0.72,
+  "p90_abs_dif_deg": 27.1
+ },
+ "modis_d9_capped": {
+  "n_capped_con_mirova": 0,
+  "ratio_capped_mediana": null,
+  "mirova_mediana_mw_capped": null,
+  "n_no_capped": 50,
+  "ratio_no_capped_mediana": 0.899
+ }
+}

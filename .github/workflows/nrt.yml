@@ -66,7 +66,7 @@ concurrency:
 jobs:
   process:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 80   # S131: peor job observado 56 min (Villarrica 2026-09-02); A15 pide >= 1.3x -> 73; 80 deja margen y cabe en el cron de 2 h
     permissions:
       contents: write
     strategy:
@@ -113,10 +113,12 @@ jobs:
       # On `schedule`, inputs are null so all jobs proceed.
       - name: Filter volcano match
         id: filter
+        env:
+          DISPATCH_VOLCANO: ${{ github.event.inputs.volcano }}
         run: |
-          if [ "${{ github.event.inputs.volcano }}" != "" ] && [ "${{ github.event.inputs.volcano }}" != "${{ matrix.volcano }}" ]; then
+          if [ "$DISPATCH_VOLCANO" != "" ] && [ "$DISPATCH_VOLCANO" != "${{ matrix.volcano }}" ]; then
             echo "skip=true" >> $GITHUB_OUTPUT
-            echo "Skipping ${{ matrix.volcano }} (dispatch filter=${{ github.event.inputs.volcano }})"
+            echo "Skipping ${{ matrix.volcano }} (dispatch filter=$DISPATCH_VOLCANO)"
           else
             echo "skip=false" >> $GITHUB_OUTPUT
           fi
@@ -170,15 +172,22 @@ jobs:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_DATE: ${{ github.event.inputs.date }}
+          VRP_START: ${{ github.event.inputs.start }}
+          VRP_END: ${{ github.event.inputs.end }}
+          VRP_OVERWRITE: ${{ github.event.inputs.overwrite }}
         timeout-minutes: 50
         run: |
           set -o pipefail
+          # S131: los inputs del dispatch entran por env (no interpolados en el shell)
+          ARGS=()
+          if [ -n "$VRP_DATE" ]; then ARGS+=(--date "$VRP_DATE"); fi
+          if [ -n "$VRP_START" ]; then ARGS+=(--start "$VRP_START"); fi
+          if [ -n "$VRP_END" ]; then ARGS+=(--end "$VRP_END"); fi
+          if [ "$VRP_OVERWRITE" = "true" ]; then ARGS+=(--overwrite); fi
           python scripts/run_pipeline.py --profile mirova_equivalent \
             --volcano ${{ matrix.volcano }} \
-            ${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }} \
-            ${{ github.event.inputs.start != '' && format('--start {0}', github.event.inputs.start) || '' }} \
-            ${{ github.event.inputs.end != '' && format('--end {0}', github.event.inputs.end) || '' }} \
-            ${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }} 2>&1 | tee -a pipeline.log
+            "${ARGS[@]}" 2>&1 | tee -a pipeline.log
 
       - name: Run VRP pipeline — experimental profile
         if: ${{ steps.filter.outputs.skip != 'true' && (github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'experimental') }}
@@ -190,15 +199,22 @@ jobs:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_DATE: ${{ github.event.inputs.date }}
+          VRP_START: ${{ github.event.inputs.start }}
+          VRP_END: ${{ github.event.inputs.end }}
+          VRP_OVERWRITE: ${{ github.event.inputs.overwrite }}
         timeout-minutes: 50
         run: |
           set -o pipefail
+          # S131: los inputs del dispatch entran por env (no interpolados en el shell)
+          ARGS=()
+          if [ -n "$VRP_DATE" ]; then ARGS+=(--date "$VRP_DATE"); fi
+          if [ -n "$VRP_START" ]; then ARGS+=(--start "$VRP_START"); fi
+          if [ -n "$VRP_END" ]; then ARGS+=(--end "$VRP_END"); fi
+          if [ "$VRP_OVERWRITE" = "true" ]; then ARGS+=(--overwrite); fi
           python scripts/run_pipeline.py --profile experimental \
             --volcano ${{ matrix.volcano }} \
-            ${{ github.event.inputs.date != '' && format('--date {0}', github.event.inputs.date) || '' }} \
-            ${{ github.event.inputs.start != '' && format('--start {0}', github.event.inputs.start) || '' }} \
-            ${{ github.event.inputs.end != '' && format('--end {0}', github.event.inputs.end) || '' }} \
-            ${{ github.event.inputs.overwrite == 'true' && '--overwrite' || '' }} 2>&1 | tee -a pipeline.log
+            "${ARGS[@]}" 2>&1 | tee -a pipeline.log
 
       # S70-0 T2: detectar NASA_AUTH_UNREACHABLE en pipeline.log para etiquetar
       # el run como [NASA_DOWN]. NO cambia exit code — el badge sigue en rojo

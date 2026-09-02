@@ -26,6 +26,7 @@ name: NRT Retry (NASA recovery)
 jobs:
   check-and-retry:
     runs-on: ubuntu-latest
+    timeout-minutes: 15   # S131: el job solo consulta/relanza con gh; A15 pedia un tope (pendiente #5 de AUDIT_S128)
     permissions:
       actions: write   # para gh workflow run
       contents: read

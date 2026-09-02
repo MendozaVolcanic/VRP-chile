@@ -1,0 +1,72 @@
+{
+ "definicion": "S131 auditoria MAGNITUD - lo que VE el operador no es pc.vrp_mw en VIIRS375.\n\nPOR QUE. `frontend/index.html:1015` arranca con `USE_F5_CORE = true`: para VIIRS375 el\ndashboard muestra `f5CoreMagnitude` (suma de los anomaly_pixels a <=0.75 km del pixel de\nmaxima energia dentro de inner_radius del centroide, o con bt>=295 K), no `pc.vrp_mw`.\nEste script replica esa funcion en Python y compara AMBAS contra MIROVA con los mismos\npares por pasada del script 03 (|dt|<=20 min, nocturnas, 2026, 11 Tier A).\n",
+ "n": 1609,
+ "global": {
+  "pc_vrp_mw": {
+   "mediana": 0.58,
+   "ic95": [
+    0.562,
+    0.603
+   ]
+  },
+  "display_f5": {
+   "mediana": 0.681,
+   "ic95": [
+    0.66,
+    0.707
+   ]
+  },
+  "display_igual_a_pc_pct": 5.7
+ },
+ "por_volcan": {
+  "Villarrica": {
+   "n": 38,
+   "pc": 0.904,
+   "display_f5": 0.945
+  },
+  "PlanchonPeteroa": {
+   "n": 171,
+   "pc": 0.793,
+   "display_f5": 0.895
+  },
+  "Lascar": {
+   "n": 317,
+   "pc": 0.418,
+   "display_f5": 0.529
+  },
+  "PuyehueCordonCaulle": {
+   "n": 258,
+   "pc": 0.656,
+   "display_f5": 1.029
+  },
+  "NevadosDeChillan": {
+   "n": 8
+  },
+  "Copahue": {
+   "n": 7
+  },
+  "Llaima": {
+   "n": 5
+  },
+  "Lastarria": {
+   "n": 220,
+   "pc": 0.471,
+   "display_f5": 0.573
+  },
+  "Isluga": {
+   "n": 314,
+   "pc": 0.528,
+   "display_f5": 0.582
+  },
+  "Chaiten": {
+   "n": 62,
+   "pc": 0.984,
+   "display_f5": 1.312
+  },
+  "Tupungatito": {
+   "n": 209,
+   "pc": 0.644,
+   "display_f5": 0.645
+  }
+ }
+}

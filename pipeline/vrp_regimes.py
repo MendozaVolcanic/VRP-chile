@@ -7,7 +7,7 @@
 #                 (lava fresca, lava lake sub-pixel, lago hidrotermal).
 # Modelo/método : Reglas físicas determinísticas (Planck/Wooster, Coppola 2016/2024).
 #                 NO es caja negra — la lógica es auditable (cumple punto 5.5 Res. 372).
-# Datos entrada : Radiancia MODIS (MOD14/MYD14) y VIIRS. SIN datos personales.
+# Datos entrada : Radiancia/temperatura de brillo MODIS MOD021KM/MYD021KM y VIIRS I04/I05, M13/M15. SIN datos personales.
 # Variables     : VRP (MW), BT del píxel, T de fondo (corona/local), área del píxel.
 # Limitaciones  : Saturación de píxel, contaminación por lago/nieve, falsos positivos
 #                 por incendios; fondo regional como fallback degrada explícitamente.

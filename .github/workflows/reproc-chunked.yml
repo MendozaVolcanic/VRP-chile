@@ -132,10 +132,11 @@ jobs:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_PROFILE_IN: ${{ github.event.inputs.profile }}
         timeout-minutes: 170
         run: |
           python scripts/run_pipeline.py \
-            --profile ${{ github.event.inputs.profile }} \
+            --profile "$VRP_PROFILE_IN" \
             --volcano ${{ matrix.job.vol }} \
             --start ${{ matrix.job.start }} \
             --end ${{ matrix.job.end }} \
@@ -227,7 +228,7 @@ jobs:
           git config user.email "vrp-bot@github-actions"
           git add -f "data/$PROFILE"/*.json
           git diff --staged --quiet && { echo "no changes"; exit 0; }
-          git commit -m "data(reproc): $PROFILE ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (${{ github.event.inputs.volcanoes }})"
+          git commit -m "data(reproc): $PROFILE $VRP_START..$VRP_END ($VRP_VOLCANOES)"
           for attempt in 1 2 3 4 5; do
             git pull --rebase -X theirs origin main && git push && exit 0
             git rebase --abort 2>/dev/null

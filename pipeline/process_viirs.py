@@ -1794,9 +1794,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # al legacy con los flags S112 OFF).
     _t1_intermediate_lbg = None
     if ENABLE_TEST1_INTERMEDIATE_BG and "I04" in bands:
-        # valid_mask = cloud_free (S112 review MEDIUM): igualar el criterio del fondo
-        # global (excluye nubes I05<260K) para no inflar la magnitud con topes de nube
-        # fríos dentro del anillo en noches de cirrus.
+        # valid_mask = cloud_free (S112 review MEDIUM): mantiene el mismo criterio que
+        # el fondo global. S131: desde S126 (#535) la máscara de nube está apagada
+        # (`cloud_mask_bt_k: 0.0`), así que cloud_free es todo-True y NO excluye nada;
+        # el comentario original decía «excluye nubes I05<260K» y ya no aplica.
         _t1_int_bt = intermediate_ring_bg_bt(
             bt, vent_dist_per_pixel,
             float(TEST1_INTERMEDIATE_BG_RING_KM[0]),

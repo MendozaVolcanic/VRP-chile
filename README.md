@@ -29,8 +29,9 @@ MIROVA KMLs:
 | Planchón–Peteroa | 3 | Copahue | 4 |
 | Nevados de Chillán | 5 | | |
 
-34 additional volcanoes are configured under the `experimental` profile (outside the
-operational dashboard).
+34 additional volcanoes are configured but outside the NRT cron; they carry a short
+April-2026 backfill window in `data/mirova_equivalent/` and are not part of the
+operational dashboard selection.
 
 ---
 
@@ -44,22 +45,26 @@ operational dashboard).
   VIIRS 750 m 19.7, VIIRS 375 m 18.0
 - **Nadir-fixed pixel area** (MIROVA literal clone): constant-area grid like MIROVA,
   no sec³ off-nadir scaling (adopted after A/B validation vs MIROVA ground truth)
-- **Detection anchored to the physical crater** (`vent_lat/lon`), while the 50×50 km
-  grid uses the official MIROVA grid center — these are decoupled on purpose
+- **Detection anchored to the physical crater** (`vent_lat/lon`). The ROI is currently
+  built around the configured volcano coordinates, **not** around the official MIROVA grid
+  center — see divergence D17 in `docs/MIROVA_DIVERGENCES.md` (`get_grid_center()` exists
+  but is not wired into production; `ENABLE_UTM_REGRID=False`)
 - **Detection paths**: NTI absolute, dNTI contextual (8-neighbor kernel, Coppola 2016a
   Tests 2–3 with dual-ROI summit/scene thresholds), ETI quadratic scene + second-pass,
   and the **integrated-ROI Test 1** for spatially-extended sub-pixel anomalies
   (lava lakes ~0.05–0.5 MW that no individual pixel can reveal)
 - **Vent-anchored cluster aggregation**: `primary_cluster` is what MIROVA reports
   (the summit cluster), kept separate from scene-wide totals
-- **TIR VRP** (VIIRS I05, 11.45 µm): Stefan-Boltzmann (Aveni et al. 2024, TIRVolcH)
+- **TIR VRP** (VIIRS I05, 11.45 µm, Stefan-Boltzmann, Aveni et al. 2024) — implemented,
+  currently **disabled** in the operational profile (`ENABLE_VRP_TIR_OUTPUT=False`); the
+  published `vrp_tir_mw` field is 0
 - **Night-time only MIR processing** (solar contamination barrier at fetch, process and
   store stages)
 - **Resilient NRT fetch**: NASA auth probe with budget, per-host circuit breaker for
   LANCE outages, NRT→Standard product auto-upgrade
 - **Automated via GitHub Actions**: cron every 2 hours, matrix per volcano, no server
 
-### Dashboard (frontend — 3 standalone views)
+### Dashboard (frontend — 3 live views + 1 preview)
 - **`index.html`** — main dashboard: VRP time series (Chart.js), hotspot map (Leaflet)
   with crater-distance classification, MIROVA reference overlay, VRE cumulative energy,
   CSV export
@@ -93,7 +98,7 @@ VRP-Chile/
 |   |-- profile.py                Profile/flag system (mirova_equivalent, experimental, A/B)
 |   |-- mirova_csv_loader.py      Canonical MIROVA reference loader (CONS + OCR)
 |-- scripts/run_pipeline.py       CLI entry point
-|-- frontend/                     3 standalone views (see above)
+|-- frontend/                     3 live views + comparacion.html (preview, see above)
 |-- data/
 |   |-- mirova_equivalent/        Operational records per volcano (11 Tier A)
 |   |-- experimental/             34 additional volcanoes

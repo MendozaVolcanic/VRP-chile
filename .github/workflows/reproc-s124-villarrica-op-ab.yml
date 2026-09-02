@@ -57,11 +57,15 @@ jobs:
           python-version: "3.11"
       - name: Partir la ventana en trozos
         id: split
+        env:
+          VRP_START: ${{ github.event.inputs.start }}
+          VRP_END: ${{ github.event.inputs.end }}
+          VRP_MAX_DAYS: ${{ github.event.inputs.max_days }}
         run: |
           CHUNKS=$(python scripts/split_date_window.py \
-            --start "${{ github.event.inputs.start }}" \
-            --end "${{ github.event.inputs.end }}" \
-            --max-days "${{ github.event.inputs.max_days }}")
+            --start "$VRP_START" \
+            --end "$VRP_END" \
+            --max-days "$VRP_MAX_DAYS")
           echo "chunks=$CHUNKS" >> "$GITHUB_OUTPUT"
           echo "Trozos: $CHUNKS"
 
@@ -144,7 +148,7 @@ jobs:
           git config user.email "vrp-bot@github-actions"
           git add -f "data/_s124_villarrica_op_ab/Villarrica.json"
           git diff --staged --quiet && { echo "no changes"; exit 0; }
-          git commit -m "data(s124): A/B Villarrica operacional ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (issue 513)"
+          git commit -m "data(s124): A/B Villarrica operacional $VRP_START..$VRP_END (issue 513)"
           for attempt in 1 2 3 4 5; do
             git pull --rebase -X theirs origin main && git push && exit 0
             git rebase --abort 2>/dev/null

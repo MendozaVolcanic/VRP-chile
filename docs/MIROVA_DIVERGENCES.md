@@ -41,6 +41,12 @@ similar a MIROVA".
 
 ### D2 — Cobertura del CSV ground truth incompleta
 
+> **Actualización S128/S131.** La cobertura medida es **79,2 %**, no ~70 %
+> (`docs/AUDIT_S128.md` §4), y el loader canónico CONS ∪ OCR (S86, `experiments/_s126_lib.py::cargar_mirova`)
+> ya la mitiga de facto: las métricas del proyecto se calculan sobre esa unión. El
+> «re-scrapear» pendiente de abajo quedó superado por `sync-mirova-csv.yml` (cron 1 h).
+> Esta sección se conserva como quedó escrita el 2026-04-29.
+
 **Hallazgo Nicolás 2026-04-29**: el CSV scrapeado de `latest.php` NO está al 100%.
 Cobertura estimada: **~70% para VIIRS** (375m y 750m).
 
@@ -64,6 +70,11 @@ Cobertura estimada: **~70% para VIIRS** (375m y 750m).
   faltantes específicas.
 
 ### D3 — MIROVA distingue FP explícito; nuestros JSONs no
+
+> **S131**: los conteos de abajo (13.378 RUTINA, 407 Muy Bajo, 165 Bajo, 253 FP) son del
+> 2026-04-29 y **no tienen instrumento que los recompute** (no hay entrada en
+> `scripts/libro_de_cuentas.py`). Son conteos absolutos sobre un corpus vivo (A90): se
+> conservan como fotografía de esa fecha; **no usar como línea base** sin volver a medir.
 
 **MIROVA NRT publica 4 categorías**:
 - `RUTINA` + `NULO` (13,378 = 94%): pasadas sin nada.
@@ -1407,7 +1418,7 @@ grave en monitoreo. Fix: reproc histórico F2 Láscar MODIS (pipeline actual nad
 ## S105 — Nota de decisión pendiente: gates intra-radio S84/S85 (A55)
 
 AUDIT_S86 §C6 los declaró anti-patrón emergente (redundantes con la supresión
-`mirovaEqVrp` del frontend desde S33). Siguen ON en `mirova_equivalent.yaml`.
+`mirovaEqVrp` del frontend desde S33). ~~Siguen ON en `mirova_equivalent.yaml`~~ → **OFF desde S118** (flip PR #474, verificado S119 y S131; ver bloque «RESUELTO S118» más abajo).
 **Decisión de Nicolás (S105): decidir con más datos al cerrar el frente Test1/
 fondo-local** (toca la misma zona del pipeline). No revertir ni re-justificar aún.
 Registrado para que no se pierda (AUDIT_S105 contradicción #1).
@@ -1957,7 +1968,7 @@ para un A/B, no para afirmar el origen exacto.
 
 ---
 
-## D18 — El ROI1 del paper es una CAJA de 5 km igual para todos; el nuestro es un CÍRCULO de 3 a 20 km por volcán — **ABIERTA (medida, sin A/B)** S129
+## D18 — El ROI1 del paper es una CAJA de 5 km igual para todos; el nuestro es un CÍRCULO de 3 a 20 km por volcán — **ABIERTA (A/B corrido S130 → NO ADOPTAR; divergencia de fidelidad literal, prioridad baja)** S129/S130
 
 **La cita**, Coppola 2016a SP426.5, verbatim:
 
