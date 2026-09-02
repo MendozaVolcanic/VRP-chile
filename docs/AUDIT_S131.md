@@ -156,6 +156,15 @@ del servidor — justo el caso que A1 describía):
 | Móvil 375 px | `scrollWidth` 783 (2,09×); enlaces a las otras vistas fuera de pantalla | **375/375**; los 4 enlaces y «Acerca de» dentro de pantalla (right ≤ 273 px); la tabla de eventos scrollea dentro de su caja |
 | Consola | — | 0 errores de script; los únicos 404 son `*_recent.json`, que sólo existen en el sitio publicado (`build_recent_json.py`) y tienen fallback al JSON completo |
 
+**Sitio publicado** (`pages-deploy` run `success` sobre `b0066a6c7`, 2026-09-02 20:50 UTC;
+leído desde https://mendozavolcanic.github.io/VRP-chile/index.html): header `status-dot
+mon-fresh` + «Sistema Operativo» con tooltip «Peor frescura entre los volcanes Tier A:
+monitoreado · última pasada hace 14 h» (con data fresca el semáforo queda verde, y ahora por
+dato, no por HTML); Villarrica/PCC/Chaitén «en el cráter (ancla)», los otros 8 con distancia;
+regiones Antofagasta ×5 / Metropolitana ×2; detalle «Sin datos · máx 30 d» (abre en Taapaca,
+R7 pendiente). Móvil 375 px en el sitio publicado: `scrollWidth` **375/375**, los cuatro
+enlaces del header con borde derecho entre 252 y 272 px (antes 399-716).
+
 Scripts de verificación: los del agente en `experiments/_s131_audit/dashboard/` (réplica de
 los 10 predicados de `index.html`, 11/11 tarjetas coinciden con el sitio publicado) y las
 lecturas del DOM de esta sesión (registradas en el transcript; los valores de la tabla son los
