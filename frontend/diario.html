@@ -269,6 +269,19 @@ function mirovaEqVrp(r, volcanoName) {
 // S100: default Núcleo F5' (coherencia con index.html; S97 lo cambió allí pero no
 // aquí — S92 L5). El usuario puede apagarlo y se recuerda (storage "false").
 let USE_F5_CORE = sessionStorage.getItem("diario_f5_core") !== "false";
+// S132 R8 — el 5,00 MW no es una medición sino un valor CENSURADO: cuando el path D
+// contextual dispara sobre cirrus, la suma cruda de la escena (80-510 MW: cientos de
+// píxeles apenas tibios sobre fondo gélido, no un foco volcánico) se recorta al tope
+// PATH_D_ONLY_CAP_MW = 5,0 del perfil operacional. Se reconoce por el valor porque el
+// pipeline no deja marca en el record; una medición real que caiga exactamente en
+// 5,000000 es prácticamente imposible. Réplica de index.html (regla S92 L5).
+const PATH_D_CAP_MW = 5.0;
+function esValorCensurado(v) {
+  return typeof v === "number" && Math.abs(v - PATH_D_CAP_MW) < 1e-9;
+}
+const TXT_VALOR_CENSURADO = "Valor CENSURADO, no medido: el path D contextual disparó sobre "
+  + "cirrus y la suma cruda de la escena (80-510 MW) se recortó al tope de 5,0 MW. Significa "
+  + "«≥ 5, magnitud desconocida, probablemente artefacto», no «5,0 MW medidos».";
 const F5_R_CORE_KM = 0.75;
 const F5_BT_EXT_K = 295.0;
 
@@ -624,12 +637,17 @@ function renderCard(volc, jsonData, mirovaForVolc) {
 
   // Max VRP
   const s3 = el("span", "stat");
-  s3.title = "Máximo diario de la ventana. Puede estar dominado por un pico aislado " +
-    "(p.ej. un residuo path D MODIS capado a 5.00 MW). La mediana da el nivel típico.";
+  const _censurado = esValorCensurado(stats.max_us);
+  s3.title = _censurado ? TXT_VALOR_CENSURADO
+    : "Máximo diario de la ventana. Puede estar dominado por un pico aislado " +
+      "(p.ej. un residuo path D MODIS capado a 5.00 MW). La mediana da el nivel típico.";
   s3.appendChild(document.createTextNode("Max VRP: "));
   const b3 = el("b"); b3.textContent = stats.max_us > 0 ? stats.max_us.toFixed(2) : "—";
+  if (_censurado) b3.style.color = "var(--orange, #e8a33d)";
   s3.appendChild(b3);
-  s3.appendChild(document.createTextNode(" MW"));
+  // S132 R8: decirlo en la pantalla, no sólo en el tooltip — el tooltip ya existía y
+  // aun así el número se leía como medición.
+  s3.appendChild(document.createTextNode(_censurado ? " MW (tope, no medido) *" : " MW"));
   stRow.appendChild(s3);
   stRow.appendChild(document.createTextNode(" · "));
 

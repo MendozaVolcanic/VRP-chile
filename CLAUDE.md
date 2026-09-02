@@ -204,7 +204,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 - **A10. Audit vs MIROVA usar `pc.vrp_mw` (NO `record.vrp_mw`)**: `record.vrp_mw` es sum
   scene-wide de todos hot_pixels; `pc.vrp_mw` (primary_cluster.vrp_mw) es solo cluster summit
   = lo que MIROVA reporta. Dashboard (`mirovaEqVrp`/`isValidDetection` en frontend/index.html,
-  l. 1387 — la cita la vigila el guard G8; el `:680` original hoy es una fila de la lista de volcanes) usa pc.vrp_mw. Audits con
+  l. 1462 — la cita la vigila el guard G8; el `:680` original hoy es una fila de la lista de volcanes) usa pc.vrp_mw. Audits con
   campo equivocado ocultaron problemas: Lastarria 1.04× → real 7.67×, Llaima 1.01× → real
   11.82×, PCC 52.77× → real 6.9×.
   - ⚠️ **Matiz S132, sólo VIIRS375**: para I-band el dashboard NO publica `pc.vrp_mw` sino la

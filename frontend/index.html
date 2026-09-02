@@ -105,6 +105,18 @@
     .vc-time-utc { font-size: 0.66rem; font-weight: 600; color: var(--muted); margin-top: 1px; }
     .vc-time-nodet { color: var(--muted); font-weight: 600; }
     .vc-distance { font-size: 0.72rem; color: #9fb3c8; margin-top: 6px; }
+    /* S132 R5/R3/R12 — filas nuevas de la tarjeta: contraste térmico, anomalía relativa
+       y coincidencia con MIROVA. Mismo peso visual que la fila de distancia para no
+       competir con el número de magnitud, que sigue siendo el titular. */
+    .vc-thermal { font-size: 0.68rem; color: #8fa6bd; margin-top: 5px; font-variant-numeric: tabular-nums; }
+    .vc-anom { font-size: 0.68rem; color: #8fa6bd; margin-top: 4px; }
+    .vc-anom.is-alto { color: var(--orange); font-weight: 600; }
+    .vc-mirova { font-size: 0.68rem; margin-top: 4px; }
+    .vc-mirova.is-conf { color: #6fd08c; }
+    .vc-mirova.is-solo { color: #7d8ea0; }
+    .vc-mon-next { color: #7d8ea0; }
+    .vc-mon-next.is-vencida { color: var(--orange); font-weight: 600; }
+    .vrp-censurado { color: var(--orange); font-weight: 700; }
     /* S109 — frescura de monitoreo (última pasada procesada, estilo MIROVA) */
     .vc-monitor { font-size: 0.64rem; margin-top: 7px; display: flex; align-items: center;
                   gap: 4px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.07); }
@@ -414,6 +426,52 @@
     <b>MIROVA</b> (Middle InfraRed Observation of Volcanic Activity) desarrollado
     por el grupo de <b>Diego Coppola</b> y colaboradores en la Università di Torino.</p>
 
+    <!-- S132 R11 — qué NO ve este sistema. Un sistema de apoyo a la decisión de alerta
+         tiene que declarar sus límites en la misma pantalla donde entrega el número:
+         si el operador no sabe qué es invisible para el instrumento, un cero se lee como
+         "no pasa nada" en vez de "esto no lo puedo ver". -->
+    <div style="background:#1a1206;border-left:3px solid #e8a33d;padding:12px 16px;margin:18px 0;border-radius:0 4px 4px 0;">
+      <b style="color:#ffcc80;">Qué NO ve este sistema</b>
+      <p style="margin:8px 0 0 0;">Mide <b>una sola cosa</b>: calor radiado por material
+      volcánico expuesto, en el infrarrojo medio. Todo lo demás le es invisible, y un
+      <b>0 MW no significa «el volcán está tranquilo»</b> — significa «no hay calor
+      resoluble para este instrumento en esta pasada».</p>
+      <ul style="margin:8px 0 0 0;padding-left:20px;">
+        <li><b>Erupciones explosivas y freáticas.</b> Ceniza, gas y vapor no exponen
+        material incandescente: una columna eruptiva puede ser espectacular y no dejar
+        firma en el infrarrojo medio. Sin lava expuesta, este sistema no la ve.</li>
+        <li><b>Focos incandescentes muy pequeños.</b> Un píxel VIIRS mide 375 m de lado y
+        uno de MODIS 1 km. Un domo naciente o una fumarola de pocas decenas de metros se
+        diluye en el promedio del píxel. Para eso el canal correcto es el SWIR de alta
+        resolución (Sentinel-2 a 20 m, Landsat a 30 m), que este sistema no usa.</li>
+        <li><b>El día.</b> El canal MIR se contamina con reflejo solar, así que sólo se
+        procesan pasadas nocturnas. Entre la última pasada de una noche y la primera de la
+        siguiente hay más de medio día sin observación posible.</li>
+        <li><b>Lo que tapa la nube.</b> El infrarrojo no atraviesa nubes. Una noche
+        cubierta es una noche sin dato, y no se distingue por sí sola de una noche sin
+        actividad.</li>
+        <li><b>Deformación, sismicidad y química de gases.</b> Están fuera de alcance por
+        completo: son otros instrumentos y otros sistemas.</li>
+      </ul>
+      <p style="margin:10px 0 0 0;">Este sistema es <b>apoyo</b> a la decisión de alerta,
+      nunca su reemplazo, y sus resultados se interpretan junto con el resto de la red de
+      monitoreo.</p>
+    </div>
+
+    <!-- S132 R11 — transparencia algorítmica (Resolución CPLT N°372). -->
+    <div style="background:#0a1320;border-left:3px solid #5b8dd6;padding:12px 16px;margin:18px 0;border-radius:0 4px 4px 0;">
+      <b style="color:#a8c8f0;">Transparencia algorítmica</b><br>
+      VRP Chile es un <b>Sistema de Decisiones Automatizadas</b> en el sentido de la
+      <b>Resolución CPLT N°372</b>: clasifica y prioriza para apoyar la decisión de alerta
+      volcánica. Su ficha pública —qué decide, con qué datos, con qué umbrales, qué
+      limitaciones tiene y quién responde por ella— está en
+      <a href="https://github.com/MendozaVolcanic/VRP-chile/blob/main/docs/FICHA_SDA_VRP_CHILE.md"
+         target="_blank" rel="noopener" style="color:#7fb3ff;">docs/FICHA_SDA_VRP_CHILE.md</a>,
+      y el código completo del pipeline es público en
+      <a href="https://github.com/MendozaVolcanic/VRP-chile" target="_blank" rel="noopener"
+         style="color:#7fb3ff;">el repositorio</a>.
+    </div>
+
     <div style="background:#0a1320;border-left:3px solid #ff5722;padding:12px 16px;margin:18px 0;border-radius:0 4px 4px 0;">
       <b style="color:#ffab91;">Agradecimientos</b><br>
       Este trabajo no sería posible sin la ciencia pública de:
@@ -606,7 +664,7 @@
     <div class="nrt-table-container">
       <h3>Últimas detecciones NRT (todos los volcanes)</h3>
       <table class="nrt-table">
-        <thead><tr><th>Fecha UTC</th><th>Volcán</th><th>VRP (MW)</th><th>Sensor</th></tr></thead>
+        <thead><tr><th>Fecha UTC</th><th>Volcán</th><th>VRP (MW)</th><th title="¿MIROVA publicó una alerta térmica en esa misma pasada? Es la referencia externa. Que no lo haya hecho NO invalida la detección: la mayoría de esos casos son anomalías térmicas reales por debajo del umbral que MIROVA publica (A54).">MIROVA</th><th>Sensor</th></tr></thead>
         <tbody id="nrt-tbody"></tbody>
       </table>
     </div>
@@ -1022,6 +1080,23 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
 // borra una detección). Trade-off: sube levemente los ya-bien-calibrados (PCC
 // 0.51×→1.89×). Reversible: cambiar el default a false. El toggle Cluster sigue.
 let USE_F5_CORE = persistedFlag("vrp_f5_core", true);
+// S132 R8 — el 5,00 MW que aparece en varias tarjetas NO es una medición: es un valor
+// CENSURADO. Cuando el path D contextual dispara sobre cirrus, la suma cruda de la escena
+// llega a 80-510 MW —cientos de píxeles apenas tibios sobre un fondo gélido, no un foco
+// volcánico— y `pipeline/path_d_cap.py` la recorta a PATH_D_ONLY_CAP_MW = 5,0 del perfil
+// operacional. En el corpus, 1.403 clusters valen exactamente 5,000 MW. Un operador que
+// compare 5,00 con 4,93 concluye que el primero es apenas mayor, cuando en realidad
+// significa "≥ 5, no sabemos cuánto, y probablemente sea cirrus".
+// El pipeline no deja marca en el record, así que se reconoce por el valor: una medición
+// real que caiga exactamente en 5,000000 es prácticamente imposible. Persistir un flag
+// `diag_d9_capped` en el pipeline sería lo correcto (A72) y queda anotado como pendiente.
+const PATH_D_CAP_MW = 5.0;
+function esValorCensurado(v) {
+  return typeof v === "number" && Math.abs(v - PATH_D_CAP_MW) < 1e-9;
+}
+const TXT_VALOR_CENSURADO = "Valor CENSURADO, no medido: el path D contextual disparó sobre "
+  + "cirrus y la suma cruda de la escena (80-510 MW) se recortó al tope de 5,0 MW. Significa "
+  + "«≥ 5, magnitud desconocida, probablemente artefacto», no «5,0 MW medidos».";
 const F5_R_CORE_KM = 0.75;
 const F5_BT_EXT_K = 295.0;
 
@@ -1442,7 +1517,14 @@ function latestDetection(records, includeFar = false, innerKm = 10) {
                dist: (_honestSrc ? r.final_hotspot_dist_km : null)
                      ?? pc.centroid_dist_km ?? null,
                npx: pc.n_pixels ?? null,
-               summit: isSummitDetection(r) };
+               summit: isSummitDetection(r),
+               // S132 R5 — el contraste térmico es el único discriminante físico que el
+               // operador tiene a mano: un píxel apenas por encima del fondo es señal
+               // sub-umbral o ruido de nieve; un ΔT de decenas de kelvin es material
+               // caliente expuesto. Estaba sólo en la tabla del detalle.
+               tMax: r.t_max_k ?? null, tBg: r.t_bg_k ?? null,
+               // S132 R3 — si MIROVA publicó algo en esa pasada (CONS ∪ OCR, A11).
+               mirova: !!r._mirova_confirmed };
     }
   }
   return best;
@@ -1509,6 +1591,84 @@ function lastEventTime(records) {
 // "hubo evento térmico"). Surfacea además el gap real de adquisición cuando el host
 // NRT (LANCE) está intermitente y una pasada no llega. Umbrales: un volcán sano
 // recibe pasadas nocturnas ~diarias; >30h sin pasada = atrasado; >72h = sin datos.
+// S132 R13 — "próxima pasada esperada". El operador necesita distinguir dos cosas que hoy
+// se ven igual: que el NRT se cayó, o que todavía no pasó ningún satélite útil.
+//
+// La clave es que el hueco entre pasadas NO tiene una escala sola: es BIMODAL, y por una
+// razón física. El canal MIR sólo sirve de noche (de día el reflejo solar lo contamina),
+// así que las pasadas útiles vienen en racimo durante la noche —separadas por una o dos
+// horas, según cuántas plataformas cubran el volcán— y después hay un agujero de medio día
+// hasta la noche siguiente. Medido sobre Villarrica: los huecos van de 1,6 h en el
+// percentil 10 a 2,3 h en la mediana, y saltan a 16,8 h en el percentil 75 y 18,8 h en el
+// 90. Un solo número no describe eso.
+//
+// Por eso se usan dos: la MEDIANA para anunciar cuándo llega la próxima pasada de la misma
+// noche, y el PERCENTIL 90 como tolerancia antes de decir que algo va mal. Sin esa
+// separación la tarjeta gritaría "pasada vencida" todas las tardes, que es justamente el
+// ruido que R13 venía a eliminar. Ambos se calculan sobre el PROPIO volcán: la latitud y
+// la cantidad de plataformas cambian el ritmo de uno a otro.
+function proximaPasadaEsperada(records) {
+  const crudos = records.map(r => parseUtcMs(r.datetime_utc))
+                        .filter(Number.isFinite).sort((a, b) => a - b);
+  if (crudos.length < 8) return null;
+  // Una "pasada" no es un record: en una misma órbita el volcán puede quedar cubierto por
+  // SNPP, NOAA-20 y NOAA-21 con minutos de diferencia, y Terra/Aqua hacen lo propio en
+  // MODIS. Si se cuentan esos como pasadas distintas el hueco mediano colapsa a ~1 h y la
+  // estimación deja de significar nada (se veía como "pasada esperada hace 15 h" cuando la
+  // última había sido hace 16). Se agrupan los records separados por menos de 90 minutos.
+  const VENTANA_MISMA_PASADA_MS = 90 * 60000;
+  const pasadas = [crudos[0]];
+  for (const t of crudos.slice(1)) {
+    if (t - pasadas[pasadas.length - 1] >= VENTANA_MISMA_PASADA_MS) pasadas.push(t);
+  }
+  const ts = pasadas;
+  if (ts.length < 6) return null;
+  const huecos = [];
+  for (let i = Math.max(1, ts.length - 120); i < ts.length; i++) huecos.push(ts[i] - ts[i - 1]);
+  if (huecos.length < 10) return null;
+  huecos.sort((a, b) => a - b);
+  const q = f => huecos[Math.floor(f * (huecos.length - 1))];
+  const medianaMs = q(0.50), toleranciaMs = q(0.90);
+  const ultima = ts[ts.length - 1];
+  const transcurridoMs = Date.now() - ultima;
+  return {
+    prox: ultima + medianaMs,
+    medianaH: medianaMs / 3600000,
+    toleranciaH: toleranciaMs / 3600000,
+    transcurridoH: transcurridoMs / 3600000,
+    // Tres estados, no dos: dentro del racimo nocturno, en el agujero diurno, o atrasado.
+    estado: transcurridoMs < medianaMs ? "en_racimo"
+          : transcurridoMs < toleranciaMs ? "hueco_diurno" : "vencida",
+  };
+}
+
+// S132 R12 — anomalía RELATIVA a la línea de base del propio volcán.
+// El nivel absoluto de MIROVA (Muy Bajo / Bajo / Moderado / Alto) compara todos los
+// volcanes contra la misma escala, y por eso deja en "Muy Bajo" tanto a un volcán que
+// lleva un año en 0,03 MW como a uno que acaba de multiplicar por diez su valor habitual.
+// Para vigilancia lo segundo importa mucho más que lo primero. Se compara la última
+// detección contra el percentil de las detecciones del mismo volcán en los 90 días
+// previos: es su propia historia, no la de otro edificio.
+function anomaliaRelativa(records, det, innerKm) {
+  if (!det || !(det.vrp > 0)) return null;
+  const desde = det.ts - 90 * 86400000;
+  const base = [];
+  for (const r of records) {
+    const t = parseUtcMs(r.datetime_utc);
+    if (!(t >= desde && t < det.ts)) continue;
+    if (!isValidDetection(r) || !isSensorVisible(r)) continue;
+    if (isThermalArtifact(r, innerKm)) continue;
+    const v = mirovaEqVrpDisplay(r, innerKm, includeFarDistance);
+    if (v > 0) base.push(v);
+  }
+  if (base.length < 10) return null;      // sin historia suficiente no se afirma nada
+  base.sort((a, b) => a - b);
+  const menores = base.filter(v => v < det.vrp).length;
+  const pct = Math.round(100 * menores / base.length);
+  const mediana = base[Math.floor(base.length / 2)];
+  return { pct, mediana, n: base.length, veces: mediana > 0 ? det.vrp / mediana : null };
+}
+
 function monitoringFreshness(lastTimeStr) {
   // Sin ningún registro = volcán sin pull de datos (no monitoreado), NO una caída
   // del NRT → estado NEUTRO (gris), no rojo de alarma. El rojo se reserva para un
@@ -1865,6 +2025,14 @@ function buildCards() {
                                    level.key === "mod"  ? "var(--orange)" : "var(--red)") : "var(--muted)";
     vrpEl.textContent = vrp > 0 ? vrp.toFixed(2) : "—";
     const vrpSub = el("div", "vc-vrp-sub"); vrpSub.textContent = vrp > 0 ? "MW" : "sin detección";
+    // S132 R8: marcar el tope como valor censurado en vez de mostrarlo como medición.
+    if (esValorCensurado(vrp)) {
+      const ast = el("span", "vrp-censurado"); ast.textContent = " *";
+      vrpEl.appendChild(ast);
+      vrpEl.title = TXT_VALOR_CENSURADO;
+      vrpSub.textContent = "MW (tope)";
+      vrpSub.title = TXT_VALOR_CENSURADO;
+    }
 
     // Sensor pills
     const pills = el("div", "vc-sensors");
@@ -1923,9 +2091,80 @@ function buildCards() {
     const mdot = el("span", "vc-mon-dot"); mdot.textContent = "●";
     const mtxt = el("span", "vc-mon-txt"); mtxt.textContent = " " + fresh.txt;
     mon.title = "Frescura del MONITOREO: última pasada satelital procesada (haya o no detección térmica). Verde = procesado recientemente; ámbar = falta data reciente (host NRT LANCE intermitente); rojo = sin pasadas.";
-    mon.append(mdot, mtxt);
+    // S132 R13: separar «el NRT se cayó» de «todavía no hay órbita». Si la próxima
+    // pasada esperada aún no llegó, el atraso es del cielo y no del sistema.
+    const prox = proximaPasadaEsperada(d.records);
+    if (prox && fresh.h != null) {
+      const px = el("span", "vc-mon-next" + (prox.estado === "vencida" ? " is-vencida" : ""));
+      px.textContent =
+          prox.estado === "en_racimo"
+            ? " · próxima ~" + fmtLocalCL(new Date(prox.prox).toISOString().slice(0, 16).replace("T", " "))
+        : prox.estado === "hueco_diurno"
+            ? " · sin pasadas útiles hasta la noche"
+            : " · pasada vencida hace " + Math.round(prox.transcurridoH - prox.toleranciaH) + " h";
+      px.title = "El canal MIR sólo sirve de noche, así que las pasadas útiles llegan en "
+               + "racimo nocturno (hueco típico de este volcán ~" + prox.medianaH.toFixed(1)
+               + " h) y después hay medio día sin nada. Se avisa de atraso recién pasadas "
+               + prox.toleranciaH.toFixed(1) + " h (su percentil 90), para no confundir el "
+               + "hueco diurno normal con una caída de la adquisición. Van "
+               + prox.transcurridoH.toFixed(1) + " h desde la última pasada.";
+      mon.append(mdot, mtxt, px);
+    } else {
+      mon.append(mdot, mtxt);
+    }
 
-    card.append(hdr, vrpEl, vrpSub, pills, dcRow, time, mon);
+    // S132 R5 — contraste térmico de la última detección. Es el único discriminante
+    // físico directo que el operador tiene en la tarjeta: cuánto más caliente está el
+    // píxel que su entorno. Un ΔT de pocos kelvin sobre un volcán nevado es señal
+    // sub-umbral o ruido de nieve; decenas de kelvin es material caliente expuesto.
+    let therm = null;
+    if (det && det.tMax != null && det.tBg != null) {
+      const dT = det.tMax - det.tBg;
+      therm = el("div", "vc-thermal");
+      therm.textContent = "T máx " + det.tMax.toFixed(1) + " K · fondo " + det.tBg.toFixed(1)
+                        + " K · ΔT " + dT.toFixed(1) + " K";
+      therm.title = "Temperatura de brillo del píxel más caliente y del fondo local de esa "
+                  + "misma pasada. La diferencia (ΔT) es el contraste térmico: pocos kelvin "
+                  + "sobre un volcán nevado suele ser señal sub-umbral o ruido de nieve; "
+                  + "decenas de kelvin indican material caliente expuesto.";
+    }
+
+    // S132 R3 — ¿MIROVA publicó algo en esa misma pasada? Es la referencia externa, y
+    // saber que coincide (o no) cambia cuánta confianza merece la lectura. Que NO
+    // coincida no la invalida: el 95 % de nuestras detecciones sin MIROVA son anomalías
+    // físicamente reales que ellos no publican (A54).
+    let mrow = null;
+    if (det) {
+      mrow = el("div", "vc-mirova " + (det.mirova ? "is-conf" : "is-solo"));
+      mrow.textContent = det.mirova ? "▲ MIROVA publicó en esta pasada"
+                                    : "— sin publicación de MIROVA";
+      mrow.title = det.mirova
+        ? "MIROVA publicó una alerta térmica para este volcán en la misma pasada (universo CONS ∪ OCR)."
+        : "MIROVA no publicó nada en esta pasada. No significa que la detección sea falsa: "
+        + "la mayoría de estos casos son anomalías térmicas reales por debajo del umbral que "
+        + "MIROVA publica (regla A54). Sí conviene mirarlos con el ΔT a la vista.";
+    }
+
+    // S132 R12 — anomalía relativa a la línea de base del propio volcán.
+    let anom = null;
+    const ar = anomaliaRelativa(d.records, det, innerKm);
+    if (ar) {
+      const fuerte = ar.pct >= 90;
+      anom = el("div", "vc-anom" + (fuerte ? " is-alto" : ""));
+      anom.textContent = "percentil " + ar.pct + " de su propia base 90 d"
+                       + (ar.veces ? " · " + ar.veces.toFixed(1) + "× su mediana" : "");
+      anom.title = "Compara esta lectura contra las " + ar.n + " detecciones del MISMO volcán "
+                 + "en los 90 días previos (mediana " + ar.mediana.toFixed(2) + " MW). El nivel "
+                 + "absoluto de MIROVA compara todos los volcanes con la misma vara y deja en "
+                 + "«Muy Bajo» tanto a uno que lleva un año quieto como a uno que acaba de "
+                 + "multiplicar por diez lo habitual; para vigilancia lo segundo importa más.";
+    }
+
+    card.append(hdr, vrpEl, vrpSub, pills, dcRow);
+    if (therm) card.appendChild(therm);
+    if (anom) card.appendChild(anom);
+    if (mrow) card.appendChild(mrow);
+    card.append(time, mon);
     grid.appendChild(card);
   });
 }
@@ -1991,12 +2230,13 @@ function renderDetail() {
 
   // Stats row
   const sr = el("div", "stats-row");
-  function addStat(label, val, unit, color) {
+  function addStat(label, val, unit, color, tip) {
     const box = el("div","stat-box");
     const l = el("div","label"); l.textContent = label;
     const vEl = el("div","val"); vEl.textContent = val;
     if (color) vEl.style.color = color;
     const u = el("div","unit"); u.textContent = unit;
+    if (tip) { box.title = tip; vEl.style.color = "var(--orange)"; }
     box.append(l, vEl, u);
     sr.appendChild(box);
   }
@@ -2018,7 +2258,12 @@ function renderDetail() {
     if (v_mw > 0) vre_gj += v_mw * DT_HOURS * 3.6; // MW * h * 3.6 = GJ
   }
 
-  addStat("Max VRP", maxVrp > 0 ? maxVrp.toFixed(2) : "—", "MW", level.key !== "nd" ? "var(--green)" : null);
+  // S132 R8: si el máximo del período es exactamente el tope del path D, lo que se está
+  // mostrando no es una medición sino un valor censurado — se rotula como tal.
+  addStat("Max VRP", maxVrp > 0 ? maxVrp.toFixed(2) + (esValorCensurado(maxVrp) ? " *" : "") : "—",
+          esValorCensurado(maxVrp) ? "MW (tope, no medido)" : "MW",
+          level.key !== "nd" ? "var(--green)" : null,
+          esValorCensurado(maxVrp) ? TXT_VALOR_CENSURADO : null);
   addStat("Promedio activo", meanVrp > 0 ? meanVrp.toFixed(2) : "—", "MW (>0)");
   addStat("VRE acumulada", vre_gj > 0 ? vre_gj.toFixed(1) : "—", "GJ", vre_gj > 0 ? "var(--cyan)" : null);
   addStat("Detecciones", String(allVrp.length), "granules");
@@ -3379,7 +3624,7 @@ function buildNRTTable() {
   const show = allDetections.slice(0, 30);
   if (show.length === 0) {
     const row = el("tr");
-    const td = el("td"); td.colSpan = 4; td.textContent = "Sin detecciones recientes";
+    const td = el("td"); td.colSpan = 5; td.textContent = "Sin detecciones recientes";
     td.style.cssText = "color:var(--muted);text-align:center;padding:20px";
     row.appendChild(td); tbody.appendChild(row);
     return;
@@ -3405,6 +3650,11 @@ function buildNRTTable() {
     const tdVolc = el("td"); tdVolc.textContent = det.volcano.display; tdVolc.style.fontWeight = "600";
     const tdVrp = el("td"); tdVrp.textContent = det.vrp.toFixed(3);
     tdVrp.style.fontWeight = "700";
+    // S132 R8: el tope del path D no es una medición.
+    if (esValorCensurado(det.vrp)) {
+      const ast = el("span", "vrp-censurado"); ast.textContent = " *";
+      tdVrp.appendChild(ast); tdVrp.title = TXT_VALOR_CENSURADO;
+    }
     // S92/S93: VRP de artefacto en muted (no se pinta con color de alerta — no es detección real).
     tdVrp.style.color = det.artifactKind
       ? "var(--muted)"
@@ -3422,7 +3672,20 @@ function buildNRTTable() {
       tdSensor.appendChild(badge);
     }
 
-    row.append(tdDate, tdVolc, tdVrp, tdSensor);
+    // S132 R3: columna MIROVA. El dato ya viajaba en el record (`_mirova_confirmed`,
+    // universo CONS ∪ OCR) y no se mostraba en ningún lado.
+    const tdMir = el("td");
+    const conf = !!det.record._mirova_confirmed;
+    tdMir.textContent = conf ? "▲" : "—";
+    tdMir.style.color = conf ? "#6fd08c" : "var(--muted)";
+    tdMir.style.textAlign = "center";
+    tdMir.title = conf
+      ? ("MIROVA publicó alerta térmica en esta pasada"
+         + (det.record._mirova_dist_km != null
+            ? " (a " + det.record._mirova_dist_km.toFixed(1) + " km según ellos)" : "") + ".")
+      : "MIROVA no publicó nada en esta pasada. No la invalida: la mayoría de estos casos son "
+        + "anomalías térmicas reales bajo el umbral que MIROVA publica (A54).";
+    row.append(tdDate, tdVolc, tdVrp, tdMir, tdSensor);
     tbody.appendChild(row);
   });
 }
@@ -3642,6 +3905,21 @@ async function init() {
 
   // Load all volcanoes in parallel
   await Promise.all(VOLCANOES.map(v => loadVolcano(v)));
+
+  // S132 R7 — abrir en un volcán que TENGA data. `VOLCANOES[0]` es Taapaca, que está
+  // configurado pero fuera del cron NRT, así que el panel de detalle arrancaba diciendo
+  // "Sin datos" y la primera impresión del sistema era que no funciona. Se elige el
+  // primer Tier A con records (los que sí se monitorean), respetando siempre el
+  // ?volcano= de la URL si vino, que es una elección explícita del usuario.
+  {
+    const pedido = new URLSearchParams(location.search).get("volcano");
+    const tieneData = v => (allData[v.name]?.records?.length || 0) > 0;
+    if (!pedido && !tieneData(currentVolcano)) {
+      const cand = VOLCANOES.find(v => v.hasMirova && tieneData(v))
+                || VOLCANOES.find(tieneData);
+      if (cand) currentVolcano = cand;
+    }
+  }
 
   // F49/S77 — Mostrar banner global si MIROVA (ground truth) está stale.
   // Si latest fecha del CSV consolidado es >14d atrás, el dashboard expone

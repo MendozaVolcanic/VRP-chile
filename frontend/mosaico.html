@@ -265,6 +265,19 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
 // ============================================================================
 // S100: default Núcleo F5' (coherencia con index.html; S92 L5). Usuario puede apagarlo.
 let USE_F5_CORE = sessionStorage.getItem("mosaico_f5_core") !== "false";
+// S132 R8 — el 5,00 MW no es una medición sino un valor CENSURADO: cuando el path D
+// contextual dispara sobre cirrus, la suma cruda de la escena (80-510 MW: cientos de
+// píxeles apenas tibios sobre fondo gélido, no un foco volcánico) se recorta al tope
+// PATH_D_ONLY_CAP_MW = 5,0 del perfil operacional. Se reconoce por el valor porque el
+// pipeline no deja marca en el record; una medición real que caiga exactamente en
+// 5,000000 es prácticamente imposible. Réplica de index.html (regla S92 L5).
+const PATH_D_CAP_MW = 5.0;
+function esValorCensurado(v) {
+  return typeof v === "number" && Math.abs(v - PATH_D_CAP_MW) < 1e-9;
+}
+const TXT_VALOR_CENSURADO = "Valor CENSURADO, no medido: el path D contextual disparó sobre "
+  + "cirrus y la suma cruda de la escena (80-510 MW) se recortó al tope de 5,0 MW. Significa "
+  + "«≥ 5, magnitud desconocida, probablemente artefacto», no «5,0 MW medidos».";
 const F5_R_CORE_KM = 0.75;
 const F5_BT_EXT_K = 295.0;
 
@@ -512,6 +525,8 @@ function el(tag, props = {}, children = []) {
 
 function fmtVRP(v) {
   if (!v || v <= 0) return "—";
+  // S132 R8: el tope del path D se marca con asterisco para que no se lea como medición.
+  if (esValorCensurado(v)) return "5,0*";
   if (v < 1) return v.toFixed(2);
   if (v < 10) return v.toFixed(1);
   if (v < 100) return v.toFixed(1);
