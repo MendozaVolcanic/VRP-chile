@@ -163,6 +163,7 @@ from pipeline.profile import (
     ENABLE_BT_SAT_SECONDARY_GUARD,
     BT_SAT_MIR_K_MODIS,
     ENABLE_MODIS_B22_PRIMARY,
+    ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER,
     ENABLE_SINGLE_PIXEL_SUB_MW_MODE,
     SUB_MW_REGIME_THRESHOLD_MW,
     SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
@@ -286,6 +287,29 @@ def read_modis_l1b(hdf_path: Path) -> dict:
 
     return {"band21": band21, "band22": band22, "band31": band31,
             "lat": lat, "lon": lon, "angles": angles}
+
+
+def derivar_distance_class(final_dist_km, pc_dist_km, inner_km, desde_cluster):
+    """Etiqueta visual summit/far de una deteccion.
+
+    `desde_cluster=False` es el comportamiento historico: la etiqueta sale del
+    `final_hotspot`, que en MODIS es el maximo de MIR absoluta de la escena.
+
+    `desde_cluster=True` la saca del centroide del `primary_cluster`, que es el punto del
+    que el dashboard ya reporta la magnitud (A10). Si no hay centroide se cae al
+    comportamiento historico, para no inventar una etiqueta donde no hay cumulo.
+
+    Es SOLO una etiqueta: no entra en deteccion, ni en seleccion de cumulo, ni en magnitud
+    (verificado mecanicamente por
+    tests/test_distance_class_modis_s132.py::test_distance_class_no_se_lee_aguas_arriba_en_modis).
+    """
+    # El flag REETIQUETA; nunca crea una etiqueta donde antes no habia ninguna. Por eso la
+    # condicion de existencia sigue siendo la historica (hay hotspot final y hay inner):
+    # asi el A/B mide relabels y no puede confundirse con detecciones nuevas.
+    if inner_km is None or final_dist_km is None:
+        return None
+    d = pc_dist_km if (desde_cluster and pc_dist_km is not None) else final_dist_km
+    return "summit" if d <= inner_km else "far"
 
 
 def merge_mir_bands(rad21, rad22, b22_primary):
@@ -1278,9 +1302,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         final_hotspot_dist_km = None
         final_hotspot_source = None
 
-    distance_class = None
-    if final_hotspot_dist_km is not None and inner_radius_km is not None:
-        distance_class = "summit" if final_hotspot_dist_km <= inner_radius_km else "far"
+    distance_class = derivar_distance_class(
+        final_hotspot_dist_km, (primary_cluster or {}).get("centroid_dist_km"),
+        inner_radius_km, ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER)
 
     # S30: VRP recompute cuando final_hotspot_source='test1' — replica fix
     # S26 D de process_viirs.py. Sin esto vrp_mw queda como suma del cluster
@@ -1445,10 +1469,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             inner_radius_km=inner_radius_km,
             mode=HONEST_ANCHOR_TEST1_MODE,
         )
-        distance_class = None
-        if final_hotspot_dist_km is not None and inner_radius_km is not None:
-            distance_class = ("summit" if final_hotspot_dist_km <= inner_radius_km
-                              else "far")
+        distance_class = derivar_distance_class(
+            final_hotspot_dist_km, (primary_cluster or {}).get("centroid_dist_km"),
+            inner_radius_km, ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER)
 
     return {
         "vrp_mw": round(vrp_mw, 3),

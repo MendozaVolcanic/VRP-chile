@@ -551,6 +551,18 @@ BT_SAT_MIR_K_MODIS: float = float(_cfg.get("bt_sat_mir_k_modis", _p.get("bt_sat_
 # pre-registrado, nunca por flip a ciegas.
 ENABLE_MODIS_B22_PRIMARY: bool = bool(_cfg.get("enable_modis_b22_primary", _p.get("enable_modis_b22_primary", False)))
 
+# S132 - origen de `distance_class` en MODIS (decision #4 de AUDIT_S131 §4).
+# POR QUE: la etiqueta se deriva hoy del `final_hotspot`, que en MODIS es el maximo de MIR
+# ABSOLUTA de la escena. A 1 km ese maximo esta dominado por el gradiente de altitud (A69)
+# y cae a 21 km del crater; S131 midio que el maximo de la propia escena de MIROVA cae a
+# 20,8 km, con correlacion 0,023 entre ambos. La etiqueta esta anclada a un punto que mide
+# topografia, y como el dashboard la usa de compuerta, 1.073 de 1.233 detecciones MODIS con
+# el cumulo a <=2 km del crater no se ven. ON deriva la etiqueta del `primary_cluster`.
+# Arranca OFF: S113 cerro a proposito la cara far->summit del bug A46 (A81) midiendola sobre
+# VIIRS; la evidencia de S131 es nueva y es de MODIS, asi que el flip necesita el numero de
+# MODIS. El flag existe para poder medirlo.
+ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER: bool = bool(_cfg.get("enable_modis_distance_class_from_cluster", _p.get("enable_modis_distance_class_from_cluster", False)))
+
 # F31 S75 — VRPTIR Aveni 2025 GRL doi:10.1029/2024GL113324 opt-in feature flag.
 # Permite usar el método VRPTIR (TIR single-band 10.5-12 μm) para retrieval de
 # RP de features moderate-to-low-temperature (300-600 K): crater lakes,

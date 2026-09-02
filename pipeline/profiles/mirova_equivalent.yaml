@@ -530,6 +530,11 @@ enable_bt_sat_secondary_guard: true
 # S132 — B22 primaria en MODIS (Coppola 2016a l.141-144). OFF: espera el A/B con reproc
 # real. Mueve detección además de magnitud (B22 tiene 1/10 del ruido de B21).
 enable_modis_b22_primary: false
+
+# S132 - distance_class de MODIS desde el primary_cluster (decision #4). OFF: espera la
+# medicion sobre los records persistidos + el OK de Nicolas (S113 cerro esta cara del bug
+# A46 midiendola sobre VIIRS; la evidencia nueva es de MODIS).
+enable_modis_distance_class_from_cluster: false
 bt_sat_mir_k_modis: 500.0
 
 # --- Output location ---
