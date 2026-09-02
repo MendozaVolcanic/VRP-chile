@@ -204,9 +204,20 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 - **A10. Audit vs MIROVA usar `pc.vrp_mw` (NO `record.vrp_mw`)**: `record.vrp_mw` es sum
   scene-wide de todos hot_pixels; `pc.vrp_mw` (primary_cluster.vrp_mw) es solo cluster summit
   = lo que MIROVA reporta. Dashboard (`mirovaEqVrp`/`isValidDetection` en frontend/index.html,
-  l. 1380 — la cita la vigila el guard G8; el `:680` original hoy es una fila de la lista de volcanes) usa pc.vrp_mw. Audits con
+  l. 1462 — la cita la vigila el guard G8; el `:680` original hoy es una fila de la lista de volcanes) usa pc.vrp_mw. Audits con
   campo equivocado ocultaron problemas: Lastarria 1.04× → real 7.67×, Llaima 1.01× → real
   11.82×, PCC 52.77× → real 6.9×.
+  - ⚠️ **Matiz S132, sólo VIIRS375**: para I-band el dashboard NO publica `pc.vrp_mw` sino la
+    magnitud del NÚCLEO — el recorte del cúmulo al entorno del píxel pico, que es el mismo
+    recorte que hace MIROVA al informar el cúmulo del cráter en vez de toda la escena. Medido
+    S131 sobre 1.609 pares por pasada: **0,68** contra MIROVA frente a **0,58** de `pc.vrp_mw`,
+    y coinciden entre sí sólo en el **5,7 %**. Hasta S131 ese número vivía sólo en JavaScript y
+    no existía en ningún JSON. Desde S132 lo calcula y persiste el pipeline en
+    **`f5_core_vrp_mw`** (`pipeline/f5_core.py`; el port está probado contra el JS sobre 4.000
+    records reales). **Un audit de VIIRS375 que quiera medir lo que el operador ve debe usar
+    `f5_core_vrp_mw`**, con fallback a `pc.vrp_mw` cuando el campo no está (asimetría A46: sin
+    cúmulo validado o sin píxeles dentro del inner no se recomputa — 6.909 de 24.368 I-band).
+    MODIS y VIIRS750 siguen publicando `pc.vrp_mw`.
 - **A11. Universo MIROVA = CONS + OCR**: `registro_vrp_ocr.csv` (Mirova-v1) tiene 457
   ALERTA_TERMICA_OCR adicionales (~2-3× más data que solo consolidado). OCR es COMPLEMENTO
   (no validación) — MIROVA publica en `latest.php` (CONS) y otros datos solo en imágenes
@@ -1044,7 +1055,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 
   **El corolario incómodo**: las cinco veces el error fue de quien estaba **auditando**,
   no de quien escribió el código — y dos de esas veces el texto correcto ya estaba en el
-  repo (el docstring de `process_viirs_mod.py:416` —era 409— nombraba los 5 volcanes opt-in desde
+  repo (el docstring de `process_viirs_mod.py:434` —era 416 en S131 y 409 antes— nombraba los 5 volcanes opt-in desde
   S72). La técnica se equivoca en la misma dirección que el defecto que busca, así que un
   hallazgo de la forma «esto está muerto» exige verificación cruzada antes de reportarse.
   Detalle: `docs/AUDIT_S127.md` + T9 en `docs/PROTOCOLO_AUDITORIA_PROFUNDA.md`.

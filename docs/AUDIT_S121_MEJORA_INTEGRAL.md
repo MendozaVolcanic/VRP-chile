@@ -124,8 +124,8 @@ y la arquitectura de data a futuro; (4) el FN de MODIS Láscar (D12) como próxi
 - **Verificación**: sin verificación individual
 
 ### [BAJA valor / esfuerzo bajo] PDF duplicado exacto en documentacion/ (26 MB desperdiciados, mismo archivo con 2 nombres)
-- **Evidencia**: Verificado con md5sum: `documentacion/Aveni_2024_TIRVolcH_RSE.pdf` y `documentacion/1-s2.0-S0034425724004140-main.pdf` tienen hash MD5 idéntico `ab8addd8fd284cccc195dbbb1e8656ae` (26 MB c/u). BEYOND_MIROVA_EXTENSIONS.md §7 confirma que es el mismo paper Aveni 2024 TIRVolcH renombrado, el original nunca se borró.
-- **Recomendación**: Borrar `1-s2.0-S0034425724004140-main.pdf` (mantener el nombre legible `Aveni_2024_TIRVolcH_RSE.pdf`), 5 minutos. Aporta directamente al objetivo explícito de reducir peso del repo (documentacion/ pesa 609 MB).
+- **Evidencia**: Verificado con md5sum: `documentacion/Aveni_2024_TIRVolcH_RSE.pdf` y `documentacion/Aveni_2024_TIRVolcH_RSE.pdf` tienen hash MD5 idéntico `ab8addd8fd284cccc195dbbb1e8656ae` (26 MB c/u). BEYOND_MIROVA_EXTENSIONS.md §7 confirma que es el mismo paper Aveni 2024 TIRVolcH renombrado, el original nunca se borró.
+- **Recomendación**: Borrar `Aveni_2024_TIRVolcH_RSE.pdf` (mantener el nombre legible `Aveni_2024_TIRVolcH_RSE.pdf`), 5 minutos. Aporta directamente al objetivo explícito de reducir peso del repo (documentacion/ pesa 609 MB).
 - **Verificación**: sin verificación individual
 
 ### [BAJA valor / esfuerzo bajo] experiments/ 458 MB — 3 subdirs de sesiones puntuales (S98/S104/S109) concentran 366 MB sin archivar

@@ -263,7 +263,7 @@ En `coppola2022_sabancaya.md` references list:
 
 En `_mm_ch5_monitoring.txt` thesis:
 - **MOUNTS** (Valade et al. 2019, rs11131528) — sistema independiente Sentinel + AI;
-  PDF en `documentacion/Valade_2019_MOUNTS_AI.pdf`. **Cita MIROVA como baseline pero NO
+  PDF en `documentacion/rs11131528.pdf`. **Cita MIROVA como baseline pero NO
   critica**. NHess-relevante para futuro benchmark cross-system.
 - **MODVOLC** (Wright et al. 2002) — el predecesor histórico; cita continuamente como
   baseline. NO crítica.

@@ -269,6 +269,19 @@ function mirovaEqVrp(r, volcanoName) {
 // S100: default Núcleo F5' (coherencia con index.html; S97 lo cambió allí pero no
 // aquí — S92 L5). El usuario puede apagarlo y se recuerda (storage "false").
 let USE_F5_CORE = sessionStorage.getItem("diario_f5_core") !== "false";
+// S132 R8 — el 5,00 MW no es una medición sino un valor CENSURADO: cuando el path D
+// contextual dispara sobre cirrus, la suma cruda de la escena (80-510 MW: cientos de
+// píxeles apenas tibios sobre fondo gélido, no un foco volcánico) se recorta al tope
+// PATH_D_ONLY_CAP_MW = 5,0 del perfil operacional. Se reconoce por el valor porque el
+// pipeline no deja marca en el record; una medición real que caiga exactamente en
+// 5,000000 es prácticamente imposible. Réplica de index.html (regla S92 L5).
+const PATH_D_CAP_MW = 5.0;
+function esValorCensurado(v) {
+  return typeof v === "number" && Math.abs(v - PATH_D_CAP_MW) < 1e-9;
+}
+const TXT_VALOR_CENSURADO = "Valor CENSURADO, no medido: el path D contextual disparó sobre "
+  + "cirrus y la suma cruda de la escena (80-510 MW) se recortó al tope de 5,0 MW. Significa "
+  + "«≥ 5, magnitud desconocida, probablemente artefacto», no «5,0 MW medidos».";
 const F5_R_CORE_KM = 0.75;
 const F5_BT_EXT_K = 295.0;
 
@@ -281,6 +294,13 @@ function _havKm(lat1, lon1, lat2, lon2) {
 }
 
 function f5CoreMagnitude(r, innerKm) {
+  // S132 — la magnitud del núcleo ahora la calcula y persiste el pipeline
+  // (`pipeline/f5_core.py`, campo `f5_core_vrp_mw`): lo que se publica es lo que se
+  // audita, y deja de depender de que el navegador rehaga la cuenta. El recálculo de
+  // abajo queda como respaldo para los records anteriores al backfill; la equivalencia
+  // entre las dos implementaciones está probada sobre 4.000 records reales en
+  // tests/test_f5_core_python_s132.py::test_paridad_con_el_javascript.
+  if (r && typeof r.f5_core_vrp_mw === "number") return r.f5_core_vrp_mw;
   const pixels = r && r.anomaly_pixels;
   if (!pixels || !pixels.length) return null;
   // Candidatos = pixels dentro de innerKm del centroide del cluster summit
@@ -617,12 +637,17 @@ function renderCard(volc, jsonData, mirovaForVolc) {
 
   // Max VRP
   const s3 = el("span", "stat");
-  s3.title = "Máximo diario de la ventana. Puede estar dominado por un pico aislado " +
-    "(p.ej. un residuo path D MODIS capado a 5.00 MW). La mediana da el nivel típico.";
+  const _censurado = esValorCensurado(stats.max_us);
+  s3.title = _censurado ? TXT_VALOR_CENSURADO
+    : "Máximo diario de la ventana. Puede estar dominado por un pico aislado " +
+      "(p.ej. un residuo path D MODIS capado a 5.00 MW). La mediana da el nivel típico.";
   s3.appendChild(document.createTextNode("Max VRP: "));
   const b3 = el("b"); b3.textContent = stats.max_us > 0 ? stats.max_us.toFixed(2) : "—";
+  if (_censurado) b3.style.color = "var(--orange, #e8a33d)";
   s3.appendChild(b3);
-  s3.appendChild(document.createTextNode(" MW"));
+  // S132 R8: decirlo en la pantalla, no sólo en el tooltip — el tooltip ya existía y
+  // aun así el número se leía como medición.
+  s3.appendChild(document.createTextNode(_censurado ? " MW (tope, no medido) *" : " MW"));
   stRow.appendChild(s3);
   stRow.appendChild(document.createTextNode(" · "));
 

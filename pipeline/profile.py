@@ -541,6 +541,40 @@ ROI1_BOX_HALF_KM: float = float(_t.get("roi1_box_half_km", 2.5))
 ENABLE_BT_SAT_SECONDARY_GUARD: bool = bool(_cfg.get("enable_bt_sat_secondary_guard", _p.get("enable_bt_sat_secondary_guard", True)))
 BT_SAT_MIR_K_MODIS: float = float(_cfg.get("bt_sat_mir_k_modis", _p.get("bt_sat_mir_k_modis", 500.0)))
 
+# S132 — B22 como banda MIR primaria en MODIS (decisión #6 de AUDIT_S131 §4).
+# POR QUÉ: Coppola 2016a SP426.5 l.141-144 construye L21ok "by using the L21 or L22
+# radiance, depending on band 22 saturation (or not), respectively" — B22 manda y B21
+# entra sólo cuando B22 saturó. El pipeline hacía lo inverso. B22 tiene NEdT 0,017 K
+# contra 0,183 K de B21, así que la banda primaria decide cuánto ruido tiene el fondo y
+# por lo tanto dónde caen los umbrales contextuales N·σ: esto mueve DETECCIÓN, no sólo
+# magnitud (A67). Arranca OFF; la adopción va por A/B con reproc real y criterio
+# pre-registrado, nunca por flip a ciegas.
+ENABLE_MODIS_B22_PRIMARY: bool = bool(_cfg.get("enable_modis_b22_primary", _p.get("enable_modis_b22_primary", False)))
+
+# S132 - origen de `distance_class` en MODIS (decision #4 de AUDIT_S131 §4).
+# POR QUE: la etiqueta se deriva hoy del `final_hotspot`, que en MODIS es el maximo de MIR
+# ABSOLUTA de la escena. A 1 km ese maximo esta dominado por el gradiente de altitud (A69)
+# y cae a 21 km del crater; S131 midio que el maximo de la propia escena de MIROVA cae a
+# 20,8 km, con correlacion 0,023 entre ambos. La etiqueta esta anclada a un punto que mide
+# topografia, y como el dashboard la usa de compuerta, 1.073 de 1.233 detecciones MODIS con
+# el cumulo a <=2 km del crater no se ven. ON deriva la etiqueta del `primary_cluster`.
+# Arranca OFF: S113 cerro a proposito la cara far->summit del bug A46 (A81) midiendola sobre
+# VIIRS; la evidencia de S131 es nueva y es de MODIS, asi que el flip necesita el numero de
+# MODIS. El flag existe para poder medirlo.
+ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER: bool = bool(_cfg.get("enable_modis_distance_class_from_cluster", _p.get("enable_modis_distance_class_from_cluster", False)))
+
+# S132 - area de pixel MEDIDA en la geolocalizacion del granule (decision #5 de AUDIT_S131).
+# POR QUE: la energia radiante es radiancia x area, y un pixel oblicuo cubre mucho mas
+# terreno que uno nadir; S131 midio que el area explica el gradiente cenital COMPLETO en
+# VIIRS (0,77 -> 0,45 sin corregir; 0,79-0,87 plano con la ley del ATBD). Se MIDE en vez de
+# modelarse porque el bow-tie de VIIRS da saltos de agregacion que ningun modelo analitico
+# reproduce (ver pixel_areas_from_geolocation). Arranca OFF: cambiar el area cambia la
+# magnitud de todos los records y, por A67, tambien puede cambiar la DETECCION, porque el
+# area multiplica dentro de la integral de energia del Test 1. Adopcion por A/B con reproc
+# real y criterio pre-registrado. NO extender a MODIS por extrapolacion (S131 midio 50 pares
+# y un solo volcan).
+ENABLE_GEOLOCATED_PIXEL_AREA: bool = bool(_cfg.get("enable_geolocated_pixel_area", _p.get("enable_geolocated_pixel_area", False)))
+
 # F31 S75 — VRPTIR Aveni 2025 GRL doi:10.1029/2024GL113324 opt-in feature flag.
 # Permite usar el método VRPTIR (TIR single-band 10.5-12 μm) para retrieval de
 # RP de features moderate-to-low-temperature (300-600 K): crater lakes,

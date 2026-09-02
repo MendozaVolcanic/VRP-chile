@@ -162,6 +162,8 @@ from pipeline.profile import (
     PATH_D_ONLY_CAP_TBG_MAX_K,
     ENABLE_BT_SAT_SECONDARY_GUARD,
     BT_SAT_MIR_K_MODIS,
+    ENABLE_MODIS_B22_PRIMARY,
+    ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER,
     ENABLE_SINGLE_PIXEL_SUB_MW_MODE,
     SUB_MW_REGIME_THRESHOLD_MW,
     SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
@@ -285,6 +287,48 @@ def read_modis_l1b(hdf_path: Path) -> dict:
 
     return {"band21": band21, "band22": band22, "band31": band31,
             "lat": lat, "lon": lon, "angles": angles}
+
+
+def derivar_distance_class(final_dist_km, pc_dist_km, inner_km, desde_cluster):
+    """Etiqueta visual summit/far de una deteccion.
+
+    `desde_cluster=False` es el comportamiento historico: la etiqueta sale del
+    `final_hotspot`, que en MODIS es el maximo de MIR absoluta de la escena.
+
+    `desde_cluster=True` la saca del centroide del `primary_cluster`, que es el punto del
+    que el dashboard ya reporta la magnitud (A10). Si no hay centroide se cae al
+    comportamiento historico, para no inventar una etiqueta donde no hay cumulo.
+
+    Es SOLO una etiqueta: no entra en deteccion, ni en seleccion de cumulo, ni en magnitud
+    (verificado mecanicamente por
+    tests/test_distance_class_modis_s132.py::test_distance_class_no_se_lee_aguas_arriba_en_modis).
+    """
+    # El flag REETIQUETA; nunca crea una etiqueta donde antes no habia ninguna. Por eso la
+    # condicion de existencia sigue siendo la historica (hay hotspot final y hay inner):
+    # asi el A/B mide relabels y no puede confundirse con detecciones nuevas.
+    if inner_km is None or final_dist_km is None:
+        return None
+    d = pc_dist_km if (desde_cluster and pc_dist_km is not None) else final_dist_km
+    return "summit" if d <= inner_km else "far"
+
+
+def merge_mir_bands(rad21, rad22, b22_primary):
+    """Combina las dos bandas MIR de MODIS en la banda corregida L21ok.
+
+    B21 y B22 miran la misma ventana (3,929-3,989 µm) y sólo difieren en ganancia: B21
+    llega a ~500 K con NEdT 0,183 K; B22 satura a ~331 K con NEdT 0,017 K. La banda que
+    manda decide el ruido del fondo, y el ruido del fondo decide dónde caen los umbrales
+    contextuales N·σ.
+
+    `b22_primary=True` sigue a Coppola 2016a SP426.5 l.141-144 (B22 manda, B21 entra
+    donde B22 saturó). La saturación de B22 llega como NaN desde `calibrate()`, que
+    descarta todo DN > 32767 e incluye el sentinel 65533 "Detector is saturated".
+
+    `b22_primary=False` conserva el comportamiento histórico del repo (B21 primaria).
+    """
+    if b22_primary:
+        return np.where(np.isnan(rad22), rad21, rad22)
+    return np.where(np.isnan(rad21), rad22, rad21)
 
 
 def _interp_geo(coarse: np.ndarray, target_lines: int, target_samples: int) -> np.ndarray:
@@ -489,15 +533,17 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     if not np.any(roi_mask):
         return None
 
-    # Merge bands: use Band 21 primary, Band 22 where 21 is NaN (saturated)
-    # Work with both radiance (for VRP) and BT (for thresholds/reporting)
+    # Banda MIR corregida (L21ok de Coppola 2016a). Cuál de las dos manda lo decide
+    # ENABLE_MODIS_B22_PRIMARY: OFF = histórico del repo (B21 primaria), ON = el paper
+    # (B22 primaria, B21 sólo donde B22 saturó). Ver merge_mir_bands().
+    # Trabajamos radiancia (para VRP) y BT (para umbrales/reporte) con la misma regla.
     rad21 = data["band21"]
     rad22 = data["band22"]
-    rad_mir = np.where(np.isnan(rad21), rad22, rad21)
+    rad_mir = merge_mir_bands(rad21, rad22, ENABLE_MODIS_B22_PRIMARY)
 
     bt21 = radiance_to_bt(rad21, BAND21_LAMBDA)
     bt22 = radiance_to_bt(rad22, BAND22_LAMBDA)
-    bt_mir = np.where(np.isnan(bt21), bt22, bt21)
+    bt_mir = merge_mir_bands(bt21, bt22, ENABLE_MODIS_B22_PRIMARY)
 
     # F2.8 S73 H3 — defensa secundaria post-Planck-inversion.
     # Si por alguna razón un pixel saturado escapó al fix L1B (calibrate() filter
@@ -510,7 +556,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     # with whichever band provided bt_mir (21 primary, 22 fallback).
     rad31 = data["band31"]
     bt31 = radiance_to_bt(rad31, BAND31_LAMBDA)
-    rad_mir_for_nti = np.where(np.isnan(rad21), rad22, rad21)
+    rad_mir_for_nti = merge_mir_bands(rad21, rad22, ENABLE_MODIS_B22_PRIMARY)
     with np.errstate(invalid="ignore", divide="ignore"):
         nti = (rad_mir_for_nti - rad31) / (rad_mir_for_nti + rad31)
 
@@ -1256,9 +1302,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         final_hotspot_dist_km = None
         final_hotspot_source = None
 
-    distance_class = None
-    if final_hotspot_dist_km is not None and inner_radius_km is not None:
-        distance_class = "summit" if final_hotspot_dist_km <= inner_radius_km else "far"
+    distance_class = derivar_distance_class(
+        final_hotspot_dist_km, (primary_cluster or {}).get("centroid_dist_km"),
+        inner_radius_km, ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER)
 
     # S30: VRP recompute cuando final_hotspot_source='test1' — replica fix
     # S26 D de process_viirs.py. Sin esto vrp_mw queda como suma del cluster
@@ -1423,10 +1469,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             inner_radius_km=inner_radius_km,
             mode=HONEST_ANCHOR_TEST1_MODE,
         )
-        distance_class = None
-        if final_hotspot_dist_km is not None and inner_radius_km is not None:
-            distance_class = ("summit" if final_hotspot_dist_km <= inner_radius_km
-                              else "far")
+        distance_class = derivar_distance_class(
+            final_hotspot_dist_km, (primary_cluster or {}).get("centroid_dist_km"),
+            inner_radius_km, ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER)
 
     return {
         "vrp_mw": round(vrp_mw, 3),

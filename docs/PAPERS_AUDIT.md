@@ -127,7 +127,7 @@
 
 ### 11. Aveni et al. 2024 RSE 315:114388 — "TIRVolcH single-band TIR algorithm"
 
-- **PDF**: `documentacion/1-s2.0-S0034425724004140-main.pdf`
+- **PDF**: `documentacion/Aveni_2024_TIRVolcH_RSE.pdf`
 - **DOI**: 10.1016/j.rse.2024.114388. Autores: Aveni, Laiolo, Campus, Massimetti, Coppola (grupo MIROVA).
 - **Rol**: algoritmo TIR experimental paralelo a MIROVA (mismo grupo, no reemplazo).
 - **Confirma (CRÍTICO para D3)**:

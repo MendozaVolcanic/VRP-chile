@@ -578,7 +578,7 @@ Si `_coppola_full` < baseline, hay mecanismo MIROVA no replicado. Acción:
 - **Massimetti 2024 JGR Stromboli 10y** — `documentacion/nuevos/JGR Solid Earth - 2024 - Massimetti...pdf`
 - **Laiolo 2017** — `documentacion/nuevos/laiolo2017.pdf`
 - **Campus 2024** — `documentacion/s00445-024-01721-z.pdf`
-- **Aveni 2024 RSE** — `documentacion/1-s2.0-S0034425724004140-main.pdf`
+- **Aveni 2024 RSE** — `documentacion/Aveni_2024_TIRVolcH_RSE.pdf`
 - **Aveni 2025 GRL** — `documentacion/Geophysical Research Letters - 2025 - Aveni...pdf`
 
 ### NO MIROVA (regla S26)

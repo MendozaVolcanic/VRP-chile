@@ -43,6 +43,7 @@ import os
 from pathlib import Path
 from datetime import datetime, timezone
 
+from pipeline.f5_core import es_viirs_iband, f5_core_vrp_mw
 from pipeline.profile import (
     DATA_SUBDIR,
     MIN_VRP_MW_VIIRS375,
@@ -476,6 +477,19 @@ def append_record(volcano_name: str, record: dict,
             record["distance_class"] = "far"
             record["diag_a46_relabel"] = "summit_to_far_pc_beyond_inner"
 
+    # S132 R17 - sello de tiempo de PROCESO.
+    # POR QUE: el record guarda cuando el SATELITE tomo la escena (`datetime_utc`) pero no
+    # cuando nosotros la procesamos, asi que la latencia del NRT -el tiempo entre que el
+    # dato existe y el operador puede verlo- solo se podia estimar por la fecha de
+    # modificacion del archivo, que se pierde en cada clone y en cada deploy. Para un
+    # sistema de apoyo a la decision de alerta la latencia es parte del producto: una
+    # deteccion que llega doce horas tarde no sirve igual que una que llega en dos.
+    # Se reescribe en cada pasada por append_record (incluido un reproceso), porque el
+    # sello describe ESTA version del record; conservar el primero daria una latencia
+    # falsa de meses despues de cualquier reproceso.
+    # Campo descriptivo: no entra en deteccion, magnitud ni en ninguna compuerta.
+    record["processed_utc"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
     # S19 M4 2026-04-24: sanity cap físico antes del piso por sensor.
     # 50,000 MW = 1.3x el P99.99 del archivo OSF v2.5 (615k filas globales
     # 2000-2025) y 0.71x el récord histórico documentado por MIROVA (~70 GW
@@ -522,6 +536,22 @@ def append_record(volcano_name: str, record: dict,
                             geo = "extension"
                             break
                 pc_geo["geo_class"] = geo
+
+    # S132 - magnitud "nucleo" F5' (decision #3 de AUDIT_S131 §4).
+    # POR QUE: para VIIRS375 el dashboard NO publica `primary_cluster.vrp_mw` - publica
+    # esta magnitud, que recorta el cumulo a la vecindad del pixel de maxima energia y
+    # descarta el halo glaciar disperso, igual que hace MIROVA al informar el cumulo del
+    # crater en vez de toda la escena. Medido S131 sobre 1.609 pares por pasada: F5' da
+    # 0,68 contra MIROVA donde pc.vrp_mw da 0,58, y coinciden entre si en el 5,7 %.
+    # Hasta S131 el calculo vivia SOLO en JavaScript y no quedaba escrito en ningun JSON:
+    # la cifra publicada no era la cifra auditable. Aca se persiste para que lo sea.
+    # NO cambia deteccion ni `vrp_mw`: es un campo descriptivo mas, como geo_class.
+    # Solo I-band 375 m - en MODIS y VIIRS750 el pixel grueso hace saltar el ancla a
+    # fuentes ajenas (caso PCC MODIS 2026-05-30: pico a 12,82 km, 8 -> 22 MW).
+    if inner_radius_km is not None and es_viirs_iband(record.get("sensor")):
+        _core = f5_core_vrp_mw(record, inner_radius_km)
+        if _core is not None:
+            record["f5_core_vrp_mw"] = round(float(_core), 4)
 
     # S37 H_D8_5 — sum VRP reporting (Coppola 2016a eq 8 + líneas 510-513).
     # Cuando ENABLE_SUM_VRP_REPORTING=True, el record persiste dos campos

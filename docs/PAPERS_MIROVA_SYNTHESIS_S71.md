@@ -8,7 +8,7 @@
 |---|---|---|---|---|
 | **Coppola 2016 GSL SP 426.5** "Enhanced volcanic hot-spot detection using MODIS" | ✅ `documentacion/sp426.5.pdf` + `sp426_5.txt` | 1036 (.txt) | Parcial | ✅ Exhaustivo |
 | **Coppola 2019 Frontiers** "Thermal Remote Sensing for Global Volcano Monitoring: Experiences From the MIROVA System" | ✅ `documentacion/Thermal_Remote_Sensing_for_Global_Volcano_Monitori.pdf` | 2353 (`coppola2019_frontiers.md` creado S71) | ❌ NO procesado en S57 | ✅ Exhaustivo |
-| **Coppola 2023 Frontiers** "Global radiant flux from active volcanoes: the 2000–2019 MIROVA database" | ✅ descargado S71 → `documentacion/Coppola_2023_GlobalRadiantFlux_MIROVA.pdf` | 1844 (`coppola2023_frontiers.md` creado S71) | ❌ NO procesado en S57 | ✅ Exhaustivo |
+| **Coppola 2023 Frontiers** "Global radiant flux from active volcanoes: the 2000–2019 MIROVA database" | ✅ descargado S71 → `documentacion/feart-11-1240107.pdf` | 1844 (`coppola2023_frontiers.md` creado S71) | ❌ NO procesado en S57 | ✅ Exhaustivo |
 
 **Gap identificado**: doc S57 cubrió SP426.5 + Coppola 2024 Springer + Campus 2024 + Aveni 2025. **NO cubrió** los 2 Frontiers (2019 y 2023) que son justo los que Nicolás citó por URL. Esa es la razón por la que el verdict S71 T1 Fase 1 fue sub-óptimo.
 
