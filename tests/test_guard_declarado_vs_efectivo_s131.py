@@ -75,12 +75,10 @@ def test_g2_mitigaciones_declaradas_en_ficha_estan_encendidas(flags_operacionale
     assert not mal, f"la FICHA declara mitigaciones cuyo flag está apagado: {mal}"
 
 
-@pytest.mark.xfail(strict=True, reason="S131: 1.635 sellos pegados por el reproceso S130; limpieza propuesta en "
-                   "experiments/_s131_audit/limpiar_sellos_data.py (tag pre-s131-data-hygiene), pendiente del OK de Nicolás. "
-                   "strict: al limpiar, quitar este xfail.")
 def test_g3_sello_del_piso_implica_vrp_cero():
     """Invariante de store.py:99-103: `diag_vrp_floor_mw` se escribe junto con `vrp_mw = 0.0`.
-    Un reproceso parcial (S130) restauró la magnitud y dejó el sello pegado en 1.635 records."""
+    Un reproceso parcial (S130) restauró la magnitud y dejó el sello pegado en 1.635 records;
+    S132 los limpió (tag `pre-s131-data-hygiene`) y desde entonces el guard corre en verde."""
     viol = tot = 0
     for f in glob.glob(os.path.join(ROOT, "data", "mirova_equivalent", "*.json")):
         d = json.load(open(f, encoding="utf-8"))
@@ -124,12 +122,10 @@ def test_g6_index_lista_la_auditoria_mas_reciente():
     assert ultima in _leer("docs/INDEX.md"), f"la última auditoría es {ultima} y no figura en docs/INDEX.md"
 
 
-@pytest.mark.xfail(strict=True, reason="S131: 28 records de abril-2026 (volcanes fuera del cron) con vrp_tir_mw > 0; "
-                   "limpieza propuesta en experiments/_s131_audit/limpiar_sellos_data.py, pendiente del OK de Nicolás. "
-                   "strict: al limpiar, quitar este xfail.")
 def test_g7_campo_con_flag_productor_apagado_queda_en_cero(flags_operacionales):
     """Un campo del schema no trae valor > 0 mientras su flag productor está OFF.
-    Instancia: `vrp_tir_mw` con ENABLE_VRP_TIR_OUTPUT=False (README lo listaba como feature activa)."""
+    Instancia: `vrp_tir_mw` con ENABLE_VRP_TIR_OUTPUT=False (README lo listaba como feature activa).
+    Los 28 records de abril-2026 que lo violaban se limpiaron en S132."""
     if flags_operacionales.get("ENABLE_VRP_TIR_OUTPUT", True):
         pytest.skip("ENABLE_VRP_TIR_OUTPUT encendido: el invariante no aplica")
     nz = []

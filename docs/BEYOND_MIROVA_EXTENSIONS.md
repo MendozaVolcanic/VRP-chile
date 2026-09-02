@@ -164,7 +164,7 @@ Eq.25 — NO escrito aún). Hermano: EXT-12 TIRVolcH (otra vía sub-MW low-T).
 
 ### EXT-12 — TIRVolcH Aveni 2024 single-band TIR low-T
 
-**Source**: Aveni et al. 2024 RSE "TIRVolcH" — DOI `10.1016/j.rse.2024.114388` (YA tenemos como `1-s2.0-S0034425724004140-main.pdf`).
+**Source**: Aveni et al. 2024 RSE "TIRVolcH" — DOI `10.1016/j.rse.2024.114388` (YA tenemos como `Aveni_2024_TIRVolcH_RSE.pdf`).
 
 **Mecanismo**: single-band TIR VIIRS I5 11.45 μm, matrices REF mensuales. **Sensibilidad 0.5 K sobre background, FP 1.8%**.
 
@@ -203,10 +203,10 @@ Estos sí son parte del clon MIROVA literal, sólo que pendientes de implementar
 | **Fan 2015 LST cirrus** ⭐⭐⭐ | ✅ F1.12 descargado `Fan_2015_DaytimeLST_Cirrus.pdf` | EXT-1 cirrus filter "beyond MIROVA" (corrige hallucinación "Zhu 2023") |
 | Frey 2008 MOD35 | ✅ Descargado F1.10 | EXT-2 base teórica BTD |
 | MOD06 ATBD Platnick | ✅ F1.12 descargado `Platnick_MODIS_MOD06_ATBD.pdf` | EXT-2 soporte canónico |
-| **AVTOD Reath 2019** ⭐⭐⭐ | ✅ Ya teníamos (`1-s2.0-S0377027318304165-main.pdf` → renamed `AVTOD_Reath_2019.pdf`) | EXT-8 ground truth secundario CRÍTICO |
+| **AVTOD Reath 2019** ⭐⭐⭐ | ✅ Ya teníamos (`AVTOD_Reath_2019.pdf` → renamed `AVTOD_Reath_2019.pdf`) | EXT-8 ground truth secundario CRÍTICO |
 | HotLINK paper | ✅ Descargado F1.10 | EXT-6 ML benchmark |
 | HotLINK GitHub | ✅ F1.14 exploración (5 conceptos transferibles identificados) | EXT-6 técnicas comparativas |
-| TIRVolcH Aveni 2024 | ✅ Ya teníamos (`1-s2.0-S0034425724004140-main.pdf` → renamed `Aveni_2024_TIRVolcH_RSE.pdf`) | EXT-12 sub-MW low-T |
+| TIRVolcH Aveni 2024 | ✅ Ya teníamos (`Aveni_2024_TIRVolcH_RSE.pdf` → renamed `Aveni_2024_TIRVolcH_RSE.pdf`) | EXT-12 sub-MW low-T |
 | Pallister 2013 Chaitén | ✅ F1.12 descargado `Pallister_2013_Chaiten_rhyolite_dome.pdf` (secuencia eruptiva, NO FLIR como Perplexity citaba) | EXT-9 context Chaitén |
 | **Bernstein 2013 Chaitén FLIR** ⭐ (bonus) | ✅ F1.12 descargado `Bernstein_2013_Chaiten_FLIR_thermal.pdf` | EXT-9 validation field-based REAL FLIR paper |
 | Valade 2019 MOUNTS | ✅ Descargado F1.10 | EXT-3 ML cloud + EXT-4 multi-sensor |
