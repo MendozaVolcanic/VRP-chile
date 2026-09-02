@@ -144,7 +144,22 @@ que se convierten en verdes cuando Nicolás apruebe la limpieza de datos (§4.1)
 
 ## 5. Verificación del frontend (navegador real, puerto 8091)
 
-Se completa en §5 al cerrar la verificación — ver el cierre de sesión.
+Sobre `frontend/index.html` servido desde el repo (data local con 38 h de atraso respecto
+del servidor — justo el caso que A1 describía):
+
+| qué | antes | después (medido en el DOM) |
+|---|---|---|
+| Semáforo del header | `status-dot` verde fijo, «Sistema Operativo» | `status-dot mon-lagging` (ámbar), texto **«Datos atrasados»**, tooltip «Peor frescura entre los volcanes Tier A: datos atrasados · última pasada hace 38 h» |
+| Distancia en tarjeta (7 de 11 en `test1_roi`) | «0.0 km del cráter · 14 px» | **«en el cráter (ancla) · 14 px»**; Lastarria 0,9 km, Tupungatito 2,4 km, PCC 1,4 km, Chaitén 2,9 km siguen como distancia |
+| Badge tarjeta / detalle | mismo badge, sin rótulo | tarjeta con tooltip «Nivel de la ÚLTIMA pasada (48 h)…»; detalle **«… · máx 30 d»** |
+| Regiones | Lastarria «Atacama», Tupungatito «Valparaíso» | **Antofagasta**, **Metropolitana** (index y mosaico) |
+| Móvil 375 px | `scrollWidth` 783 (2,09×); enlaces a las otras vistas fuera de pantalla | **375/375**; los 4 enlaces y «Acerca de» dentro de pantalla (right ≤ 273 px); la tabla de eventos scrollea dentro de su caja |
+| Consola | — | 0 errores de script; los únicos 404 son `*_recent.json`, que sólo existen en el sitio publicado (`build_recent_json.py`) y tienen fallback al JSON completo |
+
+Scripts de verificación: los del agente en `experiments/_s131_audit/dashboard/` (réplica de
+los 10 predicados de `index.html`, 11/11 tarjetas coinciden con el sitio publicado) y las
+lecturas del DOM de esta sesión (registradas en el transcript; los valores de la tabla son los
+devueltos por el navegador).
 
 ## 6. Pendientes declarados (regla C — puerta de entrada de S132)
 
