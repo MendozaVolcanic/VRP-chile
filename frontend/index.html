@@ -360,6 +360,13 @@
     }
     .charts-grid.dual { grid-template-columns: 1fr 1fr; }
     @media (max-width: 900px) { .charts-grid.dual { grid-template-columns: 1fr; } }
+    /* S131 A11: celular — leyenda del mapa envuelve, tabla de eventos scrollea dentro de su caja, nada empuja el ancho del body */
+    @media (max-width: 600px) {
+      .map-legend { flex-wrap: wrap; margin-left: 0; row-gap: 4px; }
+      .events-table { display: block; overflow-x: auto; max-width: 100%; }
+      .overview-map-wrapper, .overview-map-header, .map-controls { max-width: 100%; }
+      .map-controls { flex-wrap: wrap; }
+    }
     .chart-panel {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 8px; padding: 14px;
