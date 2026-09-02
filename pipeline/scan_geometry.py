@@ -1,6 +1,12 @@
 """
 scan_geometry.py — Per-pixel ground area correction for off-nadir scan angles.
 
+**Nota operacional (S131)**: el pipeline usa área de píxel **nadir-fija** en los tres
+sensores (`ENABLE_NADIR_FIXED_PIXEL_AREA_{MODIS,VIIRS}=True`, A66/A67) — las ramas sec³ y
+de corrección leve de abajo NO se ejecutan en producción. Lo que sigue describe la
+geometría; el estado real lo da `pipeline.profile`. Sobre el sub-reporte con el ángulo que
+el área nadir-fija sin remuestreo produce, ver `docs/s131/REMUESTREO_LEY_DE_AREA.md`.
+
 Polar-orbiting cross-track scanners (MODIS, VIIRS) project a wider IFOV onto
 the ground as the scan angle increases. Without correction, VRP values use the
 nadir pixel area and underestimate radiative power at off-nadir pixels.
@@ -162,7 +168,11 @@ def roi_mask_bbox(
     Diferencia fisica: un circulo radio 25 km tiene area 1963 km^2; un
     bbox 50x50 (half=25) tiene 2500 km^2 — 27% mas, las esquinas diagonales.
     MIROVA publica detecciones en esas esquinas (Llaima Conguillio a 28 km
-    del vent, en esquina NE del bbox). Cambiar a bbox recupera esas refs.
+    del vent, en esquina NE del bbox).
+
+    Uso actual (S131): el flag `enable_roi1_box_paper` (OFF, A/B S130 → NO ADOPTAR)
+    aplica esta función con `half_km = ROI1_BOX_HALF_KM = 2.5` para la caja 5×5 del
+    ROI1 (D18); el ROI exterior sigue siendo el círculo de `radius_km`.
 
     Args:
         lat, lon: arrays 2D de latitud/longitud per-pixel (grados).
@@ -189,10 +199,18 @@ def viirs_pixel_areas(
     RSE 137, 76-88). The aggregation divides the swath into 3 zones and
     aggregates 1x, 2x, or 3x detector samples in the along-scan direction
     so that the resulting L1B "pixel" has approximately constant ground
-    sample distance regardless of scan angle. Empirical aggregated I-band
+    sample distance regardless of scan angle.
+
+    ⚠️ S131: la cifra que seguía acá («~0.32 a ~0.6 km², Cao 2014») está MAL. Contra el
+    ATBD de geolocalización VIIRS (423-ATBD-002, Tabla 2.2-1) el HSI de I4 va de
+    0.371×0.388 km (nadir) a 0.80×0.789 km (fin de swath): área 0.144 → 0.631 km²,
+    **4.38×**. El «approximately 2» del ATBD es POR EJE; el área es el producto. El tope
+    de 2.0× de abajo hereda esa lectura y sub-corrige; la rama está muerta en producción
+    (nadir_fixed=True). Ver `docs/s131/REMUESTREO_LEY_DE_AREA.md`. Texto original:
+    «Empirical aggregated I-band
     pixel area varies only between ~0.32 and ~0.6 km^2 across the full
     swath (Cao et al. 2014, JGR Atmospheres 119), not the sec^3 ~25x that
-    a non-aggregated scanner would produce.
+    a non-aggregated scanner would produce.»
 
     Empirical test: applying sec^3 to a VIIRS edge pixel (zenith ~70 deg)
     on Lascar gave a 25x overshoot vs MIROVA reference values. Therefore

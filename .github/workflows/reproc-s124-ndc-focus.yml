@@ -69,22 +69,27 @@ jobs:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_START: ${{ github.event.inputs.start }}
+          VRP_END: ${{ github.event.inputs.end }}
         timeout-minutes: 330
         run: |
           python scripts/run_pipeline.py \
             --profile experimental_ndc_focus \
             --volcano NevadosDeChillan \
-            --start ${{ github.event.inputs.start }} \
-            --end ${{ github.event.inputs.end }} \
+            --start "$VRP_START" \
+            --end "$VRP_END" \
             --overwrite
       - name: Commit result
+        env:
+          VRP_START: ${{ github.event.inputs.start }}
+          VRP_END: ${{ github.event.inputs.end }}
         run: |
           set +e
           git config user.name  "vrp-bot"
           git config user.email "vrp-bot@github-actions"
           git add "data/experimental_ndc_focus/NevadosDeChillan.json"
           git diff --staged --quiet && { echo "no changes"; exit 0; }
-          git commit -m "data(s124): foco Nicanor NdC ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (experimental_ndc_focus)"
+          git commit -m "data(s124): foco Nicanor NdC $VRP_START..$VRP_END (experimental_ndc_focus)"
           for attempt in 1 2 3 4 5; do
             git pull --rebase -X theirs origin main && git push && exit 0
             git rebase --abort 2>/dev/null

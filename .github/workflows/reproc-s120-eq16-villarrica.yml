@@ -56,22 +56,29 @@ jobs:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_VOLCANO: ${{ github.event.inputs.volcano }}
+          VRP_START: ${{ github.event.inputs.start }}
+          VRP_END: ${{ github.event.inputs.end }}
         timeout-minutes: 330
         run: |
           python scripts/run_pipeline.py \
             --profile _s99_test1_eq16 \
-            --volcano "${{ github.event.inputs.volcano }}" \
-            --start ${{ github.event.inputs.start }} \
-            --end ${{ github.event.inputs.end }} \
+            --volcano "$VRP_VOLCANO" \
+            --start "$VRP_START" \
+            --end "$VRP_END" \
             --overwrite
       - name: Commit result
+        env:
+          VRP_VOLCANO: ${{ github.event.inputs.volcano }}
+          VRP_START: ${{ github.event.inputs.start }}
+          VRP_END: ${{ github.event.inputs.end }}
         run: |
           set +e
           git config user.name  "vrp-bot"
           git config user.email "vrp-bot@github-actions"
-          git add "data/_s99_test1_eq16/${{ github.event.inputs.volcano }}.json"
+          git add "data/_s99_test1_eq16/$VRP_VOLCANO.json"
           git diff --staged --quiet && { echo "no changes"; exit 0; }
-          git commit -m "data(s120): reproc Eq.16 ${{ github.event.inputs.volcano }} ${{ github.event.inputs.start }}..${{ github.event.inputs.end }} (Panel 2b)"
+          git commit -m "data(s120): reproc Eq.16 $VRP_VOLCANO $VRP_START..$VRP_END (Panel 2b)"
           for attempt in 1 2 3 4 5; do
             git pull --rebase -X theirs origin main && git push && exit 0
             git rebase --abort 2>/dev/null

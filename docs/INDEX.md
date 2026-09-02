@@ -13,7 +13,9 @@
 |---|---|---|
 | MISSION.md | Misión vinculante: clon literal MIROVA, 3 preguntas | S22 |
 | MIROVA_DIVERGENCES.md | Catálogo vivo de divergencias vs MIROVA | S71+ |
-| **AUDIT_S127.md** | **Última — eje «declarado ≠ efectivo» (T9): 4 afirmaciones falsas, 3 guards** | **S127** |
+| AUDIT_S131.md | Resultados + dashboard + utilidad OVDAS; 6 ejes (magnitud/ATBD, dashboard, T9, pendientes, TIF por pasada, otro sensor) | S131 |
+| AUDIT_S128.md | Evidencia exógena: ángulo de vista, grilla desde KMZ, D2 medida, GAP #A reabierto | S128 |
+| AUDIT_S127.md | Eje «declarado ≠ efectivo» (T9): 4 afirmaciones falsas, 3 guards | S127 |
 | AUDIT_S125_PROFUNDA.md | Sub-reporte aislado en VIIRS375; rebaja de A82 | S125 |
 | AUDIT_S124.md | Banda de paridad, filtro solar, D15/D16/D17 | S124 |
 | PROTOCOLO_AUDITORIA_PROFUNDA.md | Las 9 técnicas validadas (T9 = declarado vs efectivo) | S124+ |

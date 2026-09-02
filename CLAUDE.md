@@ -123,8 +123,9 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 - Si dudas de un método con datos geofísicos, **dilo** — nunca adivines.
 
 ## Reglas geométricas S14 (MIROVA-equivalent)
-- **`radius_km = 25 km` uniforme** para volcanes chilenos — replica grilla
-  MIROVA UTM 51×51 km (radio inscrito 25.5 km).
+- **`radius_km = 25 km` en los 11 Tier A** — replica grilla MIROVA UTM 51×51 km
+  (radio inscrito 25.5 km). Los 34 volcanes restantes quedan en 5 km (`volcanoes.yaml`:
+  `{25: 11, 5: 34}`, verificado S131; el texto anterior decía «uniforme» y era falso).
 - **`inner_radius_km` por volcán** (valores oficiales MIROVA de los KML):
   | Volcán | inner | Volcán | inner |
   |---|---|---|---|
@@ -202,7 +203,8 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 ## Reglas operacionales S60-S62 (aprendizajes adicionales)
 - **A10. Audit vs MIROVA usar `pc.vrp_mw` (NO `record.vrp_mw`)**: `record.vrp_mw` es sum
   scene-wide de todos hot_pixels; `pc.vrp_mw` (primary_cluster.vrp_mw) es solo cluster summit
-  = lo que MIROVA reporta. Dashboard (frontend/index.html:680) usa pc.vrp_mw. Audits con
+  = lo que MIROVA reporta. Dashboard (`mirovaEqVrp`/`isValidDetection` en frontend/index.html,
+  ~l. 1372; el `:680` original hoy es una fila de la lista de volcanes) usa pc.vrp_mw. Audits con
   campo equivocado ocultaron problemas: Lastarria 1.04× → real 7.67×, Llaima 1.01× → real
   11.82×, PCC 52.77× → real 6.9×.
 - **A11. Universo MIROVA = CONS + OCR**: `registro_vrp_ocr.csv` (Mirova-v1) tiene 457
@@ -213,7 +215,11 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 - **A12. Patrón térmico Tier A — qué necesita kernel-bg**: vols con ΔT mediano (t_max - t_bg)
   <12K en régimen Muy Bajo + ring background frío sufren ΔL inflado en Test 1 integrated-ROI
   → magnitud 8-15× MIROVA. Vols con ΔT >20K (Lascar 21.6K, Isluga ~20K) calibrados
-  naturalmente sin fix. Fix kernel-bg (Coppola 2024 L1129) reduce 70-90% del gap en Muy
+  naturalmente sin fix. ⚠️ **El ejemplo es FALSO — medido S128, marcado S131.** Los ΔT
+  reales son Láscar **16,9 K** e Isluga **8,3 K** (`scripts/libro_de_cuentas.py`, ids
+  `A12_dT_lascar` / `A12_dT_isluga`). Isluga cae debajo del propio corte de 12 K, o sea
+  pertenece a la clase que la regla dice que necesita kernel-bg. La lección de método
+  (el patrón térmico decide, validar por A/B — A19) sigue; los dos números no. Fix kernel-bg (Coppola 2024 L1129) reduce 70-90% del gap en Muy
   Bajo (validado Villarrica/PP S61).
 - **A13. ⚠️ FALSA — corregida S124.** Villarrica NO tiene distancia fija 0.84:
   sobre n=3338, el valor es **0.0 en 3284 casos** (98 %) y 0.84 solo 15 veces. El
@@ -242,7 +248,9 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   el bug que vino a arreglar. ⚠️ **Pero ojo (S125 B1)**: el canal OCR quedó partido en
   dos — `data/mirova_reference/registro_vrp_ocr.csv` está **congelado en 2026-03-28**
   (235 filas) mientras `.../mirova_v1_snapshot/registro_vrp_ocr.csv` llega al 2026-08-24
-  (887 filas). `scripts/build_c2ab_windows.py:55` consume el congelado. Texto original:
+  (887 filas). ~~`scripts/build_c2ab_windows.py:55` consume el congelado~~ (⚠️ S131: ya
+  no — `build_c2ab_windows.py:64` apunta al snapshot vivo y el comentario de la l. 55
+  documenta el fix; el split de archivos sí sigue existiendo). Texto original:
   **CSV consolidado del scraper Nicolás actualizable**: el CSV en
   `data/mirova_reference/mirova_v1_snapshot/` tiene fecha de snapshot. Para audits con data
   fresca: descargar latest desde
@@ -785,8 +793,8 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     desenlace **NO está en producción**: `ENABLE_TEST1_NTI_INTEGRAL = False` (verificado
     con `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p;
     print(p.ENABLE_TEST1_NTI_INTEGRAL)"`), y la rama `compute_test1_nti` existe **sólo en
-    `process_viirs.py:958`** — `process_modis.py:674` y `process_viirs_mod.py:665`
-    importan únicamente `compute_test1_mir`, sin alternativa. **La causa raíz que A69
+    `process_viirs.py:206/1070`** (era 958) — `process_modis.py:59` y `process_viirs_mod.py:153`
+    (eran 674/665; líneas actualizadas S131) importan únicamente `compute_test1_mir`, sin alternativa. **La causa raíz que A69
     describe sigue viva en los 3 sensores.** Ni encendiendo el flag se cura MODIS/V750,
     que es donde el píxel grande amplifica el gradiente (A80). Caso de manual de A87:
     el flag no es el fenómeno. Detalle: `docs/AUDIT_S125_PROFUNDA.md` §2 O1.
@@ -1036,7 +1044,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 
   **El corolario incómodo**: las cinco veces el error fue de quien estaba **auditando**,
   no de quien escribió el código — y dos de esas veces el texto correcto ya estaba en el
-  repo (el docstring de `process_viirs_mod.py:409` nombraba los 5 volcanes opt-in desde
+  repo (el docstring de `process_viirs_mod.py:416` —era 409— nombraba los 5 volcanes opt-in desde
   S72). La técnica se equivoca en la misma dirección que el defecto que busca, así que un
   hallazgo de la forma «esto está muerto» exige verificación cruzada antes de reportarse.
   Detalle: `docs/AUDIT_S127.md` + T9 en `docs/PROTOCOLO_AUDITORIA_PROFUNDA.md`.
@@ -1088,7 +1096,9 @@ decisiones de umbrales, o cambios metodológicos:
 ## Arquitectura
 - `pipeline/`: fetch.py (earthaccess), process_modis.py, process_viirs.py, process_viirs_mod.py, store.py, scan_geometry.py
 - `frontend/` — **3 vistas live + 1 preview**, cada una con su copia de helpers (`mirovaEqVrp`, etc.): `index.html` (dashboard Chart.js+Leaflet), `diario.html` (tendencia 90d/volcán), `mosaico.html` (overview 48h/30d). **Un cambio de display/filtro (ej. supresión cirrus) debe replicarse en esas 3** (S92 L5). La cuarta, `comparacion.html`, **también se despliega** (`cp -r frontend/.`) y está enlazada desde `index.html`, pero se rotula a sí misma *"PREVIEW S115 · no es el dashboard live"* y **no lleva `mirovaEqVrp`** (0 usos, contra 25/8/8) — es deliberado, no un olvido: no la "arregles" replicándole el helper. Verificado S127. Verificación = preview real navegador (no `node --check`): sirven desde `/frontend/`, `BASE_PATH=/`, data en `/data/...`. GitHub Pages (deploy on push a `frontend/**`).
-- `volcanoes.yaml` (45 configurados, 11 con data, 34 sin pull)
+- `volcanoes.yaml` (45 configurados · 11 Tier A con serie continua desde 2025-02 · 34 con
+  una ventana corta de abril-2026 (67-94 records c/u) en `data/mirova_equivalent/`, fuera del
+  cron NRT — corregido S131: antes decía «11 con data, 34 sin pull»)
 - `.github/workflows/nrt.yml` (cron cada 2h, matrix por volcán, **timeout 50 min per-step**)
 
 **Aprendizaje S15 sobre reprocesos largos (obligatorio respetar)**:
@@ -1230,15 +1240,14 @@ Para minimizar compactaciones automáticas ("session continued..."):
   contradecía la sección Arquitectura — corregido S123). Sigue siendo corto
   para reprocess full history; para eso usar máquina local (ver S15) o
   `timeout >= duración_esperada × 1.3` (A15).
-- **Concurrency (S123)**: los 6 workflows que hacen `git push` a main comparten
-  `group: push-main` con `cancel-in-progress: false` — nrt, nrt-retry,
-  sync-mirova-csv, audit-weekly, backfill y reproc. Un yml nuevo que pushee a
-  main declara ese mismo grupo **salvo que implemente su propio retry de push**,
-  que es la defensa real contra la carrera de `git push` que el PR #502 cerró.
-  **Verificado S127: hay 3 excepciones deliberadas**, cada una con su razón en el
-  comentario — `reproc-s124-ndc-focus`, `reproc-s124-villarrica-op-ab` y el job
-  `merge` de `reproc-chunked` (#546). Todas tienen `pull --rebase` + `push` con 5
-  reintentos y backoff. El motivo de salirse: `nrt.yml` ocupa el lock ~50 min de
+- **Concurrency (S123, reescrito S131)**: un workflow que hace `git push` a main debe tener
+  **o** `group: push-main` (`cancel-in-progress: false`), **o** su propio bucle de reintento
+  `pull --rebase` + `push` (5 intentos con backoff) — la defensa real contra la carrera que
+  el PR #502 cerró. **No se mantiene acá la lista de cuáles son**: envejece sola (S123 decía
+  «6 workflows / 3 excepciones» y al medir en S131 eran 9 pushers, 5 en el grupo y 4 con
+  retry propio — `nrt-retry` no pushea y `audit-weekly` sí, con retry). La condición la mide
+  el guard `tests/test_guard_declarado_vs_efectivo_s131.py::test_g4_pusher_push_main_o_retry`
+  derivando la lista de los yml, y ese es el contrato. El motivo de salirse: `nrt.yml` ocupa el lock ~50 min de
   cada 2 h, y GitHub mantiene **un solo run pendiente por grupo**, así que el
   segundo que llega **desplaza** al encolado — el job `merge` se perdió así en
   S125 y en S126. O grupo compartido, o retry propio: las dos cosas juntas sólo
@@ -1316,8 +1325,10 @@ en S35 durante ~70 sesiones y confundía a las sesiones frías):
    sesiones y mandaba leer una auditoría de junio como si fuera vigente (hallazgo
    S123). Al 2026-08-09 la última es `docs/AUDIT_S123.md`.
 4. `docs/MIROVA_DIVERGENCES.md` — catálogo VIVO de divergencias. Estado al S123:
-   **abiertas D2 y D3** (ambas congeladas desde S27, sin plan activo; D2 quedó
-   mitigada de facto por el loader CONS∪OCR de S86 pero el doc nunca se actualizó)
+   (⚠️ S131: no duplicar acá la lista de abiertas — quedó congelada en S123 y omitía
+   D13, D17 y D18; el estado vivo son los encabezados de cada D en el catálogo) ~~**abiertas
+   D2 y D3**~~ (ambas congeladas desde S27, sin plan activo; D2 quedó mitigada de facto por el
+   loader CONS∪OCR de S86 — medida en 79,2 % en S128 y anotada en el doc en S131)
    y **D12** (FN MODIS; C2 peak-of-kernel refutado en S122, cierre formal pendiente
    de Nicolás). **CERRADAS, no reabrir** (anti-A8): D9 (S113, sus dos caras),
    D11 cara far→summit (**⚠️ S125: leer con la rebaja de A82 — la auditoría S114

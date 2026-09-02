@@ -17,7 +17,7 @@
       --modis: #ff8c00; --v375: #e91e63; --v750: #00bcd4; --vent: #7c4dff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; overflow-x: hidden; }  /* S131 A11 */
 
     /* ── Header ── */
     header {
@@ -29,8 +29,10 @@
     .logo { font-size: 1.4rem; font-weight: 700; letter-spacing: 1px; }
     .logo span { color: var(--orange); }
     .header-sub { font-size: 0.78rem; color: var(--muted); }
-    .header-right { margin-left: auto; display: flex; align-items: center; gap: 20px; }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }  /* S131 A11: en celular los enlaces se salían de pantalla */
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+    .status-dot.mon-lagging { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }  /* S131 A1 */
+    .status-dot.mon-stale   { background: var(--red);    box-shadow: 0 0 8px var(--red); animation: none; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
     .status-label { font-size: 0.75rem; color: var(--green); display: flex; align-items: center; gap: 6px; }
     #updated-label { font-size: 0.72rem; color: var(--muted); }
@@ -225,7 +227,7 @@
       padding: 6px 0; margin-bottom: 6px;
     }
     .overview-map-header span { font-size: .82rem; font-weight: 600; color: var(--text); }
-    .overview-map-header .map-controls { display: flex; gap: 6px; align-items: center; }
+    .overview-map-header .map-controls { display: flex; gap: 6px; align-items: center; overflow-x: auto; }  /* S131 A11 */
     .overview-map-container {
       height: 420px; border-radius: 10px; overflow: hidden;
       border: 1px solid var(--border); background: var(--card);
@@ -376,7 +378,7 @@
   <div class="header-right">
     <div class="status-label">
       <div class="status-dot"></div>
-      Sistema Operativo
+      <span id="status-text">Sistema Operativo</span>
     </div>
     <span id="utc-clock"></span>
     <span id="updated-label"></span>
@@ -647,9 +649,9 @@ const VOLCANOES_ALL = [
   { name: "SanPedro",             display: "San Pedro",              region: "Antofagasta",   lat: -21.880, lon: -68.400, radius_km: 10 },
   { name: "Putana",               display: "Putana",                 region: "Antofagasta",   lat: -22.557, lon: -67.853, radius_km: 10 },
   { name: "Lascar",               display: "Láscar",                 region: "Antofagasta",   lat: -23.369, lon: -67.732, radius_km: 25, inner_radius_km: 5, vent_radius_km: 3, hasMirova: true,  vent_lat: -23.362930, vent_lon: -67.731416 },
-  { name: "Lastarria",            display: "Lastarria",              region: "Atacama",        lat: -25.168, lon: -68.507, radius_km: 25, inner_radius_km: 3, vent_radius_km: 3, hasMirova: true,  vent_lat: -25.168, vent_lon: -68.507 },
+  { name: "Lastarria",            display: "Lastarria",              region: "Antofagasta",      lat: -25.168, lon: -68.507, radius_km: 25, inner_radius_km: 3, vent_radius_km: 3, hasMirova: true,  vent_lat: -25.168, vent_lon: -68.507 },
   // === Zona Central SVZ ===
-  { name: "Tupungatito",          display: "Tupungatito",            region: "Valparaíso",    lat: -33.400, lon: -69.800, radius_km: 25, inner_radius_km: 7, vent_radius_km: 5, hasMirova: true,  vent_lat: -33.389044, vent_lon: -69.826374 },
+  { name: "Tupungatito",          display: "Tupungatito",            region: "Metropolitana", lat: -33.400, lon: -69.800, radius_km: 25, inner_radius_km: 7, vent_radius_km: 5, hasMirova: true,  vent_lat: -33.389044, vent_lon: -69.826374 },
   // S29: POI hardcoded "Hotspot NE recurrente" S19 M2 eliminado — ya cumplió su
   // función de identificar Nevado El Plomo / planta solar / ruta minera como
   // FPs. El pipeline ahora descarta esos hotspots correctamente como "far".
@@ -1789,7 +1791,25 @@ function fmtLocalCL(s) {
   }).replace(",", "") + " (Chile)";
 }
 
+// S131 A1: semáforo del encabezado alimentado por datos. Guarda la peor frescura de los
+// Tier A vista durante buildCards() y la refleja en el punto + texto del header.
+const _FRESH_RANK = { "mon-fresh": 0, "mon-lagging": 1, "mon-stale": 2 };
+let _headerWorst = null;
+function trackHeaderFreshness(fresh) {
+  if (!(fresh.cls in _FRESH_RANK)) return;
+  if (_headerWorst == null || _FRESH_RANK[fresh.cls] > _FRESH_RANK[_headerWorst.cls]) _headerWorst = fresh;
+  const dot = document.querySelector(".status-dot");
+  const txt = document.getElementById("status-text");
+  if (!dot || !_headerWorst) return;
+  dot.className = "status-dot " + _headerWorst.cls;
+  const label = _headerWorst.cls === "mon-fresh" ? "Sistema Operativo"
+              : _headerWorst.cls === "mon-lagging" ? "Datos atrasados"
+              : "Sin pasadas recientes";
+  if (txt) { txt.textContent = label; txt.title = "Peor frescura entre los volcanes Tier A: " + _headerWorst.txt; }
+}
+
 function buildCards() {
+  _headerWorst = null;
   const grid = document.getElementById("volcano-grid");
   while (grid.firstChild) grid.removeChild(grid.firstChild);
 
@@ -1819,6 +1839,9 @@ function buildCards() {
     nameDiv.append(nm, rg);
     const badge = el("span", "alert-badge " + level.cls);
     badge.textContent = level.label;
+    // S131 A2/A3: la tarjeta clasifica la ÚLTIMA pasada; el detalle, el máximo de 30 d.
+    // Dos ventanas distintas con el mismo badge se rotulan para que no se confundan.
+    badge.title = "Nivel de la ÚLTIMA pasada (ventana 48 h). El panel de detalle muestra el máximo de 30 días, que puede ser mayor.";
     hdr.append(nameDiv, badge);
 
     // VRP
@@ -1845,9 +1868,12 @@ function buildCards() {
       const ic = el("span", "vc-dist-ic" + (det.summit ? " is-summit" : " is-far"));
       ic.textContent = det.summit ? "◉" : "○";
       const s = el("span", "vc-dist-txt");
-      s.textContent = " " + det.dist.toFixed(1) + " km del cráter" +
-                      (det.npx != null ? " · " + det.npx + " px" : "");
-      dcRow.title = "Distancia del centroide del cluster de la última detección al cráter, y su extensión en píxeles.";
+      // S131 A4: para records Test 1 (ancla honesta S106) la distancia es 0,0 por
+      // construcción — el ancla ES el cráter, no una medición. Se dice con palabras,
+      // igual que ya hace la columna DIST de la tabla del detalle.
+      const distTxt = det.dist < 0.05 ? "en el cráter (ancla)" : det.dist.toFixed(1) + " km del cráter";
+      s.textContent = " " + distTxt + (det.npx != null ? " · " + det.npx + " px" : "");
+      dcRow.title = "Posición de la última detección respecto del cráter: para detecciones por integral (Test 1) es el ancla del cráter, no un centroide; para clústeres es la distancia del punto reportado al cráter. Extensión en píxeles.";
       dcRow.append(ic, s);
     }
 
@@ -1876,6 +1902,9 @@ function buildCards() {
     // detección. Estilo MIROVA: ver que las últimas pasadas se procesaron aunque
     // no haya evento térmico. Surfacea el gap de adquisición (LANCE intermitente).
     const fresh = monitoringFreshness(lastTime);
+    // S131 A1: el semáforo del encabezado era HTML fijo (verde pulsante aunque las 11
+    // tarjetas dijeran «datos atrasados»). Ahora consume la PEOR frescura de los Tier A.
+    if (v.hasMirova) trackHeaderFreshness(fresh);
     const mon = el("div", "vc-monitor " + fresh.cls);
     const mdot = el("span", "vc-mon-dot"); mdot.textContent = "●";
     const mtxt = el("span", "vc-mon-txt"); mtxt.textContent = " " + fresh.txt;
@@ -1925,7 +1954,9 @@ function renderDetail() {
   // Header
   const dh = el("div", "detail-header");
   const dt = el("div", "detail-title"); dt.textContent = v.display;
-  const badge = el("span", "alert-badge " + level.cls); badge.textContent = level.label;
+  const badge = el("span", "alert-badge " + level.cls);
+  badge.textContent = level.label + " · máx 30 d";   // S131 A2: rótulo de la ventana
+  badge.title = "Nivel del MÁXIMO de la ventana de 30 días. La tarjeta muestra la última pasada (48 h).";
   const dc = el("div", "detail-coords");
   // coords will be added from volcanoes config — hardcoded for now
   dh.append(dt, badge);

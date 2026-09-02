@@ -1,0 +1,476 @@
+{
+ "definicion": "S131 auditoria MAGNITUD - items 3 y 4: ley de area por angulo (VIIRS) y cruce con datos.\n\nPOR QUE. S131 mostro que el ratio nuestro/MIROVA cae con el angulo cenital en VIIRS y\nque MIROVA es plano. La hipotesis es que MIROVA remuestrea a celdas de area nominal\n(Coppola 2014 s2.2) y nosotros integramos con area nominal FIJA sobre el pixel real,\nmas grande en oblicuo. Para la magnitud, \"regrid + area nominal\" equivale a \"area real\nsin regrid\" (Sum k*A0*dL sobre A/A0 celdas = k*A*dL). Este script aplica esa\ncorreccion a `pc.vrp_mw` READ-ONLY y mira si el gradiente se aplana.\n\nLA LEY DE AREA. El ATBD de geolocalizacion VIIRS (423-ATBD-002) NO da tabla ni formula\nde area vs angulo: da (a) los extremos de la Tabla 2.2-1 (HSI nadir / end of scan),\n(b) los angulos de cambio de zona de agregacion (3:1 -> 2:1 en 31.589 deg de scan,\n2:1 -> 1:1 en 44.680 deg, fin de scan 56.063 deg) y (c) la Figura 3.3-1, que es un\ngrafico no transcribible. Por eso se construyen DOS brazos, y se dice cual es cual:\n\n  B  \"modelo geometrico anclado\": esfera R=6371 km, h=829 km; angulo de scan desde el\n     cenital del record por sin(ts) = R*sin(tz)/(R+h); crecimiento along-track =\n     rango inclinado / h; along-scan crudo = along-track / cos(tz); agregacion 3/2/1\n     por zona de scan. f = g_track * g_scan_crudo * agg/3. NO es el ATBD: es un modelo\n     que reproduce sus dos extremos (1.00 en nadir; 4.48 vs 4.38 al borde, +2 %) y sus\n     saltos. Se declara como modelo.\n  C  \"lineal en (1-cos)\": f = 1 + (4.38-1) * (1-cos tz)/(1-cos 70.3 deg). Brazo\n     extremo pedido en el encargo; no tiene los saltos.\n  A  sin correccion (lo publicado hoy).\n\nDEFINICIONES (A90): identicas a `experiments/_s131_remuestreo/factor_requerido.py` —\nun par por (volcan, fecha, bucket), maximo de cada lado, `pc.vrp_mw` (A10), loader\nCONS union OCR (A11), solo nocturnas, ventana 2026, 11 Tier A, angulo =\n|sensor_zenith_deg| del record (es el del pixel mas cercano al hotspot final, S122).\nLa correccion se aplica con el angulo del record, no por pixel: el cluster es\ncompacto y el angulo varia poco dentro de el. Con n<15 no se afirma nada.\n",
+ "ley": [
+  {
+   "cenital_deg": 0,
+   "scan_deg": 0.0,
+   "zona": "3:1",
+   "f_modelo": 1.0,
+   "f_lineal": 1.0
+  },
+  {
+   "cenital_deg": 10,
+   "scan_deg": 8.84,
+   "zona": "3:1",
+   "f_modelo": 1.043,
+   "f_lineal": 1.077
+  },
+  {
+   "cenital_deg": 20,
+   "scan_deg": 17.62,
+   "zona": "3:1",
+   "f_modelo": 1.187,
+   "f_lineal": 1.307
+  },
+  {
+   "cenital_deg": 30,
+   "scan_deg": 26.26,
+   "zona": "3:1",
+   "f_modelo": 1.483,
+   "f_lineal": 1.683
+  },
+  {
+   "cenital_deg": 36.2,
+   "scan_deg": 31.51,
+   "zona": "3:1",
+   "f_modelo": 1.794,
+   "f_lineal": 1.984
+  },
+  {
+   "cenital_deg": 36.4,
+   "scan_deg": 31.67,
+   "zona": "2:1",
+   "f_modelo": 1.204,
+   "f_lineal": 1.995
+  },
+  {
+   "cenital_deg": 40,
+   "scan_deg": 34.67,
+   "zona": "2:1",
+   "f_modelo": 1.374,
+   "f_lineal": 2.193
+  },
+  {
+   "cenital_deg": 45,
+   "scan_deg": 38.73,
+   "zona": "2:1",
+   "f_modelo": 1.695,
+   "f_lineal": 2.493
+  },
+  {
+   "cenital_deg": 50,
+   "scan_deg": 42.68,
+   "zona": "2:1",
+   "f_modelo": 2.167,
+   "f_lineal": 2.821
+  },
+  {
+   "cenital_deg": 52.5,
+   "scan_deg": 44.59,
+   "zona": "2:1",
+   "f_modelo": 2.487,
+   "f_lineal": 2.995
+  },
+  {
+   "cenital_deg": 52.7,
+   "scan_deg": 44.74,
+   "zona": "1:1",
+   "f_modelo": 1.258,
+   "f_lineal": 3.009
+  },
+  {
+   "cenital_deg": 55,
+   "scan_deg": 46.46,
+   "zona": "1:1",
+   "f_modelo": 1.442,
+   "f_lineal": 3.174
+  },
+  {
+   "cenital_deg": 60,
+   "scan_deg": 50.02,
+   "zona": "1:1",
+   "f_modelo": 2.012,
+   "f_lineal": 3.549
+  },
+  {
+   "cenital_deg": 65,
+   "scan_deg": 53.32,
+   "zona": "1:1",
+   "f_modelo": 2.97,
+   "f_lineal": 3.944
+  },
+  {
+   "cenital_deg": 69.6,
+   "scan_deg": 56.03,
+   "zona": "1:1",
+   "f_modelo": 4.518,
+   "f_lineal": 4.321
+  },
+  {
+   "cenital_deg": 70.3,
+   "scan_deg": 56.42,
+   "zona": "1:1",
+   "f_modelo": 4.846,
+   "f_lineal": 4.38
+  }
+ ],
+ "por_sensor": {
+  "v375": {
+   "bins": {
+    "0-15": {
+     "n": 303,
+     "zen_mediano": 7.55,
+     "A_sin": 0.803,
+     "B_modelo": 0.824,
+     "C_lineal": 0.836
+    },
+    "15-25": {
+     "n": 175,
+     "zen_mediano": 21.33,
+     "A_sin": 0.714,
+     "B_modelo": 0.845,
+     "C_lineal": 0.942
+    },
+    "25-35": {
+     "n": 105,
+     "zen_mediano": 31.35,
+     "A_sin": 0.604,
+     "B_modelo": 0.927,
+     "C_lineal": 1.044
+    },
+    "35-50": {
+     "n": 120,
+     "zen_mediano": 42.035,
+     "A_sin": 0.584,
+     "B_modelo": 0.866,
+     "C_lineal": 1.315
+    },
+    "50+": {
+     "n": 107,
+     "zen_mediano": 56.82,
+     "A_sin": 0.6,
+     "B_modelo": 1.195,
+     "C_lineal": 1.986
+    }
+   },
+   "global": {
+    "A_sin": {
+     "mediana": 0.689,
+     "ic95": [
+      0.661,
+      0.725
+     ],
+     "n": 810,
+     "n_sobre_2": 46,
+     "pct_sobre_2": 5.7,
+     "n_en_banda": 298
+    },
+    "B_modelo": {
+     "mediana": 0.865,
+     "ic95": [
+      0.841,
+      0.905
+     ],
+     "n": 810,
+     "n_sobre_2": 95,
+     "pct_sobre_2": 11.7,
+     "n_en_banda": 370
+    },
+    "C_lineal": {
+     "mediana": 1.022,
+     "ic95": [
+      0.971,
+      1.059
+     ],
+     "n": 810,
+     "n_sobre_2": 146,
+     "pct_sobre_2": 18.0,
+     "n_en_banda": 363
+    }
+   }
+  },
+  "v750": {
+   "bins": {
+    "0-15": {
+     "n": 84,
+     "zen_mediano": 11.18,
+     "A_sin": 0.805,
+     "B_modelo": 0.843,
+     "C_lineal": 0.867
+    },
+    "15-25": {
+     "n": 41,
+     "zen_mediano": 23.25,
+     "A_sin": 0.726,
+     "B_modelo": 0.906,
+     "C_lineal": 1.012
+    },
+    "25-35": {
+     "n": 19,
+     "zen_mediano": 33.2,
+     "A_sin": 0.509,
+     "B_modelo": 0.828,
+     "C_lineal": 0.932
+    },
+    "35-50": {
+     "n": 28,
+     "zen_mediano": 41.735,
+     "A_sin": 0.916,
+     "B_modelo": 1.498,
+     "C_lineal": 2.215
+    },
+    "50+": {
+     "n": 24,
+     "zen_mediano": 60.125,
+     "A_sin": 2.202,
+     "B_modelo": 5.695,
+     "C_lineal": 7.896
+    }
+   },
+   "global": {
+    "A_sin": {
+     "mediana": 0.828,
+     "ic95": [
+      0.762,
+      0.909
+     ],
+     "n": 196,
+     "n_sobre_2": 37,
+     "pct_sobre_2": 18.9,
+     "n_en_banda": 79
+    },
+    "B_modelo": {
+     "mediana": 1.01,
+     "ic95": [
+      0.874,
+      1.117
+     ],
+     "n": 196,
+     "n_sobre_2": 49,
+     "pct_sobre_2": 25.0,
+     "n_en_banda": 79
+    },
+    "C_lineal": {
+     "mediana": 1.114,
+     "ic95": [
+      0.94,
+      1.279
+     ],
+     "n": 196,
+     "n_sobre_2": 58,
+     "pct_sobre_2": 29.6,
+     "n_en_banda": 85
+    }
+   }
+  },
+  "modis": {
+   "bins": {
+    "0-15": {
+     "n": 15,
+     "zen_mediano": 8.45,
+     "A_sin": 1.063
+    }
+   },
+   "global": {
+    "A_sin": {
+     "mediana": 1.082,
+     "ic95": [
+      0.898,
+      1.775
+     ],
+     "n": 50,
+     "n_sobre_2": 16,
+     "pct_sobre_2": 32.0,
+     "n_en_banda": 19
+    }
+   }
+  }
+ },
+ "por_volcan": {
+  "v375": {
+   "Chaiten": {
+    "n": 32,
+    "zen_mediano": 22.855,
+    "A_sin": 1.274,
+    "A_sin_sobre_2": 4,
+    "B_modelo": 1.702,
+    "B_modelo_sobre_2": 11,
+    "C_lineal": 1.873,
+    "C_lineal_sobre_2": 15
+   },
+   "Copahue": {
+    "n": 4
+   },
+   "Isluga": {
+    "n": 153,
+    "zen_mediano": 27.63,
+    "A_sin": 0.579,
+    "A_sin_sobre_2": 6,
+    "B_modelo": 0.752,
+    "B_modelo_sobre_2": 16,
+    "C_lineal": 0.963,
+    "C_lineal_sobre_2": 25
+   },
+   "Lascar": {
+    "n": 161,
+    "zen_mediano": 22.4,
+    "A_sin": 0.6,
+    "A_sin_sobre_2": 13,
+    "B_modelo": 0.732,
+    "B_modelo_sobre_2": 18,
+    "C_lineal": 0.821,
+    "C_lineal_sobre_2": 19
+   },
+   "Lastarria": {
+    "n": 137,
+    "zen_mediano": 24.87,
+    "A_sin": 0.55,
+    "A_sin_sobre_2": 4,
+    "B_modelo": 0.717,
+    "B_modelo_sobre_2": 12,
+    "C_lineal": 0.804,
+    "C_lineal_sobre_2": 24
+   },
+   "Llaima": {
+    "n": 2
+   },
+   "NevadosDeChillan": {
+    "n": 5
+   },
+   "PlanchonPeteroa": {
+    "n": 87,
+    "zen_mediano": 14.53,
+    "A_sin": 0.921,
+    "A_sin_sobre_2": 6,
+    "B_modelo": 1.001,
+    "B_modelo_sobre_2": 10,
+    "C_lineal": 1.104,
+    "C_lineal_sobre_2": 13
+   },
+   "PuyehueCordonCaulle": {
+    "n": 98,
+    "zen_mediano": 21.755,
+    "A_sin": 0.859,
+    "A_sin_sobre_2": 6,
+    "B_modelo": 1.009,
+    "B_modelo_sobre_2": 15,
+    "C_lineal": 1.293,
+    "C_lineal_sobre_2": 27
+   },
+   "Tupungatito": {
+    "n": 102,
+    "zen_mediano": 25.115,
+    "A_sin": 0.692,
+    "A_sin_sobre_2": 4,
+    "B_modelo": 0.892,
+    "B_modelo_sobre_2": 7,
+    "C_lineal": 1.088,
+    "C_lineal_sobre_2": 15
+   },
+   "Villarrica": {
+    "n": 29,
+    "zen_mediano": 16.56,
+    "A_sin": 0.9,
+    "A_sin_sobre_2": 3,
+    "B_modelo": 0.999,
+    "B_modelo_sobre_2": 4,
+    "C_lineal": 1.094,
+    "C_lineal_sobre_2": 4
+   }
+  },
+  "v750": {
+   "Chaiten": {
+    "n": 1
+   },
+   "Copahue": {
+    "n": 1
+   },
+   "Isluga": {
+    "n": 28,
+    "zen_mediano": 33.995,
+    "A_sin": 1.59,
+    "A_sin_sobre_2": 13,
+    "B_modelo": 2.821,
+    "B_modelo_sobre_2": 17,
+    "C_lineal": 3.858,
+    "C_lineal_sobre_2": 19
+   },
+   "Lascar": {
+    "n": 123,
+    "zen_mediano": 21.92,
+    "A_sin": 0.726,
+    "A_sin_sobre_2": 7,
+    "B_modelo": 0.825,
+    "B_modelo_sobre_2": 9,
+    "C_lineal": 0.894,
+    "C_lineal_sobre_2": 15
+   },
+   "Lastarria": {
+    "n": 0
+   },
+   "Llaima": {
+    "n": 0
+   },
+   "NevadosDeChillan": {
+    "n": 0
+   },
+   "PlanchonPeteroa": {
+    "n": 5
+   },
+   "PuyehueCordonCaulle": {
+    "n": 27,
+    "zen_mediano": 38.49,
+    "A_sin": 1.031,
+    "A_sin_sobre_2": 10,
+    "B_modelo": 2.081,
+    "B_modelo_sobre_2": 14,
+    "C_lineal": 2.4,
+    "C_lineal_sobre_2": 15
+   },
+   "Tupungatito": {
+    "n": 6
+   },
+   "Villarrica": {
+    "n": 5
+   }
+  },
+  "modis": {
+   "Chaiten": {
+    "n": 0
+   },
+   "Copahue": {
+    "n": 0
+   },
+   "Isluga": {
+    "n": 0
+   },
+   "Lascar": {
+    "n": 50,
+    "zen_mediano": 26.815,
+    "A_sin": 1.082,
+    "A_sin_sobre_2": 16
+   },
+   "Lastarria": {
+    "n": 0
+   },
+   "Llaima": {
+    "n": 0
+   },
+   "NevadosDeChillan": {
+    "n": 0
+   },
+   "PlanchonPeteroa": {
+    "n": 0
+   },
+   "PuyehueCordonCaulle": {
+    "n": 0
+   },
+   "Tupungatito": {
+    "n": 0
+   },
+   "Villarrica": {
+    "n": 0
+   }
+  }
+ }
+}
