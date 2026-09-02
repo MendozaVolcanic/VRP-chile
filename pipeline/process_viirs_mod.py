@@ -159,6 +159,30 @@ M13_INDEX = 12       # M13 index within VNP02MOD observation_data (0-based)
 M13_LAMBDA = 4.050   # µm — primary MIR channel
 M15_LAMBDA = 10.763  # µm — TIR channel for NTI computation
 
+# S132 — techo de saturación de las bandas M (decisión #2 de AUDIT_S131 §4).
+# POR QUÉ: un píxel saturado no es un píxel caliente, es un píxel del que el sensor ya no
+# sabe nada; si el techo declarado queda por encima del techo real del detector, los
+# píxeles clampeados entran al cálculo como medición buena e inflan la magnitud (mecanismo
+# del record PP 2026-03-18 de 695.431 MW, F28).
+# FUENTE: Campus et al. 2022, Sensors 22:1713, Tabla 1 — TMAX sobre órbita, M13 = 634 K
+# (NEdT 0,04) y M15 = 343 K (NEdT 0,03). Es la misma tabla de la que ya salía el 634,0 de
+# M13. El 423,0 anterior de M15 era una analogía con I05, no una medición (S73 F2.8 H2/H10).
+# El VIIRS L1B UserGuide da 374,6 K para la LUT de M15: ese es el techo del contenedor, no
+# el del detector, y por eso no contradice al 343,0 operacional (A35, jerarquía de fuentes).
+BT_LUT_MAX_MBAND = {"M13": 634.0, "M15": 343.0}
+
+
+def aplicar_techo_saturacion_mband(bt, band_key):
+    """Descarta (NaN) las BT que alcanzan el techo de saturación de su banda M.
+
+    El margen de 0,5 K evita quedarse con el último escalón de la LUT, que ya está
+    contra el tope y no distingue "343 K" de "más que 343 K".
+    """
+    lut_max = BT_LUT_MAX_MBAND.get(band_key)
+    if lut_max is not None:
+        bt[bt >= lut_max - 0.5] = np.nan
+    return bt
+
 
 def _sensor_label_from_filename(filename: str) -> str:
     """Map VIIRS M-band 750m L1B filename → sensor label.
@@ -189,11 +213,9 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
         raise ImportError("h5py required. pip install h5py")
 
     # F2.8 fix (S73 Task 3 H2+H10): VIIRS M-band saturation guard simétrico a I-band.
-    # M13 (4.05 µm low-gain fire channel) sat ~634 K per Coppola 2025 Cap.11 Table 1.
-    # M15 (10.76 µm TIR) sat ~423 K análogo a I05. Quality flags bit-2 schema
-    # idéntico al de I-band (VIIRS L1B UserGuide Aug 2021 Tabla C.1).
+    # Quality flags bit-2 schema idéntico al de I-band (VIIRS L1B UserGuide Aug 2021
+    # Tabla C.1). Los techos viven en BT_LUT_MAX_MBAND, a nivel de módulo (S132).
     SAT_BIT_MASK = 0b100
-    BT_LUT_MAX_MBAND = {"M13": 634.0, "M15": 423.0}
 
     result = {}
     with h5py.File(l1b_path, "r") as f:
@@ -218,9 +240,7 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
             bt[bt < 0] = np.nan
             if qf is not None:
                 bt[(qf & SAT_BIT_MASK) != 0] = np.nan
-            lut_max = BT_LUT_MAX_MBAND.get(band_key)
-            if lut_max is not None:
-                bt[bt >= lut_max - 0.5] = np.nan
+            bt = aplicar_techo_saturacion_mband(bt, band_key)
         else:
             ds = obs[band_key]
             scale  = float(ds.attrs.get("scale_factor", 1.0))
@@ -253,9 +273,7 @@ def read_viirs_mod_l1b(l1b_path: Path) -> dict:
                 bt15[bt15 < 0] = np.nan
                 if qf15 is not None:
                     bt15[(qf15 & SAT_BIT_MASK) != 0] = np.nan
-                lut_max_15 = BT_LUT_MAX_MBAND.get(band_key_15)
-                if lut_max_15 is not None:
-                    bt15[bt15 >= lut_max_15 - 0.5] = np.nan
+                bt15 = aplicar_techo_saturacion_mband(bt15, band_key_15)
             else:
                 ds15 = obs[band_key_15]
                 scale15  = float(ds15.attrs.get("scale_factor", 1.0))

@@ -541,6 +541,16 @@ ROI1_BOX_HALF_KM: float = float(_t.get("roi1_box_half_km", 2.5))
 ENABLE_BT_SAT_SECONDARY_GUARD: bool = bool(_cfg.get("enable_bt_sat_secondary_guard", _p.get("enable_bt_sat_secondary_guard", True)))
 BT_SAT_MIR_K_MODIS: float = float(_cfg.get("bt_sat_mir_k_modis", _p.get("bt_sat_mir_k_modis", 500.0)))
 
+# S132 — B22 como banda MIR primaria en MODIS (decisión #6 de AUDIT_S131 §4).
+# POR QUÉ: Coppola 2016a SP426.5 l.141-144 construye L21ok "by using the L21 or L22
+# radiance, depending on band 22 saturation (or not), respectively" — B22 manda y B21
+# entra sólo cuando B22 saturó. El pipeline hacía lo inverso. B22 tiene NEdT 0,017 K
+# contra 0,183 K de B21, así que la banda primaria decide cuánto ruido tiene el fondo y
+# por lo tanto dónde caen los umbrales contextuales N·σ: esto mueve DETECCIÓN, no sólo
+# magnitud (A67). Arranca OFF; la adopción va por A/B con reproc real y criterio
+# pre-registrado, nunca por flip a ciegas.
+ENABLE_MODIS_B22_PRIMARY: bool = bool(_cfg.get("enable_modis_b22_primary", _p.get("enable_modis_b22_primary", False)))
+
 # F31 S75 — VRPTIR Aveni 2025 GRL doi:10.1029/2024GL113324 opt-in feature flag.
 # Permite usar el método VRPTIR (TIR single-band 10.5-12 μm) para retrieval de
 # RP de features moderate-to-low-temperature (300-600 K): crater lakes,

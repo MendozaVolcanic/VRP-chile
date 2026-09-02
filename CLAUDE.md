@@ -1044,7 +1044,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 
   **El corolario incómodo**: las cinco veces el error fue de quien estaba **auditando**,
   no de quien escribió el código — y dos de esas veces el texto correcto ya estaba en el
-  repo (el docstring de `process_viirs_mod.py:416` —era 409— nombraba los 5 volcanes opt-in desde
+  repo (el docstring de `process_viirs_mod.py:434` —era 416 en S131 y 409 antes— nombraba los 5 volcanes opt-in desde
   S72). La técnica se equivoca en la misma dirección que el defecto que busca, así que un
   hallazgo de la forma «esto está muerto» exige verificación cruzada antes de reportarse.
   Detalle: `docs/AUDIT_S127.md` + T9 en `docs/PROTOCOLO_AUDITORIA_PROFUNDA.md`.

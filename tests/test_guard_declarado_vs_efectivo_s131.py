@@ -143,7 +143,7 @@ CITAS_CLAUDE_MD = [
     ("pipeline/geo_utils.py", 29, "get_grid_center"),
     ("frontend/index.html", 1380, "isValidDetection"),
     ("pipeline/process_viirs.py", 80, "FLAG_DNS"),
-    ("pipeline/process_viirs_mod.py", 416, "Villarrica/PP/Lastarria/Chaiten/PCC"),
+    ("pipeline/process_viirs_mod.py", 434, "Villarrica/PP/Lastarria/Chaiten/PCC"),
     ("pipeline/process_viirs.py", 206, "compute_test1_nti"),
     ("pipeline/process_modis.py", 59, "compute_test1_mir"),
     ("pipeline/process_viirs_mod.py", 153, "compute_test1_mir"),
