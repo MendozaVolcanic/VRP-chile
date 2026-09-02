@@ -477,6 +477,19 @@ def append_record(volcano_name: str, record: dict,
             record["distance_class"] = "far"
             record["diag_a46_relabel"] = "summit_to_far_pc_beyond_inner"
 
+    # S132 R17 - sello de tiempo de PROCESO.
+    # POR QUE: el record guarda cuando el SATELITE tomo la escena (`datetime_utc`) pero no
+    # cuando nosotros la procesamos, asi que la latencia del NRT -el tiempo entre que el
+    # dato existe y el operador puede verlo- solo se podia estimar por la fecha de
+    # modificacion del archivo, que se pierde en cada clone y en cada deploy. Para un
+    # sistema de apoyo a la decision de alerta la latencia es parte del producto: una
+    # deteccion que llega doce horas tarde no sirve igual que una que llega en dos.
+    # Se reescribe en cada pasada por append_record (incluido un reproceso), porque el
+    # sello describe ESTA version del record; conservar el primero daria una latencia
+    # falsa de meses despues de cualquier reproceso.
+    # Campo descriptivo: no entra en deteccion, magnitud ni en ninguna compuerta.
+    record["processed_utc"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
     # S19 M4 2026-04-24: sanity cap físico antes del piso por sensor.
     # 50,000 MW = 1.3x el P99.99 del archivo OSF v2.5 (615k filas globales
     # 2000-2025) y 0.71x el récord histórico documentado por MIROVA (~70 GW
