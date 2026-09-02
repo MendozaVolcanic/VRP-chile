@@ -563,6 +563,18 @@ ENABLE_MODIS_B22_PRIMARY: bool = bool(_cfg.get("enable_modis_b22_primary", _p.ge
 # MODIS. El flag existe para poder medirlo.
 ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER: bool = bool(_cfg.get("enable_modis_distance_class_from_cluster", _p.get("enable_modis_distance_class_from_cluster", False)))
 
+# S132 - area de pixel MEDIDA en la geolocalizacion del granule (decision #5 de AUDIT_S131).
+# POR QUE: la energia radiante es radiancia x area, y un pixel oblicuo cubre mucho mas
+# terreno que uno nadir; S131 midio que el area explica el gradiente cenital COMPLETO en
+# VIIRS (0,77 -> 0,45 sin corregir; 0,79-0,87 plano con la ley del ATBD). Se MIDE en vez de
+# modelarse porque el bow-tie de VIIRS da saltos de agregacion que ningun modelo analitico
+# reproduce (ver pixel_areas_from_geolocation). Arranca OFF: cambiar el area cambia la
+# magnitud de todos los records y, por A67, tambien puede cambiar la DETECCION, porque el
+# area multiplica dentro de la integral de energia del Test 1. Adopcion por A/B con reproc
+# real y criterio pre-registrado. NO extender a MODIS por extrapolacion (S131 midio 50 pares
+# y un solo volcan).
+ENABLE_GEOLOCATED_PIXEL_AREA: bool = bool(_cfg.get("enable_geolocated_pixel_area", _p.get("enable_geolocated_pixel_area", False)))
+
 # F31 S75 — VRPTIR Aveni 2025 GRL doi:10.1029/2024GL113324 opt-in feature flag.
 # Permite usar el método VRPTIR (TIR single-band 10.5-12 μm) para retrieval de
 # RP de features moderate-to-low-temperature (300-600 K): crater lakes,

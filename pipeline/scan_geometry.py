@@ -33,6 +33,8 @@ References:
   - Coppola, D., Laiolo, M. et al. (2016) MIROVA pixel area treatment.
 """
 
+import warnings
+
 import numpy as np
 
 
@@ -241,6 +243,77 @@ def viirs_pixel_areas(
     factor = 1.0 + (1.0 / cos_z - 1.0) * 0.5
     factor = np.minimum(factor, 2.0)
     return nadir_area_m2 * factor
+
+
+def pixel_areas_from_geolocation(lat, lon):
+    """Área de cada píxel (m²) MEDIDA en la geolocalización del granule, sin modelo.
+
+    POR QUE. La energia radiante es una radiancia (por unidad de area) multiplicada por el
+    area del pixel. Un sensor de barrido que apunta de reojo al borde del swath cubre con
+    el mismo detector un pedazo de terreno mucho mas grande que en el nadir, asi que usar
+    area nadir en una pasada oblicua sub-reporta la magnitud. S131 midio que ese efecto
+    explica el gradiente cenital COMPLETO en VIIRS (razon contra MIROVA 0,77 -> 0,45 sin
+    corregir; 0,79-0,87 plana con la ley de area del ATBD).
+
+    POR QUE MEDIRLA Y NO MODELARLA. VIIRS agrega bow-tie a bordo (Wolfe et al. 2013): junta
+    3, 2 o 1 muestras del detector segun la zona del swath, de modo que el area da SALTOS en
+    dos fronteras en vez de seguir una curva. Cualquier modelo analitico se equivoca en algun
+    tramo -el sec^3 de un barredor puro sobre-corrige, y el factor lineal capado a 2,0 de
+    `viirs_pixel_areas` sub-corrige, como su propio docstring reconoce contra el ATBD (4,38x
+    de nadir a borde). La geolocalizacion no es un modelo: es donde cayo cada pixel. La
+    distancia en el terreno entre centros vecinos ES el tamano del pixel, con los saltos de
+    agregacion ya adentro y sin suponer nada de la orbita ni del sensor.
+
+    METODO. Para cada pixel se toma la distancia a su vecino en la direccion de barrido y a
+    su vecino en la direccion de vuelo, usando diferencias centradas en el interior y
+    diferencias hacia adelante/atras en los bordes (nunca extrapolando, para no inventar
+    area donde no hay vecino). El area es el producto de las dos.
+
+    Aproximacion asumida, dicha explicitamente: se toma el pixel como un paralelogramo de
+    lados iguales a esas dos distancias. Es exacto para una grilla localmente regular y no
+    modela el corte real del footprint (que en el borde del swath es un trapecio curvo).
+    Para el uso que se le da -escalar la energia radiada- el error de esa aproximacion es
+    mucho menor que el 4,38x que se esta corrigiendo.
+
+    Args:
+        lat, lon: arrays 2-D de la geolocalizacion del granule, en grados.
+
+    Returns:
+        Array de la misma forma, en m^2. Un pixel cuya geolocalizacion (o la de sus vecinos
+        usados) venga invalida devuelve NaN a proposito: es preferible un NaN visible a un
+        area plausible pero falsa, que se propagaria a la magnitud sin que nadie lo note.
+    """
+    lat = np.asarray(lat, dtype=np.float64)
+    lon = np.asarray(lon, dtype=np.float64)
+    if lat.ndim != 2 or lat.shape != lon.shape:
+        raise ValueError("lat y lon deben ser arrays 2-D de la misma forma")
+    if lat.shape[0] < 2 or lat.shape[1] < 2:
+        raise ValueError("hace falta al menos 2x2 pixeles para medir un paso")
+
+    def _paso(eje):
+        """Distancia en el terreno al vecino a lo largo de `eje`, por pixel."""
+        # Diferencia hacia adelante y hacia atras; en el interior se promedian (diferencia
+        # centrada), en los bordes sobrevive la unica que existe.
+        a = np.roll(lat, -1, axis=eje), np.roll(lon, -1, axis=eje)
+        b = np.roll(lat, 1, axis=eje), np.roll(lon, 1, axis=eje)
+        d_fwd = haversine_km(lat, lon, a[0], a[1])
+        d_bwd = haversine_km(b[0], b[1], lat, lon)
+        # `roll` es circular: el borde toma el extremo opuesto del granule, que no es su
+        # vecino. Se invalida y queda la diferencia del lado que si existe.
+        sl_fin = [slice(None)] * 2; sl_fin[eje] = -1
+        sl_ini = [slice(None)] * 2; sl_ini[eje] = 0
+        d_fwd[tuple(sl_fin)] = np.nan
+        d_bwd[tuple(sl_ini)] = np.nan
+        # Un pixel con ambos lados invalidos (geolocalizacion corrupta) da NaN a proposito;
+        # `nanmean` avisa de la rebanada vacia y ese aviso es ruido, no informacion.
+        with np.errstate(invalid="ignore"), warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            return np.nanmean(np.stack([d_fwd, d_bwd]), axis=0)
+
+    with np.errstate(invalid="ignore"):
+        paso_scan = _paso(1)     # a lo ancho del barrido
+        paso_track = _paso(0)    # a lo largo del vuelo
+        return paso_scan * paso_track * 1.0e6   # km^2 -> m^2
 
 
 # ════════════════════════════════════════════════════════════════════
