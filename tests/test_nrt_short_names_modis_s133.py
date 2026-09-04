@@ -113,3 +113,56 @@ def test_los_dos_esquemas_conviven_y_esa_asimetria_es_deliberada():
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+# ────────────────────────────────────────────────────────────────────
+# Segunda mitad del mismo defecto: detectar que un granule ES de NRT.
+#
+# POR QUE. `store.py` reemplaza por la calibracion definitiva SOLO los records marcados
+# `nrt`. Un granule NRT etiquetado `standard` nunca se actualiza: se queda con la
+# calibracion provisional para siempre, y en silencio.
+#
+# Los dos sensores marcan el NRT en el nombre de forma DISTINTA, verificado contra el
+# CMR el 2026-09-04:
+#     MODIS  MYD021KM.A2026247.0750.061.2026247092322.NRT.hdf   -> token ".NRT."
+#     VIIRS  VNP02IMG_NRT.A2026247.0606.002.2026247081613.nc    -> prefijo "_NRT"
+# El detector solo miraba "_NRT", asi que los NRT de MODIS pasaban por standard.
+# ────────────────────────────────────────────────────────────────────
+
+from pipeline.fetch import product_version_from_granule as _pv  # noqa: E402
+
+
+@pytest.mark.parametrize("nombre", [
+    "MYD021KM.A2026247.0750.061.2026247092322.NRT.hdf",   # el caso real de Villarrica
+    "MOD021KM.A2026247.0215.061.2026247061218.NRT.hdf",
+    "MYD03.A2026247.0750.061.2026247092322.NRT.hdf",
+])
+def test_los_granules_nrt_de_modis_se_reconocen_como_nrt(nombre):
+    assert _pv(nombre) == "nrt", (
+        "%s es de LANCE (token .NRT.) y se estaria guardando como 'standard'; "
+        "store.py nunca lo reemplazaria por la calibracion definitiva" % nombre)
+
+
+@pytest.mark.parametrize("nombre", [
+    "VNP02IMG_NRT.A2026247.0606.002.2026247081613.nc",
+    "VJ102IMG_NRT.A2026247.0554.021.2026247122413.nc",
+])
+def test_los_granules_nrt_de_viirs_se_siguen_reconociendo(nombre):
+    """Control: la convencion que ya funcionaba no se rompe al agregar la otra."""
+    assert _pv(nombre) == "nrt"
+
+
+@pytest.mark.parametrize("nombre", [
+    "MYD021KM.A2026247.0750.061.2026247092322.hdf",       # standard de verdad
+    "MOD021KM.A2026001.0225.061.2026001131216.hdf",
+    "VJ102IMG.A2026099.0554.021.2026099122413.nc",
+    "VNP02IMG.A2026103.0554.002.2026103122413.nc",
+])
+def test_los_granules_estandar_no_se_marcan_como_nrt(nombre):
+    """Que no haya falsos positivos: un standard marcado nrt se reprocesaria de mas."""
+    assert _pv(nombre) == "standard"
+
+
+def test_no_confunde_un_volcan_o_ruta_que_contenga_las_letras_nrt():
+    """La marca es un token delimitado por puntos, no una subcadena suelta (A92)."""
+    assert _pv("/datos/CONTRNRTO/MYD021KM.A2026247.0750.061.x.hdf") == "standard"
