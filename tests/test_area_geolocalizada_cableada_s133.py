@@ -193,5 +193,34 @@ def test_una_geolocalizacion_que_no_calza_es_error_y_no_un_reencuadre_inventado(
                                   geolocated=True, nadir_fixed=True)
 
 
+@pytest.mark.parametrize("modulo", ["pipeline.process_viirs",
+                                   "pipeline.process_viirs_mod"],
+                         ids=["iband", "mband"])
+def test_el_flag_llega_hasta_calculate_vrp_y_no_solo_al_modulo(modulo):
+    """
+    Tripwire al estilo del de S103: no basta con importar el flag arriba del archivo, tiene
+    que llegar a la funcion que calcula el VRP. Importarlo y no usarlo dejaria el flag
+    muerto igual que si no existiera, y el A/B volveria a medir dos veces el control.
+
+    La comprobacion exige frontera de palabra a proposito: `viirs_pixel_areas` es subcadena
+    de `resolve_viirs_pixel_areas`, y una coincidencia de texto haria pasar el guard sin que
+    el cableado exista. Ese falso verde ya ocurrio una vez, en el guard de S103, y por eso
+    este test lo pide asi.
+    """
+    import importlib
+    import inspect
+    import re
+
+    mod = importlib.import_module(modulo)
+    src = inspect.getsource(mod.calculate_vrp)
+    sin_espacios = re.sub(r"\s", "", src)
+
+    assert re.search(r"(?<![A-Za-z0-9_])resolve_viirs_pixel_areas\s*\(", src), (
+        "%s.calculate_vrp no llama resolve_viirs_pixel_areas()" % modulo)
+    assert "geolocated=" + FLAG in sin_espacios, (
+        "%s.calculate_vrp no pasa geolocated=%s: el flag quedaria muerto y el brazo "
+        "'area' del A/B volveria a ser el control" % (modulo, FLAG))
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

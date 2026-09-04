@@ -1,0 +1,142 @@
+name: A/B S133 — B22 como banda MIR primaria en MODIS
+
+# Dos brazos que difieren en UN flag: `enable_modis_b22_primary`.
+#
+#   _s133_b22_control  false → B21 primaria, lo que corre hoy
+#   _s133_b22_enabled  true  → B22 primaria, lo que dice el paper
+#
+# EL FENOMENO, primero. MODIS mira la ventana de 3,9 um con dos detectores de la
+# misma banda espectral y distinta ganancia. B21 es de ganancia baja: aguanta hasta
+# ~500 K sin saturar, pero paga el rango con ruido (NEdT 0,183 K). B22 es de ganancia
+# alta, diez veces mas fina (0,017 K), y se satura apenas la escena pasa de ~331 K.
+# Para un volcan con lava expuesta hace falta B21; para una noche cualquiera de un
+# volcan chileno, donde el pixel mas caliente anda en 281 K, B22 mide lo mismo con una
+# decima parte del ruido. Coppola 2016a SP426.5 l.141-144 lo resuelve construyendo la
+# banda corregida L21ok "by using the L21 or L22 radiance, depending on band 22
+# saturation (or not), respectively": manda B22, B21 entra solo donde B22 saturo.
+# El repo hace hoy lo inverso.
+#
+# POR QUE hay que reprocesar aunque el efecto esperado sea diminuto. La banda primaria
+# fija el ruido del fondo y por lo tanto donde caen los umbrales contextuales N.sigma:
+# el mecanismo toca DETECCION, no solo magnitud (A67). Pero se midio la magnitud del
+# efecto y es de 0,0036 K sobre `diag_sigma_bg_k` — dos ordenes por debajo del redondeo
+# con que lo persistimos, porque ese sigma mide lo heterogeneo del terreno del anillo
+# (mediana 4,586 K, minimo 0,996 K) y no el ruido del sensor. Lo que NO esta medido, y
+# es el motivo real de este A/B, es el efecto sobre la MAGNITUD: las dos bandas tienen
+# calibraciones independientes y un sesgo relativo pequeno si se traslada al VRP (C3).
+#
+# Evidencia y criterios CONGELADOS antes de ver resultados:
+#   docs/s133/B22_EVIDENCIA.md, seccion "Validacion propuesta" (C1-C4)
+#   experiments/_s133/b22_evidencia.json (los numeros; regla S91)
+# Analisis: `python experiments/_s133/analizar_ab_b22.py` — parea por GRANULE, no por
+# fecha, porque dos pasadas MODIS de la misma noche son dos objetos distintos.
+#
+# LOS DOS VOLCANES estan elegidos por regimen opuesto (A83, y nunca leer la mediana
+# agrupada de los dos):
+#   Lascar     — el mas caliente y el de sigma mas alto (mediana 5,51 K); tambien el
+#                control de C4: su t_max historico es 294,75 K sobre 930 records, asi
+#                que no deberia haber un solo pixel con B22 saturada en la muestra.
+#   Villarrica — el nevado de senal debil (sigma 4,04 K), que es donde un sigma menor
+#                moveria un umbral si lo va a mover.
+#
+# MODIS SOLO CORRE EN LINUX: pyhdf esta roto en Windows (constraint del proyecto), por
+# eso ubuntu-latest y por eso este A/B no se puede correr en la maquina de Nicolas.
+#
+# max-parallel 1 (A47): aunque cada brazo escribe a su propio data_subdir, los cuatro
+# jobs comparten la cuota de Earthdata y la serializacion evita el 429 y cualquier
+# carrera sobre `data/`.
+#
+# ⚠️ ESTE WORKFLOW NO COMMITEA NADA — hereda la decision de S129/S130. Los resultados
+# quedan SOLO como artefactos, 14 dias de retencion. Hay que bajarlos a mano:
+#
+#     gh run download <run_id> --dir data/
+#
+# ⚠️ LA VENTANA Y EL TIMEOUT VAN JUNTOS (A15, guard tests/test_guard_timeout_vs_ventana_s129.py).
+# La ventana por defecto es agosto de 2026, el ultimo mes COMPLETO, y sale del dato:
+# en `data/mirova_equivalent/` ese mes tiene 61 records MODIS en Lascar y 70 en
+# Villarrica, y cada record es una pasada — con eso los ~50 pares por volcan del
+# pre-registro estan cubiertos con holgura en los dos. Son 30 dias x 2,4 min/dia = 72
+# min necesarios; se declaran 120. Si se agranda la ventana hay que RECALCULAR el
+# timeout, no copiarlo: en S129 copiarlo mato 8 de 15 jobs.
+#
+# ⚠️ La key del trigger va QUOTEADA como "on": — sin comillas, YAML 1.1 la parsea como
+# el booleano True (problema Norway, A43) y el dispatch responde HTTP 422.
+
+"on":
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-08-01"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-08-31"
+      overwrite:
+        description: "true en el PRIMER chunk (pisa), false en los siguientes (agrega)"
+        required: true
+        default: "true"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 130
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        volcano: [Lascar, Villarrica]
+        profile: [_s133_b22_control, _s133_b22_enabled]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        # libhdf4-dev + pyhdf son lo que MODIS necesita para leer el L1B; es la
+        # dependencia que no existe en Windows y por la que este job es Linux.
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          # Las fechas pasan por env y NO se interpolan dentro del `run:`. S128
+          # encontro 31 ocurrencias de esa inyeccion en 7 workflows; este no suma una.
+          ARM_OVERWRITE: ${{ github.event.inputs.overwrite }}
+          ARM_START: ${{ github.event.inputs.start }}
+          ARM_END: ${{ github.event.inputs.end }}
+          ARM_PROFILE: ${{ matrix.profile }}
+          ARM_VOLCANO: ${{ matrix.volcano }}
+        timeout-minutes: 120
+        run: |
+          OW=""
+          if [ "$ARM_OVERWRITE" = "true" ]; then OW="--overwrite"; fi
+          python scripts/run_pipeline.py \
+            --profile "$ARM_PROFILE" \
+            --volcano "$ARM_VOLCANO" \
+            --start "$ARM_START" \
+            --end "$ARM_END" \
+            $OW
+
+      - name: Upload reprocessed JSON as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s133b22-${{ matrix.profile }}-${{ matrix.volcano }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          retention-days: 14
+          if-no-files-found: warn
