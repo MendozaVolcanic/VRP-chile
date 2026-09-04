@@ -1081,6 +1081,29 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   exige la **definición DENTRO de la afirmación**: sin denominador, una afirmación numérica no es
   una afirmación. Detalle: `docs/s130/A81_DISCREPANCIA_RESUELTA.md`.
 
+- **A92. Un guard que verifica por SUBCADENA da falso verde cuando el nombre viejo queda
+  dentro del nuevo** (S133, encontrado sobre mi propio cambio). Al envolver
+  `viirs_pixel_areas` en `resolve_viirs_pixel_areas`, el tripwire de S103 que vigila
+  justamente ese cableado siguió en verde: comprobaba `assert "viirs_pixel_areas(" in src`
+  y el nombre viejo es subcadena del nuevo. La llamada directa ya no existía y el test no se
+  enteró. Un guard que pasa por coincidencia de texto es **peor que no tenerlo**, porque da
+  permiso justo para el cambio que debería frenar.
+  - **How to apply**: (a) al renombrar o envolver una función vigilada, revisar si el nombre
+    viejo queda dentro del nuevo, y si queda, exigir frontera de palabra
+    (`re.search(r"(?<![A-Za-z0-9_])" + re.escape(token) + r"\s*\(", src)`); (b) no arreglar
+    sólo el caso encontrado — barrer la familia con
+    `experiments/_s133/auditar_guards_por_subcadena.py`, que cruza todos los `assert "X" in
+    src` de la suite contra los identificadores reales de `pipeline/`. En S133 dio 2
+    candidatos (ninguno roto aún) y tras endurecerlos da 0. Volver a correrlo al agregar
+    guards. (c) Los flags con sufijo por sensor son la forma más común de la trampa acá:
+    `ENABLE_LOCAL_CLUSTER_MAGNITUDE` es prefijo de `..._VIIRS375`.
+  - **Lo que el barrido NO cubre**, para que nadie lo tome por garantía: sólo mira asserts de
+    subcadena sobre código fuente. Un guard puede pasar por la razón equivocada de otras
+    maneras — comparar NaN con `!=` (S132), medir sobre una ventana que no contiene el
+    fenómeno (A87), engancharse con el texto de una leyenda (S132). Las tres ya pasaron acá.
+    La familia general es «el instrumento mide otra cosa que la que dice medir», y no hay un
+    script que la cierre entera.
+
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
 
