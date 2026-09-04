@@ -1,0 +1,187 @@
+name: A/B S133 — el area del pixel VIIRS (3 brazos)
+
+# Tres brazos, cada uno con su `data_subdir` aislado (A47), sobre los mismos volcanes
+# y la misma ventana:
+#
+#   _s133_area_control  area nadir fija — lo que corre hoy
+#   _s133_area_geoloc   + enable_geolocated_pixel_area  (el area se MIDE)
+#   _s133_area_corona   + enable_local_cluster_magnitude_viirs375 (fondo Eq.6)
+#
+# EL FENOMENO, primero. El VRP es una RADIANCIA —energia por unidad de area— por el
+# AREA del pixel. Un radiometro de barrido que mira de reojo al borde del swath cubre
+# con el mismo detector un pedazo de terreno mucho mas grande que cuando mira hacia
+# abajo. Si usamos el area del nadir mientras el pixel real es el cuadruple,
+# sub-reportamos la magnitud exactamente en las pasadas oblicuas. S131 lo midio POR
+# PASADA: la razon contra MIROVA cae de 0,77 en el nadir a 0,45 en el bin de 50 grados
+# o mas, y con la ley de area del ATBD los cinco bins quedan planos (0,79 a 0,87). El
+# area explica el gradiente cenital COMPLETO. El deficit uniforme de ~0,82 que sobra ya
+# no es geometria: es el fondo, y por eso existe el tercer brazo.
+#
+# POR QUE SE MIDE EL AREA EN VEZ DE MODELARLA. VIIRS agrega bow-tie a bordo (3x1, 2x1,
+# 1x1 segun la zona del swath), asi que el area da SALTOS en dos fronteras y ninguna
+# curva analitica la sigue. La geolocalizacion del granule no es un modelo: es donde
+# cayo cada pixel. Detalle: docs/s131/REMUESTREO_LEY_DE_AREA.md.
+#
+# ES VIIRS-ONLY, A PROPOSITO — el doc de S132 lo dice con todas las letras: NO extender
+# a MODIS por extrapolacion. En VIIRS el de-solape lo hace el sensor; en MODIS el
+# remuestreo es trabajo real y el gradiente no esta probado (50 pares, un solo volcan).
+# Los tres brazos igual procesan MODIS porque el perfil es un clon del operacional y
+# solo se le cambia lo minimo; MODIS sale identico en los tres. Si el reloj de pared
+# importara mas que la comparabilidad con el operacional, apagar `sensors: modis` en
+# los TRES perfiles es la palanca — pero es un cambio de perfil, no de este workflow.
+#
+# CRITERIO PRE-REGISTRADO, congelado antes de correr y NO reinterpretado aca:
+#   docs/s132/AB_AREA_GEOLOCALIZADA.md, seccion "Lo que falta correr, y con que criterio"
+# Analisis: `python experiments/_s133/analizar_ab_area.py` — parea POR PASADA (granule),
+# nunca por noche: el maximo de la noche mezcla pasadas de angulos distintos y fue lo
+# que inflo el gradiente de S130 (A90).
+#
+# ⚠️ LOS OCHO VOLCANES SALEN DEL DATO, no del gusto. El criterio pide "6 de 8 volcanes
+# en banda", asi que hacen falta ocho con pares VIIRS375 contra MIROVA y poblacion en
+# LOS DOS bins extremos (nadir 0-15 grados y 50+). Medido por
+# `experiments/_s133/sustrato_ab_area.py` (JSON con todos los numeros; regla S91), sobre
+# la ventana 2026-04-01..2026-08-31 y con pareo por pasada a <=20 min:
+#
+#   volcan                pares  nadir 0-15   50+
+#   Lascar                  238        48      57
+#   Isluga                  253        36      87
+#   Lastarria               167        33      51
+#   PuyehueCordonCaulle     197        31      81
+#   PlanchonPeteroa         135        29      28
+#   Tupungatito             156        25      46
+#   Chaiten                  52        17      12
+#   Villarrica               27        12       1
+#
+# Los tres Tier A que quedan afuera no tienen sustrato: NevadosDeChillan 8 pares,
+# Copahue 7, Llaima 5. HAY QUE DECIRLO: con el piso de 15 pares por bin que S131 uso,
+# solo SEIS volcanes son evaluables en los dos bins. Chaiten queda apenas debajo en el
+# bin oblicuo (12) y Villarrica practicamente no tiene pasadas oblicuas (1). O sea el
+# "6 de 8" del pre-registro se puede cumplir, pero el denominador honesto del veredicto
+# por volcan son 6, no 8; los otros dos entran para poder contarlos y porque el bin del
+# nadir de los dos si es solido. No hay novena opcion en la flota.
+#
+# ⚠️ LA VENTANA Y EL TIMEOUT VAN JUNTOS (A15, guard tests/test_guard_timeout_vs_ventana_s129.py).
+# La ventana COMPLETA del A/B es 2026-04-01..2026-08-31 (152 dias): es la mas corta que
+# deja a los seis evaluables con >=25 pares en el bin del nadir y >=28 en el de 50+, y
+# acortarla a 91 dias derrumba los evaluables de 6 a 3 (medido, mismo JSON). Pero 152
+# dias x 2,4 min/dia = 365 min y GitHub corta a los 360 por job: NO cabe en una corrida.
+# Por eso se dispara EN TRES CHUNKS, que es para lo que existe el input `overwrite`:
+#
+#   1) 2026-04-01 .. 2026-05-31   overwrite=true    (60 dias)
+#   2) 2026-06-01 .. 2026-07-31   overwrite=false   (60 dias)
+#   3) 2026-08-01 .. 2026-08-31   overwrite=false   (31 dias)
+#
+# El default es el chunk 1. 60 x 2,4 = 144 min necesarios; se declaran 150 en el paso.
+# Si se agranda un chunk hay que RECALCULAR el timeout, no copiarlo: en S129 copiarlo
+# mato 8 de 15 jobs.
+#
+# COSTO DE PARED. 8 volcanes x 3 brazos = 24 jobs. Con MODIS apagado en los tres
+# perfiles (ver la nota del bloque `sensors:`) cada job procesa solo VIIRS, y con
+# max-parallel 8 los 24 corren en 3 tandas. Del orden de horas por chunk, no de dias.
+#
+# max-parallel 8, y no 1, por dos razones que se verificaron en vez de suponerse:
+#   1. NO HAY CARRERA DE ARCHIVOS. Este workflow no commitea (solo sube artefactos), y
+#      ademas cada job escribe un JSON distinto dentro del data_subdir de su brazo. El
+#      caso que A47 prohibe es otro: varios procesos sobre el MISMO archivo.
+#   2. LA CUOTA DE EARTHDATA AGUANTA. No es una estimacion: `nrt.yml` corre max-parallel
+#      8 sobre 45 volcanes contra la misma cuota, 12 veces al dia, desde hace meses. Los
+#      templates A/B archivados (reproc-ab-*.yml) tambien usan 8, y esos ademas pusheaban.
+#
+# ⚠️ ESTE WORKFLOW NO COMMITEA NADA — hereda la decision de S129/S130. Los resultados
+# quedan SOLO como artefactos, 14 dias de retencion. Hay que bajarlos a mano:
+#
+#     gh run download <run_id> --dir data/
+#
+# ⚠️ La key del trigger va QUOTEADA como "on": — sin comillas, YAML 1.1 la parsea como
+# el booleano True (problema Norway, A43) y el dispatch responde HTTP 422.
+
+"on":
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Start date YYYY-MM-DD"
+        required: true
+        default: "2026-04-01"
+      end:
+        description: "End date YYYY-MM-DD (inclusive)"
+        required: true
+        default: "2026-05-31"
+      overwrite:
+        description: "true en el PRIMER chunk (pisa), false en los siguientes (agrega)"
+        required: true
+        default: "true"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 160
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        volcano:
+          - Lascar
+          - Isluga
+          - Lastarria
+          - PuyehueCordonCaulle
+          - PlanchonPeteroa
+          - Tupungatito
+          - Chaiten
+          - Villarrica
+        profile:
+          - _s133_area_control
+          - _s133_area_geoloc
+          - _s133_area_corona
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        # libhdf4-dev + pyhdf son lo que MODIS necesita para leer el L1B. El A/B es
+        # VIIRS-only, pero el perfil es un clon del operacional y procesa MODIS igual;
+        # sin pyhdf esos granules abortarian el run.
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run reprocess
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          # Las fechas pasan por env y NO se interpolan dentro del `run:`. S128
+          # encontro 31 ocurrencias de esa inyeccion en 7 workflows; este no suma una.
+          ARM_OVERWRITE: ${{ github.event.inputs.overwrite }}
+          ARM_START: ${{ github.event.inputs.start }}
+          ARM_END: ${{ github.event.inputs.end }}
+          ARM_PROFILE: ${{ matrix.profile }}
+          ARM_VOLCANO: ${{ matrix.volcano }}
+        timeout-minutes: 150
+        run: |
+          OW=""
+          if [ "$ARM_OVERWRITE" = "true" ]; then OW="--overwrite"; fi
+          python scripts/run_pipeline.py \
+            --profile "$ARM_PROFILE" \
+            --volcano "$ARM_VOLCANO" \
+            --start "$ARM_START" \
+            --end "$ARM_END" \
+            $OW
+
+      - name: Upload reprocessed JSON as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s133area-${{ matrix.profile }}-${{ matrix.volcano }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          retention-days: 14
+          if-no-files-found: warn
