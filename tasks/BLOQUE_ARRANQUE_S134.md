@@ -99,6 +99,45 @@ tienen población en ambos bins de cenital (Chaitén 12 en el oblicuo, Villarric
 8» se puede cumplir, pero los 6 evaluables tendrían que pasar todos. No hay noveno volcán
 con sustrato. El criterio **no se tocó**.
 
+## Lo operacional que S133 arregló al final
+
+**La cadencia del cron cayó 51 % el 2026-08-27 y estuvimos ocho días sin verlo.** GitHub dejó
+de entregar la mitad de los eventos `schedule` del repo, uniformemente sobre los cuatro
+workflows con cron. Es externo: cero corridas canceladas (no es la concurrencia), los `cron`
+declarados no cambiaron, y golpea por igual a los cuatro. **No se perdió un solo record** —
+116 records/día antes contra 121 después, 11/11 volcanes todos los días — porque cada corrida
+procesa el día completo. Se degrada la latencia, de ~3-4 h a ~7 h. Ningún monitor falló:
+ninguno mide la AUSENCIA de corridas, y una corrida que no ocurre no deja rastro. Se agregó
+`scripts/medir_cadencia_cron.py` al healthcheck diario. Doc: `docs/s133/CADENCIA_DEL_CRON.md`.
+
+**El watchdog llevaba 22 comentarios sobre un workflow borrado hace tres meses** (issue #567).
+Consultaba la API, que sigue devolviendo los borrados con `state: "active"`. Arreglado: la
+fuente de verdad de «existe» es el repo. **La #567 sigue abierta: cerrarla es decisión tuya.**
+
+## Issue #506 (Villarrica 35×): RESUELTA, verificado con data fresca
+
+El auto-audit del 31-ago da **Villarrica 0,804× con n=13 noches**, dentro de banda. Se
+verificó además noche por noche contra las pasadas exactas que MIROVA publicó en agosto:
+
+| noche | MIROVA | nuestro | razón |
+|---|---:|---:|---:|
+| 08-18 05:48 | 1,86 | 1,62 | 0,87 |
+| 08-21 05:48 | 1,82 | 1,65 | 0,91 |
+| 08-23 05:54 | 1,33 | 0,92 | 0,69 |
+| 08-24 05:36 | 2,21 | 1,90 | 0,86 |
+
+Villarrica tuvo una escalada real en agosto (12 alertas contra 0-5 de los meses previos) y la
+seguimos bien. **Se puede cerrar la #506**, es decisión tuya.
+
+⚠️ Dos trampas en las que caí al verificar esto, por si alguien repite el camino: comparar
+nuestra mediana sobre TODAS las pasadas contra la mediana de MIROVA sobre sus ALERTAS da un
+falso «sub-reportamos 24×» — son poblaciones distintas (A90). Y truncar el diccionario del
+audit en un `print` propio se lee como «el audit está ciego». Las dos las atrapó mirar los
+eventos concretos en vez del agregado (A79).
+
+Lo que SÍ está fuera de banda hoy, y es el frente conocido de déficit en régimen débil de
+S124/S125: **Lastarria 0,415 · Láscar 0,465 · Isluga 0,603**, los tres sub-estimando.
+
 ## Sigue esperando a Nicolás
 
 - Los tres flips: `ENABLE_MODIS_B22_PRIMARY`, `ENABLE_GEOLOCATED_PIXEL_AREA`,
