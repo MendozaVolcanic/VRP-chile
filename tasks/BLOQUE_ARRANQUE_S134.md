@@ -138,12 +138,38 @@ eventos concretos en vez del agregado (A79).
 Lo que SÍ está fuera de banda hoy, y es el frente conocido de déficit en régimen débil de
 S124/S125: **Lastarria 0,415 · Láscar 0,465 · Isluga 0,603**, los tres sub-estimando.
 
+## El incidente del 2026-09-04: la alerta que no vimos (leer `docs/s133/AUDITORIA_DEL_INCIDENTE.md`)
+
+Nicolás preguntó por qué MIROVA tenía una anomalía MODIS de **4,75 MW en Villarrica**
+(07:50 UTC) y nosotros no. Debajo había **cinco defectos**, cuatro silenciosos. Ya la
+tenemos: **3,859 MW a 0,85 km, summit, razón 0,81×**. No hubo que tocar detección ni
+magnitud — el dato nunca había llegado.
+
+| # | defecto | PR |
+|---|---|---|
+| 1 | El NRT de MODIS pedía `MYD021KM_NRT` v61, que **no existe** (LANCE usa `MYD021KM` v`6.1NRT`) | #587 |
+| 2 | Los granules NRT de MODIS se guardaban como `standard` (marca `.NRT.`, no `_NRT`) | #588 |
+| 3 | La cadencia del cron cayó 51 % y ningún monitor mira la AUSENCIA de corridas | #585 |
+| 4 | El poller de TIF: `timeout-minutes: 10` contra 12,3 min de mediana | archive #2 + commit |
+| 5 | VegStress-v1 caído desde el 13-ago: faltan los secrets de Sentinel Hub | **pendiente de Nicolás** |
+
+**Verificado en vivo**: el poller volvió a correr (231 snapshots, primera corrida exitosa
+desde el 27-ago). El TIF de las 07:50 se perdió igual: MIROVA sobrescribe su imagen «Last»,
+así que lo capturado ya es el de las 13:15. Eso es irreversible y es la razón por la que el
+poller importa.
+
+**Ojo con el patrón**: ninguno de los cinco produjo un error. Produjeron un cero, una
+etiqueta plausible, una métrica verde y una palabra ambigua (`cancelled` sirve para timeout
+y para concurrencia — me despistó y mi primer diagnóstico del poller estuvo incompleto).
+
 ## Sigue esperando a Nicolás
 
 - Los tres flips: `ENABLE_MODIS_B22_PRIMARY`, `ENABLE_GEOLOCATED_PIXEL_AREA`,
   `ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER`.
 - El marcador «extensión» de PCC. Pregunta volcanológica, no de código.
 - Rotar el PAT de `~/.claude/settings.json`.
+- **Cargar los secrets `SH_CLIENT_ID` y `SH_CLIENT_SECRET` en VegStress-v1** (caído hace 3 semanas).
+- Cerrar las issues #506 (Villarrica, resuelta) y #567 (watchdog, arreglado) si estás de acuerdo.
 - Persistir `diag_d9_capped` en el pipeline (hoy el tope de 5 MW se reconoce por el valor
   en el frontend, que funciona pero es frágil; A72 pide el flag en el algoritmo).
 
