@@ -173,14 +173,25 @@ def _solar_elevation(lat_deg: float, lon_deg: float, dt_utc: datetime) -> float:
 # always lagged LAADS DAAC publication.
 PRODUCTS = {
     # MODIS 1km emissive bands
+    # ⚠️ S133 — El NRT de MODIS va en la VERSION, no en el short_name.
+    # LANCE nombra sus colecciones de MODIS con el MISMO short_name del Standard y la
+    # version con sufijo: `MYD021KM` v`6.1NRT`. Hasta S133 pedíamos `MYD021KM_NRT` v`61`,
+    # que NO EXISTE — y una colección inexistente no da error, da CERO granules, que es
+    # indistinguible de «todavía no hay dato». Resultado: el fallback NRT de MODIS nunca
+    # funcionó y dependíamos sólo del Standard de LAADS.
+    # El sufijo `_NRT` del short_name SÍ es el esquema correcto para VIIRS (más abajo);
+    # extrapolarlo a MODIS fue el error (misma familia que A37: el esquema de un sensor
+    # no se traslada al otro). Verificado contra el CMR el 2026-09-04: con el nombre
+    # corregido aparece la pasada Aqua 07:50 que MIROVA publicó a 4,75 MW y nosotros no
+    # teníamos. Lo fija `tests/test_nrt_short_names_modis_s133.py`.
     "MODIS_TERRA_L1B":        {"short_name": "MOD021KM",  "version": "6.1",
-                               "nrt": {"short_name": "MOD021KM_NRT", "version": "61"}},
+                               "nrt": {"short_name": "MOD021KM", "version": "6.1NRT"}},
     "MODIS_TERRA_GEO":        {"short_name": "MOD03",     "version": "6.1",
-                               "nrt": {"short_name": "MOD03_NRT",     "version": "61"}},
+                               "nrt": {"short_name": "MOD03",    "version": "6.1NRT"}},
     "MODIS_AQUA_L1B":         {"short_name": "MYD021KM",  "version": "6.1",
-                               "nrt": {"short_name": "MYD021KM_NRT", "version": "61"}},
+                               "nrt": {"short_name": "MYD021KM", "version": "6.1NRT"}},
     "MODIS_AQUA_GEO":         {"short_name": "MYD03",     "version": "6.1",
-                               "nrt": {"short_name": "MYD03_NRT",     "version": "61"}},
+                               "nrt": {"short_name": "MYD03",    "version": "6.1NRT"}},
     # VIIRS 375m I-band (IMG product) — Band I04 @ 3.74µm
     "VIIRS_SNPP_L1B":         {"short_name": "VNP02IMG",  "version": "2",
                                "nrt": {"short_name": "VNP02IMG_NRT", "version": "2"}},
