@@ -316,6 +316,63 @@ def pixel_areas_from_geolocation(lat, lon):
         return paso_scan * paso_track * 1.0e6   # km^2 -> m^2
 
 
+def resolve_viirs_pixel_areas(sensor_zenith_deg, nadir_area_m2, lat, lon,
+                              geolocated: bool = False,
+                              nadir_fixed: bool = False):
+    """Elige CON QUE area de pixel trabaja el procesador VIIRS, y por que.
+
+    POR QUE EXISTE ESTA FUNCION (S133). Hay tres formas de conocer el area del pixel y las
+    tres viven en este modulo; la eleccion tiene que estar en UN solo lugar porque I-band
+    (`process_viirs.py`) y M-band (`process_viirs_mod.py`) la calculan por separado, y
+    cablear una sola dejaria la otra muda sin que ningun test se ponga rojo. Antes de S133
+    el flag `enable_geolocated_pixel_area` estaba definido en el perfil pero no lo leia
+    nadie: el brazo "area" de su propio A/B habria sido identico al control.
+
+    LOS TRES MODOS, en orden de precedencia:
+
+    1. `geolocated=True` -> se MIDE en la geolocalizacion del granule
+       (`pixel_areas_from_geolocation`). Es el unico modo que captura los saltos de la
+       agregacion bow-tie, porque no supone ninguna ley: lee donde cayo cada pixel.
+    2. `nadir_fixed=True` -> area uniforme del nadir. Es el modo clon-literal de MIROVA
+       (A66/A67) y el operacional de hoy: MIROVA resamplea a una grilla de area constante,
+       y los coeficientes de Wooster estan calibrados contra ESA area.
+    3. Ninguno de los dos -> factor lineal por angulo cenital. Rama historica, hoy muerta.
+       ⚠️ Sub-corrige: su tope de 2,0x sale de leer como multiplicador de AREA el
+       "approximately 2" que el ATBD de geolocalizacion da POR EJE (S131 §5). El area real
+       crece 4,38x del nadir al borde. El modo geolocalizado NO pasa por aca, a proposito.
+
+    QUE PASA CON LA GEOLOCALIZACION INVALIDA. `pixel_areas_from_geolocation` devuelve NaN
+    donde la geolocalizacion viene corrupta, y eso esta bien para analisis: un NaN visible
+    es preferible a un area plausible pero falsa. En produccion un NaN se propagaria a la
+    magnitud y dejaria el record sin VRP, asi que aca esos pixeles caen al area modelada,
+    que es exactamente el valor que tendrian con el flag apagado. La caida es explicita y
+    acotada a los pixeles invalidos; no toca a los demas.
+
+    Args:
+        sensor_zenith_deg: angulo cenital del sensor por pixel, en grados.
+        nadir_area_m2: area del pixel en el nadir (140625 I-band, 562500 M-band).
+        lat, lon: geolocalizacion 2-D del granule. Solo se usa si `geolocated`.
+        geolocated: usar el area medida en la geolocalizacion (flag del perfil).
+        nadir_fixed: usar area uniforme del nadir (modo operacional MIROVA).
+
+    Returns:
+        Array de areas por pixel en m^2, de la forma de `sensor_zenith_deg`.
+    """
+    modelada = viirs_pixel_areas(sensor_zenith_deg, nadir_area_m2,
+                                 nadir_fixed=nadir_fixed)
+    if not geolocated:
+        return modelada
+
+    medida = pixel_areas_from_geolocation(lat, lon)
+    if medida.shape != modelada.shape:
+        # No se adivina un reencuadre: si las formas no calzan, algo cambio aguas arriba
+        # (un regrid, un recorte) y seguir seria inventar area donde no la hay.
+        raise ValueError(
+            "la geolocalizacion %s no calza con la grilla de angulos %s"
+            % (medida.shape, modelada.shape))
+    return np.where(np.isfinite(medida), medida, modelada)
+
+
 # ════════════════════════════════════════════════════════════════════
 # S122 — Geometría de observación persistida por record (research use).
 # POR QUÉ: el ángulo de visión condiciona lo que el sensor "ve" del cráter.

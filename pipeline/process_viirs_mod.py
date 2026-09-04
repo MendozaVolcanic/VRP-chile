@@ -41,7 +41,8 @@ try:
 except ImportError:
     H5_AVAILABLE = False
 
-from .scan_geometry import viirs_pixel_areas, roi_mask_bbox, observation_geometry, attr_scale_factor
+from .scan_geometry import (viirs_pixel_areas, resolve_viirs_pixel_areas,
+                            roi_mask_bbox, observation_geometry, attr_scale_factor)
 from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots, cluster_pixels_geographic
 from .path_d_cap import apply_d9_scene_cap  # F50/S77
@@ -120,6 +121,7 @@ from pipeline.profile import (
     ENABLE_UNSUITABLE_FILTERS_267_273,
     ENABLE_TEST1_K1_BG_EXCLUDE,
     ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS,
+    ENABLE_GEOLOCATED_PIXEL_AREA,
     ENABLE_FIRST_PASS_TESTS_2_AND_3,
     ENABLE_DUAL_ROI_FIRST_PASS,
     ENABLE_DUAL_ROI_SECOND_PASS,
@@ -449,10 +451,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         bands, geo = _regrid_viirs_mod_granule(bands, geo, volcano_lat, volcano_lon)
 
     lat, lon = geo["lat"], geo["lon"]
-    # Per-pixel ground area corrected for off-nadir geometry
-    pixel_areas = viirs_pixel_areas(
+    # Área del píxel en el terreno (m²). Misma decisión que en I-band y por la misma
+    # razón: el área escala la magnitud. Se resuelve en un solo lugar para que cablear
+    # un procesador y no el otro no pase inadvertido (S133).
+    pixel_areas = resolve_viirs_pixel_areas(
         geo["sensor_zenith"],
         NADIR_PIXEL_AREA_M2,
+        lat,
+        lon,
+        geolocated=ENABLE_GEOLOCATED_PIXEL_AREA,
         nadir_fixed=ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS,
     )
     dist = haversine_km(volcano_lat, volcano_lon, lat, lon)

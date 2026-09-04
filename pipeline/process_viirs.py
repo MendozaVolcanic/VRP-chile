@@ -47,7 +47,8 @@ except ImportError:
     H5_AVAILABLE = False
     print("WARNING: h5py not found. Install: pip install h5py")
 
-from .scan_geometry import viirs_pixel_areas, roi_mask_bbox, observation_geometry, attr_scale_factor
+from .scan_geometry import (viirs_pixel_areas, resolve_viirs_pixel_areas,
+                            roi_mask_bbox, observation_geometry, attr_scale_factor)
 from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots, cluster_pixels_geographic
 from .anomaly_pixels import build_anomaly_pixels
@@ -148,6 +149,7 @@ from pipeline.profile import (
     ENABLE_UNSUITABLE_FILTERS_267_273,
     ENABLE_TEST1_K1_BG_EXCLUDE,
     ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS,
+    ENABLE_GEOLOCATED_PIXEL_AREA,
     ENABLE_FIRST_PASS_TESTS_2_AND_3,
     ENABLE_DUAL_ROI_FIRST_PASS,
     ENABLE_DUAL_ROI_SECOND_PASS,
@@ -705,11 +707,16 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
 
     lat = geo["lat"]
     lon = geo["lon"]
-    # Per-pixel ground area (m^2) corrected for off-nadir scan geometry.
-    # See pipeline/scan_geometry.py for the sec^3(theta_z) formula.
-    pixel_areas = viirs_pixel_areas(
+    # Área del píxel en el terreno (m²). POR QUÉ importa: el VRP es una radiancia por
+    # unidad de área multiplicada por el área, así que este número escala la magnitud
+    # directamente. Los tres modos y su precedencia viven en resolve_viirs_pixel_areas;
+    # el operacional de hoy es nadir-fijo (A66/A67, clon literal MIROVA).
+    pixel_areas = resolve_viirs_pixel_areas(
         geo["sensor_zenith"],
         NADIR_PIXEL_AREA_M2,
+        lat,
+        lon,
+        geolocated=ENABLE_GEOLOCATED_PIXEL_AREA,
         nadir_fixed=ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS,
     )
 
