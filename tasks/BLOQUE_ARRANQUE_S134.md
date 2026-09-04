@@ -16,7 +16,14 @@ No commitean nada. Los artefactos se borran a los 14 días.
   gh run view 33872836355    # A/B área chunk 1 (24 jobs: 8 volcanes × 3 brazos)
 
   gh run download 33872821788 --dir data/
-  gh run download 33872836355 --dir data/
+  gh run download 33872836355 --dir data/   # ⚠️ chunk 1 INCOMPLETO: 13 de 24 jobs
+                                            # murieron por timeout. Ver abajo.
+
+⚠️ EL A/B DEL AREA HAY QUE RELANZARLO ENTERO. El chunk 1 fallo 13 de 24 jobs: el
+`timeout-minutes` era 150 y los jobs tardan 128-133 min los que terminan. Peor: los 3 que
+sobrevivieron son TODOS del brazo de control, asi que no hay un solo par comparable.
+Ya esta subido a 300 min (medido, A15). Relanzar los 3 chunks desde cero:
+  gh workflow run reproc-s133-area-ab.yml --ref main -f start=2026-04-01 -f end=2026-05-31 -f overwrite=true
 
   python experiments/_s133/analizar_ab_b22.py    # criterios C1-C4, congelados
   python experiments/_s133/analizar_ab_area.py   # los 4 criterios, congelados
