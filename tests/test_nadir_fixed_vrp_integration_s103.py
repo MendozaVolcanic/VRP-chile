@@ -148,7 +148,11 @@ def test_calculate_vrp_derives_pixel_areas_from_nadir_flag(mod, area_fn, flag):
     )
     # (b) el VRP (Wooster) y el pixel_areas flageado viven en la misma funcion:
     # el area por-pixel se indexa de pixel_areas y se multiplica por WOOSTER_COEFF.
-    assert "pixel_areas" in src, f"{mod.__name__}.calculate_vrp no usa pixel_areas"
+    # S133: frontera de palabra. `pixel_areas` es subcadena de los cuatro nombres de
+    # funcion de area del modulo, asi que un `in` pelado se satisface con la llamada sola
+    # y no prueba que el array llegue a usarse.
+    assert re.search(r"(?<![A-Za-z0-9_])pixel_areas(?![A-Za-z0-9_])", src), (
+        f"{mod.__name__}.calculate_vrp no usa la variable pixel_areas")
     assert "WOOSTER_COEFF" in src, (
         f"{mod.__name__}.calculate_vrp no calcula VRP con WOOSTER_COEFF "
         f"-> no se puede garantizar que el area flageada llegue al VRP"
