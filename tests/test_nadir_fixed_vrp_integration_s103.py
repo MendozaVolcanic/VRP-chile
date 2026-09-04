@@ -112,9 +112,20 @@ def test_vrp_scales_with_area_when_nadir_flips_modis():
 # falla (tripwire — actualizar deliberadamente si se refactoriza el seam).
 # --------------------------------------------------------------------------
 # (modulo, funcion de area esperada, constante de flag del modulo)
+#
+# S133: en VIIRS la funcion pasó a ser `resolve_viirs_pixel_areas`, que elige entre los
+# tres modos de area (geolocalizado / nadir-fijo / factor lineal) y sigue recibiendo el
+# flag nadir. La actualizacion es deliberada, que es lo que el comentario de arriba pide
+# al refactorizar el seam.
+#
+# ⚠️ Y hubo que endurecer la comprobacion. `viirs_pixel_areas` es SUBCADENA de
+# `resolve_viirs_pixel_areas`, asi que la version anterior de este test seguia en verde
+# despues de que la llamada directa desaparecio: pasaba por coincidencia de texto, no
+# porque el cableado siguiera ahi. Un guard que pasa por la razon equivocada es peor que
+# no tenerlo, porque da permiso. Ahora se exige la llamada con frontera de palabra.
 WIRING = [
-    (p_viirs_i, "viirs_pixel_areas", "ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS"),
-    (p_viirs_m, "viirs_pixel_areas", "ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS"),
+    (p_viirs_i, "resolve_viirs_pixel_areas", "ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS"),
+    (p_viirs_m, "resolve_viirs_pixel_areas", "ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS"),
     (p_modis,   "modis_pixel_areas", "ENABLE_NADIR_FIXED_PIXEL_AREA_MODIS"),
 ]
 
@@ -125,8 +136,11 @@ def test_calculate_vrp_derives_pixel_areas_from_nadir_flag(mod, area_fn, flag):
     src = inspect.getsource(mod.calculate_vrp)
     src_nospace = re.sub(r"\s", "", src)
     # (a) pixel_areas se computa con la funcion de area pasando el flag nadir.
-    assert area_fn + "(" in src, (
-        f"{mod.__name__}.calculate_vrp no llama {area_fn}()"
+    # Frontera de palabra a la izquierda: `resolve_viirs_pixel_areas(` NO puede satisfacer
+    # una expectativa de `viirs_pixel_areas(` ni al reves.
+    assert re.search(r"(?<![A-Za-z0-9_])" + re.escape(area_fn) + r"\s*\(", src), (
+        f"{mod.__name__}.calculate_vrp no llama {area_fn}() "
+        f"(ojo: una subcadena de otro nombre no cuenta)"
     )
     assert "nadir_fixed=" + flag in src_nospace, (
         f"{mod.__name__}.calculate_vrp no pasa nadir_fixed={flag} a {area_fn} "
@@ -134,7 +148,11 @@ def test_calculate_vrp_derives_pixel_areas_from_nadir_flag(mod, area_fn, flag):
     )
     # (b) el VRP (Wooster) y el pixel_areas flageado viven en la misma funcion:
     # el area por-pixel se indexa de pixel_areas y se multiplica por WOOSTER_COEFF.
-    assert "pixel_areas" in src, f"{mod.__name__}.calculate_vrp no usa pixel_areas"
+    # S133: frontera de palabra. `pixel_areas` es subcadena de los cuatro nombres de
+    # funcion de area del modulo, asi que un `in` pelado se satisface con la llamada sola
+    # y no prueba que el array llegue a usarse.
+    assert re.search(r"(?<![A-Za-z0-9_])pixel_areas(?![A-Za-z0-9_])", src), (
+        f"{mod.__name__}.calculate_vrp no usa la variable pixel_areas")
     assert "WOOSTER_COEFF" in src, (
         f"{mod.__name__}.calculate_vrp no calcula VRP con WOOSTER_COEFF "
         f"-> no se puede garantizar que el area flageada llegue al VRP"

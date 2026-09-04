@@ -1,0 +1,417 @@
+{
+  "que_es_esto": "recalibracion del criterio C2 del A/B de distance_class MODIS de S132 en unidades de inner_radius_km; NO cambia el veredicto de S132",
+  "integridad_del_insumo": {
+    "filas_csv": 9218,
+    "volcanes": 11,
+    "sin_inner_radius_en_yaml": [],
+    "pc_dist_nulos": 0,
+    "final_hotspot_dist_nulos": 0,
+    "inner_radius_por_volcan": {
+      "Chaiten": 5.0,
+      "Copahue": 4.0,
+      "Isluga": 5.0,
+      "Lascar": 5.0,
+      "Lastarria": 3.0,
+      "Llaima": 5.0,
+      "NevadosDeChillan": 5.0,
+      "PlanchonPeteroa": 3.0,
+      "PuyehueCordonCaulle": 20.0,
+      "Tupungatito": 7.0,
+      "Villarrica": 5.0
+    }
+  },
+  "denominadores_A90": {
+    "que_cuenta_cada_numero": "un record MODIS del flip far->summit del A/B de S132; NO son noches ni pasadas ni detecciones de todo el corpus",
+    "n_flip_total": 9218,
+    "n_flip_con_d_norm_calculable": 9218,
+    "ventana_utc": [
+      "2025-02-15 01:40:00+00:00",
+      "2026-09-01 07:35:00+00:00"
+    ],
+    "corpus_del_que_sale_el_flip": {
+      "records_modis": 11749,
+      "fuente": "experiments/_s132/ab_distance_class_modis.json:records_modis",
+      "nota": "denominador del A/B de S132, no recomputado aca"
+    },
+    "n_flip_confirmado_por_mirova": 4026,
+    "n_flip_no_confirmado_por_mirova": 5192
+  },
+  "tautologia_d_norm_le_1": {
+    "definicion_del_flip_en_s132": "far -> summit si (pc_dist if pc_dist is not None else final_hotspot_dist_km) <= inner_radius_km",
+    "frac_d_norm_le_1_observada": 1.0,
+    "records_que_usaron_el_fallback_final_hotspot": 0,
+    "es_tautologico": true,
+    "por_que": "ningun record del flip uso el fallback, asi que el mismo `pc_dist` que define el flip es el numerador de d_norm: d_norm <= 1 se cumple por construccion y un C2 escrito asi no puede fallar nunca"
+  },
+  "agregado": {
+    "n": 9218,
+    "d_norm_cuantiles": {
+      "p5": 0.0953,
+      "p25": 0.2545,
+      "p50": 0.4102,
+      "p75": 0.581,
+      "p95": 0.8558
+    },
+    "d_norm_media": 0.4313,
+    "frac_d_norm_le": {
+      "0.25": 0.2437,
+      "0.33": 0.3684,
+      "0.5": 0.6373,
+      "0.75": 0.8965,
+      "1.0": 1.0
+    },
+    "nulo_area_uniforme_frac_esperada": {
+      "0.25": 0.0625,
+      "0.33": 0.1089,
+      "0.5": 0.25,
+      "0.75": 0.5625,
+      "1.0": 1.0
+    },
+    "dist_km_cuantiles": {
+      "p5": 0.524,
+      "p25": 1.231,
+      "p50": 1.9185,
+      "p75": 2.7797,
+      "p95": 4.3044
+    },
+    "frac_dist_km_le_2_criterio_s132": 0.5273
+  },
+  "micro_vs_macro_S126": {
+    "d_norm_p50_macro_promedio_de_medianas_por_volcan": 0.4053,
+    "d_norm_p50_micro_mediana_agrupada": 0.4102,
+    "frac_le_0.5_macro": 0.6477,
+    "frac_le_0.5_micro": 0.6373,
+    "peor_volcan_por_frac_le_0.5": "Copahue",
+    "mejor_volcan_por_frac_le_0.5": "PuyehueCordonCaulle"
+  },
+  "por_volcan": {
+    "Villarrica": {
+      "n": 1120,
+      "inner_radius_km": 5.0,
+      "d_norm_cuantiles": {
+        "p5": 0.1174,
+        "p25": 0.2454,
+        "p50": 0.3683,
+        "p75": 0.5007,
+        "p95": 0.7315
+      },
+      "frac_d_norm_le": {
+        "0.25": 0.2625,
+        "0.33": 0.425,
+        "0.5": 0.7473,
+        "0.75": 0.9554,
+        "1.0": 1.0
+      },
+      "dist_km_p50": 1.8415,
+      "frac_dist_km_le_2_criterio_s132": 0.5643,
+      "n_confirmado_por_mirova": 469,
+      "ventana_utc": [
+        "2025-02-15 06:30:00+00:00",
+        "2026-09-01 01:55:00+00:00"
+      ]
+    },
+    "Chaiten": {
+      "n": 1044,
+      "inner_radius_km": 5.0,
+      "d_norm_cuantiles": {
+        "p5": 0.0761,
+        "p25": 0.232,
+        "p50": 0.3501,
+        "p75": 0.4884,
+        "p95": 0.7078
+      },
+      "frac_d_norm_le": {
+        "0.25": 0.2931,
+        "0.33": 0.455,
+        "0.5": 0.772,
+        "0.75": 0.9607,
+        "1.0": 1.0
+      },
+      "dist_km_p50": 1.7505,
+      "frac_dist_km_le_2_criterio_s132": 0.5872,
+      "n_confirmado_por_mirova": 473,
+      "ventana_utc": [
+        "2025-02-15 03:15:00+00:00",
+        "2026-09-01 07:35:00+00:00"
+      ]
+    },
+    "Tupungatito": {
+      "n": 937,
+      "inner_radius_km": 7.0,
+      "d_norm_cuantiles": {
+        "p5": 0.0955,
+        "p25": 0.2411,
+        "p50": 0.4033,
+        "p75": 0.5606,
+        "p95": 0.7557
+      },
+      "frac_d_norm_le": {
+        "0.25": 0.2636,
+        "0.33": 0.3778,
+        "0.5": 0.6542,
+        "0.75": 0.9434,
+        "1.0": 1.0
+      },
+      "dist_km_p50": 2.823,
+      "frac_dist_km_le_2_criterio_s132": 0.3095,
+      "n_confirmado_por_mirova": 377,
+      "ventana_utc": [
+        "2025-02-15 03:15:00+00:00",
+        "2026-09-01 07:35:00+00:00"
+      ]
+    },
+    "Llaima": {
+      "n": 870,
+      "inner_radius_km": 5.0,
+      "d_norm_cuantiles": {
+        "p5": 0.1189,
+        "p25": 0.2844,
+        "p50": 0.4702,
+        "p75": 0.6691,
+        "p95": 0.9085
+      },
+      "frac_d_norm_le": {
+        "0.25": 0.2057,
+        "0.33": 0.3161,
+        "0.5": 0.5391,
+        "0.75": 0.8322,
+        "1.0": 1.0
+      },
+      "dist_km_p50": 2.351,
+      "frac_dist_km_le_2_criterio_s132": 0.4161,
+      "n_confirmado_por_mirova": 372,
+      "ventana_utc": [
+        "2025-02-15 06:30:00+00:00",
+        "2026-09-01 07:35:00+00:00"
+      ]
+    },
+    "Copahue": {
+      "n": 866,
+      "inner_radius_km": 4.0,
+      "d_norm_cuantiles": {
+        "p5": 0.1564,
+        "p25": 0.3431,
+        "p50": 0.5264,
+        "p75": 0.6984,
+        "p95": 0.9282
+      },
+      "frac_d_norm_le": {
+        "0.25": 0.1397,
+        "0.33": 0.2298,
+        "0.5": 0.4654,
+        "0.75": 0.8014,
+        "1.0": 1.0
+      },
+      "dist_km_p50": 2.1055,
+      "frac_dist_km_le_2_criterio_s132": 0.4654,
+      "n_confirmado_por_mirova": 391,
+      "ventana_utc": [
+        "2025-02-15 06:30:00+00:00",
+        "2026-09-01 07:35:00+00:00"
+      ]
+    },
+    "PlanchonPeteroa": {
+      "n": 857,
+      "inner_radius_km": 3.0,
+      "d_norm_cuantiles": {
+        "p5": 0.1423,
+        "p25": 0.3127,
+        "p50": 0.4643,
+        "p75": 0.6287,
+        "p95": 0.8821
+      },
+      "frac_d_norm_le": {
+        "0.25": 0.161,
+        "0.33": 0.2742,
+        "0.5": 0.5613,
+        "0.75": 0.8728,
+        "1.0": 1.0
+      },
+      "dist_km_p50": 1.393,
+      "frac_dist_km_le_2_criterio_s132": 0.7888,
+      "n_confirmado_por_mirova": 383,
+      "ventana_utc": [
+        "2025-02-15 03:15:00+00:00",
+        "2026-09-01 07:35:00+00:00"
+      ]
+    },
+    "Lascar": {
+      "n": 808,
+      "inner_radius_km": 5.0,
+      "d_norm_cuantiles": {
+        "p5": 0.1106,
+        "p25": 0.246,
+        "p50": 0.3822,
+        "p75": 0.5316,
+        "p95": 0.7643
+      },
+      "frac_d_norm_le": {
+        "0.25": 0.2599,
+        "0.33": 0.3911,
+        "0.5": 0.7141,
+        "0.75": 0.9406,
+        "1.0": 1.0
+      },
+      "dist_km_p50": 1.911,
+      "frac_dist_km_le_2_criterio_s132": 0.5272,
+      "n_confirmado_por_mirova": 359,
+      "ventana_utc": [
+        "2025-02-15 01:40:00+00:00",
+        "2026-09-01 07:30:00+00:00"
+      ]
+    },
+    "Isluga": {
+      "n": 801,
+      "inner_radius_km": 5.0,
+      "d_norm_cuantiles": {
+        "p5": 0.1212,
+        "p25": 0.2782,
+        "p50": 0.4126,
+        "p75": 0.5748,
+        "p95": 0.7888
+      },
+      "frac_d_norm_le": {
+        "0.25": 0.2022,
+        "0.33": 0.3483,
+        "0.5": 0.6442,
+        "0.75": 0.9213,
+        "1.0": 1.0
+      },
+      "dist_km_p50": 2.063,
+      "frac_dist_km_le_2_criterio_s132": 0.4719,
+      "n_confirmado_por_mirova": 357,
+      "ventana_utc": [
+        "2025-02-15 01:45:00+00:00",
+        "2026-09-01 07:30:00+00:00"
+      ]
+    },
+    "Lastarria": {
+      "n": 800,
+      "inner_radius_km": 3.0,
+      "d_norm_cuantiles": {
+        "p5": 0.1183,
+        "p25": 0.2956,
+        "p50": 0.4572,
+        "p75": 0.612,
+        "p95": 0.8681
+      },
+      "frac_d_norm_le": {
+        "0.25": 0.1875,
+        "0.33": 0.2963,
+        "0.5": 0.56,
+        "0.75": 0.8812,
+        "1.0": 1.0
+      },
+      "dist_km_p50": 1.3715,
+      "frac_dist_km_le_2_criterio_s132": 0.8137,
+      "n_confirmado_por_mirova": 348,
+      "ventana_utc": [
+        "2025-02-15 01:40:00+00:00",
+        "2026-09-01 07:30:00+00:00"
+      ]
+    },
+    "NevadosDeChillan": {
+      "n": 755,
+      "inner_radius_km": 5.0,
+      "d_norm_cuantiles": {
+        "p5": 0.1202,
+        "p25": 0.3109,
+        "p50": 0.5052,
+        "p75": 0.7055,
+        "p95": 0.9266
+      },
+      "frac_d_norm_le": {
+        "0.25": 0.1656,
+        "0.33": 0.2781,
+        "0.5": 0.498,
+        "0.75": 0.7748,
+        "1.0": 1.0
+      },
+      "dist_km_p50": 2.526,
+      "frac_dist_km_le_2_criterio_s132": 0.3722,
+      "n_confirmado_por_mirova": 327,
+      "ventana_utc": [
+        "2025-02-15 03:15:00+00:00",
+        "2026-09-01 07:35:00+00:00"
+      ]
+    },
+    "PuyehueCordonCaulle": {
+      "n": 360,
+      "inner_radius_km": 20.0,
+      "d_norm_cuantiles": {
+        "p5": 0.0363,
+        "p25": 0.0718,
+        "p50": 0.1182,
+        "p75": 0.1925,
+        "p95": 0.3807
+      },
+      "frac_d_norm_le": {
+        "0.25": 0.8722,
+        "0.33": 0.9444,
+        "0.5": 0.9694,
+        "0.75": 0.9806,
+        "1.0": 1.0
+      },
+      "dist_km_p50": 2.365,
+      "frac_dist_km_le_2_criterio_s132": 0.4139,
+      "n_confirmado_por_mirova": 170,
+      "ventana_utc": [
+        "2025-02-15 03:15:00+00:00",
+        "2026-08-31 08:35:00+00:00"
+      ]
+    }
+  },
+  "por_confirmacion_mirova": {
+    "confirmado": {
+      "n": 4026,
+      "d_norm_cuantiles": {
+        "p5": 0.0912,
+        "p25": 0.2431,
+        "p50": 0.4032,
+        "p75": 0.573,
+        "p95": 0.8469
+      },
+      "frac_d_norm_le_0.5": 0.6505
+    },
+    "no_confirmado": {
+      "n": 5192,
+      "d_norm_cuantiles": {
+        "p5": 0.0991,
+        "p25": 0.2634,
+        "p50": 0.4164,
+        "p75": 0.588,
+        "p95": 0.8646
+      },
+      "frac_d_norm_le_0.5": 0.6271
+    }
+  },
+  "propuesta_C2_no_adoptada": {
+    "estado": "PROPUESTA - no adoptada, no pre-registrada, no aplicada a S132",
+    "formulacion": "C2' — en cada uno de los 11 Tier A por separado, la mediana de d_norm del flip debe ser <= 0.5, y en el agregado >= 60 % del flip debe tener d_norm <= 0.5",
+    "por_que_no_es_tautologica": "0.5 del inner es estrictamente interior al corte que define el flip, asi que puede fallar",
+    "referencia_nula": "bajo cumulos uniformes en area dentro del inner la fraccion esperada con d_norm <= 0.5 es 25 %; el criterio exige separarse de esa nula",
+    "por_que_por_volcan": "S126: la mediana agrupada puede invertir el veredicto porque los inner van de 3 a 20 km y los n son desparejos",
+    "evaluacion_retrospectiva_sobre_el_flip_de_s132": {
+      "advertencia": "diagnostico, NO veredicto; el veredicto de S132 no se toca",
+      "volcanes_que_fallarian_la_mediana_0.5": [
+        "Copahue",
+        "NevadosDeChillan"
+      ],
+      "volcanes_que_pasarian": [
+        "Villarrica",
+        "Chaiten",
+        "Tupungatito",
+        "Llaima",
+        "PlanchonPeteroa",
+        "Lascar",
+        "Isluga",
+        "Lastarria",
+        "PuyehueCordonCaulle"
+      ],
+      "agregado_frac_le_0.5": 0.6373,
+      "agregado_pasaria_el_60_pct": true,
+      "lectura": "el criterio discrimina: no lo pasan todos, luego no es tautologico",
+      "limite_del_normalizado": "normalizar por inner NO arregla Puyehue-Cordon Caulle: con inner = 20 km cualquier cumulo sobre el edificio da d_norm chico y el criterio se vuelve vacio ahi. El inner grande de PCC es una decision de MIROVA sobre un lacolito difuso de ~707 km2, no una medida de cercania al crater"
+    }
+  }
+}

@@ -273,7 +273,13 @@ def test_process_modis_integrates_local_cluster_magnitude_flag():
     import inspect
     import pipeline.process_modis as pm
     src = inspect.getsource(pm)
-    assert "ENABLE_LOCAL_CLUSTER_MAGNITUDE" in src, "flag no importado/usado"
+    # S133: frontera de palabra a proposito. `ENABLE_LOCAL_CLUSTER_MAGNITUDE` es prefijo
+    # de `ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375` (el flag de la corona Eq.6 de VIIRS375),
+    # asi que un `in` pelado daria verde aunque el flag de MODIS hubiera desaparecido y solo
+    # quedara el del otro sensor. Es la misma trampa que dejo pasar el guard de S103.
+    import re as _re
+    assert _re.search(r"(?<![A-Za-z0-9_])ENABLE_LOCAL_CLUSTER_MAGNITUDE(?![A-Za-z0-9_])",
+                      src), "flag no importado/usado (ojo: el sufijo _VIIRS375 no cuenta)"
     assert "cluster_corona_background" in src, "helper corona no usado"
     # S127: el recompute pasa por el helper POR PÍXEL, no por el que sólo devuelve el
     # total. Con el total solo, todo lo que corre después (focal, single-pixel mode)
