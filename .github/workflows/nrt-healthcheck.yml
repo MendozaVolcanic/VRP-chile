@@ -276,3 +276,30 @@ jobs:
           print(f"Issue #{num}: escaló {previo} → {actual} (notificado).")
           _fin()
           PYEOF
+
+      # ────────────────────────────────────────────────────────────────
+      # S133 — Puntualidad del cron, no solo frescura del dato.
+      #
+      # POR QUE VA ACA Y NO EN UN WORKFLOW NUEVO: agregar otro cron empeoraria
+      # justamente lo que se quiere medir. Este job ya corre todos los dias.
+      #
+      # QUE AGUJERO TAPA: el 2026-08-27 GitHub dejo de entregar la mitad de los
+      # eventos `schedule` del repo, uniformemente sobre los cuatro workflows con
+      # cron, y nadie se entero durante ocho dias. No fallo ningun monitor: las 200
+      # ultimas corridas del NRT terminaron en success, y el dato nunca paso de 7 h
+      # de viejo contra un umbral de 48. Dos metricas verdes sobre un mecanismo
+      # degradado a la mitad (A87). Lo que faltaba medir era la AUSENCIA, y una
+      # corrida que no ocurre no deja rastro que un monitor de fallas pueda ver.
+      #
+      # `if: always()` porque un paso previo en rojo es cuando MAS interesa saber
+      # si el cron esta llegando.
+      # ────────────────────────────────────────────────────────────────
+      - name: Medir la puntualidad del cron
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run list --limit 400 --json createdAt,name,event \
+            | python scripts/medir_cadencia_cron.py \
+                --ventana-h 24 --json-out cadencia.json \
+            | tee -a "$GITHUB_STEP_SUMMARY"

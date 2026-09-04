@@ -18,6 +18,23 @@ name: Reproc watchdog — avisa si un reproceso muere o se cuelga
 # curso hace mas de 7 h — sobre el techo de 6 h por job de GitHub, o sea colgada.
 #
 # Cierra el issue solo cuando el mismo workflow vuelve a correr en verde.
+#
+# QUE NO MIRA (fix S133, issue #567)
+# ==================================
+# La lista de workflows sale de la API (`listRepoWorkflows`), y esa API devuelve
+# tambien los que ya se BORRARON del repo: GitHub conserva la entidad para poder
+# seguir mostrando su historial de corridas. Medido el 2026-09-03 sobre este repo,
+# `reproc-f28-pp-saturation.yml` — archivo inexistente en `.github/workflows/` desde
+# mayo — sigue apareciendo con `state: "active"` y su ultima corrida (fallida,
+# 2026-05-23) hacia que el watchdog comentara la issue #567 una vez por hora, 22
+# veces. Ese ruido es el dano real: tapa la alerta verdadera cuando llegue.
+#
+# Filtrar por `state == "active"` NO alcanza — la evidencia de arriba lo refuta.
+# Por eso la fuente de verdad de "que existe" es el REPO, no la API: se listan los
+# archivos reales de `.github/workflows` en la rama por defecto y se vigila solo la
+# interseccion. Ademas se acotan las corridas a MAX_DIAS_ANTIGUEDAD, porque un A/B
+# de una sola vez que fallo y nunca va a volver a correr en verde jamas cerraria su
+# issue — mismo ruido perpetuo por otra puerta.
 
 "on":
   schedule:
@@ -43,14 +60,48 @@ jobs:
         with:
           script: |
             const HORAS_COLGADO = 7;          // el techo de GitHub es 6 h por job
+            const MAX_DIAS_ANTIGUEDAD = 14;   // mas viejo que esto ya no es accionable
             const TITULO = 'Reproc: corrida fallida o colgada';
             const { owner, repo } = context.repo;
 
-            const wfs = (await github.rest.actions.listRepoWorkflows({
-              owner, repo, per_page: 100 })).data.workflows
-              .filter(w => w.path.includes('/reproc-')
-                        && !w.path.includes('/_archive/')
-                        && !w.path.includes('reproc-watchdog'));
+            // --- SELECCION PURA (la testea tests/test_reproc_watchdog_vivos_s133.py;
+            //     no mover los marcadores ni meter await aca adentro) ---
+            function seleccionarVigilados(workflows, pathsEnRepo) {
+              const vivos = new Set(pathsEnRepo);
+              return workflows.filter(w => w.path.includes('/reproc-')
+                                        && !w.path.includes('/_archive/')
+                                        && !w.path.includes('reproc-watchdog')
+                                        && vivos.has(w.path));
+            }
+
+            function evaluarCorrida(r, ahoraMs, horasColgado, maxDias) {
+              const horas = (ahoraMs - new Date(r.created_at).getTime()) / 36e5;
+              if (horas > maxDias * 24) return null;
+              if (r.status === 'completed' && r.conclusion !== 'success'
+                  && r.conclusion !== 'cancelled') return { tipo: 'fallida', horas };
+              if (r.status !== 'completed' && horas > horasColgado)
+                return { tipo: 'colgada', horas };
+              return null;
+            }
+            // --- FIN SELECCION PURA ---
+
+            // Fuente de verdad de "existe": los archivos de la rama por defecto.
+            // Si esta lectura falla, abortamos en vez de vigilar fantasmas.
+            let pathsEnRepo;
+            try {
+              const contenido = (await github.rest.repos.getContent({
+                owner, repo, path: '.github/workflows' })).data;
+              pathsEnRepo = contenido.filter(e => e.type === 'file').map(e => e.path);
+            } catch (e) {
+              core.setFailed(`no pude listar .github/workflows en el repo: ${e.message}`);
+              return;
+            }
+
+            const wfs = seleccionarVigilados(
+              (await github.rest.actions.listRepoWorkflows({
+                owner, repo, per_page: 100 })).data.workflows,
+              pathsEnRepo);
+            core.info(`vigilando ${wfs.length} reprocesos vivos de ${pathsEnRepo.length} archivos`);
 
             const problemas = [];
             for (const w of wfs) {
@@ -58,13 +109,13 @@ jobs:
                 owner, repo, workflow_id: w.id, per_page: 3 })).data.workflow_runs;
               if (!runs.length) continue;
               const r = runs[0];
-              const horas = (Date.now() - new Date(r.created_at)) / 36e5;
-              if (r.status === 'completed' && r.conclusion !== 'success'
-                  && r.conclusion !== 'cancelled') {
+              const v = evaluarCorrida(r, Date.now(), HORAS_COLGADO, MAX_DIAS_ANTIGUEDAD);
+              if (!v) continue;
+              if (v.tipo === 'fallida') {
                 problemas.push(`- **${w.name}** — ultima corrida \`${r.conclusion}\` `
-                  + `hace ${horas.toFixed(1)} h · ${r.html_url}`);
-              } else if (r.status !== 'completed' && horas > HORAS_COLGADO) {
-                problemas.push(`- **${w.name}** — lleva ${horas.toFixed(1)} h en `
+                  + `hace ${v.horas.toFixed(1)} h · ${r.html_url}`);
+              } else {
+                problemas.push(`- **${w.name}** — lleva ${v.horas.toFixed(1)} h en `
                   + `\`${r.status}\`, sobre el techo de 6 h por job · ${r.html_url}`);
               }
             }
