@@ -13,14 +13,28 @@
 | Terra Geolocation | `MOD03` | 6.1 | 1 km | lat/lon/solar zen | pixel-geo |
 | Aqua L1B Radiances | `MYD021KM` | 6.1 | 1 km | B21/22, B31 | VRP MIR |
 | Aqua Geolocation | `MYD03` | 6.1 | 1 km | lat/lon | pixel-geo |
-| NRT Terra L1B | `MOD021KM_NRT` | 61 | 1 km | idem | fallback <3h latencia |
-| NRT Terra GEO | `MOD03_NRT` | 61 | 1 km | — | pair NRT |
-| NRT Aqua L1B | `MYD021KM_NRT` | 61 | — | — | idem |
-| NRT Aqua GEO | `MYD03_NRT` | 61 | — | — | — |
+| NRT Terra L1B | `MOD021KM` | **6.1NRT** | 1 km | idem | fallback <3h latencia |
+| NRT Terra GEO | `MOD03` | **6.1NRT** | 1 km | — | pair NRT |
+| NRT Aqua L1B | `MYD021KM` | **6.1NRT** | — | — | idem |
+| NRT Aqua GEO | `MYD03` | **6.1NRT** | — | — | — |
+
+> ⚠️ **S133 — el NRT de MODIS va en la VERSIÓN, no en el short_name.** Esta tabla decía
+> `MOD021KM_NRT` / `MYD021KM_NRT` en versión `61`, igual que el código, y **esas colecciones
+> no existen**. LANCE nombra las suyas con el mismo short_name del estándar y marca el NRT
+> con el sufijo de versión. Una colección inexistente no da error: da **cero granules**, que
+> es indistinguible de «todavía no hay dato», y por eso el fallback NRT de MODIS nunca
+> funcionó sin que nadie lo notara.
+>
+> **En VIIRS el esquema es el opuesto y está bien** (`VNP02IMG_NRT`, ver la tabla de abajo):
+> el error fue extrapolar de un sensor al otro, misma familia que A37. Lo fija
+> `tests/test_nrt_short_names_modis_s133.py`, que vigila las **dos** convenciones.
+> Detalle: [`s133/AUDITORIA_NRT_MODIS.md`](s133/AUDITORIA_NRT_MODIS.md).
 
 **Notas**:
 - MODIS **fin de vida útil declarado hasta 2026** (Campus 2022). Después pipeline debe correr VIIRS-only.
-- MODIS **NRT eliminado ~7-14 días**. Standard tiene lag 3-5 días.
+- MODIS **NRT eliminado ~7-14 días**. El lag del Standard es variable y **no simétrico
+  entre satélites**: medido el 2026-09-04, Terra 11,6 h y **Aqua 35,6 h** (VIIRS 9,8-11,8 h).
+  La nota anterior decía «3-5 días» de forma uniforme.
 - **pyhdf roto en Windows** — MODIS solo corre en GitHub Actions Linux.
 
 ### VIIRS I-band (375m) — Suomi-NPP (2011) y NOAA-20 (2017), NOAA-21 (2022, pendiente)

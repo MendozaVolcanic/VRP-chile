@@ -6,6 +6,11 @@
 > AUDIT_S105 como "última auditoría vigente" mientras existían 6 auditorías integrales
 > posteriores, y ~25 docs S106-S123 no figuraban. Si vas a agregar un doc, agregá también
 > su fila acá **en la misma sesión** — la regla de arriba es vieja, lo que falló es cumplirla.
+>
+> **S133**: volvió a fallar. Los seis docs de `s133/` y los dos de `s132/` se agregaron sólo
+> cuando Nicolás preguntó si se había cruzado contra los propios documentos del proyecto.
+> Escribir el doc y no indexarlo es la forma habitual del olvido: el doc existe, pero para
+> una sesión fría no existe.
 
 ## CANÓNICOS (fuente de verdad — leer estos primero)
 
@@ -86,6 +91,15 @@
 | AUDIT_S112_DASHBOARD_MIROVA.md · S101_DASHBOARD_AUDIT.md · S100_DASHBOARD_AUDIT.md | Auditorías de dashboard | S100-S112 |
 | AUDIT_S106.md · AUDIT_S109_VIIRS_FRENTES.md · S101_SENSOR_PERFORMANCE.md | Estado por sensor / frentes VIIRS | S106-S109 |
 | EARTHDATA_TOKEN_SETUP.md | Setup de credenciales NASA — **relevante tras el incidente 20-jul** | — |
+| **s133/AUDITORIA_DEL_INCIDENTE.md** | **La alerta de 4,75 MW que no vimos y los 5 defectos que la escondieron** | **S133** |
+| s133/AUDITORIA_NRT_MODIS.md | El NRT de MODIS pedía una colección inexistente (`MYD021KM_NRT` v61) | S133 |
+| s133/CADENCIA_DEL_CRON.md | La entrega de eventos programados cayó 51 %; sin pérdida de datos | S133 |
+| s133/SUSTRATO_AREA_GEOLOCALIZADA.md | El A/B del área no tenía sustrato de código | S133 |
+| s133/B22_EVIDENCIA.md | B22 banda primaria: evidencia + criterios C1-C4 pre-registrados | S133 |
+| s133/C2_NORMALIZADO_INNER_RADIUS.md | C2 de `distance_class` era tautológico; C2' propuesto | S133 |
+| s132/AB_AREA_GEOLOCALIZADA.md | Criterio pre-registrado del A/B del área (**no se toca**) | S132 |
+| s132/AB_DISTANCE_CLASS_MODIS.md | A/B corrido: NO ADOPTAR (falló C2, mal calibrado — A91) | S132 |
+| s131/REMUESTREO_LEY_DE_AREA.md | El área explica el gradiente cenital entero; ATBD 4,38× | S131 |
 
 ## HISTÓRICO-CERRADO (referencia, NO fuente de verdad actual)
 
