@@ -1104,6 +1104,25 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     La familia general es «el instrumento mide otra cosa que la que dice medir», y no hay un
     script que la cierre entera.
 
+- **A93. Un radio no es una posición; una fracción de «verdes» no es una ventana; un pareo no es
+  el conjunto que dice contar** (S134, cinco enunciados refutados por los verificadores, cuatro
+  de instrumento). El CSV de MIROVA trae `Distancia_km` **sin acimut**: comparar su radio con el
+  nuestro re-anclado dio «0,21 km de separación» cuando la cota superior real era 15,6 km (PCC) —
+  la diferencia de dos radios es una cota inferior de la distancia entre puntos, no la distancia.
+  Un auditor leyó «24/24 jobs verdes» como «universo completo» sin mirar la ventana de fechas de
+  los datos (era el chunk 1, abril-mayo). Otro contó pares TIF+record y los reportó como
+  «ALERTAS de MIROVA» (Villarrica 3 → 15). Otro transcribió una ventana horaria («17:24-18:24»)
+  que su propia salida contradecía en 14 de 59 casos. Ninguno cambió un veredicto; **todos habrían
+  quedado escritos como hechos sin un verificador con contexto limpio**, que además aportó 14
+  hallazgos propios (el mayor: la pata de magnitud de `keep_peak`, D19).
+  - **How to apply**: (a) antes de comparar dos «distancias», preguntar desde qué punto y en qué
+    espacio mide cada una (escalar vs 2D; A3, A13, D15); (b) todo conteo de un run/artefacto lleva
+    la ventana temporal de los DATOS, no del job (A90); (c) un número que nombra un conjunto
+    («alertas», «pasadas», «records») debe salir de la definición de ese conjunto, no de un pareo
+    intermedio; (d) el que verifica no es el que encontró, recibe sólo título + ruta + script, y
+    enumera los caminos por los que la afirmación podría estar mal — en S134 encontró algo propio
+    en 4 de 4 frentes. Detalle: `docs/AUDIT_S134.md` §5.5.
+
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
 

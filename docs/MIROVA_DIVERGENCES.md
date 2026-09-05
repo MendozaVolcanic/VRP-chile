@@ -2054,3 +2054,50 @@ círculo de igual área tiene radio 2,82, así que hay píxeles que sólo la caj
     igual que el GAP #A. El flag queda en el código, **OFF**, con sus 7 tests.
 
 Detalle: `docs/s129/ROI1_CAJA_VS_CIRCULO.md`.
+
+## D19 — `keep_peak` publica como *summit* a 0,0 km un píxel del borde del disco del Test 1, más frío que el fondo; y el second pass corre sin conjunto activo — **ABIERTA (CONFIRMADA gravedad 5 por verificador limpio; decisión D1/D2 de Nicolás pendiente)** S134
+
+**El fenómeno.** En un cono nevado la temperatura MIR nocturna sigue la altitud: dentro de un
+disco de 3 km alrededor de la cumbre, el píxel más caliente es el borde del disco (cota más
+baja), no el cráter (A69).
+
+**Lo nuestro** (`pipeline/process_viirs.py:1777-1786`, flags efectivos
+`ENABLE_TEST1_CONTEXTUAL_FILTER=True` y `ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK=True`, adopción
+S100 #340 «ctxpeak»): el Test 1 marca ~la mitad del disco (exceso sobre la mediana del anillo
+1-3 km, `test1_integrated.py:376,412,420`), el filtro contextual lo intersecta con `dNTI_ctx`
+—vacía en esas noches— y `keep_peak` conserva sólo `argmax(BT)`. Ese único píxel es el
+`primary_cluster`; el ancla honesta (`anchor.py:89`) lo publica como `test1_roi` **en el vent a
+0,0 km**; su magnitud (0,011-0,618 MW, mediana 0,046) es el exceso de ese píxel sobre un anillo
+que solapa el ROI que mide (fondo autorreferente, S126), con la corona Eq. 6 apagada
+(`ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375=False`).
+
+**La medición** (S134 F3 + verificador, records V375 summit publicados desde 2026-06-01):
+Villarrica 245/289 son `test1_roi`, 100 % de 1 píxel, mediana 2,80 km del cráter, 198/245 en la
+corona 2,5-3,0 km (≈30 % esperable por área), **`bt_k < t_bg_k` en 172/245, mediana −2,95 K**.
+Está en los **11 Tier A** (56-266 records cada uno), Láscar incluido (2,63 km): la diferencia
+Láscar/Villarrica del anillo de S133 es la mezcla de fuentes (Láscar 138 `test1_roi` / 152
+`ctx_cluster`; Villarrica 245 / 44). Control positivo: `ctx_cluster` de Láscar 0,18 km (n=152).
+MIROVA corrobora más los `ctx_cluster` que los `test1_roi` dentro de cada volcán en 10 de 11.
+
+**Lo que MIROVA hace**: Coppola 2016a integra el ROI y publica el cúmulo; la posición «en el
+cráter» de una integral de ROI es una convención que el frontend declara
+(`frontend/index.html:2779-2784`). **La magnitud del píxel único no la cubre ninguna convención.**
+
+**Segunda cara** (`detection_context.py:877-879` vs `:518-523`): `second_pass_adjacent` corre con
+conjunto activo vacío en 2.295/3.164 records, sin restricción de adyacencia y sin la compuerta
+`bt > t_bg + 3 K` del first pass. Coppola 2016a (`sp426_5.txt:329-341`): *«applied only if one or
+more pixels have been detected by the previous tests, and focuses on … the pixels adjacent to
+those already flagged»*. 438 records publicados así en los 11 (Chaitén 89/323), a 3,2-3,9 km.
+
+**Tensión, no fix (A83/A84)**: el mismo `keep_peak` devuelve pasadas MIROVA-confirmadas en
+Lastarria (60 %), Tupungatito (34 %), Isluga (30 %). Cualquier cambio es régimen-dependiente y
+debe medir FN sobre cat-b real. Pasa por MISSION.md (3 preguntas), A45 y el probe A75 en CI
+(`experiments/_s134_audit/f3/probe_etapas_ci.md`).
+
+**Guards**: `tests/test_guard_keep_peak_s134.py` (2 xfail estrictos: si alguien lo cura, XPASS
+rompe la suite y obliga a actualizar esto). Detalle: `docs/AUDIT_S134.md` §3, §5.3, §D (D1, D2).
+
+**Relación con lo ya catalogado**: cierra la lectura de `docs/s133/ANILLO_TIER_A.md` (el anillo
+no explica el déficit de paridad: F1 y F2 de S134 lo refutan por dos vías); D10 (S100) justificó
+`keep_peak` con «pico = cráter», que es falso en los nevados de señal débil; D11/A82 quedan
+intactas (esto es VIIRS375 y vía geométrica, no espectral).

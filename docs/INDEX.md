@@ -18,6 +18,7 @@
 |---|---|---|
 | MISSION.md | Misión vinculante: clon literal MIROVA, 3 preguntas | S22 |
 | MIROVA_DIVERGENCES.md | Catálogo vivo de divergencias vs MIROVA | S71+ |
+| AUDIT_S134.md | El anillo y la paridad: posición del cúmulo → magnitud → paridad por pasada (F1), TIF MIROVA misma pasada (F2), mecanismo por etapa (F3), solape del barrido (F4), regla C (F5) | S134 |
 | AUDIT_S131.md | Resultados + dashboard + utilidad OVDAS; 6 ejes (magnitud/ATBD, dashboard, T9, pendientes, TIF por pasada, otro sensor) | S131 |
 | AUDIT_S128.md | Evidencia exógena: ángulo de vista, grilla desde KMZ, D2 medida, GAP #A reabierto | S128 |
 | AUDIT_S127.md | Eje «declarado ≠ efectivo» (T9): 4 afirmaciones falsas, 3 guards | S127 |

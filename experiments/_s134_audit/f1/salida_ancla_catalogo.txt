@@ -1,0 +1,115 @@
+ANCLA = catalogo | desde 2026-04-01 | tolerancia ±20 min
+records en ventana (dedupe): 18373 · último 2026-09-05 08:30 · duplicados: 0 (con pc.vrp distinto: 0)
+  sensores: {'MODIS_TERRA': 1889, 'VIIRS_SNPP': 2346, 'VIIRS_SNPP_750': 2323, 'VIIRS_NOAA20': 2521, 'VIIRS_NOAA20_750': 2495, 'VIIRS_NOAA21': 2451, 'VIIRS_NOAA21_750': 2442, 'MODIS_AQUA': 1906}
+ALERTAS MIROVA (CONS∪OCR) en ventana: 1371 · última 2026-08-31 06:00:01 · fuentes {'CONS': 980, 'OCR': 391}
+PARES (mag_pub>0): 1161 · MIROVA sin pasada nuestra: 86 · MIROVA con pasada nuestra sin publicar (FN): 124 · nuestros publicados sin MIROVA: 3889 · alertas con ≥2 granules a ±tol: 607
+  |dt| pares (min): mediana 0.0 · p95 0.0
+
+== CONTROLES ==
+{"n": 208, "d_crater_mediana": 0.8, "frac_crater_<=0.5": 0.01, "n_con_pico": 208, "d_pico_mediana": 0.83, "frac_pico_<=0.5": 0.019, "frac_centroide_>1.5_y_pico_<=0.5": 0.0, "frac_single_pixel_mode": 1.0, "n_pixels_mediana": 1.0, "esperado_S133": {"mediana_km": 0.22, "frac_500m": 0.79, "n": 208}, "pasa": false}
+{"alertas_mirova": 118, "con_pasada_nuestra_±tol": 110, "con_pasada_publicada": 104, "frac_con_pasada": 0.932, "pasa": true}
+Villarrica d_crater mediana V375 publicados: 3.03
+centroid_dist_km pipeline vs mi haversine (mediana |diff| km): {'Lascar': 0.528, 'Isluga': 0.0, 'Lastarria': 0.0, 'Llaima': 0.0, 'Villarrica': 0.644, 'Copahue': 0.0, 'Chaiten': 0.406, 'NevadosDeChillan': 0.0, 'PlanchonPeteroa': 0.415, 'PuyehueCordonCaulle': 6.933, 'Tupungatito': 2.498}
+
+== PARIDAD por sensor × bin d_crater (razón ours/MIROVA, magnitud del operador) ==
+[VIIRS375] n=992 mediana=0.705 IC=[0.675, 0.735] spearman={'rho': 0.192, 'p': 1.1667362902652062e-09, 'n': 992}
+     <=0.5: n=  11 med=1.137 IC=[0.75, 1.44] >1.4:4 <0.7:2 banda:5
+   0.5-1.5: n= 597 med=0.652 IC=[0.612, 0.672] >1.4:43 <0.7:343 banda:211
+     1.5-3: n= 182 med=0.649 IC=[0.6, 0.702] >1.4:10 <0.7:102 banda:70
+        >3: n= 202 med=1.006 IC=[0.894, 1.086] >1.4:50 <0.7:43 banda:109
+[VIIRS750] n=164 mediana=0.572 IC=[0.534, 0.674] spearman={'rho': 0.148, 'p': 0.05780418062584061, 'n': 164}
+     <=0.5: n=  11 med=0.594 IC=[0.378, 0.676] >1.4:0 <0.7:9 banda:2
+   0.5-1.5: n= 116 med=0.553 IC=[0.51, 0.654] >1.4:5 <0.7:72 banda:39
+     1.5-3: n=  11 med=2.263 IC=[1.286, 8.692] >1.4:8 <0.7:2 banda:1
+        >3: n=  26 med=0.655 IC=[0.427, 1.007] >1.4:3 <0.7:13 banda:10
+[MODIS] n=5 mediana=0.919 IC=None spearman={'rho': None, 'p': None, 'n': 5}
+     <=0.5: n=   0 med=None IC=None >1.4:0 <0.7:0 banda:0
+   0.5-1.5: n=   3 med=0.919 IC=None >1.4:0 <0.7:0 banda:3
+     1.5-3: n=   2 med=1.313 IC=None >1.4:1 <0.7:1 banda:0
+        >3: n=   0 med=None IC=None >1.4:0 <0.7:0 banda:0
+
+== CRITERIO PRE-REGISTRADO (VIIRS375, 9 volcanes con anillo) ==
+  Lastarria            pares=142 cerca n=  0 med=None IC=None | lejos n= 75 med=0.465 IC=[0.401, 0.588] | cumple=None
+  Llaima               pares=  3 cerca n=  0 med=None IC=None | lejos n=  3 med=0.431 IC=None | cumple=None
+  Villarrica           pares= 21 cerca n=  0 med=None IC=None | lejos n=  0 med=None IC=None | cumple=None
+  Copahue              pares=  4 cerca n=  0 med=None IC=None | lejos n=  4 med=0.962 IC=None | cumple=None
+  Chaiten              pares= 35 cerca n=  7 med=1.403 IC=None | lejos n=  5 med=0.737 IC=None | cumple=False
+  NevadosDeChillan     pares=  6 cerca n=  2 med=1.126 IC=None | lejos n=  1 med=1.097 IC=None | cumple=None
+  PlanchonPeteroa      pares= 98 cerca n=  1 med=0.75 IC=None | lejos n=  4 med=1.449 IC=None | cumple=None
+  PuyehueCordonCaulle  pares=159 cerca n=  0 med=None IC=None | lejos n=159 med=1.031 IC=[0.918, 1.125] | cumple=None
+  Tupungatito          pares=115 cerca n=  0 med=None IC=None | lejos n=115 med=0.702 IC=[0.649, 0.763] | cumple=None
+  → evaluables 1/9 · cumplen 0 · NO CUMPLE
+
+== POSICIÓN d_crater vs d_pico (records publicados desde 2026-04-01) ==
+  Lascar               VIIRS375 n= 392 d_crater med=0.77 (<=0.5: 0.008) d_pico med=0.8 (<=0.5: 0.018) centro>1.5&pico<=0.5: 0.0 spm=0.982
+  Lascar               VIIRS750 n= 215 d_crater med=0.77 (<=0.5: 0.126) d_pico med=0.85 (<=0.5: 0.084) centro>1.5&pico<=0.5: 0.0 spm=0.823
+  Lascar               MODIS    n=  10 d_crater med=0.96 (<=0.5: 0.0) d_pico med=1.91 (<=0.5: 0.2) centro>1.5&pico<=0.5: 0.1 spm=0.1
+  Isluga               VIIRS375 n= 513 d_crater med=0.97 (<=0.5: 0.002) d_pico med=1.02 (<=0.5: 0.002) centro>1.5&pico<=0.5: 0.0 spm=1.0
+  Isluga               VIIRS750 n= 172 d_crater med=1.53 (<=0.5: 0.017) d_pico med=2.81 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.395
+  Isluga               MODIS    n=   9 d_crater med=1.36 (<=0.5: 0.0) d_pico med=2.64 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.222
+  Lastarria            VIIRS375 n= 324 d_crater med=2.26 (<=0.5: 0.0) d_pico med=2.31 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=1.0
+  Lastarria            VIIRS750 n= 125 d_crater med=1.76 (<=0.5: 0.016) d_pico med=2.4 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.408
+  Lastarria            MODIS    n=  14 d_crater med=1.26 (<=0.5: 0.0) d_pico med=2.24 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.071
+  Llaima               VIIRS375 n= 496 d_crater med=2.84 (<=0.5: 0.0) d_pico med=2.85 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=1.0
+  Llaima               VIIRS750 n= 119 d_crater med=1.43 (<=0.5: 0.0) d_pico med=2.82 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.319
+  Llaima               MODIS    n=  15 d_crater med=1.24 (<=0.5: 0.067) d_pico med=2.46 (<=0.5: 0.067) centro>1.5&pico<=0.5: 0.0 spm=0.267
+  Villarrica           VIIRS375 n= 518 d_crater med=3.03 (<=0.5: 0.0) d_pico med=3.1 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.998
+  Villarrica           VIIRS750 n= 146 d_crater med=1.59 (<=0.5: 0.041) d_pico med=2.97 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.301
+  Villarrica           MODIS    n=  28 d_crater med=2.1 (<=0.5: 0.0) d_pico med=3.42 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.25
+  Copahue              VIIRS375 n= 531 d_crater med=2.83 (<=0.5: 0.0) d_pico med=2.83 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=1.0
+  Copahue              VIIRS750 n= 113 d_crater med=1.51 (<=0.5: 0.027) d_pico med=2.83 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.204
+  Copahue              MODIS    n=   8 d_crater med=0.83 (<=0.5: 0.25) d_pico med=1.82 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.125
+  Chaiten              VIIRS375 n= 536 d_crater med=2.23 (<=0.5: 0.076) d_pico med=2.41 (<=0.5: 0.08) centro>1.5&pico<=0.5: 0.0 spm=0.998
+  Chaiten              VIIRS750 n= 159 d_crater med=1.38 (<=0.5: 0.101) d_pico med=2.66 (<=0.5: 0.044) centro>1.5&pico<=0.5: 0.006 spm=0.302
+  Chaiten              MODIS    n=  43 d_crater med=1.63 (<=0.5: 0.14) d_pico med=2.67 (<=0.5: 0.023) centro>1.5&pico<=0.5: 0.0 spm=0.256
+  NevadosDeChillan     VIIRS375 n= 243 d_crater med=2.67 (<=0.5: 0.086) d_pico med=2.71 (<=0.5: 0.086) centro>1.5&pico<=0.5: 0.0 spm=1.0
+  NevadosDeChillan     VIIRS750 n=  61 d_crater med=1.42 (<=0.5: 0.033) d_pico med=2.69 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.262
+  NevadosDeChillan     MODIS    n=  16 d_crater med=1.11 (<=0.5: 0.125) d_pico med=2.21 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.188
+  PlanchonPeteroa      VIIRS375 n= 472 d_crater med=2.29 (<=0.5: 0.002) d_pico med=2.3 (<=0.5: 0.002) centro>1.5&pico<=0.5: 0.0 spm=1.0
+  PlanchonPeteroa      VIIRS750 n= 122 d_crater med=1.22 (<=0.5: 0.098) d_pico med=2.55 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.189
+  PlanchonPeteroa      MODIS    n=  23 d_crater med=0.86 (<=0.5: 0.087) d_pico med=1.83 (<=0.5: 0.043) centro>1.5&pico<=0.5: 0.0 spm=0.174
+  PuyehueCordonCaulle  VIIRS375 n= 565 d_crater med=7.72 (<=0.5: 0.0) d_pico med=7.76 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.968
+  PuyehueCordonCaulle  VIIRS750 n= 409 d_crater med=8.01 (<=0.5: 0.0) d_pico med=9.34 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.721
+  PuyehueCordonCaulle  MODIS    n= 247 d_crater med=7.59 (<=0.5: 0.0) d_pico med=13.46 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.457
+  Tupungatito          VIIRS375 n= 434 d_crater med=3.21 (<=0.5: 0.007) d_pico med=3.21 (<=0.5: 0.007) centro>1.5&pico<=0.5: 0.0 spm=1.0
+  Tupungatito          VIIRS750 n= 149 d_crater med=3.86 (<=0.5: 0.0) d_pico med=4.95 (<=0.5: 0.007) centro>1.5&pico<=0.5: 0.007 spm=0.255
+  Tupungatito          MODIS    n=  17 d_crater med=3.1 (<=0.5: 0.0) d_pico med=4.81 (<=0.5: 0.0) centro>1.5&pico<=0.5: 0.0 spm=0.0
+
+== ESTRATO DOBLE (solo summit vs summit∪far con pc.vrp_mw) ==
+  VIIRS375: summit n=992 med=0.705 | summit∪far n=992 med=0.6 clases={'summit': 992} FN_restantes=44
+  VIIRS750: summit n=164 med=0.572 | summit∪far n=164 med=0.572 clases={'summit': 164} FN_restantes=37
+  MODIS: summit n=5 med=0.919 | summit∪far n=48 med=0.91 clases={'far': 43, 'summit': 5} FN_restantes=0
+
+== POSICIÓN del cúmulo V375: pares (MIROVA confirma) vs nuestros sin MIROVA ==
+  Lascar               pares n=207 med=0.75 <=0.5:0.005 | sin MIROVA n= 99 med=0.84 <=0.5:0.01 offN=0.71 offE=-0.0 cuad={'NE': 45, 'NW': 37, 'SW': 13, 'SE': 4}
+  Isluga               pares n=202 med=0.86 <=0.5:0.0 | sin MIROVA n=203 med=2.59 <=0.5:0.005 offN=-0.69 offE=-0.45 cuad={'SW': 112, 'NW': 31, 'NE': 11, 'SE': 49}
+  Lastarria            pares n=142 med=2.14 <=0.5:0.0 | sin MIROVA n= 70 med=2.36 <=0.5:0.0 offN=1.52 offE=-1.43 cuad={'NW': 54, 'SW': 7, 'NE': 3, 'SE': 6}
+  Llaima               pares n=  3 med=2.28 <=0.5:0.0 | sin MIROVA n=234 med=2.84 <=0.5:0.0 offN=0.55 offE=0.82 cuad={'NW': 69, 'NE': 62, 'SE': 84, 'SW': 19}
+  Villarrica           pares n= 21 med=0.85 <=0.5:0.0 | sin MIROVA n=262 med=2.87 <=0.5:0.0 offN=0.0 offE=-1.08 cuad={'NE': 47, 'NW': 84, 'SW': 77, 'SE': 54}
+  Copahue              pares n=  4 med=3.0 <=0.5:0.0 | sin MIROVA n=249 med=2.82 <=0.5:0.0 offN=-2.07 offE=0.1 cuad={'SW': 78, 'SE': 97, 'NW': 36, 'NE': 38}
+  Chaiten              pares n= 35 med=0.67 <=0.5:0.2 | sin MIROVA n=307 med=2.48 <=0.5:0.039 offN=0.03 offE=-0.95 cuad={'SE': 43, 'NE': 42, 'SW': 105, 'NW': 117}
+  NevadosDeChillan     pares n=  6 med=0.59 <=0.5:0.333 | sin MIROVA n= 97 med=2.74 <=0.5:0.021 offN=0.5 offE=0.43 cuad={'NW': 8, 'NE': 48, 'SW': 33, 'SE': 8}
+  PlanchonPeteroa      pares n= 98 med=0.87 <=0.5:0.01 | sin MIROVA n=186 med=2.47 <=0.5:0.0 offN=-0.09 offE=0.44 cuad={'NE': 29, 'SW': 33, 'NW': 54, 'SE': 70}
+  PuyehueCordonCaulle  pares n=159 med=7.65 <=0.5:0.0 | sin MIROVA n=285 med=7.83 <=0.5:0.0 offN=7.3 offE=-2.41 cuad={'NW': 234, 'NE': 34, 'SW': 9, 'SE': 8}
+  Tupungatito          pares n=115 med=2.91 <=0.5:0.0 | sin MIROVA n=160 med=4.2 <=0.5:0.013 offN=2.28 offE=-2.6 cuad={'NW': 146, 'SW': 8, 'NE': 6}
+
+== RAZÓN vs covariables (V375) ==
+  n_anomaly_pixels_nuestros: [1,2) n=532 med=0.67 · [2,4) n=297 med=0.658 · [4,10) n=116 med=0.895 · [10,100000) n=47 med=1.162
+  vrp_mirova_mw: [0,0.3) n=637 med=0.793 · [0.3,1) n=287 med=0.596 · [1,3) n=67 med=0.607 · [3,1000000000.0) n=1 med=0.023
+  zenith_deg: [0,20) n=270 med=0.809 · [20,40) n=292 med=0.69 · [40,90) n=430 med=0.605
+  single_pixel_mode: True n=973 med=0.698 · False n=19 med=0.889
+  n_exactamente_1_anomaly_pixel: 532
+
+== d_catalogo nuestra vs Distancia_km MIROVA (V375) ==
+   {'n': 810, 'ours_catalogo_mediana_km': 1.01, 'mirova_dist_mediana_km': 1.55, 'diff_mediana_km': -0.33, 'diff_iqr_km': [-0.85, 0.05], 'n_mirova_dist_0': 7, 'valores_mirova_mas_comunes': [[1.55, 76], [0.84, 61], [0.53, 56], [1.19, 47]]}
+  razón vs |desacuerdo|: {'[0,0.5)': (433, 0.73), '[0.5,1.5)': (262, 0.658), '[1.5,3)': (108, 0.74), '[3,1000000000.0)': (7, 1.135)}
+
+== FN == {"n_FN": 124, "n_FN_con_otro_granule_publicado_±tol": 5, "por_bucket_clase": {"VIIRS375|summit": 28, "VIIRS750|summit": 37, "VIIRS375|None": 16, "MODIS|far": 43}, "n_FN_con_pc_vrp>0": 43, "vrp_mirova_mediana_FN": 0.265, "sin_pasada_por_bucket_vol": {"VIIRS375|Lastarria": 33, "VIIRS375|Lascar": 26, "VIIRS375|Tupungatito": 4, "VIIRS375|Villarrica": 4, "VIIRS375|Isluga": 4, "MODIS|Chaiten": 3, "VIIRS375|PuyehueCordonCaulle": 3, "VIIRS375|NevadosDeChillan": 2, "VIIRS375|Chaiten": 1, "MODIS|Villarrica": 1, "VIIRS750|NevadosDeChillan": 1, "VIIRS750|Tupungatito": 1, "VIIRS750|PlanchonPeteroa": 1, "VIIRS750|Isluga": 1, "MODIS|Lascar": 1}}
+== MODIS far pareado, posición == {'n': 43, 'd_crater_mediana': 1.66, 'frac_<=0.5': 0.07, 'frac_>1.5': 0.605, 'offset_mediano_N_km': 0.37, 'offset_mediano_E_km': -0.57, 'iqr_N_km': [-0.23, 1.23], 'iqr_E_km': [-1.49, 0.5], 'cuadrantes': {'NW': 18, 'NE': 12, 'SE': 6, 'SW': 7}}
+
+== LOS TRES CONJUNTOS por sensor ==
+  VIIRS375: {'pares': 992, 'mirova_sin_pasada_nuestra': 77, 'mirova_con_pasada_sin_publicar_FN': 44, 'nuestros_publicados_sin_mirova': 2152, 'alertas_mirova_total': 1113}
+  VIIRS750: {'pares': 164, 'mirova_sin_pasada_nuestra': 4, 'mirova_con_pasada_sin_publicar_FN': 37, 'nuestros_publicados_sin_mirova': 1340, 'alertas_mirova_total': 205}
+  MODIS: {'pares': 5, 'mirova_sin_pasada_nuestra': 5, 'mirova_con_pasada_sin_publicar_FN': 43, 'nuestros_publicados_sin_mirova': 397, 'alertas_mirova_total': 53}
+
+escrito: resultados_ancla_catalogo.json

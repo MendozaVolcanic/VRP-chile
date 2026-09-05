@@ -58,3 +58,17 @@ régimen débil (Lastarria 0,415, Láscar 0,465, Isluga 0,603 en el auto-audit) 
 correcciones de área ni de banda: las correcciones escalan una magnitud que ya viene del
 lugar equivocado. Láscar contradice esa lectura simple (cúmulo en el cráter y aun así
 sub-estima), así que la hipótesis tiene un contraejemplo que hay que explicar, no ignorar.
+
+
+---
+
+> **⚠️ Lectura corregida en S134 (`docs/AUDIT_S134.md`).** Los números de esta tabla se
+> reproducen exactos (F1, F2 y F3 lo verificaron), pero la interpretación no: (1) el anillo
+> **no explica el déficit de paridad** — en las pasadas que MIROVA confirma nuestro cúmulo ya
+> está en el cráter (Villarrica 0,15 km, PCC 0,22, Tupungatito 0,23) y la razón ours/MIROVA es
+> plana en distancia (F1, criterio pre-registrado NO CUMPLE); (2) el anillo vive en los records
+> débiles que MIROVA no publica (85 % con < 0,1 MW) y **está en los 11, Láscar incluido**
+> (2,63 km en sus `test1_roi`): «Láscar 0,22 vs Villarrica 2,79» es la mezcla de fuentes
+> `ctx_cluster`/`test1_roi`, no un volcán que el mecanismo respete; (3) el mecanismo es
+> `keep_peak` (D19). Esta tabla midió `pc.centroid`, que para los records `ctx_cluster` con
+> `_test1_wins` no es lo que el dashboard dibuja (F3 H3).
