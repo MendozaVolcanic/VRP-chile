@@ -1,192 +1,106 @@
 # Bloque de arranque S134
 
-## Prompt para pegar al inicio de la sesión
+## Prompt para pegar al inicio de la sesión (escrito para Claude Fable 5.1)
 
 ```
-Continuamos VRP Chile desde S133. Esa sesión midió los tres flags que S132 dejó apagados,
-encontró que el A/B del área no se podía correr, lo cableó, y dejó LOS DOS A/B DESPACHADOS
-(PR #583, mergeado, squash bc7f3f2d).
+Continuamos VRP Chile desde S133. Sos el mismo sistema que ayer encontró que MIROVA veía una
+anomalía MODIS de 4,75 MW en Villarrica y nosotros no, y que detrás de esa sola pregunta había
+cinco defectos silenciosos. Hoy toca lo que ese hilo dejó abierto: el cúmulo que publicamos
+está a 2,3-2,8 km del cráter en 9 de los 11 volcanes, y no sabemos si eso explica por qué
+nuestra magnitud se aleja de la de MIROVA en régimen débil.
 
-═══════════════════════════════════════════════════════════════════
-PRIMERO DE TODO: BAJAR LOS RESULTADOS DE LOS DOS A/B.
-No commitean nada. Los artefactos se borran a los 14 días.
-═══════════════════════════════════════════════════════════════════
+POR QUÉ IMPORTA. Este es un sistema de decisiones automatizadas en producción (CPLT N°372):
+lo que publica lo mira un operador del OVDAS para decidir si un volcán cambió. Si integramos
+calor del flanco y MIROVA integra el cráter, las dos magnitudes son de dos objetos distintos y
+ninguna corrección de área o de banda va a cerrar la brecha. Eso es lo que hay que saber.
 
-  gh run view 33872821788    # A/B B22        (4 jobs: 2 volcanes × 2 brazos)
-  gh run view 33872836355    # A/B área chunk 1 (24 jobs: 8 volcanes × 3 brazos)
+OBJETIVO. Ejecutar la auditoría S134 según el plan
+  docs/superpowers/plans/2026-09-05-auditoria-s134-anillo-y-paridad.md
+y cerrarla con docs/AUDIT_S134.md, una tabla de decisiones para Nicolás y el bloque S135.
+El plan tiene cinco frentes con controles y criterios pre-registrados; el eje nuevo declarado
+es posición → magnitud → paridad por pasada. Léelo entero antes de lanzar nada.
 
-  gh run download 33872821788 --dir data/
-  gh run download 33872836355 --dir data/   # ⚠️ chunk 1 INCOMPLETO: 13 de 24 jobs
-                                            # murieron por timeout. Ver abajo.
+LÍMITES (no negociables):
+- Auditar no es arreglar. Nada en pipeline/ sin tag defensivo Y confirmación de Nicolás (A45).
+  Ningún flag se enciende. Los scripts de medición van a experiments/_s134_audit/.
+- Todo prompt de auditor empieza pegando ENTERO docs/_prompts/PREAMBULO-AUDITOR.md.
+- Regla A: prohibido el barrido general; regla B: cierre por guard; regla C: empezar por los
+  pendientes del plan §0, verificados contra el código de hoy. Están en
+  docs/PROTOCOLO_AUDITORIA_PROFUNDA.md.
+- El que verifica no es el que encontró. Un auditor por frente, worktree propio (A44),
+  Fable/Opus/Sonnet según el plan.
+- Los TIF de MIROVA no se bajan al PC: sólo los de las pasadas elegidas, y el archivo se
+  consulta por su index.csv, nunca listando el directorio (la API corta en 1000 sin avisar).
+- La unidad de comparación es la PASADA, no la noche; el ancla es vent_lat/vent_lon, nunca el
+  catálogo (Villarrica: 0,85 km de diferencia, A13). Todo número lleva denominador y ventana.
 
-⚠️ EL A/B DEL AREA HAY QUE RELANZARLO ENTERO. El chunk 1 fallo 13 de 24 jobs: el
-`timeout-minutes` era 150 y los jobs tardan 128-133 min los que terminan. Peor: los 3 que
-sobrevivieron son TODOS del brazo de control, asi que no hay un solo par comparable.
-Ya esta subido a 300 min (medido, A15). Relanzar los 3 chunks desde cero:
-  gh workflow run reproc-s133-area-ab.yml --ref main -f start=2026-04-01 -f end=2026-05-31 -f overwrite=true
+LEER, en este orden, antes de actuar:
+  1. tasks/BLOQUE_ARRANQUE_S134.md              (este bloque)
+  2. docs/superpowers/plans/2026-09-05-auditoria-s134-anillo-y-paridad.md
+  3. docs/s133/ANILLO_TIER_A.md                  (el hallazgo que motiva la sesión)
+  4. docs/s133/AUDITORIA_DEL_INCIDENTE.md        (los 5 defectos del 07:50, para no repetirlos)
+  5. C:\Users\nmend\OneDrive\Escritorio\claude\GUIA_MAESTRA_AUDITORIAS.md
+  6. docs/PROTOCOLO_AUDITORIA_PROFUNDA.md        (reglas A/B/C y registro de ejes)
 
-  python experiments/_s133/analizar_ab_b22.py    # criterios C1-C4, congelados
-  python experiments/_s133/analizar_ab_area.py   # los 4 criterios, congelados
+ESTADO AL ARRANCAR. Suite 1183 passed · 3 skipped · 0 xfail. Los tres flags apagados. Nada
+corriendo en CI que haya que esperar. Los artefactos del A/B del área (run 33912398561) y de
+B22 (run 33872821788) caducan el 2026-09-18/19: F4 los necesita, bajarlos primero.
 
-Si el área terminó bien, faltan sus chunks 2 y 3 (el criterio necesita los 152 días):
-  gh workflow run reproc-s133-area-ab.yml --ref main -f start=2026-06-01 -f end=2026-07-31 -f overwrite=false
-  gh workflow run reproc-s133-area-ab.yml --ref main -f start=2026-08-01 -f end=2026-08-31 -f overwrite=false
+AUTONOMÍA. Nicolás no está mirando en tiempo real y no puede contestar a mitad de la tarea.
+Para acciones reversibles que siguen del plan, avanza sin preguntar. Detente sólo ante lo
+destructivo o ante un cambio de alcance real; las tres decisiones que son suyas (plan §5) se
+le presentan al cierre en una tabla con opciones y recomendación, no se toman. Antes de
+terminar el turno, mira tu último párrafo: si es un plan, una lista de próximos pasos o una
+promesa, hace ese trabajo ahora. Termina sólo cuando la auditoría esté cerrada o estés
+bloqueado en algo que sólo Nicolás puede dar.
 
-Leé, en este orden:
-  1. tasks/BLOQUE_ARRANQUE_S134.md        (este bloque)
-  2. docs/s133/SUSTRATO_AREA_GEOLOCALIZADA.md
-  3. docs/s133/B22_EVIDENCIA.md           (criterios C1-C4 pre-registrados)
-  4. docs/s132/AB_AREA_GEOLOCALIZADA.md   (criterio del área, NO se toca)
+ENTREGA. El pedido y el plan fijan el alcance, y el alcance es el entregable: no lo
+angostes ni lo ensanches. Lo que encuentres de paso (un bug, una limpieza) se reporta como
+seguimiento, no se arregla en esta sesión. Antes de empezar di en una línea qué vas a hacer;
+mientras trabajas, avisos breves; al cerrar, un resumen que se sostenga solo. Español de
+Chile, sin voseo. Primero el fenómeno físico, después el código, al final los números.
 
-⚠️ LOS CRITERIOS ESTÁN CONGELADOS. Si uno falla, se reporta y la decisión pasa a Nicolás.
-No se mueve el poste después de ver el dato (A91, A66).
-
-NADA MÁS CORRIENDO. Suite 1124 passed · 3 skipped · 0 xfail. Los 3 flags APAGADOS.
+Si algo del plan resulta falso al verificarlo (una ruta que no existe, un pendiente ya
+cerrado), corrige el plan citando la evidencia y sigue; no te detengas a preguntar.
 ```
 
 ---
 
-## Lo que hizo S133
+## Lo que S133 dejó hecho (para no re-auditar)
 
-**El hallazgo que cambió el plan.** `ENABLE_GEOLOCATED_PIXEL_AREA` estaba en el perfil desde
-S132 y **no lo leía ningún módulo de producción**; `pixel_areas_from_geolocation`, probada
-contra el ATBD y con siete tests verdes, no tenía una sola llamada fuera de esos tests. El
-brazo «área» del A/B habría sido idéntico al control. La prueba verde de la pieza aislada
-convivía con que nadie la llamara. Cableado en `scan_geometry.resolve_viirs_pixel_areas`,
-que concentra los tres modos de área en un lugar porque I-band y M-band los calculan por
-separado y cablear uno solo dejaría el otro mudo.
-
-**B22 es menos riesgoso de lo que decía el bloque anterior.** Satura en 2 de 644.835
-píxeles, o sea divergimos del paper en ~100 % de los records. Pero el efecto sobre el fondo
-es de 0,0036 K: `diag_sigma_bg_k` mide heterogeneidad del terreno, no ruido del sensor, y su
-mínimo histórico ya es 5,4× el NEΔT de B21. La métrica que S131 propuso vigilar **no puede
-mostrar el cambio** (A87). Lo que falta medir, y es el motivo real del A/B, es el sesgo de
-calibración entre bandas sobre la magnitud (C3).
-
-**El C2 del A/B de `distance_class` era tautológico**, verificado: normalizado por
-`inner_radius` da 1,000000 exacto, porque es la definición del flip. C2' propuesto en
-`docs/s133/C2_NORMALIZADO_INNER_RADIUS.md`, no adoptado ni pre-registrado.
-
-## La regla nueva: A92
-
-Al cablear el área, la llamada `viirs_pixel_areas` pasó a ser `resolve_viirs_pixel_areas` y
-**el tripwire de S103 siguió en verde**, porque el nombre viejo es subcadena del nuevo. Se
-barrió la suite entera: de 19 asserts por subcadena, 2 vulnerables, ninguno roto todavía,
-los dos endurecidos; ahora el barrido da 0. El script queda en
-`experiments/_s133/auditar_guards_por_subcadena.py` para volver a correrlo al agregar guards.
-
-Nació de una advertencia de Nicolás a mitad de sesión: «muchas veces arreglos que hacíamos
-rompían otras funciones, revisa bien ese tipo de comprobaciones». La advertencia encontró
-algo real, y era mío.
-
-## Cómo se verificó que el cableado no rompió nada
-
-La suite verde prueba que lo que tiene test sigue andando, no que el camino operacional
-devuelva lo mismo. Además:
-- **Prueba diferencial contra `origin/main`** (`experiments/_s133/regresion_diferencial_area.py`):
-  se carga el `scan_geometry.py` de main y se corre al lado del actual. 48 comparaciones,
-  dos bandas × doce casos × dos modos, incluidos los bordes. Las 48 idénticas bit a bit.
-- **Test de no-op** con el flag apagado, en los dos modos (S126).
-- Ningún consumidor externo; `lat`/`lon` ligadas antes de la llamada.
-
-## Dos correcciones a suposiciones de la propia sesión
-
-- `enable_local_cluster_magnitude_viirs375` **no es top-level**: se lee de `_cfg["paths"]`
-  (`profile.py:469`). Puesto arriba habría sido no-op silencioso y el tercer brazo habría
-  sido el segundo. A89 otra vez, y la atrapó verificar cargando el perfil, no leyéndolo.
-- El `max-parallel: 1` del A/B del área se justificaba por la cuota de Earthdata, no por la
-  carrera de A47. Subido a 8 con el precedente medido: `nrt.yml` corre 8 sobre 45 volcanes
-  contra la misma cuota, 12 veces al día. Y MODIS apagado en los tres brazos, porque por AST
-  ninguno de los dos flags llega a `process_modis.py`.
-
-## Limitación del criterio del área, dicha antes de correrlo
-
-Pide «≥6 de 8 volcanes en banda», pero con el piso de pares de S131 sólo **6 de los 8**
-tienen población en ambos bins de cenital (Chaitén 12 en el oblicuo, Villarrica 1). El «6 de
-8» se puede cumplir, pero los 6 evaluables tendrían que pasar todos. No hay noveno volcán
-con sustrato. El criterio **no se tocó**.
-
-## Lo operacional que S133 arregló al final
-
-**La cadencia del cron cayó 51 % el 2026-08-27 y estuvimos ocho días sin verlo.** GitHub dejó
-de entregar la mitad de los eventos `schedule` del repo, uniformemente sobre los cuatro
-workflows con cron. Es externo: cero corridas canceladas (no es la concurrencia), los `cron`
-declarados no cambiaron, y golpea por igual a los cuatro. **No se perdió un solo record** —
-116 records/día antes contra 121 después, 11/11 volcanes todos los días — porque cada corrida
-procesa el día completo. Se degrada la latencia, de ~3-4 h a ~7 h. Ningún monitor falló:
-ninguno mide la AUSENCIA de corridas, y una corrida que no ocurre no deja rastro. Se agregó
-`scripts/medir_cadencia_cron.py` al healthcheck diario. Doc: `docs/s133/CADENCIA_DEL_CRON.md`.
-
-**El watchdog llevaba 22 comentarios sobre un workflow borrado hace tres meses** (issue #567).
-Consultaba la API, que sigue devolviendo los borrados con `state: "active"`. Arreglado: la
-fuente de verdad de «existe» es el repo. **La #567 sigue abierta: cerrarla es decisión tuya.**
-
-## Issue #506 (Villarrica 35×): RESUELTA, verificado con data fresca
-
-El auto-audit del 31-ago da **Villarrica 0,804× con n=13 noches**, dentro de banda. Se
-verificó además noche por noche contra las pasadas exactas que MIROVA publicó en agosto:
-
-| noche | MIROVA | nuestro | razón |
-|---|---:|---:|---:|
-| 08-18 05:48 | 1,86 | 1,62 | 0,87 |
-| 08-21 05:48 | 1,82 | 1,65 | 0,91 |
-| 08-23 05:54 | 1,33 | 0,92 | 0,69 |
-| 08-24 05:36 | 2,21 | 1,90 | 0,86 |
-
-Villarrica tuvo una escalada real en agosto (12 alertas contra 0-5 de los meses previos) y la
-seguimos bien. **Se puede cerrar la #506**, es decisión tuya.
-
-⚠️ Dos trampas en las que caí al verificar esto, por si alguien repite el camino: comparar
-nuestra mediana sobre TODAS las pasadas contra la mediana de MIROVA sobre sus ALERTAS da un
-falso «sub-reportamos 24×» — son poblaciones distintas (A90). Y truncar el diccionario del
-audit en un `print` propio se lee como «el audit está ciego». Las dos las atrapó mirar los
-eventos concretos en vez del agregado (A79).
-
-Lo que SÍ está fuera de banda hoy, y es el frente conocido de déficit en régimen débil de
-S124/S125: **Lastarria 0,415 · Láscar 0,465 · Isluga 0,603**, los tres sub-estimando.
-
-## El incidente del 2026-09-04: la alerta que no vimos (leer `docs/s133/AUDITORIA_DEL_INCIDENTE.md`)
-
-Nicolás preguntó por qué MIROVA tenía una anomalía MODIS de **4,75 MW en Villarrica**
-(07:50 UTC) y nosotros no. Debajo había **cinco defectos**, cuatro silenciosos. Ya la
-tenemos: **3,859 MW a 0,85 km, summit, razón 0,81×**. No hubo que tocar detección ni
-magnitud — el dato nunca había llegado.
-
-| # | defecto | PR |
+| frente | estado | dónde |
 |---|---|---|
-| 1 | El NRT de MODIS pedía `MYD021KM_NRT` v61, que **no existe** (LANCE usa `MYD021KM` v`6.1NRT`) | #587 |
-| 2 | Los granules NRT de MODIS se guardaban como `standard` (marca `.NRT.`, no `_NRT`) | #588 |
-| 3 | La cadencia del cron cayó 51 % y ningún monitor mira la AUSENCIA de corridas | #585 |
-| 4 | El poller de TIF: `timeout-minutes: 10` contra 12,3 min de mediana | archive #2 + commit |
-| 5 | VegStress-v1 caído desde el 13-ago: faltan los secrets de Sentinel Hub | **pendiente de Nicolás** |
+| A/B del área (chunk 1, 24/24 verdes) | **NO ADOPTAR**: corrige el gradiente pero lo invierte (borde 0,62 → 1,36) | `docs/s133/AB_AREA_VEREDICTO_CHUNK1.md` |
+| A/B de B22 | **NO ADOPTAR por ahora**: el fondo cae 1,2 K (no 0,004); magnitud ÷4-10; paridad no medible con n=2 | `docs/s133/AB_B22_VEREDICTO.md` |
+| NRT de MODIS | corregido: pedía `MYD021KM_NRT` v61, que no existe; ahora `MYD021KM` v6.1NRT (#587, #588) | `docs/s133/AUDITORIA_NRT_MODIS.md` |
+| Cadencia del cron | externa (GitHub entrega 51 % menos); sin pérdida de datos; medida desde el healthcheck | `docs/s133/CADENCIA_DEL_CRON.md` |
+| Poller de TIF | vivo (231 snapshots); era el timeout de 10 min contra 12,3 de mediana, no sólo la concurrencia | archive #2 |
+| Mapa de foco Villarrica | dos vistas; el anillo | `experiments/_s133_villarrica_focus/` |
+| Issues #506 y #567 | cerradas con evidencia | — |
+| Docs corregidos | `DATA_SOURCES.md` (nombres NRT), `INDEX.md` (8 docs sin indexar) | #592 |
 
-**Verificado en vivo**: el poller volvió a correr (231 snapshots, primera corrida exitosa
-desde el 27-ago). El TIF de las 07:50 se perdió igual: MIROVA sobrescribe su imagen «Last»,
-así que lo capturado ya es el de las 13:15. Eso es irreversible y es la razón por la que el
-poller importa.
+## Decisiones que esperan a Nicolás (se presentan al cierre de S134, plan §5)
 
-**Ojo con el patrón**: ninguno de los cinco produjo un error. Produjeron un cero, una
-etiqueta plausible, una métrica verde y una palabra ambigua (`cancelled` sirve para timeout
-y para concurrencia — me despistó y mi primer diagnóstico del poller estuvo incompleto).
+1. **Flip de `ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER`.** El A/B de S132 dio NO ADOPTAR porque
+   C2 falló, pero C2 era tautológico (S133). Recomendación: **no encender hasta que F1 y F3
+   digan si el cúmulo MODIS está en el cráter**; si se re-corre, con C2' en unidades de
+   `inner_radius` (`docs/s133/C2_NORMALIZADO_INNER_RADIUS.md`).
+2. Marcador «extensión» para el lacolito de PCC (pregunta volcanológica).
+3. Re-correr B22 con ventana ancha y volcanes con más alertas (Isluga 66, Láscar 62).
 
-## Sigue esperando a Nicolás
+## Anotado y fuera de alcance (pedido de Nicolás)
 
-- Los tres flips: `ENABLE_MODIS_B22_PRIMARY`, `ENABLE_GEOLOCATED_PIXEL_AREA`,
-  `ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER`.
-- El marcador «extensión» de PCC. Pregunta volcanológica, no de código.
+- VegStress-v1: caído desde el 13-ago por secrets `SH_CLIENT_ID`/`SH_CLIENT_SECRET`
+  ausentes. **No es prioridad; no se trabaja hasta que él lo pida.**
 - Rotar el PAT de `~/.claude/settings.json`.
-- **Cargar los secrets `SH_CLIENT_ID` y `SH_CLIENT_SECRET` en VegStress-v1** (caído hace 3 semanas).
-- Cerrar las issues #506 (Villarrica, resuelta) y #567 (watchdog, arreglado) si estás de acuerdo.
-- Persistir `diag_d9_capped` en el pipeline (hoy el tope de 5 MW se reconoce por el valor
-  en el frontend, que funciona pero es frágil; A72 pide el flag en el algoritmo).
+- Reducir a 30 min el disparo de cron-job.org sobre el poller — **NO**: Nicolás lo quiere en
+  5 min porque GitHub deja las corridas en cola; ya no se cancelan entre sí.
 
-## Estado al cerrar S133
+## Lección de método de S133 para quien arranque
 
-**PR**: #583 (squash a main, `bc7f3f2d`). **Suite**: 1124 passed · 3 skipped · 0 xfail.
-**Tag defensivo**: `pre-s133-cableado-area`.
-**Docs nuevos**: `docs/s133/{SUSTRATO_AREA_GEOLOCALIZADA,B22_EVIDENCIA,C2_NORMALIZADO_INNER_RADIUS}.md`.
-**Código nuevo**: `pipeline/scan_geometry.py::resolve_viirs_pixel_areas`.
-**Perfiles A/B**: `_s133_b22_{control,enabled}`, `_s133_area_{control,geoloc,corona}`.
-**Workflows**: `reproc-s133-b22-ab.yml`, `reproc-s133-area-ab.yml`.
-**Tests nuevos**: `test_area_geolocalizada_cableada_s133.py` (9), más el endurecimiento de
-`test_nadir_fixed_vrp_integration_s103.py` y `test_cluster_corona_magnitude.py`.
+Ninguno de los cinco defectos del 07:50 produjo un error: produjeron un cero (colección
+inexistente), una etiqueta plausible (`standard` por `nrt`), una métrica verde (monitores que
+miran fallas donde el problema era ausencia) y una palabra ambigua (`cancelled` para timeout
+y para concurrencia). Y tres veces el instrumento se equivocó antes que el dato: comparar
+poblaciones distintas, truncar un diccionario en el propio `print`, y una API que corta en
+1000 sin avisar. Las dos preguntas del instrumento (guía §3) van en cada medición.

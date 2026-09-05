@@ -91,6 +91,9 @@
 | AUDIT_S112_DASHBOARD_MIROVA.md · S101_DASHBOARD_AUDIT.md · S100_DASHBOARD_AUDIT.md | Auditorías de dashboard | S100-S112 |
 | AUDIT_S106.md · AUDIT_S109_VIIRS_FRENTES.md · S101_SENSOR_PERFORMANCE.md | Estado por sensor / frentes VIIRS | S106-S109 |
 | EARTHDATA_TOKEN_SETUP.md | Setup de credenciales NASA — **relevante tras el incidente 20-jul** | — |
+| **s133/ANILLO_TIER_A.md** | **El anillo de Villarrica está en 9 de 11 Tier A: cúmulo a 2,3-2,8 km del cráter; Láscar control positivo** | **S133** |
+| superpowers/plans/2026-09-05-auditoria-s134-anillo-y-paridad.md | Plan de la auditoría S134 (eje nuevo: posición → magnitud → paridad por pasada) | S133 |
+| _prompts/PREAMBULO-AUDITOR.md | Bloque canónico que abre todo prompt de auditor (guía maestra §5/§8) | S133 |
 | s133/AB_AREA_VEREDICTO_CHUNK1.md | A/B del área: el área corrige el gradiente pero INVIERTE el signo (borde 0,62 -> 1,36) | S133 |
 | s133/AB_B22_VEREDICTO.md | A/B de B22: NO ADOPTAR (C1 y C3 fallan); el fondo cae 1,2 K, no 0,004 | S133 |
 | **s133/AUDITORIA_DEL_INCIDENTE.md** | **La alerta de 4,75 MW que no vimos y los 5 defectos que la escondieron** | **S133** |
