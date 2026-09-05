@@ -91,6 +91,7 @@
 | AUDIT_S112_DASHBOARD_MIROVA.md · S101_DASHBOARD_AUDIT.md · S100_DASHBOARD_AUDIT.md | Auditorías de dashboard | S100-S112 |
 | AUDIT_S106.md · AUDIT_S109_VIIRS_FRENTES.md · S101_SENSOR_PERFORMANCE.md | Estado por sensor / frentes VIIRS | S106-S109 |
 | EARTHDATA_TOKEN_SETUP.md | Setup de credenciales NASA — **relevante tras el incidente 20-jul** | — |
+| s133/AB_AREA_VEREDICTO_CHUNK1.md | A/B del área: el área corrige el gradiente pero INVIERTE el signo (borde 0,62 -> 1,36) | S133 |
 | s133/AB_B22_VEREDICTO.md | A/B de B22: NO ADOPTAR (C1 y C3 fallan); el fondo cae 1,2 K, no 0,004 | S133 |
 | **s133/AUDITORIA_DEL_INCIDENTE.md** | **La alerta de 4,75 MW que no vimos y los 5 defectos que la escondieron** | **S133** |
 | s133/AUDITORIA_NRT_MODIS.md | El NRT de MODIS pedía una colección inexistente (`MYD021KM_NRT` v61) | S133 |
