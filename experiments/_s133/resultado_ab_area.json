@@ -1,0 +1,1467 @@
+{
+ "_que_es": "Veredicto S133 del A/B del area del pixel VIIRS. Criterios congelados en docs/s132/AB_AREA_GEOLOCALIZADA.md; este script no los reinterpreta.",
+ "_brazos": [
+  "_s133_area_control",
+  "_s133_area_geoloc",
+  "_s133_area_corona"
+ ],
+ "_volcanes": [
+  "Lascar",
+  "Isluga",
+  "Lastarria",
+  "PuyehueCordonCaulle",
+  "PlanchonPeteroa",
+  "Tupungatito",
+  "Chaiten",
+  "Villarrica"
+ ],
+ "_sensor": "VIIRS375 (VIIRS_* sin sufijo; el sufijo _750 es M-band, A48)",
+ "_pareo": "contra MIROVA por PASADA (<=20 min, ALERTA nocturna 03-09 UTC, CONS union OCR); entre brazos por `granule`",
+ "_magnitud": "VIIRS375: f5_core_vrp_mw con fallback a primary_cluster.vrp_mw (A46); nunca record.vrp_mw",
+ "_lectura_declarada": "el criterio 2 dice 'en banda' sin repetir cual: se toma la misma banda [0.9, 1.1] del criterio 1",
+ "_parametros": {
+  "banda": [
+   0.9,
+   1.1
+  ],
+  "min_volcanes_en_banda": 6,
+  "razon_cola": 2.0,
+  "fraccion_cola_max": 0.1,
+  "min_n": 15,
+  "tolerancia_pareo_min": 20
+ },
+ "_ground_truth": {
+  "n_filas_alerta_nocturnas": 2037,
+  "fuentes": [
+   "latest_consolidado.csv",
+   "data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv"
+  ]
+ },
+ "por_brazo": {
+  "_s133_area_control": {
+   "brazo": "_s133_area_control",
+   "n_pares_totales": 643,
+   "ventana_utc": {
+    "desde": "2026-04-01 05:00",
+    "hasta": "2026-05-31 06:24"
+   },
+   "fuentes_de_magnitud": {
+    "f5_core_vrp_mw": 643
+   },
+   "diagnostico_por_volcan": {
+    "Lascar": {
+     "n_records_del_bucket": 228,
+     "n_sin_magnitud_publicada": 16,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 88,
+     "granules_duplicados": []
+    },
+    "Isluga": {
+     "n_records_del_bucket": 221,
+     "n_sin_magnitud_publicada": 10,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 120,
+     "granules_duplicados": []
+    },
+    "Lastarria": {
+     "n_records_del_bucket": 232,
+     "n_sin_magnitud_publicada": 19,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 107,
+     "granules_duplicados": []
+    },
+    "PuyehueCordonCaulle": {
+     "n_records_del_bucket": 283,
+     "n_sin_magnitud_publicada": 10,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 174,
+     "granules_duplicados": []
+    },
+    "PlanchonPeteroa": {
+     "n_records_del_bucket": 255,
+     "n_sin_magnitud_publicada": 14,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 160,
+     "granules_duplicados": []
+    },
+    "Tupungatito": {
+     "n_records_del_bucket": 255,
+     "n_sin_magnitud_publicada": 20,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 133,
+     "granules_duplicados": []
+    },
+    "Chaiten": {
+     "n_records_del_bucket": 290,
+     "n_sin_magnitud_publicada": 50,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 213,
+     "granules_duplicados": []
+    },
+    "Villarrica": {
+     "n_records_del_bucket": 276,
+     "n_sin_magnitud_publicada": 36,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 227,
+     "granules_duplicados": []
+    }
+   },
+   "C1_bins": {
+    "criterio": "1 - el bin de 50+ y el de nadir, ambos en banda",
+    "banda": [
+     0.9,
+     1.1
+    ],
+    "min_n_por_bin": 15,
+    "bins_juzgados": [
+     "0-15",
+     "50+"
+    ],
+    "por_bin": {
+     "0-15": {
+      "n_pares": 111,
+      "mediana_razon": 0.8790506329113924,
+      "distribucion": {
+       "n": 111,
+       "mediana": 0.8790506329113924,
+       "p10": 0.584,
+       "p90": 1.836,
+       "min": 0.0626086956521739,
+       "max": 5.476666666666667
+      },
+      "evaluable": true,
+      "en_banda": false
+     },
+     "15-25": {
+      "n_pares": 91,
+      "mediana_razon": 0.8207142857142857,
+      "distribucion": {
+       "n": 91,
+       "mediana": 0.8207142857142857,
+       "p10": 0.5881818181818183,
+       "p90": 1.6368181818181817,
+       "min": 0.2756521739130435,
+       "max": 27.682499999999997
+      },
+      "evaluable": true,
+      "en_banda": false
+     },
+     "25-35": {
+      "n_pares": 76,
+      "mediana_razon": 0.6405000000000001,
+      "distribucion": {
+       "n": 76,
+       "mediana": 0.6405000000000001,
+       "p10": 0.3959090909090909,
+       "p90": 1.61625,
+       "min": 0.02283980582524272,
+       "max": 2.1342857142857143
+      },
+      "evaluable": true,
+      "en_banda": false
+     },
+     "35-50": {
+      "n_pares": 155,
+      "mediana_razon": 0.5624,
+      "distribucion": {
+       "n": 155,
+       "mediana": 0.5624,
+       "p10": 0.19423529411764703,
+       "p90": 1.3436562499999998,
+       "min": 0.02592274678111588,
+       "max": 5.692
+      },
+      "evaluable": true,
+      "en_banda": false
+     },
+     "50+": {
+      "n_pares": 210,
+      "mediana_razon": 0.6185035842293907,
+      "distribucion": {
+       "n": 210,
+       "mediana": 0.6185035842293907,
+       "p10": 0.12791061224489794,
+       "p90": 1.6843249999999996,
+       "min": 0.015116279069767442,
+       "max": 5.4191666666666665
+      },
+      "evaluable": true,
+      "en_banda": false
+     }
+    },
+    "los_dos_bins_evaluables": true,
+    "pasa": false
+   },
+   "C2_volcanes": {
+    "criterio": "2 - >= 6 de 8 volcanes en banda",
+    "banda": [
+     0.9,
+     1.1
+    ],
+    "min_n_por_volcan": 15,
+    "n_volcanes_evaluados": 8,
+    "n_en_banda": 3,
+    "minimo_exigido": 6,
+    "volcanes_no_evaluables_por_n": [
+     "Villarrica"
+    ],
+    "por_volcan": {
+     "Lascar": {
+      "n_pares": 124,
+      "mediana_razon": 0.5632631578947369,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 124,
+       "mediana": 0.5632631578947369,
+       "p10": 0.21205000000000002,
+       "p90": 0.927959647627167,
+       "min": 0.023186813186813187,
+       "max": 27.682499999999997
+      }
+     },
+     "Isluga": {
+      "n_pares": 91,
+      "mediana_razon": 0.6184848484848484,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 91,
+       "mediana": 0.6184848484848484,
+       "p10": 0.214,
+       "p90": 0.9855555555555555,
+       "min": 0.015116279069767442,
+       "max": 4.8125
+      }
+     },
+     "Lastarria": {
+      "n_pares": 106,
+      "mediana_razon": 0.9120535714285714,
+      "evaluable": true,
+      "en_banda": true,
+      "distribucion": {
+       "n": 106,
+       "mediana": 0.9120535714285714,
+       "p10": 0.21025669642857142,
+       "p90": 2.0210606060606064,
+       "min": 0.02592274678111588,
+       "max": 5.476666666666667
+      }
+     },
+     "PuyehueCordonCaulle": {
+      "n_pares": 99,
+      "mediana_razon": 1.0309756097560976,
+      "evaluable": true,
+      "en_banda": true,
+      "distribucion": {
+       "n": 99,
+       "mediana": 1.0309756097560976,
+       "p10": 0.39998518518518517,
+       "p90": 1.859344768439108,
+       "min": 0.0626086956521739,
+       "max": 5.692
+      }
+     },
+     "PlanchonPeteroa": {
+      "n_pares": 81,
+      "mediana_razon": 0.9483333333333334,
+      "evaluable": true,
+      "en_banda": true,
+      "distribucion": {
+       "n": 81,
+       "mediana": 0.9483333333333334,
+       "p10": 0.46307692307692305,
+       "p90": 1.4899999999999998,
+       "min": 0.16485714285714287,
+       "max": 2.4939999999999998
+      }
+     },
+     "Tupungatito": {
+      "n_pares": 102,
+      "mediana_razon": 0.42027777777777775,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 102,
+       "mediana": 0.42027777777777775,
+       "p10": 0.1916764705882353,
+       "p90": 1.1671454545454552,
+       "min": 0.058,
+       "max": 5.4191666666666665
+      }
+     },
+     "Chaiten": {
+      "n_pares": 27,
+      "mediana_razon": 1.3085714285714285,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 27,
+       "mediana": 1.3085714285714285,
+       "p10": 0.6985575757575757,
+       "p90": 1.7708000000000002,
+       "min": 0.44687499999999997,
+       "max": 2.927142857142857
+      }
+     },
+     "Villarrica": {
+      "n_pares": 13,
+      "mediana_razon": 0.9518181818181818,
+      "evaluable": false,
+      "en_banda": null,
+      "distribucion": {
+       "n": 13,
+       "mediana": 0.9518181818181818,
+       "p10": 0.4012000000000001,
+       "p90": 1.2291818181818182,
+       "min": 0.16636363636363635,
+       "max": 1.5154545454545454
+      }
+     }
+    },
+    "pasa": false
+   },
+   "C4_cola": {
+    "criterio": "4 - pares con razon > 2 en <= 10 %",
+    "umbral_razon": 2.0,
+    "fraccion_maxima": 0.1,
+    "n_pares": 643,
+    "n_sobre_umbral": 27,
+    "fraccion_sobre_umbral": 0.041990668740279936,
+    "distribucion_razon": {
+     "n": 643,
+     "mediana": 0.7288333333333334,
+     "p10": 0.24372506738544475,
+     "p90": 1.6193684210526316,
+     "min": 0.015116279069767442,
+     "max": 27.682499999999997
+    },
+    "pasa": true
+   },
+   "C3_fn": {
+    "criterio": "3 - 0 noches de MIROVA perdidas (FN a nivel record)",
+    "nota": "el control es su propia referencia; no aplica",
+    "pasa": true
+   },
+   "pasa_los_cuatro": false
+  },
+  "_s133_area_geoloc": {
+   "brazo": "_s133_area_geoloc",
+   "n_pares_totales": 643,
+   "ventana_utc": {
+    "desde": "2026-04-01 05:00",
+    "hasta": "2026-05-31 06:24"
+   },
+   "fuentes_de_magnitud": {
+    "f5_core_vrp_mw": 643
+   },
+   "diagnostico_por_volcan": {
+    "Lascar": {
+     "n_records_del_bucket": 228,
+     "n_sin_magnitud_publicada": 16,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 88,
+     "granules_duplicados": []
+    },
+    "Isluga": {
+     "n_records_del_bucket": 221,
+     "n_sin_magnitud_publicada": 10,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 120,
+     "granules_duplicados": []
+    },
+    "Lastarria": {
+     "n_records_del_bucket": 232,
+     "n_sin_magnitud_publicada": 19,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 107,
+     "granules_duplicados": []
+    },
+    "PuyehueCordonCaulle": {
+     "n_records_del_bucket": 283,
+     "n_sin_magnitud_publicada": 10,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 174,
+     "granules_duplicados": []
+    },
+    "PlanchonPeteroa": {
+     "n_records_del_bucket": 255,
+     "n_sin_magnitud_publicada": 14,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 160,
+     "granules_duplicados": []
+    },
+    "Tupungatito": {
+     "n_records_del_bucket": 255,
+     "n_sin_magnitud_publicada": 20,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 133,
+     "granules_duplicados": []
+    },
+    "Chaiten": {
+     "n_records_del_bucket": 290,
+     "n_sin_magnitud_publicada": 50,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 213,
+     "granules_duplicados": []
+    },
+    "Villarrica": {
+     "n_records_del_bucket": 276,
+     "n_sin_magnitud_publicada": 36,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 227,
+     "granules_duplicados": []
+    }
+   },
+   "C1_bins": {
+    "criterio": "1 - el bin de 50+ y el de nadir, ambos en banda",
+    "banda": [
+     0.9,
+     1.1
+    ],
+    "min_n_por_bin": 15,
+    "bins_juzgados": [
+     "0-15",
+     "50+"
+    ],
+    "por_bin": {
+     "0-15": {
+      "n_pares": 111,
+      "mediana_razon": 0.9581481481481481,
+      "distribucion": {
+       "n": 111,
+       "mediana": 0.9581481481481481,
+       "p10": 0.6164285714285714,
+       "p90": 2.1085714285714285,
+       "min": 0.07956521739130434,
+       "max": 5.6866666666666665
+      },
+      "evaluable": true,
+      "en_banda": true
+     },
+     "15-25": {
+      "n_pares": 91,
+      "mediana_razon": 1.0433333333333332,
+      "distribucion": {
+       "n": 91,
+       "mediana": 1.0433333333333332,
+       "p10": 0.7343333333333334,
+       "p90": 2.0533333333333337,
+       "min": 0.3452173913043478,
+       "max": 36.6225
+      },
+      "evaluable": true,
+      "en_banda": true
+     },
+     "25-35": {
+      "n_pares": 76,
+      "mediana_razon": 1.0334508547008547,
+      "distribucion": {
+       "n": 76,
+       "mediana": 1.0334508547008547,
+       "p10": 0.6069696029776676,
+       "p90": 2.6333333333333333,
+       "min": 0.03298543689320388,
+       "max": 5.383636363636363
+      },
+      "evaluable": true,
+      "en_banda": true
+     },
+     "35-50": {
+      "n_pares": 155,
+      "mediana_razon": 0.924949494949495,
+      "distribucion": {
+       "n": 155,
+       "mediana": 0.924949494949495,
+       "p10": 0.31004444444444446,
+       "p90": 2.037837837837838,
+       "min": 0.04107296137339055,
+       "max": 13.855999999999998
+      },
+      "evaluable": true,
+      "en_banda": true
+     },
+     "50+": {
+      "n_pares": 210,
+      "mediana_razon": 1.3599999999999999,
+      "distribucion": {
+       "n": 210,
+       "mediana": 1.3599999999999999,
+       "p10": 0.28195857558139537,
+       "p90": 4.1837,
+       "min": 0.03268571428571428,
+       "max": 18.605999999999998
+      },
+      "evaluable": true,
+      "en_banda": false
+     }
+    },
+    "los_dos_bins_evaluables": true,
+    "pasa": false
+   },
+   "C2_volcanes": {
+    "criterio": "2 - >= 6 de 8 volcanes en banda",
+    "banda": [
+     0.9,
+     1.1
+    ],
+    "min_n_por_volcan": 15,
+    "n_volcanes_evaluados": 8,
+    "n_en_banda": 1,
+    "minimo_exigido": 6,
+    "volcanes_no_evaluables_por_n": [
+     "Villarrica"
+    ],
+    "por_volcan": {
+     "Lascar": {
+      "n_pares": 124,
+      "mediana_razon": 0.8771486340762042,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 124,
+       "mediana": 0.8771486340762042,
+       "p10": 0.5296013986013985,
+       "p90": 1.6480537634408607,
+       "min": 0.03268571428571428,
+       "max": 36.6225
+      }
+     },
+     "Isluga": {
+      "n_pares": 91,
+      "mediana_razon": 0.9085714285714286,
+      "evaluable": true,
+      "en_banda": true,
+      "distribucion": {
+       "n": 91,
+       "mediana": 0.9085714285714286,
+       "p10": 0.5077777777777778,
+       "p90": 1.8149999999999997,
+       "min": 0.03298543689320388,
+       "max": 5.675
+      }
+     },
+     "Lastarria": {
+      "n_pares": 106,
+      "mediana_razon": 1.3025892857142856,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 106,
+       "mediana": 1.3025892857142856,
+       "p10": 0.3900653594771242,
+       "p90": 2.9579999999999997,
+       "min": 0.04107296137339055,
+       "max": 7.983333333333333
+      }
+     },
+     "PuyehueCordonCaulle": {
+      "n_pares": 99,
+      "mediana_razon": 1.4589999999999999,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 99,
+       "mediana": 1.4589999999999999,
+       "p10": 0.8682736842105263,
+       "p90": 4.379972222222222,
+       "min": 0.07956521739130434,
+       "max": 13.855999999999998
+      }
+     },
+     "PlanchonPeteroa": {
+      "n_pares": 81,
+      "mediana_razon": 1.3266666666666669,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 81,
+       "mediana": 1.3266666666666669,
+       "p10": 0.73375,
+       "p90": 2.361666666666667,
+       "min": 0.1919047619047619,
+       "max": 9.1
+      }
+     },
+     "Tupungatito": {
+      "n_pares": 102,
+      "mediana_razon": 0.7376333333333334,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 102,
+       "mediana": 0.7376333333333334,
+       "p10": 0.26508484848484853,
+       "p90": 2.892202898550726,
+       "min": 0.0652,
+       "max": 18.605999999999998
+      }
+     },
+     "Chaiten": {
+      "n_pares": 27,
+      "mediana_razon": 1.8715384615384614,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 27,
+       "mediana": 1.8715384615384614,
+       "p10": 1.1757272727272727,
+       "p90": 3.531142857142857,
+       "min": 0.6437499999999999,
+       "max": 5.7620000000000005
+      }
+     },
+     "Villarrica": {
+      "n_pares": 13,
+      "mediana_razon": 1.082,
+      "evaluable": false,
+      "en_banda": null,
+      "distribucion": {
+       "n": 13,
+       "mediana": 1.082,
+       "p10": 0.7523619047619048,
+       "p90": 1.4365454545454548,
+       "min": 0.3040909090909091,
+       "max": 1.7554545454545454
+      }
+     }
+    },
+    "pasa": false
+   },
+   "C4_cola": {
+    "criterio": "4 - pares con razon > 2 en <= 10 %",
+    "umbral_razon": 2.0,
+    "fraccion_maxima": 0.1,
+    "n_pares": 643,
+    "n_sobre_umbral": 129,
+    "fraccion_sobre_umbral": 0.2006220839813375,
+    "distribucion_razon": {
+     "n": 643,
+     "mediana": 1.0338095238095237,
+     "p10": 0.41659477124183003,
+     "p90": 2.7978000000000005,
+     "min": 0.03268571428571428,
+     "max": 36.6225
+    },
+    "pasa": false
+   },
+   "C3_fn": {
+    "criterio": "3 - 0 noches de MIROVA perdidas (FN a nivel record)",
+    "definicion_perdida": "granule donde el control publica magnitud > 0, el brazo no, y MIROVA publico ALERTA en esa misma pasada",
+    "prediccion": 0,
+    "n_pierde_deteccion": 0,
+    "n_pierde_pasada_que_MIROVA_publico": 0,
+    "n_gana_deteccion": 0,
+    "n_cambios_sin_respaldo_mirova": 0,
+    "perdidas_confirmadas": [],
+    "perdidas_sin_respaldo_mirova": [],
+    "ganadas": [],
+    "pasa": true
+   },
+   "pasa_los_cuatro": false
+  },
+  "_s133_area_corona": {
+   "brazo": "_s133_area_corona",
+   "n_pares_totales": 631,
+   "ventana_utc": {
+    "desde": "2026-04-01 05:00",
+    "hasta": "2026-05-31 06:24"
+   },
+   "fuentes_de_magnitud": {
+    "f5_core_vrp_mw": 631
+   },
+   "diagnostico_por_volcan": {
+    "Lascar": {
+     "n_records_del_bucket": 228,
+     "n_sin_magnitud_publicada": 18,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 87,
+     "granules_duplicados": []
+    },
+    "Isluga": {
+     "n_records_del_bucket": 221,
+     "n_sin_magnitud_publicada": 18,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 114,
+     "granules_duplicados": []
+    },
+    "Lastarria": {
+     "n_records_del_bucket": 232,
+     "n_sin_magnitud_publicada": 19,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 107,
+     "granules_duplicados": []
+    },
+    "PuyehueCordonCaulle": {
+     "n_records_del_bucket": 283,
+     "n_sin_magnitud_publicada": 10,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 174,
+     "granules_duplicados": []
+    },
+    "PlanchonPeteroa": {
+     "n_records_del_bucket": 255,
+     "n_sin_magnitud_publicada": 14,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 160,
+     "granules_duplicados": []
+    },
+    "Tupungatito": {
+     "n_records_del_bucket": 255,
+     "n_sin_magnitud_publicada": 52,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 110,
+     "granules_duplicados": []
+    },
+    "Chaiten": {
+     "n_records_del_bucket": 290,
+     "n_sin_magnitud_publicada": 50,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 213,
+     "granules_duplicados": []
+    },
+    "Villarrica": {
+     "n_records_del_bucket": 276,
+     "n_sin_magnitud_publicada": 36,
+     "n_sin_sensor_zenith_deg": 0,
+     "n_sin_alerta_mirova_a_20min": 227,
+     "granules_duplicados": []
+    }
+   },
+   "C1_bins": {
+    "criterio": "1 - el bin de 50+ y el de nadir, ambos en banda",
+    "banda": [
+     0.9,
+     1.1
+    ],
+    "min_n_por_bin": 15,
+    "bins_juzgados": [
+     "0-15",
+     "50+"
+    ],
+    "por_bin": {
+     "0-15": {
+      "n_pares": 111,
+      "mediana_razon": 0.9581481481481481,
+      "distribucion": {
+       "n": 111,
+       "mediana": 0.9581481481481481,
+       "p10": 0.6164285714285714,
+       "p90": 2.1085714285714285,
+       "min": 0.07956521739130434,
+       "max": 5.6866666666666665
+      },
+      "evaluable": true,
+      "en_banda": true
+     },
+     "15-25": {
+      "n_pares": 91,
+      "mediana_razon": 1.0433333333333332,
+      "distribucion": {
+       "n": 91,
+       "mediana": 1.0433333333333332,
+       "p10": 0.7343333333333334,
+       "p90": 2.0533333333333337,
+       "min": 0.3452173913043478,
+       "max": 36.6225
+      },
+      "evaluable": true,
+      "en_banda": true
+     },
+     "25-35": {
+      "n_pares": 75,
+      "mediana_razon": 1.0405128205128207,
+      "distribucion": {
+       "n": 75,
+       "mediana": 1.0405128205128207,
+       "p10": 0.6064789081885856,
+       "p90": 2.6365000000000003,
+       "min": 0.03298543689320388,
+       "max": 5.383636363636363
+      },
+      "evaluable": true,
+      "en_banda": true
+     },
+     "35-50": {
+      "n_pares": 154,
+      "mediana_razon": 0.9103953953953954,
+      "distribucion": {
+       "n": 154,
+       "mediana": 0.9103953953953954,
+       "p10": 0.28280000000000005,
+       "p90": 2.0383783783783787,
+       "min": 0.004,
+       "max": 13.855999999999998
+      },
+      "evaluable": true,
+      "en_banda": true
+     },
+     "50+": {
+      "n_pares": 200,
+      "mediana_razon": 1.3025892857142856,
+      "distribucion": {
+       "n": 200,
+       "mediana": 1.3025892857142856,
+       "p10": 0.27621507352941177,
+       "p90": 4.134326923076923,
+       "min": 0.03268571428571428,
+       "max": 17.955833333333334
+      },
+      "evaluable": true,
+      "en_banda": false
+     }
+    },
+    "los_dos_bins_evaluables": true,
+    "pasa": false
+   },
+   "C2_volcanes": {
+    "criterio": "2 - >= 6 de 8 volcanes en banda",
+    "banda": [
+     0.9,
+     1.1
+    ],
+    "min_n_por_volcan": 15,
+    "n_volcanes_evaluados": 8,
+    "n_en_banda": 0,
+    "minimo_exigido": 6,
+    "volcanes_no_evaluables_por_n": [
+     "Villarrica"
+    ],
+    "por_volcan": {
+     "Lascar": {
+      "n_pares": 123,
+      "mediana_razon": 0.8760280373831776,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 123,
+       "mediana": 0.8760280373831776,
+       "p10": 0.5273100233100233,
+       "p90": 1.5234132104454683,
+       "min": 0.03268571428571428,
+       "max": 36.6225
+      }
+     },
+     "Isluga": {
+      "n_pares": 89,
+      "mediana_razon": 0.8957692307692308,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 89,
+       "mediana": 0.8957692307692308,
+       "p10": 0.500991452991453,
+       "p90": 1.8405000000000002,
+       "min": 0.03298543689320388,
+       "max": 5.675
+      }
+     },
+     "Lastarria": {
+      "n_pares": 106,
+      "mediana_razon": 1.3025892857142856,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 106,
+       "mediana": 1.3025892857142856,
+       "p10": 0.3900653594771242,
+       "p90": 2.9579999999999997,
+       "min": 0.04107296137339055,
+       "max": 7.983333333333333
+      }
+     },
+     "PuyehueCordonCaulle": {
+      "n_pares": 99,
+      "mediana_razon": 1.4589999999999999,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 99,
+       "mediana": 1.4589999999999999,
+       "p10": 0.8682736842105263,
+       "p90": 4.379972222222222,
+       "min": 0.07956521739130434,
+       "max": 13.855999999999998
+      }
+     },
+     "PlanchonPeteroa": {
+      "n_pares": 81,
+      "mediana_razon": 1.3266666666666669,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 81,
+       "mediana": 1.3266666666666669,
+       "p10": 0.73375,
+       "p90": 2.361666666666667,
+       "min": 0.1919047619047619,
+       "max": 9.1
+      }
+     },
+     "Tupungatito": {
+      "n_pares": 93,
+      "mediana_razon": 0.6627272727272728,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 93,
+       "mediana": 0.6627272727272728,
+       "p10": 0.23585714285714288,
+       "p90": 2.4621954022988497,
+       "min": 0.004,
+       "max": 17.955833333333334
+      }
+     },
+     "Chaiten": {
+      "n_pares": 27,
+      "mediana_razon": 1.8715384615384614,
+      "evaluable": true,
+      "en_banda": false,
+      "distribucion": {
+       "n": 27,
+       "mediana": 1.8715384615384614,
+       "p10": 1.1757272727272727,
+       "p90": 3.531142857142857,
+       "min": 0.6437499999999999,
+       "max": 5.7620000000000005
+      }
+     },
+     "Villarrica": {
+      "n_pares": 13,
+      "mediana_razon": 1.082,
+      "evaluable": false,
+      "en_banda": null,
+      "distribucion": {
+       "n": 13,
+       "mediana": 1.082,
+       "p10": 0.7523619047619048,
+       "p90": 1.4365454545454548,
+       "min": 0.3040909090909091,
+       "max": 1.7554545454545454
+      }
+     }
+    },
+    "pasa": false
+   },
+   "C4_cola": {
+    "criterio": "4 - pares con razon > 2 en <= 10 %",
+    "umbral_razon": 2.0,
+    "fraccion_maxima": 0.1,
+    "n_pares": 631,
+    "n_sobre_umbral": 123,
+    "fraccion_sobre_umbral": 0.1949286846275753,
+    "distribucion_razon": {
+     "n": 631,
+     "mediana": 1.02625,
+     "p10": 0.41142857142857137,
+     "p90": 2.7314285714285713,
+     "min": 0.004,
+     "max": 36.6225
+    },
+    "pasa": false
+   },
+   "C3_fn": {
+    "criterio": "3 - 0 noches de MIROVA perdidas (FN a nivel record)",
+    "definicion_perdida": "granule donde el control publica magnitud > 0, el brazo no, y MIROVA publico ALERTA en esa misma pasada",
+    "prediccion": 0,
+    "n_pierde_deteccion": 42,
+    "n_pierde_pasada_que_MIROVA_publico": 12,
+    "n_gana_deteccion": 0,
+    "n_cambios_sin_respaldo_mirova": 30,
+    "perdidas_confirmadas": [
+     {
+      "volcano": "Lascar",
+      "granule": "VJ202IMG.A2026126.0454.021.2026126182324.nc",
+      "datetime_utc": "2026-05-06 04:54",
+      "mirova_publico_esa_pasada": true,
+      "vrp_mirova_mw": 0.03,
+      "vrp_control_mw": 0.0681,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Isluga",
+      "granule": "VJ102IMG.A2026108.0624.021.2026108130039.nc",
+      "datetime_utc": "2026-04-18 06:24",
+      "mirova_publico_esa_pasada": true,
+      "vrp_mirova_mw": 0.04,
+      "vrp_control_mw": 0.0469,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Isluga",
+      "granule": "VJ102IMG.A2026123.0642.021.2026123122148.nc",
+      "datetime_utc": "2026-05-03 06:42",
+      "mirova_publico_esa_pasada": true,
+      "vrp_mirova_mw": 0.09,
+      "vrp_control_mw": 0.0402,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ102IMG.A2026139.0648.021.2026139122522.nc",
+      "datetime_utc": "2026-05-19 06:48",
+      "mirova_publico_esa_pasada": true,
+      "vrp_mirova_mw": 0.09,
+      "vrp_control_mw": 0.0686,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ102IMG.A2026123.0648.021.2026123122148.nc",
+      "datetime_utc": "2026-05-03 06:48",
+      "mirova_publico_esa_pasada": true,
+      "vrp_mirova_mw": 0.06,
+      "vrp_control_mw": 0.0883,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VNP02IMG.A2026139.0448.002.2026139130121.nc",
+      "datetime_utc": "2026-05-19 04:48",
+      "mirova_publico_esa_pasada": true,
+      "vrp_mirova_mw": 0.18,
+      "vrp_control_mw": 0.0757,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ102IMG.A2026104.0600.021.2026104122126.nc",
+      "datetime_utc": "2026-04-14 06:00",
+      "mirova_publico_esa_pasada": true,
+      "vrp_mirova_mw": 0.22,
+      "vrp_control_mw": 0.0992,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VNP02IMG.A2026102.0618.002.2026102145433.nc",
+      "datetime_utc": "2026-04-12 06:18",
+      "mirova_publico_esa_pasada": true,
+      "vrp_mirova_mw": 0.12,
+      "vrp_control_mw": 0.0922,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ202IMG.A2026100.0624.021.2026100122216.nc",
+      "datetime_utc": "2026-04-10 06:24",
+      "mirova_publico_esa_pasada": true,
+      "vrp_mirova_mw": 0.13,
+      "vrp_control_mw": 0.0788,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ102IMG.A2026113.0636.021.2026113124620.nc",
+      "datetime_utc": "2026-04-23 06:36",
+      "mirova_publico_esa_pasada": true,
+      "vrp_mirova_mw": 0.03,
+      "vrp_control_mw": 0.0761,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VNP02IMG.A2026139.0630.002.2026139143523.nc",
+      "datetime_utc": "2026-05-19 06:30",
+      "mirova_publico_esa_pasada": true,
+      "vrp_mirova_mw": 0.09,
+      "vrp_control_mw": 0.09,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ202IMG.A2026100.0448.021.2026100101607.nc",
+      "datetime_utc": "2026-04-10 04:48",
+      "mirova_publico_esa_pasada": true,
+      "vrp_mirova_mw": 0.05,
+      "vrp_control_mw": 0.1202,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     }
+    ],
+    "perdidas_sin_respaldo_mirova": [
+     {
+      "volcano": "Lascar",
+      "granule": "VJ102IMG.A2026137.0542.021.2026137110614.nc",
+      "datetime_utc": "2026-05-17 05:42",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0576,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Isluga",
+      "granule": "VJ102IMG.A2026133.0512.021.2026134192923.nc",
+      "datetime_utc": "2026-05-13 05:12",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0748,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Isluga",
+      "granule": "VJ102IMG.A2026120.0600.021.2026120122448.nc",
+      "datetime_utc": "2026-04-30 06:00",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0864,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Isluga",
+      "granule": "VNP02IMG.A2026134.0618.002.2026134145123.nc",
+      "datetime_utc": "2026-05-14 06:18",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0454,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Isluga",
+      "granule": "VJ102IMG.A2026092.0624.021.2026092130233.nc",
+      "datetime_utc": "2026-04-02 06:24",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.067,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Isluga",
+      "granule": "VJ202IMG.A2026115.0642.021.2026115115959.nc",
+      "datetime_utc": "2026-04-25 06:42",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0539,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Isluga",
+      "granule": "VNP02IMG.A2026127.0648.002.2026128195756.nc",
+      "datetime_utc": "2026-05-07 06:48",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.1149,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ202IMG.A2026106.0612.021.2026106121405.nc",
+      "datetime_utc": "2026-04-16 06:12",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0833,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ202IMG.A2026137.0630.021.2026137122904.nc",
+      "datetime_utc": "2026-05-17 06:30",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0536,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VNP02IMG.A2026133.0642.002.2026133155533.nc",
+      "datetime_utc": "2026-05-13 06:42",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0703,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ202IMG.A2026116.0624.021.2026116124517.nc",
+      "datetime_utc": "2026-04-26 06:24",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0548,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ202IMG.A2026126.0500.021.2026126182332.nc",
+      "datetime_utc": "2026-05-06 05:00",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0217,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ102IMG.A2026102.0642.021.2026102125700.nc",
+      "datetime_utc": "2026-04-12 06:42",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0826,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ102IMG.A2026109.0606.021.2026109121642.nc",
+      "datetime_utc": "2026-04-19 06:06",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.4151,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ202IMG.A2026110.0636.021.2026110124638.nc",
+      "datetime_utc": "2026-04-20 06:36",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0321,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ202IMG.A2026136.0512.021.2026136103154.nc",
+      "datetime_utc": "2026-05-16 05:12",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0328,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ202IMG.A2026105.0630.021.2026106172839.nc",
+      "datetime_utc": "2026-04-15 06:30",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0827,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ102IMG.A2026113.0454.021.2026113103224.nc",
+      "datetime_utc": "2026-04-23 04:54",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0704,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ102IMG.A2026140.0630.021.2026140132442.nc",
+      "datetime_utc": "2026-05-20 06:30",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.175,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VNP02IMG.A2026117.0642.002.2026117150844.nc",
+      "datetime_utc": "2026-04-27 06:42",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0673,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VNP02IMG.A2026143.0654.002.2026143154243.nc",
+      "datetime_utc": "2026-05-23 06:54",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0657,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ202IMG.A2026142.0636.021.2026142130111.nc",
+      "datetime_utc": "2026-05-22 06:36",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0814,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ202IMG.A2026127.0618.021.2026127125149.nc",
+      "datetime_utc": "2026-05-07 06:18",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0403,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VNP02IMG.A2026149.0642.002.2026149235831.nc",
+      "datetime_utc": "2026-05-29 06:42",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0493,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ202IMG.A2026094.0636.021.2026094123028.nc",
+      "datetime_utc": "2026-04-04 06:36",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0878,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ102IMG.A2026140.0448.021.2026140111338.nc",
+      "datetime_utc": "2026-05-20 04:48",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0933,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ102IMG.A2026145.0636.021.2026145131149.nc",
+      "datetime_utc": "2026-05-25 06:36",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0788,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ202IMG.A2026123.0554.021.2026123120830.nc",
+      "datetime_utc": "2026-05-03 05:54",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0919,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ102IMG.A2026103.0618.021.2026103123634.nc",
+      "datetime_utc": "2026-04-13 06:18",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0915,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     },
+     {
+      "volcano": "Tupungatito",
+      "granule": "VJ202IMG.A2026111.0442.021.2026111104459.nc",
+      "datetime_utc": "2026-04-21 04:42",
+      "mirova_publico_esa_pasada": false,
+      "vrp_mirova_mw": null,
+      "vrp_control_mw": 0.0535,
+      "vrp_brazo_mw": 0.0,
+      "triggered_test1_control": true,
+      "triggered_test1_brazo": true
+     }
+    ],
+    "ganadas": [],
+    "pasa": false
+   },
+   "pasa_los_cuatro": false
+  }
+ },
+ "veredicto": {
+  "_s133_area_control": {
+   "C1": false,
+   "C2": false,
+   "C3": true,
+   "C4": true,
+   "los_cuatro": false
+  },
+  "_s133_area_geoloc": {
+   "C1": false,
+   "C2": false,
+   "C3": true,
+   "C4": false,
+   "los_cuatro": false
+  },
+  "_s133_area_corona": {
+   "C1": false,
+   "C2": false,
+   "C3": false,
+   "C4": false,
+   "los_cuatro": false
+  }
+ },
+ "brazos_que_pasan_los_cuatro": []
+}
