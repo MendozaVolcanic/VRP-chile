@@ -1,0 +1,380 @@
+{
+ "_que_es": "Veredicto S133 del A/B de ENABLE_MODIS_B22_PRIMARY. Criterios congelados en docs/s133/B22_EVIDENCIA.md.",
+ "_brazos": {
+  "off_control_b21": "_s133_b22_control",
+  "on_b22_primaria": "_s133_b22_enabled"
+ },
+ "_pareo": "por granule (no por fecha: Terra y Aqua son dos objetos)",
+ "_parametros": {
+  "C1_tolerancia_k": 0.05,
+  "C3_banda": [
+   0.95,
+   1.05
+  ],
+  "C3b_paridad_mirova": [
+   0.5,
+   2.0
+  ],
+  "C4_techo_b22_k": 331.0
+ },
+ "por_volcan": {
+  "Lascar": {
+   "volcano": "Lascar",
+   "pareo": {
+    "por": "granule",
+    "n_modis_off": 61,
+    "n_modis_on": 61,
+    "n_pares": 61,
+    "solo_en_off": [],
+    "solo_en_on": [],
+    "granules_duplicados_off": [],
+    "granules_duplicados_on": []
+   },
+   "ventana_utc": {
+    "desde": "2026-08-01 01:25",
+    "hasta": "2026-08-31 08:30"
+   },
+   "ground_truth": {
+    "n_noches_mirova_modis": 77,
+    "aviso": null
+   },
+   "C1": {
+    "criterio": "C1 — el fondo, en kelvin",
+    "unidad": "K",
+    "prediccion": -0.0036,
+    "tolerancia_abs": 0.05,
+    "n_pares_con_dato": 61,
+    "n_pares_sin_dato": 0,
+    "mediana_delta_k": -1.2210000000000005,
+    "distribucion_delta_k": {
+     "n": 61,
+     "mediana": -1.2210000000000005,
+     "p10": -6.467,
+     "p90": -0.36299999999999955,
+     "min": -9.89,
+     "max": 0.009999999999999787
+    },
+    "sigma_off": {
+     "n": 61,
+     "mediana": 6.379,
+     "p10": 4.814,
+     "p90": 11.521,
+     "min": 1.919,
+     "max": 13.399
+    },
+    "sigma_on": {
+     "n": 61,
+     "mediana": 4.902,
+     "p10": 3.697,
+     "p90": 6.756,
+     "min": 1.27,
+     "max": 8.964
+    },
+    "pasa": false
+   },
+   "C2": {
+    "criterio": "C2 — la deteccion, en pasadas",
+    "unidad": "pasadas",
+    "prediccion": 0,
+    "n_pares": 61,
+    "n_cambian_triggered_test1": 4,
+    "n_gana_deteccion": 2,
+    "n_pierde_deteccion": 2,
+    "n_pierde_pasada_que_MIROVA_publico": 0,
+    "perdidas_confirmadas": [],
+    "perdidas_sin_respaldo_mirova": [
+     {
+      "granule": "MYD021KM.A2026216.0745.061.2026216193555.hdf",
+      "fecha_utc": "2026-08-04",
+      "mirova_publico_esa_noche": false,
+      "vrp_mirova_mw": null,
+      "pc_vrp_off": 1.9,
+      "pc_vrp_on": 0.295
+     },
+     {
+      "granule": "MYD021KM.A2026229.0750.061.2026229193752.hdf",
+      "fecha_utc": "2026-08-17",
+      "mirova_publico_esa_noche": false,
+      "vrp_mirova_mw": null,
+      "pc_vrp_off": 0.131,
+      "pc_vrp_on": null
+     }
+    ],
+    "ganadas": [
+     {
+      "granule": "MOD021KM.A2026213.0125.061.2026216003559.hdf",
+      "fecha_utc": "2026-08-01",
+      "mirova_publico_esa_noche": false,
+      "vrp_mirova_mw": null,
+      "pc_vrp_off": 1.667,
+      "pc_vrp_on": 0.178
+     },
+     {
+      "granule": "MOD021KM.A2026243.0120.061.2026243131407.hdf",
+      "fecha_utc": "2026-08-31",
+      "mirova_publico_esa_noche": false,
+      "vrp_mirova_mw": null,
+      "pc_vrp_off": 0.357,
+      "pc_vrp_on": 0.088
+     }
+    ],
+    "ground_truth_disponible": true,
+    "pasa": true
+   },
+   "C3": {
+    "criterio": "C3 — la magnitud, en MW y en razon",
+    "unidad": "razon ON/OFF de primary_cluster.vrp_mw",
+    "banda": [
+     0.95,
+     1.05
+    ],
+    "n_pares_detectados_en_ambos": 5,
+    "mediana_razon_on_sobre_off": 0.10677864427114576,
+    "distribucion_razon": {
+     "n": 5,
+     "mediana": 0.10677864427114576,
+     "p10": 0.027814706723891275,
+     "p90": 0.21000442282176027,
+     "min": 0.010491177873152121,
+     "max": 0.2464985994397759
+    },
+    "vrp_off_mw": {
+     "n": 5,
+     "mediana": 1.9,
+     "p10": 0.881,
+     "p90": 3.8388,
+     "min": 0.357,
+     "max": 5.0
+    },
+    "vrp_on_mw": {
+     "n": 5,
+     "mediana": 0.178,
+     "p10": 0.0484,
+     "p90": 0.2846,
+     "min": 0.022,
+     "max": 0.295
+    },
+    "C3b_paridad_vs_mirova": {
+     "off": {
+      "n": 2,
+      "mediana_ratio_ours_mirova": 7.442499999999999,
+      "dentro_de_banda": false
+     },
+     "on": {
+      "n": 0,
+      "mediana_ratio_ours_mirova": null,
+      "dentro_de_banda": false
+     }
+    },
+    "C3b_banda": [
+     0.5,
+     2.0
+    ],
+    "pasa": false
+   },
+   "C4": {
+    "criterio": "C4 — el control (saturacion de B22)",
+    "unidad": "pixeles",
+    "techo_b22_k": 331.0,
+    "esperado": 0,
+    "n_px_anomalia_evaluados": 3829,
+    "n_px_sin_bt_k": 0,
+    "n_px_sobre_techo": 0,
+    "granules_con_px_saturado": [],
+    "t_max_k_en_la_muestra": {
+     "n": 122,
+     "mediana": 278.7,
+     "p10": 264.118,
+     "p90": 283.70500000000004,
+     "min": 241.71,
+     "max": 286.28
+    },
+    "pasa": true
+   },
+   "pasa_los_cuatro": false
+  },
+  "Villarrica": {
+   "volcano": "Villarrica",
+   "pareo": {
+    "por": "granule",
+    "n_modis_off": 70,
+    "n_modis_on": 70,
+    "n_pares": 70,
+    "solo_en_off": [],
+    "solo_en_on": [],
+    "granules_duplicados_off": [],
+    "granules_duplicados_on": []
+   },
+   "ventana_utc": {
+    "desde": "2026-08-01 01:25",
+    "hasta": "2026-08-31 08:35"
+   },
+   "ground_truth": {
+    "n_noches_mirova_modis": 1,
+    "aviso": null
+   },
+   "C1": {
+    "criterio": "C1 — el fondo, en kelvin",
+    "unidad": "K",
+    "prediccion": -0.0036,
+    "tolerancia_abs": 0.05,
+    "n_pares_con_dato": 70,
+    "n_pares_sin_dato": 0,
+    "mediana_delta_k": -1.181,
+    "distribucion_delta_k": {
+     "n": 70,
+     "mediana": -1.181,
+     "p10": -7.5085999999999995,
+     "p90": -0.27689999999999937,
+     "min": -10.571,
+     "max": 0.09999999999999964
+    },
+    "sigma_off": {
+     "n": 70,
+     "mediana": 7.359500000000001,
+     "p10": 3.2818,
+     "p90": 12.3169,
+     "min": 2.725,
+     "max": 13.833
+    },
+    "sigma_on": {
+     "n": 70,
+     "mediana": 4.2059999999999995,
+     "p10": 2.1814,
+     "p90": 7.6884,
+     "min": 0.789,
+     "max": 12.213
+    },
+    "pasa": false
+   },
+   "C2": {
+    "criterio": "C2 — la deteccion, en pasadas",
+    "unidad": "pasadas",
+    "prediccion": 0,
+    "n_pares": 70,
+    "n_cambian_triggered_test1": 3,
+    "n_gana_deteccion": 0,
+    "n_pierde_deteccion": 3,
+    "n_pierde_pasada_que_MIROVA_publico": 0,
+    "perdidas_confirmadas": [],
+    "perdidas_sin_respaldo_mirova": [
+     {
+      "granule": "MYD021KM.A2026221.0745.061.2026221192942.hdf",
+      "fecha_utc": "2026-08-09",
+      "mirova_publico_esa_noche": false,
+      "vrp_mirova_mw": null,
+      "pc_vrp_off": 2.423,
+      "pc_vrp_on": null
+     },
+     {
+      "granule": "MYD021KM.A2026234.0750.061.2026234193553.hdf",
+      "fecha_utc": "2026-08-22",
+      "mirova_publico_esa_noche": false,
+      "vrp_mirova_mw": null,
+      "pc_vrp_off": 1.048,
+      "pc_vrp_on": null
+     },
+     {
+      "granule": "MYD021KM.A2026242.0755.061.2026242233427.hdf",
+      "fecha_utc": "2026-08-30",
+      "mirova_publico_esa_noche": false,
+      "vrp_mirova_mw": null,
+      "pc_vrp_off": 0.764,
+      "pc_vrp_on": null
+     }
+    ],
+    "ganadas": [],
+    "ground_truth_disponible": true,
+    "pasa": true
+   },
+   "C3": {
+    "criterio": "C3 — la magnitud, en MW y en razon",
+    "unidad": "razon ON/OFF de primary_cluster.vrp_mw",
+    "banda": [
+     0.95,
+     1.05
+    ],
+    "n_pares_detectados_en_ambos": 14,
+    "mediana_razon_on_sobre_off": 0.2558801086458603,
+    "distribucion_razon": {
+     "n": 14,
+     "mediana": 0.2558801086458603,
+     "p10": 0.05164211470438636,
+     "p90": 0.7276748251748252,
+     "min": 0.0258,
+     "max": 1.5036674816625917
+    },
+    "vrp_off_mw": {
+     "n": 14,
+     "mediana": 0.7535000000000001,
+     "p10": 0.41679999999999995,
+     "p90": 4.222100000000003,
+     "min": 0.26,
+     "max": 5.992
+    },
+    "vrp_on_mw": {
+     "n": 14,
+     "mediana": 0.228,
+     "p10": 0.0882,
+     "p90": 0.5868000000000001,
+     "min": 0.068,
+     "max": 0.723
+    },
+    "C3b_paridad_vs_mirova": {
+     "off": {
+      "n": 0,
+      "mediana_ratio_ours_mirova": null,
+      "dentro_de_banda": false
+     },
+     "on": {
+      "n": 0,
+      "mediana_ratio_ours_mirova": null,
+      "dentro_de_banda": false
+     }
+    },
+    "C3b_banda": [
+     0.5,
+     2.0
+    ],
+    "pasa": false
+   },
+   "C4": {
+    "criterio": "C4 — el control (saturacion de B22)",
+    "unidad": "pixeles",
+    "techo_b22_k": 331.0,
+    "esperado": 0,
+    "n_px_anomalia_evaluados": 4554,
+    "n_px_sin_bt_k": 0,
+    "n_px_sobre_techo": 0,
+    "granules_con_px_saturado": [],
+    "t_max_k_en_la_muestra": {
+     "n": 140,
+     "mediana": 276.01,
+     "p10": 255.09900000000002,
+     "p90": 284.689,
+     "min": 233.96,
+     "max": 287.44
+    },
+    "pasa": true
+   },
+   "pasa_los_cuatro": false
+  }
+ },
+ "veredicto": {
+  "Lascar": {
+   "C1": false,
+   "C2": true,
+   "C3": false,
+   "C4": true,
+   "los_cuatro": false
+  },
+  "Villarrica": {
+   "C1": false,
+   "C2": true,
+   "C3": false,
+   "C4": true,
+   "los_cuatro": false
+  }
+ },
+ "adoptar": false
+}
