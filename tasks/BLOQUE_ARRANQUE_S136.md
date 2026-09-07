@@ -22,17 +22,32 @@ cerrada, correcta). En nevados el fondo global baja 6-8 K (Villarrica 268,5 → 
 (245/289 test1_roi) son del régimen viejo: 396 records contra 40 del nuevo. El mecanismo sigue
 (08-31 reproduce exacto) pero su tamaño en producción hoy NO está medido.
 
+PASO 0 YA CORRIÓ (S135, experiments/_s135_probe_etapas/RESULTADOS_PASO0.md, verificado): 12 pasadas
+(9 cat-b Lastarria/Tupungatito/Isluga + 3 control Láscar con first pass vacío), con I05, sin nube.
+Veredicto pre-registrado INTERMEDIA (0 pérdidas con el pico en el cráter, n=2; 4/9 con el pico en el
+borde). El verificador limpio corrigió (gravedad 5) que off_pierde ignoraba el second pass, que corre
+antes del filtro y no depende de keep_peak: con D2 permisivo (hoy) el second pass rescata 3 de las 4
+(Lastarria 08-28 con el píxel idéntico, Tupungatito 08-21 con el cráter) y la cuarta (Isluga 08-19)
+no es señal (−3,8 K; cota A93 2,56 km del hotspot de MIROVA). Con D2 condicionado como manda Coppola,
+keep_peak OFF pierde el campo fumarólico de Lastarria (cota 0,08/0,64, presupuesto 0,55 km) y el
+cráter de Tupungatito 08-21. Conclusión: D1 y D2 son UN diseño de 4 brazos (keep_peak OFF/ON ×
+second pass condicionado/no), régimen nuevo, FN cat-b por volcán, cota A93 desde mirova_center.
+11/12 test1_roi persistidos son hoy ctx_cluster (régimen D14). H2 = 13/13 ≤ 3 K.
+
+PAPER (S135): docs/paper/ tiene §4 y §5 en prosa (PR #601), README del flujo, y
+scripts/paper_numbers.py --tests → numbers.json/TABLAS.md (Tablas 2-4; PR #600). D20 registrado
+(banda 31 vs 32, despreciable). Siguiente paso acordado: §6 Validation con la Tabla 4 y las
+divergencias abiertas de frente; después §3/§7/§8. Las 11+6 notas al editor de sec4/sec5 esperan
+revisión de Nicolás (la más importante: Coppola 2014 citado de segunda mano; grilla 50 vs 51 km).
+
 OBJETIVO S136 (si Nicolás no decide otra cosa): (1) medir D19 sobre el régimen vigente
 (records V375 summit desde 2026-08-28 23:00; reusar experiments/_s134_audit/f3/verif_h1.py con
 esa ventana; reportar con denominador — hoy n≈40 por volcán, así que puede convenir esperar o
 reprocesar junio-agosto con el código actual en CI, chunked, sin tocar data/ operacional);
-(2) paso 0 del A/B D1(c): el mismo probe (yml en _archive/probe-s135-etapas.yml; agregar captura
-de I05 y exigir noches despejadas: mediana del disco a menos de ~10 K del fondo global) sobre
-3 test1_roi MIROVA-confirmadas de Lastarria y 3 de Tupungatito (la cara cat-b de A83/A84) y un
-control focal con first pass VACÍO; (3) con eso, escribir el pre-registro del A/B keep_peak
-OFF/ON (criterio propuesto en RESULTADOS.md §4.5) y presentárselo a Nicolás junto con D2, que
-sube de prioridad: en el régimen nuevo el second pass sin conjunto activo fija la posición
-publicada (07-01: 3,789 km, summit).
+(2) escribir el pre-registro del A/B de 4 brazos (keep_peak OFF/ON × second pass condicionado a
+conjunto activo no vacío + vecindad 8, Coppola 2016a l.329-341) con FN medido sobre cat-b por
+volcán y presentárselo a Nicolás; (3) si lo aprueba, montar los 4 perfiles con data_subdir
+aislado (patrón S24/S25) sobre la ventana del régimen nuevo.
 
 HILO PARALELO — el paper. Nicolás preguntó en S135 en qué quedó. Estado: un solo borrador,
 docs/PAPER_VRP_CHILE_DRAFT_S72.md (475 líneas, esqueleto anotado, sin prosa salvo el abstract,
@@ -64,6 +79,8 @@ probe archivado. Tres flags de S132 siguen OFF. Ninguna decisión de §D tomada 
 | item | dónde |
 |---|---|
 | probe A75 por etapa VIIRS375, read-only, corrido en CI (run 34071793829, 6/6) | `experiments/_s135_probe_etapas/` · PR #598 |
+| paso 0 (12 pasadas cat-b/control, I05, criterio pre-registrado) corrido (run 34091969140) | `RESULTADOS_PASO0.md` · PR #600/#602 |
+| paper: §4 + §5 en prosa, README, `scripts/paper_numbers.py`, D20 | `docs/paper/` · PR #600/#601 |
 | análisis puro con 13 tests (A89, escena sintética D19, criterio, yml) | `analisis.py`, `tests/test_probe_etapas_s135.py` |
 | resultados + verificación con contexto limpio (4 correcciones incorporadas) | `RESULTADOS.md` |
 | §3 dos regímenes de fondo, con script | `regimen_fondo.py` → `regimen_fondo.json` |
