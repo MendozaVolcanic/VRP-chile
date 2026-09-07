@@ -52,6 +52,8 @@ def test_crater_y_dashboard():
 def test_tabla4_denominadores_coherentes_en_una_ventana_corta():
     _, tier_a = pn.load_volcanoes()
     t4 = pn.tabla4(tier_a, "2026-08-01", "2026-08-31")
+    gt = t4.pop("_ventana_ground_truth")
+    assert gt["hasta"] <= "2026-08-31" and gt["fin_csv_mirova"]
     assert len(t4) == 11 * 3
     for x in t4.values():
         assert 0 <= x["tp_dashboard"] <= x["tp_crater"] <= x["noches_alerta_mirova"]
@@ -64,6 +66,16 @@ def test_tabla4_denominadores_coherentes_en_una_ventana_corta():
             assert x["pares_pasada"] > 0 and x["razon_q25"] <= x["razon_mediana"] <= x["razon_q75"]
     agg = pn.agregados(t4)
     assert sum(a["noches_alerta_mirova"] for a in agg.values()) == sum(x["noches_alerta_mirova"] for x in t4.values())
+
+
+def test_la_comparacion_no_pasa_del_fin_del_ground_truth():
+    """Sin ground truth no hay comparación: una noche nuestra posterior al último dato de
+    MIROVA no puede contarse como «detectamos y ella no». El recorte es del script, no del
+    que lo llama."""
+    _, tier_a = pn.load_volcanoes()
+    t4 = pn.tabla4(tier_a, "2026-01-01", "2099-12-31")
+    gt = t4["_ventana_ground_truth"]
+    assert gt["hasta"] == gt["fin_csv_mirova"] < "2099-12-31"
 
 
 def test_tabla3_lee_los_coeficientes_del_codigo_y_la_validacion_osf():

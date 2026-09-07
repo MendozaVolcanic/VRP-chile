@@ -23,7 +23,8 @@ se agrega la clave al script primero y recién después se cita. La ventana por 
 |---|---|---|
 | `../PAPER_VRP_CHILE_DRAFT_S72.md` | esqueleto anotado + decisiones §0 + roadmap §C | vigente para §0-§3, §6-§12; §4-§5 quedan reemplazados por los archivos de abajo |
 | `sec4_background.md` | §4 Background: el algoritmo MIROVA, prosa | borrador S135 (agente redactor + revisión) |
-| `sec5_methods.md` | §5 Methods: la implementación, prosa | borrador S135; 1 placeholder (`n_tests_collected`) |
+| `sec5_methods.md` | §5 Methods: la implementación, prosa | borrador S135; 1 placeholder (`n_tests_collected`, ya disponible en `numbers.json`) |
+| `sec6_validation.md` | §6 Validation: recall, paridad y por qué no se reporta precisión | borrador S135; 1 placeholder |
 | `numbers.json` · `TABLAS.md` | salida del script | regenerar antes de cada revisión |
 
 Cada párrafo de las secciones lleva al final un comentario `<!-- src: archivo:línea -->` con la
@@ -35,7 +36,7 @@ redactor no pudo verificar: hay que resolverlas antes de pasar la sección a «r
 1. ✅ Script único de números (`scripts/paper_numbers.py`, 6 tests).
 2. ✅ §4 y §5 redactados desde `MIROVA_DIVERGENCES.md`, `BIBLIOGRAPHY_SYNTHESIS.md`,
    `FICHA_SDA_VRP_CHILE.md` y `sp426_5.txt` (pendiente: revisión de Nicolás).
-3. ⬜ §6 Validation con la banda de paridad vigente y las divergencias abiertas dichas de frente
-   (Tabla 4 ya sale del script).
+3. ✅ §6 Validation redactada desde `TABLAS.md` (pendiente: revisión de Nicolás; el punto más
+   discutible es no reportar precisión, y está argumentado en el propio texto).
 4. ⬜ §3 Introduction, §7 casos, §8 Discussion, §9 Conclusions.
 5. ⬜ Figuras (12+), referencias con DOI (`.bib`), coautores, disclosure IA.

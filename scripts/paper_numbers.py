@@ -22,6 +22,10 @@ DEFINICIONES (heredadas de las auditorías, citadas por script de origen)
 Tier A       = los 11 volcanes con radius_km = 25 en volcanoes.yaml (S14).
 Bucket       = MODIS (MODIS_*), VIIRS750 (VIIRS_*_750), VIIRS375 (VIIRS_* sin sufijo). A48.
 Ventana      = --desde .. --hasta (default 2026-01-01 .. último record), por datetime_utc.
+Ventana GT   = toda comparación contra MIROVA (recall, pares, «noches sin alerta») se recorta
+               además a la última fecha PRESENTE en el CSV de referencia. Sin ese recorte, los
+               días posteriores al ground truth cuentan como «detectamos y MIROVA no», que es
+               falso: MIROVA no fue observada. El JSON publica `ventana_ground_truth`.
 Noche ALERTA = (volcán, bucket, fecha UTC) con ≥1 fila ALERTA_TERMICA/ALERTA_TERMICA_OCR
                en CONS ∪ OCR (loader canónico A11; nocturna 03-09 UTC según el loader).
                Origen: experiments/_s119_audit/eje2_recall_magnitud.py.
@@ -62,6 +66,9 @@ OCR = os.path.join(SNAP, "registro_vrp_ocr.csv")
 DATA = os.path.join(ROOT, "data", "mirova_equivalent")
 OUT_DIR = os.path.join(ROOT, "docs", "paper")
 BUCKETS = ("MODIS", "VIIRS750", "VIIRS375")
+# El snapshot que lee el cargador canónico puede quedar atrás del CSV que el workflow
+# `sync-mirova-csv.yml` refresca cada hora en la raíz del repo (canal partido, familia A17).
+# Acá NO se elige archivo: se mide la última fecha realmente presente y se recorta con ella.
 CAP_MW = 50000.0
 PAR_DT_MIN = 20
 
@@ -171,8 +178,17 @@ def tabla3():
     }
 
 
+def fin_ground_truth(alertas):
+    """Última fecha UTC con una fila de MIROVA. Más allá no hay con qué comparar."""
+    f = [a["fecha_utc"][:10] for a in alertas if a.get("fecha_utc")]
+    return max(f) if f else None
+
+
 def tabla4(tier_a, desde, hasta):
     alertas = load_mirova_alertas(cons_path=CONS, ocr_path=OCR)
+    fin_gt = fin_ground_truth(alertas)
+    if fin_gt and fin_gt < hasta:
+        hasta = fin_gt   # recorte: sin ground truth no hay comparación posible
     inner = {v["name"]: v.get("inner_radius_km") for v in tier_a}
     # MIROVA: noches ALERTA y filas por (vol, bucket)
     noches = defaultdict(set)
@@ -238,13 +254,16 @@ def tabla4(tier_a, desde, hasta):
                 "razon_q25": pct(0.25), "razon_q75": pct(0.75),
                 "fuente_magnitud": dict(fuente_mag),
             }
+    out["_ventana_ground_truth"] = {"desde": desde, "hasta": hasta,
+                                    "fin_csv_mirova": fin_gt,
+                                    "nota": "recall, pares y «noches sin alerta» se calculan sólo acá"}
     return out
 
 
 def agregados(t4):
     agg = {}
     for b in BUCKETS:
-        filas = [x for x in t4.values() if x["bucket"] == b]
+        filas = [x for x in t4.values() if isinstance(x, dict) and x.get("bucket") == b]
         nm = sum(x["noches_alerta_mirova"] for x in filas)
         tpd = sum(x["tp_dashboard"] for x in filas)
         tpc = sum(x["tp_crater"] for x in filas)
@@ -259,8 +278,11 @@ def agregados(t4):
 def md_tablas(num):
     L = []
     L.append("# Tablas del manuscrito — generadas por `scripts/paper_numbers.py`\n")
-    L.append(f"> Generado {num['generated_utc']} · HEAD `{num['git_head']}` · ventana {num['ventana']['desde']} → {num['ventana']['hasta']} · "
-             f"ground truth CONS ∪ OCR (loader canónico). **No editar a mano: regenerar.**\n")
+    gt = num["ventana_ground_truth"]
+    L.append(f"> Generado {num['generated_utc']} · HEAD `{num['git_head']}` · ventana de records {num['ventana']['desde']} → {num['ventana']['hasta']}.\n"
+             f"> **Comparación contra MIROVA recortada a {gt['desde']} → {gt['hasta']}** (última fila del CSV de referencia: {gt['fin_csv_mirova']}); "
+             f"más allá no hay ground truth y una noche nuestra no puede contarse como «sin alerta». "
+             f"Ground truth CONS ∪ OCR (cargador canónico). **No editar a mano: regenerar.**\n")
     L.append("Definiciones: ver docstring del script y `numbers.json` → `definiciones`.\n")
     L.append("\n## Table 2 — Tier A volcanoes\n")
     L.append("| Volcano | Vent (lat, lon) | MIROVA grid centre (lat, lon) | R (km) | inner (km) | n records | MODIS / V750 / V375 | first | last |")
@@ -281,6 +303,8 @@ def md_tablas(num):
     L.append("| Volcano | Sensor | n records | MIROVA alert nights | recall (dashboard) | recall (crater) | dashboard nights w/o alert | pairs | ratio median [IQR] |")
     L.append("|---|---|---|---|---|---|---|---|---|")
     for k, x in num["tabla4"].items():
+        if k.startswith("_"):
+            continue
         rz = f"{x['razon_mediana']} [{x['razon_q25']}–{x['razon_q75']}]" if x["razon_mediana"] is not None else "—"
         L.append(f"| {x['volcano']} | {x['bucket']} | {x['n_records']} | {x['noches_alerta_mirova']} | {x['recall_dashboard']} | {x['recall_crater']} | {x['noches_dashboard_sin_alerta']}/{x['n_noches_dashboard']} | {x['pares_pasada']} | {rz} |")
     L.append("\n### Aggregate by sensor\n")
@@ -318,6 +342,7 @@ def main():
         "tabla3": tabla3(),
     }
     num["tabla4"] = tabla4(tier_a, args.desde, hasta)
+    num["ventana_ground_truth"] = num["tabla4"].pop("_ventana_ground_truth")
     num["agregados"] = agregados(num["tabla4"])
     num["n_records_tier_a_ventana"] = sum(f["n_records"] for f in num["tabla2"])
     if args.tests:

@@ -152,6 +152,7 @@ use, audit or extension. That gap is what the present work addresses.
 | Coppola et al., 2014 | Coppola, D. et al. Strombolian activity from space (*Int. J. Remote Sens.*; quoted pp. 3413, 3417–3418). | 10.1080/01431161.2014.903354 |
 | Coppola et al., 2016a | Coppola, D., Laiolo, M., Cigolini, C. et al. Enhanced volcanic hot-spot detection using MODIS IR data: results from the MIROVA system. *Geol. Soc. London Spec. Publ.* 426(1):181–205. | 10.1144/SP426.5 |
 | Coppola et al., 2022 | Coppola, D., Valade, S., Masias, P., Laiolo, M., Massimetti, F., Campus, A. et al. Shallow magma convection … during the dome-forming Sabancaya eruption (2012–2020). *Bull. Volcanol.* 84:16. | 10.1007/s00445-022-01523-1 |
+| Laiolo et al., 2026 | Laiolo, M. et al. *Bull. Volcanol.* 88:11 (cadena NRT de MIROVA sin filtrado automático de nubes; verificado verbatim S128, p. 4). Título completo por confirmar. | 10.1007/s00445-025-01932-y |
 | Coppola, 2025 | Coppola, D. Thermal Monitoring of Volcanoes from Space. In: *Modern Volcano Monitoring*, Springer, pp. 325–364. | 10.1007/978-3-031-86841-2_11 |
 | Wooster et al., 2003 | Wooster, M. J., Zhukov, B., Oertel, D. Fire radiative energy for quantitative study of biomass burning. *Remote Sens. Environ.* 86:83–107. | [DOI pendiente] |
 | Wright et al., 2002 | Wright, R., Flynn, L. P., Garbeil, H., Harris, A. J. L., Pilger, E. Automated volcanic eruption detection using MODIS. *Remote Sens. Environ.* 82:135–155. | [DOI pendiente] |
@@ -186,13 +187,15 @@ las contradicciones que aparecieron entre fuentes del repo.
    del capítulo. **No usé ninguno de los dos números en §4** para no propagarlo; el valor
    operativo va en Methods.
 
-4. **«Laiolo 2026» no existe en el repo.** El prompt pedía verificar contra esa fuente que
-   MIROVA no filtra nubes en NRT. No hay PDF ni texto de ese paper en `documentacion/`; sólo
-   aparece citado de segunda mano en `docs/AUDIT_S128.md:510`. Anclé la afirmación a dos
-   fuentes que **sí** están: el propio Coppola et al. (2016a) (`sp426_5.txt:247-249`, «the
-   presence of clouds is not taken into account by the algorithm»; y `:362-368`, el descarte
-   a posteriori por inspección visual) y la cita verbatim de Campus et al. (2022) recogida en
-   `docs/AUDIT_S128.md:493-495`. Si el paper de Laiolo aparece, citarlo directo.
+4. **«Laiolo 2026» SÍ está en el repo — corregido S135.** La nota original de esta sección
+   decía que no existía. Es el falso negativo de la regla A89: el archivo está nombrado por
+   DOI, `documentacion/s00445-025-01932-y.pdf` (Laiolo et al., *Bull. Volcanol.* 88:11), y
+   buscar «laiolo» devuelve cero. `docs/MISSION.md:38-60` lo lista entre los once papers
+   canónicos y registra que S128 verificó **verbatim** contra la p. 4 del PDF la afirmación
+   de que la cadena NRT de MIROVA no aplica filtrado automático de nubes. El texto de §4.5
+   está anclado a Coppola et al. (2016a) (`sp426_5.txt:247-249` y `:362-368`), que sostiene
+   lo mismo y es la fuente primaria del algoritmo; **queda pendiente** agregar Laiolo como
+   cita directa y su fila a la tabla de referencias con el DOI 10.1007/s00445-025-01932-y.
 
 5. **Las citas de Coppola et al. (2014) son de segunda mano.** Los pasajes del corte de 2 MW
    y del 79 % → 59 % los tomé de `docs/AUDIT_S128.md:518-534`, que los declara verificados

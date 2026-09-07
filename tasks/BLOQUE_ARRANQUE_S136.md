@@ -86,9 +86,30 @@ probe archivado. Tres flags de S132 siguen OFF. Ninguna decisión de §D tomada 
 | §3 dos regímenes de fondo, con script | `regimen_fondo.py` → `regimen_fondo.json` |
 | adenda S135 a D19 | `docs/MIROVA_DIVERGENCES.md` |
 | yml archivado | `.github/workflows/_archive/probe-s135-etapas.yml` |
+| D19 medido en el régimen vigente: **la caída no está demostrada** (39,0 % cae dentro de la variación mensual; el artefacto se mudó de rama) | `D19_HOY.md` · `d19_regimen_vigente.py` |
+| pre-registro del A/B de 4 brazos, con criterio y umbrales | `docs/PREREGISTRO_AB_D1_D2_S135.md` |
+| paper: §6 Validation en prosa + recorte de la ventana de ground truth | `docs/paper/sec6_validation.md` |
+
+## Seguimiento nuevo (S135, no arreglado a propósito)
+
+**El ground truth que leen los análisis está siete días atrás del que refresca el pipeline.**
+`data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado.csv` (35.037 filas, hasta
+2026-08-31) es el que consumen el cargador canónico, `scripts/paper_numbers.py` y todas las
+mediciones; `latest_consolidado.csv` en la raíz (36.160 filas, hasta 2026-09-07) es el que
+`sync-mirova-csv.yml` actualiza cada hora y el que consume el frontend. El workflow corre verde:
+no está roto, escribe en otro archivo (familia A17, canal partido). No se tocó en S135 porque
+cambiar la fuente del ground truth en medio de una medición comparativa la invalidaría. Al
+arreglarlo, ojo con la asimetría: `latest_consolidado.csv` es sólo el canal consolidado; el OCR
+fresco sigue en el snapshot. Mitigación ya aplicada: `paper_numbers.py` y
+`d19_regimen_vigente.py` recortan toda comparación a la última fecha presente en el CSV y lo
+declaran en la salida (antes, seis días de septiembre contaban como «detectamos y MIROVA no»).
 
 ## Decisiones que siguen esperando a Nicolás (AUDIT_S134 §D)
 
-D1 (ahora con el probe: A/B sólo sobre el régimen nuevo y tras el paso 0 cat-b) · D2 (sube de
-prioridad) · D3 · D4 · D5 · D6 · D7 · D8. Y una nueva: **qué es el objeto a 2,97 km E del cráter
+**D1 y D2 tienen pre-registro escrito y esperan tres respuestas suyas**
+(`docs/PREREGISTRO_AB_D1_D2_S135.md` §«Lo que necesito de vos»): (a) ¿autoriza tocar
+`pipeline/detection_context.py` para el brazo del segundo pase condicionado (A45)?; (b) ¿acepta
+el umbral de rechazo del criterio 1 (perder >10 % de noches MIROVA-confirmadas en Lastarria,
+Tupungatito o Isluga descarta el brazo)?; (c) ¿los 11 Tier A o los 5 que deciden? Sin (a) sólo
+corren los brazos A y B. · D3 · D4 · D5 · D6 · D7 · D8. Y una nueva: **qué es el objeto a 2,97 km E del cráter
 de Villarrica** (08-31, +8 K sobre un disco plano, dNTI-positivo).
