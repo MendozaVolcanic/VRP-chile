@@ -68,3 +68,8 @@ circuit-breaker por host ya está en `fetch.py`).
 - H1 refutada si en Villarrica el cráter no está en `mask_contributing` (entonces el Test 1 ni siquiera
   ve el cráter y el problema está antes, en el ROI/fondo del Test 1).
 - H2 confirmada si ≥90 % de los `newly_active` con `n_first_pass==0` tienen `bt - t_bg ≤ 3 K`.
+
+---
+
+**Corrido en S135** (run 34071793829, 6/6 pasadas OK): resultados y criterio aplicado en
+`experiments/_s135_probe_etapas/RESULTADOS.md`. El yml quedó en `_archive/probe-s135-etapas.yml`.
