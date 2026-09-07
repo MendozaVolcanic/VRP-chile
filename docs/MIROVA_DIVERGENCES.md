@@ -2116,10 +2116,25 @@ hasta #535 (2026-08-28 23:00 UTC; #537 fue documentación) `process_viirs.py` fi
 fondo global excluía lo más frío; hoy lee `cloud_mask_bt_k: 0.0` (D14, cerrada, correcta). Villarrica
 y Llaima bajan 6-8 K de fondo mediano en producción (396 → 40 records; Láscar no se mueve). **Los
 conteos de arriba (245/289) son del régimen viejo**; el mecanismo sigue en el nuevo (08-31 reproduce
-exacto) pero su tamaño hoy no está medido. Consecuencias para D1/D2 en `RESULTADOS.md` §4: paso 0 =
-mismo probe (con I05, noches despejadas, control con first pass vacío) sobre 3 `test1_roi`
-MIROVA-confirmadas de Lastarria y 3 de Tupungatito (la cara cat-b);
-el A/B sólo sobre el régimen nuevo; D2 sube de prioridad.
+exacto) pero su tamaño hoy no está medido. Consecuencias para D1/D2 en `RESULTADOS.md` §4.
+
+**Paso 0 corrido (S135, run 34091969140, `RESULTADOS_PASO0.md`)**: 9 pasadas cat-b (Lastarria,
+Tupungatito, Isluga: `test1_roi` con alerta MIROVA en la misma pasada, ±20 min) + 3 controles de
+Láscar con first pass vacío, con I05 y sin nube sospechada en ninguna. Veredicto pre-registrado
+**INTERMEDIA**: 0 pasadas se pierden con `keep_peak` OFF teniendo el pico en el cráter; 4/9 se
+pierden con el pico en el borde. **Corrección del verificador limpio (gravedad 5)**: `off_pierde`
+ignoraba el second pass, que corre antes del filtro y no depende de `keep_peak`; con D2 como está
+(permisivo) el second pass rescata 3 de las 4 (Lastarria 08-28 con el píxel idéntico; Tupungatito
+08-21 con el cráter) y la cuarta (Isluga 08-19) no es señal (−3,8 K, cota A93 2,56 km del hotspot
+de MIROVA, que era el cráter). Con D2 condicionado como manda Coppola 2016a, esos rescates
+desaparecen y `keep_peak` OFF pierde el campo fumarólico de Lastarria (08-27 cota 0,08; 08-28
+0,64, presupuesto 0,55 km) y el cráter de Tupungatito 08-21. **La tensión A83/A84 es real sólo
+bajo D2 fiel, y está localizada en Lastarria (A84).** Además: 11/12 pasadas persistidas como `test1_roi` son hoy
+`ctx_cluster` (first pass vacío 11/12 → 4/12; t_bg mediano 264,6 → 260,1 K): el régimen D14 ya
+movió la mayor parte de D19 al path contextual, y el second pass sin conjunto activo (D2) es hoy
+el que pone el cúmulo en el cráter de Tupungatito 08-21. **D1 y D2 hay que diseñarlos juntos**
+(4 brazos, OFF/ON × D2 condicionado/no), sobre el régimen nuevo y estratificado por volcán. H2:
+13/13 `newly_active` con first pass vacío ≤ 3 K (era 2/2).
 
 **Relación con lo ya catalogado**: cierra la lectura de `docs/s133/ANILLO_TIER_A.md` (el anillo
 no explica el déficit de paridad: F1 y F2 de S134 lo refutan por dos vías); D10 (S100) justificó

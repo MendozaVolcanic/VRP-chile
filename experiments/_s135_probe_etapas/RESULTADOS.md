@@ -163,6 +163,10 @@ Lo que el probe cambia del A/B recomendado en AUDIT_S134 §D:
    `pc.n_pixels == 1`, `bt_k < t_bg_k` y sin alerta MIROVA. Adoptar sólo si FN cat-b = 0 en
    Lastarria/Tupungatito/Isluga **y** el nivel base falso cae ≥ 80 % en los nevados.
 
+**Actualización S135 (mismo día)**: el paso 0 del punto 2 ya corrió — `RESULTADOS_PASO0.md`.
+Veredicto INTERMEDIA: 0 pérdidas con el pico en el cráter, 2 reales en Lastarria (campo fumarólico,
+A84), 2 coincidencias (Tupungatito/Isluga). D1 y D2 acoplados: 4 brazos.
+
 ## 5. Límites de lo medido
 
 - Seis pasadas, elegidas en S134 por ser las insignia de cada clase: no son muestra.
