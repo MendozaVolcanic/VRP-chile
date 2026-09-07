@@ -1,9 +1,9 @@
 {
- "generated_utc": "2026-09-07 06:33 UTC",
- "git_head": "a390a24fd",
+ "generated_utc": "2026-09-07 06:42 UTC",
+ "git_head": "c421005c8",
  "ventana": {
   "desde": "2026-01-01",
-  "hasta": "2026-09-06"
+  "hasta": "2026-09-07"
  },
  "definiciones": "(heredadas de las auditorías, citadas por script de origen)\n======================================================================\nTier A       = los 11 volcanes con radius_km = 25 en volcanoes.yaml (S14).\nBucket       = MODIS (MODIS_*), VIIRS750 (VIIRS_*_750), VIIRS375 (VIIRS_* sin sufijo). A48.\nVentana      = --desde .. --hasta (default 2026-01-01 .. último record), por datetime_utc.\nNoche ALERTA = (volcán, bucket, fecha UTC) con ≥1 fila ALERTA_TERMICA/ALERTA_TERMICA_OCR\n               en CONS ∪ OCR (loader canónico A11; nocturna 03-09 UTC según el loader).\n               Origen: experiments/_s119_audit/eje2_recall_magnitud.py.\nRecord CRÁTER  = pc.vrp_mw > 0 y pc.vrp_mw ≤ 50 000 y pc.centroid_dist_km ≤ inner_radius_km.\nRecord DASHBOARD = CRÁTER y distance_class ∈ {summit, None}. (S119/S114.)\nRecall       = noches ALERTA con ≥1 record DASHBOARD del mismo (volcán, bucket, fecha) /\n               noches ALERTA. Se reporta también con CRÁTER (detección sin la etiqueta A46).\nPar por pasada = record DASHBOARD × fila ALERTA del mismo bucket con |Δt| ≤ 20 min y\n               VRP_MW > 0; si hay varias, la más cercana. Origen:\n               experiments/_s131_audit/magnitud/03_pares_por_pasada.py.\nMagnitud nuestra = f5_core_vrp_mw si bucket VIIRS375 y el campo existe (lo que el operador\n               ve, S132, A10 matiz), si no pc.vrp_mw.\nRazón        = mediana de (nuestra / MIROVA) sobre los pares; IQR; n pares.\nSin alerta   = noches con record DASHBOARD y sin noche ALERTA. NO se rotulan «falsos\n               positivos»: A54 (95 % son anomalías físicamente reales o fallas del cruce).",
  "n_volcanes_configurados": 45,
@@ -31,14 +31,14 @@
    "mirova_center_lon": -72.1187,
    "radius_km": 25,
    "inner_radius_km": 20,
-   "n_records": 2565,
+   "n_records": 2566,
    "n_por_bucket": {
-    "MODIS": 529,
+    "MODIS": 530,
     "VIIRS375": 1022,
     "VIIRS750": 1014
    },
    "primer_record": "2026-01-29 02:35",
-   "ultimo_record": "2026-09-06 07:30"
+   "ultimo_record": "2026-09-07 02:30"
   },
   {
    "volcano": "Villarrica",
@@ -49,14 +49,14 @@
    "mirova_center_lon": -71.93391,
    "radius_km": 25,
    "inner_radius_km": 5,
-   "n_records": 2805,
+   "n_records": 2806,
    "n_por_bucket": {
-    "MODIS": 560,
+    "MODIS": 561,
     "VIIRS375": 1124,
     "VIIRS750": 1121
    },
    "primer_record": "2026-01-01 02:20",
-   "ultimo_record": "2026-09-06 07:30"
+   "ultimo_record": "2026-09-07 02:30"
   },
   {
    "volcano": "Lascar",
@@ -67,14 +67,14 @@
    "mirova_center_lon": -67.73102,
    "radius_km": 25,
    "inner_radius_km": 5,
-   "n_records": 2048,
+   "n_records": 2049,
    "n_por_bucket": {
-    "MODIS": 421,
+    "MODIS": 422,
     "VIIRS375": 817,
     "VIIRS750": 810
    },
    "primer_record": "2026-01-29 01:00",
-   "ultimo_record": "2026-09-06 07:25"
+   "ultimo_record": "2026-09-07 01:00"
   },
   {
    "volcano": "Copahue",
@@ -103,14 +103,14 @@
    "mirova_center_lon": -71.38068,
    "radius_km": 25,
    "inner_radius_km": 5,
-   "n_records": 2414,
+   "n_records": 2415,
    "n_por_bucket": {
-    "MODIS": 495,
+    "MODIS": 496,
     "VIIRS375": 967,
     "VIIRS750": 952
    },
    "primer_record": "2026-01-29 02:35",
-   "ultimo_record": "2026-09-06 07:30"
+   "ultimo_record": "2026-09-07 02:30"
   },
   {
    "volcano": "Llaima",
@@ -121,14 +121,14 @@
    "mirova_center_lon": -71.73063,
    "radius_km": 25,
    "inner_radius_km": 5,
-   "n_records": 2474,
+   "n_records": 2475,
    "n_por_bucket": {
-    "MODIS": 496,
+    "MODIS": 497,
     "VIIRS375": 990,
     "VIIRS750": 988
    },
    "primer_record": "2026-01-29 02:35",
-   "ultimo_record": "2026-09-06 07:30"
+   "ultimo_record": "2026-09-07 02:30"
   },
   {
    "volcano": "Chaiten",
@@ -157,14 +157,14 @@
    "mirova_center_lon": -70.5695,
    "radius_km": 25,
    "inner_radius_km": 3,
-   "n_records": 2322,
+   "n_records": 2324,
    "n_por_bucket": {
-    "MODIS": 487,
+    "MODIS": 489,
     "VIIRS375": 922,
     "VIIRS750": 913
    },
    "primer_record": "2026-01-29 02:35",
-   "ultimo_record": "2026-09-06 07:30"
+   "ultimo_record": "2026-09-07 02:30"
   },
   {
    "volcano": "Lastarria",
@@ -175,14 +175,14 @@
    "mirova_center_lon": -68.50807,
    "radius_km": 25,
    "inner_radius_km": 3,
-   "n_records": 2058,
+   "n_records": 2059,
    "n_por_bucket": {
     "VIIRS375": 829,
     "VIIRS750": 815,
-    "MODIS": 414
+    "MODIS": 415
    },
    "primer_record": "2026-01-29 05:12",
-   "ultimo_record": "2026-09-06 07:25"
+   "ultimo_record": "2026-09-07 00:55"
   },
   {
    "volcano": "Isluga",
@@ -193,14 +193,14 @@
    "mirova_center_lon": -68.83269,
    "radius_km": 25,
    "inner_radius_km": 5,
-   "n_records": 1981,
+   "n_records": 1982,
    "n_por_bucket": {
-    "MODIS": 407,
+    "MODIS": 408,
     "VIIRS375": 789,
     "VIIRS750": 785
    },
    "primer_record": "2026-01-29 01:05",
-   "ultimo_record": "2026-09-06 07:25"
+   "ultimo_record": "2026-09-07 01:00"
   },
   {
    "volcano": "Tupungatito",
@@ -211,14 +211,14 @@
    "mirova_center_lon": -69.80039,
    "radius_km": 25,
    "inner_radius_km": 7,
-   "n_records": 2293,
+   "n_records": 2294,
    "n_por_bucket": {
-    "MODIS": 467,
+    "MODIS": 468,
     "VIIRS375": 916,
     "VIIRS750": 910
    },
    "primer_record": "2026-01-29 02:35",
-   "ultimo_record": "2026-09-06 07:25"
+   "ultimo_record": "2026-09-07 00:55"
   }
  ],
  "tabla3": {
@@ -261,14 +261,14 @@
   "PuyehueCordonCaulle|MODIS": {
    "volcano": "PuyehueCordonCaulle",
    "bucket": "MODIS",
-   "n_records": 529,
+   "n_records": 530,
    "noches_alerta_mirova": 0,
    "tp_dashboard": 0,
    "tp_crater": 0,
    "recall_dashboard": null,
    "recall_crater": null,
-   "noches_dashboard_sin_alerta": 201,
-   "n_noches_dashboard": 201,
+   "noches_dashboard_sin_alerta": 202,
+   "n_noches_dashboard": 202,
    "pares_pasada": 0,
    "razon_mediana": null,
    "razon_q25": null,
@@ -316,7 +316,7 @@
   "Villarrica|MODIS": {
    "volcano": "Villarrica",
    "bucket": "MODIS",
-   "n_records": 560,
+   "n_records": 561,
    "noches_alerta_mirova": 1,
    "tp_dashboard": 0,
    "tp_crater": 1,
@@ -371,7 +371,7 @@
   "Lascar|MODIS": {
    "volcano": "Lascar",
    "bucket": "MODIS",
-   "n_records": 421,
+   "n_records": 422,
    "noches_alerta_mirova": 77,
    "tp_dashboard": 9,
    "tp_crater": 75,
@@ -483,7 +483,7 @@
   "NevadosDeChillan|MODIS": {
    "volcano": "NevadosDeChillan",
    "bucket": "MODIS",
-   "n_records": 495,
+   "n_records": 496,
    "noches_alerta_mirova": 1,
    "tp_dashboard": 0,
    "tp_crater": 1,
@@ -536,7 +536,7 @@
   "Llaima|MODIS": {
    "volcano": "Llaima",
    "bucket": "MODIS",
-   "n_records": 496,
+   "n_records": 497,
    "noches_alerta_mirova": 0,
    "tp_dashboard": 0,
    "tp_crater": 0,
@@ -644,7 +644,7 @@
   "PlanchonPeteroa|MODIS": {
    "volcano": "PlanchonPeteroa",
    "bucket": "MODIS",
-   "n_records": 487,
+   "n_records": 489,
    "noches_alerta_mirova": 0,
    "tp_dashboard": 0,
    "tp_crater": 0,
@@ -699,7 +699,7 @@
   "Lastarria|MODIS": {
    "volcano": "Lastarria",
    "bucket": "MODIS",
-   "n_records": 414,
+   "n_records": 415,
    "noches_alerta_mirova": 0,
    "tp_dashboard": 0,
    "tp_crater": 0,
@@ -752,7 +752,7 @@
   "Isluga|MODIS": {
    "volcano": "Isluga",
    "bucket": "MODIS",
-   "n_records": 407,
+   "n_records": 408,
    "noches_alerta_mirova": 0,
    "tp_dashboard": 0,
    "tp_crater": 0,
@@ -807,7 +807,7 @@
   "Tupungatito|MODIS": {
    "volcano": "Tupungatito",
    "bucket": "MODIS",
-   "n_records": 467,
+   "n_records": 468,
    "noches_alerta_mirova": 0,
    "tp_dashboard": 0,
    "tp_crater": 0,
@@ -889,5 +889,7 @@
    "volcanes_en_banda_0_5_2_0": 10
   }
  },
- "n_records_tier_a_ventana": 26018
+ "n_records_tier_a_ventana": 26028,
+ "n_tests_collected": 1225,
+ "n_tests_definicion": "pytest tests --collect-only (tests recolectados, no ejecutados)"
 }

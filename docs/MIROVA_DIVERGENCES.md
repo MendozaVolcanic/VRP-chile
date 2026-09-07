@@ -2125,3 +2125,29 @@ el A/B sólo sobre el régimen nuevo; D2 sube de prioridad.
 no explica el déficit de paridad: F1 y F2 de S134 lo refutan por dos vías); D10 (S100) justificó
 `keep_peak` con «pico = cráter», que es falso en los nevados de señal débil; D11/A82 quedan
 intactas (esto es VIIRS375 y vía geométrica, no espectral).
+
+## D20 — El NTI de MODIS se calcula con la banda 31 (11,03 µm); Coppola 2016a y Wright 2002 usan la banda 32 (12,02 µm) — **HALLAZGO, despreciable (cuantificado S128), registrado S135**
+
+**Lo que dice el canon.** `documentacion/sp426_5.txt:182-183` («radiance of band 32 (L32), centred
+at 12.02 µm (TIR channel)») y `:211-216` (NTI = (L21ok − L32)/(L21ok + L32)); la Tabla 2 del
+capítulo Springer (`coppola2024_chapter.txt:1035`) repite «TIR (12.02 µm)». Es la elección
+original de MODVOLC (Wright et al. 2002).
+
+**Lo nuestro.** `pipeline/process_modis.py:72-76` calibra la banda 31 (índice 10 de
+`EV_1KM_Emissive`, λ = 11,03 µm) para el NTI, desde el commit `59846e897` (2026-04-08, «E3: add NTI
+dual-criteria detection to MODIS (Band 31 TIR)»). Ningún documento del proyecto lo justificó; la
+síntesis bibliográfica decía «B31/B32» sin distinguir. VIIRS no está afectado: I05 (11,45 µm) y
+M15 (10,76 µm) son las que MIROVA usa.
+
+**Cuantificación (S128, `docs/AUDIT_S128.md:654-660`, Planck):** el corrimiento del NTI entre las
+dos bandas va de 0,0001 (250 K) a 0,0054 (290 K), contra un margen de ~0,14 entre el NTI típico de
+escena y el umbral K1 = −0,8; en el dNTI se cancela porque es casi uniforme en la escena. **Real,
+nunca registrado, numéricamente despreciable.**
+
+**Por qué entra al catálogo recién en S135.** S128 lo anotó en la prosa de su auditoría «para no
+re-descubrirlo», y el redactor de §4 del paper lo re-descubrió igual desde `sp426_5.txt` en S135:
+una nota en una auditoría no es un registro. Queda acá para que §5.7 del manuscrito lo declare y
+para que nadie lo vuelva a encontrar como novedad. **No se propone cambio**: pasa por MISSION
+(puerta 1, cita verbatim) y sería un flip trivial (índice 11 en vez de 10), pero un A/B honesto
+tendría que mostrar un efecto que el cálculo de S128 dice que no existe a la precisión de los
+umbrales. Si algún día se hace, medir también el ETI (regresión NTI vs NTI_bk) y el `t_bg` TIR.

@@ -1,3 +1,5 @@
+> **S135 (2026-09-07)**: las secciones en prosa viven en `docs/paper/` (`sec4_background.md`, `sec5_methods.md`) y los números en `docs/paper/numbers.json` + `TABLAS.md`, regenerados por `scripts/paper_numbers.py`. Ver `docs/paper/README.md`. Este esqueleto sigue vigente para §0-§3 y §6-§12.
+
 # PAPER VRP CHILE — DRAFT ESQUEMÁTICO (S72, actualizado S120)
 
 > **Estado S120 (2026-07-01)**: skeleton actualizado con los números de la auditoría
