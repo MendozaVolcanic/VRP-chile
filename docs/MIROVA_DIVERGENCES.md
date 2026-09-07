@@ -2055,7 +2055,7 @@ círculo de igual área tiene radio 2,82, así que hay píxeles que sólo la caj
 
 Detalle: `docs/s129/ROI1_CAJA_VS_CIRCULO.md`.
 
-## D19 — `keep_peak` publica como *summit* a 0,0 km un píxel del borde del disco del Test 1, más frío que el fondo; y el second pass corre sin conjunto activo — **ABIERTA (CONFIRMADA gravedad 5 por verificador limpio; decisión D1/D2 de Nicolás pendiente)** S134
+## D19 — `keep_peak` publica como *summit* a 0,0 km un píxel del borde del disco del Test 1, más frío que el fondo; y el second pass corre sin conjunto activo — **ABIERTA (CONFIRMADA gravedad 5 por verificador limpio; probe A75 corrido S135: el cráter no está en el Test 1, y los conteos son del régimen de fondo previo a #537; decisión D1/D2 de Nicolás pendiente)** S134/S135
 
 **El fenómeno.** En un cono nevado la temperatura MIR nocturna sigue la altitud: dentro de un
 disco de 3 km alrededor de la cumbre, el píxel más caliente es el borde del disco (cota más
@@ -2096,6 +2096,30 @@ debe medir FN sobre cat-b real. Pasa por MISSION.md (3 preguntas), A45 y el prob
 
 **Guards**: `tests/test_guard_keep_peak_s134.py` (2 xfail estrictos: si alguien lo cura, XPASS
 rompe la suite y obliga a actualizar esto). Detalle: `docs/AUDIT_S134.md` §3, §5.3, §D (D1, D2).
+
+**Probe A75 en CI — S135** (`experiments/_s135_probe_etapas/RESULTADOS.md`, run 34071793829, las
+6 pasadas de `tabla_6_pasadas.json`). Criterio pre-registrado aplicado tal cual: **H1 REFUTADA por la
+rama que el diseño previó** — en Villarrica 2026-07-01 el cráter **no está en `mask_contributing`**
+(0 px a <0,5 km; el más cercano, a 0,177 km, está 27 K bajo el fondo global; gradiente radial en
+los 8 octantes). `keep_peak` no descarta el cráter: el Test 1 dispara sobre un disco frío sin señal en el cráter
+(gradiente A69 **o tope de nube**: 27 K bajo el fondo es más de lo que da la cota, y el probe no
+capturó I05), y el pico es el borde. El criterio refuta con esa sola pasada; es asimétrico por diseño. En las otras dos noches el cráter está en la máscara pero en el
+rango 24/36 y 33/49 por BT, siempre bajo el fondo. **Tres noches, tres fenómenos**: 07-01 gradiente
+del cono; 08-14 flanco S tibio (hoy dispara el first pass, 5 px, y `keep_peak` no corre); 08-31 un
+objeto discreto a 2,97 km E, +8 K sobre un disco plano, dNTI-positivo, donde **`keep_peak` es
+inerte** (los 2 px ya estaban en la intersección). Control Láscar 3/3: cráter rango 1 de la máscara,
++9 a +27 K sobre el fondo; `keep_peak` ni se invoca. **H2 confirmada con n=2** (07-01: 2/2 nuevos
+≤ 3 K) y en el régimen vigente esa recaptura **fija la posición publicada** (3,789 km, summit).
+**Hallazgo no previsto**: 2 de 3 pasadas de Villarrica no reproducen el record persistido con el
+código de hoy sobre el mismo granule (08-14: t_bg 262,78 → 252,42 K; path `test1_roi` → `ctx_cluster`):
+hasta #535 (2026-08-28 23:00 UTC; #537 fue documentación) `process_viirs.py` fijaba `CLOUD_BT_THRESHOLD = 260 K` a mano y el
+fondo global excluía lo más frío; hoy lee `cloud_mask_bt_k: 0.0` (D14, cerrada, correcta). Villarrica
+y Llaima bajan 6-8 K de fondo mediano en producción (396 → 40 records; Láscar no se mueve). **Los
+conteos de arriba (245/289) son del régimen viejo**; el mecanismo sigue en el nuevo (08-31 reproduce
+exacto) pero su tamaño hoy no está medido. Consecuencias para D1/D2 en `RESULTADOS.md` §4: paso 0 =
+mismo probe (con I05, noches despejadas, control con first pass vacío) sobre 3 `test1_roi`
+MIROVA-confirmadas de Lastarria y 3 de Tupungatito (la cara cat-b);
+el A/B sólo sobre el régimen nuevo; D2 sube de prioridad.
 
 **Relación con lo ya catalogado**: cierra la lectura de `docs/s133/ANILLO_TIER_A.md` (el anillo
 no explica el déficit de paridad: F1 y F2 de S134 lo refutan por dos vías); D10 (S100) justificó
