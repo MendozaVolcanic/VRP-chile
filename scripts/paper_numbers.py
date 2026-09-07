@@ -298,6 +298,8 @@ def main():
     ap.add_argument("--desde", default="2026-01-01")
     ap.add_argument("--hasta", default=None, help="default: último record en data/")
     ap.add_argument("--out", default=OUT_DIR)
+    ap.add_argument("--tests", action="store_true",
+                    help="cuenta los tests recolectados por pytest (clave n_tests_collected; ~10 s)")
     args = ap.parse_args()
     vols, tier_a = load_volcanoes()
     hasta = args.hasta
@@ -318,6 +320,16 @@ def main():
     num["tabla4"] = tabla4(tier_a, args.desde, hasta)
     num["agregados"] = agregados(num["tabla4"])
     num["n_records_tier_a_ventana"] = sum(f["n_records"] for f in num["tabla2"])
+    if args.tests:
+        try:
+            out = subprocess.check_output([sys.executable, "-m", "pytest", "tests", "-q", "--collect-only",
+                                           "-p", "no:cacheprovider"], cwd=ROOT, text=True, stderr=subprocess.STDOUT)
+            ult = [l for l in out.splitlines() if "test" in l and ("collected" in l or "selected" in l)]
+            num["n_tests_collected"] = int(ult[-1].split()[0]) if ult else None
+            num["n_tests_definicion"] = "pytest tests --collect-only (tests recolectados, no ejecutados)"
+        except Exception as e:  # noqa: BLE001
+            num["n_tests_collected"] = None
+            num["n_tests_error"] = str(e)[:200]
     os.makedirs(args.out, exist_ok=True)
     with open(os.path.join(args.out, "numbers.json"), "w", encoding="utf-8") as fh:
         json.dump(num, fh, indent=1, ensure_ascii=False)
