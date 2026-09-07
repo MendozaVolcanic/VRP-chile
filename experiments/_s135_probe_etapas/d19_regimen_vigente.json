@@ -1,0 +1,1128 @@
+{
+ "corte_utc": "2026-08-28 23:00",
+ "desde": "2026-06-01",
+ "fin_ground_truth": "2026-08-31",
+ "definiciones": "(definiciones heredadas de `experiments/_s134_audit/f3/verif_h1.py` y `verif_h1c.py`,\nel verificador con contexto limpio de S134 — no se reinventan acá):\n\n  universo   = records de `data/mirova_equivalent/<vol>.json` con sensor VIIRS de 375 m\n               (`VIIRS_*` sin sufijo `_750`). Se reportan DOS denominadores porque el\n               etiquetado se movió con el mismo cambio de código que se está midiendo:\n                 · TODOS los V375  → denominador ROBUSTO, el que se usa para el veredicto;\n                 · sólo `summit`   → el que usó S134, informativo, NO comparable entre\n                   regímenes (la fracción summit pasó de ~69 % a ~89 %).\n               Todo `test1_roi` es summit (verificado), así que el numerador no cambia:\n               cambia sólo con qué se lo divide, y ahí estaba el error de la primera versión.\n  ventanas   = VIEJO  [2026-06-01, CORTE)   ·  NUEVO  [CORTE, último record]\n               CORTE = 2026-08-28 23:00 UTC (merge del PR #535; #537 del 29-ago fue documentación).\n  test1_roi  = `final_hotspot_source == \"test1_roi\"` (la rama donde `keep_peak` decide).\n  1 píxel    = `primary_cluster.n_pixels == 1`.\n  distancia  = haversine(`vent_lat/lon` de volcanoes.yaml, `primary_cluster.centroid`).\n  corona     = distancia en [2,5 , 3,0] km (el borde del disco de 3 km del Test 1).\n  frío       = `bt_k` del píxel del cúmulo (el `anomaly_pixel` más cercano al centroide) menor\n               que `t_bg_k` del record. Es el par de campos correcto: `t_max_i04_k` es el máximo\n               del ROI de 25 km y da lo contrario.\n  MIROVA     = alerta V375 (CONS ∪ OCR, cargador canónico) en la misma fecha UTC, y **sólo\n               sobre los records anteriores a la última fecha del CSV de referencia**: más allá\n               MIROVA no fue observada, así que un 0 % ahí no significa «no corroboró» sino «no\n               hay con qué comparar». El denominador de esa columna se reporta aparte.\n\n  base falso = record summit V375 con cúmulo de 1 píxel, ese píxel más frío que el fondo\n               global, y sin alerta de MIROVA esa noche (la definición del pre-registro). Se\n               parte en la porción `test1_roi` —lo único que el A/B de `keep_peak` puede\n               mover— y el resto (`ctx_cluster`), que ningún brazo toca.\n\nCada proporción va con su intervalo de Wilson al 95 %: con n de dos dígitos, una proporción sin\nintervalo se lee como si fuera precisa y no lo es (A90). Y además va la serie MENSUAL, porque un\ncociente antes/después no distingue un cambio de código de la variación estacional si el\n«después» cae dentro de la dispersión de los meses previos.",
+ "volcanes": {
+  "Villarrica": {
+   "viejo": {
+    "n_summit": 261,
+    "fuentes": {
+     "test1_roi": 229,
+     "ctx_cluster": 32
+    },
+    "n_test1_roi": 229,
+    "n_todos_v375": 396,
+    "pct_test1_roi_sobre_todos": 57.8,
+    "ic95_pct_test1_roi_sobre_todos": [
+     52.9,
+     62.6
+    ],
+    "pct_summit_sobre_todos": 65.9,
+    "pct_test1_roi_sobre_summit": 87.7,
+    "ic95_pct_test1_roi_sobre_summit": [
+     83.2,
+     91.2
+    ],
+    "t_bg_mediana_k": 267.8,
+    "pct_first_pass_vacio": 92.7,
+    "base_falso_total": 146,
+    "base_falso_test1_roi": 135,
+    "base_falso_pct_alcanzable": 92.5,
+    "n_1px": 229,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 2.81,
+    "pct_en_corona": 80.8,
+    "n_frio": 170,
+    "n_frio_denominador": 229,
+    "pct_frio": 74.2,
+    "ic95_pct_frio": [
+     68.2,
+     79.5
+    ],
+    "vrp_mediana_mw": 0.047,
+    "n_con_ventana_gt": 229,
+    "pct_con_alerta_mirova": 15.7,
+    "ic95_pct_con_alerta": [
+     11.6,
+     21.0
+    ]
+   },
+   "nuevo": {
+    "n_summit": 34,
+    "fuentes": {
+     "test1_roi": 22,
+     "ctx_cluster": 12
+    },
+    "n_test1_roi": 22,
+    "n_todos_v375": 40,
+    "pct_test1_roi_sobre_todos": 55.0,
+    "ic95_pct_test1_roi_sobre_todos": [
+     39.8,
+     69.3
+    ],
+    "pct_summit_sobre_todos": 85.0,
+    "pct_test1_roi_sobre_summit": 64.7,
+    "ic95_pct_test1_roi_sobre_summit": [
+     47.9,
+     78.5
+    ],
+    "t_bg_mediana_k": 262.3,
+    "pct_first_pass_vacio": 79.4,
+    "base_falso_total": 10,
+    "base_falso_test1_roi": 8,
+    "base_falso_pct_alcanzable": 80.0,
+    "n_1px": 21,
+    "pct_1px": 95.5,
+    "dist_mediana_km": 2.76,
+    "pct_en_corona": 86.4,
+    "n_frio": 8,
+    "n_frio_denominador": 22,
+    "pct_frio": 36.4,
+    "ic95_pct_frio": [
+     19.7,
+     57.0
+    ],
+    "vrp_mediana_mw": 0.049,
+    "n_con_ventana_gt": 7,
+    "pct_con_alerta_mirova": 0.0,
+    "ic95_pct_con_alerta": [
+     0.0,
+     35.4
+    ]
+   }
+  },
+  "Lascar": {
+   "viejo": {
+    "n_summit": 262,
+    "fuentes": {
+     "test1_roi": 132,
+     "ctx_cluster": 130
+    },
+    "n_test1_roi": 132,
+    "n_todos_v375": 325,
+    "pct_test1_roi_sobre_todos": 40.6,
+    "ic95_pct_test1_roi_sobre_todos": [
+     35.4,
+     46.0
+    ],
+    "pct_summit_sobre_todos": 80.6,
+    "pct_test1_roi_sobre_summit": 50.4,
+    "ic95_pct_test1_roi_sobre_summit": [
+     44.4,
+     56.4
+    ],
+    "t_bg_mediana_k": 264.4,
+    "pct_first_pass_vacio": 49.2,
+    "base_falso_total": 12,
+    "base_falso_test1_roi": 10,
+    "base_falso_pct_alcanzable": 83.3,
+    "n_1px": 132,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 2.61,
+    "pct_en_corona": 56.1,
+    "n_frio": 23,
+    "n_frio_denominador": 54,
+    "pct_frio": 42.6,
+    "ic95_pct_frio": [
+     30.3,
+     55.8
+    ],
+    "vrp_mediana_mw": 0.033,
+    "n_con_ventana_gt": 132,
+    "pct_con_alerta_mirova": 49.2,
+    "ic95_pct_con_alerta": [
+     40.9,
+     57.7
+    ]
+   },
+   "nuevo": {
+    "n_summit": 32,
+    "fuentes": {
+     "ctx_cluster": 26,
+     "test1_roi": 6
+    },
+    "n_test1_roi": 6,
+    "n_todos_v375": 35,
+    "pct_test1_roi_sobre_todos": 17.1,
+    "ic95_pct_test1_roi_sobre_todos": [
+     8.1,
+     32.7
+    ],
+    "pct_summit_sobre_todos": 91.4,
+    "pct_test1_roi_sobre_summit": 18.8,
+    "ic95_pct_test1_roi_sobre_summit": [
+     8.9,
+     35.3
+    ],
+    "t_bg_mediana_k": 263.4,
+    "pct_first_pass_vacio": 34.4,
+    "base_falso_total": 8,
+    "base_falso_test1_roi": 4,
+    "base_falso_pct_alcanzable": 50.0,
+    "n_1px": 6,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 2.87,
+    "pct_en_corona": 100.0,
+    "n_frio": 4,
+    "n_frio_denominador": 6,
+    "pct_frio": 66.7,
+    "ic95_pct_frio": [
+     30.0,
+     90.3
+    ],
+    "vrp_mediana_mw": 0.04,
+    "n_con_ventana_gt": 4,
+    "pct_con_alerta_mirova": 25.0,
+    "ic95_pct_con_alerta": [
+     4.6,
+     69.9
+    ]
+   }
+  },
+  "Copahue": {
+   "viejo": {
+    "n_summit": 275,
+    "fuentes": {
+     "test1_roi": 243,
+     "ctx_cluster": 26,
+     "test1": 6
+    },
+    "n_test1_roi": 243,
+    "n_todos_v375": 383,
+    "pct_test1_roi_sobre_todos": 63.4,
+    "ic95_pct_test1_roi_sobre_todos": [
+     58.5,
+     68.1
+    ],
+    "pct_summit_sobre_todos": 71.8,
+    "pct_test1_roi_sobre_summit": 88.4,
+    "ic95_pct_test1_roi_sobre_summit": [
+     84.0,
+     91.6
+    ],
+    "t_bg_mediana_k": 265.9,
+    "pct_first_pass_vacio": 87.3,
+    "base_falso_total": 171,
+    "base_falso_test1_roi": 162,
+    "base_falso_pct_alcanzable": 94.7,
+    "n_1px": 243,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 2.8,
+    "pct_en_corona": 81.5,
+    "n_frio": 166,
+    "n_frio_denominador": 243,
+    "pct_frio": 68.3,
+    "ic95_pct_frio": [
+     62.2,
+     73.8
+    ],
+    "vrp_mediana_mw": 0.039,
+    "n_con_ventana_gt": 243,
+    "pct_con_alerta_mirova": 2.1,
+    "ic95_pct_con_alerta": [
+     0.9,
+     4.7
+    ]
+   },
+   "nuevo": {
+    "n_summit": 35,
+    "fuentes": {
+     "test1_roi": 26,
+     "ctx_cluster": 9
+    },
+    "n_test1_roi": 26,
+    "n_todos_v375": 40,
+    "pct_test1_roi_sobre_todos": 65.0,
+    "ic95_pct_test1_roi_sobre_todos": [
+     49.5,
+     77.9
+    ],
+    "pct_summit_sobre_todos": 87.5,
+    "pct_test1_roi_sobre_summit": 74.3,
+    "ic95_pct_test1_roi_sobre_summit": [
+     57.9,
+     85.8
+    ],
+    "t_bg_mediana_k": 263.4,
+    "pct_first_pass_vacio": 77.1,
+    "base_falso_total": 7,
+    "base_falso_test1_roi": 5,
+    "base_falso_pct_alcanzable": 71.4,
+    "n_1px": 26,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 2.81,
+    "pct_en_corona": 84.6,
+    "n_frio": 5,
+    "n_frio_denominador": 26,
+    "pct_frio": 19.2,
+    "ic95_pct_frio": [
+     8.5,
+     37.9
+    ],
+    "vrp_mediana_mw": 0.049,
+    "n_con_ventana_gt": 8,
+    "pct_con_alerta_mirova": 0.0,
+    "ic95_pct_con_alerta": [
+     0.0,
+     32.4
+    ]
+   }
+  },
+  "Llaima": {
+   "viejo": {
+    "n_summit": 252,
+    "fuentes": {
+     "test1_roi": 206,
+     "ctx_cluster": 39,
+     "test1": 7
+    },
+    "n_test1_roi": 206,
+    "n_todos_v375": 394,
+    "pct_test1_roi_sobre_todos": 52.3,
+    "ic95_pct_test1_roi_sobre_todos": [
+     47.4,
+     57.2
+    ],
+    "pct_summit_sobre_todos": 64.0,
+    "pct_test1_roi_sobre_summit": 81.7,
+    "ic95_pct_test1_roi_sobre_summit": [
+     76.5,
+     86.0
+    ],
+    "t_bg_mediana_k": 268.4,
+    "pct_first_pass_vacio": 94.0,
+    "base_falso_total": 175,
+    "base_falso_test1_roi": 157,
+    "base_falso_pct_alcanzable": 89.7,
+    "n_1px": 206,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 2.85,
+    "pct_en_corona": 87.9,
+    "n_frio": 157,
+    "n_frio_denominador": 206,
+    "pct_frio": 76.2,
+    "ic95_pct_frio": [
+     70.0,
+     81.5
+    ],
+    "vrp_mediana_mw": 0.044,
+    "n_con_ventana_gt": 206,
+    "pct_con_alerta_mirova": 0.0,
+    "ic95_pct_con_alerta": [
+     0.0,
+     1.8
+    ]
+   },
+   "nuevo": {
+    "n_summit": 34,
+    "fuentes": {
+     "test1_roi": 21,
+     "ctx_cluster": 13
+    },
+    "n_test1_roi": 21,
+    "n_todos_v375": 40,
+    "pct_test1_roi_sobre_todos": 52.5,
+    "ic95_pct_test1_roi_sobre_todos": [
+     37.5,
+     67.1
+    ],
+    "pct_summit_sobre_todos": 85.0,
+    "pct_test1_roi_sobre_summit": 61.8,
+    "ic95_pct_test1_roi_sobre_summit": [
+     45.0,
+     76.1
+    ],
+    "t_bg_mediana_k": 258.9,
+    "pct_first_pass_vacio": 70.6,
+    "base_falso_total": 12,
+    "base_falso_test1_roi": 10,
+    "base_falso_pct_alcanzable": 83.3,
+    "n_1px": 20,
+    "pct_1px": 95.2,
+    "dist_mediana_km": 2.75,
+    "pct_en_corona": 76.2,
+    "n_frio": 10,
+    "n_frio_denominador": 21,
+    "pct_frio": 47.6,
+    "ic95_pct_frio": [
+     28.3,
+     67.6
+    ],
+    "vrp_mediana_mw": 0.044,
+    "n_con_ventana_gt": 7,
+    "pct_con_alerta_mirova": 0.0,
+    "ic95_pct_con_alerta": [
+     0.0,
+     35.4
+    ]
+   }
+  },
+  "NevadosDeChillan": {
+   "viejo": {
+    "n_summit": 251,
+    "fuentes": {
+     "test1_roi": 193,
+     "ctx_cluster": 58
+    },
+    "n_test1_roi": 193,
+    "n_todos_v375": 388,
+    "pct_test1_roi_sobre_todos": 49.7,
+    "ic95_pct_test1_roi_sobre_todos": [
+     44.8,
+     54.7
+    ],
+    "pct_summit_sobre_todos": 64.7,
+    "pct_test1_roi_sobre_summit": 76.9,
+    "ic95_pct_test1_roi_sobre_summit": [
+     71.3,
+     81.7
+    ],
+    "t_bg_mediana_k": 268.3,
+    "pct_first_pass_vacio": 90.8,
+    "base_falso_total": 117,
+    "base_falso_test1_roi": 81,
+    "base_falso_pct_alcanzable": 69.2,
+    "n_1px": 193,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 2.7,
+    "pct_en_corona": 60.6,
+    "n_frio": 84,
+    "n_frio_denominador": 113,
+    "pct_frio": 74.3,
+    "ic95_pct_frio": [
+     65.6,
+     81.5
+    ],
+    "vrp_mediana_mw": 0.035,
+    "n_con_ventana_gt": 193,
+    "pct_con_alerta_mirova": 1.6,
+    "ic95_pct_con_alerta": [
+     0.5,
+     4.5
+    ]
+   },
+   "nuevo": {
+    "n_summit": 32,
+    "fuentes": {
+     "test1_roi": 17,
+     "ctx_cluster": 15
+    },
+    "n_test1_roi": 17,
+    "n_todos_v375": 41,
+    "pct_test1_roi_sobre_todos": 41.5,
+    "ic95_pct_test1_roi_sobre_todos": [
+     27.8,
+     56.6
+    ],
+    "pct_summit_sobre_todos": 78.0,
+    "pct_test1_roi_sobre_summit": 53.1,
+    "ic95_pct_test1_roi_sobre_summit": [
+     36.4,
+     69.1
+    ],
+    "t_bg_mediana_k": 263.9,
+    "pct_first_pass_vacio": 78.1,
+    "base_falso_total": 17,
+    "base_falso_test1_roi": 9,
+    "base_falso_pct_alcanzable": 52.9,
+    "n_1px": 17,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 2.62,
+    "pct_en_corona": 70.6,
+    "n_frio": 9,
+    "n_frio_denominador": 17,
+    "pct_frio": 52.9,
+    "ic95_pct_frio": [
+     31.0,
+     73.8
+    ],
+    "vrp_mediana_mw": 0.036,
+    "n_con_ventana_gt": 7,
+    "pct_con_alerta_mirova": 0.0,
+    "ic95_pct_con_alerta": [
+     0.0,
+     35.4
+    ]
+   }
+  },
+  "Isluga": {
+   "viejo": {
+    "n_summit": 289,
+    "fuentes": {
+     "ctx_cluster": 170,
+     "test1_roi": 93,
+     "eruption": 13,
+     "test1": 10,
+     "cluster_rescue": 3
+    },
+    "n_test1_roi": 93,
+    "n_todos_v375": 310,
+    "pct_test1_roi_sobre_todos": 30.0,
+    "ic95_pct_test1_roi_sobre_todos": [
+     25.2,
+     35.3
+    ],
+    "pct_summit_sobre_todos": 93.2,
+    "pct_test1_roi_sobre_summit": 32.2,
+    "ic95_pct_test1_roi_sobre_summit": [
+     27.1,
+     37.8
+    ],
+    "t_bg_mediana_k": 265.7,
+    "pct_first_pass_vacio": 44.6,
+    "base_falso_total": 24,
+    "base_falso_test1_roi": 21,
+    "base_falso_pct_alcanzable": 87.5,
+    "n_1px": 92,
+    "pct_1px": 98.9,
+    "dist_mediana_km": 2.75,
+    "pct_en_corona": 69.9,
+    "n_frio": 34,
+    "n_frio_denominador": 93,
+    "pct_frio": 36.6,
+    "ic95_pct_frio": [
+     27.5,
+     46.7
+    ],
+    "vrp_mediana_mw": 0.06,
+    "n_con_ventana_gt": 93,
+    "pct_con_alerta_mirova": 64.5,
+    "ic95_pct_con_alerta": [
+     54.4,
+     73.5
+    ]
+   },
+   "nuevo": {
+    "n_summit": 33,
+    "fuentes": {
+     "ctx_cluster": 29,
+     "test1_roi": 4
+    },
+    "n_test1_roi": 4,
+    "n_todos_v375": 33,
+    "pct_test1_roi_sobre_todos": 12.1,
+    "ic95_pct_test1_roi_sobre_todos": [
+     4.8,
+     27.3
+    ],
+    "pct_summit_sobre_todos": 100.0,
+    "pct_test1_roi_sobre_summit": 12.1,
+    "ic95_pct_test1_roi_sobre_summit": [
+     4.8,
+     27.3
+    ],
+    "t_bg_mediana_k": 268.4,
+    "pct_first_pass_vacio": 24.2,
+    "base_falso_total": 1,
+    "base_falso_test1_roi": 0,
+    "base_falso_pct_alcanzable": 0.0,
+    "n_1px": 4,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 2.84,
+    "pct_en_corona": 100.0,
+    "n_frio": 0,
+    "n_frio_denominador": 4,
+    "pct_frio": 0.0,
+    "ic95_pct_frio": [
+     0.0,
+     49.0
+    ],
+    "vrp_mediana_mw": 0.056,
+    "n_con_ventana_gt": 1,
+    "pct_con_alerta_mirova": 100.0,
+    "ic95_pct_con_alerta": [
+     20.7,
+     100.0
+    ]
+   }
+  },
+  "Lastarria": {
+   "viejo": {
+    "n_summit": 260,
+    "fuentes": {
+     "test1_roi": 209,
+     "ctx_cluster": 51
+    },
+    "n_test1_roi": 209,
+    "n_todos_v375": 325,
+    "pct_test1_roi_sobre_todos": 64.3,
+    "ic95_pct_test1_roi_sobre_todos": [
+     59.0,
+     69.3
+    ],
+    "pct_summit_sobre_todos": 80.0,
+    "pct_test1_roi_sobre_summit": 80.4,
+    "ic95_pct_test1_roi_sobre_summit": [
+     75.1,
+     84.8
+    ],
+    "t_bg_mediana_k": 262.4,
+    "pct_first_pass_vacio": 74.6,
+    "base_falso_total": 1,
+    "base_falso_test1_roi": 1,
+    "base_falso_pct_alcanzable": 100.0,
+    "n_1px": 209,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 2.46,
+    "pct_en_corona": 45.0,
+    "n_frio": 2,
+    "n_frio_denominador": 69,
+    "pct_frio": 2.9,
+    "ic95_pct_frio": [
+     0.8,
+     10.0
+    ],
+    "vrp_mediana_mw": 0.016,
+    "n_con_ventana_gt": 209,
+    "pct_con_alerta_mirova": 56.9,
+    "ic95_pct_con_alerta": [
+     50.2,
+     63.5
+    ]
+   },
+   "nuevo": {
+    "n_summit": 31,
+    "fuentes": {
+     "ctx_cluster": 20,
+     "test1_roi": 11
+    },
+    "n_test1_roi": 11,
+    "n_todos_v375": 35,
+    "pct_test1_roi_sobre_todos": 31.4,
+    "ic95_pct_test1_roi_sobre_todos": [
+     18.6,
+     48.0
+    ],
+    "pct_summit_sobre_todos": 88.6,
+    "pct_test1_roi_sobre_summit": 35.5,
+    "ic95_pct_test1_roi_sobre_summit": [
+     21.1,
+     53.1
+    ],
+    "t_bg_mediana_k": 260.5,
+    "pct_first_pass_vacio": 32.3,
+    "base_falso_total": 6,
+    "base_falso_test1_roi": 4,
+    "base_falso_pct_alcanzable": 66.7,
+    "n_1px": 11,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 2.6,
+    "pct_en_corona": 54.5,
+    "n_frio": 4,
+    "n_frio_denominador": 11,
+    "pct_frio": 36.4,
+    "ic95_pct_frio": [
+     15.2,
+     64.6
+    ],
+    "vrp_mediana_mw": 0.039,
+    "n_con_ventana_gt": 4,
+    "pct_con_alerta_mirova": 0.0,
+    "ic95_pct_con_alerta": [
+     0.0,
+     49.0
+    ]
+   }
+  },
+  "Chaiten": {
+   "viejo": {
+    "n_summit": 292,
+    "fuentes": {
+     "test1_roi": 169,
+     "ctx_cluster": 123
+    },
+    "n_test1_roi": 169,
+    "n_todos_v375": 424,
+    "pct_test1_roi_sobre_todos": 39.9,
+    "ic95_pct_test1_roi_sobre_todos": [
+     35.3,
+     44.6
+    ],
+    "pct_summit_sobre_todos": 68.9,
+    "pct_test1_roi_sobre_summit": 57.9,
+    "ic95_pct_test1_roi_sobre_summit": [
+     52.1,
+     63.4
+    ],
+    "t_bg_mediana_k": 270.4,
+    "pct_first_pass_vacio": 86.0,
+    "base_falso_total": 77,
+    "base_falso_test1_roi": 66,
+    "base_falso_pct_alcanzable": 85.7,
+    "n_1px": 163,
+    "pct_1px": 96.4,
+    "dist_mediana_km": 2.6,
+    "pct_en_corona": 57.4,
+    "n_frio": 77,
+    "n_frio_denominador": 169,
+    "pct_frio": 45.6,
+    "ic95_pct_frio": [
+     38.2,
+     53.1
+    ],
+    "vrp_mediana_mw": 0.049,
+    "n_con_ventana_gt": 169,
+    "pct_con_alerta_mirova": 10.7,
+    "ic95_pct_con_alerta": [
+     6.8,
+     16.2
+    ]
+   },
+   "nuevo": {
+    "n_summit": 36,
+    "fuentes": {
+     "ctx_cluster": 19,
+     "test1_roi": 17
+    },
+    "n_test1_roi": 17,
+    "n_todos_v375": 43,
+    "pct_test1_roi_sobre_todos": 39.5,
+    "ic95_pct_test1_roi_sobre_todos": [
+     26.4,
+     54.4
+    ],
+    "pct_summit_sobre_todos": 83.7,
+    "pct_test1_roi_sobre_summit": 47.2,
+    "ic95_pct_test1_roi_sobre_summit": [
+     32.0,
+     63.0
+    ],
+    "t_bg_mediana_k": 259.4,
+    "pct_first_pass_vacio": 69.4,
+    "base_falso_total": 5,
+    "base_falso_test1_roi": 1,
+    "base_falso_pct_alcanzable": 20.0,
+    "n_1px": 15,
+    "pct_1px": 88.2,
+    "dist_mediana_km": 2.13,
+    "pct_en_corona": 47.1,
+    "n_frio": 1,
+    "n_frio_denominador": 17,
+    "pct_frio": 5.9,
+    "ic95_pct_frio": [
+     1.0,
+     27.0
+    ],
+    "vrp_mediana_mw": 0.041,
+    "n_con_ventana_gt": 4,
+    "pct_con_alerta_mirova": 0.0,
+    "ic95_pct_con_alerta": [
+     0.0,
+     49.0
+    ]
+   }
+  },
+  "PlanchonPeteroa": {
+   "viejo": {
+    "n_summit": 222,
+    "fuentes": {
+     "test1_roi": 169,
+     "ctx_cluster": 51,
+     "test1": 2
+    },
+    "n_test1_roi": 169,
+    "n_todos_v375": 368,
+    "pct_test1_roi_sobre_todos": 45.9,
+    "ic95_pct_test1_roi_sobre_todos": [
+     40.9,
+     51.0
+    ],
+    "pct_summit_sobre_todos": 60.3,
+    "pct_test1_roi_sobre_summit": 76.1,
+    "ic95_pct_test1_roi_sobre_summit": [
+     70.1,
+     81.3
+    ],
+    "t_bg_mediana_k": 266.4,
+    "pct_first_pass_vacio": 85.1,
+    "base_falso_total": 106,
+    "base_falso_test1_roi": 96,
+    "base_falso_pct_alcanzable": 90.6,
+    "n_1px": 169,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 2.59,
+    "pct_en_corona": 57.4,
+    "n_frio": 141,
+    "n_frio_denominador": 169,
+    "pct_frio": 83.4,
+    "ic95_pct_frio": [
+     77.1,
+     88.3
+    ],
+    "vrp_mediana_mw": 0.04,
+    "n_con_ventana_gt": 169,
+    "pct_con_alerta_mirova": 33.1,
+    "ic95_pct_con_alerta": [
+     26.5,
+     40.5
+    ]
+   },
+   "nuevo": {
+    "n_summit": 33,
+    "fuentes": {
+     "test1_roi": 25,
+     "ctx_cluster": 8
+    },
+    "n_test1_roi": 25,
+    "n_todos_v375": 38,
+    "pct_test1_roi_sobre_todos": 65.8,
+    "ic95_pct_test1_roi_sobre_todos": [
+     49.9,
+     78.8
+    ],
+    "pct_summit_sobre_todos": 86.8,
+    "pct_test1_roi_sobre_summit": 75.8,
+    "ic95_pct_test1_roi_sobre_summit": [
+     59.0,
+     87.2
+    ],
+    "t_bg_mediana_k": 259.6,
+    "pct_first_pass_vacio": 66.7,
+    "base_falso_total": 12,
+    "base_falso_test1_roi": 11,
+    "base_falso_pct_alcanzable": 91.7,
+    "n_1px": 25,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 2.79,
+    "pct_en_corona": 64.0,
+    "n_frio": 11,
+    "n_frio_denominador": 25,
+    "pct_frio": 44.0,
+    "ic95_pct_frio": [
+     26.7,
+     62.9
+    ],
+    "vrp_mediana_mw": 0.035,
+    "n_con_ventana_gt": 9,
+    "pct_con_alerta_mirova": 22.2,
+    "ic95_pct_con_alerta": [
+     6.3,
+     54.7
+    ]
+   }
+  },
+  "PuyehueCordonCaulle": {
+   "viejo": {
+    "n_summit": 278,
+    "fuentes": {
+     "ctx_cluster": 220,
+     "test1_roi": 56,
+     "test1": 2
+    },
+    "n_test1_roi": 56,
+    "n_todos_v375": 409,
+    "pct_test1_roi_sobre_todos": 13.7,
+    "ic95_pct_test1_roi_sobre_todos": [
+     10.7,
+     17.4
+    ],
+    "pct_summit_sobre_todos": 68.0,
+    "pct_test1_roi_sobre_summit": 20.1,
+    "ic95_pct_test1_roi_sobre_summit": [
+     15.9,
+     25.3
+    ],
+    "t_bg_mediana_k": 268.0,
+    "pct_first_pass_vacio": 37.8,
+    "base_falso_total": 54,
+    "base_falso_test1_roi": 29,
+    "base_falso_pct_alcanzable": 53.7,
+    "n_1px": 55,
+    "pct_1px": 98.2,
+    "dist_mediana_km": 2.53,
+    "pct_en_corona": 50.0,
+    "n_frio": 36,
+    "n_frio_denominador": 56,
+    "pct_frio": 64.3,
+    "ic95_pct_frio": [
+     51.2,
+     75.5
+    ],
+    "vrp_mediana_mw": 0.04,
+    "n_con_ventana_gt": 56,
+    "pct_con_alerta_mirova": 23.2,
+    "ic95_pct_con_alerta": [
+     14.1,
+     35.8
+    ]
+   },
+   "nuevo": {
+    "n_summit": 40,
+    "fuentes": {
+     "ctx_cluster": 37,
+     "test1_roi": 3
+    },
+    "n_test1_roi": 3,
+    "n_todos_v375": 41,
+    "pct_test1_roi_sobre_todos": 7.3,
+    "ic95_pct_test1_roi_sobre_todos": [
+     2.5,
+     19.4
+    ],
+    "pct_summit_sobre_todos": 97.6,
+    "pct_test1_roi_sobre_summit": 7.5,
+    "ic95_pct_test1_roi_sobre_summit": [
+     2.6,
+     19.9
+    ],
+    "t_bg_mediana_k": 261.2,
+    "pct_first_pass_vacio": 22.5,
+    "base_falso_total": 6,
+    "base_falso_test1_roi": 2,
+    "base_falso_pct_alcanzable": 33.3,
+    "n_1px": 3,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 0.44,
+    "pct_en_corona": 0.0,
+    "n_frio": 2,
+    "n_frio_denominador": 3,
+    "pct_frio": 66.7,
+    "ic95_pct_frio": [
+     20.8,
+     93.9
+    ],
+    "vrp_mediana_mw": 0.058,
+    "n_con_ventana_gt": 0,
+    "pct_con_alerta_mirova": null,
+    "ic95_pct_con_alerta": null
+   }
+  },
+  "Tupungatito": {
+   "viejo": {
+    "n_summit": 193,
+    "fuentes": {
+     "test1_roi": 190,
+     "ctx_cluster": 3
+    },
+    "n_test1_roi": 190,
+    "n_todos_v375": 370,
+    "pct_test1_roi_sobre_todos": 51.4,
+    "ic95_pct_test1_roi_sobre_todos": [
+     46.3,
+     56.4
+    ],
+    "pct_summit_sobre_todos": 52.2,
+    "pct_test1_roi_sobre_summit": 98.4,
+    "ic95_pct_test1_roi_sobre_summit": [
+     95.5,
+     99.5
+    ],
+    "t_bg_mediana_k": 263.2,
+    "pct_first_pass_vacio": 93.8,
+    "base_falso_total": 91,
+    "base_falso_test1_roi": 89,
+    "base_falso_pct_alcanzable": 97.8,
+    "n_1px": 190,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 2.22,
+    "pct_en_corona": 44.2,
+    "n_frio": 166,
+    "n_frio_denominador": 190,
+    "pct_frio": 87.4,
+    "ic95_pct_frio": [
+     81.9,
+     91.4
+    ],
+    "vrp_mediana_mw": 0.053,
+    "n_con_ventana_gt": 190,
+    "pct_con_alerta_mirova": 52.1,
+    "ic95_pct_con_alerta": [
+     45.0,
+     59.1
+    ]
+   },
+   "nuevo": {
+    "n_summit": 35,
+    "fuentes": {
+     "ctx_cluster": 22,
+     "test1_roi": 13
+    },
+    "n_test1_roi": 13,
+    "n_todos_v375": 37,
+    "pct_test1_roi_sobre_todos": 35.1,
+    "ic95_pct_test1_roi_sobre_todos": [
+     21.8,
+     51.2
+    ],
+    "pct_summit_sobre_todos": 94.6,
+    "pct_test1_roi_sobre_summit": 37.1,
+    "ic95_pct_test1_roi_sobre_summit": [
+     23.2,
+     53.7
+    ],
+    "t_bg_mediana_k": 246.9,
+    "pct_first_pass_vacio": 48.6,
+    "base_falso_total": 7,
+    "base_falso_test1_roi": 3,
+    "base_falso_pct_alcanzable": 42.9,
+    "n_1px": 13,
+    "pct_1px": 100.0,
+    "dist_mediana_km": 2.54,
+    "pct_en_corona": 53.8,
+    "n_frio": 3,
+    "n_frio_denominador": 13,
+    "pct_frio": 23.1,
+    "ic95_pct_frio": [
+     8.2,
+     50.3
+    ],
+    "vrp_mediana_mw": 0.028,
+    "n_con_ventana_gt": 5,
+    "pct_con_alerta_mirova": 40.0,
+    "ic95_pct_con_alerta": [
+     11.8,
+     76.9
+    ]
+   }
+  }
+ },
+ "serie_mensual_test1_roi_sobre_todos_v375": {
+  "2026-06": {
+   "n_v375": 1395,
+   "n_test1_roi": 685,
+   "pct": 49.1,
+   "ic95": [
+    46.5,
+    51.7
+   ]
+  },
+  "2026-07": {
+   "n_v375": 1374,
+   "n_test1_roi": 549,
+   "pct": 40.0,
+   "ic95": [
+    37.4,
+    42.6
+   ]
+  },
+  "2026-08": {
+   "n_v375": 1323,
+   "n_test1_roi": 655,
+   "pct": 49.5,
+   "ic95": [
+    46.8,
+    52.2
+   ]
+  },
+  "post-#535": {
+   "n_v375": 423,
+   "n_test1_roi": 165,
+   "pct": 39.0,
+   "ic95": [
+    34.5,
+    43.7
+   ]
+  }
+ },
+ "noches_catb_ventana_ab": {
+  "ventana": [
+   "2026-06-01",
+   "2026-08-31"
+  ],
+  "por_volcan": {
+   "Villarrica": {
+    "noches_catb": 14,
+    "por_test1_roi": 13,
+    "umbral_10pct_noches": 1.4
+   },
+   "Lascar": {
+    "noches_catb": 61,
+    "por_test1_roi": 39,
+    "umbral_10pct_noches": 6.1
+   },
+   "Copahue": {
+    "noches_catb": 3,
+    "por_test1_roi": 3,
+    "umbral_10pct_noches": 0.3
+   },
+   "Llaima": {
+    "noches_catb": 0,
+    "por_test1_roi": 0,
+    "umbral_10pct_noches": 0.0
+   },
+   "NevadosDeChillan": {
+    "noches_catb": 3,
+    "por_test1_roi": 3,
+    "umbral_10pct_noches": 0.3
+   },
+   "Isluga": {
+    "noches_catb": 74,
+    "por_test1_roi": 38,
+    "umbral_10pct_noches": 7.4
+   },
+   "Lastarria": {
+    "noches_catb": 51,
+    "por_test1_roi": 48,
+    "umbral_10pct_noches": 5.1
+   },
+   "Chaiten": {
+    "noches_catb": 15,
+    "por_test1_roi": 8,
+    "umbral_10pct_noches": 1.5
+   },
+   "PlanchonPeteroa": {
+    "noches_catb": 28,
+    "por_test1_roi": 24,
+    "umbral_10pct_noches": 2.8
+   },
+   "PuyehueCordonCaulle": {
+    "noches_catb": 37,
+    "por_test1_roi": 10,
+    "umbral_10pct_noches": 3.7
+   },
+   "Tupungatito": {
+    "noches_catb": 28,
+    "por_test1_roi": 28,
+    "umbral_10pct_noches": 2.8
+   }
+  }
+ },
+ "agregado_11_tier_a": {
+  "viejo": {
+   "n_summit": 2835,
+   "n_todos_v375": 4092,
+   "n_test1_roi": 1889,
+   "pct_test1_roi_sobre_todos": 46.2,
+   "ic95_pct_test1_roi_sobre_todos": [
+    44.6,
+    47.7
+   ],
+   "pct_summit_sobre_todos": 69.3,
+   "pct_test1_roi_sobre_summit": 66.6,
+   "base_falso_total": 974,
+   "base_falso_test1_roi": 847,
+   "base_falso_pct_alcanzable": 87.0,
+   "n_frio": 1056,
+   "n_frio_denominador": 1591,
+   "pct_frio": 66.4,
+   "ic95_pct_frio": [
+    64.0,
+    68.7
+   ]
+  },
+  "nuevo": {
+   "n_summit": 375,
+   "n_todos_v375": 423,
+   "n_test1_roi": 165,
+   "pct_test1_roi_sobre_todos": 39.0,
+   "ic95_pct_test1_roi_sobre_todos": [
+    34.5,
+    43.7
+   ],
+   "pct_summit_sobre_todos": 88.7,
+   "pct_test1_roi_sobre_summit": 44.0,
+   "base_falso_total": 91,
+   "base_falso_test1_roi": 57,
+   "base_falso_pct_alcanzable": 62.6,
+   "n_frio": 57,
+   "n_frio_denominador": 165,
+   "pct_frio": 34.5,
+   "ic95_pct_frio": [
+    27.7,
+    42.1
+   ]
+  }
+ },
+ "ultimo_record": "2026-09-06 06:36"
+}
