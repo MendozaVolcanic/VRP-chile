@@ -1,0 +1,893 @@
+{
+ "generated_utc": "2026-09-07 06:33 UTC",
+ "git_head": "a390a24fd",
+ "ventana": {
+  "desde": "2026-01-01",
+  "hasta": "2026-09-06"
+ },
+ "definiciones": "(heredadas de las auditorías, citadas por script de origen)\n======================================================================\nTier A       = los 11 volcanes con radius_km = 25 en volcanoes.yaml (S14).\nBucket       = MODIS (MODIS_*), VIIRS750 (VIIRS_*_750), VIIRS375 (VIIRS_* sin sufijo). A48.\nVentana      = --desde .. --hasta (default 2026-01-01 .. último record), por datetime_utc.\nNoche ALERTA = (volcán, bucket, fecha UTC) con ≥1 fila ALERTA_TERMICA/ALERTA_TERMICA_OCR\n               en CONS ∪ OCR (loader canónico A11; nocturna 03-09 UTC según el loader).\n               Origen: experiments/_s119_audit/eje2_recall_magnitud.py.\nRecord CRÁTER  = pc.vrp_mw > 0 y pc.vrp_mw ≤ 50 000 y pc.centroid_dist_km ≤ inner_radius_km.\nRecord DASHBOARD = CRÁTER y distance_class ∈ {summit, None}. (S119/S114.)\nRecall       = noches ALERTA con ≥1 record DASHBOARD del mismo (volcán, bucket, fecha) /\n               noches ALERTA. Se reporta también con CRÁTER (detección sin la etiqueta A46).\nPar por pasada = record DASHBOARD × fila ALERTA del mismo bucket con |Δt| ≤ 20 min y\n               VRP_MW > 0; si hay varias, la más cercana. Origen:\n               experiments/_s131_audit/magnitud/03_pares_por_pasada.py.\nMagnitud nuestra = f5_core_vrp_mw si bucket VIIRS375 y el campo existe (lo que el operador\n               ve, S132, A10 matiz), si no pc.vrp_mw.\nRazón        = mediana de (nuestra / MIROVA) sobre los pares; IQR; n pares.\nSin alerta   = noches con record DASHBOARD y sin noche ALERTA. NO se rotulan «falsos\n               positivos»: A54 (95 % son anomalías físicamente reales o fallas del cruce).",
+ "n_volcanes_configurados": 45,
+ "n_tier_a": 11,
+ "tier_a": [
+  "PuyehueCordonCaulle",
+  "Villarrica",
+  "Lascar",
+  "Copahue",
+  "NevadosDeChillan",
+  "Llaima",
+  "Chaiten",
+  "PlanchonPeteroa",
+  "Lastarria",
+  "Isluga",
+  "Tupungatito"
+ ],
+ "tabla2": [
+  {
+   "volcano": "PuyehueCordonCaulle",
+   "display_name": "Puyehue - Cordón Caulle",
+   "vent_lat": -40.525499,
+   "vent_lon": -72.146137,
+   "mirova_center_lat": -40.5903,
+   "mirova_center_lon": -72.1187,
+   "radius_km": 25,
+   "inner_radius_km": 20,
+   "n_records": 2565,
+   "n_por_bucket": {
+    "MODIS": 529,
+    "VIIRS375": 1022,
+    "VIIRS750": 1014
+   },
+   "primer_record": "2026-01-29 02:35",
+   "ultimo_record": "2026-09-06 07:30"
+  },
+  {
+   "volcano": "Villarrica",
+   "display_name": "Villarrica",
+   "vent_lat": -39.420227,
+   "vent_lon": -71.939876,
+   "mirova_center_lat": -39.42177,
+   "mirova_center_lon": -71.93391,
+   "radius_km": 25,
+   "inner_radius_km": 5,
+   "n_records": 2805,
+   "n_por_bucket": {
+    "MODIS": 560,
+    "VIIRS375": 1124,
+    "VIIRS750": 1121
+   },
+   "primer_record": "2026-01-01 02:20",
+   "ultimo_record": "2026-09-06 07:30"
+  },
+  {
+   "volcano": "Lascar",
+   "display_name": "Láscar",
+   "vent_lat": -23.36293,
+   "vent_lon": -67.731416,
+   "mirova_center_lat": -23.37041,
+   "mirova_center_lon": -67.73102,
+   "radius_km": 25,
+   "inner_radius_km": 5,
+   "n_records": 2048,
+   "n_por_bucket": {
+    "MODIS": 421,
+    "VIIRS375": 817,
+    "VIIRS750": 810
+   },
+   "primer_record": "2026-01-29 01:00",
+   "ultimo_record": "2026-09-06 07:25"
+  },
+  {
+   "volcano": "Copahue",
+   "display_name": "Copahue",
+   "vent_lat": -37.856,
+   "vent_lon": -71.183,
+   "mirova_center_lat": -37.85617,
+   "mirova_center_lon": -71.18458,
+   "radius_km": 25,
+   "inner_radius_km": 4,
+   "n_records": 2408,
+   "n_por_bucket": {
+    "MODIS": 496,
+    "VIIRS375": 960,
+    "VIIRS750": 952
+   },
+   "primer_record": "2026-01-29 02:35",
+   "ultimo_record": "2026-09-06 07:30"
+  },
+  {
+   "volcano": "NevadosDeChillan",
+   "display_name": "Nevados de Chillán",
+   "vent_lat": -36.863,
+   "vent_lon": -71.377,
+   "mirova_center_lat": -36.86483,
+   "mirova_center_lon": -71.38068,
+   "radius_km": 25,
+   "inner_radius_km": 5,
+   "n_records": 2414,
+   "n_por_bucket": {
+    "MODIS": 495,
+    "VIIRS375": 967,
+    "VIIRS750": 952
+   },
+   "primer_record": "2026-01-29 02:35",
+   "ultimo_record": "2026-09-06 07:30"
+  },
+  {
+   "volcano": "Llaima",
+   "display_name": "Llaima",
+   "vent_lat": -38.692,
+   "vent_lon": -71.729,
+   "mirova_center_lat": -38.69215,
+   "mirova_center_lon": -71.73063,
+   "radius_km": 25,
+   "inner_radius_km": 5,
+   "n_records": 2474,
+   "n_por_bucket": {
+    "MODIS": 496,
+    "VIIRS375": 990,
+    "VIIRS750": 988
+   },
+   "primer_record": "2026-01-29 02:35",
+   "ultimo_record": "2026-09-06 07:30"
+  },
+  {
+   "volcano": "Chaiten",
+   "display_name": "Chaitén",
+   "vent_lat": -42.8344815,
+   "vent_lon": -72.6528875,
+   "mirova_center_lat": -42.83496,
+   "mirova_center_lon": -72.65005,
+   "radius_km": 25,
+   "inner_radius_km": 5,
+   "n_records": 2650,
+   "n_por_bucket": {
+    "MODIS": 562,
+    "VIIRS375": 1048,
+    "VIIRS750": 1040
+   },
+   "primer_record": "2026-01-29 02:35",
+   "ultimo_record": "2026-09-06 07:30"
+  },
+  {
+   "volcano": "PlanchonPeteroa",
+   "display_name": "Planchón-Peteroa",
+   "vent_lat": -35.241099,
+   "vent_lon": -70.573345,
+   "mirova_center_lat": -35.2232,
+   "mirova_center_lon": -70.5695,
+   "radius_km": 25,
+   "inner_radius_km": 3,
+   "n_records": 2322,
+   "n_por_bucket": {
+    "MODIS": 487,
+    "VIIRS375": 922,
+    "VIIRS750": 913
+   },
+   "primer_record": "2026-01-29 02:35",
+   "ultimo_record": "2026-09-06 07:30"
+  },
+  {
+   "volcano": "Lastarria",
+   "display_name": "Lastarria",
+   "vent_lat": -25.168,
+   "vent_lon": -68.507,
+   "mirova_center_lat": -25.16837,
+   "mirova_center_lon": -68.50807,
+   "radius_km": 25,
+   "inner_radius_km": 3,
+   "n_records": 2058,
+   "n_por_bucket": {
+    "VIIRS375": 829,
+    "VIIRS750": 815,
+    "MODIS": 414
+   },
+   "primer_record": "2026-01-29 05:12",
+   "ultimo_record": "2026-09-06 07:25"
+  },
+  {
+   "volcano": "Isluga",
+   "display_name": "Isluga",
+   "vent_lat": -19.15,
+   "vent_lon": -68.83,
+   "mirova_center_lat": -19.15212,
+   "mirova_center_lon": -68.83269,
+   "radius_km": 25,
+   "inner_radius_km": 5,
+   "n_records": 1981,
+   "n_por_bucket": {
+    "MODIS": 407,
+    "VIIRS375": 789,
+    "VIIRS750": 785
+   },
+   "primer_record": "2026-01-29 01:05",
+   "ultimo_record": "2026-09-06 07:25"
+  },
+  {
+   "volcano": "Tupungatito",
+   "display_name": "Tupungatito",
+   "vent_lat": -33.389044,
+   "vent_lon": -69.826374,
+   "mirova_center_lat": -33.42694,
+   "mirova_center_lon": -69.80039,
+   "radius_km": 25,
+   "inner_radius_km": 7,
+   "n_records": 2293,
+   "n_por_bucket": {
+    "MODIS": 467,
+    "VIIRS375": 916,
+    "VIIRS750": 910
+   },
+   "primer_record": "2026-01-29 02:35",
+   "ultimo_record": "2026-09-06 07:25"
+  }
+ ],
+ "tabla3": {
+  "fuente_validacion": "experiments/21_results.json (S14, OSF v2.5, n_rows_total=48360)",
+  "generated_utc_validacion": "2026-04-21T06:35:45.989345Z",
+  "sensores": {
+   "MODIS_1000m": {
+    "coef_codigo": {
+     "WOOSTER_COEFF": 18.9
+    },
+    "n": 13157,
+    "matched_formula": "Coppola2016_Wooster_k18.9_Apix1e6",
+    "matched_value": 18900000.0,
+    "matched_error_pct": 1.9710530679692667e-14,
+    "a_pix_mode": "nadir_fijo"
+   },
+   "VIIRS_750m": {
+    "coef_codigo": {
+     "WOOSTER_COEFF": 19.7
+    },
+    "n": 2515,
+    "matched_formula": "DiBella2024_k1.11e7",
+    "matched_value": 11100000.0,
+    "matched_error_pct": 0.16891891816305415,
+    "a_pix_mode": "nadir_fijo"
+   },
+   "VIIRS_375m": {
+    "coef_codigo": {
+     "WOOSTER_COEFF": 18.0
+    },
+    "n": 32688,
+    "matched_formula": "Laiolo2024_k18.0_Apix140625",
+    "matched_value": 2531250.0,
+    "matched_error_pct": 1.839649530104649e-14,
+    "a_pix_mode": "nadir_fijo"
+   }
+  }
+ },
+ "tabla4": {
+  "PuyehueCordonCaulle|MODIS": {
+   "volcano": "PuyehueCordonCaulle",
+   "bucket": "MODIS",
+   "n_records": 529,
+   "noches_alerta_mirova": 0,
+   "tp_dashboard": 0,
+   "tp_crater": 0,
+   "recall_dashboard": null,
+   "recall_crater": null,
+   "noches_dashboard_sin_alerta": 201,
+   "n_noches_dashboard": 201,
+   "pares_pasada": 0,
+   "razon_mediana": null,
+   "razon_q25": null,
+   "razon_q75": null,
+   "fuente_magnitud": {}
+  },
+  "PuyehueCordonCaulle|VIIRS750": {
+   "volcano": "PuyehueCordonCaulle",
+   "bucket": "VIIRS750",
+   "n_records": 1014,
+   "noches_alerta_mirova": 38,
+   "tp_dashboard": 30,
+   "tp_crater": 30,
+   "recall_dashboard": 0.789,
+   "recall_crater": 0.789,
+   "noches_dashboard_sin_alerta": 181,
+   "n_noches_dashboard": 211,
+   "pares_pasada": 38,
+   "razon_mediana": 0.691,
+   "razon_q25": 0.365,
+   "razon_q75": 1.029,
+   "fuente_magnitud": {
+    "pc.vrp_mw": 38
+   }
+  },
+  "PuyehueCordonCaulle|VIIRS375": {
+   "volcano": "PuyehueCordonCaulle",
+   "bucket": "VIIRS375",
+   "n_records": 1022,
+   "noches_alerta_mirova": 120,
+   "tp_dashboard": 104,
+   "tp_crater": 104,
+   "recall_dashboard": 0.867,
+   "recall_crater": 0.867,
+   "noches_dashboard_sin_alerta": 98,
+   "n_noches_dashboard": 202,
+   "pares_pasada": 258,
+   "razon_mediana": 1.029,
+   "razon_q25": 0.742,
+   "razon_q75": 1.498,
+   "fuente_magnitud": {
+    "f5_core_vrp_mw": 258
+   }
+  },
+  "Villarrica|MODIS": {
+   "volcano": "Villarrica",
+   "bucket": "MODIS",
+   "n_records": 560,
+   "noches_alerta_mirova": 1,
+   "tp_dashboard": 0,
+   "tp_crater": 1,
+   "recall_dashboard": 0.0,
+   "recall_crater": 1.0,
+   "noches_dashboard_sin_alerta": 44,
+   "n_noches_dashboard": 44,
+   "pares_pasada": 0,
+   "razon_mediana": null,
+   "razon_q25": null,
+   "razon_q75": null,
+   "fuente_magnitud": {}
+  },
+  "Villarrica|VIIRS750": {
+   "volcano": "Villarrica",
+   "bucket": "VIIRS750",
+   "n_records": 1121,
+   "noches_alerta_mirova": 6,
+   "tp_dashboard": 5,
+   "tp_crater": 5,
+   "recall_dashboard": 0.833,
+   "recall_crater": 0.833,
+   "noches_dashboard_sin_alerta": 146,
+   "n_noches_dashboard": 151,
+   "pares_pasada": 4,
+   "razon_mediana": 0.994,
+   "razon_q25": 0.769,
+   "razon_q75": 1.127,
+   "fuente_magnitud": {
+    "pc.vrp_mw": 4
+   }
+  },
+  "Villarrica|VIIRS375": {
+   "volcano": "Villarrica",
+   "bucket": "VIIRS375",
+   "n_records": 1124,
+   "noches_alerta_mirova": 32,
+   "tp_dashboard": 32,
+   "tp_crater": 32,
+   "recall_dashboard": 1.0,
+   "recall_crater": 1.0,
+   "noches_dashboard_sin_alerta": 203,
+   "n_noches_dashboard": 235,
+   "pares_pasada": 38,
+   "razon_mediana": 0.945,
+   "razon_q25": 0.8,
+   "razon_q75": 1.225,
+   "fuente_magnitud": {
+    "f5_core_vrp_mw": 38
+   }
+  },
+  "Lascar|MODIS": {
+   "volcano": "Lascar",
+   "bucket": "MODIS",
+   "n_records": 421,
+   "noches_alerta_mirova": 77,
+   "tp_dashboard": 9,
+   "tp_crater": 75,
+   "recall_dashboard": 0.117,
+   "recall_crater": 0.974,
+   "noches_dashboard_sin_alerta": 5,
+   "n_noches_dashboard": 14,
+   "pares_pasada": 9,
+   "razon_mediana": 0.799,
+   "razon_q25": 0.538,
+   "razon_q75": 0.965,
+   "fuente_magnitud": {
+    "pc.vrp_mw": 9
+   }
+  },
+  "Lascar|VIIRS750": {
+   "volcano": "Lascar",
+   "bucket": "VIIRS750",
+   "n_records": 810,
+   "noches_alerta_mirova": 134,
+   "tp_dashboard": 121,
+   "tp_crater": 121,
+   "recall_dashboard": 0.903,
+   "recall_crater": 0.903,
+   "noches_dashboard_sin_alerta": 49,
+   "n_noches_dashboard": 170,
+   "pares_pasada": 178,
+   "razon_mediana": 0.533,
+   "razon_q25": 0.344,
+   "razon_q75": 0.753,
+   "fuente_magnitud": {
+    "pc.vrp_mw": 178
+   }
+  },
+  "Lascar|VIIRS375": {
+   "volcano": "Lascar",
+   "bucket": "VIIRS375",
+   "n_records": 817,
+   "noches_alerta_mirova": 174,
+   "tp_dashboard": 163,
+   "tp_crater": 163,
+   "recall_dashboard": 0.937,
+   "recall_crater": 0.937,
+   "noches_dashboard_sin_alerta": 30,
+   "n_noches_dashboard": 193,
+   "pares_pasada": 316,
+   "razon_mediana": 0.53,
+   "razon_q25": 0.37,
+   "razon_q75": 0.684,
+   "fuente_magnitud": {
+    "f5_core_vrp_mw": 316
+   }
+  },
+  "Copahue|MODIS": {
+   "volcano": "Copahue",
+   "bucket": "MODIS",
+   "n_records": 496,
+   "noches_alerta_mirova": 0,
+   "tp_dashboard": 0,
+   "tp_crater": 0,
+   "recall_dashboard": null,
+   "recall_crater": null,
+   "noches_dashboard_sin_alerta": 10,
+   "n_noches_dashboard": 10,
+   "pares_pasada": 0,
+   "razon_mediana": null,
+   "razon_q25": null,
+   "razon_q75": null,
+   "fuente_magnitud": {}
+  },
+  "Copahue|VIIRS750": {
+   "volcano": "Copahue",
+   "bucket": "VIIRS750",
+   "n_records": 952,
+   "noches_alerta_mirova": 1,
+   "tp_dashboard": 1,
+   "tp_crater": 1,
+   "recall_dashboard": 1.0,
+   "recall_crater": 1.0,
+   "noches_dashboard_sin_alerta": 95,
+   "n_noches_dashboard": 96,
+   "pares_pasada": 2,
+   "razon_mediana": 1.302,
+   "razon_q25": 1.288,
+   "razon_q75": 1.317,
+   "fuente_magnitud": {
+    "pc.vrp_mw": 2
+   }
+  },
+  "Copahue|VIIRS375": {
+   "volcano": "Copahue",
+   "bucket": "VIIRS375",
+   "n_records": 960,
+   "noches_alerta_mirova": 4,
+   "tp_dashboard": 4,
+   "tp_crater": 4,
+   "recall_dashboard": 1.0,
+   "recall_crater": 1.0,
+   "noches_dashboard_sin_alerta": 210,
+   "n_noches_dashboard": 214,
+   "pares_pasada": 7,
+   "razon_mediana": 0.912,
+   "razon_q25": 0.488,
+   "razon_q75": 1.29,
+   "fuente_magnitud": {
+    "f5_core_vrp_mw": 7
+   }
+  },
+  "NevadosDeChillan|MODIS": {
+   "volcano": "NevadosDeChillan",
+   "bucket": "MODIS",
+   "n_records": 495,
+   "noches_alerta_mirova": 1,
+   "tp_dashboard": 0,
+   "tp_crater": 1,
+   "recall_dashboard": 0.0,
+   "recall_crater": 1.0,
+   "noches_dashboard_sin_alerta": 22,
+   "n_noches_dashboard": 22,
+   "pares_pasada": 0,
+   "razon_mediana": null,
+   "razon_q25": null,
+   "razon_q75": null,
+   "fuente_magnitud": {}
+  },
+  "NevadosDeChillan|VIIRS750": {
+   "volcano": "NevadosDeChillan",
+   "bucket": "VIIRS750",
+   "n_records": 952,
+   "noches_alerta_mirova": 1,
+   "tp_dashboard": 1,
+   "tp_crater": 1,
+   "recall_dashboard": 1.0,
+   "recall_crater": 1.0,
+   "noches_dashboard_sin_alerta": 57,
+   "n_noches_dashboard": 58,
+   "pares_pasada": 0,
+   "razon_mediana": null,
+   "razon_q25": null,
+   "razon_q75": null,
+   "fuente_magnitud": {}
+  },
+  "NevadosDeChillan|VIIRS375": {
+   "volcano": "NevadosDeChillan",
+   "bucket": "VIIRS375",
+   "n_records": 967,
+   "noches_alerta_mirova": 11,
+   "tp_dashboard": 5,
+   "tp_crater": 5,
+   "recall_dashboard": 0.455,
+   "recall_crater": 0.455,
+   "noches_dashboard_sin_alerta": 96,
+   "n_noches_dashboard": 101,
+   "pares_pasada": 8,
+   "razon_mediana": 1.162,
+   "razon_q25": 1.111,
+   "razon_q75": 1.261,
+   "fuente_magnitud": {
+    "f5_core_vrp_mw": 8
+   }
+  },
+  "Llaima|MODIS": {
+   "volcano": "Llaima",
+   "bucket": "MODIS",
+   "n_records": 496,
+   "noches_alerta_mirova": 0,
+   "tp_dashboard": 0,
+   "tp_crater": 0,
+   "recall_dashboard": null,
+   "recall_crater": null,
+   "noches_dashboard_sin_alerta": 22,
+   "n_noches_dashboard": 22,
+   "pares_pasada": 0,
+   "razon_mediana": null,
+   "razon_q25": null,
+   "razon_q75": null,
+   "fuente_magnitud": {}
+  },
+  "Llaima|VIIRS750": {
+   "volcano": "Llaima",
+   "bucket": "VIIRS750",
+   "n_records": 988,
+   "noches_alerta_mirova": 0,
+   "tp_dashboard": 0,
+   "tp_crater": 0,
+   "recall_dashboard": null,
+   "recall_crater": null,
+   "noches_dashboard_sin_alerta": 94,
+   "n_noches_dashboard": 94,
+   "pares_pasada": 0,
+   "razon_mediana": null,
+   "razon_q25": null,
+   "razon_q75": null,
+   "fuente_magnitud": {}
+  },
+  "Llaima|VIIRS375": {
+   "volcano": "Llaima",
+   "bucket": "VIIRS375",
+   "n_records": 990,
+   "noches_alerta_mirova": 2,
+   "tp_dashboard": 2,
+   "tp_crater": 2,
+   "recall_dashboard": 1.0,
+   "recall_crater": 1.0,
+   "noches_dashboard_sin_alerta": 204,
+   "n_noches_dashboard": 206,
+   "pares_pasada": 5,
+   "razon_mediana": 0.431,
+   "razon_q25": 0.182,
+   "razon_q75": 0.541,
+   "fuente_magnitud": {
+    "f5_core_vrp_mw": 5
+   }
+  },
+  "Chaiten|MODIS": {
+   "volcano": "Chaiten",
+   "bucket": "MODIS",
+   "n_records": 562,
+   "noches_alerta_mirova": 3,
+   "tp_dashboard": 1,
+   "tp_crater": 3,
+   "recall_dashboard": 0.333,
+   "recall_crater": 1.0,
+   "noches_dashboard_sin_alerta": 55,
+   "n_noches_dashboard": 56,
+   "pares_pasada": 0,
+   "razon_mediana": null,
+   "razon_q25": null,
+   "razon_q75": null,
+   "fuente_magnitud": {}
+  },
+  "Chaiten|VIIRS750": {
+   "volcano": "Chaiten",
+   "bucket": "VIIRS750",
+   "n_records": 1040,
+   "noches_alerta_mirova": 2,
+   "tp_dashboard": 1,
+   "tp_crater": 1,
+   "recall_dashboard": 0.5,
+   "recall_crater": 0.5,
+   "noches_dashboard_sin_alerta": 154,
+   "n_noches_dashboard": 155,
+   "pares_pasada": 1,
+   "razon_mediana": 1.15,
+   "razon_q25": 1.15,
+   "razon_q75": 1.15,
+   "fuente_magnitud": {
+    "pc.vrp_mw": 1
+   }
+  },
+  "Chaiten|VIIRS375": {
+   "volcano": "Chaiten",
+   "bucket": "VIIRS375",
+   "n_records": 1048,
+   "noches_alerta_mirova": 38,
+   "tp_dashboard": 34,
+   "tp_crater": 34,
+   "recall_dashboard": 0.895,
+   "recall_crater": 0.895,
+   "noches_dashboard_sin_alerta": 169,
+   "n_noches_dashboard": 203,
+   "pares_pasada": 62,
+   "razon_mediana": 1.312,
+   "razon_q25": 1.024,
+   "razon_q75": 1.695,
+   "fuente_magnitud": {
+    "f5_core_vrp_mw": 62
+   }
+  },
+  "PlanchonPeteroa|MODIS": {
+   "volcano": "PlanchonPeteroa",
+   "bucket": "MODIS",
+   "n_records": 487,
+   "noches_alerta_mirova": 0,
+   "tp_dashboard": 0,
+   "tp_crater": 0,
+   "recall_dashboard": null,
+   "recall_crater": null,
+   "noches_dashboard_sin_alerta": 27,
+   "n_noches_dashboard": 27,
+   "pares_pasada": 0,
+   "razon_mediana": null,
+   "razon_q25": null,
+   "razon_q75": null,
+   "fuente_magnitud": {}
+  },
+  "PlanchonPeteroa|VIIRS750": {
+   "volcano": "PlanchonPeteroa",
+   "bucket": "VIIRS750",
+   "n_records": 913,
+   "noches_alerta_mirova": 9,
+   "tp_dashboard": 4,
+   "tp_crater": 4,
+   "recall_dashboard": 0.444,
+   "recall_crater": 0.444,
+   "noches_dashboard_sin_alerta": 111,
+   "n_noches_dashboard": 115,
+   "pares_pasada": 2,
+   "razon_mediana": 6.783,
+   "razon_q25": 3.925,
+   "razon_q75": 9.642,
+   "fuente_magnitud": {
+    "pc.vrp_mw": 2
+   }
+  },
+  "PlanchonPeteroa|VIIRS375": {
+   "volcano": "PlanchonPeteroa",
+   "bucket": "VIIRS375",
+   "n_records": 922,
+   "noches_alerta_mirova": 92,
+   "tp_dashboard": 87,
+   "tp_crater": 87,
+   "recall_dashboard": 0.946,
+   "recall_crater": 0.946,
+   "noches_dashboard_sin_alerta": 106,
+   "n_noches_dashboard": 193,
+   "pares_pasada": 171,
+   "razon_mediana": 0.895,
+   "razon_q25": 0.657,
+   "razon_q75": 1.186,
+   "fuente_magnitud": {
+    "f5_core_vrp_mw": 171
+   }
+  },
+  "Lastarria|MODIS": {
+   "volcano": "Lastarria",
+   "bucket": "MODIS",
+   "n_records": 414,
+   "noches_alerta_mirova": 0,
+   "tp_dashboard": 0,
+   "tp_crater": 0,
+   "recall_dashboard": null,
+   "recall_crater": null,
+   "noches_dashboard_sin_alerta": 18,
+   "n_noches_dashboard": 18,
+   "pares_pasada": 0,
+   "razon_mediana": null,
+   "razon_q25": null,
+   "razon_q75": null,
+   "fuente_magnitud": {}
+  },
+  "Lastarria|VIIRS750": {
+   "volcano": "Lastarria",
+   "bucket": "VIIRS750",
+   "n_records": 815,
+   "noches_alerta_mirova": 0,
+   "tp_dashboard": 0,
+   "tp_crater": 0,
+   "recall_dashboard": null,
+   "recall_crater": null,
+   "noches_dashboard_sin_alerta": 122,
+   "n_noches_dashboard": 122,
+   "pares_pasada": 0,
+   "razon_mediana": null,
+   "razon_q25": null,
+   "razon_q75": null,
+   "fuente_magnitud": {}
+  },
+  "Lastarria|VIIRS375": {
+   "volcano": "Lastarria",
+   "bucket": "VIIRS375",
+   "n_records": 829,
+   "noches_alerta_mirova": 154,
+   "tp_dashboard": 140,
+   "tp_crater": 140,
+   "recall_dashboard": 0.909,
+   "recall_crater": 0.909,
+   "noches_dashboard_sin_alerta": 49,
+   "n_noches_dashboard": 189,
+   "pares_pasada": 218,
+   "razon_mediana": 0.569,
+   "razon_q25": 0.308,
+   "razon_q75": 1.032,
+   "fuente_magnitud": {
+    "f5_core_vrp_mw": 218
+   }
+  },
+  "Isluga|MODIS": {
+   "volcano": "Isluga",
+   "bucket": "MODIS",
+   "n_records": 407,
+   "noches_alerta_mirova": 0,
+   "tp_dashboard": 0,
+   "tp_crater": 0,
+   "recall_dashboard": null,
+   "recall_crater": null,
+   "noches_dashboard_sin_alerta": 15,
+   "n_noches_dashboard": 15,
+   "pares_pasada": 0,
+   "razon_mediana": null,
+   "razon_q25": null,
+   "razon_q75": null,
+   "fuente_magnitud": {}
+  },
+  "Isluga|VIIRS750": {
+   "volcano": "Isluga",
+   "bucket": "VIIRS750",
+   "n_records": 785,
+   "noches_alerta_mirova": 40,
+   "tp_dashboard": 28,
+   "tp_crater": 28,
+   "recall_dashboard": 0.7,
+   "recall_crater": 0.7,
+   "noches_dashboard_sin_alerta": 117,
+   "n_noches_dashboard": 145,
+   "pares_pasada": 27,
+   "razon_mediana": 1.003,
+   "razon_q25": 0.442,
+   "razon_q75": 3.231,
+   "fuente_magnitud": {
+    "pc.vrp_mw": 27
+   }
+  },
+  "Isluga|VIIRS375": {
+   "volcano": "Isluga",
+   "bucket": "VIIRS375",
+   "n_records": 789,
+   "noches_alerta_mirova": 156,
+   "tp_dashboard": 154,
+   "tp_crater": 154,
+   "recall_dashboard": 0.987,
+   "recall_crater": 0.987,
+   "noches_dashboard_sin_alerta": 64,
+   "n_noches_dashboard": 218,
+   "pares_pasada": 310,
+   "razon_mediana": 0.58,
+   "razon_q25": 0.361,
+   "razon_q75": 0.791,
+   "fuente_magnitud": {
+    "f5_core_vrp_mw": 310
+   }
+  },
+  "Tupungatito|MODIS": {
+   "volcano": "Tupungatito",
+   "bucket": "MODIS",
+   "n_records": 467,
+   "noches_alerta_mirova": 0,
+   "tp_dashboard": 0,
+   "tp_crater": 0,
+   "recall_dashboard": null,
+   "recall_crater": null,
+   "noches_dashboard_sin_alerta": 23,
+   "n_noches_dashboard": 23,
+   "pares_pasada": 0,
+   "razon_mediana": null,
+   "razon_q25": null,
+   "razon_q75": null,
+   "fuente_magnitud": {}
+  },
+  "Tupungatito|VIIRS750": {
+   "volcano": "Tupungatito",
+   "bucket": "VIIRS750",
+   "n_records": 910,
+   "noches_alerta_mirova": 15,
+   "tp_dashboard": 7,
+   "tp_crater": 7,
+   "recall_dashboard": 0.467,
+   "recall_crater": 0.467,
+   "noches_dashboard_sin_alerta": 107,
+   "n_noches_dashboard": 114,
+   "pares_pasada": 3,
+   "razon_mediana": 0.09,
+   "razon_q25": 0.072,
+   "razon_q75": 1.306,
+   "fuente_magnitud": {
+    "pc.vrp_mw": 3
+   }
+  },
+  "Tupungatito|VIIRS375": {
+   "volcano": "Tupungatito",
+   "bucket": "VIIRS375",
+   "n_records": 916,
+   "noches_alerta_mirova": 107,
+   "tp_dashboard": 104,
+   "tp_crater": 104,
+   "recall_dashboard": 0.972,
+   "recall_crater": 0.972,
+   "noches_dashboard_sin_alerta": 89,
+   "n_noches_dashboard": 193,
+   "pares_pasada": 209,
+   "razon_mediana": 0.645,
+   "razon_q25": 0.398,
+   "razon_q75": 0.864,
+   "fuente_magnitud": {
+    "f5_core_vrp_mw": 209
+   }
+  }
+ },
+ "agregados": {
+  "MODIS": {
+   "noches_alerta_mirova": 82,
+   "tp_dashboard": 10,
+   "tp_crater": 80,
+   "recall_dashboard": 0.122,
+   "recall_crater": 0.976,
+   "volcanes_con_razon": 1,
+   "volcanes_en_banda_0_5_2_0": 1
+  },
+  "VIIRS750": {
+   "noches_alerta_mirova": 246,
+   "tp_dashboard": 198,
+   "tp_crater": 198,
+   "recall_dashboard": 0.805,
+   "recall_crater": 0.805,
+   "volcanes_con_razon": 8,
+   "volcanes_en_banda_0_5_2_0": 6
+  },
+  "VIIRS375": {
+   "noches_alerta_mirova": 890,
+   "tp_dashboard": 829,
+   "tp_crater": 829,
+   "recall_dashboard": 0.931,
+   "recall_crater": 0.931,
+   "volcanes_con_razon": 11,
+   "volcanes_en_banda_0_5_2_0": 10
+  }
+ },
+ "n_records_tier_a_ventana": 26018
+}

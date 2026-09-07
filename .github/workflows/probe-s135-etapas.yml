@@ -7,7 +7,7 @@ name: Probe S135 etapas keep_peak (D19 / AUDIT_S134 D1-b)
 # (control). Diseño y criterio pre-registrado: experiments/_s134_audit/f3/probe_etapas_ci.md.
 # NO empuja commits ni toca data/ (queda fuera de la concurrencia push-main). Sólo VIIRS:
 # no instala la dependencia HDF4 de MODIS.
-# Archivar en _archive/ al terminar (regla S80 de plantillas).
+# Corrido S135 (6 pasadas) y paso 0 (12 pasadas cat-b/control). Archivar en _archive/ al terminar (regla S80).
 "on":
   workflow_dispatch:
     inputs:
@@ -17,6 +17,10 @@ name: Probe S135 etapas keep_peak (D19 / AUDIT_S134 D1-b)
         default: ""
       fecha:
         description: "Filtrar fecha YYYY-MM-DD. Vacío = todas"
+        required: false
+        default: ""
+      pasadas:
+        description: "Ruta a un JSON de pasadas (paso 0: experiments/_s135_probe_etapas/pasadas_paso0.json). Vacío = las 6 de S134"
         required: false
         default: ""
 
@@ -41,6 +45,7 @@ jobs:
           VRP_PROFILE: mirova_equivalent
           PROBE_VOL: ${{ github.event.inputs.vol }}
           PROBE_FECHA: ${{ github.event.inputs.fecha }}
+          PROBE_PASADAS: ${{ github.event.inputs.pasadas }}
         run: |
           mkdir -p experiments/_s135_probe_etapas/out
           python experiments/_s135_probe_etapas/probe_etapas.py | tee experiments/_s135_probe_etapas/out/report.txt

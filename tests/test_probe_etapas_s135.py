@@ -21,12 +21,13 @@ PROBE_DIR = os.path.join(ROOT, "experiments", "_s135_probe_etapas")
 sys.path.insert(0, PROBE_DIR)
 
 from analisis import (  # noqa: E402
-    CRATER_KM, PICO_LEJOS_KM, a_json, evaluar_criterio, haversine_km, octante,
+    CRATER_KM, PICO_LEJOS_KM, a_json, evaluar_criterio, evaluar_paso0, haversine_km, octante,
     perfil_bt_vs_distancia, resumir_pasada, rumbo_deg,
 )
 
 PATCH_NAMES = ("compute_test1_mir", "apply_contextual_test1_filter",
-               "first_pass_tests_2_and_3", "second_pass_adjacent", "cluster_hotspots")
+               "first_pass_tests_2_and_3", "second_pass_adjacent", "cluster_hotspots",
+               "read_viirs_l1b")
 
 
 # ---------- 1. A89: los nombres existen donde el probe los parchea ----------
@@ -159,6 +160,40 @@ def test_a_json_convierte_numpy_y_nan():
     out = a_json({"a": np.float64(1.5), "b": np.int64(2), "c": np.bool_(True),
                   "d": float("nan"), "e": np.array([1, 2])})
     assert out == {"a": 1.5, "b": 2, "c": True, "d": None, "e": [1, 2]}
+
+
+def test_nube_sospechada_cuando_el_disco_esta_muy_bajo_el_fondo():
+    cap, bt, d, c = _cap_d19()
+    r = resumir_pasada(cap, VENT[0], VENT[1], VENT[0], VENT[1], 300.0)   # fondo 300 K: disco ~275 → −25 K
+    assert r["nube"]["sospechada"] is True
+    r = resumir_pasada(cap, VENT[0], VENT[1], VENT[0], VENT[1], 280.0)   # −5 K: cota, no nube
+    assert r["nube"]["sospechada"] is False
+    assert r["nube"]["i05_disco_mediana_k"] is None                     # sin I05 capturado
+    cap["l1b"] = {"I04": bt, "I05": bt - 3.0}
+    r = resumir_pasada(cap, VENT[0], VENT[1], VENT[0], VENT[1], 280.0)
+    assert abs(r["nube"]["i05_disco_mediana_k"] - (r["nube"]["i04_disco_mediana_k"] - 3.0)) < 0.05
+
+
+def _p0(vol, clase, d_pico, n_inter, n_fp=0, nube=False, ok=True):
+    return {"volcan": vol, "pasada_utc": "x", "clase": clase, "ok": ok, "resumen": {
+        "test1": {"corrio": True, "n_mask_a_menos_0_5km": 1},
+        "keep_peak": (None if d_pico is None else {"dist_vent_km": d_pico, "bt_menos_t_bg_global_k": 1.0}),
+        "interseccion_sin_pico": {"n": n_inter},
+        "first_pass": {"n_hot": n_fp},
+        "nube": {"sospechada": nube},
+    }}
+
+
+def test_paso0_tension_real_aparente_e_intermedia():
+    real = [_p0("Tupungatito", "cat_b", 0.2, 0, 0)] * 2 + [_p0("Lastarria", "cat_b", 2.3, 1, 0)]
+    assert evaluar_paso0(real)["veredicto"].startswith("TENSIÓN REAL")
+    aparente = [_p0("Tupungatito", "cat_b", 0.2, 2, 0), _p0("Lastarria", "cat_b", 2.3, 0, 3)]
+    assert evaluar_paso0(aparente)["veredicto"].startswith("TENSIÓN APARENTE")
+    inter = [_p0("Lastarria", "cat_b", 2.3, 0, 0)]
+    assert evaluar_paso0(inter)["veredicto"].startswith("INTERMEDIA")
+    nube = [_p0("Tupungatito", "cat_b", 0.2, 0, 0, nube=True)] * 3 + [_p0("Lascar", "control_fp0", 0.1, 0, 0)]
+    p = evaluar_paso0(nube)
+    assert p["reales"] == 0 and p["n_catb_evaluadas_sin_nube"] == 0
 
 
 # ---------- 3. El criterio pre-registrado ----------

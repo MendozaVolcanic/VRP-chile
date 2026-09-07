@@ -17,7 +17,10 @@ Diseño: `experiments/_s134_audit/f3/probe_etapas_ci.md`. Plantilla: probe S110
 DÓNDE. Sólo en GitHub Actions (`.github/workflows/probe-s135-etapas.yml`): los granules
 no se bajan al PC (disco al 100 %) y las credenciales válidas viven en los secrets (A71).
 
-Env opcionales: PROBE_VOL (Villarrica|Lascar), PROBE_FECHA (YYYY-MM-DD) para filtrar.
+Env opcionales: PROBE_VOL (Villarrica|Lascar), PROBE_FECHA (YYYY-MM-DD) para filtrar;
+PROBE_PASADAS = ruta a un JSON con [{volcan, pasada_utc, sensor, clase, ...}] (paso 0, S135:
+`pasadas_paso0.json`) que reemplaza la lista fija de las 6. Desde el paso 0 se captura también
+I05 (envolviendo `read_viirs_l1b`) para poder sospechar nube sobre la cumbre.
 Salida: `experiments/_s135_probe_etapas/out/<vol>_<fecha>_<hhmm>.json` + `report.txt`
 + `criterio.json`.
 """
@@ -42,7 +45,7 @@ from pipeline.geo_utils import get_detection_anchor  # noqa: E402
 import pipeline.process_viirs as pv  # noqa: E402
 from run_pipeline import load_volcanoes  # noqa: E402  (aplica VOLCANO_OVERRIDES del perfil)
 
-from analisis import a_json, evaluar_criterio, resumir_pasada  # noqa: E402
+from analisis import a_json, evaluar_criterio, evaluar_paso0, resumir_pasada  # noqa: E402
 
 HERE = Path(__file__).parent
 OUT = HERE / "out"
@@ -65,7 +68,8 @@ PRODUCTOS = {
 # Nombres que el probe parchea EN `pipeline.process_viirs`. El test
 # `tests/test_probe_etapas_s135.py` verifica que existan ahí (A89).
 PATCH_NAMES = ("compute_test1_mir", "apply_contextual_test1_filter",
-               "first_pass_tests_2_and_3", "second_pass_adjacent", "cluster_hotspots")
+               "first_pass_tests_2_and_3", "second_pass_adjacent", "cluster_hotspots",
+               "read_viirs_l1b")
 
 _CAP = {}
 _REAL = {n: getattr(pv, n) for n in PATCH_NAMES}
@@ -131,6 +135,17 @@ def _wrap_cl(hot_mask_2d, lat, lon, vent_lat, vent_lon, **kw):
     return cl
 
 
+def _wrap_l1b(*a, **kw):
+    bands = _REAL["read_viirs_l1b"](*a, **kw)
+    try:
+        _CAP["l1b"] = {"I04": np.array(bands["I04"], dtype=float) if "I04" in bands else None,
+                       "I05": np.array(bands["I05"], dtype=float) if "I05" in bands else None}
+    except Exception:
+        _CAP["l1b"] = None
+    return bands
+
+
+pv.read_viirs_l1b = _wrap_l1b
 pv.compute_test1_mir = _wrap_test1
 pv.apply_contextual_test1_filter = _wrap_ctx
 pv.first_pass_tests_2_and_3 = _wrap_fp
@@ -168,11 +183,14 @@ def bajar_par(vol, platform, dt, stamp):
     return paths[l1b_key], paths[geo_key]
 
 
-def correr_pasada(vol, pasada_utc, platform, clase):
+def correr_pasada(vol, pasada_utc, platform, clase, extra=None):
     dt, stamp = stamp_de(pasada_utc)
     print(f"=== {clase} {vol['name']} {pasada_utc} {platform} ({stamp}) ===", flush=True)
     fila = {"volcan": vol["name"], "pasada_utc": pasada_utc, "sensor": platform,
             "clase": clase, "stamp": stamp, "ok": False}
+    if extra:
+        fila["persistido"] = {k: extra.get(k) for k in ("regimen", "pc_n", "pc_vrp", "pc_dist_km", "t_bg_k", "n_first_pass")}
+        fila["mirova"] = extra.get("mirova")
     par = bajar_par(vol, platform, dt, stamp)
     if par is None:
         fila["error"] = "granule no encontrado o no descargado"
@@ -236,6 +254,10 @@ def correr_pasada(vol, pasada_utc, platform, clase):
                   flush=True)
     else:
         print("    Test1 NO corrió", flush=True)
+    nb = r.get("nube")
+    if nb:
+        print(f"    disco 3 km: I04 mediana {nb['i04_disco_mediana_k']} K ({nb['i04_disco_menos_t_bg_k']} K vs fondo) · "
+              f"I05 mediana {nb['i05_disco_mediana_k']} K · nube sospechada={nb['sospechada']}", flush=True)
     if kp:
         print(f"    keep_peak: {kp['dist_vent_km']} km del vent ({kp['octante']}), BT {kp['bt_k']} K "
               f"({kp['bt_menos_t_bg_global_k']} K vs fondo global), argmax del disco={kp['es_argmax_del_disco']}",
@@ -261,7 +283,14 @@ def main():
     DEST.mkdir(parents=True, exist_ok=True)
     f_vol = os.environ.get("PROBE_VOL", "").strip()
     f_fecha = os.environ.get("PROBE_FECHA", "").strip()
-    sel = [p for p in PASADAS
+    f_json = os.environ.get("PROBE_PASADAS", "").strip()
+    if f_json:
+        lista = json.loads(Path(f_json).read_text(encoding="utf-8"))
+        base = [(x["volcan"], x["pasada_utc"], x["sensor"], x.get("clase", "cat_b"), x) for x in lista]
+        print(f"pasadas desde {f_json}: {len(base)}", flush=True)
+    else:
+        base = [(v, p, s_, c, None) for v, p, s_, c in PASADAS]
+    sel = [p for p in base
            if (not f_vol or p[0] == f_vol) and (not f_fecha or p[1].startswith(f_fecha))]
     print(f"Probe S135 etapas — {len(sel)} pasadas (perfil {os.environ['VRP_PROFILE']})\n", flush=True)
     print("flags efectivos:", {k: getattr(pv, k, None) for k in (
@@ -271,10 +300,10 @@ def main():
     auth()
     vols = {v["name"]: v for v in load_volcanoes()}
     filas = []
-    for vol_name, pasada_utc, platform, clase in sel:
+    for vol_name, pasada_utc, platform, clase, extra in sel:
         vol = vols[vol_name]
         try:
-            fila = correr_pasada(vol, pasada_utc, platform, clase)
+            fila = correr_pasada(vol, pasada_utc, platform, clase, extra)
         except Exception as e:
             fila = {"volcan": vol_name, "pasada_utc": pasada_utc, "sensor": platform,
                     "clase": clase, "ok": False, "error": f"{e}", "traceback": traceback.format_exc()}
@@ -292,6 +321,16 @@ def main():
                 pass
 
     crit = evaluar_criterio(filas)
+    if any(f.get("clase") in ("cat_b", "control_fp0") for f in filas):
+        p0 = evaluar_paso0(filas)
+        (OUT / "criterio_paso0.json").write_text(json.dumps(a_json(p0), indent=1, ensure_ascii=False), encoding="utf-8")
+        print("=" * 70, flush=True)
+        print("PASO 0 (criterio pre-registrado en analisis.evaluar_paso0):", flush=True)
+        print(f"  {p0['veredicto']}", flush=True)
+        for d in p0["detalle"]:
+            print(f"    {d['volcan']} {d['pasada_utc']} [{d['clase']}] pico {d.get('pico_dist_vent_km')} km · "
+                  f"cráter en mask {d.get('n_crater')} · ∩ sin pico {d.get('n_interseccion_sin_pico')} · "
+                  f"OFF pierde={d.get('off_pierde')} · nube={d.get('nube_sospechada')}", flush=True)
     (OUT / "criterio.json").write_text(json.dumps(a_json(crit), indent=1, ensure_ascii=False),
                                        encoding="utf-8")
     print("=" * 70, flush=True)
