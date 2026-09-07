@@ -1,0 +1,52 @@
+name: Probe S135 etapas keep_peak (D19 / AUDIT_S134 D1-b)
+
+# A43: "on" entre comillas. One-off, READ-ONLY (A75): monkeypatch en el namespace de
+# pipeline.process_viirs para capturar el footprint del Test 1 ANTES de keep_peak, el píxel
+# pico, (Test1 ∩ dNTI_ctx) sin pico, el perfil BT-vs-distancia por octante y los newly_active
+# del second pass sin conjunto activo (H2). 3 pasadas de Villarrica (nevado) + 3 de Láscar
+# (control). Diseño y criterio pre-registrado: experiments/_s134_audit/f3/probe_etapas_ci.md.
+# NO empuja commits ni toca data/ (queda fuera de la concurrencia push-main). Sólo VIIRS:
+# no instala la dependencia HDF4 de MODIS.
+# Archivar en _archive/ al terminar (regla S80 de plantillas).
+"on":
+  workflow_dispatch:
+    inputs:
+      vol:
+        description: "Filtrar volcán (Villarrica | Lascar). Vacío = las 6 pasadas"
+        required: false
+        default: ""
+      fecha:
+        description: "Filtrar fecha YYYY-MM-DD. Vacío = todas"
+        required: false
+        default: ""
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml
+      - name: Run probe etapas (read-only)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_PROFILE: mirova_equivalent
+          PROBE_VOL: ${{ github.event.inputs.vol }}
+          PROBE_FECHA: ${{ github.event.inputs.fecha }}
+        run: |
+          mkdir -p experiments/_s135_probe_etapas/out
+          python experiments/_s135_probe_etapas/probe_etapas.py | tee experiments/_s135_probe_etapas/out/report.txt
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s135-probe-etapas
+          path: experiments/_s135_probe_etapas/out/
