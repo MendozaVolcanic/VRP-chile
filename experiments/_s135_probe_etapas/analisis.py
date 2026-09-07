@@ -36,6 +36,8 @@ DISCO_KM = 3.0
 ANILLO_PASO_KM = 0.25
 H2_COMPUERTA_K = 3.0
 H2_FRACCION_MIN = 0.90
+NUBE_DELTA_K = 10.0        # disco 3 km más de 10 K bajo el fondo global → sospechar nube
+PASO0_PIERDE_MIN = 2       # pre-registro paso 0: ≥2 cat-b perdidas con OFF y pico en cráter → tensión real
 
 
 def haversine_km(lat1, lon1, lat2, lon2):
@@ -212,6 +214,25 @@ def resumir_pasada(cap, vent_lat, vent_lon, ancla_lat, ancla_lon, t_bg_global):
         res["keep_peak"] = None
         res["interseccion_sin_pico"] = None
 
+    # --- 3b. Nube sobre la cumbre (paso 0, S135): el disco entero muy por debajo del fondo
+    # global no es cota (un lapso ambiental da ~8-9 K sobre 1.300 m); I05 ayuda si vino.
+    i04_med = float(np.median(bt[disco])) if disco.any() else None
+    l1b = cap.get("l1b") or {}
+    bt5 = l1b.get("I05") if isinstance(l1b, dict) else None
+    i05_med = None
+    if bt5 is not None and np.shape(bt5) == bt.shape:
+        b5 = np.asarray(bt5, dtype=float)
+        s5 = disco & np.isfinite(b5)
+        i05_med = float(np.median(b5[s5])) if s5.any() else None
+    delta = (round(i04_med - t_bg_global, 2) if (i04_med is not None and t_bg_global is not None) else None)
+    res["nube"] = {
+        "i04_disco_mediana_k": (round(i04_med, 2) if i04_med is not None else None),
+        "i04_disco_menos_t_bg_k": delta,
+        "i05_disco_mediana_k": (round(i05_med, 2) if i05_med is not None else None),
+        "sospechada": (bool(delta is not None and delta < -NUBE_DELTA_K)),
+        "criterio": f"disco I04 mediana < t_bg_global - {NUBE_DELTA_K} K",
+    }
+
     # --- 4. Perfil BT vs distancia por octante ---
     res["perfil_bt"] = perfil_bt_vs_distancia(bt[disco], dist_vent[disco], rumbo[disco])
     for a, b in ((1.0, 3.0), (1.5, 3.0)):
@@ -341,3 +362,70 @@ def a_json(obj):
     if isinstance(obj, float) and not math.isfinite(obj):
         return None
     return obj
+
+
+def evaluar_paso0(pasadas):
+    """Paso 0 del A/B D1(c) — criterio PRE-REGISTRADO (S135, escrito antes de correr):
+
+    Para cada pasada cat-b (Lastarria/Tupungatito/Isluga con alerta MIROVA en la misma
+    pasada) y cada control_fp0 (Láscar, first pass vacío, con alerta):
+      off_pierde = (Test1 ∩ dNTI_ctx) sin pico == 0 px  Y  first pass == 0
+                   (con keep_peak OFF no queda ningún píxel del Test 1 y no hay otro path:
+                    la pasada MIROVA-confirmada desaparece del dashboard).
+      pico_en_crater = keep_peak a < 0,5 km del vent.
+      nube_sospechada = disco I04 mediana < t_bg_global − 10 K (esas pasadas NO cuentan).
+    Veredicto:
+      TENSIÓN REAL     si ≥ 2 pasadas cat-b (sin nube) tienen off_pierde y pico_en_crater
+                       → el A/B debe medir FN sobre cat-b; keep_peak no se apaga a ciegas.
+      TENSIÓN APARENTE si ninguna cat-b (sin nube) se pierde con OFF
+                       → apagar keep_peak no destruye señal MIROVA-confirmada en estas pasadas.
+      INTERMEDIA       en cualquier otro caso (se pierden pasadas cuyo pico NO está en el
+                       cráter: el A/B debe decidir con la distancia de MIROVA como referencia).
+    """
+    det = []
+    reales, perdidas_borde = 0, 0
+    for p in pasadas:
+        if p.get("clase") not in ("cat_b", "control_fp0"):
+            continue
+        fila = {"volcan": p["volcan"], "pasada_utc": p.get("pasada_utc"), "clase": p["clase"],
+                "ok": bool(p.get("ok")), "mirova": p.get("mirova")}
+        r = p.get("resumen") or {}
+        if not p.get("ok") or not r.get("test1", {}).get("corrio"):
+            fila["estado"] = "no_evaluable"
+            det.append(fila)
+            continue
+        kp = r.get("keep_peak")
+        it = r.get("interseccion_sin_pico") or {}
+        n_fp = (r.get("first_pass") or {}).get("n_hot")
+        nube = bool((r.get("nube") or {}).get("sospechada"))
+        off_pierde = bool(kp is not None and it.get("n") == 0 and n_fp == 0)
+        fila.update(
+            pico_dist_vent_km=(kp["dist_vent_km"] if kp else None),
+            pico_bt_menos_t_bg=(kp["bt_menos_t_bg_global_k"] if kp else None),
+            n_crater=r["test1"]["n_mask_a_menos_0_5km"],
+            n_interseccion_sin_pico=it.get("n"),
+            n_first_pass=n_fp,
+            off_pierde=off_pierde,
+            pico_en_crater=(bool(kp and kp["dist_vent_km"] < CRATER_KM)),
+            nube_sospechada=nube,
+            keep_peak_aplico=(kp is not None),
+        )
+        fila["estado"] = "evaluada"
+        if p["clase"] == "cat_b" and not nube and off_pierde:
+            if fila["pico_en_crater"]:
+                reales += 1
+            else:
+                perdidas_borde += 1
+        det.append(fila)
+    n_catb = sum(1 for d in det if d["clase"] == "cat_b" and d.get("estado") == "evaluada"
+                 and not d.get("nube_sospechada"))
+    if reales >= PASO0_PIERDE_MIN:
+        v = (f"TENSIÓN REAL: {reales}/{n_catb} cat-b (sin nube) se pierden con keep_peak OFF y su pico "
+             f"está en el cráter → el A/B debe medir FN sobre cat-b")
+    elif reales == 0 and perdidas_borde == 0:
+        v = f"TENSIÓN APARENTE: 0/{n_catb} cat-b (sin nube) se pierden con keep_peak OFF"
+    else:
+        v = (f"INTERMEDIA: {reales} perdidas con pico en cráter + {perdidas_borde} perdidas con pico "
+             f"fuera del cráter, de {n_catb} cat-b sin nube")
+    return {"veredicto": v, "reales": reales, "perdidas_borde": perdidas_borde,
+            "n_catb_evaluadas_sin_nube": n_catb, "detalle": det}
