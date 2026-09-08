@@ -1,0 +1,59 @@
+name: Probe S136 conformidad Apendice A (9 casos)
+
+# A43: "on" entre comillas.
+#
+# QUE HACE. Corre la bateria de conformidad contra los NUEVE casos del Apendice A de Coppola
+# 2016a: seis escenas donde el autor detecta y TRES donde deliberadamente NO detecta (Dubbi,
+# Tolbachik, Stromboli). Es el conjunto de validacion del algoritmo que este proyecto clona, y
+# nunca se habia usado. Los negativos son los que miden sobre-deteccion contra su referencia.
+#
+# Coordenadas del catalogo Smithsonian GVP, verificadas por altitud contra el paper; viven en
+# experiments/_s136/apendice_a.yaml y NO en volcanoes.yaml, para que el cron de produccion no
+# empiece a procesar Kamchatka y Etiopia cada dos horas.
+#
+# READ-ONLY (A71/A75): solo llama a calculate_vrp. No escribe en data/, no empuja commits (queda
+# fuera de la concurrencia push-main), no toca pipeline/ ni ningun perfil. MODIS necesita HDF4.
+# Criterio pre-registrado: docs/PREREGISTRO_CONFORMIDAD_A6_S136.md (mismo criterio, extendido a
+# los negativos: en un caso negativo, publicar algo es el fallo).
+# Archivar en _archive/ al terminar (regla S80).
+"on":
+  workflow_dispatch:
+    inputs:
+      caso:
+        description: "Un solo caso (A1..A9 o el nombre del volcan). Vacio = los 9"
+        required: false
+        default: ""
+
+jobs:
+  apendice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps (MODIS necesita HDF4)
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+      - name: Run bateria de conformidad (read-only)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_DEST: /tmp/apendice
+          APENDICE_CASO: ${{ github.event.inputs.caso }}
+        run: |
+          mkdir -p experiments/_s136/out_apendice
+          python experiments/_s136/conformidad_apendice.py \
+            | tee experiments/_s136/out_apendice/report.txt
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s136-conformidad-apendice
+          path: experiments/_s136/out_apendice/

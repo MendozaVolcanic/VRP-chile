@@ -1,0 +1,161 @@
+# Apéndice A de Coppola 2016a SP 426.5 — los nueve casos de validación del autor
+#
+# POR QUÉ ESTE ARCHIVO ESTÁ APARTE DE volcanoes.yaml. Ocho de los nueve son volcanes
+# extranjeros. Si entraran al catálogo operacional, el cron de producción empezaría a
+# procesar Kamchatka, Etiopía y Sicilia cada dos horas. Esto es un banco de pruebas, no
+# configuración operacional: lo lee sólo el probe de conformidad.
+#
+# COORDENADAS: catálogo Smithsonian GVP (webservice WFS oficial), el mismo catálogo del que
+# sale el campo `gvp_id` de volcanoes.yaml. NO estimadas. Verificación cruzada por altitud:
+# ninguna difiere del paper en más de 100 m, y el catálogo HISTÓRICO del GVP —el vigente
+# cuando se escribió el paper— da exactamente los valores del Apéndice A (Eyjafjöll 1666,
+# Erta Ale 613, Ubinas 5672), lo que confirma que son las mismas montañas. Siete de los
+# ocho estaban además en data/mirova_reference/VRP_GLOBAL_ARCHIVE_2025.csv con el mismo id.
+#
+# GEOMETRÍA: `inner_radius_km: 5` para todos, y es deliberado. El paper usa un ROI1 de 5 km
+# igual para todos los objetivos (D18), así que 5 km es el valor del paper y además uniforme
+# — no hay valores oficiales de MIROVA por volcán para estos ocho, y inventarlos sería
+# exactamente el parche per-volcán que MISSION prohíbe. `radius_km: 25` replica la grilla
+# de 51×51 km, como en los 11 Tier A.
+#
+# El veredicto de cada caso es del paper, citado por línea de documentacion/sp426_5.txt.
+
+casos:
+  - name: Bezymianny
+    caso: A1
+    fecha: "2012-01-08"
+    veredicto: detecta
+    lat: 55.972
+    lon: 160.595
+    gvp_id: 300250
+    alt_gvp_m: 2882
+    alt_paper_m: null
+    nota: >-
+      sp426_5.txt:775-778. "cloud-free". El paper destaca el ALTO contraste de los píxeles
+      activos con el entorno, que hace el filtrado espacial "extremely efficient".
+      TIR de la escena entre 231 y 249 K.
+
+  - name: Eyjafjallajokull
+    caso: A2
+    fecha: "2010-04-07"
+    veredicto: detecta
+    lat: 63.633
+    lon: -19.633
+    gvp_id: 372020
+    alt_gvp_m: 1651
+    alt_paper_m: 1666
+    nota: >-
+      sp426_5.txt:781-784. La línea de costa produce un aumento MODERADO de dNTI y dETI, y
+      aun así los píxeles volcánicos son los únicos outliers. Caso de control contra un
+      borde geográfico fuerte.
+
+  - name: ErtaAle
+    caso: A3
+    fecha: "2009-08-16"
+    veredicto: detecta
+    lat: 13.601
+    lon: 40.666
+    gvp_id: 221080
+    alt_gvp_m: 585
+    alt_paper_m: 613
+    nota: >-
+      sp426_5.txt:786-789. Lago de lava permanente. TIR máximo 305 K y los índices igual
+      aíslan la anomalía. Caso de fondo CALIENTE (desierto de Danakil), el opuesto térmico
+      de los nevados chilenos.
+
+  - name: Dubbi
+    caso: A4
+    fecha: "2013-07-03"
+    veredicto: no_detecta
+    lat: 13.579
+    lon: 41.809
+    gvp_id: 221100
+    alt_gvp_m: 1625
+    alt_paper_m: 1625
+    nota: >-
+      sp426_5.txt:802-805. NEGATIVO. "Despite the contrasting background and thermal
+      indexes, there are no outliers that pass the algorithm test." TIR máximo 302 K.
+      Único de los nueve que MIROVA no monitorea (no está en su archivo global), coherente
+      con que sea el caso sin actividad.
+
+  - name: Ubinas
+    caso: A5
+    fecha: "2008-04-03"
+    veredicto: detecta
+    lat: -16.345
+    lon: -70.8972
+    gvp_id: 354020
+    alt_gvp_m: 5608
+    alt_paper_m: 5672
+    nota: >-
+      sp426_5.txt:806-810. Anomalía MUY pequeña, NTI ~ -0.91, detectada tras el filtrado
+      espacial. El gradiente entre la cumbre (5672 m) y el valle del río Tambo (2500 m)
+      "is strongly reduced by performing the spatial filters". Es el análogo andino directo
+      del fenómeno A69 y el hermano de Villarrica/A6.
+    nti_paper: -0.91
+
+  - name: Tolbachik
+    caso: A7
+    fecha: "2012-11-20"
+    veredicto: no_detecta
+    lat: 55.832
+    lon: 160.326
+    gvp_id: 300240
+    alt_gvp_m: 3611
+    alt_paper_m: 3611
+    nota: >-
+      sp426_5.txt:819-823. NEGATIVO, con nubes. "their spatial variability (dNTI and dETI)
+      is not sufficient to trigger an alert." OJO, dato de contexto: la erupción de
+      Tolbachik empezó el 27-nov-2012, SIETE DÍAS DESPUÉS de esta fecha, y en fisuras del
+      flanco SO, no en la cumbre. Así que el "no detecta" prueba que el algoritmo no
+      inventa señal sobre un volcán en reposo, NO su sensibilidad. Test válido pero débil.
+
+  - name: Etna
+    caso: A8
+    fecha: "2010-02-08"
+    veredicto: detecta
+    lat: 37.748
+    lon: 14.999
+    gvp_id: 211060
+    alt_gvp_m: 3357
+    alt_paper_m: 3330
+    nota: >-
+      sp426_5.txt:827-830. "partially cloudy". Detecta una anomalía muy pequeña
+      (NTI ~ -0.9) y el paper subraya que las nubes FRÍAS acercándose a la cumbre no lo
+      impidieron. Espejo positivo de Stromboli/A9: prueba que no sobre-filtramos por nube.
+      La Δ27 m de altitud es la cumbre de Etna cambiando entre erupciones, no un error.
+    nti_paper: -0.9
+
+  - name: Stromboli
+    caso: A9
+    fecha: "2010-01-19"
+    veredicto: no_detecta
+    lat: 38.789
+    lon: 15.213
+    gvp_id: 211040
+    alt_gvp_m: 924
+    alt_paper_m: 924
+    nota: >-
+      sp426_5.txt:832-835. NEGATIVO, y el MÁS EXIGENTE de los tres. Volcán en actividad
+      estromboliana permanente, con nubes dispersas que producen una escena heterogénea y
+      AUMENTAN la variabilidad espacial de los índices; aun así "there are no clear
+      outliers in the dNTI and dETI indexes so that no hotspot is detected". Si nosotros
+      detectamos acá, es sobre-detección por nube — el frente del artefacto, medido contra
+      la referencia del autor.
+
+  # A6 ya corrió por separado (run 34281070800): CONFORME. Se incluye para que la batería
+  # sea completa y reproducible de una sola vez.
+  - name: Villarrica
+    caso: A6
+    fecha: "2009-06-24"
+    veredicto: detecta
+    lat: -39.420227
+    lon: -71.939876
+    gvp_id: 357120
+    alt_gvp_m: 2847
+    alt_paper_m: 2847
+    nota: >-
+      sp426_5.txt:812-817. Anomalía muy pequeña, NTI ~ -0.93, detectada tras el filtrado
+      espacial; y "the warm lake surface almost disappears in the ETI map". Ya verificado
+      CONFORME en el run 34281070800 usando la configuración operacional del volcán.
+    nti_paper: -0.93
