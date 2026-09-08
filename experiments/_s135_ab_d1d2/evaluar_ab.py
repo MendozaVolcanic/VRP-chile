@@ -41,6 +41,15 @@ Aplica, sin ajustar nada después de ver los datos, el criterio de
       La mediana agregada del brazo no puede alejarse de 1,0 más que la del control.
   DESEMPATE — entre los que cumplen, gana el más cercano al paper: D > C > B > E.
 
+  CONTROL DE COBERTURA (previo a todo lo anterior). Antes de comparar nada se verifica que los
+  cinco brazos hayan procesado LAS MISMAS PASADAS. Un brazo con menos pasadas no perdió noches:
+  no las miró, y su «pérdida» es del experimento, no del algoritmo. Pasó de verdad en el chunk 1:
+  el cortacircuitos de búsqueda de CMR (A64/S116) saltó por un corte de conexión de NASA en
+  Puyehue/brazo B, que quedó con 149 pasadas contra 203 de los otros cuatro, y sus 4 «noches
+  perdidas» eran los días que nunca procesó. Los volcanes con cobertura despareja se EXCLUYEN
+  del veredicto y se listan aparte, para que el número no salga contaminado y para que se sepa
+  qué hay que re-correr.
+
 Estratifica por régimen (A83): focales = Láscar, Lastarria; nevados = los otros cuatro.
 Todo conteo va con denominador y ventana (A90). Read-only.
 
@@ -161,6 +170,7 @@ def es_base_falso(r, fechas_mir, inner):
 
 
 def main():
+    global VOLCANES
     if hasattr(sys.stdout, "buffer"):
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     ap = argparse.ArgumentParser()
@@ -216,8 +226,34 @@ def main():
             print("  gh run download <run_id> --dir <destino>")
             return
 
+    # --- control de cobertura: ¿todos los brazos vieron las mismas pasadas? ---
+    cobertura, desparejos = {}, {}
+    for vol in VOLCANES:
+        pases = {}
+        for _, perfil, _ in BRAZOS:
+            rs = datos.get((perfil, vol))
+            if rs is None:
+                continue
+            pases[perfil] = {r["datetime_utc"] for r in rs}
+        if len(pases) < 2:
+            continue
+        base = pases.get(CONTROL) or max(pases.values(), key=len)
+        falt = {p: len(base - v) for p, v in pases.items() if base - v}
+        cobertura[vol] = {p: len(v) for p, v in pases.items()}
+        if falt:
+            desparejos[vol] = falt
+    if desparejos:
+        print("⚠ COBERTURA DESPAREJA — estos volcanes NO entran al veredicto:")
+        for vol, falt in desparejos.items():
+            for perfil, n in falt.items():
+                print(f"    {vol} / {perfil}: le faltan {n} pasadas que el control sí tiene")
+        print("  Sus «pérdidas» serían del experimento, no del algoritmo: re-correr esos jobs.\n")
+        VOLCANES = [v for v in VOLCANES if v not in desparejos]
+
     res = {"ventana_ground_truth_hasta": fin_gt, "volcanes": VOLCANES,
            "faltantes": faltan, "brazos": {},
+           "cobertura_por_volcan": cobertura,
+           "volcanes_excluidos_por_cobertura": desparejos,
            "alertas_diurnas_excluidas": {k: v for k, v in n_diurnas.items() if k in VOLCANES}}
 
     # ---- noches cat-b según el CONTROL ----
