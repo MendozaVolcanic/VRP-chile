@@ -1,0 +1,50 @@
+name: Probe S136 conformidad A6 Villarrica 2009
+
+# A43: "on" entre comillas.
+#
+# QUE HACE. Test de conformidad contra el caso A6 del Apendice A de Coppola 2016a: Villarrica,
+# 24 de junio de 2009, MODIS. El paper afirma dos cosas comprobables sobre esa imagen —que
+# DETECTA una anomalia de NTI ~ -0,93 en la cumbre (muy por debajo del umbral fijo K1 = -0,80),
+# y que el lago tibio NO produce deteccion porque el ETI lo cancela. Es el conjunto de
+# validacion del algoritmo que clonamos, publicado por su autor, y el proyecto nunca lo uso.
+#
+# READ-ONLY (A71/A75): solo llama a calculate_vrp. No escribe en data/, no empuja commits
+# (queda fuera de la concurrencia push-main), no toca pipeline/ ni ningun perfil.
+# MODIS necesita HDF4, que en Windows no funciona (por eso corre aca y no local).
+# Criterio pre-registrado: docs/PREREGISTRO_CONFORMIDAD_A6_S136.md
+# Archivar en _archive/ al terminar (regla S80).
+"on":
+  workflow_dispatch:
+
+jobs:
+  conformidad:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps (MODIS necesita HDF4)
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+      - name: Run conformidad A6 (read-only)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_DEST: /tmp/a6
+        run: |
+          mkdir -p experiments/_s136/out_a6
+          python experiments/_s136/conformidad_a6.py \
+            | tee experiments/_s136/out_a6/report.txt
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s136-conformidad-a6
+          path: experiments/_s136/out_a6/
