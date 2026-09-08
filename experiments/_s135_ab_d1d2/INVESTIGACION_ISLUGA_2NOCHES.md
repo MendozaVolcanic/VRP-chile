@@ -220,3 +220,45 @@ el error tuvo la misma forma —restar dos radios sin preguntar desde dónde mid
 tres veces pasó desapercibido hasta que un número quedó absurdo. Lo que lo delató no fue una
 revisión del método sino que Láscar, un volcán focal, apareciera con el 90 % de sus noches
 descartadas.
+
+---
+
+## Quinto tramo: la segunda pérdida (Lastarria, 2 de julio) es el mismo mecanismo
+
+MIROVA publicó esa noche una sola vez: **06:18:01, 0,06 MW a 1,55 km** de su centro, canal
+consolidado.
+
+| brazo | fuente | clase | cúmulo | distancia al centro de MIROVA |
+|---|---|---|---|---|
+| A control | `ctx_cluster` | summit | 1 px, **0,057 MW** | **1,351 km** |
+| B sin keep_peak | `ctx_cluster` | summit | 1 px, 0,063 MW | 1,351 km |
+| C condicionado | `test1_roi` | summit | 1 px, 0,057 MW | 1,366 km |
+| D ambos | `test1_roi` | summit | **sin cúmulo** | — |
+
+La cota contra MIROVA es 0,199 km, dentro del presupuesto, y **la magnitud coincide casi
+exacta**: 0,057 MW contra 0,06. No hay duda de que es el mismo objeto, y por la distancia es el
+campo fumarólico del Lazufre, no el cráter.
+
+Los diagnósticos de esa pasada repiten el patrón de Isluga: primer pase **0 píxeles**, Test 1
+con **82 píxeles**, y tres píxeles recuperados por el segundo pase. Lo que sostiene la detección
+es el segundo pase suelto (control y B) o `keep_peak` (C). Con los dos arreglados, nada.
+
+**Las dos pérdidas del brazo fiel son el mismo caso**, en dos volcanes distintos y con dos
+fuentes físicas distintas —un cráter en Isluga, un campo fumarólico en Lastarria—: el Test 1
+integrado ve la señal, el contraste contra vecinos no, y la intersección entre ambos la borra.
+
+### La hipótesis, ahora con dos casos
+
+En las dos noches, `keep_peak` es lo que salva la detección (brazo C la conserva). Y es el mismo
+`keep_peak` que fabrica el nivel base falso en los nevados. Elegir entre encenderlo o apagarlo es
+elegir entre perder señal real y publicar un artefacto, y por eso ningún brazo cumple los tres
+criterios a la vez.
+
+La salida que sugieren los dos casos no está en ese eje: si el Test 1 integrado **no se
+intersectara** con la máscara contextual —que es como lo describe Coppola, donde es un camino de
+detección propio y no un candidato a filtrar— su cúmulo se formaría sobre el footprint completo,
+82 píxeles en el caso de Lastarria, y el centroide sería el del conjunto, no el de un píxel
+suelto elegido por ser el más caliente. Ni el pico del borde ni la nada.
+
+Eso es lo que hay que medir después de este A/B, y pasa por las tres preguntas de la misión
+antes que por cualquier flag. Los dos casos quedan documentados como la evidencia que lo motiva.
