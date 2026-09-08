@@ -1,79 +1,99 @@
-# S136 — resultado del probe de 3 brazos: **el control de validez falla, no hay veredicto**
+# S136 — resultado del probe de 3 brazos: **desenlace C, indeterminado por falta de sustrato**
 
 > Run 34274884640, `success`, 20/20 pasadas con los tres brazos. Criterio de
 > `docs/PREREGISTRO_PROBE_S136_TEST1_CONTEXTUAL.md`, fijado antes de correr.
+>
+> **Corregido tras la auditoría de la sesión paralela (VRP 136)**, que trajo dos correcciones al
+> resultado original de este documento. Las dos se verificaron acá por una vía independiente de
+> la suya (`verificar_control_y_sustrato.py`) antes de aceptarlas — un par no es autoridad (A48).
+> Su auditoría completa está en `AUDITORIA_PROBE_Y_CAMINOS.md`.
 
-## El resultado es el control, no los ratios
+## Corrección 1 — el probe SÍ es válido; el control de validez estaba mal construido
 
-El criterio pre-registrado puso una condición delante de todo: **si el brazo ACTUAL no reproduce
-la magnitud que la producción ya tiene para esas mismas pasadas (dentro del 10 %), el probe no
-está midiendo la producción y ningún otro número del run es interpretable.**
+La versión anterior de este documento concluyó «el probe no reproduce la producción, ningún
+número es interpretable». **Era el comparador.**
 
-**Reproducen 10 de 20.** El umbral era 16 de 20. Así que **no se emite desenlace**, aunque los
-ratios estén calculados y se vean razonables. Esa disciplina es justamente para lo que el
-pre-registro existía: mirar los ratios ahora sería elegir el resultado después de verlo.
+El control comparaba el probe —que corre con el código de hoy— contra
+`data/mirova_equivalent/`, que para las pasadas de junio y julio fue escrito por el código **de
+entonces**: régimen previo a `#535`, con la máscara de nube encendida y el fondo global 6-8 K más
+alto en nevados. **No podía reproducir por construcción.** Es el razonamiento del propio
+pre-registro — «el régimen lo fija el código que procesa, no la fecha del granule» — aplicado al
+revés en el control.
 
-Las diferencias son de factor 1,5 a 2,5, en ambas direcciones:
+**Verificación independiente por el fondo.** Si la causa es el régimen, las pasadas que
+reproducen deben tener el mismo fondo y las que no, uno corrido. Medido:
 
-| pasada | probe | persistido |
+| grupo | n | \|Δ t_bg\| mediana |
 |---|---|---|
-| Tupungatito 2026-06-08 05:30 | 0,0930 | 0,1679 |
-| Tupungatito 2026-06-30 06:06 | 0,0393 | 0,0966 |
-| Láscar 2026-07-10 05:12 | 0,2290 | 0,1466 |
-| Lastarria 2026-06-01 05:06 | 0,0515 | 0,0077 |
+| reproducen | 10 | **0,19 K** |
+| no reproducen | 10 | **3,62 K** |
 
-## Antes de creerle al control: el comparador estaba roto (cuarto error de instrumento)
+Un factor **20** de separación. La no-reproducción es del comparador, no del probe. (VRP 136 lo
+verificó por otra vía: contra el brazo control del A/B de S135, que reprocesó esos mismos
+granules con código post-`#535`, obtuvo **16/16 exacto**; las 4 sin referencia son de Villarrica,
+que no está entre los 6 volcanes del A/B. Ese número es suyo, no reproducido acá.)
 
-La primera corrida del evaluador dijo «reproducen 5 de 20» y listó discrepancias absurdas
-(persistido 0,0000 contra probe 0,0930; persistido 1,3560 contra probe 0,0844). Era **el
-comparador**, no el probe: `magnitud_persistida()` buscaba el record más cercano en el tiempo
-**sin filtrar por sensor**, y en cada pasada hay un record de VIIRS 750 m con el **mismo
-timestamp** que el de 375 m. Como el de 750 no tiene `f5_core_vrp_mw`, caía al `pc.vrp_mw`, que
-es otra cantidad — la escena, no el núcleo.
+Nota: el conteo de 10/20 ya incorpora el arreglo del filtro por sensor (#611). La auditoría de
+VRP 136 cita «0/15», que es la versión previa a ese arreglo.
 
-Con el filtro por sensor y una ventana de 3 minutos (la misma pasada, no una cercana),
-Planchón-Peteroa 06-01 reproduce **exacto** (0,0844 contra 0,0844) y el conteo sube de 5 a 10.
+## Corrección 2 — el desenlace es C, no A: sólo 3 pasadas de nevado tienen sustrato
 
-Es el **cuarto** error de instrumento de esta sesión, todos de la misma familia (A93): el
-instrumento medía otra cosa que la que decía medir. Los otros tres fueron `n_test1_pixels` como
-proxy del mosaico nival, el máximo global del TIF como «el foco» de Isluga, y
-`final_hotspot_source` persistido como registro de qué rama corrió.
+El filtro contextual sólo actúa si el hotspot final viene del camino Test 1
+(`process_viirs.py:1779`, valor **legacy**). Las 20 pasadas se eligieron por
+`triggered_test1 == True`, **que no es lo mismo**: disparar el Test 1 no es ganar la selección. Si
+el camino contextual gana, el filtro no tiene sobre qué actuar.
 
-**Y el evaluador tenía un segundo defecto**: imprimía el desenlace igual, después de avisar que
-el control había fallado. Contradecía su propio criterio. Corregido: ahora se detiene.
+Comparando ACTUAL contra SIN_FILTRO pasada por pasada:
 
-## Los ratios, para el registro — NO son un veredicto
+| | pasadas |
+|---|---|
+| la magnitud publicada cambia | **7 / 20** |
+| de esas, en nevados | **3** |
+| de esas, en el control no nevado | 4 |
 
-Se dejan escritos por trazabilidad, con la etiqueta puesta: **no sostienen ninguna conclusión**
-mientras el control no pase.
+El criterio pre-registrado dice textual: «**C — indeterminado**: menos de 4 pasadas útiles en los
+nevados». Hay 3.
 
-| brazo | nevados (n=13) | control no nevado (n=7) |
-|---|---|---|
-| ACTUAL | 0,91 | 0,69 |
-| SIN_KEEP | 0,91 | 0,79 |
-| SIN_FILTRO | 0,97 | 0,97 |
+Y el «SIN_FILTRO no explota, ×1,07» de la versión anterior sale de promediar 13 pasadas de nevado
+de las que **10 nunca pasaron por el filtro**. La mediana no se mueve porque el filtro no actuó,
+no porque no cure. Es la tercera aparición del mismo problema en el proyecto
+(`feedback_s130_medir_el_sustrato_antes_del_ab`): la pregunta previa a «¿mejora algo?» es «¿llega
+a ejecutarse?».
 
-Lo único que se puede decir sin violar el pre-registro: **el brazo SIN_FILTRO no explota**. No
-aparece nada parecido al 8-19× de D10 en ninguna de las 20 pasadas (el máximo del brazo
-SIN_FILTRO es 4,57× y está en el control, no en un nevado). Si el control de validez se
-resolviera y estos números se sostuvieran, el desenlace sería el A del pre-registro. Pero eso hay
-que ganárselo, no suponerlo.
+**Ambigüedad que decide Nicolás, no nosotros.** El pre-registro no define «pasada útil»
+operacionalmente. Leerlo como «con sustrato» da **C**; leerlo como «13 pasadas de nevado» da
+**A**. La primera lectura es de validez y no de gusto —una pasada donde el filtro no actúa no
+puede informar si el filtro cura, y meterlas diluye la mediana hacia «sin efecto» por
+construcción— pero la elección hay que ponérsela por delante.
 
-## Qué hay que hacer antes de leer estos ratios
+## Donde sí hay sustrato, el efecto es grande y apunta hacia MIROVA
 
-Entender por qué la mitad de las pasadas no reproduce. Descartado ya: no es la versión del
-producto (los persistidos son `standard`). Candidatos, en orden de sospecha:
+| pasada | ACTUAL | SIN_FILTRO | |
+|---|---|---|---|
+| Tupungatito 07-07 | 0,0701 | 0,1533 | ×2,19 |
+| Tupungatito 08-18 | 0,1097 | 0,1857 | ×1,69 |
+| Planchón-Peteroa 06-01 | 0,0844 | 0,1116 | ×1,32 |
+| Láscar 07-10 | 0,2290 | 0,2645 | ×1,16 |
+| Lastarria 06-01 | 0,0515 | 0,0800 | ×1,55 |
+| Lastarria 06-25 | 0,0761 | 0,1428 | ×1,88 |
+| Lastarria 07-24 | 0,0421 | 0,1828 | ×4,34 |
 
-1. **El probe llama a `calculate_vrp` directo**, mientras la producción pasa además por
-   `store.py` (auto-upgrade NRT→Standard, pisos, `f5_core`, y lo que haya en el camino). Si
-   `store.py` toca la magnitud, el probe mide una etapa anterior. Es lo más barato de verificar.
-2. **Granule distinto para la misma pasada**: el `stamp` se arma con la hora del record, y si la
-   plataforma tiene más de un granule cerca, el probe puede haber tomado otro. En Tupungatito
-   06-08 el probe da 0,0930 y el record SNPP de las 05:12 vale 0,0937 — sospechosamente cerca
-   para ser casualidad, siendo que el caso pedía el NOAA20 de las 05:30.
-3. Casos donde el persistido tiene `f5_core_vrp_mw = None` y el comparador cae a `pc.vrp_mw`
-   (Lastarria 07-24): ahí la comparación es entre dos cantidades distintas y habría que
-   excluirla, no contarla como fallo.
+**Sube en las 7, sin excepción**, entre ×1,16 y ×4,34. Como el sistema sub-reporta contra MIROVA
+(paridad global 0,708), la dirección es la correcta. Y ninguna se acerca al 8-19× de D10.
 
-El (2) tiene una consecuencia incómoda si se confirma: querría decir que el probe procesó una
-pasada distinta de la que el caso nombra, y entonces **los ratios son de otro objeto**.
+## Qué queda
+
+1. **Rehacer el control de validez contra datos del mismo régimen de código** — no contra lo
+   persistido. Con eso, el probe queda validado y los ratios pasan a ser legibles.
+2. **Ampliar la muestra en nevados eligiendo por sustrato**, no por `triggered_test1`: hacen falta
+   pasadas donde el camino Test 1 gane la selección. Sin eso el desenlace seguirá siendo C por
+   más pasadas que se agreguen.
+3. Las tres sospechas de la versión anterior (`store.py`, granule distinto, `f5_core = None`)
+   **quedan descartadas** como causa de la no-reproducción.
+
+## Lección de método
+
+Un control de reproducibilidad debe comparar contra **datos del mismo régimen de código**. La
+fecha del dato no fija el régimen; lo fija el código que lo procesó. Y un criterio que filtra
+casos («pasadas útiles») necesita su definición operacional escrita **en el pre-registro**, porque
+si se deja para después, se elige mirando el resultado.
