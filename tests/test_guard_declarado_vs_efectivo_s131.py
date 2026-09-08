@@ -154,6 +154,46 @@ CITAS_CLAUDE_MD = [
 ]
 
 
+def test_g8b_toda_linea_citada_en_claude_md_existe_en_su_archivo():
+    """Ninguna cita `archivo.py:N` de CLAUDE.md apunta más allá del final del archivo.
+
+    POR QUÉ, y cuál es su alcance real. G8 (abajo) verifica que la línea del CONTRATO apunte
+    al token correcto dentro del archivo de código, pero no lee CLAUDE.md. En S135, al insertar
+    una línea en los tres procesadores, se actualizaron el código y el contrato y CI quedó en
+    verde mientras CLAUDE.md citaba las líneas viejas: el guard pasaba por la razón equivocada,
+    que es la familia de A92.
+
+    Este test cierra sólo la parte que se puede cerrar sin falsos positivos: que la línea
+    exista. **No** detecta el desplazamiento de una o dos líneas, que es el caso de S135 y el
+    más común, porque la línea vieja sigue existiendo; para eso está el contrato de G8, que hay
+    que actualizar a mano. Y no puede exigir que el contrato y CLAUDE.md coincidan número a
+    número, porque el documento cita a propósito líneas históricas junto a las vigentes
+    («era 208 antes de S135»), que es información deliberada y no drift.
+
+    Se declara así, con su límite escrito, en vez de dejar un guard que parece cubrir más de lo
+    que cubre.
+    """
+    md = _leer("CLAUDE.md")
+    n_lineas = {}
+    fallos = []
+    for base, num in re.findall(r"([A-Za-z0-9_]+\.(?:py|html|yaml|yml|md)):(\d+)", md):
+        num = int(num)
+        if base not in n_lineas:
+            hallados = [os.path.join(dp, f)
+                        for dp, _dn, fn in os.walk(ROOT)
+                        for f in fn
+                        if f == base and ".git" not in dp and "node_modules" not in dp]
+            if not hallados:
+                n_lineas[base] = None
+                continue
+            n_lineas[base] = max(len(open(h, encoding="utf-8", errors="replace").read().splitlines())
+                                 for h in hallados)
+        tope = n_lineas[base]
+        if tope is not None and num > tope:
+            fallos.append(f"CLAUDE.md cita {base}:{num} pero el archivo tiene {tope} líneas")
+    assert not fallos, "citas que apuntan fuera del archivo:\n  " + "\n  ".join(sorted(set(fallos)))
+
+
 @pytest.mark.parametrize("archivo,linea,token", CITAS_CLAUDE_MD)
 def test_g8_citas_file_line_de_claude_md_apuntan_bien(archivo, linea, token):
     """Una cita `file:line` de CLAUDE.md sigue apuntando al símbolo que nombra.
