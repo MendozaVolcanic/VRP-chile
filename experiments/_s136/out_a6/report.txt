@@ -1,0 +1,45 @@
+====================================================================================
+CONFORMIDAD A6 — Villarrica, 2009-06-24 — MODIS, perfil mirova_equivalent
+El paper: DETECTA la cumbre (NTI ~ -0.93) y el lago NO produce deteccion.
+ENABLE_EXCLUDE_ZONES = False  (False => el lago no esta enmascarado)
+====================================================================================
+ancla de deteccion: -39.42023 / -71.93988   crater -39.42023 / -71.93988   inner_radius 5 km
+
+  MODIS_TERRA_L1B: 2 granules ese dia
+    MOD021KM.A2009175.0410.061.2017299185352.hdf  inicio 2009-06-24 04:10:00  nocturna=True
+[diag 21:32:47Z] DOWNLOAD_START attempt=0 n=1 dest=a6 [LAADS:2856146863]
+[diag 21:32:49Z] DOWNLOAD_DONE attempt=0 elapsed=2.5s n_files=1
+[diag 21:32:50Z] DOWNLOAD_START attempt=0 n=1 dest=a6 [LAADS:2855887924]
+[diag 21:32:52Z] DOWNLOAD_DONE attempt=0 elapsed=2.1s n_files=1
+      nti_max=-0.9052  vrp_pc=0.322  d_crater=0.7325601941681914  d_lago=21.20021929085119
+    MOD021KM.A2009175.1515.061.2017299185735.hdf  inicio 2009-06-24 15:15:00  nocturna=False
+
+  MODIS_AQUA_L1B: 3 granules ese dia
+    MYD021KM.A2009175.0555.061.2018044082410.hdf  inicio 2009-06-24 05:55:00  nocturna=True
+[diag 21:32:55Z] DOWNLOAD_START attempt=0 n=1 dest=a6 [LAADS:3052880597]
+[diag 21:32:57Z] DOWNLOAD_DONE attempt=0 elapsed=2.4s n_files=1
+[diag 21:32:57Z] DOWNLOAD_START attempt=0 n=1 dest=a6 [LAADS:3050773215]
+[diag 21:33:00Z] DOWNLOAD_DONE attempt=0 elapsed=2.1s n_files=1
+      nti_max=-0.9019  vrp_pc=1.814  d_crater=1.015828829284288  d_lago=21.59177862257084
+    MYD021KM.A2009175.1755.061.2018044082900.hdf  inicio 2009-06-24 17:55:00  nocturna=False
+    MYD021KM.A2009175.1930.061.2018044083033.hdf  inicio 2009-06-24 19:30:00  nocturna=False
+
+====================================================================================
+CONTROL DE VALIDEZ — ¿estamos mirando la escena del paper? (se evalua PRIMERO)
+====================================================================================
+pasadas nocturnas procesadas: 2 de 5 granules del dia
+  MOD021KM.A2009175.0410.061.2017299185352.hdf  nti_max=-0.9052  EN BANDA
+  MYD021KM.A2009175.0555.061.2018044082410.hdf  nti_max=-0.9019  EN BANDA
+
+control SUPERADO: 2 pasada(s) en la banda (-0.97, -0.85)
+
+====================================================================================
+DESENLACE segun el criterio pre-registrado
+====================================================================================
+  (1) detecta en la cumbre (cumulo a <= 5.0 km del crater): 2 de 2
+  (2) detecta sobre el lago (cumulo dentro de 7.0 km del lago): 0
+  (3) etiqueta que llega al dashboard, por pasada crateriana: [('MOD021KM.A2009175.0410.0', 'far', 0.73), ('MYD021KM.A2009175.0555.0', 'far', 1.02)]
+      OJO: 2 de 2 detectan el crater pero NO se publican como summit -> el operador no las ve (cara oculta de A46/A81).
+
+>>> CONFORME. Reproducimos las dos afirmaciones del paper sobre este caso.
+>>> No absuelve a VIIRS 375 m: este caso es MODIS (limite declarado).
