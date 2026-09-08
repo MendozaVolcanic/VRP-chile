@@ -1,8 +1,12 @@
 # Bloque de arranque S136
 
-> **Estado fijado el 2026-09-08 con trabajo EN CURSO**: el chunk 2 del A/B (run 34208191011) iba
-> en **21 de 30 jobs** cuando se escribió esto. Lo que aterrice después no está acá. Verifícalo
-> antes de creerle a este documento: `gh run view 34208191011 --json status,jobs`.
+> **ACTUALIZADO el 2026-09-08 tras cerrar**: el chunk 2 terminó (30/30 verde) minutos después de
+> fijar el cierre, así que el A/B **ya tiene veredicto sobre la ventana completa** y está en
+> `experiments/_s135_ab_d1d2/RESULTADO_FINAL.md`. **Ningún brazo cumple los tres criterios**: con
+> junio a agosto completos el brazo B deja de cumplir (su paridad se aleja de 1,0 un poco más que
+> el control, 0,692 contra 0,708) y el brazo fiel pierde 12 noches, no 5. Lo que sigue conserva
+> las cifras del primer tramo donde lo diga explícitamente; **el número que manda es el del
+> resultado final**.
 
 ## 0. Todo en una pantalla
 
@@ -20,7 +24,19 @@
 | Suite | **1245 passed · 4 skipped · 2 xfailed** | los 2 xfail son los tripwires de D19, intactos |
 | Rama y remoto | `main`, verificado contra `git ls-remote` | las 5 ramas `s135-*` integradas (`git cherry` = 0) |
 
-### El resultado del chunk 1, que es lo que hay que leer
+### El veredicto sobre la ventana completa (junio-agosto, 260 noches confirmadas)
+
+| brazo | pierde | quita el artefacto | paridad | falla en |
+|---|---|---|---|---|
+| A control | 0 | — | 0,708 | (control) |
+| B sin `keep_peak` | 0 | 100 % | **0,692** | criterio 3, por poco |
+| C sólo 2º pase | 0 | **−46,6 %** | 0,713 | criterio 2 |
+| D ambos (el más fiel) | **12** | 100 % | 0,713 | criterio 1 |
+| E 2º pase apagado | 0 | **−46,6 %** | 0,672 | criterios 2 y 3 |
+
+**Ninguno cumple los tres.** Detalle y conclusión en `RESULTADO_FINAL.md`.
+
+### El resultado del chunk 1 (parcial, conservado por trazabilidad)
 
 156 noches confirmadas (Isluga 38, Lastarria 30, Láscar 26, Planchón-Peteroa 23, Puyehue 20,
 Tupungatito 19), después de excluir pasadas diurnas y coincidencias de fecha con objetos distintos.
@@ -37,7 +53,7 @@ Tupungatito 19), después de excluir pasadas diurnas y coincidencias de fecha co
 
 | # | pregunta | opciones | recomendación |
 |---|---|---|---|
-| 1 | El brazo B cumple los tres criterios, pero se apoya en un segundo pase que sabemos infiel a Coppola. ¿Se adopta igual? | (a) adoptar B; (b) no adoptar y perseguir la hipótesis del Test 1; (c) esperar el chunk 2 | **(c), y después (b)**. B es el menos malo del eje, no una solución: quita el artefacto conservando un mecanismo que el paper no tiene. Adoptarlo cierra el problema en falso |
+| 1 | Con la ventana completa **ningún brazo cumple los tres criterios**; B falla el de paridad por dos centésimas. ¿Se adopta B igual, ponderando que es marginal? | (a) adoptar B pese al criterio; (b) **no adoptar** y perseguir la hipótesis del Test 1 | **(b)**. Adoptar B cerraría el problema en falso: quita el artefacto conservando un segundo pase que no es el de Coppola, y con una paridad que empeora respecto de hoy. El margen es chico, pero el criterio se fijó antes de ver los datos |
 | 2 | La hipótesis que dejan los 5 casos: que el **Test 1 integrado no deba intersectarse con la máscara contextual**. ¿Se investiga? | (a) sí, con las 3 preguntas de MISSION y su propio A/B; (b) archivar | **(a)**. Es la única salida que no obliga a elegir entre perder señal y publicar artefacto, y tiene 5 casos que la motivan |
 | 3 | D19 sigue abierta. Con lo medido, ¿se re-enuncia? | (a) reescribirla con el matiz de Copahue y el tamaño real; (b) dejarla | **(a)**: el anillo de 2,5-3 km contiene artefacto **y** señal (en Copahue MIROVA reporta a 2,7 km), y su enunciado usa un denominador que se mueve |
 | 4 | Las notas al editor de §4 y §5 del paper esperan tu lectura | (a) revisarlas ahora; (b) seguir con §3/§7/§8 | **(a)** primero: hay dos citas de Coppola 2014 de segunda mano que sostienen el argumento central del paper |
