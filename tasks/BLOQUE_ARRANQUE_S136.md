@@ -90,6 +90,47 @@ probe archivado. Tres flags de S132 siguen OFF. Ninguna decisión de §D tomada 
 | pre-registro del A/B de 4 brazos, con criterio y umbrales | `docs/PREREGISTRO_AB_D1_D2_S135.md` |
 | paper: §6 Validation en prosa + recorte de la ventana de ground truth | `docs/paper/sec6_validation.md` |
 
+## Estado del A/B al cierre del tramo (S135)
+
+**Run del chunk 1**: 34173711390 (`reproc-s135-ab-d1d2.yml`, 2026-06-01 → 07-15, overwrite=true).
+**Falta el chunk 2**: mismo workflow con `start=2026-07-16 end=2026-08-31 overwrite=false`.
+Bajar los artefactos con `gh run download <run_id> --dir <destino>` y evaluar con
+`python experiments/_s135_ab_d1d2/evaluar_ab.py --dir <destino>`.
+
+**Resultado parcial** (3 de 6 volcanes: Isluga, Láscar, Lastarria; sólo el chunk 1):
+
+| brazo | FN | quita artefacto | paridad | veredicto |
+|---|---|---|---|---|
+| A control | 0 | 0 % | 0,647 | — |
+| B sin keep_peak | 0 | 100 % | 0,647 | CUMPLE |
+| C segundo pase condicionado | 0 | **−25 %** | 0,644 | no cumple |
+| D ambos (el más fiel) | **2** | 100 % | 0,652 | pierde 2 noches |
+| E segundo pase apagado | 0 | **−25 %** | 0,626 | no cumple |
+
+**Las 2 noches perdidas están investigadas** (`experiments/_s135_ab_d1d2/INVESTIGACION_ISLUGA_2NOCHES.md`,
+cinco tramos): Isluga 01-jul (cráter, MIROVA 0,10 MW @ 0,75 km) y Lastarria 02-jul (campo
+fumarólico del Lazufre, MIROVA 0,06 MW @ 1,55 km, nuestra magnitud 0,057 — coincide). **Son el
+mismo mecanismo**: primer pase 0 píxeles, el Test 1 integrado SÍ dispara (82-89 px), y la
+intersección con la máscara contextual (filtro de S99, que no es de Coppola) lo anula; lo que
+sostiene la detección es `keep_peak` o el segundo pase suelto.
+
+**Frecuencia del patrón** (`frecuencia_patron_test1.py`): el patrón «Test 1 dispara + primer
+pase en cero» está en **2.315 de 4.571** records V375 (50,6 %), y **118** de esos son
+detecciones que MIROVA confirma y son el mismo objeto (Lastarria 35, Isluga 33, Chaitén 24).
+Todas dependen hoy de los dos mecanismos en cuestión.
+
+**HIPÓTESIS PARA DESPUÉS DEL A/B, no implementada**: que el Test 1 integrado no deba
+intersectarse con la máscara contextual. Pasa por las 3 preguntas de MISSION. Los dos casos son
+la evidencia.
+
+**Matiz que corrige D19**: en Copahue 2026-07-27, tres pasadas seguidas, nuestro cúmulo está a
+2,9 km y MIROVA reporta 2,7 km (mismo objeto). Un cúmulo a ~3 km NO es automáticamente el
+artefacto del borde.
+
+**Tres errores propios corregidos en el camino** (los tres de la familia A93 / A90): el techo
+artificial de la supervisión humana (lo corrigió Nicolás), el denominador que se movía solo, y
+la cota que restaba radios de orígenes distintos (Láscar 4 → 26 noches).
+
 ## Seguimiento nuevo (S135, no arreglado a propósito)
 
 **El ground truth de los análisis va hasta una semana atrás del que ve el frontend.**
