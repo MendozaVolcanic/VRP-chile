@@ -26,12 +26,26 @@ alert MIROVA published but we did not capture is invisible to us and can only de
 apparent recall, never inflate it. Second, the reference carries no negative labels. MIROVA
 publishes detections; it does not publish an assertion that a given overpass contained
 nothing. There is no set of confirmed empty nights against which a detection of ours could be
-scored as wrong. Third, MIROVA's per-volcano product is visually supervised — cloud-affected
-data are discarded a posteriori by inspection, and residual false alerts are removed by hand —
-whereas VRP Chile is unsupervised end to end. The two systems are therefore not equally
-filtered, and the asymmetry runs in the direction of our reporting more, not less.
+scored as wrong. Third, the reference contains alerts from daytime overpasses, which our
+night-only chain cannot reproduce by design: near solar noon a cloud top reflects sunlight in
+the mid-infrared while staying cold in the thermal band, and the index rises with nothing hot
+beneath it. Ninety-eight such rows are present in the VIIRS 375 m reference. They are excluded
+from the comparison rather than counted as misses, because missing them is the correct
+behaviour.
 
-<!-- src: docs/MIROVA_DIVERGENCES.md:42-52 (D2, cobertura 79,2 % medida en AUDIT_S128 §4) ; docs/MIROVA_DIVERGENCES.md:72-95 (D3) ; docs/paper/sec4_background.md §4.5 -->
+One asymmetry that is often assumed here does **not** apply. The visual supervision described
+in the MIROVA literature — cloud-affected data discarded a posteriori, residual false alerts
+removed by hand — belongs to the curated archive prepared for publication, not to the
+near-real-time product we compare against. The NRT chain monitors hundreds of volcanoes
+worldwide, free of charge, every one to two hours; there is no capacity to review each
+detection by hand, nor the local knowledge of each volcano that doing so would require. Both
+sides of our comparison are therefore unsupervised, and any difference in recall is
+algorithmic: something one system's rules capture and the other's do not. We state this
+explicitly because the opposite assumption would set an artificial ceiling on how faithful an
+open implementation can aspire to be, and would excuse differences that are in fact
+investigable.
+
+<!-- src: docs/MIROVA_DIVERGENCES.md:42-52 (D2, cobertura 79,2 % medida en AUDIT_S128 §4) ; docs/MIROVA_DIVERGENCES.md:72-95 (D3) ; regla durable del proyecto desde S21 (memoria: MIROVA NRT sin supervisión humana) ; A76 (artefacto solar diurno) ; conteo de 98 filas diurnas: experiments/_s135_probe_etapas/d19_regimen_vigente.py -->
 
 ## 6.2 What counts as a match
 
