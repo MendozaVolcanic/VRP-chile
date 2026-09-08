@@ -85,3 +85,56 @@ artefacto. El evaluador ahora exige, además de la coincidencia de noche, que la
 separación entre el cúmulo del control y la fuente de MIROVA sea compatible con el presupuesto
 de 0,55 km; las noches donde el control acertaba con un objeto lejano se reportan aparte, como
 lo que son.
+
+---
+
+## Segundo tramo: por qué el primer pase no ve ese cráter (1 de julio, 05:42)
+
+Los diagnósticos que el propio registro persiste alcanzan para llegar bastante lejos sin volver
+a bajar el granule.
+
+| diagnóstico | valor |
+|---|---|
+| píxeles del primer pase (Tests 2 ∧ 3) | **0** |
+| píxeles recapturados por el segundo pase | 1 (el del cráter, a 0,945 km, 270,43 K) |
+| Test 1 integrado | **dispara**, 89 píxeles, k observado 6,09 |
+| fondo global | 267,72 K |
+| NTI máximo menos NTI del fondo | 0,009 |
+| μ y σ del dNTI de la escena | −1,4·10⁻⁶ y 8,2·10⁻⁴ |
+| umbral efectivo del Test 2 | 0,003 |
+| umbral efectivo del Test 3 | 0,0026 |
+
+**El píxel del cráter existe y está caliente**: 270,43 K contra un fondo de 267,72, casi tres
+grados por encima, y el índice normalizado de la escena se despega nueve milésimas del fondo.
+Lo que no alcanza es el **contraste contra sus ocho vecinos**, que es lo que miden los Tests 2 y
+3. En un cráter cuya anomalía es más ancha que un píxel de 375 metros, los vecinos ya están
+tibios y la diferencia local se diluye: el píxel no es anómalo respecto de su entorno inmediato
+aunque el conjunto sí lo sea respecto de la escena. Por eso el primer pase entrega cero.
+
+**Y sin embargo el Test 1 sí dispara.** Ese es el camino que integra la energía sobre todo el
+disco en vez de mirar píxel contra vecino, y es justamente el que sirve para una fuente débil y
+extendida como ésta. Dispara con holgura, 6,09 veces la desviación del fondo.
+
+Entonces la pregunta se corre de lugar: **el problema no es que no detectemos, es que lo que
+detecta el Test 1 no llega a publicarse.** El filtro contextual de S99 intersecta la máscara del
+Test 1 con la máscara de anomalía contra vecinos, que en esta pasada está vacía, y el resultado
+es vacío. Con `keep_peak` encendido queda el pico —que en los nevados suele ser el borde, D19—;
+apagado, no queda nada.
+
+Ese filtro no viene de Coppola. El Test 1 integrado del paper no se intersecta con la máscara
+contextual: son dos caminos de detección, no uno filtrado por el otro. La intersección se
+introdujo como candidato en S99 para cortar el halo nival, y `keep_peak` se agregó encima como
+guarda contra el falso negativo del cráter. Este caso muestra las dos caras del arreglo: la
+guarda evita perder el cráter, pero lo hace publicando el píxel equivocado.
+
+**Hipótesis para la próxima investigación, no para implementar acá:** que el camino correcto no
+sea elegir entre `keep_peak` encendido o apagado, sino revisar si el Test 1 integrado debe estar
+sujeto al filtro contextual. Es una pregunta de fidelidad y pasa por las tres preguntas de
+MISSION antes que por cualquier A/B. Queda anotada, con este caso como evidencia de una pasada
+donde MIROVA publica, el Test 1 dispara, y aun así no publicamos nada por la intersección.
+
+**Lo que este tramo no prueba.** Es una pasada. No se midió cuántas veces se repite el patrón
+(Test 1 dispara, primer pase en cero, intersección vacía) ni si MIROVA llegó a esa detección por
+su Test 1 o por sus Tests 2 y 3, que no podemos observar. Y el valor de 0,009 es el índice
+absoluto contra el fondo de escena, no el contraste local que evalúan los tests: sirve para
+decir que hay señal, no para decir que los tests deberían haberla marcado.
