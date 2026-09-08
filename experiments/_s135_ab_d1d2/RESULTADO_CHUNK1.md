@@ -22,7 +22,23 @@ comparar nada**: un volcán cuyos brazos no procesaron las mismas pasadas queda 
 veredicto y se lista aparte. Sin ese control, el resultado habría dicho que apagar `keep_peak`
 pierde cuatro noches en Puyehue, que es falso.
 
-## El cuadro, con los cinco volcanes de cobertura pareja
+## El cuadro definitivo del tramo, con los seis volcanes
+
+Tras relanzar el job degradado, Puyehue quedó con **203 pasadas, igual que los otros cuatro
+brazos**, y vuelve al veredicto. Con los seis volcanes y 156 noches confirmadas:
+
+| brazo | pierde noches | quita el artefacto | paridad | veredicto |
+|---|---|---|---|---|
+| A control | 0 | — | 0,691 | — |
+| **B sin `keep_peak`** | **0** | **100 %** | 0,692 | **cumple los tres** |
+| C sólo segundo pase | 0 | **−65,8 %** | 0,689 | no cumple |
+| D ambos (el más fiel) | **5** | 100 % | 0,692 | pierde cinco |
+| E segundo pase apagado | 0 | **−65,8 %** | 0,658 | no cumple |
+
+**El brazo B no pierde ninguna noche en Puyehue**, lo que confirma que las cuatro anteriores eran
+el job degradado y no el algoritmo.
+
+## El cuadro con cinco volcanes (previo al relanzamiento, se conserva por trazabilidad)
 
 | brazo | pierde noches | quita el artefacto | paridad | veredicto |
 |---|---|---|---|---|

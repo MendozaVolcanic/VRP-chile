@@ -1,6 +1,176 @@
 # Bloque de arranque S136
 
-## Prompt para pegar al inicio de la sesión (escrito para Claude Fable 5.1)
+> **Estado fijado el 2026-09-08 con trabajo EN CURSO**: el chunk 2 del A/B (run 34208191011) iba
+> en **21 de 30 jobs** cuando se escribió esto. Lo que aterrice después no está acá. Verifícalo
+> antes de creerle a este documento: `gh run view 34208191011 --json status,jobs`.
+
+## 0. Todo en una pantalla
+
+| qué | estado | evidencia |
+|---|---|---|
+| **Segundo pase condicionado (D2)** implementado detrás de flag **en OFF** | terminado | PR #605 · `pipeline/detection_context.py` (`conditioned=`) · `ENABLE_SECOND_PASS_CONDITIONED` · 17 tests |
+| **A/B de 5 brazos**, 6 volcanes, perfiles aislados | chunk 1 terminado, chunk 2 **corriendo** | `reproc-s135-ab-d1d2.yml` · chunk 1 run 34173711390 (30/30 verde) · chunk 2 run 34208191011 (21/30 al cierre) |
+| **Resultado del chunk 1** (06-01 → 07-15, los 6 volcanes) | terminado | `experiments/_s135_ab_d1d2/RESULTADO_CHUNK1.md` + `resultado_chunk1.json` |
+| **Las 5 pérdidas del brazo fiel**, investigadas una por una | terminado | `INVESTIGACION_ISLUGA_2NOCHES.md` (5 tramos) + `investigar_perdidas.py` |
+| **Pre-registro del A/B** con la decisión de Nicolás incorporada | terminado | `docs/PREREGISTRO_AB_D1_D2_S135.md` |
+| **D19 medido en el régimen vigente** | terminado | `experiments/_s135_probe_etapas/D19_HOY.md` · `d19_regimen_vigente.py` |
+| **Probe A75 por etapa** + paso 0 cat-b | terminado | `experiments/_s135_probe_etapas/` (yml en `_archive/`) |
+| **Paper: §4, §5 y §6 en prosa** + script único de números | escrito, falta revisión de Nicolás | `docs/paper/` (`sec4`, `sec5`, `sec6`, `README.md`) · `scripts/paper_numbers.py` |
+| **D20** (el NTI de MODIS usa la banda 31 y el canon la 32) registrado | terminado | `docs/MIROVA_DIVERGENCES.md` |
+| Suite | **1245 passed · 4 skipped · 2 xfailed** | los 2 xfail son los tripwires de D19, intactos |
+| Rama y remoto | `main`, verificado contra `git ls-remote` | las 5 ramas `s135-*` integradas (`git cherry` = 0) |
+
+### El resultado del chunk 1, que es lo que hay que leer
+
+156 noches confirmadas (Isluga 38, Lastarria 30, Láscar 26, Planchón-Peteroa 23, Puyehue 20,
+Tupungatito 19), después de excluir pasadas diurnas y coincidencias de fecha con objetos distintos.
+
+| brazo | pierde | quita el artefacto | paridad | veredicto |
+|---|---|---|---|---|
+| A control | 0 | — | 0,691 | — |
+| **B sin `keep_peak`** | **0** | **100 %** | 0,692 | **cumple los tres** |
+| C sólo 2º pase condicionado | 0 | **−65,8 %** | 0,689 | no |
+| D ambos (el más fiel) | **5** | 100 % | 0,692 | pierde 5 |
+| E 2º pase apagado | 0 | **−65,8 %** | 0,658 | no |
+
+## 1. Decisiones que esperan a Nicolás
+
+| # | pregunta | opciones | recomendación |
+|---|---|---|---|
+| 1 | El brazo B cumple los tres criterios, pero se apoya en un segundo pase que sabemos infiel a Coppola. ¿Se adopta igual? | (a) adoptar B; (b) no adoptar y perseguir la hipótesis del Test 1; (c) esperar el chunk 2 | **(c), y después (b)**. B es el menos malo del eje, no una solución: quita el artefacto conservando un mecanismo que el paper no tiene. Adoptarlo cierra el problema en falso |
+| 2 | La hipótesis que dejan los 5 casos: que el **Test 1 integrado no deba intersectarse con la máscara contextual**. ¿Se investiga? | (a) sí, con las 3 preguntas de MISSION y su propio A/B; (b) archivar | **(a)**. Es la única salida que no obliga a elegir entre perder señal y publicar artefacto, y tiene 5 casos que la motivan |
+| 3 | D19 sigue abierta. Con lo medido, ¿se re-enuncia? | (a) reescribirla con el matiz de Copahue y el tamaño real; (b) dejarla | **(a)**: el anillo de 2,5-3 km contiene artefacto **y** señal (en Copahue MIROVA reporta a 2,7 km), y su enunciado usa un denominador que se mueve |
+| 4 | Las notas al editor de §4 y §5 del paper esperan tu lectura | (a) revisarlas ahora; (b) seguir con §3/§7/§8 | **(a)** primero: hay dos citas de Coppola 2014 de segunda mano que sostienen el argumento central del paper |
+| 5 | ¿El A/B debería reintentar solo los jobs que quedan con cobertura corta? | (a) automatizar el reintento; (b) verificar a mano con el control que ya existe | **(b)** por ahora: el control de cobertura ya lo detecta y avisa; automatizarlo es alcance nuevo |
+
+## 2. Lo aprendido
+
+**Reglas de método, candidatas al `CLAUDE.md` del proyecto:**
+
+- **Un denominador que se mueve solo invalida el antes/después.** Medí un mecanismo sobre los
+  records etiquetados *summit*, y ese etiquetado lo movía el mismo cambio de código que estaba
+  midiendo. Con el denominador robusto la caída se desvanece. Corolario: dos puntos no distinguen
+  un salto de la variación normal; hace falta la serie previa.
+- **Antes de comparar dos brazos, verificar que hayan procesado lo mismo.** Un cortacircuitos de
+  red dejó un brazo con 149 de 203 pasadas, y sus «pérdidas» eran días que nunca miró. El control
+  de cobertura ahora corre primero en el evaluador.
+- **Una «pérdida» se define simulando todas las etapas siguientes**, no sólo la que se apaga.
+
+**Reglas generales del workspace, no sólo de este proyecto:**
+
+- **A93, tres veces en una sesión:** restar dos radios sin preguntar desde qué punto mide cada
+  uno. La separación cráter ↔ centro de grilla de MIROVA va de 0,115 km en Lastarria a 7,569 en
+  Puyehue. Lo delató un número absurdo, no una revisión del método.
+- **Un techo artificial se reconoce por su forma**: «entonces no podemos aspirar a igualarlos».
+  Escribí que MIROVA publica cosas por supervisión humana; la regla que lo desmiente estaba en la
+  memoria desde S21 y aun así lo escribí.
+- **Un guard que falla por razones equivocadas también queda inutilizado**: la versión fuerte del
+  guard de citas daba falsos positivos con las líneas históricas que el proyecto cita a propósito.
+  Se dejó la débil, con su límite escrito en el propio test.
+
+## 3. Problemas abiertos e hipótesis
+
+**CONFIRMADO** (verificado con herramientas en esta sesión):
+
+- El patrón «Test 1 dispara y el primer pase da cero» está en **2.315 de 4.571** records de
+  VIIRS 375 m (50,6 %); **118** de ellos son detecciones que MIROVA confirma y son el mismo
+  objeto. Todas dependen hoy de `keep_peak` o del segundo pase suelto.
+- Las **5 pérdidas del brazo fiel** son un solo mecanismo, en 4 volcanes y con fuentes físicas
+  distintas: primer pase 0-2 px, Test 1 con 65-98 px, y la detección la sostienen los brazos B, C
+  y E. En dos casos la magnitud coincide con MIROVA (0,057 vs 0,06 y 0,098 vs 0,06).
+- **Arreglar sólo el segundo pase empeora el artefacto un 65,8 %**: al condicionarlo o apagarlo,
+  el camino contextual deja de ganar la selección y el Test 1 pasa a ser la fuente con su píxel
+  único.
+- En **Copahue el 27 de julio**, tres pasadas seguidas, nuestro cúmulo está a 2,9 km y MIROVA
+  reporta 2,7 km: un cúmulo a ~3 km **no** es automáticamente el artefacto del borde.
+- El snapshot del ground truth lo refresca `audit-weekly.yml` (lunes), no el sync horario: el
+  desfase con lo que ve el frontend es de hasta una semana, no permanente.
+
+**SOSPECHA** (no verificada en esta sesión):
+
+- Que el **Test 1 integrado no deba intersectarse con la máscara contextual**. Tiene 5 casos que
+  la motivan y base en el paper (allí es un camino propio, no un candidato a filtrar), pero **no
+  se midió** qué cúmulo se formaría sobre el footprint completo ni qué pasaría con el artefacto
+  en los nevados.
+- Que el contraste contra vecinos falle en estos casos **porque la anomalía es más ancha que el
+  píxel de 375 m**. Encaja con los diagnósticos, pero no se probó contra el footprint real.
+
+## 4. Cerrado, no rehacer
+
+- **Las 4 «pérdidas» del brazo B en Puyehue**: eran un job degradado por el cortacircuitos de CMR
+  (`ConnectionResetError` de NASA), ya relanzado y con cobertura completa (203 pasadas). El brazo
+  B **no pierde ninguna noche**.
+- **Una de las 2 noches de Isluga** del análisis parcial: era coincidencia de fecha con un objeto
+  distinto (el control acertaba con algo a 2,77 km cuando MIROVA veía a 0,75), no una pérdida.
+- **El A/B tiene sustrato**: los 5 brazos leen lo que declaran y producen resultados distintos,
+  verificado con test propio y en un paso previo dentro de cada job.
+- **El criterio de cero pérdidas** ya está incorporado al pre-registro y al evaluador, junto con
+  la instrucción de investigar cada diferencia en vez de descartar el brazo.
+- **«MIROVA lo revisó a mano» no es explicación válida** para una diferencia contra su canal NRT.
+- **D14** (máscara de nube) sigue cerrada y correcta: lo que se descubrió es que su cambio movió
+  el etiquetado y el fondo, no que hubiera que revisarla.
+
+## 5. Prompt para la próxima sesión
+
+```
+Continuamos VRP Chile desde S135. Antes de creerle a nada de lo que sigue, verifica el estado:
+
+    cd "C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile"
+    git fetch origin --prune && git pull --ff-only
+    gh run view 34208191011 --json status,jobs   # chunk 2 del A/B: iba 21/30 al cierre de S135
+    gh run list --workflow=nrt.yml --limit 3     # que el NRT siga produciendo
+
+LEER, en este orden:
+  1. tasks/BLOQUE_ARRANQUE_S136.md               (este bloque)
+  2. experiments/_s135_ab_d1d2/RESULTADO_CHUNK1.md
+  3. experiments/_s135_ab_d1d2/INVESTIGACION_ISLUGA_2NOCHES.md   (5 tramos)
+  4. docs/PREREGISTRO_AB_D1_D2_S135.md           (criterio y decisiones ya tomadas)
+  5. docs/MIROVA_DIVERGENCES.md, entradas D19 y D20
+
+QUÉ HACER, en orden:
+
+1. Si el chunk 2 terminó: bajar sus artefactos, juntarlos con los del chunk 1 y correr
+       python experiments/_s135_ab_d1d2/evaluar_ab.py --dir <carpeta>
+   El evaluador verifica PRIMERO la paridad de cobertura entre brazos. Si avisa que un volcán
+   quedó desparejo, relanzar ese job antes de leer cualquier número: pasó con Puyehue/brazo B,
+   que el cortacircuitos de CMR dejó con 149 de 203 pasadas y produjo 4 pérdidas falsas.
+   Investigar cada noche perdida con
+       python experiments/_s135_ab_d1d2/investigar_perdidas.py --dir <carpeta> --brazo D
+
+2. Presentarle a Nicolás las 5 decisiones de la sección 1, con su recomendación. La 1 y la 2
+   son las que mueven el proyecto.
+
+3. Si autoriza la hipótesis del Test 1 sin intersección contextual: pasar las 3 preguntas de
+   MISSION.md ANTES de tocar nada, y recién entonces diseñar su A/B. Hay 5 casos documentados
+   como evidencia, y el flag ENABLE_TEST1_CONTEXTUAL_FILTER ya existe.
+
+4. Paper: las notas al editor de docs/paper/sec4 y sec5 esperan la revisión de Nicolás. Lo más
+   urgente son dos citas de Coppola 2014 de segunda mano que sostienen el argumento central.
+   Después vienen §3, §7 y §8. Los números se regeneran con
+       python scripts/paper_numbers.py --tests
+
+REGLAS DURAS:
+  · Nada en pipeline/ sin tag defensivo Y confirmación explícita de Nicolás (A45).
+  · Ningún flag se enciende sin A/B con reproceso real y criterio pre-registrado (A18/A91).
+  · Todo número con denominador y ventana (A90). Un radio no es una posición, y dos radios sólo
+    se restan si salen del mismo origen (A93): falló tres veces en S135.
+  · Antes de comparar dos brazos, verificar que procesaron las mismas pasadas.
+  · «MIROVA lo revisó a mano» NO explica una diferencia: su canal NRT no tiene supervisión.
+  · Los 2 xfail de tests/test_guard_keep_peak_s134.py son el tripwire de D19.
+  · Español de Chile sin voseo; fenómeno físico → mecanismo → números.
+
+SI LA SESIÓN NO ALCANZA: lo mínimo es dejar escrito el veredicto del A/B completo en
+experiments/_s135_ab_d1d2/ y las decisiones presentadas a Nicolás. Lo demás puede esperar.
+```
+
+---
+
+## 0-prev. Bloque previo de S136 (HISTÓRICO — escrito antes de correr el A/B)
+
+> Se conserva entero, sin editar, para poder ver qué se creía antes de tener el
+> resultado. El estado vigente está arriba.
+
+### Prompt de entonces (superado por el de arriba)
 
 ```
 Continuamos VRP Chile desde S135. Ayer corrimos el probe A75 por etapa en CI (decisión D1(b) de
