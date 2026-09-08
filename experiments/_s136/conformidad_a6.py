@@ -157,7 +157,11 @@ def main():
             d_lago = hav(clat, clon, LAGO[0], LAGO[1]) if clat is not None else None
             fila = {
                 "granule": nom, "inicio": str(ini), "nocturna": True,
-                "nti_max": rec.get("nti_max"),
+                # A89: MODIS persiste `diag_nti_max`; `nti_max` es el nombre de VIIRS y
+                # devuelve None, lo que hacia que el control descartara pasadas validas.
+                "nti_max": (rec.get("diag_nti_max")
+                            if rec.get("diag_nti_max") is not None
+                            else rec.get("nti_max")),
                 "t_bg_k": rec.get("t_bg_k"),
                 "vrp_pc_mw": pc.get("vrp_mw"),
                 "n_pixels_pc": pc.get("n_pixels"),
@@ -213,6 +217,15 @@ def evaluar(filas, vol):
     print(f"  (1) detecta en la cumbre (cumulo a <= {inner} km del crater): "
           f"{len(cumbre)} de {len(en_banda)}")
     print(f"  (2) detecta sobre el lago (cumulo dentro de {LAGO[2]} km del lago): {len(lago)}")
+    # A46/A81: `distance_class` se deriva de final_hotspot, no del cumulo. El dashboard
+    # filtra por summit, asi que una deteccion crateriana etiquetada `far` NO se publica.
+    etiq = [(f["granule"][:24], f.get("distance_class"), round(f["dist_crater_km"], 2))
+            for f in cumbre]
+    print(f"  (3) etiqueta que llega al dashboard, por pasada crateriana: {etiq}")
+    ocultas = [e for e in etiq if e[1] != "summit"]
+    if ocultas:
+        print(f"      OJO: {len(ocultas)} de {len(etiq)} detectan el crater pero NO se "
+              "publican como summit -> el operador no las ve (cara oculta de A46/A81).")
     fn, fp = not cumbre, bool(lago)
     if not fn and not fp:
         print("\n>>> CONFORME. Reproducimos las dos afirmaciones del paper sobre este caso.")

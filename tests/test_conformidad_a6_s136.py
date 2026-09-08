@@ -128,3 +128,24 @@ def test_el_probe_no_escribe_en_data(mod):
     src = (RAIZ / "experiments" / "_s136" / "conformidad_a6.py").read_text(encoding="utf-8")
     for prohibido in ("store.append_record", "data/mirova_equivalent", "append_record("):
         assert prohibido not in src, f"el probe no debe usar {prohibido}"
+
+
+def test_el_probe_lee_el_nombre_que_MODIS_realmente_persiste(mod):
+    """A89, cazado corriendo el probe: en MODIS el campo es `diag_nti_max`, no `nti_max`.
+
+    Leer el nombre de VIIRS devolvia None y el control de validez descartaba pasadas que SI se
+    habian procesado, reportando "0 pasadas nocturnas" con dos detecciones en la mano. El guard
+    usa frontera de palabra y no subcadena (A92): `nti_max` es subcadena de `diag_nti_max`, asi
+    que un `in src` daria verde por la razon equivocada.
+    """
+    import re
+    src_probe = (RAIZ / "experiments" / "_s136" / "conformidad_a6.py").read_text(encoding="utf-8")
+    assert "diag_nti_max" in src_probe, "el probe debe leer el campo que MODIS persiste"
+
+    src_modis = (RAIZ / "pipeline" / "process_modis.py").read_text(encoding="utf-8")
+    pat = r'(?<![A-Za-z0-9_])"diag_nti_max"\s*:'
+    assert re.search(pat, src_modis), (
+        "process_modis dejo de persistir 'diag_nti_max': el probe lee un campo inexistente")
+    # y el nombre de VIIRS NO se persiste en MODIS, que es la causa del falso None
+    assert not re.search(r'(?<![A-Za-z0-9_])"nti_max"\s*:', src_modis), (
+        "si MODIS empezara a persistir 'nti_max', revisar el fallback del probe")
