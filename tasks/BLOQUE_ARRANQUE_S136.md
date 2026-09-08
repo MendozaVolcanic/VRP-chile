@@ -106,7 +106,16 @@ declaran en la salida (antes, seis días de septiembre contaban como «detectamo
 
 ## Decisiones que siguen esperando a Nicolás (AUDIT_S134 §D)
 
-**D1 y D2 tienen pre-registro escrito y esperan tres respuestas suyas**
+**D1 y D2: DECIDIDO Y EN EJECUCIÓN (2026-09-07).** Nicolás autorizó tocar el pipeline, fijó
+**cero pérdidas** sobre lo que MIROVA entrega (más exigente que el 10 % propuesto) e instruyó
+«ser lo más fiel posible y entender por qué sucede y arreglar cuando diferimos»: una pérdida
+NO descarta el brazo, abre una investigación por pasada. Corre sobre los 6 volcanes que
+deciden. El segundo pase condicionado está implementado detrás de
+`ENABLE_SECOND_PASS_CONDITIONED` (OFF en producción, 17 tests, PR #605) y el A/B de 5 brazos
+está lanzado (`reproc-s135-ab-d1d2.yml`, chunk 1 = 06-01→07-15 con overwrite=true; **falta el
+chunk 2 = 07-16→08-31 con overwrite=false**). Evaluador pre-escrito:
+`experiments/_s135_ab_d1d2/evaluar_ab.py --dir <artefactos>`. Texto viejo, por historia:
+**esperaba tres respuestas suyas**
 (`docs/PREREGISTRO_AB_D1_D2_S135.md` §«Lo que necesito de vos»): (a) ¿autoriza tocar
 `pipeline/detection_context.py` para el brazo del segundo pase condicionado (A45)?; (b) ¿acepta
 el umbral de rechazo del criterio 1 (perder >10 % de noches MIROVA-confirmadas en Lastarria,
