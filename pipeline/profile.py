@@ -396,6 +396,11 @@ ENABLE_EXCLUDE_ZONES: bool = bool(_p.get("enable_exclude_zones", True))
 # Default OFF en mirova_equivalent. Activar solo en _h_d8_5_full.yaml para A/B.
 ENABLE_ETI_QUADRATIC_SCENE: bool = bool(_p.get("enable_eti_quadratic_scene", False))
 ENABLE_SECOND_PASS_ADJACENT: bool = bool(_p.get("enable_second_pass_adjacent", False))
+# S135 D2 — el segundo pase de Coppola sólo corre si el primero detectó algo y sólo
+# refina los ADYACENTES (sp426_5.txt:329-341). Nuestro paso corría con el conjunto
+# activo vacío en 2.295 de 3.164 records summit de VIIRS 375 m y sin restricción de
+# vecindad. Flag OFF: el flip se decide por A/B (docs/PREREGISTRO_AB_D1_D2_S135.md).
+ENABLE_SECOND_PASS_CONDITIONED: bool = bool(_p.get("enable_second_pass_conditioned", False))
 ENABLE_SUM_VRP_REPORTING: bool = bool(_p.get("enable_sum_vrp_reporting", False))
 
 # C2 multiplicadores σ contextual para Tests 2 (dNTI) y 3 (dETI), por ROI.

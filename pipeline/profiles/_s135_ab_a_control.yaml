@@ -1,0 +1,29 @@
+# A/B S135 — D1 (`keep_peak`) x D2 (segundo pase condicionado). Brazo A: control (producción de hoy)
+#
+# EL FENÓMENO. En un cono nevado, de noche, el píxel más caliente del disco de 3 km del
+# Test 1 es el BORDE del disco (cota más baja), no el cráter. Dos reglas del pipeline
+# publican ese píxel como si fuera actividad en el cráter:
+#   · `keep_peak` conserva el pico aunque el filtro contextual no deje nada, y lo publica
+#     como detección «a 0,0 km» con centésimas de MW medidas contra un anillo que solapa
+#     el disco que mide;
+#   · el segundo pase corre aunque el primero no haya detectado nada y sin restringirse a
+#     los adyacentes, contra las dos condiciones explícitas de Coppola 2016a (l. 329-341).
+# Las dos están acopladas: hoy, con el segundo pase suelto, ÉL rescata el campo fumarólico
+# de Lastarria aunque `keep_peak` esté apagado. Por eso el A/B es factorial, no dos A/B.
+#
+# CRITERIO PRE-REGISTRADO: docs/PREREGISTRO_AB_D1_D2_S135.md (escrito antes de correr).
+# Decisión de Nicolás (2026-09-07): CERO pérdidas sobre noches que MIROVA entrega; ante
+# una diferencia, entender el mecanismo y arreglarlo, no descartar el brazo.
+#
+# NO OPERACIONAL: `data_subdir` aislado, fuera del cron.
+extends: mirova_equivalent
+profile: _s135_ab_a_control
+description: >
+  Brazo A del A/B S135: control. keep_peak ON, segundo pase suelto. Es lo que corre hoy en producción; existe para que los otros brazos se midan contra él con el MISMO código y la misma ventana.
+
+paths:
+  enable_test1_contextual_keep_peak: true
+  enable_second_pass_conditioned: false
+
+output:
+  data_subdir: _s135_ab_a_control

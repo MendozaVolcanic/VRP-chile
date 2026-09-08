@@ -1,0 +1,129 @@
+name: A/B S135 — D1 keep_peak x D2 segundo pase condicionado
+
+# CINCO brazos que difieren en uno o dos flags, sobre los SEIS volcanes que deciden.
+# Pre-registro: docs/PREREGISTRO_AB_D1_D2_S135.md (escrito y aprobado ANTES de correr).
+#
+# EL FENÓMENO. En un cono nevado, de noche, el píxel más caliente del disco de 3 km del Test 1
+# es el borde del disco (cota más baja), no el cráter. Dos reglas publican ese píxel como si
+# fuera actividad crateriana: `keep_peak` (conserva el pico aunque el filtro contextual no deje
+# nada) y el segundo pase corriendo suelto (sin conjunto activo previo y sin restricción de
+# vecindad, contra las dos condiciones de Coppola 2016a l.329-341). Están ACOPLADAS: hoy el
+# segundo pase suelto rescata el campo fumarólico de Lastarria aunque keep_peak esté apagado.
+# Por eso el diseño es factorial y no dos A/B sueltos.
+#
+#   A  _s135_ab_a_control     keep_peak ON  · segundo pase suelto        (producción de hoy)
+#   B  _s135_ab_b_nokeeppeak  keep_peak OFF · segundo pase suelto
+#   C  _s135_ab_c_cond        keep_peak ON  · segundo pase condicionado
+#   D  _s135_ab_d_ambos       keep_peak OFF · segundo pase condicionado  (el más fiel al paper)
+#   E  _s135_ab_e_sp_off      keep_peak ON  · segundo pase APAGADO       (cota superior)
+#
+# CRITERIO (decisión de Nicolás, 2026-09-07): CERO pérdidas sobre noches que MIROVA entrega.
+# Una pérdida no descarta el brazo: abre una investigación por pasada, para distinguir si nos
+# falta algo del algoritmo, si MIROVA lo publica por supervisión humana, o si la entrada difiere.
+#
+# EL CONTROL SE REPROCESA, no se toma de `mirova_equivalent`: esa serie se fue armando con
+# versiones distintas del código (incluido el cambio de la máscara de nube del 28-ago) y meter
+# esa mezcla como línea base agrega diferencias ajenas al A/B.
+#
+# Los cinco escriben en `data_subdir` aislados. NO tocan el operacional ni el dashboard, y este
+# workflow NO commitea: los resultados quedan como artefactos (14 días). Bajarlos con
+#     gh run download <run_id> --dir <destino>
+#
+# VENTANA POR CHUNKS (A15: timeout >= duración esperada x 1,3). La ventana completa del
+# pre-registro es 2026-06-01 → 2026-08-31 (92 días). Correrla de una en un solo job excede el
+# presupuesto con holgura escasa, así que el default parte en dos mitades: primero
+# 06-01 → 07-15 con overwrite=true, después 07-16 → 08-31 con overwrite=false.
+# A43: la clave "on" va entre comillas.
+"on":
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Inicio YYYY-MM-DD (chunk 1: 2026-06-01)"
+        required: true
+        default: "2026-06-01"
+      end:
+        description: "Fin YYYY-MM-DD inclusive (chunk 1: 2026-07-15)"
+        required: true
+        default: "2026-07-15"
+      overwrite:
+        description: "true en el PRIMER chunk (pisa), false en los siguientes (agrega)"
+        required: true
+        default: "true"
+
+jobs:
+  reproc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      # 6 volcanes x 5 brazos = 30 jobs. max-parallel 6 para no castigar a NASA con 30
+      # descargas simultáneas (el circuit-breaker por host de A64 protege la corrida, pero
+      # más vale no tripiarlo).
+      max-parallel: 6
+      matrix:
+        volcano: [Isluga, Lascar, Lastarria, PuyehueCordonCaulle, PlanchonPeteroa, Tupungatito]
+        profile:
+          - _s135_ab_a_control
+          - _s135_ab_b_nokeeppeak
+          - _s135_ab_c_cond
+          - _s135_ab_d_ambos
+          - _s135_ab_e_sp_off
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Verificar que el brazo LEE lo que declara
+        env:
+          VRP_PROFILE: ${{ matrix.profile }}
+        run: |
+          python -c "import pipeline.profile as p; \
+            print('brazo', p.PROFILE_NAME, '| keep_peak', p.ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK, \
+            '| conditioned', p.ENABLE_SECOND_PASS_CONDITIONED, \
+            '| adjacent', p.ENABLE_SECOND_PASS_ADJACENT)"
+
+      - name: Run reprocess
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          # Las fechas pasan por env y NO se interpolan dentro del run: (S128 encontró 31
+          # ocurrencias de esa inyección en 7 workflows; éste no suma una más).
+          ARM_OVERWRITE: ${{ github.event.inputs.overwrite }}
+          ARM_START: ${{ github.event.inputs.start }}
+          ARM_END: ${{ github.event.inputs.end }}
+          ARM_PROFILE: ${{ matrix.profile }}
+          ARM_VOLCANO: ${{ matrix.volcano }}
+        timeout-minutes: 330
+        run: |
+          OW=""
+          if [ "$ARM_OVERWRITE" = "true" ]; then OW="--overwrite"; fi
+          python scripts/run_pipeline.py \
+            --profile "$ARM_PROFILE" \
+            --volcano "$ARM_VOLCANO" \
+            --start "$ARM_START" \
+            --end "$ARM_END" \
+            $OW
+
+      - name: Upload reprocessed JSON as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s135ab-${{ matrix.profile }}-${{ matrix.volcano }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          retention-days: 14
+          if-no-files-found: warn

@@ -764,6 +764,31 @@ def compute_eti_scene_quadratic(
     return eti
 
 
+def _vecindad_8(mask: np.ndarray) -> np.ndarray:
+    """Los 8 vecinos de cada píxel de `mask` (la máscara dilatada 1 paso, sin el centro).
+
+    Se usa para la condición (b) del segundo pase de Coppola. Implementado con
+    desplazamientos en vez de `scipy.ndimage.binary_dilation` para no agregar una
+    dependencia distinta a las que el módulo ya importa.
+    """
+    m = np.asarray(mask, dtype=bool)
+    if m.ndim != 2:
+        raise ValueError("_vecindad_8 espera una máscara 2-D")
+    f, c = m.shape
+    # Relleno de una celda con False alrededor: así cada desplazamiento es una
+    # ventana del padded y el borde de la escena no toma vecinos del lado opuesto
+    # (que es lo que haría `np.roll`, circular).
+    p = np.zeros((f + 2, c + 2), dtype=bool)
+    p[1:-1, 1:-1] = m
+    out = np.zeros_like(m)
+    for dr in (0, 1, 2):
+        for dc in (0, 1, 2):
+            if dr == 1 and dc == 1:
+                continue          # el centro no es vecino de sí mismo
+            out |= p[dr:dr + f, dc:dc + c]
+    return out
+
+
 def second_pass_adjacent(
     nti: np.ndarray,
     eti: np.ndarray,
@@ -779,6 +804,7 @@ def second_pass_adjacent(
     c2_dnti_scene: float = None,
     c2_deti_scene: float = None,
     min_bg_pixels: int = 10,
+    conditioned: bool = False,
 ) -> np.ndarray:
     """Coppola 2016a SP 426.5 paso 5 — second-pass adyacente.
 
@@ -823,11 +849,32 @@ def second_pass_adjacent(
         c2_dnti_scene, c2_deti_scene: multiplicadores σ scene.
         min_bg_pixels: mínimo pixels bg para computar μ, σ confiable.
             Si menos, devuelve active_mask sin cambios.
+        conditioned: aplica las DOS condiciones que el paper pone a este paso
+            (`documentacion/sp426_5.txt:329-341`, D2/D19, S135):
+
+              (a) *"applied only if one or more pixels have been detected by the
+                  previous tests"* → con `active_mask` vacía no corre y devuelve
+                  la máscara vacía. Sin detección previa no hay borde que refinar:
+                  correrlo igual lo convierte en una segunda detección MÁS
+                  permisiva que la primera (no re-aplica la compuerta de BT del
+                  first pass), que es justo lo contrario de su propósito.
+              (b) *"the pixels adjacent to those already flagged"* → los píxeles
+                  nuevos se restringen a la vecindad-8 del conjunto activo.
+
+            Default **False** = comportamiento histórico intacto. El flip a True
+            se decide por A/B (`docs/PREREGISTRO_AB_D1_D2_S135.md`); el perfil
+            operacional lo lleva apagado.
 
     Returns:
         bool 2D con pixels active tras recapture (incluye primer pass +
         nuevos). Shape igual a ``nti``.
     """
+    # (a) Paper: este paso "is applied only if one or more pixels have been
+    # detected by the previous tests". Con el conjunto activo vacío no hay nada
+    # que refinar y el paso se saltea entero (S135, D2).
+    if conditioned and not bool(np.any(active_mask)):
+        return active_mask.copy()
+
     # 1) Excluir active pixels del cómputo de mean: ponerlos a NaN.
     nti_for_mean = np.where(active_mask, np.nan, nti)
     eti_for_mean = np.where(active_mask, np.nan, eti)
@@ -875,6 +922,12 @@ def second_pass_adjacent(
     # 5) Pixel "newly active" si pasa Test 2 ∧ Test 3 y es válido.
     newly_active = (pass_2 & pass_3
                     & np.isfinite(dnti) & np.isfinite(deti))
+
+    # (b) Paper: el paso "focuses on refining the hotspot detection for the pixels
+    # ADJACENT to those already flagged". Sin esta restricción el segundo pase
+    # marca en toda la imagen, incluidos focos que no tocan lo ya detectado.
+    if conditioned:
+        newly_active = newly_active & _vecindad_8(active_mask)
 
     return active_mask | newly_active
 

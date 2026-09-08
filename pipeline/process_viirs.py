@@ -133,6 +133,7 @@ from pipeline.profile import (
     ENABLE_EXCLUDE_ZONES,
     ENABLE_ETI_QUADRATIC_SCENE,
     ENABLE_SECOND_PASS_ADJACENT,
+    ENABLE_SECOND_PASS_CONDITIONED,
     ENABLE_SECOND_PASS_INTRA_RADIO_GATE,
     C1_SUMMIT_OVERRIDE,
     C2_SUMMIT_OVERRIDE,
@@ -1152,6 +1153,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     c1_deti_scene=DNTI_CONTEXTUAL_C1_SCENE,
                     c2_dnti_scene=C2_DNTI_SCENE_NIGHT,
                     c2_deti_scene=C2_DETI_SCENE_NIGHT,
+                    conditioned=ENABLE_SECOND_PASS_CONDITIONED,
                 )
                 if ENABLE_SECOND_PASS_ADJACENT:
                     eti_path_hot = second_pass_adjacent(
@@ -1165,6 +1167,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         c1_deti_scene=DNTI_CONTEXTUAL_C1_SCENE,
                         c2_dnti_scene=C2_DNTI_SCENE_NIGHT,
                         c2_deti_scene=C2_DETI_SCENE_NIGHT,
+                        conditioned=ENABLE_SECOND_PASS_CONDITIONED,
                     )
                 else:
                     eti_path_hot = first_pass_active
@@ -1291,6 +1294,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                                        if ENABLE_DUAL_ROI_SECOND_PASS else None),
                         c2_deti_scene=(_c2_scene_sp
                                        if ENABLE_DUAL_ROI_SECOND_PASS else None),
+                        conditioned=ENABLE_SECOND_PASS_CONDITIONED,
                     )
                     # S85 F-S81-B' — gate intra-radio sobre pixels NUEVOS del
                     # second pass. Default OFF; ON via profile A/B. Ver

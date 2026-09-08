@@ -420,6 +420,12 @@ paths:
   enable_first_pass_tests_2_and_3: true
   enable_dual_roi_first_pass: true
   enable_second_pass_adjacent: true
+  # S135 D2 — condiciona el segundo pase a las dos reglas del paper (Coppola 2016a,
+  # sp426_5.txt:329-341): corre sólo si el primer pase detectó algo, y sólo refina los
+  # píxeles ADYACENTES a lo detectado. Hoy corre con el conjunto activo vacío en 2.295
+  # de 3.164 records summit de VIIRS 375 m y marca en toda la imagen.
+  # OFF hasta que el A/B decida: docs/PREREGISTRO_AB_D1_D2_S135.md (D2/D19).
+  enable_second_pass_conditioned: false
   enable_dual_roi_second_pass: true
 
   # S61 ADOPCIÓN — kernel local 3×3 (Coppola 2024 L1129, Coppola 2016a L357,
