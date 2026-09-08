@@ -138,3 +138,49 @@ donde MIROVA publica, el Test 1 dispara, y aun así no publicamos nada por la in
 su Test 1 o por sus Tests 2 y 3, que no podemos observar. Y el valor de 0,009 es el índice
 absoluto contra el fondo de escena, no el contraste local que evalúan los tests: sirve para
 decir que hay señal, no para decir que los tests deberían haberla marcado.
+
+---
+
+## Tercer tramo: cuántas veces se repite el patrón (cierra la limitación declarada arriba)
+
+`frecuencia_patron_test1.py` → `frecuencia_patron_test1.json`. Universo: los 4.571 records de
+VIIRS 375 m de los 11 Tier A entre el 2026-06-01 y el 2026-09-07, con las alertas de pasadas
+diurnas excluidas (98).
+
+| | | |
+|---|---|---|
+| records del universo | 4.571 | |
+| con el patrón (Test 1 dispara, primer pase en cero) | **2.315** | 50,6 % del universo |
+| de ellos, publicados como *summit* | 2.036 | 87,9 % del patrón |
+| de ellos, con alerta de MIROVA esa noche | 606 | 26,2 % |
+| **y además el mismo objeto** (cota ≤ 0,55 km) | **118** | 5,1 % |
+
+**El patrón es la mitad del sensor, no una rareza.** En una de cada dos pasadas de VIIRS 375 m
+el Test 1 integrado dispara y el contraste contra vecinos no marca nada. Es el régimen normal de
+un volcán tranquilo con anomalía difusa, no una excepción.
+
+**Y 118 de esas pasadas son detecciones reales confirmadas.** En ellas MIROVA publica, nosotros
+publicamos, y las dos fuentes son plausiblemente el mismo objeto. Todas dependen de `keep_peak`
+o del segundo pase suelto, porque el primer pase no marcó nada. Se concentran en Lastarria (35),
+Isluga (33), Chaitén (24), Planchón-Peteroa (12) y Nevados de Chillán (7).
+
+Eso es la tensión A83/A84 medida: **hay 118 pasadas confirmadas que hoy sobreviven gracias a los
+dos mecanismos que el A/B está poniendo en cuestión.** No implica que se pierdan 118 noches —el
+criterio es por noche y otra pasada de la misma noche puede salvarla, que es justamente lo que
+el A/B mide— pero fija el tamaño del riesgo.
+
+### Un matiz que corrige la lectura de D19
+
+Los ejemplos traen una sorpresa útil. En Copahue, el 27 de julio, nuestro cúmulo está a 2,9 km
+del cráter y **MIROVA reporta 2,7 km esa misma pasada** (cota 0,21 km: el mismo objeto). Lo
+mismo a las 06:00 y a las 06:36.
+
+O sea: **un cúmulo a casi tres kilómetros del cráter no es automáticamente el artefacto del
+borde**. En algunos volcanes MIROVA también pone su fuente ahí. La distancia por sí sola no
+separa el artefacto de la señal, igual que no lo hacía ninguno de los discriminantes físicos que
+S116 barrió. Lo que separa es la coincidencia con lo que MIROVA ve, que es información externa,
+no una propiedad del record.
+
+Esto no invalida D19 —el mecanismo existe y publica píxeles más fríos que su fondo sin que nadie
+confirme nada— pero sí obliga a decirlo con cuidado: el anillo de 2,5 a 3 km contiene artefacto
+**y** señal real, y en Copahue lo que hay es señal.

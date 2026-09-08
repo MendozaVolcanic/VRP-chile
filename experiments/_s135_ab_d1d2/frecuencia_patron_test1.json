@@ -1,0 +1,173 @@
+{
+ "ventana": [
+  "2026-06-01",
+  "2026-09-07"
+ ],
+ "cota_km": 0.55,
+ "alertas_diurnas_excluidas": 98,
+ "definiciones": "(A90: cada número con su denominador y su ventana)\n  universo      = records V375 (VIIRS_* sin sufijo _750) de los 11 Tier A, desde 2026-06-01.\n  test1 solo    = `triggered_test1` Y `diag_n_first_pass_pixels == 0`: el Test 1 disparó y el\n                  contraste local no marcó nada. Es el patrón.\n  publicado     = `distance_class == \"summit\"` y el cúmulo primario tiene VRP > 0.\n  confirmado    = hay alerta MIROVA V375 (CONS ∪ OCR) de una pasada NOCTURNA esa fecha y volcán.\n                  Las diurnas se excluyen con `is_nighttime` (A76), igual que en el evaluador.\n  mismo objeto  = la cota |dist_nuestra − dist_MIROVA| <= 0,55 km (A93). Una cota inferior:\n                  descarta con seguridad lo distinto, no garantiza identidad.",
+ "total": {
+  "universo": 4571,
+  "patron": 2315,
+  "patron_publicado": 2036,
+  "patron_con_alerta": 606,
+  "patron_mismo_objeto": 118
+ },
+ "por_volcan": {
+  "Villarrica": {
+   "universo": 441,
+   "patron": 268,
+   "patron_publicado": 268,
+   "patron_con_alerta": 28
+  },
+  "Lascar": {
+   "universo": 364,
+   "patron": 138,
+   "patron_con_alerta": 74,
+   "patron_publicado": 66,
+   "patron_mismo_objeto": 2
+  },
+  "Copahue": {
+   "universo": 428,
+   "patron": 269,
+   "patron_publicado": 269,
+   "patron_con_alerta": 8,
+   "patron_mismo_objeto": 3
+  },
+  "Llaima": {
+   "universo": 440,
+   "patron": 254,
+   "patron_publicado": 254
+  },
+  "NevadosDeChillan": {
+   "universo": 434,
+   "patron": 247,
+   "patron_publicado": 167,
+   "patron_con_alerta": 14,
+   "patron_mismo_objeto": 7
+  },
+  "Isluga": {
+   "universo": 348,
+   "patron": 133,
+   "patron_publicado": 132,
+   "patron_con_alerta": 101,
+   "patron_mismo_objeto": 33
+  },
+  "Lastarria": {
+   "universo": 364,
+   "patron": 206,
+   "patron_con_alerta": 111,
+   "patron_publicado": 80,
+   "patron_mismo_objeto": 35
+  },
+  "Chaiten": {
+   "universo": 472,
+   "patron": 275,
+   "patron_publicado": 275,
+   "patron_con_alerta": 52,
+   "patron_mismo_objeto": 24
+  },
+  "PlanchonPeteroa": {
+   "universo": 411,
+   "patron": 213,
+   "patron_publicado": 213,
+   "patron_con_alerta": 77,
+   "patron_mismo_objeto": 12
+  },
+  "PuyehueCordonCaulle": {
+   "universo": 456,
+   "patron": 113,
+   "patron_publicado": 113,
+   "patron_con_alerta": 41
+  },
+  "Tupungatito": {
+   "universo": 413,
+   "patron": 199,
+   "patron_publicado": 199,
+   "patron_con_alerta": 100,
+   "patron_mismo_objeto": 2
+  }
+ },
+ "ejemplos": [
+  {
+   "volcan": "Lascar",
+   "pasada": "2026-06-20 04:48",
+   "nuestra_km": 1.495,
+   "mirova_km": 1.5,
+   "cota_km": 0.005,
+   "fuente": "test1_roi",
+   "n_px": 1,
+   "recaptura_2p": 0
+  },
+  {
+   "volcan": "Lascar",
+   "pasada": "2026-07-24 06:06",
+   "nuestra_km": 0.234,
+   "mirova_km": 0.75,
+   "cota_km": 0.516,
+   "fuente": "ctx_cluster",
+   "n_px": 1,
+   "recaptura_2p": 1
+  },
+  {
+   "volcan": "Copahue",
+   "pasada": "2026-07-27 05:18",
+   "nuestra_km": 2.9,
+   "mirova_km": 2.7,
+   "cota_km": 0.2,
+   "fuente": "test1_roi",
+   "n_px": 1,
+   "recaptura_2p": 0
+  },
+  {
+   "volcan": "Copahue",
+   "pasada": "2026-07-27 06:00",
+   "nuestra_km": 2.278,
+   "mirova_km": 2.7,
+   "cota_km": 0.422,
+   "fuente": "test1_roi",
+   "n_px": 1,
+   "recaptura_2p": 0
+  },
+  {
+   "volcan": "Copahue",
+   "pasada": "2026-07-27 06:36",
+   "nuestra_km": 2.91,
+   "mirova_km": 2.7,
+   "cota_km": 0.21,
+   "fuente": "test1_roi",
+   "n_px": 1,
+   "recaptura_2p": 0
+  },
+  {
+   "volcan": "NevadosDeChillan",
+   "pasada": "2026-06-16 05:30",
+   "nuestra_km": 0.441,
+   "mirova_km": 0.0,
+   "cota_km": 0.441,
+   "fuente": "ctx_cluster",
+   "n_px": 1,
+   "recaptura_2p": 1
+  },
+  {
+   "volcan": "NevadosDeChillan",
+   "pasada": "2026-08-18 05:48",
+   "nuestra_km": 0.562,
+   "mirova_km": 0.38,
+   "cota_km": 0.182,
+   "fuente": "ctx_cluster",
+   "n_px": 1,
+   "recaptura_2p": 1
+  },
+  {
+   "volcan": "NevadosDeChillan",
+   "pasada": "2026-08-18 06:24",
+   "nuestra_km": 0.484,
+   "mirova_km": 0.38,
+   "cota_km": 0.104,
+   "fuente": "ctx_cluster",
+   "n_px": 1,
+   "recaptura_2p": 1
+  }
+ ]
+}
