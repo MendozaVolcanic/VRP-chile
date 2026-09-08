@@ -43,16 +43,28 @@ def ts(s):
     return t if t.tzinfo else t.replace(tzinfo=timezone.utc)
 
 
-def magnitud_persistida(volcan, pasada_utc):
-    """La magnitud que hoy tiene el JSON operacional para esa pasada (control de validez)."""
+def magnitud_persistida(volcan, pasada_utc, sensor):
+    """La magnitud que hoy tiene el JSON operacional para ESA pasada Y ESE sensor.
+
+    El filtro por sensor no es un detalle: la primera version de esta funcion tomaba el record
+    mas cercano en el tiempo sin mirar el sensor, y en cada pasada hay un record VIIRS750 con el
+    MISMO timestamp que el de 375 m. Como el de 750 no tiene `f5_core_vrp_mw`, caia al
+    `pc.vrp_mw`, que es otra cantidad (la escena, no el nucleo). El control de validez daba
+    "no reproduce" en 15 de 20 pasadas y era el comparador, no el probe. Cuarto error de
+    instrumento de S136, familia A93: el instrumento medía otra cosa que la que decia medir.
+
+    La ventana es de 3 minutos, no 20: es la MISMA pasada, no una cercana.
+    """
     p = RAIZ / "data" / "mirova_equivalent" / "{}.json".format(volcan)
     if not p.exists():
         return None
     d = json.loads(p.read_text(encoding="utf-8"))
     recs = d["records"] if isinstance(d, dict) else d
     objetivo = ts(pasada_utc)
-    mejor, dmin = None, timedelta(minutes=20)
+    mejor, dmin = None, timedelta(minutes=3)
     for r in recs:
+        if r.get("sensor") != sensor:
+            continue
         t = ts(r.get("datetime_utc") or r.get("timestamp"))
         if t is None:
             continue
@@ -88,7 +100,7 @@ def main():
     repro_ok, repro_no, sin_ref = 0, [], 0
     for f in filas:
         m = mag(f, "ACTUAL")
-        p = magnitud_persistida(f["volcan"], f["pasada_utc"])
+        p = magnitud_persistida(f["volcan"], f["pasada_utc"], f.get("sensor"))
         if m is None or p is None:
             sin_ref += 1
             continue
@@ -105,9 +117,13 @@ def main():
     for f, m, p in repro_no:
         print("  NO reproduce  {:22s} {}  probe={:.4f}  persistido={:.4f}".format(
             f["volcan"], f["pasada_utc"], m, p))
-    if total_comp and repro_ok / total_comp < 0.8:
+    control_ok = not (total_comp and repro_ok / total_comp < 0.8)
+    if not control_ok:
         print("\n>>> El probe NO reproduce la produccion en la mayoria de las pasadas.")
-        print(">>> Eso es el hallazgo; los ratios de abajo NO sostienen ningun veredicto.")
+        print(">>> ESO es el hallazgo. El criterio pre-registrado dice que ningun otro numero")
+        print(">>> del run es interpretable, asi que NO se emite desenlace.")
+        print(">>> Antes de creerle: verificar el COMPARADOR (en S136 fallo por no filtrar por")
+        print(">>> sensor y comparaba contra records de VIIRS750).")
 
     print()
     print("=" * 100)
@@ -147,6 +163,10 @@ def main():
     print("=" * 100)
     print("DESENLACE segun el criterio pre-registrado")
     print("=" * 100)
+    if not control_ok:
+        print("NO SE EMITE: el control de validez fallo (ver arriba). El criterio pre-registrado")
+        print("dice que ningun otro numero del run sostiene un veredicto.")
+        return
     n_nev = sum(1 for f in utiles if f["clase"] == "nevado")
     r_sin = resumen.get(("nevado", "SIN_FILTRO"))
     r_act = resumen.get(("nevado", "ACTUAL"))

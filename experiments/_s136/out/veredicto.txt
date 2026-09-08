@@ -1,0 +1,45 @@
+====================================================================================================
+CONTROL DE VALIDEZ - ¿el brazo ACTUAL reproduce la produccion persistida?
+Si no reproduce, ningun otro numero de este run es interpretable.
+====================================================================================================
+reproducen: 10/20   sin referencia persistida: 0
+  NO reproduce  Tupungatito            2026-06-01 05:12  probe=0.1034  persistido=0.0536
+  NO reproduce  Tupungatito            2026-06-08 05:30  probe=0.0930  persistido=0.1679
+  NO reproduce  Tupungatito            2026-06-22 05:54  probe=0.0605  persistido=0.0829
+  NO reproduce  Tupungatito            2026-06-30 06:06  probe=0.0393  persistido=0.0966
+  NO reproduce  Lascar                 2026-06-17 05:06  probe=0.1773  persistido=0.1608
+  NO reproduce  Lascar                 2026-07-10 05:12  probe=0.2290  persistido=0.1466
+  NO reproduce  Lascar                 2026-08-05 05:42  probe=0.3185  persistido=0.2708
+  NO reproduce  Lastarria              2026-06-01 05:06  probe=0.0515  persistido=0.0077
+  NO reproduce  Lastarria              2026-06-25 06:00  probe=0.0761  persistido=0.0349
+  NO reproduce  Lastarria              2026-07-24 05:48  probe=0.0421  persistido=0.0000
+
+>>> El probe NO reproduce la produccion en la mayoria de las pasadas.
+>>> ESO es el hallazgo. El criterio pre-registrado dice que ningun otro numero
+>>> del run es interpretable, asi que NO se emite desenlace.
+>>> Antes de creerle: verificar el COMPARADOR (en S136 fallo por no filtrar por
+>>> sensor y comparaba contra records de VIIRS750).
+
+====================================================================================================
+PARIDAD DE COBERTURA entre brazos (leccion S135)
+====================================================================================================
+pasadas con los 3 brazos: 20/20
+
+====================================================================================================
+RATIOS nuestro/MIROVA por brazo y clase (pareado sobre las mismas pasadas)
+====================================================================================================
+nevado   n=13
+   ACTUAL      mediana=  0.91  min=  0.36  max=  1.69
+   SIN_KEEP    mediana=  0.91  min=  0.24  max=  1.36
+   SIN_FILTRO  mediana=  0.97  min=  0.36  max=  2.56
+
+control  n=7
+   ACTUAL      mediana=  0.69  min=  0.10  max=  1.05
+   SIN_KEEP    mediana=  0.79  min=  0.31  max=  1.01
+   SIN_FILTRO  mediana=  0.97  min=  0.15  max=  4.57
+
+====================================================================================================
+DESENLACE segun el criterio pre-registrado
+====================================================================================================
+NO SE EMITE: el control de validez fallo (ver arriba). El criterio pre-registrado
+dice que ningun otro numero del run sostiene un veredicto.
