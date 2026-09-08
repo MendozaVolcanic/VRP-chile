@@ -71,13 +71,16 @@ script no recortaba esa ventana y mostraba «0,0 %» en ocho de los once volcane
 «dejó de corroborar» cuando significa «MIROVA no fue observada». Corregido: la columna lleva su
 propio `n` y donde no hay ground truth dice `s/gt`.
 
-**Hallazgo lateral, del mismo tipo** (familia A17, canal partido): el archivo que leen el
-cargador canónico y todos los análisis —`data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado.csv`,
-35.037 filas hasta el 31-ago— está siete días atrás de `latest_consolidado.csv` (36.160 filas,
-hasta el 07-sep), que es el que `sync-mirova-csv.yml` refresca cada hora y consume el frontend.
-El workflow corre verde: no está roto, escribe en otro archivo. Queda como seguimiento; no se
-toca acá porque cambiar la fuente del ground truth en medio de una medición comparativa la
-invalidaría.
+**Nota sobre la frescura del ground truth, corregida el mismo día.** Cuando se corrió esta
+medición, el archivo que leen el cargador canónico y todos los análisis
+(`data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado.csv`) llegaba al 31-ago,
+siete días atrás de `latest_consolidado.csv`, que `sync-mirova-csv.yml` refresca cada hora para
+el frontend. Anoté eso como un canal partido de la familia A17. **Era sólo parte de la verdad**:
+el snapshot no está congelado, lo refresca `audit-weekly.yml` (cron de los lunes) con `curl` al
+repo del scraper, y de hecho se actualizó hasta el 07-sep mientras esta sesión trabajaba. Lo que
+queda es un desfase acotado de hasta una semana entre lo que ve el dashboard y lo que ven los
+análisis, no un archivo muerto. Los números de arriba corresponden a la ventana con el snapshot
+del 31-ago y siguen siendo válidos para ella.
 
 ## Otras correcciones del verificador, incorporadas
 

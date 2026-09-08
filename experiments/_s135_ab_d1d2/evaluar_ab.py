@@ -10,6 +10,17 @@ Aplica, sin ajustar nada después de ver los datos, el criterio de
       el control publica y el brazo no. El umbral es 0: cualquier pérdida bloquea la adopción Y
       abre una investigación por pasada (no descarta el brazo automáticamente).
 
+      Además, la noche sólo entra al universo si el cúmulo del control y la fuente de MIROVA
+      son PLAUSIBLEMENTE EL MISMO OBJETO. La diferencia entre el radio que reporta MIROVA
+      (desde su centro de grilla) y el nuestro (desde el cráter) es una cota INFERIOR de la
+      separación real entre los dos puntos (A93); si esa cota supera el presupuesto de 0,55 km
+      —semidiagonal de la celda de 375 m más el residuo por sensor— no es el mismo objeto y el
+      «acierto» del control es una coincidencia de calendario. Sin este filtro, el artefacto del
+      borde del disco (D19) coincidiendo en fecha con una detección real del cráter cuenta como
+      acierto, y el brazo que deja de producir el artefacto queda castigado por perderlo. Medido
+      en Isluga: de las dos noches que el brazo D «perdía», una era exactamente esto (ver
+      INVESTIGACION_ISLUGA_2NOCHES.md).
+
       Las pasadas diurnas se excluyen con `is_nighttime`, la MISMA función con que el pipeline
       decide qué granule mirar: comparar contra una alerta que por diseño no podemos ver sería
       fabricar un falso negativo. Son los artefactos solares de A76 (98 filas en la referencia
@@ -70,6 +81,9 @@ INNER = {"Isluga": 5, "Lascar": 5, "Lastarria": 3, "PuyehueCordonCaulle": 20,
 CAP_MW = 50000.0
 PAR_DT_MIN = 20
 UMBRAL_C2 = 0.70
+# Presupuesto de la cota A93: semidiagonal de la celda de 375 m (0,27 km) + residuo por
+# sensor del centro de grilla (0,18-0,31 km, AUDIT_S128.md:191). Ver el paso 0 de S135.
+PRESUPUESTO_COTA_KM = 0.55
 
 
 def es_v375(r):
@@ -146,6 +160,7 @@ def main():
     _vc = yaml.safe_load(open(os.path.join(ROOT, "volcanoes.yaml"), encoding="utf-8"))
     coord = {v["name"]: (v["lat"], v["lon"]) for v in _vc["volcanoes"]}
     fechas_mir, filas_mir = defaultdict(set), defaultdict(list)
+    dist_mir = defaultdict(list)
     fin_gt = ""
     n_diurnas = defaultdict(int)
     for a in alertas:
@@ -160,6 +175,8 @@ def main():
             n_diurnas[vol_a] += 1
             continue
         fechas_mir[a["volcano"]].add(f[:10])
+        if a.get("dist_km") is not None:
+            dist_mir[(a["volcano"], f[:10])].append(float(a["dist_km"]))
         dt = parse_dt(f)
         if dt and (a.get("vrp_mw") or 0) > 0:
             filas_mir[a["volcano"]].append((dt, float(a["vrp_mw"])))
@@ -186,16 +203,30 @@ def main():
            "alertas_diurnas_excluidas": {k: v for k, v in n_diurnas.items() if k in VOLCANES}}
 
     # ---- noches cat-b según el CONTROL ----
-    catb = {}
+    catb, coincidencia_lejana = {}, {}
     for vol in VOLCANES:
         recs = datos.get((CONTROL, vol)) or []
-        noches = set()
+        noches, lejanas = set(), {}
         for r in recs:
             d = r["datetime_utc"][:10]
-            if d <= fin_gt and d in fechas_mir.get(vol, set()) and publica_en_crater(r, INNER[vol]):
-                noches.add(d)
+            if d > fin_gt or d not in fechas_mir.get(vol, set()):
+                continue
+            if not publica_en_crater(r, INNER[vol]):
+                continue
+            # A93: ¿es el mismo objeto que vio MIROVA, o sólo la misma fecha?
+            nuestra = (r.get("primary_cluster") or {}).get("centroid_dist_km")
+            dm = dist_mir.get((vol, d)) or []
+            if nuestra is not None and dm:
+                cota = min(abs(nuestra - x) for x in dm)
+                if cota > PRESUPUESTO_COTA_KM:
+                    lejanas[d] = round(cota, 2)
+                    continue
+            noches.add(d)
         catb[vol] = noches
+        coincidencia_lejana[vol] = lejanas
     res["noches_catb_control"] = {v: len(n) for v, n in catb.items()}
+    res["coincidencias_de_fecha_descartadas"] = {
+        v: lej for v, lej in coincidencia_lejana.items() if lej}
 
     # ---- base falso del control (denominador del criterio 2) ----
     base_ctrl = {}
@@ -209,8 +240,11 @@ def main():
     print(f"A/B S135 · ventana de ground truth hasta {fin_gt} · {len(VOLCANES)} volcanes")
     print("alertas de pasadas DIURNAS excluidas del universo (A76):",
           dict(res["alertas_diurnas_excluidas"]) or "ninguna")
-    print("noches cat-b (las que el control publica y MIROVA confirma):",
-          {v: len(n) for v, n in catb.items()}, "\n")
+    print("noches cat-b (control publica Y es el mismo objeto que MIROVA):",
+          {v: len(n) for v, n in catb.items()})
+    desc = {v: len(x) for v, x in coincidencia_lejana.items() if x}
+    print("coincidencias de FECHA descartadas (objetos distintos, cota A93 > "
+          f"{PRESUPUESTO_COTA_KM} km):", desc or "ninguna", "\n")
 
     # ---- evaluar cada brazo ----
     for letra, perfil, desc in BRAZOS:
