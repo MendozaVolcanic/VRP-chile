@@ -9,7 +9,8 @@
 
 ## 1. El control de validez del probe estaba mal construido (falso negativo)
 
-El probe reportó **0 de 15 pasadas reproducen** la producción, y su propio texto concluyó que por
+El probe reportó **10 de 20 pasadas reproducen** la producción, contra un umbral de 16, y su
+propio texto concluyó que por
 eso «ningún otro número del run es interpretable». Pero comparaba contra
 `data/mirova_equivalent/`, que para pasadas de junio y julio fue escrito por el **código de
 entonces** — régimen previo a `#535`, con la máscara de nube encendida y el fondo global 6-8 K más
