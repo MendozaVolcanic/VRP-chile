@@ -1,14 +1,22 @@
 # Pre-registro del A/B de D1 y D2 — para la decisión de Nicolás
 
-> Escrito en S135, **antes** de correr nada. Nada de esto se ejecuta sin tu visto bueno: uno de
-> los brazos toca `pipeline/` y por regla A45 eso necesita tag defensivo y autorización explícita
-> tuya. Números de apoyo, todos de script: `experiments/_s135_probe_etapas/D19_HOY.md`
-> (→ `d19_regimen_vigente.json`) y `RESULTADOS_PASO0.md`.
+> **DECIDIDO por Nicolás el 2026-09-07.** Sus tres respuestas, textuales en lo esencial:
+> autoriza tocar el pipeline; corre sobre los seis volcanes que deciden; y **«no debemos perder
+> nada que MIROVA esté entregando, debemos ser lo más fiel posible y entender por qué sucede y
+> arreglar cuando diferimos»**. Esa tercera frase endurece el criterio 1 de un 10 % a **cero**, y
+> cambia qué se hace ante una diferencia: no se descarta el brazo, se investiga el mecanismo.
+> Todo el documento quedó actualizado con eso; §«Lo que necesito de vos» se conserva al final
+> como registro de lo que se preguntó.
 >
-> **Segunda versión.** Un verificador con contexto limpio encontró dos errores de gravedad 5 en
-> la primera: el tamaño de efecto estaba medido sobre un denominador que se movió solo, y el
-> umbral del criterio 2 era inalcanzable por construcción. Los dos están corregidos abajo, y
-> se agregó un brazo que el verificador señaló y que no requiere autorización.
+> Estado de ejecución: tag defensivo `pre-s135-second-pass-condicionado` creado y subido; el
+> segundo pase condicionado está implementado detrás de `ENABLE_SECOND_PASS_CONDITIONED`, en OFF
+> en el perfil operacional, con 17 tests propios; los cinco perfiles de brazos existen y se
+> verificó que **cada uno lee lo que declara**. Números de apoyo, todos de script:
+> `experiments/_s135_probe_etapas/D19_HOY.md` y `RESULTADOS_PASO0.md`.
+>
+> **Tercera versión.** La primera midió el tamaño de efecto sobre un denominador que se movía
+> solo y puso un umbral inalcanzable por construcción; las dos cosas las encontró un verificador
+> con contexto limpio (gravedad 5) y están corregidas.
 
 ## El fenómeno, primero
 
@@ -82,8 +90,11 @@ responden la pregunta principal, aunque no den la solución fiel.
 
 ## Universo y ventana
 
-- **Volcanes**: los 11 Tier A, estratificados como manda A83 en **focales** (Láscar, Lastarria) y
-  **nevados de señal débil** (los otros nueve). Un criterio único los mezcla y esconde el daño.
+- **Volcanes**: los **seis que deciden** (Isluga, Láscar, Lastarria, Puyehue-Cordón Caulle,
+  Planchón-Peteroa, Tupungatito), estratificados como manda A83 en **focales** (Láscar,
+  Lastarria) y **nevados de señal débil** (los otros cuatro). Un criterio único los mezcla y
+  esconde el daño. Los cinco restantes quedan fuera del reproceso por costo, y su tabla se
+  completa después si el resultado se adopta.
 - **Ventana**: 2026-06-01 → 2026-08-31, reprocesada **con el código de hoy** en todos los brazos.
   No sirve comparar contra los records ya guardados: se grabaron con otro régimen de fondo. Y no
   sirve usar sólo el régimen nuevo: tiene nueve días, de los cuales tres tienen ground truth.
@@ -108,14 +119,27 @@ volcán y con su denominador. Los denominadores reales en la ventana, medidos:
 | Tupungatito | 28 | 28 | 2,8 |
 | Chaitén 15 · Villarrica 14 · Copahue 3 · Nevados de Chillán 3 · Llaima 0 | | | <1,5 |
 
-> **Umbral de rechazo: un brazo que pierda más del 10 % de las noches cat-b en cualquiera de los
-> seis volcanes de la tabla superior no se adopta**, por más que mejore todo lo demás.
+> **Umbral, decidido por Nicolás: CERO.** No se adopta un brazo que pierda **ninguna** noche que
+> MIROVA esté entregando, en ninguno de los once volcanes. El 10 % que proponía la versión
+> anterior queda descartado.
 
-Los seis son los que tienen denominador suficiente para que un 10 % signifique algo. En los cinco
-de abajo el umbral sería menos de dos noches, así que **no deciden**: se reportan igual, como
-información, pero no vetan. La primera versión de este documento nombraba a Lastarria,
-Tupungatito e Isluga; dejaba fuera a Láscar (61 noches) y a Puyehue (37), que tienen más peso que
-dos de los nombrados. Corregido.
+Y la consecuencia práctica, que es lo que cambia el trabajo: **una pérdida no descarta el brazo,
+abre una investigación.** Si el brazo más fiel al paper pierde una noche que MIROVA publica, la
+respuesta no es volver al comportamiento actual, es entender por qué el algoritmo literal no ve
+lo que MIROVA sí ve. Las posibilidades son tres y hay que distinguirlas caso por caso, a nivel
+de pasada:
+
+1. **Nos falta algo que MIROVA hace** y no habíamos implementado. Se implementa.
+2. **MIROVA lo publica por su supervisión humana**, no por su algoritmo (descarta nubes a mano,
+   quita falsas alarmas a mano). Entonces el algoritmo literal *debe* no verlo, y lo que hay que
+   arreglar es nuestra expectativa, no el código.
+3. **Nuestra reconstrucción de esa noche difiere** por un dato de entrada distinto (granule NRT
+   contra estándar, cobertura, geometría). Se documenta y no cuenta como pérdida algorítmica.
+
+Los seis volcanes de la tabla siguen siendo los que **deciden** la adopción, por tener
+denominador suficiente; los otros cinco se reportan igual y cualquier pérdida en ellos también
+se investiga. La primera versión nombraba sólo a Lastarria, Tupungatito e Isluga, dejando fuera
+a Láscar (61 noches) y a Puyehue (37): corregido.
 
 **2. Lo que se quiere quitar (el nivel base falso).**
 Un «record de nivel base falso» es un record summit de VIIRS 375 m con cúmulo de **un solo
@@ -138,6 +162,9 @@ volcán. **La mediana agregada del brazo no puede alejarse de 1,0 más que la de
 
 **4. Desempate.** Si dos brazos cumplen 1, 2 y 3, gana el que esté **más cerca del paper**:
 D sobre C sobre B sobre E. La fidelidad literal es el objetivo del proyecto, no un empate técnico.
+Con el criterio 1 en cero, el orden de trabajo es: se corre D (el más fiel), se miran una por una
+las noches que pierda respecto del control, se clasifica cada una en los tres casos de arriba, y
+sólo si queda una pérdida del caso 1 sin explicación se baja a C o a B.
 
 ## Lo que este A/B no decide
 
@@ -155,12 +182,11 @@ producción no los toca. El riesgo real es el otro: **si el brazo D gana y se ad
 el operador ve en el dashboard todos los días**, con menos detecciones en el cráter en noches
 tranquilas. Por eso el criterio 1 está puesto donde está.
 
-## Lo que necesito de vos
+## Lo que se preguntó y lo que se decidió (2026-09-07)
 
-1. **¿Autorizás tocar `pipeline/detection_context.py`** para los brazos C y D? Sin eso corren
-   A, B y E, que acotan el problema pero no dan la solución fiel al paper.
-2. **¿Estás de acuerdo con el umbral del criterio 1** (perder más del 10 % de las noches
-   confirmadas por MIROVA en Isluga, Láscar, Lastarria, Puyehue, Planchón-Peteroa o Tupungatito
-   descarta el brazo)? Es el número que protege la señal real, y es tuyo como geólogo, no mío.
-3. **¿Los 11 Tier A o sólo los seis que deciden?** Los seis cuestan la mitad y responden la
-   pregunta; los once dan la tabla completa para el paper.
+| pregunta | respuesta de Nicolás |
+|---|---|
+| ¿Autorizás tocar `pipeline/detection_context.py` para los brazos C y D? | **Sí.** Tag defensivo `pre-s135-second-pass-condicionado` creado antes del primer edit (A45); el cambio entró detrás de un flag en OFF, con 17 tests. |
+| ¿Umbral del criterio 1? | **Cero pérdidas**, más exigente que el 10 % propuesto. «No debemos perder nada que MIROVA esté entregando.» |
+| ¿Los 11 Tier A o los seis que deciden? | **Los seis**: Isluga, Láscar, Lastarria, Puyehue-Cordón Caulle, Planchón-Peteroa y Tupungatito. |
+| (no preguntado, instruido) | **«Ser lo más fiel posible y entender por qué sucede y arreglar cuando diferimos.»** Incorporado al criterio 1 y al desempate: una diferencia se investiga, no se esquiva. |

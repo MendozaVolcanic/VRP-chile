@@ -138,6 +138,7 @@ from pipeline.profile import (
     P95_VENT_EXCLUSION_MODIS_KM,
     ENABLE_ETI_QUADRATIC_SCENE,
     ENABLE_SECOND_PASS_ADJACENT,
+    ENABLE_SECOND_PASS_CONDITIONED,
     C1_SUMMIT_OVERRIDE,
     C2_SUMMIT_OVERRIDE,
     C2_DNTI_SUMMIT_NIGHT,
@@ -791,6 +792,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             c1_deti_scene=DNTI_CONTEXTUAL_C1_SCENE,
             c2_dnti_scene=C2_DNTI_SCENE_NIGHT,
             c2_deti_scene=C2_DETI_SCENE_NIGHT,
+            conditioned=ENABLE_SECOND_PASS_CONDITIONED,
         )
 
         # Second pass — recapture marginales contaminados (opcional).
@@ -806,6 +808,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                 c1_deti_scene=DNTI_CONTEXTUAL_C1_SCENE,
                 c2_dnti_scene=C2_DNTI_SCENE_NIGHT,
                 c2_deti_scene=C2_DETI_SCENE_NIGHT,
+                conditioned=ENABLE_SECOND_PASS_CONDITIONED,
             )
         else:
             eti_path_hot = first_pass_active
@@ -926,6 +929,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                                if ENABLE_DUAL_ROI_SECOND_PASS else None),
                 c2_deti_scene=(C2_DETI_SCENE_NIGHT
                                if ENABLE_DUAL_ROI_SECOND_PASS else None),
+                conditioned=ENABLE_SECOND_PASS_CONDITIONED,
             )
             # S85 F-S81-B' — gate intra-radio sobre pixels NUEVOS del second
             # pass. Default OFF; ON via profile A/B. Solo afecta pixels nuevos

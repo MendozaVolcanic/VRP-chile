@@ -137,16 +137,19 @@ def test_g7_campo_con_flag_productor_apagado_queda_en_cero(flags_operacionales):
 
 
 # Contrato explícito, no heurística: cada cita file:line que CLAUDE.md usa como evidencia.
+# Al insertar líneas en pipeline/ hay que correr estos números Y los de CLAUDE.md: el guard
+# atrapa el desfase, pero la lista es el contrato y se actualiza a mano (S135: +1 en los tres
+# procesadores al cablear `conditioned=` en las 9 llamadas a second_pass_adjacent).
 CITAS_CLAUDE_MD = [
     ("scripts/run_pipeline.py", 234, "get_detection_anchor"),
     ("scripts/run_pipeline.py", 244, "local_kernel_bg"),
     ("pipeline/geo_utils.py", 29, "get_grid_center"),
     ("frontend/index.html", 1462, "isValidDetection"),
     ("pipeline/process_viirs.py", 81, "FLAG_DNS"),
-    ("pipeline/process_viirs_mod.py", 436, "Villarrica/PP/Lastarria/Chaiten/PCC"),
-    ("pipeline/process_viirs.py", 208, "compute_test1_nti"),
+    ("pipeline/process_viirs_mod.py", 437, "Villarrica/PP/Lastarria/Chaiten/PCC"),
+    ("pipeline/process_viirs.py", 209, "compute_test1_nti"),
     ("pipeline/process_modis.py", 59, "compute_test1_mir"),
-    ("pipeline/process_viirs_mod.py", 155, "compute_test1_mir"),
+    ("pipeline/process_viirs_mod.py", 156, "compute_test1_mir"),
     ("scripts/build_c2ab_windows.py", 64, "registro_vrp_ocr.csv"),
 ]
 
