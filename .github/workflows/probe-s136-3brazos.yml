@@ -1,0 +1,50 @@
+name: Probe S136 3 brazos filtro contextual Test 1
+
+# A43: "on" entre comillas. One-off, READ-ONLY (A75/A71): procesa cada granule tres veces
+# variando ENABLE_TEST1_CONTEXTUAL_FILTER / _KEEP_PEAK en el namespace de
+# pipeline.process_viirs. No edita ningún módulo, no escribe en data/, no empuja commits
+# (queda fuera de la concurrencia push-main). Sólo VIIRS: no instala la dependencia HDF4 de
+# MODIS. Criterio pre-registrado: docs/PREREGISTRO_PROBE_S136_TEST1_CONTEXTUAL.md.
+# Archivar en _archive/ al terminar (regla S80).
+"on":
+  workflow_dispatch:
+    inputs:
+      vol:
+        description: "Filtrar volcán (Tupungatito | Villarrica | PlanchonPeteroa | Lascar | Lastarria). Vacío = las 20 pasadas"
+        required: false
+        default: ""
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml
+      - name: Run probe 3 brazos (read-only)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_PROFILE: mirova_equivalent
+          PROBE_VOL: ${{ github.event.inputs.vol }}
+        run: |
+          mkdir -p experiments/_s136/out
+          python experiments/_s136/probe_3brazos.py | tee experiments/_s136/out/report.txt
+      - name: Evaluar con el criterio pre-registrado
+        if: always()
+        run: |
+          python experiments/_s136/evaluar_3brazos.py --dir experiments/_s136/out \
+            | tee experiments/_s136/out/veredicto.txt
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s136-probe-3brazos
+          path: experiments/_s136/out/
