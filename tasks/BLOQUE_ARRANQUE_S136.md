@@ -92,13 +92,14 @@ probe archivado. Tres flags de S132 siguen OFF. Ninguna decisión de §D tomada 
 
 ## Seguimiento nuevo (S135, no arreglado a propósito)
 
-**El ground truth que leen los análisis está siete días atrás del que refresca el pipeline.**
+**El ground truth de los análisis va hasta una semana atrás del que ve el frontend.**
 `data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado.csv` (35.037 filas, hasta
 2026-08-31) es el que consumen el cargador canónico, `scripts/paper_numbers.py` y todas las
-mediciones; `latest_consolidado.csv` en la raíz (36.160 filas, hasta 2026-09-07) es el que
-`sync-mirova-csv.yml` actualiza cada hora y el que consume el frontend. El workflow corre verde:
-no está roto, escribe en otro archivo (familia A17, canal partido). No se tocó en S135 porque
-cambiar la fuente del ground truth en medio de una medición comparativa la invalidaría. Al
+mediciones; `latest_consolidado.csv` en la raíz es el que `sync-mirova-csv.yml` actualiza cada hora y el que
+consume el frontend. **Corregido el mismo día**: el snapshot NO está congelado — lo refresca
+`audit-weekly.yml` (cron lunes 09:00 UTC) con `curl` al repo del scraper, y se actualizó al
+07-sep durante la sesión. El desfase real es de hasta una semana, no permanente. No se tocó en
+S135 porque cambiar la fuente en medio de una medición comparativa la invalidaría. Al
 arreglarlo, ojo con la asimetría: `latest_consolidado.csv` es sólo el canal consolidado; el OCR
 fresco sigue en el snapshot. Mitigación ya aplicada: `paper_numbers.py` y
 `d19_regimen_vigente.py` recortan toda comparación a la última fecha presente en el CSV y lo
