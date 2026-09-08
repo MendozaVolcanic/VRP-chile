@@ -31,7 +31,13 @@ el verificador con contexto limpio de S134 — no se reinventan acá):
   frío       = `bt_k` del píxel del cúmulo (el `anomaly_pixel` más cercano al centroide) menor
                que `t_bg_k` del record. Es el par de campos correcto: `t_max_i04_k` es el máximo
                del ROI de 25 km y da lo contrario.
-  MIROVA     = alerta V375 (CONS ∪ OCR, cargador canónico) en la misma fecha UTC, y **sólo
+  MIROVA     = alerta V375 (CONS ∪ OCR, cargador canónico) en la misma fecha UTC. ⚠️ El
+               cargador **NO** filtra día/noche: una versión anterior de este docstring decía
+               «nocturna 03-09 UTC según el loader» y era falso. De las 1.551 alertas V375 de
+               la referencia, **98 son de pasadas diurnas** (17-19 UTC, 77 del canal OCR y 21
+               del consolidado): son los artefactos solares de A76, que nuestro pipeline
+               night-only no puede ver por diseño. Acá no se filtran —esta columna es
+               informativa— pero el evaluador del A/B sí los excluye del universo. Y **sólo
                sobre los records anteriores a la última fecha del CSV de referencia**: más allá
                MIROVA no fue observada, así que un 0 % ahí no significa «no corroboró» sino «no
                hay con qué comparar». El denominador de esa columna se reporta aparte.

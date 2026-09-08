@@ -105,8 +105,10 @@ responden la pregunta principal, aunque no den la solución fiel.
 En las unidades del objeto (A91), fijado antes de ver los resultados.
 
 **1. Lo que no se puede perder (falsos negativos sobre señal real).**
-Una «noche cat-b» es una noche con alerta de MIROVA en VIIRS 375 m que el brazo control publica
-como detección en el cráter. **FN = noches cat-b que el control publica y el brazo no**, por
+Una «noche cat-b» es una noche con alerta de MIROVA en VIIRS 375 m **de una pasada nocturna**
+que el brazo control publica como detección en el cráter. La restricción a pasadas nocturnas usa
+la misma función con la que el pipeline decide qué granule mirar, así que el universo contiene
+sólo lo que por diseño podemos ver; las 98 alertas de pasadas diurnas se reportan aparte. **FN = noches cat-b que el control publica y el brazo no**, por
 volcán y con su denominador. Los denominadores reales en la ventana, medidos:
 
 | volcán | noches cat-b | de ellas por `test1_roi` | 10 % = |
@@ -130,11 +132,25 @@ lo que MIROVA sí ve. Las posibilidades son tres y hay que distinguirlas caso po
 de pasada:
 
 1. **Nos falta algo que MIROVA hace** y no habíamos implementado. Se implementa.
-2. **MIROVA lo publica por su supervisión humana**, no por su algoritmo (descarta nubes a mano,
-   quita falsas alarmas a mano). Entonces el algoritmo literal *debe* no verlo, y lo que hay que
-   arreglar es nuestra expectativa, no el código.
+2. **La fila de MIROVA es de una pasada DIURNA** (A76): cerca del mediodía solar, una nube
+   refleja sol en el infrarrojo medio y se ve fría en el térmico, con lo que el índice se
+   dispara sin que haya nada caliente. Nuestro pipeline sólo procesa pasadas nocturnas, así que
+   por diseño no la ve, y **perderla es correcto**. Hay 98 alertas así en la referencia de
+   VIIRS 375 m, 77 del canal OCR y 21 del consolidado. No cuentan como pérdida: quedan fuera
+   del universo (ver más abajo).
 3. **Nuestra reconstrucción de esa noche difiere** por un dato de entrada distinto (granule NRT
    contra estándar, cobertura, geometría). Se documenta y no cuenta como pérdida algorítmica.
+
+**Lo que NO es una explicación válida, y hay que decirlo porque yo lo escribí mal en la versión
+anterior de este documento:** «MIROVA lo publica porque una persona lo revisó». El canal que
+comparamos es el de tiempo casi real, y ahí **no hay nadie mirando**. MIROVA vigila cientos de
+volcanes en el mundo, gratis, cada una o dos horas: no existe la capacidad de revisar caso por
+caso, ni el conocimiento local de cada volcán para hacerlo. La supervisión manual que menciona
+la literatura es del archivo histórico curado para publicación, no del producto operacional.
+Está registrado en la memoria del proyecto desde S21 como regla durable, y aceptarlo como
+explicación sería aceptar **un techo artificial que no existe**: si MIROVA captura algo que
+nosotros no, la diferencia es algorítmica y se puede investigar y replicar. Es exactamente lo
+que Nicolás pidió al fijar el criterio en cero.
 
 Los seis volcanes de la tabla siguen siendo los que **deciden** la adopción, por tener
 denominador suficiente; los otros cinco se reportan igual y cualquier pérdida en ellos también

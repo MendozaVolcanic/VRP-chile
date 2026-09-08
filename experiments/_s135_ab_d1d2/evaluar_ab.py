@@ -5,10 +5,17 @@ Aplica, sin ajustar nada después de ver los datos, el criterio de
 `docs/PREREGISTRO_AB_D1_D2_S135.md`, con la decisión de Nicolás del 2026-09-07:
 
   CRITERIO 1 — CERO pérdidas sobre lo que MIROVA entrega.
-      noche cat-b = (volcán, fecha UTC) con alerta MIROVA VIIRS375 (CONS ∪ OCR) que el brazo
-      CONTROL publica como detección en el cráter. FN = noches cat-b que el control publica y
-      el brazo no. El umbral es 0: cualquier pérdida bloquea la adopción Y abre una
-      investigación por pasada (no descarta el brazo automáticamente).
+      noche cat-b = (volcán, fecha UTC) con alerta MIROVA VIIRS375 (CONS ∪ OCR) **de una pasada
+      NOCTURNA** que el brazo CONTROL publica como detección en el cráter. FN = noches cat-b que
+      el control publica y el brazo no. El umbral es 0: cualquier pérdida bloquea la adopción Y
+      abre una investigación por pasada (no descarta el brazo automáticamente).
+
+      Las pasadas diurnas se excluyen con `is_nighttime`, la MISMA función con que el pipeline
+      decide qué granule mirar: comparar contra una alerta que por diseño no podemos ver sería
+      fabricar un falso negativo. Son los artefactos solares de A76 (98 filas en la referencia
+      de V375). Lo que NO se admite como explicación de una pérdida es «MIROVA lo revisó a
+      mano»: el canal NRT que comparamos no tiene supervisión humana (regla durable desde S21),
+      y aceptarlo sería aceptar un techo artificial.
   CRITERIO 2 — el brazo elimina >= 70 % de la porción ALCANZABLE del nivel base falso.
       nivel base falso = record summit V375 con cúmulo de 1 píxel, ese píxel más frío que el
       fondo global, y sin alerta de MIROVA esa noche. «Alcanzable» = la porción que llega por
@@ -40,7 +47,9 @@ from datetime import datetime
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, ROOT)
+sys.path.insert(0, os.path.join(ROOT, "scripts"))
 from pipeline.mirova_csv_loader import load_mirova_alertas  # noqa: E402
+from run_pipeline import is_nighttime  # noqa: E402  (el mismo criterio que usa el pipeline)
 
 SNAP = os.path.join(ROOT, "data", "mirova_reference", "mirova_v1_snapshot")
 BRAZOS = [
@@ -133,13 +142,23 @@ def main():
 
     alertas = load_mirova_alertas(cons_path=os.path.join(SNAP, "registro_vrp_consolidado.csv"),
                                   ocr_path=os.path.join(SNAP, "registro_vrp_ocr.csv"))
+    import yaml
+    _vc = yaml.safe_load(open(os.path.join(ROOT, "volcanoes.yaml"), encoding="utf-8"))
+    coord = {v["name"]: (v["lat"], v["lon"]) for v in _vc["volcanoes"]}
     fechas_mir, filas_mir = defaultdict(set), defaultdict(list)
     fin_gt = ""
+    n_diurnas = defaultdict(int)
     for a in alertas:
         f = a.get("fecha_utc")
         if not f or a["sensor_bucket"] != "VIIRS375":
             continue
         fin_gt = max(fin_gt, f[:10])
+        # A76: una alerta de pasada diurna no puede contarse contra un pipeline night-only.
+        dt_a = parse_dt(f)
+        vol_a = a["volcano"]
+        if dt_a is not None and vol_a in coord and not is_nighttime(*coord[vol_a], dt_a):
+            n_diurnas[vol_a] += 1
+            continue
         fechas_mir[a["volcano"]].add(f[:10])
         dt = parse_dt(f)
         if dt and (a.get("vrp_mw") or 0) > 0:
@@ -163,7 +182,8 @@ def main():
             return
 
     res = {"ventana_ground_truth_hasta": fin_gt, "volcanes": VOLCANES,
-           "faltantes": faltan, "brazos": {}}
+           "faltantes": faltan, "brazos": {},
+           "alertas_diurnas_excluidas": {k: v for k, v in n_diurnas.items() if k in VOLCANES}}
 
     # ---- noches cat-b según el CONTROL ----
     catb = {}
@@ -187,6 +207,8 @@ def main():
     res["base_falso_control"] = base_ctrl
 
     print(f"A/B S135 · ventana de ground truth hasta {fin_gt} · {len(VOLCANES)} volcanes")
+    print("alertas de pasadas DIURNAS excluidas del universo (A76):",
+          dict(res["alertas_diurnas_excluidas"]) or "ninguna")
     print("noches cat-b (las que el control publica y MIROVA confirma):",
           {v: len(n) for v, n in catb.items()}, "\n")
 
