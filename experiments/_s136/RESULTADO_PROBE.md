@@ -28,10 +28,30 @@ reproducen deben tener el mismo fondo y las que no, uno corrido. Medido:
 | reproducen | 10 | **0,19 K** |
 | no reproducen | 10 | **3,62 K** |
 
-Un factor **20** de separación. La no-reproducción es del comparador, no del probe. (VRP 136 lo
-verificó por otra vía: contra el brazo control del A/B de S135, que reprocesó esos mismos
-granules con código post-`#535`, obtuvo **16/16 exacto**; las 4 sin referencia son de Villarrica,
-que no está entre los 6 volcanes del A/B. Ese número es suyo, no reproducido acá.)
+Un factor **20** de separación. La no-reproducción es del comparador, no del probe.
+
+**Confirmación directa, ya reproducida acá** (bajando el brazo control del A/B de S135, runs
+34173711390 y 34208191011, que reprocesó esos mismos granules con código post-`#535`):
+
+| comparación | resultado |
+|---|---|
+| probe vs **reproceso con el mismo código** | **16 / 16 coinciden al cuarto decimal** |
+| probe vs producción (código de cuando se escribió el record) | 10 / 20 |
+| producción vs reproceso, **mismo granule, código distinto** | **difieren 11 / 16** |
+
+La tercera fila es la que cierra el caso: producción y reproceso difieren entre sí sobre el mismo
+granule. El probe no se aparta de la producción por un defecto propio, sino porque **la producción
+de junio-julio la escribió otro código**. Las 4 pasadas sin referencia son de Villarrica, que no
+está entre los 6 volcanes del A/B.
+
+(VRP 136 llegó a esto primero y reportó 9/16 en la tercera fila; acá dan 11/16 — la diferencia es
+de tolerancia o de conjunto y no cambia nada. El 16/16 coincide exacto entre las dos sesiones.)
+
+**Con esto, las tres sospechas de la versión anterior quedan descartadas por medición, no por
+argumento**: el A/B fue un reproceso real por `run_pipeline`, así que **pasó por `store.py`** y el
+probe le coincide exacto (descarta la 1); Tupungatito 06-08 da 0,0930 en probe y en A/B, o sea
+**el mismo granule** — el 0,0937 del SNPP de las 05:12 era otra pasada (descarta la 2); y
+Lastarria 07-24 coincide exacto en 0,0421 (descarta la 3).
 
 Nota: el conteo de 10/20 ya incorpora el arreglo del filtro por sensor (#611). La auditoría de
 VRP 136 cita «0/15», que es la versión previa a ese arreglo.
@@ -83,13 +103,13 @@ construcción— pero la elección hay que ponérsela por delante.
 
 ## Qué queda
 
-1. **Rehacer el control de validez contra datos del mismo régimen de código** — no contra lo
-   persistido. Con eso, el probe queda validado y los ratios pasan a ser legibles.
+1. **El probe ya está validado** (16/16 contra el reproceso del mismo régimen), así que los
+   ratios son legibles. Lo que falta es muestra, no instrumento.
 2. **Ampliar la muestra en nevados eligiendo por sustrato**, no por `triggered_test1`: hacen falta
-   pasadas donde el camino Test 1 gane la selección. Sin eso el desenlace seguirá siendo C por
-   más pasadas que se agreguen.
-3. Las tres sospechas de la versión anterior (`store.py`, granule distinto, `f5_core = None`)
-   **quedan descartadas** como causa de la no-reproducción.
+   pasadas donde el camino Test 1 **gane la selección**. Sin eso el desenlace seguirá siendo C por
+   más pasadas que se agreguen. Es el único cambio que el probe necesita.
+3. El control de validez del evaluador debe apuntar al reproceso del mismo régimen, no a
+   `data/mirova_equivalent/`.
 
 ## Lección de método
 
@@ -97,3 +117,24 @@ Un control de reproducibilidad debe comparar contra **datos del mismo régimen d
 fecha del dato no fija el régimen; lo fija el código que lo procesó. Y un criterio que filtra
 casos («pasadas útiles») necesita su definición operacional escrita **en el pre-registro**, porque
 si se deja para después, se elige mirando el resultado.
+
+## Apéndice — los errores de instrumento de S136, entre las dos sesiones
+
+Ocho, todos de la misma familia (A93: el instrumento medía otra cosa que la que decía medir), y
+**ninguno lo cazó leer el código con cuidado**. Se dejan listados porque el patrón, no cada caso,
+es lo que vale:
+
+| # | el instrumento | qué lo delató |
+|---|---|---|
+| 1 | `n_test1_pixels` como proxy del mosaico nival | un **control** (Láscar, desierto, mismo footprint que un glaciar) |
+| 2 | el máximo global del TIF como «el foco» de Isluga | un **número imposible** (focos a 20-31 km del cráter) |
+| 3 | `final_hotspot_source` persistido como registro de qué rama corrió | un **cero** (lo reasigna `resolve_honest_anchor`, línea 2006) |
+| 4 | el comparador sin filtro de sensor (comparaba contra VIIRS750) | un **número imposible** (persistido 0,0000 contra probe 0,0930) |
+| 5 | el control de validez contra el régimen viejo | la sesión paralela |
+| 6 | elegir las pasadas por `triggered_test1` en vez de por sustrato | la sesión paralela |
+| 7 | *(VRP 136)* fallback silencioso a producción para el volcán sin referencia | que **Villarrica no podía tener referencia** |
+| 8 | parseo de rutas con `/` en Windows al cargar el A/B | un **cero** (0/0 comparaciones) |
+
+Cinco de los ocho los delató un control o un valor que no podía ser; dos, la otra sesión; ninguno,
+una revisión del método. El corolario para el proyecto: **poner el control primero no es cortesía
+metodológica, es el único mecanismo que funcionó**.
