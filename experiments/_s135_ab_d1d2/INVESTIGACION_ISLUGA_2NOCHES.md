@@ -184,3 +184,39 @@ no una propiedad del record.
 Esto no invalida D19 —el mecanismo existe y publica píxeles más fríos que su fondo sin que nadie
 confirme nada— pero sí obliga a decirlo con cuidado: el anillo de 2,5 a 3 km contiene artefacto
 **y** señal real, y en Copahue lo que hay es señal.
+
+---
+
+## Cuarto tramo: la cota A93 estaba mal aplicada, por tercera vez en la sesión
+
+Al correr la evaluación parcial con tres volcanes, Láscar quedó con **4 noches confirmadas de
+39 candidatas**: el 90 % descartado como «objetos distintos». Para un volcán focal con el cráter
+caliente y bien localizado, eso no tenía sentido.
+
+La causa: comparaba el radio que reporta MIROVA, medido **desde su centro de grilla**, contra
+`centroid_dist_km`, que mide **desde el cráter**. Son dos orígenes distintos, y la separación
+entre ellos no es despreciable:
+
+| volcán | separación cráter ↔ centro de grilla |
+|---|---|
+| Puyehue-Cordón Caulle | 7,569 km |
+| Tupungatito | 4,855 km |
+| Planchón-Peteroa | 2,021 km |
+| Láscar | 0,833 km |
+| Lastarria | 0,115 km |
+
+Con el umbral en 0,55 km, un desplazamiento de origen de 0,83 km ya basta para declarar
+«objetos distintos» a dos mediciones de la misma cosa; en Puyehue y Tupungatito el error del
+método supera al umbral por un orden de magnitud.
+
+Corregido: nuestro radio se recalcula desde el centro de grilla de MIROVA usando el centroide
+del cúmulo, de modo que los dos salen del mismo punto. Láscar pasa de 4 a **26** noches
+confirmadas. Los veredictos de los cinco brazos no cambiaron, pero eso es suerte, no una defensa
+del error: el universo sobre el que se juzgaban era otro.
+
+Es la **tercera** aparición de A93 en esta sesión: primero al comparar el pico con la distancia
+de MIROVA en el paso 0, después al descartar coincidencias de fecha, y ahora acá. Las tres veces
+el error tuvo la misma forma —restar dos radios sin preguntar desde dónde mide cada uno— y las
+tres veces pasó desapercibido hasta que un número quedó absurdo. Lo que lo delató no fue una
+revisión del método sino que Láscar, un volcán focal, apareciera con el 90 % de sus noches
+descartadas.

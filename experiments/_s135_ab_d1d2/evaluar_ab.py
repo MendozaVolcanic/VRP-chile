@@ -11,8 +11,12 @@ Aplica, sin ajustar nada después de ver los datos, el criterio de
       abre una investigación por pasada (no descarta el brazo automáticamente).
 
       Además, la noche sólo entra al universo si el cúmulo del control y la fuente de MIROVA
-      son PLAUSIBLEMENTE EL MISMO OBJETO. La diferencia entre el radio que reporta MIROVA
-      (desde su centro de grilla) y el nuestro (desde el cráter) es una cota INFERIOR de la
+      son PLAUSIBLEMENTE EL MISMO OBJETO. Los dos radios se miden desde el MISMO origen —el
+      `mirova_center` del volcán, que es de donde mide MIROVA— recalculando el nuestro desde
+      el centroide del cúmulo. Compararlo contra `centroid_dist_km`, que mide desde el cráter,
+      sería restar radios de orígenes distintos: la separación vent ↔ centro va de 0,115 km en
+      Lastarria a 4,855 en Tupungatito y 7,569 en Puyehue, así que el error superaría al propio
+      umbral. Con el mismo origen, la diferencia de radios es una cota INFERIOR de la
       separación real entre los dos puntos (A93); si esa cota supera el presupuesto de 0,55 km
       —semidiagonal de la celda de 375 m más el residuo por sensor— no es el mismo objeto y el
       «acierto» del control es una coincidencia de calendario. Sin este filtro, el artefacto del
@@ -111,6 +115,16 @@ def cargar(base, perfil, vol):
     return None
 
 
+def hav(la1, lo1, la2, lo2):
+    """Distancia sobre la esfera, en km."""
+    import math
+    Rt = 6371.0088
+    p = math.radians
+    dla, dlo = p(la2 - la1), p(lo2 - lo1)
+    a = math.sin(dla / 2) ** 2 + math.cos(p(la1)) * math.cos(p(la2)) * math.sin(dlo / 2) ** 2
+    return 2 * Rt * math.asin(math.sqrt(a))
+
+
 def publica_en_crater(r, inner):
     """Lo que el operador ve como detección crateriana (definición S119/S114)."""
     pc = r.get("primary_cluster") or {}
@@ -159,6 +173,10 @@ def main():
     import yaml
     _vc = yaml.safe_load(open(os.path.join(ROOT, "volcanoes.yaml"), encoding="utf-8"))
     coord = {v["name"]: (v["lat"], v["lon"]) for v in _vc["volcanoes"]}
+    # Origen desde el que MIROVA mide su `Distancia_km`: el centro de su grilla, que coincide
+    # con el centro del TIF a ±200 m (AUDIT_S128.md:188-210). NO es el cráter.
+    centro_mir = {v["name"]: (v.get("mirova_center_lat"), v.get("mirova_center_lon"))
+                  for v in _vc["volcanoes"]}
     fechas_mir, filas_mir = defaultdict(set), defaultdict(list)
     dist_mir = defaultdict(list)
     fin_gt = ""
@@ -213,8 +231,13 @@ def main():
                 continue
             if not publica_en_crater(r, INNER[vol]):
                 continue
-            # A93: ¿es el mismo objeto que vio MIROVA, o sólo la misma fecha?
-            nuestra = (r.get("primary_cluster") or {}).get("centroid_dist_km")
+            # A93: ¿es el mismo objeto que vio MIROVA, o sólo la misma fecha? Los dos
+            # radios, desde el MISMO origen (el centro de grilla de MIROVA).
+            pc = r.get("primary_cluster") or {}
+            cm = centro_mir.get(vol) or (None, None)
+            nuestra = None
+            if pc.get("centroid_lat") is not None and cm[0] is not None:
+                nuestra = hav(cm[0], cm[1], pc["centroid_lat"], pc["centroid_lon"])
             dm = dist_mir.get((vol, d)) or []
             if nuestra is not None and dm:
                 cota = min(abs(nuestra - x) for x in dm)
