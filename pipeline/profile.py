@@ -623,6 +623,31 @@ ENABLE_UNSUITABLE_FILTERS_267_273: bool = bool(
     _p.get("enable_unsuitable_filters_267_273", True)
 )
 
+# S136 — la conectiva de los Tests 2 y 3: la FÓRMULA del paper contra su PROSA.
+#
+# La fórmula (verificada en el PDF p.7, el `or` está literal en su propia línea) es
+#   dNTI > C1  OR  dNTI > μ + C2·σ   →   thr = min(C1, μ + C2·σ)
+# y es el comportamiento por defecto (OFF). Pero la prosa del MISMO paper, tres líneas más
+# abajo, describe lo contrario: "the parameter C1 implies that a minimum threshold needs to be
+# exceeded (...) HOWEVER, when highly variable scenes are analysed, the detection is achieved
+# using statistical analysis of the whole scene" → C1 como cota INFERIOR y el contraste mandando
+# en escenas variables, o sea thr = max(C1, μ + C2·σ).
+#
+# Medido S136: con la fórmula el piso C1 gobierna el 100 % de los records de MODIS y el 99,9 %
+# de VIIRS, así que el contraste con la escena NUNCA decide; y en los tres casos NEGATIVOS del
+# Apéndice A (Dubbi, Tolbachik, Stromboli) detectamos donde el autor publica que su algoritmo no
+# detecta. Nota histórica: el proyecto usaba `max` y lo cambió a `min` en S46 Task 5 como "bug
+# fix" de fidelidad a la fórmula (ver el comentario en detection_context.py), así que encender
+# este flag es volver a ese comportamiento con criterio de decisión externo.
+#
+# Cuando ON: thr = max(...) en first_pass_tests_2_and_3 Y en second_pass_adjacent (el paper
+# reaplica los Tests 2/3 en el second run, §354-356). Adopción sujeta a A/B con criterio
+# pre-registrado (A18/A91); el patrón de medida es la batería del Apéndice A.
+# Detalle: experiments/_s136/LA_CONECTIVA_DE_LOS_TESTS_23.md
+ENABLE_TESTS_23_PROSE_BRANCH: bool = bool(
+    _p.get("enable_tests_23_prose_branch", False)
+)
+
 # S46 Drift #1b — Coppola 2016a SP426.5:352-356 dice "step 2 is performed a
 # second time, being particularly careful to eliminate all of the 'active'
 # pixels already detected". Nuestro bg_vals NO excluye pixels Test 1 K1 active,

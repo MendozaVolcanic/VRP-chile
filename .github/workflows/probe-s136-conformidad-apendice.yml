@@ -23,6 +23,10 @@ name: Probe S136 conformidad Apendice A (9 casos)
         description: "Un solo caso (A1..A9 o el nombre del volcan). Vacio = los 9"
         required: false
         default: ""
+      prosa:
+        description: "1 = brazo de la PROSA, max(C1, mu+C2*sigma). Vacio = la FORMULA de hoy"
+        required: false
+        default: ""
 
 jobs:
   apendice:
@@ -47,13 +51,16 @@ jobs:
           VRP_PROFILE: mirova_equivalent
           VRP_DEST: /tmp/apendice
           APENDICE_CASO: ${{ github.event.inputs.caso }}
+          APENDICE_PROSA: ${{ github.event.inputs.prosa }}
         run: |
-          mkdir -p experiments/_s136/out_apendice
+          mkdir -p experiments/_s136/out_apendice experiments/_s136/out_apendice_prosa
           python experiments/_s136/conformidad_apendice.py \
             | tee experiments/_s136/out_apendice/report.txt
       - name: Upload artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: s136-conformidad-apendice
-          path: experiments/_s136/out_apendice/
+          name: s136-conformidad-apendice-${{ github.event.inputs.prosa && 'prosa' || 'formula' }}
+          path: |
+            experiments/_s136/out_apendice/
+            experiments/_s136/out_apendice_prosa/

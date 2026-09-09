@@ -140,16 +140,19 @@ def test_g7_campo_con_flag_productor_apagado_queda_en_cero(flags_operacionales):
 # Al insertar líneas en pipeline/ hay que correr estos números Y los de CLAUDE.md: el guard
 # atrapa el desfase, pero la lista es el contrato y se actualiza a mano (S135: +1 en los tres
 # procesadores al cablear `conditioned=` en las 9 llamadas a second_pass_adjacent).
+# OJO: esta lista es un espejo MANUAL de las citas `file:line` de CLAUDE.md. Si insertas
+# lineas en un archivo citado, hay que corregir CLAUDE.md **y** esta lista: el guard no la
+# deriva del documento (S136 lo aprendio agregando un flag que corrio tres citas en 1).
 CITAS_CLAUDE_MD = [
     ("scripts/run_pipeline.py", 234, "get_detection_anchor"),
     ("scripts/run_pipeline.py", 244, "local_kernel_bg"),
     ("pipeline/geo_utils.py", 29, "get_grid_center"),
     ("frontend/index.html", 1462, "isValidDetection"),
     ("pipeline/process_viirs.py", 81, "FLAG_DNS"),
-    ("pipeline/process_viirs_mod.py", 437, "Villarrica/PP/Lastarria/Chaiten/PCC"),
-    ("pipeline/process_viirs.py", 209, "compute_test1_nti"),
+    ("pipeline/process_viirs_mod.py", 438, "Villarrica/PP/Lastarria/Chaiten/PCC"),
+    ("pipeline/process_viirs.py", 210, "compute_test1_nti"),
     ("pipeline/process_modis.py", 59, "compute_test1_mir"),
-    ("pipeline/process_viirs_mod.py", 156, "compute_test1_mir"),
+    ("pipeline/process_viirs_mod.py", 157, "compute_test1_mir"),
     ("scripts/build_c2ab_windows.py", 64, "registro_vrp_ocr.csv"),
 ]
 

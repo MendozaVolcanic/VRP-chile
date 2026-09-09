@@ -419,6 +419,7 @@ def first_pass_tests_2_and_3(
     test1_mask: Optional[np.ndarray] = None,
     unsuitable_dnti_floor: float = UNSUITABLE_DNTI_FLOOR_DEFAULT,
     unsuitable_deti_floor: float = UNSUITABLE_DETI_FLOOR_DEFAULT,
+    use_prose_branch: bool = False,
 ) -> tuple:
     """Coppola 2016a SP426.5 first-pass — Tests 2 ∧ 3 conjunción + dual-ROI.
 
@@ -494,22 +495,32 @@ def first_pass_tests_2_and_3(
     sd_deti = float(np.std(deti[bg_mask]))
 
     # 4) Threshold por ROI (dual o uniforme).
-    # Paper Tests 2/3: `dNTI > C1 OR dNTI > μ + C2·σ` → threshold efectivo es
-    # el MENOR de los dos (suficiente con que uno se supere). Equivalente:
-    # ``thr = min(C1, μ + C2·σ)``.
+    # POR QUÉ HAY DOS LECTURAS. La FÓRMULA del paper (verificada en el PDF p.7, el `or` está
+    # literal en su propia línea) es `dNTI > C1 OR dNTI > μ + C2·σ`, cuyo threshold efectivo es
+    # el MENOR de los dos: ``thr = min(C1, μ + C2·σ)``. Es el comportamiento por defecto.
+    # Pero la PROSA del mismo paper, tres líneas más abajo, describe lo contrario: "the
+    # parameter C1 implies that a minimum threshold needs to be exceeded (...) HOWEVER, when
+    # highly variable scenes are analysed, the detection is achieved using statistical analysis
+    # of the whole scene" — o sea C1 como cota INFERIOR y el contraste mandando en escenas
+    # variables, que es ``thr = max(C1, μ + C2·σ)``. Con la fórmula, el piso gobierna el 100 %
+    # de los records de MODIS y el 99,9 % de VIIRS, así que el contraste nunca decide, y en los
+    # tres casos NEGATIVOS del Apéndice A detectamos donde el autor publica que no detecta.
+    # `use_prose_branch` selecciona la segunda lectura. Ver
+    # experiments/_s136/LA_CONECTIVA_DE_LOS_TESTS_23.md. Adopción sujeta a A/B (A18/A91).
+    combinar = max if use_prose_branch else min
     is_summit = roi1_summit_mask(dist_km, inner_km, roi1_mask)
     dual = c1_dnti_scene is not None
 
     if dual:
-        thr_dnti_sum = min(c1_dnti_summit, mu_dnti + c2_dnti_summit * sd_dnti)
-        thr_deti_sum = min(c1_deti_summit, mu_deti + c2_deti_summit * sd_deti)
-        thr_dnti_sce = min(c1_dnti_scene, mu_dnti + c2_dnti_scene * sd_dnti)
-        thr_deti_sce = min(c1_deti_scene, mu_deti + c2_deti_scene * sd_deti)
+        thr_dnti_sum = combinar(c1_dnti_summit, mu_dnti + c2_dnti_summit * sd_dnti)
+        thr_deti_sum = combinar(c1_deti_summit, mu_deti + c2_deti_summit * sd_deti)
+        thr_dnti_sce = combinar(c1_dnti_scene, mu_dnti + c2_dnti_scene * sd_dnti)
+        thr_deti_sce = combinar(c1_deti_scene, mu_deti + c2_deti_scene * sd_deti)
         pass_2 = np.where(is_summit, dnti > thr_dnti_sum, dnti > thr_dnti_sce)
         pass_3 = np.where(is_summit, deti > thr_deti_sum, deti > thr_deti_sce)
     else:
-        thr_dnti = min(c1_dnti_summit, mu_dnti + c2_dnti_summit * sd_dnti)
-        thr_deti = min(c1_deti_summit, mu_deti + c2_deti_summit * sd_deti)
+        thr_dnti = combinar(c1_dnti_summit, mu_dnti + c2_dnti_summit * sd_dnti)
+        thr_deti = combinar(c1_deti_summit, mu_deti + c2_deti_summit * sd_deti)
         pass_2 = dnti > thr_dnti
         pass_3 = deti > thr_deti
 
@@ -805,6 +816,7 @@ def second_pass_adjacent(
     c2_deti_scene: float = None,
     min_bg_pixels: int = 10,
     conditioned: bool = False,
+    use_prose_branch: bool = False,
 ) -> np.ndarray:
     """Coppola 2016a SP 426.5 paso 5 — second-pass adyacente.
 
@@ -906,16 +918,20 @@ def second_pass_adjacent(
     # ``thr = min(C1, μ + C2·σ)``. Bug fix S46 Task 5: antes usábamos `max`
     # (AND lógico), ahora `min` (OR lógico paper-correct). Alineado con
     # first_pass_tests_2_and_3 líneas 290-300.
+    # Misma conectiva que el primer pase: el paper reaplica los Tests 2 y 3 en el
+    # second run (sp426_5.txt:354-356). Ver el comentario largo de
+    # first_pass_tests_2_and_3 y experiments/_s136/LA_CONECTIVA_DE_LOS_TESTS_23.md.
+    combinar = max if use_prose_branch else min
     if dual:
-        thr_dnti_sum = min(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
-        thr_deti_sum = min(c1_deti, mu_deti + c2_deti * sd_deti)
-        thr_dnti_sce = min(c1_dnti_scene, mu_dnti + c2_dnti_scene * sd_dnti)
-        thr_deti_sce = min(c1_deti_scene, mu_deti + c2_deti_scene * sd_deti)
+        thr_dnti_sum = combinar(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
+        thr_deti_sum = combinar(c1_deti, mu_deti + c2_deti * sd_deti)
+        thr_dnti_sce = combinar(c1_dnti_scene, mu_dnti + c2_dnti_scene * sd_dnti)
+        thr_deti_sce = combinar(c1_deti_scene, mu_deti + c2_deti_scene * sd_deti)
         pass_2 = np.where(is_summit, dnti > thr_dnti_sum, dnti > thr_dnti_sce)
         pass_3 = np.where(is_summit, deti > thr_deti_sum, deti > thr_deti_sce)
     else:
-        thr_dnti = min(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
-        thr_deti = min(c1_deti, mu_deti + c2_deti * sd_deti)
+        thr_dnti = combinar(c1_dnti, mu_dnti + c2_dnti * sd_dnti)
+        thr_deti = combinar(c1_deti, mu_deti + c2_deti * sd_deti)
         pass_2 = dnti > thr_dnti
         pass_3 = deti > thr_deti
 
