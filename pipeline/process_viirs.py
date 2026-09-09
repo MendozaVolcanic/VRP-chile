@@ -148,6 +148,7 @@ from pipeline.profile import (
     ENABLE_ROI1_BOX_PAPER,
     ROI1_BOX_HALF_KM,
     ENABLE_UNSUITABLE_FILTERS_267_273,
+    ENABLE_TESTS_23_PROSE_BRANCH,
     ENABLE_TEST1_K1_BG_EXCLUDE,
     ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS,
     ENABLE_GEOLOCATED_PIXEL_AREA,
@@ -1154,6 +1155,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     c2_dnti_scene=C2_DNTI_SCENE_NIGHT,
                     c2_deti_scene=C2_DETI_SCENE_NIGHT,
                     conditioned=ENABLE_SECOND_PASS_CONDITIONED,
+                    use_prose_branch=ENABLE_TESTS_23_PROSE_BRANCH,
                 )
                 if ENABLE_SECOND_PASS_ADJACENT:
                     eti_path_hot = second_pass_adjacent(
@@ -1168,6 +1170,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         c2_dnti_scene=C2_DNTI_SCENE_NIGHT,
                         c2_deti_scene=C2_DETI_SCENE_NIGHT,
                         conditioned=ENABLE_SECOND_PASS_CONDITIONED,
+                        use_prose_branch=ENABLE_TESTS_23_PROSE_BRANCH,
                     )
                 else:
                     eti_path_hot = first_pass_active
@@ -1251,6 +1254,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     test1_mask=_test1_mask_for_fp,
                     unsuitable_dnti_floor=_unsuit_dnti,
                     unsuitable_deti_floor=_unsuit_deti,
+                    use_prose_branch=ENABLE_TESTS_23_PROSE_BRANCH,
                 )
                 hot_mask_2d = fp_hot
                 n_first_pass = fp_diag["n_first_pass_pixels"]
@@ -1295,6 +1299,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         c2_deti_scene=(_c2_scene_sp
                                        if ENABLE_DUAL_ROI_SECOND_PASS else None),
                         conditioned=ENABLE_SECOND_PASS_CONDITIONED,
+                        use_prose_branch=ENABLE_TESTS_23_PROSE_BRANCH,
                     )
                     # S85 F-S81-B' — gate intra-radio sobre pixels NUEVOS del
                     # second pass. Default OFF; ON via profile A/B. Ver

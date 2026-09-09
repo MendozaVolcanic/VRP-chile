@@ -173,6 +173,11 @@ def main():
     if hasattr(sys.stdout, "buffer"):
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     DEST.mkdir(parents=True, exist_ok=True)
+    # Brazo de la conectiva (S136). Patron A75: se reasigna el flag en el NAMESPACE del
+    # procesador, que es de donde el codigo lo lee; no se edita ningun modulo ni perfil.
+    prosa = (os.environ.get("APENDICE_PROSA") or "").strip().lower() in ("1", "true", "si")
+    if prosa:
+        pm.ENABLE_TESTS_23_PROSE_BRANCH = True
     casos = yaml.safe_load((HERE / "apendice_a.yaml").read_text(encoding="utf-8"))["casos"]
     solo = (os.environ.get("APENDICE_CASO") or "").strip()
     if solo:
@@ -180,6 +185,8 @@ def main():
     print(f"BATERIA DE CONFORMIDAD — Apendice A de Coppola 2016a — {len(casos)} casos")
     print(f"perfil={os.environ['VRP_PROFILE']}  inner={INNER_KM} km (ROI1 del paper, uniforme)  "
           f"exclude_zones={P.ENABLE_EXCLUDE_ZONES}")
+    print(f"conectiva Tests 2/3: {'PROSA  max(C1, mu+C2*sigma)' if prosa else 'FORMULA  min(C1, mu+C2*sigma)'}"
+          f"   (flag efectivo en el procesador: {pm.ENABLE_TESTS_23_PROSE_BRANCH})")
     auth()
     salida = []
     for c in casos:
@@ -194,7 +201,7 @@ def main():
         salida.append({"caso": c["caso"], "name": c["name"], "fecha": c["fecha"],
                        "veredicto_paper": c["veredicto"], "nti_paper": c.get("nti_paper"),
                        "resultado": ver, "detalle": det, "pasadas": pas})
-    out = HERE / "out_apendice"
+    out = HERE / ("out_apendice_prosa" if prosa else "out_apendice")
     out.mkdir(exist_ok=True)
     (out / "resultado_apendice.json").write_text(
         json.dumps(salida, indent=2, ensure_ascii=False), encoding="utf-8")

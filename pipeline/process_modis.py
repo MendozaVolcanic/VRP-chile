@@ -151,6 +151,7 @@ from pipeline.profile import (
     ENABLE_ROI1_BOX_PAPER,
     ROI1_BOX_HALF_KM,
     ENABLE_UNSUITABLE_FILTERS_267_273,
+    ENABLE_TESTS_23_PROSE_BRANCH,
     ENABLE_TEST1_K1_BG_EXCLUDE,
     ENABLE_NADIR_FIXED_PIXEL_AREA_MODIS,
     ENABLE_FIRST_PASS_TESTS_2_AND_3,
@@ -793,6 +794,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             c2_dnti_scene=C2_DNTI_SCENE_NIGHT,
             c2_deti_scene=C2_DETI_SCENE_NIGHT,
             conditioned=ENABLE_SECOND_PASS_CONDITIONED,
+            use_prose_branch=ENABLE_TESTS_23_PROSE_BRANCH,
         )
 
         # Second pass — recapture marginales contaminados (opcional).
@@ -809,6 +811,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                 c2_dnti_scene=C2_DNTI_SCENE_NIGHT,
                 c2_deti_scene=C2_DETI_SCENE_NIGHT,
                 conditioned=ENABLE_SECOND_PASS_CONDITIONED,
+                use_prose_branch=ENABLE_TESTS_23_PROSE_BRANCH,
             )
         else:
             eti_path_hot = first_pass_active
@@ -880,6 +883,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             test1_mask=_test1_mask_for_fp,
             unsuitable_dnti_floor=_unsuit_dnti,
             unsuitable_deti_floor=_unsuit_deti,
+            use_prose_branch=ENABLE_TESTS_23_PROSE_BRANCH,
         )
         hot_mask_2d = fp_hot
         n_first_pass = fp_diag["n_first_pass_pixels"]
@@ -930,6 +934,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                 c2_deti_scene=(C2_DETI_SCENE_NIGHT
                                if ENABLE_DUAL_ROI_SECOND_PASS else None),
                 conditioned=ENABLE_SECOND_PASS_CONDITIONED,
+                use_prose_branch=ENABLE_TESTS_23_PROSE_BRANCH,
             )
             # S85 F-S81-B' — gate intra-radio sobre pixels NUEVOS del second
             # pass. Default OFF; ON via profile A/B. Solo afecta pixels nuevos
