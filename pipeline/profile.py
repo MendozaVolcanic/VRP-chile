@@ -623,7 +623,7 @@ ENABLE_UNSUITABLE_FILTERS_267_273: bool = bool(
     _p.get("enable_unsuitable_filters_267_273", True)
 )
 
-# S136 — la conectiva de los Tests 2 y 3: la FÓRMULA del paper contra su PROSA.
+# S136, la conectiva de los Tests 2 y 3: la FÓRMULA del paper contra su PROSA.
 #
 # La fórmula (verificada en el PDF p.7, el `or` está literal en su propia línea) es
 #   dNTI > C1  OR  dNTI > μ + C2·σ   →   thr = min(C1, μ + C2·σ)
@@ -739,7 +739,7 @@ PATH_D_ONLY_CAP_TBG_MAX_K = _p.get("path_d_only_cap_tbg_max_k", None)
 if PATH_D_ONLY_CAP_TBG_MAX_K is not None:
     PATH_D_ONLY_CAP_TBG_MAX_K = float(PATH_D_ONLY_CAP_TBG_MAX_K)
 
-# S46 Task 5 Drift #4 — Coppola 2016a SP426.5:347-356 dice literalmente:
+# S46 Task 5 Drift #4, Coppola 2016a SP426.5:347-356 dice literalmente:
 #   "active pixels may strongly modify the average values of their surroundings,
 #    with a consequent decrease in the dNTI and dETI values of adjacent pixels.
 #    To avoid this problem, step 2 (spatial analysis) is performed a second time,

@@ -23,7 +23,7 @@ quedó indeterminado: los tres con NTI publicado (A5, A6, A8) pasaron el control
 
 El patrón no podría ser más limpio: **la sensibilidad está bien o de más; el problema es la
 precisión.** Y por primera vez está medido contra la referencia del autor del algoritmo, no contra
-el consolidado de MIROVA — que era la limitación de fondo del frente del artefacto.
+el consolidado de MIROVA, que era la limitación de fondo del frente del artefacto.
 
 ## Qué dispara en los tres negativos
 
@@ -49,7 +49,7 @@ Verificado leyendo `pipeline.profile`, no el YAML: `C1 = 0,003` cumbre / `0,010`
 
 **Así que la sobre-detección no viene de umbrales laxos.** Eso descarta la explicación más obvia y
 deja el frente donde importa: la diferencia con MIROVA está en algo distinto de los números de la
-Tabla 1 — el pool de píxeles sobre el que se calculan μ y σ, la geometría del ROI, el segundo pase
+Tabla 1, el pool de píxeles sobre el que se calculan μ y σ, la geometría del ROI, el segundo pase
 que corre sin la condición del paper, o la rama del piso absoluto `C1` de los Tests 2 y 3, que
 dispara con `dNTI > 0,003` sin mirar la variabilidad de la escena.
 
@@ -59,7 +59,7 @@ dispara con `dNTI > 0,003` sin mirar la variabilidad de la escena.
 `PATH_D_ONLY_CAP_MW = 5.0`, el tope que el proyecto adoptó para el camino contextual en escenas
 sospechosas de nube alta (D9). O sea: el pipeline **reconoció la condición** y eligió **atenuar la
 magnitud en vez de descartar la detección**. MIROVA, en esa misma escena, descarta. Es un ejemplo
-nítido de la diferencia entre parchear el síntoma y no generar el dato — exactamente lo que la
+nítido de la diferencia entre parchear el síntoma y no generar el dato, exactamente lo que la
 regla A72 pide distinguir.
 
 **Los tres negativos fallan en tres contextos térmicos distintos**: mar templado alrededor de una
@@ -77,7 +77,7 @@ hay además un límite de resolución honesto: 15 píxeles de MODIS son ~15 km²
 - Una fecha por caso.
 - Tolbachik es el negativo más débil: su erupción empezó siete días después, así que prueba que no
   inventamos señal sobre un volcán en reposo, no la sensibilidad. **Stromboli es el negativo
-  fuerte** — volcán en actividad permanente, nubes dispersas, y el autor no detecta.
+  fuerte**, volcán en actividad permanente, nubes dispersas, y el autor no detecta.
 
 ## Qué abre
 
@@ -85,5 +85,5 @@ Un patrón de referencia externo para el frente del artefacto. Hasta hoy la sobr
 podía medir contra el consolidado de MIROVA, con el problema de que su silencio puede ser scope
 operacional y no ausencia de señal (A54). Estos tres casos son distintos: **el autor publicó que su
 algoritmo no detecta ahí**. Eso permite ajustar el contextual sabiendo qué se rompe del otro lado,
-que es justo lo que faltaba — con los seis positivos, y en particular Ubinas y Villarrica (anomalías
+que es justo lo que faltaba, con los seis positivos, y en particular Ubinas y Villarrica (anomalías
 reales de NTI ≈ −0,91 y −0,93), como red de seguridad contra pasarse de estricto.

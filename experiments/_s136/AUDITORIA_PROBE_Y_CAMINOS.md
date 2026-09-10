@@ -1,9 +1,9 @@
-# S136 — auditoría del probe, dos caminos descartados, y el frente que queda
+# S136: auditoría del probe, dos caminos descartados, y el frente que queda
 
 > Sesión de continuación. El probe (run 34274884640) terminó verde y su veredicto impreso dice
-> **A — el filtro quedó sin función**. **Ese veredicto no se sostiene**, por dos defectos del
+> **A, el filtro quedó sin función**. **Ese veredicto no se sostiene**, por dos defectos del
 > instrumento que se documentan acá; aplicado como está escrito, el criterio pre-registrado da
-> **C — indeterminado**. Además se descartaron dos caminos con medición, y la investigación
+> **C, indeterminado**. Además se descartaron dos caminos con medición, y la investigación
 > documental reencuadró el problema: el frente no está en el Test 1 sino en los tests
 > contextuales.
 
@@ -13,7 +13,7 @@ El probe reportó **10 de 20 pasadas reproducen** la producción, contra un umbr
 propio texto concluyó que por
 eso «ningún otro número del run es interpretable». Pero comparaba contra
 `data/mirova_equivalent/`, que para pasadas de junio y julio fue escrito por el **código de
-entonces** — régimen previo a `#535`, con la máscara de nube encendida y el fondo global 6-8 K más
+entonces**, régimen previo a `#535`, con la máscara de nube encendida y el fondo global 6-8 K más
 alto en nevados. El probe corre con el código de hoy: **no podía reproducir por construcción**.
 
 El término de comparación correcto existía: el brazo control del A/B de S135 reprocesó **esos
@@ -33,7 +33,7 @@ A/B. Script: `scratchpad/auditar_probe.py` §2.
 
 Esto **descarta las tres sospechas** que quedaron anotadas en `RESULTADO_PROBE.md` (#611), sin
 necesidad de investigarlas: (1) el A/B fue un reproceso real por `run_pipeline`, así que **pasó
-por `store.py`**, y el probe le coincide exacto — si `store.py` alterara la magnitud, no podría;
+por `store.py`**, y el probe le coincide exacto, si `store.py` alterara la magnitud, no podría;
 (2) dieciséis coincidencias al cuarto decimal no ocurren con granules distintos; (3) Lastarria
 07-24 coincide exacto, así que no es el comparador cayendo a otra cantidad.
 
@@ -64,7 +64,7 @@ Medido, comparando ACTUAL contra SIN_FILTRO pasada por pasada:
 | de esas 7, **en nevados** | **3** |
 | de esas 7, en el control no nevado | 4 |
 
-El criterio pre-registrado dice **«C — indeterminado: menos de 4 pasadas útiles en los nevados»**.
+El criterio pre-registrado dice **«C, indeterminado: menos de 4 pasadas útiles en los nevados»**.
 Hay **3**. El desenlace correcto es **C**, no A. El `×1,07` que el script leyó como «el filtro no
 mueve nada» resulta de promediar 13 pasadas de las que **10 no tienen sustrato**: la mediana no se
 mueve porque en la mayoría el filtro nunca actuó.
@@ -80,7 +80,7 @@ y ×4,3 (Lastarria 24-jul 0,042 → 0,183; Tupungatito 07-jul 0,070 → 0,153). 
 **sub-reporta** (paridad 0,708 en la ventana completa), la dirección es la correcta. Con n = 3 en
 nevados no se concluye: es lo que el desenlace C ordena, ampliar la muestra.
 
-## 3. Camino descartado — restaurar la unión de caminos de detección
+## 3. Camino descartado: restaurar la unión de caminos de detección
 
 El código construye la unión de todos los caminos (`combine_hot_paths`, que incluye el Test 1) y
 **la descarta** una línea después: `hot_mask_2d = fp_hot` (`process_viirs.py:1255`,
@@ -93,10 +93,10 @@ active pixels (first and second runs) are shown in the alert mask"*
 
 **Es una divergencia literal real, en los tres sensores.** Pero **no resuelve las 12 noches** que
 perdía el brazo fiel de S135: medido sobre los 45 registros de esas noches, el término que
-importaría de esa unión —el Test 1 del paper— vale **cero en todas**. Queda como divergencia a
+importaría de esa unión (el Test 1 del paper) vale **cero en todas**. Queda como divergencia a
 documentar, no como solución.
 
-## 4. Camino descartado — recalibrar K1 para VIIRS (por dos vías independientes)
+## 4. Camino descartado: recalibrar K1 para VIIRS (por dos vías independientes)
 
 **Vía empírica.** El Test 1 del paper dispara en **13 de 2.142 registros de VIIRS 375 m (0,61 %)**
 en junio-agosto, con `nti_max` mediano de **−0,956** contra el umbral de −0,80. Medido por noche
@@ -104,9 +104,9 @@ sobre 279 noches con alerta de MIROVA y 273 sin alerta (`scratchpad/sustrato_k1.
 
 | K1 candidato | noches de MIROVA capturadas | noches sin alerta que entran |
 |---|---|---|
-| −0,80 (actual) | 4 / 279 — 1 % | 9 / 273 — 3 % |
-| −0,95 | 224 / 279 — 80 % | 155 / 273 — **57 %** |
-| −0,96 | 265 / 279 — 95 % | 205 / 273 — **75 %** |
+| −0,80 (actual) | 4 / 279 ( 1 % | 9 / 273 ) 3 % |
+| −0,95 | 224 / 279 ( 80 % | 155 / 273 ) **57 %** |
+| −0,96 | 265 / 279 ( 95 % | 205 / 273 ) **75 %** |
 
 **AUC del `nti_max` como discriminante: 0,614** (0,5 sería azar). No existe umbral con separación
 útil, y la medición es **optimista**: `nti_max` se calcula sobre el mismo ROI donde el Test 1
@@ -116,7 +116,7 @@ en un subconjunto. Si el óptimo no separa, el real menos. Consistente con A80/A
 **Vía documental, y es la que cierra el caso.** No existe umbral fijo de NTI para VIIRS en la
 literatura MIROVA:
 
-- **Campus et al. 2022** (*Sensors* 22:1713 — Torino, MIROVA legítimo) es el paper de la
+- **Campus et al. 2022** (*Sensors* 22:1713, Torino, MIROVA legítimo) es el paper de la
   adaptación a VIIRS, y en detección **no adapta nada**: *"The hot-spot detection algorithm is the
   same used for MODIS"*, remitiendo a Coppola 2016a (`campus2022_extracted.txt:418-421`). Sus
   únicas modificaciones explícitas son geométricas y radiométricas.
@@ -130,7 +130,7 @@ literatura MIROVA:
 
 **Recalibrar K1 sería inventar un mecanismo que MIROVA no tiene.** Camino cerrado.
 
-## 5. El reencuadre — el 0,61 % es el diseño, no la avería
+## 5. El reencuadre: el 0,61 % es el diseño, no la avería
 
 El dato que reordena el problema está en los apéndices del propio paper: las anomalías **reales**
 de Villarrica (NTI ≈ −0,93) y Ubinas (−0,91) están **muy por debajo** de K1 = −0,80, y el paper
@@ -149,7 +149,7 @@ el Test 1 integrado.
 **Hipótesis de causa raíz, no verificada:** el Test 1 integrado (S25/S27) no fue un aporte al
 algoritmo sino **una compensación de la debilidad de nuestros tests contextuales**. Si es así,
 explica por qué los cinco brazos del A/B de S135 fracasaron: tocaban los parches, no la causa. El
-frente a auditar es el contextual — C1/C2 por dual-ROI, el σ global por imagen, el retiro de los
+frente a auditar es el contextual, C1/C2 por dual-ROI, el σ global por imagen, el retiro de los
 activos del pool, y el second run.
 
 ## 6. Estado de los caminos
@@ -157,16 +157,16 @@ activos del pool, y el second run.
 | camino | estado |
 |---|---|
 | **Los tests contextuales: por qué el primer pase da 0-2 px donde MIROVA detecta** | **abierto, candidato principal** |
-| Intersección contextual del Test 1 | abierto — desenlace C; ampliar a pasadas con sustrato |
+| Intersección contextual del Test 1 | abierto, desenlace C; ampliar a pasadas con sustrato |
 | Restaurar la unión de caminos (`:1255`) | descartado como solución; divergencia literal a documentar |
-| Recalibrar K1 para VIIRS | **cerrado** — empírico (AUC 0,614) y documental (no existe en MIROVA) |
+| Recalibrar K1 para VIIRS | **cerrado**, empírico (AUC 0,614) y documental (no existe en MIROVA) |
 | Máximo diario de Laiolo 2026 | sin explorar |
 | `k_sigma` = 3 contra 5/10 de la Tabla 1 | sin explorar |
 
 ## 7. Hallazgo aparte, que afecta el artículo en redacción
 
-El mecanismo que sostiene **toda** la señal débil del sensor principal —`compute_test1_mir`, el
-«Test 1 integrado»— **no es el Test 1 del paper**, y sus parámetros tampoco salen de ahí:
+El mecanismo que sostiene **toda** la señal débil del sensor principal ,`compute_test1_mir`, el
+«Test 1 integrado», **no es el Test 1 del paper**, y sus parámetros tampoco salen de ahí:
 
 - No hay en `sp426.5` ninguna versión del Test 1 que integre radiancia sobre una región: el del
   paper es per-píxel (`:294-302`), en una sección titulada *Fixed NTI threshold*.
@@ -185,7 +185,7 @@ redactar.
 
 ## 8. Hueco declarado
 
-**Coppola et al. 2022, Vulcano, *Front. Earth Sci.* 10:964372** —el paper primario de las bandas I
-de VIIRS— **no está en `documentacion/`**; sólo aparece citado por la tesis, Campus 2024 y Aveni
+**Coppola et al. 2022, Vulcano, *Front. Earth Sci.* 10:964372** ,el paper primario de las bandas I
+de VIIRS, **no está en `documentacion/`**; sólo aparece citado por la tesis, Campus 2024 y Aveni
 2024. Es el único documento del canon que podría contener un umbral para I04/I05 y no se pudo
 verificar. Conseguirlo es barato y cerraría el punto 4 sin residuo.

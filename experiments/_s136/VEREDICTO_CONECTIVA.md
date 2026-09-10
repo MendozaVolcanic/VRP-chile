@@ -1,4 +1,4 @@
-# Veredicto: NO ADOPTAR la lectura de la prosa — y ninguna de las dos lecturas es MIROVA
+# Veredicto: NO ADOPTAR la lectura de la prosa: y ninguna de las dos lecturas es MIROVA
 
 > Brazo de la prosa: run 34310522104 (`APENDICE_PROSA=1`). Brazo de la fórmula: run 34284386094.
 > Criterio pre-registrado: un brazo sirve si y sólo si **mantiene los 6 positivos y cura los 3
@@ -24,7 +24,7 @@
 | negativos conformes | 0 / 3 | **3 / 3** |
 
 **La prosa cura el artefacto por completo y pierde cuatro positivos, entre ellos Ubinas
-(NTI ≈ −0,91) y Villarrica (≈ −0,93)** — precisamente los dos que el pre-registro puso como freno
+(NTI ≈ −0,91) y Villarrica (≈ −0,93)**, precisamente los dos que el pre-registro puso como freno
 contra pasarse de estricto. Rechazado por el criterio.
 
 ## Por qué falla: no es un ajuste, es un apagón
@@ -51,16 +51,16 @@ sobre qué rama gobierna: la gobierna el piso, y forzar la otra no arregla nada.
 
 Si el algoritmo de detección no puede dar 6/6 y 3/3 con ninguna de las dos conectivas, entonces
 **MIROVA descarta después de detectar**. Y eso está documentado verbatim, es de MIROVA, y no lo
-tenemos implementado — está anotado en `MIROVA_DIVERGENCES.md` (D14) desde S128:
+tenemos implementado, está anotado en `MIROVA_DIVERGENCES.md` (D14) desde S128:
 
 > *"...and filtered in terms of **distance and/or intensity** of the thermal anomaly to minimize
 > the false alerts and the double counting (coming from different detectors acquiring at the same
-> time) thus resulting in 9712 data points (**ca. 12 %**)."*  — Laiolo 2026, Bull. Volcanol.
+> time) thus resulting in 9712 data points (**ca. 12 %**)."*, Laiolo 2026, Bull. Volcanol.
 
 MIROVA se queda con el **12 %** de sus imágenes: filtra por distancia y por **intensidad**, y
 descarta el doble conteo entre detectores. Nuestro criterio de conformidad es «publica un cúmulo
 con VRP > 0 dentro del ROI», o sea mide **reporte**. Si MIROVA detecta en Stromboli y no lo
-publica por intensidad, nuestros tres falsos positivos son de reporte y no de detección — que es
+publica por intensidad, nuestros tres falsos positivos son de reporte y no de detección, que es
 exactamente el límite que el pre-registro declaró de antemano.
 
 Es coherente con lo demás: en los tres negativos las magnitudes son 1,5 · 5,0 y 22,1 MW, y el
@@ -72,8 +72,8 @@ detección.
 
 1. **Mi primera lectura de este resultado fue equivocada.** Comparé los brazos y me dieron
    idénticos, contradiciendo el propio reporte del run. La causa: el artefacto trae **dos** JSON,
-   porque el runner hace checkout del repo —que ya tiene `out_apendice/` commiteado del brazo
-   anterior— y el brazo de la prosa escribe en `out_apendice_prosa/`. Mi `glob` tomó el primero.
+   porque el runner hace checkout del repo ,que ya tiene `out_apendice/` commiteado del brazo
+   anterior, y el brazo de la prosa escribe en `out_apendice_prosa/`. Mi `glob` tomó el primero.
    Décimo error de instrumento de la sesión, y del mismo tipo que los otros nueve: **el archivo
    que leí no era el que creía**. Lo delató que los conteos del primer pase salieran idénticos
    dígito por dígito, que es imposible si el umbral cambió.

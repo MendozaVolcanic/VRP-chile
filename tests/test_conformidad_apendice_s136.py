@@ -67,7 +67,7 @@ def test_control_de_identidad_por_altitud(casos):
         if ap is None or ag is None:
             continue
         assert abs(ap - ag) <= 100, (
-            f"{c['name']}: altitud paper {ap} vs catalogo {ag} — probable volcan equivocado")
+            f"{c['name']}: altitud paper {ap} vs catalogo {ag}, probable volcan equivocado")
 
 
 def test_el_nti_del_paper_solo_donde_el_paper_lo_da(casos):

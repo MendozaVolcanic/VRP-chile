@@ -1,23 +1,23 @@
-# S136 — resultado del probe de 3 brazos: **desenlace C, indeterminado por falta de sustrato**
+# S136: resultado del probe de 3 brazos: **desenlace C, indeterminado por falta de sustrato**
 
 > Run 34274884640, `success`, 20/20 pasadas con los tres brazos. Criterio de
 > `docs/PREREGISTRO_PROBE_S136_TEST1_CONTEXTUAL.md`, fijado antes de correr.
 >
 > **Corregido tras la auditoría de la sesión paralela (VRP 136)**, que trajo dos correcciones al
 > resultado original de este documento. Las dos se verificaron acá por una vía independiente de
-> la suya (`verificar_control_y_sustrato.py`) antes de aceptarlas — un par no es autoridad (A48).
+> la suya (`verificar_control_y_sustrato.py`) antes de aceptarlas, un par no es autoridad (A48).
 > Su auditoría completa está en `AUDITORIA_PROBE_Y_CAMINOS.md`.
 
-## Corrección 1 — el probe SÍ es válido; el control de validez estaba mal construido
+## Corrección 1: el probe SÍ es válido; el control de validez estaba mal construido
 
 La versión anterior de este documento concluyó «el probe no reproduce la producción, ningún
 número es interpretable». **Era el comparador.**
 
-El control comparaba el probe —que corre con el código de hoy— contra
+El control comparaba el probe (que corre con el código de hoy) contra
 `data/mirova_equivalent/`, que para las pasadas de junio y julio fue escrito por el código **de
 entonces**: régimen previo a `#535`, con la máscara de nube encendida y el fondo global 6-8 K más
 alto en nevados. **No podía reproducir por construcción.** Es el razonamiento del propio
-pre-registro — «el régimen lo fija el código que procesa, no la fecha del granule» — aplicado al
+pre-registro ( «el régimen lo fija el código que procesa, no la fecha del granule» ) aplicado al
 revés en el control.
 
 **Verificación independiente por el fondo.** Si la causa es el régimen, las pasadas que
@@ -44,19 +44,19 @@ granule. El probe no se aparta de la producción por un defecto propio, sino por
 de junio-julio la escribió otro código**. Las 4 pasadas sin referencia son de Villarrica, que no
 está entre los 6 volcanes del A/B.
 
-(VRP 136 llegó a esto primero y reportó 9/16 en la tercera fila; acá dan 11/16 — la diferencia es
+(VRP 136 llegó a esto primero y reportó 9/16 en la tercera fila; acá dan 11/16, la diferencia es
 de tolerancia o de conjunto y no cambia nada. El 16/16 coincide exacto entre las dos sesiones.)
 
 **Con esto, las tres sospechas de la versión anterior quedan descartadas por medición, no por
 argumento**: el A/B fue un reproceso real por `run_pipeline`, así que **pasó por `store.py`** y el
 probe le coincide exacto (descarta la 1); Tupungatito 06-08 da 0,0930 en probe y en A/B, o sea
-**el mismo granule** — el 0,0937 del SNPP de las 05:12 era otra pasada (descarta la 2); y
+**el mismo granule**, el 0,0937 del SNPP de las 05:12 era otra pasada (descarta la 2); y
 Lastarria 07-24 coincide exacto en 0,0421 (descarta la 3).
 
 Nota: el conteo de 10/20 ya incorpora el arreglo del filtro por sensor (#611). La auditoría de
 VRP 136 cita «0/15», que es la versión previa a ese arreglo.
 
-## Corrección 2 — el desenlace es C, no A: sólo 3 pasadas de nevado tienen sustrato
+## Corrección 2: el desenlace es C, no A: sólo 3 pasadas de nevado tienen sustrato
 
 El filtro contextual sólo actúa si el hotspot final viene del camino Test 1
 (`process_viirs.py:1779`, valor **legacy**). Las 20 pasadas se eligieron por
@@ -71,7 +71,7 @@ Comparando ACTUAL contra SIN_FILTRO pasada por pasada:
 | de esas, en nevados | **3** |
 | de esas, en el control no nevado | 4 |
 
-El criterio pre-registrado dice textual: «**C — indeterminado**: menos de 4 pasadas útiles en los
+El criterio pre-registrado dice textual: «**C, indeterminado**: menos de 4 pasadas útiles en los
 nevados». Hay 3.
 
 Y el «SIN_FILTRO no explota, ×1,07» de la versión anterior sale de promediar 13 pasadas de nevado
@@ -82,9 +82,9 @@ a ejecutarse?».
 
 **Ambigüedad que decide Nicolás, no nosotros.** El pre-registro no define «pasada útil»
 operacionalmente. Leerlo como «con sustrato» da **C**; leerlo como «13 pasadas de nevado» da
-**A**. La primera lectura es de validez y no de gusto —una pasada donde el filtro no actúa no
+**A**. La primera lectura es de validez y no de gusto ,una pasada donde el filtro no actúa no
 puede informar si el filtro cura, y meterlas diluye la mediana hacia «sin efecto» por
-construcción— pero la elección hay que ponérsela por delante.
+construcción, pero la elección hay que ponérsela por delante.
 
 ## Donde sí hay sustrato, el efecto es grande y apunta hacia MIROVA
 
@@ -118,7 +118,7 @@ fecha del dato no fija el régimen; lo fija el código que lo procesó. Y un cri
 casos («pasadas útiles») necesita su definición operacional escrita **en el pre-registro**, porque
 si se deja para después, se elige mirando el resultado.
 
-## Apéndice — los errores de instrumento de S136, entre las dos sesiones
+## Apéndice: los errores de instrumento de S136, entre las dos sesiones
 
 Ocho, todos de la misma familia (A93: el instrumento medía otra cosa que la que decía medir), y
 **ninguno lo cazó leer el código con cuidado**. Se dejan listados porque el patrón, no cada caso,
