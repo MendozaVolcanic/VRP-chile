@@ -1,7 +1,7 @@
 """S136 - bateria de conformidad contra los NUEVE casos del Apendice A de Coppola 2016a.
 
 POR QUE. El paper que este proyecto clona trae su propio conjunto de validacion: nueve escenas
-con fecha exacta y veredicto del autor — SEIS donde el algoritmo detecta y TRES donde
+con fecha exacta y veredicto del autor, SEIS donde el algoritmo detecta y TRES donde
 deliberadamente NO detecta. En 136 sesiones nunca se uso. Para una mision de clon literal los
 negativos valen tanto como los positivos: si detectamos donde el autor no detecta, eso es
 sobre-deteccion estructural medida contra su referencia, que es el frente del artefacto.
@@ -81,14 +81,14 @@ def nti_de(rec):
 
 def correr_caso(caso, is_nighttime):
     dt_dia = datetime.strptime(caso["fecha"], "%Y-%m-%d")
-    print(f"\n{'='*84}\n{caso['caso']} — {caso['name']} — {caso['fecha']} — "
+    print(f"\n{'='*84}\n{caso['caso']}, {caso['name']}, {caso['fecha']}, "
           f"el paper: {caso['veredicto'].upper()}\n{'='*84}", flush=True)
     pasadas = []
     for l1b_key, geo_key in PARES:
         try:
             grs = search_granules(l1b_key, caso["lat"], caso["lon"], RADIUS_KM, dt_dia)
         except Exception as e:
-            print(f"  {l1b_key}: BUSQUEDA FALLO — {e}", flush=True)
+            print(f"  {l1b_key}: BUSQUEDA FALLO, {e}", flush=True)
             continue
         print(f"  {l1b_key}: {len(grs)} granules ese dia", flush=True)
         for g in grs:
@@ -164,7 +164,7 @@ def evaluar_caso(caso, pasadas):
         mx = max(p["vrp_pc_mw"] for p in publica)
         return ("NO CONFORME (falso positivo)",
                 f"el paper NO detecta y nosotros publicamos en {len(publica)} de "
-                f"{len(pasadas)} pasadas, hasta {mx:.3f} MW — sobre-deteccion")
+                f"{len(pasadas)} pasadas, hasta {mx:.3f} MW, sobre-deteccion")
     return "CONFORME", f"no publicamos nada, como el paper, en {len(pasadas)} pasadas"
 
 
@@ -182,7 +182,7 @@ def main():
     solo = (os.environ.get("APENDICE_CASO") or "").strip()
     if solo:
         casos = [c for c in casos if c["caso"] == solo or c["name"] == solo]
-    print(f"BATERIA DE CONFORMIDAD — Apendice A de Coppola 2016a — {len(casos)} casos")
+    print(f"BATERIA DE CONFORMIDAD, Apendice A de Coppola 2016a, {len(casos)} casos")
     print(f"perfil={os.environ['VRP_PROFILE']}  inner={INNER_KM} km (ROI1 del paper, uniforme)  "
           f"exclude_zones={P.ENABLE_EXCLUDE_ZONES}")
     print(f"conectiva Tests 2/3: {'PROSA  max(C1, mu+C2*sigma)' if prosa else 'FORMULA  min(C1, mu+C2*sigma)'}"
@@ -197,7 +197,7 @@ def main():
             traceback.print_exc()
             pas = []
         ver, det = evaluar_caso(c, pas)
-        print(f"  >>> {c['caso']} {c['name']}: {ver} — {det}", flush=True)
+        print(f"  >>> {c['caso']} {c['name']}: {ver}, {det}", flush=True)
         salida.append({"caso": c["caso"], "name": c["name"], "fecha": c["fecha"],
                        "veredicto_paper": c["veredicto"], "nti_paper": c.get("nti_paper"),
                        "resultado": ver, "detalle": det, "pasadas": pas})

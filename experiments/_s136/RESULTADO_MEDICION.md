@@ -1,4 +1,4 @@
-# S136 — ¿sigue existiendo el fenómeno que justificó la intersección contextual?
+# S136: ¿sigue existiendo el fenómeno que justificó la intersección contextual?
 
 > Medición read-only pedida antes de diseñar el A/B. **Respuesta corta: no se puede responder
 > read-only, y ahora se sabe por qué.** Lo que sí quedó medido, y un indicador propio refutado.
@@ -11,7 +11,7 @@ a `#535` (S126, que apagó la máscara de nube y bajó el fondo global 6-8 K en 
 fenómeno se hubiera apagado solo, la intersección habría quedado inerte y retirarla sería un
 no-op.
 
-## Resultado 1 — la paridad de hoy está en banda, con el filtro puesto
+## Resultado 1: la paridad de hoy está en banda, con el filtro puesto
 
 `paridad_por_regimen.py`. VIIRS 375 m, ground truth CONS ∪ OCR del cargador canónico, pareo por
 pasada a ±20 min, magnitud `f5_core_vrp_mw` con fallback a `pc.vrp_mw` (A10 + S132/A46).
@@ -24,7 +24,7 @@ pasada a ±20 min, magnitud `f5_core_vrp_mw` con fallback a `pc.vrp_mw` (A10 + S
 | Láscar (control) | 0,54× (n=277) | 0,68× (n=13) |
 | Lastarria | 0,60× (n=192) | 0,88× (n=6) |
 | Isluga | 0,60× (n=254) | 0,58× (n=19) |
-| Villarrica | 0,95× (n=28) | — (n=0) |
+| Villarrica | 0,95× (n=28) |, (n=0) |
 
 Los once están dentro de la banda 0,5-2,0 en el régimen con n suficiente. **Nada del 18,9×.**
 
@@ -32,7 +32,7 @@ Los once están dentro de la banda 0,5-2,0 en el régimen con n suficiente. **Na
 Mide que el filtro cumple su función (o que ya no hace falta), sin distinguir entre las dos.
 El régimen actual tiene n de un dígito en cuatro volcanes: no sostiene un veredicto propio (A90).
 
-## Resultado 2 — el indicador pre-filtro que iba a decidirlo NO mide el fenómeno (error propio)
+## Resultado 2: el indicador pre-filtro que iba a decidirlo NO mide el fenómeno (error propio)
 
 `n_test1_pixels` se persiste **antes** del recorte (`process_viirs.py:1109`, previo al filtro de
 la 1779), así que parecía el proxy ideal: si el Test 1 ya no barriera el mosaico nival, el
@@ -54,10 +54,10 @@ decir **todo píxel del ROI cuyo NTI supere el fondo**. Eso es cerca de la mitad
 estadística, en cualquier escena. El campo cuenta píxeles sobre el fondo, no extensión de anomalía.
 
 **`n_test1_pixels` queda descartado como proxy del fenómeno de D10.** Es un error de instrumento
-de la familia A93 — el instrumento medía otra cosa que la que decía medir — cazado por el control,
+de la familia A93 ( el instrumento medía otra cosa que la que decía medir ) cazado por el control,
 no por revisar el método.
 
-## Resultado 3 — `final_hotspot_source` persistido no dice qué records pasaron por el filtro
+## Resultado 3: `final_hotspot_source` persistido no dice qué records pasaron por el filtro
 
 El filtro se decide con `final_hotspot_source == "test1"` (`process_viirs.py:1779`), con el valor
 legacy asignado en las líneas 1715/1726. Pero en la **línea 2006** `resolve_honest_anchor()`
@@ -65,7 +65,7 @@ legacy asignado en las líneas 1715/1726. Pero en la **línea 2006** `resolve_ho
 `ctx_cluster` / `test1_roi` / `test1_nti_peak` / `vent` / `eruption_loose`.
 
 Por eso el campo guardado no vale `"test1"` en ningún record de la serie, y una consulta que lo
-busque devuelve cero — un cero que se lee como «el filtro no corre nunca» y es falso (A89, otra
+busque devuelve cero, un cero que se lee como «el filtro no corre nunca» y es falso (A89, otra
 vez del lado de quien audita). Cualquier auditoría futura que quiera saber qué records pasaron
 por el filtro **no puede usar este campo**; hay que instrumentarlo en el probe.
 
@@ -77,6 +77,6 @@ por el filtro **no puede usar este campo**; hay que instrumentarlo en el probe.
    data lleva el filtro puesto, y el único campo pre-filtro persistido no mide el fenómeno.
 3. **Lo que hay que instrumentar en el probe** (A75, en CI, read-only sobre granules):
    `delta_L_integrated` del Test 1 antes y después del recorte, y el `final_hotspot_source`
-   **legacy** de la línea 1779 — ninguno de los dos se persiste hoy.
+   **legacy** de la línea 1779, ninguno de los dos se persiste hoy.
 4. La banda de paridad actual dice que el sistema, tal como está, publica magnitudes sanas en los
    nevados. Retirar el filtro sin medir pondría eso en riesgo.

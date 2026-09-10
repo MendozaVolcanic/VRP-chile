@@ -1,4 +1,4 @@
-# El filtro de intensidad de Laiolo 2026 no es del pipeline NRT — y el piso C1 acota el frente
+# El filtro de intensidad de Laiolo 2026 no es del pipeline NRT: y el piso C1 acota el frente
 
 > Descartado por **dos vías independientes**, documental y empírica, antes de escribir una línea
 > de código. Cierra el candidato que yo mismo había propuesto al terminar el veredicto de la
@@ -16,7 +16,7 @@ El pasaje completo, leído en el PDF con contexto (`s00445-025-01932-y.pdf`, p. 
 
 Tres marcas, y las tres apuntan al mismo lado:
 
-1. **Voz pasiva** con sujeto «the VRP time series (Fig. 2)» — la serie **de este paper**, no el
+1. **Voz pasiva** con sujeto «the VRP time series (Fig. 2)», la serie **de este paper**, no el
    sistema.
 2. El resultado va al **Online Resource 1**, o sea el material suplementario del estudio.
 3. La frase siguiente dice «to **the dataset**», no «the algorithm».
@@ -34,12 +34,12 @@ Medido sobre las 1.952 alertas con VRP > 0 del ground truth (CONS ∪ OCR, `piso
 |---|---|
 | mínimo publicado | **0,0100 MW** |
 | percentil 1 · 5 · 10 | 0,03 · 0,05 · 0,07 MW |
-| alertas bajo 0,1 MW | **358 — 18,3 %** |
+| alertas bajo 0,1 MW | **358, 18,3 %** |
 | los doce valores más chicos | 0,01 · 0,02 ×8 · 0,03 ×3 |
 
 No hay salto: la distribución baja de forma continua hasta 0,01 MW. **MIROVA NRT publica alertas
-de una centésima de megavatio.** Y los mínimos por sensor —MODIS 0,14 · VIIRS 750 m 0,09 · VIIRS
-375 m 0,01— siguen el orden de la resolución, así que son **límite de sensibilidad del
+de una centésima de megavatio.** Y los mínimos por sensor ,MODIS 0,14 · VIIRS 750 m 0,09 · VIIRS
+375 m 0,01, siguen el orden de la resolución, así que son **límite de sensibilidad del
 instrumento**, no un corte administrativo.
 
 Queda descartado que MIROVA aplique un filtro de intensidad en el canal que comparamos.
@@ -66,7 +66,7 @@ nuestro dNTI.** Y C1 son los valores de la Tabla 1, así que la pregunta que que
 
 Hay un indicio medido de que no: en MODIS la mediana de σ_dNTI es 0,00697, así que **C1 = 0,003
 queda a menos de medio sigma del fondo**. Para que C1 fuera «un umbral mínimo que hay que superar»
-en escenas homogéneas —lo que el paper dice que es— tendría que estar bastante por encima del ruido
+en escenas homogéneas (lo que el paper dice que es) tendría que estar bastante por encima del ruido
 de fondo, no por debajo.
 
 ## El candidato que eso sugiere, y que NO está verificado
@@ -78,7 +78,7 @@ suaviza**, y eso baja la textura local, que es justamente lo que el dNTI mide. N
 sobre píxeles nativos.
 
 Si el dNTI de MIROVA es más liso que el nuestro, su C1 = 0,003 es un umbral exigente y el nuestro
-es permisivo — sin que ninguno de los dos números esté «mal». **Es una hipótesis, no un hallazgo**:
+es permisivo, sin que ninguno de los dos números esté «mal». **Es una hipótesis, no un hallazgo**:
 requiere medir el σ_dNTI antes y después de un remuestreo a grilla regular, y compararlo con lo que
 C1 supone. Ojo con no confundirlo con D16, que cerró la grilla UTM como explicación del
 **sub-reporte de magnitud**: esto es sobre el **ruido del índice**, que es otra cosa.

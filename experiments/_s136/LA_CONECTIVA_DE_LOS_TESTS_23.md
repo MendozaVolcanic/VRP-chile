@@ -50,9 +50,9 @@ Sobre los records en disco de los 11 Tier A, comparando el piso contra el contra
 
 | sensor | records | el umbral efectivo es el PISO C1 (cumbre) | mediana de μ+5σ | mediana de σ |
 |---|---|---|---|---|
-| MODIS | 11.907 | **11.907 — 100,0 %** | 0,03485 | 0,00697 |
-| VIIRS 375 m | 21.047 | 21.023 — 99,9 % | 0,00695 | 0,00137 |
-| VIIRS 750 m | 23.312 | 23.277 — 99,8 % | 0,00822 | 0,00164 |
+| MODIS | 11.907 | **11.907, 100,0 %** | 0,03485 | 0,00697 |
+| VIIRS 375 m | 21.047 | 21.023, 99,9 % | 0,00695 | 0,00137 |
+| VIIRS 750 m | 23.312 | 23.277, 99,8 % | 0,00822 | 0,00164 |
 
 **En la práctica el contraste con la escena nunca decide nada.** La detección la gobierna un número
 fijo. Y la escala lo empeora: en MODIS el piso de 0,003 queda a **menos de 1σ** del fondo, cuando

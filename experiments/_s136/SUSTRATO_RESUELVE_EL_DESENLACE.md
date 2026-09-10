@@ -5,7 +5,7 @@
 
 ## Lo que estaba en duda
 
-El criterio pre-registrado dice «C — indeterminado: menos de 4 pasadas útiles en los nevados»,
+El criterio pre-registrado dice «C, indeterminado: menos de 4 pasadas útiles en los nevados»,
 sin definir *útil*. Con una lectura hay 3 y con otra 13. Se planteó como decisión del dueño. **No
 lo era**: es medible cuál lectura responde la pregunta del experimento.
 
@@ -28,7 +28,7 @@ mediana. **La lectura «con sustrato» es la correcta, y eso queda medido, no el
 
 En los nevados donde el filtro actúa, retirarlo lleva la mediana a **2,23**, que está **fuera de la
 banda de paridad 0,5-2,0**, con un movimiento de **×1,91** que además excede el factor 1,5 que el
-criterio A exigía. Eso es el desenlace **B — el filtro sigue curando**, no el A que el script
+criterio A exigía. Eso es el desenlace **B, el filtro sigue curando**, no el A que el script
 imprimió.
 
 Formalmente sigue siendo **C** porque n = 3 < 4, el umbral pre-registrado. Pero la dirección de la
@@ -43,7 +43,7 @@ había refutado con un A/B de 3 brazos que `ctxpeak` fuera un parche redundante 
 En esta sesión escribí que el efecto «va en la dirección correcta, porque sub-reportamos». Con la
 mediana de las pasadas que tienen sustrato, **se pasa de largo**: 2,23 supera el techo de la banda.
 La afirmación era de las 7 pasadas mezclando nevados y control (1,00 → 1,30, que sí queda en
-banda); estratificando por régimen —que es como manda medirse este proyecto— los nevados se salen.
+banda); estratificando por régimen (que es como manda medirse este proyecto) los nevados se salen.
 Es el error de la mediana agrupada que ya está registrado como lección en S126.
 
 ## Consecuencia para el frente
