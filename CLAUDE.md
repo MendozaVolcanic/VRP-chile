@@ -1123,6 +1123,26 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     enumera los caminos por los que la afirmación podría estar mal — en S134 encontró algo propio
     en 4 de 4 frentes. Detalle: `docs/AUDIT_S134.md` §5.5.
 
+- **A94. Un caso de referencia solido justifica INVESTIGAR un mecanismo, no PRIORIZARLO; y el
+  agregado se cuenta en la unidad en que el operador lo vive** (S136, error propio corregido en la
+  misma sesion). Propuse el bug de la etiqueta `far` como "lo mas rentable" del frente apoyado en el
+  caso A6 del Apendice A de Coppola, donde el propio autor publica que ahi se detecta y donde
+  verificamos que detectamos el crater y la etiqueta lo esconde del dashboard. El caso era real y el
+  mecanismo tambien. Medido el agregado, el fix rinde **una noche util sobre 946** (recall del gate
+  94,8 % a 95,2 %), y de las 4 noches que destaparia **3 son el artefacto de NdC** que S113 ya dijo no
+  destapar.
+  - **Por que**: un caso de referencia prueba que el mecanismo EXISTE, lo que justifica ir a mirarlo,
+    pero no dice nada de su TAMANO, y la prioridad se decide por tamano. Saltar de "esta demostrado
+    que pasa" a "es lo mas rentable" convierte una prueba de existencia en una estimacion de impacto,
+    que es otro tipo de afirmacion y que nadie habia medido.
+  - **How to apply**: (a) de un caso de referencia se concluye "vale investigarlo", nunca un orden de
+    prioridad; (b) el impacto de cada frente se mide en la unidad en que el operador lo vive, que para
+    recall de alerta volcanica es la **noche** y no el record (un record oculto no es una alerta
+    perdida si otra pasada de la misma noche si se publica: en records el bug afecta ~9.350 casos y
+    parece enorme, en noches afecta 4); (c) si el agregado desmiente la prioridad, decirlo y corregir
+    el orden. Es el error de unidades de A90 y A93 aplicado a **la eleccion de que hacer**, no a un
+    numero reportado.
+
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
 
