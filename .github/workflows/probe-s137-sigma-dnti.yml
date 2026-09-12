@@ -1,0 +1,75 @@
+name: Probe S137 sigma del dNTI, 4 brazos
+
+# A43: "on" entre comillas.
+#
+# QUE HACE. Mide, pareado por granule, el sigma del dNTI bajo cuatro configuraciones: lo que corre
+# hoy, con la banda 22 primaria (Coppola 2016a p.3, la banda L21ok), con remuestreo a grilla de
+# 1 km (mismo paper, "requires homogenous pixel scale"), y con las dos juntas.
+#
+# POR QUE. El umbral de los Tests 2 y 3 es combinar(C1, mu + C2*sigma). Bajo la formula del paper
+# (`min`) el piso gobierna y sigma no entra, que es el corolario con el que S136 cerro estos
+# frentes. Bajo la prosa del mismo paper (`max`) sigma es lo unico que decide. Como S136 midio que
+# ninguna de las dos lecturas reproduce a MIROVA, ese cierre quedo apoyado en una lectura
+# refutada. Ver experiments/_s137/EL_CIERRE_DE_S136_ES_CIRCULAR.md.
+#
+# NO DECIDE NADA: mide el numero que falta. La decision la toma despues la bateria del Apendice A
+# con su propio criterio (conservar los 6 positivos Y curar los 3 negativos).
+#
+# READ-ONLY (A75): monkeypatchea los dos flags en el namespace del modulo y llama a calculate_vrp.
+# No escribe en data/, no empuja commits (queda fuera de la concurrencia push-main), no toca
+# pipeline/ ni ningun perfil. MODIS necesita HDF4.
+# Archivar en _archive/ al terminar (regla S80).
+"on":
+  workflow_dispatch:
+    inputs:
+      volcanes:
+        description: "Lista separada por comas. Vacio = Lascar,Villarrica"
+        required: false
+        default: ""
+      dias:
+        description: "Dias hacia atras desde la fecha final. Vacio = 20"
+        required: false
+        default: ""
+      fin:
+        description: "Fecha final AAAA-MM-DD. Vacio = 2026-08-31 (la ventana del A/B de S133)"
+        required: false
+        default: ""
+
+jobs:
+  sigma:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps (MODIS necesita HDF4)
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+      - name: Medir sigma del dNTI (read-only)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_DEST: /tmp/sigma137
+          SIGMA_VOLCANES: ${{ github.event.inputs.volcanes }}
+          SIGMA_DIAS: ${{ github.event.inputs.dias }}
+          SIGMA_FIN: ${{ github.event.inputs.fin }}
+        run: |
+          mkdir -p experiments/_s137/out_sigma
+          test -n "$SIGMA_VOLCANES" || unset SIGMA_VOLCANES
+          test -n "$SIGMA_DIAS" || unset SIGMA_DIAS
+          test -n "$SIGMA_FIN" || unset SIGMA_FIN
+          python experiments/_s137/sigma_dnti_4brazos.py \
+            | tee experiments/_s137/out_sigma/report.txt
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s137-sigma-dnti
+          path: experiments/_s137/out_sigma/
