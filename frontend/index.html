@@ -114,6 +114,10 @@
     .vc-mirova { font-size: 0.68rem; margin-top: 4px; }
     .vc-mirova.is-conf { color: #6fd08c; }
     .vc-mirova.is-solo { color: #7d8ea0; }
+    /* S137 D5 — corroboración acumulada de MIROVA (90 d), sólo Tier A */
+    .vc-corr { font-size: 0.66rem; color: #8fa6bd; margin-top: 4px;
+               font-variant-numeric: tabular-nums; }
+    .vc-corr.is-sola { color: var(--yellow); }
     .vc-mon-next { color: #7d8ea0; }
     .vc-mon-next.is-vencida { color: var(--orange); font-weight: 600; }
     .vrp-censurado { color: var(--orange); font-weight: 700; }
@@ -1982,6 +1986,36 @@ function trackHeaderFreshness(fresh) {
   if (txt) { txt.textContent = label; txt.title = "Peor frescura entre los volcanes Tier A: " + _headerWorst.txt; }
 }
 
+// S137 D5 (decisión de Nicolás) — corroboración agregada de MIROVA por volcán.
+// POR QUÉ. La fila R3 de S132 dice si MIROVA publicó en ESA pasada, que es un dato
+// puntual. Lo que el operador no tiene es el contexto: en 90 días Llaima acumula
+// cientos de detecciones nuestras contra CERO alertas de MIROVA, mientras Villarrica
+// va con quince. Un volcán sin ninguna corroboración en tres meses se lee distinto
+// que uno corroborado seguido, y esa diferencia hoy no se ve en ninguna parte.
+// NO esconde ni filtra nada: es display de señal real (A72). Que MIROVA no publique
+// no invalida la detección (A54: el 95 % de esos casos son anomalías físicamente
+// reales bajo su umbral de publicación), pero sí cambia cuánta confianza merece.
+// El conteo lleva su ventana escrita y su denominador a la vista (A90).
+function corroboracionMirova(d, dias) {
+  const corte = Date.now() - dias * 86400000;
+  let alertas = 0;
+  for (const m of (d.mirovaRecords || [])) {
+    const cls = String(m.clasificacion || m.Clasificacion || m["Clasificacion Mirova"] || "").toUpperCase();
+    if (cls === "NULO" || cls === "RUTINA") continue;
+    if (!(parseFloat(m.VRP_MW ?? m.vrp_mw ?? 0) > 0)) continue;
+    const t = parseUtcMs(m.datetime_utc);
+    if (Number.isFinite(t) && t >= corte) alertas++;
+  }
+  let nuestras = 0;
+  for (const r of (d.records || [])) {
+    if (!isValidDetection(r)) continue;
+    const t = parseUtcMs(r.datetime_utc);
+    if (Number.isFinite(t) && t >= corte) nuestras++;
+  }
+  if (!alertas && !nuestras) return null;
+  return { alertas, nuestras, dias };
+}
+
 function buildCards() {
   _headerWorst = null;
   const grid = document.getElementById("volcano-grid");
@@ -2160,10 +2194,35 @@ function buildCards() {
                  + "multiplicar por diez lo habitual; para vigilancia lo segundo importa más.";
     }
 
+    // S137 D5 — corroboración acumulada, sólo para los Tier A (los 34 restantes no
+    // tienen referencia de MIROVA con la que cruzarse, así que la fila mentiría).
+    let corr = null;
+    if (v.hasMirova) {
+      const cm = corroboracionMirova(d, 90);
+      if (cm) {
+        const sinNada = cm.alertas === 0;
+        corr = el("div", "vc-corr" + (sinNada ? " is-sola" : ""));
+        //   para que la ventana no se parta de línea entre el número y la unidad.
+        corr.textContent = "MIROVA " + cm.alertas + " · nuestras " + cm.nuestras
+                         + " (" + cm.dias + " d)";
+        corr.title = "Alertas térmicas que MIROVA publicó para este volcán en los últimos "
+                   + cm.dias + " días (universo CONS ∪ OCR), contra nuestras detecciones "
+                   + "válidas en la misma ventana. "
+                   + (sinNada
+                      ? "Sin ninguna corroboración externa en el período: conviene leer las "
+                      + "detecciones de este volcán con más cautela, sobre todo si el ΔT es "
+                      + "de pocos kelvin sobre terreno nevado."
+                      : "Que el número nuestro sea mayor es lo esperado y no es un defecto: "
+                      + "MIROVA publica por encima de un umbral operacional y nosotros "
+                      + "registramos también la señal real que queda por debajo (A54).");
+      }
+    }
+
     card.append(hdr, vrpEl, vrpSub, pills, dcRow);
     if (therm) card.appendChild(therm);
     if (anom) card.appendChild(anom);
     if (mrow) card.appendChild(mrow);
+    if (corr) card.appendChild(corr);
     card.append(time, mon);
     grid.appendChild(card);
   });

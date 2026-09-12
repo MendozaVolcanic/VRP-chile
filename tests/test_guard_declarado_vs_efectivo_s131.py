@@ -147,7 +147,7 @@ CITAS_CLAUDE_MD = [
     ("scripts/run_pipeline.py", 234, "get_detection_anchor"),
     ("scripts/run_pipeline.py", 244, "local_kernel_bg"),
     ("pipeline/geo_utils.py", 29, "get_grid_center"),
-    ("frontend/index.html", 1462, "isValidDetection"),
+    ("frontend/index.html", 1466, "isValidDetection"),
     ("pipeline/process_viirs.py", 81, "FLAG_DNS"),
     ("pipeline/process_viirs_mod.py", 438, "Villarrica/PP/Lastarria/Chaiten/PCC"),
     ("pipeline/process_viirs.py", 210, "compute_test1_nti"),
