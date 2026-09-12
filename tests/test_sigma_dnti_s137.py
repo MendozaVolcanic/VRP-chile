@@ -77,6 +77,24 @@ def test_correr_aplica_los_flags_del_brazo_durante_la_llamada():
     assert visto == {"b22": True, "regrid": True}
 
 
+def test_importar_el_modulo_no_toca_el_stdout_del_proceso():
+    """Lo encontro el CI: el wrapper de UTF-8 estaba a nivel de modulo y al importarlo
+    reemplazaba el stdout de pytest, que despues reventaba con "I/O operation on closed
+    file" al cerrar su captura. Un modulo importable no toca el stdout de quien lo importa.
+    """
+    # Reimportacion limpia: si otro test ya lo importo, el import queda cacheado y el
+    # codigo de nivel de modulo no se vuelve a ejecutar, asi que el guard pasaria por la
+    # razon equivocada (A92: un guard que pasa sin medir es peor que no tenerlo).
+    sys.modules.pop("sigma_dnti_4brazos", None)
+    antes = sys.stdout
+    try:
+        _mod()
+        assert sys.stdout is antes, (
+            "importar el probe cambio sys.stdout: el wrapper debe vivir dentro de main()")
+    finally:
+        sys.stdout = antes
+
+
 def test_mediana_ignora_los_none():
     m = _mod()
     assert m.mediana([1.0, None, 3.0, 2.0]) == 2.0

@@ -39,8 +39,6 @@ sys.path.insert(0, str(RAIZ))
 sys.path.insert(0, str(RAIZ / "scripts"))
 os.environ.setdefault("VRP_PROFILE", "mirova_equivalent")
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-
 import yaml  # noqa: E402
 from pipeline.fetch import auth, download_granules, search_granules  # noqa: E402
 import pipeline.process_modis as pm  # noqa: E402
@@ -162,6 +160,12 @@ def resumen(filas):
 
 
 def main():
+    # El wrapper de UTF-8 va DENTRO de main, nunca a nivel de modulo: importar este
+    # archivo desde un test no debe tocar el stdout del proceso que lo importa. A nivel
+    # de modulo rompia la captura de pytest con "I/O operation on closed file", y el
+    # guard de tests/test_sigma_dnti_s137.py ahora lo vigila.
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+
     nombres = [s.strip() for s in os.environ.get("SIGMA_VOLCANES", "Lascar,Villarrica").split(",")]
     dias = int(os.environ.get("SIGMA_DIAS", "20"))
     fin = datetime.strptime(os.environ.get("SIGMA_FIN", "2026-08-31"), "%Y-%m-%d")
