@@ -116,7 +116,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   satura, p. 3) y **D22** (el primer paso exige `bt > t_bg + 3 K`; la fórmula de los Tests 2 y 3 no
   tiene condición de temperatura, p. 7). Medidas en `experiments/_s137/`: con banda 22 el sigma del
   dNTI cae 3,5 a 4,7× y el primer paso queda vacío; la compuerta elimina el cráter de Villarrica en
-  la figura A6 del propio paper. La frase que sigue se conserva por historia. **NO quedan gaps de fidelidad literal pendientes**: el antiguo GAP #A
+  la figura A6 del propio paper. La frase que sigue se conserva por historia. ⚠️ **FALSA en sus dos partes, verificado S138 (AUDIT_S138 C1)**: el GAP #A está **REABIERTO desde S128** en `docs/MIROVA_DIVERGENCES.md` con guard `tests/test_guard_gap_a_pool_musigma_s128.py`; el paper (p. 6) descarta los píxeles del Test 1 como no aptos para los pasos siguientes y el código no los retira (`ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK = False`). Efecto nulo hoy por falta de sustrato; la frase apagaba el frente para una fase efusiva. Texto original: **NO quedan gaps de fidelidad literal pendientes**: el antiguo GAP #A
   (§298-300, retiro de píxeles Test 1 K1 del pool μ/σ) fue **RESUELTO S115 = MISLABEL** — no era un
   gap real (ver `docs/MIROVA_DIVERGENCES.md:1292` + `docs/AUDIT_S114_PARITY_BY_SENSOR.md:232`). NO
   reabrir como trabajo pendiente (anti-A8/A50). NTI absoluto floor 0.005 legacy.
@@ -737,7 +737,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   ciclo de cron; barato vs adivinar el fix.
 
 - **A66. nadir-fijo es el modo de área clon-literal de MIROVA para los 3 sensores; un
-  parche de magnitud previo puede estar parcheando el mismo drift** (S102). El sec³(θ)
+  parche de magnitud previo puede estar parcheando el mismo drift** (S102). ⚠️ **«Clon literal» es demasiado fuerte, verificado S138 (AUDIT_S138 C6)**: el paper (p. 3) recorta y **remuestrea** a una grilla de 1 km; el código sólo fija el área en la fórmula (`ENABLE_UTM_REGRID = False`) y S130 midió que el ratio contra MIROVA cae 2,7× con el ángulo aun con nadir fijo. El área uniforme es necesaria pero no es el remuestreo: D17 sigue abierta. La lección de método (A/B de 3 brazos) vale entera. El sec³(θ)
   off-nadir activo era un DRIFT; MIROVA resamplea a grid 1km de área constante
   (calibración S14 `experiments/21_results.json` a_pix_mode=nadir_fijo para MODIS+
   VIIRS750+VIIRS375). El WOOSTER_COEFF ya es para área nadir → activar nadir-fijo
@@ -752,7 +752,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   afecta el ÁREA; ctxpeak/Test1 afecta el FONDO del ROI — son ortogonales.
 
 - **A67. nadir-fijo VIIRS ADOPTADO+PROMOVIDO; el área nadir afecta también la DETECCIÓN
-  Test1, no solo la magnitud** (S103). Ciclo A45 completo: tag `pre-s103-nadir-fixed-viirs`
+  Test1, no solo la magnitud** (S103). ⚠️ Misma salvedad S138 que A66: adoptado y promovido, pero no «clon literal» mientras D17 (remuestreo) siga abierta. Ciclo A45 completo: tag `pre-s103-nadir-fixed-viirs`
   → TDD (GR2 + `test_nadir_fixed_vrp_integration_s103`) → flip #368 → reproc (runs
   27098410956 + re-reproc PCC/Tupun 27140784929) → promoción #373 → R3 (VIIRS375 global
   2.27×→**0.78×**, VIIRS750 1.59×→**0.80×**, 0 FN nuevos VIIRS375) → R8 live. Curados
@@ -945,7 +945,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   ancla honesta — verificar data fresca antes de asumir el problema. Detalle:
   [[reference_s113_a46_bidirectional]] + `docs/S113_A46_COHERENCE_GUARD.md`.
 
-- **A82. ⚠️ REBAJADA S124: «agotado» ya no aplica.** La auditoría S114 en que se
+- **A82. ⚠️ REBAJADA S124: «agotado» ya no aplica.** ⚠️ **Rebajada también por la vía espectral en S138 (AUDIT_S138 C3)**: los ejes que la regla da por agotados se barrieron sobre records producidos con banda 21 primaria (D21) y compuerta `bt > t_bg + 3 K` (D22), las dos divergencias que S137 abrió; «irreducible» vale sólo bajo esa configuración. La auditoría S114 en que se
   apoya cubrió umbrales, tests, kernel y second-run — **NO la geometría del ROI**.
   S124 mostró que la grilla UTM de MIROVA no está replicada y que
   `geo_utils.get_grid_center()` (escrita en S98 justo para eso) **nunca se cableó**
@@ -1100,7 +1100,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     sólo el caso encontrado — barrer la familia con
     `experiments/_s133/auditar_guards_por_subcadena.py`, que cruza todos los `assert "X" in
     src` de la suite contra los identificadores reales de `pipeline/`. En S133 dio 2
-    candidatos (ninguno roto aún) y tras endurecerlos da 0. Volver a correrlo al agregar
+    candidatos (ninguno roto aún) y tras endurecerlos da 0 (⚠️ S138: volvió a dar **1**, el guard de la conectiva de S136 `assert "min(" in src`, satisfecho por `min_bg_pixels` y por recortes de bounding box; endurecido en S138 a la expresión real `combinar = max if use_prose_branch else min`). Volver a correrlo al agregar
     guards. (c) Los flags con sufijo por sensor son la forma más común de la trampa acá:
     `ENABLE_LOCAL_CLUSTER_MAGNITUDE` es prefijo de `..._VIIRS375`.
   - **Lo que el barrido NO cubre**, para que nadie lo tome por garantía: sólo mira asserts de
@@ -1158,8 +1158,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   el remuestreo, el bow tie y una compuerta de temperatura que el paper no tiene: la auditoria en que
   se apoyaba (S114) nunca miro los pasos previos a los Tests.
   - **How to apply**: (a) ante toda afirmacion "cerrado / agotado / no reabrir / fiel", preguntar
-    bajo QUE lectura del paper vale y comprobar esa lectura en el PDF con PyMuPDF (el `.txt`
-    corrompe los operadores: el mayor que sale como punto), nunca en docs previos; (b) un cierre que
+    bajo QUE lectura del paper vale y comprobar esa lectura en el PDF **renderizando la pagina a imagen** (`page.get_pixmap(dpi=200)` con PyMuPDF y mirarla): la capa de TEXTO de PyMuPDF corrompe los operadores igual que el `.txt` (verificado S138: p. 21 da `,20.93` donde el papel dice `< -0.93`), nunca en docs previos; (b) un cierre que
     se apoya en una auditoria vale lo que cubrio esa auditoria (A82 ya cayo asi en S124); (c) si un
     frente se cerro "sin necesidad de A/B", ese es el primero que hay que revisar, porque no tiene
     medicion detras. Las afirmaciones de cierre apagan trabajo futuro: cuando una esta mal, cuesta

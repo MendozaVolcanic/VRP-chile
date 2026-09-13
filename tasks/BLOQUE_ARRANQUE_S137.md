@@ -137,7 +137,7 @@ salvo que aparezca evidencia nueva:
 4. **El discriminante geométrico** entre robo legítimo y artefacto (la distancia del hotspot robado).
    No separa: con corte a 10 km, Láscar tiene el 100 % de sus ocultos del lado "robo claro" y Llaima,
    que no tiene una sola noche confirmada, el 94 %.
-5. **Retirar la intersección contextual.** Los datos apuntan a que sigue curando, no a que sobre.
+5. **Retirar la intersección contextual.** Los datos apuntan a que sigue curando, no a que sobre. ⚠️ **S138: contradice a §d de este mismo archivo** («n insuficiente, 3 contra el umbral de 4, formalmente sigue indeterminado»). Manda §d: NO está cerrado (AUDIT_S138 C5).
 6. **La conectiva de los Tests 2 y 3**, en sus **dos** lecturas.
 7. **El filtro de intensidad de Laiolo.** No es del pipeline NRT (voz pasiva, sujeto "the VRP time
    series (Fig. 2)", resultado en el material suplementario) y el canal NRT no muestra piso alguno.

@@ -199,6 +199,12 @@ def test_la_formula_y_la_prosa_son_min_y_max_de_verdad():
     from pathlib import Path
     src = (Path(__file__).resolve().parents[1] / "pipeline" / "detection_context.py").read_text(
         encoding="utf-8")
-    assert re.search(r"(?<![A-Za-z0-9_])max(?![A-Za-z0-9_])\s*\(", src), (
-        "la rama de la prosa necesita max()")
-    assert "min(" in src, "la rama de la formula necesita min()"
+    # S138 (AUDIT_S138 C4): los asserts anteriores (`max(` con frontera y `"min(" in src`)
+    # pasaban por coincidencia con recortes de bounding box, `max(anomaly_floor_k, ...)` y
+    # `min_bg_pixels`. La conectiva real es una expresion, no una llamada: se vigila esa expresion
+    # y que aparezca en el primer pase y en el segundo (l. 510 y 924 al escribir esto).
+    patron = r"combinar\s*=\s*max\s+if\s+use_prose_branch\s+else\s+min\b"
+    n = len(re.findall(patron, src))
+    assert n >= 2, (
+        f"la conectiva `combinar = max if use_prose_branch else min` aparece {n} veces; "
+        "se esperan al menos 2 (primer y segundo pase)")
