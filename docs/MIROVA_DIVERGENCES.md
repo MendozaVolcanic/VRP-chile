@@ -2166,3 +2166,53 @@ para que nadie lo vuelva a encontrar como novedad. **No se propone cambio**: pas
 (puerta 1, cita verbatim) y sería un flip trivial (índice 11 en vez de 10), pero un A/B honesto
 tendría que mostrar un efecto que el cálculo de S128 dice que no existe a la precisión de los
 umbrales. Si algún día se hace, medir también el ETI (regresión NTI vs NTI_bk) y el `t_bg` TIR.
+
+## D21: La banda MIR de MODIS: usamos la 21 como primaria; Coppola 2016a usa la 22 y la 21 sólo donde la 22 satura. **ABIERTA (medida S133 en magnitud y S137 en detección; ningún brazo cumple aún la batería)** S137
+
+**El paper** (`documentacion/sp426.5.pdf`, p. 3, verbatim): *"we built a corrected spectral band
+centred at 3.959 um (hereby called band L21ok), by using the L21 or L22 radiance, depending on band 22
+saturation (or not), respectively"*. La 22 manda; la 21 entra sólo donde la 22 satura.
+
+**Lo nuestro**: `ENABLE_MODIS_B22_PRIMARY = False` (B21 primaria). El flag existe, cableado, desde
+S133; `process_modis.py:325` documenta que el ON es el que sigue al paper.
+
+**El fenómeno.** La banda 21 es de ganancia baja (llega a ~500 K); de noche, sobre roca y nieve a
+250-270 K, trabaja en el fondo de su escala con escalones gruesos. El dNTI, que resta a cada píxel el
+promedio de sus vecinos, amplifica esa textura.
+
+**La medición** (S137, `experiments/_s137/`):
+- Probe de sigma, 84 pares, Láscar y Villarrica 12-31 ago 2026: sigma dNTI 0,0079 → 0,0017 (Láscar) y
+  0,0071 → 0,0020 (Villarrica); el primer paso pasa de ~55-60 píxeles por escena a vacío en 80 de 84.
+- En la escena exacta de la figura A6 del paper: sigma dNTI 0,0076 (B21), 0,0016 (B22); el del autor,
+  medido en su figura, ~0,0008.
+- Batería del Apéndice A: B22 con la fórmula 4/6 y 2/3; B22 con la prosa 4/6 y 3/3 (hoy 6/6 y 0/3).
+  La pérdida de Villarrica la causa D22, no la banda; la de Eyjafjallajökull es de la evaluación.
+- S133 ya había medido la magnitud: cae a un décimo en Láscar y a un cuarto en Villarrica.
+
+**Próximo paso**: batería con B22 y sin D22 (pre-registro en `RESULTADO_ETAPA_Y_FIGURAS.md`). Adoptar
+exige A45 y un A/B en los Tier A.
+
+## D22: La compuerta de temperatura `bt > t_bg + 3 K` dentro de los Tests 2 y 3; la fórmula del paper no tiene condición de temperatura. **ABIERTA (causa verificada de la pérdida de Villarrica en el Apéndice A, S137)** S137
+
+**El paper** (`sp426.5.pdf`, p. 7): los Tests 2 y 3 son dNTI y dETI contra `C1` o contra
+`mu + C2 sigma`. Sin condición sobre la temperatura del píxel.
+
+**Lo nuestro**: `first_pass_tests_2_and_3` exige además `bt > t_bg + bt_sanity_k`, con
+`NTI_BT_SANITY_K = 3.0` (perfil `mirova_equivalent.yaml:44`). La misma constante aparece en unos 13
+lugares de los tres sensores.
+
+**Origen**: commit `59846e897`, 2026-04-08, "E3: add NTI dual-criteria detection to MODIS", para el
+camino del NTI absoluto (`nti > -0,8 AND bt > t_bg + 3`). El comentario de ese commit dice *"We don't
+implement dNTI/dETI (would need full spatial-contrast machinery)"*: se diseñó para un camino sin
+contraste espacial y se heredó a los contextuales.
+
+**El fenómeno.** En una cumbre helada el píxel que contiene un lago de lava sub-píxel sigue más frío
+que la mediana de la escena, que incluye lagos y valles a baja altura. La compuerta descarta justo el
+objeto que el contraste espectral delata. Es la imagen especular de A69.
+
+**La medición** (probe por etapa S137, run 34746870643, Villarrica 24 jun 2009 05:55, la pasada de la
+figura A6): con B22 el cráter tiene dNTI 0,0121 y dETI 0,0140, pasa los Tests 2 y 3 incluso con la
+conectiva de la prosa, y cae sólo por la compuerta: BT 268,32 K contra fondo + 3 K = 275,25 K.
+
+**Lo que no se sabe**: cuántos falsos positivos devuelve quitarla, en los negativos del apéndice y en
+los Tier A. Hay que medirlo antes de proponer nada.
