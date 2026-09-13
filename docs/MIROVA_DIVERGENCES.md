@@ -2192,7 +2192,9 @@ promedio de sus vecinos, amplifica esa textura.
 **Próximo paso**: batería con B22 y sin D22 (pre-registro en `RESULTADO_ETAPA_Y_FIGURAS.md`). Adoptar
 exige A45 y un A/B en los Tier A.
 
-## D22: La compuerta de temperatura `bt > t_bg + 3 K` dentro de los Tests 2 y 3; la fórmula del paper no tiene condición de temperatura. **ABIERTA (causa verificada de la pérdida de Villarrica en el Apéndice A, S137)** S137
+## D22: La compuerta de temperatura `bt > t_bg + 3 K` dentro de los Tests 2 y 3; la fórmula del paper no tiene condición de temperatura. **ABIERTA (divergencia literal confirmada; la atribución de S137 fue CORREGIDA en S138: la compuerta NO es lo que pierde a Villarrica A6)** S137, S138
+
+> ⚠️ **Corrección S138** (`docs/AUDIT_S138.md` §8 y verificador §3.b, sobre las salidas commiteadas de la batería, sin reprocesar): la compuerta sólo actúa en el primer pase. El segundo pase (`second_pass_adjacent`, `detection_context.py:803`) recibe NTI, ETI y la máscara de activos, sin temperatura, y corre aunque no haya activos (`ENABLE_SECOND_PASS_CONDITIONED = False`, D19): rescata el píxel que la compuerta rechazó. En A6 con compuerta el cúmulo ya está a 0,8 km del cráter y publica 0,0 MW; quitar la compuerta no mueve ese cero; cambiar el fondo del anillo por vecinos da 0,539 MW (D25). Medido en producción: 14 % de los records VIIRS375 y 17 % de los VIIRS750 se detectan sólo en el segundo pase. **Un brazo de A/B que quite sólo la compuerta no devuelve ninguna alerta.** D22, D19/D2 y D25 no se pueden A/B-ear por separado. La divergencia literal sigue siendo real (la fórmula del paper no la tiene) y sigue abierta como fidelidad.
 
 **El paper** (`sp426.5.pdf`, p. 7): los Tests 2 y 3 son dNTI y dETI contra `C1` o contra
 `mu + C2 sigma`. Sin condición sobre la temperatura del píxel.
@@ -2216,3 +2218,59 @@ conectiva de la prosa, y cae sólo por la compuerta: BT 268,32 K contra fondo + 
 
 **Lo que no se sabe**: cuántos falsos positivos devuelve quitarla, en los negativos del apéndice y en
 los Tier A. Hay que medirlo antes de proponer nada.
+
+---
+
+## D23: El Test 1 (NTI > K1) del paper no es un camino de detección en producción; sus píxeles sólo cuentan si además pasan los Tests 2 y 3. **ABIERTA (registrada S138, AUDIT_S138 H-S138-04)** S138
+
+**El paper** (p. 6): los píxeles con `NTI > K1` se declaran activos por el Test 1 y se descartan como no aptos para los pasos siguientes (eso último es el GAP #A dentro de D11, reabierto S128).
+
+**Lo nuestro**: K1 se calcula (`process_modis.py:660-666`) y entra a `combine_hot_paths` (l. 824), pero `hot_mask_2d = fp_hot` (l. 888) lo pisa con la salida del primer pase; `test1_mask=None` (l. 857-859). Igual en `process_viirs.py` (971-976, 1188, 1259) y `process_viirs_mod.py` (619-624, 783, 851). Control sintético (`experiments/_s138_audit/eje2/01_controles_sinteticos_detection_context.py`, M3): bloque 7x7 a 400 K sobre 280 K, el paper marcaría 49, el pipeline 28; interior 3x3, 1 de 9.
+
+**Fenómeno**: en una colada o lago de lava de varios píxeles, los interiores están rodeados de píxeles igual de calientes, su dNTI es ~0 y no son anómalos respecto de sus vecinos; el paper los captura por NTI absoluto. Frecuencia de K1 en records operacionales: MODIS 0,09 %, VIIRS375 1,34 %, VIIRS750 0,12 % (pocos, pero son los eventos más energéticos). **Efecto**: sub-estimación de magnitud justo en fase efusiva fuerte. Gravedad 4 en magnitud de erupción, 2 en detección (el borde siempre dispara). No reprocesado sobre granules reales: la magnitud del efecto es SOSPECHA.
+
+---
+
+## D24: Los píxeles saturados de MODIS (DN 65533) se eliminan; el paper los conserva explícitamente. **ABIERTA (registrada S138, H-S138-09)** S138
+
+**El paper** (p. 3): descarta los DN inválidos "with the exception of the pixels with DN = 65 533" (saturación), que se conservan marcados.
+
+**Lo nuestro**: `rad[dn > 32767] = NaN` (`process_modis.py:244-250`), guard BT > 500 K a NaN (l. 555), y en `merge_mir_bands` (l. 331-333) el NaN de B21 cae a B22, que también satura. Origen: corrección F28 (S73) a un caso de basura (PP 2026-03-18).
+
+**Fenómeno**: en un paroxismo el píxel del foco satura la banda 21 (~500 K) y es el más caliente de la escena; queda NaN, no entra al NTI, al pool ni al hot mask, y no aporta radiancia: agujero en el centro de la anomalía. Sin casos en la ventana medida (`sanity_cap_tocado = 0`), invisible hoy; sólo actúa en paroxismos, pero ahí resta. Gravedad 3.
+
+---
+
+## D25: El fondo del VRP es la mediana de un anillo regional de 5 a 25 km, no la media de los píxeles que rodean al activo; y el exceso se recorta a cero. **ABIERTA (registrada S138, H-S138-01; es la palanca real detrás de A6 y del cráter en 0,0 MW)** S138
+
+**El paper** (p. 8, ecuación 6): el fondo es "the arithmetic mean of all the pixels surrounding the active one"; no necesita recorte.
+
+**Lo nuestro**: `np.median` sobre el anillo (`detection_context.py:1064`; `process_modis.py:569-577`, 1023; `process_viirs_mod.py:981`, sin alternativa en M-band); kernel 3x3 sólo para los 5 volcanes opt-in del YAML (`local_kernel_bg`: PCC, Villarrica, Chaitén, PP, Lastarria; `process_modis.py:1041-1049`); `delta_L` recortado a 0 (`process_modis.py:1056`). D8 quedó marcada resuelta por el kernel opt-in, pero la divergencia literal sigue vigente en 6 de 11 Tier A en MODIS, 11 de 11 en M-band y todo el camino Test 1.
+
+**Fenómeno**: en una cumbre helada el cráter con lava sub-píxel está más frío en MIR que la mediana de un anillo lleno de valle tibio; su exceso sale negativo y se recorta a 0,0 MW aunque los Tests 2 y 3 lo hayan aceptado (Villarrica A6 con B22; Tupungatito 2026-08-21 05:30 UTC VIIRS_SNPP_750, cúmulo de 1 píxel summit en 0,0 MW, fondo 256,4 K). En noches-sensor: VIIRS750 33 de 246 noches ALERTA de MIROVA con el cráter en cero (ventana 2026-01-11 a 2026-09-07); **en noches de volcán, 0 de 33**: todas cubiertas por otra pasada (verificador S138 §3.d). Es fidelidad y magnitud, no recall. Y al revés, infla donde el anillo es más frío que el entorno del foco (glaciar de Tupungatito, A19). Gravedad 4.
+
+---
+
+## D26: El segundo pase calcula mu y sigma sin los filtros de no-aptos del paper (borde, dNTI < -0,1, K1). **ABIERTA, efecto nulo bajo la conectiva `min` (registrada S138)** S138
+
+**El paper** (p. 6-7): los no aptos se excluyen de "the subsequent steps", incluido el segundo cálculo.
+
+**Lo nuestro**: `detection_context.py:904` contra 81-140 y 477 (el primer pase sí los aplica). Control sintético M4: un solo outlier con dNTI << -0,1 multiplica el sigma del segundo pase por 12 (0,00085 a 0,0104) mientras el primer pase lo excluye. Bajo `min(C1, mu + C2 sigma)` el piso gobierna y el efecto sobre el umbral es nulo (S136 midió que `mu + C2 sigma > C1` en el 100 % de MODIS). Gravedad 1 hoy; 3 si se adopta la rama de la prosa (`ENABLE_TESTS_23_PROSE_BRANCH`).
+
+---
+
+## D27: El día no existe: la Tabla 1 diurna (K1 = -0,6, C1 = 0,02, C2 = 15) está escrita y nunca se ejecuta. **DELIBERADA (MISSION: sólo noche), registrada S138 para que conste como divergencia literal** S138
+
+`_select_thresholds` (`process_modis.py:355-378`), `ENABLE_DAYTIME_MODIS = False`, `run_pipeline.py:185-195`, `store.py:171-182`. El paper procesa pasadas diurnas y advierte que ahí están la mayoría de sus falsas alertas (p. 16-17; A76). MIROVA publica detecciones diurnas de MODIS que el operador no verá acá. Gravedad 2 (recall de día; riesgo de falsos positivos si se activara). No se propone cambiar.
+
+---
+
+## D28: El bow tie de MODIS no se trata en ningún paso del perfil operacional. **ABIERTA, parte de D17 (registrada S138 como paso propio)** S138
+
+El paper (p. 3) corrige el solapamiento de barridos antes de remuestrear; el código no tiene el paso (`process_modis.py:499-510` sin regrid; `ENABLE_UTM_REGRID = False`, leído de `thresholds:`, `profile.py:606`). Consecuencia junto con D17: los 8 vecinos son píxeles nativos de tamaño variable y la magnitud usa un área que no es la del píxel (S131). Gravedad 3 dentro de D17.
+
+---
+
+## D29: Refit iterativo a 3 sigma en la regresión cuadrática de NTIbk. **ABIERTA, menor (registrada S138)** S138
+
+`detection_context.py:685-688` y 745-765: la regresión NTI contra NTIapp se reajusta excluyendo residuos mayores a 3 sigma. El paper (p. 5, ecuación 4) describe un solo ajuste. Probablemente mejora el fondo, pero no está en el paper y no tiene flag. Gravedad 1.
