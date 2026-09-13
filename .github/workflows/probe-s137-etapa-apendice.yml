@@ -1,0 +1,56 @@
+name: Probe S137 etapa del primer paso, Apendice A, B21 contra B22
+
+# A43: "on" entre comillas.
+#
+# QUE HACE. Sobre casos del Apendice A de Coppola 2016a, descompone el primer paso (Tests 2 y 3) en
+# sus cuatro condiciones por pixel (dNTI, dETI, ROI, compuerta de temperatura) dentro de 5 km, con
+# la banda 21 de hoy y con la banda 22 del paper. Guarda ademas la POSICION y el rumbo del cumulo.
+#
+# POR QUE. Con banda 22 la bateria pierde Villarrica (los Tests 2 y 3 dan cero pixeles aunque el
+# paper dice que el filtro espacial la detecta) y Eyjafjallajokull (cumulo fuerte a 7-11 km de la
+# cumbre). Ver experiments/_s137/RESULTADO_BATERIA_B22.md.
+#
+# READ-ONLY (A75): envuelve la funcion en el namespace del procesador sin alterar lo que devuelve.
+# No escribe en data/, no empuja commits, no toca pipeline/ ni perfiles. MODIS necesita HDF4.
+# Archivar en _archive/ al terminar (regla S80).
+"on":
+  workflow_dispatch:
+    inputs:
+      casos:
+        description: "Casos separados por coma (A1..A9 o nombre). Vacio = A6,A2"
+        required: false
+        default: ""
+
+jobs:
+  etapa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps (MODIS necesita HDF4)
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+      - name: Probe por etapa (read-only)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_DEST: /tmp/etapa137
+          ETAPA_CASOS: ${{ github.event.inputs.casos }}
+        run: |
+          mkdir -p experiments/_s137/out_etapa
+          python experiments/_s137/probe_etapa_apendice.py \
+            | tee experiments/_s137/out_etapa/report.txt
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s137-etapa-apendice
+          path: experiments/_s137/out_etapa/
