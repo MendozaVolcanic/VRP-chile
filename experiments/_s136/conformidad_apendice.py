@@ -112,7 +112,7 @@ def correr_caso(caso, is_nighttime):
                     vent_lat=caso["lat"], vent_lon=caso["lon"],
                     vent_radius_km=4.0, inner_radius_km=INNER_KM,
                     exclude_zones=None, active_water_bodies=None,
-                    lbg_global_compatible=False, local_kernel_bg_compatible=False,
+                    lbg_global_compatible=False, local_kernel_bg_compatible=FONDO_LOCAL,
                 )
             except Exception as e:
                 print(f"    {nom}  EXCEPCION: {e}", flush=True)
@@ -189,9 +189,21 @@ def brazo_desde_env(env):
     """
     prosa, b22 = _si(env.get("APENDICE_PROSA")), _si(env.get("APENDICE_B22"))
     sin_compuerta = _si(env.get("APENDICE_SIN_COMPUERTA"))
+    fondo_local = _si(env.get("APENDICE_FONDO_LOCAL"))
     nombre = ("out_apendice" + ("_b22" if b22 else "") + ("_sincompuerta" if sin_compuerta else "")
-              + ("_prosa" if prosa else ""))
-    return {"prosa": prosa, "b22": b22, "sin_compuerta": sin_compuerta, "out": nombre}
+              + ("_fondolocal" if fondo_local else "") + ("_prosa" if prosa else ""))
+    return {"prosa": prosa, "b22": b22, "sin_compuerta": sin_compuerta, "fondo_local": fondo_local,
+            "out": nombre}
+
+
+# S137, eje del FONDO DE LA MAGNITUD. La ecuacion 6 de Coppola 2016a (p. 8) estima el fondo "from the
+# arithmetic mean of all the pixels surrounding the active one (or around the active cluster)". Nuestro
+# MODIS usa el fondo del anillo de 5-25 km salvo que ENABLE_LOCAL_KERNEL_BG y el campo por volcan
+# local_kernel_bg_compatible esten los dos encendidos, y despues recorta el exceso a cero. En la cumbre
+# helada de Villarrica el crater (268 K) queda bajo el fondo del anillo (272 K) y su VRP sale 0,0 aunque
+# la deteccion ya este (S137, brazo B22 sin compuerta). La ecuacion no distingue por volcan, asi que el
+# brazo lo enciende UNIFORME para los nueve casos.
+FONDO_LOCAL = False
 
 
 def sin_compuerta_t23(original):
@@ -260,6 +272,10 @@ def main():
         pm.ENABLE_MODIS_B22_PRIMARY = True
     if brazo["sin_compuerta"]:
         pm.first_pass_tests_2_and_3 = sin_compuerta_t23(pm.first_pass_tests_2_and_3)
+    if brazo["fondo_local"]:
+        global FONDO_LOCAL
+        FONDO_LOCAL = True
+        pm.ENABLE_LOCAL_KERNEL_BG = True  # las dos llaves: flag del perfil y campo por volcan
     casos = yaml.safe_load((HERE / "apendice_a.yaml").read_text(encoding="utf-8"))["casos"]
     solo = (os.environ.get("APENDICE_CASO") or "").strip()
     if solo:
@@ -273,6 +289,8 @@ def main():
           f"   (flag efectivo en el procesador: {pm.ENABLE_MODIS_B22_PRIMARY})"
           f"   salida: {brazo['out']}/")
     print(f"compuerta de temperatura en Tests 2/3: {'QUITADA (S137)' if brazo['sin_compuerta'] else 'la de hoy, bt > t_bg + 3 K'}")
+    print(f"fondo de la magnitud: {'LOCAL 3x3 uniforme (ec. 6)' if brazo['fondo_local'] else 'anillo 5-25 km'}"
+          f"   (flag en el procesador: {pm.ENABLE_LOCAL_KERNEL_BG}, campo por volcan: {FONDO_LOCAL})")
     auth()
     salida = []
     for c in casos:

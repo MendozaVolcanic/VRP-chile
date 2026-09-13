@@ -169,20 +169,36 @@ def test_la_bateria_no_contamina_el_catalogo_operacional():
 
 # ---------------------------------------------------------------- los brazos (S137)
 
-@pytest.mark.parametrize("env,prosa,b22,sc,out", [
-    ({}, False, False, False, "out_apendice"),
-    ({"APENDICE_PROSA": "1"}, True, False, False, "out_apendice_prosa"),
-    ({"APENDICE_B22": "1"}, False, True, False, "out_apendice_b22"),
-    ({"APENDICE_PROSA": "1", "APENDICE_B22": "1"}, True, True, False, "out_apendice_b22_prosa"),
-    ({"APENDICE_PROSA": "", "APENDICE_B22": "0"}, False, False, False, "out_apendice"),
-    ({"APENDICE_B22": "1", "APENDICE_SIN_COMPUERTA": "1"}, False, True, True,
+@pytest.mark.parametrize("env,prosa,b22,sc,fl,out", [
+    ({}, False, False, False, False, "out_apendice"),
+    ({"APENDICE_PROSA": "1"}, True, False, False, False, "out_apendice_prosa"),
+    ({"APENDICE_B22": "1"}, False, True, False, False, "out_apendice_b22"),
+    ({"APENDICE_PROSA": "1", "APENDICE_B22": "1"}, True, True, False, False, "out_apendice_b22_prosa"),
+    ({"APENDICE_PROSA": "", "APENDICE_B22": "0"}, False, False, False, False, "out_apendice"),
+    ({"APENDICE_B22": "1", "APENDICE_SIN_COMPUERTA": "1"}, False, True, True, False,
      "out_apendice_b22_sincompuerta"),
-    ({"APENDICE_B22": "1", "APENDICE_SIN_COMPUERTA": "1", "APENDICE_PROSA": "1"}, True, True, True,
+    ({"APENDICE_B22": "1", "APENDICE_SIN_COMPUERTA": "1", "APENDICE_PROSA": "1"}, True, True, True, False,
      "out_apendice_b22_sincompuerta_prosa"),
+    ({"APENDICE_B22": "1", "APENDICE_SIN_COMPUERTA": "1", "APENDICE_FONDO_LOCAL": "1"}, False, True, True,
+     True, "out_apendice_b22_sincompuerta_fondolocal"),
+    ({"APENDICE_B22": "1", "APENDICE_SIN_COMPUERTA": "1", "APENDICE_FONDO_LOCAL": "1",
+      "APENDICE_PROSA": "1"}, True, True, True, True, "out_apendice_b22_sincompuerta_fondolocal_prosa"),
 ])
-def test_el_brazo_sale_del_entorno_y_escribe_en_su_directorio(mod, env, prosa, b22, sc, out):
+def test_el_brazo_sale_del_entorno_y_escribe_en_su_directorio(mod, env, prosa, b22, sc, fl, out):
     """Los nombres ya commiteados (S136 y S137) no cambian al agregar ejes."""
-    assert mod.brazo_desde_env(env) == {"prosa": prosa, "b22": b22, "sin_compuerta": sc, "out": out}
+    assert mod.brazo_desde_env(env) == {"prosa": prosa, "b22": b22, "sin_compuerta": sc,
+                                        "fondo_local": fl, "out": out}
+
+
+def test_el_fondo_local_se_pasa_a_calculate_vrp_y_enciende_las_dos_llaves(mod):
+    """A89: el fondo local exige el flag del perfil Y el campo por volcan. Si solo se enciende uno,
+    el brazo corre identico al control sin avisar."""
+    import re
+    src = (RAIZ / "experiments" / "_s136" / "conformidad_apendice.py").read_text(encoding="utf-8")
+    assert re.search(r"local_kernel_bg_compatible\s*=\s*FONDO_LOCAL(?![A-Za-z0-9_])", src)
+    assert re.search(r"(?<![A-Za-z0-9_])pm\.ENABLE_LOCAL_KERNEL_BG\s*=\s*True", src)
+    assert re.search(r"(?<![A-Za-z0-9_])global FONDO_LOCAL", src)
+    assert mod.FONDO_LOCAL is False, "por defecto la bateria corre con el fondo del anillo"
 
 
 def test_sin_compuerta_anula_solo_el_margen_y_devuelve_lo_mismo(mod):
