@@ -1,0 +1,1807 @@
+
+===== PAGE 1 =====
+Enhanced volcanic hot-spot detection using MODIS IR data:
+results from the MIROVA system
+D. COPPOLA1*, M. LAIOLO1,2, C. CIGOLINI1,3, D. DELLE DONNE2,4 & M. RIPEPE2
+1Dipartimento di Scienze della Terra, Universita` di Torino,
+Via Valperga Caluso 35, 10135 Torino, Italy
+2Dipartimento di Scienze della Terra, Universita` di Firenze,
+Via G. La Pira 4, 50121 Firenze, Italy
+3NatRisk, Centro Interdipartimentale sui Rischi Naturali in Ambiente Montano e Collinare,
+Universita` degli Studi di Torino, Torino, Italy
+4Dipartimento di Scienze della Terra e del Mare, Universita` di Palermo,
+Via Archiraﬁ22, 90123 Palermo, Italy
+*Corresponding author (e-mail: diego.coppola@unito.it)
+Abstract: We describe a new volcanic hotspot detection system, named Middle InfraRed Obser-
+vation of Volcanic Activity (MIROVA), based on the analysis of infrared data acquired by the
+Moderate Resolution Imaging Spectroradiometer sensor (MODIS). MIROVA uses the middle
+infrared radiation (MIR), measured by MODIS, in order to detect and measure the heat radia-
+tion deriving from volcanic activity. The algorithm combines spectral and spatial principles, allow-
+ing the detection of heat sources from 1 megawatt (MW) to more than 10 gigawatt (GW). This
+provides a unique opportunity to: (i) recognize small-scale variations in thermal output that may
+precede the onset of effusive activity; (ii) track the advance of large lava ﬂows; (iii) estimate
+lava discharge rates; (iv) identify distinct effusive trends; and, lastly, (v) follow the cooling
+process of voluminous lava bodies for several months. Here we show the results obtained from
+data sets spanning 14 years recorded at the Stromboli and Mt Etna volcanoes, Italy, and we inves-
+tigate the above aspects at these two persistently active volcanoes. Finally, we describe how the
+algorithm has been implemented within an operational near-real-time processing chain that ena-
+bles the MIROVA system to provide data and infrared maps within 1–4 h of the satellite overpass.
+During an eruptive crisis or volcanic unrest, one
+of the primary contributions of satellite-derived
+thermal data is to provide information about the
+presence, or absence, of thermal anomalies (i.e. hot-
+spots) associated with the observed phenomena
+(Ramsey & Harris 2012 and references therein).
+Speciﬁcally, satellite-based thermal efforts focus
+on data collected in the thermal infrared region
+(IR: 0.7–20 mm), especially in the atmospheric win-
+dows in the mid-infrared (MIR: 3.44–4.13 mm)
+and thermal infrared (TIR: 8.6–12.2 mm) (Harris
+2013).
+A series of critical parameters may be promptly
+delivered by the IR remote sensing community to
+the observatories and civil protection agencies in
+order to mitigate eruption hazards. Generally, this
+information consists of: (i) the location of the hot-
+spot(s); (ii) the area and temperature of the heat
+source; (iii) the excess of ‘radiance’ or heat
+ﬂux(s); and (iv) the mass or volume ﬂux(s). This
+data can be used to help reduce eruption-related
+hazards to lives and property and, in the case of
+effusive activity, provide essential input parameters
+for numerical models that predict the path of lava
+ﬂows (Favalli et al. 2005; Wright et al. 2008;
+Proietti et al. 2009; Vicari et al. 2009; Ganci et al.
+2012b; Del Negro et al. 2013). Lava ﬂows can
+cause a major decrease in agricultural productivity
+and considerable damage to property, and, in some
+cases, they may also cause a signiﬁcant number of
+deaths, such as during the 1977 and 2002 eruptions
+of Nyiragongo volcano (IRIS 2002; Baxter 2011).
+Depending on the sensor and the applied meth-
+odology, the quality of this information can dif-
+fer substantially. For example, the data provided by
+the geostationary sensors (e.g. Geostationary Oper-
+ational Environmental Satellite (GOES), Spinning
+Enhanced Visible and InfraRed Imager (SEVIRI);
+GOES-class sensors, according to the classiﬁca-
+tion of Harris 2013) enable us to estimate the ther-
+mal output every 15–30 min, and is thus crucial
+for tracking short-term variations in major effu-
+sive activity (e.g. Ganci et al. 2012a; Gouhier
+et al. 2012). However, the low spatial resolution
+From: Harris, A. J. L., De Groeve, T., Garel, F. & Carn, S. A. (eds) Detecting, Modelling and Responding to Effusive
+Eruptions. Geological Society, London, Special Publications, 426, http://doi.org/10.1144/SP426.5
+# 2015 The Author(s). Published by The Geological Society of London. All rights reserved. For permissions:
+http://www.geolsoc.org.uk/permissions. Publishing disclaimer: www.geolsoc.org.uk/pub_ethics
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 2 =====
+characterizing these sensors (i.e. 4–20 km) is not
+adequate for locating the source of the hotspot
+with precision and does not enable the detection of
+low thermal anomalies that may precede the major
+effusions (i.e. slow magma rising). Conversely, the
+high-resolution images (i.e. 30 m) provided by the
+TM-class sensors (e.g. Landsat suite; Advanced
+Spaceborne
+Thermal
+Emission
+and
+Reﬂection
+Radiometer (ASTER); Earth Observatory Satellite;
+EOS-1 suite: Harris 2013) are extremely efﬁcient
+in detecting small thermal sources, and allow us to
+locate the active vent(s) with precision, as well as
+lava channels, levees and ﬂow front(s), and, more
+generally, enable us to discriminate between active
+or inactive lava areas (Flynn et al. 2000; Lombardo
+et al. 2009; Wright et al. 2010). In other words,
+they allow us to characterize the thermal state of
+the observed lava bodies with greater accuracy,
+including the measurements of their areas, tempera-
+tures, heat and mass ﬂuxes (Oppenheimer 1991;
+Harris et al. 1998; Flynn et al. 2001; Lombardo &
+Buongiorno 2006). In addition, the characteristic
+temperature distribution obtained with some of
+these high-resolution sensors (e.g. the Hyperion
+sensor carried on NASA’s Earth Observing–1
+spacecraft) may help to constrain effusive tempera-
+tures, as well as to provide clues as to the lava com-
+position (Wright & Flynn 2003; Davies et al. 2011;
+Wright et al. 2011). However, despite their high
+degree of efﬁciency, these sensors currently pro-
+vide data and images with a temporal coverage of
+several days; a resolution that is still too low to
+enable tracking of the short-term evolution of volca-
+nic activity at selected sites.
+An excellent compromise between these two
+end-member classes is offered by sensors with mod-
+erate spatial resolution (e.g. Advanced Very High
+Resolution Radiometer; AVHRR-class, according to
+Harris 2013) that provide several images per day,
+with a ground resolution of 500–1000 m.
+A number of hotspot detection algorithms have
+been applied to the data acquired by these kinds of
+sensors (including MODIS), and a comprehensive
+review of their strengths and weaknesses can be
+found in Steffke & Harris (2011) and Harris
+(2013). The authors concluded that each algorithm
+operates well within the criteria of its design
+requirement, with the main limitations being due
+to the following:
+† Global hotspot detection systems (e.g. MOD-
+VOLC: Wright et al. 2002), based on a ﬁxed
+threshold, require little processing power (no
+temporal and no spatial analysis) but can-
+not detect small thermal anomalies.
+† Local hotspot detection systems based on
+adapted thresholds (e.g. MODLEN: Kervyn
+et al. 2006) are more precise, but require input
+parameters that are not exportable on a global
+scale.
+† Local hotspot detection systems based on tem-
+poral (e.g. RAT: Pergola et al. 2004) or spatial
+(e.g. VAST: Harris et al. 1995) analysis require
+more processing power, owing to the analysis
+of a large amount of data, and are more difﬁcult
+to apply on a global scale and in near real time.
+In order to improve the detection capability, a
+number of ‘hybrid’ algorithms have been developed
+by coupling spectral, spatial and temporal principles
+(e.g. Dean et al. 1998; Koeppen et al. 2011; Coppola
+et al. 2014) or by using artiﬁcial neural networks
+(Piscini
+&
+Lombardo
+2014).
+For
+example,
+Coppola et al. (2014) proposed a hybrid approach
+that has been expressly developed for tracking ther-
+mal anomalies at Stromboli volcano using MODIS
+data. As for the OKMOK algorithm (Dehn et al.
+2000), the basic principle of this hybrid approach
+was to model the regional background for Strom-
+boli, a procedure that requires the analysis of at
+least 1 year of recorded data (Coppola et al. 2014).
+Although the results are excellent for Stromboli,
+application of the same procedure to other target
+volcanoes would require the analysis of their histori-
+cal data sets since the thresholds (and associated
+parameters) must be determined case by case. For
+example, running Coppola’s 2014 algorithm for Mt
+Etna volcano would not have worked as the para-
+meters found for Stromboli do not apply to Mt Etna.
+In this paper we describe a new automatic hot-
+spot detection system, named Middle Infrared
+ObservationofVolcanicActivity(MIROVA),which
+aims to combine greater accuracy of local hotspot
+detection systems with an easier exportability,
+necessary for extending the application to different
+volcanoes, and in near-real time. Hence, the main
+motivation for developing the MIROVA algorithm
+was to develop a hotspot detection system that
+does not require the analysis of historical data sets
+but produces results of the same quality as the algor-
+ithms speciﬁcally calibrated for any target volcano
+(i.e. with a case by case determination of adapted
+thresholds: cf. Coppola et al. 2014).
+MIROVA is based on the analysis of the middle
+infrared radiation (MIR) detected by the MODIS
+sensor, and combines spatial and spectral principles
+allowing the detection of thermal anomalies from
+1 MW to more than 10 GW. After describing the
+main steps of the processing chain, we will present
+the results obtained from the analysis of data sets
+spanning 14 years from Stromboli and Mt Etna vol-
+canoes, with special emphasis on the periods char-
+acterized by effusive activity. This gives us the
+opportunity to outline the main contributions that
+MIROVA provides for tracking, monitoring and
+modelling lava effusion and the volcanic processes
+D. COPPOLA ET AL.
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 3 =====
+associated with distinct eruptive episodes. Lastly,
+we describe the implementation of the algorithm
+in terms of a near-real-time web-based system
+(hosted at www.mirova.unito.it), emphasizing the
+possibility that this monitoring system could easily
+be expanded to cover a wide range of volcanic
+targets.
+The MIROVA system
+The MIROVA system is based on MODIS Level
+1B data provided by NASA’s Terra (launched on
+December 1999) and Aqua (launched on May 2002)
+sensors that allow a target volcano to be imaged
+approximately four times per day (http://ge.ssec.
+wisc.edu/modis-today/about.html). MODIS gran-
+ules are analysed in ﬁve principal steps. These are:
+(i) data extraction; (ii) cropping and resampling;
+(iii) deﬁnition of regions of interest (ROIs); (iv)
+hotspot detection; and, lastly, (v) calculation of the
+‘excess’ MIR radiance and radiative power (RP).
+Data extraction from MODIS Level 1B
+granules
+The ﬁrst step deals with the extraction of the data of
+interest from the MODIS Level 1 granules. These
+data consist of the date and time of satellite over-
+passes, the satellite viewing geometry (zenith and
+azimuth) and pixel(s) geolocation (latitude and
+longitude), as well as the digital number (DN)
+related to seven spectral bands of interest:
+(i) reﬂectivity
+of
+band
+1
+(R1),
+centred
+at
+0.645 mm (for daytime images only);
+(ii) reﬂectivity
+of
+band
+2
+(R2),
+centred
+at
+0.858 mm (for daytime images only);
+(iii) radiance of band 6 (L6), centred at 1.64 mm
+(for daytime images only);
+(iv) radiance
+of
+band
+21
+(L21),
+centred
+at
+3.959 mm (low-gain MIR channel);
+(v) radiance
+of
+band
+22
+(L22),
+centred
+at
+3.959 mm (high-gain MIR channel);
+(vi) radiance
+of
+band
+31
+(L31),
+centred
+at
+11.03 mm (thermal infrared (TIR) channel);
+(vii) radiance
+of
+band
+32
+(L32),
+centred
+at
+12.02 mm (TIR channel).
+The DN of each selected band was ﬁrst scanned to
+ﬁlter out any missed or ‘corrupted’ data. According
+to the MODIS Level 1B Product User’s Guide
+(Toller et al. 2006), this is achieved by eliminating,
+for each band, all the pixels with DN . 32 768 (i.e.
+the invalid data values), with the exception of the
+pixels with DN ¼ 65 533, indicating saturated
+values.
+The georeferred data were also scanned in order
+to remove the bow-tie effect that produces the
+so-called ‘scan to scan’ overlapping at the edge of
+the swath (Nishihama et al. 1997).
+Once the effects of invalid and bow-tie related
+pixels had been removed, we used the conversion
+coefﬁcients for each selected band (scale and
+offset) to convert the DN into reﬂectivity and/or
+radiance data (for details regarding this step see
+the MODIS Level 1B Product User’s Guide).
+Lastly, we built a corrected spectral band centred
+at 3.959 mm (hereby called band L21ok), by using
+the L21 or L22 radiance, depending on band 22 satur-
+ation (or not), respectively.
+Cropping and resampling of original
+MODIS granules
+Cropping and resampling of the original Level 1B
+MODIS data is necessary for two main reasons.
+First, because high scan angles contribute to the
+growth of the projected ground spatial element (up
+to c. 10 km2 for scan angles of 558: Nishihama
+et al. 1997). This leads to the radiance of a potential
+subpixel hotspot being integrated over a variable
+area (depending on the scan angle) introducing an
+‘inherited’ error source in estimating its thermal
+output. Secondly, because the hotspot detection
+scheme, described below, requires homogenous
+pixel scale.
+Thus, we cropped and resampled (into an equally
+spaced 1 km grid) the MODIS Level 1B data that
+fall within a grid (50 × 50 km) centred on the
+volcano’s summit (Fig. 1). For this purpose we
+used the Global Volcanism Program volcano data-
+base (http://www.volcano.si.edu/) as the reference
+source for the volcano nomenclature and for the
+summit latitude and longitude.
+Hence, we produced a series of matrices for the
+bands of interest described above, which were
+stored in the local computer. This step reduces the
+size of the ingested data from approximately
+150 Mb, for the original MODIS granule, to less
+than 250 kb for the whole resampled matrices.
+For clarity, in this paper we use the term ‘matrix’
+to indicate the square array of numbers (radiances or
+reﬂectances) that results from the resampling of the
+original MODIS granules. A visual representation
+(in the form of an image) of a matrix is termed a
+‘map’.
+Regions of interest
+An important step in the processing ﬂowchart is the
+deﬁnition of two concentric regions of interest
+(ROIs) within the resampled matrices. The ﬁrst,
+inner region (ROI1) consists of a box (5 × 5 km)
+centred on the volcano’s summit, where summit
+crater(s) are typically present and where small-scale
+thermal activity is more likely to occur (Fig. 1). The
+ENHANCED VOLCANIC HOTSPOT DETECTION
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 4 =====
+second, larger region (ROI2) represents the outer
+frame (measuring 50 × 50 km) and includes the
+whole scene with the exception of the ROI1. As
+speciﬁed later, different thresholds will be applied
+to these two distinct ROIs.
+Hotspot detection
+Spectral analysis: NTI and ETI matrices. Once the
+radiance data has been resampled into equal-area
+matrices, we used two of them (L21ok and L32) to
+produce additional matrices that represent distinct
+thermal indexes.
+The ﬁrst index is the Normalized Thermal Index
+(NTI), introduced by Wright et al. (2002), which is
+calculated as follows:
+NTI = LMIR −LTIR
+LMIR + LTIR
+(1)
+where LMIR is the radiance recorded by the MIR
+channel (L21ok) and LTIR is the radiance of the TIR
+channel (L32).
+Fig. 1. (a) Location of Stromboli and Mt Etna volcanoes in southern Italy. Two examples of resampled MODIS
+data produced by MIROVA, for (b) Stromboli and (c) Etna, respectively. The original MODIS granules are cropped
+and resampled within a 50 × 50 km grid, which is centred on the summit of the volcano. The spatial resolution of the
+resampled maps is 1 km. The white box outlines the inner region of interest (ROI1). See the text for details.
+D. COPPOLA ET AL.
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 5 =====
+Then, we calculated a second empirical index,
+similar to the NTI, which we call ‘apparent NTI’
+(NTIapp). In performing this step, we assumed that
+each pixel was characterized by an apparent and
+homogeneous surface temperature (Tapp) equal to
+the brightness temperature (BT) recorded in the TIR
+channel (Tapp ¼ BTTIR). In addition, we assumed
+that the atmospheric transmission and the emissivity
+of the ground sampled in each pixel were constant
+at all wavelengths. Accordingly, we calculated an
+apparent MIR radiance (LMIR, app) on the basis of
+the assumed apparent temperature (Tapp):
+LMIR,app = PMIR(Tapp)
+(2)
+where PMIR is the Plank’s function. The apparent
+NTI thus becomes:
+NTIapp = LMIR,app −LTIR
+LMIR,app + LTIR
+.
+(3)
+In practical terms, the NTIapp simulates the NTI
+in the event of each pixel having a homogeneous
+temperature, and where the emissivity and atmos-
+pheric transmission are constant at all wavelengths.
+Thus, any discrepancy between the observed NTI
+and the apparent NTIapp highlights a failure in the
+above assumptions. For example, in Figure 2 we
+plot the observed NTI (equation 1) for two night-
+time images acquired over Mt Etna volcano (2500
+pixels each) v. the apparent NTI (NTIapp), calculated
+using equation (3). It can be noted that this relation-
+ship is not linear and deviates from the 1:1 ratio,
+based on the real conditions sampled by each pixel
+(e.g. thermal homogeneity, emissivity and atmos-
+pheric transmission). A quadratic best-ﬁt regression
+allows this trend to be normalized so that a third
+empirical index (which we term NTIbk) is obtained
+according to:
+NTIbk = aNTI2
+app + bNTI + c
+(4)
+where a, b and c are the polynomial parameters
+obtained by the regression (see Fig. 2a, c).
+Note that parameters a, b and c are obtained for
+each case, and distinct regression coefﬁcients are
+retrieved from each single image. Hence, the
+NTIbk should represent a ﬁrst-order approximation
+of the background NTI in the absence of a hotspot.
+In this case, a strong departure from the 1:1 ratio
+would essentially be a clear indication of hotspot-
+contaminated pixels (Fig. 2b, d). This principle is
+the basis of the so-called Enhanced Thermal Index
+(ETI), which is obtained by subtracting the back-
+ground NTIbk (equation 4) from the observed NTI
+(equation 1) so that:
+NTIbk = aNTI2
+app + bNTIapp + c.
+(5)
+The effectiveness of this procedure in enhanc-
+ing the presence of hotspots is shown in Figure 3.
+In fact, while the hotspots on the summit of Mt
+Etna are absent from the background NTIbk maps
+(Fig. 3b, e) or weak on the NTI maps (Fig. 3a, d),
+they are clearly visible on the ETI maps (Fig. 3c, f).
+It should be noted that a perturbation of the TIR
+signal due to large volcanic heat sources (i.e. large
+lava ﬂows) does not affect the hotspot detection
+since the ‘measured’ NTI will always be higher
+than the ‘apparent’ NTI (NTIapp). This is due to the
+fact that the NTI is highly sensitive to the presence
+of hot surfaces (causing a strong increase in LMIR),
+whereas the apparent MIR radiance (LMIR, app) at
+the base of the NTIapp will be less affected according
+to the TIR signal.
+Spatial analysis: dNTI and dETI matrices
+Step 2 consists of the spatial analysis of two of the
+previously described indexes, namely the NTI and
+the ETI. This step is performed one pixel at a
+time, and consists of subtracting from its value
+(NTI or ETI) the average (arithmetic mean) of the
+eight neighbouring pixels.
+Notably, the presence of clouds is not taken into
+account by the algorithm and all eight neighbouring
+pixels are used to compute the spatial average. This
+is a simple spatial ﬁltering that does not take into
+account the type of surface imaged by each pixels
+(e.g. land, sea, clouds), just ‘its variability with
+respect to the surroundings’.
+The ﬁltered matrices thus obtained (hereby
+called dNTI and dETI) enhance local variations of
+the above indexes, and produce positive values for
+pixels with values higher than the surrounding
+ones. An example of dNTI and dETI obtained for
+an image acquired over Mt Etna on 25 July 2012
+at 00:40 UTC (Coordinated Universal Time) is
+shown in Figure 4 (at that time a small lava
+outﬂow was occurring within the Bocca Nuova
+crater: INGV 2012).
+In performing this spatial ﬁlter, some pixels need
+to be ﬁltered out and are considered ‘unsuitable’ for
+further analysis. These unsuitable pixels are:
+† all the pixels at the edge of the resampled
+matrices;
+† all the pixels with dNTI or dETI ,20.1.
+While the ﬁrst condition eliminates the pixels with
+anomalous values associated with the edge resam-
+pling and spatial averaging procedure, the second
+condition eliminates the negative outliers that
+would alter the contextual thresholds presented in
+the next section.
+The rest of the pixels are thus considered
+‘suitable’ and are subjected to the subsequent steps.
+ENHANCED VOLCANIC HOTSPOT DETECTION
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 6 =====
+Fixed NTI threshold
+This step is performed to detect ‘active’ pixels
+by means of a simple test based on a ﬁxed NTI
+threshold:
+NTIPIX . K1
+(Test 1)
+where NTIPIX is the NTI pixel value and K1 is the
+threshold. The K1 values are the same for the two
+analysed ROIs, but are distinct for night-time and
+daytime data (see Table 1). Their values have been
+settled according to the global application and vali-
+dation of the NTI thresholds within the MODVOLC
+algorithm (Wright et al. 2002).
+Pixels that satisfy Test 1 are ﬂagged as ‘active’
+and subsequently discarded (unsuitable) for further
+steps.
+Contextual thresholds for dNTI and dETI
+matrices
+Step 4 consists of two tests (applied to the dNTI and
+dETI matrices, respectively) that must be satisﬁed at
+Fig. 2. (a) Relationship between NTI (equation 1) and NTIapp (equation 3) for a night-time image acquired of Mt
+Etna on 25 July 2012 at 00:40 (UTC). A best-ﬁt quadratic regression is used to calculate NTIbk, the relationship of
+which with NTI is shown in (b). In (c) & (d), the same relationships between NTI, NTIapp and NTIbk are shown for
+a daytime image acquired of Mt Etna on 7 November 2013 at 09:45 (UTC). Note how the hotspot-contaminated
+pixels clearly deviate from the 1:1 ratio illustrated in (b) & (d).
+D. COPPOLA ET AL.
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 7 =====
+the same time for each pixel. Hence, a pixel is
+ﬂagged as ‘active’ when:
+dNTIPIX . C1
+or
+dNTIPIX . mdNTI + C2sdNTI
+(Test 2)
+and
+dETIPIX . C1
+or
+dETIPIX . mdETI + C2sdETI
+(Test 3)
+where the subscript PIX refers to the value of the
+analysed pixel, C1 and C2 are constants, and m and
+s are the arithmetic mean and standard deviation
+of all the suitable pixels within the image.
+In the case of very homogeneous scenes (i.e. in
+the absence of clouds and over homogeneous
+terrain), the parameter C1 implies that a minimum
+threshold (for both dNTI and dETI) needs to be
+exceeded in order to ﬂag a pixel as ‘active’ (see
+Table 1). However, when highly variable scenes
+are analysed, the detection of clear positive outliers
+(hotspots) is achieved using statistical analysis of
+the whole scene (mean (m) and standard deviation
+(s) for all the suitable pixels). Notably, the C1 and
+C2 values are different for two distinct ROIs
+(because of variable size and different chance of
+ﬁnding a thermal anomaly in the two regions), as
+well as for night-time and daytime data (because
+solar effects amplify the variability in NTI and ETI
+matrices in daytime data). The values of the above
+parameters used in the current version of the algor-
+ithm are listed in Table 1.
+In addition, pixels ﬂagged as ‘active’ by means
+of tests 2 and 3 are subsequently eliminated from
+further analysis.
+Second run
+The last step is applied only if one or more pixels
+have been detected by the previous tests, and
+focuses on reﬁning the hotspot detection for the
+pixels adjacent to those already ﬂagged. This is
+Fig. 3. Sequence of thermal indexes (a) NTI, (b) NTIbk and (c) ETI, obtained for the night-time image acquired on
+Mt Etna on 25 July 2012. The ETI clearly enhances the presence of hotspots at the summit of the volcano. The
+same indexes, relative to the daytime image acquired on 7 November 2013, are shown in (d), (e) and (f). The colourscale
+is the same for NTI and NTIbk images, in order to show the consistency of these indexes in the absence of hotspot(s).
+Table 1. Parameters used in the MIROVA algorithm
+Parameter
+Night-time
+Daytime
+ROI1
+ROI2
+ROI1
+ROI2
+K1
+20.8
+20.8
+20.6
+20.6
+C1
+0.003
+0.01
+0.02
+0.02
+C2
+5
+10
+15
+15
+ENHANCED VOLCANIC HOTSPOT DETECTION
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 8 =====
+necessary since ‘active’ pixels may strongly modify
+the average values of their surroundings, with a con-
+sequent decrease in the dNTI and dETI values of
+adjacent pixels (e.g. see the black pixels in Fig. 4).
+To avoid this problem, step 2 (spatial analysis) is
+performed a second time, being particularly care-
+ful to eliminate all of the ‘active’ pixels already
+detected. Hence, the previous step (contextual
+threshold: tests 2 and 3) are applied again to the
+new dNTI and dETI matrices.
+It is important to outline that in all of the steps
+described above we are not interested in discrimi-
+nating cloudy pixels, but only in detecting pixels
+were two indexes are ‘anomalously high’ with
+respect to their surroundings. The basic idea is that
+after performing the spectral ﬁlter (NTI and ETI
+indexes), the detection of a hotspot simply requires
+the ‘spatial’ variability of the above indexes that
+characterize the analysed scene (on a statistical
+basis). Note the latter is independent of the absolute
+values of the indexes themselves, and is calculated
+case by case (tests 2 and 3). A statistical analysis
+is thus performed to identify the clear outliers. It
+has been found that the parameters given in
+Table 1 bring out this natural variability, whatever
+the surface type sampled by each pixel.
+‘Excess’ MIR radiance and
+radiative power
+Once a pixel is ﬂagged as active, the ‘above back-
+ground’ at 4 mm radiance (DL4PIX) is calculated as:
+DL4PIX = L4alert −L4bk
+(6)
+where L4alert is the 4 mm radiance of the alerted
+pixel/s and L4bk is the background radiance at
+4 mm. L4bk is estimated from the arithmetic mean
+of all the pixels surrounding the active one (or
+around the active cluster).
+In performing this calculation some error in L4bk
+might be introduced by the presence of clouds (see
+the section on ‘Limits and uncertainty of the data
+provided by the MIROVA system’). However, a
+visual inspection of the images allows the quality
+of each acquisition to be assessed, and cloud-
+affected data to be discarded (a posteriori).
+Following Wooster et al. (2003), we calculated
+the radiative power (RP in W) by means of the
+MIR method. Hence, for an individual alerted
+pixel, the RPPIX is calculated as:
+RPPIX = 18.9 × APIX × DL4PIX
+(7)
+Fig. 4. Flow chart of the spectral (a) and spatial (b) principles applied to the night-time image acquired of Mt Etna
+on 25 July 2012, during small lava outﬂow within the Bocca Nuova crater. Once the NTI and ETI indexes are calculated,
+the spatial analysis is used to identify pixels having values higher than the surroundings. Black pixels on the dNTI
+and dETI images correspond to pixels ﬂagged as ‘active’ during the ﬁrst run of the algorithm. The total active pixels
+(ﬁrst and second runs) are shown in the alert mask. See the text for further details.
+D. COPPOLA ET AL.
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 9 =====
+where APIX is the pixel size (1 km2 for the resampled
+MODIS pixels).
+When two or more pixels (a cluster of pix-
+els) are alerted, the total radiative power is calcu-
+lated as being the sum of the single RPPIX, so
+that:
+RP =
+
+n alert
+1
+RPPIX
+(8)
+where ‘n alert’ is the number of alerted pixels.
+Performance and exportability
+The effectiveness of the detection (omission v. false
+alerts) is essentially controlled by the values of
+parameters K1, C1 and C2. In particular, parameter
+C2 deﬁnes the number of standard deviations (s)
+used to identify the outliers in each ROI. For exam-
+ple, the visual inspection of night-time images col-
+lected on Etna during 2006 reveals that a value of
+C2 ≥10 will efﬁciently avoid false detections but
+will cause the omission of more than 25% of the
+small alerts (,10 MW). Conversely, a very low
+value of C2 (i.e. C2 ≤3) will only lose 7% of
+the small alerts, at the expense of more than 7%
+false detections.
+Based on several runs on the Stromboli and Mt
+Etna data sets (more than 20 000 images), we estab-
+lished that the values shown in Table 1 produce
+excellent results in terms of algorithm perfor-
+mance and provide the best compromise between
+omitted (c. 10%) and false (c. 5%) detections. These
+results are in excellent agreement with those
+obtained using an adapted threshold procedure
+(Coppola et al. 2014), and support the efﬁciency
+of the MIROVA system in tracking small thermal
+anomalies.
+However, we must highlight that the values pre-
+sented in Table 1 simply describe the natural varia-
+bility of dNTI and dETI, and provide self-adapting
+thresholds for each analysed scene ‘independent’ of
+the local conditions (climate, temperature and topo-
+graphy). In addition to Stromboli and Mt Etna,
+our preliminary tests in other volcanic contexts (see
+Appendix A) clearly suggest that the MIROVA
+algorithm can easily be applied over a wide range
+of environmental conditions without the need to
+process historical archives. We recognize that a
+global validation of the algorithm would require a
+complete examination of all environmental, topo-
+graphical and climatic conditions. However, sam-
+pling suggests that the parameters listed in Table 1
+may also be applied to other volcanoes to track vol-
+canic hotspots (by using the same spatial grid and
+ROIs).
+Results: radiative power emitted by
+Stromboli and Mt Etna during the
+2000–13 period
+The radiative power (RP) recorded at Stromboli
+and Mt Etna during the 2000–13 time span is
+shown in Figure 5. In order to display the high
+number of detections, ranging from 1 MW to more
+than 10 GW, we plotted both of the time series on
+a logarithmic scale.
+At Stromboli volcano, the MIROVA system
+detected 2063 alerts over a total of 20 494 MODIS
+overpasses between 2000 and 2013 (c. 10.1%).
+The RP ranged from 1 MW to a maximum of
+around 3.83 GW detected on 28 December 2002 at
+21:15 (UTC) during the initial phase of the 2002–
+03 effusive eruption (Calvari et al. 2005).
+At Mt Etna, the MIROVA system detected 5197
+alerts over a total of 20 090 MODIS overpasses ana-
+lysed between 2000 and 2013 (c. 25.9%). The RP
+ranged from 1 MW to approximately 24.3 GW,
+with an arithmetic mean of 379.7 MW. The maxi-
+mum RP (c. 24.3 GW) was detected on 4 March
+2012 at 09:10 (UTC), corresponding to a powerful
+fountaining episode of Mt Etna that started at 07:00
+(UTC) on the same day (Behncke et al. 2014).
+An exhaustive description of the whole time
+series presented in Figure 5 lies outside the goal
+of this work. Instead, we focus here on speciﬁc
+results obtained from the above data sets, concern-
+ing detection, monitoring and modelling of effusive
+activity at the Stromboli and Mt Etna volcanoes.
+These basic ﬁndings refer to: (i) the detection of
+magma ascent before effusive eruptions; (ii) the
+tracking of the initial advance of kilometre-long lava
+ﬂows; (iii) the recognition of an effusive trend
+during ongoing eruption; (iv) the detection of lava-
+ﬂow cooling processes; and, lastly, (v) the estima-
+tion of time-averaged lava discharge rates (TADRs)
+and cumulative volumes.
+Detection of magma ascent before effusive
+eruptions
+At open-conduit volcanoes, the rise of magma may
+produce variations in the thermal output detectable
+from space. For example, it has been shown that
+the radiative power measured at Stromboli vol-
+cano is strongly linked to the height of the magmatic
+column feeding the activity at the surface (Coppola
+et al. 2013). In particular, it has been inferred that
+an empirical threshold of 30–50 MW (2002–03
+and 2007) marks the transition between Strombo-
+lian and effusive activity, a condition that was
+reached during the two major effusive eruptions
+(2002–03 and 2007), and during several episodes
+of summit overﬂows observed between 2008 and
+ENHANCED VOLCANIC HOTSPOT DETECTION
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 10 =====
+2013 (cf. Coppola et al. 2012, 2014). In some cases,
+changes in the eruption style were preceded by
+a gradual increase in thermal output, and also in
+other geophysical (seismicity, deformation and
+infrasound: e.g. Ripepe et al. 2009) and geochem-
+ical parameters (Aiuppa et al. 2009; Inguaggiato
+et al. 2011; Cigolini et al. 2013). This increase
+was interpreted as being due to the gradual ascent
+of the magma column feeding the summit vents
+(Coppola et al. 2012). For instance, several changes
+were observed a few months before the onset of the
+2007 eruption (Fig. 6a). In fact, the RP increased
+from less than 5 MW (October–December 2006)
+to more than 10 MW at the beginning of February
+2007, and reached more than 50 MW on 20 Febru-
+ary 2007, just 7 days before the onset of the major
+eruption (Fig. 6a). In a similar manner, during Feb-
+ruary–April 2009, the increase in RP tracked the
+uprising of Stromboli’s magma column that culmi-
+nated with several episodes of intracrater overﬂows
+during late April and May 2009 (Global Volcanism
+Program 2010) (Fig. 6b).
+Although not all of the effusive eruptions are
+necessarily preceded by this kind of activity, the
+occurrence of the cited processes show how the
+thermal data recorded by MIROVA may be used
+for assessing magma column ascent (especially at
+open-vent volcanoes) and provide ‘early warnings’
+for the onset of effusive activity and/or major
+changes in the eruption style.
+Tracking the initial advance of
+long lava ﬂows
+Takagi & Huppert (2010) suggested that monitoring
+the length and volume of an active ﬂow is essential
+for estimating its evolving viscosity and for predict-
+ing the further advance of the ﬂow front. However, a
+systematic record of these data during the initial
+Fig. 5. Long-term RP time series (log-scale) for (a) Stromboli and (b) Etna retrieved using the MIROVA algorithm.
+Grey ﬁelds outline the periods of persistent effusive activity. Note the long decreasing RP tail (due to lava-ﬂow cooling)
+after the end of the effusive periods at Mt Etna.
+D. COPPOLA ET AL.
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 11 =====
+stage of effusive eruptions is not always possible
+and is often problematic, especially when the lava
+emplacement takes place within poorly accessible
+areas. In this regard, the data set processed automati-
+cally by MIROVA does make this possible, allow-
+ing the initial advancement of long lava ﬂows (i.e.
+during the ﬁrst days of emplacement) to be
+tracked by using the MODIS-derived NTI maps.
+As an example, we show the results obtained for
+two lava ﬂows that formed at Mt Etna on 2001
+and 2002 in Figure 7. The ﬁrst lava ﬂow was
+emplaced on the south ﬂank during the 2001 erup-
+tion and is the longer ﬂow unit described by Coltelli
+et al. (2007) (LFS1 unit: Fig. 7a). The second ﬂow
+was active during the ﬁrst days of the 2002 eruption
+and represents the main lava ﬂow that emplaced
+onto the northern ﬂank of Mt Etna during late
+October 2002 (Castruccio et al. 2014) (Fig. 7b).
+Both of these lava ﬂows advanced rapidly during
+the ﬁrst days of activity, and extended downhill
+for 6–7 km from the feeding vents (cf. Coltelli
+et al. 2007; Castruccio et al. 2014).
+The ﬂow-front position has been determined
+using NTI maps, available in .kmz format (see the
+next section), which allows the hotspot pixels to
+be projected onto Google Earth (GE) images, as
+shown in Figure 7a, c. Then, by using the GE ruler
+tool, we measured the approximate distance (+1 km)
+between the main vent (whose location must be
+known a priori) and the centre of the furthermost
+alerted pixel. This procedure, applied to a series of
+selected NTI maps, allowed us to reconstruct the
+MODIS-derived lava-ﬂow’s lengthening, which is
+compared with ﬁeld observations in Figure 7b,
+d. The excellent agreement with ﬁeld data suggests
+that the initial advance of these relatively long lava
+ﬂows has been efﬁciently tracked using MODIS
+data processed by MIROVA. We must note that
+the application of our method is constrained by the
+extension of the lava ﬂows (that must be longer
+than 1–2 km), as well as by the satellite-bearing
+viewing
+geometry
+(the
+images
+acquired
+with
+higher zenith angles should be excluded) and by
+the availability of cloud-free data (a least over the
+ﬂow front). However, our results suggest that, in
+the absence of direct ﬁeld observations, the MODIS-
+derived NTI maps can provide crucial information
+about ﬂow-front position and advancement velocity.
+The availability of this kind of data in near-real time
+may help to assess the risks posed by a further
+advancement of the lava ﬂow and, together with
+effusion rate estimates, may be crucial for improv-
+ing numerical models that predict lava-ﬂow paths.
+Effusive trend during ongoing eruptions
+Identifying the trend of an ongoing eruption is very
+important in terms of volcano surveillance and risk
+assessment. Although the effusive dynamic may
+change suddenly (within a few minutes), the detec-
+tion of the effusive trend gives indications about the
+general tendency of an ongoing effusion (i.e.
+waning, rising, steady or pulsatory) and may help
+evaluate eruptive scenarios and forecast future
+changes in the eruptive activity. In addition,
+mid-term (i.e. daily or weekly) and/or long-term
+(monthly–yearly)
+effusive
+trends
+have
+been
+proved to be essential in understanding the eruptive
+dynamics and associated processes (Wadge 1981;
+Harris et al. 2000).
+As detailed in the next section, the RP time series
+may be regarded as a thermal proxy for effusive
+Fig. 6. Example of selected RP time series retrieved using the MIROVA algorithm at Stromboli volcano. Both time
+series show a month-long increase in RP (outlined by the dashed line) that culminated in the effusive ﬂank eruptions of
+February 2007 (a), and a period of recurrent summit overﬂows in April–May 2009 (b). Note how the empirical
+threshold of 30–50 MW (regarded as the transitional regime: Coppola et al. 2012, 2014) marks the transition from
+Strombolian (white ﬁeld) to effusive activity (grey ﬁeld).
+ENHANCED VOLCANIC HOTSPOT DETECTION
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 12 =====
+D. COPPOLA ET AL.
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 13 =====
+activity. An overview of some particular trends
+recorded at Mt Etna and Stromboli is given in
+Figure 8, where we plot the RP time series relative
+to the 2002–03 (Fig. 8a), the 2006 (Fig. 8b) and
+the 2008–09 (Fig. 8c) eruptions of Mt Etna, together
+with the 2002–03 eruption of Stromboli (Fig. 8d).
+Harris et al. (2011) identiﬁed distinct effusive
+trends at Mt Etna, each one reﬂecting speciﬁc erup-
+tive dynamics (or processes). Accordingly, waning
+trends observed during the 2002–03 eruption (Fig.
+8a) are probably associated with the draining of a
+pressurized magmatic system. Conversely, increas-
+ing effusive activity, such as that observed during
+the 2006 eruption (Fig. 8b), was interpreted as the
+result of ‘the ascent of a magma batch which
+pushes a volume of degassed magma ahead of it’
+(Harris et al. 2011, p. 5). However, the second half
+of the 2008–09 eruption of Mt Etna (i.e. from
+October 2008 to April 2009: Fig. 8c) showed a
+remarkably steady trend typical of stable effusion
+of lava at the same rate at which the magma is sup-
+plied (Harris & Neri 2002).
+The trend observed during the 2002–03 erup-
+tion of Stromboli seems to be more complex, being
+characterized by a pulsatory behaviour with four
+consecutive phases, lasting 1–2 months each (Fig.
+8d). According to Coppola et al. (2012), this trend
+could reﬂect cyclic pressurization of the magma
+column or local variations in magma compressibil-
+ity within the conduit (e.g. Cigolini et al. 2015).
+Fig. 7. (a) Details of the NTI map, acquired on 22 July 2001, plotted onto Google Earth images. The contour on the
+northern lava ﬂow is marked by the white line. The red line represents the proﬁle from which the ﬂow-front position is
+calculated (white arrow). (b) Lava-ﬂow lengths (distance from the vent) obtained from a sequence of MODIS images
+(red squares) compared with ﬁeld observations (black circles: from Coltelli et al. 2007). (c) NTI image acquired on 29
+October 2002 and (d) MODIS-derived ﬂow lengths (red squares) compared with ﬁeld data (black circles; from
+Castruccio et al. 2014, modiﬁed). The mean error bar for MODIS-derived measurements is 1 km.
+Fig. 8. Four examples of effusive trends that characterized the recent activity of Etna and Stromboli. (a) Waxing–
+waning trend reﬂecting the tapping of a pressurized volume during the 2002–03 eruption of Mt Etna. (b) Increasing
+trend associated with the ascent of a magma batch during the 2006 eruption of Mt Etna. (c) Stable trend at Mt Etna
+(between October 2008 and April 2009) probably associated with steady effusion of lava. (d) Oscillating trend observed
+during the 2002–03 eruption of Stromboli, possibly associated with cyclic pressurization of the magma column. See the
+text for details.
+ENHANCED VOLCANIC HOTSPOT DETECTION
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 14 =====
+As argued by Harris et al. (2011), the availability
+of a long-term data set of satellite-derived time
+series may be used to build up a resource record of
+effusive trends. Besides being useful for decoding
+the eruptive processes at the onset and during the
+evolution of volcanic activity, we suggest that a
+well-organized and parameterized database of the
+effusive trends provides a major contribution for
+improving the understanding of eruption dynamics
+and related processes.
+Lava-ﬂow cooling
+The cooling of lava ﬂows may produce middle infra-
+red radiation (MIR), which is still detectable by sat-
+ellites (Aries et al. 2001; Patrick et al. 2003;
+Coppola & Cigolini 2013). In the examples shown
+in Figure 9, the RP values recorded at Mt Etna
+after the end of the 2002–03 and 2004–05 eruptions
+show a slow but clear decrease of the thermal output
+associated with the cooling of the associated lava
+ﬂows. These declining trends were recorded for
+several months after the end of the effusions (28
+January 2003 and 8 March 2005, respectively:
+Andronico et al. 2005; Neri & Acocella 2006),
+which, in our dataset, is marked by a sudden
+‘crash’ in the radiative power (Fig. 9).
+Notably, these two eruptions were different in
+character (Allard et al. 2006) and produced lava-
+ﬂow ﬁelds with volumes of 33–50 and 40–
+64 Mm3 for the 2002–03 and the 2004–05 erup-
+tions, respectively (Andronico et al. 2005; Neri &
+Acocella 2006; Harris et al. 2011). The two effusive
+events produced ﬂow ﬁelds remarkably different in
+terms of location and morphometry. In fact, the
+2002–03 eruption produced distinct lava-ﬂow
+units on the north and south ﬂanks, covering a
+total area of about 5 km2 (Andronico et al. 2005),
+while the 2004–05 eruption emplaced a massive,
+compound lava ﬁeld within the Valle del Bove,
+which covered an area of only 2.3 km2 (Neri & Aco-
+cella 2006). Hence, the two events produced lava-
+ﬂow ﬁelds with very different areas (cf. ﬁg. 1 in
+Allard et al. 2006) and thicknesses.
+Previous studies have shown that the duration
+of the cooling curve and its integrated thermal
+energy can be correlated with the volume or thick-
+ness of the observed lava ﬂows (Gouhier et al.
+2012; Ganci et al. 2012a; Coppola et al. 2013). For
+example, Gouhier et al. (2012) proposed a method
+to estimate lava-ﬂow volume based on the cooling
+curves recorded by the SEVIRI sensor after a parox-
+ysmal event at Mt Etna. Likewise, Coppola & Cigo-
+lini (2013) showed that the duration of the cooling
+regime, observed via MODIS IR data at Nyamura-
+gira volcano, was correlated with the volumes and
+thicknesses of the associated lava ﬂows.
+Hence, the curves shown in Figure 9 probably
+record the cooling process of these two different
+ﬂow ﬁelds, with the longer and more energetic
+cooling curve associated with the thicker lava
+body emplaced within the Valle del Bove during
+the 2004–05 eruption.
+Future investigations will be better able to char-
+acterize the cooling curves provided by MIROVA
+in terms of lava ﬁeld volume and thickness, thus
+offering an additional tool to reﬁne these parameters
+from remote-sensing data.
+Time-averaged lava discharge rate (TADR)
+and cumulative volumes
+During
+effusive
+eruptions,
+thermal
+remote-
+sensing data can be converted into estimates of
+Fig. 9. Selected frames of the RP time series retrieved using the MIROVA algorithm during the cooling phase of (a) the
+2002–03 lava ﬂows, and (b) the 2004–05 lava ﬂows. The differences in the cooling curves are probably due to the
+different thicknesses of the associated ﬂow ﬁelds. Isolated spikes are due to the detection of ﬁres around Mt Etna during
+the hot season (July–September).
+D. COPPOLA ET AL.
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 15 =====
+time-averaged lava discharge rates (TADR). Since
+the original heat budget approach of Pieri & Baloga
+(1986), alternative and more detailed methods have
+been developed and debated in recent years (e.g.
+Harris et al. 1998; Wright et al. 2001; Harris &
+Baloga 2009), all converging towards a general cor-
+relation between radiative heat power and volu-
+metric ﬂux(es) (Garel et al. 2012, 2014).
+Here we use the radiant density approach
+(Coppola et al. 2012), where TADR (m3 s1) can be
+directly related to the RP (W) estimated from the
+MIR method, through a unique best-ﬁt coefﬁcient
+deﬁned as ‘radiant density’ (crad):
+TADR = RP
+crad
+(9)
+where, for a given discharge rate, the radiant density
+crad (J m23) expresses the efﬁciency of the lava
+body to modulate the heat radiated from the active
+surface (see Coppola et al. 2012).
+The recent eruptions of Mt Etna were character-
+ized by insulation, rheological and topographical
+conditions, which, according to Coppola et al.
+(2012), produced a limited range of radiant den-
+sities, spanning from 2 × 108 to 3.6 × 108 J m23.
+Hence, by using this range of crad, equation (9) can
+be directly applied to the RP recorded by MIROVA
+in order to obtain a maximum and minimum esti-
+mate of TADR for each image analysed.
+In Figure 10a, we plotted the TADR obtained for
+the 2008–09 eruption (minimum and maximum
+values). Note that we plotted all of the data obtained
+by the RP time series (Fig. 5), thus including cloudy
+data that clearly produce an underestimated TADR.
+Therefore, the time series showed in Figure 10a
+must be interpreted in terms of a general trend
+since individual data points may be affected by the
+presence of clouds. This issue is of primary impor-
+tance during near-real-time data delivery, and a
+human-based or computer-based procedure should
+be carried out in order to assess the quality of each
+image (Zaksˇek et al. 2013). In addition, as this
+also affects the calculation of erupted volumes, bad-
+quality data must be excluded from the integration
+of the TADR time series. To simplify this prob-
+lem, we consider here the highest TADR recorded
+during a 24 h time window as being the most repre-
+sentative value for the daily eruption rate. Hence,
+the cumulative volume of erupted lava is calcu-
+lated by integrating the daily TADR, as shown in
+Figure 10b. In the case of the 2008–09 eruption,
+this calculation yields a total erupted volume of
+64 + 18 Mm3, which is in excellent agreement
+with independent measurements of 70 + 20 Mm3
+(Harris et al. 2011; Corsaro & Miraglia 2014).
+Similarly, the total calculated volume of erupted
+lava between 2000 and 2014 amounted to 344 +
+98 Mm3, giving a mean output rate (MOR) of
+0.80 + 0.17 m3 s21 (Fig. 10b). The excellent agree-
+ment of our output rate with that estimated by
+Harris et al. (2011) for between 1980 and 2010
+(0.8 m3 s21) highlights the efﬁciency of the radi-
+ant density approach in estimating TADR and
+erupted volumes at effusive volcanoes.
+Near-real-time implementation
+(MIROVA-NRT)
+Near-real-time processing is achieved by using
+MODIS-NRT products distributed by the LANCE-
+Fig. 10. (a) TADR time series relative to the 2008–09 eruption of Mt Etna. Grey and black stems refer to the minimum
+and maximum estimates. (b) Cumulative volume (median, maximum and minimum estimates) of lava erupted at
+Mt Etna between 2000 and 2013. The mean output rate for the median estimate is 0.80 m3s21, in agreement with the
+30 year-long value estimated for 1980–2010 (Harris et al. 2011).
+ENHANCED VOLCANIC HOTSPOT DETECTION
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 16 =====
+MODIS
+system
+(http://lance-modis.eosdis.nasa.
+gov/) that delivers Level 1 granules within 3 h of
+real time. These data are stored in a rolling archive
+for 7 days and are available for distribution by direct
+access to the ﬁle transfer protocol (FTP) sites.
+The MIROVA-NRT system scans the LANCE ftp
+site every 5 min looking for the new granules that
+contain the target volcano. Once a new granule is
+found, it is downloaded and stored onto a local
+hard drive. Depending on the connection speed, this
+step requires 1–15 min. The new image is automati-
+cally processed by the algorithm, following the pro-
+cedure described in the section on ‘The MIROVA
+system’, which requires a few additional minutes
+for graphical outputs to be generated and posted
+onto the MIROVA website (www.mirova.unito.it).
+Overall, the MIROVA-NRT system enables the pro-
+duction of updated NTI maps (including .kmz
+format for Google Earth use) and RP time series
+within 1–4 h of a satellite overpass. An example
+of the graphical output automatically posted on the
+cited website is shown here as Figure 11
+As described in the sections on ‘The MIROVA
+system’ and ‘Performances and exportability’, the
+MIROVA algorithm is completely autonomous
+and does not require historical (temporal) analysis
+in order to retrieve the appropriate thresholds.
+Hence, the whole processing scheme is easily expor-
+table to several target volcanoes that cover a wide
+range of local and climatic conditions (see Appen-
+dix A).
+The system is currently running in near-real time
+for several volcanoes (Campi Flegrei, Vesuvius,
+Stromboli, Vulcano and Mt Etna) and it is scheduled
+to be extended to several other targets in the near
+future.
+Limits and uncertainty of the data provided
+by the MIROVA system
+A number of issues must be taken into account when
+using the data automatically provided by MIROVA.
+These concern the limits and uncertainty of the data
+as summarized below:
+False alerts
+A limited number of false alerts may be detected by
+the algorithm. These principally occur on daytime
+Fig. 11. A selected example of RP time series for Mt Etna automatically posted at the MIROVA website (www.mirova.
+unito.it). On (a) the last NTI map is displayed with relative RP, satellite zenith and azimuth data displayed. RP time
+series (log scale) relative to the last month (b) and last year (c). The colour of the thermal anomaly box (upper right) is
+automatically set according to the radiative power scale (Low ,1 MW; Moderate 1–10 MW; High 10–100 MW; Very
+High 100–1000 MW; Extreme 1000–10 000 MW).
+D. COPPOLA ET AL.
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 17 =====
+images and are associated with high NTI contrasts at
+the edge of water bodies, as well as within scattered
+clouds. However, these false detections typically
+radiate less than 5 MW and can be easily identiﬁed
+by a visual inspection of the associated NTI map. As
+discussed previously, reducing the false detection
+rate will cause numerous genuine alerts of low
+intensity (,10 MW) to be missed.
+Fires and anthropogenic heat sources
+Fires and/or high-temperature anthropogenic heat
+sources may trigger the automatic detection of hot-
+spots. These non-volcanic thermal anomalies have
+similar thermal signatures to volcanic hotspots and
+cannot be distinguished from genuine volcanic
+activity. Although they typically occur in vegetated
+or urban areas located at some kilometres from the
+volcano summit, the occurrence of distal volcanic
+activity (i.e. eccentric vents) cannot be ruled out a
+priori. Thus, the time series automatically provided
+by MIROVA might include these non-volcanic
+thermal anomalies. However, they can be identiﬁed
+during post-analysis (Fig. 9).
+Metereological and volcanic clouds
+As discussed previously, meteorological and volca-
+nic clouds may prevent the detection of hotspots or
+affect the associated thermal anomaly. Clouds may
+also affect the L4bk estimation, especially when
+they completely surround the active pixel(s).
+However, there is, as yet, no robust method to evalu-
+ate the amount of thermal radiation attenuated by
+clouds, or volcanic plumes, so that visual inspection
+of the image still remains the best solution to assess
+the quality of each image. Hence, the RP time series
+obtained by MIROVA are provided ‘as they are’ and
+may be affected by the presence of meteorological
+and/or volcanic clouds.
+Satellite viewing geometry
+The satellite viewing geometry (i.e. high satellite
+zenith) must also be taken into account when inter-
+preting the MIROVA data. Images acquired with a
+high zenith angle (c. 69% of the data have a satellite
+zenith .308) may not detect hotspots located in
+deep craters or positioned at the base of steep
+crater rims. In addition, high scan angles produce
+a strong deformation of the projected thermal
+anomalies. This is accompanied by a decrease in
+the accuracy of the pixel(s) geolocation and thus
+of related hotspot(s). In these cases, spatial measure-
+ments of the thermal anomaly (such as those illus-
+trated in Fig. 7) may have large errors (up to
+several kilometres) and are not recommended.
+Radiative power uncertainty
+The radiative power calculated by MIROVA is
+obtained using the MIR method (Wooster et al.
+2003). The authors state that when the hot emitter
+has an integrated temperature higher than 600K
+(which applies to most active lava surfaces: cf.
+Wright et al. 2010) this method provides RP esti-
+mates with an uncertainty of +30%. However, in
+the case of cooler lava bodies (i.e. cryptodomes),
+the RP calculated using the MIR method provides
+only a minimum value for the whole thermal
+output, and is more likely to represent the heat
+radiated by the most active portion of the lava body.
+The time-averaged lava discharge rates issue
+Although the TADRs obtained using the radiant
+density approach has been proved to be efﬁcient in
+tracking the effusive trend and cumulated volumes
+during long-lived eruptions (see the section on
+‘Time-averaged lava discharge rate (TADR) and
+cumulative volumes’), some caution must be used
+for its general application. The linear relationship
+between RP and TADR (which is the fundamen-
+tal assumption of the radiant density approach)
+becomes valid after a certain ‘transient time’ dur-
+ing which the surface thermal structure becomes
+steady (Garel et al. 2012). This makes the TADR
+estimated using the radiant density approach less
+reliable during sharp variations of the effusion
+rate, such as short-lived fountaining events. In addi-
+tion, in order to set a plausible range of radiant den-
+sities, some constraints about the active lava body
+(i.e. lava composition) creating the heat ﬂux
+measured by MIROVA must be known a priori
+(Coppola et al. 2013). All these issues make the
+estimation of the TADR a complex evaluation,
+especially on poorly studied volcanoes.
+Conclusions
+We have here presented a new hotspot detection
+system (MIROVA) based on the analysis of
+MODIS IR data. The algorithm is characterized by
+spectral and spatial principles that do not require
+the analysis of a historical data set, thus making
+the system extremely ﬂexible and easily exportable
+to a large number of target volcanoes.
+The long-term data set recorded at Stromboli and
+Mt Etna volcanoes has been used to show what kind
+of information the MIROVA system may provide in
+order to track effusive activity. The principal out-
+comes are:
+† The detection of small thermal anomalies
+(,10 MW) may allow the tracking of small
+ENHANCED VOLCANIC HOTSPOT DETECTION
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 18 =====
+variations in thermal output related to magma
+ascent prior to the onset of effusive activity.
+† The initial advance of major lava ﬂows (.2–
+3 km) can be tracked by using near-real-time
+NTI maps.
+† When properly calibrated, the radiant density
+approach allows the thermal output to be con-
+verted into lava discharge rates and erupted
+volumes, with a reasonable degree of uncertainty
+(+30%).
+† Middle- and long-term time series enable the
+interpretation of ongoing effusive trends (e.g.
+waning; waxing, steady and pulsatory).
+† The detection of the cooling curve after major
+effusive eruptions provides an opportunity to
+reﬁne volumes and thicknesses of the related
+ﬂow ﬁelds.
+Lastly, we described how the whole hotspot detec-
+tion
+system
+has
+been
+implemented
+within
+a
+near-real-time processing scheme. Near-real-time
+observation is currently operational for ﬁve Italian
+volcanoes (listed in the previous section), thus pro-
+viding updated NTI maps and the RP time series
+within 1–4 h of the image acquisition (www.
+mirova.unito.it). In addition to the above-mentioned
+volcanoes, the system is currently being tested for
+several others volcanoes (unpublished data), the
+near-real-time observation of which is scheduled
+to become operational in the next few months.
+Thus, although it has not been designed for global
+monitoring, the MIROVA system has the potential
+to monitor, in near-real time, any sector of the
+globe within only a few hours. This provides a
+useful option for monitoring volcanic activity in
+any remote region not covered by conventional or
+ad hoc thermal monitoring systems.
+We thank the Editor and two anonymous reviewers for
+their constructive comments that strongly improved this
+work. This research has beneﬁted from funding provided
+by the Italian Presidenza del Consiglio dei Ministri, Dipar-
+timento della Protezione Civile (DPC) as part of the
+DEVnet Programme that includes a collaborative project
+between the Earth Sciences departments of the University
+of Florence and the University of Torino. This research
+was partially supported by the Italian Ministry for Uni-
+versities and Research (MIUR). We thank the CRT
+Foundation for supporting the improvement of our comput-
+ing system at the Department of Earth Science of Turin.
+We acknowledge the LANCE-MODIS system (http://
+lance-modis.eosdis.nasa.gov/) for providing Level 1B
+MODIS data in near-real time. The digital elevation mod-
+els (DEMs) used for the contour lines are courtesy of
+CGIAR (srtm.csi.cgiar.org). Scientiﬁc papers funded by
+DPC do not represent its ofﬁcial opinion and policies.
+Appendix A
+Here we provide a series of ﬁgures (Figs A1–A9) showing
+the application of the MIROVA algorithm in various vol-
+canic contexts and under different climatic conditions.
+Fig. A1. Thermal indexes and alert mask retrieved for a ‘cloud-free’ image acquired over Bezymianny volcano
+(Kamchatcka) on 8 January 2012. TIR temperatures in this scene range from 231 to 249K. However, the high contrast of
+the ‘active’ pixels at the summit of the volcano with the surroundings makes the spatial ﬁltering (dNTI and dETI)
+extremely efﬁcient in the detection of the hotspot(s).
+D. COPPOLA ET AL.
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 19 =====
+Fig. A2. Thermal indexes and alert mask retrieved for a ‘cloud-free’ image acquired over Eyjafjallajo¨kull volcano
+(Iceland: 1666 m above sea level (asl)) on 7 April 2010. TIR temperatures in this scene range from 256 to 278K. The
+coast line on the south produces a moderate increase in dNTI and dETI: However, ‘active’ pixels due to volcanic activity
+are the only outliers that trigger the detection of the hotspot(s).
+Fig. A3. Thermal indexes and alert mask retrieved for a ‘cloud-free’ image acquired at Erta-Ale volcano (Ethiopia:
+613 m above sea level (asl)) on 16 August 2009. Maximum TIR temperature reached 305K but the thermal indexes
+clearly isolated the lava-lake-induced thermal anomaly.
+ENHANCED VOLCANIC HOTSPOT DETECTION
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 20 =====
+Fig. A4. Thermal indexes and alert mask retrieved for a ‘cloud-free’ image acquired at Dubbi volcano (Eritrea: 1625 m
+above sea level (asl)) on 3 July 2013. Maximum TIR temperature reached 302K. Despite the contrasting background and
+thermal indexes, there are no outliers that pass the algorithm test. No thermal anomalies are detected.
+Fig. A5. Thermal indexes and alert mask retrieved for a ‘cloud-free’ image acquired for Ubinas volcano (Peru) on 3
+April 2008. The clear thermal gradient between the summit of the volcano (5672 m above sea level (asl)) and the bottom
+of the Tambo River Valley (on the right of each image: 2500 m above sea level (asl)) is strongly reduced by performing
+the spatial ﬁlters (dNTI and dETI). The very small thermal anomaly (NTI ,20.91) at the summit of Ubinas appears well
+contrasted with respect to the surroundings showing the highest thermal indexes.
+D. COPPOLA ET AL.
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 21 =====
+Fig. A6. Thermal indexes and alert mask retrieved for a ‘cloud-free’ image acquired Villarrica volcano (Chile) on 24
+June 2009. The clear thermal contrast between the ice-covered summit of the volcano (2847 m above sea level (asl)) and
+the Villarrica lake (on the top left of each image; 215 m asl) is clearly visible on the NTI and NTIbk. However, a very
+small thermal anomaly (NTI ,20.93) at the summit of Villarrica is easily detected after performing the spatial ﬁltering
+(dNTI and dETI). Note how the warm lake surface almost disappears in the ETI map
+Fig. A7. Thermal indexes and alert mask retrieved for a ‘cloudy’ image acquired over Tolbachik volcano (Kamchatcka:
+3611 m above sea level (asl)) on 20 November 2012. In this image, cloudy conditions prevent a clear view of Tolbachik
+volcano and its surroundings. Although the NTI and the ETI are not uniform within the acquired scene, their spatial
+variability (dNTI and dETI) is not sufﬁcient to trigger an alert.
+ENHANCED VOLCANIC HOTSPOT DETECTION
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 22 =====
+Fig. A8. Thermal indexes and alert mask retrieved for a ‘partially cloudy’ image acquired on Etna volcano (Italy:
+3330 m above sea level (asl)) on 8 February 2010. Note how the cold clouds approaching the summit of the volcano did
+not prevent the detection of a very small thermal anomaly (NTI ,20.9).
+Fig. A9. Thermal indexes and alert mask retrieved for a ‘partially cloudy’ image acquired over Stromboli volcano
+(Italy: 924 m above sea level (asl)) on 19 January 2010. The presence of scattered clouds produces a heterogeneous
+scene that increase the spatial variability of the thermal indexes (dNTI and dETI). However, there are no clear outliers in
+the dNTI and dETI indexes so that no hotspot is detected in this scene.
+D. COPPOLA ET AL.
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 23 =====
+References
+Aiuppa, A., Federico, C. et al. 2009. The 2007 eruption
+of Stromboli volcano: insights from real-time measure-
+ment of the volcanic gas plume CO2/SO2 ratio.
+Journal of Volcanology and Geothermal Research,
+182, 221–230.
+Allard, P., Behncke, B., D’Amico, S., Neri, M. &
+Gambino, S. 2006. Mount Etna 1993–2005: anatomy
+of an evolving eruptive cycle. Earth Science Reviews,
+78, 85–114.
+Andronico, D., Branca, S.
+et al. 2005. A multi-
+disciplinary study of the 2002–03 Etna eruption:
+insights into a complex plumbing system. Bulletin of
+Volcanology, 67, 314–330.
+Aries, S. A., Harris, A. J. L. & Rothery, D. A. 2001.
+Remote infrared detection of the cessation of vol-
+canic eruptions. Geophysical Research Letters, 28,
+1803–1807.
+Baxter, P. J. 2011. Volcanoes and human health. In:
+Reference Module in Earth Systems and Environ-
+mental Sciences, from Encyclopedia of Environmental
+Health. Elsevier, Amsterdam, 672–680, http://doi.
+org/10.1016/B978-0-444-52272-6.00666-8
+Behncke, B., Branca, S., Corsaro, R. A., De Beni, E.,
+Miraglia, L. & Proietti, C. 2014. The 2011–2012
+summit activity of Mount Etna: birth, growth and pro-
+ducts of the new SE crater. Journal of Volcanology and
+Geothermal Research, 270, 10–21.
+Calvari, S., Spampinato, L. et al. 2005. Chronology
+and complex volcanic processes during the 2002–
+2003 ﬂank eruption at Stromboli volcano (Italy) recon-
+structed from direct observations and surveys with
+a handheld thermal camera. Journal of Geophysi-
+cal Research, 110, B02201, http://doi.org/10.1029/
+2004JB003129
+Castruccio, A., Rust, A. C. & Sparks, R. S. J. 2014.
+Assessing lava ﬂow evolution from post-eruption
+ﬁeld data using Herschel-Bulkley rheology. Journal of
+Volcanology and Geothermal Research, 275, 71–84,
+http://doi.org/10.1016/j.jvolgeores.2014.02.004
+Cigolini, C., Laiolo, M., Ulivieri, G., Coppola, D. &
+Ripepe, M. 2013. Radon mapping, automatic measure-
+ments and extremely high 222Rn emissions during the
+2002–2007 eruptive scenarios at Stromboli volcano.
+Journal of Volcanology and Geothermal Research,
+264, 49–65.
+Cigolini, C., Laiolo, M. & Coppola, D. 2015. Revisiting
+the last major eruptions of Stromboli volcano: infer-
+ences on the role of volatiles during magma storage
+and decompression. In: Zellmer, G., Edmonds, M.
+& Straub, S. M. (eds) The Role of Volaties in the
+Genesis, Evolution and Eruption of Arc Magmas. Geo-
+logical Society, London, Special Publications, 410,
+143–177, http://doi.org/10.1144/SP410.3
+Coltelli, M., Proietti, C., Branca, S., Marsella, M.,
+Andronico, D. & Lodato, L. 2007. Analysis of the
+2001 lava ﬂow eruption of Mt. Etna from three-
+dimensional
+mapping.
+Journal
+of
+Geophysical
+Research, 112, F02029.
+Coppola, D. & Cigolini, C. 2013. Thermal regimes and
+effusive trends at Nyamuragira volcano (DRC) from
+MODIS infrared data. Bulletin of Volcanology, 75,
+1–15, http://doi.org/10.1007/s00445-013-0744-z
+Coppola, D., Piscopo, D., Laiolo, M., Cigolini, C.,
+Delle Donne, D. & Ripepe, M. 2012. Radiative
+heat power at Stromboli volcano during 2000–2011:
+twelve years of MODIS observations. Journal of
+Volcanology and Geothermal Research, 215–216,
+48–60.
+Coppola, D., Laiolo, M., Piscopo, D. & Cigolini, C.
+2013. Rheological control on the radiant density of
+active lava ﬂows and domes. Journal of Volcanology
+and Geothermal Research, 249, 39–48, http://doi.
+org/10.1016/j.jvolgeores.2012.09.005
+Coppola, D., Laiolo, M., Delle Donne, D. & Ripepe,
+M. & Cigolini, C. 2014. Hot-spot detection and
+characterization of strombolian activity from MODIS
+infrared
+data.
+International
+Journal
+of
+Remote
+Sensing, 35, 3403–3426.
+Corsaro, R. A. & Miraglia, L. 2014. The transition from
+summit to ﬂank activity at Mt. Etna, Sicily (Italy):
+inferences from the petrology of products erupted in
+2007–2009. Journal of Volcanology and Geothermal
+Research, 275, 51–60, http://doi.org/10.1016/j.jvol
+geores.2014.02.009
+Davies, A. G., Keszthelyi, L. & McEwen, A. S. 2011.
+Estimating eruption temperature from thermal emis-
+sion spectra of lava fountain activity in the Erta’Ale
+(Ethiopia) volcano lava lake: implications for observ-
+ing Io’s volcanoes. Geophysical Research Letters,
+38, L21308, http://doi.org/10.1029/2011GL049418
+Dean, K. G., Servilla, M., Roach, A., Foster, B. &
+Engle, K. 1998. Satellite monitoring of remote volca-
+noes improves study efforts in Alaska. Eos, Trans-
+actions of the American Geophysical Union, 79,
+422–423.
+Dehn, J., Dean, K. G. & Engle, K. 2000. Thermal moni-
+toring of North Paciﬁc volcanoes from space. Geology,
+28, 755–758.
+Del Negro, C., Cappello, A., Neri, M., Bilotta, G.,
+He´rault, A. & Ganci, G. 2013. Lava ﬂow hazards
+at Mount Etna: constraints imposed by eruptive
+history and numerical simulations. Nature Scientiﬁc
+Reports, 3, http://doi.org/10.1038/srep03493
+Favalli, M., Pareschi, M. T., Neri, A. & Isola, I. 2005.
+Forecasting lava ﬂow paths by a stochastic approach.
+Geophysical Research Letters, 32, L03305, http://
+doi.org/10.1029/2004GL021718
+Flynn, L. P., Harris, A. J. L., Rothery, D. A. & Oppen-
+heimer, C. 2000. High-spatial-resolution thermal
+remote sensing of active volcanic features using
+landsat and hyperspectral data. In: Mouginis-Mark,
+P. J., Crisp, J. A. & Fink, J. H. (eds) Remote Sensing
+of Active Volcanism. American Geophysics Union,
+Geophysical
+Monograph
+Series,
+116,
+161–177,
+http://doi.org/10.1029/GM116p0161
+Flynn, L. P., Harris, A. J. L. & Wright, R. 2001.
+Improved identiﬁcation of volcanic features using
+Landsat 7 ETM + . Remote Sensing of Environment,
+79, 1–14.
+Ganci, G., Harris, A. J. L. et al. 2012a. A year of lava
+fountaining at Etna: volumes from SEVIRI. Geophysi-
+cal Research Letters, 39, L06305, http://doi.org/10.
+1029/2012GL051026
+Ganci, G., Vicari, A., Cappello, A. & Del Negro, C.
+2012b. An emergent strategy for volcano hazard
+assessment: from thermal satellite monitoring to lava
+ENHANCED VOLCANIC HOTSPOT DETECTION
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 24 =====
+ﬂow modeling. Remote Sensing of Environment, 119,
+197–207.
+Garel, F., Kaminski, E., Tait, S. & Limare, A. 2012. An
+experimental study of the surface thermal signature of
+hot subaerial isoviscous gravity currents: implications
+for thermal monitoring of lava ﬂows and domes.
+Journal of Geophysical Research, 117, B02205.
+Garel, F., Kaminski, E., Tait, S. & Limare, A. 2014.
+An analogue study of the inﬂuence of solidiﬁcation
+on the advance and surface thermal signature of lava
+ﬂows. Earth and Planetary Science Letters, 396,
+46–55.
+GLOBAL VOLCANISM PROGRAM 2010. Report on
+Stromboli (Italy). In: Wunderman, R. (ed.) Bulletin
+of the Global Volcanism Network, 35, (3). Smithsonian
+Information,
+Washington,
+DC,
+http://doi.org/10.
+5479/si.GVP.BGVN201003-211040
+Gouhier, M., Harris, A. J. L., Calvari, S., Labazuy, P.,
+Gue´henneux, Y., Donnadieu, F. & Valade, S.
+2012. Lava discharge during Etna’s January 2011 ﬁre
+fountain tracked using MSG-SEVIRI. Bulletin of
+Volcanology, 74, 787–793, http://doi.org/10.1007/
+s00445-011-0572-y
+Harris, A. J. L. 2013. Thermal Remote Sensing of Active
+Volcanoes. A User’s Manual. Cambridge University
+Press, Cambridge.
+Harris, A. J. L. & Baloga, S. M. 2009. Lava discharge
+rates from satellite-measured heat ﬂux. Geophysi-
+cal Research Letters, 36, L19302, http://doi.org/10.
+1029/2009GL039717
+Harris, A. J. L. & Neri, M. 2002. Volumetric obser-
+vations during paroxysmal eruptions at Mount Etna:
+pressurized drainage of a shallow chamber or pulsed
+supply? Journal of Volcanology and Geothermal
+Research, 116, 79–95.
+Harris, A. J. L., Swabey, S. E. J. & Higgins, J.
+1995. Automated thresholding of active lavas using
+AVHRR
+data.
+International
+Journal
+of
+Remote
+Sensing, 16, 3681–3686.
+Harris, A. J. L., Flynn, L. P., Keszthelyi, L.,
+Mouginis-Mark, P. J., Rowland, S. K. & Resing,
+J.
+A.
+1998. Calculation
+of
+lava effusion rates
+from Landsat TM data. Bulletin of Volcanology, 60,
+52–71.
+Harris, A. J. L., Murray, J. B. et al. 2000. Effusion rate
+trends at Etna and Kraﬂa and their implications for
+eruptive mechanisms. Journal of Volcanology and
+Geothermal Research, 102, 237–270.
+Harris, A. J. L., Steffke, A., Calvari, S. & Spampinato,
+L. 2011. Thirty years of satellite-derived lava dis-
+charge rates at Etna: implications for steady volumet-
+ric output. Journal of Geophysical Research, 116,
+B08204, http://doi.org/10.1029/2011JB008237
+Inguaggiato, S., Vita, F., Rouwet, D., Bobrowski, N.,
+Morici, S. & Sollami, A. 2011. Geo-chemical evi-
+dence of the renewal of volcanic activity inferred
+from CO2 soil and SO2 plume ﬂuxes: the 2007 Strom-
+boli eruption (Italy). Bulletin of Volcanology, 73,
+443–456.
+INGV 2012. Online resource at: http://www.ct.ingv.it/it/
+component/content/article/11-notizie/news/538
+IRIS SPECIAL REPORT 2002. Nyiragongo Volcano.
+http://www.iris.washington.edu/news/events/congo/
+congo.htm
+Kervyn, M., Harris,, A. J. L., Mbede, E., Belton, F.,
+Jacobs, P. & Ernst, G. G. J. 2006. MODLEN:
+a semi-automated algorithm for monitoring small
+scale thermal activity at Oldoinyo Lengai Volcano
+Tanzania. Paper presented at the AMG ’06. Quan-
+titative Geology from Multiple Sources, International
+Association Mathematical Geology, XI Annual Confer-
+ence, 3–8 September 2006, Liege, Belgium, http://
+doi.org/1854/5913 (http://hdl.handle.net/1854/LU-
+347378).
+Koeppen, W., Pilger, E. & Wright, R. 2011. Time
+series analysis of low resolution thermal infrared satel-
+lite data for detecting thermal anomalies: a hybrid
+approach. Bulletin of Volcanology, 73, 577–593.
+http://doi.org/10.1007/s00445-010-0427-y
+Lombardo, V. & Buongiorno, M. F. 2006. Lava
+ﬂow thermal analysis using three infrared bands of
+remote-sensing imagery: a study case from Mount
+Etna 2001 eruption. Remote Sensing of Environment,
+101, 141–149.
+Lombardo, V., Harris, A. J. L., Calvari, S. & Buon-
+giorno, M. F. 2009. Spatial variations in lava ﬂow
+ﬁeld thermal structure and effusion rate derived from
+very high spatial resolution hyperspectral (MIVIS)
+data. Journal of Geophysical Research, 114, B02208,
+http://doi.org/10.1029/2008JB005648
+Neri, M. & Acocella, V. 2006. The 2004–2005 Etna
+eruption: implications for ﬂank deformation and struc-
+tural behaviour of the volcano. Journal of Volcanology
+and Geothermal Research, 158, 195–206.
+Nishihama, M., Wolfe, R. E., Solomon, D., Patt, F. S.,
+Blanchette, J., Fleig, A. J. & Masuoka, E. 1997.
+MODIS Level 1A Earth Location Algorithm Theoreti-
+cal Basis Document Version 3.0. SDST-092. Labora-
+tory for Terrestrial Physics, NASA Goddard Space
+Flight Center, Greenbelt, MD.
+Oppenheimer, C. 1991. Lava ﬂow cooling estimated from
+Landsat Thematic Mapper infrared data: the Lonqui-
+may eruption (Chile, 1989). Journal of Geophysical
+Research, 96, 21,865–21,878.
+Patrick, M. R., Dehn, J. et al. 2003. The 1997 eruption
+of Okmok volcano, Alaska: a synthesis of remotely
+sensed imagery. Journal of Volcanology and Geother-
+mal Research, 127, 89–107.
+Pergola, N., Marchese, F. & Tramutoli, V. 2004.
+Automated detection of thermal features of active vol-
+canoes by means of infrared AVHRR records. Remote
+Sensing of Environment, 93, 311–327.
+Pieri, D. C. & S. M. Baloga, M. 1986. Eruption rate, area,
+and length relationships for some Hawaiian lava ﬂows.
+Journal of Volcanology and Geothermal Research, 30,
+29–45,http://doi.org/10.1016/0377-0273(86)90066-1
+Piscini, A. & Lombardo, V. 2014. Volcanic hot spot
+detection from optical multispectral remote sensing
+data using artiﬁcial neural networks. Geophysical Jour-
+nal International, 196, 1525–1535.
+Proietti, C., Coltelli, M., Marsella, M. & Fujita, E.
+2009. A quantitative approach for evaluating lava
+ﬂow simulation reliability: lavaSIM code applied to
+the 2001 Etna eruption. Geochemistry, Geophysics,
+Geosystems, 10, Q09003, http://doi.org/10.1029/
+2009GC002426
+Ramsey, M. S. & Harris, A. J. L. 2012. Volcanology
+2020: how will thermal remote sensing of volcanic
+D. COPPOLA ET AL.
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 
+
+===== PAGE 25 =====
+surface activity evolve over the next decade? Jour-
+nal of Volcanology and Geothermal Research, 249,
+217–233.
+Ripepe, M., Delle Donne, D., Lacanna, G., March-
+etti, E. & Ulivieri, G. 2009. The onset of the 2007
+Stromboli effusive eruption recorded by an integrated
+geophysical network. Journal of Volcanology and
+Geothermal Research, 182, 131–136.
+Steffke, A. M. & Harris, A. J. L. 2011. A review
+of algorithms for detecting volcanic hot spots in
+satellite
+infrared
+data.
+Bulletin
+of
+Volcanology,
+73, 1109–1137, http://doi.org/10.1007/s00445-011-
+0487-7
+Takagi, D. & Huppert, H. E. 2010. Initial advance of long
+lava ﬂows in open channels. Journal of Volcanology
+and Geothermal Research, 195, 121–126.
+Toller, G. N., Isaacman, A. & Kuyper, J. 2006.
+MODIS Level 1B Product User’s Guide. Prepared by
+Members of the MODIS Characterization Support
+Team for NASA/Goddard Space Flight Center, Green-
+belt, MD.
+Vicari, A., Ciraudo, A., Del Negro, C., Herault, A. &
+Fortuna, L. 2009. Lava ﬂow simulations using dis-
+charge rates from thermal infrared satellite imagery
+during the 2006 Etna eruption. Natural Hazards,
+50, 539–550, http://doi.org/10.1007/s11069–008-
+9306-7
+Wadge, G. 1981. The variation of magma discharge dur-
+ing basaltic eruptions. Journal of Volcanology and
+Geothermal Research, 11, 139–168.
+Wooster, M. J., Zhukov, B. & Oertel, D. 2003. Fire
+radiative energy for quantitative study of biomass
+burning: derivation from the BIRD experimental satel-
+lite and comparison to MODIS ﬁre products. Remote
+Sensing of Environments, 86, 83–107.
+Wright, R. & Flynn, L. P. 2003. On the retrieval of
+lava ﬂow surface temperatures from infrared satellite
+data. Geology, 31, 893–896, http://doi.org/10.1130/
+G19645.1
+Wright, R., Blake, S., Harris, A. J. L. & Rothery,
+D. A. 2001. A simple explanation for the space-based
+calculation of lava eruption rates. Earth and Planetary
+Science Letters, 192, 223–233.
+Wright, R., Flynn, L. P., Garbeil, H., Harris, A. J. L. &
+Pilger, E. 2002. Automated volcanic eruption detec-
+tion using MODIS. Remote Sensing of Environments,
+82, 135–155.
+Wright, R., Garbeil, H. & Harris, A. J. L. 2008. Using
+infrared satellite data to drive a thermo-rheological/
+stochastic lava ﬂow emplacement model: a method
+for near-real-time volcanic hazard assessment. Geo-
+physical Research Letters, 35, L19307, http://doi.org/
+10.1029/2008GL035228
+Wright, R., Garbeil, H. & Davies, A. G. 2010. Cool-
+ing rate of some active lavas determined using an
+orbital imaging spectrometer. Journal of Geophysi-
+cal Research, 115, B06205, http://doi.org/10.1029/
+2009JB006536
+Wright, R., Glaze, L., & Baloga, S. M. 2011. Con-
+straints on determining the eruption style and compo-
+sition of terrestrial lavas from space. Geology, 39,
+1127–1130.
+Zaksˇek, K., Shirzaei, M. & Hort, M. 2013. Constraining
+the uncertainties of volcano thermal anomaly monitor-
+ing using a Kalman ﬁlter technique. In: Pyle, D. M.,
+Mather, T. A. & Biggs, J. (eds) Remote Sensing of
+Volcanoes and Volcanic Processes: Integrating Obser-
+vation and Modelling. Geological Society, London,
+Special Publications, 380, 137–160, http://doi.org/
+10.1144/SP380.5
+ENHANCED VOLCANIC HOTSPOT DETECTION
+ at Carleton University Library on June 24, 2015
+http://sp.lyellcollection.org/
+Downloaded from 

@@ -1,0 +1,56 @@
+name: Probe S138 eje 4, compuerta de temperatura y fondo del anillo en VIIRS 375 y 750
+
+# A43: "on" entre comillas. One-off, READ-ONLY (A75): envuelve first_pass_tests_2_and_3,
+# second_pass_adjacent y cluster_hotspots en los namespaces de pipeline.process_viirs y
+# pipeline.process_viirs_mod para contar, por pasada y dentro del inner, cuantos pixeles pasan
+# los Tests 2 y 3 y caen SOLO por la compuerta bt > t_bg + 3 K (D22), cuantos rescata el segundo
+# paso sin activos (D19/D2) y que magnitud tendria el cumulo del crater con anillo, kernel 3x3 y
+# corona Eq.6. 12 pasadas en experiments/_s138_audit/eje4/pasadas_eje4.json (Villarrica V375,
+# Tupungatito/Isluga/Lascar V750, controles con fp > 0).
+#
+# ESTE ARCHIVO VIVE EN experiments/_s138_audit/eje4/ Y NO SE DISPARA SOLO: copiarlo a
+# .github/workflows/ y lanzarlo es decision del orquestador (S138). No empuja commits ni toca
+# data/ (fuera de la concurrencia push-main). Solo VIIRS: sin HDF4. Archivar al terminar (S80).
+"on":
+  workflow_dispatch:
+    inputs:
+      vol:
+        description: "Filtrar volcan (Villarrica | Tupungatito | Isluga | Lascar). Vacio = todas"
+        required: false
+        default: ""
+      fecha:
+        description: "Filtrar fecha YYYY-MM-DD. Vacio = todas"
+        required: false
+        default: ""
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml
+      - name: Probe compuerta VIIRS (read-only)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_PROFILE: mirova_equivalent
+          PROBE_VOL: ${{ github.event.inputs.vol }}
+          PROBE_FECHA: ${{ github.event.inputs.fecha }}
+        run: |
+          mkdir -p experiments/_s138_audit/eje4/out_probe
+          python experiments/_s138_audit/eje4/probe_compuerta_viirs.py \
+            | tee experiments/_s138_audit/eje4/out_probe/report.txt
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s138-eje4-probe-compuerta-viirs
+          path: experiments/_s138_audit/eje4/out_probe/
