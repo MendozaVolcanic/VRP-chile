@@ -1464,6 +1464,14 @@ function enrichWithMirovaConfirmation(ourRecords, mirovaRecords) {
 // fallbacks tipo `r.vrp_mir_mw ?? 0` re-aparezcan en nuevos paneles y
 // re-inflen records descartados por el pipeline (`vrp_mw=0 + discarded_reason`).
 function isValidDetection(r) {
+  // S139 (decisión S138-H, hallazgo P5 del verificador S138): con cúmulo, detección válida
+  // exige que el cúmulo tenga energía, que es la misma magnitud que publica mirovaEqVrp. Antes
+  // bastaba `triggered_test1`, y un cúmulo en 0,0 MW contaba en el contador del cráter, las
+  // pastillas y la corroboración mientras el gráfico lo mostraba en cero (familia A46). Medido
+  // S139: 2.219 records; en noches de volcán sólo 161 se quedan sin detección y MIROVA publicó
+  // en 1. Guard: tests/test_isvaliddetection_coherencia_s139.py. Records legacy sin cúmulo
+  // (pre-S27) conservan la regla antigua.
+  if (r?.primary_cluster) return (r.primary_cluster.vrp_mw ?? 0) > 0;
   if ((r?.vrp_mw ?? 0) > 0) return true;        // detección eruption-path / suma indistinta legacy
   if (r?.triggered_test1 === true) return true;  // detección Test 1 integrated-ROI (Coppola 2015)
   return false;

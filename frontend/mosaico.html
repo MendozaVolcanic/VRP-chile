@@ -391,6 +391,8 @@ function eqVrpDisplay(r, innerKm) {
 // pasada" (abajo) hacen falta para que el nivel de alerta COINCIDA con index:
 // sin ellas, un record descartado por el pipeline titularía la tarjeta.
 function isValidDetection(r) {
+  // S139 (S138-H): réplica de index.html. Con cúmulo, válida sólo si el cúmulo tiene energía.
+  if (r?.primary_cluster) return (r.primary_cluster.vrp_mw ?? 0) > 0;
   if ((r?.vrp_mw ?? 0) > 0) return true;
   return r?.triggered_test1 === true;
 }
