@@ -169,16 +169,65 @@ def test_la_bateria_no_contamina_el_catalogo_operacional():
 
 # ---------------------------------------------------------------- los brazos (S137)
 
-@pytest.mark.parametrize("env,prosa,b22,out", [
-    ({}, False, False, "out_apendice"),
-    ({"APENDICE_PROSA": "1"}, True, False, "out_apendice_prosa"),
-    ({"APENDICE_B22": "1"}, False, True, "out_apendice_b22"),
-    ({"APENDICE_PROSA": "1", "APENDICE_B22": "1"}, True, True, "out_apendice_b22_prosa"),
-    ({"APENDICE_PROSA": "", "APENDICE_B22": "0"}, False, False, "out_apendice"),
+@pytest.mark.parametrize("env,prosa,b22,sc,out", [
+    ({}, False, False, False, "out_apendice"),
+    ({"APENDICE_PROSA": "1"}, True, False, False, "out_apendice_prosa"),
+    ({"APENDICE_B22": "1"}, False, True, False, "out_apendice_b22"),
+    ({"APENDICE_PROSA": "1", "APENDICE_B22": "1"}, True, True, False, "out_apendice_b22_prosa"),
+    ({"APENDICE_PROSA": "", "APENDICE_B22": "0"}, False, False, False, "out_apendice"),
+    ({"APENDICE_B22": "1", "APENDICE_SIN_COMPUERTA": "1"}, False, True, True,
+     "out_apendice_b22_sincompuerta"),
+    ({"APENDICE_B22": "1", "APENDICE_SIN_COMPUERTA": "1", "APENDICE_PROSA": "1"}, True, True, True,
+     "out_apendice_b22_sincompuerta_prosa"),
 ])
-def test_el_brazo_sale_del_entorno_y_escribe_en_su_directorio(mod, env, prosa, b22, out):
-    """Los dos nombres de S136 no cambian: sus resultados ya estan commiteados con ese nombre."""
-    assert mod.brazo_desde_env(env) == {"prosa": prosa, "b22": b22, "out": out}
+def test_el_brazo_sale_del_entorno_y_escribe_en_su_directorio(mod, env, prosa, b22, sc, out):
+    """Los nombres ya commiteados (S136 y S137) no cambian al agregar ejes."""
+    assert mod.brazo_desde_env(env) == {"prosa": prosa, "b22": b22, "sin_compuerta": sc, "out": out}
+
+
+def test_sin_compuerta_anula_solo_el_margen_y_devuelve_lo_mismo(mod):
+    visto = {}
+    sentinela = (object(), {})
+
+    def original(**kw):
+        visto.update(kw)
+        return sentinela
+
+    out = mod.sin_compuerta_t23(original)(t_bg=270.0, bt_sanity_k=3.0, c1_dnti_summit=0.003)
+    assert out is sentinela
+    assert visto["bt_sanity_k"] < -1e6, "la compuerta debe quedar anulada"
+    assert visto["t_bg"] == 270.0 and visto["c1_dnti_summit"] == 0.003, "no debe tocar nada mas"
+
+
+def test_punto_desde_ida_y_vuelta(mod):
+    la, lo = mod.punto_desde(63.633, -19.633, 9.6, 83.0)
+    assert mod.hav(63.633, -19.633, la, lo) == pytest.approx(9.6, abs=0.01)
+    assert lo > -19.633, "rumbo 83 grados es hacia el este"
+
+
+def test_evaluacion_post_hoc_solo_para_A2_y_en_la_posicion_del_autor(mod):
+    a2 = {"caso": "A2", "name": "Eyjafjallajokull", "lat": 63.633, "lon": -19.633, "veredicto": "detecta"}
+    la, lo = mod.punto_desde(63.633, -19.633, 9.6, 83.0)
+    en_autor = {"vrp_pc_mw": 0.3, "pc_lat": la, "pc_lon": lo}
+    cerca_cumbre = dict(zip(("pc_lat", "pc_lon"), mod.punto_desde(63.633, -19.633, 3.1, 153.0)))
+    cerca_cumbre["vrp_pc_mw"] = 0.5
+    assert mod.evaluar_posicion_autor(a2, [en_autor]).startswith("CONFORME (post hoc)")
+    assert mod.evaluar_posicion_autor(a2, [cerca_cumbre]).startswith("NO CONFORME (post hoc)")
+    assert mod.evaluar_posicion_autor(dict(a2, caso="A6"), [en_autor]) is None
+    assert mod.evaluar_posicion_autor(a2, [dict(en_autor, vrp_pc_mw=0.0)]).startswith("NO CONFORME")
+
+
+def test_la_evaluacion_primaria_no_depende_del_post_hoc(mod):
+    """El criterio pre-registrado no se mueve: evaluar_caso sigue midiendo dentro de 5 km."""
+    import inspect
+    assert "POSICION_AUTOR" not in inspect.getsource(mod.evaluar_caso)
+    assert "post" not in inspect.getsource(mod.evaluar_caso).lower()
+
+
+def test_main_aplica_el_envoltorio_sin_compuerta(mod):
+    import re
+    src = (RAIZ / "experiments" / "_s136" / "conformidad_apendice.py").read_text(encoding="utf-8")
+    assert re.search(r"(?<![A-Za-z0-9_])pm\.first_pass_tests_2_and_3\s*=\s*sin_compuerta_t23\(", src)
 
 
 def test_los_cuatro_brazos_no_se_pisan(mod):

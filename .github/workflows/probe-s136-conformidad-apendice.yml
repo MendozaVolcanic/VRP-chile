@@ -31,6 +31,10 @@ name: Probe S136 conformidad Apendice A (9 casos)
         description: "1 = banda 22 primaria, como el paper (S137). Vacio = banda 21, lo de hoy"
         required: false
         default: ""
+      sin_compuerta:
+        description: "1 = quita bt > t_bg + 3 K solo en Tests 2/3 (S137). Vacio = la de hoy"
+        required: false
+        default: ""
 
 jobs:
   apendice:
@@ -57,21 +61,17 @@ jobs:
           APENDICE_CASO: ${{ github.event.inputs.caso }}
           APENDICE_PROSA: ${{ github.event.inputs.prosa }}
           APENDICE_B22: ${{ github.event.inputs.b22 }}
+          APENDICE_SIN_COMPUERTA: ${{ github.event.inputs.sin_compuerta }}
         run: |
-          # OJO (S136): el checkout trae out_apendice/ y out_apendice_prosa/ ya commiteados. Cada
-          # brazo escribe en SU directorio; al leer el artefacto, nombra el directorio, no uses glob.
-          mkdir -p experiments/_s136/out_apendice experiments/_s136/out_apendice_prosa \
-                   experiments/_s136/out_apendice_b22 experiments/_s136/out_apendice_b22_prosa
+          # OJO (S136): el checkout trae directorios out_apendice*/ ya commiteados. Cada brazo escribe
+          # en SU directorio (el script lo crea); al leer el artefacto, nombra el directorio, no uses glob.
           python experiments/_s136/conformidad_apendice.py \
             | tee experiments/_s136/report_ultimo_brazo.txt
       - name: Upload artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: s136-conformidad-apendice-${{ github.event.inputs.b22 && 'b22-' || '' }}${{ github.event.inputs.prosa && 'prosa' || 'formula' }}
+          name: s136-conformidad-apendice-${{ github.event.inputs.b22 && 'b22-' || '' }}${{ github.event.inputs.sin_compuerta && 'sincompuerta-' || '' }}${{ github.event.inputs.prosa && 'prosa' || 'formula' }}
           path: |
             experiments/_s136/report_ultimo_brazo.txt
-            experiments/_s136/out_apendice/
-            experiments/_s136/out_apendice_prosa/
-            experiments/_s136/out_apendice_b22/
-            experiments/_s136/out_apendice_b22_prosa/
+            experiments/_s136/out_apendice*/
