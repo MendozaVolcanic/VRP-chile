@@ -18,6 +18,12 @@
 |---|---|---|
 | MISSION.md | Misión vinculante: clon literal MIROVA, 3 preguntas | S22 |
 | MIROVA_DIVERGENCES.md | Catálogo vivo de divergencias vs MIROVA | S71+ |
+| **PLAN_AUDITORIA_S138.md** | **Plan de la auditoría S138: seis ejes en paralelo (cierres contra el PDF, matriz de conformidad desde el PDF, verificador de instrumentos S137, D21/D22 en VIIRS, la batería como instrumento, decisiones e higiene) + verificador limpio** | **S137** |
+| **_s137/RESULTADO_FONDO_LOCAL.md** (en `experiments/`) | **Batería del Apéndice A, 8 brazos: B22 + sin compuerta + fondo local + prosa = 5/6 y 3/3; hoy 6/6 y 0/3; ninguno cumple** | **S137** |
+| _s137/RESULTADO_ETAPA_Y_FIGURAS.md (en `experiments/`) | La compuerta `bt > t_bg + 3 K` elimina el cráter de Villarrica (figura A6); sigma del dNTI de MIROVA medido en sus figuras (~0,0008); A2 detectado por el autor a 9,6 km | S137 |
+| _s137/RESULTADO_SIGMA_DNTI.md (en `experiments/`) | La banda 21 fabrica el primer paso de MODIS: con B22 el sigma del dNTI cae 3,5 a 4,7× y el primer paso queda vacío en 80 de 84 escenas | S137 |
+| _s137/EL_CIERRE_DE_S136_ES_CIRCULAR.md (en `experiments/`) | El corolario "sigma irrelevante" valía sólo bajo `min`, que S136 refutó | S137 |
+| _s137/EL_AB_DE_D1_YA_ESTABA_CORRIDO.md (en `experiments/`) | El A/B de keep_peak corrió en S135; ningún brazo cumple; corrección de una recomendación propia | S137 |
 | AUDIT_S134.md | El anillo y la paridad: posición del cúmulo → magnitud → paridad por pasada (F1), TIF MIROVA misma pasada (F2), mecanismo por etapa (F3), solape del barrido (F4), regla C (F5) | S134 |
 | AUDIT_S131.md | Resultados + dashboard + utilidad OVDAS; 6 ejes (magnitud/ATBD, dashboard, T9, pendientes, TIF por pasada, otro sensor) | S131 |
 | AUDIT_S128.md | Evidencia exógena: ángulo de vista, grilla desde KMZ, D2 medida, GAP #A reabierto | S128 |
