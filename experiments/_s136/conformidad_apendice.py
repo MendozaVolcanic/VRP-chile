@@ -126,6 +126,9 @@ def correr_caso(caso, is_nighttime):
             d = hav(clat, clon, caso["lat"], caso["lon"]) if clat is not None else None
             f = {"granule": nom, "inicio": str(ini), "nti_max": nti_de(rec),
                  "vrp_pc_mw": pc.get("vrp_mw"), "n_pixels_pc": pc.get("n_pixels"),
+                 # S137: la POSICION, no solo la distancia. En A2 el autor detecta a 9,6 km de la
+                 # cumbre y sin posicion no se puede saber si publicamos su objeto u otro.
+                 "pc_lat": clat, "pc_lon": clon,
                  "dist_crater_km": d, "distance_class": rec.get("distance_class"),
                  "t_bg_k": rec.get("t_bg_k"),
                  "diag_n_first_pass_pixels": rec.get("diag_n_first_pass_pixels"),
@@ -185,8 +188,61 @@ def brazo_desde_env(env):
     Cada combinacion escribe en su propio directorio: los brazos no se pisan entre si (A93).
     """
     prosa, b22 = _si(env.get("APENDICE_PROSA")), _si(env.get("APENDICE_B22"))
-    nombre = "out_apendice" + ("_b22" if b22 else "") + ("_prosa" if prosa else "")
-    return {"prosa": prosa, "b22": b22, "out": nombre}
+    sin_compuerta = _si(env.get("APENDICE_SIN_COMPUERTA"))
+    nombre = ("out_apendice" + ("_b22" if b22 else "") + ("_sincompuerta" if sin_compuerta else "")
+              + ("_prosa" if prosa else ""))
+    return {"prosa": prosa, "b22": b22, "sin_compuerta": sin_compuerta, "out": nombre}
+
+
+def sin_compuerta_t23(original):
+    """Quita la compuerta de temperatura SOLO dentro de los Tests 2 y 3 (S137).
+
+    POR QUE. El primer paso exige `bt > t_bg + bt_sanity_k`, condicion que la formula de los Tests 2
+    y 3 del paper no tiene (sp426.5.pdf p. 7). Nacio el 2026-04-08 para el camino del NTI absoluto,
+    sin contraste espacial, y se hereda aca. En la cumbre helada de Villarrica elimina el unico
+    pixel que el autor detecta (probe por etapa S137: dNTI 0,0121 y dETI 0,014 pasan, BT 268 K no
+    llega a fondo + 3 K = 275 K). Se anula pasando un margen enorme negativo; los demas caminos que
+    usan la misma constante quedan intactos porque no se toca la constante, solo este argumento.
+    Ver experiments/_s137/RESULTADO_ETAPA_Y_FIGURAS.md.
+    """
+    def envoltorio(*args, **kw):
+        kw["bt_sanity_k"] = -1.0e9
+        return original(*args, **kw)
+    return envoltorio
+
+
+# S137, evaluacion SECUNDARIA y declarada POST HOC (no se usa para adoptar). La mascara de alerta de la
+# figura A2 del autor, medida en pixeles, pone su deteccion a 9,5-9,7 km de la cumbre del catalogo con
+# rumbo 83 grados (experiments/_s137/RESULTADO_ETAPA_Y_FIGURAS.md). La evaluacion primaria de A2
+# (dentro de 5 km de la cumbre) mide otra cosa que lo que el autor detecto.
+POSICION_AUTOR = {"A2": (9.6, 83.0)}
+RADIO_POST_HOC_KM = 3.0
+
+
+def punto_desde(lat, lon, dist_km, rumbo_deg):
+    """Punto a dist_km con rumbo dado, sobre esfera (mismo radio que hav)."""
+    R = 6371.0088
+    d = dist_km / R
+    br = math.radians(rumbo_deg)
+    la1, lo1 = math.radians(lat), math.radians(lon)
+    la2 = math.asin(math.sin(la1) * math.cos(d) + math.cos(la1) * math.sin(d) * math.cos(br))
+    lo2 = lo1 + math.atan2(math.sin(br) * math.sin(d) * math.cos(la1),
+                           math.cos(d) - math.sin(la1) * math.sin(la2))
+    return math.degrees(la2), math.degrees(lo2)
+
+
+def evaluar_posicion_autor(caso, pasadas):
+    """None si el caso no tiene posicion medida del autor. Si la tiene, CONFORME post hoc cuando algun
+    cumulo con VRP > 0 cae a RADIO_POST_HOC_KM o menos de esa posicion."""
+    if caso["caso"] not in POSICION_AUTOR:
+        return None
+    plat, plon = punto_desde(caso["lat"], caso["lon"], *POSICION_AUTOR[caso["caso"]])
+    cerca = [p for p in pasadas
+             if (p.get("vrp_pc_mw") or 0) > 0 and p.get("pc_lat") is not None
+             and hav(p["pc_lat"], p["pc_lon"], plat, plon) <= RADIO_POST_HOC_KM]
+    if cerca:
+        return f"CONFORME (post hoc), cumulo a <= {RADIO_POST_HOC_KM} km de la deteccion del autor en {len(cerca)} pasadas"
+    return f"NO CONFORME (post hoc), ningun cumulo a <= {RADIO_POST_HOC_KM} km de la deteccion del autor"
 
 
 def main():
@@ -202,6 +258,8 @@ def main():
         pm.ENABLE_TESTS_23_PROSE_BRANCH = True
     if brazo["b22"]:
         pm.ENABLE_MODIS_B22_PRIMARY = True
+    if brazo["sin_compuerta"]:
+        pm.first_pass_tests_2_and_3 = sin_compuerta_t23(pm.first_pass_tests_2_and_3)
     casos = yaml.safe_load((HERE / "apendice_a.yaml").read_text(encoding="utf-8"))["casos"]
     solo = (os.environ.get("APENDICE_CASO") or "").strip()
     if solo:
@@ -214,6 +272,7 @@ def main():
     print(f"banda MIR primaria: {'B22, como el paper' if brazo['b22'] else 'B21, lo de hoy'}"
           f"   (flag efectivo en el procesador: {pm.ENABLE_MODIS_B22_PRIMARY})"
           f"   salida: {brazo['out']}/")
+    print(f"compuerta de temperatura en Tests 2/3: {'QUITADA (S137)' if brazo['sin_compuerta'] else 'la de hoy, bt > t_bg + 3 K'}")
     auth()
     salida = []
     for c in casos:
@@ -224,10 +283,14 @@ def main():
             traceback.print_exc()
             pas = []
         ver, det = evaluar_caso(c, pas)
+        post = evaluar_posicion_autor(c, pas)
         print(f"  >>> {c['caso']} {c['name']}: {ver}, {det}", flush=True)
+        if post:
+            print(f"      {post}", flush=True)
         salida.append({"caso": c["caso"], "name": c["name"], "fecha": c["fecha"],
                        "veredicto_paper": c["veredicto"], "nti_paper": c.get("nti_paper"),
-                       "resultado": ver, "detalle": det, "pasadas": pas})
+                       "resultado": ver, "detalle": det, "post_hoc_posicion_autor": post,
+                       "pasadas": pas})
     out = HERE / brazo["out"]
     out.mkdir(exist_ok=True)
     (out / "resultado_apendice.json").write_text(

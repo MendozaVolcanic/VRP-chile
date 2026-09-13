@@ -21,6 +21,8 @@ BRAZOS = [
     ("out_apendice_prosa", "B21 max"),
     ("out_apendice_b22", "B22 min"),
     ("out_apendice_b22_prosa", "B22 max"),
+    ("out_apendice_b22_sincompuerta", "B22 min sinBT"),
+    ("out_apendice_b22_sincompuerta_prosa", "B22 max sinBT"),
 ]
 
 
