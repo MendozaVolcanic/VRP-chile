@@ -1454,3 +1454,33 @@ Pasa MISSION.md Q1 literal. Implementación scope mediano (kernel filter per hot
 - **Estado**: active / confirmed / refuted / stale
 - **Resolución**: [acción tomada o pendiente]
 ```
+
+## H_S137_SIGMA_MIROVA: el sigma del dNTI de MIROVA es del orden de 0,001, diez veces menor que el nuestro con banda 21
+
+- **Formulada**: S137 (2026-09-13) en `experiments/_s137/RESULTADO_ETAPA_Y_FIGURAS.md`
+- **Hipótesis**: el fondo del dNTI de MIROVA tiene sigma ~0,0008 (medido en su figura A6, Villarrica 2009-06-24 05:55); el nuestro es 0,0076 con banda 21 y 0,0016 con banda 22 en la misma escena. La brecha restante (factor 2) es en parte suavizado del raster de imprenta y en parte pasos previos del paper que no replicamos (remuestreo, bow tie).
+- **Evidencia a favor**: `medir_figuras_apendice.py` con control pre registrado de mediana (pasa en 4 paneles); probe de sigma sobre 84 pares (run 34706563697); el paper usa la banda 22 como primaria (p. 3).
+- **Evidencia en contra**: la medición es sobre un raster reescalado; la v1 del script falló el control y se descartó, así que el instrumento tiene historial.
+- **Criterio testable**: eje 3 de la auditoría S138 (verificador limpio, línea base roja sobre A7) y un probe con bow tie removido sobre la misma escena.
+- **Estado**: active
+- **Resolución**: pendiente
+
+## H_S137_COMPUERTA_VIIRS: la compuerta `bt > t_bg + 3 K` también elimina focos sub píxel en cumbres heladas en VIIRS 375
+
+- **Formulada**: S137 (2026-09-13), derivada de D22
+- **Hipótesis**: en VIIRS 375 y 750 la misma compuerta (13 lugares en los tres sensores) descarta píxeles del cráter que pasan dNTI y dETI en nevados (Villarrica, Llaima, Chaitén, NdC, Tupungatito), igual que en MODIS.
+- **Evidencia a favor**: mecanismo idéntico en el código; A69 describe el gradiente que deja al cráter más frío que el fondo.
+- **Evidencia en contra**: ninguna medición en VIIRS todavía. VIIRS 375 tiene recall dashboard 99 % contra MIROVA (S114), lo que sugiere que otros caminos (Test 1 integrado) lo compensan.
+- **Criterio testable**: eje 4 de S138 sobre records persistidos (t_max_k < t_bg_k + 3 en summit) y probe A75 por etapa VIIRS 375 sobre noches confirmadas de Villarrica.
+- **Estado**: active
+- **Resolución**: pendiente
+
+## H_S137_A2_FLANCO: la anomalía de la figura A2 (Eyjafjallajökull, 2010-04-07) es la erupción de flanco de Fimmvörðuháls
+
+- **Formulada**: S137 (2026-09-13)
+- **Hipótesis**: la máscara de alerta del autor a 9,5-9,7 km rumbo 83° de la cumbre del catálogo corresponde a la fisura de Fimmvörðuháls (activa desde el 20 de marzo de 2010), y por eso la evaluación de la batería dentro de 5 km no mide el objeto del autor.
+- **Evidencia a favor**: posición medida en la figura; con banda 22 nuestro cúmulo cae a 9,1 km rumbo 100°.
+- **Evidencia en contra**: no se contrastó con una fuente externa de posición de la fisura.
+- **Criterio testable**: coordenadas publicadas de la fisura (GVP, Smithsonian) contra el punto medido.
+- **Estado**: active
+- **Resolución**: pendiente; la evaluación post hoc de A2 en la batería queda declarada y no se usa para adoptar

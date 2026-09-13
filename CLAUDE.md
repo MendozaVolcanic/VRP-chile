@@ -110,7 +110,13 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   true` (**C1 = 0.003 summit / 0.010 scene**, 0.02 día), Tests 2∧3 con la rama OR completa
   `min(C1, μ+C2·σ)`, σ **global per-imagen** (no del anillo), second-run (excluye activos, recomputa
   μ/σ), ETI por regresión cuadrática, kernel 8-vec aritmético. **La detección MODIS es FIEL a
-  Coppola 2016a** (S114). **NO quedan gaps de fidelidad literal pendientes**: el antiguo GAP #A
+  Coppola 2016a** (S114). ⚠️ **FALSO desde S137, verificado contra el PDF**: la auditoría S114
+  nunca miró los pasos previos a los Tests. Hoy hay dos divergencias literales abiertas con cita
+  verbatim: **D21** (usamos la banda 21 como primaria; el paper usa la 22 y la 21 sólo donde la 22
+  satura, p. 3) y **D22** (el primer paso exige `bt > t_bg + 3 K`; la fórmula de los Tests 2 y 3 no
+  tiene condición de temperatura, p. 7). Medidas en `experiments/_s137/`: con banda 22 el sigma del
+  dNTI cae 3,5 a 4,7× y el primer paso queda vacío; la compuerta elimina el cráter de Villarrica en
+  la figura A6 del propio paper. La frase que sigue se conserva por historia. **NO quedan gaps de fidelidad literal pendientes**: el antiguo GAP #A
   (§298-300, retiro de píxeles Test 1 K1 del pool μ/σ) fue **RESUELTO S115 = MISLABEL** — no era un
   gap real (ver `docs/MIROVA_DIVERGENCES.md:1292` + `docs/AUDIT_S114_PARITY_BY_SENSOR.md:232`). NO
   reabrir como trabajo pendiente (anti-A8/A50). NTI absoluto floor 0.005 legacy.
@@ -1142,6 +1148,34 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     parece enorme, en noches afecta 4); (c) si el agregado desmiente la prioridad, decirlo y corregir
     el orden. Es el error de unidades de A90 y A93 aplicado a **la eleccion de que hacer**, no a un
     numero reportado.
+
+- **A95. Un corolario que cierra frentes hereda las premisas de la lectura con que se derivo; si esa
+  lectura se refuta en la misma sesion, el cierre cae con ella** (S137, dos casos el mismo dia). S136
+  midio que la conectiva `min` no reproduce a MIROVA (3 de 3 negativos del Apendice A con falso
+  positivo) y en la misma sesion cerro tres frentes (pool de mu y sigma, retiro de los Test 1, C2) con
+  el corolario "el piso manda, luego sigma es irrelevante", que solo vale bajo `min`. Y esta misma
+  seccion de reglas decia "NO quedan gaps de fidelidad literal" mientras faltaban la banda primaria,
+  el remuestreo, el bow tie y una compuerta de temperatura que el paper no tiene: la auditoria en que
+  se apoyaba (S114) nunca miro los pasos previos a los Tests.
+  - **How to apply**: (a) ante toda afirmacion "cerrado / agotado / no reabrir / fiel", preguntar
+    bajo QUE lectura del paper vale y comprobar esa lectura en el PDF con PyMuPDF (el `.txt`
+    corrompe los operadores: el mayor que sale como punto), nunca en docs previos; (b) un cierre que
+    se apoya en una auditoria vale lo que cubrio esa auditoria (A82 ya cayo asi en S124); (c) si un
+    frente se cerro "sin necesidad de A/B", ese es el primero que hay que revisar, porque no tiene
+    medicion detras. Las afirmaciones de cierre apagan trabajo futuro: cuando una esta mal, cuesta
+    sesiones enteras. Es el eje 1 de `docs/PLAN_AUDITORIA_S138.md`.
+
+- **A96. `git stash pop` reaplica el stash MAS RECIENTE de la lista, que puede ser ajeno; y `git
+  cherry` da falsos "sin integrar" con squash merges** (S137, regla general del workspace). Con el
+  arbol limpio, `git stash -u` no crea entrada, y el `pop` siguiente reaplico "WIP audit fresh" de
+  S78 sobre `data/mirova_equivalent/Tupungatito.json` (conflicto) y un CSV de audit. Se restauro con
+  `git checkout HEAD -- <rutas>`; el stash sigue guardado. Y `git cherry main origin/s137-*` marco
+  como pendientes dos ramas ya integradas por squash (el squash cambia el patch id).
+  - **How to apply**: nunca `stash pop` sin mirar `git stash list`; para llevar cambios a una rama
+    nueva, `git checkout -b X origin/main` directo (los cambios sin commitear viajan solos si no
+    chocan). Integracion de ramas: verificar por contenido (`git diff <rama> main -- <archivos>`),
+    no por identificador. Los 4 stashes de S72 a S78 no son de ninguna sesion viva: no tocarlos sin
+    tag defensivo (A38).
 
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
