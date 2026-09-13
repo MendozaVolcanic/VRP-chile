@@ -35,6 +35,10 @@ name: Probe S136 conformidad Apendice A (9 casos)
         description: "1 = quita bt > t_bg + 3 K solo en Tests 2/3 (S137). Vacio = la de hoy"
         required: false
         default: ""
+      fondo_local:
+        description: "1 = fondo de la magnitud local 3x3 uniforme, ec. 6 (S137). Vacio = anillo"
+        required: false
+        default: ""
 
 jobs:
   apendice:
@@ -62,6 +66,7 @@ jobs:
           APENDICE_PROSA: ${{ github.event.inputs.prosa }}
           APENDICE_B22: ${{ github.event.inputs.b22 }}
           APENDICE_SIN_COMPUERTA: ${{ github.event.inputs.sin_compuerta }}
+          APENDICE_FONDO_LOCAL: ${{ github.event.inputs.fondo_local }}
         run: |
           # OJO (S136): el checkout trae directorios out_apendice*/ ya commiteados. Cada brazo escribe
           # en SU directorio (el script lo crea); al leer el artefacto, nombra el directorio, no uses glob.
@@ -71,7 +76,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: s136-conformidad-apendice-${{ github.event.inputs.b22 && 'b22-' || '' }}${{ github.event.inputs.sin_compuerta && 'sincompuerta-' || '' }}${{ github.event.inputs.prosa && 'prosa' || 'formula' }}
+          name: s136-conformidad-apendice-${{ github.event.inputs.b22 && 'b22-' || '' }}${{ github.event.inputs.sin_compuerta && 'sincompuerta-' || '' }}${{ github.event.inputs.fondo_local && 'fondolocal-' || '' }}${{ github.event.inputs.prosa && 'prosa' || 'formula' }}
           path: |
             experiments/_s136/report_ultimo_brazo.txt
             experiments/_s136/out_apendice*/
