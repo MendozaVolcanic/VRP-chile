@@ -165,3 +165,33 @@ def test_la_bateria_no_contamina_el_catalogo_operacional():
     casos = yaml.safe_load(YML.read_text(encoding="utf-8"))["casos"]
     intrusos = {c["name"] for c in casos if c["name"] != "Villarrica"} & nombres
     assert not intrusos, f"volcanes del apendice filtrados al catalogo operacional: {intrusos}"
+
+
+# ---------------------------------------------------------------- los brazos (S137)
+
+@pytest.mark.parametrize("env,prosa,b22,out", [
+    ({}, False, False, "out_apendice"),
+    ({"APENDICE_PROSA": "1"}, True, False, "out_apendice_prosa"),
+    ({"APENDICE_B22": "1"}, False, True, "out_apendice_b22"),
+    ({"APENDICE_PROSA": "1", "APENDICE_B22": "1"}, True, True, "out_apendice_b22_prosa"),
+    ({"APENDICE_PROSA": "", "APENDICE_B22": "0"}, False, False, "out_apendice"),
+])
+def test_el_brazo_sale_del_entorno_y_escribe_en_su_directorio(mod, env, prosa, b22, out):
+    """Los dos nombres de S136 no cambian: sus resultados ya estan commiteados con ese nombre."""
+    assert mod.brazo_desde_env(env) == {"prosa": prosa, "b22": b22, "out": out}
+
+
+def test_los_cuatro_brazos_no_se_pisan(mod):
+    combos = [{}, {"APENDICE_PROSA": "1"}, {"APENDICE_B22": "1"},
+              {"APENDICE_PROSA": "1", "APENDICE_B22": "1"}]
+    assert len({mod.brazo_desde_env(e)["out"] for e in combos}) == 4
+
+
+def test_main_aplica_el_flag_de_banda_en_el_namespace_del_procesador(mod):
+    """A75: el flag se reasigna donde el procesador lo lee. Frontera de palabra (A92): el nombre
+    del flag no debe poder calzar como subcadena de otro."""
+    import re
+    src = (RAIZ / "experiments" / "_s136" / "conformidad_apendice.py").read_text(encoding="utf-8")
+    assert re.search(r"(?<![A-Za-z0-9_])pm\.ENABLE_MODIS_B22_PRIMARY\s*=\s*True(?![A-Za-z0-9_])", src)
+    assert re.search(r'out\s*=\s*HERE\s*/\s*brazo\["out"\]', src), \
+        "la salida debe salir del brazo, si no los brazos de banda 22 pisan los de S136"
