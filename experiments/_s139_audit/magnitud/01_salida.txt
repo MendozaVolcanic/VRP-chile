@@ -1,0 +1,62 @@
+filas 615470 Resolution {1000: 262455, 375: 252374, 750: 100641}
+
+== cociente VRP/(k*A*(hot-bk)), por resolucion: cuantiles
+               count     mean      std      min       1%  50%  99%  max
+Resolution                                                             
+375         252374.0  1.00000  0.00000  1.00000  1.00000  1.0  1.0  1.0
+750         100641.0  0.95949  0.14575  0.02714  0.27496  1.0  1.0  1.0
+1000        262455.0  1.00000  0.00000  1.00000  1.00000  1.0  1.0  1.0
+fraccion |rel-1|<0.001 por res: {375: 1.0, 750: 0.91813, 1000: 1.0}
+
+== mediana rel por res x SatZen bin (si MIROVA usara area variable creceria)
+Resolution  375   750   1000
+zbin                        
+(0, 15]      1.0   1.0   1.0
+(15, 25]     1.0   1.0   1.0
+(25, 35]     1.0   1.0   1.0
+(35, 50]     1.0   1.0   1.0
+(50, 90]     1.0   1.0   1.0
+
+== control negativo: rel con k*A de 375 aplicado a 1000 (debe dar ~7.5)
+7.467
+
+== control positivo: Npix mediana/media por res x SatZen bin (remuestreo => crece)
+           median             mean              
+Resolution   375   750  1000  375    750    1000
+zbin                                            
+(0, 15]       3.0   6.0  4.0  4.35   8.19   4.91
+(15, 25]      3.0   6.0  4.0  4.93   8.64   5.48
+(25, 35]      4.0   7.0  5.0  5.22   9.47   6.04
+(35, 50]      4.0   8.0  6.0  5.65  10.62   7.54
+(50, 90]      5.0  11.0  7.0  7.68  14.24  10.18
+
+== Npix==1 fraccion por res x bin
+Resolution   375    750    1000
+zbin                           
+(0, 15]     0.203  0.003  0.187
+(15, 25]    0.192  0.001  0.164
+(25, 35]    0.170  0.001  0.144
+(35, 50]    0.175  0.001  0.114
+(50, 90]    0.170  0.002  0.102
+
+== radiancia de fondo media por pixel bk/Npix y exceso por pixel (hot-bk)/Npix, por res x bin (mediana)
+               bk1                     ex1                
+Resolution    375     750     1000    375     750     1000
+zbin                                                      
+(0, 15]     0.1684  0.3653  0.3024  0.0858  0.5468  0.1271
+(15, 25]    0.1797  0.3718  0.3122  0.0825  0.4799  0.1255
+(25, 35]    0.1729  0.3645  0.3118  0.0727  0.4522  0.1164
+(35, 50]    0.1742  0.3594  0.3196  0.0696  0.4169  0.0985
+(50, 90]    0.1735  0.3318  0.3365  0.0625  0.3436  0.0869
+
+== T equivalente de bk/Npix (K), mediana por res y Dayflag; si Tot fuera suma deberia dar T de superficie plausible
+Resolution   375    750    1000
+Dayflag                        
+0           279.7  279.7  281.5
+1           309.1  295.1  306.3
+T de bk total sin dividir (si NO fuera suma, esta seria la plausible):
+             Tbk1               Tbk_tot              
+Resolution   375    750    1000    375    750    1000
+Dayflag                                              
+0           279.4  279.5  282.8   327.6  338.0  337.2
+1           309.1  293.4  305.1   396.4  358.0  370.9

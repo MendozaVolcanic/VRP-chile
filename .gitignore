@@ -213,3 +213,15 @@ experiments/**/*_art/
 experiments/**/_staging*/
 experiments/**/*_staging/
 experiments/**/_dl_*/
+# S139: rescate de los artefactos A/B de S129, S130, S133 y S135 antes de que vencieran
+# (172 archivos, 433 MB, inventario en INVENTARIO.tsv). Viven sólo en el disco local: son
+# el sustrato de `experiments/_s139_audit/keep_peak_paridad/` y no caben en git.
+experiments/_artefactos_ab/
+# S139: salidas regenerables de la auditoría que no aportan al commit. La tabla del banco sale de
+# `experiments/_s139_audit/eje2/banco_noches.py` en ~31 s; los logs de CI del eje 5 se vuelven a
+# bajar con `gh run view <id> --log` mientras GitHub los retenga.
+experiments/_s139_audit/eje2/banco_tabla.json
+experiments/_s139_audit/eje5/log_*.txt
+# Páginas del PDF de Coppola 2016a renderizadas para leer operadores (A95). Son material con
+# derechos de autor y el repo es público: se regeneran localmente con PyMuPDF, no se suben.
+experiments/_s139_audit/eje4/out/sp426_*.png

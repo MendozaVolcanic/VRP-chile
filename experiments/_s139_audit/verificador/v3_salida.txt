@@ -1,0 +1,36 @@
+records sin campo final_hotspot_source (SIN DATO del marcador): {}
+
+== (c) desfase a la fila CONS mas cercana del mismo volcan y sensor
+MODIS {'<=2min': '5016 (0.940)', '>20min': '213 (0.040)', '2-10min': '105 (0.020)'} | pareo <=20 min: 0.960
+VIIRS375 {'>20min': '2955 (0.284)', '<=2min': '5596 (0.538)', '10-20min': '1682 (0.162)', '2-10min': '165 (0.016)'} | pareo <=20 min: 0.716
+VIIRS750 {'>20min': '2648 (0.257)', '<=2min': '5823 (0.565)', '10-20min': '1694 (0.164)', '2-10min': '149 (0.014)'} | pareo <=20 min: 0.743
+
+== (a) objeto D19 dentro de lo publicado, y (b) proxy por pasada sin el objeto
+VIIRS375  POS               n=  994 publica 0.966 | D19 en lo publicado 171/960 | proxy sin D19 0.794
+VIIRS375  NEG_LIMPIO        n= 3245 publica 0.635 | D19 en lo publicado 1356/2062 | proxy sin D19 0.218
+VIIRS375  RUT_noche_alerta  n=  801 publica 0.757 | D19 en lo publicado 302/606 | proxy sin D19 0.380
+VIIRS375  SIN_FILA          n= 4802 publica 0.699 | D19 en lo publicado 1609/3358 | proxy sin D19 0.364
+VIIRS750  POS               n=  244 publica 0.783 | D19 en lo publicado 0/191 | proxy sin D19 0.783
+VIIRS750  NEG_LIMPIO        n= 3392 publica 0.204 | D19 en lo publicado 20/693 | proxy sin D19 0.198
+VIIRS750  RUT_noche_alerta  n= 1756 publica 0.257 | D19 en lo publicado 4/451 | proxy sin D19 0.255
+VIIRS750  SIN_FILA          n= 4491 publica 0.252 | D19 en lo publicado 25/1132 | proxy sin D19 0.246
+MODIS     POS               n=   87 publica 0.115 | D19 en lo publicado 0/10 | proxy sin D19 0.115
+MODIS     NEG_LIMPIO        n= 2977 publica 0.102 | D19 en lo publicado 0/305 | proxy sin D19 0.102
+MODIS     RUT_noche_alerta  n= 1589 publica 0.130 | D19 en lo publicado 0/207 | proxy sin D19 0.130
+MODIS     SIN_FILA          n=  318 publica 0.119 | D19 en lo publicado 0/38 | proxy sin D19 0.119
+
+== (b) proxy por NOCHE-sensor con las etiquetas del eje 2 (cons_ocr|pipeline|rutina_estricta)
+valores de etiqueta del eje 2: [('sin_fila', 9354), ('neg', 6330), ('pos', 1219), ('excl', 233)]
+MODIS     excl           n=    8 publica 0/8 (0.000) -> proxy sin D19 0/8 (0.000)
+MODIS     neg            n= 2347 publica 428/2347 (0.182) -> proxy sin D19 428/2347 (0.182)
+MODIS     pos            n=   75 publica 10/75 (0.133) -> proxy sin D19 10/75 (0.133)
+MODIS     sin_fila       n=   25 publica 4/25 (0.160) -> proxy sin D19 4/25 (0.160)
+VIIRS375  excl           n=  192 publica 144/192 (0.750) -> proxy sin D19 84/192 (0.438)
+VIIRS375  neg            n= 1393 publica 1145/1393 (0.822) -> proxy sin D19 600/1393 (0.431)
+VIIRS375  pos            n=  854 publica 840/854 (0.984) -> proxy sin D19 745/854 (0.872)
+VIIRS375  sin_fila       n=   22 publica 20/22 (0.909) -> proxy sin D19 18/22 (0.818)
+VIIRS750  excl           n=   15 publica 6/15 (0.400) -> proxy sin D19 6/15 (0.400)
+VIIRS750  neg            n= 2188 publica 1205/2188 (0.551) -> proxy sin D19 1182/2188 (0.540)
+VIIRS750  pos            n=  233 publica 200/233 (0.858) -> proxy sin D19 200/233 (0.858)
+VIIRS750  sin_fila       n=   25 publica 13/25 (0.520) -> proxy sin D19 13/25 (0.520)
+noches no negativas que el proxy dejaria sin publicar, por volcan: {('VIIRS375', 'excl', 'Chaiten'): 1, ('VIIRS375', 'pos', 'Chaiten'): 1, ('VIIRS375', 'excl', 'Copahue'): 11, ('VIIRS375', 'pos', 'Copahue'): 1, ('VIIRS375', 'pos', 'Isluga'): 4, ('VIIRS375', 'excl', 'Isluga'): 5, ('VIIRS375', 'pos', 'Lascar'): 7, ('VIIRS375', 'excl', 'Lastarria'): 6, ('VIIRS375', 'pos', 'Lastarria'): 23, ('VIIRS375', 'excl', 'Llaima'): 10, ('VIIRS375', 'excl', 'NevadosDeChillan'): 6, ('VIIRS375', 'excl', 'PlanchonPeteroa'): 7, ('VIIRS375', 'pos', 'PlanchonPeteroa'): 10, ('VIIRS375', 'excl', 'Tupungatito'): 9, ('VIIRS375', 'pos', 'Tupungatito'): 46, ('VIIRS375', 'excl', 'Villarrica'): 5, ('VIIRS375', 'pos', 'Villarrica'): 3}

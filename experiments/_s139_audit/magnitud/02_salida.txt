@@ -1,0 +1,106 @@
+CONTROL NEGATIVO: pares con desplazamiento +6 h = 0 (real = 1552)
+pares por res {375: 1499, 1000: 36, 750: 17} | |dt| max min 0.0
+
+== reproducir eje6: mediana R con pc.vrp_mw por res
+res
+375     0.551
+750     0.586
+1000    0.665
+Name: R_pc, dtype: float64
+== R publicado (V375 = f5 persistido, fallback pc)
+res
+375     0.703
+750     0.586
+1000    0.665
+Name: R, dtype: float64
+chequeo replica f5: |core_mw - f5_persist|>1e-3 en 0 de 1499
+V375 pares con f5 persistido: 1499 de 1499
+
+== descomposicion geometrica (R_gm = Fn_gm * Fex_gm exacto) por res
+           n  R_med   R_gm  Fn_gm  Fex_gm  Fn_med  Fex_med  Npix_med  pub_n_med  pc_n_med  R_pc_med
+res                                                                                                
+375   1499.0  0.703  0.659  0.553   1.192     0.5    1.284       3.0        1.0       1.0     0.551
+750     17.0  0.586  0.573  0.396   1.447     0.5    1.406       4.0        2.0       2.0     0.586
+1000    36.0  0.665  0.480  3.185   0.151     3.0    0.168       3.0        9.0       9.0     0.665
+
+== por res x SatZen
+                   n  R_med   R_gm  Fn_gm  Fex_gm  Fn_med  Fex_med  Npix_med  pub_n_med  pc_n_med  R_pc_med
+res  zbin                                                                                                  
+375  (0, 15]   304.0  0.837  0.825  0.629   1.312   0.600    1.389       3.0        2.0       2.0     0.773
+     (15, 25]  205.0  0.729  0.747  0.582   1.283   0.500    1.317       3.0        1.0       1.0     0.652
+     (25, 35]  205.0  0.623  0.668  0.520   1.284   0.500    1.332       3.0        1.0       1.0     0.530
+     (35, 50]  368.0  0.598  0.607  0.494   1.228   0.500    1.308       4.0        1.0       1.0     0.496
+     (50, 90]  417.0  0.595  0.562  0.557   1.008   0.500    1.116       3.0        1.0       1.0     0.411
+750  (0, 15]     8.0  0.706  0.659  0.493   1.337   0.500    1.407       4.0        2.0       2.0     0.706
+     (15, 25]    2.0  0.583  0.572  0.408   1.400   0.417    1.400       5.0        2.0       2.0     0.583
+     (25, 35]    4.0  0.497  0.448  0.258   1.733   0.250    1.987       4.0        1.0       1.0     0.497
+     (35, 50]    3.0  0.586  0.548  0.382   1.436   0.500    1.173       4.0        2.0       2.0     0.586
+1000 (0, 15]    18.0  0.439  0.355  2.677   0.133   2.708    0.129       3.0        9.0       9.0     0.439
+     (15, 25]   15.0  0.711  0.693  3.895   0.178   3.500    0.170       3.0       11.0      11.0     0.711
+     (25, 35]    3.0  0.634  0.462  3.302   0.140   3.000    0.211       3.0        9.0       9.0     0.634
+
+== por res x volcan
+                              n  R_med   R_gm  Fn_gm  Fex_gm  Fn_med  Fex_med  Npix_med  pub_n_med  pc_n_med  R_pc_med
+res  vol                                                                                                              
+375  Chaiten               64.0  1.404  1.384  1.274   1.086   1.000    1.003       1.0        2.0       2.0     1.002
+     Copahue               28.0  0.745  0.635  0.906   0.702   1.000    0.830       1.0        1.0       1.0     0.742
+     Isluga               333.0  0.574  0.543  0.445   1.221   0.500    1.270       3.0        1.0       1.0     0.491
+     Lascar               390.0  0.585  0.569  0.416   1.368   0.429    1.410       5.0        2.0       2.0     0.464
+     Lastarria            253.0  0.647  0.609  0.616   0.989   0.500    1.217       2.0        1.0       1.0     0.524
+     NevadosDeChillan      15.0  0.007  0.011  0.137   0.077   0.100    0.077      10.0        1.0       1.0     0.007
+     PlanchonPeteroa      166.0  0.923  0.924  0.596   1.549   0.500    1.543       2.0        1.0       1.0     0.886
+     PuyehueCordonCaulle  234.0  0.931  0.975  0.824   1.184   0.800    1.169       3.5        3.0       2.0     0.632
+     Villarrica            16.0  1.345  1.216  0.715   1.701   1.000    1.847       1.0        1.0       1.0     1.186
+750  Lascar                17.0  0.586  0.573  0.396   1.447   0.500    1.406       4.0        2.0       2.0     0.586
+1000 Lascar                35.0  0.634  0.466  3.254   0.143   3.000    0.167       3.0        9.0       9.0     0.634
+     PlanchonPeteroa        1.0  1.293  1.293  1.500   0.862   1.500    0.862       2.0        3.0       3.0     1.293
+
+== V375 por n publicado (1,2,3-5,6+)
+               n  R_med   R_gm  Fn_gm  Fex_gm  Fn_med  Fex_med  Npix_med  pub_n_med  pc_n_med  R_pc_med
+nb                                                                                                     
+(0, 1]     768.0  0.639  0.558  0.451   1.235    0.50    1.418       2.0        1.0       1.0     0.626
+(1, 2]     425.0  0.688  0.721  0.600   1.201    0.50    1.253       4.0        2.0       2.0     0.510
+(2, 5]     279.0  0.793  0.856  0.789   1.086    0.75    1.124       5.0        3.0       3.0     0.518
+(5, 1000]   27.0  1.332  1.248  1.208   1.032    1.20    1.035       5.0        6.0       4.0     0.633
+
+== V375 por Npix MIROVA (1,2,3-5,6+)
+               n  R_med   R_gm  Fn_gm  Fex_gm  Fn_med  Fex_med  Npix_med  pub_n_med  pc_n_med  R_pc_med
+Nb                                                                                                     
+(0, 1]     302.0  1.258  1.199  1.204   0.996   1.000    1.065       1.0        1.0       1.0     1.102
+(1, 2]     296.0  0.762  0.683  0.639   1.069   0.500    1.237       2.0        1.0       1.0     0.651
+(2, 5]     622.0  0.634  0.593  0.462   1.285   0.400    1.306       4.0        2.0       2.0     0.495
+(5, 1000]  279.0  0.497  0.419  0.305   1.375   0.333    1.541       7.0        2.0       2.0     0.365
+
+== V375 separacion del exceso por pixel: nivel caliente y fondo (mediana)
+n 1499 | mediana Lbg_imp/bk1 1.071 | Lbg_ring/bk1 1.2075 | hot1_ours/hot1 1.1135
+gm F_ex 1.192 gm F_hot 1.402 gm F_bg 0.875 (F_hot<=0 descartados en gm: 16 )
+T (K) medianas: fondo nuestro implicito 265.62 | t_bg_k anillo 267.33 | fondo MIROVA bk/Npix 263.38 | caliente MIROVA hot/Npix 273.07 | caliente nuestro 276.18
+diferencia de fondo (nuestro implicito - MIROVA) en K, cuantiles {0.1: -1.41, 0.25: -0.53, 0.5: 1.24, 0.75: 3.59, 0.9: 5.08}
+fondo implicito vs anillo: |Lbg_imp-Lbg_ring|/Lbg_ring > 1%: 0.542
+                         n  Tbg_imp-Tbk  Thot_ours-Thot  Fhot_gm  Fbg_gm  Fn_gm   R_gm  test1_frac
+vol                                                                                               
+Chaiten               64.0       -0.693          -0.461    0.896   1.212  1.274  1.384       0.000
+Copahue               28.0        1.754           0.531    1.217   0.576  0.906  0.635       0.143
+Isluga               333.0        2.712           2.820    1.550   0.788  0.445  0.543       0.108
+Lascar               390.0        3.703           6.331    1.631   0.839  0.416  0.569       0.074
+Lastarria            253.0        0.452           1.381    1.309   0.755  0.616  0.609       0.304
+NevadosDeChillan      15.0       -9.891         -25.649      NaN     NaN  0.137  0.011       0.933
+PlanchonPeteroa      166.0       -0.596           2.383    1.463   1.059  0.596  0.924       0.235
+PuyehueCordonCaulle  234.0       -0.452           0.531    1.118   1.066  0.824  0.975       0.000
+Villarrica            16.0       -0.952           2.663    1.712   0.994  0.715  1.216       0.000
+
+== V375 por SatZen: Fhot/Fbg
+              n     Fn   Fhot    Fbg      R   dTbg
+zbin                                              
+(0, 15]   304.0  0.629  1.497  0.891  0.825  1.438
+(15, 25]  205.0  0.582  1.443  0.923  0.747  1.048
+(25, 35]  205.0  0.520  1.443  0.904  0.668  0.930
+(35, 50]  368.0  0.494  1.435  0.880  0.607  1.838
+(50, 90]  417.0  0.557  1.272  0.823  0.562  0.858
+
+== escena dentro del radio vs publicado (V375), mediana de razones a MIROVA
+R pub 0.703 | R pc 0.551 | R suma anomaly_pixels dentro inner 0.755 | R vrp_mw escena 0.783 | pares con 100 px guardados (tope) 1
+n dentro inner / Npix mediana 0.667 | n_anom / Npix 0.75
+
+== control positivo: correlacion Spearman con SatZen (V375): Npix 0.082 | pub_n -0.016 | pc_n -0.126 | R -0.238
+== Spearman pub_n vs Npix por res: {375: 0.436, 750: 0.056, 1000: -0.155}

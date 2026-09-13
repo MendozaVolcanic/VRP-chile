@@ -1,0 +1,155 @@
+== data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado.csv
+filas=36255 ventana Fecha_Satelite_UTC 2026-01-10 19:06:00 a 2026-09-07 13:30:00
+Fecha_Proceso_GitHub min/max: 2026-01-11 22:57:40 2026-09-07 11:50:58
+CONTROL POSITIVO: fila incoherente inyectada detectada=True (n_mis=1); hueco inyectado detectado=True [(datetime.date(2026, 5, 20), datetime.date(2026, 5, 25), 4)]
+
+-- Tipo x Clasificacion x Sensor
+Sensor                               MODIS  VIIRS  VIIRS375    All
+Tipo_Registro  Clasificacion Mirova                               
+ALERTA_TERMICA Bajo                     51     84        93    228
+               Muy Bajo                 43    176       966   1185
+FALSO_POSITIVO NULO                     38     78       714    830
+RUTINA         FALSO POSITIVO            1      2         9     12
+               NULO                  10466  12818     10716  34000
+All                                  10599  13158     12498  36255
+
+-- Volcan (nombres crudos)
+Volcan
+Chaiten                  3688
+Puyehue-Cordon Caulle    3544
+Villarrica               3506
+Llaima                   3473
+Copahue                  3459
+Nevados de Chillan       3413
+PlanchonPeteroa          3328
+Lascar                   3017
+Lastarria                3014
+Isluga                   2927
+Tupungatito              2886
+
+-- Editado: {'NO': 36255}
+
+-- duplicados exactos (timestamp,Volcan,Sensor): 0
+   pares consecutivos mismo volcan+sensor separados <=300 s: 12; <=1800 s: 3428 (de 36222)
+   ejemplos <=300 s:
+      ['2026-06-04 13:55:00', 'Copahue', 'MODIS', np.float64(0.0), 'RUTINA'] | ['2026-06-04 14:00:00', np.float64(0.0), np.float64(0.0), 'RUTINA']
+      ['2026-08-17 19:50:00', 'Copahue', 'MODIS', np.float64(0.0), 'RUTINA'] | ['2026-08-17 19:55:00', np.float64(0.0), np.float64(0.0), 'RUTINA']
+      ['2026-06-04 20:30:00', 'Isluga', 'MODIS', np.float64(0.0), 'RUTINA'] | ['2026-06-04 20:35:00', np.float64(0.0), np.float64(0.0), 'RUTINA']
+      ['2026-03-09 19:15:00', 'Lascar', 'MODIS', np.float64(0.0), 'RUTINA'] | ['2026-03-09 19:20:00', np.float64(0.0), np.float64(0.0), 'RUTINA']
+      ['2026-01-17 01:20:00', 'Lastarria', 'MODIS', np.float64(0.0), 'RUTINA'] | ['2026-01-17 01:25:00', np.float64(0.0), np.float64(0.0), 'RUTINA']
+      ['2026-04-25 12:25:00', 'Nevados de Chillan', 'MODIS', np.float64(0.0), 'RUTINA'] | ['2026-04-25 12:30:00', np.float64(0.0), np.float64(0.0), 'RUTINA']
+
+-- coherencia Tipo_Registro vs regla scraper.py (limite_km actual)
+   discrepancias: 22 de 36255
+tipo_regla                         ALERTA_TERMICA  FALSO_POSITIVO
+Volcan             Tipo_Registro                                 
+Chaiten            RUTINA                       0               1
+Copahue            RUTINA                       0               2
+Lascar             RUTINA                       0               2
+Lastarria          RUTINA                       0               2
+Llaima             RUTINA                       0               1
+Nevados de Chillan RUTINA                       0               9
+Tupungatito        FALSO_POSITIVO               5               0
+   rango fechas discrepancias: 2026-01-10 19:24:01 2026-02-22 05:18:01
+        Fecha_Satelite_UTC              Volcan    Sensor  VRP_MW  Distancia_km   Tipo_Registro Clasificacion Mirova
+31106  2026-02-22 05:18:01         Tupungatito  VIIRS375    0.17          5.41  FALSO_POSITIVO                 NULO
+31555  2026-02-18 04:54:01         Tupungatito  VIIRS375    0.39          5.41  FALSO_POSITIVO                 NULO
+31715  2026-02-17 05:12:01         Tupungatito  VIIRS375    0.47          5.41  FALSO_POSITIVO                 NULO
+31855  2026-02-16 05:30:01         Tupungatito     VIIRS    0.34          5.03  FALSO_POSITIVO                 NULO
+31858  2026-02-16 05:30:01         Tupungatito  VIIRS375    0.09          5.21  FALSO_POSITIVO                 NULO
+35843  2026-01-14 17:54:00           Lastarria  VIIRS375    0.96         10.30          RUTINA                 NULO
+35846  2026-01-14 17:54:00              Lascar  VIIRS375    0.76         22.84          RUTINA                 NULO
+35891  2026-01-14 05:48:01  Nevados de Chillan  VIIRS375    0.89         17.08          RUTINA                 NULO
+35894  2026-01-14 05:48:01              Lascar  VIIRS375    1.01         19.18          RUTINA                 NULO
+35897  2026-01-14 05:48:01              Llaima  VIIRS375    0.43          8.11          RUTINA                 NULO
+35979  2026-01-13 06:06:01  Nevados de Chillan  VIIRS375    0.51         16.77          RUTINA       FALSO POSITIVO
+36006  2026-01-13 02:00:00  Nevados de Chillan     MODIS    3.24         17.26          RUTINA       FALSO POSITIVO
+
+-- geometria de los ceros
+   VRP==0 con Distancia>0: 0 de 33994
+   VRP>0 con Distancia==0: 19 de 2260
+   VRP NaN: 0
+
+-- dia/noche (hora solar local <6 o >=18 = noche) por sensor y tipo
+Tipo_Registro   ALERTA_TERMICA  FALSO_POSITIVO  RUTINA    All
+Sensor   noche                                               
+MODIS    False               5              28    5226   5259
+         True               89              10    5241   5340
+VIIRS    False               2              61    6952   7015
+         True              258              17    5868   6143
+VIIRS375 False              21             393    6210   6624
+         True             1038             321    4515   5874
+All                       1413             830   34012  36255
+   hora UTC por sensor (conteo):
+t         0     1     2   3    4     5     6     7    8     12    13   14    17    18    19    20   21
+Sensor                                                                                                
+MODIS     53  1350  1212  65    0     0   286  1527  847  1013  1496  144     0     0   531  1468  607
+VIIRS      0     0     0   0  942  2312  2803    86    0     0     0    0  1497  2786  2561   171    0
+VIIRS375   0     0     0   0  865  2171  2757    81    0     0     0    0  1451  2532  2467   174    0
+
+-- huecos globales (dias calendario sin ninguna fila, >=1 dia)
+   n huecos=0; dias perdidos total=0
+   dias con >=1 fila: 241 de 241
+
+-- cobertura por volcan x sensor: noches con >=1 fila nocturna / noches en ventana del volcan
+                   volcan    sensor  noches_con_fila  noches_ventana   frac  pasadas_noche_mediana
+0                 Chaiten     MODIS              239             240  0.996                    2.0
+1                 Chaiten     VIIRS              238             240  0.992                    2.0
+2                 Chaiten  VIIRS375              239             240  0.996                    2.0
+3                 Copahue     MODIS              238             240  0.992                    2.0
+4                 Copahue     VIIRS              239             240  0.996                    2.0
+5                 Copahue  VIIRS375              239             240  0.996                    2.0
+6                  Isluga     MODIS              235             240  0.979                    2.0
+7                  Isluga     VIIRS              239             240  0.996                    2.0
+8                  Isluga  VIIRS375              239             240  0.996                    2.0
+9                  Lascar     MODIS              237             240  0.988                    2.0
+10                 Lascar     VIIRS              237             240  0.988                    2.0
+11                 Lascar  VIIRS375              239             240  0.996                    2.0
+12              Lastarria     MODIS              237             239  0.992                    2.0
+13              Lastarria     VIIRS              239             240  0.996                    2.0
+14              Lastarria  VIIRS375              240             240  1.000                    2.0
+15                 Llaima     MODIS              240             240  1.000                    2.0
+16                 Llaima     VIIRS              239             240  0.996                    2.0
+17                 Llaima  VIIRS375              240             240  1.000                    2.0
+18     Nevados de Chillan     MODIS              240             240  1.000                    2.0
+19     Nevados de Chillan     VIIRS              239             240  0.996                    2.0
+20     Nevados de Chillan  VIIRS375              239             240  0.996                    2.0
+21        PlanchonPeteroa     MODIS              239             240  0.996                    2.0
+22        PlanchonPeteroa     VIIRS              239             240  0.996                    2.0
+23        PlanchonPeteroa  VIIRS375              239             240  0.996                    2.0
+24  Puyehue-Cordon Caulle     MODIS              240             240  1.000                    2.0
+25  Puyehue-Cordon Caulle     VIIRS              239             240  0.996                    2.0
+26  Puyehue-Cordon Caulle  VIIRS375              240             240  1.000                    2.0
+27            Tupungatito     MODIS              206             206  1.000                    2.0
+28            Tupungatito     VIIRS              205             206  0.995                    2.0
+29            Tupungatito  VIIRS375              205             206  0.995                    2.0
+30             Villarrica     MODIS              239             240  0.996                    2.0
+31             Villarrica     VIIRS              238             240  0.992                    2.0
+32             Villarrica  VIIRS375              240             240  1.000                    2.0
+
+-- latencia: primera vez vista (Fecha_Proceso_GitHub, hora Chile) menos adquisicion (Fecha_Captura_Chile), horas
+    {'count': 36151.0, 'mean': 4.06, 'std': 2.73, 'min': 0.77, '5%': 1.43, '50%': 3.34, '95%': 9.35, '99%': 13.9, 'max': 39.69}
+   latencia negativa (<-0.1 h): 0; > 24 h: 34
+   filas con Fecha_Proceso anterior a 2026-01-09 (creacion scraper): 0
+   instantes distintos de Fecha_Proceso: 4498; brechas >6 h entre corridas que agregaron filas: 109
+      2026-01-18 01:17:34 -> 2026-01-18 20:39:33 (19.4 h)
+
+-- noche de volcan (todas las pasadas nocturnas, todos los sensores): composicion
+Tipo_Registro          ALERTA  SOLO_FP  SOLO_RUTINA
+row_0                                              
+Chaiten                    36        6          198
+Copahue                     4       16          220
+Isluga                    153       25           62
+Lascar                    182       16           42
+Lastarria                 144       35           61
+Llaima                      1       14          225
+Nevados de Chillan         10       27          203
+PlanchonPeteroa            78       27          135
+Puyehue-Cordon Caulle     104        2          134
+Tupungatito               100       28           78
+Villarrica                 20        7          213
+
+-- FALSO_POSITIVO: distancia y dia/noche
+   dist km describe: {'count': 830.0, 'mean': 19.15, 'std': 7.94, 'min': 3.77, '25%': 10.67, '50%': 19.56, '75%': 25.82, 'max': 34.47}
+   noche: {False: 482, True: 348}
+   FP con dist <= limite+1 km (borde): 12
