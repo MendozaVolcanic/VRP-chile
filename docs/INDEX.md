@@ -18,6 +18,7 @@
 |---|---|---|
 | MISSION.md | Misión vinculante: clon literal MIROVA, 3 preguntas | S22 |
 | MIROVA_DIVERGENCES.md | Catálogo vivo de divergencias vs MIROVA | S71+ |
+| **AUDIT_S138.md** | **Auditoría integral S138: 6 ejes + verificador limpio. 16 hallazgos fundidos; 6 contradicciones entre fuentes (regla A51: se pausa el frente D21/D22 y se consolida). El fondo del anillo, no la compuerta, borra el cráter; la batería del Apéndice A no mide lo que dice; PyMuPDF no cura los operadores del PDF. Detalle por eje en `docs/audit_s138/`** | **S138** |
 | **PLAN_AUDITORIA_S138.md** | **Plan de la auditoría S138: seis ejes en paralelo (cierres contra el PDF, matriz de conformidad desde el PDF, verificador de instrumentos S137, D21/D22 en VIIRS, la batería como instrumento, decisiones e higiene) + verificador limpio** | **S137** |
 | **_s137/RESULTADO_FONDO_LOCAL.md** (en `experiments/`) | **Batería del Apéndice A, 8 brazos: B22 + sin compuerta + fondo local + prosa = 5/6 y 3/3; hoy 6/6 y 0/3; ninguno cumple** | **S137** |
 | _s137/RESULTADO_ETAPA_Y_FIGURAS.md (en `experiments/`) | La compuerta `bt > t_bg + 3 K` elimina el cráter de Villarrica (figura A6); sigma del dNTI de MIROVA medido en sus figuras (~0,0008); A2 detectado por el autor a 9,6 km | S137 |
