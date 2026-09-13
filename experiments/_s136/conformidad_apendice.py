@@ -168,16 +168,40 @@ def evaluar_caso(caso, pasadas):
     return "CONFORME", f"no publicamos nada, como el paper, en {len(pasadas)} pasadas"
 
 
+def _si(valor):
+    return (valor or "").strip().lower() in ("1", "true", "si")
+
+
+def brazo_desde_env(env):
+    """Que brazo corre y donde escribe, a partir de las variables de entorno.
+
+    Dos ejes independientes:
+      APENDICE_PROSA  (S136) conectiva de los Tests 2/3: max en vez de min.
+      APENDICE_B22    (S137) banda MIR primaria: B22, como el paper (banda L21ok), en vez de B21.
+    POR QUE B22. El probe de S137 (experiments/_s137/RESULTADO_SIGMA_DNTI.md) midio que con B21
+    unos 60 pixeles por escena pasan el primer paso por ruido de cuantizacion, y con B22 casi
+    ninguno. Esta bateria es la unica referencia que puede decir si lo que desaparece era ruido o
+    senal, porque trae los veredictos del autor.
+    Cada combinacion escribe en su propio directorio: los brazos no se pisan entre si (A93).
+    """
+    prosa, b22 = _si(env.get("APENDICE_PROSA")), _si(env.get("APENDICE_B22"))
+    nombre = "out_apendice" + ("_b22" if b22 else "") + ("_prosa" if prosa else "")
+    return {"prosa": prosa, "b22": b22, "out": nombre}
+
+
 def main():
     from run_pipeline import is_nighttime
     if hasattr(sys.stdout, "buffer"):
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     DEST.mkdir(parents=True, exist_ok=True)
-    # Brazo de la conectiva (S136). Patron A75: se reasigna el flag en el NAMESPACE del
+    # Brazos (S136 conectiva, S137 banda). Patron A75: se reasigna el flag en el NAMESPACE del
     # procesador, que es de donde el codigo lo lee; no se edita ningun modulo ni perfil.
-    prosa = (os.environ.get("APENDICE_PROSA") or "").strip().lower() in ("1", "true", "si")
+    brazo = brazo_desde_env(os.environ)
+    prosa = brazo["prosa"]
     if prosa:
         pm.ENABLE_TESTS_23_PROSE_BRANCH = True
+    if brazo["b22"]:
+        pm.ENABLE_MODIS_B22_PRIMARY = True
     casos = yaml.safe_load((HERE / "apendice_a.yaml").read_text(encoding="utf-8"))["casos"]
     solo = (os.environ.get("APENDICE_CASO") or "").strip()
     if solo:
@@ -187,6 +211,9 @@ def main():
           f"exclude_zones={P.ENABLE_EXCLUDE_ZONES}")
     print(f"conectiva Tests 2/3: {'PROSA  max(C1, mu+C2*sigma)' if prosa else 'FORMULA  min(C1, mu+C2*sigma)'}"
           f"   (flag efectivo en el procesador: {pm.ENABLE_TESTS_23_PROSE_BRANCH})")
+    print(f"banda MIR primaria: {'B22, como el paper' if brazo['b22'] else 'B21, lo de hoy'}"
+          f"   (flag efectivo en el procesador: {pm.ENABLE_MODIS_B22_PRIMARY})"
+          f"   salida: {brazo['out']}/")
     auth()
     salida = []
     for c in casos:
@@ -201,7 +228,7 @@ def main():
         salida.append({"caso": c["caso"], "name": c["name"], "fecha": c["fecha"],
                        "veredicto_paper": c["veredicto"], "nti_paper": c.get("nti_paper"),
                        "resultado": ver, "detalle": det, "pasadas": pas})
-    out = HERE / ("out_apendice_prosa" if prosa else "out_apendice")
+    out = HERE / brazo["out"]
     out.mkdir(exist_ok=True)
     (out / "resultado_apendice.json").write_text(
         json.dumps(salida, indent=2, ensure_ascii=False), encoding="utf-8")
