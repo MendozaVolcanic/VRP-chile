@@ -1256,7 +1256,7 @@ Guard anti-revert: `tests/test_detection_anchor.py`. Resultados: det→cráter T
 5.76→1.25 km, PCC 7.23→0.69, PP 2.69→1.14. Detalle: `docs/S98_ANCHOR_FIX_RESULTS.md`.
 (Entrada agregada retroactivamente en S105 — AUDIT_S105 detectó que faltaba acá.)
 
-## D11 — Sesgo topográfico de los paths MIR-absolutos (A69) — **CERRADA S114** (irreducible a 1 km; detección fiel a Coppola; todos los ejes agotados)
+## D11 — Sesgo topográfico de los paths MIR-absolutos (A69) — **CERRADA S114, CONDICIONADA S138** (el «irreducible a 1 km» y el «todos los ejes agotados» valen sólo bajo banda 21 primaria y compuerta de 3 K, D21 y D22, abiertas en este mismo catálogo; la «detección fiel a Coppola» es falsa en el código de hoy: la fórmula de los Tests 2 y 3 del paper no tiene condición de temperatura y `detection_context.py:532` la impone. Ver `docs/AUDIT_S138.md` §8 C2. No se reabre el frente far→summit por la vía espectral hasta consolidar D21/D22)
 
 **Divergencia formal** (S104, formalizada S105 por AUDIT_S105): en volcanes nevados
 (Villarrica/Tupungatito/Llaima) el campo nocturno BT MIR está dominado por el gradiente
