@@ -1,0 +1,254 @@
+{
+ "_meta": {
+  "osf": {
+   "archivo": "data\\mirova_reference\\VRP_GLOBAL_ARCHIVE_2025.csv",
+   "n_filas_chile": 48360,
+   "ventana": [
+    "2018-2025 (ver sonda 01)"
+   ]
+  },
+  "web": {
+   "archivo": "data\\mirova_reference\\mirova_v1_snapshot\\registro_vrp_consolidado.csv",
+   "n_filas_usadas": 2243,
+   "filtro": "Tipo_Registro in (ALERTA_TERMICA, FALSO_POSITIVO) y VRP_MW>0",
+   "ventana": [
+    "2026-01-11 05:00:01",
+    "2026-09-07 06:54:00"
+   ]
+  },
+  "umbral_cero": "<= 0.05 km (la web redondea a 2 decimales; medio píxel de 375 m son 0.19 km)",
+  "limite": "OSF y web NO son las mismas pasadas (2018-2025 vs 2026): se comparan FORMAS de distribución por volcán y sensor, no filas pareadas."
+ },
+ "controles": {
+  "positivo_npix_1": {
+   "que_deberia_pasar": "Max_Dist y d_hot coinciden (un solo píxel alertado)",
+   "n": 8357,
+   "coinciden_<=0.19km_pct": 47.1,
+   "ceros_max_dist_pct": 8.4,
+   "ceros_d_hot_pct": 4.0
+  },
+  "negativo_npix_>=11": {
+   "que_deberia_pasar": "se separan (cúmulo grande)",
+   "n": 2082,
+   "coinciden_<=0.19km_pct": 3.5,
+   "ceros_max_dist_pct": 0.0,
+   "ceros_d_hot_pct": 7.9
+  }
+ },
+ "por_volcan_sensor": [
+  {
+   "volcan": "Lascar",
+   "sensor": "VIIRS375",
+   "n_osf": 4767,
+   "n_web": 349,
+   "osf_ceros_max_dist_pct": 0.0,
+   "osf_ceros_d_hot_pct": 0.0,
+   "web_ceros_distancia_pct": 0.0,
+   "osf_max_dist_mediana": 1.5,
+   "osf_d_hot_mediana": 0.912,
+   "web_distancia_mediana": 1.55,
+   "osf_npix_mediana": 4.0
+  },
+  {
+   "volcan": "Lascar",
+   "sensor": "VIIRS",
+   "n_osf": 212,
+   "n_web": 150,
+   "osf_ceros_max_dist_pct": 0.0,
+   "osf_ceros_d_hot_pct": 0.0,
+   "web_ceros_distancia_pct": 0.0,
+   "osf_max_dist_mediana": 1.677,
+   "osf_d_hot_mediana": 0.707,
+   "web_distancia_mediana": 1.5,
+   "osf_npix_mediana": 4.0
+  },
+  {
+   "volcan": "Lascar",
+   "sensor": "MODIS",
+   "n_osf": 5049,
+   "n_web": 89,
+   "osf_ceros_max_dist_pct": 3.0,
+   "osf_ceros_d_hot_pct": 1.7,
+   "web_ceros_distancia_pct": 0.0,
+   "osf_max_dist_mediana": 1.414,
+   "osf_d_hot_mediana": 1.003,
+   "web_distancia_mediana": 1.41,
+   "osf_npix_mediana": 3.0
+  },
+  {
+   "volcan": "Chaiten",
+   "sensor": "VIIRS375",
+   "n_osf": 2964,
+   "n_web": 48,
+   "osf_ceros_max_dist_pct": 2.6,
+   "osf_ceros_d_hot_pct": 0.0,
+   "web_ceros_distancia_pct": 8.3,
+   "osf_max_dist_mediana": 0.839,
+   "osf_d_hot_mediana": 0.672,
+   "web_distancia_mediana": 0.38,
+   "osf_npix_mediana": 5.0
+  },
+  {
+   "volcan": "Puyehue-Cordon Caulle",
+   "sensor": "VIIRS375",
+   "n_osf": 4616,
+   "n_web": 176,
+   "osf_ceros_max_dist_pct": 0.0,
+   "osf_ceros_d_hot_pct": 0.0,
+   "web_ceros_distancia_pct": 0.0,
+   "osf_max_dist_mediana": 8.301,
+   "osf_d_hot_mediana": 7.559,
+   "web_distancia_mediana": 8.1,
+   "osf_npix_mediana": 4.0
+  },
+  {
+   "volcan": "Puyehue-Cordon Caulle",
+   "sensor": "VIIRS",
+   "n_osf": 351,
+   "n_web": 42,
+   "osf_ceros_max_dist_pct": 0.0,
+   "osf_ceros_d_hot_pct": 0.0,
+   "web_ceros_distancia_pct": 0.0,
+   "osf_max_dist_mediana": 8.551,
+   "osf_d_hot_mediana": 7.672,
+   "web_distancia_mediana": 7.83,
+   "osf_npix_mediana": 6.0
+  },
+  {
+   "volcan": "Lastarria",
+   "sensor": "VIIRS375",
+   "n_osf": 5340,
+   "n_web": 390,
+   "osf_ceros_max_dist_pct": 0.0,
+   "osf_ceros_d_hot_pct": 0.0,
+   "web_ceros_distancia_pct": 0.0,
+   "osf_max_dist_mediana": 2.401,
+   "osf_d_hot_mediana": 2.132,
+   "web_distancia_mediana": 10.3,
+   "osf_npix_mediana": 3.0
+  },
+  {
+   "volcan": "Villarrica",
+   "sensor": "VIIRS375",
+   "n_osf": 1998,
+   "n_web": 42,
+   "osf_ceros_max_dist_pct": 0.1,
+   "osf_ceros_d_hot_pct": 0.0,
+   "web_ceros_distancia_pct": 0.0,
+   "osf_max_dist_mediana": 1.061,
+   "osf_d_hot_mediana": 1.005,
+   "web_distancia_mediana": 10.415,
+   "osf_npix_mediana": 4.0
+  },
+  {
+   "volcan": "Nevados de Chillan",
+   "sensor": "VIIRS375",
+   "n_osf": 2935,
+   "n_web": 71,
+   "osf_ceros_max_dist_pct": 1.9,
+   "osf_ceros_d_hot_pct": 0.0,
+   "web_ceros_distancia_pct": 4.2,
+   "osf_max_dist_mediana": 0.839,
+   "osf_d_hot_mediana": 0.559,
+   "web_distancia_mediana": 8.11,
+   "osf_npix_mediana": 5.0
+  },
+  {
+   "volcan": "Nevados de Chillan",
+   "sensor": "VIIRS",
+   "n_osf": 733,
+   "n_web": 19,
+   "osf_ceros_max_dist_pct": 0.0,
+   "osf_ceros_d_hot_pct": 0.0,
+   "web_ceros_distancia_pct": 0.0,
+   "osf_max_dist_mediana": 1.677,
+   "osf_d_hot_mediana": 0.559,
+   "web_distancia_mediana": 7.5,
+   "osf_npix_mediana": 7.0
+  },
+  {
+   "volcan": "Isluga",
+   "sensor": "VIIRS375",
+   "n_osf": 4742,
+   "n_web": 272,
+   "osf_ceros_max_dist_pct": 0.2,
+   "osf_ceros_d_hot_pct": 0.0,
+   "web_ceros_distancia_pct": 0.0,
+   "osf_max_dist_mediana": 0.839,
+   "osf_d_hot_mediana": 0.886,
+   "web_distancia_mediana": 0.84,
+   "osf_npix_mediana": 3.0
+  },
+  {
+   "volcan": "Copahue",
+   "sensor": "VIIRS375",
+   "n_osf": 3374,
+   "n_web": 32,
+   "osf_ceros_max_dist_pct": 0.0,
+   "osf_ceros_d_hot_pct": 0.0,
+   "web_ceros_distancia_pct": 0.0,
+   "osf_max_dist_mediana": 2.372,
+   "osf_d_hot_mediana": 1.999,
+   "web_distancia_mediana": 21.025,
+   "osf_npix_mediana": 3.0
+  },
+  {
+   "volcan": "PlanchonPeteroa",
+   "sensor": "VIIRS375",
+   "n_osf": 1651,
+   "n_web": 147,
+   "osf_ceros_max_dist_pct": 0.1,
+   "osf_ceros_d_hot_pct": 0.0,
+   "web_ceros_distancia_pct": 0.0,
+   "osf_max_dist_mediana": 2.281,
+   "osf_d_hot_mediana": 2.353,
+   "web_distancia_mediana": 2.02,
+   "osf_npix_mediana": 2.0
+  },
+  {
+   "volcan": "PlanchonPeteroa",
+   "sensor": "VIIRS",
+   "n_osf": 49,
+   "n_web": 14,
+   "osf_ceros_max_dist_pct": 0.0,
+   "osf_ceros_d_hot_pct": 0.0,
+   "web_ceros_distancia_pct": 0.0,
+   "osf_max_dist_mediana": 20.194,
+   "osf_d_hot_mediana": 20.134,
+   "web_distancia_mediana": 2.31,
+   "osf_npix_mediana": 5.0
+  },
+  {
+   "volcan": "Llaima",
+   "sensor": "VIIRS375",
+   "n_osf": 301,
+   "n_web": 59,
+   "osf_ceros_max_dist_pct": 0.0,
+   "osf_ceros_d_hot_pct": 0.0,
+   "web_ceros_distancia_pct": 0.0,
+   "osf_max_dist_mediana": 18.832,
+   "osf_d_hot_mediana": 18.206,
+   "web_distancia_mediana": 26.11,
+   "osf_npix_mediana": 1.0
+  },
+  {
+   "volcan": "Llaima",
+   "sensor": "MODIS",
+   "n_osf": 420,
+   "n_web": 14,
+   "osf_ceros_max_dist_pct": 4.0,
+   "osf_ceros_d_hot_pct": 23.3,
+   "web_ceros_distancia_pct": 0.0,
+   "osf_max_dist_mediana": 2.828,
+   "osf_d_hot_mediana": 1.364,
+   "web_distancia_mediana": 25.81,
+   "osf_npix_mediana": 5.0
+  }
+ ],
+ "agregado": {
+  "pares_comparados": 16,
+  "media_pct_ceros_osf_max_dist": 0.7,
+  "media_pct_ceros_osf_d_hot": 1.6,
+  "media_pct_ceros_web_distancia": 0.8
+ }
+}

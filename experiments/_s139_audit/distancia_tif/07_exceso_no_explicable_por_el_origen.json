@@ -1,0 +1,150 @@
+{
+ "_meta": {
+  "entrada": "06_hipotesis_caliente_vs_lejano.json (detalle)",
+  "corte_km": 1.0,
+  "criterio_de_inclusion": "|distancia publicada - distancia al foco| <= 1 km, para quedarse con las pasadas donde el foco del TIF ES la anomalía que la web reportó",
+  "modelo": "residuo = a + b·cos(rumbo) + c·sen(rumbo); `a` es el exceso que ningún corrimiento de origen puede explicar",
+  "esperado_si_mas_caliente_km": 0.0,
+  "esperado_si_mas_lejano_km": "+0,21 (VIIRS375, mediana OSF de Max_Dist - d_hot)"
+ },
+ "controles_sobre_el_archivo_OSF": {
+  "CONTROL_pos_publicada=mas_caliente": {
+   "n": 32688,
+   "constante_km": 0.0,
+   "IC95_km": [
+    0.0,
+    0.0
+   ],
+   "amplitud_direccional_km": 0.0,
+   "residuo_mediano_bruto_km": 0.0
+  },
+  "CONTROL_neg_publicada=Max_Dist": {
+   "n": 30537,
+   "constante_km": 0.232,
+   "IC95_km": [
+    0.229,
+    0.235
+   ],
+   "amplitud_direccional_km": 0.303,
+   "residuo_mediano_bruto_km": 0.21
+  },
+  "CONTROL_neg_con_origen_corrido_250m": {
+   "n": 30537,
+   "constante_km": 0.232,
+   "IC95_km": [
+    0.229,
+    0.235
+   ],
+   "amplitud_direccional_km": 0.303,
+   "residuo_mediano_bruto_km": 0.21
+  }
+ },
+ "n_disponibles": 385,
+ "n_incluidos": 171,
+ "global": {
+  "n": 171,
+  "constante_km": 0.113,
+  "IC95_km": [
+   0.072,
+   0.153
+  ],
+  "amplitud_direccional_km": 0.084,
+  "residuo_mediano_bruto_km": 0.093
+ },
+ "por_sensor": {
+  "VIIRS375": {
+   "n": 160,
+   "constante_km": 0.106,
+   "IC95_km": [
+    0.067,
+    0.146
+   ],
+   "amplitud_direccional_km": 0.078,
+   "residuo_mediano_bruto_km": 0.093
+  }
+ },
+ "por_tipo": {
+  "ALERTA_TERMICA": {
+   "n": 105,
+   "constante_km": 0.291,
+   "IC95_km": [
+    0.176,
+    0.423
+   ],
+   "amplitud_direccional_km": 0.254,
+   "residuo_mediano_bruto_km": 0.215
+  },
+  "FALSO_POSITIVO": {
+   "n": 66,
+   "constante_km": 0.063,
+   "IC95_km": [
+    0.009,
+    0.121
+   ],
+   "amplitud_direccional_km": 0.08,
+   "residuo_mediano_bruto_km": 0.039
+  }
+ },
+ "foco_cerca_<=5km": {
+  "n": 79,
+  "constante_km": 0.301,
+  "IC95_km": [
+   0.18,
+   0.436
+  ],
+  "amplitud_direccional_km": 0.178,
+  "residuo_mediano_bruto_km": 0.285
+ },
+ "foco_lejos_>10km": {
+  "n": 63,
+  "constante_km": 0.063,
+  "IC95_km": [
+   0.003,
+   0.123
+  ],
+  "amplitud_direccional_km": 0.07,
+  "residuo_mediano_bruto_km": 0.042
+ },
+ "por_volcan": {
+  "Isluga": {
+   "n": 41,
+   "constante_km": 0.246,
+   "IC95_km": [
+    0.153,
+    0.353
+   ],
+   "amplitud_direccional_km": 0.094,
+   "residuo_mediano_bruto_km": 0.22
+  },
+  "Lascar": {
+   "n": 45,
+   "constante_km": 0.268,
+   "IC95_km": [
+    0.064,
+    0.398
+   ],
+   "amplitud_direccional_km": 0.314,
+   "residuo_mediano_bruto_km": 0.285
+  },
+  "PuyehueCordonCaulle": {
+   "n": 26,
+   "constante_km": 0.839,
+   "IC95_km": [
+    -80.836,
+    636.951
+   ],
+   "amplitud_direccional_km": 1.08,
+   "residuo_mediano_bruto_km": -0.098
+  }
+ },
+ "control_negativo_residuos_barajados": {
+  "n": 171,
+  "constante_km": 0.136,
+  "IC95_km": [
+   0.09,
+   0.179
+  ],
+  "amplitud_direccional_km": 0.054,
+  "residuo_mediano_bruto_km": 0.093
+ }
+}
