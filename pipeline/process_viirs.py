@@ -55,6 +55,7 @@ from .anomaly_pixels import build_anomaly_pixels
 from .vrp_regimes import compute_local_background
 from .path_d_cap import apply_d9_scene_cap  # F50/S77
 from .product_version import product_version_from_granule  # S140 8b
+from .diag_fondo import radiancia_planck, redondear_diag  # S140 T7
 
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
@@ -893,6 +894,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     hotspot_lon = None
     hotspot_dist_km = None
     anomaly_pixels = []   # All anomalous pixels with location + per-pixel VRP
+    diag_L_bg_local = None  # S140 T7: sólo si actúa el kernel local
     # S46 drift23 — first_pass_tests_2_and_3 diag (default outside I04 block).
     fp_diag = None
     # S46 Task 5 Drift #4 — second_pass_adjacent recapture counter (default 0).
@@ -1406,6 +1408,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     if not np.isnan(t_bg_i04):
                         t_bk_arr = np.where(np.isnan(t_bk_arr), t_bg_i04, t_bk_arr)
                     L_bg = bt_to_spectral_radiance(t_bk_arr, I04_LAMBDA)
+                    diag_L_bg_local = redondear_diag(float(np.nanmedian(L_bg)))  # S140 T7: fondo local que se resta
                 else:
                     L_bg = bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA)
 
@@ -2094,6 +2097,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "distance_class": distance_class,
         "anomaly_pixels": anomaly_pixels,
         "t_bg_k": round(t_bg_i04, 2) if not np.isnan(t_bg_i04) else None,
+        # S140 T7: fondo en radiancia, en la banda del delta_L, para comparar con Tot_Lmir_bk de MIROVA.
+        "diag_L_bg_w_m2_sr_um": redondear_diag(radiancia_planck(t_bg_i04, I04_LAMBDA)),
+        "diag_n_bg_anillo": int(n_bg_i04),  # píxeles del anillo en la mediana de t_bg (no los "suitable" del paper)
+        "diag_L_bg_local_w_m2_sr_um": diag_L_bg_local,
         "t_max_i04_k": round(t_max_i04, 2) if not np.isnan(t_max_i04) else None,
         "t_max_i05_k": round(t_max_i05, 2) if not np.isnan(t_max_i05) else None,
         "sensor": sensor,
