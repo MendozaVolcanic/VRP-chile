@@ -1,4 +1,4 @@
-# Manuscrito VRP Chile — cómo se trabaja esta carpeta (S135)
+# Manuscrito VRP Chile: cómo se trabaja esta carpeta (S135)
 
 **Revista decidida**: Volcanica (diamond OA; decisión S120, `../PAPER_VRP_CHILE_DRAFT_S72.md` §0).
 **Idioma del manuscrito**: inglés. **Idioma de las notas al editor**: español de Chile.
