@@ -318,6 +318,36 @@ verificar la página) y en D17/D25 la cita de Fernandina p. 9 (verificada).
 
 ---
 
+### Tarea 10: segunda pasada de lectura de papers (sin tocar código)
+
+Motivo: el inventario S139 (`docs/audit_s139/LECTURA_PDF_TABLAS_FIGURAS.md` l. 16-23) cubrió sólo los
+seis PDF de prioridad 1 y declara que **no** leyó la tesis de Massimetti (204 p.) ni los PDF de
+prioridad 2, y que su cruce automático de citas falló. Coppola 2023 §2.5 y Fernandina 2025 p. 9 los
+leyó el orquestador; el resto del corpus del grupo MIROVA sigue sin revisión renderizada.
+
+- [ ] Lista cerrada de PDF del grupo MIROVA (Torino, Firenze, Sapienza; excluir Catania y Potenza, A9)
+  con `ls documentacion/*.pdf` + afiliación en p. 1; incluir los `feart-*.pdf` y los de `coppola*`.
+- [ ] Por cada uno: páginas con tablas, ecuaciones o figuras con parámetros → renderizar
+  (`page.get_pixmap(dpi=150)`) y leer la imagen; anotar valores que respondan divergencias abiertas
+  (D17 a D29, conectiva, ETI) o preguntas del correo a Coppola.
+- [ ] Tesis de Massimetti: capítulos 2 a 5, sólo secciones de método (umbrales, fondo, ROI, VIIRS).
+- [ ] Salida `docs/audit_s139/LECTURA_PDF_SEGUNDA_PASADA.md`; PNG fuera de git (derechos, repo público).
+- [ ] Verificador con contexto limpio sobre cada afirmación que cambie una divergencia.
+
+### Tarea 11: correcciones heredadas de las mediciones de distancia (S139)
+
+- [ ] El banco (tarea 3) ubica el foco de un TIF con **máximo del campo MIR menos su mediana móvil de
+  9 píxeles** (3,4 km en VIIRS375), nunca con el máximo crudo: el crudo cae en el gradiente topográfico
+  (A69), a 22,5 km del centro en mediana (`docs/audit_s139/DISTANCIA_MIROVA_VS_TIF.md` §3 y §6).
+- [ ] Toda distancia a MIROVA se mide desde su origen real, ~250 m al SO de `Volc_LAT/LON`
+  (`DISTANCIA_MIROVA_VS_TIF.md` §5), y el umbral del scraper se toma del código de Mirova-v1
+  (`limite_km`, igual a `inner_radius_km`; Tupungatito 5 km hasta 2026-02-22 y 7 km desde 2026-02-23),
+  no estimado de los datos.
+- [ ] Ningún porcentaje calculado sobre el OSF se usa como número del NRT (archivo supervisado a mano,
+  Coppola 2023 §2.5): sólo definiciones por fila.
+- [ ] Frente de la conectiva (D26): anotar en el catálogo la pieza de Coppola 2014 p. 9 (`and`
+  explícito en su test 2), sin cerrar el frente.
+
 ## Autoevaluación del plan contra la spec
 
 - §3.1 banco → tareas 2, 3. §3.2 magnitud → 4. §3.3 línea base → 5. §3.4 auto-audit → 6.

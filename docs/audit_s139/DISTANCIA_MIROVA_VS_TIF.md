@@ -6,6 +6,29 @@ No se tocó `../mirova-tif-archive` salvo para leerlo.
 
 ---
 
+## 0. Adenda del orquestador (2026-09-14, después de la entrega)
+
+Revisado a pedido de Nicolás. Tres correcciones a cómo se leyó este informe; el trabajo de medición no
+cambia:
+
+1. **La conclusión es SOSPECHA fuerte, no demostración.** De las dos pruebas de §6, la pendiente apoya
+   `Max_Dist`, pero la constante sobre todas las pasadas (+0,113 km [0,072; 0,153]) excluye **las dos**
+   predicciones (0 y +0,232) y queda entre ellas; en FALSO_POSITIVO no decide. El título de este
+   informe dice más de lo que los datos sostienen.
+2. **Los conteos de §5 y §8 calculados sobre el OSF no valen para el NRT.** El archivo está supervisado
+   a mano: Coppola 2023 (feart-11-1240107) §2.5, p. 4, "the entire dataset has been supervised to remove
+   obvious non-volcanic thermal features ... removing data points related to fires or false alerts"
+   (página leída renderizada). Quitar incendios cambia justamente la población de filas con foco lejano.
+   Del OSF sólo sirven definiciones por fila.
+3. **Dato sólo NRT** (`06_hipotesis_caliente_vs_lejano.json`, `control_prominencia_por_etiqueta`): el foco
+   dominante del TIF cae dentro del radio en el 4,7 % de 128 pasadas FALSO_POSITIVO, en el 33,3 % de 396
+   ALERTA_TERMICA y en el 10,2 % de 1.418 RUTINA. Que en ALERTA sea sólo un tercio muestra que el
+   instrumento encuentra el foco **dominante** de la escena, no la señal débil del cráter: no puede
+   descartar un cráter activo detrás de un foco lejano.
+
+Consecuencia en el plan (spec §7.1): FALSO_POSITIVO sigue "sin información" para el cráter; la pregunta
+11 a Coppola es necesaria para cerrar la definición.
+
 ## 1. Respuesta
 
 El número que MIROVA publica por pasada, el que el scraper guarda como `Distancia_km` y con el que
