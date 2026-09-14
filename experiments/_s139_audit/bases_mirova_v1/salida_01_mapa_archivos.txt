@@ -1,0 +1,224 @@
+carpeta de datos: C:/Users/nmend/AppData/Local/Temp/claude/C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile/6866b37f-71f0-4a5d-aa35-4d359e9beac8/scratchpad/remoto/monitoreo_satelital
+remoto: f51634e165bd0a6c455811a358274d61c17035a6	2026-09-14T12:01:05Z
+================================================================================================
+MAPA DE ARCHIVOS
+  P1 (si estuviera roto, lo veria?): si un archivo no fuera la derivacion declarada, las llaves no coincidirian y se listan las diferencias
+  P2 (si el instrumento estuviera muerto, se veria distinto?): un archivo vacio o ilegible da filas=0 y se imprime como tal, no como 'coincide'
+  Control positivo: se quita una fila a la copia de positivos y se comprueba que la comparacion la detecta
+================================================================================================
+
+--- registro_vrp_consolidado.csv: 37474 filas, 17 columnas
+    columnas: ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado']
+    rango Fecha_Satelite_UTC: 2026-01-10 19:06:00 -> 2026-09-14 07:40:00
+    Tipo_Registro: {'RUTINA': 35160, 'ALERTA_TERMICA': 1462, 'FALSO_POSITIVO': 852}
+    Sensor: {'VIIRS': 13598, 'VIIRS375': 12950, 'MODIS': 10926}
+    Volcan: {'Chaiten': 3804, 'Puyehue-Cordon Caulle': 3656, 'Villarrica': 3616, 'Llaima': 3583, 'Copahue': 3573, 'Nevados de Chillan': 3526, 'PlanchonPeteroa': 3440, 'Lascar': 3126, 'Lastarria': 3124, 'Isluga': 3029, 'Tupungatito': 2997}
+    duplicados por (timestamp, Volcan, Sensor): 0
+    Editado: {'NO': 37474}
+
+--- registro_vrp_positivos.csv: 1462 filas, 17 columnas
+    columnas: ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado']
+    rango Fecha_Satelite_UTC: 2026-01-11 05:00:01 -> 2026-09-14 06:42:01
+    Tipo_Registro: {'ALERTA_TERMICA': 1462}
+    Sensor: {'VIIRS375': 1101, 'VIIRS': 267, 'MODIS': 94}
+    Volcan: {'Lascar': 463, 'Isluga': 247, 'Puyehue-Cordon Caulle': 230, 'Lastarria': 170, 'Tupungatito': 154, 'PlanchonPeteroa': 101, 'Chaiten': 49, 'Villarrica': 28, 'Nevados de Chillan': 15, 'Copahue': 4, 'Llaima': 1}
+    duplicados por (timestamp, Volcan, Sensor): 0
+    Editado: {'NO': 1462}
+
+--- registro_vrp_ocr.csv: 961 filas, 27 columnas
+    columnas: ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado', 'Color_Punto_Dist', 'Confianza_Validacion', 'Requiere_Verificacion', 'Metodo_Validacion', 'Nota_Validacion', 'Version_OCR', 'Zenith_Sat_deg', 'Azimut_Sat_deg', 'Nivel_Anomalia_MIROVA', 'Confianza_Geometria']
+    rango Fecha_Satelite_UTC: 2026-01-20 05:12:00 -> 2026-09-14 06:42:01
+    Tipo_Registro: {'ALERTA_TERMICA_OCR': 870, 'FALSO_POSITIVO_OCR': 91}
+    Sensor: {'VIIRS375': 844, 'VIIRS': 79, 'MODIS': 38}
+    Volcan: {'Lascar': 300, 'Lastarria': 157, 'Isluga': 146, 'Puyehue-Cordon Caulle': 143, 'PlanchonPeteroa': 71, 'Tupungatito': 65, 'Chaiten': 38, 'Villarrica': 24, 'Nevados de Chillan': 9, 'Copahue': 4, 'Llaima': 4}
+    duplicados por (timestamp, Volcan, Sensor): 0
+    Confianza_Validacion: {'alta': 862, 'baja': 75, 'media': 24}
+    Version_OCR: {'21.0': 592, '29.2': 168, '30.0': 137, '1.0': 43, '20.0': 10, '17.0': 7, '29.1': 4}
+    Metodo_Validacion: {'roi_temporal_v26': 901, 'negro_dominante_con_estrella': 11, 'sin_pixeles_roi': 8, 'solo_rojos_densidad': 8, 'roi_temporal_v19': 6, 'desconocido': 6, 'mezcla_con_estrella': 5, 'rojo_dominante_con_estrella': 5, 'roi_temporal_v25': 4, 'solo_negros_densidad': 3, 'mezcla_densidad': 2, 'roi_temporal_v17': 1}
+    Color_Punto_Dist: {'mixto': 912, 'negro': 15, 'sin_punto': 14, 'rojo': 13, 'mezcla': 7}
+    Requiere_Verificacion: {'False': 947, 'True': 14}
+    Editado: {'NO': 889, 'SI': 49, 'AUTO': 23}
+    Nivel_Anomalia_MIROVA: {'': 872, 'VERY_LOW': 76, 'LOW': 8, 'NONE': 5}
+    Confianza_Geometria: {'': 826, 'alta': 135}
+
+--- registro_vrp_maestro_publicable.csv: 2005 filas, 21 columnas
+    columnas: ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado', 'Origen_Dato', 'Confianza_Validacion', 'Requiere_Verificacion', 'Nota_Validacion']
+    rango Fecha_Satelite_UTC: 2026-01-11 05:00:01 -> 2026-09-14 06:42:01
+    Tipo_Registro: {'ALERTA_TERMICA': 1461, 'ALERTA_TERMICA_OCR': 544}
+    Sensor: {'VIIRS375': 1597, 'VIIRS': 311, 'MODIS': 97}
+    Volcan: {'Lascar': 628, 'Isluga': 337, 'Puyehue-Cordon Caulle': 312, 'Lastarria': 261, 'Tupungatito': 193, 'PlanchonPeteroa': 146, 'Chaiten': 62, 'Villarrica': 42, 'Nevados de Chillan': 16, 'Copahue': 5, 'Llaima': 3}
+    duplicados por (timestamp, Volcan, Sensor): 0
+    Origen_Dato: {'latest.php': 1135, 'OCR': 544, 'ambos': 326}
+    Confianza_Validacion: {'alta': 1989, 'media': 15, 'baja': 1}
+    Requiere_Verificacion: {'False': 1996, 'True': 9}
+    Editado: {'NO': 2005}
+
+--- registro_Chaiten.csv: 62 filas, 21 columnas
+    columnas: ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado', 'Origen_Dato', 'Confianza_Validacion', 'Requiere_Verificacion', 'Nota_Validacion']
+    rango Fecha_Satelite_UTC: 2026-01-19 06:00:01 -> 2026-09-14 05:42:02
+    Tipo_Registro: {'ALERTA_TERMICA': 49, 'ALERTA_TERMICA_OCR': 13}
+    Sensor: {'VIIRS375': 57, 'MODIS': 3, 'VIIRS': 2}
+    Volcan: {'Chaiten': 62}
+    duplicados por (timestamp, Volcan, Sensor): 0
+    Origen_Dato: {'latest.php': 26, 'ambos': 23, 'OCR': 13}
+    Confianza_Validacion: {'alta': 61, 'baja': 1}
+    Requiere_Verificacion: {'False': 61, 'True': 1}
+    Editado: {'NO': 62}
+
+--- registro_Copahue.csv: 5 filas, 21 columnas
+    columnas: ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado', 'Origen_Dato', 'Confianza_Validacion', 'Requiere_Verificacion', 'Nota_Validacion']
+    rango Fecha_Satelite_UTC: 2026-04-22 05:12:01 -> 2026-08-10 05:54:01
+    Tipo_Registro: {'ALERTA_TERMICA': 4, 'ALERTA_TERMICA_OCR': 1}
+    Sensor: {'VIIRS375': 4, 'VIIRS': 1}
+    Volcan: {'Copahue': 5}
+    duplicados por (timestamp, Volcan, Sensor): 0
+    Origen_Dato: {'latest.php': 4, 'OCR': 1}
+    Confianza_Validacion: {'alta': 5}
+    Requiere_Verificacion: {'False': 5}
+    Editado: {'NO': 5}
+
+--- registro_Isluga.csv: 337 filas, 21 columnas
+    columnas: ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado', 'Origen_Dato', 'Confianza_Validacion', 'Requiere_Verificacion', 'Nota_Validacion']
+    rango Fecha_Satelite_UTC: 2026-01-13 18:12:00 -> 2026-09-14 05:36:02
+    Tipo_Registro: {'ALERTA_TERMICA': 247, 'ALERTA_TERMICA_OCR': 90}
+    Sensor: {'VIIRS375': 295, 'VIIRS': 42}
+    Volcan: {'Isluga': 337}
+    duplicados por (timestamp, Volcan, Sensor): 0
+    Origen_Dato: {'latest.php': 204, 'OCR': 90, 'ambos': 43}
+    Confianza_Validacion: {'alta': 335, 'media': 2}
+    Requiere_Verificacion: {'False': 335, 'True': 2}
+    Editado: {'NO': 337}
+
+--- registro_Lascar.csv: 628 filas, 21 columnas
+    columnas: ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado', 'Origen_Dato', 'Confianza_Validacion', 'Requiere_Verificacion', 'Nota_Validacion']
+    rango Fecha_Satelite_UTC: 2026-01-11 05:00:01 -> 2026-09-14 05:36:02
+    Tipo_Registro: {'ALERTA_TERMICA': 463, 'ALERTA_TERMICA_OCR': 165}
+    Sensor: {'VIIRS375': 354, 'VIIRS': 183, 'MODIS': 91}
+    Volcan: {'Lascar': 628}
+    duplicados por (timestamp, Volcan, Sensor): 0
+    Origen_Dato: {'latest.php': 358, 'OCR': 165, 'ambos': 105}
+    Confianza_Validacion: {'alta': 625, 'media': 3}
+    Requiere_Verificacion: {'False': 625, 'True': 3}
+    Editado: {'NO': 628}
+
+--- registro_Lastarria.csv: 261 filas, 21 columnas
+    columnas: ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado', 'Origen_Dato', 'Confianza_Validacion', 'Requiere_Verificacion', 'Nota_Validacion']
+    rango Fecha_Satelite_UTC: 2026-01-11 06:24:00 -> 2026-09-13 06:36:00
+    Tipo_Registro: {'ALERTA_TERMICA': 170, 'ALERTA_TERMICA_OCR': 91}
+    Sensor: {'VIIRS375': 261}
+    Volcan: {'Lastarria': 261}
+    duplicados por (timestamp, Volcan, Sensor): 0
+    Origen_Dato: {'latest.php': 133, 'OCR': 91, 'ambos': 37}
+    Confianza_Validacion: {'alta': 258, 'media': 3}
+    Requiere_Verificacion: {'False': 260, 'True': 1}
+    Editado: {'NO': 261}
+
+--- registro_Llaima.csv: 3 filas, 21 columnas
+    columnas: ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado', 'Origen_Dato', 'Confianza_Validacion', 'Requiere_Verificacion', 'Nota_Validacion']
+    rango Fecha_Satelite_UTC: 2026-05-15 05:30:02 -> 2026-05-29 05:00:00
+    Tipo_Registro: {'ALERTA_TERMICA_OCR': 2, 'ALERTA_TERMICA': 1}
+    Sensor: {'VIIRS375': 3}
+    Volcan: {'Llaima': 3}
+    duplicados por (timestamp, Volcan, Sensor): 0
+    Origen_Dato: {'OCR': 2, 'latest.php': 1}
+    Confianza_Validacion: {'alta': 3}
+    Requiere_Verificacion: {'False': 3}
+    Editado: {'NO': 3}
+
+--- registro_Nevados_de_Chillan.csv: 16 filas, 21 columnas
+    columnas: ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado', 'Origen_Dato', 'Confianza_Validacion', 'Requiere_Verificacion', 'Nota_Validacion']
+    rango Fecha_Satelite_UTC: 2026-03-17 13:15:00 -> 2026-09-14 05:42:02
+    Tipo_Registro: {'ALERTA_TERMICA': 15, 'ALERTA_TERMICA_OCR': 1}
+    Sensor: {'VIIRS375': 14, 'VIIRS': 1, 'MODIS': 1}
+    Volcan: {'Nevados de Chillan': 16}
+    duplicados por (timestamp, Volcan, Sensor): 0
+    Origen_Dato: {'latest.php': 8, 'ambos': 7, 'OCR': 1}
+    Confianza_Validacion: {'alta': 15, 'media': 1}
+    Requiere_Verificacion: {'False': 16}
+    Editado: {'NO': 16}
+
+--- registro_PlanchonPeteroa.csv: 146 filas, 21 columnas
+    columnas: ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado', 'Origen_Dato', 'Confianza_Validacion', 'Requiere_Verificacion', 'Nota_Validacion']
+    rango Fecha_Satelite_UTC: 2026-01-13 06:06:01 -> 2026-09-14 05:42:02
+    Tipo_Registro: {'ALERTA_TERMICA': 101, 'ALERTA_TERMICA_OCR': 45}
+    Sensor: {'VIIRS375': 136, 'VIIRS': 10}
+    Volcan: {'PlanchonPeteroa': 146}
+    duplicados por (timestamp, Volcan, Sensor): 0
+    Origen_Dato: {'latest.php': 81, 'OCR': 45, 'ambos': 20}
+    Confianza_Validacion: {'alta': 143, 'media': 3}
+    Requiere_Verificacion: {'False': 145, 'True': 1}
+    Editado: {'NO': 146}
+
+--- registro_Puyehue_Cordon_Caulle.csv: 312 filas, 21 columnas
+    columnas: ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado', 'Origen_Dato', 'Confianza_Validacion', 'Requiere_Verificacion', 'Nota_Validacion']
+    rango Fecha_Satelite_UTC: 2026-01-11 05:06:01 -> 2026-09-14 06:42:01
+    Tipo_Registro: {'ALERTA_TERMICA': 229, 'ALERTA_TERMICA_OCR': 83}
+    Sensor: {'VIIRS375': 261, 'VIIRS': 51}
+    Volcan: {'Puyehue-Cordon Caulle': 312}
+    duplicados por (timestamp, Volcan, Sensor): 0
+    Origen_Dato: {'latest.php': 170, 'OCR': 83, 'ambos': 59}
+    Confianza_Validacion: {'alta': 311, 'media': 1}
+    Requiere_Verificacion: {'False': 311, 'True': 1}
+    Editado: {'NO': 312}
+
+--- registro_Tupungatito.csv: 193 filas, 21 columnas
+    columnas: ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado', 'Origen_Dato', 'Confianza_Validacion', 'Requiere_Verificacion', 'Nota_Validacion']
+    rango Fecha_Satelite_UTC: 2026-02-12 06:24:00 -> 2026-09-14 05:42:02
+    Tipo_Registro: {'ALERTA_TERMICA': 154, 'ALERTA_TERMICA_OCR': 39}
+    Sensor: {'VIIRS375': 178, 'VIIRS': 15}
+    Volcan: {'Tupungatito': 193}
+    duplicados por (timestamp, Volcan, Sensor): 0
+    Origen_Dato: {'latest.php': 131, 'OCR': 39, 'ambos': 23}
+    Confianza_Validacion: {'alta': 191, 'media': 2}
+    Requiere_Verificacion: {'False': 193}
+    Editado: {'NO': 193}
+
+--- registro_Villarrica.csv: 42 filas, 21 columnas
+    columnas: ['timestamp', 'Fecha_Satelite_UTC', 'Fecha_Captura_Chile', 'Volcan', 'Sensor', 'VRP_MW', 'Distancia_km', 'Tipo_Registro', 'Clasificacion Mirova', 'Ruta Foto', 'Fecha_Proceso_GitHub', 'Ultima_Actualizacion', 'Editado', 'Origen_Dato', 'Confianza_Validacion', 'Requiere_Verificacion', 'Nota_Validacion']
+    rango Fecha_Satelite_UTC: 2026-01-13 05:48:00 -> 2026-09-14 05:42:02
+    Tipo_Registro: {'ALERTA_TERMICA': 28, 'ALERTA_TERMICA_OCR': 14}
+    Sensor: {'VIIRS375': 34, 'VIIRS': 6, 'MODIS': 2}
+    Volcan: {'Villarrica': 42}
+    duplicados por (timestamp, Volcan, Sensor): 0
+    Origen_Dato: {'latest.php': 19, 'OCR': 14, 'ambos': 9}
+    Confianza_Validacion: {'alta': 42}
+    Requiere_Verificacion: {'False': 42}
+    Editado: {'NO': 42}
+
+=== DERIVACION 1: positivos == consolidado[Tipo_Registro == ALERTA_TERMICA] ?
+  consolidado ALERTA: 1462 | positivos: 1462 | solo en cons: 0 | solo en positivos: 0
+  tipos en positivos: {'ALERTA_TERMICA': 1462}
+  CONTROL: quitando 1 fila a positivos, solo-en-cons pasa a 1 (esperado 1 mas)
+
+=== DERIVACION 2: maestro_publicable == dedup(cons + ocr) filtrado ?
+  reconstruido: 2005 | maestro publicado: 2005 | solo reconstruido: 0 | solo publicado: 0
+  Origen_Dato en maestro: {'latest.php': 1135, 'OCR': 544, 'ambos': 326}
+  Tipo en maestro: {'ALERTA_TERMICA': 1461, 'ALERTA_TERMICA_OCR': 544}
+  filas 'ambos': 326; de ellas Tipo ALERTA_TERMICA (gano cons): 326
+
+=== DERIVACION 3: registro_<Volcan>.csv == maestro[Volcan] ?
+  registro_Chaiten.csv                     maestro=  62 archivo=  62 OK
+  registro_Copahue.csv                     maestro=   5 archivo=   5 OK
+  registro_Isluga.csv                      maestro= 337 archivo= 337 OK
+  registro_Lascar.csv                      maestro= 628 archivo= 628 OK
+  registro_Lastarria.csv                   maestro= 261 archivo= 261 OK
+  registro_Llaima.csv                      maestro=   3 archivo=   3 OK
+  registro_Nevados_de_Chillan.csv          maestro=  16 archivo=  16 OK
+  registro_PlanchonPeteroa.csv             maestro= 146 archivo= 146 OK
+  registro_Puyehue_Cordon_Caulle.csv       maestro= 312 archivo= 312 OK
+  registro_Tupungatito.csv                 maestro= 193 archivo= 193 OK
+  registro_Villarrica.csv                  maestro=  42 archivo=  42 OK
+  suma por volcan: 2005 vs maestro: 2005
+
+=== OCR: que aporta el OCR que el consolidado no tiene (por tipo) ===
+  ALERTA_TERMICA_OCR      870 filas; con misma llave en consolidado: 327; solo OCR: 543
+  FALSO_POSITIVO_OCR       91 filas; con misma llave en consolidado: 69; solo OCR: 22
+  ALERTA_TERMICA_OCR con misma llave que una ALERTA del consolidado: 327
+  ALERTA_TERMICA_OCR con una ALERTA del consolidado a +-60 s (mismo volcan y sensor): 327
+
+=== Columnas V30 del OCR pobladas (Zenith/Azimut/Nivel banner) ===
+  Zenith_Sat_deg           no vacias: 135 / 961
+  Azimut_Sat_deg           no vacias: 135 / 961
+  Nivel_Anomalia_MIROVA    no vacias: 89 / 961
+  Confianza_Geometria      no vacias: 135 / 961
+  Nivel_Anomalia_MIROVA por Tipo: {('ALERTA_TERMICA_OCR', 'VERY_LOW'): 74.0, ('ALERTA_TERMICA_OCR', 'NONE'): 5.0, ('ALERTA_TERMICA_OCR', 'LOW'): 5.0, ('FALSO_POSITIVO_OCR', 'VERY_LOW'): 2.0, ('FALSO_POSITIVO_OCR', 'NONE'): nan, ('FALSO_POSITIVO_OCR', 'LOW'): 3.0}

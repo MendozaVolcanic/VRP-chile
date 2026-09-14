@@ -1,0 +1,56 @@
+================================================================================================
+CRONOLOGIA DE LAS FILAS PERDIDAS Y DISTANCIAS OCR PRE-V29
+  P1 (si estuviera roto, lo veria?): si nada se hubiera perdido, cada version historica contendria el 100 % de las llaves de la copia del 08-abr; si se perdio de una vez, habria un escalon; si es progresivo, una pendiente
+  P2 (si el instrumento estuviera muerto, se veria distinto?): cada version imprime cuantas de las llaves buscadas contiene (n/244); un archivo ilegible se reporta como error, no como 0
+  Control positivo: la copia del 08-abr contra si misma debe dar 244/244 presentes
+================================================================================================
+llaves de la copia del 08-abr ausentes en el remoto de hoy: 244
+CONTROL: presentes en la propia copia del 08-abr: 244/244
+
+version historica del remoto -> cuantas de esas llaves seguian presentes (y filas totales)
+  cons_2026-04-09.csv: filas  11401, max 2026-04-08 20:25:00 -> presentes 244/244  {'RUTINA': 221, 'ALERTA_TERMICA': 17, 'FALSO_POSITIVO': 6}
+  cons_2026-04-20.csv: filas  13365, max 2026-04-19 19:48:00 -> presentes 244/244  {'RUTINA': 221, 'ALERTA_TERMICA': 17, 'FALSO_POSITIVO': 6}
+  cons_2026-05-02.csv: filas  15176, max 2026-05-01 18:12:01 -> presentes 139/244  {'RUTINA': 124, 'ALERTA_TERMICA': 11, 'FALSO_POSITIVO': 4}
+  cons_2026-05-20.csv: filas  18138, max 2026-05-19 21:45:00 -> presentes 139/244  {'RUTINA': 124, 'ALERTA_TERMICA': 11, 'FALSO_POSITIVO': 4}
+  cons_2026-06-11.csv: filas  21692, max 2026-06-10 21:00:00 -> presentes 139/244  {'RUTINA': 124, 'ALERTA_TERMICA': 11, 'FALSO_POSITIVO': 4}
+  cons_2026-06-13.csv: filas  21979, max 2026-06-12 12:40:00 -> presentes 139/244  {'RUTINA': 124, 'ALERTA_TERMICA': 11, 'FALSO_POSITIVO': 4}
+  cons_2026-07-01.csv: filas  25082, max 2026-06-30 20:40:00 -> presentes 139/244  {'RUTINA': 124, 'ALERTA_TERMICA': 11, 'FALSO_POSITIVO': 4}
+  cons_2026-08-01.csv: filas  30201, max 2026-07-31 20:40:00 -> presentes 139/244  {'RUTINA': 124, 'ALERTA_TERMICA': 11, 'FALSO_POSITIVO': 4}
+
+las 244 por semana de la fecha del satelite:
+dt
+2026-01-12/2026-01-18    23
+2026-01-19/2026-01-25     9
+2026-01-26/2026-02-01    16
+2026-02-02/2026-02-08    11
+2026-02-09/2026-02-15    17
+2026-02-16/2026-02-22    16
+2026-02-23/2026-03-01    17
+2026-03-02/2026-03-08    16
+2026-03-09/2026-03-15    23
+2026-03-16/2026-03-22    20
+2026-03-23/2026-03-29    13
+2026-03-30/2026-04-05    44
+2026-04-06/2026-04-12    19
+Freq: W-SUN, Name: Tipo_Registro, dtype: int64
+
+las 244: posicion que ocupaban en la copia del 08-abr (ordenada por timestamp desc, fila 0 = mas nueva)
+  min/mediana/max: 53 4446 11153 de 11319
+
+de las 244, cuantas son la UNICA fila de su (volcan, sensor, noche) en la copia del 08-abr (o sea la noche entera se pierde):
+   15 de 129 nocturnas
+
+=== distancia de la NOTA OCR (parse del loader de VRP Chile) contra Distancia_km de latest.php, en las llaves compartidas, por mes ===
+          n  con_nota  col_medida  ratio_mediana  abs_err_mediana_km
+mes                                                                 
+2026-01   2         0           0            NaN                 NaN
+2026-02  14         0           0            NaN                 NaN
+2026-03  62         0           0            NaN                 NaN
+2026-04  30         0           0            NaN                 NaN
+2026-05  49         0           0            NaN                 NaN
+2026-06  53        26          22           1.02                0.07
+2026-07  30        30          30           1.02                0.06
+2026-08  47        47          46           1.03                0.09
+2026-09  40        40          38           1.01                0.06
+
+ratio mediana por Version_OCR: {'1.0': nan, '17.0': nan, '20.0': nan, '21.0': 1.01, '29.1': 1.02, '29.2': 1.02, '30.0': 1.02}

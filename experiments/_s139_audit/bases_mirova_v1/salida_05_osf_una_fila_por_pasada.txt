@@ -1,0 +1,27 @@
+================================================================================================
+OSF v2.5: UNA FILA POR PASADA; QUE DISTANCIA PUBLICA MIROVA
+  P1 (si estuviera roto, lo veria?): si MIROVA publicara varias filas por pasada, habria duplicados (timeUTC, IDvolc, Satellite, Resolution)
+  P2 (si el instrumento estuviera muerto, se veria distinto?): un archivo vacio daria 0 filas; se imprime n en cada tabla
+  Control positivo: la distancia del pixel mas caliente calculada debe ser <= Max_Dist en toda fila (si no, el calculo esta mal)
+================================================================================================
+filas OSF Chile Tier A: 48360 | duplicados (timeUTC, IDvolc, Satellite, Resolution): 0
+Npix: distribucion {'count': 48360.0, 'mean': 4.39, 'std': 20.4, 'min': 1.0, '25%': 2.0, '50%': 3.0, '75%': 5.0, 'max': 2979.0}
+filas con Npix > 1: 40003 / 48360
+CONTROL: filas con d_hot_km > Max_Dist + 0.5 km (deberian ser ~0): 326
+filas Npix>1 con Max_Dist - d_hot > 0.5 km (el pixel mas lejano NO es el mas caliente): 16342 / 40003
+
+--- por volcan: fraccion de distancias == 0 y mediana, OSF (Max_Dist, d_hot) 2025 vs latest.php 2026
+volcan                  n_osf  MaxD=0%  dhot=0%  MaxD_med  dhot_med |  n_php  php=0%  php_med  Npix>1%
+Isluga                   4743      0.2      0.0      0.84      0.89 |    334     3.0     0.84     76.8
+Lascar                  10028      1.5      0.9      1.41      1.00 |    598     0.0     1.50     82.6
+Lastarria                5368      0.0      0.0      2.40      2.13 |    404     0.0    10.30     80.7
+PlanchonPeteroa          1762      0.1      0.0      2.28      2.35 |    167     0.0     2.02     69.8
+Nevados de Chillan       5042      3.9     26.3      1.06      0.56 |    105     3.8     8.11     89.2
+Copahue                  4168      0.1      0.0      2.37      2.00 |     48     0.0    20.71     74.0
+Llaima                    741      2.3     13.4      5.10      3.02 |     93     0.0    25.90     71.1
+Villarrica               5211      2.2      5.5      1.41      1.00 |     58     0.0     7.37     87.7
+Puyehue-Cordon Caulle    5488      0.0      0.0      8.46      7.67 |    238     0.0     7.83     87.5
+Chaiten                  5809      3.6     18.5      1.19      0.80 |     64    10.9     0.46     86.7
+
+Nota: d_hot < 0.3 km se usa como '0' porque LAT/LON son continuos y Volc_LAT/LON tienen 3 decimales.
+MODIS 2025 (Resolution 1000) Max_Dist en km redondeado, top 10 valores: {1.41: 4664, 1.0: 2723, 2.24: 2174, 2.0: 1144, 0.0: 554, 3.16: 335, 2.83: 272, 3.0: 157, 3.61: 118, 9.49: 110}

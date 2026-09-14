@@ -161,7 +161,67 @@ Las respuestas de Coppola pueden reordenar o saltar brazos de cualquier fase.
 - No reprocesar la ventana completa antes del tamaño mínimo viable (6 volcanes, junio a agosto, ~63 h
   de runner, eje 5).
 
-## 7. Decisiones que siguen pendientes (Nicolás)
+## 7. Revisión del 2026-09-14 (tanda 2) a partir de las preguntas de Nicolás
+
+Fuentes: `docs/audit_s139/MAPA_BASES_MIROVA_V1.md`, `OSF_VS_NRT.md`, `NRT_CADENCIA_Y_MEJORAS.md`,
+`LECTURA_PDF_TABLAS_FIGURAS.md`, y lectura propia (renderizada) de SP426.5 p. 5 a 9, 16 y 17,
+Fernandina 2025 p. 9 y Coppola 2014 p. 9. Lo marcado "verificado" lo re-medí o lo leí en la página.
+
+### 7.1 Lo que cambia en la verdad de referencia
+
+| hallazgo | estado | consecuencia en el plan |
+|---|---|---|
+| El OSF está supervisado a mano (Coppola 2023 §2.5; Fernandina p. 9: "continuously supervised by visualizing each image"; SP426.5 p. 17: las series NRT van "as they are"). No hay ni un día de solape con el NRT que guardamos (OSF hasta 2025-12-31; scraper desde 2026-01-10; TIF desde 2026-05-09). | verificado | El OSF sirve para fórmula, fondo (`Tot_Lmir_bk`) y número de píxeles (`Npix`) por pasada; **no** para recall ni precisión. La verdad del NRT es sólo lo que nosotros guardamos. |
+| `Max_Dist` del OSF es la distancia de la cumbre al píxel alertado **más lejano**, y `LAT/LON` es el píxel más caliente. Una fila con distancia grande puede tener el cráter dentro del cúmulo. Si `latest.php` publica esa misma distancia (SOSPECHA), una fila FALSO_POSITIVO **no** dice que el cráter estuviera tapado ni vacío. | esquema verificado; `latest.php` SOSPECHA | FALSO_POSITIVO va como **sin información** para el cráter (ni positivo ni negativo). Sí sirve para validar nuestras detecciones `far`. Pregunta 12 para Coppola: qué distancia publica el NRT. |
+| El consolidado remoto de Mirova-v1 perdió filas dos veces (23-abr y 25-ago): al menos **18 ALERTAS** faltan respecto del respaldo local del 8 de abril (el agente cuenta 31 con la versión del 22-ago). VRP Chile las heredó perdidas. | verificado (18) | Fase 0: reconstruir la referencia como **unión** del snapshot actual, el respaldo del 8-abr y el OCR, y avisar a Mirova-v1 del mecanismo (`rebase -X ours` sobre un archivo reescrito entero). |
+| Cobertura por fecha: tipos válidos desde 2026-01-16; cobertura ≥ 95 % desde febrero y ≥ 99 % desde marzo; Tupungatito con límite de 7 km desde 2026-02-23; OCR confiable desde 2026-03-01, con distancia desde 2026-06-13. | medido por el agente | Ventana del banco: **desde 2026-03-01** para los tres sensores; enero y febrero sólo como sin información. |
+| 578 ALERTA_OCR quedan sin distancia por mojibake en las notas (loader de VRP Chile). | medido por el agente | Fase 0: arreglar el regex del loader antes de congelar el banco. |
+| `float('2,178.53')` aborta el ciclo del scraper con VRP ≥ 1.000 MW. | medido por el agente | Aviso a Mirova-v1; latente para una erupción grande. |
+
+### 7.2 Lo que cambia en la lectura del paper
+
+| hallazgo | estado | consecuencia |
+|---|---|---|
+| El `.txt` de SP426.5 convierte `>` en un **punto** y `=` en `¼`; A95 debe decir "operadores y símbolos", no sólo `<`. | verificado por el agente en las 25 páginas | Regla: toda fórmula se lee renderizada. Corregir A95 en `CLAUDE.md`. |
+| Fernandina 2025 ec. 2: coeficiente de Wooster en forma cerrada, `α = -8,6344e-10·λ + 6,3796e-9`, `k = σ/α`. Da 17,998 (I4), 19,67 (M13), 18,98 (MODIS b21) y 19,15 (MODIS b22). | verificado (página leída, números recalculados) | Confirma la calibración S14; **no se cambia k** (manda la paridad y S14 dio ±0,17 % contra el OSF). Sirve para cualquier sensor nuevo. |
+| Fernandina p. 9: el NRT remuestrea a grilla UTM 51 × 51 km **centrada en la cumbre del GVP**; fondo = radiancia media de los vecinos no alertados. | verificado | Responde las preguntas 6 (parte) y 7 del correo a Coppola; D17 y D25 tienen cita moderna. |
+| SP426.5 p. 9: con la Tabla 1 MIROVA omite ~10 % y produce ~5 % de falsas alertas (Etna y Stromboli). | verificado | Techo de la definición de terminado: falsas publicaciones por pasada **≤ 10 %** en focales (el doble del propio MIROVA), en vez del 25 % de §2. |
+| Coppola 2014 p. 9: test 2 con `and` explícito. | verificado | Pesa hacia la lectura `max` de la conectiva (D26, pregunta 1). No decide solo. |
+| El paper nunca escribe la ecuación del ETI: Fig. 3 rotula `NTI - NTIbk`, Fig. 4 `NTI - NTIapp`. | verificado (lo vi en las páginas 7 y 8) | Pregunta 13 para Coppola. Nuestro código usa `NTIbk` (ec. 5), que es lo que muestran los ejes de la Fig. 2. |
+| `docs/MIROVA_DETAILED_CITATIONS.md:216` atribuye al paper una ecuación que no está impresa. | agente | Corregir la cita. |
+| Fernandina fig. 3: "Supervised VRP timeseries"; MODIS TIR = banda 31 en 2025 (D20 cambia de signo). | agente, no verificado por mí | Anotar en el catálogo; D20 se revisa. |
+
+### 7.3 NRT
+
+Causa raíz de las 5 corridas diarias (verificada por el agente, hipótesis alternativas refutadas): GitHub
+despacha los crones de este repo con ~3,5 h de atraso desde el 27 de agosto y funde las franjas que
+vencen en la cola; la cobertura de datos está intacta y el problema es latencia (~6,5 h). Verificado por
+mí: el cron corre el perfil `experimental` (`nrt.yml:192`) que escribe en `experimental_v2/` mientras el
+workflow commitea `experimental/`: se calcula y se pierde; y `product_version_from_granule`
+(`fetch.py:367`) no tiene llamador, así que MODIS NRT queda etiquetado "standard" (19 gránulos en Láscar
+desde agosto). Mejoras, en orden: (1) sacar `experimental` del cron o commitear su carpeta real; (2) aviso
+del vencimiento del token Earthdata (~2026-10-03); (3) hacer visible el cortacircuitos A64 en el resumen
+del job; (4) cablear el detector de producto. Las cuatro tocan `nrt.yml` o `fetch.py`: tag y confirmación.
+
+### 7.4 Radiancia de fondo
+
+MIROVA la calcula y la publica por pasada (`Tot_Lmir_bk`). Nosotros guardamos `t_bg_k` y de ahí se
+reconstruye; no guardamos el fondo por píxel cuando actúa el kernel local ni el número de píxeles
+"suitable". Fase 0 agrega al record `diag_L_bg_w_m2_sr_um` (del anillo y, si aplica, local) y
+`diag_n_suitable`, sin cambiar ninguna decisión. Permite comparar fondo contra fondo sin reprocesar.
+
+### 7.5 Ajustes al plan (§2 a §6)
+
+- Banco (§3.1): ventana desde 2026-03-01; referencia = unión snapshot + respaldo 8-abr + OCR; FALSO_POSITIVO
+  = sin información para el cráter y positivo para `far`; negativo limpio por gránulo como estaba.
+- Definición de terminado (§2): falsas publicaciones por pasada ≤ 10 % en focales y ≤ 15 % en nevados
+  (MIROVA declara ~5 %); magnitud y recall como estaban.
+- Fase 0 suma: loader OCR (mojibake), radiancia de fondo persistida, corrección de A95 y de la cita
+  fabricada, y las mejoras 1 a 4 del NRT.
+- Correo a Coppola: quitar las preguntas 6 (parte) y 7, ya contestadas por Fernandina 2025; agregar
+  12 (qué distancia publica el NRT: ¿la del píxel más lejano?) y 13 (ecuación del ETI: `NTIbk` o `NTIapp`).
+
+## 8. Decisiones que siguen pendientes (Nicolás)
 
 | # | pregunta | recomendación |
 |---|---|---|

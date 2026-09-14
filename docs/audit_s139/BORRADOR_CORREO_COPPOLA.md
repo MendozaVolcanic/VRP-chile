@@ -32,16 +32,20 @@ reprocessing runs, we would be very grateful if you could clarify the following 
    pixel (8 neighbours), or a larger ring? And is a negative excess set to zero?
 5. Are pixels with NTI above K1 declared as alerted on their own, without passing Tests 2 and 3? And are
    saturated pixels kept in the radiance sum?
-6. Are VIIRS 375 m and 750 m images also resampled to a constant area grid, as described for MODIS? If
-   so, how is the grid centred on each volcano, and how is the bow tie effect handled?
-7. Is ROI1 still a fixed 5 by 5 km box for every volcano, or are volcano specific radii used?
-8. Is the quadratic regression of the background NTI fitted iteratively with outlier rejection (for
+6. Your 2025 paper on Fernandina describes resampling to a 51 by 51 km UTM grid centred on the GVP
+   summit for both MODIS and VIIRS. Is the bow tie effect handled before resampling for MODIS, and is
+   ROI1 still a fixed 5 by 5 km box?
+7. Is the quadratic regression of the background NTI fitted iteratively with outlier rejection (for
    example at 3 sigma)?
-9. What does the "class" column of the published VRP archive (OSF v2.5) mean, and is the published
+8. What does the "class" column of the published VRP archive (OSF v2.5) mean, and is the published
    archive complete or filtered (for example by distance or intensity)?
-10. We noticed that Tupungatito does not appear in the archive, and that there are relatively few VIIRS
+9. We noticed that Tupungatito does not appear in the archive, and that there are relatively few VIIRS
     750 m entries for Chilean volcanoes. Is there a reason for this?
-11. Is the choice between a global and a local background applied uniformly to all volcanoes?
+10. Is the choice between a global and a local background applied uniformly to all volcanoes?
+11. The distance published on the MIROVA web page for each detection: is it the distance to the
+    hottest alerted pixel, or to the farthest one (as Max_Dist in the archive)?
+12. The ETI is labelled NTI minus NTIbk in Figure 3 and NTI minus NTIapp in Figure 4 of the 2016
+    paper. Which one is computed in the current system?
 
 We would of course be happy to share our comparisons with MIROVA if they are of any use to your group.
 
@@ -64,9 +68,10 @@ Servicio Nacional de Geología y Minería (SERNAGEOMIN), Chile
 | 3 | D22 |
 | 4 | D25 |
 | 5 | D23, D24, GAP #A |
-| 6 | D17, D28 |
-| 7 | D18 |
-| 8 | D29 |
-| 9 | supuestos del cruce OSF (eje 6), D3 |
-| 10 | H603, H604 del eje 6 |
-| 11 | `lbg_global_compatible` (MISSION, nota S125) |
+| 6 | D28, D18 (D17 y el centro de grilla ya los contesta Fernandina 2025 p. 9) |
+| 7 | D29 |
+| 8 | supuestos del cruce OSF (eje 6), D3 |
+| 9 | H603, H604 del eje 6 |
+| 10 | `lbg_global_compatible` (MISSION, nota S125) |
+| 11 | semantica de FALSO_POSITIVO y Distancia_km del scraper (banco S139) |
+| 12 | ecuacion del ETI nunca escrita en SP426.5 (LECTURA_PDF S139) |
