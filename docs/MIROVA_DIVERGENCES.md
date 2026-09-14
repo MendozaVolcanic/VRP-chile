@@ -1893,6 +1893,10 @@ cosa: ver D17.
 
 ## D17 — Nuestra grilla F70 se centró en el punto equivocado — **ABIERTA (premisa probada, consecuencia NO)** S124/S125
 
+> **S140, cita del grupo MIROVA verificada renderizando la página.** Fernandina 2025 (Remote Sens. 17, 1191), p. 9, §2.3.1:
+> las bandas MIR y TIR se remuestrean a una grilla UTM regular de 51 × 51 km centrada en la cumbre del volcán, con las
+> coordenadas del Global Volcanism Program. Es la descripción más reciente del flujo NRT escrita por el propio grupo.
+
 > 🟢 **S130 — el mecanismo geométrico SÍ quedó probado, por otro eje: el ÁNGULO.**
 > S128 concluyó que D17 y el gap de magnitud eran el mismo problema, pero le faltaba
 > el control que separara «perdemos nosotros» de «MIROVA infla». Ese control ya está
@@ -2143,6 +2147,12 @@ intactas (esto es VIIRS375 y vía geométrica, no espectral).
 
 ## D20 — El NTI de MODIS se calcula con la banda 31 (11,03 µm); Coppola 2016a y Wright 2002 usan la banda 32 (12,02 µm) — **HALLAZGO, despreciable (cuantificado S128), registrado S135**
 
+> **S140, verificado renderizando la página: el grupo MIROVA describe hoy la banda 31.** Fernandina 2025
+> (Remote Sens. 17, 1191), p. 6, §2.2.1: de MODIS, MIROVA ingiere las bandas MIR B21 y B22 y el canal TIR
+> **B31**. La divergencia queda sólo contra SP426.5 (banda 32, 2016); contra la descripción más reciente del
+> propio sistema nuestro código coincide. No se propone cambio: el efecto ya era despreciable (S128) y ahora
+> tampoco hay divergencia con el flujo NRT declarado en 2025.
+
 **Lo que dice el canon.** `documentacion/sp426_5.txt:182-183` («radiance of band 32 (L32), centred
 at 12.02 µm (TIR channel)») y `:211-216` (NTI = (L21ok − L32)/(L21ok + L32)); la Tabla 2 del
 capítulo Springer (`coppola2024_chapter.txt:1035`) repite «TIR (12.02 µm)». Es la elección
@@ -2245,6 +2255,8 @@ los Tier A. Hay que medirlo antes de proponer nada.
 
 **El paper** (p. 8, ecuación 6): el fondo es "the arithmetic mean of all the pixels surrounding the active one"; no necesita recorte.
 
+**S140, confirmación posterior del mismo grupo** (Fernandina 2025, Remote Sens. 17, 1191, p. 9, ecuación 3, página renderizada): el fondo es la radiancia promediada de los píxeles vecinos **no alertados**. Coincide con SP426.5 y agrega que los alertados quedan fuera del promedio.
+
 **Lo nuestro**: `np.median` sobre el anillo (`detection_context.py:1064`; `process_modis.py:569-577`, 1023; `process_viirs_mod.py:981`, sin alternativa en M-band); kernel 3x3 sólo para los 5 volcanes opt-in del YAML (`local_kernel_bg`: PCC, Villarrica, Chaitén, PP, Lastarria; `process_modis.py:1041-1049`); `delta_L` recortado a 0 (`process_modis.py:1056`). D8 quedó marcada resuelta por el kernel opt-in, pero la divergencia literal sigue vigente en 6 de 11 Tier A en MODIS, 11 de 11 en M-band y todo el camino Test 1.
 
 **Fenómeno**: en una cumbre helada el cráter con lava sub-píxel está más frío en MIR que la mediana de un anillo lleno de valle tibio; su exceso sale negativo y se recorta a 0,0 MW aunque los Tests 2 y 3 lo hayan aceptado (Villarrica A6 con B22; Tupungatito 2026-08-21 05:30 UTC VIIRS_SNPP_750, cúmulo de 1 píxel summit en 0,0 MW, fondo 256,4 K). En noches-sensor: VIIRS750 33 de 246 noches ALERTA de MIROVA con el cráter en cero (ventana 2026-01-11 a 2026-09-07); **en noches de volcán, 0 de 33**: todas cubiertas por otra pasada (verificador S138 §3.d). Es fidelidad y magnitud, no recall. Y al revés, infla donde el anillo es más frío que el entorno del foco (glaciar de Tupungatito, A19). Gravedad 4.
@@ -2254,6 +2266,8 @@ los Tier A. Hay que medirlo antes de proponer nada.
 ## D26: El segundo pase calcula mu y sigma sin los filtros de no-aptos del paper (borde, dNTI < -0,1, K1). **ABIERTA, efecto nulo bajo la conectiva `min` (registrada S138)** S138
 
 **El paper** (p. 6-7): los no aptos se excluyen de "the subsequent steps", incluido el segundo cálculo.
+
+**Pieza para el frente de la conectiva (S140, sin cerrarlo).** Coppola 2014 (IJRS, p. 3409 de la revista, p. 9 del PDF, renderizada) escribe su test 2 con un `and` explícito entre las dos condiciones: superar el máximo de los píxeles de referencia **y** superar su media más 3 desviaciones. Ojo con el alcance: es el algoritmo de Stromboli de 2014 (ROI2/ROI3, umbrales estacionales de NTI), no el de SP426.5, así que muestra cómo escribía el grupo esa conjunción, no qué conectiva usa MIROVA en los Tests 2 y 3.
 
 **Lo nuestro**: `detection_context.py:904` contra 81-140 y 477 (el primer pase sí los aplica). Control sintético M4: un solo outlier con dNTI << -0,1 multiplica el sigma del segundo pase por 12 (0,00085 a 0,0104) mientras el primer pase lo excluye. Bajo `min(C1, mu + C2 sigma)` el piso gobierna y el efecto sobre el umbral es nulo (S136 midió que `mu + C2 sigma > C1` en el 100 % de MODIS). Gravedad 1 hoy; 3 si se adopta la rama de la prosa (`ENABLE_TESTS_23_PROSE_BRANCH`).
 

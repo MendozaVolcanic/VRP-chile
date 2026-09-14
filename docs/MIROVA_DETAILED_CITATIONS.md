@@ -209,11 +209,14 @@ Convención: `[file:line]` = `documentacion/<archivo>` línea de la cita.
   parameters a, b and c are obtained for each case, and distinct regression
   coefficients are retrieved from each single image".
 
-### 5.4 ETI — Eq.5
+### 5.4 ETI (el paper no escribe su ecuación)
 
-- **[sp426_5.txt:275-280]** "the so-called Enhanced Thermal Index (ETI) is
-  obtained by subtracting the background NTIbk (Eq. 4) from the observed
-  NTI (Eq. 1) so that: ETI = NTI − NTIbk (Eq. 5)".
+- **Corregido S140, verificado renderizando las páginas de `sp426.5.pdf`.** La cita anterior
+  ("ETI = NTI − NTIbk (Eq. 5)") no está en el paper: era una cita fabricada. La p. 5 anuncia que
+  el ETI se obtiene restando el fondo NTIbk al NTI observado "so that:", pero la ecuación (5)
+  impresa a continuación es `NTIbk = aNTIapp² + bNTIapp + c`, no la del ETI. El ETI sólo aparece
+  en los rótulos de las figuras: la Fig. 3 (p. 7) lo rotula `ETI = NTI - NTIbk` y la Fig. 4 (p. 8)
+  `ETI = NTI - NTIapp`. Nota menor: la ecuación (4) impresa lleva `bNTI` y no `bNTIapp`.
 
 ---
 

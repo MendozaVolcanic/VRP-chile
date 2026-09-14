@@ -1158,7 +1158,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   el remuestreo, el bow tie y una compuerta de temperatura que el paper no tiene: la auditoria en que
   se apoyaba (S114) nunca miro los pasos previos a los Tests.
   - **How to apply**: (a) ante toda afirmacion "cerrado / agotado / no reabrir / fiel", preguntar
-    bajo QUE lectura del paper vale y comprobar esa lectura en el PDF **renderizando la pagina a imagen** (`page.get_pixmap(dpi=200)` con PyMuPDF y mirarla): la capa de TEXTO de PyMuPDF corrompe los operadores igual que el `.txt` (verificado S138: p. 21 da `,20.93` donde el papel dice `< -0.93`), nunca en docs previos; (b) un cierre que
+    bajo QUE lectura del paper vale y comprobar esa lectura en el PDF **renderizando la pagina a imagen** (`page.get_pixmap(dpi=200)` con PyMuPDF y mirarla): la capa de TEXTO de PyMuPDF corrompe los operadores y símbolos igual que el `.txt` (verificado S138: p. 21 da `,20.93` donde el papel dice `< -0.93`; S139: `>` sale como punto y `=` como `¼`, ver `docs/audit_s139/LECTURA_PDF_TABLAS_FIGURAS.md` l. 32 y 77), nunca en docs previos; (b) un cierre que
     se apoya en una auditoria vale lo que cubrio esa auditoria (A82 ya cayo asi en S124); (c) si un
     frente se cerro "sin necesidad de A/B", ese es el primero que hay que revisar, porque no tiene
     medicion detras. Las afirmaciones de cierre apagan trabajo futuro: cuando una esta mal, cuesta
