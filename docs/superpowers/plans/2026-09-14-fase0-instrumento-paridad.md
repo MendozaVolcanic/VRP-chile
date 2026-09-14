@@ -148,7 +148,15 @@ Cambios respecto de los scripts de origen (todos de la spec §7.5):
 4. el predicado del dashboard se extrae de `frontend/index.html` con node y el script escribe en su
    salida el sha de ese archivo (`git hash-object frontend/index.html`);
 5. salida JSON con, por sensor y por volcán, en pasada y en noche de volcán: recall en `pos`, tasa de
-   publicación en `neg_limpio`, n, ventana, sha; más los dos controles (etiquetas barajadas y oráculo).
+   publicación en `neg_limpio`, n, ventana, sha; más los dos controles (etiquetas barajadas y oráculo);
+6. **métrica `far_ref`** (pedido de Nicolás, 2026-09-14): de las pasadas FALSO_POSITIVO nocturnas
+   (VRP > 0 publicado por MIROVA a más de `limite_km` del volcán), fracción en que tenemos un record a
+   ±2 min con `distance_class == "far"` y cúmulo con `vrp_mw > 0`, y fracción en que
+   `|centroid_dist_km - Distancia_km| <= 2` (diferencia de radios, no posición: A93). Reportar n por
+   sensor (MODIS tiene sólo ~10 nocturnas; el grueso es VIIRS 375). Si no vemos el foco lejano que
+   MIROVA vio, es una pérdida real (incendio o foco excéntrico), no un acierto. Aparte, contar las
+   noches en que el cráter tiene alerta en otra pasada y esta pasada quedó FALSO_POSITIVO: es el
+   volumen de "cráter tapado por un foco lejano" en el propio MIROVA.
 
 - [ ] **Paso 1: test que falla**
 
