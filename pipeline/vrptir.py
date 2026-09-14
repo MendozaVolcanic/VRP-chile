@@ -7,7 +7,7 @@ Coeficientes confidence:HIGH. Task F31 A6 (PDF verify) COMPLETADA S74.
 
 Coeficientes verbatim (Aveni 2025 GRL):
 - Eq.8: k_TIR(λ) = 1.0575·λ² − 14.3139·λ + 85.4239  [μm·sr]
-- k_TIR(λ=11.45 µm, VIIRS I5) = 60.17 μm·sr (verbatim p.4, Fig.2b)
+- k_TIR(λ=11.45 µm, VIIRS I5) = 60.17 μm·sr (verbatim p.5, leyenda de la Fig. 2; la ec. 8 está en la p.4. Página corregida S141, renderizada)
 - Rango validez: ~300-600 K (Wooster MIR vale 600-1500 K — complementarios)
 - Uncertainty método: ±35% (vs ±30% Wooster MIR)
 - Componente hot >600 K tolerado si ≤0.0025% del área anómala total

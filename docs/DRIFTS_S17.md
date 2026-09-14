@@ -80,7 +80,7 @@ Métrica de decisión: recall/precision/F1 vs OSF v2.5 CSV consolidado. Adoptar 
 
 ### ✅ RESUELTO en S17 (2026-04-23 tarde)
 Auditoría de **Aveni et al. 2024 RSE "TIRVolcH"** (DOI 10.1016/j.rse.2024.114388, paper algorítmico previo al GRL 2025):
-**Aveni 2024 RSE Eq.5 p.12 usa Stefan-Boltzmann puro** — idéntico a nuestro código y a Coppola 2024.
+**Aveni 2024 RSE Eq.5 p.11 usa Stefan-Boltzmann puro** (página corregida S141: la ec. 5 está en la p. 11, columna derecha, renderizada; decía p.12): idéntico a nuestro código y a Coppola 2024.
 
 La Eq.9 con k_TIR=60.17 μm·sr **aparece SOLO en Aveni 2025 GRL** (paper posterior, refinamiento cuantitativo, no operacional). Coppola 2024 cap Springer (review post-Aveni 2024) también usa Stefan-Boltzmann.
 
