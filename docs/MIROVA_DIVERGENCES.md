@@ -1653,6 +1653,15 @@ clon-literal**, con fundamento verificable. La reapertura queda anulada.
 
 ### Pero el párrafo dice tres cosas más que sí nos faltaban
 
+> ⚠️ **S141, verificador con contexto limpio (P-01): el punto 1 de abajo generaliza de más.** Laiolo et al.
+> 2026 (Bull. Volcanol. 88:11, p. 4, «Satellite thermal data», columna derecha, 2.º párrafo) aplica el filtro
+> por distancia y/o intensidad y por doble conteo a **su serie de estudio de Stromboli**, al combinar sensores.
+> No dice que el NRT publicado lo aplique, y el 12 % (9.712 puntos sobre 82.329 imágenes) cuenta también las
+> pasadas sin anomalía, así que no mide lo que recorta el filtro. Otros textos del grupo describen el canal
+> NRT sin supervisión ni filtros: Campus et al. 2022 (Sensors 22, 1713, p. 8, §3.4, 3.er párrafo) y Campus et
+> al. 2024 (Bull. Volcanol. 86:25, p. 4, «Dataset»). **No usar este párrafo para justificar una cerca por
+> distancia o intensidad como clon literal.** Detalle: `docs/audit_s141/lectura/VERIFICADOR_LECTORES.md` P-01.
+
 **1. MIROVA SÍ filtra — por distancia y por intensidad — y se queda con el 12 %.** De
 82.329 imágenes salen **9.712 puntos**. Lo que no hace es filtrar *nube*; sí descarta por
 distancia, por intensidad, y por **doble conteo entre detectores que adquieren a la misma
@@ -1893,6 +1902,21 @@ cosa: ver D17.
 
 ## D17 — Nuestra grilla F70 se centró en el punto equivocado — **ABIERTA (premisa probada, consecuencia NO)** S124/S125
 
+> **S141, lectura de papers verificada renderizando las páginas** (`docs/audit_s141/lectura/VERIFICADOR_LECTORES.md` V-08 y V-13).
+> **Grilla por sensor.** MODIS 51 × 51 celdas de 1 km (Coppola et al. 2023, Front. Earth Sci. 11:1240107, p. 3, §2.1);
+> VIIRS M-band 67 × 67 celdas de 750 m, conservando la resolución nominal (Campus et al. 2022, Sensors 22, 1713, p. 7, §3.2,
+> 2.º párrafo); VIIRS I-band 134 × 134 celdas de 375 m, «as per MIROVA workflow» (Aveni et al. 2024, RSE 315, 114388, p. 5,
+> §3.2). Las tres cubren unos 50 km (67 × 0,75 = 134 × 0,375 = 50,25 km), por eso otros papers escriben «50 × 50 km»
+> (Coppola et al. 2020, Front. Earth Sci. 7:362, p. 3; Campus et al. 2024, Bull. Volcanol. 86:25, p. 3): es la misma grilla.
+> **Ángulo cenital: matiza la frase «su magnitud no depende del ángulo» de la nota S130.** El grupo escribe que el
+> remuestreo corrige el efecto del cenit sólo «partially» y que el VRP cae con el ángulo (Aveni et al. 2023, Remote Sens.
+> 15, 2528, p. 15 §4.2.1 último párrafo y p. 16 1.er párrafo), también por oclusión en bordes de cráter empinados (Aveni
+> et al. 2024, RSE 315, p. 20, §7.3). En sus análisis descarta pasadas sobre 40° (Massimetti et al. 2020, Remote Sens. 12,
+> 820, p. 15, §3.2, 3.er párrafo) o sobre 50° (Aveni 2024, Tabla 2 nota **, p. 14; Coppola et al. 2013, JVGR 249, p. 46,
+> Apéndice 2, a mano), pero el canal NRT **no filtra por cenit** (Campus 2022 p. 8 §3.4; Campus 2024 p. 4). No es
+> divergencia de producción. **Toda comparación de magnitud contra MIROVA se reporta también restringida a cenit ≤ 40°**
+> antes de atribuir el gap de ~0,7 a un mecanismo.
+
 > **S140, cita del grupo MIROVA verificada renderizando la página.** Fernandina 2025 (Remote Sens. 17, 1191), p. 9, §2.3.1:
 > las bandas MIR y TIR se remuestrean a una grilla UTM regular de 51 × 51 km centrada en la cumbre del volcán, con las
 > coordenadas del Global Volcanism Program. Es la descripción más reciente del flujo NRT escrita por el propio grupo.
@@ -1973,6 +1997,17 @@ para un A/B, no para afirmar el origen exacto.
 ---
 
 ## D18 — El ROI1 del paper es una CAJA de 5 km igual para todos; el nuestro es un CÍRCULO de 3 a 20 km por volcán — **ABIERTA (A/B corrido S130 → NO ADOPTAR; divergencia de fidelidad literal, prioridad baja)** S129/S130
+
+> **S141, citas del grupo verificadas renderizando las páginas** (`VERIFICADOR_LECTORES.md` V-02, V-06, V-10).
+> (1) El ROI de cumbre sigue siendo una caja de 5 × 5 km en 2023: «in the summit area (5 × 5 km) slightly lower thresholds
+> are applied», y a mayor distancia umbrales algo más altos «which reduce false alerts», sin valores (Coppola et al. 2023,
+> Front. Earth Sci. 11:1240107, p. 3, §2.1, columna derecha). Con `inner_radius_km` de hasta 20 km aplicamos umbrales de
+> cumbre donde el grupo declara usar los más altos: toca la sobre-publicación. (2) La web de 2020 separa proximal y distal
+> a 5 km fijos para todos los volcanes, como color de la serie, no como compuerta (Coppola et al. 2020, Front. Earth Sci.
+> 7:362, p. 4, «VRP Time Series»). (3) En sus datasets de estudio el grupo cuenta alertas con radios al punto GVP ajustados
+> al objeto: 1 km en La Fossa (Campus et al. 2024, Bull. Volcanol. 86:25, p. 5, columna derecha, 1.er párrafo) y 0,75 / 2 /
+> 7 km en Vulcano, Agung y La Palma (Aveni et al. 2024, RSE 315, Tabla 2 nota **, p. 14). No describen el NRT: sirven para
+> no comparar conteos de papers contra nuestro inner_radius, no para adoptar un radio (MISSION excluye lo per-volcán).
 
 **La cita**, Coppola 2016a SP426.5, verbatim:
 
@@ -2147,6 +2182,12 @@ intactas (esto es VIIRS375 y vía geométrica, no espectral).
 
 ## D20 — El NTI de MODIS se calcula con la banda 31 (11,03 µm); Coppola 2016a y Wright 2002 usan la banda 32 (12,02 µm) — **HALLAZGO, despreciable (cuantificado S128), registrado S135**
 
+> ⚠️ **S141, corrige la nota S140 de abajo** (`VERIFICADOR_LECTORES.md` V-15). «La divergencia queda sólo contra SP426.5»
+> es demasiado fuerte: el grupo describe la banda TIR de MODIS de forma inconsistente. Escribe 12,02 µm (banda 32) en
+> Coppola et al. 2020 (Front. Earth Sci. 7:362, p. 3, columna derecha) y en Coppola et al. 2023 (Front. Earth Sci.
+> 11:1240107, p. 3, columna izquierda), y banda 31 en Fernandina 2025 (p. 6). No se sabe cuál usa el NRT; el efecto sigue
+> siendo despreciable (S128).
+
 > **S140, verificado renderizando la página: el grupo MIROVA describe hoy la banda 31.** Fernandina 2025
 > (Remote Sens. 17, 1191), p. 6, §2.2.1: de MODIS, MIROVA ingiere las bandas MIR B21 y B22 y el canal TIR
 > **B31**. La divergencia queda sólo contra SP426.5 (banda 32, 2016); contra la descripción más reciente del
@@ -2257,6 +2298,8 @@ los Tier A. Hay que medirlo antes de proponer nada.
 
 **S140, confirmación posterior del mismo grupo** (Fernandina 2025, Remote Sens. 17, 1191, p. 9, ecuación 3, página renderizada): el fondo es la radiancia promediada de los píxeles vecinos **no alertados**. Coincide con SP426.5 y agrega que los alertados quedan fuera del promedio.
 
+**S141, siete textos más del grupo, páginas renderizadas** (`docs/audit_s141/lectura/VERIFICADOR_LECTORES.md` V-07 y P-02): fondo = media de los píxeles que rodean al alertado o al cúmulo, nunca mediana ni anillo regional. Coppola et al. 2013 (JVGR 249, p. 46, Apéndice 2, bajo la ec. A.1); Coppola et al. 2020 (Front. Earth Sci. 7:362, p. 3, bajo la ecuación del VRP); Campus et al. 2022 (Sensors 22, 1713, p. 7, §3.2, bajo la ec. 2); Aveni et al. 2023 (Remote Sens. 15, 2528, p. 8, §3.3, bajo la ec. 3: vecinos «non-alerted»); Coppola et al. 2023 (Front. Earth Sci. 11:1240107, p. 3, §2.2, ec. 1, y p. 6, Tabla 1, fila Tot_Lmir_bk); Campus et al. 2024 (Bull. Volcanol. 86:25, p. 3, columna derecha, bajo la ec. 1, y ec. 2). **Segunda divergencia dentro de D25**: Campus 2024 precisa que cada píxel alertado tiene **su propio** fondo (media de sus vecinos) y que el fondo total es la **suma** de esos fondos; la columna Tot_Lmir_bk del archivo v1 es esa suma («Sum of MIR background radiance from all alerted pixels», Coppola 2023 Tabla 1). Lo nuestro usa un único `t_bg` para todos los píxeles del cúmulo. Para comparar `diag_L_bg_w_m2_sr_um` (T7, S140) con Tot_Lmir_bk hay que dividir este último por Npix. Ningún texto visto menciona recortar a cero el exceso negativo: esa mitad de la pregunta 4 del correo sigue abierta.
+
 **Lo nuestro**: `np.median` sobre el anillo (`detection_context.py:1064`; `process_modis.py:571-579`, 1023; `process_viirs_mod.py:983`, sin alternativa en M-band); kernel 3x3 sólo para los 5 volcanes opt-in del YAML (`local_kernel_bg`: PCC, Villarrica, Chaitén, PP, Lastarria; `process_modis.py:1044-1052`); `delta_L` recortado a 0 (`process_modis.py:1060`). D8 quedó marcada resuelta por el kernel opt-in, pero la divergencia literal sigue vigente en 6 de 11 Tier A en MODIS, 11 de 11 en M-band y todo el camino Test 1.
 
 **Fenómeno**: en una cumbre helada el cráter con lava sub-píxel está más frío en MIR que la mediana de un anillo lleno de valle tibio; su exceso sale negativo y se recorta a 0,0 MW aunque los Tests 2 y 3 lo hayan aceptado (Villarrica A6 con B22; Tupungatito 2026-08-21 05:30 UTC VIIRS_SNPP_750, cúmulo de 1 píxel summit en 0,0 MW, fondo 256,4 K). En noches-sensor: VIIRS750 33 de 246 noches ALERTA de MIROVA con el cráter en cero (ventana 2026-01-11 a 2026-09-07); **en noches de volcán, 0 de 33**: todas cubiertas por otra pasada (verificador S138 §3.d). Es fidelidad y magnitud, no recall. Y al revés, infla donde el anillo es más frío que el entorno del foco (glaciar de Tupungatito, A19). Gravedad 4.
@@ -2282,6 +2325,8 @@ los Tier A. Hay que medirlo antes de proponer nada.
 ## D28: El bow tie de MODIS no se trata en ningún paso del perfil operacional. **ABIERTA, parte de D17 (registrada S138 como paso propio)** S138
 
 El paper (p. 3) corrige el solapamiento de barridos antes de remuestrear; el código no tiene el paso (`process_modis.py:501-512` sin regrid; `ENABLE_UTM_REGRID = False`, leído de `thresholds:`, `profile.py:606`). Consecuencia junto con D17: los 8 vecinos son píxeles nativos de tamaño variable y la magnitud usa un área que no es la del píxel (S131). Gravedad 3 dentro de D17.
+
+**S141, tres textos del grupo, páginas renderizadas** (`docs/audit_s141/lectura/VERIFICADOR_LECTORES.md` V-05): los píxeles duplicados por bow tie se **identifican y eliminan** sobre el gránulo original, antes del remuestreo; ninguno dice que se promedien. Coppola et al. 2013 (JVGR 249, p. 46, Apéndice 2, último párrafo de la columna izquierda: «removal of the bow-tie effect and resampling into an equal area projection with 1 km pixel size»); Coppola et al. 2023 (Front. Earth Sci. 11:1240107, p. 3, §2.1: «pixels affected by bow-tie distortions are identified and removed», citando Coppola et al. 2010); Aveni et al. 2023 (Remote Sens. 15, 2528, p. 8, §3.2: «Consistently with the MIROVA algorithm», citando su referencia [82]). Tensión de fuentes sobre el método exacto (Coppola 2010 contra la ref. [82] de Aveni 2023, que un lector identificó como Liu et al. 2008 sólo desde la capa de texto: SOSPECHA). La pregunta abierta se reduce a «¿qué método exacto?».
 
 ---
 

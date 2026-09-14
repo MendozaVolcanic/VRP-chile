@@ -353,7 +353,7 @@ verificar la página) y en D17/D25 la cita de Fernandina p. 9 (verificada).
 
 ---
 
-### Tarea 10: segunda pasada de lectura de papers (sin tocar código)
+### Tarea 10: segunda pasada de lectura de papers (sin tocar código). HECHA S141: `docs/audit_s139/LECTURA_PDF_SEGUNDA_PASADA.md`
 
 Motivo: el inventario S139 (`docs/audit_s139/LECTURA_PDF_TABLAS_FIGURAS.md` l. 16-23) cubrió sólo los
 seis PDF de prioridad 1 y declara que **no** leyó la tesis de Massimetti (204 p.) ni los PDF de
