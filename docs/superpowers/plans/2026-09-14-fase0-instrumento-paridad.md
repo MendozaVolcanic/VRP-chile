@@ -349,12 +349,27 @@ seis PDF de prioridad 1 y declara que **no** leyó la tesis de Massimetti (204 p
 prioridad 2, y que su cruce automático de citas falló. Coppola 2023 §2.5 y Fernandina 2025 p. 9 los
 leyó el orquestador; el resto del corpus del grupo MIROVA sigue sin revisión renderizada.
 
-- [ ] Lista cerrada de PDF del grupo MIROVA (Torino, Firenze, Sapienza; excluir Catania y Potenza, A9)
-  con `ls documentacion/*.pdf` + afiliación en p. 1; incluir los `feart-*.pdf` y los de `coppola*`.
+- [ ] Confirmar título y afiliación en p. 1 de cada PDF antes de leerlo (el orden de abajo sale sólo de
+  autores y afiliación, medido 2026-09-14; 28 PDF con autores del grupo en `documentacion/`).
+- [ ] **Prioridad 1, describen el sistema o su adaptación a un sensor** (donde pueden estar umbrales,
+  fondo y ROI de VIIRS, que es donde vive la sobre-publicación):
+  `Thermal_Remote_Sensing_for_Global_Volcano_Monitori.pdf` (Coppola 2020), `campus2022_sensors_22_1713.pdf`,
+  `The_Capabilities_of_FY-3DMERSI-II_Sensor_to_Detect.pdf`, `Rapid_Response_to_Effusive_Eruptions_Using_Satelli.pdf`
+  (entero; sólo se leyó p. 9), `feart-11-1240107.pdf` (Coppola 2023, entero; sólo se leyó p. 4),
+  `rs11131528.pdf`, y las planillas `Coppola_2019_supp_Table1.xlsx`/`Table2.xlsx`.
+- [ ] **Prioridad 2, validación y TIR**: `remotesensing-12-00820-v4.pdf` (Massimetti 2020),
+  `Aveni_2024_TIRVolcH_RSE.pdf`, `Geophysical Research Letters - 2025 - Aveni ...pdf`,
+  `remotesensing-17-02543-v2.pdf`.
+- [ ] **Prioridad 3, casos de estudio** (umbrales usados en la práctica): `s41598-021-92542-z.pdf`,
+  `1-s2.0-S0377027316305248-main.pdf`, `1-s2.0-S0377027315003716-main.pdf`, `1-s2.0-S0377027322002384-main.pdf`,
+  `s00445-*.pdf`, `j.jvolgeores.2012.09.005.pdf`, `feart-11-1040199.pdf`, `JGR Solid Earth - 2025 - Galetto ...pdf`.
+- [ ] **Fuera**: `THESIS_MASSIMETTI.pdf` (su tema es Sentinel-2 y Landsat-8, verificado en el título y el
+  índice; sólo se consulta si otro paper la cita para un parámetro), `feart-12-1345104.pdf` (HotLINK,
+  Alaska), `Volcanic_Anomalies_Monitoring_System_VOLCANOMS_a_L.pdf`, `nhess-24-4267-2024.pdf` (afiliación a
+  confirmar), `NO_ES_cap11__...pdf`, y todo lo de Catania o Potenza (A9).
 - [ ] Por cada uno: páginas con tablas, ecuaciones o figuras con parámetros → renderizar
   (`page.get_pixmap(dpi=150)`) y leer la imagen; anotar valores que respondan divergencias abiertas
   (D17 a D29, conectiva, ETI) o preguntas del correo a Coppola.
-- [ ] Tesis de Massimetti: capítulos 2 a 5, sólo secciones de método (umbrales, fondo, ROI, VIIRS).
 - [ ] Salida `docs/audit_s139/LECTURA_PDF_SEGUNDA_PASADA.md`; PNG fuera de git (derechos, repo público).
 - [ ] Verificador con contexto limpio sobre cada afirmación que cambie una divergencia.
 
