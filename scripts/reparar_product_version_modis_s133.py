@@ -13,16 +13,29 @@ se queda con la calibracion provisional para siempre, y en silencio. Reprocesar 
 arregla, porque el reproceso produciria "nrt" contra un "standard" ya guardado y la rama
 de upgrade no aplica en ese sentido.
 
-QUE HACE, y como evita adivinar. Para cada record MODIS sospechoso pregunta al catalogo
-de NASA (CMR) si existe el granule ESTANDAR de esa pasada. Si no existe, el record solo
-pudo venir de LANCE y se reetiqueta. Si existe, se deja como esta. No se infiere por
-fecha ni por sensor: se verifica uno por uno.
+S141 - DECIDE POR EL NOMBRE DEL GRANULE GUARDADO. Hasta #659 (S140) los tres procesadores
+seguian escribiendo `"nrt" if "_NRT" in nombre`, y MODIS marca sus NRT con `.NRT.`: al
+2026-09-14 habia 254 records MODIS con granule `.NRT.` etiquetados "standard" en los 11 Tier A
+(el primero del 2026-09-03 07:10 UTC, medido con el informe en seco de este script). La version S133 preguntaba al CMR
+si existia el granule estandar y, si existia, dejaba el record como estaba. Para un record que
+guarda su granule eso es al reves: si el nombre dice `.NRT.`, el record se calculo con el
+producto NRT aunque hoy exista el estandar, y justamente por eso debe quedar "nrt" para que el
+upgrade de `store.py` lo reemplace dentro de la ventana de 7 dias del NRT. El nombre guardado es
+la prueba y no necesita red. El CMR queda sólo para records sin granule guardado, con la regla
+S133 intacta (sin respuesta no se decide).
+
+QUE HACE, y como evita adivinar. Para cada record MODIS etiquetado "standard": si guarda el
+nombre del granule, decide por el nombre (`pipeline.product_version`, el mismo detector que usan
+los procesadores). Si no lo guarda y es posterior a `--desde`, pregunta al CMR si existe el
+granule ESTANDAR de esa pasada: si no existe, el record solo pudo venir de LANCE y se reetiqueta.
+No se infiere por fecha ni por sensor: se verifica uno por uno.
 
 USO:
     python scripts/reparar_product_version_modis_s133.py            # informe, no escribe
     python scripts/reparar_product_version_modis_s133.py --aplicar  # escribe
 """
 import argparse
+import collections
 import datetime as dt
 import glob
 import io
@@ -34,8 +47,24 @@ import urllib.parse
 import urllib.request
 
 RAIZ = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+if RAIZ not in sys.path:
+    sys.path.insert(0, RAIZ)
+from pipeline.product_version import product_version_from_granule  # noqa: E402
+
 CMR = "https://cmr.earthdata.nasa.gov/search/granules.json"
 COLECCION = {"MODIS_TERRA": "MOD021KM", "MODIS_AQUA": "MYD021KM"}
+
+
+def decidir_por_granule(record):
+    """"nrt" / "standard" segun el nombre del granule guardado; None si no lo guarda.
+
+    El nombre es la prueba de con que producto se calculo el record. Sin nombre no hay prueba y
+    la decision queda para el CMR.
+    """
+    g = record.get("granule") or ""
+    if not g:
+        return None
+    return product_version_from_granule(g)
 
 
 def _volcan_latlon():
@@ -74,19 +103,19 @@ def hay_granule_estandar(coleccion, cuando, lat, lon, margen_min=10):
 
 
 def main():
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--aplicar", action="store_true", help="escribir los cambios")
-    ap.add_argument("--desde", default="2026-09-01", help="fecha minima a revisar")
+    ap.add_argument("--desde", default="2026-09-01",
+                    help="fecha minima para consultar el CMR (solo records sin granule guardado)")
     a = ap.parse_args()
 
     coords = _volcan_latlon()
     cambios, revisados = [], 0
+    por_via = collections.Counter()
     for ruta in sorted(glob.glob(os.path.join(RAIZ, "data", "mirova_equivalent",
                                               "*.json"))):
         vol = os.path.splitext(os.path.basename(ruta))[0]
-        if vol not in coords or coords[vol][0] is None:
-            continue
-        lat, lon = coords[vol]
         with io.open(ruta, encoding="utf-8") as fh:
             doc = json.load(fh)
         recs = doc["records"] if isinstance(doc, dict) and "records" in doc else doc
@@ -98,25 +127,36 @@ def main():
                 continue
             sensor = str(r.get("sensor") or "")
             ts = str(r.get("datetime_utc") or "")
-            if sensor not in COLECCION or ts[:10] < a.desde:
-                continue
-            if r.get("product_version") != "standard":
+            if sensor not in COLECCION or r.get("product_version") != "standard":
                 continue
             revisados += 1
-            if hay_granule_estandar(COLECCION[sensor], ts, lat, lon):
+            decision = decidir_por_granule(r)
+            if decision is None:
+                # Camino S133: sin nombre guardado, se pregunta al CMR.
+                if ts[:10] < a.desde or vol not in coords or coords[vol][0] is None:
+                    continue
+                lat, lon = coords[vol]
+                if hay_granule_estandar(COLECCION[sensor], ts, lat, lon):
+                    time.sleep(0.3)
+                    continue
+                time.sleep(0.3)
+                via = "cmr"
+            elif decision == "nrt":
+                via = "granule"
+            else:
                 continue
-            cambios.append((vol, ts[:16], sensor))
+            por_via[via] += 1
+            cambios.append((vol, ts[:16], sensor, via))
             if a.aplicar:
                 r["product_version"] = "nrt"
                 tocado = True
-            time.sleep(0.3)
         if tocado:
-            # EL FORMATO TIENE QUE SER EXACTAMENTE EL DE store.py:213
+            # EL FORMATO TIENE QUE SER EXACTAMENTE EL DE store.py
             # (`json.dump(store, f, indent=2)`, con el ensure_ascii por defecto y sin
             # newline final). El primer intento de S133 escribió con `indent=1` y
             # `ensure_ascii=False`: reformateó los diez archivos enteros y produjo un
             # diff de 9,2 millones de líneas para cambiar diez palabras. Un diff así no
-            # es sólo ruido — vuelve irrevisable el cambio real y puede romper a
+            # es sólo ruido: vuelve irrevisable el cambio real y puede romper a
             # cualquiera que compare bytes. Se revirtió con `git checkout -- data/`.
             tmp = ruta + ".tmp"
             with io.open(tmp, "w", encoding="utf-8") as fh:
@@ -124,9 +164,14 @@ def main():
             os.replace(tmp, ruta)
 
     print()
-    print("revisados: %d  |  a reetiquetar como nrt: %d" % (revisados, len(cambios)))
-    for c in cambios:
-        print("   %-22s %s %s" % c)
+    print("MODIS 'standard' revisados: %d  |  a reetiquetar como nrt: %d  (%s)"
+          % (revisados, len(cambios), dict(por_via)))
+    por_vol = collections.Counter(c[0] for c in cambios)
+    for vol, n in sorted(por_vol.items()):
+        print("   %-22s %d" % (vol, n))
+    if cambios:
+        print("   primero: %s %s   ultimo: %s %s"
+              % (min(c[1] for c in cambios), "", max(c[1] for c in cambios), ""))
     if cambios and not a.aplicar:
         print("\n(informe solamente; volver a correr con --aplicar para escribir)")
     return 0
