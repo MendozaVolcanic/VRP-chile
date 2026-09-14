@@ -46,6 +46,7 @@ from .scan_geometry import (viirs_pixel_areas, resolve_viirs_pixel_areas,
 from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots, cluster_pixels_geographic
 from .path_d_cap import apply_d9_scene_cap  # F50/S77
+from .product_version import product_version_from_granule  # S140 8b
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
 from pipeline.constants import SIGMA  # kept for reference, not used in MIR VRP
@@ -1388,7 +1389,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "diag_n_second_pass_recapture": n_second_pass_recapture,
         "sensor": sensor,
         "granule": name,
-        "product_version": "nrt" if "_NRT" in name else "standard",
+        "product_version": product_version_from_granule(name),  # S140 (8b): detector único
         "datetime_utc": _parse_datetime(name),
         # S122 — geometría de observación en el punto reportado (research).
         **observation_geometry(
