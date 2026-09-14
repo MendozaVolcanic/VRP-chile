@@ -54,6 +54,7 @@ from .clustering import cluster_hotspots, cluster_pixels_geographic
 from .anomaly_pixels import build_anomaly_pixels
 from .vrp_regimes import compute_local_background
 from .path_d_cap import apply_d9_scene_cap  # F50/S77
+from .product_version import product_version_from_granule  # S140 8b
 
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
@@ -2097,7 +2098,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "t_max_i05_k": round(t_max_i05, 2) if not np.isnan(t_max_i05) else None,
         "sensor": sensor,
         "granule": name,
-        "product_version": "nrt" if "_NRT" in name else "standard",
+        "product_version": product_version_from_granule(name),  # S140 (8b): detector único
         "datetime_utc": _parse_datetime(name),
         # S122 — geometría de observación en el punto reportado (research).
         **observation_geometry(

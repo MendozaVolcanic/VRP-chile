@@ -1554,7 +1554,7 @@ correction or cloud-contamination automatic filtering"*. Por eso
 [`MISSION.md`](MISSION.md) l.127 lista `Cloud mask BT<260K` en la tabla de
 parches **rechazados**, con estado *"Removido S27"*.
 
-**Qué hace el código.** `pipeline/process_viirs.py:674-682` la aplica:
+**Qué hace el código.** `pipeline/process_viirs.py:675-683` la aplica:
 
 ```python
 CLOUD_BT_THRESHOLD = 260.0                      # K
@@ -1569,10 +1569,10 @@ en S124 (la otra, los pisos VRP, se corrigió en #523). Solo afecta a VIIRS
 375 m; MODIS y VIIRS 750 no la tienen.
 
 > ⚠️ **Corrección S125 — la última frase es imprecisa y esconde el fix.** MODIS
-> **sí tiene** la máscara (`process_modis.py:505` y `:715`), sólo que la lee de la
+> **sí tiene** la máscara (`process_modis.py:506` y `:715`), sólo que la lee de la
 > perilla del perfil `CLOUD_MASK_BT_K`, hoy en `0.0` — o sea el predicado queda
 > tautológico y la máscara inerte. Lo mismo VIIRS 750. **El caso raro es VIIRS 375**:
-> `process_viirs.py:674` tiene `CLOUD_BT_THRESHOLD = 260.0` **hardcodeado** e ignora
+> `process_viirs.py:675` tiene `CLOUD_BT_THRESHOLD = 260.0` **hardcodeado** e ignora
 > la perilla, aplicándolo a `roi_mask` y `bg_mask` en `:678-681`.
 >
 > Consecuencia práctica que la sección no sacaba: **la perilla correcta ya existe y un
@@ -1701,7 +1701,7 @@ Estado del código, verificado leyendo `pipeline.profile` y no el YAML:
 `bt > CLOUD_MASK_BT_K` es tautológico y la máscara está inerte en los tres
 sensores. El literal `260.0` que VIIRS 375 tenía hardcodeado —la anomalía que la
 corrección S125 de arriba señalaba— **ya está reemplazado por la perilla**
-(`process_viirs.py:772`), con dos guards: `tests/test_cloud_mask_from_profile_s125.py`
+(`process_viirs.py:773`), con dos guards: `tests/test_cloud_mask_from_profile_s125.py`
 y `tests/test_cloud_mask_operacional_s126.py`.
 
 **Por qué se sostiene el apagado**, en este orden:
@@ -2065,7 +2065,7 @@ Detalle: `docs/s129/ROI1_CAJA_VS_CIRCULO.md`.
 disco de 3 km alrededor de la cumbre, el píxel más caliente es el borde del disco (cota más
 baja), no el cráter (A69).
 
-**Lo nuestro** (`pipeline/process_viirs.py:1777-1786`, flags efectivos
+**Lo nuestro** (`pipeline/process_viirs.py:1778-1787`, flags efectivos
 `ENABLE_TEST1_CONTEXTUAL_FILTER=True` y `ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK=True`, adopción
 S100 #340 «ctxpeak»): el Test 1 marca ~la mitad del disco (exceso sobre la mediana del anillo
 1-3 km, `test1_integrated.py:376,412,420`), el filtro contextual lo intersecta con `dNTI_ctx`
@@ -2158,7 +2158,7 @@ at 12.02 µm (TIR channel)») y `:211-216` (NTI = (L21ok − L32)/(L21ok + L32))
 capítulo Springer (`coppola2024_chapter.txt:1035`) repite «TIR (12.02 µm)». Es la elección
 original de MODVOLC (Wright et al. 2002).
 
-**Lo nuestro.** `pipeline/process_modis.py:72-76` calibra la banda 31 (índice 10 de
+**Lo nuestro.** `pipeline/process_modis.py:73-77` calibra la banda 31 (índice 10 de
 `EV_1KM_Emissive`, λ = 11,03 µm) para el NTI, desde el commit `59846e897` (2026-04-08, «E3: add NTI
 dual-criteria detection to MODIS (Band 31 TIR)»). Ningún documento del proyecto lo justificó; la
 síntesis bibliográfica decía «B31/B32» sin distinguir. VIIRS no está afectado: I05 (11,45 µm) y
@@ -2184,7 +2184,7 @@ centred at 3.959 um (hereby called band L21ok), by using the L21 or L22 radiance
 saturation (or not), respectively"*. La 22 manda; la 21 entra sólo donde la 22 satura.
 
 **Lo nuestro**: `ENABLE_MODIS_B22_PRIMARY = False` (B21 primaria). El flag existe, cableado, desde
-S133; `process_modis.py:325` documenta que el ON es el que sigue al paper.
+S133; `process_modis.py:326` documenta que el ON es el que sigue al paper.
 
 **El fenómeno.** La banda 21 es de ganancia baja (llega a ~500 K); de noche, sobre roca y nieve a
 250-270 K, trabaja en el fondo de su escala con escalones gruesos. El dNTI, que resta a cada píxel el
@@ -2235,7 +2235,7 @@ los Tier A. Hay que medirlo antes de proponer nada.
 
 **El paper** (p. 6): los píxeles con `NTI > K1` se declaran activos por el Test 1 y se descartan como no aptos para los pasos siguientes (eso último es el GAP #A dentro de D11, reabierto S128).
 
-**Lo nuestro**: K1 se calcula (`process_modis.py:660-666`) y entra a `combine_hot_paths` (l. 824), pero `hot_mask_2d = fp_hot` (l. 888) lo pisa con la salida del primer pase; `test1_mask=None` (l. 857-859). Igual en `process_viirs.py` (971-976, 1188, 1259) y `process_viirs_mod.py` (619-624, 783, 851). Control sintético (`experiments/_s138_audit/eje2/01_controles_sinteticos_detection_context.py`, M3): bloque 7x7 a 400 K sobre 280 K, el paper marcaría 49, el pipeline 28; interior 3x3, 1 de 9.
+**Lo nuestro**: K1 se calcula (`process_modis.py:661-667`) y entra a `combine_hot_paths` (l. 824), pero `hot_mask_2d = fp_hot` (l. 888) lo pisa con la salida del primer pase; `test1_mask=None` (l. 857-859). Igual en `process_viirs.py` (971-976, 1188, 1259) y `process_viirs_mod.py` (619-624, 783, 851). Control sintético (`experiments/_s138_audit/eje2/01_controles_sinteticos_detection_context.py`, M3): bloque 7x7 a 400 K sobre 280 K, el paper marcaría 49, el pipeline 28; interior 3x3, 1 de 9.
 
 **Fenómeno**: en una colada o lago de lava de varios píxeles, los interiores están rodeados de píxeles igual de calientes, su dNTI es ~0 y no son anómalos respecto de sus vecinos; el paper los captura por NTI absoluto. Frecuencia de K1 en records operacionales: MODIS 0,09 %, VIIRS375 1,34 %, VIIRS750 0,12 % (pocos, pero son los eventos más energéticos). **Efecto**: sub-estimación de magnitud justo en fase efusiva fuerte. Gravedad 4 en magnitud de erupción, 2 en detección (el borde siempre dispara). No reprocesado sobre granules reales: la magnitud del efecto es SOSPECHA.
 
@@ -2245,7 +2245,7 @@ los Tier A. Hay que medirlo antes de proponer nada.
 
 **El paper** (p. 3): descarta los DN inválidos "with the exception of the pixels with DN = 65 533" (saturación), que se conservan marcados.
 
-**Lo nuestro**: `rad[dn > 32767] = NaN` (`process_modis.py:244-250`), guard BT > 500 K a NaN (l. 555), y en `merge_mir_bands` (l. 331-333) el NaN de B21 cae a B22, que también satura. Origen: corrección F28 (S73) a un caso de basura (PP 2026-03-18).
+**Lo nuestro**: `rad[dn > 32767] = NaN` (`process_modis.py:245-251`), guard BT > 500 K a NaN (l. 555), y en `merge_mir_bands` (l. 331-333) el NaN de B21 cae a B22, que también satura. Origen: corrección F28 (S73) a un caso de basura (PP 2026-03-18).
 
 **Fenómeno**: en un paroxismo el píxel del foco satura la banda 21 (~500 K) y es el más caliente de la escena; queda NaN, no entra al NTI, al pool ni al hot mask, y no aporta radiancia: agujero en el centro de la anomalía. Sin casos en la ventana medida (`sanity_cap_tocado = 0`), invisible hoy; sólo actúa en paroxismos, pero ahí resta. Gravedad 3.
 
@@ -2257,7 +2257,7 @@ los Tier A. Hay que medirlo antes de proponer nada.
 
 **S140, confirmación posterior del mismo grupo** (Fernandina 2025, Remote Sens. 17, 1191, p. 9, ecuación 3, página renderizada): el fondo es la radiancia promediada de los píxeles vecinos **no alertados**. Coincide con SP426.5 y agrega que los alertados quedan fuera del promedio.
 
-**Lo nuestro**: `np.median` sobre el anillo (`detection_context.py:1064`; `process_modis.py:569-577`, 1023; `process_viirs_mod.py:981`, sin alternativa en M-band); kernel 3x3 sólo para los 5 volcanes opt-in del YAML (`local_kernel_bg`: PCC, Villarrica, Chaitén, PP, Lastarria; `process_modis.py:1041-1049`); `delta_L` recortado a 0 (`process_modis.py:1056`). D8 quedó marcada resuelta por el kernel opt-in, pero la divergencia literal sigue vigente en 6 de 11 Tier A en MODIS, 11 de 11 en M-band y todo el camino Test 1.
+**Lo nuestro**: `np.median` sobre el anillo (`detection_context.py:1064`; `process_modis.py:570-578`, 1023; `process_viirs_mod.py:982`, sin alternativa en M-band); kernel 3x3 sólo para los 5 volcanes opt-in del YAML (`local_kernel_bg`: PCC, Villarrica, Chaitén, PP, Lastarria; `process_modis.py:1042-1050`); `delta_L` recortado a 0 (`process_modis.py:1057`). D8 quedó marcada resuelta por el kernel opt-in, pero la divergencia literal sigue vigente en 6 de 11 Tier A en MODIS, 11 de 11 en M-band y todo el camino Test 1.
 
 **Fenómeno**: en una cumbre helada el cráter con lava sub-píxel está más frío en MIR que la mediana de un anillo lleno de valle tibio; su exceso sale negativo y se recorta a 0,0 MW aunque los Tests 2 y 3 lo hayan aceptado (Villarrica A6 con B22; Tupungatito 2026-08-21 05:30 UTC VIIRS_SNPP_750, cúmulo de 1 píxel summit en 0,0 MW, fondo 256,4 K). En noches-sensor: VIIRS750 33 de 246 noches ALERTA de MIROVA con el cráter en cero (ventana 2026-01-11 a 2026-09-07); **en noches de volcán, 0 de 33**: todas cubiertas por otra pasada (verificador S138 §3.d). Es fidelidad y magnitud, no recall. Y al revés, infla donde el anillo es más frío que el entorno del foco (glaciar de Tupungatito, A19). Gravedad 4.
 
@@ -2275,13 +2275,13 @@ los Tier A. Hay que medirlo antes de proponer nada.
 
 ## D27: El día no existe: la Tabla 1 diurna (K1 = -0,6, C1 = 0,02, C2 = 15) está escrita y nunca se ejecuta. **DELIBERADA (MISSION: sólo noche), registrada S138 para que conste como divergencia literal** S138
 
-`_select_thresholds` (`process_modis.py:355-378`), `ENABLE_DAYTIME_MODIS = False`, `run_pipeline.py:185-195`, `store.py:171-182`. El paper procesa pasadas diurnas y advierte que ahí están la mayoría de sus falsas alertas (p. 16-17; A76). MIROVA publica detecciones diurnas de MODIS que el operador no verá acá. Gravedad 2 (recall de día; riesgo de falsos positivos si se activara). No se propone cambiar.
+`_select_thresholds` (`process_modis.py:356-379`), `ENABLE_DAYTIME_MODIS = False`, `run_pipeline.py:185-195`, `store.py:171-182`. El paper procesa pasadas diurnas y advierte que ahí están la mayoría de sus falsas alertas (p. 16-17; A76). MIROVA publica detecciones diurnas de MODIS que el operador no verá acá. Gravedad 2 (recall de día; riesgo de falsos positivos si se activara). No se propone cambiar.
 
 ---
 
 ## D28: El bow tie de MODIS no se trata en ningún paso del perfil operacional. **ABIERTA, parte de D17 (registrada S138 como paso propio)** S138
 
-El paper (p. 3) corrige el solapamiento de barridos antes de remuestrear; el código no tiene el paso (`process_modis.py:499-510` sin regrid; `ENABLE_UTM_REGRID = False`, leído de `thresholds:`, `profile.py:606`). Consecuencia junto con D17: los 8 vecinos son píxeles nativos de tamaño variable y la magnitud usa un área que no es la del píxel (S131). Gravedad 3 dentro de D17.
+El paper (p. 3) corrige el solapamiento de barridos antes de remuestrear; el código no tiene el paso (`process_modis.py:500-511` sin regrid; `ENABLE_UTM_REGRID = False`, leído de `thresholds:`, `profile.py:606`). Consecuencia junto con D17: los 8 vecinos son píxeles nativos de tamaño variable y la magnitud usa un área que no es la del píxel (S131). Gravedad 3 dentro de D17.
 
 ---
 

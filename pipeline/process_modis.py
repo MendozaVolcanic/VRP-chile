@@ -59,6 +59,7 @@ from .vrp_regimes import (
 from .test1_integrated import compute_test1_mir
 from .anomaly_pixels import build_anomaly_pixels
 from .path_d_cap import apply_d9_scene_cap  # F50/S77
+from .product_version import product_version_from_granule  # S140 8b
 from .path_d_intra_radio import apply_intra_radio_gate  # S83 F-S81-A Fase 2
 from .second_pass_intra_radio import apply_second_pass_intra_radio_gate  # S85 F-S81-B'
 from .regrid import regrid_to_utm  # F70.2 grilla UTM
@@ -1543,7 +1544,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "diag_n_second_pass_recapture": n_second_pass_recapture,
         "sensor": "MODIS_TERRA" if "MOD0" in hdf_path.name else "MODIS_AQUA",
         "granule": hdf_path.name,
-        "product_version": "nrt" if "_NRT" in hdf_path.name else "standard",
+        # S140 (8b): MODIS marca el NRT con `.NRT.`, no con `_NRT`; el detector reconoce los dos.
+        "product_version": product_version_from_granule(hdf_path.name),
         "datetime_utc": _parse_datetime(hdf_path.name),
         # S122 — geometría de observación en el punto reportado (research).
         **observation_geometry(
