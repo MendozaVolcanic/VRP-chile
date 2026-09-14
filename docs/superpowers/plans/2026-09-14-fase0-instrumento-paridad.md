@@ -320,7 +320,7 @@ actualizados si se corrieron líneas. **Paso 5: commit**; PR con confirmación d
 
 Cuatro PR chicos, cada uno con su verificación:
 
-- [ ] **8a. Perfil experimental.** Decidir con Nicolás: (i) quitar el paso de `nrt.yml:192-215` del cron, o
+- [x] **8a. Perfil experimental.** HECHO S141: opción (i), el paso corre sólo por despacho manual (tag `pre-s141-t8a-experimental`). Texto original: Decidir con Nicolás: (i) quitar el paso de `nrt.yml:192-215` del cron, o
 (ii) commitear `data/experimental_v2/` en `nrt.yml:330`. Recomendación: (i), porque nadie consume
 ese perfil y ahorra ~la mitad del reloj del job. Verificación: el siguiente run del cron dura menos
 y `gh run view --json jobs` no muestra el paso.

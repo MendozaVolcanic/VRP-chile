@@ -72,7 +72,7 @@ hace publicar píxeles sueltos en el flanco (1.2) y lo mismo que S124 vio en noc
 5. Cierres heredados de lecturas incompletas del paper (A95) y olvido del propio repo (A50).
 6. Verdad externa rica sin usar: OSF v2.5, OCR, Coppola.
 
-## 2. Definición de terminado por sensor (propuesta, decide Nicolás)
+## 2. Definición de terminado por sensor (CONGELADA el 2026-09-14, S141, decisión Nicolás)
 
 Medida siempre con el **banco congelado** (§3), por pasada y por noche de volcán, **por volcán**
 (nunca sólo agregado, S126), con la ventana y el denominador escritos.
@@ -83,9 +83,16 @@ Medida siempre con el **banco congelado** (§3), por pasada y por noche de volc�
 | VIIRS 750 | igual | **≤ 10 % focales, ≤ 15 % nevados** (hoy 20 % por pasada, 55 % por noche) | igual, donde haya n ≥ 30 (hoy casi sin verdad) |
 | MODIS | todos los pasos literales implementados y activos (D21 a D25, D19) | en Láscar, tasa en noches con alerta **significativamente mayor** que en noches sin alerta (hoy 11,5 % contra 10,2 %) | informativa (n = 35 en OSF) |
 
-Los umbrales numéricos son una propuesta de partida. Se revisan una sola vez, al terminar la Fase 0,
-cuando se mida la consistencia del propio MIROVA (por ejemplo, con cuánta frecuencia MIROVA publica
-en pasadas vecinas de la misma noche), y después **quedan congelados**.
+Los umbrales numéricos eran una propuesta de partida. Se iban a revisar una sola vez, al terminar la
+Fase 0, cuando se midiera la consistencia del propio MIROVA (por ejemplo, con cuánta frecuencia MIROVA
+publica en pasadas vecinas de la misma noche), y después **quedar congelados**.
+
+**Congelados el 2026-09-14 (S141), decisión de Nicolás**, con la Fase 0 cerrada salvo la tarea 10
+(lectura de papers), que no mueve umbrales. Queda escrito lo que NO se hizo: **la medición de
+consistencia del propio MIROVA no se corrió** antes de congelar. Si al correrla resulta que MIROVA
+mismo no cumple estas bandas contra sí mismo, eso es motivo para reabrir esta tabla, y es el único.
+Los valores que usa el auto-audit semanal (`scripts/auto_audit_weekly.py`, `FALSAS_BANDA_TERMINADO`)
+son los de esta tabla.
 
 ## 3. Fase 0: el instrumento (sin tocar `pipeline/`)
 
