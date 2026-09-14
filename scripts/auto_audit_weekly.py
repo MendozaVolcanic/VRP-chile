@@ -93,8 +93,15 @@ RECALL_MIN = {"VIIRS375": 93.4, "VIIRS750": 79.5, "MODIS": 95.0}
 RATIO_BAND_INDIVIDUAL = (0.5, 2.0)   # una detección suelta (referencia, no se usa acá)
 RATIO_BAND_MEDIAN = (0.7, 1.4)       # la mediana per-volcán: lo que este script juzga
 RATIO_BAND = RATIO_BAND_MEDIAN       # compat con lectores externos del módulo
-# Excepciones físicas documentadas (AUDIT_S119 §2.3): sub-banda esperada, no flaggear.
-UNDER_BAND_KNOWN = {"Lastarria"}
+# Excepciones documentadas: sub-banda esperada, no flaggear.
+# - Lastarria: cat-b Lazufre (AUDIT_S119 §2.3), excepción física.
+# - Lascar e Isluga (S141, decisión Nicolás 2026-09-14): déficit de régimen débil de S124
+#   (docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md), que es el objeto de la Fase 1 del plan de
+#   paridad (docs/superpowers/specs/2026-09-13-plan-definitivo-paridad-design.md §4). Salieron
+#   en el issue semanal cuatro semanas seguidas (#511, #568, #603, #661) por lo mismo; un aviso
+#   que repite lo sabido deja de leerse y tapa la regresión real. QUITARLOS al cerrar la Fase 1.
+#   La magnitud sigue medida en latest.json; sólo deja de abrir issue por debajo de la banda.
+UNDER_BAND_KNOWN = {"Lastarria", "Lascar", "Isluga"}
 
 
 def evaluar_ratio_mediano(volcan: str, ratio: float, n_noches: int):
