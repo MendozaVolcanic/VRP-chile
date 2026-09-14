@@ -303,3 +303,99 @@ jobs:
             | python scripts/medir_cadencia_cron.py \
                 --ventana-h 24 --json-out cadencia.json \
             | tee -a "$GITHUB_STEP_SUMMARY"
+
+      # ────────────────────────────────────────────────────────────────
+      # S140 (Fase 0, tarea 8c): aviso ANTES de que venza el EARTHDATA_TOKEN.
+      #
+      # POR QUE: en julio de 2026 el token vencio sin aviso y el NRT paso 13 dias
+      # "verde" sin datos (S123). El token es un JWT y su campo `exp` trae el
+      # vencimiento real; scripts/token_edad.py lo lee sin imprimir el token.
+      #
+      # Notifica por TRANSICION, con la misma regla que el paso de staleness (S123):
+      # abre issue al entrar a `renovar` (10 dias o menos) o `vencido`, edita el cuerpo
+      # sin notificar mientras sigue igual, comenta si empeora y cierra al volver a `ok`.
+      # `desconocido` (secret ausente o no legible como JWT) va solo al resumen del job:
+      # no es evidencia de vencimiento y abrir issue por eso seria ruido.
+      # ────────────────────────────────────────────────────────────────
+      - name: Vencimiento del EARTHDATA_TOKEN
+        id: token
+        if: always()
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          python scripts/token_edad.py | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Issue de renovacion del token (por transicion)
+        if: always() && steps.token.conclusion == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          ESTADO: ${{ steps.token.outputs.estado }}
+          VENCE: ${{ steps.token.outputs.vence_utc }}
+          DIAS: ${{ steps.token.outputs.dias_restantes }}
+        run: |
+          python - <<'PYEOF'
+          import json, os, subprocess, sys
+
+          REPO = os.environ["GH_REPO"]
+          ESTADO = os.environ.get("ESTADO") or "desconocido"
+          VENCE = os.environ.get("VENCE") or "?"
+          DIAS = os.environ.get("DIAS") or "?"
+          LABEL = "earthdata-token"
+          TITLE = "EARTHDATA_TOKEN por vencer: renovar en Earthdata y actualizar el secret"
+          MARK = "<!-- s140-token:"
+          fallos = []
+
+          def gh(*args, stdin=None):
+              # Un canal de alerta que falla mudo no es un canal de alerta (S124).
+              r = subprocess.run(["gh", *args], capture_output=True, text=True,
+                                 encoding="utf-8", input=stdin)
+              if r.returncode != 0:
+                  fallos.append(f"gh {' '.join(args[:3])}: {r.stderr.strip()[:200]}")
+              return r.stdout.strip()
+
+          def fin():
+              for f in fallos:
+                  print(f"WARN {f}")
+              sys.exit(1 if fallos else 0)
+
+          if ESTADO == "desconocido":
+              print("Estado del token desconocido (secret ausente o no-JWT): sin issue.")
+              sys.exit(0)
+
+          raw = gh("issue", "list", "--repo", REPO, "--label", LABEL, "--state", "open",
+                   "--json", "number,body", "--jq", ".[0] // empty")
+          abierto = json.loads(raw) if raw else None
+
+          if ESTADO == "ok":
+              if abierto:
+                  num = str(abierto["number"])
+                  gh("issue", "comment", num, "--repo", REPO, "--body-file", "-",
+                     stdin=f"Token renovado: vence {VENCE} ({DIAS} dias). Cierro el issue.")
+                  gh("issue", "close", num, "--repo", REPO, "--reason", "completed")
+              else:
+                  print(f"Token OK: vence {VENCE} ({DIAS} dias).")
+              fin()
+
+          cuerpo = (f"{MARK} {ESTADO} -->\n\n"
+                    f"El `EARTHDATA_TOKEN` esta en estado **{ESTADO}**: vence **{VENCE}** UTC "
+                    f"({DIAS} dias).\n\n"
+                    "Si vence, el NRT deja de descargar granules (S123: 13 dias sin datos en julio).\n\n"
+                    "Pasos: generar un token nuevo en https://urs.earthdata.nasa.gov (Generate Token) y "
+                    "pegarlo en Settings > Secrets > Actions > `EARTHDATA_TOKEN`. "
+                    "Ver `docs/EARTHDATA_TOKEN_SETUP.md`.\n")
+          if not abierto:
+              gh("label", "create", LABEL, "--repo", REPO, "--color", "FBCA04",
+                 "--description", "Vencimiento del EARTHDATA_TOKEN")
+              gh("issue", "create", "--repo", REPO, "--title", TITLE, "--label", LABEL,
+                 "--body-file", "-", stdin=cuerpo)
+              fin()
+          num = str(abierto["number"])
+          previo = next((l[len(MARK):].replace("-->", "").strip()
+                         for l in (abierto.get("body") or "").splitlines() if l.startswith(MARK)), None)
+          gh("issue", "edit", num, "--repo", REPO, "--body-file", "-", stdin=cuerpo)
+          if previo != ESTADO:
+              gh("issue", "comment", num, "--repo", REPO, "--body-file", "-",
+                 stdin=f"El token paso de `{previo}` a **{ESTADO}**: vence {VENCE} ({DIAS} dias).")
+          fin()
+          PYEOF
