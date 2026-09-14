@@ -131,6 +131,17 @@ RUTINA y no sirven para el banco: `registro_vrp_positivos.csv` (sólo ALERTA),
 `registro_vrp_maestro_publicable.csv` (unión de alertas de ambos canales, lo que dibuja el dashboard de
 Mirova-v1) y `registro_<Volcan>.csv` (el maestro partido por volcán).
 
+**Fuente: el remoto de Mirova-v1, no el snapshot** (verificado 2026-09-14 contra
+`https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/`). El snapshot
+`data/mirova_reference/mirova_v1_snapshot/` sólo lo actualiza el auto-audit semanal y estaba 7 días
+atrás: remoto 37.474 filas del consolidado (1.462 ALERTA, 852 FALSO_POSITIVO, 35.160 RUTINA, hasta
+2026-09-14) contra 36.255 del snapshot; OCR 966 contra 937. Toda fila del snapshot está en el remoto
+con el mismo tipo, VRP y distancia (0 diferencias), así que el remoto es un superconjunto. El banco
+baja los dos CSV del remoto al correr, registra en su salida el sha del commit de Mirova-v1
+(`gh api repos/MendozaVolcanic/Mirova-v1/commits?path=monitoreo_satelital/registro_vrp_consolidado.csv&per_page=1`)
+y guarda copia en `experiments/**/_dl_*/` (ignorado) para reproducir. La unión con el respaldo del
+2026-04-08 sigue siendo necesaria: el remoto perdió filas en abril y agosto (issue Mirova-v1 #19).
+
 **No usar `load_mirova_alertas`**: `pipeline/mirova_csv_loader.py:147-149` descarta toda fila cuyo
 `Tipo_Registro` no esté en `_ALERT_TIPOS`, así que borraría RUTINA y FALSO_POSITIVO. En su lugar, leer
 los dos CSV primarios con `csv.DictReader` conservando **todas** las filas (patrón de
