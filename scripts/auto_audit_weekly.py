@@ -115,6 +115,68 @@ def evaluar_ratio_mediano(volcan: str, ratio: float, n_noches: int):
     return None
 
 
+# --- S140 (Fase 0, tarea 6): falsas publicaciones, SIN alarma ---
+# POR QUÉ: la brecha con MIROVA es sobre-publicación (S139): en pasadas donde MIROVA
+# miró el volcán y no vio nada, el dashboard publica igual. Este script sólo medía
+# recall y magnitud, así que esa brecha no se veía semana a semana. Ahora se mide con
+# el banco de paridad (scripts/banco_paridad.py), por sensor y por régimen.
+# DECISIÓN de Nicolás (2026-09-14): medir SIN alarma. V375 está hoy en ~64 % contra
+# una banda de terminado de 10 %: con flag, el workflow abriría un issue cada lunes
+# hasta cerrar la Fase 1 y taparía las regresiones reales. La banda va al lado.
+FALSAS_BANDA_TERMINADO = {"focal": 10.0, "nevado": 15.0}   # spec §2 revisada (§7.5)
+# Partición de régimen de S131 (scripts/build_c2ab_windows.py:41-42).
+REGIMEN = {**{v: "focal" for v in ("Lascar", "Lastarria", "Isluga",
+                                   "PlanchonPeteroa", "PuyehueCordonCaulle")},
+           **{v: "nevado" for v in ("Llaima", "Copahue", "Villarrica",
+                                    "NevadosDeChillan", "Tupungatito", "Chaiten")}}
+
+
+def _pct_falsas(recs):
+    neg = [r for r in recs if r["lab"] == "neg_limpio"]
+    pub = sum(r["pub"] for r in neg)
+    return {"n_neg_limpio": len(neg), "n_publica": pub,
+            "falsas_pub_pct": round(100.0 * pub / len(neg), 1) if neg else None}
+
+
+def resumir_falsas(recs, flags):
+    """Falsas publicaciones por sensor y por régimen, sobre pasadas etiquetadas por el banco.
+
+    Recibe `flags` para dejar explícito el contrato: esta métrica NO los modifica.
+    """
+    por_sensor = {s: _pct_falsas([r for r in recs if r["b"] == s]) for s in SENSORS}
+    por_regimen = {}
+    for reg, banda in FALSAS_BANDA_TERMINADO.items():
+        por_regimen[reg] = {}
+        for s in SENSORS:
+            d = _pct_falsas([r for r in recs if r["b"] == s and REGIMEN.get(r["vol"]) == reg])
+            d["banda_terminado_pct"] = banda
+            d["sobre_banda_terminado"] = (d["falsas_pub_pct"] > banda
+                                          if d["falsas_pub_pct"] is not None else None)
+            por_regimen[reg][s] = d
+    return {"por_sensor": por_sensor, "por_regimen": por_regimen, "alarma": False,
+            "nota": ("medición sin alarma (decisión Nicolás S140); la banda es la de "
+                     "terminado de la spec §2, no un umbral de regresión")}
+
+
+def medir_falsas_ventana(win):
+    """Etiqueta con el banco de paridad las pasadas nocturnas de la ventana.
+
+    Usa el predicado del dashboard ejecutado con node desde frontend/index.html, igual
+    que el banco; la referencia es la unión consolidado + OCR + respaldo (tarea 2).
+    """
+    if HERE not in sys.path:
+        sys.path.insert(0, HERE)
+    import banco_paridad as bp  # noqa: E402  (importa este módulo: se carga en runtime)
+    from referencia_mirova_unificada import cargar_referencia_unificada  # noqa: E402
+    coords = _coords_por_volcan()
+    inner = bp.inner_desde_html()
+    filas = cargar_referencia_unificada(CONS, OCR)
+    por_vb, noche_sensor, noche_volcan, _ = bp.indexar_referencia(filas, coords, win)
+    recs = bp.cargar_nuestros(coords, inner, win)
+    bp.etiquetar(recs, por_vb, noche_sensor, noche_volcan)
+    return recs
+
+
 # --- S124: no evaluarnos con pasadas DIURNAS de MIROVA ---
 # De día el Sol reflejado en nube o nieve entra en la banda MIR de 3,7-4 µm con
 # intensidad comparable a la de un foco incandescente: el sensor no distingue
@@ -351,6 +413,14 @@ def main():
     else:
         verdict = "VERDE"
 
+    # S140 (Fase 0, tarea 6): falsas publicaciones, medidas sin alarma (decisión Nicolás).
+    # Si el banco no puede correr (sin node, CSV ilegible), el error queda escrito en el
+    # bloque en vez de tumbar el audit: recall y magnitud siguen valiendo por sí solos.
+    try:
+        falsas = resumir_falsas(medir_falsas_ventana(win), flags)
+    except Exception as e:  # noqa: BLE001
+        falsas = {"error": f"{type(e).__name__}: {str(e)[:300]}", "alarma": False}
+
     out = {
         "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "window": list(win),
@@ -361,10 +431,18 @@ def main():
         "magnitud_ratio_by_npix": {
             b: {"n_noches": len(r), "ratio_mediano": round(statistics.median(r), 3)}
             for b, r in sorted(ratios_by_npix.items()) if r},
+        "falsas_publicaciones": falsas,
         "integrity": integrity,
         "flags": flags,
         "verdict": verdict,
     }
+    if "error" in falsas:
+        print(f"FALSAS PUBLICACIONES: no se pudo medir: {falsas['error']}")
+    else:
+        for s in SENSORS:
+            p = falsas["por_sensor"][s]
+            print(f"  falsas {s:<9} {p['falsas_pub_pct']}% de {p['n_neg_limpio']} pasadas "
+                  f"negativas limpias (sin alarma)")
     os.makedirs(OUTDIR, exist_ok=True)
     with open(os.path.join(OUTDIR, "latest.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1, ensure_ascii=False)
