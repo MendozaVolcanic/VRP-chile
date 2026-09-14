@@ -1,4 +1,12 @@
 # STATUS — VRP Chile
+
+> **ARCHIVO HISTÓRICO (congelado en la sesión 6, 2026-04-08). NO es el traspaso vigente.**
+> Desde S79 el traspaso de cada sesión vive en `tasks/BLOQUE_ARRANQUE_S<N>.md`; el vigente es el de
+> número más alto: `ls tasks/BLOQUE_ARRANQUE_S*.md | sort -V | tail -1` (al 2026-09-14,
+> `tasks/BLOQUE_ARRANQUE_S140.md`). Ese orden de lectura lo declara el `CLAUDE.md` del proyecto.
+> Esta nota existe porque el hook `check_traspaso.py` y el respaldo de `/retomar` buscan `STATUS.md`
+> antes que `tasks/`, y anunciaban este archivo como traspaso. Lo de abajo se conserva por historia.
+
 **Ultima actualizacion:** 2026-04-08 (sesion 6 — diagnóstico profundo MODIS, plan E2 listo para sesión 7)
 
 ---
