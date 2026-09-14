@@ -40,3 +40,13 @@ redactor no pudo verificar: hay que resolverlas antes de pasar la sección a «r
    discutible es no reportar precisión, y está argumentado en el propio texto).
 4. ⬜ §3 Introduction, §7 casos, §8 Discussion, §9 Conclusions.
 5. ⬜ Figuras (12+), referencias con DOI (`.bib`), coautores, disclosure IA.
+
+## Localizadores de literatura (S141, pedido de Nicolás)
+
+Toda afirmación que sale de un paper lleva en su comentario `<!-- src: -->` el archivo PDF de
+`documentacion/`, la página impresa y la del visor, y la sección con el número de párrafo, o la figura,
+tabla o ecuación, para poder comprobarla a mano. Nunca líneas de un `.txt` extraído: esa capa de texto
+corrompe operadores (A95). Cada sección trae al pie la tabla de archivos y convención de página. Los
+localizadores se verificaron mirando la página renderizada: `docs/audit_s141/lectura/LOCALIZADOR_MANUSCRITO.md`
+y `docs/audit_s141/lectura/VERIFICADOR_MANUSCRITO.md`. Si no se encontró el lugar exacto, se escribe
+"localizador pendiente de verificar en imagen", nunca una página inventada.

@@ -15,9 +15,9 @@ Both sides of the comparison are near-real-time products. Our records are built 
 NRT granules when the Standard granule is not yet archived, and the MIROVA alerts we collect
 are the ones its NRT chain published at the time. Comparing NRT against NRT is therefore the
 operationally meaningful test, and it is also the only one available: MIROVA does not
-distribute a reprocessed Chilean archive for the period we cover.
+distribute a reprocessed Chilean archive covering 2026, the period of this comparison.
 
-<!-- src: docs/paper/sec5_methods.md §5.1 ; CLAUDE.md ("Refs MIROVA son NRT ... Comparar contra NRT es operacionalmente correcto") -->
+<!-- src: docs/paper/sec5_methods.md §5.1 ; CLAUDE.md ("Refs MIROVA son NRT ... Comparar contra NRT es operacionalmente correcto") ; [6.1] Coppola et al. 2023, feart-11-1240107.pdf, p. 3 impresa (visor 3), col. izq., 3.er párrafo (archivo histórico descargable) -->
 
 Three limits of this reference must be stated before any number is read. First, coverage is
 partial: an internal audit measured the scraped ground truth at 79.2 % of the MIROVA passes
@@ -27,17 +27,18 @@ apparent recall, never inflate it. Second, the reference carries no negative lab
 publishes detections; it does not publish an assertion that a given overpass contained
 nothing. There is no set of confirmed empty nights against which a detection of ours could be
 scored as wrong. Third, the reference contains alerts from daytime overpasses, which our
-night-only chain cannot reproduce by design: near solar noon a cloud top reflects sunlight in
-the mid-infrared while staying cold in the thermal band, and the index rises with nothing hot
-beneath it. Ninety-eight such rows are present in the VIIRS 375 m reference. They are excluded
+night-only chain cannot reproduce by design: by day, sunlight reflected by clouds and other
+reflective surfaces raises the MIR radiance and hence the NTI without any hot source
+(Coppola et al., 2014, p. 3410). Ninety-eight such rows are present in the VIIRS 375 m reference. They are excluded
 from the comparison rather than counted as misses, because missing them is the correct
 behaviour.
 
 One asymmetry that is often assumed here does **not** apply. The visual supervision described
-in the MIROVA literature — cloud-affected data discarded a posteriori, residual false alerts
-removed by hand — belongs to the curated archive prepared for publication, not to the
-near-real-time product we compare against. The NRT chain monitors hundreds of volcanoes
-worldwide, free of charge, every one to two hours; there is no capacity to review each
+in the MIROVA literature is applied to curated archives (Coppola et al., 2023, p. 4), while
+the automatically posted time series are provided 'as they are' (Coppola et al., 2016a,
+p. 197). The NRT chain monitors hundreds of volcanoes worldwide, with products posted within
+1-4 h of each overpass (Coppola et al., 2016a, p. 196) and freely accessible on the web
+(Coppola et al., 2020, p. 11); there is no capacity to review each
 detection by hand, nor the local knowledge of each volcano that doing so would require. Both
 sides of our comparison are therefore unsupervised, and any difference in recall is
 algorithmic: something one system's rules capture and the other's do not. We state this
@@ -45,7 +46,7 @@ explicitly because the opposite assumption would set an artificial ceiling on ho
 open implementation can aspire to be, and would excuse differences that are in fact
 investigable.
 
-<!-- src: docs/MIROVA_DIVERGENCES.md:42-52 (D2, cobertura 79,2 % medida en AUDIT_S128 §4) ; docs/MIROVA_DIVERGENCES.md:72-95 (D3) ; regla durable del proyecto desde S21 (memoria: MIROVA NRT sin supervisión humana) ; A76 (artefacto solar diurno) ; conteo de 98 filas diurnas: experiments/_s135_probe_etapas/d19_regimen_vigente.py -->
+<!-- src: docs/MIROVA_DIVERGENCES.md:42-52 (D2, cobertura 79,2 % medida en AUDIT_S128 §4) ; docs/MIROVA_DIVERGENCES.md:72-95 (D3) ; regla durable del proyecto desde S21 (memoria: MIROVA NRT sin supervisión humana) ; A76 (artefacto solar diurno) ; conteo de 98 filas diurnas: experiments/_s135_probe_etapas/d19_regimen_vigente.py ; [6.2] Coppola et al. 2014, coppola2014_ijrs_strombolian_10.1080-01431161.2014.903354.pdf, p. 3410 impresa (visor 10), §2.4.2 Daytime algorithm, 1.er párrafo ; [6.3] Coppola et al. 2023, feart-11-1240107.pdf, p. 4 impresa (visor 4), §2.5 ; [6.3] Coppola et al. 2016a, sp426.5.pdf, p. 197 impresa (visor 17), col. izq., §Metereological and volcanic clouds ; [6.3] Coppola et al. 2016a, sp426.5.pdf, p. 196 impresa (visor 16), col. der. ("completely autonomous") ; [6.3] Campus et al. 2022, campus2022_sensors_22_1713.pdf, p. 8 impresa (visor 8), §3.4 ; [6.3] Laiolo et al. 2026, s00445-025-01932-y.pdf, p. 4 impresa (visor 4) ; [6.3] Coppola 2025, 978-3-031-86841-2.pdf, p. 346 impresa (visor 350), §4.1, y p. 347 impresa (visor 351) ; [6.4] Campus et al. 2022, campus2022_sensors_22_1713.pdf, p. 7 impresa (visor 7) ; [6.4] Coppola et al. 2020, Thermal_Remote_Sensing_for_Global_Volcano_Monitori.pdf, p. 3 impresa (visor 3) ("216 units") ; [6.4] Coppola et al. 2023, feart-11-1240107.pdf, p. 3 impresa (visor 3) (">200") ; [6.5] Coppola et al. 2016a, sp426.5.pdf, p. 196 impresa (visor 16), col. izq. ; [6.6] Coppola et al. 2020, Thermal_Remote_Sensing_for_Global_Volcano_Monitori.pdf, p. 11 impresa (visor 11), col. izq., último párrafo ; [6.6] Coppola et al. 2023, feart-11-1240107.pdf, p. 3 impresa (visor 3) ("freely downloaded") ; [6.7] Coppola et al. 2023, feart-11-1240107.pdf, p. 4 impresa (visor 4), col. der., 1.er párrafo ; [6.7] Coppola 2025, 978-3-031-86841-2.pdf, p. 347 impresa (visor 351), col. izq. ; [6.8] conocimiento local de cada volcán: SIN LOCALIZAR (ver Notas para el editor) -->
 
 ## 6.2 What counts as a match
 
@@ -90,8 +91,8 @@ the kind described above, and it is severe at 1 km resolution because the MODIS 
 large enough to contain a hotter non-volcanic pixel far from the vent on most nights. Láscar
 shows the effect in isolation: 77 alert nights, crater recall 0.974, dashboard recall 0.117.
 We report the discrepancy rather than resolving it by redefining the label, because the
-underlying question — whether a 1 km pixel can separate a weak sub-pixel crater source from a
-diffuse topographic gradient — was examined across several independent axes and found to have
+underlying question (whether a 1 km pixel can separate a weak sub-pixel crater source from a
+diffuse topographic gradient) was examined across several independent axes and found to have
 no per-record answer at that resolution.
 
 <!-- src: docs/paper/numbers.json → agregados, tabla4 (Lascar|MODIS) ; CLAUDE.md:A82, A83 -->
@@ -107,14 +108,14 @@ VIIRS 750 m, 6 of 8; on MODIS only one volcano yields pairs at all, and it is in
 <!-- src: docs/paper/numbers.json → agregados ; docs/paper/TABLAS.md Table 4 -->
 
 The residual bias is one of under-integration, not of over-reporting. The best-sampled
-VIIRS 375 m series sit at or slightly below unity — Puyehue-Cordón Caulle 1.029 over 258
-pairs, Villarrica 0.945 over 38, Planchón-Peteroa 0.895 over 171 — while the deficit
+VIIRS 375 m series sit at or slightly below unity (Puyehue-Cordón Caulle 1.029 over 258
+pairs, Villarrica 0.945 over 38, Planchón-Peteroa 0.895 over 171), while the deficit
 concentrates in Láscar 0.530 (316 pairs), Isluga 0.580 (310) and Lastarria 0.569 (218). A
 ratio below one means we integrate less energy than MIROVA does over the same overpass:
 either our cluster covers fewer pixels than the region MIROVA sums, or our local background
 is estimated over an annulus that overlaps the region being measured, which suppresses the
 excess. An internal audit tested and rejected the hypothesis that the deficit is caused by
-our cluster sitting off-crater — on MIROVA-confirmed passes the cluster centroid is within a
+our cluster sitting off-crater: on MIROVA-confirmed passes the cluster centroid is within a
 few hundred metres of the vent, and the ratio is flat with distance to the crater. Chaitén at
 1.312 over 62 pairs is the one well-sampled series above unity.
 
@@ -129,7 +130,7 @@ for the same volcanoes, with 171 and 209 pairs, are 0.895 and 0.645.
 
 ## 6.5 Why we report no precision against MIROVA
 
-Many of our nights carry a valid detection with no corresponding MIROVA alert — at Láscar on
+Many of our nights carry a valid detection with no corresponding MIROVA alert: at Láscar on
 VIIRS 375 m, 30 of 193 dashboard nights; at Copahue, 210 of 214. It would be arithmetically
 easy and scientifically wrong to call those false positives. Precision requires a reference
 that labels negatives, and as stated in §6.1 this one does not.
@@ -140,7 +141,7 @@ An internal audit classified that population and found it dominated by two categ
 are not detector errors. The first is thermal anomalies that are physically real but that
 MIROVA does not publish: chronic fumarolic fields offset from the summit, sub-threshold lava
 lakes, and the diffuse anomaly of an extended laccolith. The second is failures of the
-cross-match itself — name variants, unparsed distances in the OCR channel, and coverage that
+cross-match itself: name variants, unparsed distances in the OCR channel, and coverage that
 begins later for some targets than for others. Only a minority were artefacts of our own
 detector, principally cold-cirrus responses and a ring background over glaciated terrain.
 
@@ -155,6 +156,27 @@ requires a reference with negative labels, which for Chilean volcanoes means fie
 ground-based corroboration rather than another satellite product.
 
 <!-- src: CLAUDE.md:A54 ; docs/paper/sec5_methods.md §5.7 -->
+
+---
+
+## Localizadores: archivos PDF y convención de página
+
+Todos los archivos están en `documentacion\`. "p. impresa" es el folio del artículo y "visor" la
+página del PDF. Los localizadores de cada comentario `src` fueron verificados mirando la página
+renderizada (`docs/audit_s141/lectura/VERIFICADOR_MANUSCRITO.md`); el número entre corchetes es la
+fila de ese informe. Las fuentes de código, datos y auditorías del repo quedan como estaban. La
+etiqueta "MIROVA database v1" de Coppola et al. 2023 viene del localizador: **sin segunda
+verificación**.
+
+| ref | paper (autor, año, revista) | archivo PDF | convención de página |
+|---|---|---|---|
+| Coppola et al., 2016a | Coppola et al. 2016a, *Geol. Soc. London Spec. Publ.* 426 | `sp426.5.pdf` | p. impresa = visor + 180. **Deducida, no leída**: el PDF no imprime folios; el rango 181-205 sale de la lista de referencias de Campus et al. 2024 (p. 6) |
+| Coppola, 2025 | Coppola 2025, capítulo 11 de *Modern Volcano Monitoring* (Springer) | `978-3-031-86841-2.pdf` (libro completo) | p. impresa = visor − 4 (p. 346 = visor 350; p. 347 = visor 351). **`978-3-031-86841-2_9.pdf` NO es este capítulo** (es el de R. Campion sobre gases) |
+| Coppola et al., 2014 | Coppola et al. 2014, *Int. J. Remote Sens.* 35(9) | `coppola2014_ijrs_strombolian_10.1080-01431161.2014.903354.pdf` | p. impresa = visor + 3400 (visor 10 = p. 3410) |
+| Coppola et al., 2020 | Coppola et al. 2020, *Front. Earth Sci.* 7:362 | `Thermal_Remote_Sensing_for_Global_Volcano_Monitori.pdf` | p. impresa = visor |
+| Coppola et al., 2023 | Coppola et al. 2023, *Front. Earth Sci.* (MIROVA database v1) | `feart-11-1240107.pdf` | p. impresa = visor |
+| Campus et al., 2022 | Campus et al. 2022, *Sensors* 22:1713 | `campus2022_sensors_22_1713.pdf` | p. impresa = visor |
+| Laiolo et al., 2026 | Laiolo et al. 2026, *Bull. Volcanol.* 88:11 | `s00445-025-01932-y.pdf` | p. impresa = visor |
 
 ---
 
@@ -195,8 +217,31 @@ magnitud cualitativo («dominada por dos categorías», «una minoría»), que s
 
 **Decisiones de alcance pendientes:**
 
-- Las figuras previstas en el esqueleto (6, 7 y 8) no las produje. La Figura 8 —histograma
-  de razones por record contra la banda— es la que más directamente respalda §6.4.
+- Las figuras previstas en el esqueleto (6, 7 y 8) no las produje. La Figura 8 (histograma
+  de razones por record contra la banda) es la que más directamente respalda §6.4.
 - La ventana de la Tabla 4 arranca el 2026-01-01, pero la serie de la mayoría de los Tier A
   parte el 2026-01-29 (Tabla 2). Conviene decidir si el manuscrito declara la ventana
   nominal o la efectiva por volcán.
+
+**Localizadores de literatura (S141):**
+
+- **Fila 6.8 (SIN LOCALIZAR): localizador pendiente de verificar en imagen.** «Nor the local
+  knowledge of each volcano that doing so would require» no tiene fuente en los PDF revisados.
+  Coppola et al. 2020, p. 11, habla del conocimiento de los observadores, no del operador de
+  MIROVA. Queda como argumento propio, o hay que buscarle fuente.
+- **Frases reemplazadas por los textos del verificador.** §6.1: el archivo no reprocesado se
+  acota a 2026 (MIROVA sí publica archivos históricos, Coppola et al. 2023, p. 3). §6.1, tercer
+  límite: el mecanismo diurno se ancla a Coppola et al. 2014, p. 3410, que describe la reflexión
+  solar sobre nubes y otras superficies; «near solar noon» y «cold in the thermal band» no están en
+  la literatura y se quitaron. Asimetría de supervisión: se ancla a Coppola et al. 2023, p. 4, y
+  2016a, p. 197. «Every one to two hours» no aparece en ninguna fuente y pasa a «within 1-4 h of
+  each overpass» (2016a, p. 196). «Free of charge» pasa a «freely accessible on the web» (Coppola
+  et al. 2020, p. 11), que habla del acceso al sitio, no de un servicio gratuito.
+- **Matices del localizador para la asimetría de supervisión que el texto no recoge.** Laiolo et
+  al. 2026, p. 4, publica un dataset sin inspección visual, y Campus et al. 2022, p. 8, dice que en
+  crisis los datos deben ser evaluados por un usuario final. Decidir si se mencionan.
+- **La nota `src` del cierre de §6.1 sigue citando la memoria del agente** («regla durable del
+  proyecto desde S21»). No es citable en un paper; la afirmación ya tiene respaldo en literatura
+  (Coppola et al. 2016a, p. 197; 2023, p. 4) y la cita a la memoria puede salir.
+- **§6 no tiene tabla de referencias.** Coppola et al. 2014, 2016a, 2020 y 2023 se citan ahora en
+  el cuerpo; sus filas están en la tabla de §4 (con los metadatos pendientes de 2020 y 2023).
