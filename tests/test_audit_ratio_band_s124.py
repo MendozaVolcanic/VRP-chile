@@ -47,7 +47,7 @@ def test_las_dos_bandas_existen_y_la_de_mediana_es_mas_estricta():
     (4.86, "sobre"),   # Villarrica congelada pre-flip
 ])
 def test_veredicto_por_ratio(ratio, esperado):
-    v = evaluar_ratio_mediano("Lascar", ratio, n_noches=50)
+    v = evaluar_ratio_mediano("Villarrica", ratio, n_noches=50)
     if esperado is None:
         assert v is None, f"{ratio} debería estar en banda"
     else:
@@ -58,7 +58,7 @@ def test_los_casos_que_la_banda_floja_dejaba_pasar():
     """El corazón del bug: 0,62 y 0,61 pasaban [0,5-2,0] y no debían."""
     for ratio in (0.62, 0.61):
         assert RATIO_BAND_INDIVIDUAL[0] <= ratio <= RATIO_BAND_INDIVIDUAL[1]
-        assert evaluar_ratio_mediano("Lascar", ratio, n_noches=50) is not None
+        assert evaluar_ratio_mediano("Villarrica", ratio, n_noches=50) is not None
 
 
 def test_n_insuficiente_no_flaggea():
@@ -74,5 +74,17 @@ def test_excepcion_fisica_documentada_no_flaggea_por_debajo():
 
 
 def test_el_flag_referencia_el_hallazgo_para_no_leerse_como_regresion():
-    v = evaluar_ratio_mediano("Lascar", 0.62, n_noches=50)
+    v = evaluar_ratio_mediano("Villarrica", 0.62, n_noches=50)
     assert "S124" in v, "el flag debe apuntar al hallazgo documentado"
+
+
+def test_lascar_e_isluga_sub_banda_son_conocidos_hasta_la_fase_1():
+    """S141 (decisión Nicolás, 2026-09-14): la magnitud baja de Láscar e Isluga es el déficit
+    de régimen débil de S124 que la Fase 1 del plan de paridad ataca. Salió en el issue semanal
+    las cuatro semanas seguidas (#511, #568, #603, #661) por lo mismo, y un issue que repite lo
+    ya sabido deja de leerse y tapa una regresión real. Valores del issue #661."""
+    assert evaluar_ratio_mediano("Lascar", 0.435, n_noches=43) is None
+    assert evaluar_ratio_mediano("Isluga", 0.54, n_noches=52) is None
+    # Sobre-estimar sigue siendo nuevo y sí se reporta.
+    assert evaluar_ratio_mediano("Lascar", 1.6, n_noches=43) is not None
+    assert evaluar_ratio_mediano("Isluga", 1.6, n_noches=52) is not None
