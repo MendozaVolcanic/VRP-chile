@@ -1,0 +1,109 @@
+================================================================================================
+PERDIDAS DE FILAS, VENTANAS DE ERROR Y CARRERAS ENTRE CANALES
+  P1 (si estuviera roto, lo veria?): si el remoto no hubiera perdido nada, 'solo en copia vieja' seria 0 salvo renombres; si el error float no hubiera costado filas, la ventana tendria pasadas en el consolidado
+  P2 (si el instrumento estuviera muerto, se veria distinto?): cada bloque imprime n y ventana; 'solo copia vieja' se desglosa por tipo para que un 0 en ALERTA no se confunda con 'no medi'
+  Control positivo: renombrar 'Peteroa' a 'PlanchonPeteroa' en la copia vieja debe bajar las diferencias exactamente en las filas Peteroa
+================================================================================================
+
+(A) llaves de copias viejas ausentes en el remoto de hoy (por Tipo y por mes)
+  checkout local 2026-03-28: filas 9717, rango 2026-01-10 19:06:00 -> 2026-03-28 07:55:00; Peteroa renombradas 65; ausentes en remoto tras renombrar: 177
+     por Tipo: {'RUTINA': 162, 'ALERTA_TERMICA': 10, 'FALSO_POSITIVO': 5}
+     por mes: {'2026-01': 47, '2026-02': 55, '2026-03': 75}
+     por sensor: {'MODIS': 96, 'VIIRS375': 45, 'VIIRS': 36}
+     por volcan: {'Puyehue-Cordon Caulle': 20, 'Lascar': 20, 'Isluga': 19, 'Llaima': 19, 'Nevados de Chillan': 18, 'Chaiten': 16, 'Lastarria': 15, 'Copahue': 15, 'PlanchonPeteroa': 14, 'Villarrica': 14, 'Tupungatito': 7}
+     de ellas, con una fila del remoto a +-120 s (mismo volcan y sensor): 0
+     ALERTAS perdidas (primeras 15):
+ Fecha_Satelite_UTC                Volcan   Sensor  VRP_MW  Distancia_km
+2026-03-21 05:06:01                Lascar VIIRS375    1.69          1.55
+2026-03-19 01:55:00                Lascar    MODIS    2.01          1.41
+2026-03-14 07:05:00                Lascar    MODIS    0.97          1.41
+2026-03-04 07:15:00                Lascar    MODIS    2.28          1.41
+2026-02-26 05:48:01               Chaiten VIIRS375    0.03          0.75
+2026-02-12 06:24:00             Lastarria VIIRS375    0.07          1.55
+2026-01-27 06:24:00             Lastarria VIIRS375    0.17          2.40
+2026-01-26 05:24:01 Puyehue-Cordon Caulle    VIIRS    0.93          7.83
+2026-01-13 06:12:01 Puyehue-Cordon Caulle VIIRS375    1.06          8.19
+2026-01-12 06:30:01 Puyehue-Cordon Caulle VIIRS375    0.28          8.10
+     CONTROL sin renombrar Peteroa: ausentes = 241 (esperado 177 + 65 = 242)
+  backup 'al 08042026': filas 11319, rango 2026-01-10 19:06:00 -> 2026-04-08 12:50:00; Peteroa renombradas 65; ausentes en remoto tras renombrar: 244
+     por Tipo: {'RUTINA': 221, 'ALERTA_TERMICA': 17, 'FALSO_POSITIVO': 6}
+     por mes: {'2026-01': 47, '2026-02': 55, '2026-03': 90, '2026-04': 52}
+     por sensor: {'MODIS': 118, 'VIIRS375': 63, 'VIIRS': 63}
+     por volcan: {'Puyehue-Cordon Caulle': 31, 'Lascar': 29, 'Nevados de Chillan': 28, 'Copahue': 23, 'Isluga': 22, 'Llaima': 22, 'Chaiten': 20, 'Lastarria': 20, 'Villarrica': 20, 'PlanchonPeteroa': 19, 'Tupungatito': 10}
+     de ellas, con una fila del remoto a +-120 s (mismo volcan y sensor): 0
+     ALERTAS perdidas (primeras 15):
+ Fecha_Satelite_UTC                Volcan   Sensor  VRP_MW  Distancia_km
+2026-04-07 05:42:02 Puyehue-Cordon Caulle    VIIRS    0.58          7.65
+2026-04-05 05:30:01             Lastarria VIIRS375    0.05          1.19
+2026-04-05 05:30:01                Lascar    VIIRS    2.13          1.68
+2026-04-05 05:30:01           Tupungatito VIIRS375    0.40          5.21
+2026-04-05 01:35:00                Lascar    MODIS    1.98          1.41
+2026-04-01 06:24:00             Lastarria VIIRS375    0.05          2.40
+2026-03-30 05:42:01           Tupungatito VIIRS375    0.41          5.21
+2026-03-21 05:06:01                Lascar VIIRS375    1.69          1.55
+2026-03-19 01:55:00                Lascar    MODIS    2.01          1.41
+2026-03-14 07:05:00                Lascar    MODIS    0.97          1.41
+2026-03-04 07:15:00                Lascar    MODIS    2.28          1.41
+2026-02-26 05:48:01               Chaiten VIIRS375    0.03          0.75
+2026-02-12 06:24:00             Lastarria VIIRS375    0.07          1.55
+2026-01-27 06:24:00             Lastarria VIIRS375    0.17          2.40
+2026-01-26 05:24:01 Puyehue-Cordon Caulle    VIIRS    0.93          7.83
+     CONTROL sin renombrar Peteroa: ausentes = 308 (esperado 244 + 65 = 309)
+  01_05_2026 (VRP Chile): filas 15176, rango 2026-01-10 19:06:00 -> 2026-05-01 18:12:01; Peteroa renombradas 65; ausentes en remoto tras renombrar: 170
+     por Tipo: {'RUTINA': 150, 'ALERTA_TERMICA': 16, 'FALSO_POSITIVO': 4}
+     por mes: {'2026-01': 37, '2026-02': 38, '2026-03': 43, '2026-04': 51, '2026-05': 1}
+     por sensor: {'MODIS': 88, 'VIIRS375': 42, 'VIIRS': 40}
+     por volcan: {'Puyehue-Cordon Caulle': 25, 'Lascar': 24, 'PlanchonPeteroa': 18, 'Lastarria': 18, 'Isluga': 16, 'Copahue': 15, 'Nevados de Chillan': 15, 'Chaiten': 13, 'Llaima': 13, 'Villarrica': 9, 'Tupungatito': 4}
+     de ellas, con una fila del remoto a +-120 s (mismo volcan y sensor): 0
+     ALERTAS perdidas (primeras 15):
+ Fecha_Satelite_UTC                Volcan   Sensor  VRP_MW  Distancia_km
+2026-04-29 05:24:02                Isluga VIIRS375    0.10          0.84
+2026-04-24 06:12:01             Lastarria VIIRS375    0.09          1.55
+2026-04-20 07:40:00                Lascar    MODIS    0.76          1.41
+2026-04-17 05:06:01 Puyehue-Cordon Caulle VIIRS375    0.04          8.66
+2026-04-12 05:42:02                Isluga    VIIRS    0.18          0.75
+2026-04-05 01:35:00                Lascar    MODIS    1.98          1.41
+2026-04-01 06:24:00             Lastarria VIIRS375    0.05          2.40
+2026-03-30 05:42:01           Tupungatito VIIRS375    0.41          5.21
+2026-03-21 05:06:01                Lascar VIIRS375    1.69          1.55
+2026-03-19 01:55:00                Lascar    MODIS    2.01          1.41
+2026-03-14 07:05:00                Lascar    MODIS    0.97          1.41
+2026-02-26 05:48:01               Chaiten VIIRS375    0.03          0.75
+2026-02-12 06:24:00             Lastarria VIIRS375    0.07          1.55
+2026-01-27 06:24:00             Lastarria VIIRS375    0.17          2.40
+2026-01-13 06:12:01 Puyehue-Cordon Caulle VIIRS375    1.06          8.19
+     CONTROL sin renombrar Peteroa: ausentes = 234 (esperado 170 + 65 = 235)
+  snapshot 2026-09-07 (VRP Chile): filas 36255, rango 2026-01-10 19:06:00 -> 2026-09-07 13:30:00; Peteroa renombradas 0; ausentes en remoto tras renombrar: 0
+     CONTROL sin renombrar Peteroa: ausentes = 0 (esperado 0 + 0 = 0)
+
+(B) ventanas del error float en scraper.py:140 (hora Chile -> UTC = +4 h en jun/jul)
+  ventana 2,178.53: filas del consolidado cuya PRIMERA visita cayo dentro: 0 | en las 2 h previas: 0 | en las 2 h siguientes: 74
+     filas OCR con hora de satelite en las 12 h previas al cierre de la ventana: 3; de ellas sin llave en el consolidado: 2
+ Fecha_Satelite_UTC    Volcan   Sensor  VRP_MW  Distancia_km      Tipo_Registro Fecha_Proceso_GitHub
+2026-06-15 18:12:02 Lastarria VIIRS375    2.79         10.67 FALSO_POSITIVO_OCR  2026-06-15 18:31:44
+2026-06-15 17:24:01 Lastarria VIIRS375   19.26          1.49 ALERTA_TERMICA_OCR  2026-06-15 17:01:25
+2026-06-15 17:24:01    Lascar VIIRS375  760.60          1.08 ALERTA_TERMICA_OCR  2026-06-15 17:01:18
+     filas del consolidado con VRP >= 1000 en toda la historia: 0
+  ventana 1,357.39: filas del consolidado cuya PRIMERA visita cayo dentro: 0 | en las 2 h previas: 0 | en las 2 h siguientes: 70
+     filas OCR con hora de satelite en las 12 h previas al cierre de la ventana: 1; de ellas sin llave en el consolidado: 1
+ Fecha_Satelite_UTC      Volcan   Sensor  VRP_MW  Distancia_km      Tipo_Registro Fecha_Proceso_GitHub
+2026-07-08 17:36:02 Tupungatito VIIRS375 1357.39         24.86 FALSO_POSITIVO_OCR  2026-07-08 18:31:46
+     filas del consolidado con VRP >= 1000 en toda la historia: 0
+
+(C) en las llaves compartidas ALERTA_TERMICA_OCR / ALERTA_TERMICA: quien escribio primero
+  llaves comunes: 327 | OCR antes que latest.php: 323 | latest.php antes: 4 | mismo minuto: 0
+  horas de ventaja del OCR (latest - ocr): mediana 0.08, p90 0.33, min -0.01, max 1.29
+  Version_OCR de esas filas: {'21.0': 174, '30.0': 80, '29.2': 59, '1.0': 5, '20.0': 4, '29.1': 3, '17.0': 2}
+  por mes del satelite: {'2026-01': 2, '2026-02': 14, '2026-03': 62, '2026-04': 30, '2026-05': 49, '2026-06': 53, '2026-07': 30, '2026-08': 47, '2026-09': 40}
+  VRP OCR vs VRP latest.php: |dif| > 0.05 MW en 61 de 327 | por sensor: {'MODIS': 32, 'VIIRS': 29, 'VIIRS375': 0}
+
+(D) filas OCR con Editado = SI
+  n = 49 | Tipo: {'FALSO_POSITIVO_OCR': 49} | mes: {'2026-02': 2, '2026-03': 4, '2026-04': 16, '2026-05': 21, '2026-06': 6}
+  Version_OCR: {'21.0': 49} | Confianza: {'baja': 49}
+  notas (primeras 6):
+    - Grupo pÃ­xeles rojos Y=286 (Ã¡rea=41 pxÂ², distâ‰ˆ1.17 km) | RECLASIFICADO 2026-06-15: latest.php (MIROVA) confirma FALSO_POSITIVO @ 22.01 km; el OCR lo ubicó dentro de radio (error de estrella, pre-V29). Conservado como
+    - Grupo pÃ­xeles rojos Y=284 (Ã¡rea=71 pxÂ², distâ‰ˆ0.57 km) | RECLASIFICADO 2026-06-15: latest.php (MIROVA) confirma FALSO_POSITIVO @ 10.67 km; el OCR lo ubicó dentro de radio (error de estrella, pre-V29). Conservado como
+    - Grupo pÃ­xeles rojos Y=286 (Ã¡rea=32 pxÂ², distâ‰ˆ1.86 km) | RECLASIFICADO 2026-06-15: latest.php (MIROVA) confirma FALSO_POSITIVO @ 11.34 km; el OCR lo ubicó dentro de radio (error de estrella, pre-V29). Conservado como
+    - Grupo pÃ­xeles rojos Y=281 (Ã¡rea=71 pxÂ², distâ‰ˆ1.54 km) | RECLASIFICADO 2026-06-15: latest.php (MIROVA) confirma FALSO_POSITIVO @ 22.01 km; el OCR lo ubicó dentro de radio (error de estrella, pre-V29). Conservado como
+    - Grupo pÃ­xeles rojos Y=287 (Ã¡rea=50 pxÂ², distâ‰ˆ1.92 km) | RECLASIFICADO 2026-06-15: latest.php (MIROVA) confirma FALSO_POSITIVO @ 30.0 km; el OCR lo ubicó dentro de radio (error de estrella, pre-V29). Conservado como 
+    - Grupo pÃ­xeles rojos Y=287 (Ã¡rea=28 pxÂ², distâ‰ˆ1.92 km) | RECLASIFICADO 2026-06-15: latest.php (MIROVA) confirma FALSO_POSITIVO @ 17.3 km; el OCR lo ubicó dentro de radio (error de estrella, pre-V29). Conservado como 

@@ -1,0 +1,136 @@
+================================================================================================
+FALSOS POSITIVOS (focos lejanos) EN LAS BASES DE MIROVA-V1
+  P1 (si estuviera roto, lo veria?): si no hubiera FP se imprimiria 0 por volcan; si la distancia no viniera, la columna seria NaN y se cuenta
+  P2 (si el instrumento estuviera muerto, se veria distinto?): todas las tablas llevan n; una tabla vacia se imprime vacia
+  Control positivo: se fuerza un FP con distancia NaN y se comprueba que el conteo de 'sin distancia' sube a 1
+================================================================================================
+FALSO_POSITIVO en consolidado: 852 | ventana: 2026-01-15 17:54:01 -> 2026-09-14 04:54:01
+sin Distancia_km: 0 | sin lat/lon: no existen esas columnas en el CSV: True
+
+--- FP por volcan x sensor
+Sensor                 MODIS  VIIRS  VIIRS375  All
+Volcan                                            
+Chaiten                    4      2         8   14
+Copahue                    5      7        30   42
+Isluga                     3      8        76   87
+Lascar                     1      5       127  133
+Lastarria                  1      6       225  232
+Llaima                    14     17        60   91
+Nevados de Chillan         2     18        61   81
+PlanchonPeteroa            1      5        60   66
+Puyehue-Cordon Caulle      1      0         7    8
+Tupungatito                3      9        56   68
+Villarrica                 5      2        23   30
+All                       40     79       733  852
+
+--- FP nocturnos por volcan x sensor
+Sensor                 MODIS  VIIRS  VIIRS375  All
+Volcan                                            
+Chaiten                    1      0         5    6
+Copahue                    1      0        18   19
+Isluga                     2      1        53   56
+Lascar                     1      1        54   56
+Lastarria                  0      4        59   63
+Llaima                     3      1        21   25
+Nevados de Chillan         1      4        30   35
+PlanchonPeteroa            1      2        41   44
+Puyehue-Cordon Caulle      0      0         3    3
+Tupungatito                0      4        40   44
+Villarrica                 0      0         9    9
+All                       10     17       333  360
+
+--- FP por mes x sensor
+Sensor   MODIS  VIIRS  VIIRS375  All
+mes                                 
+2026-01      3      7        22   32
+2026-02      0      1        40   41
+2026-03      7      7        43   57
+2026-04      4     11       127  142
+2026-05     12     21       174  207
+2026-06      4     12       111  127
+2026-07      4     10        84   98
+2026-08      4      9       100  113
+2026-09      2      1        32   35
+All         40     79       733  852
+
+--- distancia (km) de los FP por sensor: min / mediana / max
+           min  median    max  count
+Sensor                              
+MODIS     6.40  24.525  31.89     40
+VIIRS     5.03  21.120  33.42     79
+VIIRS375  3.77  19.290  34.47    733
+
+--- VRP (MW) de los FP por sensor: min / mediana / max
+           min  median     max
+Sensor                        
+MODIS     0.03    3.70   96.05
+VIIRS     0.22    2.48   72.70
+VIIRS375  0.03    1.18  347.13
+
+=== MODIS: FP por volcan, con distancia redondeada (fuentes lejanas persistentes) ===
+  Chaiten                n=  4 noct=  1 dist_km mediana= 24.5 VRP mediana= 2.35 max=  5.40 distancias frecuentes={25.0: 2, 24.0: 1, 6.0: 1}
+  Copahue                n=  5 noct=  1 dist_km mediana= 24.4 VRP mediana= 3.45 max= 71.33 distancias frecuentes={26.0: 2, 13.0: 1, 24.0: 1, 18.0: 1}
+  Isluga                 n=  3 noct=  2 dist_km mediana= 23.1 VRP mediana= 2.08 max=  2.16 distancias frecuentes={29.0: 1, 22.0: 1, 23.0: 1}
+  Lascar                 n=  1 noct=  1 dist_km mediana= 26.9 VRP mediana=11.31 max= 11.31 distancias frecuentes={27.0: 1}
+  Lastarria              n=  1 noct=  0 dist_km mediana= 24.7 VRP mediana=16.51 max= 16.51 distancias frecuentes={25.0: 1}
+  Llaima                 n= 14 noct=  3 dist_km mediana= 25.8 VRP mediana= 4.81 max= 96.05 distancias frecuentes={26.0: 4, 27.0: 3, 31.0: 2, 11.0: 1}
+  Nevados de Chillan     n=  2 noct=  1 dist_km mediana= 12.6 VRP mediana=52.84 max= 70.43 distancias frecuentes={17.0: 1, 8.0: 1}
+  PlanchonPeteroa        n=  1 noct=  1 dist_km mediana= 20.2 VRP mediana= 2.31 max=  2.31 distancias frecuentes={20.0: 1}
+  Puyehue-Cordon Caulle  n=  1 noct=  0 dist_km mediana= 20.6 VRP mediana= 1.75 max=  1.75 distancias frecuentes={21.0: 1}
+  Tupungatito            n=  3 noct=  0 dist_km mediana=  9.5 VRP mediana= 1.72 max=  2.19 distancias frecuentes={9.0: 2, 12.0: 1}
+  Villarrica             n=  5 noct=  0 dist_km mediana= 18.4 VRP mediana= 3.93 max= 11.93 distancias frecuentes={32.0: 1, 8.0: 1, 30.0: 1, 18.0: 1}
+
+=== En la misma noche de volcan de un FP, hubo ALERTA (dentro del radio) en OTRO sensor? ===
+FP nocturnos: 360
+         otro_sensor_alerta       mismo_sensor_alerta_otra_pasada      
+                        sum count                             sum count
+Sensor                                                                 
+MODIS                     3    10                               0    10
+VIIRS                     4    17                               0    17
+VIIRS375                 40   333                              84   333
+
+  por volcan (MODIS): FP nocturnos con alerta de otro sensor esa noche
+                    sum  count
+Volcan                        
+Chaiten               0      1
+Copahue               0      1
+Isluga                2      2
+Lascar                1      1
+Llaima                0      3
+Nevados de Chillan    0      1
+PlanchonPeteroa       0      1
+
+=== FALSO_POSITIVO_OCR ===
+filas: 91 | ventana: 2026-01-20 05:12:00 -> 2026-09-06 06:30:02
+Sensor                 MODIS  VIIRS  VIIRS375  All
+Volcan                                            
+Chaiten                    0      0         2    2
+Copahue                    1      0         2    3
+Isluga                     0      2        11   13
+Lascar                     0      0        30   30
+Lastarria                  0      1        28   29
+Llaima                     1      0         1    2
+Nevados de Chillan         0      0         1    1
+PlanchonPeteroa            0      0         6    6
+Puyehue-Cordon Caulle      0      0         1    1
+Tupungatito                0      0         3    3
+Villarrica                 0      0         1    1
+All                        2      3        86   91
+Distancia_km == 0 (no medida): 19
+Confianza: {'baja': 74, 'alta': 17}
+Editado (AUTO = reconciliado contra latest.php): {'SI': 49, 'AUTO': 23, 'NO': 19}
+Version_OCR: {'21.0': 51, '1.0': 18, '29.2': 16, '30.0': 5, '17.0': 1}
+Clasificacion Mirova (deberia ser NULO): {'Medio': 41, 'Bajo': 35, 'Muy Bajo': 10, 'Alto': 4, 'Muy Alto': 1}
+con nota RECONCILIADO: 18
+VRP >= 10 MW: 3 | diurnas (12<=h UTC<=23): 54
+
+=== Unicidad: una fila por (Volcan, Sensor, timestamp) en el consolidado -> UNA distancia y UN VRP por pasada ===
+filas: 37474 | llaves distintas: 37474
+pasadas (Volcan, Sensor, timestamp) con >1 fila: 0
+
+CONTROL: tras anular una distancia, 'sin Distancia_km' = 1 (esperado 1)
+
+=== Filas de artefacto curadas a mano (anotaciones.csv) ===
+timestamp,Volcan,estado,motivo,fecha_marcado
+1781544241,Lascar,artefacto,"Probable cirrus u otro artefacto: 760.6 MW anomalo a 1.08 km, aislado (siguiente maximo real del periodo 5.09 MW). Dato crudo conservado para calibracion.",2026-07-15
+

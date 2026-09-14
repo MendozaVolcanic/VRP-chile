@@ -1,0 +1,64 @@
+================================================================================================
+COPIAS LOCALES Y SNAPSHOTS CONTRA EL REMOTO
+  P1 (si estuviera roto, lo veria?): una copia congelada muestra max fecha vieja y filas de menos; una copia divergente muestra llaves que el remoto no tiene
+  P2 (si el instrumento estuviera muerto, se veria distinto?): un archivo ausente se imprime como NO EXISTE; una comparacion de un archivo consigo mismo daria 0 diferencias (control abajo)
+  Control positivo: el remoto contra si mismo debe dar 0 y 0; el remoto contra su copia sin la ultima fila debe dar 1
+================================================================================================
+remoto consolidado: 37474 filas, max 2026-09-14 07:40:00
+
+--- (a) checkout local Mirova-v1/monitoreo_satelital
+  registro_vrp_consolidado.csv: filas 9717 vs remoto 37474 | max fecha 2026-03-28 07:55:00 vs 2026-09-14 07:40:00 | llaves solo local: 241 | solo remoto: 27998
+      en las 9476 llaves comunes: Tipo distinto 0, VRP distinto 0
+  registro_vrp_ocr.csv: filas 235 vs remoto 961 | max fecha 2026-03-28 07:50:00 vs 2026-09-14 06:42:01 | llaves solo local: 0 | solo remoto: 726
+      en las 235 llaves comunes: Tipo distinto 6, VRP distinto 0
+        ej (1772174520, 'PlanchonPeteroa', 'VIIRS375'): local ALERTA_TERMICA_OCR / remoto FALSO_POSITIVO_OCR
+        ej (1772305921, 'Lastarria', 'VIIRS375'): local ALERTA_TERMICA_OCR / remoto FALSO_POSITIVO_OCR
+        ej (1773164521, 'Lastarria', 'VIIRS375'): local ALERTA_TERMICA_OCR / remoto FALSO_POSITIVO_OCR
+        ej (1772993881, 'Lascar', 'VIIRS375'): local ALERTA_TERMICA_OCR / remoto FALSO_POSITIVO_OCR
+        ej (1773079201, 'Lastarria', 'VIIRS375'): local ALERTA_TERMICA_OCR / remoto FALSO_POSITIVO_OCR
+  registro_vrp_positivos.csv: filas 381 vs remoto 1462 | max fecha 2026-03-28 07:50:00 vs 2026-09-14 06:42:01 | llaves solo local: 11 | solo remoto: 1092
+      en las 370 llaves comunes: Tipo distinto 0, VRP distinto 0
+  registro_vrp_maestro_publicable.csv: filas 514 vs remoto 2005 | max fecha 2026-03-28 07:50:00 vs 2026-09-14 06:42:01 | llaves solo local: 9 | solo remoto: 1500
+      en las 505 llaves comunes: Tipo distinto 2, VRP distinto 2
+        ej (1773885300, 'Lascar', 'MODIS'): local ALERTA_TERMICA / remoto ALERTA_TERMICA_OCR
+        ej (1772608500, 'Lascar', 'MODIS'): local ALERTA_TERMICA / remoto ALERTA_TERMICA_OCR
+  registro_Peteroa.csv (solo local): 1 filas, 2026-01-13 06:06:01 -> 2026-01-13 06:06:01 | Volcan: ['Peteroa'] | en remoto: False
+    sus (timestamp, Sensor) presentes en el remoto como PlanchonPeteroa: 1 / 1
+
+--- (b) backup manual 'registro_vrp_consolidado al 08042026.csv'
+  al 08042026: filas 11319 vs remoto 37474 | max fecha 2026-04-08 12:50:00 vs 2026-09-14 07:40:00 | llaves solo local: 308 | solo remoto: 26463
+      en las 11011 llaves comunes: Tipo distinto 0, VRP distinto 0
+   Volcan en el backup: {'Chaiten': 1187, 'Puyehue-Cordon Caulle': 1149, 'Copahue': 1111, 'Nevados de Chillan': 1109, 'Villarrica': 1106, 'Llaima': 1102, 'PlanchonPeteroa': 1006, 'Lascar': 975, 'Lastarria': 958, 'Isluga': 917, 'Tupungatito': 634, 'Peteroa': 65}
+   rango: 2026-01-10 19:06:00 -> 2026-04-08 12:50:00
+
+--- (c) snapshot semanal de VRP Chile (data/mirova_reference/mirova_v1_snapshot)
+  registro_vrp_consolidado.csv: filas 36255 vs remoto 37474 | max fecha 2026-09-07 13:30:00 vs 2026-09-14 07:40:00 | llaves solo local: 0 | solo remoto: 1219
+      en las 36255 llaves comunes: Tipo distinto 0, VRP distinto 0
+  registro_vrp_ocr.csv: filas 937 vs remoto 961 | max fecha 2026-09-07 06:54:00 vs 2026-09-14 06:42:01 | llaves solo local: 0 | solo remoto: 24
+      en las 937 llaves comunes: Tipo distinto 0, VRP distinto 0
+  registro_Chaiten.csv (snapshot): 22 filas, 2026-01-19 06:00:01 -> 2026-04-13 05:30:02 | remoto hoy: 62 filas
+  registro_Lascar.csv (snapshot): 301 filas, 2026-01-11 05:00:01 -> 2026-04-25 07:35:00 | remoto hoy: 628 filas
+  registro_Tupungatito.csv (snapshot): 79 filas, 2026-02-12 06:24:00 -> 2026-04-25 05:54:01 | remoto hoy: 193 filas
+
+--- (d) latest_consolidado.csv (raiz de VRP Chile, cron 1 h)
+  latest_consolidado.csv: filas 37341 vs remoto 37474 | max fecha 2026-09-13 17:42:01 vs 2026-09-14 07:40:00 | llaves solo local: 0 | solo remoto: 133
+      en las 37341 llaves comunes: Tipo distinto 0, VRP distinto 0
+
+--- (e) data/mirova_reference/registro_vrp_ocr.csv (congelado segun LEEME)
+  registro_vrp_ocr.csv congelado: filas 235 vs remoto 961 | max fecha 2026-03-28 07:50:00 vs 2026-09-14 06:42:01 | llaves solo local: 0 | solo remoto: 726
+      en las 235 llaves comunes: Tipo distinto 6, VRP distinto 0
+        ej (1772174520, 'PlanchonPeteroa', 'VIIRS375'): local ALERTA_TERMICA_OCR / remoto FALSO_POSITIVO_OCR
+        ej (1772305921, 'Lastarria', 'VIIRS375'): local ALERTA_TERMICA_OCR / remoto FALSO_POSITIVO_OCR
+        ej (1773164521, 'Lastarria', 'VIIRS375'): local ALERTA_TERMICA_OCR / remoto FALSO_POSITIVO_OCR
+        ej (1772993881, 'Lascar', 'VIIRS375'): local ALERTA_TERMICA_OCR / remoto FALSO_POSITIVO_OCR
+        ej (1773079201, 'Lastarria', 'VIIRS375'): local ALERTA_TERMICA_OCR / remoto FALSO_POSITIVO_OCR
+
+--- (f) 01_05_2026_registro_vrp_consolidado.csv (fallback del frontend)
+  01_05_2026: filas 15176 vs remoto 37474 | max fecha 2026-05-01 18:12:01 vs 2026-09-14 07:40:00 | llaves solo local: 234 | solo remoto: 22532
+      en las 14942 llaves comunes: Tipo distinto 0, VRP distinto 0
+
+--- CONTROLES
+  remoto vs remoto: filas 37474 vs remoto 37474 | max fecha 2026-09-14 07:40:00 vs 2026-09-14 07:40:00 | llaves solo local: 0 | solo remoto: 0
+      en las 37474 llaves comunes: Tipo distinto 0, VRP distinto 0
+  remoto sin la ultima fila vs remoto: filas 37473 vs remoto 37474 | max fecha 2026-09-14 07:40:00 vs 2026-09-14 07:40:00 | llaves solo local: 0 | solo remoto: 1
+      en las 37473 llaves comunes: Tipo distinto 0, VRP distinto 0

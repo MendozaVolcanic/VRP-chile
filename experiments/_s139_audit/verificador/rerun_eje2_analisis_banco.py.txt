@@ -1,0 +1,94 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[node] 59310 records evaluados con el predicado real en 2.8s
+ventana referencia (fecha UTC): ('2026-01-10', '2026-09-07')
+
+(a) LINEA BASE cons_ocr|pipeline|rutina_estricta, predicado dashboard; formato det/total
+volcan                                           MODIS                          VIIRS375                          VIIRS750                        CUALQUIERA
+Lascar                pos   9/ 74 neg    5/ 144 sd 2/ 16  pos 166/167 neg   19/  37 sd 9/  5  pos 123/131 neg   46/  90 sd 5/ 12  pos 177/177 neg   24/  36 sd10/  4
+Lastarria             pos   0/  0 neg   18/ 220 sd 0/ 17  pos 142/146 neg   29/  47 sd10/  6  pos   0/  0 neg  120/ 218 sd 0/ 17  pos 146/146 neg   37/  46 sd10/  6
+Isluga                pos   0/  0 neg   15/ 215 sd 0/ 18  pos 159/159 neg   32/  33 sd 1/ 15  pos  29/ 40 neg  116/ 181 sd 0/ 17  pos 165/165 neg   32/  32 sd 1/ 15
+Tupungatito           pos   0/  0 neg   21/ 206 sd 0/  0  pos 105/107 neg   55/  74 sd 0/  0  pos   6/ 14 neg  100/ 187 sd 0/  0  pos 107/108 neg   67/  72 sd 0/  0
+PlanchonPeteroa       pos   0/  0 neg   27/ 221 sd 0/ 17  pos  88/ 88 neg   87/ 109 sd 5/ 13  pos   5/  9 neg  109/ 211 sd 0/ 17  pos  91/ 91 neg  101/ 107 sd 5/ 13
+NevadosDeChillan      pos   0/  0 neg   22/ 221 sd 0/ 17  pos   6/ 10 neg   82/ 186 sd 0/ 14  pos   0/  0 neg   57/ 218 sd 0/ 17  pos   8/ 10 neg  105/ 186 sd 0/ 14
+Llaima                pos   0/  0 neg   22/ 220 sd 0/ 18  pos   2/  2 neg  193/ 206 sd 0/ 18  pos   0/  0 neg   93/ 221 sd 0/ 17  pos   2/  2 neg  204/ 206 sd 0/ 18
+Villarrica            pos   1/  1 neg   30/ 238 sd 0/  0  pos  29/ 29 neg  188/ 202 sd 0/  0  pos   5/  6 neg  136/ 232 sd 0/  0  pos  31/ 31 neg  197/ 201 sd 0/  0
+Copahue               pos   0/  0 neg   10/ 220 sd 0/ 17  pos   4/  4 neg  199/ 205 sd 0/ 14  pos   1/  1 neg   94/ 220 sd 0/ 18  pos   5/  5 neg  200/ 204 sd 0/ 15
+PuyehueCordonCaulle   pos   0/  0 neg  202/ 222 sd 0/ 18  pos 104/107 neg   97/ 113 sd13/  5  pos  30/ 31 neg  181/ 190 sd 7/ 11  pos 107/107 neg  112/ 113 sd14/  4
+Chaiten               pos   0/  0 neg   56/ 220 sd 0/ 18  pos  35/ 35 neg  164/ 181 sd 4/ 14  pos   1/  1 neg  153/ 220 sd 1/ 16  pos  35/ 35 neg  173/ 181 sd 4/ 14
+
+(b) PARIDAD DE COBERTURA (ventana referencia, diurno pipeline, cons_ocr)
+  VIIRS375 {'ambos': 2439, 'solo_ref': 161, 'solo_ref_con_alerta': 42, 'solo_nos': 22}
+  VIIRS750 {'ambos': 2436, 'solo_ref': 156, 'solo_nos': 25, 'solo_ref_con_alerta': 13}
+  MODIS {'ambos': 2430, 'solo_ref': 160, 'solo_nos': 25, 'solo_ref_con_alerta': 2}
+  noches-sensor con referencia y sin record nuestro, por volcan-mes (>=10): {'Chaiten|2026-01': 53, 'Copahue|2026-01': 53, 'Isluga|2026-01': 53, 'Lascar|2026-01': 53, 'Lastarria|2026-01': 52, 'Llaima|2026-01': 53, 'NevadosDeChillan|2026-01': 54, 'PlanchonPeteroa|2026-01': 52, 'PuyehueCordonCaulle|2026-01': 54}
+
+(c) PODER: positivos por volcan y sensor (con cobertura)
+  MODIS {'Lascar': 74, 'Lastarria': 0, 'Isluga': 0, 'Tupungatito': 0, 'PlanchonPeteroa': 0, 'NevadosDeChillan': 0, 'Llaima': 0, 'Villarrica': 1, 'Copahue': 0, 'PuyehueCordonCaulle': 0, 'Chaiten': 0}
+  VIIRS375 {'Lascar': 167, 'Lastarria': 146, 'Isluga': 159, 'Tupungatito': 107, 'PlanchonPeteroa': 88, 'NevadosDeChillan': 10, 'Llaima': 2, 'Villarrica': 29, 'Copahue': 4, 'PuyehueCordonCaulle': 107, 'Chaiten': 35}
+  VIIRS750 {'Lascar': 131, 'Lastarria': 0, 'Isluga': 40, 'Tupungatito': 14, 'PlanchonPeteroa': 9, 'NevadosDeChillan': 0, 'Llaima': 0, 'Villarrica': 6, 'Copahue': 1, 'PuyehueCordonCaulle': 31, 'Chaiten': 1}
+
+(d) AUC POR VOLCAN (noche-sensor, maximo por noche) y control barajado por volcan
+  == MODIS
+    pc_vrp_summitgated   pooled 0.473  media/vol 0.544  [barajado media/vol 0.493]  por vol (npos>=5): {'Lascar': 0.544}
+    pc_vrp               pooled 0.428  media/vol 0.534  [barajado media/vol 0.549]  por vol (npos>=5): {'Lascar': 0.534}
+    f5                   pooled None  media/vol None  [barajado media/vol None]  por vol (npos>=5): {}
+    nti_max              pooled 0.678  media/vol 0.72  [barajado media/vol 0.489]  por vol (npos>=5): {'Lascar': 0.72}
+    dT                   pooled 0.615  media/vol 0.384  [barajado media/vol 0.46]  por vol (npos>=5): {'Lascar': 0.384}
+    t1k                  pooled 0.643  media/vol 0.736  [barajado media/vol 0.551]  por vol (npos>=5): {'Lascar': 0.736}
+    n_anom               pooled 0.36  media/vol 0.433  [barajado media/vol 0.488]  por vol (npos>=5): {'Lascar': 0.433}
+    pc_npx               pooled 0.517  media/vol 0.478  [barajado media/vol 0.461]  por vol (npos>=5): {'Lascar': 0.478}
+    fp_summit            pooled 0.467  media/vol 0.558  [barajado media/vol 0.49]  por vol (npos>=5): {'Lascar': 0.558}
+    vrp_rec              pooled 0.533  media/vol 0.705  [barajado media/vol 0.502]  por vol (npos>=5): {'Lascar': 0.705}
+    disp                 pooled 0.471  media/vol 0.544  [barajado media/vol 0.493]  por vol (npos>=5): {'Lascar': 0.544}
+    pc_dist              pooled 0.541  media/vol 0.584  [barajado media/vol 0.485]  por vol (npos>=5): {'Lascar': 0.584}
+  == VIIRS375
+    pc_vrp_summitgated   pooled 0.841  media/vol 0.829  [barajado media/vol 0.502]  por vol (npos>=5): {'Lascar': 0.9, 'Lastarria': 0.739, 'Isluga': 0.695, 'Tupungatito': 0.891, 'PlanchonPeteroa': 0.899, 'NevadosDeChillan': 0.669, 'Villarrica': 0.913, 'PuyehueCordonCaulle': 0.922, 'Chaiten': 0.81}
+    pc_vrp               pooled 0.825  media/vol 0.804  [barajado media/vol 0.504]  por vol (npos>=5): {'Lascar': 0.886, 'Lastarria': 0.682, 'Isluga': 0.65, 'Tupungatito': 0.873, 'PlanchonPeteroa': 0.871, 'NevadosDeChillan': 0.808, 'Villarrica': 0.904, 'PuyehueCordonCaulle': 0.933, 'Chaiten': 0.789}
+    f5                   pooled 0.817  media/vol 0.767  [barajado media/vol 0.518]  por vol (npos>=5): {'Lascar': 0.816, 'Lastarria': 0.565, 'Isluga': 0.654, 'Tupungatito': 0.881, 'PlanchonPeteroa': 0.865, 'NevadosDeChillan': 0.803, 'Villarrica': 0.899, 'PuyehueCordonCaulle': 0.888, 'Chaiten': 0.792}
+    nti_max              pooled 0.645  media/vol 0.661  [barajado media/vol 0.506]  por vol (npos>=5): {'Lascar': 0.716, 'Lastarria': 0.576, 'Isluga': 0.562, 'Tupungatito': 0.719, 'PlanchonPeteroa': 0.635, 'NevadosDeChillan': 0.437, 'Villarrica': 0.751, 'PuyehueCordonCaulle': 0.804, 'Chaiten': 0.632}
+    dT                   pooled 0.663  media/vol 0.588  [barajado media/vol 0.523]  por vol (npos>=5): {'Lascar': 0.73, 'Lastarria': 0.609, 'Isluga': 0.561, 'Tupungatito': 0.731, 'PlanchonPeteroa': 0.559, 'NevadosDeChillan': 0.66, 'Villarrica': 0.428, 'PuyehueCordonCaulle': 0.427, 'Chaiten': 0.191}
+    t1k                  pooled 0.67  media/vol 0.621  [barajado media/vol 0.498]  por vol (npos>=5): {'Lascar': 0.707, 'Lastarria': 0.596, 'Isluga': 0.546, 'Tupungatito': 0.622, 'PlanchonPeteroa': 0.627, 'NevadosDeChillan': 0.365, 'Villarrica': 0.561, 'PuyehueCordonCaulle': 0.727, 'Chaiten': 0.427}
+    n_anom               pooled 0.733  media/vol 0.671  [barajado media/vol 0.514]  por vol (npos>=5): {'Lascar': 0.785, 'Lastarria': 0.665, 'Isluga': 0.531, 'Tupungatito': 0.711, 'PlanchonPeteroa': 0.723, 'NevadosDeChillan': 0.482, 'Villarrica': 0.659, 'PuyehueCordonCaulle': 0.624, 'Chaiten': 0.755}
+    pc_npx               pooled 0.682  media/vol 0.669  [barajado media/vol 0.519]  por vol (npos>=5): {'Lascar': 0.832, 'Lastarria': 0.51, 'Isluga': 0.638, 'Tupungatito': 0.602, 'PlanchonPeteroa': 0.539, 'NevadosDeChillan': 0.497, 'Villarrica': 0.602, 'PuyehueCordonCaulle': 0.849, 'Chaiten': 0.787}
+    fp_summit            pooled None  media/vol None  [barajado media/vol None]  por vol (npos>=5): {}
+    vrp_rec              pooled 0.803  media/vol 0.769  [barajado media/vol 0.518]  por vol (npos>=5): {'Lascar': 0.889, 'Lastarria': 0.699, 'Isluga': 0.607, 'Tupungatito': 0.895, 'PlanchonPeteroa': 0.865, 'NevadosDeChillan': 0.628, 'Villarrica': 0.882, 'PuyehueCordonCaulle': 0.714, 'Chaiten': 0.71}
+    disp                 pooled 0.839  media/vol 0.821  [barajado media/vol 0.508]  por vol (npos>=5): {'Lascar': 0.9, 'Lastarria': 0.734, 'Isluga': 0.68, 'Tupungatito': 0.897, 'PlanchonPeteroa': 0.893, 'NevadosDeChillan': 0.655, 'Villarrica': 0.907, 'PuyehueCordonCaulle': 0.881, 'Chaiten': 0.812}
+    pc_dist              pooled 0.875  media/vol 0.831  [barajado media/vol 0.519]  por vol (npos>=5): {'Lascar': 0.891, 'Lastarria': 0.625, 'Isluga': 0.842, 'Tupungatito': 0.889, 'PlanchonPeteroa': 0.839, 'NevadosDeChillan': 0.886, 'Villarrica': 0.944, 'PuyehueCordonCaulle': 0.907, 'Chaiten': 0.84}
+  == VIIRS750
+    pc_vrp_summitgated   pooled 0.717  media/vol 0.73  [barajado media/vol 0.446]  por vol (npos>=5): {'Lascar': 0.849, 'Isluga': 0.572, 'Tupungatito': 0.483, 'PlanchonPeteroa': 0.51, 'Villarrica': 0.742, 'PuyehueCordonCaulle': 0.601}
+    pc_vrp               pooled 0.635  media/vol 0.698  [barajado media/vol 0.446]  por vol (npos>=5): {'Lascar': 0.811, 'Isluga': 0.552, 'Tupungatito': 0.451, 'PlanchonPeteroa': 0.485, 'Villarrica': 0.655, 'PuyehueCordonCaulle': 0.589}
+    f5                   pooled None  media/vol None  [barajado media/vol None]  por vol (npos>=5): {}
+    nti_max              pooled 0.645  media/vol 0.651  [barajado media/vol 0.484]  por vol (npos>=5): {'Lascar': 0.733, 'Isluga': 0.428, 'Tupungatito': 0.692, 'PlanchonPeteroa': 0.448, 'Villarrica': 0.519, 'PuyehueCordonCaulle': 0.657}
+    dT                   pooled 0.538  media/vol 0.412  [barajado media/vol 0.504]  por vol (npos>=5): {'Lascar': 0.451, 'Isluga': 0.4, 'Tupungatito': 0.313, 'PlanchonPeteroa': 0.61, 'Villarrica': 0.366, 'PuyehueCordonCaulle': 0.26}
+    t1k                  pooled 0.688  media/vol 0.646  [barajado media/vol 0.435]  por vol (npos>=5): {'Lascar': 0.689, 'Isluga': 0.61, 'Tupungatito': 0.446, 'PlanchonPeteroa': 0.676, 'Villarrica': 0.63, 'PuyehueCordonCaulle': 0.597}
+    n_anom               pooled 0.755  media/vol 0.617  [barajado media/vol 0.475]  por vol (npos>=5): {'Lascar': 0.675, 'Isluga': 0.481, 'Tupungatito': 0.604, 'PlanchonPeteroa': 0.698, 'Villarrica': 0.666, 'PuyehueCordonCaulle': 0.515}
+    pc_npx               pooled 0.425  media/vol 0.458  [barajado media/vol 0.491]  por vol (npos>=5): {'Lascar': 0.432, 'Isluga': 0.545, 'Tupungatito': 0.464, 'PlanchonPeteroa': 0.401, 'Villarrica': 0.276, 'PuyehueCordonCaulle': 0.508}
+    fp_summit            pooled None  media/vol None  [barajado media/vol None]  por vol (npos>=5): {}
+    vrp_rec              pooled 0.648  media/vol 0.692  [barajado media/vol 0.455]  por vol (npos>=5): {'Lascar': 0.802, 'Isluga': 0.595, 'Tupungatito': 0.479, 'PlanchonPeteroa': 0.532, 'Villarrica': 0.769, 'PuyehueCordonCaulle': 0.479}
+    disp                 pooled 0.717  media/vol 0.73  [barajado media/vol 0.446]  por vol (npos>=5): {'Lascar': 0.849, 'Isluga': 0.572, 'Tupungatito': 0.483, 'PlanchonPeteroa': 0.51, 'Villarrica': 0.742, 'PuyehueCordonCaulle': 0.601}
+    pc_dist              pooled 0.843  media/vol 0.746  [barajado media/vol 0.481]  por vol (npos>=5): {'Lascar': 0.796, 'Isluga': 0.553, 'Tupungatito': 0.764, 'PlanchonPeteroa': 0.438, 'Villarrica': 0.953, 'PuyehueCordonCaulle': 0.828}
+
+(e) REPRODUCCION DE NUMEROS PRELIMINARES (MODIS, hora UTC<12, CONS)
+  exigir_cobertura=True Lascar MODIS: alerta det 9/73 (sin dato 2)
+    11 vol MODIS: sin alerta con deteccion 426/2356; alertas det 10/74
+    PuyehueCordonCaulle: neg det 202/222 = 0.91
+    Chaiten: neg det 54/221 = 0.24
+    predicado cumulo (pc.vrp>0 y centroide<=inner, sin distance_class): alertas 74/74, sin alerta 2310/2356
+  exigir_cobertura=False Lascar MODIS: alerta det 9/75 (sin dato 2)
+    11 vol MODIS: sin alerta con deteccion 426/2514; alertas det 10/76
+    PuyehueCordonCaulle: neg det 202/240 = 0.84
+    Chaiten: neg det 54/239 = 0.23
+    predicado cumulo (pc.vrp>0 y centroide<=inner, sin distance_class): alertas 74/76, sin alerta 2310/2514
+  Lascar MODIS noches ALERTA no publicadas con cumulo en inner y far: 64 de 75; mediana final_hotspot_dist_km de esos records 24.2 km (n=122), mediana pc_dist 1.76 km
+  Lascar MODIS AUC (sin_alerta, utc12, cons): pc_vrp {'auc': 0.536, 'n_pos': 73, 'n_neg': 146} nti_max {'auc': 0.711, 'n_pos': 73, 'n_neg': 146} summitgated {'auc': 0.546, 'n_pos': 73, 'n_neg': 146}
+
+(f) CONTAMINACION DE RUTINA POR OCR (diurno pipeline)
+  MODIS: noches RUTINA estricta CONS 2504; con ALERTA OCR esa noche-sensor 1 (0.0 %) por volcan {'Lascar': 1}
+  VIIRS375: noches RUTINA estricta CONS 1587; con ALERTA OCR esa noche-sensor 83 (5.2 %) por volcan {'PlanchonPeteroa': 15, 'Villarrica': 12, 'Isluga': 13, 'Lascar': 5, 'Lastarria': 8, 'PuyehueCordonCaulle': 17, 'Copahue': 1, 'Tupungatito': 8, 'Llaima': 1, 'Chaiten': 3}
+  VIIRS750: noches RUTINA estricta CONS 2342; con ALERTA OCR esa noche-sensor 12 (0.5 %) por volcan {'PuyehueCordonCaulle': 2, 'Lascar': 10}
+  alertas OCR: {'VIIRS375': 734, 'VIIRS750': 76, 'MODIS': 36} | sin pasada CONS a +-10 min: {'VIIRS375': 492, 'VIIRS750': 44, 'MODIS': 3} | con pasada CONS RUTINA a +-10 min: {}
+
+(g) TASA DE PUBLICACION POR NOCHE-SENSOR, TODAS LAS NOCHES CON RECORD (ventana ref, sin etiqueta)
+  MODIS: 442/2455
+  VIIRS375: 2149/2461
+  VIIRS750: 1424/2461

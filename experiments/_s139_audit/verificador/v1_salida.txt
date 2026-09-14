@@ -1,0 +1,37 @@
+VALIDACION port Python vs node (eje 2): 7377/7377 noches-sensor coinciden
+pareo reloj +0 h: {'MODIS': '5016/5334', 'VIIRS375': '5596/10398', 'VIIRS750': '5823/10314'}
+pareo reloj +3 h: {'MODIS': '0/5334', 'VIIRS375': '0/10398', 'VIIRS750': '0/10314'}
+
+== tasa de publicacion POR PASADA (publica/total), ventana 2026-01-10 a 2026-09-07
+MODIS {'POS_pasada_ALERTA': '10/87 = 0.115', 'NEG_LIMPIO': '305/2977 = 0.102', 'RUTINA_noche_con_alerta': '207/1589 = 0.130', 'RUTINA_noche_con_FP': '33/354 = 0.093', 'FP_pasada': '0/9 = 0.000', 'SIN_FILA': '38/318 = 0.119'}
+VIIRS375 {'POS_pasada_ALERTA': '960/994 = 0.966', 'NEG_LIMPIO': '2062/3245 = 0.635', 'RUTINA_noche_con_alerta': '606/801 = 0.757', 'RUTINA_noche_con_FP': '130/249 = 0.522', 'FP_pasada': '215/307 = 0.700', 'SIN_FILA': '3358/4802 = 0.699'}
+VIIRS750 {'POS_pasada_ALERTA': '191/244 = 0.783', 'NEG_LIMPIO': '693/3392 = 0.204', 'RUTINA_noche_con_alerta': '451/1756 = 0.257', 'RUTINA_noche_con_FP': '75/415 = 0.181', 'FP_pasada': '3/16 = 0.188', 'SIN_FILA': '1132/4491 = 0.252'}
+
+== NEG_LIMPIO por volcan (publica/total)
+VIIRS375 {'Lascar': '21/78', 'Lastarria': '36/93', 'Tupungatito': '82/165', 'PlanchonPeteroa': '162/250', 'NevadosDeChillan': '132/425', 'Chaiten': '321/446', 'Villarrica': '364/483', 'Llaima': '345/491', 'Copahue': '364/474', 'Isluga': '46/63', 'PuyehueCordonCaulle': '189/277'}
+VIIRS750 {'Lascar': '10/82', 'Lastarria': '18/102', 'Tupungatito': '50/176', 'PlanchonPeteroa': '49/258', 'NevadosDeChillan': '40/449', 'Chaiten': '101/460', 'Villarrica': '103/498', 'Llaima': '83/520', 'Copahue': '68/496', 'Isluga': '20/65', 'PuyehueCordonCaulle': '151/286'}
+MODIS {'Lascar': '0/67', 'Lastarria': '3/82', 'Tupungatito': '6/142', 'PlanchonPeteroa': '16/232', 'NevadosDeChillan': '18/395', 'Chaiten': '42/450', 'Villarrica': '27/427', 'Llaima': '19/443', 'Copahue': '11/437', 'Isluga': '3/60', 'PuyehueCordonCaulle': '160/242'}
+
+== por angulo cenital del sensor: publica/total
+VIIRS375 POS_pasada_ALERTA {'z<30': '377/380', 'z30-50': '303/312', 'z50-60': '194/202', 'z>=60': '79/93', 'z?': '7/7'}
+VIIRS375 NEG_LIMPIO {'z<30': '501/693', 'z30-50': '541/776', 'z50-60': '413/616', 'z>=60': '590/1131', 'z?': '17/29'}
+VIIRS375 fraccion de pasadas nuestras CON fila CONS por cenital: {'z<30': '1237/2617', 'z30-50': '1411/2738', 'z50-60': '1084/1972', 'z>=60': '1824/2950', 'z?': '40/121'}
+VIIRS750 POS_pasada_ALERTA {'z<30': '98/134', 'z30-50': '81/96', 'z50-60': '11/13', 'z?': '1/1'}
+VIIRS750 NEG_LIMPIO {'z<30': '199/737', 'z30-50': '177/827', 'z50-60': '160/647', 'z>=60': '152/1153', 'z?': '5/28'}
+VIIRS750 fraccion de pasadas nuestras CON fila CONS por cenital: {'z<30': '1300/2605', 'z30-50': '1465/2729', 'z50-60': '1147/1965', 'z>=60': '1874/2895', 'z?': '37/120'}
+MODIS POS_pasada_ALERTA {'z<30': '9/64', 'z30-50': '1/23'}
+MODIS NEG_LIMPIO {'z<30': '141/883', 'z30-50': '73/855', 'z50-60': '56/708', 'z>=60': '35/489', 'z?': '0/42'}
+MODIS fraccion de pasadas nuestras CON fila CONS por cenital: {'z<30': '1500/1598', 'z30-50': '1466/1554', 'z50-60': '1154/1229', 'z>=60': '837/885', 'z?': '59/68'}
+
+== magnitud publicada en NEG_LIMPIO vs VRP de las ALERTAS nocturnas de MIROVA (CONS)
+VIIRS375 nuestra n=2062 mediana 0.046 p90 0.088 | frac <0.05 0.548 <0.1 0.932 || MIROVA ALERTA n=1038 min 0.01 p5 0.04 p10 0.06 mediana 0.19 || nuestra NEG bajo el p5 de MIROVA: 782/2062
+VIIRS750 nuestra n=693 mediana 0.303 p90 1.963 | frac <0.05 0.121 <0.1 0.235 || MIROVA ALERTA n=258 min 0.09 p5 0.18 p10 0.20 mediana 0.56 || nuestra NEG bajo el p5 de MIROVA: 252/693
+MODIS nuestra n=305 mediana 2.011 p90 5.000 | frac <0.05 0.000 <0.1 0.003 || MIROVA ALERTA n=89 min 0.19 p5 0.27 p10 0.28 mediana 1.04 || nuestra NEG bajo el p5 de MIROVA: 15/305
+
+== composicion de las publicaciones (NEG_LIMPIO vs POS)
+('MODIS', 'NEG_LIMPIO') {'pc_1px': '45/305 (0.15)', 'first_pass>0': '298/305 (0.98)', 'recaptura>0': '305/305 (1.00)', 'triggered_test1': '98/305 (0.32)', 'nti_max>-0.8': '0/305 (0.00)', 'pc_dist>inner/2': '20/305 (0.07)'}
+('MODIS', 'POS_pasada_ALERTA') {'pc_1px': '0/10 (0.00)', 'first_pass>0': '9/10 (0.90)', 'recaptura>0': '10/10 (1.00)', 'triggered_test1': '8/10 (0.80)', 'nti_max>-0.8': '0/10 (0.00)', 'pc_dist>inner/2': '0/10 (0.00)'}
+('VIIRS375', 'NEG_LIMPIO') {'pc_1px': '2002/2062 (0.97)', 'first_pass>0': '386/2062 (0.19)', 'recaptura>0': '589/2062 (0.29)', 'triggered_test1': '1987/2062 (0.96)', 'nti_max>-0.8': '0/2062 (0.00)', 'pc_dist>inner/2': '1409/2062 (0.68)'}
+('VIIRS375', 'POS_pasada_ALERTA') {'pc_1px': '638/960 (0.66)', 'first_pass>0': '651/960 (0.68)', 'recaptura>0': '554/960 (0.58)', 'triggered_test1': '954/960 (0.99)', 'nti_max>-0.8': '12/960 (0.01)', 'pc_dist>inner/2': '84/960 (0.09)'}
+('VIIRS750', 'NEG_LIMPIO') {'pc_1px': '208/693 (0.30)', 'first_pass>0': '162/693 (0.23)', 'recaptura>0': '213/693 (0.31)', 'triggered_test1': '485/693 (0.70)', 'nti_max>-0.8': '0/693 (0.00)', 'pc_dist>inner/2': '183/693 (0.26)'}
+('VIIRS750', 'POS_pasada_ALERTA') {'pc_1px': '113/191 (0.59)', 'first_pass>0': '123/191 (0.64)', 'recaptura>0': '119/191 (0.62)', 'triggered_test1': '139/191 (0.73)', 'nti_max>-0.8': '0/191 (0.00)', 'pc_dist>inner/2': '3/191 (0.02)'}
