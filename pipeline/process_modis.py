@@ -60,6 +60,7 @@ from .test1_integrated import compute_test1_mir
 from .anomaly_pixels import build_anomaly_pixels
 from .path_d_cap import apply_d9_scene_cap  # F50/S77
 from .product_version import product_version_from_granule  # S140 8b
+from .diag_fondo import radiancia_planck, redondear_diag  # S140 T7
 from .path_d_intra_radio import apply_intra_radio_gate  # S83 F-S81-A Fase 2
 from .second_pass_intra_radio import apply_second_pass_intra_radio_gate  # S85 F-S81-B'
 from .regrid import regrid_to_utm  # F70.2 grilla UTM
@@ -1015,6 +1016,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     hotspot_lon = None
     hotspot_dist_km = None
     anomaly_pixels = []
+    diag_L_bg_local = None  # S140 T7: sólo si actúa el kernel local
 
     if n_anomalous > 0:
         # Wooster MIR radiance method (Coppola 2015, Eq.7)
@@ -1048,6 +1050,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             if t_bg is not None and not np.isnan(t_bg):
                 t_bk_arr = np.where(np.isnan(t_bk_arr), t_bg, t_bk_arr)
             L_bg = C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bk_arr)) - 1))
+            diag_L_bg_local = redondear_diag(float(np.nanmedian(L_bg)))  # S140 T7: fondo local que se resta
         else:
             L_bg = L_bg_global
 
@@ -1507,6 +1510,10 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "distance_class": distance_class,
         "anomaly_pixels": anomaly_pixels,
         "t_bg_k": round(t_bg, 2),
+        # S140 T7: fondo en radiancia, en la banda del delta_L, para comparar con Tot_Lmir_bk de MIROVA.
+        "diag_L_bg_w_m2_sr_um": redondear_diag(radiancia_planck(t_bg, BAND21_LAMBDA)),
+        "diag_n_bg_anillo": int(_n_bg),  # píxeles del anillo en la mediana de t_bg (no los "suitable" del paper)
+        "diag_L_bg_local_w_m2_sr_um": diag_L_bg_local,
         "t_max_k": round(t_max, 2),
         # Diagnostic fields (session 6) — present when MODIS path runs.
         "diag_sigma_bg_k": round(std_bg, 3),

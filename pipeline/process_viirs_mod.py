@@ -47,6 +47,7 @@ from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots, cluster_pixels_geographic
 from .path_d_cap import apply_d9_scene_cap  # F50/S77
 from .product_version import product_version_from_granule  # S140 8b
+from .diag_fondo import radiancia_planck, redondear_diag  # S140 T7
 
 # S23 T17: constantes físicas centralizadas en pipeline/constants.py
 from pipeline.constants import SIGMA  # kept for reference, not used in MIR VRP
@@ -1355,6 +1356,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "distance_class": distance_class,
         "anomaly_pixels": anomaly_pixels,
         "t_bg_k": round(t_bg, 2),
+        # S140 T7: fondo en radiancia, en la banda del delta_L, para comparar con Tot_Lmir_bk de MIROVA.
+        "diag_L_bg_w_m2_sr_um": redondear_diag(radiancia_planck(t_bg, M13_LAMBDA)),
+        "diag_n_bg_anillo": int(_n_bg),  # píxeles del anillo en la mediana de t_bg (no los "suitable" del paper)
+        "diag_L_bg_local_w_m2_sr_um": None,  # M-band sin kernel local (D25)
         "t_max_k": round(t_max, 2) if not np.isnan(t_max) else None,
         # S22.1 paridad schema MODIS (H_S21_11). Algunos diag_* duplican campos
         # existentes (nti_bg, nti_max, n_*_path) por compat frontend; otros son
