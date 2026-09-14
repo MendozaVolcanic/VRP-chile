@@ -391,9 +391,11 @@ def reset_transient_breakers():
     Pero run_pipeline loopea rangos multi-día en UN proceso (backfill/reproc):
     un timeout transitorio del día 1 degradaba TODOS los días restantes a []
     silencioso. run_pipeline llama esto al inicio de cada fecha."""
-    global _CMR_SEARCH_DOWN
+    global _CMR_SEARCH_DOWN, _N_DESCARGAS_SALTADAS
     _CMR_SEARCH_DOWN = False
     _DOWN_DOWNLOAD_HOSTS.clear()
+    _N_DESCARGAS_SALTADAS = 0  # S140 8d
+    _HOSTS_AVISADOS.clear()
 try:
     # requests.Timeout = base de ReadTimeout y ConnectTimeout; ConnectionError aparte.
     from requests.exceptions import Timeout as _Timeout, \
@@ -554,6 +556,52 @@ def _diag(msg: str) -> None:
 # haberse recuperado). Estado por-proceso → cada job de GH Actions arranca limpio.
 _DOWN_DOWNLOAD_HOSTS: set = set()
 
+# S140 (Fase 0, tarea 8d): el host caido deja de ser invisible (A64 visible).
+# POR QUE: el breaker de arriba es la decision correcta, pero solo deja una linea [diag]
+# en el log; el job termina verde con menos granules y nadie lo ve. Dentro de GitHub
+# Actions se emite un ::warning:: por host (no por granule, para no inundar la pagina del
+# run) y el resumen del job cuenta las descargas saltadas. Fuera de Actions no se imprime
+# ningun comando de GitHub. Solo agrega avisos: no cambia que se descarga.
+_HOSTS_AVISADOS: set = set()
+_N_DESCARGAS_SALTADAS = 0
+
+
+def _escribir_resumen(linea: str) -> None:
+    ruta = os.environ.get("GITHUB_STEP_SUMMARY")
+    if not ruta:
+        return
+    try:
+        with open(ruta, "a", encoding="utf-8") as fh:
+            fh.write(linea + "\n")
+    except OSError:
+        pass  # el resumen es informativo: no puede tumbar la descarga
+
+
+def _avisar_host_caido(hosts, detalle: str) -> None:
+    """Un aviso por host por corrida: ::warning:: en Actions y una linea en el resumen."""
+    nuevos = sorted(set(hosts) - _HOSTS_AVISADOS)
+    if not nuevos:
+        return
+    _HOSTS_AVISADOS.update(nuevos)
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        print(f"::warning title=Host de descarga NASA caido::{', '.join(nuevos)} no responde; "
+              f"sus descargas se saltan en esta corrida (A64). Primer granule: {detalle[:80]}",
+              flush=True)
+    _escribir_resumen(f"- Host de descarga caido: `{', '.join(nuevos)}` (primer granule: `{detalle[:80]}`)")
+
+
+def descargas_saltadas() -> int:
+    """Descargas saltadas por el circuit-breaker desde el ultimo reset."""
+    return _N_DESCARGAS_SALTADAS
+
+
+def _resumen_hosts_caidos(volcan: str) -> None:
+    """Linea final por volcan en el resumen del job; nada si no hubo host caido."""
+    if not _DOWN_DOWNLOAD_HOSTS and not _N_DESCARGAS_SALTADAS:
+        return
+    _escribir_resumen(f"**{volcan}**: hosts caidos {sorted(_DOWN_DOWNLOAD_HOSTS)}; "
+                      f"descargas saltadas por el circuit-breaker: {_N_DESCARGAS_SALTADAS}")
+
 # S109 — resiliencia a timeouts TRANSITORIOS: antes de marcar un host caído para TODA
 # la corrida (S102 all-or-nothing), probe TCP rápido (5s). Si responde = blip ya
 # recuperado → reintentar; si no = caído de verdad → marcar + saltar (S102). Acota el
@@ -620,6 +668,7 @@ def download_granules(granules: list, dest_dir: Path) -> list[Path]:
     Markers _diag para diagnóstico continuo.
     """
     import time
+    global _N_DESCARGAS_SALTADAS
     dest_dir.mkdir(parents=True, exist_ok=True)
     names = ",".join(str(g.get("umm", {}).get("GranuleUR", "?"))[:40] for g in granules) \
         if all(hasattr(g, "get") for g in granules) else f"{len(granules)} items"
@@ -628,6 +677,8 @@ def download_granules(granules: list, dest_dir: Path) -> list[Path]:
     # Circuit-breaker: si TODOS los hosts destino ya fallaron ConnectTimeout en
     # esta corrida, fallar al instante (no quemar otro connect-timeout largo).
     if hosts and hosts <= _DOWN_DOWNLOAD_HOSTS:
+        _N_DESCARGAS_SALTADAS += 1  # S140 8d
+        _avisar_host_caido(hosts, names)
         _diag(f"DOWNLOAD_SKIP host caído {sorted(hosts)} [{names}]")
         raise RuntimeError(f"download host(s) down this run: {sorted(hosts)}")
 
@@ -660,6 +711,7 @@ def download_granules(granules: list, dest_dir: Path) -> list[Path]:
             # reintenta la corrida ~30min después con el circuit-breaker reseteado.
             if hosts:
                 _DOWN_DOWNLOAD_HOSTS.update(hosts)
+                _avisar_host_caido(hosts, names)  # S140 8d
             _diag(f"DOWNLOAD_CONNFAIL attempt={attempt} elapsed={time.time()-t0:.1f}s "
                   f"host_down={sorted(hosts) or 'unknown'} err={type(e).__name__}: {str(e)[:90]}")
             break
@@ -796,6 +848,7 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             print(f"  WARN: Failed to fetch {platform}: {e}")
             results[platform] = []
 
+    _resumen_hosts_caidos(volcano.get("name", "?"))  # S140 8d
     return results
 
 
