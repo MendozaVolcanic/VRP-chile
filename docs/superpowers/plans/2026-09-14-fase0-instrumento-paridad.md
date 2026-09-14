@@ -121,10 +121,34 @@ def test_recupera_las_alertas_perdidas():
 ```
 
 - [ ] **Paso 2: rojo** (el módulo no existe).
-- [ ] **Paso 3: implementar** `cargar_referencia_unificada()`: llama a
-`pipeline.mirova_csv_loader.load_mirova_alertas` dos veces (snapshot actual + respaldo de abril,
-mismo `ocr_path`) y une por clave `(volcano, sensor_bucket, fecha_utc, source)`; conserva la fila del
-snapshot actual cuando las dos existen. Devuelve la lista con el mismo esquema que el loader.
+- [ ] **Paso 3: implementar** `cargar_referencia_unificada()`.
+
+**Qué CSV y por qué (corregido 2026-09-14 tras recordatorio de Nicolás).** Mirova-v1 produce varios
+CSV y sólo dos son lecturas de MIROVA **por pasada** (`docs/audit_s139/MAPA_BASES_MIROVA_V1.md` §1):
+`registro_vrp_consolidado.csv` (una fila por gránulo, volcán y sensor, **con** RUTINA, ALERTA_TERMICA y
+FALSO_POSITIVO) y `registro_vrp_ocr.csv`. Los demás son derivados que **no traen** FALSO_POSITIVO ni
+RUTINA y no sirven para el banco: `registro_vrp_positivos.csv` (sólo ALERTA),
+`registro_vrp_maestro_publicable.csv` (unión de alertas de ambos canales, lo que dibuja el dashboard de
+Mirova-v1) y `registro_<Volcan>.csv` (el maestro partido por volcán).
+
+**No usar `load_mirova_alertas`**: `pipeline/mirova_csv_loader.py:147-149` descarta toda fila cuyo
+`Tipo_Registro` no esté en `_ALERT_TIPOS`, así que borraría RUTINA y FALSO_POSITIVO. En su lugar, leer
+los dos CSV primarios con `csv.DictReader` conservando **todas** las filas (patrón de
+`experiments/_s139_audit/eje2/banco_noches.py:169-207`), y reusar del loader sólo la normalización:
+nombre canónico de volcán (variantes A14), `sensor_bucket` y `parse_ocr_distance` (con el arreglo de la
+tarea 1). Unir snapshot actual + respaldo del 2026-04-08 por clave
+`(volcano, sensor_bucket, Fecha_Satelite_UTC, fuente)`, conservando la fila del snapshot cuando existen
+las dos. Cada fila lleva `tipo` = `Tipo_Registro` tal cual.
+
+Test adicional del paso 1, que falla si alguien vuelve a usar el loader de alertas:
+
+```python
+def test_conserva_rutina_y_falso_positivo():
+    from collections import Counter
+    ref = cargar_referencia_unificada()
+    c = Counter(a["tipo"] for a in ref)
+    assert c["RUTINA"] > 10000 and c["FALSO_POSITIVO"] > 100 and c["ALERTA_TERMICA"] > 1000, c
+```
 - [ ] **Paso 4: verde**, suite, commit `feat(referencia): union snapshot + respaldo 8-abr + OCR`.
 
 ---
