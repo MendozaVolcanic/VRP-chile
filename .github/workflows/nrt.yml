@@ -190,7 +190,14 @@ jobs:
             "${ARGS[@]}" 2>&1 | tee -a pipeline.log
 
       - name: Run VRP pipeline — experimental profile
-        if: ${{ steps.filter.outputs.skip != 'true' && (github.event.inputs.profile == '' || github.event.inputs.profile == 'both' || github.event.inputs.profile == 'experimental') }}
+        # S141 (Fase 0 T8a, decisión Nicolás 2026-09-14): FUERA DEL CRON. Ocupaba casi la mitad
+        # del job (Láscar 14-sep: 19 de 38 min a las 09:34 UTC, 19 de 40 a las 16:09) y su salida,
+        # data/experimental_v2/, nunca se commitea: el paso de commit sólo agrega
+        # data/experimental/. Queda sólo por despacho manual con profile=experimental; `both`
+        # y el cron ya no lo corren. El nombre del workflow no se cambia porque
+        # tests/test_cadencia_cron_s133.py mide la puntualidad del cron por ese nombre.
+        # Tag defensivo: pre-s141-t8a-experimental.
+        if: ${{ steps.filter.outputs.skip != 'true' && github.event.inputs.profile == 'experimental' }}
         env:
           # S72 EARTHDATA_TOKEN: si está seteado en GH Secrets, earthaccess lo
           # prefiere automáticamente y bypassea el endpoint /api/users/find_or_create_token

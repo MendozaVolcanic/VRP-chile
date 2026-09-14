@@ -431,8 +431,9 @@ function reportDataAvailability() {
   el.innerHTML = todos
     ? "<b>No se pudo cargar la serie experimental.</b> Los volcanes aparecen sin " +
       "datos porque falta el archivo, <b>no porque no haya actividad</b>. Esta vista " +
-      "consume <code>data/experimental_v2/</code>, que se genera desde el NRT del " +
-      "2026-08-25 en adelante; la serie anterior quedó en <code>data/experimental/</code> " +
+      "consume <code>data/experimental_v2/</code>, que sólo existe si se corre un reproceso " +
+      "o un despacho manual del perfil experimental (desde S141 ya no corre en el cron NRT, " +
+      "y lo que el cron generó antes nunca se guardó); la serie anterior quedó en <code>data/experimental/</code> " +
       "y no se mezcla con esta a propósito (se generó con otra configuración). " +
       "Para tener historia acá hace falta un reproceso."
     : "<b>Serie incompleta:</b> no se pudo cargar el dato de " + fallidos + " de " +
