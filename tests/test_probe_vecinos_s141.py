@@ -163,6 +163,28 @@ def test_a89_nombres_parcheados_existen():
         assert callable(getattr(pv, n, None)), n
 
 
+def test_runner_como_script_no_cierra_stdout():
+    """Corrida 34928488409: el runner envolvía sys.stdout y el probe S135 lo volvía a envolver al
+    importarse; el primer envoltorio quedaba huérfano, al recolectarse cerraba el buffer, y
+    run_pipeline.py fallaba con 'I/O operation on closed file' antes de procesar una sola pasada.
+    Se reproduce corriendo el archivo como script (el import desde un test no toca __main__)."""
+    import subprocess
+    env = dict(os.environ, PROBE_VOL="VolcanQueNoExiste", VRP_PROFILE="mirova_equivalent",
+               PYTHONIOENCODING="utf-8")
+    r = subprocess.run([sys.executable, os.path.join(PROBE_DIR, "probe_vecinos.py")], cwd=ROOT, env=env,
+                       capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=300)
+    assert "closed file" not in r.stderr, r.stderr[-800:]
+    assert r.returncode == 0, r.stderr[-800:]
+    assert "sin pasadas" in r.stdout
+
+
+def test_yml_con_pipefail_para_que_un_crash_no_salga_verde():
+    """En la misma corrida el job salió success con el script caído: `python ... | tee` sin
+    pipefail devuelve el código de tee."""
+    txt = open(os.path.join(ROOT, ".github", "workflows", "probe-s141-vecinos.yml"), encoding="utf-8").read()
+    assert "set -o pipefail" in txt
+
+
 def test_yml_no_pushea_y_on_entre_comillas():
     p = os.path.join(ROOT, ".github", "workflows", "probe-s141-vecinos.yml")
     txt = open(p, encoding="utf-8").read()
