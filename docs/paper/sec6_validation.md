@@ -34,9 +34,12 @@ from the comparison rather than counted as misses, because missing them is the c
 behaviour.
 
 One asymmetry that is often assumed here does **not** apply. The visual supervision described
-in the MIROVA literature is applied to curated archives (Coppola et al., 2023, p. 4), while
-the automatically posted time series are provided 'as they are' (Coppola et al., 2016a,
-p. 197). The NRT chain monitors hundreds of volcanoes worldwide, with products posted within
+in the MIROVA literature was applied to the first curated archive (Coppola et al., 2023, p. 4);
+the current global archive (v2.5) retains threshold-filtered detections with an automated
+classification, and no additional quality control or manual screening was applied when it was
+aggregated (Coppola et al., 2026, p. 7). The automatically posted time series are provided
+'as they are' (Coppola et al., 2016a, p. 197).
+<!-- S142 (A105): la supervisión visual de Coppola 2023 p. 4 es de la base v.1. [nuevo] Coppola et al. 2026, Scientific Data (Coppola_2026_SciData_Global_VRP_Dataset_s41597-026-08100-7.pdf), p. 7 (visor 7, artículo en prensa), subsección "Data aggregation", 3.er párrafo: "No additional quality control or manual screening was applied during this aggregation step"; verificado en página renderizada en S142. Agregar la referencia a la bibliografía. --> The NRT chain monitors hundreds of volcanoes worldwide, with products posted within
 1-4 h of each overpass (Coppola et al., 2016a, p. 196) and freely accessible on the web
 (Coppola et al., 2020, p. 11); there is no capacity to review each
 detection by hand, nor the local knowledge of each volcano that doing so would require. Both

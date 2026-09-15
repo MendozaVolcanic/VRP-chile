@@ -159,6 +159,7 @@ use, audit or extension. That gap is what the present work addresses.
 | Coppola et al., 2020 | Coppola, D. et al. Thermal remote sensing for global volcano monitoring (título completo y autores por verificar en imagen). *Front. Earth Sci.* 7:362. | 10.3389/feart.2019.00362 |
 | Coppola et al., 2022 | Coppola, D., Valade, S., Masias, P., Laiolo, M., Massimetti, F., Campus, A. et al. Shallow magma convection … during the dome-forming Sabancaya eruption (2012-2020). *Bull. Volcanol.* 84:16. | 10.1007/s00445-022-01523-1 |
 | Coppola et al., 2023 | Coppola, D. et al. MIROVA database v1 (título completo, autores, volumen y DOI por verificar en imagen). *Front. Earth Sci.* Archivo `feart-11-1240107.pdf`. | [DOI pendiente] |
+| Coppola et al., 2026 | Coppola, D., Laiolo, M., Aveni, S., Campus, A., Massimetti, F. The Global Volcanic Radiative Power (VRP) Dataset: Twenty-Five Years of Middle InfraRed Satellite Observations (2000-2025). *Sci. Data* (2026), article in press (volumen y páginas por asignar). | 10.1038/s41597-026-08100-7 |
 | Laiolo et al., 2026 | Laiolo, M. et al. Switching between ordinary and non-ordinary activity at Stromboli volcano: insights from short- and long-term thermal trends recorded from space. *Bull. Volcanol.* 88:11. | 10.1007/s00445-025-01932-y |
 | Coppola, 2025 | Coppola, D. Thermal Monitoring of Volcanoes from Space. In: *Modern Volcano Monitoring*, Springer, pp. 325-364. | 10.1007/978-3-031-86841-2_11 |
 | Wooster et al., 2003 | Wooster, M. J., Zhukov, B., Oertel, D. Fire radiative energy for quantitative study of biomass burning: derivation from the BIRD experimental satellite and comparison to MODIS fire products. *Remote Sens. Environ.* 86:83-107. | 10.1016/S0034-4257(03)00070-1 |
@@ -185,6 +186,7 @@ fila de ese informe.
 | Coppola et al., 2020 | Coppola et al. 2020, *Front. Earth Sci.* 7:362 | `Thermal_Remote_Sensing_for_Global_Volcano_Monitori.pdf` | p. impresa = visor |
 | Coppola et al., 2022 | Coppola et al. 2022, *Bull. Volcanol.* 84:16 | `s00445-022-01523-1.pdf` | p. impresa = visor |
 | Coppola et al., 2023 | Coppola et al. 2023, *Front. Earth Sci.* (MIROVA database v1) | `feart-11-1240107.pdf` | p. impresa = visor |
+| Coppola et al., 2026 | Coppola et al. 2026, *Sci. Data* (article in press) | `Coppola_2026_SciData_Global_VRP_Dataset_s41597-026-08100-7.pdf` | versión en prensa sin folios de revista: se cita la página del visor (p. 7 = visor 7); revisar al salir la versión final |
 | Laiolo et al., 2026 | Laiolo et al. 2026, *Bull. Volcanol.* 88:11 | `s00445-025-01932-y.pdf` | p. impresa = visor |
 | Wooster et al., 2003 | Wooster et al. 2003, *Remote Sens. Environ.* 86 | `1-s2.0-S0034425703000701-main.pdf` | p. impresa = visor + 82 (visor 1 = p. 83; visor 5 = p. 87) |
 | Wright et al., 2002 | Wright et al. 2002, *Remote Sens. Environ.* 82 | `wright2002_rse_automated_volcanic_eruption_detection_10.1016-S0034-4257(02)00030-5.pdf` | p. impresa = visor + 134 (visor 1 = p. 135; visor 7 = p. 141) |

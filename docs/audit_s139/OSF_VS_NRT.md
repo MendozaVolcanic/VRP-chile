@@ -7,6 +7,15 @@ modifico ningun archivo del repositorio fuera de esta carpeta y este informe.
 
 ## 0. Respuesta corta
 
+> ⚠️ **Corrección S142 (A105).** La revisión manual de Coppola 2023 §2.5 es de la base **v.1**. El OSF
+> **v2.5 no tuvo revisión manual**: "No additional quality control or manual screening was applied
+> during this aggregation step" (Coppola et al. 2026, Scientific Data, p. 7, leído en página renderizada
+> en S141). La clase es automática (DBSCAN más reglas por distancia, p. 10 a 12) y el archivo aplica
+> umbrales VRP por sensor al construirse (Tabla 1, p. 8). La consecuencia práctica de este informe se
+> mantiene (el OSF es un producto **filtrado**, no un espejo del NRT, y sus conteos no valen para el
+> NRT), pero la causa es el filtrado por umbrales y clase automática, no la supervisión humana. Lo de
+> abajo se conserva como se escribió.
+
 **Esta reprocesado y supervisado a mano; no es un espejo del feed NRT.** No hay forma de comprobarlo
 por comparacion pasada-por-pasada (el archivo termina el 2025-12-31 y las dos fuentes NRT locales
 empiezan despues, sin un solo dia de solape), pero la documentacion oficial de MIROVA lo dice de forma
@@ -165,7 +174,8 @@ retenida o removida en la revision manual):
 **Para que NO sirve el OSF:**
 - Medir recall o precision del clon NRT (`mirova_equivalent`) contra "lo que MIROVA hubiera dicho en
   vivo": no hay overlap temporal con ninguna fuente NRT local (seccion 1), y aunque lo hubiera, el
-  archivo esta supervisado a mano para remover fuegos y falsas alarmas (seccion 3.2): un FP real
+  archivo esta supervisado a mano para remover fuegos y falsas alarmas (seccion 3.2; falso para la v2.5,
+  ver la corrección S142 en §0: el filtro es por umbrales y clase automática): un FP real
   del feed NRT (el que VRP Chile busca reproducir) puede simplemente no estar en el OSF porque
   alguien ya lo borro despues del hecho. Comparar contra el OSF subestimaria sistematicamente los
   falsos positivos "esperables" de un clon fiel al NRT.

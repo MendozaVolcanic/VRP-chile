@@ -218,7 +218,8 @@ def test_controles_de_instrumento(tmp_path):
 
 def test_linea_base_reproduce_s139(tmp_path):
     """Numeros medidos en S139 (VERIFICADOR.md): con la referencia solo-snapshot el V375 publicaba en
-    63,5 % de los negativos limpios por pasada. Con la referencia unificada y ventana desde marzo el
+    63,5 % de los negativos limpios por pasada (⚠️ S142: mezcla regímenes; desde #571 es 87,1 % de 295,
+    `experiments/_s142_linea_base/linea_base_post535.json`). Con la referencia unificada y ventana desde marzo el
     valor puede moverse unos puntos, no de orden: se fija una banda."""
     b = _correr(tmp_path)
     v375 = b["por_sensor"]["VIIRS375"]["pasada"]
@@ -394,7 +395,9 @@ leyó el orquestador; el resto del corpus del grupo MIROVA sigue sin revisión r
   (`limite_km`, igual a `inner_radius_km`; Tupungatito 5 km hasta 2026-02-22 y 7 km desde 2026-02-23),
   no estimado de los datos.
 - [ ] Ningún porcentaje calculado sobre el OSF se usa como número del NRT (archivo supervisado a mano,
-  Coppola 2023 §2.5): sólo definiciones por fila.
+  Coppola 2023 §2.5): sólo definiciones por fila. ⚠️ Corrección S142 (A105): la supervisión manual era
+  de la v.1; la v2.5 es filtrada por clase automática y umbrales VRP por sensor (Coppola et al. 2026,
+  Scientific Data, p. 7, p. 8 Tabla 1, p. 10 a 12). La regla se mantiene con esa causa.
 - [ ] Frente de la conectiva (D26): anotar en el catálogo la pieza de Coppola 2014 p. 9 (`and`
   explícito en su test 2), sin cerrar el frente.
 
