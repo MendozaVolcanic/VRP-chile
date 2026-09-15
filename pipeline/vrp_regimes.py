@@ -8,7 +8,8 @@
 # Modelo/método : Reglas físicas determinísticas (Planck/Wooster, Coppola 2016/2024).
 #                 NO es caja negra — la lógica es auditable (cumple punto 5.5 Res. 372).
 # Datos entrada : Radiancia/temperatura de brillo MODIS MOD021KM/MYD021KM y VIIRS I04/I05, M13/M15. SIN datos personales.
-# Variables     : VRP (MW), BT del píxel, T de fondo (corona/local), área del píxel.
+# Variables     : VRP (MW), BT del píxel, T de fondo (corona/local; media de radiancia de
+#                 vecinos no alertados D25, flag OFF en producción), área del píxel.
 # Limitaciones  : Saturación de píxel, contaminación por lago/nieve, falsos positivos
 #                 por incendios; fondo regional como fallback degrada explícitamente.
 # Refs/datos    : Coppola et al. 2016a, Coppola 2024 (Springer). Datos de
@@ -104,6 +105,75 @@ def compute_local_background(
             t_bks.append(float(np.mean(neighbors)))
 
     return t_bks
+
+
+def neighbor_mean_radiance_background(
+    bt_grid: np.ndarray,
+    alert_mask: np.ndarray,
+    hot_rows: Sequence[int],
+    hot_cols: Sequence[int],
+    wavelength_um: float,
+    *,
+    max_half_px: int = 1,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Fondo MIR de cada píxel alertado = media de la RADIANCIA de sus vecinos no alertados (D25, S142).
+
+    POR QUÉ. Coppola 2016a (ec. 6) resta como fondo la media aritmética de los píxeles que rodean
+    al activo; Fernandina 2025 (p. 9) precisa que son los vecinos NO alertados, y Campus 2024 (p. 3)
+    que cada alertado tiene su propio fondo (docs/MIROVA_DIVERGENCES.md D25). Nuestro pipeline usa
+    la mediana de un anillo regional de 5 a 25 km, que en un cono nevado de noche es valle tibio:
+    el cráter con lava sub-píxel sale más frío que ese fondo y su VRP se recorta a cero.
+
+    QUÉ SE PROMEDIA. Radiancia (Planck de cada vecino), no temperatura: los textos hablan de
+    radiancia, y como Planck es convexo en el MIR, Planck(media de BT) subestima el fondo cuando el
+    entorno es heterogéneo. Difiere de `compute_local_background` (arriba), que promedia BT.
+
+    PÍXEL SIN VECINOS NO ALERTADOS (interior de un cúmulo). El paper no lo trata. Se agranda la
+    ventana (5x5, 7x7, ...) hasta `max_half_px`, porque los píxeles no alertados más cercanos son la
+    corona del cúmulo, que es lo que "surrounding" describe para un cuerpo de varios píxeles. Si no
+    hay ninguno, devuelve NaN y el llamador decide el respaldo. Decisión del dueño (S142): el
+    default del perfil es 3 (hasta 7x7), el A/B barre 1 contra 3, y los píxeles que caen al respaldo
+    quedan contados en el record.
+
+    Args:
+        bt_grid: BT en K (2D). NaN = inválido, se ignora.
+        alert_mask: bool 2D, True en TODOS los píxeles alertados (no sólo los de hot_rows/cols).
+        hot_rows, hot_cols: índices de los píxeles a los que se les calcula fondo.
+        wavelength_um: longitud de onda de la banda MIR (VIIRS I04 = 3,740).
+        max_half_px: semiancho máximo de la ventana (>= 1; 1 = los 8 vecinos).
+
+    Returns:
+        (l_bk, half_used): radiancia de fondo (W/m2/sr/µm, float64; NaN sin vecinos) y el semiancho
+        con que se obtuvo (0 = sin vecinos), un valor por píxel.
+    """
+    if max_half_px < 1:
+        raise ValueError(f"max_half_px debe ser >= 1, recibido {max_half_px}")
+    grid = np.asarray(bt_grid, dtype=np.float64)
+    alert = np.asarray(alert_mask, dtype=bool)
+    if grid.shape != alert.shape:
+        raise ValueError(f"bt_grid {grid.shape} y alert_mask {alert.shape} difieren")
+    if len(hot_rows) != len(hot_cols):
+        raise ValueError("hot_rows y hot_cols deben tener mismo largo")
+
+    n_rows, n_cols = grid.shape
+    n = len(hot_rows)
+    l_bk = np.full(n, np.nan, dtype=np.float64)
+    half_used = np.zeros(n, dtype=int)
+    for i, (r, c) in enumerate(zip(hot_rows, hot_cols)):
+        r, c = int(r), int(c)
+        for half in range(1, max_half_px + 1):
+            r0, r1 = max(0, r - half), min(n_rows, r + half + 1)
+            k0, k1 = max(0, c - half), min(n_cols, c + half + 1)
+            ventana = grid[r0:r1, k0:k1]
+            usable = ~alert[r0:r1, k0:k1] & np.isfinite(ventana)
+            if np.any(usable):
+                vals = ventana[usable]
+                with np.errstate(invalid="ignore", divide="ignore", over="ignore"):
+                    rad = C1 / (wavelength_um ** 5 * (np.exp(C2 / (wavelength_um * vals)) - 1))
+                l_bk[i] = float(np.mean(rad))
+                half_used[i] = half
+                break
+    return l_bk, half_used
 
 
 def cluster_corona_background(
