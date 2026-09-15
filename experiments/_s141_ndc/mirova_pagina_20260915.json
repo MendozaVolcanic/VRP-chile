@@ -1,0 +1,57 @@
+{
+ "procedencia": {
+  "descripcion": "Salidas de consultas JavaScript de sólo lectura sobre la página pública de MIROVA, con el raster que la propia página ya había cargado en memoria (window.georasterData). No se descargó ningún archivo al disco.",
+  "sesion": "S141",
+  "consultado_utc": "2026-09-15T11:30Z aprox.",
+  "paginas": [
+   "https://www.mirovaweb.it/NRT/volcanoDetails_VIR375.php?volcano_id=357070",
+   "https://www.mirovaweb.it/NRT/volcanoMap.php?volcano=ChillanNevadosde&sensor=VIIRS375"
+  ],
+  "tif_en_vivo": "https://www.mirovaweb.it/OUTPUTweb/MIROVA/VIIRS375/VOLCANOES/ChillanNevadosde/ChillanNevadosde_VIIRS375_I04.tif",
+  "tif_head": {"bytes": 73898, "last_modified": "Tue, 15 Sep 2026 10:46:37 GMT", "content_type": "image/tiff"},
+  "copia_en_archivo_propio": {"repo": "MendozaVolcanic/mirova-tif-archive", "ruta": "data/tif/ChillanNevadosde/20260915_061801_VIIRS375.tif", "bytes": 73898, "blob_sha_prefijo": "eeb803c40"},
+  "nota_s91": "Estos números son la transcripción literal de las salidas de las consultas; para un análisis reproducible hay que rehacerlos con un script sobre el TIF archivado."
+ },
+ "pagina_detalle": {
+  "ultima_actualizacion": "15-Sep-2026 06:18:01",
+  "nivel": "Thermal anomaly: VERY LOW",
+  "ultimas_10_imagenes": [
+   {"fecha": "15-Sep-2026 06:18:01", "vrp_mw": 0.05, "zen_deg": 45, "alerta": true},
+   {"fecha": "15-Sep-2026 06:00:00", "vrp_mw": null, "zen_deg": 11},
+   {"fecha": "15-Sep-2026 05:24:02", "vrp_mw": null, "zen_deg": 27},
+   {"fecha": "15-Sep-2026 04:42:01", "vrp_mw": null, "zen_deg": 67},
+   {"fecha": "14-Sep-2026 19:42:02", "vrp_mw": null, "zen_deg": 68},
+   {"fecha": "14-Sep-2026 19:00:01", "vrp_mw": null, "zen_deg": 29},
+   {"fecha": "14-Sep-2026 18:42:00", "vrp_mw": null, "zen_deg": 11},
+   {"fecha": "14-Sep-2026 06:36:01", "vrp_mw": null, "zen_deg": 60},
+   {"fecha": "14-Sep-2026 06:18:00", "vrp_mw": null, "zen_deg": 38},
+   {"fecha": "14-Sep-2026 05:42:02", "vrp_mw": 0.09, "zen_deg": 1, "alerta": true}
+  ],
+  "graficos": "logVRP, VRP y Dist se sirven como PNG (OUTPUTweb/MIROVA/VIIRS375/VOLCANOES/ChillanNevadosde/*.png); no hay endpoint de datos por pasada"
+ },
+ "pagina_mapa": {
+  "encabezado": {"ultima_actualizacion": "15-Sep-2026 06:18:01", "vrp_mw": 0.1, "distancia_km": 0.4},
+  "opciones": ["volcán", "sensor (MODIS, VIIRS375, VIIRS750)", "fondo (satelital, topográfico)", "paleta (gris, hot, jet)", "opacidad", "rango mínimo y máximo", "ocultar GeoTIFF", "leer valores por píxel", "descargar GeoTIFF", "descargar KMZ"],
+  "raster": {"proyeccion_epsg": 32719, "filas": 134, "columnas": 134, "pixel_m": 375,
+             "xmin": 262920.3584219662, "xmax": 313170.3584219662, "ymin": 5892499.181368953, "ymax": 5942749.181368953,
+             "unidad": "radiancia MIR, W/m2 sr um", "min": 0.02399587258696556, "max": 0.19632309675216675, "mediana": 0.0918, "p95": 0.1571},
+  "maximo_crudo": {"fila": 0, "col": 26, "radiancia": 0.1963, "lectura": "borde norte de la grilla: gradiente del terreno, no el foco"},
+  "filtro_alto_9x9": {"sigma_robusto_exceso": 0.0057, "celdas_mas_prominentes": "fila 50, columnas 40 a 44 (exceso 0,036 a 0,040), unos 7 km al norte y 9 km al oeste del cráter"},
+  "crater": {
+   "celda_crater_nicanor": [68, 66], "celda_referencia_gvp": [66, 67], "centro_grilla": [67, 67],
+   "radiancia_crater": 0.0871, "exceso_crater_sobre_mediana_9x9": 0.0148, "puesto_en_la_escena": 626, "de": 15876,
+   "celda_vecina_igual_de_prominente": {"celda": [67, 66], "radiancia": 0.0869, "exceso": 0.0148}
+  },
+  "reconstruccion_vrp": {
+   "metodo": "fondo por celda = media de sus 8 vecinas no alertadas; VRP = 18,0 x 140625 m2 x suma de delta L",
+   "una_celda_68_66_mw": 0.03, "dos_celdas_67_66_y_68_66_mw": 0.065, "tres_celdas_mas_68_67_mw": 0.078, "mirova_publica_mw": 0.05,
+   "lectura": "no concluyente: la cifra publicada queda entre una y dos celdas"
+  }
+ },
+ "nuestros_records_14sep_viirs375": [
+  {"utc": "2026-09-14 05:00", "sensor": "VIIRS_NOAA20", "zen_deg": 57.92, "f5_mw": 0.0315, "d_crater_km": 1.26, "celda_mirova": [67, 63], "mirova": "fuera de las 10 últimas imágenes"},
+  {"utc": "2026-09-14 05:42", "sensor": "VIIRS_NOAA21", "zen_deg": 1.67, "f5_mw": 0.0936, "d_crater_km": 0.23, "celda_mirova": [67, 66], "mirova": "alerta 0,09 MW"},
+  {"utc": "2026-09-14 06:18", "sensor": "VIIRS_SNPP", "zen_deg": 38.43, "f5_mw": 0.043, "d_crater_km": 0.06, "celda_mirova": [68, 66], "mirova": "sin alerta (NaN)"},
+  {"utc": "2026-09-14 06:36", "sensor": "VIIRS_NOAA20", "zen_deg": 60.65, "f5_mw": 0.0717, "d_crater_km": 0.2, "celda_mirova": [67, 67], "mirova": "sin alerta (NaN)"}
+ ]
+}
