@@ -44,7 +44,11 @@ def resumen_total(dir_art):
                         "ruta": (f.get("publicado") or {}).get("ruta"), "npix_osf": (f.get("osf") or {}).get("Npix"),
                         "n_publicado_hoy": (f.get("hoy") or {}).get("n_publicado"),
                         "dist_centro_osf_km": r.get("dist_centro_osf_km"), "foco_ok": r.get("foco_ok"),
-                        "fraccion_brecha": r.get("fraccion_brecha"), "error": f.get("error")})
+                        "replica_ok": r.get("replica_ok"), "alineacion_bt": r.get("alineacion_bt"),
+                        "limitantes": [v.get("limitante") for v in r.get("vecinos", [])
+                                       if v.get("caliente") and not v.get("incluido")],
+                        "fraccion_brecha": r.get("fraccion_brecha"), "fraccion_fondo": r.get("fraccion_fondo"),
+                        "error": f.get("error"), "error_analisis": f.get("error_analisis")})
     return {"n_filas": len(filas),
             "criterio": {k: evaluar(filas, None if k == "total" else k) for k in ("total", "focal", "nevado")},
             "pasadas": pasadas}

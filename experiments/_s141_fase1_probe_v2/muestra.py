@@ -87,11 +87,17 @@ def seleccionar(d, vents, excluir=(), por_volcan=6, controles_por_volcan=2):
                 dc = _hav_km(x.lat, x.lon, vlat, vlon) if _finito(x.lat, x.lon) else None
                 plat, plon = getattr(x, "pico_lat", None), getattr(x, "pico_lon", None)
                 dp = _hav_km(x.lat, x.lon, plat, plon) if _finito(x.lat, x.lon, plat, plon) else None
+                # H1 (VERIFICADOR_V2_PRE_CORRIDA.md): el foco de MIROVA se mide contra NUESTRO pico, sin
+                # rama del cráter. Con la rama, entraba Puyehue 2025-07-18 con MIROVA en el cráter y
+                # nuestro pico a 16 km: vecinos de un foco comparados con la brecha de otro.
+                # `dist_foco_crater_km` se guarda sólo como descripción.
                 if (vol, pas) in excluir:
                     motivo = "pasada_del_v1"
                 elif dc is None:
                     motivo = "sin_posicion_osf"
-                elif min(dc, dp if dp is not None else math.inf) > RADIO_FOCO_KM:
+                elif dp is None:
+                    motivo = "sin_pico_persistido"
+                elif dp > RADIO_FOCO_KM:
                     motivo = "foco_mirova_lejos"
                 else:
                     aptas.append(_fila(x, clase, dc, dp))

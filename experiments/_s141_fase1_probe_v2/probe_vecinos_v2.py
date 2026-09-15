@@ -33,11 +33,14 @@ for p in (ROOT, ROOT / "scripts", S135, HERE):
 os.environ.setdefault("VRP_PROFILE", "mirova_equivalent")
 
 import probe_etapas as s135  # noqa: E402  (aplica los parches de S135 al importarse)
+import run_pipeline  # noqa: E402  (el mismo módulo de perfil que usa store.append_record, A89)
 from analisis_v2 import evaluar  # noqa: E402
 from captura import Captura  # noqa: E402
 from ensamblar import analizar  # noqa: E402
+from flags import verificar_flags  # noqa: E402
 
 pv = s135.pv
+FILTRO_DISTANCIA = run_pipeline.vrp_profile.ENABLE_PIXEL_LEVEL_DISTANCE_FILTER   # run_pipeline.py:251
 OUT = HERE / "out"
 s135.OUT = OUT
 s135.DEST = HERE / "granules"
@@ -50,6 +53,8 @@ pv.second_pass_adjacent = CAP.envolver_second_pass(pv.second_pass_adjacent)
 pv.compute_test1_mir = CAP.envolver_test1(pv.compute_test1_mir)
 pv.apply_contextual_test1_filter = CAP.envolver_ctx(pv.apply_contextual_test1_filter)
 pv.resolve_test1_source_priority = CAP.envolver_prioridad(pv.resolve_test1_source_priority)
+pv.dual_roi_contextual_dnti_hot_mask = CAP.envolver_dnti_ctx(pv.dual_roi_contextual_dnti_hot_mask)
+pv.select_test1_effective_lbg = CAP.envolver_lbg(pv.select_test1_effective_lbg)
 
 FLAGS = ("ENABLE_FIRST_PASS_TESTS_2_AND_3", "ENABLE_SECOND_PASS_ADJACENT", "ENABLE_TEST1_CONTEXTUAL_FILTER",
          "ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK", "ENABLE_TEST1_PIXEL_FILTER", "ENABLE_TEST1_SPATIAL_CORE",
@@ -59,9 +64,12 @@ FLAGS = ("ENABLE_FIRST_PASS_TESTS_2_AND_3", "ENABLE_SECOND_PASS_ADJACENT", "ENAB
 
 
 def main():
+    # H10: las imposibilidades por construcción del plan dependen de estos flags; si cambian, se detiene.
+    verificar_flags(pv)
+    print("flags de la taxonomía verificados", flush=True)
     OUT.mkdir(parents=True, exist_ok=True)
     s135.DEST.mkdir(parents=True, exist_ok=True)
-    ruta = os.environ.get("PROBE_PASADAS", "").strip() or str(HERE / "pasadas.json")
+    ruta =os.environ.get("PROBE_PASADAS", "").strip() or str(HERE / "pasadas.json")
     f_vol = os.environ.get("PROBE_VOL", "").strip()
     lista = [x for x in json.loads(Path(ruta).read_text(encoding="utf-8")) if not f_vol or x["volcan"] == f_vol]
     print(f"Probe S141 vecinos v2: {len(lista)} pasadas (perfil {os.environ['VRP_PROFILE']})", flush=True)
@@ -78,11 +86,18 @@ def main():
             fila["resumen_s135"] = fila.pop("resumen", None)
             fila.update({"regimen": x["regimen"], "osf": x["osf"], "persistido": x["persistido"]})
             if fila.get("ok"):
-                fila = analizar(fila, vols[x["volcan"]], x, CAP)
+                # H4: un error del análisis NO saca la pasada del control: conserva `ok` del pipeline.
+                try:
+                    fila = analizar(fila, vols[x["volcan"]], x, CAP, FILTRO_DISTANCIA)
+                except Exception as e:
+                    fila["error_analisis"] = str(e)
+                    fila["traceback_analisis"] = traceback.format_exc()
                 r = fila.get("resumen") or {}
-                print(f"    v2: publicado={fila['publicado'].get('ruta')} ident={fila['publicado'].get('identificado')} "
-                      f"n_hoy={fila['hoy'].get('n_publicado')} foco_ok={r.get('foco_ok')} "
-                      f"rotulos={[v['rotulo'] for v in r.get('vecinos', []) if v.get('caliente')]}", flush=True)
+                print(f"    v2: publicado={(fila.get('publicado') or {}).get('ruta')} "
+                      f"n_hoy={(fila.get('hoy') or {}).get('n_publicado')} foco_ok={r.get('foco_ok')} "
+                      f"replica={r.get('replica_ok')} alineacion={r.get('alineacion_bt')} "
+                      f"limitantes={[v['limitante'] for v in r.get('vecinos', []) if v.get('caliente')]} "
+                      f"error_analisis={fila.get('error_analisis')}", flush=True)
         except Exception as e:
             fila = {**x, "ok": False, "error": str(e), "traceback": traceback.format_exc()}
             print(f"    FALLO: {e}", flush=True)

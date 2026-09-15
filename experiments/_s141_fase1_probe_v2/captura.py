@@ -3,14 +3,15 @@
 
 POR QUÉ. El v1 infería qué etapa había corrido a partir de un None y ponía en fila dos rutas que en
 el pipeline corren en paralelo (VERIFICADOR.md V2, V9). Aquí cada llamada queda como un evento con
-número de orden, y la ruta del cúmulo se lee de cómo la llama el código (A89, el nombre en el punto
-de uso): la llamada del Test 1 pasa `connectivity=8` (process_viirs.py:1910-1914) y la contextual no
-(:1467-1472). El segundo pase de la ruta contextual es la única llamada con `active_mask=` por nombre
-(:1287); las de :1149 y :1164 son posicionales (ETI de escena, apagado hoy). Un test cuenta esas
-llamadas en el fuente y falla si cambian.
+número de orden, y la ruta del cúmulo se lee de cómo la llama el código (A89): la llamada del Test 1
+pasa `connectivity=8` (process_viirs.py:1910-1914) y la contextual no (:1467-1472). El segundo pase
+de la ruta contextual es la única llamada con `active_mask=` por nombre (:1287).
 
-Son funciones puras sobre el callable real: no importan el pipeline, así que se prueban sin red.
-El runner (`probe_vecinos_v2.py`) las instala en el namespace de `pipeline.process_viirs`.
+Rediseño por H3 (VERIFICADOR_V2_PRE_CORRIDA.md): los eventos de los tests de detección guardan los
+argumentos con que se llamaron (referencias, sin copiar los arreglos grandes) para que
+`margenes.py` recalcule el margen de cada vecino a cada test contra la firma real de la función.
+
+Funciones puras sobre el callable real: no importan el pipeline y se prueban sin red.
 """
 import numpy as np
 
@@ -20,9 +21,6 @@ def _bool(x):
 
 
 class Captura:
-    ETAPAS = ("first_pass", "second_pass_por_nombre", "test1", "test1_disparo", "filtro_contextual",
-              "cumulo_contextual", "cumulo_test1")
-
     def __init__(self):
         self.reset()
 
@@ -40,12 +38,19 @@ class Captura:
     def de_tipo(self, tipo):
         return [e for e in self.eventos if e["tipo"] == tipo]
 
+    def ultimo(self, tipo, cond=None):
+        for e in reversed(self.de_tipo(tipo)):
+            if cond is None or cond(e):
+                return e
+        return None
+
     def corrio(self):
         """Booleano por etapa: True si la función fue llamada (aunque devolviera vacío)."""
         cl = self.de_tipo("cluster")
         return {
             "first_pass": bool(self.de_tipo("first_pass")),
             "second_pass_por_nombre": any(e["via_kw"] for e in self.de_tipo("second_pass")),
+            "dnti_ctx": bool(self.de_tipo("dnti_ctx")),
             "test1": bool(self.de_tipo("test1")),
             "test1_disparo": any(e["triggered"] for e in self.de_tipo("test1")),
             "filtro_contextual": bool(self.de_tipo("ctx_filter")),
@@ -56,8 +61,12 @@ class Captura:
     def test1_gana(self):
         """Último valor de resolve_test1_source_priority; None si no se llamó (process_viirs.py:1712
         no la llama cuando test1_centroid_lat es None). Evidencia parcial de la fuente interna."""
-        ev = self.de_tipo("prioridad")
-        return ev[-1]["valor"] if ev else None
+        ev = self.ultimo("prioridad")
+        return None if ev is None else ev["valor"]
+
+    def lbg_test1(self):
+        ev = self.ultimo("lbg_test1")
+        return None if ev is None else ev["valor"]
 
     # -------------------------------------------------------------- envoltorios
 
@@ -88,7 +97,9 @@ class Captura:
     def envolver_first_pass(self, real):
         def first_pass_tests_2_and_3(*a, **kw):
             hot, diag = real(*a, **kw)
-            self._add({"tipo": "first_pass", "hot": _bool(hot), "bt": kw.get("bt")})
+            d = diag or {}
+            self._add({"tipo": "first_pass", "hot": _bool(hot), "bt": kw.get("bt"), "a": a, "kw": kw,
+                       "diag": {k: d.get(k) for k in ("mu_dnti", "sd_dnti", "mu_deti", "sd_deti", "n_bg_used", "eti")}})
             return hot, diag
         return first_pass_tests_2_and_3
 
@@ -97,9 +108,16 @@ class Captura:
             out = real(*a, **kw)
             entrada = kw.get("active_mask", a[2] if len(a) > 2 else None)
             self._add({"tipo": "second_pass", "via_kw": "active_mask" in kw, "entrada": _bool(entrada),
-                       "salida": _bool(out)})
+                       "salida": _bool(out), "a": a, "kw": kw})
             return out
         return second_pass_adjacent
+
+    def envolver_dnti_ctx(self, real):
+        def dual_roi_contextual_dnti_hot_mask(*a, **kw):
+            out = real(*a, **kw)
+            self._add({"tipo": "dnti_ctx", "salida": _bool(out), "a": a, "kw": kw})
+            return out
+        return dual_roi_contextual_dnti_hot_mask
 
     def envolver_test1(self, real):
         def compute_test1_mir(*a, **kw):
@@ -125,3 +143,10 @@ class Captura:
             self._add({"tipo": "prioridad", "valor": bool(v)})
             return v
         return resolve_test1_source_priority
+
+    def envolver_lbg(self, real):
+        def select_test1_effective_lbg(*a, **kw):
+            v = real(*a, **kw)
+            self._add({"tipo": "lbg_test1", "valor": None if v is None else float(v)})
+            return v
+        return select_test1_effective_lbg
