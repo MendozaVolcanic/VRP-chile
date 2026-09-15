@@ -20,6 +20,11 @@ cambia:
    obvious non-volcanic thermal features ... removing data points related to fires or false alerts"
    (página leída renderizada). Quitar incendios cambia justamente la población de filas con foco lejano.
    Del OSF sólo sirven definiciones por fila.
+   ⚠️ **Corrección S142 (A105)**: esa cita describe la base v.1. El OSF v2.5 no tuvo revisión manual
+   (Coppola et al. 2026, Scientific Data, p. 7); lo filtran una clase automática (DBSCAN más reglas por
+   distancia, p. 10 a 12) y umbrales VRP por sensor (Tabla 1, p. 8). La conclusión (los conteos del OSF
+   no valen para el NRT) se mantiene, porque la clase automática por distancia también cambia la
+   población de focos lejanos; la causa es otra.
 3. **Dato sólo NRT** (`06_hipotesis_caliente_vs_lejano.json`, `control_prominencia_por_etiqueta`): el foco
    dominante del TIF cae dentro del radio en el 4,7 % de 128 pasadas FALSO_POSITIVO, en el 33,3 % de 396
    ALERTA_TERMICA y en el 10,2 % de 1.418 RUTINA. Que en ALERTA sea sólo un tercio muestra que el

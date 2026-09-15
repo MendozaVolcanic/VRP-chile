@@ -19,7 +19,7 @@ La magnitud VIIRS 375 m queda en ~0,66 de MIROVA porque sumamos 1 píxel donde M
 ## Límite del instrumento (se escribe antes de correr)
 
 - MIROVA remuestrea a una grilla de 375 m; nosotros vemos píxeles nativos. **No se puede saber cuáles de nuestros píxeles son los `Npix` de MIROVA.** Se miran los 8 vecinos nativos del píxel nuestro más cercano al `LAT/LON` del OSF (el píxel más caliente de MIROVA). Es una aproximación; la distancia al punto del OSF se registra por pasada.
-- El OSF está supervisado a mano: se usa sólo pasada contra pasada (fórmula, `Npix`, `Tot_Lmir_bk`), nunca para conteos.
+- El OSF está supervisado a mano: se usa sólo pasada contra pasada (fórmula, `Npix`, `Tot_Lmir_bk`), nunca para conteos. ⚠️ Corrección S142 (A105): la v2.5 no tuvo revisión manual; la filtran una clase automática y umbrales VRP por sensor (Coppola et al. 2026, Scientific Data, p. 7, p. 8 Tabla 1, p. 10 a 12). La regla de uso se mantiene.
 - **P1 (¿vería una pérdida si existiera?)**: pasadas control donde publicamos tantos píxeles como MIROVA; ahí la mayoría de los vecinos debe salir "incluido". Si no, el instrumento no sirve y el veredicto es INDETERMINADO.
 - **P2 (¿mide lo que dice?)**: por pasada se verifica que todas las máscaras capturadas tienen la misma forma que la escena de BT; si no, la pasada se descarta con `grilla_distinta`.
 - **P3 (¿la muestra sigue siendo la que dice?, agregado S141 por pregunta de Nicolás)**: el OSF no se cruza con el NRT (no hay solape de fechas, spec §7.1), pero sí con nuestros records de 2025 del backfill, pasada contra pasada, sólo para fórmula, `Npix` y fondo. Esos records se procesaron con el código del backfill y el probe reprocesa con el de hoy. Por pasada se guarda el cúmulo de hoy (`hoy.pc_n`) y el criterio reporta cuántos candidatos siguen publicando 1 píxel; los que hoy publican otro conteo se leen aparte y no se atribuyen al código actual.
@@ -152,7 +152,8 @@ def test_selector_toma_candidatos_y_controles_deterministas():
 POR QUÉ. Sumamos 1 píxel donde MIROVA suma 3 o más (S139, F_n 0,553). Se eligen pasadas OSF
 pareadas con nuestro record donde pasa eso (candidatos) y, como control del instrumento, pasadas
 donde publicamos tantos píxeles como MIROVA (controles). El OSF está supervisado a mano: se usa
-pasada contra pasada, nunca para conteos.
+pasada contra pasada, nunca para conteos. (Corrección S142, A105: filtrado por clase automática y
+umbrales, no supervisado a mano; la regla de uso no cambia.)
 
 INSTRUMENTO. P1: los controles deben salir con los vecinos incluidos; P2: la muestra es
 determinista (mismo resultado dos veces) y se reparte parejo en el tiempo dentro de cada volcán.
