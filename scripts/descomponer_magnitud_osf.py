@@ -14,6 +14,9 @@ mismo numero de pixeles: la formula esta bien, falta seleccion (y el fondo compe
 
 El OSF es un archivo SUPERVISADO A MANO (Coppola 2023 §2.5): sirve para definiciones por fila
 (formula, Tot_Lmir_bk, Npix), nunca para conteos del NRT. Aca se usa asi: pasada contra pasada.
+Correccion S142 (A105): la supervision manual era de la base v.1. La v2.5 no tuvo revision manual y
+la filtran una clase automatica y umbrales VRP por sensor (Coppola et al. 2026, Scientific Data, p. 7,
+p. 8 Tabla 1, p. 10 a 12). La regla de uso (pasada contra pasada, nunca conteos) no cambia.
 
 INSTRUMENTO. P1: si k o A estuvieran mal, F_ex saldria lejos de 1 aun con los mismos pixeles
 (subconjunto igual_conteo); si la seleccion estuviera rota, F_n lo mostraria. P2: desplazar el

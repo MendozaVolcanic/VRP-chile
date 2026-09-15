@@ -50,6 +50,21 @@ OUTDIR = os.path.join(ROOT, "data", "audit_continuous")
 VOLCANOES_YAML = os.path.join(ROOT, "volcanoes.yaml")
 
 WINDOW_DAYS = 60
+# S142: primer día del régimen vigente para la métrica de falsas publicaciones. POR QUÉ: #535
+# (2026-08-28) apagó la máscara de nube de 260 K, que dejaba sin fondo las pasadas de invierno
+# (nieve fría leída como nube) y así ocultaba la sobre-publicación; #571 (2026-08-31) quitó el piso
+# VRP. V375 pasó de 62,1 % a 87,1 % de publicación en negativos limpios
+# (experiments/_s142_linea_base/linea_base_post535.json). Una ventana que cruza el corte mezcla
+# regímenes y el número sube solo. Recall y magnitud no se recortan: el recall no se movió.
+INICIO_REGIMEN_FALSAS = "2026-09-01"
+
+
+def ventana_falsas(today):
+    """Ventana de falsas publicaciones: la rodante de WINDOW_DAYS, sin empezar antes del régimen."""
+    inicio = max((today - timedelta(days=WINDOW_DAYS)).isoformat(), INICIO_REGIMEN_FALSAS)
+    return (inicio, today.isoformat())
+
+
 MIN_N_RECALL = 15   # noches ALERTA mínimas para que el recall del bucket sea flaggeable
 MIN_N_RATIO = 5     # noches comunes mínimas para que el ratio per-vol sea flaggeable
 
@@ -423,14 +438,16 @@ def main():
     # S140 (Fase 0, tarea 6): falsas publicaciones, medidas sin alarma (decisión Nicolás).
     # Si el banco no puede correr (sin node, CSV ilegible), el error queda escrito en el
     # bloque en vez de tumbar el audit: recall y magnitud siguen valiendo por sí solos.
+    win_falsas = ventana_falsas(today)
     try:
-        falsas = resumir_falsas(medir_falsas_ventana(win), flags)
+        falsas = resumir_falsas(medir_falsas_ventana(win_falsas), flags)
     except Exception as e:  # noqa: BLE001
         falsas = {"error": f"{type(e).__name__}: {str(e)[:300]}", "alarma": False}
 
     out = {
         "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "window": list(win),
+        "ventana_falsas": list(win_falsas),
         "cobertura": cobertura,
         "criteria": ("eje2 S119 (crater A10 + dash), loader canónico CONS∪OCR, referencia filtrada a pasadas nocturnas con la misma regla del pipeline (_reject_daytime, S124)"),
         "recall": recall,
