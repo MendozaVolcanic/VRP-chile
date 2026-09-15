@@ -1484,3 +1484,13 @@ Pasa MISSION.md Q1 literal. Implementación scope mediano (kernel filter per hot
 - **Criterio testable**: coordenadas publicadas de la fisura (GVP, Smithsonian) contra el punto medido.
 - **Estado**: active
 - **Resolución**: pendiente; la evaluación post hoc de A2 en la batería queda declarada y no se usa para adoptar
+
+## H_S141_VECINO_FOCO: los vecinos tibios del foco que MIROVA suma se pierden en una etapa identificable del ensamblado VIIRS 375, y con fondo local cerrarían al menos la mitad de la brecha de magnitud
+
+- **Formulada**: S141 (2026-09-15), antes de correr el probe. Plan y criterio: `docs/superpowers/plans/2026-09-15-fase1-probe-vecinos.md`.
+- **Hipótesis**: donde MIROVA suma 3 o más píxeles y nosotros 1 (329 pasadas OSF 2025 pareadas), los 8 vecinos nativos del foco se pierden mayoritariamente en una sola etapa (primer pase, segundo pase, Test 1, filtro contextual con `keep_peak` o cúmulo), y su aporte con fondo local (media de vecinos no alertados, Campus et al. 2024 p. 3) cierra al menos la mitad de la diferencia entre el VRP del OSF y el publicado.
+- **Evidencia a favor**: S139 midió F_n 0,553 y R 0,995 a igual número de píxeles (la fórmula está bien, falta selección); siete textos del grupo MIROVA definen el fondo por píxel alertado (`docs/audit_s141/lectura/VERIFICADOR_LECTORES.md` V-07).
+- **Evidencia en contra**: no se sabe cuáles píxeles nativos son los `Npix` de MIROVA (remuestreo, D17); los records de la muestra son del backfill de 2025 y el código de hoy puede publicar otro conteo (control P3).
+- **Criterio testable (pre-registrado, no se cambia)**: sobre candidatos con grilla consistente, n ≥ 10. (1) Una etapa con ≥ 50 % de los vecinos perdidos es la palanca del primer brazo del A/B; si no, DISPERSA; si `nunca_candidato` ≥ 50 %, la palanca es umbral o fondo de la detección. (2) Mediana de (aporte perdido con fondo local) / (VRP OSF − publicado): ≥ 0,5 cierra, < 0,2 no cierra, si no parcial. (3) Controles con ≥ 50 % de vecinos incluidos; si falla, INDETERMINADO. (4) Por estrato focal/nevado.
+- **Estado**: active
+- **Resolución**: pendiente (probe `probe-s141-vecinos.yml`, 40 pasadas: 29 candidatos y 11 controles)

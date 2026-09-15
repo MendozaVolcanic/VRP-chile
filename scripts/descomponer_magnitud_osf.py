@@ -119,7 +119,8 @@ def build(shift_h=0):
                  hot1=x.Tot_Lmir_hot / x.Npix, bk1=x.Tot_Lmir_bk / x.Npix, ex1=(x.Tot_Lmir_hot - x.Tot_Lmir_bk) / x.Npix,
                  pc_mw=pc['vrp_mw'], pc_n=pc['n_pixels'], n_anom=r.get('n_anomalous_pixels'), sensor=r['sensor'],
                  t_bg=r.get('t_bg_k'), dt_min=(m[0] - x.t.to_pydatetime()).total_seconds() / 60,
-                 test1=r.get('final_hotspot_source') == 'test1_roi', single=pc.get('single_pixel_mode'))
+                 test1=r.get('final_hotspot_source') == 'test1_roi', single=pc.get('single_pixel_mode'),
+                 t_osf=x.t.to_pydatetime(), t_ours=m[0])  # S141: horas de la pasada, para el probe de la Fase 1
         d['Lbg_ring'] = planck(r['t_bg_k'], lam) if r.get('t_bg_k') else np.nan
         px = r.get('anomaly_pixels') or []
         inn = [p for p in px if (p.get('dist_km') is not None and p['dist_km'] <= inner)]
