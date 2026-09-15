@@ -661,7 +661,14 @@ def test_hipotesis_pre_registrada_antes_de_correr():
     k = txt.find("## H_S141_VECINO_FOCO_V2")
     assert k >= 0
     bloque = txt[k:k + 6000]
-    assert "imposible por construcción" in bloque and "Estado**: abierta" in bloque
+    # Lo que vigila: que el criterio se escribió ANTES de correr. El texto pre-registrado se conserva
+    # siempre; el estado puede pasar de abierta a resuelta sólo con la corrida citada (S142 la resolvió
+    # con el run 34967596160 y su verificador). Una resolución sin corrida sería otra cosa.
+    assert "imposible por construcción" in bloque
+    assert "antes de cualquier corrida" in bloque
+    assert ("Estado**: abierta" in bloque
+            or ("Estado**: resuelta" in bloque and "34967596160" in bloque
+                and "VERIFICADOR_POST_CORRIDA.md" in bloque))
 
 
 def test_juntar_aplica_el_criterio_sobre_los_artefactos(tmp_path):
