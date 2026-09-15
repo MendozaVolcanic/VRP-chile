@@ -16,8 +16,9 @@ import sys
 import traceback
 from pathlib import Path
 
-if __name__ == "__main__":
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+# NO se envuelve sys.stdout aquí: probe_etapas (S135) ya lo envuelve al importarse. Envolverlo dos
+# veces deja huérfano el primer TextIOWrapper, que al recolectarse cierra el buffer compartido, y
+# run_pipeline.py cae con "I/O operation on closed file" (corrida 34928488409, S141).
 import numpy as np  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
@@ -83,6 +84,9 @@ def main():
     lista = [x for x in json.loads(Path(ruta).read_text(encoding="utf-8"))
              if not f_vol or x["volcan"] == f_vol]
     print(f"Probe S141 vecinos: {len(lista)} pasadas (perfil {os.environ['VRP_PROFILE']})", flush=True)
+    if not lista:
+        print("sin pasadas para este filtro: nada que procesar", flush=True)
+        return
     s135.auth()
     vols = {v["name"]: v for v in s135.load_volcanoes()}
     filas = []

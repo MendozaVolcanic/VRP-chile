@@ -42,6 +42,9 @@ jobs:
           VRP_PROFILE: mirova_equivalent
           PROBE_VOL: ${{ matrix.vol }}
         run: |
+          # S141: sin pipefail, `python ... | tee` devuelve el código de tee y un crash sale verde
+          # (corrida 34928488409: los 8 jobs success sin procesar ninguna pasada).
+          set -o pipefail
           mkdir -p experiments/_s141_fase1_probe/out
           python experiments/_s141_fase1_probe/probe_vecinos.py | tee experiments/_s141_fase1_probe/out/report_${{ matrix.vol }}.txt
       - name: Upload artifact
