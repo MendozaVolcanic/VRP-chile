@@ -1176,6 +1176,34 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     no por identificador. Los 4 stashes de S72 a S78 no son de ninguna sesion viva: no tocarlos sin
     tag defensivo (A38).
 
+- **A97. Atribuir un mecanismo simulando la etapa siguiente, con el predicado literal del operador**
+  (S138): "publicamos" es el predicado del dashboard ejecutado con node, nunca uno reconstruido a mano.
+- **A98. La brecha de paridad es SOBRE-PUBLICACIÓN, no recall** (S139): 874 de 877 noches con alerta
+  detectadas; toda métrica nueva lleva negativos limpios (pasadas donde MIROVA miró y no vio nada).
+- **A99. Magnitud ~0,7 = conteo de píxeles × fondo de anillo más tibio** (S139): a igual conteo la razón
+  es 0,995; el déficit es de selección (vecinos tibios que MIROVA suma), no de fórmula ni calibración.
+- **A100. `keep_peak` daba paridad por accidente** con un píxel a ~3 km del cráter (S139): nunca apagarlo solo.
+- **A101. Las citas `file:line` se remapean por contenido** (`difflib` contra `origin/main`, sólo bloques
+  idénticos), nunca por aritmética ni en citas históricas deliberadas como A6 y A49 (S141).
+- **A102. Al corregir una función, buscar también las copias en línea de su lógica** (S141): el detector
+  NRT se arregló en S133 y la expresión vieja siguió un mes en los tres procesadores.
+- **A103. Toda pérdida de vecinos tibios está en la DETECCIÓN, no en el ensamblado** (S141):
+  `cluster_hotspots` une componentes 8-conexas, así que un vecino alertado que toca al centro siempre entra.
+  S142 lo precisó: en la ruta contextual falla el dETI (52 de 52) y en la del Test 1 la compuerta de BT
+  (18 de 18), con el piso C1 = 0,003 como umbral efectivo en los 70.
+- **A104. Una métrica con ventana que cruza #535 (2026-08-28 23:00 UTC) mezcla dos regímenes** (S141/S142):
+  la máscara de nube de 260 K dejaba sin fondo las pasadas de invierno y eso se leía como precisión. VIIRS 375
+  publica en negativos limpios 62,1 % antes y 87,1 % después de #571. Medir siempre por tramo.
+- **A105. El OSF v2.5 NO está supervisado a mano** (Coppola et al. 2026, Scientific Data, p. 7, sección
+  "Data aggregation", 3.er párrafo): clase automática DBSCAN y umbrales VRP por sensor (Tabla 1, p. 8). La
+  supervisión manual de Coppola 2023 §2.5 es de la base v.1. El OSF es filtrado: sus conteos no valen para el NRT.
+- **A106. Los GeoTIFF VIIRS 375 de MIROVA son UTM nativo de 375 m sólo desde el 2026-09-14** (S141): sólo esos
+  dan la celda exacta. En `mirova-tif-archive` la hora del nombre puede no ser la de la pasada (S142: dos TIF
+  rotulados de madrugada eran escenas diurnas escritas 17 h después); leer la hora de adquisición del TIF.
+- **A39, enmienda S142**: "0 checks" recién abierto un PR es SIN DATO, no verde. #676 se mergeó así con el CI
+  en rojo. Esperar el run con conclusión (`gh pr checks <N> --watch`) antes de mergear, y después de editar un
+  documento correr `grep -rl <archivo> tests/` y la suite completa: un test puede leer ese documento.
+
 **Explicar como geólogo, no como programador.** Cuando discutas resultados, bugs,
 decisiones de umbrales, o cambios metodológicos:
 
