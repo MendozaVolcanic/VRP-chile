@@ -187,6 +187,35 @@ tantos píxeles como MIROVA en el backfill) sólo entran a C1 a C3 y se describe
 - [ ] **T6 (orquestador, fuera de esta tarea)**: anotar la hipótesis en `docs/HYPOTHESIS_LOG.md`, mergear,
   despachar, juntar con `juntar.py`, verificador con contexto limpio.
 
-## 9. Muestra (se completa en T2 con la salida de `muestra.py`, sin mirar resultados del probe)
+## 9. Muestra (salida de `muestra.py`, antes de cualquier corrida del probe)
 
-Ver §10, escrita por el script de selección.
+Números en `experiments/_s141_fase1_probe_v2/muestra_resumen.json` (escrito por el script, S91); detalle por
+pasada en `pasadas.json` y `excluidas.json`. Corrida local sobre el OSF 2025 (ventana de
+`scripts/descomponer_magnitud_osf.py`, 2025-02-15 a 2025-12-01), 6 candidatos y 2 controles por volcán como
+máximo:
+
+- **38 pasadas**: 30 candidatos, 6 por volcán en Isluga, Láscar, Lastarria, Planchón-Peteroa y Puyehue-Cordón
+  Caulle; 8 controles (Chaitén 2, Láscar 2, Puyehue 2, Isluga 1, Lastarria 1).
+- **Excluidas por posición del foco de MIROVA** (candidatos): Lastarria 15, Nevados de Chillán 10, Isluga 2.
+  Las demás exclusiones son pasadas del v1.
+- **El estrato nevado queda sin candidatos.** Los de Chaitén y Villarrica que cumplen la definición ya
+  estaban todos en el v1, y en Nevados de Chillán los 10 restantes tienen el foco de MIROVA a más de 10 km del
+  cráter y de nuestro pico. Con el pre-registro, el estrato nevado sale **INDETERMINADO:pocos_volcanes por
+  construcción**: este v2 sólo puede hablar del estrato focal. No se relaja el criterio para rescatarlo; si la
+  Fase 1 necesita nevados, hace falta otra ventana del OSF o aceptar reusar pasadas ya miradas, y esa es una
+  decisión para Nicolás, no para el instrumento.
+- **Indicio sobre la SOSPECHA de cuantización (§6).** En `excluidas.json` las distancias del foco de MIROVA al
+  cráter se repiten en pocos valores (Lastarria vuelve una y otra vez al mismo valor, Isluga también), que es
+  lo que se espera si `LAT/LON` es el centro de una celda de la grilla de MIROVA. Los 15 de Lastarria quedan a
+  algo más de 1 km de nuestro pico: con un radio de 0,75 km no entran. El radio no se cambia (pre-registro);
+  el informe de resultados tiene que decir que el estrato focal quedó sin esa franja de Lastarria.
+
+## 10. Estado de los tests en rojo (T1)
+
+Antes de implementar, 29 de 31 tests fallaron por módulo, muestra o yml inexistentes. Los dos que pasaban son
+guardas de premisas del código de hoy, que deben pasar sin código nuevo: los nombres parcheados existen en
+`pipeline.process_viirs` y las dos llamadas a `cluster_hotspots` se distinguen por `connectivity=`.
+
+Excepción declarada: los dos tests de ensamblado sintético (`test_ensamblado_*`) se escribieron junto con
+`ensamblar.py`, al extraer del runner la función `analizar` para poder probarla sin parchear el pipeline en el
+proceso de la suite. No pasaron por rojo; cubren la integración de piezas que sí lo hicieron.

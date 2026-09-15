@@ -1,0 +1,56 @@
+name: Probe S141 vecinos del foco v2 (Fase 1, VIIRS 375)
+
+# A43: "on" entre comillas. One-off, READ-ONLY (A75): monkeypatch en pipeline.process_viirs.
+# NO empuja commits ni toca data/ (fuera de la concurrencia push-main). Sólo VIIRS: sin HDF4.
+# Plan y criterio pre-registrado: docs/superpowers/plans/2026-09-15-fase1-probe-vecinos-v2.md
+# La matriz tiene que ser igual a los volcanes de experiments/_s141_fase1_probe_v2/pasadas.json
+# (lo vigila tests/test_probe_vecinos_v2_s141.py). Archivar en _archive/ al terminar (regla S80).
+"on":
+  workflow_dispatch:
+    inputs:
+      vol:
+        description: "Volcán (vacío = matriz completa)"
+        required: false
+        default: ""
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        vol: [Chaiten, Isluga, Lascar, Lastarria, PlanchonPeteroa, PuyehueCordonCaulle]
+    steps:
+      - uses: actions/checkout@v4
+        if: github.event.inputs.vol == '' || github.event.inputs.vol == matrix.vol
+      - uses: actions/setup-python@v5
+        if: github.event.inputs.vol == '' || github.event.inputs.vol == matrix.vol
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        if: github.event.inputs.vol == '' || github.event.inputs.vol == matrix.vol
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml pandas
+      - name: Run probe v2 (read-only)
+        if: github.event.inputs.vol == '' || github.event.inputs.vol == matrix.vol
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_PROFILE: mirova_equivalent
+          PROBE_VOL: ${{ matrix.vol }}
+        run: |
+          # S141: sin pipefail, `python ... | tee` devuelve el código de tee y un crash sale verde
+          # (corrida 34928488409 del v1: los 8 jobs success sin procesar ninguna pasada).
+          set -o pipefail
+          mkdir -p experiments/_s141_fase1_probe_v2/out
+          python experiments/_s141_fase1_probe_v2/probe_vecinos_v2.py | tee experiments/_s141_fase1_probe_v2/out/report_${{ matrix.vol }}.txt
+      - name: Upload artifact
+        if: always() && (github.event.inputs.vol == '' || github.event.inputs.vol == matrix.vol)
+        uses: actions/upload-artifact@v4
+        with:
+          name: s141-probe-vecinos-v2-${{ matrix.vol }}
+          path: experiments/_s141_fase1_probe_v2/out/

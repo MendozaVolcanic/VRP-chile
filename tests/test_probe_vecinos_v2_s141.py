@@ -339,6 +339,89 @@ def test_grilla_distinta_se_marca():
     assert r["grilla_ok"] is False
 
 
+# ---------------------------------------------------------------- 4b. ensamblado sintético por ruta
+
+def _ensamblado(test1_publica):
+    """Recorre las llamadas en el orden de process_viirs.py (Test 1 :1099, primer pase :1240, segundo pase
+    :1287, cúmulo contextual :1467, prioridad :1712, filtro :1798, cúmulo Test 1 :1910) con funciones falsas."""
+    from captura import Captura
+    lat, lon, bt = _escena()
+    forma = bt.shape
+
+    def m(*ij):
+        x = np.zeros(forma, bool)
+        for a, b in ij:
+            x[a, b] = True
+        return x
+
+    def cum(idx, vrp):
+        return [{"n_pixels": len(idx), "centroid_lat": float(np.mean([lat[ij] for ij in idx])),
+                 "centroid_lon": float(np.mean([lon[ij] for ij in idx])), "vrp_mw": sum(vrp[ij] for ij in idx),
+                 "pixel_indices": idx}]
+    cap = Captura()
+    cap.reset()
+    cap.envolver_test1(lambda **kw: {"triggered": True, "mask_contributing": m((20, 20), (20, 21), (19, 20), (20, 22))})(
+        bt=bt, lat=lat, lon=lon)
+    fp = m((20, 20), (19, 20))
+    cap.envolver_first_pass(lambda **kw: (fp, {}))(bt=bt)
+    cap.envolver_second_pass(lambda **kw: kw["active_mask"])(nti=None, eti=None, active_mask=fp)
+    v_ctx = np.zeros(forma)
+    v_ctx[20, 20], v_ctx[19, 20] = 0.2, 0.1
+    ctx = cap.envolver_cluster(lambda *a, **kw: cum([(20, 20), (19, 20)], v_ctx))(
+        fp, lat, lon, 0.0, 0.0, vrp_per_pixel=v_ctx, strategy="vent_anchored", inner_radius_km=5)
+    cap.envolver_prioridad(lambda **kw: test1_publica)(cluster_vrp_mw=0.3)
+    idx_pub, vpub, c = [(20, 20), (19, 20)], v_ctx, ctx[0]
+    if test1_publica:
+        v_t1 = np.zeros(forma)
+        v_t1[20, 20], v_t1[20, 21] = 0.2, 0.5
+        salida = cap.envolver_ctx(lambda t, d, keep_peak_rc=None: m((20, 20), (20, 21)))(
+            m((20, 20), (20, 21), (19, 20), (20, 22)), m((20, 20)), keep_peak_rc=(20, 21))
+        t1 = cap.envolver_cluster(lambda *a, **kw: cum([(20, 20), (20, 21)], v_t1))(
+            salida, lat, lon, 0.0, 0.0, connectivity=8, vrp_per_pixel=v_t1, strategy="vent_anchored", inner_radius_km=5)
+        idx_pub, vpub, c = [(20, 20), (20, 21)], v_t1, t1[0]
+    cap.record ={"sensor": "VIIRS_SNPP", "t_bg_k": 268.0,
+                  "primary_cluster": {"n_pixels": 2, "vrp_mw": 0.5, "single_pixel_mode": True,
+                                      "centroid_lat": round(c["centroid_lat"], 5), "centroid_lon": round(c["centroid_lon"], 5)},
+                  "anomaly_pixels": [{"lat": round(float(lat[ij]), 5), "lon": round(float(lon[ij]), 5),
+                                      "bt_k": float(bt[ij]), "vrp_mw": float(vpub[ij])} for ij in idx_pub]}
+    x = {"osf": {"vrp_mw": 1.0, "Npix": 4, "lat": float(lat[20, 20]), "lon": float(lon[20, 20])}}
+    vol = {"inner_radius_km": 5, "vent_lat": float(lat[20, 20]), "vent_lon": float(lon[20, 20])}
+    return analizar_(dict(vent={}), vol, x, cap)
+
+
+def analizar_(fila, vol, x, cap):
+    from ensamblar import analizar
+    return analizar(fila, vol, x, cap)
+
+
+def test_ensamblado_ruta_test1_publica_y_los_vecinos_se_rotulan_dentro_de_ella():
+    f = _ensamblado(test1_publica=True)
+    assert f["publicado"]["identificado"] and not f["publicado"]["ambiguo"]
+    assert f["publicado"]["ruta"] == "test1"
+    assert f["corrio"] == {"first_pass": True, "second_pass_por_nombre": True, "test1": True, "test1_disparo": True,
+                           "filtro_contextual": True, "cumulo_contextual": True, "cumulo_test1": True}
+    assert f["test1_gana"] is True
+    assert f["hoy"]["f5_replica_mw"] == pytest.approx(f["hoy"]["f5_pipeline_mw"])
+    assert f["hoy"]["n_publicado"] == 2
+    assert f["hoy"]["brecha_mw"] == pytest.approx(1.0 - f["hoy"]["f5_pipeline_mw"])
+    r = f["resumen"]
+    assert r["centro"] == [20, 21] and r["consistencia_rotulos"] is True
+    v = {tuple(x["ij"]): x for x in r["vecinos"]}
+    # (19,20) pasó el primer pase contextual y está en la máscara del Test 1, pero en la ruta que publicó
+    # (Test 1) ningún test por píxel lo marcó: el v1 lo habría rotulado "perdido en el filtro".
+    assert v[(19, 20)]["rotulo"] == "nunca_marcado"
+    assert v[(19, 20)]["en_mask_contributing"] is True
+
+
+def test_ensamblado_ruta_contextual_publica_cuando_el_test1_no_corre():
+    f = _ensamblado(test1_publica=False)
+    assert f["publicado"]["ruta"] == "contextual"
+    assert f["corrio"]["cumulo_test1"] is False and f["corrio"]["filtro_contextual"] is False
+    r = f["resumen"]
+    assert r["centro"] == [20, 20]
+    assert {tuple(x["ij"]): x for x in r["vecinos"]}[(19, 20)]["rotulo"] == "incluido"
+
+
 # ---------------------------------------------------------------- 5. criterio
 
 def test_constantes_pre_registradas():
