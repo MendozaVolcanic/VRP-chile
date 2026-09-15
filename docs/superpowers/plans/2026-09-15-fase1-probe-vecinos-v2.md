@@ -209,6 +209,7 @@ controles por volcán como máximo.
   Isluga 2, Puyehue-Cordón Caulle 1 (la 2025-07-18 05:24 que señaló H1). Las demás exclusiones son pasadas del v1.
   Respecto de la muestra con rama del cráter, en Puyehue salen 2025-07-04 04:48 y 2025-07-18 05:24 y entran
   2025-07-03 05:06 y 2025-07-18 05:00 (el espaciado en el tiempo se recalcula sobre las aptas).
+- **Decidido S142 (Nicolás aprobó la recomendación): el estrato nevado queda INDETERMINADO:pocos_volcanes en este probe, sin backfill.** Una muestra en otra ventana del OSF no es viable: nuestros records de los 11 Tier A empiezan el 2025-02-15, y aun con backfill sólo Chaitén, Nevados de Chillán y Villarrica juntan 3 pasadas a la vez, entre 2017 y 2022, con código distinto al de las muestras v1 y v2 (`experiments/_s142_nevado_muestra/PROPUESTA.md`). La pregunta del nevado se retoma con los TIF UTM de MIROVA posteriores al 2026-09-14.
 - **El estrato nevado queda sin candidatos: decisión de Nicolás.** Los de Chaitén y Villarrica ya estaban en el
   v1 y los de Nevados de Chillán tienen el foco de MIROVA a más de 10 km. Con el pre-registro, el nevado sale
   INDETERMINADO:pocos_volcanes por construcción. Las dos salidas posibles (otra ventana del OSF, o reusar
