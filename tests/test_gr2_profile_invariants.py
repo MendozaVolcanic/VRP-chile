@@ -130,6 +130,10 @@ EXPECTED_OPERATIONAL_FLAGS = {
     # el A/B cambiaria la magnitud publicada (pc.vrp_mw) de los 11 Tier A. Pinear OFF
     # para que un flip accidental falle CI. Design 2026-06-13 (revision S107, gap A48).
     "ENABLE_LOCAL_CLUSTER_MAGNITUDE": False,
+    # S142 (A45): D22 sin compuerta de temperatura y D25 fondo por vecinos, ambos V375. OFF hasta
+    # el A/B literal completo + ablaciones (plan docs/superpowers/plans/2026-09-15-flags-d22-d25.md).
+    "ENABLE_TESTS_23_NO_BT_GATE_VIIRS375": False,
+    "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375": False,
 }
 
 
@@ -160,6 +164,8 @@ def test_profile_constants_match_yaml_paths(yaml_raw):
         "ENABLE_VENT_PATH": "enable_vent_path",
         "ENABLE_NADIR_FIXED_PIXEL_AREA_MODIS": "enable_nadir_fixed_pixel_area_modis",
         "ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS": "enable_nadir_fixed_pixel_area_viirs",
+        "ENABLE_TESTS_23_NO_BT_GATE_VIIRS375": "enable_tests_23_no_bt_gate_viirs375",
+        "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375": "enable_vrp_bg_neighbor_mean_viirs375",
     }
     for const, ykey in const_to_yaml.items():
         assert ykey in paths, f"{ykey} missing from YAML paths"
