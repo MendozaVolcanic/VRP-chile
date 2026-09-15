@@ -5,6 +5,11 @@ S141. Figuras y números: `experiments/_s141_ndc/` (`ndc_s141.py` escribe `ndc_s
 `regimen_535.py` escribe `regimen_535.json`; `mirova_pagina_20260915.json` guarda lo leído en la página de
 MIROVA). Ningún número de este documento está escrito a mano fuera de esas salidas (regla S91).
 
+> **Actualizado S142 (2026-09-15 22:11 UTC, hora del servidor).** Figuras y JSON regenerados con los records
+> hasta la pasada del 15-sep 08:15 UTC y la referencia del remoto de Mirova-v1 de esa hora
+> (`ndc_s141.py`, `regimen_535.py --fin 2026-09-15`). Entró la alerta de MIROVA del 15-sep 06:18 en el
+> cráter. Se agrega §6 con MOUNTS y el conteo de celdas desde los TIF UTM (`experiments/_s142_ndc/`).
+
 ## 1. Lo que hace el volcán
 
 El cráter Nicanor mantiene un foco caliente muy débil, de centésimas de MW, que a 375 m ocupa uno o dos
@@ -15,7 +20,7 @@ septiembre), siempre entre 0,05 y 0,09 MW. Aparte, publicó tres alertas lejos d
 solar A76 (12 de junio 0,32 MW y 25 de agosto 0,60 MW). El silencio de julio que mostraba S124 sigue ahí.
 
 Cuando MIROVA alerta en el cráter, medimos lo mismo: la mediana de nuestro VRP sobre el suyo, pasada contra
-pasada, es 1,13 en las 6 pasadas comparables (1,12 en las 5 con el sensor a 40° o menos). El caso de hoy lo
+pasada, es 1,12 en las 7 pasadas comparables (1,12 en las 5 con el sensor a 40° o menos). El caso de hoy lo
 muestra bien: el 14 de septiembre a las 05:42 UTC, con el satélite casi en la vertical, MIROVA publicó
 0,09 MW y nosotros 0,094 MW a 230 m del cráter.
 
@@ -31,7 +36,7 @@ muestra bien: el 14 de septiembre a las 05:42 UTC, con el satélite casi en la v
 | sin geometría | sensor a más de 40° marcado aparte | el propio grupo MIROVA no confía en esa magnitud (D17, nota S141) |
 
 Dos controles del instrumento pasan: el predicado da los casos conocidos del guard, y la carga de Nevados de
-Chillán publica exactamente lo mismo que el banco de paridad completo (1.169 pasadas, 0 discrepancias).
+Chillán publica exactamente lo mismo que el banco de paridad completo (1.179 pasadas, 0 discrepancias).
 Las alertas que llegan duplicadas por consolidado y OCR se cuentan una vez por pasada.
 
 ## 3. El hallazgo que cambia la lectura: desde el 28 de agosto publicamos casi siempre
@@ -45,14 +50,14 @@ volcanes a la vez**, y el escalón coincide con el PR #535, que apagó en produc
 |---|---|---|---|
 | antes de #535 (hasta 28-ago 23:00 UTC) | 412 | 0,61 | 75 de 160 |
 | entre #535 y #571 (máscara apagada, piso VRP aún puesto) | 64 | 0,84 | 0 de 10 |
-| después de #571 (sin piso VRP) | 297 | 0,87 | 1 de 38 |
+| después de #571 (sin piso VRP) | 299 | 0,87 | 1 de 38 |
 
 **El fenómeno.** A la altura de estos volcanes, en invierno, la nieve irradia a la misma temperatura que
 una nube baja. La máscara de 260 K descartaba esos píxeles como nube y, en muchas pasadas, dejaba el primer
 pase sin un solo píxel de fondo: la pasada quedaba ciega y no podía publicar nada. Esa ceguera escondía la
 sobre-publicación. Al apagar la máscara (lo que MIROVA hace, Laiolo 2026 p. 4), las pasadas recuperaron
-fondo y publicaron como el resto. Quitar el piso VRP tres días después movió poco: sólo 5 de las 297
-publicaciones posteriores habrían quedado ocultas por él.
+fondo y publicaron como el resto. Quitar el piso VRP tres días después movió poco: sólo 5 de las 299
+pasadas posteriores habrían quedado ocultas por él.
 
 **Por qué importa.** La línea base de la Fase 1 (63,5 % en S139) y el auto-audit semanal (62,9 % con ventana
 de 60 días) mezclan los dos regímenes y subestiman el actual. El objetivo de terminado (10 % en focales,
@@ -91,3 +96,20 @@ sólo leyendo el raster que la página ya tenía cargado.
 2. Contar los píxeles de MIROVA con los TIF archivados (script reproducible, no consultas en la página),
    empezando por las alertas de este volcán, y usarlo en el probe v2.
 3. Revisar si los TIF archivados de mayo también están en UTM, para cerrar la corrección de S124.
+
+## 6. Actualización S142: un testigo independiente y las celdas de MIROVA
+
+Números de `experiments/_s142_ndc/mounts_ndc.json` y `pixeles_mirova.json`; detalle y criterio escrito antes de
+correr en `experiments/_s142_ndc/RESULTADOS.md`.
+
+- **MOUNTS (Sentinel-2, infrarrojo de onda corta a 20 m, pasa de día cerca de las 14:37 UTC) ve calor en el
+  cráter**: 6 píxeles el 16 de junio y 2 el 14 de septiembre, los dos días en que MIROVA alertó de madrugada;
+  en julio, sin alerta de MIROVA, detecta en 3 de 15 imágenes. Un foco de decenas de metros cabe en el píxel de
+  20 m y se diluye en el de 375 m (A77). **Confirma por día, no por pasada**: no distingue si nuestras
+  publicaciones del 14 de septiembre a las 06:18 y 06:36 sobraban. MOUNTS cuenta píxeles; no mide potencia.
+- **Cuántas celdas suma MIROVA, desde sus GeoTIFF UTM: INCONCLUSO.** Hay 6 alertas nocturnas con TIF en UTM, todas
+  del 15 de septiembre; el procedimiento sólo calza en 1 y no es específico: en 8 de 19 pasadas sin alerta una sola
+  celda da menos de 0,01 MW, pero en otras da lo mismo que la alerta de este volcán. La celda caliente sí destaca
+  mucho más cuando MIROVA alerta (desvío mediano 10,0 contra 2,7). Hace falta una semana de TIF UTM.
+- **Las horas del archivo de TIF pueden no ser la pasada**: los rotulados 06:36 y 06:42 del 14 de septiembre son
+  escenas diurnas escritas unas 17 h después. Leer la hora de adquisición del propio TIF, no la del nombre.
