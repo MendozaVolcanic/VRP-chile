@@ -1,0 +1,9479 @@
+{
+ "meta": {
+  "generado_utc": "2026-09-15T13:34:22+00:00",
+  "git_head": "d54099ea7ad8c70210b22608bc199c91ad8948c0",
+  "records_fijados_a_commit": "a54ce6d32f615f989b2c371d460f728442683e5b",
+  "n_commits_data_en_head_posteriores": 5,
+  "referencia_sha": {
+   "registro_vrp_consolidado.csv": "d944cd9cb3f6cecd7ed37dba34e763366409fade",
+   "registro_vrp_ocr.csv": "2712d1743d560af5813d6ac522c7d5bddd80a12b"
+  },
+  "sha_index_html": "24fba8a157136bf76509ed647c7d086d3f9f45aa",
+  "sha_index_html_linea_base": "24fba8a157136bf76509ed647c7d086d3f9f45aa",
+  "tramos": {
+   "linea_base_s139": [
+    "2026-03-01",
+    "2026-09-14"
+   ],
+   "antes_535_misma_longitud": [
+    "2026-08-14",
+    "2026-08-28"
+   ],
+   "entre_535_y_571": [
+    "2026-08-29",
+    "2026-08-31"
+   ],
+   "despues_571": [
+    "2026-09-01",
+    "2026-09-15"
+   ]
+  },
+  "n_filas_ref_nocturnas": 16256,
+  "n_records_nocturnos": 23062,
+  "estratos": {
+   "focal": [
+    "Lascar",
+    "Lastarria",
+    "Isluga",
+    "PlanchonPeteroa",
+    "PuyehueCordonCaulle"
+   ],
+   "nevado": [
+    "Llaima",
+    "Copahue",
+    "Villarrica",
+    "NevadosDeChillan",
+    "Tupungatito",
+    "Chaiten"
+   ],
+   "fuente": "scripts/build_c2ab_windows.py:41-42"
+  },
+  "banda_falsas": {
+   "focal": 0.1,
+   "nevado": 0.15
+  },
+  "banda_magnitud": [
+   0.8,
+   1.25
+  ],
+  "n_min_magnitud": 30,
+  "fuentes_leidas": {
+   "deteccion_y_falsas_hoy": "experiments\\_s142_linea_base\\linea_base_post535.json",
+   "linea_base_congelada": "data\\audit_continuous\\linea_base_s139\\banco.json",
+   "magnitud_osf": "data\\audit_continuous\\linea_base_s139\\magnitud.json",
+   "auto_audit": "data\\audit_continuous\\latest.json",
+   "latencia": "experiments\\_s141_cron\\atraso_despacho.json"
+  },
+  "predicado_magnitud": "frontend/index.html:1191 mirovaEqVrpDisplay -> 1166 mirovaEqVrpCore (V375: f5_core_vrp_mw l. 1126, respaldo pc l. 1184; MODIS y V750 pc l. 1177)",
+  "definiciones": {
+   "par_magnitud": "pasada nuestra etiquetada pos (banco_paridad) con fila ALERTA de MIROVA a +-2 min y VRP > 0. Si hay fila CONS y OCR para la pasada se usa CONS (latest.php, numero escrito por MIROVA; el OCR lee la imagen y es complemento, regla A11); la OCR solo cuando no hay CONS. Una fila de MIROVA se parea con una sola pasada nuestra (la mas cercana en tiempo).",
+   "magnitud_publicada": "disp = mirovaEqVrpDisplay(r, inner, false) (frontend/index.html:1191), solo en pares que el dashboard publica (pub=1)",
+   "razon": "disp / VRP_MIROVA por pasada; mediana, media geometrica, fraccion en [0,8 ; 1,25]; n < 30 marcado",
+   "pasada_mirova": "filas nocturnas de MIROVA del mismo volcan y sensor agrupadas a +-2 min (CONS y OCR juntas); estado ALERTA si alguna fila es ALERTA, FP si alguna es FALSO_POSITIVO y ninguna ALERTA, RUTINA si no",
+   "listada": "pasada MIROVA en estado ALERTA o RUTINA (FP excluida: calor fuera del limite, sin informacion del crater, igual que el banco)",
+   "noche": "fecha UTC de la pasada, igual que el banco",
+   "C1_repeticion_intra_sensor": "VIIRS 375: en noches de volcan con >= 1 pasada ALERTA y >= 2 listadas, sobre pares ordenados (i ALERTA, j distinta listada) la fraccion con j ALERTA. Tasa base: fraccion ALERTA entre todas las listadas del volcan.",
+   "C1b_contradiccion_canales": "pasadas MIROVA con fila CONS RUTINA y fila OCR ALERTA a la vez (MIROVA se contradice entre su CSV y su imagen)",
+   "C2_entre_sensores": "en noches con >= 1 pasada ALERTA en el sensor A, fraccion de pasadas listadas del sensor B esa noche que son ALERTA (A=V375,B=V750 y A=V750,B=V375)",
+   "C2b_falsas_de_mirova_contra_otro_sensor": "analogo MIROVA-contra-MIROVA de la banda: noches negativas segun el sensor A (>= 1 listada, ninguna ALERTA ni FP en A) y fraccion de pasadas listadas del sensor B esa noche con ALERTA",
+   "C3_persistencia_noche": "VIIRS 375, noches listadas: P(noche ALERTA | noche anterior ALERTA) y P(noche ALERTA | noche anterior listada sin ALERTA ni FP); C3b: fraccion de pasadas listadas en ALERTA en la noche siguiente a una noche negativa",
+   "C4_negativos_adyacentes": "nuestros neg_limpio VIIRS 375: fraccion cuya noche esta a +-1 noche de una noche con ALERTA V375 de MIROVA en el mismo volcan, y tasa de publicacion nuestra en adyacentes y no adyacentes"
+  }
+ },
+ "controles": {
+  "etiquetas_iguales_a_linea_base": {
+   "antes_535_misma_longitud": {
+    "mio": {
+     "neg_limpio": 1090,
+     "sin_info": 562,
+     "far_ref": 34,
+     "pos": 102
+    },
+    "linea_base": {
+     "neg_limpio": 1090,
+     "sin_info": 562,
+     "far_ref": 34,
+     "pos": 102
+    },
+    "igual": true
+   },
+   "entre_535_y_571": {
+    "mio": {
+     "neg_limpio": 218,
+     "sin_info": 101,
+     "pos": 13,
+     "far_ref": 8
+    },
+    "linea_base": {
+     "neg_limpio": 218,
+     "sin_info": 101,
+     "pos": 13,
+     "far_ref": 8
+    },
+    "igual": true
+   },
+   "despues_571": {
+    "mio": {
+     "neg_limpio": 1116,
+     "sin_info": 474,
+     "far_ref": 23,
+     "pos": 117
+    },
+    "linea_base": {
+     "neg_limpio": 1116,
+     "sin_info": 474,
+     "far_ref": 23,
+     "pos": 117
+    },
+    "igual": true
+   }
+  },
+  "fuentes_magnitud": {
+   "n_pares_total": 1657,
+   "n_pos_con_alerta_vrp": 1657,
+   "n_filas_mirova_con_mas_de_una_pasada_nuestra": 0,
+   "n_con_cons_y_ocr": 305,
+   "ocr_sobre_cons": {
+    "n": 305,
+    "mediana": 1.0,
+    "media_geom": 0.9483,
+    "p25": 1.0,
+    "p75": 1.0,
+    "frac_en_banda": 0.8918,
+    "mediana_en_banda": true,
+    "n_menor_30": false
+   },
+   "frac_ocr_igual_cons_5pct": 0.8262,
+   "por_fuente_elegida": {
+    "CONS": 1250,
+    "OCR": 407
+   }
+  },
+  "deteccion_igual_a_linea_base": true
+ },
+ "objetivos": {
+  "MODIS": {
+   "focal": {
+    "deteccion": {
+     "hoy": {
+      "noches_pos": 0,
+      "noches_perdidas": 0,
+      "lista": []
+     },
+     "linea_base_misma_referencia": {
+      "noches_pos": 65,
+      "noches_perdidas": 57
+     },
+     "linea_base_congelada_banco": {
+      "noches_pos": 65,
+      "noches_pos_publicadas": 8,
+      "noches_perdidas": 57
+     },
+     "recall_noche_linea_base_post535": {
+      "n_pos": 0,
+      "recall_pos": null,
+      "n_neg": 74,
+      "tasa_pub_neg": 0.2027
+     }
+    },
+    "falsas": {
+     "hoy_pasada": {
+      "k": 25,
+      "n": 144,
+      "frac": 0.1736,
+      "ic95": [
+       0.1204,
+       0.2437
+      ]
+     },
+     "hoy_noche": {
+      "n_pos": 0,
+      "recall_pos": null,
+      "n_neg": 74,
+      "tasa_pub_neg": 0.2027
+     },
+     "linea_base_congelada_pasada": {
+      "k": 351,
+      "n": 1799,
+      "frac": 0.1951,
+      "ic95": [
+       0.1775,
+       0.2141
+      ]
+     },
+     "banda": 0.1,
+     "veredicto": "no cumple"
+    }
+   },
+   "nevado": {
+    "deteccion": {
+     "hoy": {
+      "noches_pos": 1,
+      "noches_perdidas": 0,
+      "lista": []
+     },
+     "linea_base_misma_referencia": {
+      "noches_pos": 1,
+      "noches_perdidas": 0
+     },
+     "linea_base_congelada_banco": {
+      "noches_pos": 1,
+      "noches_pos_publicadas": 1,
+      "noches_perdidas": 0
+     },
+     "recall_noche_linea_base_post535": {
+      "n_pos": 1,
+      "recall_pos": 1.0,
+      "n_neg": 88,
+      "tasa_pub_neg": 0.0909
+     }
+    },
+    "falsas": {
+     "hoy_pasada": {
+      "k": 8,
+      "n": 181,
+      "frac": 0.0442,
+      "ic95": [
+       0.0226,
+       0.0848
+      ]
+     },
+     "hoy_noche": {
+      "n_pos": 1,
+      "recall_pos": 1.0,
+      "n_neg": 88,
+      "tasa_pub_neg": 0.0909
+     },
+     "linea_base_congelada_pasada": {
+      "k": 144,
+      "n": 2593,
+      "frac": 0.0555,
+      "ic95": [
+       0.0474,
+       0.065
+      ]
+     },
+     "banda": 0.15,
+     "veredicto": "cumple"
+    }
+   },
+   "magnitud_despues_571": {
+    "volcanes_n30": [],
+    "fuera_de_banda": [],
+    "veredicto": "sin n suficiente",
+    "total": {
+     "n": 1,
+     "mediana": 0.8124,
+     "media_geom": 0.8124,
+     "p25": 0.8124,
+     "p75": 0.8124,
+     "frac_en_banda": 1.0,
+     "mediana_en_banda": true,
+     "n_menor_30": true
+    }
+   },
+   "magnitud_linea_base_s139": {
+    "volcanes_n30": [],
+    "fuera_de_banda": [],
+    "veredicto": "sin n suficiente",
+    "total": {
+     "n": 9,
+     "mediana": 0.7993,
+     "media_geom": 0.7537,
+     "p25": 0.5377,
+     "p75": 0.9191,
+     "frac_en_banda": 0.3333,
+     "mediana_en_banda": false,
+     "n_menor_30": true
+    }
+   }
+  },
+  "VIIRS375": {
+   "focal": {
+    "deteccion": {
+     "hoy": {
+      "noches_pos": 38,
+      "noches_perdidas": 0,
+      "lista": []
+     },
+     "linea_base_misma_referencia": {
+      "noches_pos": 599,
+      "noches_perdidas": 8
+     },
+     "linea_base_congelada_banco": {
+      "noches_pos": 599,
+      "noches_pos_publicadas": 591,
+      "noches_perdidas": 8
+     },
+     "recall_noche_linea_base_post535": {
+      "n_pos": 38,
+      "recall_pos": 1.0,
+      "n_neg": 27,
+      "tasa_pub_neg": 1.0
+     }
+    },
+    "falsas": {
+     "hoy_pasada": {
+      "k": 71,
+      "n": 84,
+      "frac": 0.8452,
+      "ic95": [
+       0.753,
+       0.9073
+      ]
+     },
+     "hoy_noche": {
+      "n_pos": 38,
+      "recall_pos": 1.0,
+      "n_neg": 27,
+      "tasa_pub_neg": 1.0
+     },
+     "linea_base_congelada_pasada": {
+      "k": 415,
+      "n": 707,
+      "frac": 0.587,
+      "ic95": [
+       0.5503,
+       0.6227
+      ]
+     },
+     "banda": 0.1,
+     "veredicto": "no cumple"
+    }
+   },
+   "nevado": {
+    "deteccion": {
+     "hoy": {
+      "noches_pos": 16,
+      "noches_perdidas": 0,
+      "lista": []
+     },
+     "linea_base_misma_referencia": {
+      "noches_pos": 179,
+      "noches_perdidas": 6
+     },
+     "linea_base_congelada_banco": {
+      "noches_pos": 179,
+      "noches_pos_publicadas": 173,
+      "noches_perdidas": 6
+     },
+     "recall_noche_linea_base_post535": {
+      "n_pos": 16,
+      "recall_pos": 1.0,
+      "n_neg": 66,
+      "tasa_pub_neg": 1.0
+     }
+    },
+    "falsas": {
+     "hoy_pasada": {
+      "k": 186,
+      "n": 211,
+      "frac": 0.8815,
+      "ic95": [
+       0.8309,
+       0.9184
+      ]
+     },
+     "hoy_noche": {
+      "n_pos": 16,
+      "recall_pos": 1.0,
+      "n_neg": 66,
+      "tasa_pub_neg": 1.0
+     },
+     "linea_base_congelada_pasada": {
+      "k": 1512,
+      "n": 2319,
+      "frac": 0.652,
+      "ic95": [
+       0.6324,
+       0.6711
+      ]
+     },
+     "banda": 0.15,
+     "veredicto": "no cumple"
+    }
+   },
+   "magnitud_despues_571": {
+    "volcanes_n30": [],
+    "fuera_de_banda": [],
+    "veredicto": "sin n suficiente",
+    "total": {
+     "n": 104,
+     "mediana": 0.8295,
+     "media_geom": 0.771,
+     "p25": 0.5332,
+     "p75": 1.1441,
+     "frac_en_banda": 0.3173,
+     "mediana_en_banda": true,
+     "n_menor_30": false
+    }
+   },
+   "magnitud_linea_base_s139": {
+    "volcanes_n30": [
+     "Chaiten",
+     "Isluga",
+     "Lascar",
+     "Lastarria",
+     "PlanchonPeteroa",
+     "PuyehueCordonCaulle",
+     "Tupungatito"
+    ],
+    "fuera_de_banda": [
+     "Chaiten",
+     "Isluga",
+     "Lascar",
+     "Lastarria",
+     "Tupungatito"
+    ],
+    "veredicto": "no cumple",
+    "total": {
+     "n": 1264,
+     "mediana": 0.7059,
+     "media_geom": 0.6541,
+     "p25": 0.4808,
+     "p75": 1.0125,
+     "frac_en_banda": 0.2508,
+     "mediana_en_banda": false,
+     "n_menor_30": false
+    }
+   }
+  },
+  "VIIRS750": {
+   "focal": {
+    "deteccion": {
+     "hoy": {
+      "noches_pos": 9,
+      "noches_perdidas": 0,
+      "lista": []
+     },
+     "linea_base_misma_referencia": {
+      "noches_pos": 193,
+      "noches_perdidas": 20
+     },
+     "linea_base_congelada_banco": {
+      "noches_pos": 193,
+      "noches_pos_publicadas": 173,
+      "noches_perdidas": 20
+     },
+     "recall_noche_linea_base_post535": {
+      "n_pos": 9,
+      "recall_pos": 1.0,
+      "n_neg": 65,
+      "tasa_pub_neg": 0.5231
+     }
+    },
+    "falsas": {
+     "hoy_pasada": {
+      "k": 51,
+      "n": 203,
+      "frac": 0.2512,
+      "ic95": [
+       0.1966,
+       0.3151
+      ]
+     },
+     "hoy_noche": {
+      "n_pos": 9,
+      "recall_pos": 1.0,
+      "n_neg": 65,
+      "tasa_pub_neg": 0.5231
+     },
+     "linea_base_congelada_pasada": {
+      "k": 563,
+      "n": 1900,
+      "frac": 0.2963,
+      "ic95": [
+       0.2762,
+       0.3172
+      ]
+     },
+     "banda": 0.1,
+     "veredicto": "no cumple"
+    }
+   },
+   "nevado": {
+    "deteccion": {
+     "hoy": {
+      "noches_pos": 0,
+      "noches_perdidas": 0,
+      "lista": []
+     },
+     "linea_base_misma_referencia": {
+      "noches_pos": 21,
+      "noches_perdidas": 8
+     },
+     "linea_base_congelada_banco": {
+      "noches_pos": 21,
+      "noches_pos_publicadas": 13,
+      "noches_perdidas": 8
+     },
+     "recall_noche_linea_base_post535": {
+      "n_pos": 0,
+      "recall_pos": null,
+      "n_neg": 89,
+      "tasa_pub_neg": 0.4494
+     }
+    },
+    "falsas": {
+     "hoy_pasada": {
+      "k": 54,
+      "n": 293,
+      "frac": 0.1843,
+      "ic95": [
+       0.1441,
+       0.2327
+      ]
+     },
+     "hoy_noche": {
+      "n_pos": 0,
+      "recall_pos": null,
+      "n_neg": 89,
+      "tasa_pub_neg": 0.4494
+     },
+     "linea_base_congelada_pasada": {
+      "k": 535,
+      "n": 3041,
+      "frac": 0.1759,
+      "ic95": [
+       0.1628,
+       0.1899
+      ]
+     },
+     "banda": 0.15,
+     "veredicto": "no cumple"
+    }
+   },
+   "magnitud_despues_571": {
+    "volcanes_n30": [],
+    "fuera_de_banda": [],
+    "veredicto": "sin n suficiente",
+    "total": {
+     "n": 8,
+     "mediana": 0.3232,
+     "media_geom": 0.2729,
+     "p25": 0.0931,
+     "p75": 0.576,
+     "frac_en_banda": 0.0,
+     "mediana_en_banda": false,
+     "n_menor_30": true
+    }
+   },
+   "magnitud_linea_base_s139": {
+    "volcanes_n30": [
+     "Lascar",
+     "PuyehueCordonCaulle"
+    ],
+    "fuera_de_banda": [
+     "Lascar",
+     "PuyehueCordonCaulle"
+    ],
+    "veredicto": "no cumple",
+    "total": {
+     "n": 218,
+     "mediana": 0.5713,
+     "media_geom": 0.5825,
+     "p25": 0.3942,
+     "p75": 0.8534,
+     "frac_en_banda": 0.1881,
+     "mediana_en_banda": false,
+     "n_menor_30": false
+    }
+   }
+  }
+ },
+ "modis_criterio_falsas": {
+  "despues_571": {
+   "Lascar": {
+    "pub_en_pos": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "pub_en_neg": {
+     "k": 0,
+     "n": 27,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.1246
+     ]
+    },
+    "p_fisher_pos_mayor": null
+   },
+   "TODOS": {
+    "pub_en_pos": {
+     "k": 1,
+     "n": 1,
+     "frac": 1.0,
+     "ic95": [
+      0.2065,
+      1.0
+     ]
+    },
+    "pub_en_neg": {
+     "k": 33,
+     "n": 325,
+     "frac": 0.1015,
+     "ic95": [
+      0.0732,
+      0.1392
+     ]
+    },
+    "p_fisher_pos_mayor": 0.1043
+   }
+  },
+  "linea_base_s139": {
+   "Lascar": {
+    "pub_en_pos": {
+     "k": 8,
+     "n": 76,
+     "frac": 0.1053,
+     "ic95": [
+      0.0543,
+      0.1942
+     ]
+    },
+    "pub_en_neg": {
+     "k": 4,
+     "n": 233,
+     "frac": 0.0172,
+     "ic95": [
+      0.0067,
+      0.0433
+     ]
+    },
+    "p_fisher_pos_mayor": 0.002
+   },
+   "TODOS": {
+    "pub_en_pos": {
+     "k": 9,
+     "n": 77,
+     "frac": 0.1169,
+     "ic95": [
+      0.0627,
+      0.2075
+     ]
+    },
+    "pub_en_neg": {
+     "k": 495,
+     "n": 4392,
+     "frac": 0.1127,
+     "ic95": [
+      0.1037,
+      0.1224
+     ]
+    },
+    "p_fisher_pos_mayor": 0.5083
+   }
+  }
+ },
+ "magnitud": {
+  "linea_base_s139": {
+   "MODIS": {
+    "total": {
+     "n_pares": 77,
+     "n_no_publicados": 68,
+     "publicado": {
+      "n": 9,
+      "mediana": 0.7993,
+      "media_geom": 0.7537,
+      "p25": 0.5377,
+      "p75": 0.9191,
+      "frac_en_banda": 0.3333,
+      "mediana_en_banda": false,
+      "n_menor_30": true
+     },
+     "cluster_pc_en_publicados": {
+      "n": 9,
+      "mediana": 0.7993,
+      "media_geom": 0.7537,
+      "p25": 0.5377,
+      "p75": 0.9191,
+      "frac_en_banda": 0.3333,
+      "mediana_en_banda": false,
+      "n_menor_30": true
+     },
+     "por_fuente": {
+      "CONS": {
+       "n": 9,
+       "mediana": 0.7993,
+       "media_geom": 0.7537,
+       "p25": 0.5377,
+       "p75": 0.9191,
+       "frac_en_banda": 0.3333,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "OCR": {
+       "n": 0
+      }
+     }
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pares": 76,
+      "n_no_publicados": 68,
+      "publicado": {
+       "n": 8,
+       "mediana": 0.7462,
+       "media_geom": 0.7467,
+       "p25": 0.5096,
+       "p75": 0.9306,
+       "frac_en_banda": 0.25,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 8,
+       "mediana": 0.7462,
+       "media_geom": 0.7467,
+       "p25": 0.5096,
+       "p75": 0.9306,
+       "frac_en_banda": 0.25,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 8,
+        "mediana": 0.7462,
+        "media_geom": 0.7467,
+        "p25": 0.5096,
+        "p75": 0.9306,
+        "frac_en_banda": 0.25,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "nevado": {
+      "n_pares": 1,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 1,
+       "mediana": 0.8124,
+       "media_geom": 0.8124,
+       "p25": 0.8124,
+       "p75": 0.8124,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 1,
+       "mediana": 0.8124,
+       "media_geom": 0.8124,
+       "p25": 0.8124,
+       "p75": 0.8124,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 1,
+        "mediana": 0.8124,
+        "media_geom": 0.8124,
+        "p25": 0.8124,
+        "p75": 0.8124,
+        "frac_en_banda": 1.0,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    },
+    "por_volcan": {
+     "Lascar": {
+      "n_pares": 76,
+      "n_no_publicados": 68,
+      "publicado": {
+       "n": 8,
+       "mediana": 0.7462,
+       "media_geom": 0.7467,
+       "p25": 0.5096,
+       "p75": 0.9306,
+       "frac_en_banda": 0.25,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 8,
+       "mediana": 0.7462,
+       "media_geom": 0.7467,
+       "p25": 0.5096,
+       "p75": 0.9306,
+       "frac_en_banda": 0.25,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 8,
+        "mediana": 0.7462,
+        "media_geom": 0.7467,
+        "p25": 0.5096,
+        "p75": 0.9306,
+        "frac_en_banda": 0.25,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Lastarria": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Isluga": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Tupungatito": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PlanchonPeteroa": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "NevadosDeChillan": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Llaima": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Villarrica": {
+      "n_pares": 1,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 1,
+       "mediana": 0.8124,
+       "media_geom": 0.8124,
+       "p25": 0.8124,
+       "p75": 0.8124,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 1,
+       "mediana": 0.8124,
+       "media_geom": 0.8124,
+       "p25": 0.8124,
+       "p75": 0.8124,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 1,
+        "mediana": 0.8124,
+        "media_geom": 0.8124,
+        "p25": 0.8124,
+        "p75": 0.8124,
+        "frac_en_banda": 1.0,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Copahue": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PuyehueCordonCaulle": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Chaiten": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    }
+   },
+   "VIIRS375": {
+    "total": {
+     "n_pares": 1312,
+     "n_no_publicados": 48,
+     "publicado": {
+      "n": 1264,
+      "mediana": 0.7059,
+      "media_geom": 0.6541,
+      "p25": 0.4808,
+      "p75": 1.0125,
+      "frac_en_banda": 0.2508,
+      "mediana_en_banda": false,
+      "n_menor_30": false
+     },
+     "cluster_pc_en_publicados": {
+      "n": 1264,
+      "mediana": 0.6,
+      "media_geom": 0.5394,
+      "p25": 0.3915,
+      "p75": 0.8555,
+      "frac_en_banda": 0.2097,
+      "mediana_en_banda": false,
+      "n_menor_30": false
+     },
+     "por_fuente": {
+      "CONS": {
+       "n": 910,
+       "mediana": 0.7271,
+       "media_geom": 0.6953,
+       "p25": 0.4863,
+       "p75": 1.0376,
+       "frac_en_banda": 0.2714,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "OCR": {
+       "n": 354,
+       "mediana": 0.6587,
+       "media_geom": 0.5591,
+       "p25": 0.4479,
+       "p75": 0.9639,
+       "frac_en_banda": 0.1977,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      }
+     }
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pares": 1060,
+      "n_no_publicados": 36,
+      "publicado": {
+       "n": 1024,
+       "mediana": 0.6828,
+       "media_geom": 0.6358,
+       "p25": 0.4683,
+       "p75": 0.9881,
+       "frac_en_banda": 0.2402,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "cluster_pc_en_publicados": {
+       "n": 1024,
+       "mediana": 0.5641,
+       "media_geom": 0.513,
+       "p25": 0.3772,
+       "p75": 0.81,
+       "frac_en_banda": 0.1846,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 723,
+        "mediana": 0.7057,
+        "media_geom": 0.6768,
+        "p25": 0.4764,
+        "p75": 1.0038,
+        "frac_en_banda": 0.2586,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       },
+       "OCR": {
+        "n": 301,
+        "mediana": 0.6523,
+        "media_geom": 0.5473,
+        "p25": 0.4431,
+        "p75": 0.9112,
+        "frac_en_banda": 0.196,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       }
+      }
+     },
+     "nevado": {
+      "n_pares": 252,
+      "n_no_publicados": 12,
+      "publicado": {
+       "n": 240,
+       "mediana": 0.8031,
+       "media_geom": 0.7384,
+       "p25": 0.5634,
+       "p75": 1.1624,
+       "frac_en_banda": 0.2958,
+       "mediana_en_banda": true,
+       "n_menor_30": false
+      },
+      "cluster_pc_en_publicados": {
+       "n": 240,
+       "mediana": 0.7392,
+       "media_geom": 0.6687,
+       "p25": 0.5373,
+       "p75": 1.0299,
+       "frac_en_banda": 0.3167,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 187,
+        "mediana": 0.8208,
+        "media_geom": 0.7721,
+        "p25": 0.5745,
+        "p75": 1.1531,
+        "frac_en_banda": 0.3209,
+        "mediana_en_banda": true,
+        "n_menor_30": false
+       },
+       "OCR": {
+        "n": 53,
+        "mediana": 0.7233,
+        "media_geom": 0.6307,
+        "p25": 0.483,
+        "p75": 1.1767,
+        "frac_en_banda": 0.2075,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       }
+      }
+     }
+    },
+    "por_volcan": {
+     "Lascar": {
+      "n_pares": 275,
+      "n_no_publicados": 7,
+      "publicado": {
+       "n": 268,
+       "mediana": 0.5584,
+       "media_geom": 0.5054,
+       "p25": 0.4057,
+       "p75": 0.6957,
+       "frac_en_banda": 0.1157,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "cluster_pc_en_publicados": {
+       "n": 268,
+       "mediana": 0.432,
+       "media_geom": 0.4163,
+       "p25": 0.3432,
+       "p75": 0.6105,
+       "frac_en_banda": 0.0746,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 183,
+        "mediana": 0.5439,
+        "media_geom": 0.528,
+        "p25": 0.416,
+        "p75": 0.7161,
+        "frac_en_banda": 0.1311,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       },
+       "OCR": {
+        "n": 85,
+        "mediana": 0.56,
+        "media_geom": 0.46,
+        "p25": 0.3911,
+        "p75": 0.676,
+        "frac_en_banda": 0.0824,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       }
+      }
+     },
+     "Lastarria": {
+      "n_pares": 195,
+      "n_no_publicados": 18,
+      "publicado": {
+       "n": 177,
+       "mediana": 0.55,
+       "media_geom": 0.4754,
+       "p25": 0.3295,
+       "p75": 1.0075,
+       "frac_en_banda": 0.2034,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "cluster_pc_en_publicados": {
+       "n": 177,
+       "mediana": 0.4833,
+       "media_geom": 0.395,
+       "p25": 0.2583,
+       "p75": 0.8364,
+       "frac_en_banda": 0.1864,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 135,
+        "mediana": 0.6056,
+        "media_geom": 0.5493,
+        "p25": 0.3942,
+        "p75": 1.0112,
+        "frac_en_banda": 0.2296,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       },
+       "OCR": {
+        "n": 42,
+        "mediana": 0.5007,
+        "media_geom": 0.2988,
+        "p25": 0.0827,
+        "p75": 0.9777,
+        "frac_en_banda": 0.119,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       }
+      }
+     },
+     "Isluga": {
+      "n_pares": 266,
+      "n_no_publicados": 3,
+      "publicado": {
+       "n": 263,
+       "mediana": 0.6,
+       "media_geom": 0.544,
+       "p25": 0.4302,
+       "p75": 0.8068,
+       "frac_en_banda": 0.2319,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "cluster_pc_en_publicados": {
+       "n": 263,
+       "mediana": 0.537,
+       "media_geom": 0.4628,
+       "p25": 0.3323,
+       "p75": 0.7712,
+       "frac_en_banda": 0.1939,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 187,
+        "mediana": 0.6118,
+        "media_geom": 0.6004,
+        "p25": 0.4536,
+        "p75": 0.8207,
+        "frac_en_banda": 0.246,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       },
+       "OCR": {
+        "n": 76,
+        "mediana": 0.5726,
+        "media_geom": 0.4269,
+        "p25": 0.338,
+        "p75": 0.7637,
+        "frac_en_banda": 0.1974,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       }
+      }
+     },
+     "Tupungatito": {
+      "n_pares": 164,
+      "n_no_publicados": 8,
+      "publicado": {
+       "n": 156,
+       "mediana": 0.6734,
+       "media_geom": 0.595,
+       "p25": 0.4725,
+       "p75": 0.864,
+       "frac_en_banda": 0.2244,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "cluster_pc_en_publicados": {
+       "n": 156,
+       "mediana": 0.6732,
+       "media_geom": 0.5705,
+       "p25": 0.4458,
+       "p75": 0.8414,
+       "frac_en_banda": 0.2179,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 125,
+        "mediana": 0.6917,
+        "media_geom": 0.641,
+        "p25": 0.4932,
+        "p75": 0.8825,
+        "frac_en_banda": 0.256,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       },
+       "OCR": {
+        "n": 31,
+        "mediana": 0.6009,
+        "media_geom": 0.4407,
+        "p25": 0.3265,
+        "p75": 0.7263,
+        "frac_en_banda": 0.0968,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       }
+      }
+     },
+     "PlanchonPeteroa": {
+      "n_pares": 121,
+      "n_no_publicados": 1,
+      "publicado": {
+       "n": 120,
+       "mediana": 0.9673,
+       "media_geom": 0.9767,
+       "p25": 0.7244,
+       "p75": 1.2598,
+       "frac_en_banda": 0.35,
+       "mediana_en_banda": true,
+       "n_menor_30": false
+      },
+      "cluster_pc_en_publicados": {
+       "n": 120,
+       "mediana": 0.918,
+       "media_geom": 0.9091,
+       "p25": 0.6781,
+       "p75": 1.1893,
+       "frac_en_banda": 0.325,
+       "mediana_en_banda": true,
+       "n_menor_30": false
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 81,
+        "mediana": 0.969,
+        "media_geom": 0.9983,
+        "p25": 0.745,
+        "p75": 1.2371,
+        "frac_en_banda": 0.3827,
+        "mediana_en_banda": true,
+        "n_menor_30": false
+       },
+       "OCR": {
+        "n": 39,
+        "mediana": 0.9656,
+        "media_geom": 0.9335,
+        "p25": 0.7129,
+        "p75": 1.3031,
+        "frac_en_banda": 0.2821,
+        "mediana_en_banda": true,
+        "n_menor_30": false
+       }
+      }
+     },
+     "NevadosDeChillan": {
+      "n_pares": 12,
+      "n_no_publicados": 4,
+      "publicado": {
+       "n": 8,
+       "mediana": 1.1261,
+       "media_geom": 1.1137,
+       "p25": 1.0825,
+       "p75": 1.2608,
+       "frac_en_banda": 0.5,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 8,
+       "mediana": 1.1222,
+       "media_geom": 1.1131,
+       "p25": 1.0861,
+       "p75": 1.2542,
+       "frac_en_banda": 0.625,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 8,
+        "mediana": 1.1261,
+        "media_geom": 1.1137,
+        "p25": 1.0825,
+        "p75": 1.2608,
+        "frac_en_banda": 0.5,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Llaima": {
+      "n_pares": 3,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 3,
+       "mediana": 0.4313,
+       "media_geom": 0.4322,
+       "p25": 0.3069,
+       "p75": 0.7288,
+       "frac_en_banda": 0.3333,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 3,
+       "mediana": 0.4313,
+       "media_geom": 0.4323,
+       "p25": 0.307,
+       "p75": 0.7282,
+       "frac_en_banda": 0.3333,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 1,
+        "mediana": 1.0263,
+        "media_geom": 1.0263,
+        "p25": 1.0263,
+        "p75": 1.0263,
+        "frac_en_banda": 1.0,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 2,
+        "mediana": 0.3069,
+        "media_geom": 0.2805,
+        "p25": 0.2446,
+        "p75": 0.3691,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "Villarrica": {
+      "n_pares": 24,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 24,
+       "mediana": 0.9026,
+       "media_geom": 0.939,
+       "p25": 0.8203,
+       "p75": 1.0723,
+       "frac_en_banda": 0.75,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 24,
+       "mediana": 0.8687,
+       "media_geom": 0.8702,
+       "p25": 0.8029,
+       "p75": 0.9736,
+       "frac_en_banda": 0.6667,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 14,
+        "mediana": 0.8829,
+        "media_geom": 0.8819,
+        "p25": 0.8234,
+        "p75": 0.9856,
+        "frac_en_banda": 0.8571,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 10,
+        "mediana": 0.9688,
+        "media_geom": 1.0252,
+        "p25": 0.8275,
+        "p75": 1.2249,
+        "frac_en_banda": 0.6,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       }
+      }
+     },
+     "Copahue": {
+      "n_pares": 4,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 4,
+       "mediana": 0.9623,
+       "media_geom": 0.9062,
+       "p25": 0.7969,
+       "p75": 1.1638,
+       "frac_en_banda": 0.5,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 4,
+       "mediana": 0.9725,
+       "media_geom": 0.9104,
+       "p25": 0.8025,
+       "p75": 1.1735,
+       "frac_en_banda": 0.5,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 3,
+        "mediana": 1.0125,
+        "media_geom": 0.9042,
+        "p25": 0.732,
+        "p75": 1.3151,
+        "frac_en_banda": 0.3333,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 1,
+        "mediana": 0.912,
+        "media_geom": 0.912,
+        "p25": 0.912,
+        "p75": 0.912,
+        "frac_en_banda": 1.0,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       }
+      }
+     },
+     "PuyehueCordonCaulle": {
+      "n_pares": 203,
+      "n_no_publicados": 7,
+      "publicado": {
+       "n": 196,
+       "mediana": 1.039,
+       "media_geom": 1.0724,
+       "p25": 0.7717,
+       "p75": 1.4381,
+       "frac_en_banda": 0.3878,
+       "mediana_en_banda": true,
+       "n_menor_30": false
+      },
+      "cluster_pc_en_publicados": {
+       "n": 196,
+       "mediana": 0.6592,
+       "media_geom": 0.6988,
+       "p25": 0.4812,
+       "p75": 1.0446,
+       "frac_en_banda": 0.2347,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 137,
+        "mediana": 1.042,
+        "media_geom": 1.0836,
+        "p25": 0.7961,
+        "p75": 1.4391,
+        "frac_en_banda": 0.4015,
+        "mediana_en_banda": true,
+        "n_menor_30": false
+       },
+       "OCR": {
+        "n": 59,
+        "mediana": 0.9707,
+        "media_geom": 1.0467,
+        "p25": 0.7516,
+        "p75": 1.3736,
+        "frac_en_banda": 0.3559,
+        "mediana_en_banda": true,
+        "n_menor_30": false
+       }
+      }
+     },
+     "Chaiten": {
+      "n_pares": 45,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 45,
+       "mediana": 1.3457,
+       "media_geom": 1.2991,
+       "p25": 1.09,
+       "p75": 1.7294,
+       "frac_en_banda": 0.2444,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "cluster_pc_en_publicados": {
+       "n": 45,
+       "mediana": 0.9818,
+       "media_geom": 0.9219,
+       "p25": 0.7067,
+       "p75": 1.2429,
+       "frac_en_banda": 0.4,
+       "mediana_en_banda": true,
+       "n_menor_30": false
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 36,
+        "mediana": 1.3059,
+        "media_geom": 1.2633,
+        "p25": 1.06,
+        "p75": 1.7083,
+        "frac_en_banda": 0.2778,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       },
+       "OCR": {
+        "n": 9,
+        "mediana": 1.4936,
+        "media_geom": 1.453,
+        "p25": 1.296,
+        "p75": 1.7294,
+        "frac_en_banda": 0.1111,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     }
+    }
+   },
+   "VIIRS750": {
+    "total": {
+     "n_pares": 265,
+     "n_no_publicados": 47,
+     "publicado": {
+      "n": 218,
+      "mediana": 0.5713,
+      "media_geom": 0.5825,
+      "p25": 0.3942,
+      "p75": 0.8534,
+      "frac_en_banda": 0.1881,
+      "mediana_en_banda": false,
+      "n_menor_30": false
+     },
+     "cluster_pc_en_publicados": {
+      "n": 218,
+      "mediana": 0.5713,
+      "media_geom": 0.5825,
+      "p25": 0.3942,
+      "p75": 0.8534,
+      "frac_en_banda": 0.1881,
+      "mediana_en_banda": false,
+      "n_menor_30": false
+     },
+     "por_fuente": {
+      "CONS": {
+       "n": 183,
+       "mediana": 0.5484,
+       "media_geom": 0.5713,
+       "p25": 0.3802,
+       "p75": 0.826,
+       "frac_en_banda": 0.1639,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "OCR": {
+       "n": 35,
+       "mediana": 0.676,
+       "media_geom": 0.6445,
+       "p25": 0.5148,
+       "p75": 0.9113,
+       "frac_en_banda": 0.3143,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      }
+     }
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pares": 244,
+      "n_no_publicados": 34,
+      "publicado": {
+       "n": 210,
+       "mediana": 0.5687,
+       "media_geom": 0.586,
+       "p25": 0.3942,
+       "p75": 0.8307,
+       "frac_en_banda": 0.1762,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "cluster_pc_en_publicados": {
+       "n": 210,
+       "mediana": 0.5687,
+       "media_geom": 0.586,
+       "p25": 0.3942,
+       "p75": 0.8307,
+       "frac_en_banda": 0.1762,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 175,
+        "mediana": 0.5474,
+        "media_geom": 0.575,
+        "p25": 0.3802,
+        "p75": 0.8014,
+        "frac_en_banda": 0.1486,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       },
+       "OCR": {
+        "n": 35,
+        "mediana": 0.676,
+        "media_geom": 0.6445,
+        "p25": 0.5148,
+        "p75": 0.9113,
+        "frac_en_banda": 0.3143,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       }
+      }
+     },
+     "nevado": {
+      "n_pares": 21,
+      "n_no_publicados": 13,
+      "publicado": {
+       "n": 8,
+       "mediana": 0.9943,
+       "media_geom": 0.4966,
+       "p25": 0.3503,
+       "p75": 1.1572,
+       "frac_en_banda": 0.5,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 8,
+       "mediana": 0.9943,
+       "media_geom": 0.4966,
+       "p25": 0.3503,
+       "p75": 1.1572,
+       "frac_en_banda": 0.5,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 8,
+        "mediana": 0.9943,
+        "media_geom": 0.4966,
+        "p25": 0.3503,
+        "p75": 1.1572,
+        "frac_en_banda": 0.5,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    },
+    "por_volcan": {
+     "Lascar": {
+      "n_pares": 159,
+      "n_no_publicados": 8,
+      "publicado": {
+       "n": 151,
+       "mediana": 0.537,
+       "media_geom": 0.5019,
+       "p25": 0.3979,
+       "p75": 0.7527,
+       "frac_en_banda": 0.1523,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "cluster_pc_en_publicados": {
+       "n": 151,
+       "mediana": 0.537,
+       "media_geom": 0.5019,
+       "p25": 0.3979,
+       "p75": 0.7527,
+       "frac_en_banda": 0.1523,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 118,
+        "mediana": 0.5141,
+        "media_geom": 0.4648,
+        "p25": 0.384,
+        "p75": 0.6584,
+        "frac_en_banda": 0.1017,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       },
+       "OCR": {
+        "n": 33,
+        "mediana": 0.676,
+        "media_geom": 0.6604,
+        "p25": 0.537,
+        "p75": 0.919,
+        "frac_en_banda": 0.3333,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       }
+      }
+     },
+     "Lastarria": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Isluga": {
+      "n_pares": 38,
+      "n_no_publicados": 12,
+      "publicado": {
+       "n": 26,
+       "mediana": 1.0627,
+       "media_geom": 1.4012,
+       "p25": 0.5574,
+       "p75": 3.2696,
+       "frac_en_banda": 0.2308,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 26,
+       "mediana": 1.0627,
+       "media_geom": 1.4012,
+       "p25": 0.5574,
+       "p75": 3.2696,
+       "frac_en_banda": 0.2308,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 26,
+        "mediana": 1.0627,
+        "media_geom": 1.4012,
+        "p25": 0.5574,
+        "p75": 3.2696,
+        "frac_en_banda": 0.2308,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Tupungatito": {
+      "n_pares": 13,
+      "n_no_publicados": 11,
+      "publicado": {
+       "n": 2,
+       "mediana": 0.0718,
+       "media_geom": 0.0693,
+       "p25": 0.0625,
+       "p75": 0.0811,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 2,
+       "mediana": 0.0718,
+       "media_geom": 0.0693,
+       "p25": 0.0625,
+       "p75": 0.0811,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 2,
+        "mediana": 0.0718,
+        "media_geom": 0.0693,
+        "p25": 0.0625,
+        "p75": 0.0811,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PlanchonPeteroa": {
+      "n_pares": 9,
+      "n_no_publicados": 6,
+      "publicado": {
+       "n": 3,
+       "mediana": 1.6687,
+       "media_geom": 2.8126,
+       "p25": 1.3677,
+       "p75": 7.0844,
+       "frac_en_banda": 0.3333,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 3,
+       "mediana": 1.6687,
+       "media_geom": 2.8126,
+       "p25": 1.3677,
+       "p75": 7.0844,
+       "frac_en_banda": 0.3333,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 3,
+        "mediana": 1.6687,
+        "media_geom": 2.8126,
+        "p25": 1.3677,
+        "p75": 7.0844,
+        "frac_en_banda": 0.3333,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "NevadosDeChillan": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Llaima": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Villarrica": {
+      "n_pares": 6,
+      "n_no_publicados": 2,
+      "publicado": {
+       "n": 4,
+       "mediana": 0.9943,
+       "media_geom": 0.8419,
+       "p25": 0.7686,
+       "p75": 1.1268,
+       "frac_en_banda": 0.75,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 4,
+       "mediana": 0.9943,
+       "media_geom": 0.8419,
+       "p25": 0.7686,
+       "p75": 1.1268,
+       "frac_en_banda": 0.75,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 4,
+        "mediana": 0.9943,
+        "media_geom": 0.8419,
+        "p25": 0.7686,
+        "p75": 1.1268,
+        "frac_en_banda": 0.75,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Copahue": {
+      "n_pares": 1,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 1,
+       "mediana": 1.3325,
+       "media_geom": 1.3325,
+       "p25": 1.3325,
+       "p75": 1.3325,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 1,
+       "mediana": 1.3325,
+       "media_geom": 1.3325,
+       "p25": 1.3325,
+       "p75": 1.3325,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 1,
+        "mediana": 1.3325,
+        "media_geom": 1.3325,
+        "p25": 1.3325,
+        "p75": 1.3325,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PuyehueCordonCaulle": {
+      "n_pares": 38,
+      "n_no_publicados": 8,
+      "publicado": {
+       "n": 30,
+       "mediana": 0.5731,
+       "media_geom": 0.5134,
+       "p25": 0.2851,
+       "p75": 0.9905,
+       "frac_en_banda": 0.2333,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "cluster_pc_en_publicados": {
+       "n": 30,
+       "mediana": 0.5731,
+       "media_geom": 0.5134,
+       "p25": 0.2851,
+       "p75": 0.9905,
+       "frac_en_banda": 0.2333,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 28,
+        "mediana": 0.6172,
+        "media_geom": 0.5199,
+        "p25": 0.277,
+        "p75": 1.0097,
+        "frac_en_banda": 0.25,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 2,
+        "mediana": 0.4365,
+        "media_geom": 0.4304,
+        "p25": 0.4002,
+        "p75": 0.4728,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "Chaiten": {
+      "n_pares": 1,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 1,
+       "mediana": 1.15,
+       "media_geom": 1.15,
+       "p25": 1.15,
+       "p75": 1.15,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 1,
+       "mediana": 1.15,
+       "media_geom": 1.15,
+       "p25": 1.15,
+       "p75": 1.15,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 1,
+        "mediana": 1.15,
+        "media_geom": 1.15,
+        "p25": 1.15,
+        "p75": 1.15,
+        "frac_en_banda": 1.0,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "antes_535_misma_longitud": {
+   "MODIS": {
+    "total": {
+     "n_pares": 1,
+     "n_no_publicados": 1,
+     "publicado": {
+      "n": 0
+     },
+     "cluster_pc_en_publicados": {
+      "n": 0
+     },
+     "por_fuente": {
+      "CONS": {
+       "n": 0
+      },
+      "OCR": {
+       "n": 0
+      }
+     }
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pares": 1,
+      "n_no_publicados": 1,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "nevado": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    },
+    "por_volcan": {
+     "Lascar": {
+      "n_pares": 1,
+      "n_no_publicados": 1,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Lastarria": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Isluga": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Tupungatito": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PlanchonPeteroa": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "NevadosDeChillan": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Llaima": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Villarrica": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Copahue": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PuyehueCordonCaulle": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Chaiten": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    }
+   },
+   "VIIRS375": {
+    "total": {
+     "n_pares": 83,
+     "n_no_publicados": 9,
+     "publicado": {
+      "n": 74,
+      "mediana": 0.715,
+      "media_geom": 0.6179,
+      "p25": 0.5281,
+      "p75": 0.901,
+      "frac_en_banda": 0.2973,
+      "mediana_en_banda": false,
+      "n_menor_30": false
+     },
+     "cluster_pc_en_publicados": {
+      "n": 74,
+      "mediana": 0.6,
+      "media_geom": 0.5294,
+      "p25": 0.365,
+      "p75": 0.865,
+      "frac_en_banda": 0.2838,
+      "mediana_en_banda": false,
+      "n_menor_30": false
+     },
+     "por_fuente": {
+      "CONS": {
+       "n": 56,
+       "mediana": 0.7417,
+       "media_geom": 0.6537,
+       "p25": 0.5436,
+       "p75": 0.9388,
+       "frac_en_banda": 0.3571,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "OCR": {
+       "n": 18,
+       "mediana": 0.6548,
+       "media_geom": 0.5185,
+       "p25": 0.469,
+       "p75": 0.7938,
+       "frac_en_banda": 0.1111,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      }
+     }
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pares": 59,
+      "n_no_publicados": 8,
+      "publicado": {
+       "n": 51,
+       "mediana": 0.6474,
+       "media_geom": 0.5185,
+       "p25": 0.4153,
+       "p75": 0.7951,
+       "frac_en_banda": 0.2157,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "cluster_pc_en_publicados": {
+       "n": 51,
+       "mediana": 0.4577,
+       "media_geom": 0.4208,
+       "p25": 0.2703,
+       "p75": 0.7671,
+       "frac_en_banda": 0.2157,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 35,
+        "mediana": 0.6474,
+        "media_geom": 0.5257,
+        "p25": 0.4036,
+        "p75": 0.7751,
+        "frac_en_banda": 0.2571,
+        "mediana_en_banda": false,
+        "n_menor_30": false
+       },
+       "OCR": {
+        "n": 16,
+        "mediana": 0.6399,
+        "media_geom": 0.5031,
+        "p25": 0.4283,
+        "p75": 0.7947,
+        "frac_en_banda": 0.125,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "nevado": {
+      "n_pares": 24,
+      "n_no_publicados": 1,
+      "publicado": {
+       "n": 23,
+       "mediana": 0.8685,
+       "media_geom": 0.9115,
+       "p25": 0.7159,
+       "p75": 1.2083,
+       "frac_en_banda": 0.4783,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 23,
+       "mediana": 0.8602,
+       "media_geom": 0.8811,
+       "p25": 0.6601,
+       "p75": 1.2,
+       "frac_en_banda": 0.4348,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 21,
+        "mediana": 0.9079,
+        "media_geom": 0.9399,
+        "p25": 0.7633,
+        "p75": 1.21,
+        "frac_en_banda": 0.5238,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 2,
+        "mediana": 0.6607,
+        "media_geom": 0.6606,
+        "p25": 0.6562,
+        "p75": 0.6652,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     }
+    },
+    "por_volcan": {
+     "Lascar": {
+      "n_pares": 15,
+      "n_no_publicados": 3,
+      "publicado": {
+       "n": 12,
+       "mediana": 0.4718,
+       "media_geom": 0.383,
+       "p25": 0.4218,
+       "p75": 0.5818,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 12,
+       "mediana": 0.4172,
+       "media_geom": 0.345,
+       "p25": 0.3646,
+       "p75": 0.5164,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 8,
+        "mediana": 0.4718,
+        "media_geom": 0.4847,
+        "p25": 0.4235,
+        "p75": 0.5818,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 4,
+        "mediana": 0.4968,
+        "media_geom": 0.2392,
+        "p25": 0.336,
+        "p75": 0.5788,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "Lastarria": {
+      "n_pares": 9,
+      "n_no_publicados": 2,
+      "publicado": {
+       "n": 7,
+       "mediana": 0.2571,
+       "media_geom": 0.2323,
+       "p25": 0.1586,
+       "p75": 0.3248,
+       "frac_en_banda": 0.1429,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 7,
+       "mediana": 0.2571,
+       "media_geom": 0.2292,
+       "p25": 0.1565,
+       "p75": 0.324,
+       "frac_en_banda": 0.1429,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 6,
+        "mediana": 0.2221,
+        "media_geom": 0.2131,
+        "p25": 0.1443,
+        "p75": 0.2593,
+        "frac_en_banda": 0.1667,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 1,
+        "mediana": 0.3895,
+        "media_geom": 0.3895,
+        "p25": 0.3895,
+        "p75": 0.3895,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "Isluga": {
+      "n_pares": 20,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 20,
+       "mediana": 0.7015,
+       "media_geom": 0.6287,
+       "p25": 0.5436,
+       "p75": 0.806,
+       "frac_en_banda": 0.3,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 20,
+       "mediana": 0.6,
+       "media_geom": 0.5062,
+       "p25": 0.3092,
+       "p75": 0.8013,
+       "frac_en_banda": 0.35,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 13,
+        "mediana": 0.7167,
+        "media_geom": 0.6821,
+        "p25": 0.5514,
+        "p75": 0.8189,
+        "frac_en_banda": 0.3846,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 7,
+        "mediana": 0.6219,
+        "media_geom": 0.5403,
+        "p25": 0.4516,
+        "p75": 0.7934,
+        "frac_en_banda": 0.1429,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "Tupungatito": {
+      "n_pares": 11,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 11,
+       "mediana": 0.83,
+       "media_geom": 0.9163,
+       "p25": 0.7075,
+       "p75": 1.2133,
+       "frac_en_banda": 0.4545,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 11,
+       "mediana": 0.8316,
+       "media_geom": 0.9168,
+       "p25": 0.7083,
+       "p75": 1.2125,
+       "frac_en_banda": 0.4545,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 10,
+        "mediana": 0.8832,
+        "media_geom": 0.9481,
+        "p25": 0.7777,
+        "p75": 1.2167,
+        "frac_en_banda": 0.5,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 1,
+        "mediana": 0.6517,
+        "media_geom": 0.6517,
+        "p25": 0.6517,
+        "p75": 0.6517,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "PlanchonPeteroa": {
+      "n_pares": 2,
+      "n_no_publicados": 1,
+      "publicado": {
+       "n": 1,
+       "mediana": 1.12,
+       "media_geom": 1.12,
+       "p25": 1.12,
+       "p75": 1.12,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 1,
+       "mediana": 1.125,
+       "media_geom": 1.125,
+       "p25": 1.125,
+       "p75": 1.125,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 1,
+        "mediana": 1.12,
+        "media_geom": 1.12,
+        "p25": 1.12,
+        "p75": 1.12,
+        "frac_en_banda": 1.0,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       }
+      }
+     },
+     "NevadosDeChillan": {
+      "n_pares": 4,
+      "n_no_publicados": 1,
+      "publicado": {
+       "n": 3,
+       "mediana": 1.2683,
+       "media_geom": 1.2855,
+       "p25": 1.1919,
+       "p75": 1.3849,
+       "frac_en_banda": 0.3333,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 3,
+       "mediana": 1.2667,
+       "media_geom": 1.2828,
+       "p25": 1.1889,
+       "p75": 1.3833,
+       "frac_en_banda": 0.3333,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 3,
+        "mediana": 1.2683,
+        "media_geom": 1.2855,
+        "p25": 1.1919,
+        "p75": 1.3849,
+        "frac_en_banda": 0.3333,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Llaima": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Villarrica": {
+      "n_pares": 5,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 5,
+       "mediana": 0.86,
+       "media_geom": 0.7939,
+       "p25": 0.6946,
+       "p75": 0.8685,
+       "frac_en_banda": 0.6,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 5,
+       "mediana": 0.6701,
+       "media_geom": 0.6806,
+       "p25": 0.5382,
+       "p75": 0.8602,
+       "frac_en_banda": 0.4,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 4,
+        "mediana": 0.8643,
+        "media_geom": 0.8284,
+        "p25": 0.8187,
+        "p75": 0.8783,
+        "frac_en_banda": 0.75,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 1,
+        "mediana": 0.6697,
+        "media_geom": 0.6697,
+        "p25": 0.6697,
+        "p75": 0.6697,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "Copahue": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PuyehueCordonCaulle": {
+      "n_pares": 13,
+      "n_no_publicados": 2,
+      "publicado": {
+       "n": 11,
+       "mediana": 0.7485,
+       "media_geom": 0.7897,
+       "p25": 0.724,
+       "p75": 0.9324,
+       "frac_en_banda": 0.2727,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 11,
+       "mediana": 0.4639,
+       "media_geom": 0.5025,
+       "p25": 0.2831,
+       "p75": 0.8433,
+       "frac_en_banda": 0.1818,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 8,
+        "mediana": 0.7473,
+        "media_geom": 0.7349,
+        "p25": 0.708,
+        "p75": 0.9063,
+        "frac_en_banda": 0.375,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 3,
+        "mediana": 0.7958,
+        "media_geom": 0.957,
+        "p25": 0.7653,
+        "p75": 1.1473,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "Chaiten": {
+      "n_pares": 4,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 4,
+       "mediana": 0.827,
+       "media_geom": 0.8251,
+       "p25": 0.6946,
+       "p75": 0.99,
+       "frac_en_banda": 0.5,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 4,
+       "mediana": 0.8265,
+       "media_geom": 0.8231,
+       "p25": 0.6939,
+       "p75": 0.9875,
+       "frac_en_banda": 0.5,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 4,
+        "mediana": 0.827,
+        "media_geom": 0.8251,
+        "p25": 0.6946,
+        "p75": 0.99,
+        "frac_en_banda": 0.5,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    }
+   },
+   "VIIRS750": {
+    "total": {
+     "n_pares": 18,
+     "n_no_publicados": 3,
+     "publicado": {
+      "n": 15,
+      "mediana": 0.9214,
+      "media_geom": 0.7864,
+      "p25": 0.4509,
+      "p75": 1.088,
+      "frac_en_banda": 0.4667,
+      "mediana_en_banda": true,
+      "n_menor_30": true
+     },
+     "cluster_pc_en_publicados": {
+      "n": 15,
+      "mediana": 0.9214,
+      "media_geom": 0.7864,
+      "p25": 0.4509,
+      "p75": 1.088,
+      "frac_en_banda": 0.4667,
+      "mediana_en_banda": true,
+      "n_menor_30": true
+     },
+     "por_fuente": {
+      "CONS": {
+       "n": 15,
+       "mediana": 0.9214,
+       "media_geom": 0.7864,
+       "p25": 0.4509,
+       "p75": 1.088,
+       "frac_en_banda": 0.4667,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "OCR": {
+       "n": 0
+      }
+     }
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pares": 12,
+      "n_no_publicados": 1,
+      "publicado": {
+       "n": 11,
+       "mediana": 0.9214,
+       "media_geom": 0.7671,
+       "p25": 0.4165,
+       "p75": 1.0497,
+       "frac_en_banda": 0.3636,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 11,
+       "mediana": 0.9214,
+       "media_geom": 0.7671,
+       "p25": 0.4165,
+       "p75": 1.0497,
+       "frac_en_banda": 0.3636,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 11,
+        "mediana": 0.9214,
+        "media_geom": 0.7671,
+        "p25": 0.4165,
+        "p75": 1.0497,
+        "frac_en_banda": 0.3636,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "nevado": {
+      "n_pares": 6,
+      "n_no_publicados": 2,
+      "publicado": {
+       "n": 4,
+       "mediana": 0.9943,
+       "media_geom": 0.8419,
+       "p25": 0.7686,
+       "p75": 1.1268,
+       "frac_en_banda": 0.75,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 4,
+       "mediana": 0.9943,
+       "media_geom": 0.8419,
+       "p25": 0.7686,
+       "p75": 1.1268,
+       "frac_en_banda": 0.75,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 4,
+        "mediana": 0.9943,
+        "media_geom": 0.8419,
+        "p25": 0.7686,
+        "p75": 1.1268,
+        "frac_en_banda": 0.75,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    },
+    "por_volcan": {
+     "Lascar": {
+      "n_pares": 3,
+      "n_no_publicados": 1,
+      "publicado": {
+       "n": 2,
+       "mediana": 0.609,
+       "media_geom": 0.5917,
+       "p25": 0.5369,
+       "p75": 0.6811,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 2,
+       "mediana": 0.609,
+       "media_geom": 0.5917,
+       "p25": 0.5369,
+       "p75": 0.6811,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 2,
+        "mediana": 0.609,
+        "media_geom": 0.5917,
+        "p25": 0.5369,
+        "p75": 0.6811,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Lastarria": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Isluga": {
+      "n_pares": 2,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 2,
+       "mediana": 2.1149,
+       "media_geom": 1.746,
+       "p25": 1.5182,
+       "p75": 2.7116,
+       "frac_en_banda": 0.5,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 2,
+       "mediana": 2.1149,
+       "media_geom": 1.746,
+       "p25": 1.5182,
+       "p75": 2.7116,
+       "frac_en_banda": 0.5,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 2,
+        "mediana": 2.1149,
+        "media_geom": 1.746,
+        "p25": 1.5182,
+        "p75": 2.7116,
+        "frac_en_banda": 0.5,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Tupungatito": {
+      "n_pares": 1,
+      "n_no_publicados": 1,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PlanchonPeteroa": {
+      "n_pares": 1,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 1,
+       "mediana": 1.0667,
+       "media_geom": 1.0667,
+       "p25": 1.0667,
+       "p75": 1.0667,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 1,
+       "mediana": 1.0667,
+       "media_geom": 1.0667,
+       "p25": 1.0667,
+       "p75": 1.0667,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 1,
+        "mediana": 1.0667,
+        "media_geom": 1.0667,
+        "p25": 1.0667,
+        "p75": 1.0667,
+        "frac_en_banda": 1.0,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "NevadosDeChillan": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Llaima": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Villarrica": {
+      "n_pares": 5,
+      "n_no_publicados": 1,
+      "publicado": {
+       "n": 4,
+       "mediana": 0.9943,
+       "media_geom": 0.8419,
+       "p25": 0.7686,
+       "p75": 1.1268,
+       "frac_en_banda": 0.75,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 4,
+       "mediana": 0.9943,
+       "media_geom": 0.8419,
+       "p25": 0.7686,
+       "p75": 1.1268,
+       "frac_en_banda": 0.75,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 4,
+        "mediana": 0.9943,
+        "media_geom": 0.8419,
+        "p25": 0.7686,
+        "p75": 1.1268,
+        "frac_en_banda": 0.75,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Copahue": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PuyehueCordonCaulle": {
+      "n_pares": 6,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 6,
+       "mediana": 0.693,
+       "media_geom": 0.6019,
+       "p25": 0.2851,
+       "p75": 1.0291,
+       "frac_en_banda": 0.3333,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 6,
+       "mediana": 0.693,
+       "media_geom": 0.6019,
+       "p25": 0.2851,
+       "p75": 1.0291,
+       "frac_en_banda": 0.3333,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 6,
+        "mediana": 0.693,
+        "media_geom": 0.6019,
+        "p25": 0.2851,
+        "p75": 1.0291,
+        "frac_en_banda": 0.3333,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Chaiten": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "entre_535_y_571": {
+   "MODIS": {
+    "total": {
+     "n_pares": 0,
+     "n_no_publicados": 0,
+     "publicado": {
+      "n": 0
+     },
+     "cluster_pc_en_publicados": {
+      "n": 0
+     },
+     "por_fuente": {
+      "CONS": {
+       "n": 0
+      },
+      "OCR": {
+       "n": 0
+      }
+     }
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "nevado": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    },
+    "por_volcan": {
+     "Lascar": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Lastarria": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Isluga": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Tupungatito": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PlanchonPeteroa": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "NevadosDeChillan": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Llaima": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Villarrica": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Copahue": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PuyehueCordonCaulle": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Chaiten": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    }
+   },
+   "VIIRS375": {
+    "total": {
+     "n_pares": 11,
+     "n_no_publicados": 0,
+     "publicado": {
+      "n": 11,
+      "mediana": 0.8239,
+      "media_geom": 0.994,
+      "p25": 0.7173,
+      "p75": 1.2136,
+      "frac_en_banda": 0.3636,
+      "mediana_en_banda": true,
+      "n_menor_30": true
+     },
+     "cluster_pc_en_publicados": {
+      "n": 11,
+      "mediana": 0.8118,
+      "media_geom": 0.8611,
+      "p25": 0.6769,
+      "p75": 1.062,
+      "frac_en_banda": 0.3636,
+      "mediana_en_banda": true,
+      "n_menor_30": true
+     },
+     "por_fuente": {
+      "CONS": {
+       "n": 8,
+       "mediana": 0.9105,
+       "media_geom": 1.033,
+       "p25": 0.73,
+       "p75": 1.2692,
+       "frac_en_banda": 0.375,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "OCR": {
+       "n": 3,
+       "mediana": 0.8094,
+       "media_geom": 0.8971,
+       "p25": 0.7471,
+       "p75": 1.056,
+       "frac_en_banda": 0.3333,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      }
+     }
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pares": 11,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 11,
+       "mediana": 0.8239,
+       "media_geom": 0.994,
+       "p25": 0.7173,
+       "p75": 1.2136,
+       "frac_en_banda": 0.3636,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 11,
+       "mediana": 0.8118,
+       "media_geom": 0.8611,
+       "p25": 0.6769,
+       "p75": 1.062,
+       "frac_en_banda": 0.3636,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 8,
+        "mediana": 0.9105,
+        "media_geom": 1.033,
+        "p25": 0.73,
+        "p75": 1.2692,
+        "frac_en_banda": 0.375,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 3,
+        "mediana": 0.8094,
+        "media_geom": 0.8971,
+        "p25": 0.7471,
+        "p75": 1.056,
+        "frac_en_banda": 0.3333,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       }
+      }
+     },
+     "nevado": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    },
+    "por_volcan": {
+     "Lascar": {
+      "n_pares": 4,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 4,
+       "mediana": 0.7543,
+       "media_geom": 0.8957,
+       "p25": 0.681,
+       "p75": 1.0436,
+       "frac_en_banda": 0.25,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 4,
+       "mediana": 0.6769,
+       "media_geom": 0.7955,
+       "p25": 0.6321,
+       "p75": 0.9368,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 3,
+        "mediana": 0.8239,
+        "media_geom": 0.9795,
+        "p25": 0.747,
+        "p75": 1.2632,
+        "frac_en_banda": 0.3333,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 1,
+        "mediana": 0.6847,
+        "media_geom": 0.6847,
+        "p25": 0.6847,
+        "p75": 0.6847,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "Lastarria": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Isluga": {
+      "n_pares": 4,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 4,
+       "mediana": 0.9032,
+       "media_geom": 0.8854,
+       "p25": 0.7532,
+       "p75": 1.0734,
+       "frac_en_banda": 0.5,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 4,
+       "mediana": 0.8767,
+       "media_geom": 0.8015,
+       "p25": 0.7438,
+       "p75": 0.9563,
+       "frac_en_banda": 0.75,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 2,
+        "mediana": 0.7908,
+        "media_geom": 0.7634,
+        "p25": 0.6877,
+        "p75": 0.8939,
+        "frac_en_banda": 0.5,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 2,
+        "mediana": 1.056,
+        "media_geom": 1.0268,
+        "p25": 0.9327,
+        "p75": 1.1792,
+        "frac_en_banda": 0.5,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       }
+      }
+     },
+     "Tupungatito": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PlanchonPeteroa": {
+      "n_pares": 1,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 1,
+       "mediana": 0.7499,
+       "media_geom": 0.7499,
+       "p25": 0.7499,
+       "p75": 0.7499,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 1,
+       "mediana": 0.7497,
+       "media_geom": 0.7497,
+       "p25": 0.7497,
+       "p75": 0.7497,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 1,
+        "mediana": 0.7499,
+        "media_geom": 0.7499,
+        "p25": 0.7499,
+        "p75": 0.7499,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "NevadosDeChillan": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Llaima": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Villarrica": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Copahue": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PuyehueCordonCaulle": {
+      "n_pares": 2,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 2,
+       "mediana": 1.9653,
+       "media_geom": 1.7765,
+       "p25": 1.545,
+       "p75": 2.3855,
+       "frac_en_banda": 0.5,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 2,
+       "mediana": 1.2549,
+       "media_geom": 1.248,
+       "p25": 1.1894,
+       "p75": 1.3203,
+       "frac_en_banda": 0.5,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 2,
+        "mediana": 1.9653,
+        "media_geom": 1.7765,
+        "p25": 1.545,
+        "p75": 2.3855,
+        "frac_en_banda": 0.5,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Chaiten": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    }
+   },
+   "VIIRS750": {
+    "total": {
+     "n_pares": 2,
+     "n_no_publicados": 0,
+     "publicado": {
+      "n": 2,
+      "mediana": 0.9146,
+      "media_geom": 0.6232,
+      "p25": 0.5799,
+      "p75": 1.2493,
+      "frac_en_banda": 0.0,
+      "mediana_en_banda": true,
+      "n_menor_30": true
+     },
+     "cluster_pc_en_publicados": {
+      "n": 2,
+      "mediana": 0.9146,
+      "media_geom": 0.6232,
+      "p25": 0.5799,
+      "p75": 1.2493,
+      "frac_en_banda": 0.0,
+      "mediana_en_banda": true,
+      "n_menor_30": true
+     },
+     "por_fuente": {
+      "CONS": {
+       "n": 2,
+       "mediana": 0.9146,
+       "media_geom": 0.6232,
+       "p25": 0.5799,
+       "p75": 1.2493,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "OCR": {
+       "n": 0
+      }
+     }
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pares": 2,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 2,
+       "mediana": 0.9146,
+       "media_geom": 0.6232,
+       "p25": 0.5799,
+       "p75": 1.2493,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 2,
+       "mediana": 0.9146,
+       "media_geom": 0.6232,
+       "p25": 0.5799,
+       "p75": 1.2493,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 2,
+        "mediana": 0.9146,
+        "media_geom": 0.6232,
+        "p25": 0.5799,
+        "p75": 1.2493,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "nevado": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    },
+    "por_volcan": {
+     "Lascar": {
+      "n_pares": 1,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 1,
+       "mediana": 0.2452,
+       "media_geom": 0.2452,
+       "p25": 0.2452,
+       "p75": 0.2452,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 1,
+       "mediana": 0.2452,
+       "media_geom": 0.2452,
+       "p25": 0.2452,
+       "p75": 0.2452,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 1,
+        "mediana": 0.2452,
+        "media_geom": 0.2452,
+        "p25": 0.2452,
+        "p75": 0.2452,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Lastarria": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Isluga": {
+      "n_pares": 1,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 1,
+       "mediana": 1.584,
+       "media_geom": 1.584,
+       "p25": 1.584,
+       "p75": 1.584,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 1,
+       "mediana": 1.584,
+       "media_geom": 1.584,
+       "p25": 1.584,
+       "p75": 1.584,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 1,
+        "mediana": 1.584,
+        "media_geom": 1.584,
+        "p25": 1.584,
+        "p75": 1.584,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Tupungatito": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PlanchonPeteroa": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "NevadosDeChillan": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Llaima": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Villarrica": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Copahue": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PuyehueCordonCaulle": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Chaiten": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    }
+   }
+  },
+  "despues_571": {
+   "MODIS": {
+    "total": {
+     "n_pares": 1,
+     "n_no_publicados": 0,
+     "publicado": {
+      "n": 1,
+      "mediana": 0.8124,
+      "media_geom": 0.8124,
+      "p25": 0.8124,
+      "p75": 0.8124,
+      "frac_en_banda": 1.0,
+      "mediana_en_banda": true,
+      "n_menor_30": true
+     },
+     "cluster_pc_en_publicados": {
+      "n": 1,
+      "mediana": 0.8124,
+      "media_geom": 0.8124,
+      "p25": 0.8124,
+      "p75": 0.8124,
+      "frac_en_banda": 1.0,
+      "mediana_en_banda": true,
+      "n_menor_30": true
+     },
+     "por_fuente": {
+      "CONS": {
+       "n": 1,
+       "mediana": 0.8124,
+       "media_geom": 0.8124,
+       "p25": 0.8124,
+       "p75": 0.8124,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "OCR": {
+       "n": 0
+      }
+     }
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "nevado": {
+      "n_pares": 1,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 1,
+       "mediana": 0.8124,
+       "media_geom": 0.8124,
+       "p25": 0.8124,
+       "p75": 0.8124,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 1,
+       "mediana": 0.8124,
+       "media_geom": 0.8124,
+       "p25": 0.8124,
+       "p75": 0.8124,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 1,
+        "mediana": 0.8124,
+        "media_geom": 0.8124,
+        "p25": 0.8124,
+        "p75": 0.8124,
+        "frac_en_banda": 1.0,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    },
+    "por_volcan": {
+     "Lascar": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Lastarria": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Isluga": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Tupungatito": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PlanchonPeteroa": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "NevadosDeChillan": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Llaima": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Villarrica": {
+      "n_pares": 1,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 1,
+       "mediana": 0.8124,
+       "media_geom": 0.8124,
+       "p25": 0.8124,
+       "p75": 0.8124,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 1,
+       "mediana": 0.8124,
+       "media_geom": 0.8124,
+       "p25": 0.8124,
+       "p75": 0.8124,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 1,
+        "mediana": 0.8124,
+        "media_geom": 0.8124,
+        "p25": 0.8124,
+        "p75": 0.8124,
+        "frac_en_banda": 1.0,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Copahue": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PuyehueCordonCaulle": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Chaiten": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    }
+   },
+   "VIIRS375": {
+    "total": {
+     "n_pares": 104,
+     "n_no_publicados": 0,
+     "publicado": {
+      "n": 104,
+      "mediana": 0.8295,
+      "media_geom": 0.771,
+      "p25": 0.5332,
+      "p75": 1.1441,
+      "frac_en_banda": 0.3173,
+      "mediana_en_banda": true,
+      "n_menor_30": false
+     },
+     "cluster_pc_en_publicados": {
+      "n": 104,
+      "mediana": 0.6764,
+      "media_geom": 0.593,
+      "p25": 0.4111,
+      "p75": 0.9607,
+      "frac_en_banda": 0.3462,
+      "mediana_en_banda": false,
+      "n_menor_30": false
+     },
+     "por_fuente": {
+      "CONS": {
+       "n": 89,
+       "mediana": 0.8385,
+       "media_geom": 0.8175,
+       "p25": 0.5823,
+       "p75": 1.1421,
+       "frac_en_banda": 0.3483,
+       "mediana_en_banda": true,
+       "n_menor_30": false
+      },
+      "OCR": {
+       "n": 15,
+       "mediana": 0.6083,
+       "media_geom": 0.5449,
+       "p25": 0.4562,
+       "p75": 1.231,
+       "frac_en_banda": 0.1333,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      }
+     }
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pares": 79,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 79,
+       "mediana": 0.7961,
+       "media_geom": 0.7732,
+       "p25": 0.517,
+       "p75": 1.0952,
+       "frac_en_banda": 0.3038,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "cluster_pc_en_publicados": {
+       "n": 79,
+       "mediana": 0.6273,
+       "media_geom": 0.5859,
+       "p25": 0.3999,
+       "p75": 0.9259,
+       "frac_en_banda": 0.3165,
+       "mediana_en_banda": false,
+       "n_menor_30": false
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 66,
+        "mediana": 0.8057,
+        "media_geom": 0.7853,
+        "p25": 0.5406,
+        "p75": 1.0701,
+        "frac_en_banda": 0.3333,
+        "mediana_en_banda": true,
+        "n_menor_30": false
+       },
+       "OCR": {
+        "n": 13,
+        "mediana": 0.6819,
+        "media_geom": 0.7147,
+        "p25": 0.4692,
+        "p75": 1.4493,
+        "frac_en_banda": 0.1538,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "nevado": {
+      "n_pares": 25,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 25,
+       "mediana": 0.8614,
+       "media_geom": 0.7641,
+       "p25": 0.5442,
+       "p75": 1.2236,
+       "frac_en_banda": 0.36,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 25,
+       "mediana": 0.8353,
+       "media_geom": 0.6159,
+       "p25": 0.5417,
+       "p75": 0.9857,
+       "frac_en_banda": 0.44,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 23,
+        "mediana": 0.9571,
+        "media_geom": 0.9174,
+        "p25": 0.6777,
+        "p75": 1.249,
+        "frac_en_banda": 0.3913,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 2,
+        "mediana": 0.2505,
+        "media_geom": 0.0934,
+        "p25": 0.1343,
+        "p75": 0.3668,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     }
+    },
+    "por_volcan": {
+     "Lascar": {
+      "n_pares": 15,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 15,
+       "mediana": 0.63,
+       "media_geom": 0.6348,
+       "p25": 0.4826,
+       "p75": 0.7712,
+       "frac_en_banda": 0.0667,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 15,
+       "mediana": 0.5615,
+       "media_geom": 0.5616,
+       "p25": 0.394,
+       "p75": 0.7175,
+       "frac_en_banda": 0.1333,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 11,
+        "mediana": 0.63,
+        "media_geom": 0.6188,
+        "p25": 0.4826,
+        "p75": 0.7712,
+        "frac_en_banda": 0.0909,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 4,
+        "mediana": 0.6209,
+        "media_geom": 0.6808,
+        "p25": 0.5143,
+        "p75": 0.8844,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "Lastarria": {
+      "n_pares": 8,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 8,
+       "mediana": 1.05,
+       "media_geom": 1.1727,
+       "p25": 0.7867,
+       "p75": 2.4806,
+       "frac_en_banda": 0.375,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 8,
+       "mediana": 0.955,
+       "media_geom": 0.8209,
+       "p25": 0.7507,
+       "p75": 1.125,
+       "frac_en_banda": 0.625,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 7,
+        "mediana": 0.905,
+        "media_geom": 1.0101,
+        "p25": 0.7217,
+        "p75": 1.7925,
+        "frac_en_banda": 0.4286,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 1,
+        "mediana": 3.3333,
+        "media_geom": 3.3333,
+        "p25": 3.3333,
+        "p75": 3.3333,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "Isluga": {
+      "n_pares": 28,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 28,
+       "mediana": 0.5545,
+       "media_geom": 0.5283,
+       "p25": 0.4424,
+       "p75": 0.8171,
+       "frac_en_banda": 0.2857,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 28,
+       "mediana": 0.4971,
+       "media_geom": 0.4097,
+       "p25": 0.3067,
+       "p75": 0.7811,
+       "frac_en_banda": 0.1786,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 24,
+        "mediana": 0.5545,
+        "media_geom": 0.5716,
+        "p25": 0.4424,
+        "p75": 0.8171,
+        "frac_en_banda": 0.2917,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 4,
+        "mediana": 0.5388,
+        "media_geom": 0.3293,
+        "p25": 0.3621,
+        "p75": 0.7094,
+        "frac_en_banda": 0.25,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "Tupungatito": {
+      "n_pares": 15,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 15,
+       "mediana": 0.6725,
+       "media_geom": 0.5576,
+       "p25": 0.4365,
+       "p75": 0.9607,
+       "frac_en_banda": 0.3333,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 15,
+       "mediana": 0.675,
+       "media_geom": 0.4775,
+       "p25": 0.3638,
+       "p75": 0.8478,
+       "frac_en_banda": 0.3333,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 13,
+        "mediana": 0.772,
+        "media_geom": 0.7339,
+        "p25": 0.5353,
+        "p75": 1.06,
+        "frac_en_banda": 0.3846,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 2,
+        "mediana": 0.2505,
+        "media_geom": 0.0934,
+        "p25": 0.1343,
+        "p75": 0.3668,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "PlanchonPeteroa": {
+      "n_pares": 5,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 5,
+       "mediana": 1.011,
+       "media_geom": 1.1801,
+       "p25": 0.9422,
+       "p75": 1.112,
+       "frac_en_banda": 0.8,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 5,
+       "mediana": 1.01,
+       "media_geom": 1.1816,
+       "p25": 0.9444,
+       "p75": 1.12,
+       "frac_en_banda": 0.8,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 4,
+        "mediana": 1.0271,
+        "media_geom": 1.2266,
+        "p25": 0.9395,
+        "p75": 1.414,
+        "frac_en_banda": 0.75,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 1,
+        "mediana": 1.011,
+        "media_geom": 1.011,
+        "p25": 1.011,
+        "p75": 1.011,
+        "frac_en_banda": 1.0,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       }
+      }
+     },
+     "NevadosDeChillan": {
+      "n_pares": 2,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 2,
+       "mediana": 0.8614,
+       "media_geom": 0.8427,
+       "p25": 0.7721,
+       "p75": 0.9507,
+       "frac_en_banda": 0.5,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 2,
+       "mediana": 0.8651,
+       "media_geom": 0.8463,
+       "p25": 0.7754,
+       "p75": 0.9548,
+       "frac_en_banda": 0.5,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 2,
+        "mediana": 0.8614,
+        "media_geom": 0.8427,
+        "p25": 0.7721,
+        "p75": 0.9507,
+        "frac_en_banda": 0.5,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Llaima": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Villarrica": {
+      "n_pares": 1,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 1,
+       "mediana": 0.8365,
+       "media_geom": 0.8365,
+       "p25": 0.8365,
+       "p75": 0.8365,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 1,
+       "mediana": 0.8353,
+       "media_geom": 0.8353,
+       "p25": 0.8353,
+       "p75": 0.8353,
+       "frac_en_banda": 1.0,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 1,
+        "mediana": 0.8365,
+        "media_geom": 0.8365,
+        "p25": 0.8365,
+        "p75": 0.8365,
+        "frac_en_banda": 1.0,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Copahue": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PuyehueCordonCaulle": {
+      "n_pares": 23,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 23,
+       "mediana": 1.0783,
+       "media_geom": 1.1035,
+       "p25": 0.8522,
+       "p75": 1.4535,
+       "frac_en_banda": 0.3478,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 23,
+       "mediana": 0.7552,
+       "media_geom": 0.7107,
+       "p25": 0.5276,
+       "p75": 1.055,
+       "frac_en_banda": 0.3913,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 20,
+        "mediana": 1.0602,
+        "media_geom": 1.0977,
+        "p25": 0.8803,
+        "p75": 1.4347,
+        "frac_en_banda": 0.4,
+        "mediana_en_banda": true,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 3,
+        "mediana": 1.4493,
+        "media_geom": 1.1426,
+        "p25": 0.9462,
+        "p75": 1.886,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       }
+      }
+     },
+     "Chaiten": {
+      "n_pares": 7,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 7,
+       "mediana": 1.3457,
+       "media_geom": 1.4411,
+       "p25": 1.249,
+       "p75": 1.7253,
+       "frac_en_banda": 0.2857,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 7,
+       "mediana": 0.9818,
+       "media_geom": 0.9291,
+       "p25": 0.8063,
+       "p75": 1.0857,
+       "frac_en_banda": 0.5714,
+       "mediana_en_banda": true,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 7,
+        "mediana": 1.3457,
+        "media_geom": 1.4411,
+        "p25": 1.249,
+        "p75": 1.7253,
+        "frac_en_banda": 0.2857,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    }
+   },
+   "VIIRS750": {
+    "total": {
+     "n_pares": 12,
+     "n_no_publicados": 4,
+     "publicado": {
+      "n": 8,
+      "mediana": 0.3232,
+      "media_geom": 0.2729,
+      "p25": 0.0931,
+      "p75": 0.576,
+      "frac_en_banda": 0.0,
+      "mediana_en_banda": false,
+      "n_menor_30": true
+     },
+     "cluster_pc_en_publicados": {
+      "n": 8,
+      "mediana": 0.3232,
+      "media_geom": 0.2729,
+      "p25": 0.0931,
+      "p75": 0.576,
+      "frac_en_banda": 0.0,
+      "mediana_en_banda": false,
+      "n_menor_30": true
+     },
+     "por_fuente": {
+      "CONS": {
+       "n": 8,
+       "mediana": 0.3232,
+       "media_geom": 0.2729,
+       "p25": 0.0931,
+       "p75": 0.576,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "OCR": {
+       "n": 0
+      }
+     }
+    },
+    "por_estrato": {
+     "focal": {
+      "n_pares": 12,
+      "n_no_publicados": 4,
+      "publicado": {
+       "n": 8,
+       "mediana": 0.3232,
+       "media_geom": 0.2729,
+       "p25": 0.0931,
+       "p75": 0.576,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 8,
+       "mediana": 0.3232,
+       "media_geom": 0.2729,
+       "p25": 0.0931,
+       "p75": 0.576,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 8,
+        "mediana": 0.3232,
+        "media_geom": 0.2729,
+        "p25": 0.0931,
+        "p75": 0.576,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "nevado": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    },
+    "por_volcan": {
+     "Lascar": {
+      "n_pares": 3,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 3,
+       "mediana": 0.4,
+       "media_geom": 0.3781,
+       "p25": 0.3232,
+       "p75": 0.4742,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 3,
+       "mediana": 0.4,
+       "media_geom": 0.3781,
+       "p25": 0.3232,
+       "p75": 0.4742,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 3,
+        "mediana": 0.4,
+        "media_geom": 0.3781,
+        "p25": 0.3232,
+        "p75": 0.4742,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Lastarria": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Isluga": {
+      "n_pares": 1,
+      "n_no_publicados": 1,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Tupungatito": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PlanchonPeteroa": {
+      "n_pares": 1,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 1,
+       "mediana": 1.6687,
+       "media_geom": 1.6687,
+       "p25": 1.6687,
+       "p75": 1.6687,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 1,
+       "mediana": 1.6687,
+       "media_geom": 1.6687,
+       "p25": 1.6687,
+       "p75": 1.6687,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 1,
+        "mediana": 1.6687,
+        "media_geom": 1.6687,
+        "p25": 1.6687,
+        "p75": 1.6687,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "NevadosDeChillan": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Llaima": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Villarrica": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Copahue": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "PuyehueCordonCaulle": {
+      "n_pares": 7,
+      "n_no_publicados": 3,
+      "publicado": {
+       "n": 4,
+       "mediana": 0.0896,
+       "media_geom": 0.1359,
+       "p25": 0.0782,
+       "p75": 0.2371,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "cluster_pc_en_publicados": {
+       "n": 4,
+       "mediana": 0.0896,
+       "media_geom": 0.1359,
+       "p25": 0.0782,
+       "p75": 0.2371,
+       "frac_en_banda": 0.0,
+       "mediana_en_banda": false,
+       "n_menor_30": true
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 4,
+        "mediana": 0.0896,
+        "media_geom": 0.1359,
+        "p25": 0.0782,
+        "p75": 0.2371,
+        "frac_en_banda": 0.0,
+        "mediana_en_banda": false,
+        "n_menor_30": true
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     },
+     "Chaiten": {
+      "n_pares": 0,
+      "n_no_publicados": 0,
+      "publicado": {
+       "n": 0
+      },
+      "cluster_pc_en_publicados": {
+       "n": 0
+      },
+      "por_fuente": {
+       "CONS": {
+        "n": 0
+       },
+       "OCR": {
+        "n": 0
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "consistencia_mirova": {
+  "linea_base_s139": {
+   "TOTAL": {
+    "C1_frac_vecina_alerta": {
+     "k": 1414,
+     "n": 2484,
+     "frac": 0.5692,
+     "ic95": [
+      0.5497,
+      0.5886
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 720,
+    "C1_frac_noches_todas_alerta": {
+     "k": 184,
+     "n": 720,
+     "frac": 0.2556,
+     "ic95": [
+      0.2251,
+      0.2887
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 1326,
+     "n": 5390,
+     "frac": 0.246,
+     "ic95": [
+      0.2347,
+      0.2577
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 246,
+     "n": 1939,
+     "frac": 0.1269,
+     "ic95": [
+      0.1128,
+      0.1424
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 387,
+     "n": 557,
+     "frac": 0.6948,
+     "ic95": [
+      0.6553,
+      0.7316
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 6,
+     "n": 3168,
+     "frac": 0.0019,
+     "ic95": [
+      0.0009,
+      0.0041
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 934,
+     "n": 4813,
+     "frac": 0.1941,
+     "ic95": [
+      0.1831,
+      0.2055
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 541,
+     "n": 730,
+     "frac": 0.7411,
+     "ic95": [
+      0.7081,
+      0.7716
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 189,
+     "n": 1107,
+     "frac": 0.1707,
+     "ic95": [
+      0.1497,
+      0.194
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 300,
+     "n": 2858,
+     "frac": 0.105,
+     "ic95": [
+      0.0943,
+      0.1167
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 747,
+     "n": 3026,
+     "frac": 0.2469,
+     "ic95": [
+      0.2318,
+      0.2625
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 496,
+     "n": 747,
+     "frac": 0.664,
+     "ic95": [
+      0.6294,
+      0.6969
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 1431,
+     "n": 2279,
+     "frac": 0.6279,
+     "ic95": [
+      0.6079,
+      0.6475
+     ]
+    }
+   },
+   "focal": {
+    "C1_frac_vecina_alerta": {
+     "k": 1226,
+     "n": 1999,
+     "frac": 0.6133,
+     "ic95": [
+      0.5918,
+      0.6344
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 554,
+    "C1_frac_noches_todas_alerta": {
+     "k": 165,
+     "n": 554,
+     "frac": 0.2978,
+     "ic95": [
+      0.2613,
+      0.3372
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 1072,
+     "n": 2427,
+     "frac": 0.4417,
+     "ic95": [
+      0.422,
+      0.4615
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 228,
+     "n": 1465,
+     "frac": 0.1556,
+     "ic95": [
+      0.138,
+      0.1751
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 362,
+     "n": 503,
+     "frac": 0.7197,
+     "ic95": [
+      0.6789,
+      0.7572
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 4,
+     "n": 736,
+     "frac": 0.0054,
+     "ic95": [
+      0.0021,
+      0.0139
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 705,
+     "n": 1912,
+     "frac": 0.3687,
+     "ic95": [
+      0.3474,
+      0.3906
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 450,
+     "n": 561,
+     "frac": 0.8021,
+     "ic95": [
+      0.7672,
+      0.833
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 106,
+     "n": 250,
+     "frac": 0.424,
+     "ic95": [
+      0.3643,
+      0.486
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 185,
+     "n": 665,
+     "frac": 0.2782,
+     "ic95": [
+      0.2455,
+      0.3135
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 401,
+     "n": 707,
+     "frac": 0.5672,
+     "ic95": [
+      0.5304,
+      0.6032
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 261,
+     "n": 401,
+     "frac": 0.6509,
+     "ic95": [
+      0.603,
+      0.6959
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 154,
+     "n": 306,
+     "frac": 0.5033,
+     "ic95": [
+      0.4476,
+      0.5589
+     ]
+    }
+   },
+   "nevado": {
+    "C1_frac_vecina_alerta": {
+     "k": 188,
+     "n": 485,
+     "frac": 0.3876,
+     "ic95": [
+      0.3453,
+      0.4317
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 166,
+    "C1_frac_noches_todas_alerta": {
+     "k": 19,
+     "n": 166,
+     "frac": 0.1145,
+     "ic95": [
+      0.0745,
+      0.1718
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 254,
+     "n": 2963,
+     "frac": 0.0857,
+     "ic95": [
+      0.0762,
+      0.0963
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 18,
+     "n": 474,
+     "frac": 0.038,
+     "ic95": [
+      0.0242,
+      0.0592
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 25,
+     "n": 54,
+     "frac": 0.463,
+     "ic95": [
+      0.3369,
+      0.5939
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 2,
+     "n": 2432,
+     "frac": 0.0008,
+     "ic95": [
+      0.0002,
+      0.003
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 229,
+     "n": 2901,
+     "frac": 0.0789,
+     "ic95": [
+      0.0697,
+      0.0893
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 91,
+     "n": 169,
+     "frac": 0.5385,
+     "ic95": [
+      0.4633,
+      0.6119
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 83,
+     "n": 857,
+     "frac": 0.0968,
+     "ic95": [
+      0.0788,
+      0.1185
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 115,
+     "n": 2193,
+     "frac": 0.0524,
+     "ic95": [
+      0.0439,
+      0.0626
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 346,
+     "n": 2319,
+     "frac": 0.1492,
+     "ic95": [
+      0.1353,
+      0.1643
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 235,
+     "n": 346,
+     "frac": 0.6792,
+     "ic95": [
+      0.6283,
+      0.7262
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 1277,
+     "n": 1973,
+     "frac": 0.6472,
+     "ic95": [
+      0.6259,
+      0.668
+     ]
+    }
+   },
+   "Lascar": {
+    "C1_frac_vecina_alerta": {
+     "k": 310,
+     "n": 461,
+     "frac": 0.6725,
+     "ic95": [
+      0.6283,
+      0.7137
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 139,
+    "C1_frac_noches_todas_alerta": {
+     "k": 58,
+     "n": 139,
+     "frac": 0.4173,
+     "ic95": [
+      0.3386,
+      0.5004
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 277,
+     "n": 474,
+     "frac": 0.5844,
+     "ic95": [
+      0.5395,
+      0.6279
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 152,
+     "n": 362,
+     "frac": 0.4199,
+     "ic95": [
+      0.3701,
+      0.4713
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 210,
+     "n": 283,
+     "frac": 0.742,
+     "ic95": [
+      0.6881,
+      0.7895
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 78,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0469
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 67,
+     "n": 191,
+     "frac": 0.3508,
+     "ic95": [
+      0.2867,
+      0.4208
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 126,
+     "n": 142,
+     "frac": 0.8873,
+     "ic95": [
+      0.8248,
+      0.9294
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 13,
+     "n": 26,
+     "frac": 0.5,
+     "ic95": [
+      0.3206,
+      0.6794
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 23,
+     "n": 66,
+     "frac": 0.3485,
+     "ic95": [
+      0.2448,
+      0.4689
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 51,
+     "n": 76,
+     "frac": 0.6711,
+     "ic95": [
+      0.5594,
+      0.7662
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 19,
+     "n": 51,
+     "frac": 0.3725,
+     "ic95": [
+      0.2532,
+      0.5098
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 5,
+     "n": 25,
+     "frac": 0.2,
+     "ic95": [
+      0.0886,
+      0.3913
+     ]
+    }
+   },
+   "Lastarria": {
+    "C1_frac_vecina_alerta": {
+     "k": 158,
+     "n": 302,
+     "frac": 0.5232,
+     "ic95": [
+      0.4669,
+      0.5789
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 110,
+    "C1_frac_noches_todas_alerta": {
+     "k": 28,
+     "n": 110,
+     "frac": 0.2545,
+     "ic95": [
+      0.1824,
+      0.3433
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 198,
+     "n": 430,
+     "frac": 0.4605,
+     "ic95": [
+      0.4139,
+      0.5077
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 0,
+     "n": 301,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0126
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 89,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0414
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 195,
+     "n": 422,
+     "frac": 0.4621,
+     "ic95": [
+      0.4151,
+      0.5098
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 101,
+     "n": 119,
+     "frac": 0.8487,
+     "ic95": [
+      0.7735,
+      0.9021
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 16,
+     "n": 26,
+     "frac": 0.6154,
+     "ic95": [
+      0.4253,
+      0.7757
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 23,
+     "n": 59,
+     "frac": 0.3898,
+     "ic95": [
+      0.2758,
+      0.5173
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 54,
+     "n": 84,
+     "frac": 0.6429,
+     "ic95": [
+      0.5362,
+      0.737
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 24,
+     "n": 54,
+     "frac": 0.4444,
+     "ic95": [
+      0.32,
+      0.5762
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 6,
+     "n": 30,
+     "frac": 0.2,
+     "ic95": [
+      0.095,
+      0.3731
+     ]
+    }
+   },
+   "Isluga": {
+    "C1_frac_vecina_alerta": {
+     "k": 288,
+     "n": 480,
+     "frac": 0.6,
+     "ic95": [
+      0.5555,
+      0.6429
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 138,
+    "C1_frac_noches_todas_alerta": {
+     "k": 39,
+     "n": 138,
+     "frac": 0.2826,
+     "ic95": [
+      0.2142,
+      0.3628
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 268,
+     "n": 465,
+     "frac": 0.5763,
+     "ic95": [
+      0.531,
+      0.6205
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 32,
+     "n": 343,
+     "frac": 0.0933,
+     "ic95": [
+      0.0669,
+      0.1287
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 59,
+     "n": 92,
+     "frac": 0.6413,
+     "ic95": [
+      0.5395,
+      0.7318
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 2,
+     "n": 53,
+     "frac": 0.0377,
+     "ic95": [
+      0.0104,
+      0.1275
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 207,
+     "n": 371,
+     "frac": 0.558,
+     "ic95": [
+      0.5071,
+      0.6076
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 126,
+     "n": 135,
+     "frac": 0.9333,
+     "ic95": [
+      0.8782,
+      0.9645
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 10,
+     "n": 17,
+     "frac": 0.5882,
+     "ic95": [
+      0.3601,
+      0.7839
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 16,
+     "n": 39,
+     "frac": 0.4103,
+     "ic95": [
+      0.2708,
+      0.5658
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 31,
+     "n": 48,
+     "frac": 0.6458,
+     "ic95": [
+      0.5044,
+      0.7657
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 27,
+     "n": 31,
+     "frac": 0.871,
+     "ic95": [
+      0.7115,
+      0.9487
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 13,
+     "n": 17,
+     "frac": 0.7647,
+     "ic95": [
+      0.5274,
+      0.9045
+     ]
+    }
+   },
+   "Tupungatito": {
+    "C1_frac_vecina_alerta": {
+     "k": 158,
+     "n": 310,
+     "frac": 0.5097,
+     "ic95": [
+      0.4543,
+      0.5649
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 91,
+    "C1_frac_noches_todas_alerta": {
+     "k": 14,
+     "n": 91,
+     "frac": 0.1538,
+     "ic95": [
+      0.0939,
+      0.2418
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 165,
+     "n": 477,
+     "frac": 0.3459,
+     "ic95": [
+      0.3046,
+      0.3897
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 12,
+     "n": 260,
+     "frac": 0.0462,
+     "ic95": [
+      0.0266,
+      0.0789
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 19,
+     "n": 30,
+     "frac": 0.6333,
+     "ic95": [
+      0.4551,
+      0.7813
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 1,
+     "n": 182,
+     "frac": 0.0055,
+     "ic95": [
+      0.001,
+      0.0305
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 146,
+     "n": 441,
+     "frac": 0.3311,
+     "ic95": [
+      0.2888,
+      0.3763
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 71,
+     "n": 98,
+     "frac": 0.7245,
+     "ic95": [
+      0.6288,
+      0.8032
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 30,
+     "n": 62,
+     "frac": 0.4839,
+     "ic95": [
+      0.3641,
+      0.6055
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 52,
+     "n": 171,
+     "frac": 0.3041,
+     "ic95": [
+      0.2401,
+      0.3767
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 95,
+     "n": 173,
+     "frac": 0.5491,
+     "ic95": [
+      0.4747,
+      0.6214
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 52,
+     "n": 95,
+     "frac": 0.5474,
+     "ic95": [
+      0.4474,
+      0.6437
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 35,
+     "n": 78,
+     "frac": 0.4487,
+     "ic95": [
+      0.3433,
+      0.5589
+     ]
+    }
+   },
+   "PlanchonPeteroa": {
+    "C1_frac_vecina_alerta": {
+     "k": 96,
+     "n": 226,
+     "frac": 0.4248,
+     "ic95": [
+      0.3621,
+      0.49
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 77,
+    "C1_frac_noches_todas_alerta": {
+     "k": 12,
+     "n": 77,
+     "frac": 0.1558,
+     "ic95": [
+      0.0915,
+      0.2529
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 123,
+     "n": 488,
+     "frac": 0.252,
+     "ic95": [
+      0.2156,
+      0.2924
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 6,
+     "n": 202,
+     "frac": 0.0297,
+     "ic95": [
+      0.0137,
+      0.0633
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 12,
+     "n": 26,
+     "frac": 0.4615,
+     "ic95": [
+      0.2876,
+      0.6454
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 2,
+     "n": 243,
+     "frac": 0.0082,
+     "ic95": [
+      0.0023,
+      0.0295
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 111,
+     "n": 460,
+     "frac": 0.2413,
+     "ic95": [
+      0.2044,
+      0.2824
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 48,
+     "n": 74,
+     "frac": 0.6486,
+     "ic95": [
+      0.535,
+      0.7476
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 26,
+     "n": 81,
+     "frac": 0.321,
+     "ic95": [
+      0.2294,
+      0.4288
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 38,
+     "n": 217,
+     "frac": 0.1751,
+     "ic95": [
+      0.1303,
+      0.2312
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 106,
+     "n": 236,
+     "frac": 0.4492,
+     "ic95": [
+      0.387,
+      0.5129
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 73,
+     "n": 106,
+     "frac": 0.6887,
+     "ic95": [
+      0.5952,
+      0.7689
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 72,
+     "n": 130,
+     "frac": 0.5538,
+     "ic95": [
+      0.4681,
+      0.6365
+     ]
+    }
+   },
+   "NevadosDeChillan": {
+    "C1_frac_vecina_alerta": {
+     "k": 2,
+     "n": 22,
+     "frac": 0.0909,
+     "ic95": [
+      0.0253,
+      0.2782
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 11,
+    "C1_frac_noches_todas_alerta": {
+     "k": 1,
+     "n": 11,
+     "frac": 0.0909,
+     "ic95": [
+      0.0162,
+      0.3774
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 12,
+     "n": 467,
+     "frac": 0.0257,
+     "ic95": [
+      0.0148,
+      0.0444
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 0,
+     "n": 30,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.1135
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 423,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.009
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 12,
+     "n": 465,
+     "frac": 0.0258,
+     "ic95": [
+      0.0148,
+      0.0446
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 0,
+     "n": 9,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.2992
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 9,
+     "n": 144,
+     "frac": 0.0625,
+     "ic95": [
+      0.0332,
+      0.1145
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 10,
+     "n": 350,
+     "frac": 0.0286,
+     "ic95": [
+      0.0156,
+      0.0518
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 45,
+     "n": 396,
+     "frac": 0.1136,
+     "ic95": [
+      0.086,
+      0.1487
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 20,
+     "n": 45,
+     "frac": 0.4444,
+     "ic95": [
+      0.3094,
+      0.5882
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 120,
+     "n": 351,
+     "frac": 0.3419,
+     "ic95": [
+      0.2942,
+      0.393
+     ]
+    }
+   },
+   "Llaima": {
+    "C1_frac_vecina_alerta": {
+     "k": 2,
+     "n": 7,
+     "frac": 0.2857,
+     "ic95": [
+      0.0822,
+      0.6411
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 2,
+    "C1_frac_noches_todas_alerta": {
+     "k": 0,
+     "n": 2,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.6576
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 3,
+     "n": 491,
+     "frac": 0.0061,
+     "ic95": [
+      0.0021,
+      0.0178
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 0,
+     "n": 6,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.3903
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 489,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0078
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 3,
+     "n": 491,
+     "frac": 0.0061,
+     "ic95": [
+      0.0021,
+      0.0178
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 0,
+     "n": 2,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.6576
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 2,
+     "n": 171,
+     "frac": 0.0117,
+     "ic95": [
+      0.0032,
+      0.0416
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 3,
+     "n": 430,
+     "frac": 0.007,
+     "ic95": [
+      0.0024,
+      0.0203
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 10,
+     "n": 461,
+     "frac": 0.0217,
+     "ic95": [
+      0.0118,
+      0.0395
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 7,
+     "n": 10,
+     "frac": 0.7,
+     "ic95": [
+      0.3968,
+      0.8922
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 322,
+     "n": 451,
+     "frac": 0.714,
+     "ic95": [
+      0.6706,
+      0.7537
+     ]
+    }
+   },
+   "Villarrica": {
+    "C1_frac_vecina_alerta": {
+     "k": 0,
+     "n": 46,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0771
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 24,
+    "C1_frac_noches_todas_alerta": {
+     "k": 0,
+     "n": 24,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.138
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 25,
+     "n": 516,
+     "frac": 0.0484,
+     "ic95": [
+      0.033,
+      0.0705
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 5,
+     "n": 66,
+     "frac": 0.0758,
+     "ic95": [
+      0.0328,
+      0.1654
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 5,
+     "n": 18,
+     "frac": 0.2778,
+     "ic95": [
+      0.125,
+      0.5087
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 443,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0086
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 20,
+     "n": 498,
+     "frac": 0.0402,
+     "ic95": [
+      0.0261,
+      0.0612
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 6,
+     "n": 24,
+     "frac": 0.25,
+     "ic95": [
+      0.12,
+      0.449
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 19,
+     "n": 159,
+     "frac": 0.1195,
+     "ic95": [
+      0.0778,
+      0.1791
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 19,
+     "n": 416,
+     "frac": 0.0457,
+     "ic95": [
+      0.0294,
+      0.0702
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 85,
+     "n": 431,
+     "frac": 0.1972,
+     "ic95": [
+      0.1624,
+      0.2374
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 68,
+     "n": 85,
+     "frac": 0.8,
+     "ic95": [
+      0.7028,
+      0.8712
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 245,
+     "n": 346,
+     "frac": 0.7081,
+     "ic95": [
+      0.6581,
+      0.7535
+     ]
+    }
+   },
+   "Copahue": {
+    "C1_frac_vecina_alerta": {
+     "k": 0,
+     "n": 7,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.3543
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 4,
+    "C1_frac_noches_todas_alerta": {
+     "k": 0,
+     "n": 4,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.4899
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 4,
+     "n": 484,
+     "frac": 0.0083,
+     "ic95": [
+      0.0032,
+      0.0211
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 0,
+     "n": 11,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.2588
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 0,
+     "n": 3,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.5615
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 1,
+     "n": 469,
+     "frac": 0.0021,
+     "ic95": [
+      0.0004,
+      0.012
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 4,
+     "n": 481,
+     "frac": 0.0083,
+     "ic95": [
+      0.0032,
+      0.0212
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 0,
+     "n": 4,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.4899
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 4,
+     "n": 166,
+     "frac": 0.0241,
+     "ic95": [
+      0.0094,
+      0.0603
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 4,
+     "n": 413,
+     "frac": 0.0097,
+     "ic95": [
+      0.0038,
+      0.0246
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 16,
+     "n": 445,
+     "frac": 0.036,
+     "ic95": [
+      0.0223,
+      0.0576
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 15,
+     "n": 16,
+     "frac": 0.9375,
+     "ic95": [
+      0.7167,
+      0.9889
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 336,
+     "n": 429,
+     "frac": 0.7832,
+     "ic95": [
+      0.7418,
+      0.8196
+     ]
+    }
+   },
+   "PuyehueCordonCaulle": {
+    "C1_frac_vecina_alerta": {
+     "k": 374,
+     "n": 530,
+     "frac": 0.7057,
+     "ic95": [
+      0.6655,
+      0.7429
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 90,
+    "C1_frac_noches_todas_alerta": {
+     "k": 28,
+     "n": 90,
+     "frac": 0.3111,
+     "ic95": [
+      0.2249,
+      0.4128
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 206,
+     "n": 570,
+     "frac": 0.3614,
+     "ic95": [
+      0.323,
+      0.4016
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 38,
+     "n": 257,
+     "frac": 0.1479,
+     "ic95": [
+      0.1097,
+      0.1964
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 81,
+     "n": 102,
+     "frac": 0.7941,
+     "ic95": [
+      0.7057,
+      0.8612
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 273,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0139
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 125,
+     "n": 468,
+     "frac": 0.2671,
+     "ic95": [
+      0.229,
+      0.309
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 49,
+     "n": 91,
+     "frac": 0.5385,
+     "ic95": [
+      0.4366,
+      0.6372
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 41,
+     "n": 100,
+     "frac": 0.41,
+     "ic95": [
+      0.3187,
+      0.508
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 85,
+     "n": 284,
+     "frac": 0.2993,
+     "ic95": [
+      0.249,
+      0.3549
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 159,
+     "n": 263,
+     "frac": 0.6046,
+     "ic95": [
+      0.5444,
+      0.6617
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 118,
+     "n": 159,
+     "frac": 0.7421,
+     "ic95": [
+      0.669,
+      0.8039
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 58,
+     "n": 104,
+     "frac": 0.5577,
+     "ic95": [
+      0.4619,
+      0.6494
+     ]
+    }
+   },
+   "Chaiten": {
+    "C1_frac_vecina_alerta": {
+     "k": 26,
+     "n": 93,
+     "frac": 0.2796,
+     "ic95": [
+      0.1985,
+      0.3781
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 34,
+    "C1_frac_noches_todas_alerta": {
+     "k": 4,
+     "n": 34,
+     "frac": 0.1176,
+     "ic95": [
+      0.0467,
+      0.2662
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 45,
+     "n": 528,
+     "frac": 0.0852,
+     "ic95": [
+      0.0643,
+      0.1121
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 1,
+     "n": 101,
+     "frac": 0.0099,
+     "ic95": [
+      0.0017,
+      0.054
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 1,
+     "n": 3,
+     "frac": 0.3333,
+     "ic95": [
+      0.0615,
+      0.7923
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 426,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0089
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 44,
+     "n": 525,
+     "frac": 0.0838,
+     "ic95": [
+      0.063,
+      0.1106
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 14,
+     "n": 32,
+     "frac": 0.4375,
+     "ic95": [
+      0.2817,
+      0.6067
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 19,
+     "n": 155,
+     "frac": 0.1226,
+     "ic95": [
+      0.0799,
+      0.1835
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 27,
+     "n": 413,
+     "frac": 0.0654,
+     "ic95": [
+      0.0453,
+      0.0934
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 95,
+     "n": 413,
+     "frac": 0.23,
+     "ic95": [
+      0.192,
+      0.273
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 73,
+     "n": 95,
+     "frac": 0.7684,
+     "ic95": [
+      0.6742,
+      0.8418
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 219,
+     "n": 318,
+     "frac": 0.6887,
+     "ic95": [
+      0.6358,
+      0.7371
+     ]
+    }
+   }
+  },
+  "despues_571": {
+   "TOTAL": {
+    "C1_frac_vecina_alerta": {
+     "k": 152,
+     "n": 281,
+     "frac": 0.5409,
+     "ic95": [
+      0.4825,
+      0.5982
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 58,
+    "C1_frac_noches_todas_alerta": {
+     "k": 10,
+     "n": 58,
+     "frac": 0.1724,
+     "ic95": [
+      0.0964,
+      0.2891
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 113,
+     "n": 524,
+     "frac": 0.2156,
+     "ic95": [
+      0.1826,
+      0.2529
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 10,
+     "n": 182,
+     "frac": 0.0549,
+     "ic95": [
+      0.0301,
+      0.0982
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 21,
+     "n": 30,
+     "frac": 0.7,
+     "ic95": [
+      0.5212,
+      0.8334
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 1,
+     "n": 311,
+     "frac": 0.0032,
+     "ic95": [
+      0.0006,
+      0.018
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 92,
+     "n": 494,
+     "frac": 0.1862,
+     "ic95": [
+      0.1544,
+      0.2229
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 37,
+     "n": 49,
+     "frac": 0.7551,
+     "ic95": [
+      0.6191,
+      0.854
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 15,
+     "n": 81,
+     "frac": 0.1852,
+     "ic95": [
+      0.1156,
+      0.2833
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 23,
+     "n": 260,
+     "frac": 0.0885,
+     "ic95": [
+      0.0597,
+      0.1292
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 84,
+     "n": 295,
+     "frac": 0.2847,
+     "ic95": [
+      0.2363,
+      0.3388
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 72,
+     "n": 84,
+     "frac": 0.8571,
+     "ic95": [
+      0.7667,
+      0.9164
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 185,
+     "n": 211,
+     "frac": 0.8768,
+     "ic95": [
+      0.8256,
+      0.9145
+     ]
+    }
+   },
+   "focal": {
+    "C1_frac_vecina_alerta": {
+     "k": 124,
+     "n": 211,
+     "frac": 0.5877,
+     "ic95": [
+      0.5203,
+      0.652
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 40,
+    "C1_frac_noches_todas_alerta": {
+     "k": 9,
+     "n": 40,
+     "frac": 0.225,
+     "ic95": [
+      0.1232,
+      0.375
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 85,
+     "n": 238,
+     "frac": 0.3571,
+     "ic95": [
+      0.299,
+      0.4198
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 10,
+     "n": 126,
+     "frac": 0.0794,
+     "ic95": [
+      0.0437,
+      0.1399
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 21,
+     "n": 30,
+     "frac": 0.7,
+     "ic95": [
+      0.5212,
+      0.8334
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 1,
+     "n": 87,
+     "frac": 0.0115,
+     "ic95": [
+      0.002,
+      0.0623
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 64,
+     "n": 208,
+     "frac": 0.3077,
+     "ic95": [
+      0.2489,
+      0.3734
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 26,
+     "n": 34,
+     "frac": 0.7647,
+     "ic95": [
+      0.6,
+      0.8756
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 8,
+     "n": 22,
+     "frac": 0.3636,
+     "ic95": [
+      0.1973,
+      0.5705
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 13,
+     "n": 67,
+     "frac": 0.194,
+     "ic95": [
+      0.1171,
+      0.3042
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 52,
+     "n": 84,
+     "frac": 0.619,
+     "ic95": [
+      0.5122,
+      0.7155
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 43,
+     "n": 52,
+     "frac": 0.8269,
+     "ic95": [
+      0.7027,
+      0.9062
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 28,
+     "n": 32,
+     "frac": 0.875,
+     "ic95": [
+      0.7193,
+      0.9503
+     ]
+    }
+   },
+   "nevado": {
+    "C1_frac_vecina_alerta": {
+     "k": 28,
+     "n": 70,
+     "frac": 0.4,
+     "ic95": [
+      0.2933,
+      0.5171
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 18,
+    "C1_frac_noches_todas_alerta": {
+     "k": 1,
+     "n": 18,
+     "frac": 0.0556,
+     "ic95": [
+      0.0099,
+      0.2576
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 28,
+     "n": 286,
+     "frac": 0.0979,
+     "ic95": [
+      0.0686,
+      0.1379
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 0,
+     "n": 56,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0642
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 224,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0169
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 28,
+     "n": 286,
+     "frac": 0.0979,
+     "ic95": [
+      0.0686,
+      0.1379
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 11,
+     "n": 15,
+     "frac": 0.7333,
+     "ic95": [
+      0.4805,
+      0.891
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 7,
+     "n": 59,
+     "frac": 0.1186,
+     "ic95": [
+      0.0587,
+      0.2252
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 10,
+     "n": 193,
+     "frac": 0.0518,
+     "ic95": [
+      0.0284,
+      0.0927
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 32,
+     "n": 211,
+     "frac": 0.1517,
+     "ic95": [
+      0.1095,
+      0.2063
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 29,
+     "n": 32,
+     "frac": 0.9062,
+     "ic95": [
+      0.7578,
+      0.9676
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 157,
+     "n": 179,
+     "frac": 0.8771,
+     "ic95": [
+      0.8209,
+      0.9174
+     ]
+    }
+   },
+   "Lascar": {
+    "C1_frac_vecina_alerta": {
+     "k": 22,
+     "n": 36,
+     "frac": 0.6111,
+     "ic95": [
+      0.4486,
+      0.7522
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 8,
+    "C1_frac_noches_todas_alerta": {
+     "k": 3,
+     "n": 8,
+     "frac": 0.375,
+     "ic95": [
+      0.1368,
+      0.6943
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 17,
+     "n": 45,
+     "frac": 0.3778,
+     "ic95": [
+      0.2511,
+      0.5237
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 2,
+     "n": 24,
+     "frac": 0.0833,
+     "ic95": [
+      0.0232,
+      0.2585
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 4,
+     "n": 9,
+     "frac": 0.4444,
+     "ic95": [
+      0.1888,
+      0.7334
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 16,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.1936
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 13,
+     "n": 36,
+     "frac": 0.3611,
+     "ic95": [
+      0.2248,
+      0.5243
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 4,
+     "n": 6,
+     "frac": 0.6667,
+     "ic95": [
+      0.3,
+      0.9032
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 2,
+     "n": 5,
+     "frac": 0.4,
+     "ic95": [
+      0.1176,
+      0.7693
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 3,
+     "n": 16,
+     "frac": 0.1875,
+     "ic95": [
+      0.0659,
+      0.4301
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 13,
+     "n": 16,
+     "frac": 0.8125,
+     "ic95": [
+      0.5699,
+      0.9341
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 11,
+     "n": 13,
+     "frac": 0.8462,
+     "ic95": [
+      0.5776,
+      0.9567
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 3,
+     "n": 3,
+     "frac": 1.0,
+     "ic95": [
+      0.4385,
+      1.0
+     ]
+    }
+   },
+   "Lastarria": {
+    "C1_frac_vecina_alerta": {
+     "k": 4,
+     "n": 20,
+     "frac": 0.2,
+     "ic95": [
+      0.0807,
+      0.416
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 7,
+    "C1_frac_noches_todas_alerta": {
+     "k": 0,
+     "n": 7,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.3543
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 9,
+     "n": 45,
+     "frac": 0.2,
+     "ic95": [
+      0.109,
+      0.3382
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 0,
+     "n": 23,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.1431
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 16,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.1936
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 9,
+     "n": 45,
+     "frac": 0.2,
+     "ic95": [
+      0.109,
+      0.3382
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 3,
+     "n": 5,
+     "frac": 0.6,
+     "ic95": [
+      0.2307,
+      0.8824
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 2,
+     "n": 3,
+     "frac": 0.6667,
+     "ic95": [
+      0.2077,
+      0.9385
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 3,
+     "n": 8,
+     "frac": 0.375,
+     "ic95": [
+      0.1368,
+      0.6943
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 9,
+     "n": 16,
+     "frac": 0.5625,
+     "ic95": [
+      0.3318,
+      0.769
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 7,
+     "n": 9,
+     "frac": 0.7778,
+     "ic95": [
+      0.4526,
+      0.9368
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 6,
+     "n": 7,
+     "frac": 0.8571,
+     "ic95": [
+      0.4869,
+      0.9743
+     ]
+    }
+   },
+   "Isluga": {
+    "C1_frac_vecina_alerta": {
+     "k": 40,
+     "n": 66,
+     "frac": 0.6061,
+     "ic95": [
+      0.4855,
+      0.715
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 13,
+    "C1_frac_noches_todas_alerta": {
+     "k": 3,
+     "n": 13,
+     "frac": 0.2308,
+     "ic95": [
+      0.0818,
+      0.5026
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 29,
+     "n": 48,
+     "frac": 0.6042,
+     "ic95": [
+      0.4631,
+      0.7298
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 1,
+     "n": 39,
+     "frac": 0.0256,
+     "ic95": [
+      0.0045,
+      0.1318
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 3,
+     "n": 3,
+     "frac": 1.0,
+     "ic95": [
+      0.4385,
+      1.0
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 6,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.3903
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 26,
+     "n": 45,
+     "frac": 0.5778,
+     "ic95": [
+      0.433,
+      0.7103
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 11,
+     "n": 12,
+     "frac": 0.9167,
+     "ic95": [
+      0.6461,
+      0.9851
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 1,
+     "n": 2,
+     "frac": 0.5,
+     "ic95": [
+      0.0945,
+      0.9055
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 2,
+     "n": 6,
+     "frac": 0.3333,
+     "ic95": [
+      0.0968,
+      0.7
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 6,
+     "n": 6,
+     "frac": 1.0,
+     "ic95": [
+      0.6097,
+      1.0
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 4,
+     "n": 6,
+     "frac": 0.6667,
+     "ic95": [
+      0.3,
+      0.9032
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    }
+   },
+   "Tupungatito": {
+    "C1_frac_vecina_alerta": {
+     "k": 22,
+     "n": 40,
+     "frac": 0.55,
+     "ic95": [
+      0.3983,
+      0.6929
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 8,
+    "C1_frac_noches_todas_alerta": {
+     "k": 1,
+     "n": 8,
+     "frac": 0.125,
+     "ic95": [
+      0.0224,
+      0.4709
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 16,
+     "n": 44,
+     "frac": 0.3636,
+     "ic95": [
+      0.2378,
+      0.5113
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 0,
+     "n": 26,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.1287
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 15,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.2039
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 16,
+     "n": 44,
+     "frac": 0.3636,
+     "ic95": [
+      0.2378,
+      0.5113
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 6,
+     "n": 7,
+     "frac": 0.8571,
+     "ic95": [
+      0.4869,
+      0.9743
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 2,
+     "n": 3,
+     "frac": 0.6667,
+     "ic95": [
+      0.2077,
+      0.9385
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 3,
+     "n": 9,
+     "frac": 0.3333,
+     "ic95": [
+      0.1206,
+      0.6458
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 8,
+     "n": 14,
+     "frac": 0.5714,
+     "ic95": [
+      0.3259,
+      0.7862
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 7,
+     "n": 8,
+     "frac": 0.875,
+     "ic95": [
+      0.5291,
+      0.9776
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 6,
+     "n": 6,
+     "frac": 1.0,
+     "ic95": [
+      0.6097,
+      1.0
+     ]
+    }
+   },
+   "PlanchonPeteroa": {
+    "C1_frac_vecina_alerta": {
+     "k": 6,
+     "n": 18,
+     "frac": 0.3333,
+     "ic95": [
+      0.1628,
+      0.5625
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 4,
+    "C1_frac_noches_todas_alerta": {
+     "k": 0,
+     "n": 4,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.4899
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 7,
+     "n": 47,
+     "frac": 0.1489,
+     "ic95": [
+      0.0741,
+      0.2769
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 0,
+     "n": 12,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.2425
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 0,
+     "n": 3,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.5615
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 1,
+     "n": 30,
+     "frac": 0.0333,
+     "ic95": [
+      0.0059,
+      0.1667
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 7,
+     "n": 44,
+     "frac": 0.1591,
+     "ic95": [
+      0.0793,
+      0.2937
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 2,
+     "n": 3,
+     "frac": 0.6667,
+     "ic95": [
+      0.2077,
+      0.9385
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 2,
+     "n": 8,
+     "frac": 0.25,
+     "ic95": [
+      0.0715,
+      0.5907
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 3,
+     "n": 24,
+     "frac": 0.125,
+     "ic95": [
+      0.0434,
+      0.31
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 13,
+     "n": 29,
+     "frac": 0.4483,
+     "ic95": [
+      0.2841,
+      0.6245
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 10,
+     "n": 13,
+     "frac": 0.7692,
+     "ic95": [
+      0.4974,
+      0.9182
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 14,
+     "n": 16,
+     "frac": 0.875,
+     "ic95": [
+      0.6398,
+      0.965
+     ]
+    }
+   },
+   "NevadosDeChillan": {
+    "C1_frac_vecina_alerta": {
+     "k": 0,
+     "n": 6,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.3903
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 3,
+    "C1_frac_noches_todas_alerta": {
+     "k": 0,
+     "n": 3,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.5615
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 3,
+     "n": 47,
+     "frac": 0.0638,
+     "ic95": [
+      0.0219,
+      0.1716
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 0,
+     "n": 8,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.3244
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 41,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0857
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 3,
+     "n": 47,
+     "frac": 0.0638,
+     "ic95": [
+      0.0219,
+      0.1716
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 1,
+     "n": 2,
+     "frac": 0.5,
+     "ic95": [
+      0.0945,
+      0.9055
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 2,
+     "n": 12,
+     "frac": 0.1667,
+     "ic95": [
+      0.047,
+      0.448
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 2,
+     "n": 37,
+     "frac": 0.0541,
+     "ic95": [
+      0.015,
+      0.177
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 9,
+     "n": 38,
+     "frac": 0.2368,
+     "ic95": [
+      0.1299,
+      0.3921
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 8,
+     "n": 9,
+     "frac": 0.8889,
+     "ic95": [
+      0.565,
+      0.9801
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 27,
+     "n": 29,
+     "frac": 0.931,
+     "ic95": [
+      0.7804,
+      0.9809
+     ]
+    }
+   },
+   "Llaima": {
+    "C1_frac_vecina_alerta": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 0,
+    "C1_frac_noches_todas_alerta": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 0,
+     "n": 48,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0741
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 47,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0756
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 0,
+     "n": 48,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0741
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 0,
+     "n": 11,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.2588
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 0,
+     "n": 37,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0941
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 0,
+     "n": 44,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0803
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 38,
+     "n": 44,
+     "frac": 0.8636,
+     "ic95": [
+      0.7329,
+      0.936
+     ]
+    }
+   },
+   "Villarrica": {
+    "C1_frac_vecina_alerta": {
+     "k": 0,
+     "n": 5,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.4345
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 2,
+    "C1_frac_noches_todas_alerta": {
+     "k": 0,
+     "n": 2,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.6576
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 2,
+     "n": 51,
+     "frac": 0.0392,
+     "ic95": [
+      0.0108,
+      0.1322
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 0,
+     "n": 4,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.4899
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 46,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0771
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 2,
+     "n": 51,
+     "frac": 0.0392,
+     "ic95": [
+      0.0108,
+      0.1322
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 1,
+     "n": 1,
+     "frac": 1.0,
+     "ic95": [
+      0.2065,
+      1.0
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 1,
+     "n": 13,
+     "frac": 0.0769,
+     "ic95": [
+      0.0137,
+      0.3331
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 1,
+     "n": 43,
+     "frac": 0.0233,
+     "ic95": [
+      0.0041,
+      0.1206
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 3,
+     "n": 44,
+     "frac": 0.0682,
+     "ic95": [
+      0.0235,
+      0.1823
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 2,
+     "n": 3,
+     "frac": 0.6667,
+     "ic95": [
+      0.2077,
+      0.9385
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 35,
+     "n": 41,
+     "frac": 0.8537,
+     "ic95": [
+      0.7156,
+      0.9312
+     ]
+    }
+   },
+   "Copahue": {
+    "C1_frac_vecina_alerta": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 0,
+    "C1_frac_noches_todas_alerta": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 0,
+     "n": 47,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0756
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 46,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0771
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 0,
+     "n": 47,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0756
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 0,
+     "n": 12,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.2425
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 0,
+     "n": 40,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0876
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 0,
+     "n": 44,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.0803
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 39,
+     "n": 44,
+     "frac": 0.8864,
+     "ic95": [
+      0.7602,
+      0.9505
+     ]
+    }
+   },
+   "PuyehueCordonCaulle": {
+    "C1_frac_vecina_alerta": {
+     "k": 52,
+     "n": 71,
+     "frac": 0.7324,
+     "ic95": [
+      0.6195,
+      0.8215
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 8,
+    "C1_frac_noches_todas_alerta": {
+     "k": 3,
+     "n": 8,
+     "frac": 0.375,
+     "ic95": [
+      0.1368,
+      0.6943
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 23,
+     "n": 53,
+     "frac": 0.434,
+     "ic95": [
+      0.3095,
+      0.5673
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 7,
+     "n": 28,
+     "frac": 0.25,
+     "ic95": [
+      0.1268,
+      0.4336
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 14,
+     "n": 15,
+     "frac": 0.9333,
+     "ic95": [
+      0.7018,
+      0.9881
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 19,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.1682
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 9,
+     "n": 38,
+     "frac": 0.2368,
+     "ic95": [
+      0.1299,
+      0.3921
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 6,
+     "n": 8,
+     "frac": 0.75,
+     "ic95": [
+      0.4093,
+      0.9285
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 1,
+     "n": 4,
+     "frac": 0.25,
+     "ic95": [
+      0.0456,
+      0.6994
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 2,
+     "n": 13,
+     "frac": 0.1538,
+     "ic95": [
+      0.0433,
+      0.4224
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 11,
+     "n": 17,
+     "frac": 0.6471,
+     "ic95": [
+      0.413,
+      0.8269
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 11,
+     "n": 11,
+     "frac": 1.0,
+     "ic95": [
+      0.7412,
+      1.0
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 5,
+     "n": 6,
+     "frac": 0.8333,
+     "ic95": [
+      0.4365,
+      0.9699
+     ]
+    }
+   },
+   "Chaiten": {
+    "C1_frac_vecina_alerta": {
+     "k": 6,
+     "n": 19,
+     "frac": 0.3158,
+     "ic95": [
+      0.1536,
+      0.5399
+     ]
+    },
+    "C1_noches_con_alerta_y_2_listadas": 5,
+    "C1_frac_noches_todas_alerta": {
+     "k": 0,
+     "n": 5,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.4345
+     ]
+    },
+    "C1_tasa_base_alerta_por_pasada_listada": {
+     "k": 7,
+     "n": 49,
+     "frac": 0.1429,
+     "ic95": [
+      0.071,
+      0.2667
+     ]
+    },
+    "C1b_contradicciones_cons_rutina_ocr_alerta": 0,
+    "C2_V375_alerta_luego_V750": {
+     "k": 0,
+     "n": 18,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.1759
+     ]
+    },
+    "C2_V750_alerta_luego_V375": {
+     "k": 0,
+     "n": 0,
+     "frac": null,
+     "ic95": [
+      null,
+      null
+     ]
+    },
+    "C2b_V375_negativa_luego_V750_alerta": {
+     "k": 0,
+     "n": 29,
+     "frac": 0.0,
+     "ic95": [
+      0.0,
+      0.117
+     ]
+    },
+    "C2b_V750_negativa_luego_V375_alerta": {
+     "k": 7,
+     "n": 49,
+     "frac": 0.1429,
+     "ic95": [
+      0.071,
+      0.2667
+     ]
+    },
+    "C3_P_alerta_tras_alerta": {
+     "k": 3,
+     "n": 5,
+     "frac": 0.6,
+     "ic95": [
+      0.2307,
+      0.8824
+     ]
+    },
+    "C3_P_alerta_tras_negativa": {
+     "k": 2,
+     "n": 8,
+     "frac": 0.25,
+     "ic95": [
+      0.0715,
+      0.5907
+     ]
+    },
+    "C3b_pasadas_alerta_tras_noche_negativa": {
+     "k": 4,
+     "n": 27,
+     "frac": 0.1481,
+     "ic95": [
+      0.0592,
+      0.3248
+     ]
+    },
+    "C4_frac_neg_limpio_adyacentes": {
+     "k": 12,
+     "n": 27,
+     "frac": 0.4444,
+     "ic95": [
+      0.2759,
+      0.6269
+     ]
+    },
+    "C4_pub_en_adyacentes": {
+     "k": 12,
+     "n": 12,
+     "frac": 1.0,
+     "ic95": [
+      0.7575,
+      1.0
+     ]
+    },
+    "C4_pub_en_no_adyacentes": {
+     "k": 12,
+     "n": 15,
+     "frac": 0.8,
+     "ic95": [
+      0.5481,
+      0.9295
+     ]
+    }
+   }
+  }
+ },
+ "otros": {
+  "sin_info_v375_despues_571": {
+   "n_sin_info": 276,
+   "n_total": 698,
+   "frac": 0.3954
+  },
+  "recall_noche_por_sensor_despues_571": {
+   "MODIS": {
+    "n_pos": 1,
+    "recall_pos": 1.0,
+    "n_neg": 162,
+    "tasa_pub_neg": 0.142
+   },
+   "VIIRS375": {
+    "n_pos": 54,
+    "recall_pos": 1.0,
+    "n_neg": 93,
+    "tasa_pub_neg": 1.0
+   },
+   "VIIRS750": {
+    "n_pos": 9,
+    "recall_pos": 1.0,
+    "n_neg": 154,
+    "tasa_pub_neg": 0.4805
+   },
+   "CUALQUIERA": {
+    "n_pos": 57,
+    "recall_pos": 1.0,
+    "n_neg": 93,
+    "tasa_pub_neg": 1.0
+   }
+  },
+  "recall_noche_por_sensor_linea_base_congelada": {
+   "MODIS": {
+    "n_pos": 66,
+    "recall_pos": 0.1364,
+    "n_neg": 2096,
+    "tasa_pub_neg": 0.1818
+   },
+   "VIIRS375": {
+    "n_pos": 778,
+    "recall_pos": 0.982,
+    "n_neg": 1213,
+    "tasa_pub_neg": 0.8162
+   },
+   "VIIRS750": {
+    "n_pos": 214,
+    "recall_pos": 0.8692,
+    "n_neg": 1948,
+    "tasa_pub_neg": 0.5544
+   },
+   "CUALQUIERA": {
+    "n_pos": 798,
+    "recall_pos": 0.9962,
+    "n_neg": 1206,
+    "tasa_pub_neg": 0.9063
+   }
+  },
+  "auto_audit_latest": {
+   "ventana": [
+    "2026-07-16",
+    "2026-09-14"
+   ],
+   "generado": "2026-09-14T15:45:53Z",
+   "magnitud_ratio_por_noche_por_volcan": {
+    "Chaiten": {
+     "n_noches": 13,
+     "ratio_mediano": 1.129
+    },
+    "Copahue": {
+     "n_noches": 2,
+     "ratio_mediano": 1.179
+    },
+    "Isluga": {
+     "n_noches": 52,
+     "ratio_mediano": 0.54
+    },
+    "Lascar": {
+     "n_noches": 43,
+     "ratio_mediano": 0.435
+    },
+    "Lastarria": {
+     "n_noches": 24,
+     "ratio_mediano": 0.403
+    },
+    "NevadosDeChillan": {
+     "n_noches": 4,
+     "ratio_mediano": 1.078
+    },
+    "PlanchonPeteroa": {
+     "n_noches": 10,
+     "ratio_mediano": 1.123
+    },
+    "PuyehueCordonCaulle": {
+     "n_noches": 30,
+     "ratio_mediano": 0.947
+    },
+    "Tupungatito": {
+     "n_noches": 15,
+     "ratio_mediano": 0.825
+    },
+    "Villarrica": {
+     "n_noches": 13,
+     "ratio_mediano": 0.812
+    }
+   },
+   "recall": {
+    "MODIS": {
+     "n_noches": 3,
+     "recall_crater_pct": 100.0,
+     "recall_dash_pct": 33.3
+    },
+    "VIIRS750": {
+     "n_noches": 39,
+     "recall_crater_pct": 87.2,
+     "recall_dash_pct": 87.2
+    },
+    "VIIRS375": {
+     "n_noches": 177,
+     "recall_crater_pct": 96.6,
+     "recall_dash_pct": 96.6
+    }
+   }
+  },
+  "latencia_despacho_cron": {
+   "generado": "2026-09-15T11:21:23+00:00",
+   "resumen": {
+    "schedule": {
+     "n": 57,
+     "mediana_espera_arranque_s": 2,
+     "max_espera_arranque_s": 12,
+     "mediana_atraso_creacion_min": 56,
+     "max_atraso_creacion_min": 120,
+     "corridas_por_dia": 4.75,
+     "franjas_declaradas_por_dia": 12
+    },
+    "workflow_dispatch": {
+     "n": 3,
+     "mediana_espera_arranque_s": 3,
+     "max_espera_arranque_s": 4
+    }
+   }
+  },
+  "osf_magnitud": {
+   "ventana": [
+    "2025-02-15",
+    "2025-12-01"
+   ],
+   "VIIRS375_total": {
+    "n": 1499,
+    "R_med": 0.7028,
+    "R_gm": 0.659,
+    "Fn_gm": 0.5527,
+    "Fex_gm": 1.1922,
+    "Fn_med": 0.5,
+    "Fex_med": 1.2836,
+    "Npix_med": 3.0,
+    "pub_n_med": 1.0,
+    "pc_n_med": 1.0,
+    "R_pc_med": 0.5512,
+    "Fhot_gm": 1.402,
+    "Fbg_gm": 0.875
+   },
+   "VIIRS375_por_volcan": {
+    "Chaiten": {
+     "n": 64,
+     "R_med": 1.4043,
+     "R_gm": 1.3839,
+     "Fn_gm": 1.2737,
+     "Fex_gm": 1.0865,
+     "Fn_med": 1.0,
+     "Fex_med": 1.0033,
+     "Npix_med": 1.0,
+     "pub_n_med": 2.0,
+     "pc_n_med": 2.0,
+     "R_pc_med": 1.002,
+     "Fhot_gm": 0.8962,
+     "Fbg_gm": 1.2123
+    },
+    "Copahue": {
+     "n": 28,
+     "R_med": 0.7445,
+     "R_gm": 0.6354,
+     "Fn_gm": 0.9057,
+     "Fex_gm": 0.7015,
+     "Fn_med": 1.0,
+     "Fex_med": 0.8299,
+     "Npix_med": 1.0,
+     "pub_n_med": 1.0,
+     "pc_n_med": 1.0,
+     "R_pc_med": 0.742,
+     "Fhot_gm": 1.2174,
+     "Fbg_gm": 0.5762
+    },
+    "Isluga": {
+     "n": 333,
+     "R_med": 0.5744,
+     "R_gm": 0.5428,
+     "Fn_gm": 0.4445,
+     "Fex_gm": 1.2211,
+     "Fn_med": 0.5,
+     "Fex_med": 1.2697,
+     "Npix_med": 3.0,
+     "pub_n_med": 1.0,
+     "pc_n_med": 1.0,
+     "R_pc_med": 0.4906,
+     "Fhot_gm": 1.5501,
+     "Fbg_gm": 0.7878
+    },
+    "Lascar": {
+     "n": 390,
+     "R_med": 0.5847,
+     "R_gm": 0.5687,
+     "Fn_gm": 0.4157,
+     "Fex_gm": 1.3679,
+     "Fn_med": 0.4286,
+     "Fex_med": 1.41,
+     "Npix_med": 5.0,
+     "pub_n_med": 2.0,
+     "pc_n_med": 2.0,
+     "R_pc_med": 0.4643,
+     "Fhot_gm": 1.6312,
+     "Fbg_gm": 0.8386
+    },
+    "Lastarria": {
+     "n": 253,
+     "R_med": 0.6468,
+     "R_gm": 0.609,
+     "Fn_gm": 0.6157,
+     "Fex_gm": 0.9891,
+     "Fn_med": 0.5,
+     "Fex_med": 1.2167,
+     "Npix_med": 2.0,
+     "pub_n_med": 1.0,
+     "pc_n_med": 1.0,
+     "R_pc_med": 0.5244,
+     "Fhot_gm": 1.3092,
+     "Fbg_gm": 0.7555
+    },
+    "NevadosDeChillan": {
+     "n": 15,
+     "R_med": 0.0072,
+     "R_gm": 0.0106,
+     "Fn_gm": 0.1368,
+     "Fex_gm": 0.0773,
+     "Fn_med": 0.1,
+     "Fex_med": 0.0773,
+     "Npix_med": 10.0,
+     "pub_n_med": 1.0,
+     "pc_n_med": 1.0,
+     "R_pc_med": 0.0072,
+     "Fhot_gm": null,
+     "Fbg_gm": null
+    },
+    "PlanchonPeteroa": {
+     "n": 166,
+     "R_med": 0.9229,
+     "R_gm": 0.9236,
+     "Fn_gm": 0.5964,
+     "Fex_gm": 1.5487,
+     "Fn_med": 0.5,
+     "Fex_med": 1.5431,
+     "Npix_med": 2.0,
+     "pub_n_med": 1.0,
+     "pc_n_med": 1.0,
+     "R_pc_med": 0.8863,
+     "Fhot_gm": 1.4631,
+     "Fbg_gm": 1.0585
+    },
+    "PuyehueCordonCaulle": {
+     "n": 234,
+     "R_med": 0.9314,
+     "R_gm": 0.9752,
+     "Fn_gm": 0.8237,
+     "Fex_gm": 1.184,
+     "Fn_med": 0.8,
+     "Fex_med": 1.1694,
+     "Npix_med": 3.5,
+     "pub_n_med": 3.0,
+     "pc_n_med": 2.0,
+     "R_pc_med": 0.6321,
+     "Fhot_gm": 1.1177,
+     "Fbg_gm": 1.0658
+    },
+    "Villarrica": {
+     "n": 16,
+     "R_med": 1.3451,
+     "R_gm": 1.2159,
+     "Fn_gm": 0.7147,
+     "Fex_gm": 1.7013,
+     "Fn_med": 1.0,
+     "Fex_med": 1.847,
+     "Npix_med": 1.0,
+     "pub_n_med": 1.0,
+     "pc_n_med": 1.0,
+     "R_pc_med": 1.1857,
+     "Fhot_gm": 1.7116,
+     "Fbg_gm": 0.994
+    }
+   },
+   "VIIRS375_igual_conteo": {
+    "n": 342,
+    "R": 0.9952,
+    "Fn": 1.0,
+    "Fhot": 1.1396,
+    "Fbg": 0.8733
+   },
+   "VIIRS750_por_volcan": {
+    "Lascar": {
+     "n": 17,
+     "R_med": 0.5864,
+     "R_gm": 0.5727,
+     "Fn_gm": 0.3958,
+     "Fex_gm": 1.447,
+     "Fn_med": 0.5,
+     "Fex_med": 1.4062,
+     "Npix_med": 4.0,
+     "pub_n_med": 2.0,
+     "pc_n_med": 2.0,
+     "R_pc_med": 0.5864
+    }
+   },
+   "MODIS_por_volcan": {
+    "Lascar": {
+     "n": 35,
+     "R_med": 0.6341,
+     "R_gm": 0.4664,
+     "Fn_gm": 3.2543,
+     "Fex_gm": 0.1433,
+     "Fn_med": 3.0,
+     "Fex_med": 0.1667,
+     "Npix_med": 3.0,
+     "pub_n_med": 9.0,
+     "pc_n_med": 9.0,
+     "R_pc_med": 0.6341
+    },
+    "PlanchonPeteroa": {
+     "n": 1,
+     "R_med": 1.2931,
+     "R_gm": 1.2931,
+     "Fn_gm": 1.5,
+     "Fex_gm": 0.8621,
+     "Fn_med": 1.5,
+     "Fex_med": 0.8621,
+     "Npix_med": 2.0,
+     "pub_n_med": 3.0,
+     "pc_n_med": 3.0,
+     "R_pc_med": 1.2931
+    }
+   }
+  }
+ }
+}
