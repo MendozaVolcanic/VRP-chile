@@ -474,6 +474,52 @@ LOCAL_CLUSTER_MAG_MIN_CORONA: int = int(_p.get("local_cluster_mag_min_corona", 4
 ENABLE_LOCAL_CLUSTER_MAGNITUDE_VIIRS375: bool = bool(
     _p.get("enable_local_cluster_magnitude_viirs375", False))
 
+# S142 D22: sin la compuerta de temperatura en los Tests 2 y 3 y en el dNTI contextual (VIIRS 375).
+# POR QUÉ: la fórmula de los Tests 2 y 3 de Coppola 2016a (p. 7) no tiene condición de temperatura.
+# La compuerta `bt > t_bg + NTI_BT_SANITY_K` nació para el camino del NTI absoluto y se heredó a los
+# contextuales; en un cono nevado de noche descarta al píxel con lava sub-píxel que está más frío que
+# la mediana del anillo. Alcance: sólo process_viirs.py (MODIS y VIIRS 750 no la reciben). NO toca el
+# camino B (NTI > K1, D23). Sola no devuelve alertas por el camino contextual (corrección S138: el
+# segundo pase ya rescata esos píxeles), pero SÍ puede mover el camino del Test 1, porque la máscara
+# contextual alimenta su filtro y su elección de fuente. Se evalúa en el A/B literal completo +
+# ablaciones. OFF por A45.
+ENABLE_TESTS_23_NO_BT_GATE_VIIRS375: bool = bool(
+    _p.get("enable_tests_23_no_bt_gate_viirs375", False))
+
+# S142 D25: fondo del VRP = media de la RADIANCIA de los vecinos NO alertados de cada píxel alertado
+# (Coppola 2016a ec. 6; Fernandina 2025 p. 9; Campus 2024 p. 3; docs/MIROVA_DIVERGENCES.md D25).
+# POR QUÉ: hoy el fondo es la mediana del anillo regional 5-25 km (o el kernel 3x3 opt-in de 5
+# volcanes). En la cumbre helada el cráter queda más frío que esa mediana y el exceso se recorta a
+# 0,0 MW aunque la detección lo haya aceptado. Precedencia: cuando está ON pisa al kernel opt-in y al
+# anillo; el fondo de hoy queda como respaldo SÓLO para el píxel sin vecinos no alertados dentro de
+# VRP_BG_NEIGHBOR_MAX_HALF_PX. El recorte a cero NO cambia (pregunta abierta al autor). VIIRS 375
+# sólo. OFF por A45.
+ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375: bool = bool(
+    _p.get("enable_vrp_bg_neighbor_mean_viirs375", False))
+
+
+def validar_vrp_bg_neighbor_max_half_px(valor) -> int:
+    """Semiancho máximo (en píxeles) de la ventana del fondo por vecinos (S142 D25).
+
+    1 = sólo los 8 vecinos; 3 = la ventana crece hasta 7x7 cuando TODOS los vecinos del píxel
+    están alertados (interior de un cúmulo o de una colada). DECISIÓN DEL DUEÑO (S142): 3 por
+    defecto, y el A/B barre 1 contra 3; el paper no trata el píxel sin vecinos no alertados.
+
+    Es función y no una expresión suelta para que el test de perfil mal escrito pueda ejercer la
+    regla sin crear un YAML dentro de `pipeline/profiles/` (el cargador sólo reconoce perfiles de
+    ese directorio, así que un perfil roto de prueba quedaría versionado si el test se corta).
+    """
+    n = int(valor)
+    if n < 1:
+        raise ValueError(
+            "vrp_bg_neighbor_max_half_px debe ser >= 1 (1 = los 8 vecinos); "
+            f"recibido {n}")
+    return n
+
+
+VRP_BG_NEIGHBOR_MAX_HALF_PX: int = validar_vrp_bg_neighbor_max_half_px(
+    _t.get("vrp_bg_neighbor_max_half_px", 3))
+
 # S109 §1 — magnitud NÚCLEO FOCAL/CONTEXTUAL del cluster MODIS. Restringe la suma
 # de pc.vrp_mw a los píxeles contextualmente anómalos (dnti_ctx ∪ {pico}) del cluster
 # YA seleccionado — el campo difuso topográfico (tibio uniforme, no anómalo vs sus 8

@@ -810,7 +810,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     desenlace **NO está en producción**: `ENABLE_TEST1_NTI_INTEGRAL = False` (verificado
     con `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p;
     print(p.ENABLE_TEST1_NTI_INTEGRAL)"`), y la rama `compute_test1_nti` existe **sólo en
-    `process_viirs.py:212/1082`** (era 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:59` y `process_viirs_mod.py:159`
+    `process_viirs.py:212/1111`** (era 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:59` y `process_viirs_mod.py:159`
     (eran 674/665; líneas actualizadas S131) importan únicamente `compute_test1_mir`, sin alternativa. **La causa raíz que A69
     describe sigue viva en los 3 sensores.** Ni encendiendo el flag se cura MODIS/V750,
     que es donde el píxel grande amplifica el gradiente (A80). Caso de manual de A87:

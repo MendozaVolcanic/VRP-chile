@@ -28,6 +28,10 @@ thresholds:
   # NdC incluido el trigger 06-16 (0.068 vs MIROVA 0.06); [2,4] perdía 06-16 por fallback
   # de la máscara de nubes (min_pixels). A/B run 27705248529 brazo _t1lm_q3_ring15.
   test1_intermediate_bg_ring_km: [1.5, 3.0]
+  # S142 D25: semiancho máximo (px) de la ventana del fondo por vecinos cuando los 8 vecinos están
+  # alertados. Sólo actúa con enable_vrp_bg_neighbor_mean_viirs375 (en paths:, OFF). El A/B barre
+  # 1 contra 3: plan docs/superpowers/plans/2026-09-15-flags-d22-d25.md §5.
+  vrp_bg_neighbor_max_half_px: 3
   # Eruption-scale MIR anomaly floor (pixel BT must exceed t_bg + this)
   anomaly_threshold_k: 5.0
   # TIR (I05) floor for VIIRS TIRVolcH secondary path
@@ -426,6 +430,12 @@ paths:
   # de 3.164 records summit de VIIRS 375 m y marca en toda la imagen.
   # OFF hasta que el A/B decida: docs/PREREGISTRO_AB_D1_D2_S135.md (D2/D19).
   enable_second_pass_conditioned: false
+  # S142 D22: quita la compuerta bt > t_bg + nti_bt_sanity_k de los Tests 2 y 3 y del dNTI
+  # contextual, SÓLO en VIIRS 375. La fórmula de Coppola 2016a (p. 7) no la tiene; en un cono
+  # nevado de noche descarta al píxel con lava sub-píxel más frío que la mediana del anillo.
+  # Por el camino contextual, sola no devuelve alertas (S138: el segundo pase ya rescata esos
+  # píxeles); sí puede mover el camino del Test 1. OFF hasta el A/B literal completo (A45).
+  enable_tests_23_no_bt_gate_viirs375: false
   enable_dual_roi_second_pass: true
 
   # S61 ADOPCIÓN — kernel local 3×3 (Coppola 2024 L1129, Coppola 2016a L357,
@@ -440,6 +450,12 @@ paths:
   # Cuando flag ON Y per-vol local_kernel_bg=true: usa kernel 3×3 vecinos directos
   # del pixel hot (excluye otros hot + NaNs). Default OFF: median ring 5-25km.
   enable_local_kernel_bg: true
+
+  # S142 D25: fondo del VRP = media de la radiancia de los vecinos NO alertados de cada píxel
+  # alertado (Coppola 2016a ec. 6; Fernandina 2025 p. 9), en VIIRS 375. Con ON pisa al kernel
+  # opt-in de arriba y a la mediana del anillo 5-25 km; el fondo de hoy queda como respaldo del
+  # píxel sin vecinos no alertados. El recorte a cero no cambia. OFF hasta el A/B (A45).
+  enable_vrp_bg_neighbor_mean_viirs375: false
 
   # S71 ADOPCIÓN — Opción C cap magnitud path D D9 (defensa intermedia).
   # Cuando el firing es contextual-only (BT/NTI duros = 0) Y t_bg <270K (cirrus

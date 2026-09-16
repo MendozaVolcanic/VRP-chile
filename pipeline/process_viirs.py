@@ -213,6 +213,14 @@ from .test1_integrated import (compute_test1_mir, compute_test1_nti,
                                resolve_test1_source_priority,
                                intermediate_ring_bg_bt,
                                select_test1_effective_lbg)
+# S142 D22/D25: bloque aparte, DESPUÉS de la l. 212, para no correr las citas file:line que
+# vigila el contrato G8 (tests/test_guard_declarado_vs_efectivo_s131.py: l. 83 y 212).
+from pipeline.profile import (
+    ENABLE_TESTS_23_NO_BT_GATE_VIIRS375,
+    ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375,
+    VRP_BG_NEIGHBOR_MAX_HALF_PX,
+)
+from .vrp_regimes import neighbor_mean_radiance_background  # S142 D25
 
 
 def _sensor_label_from_filename(filename: str) -> str:
@@ -671,6 +679,24 @@ def apply_corona_magnitude_v375(
     return sum_cluster_vrp(per_pixel), False, per_pixel
 
 
+def vrp_bg_neighbor_mean_v375(bt_grid, alert_mask, hot_rows, hot_cols, legacy_l_bg, *, max_half_px):
+    """Fondo MIR por píxel para el VRP de VIIRS 375 con el flag D25 encendido (S142).
+
+    POR QUÉ UN ENVOLTORIO. El helper de vrp_regimes devuelve NaN para el píxel sin vecinos no
+    alertados dentro de `max_half_px`. Acá se decide el respaldo: el fondo que el bloque usaría HOY
+    (`legacy_l_bg`: mediana del anillo, kernel opt-in o el L_bg efectivo del Test 1). Así el flag
+    nunca deja a un píxel sin fondo y el respaldo queda contado en el record.
+
+    Returns:
+        (l_bg, n_sin_vecinos): radiancia de fondo por píxel (float64) y cuántos usaron el respaldo.
+    """
+    l_bk, _half = neighbor_mean_radiance_background(
+        bt_grid, alert_mask, hot_rows, hot_cols, I04_LAMBDA, max_half_px=max_half_px)
+    respaldo = np.broadcast_to(np.asarray(legacy_l_bg, dtype=np.float64), l_bk.shape)
+    sin_vecinos = ~np.isfinite(l_bk)
+    return np.where(sin_vecinos, respaldo, l_bk), int(np.count_nonzero(sin_vecinos))
+
+
 def calculate_vrp(l1b_path: Path, geo_path: Path,
                   volcano_lat: float, volcano_lon: float,
                   radius_km: float = 30.0,
@@ -895,6 +921,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     hotspot_dist_km = None
     anomaly_pixels = []   # All anomalous pixels with location + per-pixel VRP
     diag_L_bg_local = None  # S140 T7: sólo si actúa el kernel local
+    # S142 D25: sólo se escriben al record con el flag ON (record idéntico con OFF).
+    diag_L_bg_vecinos = None
+    _bg_vecinos_n_sin_vecinos = 0
     # S46 drift23 — first_pass_tests_2_and_3 diag (default outside I04 block).
     fp_diag = None
     # S46 Task 5 Drift #4 — second_pass_adjacent recapture counter (default 0).
@@ -1177,8 +1206,13 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     )
                 else:
                     eti_path_hot = first_pass_active
+                # D22 (S142): este camino son los Tests 2 y 3 del paper (vía second_pass_adjacent
+                # con el conjunto vacío); con el flag ON pierde la compuerta igual que el primer
+                # pase. Inerte en producción: ENABLE_ETI_QUADRATIC_SCENE = False.
+                _eti_gate_bt = (np.ones_like(bt, dtype=bool) if ENABLE_TESTS_23_NO_BT_GATE_VIIRS375
+                                else (bt > (t_bg_i04 + NTI_BT_SANITY_K)))
                 eti_path_hot = (eti_path_hot & roi_mask & ~np.isnan(bt)
-                                & (bt > (t_bg_i04 + NTI_BT_SANITY_K)))
+                                & _eti_gate_bt)
                 n_eti_path = int(np.sum(eti_path_hot))
 
             # F53/S78 guard: si alguna rama interna saltó la asignación de
@@ -1258,6 +1292,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     unsuitable_dnti_floor=_unsuit_dnti,
                     unsuitable_deti_floor=_unsuit_deti,
                     use_prose_branch=ENABLE_TESTS_23_PROSE_BRANCH,
+                    # D22 (S142): la fórmula de los Tests 2 y 3 (Coppola 2016a p. 7) no tiene
+                    # compuerta de temperatura. El segundo pase nunca la tuvo (S138).
+                    apply_bt_gate=not ENABLE_TESTS_23_NO_BT_GATE_VIIRS375,
                 )
                 hot_mask_2d = fp_hot
                 n_first_pass = fp_diag["n_first_pass_pixels"]
@@ -1411,6 +1448,20 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     diag_L_bg_local = redondear_diag(float(np.nanmedian(L_bg)))  # S140 T7: fondo local que se resta
                 else:
                     L_bg = bt_to_spectral_radiance(np.float64(t_bg_i04), I04_LAMBDA)
+
+                # D25 (S142): fondo = media de la radiancia de los vecinos NO alertados de cada
+                # píxel alertado (Coppola 2016a ec. 6; Fernandina 2025 p. 9; Campus 2024 p. 3).
+                # POR QUÉ: en la cumbre nevada, de noche, la mediana del anillo 5-25 km es valle
+                # tibio y deja al cráter con exceso negativo, recortado a 0,0 MW. Va DESPUÉS del
+                # bloque de arriba a propósito: su resultado es el respaldo del píxel sin vecinos
+                # no alertados, y así no se mueven las líneas que vigila
+                # tests/test_fondo_persistido_s140.py. Los alertados son hot_mask_2d entero.
+                if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375:
+                    L_bg, _n_sin = vrp_bg_neighbor_mean_v375(
+                        bt, hot_mask_2d, hot_rows, hot_cols, L_bg,
+                        max_half_px=VRP_BG_NEIGHBOR_MAX_HALF_PX)
+                    _bg_vecinos_n_sin_vecinos += _n_sin
+                    diag_L_bg_vecinos = redondear_diag(float(np.nanmedian(L_bg)))
 
                 # S26: clip a 0 — Wooster requiere ΔL ≥ 0 por física.
                 # Bug detectado cuando Test 1 (path D nuevo) o NTI agregaba
@@ -1866,7 +1917,14 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             t1_bt = bt[t1_rows, t1_cols]
             t1_L = bt_to_spectral_radiance(t1_bt, I04_LAMBDA)
             # S33 D4: usar effective_L_bg (local default, global con flag ON).
-            t1_delta_L = np.maximum(t1_L - effective_L_bg, 0.0)
+            _t1_Lbg = effective_L_bg
+            if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375:
+                # D25 (S142): mismo fondo por vecinos que el bloque contextual. Alertados = cúmulo
+                # final más los píxeles del Test 1 que se suman. Respaldo = effective_L_bg.
+                _t1_Lbg, _n_sin = vrp_bg_neighbor_mean_v375(
+                    bt, np.asarray(hot_mask_2d, dtype=bool) | np.asarray(test1_hot_filtered, dtype=bool),
+                    t1_rows, t1_cols, effective_L_bg, max_half_px=VRP_BG_NEIGHBOR_MAX_HALF_PX)
+            t1_delta_L = np.maximum(t1_L - _t1_Lbg, 0.0)
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             vrp_mir_mw_test1_only = float(np.sum(t1_vrp))
@@ -1890,7 +1948,18 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         if len(t1_rows) > 0:
             t1_bt = bt[t1_rows, t1_cols]
             t1_L = bt_to_spectral_radiance(t1_bt, I04_LAMBDA)
-            t1_delta_L = np.maximum(t1_L - effective_L_bg, 0.0)
+            _t1_Lbg = effective_L_bg
+            if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375:
+                # D25 (S142): ídem bloque anterior. Este es el que reconstruye anomaly_pixels
+                # (lo que suma F5 en store.py), así que el contador y la mediana del fondo se
+                # REINICIAN acá: tienen que describir la población publicada y no la suma de dos
+                # bloques con píxeles distintos (hallazgo H8 del verificador del plan).
+                _t1_Lbg, _n_sin = vrp_bg_neighbor_mean_v375(
+                    bt, np.asarray(hot_mask_2d, dtype=bool) | np.asarray(test1_hot_filtered, dtype=bool),
+                    t1_rows, t1_cols, effective_L_bg, max_half_px=VRP_BG_NEIGHBOR_MAX_HALF_PX)
+                _bg_vecinos_n_sin_vecinos = _n_sin
+                diag_L_bg_vecinos = redondear_diag(float(np.nanmedian(_t1_Lbg)))
+            t1_delta_L = np.maximum(t1_L - _t1_Lbg, 0.0)
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp_arr = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             t1_vrp_2d[t1_rows, t1_cols] = t1_vrp_arr
@@ -2127,6 +2196,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         record["nti_peak_lat"] = _ha_nti_peak["lat"]
         record["nti_peak_lon"] = _ha_nti_peak["lon"]
         record["nti_peak_dist_km"] = _ha_nti_peak["dist_km"]
+
+    # S142 D25: diagnóstico del fondo por vecinos. Con el flag OFF los campos NO aparecen y el
+    # record queda idéntico al de hoy (tests/test_apagado_no_cambia_nada_s142.py).
+    # diag_bg_vecinos_n_sin_vecinos cuenta los píxeles que cayeron al respaldo en el bloque que
+    # publica: el contextual, o el del Test 1 cuando ese camino es el que reconstruye
+    # anomaly_pixels (ahí se reinicia, para no mezclar dos poblaciones).
+    if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375:
+        record["diag_L_bg_vecinos_w_m2_sr_um"] = diag_L_bg_vecinos
+        record["diag_bg_vecinos_n_sin_vecinos"] = int(_bg_vecinos_n_sin_vecinos)
 
     return record
 

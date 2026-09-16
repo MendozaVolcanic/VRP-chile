@@ -1,0 +1,18 @@
+# S142: instrumento de tests/test_apagado_no_cambia_nada_s142.py. NO es un brazo del A/B.
+#
+# Enciende SOLO los dos flags nuevos (D22 y D25, VIIRS 375) para comprobar, corriendo el arnés
+# sintético con este perfil, que MODIS y VIIRS 750 no se mueven, y que VIIRS 375 sí (control de
+# instrumento: si V375 tampoco cambiara, el perfil no estaría leyendo sus flags).
+#
+# NO OPERACIONAL: data_subdir aislado, fuera del cron, nunca se reprocesa con él.
+extends: mirova_equivalent
+profile: _s142_verif_flags_nuevos
+description: >
+  Instrumento de test S142: sólo enable_tests_23_no_bt_gate_viirs375 y enable_vrp_bg_neighbor_mean_viirs375 en true.
+
+paths:
+  enable_tests_23_no_bt_gate_viirs375: true
+  enable_vrp_bg_neighbor_mean_viirs375: true
+
+output:
+  data_subdir: _s142_verif_flags_nuevos

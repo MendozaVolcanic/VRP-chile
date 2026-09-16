@@ -218,6 +218,7 @@ def contextual_dnti_hot_mask(
     unsuitable_dnti_floor: float = UNSUITABLE_DNTI_FLOOR_DEFAULT,
     unsuitable_deti_floor: float = UNSUITABLE_DETI_FLOOR_DEFAULT,
     deti: Optional[np.ndarray] = None,
+    apply_bt_gate: bool = True,
 ) -> np.ndarray:
     """Contextual dNTI hot-pixel mask (Coppola 2016a, 8-neighbor median).
 
@@ -261,12 +262,23 @@ def contextual_dnti_hot_mask(
     nti_nbr_med = np.full_like(nti, np.nan)
     nti_nbr_med[y0:y1, x0:x1] = nbr_crop
     dnti = nti - nti_nbr_med
+    # D22 (S142): la compuerta de temperatura no está en la fórmula del paper (Coppola 2016a
+    # p. 7, Tests 2 y 3: dNTI contra C1 o mu + C2 sigma). Nació en el camino del NTI absoluto
+    # y se heredó acá. En un cono nevado de noche descarta al píxel con lava sub-píxel que
+    # está más frío que la mediana del anillo regional. `apply_bt_gate=False` la quita; el
+    # default conserva el comportamiento histórico. Sólo process_viirs.py la apaga, con
+    # ENABLE_TESTS_23_NO_BT_GATE_VIIRS375. La exigencia de BT finita (~isnan(bt)) se queda:
+    # un NaN es un píxel sin dato, no un píxel frío.
+    if apply_bt_gate:
+        gate_bt = bt > t_bg + bt_sanity_k
+    else:
+        gate_bt = np.ones_like(roi_mask, dtype=bool)
     hot = (
         roi_mask
         & ~np.isnan(dnti)
         & ~np.isnan(bt)
         & (dnti > c1)
-        & (bt > t_bg + bt_sanity_k)
+        & gate_bt
     )
 
     # S72 F1.2 — Coppola 2016a SP 426.5 §267-273 + §298-300: pixels unsuitable
@@ -330,6 +342,7 @@ def dual_roi_contextual_dnti_hot_mask(
     unsuitable_dnti_floor: float = UNSUITABLE_DNTI_FLOOR_DEFAULT,
     unsuitable_deti_floor: float = UNSUITABLE_DETI_FLOOR_DEFAULT,
     deti: Optional[np.ndarray] = None,
+    apply_bt_gate: bool = True,
 ) -> np.ndarray:
     """Dual-ROI contextual dNTI mask (Coppola 2016a SP 426.5, P3.1 S15).
 
@@ -368,6 +381,7 @@ def dual_roi_contextual_dnti_hot_mask(
         unsuitable_dnti_floor=unsuitable_dnti_floor,
         unsuitable_deti_floor=unsuitable_deti_floor,
         deti=deti,
+        apply_bt_gate=apply_bt_gate,  # D22 (S142): mismo test, umbral dual
     )
     hot_summit = contextual_dnti_hot_mask(
         nti, bt, summit_mask, t_bg, c1_summit, bt_sanity_k, **_kwargs,
@@ -420,6 +434,7 @@ def first_pass_tests_2_and_3(
     unsuitable_dnti_floor: float = UNSUITABLE_DNTI_FLOOR_DEFAULT,
     unsuitable_deti_floor: float = UNSUITABLE_DETI_FLOOR_DEFAULT,
     use_prose_branch: bool = False,
+    apply_bt_gate: bool = True,
 ) -> tuple:
     """Coppola 2016a SP426.5 first-pass — Tests 2 ∧ 3 conjunción + dual-ROI.
 
@@ -525,11 +540,15 @@ def first_pass_tests_2_and_3(
         pass_3 = deti > thr_deti
 
     # 5) Conjunción AND + ROI + bt sanity
+    # D22 (S142): la fórmula de los Tests 2 y 3 (Coppola 2016a p. 7) no tiene condición de
+    # temperatura. Con `apply_bt_gate=False` sólo se exige BT finita; el default conserva la
+    # compuerta. mu y sigma NO dependen de esto (salen del pool de fondo, paso 3).
+    gate_bt = (bt > t_bg + bt_sanity_k) if apply_bt_gate else np.isfinite(bt)
     hot = (
         roi_mask
         & np.isfinite(dnti) & np.isfinite(deti)
         & pass_2 & pass_3
-        & (bt > t_bg + bt_sanity_k)
+        & gate_bt
     )
 
     diag = {
