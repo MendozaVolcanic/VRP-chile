@@ -121,3 +121,62 @@ def test_el_segundo_pase_no_recibe_temperatura():
     """Corrección S138: el segundo pase no tiene compuerta; por eso rescata lo que ella rechaza."""
     assert "bt" not in inspect.signature(second_pass_adjacent).parameters
     assert "apply_bt_gate" not in inspect.signature(second_pass_adjacent).parameters
+
+
+# ---------------------------------------------------------------------------
+# De punta a punta y guards de fuente (Tarea 6).
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="module")
+def v375_sin_compuerta(tmp_path_factory):
+    texto = correr_en_subproceso(tmp_path_factory.mktemp("d22"), perfil="mirova_equivalent",
+                                 parches=("ENABLE_TESTS_23_NO_BT_GATE_VIIRS375=True",), solo="v375")
+    return json.loads(texto)["v375"]
+
+
+def test_extremo_a_extremo_el_primer_pase_toma_lo_que_rescataba_el_segundo(v375_sin_compuerta):
+    """El primer pase pasa de 0 a 2 píxeles y el segundo de 2 a 0, y lo publicado no cambia: es la
+    corrección S138, el segundo pase ya rescataba lo que la compuerta rechazaba. Por el camino
+    contextual, D22 sola no devuelve alertas ni mueve la magnitud."""
+    hoy = GOLDEN["v375"]["nevado_vecino_tibio|kernel=False"]
+    on = v375_sin_compuerta["nevado_vecino_tibio|kernel=False"]
+    assert (hoy["diag_n_first_pass_pixels"], hoy["diag_n_second_pass_recapture"]) == (0, 2)
+    assert (on["diag_n_first_pass_pixels"], on["diag_n_second_pass_recapture"]) == (2, 0)
+    assert on["anomaly_pixels"] == hoy["anomaly_pixels"]
+    assert on["primary_cluster"] == hoy["primary_cluster"]
+
+
+def test_el_camino_d_no_recibe_el_flag(v375_sin_compuerta):
+    """Decisión del dueño (hallazgos H2 y H4 del verificador): D22 se acota al primer pase de los
+    Tests 2 y 3 y al camino ETI. El camino D (dNTI > C1 a secas) no es un test del paper (le falta
+    dETI y la rama estadística) y su máscara es la que alimenta el filtro contextual del Test 1 y
+    el conteo que decide la fuente: dejarlo fuera evita acoplar D22 con keep_peak."""
+    hoy = GOLDEN["v375"]["nevado_vecino_tibio|kernel=False"]
+    on = v375_sin_compuerta["nevado_vecino_tibio|kernel=False"]
+    assert hoy["diag_n_dnti_ctx_path"] == 0
+    assert on["diag_n_dnti_ctx_path"] == 0, (
+        "el camino D se quedó sin compuerta: D22 dejó de estar acotada al primer pase")
+
+
+def test_la_escena_plana_no_cambia_sin_compuerta(v375_sin_compuerta):
+    for k in ("plana|kernel=False", "plana|kernel=True"):
+        assert json.dumps(v375_sin_compuerta[k], sort_keys=True) == json.dumps(GOLDEN["v375"][k], sort_keys=True), k
+
+
+def test_fuente_viirs375_pasa_el_flag_solo_en_el_primer_pase_y_en_el_eti():
+    s = _src("pipeline/process_viirs.py")
+    # una sola llamada lo pasa: la del primer pase de los Tests 2 y 3
+    assert _tokens(s, "apply_bt_gate=not ENABLE_TESTS_23_NO_BT_GATE_VIIRS375") == 1
+    # y NINGUNA otra: las dos llamadas del camino D quedan con la compuerta puesta
+    assert _tokens(s, "apply_bt_gate") == 1
+    assert re.search(r"_eti_gate_bt = \(np\.ones_like\(bt, dtype=bool\) if ENABLE_TESTS_23_NO_BT_GATE_VIIRS375\b", s)
+    # el camino B (NTI > K1, Test 1 del paper, D23) conserva su compuerta intacta
+    assert re.search(r"& \(nti > NTI_K1_NIGHT\)\s*\n\s*& \(bt > \(t_bg_i04 \+ NTI_BT_SANITY_K\)\)", s)
+
+
+@pytest.mark.parametrize("rel", ["pipeline/process_modis.py", "pipeline/process_viirs_mod.py"])
+def test_modis_y_viirs750_no_conocen_el_flag_ni_el_parametro(rel):
+    s = _src(rel)
+    assert _tokens(s, "ENABLE_TESTS_23_NO_BT_GATE_VIIRS375") == 0, rel
+    assert _tokens(s, "apply_bt_gate") == 0, rel

@@ -12,7 +12,9 @@ el MIR y la diferencia crece con la heterogeneidad del entorno). (2) Los alertad
 fuera. (3) El píxel interior de un cúmulo busca afuera, hasta `max_half_px`. (4) NaN se ignora. (5)
 El envoltorio de process_viirs usa el fondo de hoy sólo donde no hay vecinos, y lo cuenta.
 """
+import json
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -23,9 +25,16 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests"))
 
+from arnes_sintetico_s142 import (CENTRO_V375, correr_en_subproceso,  # noqa: E402
+                                  escena_v375)
 from pipeline.vrp_regimes import neighbor_mean_radiance_background  # noqa: E402
 
 LAMBDA_I04 = 3.740
+GOLDEN = json.loads((ROOT / "tests" / "golden_s142" / "apagado.json").read_text(encoding="utf-8"))
+
+
+def _src(rel):
+    return (ROOT / rel).read_text(encoding="utf-8")
 
 
 def _planck(bt):
@@ -110,3 +119,109 @@ def test_sin_alertados_devuelve_arreglos_vacios():
     l_bk, half = neighbor_mean_radiance_background(np.full((3, 3), 260.0), np.zeros((3, 3), bool),
                                                    [], [], LAMBDA_I04)
     assert l_bk.shape == (0,) and half.shape == (0,)
+
+
+# ---------------------------------------------------------------------------
+# Envoltorio, de punta a punta y guards de fuente (Tarea 6).
+# ---------------------------------------------------------------------------
+
+
+def test_envoltorio_usa_el_fondo_de_hoy_solo_sin_vecinos_y_lo_cuenta():
+    import pipeline.process_viirs as pv
+    bt = np.full((9, 9), 255.0)
+    bt[3:6, 3:6] = 300.0
+    alert = np.zeros((9, 9), dtype=bool)
+    alert[3:6, 3:6] = True
+    rows, cols = [4, 3], [4, 3]
+    l_bg, n_sin = pv.vrp_bg_neighbor_mean_v375(bt, alert, rows, cols, np.float64(0.123), max_half_px=1)
+    assert n_sin == 1
+    assert l_bg[0] == 0.123                                   # interior: respaldo escalar
+    assert math.isclose(l_bg[1], float(_planck(255.0)), rel_tol=1e-12)   # borde: vecinos
+    legado = np.array([0.5, 0.6])
+    l_bg2, n_sin2 = pv.vrp_bg_neighbor_mean_v375(bt, alert, rows, cols, legado, max_half_px=1)
+    assert n_sin2 == 1 and l_bg2[0] == 0.5                    # respaldo por píxel
+
+
+@pytest.fixture(scope="module")
+def v375_vecinos(tmp_path_factory):
+    texto = correr_en_subproceso(tmp_path_factory.mktemp("d25"), perfil="mirova_equivalent",
+                                 parches=("ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375=True",), solo="v375")
+    return json.loads(texto)["v375"]
+
+
+def _esperado_vrp(bt4, alert, r, c):
+    """Reimplementa la cuenta a mano desde la escena: media de la radiancia de los vecinos no
+    alertados, por Wooster, con el área nadir fija que usa producción."""
+    import pipeline.process_viirs as pv
+    ventana = bt4[r - 1:r + 2, c - 1:c + 2]
+    usable = ~alert[r - 1:r + 2, c - 1:c + 2] & np.isfinite(ventana)
+    l_bk = float(np.mean(_planck(ventana[usable])))
+    l_hot = float(pv.bt_to_spectral_radiance(np.float64(bt4[r, c]), pv.I04_LAMBDA))
+    area = pv.NADIR_PIXEL_AREA_M2   # nadir fijo en producción (ENABLE_NADIR_FIXED_PIXEL_AREA_VIIRS)
+    return area * pv.WOOSTER_COEFF * max(l_hot - l_bk, 0.0) / 1e6
+
+
+def test_extremo_a_extremo_el_crater_deja_de_publicarse_en_cero(v375_vecinos):
+    """Con el fondo del anillo regional el cráter sale más frío que su propio fondo y se recorta a
+    0,0 MW; con el fondo de los vecinos pasa a tener magnitud."""
+    bands, _geo = escena_v375("nevado_vecino_tibio")
+    bt4 = bands["I04"].astype(np.float64)
+    c = CENTRO_V375
+    alert = np.zeros(bt4.shape, dtype=bool)
+    alert[c, c] = alert[c, c + 1] = True
+    hoy = GOLDEN["v375"]["nevado_vecino_tibio|kernel=False"]
+    on = v375_vecinos["nevado_vecino_tibio|kernel=False"]
+    assert [p["vrp_mw"] for p in hoy["anomaly_pixels"]] == [0.0, 0.0]
+    por_bt = {p["bt_k"]: p["vrp_mw"] for p in on["anomaly_pixels"]}
+    assert math.isclose(por_bt[266.0], _esperado_vrp(bt4, alert, c, c), abs_tol=6e-5)
+    assert math.isclose(por_bt[262.0], _esperado_vrp(bt4, alert, c, c + 1), abs_tol=6e-5)
+    assert por_bt[266.0] > 0.0
+    # la detección y el fondo del anillo no se tocan: sólo la resta
+    assert on["t_bg_k"] == hoy["t_bg_k"] and on["n_anomalous_pixels"] == hoy["n_anomalous_pixels"]
+    assert on["diag_bg_vecinos_n_sin_vecinos"] == 0
+    assert on["diag_L_bg_vecinos_w_m2_sr_um"] is not None
+    assert "diag_bg_vecinos_n_sin_vecinos" not in hoy
+
+
+def test_el_camino_del_test1_tambien_recibe_el_fondo_nuevo(v375_vecinos):
+    """H1 y b3. En esta escena el bloque contextual NO corre (cero píxeles anómalos), así que si el
+    diagnóstico del fondo por vecinos aparece, lo escribió el bloque del Test 1 que reconstruye
+    `anomaly_pixels`: es la prueba observable de que ese bloque recibe el fondo nuevo y de que su
+    diagnóstico describe la población publicada y no la de otro bloque."""
+    hoy = GOLDEN["v375"]["test1_difuso|kernel=False"]
+    on = v375_vecinos["test1_difuso|kernel=False"]
+    assert hoy["n_anomalous_pixels"] == 0 and on["n_anomalous_pixels"] == 0
+    assert hoy["final_hotspot_source"] == "test1_roi" == on["final_hotspot_source"]
+    assert json.dumps(on["anomaly_pixels"], sort_keys=True) != json.dumps(hoy["anomaly_pixels"], sort_keys=True)
+    assert on["diag_L_bg_vecinos_w_m2_sr_um"] is not None
+    assert on["diag_bg_vecinos_n_sin_vecinos"] == 0
+
+
+def test_fuente_el_bloque_nuevo_va_despues_del_legado_y_el_recorte_sigue():
+    s = _src("pipeline/process_viirs.py")
+    legado = re.search(r"^\s*if ENABLE_LOCAL_KERNEL_BG and local_kernel_bg_compatible:", s, flags=re.M)
+    nuevo = re.search(r"^\s*if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375:\s*$", s, flags=re.M)
+    recorte = re.search(r"^\s*delta_L = np\.maximum\(L_hot - L_bg, 0\.0\)", s, flags=re.M)
+    assert legado and nuevo and recorte
+    assert legado.start() < nuevo.start() < recorte.start()
+    # los dos bloques del Test 1 usan el fondo por vecinos bajo el flag
+    assert len(re.findall(r"_t1_Lbg, _n_sin = vrp_bg_neighbor_mean_v375\(", s)) == 2
+    assert len(re.findall(r"np\.maximum\(t1_L - _t1_Lbg, 0\.0\)", s)) == 2
+
+
+def test_fuente_el_contador_se_reinicia_en_el_bloque_publicado_del_test1():
+    """b3 (hallazgo H8): el bloque contextual ACUMULA y el del Test 1 que reconstruye
+    `anomaly_pixels` REINICIA, para que el contador y la mediana del fondo describan lo publicado
+    y no la suma de dos poblaciones distintas."""
+    s = _src("pipeline/process_viirs.py")
+    assert len(re.findall(r"_bg_vecinos_n_sin_vecinos \+= _n_sin", s)) == 1
+    assert len(re.findall(r"_bg_vecinos_n_sin_vecinos = _n_sin", s)) == 1
+    assert len(re.findall(r"diag_L_bg_vecinos = redondear_diag\(", s)) == 2
+
+
+@pytest.mark.parametrize("rel", ["pipeline/process_modis.py", "pipeline/process_viirs_mod.py"])
+def test_modis_y_viirs750_no_conocen_el_fondo_por_vecinos(rel):
+    s = _src(rel)
+    for token in ("ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375", "neighbor_mean_radiance_background",
+                  "vrp_bg_neighbor_mean_v375", "VRP_BG_NEIGHBOR_MAX_HALF_PX"):
+        assert not re.search(r"(?<![A-Za-z0-9_])" + token + r"(?![A-Za-z0-9_])", s), (rel, token)
