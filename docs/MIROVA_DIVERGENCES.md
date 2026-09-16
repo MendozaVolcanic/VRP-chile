@@ -1554,7 +1554,7 @@ correction or cloud-contamination automatic filtering"*. Por eso
 [`MISSION.md`](MISSION.md) l.127 lista `Cloud mask BT<260K` en la tabla de
 parches **rechazados**, con estado *"Removido S27"*.
 
-**Qué hace el código.** `pipeline/process_viirs.py:676-684` la aplica:
+**Qué hace el código.** `pipeline/process_viirs.py:702-710` la aplica:
 
 ```python
 CLOUD_BT_THRESHOLD = 260.0                      # K
@@ -1572,7 +1572,7 @@ en S124 (la otra, los pisos VRP, se corrigió en #523). Solo afecta a VIIRS
 > **sí tiene** la máscara (`process_modis.py:507` y `:715`), sólo que la lee de la
 > perilla del perfil `CLOUD_MASK_BT_K`, hoy en `0.0` — o sea el predicado queda
 > tautológico y la máscara inerte. Lo mismo VIIRS 750. **El caso raro es VIIRS 375**:
-> `process_viirs.py:676` tiene `CLOUD_BT_THRESHOLD = 260.0` **hardcodeado** e ignora
+> `process_viirs.py:702` tiene `CLOUD_BT_THRESHOLD = 260.0` **hardcodeado** e ignora
 > la perilla, aplicándolo a `roi_mask` y `bg_mask` en `:678-681`.
 >
 > Consecuencia práctica que la sección no sacaba: **la perilla correcta ya existe y un
@@ -1710,7 +1710,7 @@ Estado del código, verificado leyendo `pipeline.profile` y no el YAML:
 `bt > CLOUD_MASK_BT_K` es tautológico y la máscara está inerte en los tres
 sensores. El literal `260.0` que VIIRS 375 tenía hardcodeado —la anomalía que la
 corrección S125 de arriba señalaba— **ya está reemplazado por la perilla**
-(`process_viirs.py:774`), con dos guards: `tests/test_cloud_mask_from_profile_s125.py`
+(`process_viirs.py:800`), con dos guards: `tests/test_cloud_mask_from_profile_s125.py`
 y `tests/test_cloud_mask_operacional_s126.py`.
 
 **Por qué se sostiene el apagado**, en este orden:
@@ -2100,7 +2100,7 @@ Detalle: `docs/s129/ROI1_CAJA_VS_CIRCULO.md`.
 disco de 3 km alrededor de la cumbre, el píxel más caliente es el borde del disco (cota más
 baja), no el cráter (A69).
 
-**Lo nuestro** (`pipeline/process_viirs.py:1781-1790`, flags efectivos
+**Lo nuestro** (`pipeline/process_viirs.py:1832-1841`, flags efectivos
 `ENABLE_TEST1_CONTEXTUAL_FILTER=True` y `ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK=True`, adopción
 S100 #340 «ctxpeak»): el Test 1 marca ~la mitad del disco (exceso sobre la mediana del anillo
 1-3 km, `test1_integrated.py:376,412,420`), el filtro contextual lo intersecta con `dNTI_ctx`
