@@ -281,7 +281,14 @@ def _a_json(o):
 # pasa de 0,0 a 0,097 MW, o el 1e-6 relativo del control en
 # tests/test_apagado_no_cambia_nada_s142.py). No es tolerancia numérica del pipeline: es cómo se
 # escribe el archivo de comparación.
-SIGNIFICATIVAS = 12
+#
+# POR QUÉ 9 Y NO 12. Con 12 el CI volvió a caer, un escalón más abajo: un diagnóstico daba
+# ...69741704334e-07 en Windows y ...69741704335e-07 en Linux, o sea el ruido alcanzaba la cifra
+# 12. Se baja a 9, que deja tres órdenes de magnitud de margen contra el control de 1e-6 relativo
+# del test, así que el archivo sigue detectando cualquier cambio con sentido físico. Si el ruido
+# llegara a la cifra 9, la comparación de texto ya no serviría y habría que comparar con tolerancia
+# relativa campo por campo: eso sería otro instrumento, no otro número.
+SIGNIFICATIVAS = 9
 
 
 def _redondear(o):
