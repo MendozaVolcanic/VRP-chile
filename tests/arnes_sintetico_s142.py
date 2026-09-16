@@ -272,8 +272,40 @@ def _a_json(o):
     return repr(o)
 
 
+# S142: cifras significativas con que se escribe cada float del golden.
+# POR QUÉ. El mismo cálculo da el último dígito distinto en Windows y en Linux (orden de las
+# operaciones de la BLAS y del compilador): `sd_dnti` 0,00025641447808233127 contra
+# 0,0002564144780823313, o sea 1e-16 relativo. Comparando el JSON como texto crudo, el golden
+# mide en qué máquina corrió y no si el pipeline cambió: así se cayó el CI del PR #681. Con 12
+# cifras el ruido desaparece y cualquier cambio con sentido físico sigue viéndose (un VRP que
+# pasa de 0,0 a 0,097 MW, o el 1e-6 relativo del control en
+# tests/test_apagado_no_cambia_nada_s142.py). No es tolerancia numérica del pipeline: es cómo se
+# escribe el archivo de comparación.
+SIGNIFICATIVAS = 12
+
+
+def _redondear(o):
+    """Redondea a SIGNIFICATIVAS cada float del árbol, respetando NaN, inf y enteros."""
+    if isinstance(o, bool) or isinstance(o, int):
+        return o
+    if isinstance(o, float):
+        if o != o or o in (float("inf"), float("-inf")) or o == 0.0:
+            return o
+        return float(f"{o:.{SIGNIFICATIVAS}g}")
+    if isinstance(o, np.ndarray):
+        return [_redondear(v) for v in o.tolist()]
+    if isinstance(o, np.generic):
+        return _redondear(o.item())
+    if isinstance(o, dict):
+        return {k: _redondear(v) for k, v in o.items()}
+    if isinstance(o, (list, tuple)):
+        return [_redondear(v) for v in o]
+    return o
+
+
 def canonico(obj):
-    return json.dumps(obj, sort_keys=True, indent=1, default=_a_json, ensure_ascii=False)
+    return json.dumps(_redondear(obj), sort_keys=True, indent=1, default=_a_json,
+                      ensure_ascii=False)
 
 
 def correr_en_subproceso(tmp_dir, perfil="mirova_equivalent", parches=(), solo=None):

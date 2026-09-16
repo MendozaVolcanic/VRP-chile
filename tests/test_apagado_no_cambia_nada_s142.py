@@ -4,7 +4,9 @@ encendidos por perfil, MODIS y VIIRS 750 no se mueven.
 
 POR QUÉ. El cron NRT corre 12 veces al día sobre 11 volcanes: un cambio que pase los tests
 unitarios pero mueva un número se replica a cientos de records antes de verse (A45). El golden se
-generó con el código previo (Tarea 1) y se compara como texto (NaN != NaN, S132).
+generó con el código previo (Tarea 1) y se compara como texto (NaN != NaN, S132), con los floats
+escritos a `arnes.SIGNIFICATIVAS` cifras: el último dígito del float64 cambia entre Windows y Linux
+y sin ese redondeo el golden medía la máquina, no el código (CI en rojo del PR #681).
 
 CONTROLES DE INSTRUMENTO (S128). Un test de "no cambia nada" pasa trivialmente si la escena no
 ejerce el camino que podría cambiar. Por eso, además de la comparación, este archivo comprueba que
@@ -36,11 +38,38 @@ PERFIL_VERIF = "_s142_verif_flags_nuevos"
 
 
 def _canon(obj):
-    return json.dumps(obj, sort_keys=True, default=arnes._a_json, ensure_ascii=False)
+    # `arnes._redondear` es obligatorio: el golden se escribe con los floats a
+    # `arnes.SIGNIFICATIVAS` cifras, así que comparar contra un lado sin redondear mide el último
+    # dígito del float64 (que difiere entre Windows y Linux) y no el comportamiento del pipeline.
+    return json.dumps(arnes._redondear(obj), sort_keys=True, default=arnes._a_json,
+                      ensure_ascii=False)
 
 
 def _golden():
     return json.loads(GOLDEN.read_text(encoding="utf-8"))
+
+
+def test_la_serializacion_ignora_el_ruido_del_ultimo_digito_pero_no_un_cambio_real():
+    """El golden no puede depender de en qué máquina se generó (S142, CI en rojo del PR #681).
+
+    POR QUÉ. El mismo cálculo en Windows y en Linux difiere en el último dígito del float64:
+    `sd_dnti` 0,00025641447808233127 contra 0,0002564144780823313, o sea 1e-16 relativo. Eso es
+    la aritmética de coma flotante, no el pipeline: ninguna decisión del algoritmo cambia con la
+    cifra 17. Comparando el JSON como texto crudo, el test se cae en el CI y deja de decir lo que
+    promete ("los flags apagados no cambian nada"): mide la máquina, no el código.
+
+    QUÉ SE EXIGE. `canonico` redondea a SIGNIFICATIVAS cifras antes de serializar, así que el
+    ruido del último dígito desaparece del texto, pero un cambio con sentido físico (acá 1e-6
+    relativo, y los cambios reales del pipeline son mucho mayores: un VRP que pasa de 0,0 a
+    0,097 MW) sigue cambiando el texto. Sin la segunda mitad, redondear sería tapar el problema.
+    """
+    base = {"vrp_mw": 0.09681234567890123, "diag": {"sd_dnti": 0.00025641447808233127}}
+    ruido = {"vrp_mw": 0.09681234567890456, "diag": {"sd_dnti": 0.0002564144780823313}}
+    real = {"vrp_mw": 0.09681244567890123, "diag": {"sd_dnti": 0.00025641547808233127}}
+    assert arnes.canonico(base) == arnes.canonico(ruido), (
+        "el ruido de coma flotante entre máquinas cambia el texto: el golden mide la máquina")
+    assert arnes.canonico(base) != arnes.canonico(real), (
+        "un cambio de 1e-6 relativo pasa desapercibido: el redondeo tapa cambios reales")
 
 
 def test_perfil_operacional_reproduce_el_golden_bit_a_bit(tmp_path):

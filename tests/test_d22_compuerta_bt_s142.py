@@ -23,8 +23,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests"))
 
-from arnes_sintetico_s142 import (CENTRO_V375, N_V375, correr_en_subproceso,  # noqa: E402
-                                  entradas_helpers, salidas_helpers)
+from arnes_sintetico_s142 import (CENTRO_V375, N_V375, _redondear,  # noqa: E402
+                                  correr_en_subproceso, entradas_helpers, salidas_helpers)
 from pipeline.detection_context import (contextual_dnti_hot_mask,  # noqa: E402
                                         dual_roi_contextual_dnti_hot_mask,
                                         first_pass_tests_2_and_3, second_pass_adjacent)
@@ -45,13 +45,16 @@ def _tokens(src, token):
 
 
 def test_default_y_explicito_true_son_la_compuerta_de_hoy():
-    assert salidas_helpers() == GOLDEN["helpers"]
-    assert salidas_helpers(apply_bt_gate=True) == GOLDEN["helpers"]
+    # El golden se escribe con los floats a `arnes.SIGNIFICATIVAS` cifras (el último dígito del
+    # float64 difiere entre Windows y Linux, CI del PR #681), así que el lado recién calculado se
+    # canonicaliza igual: comparar las dos convenciones mide la máquina, no la compuerta.
+    assert _redondear(salidas_helpers()) == GOLDEN["helpers"]
+    assert _redondear(salidas_helpers(apply_bt_gate=True)) == GOLDEN["helpers"]
 
 
 def test_sin_compuerta_el_primer_pase_toma_al_crater_y_al_vecino_tibio():
     hoy = GOLDEN["helpers"]
-    sin = salidas_helpers(apply_bt_gate=False)
+    sin = _redondear(salidas_helpers(apply_bt_gate=False))  # misma convención que el golden
     assert CRATER not in hoy["first_pass"] and VECINO not in hoy["first_pass"]
     assert CRATER in sin["first_pass"] and VECINO in sin["first_pass"]
     # sólo cambia el conjunto de activos: mu y sigma salen del pool de fondo, que no depende de BT
@@ -161,7 +164,10 @@ def test_el_camino_d_no_recibe_el_flag(v375_sin_compuerta):
 
 def test_la_escena_plana_no_cambia_sin_compuerta(v375_sin_compuerta):
     for k in ("plana|kernel=False", "plana|kernel=True"):
-        assert json.dumps(v375_sin_compuerta[k], sort_keys=True) == json.dumps(GOLDEN["v375"][k], sort_keys=True), k
+        # _redondear en los dos lados: el golden viene redondeado y el otro lado recién calculado
+        # (misma razón que arriba; sin esto el test compara el último dígito del float64).
+        assert (json.dumps(_redondear(v375_sin_compuerta[k]), sort_keys=True)
+                == json.dumps(_redondear(GOLDEN["v375"][k]), sort_keys=True)), k
 
 
 def test_fuente_viirs375_pasa_el_flag_solo_en_el_primer_pase_y_en_el_eti():
