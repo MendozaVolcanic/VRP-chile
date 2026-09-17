@@ -81,6 +81,11 @@ B_DEFECTO = PARAMETROS["B"]
 SEMILLA_DEFECTO = PARAMETROS["semilla"]
 N_MIN_MAGNITUD = PARAMETROS["n_min_magnitud"]
 TOL_MAGNITUD = PARAMETROS["tol_magnitud"]
+# Las dos posiciones con que se puede medir la cota de mismo objeto (ver `posiciones_de_record`).
+# Cuál decide es decisión abierta de Nicolás: sale del archivo, no está escrita en el código.
+CAMPOS_POSICION = {"centroide": "pos_centroide",
+                   "final_hotspot_si_test1": "pos_final_hotspot_si_test1"}
+CAMPO_POSICION_DEFECTO = PARAMETROS["campo_posicion_cota"]
 DENOMINADORES = ROOT / "experiments" / "_s143_preregistro" / "denominadores.json"
 DL_REFERENCIA = HERE / "_dl_referencia"
 NOMBRES_REF = ("registro_vrp_consolidado.csv", "registro_vrp_ocr.csv")
@@ -173,6 +178,28 @@ def cobertura(claves, control, volcanes):
     return detalle, desparejos
 
 
+# ------------------------------------------------------------------ dónde está el objeto publicado
+def posiciones_de_record(r):
+    """Las dos posiciones con que se puede medir la cota de mismo objeto, para el mismo record.
+
+    POR QUÉ HAY DOS. El cúmulo primario es el objeto que el dashboard reporta en magnitud, pero
+    cuando el record viene del Test 1 integrado ese cúmulo es el FOOTPRINT de la integral, corrido
+    por el gradiente topográfico (A69), no la posición del foco: la regla del proyecto (S106, A84,
+    y el bloque `latestDetection` de `frontend/index.html`) dice que ahí la posición oficial es
+    `final_hotspot`. En los records del camino contextual los dos campos coinciden. Cuál de los dos
+    decide la cota es una decisión abierta de Nicolás, así que el evaluador calcula las dos.
+    """
+    pc = r.get("primary_cluster") or {}
+    cen = None
+    if pc.get("centroid_lat") is not None and pc.get("centroid_lon") is not None:
+        cen = (float(pc["centroid_lat"]), float(pc["centroid_lon"]))
+    fh = cen
+    if r.get("final_hotspot_source") == "test1_roi" and r.get("final_hotspot_lat") is not None \
+            and r.get("final_hotspot_lon") is not None:
+        fh = (float(r["final_hotspot_lat"]), float(r["final_hotspot_lon"]))
+    return {"pos_centroide": cen, "pos_final_hotspot_si_test1": fh}
+
+
 # ------------------------------------------------------------------ pasadas con el predicado node
 def construir_pasadas(records_por_vol, coords, inner, ventana, buckets=("VIIRS375",)):
     """Misma selección de records y mismos casos que `banco_paridad.cargar_nuestros`, con el
@@ -193,14 +220,12 @@ def construir_pasadas(records_por_vol, coords, inner, ventana, buckets=("VIIRS37
             lat, lon = coords[vol]
             if bp.es_pasada_diurna_descartada(b, lat, lon, dt):
                 continue
-            pc = r.get("primary_cluster") or {}
-            cen = None
-            if pc.get("centroid_lat") is not None and pc.get("centroid_lon") is not None:
-                cen = (float(pc["centroid_lat"]), float(pc["centroid_lon"]))
             pasadas.append({"vol": vol, "b": b, "dt": dt, "noche": dt.strftime("%Y-%m-%d"),
                             "datetime_utc": r["datetime_utc"], "sensor": r.get("sensor"),
                             "clave": (vol, r["datetime_utc"], r.get("sensor")),
-                            "product_version": r.get("product_version"), "cen": cen})
+                            "product_version": r.get("product_version"),
+                            "final_hotspot_source": r.get("final_hotspot_source"),
+                            **posiciones_de_record(r)})
             slim = {k: r.get(k) for k in bp.CAMPOS_JS if k != "anomaly_pixels"}
             if r.get("f5_core_vrp_mw") is None:
                 slim["anomaly_pixels"] = [{k: p.get(k) for k in ("lat", "lon", "vrp_mw", "bt_k")}
@@ -253,12 +278,15 @@ def noches_y_distancias(por_vb, noche_sensor, volcanes, bucket="VIIRS375"):
 
 
 # ------------------------------------------------------------------ criterio 1
-def estado_noches(pasadas, noches_alerta, dist_noche, centros, presupuesto=PRESUPUESTO_COTA_KM):
+def estado_noches(pasadas, noches_alerta, dist_noche, centros, presupuesto=PRESUPUESTO_COTA_KM,
+                  campo=CAMPOS_POSICION[CAMPO_POSICION_DEFECTO]):
     """Por volcán, sobre las noches con alerta nocturna de MIROVA:
       pub       noches en que se publica algo;
       pub_cota  noches en que se publica un objeto que pasa la cota A93;
-      sin_cota  noches de pub_cota aceptadas sin poder calcular la cota (sin distancia o centroide);
-      descartadas {noche: cota mínima} cuando se publica pero ningún objeto pasa la cota."""
+      sin_cota  noches de pub_cota aceptadas sin poder calcular la cota (sin distancia o posición);
+      descartadas {noche: cota mínima} cuando se publica pero ningún objeto pasa la cota.
+
+    `campo` elige con qué posición del record se mide la cota (ver `posiciones_de_record`)."""
     vols = set(noches_alerta) | {p["vol"] for p in pasadas}
     out = {v: {"pub_cota": set(), "pub": set(), "descartadas": {}, "sin_cota": set()} for v in vols}
     grupos = collections.defaultdict(list)
@@ -272,10 +300,11 @@ def estado_noches(pasadas, noches_alerta, dist_noche, centros, presupuesto=PRESU
         centro = centros[v]
         pasa_con_cota, pasa_sin_cota, cotas = False, False, []
         for p in ps:
-            if p.get("cen") is None or not dm:
+            pos = p.get(campo)
+            if pos is None or not dm:
                 pasa_sin_cota = True
                 continue
-            nuestra = hav(centro[0], centro[1], p["cen"][0], p["cen"][1])
+            nuestra = hav(centro[0], centro[1], pos[0], pos[1])
             cota = min(abs(nuestra - x) for x in dm)
             cotas.append(cota)
             if cota <= presupuesto:
@@ -536,7 +565,7 @@ def argumentos(**kw):
             "denominadores": str(DENOMINADORES), "ref_cons": None, "ref_ocr": None,
             "B": B_DEFECTO, "semilla": SEMILLA_DEFECTO, "n_min": N_MIN_MAGNITUD,
             "tol_magnitud": TOL_MAGNITUD, "cota_km": PRESUPUESTO_COTA_KM, "seguimiento": None,
-            "out_json": None, "out_md": None}
+            "campo_posicion": CAMPO_POSICION_DEFECTO, "out_json": None, "out_md": None}
     desconocidos = set(kw) - set(base)
     if desconocidos:
         raise TypeError(f"argumentos desconocidos: {sorted(desconocidos)}")
@@ -548,7 +577,8 @@ def _parametros_efectivos(a):
     """Lo que esta corrida usa de verdad, para contrastarlo con lo congelado."""
     return {"ventana": [a.inicio, a.fin], "volcanes": list(a.volcanes), "brazos": list(a.brazos),
             "control": a.control, "prefijo": a.prefijo, "cota_km": a.cota_km, "B": a.B,
-            "semilla": a.semilla, "n_min_magnitud": a.n_min, "tol_magnitud": a.tol_magnitud}
+            "semilla": a.semilla, "n_min_magnitud": a.n_min, "tol_magnitud": a.tol_magnitud,
+            "campo_posicion_cota": a.campo_posicion}
 
 
 def evaluar(a):
@@ -593,14 +623,22 @@ def evaluar(a):
                 desparejos.setdefault(v, []).append("control: archivo faltante")
     evaluados = [v for v in vols if v not in desparejos]
 
-    pasadas, estados = {}, {}
+    # La cota se mide con LAS DOS posiciones del record (decisión abierta, ver
+    # `posiciones_de_record`): se calcula todo por campo y el que decide sale de `parametros.json`.
+    if a.campo_posicion not in CAMPOS_POSICION:
+        raise ValueError(f"campo_posicion desconocido: {a.campo_posicion}; "
+                         f"opciones {sorted(CAMPOS_POSICION)}")
+    pasadas, estados_por_campo = {}, {c: {} for c in CAMPOS_POSICION}
     for brazo in brazos:
         ps = construir_pasadas({v: records[brazo][v] for v in evaluados}, coords, inner, ventana)
         bp.etiquetar(ps, por_vb, noche_sensor, noche_volcan)
         anotar_mirova(ps, por_vb)
         pasadas[brazo] = ps
-        estados[brazo] = estado_noches(ps, {v: noches_alerta[v] for v in evaluados}, dist_noche,
-                                       centros, a.cota_km)
+        for campo, clave_pos in CAMPOS_POSICION.items():
+            estados_por_campo[campo][brazo] = estado_noches(
+                ps, {v: noches_alerta[v] for v in evaluados}, dist_noche, centros, a.cota_km,
+                campo=clave_pos)
+    estados = estados_por_campo[a.campo_posicion]
 
     est_fn = estratos.get
     pc = pasadas[a.control]
@@ -617,6 +655,12 @@ def evaluar(a):
                                  "sha_index_html": bp.sha_git(bp.HTML), "referencia": ref_proc},
                  "parametros": {"cota_km": a.cota_km, "tol_pareo_s": bp.TOL_S, "B": a.B,
                                 "semilla": a.semilla, "n_min_magnitud": a.n_min, "tol_magnitud": a.tol_magnitud},
+                 "campo_posicion_cota": a.campo_posicion,
+                 "campos_posicion_disponibles": {
+                     "centroide": "primary_cluster.centroid (semántica de S135)",
+                     "final_hotspot_si_test1": "final_hotspot cuando final_hotspot_source es "
+                                               "test1_roi (posición oficial del dashboard para esos "
+                                               "records, S106/A84); el centroide en el resto"},
                  "parametros_congelados": {**procedencia_archivo(ARCHIVO_PARAMETROS),
                                            "contenido": PARAMETROS},
                  "parametros_efectivos": _parametros_efectivos(a),
@@ -629,6 +673,8 @@ def evaluar(a):
                       "n_pasadas_v375_nocturnas": {b: collections.Counter(p["vol"] for p in ps)
                                                    for b, ps in pasadas.items()}},
         "noches_confirmadas": resumen_confirmadas(estados[a.control], est_fn),
+        "noches_confirmadas_por_campo_de_posicion": {
+            c: resumen_confirmadas(e[a.control], est_fn) for c, e in estados_por_campo.items()},
         "control": {"etiquetas_v375": collections.Counter(p["lab"] for p in pc),
                     "neg_limpio_n": len(neg_c),
                     "neg_limpio_tasa_publica": (sum(p["pub"] for p in neg_c) / len(neg_c)) if neg_c else None,
@@ -640,8 +686,11 @@ def evaluar(a):
     for brazo in brazos:
         if brazo == a.control:
             continue
+        por_campo = {c: criterio1(e[a.control], e[brazo], est_fn)
+                     for c, e in estados_por_campo.items()}
         res["brazos"][brazo] = {
-            "criterio1": criterio1(estados[a.control], estados[brazo], est_fn),
+            "criterio1": por_campo[a.campo_posicion],
+            "criterio1_por_campo_de_posicion": por_campo,
             "criterio2": criterio2(pc, pasadas[brazo], est_fn, a.B, a.semilla),
             "criterio3": criterio3(pc, pasadas[brazo], est_fn, a.n_min, a.tol_magnitud)}
         b = res["brazos"][brazo]
@@ -659,6 +708,8 @@ def evaluar(a):
         with open(a.seguimiento, encoding="utf-8") as fh:
             lista = json.load(fh)
         res["seguimiento"] = seguimiento(estados, lista)
+        res["seguimiento_por_campo_de_posicion"] = {c: seguimiento(e, lista)
+                                                    for c, e in estados_por_campo.items()}
     fusion = Path(a.dir) / "fusion_informe.json"
     if fusion.exists():
         with open(fusion, encoding="utf-8") as fh:
@@ -710,6 +761,8 @@ def informe_markdown(res):
     nc = res.get("noches_confirmadas") or {}
     if nc:
         L += ["## Noches confirmadas (criterio 1)", "",
+              f"Posición del record con que se mide la cota: **{m.get('campo_posicion_cota', 'sin dato')}** "
+              "(la otra se reporta al lado en cada brazo).", "",
               f"Total: **{nc['total']}**. Por estrato: "
               + ", ".join(f"{k} {v}" for k, v in sorted(nc.get("por_estrato", {}).items())) + ".", "",
               "| volcán | estrato | confirmadas | publicadas sin filtro | aceptadas sin cota calculable | coincidencias de fecha descartadas |",
@@ -732,8 +785,23 @@ def informe_markdown(res):
         L += ["### Criterio 1: cero noches perdidas", "",
               f"Pérdidas (misma cota en el brazo): **{c1['n_perdidas']}**; sin filtro en el brazo: "
               f"{c1['n_perdidas_sin_filtro_brazo']}; ganancias: {c1['n_ganancias']} "
-              f"(sin filtro {c1['n_ganancias_sin_filtro']}). Cumple: **{_f(c1['cumple'])}**.", "",
-              "| volcán | confirmadas | pérdidas | pérdidas sin filtro en el brazo | ganancias |", "|---|---|---|---|---|"]
+              f"(sin filtro {c1['n_ganancias_sin_filtro']}). Cumple: **{_f(c1['cumple'])}**.", ""]
+        por_campo = b.get("criterio1_por_campo_de_posicion")
+        if por_campo:
+            decide = m.get("campo_posicion_cota")
+            L += ["Medido con las dos posiciones del record (decisión abierta; hoy decide "
+                  f"**{decide}**):", "",
+                  "| posición | noches confirmadas | pérdidas | pérdidas sin filtro | ganancias | cumple | decide |",
+                  "|---|---|---|---|---|---|---|"]
+            conf = res.get("noches_confirmadas_por_campo_de_posicion") or {}
+            for campo, r1 in por_campo.items():
+                L.append(f"| {campo} | {(conf.get(campo) or {}).get('total', 'sin dato')} | "
+                         f"{r1['n_perdidas']} | {r1['n_perdidas_sin_filtro_brazo']} | "
+                         f"{r1['n_ganancias']} | {_f(r1['cumple'])} | "
+                         f"{'sí' if campo == decide else 'no'} |")
+            L += ["", "Por volcán, con el campo que decide:", ""]
+        L += ["| volcán | confirmadas | pérdidas | pérdidas sin filtro en el brazo | ganancias |",
+              "|---|---|---|---|---|"]
         for v, pv in c1["por_volcan"].items():
             L.append(f"| {v} | {pv['confirmadas']} | {len(pv['perdidas'])} | {len(pv['perdidas_sin_filtro_brazo'])} | {len(pv['ganancias'])} |")
         if c1["perdidas"]:
@@ -804,6 +872,8 @@ def main(argv=None):
     ap.add_argument("--n-min", type=int, default=N_MIN_MAGNITUD)
     ap.add_argument("--tol-magnitud", type=float, default=TOL_MAGNITUD)
     ap.add_argument("--cota-km", type=float, default=PRESUPUESTO_COTA_KM)
+    ap.add_argument("--campo-posicion", default=CAMPO_POSICION_DEFECTO, choices=sorted(CAMPOS_POSICION),
+                    help="con qué posición del record decide la cota (las dos se calculan y reportan)")
     ap.add_argument("--seguimiento", default=None, help="JSON [{volcan, fecha}] de noches a seguir")
     ap.add_argument("--out-json", required=True)
     ap.add_argument("--out-md", default=None)
