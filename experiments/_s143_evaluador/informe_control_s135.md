@@ -1,6 +1,8 @@
 # Evaluación del A/B: _s135_ab_b_nokeeppeak, _s135_ab_d_ambos contra _s135_ab_a_control
 
-> Generado por `experiments/_s143_evaluador/evaluar.py` el 2026-09-17T18:03:56+00:00. Ventana 2026-06-01 a 2026-08-31. Todos los números salen del JSON de resultados.
+> Generado por `experiments/_s143_evaluador/evaluar.py` el 2026-09-17T18:48:57+00:00. Ventana 2026-06-01 a 2026-08-31. Todos los números salen del JSON de resultados.
+
+**Parámetros iguales a los congelados en `parametros.json`: no** (sha 5a7b458af18b10ee743fd35a9eba423d571c461a). Referencia fijada por sha: sí.
 
 ## Procedencia
 
@@ -8,9 +10,9 @@
 {
  "evaluador": {
   "archivo": "experiments/_s143_evaluador/evaluar.py",
-  "commit": "ea5e3b24af83d95433a4de6cba5a61b1e011fde7",
+  "commit": "a8c3fb92f104fcb5e79f4934b6633c8678516999",
   "modificado_sin_commit": true,
-  "blob": "56395466dd222aa89c5847959e3d287873d12b2c"
+  "blob": "33ffa92c0c88c40e2bb43a0484ed1700c2888d6f"
  },
  "banco_paridad": {
   "archivo": "scripts/banco_paridad.py",

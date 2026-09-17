@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generado_utc": "2026-09-17T18:04:22+00:00",
+  "generado_utc": "2026-09-17T18:49:03+00:00",
   "artefactos": "C:\\Users\\nmend\\OneDrive\\Escritorio\\claude\\Volcanologia\\VRP Chile\\experiments\\_artefactos_ab",
   "runs": [
    "__run34173711390",
@@ -105,14 +105,14 @@
      ]
     }
    },
-   "dir_artefactos": "C:\\Users\\nmend\\AppData\\Local\\Temp\\s143_control_s135_a1k5qz67",
+   "dir_artefactos": "C:\\Users\\nmend\\AppData\\Local\\Temp\\s143_control_s135_uh8786uv",
    "prefijo": "s135ab-",
    "procedencia": {
     "evaluador": {
      "archivo": "experiments/_s143_evaluador/evaluar.py",
-     "commit": "ea5e3b24af83d95433a4de6cba5a61b1e011fde7",
+     "commit": "a8c3fb92f104fcb5e79f4934b6633c8678516999",
      "modificado_sin_commit": true,
-     "blob": "56395466dd222aa89c5847959e3d287873d12b2c"
+     "blob": "33ffa92c0c88c40e2bb43a0484ed1700c2888d6f"
     },
     "banco_paridad": {
      "archivo": "scripts/banco_paridad.py",
@@ -139,8 +139,82 @@
     "n_min_magnitud": 30,
     "tol_magnitud": 0.05
    },
+   "parametros_congelados": {
+    "archivo": "experiments/_s143_evaluador/parametros.json",
+    "commit": null,
+    "modificado_sin_commit": true,
+    "blob": "5a7b458af18b10ee743fd35a9eba423d571c461a",
+    "contenido": {
+     "_por_que": "Los parametros de la corrida del A/B D22/D25 se congelan aca, versionados, para que no puedan elegirse despues de ver datos (H1 del verificador externo del PR #686). El evaluador los lee por defecto, la salida JSON los copia enteros con el sha de este archivo, y tests/test_evaluador_ab_s143.py comprueba uno por uno que sigan siendo estos. Cambiar cualquiera es un cambio de pre-registro: se hace antes de correr, con su razon escrita, o el brazo se juzga en una ventana nueva sin mirar (criterio 4 del pre-registro).",
+     "_fuente": "docs/PREREGISTRO_AB_D22_D25_S143.md secciones 3, 4 y 5; cota y semilla heredadas de docs/PREREGISTRO_AB_D1_D2_S135.md",
+     "ventana": [
+      "2026-06-01",
+      "2026-08-31"
+     ],
+     "volcanes": [
+      "Isluga",
+      "Lascar",
+      "Lastarria",
+      "PlanchonPeteroa",
+      "PuyehueCordonCaulle",
+      "Tupungatito",
+      "Villarrica",
+      "NevadosDeChillan"
+     ],
+     "brazos": [
+      "_s142_ab_control",
+      "_s142_ab_literal",
+      "_s142_ab_lit_sin_fondo",
+      "_s142_ab_lit_con_compuerta",
+      "_s142_ab_lit_sp_suelto",
+      "_s142_ab_lit_keep_peak"
+     ],
+     "control": "_s142_ab_control",
+     "prefijo": "s142ab-",
+     "cota_km": 0.55,
+     "B": 10000,
+     "semilla": 143,
+     "n_min_magnitud": 30,
+     "tol_magnitud": 0.05,
+     "_unidades": {
+      "cota_km": "presupuesto de la cota de mismo objeto (A93): semidiagonal de la celda de 375 m mas el residuo por sensor del centro de grilla",
+      "B": "replicas del bootstrap percentil del criterio 2",
+      "semilla": "semilla del bootstrap",
+      "n_min_magnitud": "pasadas pos del CONTROL a partir de las cuales un volcan entra al chequeo del criterio 3",
+      "tol_magnitud": "cuanto puede empeorar por volcan la distancia a 1 antes de contar como que empeora"
+     }
+    }
+   },
+   "parametros_efectivos": {
+    "ventana": [
+     "2026-06-01",
+     "2026-08-31"
+    ],
+    "volcanes": [
+     "Isluga",
+     "Lascar",
+     "Lastarria",
+     "PuyehueCordonCaulle",
+     "PlanchonPeteroa",
+     "Tupungatito"
+    ],
+    "brazos": [
+     "_s135_ab_a_control",
+     "_s135_ab_b_nokeeppeak",
+     "_s135_ab_d_ambos"
+    ],
+    "control": "_s135_ab_a_control",
+    "prefijo": "s135ab-",
+    "cota_km": 0.55,
+    "B": 10000,
+    "semilla": 143,
+    "n_min_magnitud": 30,
+    "tol_magnitud": 0.05
+   },
+   "parametros_igual_a_los_congelados": false,
+   "referencia_fijada_por_sha": true,
    "n_filas_referencia_nocturnas": 7842,
-   "generado_utc": "2026-09-17T18:03:56+00:00",
+   "generado_utc": "2026-09-17T18:48:57+00:00",
    "fusion": {
     "tramos": [
      [
