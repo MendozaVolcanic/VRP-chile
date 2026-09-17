@@ -377,8 +377,11 @@ def test_parametros_congelados_son_los_del_preregistro():
     with open(os.path.join(DIR_EVAL, "parametros.json"), encoding="utf-8") as fh:
         p = json.load(fh)
     assert p["ventana"] == ["2026-06-01", "2026-08-31"]
+    # Nueve desde la v2 del pre-registro: Chaitén entra al estrato nevado (mayor denominador de
+    # negativos, 221, y única magnitud que hoy se pasa arriba de 1, que es el contraejemplo de un
+    # cambio de fondo que la sube). Hallazgo 12 del verificador del pre-registro.
     assert p["volcanes"] == ["Isluga", "Lascar", "Lastarria", "PlanchonPeteroa",
-                             "PuyehueCordonCaulle", "Tupungatito", "Villarrica",
+                             "PuyehueCordonCaulle", "Tupungatito", "Chaiten", "Villarrica",
                              "NevadosDeChillan"]
     assert p["control"] == "_s142_ab_control"
     assert p["brazos"] == ["_s142_ab_control", "_s142_ab_literal", "_s142_ab_lit_sin_fondo",

@@ -55,12 +55,12 @@ jobs:
       contents: read
     strategy:
       fail-fast: false
-      # 8 volcanes x 6 brazos = 48 jobs por tramo. max-parallel 6: deja espacio al cron NRT dentro
+      # 9 volcanes x 6 brazos = 54 jobs por tramo. max-parallel 6: deja espacio al cron NRT dentro
       # del límite de 20 jobs concurrentes y no satura a NASA (el circuit-breaker A64 protege, pero
       # un corte deja cobertura despareja y obliga a repetir el job).
       max-parallel: 6
       matrix:
-        volcano: [Isluga, Lascar, Lastarria, PlanchonPeteroa, PuyehueCordonCaulle, Tupungatito, Villarrica, NevadosDeChillan]
+        volcano: [Isluga, Lascar, Lastarria, PlanchonPeteroa, PuyehueCordonCaulle, Tupungatito, Chaiten, Villarrica, NevadosDeChillan]
         profile:
           - _s142_ab_control
           - _s142_ab_literal
