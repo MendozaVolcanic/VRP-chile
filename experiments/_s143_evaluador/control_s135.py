@@ -38,7 +38,6 @@ import json
 import shutil
 import sys
 import tempfile
-from argparse import Namespace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -278,12 +277,12 @@ def main():
         (tmp / "fusion_informe.json").write_text(json.dumps(inf, ensure_ascii=False), encoding="utf-8")
         seg = HERE / "_seguimiento_s135.json"
         seg.write_text(json.dumps(doce, ensure_ascii=False), encoding="utf-8")
-        args = Namespace(dir=str(tmp), prefijo=PREFIJO, brazos=BRAZOS, control=CONTROL,
-                         volcanes=VOLCANES, inicio=VENTANA[0], fin=VENTANA[1],
-                         denominadores=str(ev.DENOMINADORES), ref_cons=None, ref_ocr=None,
-                         B=ev.B_DEFECTO, semilla=ev.SEMILLA_DEFECTO, n_min=ev.N_MIN_MAGNITUD,
-                         tol_magnitud=ev.TOL_MAGNITUD, cota_km=ev.PRESUPUESTO_COTA_KM,
-                         seguimiento=str(seg), out_json=None, out_md=None)
+        # Los brazos, volcanes y ventana son los de S135, no los congelados para el A/B de S143;
+        # el resto (cota, B, semilla, n mínimo, tolerancia) sí sale de `parametros.json`, que es lo
+        # que este control tiene que ejercitar.
+        args = ev.argumentos(dir=str(tmp), prefijo=PREFIJO, brazos=BRAZOS, control=CONTROL,
+                             volcanes=VOLCANES, inicio=VENTANA[0], fin=VENTANA[1],
+                             seguimiento=str(seg))
         res = ev.evaluar(args)
 
         # --- atribución de las diferencias con S135, noche por noche ---
