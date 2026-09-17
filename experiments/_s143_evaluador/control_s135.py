@@ -336,11 +336,13 @@ def main():
                 "descartadas_por_cota_s135": len(ref["coincidencias_de_fecha_descartadas"].get(v, {})),
             }
         # --- las pérdidas que aparecen sólo al exigir la cota TAMBIÉN en el brazo (hallazgo 2) ---
-        def cota_min(pasadas, vol, noche):
+        def cota_min(pasadas, vol, noche, campo=ev.CAMPOS_POSICION["centroide"]):
+            """Cota del mejor objeto publicado esa noche. Por defecto desde el centroide, que es la
+            semántica de S135 contra la que este control se compara."""
             centro, dm = rad[vol]["mirova_center"], dist_noche.get((vol, noche)) or []
-            cotas = [min(abs(ev.hav(centro[0], centro[1], p["cen"][0], p["cen"][1]) - x) for x in dm)
+            cotas = [min(abs(ev.hav(centro[0], centro[1], p[campo][0], p[campo][1]) - x) for x in dm)
                      for p in pasadas
-                     if p["vol"] == vol and p["noche"] == noche and p["pub"] and p["cen"] and dm]
+                     if p["vol"] == vol and p["noche"] == noche and p["pub"] and p.get(campo) and dm]
             return round(min(cotas), 3) if cotas else None
 
         detalle_cota = {}
