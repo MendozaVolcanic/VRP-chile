@@ -32,7 +32,7 @@ línea de comandos.
 ## Cómo se usa cuando lleguen los artefactos del A/B
 
 ```bash
-python experiments/_s143_evaluador/fusionar.py --prefijo s142ab- \
+python experiments/_s143_evaluador/fusionar.py --prefijo s143ab- \
     --brazos _s142_ab_control _s142_ab_literal _s142_ab_lit_sin_fondo _s142_ab_lit_con_compuerta \
              _s142_ab_lit_sp_suelto _s142_ab_lit_keep_peak \
     --volcanes Isluga Lascar Lastarria PlanchonPeteroa PuyehueCordonCaulle Tupungatito \
