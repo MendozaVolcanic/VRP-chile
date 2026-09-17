@@ -411,6 +411,28 @@ def test_criterio1_una_sola_perdida_ya_no_cumple():
 
 
 # ------------------------------------------------------------------ parametros congelados
+def test_fusion_acepta_un_prefijo_por_tramo(tmp_path):
+    """El workflow del A/B nombra los artefactos con el tramo adentro (s143ab-t1-, s143ab-t2-), asi
+    que la fusion tiene que aceptar un prefijo por tramo o no encuentra el segundo."""
+    import fusionar as fus
+    def escribir(base, prefijo, dt):
+        d = os.path.join(base, f"{prefijo}_brazo-Isluga")
+        os.makedirs(d)
+        with open(os.path.join(d, "Isluga.json"), "w", encoding="utf-8") as fh:
+            json.dump({"volcano": "Isluga", "records": [{"datetime_utc": dt, "sensor": "VIIRS_SNPP"}]}, fh)
+    t1, t2 = str(tmp_path / "t1"), str(tmp_path / "t2")
+    escribir(t1, "s143ab-t1-", "2026-06-02 05:00")
+    escribir(t2, "s143ab-t2-", "2026-07-20 05:00")
+    out = str(tmp_path / "fus")
+    inf = fus.fusionar([(t1, ""), (t2, "")], ["s143ab-t1-", "s143ab-t2-"], ["_brazo"], ["Isluga"], out)
+    assert inf["faltantes"] == [], inf
+    with open(os.path.join(out, "s143ab-t1-_brazo-Isluga", "Isluga.json"), encoding="utf-8") as fh:
+        assert len(json.load(fh)["records"]) == 2
+    # con un solo prefijo, el segundo tramo no aparece
+    inf2 = fus.fusionar([(t1, ""), (t2, "")], "s143ab-t1-", ["_brazo"], ["Isluga"], str(tmp_path / "fus2"))
+    assert inf2["faltantes"], "un prefijo unico deberia dejar el tramo 2 como faltante"
+
+
 def test_parametros_congelados_son_los_del_preregistro():
     """H1: los parametros de la corrida no pueden elegirse despues de ver datos. Viven en
     `experiments/_s143_evaluador/parametros.json`, versionado, y el evaluador los lee por defecto."""

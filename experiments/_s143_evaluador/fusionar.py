@@ -50,12 +50,24 @@ def _canon(r: dict) -> str:
 
 
 def fusionar(tramos, prefijo, brazos, volcanes, out):
-    """Fusiona y escribe `<out>/<prefijo><brazo>-<volcán>/<volcán>.json`. Devuelve el informe."""
-    informe = {"tramos": [list(t) for t in tramos], "prefijo": prefijo, "archivos": [],
-               "conflictos": [], "duplicados_identicos": 0, "faltantes": []}
+    """Fusiona y escribe `<out>/<prefijo><brazo>-<volcán>/<volcán>.json`. Devuelve el informe.
+
+    `prefijo` puede ser uno solo (mismo nombre de artefacto en todos los tramos) o uno POR TRAMO:
+    el workflow del A/B S143 mete el tramo en el nombre del artefacto (`s143ab-t1-...`,
+    `s143ab-t2-...`), así que sin esto la fusión no encontraría el segundo tramo. La salida se
+    escribe con el primero.
+    """
+    prefijos = [prefijo] * len(tramos) if isinstance(prefijo, str) else list(prefijo)
+    if len(prefijos) == 1:
+        prefijos = prefijos * len(tramos)
+    if len(prefijos) != len(tramos):
+        raise SystemExit(f"--prefijo: uno solo o uno por tramo ({len(tramos)}); llegaron {len(prefijos)}")
+    prefijo = prefijos[0]
+    informe = {"tramos": [list(t) for t in tramos], "prefijo": prefijo, "prefijos": prefijos,
+               "archivos": [], "conflictos": [], "duplicados_identicos": 0, "faltantes": []}
     for vol in volcanes:
         for brazo in brazos:
-            rutas = [ruta(d, prefijo, brazo, vol, suf) for d, suf in tramos]
+            rutas = [ruta(d, prefijos[i], brazo, vol, suf) for i, (d, suf) in enumerate(tramos)]
             ausentes = [i for i, p in enumerate(rutas) if not os.path.exists(p)]
             if ausentes:
                 informe["faltantes"].append({"brazo": brazo, "volcan": vol,
@@ -100,7 +112,8 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--tramo", action="append", required=True,
                     help="directorio del tramo, opcionalmente 'dir::sufijo' (repetible, en orden)")
-    ap.add_argument("--prefijo", required=True, help="prefijo del artefacto, p. ej. 's143ab-'")
+    ap.add_argument("--prefijo", required=True, action="append",
+                    help="prefijo del artefacto, p. ej. 's143ab-t1-'; repetible, uno por tramo")
     ap.add_argument("--brazos", nargs="+", required=True)
     ap.add_argument("--volcanes", nargs="+", required=True)
     ap.add_argument("--out", required=True)
