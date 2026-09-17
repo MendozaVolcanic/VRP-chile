@@ -52,11 +52,12 @@ def _escribir(base, nombre_dir, vol, records):
 
 
 def _pasada(vol, noche, hora="03:00", pub=0, lab="neg_limpio", cen=None, disp=0.0,
-            art=0, predisp=None, sensor="VIIRS_NOAA20", mir_vrp=None):
+            art=0, predisp=None, sensor="VIIRS_NOAA20", mir_vrp=None, cen_final=None):
     dtu = f"{noche} {hora}"
     return {"vol": vol, "noche": noche, "b": "VIIRS375", "datetime_utc": dtu, "sensor": sensor,
             "clave": (vol, dtu, sensor), "lab": lab, "pub": pub, "art": art,
-            "predisp": pub if predisp is None else predisp, "disp": disp, "cen": cen,
+            "predisp": pub if predisp is None else predisp, "disp": disp,
+            "pos_centroide": cen, "pos_final_hotspot_si_test1": cen if cen_final is None else cen_final,
             "mir_vrp": mir_vrp}
 
 
@@ -147,6 +148,45 @@ def test_estado_noches_aplica_cota_desde_mirova_center():
     est2 = evaluar.estado_noches(pas[1:], noches_alerta, dist, {"V": CENTRO}, 0.55)
     assert est2["V"]["pub"] == {"2026-07-01"} and est2["V"]["pub_cota"] == set()
     assert abs(est2["V"]["descartadas"]["2026-07-01"] - 3.0) < 0.01
+
+
+def test_posiciones_de_record_segun_la_fuente():
+    """Para un record del Test 1 integrado la posicion oficial del proyecto es `final_hotspot`: el
+    `primary_cluster` de esos records es el footprint de la integral, arrastrado por la topografia
+    (A69, S106/A84, `latestDetection` en frontend/index.html). Para el resto, el centroide."""
+    pc = {"centroid_lat": -23.0, "centroid_lon": -67.0}
+    t1 = {"primary_cluster": pc, "final_hotspot_source": "test1_roi",
+          "final_hotspot_lat": -23.02, "final_hotspot_lon": -67.03}
+    ctx = {"primary_cluster": pc, "final_hotspot_source": "ctx_cluster",
+           "final_hotspot_lat": -23.02, "final_hotspot_lon": -67.03}
+    sin_fh = {"primary_cluster": pc, "final_hotspot_source": "test1_roi"}
+    assert evaluar.posiciones_de_record(t1) == {"pos_centroide": (-23.0, -67.0),
+                                                "pos_final_hotspot_si_test1": (-23.02, -67.03)}
+    assert evaluar.posiciones_de_record(ctx) == {"pos_centroide": (-23.0, -67.0),
+                                                 "pos_final_hotspot_si_test1": (-23.0, -67.0)}
+    # sin coordenadas de final_hotspot no se puede reanclar: queda el centroide
+    assert evaluar.posiciones_de_record(sin_fh)["pos_final_hotspot_si_test1"] == (-23.0, -67.0)
+    assert evaluar.posiciones_de_record({})["pos_centroide"] is None
+
+
+def test_estado_noches_cambia_segun_el_campo_de_posicion():
+    """El mismo record, la misma cota: pasa medido desde el centroide y no pasa desde el
+    final_hotspot. Cual de los dos manda es una decision abierta, no una constante del codigo."""
+    noches_alerta = {"V": {"2026-07-01"}}
+    dist = {("V", "2026-07-01"): [1.0]}
+    p = _pasada("V", "2026-07-01", pub=1, cen=_desplazado(1.2), cen_final=_desplazado(4.0),
+                lab="pos")
+    e_cen = evaluar.estado_noches([p], noches_alerta, dist, {"V": CENTRO}, 0.55,
+                                  campo="pos_centroide")
+    e_fh = evaluar.estado_noches([p], noches_alerta, dist, {"V": CENTRO}, 0.55,
+                                 campo="pos_final_hotspot_si_test1")
+    assert e_cen["V"]["pub_cota"] == {"2026-07-01"} and e_cen["V"]["descartadas"] == {}
+    assert e_fh["V"]["pub_cota"] == set()
+    assert abs(e_fh["V"]["descartadas"]["2026-07-01"] - 3.0) < 0.01
+    # el campo por defecto es el centroide, la semantica de S135
+    assert evaluar.estado_noches([p], noches_alerta, dist, {"V": CENTRO}, 0.55) == e_cen
+    assert evaluar.CAMPOS_POSICION["centroide"] == "pos_centroide"
+    assert evaluar.CAMPOS_POSICION["final_hotspot_si_test1"] == "pos_final_hotspot_si_test1"
 
 
 def test_perdida_exige_la_misma_cota_en_el_brazo():
@@ -393,6 +433,10 @@ def test_parametros_congelados_son_los_del_preregistro():
     assert p["semilla"] == 143
     assert p["n_min_magnitud"] == 30
     assert p["tol_magnitud"] == 0.05
+    # decision abierta de Nicolas: por ahora decide el centroide, la semantica de S135
+    assert p["campo_posicion_cota"] == "centroide"
+    assert evaluar.CAMPO_POSICION_DEFECTO == p["campo_posicion_cota"]
+    assert evaluar.argumentos(dir="x").campo_posicion == p["campo_posicion_cota"]
     # el modulo usa exactamente esos valores, no una copia que pueda driftear
     assert evaluar.PRESUPUESTO_COTA_KM == p["cota_km"]
     assert evaluar.TOL_MAGNITUD == p["tol_magnitud"]
@@ -548,3 +592,71 @@ def test_evaluar_excluye_del_veredicto_al_volcan_con_cobertura_despareja(tmp_pat
     assert res["controles_instrumento"]["identidad_predicado_node"] is True
     assert res["meta"]["parametros_congelados"]["contenido"] == evaluar.PARAMETROS
     assert res["meta"]["referencia_fijada_por_sha"] is False  # la corrida usa CSV locales
+
+
+def _mover(lat, lon, km_norte):
+    return (lat + km_norte / 111.195, lon)
+
+
+@pytest.mark.skipif(not HAY_NODE, reason="node no esta instalado: el predicado del dashboard se ejecuta con node (A97)")
+def test_evaluar_reporta_los_dos_campos_de_posicion_y_decide_con_el_parametro(tmp_path):
+    """El brazo publica un record del Test 1 cuyo centroide cae donde MIROVA informo pero cuyo
+    `final_hotspot` esta a 3 km: con un campo la noche se conserva y con el otro se pierde. El JSON
+    trae los dos y el que decide sale de `parametros.json`."""
+    ctrl, brazo = "_ctrl", "_brazo"
+    vol, vol2 = "Lascar", "Lastarria"
+    rad = evaluar.radios([vol, vol2])
+    art, filas = tmp_path / "art", [CABECERA_CONS]
+    # Lascar: el control publica un cumulo contextual cerca; el brazo publica un record del Test 1
+    # cuyo centroide cae igual de cerca pero cuyo final_hotspot esta a 3 km.
+    cerca = _mover(*rad[vol]["mirova_center"], 0.5)
+    lejos = _mover(*rad[vol]["mirova_center"], 3.5)
+    rec_ctrl = _record_publicable("2026-06-01 05:00", *cerca)
+    rec_ctrl["final_hotspot_source"] = "ctx_cluster"
+    rec_brazo = _record_publicable("2026-06-01 05:00", *cerca)
+    rec_brazo["final_hotspot_source"] = "test1_roi"
+    rec_brazo["final_hotspot_lat"], rec_brazo["final_hotspot_lon"] = lejos
+    _escribir(art, f"{ctrl}-{vol}", vol, [rec_ctrl])
+    _escribir(art, f"{brazo}-{vol}", vol, [rec_brazo])
+    filas.append(_fila_ref(vol, "2026-06-01 05:00:00", "ALERTA_TERMICA", "1.0", "0.5"))
+    # Lastarria: los dos publican el MISMO record del Test 1 corrido, asi que no hay perdida pero
+    # la noche deja de estar confirmada cuando la cota se mide desde el final_hotspot.
+    cerca2 = _mover(*rad[vol2]["mirova_center"], 0.5)
+    lejos2 = _mover(*rad[vol2]["mirova_center"], 3.5)
+    rec2 = _record_publicable("2026-06-02 05:00", *cerca2)
+    rec2["final_hotspot_source"] = "test1_roi"
+    rec2["final_hotspot_lat"], rec2["final_hotspot_lon"] = lejos2
+    for arm in (ctrl, brazo):
+        _escribir(art, f"{arm}-{vol2}", vol2, [dict(rec2)])
+    filas.append(_fila_ref(vol2, "2026-06-02 05:00:00", "ALERTA_TERMICA", "1.0", "0.5"))
+    cons = tmp_path / "cons.csv"
+    cons.write_text("\n".join(filas) + "\n", encoding="utf-8")
+    ocr = tmp_path / "ocr.csv"
+    ocr.write_text(CABECERA_CONS + "\n", encoding="utf-8")
+
+    def correr(campo):
+        a = evaluar.argumentos(dir=str(art), prefijo="", brazos=[ctrl, brazo], control=ctrl,
+                               volcanes=[vol, vol2], inicio="2026-06-01", fin="2026-06-30",
+                               ref_cons=str(cons), ref_ocr=str(ocr), B=200, campo_posicion=campo)
+        return evaluar.evaluar(a)
+
+    res = correr("centroide")
+    por_campo = res["brazos"][brazo]["criterio1_por_campo_de_posicion"]
+    conf = res["noches_confirmadas_por_campo_de_posicion"]
+    assert set(por_campo) == {"centroide", "final_hotspot_si_test1"}
+    assert por_campo["centroide"]["n_perdidas"] == 0
+    assert por_campo["final_hotspot_si_test1"]["n_perdidas"] == 1
+    assert conf["centroide"]["total"] == 2 and conf["final_hotspot_si_test1"]["total"] == 1
+    # con el parametro congelado decide el centroide
+    assert res["meta"]["campo_posicion_cota"] == "centroide"
+    assert res["brazos"][brazo]["criterio1"] == por_campo["centroide"]
+    assert res["noches_confirmadas"] == conf["centroide"]
+
+    # cambiar el parametro cambia cual decide, y no cambia lo que se reporta al lado
+    res2 = correr("final_hotspot_si_test1")
+    assert res2["meta"]["campo_posicion_cota"] == "final_hotspot_si_test1"
+    assert res2["brazos"][brazo]["criterio1"]["n_perdidas"] == 1
+    assert res2["brazos"][brazo]["criterio1"] == res2["brazos"][brazo]["criterio1_por_campo_de_posicion"]["final_hotspot_si_test1"]
+    assert res2["noches_confirmadas"] == res2["noches_confirmadas_por_campo_de_posicion"]["final_hotspot_si_test1"]
+    assert res2["noches_confirmadas"]["total"] == 1
+    assert res2["brazos"][brazo]["criterio1_por_campo_de_posicion"] == por_campo

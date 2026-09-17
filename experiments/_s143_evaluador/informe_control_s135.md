@@ -1,8 +1,8 @@
 # Evaluación del A/B: _s135_ab_b_nokeeppeak, _s135_ab_d_ambos contra _s135_ab_a_control
 
-> Generado por `experiments/_s143_evaluador/evaluar.py` el 2026-09-17T18:48:57+00:00. Ventana 2026-06-01 a 2026-08-31. Todos los números salen del JSON de resultados.
+> Generado por `experiments/_s143_evaluador/evaluar.py` el 2026-09-17T19:50:44+00:00. Ventana 2026-06-01 a 2026-08-31. Todos los números salen del JSON de resultados.
 
-**Parámetros iguales a los congelados en `parametros.json`: no** (sha 5a7b458af18b10ee743fd35a9eba423d571c461a). Referencia fijada por sha: sí.
+**Parámetros iguales a los congelados en `parametros.json`: no** (sha 6e4f886339ff15f776cb1b1945f1cdf7a30630b1). Referencia fijada por sha: sí.
 
 ## Procedencia
 
@@ -10,9 +10,9 @@
 {
  "evaluador": {
   "archivo": "experiments/_s143_evaluador/evaluar.py",
-  "commit": "a8c3fb92f104fcb5e79f4934b6633c8678516999",
+  "commit": "424310996d1f3f2b7a7d4deed6dac19acf5adc68",
   "modificado_sin_commit": true,
-  "blob": "33ffa92c0c88c40e2bb43a0484ed1700c2888d6f"
+  "blob": "1af058db80d77580812a163f1e60f1ba4fa859f6"
  },
  "banco_paridad": {
   "archivo": "scripts/banco_paridad.py",
@@ -39,6 +39,8 @@ Volcanes pedidos: Isluga, Lascar, Lastarria, PuyehueCordonCaulle, PlanchonPetero
 
 ## Noches confirmadas (criterio 1)
 
+Posición del record con que se mide la cota: **centroide** (la otra se reporta al lado en cada brazo).
+
 Total: **257**. Por estrato: focal 230, nevado 27.
 
 | volcán | estrato | confirmadas | publicadas sin filtro | aceptadas sin cota calculable | coincidencias de fecha descartadas |
@@ -61,6 +63,15 @@ Cumple los tres criterios: **no**.
 ### Criterio 1: cero noches perdidas
 
 Pérdidas (misma cota en el brazo): **14**; sin filtro en el brazo: 0; ganancias: 3 (sin filtro 0). Cumple: **no**.
+
+Medido con las dos posiciones del record (decisión abierta; hoy decide **centroide**):
+
+| posición | noches confirmadas | pérdidas | pérdidas sin filtro | ganancias | cumple | decide |
+|---|---|---|---|---|---|---|
+| centroide | 257 | 14 | 0 | 3 | no | sí |
+| final_hotspot_si_test1 | 247 | 5 | 0 | 1 | no | no |
+
+Por volcán, con el campo que decide:
 
 | volcán | confirmadas | pérdidas | pérdidas sin filtro en el brazo | ganancias |
 |---|---|---|---|---|
@@ -114,6 +125,15 @@ Cumple los tres criterios: **no**.
 ### Criterio 1: cero noches perdidas
 
 Pérdidas (misma cota en el brazo): **28**; sin filtro en el brazo: 12; ganancias: 1 (sin filtro 0). Cumple: **no**.
+
+Medido con las dos posiciones del record (decisión abierta; hoy decide **centroide**):
+
+| posición | noches confirmadas | pérdidas | pérdidas sin filtro | ganancias | cumple | decide |
+|---|---|---|---|---|---|---|
+| centroide | 257 | 28 | 12 | 1 | no | sí |
+| final_hotspot_si_test1 | 247 | 21 | 12 | 1 | no | no |
+
+Por volcán, con el campo que decide:
 
 | volcán | confirmadas | pérdidas | pérdidas sin filtro en el brazo | ganancias |
 |---|---|---|---|---|
