@@ -68,8 +68,18 @@ Los seis perfiles existen y cada uno lee lo que declara (`tests/test_flags_d22_d
 **Declarado (hallazgo 1 del verificador):** en los seis, la compuerta **sigue puesta** en la máscara
 contextual del camino D, por decisión del dueño (plan, ajuste S142 punto 2). Por eso un resultado
 negativo del brazo `literal` **no** se puede atribuir a "la compuerta no era": la compuerta de esa
-ruta nunca se quitó. La tabla de lectura del probe dice qué brazo se agrega según el caso, y ese brazo
-entra acá antes de correr.
+ruta nunca se quitó.
+
+**BRAZOS CERRADOS con el probe de las 12 noches (2026-09-17, `experiments/_s143_probe_12_noches/`).**
+Se corren **estos seis, sin agregar ninguno**. Razón: el probe midió que D22 y D25 solos, tal como
+están en el brazo `literal`, recuperan **10 de las 12 noches** que perdía S135, y ese número es firme
+frente al campo de posición. Las variantes que recuperaban 11 o 12 ganaban esa diferencia por un
+campo que el verificador mostró frágil (con `final_hotspot`, la posición que la regla del proyecto
+manda para records `test1_roi`, las tres empatan en 10 y el propio control cae a 10), y la de 12
+apaga el filtro contextual del Test 1 publicando los 12 artefactos, o sea deshace lo que S135 ganó.
+Cambiar los brazos por esa diferencia **no está habilitado** por el probe
+(`VERIFICADOR_POST_CORRIDA.md`). Queda anotado para después del A/B: el filtro contextual del Test 1
+(S99, que no está en el paper, D23) es el frente siguiente si la paridad lo pide.
 
 En todos: `vrp_bg_neighbor_max_half_px = 3`, conectiva `min`, corona apagada, sólo VIIRS 375,
 `data_subdir` aislado.
@@ -136,6 +146,11 @@ del reproceso o del evaluador está mal y **no se interpreta** el A/B hasta expl
   brazos contra records de producción. La versión "cualquier sensor" se reporta como acompañante.
 - **Efecto medido de la cota dura** (decisión 1 de §8): sobre los artefactos de S135, el brazo D pasa
   de 12 a 28 pérdidas y el B de 0 a 14.
+- **Campo de posición de la cota** (sub-decisión 1b, abierta): hoy la cota usa el centroide del
+  `primary_cluster`, como S135. Para records cuya fuente es `test1_roi`, la regla del proyecto (S106,
+  A84) dice que la posición del record es `final_hotspot`, y los dos campos separan 1,06 km de mediana
+  en esos records (probe S143). **El evaluador debe reportar el criterio 1 con los dos campos**, y la
+  decisión de cuál manda se toma antes de mirar el veredicto, no después.
 
 ### Criterio 2: baja la publicación en negativos limpios
 
@@ -192,6 +207,7 @@ plan S142 y del probe de las 12 noches de S143.
 | # | pregunta | recomendación |
 |---|---|---|
 | 1 | **La cota de mismo objeto, ¿se le exige también al brazo?** Con la cota floja, un brazo "conserva" una noche publicando otro objeto en otro punto del disco. Medido: el brazo D de S135 pasa de 12 a 28 pérdidas y el B de 0 a 14 | **Sí, cota dura.** Es lo que hace honesto el criterio de cero pérdidas que aprobaste: la noche cuenta sólo si publicamos el objeto que MIROVA vio |
+| 1b | **¿Qué campo de posición usa la cota?** Centroide del cúmulo (como S135) o `final_hotspot` para los records `test1_roi` (regla A84) | **`final_hotspot` cuando la fuente es `test1_roi`**, centroide en el resto: es la posición que el propio dashboard trata como oficial, y el centroide de un record del Test 1 es el footprint de la integral, contaminado por el arrastre topográfico (A69) |
 | 2 | **Escala de la corrida**: 9 volcanes × 6 brazos × 2 tramos = 108 jobs, más el tramo de confirmación | **Correr los dos tramos primero** (108 jobs, ~180 h de runner, repo público sin costo de minutos) y el de confirmación sólo para el brazo ganador |
 
 ## 9. Costo, riesgos y límites
