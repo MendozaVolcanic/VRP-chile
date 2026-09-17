@@ -69,11 +69,18 @@ import banco_paridad as bp  # noqa: E402
 import build_c2ab_windows as _ventanas  # noqa: E402
 import referencia_mirova_unificada as rmu  # noqa: E402
 
-PRESUPUESTO_COTA_KM = 0.55  # semidiagonal de la celda de 375 m + residuo por sensor (S135, AUDIT_S128.md:191)
-B_DEFECTO = 10000
-SEMILLA_DEFECTO = 143
-N_MIN_MAGNITUD = 30
-TOL_MAGNITUD = 0.05
+# H1 del verificador externo: los parámetros de la corrida NO viven en el README (editable después
+# de ver datos) sino en este archivo versionado, que la salida copia entero con su sha y que un test
+# comprueba valor por valor. Cambiar uno es un cambio de pre-registro.
+ARCHIVO_PARAMETROS = HERE / "parametros.json"
+with open(ARCHIVO_PARAMETROS, encoding="utf-8") as _fh:
+    PARAMETROS = json.load(_fh)
+
+PRESUPUESTO_COTA_KM = PARAMETROS["cota_km"]  # cota de mismo objeto (A93), heredada de S135
+B_DEFECTO = PARAMETROS["B"]
+SEMILLA_DEFECTO = PARAMETROS["semilla"]
+N_MIN_MAGNITUD = PARAMETROS["n_min_magnitud"]
+TOL_MAGNITUD = PARAMETROS["tol_magnitud"]
 DENOMINADORES = ROOT / "experiments" / "_s143_preregistro" / "denominadores.json"
 DL_REFERENCIA = HERE / "_dl_referencia"
 NOMBRES_REF = ("registro_vrp_consolidado.csv", "registro_vrp_ocr.csv")
@@ -518,6 +525,32 @@ def referencia_por_sha(denominadores=DENOMINADORES, dest=DL_REFERENCIA):
 
 
 # ------------------------------------------------------------------ orquestación
+def argumentos(**kw):
+    """Argumentos de una corrida, con los valores congelados en `parametros.json` por defecto.
+
+    Lo que no se pase queda en el valor pre-registrado; así una corrida de prueba (o un test) puede
+    cambiar lo que necesite sin que el default se mueva."""
+    base = {"dir": None, "prefijo": PARAMETROS["prefijo"], "brazos": list(PARAMETROS["brazos"]),
+            "control": PARAMETROS["control"], "volcanes": list(PARAMETROS["volcanes"]),
+            "inicio": PARAMETROS["ventana"][0], "fin": PARAMETROS["ventana"][1],
+            "denominadores": str(DENOMINADORES), "ref_cons": None, "ref_ocr": None,
+            "B": B_DEFECTO, "semilla": SEMILLA_DEFECTO, "n_min": N_MIN_MAGNITUD,
+            "tol_magnitud": TOL_MAGNITUD, "cota_km": PRESUPUESTO_COTA_KM, "seguimiento": None,
+            "out_json": None, "out_md": None}
+    desconocidos = set(kw) - set(base)
+    if desconocidos:
+        raise TypeError(f"argumentos desconocidos: {sorted(desconocidos)}")
+    base.update(kw)
+    return argparse.Namespace(**base)
+
+
+def _parametros_efectivos(a):
+    """Lo que esta corrida usa de verdad, para contrastarlo con lo congelado."""
+    return {"ventana": [a.inicio, a.fin], "volcanes": list(a.volcanes), "brazos": list(a.brazos),
+            "control": a.control, "prefijo": a.prefijo, "cota_km": a.cota_km, "B": a.B,
+            "semilla": a.semilla, "n_min_magnitud": a.n_min, "tol_magnitud": a.tol_magnitud}
+
+
 def evaluar(a):
     ventana = (a.inicio, a.fin)
     vols = list(a.volcanes)
@@ -584,6 +617,12 @@ def evaluar(a):
                                  "sha_index_html": bp.sha_git(bp.HTML), "referencia": ref_proc},
                  "parametros": {"cota_km": a.cota_km, "tol_pareo_s": bp.TOL_S, "B": a.B,
                                 "semilla": a.semilla, "n_min_magnitud": a.n_min, "tol_magnitud": a.tol_magnitud},
+                 "parametros_congelados": {**procedencia_archivo(ARCHIVO_PARAMETROS),
+                                           "contenido": PARAMETROS},
+                 "parametros_efectivos": _parametros_efectivos(a),
+                 "parametros_igual_a_los_congelados": all(
+                     _parametros_efectivos(a)[k] == PARAMETROS[k] for k in _parametros_efectivos(a)),
+                 "referencia_fijada_por_sha": not (a.ref_cons and a.ref_ocr),
                  "n_filas_referencia_nocturnas": n_ref,
                  "generado_utc": datetime.now(timezone.utc).isoformat(timespec="seconds")},
         "cobertura": {"detalle": det_cob, "excluidos": desparejos,
@@ -652,6 +691,11 @@ def informe_markdown(res):
          f"> Generado por `experiments/_s143_evaluador/evaluar.py` el {m.get('generado_utc', 'sin fecha')}. "
          f"Ventana {m['ventana'][0]} a {m['ventana'][1]}. Todos los números salen del JSON de resultados.",
          ""]
+    if "parametros_igual_a_los_congelados" in m:
+        L += [f"**Parámetros iguales a los congelados en `parametros.json`: "
+              f"{_f(m['parametros_igual_a_los_congelados'])}** (sha "
+              f"{(m.get('parametros_congelados') or {}).get('blob')}). "
+              f"Referencia fijada por sha: {_f(m.get('referencia_fijada_por_sha'))}.", ""]
     pr = m.get("procedencia") or {}
     if pr:
         L += ["## Procedencia", "", "```", json.dumps(pr, indent=1, ensure_ascii=False), "```", ""]
@@ -744,12 +788,13 @@ def main(argv=None):
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--dir", required=True, help="artefactos fusionados (salida de fusionar.py)")
-    ap.add_argument("--prefijo", default="", help="prefijo de las carpetas, p. ej. 's142ab-'")
-    ap.add_argument("--brazos", nargs="+", required=True)
-    ap.add_argument("--control", required=True)
-    ap.add_argument("--volcanes", nargs="+", required=True)
-    ap.add_argument("--inicio", required=True)
-    ap.add_argument("--fin", required=True)
+    ap.add_argument("--prefijo", default=PARAMETROS["prefijo"],
+                    help="prefijo de las carpetas; por defecto el congelado en parametros.json")
+    ap.add_argument("--brazos", nargs="+", default=list(PARAMETROS["brazos"]))
+    ap.add_argument("--control", default=PARAMETROS["control"])
+    ap.add_argument("--volcanes", nargs="+", default=list(PARAMETROS["volcanes"]))
+    ap.add_argument("--inicio", default=PARAMETROS["ventana"][0])
+    ap.add_argument("--fin", default=PARAMETROS["ventana"][1])
     ap.add_argument("--denominadores", default=str(DENOMINADORES),
                     help="JSON con meta.referencia (sha de CONS y OCR)")
     ap.add_argument("--ref-cons", default=None, help="CSV CONS local (sólo sin red; se anota el blob)")
