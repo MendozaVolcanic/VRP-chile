@@ -1,0 +1,20 @@
+# A/B S142, Fase 1 VIIRS 375. Ablación del literal: CON la compuerta de temperatura (D22 off). Mide cuánto aporta quitar la compuerta cuando el segundo pase ya no rescata en vacío.
+# NO OPERACIONAL: data_subdir aislado, fuera del cron.
+extends: mirova_equivalent
+profile: _s142_ab_lit_con_compuerta
+description: >
+  Literal menos D22: D22 off, D25 on, segundo pase condicionado on, keep_peak off; sólo VIIRS 375.
+
+paths:
+  enable_tests_23_no_bt_gate_viirs375: false
+  enable_vrp_bg_neighbor_mean_viirs375: true
+  enable_second_pass_conditioned: true
+  enable_test1_contextual_keep_peak: false
+
+sensors:
+  modis: false
+  viirs_375: true
+  viirs_750: false
+
+output:
+  data_subdir: _s142_ab_lit_con_compuerta

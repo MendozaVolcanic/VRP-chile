@@ -1,0 +1,20 @@
+# A/B S142, Fase 1 VIIRS 375. Ablación del literal: SIN fondo por vecinos (D25 off). Mide cuánto aporta el fondo dentro del conjunto literal; resto igual a _s142_ab_literal.
+# NO OPERACIONAL: data_subdir aislado, fuera del cron.
+extends: mirova_equivalent
+profile: _s142_ab_lit_sin_fondo
+description: >
+  Literal menos D25: D22 on, D25 off, segundo pase condicionado on, keep_peak off; sólo VIIRS 375.
+
+paths:
+  enable_tests_23_no_bt_gate_viirs375: true
+  enable_vrp_bg_neighbor_mean_viirs375: false
+  enable_second_pass_conditioned: true
+  enable_test1_contextual_keep_peak: false
+
+sensors:
+  modis: false
+  viirs_375: true
+  viirs_750: false
+
+output:
+  data_subdir: _s142_ab_lit_sin_fondo
