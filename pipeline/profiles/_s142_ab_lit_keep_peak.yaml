@@ -1,0 +1,20 @@
+# A/B S142, Fase 1 VIIRS 375. Ablación del literal: CON keep_peak (D19 on). Mide cuánto aporta quitar keep_peak cuando los otros tres puntos ya son literales.
+# NO OPERACIONAL: data_subdir aislado, fuera del cron.
+extends: mirova_equivalent
+profile: _s142_ab_lit_keep_peak
+description: >
+  Literal menos D19: D22 on, D25 on, segundo pase condicionado on, keep_peak on; sólo VIIRS 375.
+
+paths:
+  enable_tests_23_no_bt_gate_viirs375: true
+  enable_vrp_bg_neighbor_mean_viirs375: true
+  enable_second_pass_conditioned: true
+  enable_test1_contextual_keep_peak: true
+
+sensors:
+  modis: false
+  viirs_375: true
+  viirs_750: false
+
+output:
+  data_subdir: _s142_ab_lit_keep_peak

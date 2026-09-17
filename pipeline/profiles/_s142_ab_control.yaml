@@ -1,0 +1,22 @@
+# A/B S142, Fase 1 VIIRS 375: literal completo + ablaciones. Brazo CONTROL.
+#
+# EL FENÓMENO. En un cono nevado, de noche, el cráter con lava sub-píxel es más frío que el valle.
+# Cuatro reglas del pipeline, acopladas, deciden si se ve y con cuánto: la compuerta de temperatura
+# de los Tests 2 y 3 (D22), el fondo del VRP como mediana del anillo regional (D25), el segundo pase
+# que corre sin detección previa (D2) y keep_peak (D19). Quitar una sola no mide nada (S138).
+#
+# Este brazo es la producción de hoy, reprocesada con el mismo código que los demás.
+# CRITERIO: pre-registrado ANTES de correr en docs/PREREGISTRO_AB_D22_D25_S143.md, con verificador limpio.
+# NO OPERACIONAL: data_subdir aislado, fuera del cron.
+extends: mirova_equivalent
+profile: _s142_ab_control
+description: >
+  Brazo control: flags de producción; sólo VIIRS 375.
+
+sensors:
+  modis: false
+  viirs_375: true
+  viirs_750: false
+
+output:
+  data_subdir: _s142_ab_control
