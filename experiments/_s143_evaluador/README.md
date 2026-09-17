@@ -65,6 +65,37 @@ Necesita **node** (el predicado del dashboard se ejecuta, no se reescribe) y red
 | 15 | cobertura simétrica por `(datetime_utc, sensor)` y `product_version` |
 | 16 | el JSON trae la línea base del control en negativos limpios para contrastarla con el régimen esperado |
 
+## Dónde está el objeto publicado: dos posiciones, decisión abierta
+
+La cota de mismo objeto compara el radio de MIROVA con el radio de lo que publicamos, los dos desde
+el `mirova_center`. Falta decir **qué punto de nuestro record** es "lo que publicamos", y hay dos
+candidatos que no coinciden:
+
+| campo | qué es | cuándo difieren |
+|---|---|---|
+| `centroide` | `primary_cluster.centroid`, el cúmulo que el dashboard reporta en magnitud. Es la semántica de S135 (`evaluar_ab.py`) | es el valor de hoy |
+| `final_hotspot_si_test1` | `final_hotspot` cuando `final_hotspot_source` es `test1_roi`, y el centroide en el resto | en los records del Test 1: el verificador post-corrida del probe midió **1,06 km de separación mediana** (máximo 2,97); en los del camino contextual, 0,00 |
+
+**Por qué importa físicamente.** El cúmulo de un record del Test 1 integrado es el footprint de la
+integral de radiancia, y esa integral la arrastra el gradiente topográfico del nevado (A69), así que
+su centroide no es donde está el foco. Por eso la regla del proyecto (S106, A84 y el bloque
+`latestDetection` de `frontend/index.html`) dice que en esos records la posición oficial es
+`final_hotspot`. Del otro lado, el centroide es lo que S135 usó y con lo que se compararon los
+resultados publicados.
+
+**Cuál manda no lo decide el código.** El evaluador calcula el criterio 1 con los dos campos y los
+reporta lado a lado (`criterio1_por_campo_de_posicion`, `noches_confirmadas_por_campo_de_posicion`,
+`seguimiento_por_campo_de_posicion`, y una tabla en el informe); el que decide sale de
+`campo_posicion_cota` en `parametros.json`, hoy `"centroide"`. Cambiarlo es un cambio de
+pre-registro, y el hallazgo H1 del verificador post-corrida del probe de las 12 noches mostró que el
+orden de las variantes no sobrevive al cambio de campo: es una decisión de Nicolás, no del
+instrumento.
+
+**Lo que este campo NO cubre**: el dashboard trata como posición oficial el `final_hotspot` de las
+tres anclas deliberadas (`ctx_cluster`, `test1_roi`, `test1_nti_peak`). Acá sólo se reancla
+`test1_roi`, que es donde el verificador midió separación; en `ctx_cluster` los dos campos coinciden
+(0,00 km) y `test1_nti_peak` no aparece en el corpus del probe. Si apareciera, sería otra decisión.
+
 ## Qué vigilan los tests (batería de mutaciones)
 
 `python experiments/_s143_evaluador/mutaciones.py` aplica una por una 23 mutaciones del evaluador y
