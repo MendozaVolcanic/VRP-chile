@@ -735,7 +735,8 @@ def informe_markdown(res):
     ci = res.get("controles_instrumento")
     if ci:
         L += ["## Controles del instrumento", "", "```", json.dumps(ci, indent=1, ensure_ascii=False), "```", ""]
-    return "\n".join(L).replace("—", ",").replace("–", ",")
+    # red de seguridad: el proyecto no admite guiones largos ni medios en ningún texto
+    return "\n".join(L).replace(chr(8212), ",").replace(chr(8211), ",")
 
 
 def main(argv=None):
