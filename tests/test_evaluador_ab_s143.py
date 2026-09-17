@@ -190,12 +190,37 @@ def test_noche_sin_alerta_no_es_confirmada_y_sin_distancia_pasa():
 
 
 # ------------------------------------------------------------------ criterio 2
+def _grupos_ruidosos(n_noches=120):
+    """Fixture con suficientes noches y suficiente varianza para que el percentil distinga dos
+    semillas: con 5 noches el intervalo es tan grueso que dos corridas distintas coinciden y el
+    test de determinismo pasa aunque se saque la semilla (H4 del verificador externo).
+
+    Las noches tienen entre 1 y 4 pasadas y el brazo publica una fraccion variable de cada una, asi
+    que la razon cae en una grilla fina: con 120 noches por volcan, 30 semillas dan 30 intervalos
+    distintos (medido antes de fijar la fixture)."""
+    grupos = {}
+    for vol, sesgo in (("A", 0), ("B", 1)):
+        grupos[vol] = []
+        for i in range(n_noches):
+            n_pasadas = 1 + (i + sesgo) % 4
+            grupos[vol].append((n_pasadas, n_pasadas, (i * 7 + sesgo) % (n_pasadas + 1)))
+    return grupos
+
+
 def test_bootstrap_estratificado_determinista_con_semilla():
-    grupos = {"A": [(3, 1, 0), (2, 2, 1), (4, 0, 0)], "B": [(1, 1, 1), (5, 3, 1)]}
+    grupos = _grupos_ruidosos()
     x = evaluar.bootstrap_estratificado(grupos, B=500, semilla=143)
     y = evaluar.bootstrap_estratificado(grupos, B=500, semilla=143)
     assert x == y
-    assert x[0] <= x[1]
+    assert x[0] < x[1], "el intervalo tiene que tener ancho, si no el test no distingue semillas"
+
+
+def test_bootstrap_cambia_con_la_semilla():
+    """Si el intervalo no dependiera de la semilla, el test de determinismo no probaria nada:
+    pasaria igual con `default_rng()` sin semilla (H4). Con cuatro semillas, cuatro intervalos."""
+    grupos = _grupos_ruidosos()
+    vistos = [evaluar.bootstrap_estratificado(grupos, B=500, semilla=s) for s in (143, 7, 2026, 99)]
+    assert len(set(vistos)) == len(vistos)
 
 
 def test_bootstrap_remuestrea_dentro_de_cada_volcan():
@@ -245,6 +270,23 @@ def test_criterio2_cumple_exige_ic_total_bajo_cero_y_ningun_estrato_positivo():
     assert r2["por_estrato"]["nevado"]["margen_signo"] == 1
 
 
+def test_criterio2_no_cumple_si_el_intervalo_cruza_el_cero():
+    """La regla del pre-registro es que el intervalo TOTAL quede entero bajo cero. Con el extremo
+    bajo alcanzaria cualquier diferencia negativa: aca la puntual es negativa y el intervalo cruza."""
+    ctrl = [_pasada("A", "2026-06-01", pub=1), _pasada("A", "2026-06-01", hora="04:00", pub=1),
+            _pasada("A", "2026-06-02", pub=0), _pasada("A", "2026-06-03", pub=0),
+            _pasada("A", "2026-06-04", pub=0), _pasada("A", "2026-06-05", pub=0)]
+    brazo = [dict(p) for p in ctrl]
+    brazo[0]["pub"] = 0
+    brazo[1]["pub"] = 0          # la noche 06-01 aporta -2
+    brazo[2]["pub"] = 1          # la noche 06-02 aporta +1
+    r = evaluar.criterio2(ctrl, brazo, {"A": "focal"}.get, B=2000, semilla=143)
+    t = r["total"]
+    assert t["dif"] < 0, "la diferencia puntual es negativa"
+    assert t["ic95"][0] < 0 < t["ic95"][1], "el intervalo cruza el cero"
+    assert r["cumple"] is False
+
+
 # ------------------------------------------------------------------ criterio 3
 def test_fila_mirova_cons_antes_que_ocr():
     cons = {"tipo": "ALERTA_TERMICA", "source": "CONS", "vrp_mw": 1.0, "fecha_utc": "2026-06-01 03:01:00"}
@@ -280,6 +322,87 @@ def test_criterio3_n_min_se_cuenta_en_las_pos_del_control():
     assert v["n_pos_control"] == 30 and v["evaluado"] is True
     assert v["n_pares_decisivo"] == 2
     assert v["empeora_mas_de_tolerancia"] is True and r["cumple"] is False
+
+
+def test_criterio3_no_cumple_si_el_brazo_se_aleja_de_uno():
+    """La direccion de la desigualdad decide: el brazo no puede alejarse de 1 mas que el control."""
+    ctrl = [_pasada("A", f"2026-06-{d:02d}", lab="pos", pub=1, disp=1.0, mir_vrp=1.0)
+            for d in range(1, 6)]
+    peor = [dict(p, disp=0.5) for p in ctrl]
+    mejor = [dict(p, disp=1.0) for p in [dict(q, disp=0.5) for q in ctrl]]
+    r_peor = evaluar.criterio3(ctrl, peor, {"A": "focal"}.get, n_min=30)
+    assert r_peor["total"]["dist_a_1_brazo"] > r_peor["total"]["dist_a_1_control"]
+    assert r_peor["cumple"] is False
+    ctrl_lejos = [dict(p, disp=0.5) for p in ctrl]
+    r_mejor = evaluar.criterio3(ctrl_lejos, mejor, {"A": "focal"}.get, n_min=30)
+    assert r_mejor["total"]["dist_a_1_brazo"] < r_mejor["total"]["dist_a_1_control"]
+    assert r_mejor["cumple"] is True
+
+
+def test_criterio3_volcan_evaluado_sin_pares_decisivos_cuenta_como_que_empeora():
+    """Dejar de publicar no puede ser la forma de escapar al chequeo por volcan: el total lo dan
+    los pares del volcan B y, sin el castigo, el brazo cumpliria pese a apagar el volcan A."""
+    ctrl = [_pasada("A", f"2026-06-{d:02d}", lab="pos", pub=1, disp=1.0, mir_vrp=1.0)
+            for d in range(1, 31)]
+    ctrl += [_pasada("B", f"2026-07-{d:02d}", lab="pos", pub=1, disp=1.0, mir_vrp=1.0)
+             for d in range(1, 6)]
+    brazo = [dict(p, pub=0, disp=0.0) if p["vol"] == "A" else dict(p) for p in ctrl]
+    est = {"A": "focal", "B": "focal"}.get
+    r = evaluar.criterio3(ctrl, brazo, est, n_min=30)
+    assert r["total"]["n_pares_decisivo"] == 5
+    assert r["total"]["dist_a_1_brazo"] == r["total"]["dist_a_1_control"]
+    assert r["por_volcan"]["A"]["evaluado"] is True
+    assert r["por_volcan"]["A"]["n_pares_decisivo"] == 0
+    assert r["por_volcan"]["A"]["empeora_mas_de_tolerancia"] is True
+    assert r["volcanes_que_empeoran"] == ["A"] and r["cumple"] is False
+
+
+def test_criterio1_una_sola_perdida_ya_no_cumple():
+    """El umbral es 0, no 'casi 0' (decision de Nicolas del 2026-09-07)."""
+    noches_alerta = {"V": {"2026-07-01", "2026-07-02"}}
+    dist = {("V", "2026-07-01"): [1.0], ("V", "2026-07-02"): [1.0]}
+    c = {"V": CENTRO}
+    ctrl = [_pasada("V", "2026-07-01", pub=1, cen=_desplazado(1.0), lab="pos"),
+            _pasada("V", "2026-07-02", pub=1, cen=_desplazado(1.0), lab="pos")]
+    brazo = [dict(ctrl[0]), dict(ctrl[1], pub=0)]
+    r = evaluar.criterio1(evaluar.estado_noches(ctrl, noches_alerta, dist, c, 0.55),
+                          evaluar.estado_noches(brazo, noches_alerta, dist, c, 0.55))
+    assert r["n_perdidas"] == 1 and r["cumple"] is False
+
+
+# ------------------------------------------------------------------ parametros congelados
+def test_parametros_congelados_son_los_del_preregistro():
+    """H1: los parametros de la corrida no pueden elegirse despues de ver datos. Viven en
+    `experiments/_s143_evaluador/parametros.json`, versionado, y el evaluador los lee por defecto."""
+    with open(os.path.join(DIR_EVAL, "parametros.json"), encoding="utf-8") as fh:
+        p = json.load(fh)
+    assert p["ventana"] == ["2026-06-01", "2026-08-31"]
+    assert p["volcanes"] == ["Isluga", "Lascar", "Lastarria", "PlanchonPeteroa",
+                             "PuyehueCordonCaulle", "Tupungatito", "Villarrica",
+                             "NevadosDeChillan"]
+    assert p["control"] == "_s142_ab_control"
+    assert p["brazos"] == ["_s142_ab_control", "_s142_ab_literal", "_s142_ab_lit_sin_fondo",
+                           "_s142_ab_lit_con_compuerta", "_s142_ab_lit_sp_suelto",
+                           "_s142_ab_lit_keep_peak"]
+    assert p["prefijo"] == "s142ab-"
+    assert p["cota_km"] == 0.55
+    assert p["B"] == 10000
+    assert p["semilla"] == 143
+    assert p["n_min_magnitud"] == 30
+    assert p["tol_magnitud"] == 0.05
+    # el modulo usa exactamente esos valores, no una copia que pueda driftear
+    assert evaluar.PRESUPUESTO_COTA_KM == p["cota_km"]
+    assert evaluar.TOL_MAGNITUD == p["tol_magnitud"]
+    assert evaluar.B_DEFECTO == p["B"]
+    assert evaluar.SEMILLA_DEFECTO == p["semilla"]
+    assert evaluar.N_MIN_MAGNITUD == p["n_min_magnitud"]
+    assert evaluar.PARAMETROS == p
+
+
+def test_la_salida_copia_los_parametros_congelados_con_su_sha():
+    proc = evaluar.procedencia_archivo(os.path.join(DIR_EVAL, "parametros.json"))
+    assert proc["archivo"] == "experiments/_s143_evaluador/parametros.json"
+    assert proc["blob"] and len(proc["blob"]) == 40
 
 
 # ------------------------------------------------------------------ fuentes del repo
@@ -365,3 +488,60 @@ def test_cargador_reproduce_al_banco_de_paridad(tmp_path, monkeypatch):
 def test_identidad_del_predicado_node():
     import banco_paridad as bp
     assert bp.control_identidad_predicado() == ([0, 1, 1, 1, 0], [1, 0])
+
+
+# ------------------------------------------------------------------ de punta a punta
+CABECERA_CONS = ("timestamp,Fecha_Satelite_UTC,Fecha_Captura_Chile,Volcan,Sensor,VRP_MW,"
+                 "Distancia_km,Tipo_Registro,Clasificacion Mirova,Ruta Foto,Fecha_Proceso_GitHub,"
+                 "Ultima_Actualizacion,Editado,Nota_Validacion")
+
+
+def _fila_ref(vol, fecha, tipo, vrp, dist):
+    return (f"0,{fecha},{fecha},{vol},VIIRS375,{vrp},{dist},{tipo},NULO,No descargada,{fecha},"
+            f"{fecha},NO,")
+
+
+def _record_publicable(dt, lat, lon):
+    return _rec(dt, vrp_mw=0.4, distance_class="summit", t_max_k=300,
+                primary_cluster={"vrp_mw": 0.4, "centroid_dist_km": 0.5, "n_pixels": 2,
+                                 "centroid_lat": lat, "centroid_lon": lon},
+                anomaly_pixels=[{"lat": lat, "lon": lon, "vrp_mw": 0.4, "bt_k": 300}])
+
+
+@pytest.mark.skipif(not HAY_NODE, reason="node no esta instalado: el predicado del dashboard se ejecuta con node (A97)")
+def test_evaluar_excluye_del_veredicto_al_volcan_con_cobertura_despareja(tmp_path):
+    """De punta a punta: un volcan al que al brazo le falta una pasada no entra al veredicto, su
+    'perdida' seria del experimento y no del algoritmo."""
+    ctrl, brazo = "_ctrl", "_brazo"
+    centros = evaluar.radios(["Lascar", "Lastarria"])
+    recs = {}
+    for vol in ("Lascar", "Lastarria"):
+        lat, lon = centros[vol]["mirova_center"]
+        recs[vol] = [_record_publicable("2026-06-01 05:00", lat, lon),
+                     _record_publicable("2026-06-02 05:00", lat, lon)]
+    art = tmp_path / "art"
+    for arm in (ctrl, brazo):
+        for vol, rs in recs.items():
+            if arm == brazo and vol == "Lastarria":
+                rs = rs[:1]          # al brazo le falta una pasada de Lastarria
+            _escribir(art, f"{arm}-{vol}", vol, rs)
+    cons = tmp_path / "cons.csv"
+    filas = [CABECERA_CONS]
+    for vol in ("Lascar", "Lastarria"):
+        filas.append(_fila_ref(vol, "2026-06-01 05:00:00", "ALERTA_TERMICA", "1.0", "0.5"))
+        filas.append(_fila_ref(vol, "2026-06-02 05:00:00", "RUTINA", "0.0", "0.0"))
+    cons.write_text("\n".join(filas) + "\n", encoding="utf-8")
+    ocr = tmp_path / "ocr.csv"
+    ocr.write_text(CABECERA_CONS + "\n", encoding="utf-8")
+
+    a = evaluar.argumentos(dir=str(art), prefijo="", brazos=[ctrl, brazo], control=ctrl,
+                           volcanes=["Lascar", "Lastarria"], inicio="2026-06-01", fin="2026-06-30",
+                           ref_cons=str(cons), ref_ocr=str(ocr), B=200)
+    res = evaluar.evaluar(a)
+    assert "Lastarria" in res["cobertura"]["excluidos"]
+    assert res["meta"]["volcanes_evaluados"] == ["Lascar"]
+    assert list(res["noches_confirmadas"]["por_volcan"]) == ["Lascar"]
+    assert list(res["brazos"][brazo]["criterio1"]["por_volcan"]) == ["Lascar"]
+    assert res["controles_instrumento"]["identidad_predicado_node"] is True
+    assert res["meta"]["parametros_congelados"]["contenido"] == evaluar.PARAMETROS
+    assert res["meta"]["referencia_fijada_por_sha"] is False  # la corrida usa CSV locales
