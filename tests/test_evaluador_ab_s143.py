@@ -433,6 +433,22 @@ def test_fusion_acepta_un_prefijo_por_tramo(tmp_path):
     assert inf2["faltantes"], "un prefijo unico deberia dejar el tramo 2 como faltante"
 
 
+def test_fusion_sin_listas_usa_los_parametros_congelados():
+    """Sin --brazos ni --volcanes, la fusion toma los congelados: nueve volcanes y seis brazos.
+
+    No llama a `main()`: ese envuelve sys.stdout y dejaria la salida de pytest cerrada (S141).
+    """
+    import fusionar as fus
+    with open(os.path.join(DIR_EVAL, "parametros.json"), encoding="utf-8") as fh:
+        par = json.load(fh)
+    brazos, volcanes = fus.listas_por_defecto(None, None)
+    assert volcanes == par["volcanes"] and len(volcanes) == 9
+    assert brazos == par["brazos"] and len(brazos) == 6
+    # lo que se pasa explicito manda
+    b2, v2 = fus.listas_por_defecto(["_x"], ["Isluga"])
+    assert (b2, v2) == (["_x"], ["Isluga"])
+
+
 def test_parametros_congelados_son_los_del_preregistro():
     """H1: los parametros de la corrida no pueden elegirse despues de ver datos. Viven en
     `experiments/_s143_evaluador/parametros.json`, versionado, y el evaluador los lee por defecto."""

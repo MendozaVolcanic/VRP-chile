@@ -38,6 +38,8 @@ python experiments/_s143_evaluador/fusionar.py --prefijo s143ab-t1- --prefijo s1
     --volcanes Isluga Lascar Lastarria PlanchonPeteroa PuyehueCordonCaulle Tupungatito \
                Villarrica NevadosDeChillan \
     --tramo <dir tramo 1> --tramo <dir tramo 2> --out <dir fusionado> --estricto
+# brazos y volcanes salen de parametros.json si no se pasan: son nueve volcanes desde el
+# pre-registro v2, y tipearlos a mano es como se cuela uno de menos
 
 # brazos, control, volcanes, ventana, prefijo, cota, B, semilla, n mínimo y tolerancia salen de
 # parametros.json: no hace falta (ni conviene) pasarlos a mano

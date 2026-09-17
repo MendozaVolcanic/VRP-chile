@@ -49,6 +49,20 @@ def _canon(r: dict) -> str:
     return json.dumps(r, sort_keys=True, ensure_ascii=False)
 
 
+def listas_por_defecto(brazos, volcanes):
+    """Sin listas en la línea de comandos, las toma de `parametros.json`, que es la fuente congelada.
+
+    POR QUÉ. Tipear la lista a mano es como se cuela un volcán de menos: el README quedó en ocho
+    cuando el pre-registro v2 ya eran nueve, y la fusión habría dejado uno afuera sin avisar.
+    """
+    if brazos and volcanes:
+        return list(brazos), list(volcanes)
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "parametros.json"),
+              encoding="utf-8") as fh:
+        par = json.load(fh)
+    return list(brazos or par["brazos"]), list(volcanes or par["volcanes"])
+
+
 def fusionar(tramos, prefijo, brazos, volcanes, out):
     """Fusiona y escribe `<out>/<prefijo><brazo>-<volcán>/<volcán>.json`. Devuelve el informe.
 
@@ -114,13 +128,16 @@ def main(argv=None) -> int:
                     help="directorio del tramo, opcionalmente 'dir::sufijo' (repetible, en orden)")
     ap.add_argument("--prefijo", required=True, action="append",
                     help="prefijo del artefacto, p. ej. 's143ab-t1-'; repetible, uno por tramo")
-    ap.add_argument("--brazos", nargs="+", required=True)
-    ap.add_argument("--volcanes", nargs="+", required=True)
+    # Sin `--brazos` ni `--volcanes` salen de parametros.json, que es la fuente congelada: tipear la
+    # lista a mano es como se cuela un volcán de menos (el README quedó en ocho cuando ya eran nueve).
+    ap.add_argument("--brazos", nargs="+")
+    ap.add_argument("--volcanes", nargs="+")
     ap.add_argument("--out", required=True)
     ap.add_argument("--estricto", action="store_true", help="código 1 si hay conflictos o faltantes")
     a = ap.parse_args(argv)
     tramos = [parse_tramo(t) for t in a.tramo]
-    inf = fusionar(tramos, a.prefijo, a.brazos, a.volcanes, a.out)
+    brazos, volcanes = listas_por_defecto(a.brazos, a.volcanes)
+    inf = fusionar(tramos, a.prefijo, brazos, volcanes, a.out)
     os.makedirs(a.out, exist_ok=True)
     with open(os.path.join(a.out, "fusion_informe.json"), "w", encoding="utf-8") as fh:
         json.dump(inf, fh, indent=1, ensure_ascii=False)
