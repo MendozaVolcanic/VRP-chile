@@ -1,0 +1,60 @@
+name: "Probe S143, 12 noches perdidas por S135 (VIIRS 375, seis variantes)"
+
+# Criterio pre-registrado: experiments/_s143_probe_12_noches/README.md (escrito antes de correr).
+# Sólo lectura: no escribe en data/, no commitea. Un job por volcán; las seis variantes corren en
+# secuencia en el mismo job y reusan los granules ya bajados (misma carpeta).
+# A43: "on" entre comillas. S141: pipefail en todo paso con tee, y el script sale 2 si falta una pasada.
+"on":
+  workflow_dispatch:
+    inputs:
+      vols:
+        description: "Lista JSON de volcanes (pilotear con [\"Lastarria\"])"
+        required: true
+        default: '["Isluga","Lastarria","PlanchonPeteroa","Tupungatito"]' 
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        # Por input y no por `if:` en cada paso: un job que se salta por `if` termina VERDE sin
+        # correr nada ni subir artefacto, y eso se lee como resultado (S141, A93).
+        vol: ${{ fromJSON(github.event.inputs.vols) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml pandas
+      - name: Run seis variantes
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          PROBE_VOL: ${{ matrix.vol }}
+        run: |
+          set -o pipefail
+          cd experiments/_s143_probe_12_noches
+          mkdir -p out
+          rc=0
+          for V in control s135_d s135_d_sin_compuerta_ctx literal literal_sin_compuerta_ctx literal_t1_sin_filtro; do
+            # una variante con pasadas faltantes no corta a las demas, pero el job termina en rojo
+            PROBE_VARIANTE="$V" python probe.py | tee "out/report_${PROBE_VOL}_${V}.txt" || rc=1
+          done
+          exit $rc
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s143-probe-12-noches-${{ matrix.vol }}
+          path: experiments/_s143_probe_12_noches/out/
+          retention-days: 30
+          if-no-files-found: error
