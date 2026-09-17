@@ -10,12 +10,24 @@ libertad que el pre-registro dice no tener.
 
 | archivo | qué hace |
 |---|---|
+| `parametros.json` | los parámetros de la corrida, congelados y versionados: ventana, ocho volcanes, brazos, control, prefijo, cota, B, semilla, n mínimo y tolerancia |
 | `fusionar.py` | une los artefactos de N tramos por `(datetime_utc, sensor)`; prefijo, brazos, volcanes y tramos por argumento; avisa si una clave aparece en dos tramos con contenido distinto |
 | `evaluar.py` | aplica los criterios 1, 2 y 3 y escribe JSON con procedencia más un informe Markdown generado desde ese JSON |
 | `control_s135.py` | control de instrumento sobre los artefactos reales de S135 (ver `CONTROL_S135.md`) |
 | `CONTROL_S135.md` | resultado de ese control, con todos sus números generados por script |
 | `control_s135.json`, `informe_control_s135.md` | salidas del control |
+| `mutaciones.py` + `MUTACIONES.md` | batería de mutaciones: qué vigilan de verdad los tests |
 | `tests/test_evaluador_ab_s143.py` (en el repo) | los tests, escritos antes del código |
+
+## Los parámetros están congelados, no en este README
+
+Ventana, volcanes, brazos, control, prefijo, cota (0,55 km), B, semilla, n mínimo y tolerancia viven
+en `parametros.json`, que es lo que el evaluador lee por defecto. La salida JSON copia ese archivo
+entero con su sha de git (`meta.parametros_congelados`), guarda lo que la corrida usó de verdad
+(`meta.parametros_efectivos`) y marca si coinciden (`meta.parametros_igual_a_los_congelados`); el
+informe lo dice en su primera línea. `tests/test_evaluador_ab_s143.py` comprueba valor por valor que
+sigan siendo los del pre-registro. Cambiar uno es un cambio de pre-registro, no una opción de la
+línea de comandos.
 
 ## Cómo se usa cuando lleguen los artefactos del A/B
 
@@ -27,9 +39,9 @@ python experiments/_s143_evaluador/fusionar.py --prefijo s142ab- \
                Villarrica NevadosDeChillan \
     --tramo <dir tramo 1> --tramo <dir tramo 2> --out <dir fusionado> --estricto
 
-python experiments/_s143_evaluador/evaluar.py --dir <dir fusionado> --prefijo s142ab- \
-    --brazos <los seis> --control _s142_ab_control --volcanes <los ocho> \
-    --inicio 2026-06-01 --fin 2026-08-31 \
+# brazos, control, volcanes, ventana, prefijo, cota, B, semilla, n mínimo y tolerancia salen de
+# parametros.json: no hace falta (ni conviene) pasarlos a mano
+python experiments/_s143_evaluador/evaluar.py --dir <dir fusionado> \
     --seguimiento experiments/_s143_evaluador/_seguimiento_s135.json \
     --out-json experiments/_s143_evaluador/resultado_ab_s143.json \
     --out-md experiments/_s143_evaluador/RESULTADO_AB_S143.md
@@ -52,6 +64,18 @@ Necesita **node** (el predicado del dashboard se ejecuta, no se reescribe) y red
 | 14 | bootstrap estratificado por volcán con semilla y B por argumento, más el margen de pasadas que decide el signo |
 | 15 | cobertura simétrica por `(datetime_utc, sensor)` y `product_version` |
 | 16 | el JSON trae la línea base del control en negativos limpios para contrastarla con el régimen esperado |
+
+## Qué vigilan los tests (batería de mutaciones)
+
+`python experiments/_s143_evaluador/mutaciones.py` aplica una por una 23 mutaciones del evaluador y
+de la fusión, corre la suite y anota si mueren. La tabla vive en `MUTACIONES.md` con sus números
+generados por el script. El verificador externo del PR #686 (H3) encontró que las reglas de veredicto
+no tenían fusible: sobrevivían las mutaciones del extremo del intervalo del criterio 2, la dirección
+de la desigualdad del criterio 3, el umbral 0 del criterio 1, la exclusión por cobertura despareja,
+el castigo al brazo sin pares decisivos y los valores por defecto de la cota y la tolerancia. Hoy
+todas mueren. Las dos que siguen vivas son a propósito: una cambia un comentario (control de que la
+batería no se engaña sola) y la otra es equivalente (filtrar los negativos limpios por la etiqueta
+del brazo o la del control da el mismo conjunto, porque la etiqueta la fija la referencia).
 
 ## Decisiones abiertas (lectura conservadora, para que Nicolás las revise)
 
@@ -81,6 +105,13 @@ Necesita **node** (el predicado del dashboard se ejecuta, no se reescribe) y red
 10. **Criterio 1 secundario ("la misma medida con cualquier sensor").** NO está implementado: el
     evaluador mide sólo VIIRS 375, que es más estricto. Si se quiere el secundario, hay que ampliar
     `buckets` en `construir_pasadas` y el universo de noches con alerta.
-11. **Umbral de la cota.** 0,55 km, el de S135, por argumento `--cota-km`. Es una cota inferior de
-    la separación real (A93) y la distancia de MIROVA viene cuantizada a su celda (D15): los casos
-    al borde del umbral son sensibles y en `CONTROL_S135.md` se cuentan aparte.
+11. **Umbral de la cota.** 0,55 km, el de S135, congelado en `parametros.json` (se puede mover con
+    `--cota-km`, y entonces la salida marca que los parámetros ya no son los congelados). Es una
+    cota inferior de la separación real (A93) y la distancia de MIROVA viene cuantizada a su celda
+    (D15): los casos al borde del umbral son sensibles y en `CONTROL_S135.md` se cuentan aparte.
+12. **Exigirle la cota al brazo cambia el criterio 1 respecto de S135.** Con la definición floja el
+    brazo D de S135 perdía 12 noches y el B ninguna; con la cota en el brazo, 28 y 14. La decisión
+    de "cero pérdidas" que Nicolás tomó el 2026-09-07 se tomó sobre la definición floja: la
+    implementación se deja como está (los dos conteos van lado a lado en el JSON y en el informe) y
+    ratificar cuál manda le corresponde a Nicolás en la v2 del pre-registro (H2 del verificador
+    externo).
