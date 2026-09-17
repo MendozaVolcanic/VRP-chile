@@ -18,7 +18,7 @@ Layout de entrada, por tramo: `<dir>/<prefijo><brazo>-<volcán><sufijo>/<volcán
 sirve para los artefactos rescatados, que llevan `__run<id>` en el nombre de la carpeta.
 
 Uso:
-    python experiments/_s143_evaluador/fusionar.py --prefijo s142ab- \\
+    python experiments/_s143_evaluador/fusionar.py --prefijo s143ab- \\
         --brazos _s142_ab_control _s142_ab_literal --volcanes Isluga Lascar \\
         --tramo <dir tramo 1> --tramo <dir tramo 2> --out <dir fusionado>
     # artefactos rescatados en una misma carpeta, distinguidos por run:
@@ -100,7 +100,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--tramo", action="append", required=True,
                     help="directorio del tramo, opcionalmente 'dir::sufijo' (repetible, en orden)")
-    ap.add_argument("--prefijo", required=True, help="prefijo del artefacto, p. ej. 's142ab-'")
+    ap.add_argument("--prefijo", required=True, help="prefijo del artefacto, p. ej. 's143ab-'")
     ap.add_argument("--brazos", nargs="+", required=True)
     ap.add_argument("--volcanes", nargs="+", required=True)
     ap.add_argument("--out", required=True)

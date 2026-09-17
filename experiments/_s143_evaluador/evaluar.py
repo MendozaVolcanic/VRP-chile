@@ -37,7 +37,7 @@ DECISIONES FIJADAS (cada una es un requisito del verificador; ver README.md):
 Read-only sobre el repo: no toca pipeline/, data/ ni banco_paridad (lo envuelve).
 
 Uso:
-    python experiments/_s143_evaluador/evaluar.py --dir <artefactos fusionados> --prefijo s142ab- \\
+    python experiments/_s143_evaluador/evaluar.py --dir <artefactos fusionados> --prefijo s143ab- \\
         --brazos _s142_ab_control _s142_ab_literal ... --control _s142_ab_control \\
         --volcanes Isluga Lascar ... --inicio 2026-06-01 --fin 2026-08-31 --out-json r.json --out-md r.md
 """

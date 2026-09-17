@@ -384,7 +384,7 @@ def test_parametros_congelados_son_los_del_preregistro():
     assert p["brazos"] == ["_s142_ab_control", "_s142_ab_literal", "_s142_ab_lit_sin_fondo",
                            "_s142_ab_lit_con_compuerta", "_s142_ab_lit_sp_suelto",
                            "_s142_ab_lit_keep_peak"]
-    assert p["prefijo"] == "s142ab-"
+    assert p["prefijo"] == "s143ab-"
     assert p["cota_km"] == 0.55
     assert p["B"] == 10000
     assert p["semilla"] == 143
