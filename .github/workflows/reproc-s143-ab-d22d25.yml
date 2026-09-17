@@ -1,0 +1,127 @@
+name: "A/B S143, D22 compuerta x D25 fondo por vecinos (VIIRS 375), literal + ablaciones"
+
+# SEIS brazos sobre OCHO volcanes. Pre-registro: docs/PREREGISTRO_AB_D22_D25_S143.md, escrito y
+# verificado ANTES de correr. NO despachar sin ese pre-registro aprobado.
+#
+# EL FENÓMENO. En un cono nevado, de noche, el cráter con un foco sub-píxel está más frío en MIR que
+# el valle. Cuatro reglas acopladas deciden si se ve y con cuánto: la compuerta bt > t_bg + 3 K de
+# los Tests 2 y 3 (D22), el fondo como mediana de un anillo regional (D25), el segundo pase suelto
+# (D2) y keep_peak (D19). S135 quitó las dos últimas y perdió 12 noches; este A/B prueba si las
+# pérdidas eran de la compuerta y del fondo.
+#
+#   _s142_ab_control            producción de hoy, reprocesada
+#   _s142_ab_literal            los cuatro puntos del paper
+#   _s142_ab_lit_sin_fondo      literal menos D25
+#   _s142_ab_lit_con_compuerta  literal menos D22
+#   _s142_ab_lit_sp_suelto      literal menos D2
+#   _s142_ab_lit_keep_peak      literal menos D19
+#
+# EL CONTROL SE REPROCESA: los records guardados mezclan el régimen anterior a #535 (A104).
+#
+# NO COMMITEA: cada brazo escribe en su data_subdir aislado y sube el JSON como artefacto (14 días).
+# Cada job arranca de un checkout limpio, así que el artefacto de un tramo contiene SOLO ese tramo:
+# el nombre lleva el tramo y se fusionan offline (patrón experiments/_s135_ab_d1d2/fusionar_chunks.py).
+#
+# TRAMOS (A15: timeout >= duración esperada x 1,3; S135 midió 72 a 153 min por job de 45 días):
+#   tramo 1: 2026-06-01 → 2026-07-15    tramo 2: 2026-07-16 → 2026-08-31
+# A43: la clave "on" va entre comillas. A47: un volcán y un brazo por job, cada uno con su subdir.
+"on":
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "Inicio YYYY-MM-DD (tramo 1: 2026-06-01; tramo 2: 2026-07-16)"
+        required: true
+        default: "2026-06-01"
+      end:
+        description: "Fin YYYY-MM-DD inclusive (tramo 1: 2026-07-15; tramo 2: 2026-08-31)"
+        required: true
+        default: "2026-07-15"
+      tramo:
+        description: "Etiqueta del tramo para el nombre del artefacto (t1 o t2)"
+        required: true
+        default: "t1"
+      preregistro_aprobado:
+        description: "Escribe si SOLO con docs/PREREGISTRO_AB_D22_D25_S143.md aprobado por Nicolas y su verificador"
+        required: true
+        default: "no"
+
+jobs:
+  reproc:
+    # Candado: el pre-registro v1 quedó en CORREGIR ANTES (S143). Sin "si" explícito no corre nada.
+    if: github.event.inputs.preregistro_aprobado == 'si'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      # 8 volcanes x 6 brazos = 48 jobs por tramo. max-parallel 6: deja espacio al cron NRT dentro
+      # del límite de 20 jobs concurrentes y no satura a NASA (el circuit-breaker A64 protege, pero
+      # un corte deja cobertura despareja y obliga a repetir el job).
+      max-parallel: 6
+      matrix:
+        volcano: [Isluga, Lascar, Lastarria, PlanchonPeteroa, PuyehueCordonCaulle, Tupungatito, Villarrica, NevadosDeChillan]
+        profile:
+          - _s142_ab_control
+          - _s142_ab_literal
+          - _s142_ab_lit_sin_fondo
+          - _s142_ab_lit_con_compuerta
+          - _s142_ab_lit_sp_suelto
+          - _s142_ab_lit_keep_peak
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Verificar que el brazo LEE lo que declara
+        env:
+          VRP_PROFILE: ${{ matrix.profile }}
+        run: |
+          python -c "import pipeline.profile as p; \
+            print('brazo', p.PROFILE_NAME, '| no_bt_gate', p.ENABLE_TESTS_23_NO_BT_GATE_VIIRS375, \
+            '| bg_vecinos', p.ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375, \
+            '| conditioned', p.ENABLE_SECOND_PASS_CONDITIONED, \
+            '| keep_peak', p.ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK, \
+            '| max_half', p.VRP_BG_NEIGHBOR_MAX_HALF_PX, \
+            '| sensores', p.SENSOR_MODIS, p.SENSOR_VIIRS_375, p.SENSOR_VIIRS_750, \
+            '| subdir', p.DATA_SUBDIR)"
+
+      - name: Run reprocess
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          # Las entradas pasan por env y NO se interpolan dentro del run (S128).
+          ARM_START: ${{ github.event.inputs.start }}
+          ARM_END: ${{ github.event.inputs.end }}
+          ARM_PROFILE: ${{ matrix.profile }}
+          ARM_VOLCANO: ${{ matrix.volcano }}
+        timeout-minutes: 330
+        run: |
+          set -o pipefail
+          python scripts/run_pipeline.py \
+            --profile "$ARM_PROFILE" \
+            --volcano "$ARM_VOLCANO" \
+            --start "$ARM_START" \
+            --end "$ARM_END" \
+            --overwrite
+
+      - name: Upload reprocessed JSON as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s143ab-${{ github.event.inputs.tramo }}-${{ matrix.profile }}-${{ matrix.volcano }}
+          path: data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+          retention-days: 14
+          if-no-files-found: error
