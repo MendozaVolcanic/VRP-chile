@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generado_utc": "2026-09-17T18:49:03+00:00",
+  "generado_utc": "2026-09-17T19:50:50+00:00",
   "artefactos": "C:\\Users\\nmend\\OneDrive\\Escritorio\\claude\\Volcanologia\\VRP Chile\\experiments\\_artefactos_ab",
   "runs": [
    "__run34173711390",
@@ -105,14 +105,14 @@
      ]
     }
    },
-   "dir_artefactos": "C:\\Users\\nmend\\AppData\\Local\\Temp\\s143_control_s135_uh8786uv",
+   "dir_artefactos": "C:\\Users\\nmend\\AppData\\Local\\Temp\\s143_control_s135_peywqegt",
    "prefijo": "s135ab-",
    "procedencia": {
     "evaluador": {
      "archivo": "experiments/_s143_evaluador/evaluar.py",
-     "commit": "a8c3fb92f104fcb5e79f4934b6633c8678516999",
+     "commit": "424310996d1f3f2b7a7d4deed6dac19acf5adc68",
      "modificado_sin_commit": true,
-     "blob": "33ffa92c0c88c40e2bb43a0484ed1700c2888d6f"
+     "blob": "1af058db80d77580812a163f1e60f1ba4fa859f6"
     },
     "banco_paridad": {
      "archivo": "scripts/banco_paridad.py",
@@ -139,11 +139,16 @@
     "n_min_magnitud": 30,
     "tol_magnitud": 0.05
    },
+   "campo_posicion_cota": "centroide",
+   "campos_posicion_disponibles": {
+    "centroide": "primary_cluster.centroid (semántica de S135)",
+    "final_hotspot_si_test1": "final_hotspot cuando final_hotspot_source es test1_roi (posición oficial del dashboard para esos records, S106/A84); el centroide en el resto"
+   },
    "parametros_congelados": {
     "archivo": "experiments/_s143_evaluador/parametros.json",
-    "commit": null,
+    "commit": "aadd1766b5c7a6269eff76980e2b487289b3a708",
     "modificado_sin_commit": true,
-    "blob": "5a7b458af18b10ee743fd35a9eba423d571c461a",
+    "blob": "6e4f886339ff15f776cb1b1945f1cdf7a30630b1",
     "contenido": {
      "_por_que": "Los parametros de la corrida del A/B D22/D25 se congelan aca, versionados, para que no puedan elegirse despues de ver datos (H1 del verificador externo del PR #686). El evaluador los lee por defecto, la salida JSON los copia enteros con el sha de este archivo, y tests/test_evaluador_ab_s143.py comprueba uno por uno que sigan siendo estos. Cambiar cualquiera es un cambio de pre-registro: se hace antes de correr, con su razon escrita, o el brazo se juzga en una ventana nueva sin mirar (criterio 4 del pre-registro).",
      "_fuente": "docs/PREREGISTRO_AB_D22_D25_S143.md secciones 3, 4 y 5; cota y semilla heredadas de docs/PREREGISTRO_AB_D1_D2_S135.md",
@@ -158,6 +163,7 @@
       "PlanchonPeteroa",
       "PuyehueCordonCaulle",
       "Tupungatito",
+      "Chaiten",
       "Villarrica",
       "NevadosDeChillan"
      ],
@@ -170,13 +176,15 @@
       "_s142_ab_lit_keep_peak"
      ],
      "control": "_s142_ab_control",
-     "prefijo": "s142ab-",
+     "prefijo": "s143ab-",
      "cota_km": 0.55,
      "B": 10000,
      "semilla": 143,
      "n_min_magnitud": 30,
      "tol_magnitud": 0.05,
+     "campo_posicion_cota": "centroide",
      "_unidades": {
+      "campo_posicion_cota": "con que posicion del record se mide la cota de mismo objeto: 'centroide' (primary_cluster, la semantica de S135) o 'final_hotspot_si_test1' (final_hotspot cuando final_hotspot_source es test1_roi, la posicion oficial del dashboard para esos records; el centroide en el resto). DECISION ABIERTA de Nicolas (H1 del verificador post-corrida del probe de las 12 noches): el evaluador calcula y reporta las dos, y esta clave dice cual decide",
       "cota_km": "presupuesto de la cota de mismo objeto (A93): semidiagonal de la celda de 375 m mas el residuo por sensor del centro de grilla",
       "B": "replicas del bootstrap percentil del criterio 2",
       "semilla": "semilla del bootstrap",
@@ -209,12 +217,13 @@
     "B": 10000,
     "semilla": 143,
     "n_min_magnitud": 30,
-    "tol_magnitud": 0.05
+    "tol_magnitud": 0.05,
+    "campo_posicion_cota": "centroide"
    },
    "parametros_igual_a_los_congelados": false,
    "referencia_fijada_por_sha": true,
    "n_filas_referencia_nocturnas": 7842,
-   "generado_utc": "2026-09-17T18:48:57+00:00",
+   "generado_utc": "2026-09-17T19:50:44+00:00",
    "fusion": {
     "tramos": [
      [
@@ -686,6 +695,668 @@
     "Tupungatito": 29
    }
   },
+  "noches_confirmadas_por_campo_de_posicion": {
+   "centroide": {
+    "total": 257,
+    "por_volcan": {
+     "Isluga": 71,
+     "Lascar": 52,
+     "Lastarria": 48,
+     "PlanchonPeteroa": 28,
+     "PuyehueCordonCaulle": 31,
+     "Tupungatito": 27
+    },
+    "por_estrato": {
+     "focal": 230,
+     "nevado": 27
+    },
+    "fechas": {
+     "Isluga": [
+      "2026-06-01",
+      "2026-06-02",
+      "2026-06-03",
+      "2026-06-04",
+      "2026-06-05",
+      "2026-06-06",
+      "2026-06-07",
+      "2026-06-08",
+      "2026-06-10",
+      "2026-06-11",
+      "2026-06-12",
+      "2026-06-13",
+      "2026-06-15",
+      "2026-06-16",
+      "2026-06-17",
+      "2026-06-18",
+      "2026-06-19",
+      "2026-06-20",
+      "2026-06-21",
+      "2026-06-22",
+      "2026-06-23",
+      "2026-06-24",
+      "2026-06-25",
+      "2026-06-26",
+      "2026-06-27",
+      "2026-06-28",
+      "2026-06-29",
+      "2026-07-01",
+      "2026-07-05",
+      "2026-07-07",
+      "2026-07-08",
+      "2026-07-09",
+      "2026-07-10",
+      "2026-07-11",
+      "2026-07-12",
+      "2026-07-13",
+      "2026-07-14",
+      "2026-07-15",
+      "2026-07-16",
+      "2026-07-17",
+      "2026-07-19",
+      "2026-07-20",
+      "2026-07-21",
+      "2026-07-23",
+      "2026-07-24",
+      "2026-07-25",
+      "2026-07-26",
+      "2026-07-27",
+      "2026-07-28",
+      "2026-07-29",
+      "2026-07-30",
+      "2026-07-31",
+      "2026-08-01",
+      "2026-08-02",
+      "2026-08-05",
+      "2026-08-06",
+      "2026-08-07",
+      "2026-08-08",
+      "2026-08-09",
+      "2026-08-14",
+      "2026-08-19",
+      "2026-08-20",
+      "2026-08-21",
+      "2026-08-22",
+      "2026-08-25",
+      "2026-08-26",
+      "2026-08-27",
+      "2026-08-28",
+      "2026-08-29",
+      "2026-08-30",
+      "2026-08-31"
+     ],
+     "Lascar": [
+      "2026-06-01",
+      "2026-06-02",
+      "2026-06-03",
+      "2026-06-05",
+      "2026-06-08",
+      "2026-06-09",
+      "2026-06-13",
+      "2026-06-14",
+      "2026-06-15",
+      "2026-06-16",
+      "2026-06-20",
+      "2026-06-21",
+      "2026-06-22",
+      "2026-06-24",
+      "2026-06-25",
+      "2026-06-26",
+      "2026-06-27",
+      "2026-06-28",
+      "2026-06-30",
+      "2026-07-07",
+      "2026-07-09",
+      "2026-07-10",
+      "2026-07-11",
+      "2026-07-12",
+      "2026-07-13",
+      "2026-07-15",
+      "2026-07-17",
+      "2026-07-24",
+      "2026-07-25",
+      "2026-07-26",
+      "2026-07-27",
+      "2026-07-29",
+      "2026-07-30",
+      "2026-08-01",
+      "2026-08-02",
+      "2026-08-03",
+      "2026-08-04",
+      "2026-08-05",
+      "2026-08-06",
+      "2026-08-07",
+      "2026-08-08",
+      "2026-08-09",
+      "2026-08-17",
+      "2026-08-20",
+      "2026-08-21",
+      "2026-08-22",
+      "2026-08-23",
+      "2026-08-26",
+      "2026-08-27",
+      "2026-08-28",
+      "2026-08-29",
+      "2026-08-30"
+     ],
+     "Lastarria": [
+      "2026-06-01",
+      "2026-06-02",
+      "2026-06-03",
+      "2026-06-04",
+      "2026-06-05",
+      "2026-06-06",
+      "2026-06-07",
+      "2026-06-08",
+      "2026-06-12",
+      "2026-06-13",
+      "2026-06-14",
+      "2026-06-16",
+      "2026-06-17",
+      "2026-06-21",
+      "2026-06-22",
+      "2026-06-23",
+      "2026-06-25",
+      "2026-06-27",
+      "2026-06-28",
+      "2026-06-29",
+      "2026-06-30",
+      "2026-07-02",
+      "2026-07-06",
+      "2026-07-07",
+      "2026-07-10",
+      "2026-07-11",
+      "2026-07-12",
+      "2026-07-13",
+      "2026-07-14",
+      "2026-07-15",
+      "2026-07-16",
+      "2026-07-24",
+      "2026-07-25",
+      "2026-07-26",
+      "2026-07-27",
+      "2026-07-30",
+      "2026-08-01",
+      "2026-08-02",
+      "2026-08-03",
+      "2026-08-04",
+      "2026-08-05",
+      "2026-08-07",
+      "2026-08-09",
+      "2026-08-21",
+      "2026-08-22",
+      "2026-08-25",
+      "2026-08-27",
+      "2026-08-28"
+     ],
+     "PlanchonPeteroa": [
+      "2026-06-01",
+      "2026-06-02",
+      "2026-06-05",
+      "2026-06-06",
+      "2026-06-08",
+      "2026-06-11",
+      "2026-06-15",
+      "2026-06-16",
+      "2026-06-17",
+      "2026-06-19",
+      "2026-06-21",
+      "2026-06-22",
+      "2026-06-23",
+      "2026-06-25",
+      "2026-06-26",
+      "2026-06-28",
+      "2026-06-30",
+      "2026-07-02",
+      "2026-07-03",
+      "2026-07-04",
+      "2026-07-06",
+      "2026-07-07",
+      "2026-07-12",
+      "2026-07-24",
+      "2026-08-09",
+      "2026-08-14",
+      "2026-08-24",
+      "2026-08-31"
+     ],
+     "PuyehueCordonCaulle": [
+      "2026-06-04",
+      "2026-06-05",
+      "2026-06-06",
+      "2026-06-07",
+      "2026-06-08",
+      "2026-06-12",
+      "2026-06-14",
+      "2026-06-16",
+      "2026-06-17",
+      "2026-06-22",
+      "2026-06-28",
+      "2026-06-30",
+      "2026-07-03",
+      "2026-07-04",
+      "2026-07-05",
+      "2026-07-06",
+      "2026-07-11",
+      "2026-07-12",
+      "2026-07-18",
+      "2026-07-20",
+      "2026-07-21",
+      "2026-07-26",
+      "2026-07-29",
+      "2026-08-10",
+      "2026-08-13",
+      "2026-08-18",
+      "2026-08-19",
+      "2026-08-21",
+      "2026-08-22",
+      "2026-08-24",
+      "2026-08-31"
+     ],
+     "Tupungatito": [
+      "2026-06-01",
+      "2026-06-03",
+      "2026-06-05",
+      "2026-06-07",
+      "2026-06-08",
+      "2026-06-11",
+      "2026-06-19",
+      "2026-06-21",
+      "2026-06-22",
+      "2026-06-25",
+      "2026-06-28",
+      "2026-06-30",
+      "2026-07-02",
+      "2026-07-03",
+      "2026-07-04",
+      "2026-07-06",
+      "2026-07-07",
+      "2026-07-13",
+      "2026-07-21",
+      "2026-08-01",
+      "2026-08-13",
+      "2026-08-16",
+      "2026-08-18",
+      "2026-08-20",
+      "2026-08-21",
+      "2026-08-22",
+      "2026-08-24"
+     ]
+    },
+    "aceptadas_sin_cota_calculable": {},
+    "coincidencias_de_fecha_descartadas": {
+     "Isluga": {
+      "2026-06-09": 0.648,
+      "2026-06-30": 1.664,
+      "2026-07-22": 1.997
+     },
+     "Lascar": {
+      "2026-06-04": 0.664,
+      "2026-06-06": 0.576,
+      "2026-06-07": 0.571,
+      "2026-06-12": 0.629,
+      "2026-06-17": 0.628,
+      "2026-06-23": 0.57,
+      "2026-06-29": 0.564,
+      "2026-07-08": 0.627,
+      "2026-07-14": 0.578
+     },
+     "Lastarria": {
+      "2026-07-01": 0.698,
+      "2026-07-17": 0.605
+     },
+     "PuyehueCordonCaulle": {
+      "2026-06-01": 3.023,
+      "2026-06-10": 0.758,
+      "2026-06-15": 3.14,
+      "2026-06-19": 0.679,
+      "2026-06-29": 3.388,
+      "2026-07-25": 0.97
+     },
+     "Tupungatito": {
+      "2026-06-04": 3.288,
+      "2026-08-06": 0.553
+     }
+    },
+    "noches_publicadas_sin_filtro": {
+     "Isluga": 74,
+     "Lascar": 61,
+     "Lastarria": 50,
+     "PlanchonPeteroa": 28,
+     "PuyehueCordonCaulle": 37,
+     "Tupungatito": 29
+    }
+   },
+   "final_hotspot_si_test1": {
+    "total": 247,
+    "por_volcan": {
+     "Isluga": 73,
+     "Lascar": 50,
+     "Lastarria": 42,
+     "PlanchonPeteroa": 24,
+     "PuyehueCordonCaulle": 31,
+     "Tupungatito": 27
+    },
+    "por_estrato": {
+     "focal": 220,
+     "nevado": 27
+    },
+    "fechas": {
+     "Isluga": [
+      "2026-06-01",
+      "2026-06-02",
+      "2026-06-03",
+      "2026-06-04",
+      "2026-06-05",
+      "2026-06-06",
+      "2026-06-07",
+      "2026-06-08",
+      "2026-06-10",
+      "2026-06-11",
+      "2026-06-12",
+      "2026-06-13",
+      "2026-06-15",
+      "2026-06-16",
+      "2026-06-17",
+      "2026-06-18",
+      "2026-06-19",
+      "2026-06-20",
+      "2026-06-21",
+      "2026-06-22",
+      "2026-06-23",
+      "2026-06-24",
+      "2026-06-25",
+      "2026-06-26",
+      "2026-06-27",
+      "2026-06-28",
+      "2026-06-29",
+      "2026-06-30",
+      "2026-07-01",
+      "2026-07-05",
+      "2026-07-07",
+      "2026-07-08",
+      "2026-07-09",
+      "2026-07-10",
+      "2026-07-11",
+      "2026-07-12",
+      "2026-07-13",
+      "2026-07-14",
+      "2026-07-15",
+      "2026-07-16",
+      "2026-07-17",
+      "2026-07-19",
+      "2026-07-20",
+      "2026-07-21",
+      "2026-07-22",
+      "2026-07-23",
+      "2026-07-24",
+      "2026-07-25",
+      "2026-07-26",
+      "2026-07-27",
+      "2026-07-28",
+      "2026-07-29",
+      "2026-07-30",
+      "2026-07-31",
+      "2026-08-01",
+      "2026-08-02",
+      "2026-08-05",
+      "2026-08-06",
+      "2026-08-07",
+      "2026-08-08",
+      "2026-08-09",
+      "2026-08-14",
+      "2026-08-19",
+      "2026-08-20",
+      "2026-08-21",
+      "2026-08-22",
+      "2026-08-25",
+      "2026-08-26",
+      "2026-08-27",
+      "2026-08-28",
+      "2026-08-29",
+      "2026-08-30",
+      "2026-08-31"
+     ],
+     "Lascar": [
+      "2026-06-01",
+      "2026-06-03",
+      "2026-06-05",
+      "2026-06-08",
+      "2026-06-13",
+      "2026-06-14",
+      "2026-06-15",
+      "2026-06-16",
+      "2026-06-20",
+      "2026-06-21",
+      "2026-06-22",
+      "2026-06-24",
+      "2026-06-25",
+      "2026-06-26",
+      "2026-06-27",
+      "2026-06-28",
+      "2026-06-30",
+      "2026-07-07",
+      "2026-07-09",
+      "2026-07-10",
+      "2026-07-11",
+      "2026-07-12",
+      "2026-07-13",
+      "2026-07-15",
+      "2026-07-17",
+      "2026-07-24",
+      "2026-07-25",
+      "2026-07-26",
+      "2026-07-27",
+      "2026-07-29",
+      "2026-07-30",
+      "2026-08-01",
+      "2026-08-02",
+      "2026-08-03",
+      "2026-08-04",
+      "2026-08-05",
+      "2026-08-06",
+      "2026-08-07",
+      "2026-08-08",
+      "2026-08-09",
+      "2026-08-17",
+      "2026-08-20",
+      "2026-08-21",
+      "2026-08-22",
+      "2026-08-23",
+      "2026-08-26",
+      "2026-08-27",
+      "2026-08-28",
+      "2026-08-29",
+      "2026-08-30"
+     ],
+     "Lastarria": [
+      "2026-06-02",
+      "2026-06-03",
+      "2026-06-04",
+      "2026-06-05",
+      "2026-06-06",
+      "2026-06-07",
+      "2026-06-08",
+      "2026-06-12",
+      "2026-06-14",
+      "2026-06-16",
+      "2026-06-17",
+      "2026-06-21",
+      "2026-06-22",
+      "2026-06-23",
+      "2026-06-27",
+      "2026-06-29",
+      "2026-06-30",
+      "2026-07-02",
+      "2026-07-06",
+      "2026-07-07",
+      "2026-07-10",
+      "2026-07-12",
+      "2026-07-13",
+      "2026-07-15",
+      "2026-07-16",
+      "2026-07-24",
+      "2026-07-25",
+      "2026-07-26",
+      "2026-07-27",
+      "2026-07-30",
+      "2026-08-01",
+      "2026-08-02",
+      "2026-08-03",
+      "2026-08-04",
+      "2026-08-05",
+      "2026-08-07",
+      "2026-08-09",
+      "2026-08-21",
+      "2026-08-22",
+      "2026-08-25",
+      "2026-08-27",
+      "2026-08-28"
+     ],
+     "PlanchonPeteroa": [
+      "2026-06-01",
+      "2026-06-02",
+      "2026-06-05",
+      "2026-06-06",
+      "2026-06-08",
+      "2026-06-11",
+      "2026-06-16",
+      "2026-06-17",
+      "2026-06-19",
+      "2026-06-21",
+      "2026-06-22",
+      "2026-06-25",
+      "2026-06-26",
+      "2026-06-28",
+      "2026-06-30",
+      "2026-07-02",
+      "2026-07-03",
+      "2026-07-04",
+      "2026-07-06",
+      "2026-07-07",
+      "2026-07-12",
+      "2026-08-09",
+      "2026-08-14",
+      "2026-08-31"
+     ],
+     "PuyehueCordonCaulle": [
+      "2026-06-04",
+      "2026-06-05",
+      "2026-06-06",
+      "2026-06-07",
+      "2026-06-08",
+      "2026-06-12",
+      "2026-06-14",
+      "2026-06-16",
+      "2026-06-17",
+      "2026-06-22",
+      "2026-06-28",
+      "2026-06-30",
+      "2026-07-03",
+      "2026-07-04",
+      "2026-07-05",
+      "2026-07-06",
+      "2026-07-11",
+      "2026-07-12",
+      "2026-07-18",
+      "2026-07-20",
+      "2026-07-21",
+      "2026-07-26",
+      "2026-07-29",
+      "2026-08-10",
+      "2026-08-13",
+      "2026-08-18",
+      "2026-08-19",
+      "2026-08-21",
+      "2026-08-22",
+      "2026-08-24",
+      "2026-08-31"
+     ],
+     "Tupungatito": [
+      "2026-06-01",
+      "2026-06-03",
+      "2026-06-05",
+      "2026-06-07",
+      "2026-06-08",
+      "2026-06-11",
+      "2026-06-19",
+      "2026-06-21",
+      "2026-06-22",
+      "2026-06-25",
+      "2026-06-28",
+      "2026-06-30",
+      "2026-07-02",
+      "2026-07-03",
+      "2026-07-04",
+      "2026-07-06",
+      "2026-07-07",
+      "2026-07-13",
+      "2026-07-21",
+      "2026-08-01",
+      "2026-08-13",
+      "2026-08-16",
+      "2026-08-18",
+      "2026-08-20",
+      "2026-08-21",
+      "2026-08-22",
+      "2026-08-24"
+     ]
+    },
+    "aceptadas_sin_cota_calculable": {},
+    "coincidencias_de_fecha_descartadas": {
+     "Isluga": {
+      "2026-06-09": 0.648
+     },
+     "Lascar": {
+      "2026-06-02": 0.667,
+      "2026-06-04": 0.664,
+      "2026-06-06": 0.576,
+      "2026-06-07": 0.571,
+      "2026-06-09": 0.557,
+      "2026-06-12": 0.629,
+      "2026-06-17": 0.628,
+      "2026-06-23": 0.57,
+      "2026-06-29": 0.564,
+      "2026-07-08": 0.627,
+      "2026-07-14": 0.578
+     },
+     "Lastarria": {
+      "2026-06-01": 1.325,
+      "2026-06-13": 1.022,
+      "2026-06-25": 0.974,
+      "2026-06-28": 0.635,
+      "2026-07-01": 0.698,
+      "2026-07-11": 1.155,
+      "2026-07-14": 1.313,
+      "2026-07-17": 0.605
+     },
+     "PlanchonPeteroa": {
+      "2026-06-15": 0.671,
+      "2026-06-23": 0.708,
+      "2026-07-24": 0.671,
+      "2026-08-24": 0.801
+     },
+     "PuyehueCordonCaulle": {
+      "2026-06-01": 3.023,
+      "2026-06-10": 0.758,
+      "2026-06-15": 3.14,
+      "2026-06-19": 0.679,
+      "2026-06-29": 3.388,
+      "2026-07-25": 0.97
+     },
+     "Tupungatito": {
+      "2026-06-04": 3.288,
+      "2026-08-06": 1.155
+     }
+    },
+    "noches_publicadas_sin_filtro": {
+     "Isluga": 74,
+     "Lascar": 61,
+     "Lastarria": 50,
+     "PlanchonPeteroa": 28,
+     "PuyehueCordonCaulle": 37,
+     "Tupungatito": 29
+    }
+   }
+  },
   "control": {
    "etiquetas_v375": {
     "pos": 498,
@@ -867,6 +1538,275 @@
        "perdidas": 0,
        "perdidas_sin_filtro_brazo": 0,
        "ganancias": 0
+      }
+     }
+    },
+    "criterio1_por_campo_de_posicion": {
+     "centroide": {
+      "perdidas": [
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-06-16"
+       },
+       {
+        "volcan": "Lascar",
+        "fecha": "2026-06-02"
+       },
+       {
+        "volcan": "Lascar",
+        "fecha": "2026-06-09"
+       },
+       {
+        "volcan": "Lascar",
+        "fecha": "2026-06-13"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-06-01"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-06-07"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-06-13"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-06-14"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-06-28"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-07-25"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-06-15"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-06-23"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-07-24"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-08-24"
+       }
+      ],
+      "n_perdidas": 14,
+      "perdidas_sin_filtro_brazo": [],
+      "n_perdidas_sin_filtro_brazo": 0,
+      "ganancias": [
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-06-30"
+       },
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-07-22"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-07-01"
+       }
+      ],
+      "n_ganancias": 3,
+      "ganancias_sin_filtro": [],
+      "n_ganancias_sin_filtro": 0,
+      "por_volcan": {
+       "Isluga": {
+        "confirmadas": 71,
+        "perdidas": [
+         "2026-06-16"
+        ],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [
+         "2026-06-30",
+         "2026-07-22"
+        ],
+        "ganancias_sin_filtro": []
+       },
+       "Lascar": {
+        "confirmadas": 52,
+        "perdidas": [
+         "2026-06-02",
+         "2026-06-09",
+         "2026-06-13"
+        ],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       },
+       "Lastarria": {
+        "confirmadas": 48,
+        "perdidas": [
+         "2026-06-01",
+         "2026-06-07",
+         "2026-06-13",
+         "2026-06-14",
+         "2026-06-28",
+         "2026-07-25"
+        ],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [
+         "2026-07-01"
+        ],
+        "ganancias_sin_filtro": []
+       },
+       "PlanchonPeteroa": {
+        "confirmadas": 28,
+        "perdidas": [
+         "2026-06-15",
+         "2026-06-23",
+         "2026-07-24",
+         "2026-08-24"
+        ],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       },
+       "PuyehueCordonCaulle": {
+        "confirmadas": 31,
+        "perdidas": [],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       },
+       "Tupungatito": {
+        "confirmadas": 27,
+        "perdidas": [],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       }
+      },
+      "cumple": false,
+      "por_estrato": {
+       "focal": {
+        "confirmadas": 230,
+        "perdidas": 14,
+        "perdidas_sin_filtro_brazo": 0,
+        "ganancias": 3
+       },
+       "nevado": {
+        "confirmadas": 27,
+        "perdidas": 0,
+        "perdidas_sin_filtro_brazo": 0,
+        "ganancias": 0
+       }
+      }
+     },
+     "final_hotspot_si_test1": {
+      "perdidas": [
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-06-16"
+       },
+       {
+        "volcan": "Lascar",
+        "fecha": "2026-06-13"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-06-07"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-06-14"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-07-25"
+       }
+      ],
+      "n_perdidas": 5,
+      "perdidas_sin_filtro_brazo": [],
+      "n_perdidas_sin_filtro_brazo": 0,
+      "ganancias": [
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-07-01"
+       }
+      ],
+      "n_ganancias": 1,
+      "ganancias_sin_filtro": [],
+      "n_ganancias_sin_filtro": 0,
+      "por_volcan": {
+       "Isluga": {
+        "confirmadas": 73,
+        "perdidas": [
+         "2026-06-16"
+        ],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       },
+       "Lascar": {
+        "confirmadas": 50,
+        "perdidas": [
+         "2026-06-13"
+        ],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       },
+       "Lastarria": {
+        "confirmadas": 42,
+        "perdidas": [
+         "2026-06-07",
+         "2026-06-14",
+         "2026-07-25"
+        ],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [
+         "2026-07-01"
+        ],
+        "ganancias_sin_filtro": []
+       },
+       "PlanchonPeteroa": {
+        "confirmadas": 24,
+        "perdidas": [],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       },
+       "PuyehueCordonCaulle": {
+        "confirmadas": 31,
+        "perdidas": [],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       },
+       "Tupungatito": {
+        "confirmadas": 27,
+        "perdidas": [],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       }
+      },
+      "cumple": false,
+      "por_estrato": {
+       "focal": {
+        "confirmadas": 220,
+        "perdidas": 5,
+        "perdidas_sin_filtro_brazo": 0,
+        "ganancias": 1
+       },
+       "nevado": {
+        "confirmadas": 27,
+        "perdidas": 0,
+        "perdidas_sin_filtro_brazo": 0,
+        "ganancias": 0
+       }
       }
      }
     },
@@ -1449,6 +2389,547 @@
       }
      }
     },
+    "criterio1_por_campo_de_posicion": {
+     "centroide": {
+      "perdidas": [
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-06-16"
+       },
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-07-01"
+       },
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-07-16"
+       },
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-08-19"
+       },
+       {
+        "volcan": "Lascar",
+        "fecha": "2026-06-02"
+       },
+       {
+        "volcan": "Lascar",
+        "fecha": "2026-06-09"
+       },
+       {
+        "volcan": "Lascar",
+        "fecha": "2026-06-13"
+       },
+       {
+        "volcan": "Lascar",
+        "fecha": "2026-06-25"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-06-01"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-06-07"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-06-13"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-06-14"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-06-28"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-07-02"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-07-06"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-07-25"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-08-02"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-08-28"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-06-15"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-06-22"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-06-23"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-06-26"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-07-24"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-08-09"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-08-24"
+       },
+       {
+        "volcan": "Tupungatito",
+        "fecha": "2026-06-03"
+       },
+       {
+        "volcan": "Tupungatito",
+        "fecha": "2026-07-07"
+       },
+       {
+        "volcan": "Tupungatito",
+        "fecha": "2026-08-01"
+       }
+      ],
+      "n_perdidas": 28,
+      "perdidas_sin_filtro_brazo": [
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-07-01"
+       },
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-07-16"
+       },
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-08-19"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-07-02"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-08-28"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-06-22"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-06-26"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-07-24"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-08-09"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-08-24"
+       },
+       {
+        "volcan": "Tupungatito",
+        "fecha": "2026-07-07"
+       },
+       {
+        "volcan": "Tupungatito",
+        "fecha": "2026-08-01"
+       }
+      ],
+      "n_perdidas_sin_filtro_brazo": 12,
+      "ganancias": [
+       {
+        "volcan": "PuyehueCordonCaulle",
+        "fecha": "2026-07-25"
+       }
+      ],
+      "n_ganancias": 1,
+      "ganancias_sin_filtro": [],
+      "n_ganancias_sin_filtro": 0,
+      "por_volcan": {
+       "Isluga": {
+        "confirmadas": 71,
+        "perdidas": [
+         "2026-06-16",
+         "2026-07-01",
+         "2026-07-16",
+         "2026-08-19"
+        ],
+        "perdidas_sin_filtro_brazo": [
+         "2026-07-01",
+         "2026-07-16",
+         "2026-08-19"
+        ],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       },
+       "Lascar": {
+        "confirmadas": 52,
+        "perdidas": [
+         "2026-06-02",
+         "2026-06-09",
+         "2026-06-13",
+         "2026-06-25"
+        ],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       },
+       "Lastarria": {
+        "confirmadas": 48,
+        "perdidas": [
+         "2026-06-01",
+         "2026-06-07",
+         "2026-06-13",
+         "2026-06-14",
+         "2026-06-28",
+         "2026-07-02",
+         "2026-07-06",
+         "2026-07-25",
+         "2026-08-02",
+         "2026-08-28"
+        ],
+        "perdidas_sin_filtro_brazo": [
+         "2026-07-02",
+         "2026-08-28"
+        ],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       },
+       "PlanchonPeteroa": {
+        "confirmadas": 28,
+        "perdidas": [
+         "2026-06-15",
+         "2026-06-22",
+         "2026-06-23",
+         "2026-06-26",
+         "2026-07-24",
+         "2026-08-09",
+         "2026-08-24"
+        ],
+        "perdidas_sin_filtro_brazo": [
+         "2026-06-22",
+         "2026-06-26",
+         "2026-07-24",
+         "2026-08-09",
+         "2026-08-24"
+        ],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       },
+       "PuyehueCordonCaulle": {
+        "confirmadas": 31,
+        "perdidas": [],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [
+         "2026-07-25"
+        ],
+        "ganancias_sin_filtro": []
+       },
+       "Tupungatito": {
+        "confirmadas": 27,
+        "perdidas": [
+         "2026-06-03",
+         "2026-07-07",
+         "2026-08-01"
+        ],
+        "perdidas_sin_filtro_brazo": [
+         "2026-07-07",
+         "2026-08-01"
+        ],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       }
+      },
+      "cumple": false,
+      "por_estrato": {
+       "focal": {
+        "confirmadas": 230,
+        "perdidas": 25,
+        "perdidas_sin_filtro_brazo": 10,
+        "ganancias": 1
+       },
+       "nevado": {
+        "confirmadas": 27,
+        "perdidas": 3,
+        "perdidas_sin_filtro_brazo": 2,
+        "ganancias": 0
+       }
+      }
+     },
+     "final_hotspot_si_test1": {
+      "perdidas": [
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-06-16"
+       },
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-06-30"
+       },
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-07-01"
+       },
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-07-16"
+       },
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-07-22"
+       },
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-08-19"
+       },
+       {
+        "volcan": "Lascar",
+        "fecha": "2026-06-13"
+       },
+       {
+        "volcan": "Lascar",
+        "fecha": "2026-06-25"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-06-07"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-06-14"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-07-02"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-07-06"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-07-25"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-08-02"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-08-28"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-06-22"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-06-26"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-08-09"
+       },
+       {
+        "volcan": "Tupungatito",
+        "fecha": "2026-06-03"
+       },
+       {
+        "volcan": "Tupungatito",
+        "fecha": "2026-07-07"
+       },
+       {
+        "volcan": "Tupungatito",
+        "fecha": "2026-08-01"
+       }
+      ],
+      "n_perdidas": 21,
+      "perdidas_sin_filtro_brazo": [
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-06-30"
+       },
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-07-01"
+       },
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-07-16"
+       },
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-07-22"
+       },
+       {
+        "volcan": "Isluga",
+        "fecha": "2026-08-19"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-07-02"
+       },
+       {
+        "volcan": "Lastarria",
+        "fecha": "2026-08-28"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-06-22"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-06-26"
+       },
+       {
+        "volcan": "PlanchonPeteroa",
+        "fecha": "2026-08-09"
+       },
+       {
+        "volcan": "Tupungatito",
+        "fecha": "2026-07-07"
+       },
+       {
+        "volcan": "Tupungatito",
+        "fecha": "2026-08-01"
+       }
+      ],
+      "n_perdidas_sin_filtro_brazo": 12,
+      "ganancias": [
+       {
+        "volcan": "PuyehueCordonCaulle",
+        "fecha": "2026-07-25"
+       }
+      ],
+      "n_ganancias": 1,
+      "ganancias_sin_filtro": [],
+      "n_ganancias_sin_filtro": 0,
+      "por_volcan": {
+       "Isluga": {
+        "confirmadas": 73,
+        "perdidas": [
+         "2026-06-16",
+         "2026-06-30",
+         "2026-07-01",
+         "2026-07-16",
+         "2026-07-22",
+         "2026-08-19"
+        ],
+        "perdidas_sin_filtro_brazo": [
+         "2026-06-30",
+         "2026-07-01",
+         "2026-07-16",
+         "2026-07-22",
+         "2026-08-19"
+        ],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       },
+       "Lascar": {
+        "confirmadas": 50,
+        "perdidas": [
+         "2026-06-13",
+         "2026-06-25"
+        ],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       },
+       "Lastarria": {
+        "confirmadas": 42,
+        "perdidas": [
+         "2026-06-07",
+         "2026-06-14",
+         "2026-07-02",
+         "2026-07-06",
+         "2026-07-25",
+         "2026-08-02",
+         "2026-08-28"
+        ],
+        "perdidas_sin_filtro_brazo": [
+         "2026-07-02",
+         "2026-08-28"
+        ],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       },
+       "PlanchonPeteroa": {
+        "confirmadas": 24,
+        "perdidas": [
+         "2026-06-22",
+         "2026-06-26",
+         "2026-08-09"
+        ],
+        "perdidas_sin_filtro_brazo": [
+         "2026-06-22",
+         "2026-06-26",
+         "2026-08-09"
+        ],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       },
+       "PuyehueCordonCaulle": {
+        "confirmadas": 31,
+        "perdidas": [],
+        "perdidas_sin_filtro_brazo": [],
+        "ganancias": [
+         "2026-07-25"
+        ],
+        "ganancias_sin_filtro": []
+       },
+       "Tupungatito": {
+        "confirmadas": 27,
+        "perdidas": [
+         "2026-06-03",
+         "2026-07-07",
+         "2026-08-01"
+        ],
+        "perdidas_sin_filtro_brazo": [
+         "2026-07-07",
+         "2026-08-01"
+        ],
+        "ganancias": [],
+        "ganancias_sin_filtro": []
+       }
+      },
+      "cumple": false,
+      "por_estrato": {
+       "focal": {
+        "confirmadas": 220,
+        "perdidas": 18,
+        "perdidas_sin_filtro_brazo": 10,
+        "ganancias": 1
+       },
+       "nevado": {
+        "confirmadas": 27,
+        "perdidas": 3,
+        "perdidas_sin_filtro_brazo": 2,
+        "ganancias": 0
+       }
+      }
+     }
+    },
     "criterio2": {
      "total": {
       "n": 535,
@@ -1940,7 +3421,397 @@
      "publica": false
     }
    }
-  ]
+  ],
+  "seguimiento_por_campo_de_posicion": {
+   "centroide": [
+    {
+     "volcan": "Isluga",
+     "fecha": "2026-07-01",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "Isluga",
+     "fecha": "2026-07-16",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "Isluga",
+     "fecha": "2026-08-19",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "Lastarria",
+     "fecha": "2026-07-02",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "Lastarria",
+     "fecha": "2026-08-28",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "PlanchonPeteroa",
+     "fecha": "2026-06-22",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "PlanchonPeteroa",
+     "fecha": "2026-06-26",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "PlanchonPeteroa",
+     "fecha": "2026-07-24",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": false,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "PlanchonPeteroa",
+     "fecha": "2026-08-09",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "PlanchonPeteroa",
+     "fecha": "2026-08-24",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": false,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "Tupungatito",
+     "fecha": "2026-07-07",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "Tupungatito",
+     "fecha": "2026-08-01",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    }
+   ],
+   "final_hotspot_si_test1": [
+    {
+     "volcan": "Isluga",
+     "fecha": "2026-07-01",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "Isluga",
+     "fecha": "2026-07-16",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "Isluga",
+     "fecha": "2026-08-19",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "Lastarria",
+     "fecha": "2026-07-02",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "Lastarria",
+     "fecha": "2026-08-28",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "PlanchonPeteroa",
+     "fecha": "2026-06-22",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "PlanchonPeteroa",
+     "fecha": "2026-06-26",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "PlanchonPeteroa",
+     "fecha": "2026-07-24",
+     "_s135_ab_a_control": {
+      "publica_cota": false,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": false,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "PlanchonPeteroa",
+     "fecha": "2026-08-09",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "PlanchonPeteroa",
+     "fecha": "2026-08-24",
+     "_s135_ab_a_control": {
+      "publica_cota": false,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": false,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "Tupungatito",
+     "fecha": "2026-07-07",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    },
+    {
+     "volcan": "Tupungatito",
+     "fecha": "2026-08-01",
+     "_s135_ab_a_control": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_b_nokeeppeak": {
+      "publica_cota": true,
+      "publica": true
+     },
+     "_s135_ab_d_ambos": {
+      "publica_cota": false,
+      "publica": false
+     }
+    }
+   ]
+  }
  },
  "comparacion_con_s135": {
   "noches_confirmadas_nuevas_total": 257,

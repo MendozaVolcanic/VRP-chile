@@ -1,6 +1,6 @@
 # Control de instrumento del evaluador sobre los artefactos de S135
 
-> Generado por `experiments/_s143_evaluador/control_s135.py` el 2026-09-17T18:49:03+00:00. Artefactos locales de los runs __run34173711390, __run34208191011 (no versionados, fuera del repo), fusionados en un directorio temporal: 18 archivos, 0 conflictos, 0 faltantes. Ventana 2026-06-01 a 2026-08-31, seis volcanes, brazos A, B y D. Ningún número de este documento está escrito a mano: todos salen de `control_s135.json`.
+> Generado por `experiments/_s143_evaluador/control_s135.py` el 2026-09-17T19:50:50+00:00. Artefactos locales de los runs __run34173711390, __run34208191011 (no versionados, fuera del repo), fusionados en un directorio temporal: 18 archivos, 0 conflictos, 0 faltantes. Ventana 2026-06-01 a 2026-08-31, seis volcanes, brazos A, B y D. Ningún número de este documento está escrito a mano: todos salen de `control_s135.json`.
 
 ## Por qué este control
 
