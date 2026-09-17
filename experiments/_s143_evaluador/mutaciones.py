@@ -93,6 +93,22 @@ MUTACIONES = [
      "brazo sin pares decisivos deja de contar como que empeora", "muerta"),
     ("M24", EV, 'PRESUPUESTO_COTA_KM = PARAMETROS["cota_km"]', "PRESUPUESTO_COTA_KM = 5.0",
      "cota por defecto 0,55 a 5,0 km", "muerta"),
+    ("M25", EV, 'CAMPO_POSICION_DEFECTO = PARAMETROS["campo_posicion_cota"]',
+     'CAMPO_POSICION_DEFECTO = "final_hotspot_si_test1"',
+     "campo de posición que decide, fijado en el código en vez de leerlo del archivo", "muerta"),
+    ("M26", EV, """    fh = cen
+    if r.get("final_hotspot_source") == "test1_roi" and r.get("final_hotspot_lat") is not None \\
+            and r.get("final_hotspot_lon") is not None:
+        fh = (float(r["final_hotspot_lat"]), float(r["final_hotspot_lon"]))""",
+     """    fh = cen
+    if r.get("final_hotspot_lat") is not None and r.get("final_hotspot_lon") is not None:
+        fh = (float(r["final_hotspot_lat"]), float(r["final_hotspot_lon"]))""",
+     "reancla TODOS los records al final_hotspot, no sólo los del Test 1", "muerta"),
+    ("M27", EV, '"criterio1": por_campo[a.campo_posicion],', '"criterio1": por_campo["centroide"],',
+     "el criterio 1 que decide deja de seguir al parámetro", "muerta"),
+    ("M28", EV, 'estados = estados_por_campo[a.campo_posicion]',
+     'estados = estados_por_campo["centroide"]',
+     "las noches confirmadas dejan de seguir al parámetro", "muerta"),
 ]
 
 

@@ -1,6 +1,6 @@
 # Batería de mutaciones del evaluador
 
-> Generada por `experiments/_s143_evaluador/mutaciones.py` el 2026-09-17T18:48:43+00:00, 2 corrida(s) por mutación. Suite de referencia: `31 passed in 3.10s`. Mueren 21 de 23; viven 2, todas declaradas como inocuas o equivalentes. Ningún número está escrito a mano.
+> Generada por `experiments/_s143_evaluador/mutaciones.py` el 2026-09-17T19:48:43+00:00, 1 corrida(s) por mutación. Suite de referencia: `34 passed in 2.90s`. Mueren 25 de 27; viven 2, todas declaradas como inocuas o equivalentes. Ningún número está escrito a mano.
 
 | id | archivo | qué cambia | esperado | estado |
 |---|---|---|---|---|
@@ -27,6 +27,10 @@
 | M22 | evaluar.py | los volcanes desparejos ya no se excluyen | muerta | **muerta** |
 | M23 | evaluar.py | brazo sin pares decisivos deja de contar como que empeora | muerta | **muerta** |
 | M24 | evaluar.py | cota por defecto 0,55 a 5,0 km | muerta | **muerta** |
+| M25 | evaluar.py | campo de posición que decide, fijado en el código en vez de leerlo del archivo | muerta | **muerta** |
+| M26 | evaluar.py | reancla TODOS los records al final_hotspot, no sólo los del Test 1 | muerta | **muerta** |
+| M27 | evaluar.py | el criterio 1 que decide deja de seguir al parámetro | muerta | **muerta** |
+| M28 | evaluar.py | las noches confirmadas dejan de seguir al parámetro | muerta | **muerta** |
 
 ## Las que viven, y por qué
 
