@@ -413,6 +413,31 @@ def test_criterio1_una_sola_perdida_ya_no_cumple():
 
 
 # ------------------------------------------------------------------ parametros congelados
+def test_cobertura_detecta_brazo_con_menos_pasadas(tmp_path):
+    """Un brazo con menos pasadas no perdio noches: no las miro. Es el modo de falla que fabrico
+    cuatro perdidas falsas en S135 y que volvio a aparecer en el tramo 1 del A/B (corte de NASA)."""
+    import bajar_tramos as bt
+
+    def art(nombre, vol, dts):
+        d = tmp_path / nombre
+        d.mkdir()
+        with open(d / f"{vol}.json", "w", encoding="utf-8") as fh:
+            json.dump({"volcano": vol, "records": [{"datetime_utc": x, "sensor": "VIIRS_SNPP"} for x in dts]}, fh)
+
+    tres = ["2026-06-01 05:00", "2026-06-02 05:00", "2026-06-03 05:00"]
+    art("s143ab-t1-_s142_ab_control-Isluga", "Isluga", tres)
+    art("s143ab-t1-_s142_ab_literal-Isluga", "Isluga", tres)
+    art("s143ab-t1-_s142_ab_lit_con_compuerta-Isluga", "Isluga", tres[:2])
+    pas = bt.pasadas_por_artefacto(tmp_path)
+    assert set(pas) == {("_s142_ab_control", "Isluga"), ("_s142_ab_literal", "Isluga"),
+                        ("_s142_ab_lit_con_compuerta", "Isluga")}
+    inf = bt.cobertura(pas, "_s142_ab_control")
+    assert inf["Isluga"]["desparejos"] == {
+        "_s142_ab_lit_con_compuerta": {"diferencia_simetrica": 1, "control": 3, "brazo": 2}}
+    # y el brazo completo no aparece como desparejo
+    assert "_s142_ab_literal" not in inf["Isluga"]["desparejos"]
+
+
 def test_fusion_acepta_un_prefijo_por_tramo(tmp_path):
     """El workflow del A/B nombra los artefactos con el tramo adentro (s143ab-t1-, s143ab-t2-), asi
     que la fusion tiene que aceptar un prefijo por tramo o no encuentra el segundo."""
