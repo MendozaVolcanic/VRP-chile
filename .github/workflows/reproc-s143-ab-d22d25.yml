@@ -40,6 +40,14 @@ name: "A/B S143, D22 compuerta x D25 fondo por vecinos (VIIRS 375), literal + ab
         description: "Etiqueta del tramo para el nombre del artefacto (t1 o t2)"
         required: true
         default: "t1"
+      vols:
+        description: 'Lista JSON de volcanes; sirve para repetir un job que quedó corto por un corte de NASA'
+        required: true
+        default: '["Isluga","Lascar","Lastarria","PlanchonPeteroa","PuyehueCordonCaulle","Tupungatito","Chaiten","Villarrica","NevadosDeChillan"]'
+      brazos:
+        description: 'Lista JSON de brazos'
+        required: true
+        default: '["_s142_ab_control","_s142_ab_literal","_s142_ab_lit_sin_fondo","_s142_ab_lit_con_compuerta","_s142_ab_lit_sp_suelto","_s142_ab_lit_keep_peak"]'
       preregistro_aprobado:
         description: "Escribe si SOLO con docs/PREREGISTRO_AB_D22_D25_S143.md aprobado por Nicolas y su verificador"
         required: true
@@ -60,14 +68,12 @@ jobs:
       # un corte deja cobertura despareja y obliga a repetir el job).
       max-parallel: 6
       matrix:
-        volcano: [Isluga, Lascar, Lastarria, PlanchonPeteroa, PuyehueCordonCaulle, Tupungatito, Chaiten, Villarrica, NevadosDeChillan]
-        profile:
-          - _s142_ab_control
-          - _s142_ab_literal
-          - _s142_ab_lit_sin_fondo
-          - _s142_ab_lit_con_compuerta
-          - _s142_ab_lit_sp_suelto
-          - _s142_ab_lit_keep_peak
+        # Por input y no por `if:` en cada paso: un job saltado por `if` termina verde sin datos y se
+        # lee como resultado (S141, A93). Los defaults son los nueve volcanes y los seis brazos; las
+        # listas cortas sirven para REPETIR un job cuya cobertura quedó corta por un corte de NASA
+        # (cortacircuitos A64), que es exactamente lo que el pre-registro manda hacer.
+        volcano: ${{ fromJSON(github.event.inputs.vols) }}
+        profile: ${{ fromJSON(github.event.inputs.brazos) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
