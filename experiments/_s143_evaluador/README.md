@@ -31,6 +31,14 @@ línea de comandos.
 
 ## Cómo se usa cuando lleguen los artefactos del A/B
 
+Primero bajar y **contar cobertura**, que es lo que atrapa el modo de falla real: un job verde cuyo
+brazo procesó menos pasadas por un corte de NASA (pasó en el tramo 1, A64). Un run posterior pisa la
+carpeta del job repetido.
+
+```bash
+python experiments/_s143_evaluador/bajar_tramos.py --dir <dir tramo 1>     --run <run del tramo 1> --run <run de la repeticion> --estricto
+```
+
 ```bash
 python experiments/_s143_evaluador/fusionar.py --prefijo s143ab-t1- --prefijo s143ab-t2- \
     --brazos _s142_ab_control _s142_ab_literal _s142_ab_lit_sin_fondo _s142_ab_lit_con_compuerta \
