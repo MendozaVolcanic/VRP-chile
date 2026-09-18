@@ -183,8 +183,10 @@ def test_estado_noches_cambia_segun_el_campo_de_posicion():
     assert e_cen["V"]["pub_cota"] == {"2026-07-01"} and e_cen["V"]["descartadas"] == {}
     assert e_fh["V"]["pub_cota"] == set()
     assert abs(e_fh["V"]["descartadas"]["2026-07-01"] - 3.0) < 0.01
-    # el campo por defecto es el centroide, la semantica de S135
-    assert evaluar.estado_noches([p], noches_alerta, dist, {"V": CENTRO}, 0.55) == e_cen
+    # El campo por defecto sale de parametros.json y desde el 2026-09-18 es `final_hotspot_si_test1`
+    # (decision 1b de Nicolas): para un record del Test 1, el centroide es el footprint de la integral,
+    # arrastrado por el gradiente topografico del nevado (A69, S106/A84).
+    assert evaluar.estado_noches([p], noches_alerta, dist, {"V": CENTRO}, 0.55) == e_fh
     assert evaluar.CAMPOS_POSICION["centroide"] == "pos_centroide"
     assert evaluar.CAMPOS_POSICION["final_hotspot_si_test1"] == "pos_final_hotspot_si_test1"
 
@@ -472,7 +474,8 @@ def test_parametros_congelados_son_los_del_preregistro():
     assert p["n_min_magnitud"] == 30
     assert p["tol_magnitud"] == 0.05
     # decision abierta de Nicolas: por ahora decide el centroide, la semantica de S135
-    assert p["campo_posicion_cota"] == "centroide"
+    # DECIDIDO por Nicolas el 2026-09-18 (ver docs/PREREGISTRO_AB_D22_D25_S143.md decision 1b)
+    assert p["campo_posicion_cota"] == "final_hotspot_si_test1"
     assert evaluar.CAMPO_POSICION_DEFECTO == p["campo_posicion_cota"]
     assert evaluar.argumentos(dir="x").campo_posicion == p["campo_posicion_cota"]
     # el modulo usa exactamente esos valores, no una copia que pueda driftear
