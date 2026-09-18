@@ -1,8 +1,8 @@
 # Evaluación del A/B: _s135_ab_b_nokeeppeak, _s135_ab_d_ambos contra _s135_ab_a_control
 
-> Generado por `experiments/_s143_evaluador/evaluar.py` el 2026-09-17T19:50:44+00:00. Ventana 2026-06-01 a 2026-08-31. Todos los números salen del JSON de resultados.
+> Generado por `experiments/_s143_evaluador/evaluar.py` el 2026-09-18T05:38:29+00:00. Ventana 2026-06-01 a 2026-08-31. Todos los números salen del JSON de resultados.
 
-**Parámetros iguales a los congelados en `parametros.json`: no** (sha 6e4f886339ff15f776cb1b1945f1cdf7a30630b1). Referencia fijada por sha: sí.
+**Parámetros iguales a los congelados en `parametros.json`: no** (sha 1093f01c78bf41e26bc7e2df3fcf6d5928c14c2c). Referencia fijada por sha: sí.
 
 ## Procedencia
 
@@ -10,8 +10,8 @@
 {
  "evaluador": {
   "archivo": "experiments/_s143_evaluador/evaluar.py",
-  "commit": "424310996d1f3f2b7a7d4deed6dac19acf5adc68",
-  "modificado_sin_commit": true,
+  "commit": "a29d6e028653fda668eabd8fe6abf6345e6f010f",
+  "modificado_sin_commit": false,
   "blob": "1af058db80d77580812a163f1e60f1ba4fa859f6"
  },
  "banco_paridad": {
@@ -39,16 +39,16 @@ Volcanes pedidos: Isluga, Lascar, Lastarria, PuyehueCordonCaulle, PlanchonPetero
 
 ## Noches confirmadas (criterio 1)
 
-Posición del record con que se mide la cota: **centroide** (la otra se reporta al lado en cada brazo).
+Posición del record con que se mide la cota: **final_hotspot_si_test1** (la otra se reporta al lado en cada brazo).
 
-Total: **257**. Por estrato: focal 230, nevado 27.
+Total: **247**. Por estrato: focal 220, nevado 27.
 
 | volcán | estrato | confirmadas | publicadas sin filtro | aceptadas sin cota calculable | coincidencias de fecha descartadas |
 |---|---|---|---|---|---|
-| Isluga | focal | 71 | 74 | 0 | 3 |
-| Lascar | focal | 52 | 61 | 0 | 9 |
-| Lastarria | focal | 48 | 50 | 0 | 2 |
-| PlanchonPeteroa | focal | 28 | 28 | 0 | 0 |
+| Isluga | focal | 73 | 74 | 0 | 1 |
+| Lascar | focal | 50 | 61 | 0 | 11 |
+| Lastarria | focal | 42 | 50 | 0 | 8 |
+| PlanchonPeteroa | focal | 24 | 28 | 0 | 4 |
 | PuyehueCordonCaulle | focal | 31 | 37 | 0 | 6 |
 | Tupungatito | nevado | 27 | 29 | 0 | 2 |
 
@@ -62,27 +62,27 @@ Cumple los tres criterios: **no**.
 
 ### Criterio 1: cero noches perdidas
 
-Pérdidas (misma cota en el brazo): **14**; sin filtro en el brazo: 0; ganancias: 3 (sin filtro 0). Cumple: **no**.
+Pérdidas (misma cota en el brazo): **5**; sin filtro en el brazo: 0; ganancias: 1 (sin filtro 0). Cumple: **no**.
 
-Medido con las dos posiciones del record (decisión abierta; hoy decide **centroide**):
+Medido con las dos posiciones del record (decisión abierta; hoy decide **final_hotspot_si_test1**):
 
 | posición | noches confirmadas | pérdidas | pérdidas sin filtro | ganancias | cumple | decide |
 |---|---|---|---|---|---|---|
-| centroide | 257 | 14 | 0 | 3 | no | sí |
-| final_hotspot_si_test1 | 247 | 5 | 0 | 1 | no | no |
+| centroide | 257 | 14 | 0 | 3 | no | no |
+| final_hotspot_si_test1 | 247 | 5 | 0 | 1 | no | sí |
 
 Por volcán, con el campo que decide:
 
 | volcán | confirmadas | pérdidas | pérdidas sin filtro en el brazo | ganancias |
 |---|---|---|---|---|
-| Isluga | 71 | 1 | 0 | 2 |
-| Lascar | 52 | 3 | 0 | 0 |
-| Lastarria | 48 | 6 | 0 | 1 |
-| PlanchonPeteroa | 28 | 4 | 0 | 0 |
+| Isluga | 73 | 1 | 0 | 0 |
+| Lascar | 50 | 1 | 0 | 0 |
+| Lastarria | 42 | 3 | 0 | 1 |
+| PlanchonPeteroa | 24 | 0 | 0 | 0 |
 | PuyehueCordonCaulle | 31 | 0 | 0 | 0 |
 | Tupungatito | 27 | 0 | 0 | 0 |
 
-Noches perdidas: Isluga 2026-06-16, Lascar 2026-06-02, Lascar 2026-06-09, Lascar 2026-06-13, Lastarria 2026-06-01, Lastarria 2026-06-07, Lastarria 2026-06-13, Lastarria 2026-06-14, Lastarria 2026-06-28, Lastarria 2026-07-25, PlanchonPeteroa 2026-06-15, PlanchonPeteroa 2026-06-23, PlanchonPeteroa 2026-07-24, PlanchonPeteroa 2026-08-24.
+Noches perdidas: Isluga 2026-06-16, Lascar 2026-06-13, Lastarria 2026-06-07, Lastarria 2026-06-14, Lastarria 2026-07-25.
 
 ### Criterio 2: publicación en negativos limpios (brazo menos control)
 
@@ -124,29 +124,29 @@ Cumple los tres criterios: **no**.
 
 ### Criterio 1: cero noches perdidas
 
-Pérdidas (misma cota en el brazo): **28**; sin filtro en el brazo: 12; ganancias: 1 (sin filtro 0). Cumple: **no**.
+Pérdidas (misma cota en el brazo): **21**; sin filtro en el brazo: 12; ganancias: 1 (sin filtro 0). Cumple: **no**.
 
-Medido con las dos posiciones del record (decisión abierta; hoy decide **centroide**):
+Medido con las dos posiciones del record (decisión abierta; hoy decide **final_hotspot_si_test1**):
 
 | posición | noches confirmadas | pérdidas | pérdidas sin filtro | ganancias | cumple | decide |
 |---|---|---|---|---|---|---|
-| centroide | 257 | 28 | 12 | 1 | no | sí |
-| final_hotspot_si_test1 | 247 | 21 | 12 | 1 | no | no |
+| centroide | 257 | 28 | 12 | 1 | no | no |
+| final_hotspot_si_test1 | 247 | 21 | 12 | 1 | no | sí |
 
 Por volcán, con el campo que decide:
 
 | volcán | confirmadas | pérdidas | pérdidas sin filtro en el brazo | ganancias |
 |---|---|---|---|---|
-| Isluga | 71 | 4 | 3 | 0 |
-| Lascar | 52 | 4 | 0 | 0 |
-| Lastarria | 48 | 10 | 2 | 0 |
-| PlanchonPeteroa | 28 | 7 | 5 | 0 |
+| Isluga | 73 | 6 | 5 | 0 |
+| Lascar | 50 | 2 | 0 | 0 |
+| Lastarria | 42 | 7 | 2 | 0 |
+| PlanchonPeteroa | 24 | 3 | 3 | 0 |
 | PuyehueCordonCaulle | 31 | 0 | 0 | 1 |
 | Tupungatito | 27 | 3 | 2 | 0 |
 
-Noches perdidas: Isluga 2026-06-16, Isluga 2026-07-01, Isluga 2026-07-16, Isluga 2026-08-19, Lascar 2026-06-02, Lascar 2026-06-09, Lascar 2026-06-13, Lascar 2026-06-25, Lastarria 2026-06-01, Lastarria 2026-06-07, Lastarria 2026-06-13, Lastarria 2026-06-14, Lastarria 2026-06-28, Lastarria 2026-07-02, Lastarria 2026-07-06, Lastarria 2026-07-25, Lastarria 2026-08-02, Lastarria 2026-08-28, PlanchonPeteroa 2026-06-15, PlanchonPeteroa 2026-06-22, PlanchonPeteroa 2026-06-23, PlanchonPeteroa 2026-06-26, PlanchonPeteroa 2026-07-24, PlanchonPeteroa 2026-08-09, PlanchonPeteroa 2026-08-24, Tupungatito 2026-06-03, Tupungatito 2026-07-07, Tupungatito 2026-08-01.
+Noches perdidas: Isluga 2026-06-16, Isluga 2026-06-30, Isluga 2026-07-01, Isluga 2026-07-16, Isluga 2026-07-22, Isluga 2026-08-19, Lascar 2026-06-13, Lascar 2026-06-25, Lastarria 2026-06-07, Lastarria 2026-06-14, Lastarria 2026-07-02, Lastarria 2026-07-06, Lastarria 2026-07-25, Lastarria 2026-08-02, Lastarria 2026-08-28, PlanchonPeteroa 2026-06-22, PlanchonPeteroa 2026-06-26, PlanchonPeteroa 2026-08-09, Tupungatito 2026-06-03, Tupungatito 2026-07-07, Tupungatito 2026-08-01.
 
-Perdidas sin filtro en el brazo: Isluga 2026-07-01, Isluga 2026-07-16, Isluga 2026-08-19, Lastarria 2026-07-02, Lastarria 2026-08-28, PlanchonPeteroa 2026-06-22, PlanchonPeteroa 2026-06-26, PlanchonPeteroa 2026-07-24, PlanchonPeteroa 2026-08-09, PlanchonPeteroa 2026-08-24, Tupungatito 2026-07-07, Tupungatito 2026-08-01.
+Perdidas sin filtro en el brazo: Isluga 2026-06-30, Isluga 2026-07-01, Isluga 2026-07-16, Isluga 2026-07-22, Isluga 2026-08-19, Lastarria 2026-07-02, Lastarria 2026-08-28, PlanchonPeteroa 2026-06-22, PlanchonPeteroa 2026-06-26, PlanchonPeteroa 2026-08-09, Tupungatito 2026-07-07, Tupungatito 2026-08-01.
 
 ### Criterio 2: publicación en negativos limpios (brazo menos control)
 
@@ -195,9 +195,9 @@ Celda: publica con cota / publica sin filtro.
 | Lastarria | 2026-08-28 | sí / sí | sí / sí | no / no |
 | PlanchonPeteroa | 2026-06-22 | sí / sí | sí / sí | no / no |
 | PlanchonPeteroa | 2026-06-26 | sí / sí | sí / sí | no / no |
-| PlanchonPeteroa | 2026-07-24 | sí / sí | no / sí | no / no |
+| PlanchonPeteroa | 2026-07-24 | no / sí | no / sí | no / no |
 | PlanchonPeteroa | 2026-08-09 | sí / sí | sí / sí | no / no |
-| PlanchonPeteroa | 2026-08-24 | sí / sí | no / sí | no / no |
+| PlanchonPeteroa | 2026-08-24 | no / sí | no / sí | no / no |
 | Tupungatito | 2026-07-07 | sí / sí | sí / sí | no / no |
 | Tupungatito | 2026-08-01 | sí / sí | sí / sí | no / no |
 

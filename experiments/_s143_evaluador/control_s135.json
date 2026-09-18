@@ -1,6 +1,6 @@
 {
  "meta": {
-  "generado_utc": "2026-09-17T19:50:50+00:00",
+  "generado_utc": "2026-09-18T05:38:35+00:00",
   "artefactos": "C:\\Users\\nmend\\OneDrive\\Escritorio\\claude\\Volcanologia\\VRP Chile\\experiments\\_artefactos_ab",
   "runs": [
    "__run34173711390",
@@ -105,13 +105,13 @@
      ]
     }
    },
-   "dir_artefactos": "C:\\Users\\nmend\\AppData\\Local\\Temp\\s143_control_s135_peywqegt",
+   "dir_artefactos": "C:\\Users\\nmend\\AppData\\Local\\Temp\\s143_control_s135_cyjd_tyr",
    "prefijo": "s135ab-",
    "procedencia": {
     "evaluador": {
      "archivo": "experiments/_s143_evaluador/evaluar.py",
-     "commit": "424310996d1f3f2b7a7d4deed6dac19acf5adc68",
-     "modificado_sin_commit": true,
+     "commit": "a29d6e028653fda668eabd8fe6abf6345e6f010f",
+     "modificado_sin_commit": false,
      "blob": "1af058db80d77580812a163f1e60f1ba4fa859f6"
     },
     "banco_paridad": {
@@ -139,16 +139,16 @@
     "n_min_magnitud": 30,
     "tol_magnitud": 0.05
    },
-   "campo_posicion_cota": "centroide",
+   "campo_posicion_cota": "final_hotspot_si_test1",
    "campos_posicion_disponibles": {
     "centroide": "primary_cluster.centroid (semántica de S135)",
     "final_hotspot_si_test1": "final_hotspot cuando final_hotspot_source es test1_roi (posición oficial del dashboard para esos records, S106/A84); el centroide en el resto"
    },
    "parametros_congelados": {
     "archivo": "experiments/_s143_evaluador/parametros.json",
-    "commit": "aadd1766b5c7a6269eff76980e2b487289b3a708",
-    "modificado_sin_commit": true,
-    "blob": "6e4f886339ff15f776cb1b1945f1cdf7a30630b1",
+    "commit": "3ee3d15beb33c290bac4e6ae7c6a732fe5ac8263",
+    "modificado_sin_commit": false,
+    "blob": "1093f01c78bf41e26bc7e2df3fcf6d5928c14c2c",
     "contenido": {
      "_por_que": "Los parametros de la corrida del A/B D22/D25 se congelan aca, versionados, para que no puedan elegirse despues de ver datos (H1 del verificador externo del PR #686). El evaluador los lee por defecto, la salida JSON los copia enteros con el sha de este archivo, y tests/test_evaluador_ab_s143.py comprueba uno por uno que sigan siendo estos. Cambiar cualquiera es un cambio de pre-registro: se hace antes de correr, con su razon escrita, o el brazo se juzga en una ventana nueva sin mirar (criterio 4 del pre-registro).",
      "_fuente": "docs/PREREGISTRO_AB_D22_D25_S143.md secciones 3, 4 y 5; cota y semilla heredadas de docs/PREREGISTRO_AB_D1_D2_S135.md",
@@ -182,9 +182,9 @@
      "semilla": 143,
      "n_min_magnitud": 30,
      "tol_magnitud": 0.05,
-     "campo_posicion_cota": "centroide",
+     "campo_posicion_cota": "final_hotspot_si_test1",
      "_unidades": {
-      "campo_posicion_cota": "con que posicion del record se mide la cota de mismo objeto: 'centroide' (primary_cluster, la semantica de S135) o 'final_hotspot_si_test1' (final_hotspot cuando final_hotspot_source es test1_roi, la posicion oficial del dashboard para esos records; el centroide en el resto). DECISION ABIERTA de Nicolas (H1 del verificador post-corrida del probe de las 12 noches): el evaluador calcula y reporta las dos, y esta clave dice cual decide",
+      "campo_posicion_cota": "con que posicion del record se mide la cota de mismo objeto: 'centroide' (primary_cluster, la semantica de S135) o 'final_hotspot_si_test1' (final_hotspot cuando final_hotspot_source es test1_roi, la posicion oficial del dashboard para esos records; el centroide en el resto). DECIDIDO por Nicolas el 2026-09-18: manda 'final_hotspot_si_test1', porque es la posicion que el propio dashboard trata como oficial y el centroide de un record del Test 1 es el footprint de la integral, arrastrado por el gradiente topografico del nevado (A69, S106/A84). El evaluador calcula y reporta LAS DOS; esta clave dice cual decide",
       "cota_km": "presupuesto de la cota de mismo objeto (A93): semidiagonal de la celda de 375 m mas el residuo por sensor del centro de grilla",
       "B": "replicas del bootstrap percentil del criterio 2",
       "semilla": "semilla del bootstrap",
@@ -218,12 +218,12 @@
     "semilla": 143,
     "n_min_magnitud": 30,
     "tol_magnitud": 0.05,
-    "campo_posicion_cota": "centroide"
+    "campo_posicion_cota": "final_hotspot_si_test1"
    },
    "parametros_igual_a_los_congelados": false,
    "referencia_fijada_por_sha": true,
    "n_filas_referencia_nocturnas": 7842,
-   "generado_utc": "2026-09-17T19:50:44+00:00",
+   "generado_utc": "2026-09-18T05:38:29+00:00",
    "fusion": {
     "tramos": [
      [
@@ -367,17 +367,17 @@
    }
   },
   "noches_confirmadas": {
-   "total": 257,
+   "total": 247,
    "por_volcan": {
-    "Isluga": 71,
-    "Lascar": 52,
-    "Lastarria": 48,
-    "PlanchonPeteroa": 28,
+    "Isluga": 73,
+    "Lascar": 50,
+    "Lastarria": 42,
+    "PlanchonPeteroa": 24,
     "PuyehueCordonCaulle": 31,
     "Tupungatito": 27
    },
    "por_estrato": {
-    "focal": 230,
+    "focal": 220,
     "nevado": 27
    },
    "fechas": {
@@ -409,6 +409,7 @@
      "2026-06-27",
      "2026-06-28",
      "2026-06-29",
+     "2026-06-30",
      "2026-07-01",
      "2026-07-05",
      "2026-07-07",
@@ -425,6 +426,7 @@
      "2026-07-19",
      "2026-07-20",
      "2026-07-21",
+     "2026-07-22",
      "2026-07-23",
      "2026-07-24",
      "2026-07-25",
@@ -456,11 +458,9 @@
     ],
     "Lascar": [
      "2026-06-01",
-     "2026-06-02",
      "2026-06-03",
      "2026-06-05",
      "2026-06-08",
-     "2026-06-09",
      "2026-06-13",
      "2026-06-14",
      "2026-06-15",
@@ -509,7 +509,6 @@
      "2026-08-30"
     ],
     "Lastarria": [
-     "2026-06-01",
      "2026-06-02",
      "2026-06-03",
      "2026-06-04",
@@ -518,26 +517,21 @@
      "2026-06-07",
      "2026-06-08",
      "2026-06-12",
-     "2026-06-13",
      "2026-06-14",
      "2026-06-16",
      "2026-06-17",
      "2026-06-21",
      "2026-06-22",
      "2026-06-23",
-     "2026-06-25",
      "2026-06-27",
-     "2026-06-28",
      "2026-06-29",
      "2026-06-30",
      "2026-07-02",
      "2026-07-06",
      "2026-07-07",
      "2026-07-10",
-     "2026-07-11",
      "2026-07-12",
      "2026-07-13",
-     "2026-07-14",
      "2026-07-15",
      "2026-07-16",
      "2026-07-24",
@@ -565,13 +559,11 @@
      "2026-06-06",
      "2026-06-08",
      "2026-06-11",
-     "2026-06-15",
      "2026-06-16",
      "2026-06-17",
      "2026-06-19",
      "2026-06-21",
      "2026-06-22",
-     "2026-06-23",
      "2026-06-25",
      "2026-06-26",
      "2026-06-28",
@@ -582,10 +574,8 @@
      "2026-07-06",
      "2026-07-07",
      "2026-07-12",
-     "2026-07-24",
      "2026-08-09",
      "2026-08-14",
-     "2026-08-24",
      "2026-08-31"
     ],
     "PuyehueCordonCaulle": [
@@ -654,14 +644,14 @@
    "aceptadas_sin_cota_calculable": {},
    "coincidencias_de_fecha_descartadas": {
     "Isluga": {
-     "2026-06-09": 0.648,
-     "2026-06-30": 1.664,
-     "2026-07-22": 1.997
+     "2026-06-09": 0.648
     },
     "Lascar": {
+     "2026-06-02": 0.667,
      "2026-06-04": 0.664,
      "2026-06-06": 0.576,
      "2026-06-07": 0.571,
+     "2026-06-09": 0.557,
      "2026-06-12": 0.629,
      "2026-06-17": 0.628,
      "2026-06-23": 0.57,
@@ -670,8 +660,20 @@
      "2026-07-14": 0.578
     },
     "Lastarria": {
+     "2026-06-01": 1.325,
+     "2026-06-13": 1.022,
+     "2026-06-25": 0.974,
+     "2026-06-28": 0.635,
      "2026-07-01": 0.698,
+     "2026-07-11": 1.155,
+     "2026-07-14": 1.313,
      "2026-07-17": 0.605
+    },
+    "PlanchonPeteroa": {
+     "2026-06-15": 0.671,
+     "2026-06-23": 0.708,
+     "2026-07-24": 0.671,
+     "2026-08-24": 0.801
     },
     "PuyehueCordonCaulle": {
      "2026-06-01": 3.023,
@@ -683,7 +685,7 @@
     },
     "Tupungatito": {
      "2026-06-04": 3.288,
-     "2026-08-06": 0.553
+     "2026-08-06": 1.155
     }
    },
    "noches_publicadas_sin_filtro": {
@@ -1387,19 +1389,7 @@
       },
       {
        "volcan": "Lascar",
-       "fecha": "2026-06-02"
-      },
-      {
-       "volcan": "Lascar",
-       "fecha": "2026-06-09"
-      },
-      {
-       "volcan": "Lascar",
        "fecha": "2026-06-13"
-      },
-      {
-       "volcan": "Lastarria",
-       "fecha": "2026-06-01"
       },
       {
        "volcan": "Lastarria",
@@ -1407,75 +1397,38 @@
       },
       {
        "volcan": "Lastarria",
-       "fecha": "2026-06-13"
-      },
-      {
-       "volcan": "Lastarria",
        "fecha": "2026-06-14"
       },
       {
        "volcan": "Lastarria",
-       "fecha": "2026-06-28"
-      },
-      {
-       "volcan": "Lastarria",
        "fecha": "2026-07-25"
-      },
-      {
-       "volcan": "PlanchonPeteroa",
-       "fecha": "2026-06-15"
-      },
-      {
-       "volcan": "PlanchonPeteroa",
-       "fecha": "2026-06-23"
-      },
-      {
-       "volcan": "PlanchonPeteroa",
-       "fecha": "2026-07-24"
-      },
-      {
-       "volcan": "PlanchonPeteroa",
-       "fecha": "2026-08-24"
       }
      ],
-     "n_perdidas": 14,
+     "n_perdidas": 5,
      "perdidas_sin_filtro_brazo": [],
      "n_perdidas_sin_filtro_brazo": 0,
      "ganancias": [
-      {
-       "volcan": "Isluga",
-       "fecha": "2026-06-30"
-      },
-      {
-       "volcan": "Isluga",
-       "fecha": "2026-07-22"
-      },
       {
        "volcan": "Lastarria",
        "fecha": "2026-07-01"
       }
      ],
-     "n_ganancias": 3,
+     "n_ganancias": 1,
      "ganancias_sin_filtro": [],
      "n_ganancias_sin_filtro": 0,
      "por_volcan": {
       "Isluga": {
-       "confirmadas": 71,
+       "confirmadas": 73,
        "perdidas": [
         "2026-06-16"
        ],
        "perdidas_sin_filtro_brazo": [],
-       "ganancias": [
-        "2026-06-30",
-        "2026-07-22"
-       ],
+       "ganancias": [],
        "ganancias_sin_filtro": []
       },
       "Lascar": {
-       "confirmadas": 52,
+       "confirmadas": 50,
        "perdidas": [
-        "2026-06-02",
-        "2026-06-09",
         "2026-06-13"
        ],
        "perdidas_sin_filtro_brazo": [],
@@ -1483,13 +1436,10 @@
        "ganancias_sin_filtro": []
       },
       "Lastarria": {
-       "confirmadas": 48,
+       "confirmadas": 42,
        "perdidas": [
-        "2026-06-01",
         "2026-06-07",
-        "2026-06-13",
         "2026-06-14",
-        "2026-06-28",
         "2026-07-25"
        ],
        "perdidas_sin_filtro_brazo": [],
@@ -1499,13 +1449,8 @@
        "ganancias_sin_filtro": []
       },
       "PlanchonPeteroa": {
-       "confirmadas": 28,
-       "perdidas": [
-        "2026-06-15",
-        "2026-06-23",
-        "2026-07-24",
-        "2026-08-24"
-       ],
+       "confirmadas": 24,
+       "perdidas": [],
        "perdidas_sin_filtro_brazo": [],
        "ganancias": [],
        "ganancias_sin_filtro": []
@@ -1528,10 +1473,10 @@
      "cumple": false,
      "por_estrato": {
       "focal": {
-       "confirmadas": 230,
-       "perdidas": 14,
+       "confirmadas": 220,
+       "perdidas": 5,
        "perdidas_sin_filtro_brazo": 0,
-       "ganancias": 3
+       "ganancias": 1
       },
       "nevado": {
        "confirmadas": 27,
@@ -2110,6 +2055,10 @@
       },
       {
        "volcan": "Isluga",
+       "fecha": "2026-06-30"
+      },
+      {
+       "volcan": "Isluga",
        "fecha": "2026-07-01"
       },
       {
@@ -2118,15 +2067,11 @@
       },
       {
        "volcan": "Isluga",
+       "fecha": "2026-07-22"
+      },
+      {
+       "volcan": "Isluga",
        "fecha": "2026-08-19"
-      },
-      {
-       "volcan": "Lascar",
-       "fecha": "2026-06-02"
-      },
-      {
-       "volcan": "Lascar",
-       "fecha": "2026-06-09"
       },
       {
        "volcan": "Lascar",
@@ -2138,23 +2083,11 @@
       },
       {
        "volcan": "Lastarria",
-       "fecha": "2026-06-01"
-      },
-      {
-       "volcan": "Lastarria",
        "fecha": "2026-06-07"
       },
       {
        "volcan": "Lastarria",
-       "fecha": "2026-06-13"
-      },
-      {
-       "volcan": "Lastarria",
        "fecha": "2026-06-14"
-      },
-      {
-       "volcan": "Lastarria",
-       "fecha": "2026-06-28"
       },
       {
        "volcan": "Lastarria",
@@ -2178,15 +2111,7 @@
       },
       {
        "volcan": "PlanchonPeteroa",
-       "fecha": "2026-06-15"
-      },
-      {
-       "volcan": "PlanchonPeteroa",
        "fecha": "2026-06-22"
-      },
-      {
-       "volcan": "PlanchonPeteroa",
-       "fecha": "2026-06-23"
       },
       {
        "volcan": "PlanchonPeteroa",
@@ -2194,15 +2119,7 @@
       },
       {
        "volcan": "PlanchonPeteroa",
-       "fecha": "2026-07-24"
-      },
-      {
-       "volcan": "PlanchonPeteroa",
        "fecha": "2026-08-09"
-      },
-      {
-       "volcan": "PlanchonPeteroa",
-       "fecha": "2026-08-24"
       },
       {
        "volcan": "Tupungatito",
@@ -2217,8 +2134,12 @@
        "fecha": "2026-08-01"
       }
      ],
-     "n_perdidas": 28,
+     "n_perdidas": 21,
      "perdidas_sin_filtro_brazo": [
+      {
+       "volcan": "Isluga",
+       "fecha": "2026-06-30"
+      },
       {
        "volcan": "Isluga",
        "fecha": "2026-07-01"
@@ -2226,6 +2147,10 @@
       {
        "volcan": "Isluga",
        "fecha": "2026-07-16"
+      },
+      {
+       "volcan": "Isluga",
+       "fecha": "2026-07-22"
       },
       {
        "volcan": "Isluga",
@@ -2249,15 +2174,7 @@
       },
       {
        "volcan": "PlanchonPeteroa",
-       "fecha": "2026-07-24"
-      },
-      {
-       "volcan": "PlanchonPeteroa",
        "fecha": "2026-08-09"
-      },
-      {
-       "volcan": "PlanchonPeteroa",
-       "fecha": "2026-08-24"
       },
       {
        "volcan": "Tupungatito",
@@ -2280,26 +2197,28 @@
      "n_ganancias_sin_filtro": 0,
      "por_volcan": {
       "Isluga": {
-       "confirmadas": 71,
+       "confirmadas": 73,
        "perdidas": [
         "2026-06-16",
+        "2026-06-30",
         "2026-07-01",
         "2026-07-16",
+        "2026-07-22",
         "2026-08-19"
        ],
        "perdidas_sin_filtro_brazo": [
+        "2026-06-30",
         "2026-07-01",
         "2026-07-16",
+        "2026-07-22",
         "2026-08-19"
        ],
        "ganancias": [],
        "ganancias_sin_filtro": []
       },
       "Lascar": {
-       "confirmadas": 52,
+       "confirmadas": 50,
        "perdidas": [
-        "2026-06-02",
-        "2026-06-09",
         "2026-06-13",
         "2026-06-25"
        ],
@@ -2308,13 +2227,10 @@
        "ganancias_sin_filtro": []
       },
       "Lastarria": {
-       "confirmadas": 48,
+       "confirmadas": 42,
        "perdidas": [
-        "2026-06-01",
         "2026-06-07",
-        "2026-06-13",
         "2026-06-14",
-        "2026-06-28",
         "2026-07-02",
         "2026-07-06",
         "2026-07-25",
@@ -2329,22 +2245,16 @@
        "ganancias_sin_filtro": []
       },
       "PlanchonPeteroa": {
-       "confirmadas": 28,
+       "confirmadas": 24,
        "perdidas": [
-        "2026-06-15",
         "2026-06-22",
-        "2026-06-23",
         "2026-06-26",
-        "2026-07-24",
-        "2026-08-09",
-        "2026-08-24"
+        "2026-08-09"
        ],
        "perdidas_sin_filtro_brazo": [
         "2026-06-22",
         "2026-06-26",
-        "2026-07-24",
-        "2026-08-09",
-        "2026-08-24"
+        "2026-08-09"
        ],
        "ganancias": [],
        "ganancias_sin_filtro": []
@@ -2376,8 +2286,8 @@
      "cumple": false,
      "por_estrato": {
       "focal": {
-       "confirmadas": 230,
-       "perdidas": 25,
+       "confirmadas": 220,
+       "perdidas": 18,
        "perdidas_sin_filtro_brazo": 10,
        "ganancias": 1
       },
@@ -3345,7 +3255,7 @@
     "volcan": "PlanchonPeteroa",
     "fecha": "2026-07-24",
     "_s135_ab_a_control": {
-     "publica_cota": true,
+     "publica_cota": false,
      "publica": true
     },
     "_s135_ab_b_nokeeppeak": {
@@ -3377,7 +3287,7 @@
     "volcan": "PlanchonPeteroa",
     "fecha": "2026-08-24",
     "_s135_ab_a_control": {
-     "publica_cota": true,
+     "publica_cota": false,
      "publica": true
     },
     "_s135_ab_b_nokeeppeak": {
@@ -3814,7 +3724,7 @@
   }
  },
  "comparacion_con_s135": {
-  "noches_confirmadas_nuevas_total": 257,
+  "noches_confirmadas_nuevas_total": 247,
   "noches_confirmadas_s135_total": 260,
   "doce_noches_de_s135": [
    {
@@ -3983,7 +3893,7 @@
     "volcan": "PlanchonPeteroa",
     "fecha": "2026-07-24",
     "_s135_ab_a_control": {
-     "publica_cota": true,
+     "publica_cota": false,
      "publica": true
     },
     "_s135_ab_b_nokeeppeak": {
@@ -4015,7 +3925,7 @@
     "volcan": "PlanchonPeteroa",
     "fecha": "2026-08-24",
     "_s135_ab_a_control": {
-     "publica_cota": true,
+     "publica_cota": false,
      "publica": true
     },
     "_s135_ab_b_nokeeppeak": {
@@ -4067,6 +3977,10 @@
    },
    {
     "volcan": "Isluga",
+    "fecha": "2026-06-30"
+   },
+   {
+    "volcan": "Isluga",
     "fecha": "2026-07-01"
    },
    {
@@ -4075,15 +3989,11 @@
    },
    {
     "volcan": "Isluga",
+    "fecha": "2026-07-22"
+   },
+   {
+    "volcan": "Isluga",
     "fecha": "2026-08-19"
-   },
-   {
-    "volcan": "Lascar",
-    "fecha": "2026-06-02"
-   },
-   {
-    "volcan": "Lascar",
-    "fecha": "2026-06-09"
    },
    {
     "volcan": "Lascar",
@@ -4095,23 +4005,11 @@
    },
    {
     "volcan": "Lastarria",
-    "fecha": "2026-06-01"
-   },
-   {
-    "volcan": "Lastarria",
     "fecha": "2026-06-07"
    },
    {
     "volcan": "Lastarria",
-    "fecha": "2026-06-13"
-   },
-   {
-    "volcan": "Lastarria",
     "fecha": "2026-06-14"
-   },
-   {
-    "volcan": "Lastarria",
-    "fecha": "2026-06-28"
    },
    {
     "volcan": "Lastarria",
@@ -4135,15 +4033,7 @@
    },
    {
     "volcan": "PlanchonPeteroa",
-    "fecha": "2026-06-15"
-   },
-   {
-    "volcan": "PlanchonPeteroa",
     "fecha": "2026-06-22"
-   },
-   {
-    "volcan": "PlanchonPeteroa",
-    "fecha": "2026-06-23"
    },
    {
     "volcan": "PlanchonPeteroa",
@@ -4151,15 +4041,7 @@
    },
    {
     "volcan": "PlanchonPeteroa",
-    "fecha": "2026-07-24"
-   },
-   {
-    "volcan": "PlanchonPeteroa",
     "fecha": "2026-08-09"
-   },
-   {
-    "volcan": "PlanchonPeteroa",
-    "fecha": "2026-08-24"
    },
    {
     "volcan": "Tupungatito",
@@ -4177,11 +4059,19 @@
   "perdidas_brazo_d_sin_filtro": [
    {
     "volcan": "Isluga",
+    "fecha": "2026-06-30"
+   },
+   {
+    "volcan": "Isluga",
     "fecha": "2026-07-01"
    },
    {
     "volcan": "Isluga",
     "fecha": "2026-07-16"
+   },
+   {
+    "volcan": "Isluga",
+    "fecha": "2026-07-22"
    },
    {
     "volcan": "Isluga",
@@ -4205,15 +4095,7 @@
    },
    {
     "volcan": "PlanchonPeteroa",
-    "fecha": "2026-07-24"
-   },
-   {
-    "volcan": "PlanchonPeteroa",
     "fecha": "2026-08-09"
-   },
-   {
-    "volcan": "PlanchonPeteroa",
-    "fecha": "2026-08-24"
    },
    {
     "volcan": "Tupungatito",
@@ -4231,19 +4113,7 @@
    },
    {
     "volcan": "Lascar",
-    "fecha": "2026-06-02"
-   },
-   {
-    "volcan": "Lascar",
-    "fecha": "2026-06-09"
-   },
-   {
-    "volcan": "Lascar",
     "fecha": "2026-06-13"
-   },
-   {
-    "volcan": "Lastarria",
-    "fecha": "2026-06-01"
    },
    {
     "volcan": "Lastarria",
@@ -4251,35 +4121,11 @@
    },
    {
     "volcan": "Lastarria",
-    "fecha": "2026-06-13"
-   },
-   {
-    "volcan": "Lastarria",
     "fecha": "2026-06-14"
    },
    {
     "volcan": "Lastarria",
-    "fecha": "2026-06-28"
-   },
-   {
-    "volcan": "Lastarria",
     "fecha": "2026-07-25"
-   },
-   {
-    "volcan": "PlanchonPeteroa",
-    "fecha": "2026-06-15"
-   },
-   {
-    "volcan": "PlanchonPeteroa",
-    "fecha": "2026-06-23"
-   },
-   {
-    "volcan": "PlanchonPeteroa",
-    "fecha": "2026-07-24"
-   },
-   {
-    "volcan": "PlanchonPeteroa",
-    "fecha": "2026-08-24"
    }
   ],
   "perdidas_brazo_b_sin_filtro": [],
@@ -4298,41 +4144,12 @@
     },
     {
      "volcan": "Lascar",
-     "fecha": "2026-06-02",
-     "cota_min_brazo_km": 0.703,
-     "cota_min_control_km": 0.473,
-     "dist_mirova_km": [
-      1.5,
-      3.33
-     ]
-    },
-    {
-     "volcan": "Lascar",
-     "fecha": "2026-06-09",
-     "cota_min_brazo_km": 0.557,
-     "cota_min_control_km": 0.494,
-     "dist_mirova_km": [
-      1.55
-     ]
-    },
-    {
-     "volcan": "Lascar",
      "fecha": "2026-06-13",
      "cota_min_brazo_km": 0.609,
      "cota_min_control_km": 0.472,
      "dist_mirova_km": [
       1.55,
       1.62
-     ]
-    },
-    {
-     "volcan": "Lastarria",
-     "fecha": "2026-06-01",
-     "cota_min_brazo_km": 1.325,
-     "cota_min_control_km": 0.038,
-     "dist_mirova_km": [
-      2.4,
-      2.76
      ]
     },
     {
@@ -4346,17 +4163,6 @@
     },
     {
      "volcan": "Lastarria",
-     "fecha": "2026-06-13",
-     "cota_min_brazo_km": 1.022,
-     "cota_min_control_km": 0.153,
-     "dist_mirova_km": [
-      2.17,
-      2.19,
-      2.4
-     ]
-    },
-    {
-     "volcan": "Lastarria",
      "fecha": "2026-06-14",
      "cota_min_brazo_km": 1.175,
      "cota_min_control_km": 0.035,
@@ -4366,56 +4172,11 @@
     },
     {
      "volcan": "Lastarria",
-     "fecha": "2026-06-28",
-     "cota_min_brazo_km": 0.635,
-     "cota_min_control_km": 0.533,
-     "dist_mirova_km": [
-      2.7
-     ]
-    },
-    {
-     "volcan": "Lastarria",
      "fecha": "2026-07-25",
      "cota_min_brazo_km": 1.608,
      "cota_min_control_km": 0.45,
      "dist_mirova_km": [
       2.7
-     ]
-    },
-    {
-     "volcan": "PlanchonPeteroa",
-     "fecha": "2026-06-15",
-     "cota_min_brazo_km": 0.766,
-     "cota_min_control_km": 0.18,
-     "dist_mirova_km": [
-      1.35
-     ]
-    },
-    {
-     "volcan": "PlanchonPeteroa",
-     "fecha": "2026-06-23",
-     "cota_min_brazo_km": 0.708,
-     "cota_min_control_km": 0.375,
-     "dist_mirova_km": [
-      1.22
-     ]
-    },
-    {
-     "volcan": "PlanchonPeteroa",
-     "fecha": "2026-07-24",
-     "cota_min_brazo_km": 0.761,
-     "cota_min_control_km": 0.159,
-     "dist_mirova_km": [
-      1.35
-     ]
-    },
-    {
-     "volcan": "PlanchonPeteroa",
-     "fecha": "2026-08-24",
-     "cota_min_brazo_km": 0.819,
-     "cota_min_control_km": 0.227,
-     "dist_mirova_km": [
-      1.22
      ]
     }
    ],
@@ -4429,25 +4190,6 @@
       2.3,
       4.14,
       4.19
-     ]
-    },
-    {
-     "volcan": "Lascar",
-     "fecha": "2026-06-02",
-     "cota_min_brazo_km": 0.703,
-     "cota_min_control_km": 0.473,
-     "dist_mirova_km": [
-      1.5,
-      3.33
-     ]
-    },
-    {
-     "volcan": "Lascar",
-     "fecha": "2026-06-09",
-     "cota_min_brazo_km": 0.557,
-     "cota_min_control_km": 0.494,
-     "dist_mirova_km": [
-      1.55
      ]
     },
     {
@@ -4473,16 +4215,6 @@
     },
     {
      "volcan": "Lastarria",
-     "fecha": "2026-06-01",
-     "cota_min_brazo_km": 1.325,
-     "cota_min_control_km": 0.038,
-     "dist_mirova_km": [
-      2.4,
-      2.76
-     ]
-    },
-    {
-     "volcan": "Lastarria",
      "fecha": "2026-06-07",
      "cota_min_brazo_km": 0.986,
      "cota_min_control_km": 0.005,
@@ -4492,31 +4224,11 @@
     },
     {
      "volcan": "Lastarria",
-     "fecha": "2026-06-13",
-     "cota_min_brazo_km": 1.022,
-     "cota_min_control_km": 0.153,
-     "dist_mirova_km": [
-      2.17,
-      2.19,
-      2.4
-     ]
-    },
-    {
-     "volcan": "Lastarria",
      "fecha": "2026-06-14",
      "cota_min_brazo_km": 1.287,
      "cota_min_control_km": 0.035,
      "dist_mirova_km": [
       2.4
-     ]
-    },
-    {
-     "volcan": "Lastarria",
-     "fecha": "2026-06-28",
-     "cota_min_brazo_km": 0.635,
-     "cota_min_control_km": 0.533,
-     "dist_mirova_km": [
-      2.7
      ]
     },
     {
@@ -4544,24 +4256,6 @@
      "cota_min_control_km": 0.255,
      "dist_mirova_km": [
       2.4
-     ]
-    },
-    {
-     "volcan": "PlanchonPeteroa",
-     "fecha": "2026-06-15",
-     "cota_min_brazo_km": 0.766,
-     "cota_min_control_km": 0.18,
-     "dist_mirova_km": [
-      1.35
-     ]
-    },
-    {
-     "volcan": "PlanchonPeteroa",
-     "fecha": "2026-06-23",
-     "cota_min_brazo_km": 0.708,
-     "cota_min_control_km": 0.375,
-     "dist_mirova_km": [
-      1.22
      ]
     },
     {
@@ -4707,11 +4401,11 @@
     "noches_alerta_referencia_s135": 74,
     "solo_en_referencia_nueva": [],
     "solo_en_referencia_s135": [],
-    "confirmadas_nuevas": 71,
+    "confirmadas_nuevas": 73,
     "confirmadas_s135_publicadas": 71,
     "noches_con_alerta_publicadas_node": 74,
     "noches_con_alerta_publicadas_predicado_s135": 74,
-    "descartadas_por_cota": 3,
+    "descartadas_por_cota": 1,
     "aceptadas_sin_cota": 0,
     "descartadas_por_cota_s135": 47
    },
@@ -4720,11 +4414,11 @@
     "noches_alerta_referencia_s135": 61,
     "solo_en_referencia_nueva": [],
     "solo_en_referencia_s135": [],
-    "confirmadas_nuevas": 52,
+    "confirmadas_nuevas": 50,
     "confirmadas_s135_publicadas": 52,
     "noches_con_alerta_publicadas_node": 61,
     "noches_con_alerta_publicadas_predicado_s135": 61,
-    "descartadas_por_cota": 9,
+    "descartadas_por_cota": 11,
     "aceptadas_sin_cota": 0,
     "descartadas_por_cota_s135": 38
    },
@@ -4733,11 +4427,11 @@
     "noches_alerta_referencia_s135": 50,
     "solo_en_referencia_nueva": [],
     "solo_en_referencia_s135": [],
-    "confirmadas_nuevas": 48,
+    "confirmadas_nuevas": 42,
     "confirmadas_s135_publicadas": 48,
     "noches_con_alerta_publicadas_node": 50,
     "noches_con_alerta_publicadas_predicado_s135": 50,
-    "descartadas_por_cota": 2,
+    "descartadas_por_cota": 8,
     "aceptadas_sin_cota": 0,
     "descartadas_por_cota_s135": 40
    },
@@ -4759,11 +4453,11 @@
     "noches_alerta_referencia_s135": 28,
     "solo_en_referencia_nueva": [],
     "solo_en_referencia_s135": [],
-    "confirmadas_nuevas": 28,
+    "confirmadas_nuevas": 24,
     "confirmadas_s135_publicadas": 28,
     "noches_con_alerta_publicadas_node": 28,
     "noches_con_alerta_publicadas_predicado_s135": 28,
-    "descartadas_por_cota": 0,
+    "descartadas_por_cota": 4,
     "aceptadas_sin_cota": 0,
     "descartadas_por_cota_s135": 22
    },
