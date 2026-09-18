@@ -146,8 +146,9 @@ del reproceso o del evaluador está mal y **no se interpreta** el A/B hasta expl
   brazos contra records de producción. La versión "cualquier sensor" se reporta como acompañante.
 - **Efecto medido de la cota dura** (decisión 1 de §8): sobre los artefactos de S135, el brazo D pasa
   de 12 a 28 pérdidas y el B de 0 a 14.
-- **Campo de posición de la cota** (sub-decisión 1b, abierta): hoy la cota usa el centroide del
-  `primary_cluster`, como S135. Para records cuya fuente es `test1_roi`, la regla del proyecto (S106,
+- **Campo de posición de la cota** (sub-decisión 1b, **DECIDIDA por Nicolás el 2026-09-18**: manda
+  `final_hotspot` cuando la fuente es `test1_roi`, centroide en el resto; congelada en
+  `parametros.json`). Antes la cota usaba el centroide del `primary_cluster`, como S135. Para records cuya fuente es `test1_roi`, la regla del proyecto (S106,
   A84) dice que la posición del record es `final_hotspot`, y los dos campos separan 1,06 km de mediana
   en esos records (probe S143). **El evaluador debe reportar el criterio 1 con los dos campos**, y la
   decisión de cuál manda se toma antes de mirar el veredicto, no después.
@@ -204,10 +205,11 @@ plan S142 y del probe de las 12 noches de S143.
 
 ## 8. Decisiones de Nicolás antes de correr
 
-| # | pregunta | recomendación |
+| # | pregunta | estado |
 |---|---|---|
-| 1 | **La cota de mismo objeto, ¿se le exige también al brazo?** Con la cota floja, un brazo "conserva" una noche publicando otro objeto en otro punto del disco. Medido: el brazo D de S135 pasa de 12 a 28 pérdidas y el B de 0 a 14 | **Sí, cota dura.** Es lo que hace honesto el criterio de cero pérdidas que aprobaste: la noche cuenta sólo si publicamos el objeto que MIROVA vio |
-| 1b | **¿Qué campo de posición usa la cota?** Centroide del cúmulo (como S135) o `final_hotspot` para los records `test1_roi` (regla A84) | **`final_hotspot` cuando la fuente es `test1_roi`**, centroide en el resto: es la posición que el propio dashboard trata como oficial, y el centroide de un record del Test 1 es el footprint de la integral, contaminado por el arrastre topográfico (A69) |
+| **1 y 1b** | cota de mismo objeto exigida también al brazo, y medida con `final_hotspot` en los records del Test 1 | **DECIDIDAS por Nicolás el 2026-09-18, las dos como recomendadas.** Quedan congeladas en `experiments/_s143_evaluador/parametros.json` y vigiladas por `tests/test_evaluador_ab_s143.py`. Efecto medido sobre S135: con la cota en el brazo, el brazo D pasa de 12 a 28 pérdidas (21 con la posición decidida) y el B de 0 a 14 |
+| 1 (histórico) | **La cota de mismo objeto, ¿se le exige también al brazo?** Con la cota floja, un brazo "conserva" una noche publicando otro objeto en otro punto del disco. Medido: el brazo D de S135 pasa de 12 a 28 pérdidas y el B de 0 a 14 | **Sí, cota dura.** Es lo que hace honesto el criterio de cero pérdidas que aprobaste: la noche cuenta sólo si publicamos el objeto que MIROVA vio |
+| 1b (histórico) | **¿Qué campo de posición usa la cota?** | recomendado y **aceptado**: `final_hotspot` cuando la fuente es `test1_roi`, centroide en el resto |
 | 2 | **Escala de la corrida**: 9 volcanes × 6 brazos × 2 tramos = 108 jobs, más el tramo de confirmación | **Correr los dos tramos primero** (108 jobs, ~180 h de runner, repo público sin costo de minutos) y el de confirmación sólo para el brazo ganador |
 
 ## 9. Costo, riesgos y límites

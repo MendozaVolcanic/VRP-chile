@@ -102,12 +102,16 @@ display (A72); control de instrumento sobre la línea base; tramo de confirmaci�
 - **Tramo 2** (2026-07-16 a 2026-08-31): se despacha cuando termine el 1; el pre-registro pide no
   superponerlos, y además comparten cupo de jobs con el cron del NRT.
 
-## 7. Decisiones abiertas de Nicolás
+## 7. Decisiones de Nicolás
 
-1. **Cota de mismo objeto exigida también al brazo.** Recomendado: sí. Medido sobre S135: el brazo D
-   pasa de 12 a 28 pérdidas y el B de 0 a 14.
-2. **Campo de posición de la cota.** Recomendado: `final_hotspot` cuando la fuente es `test1_roi`,
-   centroide en el resto (A84; los dos campos separan 1,06 km de mediana en esos records).
+1. **Cota de mismo objeto exigida también al brazo: SÍ** (2026-09-18). Medido sobre S135: el brazo D
+   pasa de 12 a 28 pérdidas y el B de 0 a 14. Es lo que hace honesto el criterio de cero pérdidas:
+   una noche cuenta sólo si publicamos el objeto que MIROVA vio.
+2. **Campo de posición de la cota: `final_hotspot` cuando la fuente es `test1_roi`**, centroide en el
+   resto (2026-09-18). Los dos campos separan 1,06 km de mediana en esos records; el centroide de un
+   record del Test 1 es el footprint de la integral, arrastrado por el gradiente topográfico (A69,
+   S106/A84). Las dos quedan **congeladas** en `experiments/_s143_evaluador/parametros.json` y
+   vigiladas por tests; el evaluador sigue reportando las dos posiciones lado a lado.
 3. Token de Earthdata: vence **2026-10-03T07:18 UTC**, verificado hoy en el healthcheck (15,6 días).
 4. Cron externo y correo a Coppola: siguen pendientes de S142.
 
