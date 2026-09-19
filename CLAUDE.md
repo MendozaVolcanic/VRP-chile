@@ -1200,6 +1200,14 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 - **A106. Los GeoTIFF VIIRS 375 de MIROVA son UTM nativo de 375 m sólo desde el 2026-09-14** (S141): sólo esos
   dan la celda exacta. En `mirova-tif-archive` la hora del nombre puede no ser la de la pasada (S142: dos TIF
   rotulados de madrugada eran escenas diurnas escritas 17 h después); leer la hora de adquisición del TIF.
+- **A107. Una cota de distancia escalar no identifica el objeto** (S143): en el A/B D22/D25 el control
+  "coincidía" con MIROVA en 5 noches por un píxel de `keep_peak` a 2,2-2,8 km que caía por azar en su
+  radio (`Distancia_km` no trae acimut, A93). Una cota sobre radios sirve para descartar lo distinto,
+  no para decidir que es lo mismo; eso pide dirección (TIF UTM de MIROVA, A106).
+- **A108. Un run 100 % verde no prueba cobertura pareja** (S143): 54 de 54 jobs verdes en cada tramo y
+  3 de 108 quedaron con pasadas de menos por cortes de NASA (`SEARCH_CMR_TIMEOUT`, A64). Contar las
+  pasadas de cada brazo contra el control ANTES de mirar el veredicto
+  (`experiments/_s143_evaluador/bajar_tramos.py --estricto`) y repetir el job corto sobre el mismo código.
 - **A39, enmienda S142**: "0 checks" recién abierto un PR es SIN DATO, no verde. #676 se mergeó así con el CI
   en rojo. Esperar el run con conclusión (`gh pr checks <N> --watch`) antes de mergear, y después de editar un
   documento correr `grep -rl <archivo> tests/` y la suite completa: un test puede leer ese documento.
