@@ -1200,6 +1200,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 - **A106. Los GeoTIFF VIIRS 375 de MIROVA son UTM nativo de 375 m sólo desde el 2026-09-14** (S141): sólo esos
   dan la celda exacta. En `mirova-tif-archive` la hora del nombre puede no ser la de la pasada (S142: dos TIF
   rotulados de madrugada eran escenas diurnas escritas 17 h después); leer la hora de adquisición del TIF.
+  ⚠️ **Corregida S144, leyendo el CRS de cada archivo con rasterio**: la grilla UTM duró **sólo ocho
+  adquisiciones, del 2026-09-14 06:36 al 2026-09-15 06:24**. Desde la tarde del 15-sep MIROVA volvió a
+  EPSG:4326. Los TIF geográficos (~375 m, desde mayo) no sirven para contar celdas, pero pueden servir
+  para ubicar un objeto a km del cráter si su georreferencia se verifica antes. Y MIROVA a veces vuelve a
+  servir una imagen vieja bajo una hora nueva (md5 repetido): no cuentes esa imagen como la de la pasada.
+  Detalle: `experiments/_s144_conteo_tif/README.md`.
 - **A107. Una cota de distancia escalar no identifica el objeto** (S143): en el A/B D22/D25 el control
   "coincidía" con MIROVA en 5 noches por un píxel de `keep_peak` a 2,2-2,8 km que caía por azar en su
   radio (`Distancia_km` no trae acimut, A93). Una cota sobre radios sirve para descartar lo distinto,
