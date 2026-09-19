@@ -102,6 +102,19 @@ display (A72); control de instrumento sobre la línea base; tramo de confirmaci�
 - **Tramo 2** (2026-07-16 a 2026-08-31): se despacha cuando termine el 1; el pre-registro pide no
   superponerlos, y además comparten cupo de jobs con el cron del NRT.
 
+## 6b. El veredicto del A/B (2026-09-19)
+
+- Tramo 2 (run 35340495262) 54 de 54 verde; Láscar en `literal` quedó con 3 pasadas menos por otro
+  corte de NASA y se repitió (run 35449804356). Con las dos repeticiones: 9 volcanes, 0 desparejos en
+  los dos tramos. Evaluado con los parámetros congelados ("iguales: sí").
+- **Ningún brazo cumple los tres criterios: no se adopta nada.** `literal` cumple sobre-publicación
+  (0,917 a 0,547) y magnitud (0,77 a 0,94) y pierde 5 noches.
+- El verificador con contexto limpio (SE SOSTIENE CON MATICES) corrigió dos lecturas de la sesión: las
+  5 pérdidas no son otro objeto (el control "coincide" con MIROVA con un píxel de `keep_peak` a 2,2 a
+  2,8 km que cae por azar en el radio), y **todo el descenso de la sobre-publicación viene de apagar
+  `keep_peak`**; D22 y D25 empujan en contra (+0,20 y +0,05). Detalle en `docs/HYPOTHESIS_LOG.md`,
+  entrada H_S143_D22_D25.
+
 ## 7. Decisiones de Nicolás
 
 1. **Cota de mismo objeto exigida también al brazo: SÍ** (2026-09-18). Medido sobre S135: el brazo D
