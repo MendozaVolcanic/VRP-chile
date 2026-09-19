@@ -31,6 +31,17 @@
 | Disco local | lo llené yo con un `git pull` del archivo de TIF (17 GB) y lo recuperé | 0,03 GB → 9,8 GB libres; regla nueva en memoria |
 | Tramo de confirmación fuera de muestra (2026-09-01 a 09-15) | **no corrido** | el pre-registro lo pide sólo para un brazo ganador, y no hubo |
 
+### Medición de factibilidad hecha después del cierre (2026-09-19 18:30 UTC, exploratoria, sin commitear el script)
+
+Pasadas nocturnas VIIRS 375 de producción entre 2026-09-14 y 2026-09-19 (TIF UTM de MIROVA con hora de
+adquisición desde 2026-09-14 06:36): **290** nocturnas; **122** con TIF UTM a ±15 min; **58** con alerta de
+MIROVA, de ellas **23** con TIF; **81** con el patrón de `keep_peak` separado (fuente `test1_roi`, cúmulo de 1
+píxel a más de 0,5 km del `final_hotspot`), **34** con TIF; y sólo **2** que además tienen alerta de MIROVA y
+TIF. **Consecuencia para la decisión 1**: la prueba directa sobre alertas tiene hoy 2 casos. Opciones: esperar
+más días de TIF UTM, o diseñar la medida sobre las 34 pasadas con TIF (con y sin alerta: en las sin alerta,
+¿hay en el TIF de MIROVA calor donde está nuestro píxel de `keep_peak`?). Repetir el conteo con script
+versionado antes de usar estos números.
+
 ## b. Decisiones que espera Nicolás
 
 | # | pregunta | opciones | recomendación |
