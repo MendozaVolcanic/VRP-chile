@@ -96,19 +96,54 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
 2. **Si NO está en papers**, ¿cierra una divergencia ya documentada en
    `docs/MIROVA_DIVERGENCES.md`?**
    **El catálogo VIVO es el doc — esta lista es resumen (actualizada S105, AUDIT_S105):**
+   - ⚠️ **REBAJADA S146: esta lista de «Resueltas» se lee primero y varias entradas ya
+     cayeron dentro del propio proyecto** (`docs/AUDIT_S146.md` §2, V-13, V-01, V-06). **D9 no
+     está cerrada**: el «207 de 214 confirmados» no se reproduce con ninguna definición en que
+     «confirmado» signifique que MIROVA publicó una alerta (máximo **80 de 214, 37,4 %**; el
+     rango 201 a 211 sólo aparece contando cualquier fila de la referencia, incluidas las
+     RUTINA), y el «0 fuga» es circular porque el dashboard oculta todo `far` por construcción;
+     lo que sí se confirma es el tope de 5 MW y los denominadores 199 `far` / 214 `summit`
+     (V-01). **D4** se apoya en el Test 1 integrado en el ROI, que es un **detector propio**: en
+     `sp426.5.pdf` p. 6 el Test 1 es por píxel contra K1, y la cita «Coppola 2015, Bull.
+     Volcanol. 77:55» corresponde a Heap et al. sobre mecánica de rocas en andesita (DOI
+     10.1007/s00445-015-0938-7; Crossref y OpenAlex dan 0 artículos de Coppola en esa revista en
+     2015, con control de consulta) (V-06). **D8** sigue vigente por la vía del fondo de anillo
+     (D25 en el catálogo). **D5 tampoco está resuelta**: el catálogo la tiene desde S125 como
+     «abierta pendiente de re-medición», con el signo opuesto (sub-reporte cerca de 0,75 y no
+     sobre-reporte de 1,35), y sus dos patas están rebajadas (nadir fijo no es el remuestreo,
+     A66; `keep_peak` daba paridad por accidente, A100) (AUDIT_S146 §2 y E-06). Lo que sigue se
+     conserva por historia.
    - Resueltas (no justifican features nuevas): D1 granularidad, D4 recall sub-pixel
      (S27), D5 magnitud (nadir S102/103 + ctxpeak D10 S100), D8/D8' cluster selection
      (S38/S62), sec³ off-nadir (S102/103), fix del ancla de detección (S98),
      **D9 path-D cirrus** (cap C S71 + magnitud curada por nadir/focal S102-S109;
      verificado S113: 0 fuga al dashboard + mediana 0.53×; t_bg-gate descartado anti-MIROVA/trap A68).
    - **Abiertas**: (⚠️ S131: esta enumeración quedó congelada en S105 y omitía D13, D17 y D18. **El catálogo `docs/MIROVA_DIVERGENCES.md` es la lista viva; esta sección no la duplica** — para el estado de hoy, leer los encabezados de cada D en ese archivo. Lo que sigue se conserva por historia.) D2 cobertura CSV ground truth · D3 FP explícito MIROVA ·
-     **D11 sesgo topográfico de paths MIR-absolutos (A69, S104)** — cara MODIS far→summit
+     **D11 sesgo topográfico de paths MIR-absolutos (A69, S104)** — (⚠️ **REBAJADA S146**
+     (AUDIT_S146 V-02): «irreducible» y «todos los ejes agotados» quedan rebajados acá igual que
+     en A82 de `CLAUDE.md`, porque el número que sostiene el cierre no tiene tasa base. Con
+     negativos limpios hay cúmulo con magnitud dentro del inner en **89,1 %** de las pasadas
+     MODIS contra **93,7 %** cuando MIROVA alertó, menos de 5 puntos de contraste, y 144 de 158
+     positivas son de Láscar (ventana 2026-01-29 a 2026-08-28; después de #535, 86,0 % de 500
+     negativos y sólo 2 positivos). El texto que sigue se conserva por historia.) cara MODIS far→summit
      **CERRADA S114** (irreducible a 1 km; detección fiel a Coppola verificada file:line;
      todos los ejes agotados — A82, `docs/AUDIT_S114_PARITY_BY_SENSOR.md`); queda abierta solo
      la cara POSICIÓN del ancla en nevados (~1-1.5 km N, A70, costo residual no de recall) ·
-     D2 N·σ Tabla 1 ya implementado (dual-ROI 5/10, S114); GAP #A (§298-300 retiro Test1 K1) fue
+     D2 N·σ Tabla 1 ya implementado (dual-ROI 5/10, S114); (⚠️ **ese 5/10 no está en la Tabla 1,
+     verificado S146 (AUDIT_S146 V-08)**: en la Tabla 1 el C2 multiplica la desviación del dNTI y
+     del dETI, y el paper no tiene ningún test de temperatura de brillo. El camino de BT está
+     apagado hoy (`ENABLE_BT_PATH_HOT = False`); lo que cae es la atribución a la Tabla 1, ver
+     D31 en el catálogo.) (⚠️ **FALSO, GAP #A
+     REABIERTO S128 y confirmado S146** (AUDIT_S146 §2): está abierto en
+     `docs/MIROVA_DIVERGENCES.md` con guard `tests/test_guard_gap_a_pool_musigma_s128.py`. La
+     frase que sigue se conserva por historia.) GAP #A (§298-300 retiro Test1 K1) fue
      **RESUELTO S115 = mislabel, NO es gap** (DIVERGENCES:1292) — NO reabrir · VIIRS750 disperso
      glaciar (Tupun/PP, ctxpeak S102§2) ·
+     (⚠️ **NO es un gap abierto, verificado S146 (AUDIT_S146 V-05)**:
+     `ENABLE_UNSUITABLE_FILTERS_267_273` está en True desde S72 y los tres procesadores lo
+     consumen en las dos ramas (path D contextual y primer paso de los Tests 2 y 3). Lo único que
+     sigue apagado de ese párrafo del paper es el retiro de los píxeles del Test 1, o sea el
+     GAP #A. Un A/B contra un control que ya tiene el filtro no mediría nada.)
      NEW-8 gaps 2-4 (pool estadístico m,σ).
    - **Resuelto S118**: gates intra-radio S84/S85 → **OFF** (A/B real run 28312968093:
      0 robos de cluster en 214 noches focales; PR #474, tag `pre-s118-c2-flip`;

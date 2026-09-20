@@ -1,5 +1,11 @@
 # AUDIT S121 — A/B ancla honesta MODIS (D12): VEREDICTO = NO ADOPTAR
 
+> ⚠️ **Documento histórico, con afirmaciones rebajadas en S146.** Varias de las que este informe
+> da por cerradas (entre ellas las «76 noches reales de FN» y el marco «irreducible» que hereda
+> de A82) quedaron rebajadas o sin respaldo. **No se marca línea por línea**: leer primero
+> `docs/AUDIT_S146.md` y el catálogo `docs/MIROVA_DIVERGENCES.md` antes de usar cualquier
+> número o cierre de acá. Texto original intacto, conservado por historia.
+
 > Reproc run 29582035729 (profile aislado `_d12_honest_anchor_modis`, 4 vols × 2025-02-15..05-15).
 > Análisis `experiments/_s121_d12_ab/analyze.py` (S91). Diseño: `specs/2026-07-17-d12-...`.
 > **El operacional NO se tocó** — el flag `enable_honest_anchor_modis` sigue OFF (correcto).

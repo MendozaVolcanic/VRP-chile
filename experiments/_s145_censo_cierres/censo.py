@@ -25,8 +25,14 @@ LO QUE ESTE CENSO NO PUEDE HACER, declarado (las dos preguntas del instrumento):
   1. Si el patron estuviera completamente roto, este censo fallaria? NO NECESARIAMENTE: busca por
      palabras clave, asi que un cierre redactado con otras palabras no aparece. El censo es un PISO
      del problema, nunca su medida completa.
-  2. Si el instrumento estuviera muerto, el resultado se veria distinto? SI: con los patrones
-     vacios devuelve 0 filas, y el control de abajo lo detecta.
+  2. Si el instrumento estuviera muerto, el resultado se veria distinto? SI, y desde S146 el
+     control lo comprueba de verdad: corre LAS MISMAS funciones del bucle principal sobre tres
+     textos sinteticos, uno con un cierre conocido que tiene que encontrar y clasificar bien, uno
+     de prosa normal que no debe marcar, y uno con respaldo conocido que ejercita `RESPALDOS`. Si
+     el control falla, el script sale con codigo 1. (El control original evaluaba un `any` sobre
+     una lista vacia: no podia fallar. Lo detecto la auditoria S146, V-14. La primera correccion
+     todavia usaba una copia del detector y dejaba sobrevivir tres mutantes: lo detecto el
+     verificador de la Fase 0, H-12; ver el bloque CONTROL DE INSTRUMENTO mas abajo.)
 
 USO: python experiments/_s145_censo_cierres/censo.py
 """
@@ -78,6 +84,17 @@ def contexto(lineas, i, antes=0, despues=0):
     return "\n".join(lineas[max(0, i - antes):min(len(lineas), i + despues + 1)])
 
 
+# Los DOS detectores del censo, a nivel de modulo, para que el bucle principal y el control corran
+# LITERALMENTE el mismo codigo. Antes el bucle tenia su propia comprension y el control otra copia:
+# invertir o romper la del bucle dejaba el control en verde (S146, mutantes M4, M5 y M6).
+def tipos_de_cierre(linea):
+    return [n for n, rx in PATRONES if re.search(rx, linea)]
+
+
+def respaldos_citados(ventana):
+    return sorted({n for n, rx in RESPALDOS if re.search(rx, ventana)})
+
+
 def main():
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
     filas = []
@@ -88,12 +105,12 @@ def main():
             continue
         lineas = p.read_text(encoding="utf-8", errors="replace").split("\n")
         for i, linea in enumerate(lineas):
-            tipos = [n for n, rx in PATRONES if re.search(rx, linea)]
+            tipos = tipos_de_cierre(linea)
             if not tipos:
                 continue
             # El respaldo puede estar en la linea o en el parrafo: se mira una ventana.
             ventana = contexto(lineas, i, antes=1, despues=3)
-            respaldos = sorted({n for n, rx in RESPALDOS if re.search(rx, ventana)})
+            respaldos = respaldos_citados(ventana)
             filas.append({
                 "archivo": rel,
                 "linea": i + 1,
@@ -103,16 +120,48 @@ def main():
                 "texto": linea.strip()[:300],
             })
 
-    # CONTROL DE INSTRUMENTO (pregunta 2): con los patrones vacios el censo debe dar 0.
-    # Si diera filas igual, estaria contando otra cosa.
-    control = []
-    for rel in DOCS:
-        p = ROOT / rel
-        if p.exists():
-            for linea in p.read_text(encoding="utf-8", errors="replace").split("\n"):
-                if any(re.search(rx, linea) for _, rx in []):
-                    control.append(rel)
-    instrumento_ok = len(control) == 0 and len(filas) > 0
+    # CONTROL DE INSTRUMENTO (pregunta 2), corregido en S146 (V-14 de la auditoria S146).
+    #
+    # POR QUE SE CAMBIO. El control anterior evaluaba `any(... for _, rx in [])`, o sea un `any`
+    # sobre una lista literal VACIA: devuelve False siempre, con cualquier contenido de los
+    # documentos. El control no podia fallar, asi que no controlaba nada (A110: todo control lleva
+    # su nulo medido, y el que no puede fallar es peor que no tenerlo, porque da permiso).
+    #
+    # COMO SE CONTROLA AHORA. Tres casos sinteticos con respuesta conocida, que corren las MISMAS
+    # funciones `tipos_de_cierre` y `respaldos_citados` que usa el bucle principal (no una copia:
+    # eso era lo que dejaba sobrevivir a los mutantes M4, M5 y M6 de la auditoria S146):
+    #   - POSITIVO: un texto con un cierre que el censo TIENE que encontrar, y ademas clasificar
+    #     con el tipo correcto y sin respaldo citable.
+    #   - NEGATIVO: un texto de prosa normal, sin ninguna palabra de cierre, que NO debe marcar.
+    #   - CON RESPALDO: un cierre que SI cita script y PR, para que `RESPALDOS` tenga tambien un
+    #     caso positivo; sin el, vaciar `RESPALDOS` dejaba el control en verde y marcaba todas las
+    #     filas como "sin respaldo".
+    # Si cualquiera de los dos detectores se rompe (patrones vaciados, regex invertida o
+    # comprension mal escrita, en el bucle o aca), `instrumento_ok` se cae y el script sale con
+    # codigo 1.
+    CTRL_POSITIVO = "Esta divergencia queda CERRADA y no reabrir: el efecto es despreciable."
+    CTRL_NEGATIVO = "El anillo de fondo se mide entre 5 y 25 km del centro de la grilla."
+    CTRL_CON_RESPALDO = "Queda CERRADA, medido por `censo.py` y adoptado en el PR #535."
+    tipos_pos = tipos_de_cierre(CTRL_POSITIVO)
+    tipos_neg = tipos_de_cierre(CTRL_NEGATIVO)
+    resp_pos = respaldos_citados(CTRL_POSITIVO)
+    resp_con = respaldos_citados(CTRL_CON_RESPALDO)
+    control = {
+        "positivo_detectado": tipos_pos != [],
+        "positivo_tipos": tipos_pos,
+        "positivo_sin_respaldo": resp_pos == [],
+        "negativo_silencioso": tipos_neg == [],
+        "con_respaldo_detectado": sorted(resp_con),
+        "hay_filas": len(filas) > 0,
+    }
+    instrumento_ok = (
+        control["positivo_detectado"]
+        and set(control["positivo_tipos"]) >= {"cerrada", "no_reabrir", "despreciable"}
+        and control["positivo_sin_respaldo"]
+        and control["negativo_silencioso"]
+        and {"script", "pr"} <= set(resp_con)
+        and control["hay_filas"]
+    )
 
     por_tipo = {}
     for f in filas:
@@ -124,7 +173,15 @@ def main():
         "generado_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "por_que": "A95: un cierre hereda las premisas de la lectura con que se derivo, y apaga trabajo futuro",
         "control_de_instrumento": {
-            "con_patrones_vacios_da_cero": instrumento_ok,
+            "ok": instrumento_ok,
+            "detalle": control,
+            "como": ("S146 (V-14, corregido por el verificador de la Fase 0): TRES casos "
+                     "sinteticos con respuesta conocida, corridos con las mismas funciones que "
+                     "el bucle principal (uno que el censo debe encontrar y clasificar bien, uno "
+                     "que no debe marcar, y uno con respaldo conocido que ejercita RESPALDOS). "
+                     "El control anterior evaluaba un any sobre una lista vacia y no podia "
+                     "fallar; el de la primera correccion tenia su propia copia del detector y "
+                     "dejaba pasar tres mutantes. Si falla, el script sale con codigo 1"),
             "nota": ("este censo busca por palabras clave: un cierre redactado con otras palabras "
                      "NO aparece. Es un PISO del problema, no su medida completa"),
         },
@@ -167,7 +224,9 @@ def main():
     print(f"sin respaldo citable: {len(sin_respaldo)}")
     for t, n in out["por_tipo"].items():
         print(f"  {t:15} {n}")
-    return 0
+    if not instrumento_ok:
+        print("\nERROR: el control de instrumento FALLO; el censo de arriba no es confiable.")
+    return 0 if instrumento_ok else 1
 
 
 if __name__ == "__main__":
