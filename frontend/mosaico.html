@@ -394,7 +394,11 @@ function isValidDetection(r) {
   // S139 (S138-H): réplica de index.html. Con cúmulo, válida sólo si el cúmulo tiene energía.
   if (r?.primary_cluster) return (r.primary_cluster.vrp_mw ?? 0) > 0;
   if ((r?.vrp_mw ?? 0) > 0) return true;
-  return r?.triggered_test1 === true;
+  // S147: escrito igual que en index.html y diario.html (era `return r?.triggered_test1 === true`,
+  // logicamente identico). Las tres vistas comparten el cuerpo textual para que el guard
+  // tests/test_guard_predicado_tres_vistas_s147.py pueda cazar una divergencia futura.
+  if (r?.triggered_test1 === true) return true;  // detección Test 1 integrado en el ROI
+  return false;
 }
 
 function isSummitDetection(r) {

@@ -387,9 +387,35 @@ function parseUtcMs(s) {
   if (!/[zZ]$|[+-]\d\d:?\d\d$/.test(str)) str += "Z";
   return new Date(str).getTime();
 }
+// S147 — réplica del predicado de publicación de index.html (l. 1466) y mosaico.html (l. 393).
+// Es una GUARDA DE COHERENCIA, no un arreglo: hoy no cambia ni un record, y eso está MEDIDO.
+//
+// De dónde viene. El frente G de la auditoría S146 reportó que esta vista graficaba records que
+// el tablero principal oculta, y era cierto que `isValidDetection` aparecía 18 veces en
+// index.html, 2 en mosaico.html y 0 acá. Pero el efecto se midió en S147 sobre los 10.393
+// records de la ventana de 90 días: de los 4.448 que el predicado declara no válidos, los que
+// hoy grafican algo mayor que cero son **0**. La razón es que `mirovaEqVrp` devuelve
+// `pc.vrp_mw` y `mirovaEqVrpCore` devuelve `base` cuando `base <= 0`, así que el cero ya salía
+// por el otro camino: las dos condiciones dependen del mismo número.
+//
+// Por qué se deja igual. Que hoy coincidan es una propiedad de cómo está escrito `mirovaEqVrp`,
+// no una garantía: si alguien cambia esa función, las vistas se separan en silencio. Con el
+// predicado explícito y el guard `tests/test_guard_predicado_tres_vistas_s147.py`, la
+// divergencia se caza sola. Cualquier cambio va en las TRES vistas a la vez (regla S92 L5).
+function isValidDetection(r) {
+  // S139 (S138-H): con cúmulo, detección válida sólo si el cúmulo tiene energía, que es la
+  // misma magnitud que se publica. Records legacy sin cúmulo (pre-S27) conservan la regla
+  // antigua.
+  if (r?.primary_cluster) return (r.primary_cluster.vrp_mw ?? 0) > 0;
+  if ((r?.vrp_mw ?? 0) > 0) return true;        // detección eruption-path / suma legacy
+  if (r?.triggered_test1 === true) return true;  // detección Test 1 integrado en el ROI
+  return false;
+}
+
 // VRP para DISPLAY (chart/stats): 0 si es artefacto térmico (no infla la escala).
 // (S93: el filtro VIIRS750→0 de F1 se revirtió — MIROVA sí publica VIIRS750.)
 function eqVrpDisplay(r, volcanoName) {
+  if (!isValidDetection(r)) return 0;   // S147: mismo predicado que index.html y mosaico.html
   if (isThermalArtifact(r, volcanoName)) return 0;
   return USE_F5_CORE ? mirovaEqVrpCore(r, volcanoName) : mirovaEqVrp(r, volcanoName);
 }

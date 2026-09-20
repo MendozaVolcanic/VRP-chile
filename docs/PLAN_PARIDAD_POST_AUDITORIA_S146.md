@@ -48,7 +48,25 @@ umbral k mejor para el Test 1 (P1: la curva no tiene codo, negativos y positivos
 | 4 | **Re-despachar la batería del Apéndice A** (la primera corrida falló por credenciales: ver abajo) | workflow corregido a sólo token, en `main` | ver una corrida NRT verde después del bloqueo |
 | 5 | **Brazo `literal` de S143**: en la re-lectura por volcán pierde 0 noches de 308 y baja la publicación en negativos de 91,7 a 54,7 %, ganando en 7 de 7 volcanes | exploratorio: NO cambia su veredicto | entra como brazo al A/B siguiente, con criterio nuevo escrito antes |
 | 6 | **F-05: MIROVA publica la SUMA de todos los píxeles alertados de la pasada**, nosotros el núcleo de un cúmulo (contradice la premisa de A10) | hallazgo de auditor, sin verificador | verificarlo contra la página del paper y medir su efecto en la razón de magnitud: puede ser la mitad de la Fase 4 |
-| 7 | **El dashboard no dice lo mismo en sus tres vistas**: `diario.html` no tiene `isValidDetection` y grafica lo que `index.html` oculta; el tope de Villarrica no llega al operador | verificado | entra a la Fase 6, junto con mostrar `pc.classification` |
+| 7 | **El dashboard no dice lo mismo en sus tres vistas**: `diario.html` no tiene `isValidDetection` y grafica lo que `index.html` oculta; el tope de Villarrica no llega al operador | ⚠️ **la primera mitad NO se manifiesta, medido S147** | ver abajo |
+
+⚠️ **Ítem 7, primera mitad: RESUELTO Y REDIMENSIONADO (S147).** Era cierto que
+`isValidDetection` aparecía 18 veces en `index.html`, 2 en `mosaico.html` y **0** en
+`diario.html`. Pero el **efecto** se midió sobre los 10.393 records de la ventana de 90 días que
+esa vista muestra: de los **4.448** que el predicado declara no válidos, los que hoy grafican algo
+mayor que cero son **0**. La razón es que `mirovaEqVrp` devuelve `pc.vrp_mw` y `mirovaEqVrpCore`
+devuelve `base` cuando `base <= 0`, así que el cero ya salía por el otro camino: las dos
+condiciones dependen del mismo número. Y todo lo que `diario.html` muestra pasa por
+`eqVrpDisplay(...) > 0`, incluido el contador de detecciones, así que la vista ya era coherente.
+
+Lo que sí se hizo, y por qué igual valía la pena: el predicado quedó **escrito explícito en las
+tres vistas** y con un guard nuevo (`tests/test_guard_predicado_tres_vistas_s147.py`) que compara
+los tres cuerpos normalizados. Que hoy coincidan es una propiedad de cómo está escrito
+`mirovaEqVrp`, no una garantía. El guard encontró algo en su primera corrida: `mosaico.html`
+escribía la última rama distinto (lógicamente idéntica), y ya está igualada. Verificado además en
+navegador real: las dos vistas renderizan con datos.
+
+**La segunda mitad del ítem sigue abierta**: que el tope de Villarrica llegue al operador.
 | 8 | **14 mecanismos nuestros sin declarar en el catálogo** (frente G) y **30 pruebas que valen sólo bajo su configuración** (frente H) | listados | abrir sus divergencias; el libro de pruebas (`docs/LIBRO_DE_PRUEBAS.md`) ya los registra |
 | 9 | **Espacio**: la historia de git pesa 9,2 GB en GitHub y se duplicó en seis semanas | decisión del dueño | `docs/audit_s146/ESPACIO_Y_ARCHIVO_S146.md` |
 
