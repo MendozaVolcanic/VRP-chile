@@ -1554,6 +1554,11 @@ Para minimizar compactaciones automáticas ("session continued..."):
 - NASA LANCE NRT ~3h latencia.
 - NOAA-20: buscar v2 **y** v2.1 (disponibilidad variable).
 - Secrets en GitHub: EARTHDATA_USERNAME, EARTHDATA_PASSWORD.
+  - ⚠️ **Desactualizado, verificado S146**: el NRT autentica por **`EARTHDATA_TOKEN`** (vence el
+    2026-10-03, se rota cada 50 días). El par usuario y clave de los secretos está VENCIDO: un
+    workflow nuevo que lo usó (run 35507516244) falló con `invalid_credentials` y **bloqueó la
+    cuenta 10 minutos** (A71). Todo workflow nuevo autentica sólo por token, falla al instante si
+    viene vacío, y copia el bloque `env` de `nrt.yml`, no esta línea.
 - **NRT vs Standard L1B**: fetch.py intenta Standard primero, cae a `_NRT`
   (LANCE). Records llevan `product_version: "standard"|"nrt"`. store.py
   auto-upgrade NRT→Standard. Delta BT <0.1K, despreciable para VRP.
