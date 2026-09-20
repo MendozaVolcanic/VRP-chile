@@ -2333,8 +2333,20 @@ cúmulo **ya se midió con criterio pre-registrado y no cerró la brecha en ning
 (`docs/HYPOTHESIS_LOG.md`, H_S141_VECINO_FOCO_V2, resuelta como no confirmada en S142). Los 1035
 son un **techo de exposición, no una predicción**: el script clasifica, no corre el pipeline.
 Plan con el flag apagado y A/B pre-registrado (criterio primario = sobre-publicación):
-`docs/superpowers/plans/2026-09-20-d25-fondo-vecinos-viirs750.md`. **Nada de esto está implementado
-en M-band**: `process_viirs_mod.py` sigue con la mediana del anillo.
+`docs/superpowers/plans/2026-09-20-d25-fondo-vecinos-viirs750.md`.
+
+**S145, flag de M-band IMPLEMENTADO y APAGADO** (plan ejecutado, tag `pre-s145-d25-v750`, A45
+confirmado). `ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750` (`pipeline/profile.py`, clave en `paths:` del
+perfil) cablea `vrp_bg_neighbor_mean_v750` en los tres sitios donde M-band resta fondo: el bloque
+contextual y los dos recomputes del Test 1, todos **posteriores** a que `hot_mask_2d` quede fijado,
+así que el cambio es de magnitud y no toca detección. Los dos bloques del Test 1 promedian sobre la
+**unión** de `hot_mask_2d` con `test1_hot_filtered`. Diagnósticos `diag_L_bg_vecinos_w_m2_sr_um` y
+`diag_bg_vecinos_n_sin_vecinos`, que sólo aparecen con el flag ON. Comparte
+`VRP_BG_NEIGHBOR_MAX_HALF_PX` con I-band. **Con el flag OFF la salida es idéntica** (golden de S142
+verde). Medido de punta a punta sobre la escena `nevado` del arnés: el fondo cae de 0,204 a 0,105
+W/m²/sr/µm y la magnitud sube de 0,705 a 2,291 MW, **un factor 3,2**, que es la escala del riesgo de
+sobre-publicación si se adoptara. **MODIS sigue con la mediana del anillo**: ahí D25 queda abierta y
+su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay ni qué medir.
 
 ---
 
