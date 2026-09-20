@@ -1,0 +1,253 @@
+name: Probe S146 bateria Apendice A (todos los brazos, cumulos y pixeles)
+
+# A43: "on" entre comillas.
+#
+# QUE HACE. Corre la bateria de los nueve casos del Apendice A de Coppola 2016a para TODOS los
+# brazos (los 8 de S136/S137 mas B22 + fondo local CON compuerta, que nadie habia corrido),
+# guardando por pasada todos los cumulos y la lista de pixeles alertados con su camino. Despues
+# cuenta la cobertura por brazo y por caso y corre el evaluador con la vara corregida de A2
+# (docs/audit_s146/A2_CRITERIO_PRE_REGISTRADO.md, sellado) y el nulo por pixel alertado
+# (experiments/_s146_bateria/CRITERIO_NULO_POR_PIXEL.md, escrito antes de ver ninguna salida).
+#
+# SOLO LECTURA sobre el pipeline (A45/A75): los brazos se arman reasignando flags y funciones en el
+# namespace de pipeline.process_modis; no se edita pipeline/, ningun perfil ni data/.
+#
+# DONDE QUEDAN LAS SALIDAS, y por que NO en main. Dos copias: (1) artefactos del run, que caducan a
+# los 90 dias y en este proyecto ya se perdieron salidas que vivian solo ahi; (2) un commit en una
+# rama propia y nueva por corrida, `s146-bateria-salidas-<run_id>`, que no caduca. No se empuja a
+# main porque main lo escribe el cron NRT cada dos horas bajo el candado `push-main`: un empuje mas
+# a main compite por ese candado (GitHub guarda UN solo run pendiente por grupo y el segundo
+# desplaza al primero) o abre la carrera de rebase que el PR #502 cerro. Una rama nueva por corrida
+# no compite con nadie, no dispara pages-deploy ni tests, y se mergea a mano cuando se quiera.
+# El bucle de reintento de abajo es por cortes de red, no por contienda: la rama es nueva.
+#
+# UN RUN VERDE NO PRUEBA COBERTURA (A108). Falla a proposito cuando: faltan credenciales (un
+# secreto ausente llega como string vacio y no como error), algun caso termina con cero granulos,
+# algun granulo no se midio, la captura no cuadra con el record, o algun brazo tiene menos pasadas
+# que el control o que la linea base commiteada de S136.
+#
+# Archivar en _archive/ al terminar (regla S80).
+"on":
+  workflow_dispatch:
+    inputs:
+      brazos:
+        description: "Vacio = los 9 brazos. 'todos' = 10 (suma B22 loc max). O nombres de brazos.py separados por coma"
+        required: false
+        default: ""
+      caso:
+        description: "Un solo caso (A1..A9). Vacio = los 9. Con un solo caso los totales de 9 no aplican"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  preparar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      matriz: ${{ steps.plan.outputs.matriz }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Credenciales presentes (un secreto ausente es string vacio, no error)
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+        run: |
+          if [ -z "$EARTHDATA_USERNAME" ] || [ -z "$EARTHDATA_PASSWORD" ]; then
+            echo "::error::EARTHDATA_USERNAME o EARTHDATA_PASSWORD vacios: no se mediria nada"
+            exit 1
+          fi
+          echo "credenciales presentes"
+      - name: Plan de brazos
+        id: plan
+        env:
+          BRAZOS_INPUT: ${{ github.event.inputs.brazos }}
+        run: |
+          set -eo pipefail
+          M=$(python experiments/_s146_bateria/brazos.py --matriz "$BRAZOS_INPUT")
+          echo "brazos a correr: $M"
+          echo "matriz=$M" >> "$GITHUB_OUTPUT"
+      - name: Criterios sellados (hash con finales de linea LF)
+        run: |
+          set -eo pipefail
+          python - <<'PY'
+          import hashlib, sys
+          pares = [("docs/audit_s146/A2_CRITERIO_PRE_REGISTRADO.md", "experiments/_s146_a2/HASH_PRE_REGISTRO.txt"),
+                   ("experiments/_s146_bateria/CRITERIO_NULO_POR_PIXEL.md", "experiments/_s146_bateria/HASH_CRITERIO_NULO.txt")]
+          mal = 0
+          for doc, sello in pares:
+              h = hashlib.sha256(open(doc, "rb").read().replace(b"\r\n", b"\n")).hexdigest()
+              a = open(sello, encoding="utf-8").read().split()[0]
+              print(doc, h, "COINCIDE" if h == a else "NO COINCIDE")
+              mal += h != a
+          sys.exit(1 if mal else 0)
+          PY
+      - name: Prueba del instrumento sin MODIS (captura, evaluador, cobertura, 10 brazos)
+        run: |
+          set -eo pipefail
+          pip install --upgrade pip
+          pip install numpy scipy pyyaml h5py earthaccess
+          VRP_PROFILE=mirova_equivalent python experiments/_s146_bateria/prueba_local.py \
+            | tee prueba_local.txt
+      - name: Subir la prueba
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bateria-s146-prueba-local
+          path: prueba_local.txt
+          retention-days: 90
+
+  brazos:
+    needs: preparar
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        brazo: ${{ fromJson(needs.preparar.outputs.matriz) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps (MODIS necesita HDF4)
+        run: |
+          set -eo pipefail
+          pip install --upgrade pip
+          sudo apt-get update
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+      - name: Correr el brazo (read-only)
+        env:
+          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_DEST: /tmp/apendice_s146
+          BATERIA_BRAZO: ${{ matrix.brazo }}
+          APENDICE_CASO: ${{ github.event.inputs.caso }}
+        run: |
+          set -eo pipefail
+          mkdir -p "experiments/_s146_bateria/out/$BATERIA_BRAZO"
+          python experiments/_s146_bateria/correr_bateria.py \
+            | tee "experiments/_s146_bateria/out/$BATERIA_BRAZO/report.txt"
+      - name: Subir la salida del brazo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bateria-s146-brazo-${{ matrix.brazo }}
+          # SOLO la carpeta de este brazo: si algun dia hay salidas viejas commiteadas en out/, no
+          # deben viajar en el artefacto y pisar las de otro brazo al juntarlas.
+          path: experiments/_s146_bateria/out/${{ matrix.brazo }}/
+          retention-days: 90
+          if-no-files-found: error
+
+  evaluar:
+    needs: [preparar, brazos]
+    if: always() && needs.preparar.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Vaciar salidas viejas del checkout (que nada rancio pase por nuevo)
+        run: rm -rf experiments/_s146_bateria/out experiments/_s146_bateria/evaluacion
+      - name: Bajar las salidas de todos los brazos
+        uses: actions/download-artifact@v4
+        with:
+          pattern: bateria-s146-brazo-*
+          path: /tmp/artefactos
+      - name: Ordenar una carpeta por brazo
+        if: always()
+        run: |
+          set -eo pipefail
+          mkdir -p experiments/_s146_bateria/out
+          for d in /tmp/artefactos/bateria-s146-brazo-*; do
+            [ -d "$d" ] || continue
+            b="${d##*/bateria-s146-brazo-}"
+            mv "$d" "experiments/_s146_bateria/out/$b"
+          done
+          ls -R experiments/_s146_bateria/out | head -80
+      - name: Cobertura por brazo y por caso, y evaluador
+        id: medir
+        if: always()
+        env:
+          MATRIZ: ${{ needs.preparar.outputs.matriz }}
+          CASO: ${{ github.event.inputs.caso }}
+        run: |
+          # Actions corre bash con -e: aca se apaga, porque se quiere el codigo de salida de cada
+          # script para reportarlo y seguir (guardar las salidas aunque la cobertura falle). El
+          # ultimo paso del job es el que pone el run en rojo.
+          set +e
+          set -o pipefail
+          pip install --upgrade pip
+          pip install pyyaml
+          mkdir -p experiments/_s146_bateria/evaluacion
+          python experiments/_s146_bateria/verificar_cobertura.py --brazos "$MATRIZ" --caso "$CASO" \
+            | tee experiments/_s146_bateria/evaluacion/cobertura.txt
+          COB=$?
+          python experiments/_s146_bateria/evaluar_bateria.py \
+            | tee experiments/_s146_bateria/evaluacion/evaluacion.txt
+          EVA=$?
+          echo "cobertura=$COB" >> "$GITHUB_OUTPUT"
+          echo "evaluador=$EVA" >> "$GITHUB_OUTPUT"
+          {
+            echo "run_id=${GITHUB_RUN_ID} commit=${GITHUB_SHA} brazos=${MATRIZ} caso=${CASO:-los 9}"
+            echo "salida verificar_cobertura=$COB   salida evaluar_bateria=$EVA   (0 = sano)"
+            if [ "$COB" != "0" ]; then echo "COBERTURA NO PAREJA: la comparacion entre brazos de este run NO vale"; fi
+          } | tee experiments/_s146_bateria/evaluacion/ESTADO_DEL_RUN.txt
+      - name: Subir evaluacion y salidas juntas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bateria-s146-completa
+          path: |
+            experiments/_s146_bateria/out/
+            experiments/_s146_bateria/evaluacion/
+          retention-days: 90
+      - name: Guardar en una rama propia (no caduca, no toca main)
+        if: always()
+        run: |
+          set -eo pipefail
+          RAMA="s146-bateria-salidas-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$RAMA"
+          git add -f experiments/_s146_bateria/out experiments/_s146_bateria/evaluacion
+          if git diff --cached --quiet; then
+            echo "::error::no hay ninguna salida que guardar"
+            exit 1
+          fi
+          git commit -m "S146 bateria Apendice A: salidas del run ${GITHUB_RUN_ID} (rama de datos, no mergear sin leer ESTADO_DEL_RUN.txt)"
+          OK=0
+          for attempt in 1 2 3 4 5; do
+            if git push origin "HEAD:refs/heads/$RAMA"; then OK=1; break; fi
+            echo "empuje fallido (intento $attempt), reintento en $((attempt * 10)) s"
+            sleep $((attempt * 10))
+          done
+          if [ "$OK" != "1" ]; then
+            echo "::error::no se pudo empujar la rama $RAMA; las salidas quedan SOLO en el artefacto"
+            exit 1
+          fi
+          echo "salidas guardadas en la rama $RAMA"
+      - name: Veredicto del run (verde solo si todo se midio)
+        if: always()
+        env:
+          BRAZOS_RESULT: ${{ needs.brazos.result }}
+          COB: ${{ steps.medir.outputs.cobertura }}
+          EVA: ${{ steps.medir.outputs.evaluador }}
+        run: |
+          echo "jobs de brazos: $BRAZOS_RESULT ; cobertura: $COB ; evaluador: $EVA"
+          if [ "$BRAZOS_RESULT" != "success" ] || [ "$COB" != "0" ] || [ "$EVA" != "0" ]; then
+            echo "::error::el run NO midio todo: brazos=$BRAZOS_RESULT cobertura=$COB evaluador=$EVA"
+            exit 1
+          fi
+          echo "todo medido: cobertura pareja e instrumento sano. El veredicto se LEE en evaluacion.txt"

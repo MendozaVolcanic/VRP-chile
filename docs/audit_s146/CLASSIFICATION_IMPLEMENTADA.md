@@ -213,3 +213,83 @@ jobs:
 5. **`docs/MISSION.md`** todavía dice que `pc.classification` no existe; corregir esa frase es
    decisión del dueño.
 6. El segundo eje del diseño (§5.4, "estado de base o cambio") no se implementó: no era parte del pedido.
+
+## 7. Correcciones posteriores al verificador (S146)
+
+> Los numeros de esta seccion los escribe un script que lee `data/clasificacion_referencia/`, la salida de `python scripts/clasificar_referencia.py --inicio 2026-09-01 --fin 2026-09-20 --stats <ruta>` y un recalculo de la regla anterior sobre el mismo corpus. Ninguno esta transcrito a mano (S91). La seccion se agrego DESPUES de `hacer_informe.py`: si alguien vuelve a correr ese generador, la pisa.
+
+El verificador con contexto limpio encontro dos casos en que la etiqueta le miente al operador (V-17, matices 3 y 4) y una causa de fondo: el canal OCR de la referencia se sincronizaba una vez por semana. Las tres cosas se corrigieron. La deteccion no se toco: esto es post-proceso.
+
+### 7.1 El fenomeno, antes que el codigo
+
+MIROVA publica una fila por pasada. Cuando la fila dice RUTINA con VRP 0 quiere decir que miro ese granulo y no vio nada: es el negativo mas limpio que existe. El banco de paridad, que mide cuanto publicamos de mas, exige ademas que esa noche y ese sensor no tengan ninguna alerta ni ningun foco fuera del limite, y hace bien, porque una noche sucia no sirve de denominador. Pero el rotulo que lee el geologo no es un denominador. Al heredar esa exigencia, pasadas que MIROVA si listo terminaban con el texto "MIROVA no listo esta pasada", que para ellas es falso. Se corrigio en la capa de clasificacion; `scripts/banco_paridad.py` no se toco y sigue midiendo lo suyo.
+
+La segunda es de tiempo, no de logica. La referencia llega por dos canales y el OCR se atrasa: afirmar "MIROVA miro y callo" sobre una pasada posterior al ultimo dato de un canal es afirmar algo que el canal atrasado todavia puede desmentir. Eso ahora viaja con la pasada.
+
+### 7.2 Correccion 1: la RUTINA de esta pasada ya no la borra un foco lejano de otra pasada
+
+Antes y despues sobre el mismo corpus (2360 pasadas nocturnas, ventana 2026-09-01 a 2026-09-20):
+
+| valor | antes | ahora | diferencia |
+|---|---|---|---|
+| `mirova_confirmed` | 147 | 147 | +0 |
+| `mirova_same_night` | 652 | 652 | +0 |
+| `mirova_silent` | 1101 | 1134 | +33 |
+| `mirova_saw_outside` | 18 | 18 | +0 |
+| `no_reference` | 442 | 409 | -33 |
+
+Se movieron **33 pasadas**, todas de `no_reference` a `mirova_silent`, y todas por la misma causa unica (ese sensor tuvo un foco fuera de limite en otra pasada de la misma fecha): 32 en VIIRS375, 1 en VIIRS750. Ninguna otra celda cambia, que es lo que se pedia: la correccion no reparte de nuevo, saca una mentira. El foco fuera de limite de ESTA pasada conserva su precedencia, y hay un test que lo fija.
+
+### 7.3 Correccion 2: `provisorio`, un booleano aparte con su motivo
+
+No es un sexto valor del eje: el eje sigue teniendo cinco. Es un campo al lado, que se prende cuando la pasada es posterior al ultimo dato de alguno de los dos canales y el valor afirma una ausencia (`mirova_silent` o `no_reference`). El corte sale de la ultima fila REAL de cada canal, no de una fecha escrita en el codigo, que es lo que envejece en silencio (A90). Hoy esos cortes son: consolidado hasta **2026-09-20 02:45:00**, OCR hasta **2026-09-14 06:42:01**.
+
+| sensor | pasadas | provisorias | de ellas `mirova_silent` | de ellas `no_reference` |
+|---|---|---|---|---|
+| MODIS | 457 | 87 (19.0 %) | 82 | 5 |
+| VIIRS375 | 954 | 179 (18.8 %) | 97 | 82 |
+| VIIRS750 | 949 | 181 (19.1 %) | 96 | 85 |
+| **total** | **2360** | **447** (18.9 %) | 275 | 172 |
+
+Ninguna pasada con alerta de MIROVA detras queda marcada provisoria: una alerta publicada no se deshace porque falte el otro canal, y lo provisorio es la ausencia. El esquema del archivo subio a **2** por el campo nuevo.
+
+### 7.4 Correccion 3: el sync horario ahora trae los dos canales
+
+Diferencia conceptual en `.github/workflows/sync-mirova-csv.yml`:
+
+| antes | ahora |
+|---|---|
+| baja solo `registro_vrp_consolidado.csv` | baja tambien `registro_vrp_ocr.csv`, del mismo repo y la misma rama |
+| el OCR lo traia solo `audit-weekly.yml`, una vez por semana | el OCR se refresca cada hora; el audit semanal sigue igual, es idempotente |
+| el commit se dispara si cambio el consolidado | se dispara si cambio cualquiera de los dos, y `git add` cubre los tres caminos |
+| defensas del consolidado: archivo temporal mas `cmp` | el OCR agrega dos que el consolidado no tiene: cabecera esperada y conteo de lineas que no baje (el registro solo crece, encogerse es truncamiento) |
+| (no existia) | si el OCR viene mal no aborta el job, el consolidado igual se sincroniza, pero un step final deja la corrida en ROJO |
+
+El OCR va a `data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv`, que es la ruta que lee el codigo (`scripts/referencia_mirova_unificada.py:43`, y de ahi `auto_audit_weekly.py:48`, `build_c2ab_windows.py:64`, `paper_numbers.py:65`). El otro archivo, `data/mirova_reference/registro_vrp_ocr.csv`, esta congelado en marzo de 2026 y no se toco.
+
+**El workflow no se puede ejecutar desde una sesion local**: `workflow_dispatch` solo existe una vez que el yml esta en `main` (limitacion de GH Actions documentada en S73). Lo que si se verifico aca: el YAML parsea y `on` sale como string (A43), los nueve steps estan en orden, y el cuerpo del step nuevo se corrio en bash contra un archivo local en cinco escenarios (igual, crecio, truncado, vacio, cabecera mala): en los tres malos deja el archivo previo intacto, borra el temporal y marca `ocr_bad=true`.
+
+**Como se comprueba despues del merge**: (1) `gh workflow run sync-mirova-csv.yml --ref main` y despues `gh run watch`; (2) en el log del step *Download fresh OCR CSV from Mirova-v1* tiene que decir `OCR sin cambios` o `OCR rows: N (antes M)` con N mayor o igual que M; (3) `gh api 'repos/MendozaVolcanic/VRP-chile/commits?path=data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv'` tiene que mostrar commits del `vrp-mirova-sync-bot` y no solo del audit semanal; (4) a las 24 h, la fecha de la ultima fila del OCR no deberia estar a mas de unas horas de la del consolidado.
+
+### 7.5 Supuestos
+
+1. **Solo se rescata la causa que el verificador midio.** El `sin_info` del banco tambien cubre la RUTINA que viene unicamente del canal OCR y la RUTINA con VRP mayor que cero; esas siguen en `no_reference`, porque ahi la referencia no dijo "mire y no vi nada". En esta ventana no hay ninguna: las 409 `no_reference` que quedan no tienen ninguna fila a mas o menos 2 minutos.
+2. **El corte de cada canal es global**, no por volcan ni por sensor: es la frontera de cobertura del canal. Un corte por volcan seria mas fino y tambien mas ruidoso, porque un volcan sin filas recientes por azar marcaria todo como provisorio.
+3. **Solo `mirova_silent` y `no_reference` pueden ser provisorios.** Los otros tres afirman algo que la referencia ya publico.
+4. **Un canal sin ninguna fila cuenta como canal ausente** y marca provisorio: es el caso mas provisorio de todos, y aparece si alguien corre el script con una referencia vacia.
+
+### 7.6 Que vigila cada cosa
+
+`tests/test_clasificacion_referencia_s146.py` pasa de 12 a 19 pruebas. Las nuevas se probaron con mutantes sobre una COPIA del arbol (scratchpad, con `data/` montado como junction), nunca sobre el arbol real de records:
+
+| mutante en la copia | resultado |
+|---|---|
+| sin el rescate de la RUTINA de esta pasada | cae `test_rutina_en_esta_pasada_no_la_borra_un_fuera_de_limite_de_otra_pasada` |
+| rescate demasiado ancho, pisa el fuera de limite de esta pasada | cae `test_el_fuera_de_limite_de_ESTA_pasada_sigue_mandando_sobre_el_silencio` |
+| `provisorio` siempre False | caen 2 |
+| corte clavado a una fecha fija | cae 1 |
+| `provisorio` sin mirar el valor | caen 2 |
+
+### 7.7 Una nota de denominador (A90)
+
+El informe de arriba conto **2285** pasadas nocturnas y esta seccion cuenta **2360** en la misma ventana. No cambio el pipeline: el cron NRT siguio escribiendo records mientras tanto. Por eso el antes y despues de 7.2 se calcula recorriendo el corpus de HOY con las dos reglas, y no restando el archivo commiteado ayer. Las 33 pasadas son las mismas 33 que el verificador encontro, contadas sobre un corpus mas grande.
