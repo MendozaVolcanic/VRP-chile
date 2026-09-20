@@ -1,17 +1,46 @@
 # Pre-registro: ¿el cúmulo lejano de un píxel es el objeto que MIROVA vio? (S144)
 
-> **Estado: v5 del 2026-09-19, escrita ANTES de medir.** Corrige los 8 hallazgos del cuarto verificador
-> (`..._VERIFICADOR_V4.md`), que siguió al tercero (`..._V3.md`), al segundo (`..._V2.md`) y al primero
-> (`..._VERIFICADOR.md`). Versiones anteriores: v1 en `f6a1cb962`, v3 en `9496cdaea`, v4 en `70d26d3c7`;
-> **la v2 nunca se commiteó** (la sobrescribí antes de pasarla por git). Falta: una quinta pasada del
-> verificador y, recién después, el script (`experiments/_s144_keep_peak_direccion/`, con tests) y la
-> corrida.
+> **Estado: v6 del 2026-09-19, escrita ANTES de medir.** Corrige los 14 hallazgos del quinto verificador
+> (`..._VERIFICADOR_V5.md`), que confirmó que el **instrumento** de la v5 está bien (la pasada cruzada
+> corta el 87 % del sesgo de selección) y refutó sus **controles y su regla**. Antes: cuarto
+> (`..._V4.md`), tercero (`..._V3.md`), segundo (`..._V2.md`) y primero (`..._VERIFICADOR.md`).
+> Versiones: v1 en `f6a1cb962`, v3 en `9496cdaea`, v4 en `70d26d3c7`, v5 en `c92171901`; **la v2 nunca
+> se commiteó**. Falta: una sexta pasada del verificador y, recién después, el script
+> (`experiments/_s144_keep_peak_direccion/`, con tests) y la corrida.
 >
 > Origen: decisión 1 del traspaso `tasks/BLOQUE_ARRANQUE_S144.md`; Nicolás eligió el 2026-09-19 seguir
 > con el rediseño de pasada cruzada. Muestra: `experiments/_s144_conteo_tif/RESULTADO.md`. A/B que
 > motiva la medida: `experiments/_s143_evaluador/`. Instrumento heredado: `experiments/_s142_ndc/`.
 
-## 0. Por qué la v5 cambia el instrumento
+## 0-bis. Qué cambió en la v6 (lo que midió la quinta ronda)
+
+El instrumento de la v5 quedó **confirmado**, con números: sobre las mismas 165 pasadas ajenas a la
+muestra del veredicto, medir en la imagen propia da `D = +0,1091` (intervalo [+0,051, +0,169]) y medir
+en la cruzada da `+0,0145` ([-0,029, +0,056]). La pasada cruzada corta el 87 % de la maldición del
+ganador. Además quedó refutado, con datos, el miedo que hundió a la v3: dentro de los mismos rásteres,
+un punto sorteado del anillo excede el umbral el 5,20 % de las veces y los sitios donde publicamos el
+5,66 %, o sea son poblaciones equivalentes, y el brazo de otra noche da `+0,0005`: **nuestro cúmulo
+lejano no es un lugar persistentemente más caliente que los otros sitios donde publicamos**.
+
+Lo que la quinta ronda refutó fueron los controles y la regla, y de ahí los tres cambios de la v6:
+
+1. **El residuo del instrumento se mide y se le pone una ventana temporal.** La cruzada deja
+   `D = +0,0251` [+0,005, +0,047] en el estrato hermano, que no viene del sitio ni de la población de
+   referencia sino de algo que dura menos de una hora (nube o estado de escena). Desglosado por
+   separación entre las dos pasadas: **+0,047 debajo de 45 min**, **-0,010 entre 45 y 60**, **+0,006
+   entre 60 y 120** y +0,054 sobre 120. La v6 exige por eso una separación de **45 a 120 minutos**, que
+   cuesta poco (de 2.541 pasadas con patrón, 1.824 tienen cruzada a 15 min o más y **1.594 a 45 min o
+   más**), y además mide el residuo en la misma corrida y **decide contra ese nivel, no contra cero**.
+2. **El control de intercambio de roles se elimina.** El verificador probó que atenúa el sesgo
+   exactamente cinco veces (`C1 = −sesgo/5`): con el instrumento que la ronda 4 refutó (+0,1031) habría
+   dado -0,0206 y lo habría certificado como limpio. El nulo del instrumento pasa a ser el **punto
+   sorteado del anillo medido con imagen cruzada** (-0,0046).
+3. **El antiguo C2 deja de ser compuerta.** Las pasadas `far_ref` y `sin_info` comparten patrón y
+   publicación con las del veredicto, así que un C2 en rojo significaría que la hipótesis es cierta, no
+   que el instrumento falla. Pasa a ser una **medición informada**: la diferencia entre imagen propia y
+   cruzada sobre las mismas pasadas, que es el tamaño del sesgo de selección.
+
+## 0. Por qué la v5 cambió el instrumento
 
 La v4 comparaba el mismo punto en otras noches. El cuarto verificador midió que ese control **no tiene
 sesgo propio** (nulo -0,0068, intervalo [-0,029, +0,016]) y que la regla de equivalencia sí deja
@@ -37,8 +66,9 @@ de 2.541 pasadas con el patrón, **1.824 tienen otra pasada esa noche con TIF** 
 Cordón Caulle 39).
 
 **Y el punto de comparación deja de ser el reflejo o la otra noche**: son **los P que nuestro propio
-pipeline publicó otras noches en ese mismo volcán**, evaluados en la misma imagen. Mismo tipo de lugar
-(misma textura de flanco, que es lo que refutó a la v3), misma imagen (mismo estado de nube y de nieve,
+pipeline publicó otras noches en ese mismo volcán**, evaluados en la misma imagen. Misma **población** de
+sitios (no el mismo flanco: están a 101 grados de acimut en mediana, pero su tasa de exceso es 5,66 %
+contra 5,20 % de un punto sorteado, o sea equivalentes), misma imagen (mismo estado de nube y de nieve,
 que es lo que la v4 no controlaba), y ninguno de los dos elegido por el gránulo que estamos mirando.
 
 ## 1. Lo que ya se vio (contaminación declarada)
@@ -50,6 +80,10 @@ que es lo que la v4 no controlaba), y ninguno de los dos elegido por el gránulo
 - **Se conoce la geometría de nuestros P**: radio mediano 2,79 km, máximo 3,00 km (el borde del disco
   del Test 1), y el 97,1 % tiene otro P nuestro a menos de 0,75 km en otra noche, con mediana de 12
   noches. Ese dato es el que obliga a la regla de separación de §5.
+- **Se conoce el embudo de la muestra del veredicto**: 1.113 pasadas candidatas (con patrón,
+  publicadas, `neg_limpio`, fuera de Lastarria), de las cuales 711 tienen imagen cruzada usable con la
+  regla de la v5 (≥ 15 min), repartidas en 378 noches de volcán y con 6 volcanes que llegan a 20 noches.
+  Con la ventana de 45 a 120 minutos de la v6 el número baja algo y lo informa el script.
 - Ninguna ronda calculó `Z` sobre los P de la muestra del veredicto en pasadas cruzadas, ni las clases
   de M1.
 
@@ -71,12 +105,12 @@ pérdidas le cobró 5 noches donde MIROVA alertó y un cúmulo nuestro caía den
   compatibilidad por aritmética del centro de grilla. Lo mismo vale para Tupungatito (4,86 km) y
   Planchón-Peteroa (2,02 km). **La compatibilidad de radio sólo informa donde el centro de grilla está
   casi sobre el cráter**, y entonces la coincidencia de S143 es hoy un fenómeno de Lastarria, con una
-  pasada de Láscar (separación 0,83 km) como único caso fuera.
+  unica candidata de Lascar (separacion 0,83 km) que el filtro de region de §6 termina sacando.
 
 ## 3. Las dos medidas
 
 - **M1, dirección**: donde MIROVA publicó un objeto al mismo radio que nuestro cúmulo, ¿coincide el
-  acimut? Es la pregunta de A107 y hoy sólo se puede hacer en Lastarria y en una pasada de Láscar.
+  acimut? Es la pregunta de A107 y hoy solo se puede hacer en Lastarria.
   **Sin veredicto** (§6).
 - **M2, presencia**: donde publicamos un cúmulo lejano, ¿la imagen que MIROVA hizo de **otra pasada de
   esa misma noche** tiene un exceso ahí, más que en los sitios donde nuestro pipeline publica otras
@@ -120,10 +154,12 @@ record nuestro da el mismo conjunto) desde el 2026-05-09:
 - **`zc_anillo(vol, d)`** = percentil 95 del máximo de z sobre el anillo |r − d| ≤ 0,6 km alrededor de
   `mirova_center`, por cada `Distancia_km` d que aparezca en M1.
 
-Los tres se informan con su n y su intervalo por bootstrap. Queda declarado que con la regla literal
-Chaitén da 3,63 [3,13, 4,66] y que **Isluga se calibra con 13 pasadas y su intervalo va de 2,50 a 7,69**
-(H4): el umbral de ese volcán es poco confiable, y por eso la lectura por volcán de §7 lo informa
-aparte.
+Los tres se informan con su n y su intervalo por bootstrap. Con la regla literal de arriba (banda de 1,5
+a 3,0 km) la quinta ronda midió Chaitén **4,22** [3,19, 4,66], Cordón Caulle 4,25, Planchón-Peteroa
+3,23, Nevados de Chillán 2,47 e **Isluga 6,07 [2,04, 7,69] sobre 13 pasadas**; la tabla completa la
+imprime el script. El umbral de Isluga es poco confiable por su n, y por eso la lectura por volcán de §7
+lo informa aparte. (Las cifras que citaban la v4 y la v5 venían del anillo viejo de 1,5 a 3,5 km y no
+reproducían con la regla escrita: es el mismo error señalado dos rondas seguidas.)
 
 **Candidatos**: **P** es el centroide del cúmulo primario cuando tiene un solo píxel (el record no marca
 cuál píxel conservó `keep_peak`; puede ser un vecino recapturado por el segundo pase, a una celda). **F**
@@ -134,17 +170,27 @@ d(P, F) > 0,5 km; en M1 además d(P, F) ≥ 2T.
 ## 5. El instrumento de M2: pasada cruzada y sitios de referencia
 
 **Imagen (pasada cruzada).** Para cada pasada medida `p` (volcán `v`, noche `n`), la imagen es el TIF de
-otra pasada `q` de **la misma noche y el mismo volcán**, con |t_q − t_p| ≥ 15 min y TIF usable; se toma
-la más cercana en el tiempo y, si hay empate, la anterior. Si no existe, la pasada sale de la muestra y
-se cuenta aparte. Se informa la distribución de |t_q − t_p|. **La imagen no es del gránulo que eligió
-P**, que es todo el punto.
+otra pasada `q` **del mismo volcán**, con **45 min ≤ |t_q − t_p| ≤ 120 min**, TIF usable y que sea ella
+misma nocturna según `banco_paridad.es_pasada_diurna_descartada` (no basta con caer en la misma fecha
+UTC: tres rásteres de las 19:36 pasaban el corte de mediana y son el artefacto solar de A76). Se toma la
+más cercana en el tiempo y, si hay empate, la anterior. Si no existe, la pasada sale de la muestra y se
+cuenta aparte. **La ventana de 45 a 120 minutos está fijada por la medición de la quinta ronda**: el
+residuo del instrumento vale +0,047 debajo de 45 min, -0,010 entre 45 y 60, +0,006 entre 60 y 120 y
++0,054 sobre 120. Se informa la distribución de |t_q − t_p| y todo se estratifica por las bandas
+[45, 60) y [60, 120].
 
 **Sitios de referencia.** `R(p)` son **5 posiciones P que nuestro pipeline publicó en el mismo volcán en
 otras noches**, con patrón, a más de 3 días de `n` y **a más de 2T (1,5 km) de P_p** (el 97,1 % de los P
 tiene otro P a menos de 0,75 km en otra noche, así que sin esta separación el propio rasgo entraría al
 denominador y volveríamos a la ceguera de la v4). Se eligen las 5 más cercanas en el tiempo; empate, la
-anterior. Si quedan menos de 3, la pasada sale y se cuenta aparte. Todas se evalúan **en el mismo raster
-`q`**.
+anterior. Se exige que entre las 5 haya **al menos 3 sitios distintos** (separados entre sí por más de
+T); si no se llega a 3 posiciones que cumplan todo, la pasada sale y se cuenta aparte. Todas se evalúan
+**en el mismo raster `q`**.
+
+**Qué sostiene la comparación** (corrección de la v5, que decía "misma textura de flanco"): los sitios
+de referencia están en mediana a 101 grados de acimut del punto medido, así que **no** son el mismo
+flanco. Lo que sostiene el control es que son **la misma población de sitios**: dentro de los mismos
+rásteres, un punto sorteado del anillo excede el umbral el 5,20 % de las veces y los sitios P el 5,66 %.
 
 - Observado: `e_p = 1` si `Z_q(P_p) ≥ zc_punto(v)`.
 - Referencia: `r_p` = fracción de `R(p)` con `Z_q ≥ zc_punto(v)`.
@@ -154,17 +200,24 @@ Qué controla cada cosa: la misma imagen controla el estado de nube y de nieve d
 de referencia controlan la textura del flanco (son el mismo tipo de sitio); la pasada cruzada controla
 la maldición del ganador.
 
-**Controles de instrumento** (todos con `random.Random(2144)` declarado, y todos corridos en la misma
-corrida):
-- **C1, intercambio de roles**: se repite el procedimiento tomando como "observado" un sitio de
-  referencia y como referencia los otros cuatro más el P de la pasada, en el mismo raster cruzado.
-  Debe dar `D` dentro de ±0,05. Si no, el instrumento está sesgado y la medida es INCONCLUSA.
-- **C2, maldición del ganador visible**: se corre el mismo procedimiento con el TIF de **la propia
-  pasada** en vez del cruzado, sobre pasadas con patrón y publicadas **fuera de la muestra del
-  veredicto** (`far_ref` y `sin_info` fuera de Lastarria, 194 pasadas). La diferencia entre esa corrida
-  y la cruzada sobre las mismas pasadas es la medida directa del sesgo de selección, y se informa. La
-  corrida **cruzada** sobre esas mismas pasadas debe quedar por debajo de +0,05; si no, la pasada
-  cruzada no alcanzó a cortar el sesgo y la medida es INCONCLUSA.
+**Controles de instrumento** (todos con `random.Random(2144)`, corridos en la misma corrida):
+- **N1, nulo del instrumento (compuerta)**: se repite todo el procedimiento poniendo como "observado"
+  un **punto sorteado del anillo de 1,5 a 3,0 km** (mismo sorteo declarado en §4) en pasadas **sin
+  patrón**, con imagen cruzada y los mismos 5 sitios de referencia. Ahí no hubo selección de ningún
+  tipo, así que `D` debe quedar dentro de ±0,05 (la quinta ronda midió -0,0046 sobre 654 pasadas). Si
+  no, la medida es INCONCLUSA.
+- **R, residuo del instrumento (entra en la regla, no es compuerta)**: el mismo procedimiento completo
+  sobre el **estrato hermano** (pasadas con patrón, publicadas, etiqueta `far_ref` o `sin_info`, fuera
+  de Lastarria, con la misma ventana de 45 a 120 min). Da el nivel que el instrumento marca donde no se
+  reclama nada, y **contra ese nivel se mide el veredicto** (§7), no contra cero.
+- **B, tamaño del sesgo de selección (informado)**: el mismo procedimiento con el TIF de **la propia
+  pasada** en vez del cruzado, sobre el subconjunto del estrato hermano que tiene **las dos** imágenes
+  usables (165 pasadas en la medición de la quinta ronda). La diferencia entre las dos corridas es la
+  maldición del ganador medida en esta corrida. **No es compuerta**: esas pasadas comparten patrón y
+  publicación con las del veredicto, así que un valor alto significaría que la hipótesis es cierta, no
+  que el instrumento falle. El control de intercambio de roles de la v5 queda **eliminado**: atenúa el
+  sesgo exactamente cinco veces (`C1 = −sesgo/5`) y habría certificado como limpio al instrumento que
+  la ronda 4 refutó.
 - **G, georreferencia (compuerta)**: pasadas con alerta CONS con VRP ≥ 0,3 MW en Láscar y Villarrica,
   TIF usable; semilla = máximo de z en el disco de 4 km alrededor del cráter con `z ≥ zc_disco`. Pasa
   si n ≥ 8, la semilla cae a ≤ 0,75 km del cráter en al menos el 80 %, la mediana de esa distancia es
@@ -174,7 +227,7 @@ corrida):
 - **H, alineación** (compuerta blanda): pasadas con alerta, TIF usable y record con
   `primary_cluster.n_pixels ≥ 2`, `final_hotspot_source == "ctx_cluster"` y centroide dentro del
   `inner_radius_km` (H7: `ctx_cluster` no es una clave del record, es el valor de ese campo; con esa
-  definición hay 128 pasadas, 58 de Cordón Caulle, cuyo `inner_radius_km` es 20 km, así que se informa
+  definicion y con TIF usable hay 110 pasadas, 50 de Cordon Caulle, cuyo `inner_radius_km` es 20 km, asi que se informa
   con y sin él). La semilla del disco debe caer a ≤ 0,75 km de nuestro centroide en al menos la mitad.
   Si no pasa, todo veredicto baja a SOSPECHA.
 
@@ -183,8 +236,10 @@ corrida):
 **Universo**: pasadas con alerta CONS, TIF usable, record con patrón y d(P, F) ≥ 2T, con P y F dentro de
 la región de búsqueda (unión del disco de 3,4 km alrededor del cráter y el disco de `Distancia_km` + 1 km
 alrededor de `mirova_center`), con |r_P(mirova_center) − `Distancia_km`| ≤ 0,55 km (la cota del A/B S143)
-y en volcanes donde `mirova_center` está a menos de 1 km del cráter. Con el pool de la ronda 3 eso da
-**13 pasadas en 2 volcanes**: 12 de Lastarria y 1 de Láscar (H6).
+y en volcanes donde `mirova_center` está a menos de 1 km del cráter. Eso da **12 pasadas, todas de
+Lastarria**: la única candidata de Láscar sale por el filtro de región (su `F` está a 4,44 km del cráter
+y a 3,72 km de `mirova_center`, con el disco en 1,84 km) y además su patrón está invertido respecto de
+D19 (el cúmulo en el cráter y el `final_hotspot` lejos).
 
 **Semilla**: máximo de z sobre el anillo |r − `Distancia_km`| ≤ 0,6 km dentro de la región, con
 `z ≥ zc_anillo`. Si no hay, la pasada queda **sin identidad**.
@@ -196,7 +251,7 @@ caso, incluida la corona entre T y 2T alrededor de P, que se informa aparte.
 **Declarado de antemano**: en **Lastarria** la clase `F` es geométricamente imposible (su
 `mirova_center` está a 0,12 km del cráter y sus `Distancia_km` son 2,19, 2,40 y 2,70 km, así que el
 anillo nunca toca el cráter); las salidas posibles ahí son `P`, `otro`, `indefinido` y `sin identidad`.
-En la pasada de **Láscar** (`Distancia_km` 0,84 km) `F` sí es alcanzable.
+No queda ninguna pasada fuera de Lastarria, asi que `F` es inalcanzable en todo M1.
 
 **Contraste temporal de la semilla**: por cada pasada se informa cuántas veces la celda de la semilla es
 también el máximo del mismo anillo en las pasadas RUTINA del volcán (la ronda 3 midió que la celda a
@@ -224,20 +279,32 @@ MIROVA publicó algo esa noche y la lectura se confunde con la de M1; se informa
 noche de volcán** (A94), estratificado **por volcán**, 2.000 réplicas, `random.Random(144)`, orden de
 estratos alfabético.
 
-**Veredicto**, con al menos 30 noches de volcán fuera de Lastarria y al menos 3 volcanes con 20 noches:
+**Veredicto, medido contra el nivel del instrumento** (`R` de §5, con su intervalo), con al menos 30
+noches de volcán fuera de Lastarria y al menos 3 volcanes con 20 noches:
 - **"el cúmulo lejano cae sobre un exceso del campo de MIROVA"** si el intervalo del 95 % de `D` queda
-  entero por encima de **+0,05** y `D_v > 0` en al menos dos tercios de los volcanes con al menos 20
-  noches;
+  entero por encima de **máx(+0,05, extremo superior del intervalo de `R`)** y `D_v > 0` en al menos dos
+  tercios de los volcanes con al menos 20 noches;
 - **"no se distingue de los sitios donde publicamos otras noches"** si el intervalo del 95 % de `D`
-  queda entero dentro de **±0,05**;
+  queda entero dentro de **`R` ± 0,05**;
 - en cualquier otro caso, INCONCLUSO. Si hay menos de 3 volcanes con 20 noches, la segunda condición del
-  positivo **no es evaluable** y el veredicto es INCONCLUSO (H3: dos tercios de un conjunto vacío
-  admite dos lecturas, y así queda cerrado).
+  positivo **no es evaluable** y el veredicto es INCONCLUSO (dos tercios de un conjunto vacío admite dos
+  lecturas, y así queda cerrado).
 
-**Declarado de antemano sobre los tramos** (H3): con el n de hoy, el tramo posterior a #535 tiene
-intervalos de ancho cercano a 0,12, así que **no puede dar la salida de equivalencia**. El veredicto se
-toma sobre la muestra completa y los tramos se informan; una diferencia entre tramos se lee como
-descriptiva, no como contradicción.
+Por qué contra `R` y no contra cero: el instrumento deja un residuo medido en el estrato hermano, y
+declarar equivalencia contra cero sería declarar "no hay nada" sobre un efecto que el propio instrumento
+marca. Con la ventana de 45 a 120 minutos ese residuo debería quedar en cero (la quinta ronda midió
+-0,010 y +0,006 en esas bandas), pero eso hay que comprobarlo en la corrida, no suponerlo: por eso `R`
+se mide y entra en la regla.
+
+**Estadístico secundario, informado**: el rango de `Z_q(P_p)` entre los `Z_q` de los 5 sitios de
+referencia (empates a la mitad), cuyo nulo es 0,5. Se informa porque el indicador binario tira a cero el
+73,3 % de los `d_p` y pierde información, pero **no entra en el veredicto**, porque su nulo no está
+medido todavía.
+
+**Tramos**: el veredicto se toma sobre la muestra completa y los dos tramos se informan. Con el
+instrumento de la v6 el tramo posterior a #535 tiene intervalos de ancho cercano a 0,086, así que la
+equivalencia **sí** es alcanzable de ese lado (la v5 decía lo contrario apoyada en el instrumento
+viejo). Una diferencia entre tramos se lee como descriptiva.
 
 **Qué significa cada salida** (H1 y H2, la lectura corregida): la imagen no fue elegida por nuestro
 detector, así que un exceso ahí no es el eco de nuestra propia selección; y como es la misma noche, un
@@ -272,4 +339,4 @@ M1 acompaña y no decide.
 - Los TIF geográficos son un remuestreo de MIROVA con método no documentado; G lo valida en Láscar.
 - La hora de adquisición del índice puede no ser la de la imagen (A106); el md5 propio y la mediana
   nocturna lo acotan sin probarlo imagen por imagen.
-- M1 son 13 pasadas en 2 volcanes y no puede generalizar.
+- M1 son 12 pasadas de un solo volcan (Lastarria) y no puede generalizar.
