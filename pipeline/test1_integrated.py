@@ -9,16 +9,35 @@
 # Variables     : k_sigma (umbral N·sigma), mir_rel (piso relativo), inner_km/roi_km (anillo de fondo).
 # Limitaciones  : Sobre glaciar el fondo del anillo se sesga frio → puede marcar el halo nival
 #                 (sobre-deteccion difusa A82); por eso se acota con los filtros contextual/espacial.
-# Refs/datos    : Coppola et al. 2015 Bull.Volc. 77:55 §2.2. Validado S25 (6/6 ALERTA Villarrica).
+# Refs/datos    : DETECTOR PROPIO del proyecto, no del paper (D30, verificado S146/S147). Ver la
+#                 nota bibliografica del docstring. Validado S25 (6/6 ALERTA Villarrica).
 #                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md
 # ════════════════════════════════════════════════════════════════════
-"""Coppola 2015 Eq.1 — Test 1 integrated-ROI MIR detection.
+"""Test 1 integrado en el ROI: deteccion MIR de anomalias sub-pixel extendidas.
 
-Reference: Coppola et al. 2015, "MIROVA: a new hotspot detection system based
-on MODIS Level 1B data", Bulletin of Volcanology 77:55, §2.2.
+NOTA BIBLIOGRAFICA (corregida S147, divergencia D30). Hasta S147 este archivo citaba
+"Coppola et al. 2015, MIROVA: a new hotspot detection system based on MODIS Level 1B data,
+Bulletin of Volcanology 77:55, §2.2". **Esa referencia no corresponde a ningun articulo
+localizable** y la cita se retira:
 
-Test 1 detects spatially-extended sub-pixel hot anomalies that pixel-by-pixel
-methods miss. Used by MIROVA as one of three independent detection criteria.
+  - El articulo 55 del volumen 77 de Bulletin of Volcanology (2015) es Heap et al., "Fracture
+    and compaction of andesite in a volcanic edifice", DOI 10.1007/s00445-015-0938-7, que es
+    mecanica de rocas y no tiene nada que ver.
+  - Crossref y OpenAlex devuelven 0 articulos de Coppola en esa revista en 2015, con control de
+    consulta (la misma busqueda sin autor devuelve 12 articulos de ese numero, asi que el cero
+    no es de la consulta).
+  - El "coppola2015.pdf" del proyecto ES sp426.5.pdf, donde la Ec. 1 es el NTI, no un test
+    integrado, y no existe ningun paragrafo 2.2 con esa formula.
+
+Lo que el paper SI tiene (sp426.5.pdf p. 6, leida renderizando la pagina a imagen, A95) es un
+Test 1 POR PIXEL contra un umbral fijo de NTI: "NTI_PIX > K1 (Test 1)". No hay ninguna suma
+sobre el ROI en el algoritmo de deteccion del paper. **Este archivo implementa un detector
+propio del proyecto**, util y validado empiricamente, pero no es clon literal de MIROVA: esa
+es la divergencia D30 en docs/MIROVA_DIVERGENCES.md, abierta y sin decision.
+
+Es DECISION, no posicion ni magnitud. Detecta anomalias mas chicas que el pixel, que los tests
+pixel a pixel pierden: una fuente sub-pixel no levanta ningun pixel lo bastante como para cruzar
+un umbral, pero entibia un poco a varios vecinos a la vez.
 
 Validated S25 against 6 ALERTA Villarrica VIIRS 375m refs (lava lake
 0.05–0.21 MW): 6/6 refs trigger (POC `experiments/53_test1_villarrica_poc.py`).
@@ -198,6 +217,7 @@ def compute_test1_nti(
     min_bg_pixels: int = 20,
     local_bg_ring_km: tuple[float, float] | None = None,
     min_local_bg_pixels: int = 8,
+    null_corrected: bool = False,
 ) -> dict:
     """Test 1 integrado sobre exceso de NTI (S104 V2, realineamiento MIROVA).
 
@@ -284,7 +304,18 @@ def compute_test1_nti(
 
     contributing_in_roi = excess_roi > 0
     n_contributing = int(np.sum(contributing_in_roi))
-    abs_criterion = delta_nti > k_sigma * sigma_delta_nti
+    if null_corrected:
+        # Mismo arreglo que en compute_test1_mir (S147, D30): el estadistico recortado se compara
+        # contra su propio nulo, no contra la desviacion de la suma sin recortar. Esta rama esta
+        # APAGADA en produccion (ENABLE_TEST1_NTI_INTEGRAL = False), pero arrastraba el mismo
+        # defecto y se corrige junta para que no reviva al encenderla.
+        media_nula = n_roi * sigma_bg / math.sqrt(2.0 * math.pi)
+        sigma_delta_nti = sigma_bg * math.sqrt(n_roi * (0.5 - 1.0 / (2.0 * math.pi)))
+        k_observed = (delta_nti - media_nula) / sigma_delta_nti if sigma_delta_nti > 0 else 0.0
+        abs_criterion = k_observed > k_sigma
+    else:
+        k_observed = delta_nti / sigma_delta_nti if sigma_delta_nti > 0 else 0.0
+        abs_criterion = delta_nti > k_sigma * sigma_delta_nti
     rel_criterion = delta_nti > nti_relative * n_roi if nti_relative > 0 else True
     triggered = bool(abs_criterion and rel_criterion)
 
@@ -307,7 +338,7 @@ def compute_test1_nti(
         "rel_criterion": bool(rel_criterion), "n_roi": n_roi, "n_bg": n_bg,
         "n_contributing": n_contributing, "nti_bg": nti_bg, "sigma_bg": sigma_bg,
         "delta_nti_integrated": delta_nti, "sigma_delta_nti": sigma_delta_nti,
-        "k_sigma_observed": delta_nti / sigma_delta_nti if sigma_delta_nti > 0 else 0.0,
+        "k_sigma_observed": k_observed,
         "mask_roi": roi_mask, "mask_contributing": mask_contributing,
         "centroid_lat": centroid_lat, "centroid_lon": centroid_lon,
         "L_bg_mir": L_bg_mir, "reason": "",
@@ -327,6 +358,7 @@ def compute_test1_mir(
     mir_relative: float = 0.02,
     min_bg_pixels: int = 20,
     nti_hot_mask: "np.ndarray | None" = None,
+    null_corrected: bool = False,
 ) -> dict:
     """Coppola 2015 Test 1 integrated-ROI on a MIR brightness temperature array.
 
@@ -432,7 +464,26 @@ def compute_test1_mir(
     contributing_in_roi = excess_roi > 0
     n_contributing = int(np.sum(contributing_in_roi))
 
-    abs_criterion = delta_L > k_sigma * sigma_delta_L
+    if null_corrected:
+        # S147 (D30, docs/S147_TEST1_ESTADISTICO_CORREGIDO.md): el estadistico se compara contra
+        # SU PROPIO nulo. `delta_L` recorta los excesos negativos a cero, que es fisicamente
+        # correcto (un volcan agrega calor, no lo quita), pero la vara `sigma_bg*sqrt(N)` es la
+        # desviacion de la suma SIN recortar. Al recortar, el ruido puro deja de promediar cero:
+        # cada pixel aporta sigma/sqrt(2*pi), la suma crece con N y la vara solo con sqrt(N), asi
+        # que el cociente vale 0,399*sqrt(N) y sigma se cancela. El criterio termina midiendo el
+        # TAMANO DEL DISCO y no el calor: se cumple con N > 56,6, y el disco tiene ~201 pixeles en
+        # VIIRS 375. Para X ~ N(0, sigma): E[max(0,X)] = sigma/sqrt(2*pi) = 0,398942 sigma y
+        # Var[max(0,X)] = sigma^2 (1/2 - 1/(2*pi)) = 0,340845 sigma^2.
+        # N efectivo: los pixeles que PUEDEN aportar. Con la co-validacion NTI el resto queda en
+        # cero de forma determinista, asi que no son variables aleatorias y no entran al nulo.
+        n_eff = int(np.sum(nti_hot_mask[roi_mask])) if nti_hot_mask is not None else n_roi
+        media_nula = n_eff * sigma_bg / math.sqrt(2.0 * math.pi)
+        sigma_delta_L = sigma_bg * math.sqrt(n_eff * (0.5 - 1.0 / (2.0 * math.pi)))
+        k_observed = (delta_L - media_nula) / sigma_delta_L if sigma_delta_L > 0 else 0.0
+        abs_criterion = k_observed > k_sigma
+    else:
+        k_observed = delta_L / sigma_delta_L if sigma_delta_L > 0 else 0.0
+        abs_criterion = delta_L > k_sigma * sigma_delta_L
     rel_criterion = delta_L > mir_relative * L_bg * n_roi
     triggered = bool(abs_criterion and rel_criterion)
 
@@ -465,7 +516,7 @@ def compute_test1_mir(
         "sigma_bg": sigma_bg,
         "delta_L_integrated": delta_L,
         "sigma_delta_L_integrated": sigma_delta_L,
-        "k_sigma_observed": delta_L / sigma_delta_L if sigma_delta_L > 0 else 0.0,
+        "k_sigma_observed": k_observed,
         "rel_observed": delta_L / (L_bg * n_roi) if L_bg > 0 else 0.0,
         "mask_roi": roi_mask,
         "mask_contributing": mask_contributing,

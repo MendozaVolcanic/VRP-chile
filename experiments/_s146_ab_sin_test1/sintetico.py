@@ -170,7 +170,31 @@ def parametros_sinteticos(base):
     par["perdidas_esperadas_noche_sensor"] = []
     par["max_noches_perdidas_volcan"] = 0
     par["max_noches_perdidas_sensor"] = 0
-    par["_sintetico"] = "umbrales reales; listas de perdidas esperadas vaciadas a proposito"
+    # S147: desde que el piso de C1 se expresa en CONTEO (verificador H1: la tasa 0,667 rechazaba
+    # 12/18 por redondeo), hay que reescalarlo aca. El corpus sintetico tiene 24 pasadas positivas
+    # por sensor y el real 143 y 18, asi que un piso de 118 lo haria fallar siempre, por tamano y
+    # no por comportamiento. Se conserva la MISMA severidad relativa que tenia la tasa: 0,825 del
+    # brazo B en VIIRS 375 y tolerancia de una pasada en VIIRS 750.
+    n_pos_sintetico = 24
+    par["min_pasadas_positivas_publicadas"] = {
+        "VIIRS375": int(round(0.825 * n_pos_sintetico)),   # 20 de 24
+        "VIIRS750": n_pos_sintetico - 1,                   # 23 de 24, una de holgura
+    }
+    # El brazo C del sintetico no existe (solo se construyen 4 casos), pero si su bloque queda
+    # con conteos del corpus real y alguien lo usa, falla por tamano. Se escala igual.
+    pb = par.get("por_brazo", {}).get("_s146_ab_sin_prioridad_debil")
+    if pb:
+        pb["min_pasadas_positivas_publicadas"] = {"VIIRS375": int(round(0.86 * n_pos_sintetico)),
+                                                  "VIIRS750": n_pos_sintetico - 1}
+        pb["min_pasadas_apagadas_neg"] = {"VIIRS375": 1, "VIIRS750": 1}
+    # C8 no decide en el sintetico: el caso `bueno` apaga publicaciones de forma homogenea por
+    # construccion, asi que su contraste cae DENTRO del nulo barajado. El nulo no esta roto (el
+    # caso `muerto` lo hace fallar y el `inventa` lo cruza), pero en un corpus de juguete no
+    # distingue. Se informa y no decide, igual que en el brazo C real.
+    par["criterios_decisorios"] = [k for k in par["criterios_decisorios"]
+                                   if k != "C8_fuera_del_nulo_barajado"]
+    par["_sintetico"] = ("umbrales reales; listas de perdidas esperadas vaciadas a proposito; "
+                         "pisos de C1 reescalados al tamano del corpus de juguete; C8 informativo")
     p = base / "parametros_sintetico.json"
     p.write_text(json.dumps(par, indent=1, ensure_ascii=False), encoding="utf-8")
     return p

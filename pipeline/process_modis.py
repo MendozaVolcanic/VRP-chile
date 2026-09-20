@@ -13,7 +13,10 @@
 #                 scene), area de pixel (nadir-fijo), distancia al crater.
 # Limitaciones  : Sesgo topografico en cumbres nevadas (MIR absoluto), sobre-deteccion difusa irreducible a
 #                 1 km, saturacion de pixel, contaminacion por lago/nieve, falsos positivos por incendios.
-# Refs/datos    : Coppola et al. 2015 (BV 77:55), Coppola 2016a (GS SP426.5), Coppola 2024 (Springer).
+# Refs/datos    : Coppola 2016a (GS SP426.5), Coppola 2024 (Springer). La cita "Coppola et al.
+#                 2015 (BV 77:55)" se RETIRO en S147: no corresponde a ningun articulo
+#                 localizable (ese numero es Heap et al., mecanica de rocas). Ver D30 y la nota
+#                 bibliografica de pipeline/test1_integrated.py.
 #                 Entrenamiento: No aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md
 # ════════════════════════════════════════════════════════════════════
 """

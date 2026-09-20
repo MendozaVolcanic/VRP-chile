@@ -1,0 +1,1150 @@
+{
+ "meta": {
+  "ventana": [
+   "2026-08-29",
+   "2026-09-20"
+  ],
+  "sha_index_html": "24fba8a157136bf76509ed647c7d086d3f9f45aa",
+  "referencia": {
+   "fuente": "snapshot",
+   "sha_cons": "210fade2125490ebc8d31b19e5676fa050480f8a",
+   "sha_ocr": "6dc4585047c75335e3feff47fc093bda08853a71",
+   "sha_respaldo_20260408": "3bb77309a1f5c9ec061f908436cb2bdd2d3ea303"
+  },
+  "inner_radius_km": {
+   "Lascar": 5.0,
+   "Lastarria": 3.0,
+   "Isluga": 5.0,
+   "Tupungatito": 7.0,
+   "PlanchonPeteroa": 3.0,
+   "NevadosDeChillan": 5.0,
+   "Llaima": 5.0,
+   "Villarrica": 5.0,
+   "Copahue": 4.0,
+   "PuyehueCordonCaulle": 20.0,
+   "Chaiten": 5.0
+  },
+  "n_filas_ref_nocturnas": 1677,
+  "n_records_nocturnos": 2726,
+  "etiquetas": {
+   "neg_limpio": 1308,
+   "sin_info": 1239,
+   "pos": 148,
+   "far_ref": 31
+  },
+  "tolerancia_pareo_s": 120,
+  "generado_utc": "2026-09-20T15:19:14+00:00",
+  "definiciones": {
+   "pos": "pasada nuestra con fila ALERTA (CONS u OCR) nocturna a +-2 min",
+   "far_ref": "pasada con fila FALSO_POSITIVO y sin ALERTA: sin informacion para el crater",
+   "neg_limpio": "fila CONS RUTINA con VRP 0 a +-2 min, sin ALERTA ni FP esa noche y sensor",
+   "neg_estricto_noche_volcan": "neg_limpio y sin ALERTA ni FP en la noche del volcan (verificador S139)",
+   "sin_info": "resto, fuera de todo denominador",
+   "noche_volcan": "pos si alguna pasada pos; neg si hay neg_limpio y ninguna pos ni far_ref; publica si alguna pasada publica",
+   "nocturna": "store._reject_daytime por elevacion solar (auto_audit_weekly.es_pasada_diurna_descartada)"
+  },
+  "segundos": 5.8
+ },
+ "por_sensor": {
+  "MODIS": {
+   "pasada": {
+    "n_pos": 1,
+    "recall_pos": 1.0,
+    "n_neg_limpio": 383,
+    "tasa_pub_neg": 0.0914,
+    "n_neg_estricto_noche_volcan": 226,
+    "tasa_pub_neg_estricto_noche_volcan": 0.0752,
+    "n_far_ref": 0,
+    "n_sin_info": 151,
+    "pos_sin_record": 0
+   },
+   "noche_volcan": {
+    "n_pos": 1,
+    "recall_pos": 1.0,
+    "n_neg": 186,
+    "tasa_pub_neg": 0.1344
+   }
+  },
+  "VIIRS375": {
+   "pasada": {
+    "n_pos": 133,
+    "recall_pos": 1.0,
+    "n_neg_limpio": 351,
+    "tasa_pub_neg": 0.8632,
+    "n_neg_estricto_noche_volcan": 346,
+    "tasa_pub_neg_estricto_noche_volcan": 0.8642,
+    "n_far_ref": 31,
+    "n_sin_info": 584,
+    "pos_sin_record": 0
+   },
+   "noche_volcan": {
+    "n_pos": 76,
+    "recall_pos": 1.0,
+    "n_neg": 109,
+    "tasa_pub_neg": 1.0
+   }
+  },
+  "VIIRS750": {
+   "pasada": {
+    "n_pos": 14,
+    "recall_pos": 0.7143,
+    "n_neg_limpio": 574,
+    "tasa_pub_neg": 0.2178,
+    "n_neg_estricto_noche_volcan": 355,
+    "tasa_pub_neg_estricto_noche_volcan": 0.1915,
+    "n_far_ref": 0,
+    "n_sin_info": 504,
+    "pos_sin_record": 0
+   },
+   "noche_volcan": {
+    "n_pos": 11,
+    "recall_pos": 1.0,
+    "n_neg": 176,
+    "tasa_pub_neg": 0.5057
+   }
+  },
+  "CUALQUIERA": {
+   "pasada": {
+    "n_pos": 148,
+    "recall_pos": 0.973,
+    "n_neg_limpio": 1308,
+    "tasa_pub_neg": 0.354,
+    "n_neg_estricto_noche_volcan": 927,
+    "tasa_pub_neg_estricto_noche_volcan": 0.4142,
+    "n_far_ref": 31,
+    "n_sin_info": 1239,
+    "pos_sin_record": 0
+   },
+   "noche_volcan": {
+    "n_pos": 79,
+    "recall_pos": 1.0,
+    "n_neg": 107,
+    "tasa_pub_neg": 1.0
+   }
+  }
+ },
+ "por_volcan": {
+  "Lascar": {
+   "MODIS": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 32,
+     "tasa_pub_neg": 0.0,
+     "n_neg_estricto_noche_volcan": 11,
+     "tasa_pub_neg_estricto_noche_volcan": 0.0,
+     "n_far_ref": 0,
+     "n_sin_info": 11,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.0
+    }
+   },
+   "VIIRS375": {
+    "pasada": {
+     "n_pos": 21,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 18,
+     "tasa_pub_neg": 0.8889,
+     "n_neg_estricto_noche_volcan": 18,
+     "tasa_pub_neg_estricto_noche_volcan": 0.8889,
+     "n_far_ref": 6,
+     "n_sin_info": 43,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 12,
+     "recall_pos": 1.0,
+     "n_neg": 6,
+     "tasa_pub_neg": 1.0
+    }
+   },
+   "VIIRS750": {
+    "pasada": {
+     "n_pos": 4,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 39,
+     "tasa_pub_neg": 0.0769,
+     "n_neg_estricto_noche_volcan": 18,
+     "tasa_pub_neg_estricto_noche_volcan": 0.1111,
+     "n_far_ref": 0,
+     "n_sin_info": 45,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 4,
+     "recall_pos": 1.0,
+     "n_neg": 13,
+     "tasa_pub_neg": 0.3077
+    }
+   },
+   "CUALQUIERA": {
+    "pasada": {
+     "n_pos": 25,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 89,
+     "tasa_pub_neg": 0.2135,
+     "n_neg_estricto_noche_volcan": 47,
+     "tasa_pub_neg_estricto_noche_volcan": 0.383,
+     "n_far_ref": 6,
+     "n_sin_info": 99,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 13,
+     "recall_pos": 1.0,
+     "n_neg": 6,
+     "tasa_pub_neg": 1.0
+    }
+   }
+  },
+  "Lastarria": {
+   "MODIS": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 30,
+     "tasa_pub_neg": 0.0333,
+     "n_neg_estricto_noche_volcan": 10,
+     "tasa_pub_neg_estricto_noche_volcan": 0.0,
+     "n_far_ref": 0,
+     "n_sin_info": 15,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.0588
+    }
+   },
+   "VIIRS375": {
+    "pasada": {
+     "n_pos": 8,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 19,
+     "tasa_pub_neg": 0.8421,
+     "n_neg_estricto_noche_volcan": 19,
+     "tasa_pub_neg_estricto_noche_volcan": 0.8421,
+     "n_far_ref": 5,
+     "n_sin_info": 58,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 6,
+     "recall_pos": 1.0,
+     "n_neg": 6,
+     "tasa_pub_neg": 1.0
+    }
+   },
+   "VIIRS750": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 53,
+     "tasa_pub_neg": 0.0377,
+     "n_neg_estricto_noche_volcan": 18,
+     "tasa_pub_neg_estricto_noche_volcan": 0.0556,
+     "n_far_ref": 0,
+     "n_sin_info": 35,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.1176
+    }
+   },
+   "CUALQUIERA": {
+    "pasada": {
+     "n_pos": 8,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 102,
+     "tasa_pub_neg": 0.1863,
+     "n_neg_estricto_noche_volcan": 47,
+     "tasa_pub_neg_estricto_noche_volcan": 0.3617,
+     "n_far_ref": 5,
+     "n_sin_info": 108,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 6,
+     "recall_pos": 1.0,
+     "n_neg": 6,
+     "tasa_pub_neg": 1.0
+    }
+   }
+  },
+  "Isluga": {
+   "MODIS": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 28,
+     "tasa_pub_neg": 0.0,
+     "n_neg_estricto_noche_volcan": 4,
+     "tasa_pub_neg_estricto_noche_volcan": 0.0,
+     "n_far_ref": 0,
+     "n_sin_info": 11,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.0
+    }
+   },
+   "VIIRS375": {
+    "pasada": {
+     "n_pos": 35,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 6,
+     "tasa_pub_neg": 0.6667,
+     "n_neg_estricto_noche_volcan": 6,
+     "tasa_pub_neg_estricto_noche_volcan": 0.6667,
+     "n_far_ref": 4,
+     "n_sin_info": 41,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 18,
+     "recall_pos": 1.0,
+     "n_neg": 2,
+     "tasa_pub_neg": 1.0
+    }
+   },
+   "VIIRS750": {
+    "pasada": {
+     "n_pos": 2,
+     "recall_pos": 0.5,
+     "n_neg_limpio": 46,
+     "tasa_pub_neg": 0.413,
+     "n_neg_estricto_noche_volcan": 6,
+     "tasa_pub_neg_estricto_noche_volcan": 0.0,
+     "n_far_ref": 0,
+     "n_sin_info": 38,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 2,
+     "recall_pos": 1.0,
+     "n_neg": 15,
+     "tasa_pub_neg": 0.7333
+    }
+   },
+   "CUALQUIERA": {
+    "pasada": {
+     "n_pos": 37,
+     "recall_pos": 0.973,
+     "n_neg_limpio": 80,
+     "tasa_pub_neg": 0.2875,
+     "n_neg_estricto_noche_volcan": 16,
+     "tasa_pub_neg_estricto_noche_volcan": 0.25,
+     "n_far_ref": 4,
+     "n_sin_info": 90,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 18,
+     "recall_pos": 1.0,
+     "n_neg": 2,
+     "tasa_pub_neg": 1.0
+    }
+   }
+  },
+  "Tupungatito": {
+   "MODIS": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 35,
+     "tasa_pub_neg": 0.0571,
+     "n_neg_estricto_noche_volcan": 12,
+     "tasa_pub_neg_estricto_noche_volcan": 0.0833,
+     "n_far_ref": 0,
+     "n_sin_info": 13,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.1176
+    }
+   },
+   "VIIRS375": {
+    "pasada": {
+     "n_pos": 19,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 17,
+     "tasa_pub_neg": 0.8824,
+     "n_neg_estricto_noche_volcan": 17,
+     "tasa_pub_neg_estricto_noche_volcan": 0.8824,
+     "n_far_ref": 7,
+     "n_sin_info": 55,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 11,
+     "recall_pos": 1.0,
+     "n_neg": 6,
+     "tasa_pub_neg": 1.0
+    }
+   },
+   "VIIRS750": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 54,
+     "tasa_pub_neg": 0.2407,
+     "n_neg_estricto_noche_volcan": 18,
+     "tasa_pub_neg_estricto_noche_volcan": 0.2222,
+     "n_far_ref": 0,
+     "n_sin_info": 43,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.7059
+    }
+   },
+   "CUALQUIERA": {
+    "pasada": {
+     "n_pos": 19,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 106,
+     "tasa_pub_neg": 0.283,
+     "n_neg_estricto_noche_volcan": 47,
+     "tasa_pub_neg_estricto_noche_volcan": 0.4255,
+     "n_far_ref": 7,
+     "n_sin_info": 111,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 11,
+     "recall_pos": 1.0,
+     "n_neg": 6,
+     "tasa_pub_neg": 1.0
+    }
+   }
+  },
+  "PlanchonPeteroa": {
+   "MODIS": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 38,
+     "tasa_pub_neg": 0.0263,
+     "n_neg_estricto_noche_volcan": 23,
+     "tasa_pub_neg_estricto_noche_volcan": 0.0435,
+     "n_far_ref": 0,
+     "n_sin_info": 14,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.0588
+    }
+   },
+   "VIIRS375": {
+    "pasada": {
+     "n_pos": 7,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 35,
+     "tasa_pub_neg": 0.8286,
+     "n_neg_estricto_noche_volcan": 32,
+     "tasa_pub_neg_estricto_noche_volcan": 0.8125,
+     "n_far_ref": 2,
+     "n_sin_info": 55,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 5,
+     "recall_pos": 1.0,
+     "n_neg": 11,
+     "tasa_pub_neg": 1.0
+    }
+   },
+   "VIIRS750": {
+    "pasada": {
+     "n_pos": 1,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 52,
+     "tasa_pub_neg": 0.2115,
+     "n_neg_estricto_noche_volcan": 32,
+     "tasa_pub_neg_estricto_noche_volcan": 0.125,
+     "n_far_ref": 0,
+     "n_sin_info": 44,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 1,
+     "recall_pos": 1.0,
+     "n_neg": 16,
+     "tasa_pub_neg": 0.4375
+    }
+   },
+   "CUALQUIERA": {
+    "pasada": {
+     "n_pos": 8,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 125,
+     "tasa_pub_neg": 0.328,
+     "n_neg_estricto_noche_volcan": 87,
+     "tasa_pub_neg_estricto_noche_volcan": 0.3563,
+     "n_far_ref": 2,
+     "n_sin_info": 113,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 6,
+     "recall_pos": 1.0,
+     "n_neg": 10,
+     "tasa_pub_neg": 1.0
+    }
+   }
+  },
+  "NevadosDeChillan": {
+   "MODIS": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 36,
+     "tasa_pub_neg": 0.0278,
+     "n_neg_estricto_noche_volcan": 30,
+     "tasa_pub_neg_estricto_noche_volcan": 0.0333,
+     "n_far_ref": 0,
+     "n_sin_info": 13,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.0588
+    }
+   },
+   "VIIRS375": {
+    "pasada": {
+     "n_pos": 3,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 44,
+     "tasa_pub_neg": 0.8864,
+     "n_neg_estricto_noche_volcan": 44,
+     "tasa_pub_neg_estricto_noche_volcan": 0.8864,
+     "n_far_ref": 1,
+     "n_sin_info": 58,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 3,
+     "recall_pos": 1.0,
+     "n_neg": 14,
+     "tasa_pub_neg": 1.0
+    }
+   },
+   "VIIRS750": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 55,
+     "tasa_pub_neg": 0.1091,
+     "n_neg_estricto_noche_volcan": 47,
+     "tasa_pub_neg_estricto_noche_volcan": 0.0851,
+     "n_far_ref": 0,
+     "n_sin_info": 51,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.2353
+    }
+   },
+   "CUALQUIERA": {
+    "pasada": {
+     "n_pos": 3,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 135,
+     "tasa_pub_neg": 0.3407,
+     "n_neg_estricto_noche_volcan": 121,
+     "tasa_pub_neg_estricto_noche_volcan": 0.3636,
+     "n_far_ref": 1,
+     "n_sin_info": 122,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 3,
+     "recall_pos": 1.0,
+     "n_neg": 14,
+     "tasa_pub_neg": 1.0
+    }
+   }
+  },
+  "Llaima": {
+   "MODIS": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 35,
+     "tasa_pub_neg": 0.0,
+     "n_neg_estricto_noche_volcan": 31,
+     "tasa_pub_neg_estricto_noche_volcan": 0.0,
+     "n_far_ref": 0,
+     "n_sin_info": 13,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.0
+    }
+   },
+   "VIIRS375": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 52,
+     "tasa_pub_neg": 0.8654,
+     "n_neg_estricto_noche_volcan": 52,
+     "tasa_pub_neg_estricto_noche_volcan": 0.8654,
+     "n_far_ref": 2,
+     "n_sin_info": 52,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 15,
+     "tasa_pub_neg": 1.0
+    }
+   },
+   "VIIRS750": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 59,
+     "tasa_pub_neg": 0.1864,
+     "n_neg_estricto_noche_volcan": 54,
+     "tasa_pub_neg_estricto_noche_volcan": 0.1852,
+     "n_far_ref": 0,
+     "n_sin_info": 47,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.5294
+    }
+   },
+   "CUALQUIERA": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 146,
+     "tasa_pub_neg": 0.3836,
+     "n_neg_estricto_noche_volcan": 137,
+     "tasa_pub_neg_estricto_noche_volcan": 0.4015,
+     "n_far_ref": 2,
+     "n_sin_info": 112,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 15,
+     "tasa_pub_neg": 1.0
+    }
+   }
+  },
+  "Villarrica": {
+   "MODIS": {
+    "pasada": {
+     "n_pos": 1,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 33,
+     "tasa_pub_neg": 0.1515,
+     "n_neg_estricto_noche_volcan": 29,
+     "tasa_pub_neg_estricto_noche_volcan": 0.1724,
+     "n_far_ref": 0,
+     "n_sin_info": 16,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 1,
+     "recall_pos": 1.0,
+     "n_neg": 16,
+     "tasa_pub_neg": 0.3125
+    }
+   },
+   "VIIRS375": {
+    "pasada": {
+     "n_pos": 3,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 51,
+     "tasa_pub_neg": 0.8431,
+     "n_neg_estricto_noche_volcan": 49,
+     "tasa_pub_neg_estricto_noche_volcan": 0.8571,
+     "n_far_ref": 1,
+     "n_sin_info": 51,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 3,
+     "recall_pos": 1.0,
+     "n_neg": 15,
+     "tasa_pub_neg": 1.0
+    }
+   },
+   "VIIRS750": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 57,
+     "tasa_pub_neg": 0.193,
+     "n_neg_estricto_noche_volcan": 50,
+     "tasa_pub_neg_estricto_noche_volcan": 0.22,
+     "n_far_ref": 0,
+     "n_sin_info": 49,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.5294
+    }
+   },
+   "CUALQUIERA": {
+    "pasada": {
+     "n_pos": 4,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 141,
+     "tasa_pub_neg": 0.4184,
+     "n_neg_estricto_noche_volcan": 128,
+     "tasa_pub_neg_estricto_noche_volcan": 0.4531,
+     "n_far_ref": 1,
+     "n_sin_info": 116,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 4,
+     "recall_pos": 1.0,
+     "n_neg": 14,
+     "tasa_pub_neg": 1.0
+    }
+   }
+  },
+  "Copahue": {
+   "MODIS": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 35,
+     "tasa_pub_neg": 0.0,
+     "n_neg_estricto_noche_volcan": 33,
+     "tasa_pub_neg_estricto_noche_volcan": 0.0,
+     "n_far_ref": 0,
+     "n_sin_info": 14,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.0
+    }
+   },
+   "VIIRS375": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 52,
+     "tasa_pub_neg": 0.8654,
+     "n_neg_estricto_noche_volcan": 52,
+     "tasa_pub_neg_estricto_noche_volcan": 0.8654,
+     "n_far_ref": 1,
+     "n_sin_info": 50,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 16,
+     "tasa_pub_neg": 1.0
+    }
+   },
+   "VIIRS750": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 57,
+     "tasa_pub_neg": 0.1754,
+     "n_neg_estricto_noche_volcan": 53,
+     "tasa_pub_neg_estricto_noche_volcan": 0.1698,
+     "n_far_ref": 0,
+     "n_sin_info": 45,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.5294
+    }
+   },
+   "CUALQUIERA": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 144,
+     "tasa_pub_neg": 0.3819,
+     "n_neg_estricto_noche_volcan": 138,
+     "tasa_pub_neg_estricto_noche_volcan": 0.3913,
+     "n_far_ref": 1,
+     "n_sin_info": 109,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 16,
+     "tasa_pub_neg": 1.0
+    }
+   }
+  },
+  "PuyehueCordonCaulle": {
+   "MODIS": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 41,
+     "tasa_pub_neg": 0.5854,
+     "n_neg_estricto_noche_volcan": 15,
+     "tasa_pub_neg_estricto_noche_volcan": 0.6,
+     "n_far_ref": 0,
+     "n_sin_info": 15,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.8235
+    }
+   },
+   "VIIRS375": {
+    "pasada": {
+     "n_pos": 29,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 22,
+     "tasa_pub_neg": 0.9545,
+     "n_neg_estricto_noche_volcan": 22,
+     "tasa_pub_neg_estricto_noche_volcan": 0.9545,
+     "n_far_ref": 1,
+     "n_sin_info": 56,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 12,
+     "recall_pos": 1.0,
+     "n_neg": 7,
+     "tasa_pub_neg": 1.0
+    }
+   },
+   "VIIRS750": {
+    "pasada": {
+     "n_pos": 7,
+     "recall_pos": 0.5714,
+     "n_neg_limpio": 44,
+     "tasa_pub_neg": 0.6136,
+     "n_neg_estricto_noche_volcan": 23,
+     "tasa_pub_neg_estricto_noche_volcan": 0.6087,
+     "n_far_ref": 0,
+     "n_sin_info": 57,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 4,
+     "recall_pos": 1.0,
+     "n_neg": 13,
+     "tasa_pub_neg": 1.0
+    }
+   },
+   "CUALQUIERA": {
+    "pasada": {
+     "n_pos": 36,
+     "recall_pos": 0.9167,
+     "n_neg_limpio": 107,
+     "tasa_pub_neg": 0.6729,
+     "n_neg_estricto_noche_volcan": 60,
+     "tasa_pub_neg_estricto_noche_volcan": 0.7333,
+     "n_far_ref": 1,
+     "n_sin_info": 128,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 12,
+     "recall_pos": 1.0,
+     "n_neg": 7,
+     "tasa_pub_neg": 1.0
+    }
+   }
+  },
+  "Chaiten": {
+   "MODIS": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 40,
+     "tasa_pub_neg": 0.025,
+     "n_neg_estricto_noche_volcan": 28,
+     "tasa_pub_neg_estricto_noche_volcan": 0.0,
+     "n_far_ref": 0,
+     "n_sin_info": 16,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.0588
+    }
+   },
+   "VIIRS375": {
+    "pasada": {
+     "n_pos": 8,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 35,
+     "tasa_pub_neg": 0.8571,
+     "n_neg_estricto_noche_volcan": 35,
+     "tasa_pub_neg_estricto_noche_volcan": 0.8571,
+     "n_far_ref": 1,
+     "n_sin_info": 65,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 6,
+     "recall_pos": 1.0,
+     "n_neg": 11,
+     "tasa_pub_neg": 1.0
+    }
+   },
+   "VIIRS750": {
+    "pasada": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg_limpio": 58,
+     "tasa_pub_neg": 0.2069,
+     "n_neg_estricto_noche_volcan": 36,
+     "tasa_pub_neg_estricto_noche_volcan": 0.25,
+     "n_far_ref": 0,
+     "n_sin_info": 50,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 0,
+     "recall_pos": null,
+     "n_neg": 17,
+     "tasa_pub_neg": 0.5294
+    }
+   },
+   "CUALQUIERA": {
+    "pasada": {
+     "n_pos": 8,
+     "recall_pos": 1.0,
+     "n_neg_limpio": 133,
+     "tasa_pub_neg": 0.3233,
+     "n_neg_estricto_noche_volcan": 99,
+     "tasa_pub_neg_estricto_noche_volcan": 0.3939,
+     "n_far_ref": 1,
+     "n_sin_info": 131,
+     "pos_sin_record": 0
+    },
+    "noche_volcan": {
+     "n_pos": 6,
+     "recall_pos": 1.0,
+     "n_neg": 11,
+     "tasa_pub_neg": 1.0
+    }
+   }
+  }
+ },
+ "far_ref": {
+  "MODIS": {
+   "n": 0,
+   "frac_far_con_cumulo": null,
+   "frac_publica": null,
+   "n_con_distancia": 0,
+   "frac_radio_a_2km": null
+  },
+  "VIIRS375": {
+   "n": 31,
+   "frac_far_con_cumulo": 0.0645,
+   "frac_publica": 0.9355,
+   "n_con_distancia": 31,
+   "frac_radio_a_2km": 0.0645
+  },
+  "VIIRS750": {
+   "n": 0,
+   "frac_far_con_cumulo": null,
+   "frac_publica": null,
+   "n_con_distancia": 0,
+   "frac_radio_a_2km": null
+  },
+  "noches_crater_tapado": 10
+ },
+ "cenital_v375": {
+  "neg_limpio|z30-50": {
+   "pub": 67,
+   "n": 75
+  },
+  "neg_limpio|z50-60": {
+   "pub": 59,
+   "n": 64
+  },
+  "neg_limpio|z<30": {
+   "pub": 97,
+   "n": 100
+  },
+  "neg_limpio|z>=60": {
+   "pub": 80,
+   "n": 112
+  },
+  "pos|z30-50": {
+   "pub": 41,
+   "n": 41
+  },
+  "pos|z50-60": {
+   "pub": 27,
+   "n": 27
+  },
+  "pos|z<30": {
+   "pub": 58,
+   "n": 58
+  },
+  "pos|z>=60": {
+   "pub": 7,
+   "n": 7
+  }
+ },
+ "alertas_sin_record": {},
+ "controles": {
+  "identidad_predicado": true,
+  "identidad_valores": [
+   [
+    0,
+    1,
+    1,
+    1,
+    0
+   ],
+   [
+    1,
+    0
+   ]
+  ],
+  "todo_publica": {
+   "MODIS": {
+    "n_pos": 1,
+    "recall_pos": 1.0,
+    "n_neg_limpio": 383,
+    "tasa_pub_neg": 1.0,
+    "n_neg_estricto_noche_volcan": 226,
+    "tasa_pub_neg_estricto_noche_volcan": 1.0,
+    "n_far_ref": 0,
+    "n_sin_info": 151,
+    "pos_sin_record": 0
+   },
+   "VIIRS375": {
+    "n_pos": 133,
+    "recall_pos": 1.0,
+    "n_neg_limpio": 351,
+    "tasa_pub_neg": 1.0,
+    "n_neg_estricto_noche_volcan": 346,
+    "tasa_pub_neg_estricto_noche_volcan": 1.0,
+    "n_far_ref": 31,
+    "n_sin_info": 584,
+    "pos_sin_record": 0
+   },
+   "VIIRS750": {
+    "n_pos": 14,
+    "recall_pos": 1.0,
+    "n_neg_limpio": 574,
+    "tasa_pub_neg": 1.0,
+    "n_neg_estricto_noche_volcan": 355,
+    "tasa_pub_neg_estricto_noche_volcan": 1.0,
+    "n_far_ref": 0,
+    "n_sin_info": 504,
+    "pos_sin_record": 0
+   }
+  },
+  "nada_publica": {
+   "MODIS": {
+    "n_pos": 1,
+    "recall_pos": 0.0,
+    "n_neg_limpio": 383,
+    "tasa_pub_neg": 0.0,
+    "n_neg_estricto_noche_volcan": 226,
+    "tasa_pub_neg_estricto_noche_volcan": 0.0,
+    "n_far_ref": 0,
+    "n_sin_info": 151,
+    "pos_sin_record": 0
+   },
+   "VIIRS375": {
+    "n_pos": 133,
+    "recall_pos": 0.0,
+    "n_neg_limpio": 351,
+    "tasa_pub_neg": 0.0,
+    "n_neg_estricto_noche_volcan": 346,
+    "tasa_pub_neg_estricto_noche_volcan": 0.0,
+    "n_far_ref": 31,
+    "n_sin_info": 584,
+    "pos_sin_record": 0
+   },
+   "VIIRS750": {
+    "n_pos": 14,
+    "recall_pos": 0.0,
+    "n_neg_limpio": 574,
+    "tasa_pub_neg": 0.0,
+    "n_neg_estricto_noche_volcan": 355,
+    "tasa_pub_neg_estricto_noche_volcan": 0.0,
+    "n_far_ref": 0,
+    "n_sin_info": 504,
+    "pos_sin_record": 0
+   }
+  },
+  "auc_real_disp_v375_por_volcan": {
+   "Lascar": 0.717,
+   "Lastarria": 0.918,
+   "Isluga": 0.9,
+   "Tupungatito": 0.935,
+   "PlanchonPeteroa": 0.927,
+   "PuyehueCordonCaulle": 0.98,
+   "Chaiten": 0.946
+  },
+  "auc_barajado_por_volcan": {
+   "Lascar": 0.508,
+   "Lastarria": 0.47,
+   "Isluga": 0.474,
+   "Tupungatito": 0.5,
+   "PlanchonPeteroa": 0.512,
+   "PuyehueCordonCaulle": 0.507,
+   "Chaiten": 0.489
+  },
+  "auc_oraculo": 1.0
+ }
+}

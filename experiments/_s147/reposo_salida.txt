@@ -1,0 +1,11 @@
+ventana: desde 2026-08-29 (entera posterior al cambio de regimen de #535)
+poblacion: TODOS los records, no negativos limpios
+sensor      N disco   reposo  mediana  razon  >3 sigma  n con k  n total
+VIIRS375        201     5.66     4.70  0.831     90.9%     1048     1099
+VIIRS750         50     2.83     2.37  0.838     27.7%      902     1092
+MODIS            28     2.12     1.94  0.912     11.9%      168      535
+
+LECTURA: si el cociente 'razon' es parecido en los tres sensores, el estadistico
+esta gobernado por el tamano del disco (N) y no por el calor. El umbral del codigo
+es 3,0 fijo para los tres, asi que el sensor con el disco mas grande llega al
+umbral por construccion y el mas chico no.
