@@ -8,9 +8,9 @@
 > M-band y 5 del sustrato). Sin cambios sin commitear salvo `experiments/_s140/`, que ya venía sin
 > trackear desde S140. Disco: **9,8 GB libres de 476**.
 >
-> ⚠️ **Estado fijado con un trabajo en curso**: quedó un vigía de fondo esperando la primera corrida
-> NRT posterior al merge de #709. Sólo observa, no commitea, así que no puede aterrizar nada encima
-> de este traspaso. Ver la fila del NRT en §a.
+> **Sin trabajo en vuelo.** El vigía que esperaba la primera corrida NRT posterior al merge de #709
+> terminó: dio verde y con datos, así que ese pendiente quedó **resuelto dentro de esta misma
+> sesión**. Ver la fila del NRT en §a.
 >
 > Sesión de tres tramos: ejecutar el plan de D25 en VIIRS 750, medir dónde está la paridad, y auditar
 > cuatro frentes en paralelo. El tercero terminó dando vuelta la prioridad de los otros dos.
@@ -21,7 +21,7 @@
 |---|---|---|
 | **D25 (fondo por vecinos) en VIIRS 750** | **implementado y APAGADO** en producción | PR #709 (`d70199136`), tag `pre-s145-d25-v750`, A45 confirmado. `ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750 = False` |
 | Su efecto, medido de punta a punta | fondo 0,204 → 0,105 W/m²/sr/µm, magnitud 0,705 → **2,291 MW** (factor 3,2) | `tests/test_d25_fondo_vecinos_v750_s145.py`, escena `nevado` del arnés de S142 |
-| **Primera corrida NRT con ese cambio** | ⚠️ **TODAVÍA NO OCURRIÓ** | la última arrancó 03:33 UTC y el merge fue 04:21. Riesgo bajo (flag OFF + golden idéntico) pero **no está verificado en producción** |
+| **Primera corrida NRT con ese cambio** | ✅ **VERDE Y PRODUCIENDO** (resuelto al cerrar) | run `35501310002`, 09:04 UTC, `success`; y commiteó datos de 6+ volcanes entre 09:24 y 09:43 UTC. No es un verde vacío (A64): produjo. **D25 en M-band queda verificado en producción** |
 | **Paridad del régimen actual** | recall **78 de 78 noches**; brecha en sobre-publicación | `experiments/_s145_paridad/banco_s145.json`, `docs/audit_s145/PARIDAD_Y_OBJETIVOS_S145.md` |
 | D13: la cerca del frontend | **subestimaba por más del doble**: apaga el **70,7 %** de la magnitud, no el 31 % | `docs/audit_s145/D13_CERCA_FRONTEND_REMEDIDA.md` |
 | D26: "efecto nulo" | **deja de ser menor**: el sigma gobierna en 58,7 % de V375 y 75,0 % de V750 | `docs/audit_s145/DIVERGENCIAS_MENORES_VERIFICADAS.md` |
@@ -82,7 +82,7 @@ decirle al operador cuál de las dos cosas mira.
 | Que adoptar ese brazo mejore la paridad con MIROVA | **SIN MEDIR**: lo medido es fidelidad al Apéndice A, que no dice nada de las 2285 pasadas del régimen actual |
 | `geo_class` existe y no separa nada (5 `extension` en 62.880 records) | **CONFIRMADO** |
 | Que las categorías b, c y d se puedan separar con lo persistido | **REFUTADO**: 621 de 1050 quedan mezcladas, y toda regla candidata destruye lo confirmado por MIROVA |
-| El cambio de D25 no rompe el NRT en producción | **SOSPECHA**: flag OFF y golden idéntico, pero ninguna corrida lo ha ejercido |
+| El cambio de D25 no rompe el NRT en producción | **CONFIRMADO** al cerrar: run 35501310002 verde y con datos de 6+ volcanes |
 
 ## e. Lo que ya está cerrado y no hay que rehacer
 
@@ -114,9 +114,9 @@ largos ni medios, explicando como geólogo: fenómeno, mecanismo, números al fi
    gh api -i repos/MendozaVolcanic/VRP-chile | grep -i date         (hora del servidor, A86)
    python -m pytest tests/ -q -p no:cacheprovider | tail -1          (base: 1568 passed)
    NRT: gh run list --workflow nrt.yml -L 5
-   PENDIENTE DE S145: comprobar que la primera corrida NRT posterior al 2026-09-20 04:21 UTC
-   (el merge de #709) quedó verde. Si falló, el sospechoso es D25 en M-band, y se revierte con
-   el tag pre-s145-d25-v750.
+   (S145 dejó esto RESUELTO al cerrar: el run 35501310002 de las 09:04 UTC quedó verde y
+   commiteó datos de 6+ volcanes, así que D25 en M-band ya corrió en produccion sin romper nada.
+   Si aun asi ves algo raro en M-band, el tag para revertir es pre-s145-d25-v750.)
 
 2. LEE EN ORDEN: CLAUDE.md del proyecto · tasks/BLOQUE_ARRANQUE_S146.md ·
    docs/PLAN_AUDITORIA_S146.md · docs/audit_s145/PARIDAD_Y_OBJETIVOS_S145.md ·
