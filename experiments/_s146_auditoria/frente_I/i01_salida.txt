@@ -1,0 +1,45 @@
+
+== CRUDO registro_vrp_consolidado.csv: 38403 filas, 3295 en ventana; rango fechas 2026-01-10 19:06:00 a 2026-09-20 02:45:00
+ sensor x tipo (ventana): {('MODIS', 'ALERTA_TERMICA'): 1, ('MODIS', 'FALSO_POSITIVO'): 4, ('MODIS', 'RUTINA'): 882, ('VIIRS', 'ALERTA_TERMICA'): 18, ('VIIRS', 'FALSO_POSITIVO'): 9, ('VIIRS', 'RUTINA'): 1179, ('VIIRS375', 'ALERTA_TERMICA'): 115, ('VIIRS375', 'FALSO_POSITIVO'): 48, ('VIIRS375', 'RUTINA'): 1039}
+ claves (timestamp,Volcan,Sensor) repetidas en todo el archivo: 0
+ filas en ventana con epoch != Fecha_Satelite_UTC leida como UTC: 0
+ segundos de la hora (ventana): {'00': 1453, '01': 967, '02': 875}
+ minutos mod 5 == 0: 1348 de 3295
+ Editado: {'NO': 3295}
+ RUTINA con VRP != 0: 0
+ clasif x tipo: {('RUTINA', 'NULO'): 3100, ('ALERTA_TERMICA', 'Muy Bajo'): 132, ('FALSO_POSITIVO', 'NULO'): 61, ('ALERTA_TERMICA', 'Bajo'): 2}
+ latencia pasada->primera captura (h, hora Chile ambas): p05 1.7 p50 3.3 p95 6.2 max 17.3 n 3295
+
+== CRUDO registro_vrp_ocr.csv: 987 filas, 79 en ventana; rango fechas 2026-01-20 05:12:00 a 2026-09-19 06:24:00
+ sensor x tipo (ventana): {('VIIRS', 'ALERTA_TERMICA_OCR'): 1, ('VIIRS375', 'ALERTA_TERMICA_OCR'): 77, ('VIIRS375', 'FALSO_POSITIVO_OCR'): 1}
+ claves (timestamp,Volcan,Sensor) repetidas en todo el archivo: 0
+ filas en ventana con epoch != Fecha_Satelite_UTC leida como UTC: 0
+ segundos de la hora (ventana): {'00': 32, '02': 25, '01': 22}
+ minutos mod 5 == 0: 24 de 79
+ Editado: {'NO': 78, 'AUTO': 1}
+ confianza x tipo: {('ALERTA_TERMICA_OCR', 'alta', 'False'): 74, ('ALERTA_TERMICA_OCR', 'media', 'False'): 3, ('FALSO_POSITIVO_OCR', 'baja', 'False'): 1, ('ALERTA_TERMICA_OCR', 'media', 'True'): 1}
+
+== LOADER: filas en ventana 3374 | origen: {'principal': 3374}
+   ('MODIS', 'CONS', 'ALERTA_TERMICA', 'NOCHE') 1
+   ('MODIS', 'CONS', 'FALSO_POSITIVO', 'DIA') 4
+   ('MODIS', 'CONS', 'RUTINA', 'DIA') 436
+   ('MODIS', 'CONS', 'RUTINA', 'NOCHE') 446
+   ('VIIRS375', 'CONS', 'ALERTA_TERMICA', 'DIA') 2
+   ('VIIRS375', 'CONS', 'ALERTA_TERMICA', 'NOCHE') 113
+   ('VIIRS375', 'CONS', 'FALSO_POSITIVO', 'DIA') 18
+   ('VIIRS375', 'CONS', 'FALSO_POSITIVO', 'NOCHE') 30
+   ('VIIRS375', 'CONS', 'RUTINA', 'DIA') 525
+   ('VIIRS375', 'CONS', 'RUTINA', 'NOCHE') 514
+   ('VIIRS375', 'OCR', 'ALERTA_TERMICA_OCR', 'DIA') 3
+   ('VIIRS375', 'OCR', 'ALERTA_TERMICA_OCR', 'NOCHE') 74
+   ('VIIRS375', 'OCR', 'FALSO_POSITIVO_OCR', 'NOCHE') 1
+   ('VIIRS750', 'CONS', 'ALERTA_TERMICA', 'NOCHE') 18
+   ('VIIRS750', 'CONS', 'FALSO_POSITIVO', 'DIA') 7
+   ('VIIRS750', 'CONS', 'FALSO_POSITIVO', 'NOCHE') 2
+   ('VIIRS750', 'CONS', 'RUTINA', 'DIA') 522
+   ('VIIRS750', 'CONS', 'RUTINA', 'NOCHE') 657
+   ('VIIRS750', 'OCR', 'ALERTA_TERMICA_OCR', 'DIA') 1
+ hora UTC de filas NOCTURNAS: {'00': 18, '01': 133, '02': 75, '04': 168, '05': 667, '06': 538, '07': 157, '08': 100}
+ hora UTC de filas DIURNAS  : {'12': 117, '13': 102, '17': 239, '18': 351, '19': 459, '20': 161, '21': 89}
+ claves con fila CONS y OCR a la vez: 45 -> {('ALERTA_TERMICA', 'ALERTA_TERMICA_OCR'): 44, ('FALSO_POSITIVO', 'FALSO_POSITIVO_OCR'): 1}
+ filas OCR totales en ventana: 79

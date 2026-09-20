@@ -1,0 +1,68 @@
+{
+ "_que_es": "Umbrales y ventana del A/B S146 'sin el Test 1 integrado'. CONGELADOS: escritos y commiteados ANTES de correr ningun brazo. La justificacion de cada numero esta en PREREGISTRO.md, seccion 6. Cambiar cualquier valor despues de ver un resultado invalida el A/B.",
+
+ "ventana": ["2026-09-01", "2026-09-20"],
+ "_ventana_por_que": "Regimen posterior a #535 (2026-08-28 23:00 UTC, A104) y exactamente la misma ventana que midio la Fase 1, para que el control se pueda comparar pasada por pasada contra produccion. FIJA: no se mueve aunque el A/B se despache mas tarde (A90, denominador que se mueve solo).",
+
+ "banda_control_tasa_pub_neg": {
+  "VIIRS375": [0.80, 0.92],
+  "VIIRS750": [0.16, 0.27],
+  "MODIS": [0.07, 0.16]
+ },
+ "_banda_por_que": "Fase 1 midio 0,8633 / 0,2138 / 0,1139 sobre los records de produccion. El control se REPROCESA, asi que puede diferir por granulos NRT contra estandar y por disponibilidad. Fuera de estas bandas algo del reproceso o del evaluador esta mal y el A/B no se interpreta.",
+
+ "min_fraccion_publicacion_identica": 0.98,
+ "_control_positivo_por_que": "El control reprocesado tiene que reproducir produccion en la decision de publicar en al menos 98 de cada 100 pasadas comunes. El 2 % de holgura cubre el reproceso NRT contra estandar (delta de BT bajo 0,1 K, despreciable para el VRP, pero puede cruzar un umbral en una pasada al limite).",
+
+ "max_vrp_fn_aceptable_mw": 0.5,
+ "_fn_por_que": "Prioridad declarada del perfil mirova_equivalent: se aceptan falsos negativos sub-pixel bajo 0,5 MW. UNA sola pasada perdida que MIROVA publico con 0,5 MW o mas basta para NO ADOPTAR. Todas las pasadas perdidas se listan una por una con su magnitud, volcan, fecha, plataforma y sensor.",
+
+ "piso_recall_pasada": {"VIIRS375": 0.825, "VIIRS750": 0.667},
+ "_piso_recall_por_que": "La vara de recall que DECIDE es la PASADA en que MIROVA alerto, por sensor, porque es la unica con poder medido. Medido sobre produccion en la misma ventana (experiments/_s146_ab_sin_test1/poder_recall.json, 200 barajados dentro de cada volcan y sensor): la noche del volcan da 78 de 78 y el azar la alcanza en el 98,5 % de los barajados (NO DISCRIMINA); la noche del sensor en VIIRS 375 da 75 de 75 y el azar la alcanza en el 98,5 % (NO DISCRIMINA); la pasada da 143 de 143 en VIIRS 375 contra un nulo de 124 a 137 y 13 de 18 en VIIRS 750 contra un nulo de 2 a 12, y el azar no la alcanza nunca (DISCRIMINA las dos). MODIS queda fuera: una sola pasada positiva. Los pisos salen de la cota pesimista de la Fase 1: en VIIRS 375, 118 de 143 publicadas sin el Test 1 es 0,825; en VIIRS 750, 13 de 18 menos la perdida segura de Cordon Caulle es 12 de 18, o sea 0,667.",
+
+ "perdidas_esperadas_noche_volcan": [
+  "Isluga|2026-09-19",
+  "Lastarria|2026-09-01",
+  "NevadosDeChillan|2026-09-18",
+  "Villarrica|2026-09-16"
+ ],
+ "max_noches_perdidas_volcan": 4,
+ "perdidas_esperadas_noche_sensor": [
+  "Isluga|VIIRS375|2026-09-19",
+  "Lastarria|VIIRS375|2026-09-01",
+  "NevadosDeChillan|VIIRS375|2026-09-18",
+  "Villarrica|VIIRS375|2026-09-16",
+  "Isluga|VIIRS750|2026-09-05",
+  "PuyehueCordonCaulle|VIIRS750|2026-09-07"
+ ],
+ "max_noches_perdidas_sensor": 6,
+ "_perdidas_por_que": "La Fase 1 identifico de antemano las unicas noches que pueden perderse. Esta vara NO certifica que el brazo sea bueno (el azar la cumple, I-01): sirve para lo contrario, que es barato y si informa. Una perdida FUERA de la lista significa que la inferencia de la Fase 1 fallo por un mecanismo que no entendemos, y eso basta para NO ADOPTAR aunque la magnitud sea chica.",
+
+ "techo_tasa_pub_neg": {"VIIRS375": 0.45, "VIIRS750": 0.12},
+ "_techo_por_que": "La Fase 1 acota la tasa sin Test 1 entre 21,4 % y 36,5 % en VIIRS 375 y entre 5,3 % y 7,1 % en VIIRS 750. Los techos 0,45 y 0,12 dejan margen a que la inferencia se haya equivocado hacia el lado pesimista y aun asi exigen una caida de mas de 41 puntos y de mas de 9 puntos. MODIS NO entra: con una diferencia esperada de 2 puntos sobre 439 negativos no hay poder, y ademas 31 de sus 50 publicaciones son de un solo volcan (I-04); se informa con y sin Cordon Caulle, y no decide.",
+
+ "n_min_magnitud": 5,
+ "max_empeora_magnitud": 0.10,
+ "_magnitud_por_que": "Razon entre la magnitud que ve el operador y el VRP que publico MIROVA, mediana por volcan y sensor, solo en pasadas que los dos publican y con al menos 5 pares. El brazo no puede alejarse de 1 mas de 0,10 respecto del control en ningun estrato con muestra. Con 20 dias los n por celda son chicos: por eso 5 y no 30, y por eso este criterio protege contra un empeoramiento grande, no certifica una mejora.",
+
+ "n_barajados": 1000,
+ "semilla": 146,
+
+ "criterios_decisorios": [
+  "C1_recall_pasada",
+  "C2_noches_dentro_de_lo_previsto",
+  "C3_publicacion_negativos",
+  "C4_magnitud"
+ ],
+ "_c0_c5_c6": "C0 (cobertura pareja) y C5 (nulo estructural) no son criterios de merito: si fallan, el veredicto es INDECIDIBLE y hay que repetir el job o arreglar el instrumento. C6 (el orden de la caida V375 >= V750 >= MODIS que predice el mecanismo de F-01) no decide la adopcion pero si falla sale en el titular: la atribucion del mecanismo queda refutada.",
+
+ "_solo_se_informan": "Estratos que se informan y NO deciden: publicacion en negativos por magnitud publicada bajo 0,02, de 0,02 a 0,05 y sobre 0,05 MW (I-02: 'publicamos' cuenta apariciones, no energia); publicacion en negativos por plataforma (I-03: de SNPP MIROVA lista el 41 % de las pasadas y ninguna de las 04 UTC); MODIS con y sin Cordon Caulle (I-04). Ninguno se convierte en piso ni en criterio de adopcion.",
+
+ "por_brazo": {
+  "_s146_ab_sin_prioridad_debil": {
+   "techo_tasa_pub_neg": {"VIIRS375": 0.82, "VIIRS750": 0.21},
+   "piso_recall_pasada": {"VIIRS375": 0.86, "VIIRS750": 0.722},
+   "_por_que": "Este brazo apaga una rama mucho mas chica. La Fase 1 la dimensiona en 21 pasadas de 322 publicadas en VIIRS 375 (subclase rival_debil) y 3 de 133 en VIIRS 750: el maximo posible es bajar de 0,863 a ~0,807 y de 0,214 a ~0,209, y del lado del recall arriesga 20 pasadas positivas de 143 en VIIRS 375 (123 de 143 = 0,86) y ninguna en VIIRS 750 (13 de 18 = 0,722). ADOPTAR en este brazo NO significa apagar el Test 1: significa recomendar el flip de enable_test1_priority_weak_cluster, que es un cambio mucho menor y con su propio ciclo A45."
+  }
+ }
+}

@@ -1,0 +1,35 @@
+# A/B S146, Fase 2 del plan de paridad. Brazo B: SIN el Test 1 integrado en el ROI.
+#
+# EL FENOMENO. El Test 1 integrado no mira ningun pixel en particular: suma el exceso de
+# radiancia MIR de todo el disco de 3 km alrededor del crater contra un anillo de fondo, y
+# dispara si esa suma supera tres veces la dispersion esperada. Fisicamente eso detecta que la
+# cumbre, en conjunto, esta un poco mas tibia que su entorno. Un lago de lava sub-pixel produce
+# eso; tambien lo produce una cumbre de roca oscura sin nieve rodeada de glaciar, o el contraste
+# de altitud entre el cono y el valle (A69). Ademas la suma recorta a cero los excesos negativos,
+# asi que el ruido puro no se cancela y el estadistico tiene un valor de reposo que crece con el
+# numero de pixeles del disco (F-01 y G-27 de la auditoria S146).
+#
+# QUE APAGA ESTE BRAZO, exactamente: con enable_test1_path en false, los tres procesadores dejan
+# test1_triggered en False y test1_hot en ceros (process_viirs.py:1099, process_modis.py:737,
+# process_viirs_mod.py:731). Con eso desaparecen: el disparo persistido, los pixeles del Test 1,
+# la prioridad de fuente que le entrega el cumulo publicado, el recomputo de magnitud gateado por
+# source == 'test1', y la excepcion del dashboard que muestra un record descartado cuando
+# triggered_test1 es verdadero. NO toca la mascara contextual: con
+# ENABLE_FIRST_PASS_TESTS_2_AND_3 en true, hot_mask_2d se sobrescribe con la salida del primer
+# pase (process_viirs.py:1300) y el Test 1 nunca entro ahi; tampoco entra al fondo, porque
+# test1_mask del primer pase recibe nti_path_hot (el camino por pixel) y solo cuando
+# ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK esta en true, que no lo esta.
+#
+# CRITERIO: pre-registrado y commiteado ANTES de correr, en
+# experiments/_s146_ab_sin_test1/PREREGISTRO.md.
+# NO OPERACIONAL: data_subdir aislado, fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s146_ab_sin_test1
+description: >
+  Brazo B: identico al control salvo enable_test1_path en false. Los tres sensores.
+
+paths:
+  enable_test1_path: false
+
+output:
+  data_subdir: _s146_ab_sin_test1

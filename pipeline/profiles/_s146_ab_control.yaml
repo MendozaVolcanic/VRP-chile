@@ -1,0 +1,22 @@
+# A/B S146, Fase 2 del plan de paridad. Brazo A: CONTROL.
+#
+# EL FENOMENO. De noche, sobre una cumbre volcanica, el sensor mide dos cosas por pixel: cuanto
+# brilla en el infrarrojo medio (MIR, sensible a un punto muy caliente aunque ocupe una fraccion
+# del pixel) y cuanto en el termico (TIR, que responde a la temperatura promedio del terreno).
+# Hay dos maneras fisicamente distintas de decir que el crater esta caliente: comparar UN pixel
+# contra sus ocho vecinos en el indice que cruza MIR con TIR (los Tests 2 y 3 del paper de
+# MIROVA), o sumar el exceso de MIR de todo el disco de 3 km contra un anillo de fondo (el Test 1
+# integrado en el ROI, que es un detector nuestro y no esta en el paper). Este brazo es la
+# produccion de hoy, reprocesada con el mismo codigo que los demas brazos.
+#
+# CRITERIO: pre-registrado y commiteado ANTES de correr, en
+# experiments/_s146_ab_sin_test1/PREREGISTRO.md.
+# NO OPERACIONAL: data_subdir aislado, fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s146_ab_control
+description: >
+  Brazo A (control): flags identicos a mirova_equivalent; los tres sensores.
+  Sirve de control positivo: debe reproducir los records de produccion campo por campo.
+
+output:
+  data_subdir: _s146_ab_control

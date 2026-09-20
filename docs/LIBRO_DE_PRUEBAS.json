@@ -1,0 +1,1690 @@
+{
+ "fuentes": {
+  "grafo": "experiments/_s146_auditoria/frente_E/grafo.json",
+  "hipotesis": "experiments/_s146_auditoria/frente_H/hipotesis.json",
+  "inventario": "experiments/_s146_auditoria/frente_G/inventario.json"
+ },
+ "pruebas": [
+  {
+   "cierres_e": [],
+   "cobertura": "infraestructura",
+   "configuracion": "camino de venteo retirado",
+   "criterio_preregistrado": "en parte",
+   "fuente": "docs/HYPOTHESIS_LOG.md:532-643",
+   "id": "H-34",
+   "instrumento_declarado": "commits y py-spy citados en el log",
+   "instrumento_detalle": [],
+   "instrumento_estado": "SIN_RUTA",
+   "mecanismos_g": [],
+   "por_que": "Son de infraestructura y de adquisicion; ningun cambio de regimen las toca. H10 (NOAA-21) esta verificado limpio por el frente A",
+   "profundidad": "C",
+   "que_se_probo": "H1, H2, H3, H5, H7, H8 (S17): sigma del venteo, caja de busqueda chica, descarga sin timeout, regresion de codigo, zona horaria del scraper, referencia erronea",
+   "sesion": "S16/S17, abril 2026",
+   "sesion_orden": 16,
+   "ventana_datos": "abril 2026",
+   "veredicto_frente_h": "SIGUE",
+   "veredicto_original": "REFUTADAS (la causa real era NOAA-21, H10)"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "3 volcanes (Tupungatito, Chaiten, Lascar)",
+   "configuracion": "PRE46, M260, SEC3",
+   "criterio_preregistrado": "SI (elegir el de mayor F1)",
+   "fuente": "docs/HYPOTHESIS_LOG.md:754-773",
+   "id": "H-31",
+   "instrumento_declarado": "docs/DRIFTS_S17.md (existe); 6 reprocesos locales",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "docs/DRIFTS_S17.md",
+     "ruta": "docs/DRIFTS_S17.md"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "Dos de los tres brazos eran el mismo brazo (instrumento sin poder), y el camino de temperatura de brillo esta apagado desde S40 (2026-05-13) con sustrato cero hoy (FASE1_SUSTRATO:15-21). No apaga nada vigente",
+   "profundidad": "C",
+   "que_se_probo": "N sigma uniforme 3 contra 5 (Coppola) y 12 (Di Bella) en el umbral de temperatura de brillo",
+   "sesion": "S19, 2026-04-25",
+   "sesion_orden": 19,
+   "ventana_datos": "30 dias, abril 2026",
+   "veredicto_frente_h": "OBSOLETA",
+   "veredicto_original": "REFUTADA: 3 sigma gana; 5 y 12 dan resultados identicos al bit por el tope de 7 K"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "Tupungatito, n = 3 granulos",
+   "configuracion": "PRE46, camino de venteo (retirado S27)",
+   "criterio_preregistrado": "SI",
+   "fuente": "docs/HYPOTHESIS_LOG.md:681-699",
+   "id": "H-33",
+   "instrumento_declarado": "experiments/41_DIAGNOSIS_FINAL_S21.md (existe)",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/41_DIAGNOSIS_FINAL_S21.md",
+     "ruta": "experiments/41_DIAGNOSIS_FINAL_S21.md"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "El camino que usaba ese umbral (venteo con tope de 3 K) se retiro en S27. Tres granulos de un volcan",
+   "profundidad": "C",
+   "que_se_probo": "Sigma del fondo calculado solo en el ROI de cumbre (D6) para que el glaciar no infle el umbral",
+   "sesion": "S21, 2026-04-25",
+   "sesion_orden": 21,
+   "ventana_datos": "3 granulos",
+   "veredicto_frente_h": "OBSOLETA",
+   "veredicto_original": "REFUTADA"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "tres sensores",
+   "configuracion": "",
+   "criterio_preregistrado": "no aplica",
+   "fuente": "docs/HYPOTHESIS_LOG.md:831-841; pipeline/process_modis.py:614-617",
+   "id": "H-40",
+   "instrumento_declarado": "tests/test_local_roi_paridad.py",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "tests/test_local_roi_paridad.py",
+     "ruta": "tests/test_local_roi_paridad.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-07",
+    "G-08",
+    "G-09"
+   ],
+   "por_que": "El umbral sigue en process_modis.py:614-617 pero cuelga del camino de temperatura de brillo, que esta apagado. Nunca se midio y ya no hace falta",
+   "profundidad": "A",
+   "que_se_probo": "Local p95 del ROI como umbral adicional (D7): agregarlo a VIIRS 375 o quitarlo de MODIS y V750",
+   "sesion": "S23, 2026-04-26",
+   "sesion_orden": 23,
+   "ventana_datos": "no aplica",
+   "veredicto_frente_h": "OBSOLETA",
+   "veredicto_original": "diferida 'requiere A/B contra OSF'"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "Villarrica, Tupungatito",
+   "configuracion": "PRE46",
+   "criterio_preregistrado": "SI",
+   "fuente": "docs/HYPOTHESIS_LOG.md:864-882, 1436-1451",
+   "id": "H-32",
+   "instrumento_declarado": "experiments/52_aveni_tir_poc.py (existe)",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/52_aveni_tir_poc.py",
+     "ruta": "experiments/52_aveni_tir_poc.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-16"
+   ],
+   "por_que": "Son de formula, no de deteccion ni de regimen: el k de 18,0 quedo respaldado por Coppola 2026 Tabla 1 (AUDIT_S146:158) y la Ec. 9 no es del canal NRT (H14, H16)",
+   "profundidad": "C",
+   "que_se_probo": "Aveni 2025 Ec. 9 (VRP por TIR) para el lago de lava de Villarrica; y k de Di Bella para VIIRS 375",
+   "sesion": "S24, 2026-04-26",
+   "sesion_orden": 24,
+   "ventana_datos": "6 refs de Villarrica; 37 pares de Tupungatito",
+   "veredicto_frente_h": "SIGUE",
+   "veredicto_original": "REFUTADAS"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "no aplica",
+   "configuracion": "",
+   "criterio_preregistrado": "no aplica",
+   "fuente": "docs/MISSION.md:229-236",
+   "id": "H-39",
+   "instrumento_declarado": "ninguno",
+   "instrumento_detalle": [],
+   "instrumento_estado": "SIN_RUTA",
+   "mecanismos_g": [],
+   "por_que": "Siguen listadas en docs/MISSION.md:231-236 sin medicion. La de composicion (cascada contra OR) es justo lo que FASE1 midio hoy por otra via: el Test 1 no entra a la mascara, compite por la fuente del cumulo",
+   "profundidad": "B",
+   "que_se_probo": "Hipotesis abiertas de S27 que nunca se probaron: dNTI con C1 negativo, camino solo TIR (TIRVolcH), composicion de caminos en cascada contra OR",
+   "sesion": "S27, 2026-04-30",
+   "sesion_orden": 27,
+   "ventana_datos": "no aplica",
+   "veredicto_frente_h": "NUNCA",
+   "veredicto_original": "quedaron como 'hipotesis abiertas S28+' en MISSION"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "11 Tier A; VIIRS 375 en S27, V750 en S28, MODIS en S29",
+   "configuracion": "PRE46 (el camino contextual contra el que 'subio el recall' ya no existe), M260, SEC3, ANCLA_TUP",
+   "criterio_preregistrado": "NO consta",
+   "fuente": "docs/MIROVA_DIVERGENCES.md:848-935; git d6e64dc0b, 3d25ea16e",
+   "id": "H-A01",
+   "instrumento_declarado": "runs 25148058512 y reintentos; perfil _mirova_literal.yaml (existe)",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": "pipeline/profiles/_mirova_literal.yaml",
+     "ruta": "_mirova_literal.yaml"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-26",
+    "G-27",
+    "G-31"
+   ],
+   "por_que": "La justificacion (+30 puntos de recall) se midio contra una deteccion contextual que dos semanas despues fue reemplazada por el primer pase Tests 2 y 3 mas segundo pase (S46). Hoy, en el regimen actual, sin Test 1 siguen seguras 71 de 75 noches VIIRS 375 y 0 se pierden seguro, mientras sostiene solo 186 de 322 negativos publicados (FASE1:79-88). El aporte de recall que justifico la adopcion nunca se re-midio despues de S46. Y el acierto se contaba con el disparo del propio Test 1, o sea circular",
+   "profundidad": "B",
+   "que_se_probo": "ADOPCION. Test 1 integrado en el ROI: sumar el exceso MIR de todo el disco de 3 km para ver focos sub-pixel (detector propio, D30)",
+   "sesion": "S27 a S29, 2026-04-30/05-01",
+   "sesion_orden": 27,
+   "ventana_datos": "2026-01-29 a 2026-04-29",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "ADOPTADO: recall 50 a 80 %"
+  },
+  {
+   "cierres_e": [
+    "C_S29"
+   ],
+   "cobertura": "11 Tier A",
+   "configuracion": "PRE46, M260, SEC3, ANCLA_TUP",
+   "criterio_preregistrado": "NO (se corrigio la metrica despues de ver el resultado, por un bug real)",
+   "fuente": "docs/MIROVA_DIVERGENCES.md:733-768",
+   "id": "H-30",
+   "instrumento_declarado": "experiments/76_audit_independent.py, pipeline/audit_metrics.py (existen); runs 25339969705, 25401379853, 25414145698",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/76_audit_independent.py",
+     "ruta": "experiments/76_audit_independent.py"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "pipeline/audit_metrics.py",
+     "ruta": "pipeline/audit_metrics.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "La mascara sobre la que actuaban (caminos legacy) ya no es la de produccion. El recall se media como OR con triggered_test1. D4 fondo global 'refutado' aca se adopto por volcan ocho dias despues (S39, 36cf58316)",
+   "profundidad": "B",
+   "que_se_probo": "Filtro por pixel a 5 sigma sobre el Test 1 (Phase 1), sobre la mascara final (Phase 2) y fondo global (D4)",
+   "sesion": "S33, 2026-05-05",
+   "sesion_orden": 33,
+   "ventana_datos": "90 dias hasta abril 2026",
+   "veredicto_frente_h": "OBSOLETA",
+   "veredicto_original": "REFUTADOS: -18,6 y -63 puntos de recall"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "11 Tier A",
+   "configuracion": "M260, SEC3, ANCLA_TUP",
+   "criterio_preregistrado": "SIN DATO",
+   "fuente": "experiments/_s146_auditoria/frente_H/workflows_ab.json; git log -S sobre mirova_equivalent.yaml",
+   "id": "H-A10",
+   "instrumento_declarado": "workflows _archive/reproc-ab-d8-*.yml, reproc-ab-lbg-global.yml, reproc-ab-h8.yml, reproc-no-bt-path-15d.yml; experiments/84 a 89 (existen)",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/_archive/reproc-ab-h8.yml",
+     "ruta": "reproc-ab-h8.yml"
+    },
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/_archive/reproc-ab-lbg-global.yml",
+     "ruta": "reproc-ab-lbg-global.yml"
+    },
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/_archive/reproc-no-bt-path-15d.yml",
+     "ruta": "reproc-no-bt-path-15d.yml"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/",
+     "ruta": "experiments/"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "Cobertura declarada, no verificada. Todas anteriores a nadir fijo y a #535, con ventanas de dos a cuatro semanas. El tope de 5 MW si lo verifico V-01 como funcionando",
+   "profundidad": "A (solo existencia y ventana)",
+   "que_se_probo": "ADOPCIONES sin A/B propio leido: agrupamiento anclado al crater y filtro de distancia por pixel (S38), fondo global del Test 1 por volcan (S39), BT path apagado (S40), modo de pixel unico sub-MW (F52-B), compuerta de consistencia TIR (F46), guarda de saturacion (S73), tope de 5 MW (S71)",
+   "sesion": "S38 a S77, mayo 2026",
+   "sesion_orden": 38,
+   "ventana_datos": "ventanas de 15 a 30 dias entre 2026-04-12 y 2026-05-11",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "ADOPTADOS"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "11 Tier A, tres sensores",
+   "configuracion": "M260, SEC3, ANCLA_TUP, PISO",
+   "criterio_preregistrado": "SI (reglas de decision en el design)",
+   "fuente": "experiments/87_results.md:8-31; experiments/87_audit_s46_round1.py:145-215",
+   "id": "H-23",
+   "instrumento_declarado": "experiments/87_audit_s46_round1.py y 87_results.md (existen); workflow _archive/reproc-s46-coppola-literal-ab.yml",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/87_results.md",
+     "ruta": "87_results.md"
+    },
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/_archive/reproc-s46-coppola-literal-ab.yml",
+     "ruta": "_archive/reproc-s46-coppola-literal-ab.yml"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/87_audit_s46_round1.py",
+     "ruta": "experiments/87_audit_s46_round1.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "El FP vale 39 en 18 de las 22 variantes: el instrumento era ciego a la sobre-publicacion, porque una pasada RUTINA donde publicamos no contaba como nada. Todo lo que ese barrido dice sobre C1, C2, dual-ROI o n = 12 respecto de precision es SIN DATO. Subir C2 o C1 en el ROI de cumbre nunca se midio contra negativos limpios",
+   "profundidad": "A",
+   "que_se_probo": "Barrido Coppola literal de 22 variantes: C2 = 3, 4, 8; C1 = 0,01; sin dual-ROI; Di Bella n = 12; drifts 1 a 7",
+   "sesion": "S46, 2026-05-15/16",
+   "sesion_orden": 46,
+   "ventana_datos": "2026-04-16 a 2026-05-16",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "se adopto drift234; el resto 'sin diferencia'"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "11 Tier A",
+   "configuracion": "M260, SEC3",
+   "criterio_preregistrado": "SI",
+   "fuente": "experiments/87_results.md:8-60",
+   "id": "H-A02",
+   "instrumento_declarado": "experiments/87_results.md",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/87_results.md",
+     "ruta": "experiments/87_results.md"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "La ganancia medida son 3 records MODIS. El efecto sobre la publicacion en negativos no se pudo ver con ese instrumento (H-23). La adopcion es defendible por fidelidad, no por la medicion",
+   "profundidad": "A",
+   "que_se_probo": "ADOPCION. Primer pase Tests 2 y 3 mas segundo pase (drift234)",
+   "sesion": "S46, 2026-05-16",
+   "sesion_orden": 46,
+   "ventana_datos": "2026-04-16 a 2026-05-16",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "ADOPTADO por +0,7 de F1 y 'alineacion con el paper'"
+  },
+  {
+   "cierres_e": [
+    "C_D25V"
+   ],
+   "cobertura": "Villarrica, n = 5",
+   "configuracion": "SEC3, M260, ANILLO con recorte a cero",
+   "criterio_preregistrado": "NO",
+   "fuente": "docs/HYPOTHESIS_LOG.md:1215-1247",
+   "id": "H-27",
+   "instrumento_declarado": "experiments/100_aggregation_strategies_offline.py (existe)",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/100_aggregation_strategies_offline.py",
+     "ruta": "experiments/100_aggregation_strategies_offline.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-13",
+    "G-36",
+    "G-37",
+    "G-42"
+   ],
+   "por_que": "Operaban sobre anomaly_pixels ya recortados a cero por el fondo de anillo (el propio log lo dice). Lo refutado es 'agregar distinto arregla la magnitud con ESTE fondo'. Con fondo de vecinos (D25) nunca se probaron",
+   "profundidad": "C",
+   "que_se_probo": "Cuatro estrategias de agregacion (pixel maximo, Eq.16, umbral estricto, radio de 1 km)",
+   "sesion": "S55, 2026-05-17",
+   "sesion_orden": 55,
+   "ventana_datos": "5 casos de Villarrica",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "NEGATIVA: todas dan 0 en 4 de 5"
+  },
+  {
+   "cierres_e": [
+    "C_D25V"
+   ],
+   "cobertura": "Villarrica, VIIRS 375, n = 5",
+   "configuracion": "SEC3, M260",
+   "criterio_preregistrado": "NO",
+   "fuente": "docs/HYPOTHESIS_LOG.md:1163-1211",
+   "id": "H-26",
+   "instrumento_declarado": "experiments/101_background_variants_offline.py (existe)",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/101_background_variants_offline.py",
+     "ruta": "experiments/101_background_variants_offline.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-13",
+    "G-36",
+    "G-37",
+    "G-42"
+   ],
+   "por_que": "Se midio con un proxy gaussiano sobre 5 casos de un volcan, y se descarto por argumento de fidelidad. No hay que retomarla: el canon dice media de vecinos, no percentil de anillo (D25)",
+   "profundidad": "C",
+   "que_se_probo": "Fondo por percentil bajo del anillo (p01 a p25) para igualar la magnitud de MIROVA",
+   "sesion": "S56, 2026-05-17",
+   "sesion_orden": 56,
+   "ventana_datos": "5 casos de Villarrica",
+   "veredicto_frente_h": "NUNCA",
+   "veredicto_original": "confirmada offline, descartada como 'probable hack' a favor del kernel local"
+  },
+  {
+   "cierres_e": [
+    "C_D25V"
+   ],
+   "cobertura": "VIIRS 375 sobre todo; extendido a MODIS por TDD sin A/B propio (HYPOTHESIS_LOG:1035-1040)",
+   "configuracion": "M260, SEC3",
+   "criterio_preregistrado": "parcial",
+   "fuente": "docs/HYPOTHESIS_LOG.md:965-1018, 283-307, 50-80",
+   "id": "H-A03",
+   "instrumento_declarado": "workflows _archive/reproc-ab-local-kernel-bg*.yml, reproc-ab-pcc-kernel.yml, reproc-ab-chaiten.yml; experiments/104, 105 (existen)",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/_archive/reproc-ab-chaiten.yml",
+     "ruta": "reproc-ab-chaiten.yml"
+    },
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/_archive/reproc-ab-pcc-kernel.yml",
+     "ruta": "reproc-ab-pcc-kernel.yml"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/",
+     "ruta": "experiments/"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-13",
+    "G-36",
+    "G-37",
+    "G-42"
+   ],
+   "por_que": "Tres defectos: es una conmutacion por volcan que la mision prohibe (MISSION:93-99 lo declara deuda); Villarrica se decidio con n = 2; y el -65 % de records summit en Villarrica nunca se leyo como lo que hoy importa (menos publicacion en negativos). D25 propone lo mismo uniforme. El R2 retroactivo de S70 lo valido con un caso por volcan",
+   "profundidad": "C",
+   "que_se_probo": "ADOPCION. Kernel de fondo local por volcan (Villarrica, Planchon-Peteroa, Lastarria, Chaiten, PCC)",
+   "sesion": "S58 a S63, mayo 2026",
+   "sesion_orden": 58,
+   "ventana_datos": "2026-04-16 a 2026-05-15 (Villarrica); 2026-03-01 a 2026-05-19 (resto)",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "ADOPTADO por volcan"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "VIIRS 375, Tupungatito",
+   "configuracion": "M260, SEC3, ANCLA_TUP",
+   "criterio_preregistrado": "NO",
+   "fuente": "docs/HYPOTHESIS_LOG.md:283-307 y 259-279; CLAUDE.md A19",
+   "id": "H-24",
+   "instrumento_declarado": "workflow _archive/reproc-ab-lastarria-tupungatito.yml; run 26072884472",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/_archive/reproc-ab-lastarria-tupungatito.yml",
+     "ruta": "_archive/reproc-ab-lastarria-tupungatito.yml"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "Se midio UN DIA ANTES de descubrir que el ancla de Tupungatito apuntaba al centro de caja del KMZ y que el cumulo elegido era el flanco SE, falso (H_S64, HYPOTHESIS_LOG:259-279; corregido S65, 2026-05-20). El 18,46x es del glaciar del flanco, no del crater. A19 generaliza desde ahi a 'ring glaciar empeora con kernel'. Ademas area con sec3 y mascara de 260 K",
+   "profundidad": "C",
+   "que_se_probo": "Kernel de fondo local en Tupungatito ('refuta el kernel en glaciar', A19)",
+   "sesion": "S62, 2026-05-19",
+   "sesion_orden": 62,
+   "ventana_datos": "2026-03-01 a 2026-05-19",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "NO ADOPTAR: 10,37x a 18,46x"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "PCC",
+   "configuracion": "M260, SEC3",
+   "criterio_preregistrado": "NO",
+   "fuente": "docs/HYPOTHESIS_LOG.md:311-330",
+   "id": "H-25",
+   "instrumento_declarado": "run 26072886354",
+   "instrumento_detalle": [],
+   "instrumento_estado": "SIN_RUTA",
+   "mecanismos_g": [],
+   "por_que": "Vale como leccion de metodo (A18). Como parametro por volcan la puerta de la mision lo rechaza igual (backlog_s115.md:5-14)",
+   "profundidad": "C",
+   "que_se_probo": "Bajar el radio interno de PCC de 20 a 7 km",
+   "sesion": "S62, 2026-05-19",
+   "sesion_orden": 62,
+   "ventana_datos": "marzo a mayo 2026",
+   "veredicto_frente_h": "SIGUE",
+   "veredicto_original": "revertido (3,64x, peor)"
+  },
+  {
+   "cierres_e": [
+    "C_D9",
+    "C_D9CAP",
+    "C_S45"
+   ],
+   "cobertura": "11 Tier A, tres sensores",
+   "configuracion": "M260, G3K, SEC3, PRE46 ya no (el primer pase habia entrado 5 dias antes)",
+   "criterio_preregistrado": "NO consta",
+   "fuente": "docs/MIROVA_DIVERGENCES.md:282-296, 579-648; pipeline/process_viirs.py:1235-1237",
+   "id": "H-22",
+   "instrumento_declarado": "workflows _archive/reproc-ab-path-d-{atm-gate,covalidation,cap}.yml; perfiles mirova_equivalent_path_d_*_v1.yaml; experiments/127, 130, 131 (existen)",
+   "instrumento_detalle": [
+    {
+     "estado": "NO_ENCONTRADO",
+     "ruta": "_v1.yaml"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/",
+     "ruta": "experiments/"
+    }
+   ],
+   "instrumento_estado": "NO_ENCONTRADO",
+   "mecanismos_g": [
+    "G-05",
+    "G-10",
+    "G-11",
+    "G-12",
+    "G-24",
+    "G-40",
+    "G-52"
+   ],
+   "por_que": "Reabierta hoy por V-01. Agrego una SOSPECHA de instrumento: desde el 2026-05-15 el comentario del codigo dice que los caminos legacy 'se calcularon arriba (diag) pero no contribuyen cuando ON' (process_viirs.py:1235-1237, blame 958a7a189), y la evidencia de S70 ('100 % disparan SOLO por path D') se leyo de diag_n_dnti_ctx_path el 2026-05-20. Si el contador ya era solo diagnostico, la atribucion al path D de S70/S71 no mide lo que dice. No lo verifique corriendo nada",
+   "profundidad": "A",
+   "que_se_probo": "Camino contextual en cirrus alto (D9): compuerta atmosferica por t_bg (A) y co-validacion con BT o NTI (B)",
+   "sesion": "S71, 2026-05-21",
+   "sesion_orden": 71,
+   "ventana_datos": "2026-02-20 a 2026-05-20",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "A y B rechazadas; C (tope de 5 MW) adoptada"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "11 Tier A",
+   "configuracion": "M260, SEC3, G3K",
+   "criterio_preregistrado": "SIN DATO",
+   "fuente": "experiments/_s146_auditoria/frente_H/workflows_ab.json",
+   "id": "H-29",
+   "instrumento_declarado": "workflows _archive/reproc-ab-{unsuitable-filters,unsuitable-only,test1-retire-only,bt-path-on-v1,no-cap-v1}.yml; perfiles mirova_equivalent_*_v1.yaml (existen)",
+   "instrumento_detalle": [
+    {
+     "estado": "NO_ENCONTRADO",
+     "ruta": "_v1.yaml"
+    }
+   ],
+   "instrumento_estado": "NO_ENCONTRADO",
+   "mecanismos_g": [],
+   "por_que": "Cobertura declarada, no verificada: solo confirme que los workflows y perfiles existen y su ventana. V-05 ya establecio que el filtro corre desde S72",
+   "profundidad": "A (solo existencia y ventana)",
+   "que_se_probo": "Filtros de no aptos del segundo pase, retiro de los Test 1 K1, BT path encendido, sin tope",
+   "sesion": "S72 a S73, mayo 2026",
+   "sesion_orden": 72,
+   "ventana_datos": "2026-02-20 a 2026-05-20",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "filtros de no aptos adoptados (S72); retiro K1 apagado; BT path apagado"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "MODIS sobre todo",
+   "configuracion": "",
+   "criterio_preregistrado": "no aplica",
+   "fuente": "tasks/backlog_s93_pipeline_diffuse_field_gate.md:1-49",
+   "id": "H-41",
+   "instrumento_declarado": "tasks/backlog_s93_pipeline_diffuse_field_gate.md",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "tasks/backlog_s93_pipeline_diffuse_field_gate.md",
+     "ruta": "tasks/backlog_s93_pipeline_diffuse_field_gate.md"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-52"
+   ],
+   "por_que": "La puerta de la mision la trata como parche (A72: artefacto se arregla en la deteccion, no se esconde). Se lista por cobertura; no se propone",
+   "profundidad": "B",
+   "que_se_probo": "Compuerta de coherencia de 'campo difuso' en el pipeline (backlog S93) y supresion de cirrus en display (S90)",
+   "sesion": "S90/S93, 2026-05-30",
+   "sesion_orden": 90,
+   "ventana_datos": "no aplica",
+   "veredicto_frente_h": "NUNCA",
+   "veredicto_original": "anotada como opcional, nunca corrida"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "3 volcanes (Tupungatito entre ellos), VIIRS 375",
+   "configuracion": "M260, G3K, SEC3",
+   "criterio_preregistrado": "parcial",
+   "fuente": "docs/MIROVA_DIVERGENCES.md:1365; docs/S99_TEST1_AB_RESULTS.md:19-54; docs/MISSION_GATE_S136_TEST1_CONTEXTUAL.md:80",
+   "id": "H-21",
+   "instrumento_declarado": "experiments/_s99_audit/ab_test1_audit.py (existe); runs 26864573601 y 26885140366; perfiles _s99_test1_*.yaml",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s99_audit/ab_test1_audit.py",
+     "ruta": "experiments/_s99_audit/ab_test1_audit.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "El brazo B de S135 es contextual puro y dio 0 perdidas en 260 noches con Tupungatito adentro (28 noches), en el regimen actual. Los '31 FN' de S99 eran records con magnitud cero, no noches sin publicar",
+   "profundidad": "B",
+   "que_se_probo": "Alternativas a ctxpeak para la magnitud del Test 1: filtro por pixel (41 FN), contextual puro (31 FN por crater embebido), nucleo espacial, Eq.16",
+   "sesion": "S99, 2026-06-03",
+   "sesion_orden": 99,
+   "ventana_datos": "2026-04-01 a 2026-05-31 (S100)",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "descartadas; 'ctxpeak es el UNICO'"
+  },
+  {
+   "cierres_e": [
+    "C_D10",
+    "C_D19N"
+   ],
+   "cobertura": "VIIRS 375; 272 pares, 256 en 6 volcanes; Llaima 0 pares, Villarrica 2, Copahue 1, NdC 3",
+   "configuracion": "M260, SEC3, G3K",
+   "criterio_preregistrado": "NO consta para el criterio 'justo' (se escribio tras detectar un confusor de cobertura)",
+   "fuente": "docs/S100_TEST1_FULL_AB.md:16-50; docs/HYPOTHESIS_LOG.md:1535",
+   "id": "H-A04",
+   "instrumento_declarado": "experiments/_s99_audit/ab_test1_fair.py (existe); run 26921561612",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s99_audit/ab_test1_fair.py",
+     "ruta": "experiments/_s99_audit/ab_test1_fair.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-23",
+    "G-32",
+    "G-38",
+    "G-39",
+    "G-42"
+   ],
+   "por_que": "A100 y D19 ya mostraron que keep_peak publica como summit a 0,0 km un pixel del borde del disco, mas frio que el fondo, y que la paridad salia por accidente. En S143 todo el descenso de publicacion en negativos (0,917 a 0,547) viene de apagarlo. La adopcion nunca miro negativos y los nevados del sur tenian 0 a 3 pares",
+   "profundidad": "A",
+   "que_se_probo": "ADOPCION. ctxpeak (D10): intersectar el Test 1 con la mascara contextual y rescatar siempre el pixel mas caliente (keep_peak)",
+   "sesion": "S100, 2026-06-04",
+   "sesion_orden": 100,
+   "ventana_datos": "2026-04-01 a 2026-05-31",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "ADOPTADO: 0 FN nuevos, Tupungatito 18,4x a 1,24x"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "11 Tier A; MODIS con n = 1 fuera de Lascar (S102_NADIR_PROMOTE_RESULTS:19-24, 42)",
+   "configuracion": "M260 (VIIRS 375), G3K, T1",
+   "criterio_preregistrado": "SI (target en design 2026-06-06)",
+   "fuente": "docs/S102_NADIR_PROMOTE_RESULTS.md:8-42; CLAUDE.md A66, A67",
+   "id": "H-A05",
+   "instrumento_declarado": "experiments/_s99_audit/audit_nadir_promote_r3.py, analyze_viirs_nadir_ab.py (existen); workflows _archive/reproc-s10{1,2,3}-*.yml",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s99_audit/analyze_viirs_nadir_ab.py",
+     "ruta": "analyze_viirs_nadir_ab.py"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s99_audit/audit_nadir_promote_r3.py",
+     "ruta": "experiments/_s99_audit/audit_nadir_promote_r3.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-10"
+   ],
+   "por_que": "El cambio es de formula y esta respaldado por la calibracion S14 y por Coppola 2026 Tabla 1. Lo que NO vale es leer 0,78 como 'paridad sana': S130 midio que la razon cae de 0,740 cerca del nadir a 0,253 mas alla de 50 grados aun con nadir fijo. A67 ya anoto el efecto colateral: menos detecciones (Villarrica 636 a 602), que nunca se conto en negativos",
+   "profundidad": "B",
+   "que_se_probo": "ADOPCION. Area de pixel a nadir fijo, MODIS (S102) y VIIRS (S103)",
+   "sesion": "S101 a S103, 2026-06-05/08",
+   "sesion_orden": 101,
+   "ventana_datos": "2026-01-29 a 2026-06-07",
+   "veredicto_frente_h": "SIGUE",
+   "veredicto_original": "ADOPTADO: VIIRS 375 2,27x a 0,78x"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "VIIRS, 11 volcanes",
+   "configuracion": "M260, G3K, T1",
+   "criterio_preregistrado": "SI",
+   "fuente": "CLAUDE.md A66; docs/MISSION_GATE_S136_TEST1_CONTEXTUAL.md:78-84",
+   "id": "H-20",
+   "instrumento_declarado": "workflow _archive/reproc-s102-viirs-noctx-ab.yml; experiments/_s99_audit/analyze_viirs_3way.py (existe)",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/_archive/reproc-s102-viirs-noctx-ab.yml",
+     "ruta": "_archive/reproc-s102-viirs-noctx-ab.yml"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s99_audit/analyze_viirs_3way.py",
+     "ruta": "experiments/_s99_audit/analyze_viirs_3way.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-10"
+   ],
+   "por_que": "El propio proyecto lo dejo escrito en S136: 'ambas son previas a #535, que bajo el fondo global 6 a 8 K en nevados... hoy no tiene respaldo' (MISSION_GATE_S136:80-81). Y la metrica premiaba a keep_peak por accidente (A100)",
+   "profundidad": "B",
+   "que_se_probo": "'ctxpeak es un parche redundante del sec3': A/B de 3 brazos (base, nadir+ctx, nadir sin ctx)",
+   "sesion": "S102, 2026-06-06",
+   "sesion_orden": 102,
+   "ventana_datos": "2026-04-01 a 2026-06-06",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "REFUTADA: nadir sin ctx es 2,43x peor"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "VIIRS 375, 5 volcanes",
+   "configuracion": "M260, G3K, T1, ANILLO, C2G",
+   "criterio_preregistrado": "design 2026-06-09",
+   "fuente": "docs/MIROVA_DIVERGENCES.md:1429-1430",
+   "id": "H-02",
+   "instrumento_declarado": "experiments/_s104_roi_probe/audit_ab_test1_nti.py (existe); run 27186289487; perfiles _archive/_test1_nti_covalidation_{enabled,disabled}.yaml",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s104_roi_probe/audit_ab_test1_nti.py",
+     "ruta": "experiments/_s104_roi_probe/audit_ab_test1_nti.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "Mismo defecto de criterio que H-01: 'apaga el Test 1' se conto como dano sin medir si la noche se sigue publicando por el camino contextual ni cuanto baja la publicacion en negativos. Hoy FASE1 mide que sin Test 1 siguen seguras 71 de 75 noches",
+   "profundidad": "B",
+   "que_se_probo": "Co-validacion por pixel en NTI del Test 1: exigir que cada pixel del disco tenga firma propia en el indice",
+   "sesion": "S104, 2026-06-09",
+   "sesion_orden": 104,
+   "ventana_datos": "2026-01-29 a 2026-06-08 (segun el yml)",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "REFUTADO: 'apaga el Test 1' (la senal difusa no tiene firma por pixel)"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "VIIRS 375, 5 volcanes",
+   "configuracion": "M260, G3K, ANILLO, C2G",
+   "criterio_preregistrado": "SI",
+   "fuente": "docs/MIROVA_DIVERGENCES.md:1431-1434; CLAUDE.md A69 nota S125",
+   "id": "H-03",
+   "instrumento_declarado": "experiments/_s104_roi_probe/audit_ab_test1_nti_v2.py (existe); run 27223821692; perfil _archive/_test1_nti_integral.yaml; flag ENABLE_TEST1_NTI_INTEGRAL apagado, rama solo en process_viirs.py",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": "pipeline/profiles/_archive/_test1_nti_integral.yaml",
+     "ruta": "_archive/_test1_nti_integral.yaml"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s104_roi_probe/audit_ab_test1_nti_v2.py",
+     "ruta": "experiments/_s104_roi_probe/audit_ab_test1_nti_v2.py"
+    },
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": "pipeline/process_viirs.py",
+     "ruta": "process_viirs.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-28"
+   ],
+   "por_que": "Se juzgo solo por POSICION. Nunca se midio su efecto sobre la publicacion en negativos limpios, que es la pregunta de hoy. Un brazo 'inocuo' en recall y magnitud que cambia de MIR absoluto a NTI es candidato barato a re-medir",
+   "profundidad": "B",
+   "que_se_probo": "Test 1 que integra NTI (y no radiancia MIR absoluta) con fondo de anillo",
+   "sesion": "S104/S105, 2026-06-09",
+   "sesion_orden": 104,
+   "ventana_datos": "2026-01-29 a 2026-06-08",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "REFUTADO por insuficiente: corrige 50 m de 1000 a 1500 m; 'inocuo'"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "VIIRS 375; Tupungatito, Villarrica, Llaima, Lascar, Lastarria (5 de 11). Generalizado a 'el sesgo no es separable a escala local' para todos",
+   "configuracion": "M260, G3K, T1, ANILLO, C2G; SEC3 hasta el 7 de junio",
+   "criterio_preregistrado": "SI (design 2026-06-10 par. 12, antes de correr)",
+   "fuente": "docs/superpowers/specs/2026-06-10-test1-local-bg-nti-design.md:209-245 y :254-270; audit_local_sweep.py:62-76",
+   "id": "H-01",
+   "instrumento_declarado": "experiments/_s104_roi_probe/audit_local_sweep.py y audit_sensor_strat.py (existen); workflow _archive/reproc-s105-test1-nti-local-sweep.yml; perfiles _archive/_test1_nti_local{,_ks20,_ks25}.yaml; flag ENABLE_TEST1_LOCAL_BG_NTI sigue en el codigo, apagado",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/_archive/reproc-s105-test1-nti-local-sweep.yml",
+     "ruta": "_archive/reproc-s105-test1-nti-local-sweep.yml"
+    },
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s104_roi_probe/audit_sensor_strat.py",
+     "ruta": "audit_sensor_strat.py"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s104_roi_probe/audit_local_sweep.py",
+     "ruta": "experiments/_s104_roi_probe/audit_local_sweep.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-28"
+   ],
+   "por_que": "El criterio protegia la redundancia del mismo detector que hoy sostiene 57,8 % de la sobre-publicacion de VIIRS 375 (FASE1_SUSTRATO:79). A k=2,0 el brazo bajo los disparos del Test 1 a la mitad (Tupungatito 465 a 220, Villarrica 462 a 177, Llaima 428 a 209), curo el corrimiento (1047/748/1097 m a 182/170/206 m) y el propio informe dice que 'el recall global se sostiene porque otros paths rescatan esas noches'. Nunca se midio publicacion por noche ni negativos limpios. Repetir: mismo perfil, codigo de hoy, banco de paridad S145",
+   "profundidad": "A",
+   "que_se_probo": "Test 1 con fondo LOCAL sobre NTI: medir el exceso de la cumbre contra sus vecinos inmediatos y en el indice MIR/TIR, para que el valle tibio bajo un cono nevado no cuente como calor (A69)",
+   "sesion": "S105/S106, 2026-06-10",
+   "sesion_orden": 105,
+   "ventana_datos": "2026-01-29 a 2026-06-08",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "REFUTADO en todo el barrido k=2,0/2,5/3,0: 'el Test 1 se apaga en noches ALERTA' (Tupungatito 59/75, Villarrica 3/11 a k=2,0)"
+  },
+  {
+   "cierres_e": [
+    "C_A84"
+   ],
+   "cobertura": "VIIRS 375 y 750, 5 a 6 volcanes",
+   "configuracion": "M260, G3K, T1",
+   "criterio_preregistrado": "SI",
+   "fuente": "CLAUDE.md A84; docs/audit_s146/FRENTE_B_CIERRES_CON_SCRIPT.md:66, 227",
+   "id": "H-19",
+   "instrumento_declarado": "A/B S106: workflows _archive/reproc-s106-*.yml y experiments/_s106_fase2/ (existen). Probe S117: scratchpad/probe_ctx_cluster_s117.py NO EXISTE (B-09)",
+   "instrumento_detalle": [
+    {
+     "estado": "NO_ENCONTRADO",
+     "ruta": "scratchpad/probe_ctx_cluster_s117.py"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s106_fase2/",
+     "ruta": "experiments/_s106_fase2/"
+    }
+   ],
+   "instrumento_estado": "NO_ENCONTRADO",
+   "mecanismos_g": [],
+   "por_que": "La pata S106 tiene instrumento; la pata S117 (indistinguibles en n_pixels y VRP) lo perdio. El frente A dice que A84 se reproduce igual. Es de posicion, no de publicacion: baja prioridad",
+   "profundidad": "C",
+   "que_se_probo": "Ancla del cumulo en el pico de NTI (brazo B) en vez del crater; y no re-anclar ctx_cluster (A84)",
+   "sesion": "S106, 2026-06-11; S117",
+   "sesion_orden": 106,
+   "ventana_datos": "2026-01-29 a 2026-06-11",
+   "veredicto_frente_h": "PERDIDO",
+   "veredicto_original": "brazo B descartado (Llaima 2263 m, peor); A84 'no reabrir'"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "5 a 6 volcanes por A/B, resto promovido por reproceso",
+   "configuracion": "M260, B21, G3K",
+   "criterio_preregistrado": "SI (A66)",
+   "fuente": "docs/AUDIT_S109_MODIS_FOCAL_VEREDICTO.md:4-41; docs/superpowers/specs/2026-09-13-plan-definitivo-paridad-design.md:30-36",
+   "id": "H-A06",
+   "instrumento_declarado": "experiments/_s106_fase2/, _s109_modis_mag/audit_focalmag_ab.py, _s112_v750focal/ (existen)",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s109_modis_mag/audit_focalmag_ab.py",
+     "ruta": "_s109_modis_mag/audit_focalmag_ab.py"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s106_fase2/",
+     "ruta": "experiments/_s106_fase2/"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "En MODIS no hay referencia fuera de Lascar, asi que 'curar' fue bajar records de mas de 5 MW, no acercarse a MIROVA. El plan definitivo dice que MODIS publica igual con alerta (11,5 %) que sin ella (10,2 %). No lo re-medi",
+   "profundidad": "B",
+   "que_se_probo": "ADOPCION. Ancla espacial honesta (VIIRS 375 S106, V750 S108) y magnitud de nucleo focal (MODIS S109, V750 S112)",
+   "sesion": "S106 a S112, junio 2026",
+   "sesion_orden": 106,
+   "ventana_datos": "2026-01-29 a 2026-06-17",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "ADOPTADOS; S109 con C2 por debajo de lo pre-registrado, reinterpretado como 'metrica de maximizar'"
+  },
+  {
+   "cierres_e": [
+    "C_D25V"
+   ],
+   "cobertura": "MODIS, 6 volcanes",
+   "configuracion": "B21, G3K, ANILLO",
+   "criterio_preregistrado": "SI (A66)",
+   "fuente": "docs/AUDIT_S108_AB_MODIS_VEREDICTO.md:1-41",
+   "id": "H-18",
+   "instrumento_declarado": "experiments/_s107_modis_localmag/ (existe); run 27480234385; perfiles _archive/_modis_localmag_*.yaml",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s107_modis_localmag/",
+     "ruta": "experiments/_s107_modis_localmag/"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-13",
+    "G-36",
+    "G-37",
+    "G-42"
+   ],
+   "por_que": "Es la misma familia fisica que D25 (fondo por vecinos), que S138 identifico como 'la palanca real' y S145 implemento apagado en V750. La refutacion de S108 se midio con banda 21 (que S137 mostro que fabrica el primer pase MODIS) y con una metrica de records sobre 5 MW, sin referencia (MIROVA casi no publica MODIS fuera de Lascar). No refuta D25 y nadie lo ha dicho por escrito",
+   "profundidad": "B",
+   "que_se_probo": "Fondo local para la MAGNITUD en MODIS (huella o anillo alrededor del cumulo)",
+   "sesion": "S107/S108, 2026-06-13/14",
+   "sesion_orden": 107,
+   "ventana_datos": "2026-01-29 a 2026-06-13",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "REFUTADO: mas records suben que se curan"
+  },
+  {
+   "cierres_e": [
+    "C_A82",
+    "C_D19N"
+   ],
+   "cobertura": "MODIS",
+   "configuracion": "B21, G3K, ANILLO, conectiva min",
+   "criterio_preregistrado": "en parte",
+   "fuente": "CLAUDE.md A82; docs/AUDIT_S146.md:69",
+   "id": "H-36",
+   "instrumento_declarado": "experiments/_s111_d11/, _s114_audit/ (existen)",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s111_d11/",
+     "ruta": "experiments/_s111_d11/"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "Ya rebajada tres veces (S124, S138, S146 V-02). No agrego medicion. Lo que habria que repetir es la tasa base por volcan con banda 22 y sin compuerta, no los discriminantes",
+   "profundidad": "C",
+   "que_se_probo": "far a summit en MODIS: 8 discriminantes, N sigma de la Tabla 1, tope de magnitud (AUC 0,45), contexto temporal Method-2, ancla de primer pase",
+   "sesion": "S111 a S114, junio 2026",
+   "sesion_orden": 111,
+   "ventana_datos": "abril a junio 2026",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "A82: fisicamente irreducible, no reabrir"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "VIIRS 375; NdC, Lascar, Lastarria; 3 ALERTAS de NdC",
+   "configuracion": "M260, G3K, T1",
+   "criterio_preregistrado": "SI, endurecido por revision adversarial",
+   "fuente": "docs/S112_TEST1_LOWMAG_AB_RESULTS.md:3-48",
+   "id": "H-17",
+   "instrumento_declarado": "experiments/_s112_test1_lowmag/audit_t1lm_ab.py (existe); run 27705248529; perfiles _archive/_t1lm_*.yaml",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s112_test1_lowmag/audit_t1lm_ab.py",
+     "ruta": "experiments/_s112_test1_lowmag/audit_t1lm_ab.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "Unico A/B anterior a S139 que midio inflacion en noches RUTINA, y dio que el anillo intermedio la DUPLICA. Se adopto igual. Ver H-A07",
+   "profundidad": "A",
+   "que_se_probo": "Cuantificar el Muy Bajo de NdC con otro fondo para el Test 1 (anillos 1,5-3, 2-4, 3-5 km, NTI local, Eq.16, nucleo espacial)",
+   "sesion": "S112, 2026-06-17",
+   "sesion_orden": 112,
+   "ventana_datos": "2026-05-01 a 2026-06-17",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "NO ADOPTAR por criterio... y ADOPTADO el mismo dia por decision (ver seccion 4, H-A07)"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "VIIRS 375; 3 alertas de NdC",
+   "configuracion": "M260, G3K",
+   "criterio_preregistrado": "SI, y el veredicto pre-registrado fue NO ADOPTAR",
+   "fuente": "docs/S112_TEST1_LOWMAG_AB_RESULTS.md:3-48",
+   "id": "H-A07",
+   "instrumento_declarado": "experiments/_s112_test1_lowmag/audit_t1lm_ab.py (existe); run 27705248529",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s112_test1_lowmag/audit_t1lm_ab.py",
+     "ruta": "experiments/_s112_test1_lowmag/audit_t1lm_ab.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-31",
+    "G-37"
+   ],
+   "por_que": "Es la unica adopcion cuyo A/B midio la sobre-publicacion y la vio duplicarse, y aun asi entro a mirova_equivalent, gateada por volcan. Bajo la regla S143 (primero igualar, lo demas al experimental) es candidata directa a mudarse. ENABLE_TEST1_INTERMEDIATE_BG y ENABLE_TEST1_PRIORITY_WEAK_CLUSTER siguen en True (leido de pipeline.profile hoy)",
+   "profundidad": "A",
+   "que_se_probo": "ADOPCION. Anillo intermedio de fondo para el Test 1 mas prioridad al cumulo debil (S112), por volcan (Lascar, NdC, Lastarria)",
+   "sesion": "S112, 2026-06-17",
+   "sesion_orden": 112,
+   "ventana_datos": "2026-05-01 a 2026-06-17",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "ADOPTADO contra su propio criterio, por evidencia externa (Sentinel-2 vio 6 pixeles calientes en NdC el 16 de junio) y decision de Nicolas 'recall sobre precision'"
+  },
+  {
+   "cierres_e": [
+    "C_A83"
+   ],
+   "cobertura": "tres sensores agregados",
+   "configuracion": "M260, B21, G3K",
+   "criterio_preregistrado": "NO",
+   "fuente": "docs/AUDIT_S146.md:72",
+   "id": "H-35",
+   "instrumento_declarado": "JSON sin script (B-08)",
+   "instrumento_detalle": [],
+   "instrumento_estado": "SIN_RUTA",
+   "mecanismos_g": [],
+   "por_que": "V-03: etiqueta defectuosa, paradoja de Simpson (0,554 dentro de volcan y sensor). La puerta de la mision prohibe igual un discriminante por record contra la etiqueta de MIROVA: no retomar",
+   "profundidad": "C",
+   "que_se_probo": "Discriminante fisico por record entre foco debil real y artefacto (barrido de candidatos, AUC 0,859)",
+   "sesion": "S116, 2026-06-27",
+   "sesion_orden": 116,
+   "ventana_datos": "4.560 records summit",
+   "veredicto_frente_h": "PERDIDO",
+   "veredicto_original": "A83: agotado"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "11 Tier A, 4 brazos",
+   "configuracion": "M260 (en VIIRS 375), G3K, T1",
+   "criterio_preregistrado": "SI (A66)",
+   "fuente": "docs/AUDIT_S118_C2_GATES_AB.md:3-65; docs/HYPOTHESIS_LOG.md:9-27",
+   "id": "H-16",
+   "instrumento_declarado": "experiments/_s118_c2ab/ (existe); run 28312968093; perfiles _c2ab_*.yaml",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s118_c2ab/",
+     "ruta": "experiments/_s118_c2ab/"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "Para la pregunta que se hizo (robo) sigue valiendo, con el matiz B-03 (incluye noches donde el robo es imposible). Para la pregunta de hoy NUNCA se midio: cuanto subio la publicacion en negativos limpios al apagar las cercas. El costo se conto en records inflados sobre 1,5x, no en pasadas publicadas donde MIROVA callo",
+   "profundidad": "B",
+   "que_se_probo": "Cercas intra-radio por camino (S83/S85): 'protegen al crater del robo de cumulo'",
+   "sesion": "S118, 2026-06-28/07-01",
+   "sesion_orden": 118,
+   "ventana_datos": "ventanas dirigidas (el yml solo trae su fecha de alta)",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "REFUTADA la hipotesis; cercas a OFF (#474)"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "11 Tier A",
+   "configuracion": "",
+   "criterio_preregistrado": "SI",
+   "fuente": "docs/S126_PISO_VRP_ES_UN_NO_OP.md:1-14; docs/AUDIT_S118_C2_GATES_AB.md",
+   "id": "H-A09",
+   "instrumento_declarado": "experiments/_s126_piso/, _s130_piso_vrp/, _s118_c2ab/ (existen)",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s126_piso/",
+     "ruta": "experiments/_s126_piso/"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "Los dos van hacia el literal. Ninguno conto cuanto sube la publicacion en negativos limpios, pero ambos quitan cosas que MIROVA no tiene. Cobertura declarada: no abri los scripts del piso",
+   "profundidad": "B",
+   "que_se_probo": "ADOPCION. Retiro de los pisos VRP (S130) y apagado de las cercas intra-radio (S118)",
+   "sesion": "S118 y S130",
+   "sesion_orden": 118,
+   "ventana_datos": "2026-05-01 a 2026-08-28 (piso)",
+   "veredicto_frente_h": "SIGUE",
+   "veredicto_original": "ADOPTADOS"
+  },
+  {
+   "cierres_e": [
+    "C_D12"
+   ],
+   "cobertura": "MODIS, 4 volcanes",
+   "configuracion": "B21, G3K, ANILLO",
+   "criterio_preregistrado": "SI",
+   "fuente": "docs/AUDIT_S121_D12_AB.md:1-50; docs/AUDIT_S146.md:73",
+   "id": "H-15",
+   "instrumento_declarado": "experiments/_s121_d12_ab/ (existe el directorio; el frente B y V-09 dan los artefactos por perdidos); workflow reproc-s121-d12-modis-ab.yml",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/reproc-s121-d12-modis-ab.yml",
+     "ruta": "reproc-s121-d12-modis-ab.yml"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s121_d12_ab/",
+     "ruta": "experiments/_s121_d12_ab/"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-33"
+   ],
+   "por_que": "V-09: el 76 exacto es NO VERIFICABLE y 'curada' no era 'MIROVA confirmo'. Con tasa base de 89,1 % de cumulo dentro del inner (V-02) la metrica no distingue actividad",
+   "profundidad": "B",
+   "que_se_probo": "Ancla honesta en MODIS (D12): dejar de etiquetar far el foco de Lascar cuando un pixel del Salar roba el hotspot",
+   "sesion": "S121, 2026-07-17",
+   "sesion_orden": 121,
+   "ventana_datos": "2025-02-15 a 2026-07-17",
+   "veredicto_frente_h": "PERDIDO",
+   "veredicto_original": "NO ADOPTAR (destapa 131 records de artefacto)"
+  },
+  {
+   "cierres_e": [
+    "C_D16"
+   ],
+   "cobertura": "VIIRS 375, 11 volcanes; n = 1 y 2 en dos de ellos (V-04)",
+   "configuracion": "M260, G3K, T1, grilla mal centrada (D17), sin bow tie",
+   "criterio_preregistrado": "SI (en el perfil _f70_b.yaml)",
+   "fuente": "docs/S124_F70_VEREDICTO.md:1-5, 52-110; docs/AUDIT_S146.md:70",
+   "id": "H-14",
+   "instrumento_declarado": "experiments/_s124_f70/ (existe); perfiles _f70_{a,b}.yaml",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s124_f70/",
+     "ruta": "experiments/_s124_f70/"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-10",
+    "G-12",
+    "G-14"
+   ],
+   "por_que": "Ya rebajado por V-04: lo refutado fue el regrid F70, no la grilla de MIROVA. Agrego: corrio ademas con la mascara de 260 K. El propio veredicto reconoce que ningun script commiteado produce uno de sus numeros (S124_F70_VEREDICTO.md:97-99)",
+   "profundidad": "B",
+   "que_se_probo": "Remuestreo a grilla UTM (F70), 4 brazos",
+   "sesion": "S124, 2026-08-27/28",
+   "sesion_orden": 124,
+   "ventana_datos": "2026-06-25 a 2026-08-24",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "NO ADOPTAR; D16 'CERRADA, no reabrir'"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "VIIRS 375, 4 volcanes, 15 a 57 noches",
+   "configuracion": "M260, G3K, T1, PISO",
+   "criterio_preregistrado": "SI",
+   "fuente": "docs/S125_AB_MAGNITUD_RESULTADO.md:10-42; git 69c1e4c9e",
+   "id": "H-13",
+   "instrumento_declarado": "experiments/_s125_magnitud/02_veredicto_ab.py (existe); perfiles _s125_mag_*.yaml",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s125_magnitud/02_veredicto_ab.py",
+     "ruta": "experiments/_s125_magnitud/02_veredicto_ab.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "Corrio con la mascara de 260 K, que en invierno dejaba sin fondo pasadas enteras de Villarrica y Lascar (69 y 29 noches ciegas, S126_CLOUDMASK_RESULTADO:19-24). Muestra insuficiente declarada por el propio informe",
+   "profundidad": "B",
+   "que_se_probo": "Brazos de magnitud A, B, C (apagar dos reducciones y encender la corona) para el sub-reporte VIIRS",
+   "sesion": "S125, 2026-08-28",
+   "sesion_orden": 125,
+   "ventana_datos": "2026-06-25 a 2026-08-24",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "NO ADOPTAR todavia: 2 de 4 criterios; la direccion era correcta en 4 de 4"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "VIIRS 375; NdC, Villarrica, Lascar",
+   "configuracion": "G3K, T1, PISO",
+   "criterio_preregistrado": "el script se escribio antes de terminar los reprocesos",
+   "fuente": "docs/S126_CLOUDMASK_RESULTADO.md:11-76",
+   "id": "H-A08",
+   "instrumento_declarado": "experiments/_s126_cloudmask/02_veredicto.py (existe); runs 33257081431 y 33257082834",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s126_cloudmask/02_veredicto.py",
+     "ruta": "experiments/_s126_cloudmask/02_veredicto.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "Fiel al paper (Laiolo 2026 p. 4, verificado S128), asi que la decision es correcta por la mision. Pero el costo se midio mal para la pregunta de hoy: 'solo 21 de 286 detecciones nuevas caen en noches que MIROVA confirma' (S126_CLOUDMASK_RESULTADO:63), o sea 265 publicaciones nuevas donde MIROVA no alerto, leidas como 'cara negativa chica'. Es el origen medido del salto 62,1 a 87,1 %",
+   "profundidad": "B",
+   "que_se_probo": "ADOPCION de hecho. Mascara de nube apagada (#535 la apago creyendo que era un no-op; S126 decidio no revertir)",
+   "sesion": "S125/S126, 2026-08-28/29",
+   "sesion_orden": 125,
+   "ventana_datos": "SIN DATO exacto (tres volcanes, invierno 2026)",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "SOSTENER el apagado"
+  },
+  {
+   "cierres_e": [
+    "C_D25V"
+   ],
+   "cobertura": "VIIRS 375, 5 volcanes (Villarrica, Planchon-Peteroa, Lascar, PCC, NdC)",
+   "configuracion": "G3K, T1, PISO aun activo",
+   "criterio_preregistrado": "SI (S126_CORONA_PREREGISTRO.md)",
+   "fuente": "docs/S127_CORONA_RESULTADO.md:26-79",
+   "id": "H-12",
+   "instrumento_declarado": "experiments/_s126_corona/01_veredicto.py (existe); perfiles _s126_corona_{on,off,ctxoff}.yaml",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s126_corona/01_veredicto.py",
+     "ruta": "experiments/_s126_corona/01_veredicto.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-13",
+    "G-36",
+    "G-37",
+    "G-42"
+   ],
+   "por_que": "Dos defectos hoy conocidos: (1) la paridad por maximo nocturno infla 0,1 a 0,2 contra la de pasada (audit_s139/VERIFICADOR.md:28-29); (2) el criterio 5 conto como perdida 8 detecciones de 0,021 a 0,042 MW sin preguntar si eran noches que MIROVA confirma: en el regimen de hoy perder publicaciones de centesimas de MW en negativos limpios es el objetivo, no el dano. Es la misma familia que D25, que S145 implemento apagado",
+   "profundidad": "B",
+   "que_se_probo": "Corona Eq.6 (fondo por la corona de pixeles que rodea al cumulo), 2x2 con el filtro contextual",
+   "sesion": "S126/S127, 2026-08-29/30",
+   "sesion_orden": 126,
+   "ventana_datos": "2026-06-25 a 2026-08-24",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "NO ADOPTAR: Villarrica sube 0,045 en vez de bajar; 8 detecciones perdidas de 2.179 (0,37 %)"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "5 volcanes",
+   "configuracion": "G3K, B21, conectiva min",
+   "criterio_preregistrado": "SI",
+   "fuente": "docs/s130/AB_FONDOS_SIN_SUSTRATO.md:1-14",
+   "id": "H-11",
+   "instrumento_declarado": "experiments/_s129_ab_fondos/, _s130_ab_sustrato/ (existen); workflow reproc-s129-ab-fondos.yml",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/reproc-s129-ab-fondos.yml",
+     "ruta": "reproc-s129-ab-fondos.yml"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s129_ab_fondos/",
+     "ruta": "experiments/_s129_ab_fondos/"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "La falta de sustrato se volvio a ver hoy por otra via: diag_n_nti_path > 0 en 5 de 954 pasadas V375 y 0 en el resto (FASE1_SUSTRATO:18). Ojo: vale para volcanes sin fase efusiva; con lava expuesta el sustrato aparece",
+   "profundidad": "B",
+   "que_se_probo": "Fondos autorreferentes (GAP A: sacar los pixeles del Test 1 por pixel del pool de mu y sigma; fondo de magnitud)",
+   "sesion": "S129/S130, 2026-08-31",
+   "sesion_orden": 129,
+   "ventana_datos": "2026-03-01 a 2026-05-28",
+   "veredicto_frente_h": "SIGUE",
+   "veredicto_original": "SIN VEREDICTO: los brazos no difieren, el mecanismo casi no tiene sustrato"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "VIIRS 375, 9 volcanes con n de 5 o mas noches",
+   "configuracion": "G3K, T1, ANILLO con recorte, keep_peak",
+   "criterio_preregistrado": "SI",
+   "fuente": "docs/s129/RADIO_DE_SUMA.md:17-80",
+   "id": "H-28",
+   "instrumento_declarado": "experiments/_s129_suma/01_suma_vs_cluster.py y 02_radio_de_suma.py (existen)",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s129_suma/02_radio_de_suma.py",
+     "ruta": "02_radio_de_suma.py"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s129_suma/01_suma_vs_cluster.py",
+     "ruta": "experiments/_s129_suma/01_suma_vs_cluster.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "Se midio offline sobre los pixeles persistidos (tope de 100, con nuestro fondo y nuestro recorte). El brazo de reproceso que el propio documento pide nunca se corrio. No es una refutacion de la suma de escena",
+   "profundidad": "B",
+   "que_se_probo": "Sumar todos los pixeles alertados de la escena, como escribe Coppola 2019 p. 3, en vez de publicar un solo cumulo; barrido de radio uniforme",
+   "sesion": "S129, 2026-08-30",
+   "sesion_orden": 129,
+   "ventana_datos": "records de 2026 (SIN DATO si separa tramos: no abri el script)",
+   "veredicto_frente_h": "NUNCA",
+   "veredicto_original": "NEGATIVO: el mejor radio uniforme (10 km) gana un volcan; 'pasa a brazo del A/B'"
+  },
+  {
+   "cierres_e": [
+    "C_D18"
+   ],
+   "cobertura": "6 volcanes, tres sensores segun el perfil",
+   "configuracion": "G3K, B21, T1, ANILLO",
+   "criterio_preregistrado": "SI (PREREGISTRO_AB_D18.md)",
+   "fuente": "docs/s130/VEREDICTO_AB_D18.md:1-14; git d6d9b8e05; pipeline/profiles/_s130_d18_caja.yaml:76",
+   "id": "H-10",
+   "instrumento_declarado": "experiments/_s130_d18/ (existe); run 33456630043; perfiles _s130_d18_{caja,circulo}.yaml",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s130_d18/",
+     "ruta": "experiments/_s130_d18/"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-15"
+   ],
+   "por_que": "Correccion a A-13 del frente A: este A/B NO corrio en el regimen viejo. El regimen lo fija el codigo que procesa, no la fecha del granulo (experiments/_s136/RESULTADO_PROBE.md:14-19), y el codigo es posterior a #535. Lo que si le falta es la unidad: nunca se midio publicacion en negativos limpios, y la caja manda pixeles a umbrales mas estrictos, que es la direccion que hoy interesa (la caja de PCC pasa de 20 km a 5). Re-evaluar las salidas ya generadas, sin re-correr",
+   "profundidad": "A",
+   "que_se_probo": "ROI1 como caja de 5 km igual para todos (paper) en vez de circulo de 3 a 20 km por volcan (D18)",
+   "sesion": "S130, 2026-08-31/09-01",
+   "sesion_orden": 130,
+   "ventana_datos": "2026-05-29 a 2026-08-24",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "NO ADOPTAR por ausencia de beneficio"
+  },
+  {
+   "cierres_e": [
+    "C_A94"
+   ],
+   "cobertura": "MODIS",
+   "configuracion": "B21, G3K",
+   "criterio_preregistrado": "SI",
+   "fuente": "docs/s132/AB_DISTANCE_CLASS_MODIS.md:1-8",
+   "id": "H-43",
+   "instrumento_declarado": "experiments/_s132/ab_distance_class_modis.json (citado)",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s132/ab_distance_class_modis.json",
+     "ruta": "experiments/_s132/ab_distance_class_modis.json"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "Solo lei el encabezado. A94 y V-02 ya dicen que el frente de la etiqueta rinde una noche de 946 y que la tasa base lo vuelve indiscriminante",
+   "profundidad": "B (encabezado)",
+   "que_se_probo": "A/B de distance_class en MODIS (decision 4 de AUDIT_S131)",
+   "sesion": "S132, 2026-09-03",
+   "sesion_orden": 132,
+   "ventana_datos": "SIN DATO",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "NO ADOPTAR"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "VIIRS 375, 8 volcanes, 643 pares por pasada",
+   "configuracion": "G3K, T1, ANILLO",
+   "criterio_preregistrado": "SI",
+   "fuente": "docs/s133/AB_AREA_VEREDICTO_CHUNK1.md:1-10; docs/MIROVA_DIVERGENCES.md:2072, 2122",
+   "id": "H-08",
+   "instrumento_declarado": "experiments/_s133/analizar_ab_area.py, resultado_ab_area.json (existen); workflow reproc-s133-area-ab.yml",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s133/analizar_ab_area.py",
+     "ruta": "experiments/_s133/analizar_ab_area.py"
+    },
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/reproc-s133-area-ab.yml",
+     "ruta": "reproc-s133-area-ab.yml"
+    },
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s133/resultado_ab_area.json",
+     "ruta": "resultado_ab_area.json"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-10"
+   ],
+   "por_que": "El documento del veredicto se declara parcial y no encontre en docs/ el veredicto de los chunks 2 y 3 (SIN DATO: no abri resultado_ab_area.json). Ademas el area sola no es el remuestreo (A66 rebajada): el brazo fiel, bow tie mas remuestreo centrado en get_grid_center, nunca se corrio",
+   "profundidad": "B",
+   "que_se_probo": "Area de pixel geolocalizada (en vez de nadir fijo) para corregir el gradiente cenital de la magnitud",
+   "sesion": "S133, 2026-09-05",
+   "sesion_orden": 133,
+   "ventana_datos": "chunk 1: 2026-04-01 a 2026-05-31 (el yml llega a 08-31)",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "NO ADOPTAR: invierte el signo del sesgo (veredicto declarado PARCIAL, solo chunk 1)"
+  },
+  {
+   "cierres_e": [
+    "C_D21"
+   ],
+   "cobertura": "MODIS; solo Lascar (n=61) y Villarrica (n=70), pareado por granulo",
+   "configuracion": "G3K, ANILLO, conectiva min",
+   "criterio_preregistrado": "SI",
+   "fuente": "docs/s133/AB_B22_VEREDICTO.md:1-12; docs/audit_s139/VERIFICADOR.md:30-32",
+   "id": "H-09",
+   "instrumento_declarado": "experiments/_s133/analizar_ab_b22.py, resultado_ab_b22.json (existen); workflow reproc-s133-b22-ab.yml",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s133/analizar_ab_b22.py",
+     "ruta": "experiments/_s133/analizar_ab_b22.py"
+    },
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/reproc-s133-b22-ab.yml",
+     "ruta": "reproc-s133-b22-ab.yml"
+    },
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s133/resultado_ab_b22.json",
+     "ruta": "resultado_ab_b22.json"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-08"
+   ],
+   "por_que": "El criterio era de INVARIANCIA, no de paridad: 'la paridad nunca se midio (n = 2)' (audit_s139/VERIFICADOR.md:30-32). Un mes, dos volcanes, con la compuerta puesta, y S137 mostro que banda y compuerta interactuan. Hoy la bateria del Apendice A da 9 de 9 al brazo con banda 22. No es una refutacion de D21",
+   "profundidad": "B",
+   "que_se_probo": "Banda 22 como primaria en MODIS (D21)",
+   "sesion": "S133, 2026-09-05",
+   "sesion_orden": 133,
+   "ventana_datos": "2026-08-01 a 2026-08-31",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "NO ADOPTAR (fallaron los dos criterios, el fondo cambio -1,2 K)"
+  },
+  {
+   "cierres_e": [
+    "C_D19N"
+   ],
+   "cobertura": "VIIRS 375, 6 volcanes (Isluga, Lascar, Lastarria, PCC, Planchon-Peteroa, Tupungatito). Sin nevados del sur",
+   "configuracion": "G3K, T1, ANILLO",
+   "criterio_preregistrado": "SI",
+   "fuente": "experiments/_s135_ab_d1d2/RESULTADO_FINAL.md:9-25; CLAUDE.md A100; docs/AUDIT_S146.md:75",
+   "id": "H-05",
+   "instrumento_declarado": "experiments/_s135_ab_d1d2/evaluar_ab.py y RESULTADO_FINAL.md (existen); workflow reproc-s135-ab-d1d2.yml; perfiles _s135_ab_*.yaml",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s135_ab_d1d2/RESULTADO_FINAL.md",
+     "ruta": "RESULTADO_FINAL.md"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s135_ab_d1d2/evaluar_ab.py",
+     "ruta": "experiments/_s135_ab_d1d2/evaluar_ab.py"
+    },
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/reproc-s135-ab-d1d2.yml",
+     "ruta": "reproc-s135-ab-d1d2.yml"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-23",
+    "G-32",
+    "G-38",
+    "G-39"
+   ],
+   "por_que": "El criterio 3 es una paridad agregada que hoy se sabe defectuosa por dos lados: A100 (keep_peak daba paridad por accidente, con el pixel equivocado a ~3 km) y V-12 (el agregado compensa entre volcanes de 0,66 a 1,39). El brazo B fue rechazado por 0,016 de una metrica que premiaba el artefacto. No hay que re-correrlo: hay que re-evaluar sus salidas con criterio por volcan y negativos limpios",
+   "profundidad": "B",
+   "que_se_probo": "Apagar keep_peak y/o condicionar el segundo pase (D19), 5 brazos",
+   "sesion": "S135, 2026-09-07",
+   "sesion_orden": 135,
+   "ventana_datos": "2026-06-01 a 2026-08-31",
+   "veredicto_frente_h": "CONFIG",
+   "veredicto_original": "NO ADOPTAR: el brazo B (sin keep_peak) pierde 0 noches y quita 100 % del artefacto, pero falla el criterio 3 por 0,692 contra 0,708"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "11 Tier A",
+   "configuracion": "",
+   "criterio_preregistrado": "no aplica",
+   "fuente": "experiments/_s136/FILTRO_INTENSIDAD_DESCARTADO.md:1-30; docs/MIROVA_DIVERGENCES.md:1853-1860",
+   "id": "H-37",
+   "instrumento_declarado": "experiments/_s136/FILTRO_INTENSIDAD_DESCARTADO.md, piso_mirova.py (existen)",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s136/FILTRO_INTENSIDAD_DESCARTADO.md",
+     "ruta": "experiments/_s136/FILTRO_INTENSIDAD_DESCARTADO.md"
+    },
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s136/piso_mirova.py",
+     "ruta": "piso_mirova.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "La lectura documental la repitio el verificador de S141 (P-01). Un piso de intensidad cortaria alertas reales de 0,02 a 0,06 MW (NdC)",
+   "profundidad": "B",
+   "que_se_probo": "Filtro por intensidad o distancia 'de Laiolo 2026' como clon literal",
+   "sesion": "S136, 2026-09-08",
+   "sesion_orden": 136,
+   "ventana_datos": "canal NRT",
+   "veredicto_frente_h": "SIGUE",
+   "veredicto_original": "DESCARTADO por dos vias"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "VIIRS 375; 3 pasadas de nevado con sustrato",
+   "configuracion": "G3K, ANILLO",
+   "criterio_preregistrado": "SI",
+   "fuente": "experiments/_s136/SUSTRATO_RESUELVE_EL_DESENLACE.md:14-25",
+   "id": "H-38",
+   "instrumento_declarado": "experiments/_s136/probe_3brazos.py, RESULTADO_PROBE.md (existen); run 34274884640",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s136/RESULTADO_PROBE.md",
+     "ruta": "RESULTADO_PROBE.md"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s136/probe_3brazos.py",
+     "ruta": "experiments/_s136/probe_3brazos.py"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "El brazo 'nunca se corrio en este regimen' como reproceso (MISSION_GATE_S136:87-89). El probe dice que donde el filtro actua la magnitud casi se duplica (1,17 a 2,23 con n = 3): indicio, no veredicto",
+   "profundidad": "B",
+   "que_se_probo": "Test 1 sin la interseccion contextual (tercer estado del eje: interseccion actual, contextual puro, sin interseccion)",
+   "sesion": "S136, 2026-09-08",
+   "sesion_orden": 136,
+   "ventana_datos": "20 pasadas",
+   "veredicto_frente_h": "NUNCA",
+   "veredicto_original": "INDETERMINADO por falta de sustrato (3 pasadas utiles de nevado)"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "MODIS, escenas del paper (no son volcanes chilenos salvo Villarrica A6)",
+   "configuracion": "se prueba con y sin B21 y G3K",
+   "criterio_preregistrado": "vara de A2 re-escrita en S146",
+   "fuente": "docs/AUDIT_S146.md:96-120",
+   "id": "H-42",
+   "instrumento_declarado": "experiments/_s136/VEREDICTO_CONECTIVA.md, experiments/_s146_bateria/ (existen); workflow probe-s146-bateria-apendice.yml",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s136/VEREDICTO_CONECTIVA.md",
+     "ruta": "experiments/_s136/VEREDICTO_CONECTIVA.md"
+    },
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/probe-s146-bateria-apendice.yml",
+     "ruta": "probe-s146-bateria-apendice.yml"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s146_bateria/",
+     "ruta": "experiments/_s146_bateria/"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-16"
+   ],
+   "por_que": "Es fidelidad al Apendice A y corre con el codigo de hoy. No dice nada de la sobre-publicacion en VIIRS (AUDIT_S146:118-120). Tres brazos INDECIDIBLES por no guardar posicion",
+   "profundidad": "B",
+   "que_se_probo": "Conectiva de los Tests 2 y 3: min (formula) contra max (prosa)",
+   "sesion": "S136 a S146",
+   "sesion_orden": 136,
+   "ventana_datos": "9 escenas MODIS del Apendice A (2000 a 2015)",
+   "veredicto_frente_h": "SIGUE",
+   "veredicto_original": "S136: min no reproduce; S146: el mejor brazo usa max y da 9 de 9"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "VIIRS 375; estrato nevado sin muestra",
+   "configuracion": "G3K, ANILLO",
+   "criterio_preregistrado": "SI",
+   "fuente": "docs/HYPOTHESIS_LOG.md:1499-1523",
+   "id": "H-07",
+   "instrumento_declarado": "experiments/_s141_fase1_probe{,_v2}/ (existen), runs 34929024703 y 34967596160",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/",
+     "ruta": "experiments/"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "Bien instrumentado y en el regimen actual. No justifica A/B. El hallazgo post hoc (dETI 52 de 52 en la ruta contextual, compuerta BT 18 de 18 en la del Test 1, piso C1 en los 70) queda como pista declarada, no como veredicto",
+   "profundidad": "C",
+   "que_se_probo": "Probe de vecinos tibios v1 y v2: en que etapa se pierden los vecinos del foco que MIROVA suma",
+   "sesion": "S141/S142, 2026-09-15",
+   "sesion_orden": 141,
+   "ventana_datos": "pasadas OSF 2025 reprocesadas con codigo de hoy",
+   "veredicto_frente_h": "SIGUE",
+   "veredicto_original": "v1 INDETERMINADO; v2 HETEROGENEO en focal, INDETERMINADO en nevado"
+  },
+  {
+   "cierres_e": [
+    "C_D25V"
+   ],
+   "cobertura": "VIIRS 375, 9 volcanes. No dice nada de V750 ni MODIS (declarado)",
+   "configuracion": "B21 no aplica; T1 activo en todos los brazos",
+   "criterio_preregistrado": "SI, v2 con verificador antes de correr",
+   "fuente": "docs/HYPOTHESIS_LOG.md:1525-1538",
+   "id": "H-04",
+   "instrumento_declarado": "experiments/_s143_evaluador/ (existe), workflow reproc-s143-ab-d22d25.yml, perfiles _s142_ab_*.yaml",
+   "instrumento_detalle": [
+    {
+     "ambiguo": false,
+     "estado": "EXISTE",
+     "resuelto_en": ".github/workflows/reproc-s143-ab-d22d25.yml",
+     "ruta": "reproc-s143-ab-d22d25.yml"
+    },
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s143_evaluador/",
+     "ruta": "experiments/_s143_evaluador/"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [
+    "G-13",
+    "G-21",
+    "G-36",
+    "G-37",
+    "G-42"
+   ],
+   "por_que": "Es el A/B mejor instrumentado del proyecto y corrio en el regimen actual. Lo que si queda cojo es el criterio 1 (cota escalar sin acimut, A107): las 5 perdidas del literal son 4 y son coincidencias de radio. La atribucion (todo el descenso viene de apagar keep_peak; D22 y D25 empujan en contra) sigue valiendo y no hay que repetirla",
+   "profundidad": "C",
+   "que_se_probo": "Quitar la compuerta de 3 K (D22) y el fondo de anillo (D25) en VIIRS 375, brazo literal con 5 ablaciones",
+   "sesion": "S143, 2026-09-17/19",
+   "sesion_orden": 143,
+   "ventana_datos": "2026-06-01 a 2026-08-31",
+   "veredicto_frente_h": "SIGUE",
+   "veredicto_original": "NO ADOPTAR: ningun brazo cumple los tres"
+  },
+  {
+   "cierres_e": [],
+   "cobertura": "VIIRS 375; el fenomeno es de Lastarria (12 de 15 pasadas)",
+   "configuracion": "",
+   "criterio_preregistrado": "SI, siete versiones",
+   "fuente": "docs/HYPOTHESIS_LOG.md:1540-1567",
+   "id": "H-06",
+   "instrumento_declarado": "experiments/_s144_keep_peak_direccion/verificadores/ (existe)",
+   "instrumento_detalle": [
+    {
+     "estado": "EXISTE",
+     "resuelto_en": "experiments/_s144_keep_peak_direccion/verificadores/",
+     "ruta": "experiments/_s144_keep_peak_direccion/verificadores/"
+    }
+   ],
+   "instrumento_estado": "EXISTE",
+   "mecanismos_g": [],
+   "por_que": "La medida pre-registrada no se corrio. Lo que si se midio (nulos y controles) sigue valiendo como leccion de instrumento (A109, A110). El cierre no habilita ni prohibe apagar keep_peak",
+   "profundidad": "C",
+   "que_se_probo": "Medir con direccion (GeoTIFF UTM de MIROVA) si el cumulo lejano que publica keep_peak es el objeto de MIROVA",
+   "sesion": "S144, 2026-09-19",
+   "sesion_orden": 144,
+   "ventana_datos": "estratos ajenos a la muestra",
+   "veredicto_frente_h": "NUNCA",
+   "veredicto_original": "CERRADO sin correr la medida (habria dado INCONCLUSO 90 % de las veces)"
+  }
+ ],
+ "resumen": {
+  "con_cierre_e_enlazado": 18,
+  "con_mecanismo_g_enlazado": 24,
+  "por_estado_instrumento": {
+   "EXISTE": 46,
+   "NO_ENCONTRADO": 3,
+   "SIN_RUTA": 4
+  },
+  "por_veredicto": {
+   "CONFIG": 30,
+   "NUNCA": 6,
+   "OBSOLETA": 4,
+   "PERDIDO": 3,
+   "SIGUE": 10
+  },
+  "sin_cierre_e_enlazado": 35,
+  "sin_mecanismo_g_enlazado": 29,
+  "total_pruebas": 53
+ }
+}

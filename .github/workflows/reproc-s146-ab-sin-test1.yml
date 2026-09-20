@@ -1,0 +1,253 @@
+name: "A/B S146: sin el Test 1 integrado en el ROI (tres brazos, once Tier A, tres sensores)"
+
+# EL FENOMENO. De noche el sensor mide cuanto brilla cada pixel en el infrarrojo medio (MIR,
+# sensible a un punto muy caliente aunque ocupe una fraccion del pixel) y cuanto en el termico
+# (TIR, la temperatura promedio del terreno). Hay dos maneras fisicamente distintas de decir que
+# el crater esta caliente: que UN pixel se despegue de sus ocho vecinos en el indice que cruza MIR
+# con TIR (los Tests 2 y 3 del paper de MIROVA), o que la SUMA del exceso de MIR de todo el disco
+# de 3 km supere a su anillo de fondo (el Test 1 integrado, que es un detector nuestro y no esta
+# en el paper). Este A/B mide cuanto de lo que publicamos donde MIROVA no vio nada lo sostiene el
+# segundo, y cuanto recall se perderia al apagarlo.
+#
+# BRAZOS (perfiles aislados, cada uno con su data_subdir; A47):
+#   _s146_ab_control                 produccion de hoy, reprocesada con el mismo codigo
+#   _s146_ab_sin_test1               enable_test1_path: false
+#   _s146_ab_sin_prioridad_debil     enable_test1_priority_weak_cluster: false
+#
+# NO DESPACHAR sin el pre-registro aprobado: experiments/_s146_ab_sin_test1/PREREGISTRO.md, con
+# sus umbrales congelados en parametros.json, commiteados ANTES de la primera corrida. El candado
+# de abajo (preregistro_aprobado) impide que este workflow corra sin ese "si" explicito.
+#
+# NO COMMITEA A main. Cada brazo escribe en su data_subdir aislado; las salidas salen por dos
+# caminos a la vez, porque los artefactos caducan a los 90 dias y en este proyecto ya se perdieron
+# salidas asi: (a) artefacto por job, (b) rama propia de la corrida, s146-ab/<run_id>.
+#
+# A43: la clave "on" va entre comillas (Norway Problem de YAML 1.1).
+# A71: se autentica SOLO con EARTHDATA_TOKEN. El par usuario y clave de los secretos esta vencido
+#      y su reintento de login BLOQUEO la cuenta 10 minutos. Sin token, el job falla al instante.
+# A15: timeout >= 1,3 veces la duracion esperada (1,5 a 3 h por job) y muy por debajo del tope
+#      duro de 6 h de GitHub.
+"on":
+  workflow_dispatch:
+    inputs:
+      preregistro_aprobado:
+        description: "Escribe si SOLO con experiments/_s146_ab_sin_test1/PREREGISTRO.md aprobado por Nicolas y su verificador"
+        required: true
+        default: "no"
+      start:
+        description: "Inicio YYYY-MM-DD (fijo por pre-registro: 2026-09-01)"
+        required: true
+        default: "2026-09-01"
+      end:
+        description: "Fin YYYY-MM-DD inclusive (fijo por pre-registro: 2026-09-20)"
+        required: true
+        default: "2026-09-20"
+      vols:
+        description: 'Lista JSON de volcanes. La lista corta sirve para REPETIR un job que quedo con pasadas de menos por un corte de NASA'
+        required: true
+        default: '["Lascar","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","NevadosDeChillan","Llaima","Villarrica","Copahue","PuyehueCordonCaulle","Chaiten"]'
+      brazos:
+        description: 'Lista JSON de brazos'
+        required: true
+        default: '["_s146_ab_control","_s146_ab_sin_test1","_s146_ab_sin_prioridad_debil"]'
+
+# No entra al grupo push-main: este workflow no pushea a main. Se serializa consigo mismo para
+# que dos corridas no se pisen la rama de salida.
+concurrency:
+  group: s146-ab-sin-test1
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  reproc:
+    if: github.event.inputs.preregistro_aprobado == 'si'
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      # Un volcan y un brazo por job, cada uno escribiendo en su propio data_subdir: dos procesos
+      # sobre el mismo directorio corrompen los JSON (A47). max-parallel 6 deja lugar al cron NRT
+      # dentro del tope de 20 jobs concurrentes y no satura a NASA.
+      max-parallel: 6
+      matrix:
+        volcano: ${{ fromJSON(github.event.inputs.vols) }}
+        profile: ${{ fromJSON(github.event.inputs.brazos) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Credenciales presentes (un secreto ausente se resuelve a string vacio, no a error)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacio. Sin token no se mide nada, y el login por usuario y clave con la credencial vencida bloquea la cuenta (A71). No se reintenta."
+            exit 1
+          fi
+          echo "credenciales presentes"
+
+      - name: Dependencias
+        run: |
+          set -euo pipefail
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: El brazo LEE lo que declara (y escribe donde declara)
+        env:
+          VRP_PROFILE: ${{ matrix.profile }}
+        run: |
+          set -euo pipefail
+          python -c "import pipeline.profile as p; \
+            print('brazo', p.PROFILE_NAME, \
+            '| test1_path', p.ENABLE_TEST1_PATH, \
+            '| prioridad_debil', p.ENABLE_TEST1_PRIORITY_WEAK_CLUSTER, \
+            '| sensores', p.SENSOR_MODIS, p.SENSOR_VIIRS_375, p.SENSOR_VIIRS_750, \
+            '| subdir', p.DATA_SUBDIR); \
+            assert p.DATA_SUBDIR == p.PROFILE_NAME, 'el brazo escribiria fuera de su subdir'"
+
+      - name: Reproceso del brazo
+        env:
+          # Solo el token (A71). Ni EARTHDATA_USERNAME ni EARTHDATA_PASSWORD entran al entorno.
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          # Las entradas viajan por env y NO se interpolan dentro del run (S128).
+          ARM_START: ${{ github.event.inputs.start }}
+          ARM_END: ${{ github.event.inputs.end }}
+          ARM_PROFILE: ${{ matrix.profile }}
+          ARM_VOLCANO: ${{ matrix.volcano }}
+        timeout-minutes: 300
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          mkdir -p logs
+          python scripts/run_pipeline.py \
+            --profile "$ARM_PROFILE" \
+            --volcano "$ARM_VOLCANO" \
+            --start "$ARM_START" \
+            --end "$ARM_END" \
+            --overwrite 2>&1 | tee "logs/${ARM_PROFILE}_${ARM_VOLCANO}.log"
+
+      - name: Subir el JSON del brazo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s146ab-${{ matrix.profile }}-${{ matrix.volcano }}
+          path: |
+            data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+            logs/${{ matrix.profile }}_${{ matrix.volcano }}.log
+          retention-days: 90
+          if-no-files-found: error
+
+  recolectar:
+    needs: reproc
+    if: always() && github.event.inputs.preregistro_aprobado == 'si'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Dependencias minimas
+        run: pip install pyyaml
+
+      - name: Bajar los artefactos de todos los brazos
+        uses: actions/download-artifact@v4
+        with:
+          pattern: s146ab-*
+          path: recolectado
+          merge-multiple: true
+
+      - name: Ordenar por brazo
+        env:
+          BRAZOS: ${{ github.event.inputs.brazos }}
+        run: |
+          set -euo pipefail
+          mkdir -p salidas
+          # download-artifact con merge-multiple deja los JSON bajo data/<brazo>/<volcan>.json
+          if [ -d recolectado/data ]; then cp -r recolectado/data/. salidas/; fi
+          if [ -d recolectado/logs ]; then mkdir -p salidas/logs && cp -r recolectado/logs/. salidas/logs/; fi
+          find salidas -name '*.json' | sort | sed -n '1,200p'
+
+      - name: COBERTURA PAREJA antes de mirar nada (A108)
+        env:
+          ARM_START: ${{ github.event.inputs.start }}
+          ARM_END: ${{ github.event.inputs.end }}
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          ARGS=""
+          for d in salidas/_s146_ab_sin_test1 salidas/_s146_ab_sin_prioridad_debil; do
+            if [ -d "$d" ]; then ARGS="$ARGS --brazo $d"; fi
+          done
+          python experiments/_s146_ab_sin_test1/contar_pasadas.py \
+            --control salidas/_s146_ab_control \
+            --inicio "$ARM_START" --fin "$ARM_END" \
+            --out salidas/cobertura.json \
+            $ARGS 2>&1 | tee salidas/cobertura.txt
+
+      - name: Publicar las salidas en una rama propia de esta corrida
+        if: always()
+        env:
+          RAMA: s146-ab/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -z "$(ls -A salidas 2>/dev/null)" ]; then
+            echo "::error::no llego ninguna salida: no hay nada que publicar"
+            exit 1
+          fi
+          git checkout -b "$RAMA"
+          mkdir -p "experiments/_s146_ab_sin_test1/salidas/${GITHUB_RUN_ID}"
+          cp -r salidas/. "experiments/_s146_ab_sin_test1/salidas/${GITHUB_RUN_ID}/"
+          git add -f "experiments/_s146_ab_sin_test1/salidas/${GITHUB_RUN_ID}"
+          git commit -m "S146 A/B sin Test 1 integrado: salidas crudas de la corrida ${GITHUB_RUN_ID} (no toca main)"
+          # Reintento propio. Este workflow NO pushea a main y por eso no entra al grupo
+          # push-main (ocupado ~50 min de cada 2 h por el NRT, que ademas desplaza al run
+          # encolado). El guard G4 de tests/test_guard_declarado_vs_efectivo_s131.py detecta
+          # "git push" por texto y no distingue rama de main: el reintento lo satisface, pero
+          # esta aca por su propia razon, que es que si el push se cae por red se pierde la
+          # unica copia durable (el artefacto caduca).
+          for attempt in 1 2 3 4 5; do
+            if git push origin "$RAMA"; then
+              echo "salidas en la rama $RAMA"
+              exit 0
+            fi
+            echo "push fallido, intento $attempt"
+            sleep $((attempt * 10))
+          done
+          echo "::error::no se pudo publicar la rama $RAMA en 5 intentos; queda el artefacto"
+          exit 1
+
+      - name: Subir tambien todo junto como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s146ab-todo
+          path: salidas
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Guard declarado contra efectivo (al final, sobre el arbol con los perfiles nuevos)
+        if: always()
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          pip install pytest
+          python -m pytest tests/test_guard_declarado_vs_efectivo_s131.py -q 2>&1 | tee salidas/guard.txt

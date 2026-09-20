@@ -1,0 +1,33 @@
+# A/B S146, Fase 2 del plan de paridad. Brazo C: el Test 1 sigue detectando, pero NO le quita el
+# cumulo publicado a un rival contextual debil.
+#
+# EL FENOMENO, y por que este brazo existe. El Test 1 integrado y los Tests 2 y 3 del paper miden
+# cosas distintas, y cuando los dos ven algo hay que decidir cual de los dos arma el cumulo que
+# se publica y con que magnitud. Hoy el Test 1 gana la fuente en tres casos
+# (test1_integrated.py:156-182): (1) el pixel suelto mas caliente quedo lejos del crater y el
+# Test 1 vio algo cerca; (2) 'fuente unica', o sea ninguno de los contadores legacy tiene pixeles
+# (rama sin flag, codigo incondicional); (3) el cumulo rival tiene menos de 0,01 MW. Este brazo
+# apaga SOLO la rama (3), que es la unica de las tres que tiene flag propio.
+#
+# ALCANCE HONESTO: este brazo NO aisla el hallazgo G-19 de la auditoria (la rama 2, 'fuente
+# unica', que gana aunque la mascara contextual tenga pixeles porque los contadores que consulta
+# son diagnosticos anulados). Esa rama no tiene flag y aislarla pedira codigo nuevo en pipeline/,
+# que esta protegido por A45. Lo que este brazo mide es la otra mitad de la misma interaccion, y
+# se justifica por si solo: la adopcion de la rama (3) en S111/S112 se hizo contra su propio
+# pre-registro, con un A/B que vio la sobre-publicacion en pasadas RUTINA pasar de 24 a 54
+# (H-A07 del frente H, docs/S112_TEST1_LOWMAG_AB_RESULTS.md:37-48), y sigue encendida.
+#
+# CRITERIO: pre-registrado y commiteado ANTES de correr, en
+# experiments/_s146_ab_sin_test1/PREREGISTRO.md.
+# NO OPERACIONAL: data_subdir aislado, fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s146_ab_sin_prioridad_debil
+description: >
+  Brazo C: identico al control salvo enable_test1_priority_weak_cluster en false.
+  El Test 1 sigue detectando y sigue ganando por Regla D y por fuente unica. Los tres sensores.
+
+paths:
+  enable_test1_priority_weak_cluster: false
+
+output:
+  data_subdir: _s146_ab_sin_prioridad_debil
