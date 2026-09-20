@@ -150,10 +150,10 @@ CITAS_CLAUDE_MD = [
     ("frontend/index.html", 1466, "isValidDetection"),
     # S140: corridas por el import de product_version (8b) y por el fondo persistido (T7).
     ("pipeline/process_viirs.py", 83, "FLAG_DNS"),
-    ("pipeline/process_viirs_mod.py", 440, "Villarrica/PP/Lastarria/Chaiten/PCC"),
+    ("pipeline/process_viirs_mod.py", 465, "Villarrica/PP/Lastarria/Chaiten/PCC"),
     ("pipeline/process_viirs.py", 212, "compute_test1_nti"),
     ("pipeline/process_modis.py", 59, "compute_test1_mir"),
-    ("pipeline/process_viirs_mod.py", 159, "compute_test1_mir"),
+    ("pipeline/process_viirs_mod.py", 162, "compute_test1_mir"),
     ("scripts/build_c2ab_windows.py", 64, "registro_vrp_ocr.csv"),
 ]
 

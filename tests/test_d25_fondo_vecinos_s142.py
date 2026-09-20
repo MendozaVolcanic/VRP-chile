@@ -220,8 +220,20 @@ def test_fuente_el_contador_se_reinicia_en_el_bloque_publicado_del_test1():
 
 
 @pytest.mark.parametrize("rel", ["pipeline/process_modis.py", "pipeline/process_viirs_mod.py"])
-def test_modis_y_viirs750_no_conocen_el_fondo_por_vecinos(rel):
+def test_modis_no_conoce_el_fondo_por_vecinos_y_v750_usa_solo_el_suyo(rel):
+    """MODIS sigue con la mediana del anillo (D25 abierta ahi, S145 no lo toca).
+
+    VIIRS 750 desde S145 tiene su propio fondo por vecinos: puede nombrar el helper compartido y su
+    propio flag, nunca el de I-band (A92: el modo de falla de esta familia es el sensor equivocado
+    leyendo el flag del otro).
+    """
     s = _src(rel)
-    for token in ("ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375", "neighbor_mean_radiance_background",
-                  "vrp_bg_neighbor_mean_v375", "VRP_BG_NEIGHBOR_MAX_HALF_PX"):
+    prohibidos = ["ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375", "vrp_bg_neighbor_mean_v375"]
+    if "process_modis" in rel:
+        prohibidos += ["neighbor_mean_radiance_background", "VRP_BG_NEIGHBOR_MAX_HALF_PX",
+                       "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750"]
+    else:
+        # control de instrumento: si V750 dejara de cablearlo, este test pasaria por omision
+        assert re.search(r"(?<![A-Za-z0-9_])ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750(?![A-Za-z0-9_])", s)
+    for token in prohibidos:
         assert not re.search(r"(?<![A-Za-z0-9_])" + token + r"(?![A-Za-z0-9_])", s), (rel, token)
