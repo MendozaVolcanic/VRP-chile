@@ -2313,7 +2313,7 @@ los Tier A. Hay que medirlo antes de proponer nada.
 
 **S141, siete textos más del grupo, páginas renderizadas** (`docs/audit_s141/lectura/VERIFICADOR_LECTORES.md` V-07 y P-02): fondo = media de los píxeles que rodean al alertado o al cúmulo, nunca mediana ni anillo regional. Coppola et al. 2013 (JVGR 249, p. 46, Apéndice 2, bajo la ec. A.1); Coppola et al. 2020 (Front. Earth Sci. 7:362, p. 3, bajo la ecuación del VRP); Campus et al. 2022 (Sensors 22, 1713, p. 7, §3.2, bajo la ec. 2); Aveni et al. 2023 (Remote Sens. 15, 2528, p. 8, §3.3, bajo la ec. 3: vecinos «non-alerted»); Coppola et al. 2023 (Front. Earth Sci. 11:1240107, p. 3, §2.2, ec. 1, y p. 6, Tabla 1, fila Tot_Lmir_bk); Campus et al. 2024 (Bull. Volcanol. 86:25, p. 3, columna derecha, bajo la ec. 1, y ec. 2). **Segunda divergencia dentro de D25**: Campus 2024 precisa que cada píxel alertado tiene **su propio** fondo (media de sus vecinos) y que el fondo total es la **suma** de esos fondos; la columna Tot_Lmir_bk del archivo v1 es esa suma («Sum of MIR background radiance from all alerted pixels», Coppola 2023 Tabla 1). Lo nuestro usa un único `t_bg` para todos los píxeles del cúmulo. Para comparar `diag_L_bg_w_m2_sr_um` (T7, S140) con Tot_Lmir_bk hay que dividir este último por Npix. Ningún texto visto menciona recortar a cero el exceso negativo: esa mitad de la pregunta 4 del correo sigue abierta.
 
-**Lo nuestro**: `np.median` sobre el anillo (`detection_context.py:1064`; `process_modis.py:571-579`, 1023; `process_viirs_mod.py:983`, sin alternativa en M-band); kernel 3x3 sólo para los 5 volcanes opt-in del YAML (`local_kernel_bg`: PCC, Villarrica, Chaitén, PP, Lastarria; `process_modis.py:1044-1052`); `delta_L` recortado a 0 (`process_modis.py:1060`). D8 quedó marcada resuelta por el kernel opt-in, pero la divergencia literal sigue vigente en 6 de 11 Tier A en MODIS, 11 de 11 en M-band y todo el camino Test 1.
+**Lo nuestro**: `np.median` sobre el anillo (`detection_context.py:1064`; `process_modis.py:571-579`, 1023; `process_viirs_mod.py:1012`, sin alternativa en M-band); kernel 3x3 sólo para los 5 volcanes opt-in del YAML (`local_kernel_bg`: PCC, Villarrica, Chaitén, PP, Lastarria; `process_modis.py:1044-1052`); `delta_L` recortado a 0 (`process_modis.py:1060`). D8 quedó marcada resuelta por el kernel opt-in, pero la divergencia literal sigue vigente en 6 de 11 Tier A en MODIS, 11 de 11 en M-band y todo el camino Test 1.
 
 **S142, flag (OFF en producción).** `ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375` calcula, en VIIRS 375, el fondo de cada píxel alertado como la media de la **radiancia** de sus vecinos no alertados (`pipeline/vrp_regimes.py:neighbor_mean_radiance_background`). Cuando los 8 vecinos están alertados, la ventana crece hasta `vrp_bg_neighbor_max_half_px` (3 = 7x7, decisión abierta), y si aun así no hay vecinos, se usa el fondo de hoy como respaldo, contado en `diag_bg_vecinos_n_sin_vecinos`. Entra en el bloque contextual (`anomaly_pixels`, cúmulo, F5) y en los dos recomputes del Test 1. Pisa al kernel 3x3 opt-in. El recorte a cero **no** cambia. MODIS y VIIRS 750 siguen con la mediana. En la escena sintética del plan, el cráter pasa de 0,0 a ~0,097 MW. Brazos: `pipeline/profiles/_s142_ab_*.yaml` (S143). Plan: `docs/superpowers/plans/2026-09-15-flags-d22-d25.md`.
 
@@ -2333,8 +2333,20 @@ cúmulo **ya se midió con criterio pre-registrado y no cerró la brecha en ning
 (`docs/HYPOTHESIS_LOG.md`, H_S141_VECINO_FOCO_V2, resuelta como no confirmada en S142). Los 1035
 son un **techo de exposición, no una predicción**: el script clasifica, no corre el pipeline.
 Plan con el flag apagado y A/B pre-registrado (criterio primario = sobre-publicación):
-`docs/superpowers/plans/2026-09-20-d25-fondo-vecinos-viirs750.md`. **Nada de esto está implementado
-en M-band**: `process_viirs_mod.py` sigue con la mediana del anillo.
+`docs/superpowers/plans/2026-09-20-d25-fondo-vecinos-viirs750.md`.
+
+**S145, flag de M-band IMPLEMENTADO y APAGADO** (plan ejecutado, tag `pre-s145-d25-v750`, A45
+confirmado). `ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750` (`pipeline/profile.py`, clave en `paths:` del
+perfil) cablea `vrp_bg_neighbor_mean_v750` en los tres sitios donde M-band resta fondo: el bloque
+contextual y los dos recomputes del Test 1, todos **posteriores** a que `hot_mask_2d` quede fijado,
+así que el cambio es de magnitud y no toca detección. Los dos bloques del Test 1 promedian sobre la
+**unión** de `hot_mask_2d` con `test1_hot_filtered`. Diagnósticos `diag_L_bg_vecinos_w_m2_sr_um` y
+`diag_bg_vecinos_n_sin_vecinos`, que sólo aparecen con el flag ON. Comparte
+`VRP_BG_NEIGHBOR_MAX_HALF_PX` con I-band. **Con el flag OFF la salida es idéntica** (golden de S142
+verde). Medido de punta a punta sobre la escena `nevado` del arnés: el fondo cae de 0,204 a 0,105
+W/m²/sr/µm y la magnitud sube de 0,705 a 2,291 MW, **un factor 3,2**, que es la escala del riesgo de
+sobre-publicación si se adoptara. **MODIS sigue con la mediana del anillo**: ahí D25 queda abierta y
+su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay ni qué medir.
 
 ---
 

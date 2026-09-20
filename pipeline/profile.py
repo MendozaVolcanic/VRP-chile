@@ -497,6 +497,14 @@ ENABLE_TESTS_23_NO_BT_GATE_VIIRS375: bool = bool(
 ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375: bool = bool(
     _p.get("enable_vrp_bg_neighbor_mean_viirs375", False))
 
+# S145 D25 en M-band: el mismo fondo por vecinos, para VIIRS 750. Flag PROPIO y no el de I-band,
+# porque la banda MIR es otra (M13 4,05 µm contra I04 3,74 µm) y porque la decisión de adoptar se
+# toma por sensor, con su propio A/B. Comparte VRP_BG_NEIGHBOR_MAX_HALF_PX. OFF por A45: el sustrato
+# medido en S145 (experiments/_s145_d25_v750/sustrato.json) dice que en V750 no destapa ninguna
+# noche de alerta hoy sin cubrir y expone 1035 pasadas a publicar de más.
+ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750: bool = bool(
+    _p.get("enable_vrp_bg_neighbor_mean_viirs750", False))
+
 
 def validar_vrp_bg_neighbor_max_half_px(valor) -> int:
     """Semiancho máximo (en píxeles) de la ventana del fondo por vecinos (S142 D25).

@@ -456,6 +456,12 @@ paths:
   # opt-in de arriba y a la mediana del anillo 5-25 km; el fondo de hoy queda como respaldo del
   # píxel sin vecinos no alertados. El recorte a cero no cambia. OFF hasta el A/B (A45).
   enable_vrp_bg_neighbor_mean_viirs375: false
+  # S145 D25 en VIIRS 750 (M-band): el mismo fondo por vecinos, con flag PROPIO porque la banda MIR
+  # es otra (M13 4,05 µm contra I04 3,74 µm) y la adopción se decide por sensor. OFF: el sustrato
+  # medido (experiments/_s145_d25_v750/sustrato.json) dice que en V750 no destapa ninguna noche de
+  # alerta hoy sin cubrir y expone 1035 pasadas a publicar de más.
+  # Plan: docs/superpowers/plans/2026-09-20-d25-fondo-vecinos-viirs750.md
+  enable_vrp_bg_neighbor_mean_viirs750: false
 
   # S71 ADOPCIÓN — Opción C cap magnitud path D D9 (defensa intermedia).
   # Cuando el firing es contextual-only (BT/NTI duros = 0) Y t_bg <270K (cirrus
