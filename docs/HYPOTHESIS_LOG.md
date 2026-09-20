@@ -1525,3 +1525,32 @@ Pasa MISSION.md Q1 literal. Implementación scope mediano (kernel filter per hot
   - Chaitén, el contraejemplo de magnitud del pre-registro, empeora 0,296 a 0,481 con n < 30: fuera del chequeo por volcán, anotado.
   - **No habilitado**: "D22 y D25 reducen la sobre-publicación"; cualquier conclusión fuera de muestra (el tramo 2026-09-01 a 2026-09-15 no se corrió) o de otros sensores.
   - Siguiente: la tensión central es `keep_peak`. Quitarlo es lo que baja la sobre-publicación, y con él se van 5 noches cuya "coincidencia" con MIROVA es por azar radial. Resolverla pide una medida con dirección (el TIF UTM de MIROVA desde 2026-09-14, A106), no otra cota escalar.
+
+## H_S144_DIRECCION: el cúmulo lejano de un píxel que publica `keep_peak` es el objeto que MIROVA vio (medida con dirección sobre sus GeoTIFF)
+
+- **Formulada**: S144 (2026-09-19), antes de medir, como decisión 1 del traspaso. Pre-registro
+  `docs/PREREGISTRO_KEEP_PEAK_DIRECCION_S144.md`, **siete versiones y siete verificadores con contexto
+  limpio** (`..._VERIFICADOR{,_V2,...,_V7}.md`), cada uno refutando con medición el diseño anterior.
+- **Hipótesis**: si el objeto que MIROVA publicó está en el acimut de nuestro cúmulo lejano, la
+  coincidencia de radio que sostuvo las 5 noches del A/B S143 era el mismo objeto; si no, era de radio.
+- **Estado**: **frente CERRADO sin correr la medida** (2026-09-19, decisión de Nicolás). Los nulos y
+  controles de las siete rondas, todos sobre estratos ajenos a la muestra del veredicto, ya contestan;
+  correrla habría dado INCONCLUSO el 90 % de las veces con los umbrales pre-registrados.
+- **Resolución** (`docs/CIERRE_FRENTE_KEEP_PEAK_S144.md`; scripts en
+  `experiments/_s144_keep_peak_direccion/verificadores/`):
+  - El sitio donde publicamos **destaca** en el campo de MIROVA (+0,0514 [+0,0264, +0,0766]), pero el
+    **86 % de ese efecto es permanente** (+0,0441 con rásteres de otras noches) y lo de esa noche vale
+    +0,0073 [-0,0241, +0,0385]. Tres cuartos del efecto los pone el máximo sobre el disco, no la celda:
+    firma de textura de terreno, no de foco puntual. Es el borde de cota baja de A69.
+  - La coincidencia de radio es **un fenómeno de Lastarria** (12 de 15 pasadas; 1 de 19 fuera, y ahí el
+    cúmulo está a 0,15 km del cráter). Fuera, la compatibilidad se cumple por aritmética del centro de
+    grilla (Cordón Caulle 7,57 km, Tupungatito 4,86, Planchón-Peteroa 2,02).
+  - Las "5 noches" son **4**: Láscar 2026-06-13 nunca fue un cúmulo lejano (0,32 km del cráter).
+  - **No habilitado**: apagar `keep_peak` (la medida no separa relieve tibio de fuente permanente, A83);
+    ninguna conclusión sobre volcanes donde el centro de grilla está lejos del cráter.
+  - Instrumento, para otros frentes: medir sobre el TIF de la **misma** pasada infla por selección
+    (+0,1214 contra +0,0786 cruzada); el control reflejado mide textura (+0,1014 sin nada que detectar);
+    el control temporal es ciego a los focos permanentes; el intercambio de roles atenúa el sesgo 5×; el
+    estrato hermano no es nivel de instrumento (+0,0120 = -0,0355 de suelo + 0,0476 de sitio).
+  - Siguiente: el frente que queda es de **etiquetado** (marco A72), y separar relieve de fuente pide
+    SWIR de alta resolución (A77), que es otro proyecto.
