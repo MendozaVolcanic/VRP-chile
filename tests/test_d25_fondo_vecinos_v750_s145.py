@@ -66,15 +66,19 @@ def _fuente_v750():
     return (ROOT / "pipeline" / "process_viirs_mod.py").read_text(encoding="utf-8")
 
 
-def test_los_tres_sitios_de_fondo_consultan_el_flag():
-    """Los 3 bloques que restan fondo en M-band deben pasar por el envoltorio cuando el flag esta ON.
+def test_los_cuatro_usos_del_flag_estan_donde_corresponde():
+    """Los 3 bloques que restan fondo en M-band, mas el de diagnostico, consultan el flag.
+
+    Son CUATRO, no tres: el bloque de diagnostico abre la cuarta guarda. Es el mismo numero que
+    I-band (`grep -c "if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375:" pipeline/process_viirs.py` da 4).
 
     Se cuenta la GUARDA, no el nombre suelto: un import sin cablear dejaria el flag inerte y este
     test en verde (A89, el cero de un grep se lee como ausencia).
     """
     s = _fuente_v750()
     guardas = re.findall(r"if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750:", s)
-    assert len(guardas) == 3, f"esperaba 3 guardas (sitios A, B y C), hay {len(guardas)}"
+    assert len(guardas) == 4, (
+        f"esperaba 4 guardas (sitios A, B, C y el bloque de diagnostico), hay {len(guardas)}")
     assert s.count("vrp_bg_neighbor_mean_v750(") == 4, "3 llamadas + la definicion"
 
 
@@ -110,3 +114,23 @@ def test_el_fondo_del_test1_promedia_sobre_la_union_de_alertados():
     union = re.findall(
         r"np\.asarray\(hot_mask_2d, dtype=bool\) \| np\.asarray\(test1_hot_filtered, dtype=bool\)", s)
     assert len(union) == 2, f"los 2 bloques del Test 1 deben usar la union; hay {len(union)}"
+
+
+def test_los_diagnosticos_solo_aparecen_con_el_flag_encendido():
+    """Con el flag OFF la salida queda IDENTICA a la de hoy: ni una clave nueva.
+
+    M-band no tiene variable `record` como I-band: arma un dict literal y lo devuelve. Por eso el
+    bloque se escribe sobre `salida`, el nombre que la Tarea 4 le pone a ese dict.
+    """
+    s = _fuente_v750()
+    assert 'salida["diag_L_bg_vecinos_w_m2_sr_um"]' in s
+    assert 'salida["diag_bg_vecinos_n_sin_vecinos"]' in s
+    bloque = s.split("if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750:")[-1]
+    assert "diag_L_bg_vecinos_w_m2_sr_um" in bloque, "los diag deben colgar de la guarda del flag"
+
+
+def test_el_dict_de_salida_se_devuelve_una_sola_vez():
+    """Control de A49: nombrar el dict no puede dejar un `return` huerfano ni duplicado."""
+    s = _fuente_v750()
+    assert s.count("    salida = {") == 1
+    assert s.count("    return salida") == 1

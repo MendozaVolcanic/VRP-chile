@@ -1385,7 +1385,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             distance_class = ("summit" if final_hotspot_dist_km <= inner_radius_km
                               else "far")
 
-    return {
+    salida = {
         "vrp_mw": round(vrp_mw, 3),
         "vrp_vent_mw": round(vrp_vent_mw, 3),
         "n_anomalous_pixels": n_anomalous,
@@ -1463,6 +1463,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             final_hotspot_lon if final_hotspot_lon is not None else vent_lon,
         ),
     }
+
+    # S145 D25: diagnostico del fondo por vecinos en M-band. Con el flag OFF los campos NO
+    # aparecen y la salida queda identica a la de hoy. `n_sin_vecinos` cuenta los pixeles que
+    # cayeron al respaldo en el bloque que publica.
+    if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750:
+        salida["diag_L_bg_vecinos_w_m2_sr_um"] = diag_L_bg_vecinos
+        salida["diag_bg_vecinos_n_sin_vecinos"] = int(_bg_vecinos_n_sin_vecinos)
+
+    return salida
 
 
 def _parse_datetime(filename: str) -> str:
