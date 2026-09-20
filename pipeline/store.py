@@ -87,8 +87,16 @@ def _apply_vrp_floor(record: dict) -> None:
     SIN `triggered_test1` desaparecía de todos los paneles. Medido en S130: 582
     de 57.730 records quedaban invisibles por eso.
 
-    El mecanismo se conserva porque sigue siendo configuración legítima (el
-    perfil `experimental` usa pisos más bajos). Muta `record` in-place.
+    El mecanismo se conserva porque sigue siendo configuración legítima. ⚠️ S147: la
+    frase original decía "el perfil `experimental` usa pisos más bajos", y quedó falsa
+    en el mismo commit de S130 que bajó los del operacional a 0,0: desde entonces y
+    hasta S147 el laboratorio tenía pisos MÁS ALTOS (0,005 / 0,05 / 0,02), o sea que
+    era más ciego que el instrumento que estudiaba. `experimental_ndc_focus` tenía el
+    mismo defecto (0,005 en VIIRS375) y por la misma causa. Hoy los cuatro perfiles
+    vivos, el operacional y los tres laboratorios, tienen los tres pisos en 0,0, o sea
+    que **ningún perfil usa hoy este mecanismo**; queda disponible para un A/B futuro.
+    Guard: `tests/test_guard_laboratorio_no_mas_ciego_s147.py`.
+    Muta `record` in-place.
     """
     sensor = record.get("sensor", "")
     if "375" in sensor or sensor in ("VIIRS_SNPP", "VIIRS_NOAA20", "VIIRS_NOAA21"):

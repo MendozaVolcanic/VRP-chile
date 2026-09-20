@@ -27,7 +27,16 @@ description: >
   Foco del crater Nicanor (NdC), v2: deteccion IDENTICA a la replica, solo el
   umbral mas bajo (0.005 MW). El recorte espacial vive en el analisis.
 thresholds:
-  min_vrp_mw_viirs375: 0.005
+  # ⚠️ S147: 0.005 -> 0.0, mismo defecto y mismo origen que en `experimental.yaml`.
+  # La cabecera de este archivo dice "UNA sola diferencia con la replica: el umbral
+  # (0.005 MW vs 0.02)", y eso valia en S124. S130 bajo el piso del operacional a 0.0
+  # en los tres sensores, asi que desde entonces este perfil tenia el piso MAS ALTO
+  # que la replica: su unica diferencia declarada apuntaba al reves de su proposito.
+  # Con el operacional en 0.0 ya no queda umbral por debajo del cual mirar, asi que la
+  # diferenciacion de este perfil se evaporo junto con la del laboratorio general. Ver
+  # docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md, que es por donde tiene que volver.
+  # Guard: tests/test_guard_laboratorio_no_mas_ciego_s147.py
+  min_vrp_mw_viirs375: 0.0
 sensors:
   modis: false
   viirs_375: true
