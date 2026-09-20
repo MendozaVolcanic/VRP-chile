@@ -346,14 +346,39 @@ def cobertura(ctrl, brazo):
 
 
 def nulo_estructural(ctrl, brazo):
-    """Pasadas donde el control no tiene NINGUN pixel anomalo: de la nada no puede salir una
-    publicacion. Si el brazo publica ahi, el brazo (o el evaluador) esta inventando."""
+    """Pasadas donde el control no tiene NINGUN pixel anomalo y TAMPOCO PUBLICA: de la nada no
+    puede salir una publicacion. Si el brazo publica ahi, el brazo (o el evaluador) esta inventando.
+
+    ⚠️ S147, ARREGLO DE INSTRUMENTO. La version original exigia solo `n_px == 0` en el control, sin
+    mirar si el control publicaba. Medido sobre el brazo C: de 1.132 pasadas con 0 pixeles anomalos
+    en el control, el control PUBLICA en 392, y el brazo publica exactamente esas mismas 392, sin
+    inventar ni una. O sea que el criterio acusaba de invencion un comportamiento conocido y
+    documentado: un record con 0 `anomaly_pixels` puede publicar igual por el camino del Test 1,
+    que arma su propio cumulo (D30). El brazo C salia INDECIDIBLE por eso.
+
+    Y el defecto es peor que un falso rojo, porque tambien daba un falso VERDE: el brazo B pasaba
+    este criterio con 0 publicadas, pero no porque no inventara nada, sino porque apaga justamente
+    el camino que hace que esas 392 publiquen. O sea que el unico brazo al que el nulo "le
+    funcionaba" era aquel para el que la pregunta no aplicaba. Es el modo de falla de A110: un
+    control que no se cancela por construccion, y cuyo nulo nadie habia medido.
+
+    El predicado correcto es el diferencial: el brazo publica donde el control NO publica y ademas
+    no hay pixeles. Con eso, el brazo C da 0, que es lo que corresponde.
+    """
     ic = {clave(r): r for r in ctrl}
-    inventadas = [r for r in brazo
-                  if (c := ic.get(clave(r))) is not None and (c["n_px"] or 0) == 0 and r["pub"]]
-    base = [r for r in brazo if (c := ic.get(clave(r))) is not None and (c["n_px"] or 0) == 0]
-    return {"n_pasadas_sin_pixeles_en_control": len(base),
+
+    def _base(r):
+        c = ic.get(clave(r))
+        return c is not None and (c["n_px"] or 0) == 0 and not c["pub"]
+
+    inventadas = [r for r in brazo if _base(r) and r["pub"]]
+    base = [r for r in brazo if _base(r)]
+    # Se informa tambien el conteo viejo, para que se vea por que cambio el veredicto.
+    viejo = [r for r in brazo
+             if (c := ic.get(clave(r))) is not None and (c["n_px"] or 0) == 0 and r["pub"]]
+    return {"n_pasadas_sin_pixeles_y_sin_publicar_en_control": len(base),
             "n_publicadas_por_el_brazo": len(inventadas),
+            "diag_predicado_viejo_sin_mirar_si_el_control_publica": len(viejo),
             "ejemplos": ["|".join(clave(r)) for r in inventadas[:20]]}
 
 
@@ -813,7 +838,7 @@ def main(argv=None):
         print("  negativos por plataforma (I-03):",
               json.dumps(res["metricas_brazo"]["neg_por_plataforma"], ensure_ascii=False))
         print("  nulo estructural:", res["nulo_estructural"]["n_publicadas_por_el_brazo"],
-              "publicadas de", res["nulo_estructural"]["n_pasadas_sin_pixeles_en_control"],
+              "publicadas de", res["nulo_estructural"]["n_pasadas_sin_pixeles_y_sin_publicar_en_control"],
               "| nulo barajado:", json.dumps(res["nulo_barajado"], ensure_ascii=False))
         print("  criterios:", json.dumps(res["criterios"], ensure_ascii=False))
     print("\n->", a.out)

@@ -117,7 +117,49 @@ estadístico corregido los evita.
    estadística.
 4. **No tocar `mirova_equivalent`** con nada de esto sin el ciclo A45 completo.
 
-## 6. Límites declarados
+## 6. El tercer brazo, y un instrumento que había que arreglar
+
+**La repetición funcionó, pero el camino que el workflow ofrece para repetir no.** Los dos jobs de
+Láscar y Lastarria salieron en verde (run 35536752966), pero `recolectar` falló con "el control no
+tiene ninguna pasada en la ventana": al relanzar **sólo un brazo**, el control no está en esa
+corrida y no hay contra qué contar. O sea que la entrada `vols` existe para reparar una cobertura
+despareja y el job de evaluación no soporta ese caso. Se combinó a mano (los dos volcanes de la
+repetición reemplazando a los de la corrida original) y la cobertura quedó **pareja, 2362 contra
+2362**. El defecto del workflow queda anotado.
+
+**Y ahí apareció un instrumento roto.** El brazo C salía **INDECIDIBLE** por el nulo estructural,
+que acusaba 392 publicaciones "inventadas" sobre pasadas sin ningún píxel anómalo. Medido: el
+**control publica exactamente esas mismas 392**, y el brazo no publica ni una que el control no
+publique. El criterio pedía sólo `n_anomalous_pixels == 0` en el control, sin mirar si el control
+publicaba, y así acusaba de invención un comportamiento conocido y documentado: un record sin
+`anomaly_pixels` puede publicar igual por el camino del Test 1, que arma su propio cúmulo (D30).
+
+Lo peor no es el falso rojo, es el falso verde que lo acompañaba: **el brazo B pasaba ese criterio
+con 0 publicadas, pero no porque no inventara nada, sino porque apaga justamente el camino que
+hace publicar a esas 392**. O sea que el único brazo al que el nulo "le funcionaba" era aquel para
+el que la pregunta no aplicaba. Es el modo de falla de A110: un control que no se cancela por
+construcción y cuyo nulo nadie había medido.
+
+**Arreglo declarado, con su evidencia.** El predicado pasa a ser diferencial: el brazo publica
+donde el control **no** publica y además no hay píxeles. El campo
+`diag_predicado_viejo_sin_mirar_si_el_control_publica` conserva el conteo anterior para que se vea
+por qué cambió el veredicto. El banco sintético sigue pasando y, lo que importa, **el caso
+`inventa` sigue fallando C5**, así que el nulo arreglado todavía caza un brazo que de verdad
+inventa.
+
+Es un arreglo de instrumento hecho **después** de ver un resultado, que es justo lo que el
+pre-registro existe para impedir. Se hace igual porque el defecto está demostrado con datos (el
+control publica las mismas 392) y no depende del resultado, y se deja escrito acá con el conteo
+viejo al lado. **El veredicto del brazo B no cambió con el arreglo**: sigue NO ADOPTAR por C2, C4
+y C7.
+
+**Veredicto del brazo C: NO ADOPTAR** (falla C3 y C7). Apagar la prioridad por rival débil apaga
+**6 publicaciones de 315** en VIIRS 375 y **0 de 131** en VIIRS 750, contra los mínimos
+pre-registrados de 8 y 1. No cuesta recall (140 de 141 pasadas) y no pierde ninguna noche. La
+lectura es simple: **ese flag no es la palanca**; mueve muy poco y lo poco que mueve no justifica
+tocarlo.
+
+## 7. Límites declarados
 
 - Ventana de 20 días, del 2026-09-01 al 2026-09-20, entera posterior al cambio de régimen de #535.
 - La vara de recall de VIIRS 750 está rotulada **débil** desde la adenda S147: con un nulo que
