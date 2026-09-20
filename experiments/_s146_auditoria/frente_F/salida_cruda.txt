@@ -1,0 +1,97 @@
+===== test1_ruido_vs_resolucion.py =====
+ROI de radio 3.0 km = 28.274 km2 ; k_sigma = 3.0
+media de max(0, ruido normal) = 0.39894 * sigma
+cruce teorico: N_ROI > 56.5 pixeles
+
+sensor      A_pix km2   N_ROI  k pred. solo ruido   dispara con ruido
+MODIS          1.0000    28.3                2.12                  no
+VIIRS750       0.5625    50.3                2.83                  no
+VIIRS375       0.1406   201.1                5.66                  SI
+
+MEDIDO sobre data/mirova_equivalent (todos los volcanes, 2025-02 a 2026-09),
+records con test1_k_observed > 0:
+sensor           n  k mediana    k p25    k p75  k predicho  % triggered_test1
+MODIS         3637       1.94     1.54     2.50        2.12              12.6%
+VIIRS750     19563       2.42     1.89     3.15        2.83              27.1%
+VIIRS375     20905       4.87     3.91     6.12        5.66              89.7%
+
+===== c1_vs_sigma_por_sensor.py =====
+sensor           n  med sd_dNTI   C1s/sd   C1e/sd  %manda C1s  %manda C1e
+MODIS        12169     0.006970     0.43     1.43      100.0%      100.0%
+VIIRS750     23869     0.001644     1.83     6.08       99.9%       94.9%
+VIIRS375     21604     0.001367     2.20     7.32       99.9%       91.6%
+
+===== perfil_por_sensor.py =====
+records por sensor: {'MODIS': 12702, 'VIIRS750': 25031, 'VIIRS375': 25222}
+ventana de fechas : {'MODIS': ['2025-02-15 01:40', '2026-09-20 08:10'], 'VIIRS750': ['2025-02-15 04:30', '2026-09-20 06:30'], 'VIIRS375': ['2025-02-15 04:30', '2026-09-20 06:30']}
+
+campo                                    MODIS      VIIRS750      VIIRS375   (mediana, n)
+diag_sd_dnti                            0.0070        0.0016        0.0014   n=12169/23869/21604
+diag_sd_deti                            0.0067        0.0008        0.0009   n=12169/23869/21604
+diag_n_bg_anillo                     1019.5000     2313.5000     9232.0000   n=312/322/323
+diag_n_bg_used_first_pass            1315.0000     3089.0000     9116.0000   n=12184/23869/24059
+diag_n_dnti_ctx_path                   42.0000        0.0000        0.0000   n=12241/23869/24059
+diag_n_eti_path                         0.0000        0.0000        0.0000   n=12184/23869/24059
+diag_n_first_pass_pixels               43.0000        0.0000        0.0000   n=12184/23869/24059
+diag_n_second_pass_recapture           39.0000        0.0000        0.0000   n=12184/23869/24059
+diag_n_bt_path                          0.0000        0.0000        0.0000   n=12702/23869/24059
+n_test1_pixels                          0.0000        0.0000       61.0000   n=12184/23869/24059
+n_anomalous_pixels                     79.0000        0.0000        0.0000   n=12702/25031/25222
+n_nti_anomalous                            nan        1.0000        5.0000   n=0/25031/25222
+diag_sigma_bg_k                         4.5185        3.4150        3.0700   n=12702/23869/21613
+vrp_mw                                  5.0000        0.0000        0.0460   n=12702/25031/25222
+sensor_zenith_deg                      44.2200       48.6200       48.7000   n=6309/12310/12399
+
+fraccion de records con al menos 1 pixel por camino:
+diag_n_dnti_ctx_path                     88.6%         46.9%         47.7%
+diag_n_eti_path                           0.0%          0.0%          0.0%
+diag_n_bt_path                            0.0%          0.0%          0.0%
+diag_n_first_pass_pixels                 99.4%         10.2%         27.4%
+n_test1_pixels                            3.8%         22.2%         78.0%
+diag_n_second_pass_recapture             98.3%         22.6%         30.3%
+
+===== umbral_vrp_tabla1_scidata.py =====
+Ventana 2026-09-01 a 2026-09-20, pasadas nocturnas, todos los volcanes en disco.
+PROXY del predicado de publicacion: distance_class == summit y magnitud > 0.
+NO es el predicado exacto del dashboard (ese lo corre la Fase 1 con node): es una cota.
+
+sensor       piso MW  n pasadas  proxy publ.  sobreviven  % que sobrevive
+MODIS          0.100        457           54          54           100.0%
+VIIRS750       5.000        949          207           0             0.0%
+VIIRS375       0.010        954          833         820            98.4%
+
+===== cierre_f02_f04.py =====
+F-02b. Tasa de pixeles marcados por el primer pase, sobre los pixeles evaluados.
+sensor      n records  tasa mediana  tasa media
+MODIS           12175      0.035303    0.051645
+VIIRS750        23869      0.000000    0.000090
+VIIRS375        21613      0.000000    0.000108
+
+Si mandara el numero de intentos, la tasa seria PAREJA entre sensores.
+
+F-04b. Proxy de publicacion por tramo de angulo cenital (NO son negativos limpios).
+sensor            (0, 20)      (20, 35)      (35, 45)      (45, 55)      (55, 90)
+MODIS             17.6%        13.2%         8.7%         8.3%         8.1% 
+VIIRS750          37.5%        29.0%        27.6%        23.5%        16.4% 
+VIIRS375          82.3%        79.8%        79.4%        74.3%        62.9% 
+n por celda:
+  MODIS      {'(0, 20)': 1207, '(20, 35)': 1143, '(35, 45)': 886, '(45, 55)': 1235, '(55, 90)': 1838}
+  VIIRS750   {'(0, 20)': 2030, '(20, 35)': 1980, '(35, 45)': 1420, '(45, 55)': 2038, '(55, 90)': 4842}
+  VIIRS375   {'(0, 20)': 2035, '(20, 35)': 1989, '(35, 45)': 1421, '(45, 55)': 2056, '(55, 90)': 4898}
+
+===== f01_prueba_por_angulo.py =====
+Mediana de test1_k_observed por tramo de angulo cenital (grados).
+El umbral del criterio absoluto es 3,0: por debajo, el Test 1 no dispara solo con ruido.
+
+sensor             0-15       15-30       30-42       42-52       52-62       62-90    caida
+MODIS              1.94        1.93        1.87        n<30        n<30        n<30     1.04x
+VIIRS750           2.75        2.58        2.39        2.23        2.34        1.92     1.43x
+VIIRS375           5.82        5.46        5.09        4.59        4.74        3.66     1.59x
+
+n por celda:
+  MODIS      {'0-15': 884, '15-30': 824, '30-42': 177, '42-52': 1, '52-62': 0, '62-90': 0}
+  VIIRS750   {'0-15': 1491, '15-30': 1567, '30-42': 1802, '42-52': 1641, '52-62': 2200, '62-90': 1334}
+  VIIRS375   {'0-15': 1397, '15-30': 1434, '30-42': 1675, '42-52': 1628, '52-62': 2163, '62-90': 2401}
+
+Caida predicha en VIIRS I-band de nadir a borde: raiz(4,38) = 2.09x
+

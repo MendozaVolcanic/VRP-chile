@@ -1,0 +1,84 @@
+BASE (= banco: tol 120 s, neg por noche-sensor)        | noches 78/78 | V375  86.3% (322/373) | V750  21.4% (133/622) | MODIS  11.4% (50/439) | recall pasada  96.9% (157/162)
+identidad con el banco (datos de hoy, ver i00_salida.txt): OK
+
+-- tolerancia del pareo
+tol 0 s                                                | noches 43/43 | V375  83.6% (46/55) | V750  21.6% (30/139) | MODIS  11.4% (50/439) | recall pasada  95.7% (44/46)
+tol 60 s                                               | noches 78/78 | V375  86.3% (322/373) | V750  21.4% (133/622) | MODIS  11.4% (50/439) | recall pasada  96.9% (157/162)
+tol 120 s                                              | noches 78/78 | V375  86.3% (322/373) | V750  21.4% (133/622) | MODIS  11.4% (50/439) | recall pasada  96.9% (157/162)
+tol 300 s                                              | noches 78/78 | V375  86.3% (322/373) | V750  21.4% (133/622) | MODIS  11.3% (51/450) | recall pasada  96.9% (157/162)
+tol 600 s                                              | noches 78/78 | V375  85.0% (328/386) | V750  21.0% (134/639) | MODIS  11.3% (51/450) | recall pasada  96.3% (157/163)
+-- definicion de negativo limpio
+neg = toda RUTINA CONS pareada (sin excluir noches)    | noches 78/78 | V375  88.1% (453/514) | V750  21.6% (142/656) | MODIS  11.4% (50/440) | recall pasada  96.9% (157/162)
+neg = sin ALERTA/FP esa noche y sensor (banco)         | noches 78/78 | V375  86.3% (322/373) | V750  21.4% (133/622) | MODIS  11.4% (50/439) | recall pasada  96.9% (157/162)
+neg = sin ALERTA/FP esa noche, cualquier sensor        | noches 78/78 | V375  86.3% (316/366) | V750  19.4% (73/377) | MODIS   9.1% (23/252) | recall pasada  96.9% (157/162)
+neg = idem, y tampoco la noche previa ni la siguiente  | noches 78/78 | V375  86.4% (178/206) | V750  21.1% (45/213) | MODIS   9.1% (13/143) | recall pasada  96.9% (157/162)
+-- corte de la noche
+noche = fecha local (UTC-4, corte a mediodia local)    | noches 78/78 | V375  86.3% (322/373) | V750  21.4% (133/622) | MODIS  11.4% (50/439) | recall pasada  96.9% (157/162)
+-- que cuenta como positivo y como noche detectada
+positivos solo CONS (sin canal OCR)                    | noches 76/76 | V375  86.3% (327/379) | V750  21.4% (133/622) | MODIS  11.4% (50/439) | recall pasada  96.2% (127/132)
+noche detectada solo si publica una pasada POS         | noches 78/78 | V375  86.3% (322/373) | V750  21.4% (133/622) | MODIS  11.4% (50/439) | recall pasada  96.9% (157/162)
+noche detectada si publica una pasada con fila MIROVA  | noches 78/78 | V375  86.3% (322/373) | V750  21.4% (133/622) | MODIS  11.4% (50/439) | recall pasada  96.9% (157/162)
+-- umbral de magnitud para 'publicamos'
+publica solo si magnitud mostrada >= 0.02 MW           | noches 78/78 | V375  74.0% (276/373) | V750  20.4% (127/622) | MODIS  11.4% (50/439) | recall pasada  96.3% (156/162)
+publica solo si magnitud mostrada >= 0.05 MW           | noches 78/78 | V375  26.3% (98/373) | V750  19.8% (123/622) | MODIS  11.4% (50/439) | recall pasada  85.8% (139/162)
+publica solo si magnitud mostrada >= 0.1 MW            | noches 62/78 | V375   3.2% (12/373) | V750  17.2% (107/622) | MODIS  11.4% (50/439) | recall pasada  54.9% (89/162)
+publica solo si magnitud mostrada >= 0.2 MW            | noches 46/78 | V375   0.5% (2/373) | V750  12.9% (80/622) | MODIS  11.2% (49/439) | recall pasada  27.2% (44/162)
+publica solo si magnitud mostrada >= 0.5 MW            | noches 19/78 | V375   0.0% (0/373) | V750   1.6% (10/622) | MODIS   8.2% (36/439) | recall pasada   9.9% (16/162)
+-- por plataforma
+solo plataforma SNPP                                   | noches 42/42 | V375  83.6% (46/55) | V750  21.6% (30/139) | MODIS   s/d (0/0) | recall pasada  95.6% (43/45)
+solo plataforma NOAA20                                 | noches 50/50 | V375  87.9% (138/157) | V750  23.3% (55/236) | MODIS   s/d (0/0) | recall pasada  96.6% (57/59)
+solo plataforma NOAA21                                 | noches 49/49 | V375  85.7% (138/161) | V750  19.4% (48/247) | MODIS   s/d (0/0) | recall pasada  98.2% (56/57)
+solo plataforma AQUA                                   | noches 1/1 | V375   s/d (0/0) | V750   s/d (0/0) | MODIS  10.1% (22/217) | recall pasada 100.0% (1/1)
+solo plataforma TERRA                                  | noches 0/0 | V375   s/d (0/0) | V750   s/d (0/0) | MODIS  12.6% (28/222) | recall pasada   s/d (0/0)
+-- por angulo cenital del sensor
+cenital z<30                                           | noches 56/56 | V375  93.1% (94/101) | V750  32.7% (50/153) | MODIS  16.4% (21/128) | recall pasada  94.3% (66/70)
+cenital z 30-50                                        | noches 43/43 | V375  91.7% (77/84) | V750  19.3% (31/161) | MODIS   9.0% (13/145) | recall pasada  98.1% (51/52)
+cenital z>=50                                          | noches 34/34 | V375  80.3% (151/188) | V750  16.9% (52/308) | MODIS   9.6% (16/166) | recall pasada 100.0% (40/40)
+cenital z desconocido                                  | noches 0/0 | V375   s/d (0/0) | V750   s/d (0/0) | MODIS   s/d (0/0) | recall pasada   s/d (0/0)
+-- por mitad de la ventana
+01 al 10 de septiembre                                 | noches 32/32 | V375  89.3% (201/225) | V750  22.2% (77/347) | MODIS   8.7% (20/229) | recall pasada  97.0% (64/66)
+11 al 20 de septiembre                                 | noches 46/46 | V375  81.8% (121/148) | V750  20.4% (56/275) | MODIS  14.3% (30/210) | recall pasada  96.9% (93/96)
+
+-- POR VOLCAN (base)
+  Chaiten                                              | noches 6/6 | V375  92.1% (35/38) | V750  21.5% (14/65) | MODIS   8.9% (4/45) | recall pasada 100.0% (8/8)
+  Copahue                                              | noches 0/0 | V375  84.2% (48/57) | V750  14.5% (9/62) | MODIS   2.5% (1/40) | recall pasada   s/d (0/0)
+  Isluga                                               | noches 15/15 | V375  77.8% (7/9) | V750  42.0% (21/50) | MODIS   0.0% (0/33) | recall pasada  97.1% (33/34)
+  Lascar                                               | noches 10/10 | V375  88.0% (22/25) | V750  10.4% (5/48) | MODIS   2.8% (1/36) | recall pasada 100.0% (21/21)
+  Lastarria                                            | noches 7/7 | V375  87.5% (21/24) | V750   5.3% (3/57) | MODIS   2.8% (1/36) | recall pasada 100.0% (9/9)
+  Llaima                                               | noches 0/0 | V375  78.9% (45/57) | V750  23.1% (15/65) | MODIS   0.0% (0/40) | recall pasada   s/d (0/0)
+  NevadosDeChillan                                     | noches 4/4 | V375  91.7% (44/48) | V750   6.5% (4/62) | MODIS   2.4% (1/41) | recall pasada 100.0% (4/4)
+  PlanchonPeteroa                                      | noches 6/6 | V375  85.7% (30/35) | V750  26.3% (15/57) | MODIS   4.7% (2/43) | recall pasada 100.0% (9/9)
+  PuyehueCordonCaulle                                  | noches 12/12 | V375  94.4% (17/18) | V750  57.5% (23/40) | MODIS  67.4% (31/46) | recall pasada  93.0% (40/43)
+  Tupungatito                                          | noches 12/12 | V375  92.9% (13/14) | V750  22.0% (13/59) | MODIS   7.5% (3/40) | recall pasada 100.0% (26/26)
+  Villarrica                                           | noches 6/6 | V375  83.3% (40/48) | V750  19.3% (11/57) | MODIS  15.4% (6/39) | recall pasada  87.5% (7/8)
+ MODIS: promedio simple entre volcanes 10.4% | min 0.0% max 67.4% | volcanes con n>=5: 11
+ VIIRS375: promedio simple entre volcanes 87.0% | min 77.8% max 94.4% | volcanes con n>=5: 11
+ VIIRS750: promedio simple entre volcanes 22.6% | min 5.3% max 57.5% | volcanes con n>=5: 11
+
+-- dejando un volcan afuera (rango del agregado)
+ MODIS: 4.8% a 12.5%
+ VIIRS375: 85.5% a 87.7%
+ VIIRS750: 18.9% a 23.0%
+
+-- bootstrap por noche de volcan (2000 remuestreos, semilla 146): IC 95 % de la tasa en negativos
+ MODIS: 7.9% a 14.9% (grupos 218)
+ VIIRS375: 82.5% a 89.6% (grupos 117)
+ VIIRS750: 17.6% a 25.3% (grupos 193)
+
+-- noches negativas (unidad noche de volcan): cuantas publican, segun que pasadas cuentan
+ pub de 'todas':  99.2% (123/124)
+ pub de 'pareadas':  91.1% (113/124)
+
+-- CONTROLES DE INSTRUMENTO
+ horas nuestras +39 min: etiquetas {'sin_info': 2360}
+ horas nuestras +180 min: etiquetas {'sin_info': 2360}
+ horas nuestras +240 min: etiquetas {'sin_info': 2360}
+ todo pub=1: V375 neg 373/373, noches 78/78
+ todo pub=0: V375 neg 0/373, noches 0/78
+ pub barajado dentro de volcan-sensor: V375 pos  93.0% (133/143) ; neg  84.5% (315/373)
+ real:                                 V375 pos 100.0% (143/143) ; neg  86.3% (322/373)
+
+-- magnitud mostrada (MW) en V375: positivos contra negativos limpios, cuantiles de lo publicado
+ pos: n 143 p10 0.048 p25 0.067 p50 0.110 p75 0.199 p90 0.470
+ neg: n 322 p10 0.017 p25 0.027 p50 0.041 p75 0.054 p90 0.074
+ VRP de las ALERTAS V375 de MIROVA en ventana: n 187 min 0.02 p10 0.05 p50 0.14 max 2.22

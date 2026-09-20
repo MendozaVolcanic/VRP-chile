@@ -6,6 +6,57 @@
 > el ciclo A45 (tag defensivo y confirmación explícita de Nicolás). Los números vienen de los
 > informes de `docs/audit_s146/`, que son la fuente (S91).
 
+## 0. Adenda del mismo día: lo que cambió después de escribir este plan
+
+> Las fases 0 y 1, el paso 1 de la Fase 2 y el paso 1 de la Fase 6 **ya se ejecutaron** (PR #712,
+> #713, #714), y cuatro auditorías más (frentes F, G, H, I) con sus verificadores cambiaron el
+> cuadro. Esta adenda manda sobre lo que sigue cuando se contradigan. Fuentes:
+> `docs/audit_s146/FRENTE_F_FIDELIDAD_VIIRS.md`, `FRENTE_G_INVENTARIO_DE_CAMINOS.md` y su
+> `FRENTE_G_VERIFICADOR.md`, `FRENTE_H_HIPOTESIS_Y_AB.md`, `FRENTE_I_LA_VARA_DE_MEDIR.md`,
+> `FASE1_SUSTRATO_SOBREPUBLICACION.md` y su `FASE1_VERIFICADOR.md`, `MEDICIONES_P1_P2_P6.md`.
+
+**La hipótesis de trabajo dejó de ser hipótesis en VIIRS, y ahora tiene mecanismo.** El Test 1
+integrado suma sólo los excesos positivos de los píxeles del disco de 3 km y compara esa suma
+contra 3 sigmas por la raíz del número de píxeles. Al recortar los negativos, la suma del ruido
+puro deja de tener media cero (vale 0,399 por N por sigma), y la vara es la desviación de la suma
+SIN recortar: se compara la media de una variable contra la desviación de otra. Sigma se cancela y
+el criterio pasa a depender del tamaño del disco, no del calor: se cumple solo con más de 56,6
+píxeles. El disco tiene 208 en VIIRS 375, 50 en VIIRS 750 y 32 en MODIS. Verificado con contexto
+limpio, gravedad 5, por tres caminos independientes; los records reales caen sobre la curva del
+ruido (razón 1,056 en VIIRS 375). Techo de lo que explica: el Test 1 dispara en 83,3 % de los
+negativos limpios de VIIRS 375. El piso sigue SIN DATO y lo decide el A/B. En MODIS no sostiene la
+brecha: ahí manda el camino contextual del paper, concentrado en Puyehue Cordón Caulle.
+
+**La vara tiene dos salvedades que cambian cómo se decide** (frente I, sin verificador todavía):
+"78 de 78 noches" no discrimina (barajando al azar da lo mismo: publicamos algo en 218 de 219
+noches), así que **el recall que decide se mide por pasada del sensor que alertó**, con su nulo
+medido antes de fijar umbral; y el 86,3 % cuenta apariciones y no energía (la mitad de lo publicado
+en negativos está bajo 0,041 MW), así que la sobre-publicación se reporta también por estrato de
+magnitud, sin convertir eso en un piso.
+
+**Qué se cae del plan:** el brazo "sin test de temperatura de brillo" (está apagado, sustrato
+cero); la regla de preferencia entre banda I y banda M (P6: no cambia ninguna pasada); y buscar un
+umbral k mejor para el Test 1 (P1: la curva no tiene codo, negativos y positivos se traslapan).
+
+**Qué entra, en este orden:**
+
+| # | qué | estado | necesita |
+|---|---|---|---|
+| 1 | **A/B "sin Test 1 integrado"**: pre-registro, 3 perfiles aislados, workflow por token y evaluador probado en local, en `experiments/_s146_ab_sin_test1/` | **listo para despachar, NO despachado** | que Nicolás lea `PREREGISTRO.md`; 9 a 18 h de reloj en Actions; el token vence el 2026-10-03 |
+| 2 | **Verificador con contexto limpio del pre-registro** antes de despachar | pendiente | una sesión corta |
+| 3 | **Test 1 integrado con el estadístico corregido** (no recortar, o restar la media nula y dividir por la desviación del estadístico recortado), detrás de un flag apagado | descrito, no implementado | ciclo A45: tag y confirmación explícita. Es el brazo que sigue si "sin Test 1" pierde detección que se quiere conservar |
+| 4 | **Re-despachar la batería del Apéndice A** (la primera corrida falló por credenciales: ver abajo) | workflow corregido a sólo token, en `main` | ver una corrida NRT verde después del bloqueo |
+| 5 | **Brazo `literal` de S143**: en la re-lectura por volcán pierde 0 noches de 308 y baja la publicación en negativos de 91,7 a 54,7 %, ganando en 7 de 7 volcanes | exploratorio: NO cambia su veredicto | entra como brazo al A/B siguiente, con criterio nuevo escrito antes |
+| 6 | **F-05: MIROVA publica la SUMA de todos los píxeles alertados de la pasada**, nosotros el núcleo de un cúmulo (contradice la premisa de A10) | hallazgo de auditor, sin verificador | verificarlo contra la página del paper y medir su efecto en la razón de magnitud: puede ser la mitad de la Fase 4 |
+| 7 | **El dashboard no dice lo mismo en sus tres vistas**: `diario.html` no tiene `isValidDetection` y grafica lo que `index.html` oculta; el tope de Villarrica no llega al operador | verificado | entra a la Fase 6, junto con mostrar `pc.classification` |
+| 8 | **14 mecanismos nuestros sin declarar en el catálogo** (frente G) y **30 pruebas que valen sólo bajo su configuración** (frente H) | listados | abrir sus divergencias; el libro de pruebas (`docs/LIBRO_DE_PRUEBAS.md`) ya los registra |
+| 9 | **Espacio**: la historia de git pesa 9,2 GB en GitHub y se duplicó en seis semanas | decisión del dueño | `docs/audit_s146/ESPACIO_Y_ARCHIVO_S146.md` |
+
+**Incidente que deja regla.** La batería del Apéndice A usó `EARTHDATA_USERNAME` y
+`EARTHDATA_PASSWORD`, que están vencidos, y bloqueó la cuenta de Earthdata 10 minutos (A71). El NRT
+autentica por `EARTHDATA_TOKEN`. Todo workflow nuevo autentica sólo por token y falla al instante si
+viene vacío. La sección "Constraints técnicos" de `CLAUDE.md` todavía nombra los secretos viejos.
+
 ## 1. El objetivo, y dónde estamos parados
 
 **Objetivo**: que VRP Chile reproduzca lo que MIROVA publica, de forma que SERNAGEOMIN pueda
