@@ -1,0 +1,3045 @@
+{
+ "registro": [
+  {
+   "id": "D5_ratio_global",
+   "afirma_y_define": "el ratio nuestro/MIROVA global",
+   "donde": "docs/MIROVA_DIVERGENCES.md D5",
+   "declarado": 0.73,
+   "hoy": 0.741,
+   "estado": "OK",
+   "error": null
+  },
+  {
+   "id": "ratio_v375",
+   "afirma_y_define": "ratio en VIIRS375 — DEFINICIÓN: mediana sobre TODOS los pares noche-volcán juntos (no la mediana de las medianas por volcán, que da 0,60)",
+   "donde": "docs/AUDIT_S128.md §6",
+   "declarado": 0.69,
+   "hoy": 0.7,
+   "estado": "OK",
+   "error": null
+  },
+  {
+   "id": "A12_dT_lascar",
+   "afirma_y_define": "ΔT mediano de Láscar (A12 declara 21,6 K)",
+   "donde": "CLAUDE.md A12",
+   "declarado": 16.9,
+   "hoy": 16.9,
+   "estado": "OK",
+   "error": null
+  },
+  {
+   "id": "A12_dT_isluga",
+   "afirma_y_define": "ΔT mediano de Isluga (A12 declara ~20 K)",
+   "donde": "CLAUDE.md A12",
+   "declarado": 8.3,
+   "hoy": 8.3,
+   "estado": "OK",
+   "error": null
+  },
+  {
+   "id": "git_mb",
+   "afirma_y_define": "tamaño de .git — DEFINICIÓN: el directorio COMPLETO en disco, no el `size-pack` de git count-objects (5,99 GiB), que es sólo lo empaquetado. S121 declaraba 3.100 MB",
+   "donde": "docs/AUDIT_S128.md §5",
+   "declarado": 6507.8,
+   "hoy": 9375.6,
+   "estado": "FUERA_DE_BANDA",
+   "error": null
+  },
+  {
+   "id": "data_mb",
+   "afirma_y_define": "tamaño de data/ (S121 decía 2.000 MB)",
+   "donde": "docs/AUDIT_S128.md §5",
+   "declarado": 1034.7,
+   "hoy": 1114.8,
+   "estado": "DERIVA",
+   "error": null
+  },
+  {
+   "id": "suite_tests",
+   "afirma_y_define": "tests de la suite",
+   "donde": "tasks/BLOQUE_ARRANQUE_S129.md",
+   "declarado": 1003,
+   "hoy": 1586,
+   "estado": "FUERA_DE_BANDA",
+   "error": null
+  },
+  {
+   "id": "flags_true",
+   "afirma_y_define": "flags ENABLE_* en True — DEFINICIÓN: TODOS los que evalúan True en `pipeline.profile`, incluidos los que lo son por default del código. ⚠️ S125 declaró 17 con OTRO denominador (probablemente sólo los escritos en el YAML); los dos pueden ser correctos. Sin la definición, la comparación no significa nada — ver el encabezado de este registro",
+   "donde": "docs/AUDIT_S125_PROFUNDA.md §4",
+   "declarado": 28,
+   "hoy": 28,
+   "estado": "OK",
+   "error": null
+  },
+  {
+   "id": "wooster",
+   "afirma_y_define": "coeficientes de Wooster MODIS y VIIRS I04",
+   "donde": "CLAUDE.md Reglas científicas",
+   "declarado": [
+    18.9,
+    18.0
+   ],
+   "hoy": [
+    18.9,
+    18.0
+   ],
+   "estado": "OK",
+   "error": null
+  },
+  {
+   "id": "inner_radius",
+   "afirma_y_define": "la tabla inner_radius_km de CLAUDE.md",
+   "donde": "CLAUDE.md Reglas geométricas",
+   "declarado": {
+    "Lastarria": 3,
+    "Copahue": 4,
+    "Tupungatito": 7,
+    "PuyehueCordonCaulle": 20,
+    "Villarrica": 5
+   },
+   "hoy": {
+    "Lastarria": 3,
+    "Copahue": 4,
+    "Tupungatito": 7,
+    "PuyehueCordonCaulle": 20,
+    "Villarrica": 5
+   },
+   "estado": "OK",
+   "error": null
+  },
+  {
+   "id": "piso_invisibles",
+   "afirma_y_define": "records que el dashboard NO cuenta por vrp_mw = 0 — DEFINICIÓN: los que pasaron por el piso VRP (diag_vrp_raw_mw presente) y fallan isValidDetection() de frontend/index.html:1372. Antes de quitar el piso en S130 eran 582; si vuelve a subir, el piso se repuso (A63) o el backfill se revirtió",
+   "donde": "PR #571 / tests/test_guard_piso_vrp_s130.py",
+   "declarado": 0,
+   "hoy": 0,
+   "estado": "OK",
+   "error": null
+  },
+  {
+   "id": "recall_v750_dash",
+   "afirma_y_define": "recall VIIRS750 del DASHBOARD vs noches-ALERTA MIROVA, en % — DEFINICIÓN: predicado isValidDetection ∧ isSummitDetection del frontend, NO el de auto_audit_weekly (que mide sobre primary_cluster y por eso era ciego al piso VRP). Ventana 2026 y volcanes de _s126_lib.VENTS. ⚠️ El PR #571 reporta 82,52 %→84,55 % con OTRO corte: toda la data y los 11 Tier A explícitos. Los dos son correctos y NO son comparables entre sí — es el mismo problema de denominador que flags_true. Cota superior por D2",
+   "donde": "PR #571 (con su propio corte)",
+   "declarado": 85.06,
+   "hoy": 85.49,
+   "estado": "OK",
+   "error": null
+  },
+  {
+   "id": "papers_leidos_pct",
+   "afirma_y_define": "% del corpus leído a fondo",
+   "donde": "docs/s128/lectura_papers.json",
+   "declarado": 29.0,
+   "hoy": 29.0,
+   "estado": "OK",
+   "error": null
+  }
+ ],
+ "sin_instrumento": [
+  {
+   "doc": "CLAUDE.md",
+   "linea": 51,
+   "valor": "54%",
+   "contexto": "competidores. Creado S13 (2026-04-18). Cobertura **30/60 PDFs (54%)**."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 56,
+   "valor": "22%",
+   "contexto": "- Sistemas competidores (HotLINK USGS AVO +22% recall, MOUNTS, NHI, V-STAR, etc.)"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 96,
+   "valor": "0.17%",
+   "contexto": "contra MIROVA v2.5 OSF (error ≤0.17% sobre 48,360 filas)**:"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 98,
+   "valor": "1.97×",
+   "contexto": "- VIIRS M-band 750m (M13): `k = 1.97×10⁷ × A_pix(km²)` = **11,081,250** (`WOOSTER_COEFF=19.7`)"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 101,
+   "valor": "2.48×",
+   "contexto": "- NO usar Di Bella 2024 k=2.48×10⁷ para VIIRS 375m — no reproduce OSF (empírico)."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 102,
+   "valor": "5.67×",
+   "contexto": "- **VRP TIR (I05)**: Stefan-Boltzmann puro (`σ = 5.67×10⁻⁸`). **Drift D3 RESUELTO S17**: Aveni 2024"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 118,
+   "valor": "4,7×",
+   "contexto": "dNTI cae 3,5 a 4,7× y el primer paso queda vacío; la compuerta elimina el cráter de Villarrica en"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 132,
+   "valor": "25 km",
+   "contexto": "- **`radius_km = 25 km` en los 11 Tier A** — replica grilla MIROVA UTM 51×51 km"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 132,
+   "valor": "51×",
+   "contexto": "- **`radius_km = 25 km` en los 11 Tier A** — replica grilla MIROVA UTM 51×51 km"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 132,
+   "valor": "51 km",
+   "contexto": "- **`radius_km = 25 km` en los 11 Tier A** — replica grilla MIROVA UTM 51×51 km"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 133,
+   "valor": "25.5 km",
+   "contexto": "(radio inscrito 25.5 km). Los 34 volcanes restantes quedan en 5 km (`volcanoes.yaml`:"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 155,
+   "valor": "80%",
+   "contexto": "A/B/D resolvieron 80% de dudas sin fetch. Solo entonces tiene sentido"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 161,
+   "valor": "51×",
+   "contexto": "no hay máscaras geométricas ni radios adaptativos. Es grilla UTM 51×51 +"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 195,
+   "valor": "94%",
+   "contexto": "recall mientras código S25 daba 94% real."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 197,
+   "valor": "12σ",
+   "contexto": "(S26)**: por ~10 sesiones citamos Di Bella 2024 §3.3 (12σ VIIRS noche)"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 214,
+   "valor": "1.04×",
+   "contexto": "campo equivocado ocultaron problemas: Lastarria 1.04× → real 7.67×, Llaima 1.01× → real"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 214,
+   "valor": "7.67×",
+   "contexto": "campo equivocado ocultaron problemas: Lastarria 1.04× → real 7.67×, Llaima 1.01× → real"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 214,
+   "valor": "1.01×",
+   "contexto": "campo equivocado ocultaron problemas: Lastarria 1.04× → real 7.67×, Llaima 1.01× → real"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 215,
+   "valor": "11.82×",
+   "contexto": "11.82×, PCC 52.77× → real 6.9×."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 215,
+   "valor": "52.77×",
+   "contexto": "11.82×, PCC 52.77× → real 6.9×."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 220,
+   "valor": "5,7 %",
+   "contexto": "y coinciden entre sí sólo en el **5,7 %**. Hasta S131 ese número vivía sólo en JavaScript y"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 233,
+   "valor": "12K",
+   "contexto": "<12K en régimen Muy Bajo + ring background frío sufren ΔL inflado en Test 1 integrated-ROI"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 234,
+   "valor": "15×",
+   "contexto": "→ magnitud 8-15× MIROVA. Vols con ΔT >20K (Lascar 21.6K, Isluga ~20K) calibrados"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 234,
+   "valor": "21.6K",
+   "contexto": "→ magnitud 8-15× MIROVA. Vols con ΔT >20K (Lascar 21.6K, Isluga ~20K) calibrados"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 236,
+   "valor": "16,9 K",
+   "contexto": "reales son Láscar **16,9 K** e Isluga **8,3 K** (`scripts/libro_de_cuentas.py`, ids"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 236,
+   "valor": "8,3 K",
+   "contexto": "reales son Láscar **16,9 K** e Isluga **8,3 K** (`scripts/libro_de_cuentas.py`, ids"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 237,
+   "valor": "12 K",
+   "contexto": "`A12_dT_lascar` / `A12_dT_isluga`). Isluga cae debajo del propio corte de 12 K, o sea"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 239,
+   "valor": "90%",
+   "contexto": "(el patrón térmico decide, validar por A/B — A19) sigue; los dos números no. Fix kernel-bg (Coppola 2024 L1129"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 242,
+   "valor": "98 %",
+   "contexto": "sobre n=3338, el valor es **0.0 en 3284 casos** (98 %) y 0.84 solo 15 veces. El"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 246,
+   "valor": "0.84 km",
+   "contexto": "**`Distancia_km` MIROVA Villarrica fija 0.84 km = idiosincrasia**: MIROVA mide dist"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 248,
+   "valor": "0.85 km",
+   "contexto": "(-39.42,-71.93) está a 0.85 km del cráter actual (-39.420292,-71.939908). NO afecta"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 291,
+   "valor": "1.86×",
+   "contexto": "predijo inner=7 → ratio 1.86× pero reproc real dio 3.64× (peor que baseline)."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 291,
+   "valor": "3.64×",
+   "contexto": "predijo inner=7 → ratio 1.86× pero reproc real dio 3.64× (peor que baseline)."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 293,
+   "valor": "12K",
+   "contexto": "Lastarria (ΔT 12K, ring desierto frío) responde a kernel-bg = 6.78× → 1.07×."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 293,
+   "valor": "6.78×",
+   "contexto": "Lastarria (ΔT 12K, ring desierto frío) responde a kernel-bg = 6.78× → 1.07×."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 293,
+   "valor": "1.07×",
+   "contexto": "Lastarria (ΔT 12K, ring desierto frío) responde a kernel-bg = 6.78× → 1.07×."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 295,
+   "valor": "10.37×",
+   "contexto": "10.37× → 18.46×. Mecanismo opuesto: vecinos directos del hot pixel en glaciar"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 295,
+   "valor": "18.46×",
+   "contexto": "10.37× → 18.46×. Mecanismo opuesto: vecinos directos del hot pixel en glaciar"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 303,
+   "valor": "707 km",
+   "contexto": "focal puntiforme. Para vols con anomalía extendida (lacolito PCC ~707 km²,"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 305,
+   "valor": "9.77 km",
+   "contexto": "cluster discreto — drift resultante es artefacto del método (PCC 9.77 km),"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 308,
+   "valor": "8.5 km",
+   "contexto": "está EN la zona difusa, ej. PCC 5.6-8.5 km del vent coincide con MIROVA"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 309,
+   "valor": "7.73 km",
+   "contexto": "@ 7.73 km). Ver D7 en MIROVA_DIVERGENCES.md."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 313,
+   "valor": "12K",
+   "contexto": "(Chaiten/Villarrica/PP, ΔT <12K) requiere banda revisada con drift `<3 km`"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 320,
+   "valor": "2.08×",
+   "contexto": "ratio 10×). Mediana N=7 dio 2.08× pero **varianza alta** = single record es"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 323,
+   "valor": "43%",
+   "contexto": "43% residual. Pendiente arquitectural S71+."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 329,
+   "valor": "260K",
+   "contexto": "cuando `t_bg_k <260K` (cirrus alto frío) el path D dNTI contextual puede"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 330,
+   "valor": "150×",
+   "contexto": "dispararse falsamente e inflar `pc.vrp_mw` **20-150×** vs ground truth. Trigger"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 336,
+   "valor": "260K",
+   "contexto": "(gate atm `t_bg ≥260K`, co-validación obligatoria, cap magnitud)."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 339,
+   "valor": "0.2 MW",
+   "contexto": "sumando ~1680 MW pero el header MIROVA reporta solo \"VRP: 0.2 MW @ 9.7 km\"."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 339,
+   "valor": "9.7 km",
+   "contexto": "sumando ~1680 MW pero el header MIROVA reporta solo \"VRP: 0.2 MW @ 9.7 km\"."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 391,
+   "valor": "473 K",
+   "contexto": "caso que YA satura MODIS, BT=473 K), no el threshold mismo (que es BT≈450 K"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 391,
+   "valor": "450 K",
+   "contexto": "caso que YA satura MODIS, BT=473 K), no el threshold mismo (que es BT≈450 K"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 392,
+   "valor": "500 K",
+   "contexto": "per Wooster, actualizado a 500 K por Coppola 2025 Cap.11). El costo de la"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 413,
+   "valor": "185K",
+   "contexto": "discrepancias factor 1-5× (S73: cálculo inicial dio 185K MW, real fue 695K)."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 413,
+   "valor": "695K",
+   "contexto": "discrepancias factor 1-5× (S73: cálculo inicial dio 185K MW, real fue 695K)."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 511,
+   "valor": "98%",
+   "contexto": "(~hundred MB). Para disco al 98% considerar shallow clone o sparse-checkout."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 645,
+   "valor": "49.1%",
+   "contexto": "49.1% MIROVA SÍ publicó pero el cruce falló por bugs del loader local"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 648,
+   "valor": "46.3%",
+   "contexto": "por `limite_km` scraper); 46.3% son features volcánicas reales no"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 653,
+   "valor": "4.6%",
+   "contexto": "S33); **4.6% artefactos reales** (cirrus path D PCC + ring glaciar"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 654,
+   "valor": "95.4%",
+   "contexto": "Tupungatito). 95.4% de los \"FPs\" son anomalías térmicas físicamente"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 705,
+   "valor": "56%",
+   "contexto": "de Tupungatito (ancla al cráter, validado S66 56%). S80 (PR #220, \"consolidación"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 740,
+   "valor": "2,7×",
+   "contexto": "parche de magnitud previo puede estar parcheando el mismo drift** (S102). ⚠️ **«Clon literal» es demasiado fue"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 744,
+   "valor": "60MW",
+   "contexto": "RESTAURA la calibración, NO la rompe. **MODIS adoptado S102** (#354: PCC 342→60MW,"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 745,
+   "valor": "0.92×",
+   "contexto": "Lascar 0.92×, 0 FN con piso 0.05). **VIIRS decidido S102** (adoptar + mantener"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 749,
+   "valor": "2.43×",
+   "contexto": "la hipótesis (nadir-sin-ctx = 2.43× peor; ctxpeak cura el anillo nival del Test1, otro"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 758,
+   "valor": "2.27×",
+   "contexto": "2.27×→**0.78×**, VIIRS750 1.59×→**0.80×**, 0 FN nuevos VIIRS375) → R8 live. Curados"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 758,
+   "valor": "0.78×",
+   "contexto": "2.27×→**0.78×**, VIIRS750 1.59×→**0.80×**, 0 FN nuevos VIIRS375) → R8 live. Curados"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 758,
+   "valor": "1.59×",
+   "contexto": "2.27×→**0.78×**, VIIRS750 1.59×→**0.80×**, 0 FN nuevos VIIRS375) → R8 live. Curados"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 758,
+   "valor": "0.80×",
+   "contexto": "2.27×→**0.78×**, VIIRS750 1.59×→**0.80×**, 0 FN nuevos VIIRS375) → R8 live. Curados"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 759,
+   "valor": "1.0×",
+   "contexto": "Villarrica 18.3→1.0×, Tupun 11.2→0.71×, PCC 2.4→0.95×. **Hallazgo de método**: el área"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 759,
+   "valor": "0.71×",
+   "contexto": "Villarrica 18.3→1.0×, Tupun 11.2→0.71×, PCC 2.4→0.95×. **Hallazgo de método**: el área"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 759,
+   "valor": "0.95×",
+   "contexto": "Villarrica 18.3→1.0×, Tupun 11.2→0.71×, PCC 2.4→0.95×. **Hallazgo de método**: el área"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 762,
+   "valor": "2.56 MW",
+   "contexto": "borderline (Isluga VIIRS750: 2 detecciones glaciar 5.0/2.56 MW → 0; eran sobre-detecciones"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 773,
+   "valor": "70%",
+   "contexto": "más fríos que el fondo — REFUTÉ el claim de un subagente de \"70% píxel frío\"; miró el footprint"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 774,
+   "valor": "10.5km",
+   "contexto": "crudo, no el record); (2) PCC \"lejos del cráter\" (mediana 10.5km) **NO es error** — es el"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 775,
+   "valor": "707km",
+   "contexto": "lacolito Cordón Caulle offset real (~7km, 707km²); el `inner_radius_km=20` lo pinta todo"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 777,
+   "valor": "241×",
+   "contexto": "es **SISTÉMICA** (3-241× en los 11; PCC 5×/Villarrica 37× son medios, Copahue/Llaima 238-241×"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 777,
+   "valor": "37×",
+   "contexto": "es **SISTÉMICA** (3-241× en los 11; PCC 5×/Villarrica 37× son medios, Copahue/Llaima 238-241×"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 777,
+   "valor": "241×",
+   "contexto": "es **SISTÉMICA** (3-241× en los 11; PCC 5×/Villarrica 37× son medios, Copahue/Llaima 238-241×"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 782,
+   "valor": "270K",
+   "contexto": "cirrus `t_bg<270K` está **contaminado por altitud** (Láscar 5592m marca 85%) — NO usar solo."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 789,
+   "valor": "272K",
+   "contexto": "frío ~272K) y valle tibio de baja altitud (~281K), el campo crudo de BT MIR (I04) está"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 789,
+   "valor": "281K",
+   "contexto": "frío ~272K) y valle tibio de baja altitud (~281K), el campo crudo de BT MIR (I04) está"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 801,
+   "valor": "0.14K",
+   "contexto": "verificado: (I04−I05) es plano (mediana 0.01-0.14K) donde I04 tiene gradiente de 15K."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 801,
+   "valor": "15K",
+   "contexto": "verificado: (I04−I05) es plano (mediana 0.01-0.14K) donde I04 tiene gradiente de 15K."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 820,
+   "valor": "1.87 km",
+   "contexto": "refuerzo A61). La distancia mediana al cráter (Villarrica 1.87 km) OCULTÓ un sesgo"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 826,
+   "valor": "1.45 km",
+   "contexto": "a 1.45 km y el cluster a 4.63 km del cráter)."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 826,
+   "valor": "4.63 km",
+   "contexto": "a 1.45 km y el cluster a 4.63 km del cráter)."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 881,
+   "valor": "760 MW",
+   "contexto": "por supervisión MANUAL, no gate automático** (S110, caso Láscar 760 MW verificado):"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 883,
+   "valor": "760 MW",
+   "contexto": "3.74µm) brillante + TIR (I05) frío → NTI enorme → VRP fantasma (760 MW ≈ 100× el máx de"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 936,
+   "valor": "17 %",
+   "contexto": "La tasa es plana en **15-17 % de los records de cada mes** desde feb-2025, sin un solo quiebre;"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 939,
+   "valor": "98.8%",
+   "contexto": "La cara (b) es ~1000× más grande pero re-derivar simétrico es **trap A48/A18**: 98.8% MIROVA-"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 944,
+   "valor": "75MW",
+   "contexto": "espuria. Además A8 reforzada: el flagship del handoff (\"75MW@28km\") ya se había auto-curado por el"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 958,
+   "valor": "99%",
+   "contexto": "re-auditoría por sensor con data fresca dio recall dashboard VIIRS375 99% / VIIRS750 86% / **MODIS"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 958,
+   "valor": "86%",
+   "contexto": "re-auditoría por sensor con data fresca dio recall dashboard VIIRS375 99% / VIIRS750 86% / **MODIS"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 959,
+   "valor": "90%",
+   "contexto": "16%** — pero el \"16%\" NO es falta de detección (el pipeline encuentra el cráter 90%), es el bug de"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 977,
+   "valor": "37%",
+   "contexto": "Sobre 4560 records summit-intra (37% MIROVA-confirmados) se barrieron todos los candidatos físicos:"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 979,
+   "valor": "3,9 K",
+   "contexto": "**régimen-dependiente** (focal ~4-5 K / nevado ~2,8-3,9 K), y (b) cualquier cut **global** que rechace"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 980,
+   "valor": "70%",
+   "contexto": "~70% del artefacto nevado **destruye 14-16% del cat-b real**. En régimen nevado el discriminante"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 995,
+   "valor": "93%",
+   "contexto": "(mediana 1, ~83-93% single-pixel) y VRP (~0.04-0.05 MW) — A83. Las dos únicas anclas alternativas YA"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 995,
+   "valor": "0.05 MW",
+   "contexto": "(mediana 1, ~83-93% single-pixel) y VRP (~0.04-0.05 MW) — A83. Las dos únicas anclas alternativas YA"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1014,
+   "valor": "1.3%",
+   "contexto": "solo cola inflada 0.5-1.3% (mayormente far, filtrada por el frontend). **How to apply**:"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1029,
+   "valor": "7.70×",
+   "contexto": "de marcar Villarrica (antes 7.70×) porque la magnitud sólo se evalúa en noches donde MIROVA"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1031,
+   "valor": "2.107 MW",
+   "contexto": "2.107 MW medianos en agosto contra 0 y 0.060 en abril-mayo. **How to apply**: antes de"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1116,
+   "valor": "0,21 km",
+   "contexto": "nuestro re-anclado dio «0,21 km de separación» cuando la cota superior real era 15,6 km (PCC) —"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1116,
+   "valor": "15,6 km",
+   "contexto": "nuestro re-anclado dio «0,21 km de separación» cuando la cota superior real era 15,6 km (PCC) —"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1138,
+   "valor": "94,8 %",
+   "contexto": "94,8 % a 95,2 %), y de las 4 noches que destaparia **3 son el artefacto de NdC** que S113 ya dijo no"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1138,
+   "valor": "95,2 %",
+   "contexto": "94,8 % a 95,2 %), y de las 4 noches que destaparia **3 son el artefacto de NdC** que S113 ya dijo no"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1195,
+   "valor": "260 K",
+   "contexto": "la máscara de nube de 260 K dejaba sin fondo las pasadas de invierno y eso se leía como precisión. VIIRS 375"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1196,
+   "valor": "62,1 %",
+   "contexto": "publica en negativos limpios 62,1 % antes y 87,1 % después de #571. Medir siempre por tramo."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1196,
+   "valor": "87,1 %",
+   "contexto": "publica en negativos limpios 62,1 % antes y 87,1 % después de #571. Medir siempre por tramo."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1210,
+   "valor": "2,8 km",
+   "contexto": "\"coincidía\" con MIROVA en 5 noches por un píxel de `keep_peak` a 2,2-2,8 km que caía por azar en su"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1252,
+   "valor": "58,7 %",
+   "contexto": "sólo el dNTI, midió el Test 2 y habló de los dos (el sigma gobierna en 58,7 % de V375 y 75,0 % de"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1252,
+   "valor": "75,0 %",
+   "contexto": "sólo el dNTI, midió el Test 2 y habló de los dos (el sigma gobierna en 58,7 % de V375 y 75,0 % de"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1253,
+   "valor": "31 %",
+   "contexto": "V750); **D13** titulaba «el 31 % de la MAGNITUD» y ese 31 % era fracción de **records** (en"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1253,
+   "valor": "31 %",
+   "contexto": "V750); **D13** titulaba «el 31 % de la MAGNITUD» y ese 31 % era fracción de **records** (en"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1254,
+   "valor": "70,7 %",
+   "contexto": "magnitud, 70,7 %); el informe de **S137** dejó una hipótesis sin verificar porque «la batería"
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1375,
+   "valor": "0.2 MW",
+   "contexto": "Villarrica, 0.05–0.2 MW) que MIROVA ve integrando ROI completo."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1446,
+   "valor": "0.1K",
+   "contexto": "auto-upgrade NRT→Standard. Delta BT <0.1K, despreciable para VRP."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1472,
+   "valor": "15 km",
+   "contexto": "(3-15 km). store.py usa `max_hotspot_dist_km` per-volcano, no global 5km."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1476,
+   "valor": "80%",
+   "contexto": "OCR cubre ~80% VIIRS, MODIS completo. No re-scrapear para homogeneizar."
+  },
+  {
+   "doc": "CLAUDE.md",
+   "linea": 1545,
+   "valor": "79,2 %",
+   "contexto": "loader CONS∪OCR de S86 — medida en 79,2 % en S128 y anotada en el doc en S131)"
+  },
+  {
+   "doc": "docs/MISSION.md",
+   "linea": 26,
+   "valor": "95.4%",
+   "contexto": "profunda) mostró empíricamente que **95.4% de las \"FPs\" del cruce estricto"
+  },
+  {
+   "doc": "docs/MISSION.md",
+   "linea": 27,
+   "valor": "49.1%",
+   "contexto": "contra MIROVA son anomalías térmicas físicamente reales** — 49.1%"
+  },
+  {
+   "doc": "docs/MISSION.md",
+   "linea": 29,
+   "valor": "46.3%",
+   "contexto": "+ 46.3% features volcánicas reales no publicadas por MIROVA. Solo 4.6%"
+  },
+  {
+   "doc": "docs/MISSION.md",
+   "linea": 29,
+   "valor": "4.6%",
+   "contexto": "+ 46.3% features volcánicas reales no publicadas por MIROVA. Solo 4.6%"
+  },
+  {
+   "doc": "docs/MISSION.md",
+   "linea": 103,
+   "valor": "0.53×",
+   "contexto": "verificado S113: 0 fuga al dashboard + mediana 0.53×; t_bg-gate descartado anti-MIROVA/trap A68)."
+  },
+  {
+   "doc": "docs/MISSION.md",
+   "linea": 108,
+   "valor": "1.5 km",
+   "contexto": "la cara POSICIÓN del ancla en nevados (~1-1.5 km N, A70, costo residual no de recall) ·"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 22,
+   "valor": "51×",
+   "contexto": "hotspots dentro del ROI 51×51 km en un VRP totalizado y un punto representativo."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 22,
+   "valor": "51 km",
+   "contexto": "hotspots dentro del ROI 51×51 km en un VRP totalizado y un punto representativo."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 38,
+   "valor": "42×",
+   "contexto": "Factor empírico observado: ~42× pixels nuestros por cluster MIROVA (S23 T14"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 51,
+   "valor": "70%",
+   "contexto": "Cobertura estimada: **~70% para VIIRS** (375m y 750m)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 55,
+   "valor": "30%",
+   "contexto": "VIIRS por ese 30% faltante."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 65,
+   "valor": "80%",
+   "contexto": "- VIIRS 375m / 750m: ~70-80%."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 80,
+   "valor": "94%",
+   "contexto": "- `RUTINA` + `NULO` (13,378 = 94%): pasadas sin nada."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 81,
+   "valor": "2.9%",
+   "contexto": "- `ALERTA_TERMICA` + `Muy Bajo` (407 = 2.9%): VRP mediano 0.21 MW, dist 2 km."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 81,
+   "valor": "0.21 MW",
+   "contexto": "- `ALERTA_TERMICA` + `Muy Bajo` (407 = 2.9%): VRP mediano 0.21 MW, dist 2 km."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 82,
+   "valor": "1.2%",
+   "contexto": "- `ALERTA_TERMICA` + `Bajo` (165 = 1.2%): VRP mediano 1.79 MW, dist 1.5 km."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 82,
+   "valor": "1.79 MW",
+   "contexto": "- `ALERTA_TERMICA` + `Bajo` (165 = 1.2%): VRP mediano 1.79 MW, dist 1.5 km."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 82,
+   "valor": "1.5 km",
+   "contexto": "- `ALERTA_TERMICA` + `Bajo` (165 = 1.2%): VRP mediano 1.79 MW, dist 1.5 km."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 83,
+   "valor": "1.8%",
+   "contexto": "- `FALSO_POSITIVO` (253 = 1.8%): VRP mediano 1.56 MW, dist **20.8 km**."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 83,
+   "valor": "1.56 MW",
+   "contexto": "- `FALSO_POSITIVO` (253 = 1.8%): VRP mediano 1.56 MW, dist **20.8 km**."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 83,
+   "valor": "20.8 km",
+   "contexto": "- `FALSO_POSITIVO` (253 = 1.8%): VRP mediano 1.56 MW, dist **20.8 km**."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 110,
+   "valor": "1.79 MW",
+   "contexto": "- Nivel **\"Bajo\" (eruptivo, 1.79 MW mediano)**: 65% recall (92/141). Aceptable"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 112,
+   "valor": "0.21 MW",
+   "contexto": "- Nivel **\"Muy Bajo\" (sub-pixel, 0.21 MW mediano)**: 60.7% recall (222/366)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 112,
+   "valor": "60.7%",
+   "contexto": "- Nivel **\"Muy Bajo\" (sub-pixel, 0.21 MW mediano)**: 60.7% recall (222/366)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 114,
+   "valor": "97%",
+   "contexto": "- PCC 97% (inner_radius_km=20 grande)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 115,
+   "valor": "80%",
+   "contexto": "- Isluga 80%, Chaitén 73%, Tupungatito 72%, Lascar 71%."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 115,
+   "valor": "72%",
+   "contexto": "- Isluga 80%, Chaitén 73%, Tupungatito 72%, Lascar 71%."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 115,
+   "valor": "71%",
+   "contexto": "- Isluga 80%, Chaitén 73%, Tupungatito 72%, Lascar 71%."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 120,
+   "valor": "97%",
+   "contexto": "correlaciona con `inner_radius_km` chico. PCC con inner=20 captura 97% mientras"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 127,
+   "valor": "70×",
+   "contexto": "**Estado pre-S27 operacional (con parches)**: ratio mediano `vrp_nuestro / vrp_mirova` = **70×**."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 129,
+   "valor": "1.35×",
+   "contexto": "**Estado post-S27 literal puro**: ratio mediano = **1.35×**. Mejora drástica."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 145,
+   "valor": "1.35×",
+   "contexto": "**Estado**: ✅ Calibración de magnitud lograda. Ratio 1.35× es excelente para"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 164,
+   "valor": "11.5×",
+   "contexto": "- Ratio mediano `top10_pixels_sum / MIROVA_CSV_VRP` = **11.5×** (rango 7.9-21.9×, n=5)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 164,
+   "valor": "21.9×",
+   "contexto": "- Ratio mediano `top10_pixels_sum / MIROVA_CSV_VRP` = **11.5×** (rango 7.9-21.9×, n=5)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 166,
+   "valor": "10.9 km",
+   "contexto": "**10.9 km** (vs distancias MIROVA típicas 1-3 km del vent)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 167,
+   "valor": "99%",
+   "contexto": "- Los TIFs tienen **>99% de pixels positivos** en rango 0.035-0.10 (campo continuo,"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 172,
+   "valor": "0.2 MW",
+   "contexto": "del mismo producto reportaba \"VRP: 0.2 MW @ 9.7 km\". El factor ~10⁴× sobre Lascar y el"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 172,
+   "valor": "9.7 km",
+   "contexto": "del mismo producto reportaba \"VRP: 0.2 MW @ 9.7 km\". El factor ~10⁴× sobre Lascar y el"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 187,
+   "valor": "1.05×",
+   "contexto": "- Ratio magnitud `pc.vrp_mw / MIROVA_CSV` = **1.05×** exacto."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 188,
+   "valor": "1.04 km",
+   "contexto": "- Drift centroide TIF top10 (<3 km del vent) vs `pc.centroid` = **1.04 km**."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 189,
+   "valor": "1.05×",
+   "contexto": "- Target S69: ratio 1.05× y drift 0.752 km. Ambos drifts <2 km tolerancia."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 189,
+   "valor": "0.752 km",
+   "contexto": "- Target S69: ratio 1.05× y drift 0.752 km. Ambos drifts <2 km tolerancia."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 201,
+   "valor": "1.1 km",
+   "contexto": "- **Focales puros (Lastarria)**: R2 PASS limpio. Drift <1.1 km."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 202,
+   "valor": "2.2 km",
+   "contexto": "- **Focales con cola térmica difusa (Chaiten, Villarrica, PP)**: R2 PASS bajo gates revisadas. Drift 2.0-2.2 k"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 203,
+   "valor": "707 km",
+   "contexto": "- **No focales / difusos (PCC lacolito Cordón Caulle)**: R2 con drift NO APLICA. La intrusión 2011 cubre ~707 "
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 207,
+   "valor": "12 K",
+   "contexto": "- ΔT <12 K + cluster <5 km² → focal con halo, R2 con drift `<3 km` aplicable (gates revisadas)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 226,
+   "valor": "270 K",
+   "contexto": "**Fenómeno físico**: en invierno austral, los volcanes del norte de Chile (Lastarria, Lascar, Isluga) sufren c"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 226,
+   "valor": "270 K",
+   "contexto": "**Fenómeno físico**: en invierno austral, los volcanes del norte de Chile (Lastarria, Lascar, Isluga) sufren c"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 226,
+   "valor": "25 K",
+   "contexto": "**Fenómeno físico**: en invierno austral, los volcanes del norte de Chile (Lastarria, Lascar, Isluga) sufren c"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 226,
+   "valor": "270 K",
+   "contexto": "**Fenómeno físico**: en invierno austral, los volcanes del norte de Chile (Lastarria, Lascar, Isluga) sufren c"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 229,
+   "valor": "68.8%",
+   "contexto": "- 22/32 (68.8%) son **FPs nuestros confirmados** — MIROVA NO reporta ALERTA en esos timestamps (6 RUTINA explí"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 230,
+   "valor": "31.2%",
+   "contexto": "- 10/32 (31.2%) son TPs reales pero **amplificados 21-150× sobre MIROVA** (ratio mediano 62×). Sugiere que pat"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 230,
+   "valor": "150×",
+   "contexto": "- 10/32 (31.2%) son TPs reales pero **amplificados 21-150× sobre MIROVA** (ratio mediano 62×). Sugiere que pat"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 230,
+   "valor": "62×",
+   "contexto": "- 10/32 (31.2%) son TPs reales pero **amplificados 21-150× sobre MIROVA** (ratio mediano 62×). Sugiere que pat"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 232,
+   "valor": "91%",
+   "contexto": "- **91% (20/22) FPs** tienen `t_bg < 270K` (cirrus frío). Mediana FPs t_bg = 268.5 K."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 232,
+   "valor": "270K",
+   "contexto": "- **91% (20/22) FPs** tienen `t_bg < 270K` (cirrus frío). Mediana FPs t_bg = 268.5 K."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 232,
+   "valor": "268.5 K",
+   "contexto": "- **91% (20/22) FPs** tienen `t_bg < 270K` (cirrus frío). Mediana FPs t_bg = 268.5 K."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 235,
+   "valor": "91%",
+   "contexto": "1. **Firing espurio** sobre cirrus (predominante 91% FPs)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 236,
+   "valor": "150×",
+   "contexto": "2. **Amplificación en TPs** (10 casos donde MIROVA y nosotros coincidimos en detección, pero magnitud nuestra "
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 238,
+   "valor": "1.07×",
+   "contexto": "**Reconciliación con adopción S62 Lastarria**: la mediana global S62 (ratio 1.07× sobre 99 ALERTAS) es válida "
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 238,
+   "valor": "30 MW",
+   "contexto": "**Reconciliación con adopción S62 Lastarria**: la mediana global S62 (ratio 1.07× sobre 99 ALERTAS) es válida "
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 240,
+   "valor": "270K",
+   "contexto": "**Generalización**: Lascar e Isluga comparten granules MODIS con Lastarria en algunos casos cirrus regional (S"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 245,
+   "valor": "260 K",
+   "contexto": "- **Opción 1**: gate atmosférico — `if t_bg_k < 260 K, skip path D` (o umbral a calibrar empíricamente)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 282,
+   "valor": "0.21 MW",
+   "contexto": "- **R2** pixel-level vs TIFs MIROVA archive sobre 20 records muestreados: **0 cap leaks**. Máximo MIROVA en re"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 287,
+   "valor": "150×",
+   "contexto": "**Cobertura física**: el cap acota magnitudes en cirrus alto (Wooster BT⁸ sobre fondo frío inflaba 20-150×). A"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 287,
+   "valor": "0.21 MW",
+   "contexto": "**Cobertura física**: el cap acota magnitudes en cirrus alto (Wooster BT⁸ sobre fondo frío inflaba 20-150×). A"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 289,
+   "valor": "83×",
+   "contexto": "**Estado D9 — PARCIALMENTE RESUELTO**: mitigación defensiva adoptada. Cubre 100% del bug original (records con"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 289,
+   "valor": "12×",
+   "contexto": "**Estado D9 — PARCIALMENTE RESUELTO**: mitigación defensiva adoptada. Cubre 100% del bug original (records con"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 383,
+   "valor": "39.8%",
+   "contexto": "- **Alert rate Stromboli MIR 39.8%** (`:597-598`): 2,696 / 6,772 overpasses. Reference rate para volcán muy ac"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 389,
+   "valor": "1.6 MW",
+   "contexto": "- **Detección fumaroles 1.6 MW** (`:325-330`): primer thermal alert Santa Ana = **1.6 MW** (Sept 21, 2004). De"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 389,
+   "valor": "1.6 MW",
+   "contexto": "- **Detección fumaroles 1.6 MW** (`:325-330`): primer thermal alert Santa Ana = **1.6 MW** (Sept 21, 2004). De"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 405,
+   "valor": "1.6 MW",
+   "contexto": "Laiolo 2017 prueba que MIROVA detecta fumaroles 1.6 MW con threshold standard. **Si nuestro pipeline falla en "
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 496,
+   "valor": "5.21 km",
+   "contexto": "**F1.6 (top P2, en análisis)**: Tupungatito restaurar/ajustar `mirova_center_lat/lon` basado en centroide CONS"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 516,
+   "valor": "262K",
+   "contexto": "(path-D dominante + `t_bg<262K` + far) = **199 records**, con **0 fuga al dashboard** (el gate"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 524,
+   "valor": "96.7%",
+   "contexto": "(96.7%) son MIROVA-CONFIRMADOS reales = fondo frío por **altitud** (Láscar 5592m, Lastarria,"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 528,
+   "valor": "0.53×",
+   "contexto": "visibles mayo-jun): **mediana 0.53×** (p25-p75 0.30-0.85), levemente sub-reportando = calibración"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 529,
+   "valor": "12×",
+   "contexto": "clon-literal sana. S71 dejó \"6-12× sistemático en cirrus\"; hoy quedan **solo 2 records >5×** de 610,"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 531,
+   "valor": "30%",
+   "contexto": "absoluta chica (3-4 MW, bajo el cap), = el \"~30% residual VIIRS750 cirrus/glaciar\" que la adopción"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 536,
+   "valor": "0.53×",
+   "contexto": "curada por nadir+focal S102-S109 (mediana 0.53×, residuo = 2 records VIIRS750 cirrus a 3-4 MW). El"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 566,
+   "valor": "11×",
+   "contexto": "**H3 — NdC con vent-path activo**: 16 markers vent (color violeta) son evidencia residual de data pre-S27. Se "
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 587,
+   "valor": "134×",
+   "contexto": "- 134×134 float64 EPSG:4326. **17,911 pixels >0** (99.7% del raster)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 587,
+   "valor": "99.7%",
+   "contexto": "- 134×134 float64 EPSG:4326. **17,911 pixels >0** (99.7% del raster)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 588,
+   "valor": "0.19 MW",
+   "contexto": "- Valores 0.04-0.19 MW. **Sum total 1680 MW**. Pico 0.187 MW a 23-24 km del vent."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 588,
+   "valor": "0.187 MW",
+   "contexto": "- Valores 0.04-0.19 MW. **Sum total 1680 MW**. Pico 0.187 MW a 23-24 km del vent."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 588,
+   "valor": "24 km",
+   "contexto": "- Valores 0.04-0.19 MW. **Sum total 1680 MW**. Pico 0.187 MW a 23-24 km del vent."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 589,
+   "valor": "0.2 MW",
+   "contexto": "- Header MIROVA reporta **VRP: 0.2 MW @ Distance 9.7 km**."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 589,
+   "valor": "9.7 km",
+   "contexto": "- Header MIROVA reporta **VRP: 0.2 MW @ Distance 9.7 km**."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 592,
+   "valor": "0.2 MW",
+   "contexto": "del campo de radiancia completo. El \"VRP: 0.2 MW\" del header viene de un cluster"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 593,
+   "valor": "9.7 km",
+   "contexto": "específico (a 9.7 km) seleccionado por algún criterio MIROVA, NO la suma del TIF."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 617,
+   "valor": "80%",
+   "contexto": "4. **Re-audit con métrica revertida** — esperado recall global subir a ~80%+,"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 630,
+   "valor": "24km",
+   "contexto": "Lascar 2026-02-14 con cluster Salar Atacama a 24km daba pc.vrp_mw=19389 MW"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 654,
+   "valor": "15K",
+   "contexto": "pixel real ΔT=15K no pasa threshold 5σ_summit=23K). Catastrófico."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 654,
+   "valor": "23K",
+   "contexto": "pixel real ΔT=15K no pasa threshold 5σ_summit=23K). Catastrófico."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 663,
+   "valor": "33%",
+   "contexto": "33%, Tupungatito 37%, Planchón 96.8%. Inclusive sin Phase 1, hay"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 663,
+   "valor": "37%",
+   "contexto": "33%, Tupungatito 37%, Planchón 96.8%. Inclusive sin Phase 1, hay"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 663,
+   "valor": "96.8%",
+   "contexto": "33%, Tupungatito 37%, Planchón 96.8%. Inclusive sin Phase 1, hay"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 686,
+   "valor": "1.3 MW",
+   "contexto": "Solo Lascar (eruptivo crónico, 1.3 MW mediana) tiene 60 alertas MODIS."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 693,
+   "valor": "0.11 MW",
+   "contexto": "5. **Distribución espacial confirmada**: Lastarria con magnitud 0.11 MW"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 694,
+   "valor": "0.22 MW",
+   "contexto": "recall 8%, Tupungatito con magnitud comparable 0.22 MW recall 72%. La"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 694,
+   "valor": "72%",
+   "contexto": "recall 8%, Tupungatito con magnitud comparable 0.22 MW recall 72%. La"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 704,
+   "valor": "0.21 MW",
+   "contexto": "triggered en magnitudes 0.05-0.21 MW."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 711,
+   "valor": "11×",
+   "contexto": "**Próximo paso**: reproc 11×90d con `_mirova_literal` actualizado, comparar"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 713,
+   "valor": "40%",
+   "contexto": "- Lastarria 8% → ≥40%: H_S27_1 confirmada, mergear a operacional."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 730,
+   "valor": "72%",
+   "contexto": "Tupungatito            72% (46/64)    88% (56/64)    +16 pp"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 730,
+   "valor": "88%",
+   "contexto": "Tupungatito            72% (46/64)    88% (56/64)    +16 pp"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 731,
+   "valor": "67%",
+   "contexto": "Lascar                 67%           63%             -4 (ruido)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 731,
+   "valor": "63%",
+   "contexto": "Lascar                 67%           63%             -4 (ruido)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 732,
+   "valor": "97%",
+   "contexto": "PCC                    97%           97%             0 (saturado)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 732,
+   "valor": "97%",
+   "contexto": "PCC                    97%           97%             0 (saturado)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 733,
+   "valor": "80%",
+   "contexto": "Isluga                 80%           83%             +3"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 733,
+   "valor": "83%",
+   "contexto": "Isluga                 80%           83%             +3"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 734,
+   "valor": "33%",
+   "contexto": "NdC                    33% (1/3)     25% (1/4)       ruido (N=4)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 734,
+   "valor": "25%",
+   "contexto": "NdC                    33% (1/3)     25% (1/4)       ruido (N=4)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 737,
+   "valor": "80%",
+   "contexto": "TOTAL                  ~50%          80% (406/507)   +30 pp"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 769,
+   "valor": "72%",
+   "contexto": "Resultado: Tupungatito 72% → 88% (+16pp), Isluga 80% → 83% (+3pp)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 769,
+   "valor": "88%",
+   "contexto": "Resultado: Tupungatito 72% → 88% (+16pp), Isluga 80% → 83% (+3pp)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 769,
+   "valor": "80%",
+   "contexto": "Resultado: Tupungatito 72% → 88% (+16pp), Isluga 80% → 83% (+3pp)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 769,
+   "valor": "83%",
+   "contexto": "Resultado: Tupungatito 72% → 88% (+16pp), Isluga 80% → 83% (+3pp)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 770,
+   "valor": "80%",
+   "contexto": "Recall global mantenido en 80%. Implementado en commit 82dcaa5."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 784,
+   "valor": "88%",
+   "contexto": "- **Tupungatito 88% → 95% (+7pp)**: Test 1 MODIS rescató ~5 FNs."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 784,
+   "valor": "95%",
+   "contexto": "- **Tupungatito 88% → 95% (+7pp)**: Test 1 MODIS rescató ~5 FNs."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 785,
+   "valor": "83%",
+   "contexto": "- **Isluga 83% → 89% (+6pp)**: idem ~4 FNs."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 785,
+   "valor": "89%",
+   "contexto": "- **Isluga 83% → 89% (+6pp)**: idem ~4 FNs."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 786,
+   "valor": "63%",
+   "contexto": "- **Lascar 63% → 64% (+1pp)**: hipótesis NO confirmada."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 786,
+   "valor": "64%",
+   "contexto": "- **Lascar 63% → 64% (+1pp)**: hipótesis NO confirmada."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 787,
+   "valor": "80%",
+   "contexto": "- TOTAL recall: 80% → **82.2%** (+2.2pp)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 787,
+   "valor": "82.2%",
+   "contexto": "- TOTAL recall: 80% → **82.2%** (+2.2pp)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 792,
+   "valor": "64%",
+   "contexto": "summit en terreno árido. **Lascar 64% queda como límite físico aceptado**"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 816,
+   "valor": "88%",
+   "contexto": "Tupungatito           88%             95%            +7 pp ★"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 816,
+   "valor": "95%",
+   "contexto": "Tupungatito           88%             95%            +7 pp ★"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 817,
+   "valor": "83%",
+   "contexto": "Isluga                83%             89%            +6 pp ★"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 817,
+   "valor": "89%",
+   "contexto": "Isluga                83%             89%            +6 pp ★"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 818,
+   "valor": "63%",
+   "contexto": "Lascar                63%             64%            +1"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 818,
+   "valor": "64%",
+   "contexto": "Lascar                63%             64%            +1"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 821,
+   "valor": "97%",
+   "contexto": "PCC                   97%             97%            0"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 821,
+   "valor": "97%",
+   "contexto": "PCC                   97%             97%            0"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 825,
+   "valor": "80%",
+   "contexto": "TOTAL                 80%             82%            +2 pp"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 825,
+   "valor": "82%",
+   "contexto": "TOTAL                 80%             82%            +2 pp"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 838,
+   "valor": "95%",
+   "contexto": "- Casos parciales (Tupungatito 95%, Isluga 89%) — gain pero residuo."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 838,
+   "valor": "89%",
+   "contexto": "- Casos parciales (Tupungatito 95%, Isluga 89%) — gain pero residuo."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 839,
+   "valor": "64%",
+   "contexto": "- Casos MODIS-dependientes (Lascar 64%) — Test 1 no aplica, requiere"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 858,
+   "valor": "94.8%",
+   "contexto": "**Contexto**: S44 cerró con recall 94.8% y 6 FN persistentes. Investigación"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 860,
+   "valor": "87.5%",
+   "contexto": "window 15d 2026-04-27→2026-05-11) dio TP=35, FN=6, FP=5 (P=87.5%, R=85.4%)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 860,
+   "valor": "85.4%",
+   "contexto": "window 15d 2026-04-27→2026-05-11) dio TP=35, FN=6, FP=5 (P=87.5%, R=85.4%)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 875,
+   "valor": "268 K",
+   "contexto": "- Background MODIS B21 t_bg ≈ 265-268 K (incluye Salar de Atacama, ~25 km W)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 875,
+   "valor": "25 km",
+   "contexto": "- Background MODIS B21 t_bg ≈ 265-268 K (incluye Salar de Atacama, ~25 km W)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 876,
+   "valor": "6.5 K",
+   "contexto": "- σ_bg = 4.5-6.5 K → eff_threshold = t_bg + 4σ ≈ 286-292 K."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 876,
+   "valor": "292 K",
+   "contexto": "- σ_bg = 4.5-6.5 K → eff_threshold = t_bg + 4σ ≈ 286-292 K."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 877,
+   "valor": "30 km",
+   "contexto": "- Píxeles Salar @ 20-30 km W tienen BT 278-283 K (térmica residual post-atardecer)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 877,
+   "valor": "283 K",
+   "contexto": "- Píxeles Salar @ 20-30 km W tienen BT 278-283 K (térmica residual post-atardecer)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 878,
+   "valor": "274 K",
+   "contexto": "- Píxeles cráter @ <3 km tienen BT 272-274 K (anomalía sub-MW sub-pixel real)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 911,
+   "valor": "1.25 km",
+   "contexto": "summit ROI (`pc.centroid_dist_km=1.25 km`, n_pixels=88), pero"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 913,
+   "valor": "4.77σ",
+   "contexto": "en los píxeles que Test 1 marca anómalos por NTI (NTI dispara con 4.77σ pero"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 916,
+   "valor": "0.11 MW",
+   "contexto": "MIROVA reporta 0.11 MW @ 5.41 km — un píxel específico en zona \"near-vent\""
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 916,
+   "valor": "5.41 km",
+   "contexto": "MIROVA reporta 0.11 MW @ 5.41 km — un píxel específico en zona \"near-vent\""
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 919,
+   "valor": "5.4 km",
+   "contexto": "**Hipótesis**: el píxel @ 5.4 km que MIROVA reporta tiene NTI más alto y MIR"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 932,
+   "valor": "0.84 km",
+   "contexto": "**Caso**: 2026-04-29 05:24. MIROVA tiene VIIRS375 (alerta @ 0.84 km, vrp=0.10)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 996,
+   "valor": "134×",
+   "contexto": "- 134×134 float64 EPSG:4326. **17,911 pixels >0** (99.7% del raster)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 996,
+   "valor": "99.7%",
+   "contexto": "- 134×134 float64 EPSG:4326. **17,911 pixels >0** (99.7% del raster)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 997,
+   "valor": "0.19 MW",
+   "contexto": "- Valores 0.04-0.19 MW. **Sum total 1680 MW**. Pico 0.187 MW a 23-24 km."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 997,
+   "valor": "0.187 MW",
+   "contexto": "- Valores 0.04-0.19 MW. **Sum total 1680 MW**. Pico 0.187 MW a 23-24 km."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 997,
+   "valor": "24 km",
+   "contexto": "- Valores 0.04-0.19 MW. **Sum total 1680 MW**. Pico 0.187 MW a 23-24 km."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 998,
+   "valor": "0.2 MW",
+   "contexto": "- Header MIROVA reporta **VRP: 0.2 MW @ Distance 9.7 km**."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 998,
+   "valor": "9.7 km",
+   "contexto": "- Header MIROVA reporta **VRP: 0.2 MW @ Distance 9.7 km**."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1001,
+   "valor": "0.2 MW",
+   "contexto": "producto de **visualización del campo de radiancia completo**. El \"VRP: 0.2 MW\""
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1056,
+   "valor": "1.21×",
+   "contexto": "- Esperado: ratio mediano 1.21× → ~1.0×"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1056,
+   "valor": "1.0×",
+   "contexto": "- Esperado: ratio mediano 1.21× → ~1.0×"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1074,
+   "valor": "0.18 MW",
+   "contexto": "Caso PCC 2026-05-09 (lacolito 0.18 MW @ 7.7km reportado, cráter 4.94 MW"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1074,
+   "valor": "7.7km",
+   "contexto": "Caso PCC 2026-05-09 (lacolito 0.18 MW @ 7.7km reportado, cráter 4.94 MW"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1074,
+   "valor": "4.94 MW",
+   "contexto": "Caso PCC 2026-05-09 (lacolito 0.18 MW @ 7.7km reportado, cráter 4.94 MW"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1090,
+   "valor": "25 km",
+   "contexto": "**Hipótesis inicial S52-S58** (refutada): \"Lascar/Lastarria ring 5-25 km"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1094,
+   "valor": "12K",
+   "contexto": "general, es **régimen Muy Bajo (ΔT 10-12K)** + **ring background frío"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1106,
+   "valor": "25km",
+   "contexto": "`median(ring 5-25km)` con `mean(8 vecinos directos del hot pixel)`."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1109,
+   "valor": "31.59×",
+   "contexto": "- Villarrica audit C 5 ALERTAS reales: 31.59× → **2.16×** (-93%)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1109,
+   "valor": "2.16×",
+   "contexto": "- Villarrica audit C 5 ALERTAS reales: 31.59× → **2.16×** (-93%)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1109,
+   "valor": "93%",
+   "contexto": "- Villarrica audit C 5 ALERTAS reales: 31.59× → **2.16×** (-93%)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1110,
+   "valor": "11.80×",
+   "contexto": "- PlanchonPeteroa 39 ALERTAS: 11.80× → **2.64×** (-78%)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1110,
+   "valor": "2.64×",
+   "contexto": "- PlanchonPeteroa 39 ALERTAS: 11.80× → **2.64×** (-78%)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1110,
+   "valor": "78%",
+   "contexto": "- PlanchonPeteroa 39 ALERTAS: 11.80× → **2.64×** (-78%)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1131,
+   "valor": "52×",
+   "contexto": "**Hipótesis previa**: PCC gap 52× porque cluster lejano (Salar/Antillanca)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1134,
+   "valor": "3.51×",
+   "contexto": "**Validado**: PCC ratio mediano 3.51× con inner=20. Preview offline"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1135,
+   "valor": "1.86×",
+   "contexto": "inner=7 → 1.86× (-47%). Adoptado en `volcanoes.yaml` S62. Reproc"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1135,
+   "valor": "47%",
+   "contexto": "inner=7 → 1.86× (-47%). Adoptado en `volcanoes.yaml` S62. Reproc"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1138,
+   "valor": "0.84 km",
+   "contexto": "### Hallazgo dist=0.84 km fijo Villarrica — ⚠️ **REFUTADO S124, corregido acá en S125**"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1146,
+   "valor": "0.84 km",
+   "contexto": "#### (texto original) Hallazgo dist=0.84 km fijo Villarrica — METADATO no error"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1150,
+   "valor": "0.85 km",
+   "contexto": "lake muy localizado): coord Smithsonian (-39.42, -71.93) está a 0.85 km"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1152,
+   "valor": "0.84 km",
+   "contexto": "reporta dist=0.84 km. Es idiosincrasia metadato, NO bug nuestro."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1173,
+   "valor": "1.31×",
+   "contexto": "1.31× / OCR 1.47×; Isluga: CONS 1.44× / OCR 1.11×)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1173,
+   "valor": "1.47×",
+   "contexto": "1.31× / OCR 1.47×; Isluga: CONS 1.44× / OCR 1.11×)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1173,
+   "valor": "1.44×",
+   "contexto": "1.31× / OCR 1.47×; Isluga: CONS 1.44× / OCR 1.11×)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1173,
+   "valor": "1.11×",
+   "contexto": "1.31× / OCR 1.47×; Isluga: CONS 1.44× / OCR 1.11×)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1182,
+   "valor": "99%",
+   "contexto": "- Total esperado: **~99% del universo Tier A en ratio ≤3×** = clon literal MIROVA NRT logrado."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1190,
+   "valor": "4.94 MW",
+   "contexto": "**Hipótesis S35** (descrita en CLAUDE.md sección \"Estado S35\"): el pipeline elegía un cluster distinto al que "
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1190,
+   "valor": "0.18 MW",
+   "contexto": "**Hipótesis S35** (descrita en CLAUDE.md sección \"Estado S35\"): el pipeline elegía un cluster distinto al que "
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1190,
+   "valor": "27×",
+   "contexto": "**Hipótesis S35** (descrita en CLAUDE.md sección \"Estado S35\"): el pipeline elegía un cluster distinto al que "
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1194,
+   "valor": "7.99 km",
+   "contexto": "**Verificación retroactiva S86** (Subagentes A+B+C+E): el cruce TP/FP con metodología corregida muestra que el"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1203,
+   "valor": "19×",
+   "contexto": "**Fenómeno**: el Test 1 integrado-ROI (Coppola 2015 §2.2 Eq.1) suma TODOS los píxeles del ROI sobre la mediana"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1203,
+   "valor": "0.2 MW",
+   "contexto": "**Fenómeno**: el Test 1 integrado-ROI (Coppola 2015 §2.2 Eq.1) suma TODOS los píxeles del ROI sobre la mediana"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1203,
+   "valor": "1.04×",
+   "contexto": "**Fenómeno**: el Test 1 integrado-ROI (Coppola 2015 §2.2 Eq.1) suma TODOS los píxeles del ROI sobre la mediana"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1205,
+   "valor": "1.22×",
+   "contexto": "**Divergencia respecto al literal MIROVA**: el flagging contextual literal (dNTI/dETI vs vecinos, Coppola 2016"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1210,
+   "valor": "18.94×",
+   "contexto": "- Tupungatito 18.94× → **1.33×** | Lastarria 1.31→1.02 | PP 2.23→1.83 | Llaima 6.12→2.01"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1210,
+   "valor": "1.33×",
+   "contexto": "- Tupungatito 18.94× → **1.33×** | Lastarria 1.31→1.02 | PP 2.23→1.83 | Llaima 6.12→2.01"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1228,
+   "valor": "2.43×",
+   "contexto": "nadir-sin-ctxpeak = 2.43× peor; mecanismos ortogonales A66 — área vs fondo del ROI)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1231,
+   "valor": "2.27×",
+   "contexto": "VIIRS375 global **2.27×→0.78×**, VIIRS750 **1.59×→0.80×**, **0 FN nuevos VIIRS375**. Curados"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1231,
+   "valor": "0.78×",
+   "contexto": "VIIRS375 global **2.27×→0.78×**, VIIRS750 **1.59×→0.80×**, **0 FN nuevos VIIRS375**. Curados"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1231,
+   "valor": "1.59×",
+   "contexto": "VIIRS375 global **2.27×→0.78×**, VIIRS750 **1.59×→0.80×**, **0 FN nuevos VIIRS375**. Curados"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1231,
+   "valor": "0.80×",
+   "contexto": "VIIRS375 global **2.27×→0.78×**, VIIRS750 **1.59×→0.80×**, **0 FN nuevos VIIRS375**. Curados"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1232,
+   "valor": "0.95×",
+   "contexto": "PCC 2.38→0.95×, Tupun 11.19→0.71×, Villarrica 18.3→1.0×, Chaitén 6.9→1.2×, PP 7.3→1.1×."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1232,
+   "valor": "0.71×",
+   "contexto": "PCC 2.38→0.95×, Tupun 11.19→0.71×, Villarrica 18.3→1.0×, Chaitén 6.9→1.2×, PP 7.3→1.1×."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1232,
+   "valor": "1.0×",
+   "contexto": "PCC 2.38→0.95×, Tupun 11.19→0.71×, Villarrica 18.3→1.0×, Chaitén 6.9→1.2×, PP 7.3→1.1×."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1232,
+   "valor": "1.2×",
+   "contexto": "PCC 2.38→0.95×, Tupun 11.19→0.71×, Villarrica 18.3→1.0×, Chaitén 6.9→1.2×, PP 7.3→1.1×."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1232,
+   "valor": "1.1×",
+   "contexto": "PCC 2.38→0.95×, Tupun 11.19→0.71×, Villarrica 18.3→1.0×, Chaitén 6.9→1.2×, PP 7.3→1.1×."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1240,
+   "valor": "2.56 MW",
+   "contexto": "(pc.vrp 5.0 y 2.56 MW vs MIROVA 0.19/0.25 MW) = el residuo glaciar Test1 de VIIRS750 (=§2 path D,"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1240,
+   "valor": "0.25 MW",
+   "contexto": "(pc.vrp 5.0 y 2.56 MW vs MIROVA 0.19/0.25 MW) = el residuo glaciar Test1 de VIIRS750 (=§2 path D,"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1246,
+   "valor": "16.6×",
+   "contexto": "ayuda parcialmente a la sobre-detección. El residuo glaciar VIIRS750 (Tupun/PP 16.6×, Isluga 4.76×)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1246,
+   "valor": "4.76×",
+   "contexto": "ayuda parcialmente a la sobre-detección. El residuo glaciar VIIRS750 (Tupun/PP 16.6×, Isluga 4.76×)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1256,
+   "valor": "1.25 km",
+   "contexto": "5.76→1.25 km, PCC 7.23→0.69, PP 2.69→1.14. Detalle: `docs/S98_ANCHOR_FIX_RESULTS.md`."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1263,
+   "valor": "272K",
+   "contexto": "topográfico de altitud (cumbre nevada fría ~272K vs valle tibio ~281K). Nuestro Test1"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1263,
+   "valor": "281K",
+   "contexto": "topográfico de altitud (cumbre nevada fría ~272K vs valle tibio ~281K). Nuestro Test1"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1277,
+   "valor": "26 km",
+   "contexto": "mueve el centroide). **Anclas de brillo — REFUTADAS**: BT máx = valle (12–26 km)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1288,
+   "valor": "1.5 km",
+   "contexto": "escala del anillo local (0.5–1.5 km) la señal débil real es espacialmente SUAVE (la"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1297,
+   "valor": "1.5 km",
+   "contexto": "candidato activo; el costo operacional es de POSICIÓN del ancla (~1–1.5 km N mediano en"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1298,
+   "valor": "0.80×",
+   "contexto": "nevados, A70), no de recall ni de magnitud (calibración 0.78–0.80× intacta S103)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1305,
+   "valor": "90%",
+   "contexto": "re-auditoría por sensor con data fresca destapó que el recall dashboard MODIS es 16% (vs 90%"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1312,
+   "valor": "40%",
+   "contexto": "Villarrica/Chaitén caen en la banda del difuso → cualquier umbral mata 40% de cat-b)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1313,
+   "valor": "3.5σ",
+   "contexto": "- **Frente B (N·σ Tabla 1)**: el N·σ canónico no separa (Láscar 3.5σ vs nevados 3.1σ, solapan); a 5σ"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1313,
+   "valor": "3.1σ",
+   "contexto": "- **Frente B (N·σ Tabla 1)**: el N·σ canónico no separa (Láscar 3.5σ vs nevados 3.1σ, solapan); a 5σ"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1342,
+   "valor": "0,09 %",
+   "contexto": "que el mecanismo opera aparecen en el **0,09 %** de las pasadas MODIS, **0,12 %** de"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1342,
+   "valor": "0,12 %",
+   "contexto": "que el mecanismo opera aparecen en el **0,09 %** de las pasadas MODIS, **0,12 %** de"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1343,
+   "valor": "1,36 %",
+   "contexto": "VIIRS750 y **1,36 %** de VIIRS375. Por volcán, **Láscar 4,82 %** es el único con"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1343,
+   "valor": "4,82 %",
+   "contexto": "VIIRS750 y **1,36 %** de VIIRS375. Por volcán, **Láscar 4,82 %** es el único con"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1354,
+   "valor": "0,1 %",
+   "contexto": "empírico** a menos del 0,1 % de las pasadas MODIS. Si algún volcán entra en fase"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1369,
+   "valor": "1.5 km",
+   "contexto": "gate/discriminante/cap post-hoc (anti-A8). La cara POSICIÓN del ancla en nevados (~1-1.5 km N, A70)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1378,
+   "valor": "1.68 km",
+   "contexto": "su `Distancia_km` es un offset variable volcán-específico (mediana global 1.68 km; de 969"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1379,
+   "valor": "1.03%",
+   "contexto": "ALERTAS solo 10 = 1.03% dan 0.0; Tupungatito mediana 5.21 km; incluso Villarrica \"al"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1379,
+   "valor": "5.21 km",
+   "contexto": "ALERTAS solo 10 = 1.03% dan 0.0; Tupungatito mediana 5.21 km; incluso Villarrica \"al"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1380,
+   "valor": "0.84 km",
+   "contexto": "cráter\" da 0.84 km fijo, A13). **Es divergencia literal de POSICIÓN** — trade-off"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1410,
+   "valor": "1.46 km",
+   "contexto": "1.46 km ≈ MIROVA 1.41 km) pero el píxel suelto más caliente cae en el **Salar de Atacama**"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1410,
+   "valor": "1.41 km",
+   "contexto": "1.46 km ≈ MIROVA 1.41 km) pero el píxel suelto más caliente cae en el **Salar de Atacama**"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1411,
+   "valor": "32 km",
+   "contexto": "(16-32 km) → `distance_class='far'` → el gate `mirovaEqVrp`/`audit_metrics.py:79` lo anula."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1412,
+   "valor": "25 km",
+   "contexto": "El rescate F47 no dispara (`hotspot_dist<25 km`). Es el **espejo MODIS** del bug que el"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1459,
+   "valor": "24 km",
+   "contexto": "16-24 km\" — REFUTADO (usaba `final_hotspot_dist_km` corrupto + vrp scene-wide, A48/A10)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1460,
+   "valor": "3.3 km",
+   "contexto": "Cuadro real con `primary_cluster`: el cluster MODIS está al cráter (mediana 1.3–3.3 km)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1461,
+   "valor": "1.9 MW",
+   "contexto": "y calibrado (pc.vrp mediana 0.6–1.9 MW). El residuo path D real = **131/3072 records"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1462,
+   "valor": "4.3%",
+   "contexto": "(4.3%) con pc.vrp>5 MW, 80% path-D-only, 0% confirmados MIROVA** (cruce loader"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1462,
+   "valor": "80%",
+   "contexto": "(4.3%) con pc.vrp>5 MW, 80% path-D-only, 0% confirmados MIROVA** (cruce loader"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1468,
+   "valor": "31 %",
+   "contexto": "## D13 — La cerca `distance_class != summit` del frontend apaga el 31 % de la magnitud — **ABIERTA (documental"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1471,
+   "valor": "51×",
+   "contexto": "51×51 km. Su producto per-volcán reporta la distancia (`Distancia_km`) como un"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1471,
+   "valor": "51 km",
+   "contexto": "51×51 km. Su producto per-volcán reporta la distancia (`Distancia_km`) como un"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1472,
+   "valor": "12 km",
+   "contexto": "atributo del dato, no como un filtro: una anomalía a 12 km del cráter aparece"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1501,
+   "valor": "31 %",
+   "contexto": "**Por qué queda ABIERTA como documental y no se toca.** El 31 % apagado NO es"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1506,
+   "valor": "31 %",
+   "contexto": "ningún lado**: una decisión de display que mueve el 31 % de la magnitud publicada"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1529,
+   "valor": "24 km",
+   "contexto": "19–24 km**, mientras su clúster está a **1,45–4,11 km**. Un salar, un lago o un"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1529,
+   "valor": "4,11 km",
+   "contexto": "19–24 km**, mientras su clúster está a **1,45–4,11 km**. Un salar, un lago o un"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1536,
+   "valor": "92 %",
+   "contexto": "mayo con el 92 % del clúster a más de 1,5 km del cráter, todas en rojo, porque"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1536,
+   "valor": "1,5 km",
+   "contexto": "mayo con el 92 % del clúster a más de 1,5 km del cráter, todas en rojo, porque"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1537,
+   "valor": "2,8 km",
+   "contexto": "2,8 km < `inner_radius` 5 (`docs/S126_COSTO_FILTRO_CONTEXTUAL.md`). La cerca es"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1541,
+   "valor": "37 %",
+   "contexto": "artefacto (37 %) y corroboraría casi nada (1,5 %). Mantenerla tampoco resuelve"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1541,
+   "valor": "1,5 %",
+   "contexto": "artefacto (37 %) y corroboraría casi nada (1,5 %). Mantenerla tampoco resuelve"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1550,
+   "valor": "260 K",
+   "contexto": "## D14 — La máscara de nube BT<260 K — **CERRADA** S128 (cita verificada verbatim contra el PDF)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1554,
+   "valor": "260K",
+   "contexto": "[`MISSION.md`](MISSION.md) l.127 lista `Cloud mask BT<260K` en la tabla de"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1588,
+   "valor": "260 K",
+   "contexto": "- Un umbral único a 260 K (−13 °C) detecta nube **alta y fría** — cirros, topes"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1590,
+   "valor": "273 K",
+   "contexto": "0 °C, o sea **263-273 K**: pasa como cielo despejado."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1592,
+   "valor": "76 %",
+   "contexto": "rango**. Medido sobre NdC: en el **76 %** de las pasadas que el proxy llama"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1595,
+   "valor": "270K",
+   "contexto": "(el proxy cirrus `t_bg<270K` contaminado por altitud)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1665,
+   "valor": "12 %",
+   "contexto": "**1. MIROVA SÍ filtra — por distancia y por intensidad — y se queda con el 12 %.** De"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1677,
+   "valor": "30 %",
+   "contexto": "**3. La incertidumbre declarada del propio MIR-method es ±30 %**, sobre emisores con"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1678,
+   "valor": "600 K",
+   "contexto": "temperatura radiante efectiva **>600 K**. Nuestra banda de paridad es [0,5–2,0] y"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1680,
+   "valor": "30 %",
+   "contexto": "±30 % de incertidumbre propia."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1682,
+   "valor": "0,1 MW",
+   "contexto": "### ⚠️ Corrección al hallazgo del corte de 0,1 MW"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1691,
+   "valor": "0,1 MW",
+   "contexto": "0,1 MW a lo que publica. Está en el análisis de los **puntos de inflexión de la"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1697,
+   "valor": "0,1 MW",
+   "contexto": "bajo 0,1 MW son probablemente nube o mala geometría**. Nuestro frente de artefacto vive en"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1698,
+   "valor": "0,06 MW",
+   "contexto": "0,04-0,06 MW y las 8 detecciones que perdió el brazo corona en S127 estaban en"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1699,
+   "valor": "0,042 MW",
+   "contexto": "0,021-0,042 MW. Es un argumento de autoridad para revisar el piso VRP — **no** una"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1700,
+   "valor": "0,1 MW",
+   "contexto": "instrucción de implementar un corte a 0,1 MW."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1730,
+   "valor": "260 K",
+   "contexto": "a 260 K ve nube alta y fría, pero la nube baja de temporal tiene su tope en"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1731,
+   "valor": "273 K",
+   "contexto": "263-273 K y pasa como despejado — y a esta altitud el terreno nevado irradia"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1746,
+   "valor": "2,7 km",
+   "contexto": "2,4-2,7 km al cráter — la firma exacta del artefacto del anillo autorreferente"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1790,
+   "valor": "0,5 km",
+   "contexto": "Control: con celdas arbitrarias el ajuste cae (VIIRS375 a 0,5 km → 89 %; a"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1790,
+   "valor": "89 %",
+   "contexto": "Control: con celdas arbitrarias el ajuste cae (VIIRS375 a 0,5 km → 89 %; a"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1791,
+   "valor": "0,25 km",
+   "contexto": "0,25 km → 93 %), así que el test no es trivial. Script:"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1791,
+   "valor": "93 %",
+   "contexto": "0,25 km → 93 %), así que el test no es trivial. Script:"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1801,
+   "valor": "0,00 km",
+   "contexto": "2. **La referencia es una CELDA, no un punto.** *\"Distancia 0,00 km\"* NO"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1808,
+   "valor": "0,84 km",
+   "contexto": "(Villarrica 0,84 km fija): esa idiosincrasia es consistente con una celda"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1824,
+   "valor": "134×",
+   "contexto": "- **Grilla 134×134** — confirma la deducción de F70.2b desde el producto real,"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1825,
+   "valor": "51×",
+   "contexto": "no desde los papers. MODIS: **51×51** con celda ~1 km. Origen y extent FIJOS"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1833,
+   "valor": "382×",
+   "contexto": "UTM (celdas 382×381 m, no 375 exactos). Se probó inferir la celda de"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1895,
+   "valor": "96 %",
+   "contexto": "**Sin daño colateral**: recall VIIRS375 96 % → 96 %, sin migración de cluster"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1895,
+   "valor": "96 %",
+   "contexto": "**Sin daño colateral**: recall VIIRS375 96 % → 96 %, sin migración de cluster"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 1896,
+   "valor": "0,08 km",
+   "contexto": "(±0,08 km), 0 de 19 eventos ancla perdidos."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2017,
+   "valor": "25 km",
+   "contexto": "Caja de 25 km², **uniforme**. El criterio del paper para tener dos regiones es que"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2026,
+   "valor": "68,9 %",
+   "contexto": "ROI1 del paper. **El 68,9 % lo recibe por una geometría que el canon no respalda.**"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2027,
+   "valor": "50,3×",
+   "contexto": "PCC es el extremo: su ROI1 es **50,3×** el área del paper y perdería el 91 %. Ni el"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2027,
+   "valor": "91 %",
+   "contexto": "PCC es el extremo: su ROI1 es **50,3×** el área del paper y perdería el 91 %. Ni el"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2028,
+   "valor": "3,1×",
+   "contexto": "radio «estándar» de 5 km se acerca — es 3,1×."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2045,
+   "valor": "3,54 km",
+   "contexto": "el paper dice caja y la forma importa en las esquinas (la esquina está a 3,54 km y un"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2057,
+   "valor": "42 %",
+   "contexto": "- **Cuánto está en juego, en DETECCIONES** (no sólo píxeles): el **42 %** de las summit"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2059,
+   "valor": "71,6 %",
+   "contexto": "señal débil — **Llaima 71,6 % · Copahue 69,5 % · Villarrica 66,4 %**, justo donde vive"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2059,
+   "valor": "69,5 %",
+   "contexto": "señal débil — **Llaima 71,6 % · Copahue 69,5 % · Villarrica 66,4 %**, justo donde vive"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2059,
+   "valor": "66,4 %",
+   "contexto": "señal débil — **Llaima 71,6 % · Copahue 69,5 % · Villarrica 66,4 %**, justo donde vive"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2061,
+   "valor": "22,9 %",
+   "contexto": "22,9 % · PCC/lacolito 40,6 %**. Láscar, con foco compacto real, sólo 11,3 %."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2061,
+   "valor": "40,6 %",
+   "contexto": "22,9 % · PCC/lacolito 40,6 %**. Láscar, con foco compacto real, sólo 11,3 %."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2061,
+   "valor": "11,3 %",
+   "contexto": "22,9 % · PCC/lacolito 40,6 %**. Láscar, con foco compacto real, sólo 11,3 %."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2063,
+   "valor": "22 km",
+   "contexto": "en los 9.203 far→summit está a una **mediana de 22 km** del cráter (p10 = 11,8 km); NI"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2063,
+   "valor": "11,8 km",
+   "contexto": "en los 9.203 far→summit está a una **mediana de 22 km** del cráter (p10 = 11,8 km); NI"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2070,
+   "valor": "6,59 %",
+   "contexto": "- **El control de instrumento pasa**: 366 de 5.551 records comunes (**6,59 %**)"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2071,
+   "valor": "17,98 %",
+   "contexto": "cambian de `pc.vrp_mw`; PCC llega al 17,98 %. Pero de esos 366 la caja da **más** en"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2073,
+   "valor": "0,0 %",
+   "contexto": "- **Ningún límite de no-adopción se cruza**: Lastarria pierde **0,0 %** (límite 20) y"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2074,
+   "valor": "0,8 %",
+   "contexto": "PCC **0,8 %** (límite 50). **Cero noches MIROVA-confirmadas perdidas** en los seis."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2077,
+   "valor": "2,63 km",
+   "contexto": "los tres nevados y Villarrica **sube** 1 m sobre 2,63 km; los otros dos bajan 9 y 14"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2078,
+   "valor": "2,7 km",
+   "contexto": "metros sobre 2,7 km — ruido. Lo único que se mueve es la paridad: **+0,040 en PCC**"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2080,
+   "valor": "42 %",
+   "contexto": "- **⚠️ La predicción previa erró por 50×.** Se había medido que el 42 % de las"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2082,
+   "valor": "0,8 %",
+   "contexto": "está en juego»; lo que se pierde de verdad es 0-0,8 %. El error fue de **qué se"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2089,
+   "valor": "3,1×",
+   "contexto": "práctica — por eso Llaima, Villarrica y Láscar, con círculos de 3,1× el área del"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2097,
+   "valor": "0,0 km",
+   "contexto": "## D19 — `keep_peak` publica como *summit* a 0,0 km un píxel del borde del disco del Test 1, más frío que el f"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2102,
+   "valor": "86 %",
+   "contexto": "contra otro punto de la misma banda. Pero el **86 % de ese efecto es permanente** (+0,0441 con rásteres"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2108,
+   "valor": "0,15 km",
+   "contexto": "ahí el cúmulo está a 0,15 km del cráter)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2120,
+   "valor": "0,0 km",
+   "contexto": "0,0 km**; su magnitud (0,011-0,618 MW, mediana 0,046) es el exceso de ese píxel sobre un anillo"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2120,
+   "valor": "0,618 MW",
+   "contexto": "0,0 km**; su magnitud (0,011-0,618 MW, mediana 0,046) es el exceso de ese píxel sobre un anillo"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2125,
+   "valor": "2,80 km",
+   "contexto": "Villarrica 245/289 son `test1_roi`, 100 % de 1 píxel, mediana 2,80 km del cráter, 198/245 en la"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2126,
+   "valor": "3,0 km",
+   "contexto": "corona 2,5-3,0 km (≈30 % esperable por área), **`bt_k < t_bg_k` en 172/245, mediana −2,95 K**."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2126,
+   "valor": "30 %",
+   "contexto": "corona 2,5-3,0 km (≈30 % esperable por área), **`bt_k < t_bg_k` en 172/245, mediana −2,95 K**."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2126,
+   "valor": "2,95 K",
+   "contexto": "corona 2,5-3,0 km (≈30 % esperable por área), **`bt_k < t_bg_k` en 172/245, mediana −2,95 K**."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2127,
+   "valor": "2,63 km",
+   "contexto": "Está en los **11 Tier A** (56-266 records cada uno), Láscar incluido (2,63 km): la diferencia"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2129,
+   "valor": "0,18 km",
+   "contexto": "`ctx_cluster`; Villarrica 245 / 44). Control positivo: `ctx_cluster` de Láscar 0,18 km (n=152)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2140,
+   "valor": "3,9 km",
+   "contexto": "those already flagged»*. 438 records publicados así en los 11 (Chaitén 89/323), a 3,2-3,9 km."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2143,
+   "valor": "60 %",
+   "contexto": "Lastarria (60 %), Tupungatito (34 %), Isluga (30 %). Cualquier cambio es régimen-dependiente y"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2143,
+   "valor": "30 %",
+   "contexto": "Lastarria (60 %), Tupungatito (34 %), Isluga (30 %). Cualquier cambio es régimen-dependiente y"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2153,
+   "valor": "0,5 km",
+   "contexto": "(0 px a <0,5 km; el más cercano, a 0,177 km, está 27 K bajo el fondo global; gradiente radial en"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2153,
+   "valor": "0,177 km",
+   "contexto": "(0 px a <0,5 km; el más cercano, a 0,177 km, está 27 K bajo el fondo global; gradiente radial en"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2153,
+   "valor": "27 K",
+   "contexto": "(0 px a <0,5 km; el más cercano, a 0,177 km, está 27 K bajo el fondo global; gradiente radial en"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2155,
+   "valor": "27 K",
+   "contexto": "(gradiente A69 **o tope de nube**: 27 K bajo el fondo es más de lo que da la cota, y el probe no"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2159,
+   "valor": "2,97 km",
+   "contexto": "objeto discreto a 2,97 km E, +8 K sobre un disco plano, dNTI-positivo, donde **`keep_peak` es"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2161,
+   "valor": "27 K",
+   "contexto": "+9 a +27 K sobre el fondo; `keep_peak` ni se invoca. **H2 confirmada con n=2** (07-01: 2/2 nuevos"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2162,
+   "valor": "3,789 km",
+   "contexto": "≤ 3 K) y en el régimen vigente esa recaptura **fija la posición publicada** (3,789 km, summit)."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2164,
+   "valor": "252,42 K",
+   "contexto": "código de hoy sobre el mismo granule (08-14: t_bg 262,78 → 252,42 K; path `test1_roi` → `ctx_cluster`):"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2165,
+   "valor": "260 K",
+   "contexto": "hasta #535 (2026-08-28 23:00 UTC; #537 fue documentación) `process_viirs.py` fijaba `CLOUD_BT_THRESHOLD = 260 "
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2178,
+   "valor": "3,8 K",
+   "contexto": "08-21 con el cráter) y la cuarta (Isluga 08-19) no es señal (−3,8 K, cota A93 2,56 km del hotspot"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2178,
+   "valor": "2,56 km",
+   "contexto": "08-21 con el cráter) y la cuarta (Isluga 08-19) no es señal (−3,8 K, cota A93 2,56 km del hotspot"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2181,
+   "valor": "0,55 km",
+   "contexto": "0,64, presupuesto 0,55 km) y el cráter de Tupungatito 08-21. **La tensión A83/A84 es real sólo"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2183,
+   "valor": "260,1 K",
+   "contexto": "`ctx_cluster` (first pass vacío 11/12 → 4/12; t_bg mediano 264,6 → 260,1 K): el régimen D14 ya"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2220,
+   "valor": "250 K",
+   "contexto": "dos bandas va de 0,0001 (250 K) a 0,0054 (290 K), contra un margen de ~0,14 entre el NTI típico de"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2220,
+   "valor": "290 K",
+   "contexto": "dos bandas va de 0,0001 (250 K) a 0,0054 (290 K), contra un margen de ~0,14 entre el NTI típico de"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2241,
+   "valor": "500 K",
+   "contexto": "**El fenómeno.** La banda 21 es de ganancia baja (llega a ~500 K); de noche, sobre roca y nieve a"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2242,
+   "valor": "270 K",
+   "contexto": "250-270 K, trabaja en el fondo de su escala con escalones gruesos. El dNTI, que resta a cada píxel el"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2279,
+   "valor": "268,32 K",
+   "contexto": "conectiva de la prosa, y cae sólo por la compuerta: BT 268,32 K contra fondo + 3 K = 275,25 K."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2279,
+   "valor": "275,25 K",
+   "contexto": "conectiva de la prosa, y cae sólo por la compuerta: BT 268,32 K contra fondo + 3 K = 275,25 K."
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2292,
+   "valor": "400 K",
+   "contexto": "**Lo nuestro**: K1 se calcula (`process_modis.py:662-668`) y entra a `combine_hot_paths` (l. 824), pero `hot_m"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2292,
+   "valor": "280 K",
+   "contexto": "**Lo nuestro**: K1 se calcula (`process_modis.py:662-668`) y entra a `combine_hot_paths` (l. 824), pero `hot_m"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2294,
+   "valor": "0,09 %",
+   "contexto": "**Fenómeno**: en una colada o lago de lava de varios píxeles, los interiores están rodeados de píxeles igual d"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2294,
+   "valor": "1,34 %",
+   "contexto": "**Fenómeno**: en una colada o lago de lava de varios píxeles, los interiores están rodeados de píxeles igual d"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2294,
+   "valor": "0,12 %",
+   "contexto": "**Fenómeno**: en una colada o lago de lava de varios píxeles, los interiores están rodeados de píxeles igual d"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2302,
+   "valor": "500 K",
+   "contexto": "**Lo nuestro**: `rad[dn > 32767] = NaN` (`process_modis.py:246-252`), guard BT > 500 K a NaN (l. 555), y en `m"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2304,
+   "valor": "500 K",
+   "contexto": "**Fenómeno**: en un paroxismo el píxel del foco satura la banda 21 (~500 K) y es el más caliente de la escena;"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2308,
+   "valor": "25 km",
+   "contexto": "## D25: El fondo del VRP es la mediana de un anillo regional de 5 a 25 km, no la media de los píxeles que rode"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2308,
+   "valor": "0,0 MW",
+   "contexto": "## D25: El fondo del VRP es la mediana de un anillo regional de 5 a 25 km, no la media de los píxeles que rode"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2318,
+   "valor": "0,097 MW",
+   "contexto": "**S142, flag (OFF en producción).** `ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375` calcula, en VIIRS 375, el fondo de "
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2320,
+   "valor": "0,0 MW",
+   "contexto": "**Fenómeno**: en una cumbre helada el cráter con lava sub-píxel está más frío en MIR que la mediana de un anil"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2320,
+   "valor": "0,0 MW",
+   "contexto": "**Fenómeno**: en una cumbre helada el cráter con lava sub-píxel está más frío en MIR que la mediana de un anil"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2320,
+   "valor": "256,4 K",
+   "contexto": "**Fenómeno**: en una cumbre helada el cráter con lava sub-píxel está más frío en MIR que la mediana de un anil"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2325,
+   "valor": "0,0 MW",
+   "contexto": "cráter con 0,0 MW (las que el fondo por vecinos podría despegar) y **2301** ya tienen magnitud"
+  },
+  {
+   "doc": "docs/MIROVA_DIVERGENCES.md",
+   "linea": 2347,
+   "valor": "2,291 MW",
+   "contexto": "W/m²/sr/µm y la magnitud sube de 0,705 a 2,291 MW, **un factor 3,2**, que es la escala del riesgo de"
+  }
+ ],
+ "resumen": {
+  "registradas": 13,
+  "ok": 10,
+  "con_deriva": 3,
+  "sin_instrumento": 483
+ }
+}

@@ -18,6 +18,7 @@
 |---|---|---|
 | MISSION.md | Misión vinculante: clon literal MIROVA, 3 preguntas | S22 |
 | MIROVA_DIVERGENCES.md | Catálogo vivo de divergencias vs MIROVA | S71+ |
+| **AUDIT_S146.md** | **Auditoría S146 de los cierres, no del código: 5 frentes + verificador limpio en dos tramos, 17 afirmaciones verificadas, ninguna refutada, 13 con matiz. Hallazgo central: las rebajas no bajan a los hijos (MISSION.md y encabezados del catálogo siguen diciendo lo viejo). El Test 1 integrado y el test de temperatura de brillo no están en el paper. Detalle en `docs/audit_s146/`; plan en `PLAN_PARIDAD_POST_AUDITORIA_S146.md`** | **S146** |
 | **AUDIT_S138.md** | **Auditoría integral S138: 6 ejes + verificador limpio. 16 hallazgos fundidos; 6 contradicciones entre fuentes (regla A51: se pausa el frente D21/D22 y se consolida). El fondo del anillo, no la compuerta, borra el cráter; la batería del Apéndice A no mide lo que dice; PyMuPDF no cura los operadores del PDF. Detalle por eje en `docs/audit_s138/`** | **S138** |
 | **PLAN_AUDITORIA_S138.md** | **Plan de la auditoría S138: seis ejes en paralelo (cierres contra el PDF, matriz de conformidad desde el PDF, verificador de instrumentos S137, D21/D22 en VIIRS, la batería como instrumento, decisiones e higiene) + verificador limpio** | **S137** |
 | **_s137/RESULTADO_FONDO_LOCAL.md** (en `experiments/`) | **Batería del Apéndice A, 8 brazos: B22 + sin compuerta + fondo local + prosa = 5/6 y 3/3; hoy 6/6 y 0/3; ninguno cumple** | **S137** |

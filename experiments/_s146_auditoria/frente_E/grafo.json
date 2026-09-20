@@ -1,0 +1,2834 @@
+{
+ "generado": "2026-09-20",
+ "nota": "aristas anotadas a mano por el auditor con archivo:linea leido en la sesion; el script solo calcula estructura",
+ "flags_leidos_de_pipeline_profile": {
+  "ENABLE_TESTS_23_PROSE_BRANCH": false,
+  "ENABLE_MODIS_B22_PRIMARY": false,
+  "NTI_BT_SANITY_K": 3.0,
+  "ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK": false,
+  "ENABLE_SECOND_PASS_CONDITIONED": false,
+  "ENABLE_UTM_REGRID": false,
+  "CLOUD_MASK_BT_K": 0.0,
+  "ENABLE_UNSUITABLE_FILTERS_267_273": true,
+  "ENABLE_TEST1_CONTEXTUAL_KEEP_PEAK": true,
+  "ENABLE_PATH_D_INTRA_RADIO_GATE": false,
+  "ENABLE_SECOND_PASS_INTRA_RADIO_GATE": false,
+  "ENABLE_LOCAL_KERNEL_BG": true,
+  "MAX_SIGMA_COMPONENT_K": 999.0,
+  "PATH_D_ONLY_CAP_MW": 5.0,
+  "ENABLE_ROI1_BOX_PAPER": false,
+  "ENABLE_DAYTIME_MODIS": false
+ },
+ "n_nodos": 63,
+ "n_aristas": 73,
+ "relaciones_no_dependencia": [
+  {
+   "arriba": "C_D12",
+   "abajo": "C_D9",
+   "clase": "INFERIDA",
+   "relacion": "tension",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1403-1404 el camino de D12 se rechazo porque 'destapa el path-D, PCC 117 MW': presupone que la magnitud path-D sigue viva detras de la etiqueta far, lo que D9 da por curado",
+   "nota": "tension, no dependencia limpia"
+  },
+  {
+   "arriba": "C_S29",
+   "abajo": "C_D12",
+   "clase": "EXPLICITA",
+   "relacion": "contradicho_por",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:789-793 'el crater realmente NO tiene radiancia integrada detectable en MODIS' contra docs/MIROVA_DIVERGENCES.md:1408-1411 'El primary_cluster MODIS esta en el crater (mediana 1,46 km) pero el pixel suelto mas caliente cae en el Salar'",
+   "nota": "D12 contradice la causa que S29 acepto como limite fisico"
+  },
+  {
+   "arriba": "C_S45",
+   "abajo": "C_D11",
+   "clase": "INFERIDA",
+   "relacion": "contradicho_por",
+   "evidencia": "titulo docs/MIROVA_DIVERGENCES.md:856 'summit-priority confirmado' contra docs/MIROVA_DIVERGENCES.md:1070-1072 'Esto refuta hipotesis D9 summit-priority exclusiva' (mismo documento)",
+   "nota": "contradiccion interna; no es dependencia real, se ancla aqui por ser el mismo objeto Lascar MODIS far->summit"
+  },
+  {
+   "arriba": "C_HS68",
+   "abajo": "P_A54",
+   "clase": "INFERIDA",
+   "relacion": "contradicho_por",
+   "evidencia": "docs/HYPOTHESIS_LOG.md:166-169 '14/2282 records (0,6 %) afectados por floors. Negligible' contra docs/MISSION.md:143 'Alcance medido S124: 1564 de 23990 records summit (6,5 %)'",
+   "nota": "contradiccion de numeros y de veredicto; se ancla aqui por ser la misma familia 'no tocar la precision'"
+  },
+  {
+   "arriba": "C_H13",
+   "abajo": "P_S99",
+   "clase": "INFERIDA",
+   "relacion": "contradicho_por",
+   "evidencia": "docs/HYPOTHESIS_LOG.md:764-766 'mantener n_sigma 3.0 + MAX_SIGMA_COMPONENT_K 7.0' contra CLAUDE.md:106-108 (3 sigma uniforme era el drift, resuelto) y docs/MISSION.md:137 (cap neutralizado a 999; leido hoy MAX_SIGMA_COMPONENT_K=999.0)",
+   "nota": ""
+  }
+ ],
+ "n_explicitas": 60,
+ "n_inferidas": 13,
+ "ciclos": [
+  [
+   "C_A82",
+   "C_D11"
+  ],
+  [
+   "C_D9",
+   "C_NEW8"
+  ]
+ ],
+ "nodos": [
+  {
+   "id": "P_S114",
+   "etiqueta": "Auditoria de fidelidad S114 (file:line + adversarial)",
+   "donde": [
+    "CLAUDE.md:112",
+    "docs/MIROVA_DIVERGENCES.md:1315"
+   ],
+   "estado_declarado": "se cita como prueba de 'deteccion MODIS fiel'",
+   "tipo": "premisa",
+   "lineas_censo": [
+    "CLAUDE.md:112",
+    "CLAUDE.md:965",
+    "docs/MIROVA_DIVERGENCES.md:1315"
+   ],
+   "caido_segun_el_proyecto": "no miro geometria del ROI (CLAUDE.md:948-953, S124) ni los pasos previos a los Tests (CLAUDE.md:112-119, S137/S138)",
+   "arrastre_n": 12,
+   "arrastre": [
+    "C_A81",
+    "C_A82",
+    "C_A83",
+    "C_A84",
+    "C_A85",
+    "C_A94",
+    "C_D11",
+    "C_D13",
+    "C_D18",
+    "C_D19N",
+    "C_D9",
+    "C_NEW8"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_B21",
+   "etiqueta": "Configuracion banda 21 primaria (= D21 abierta)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:2232"
+   ],
+   "estado_declarado": "ABIERTA",
+   "tipo": "premisa",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "el paper usa B22 primaria (docs/MIROVA_DIVERGENCES.md:2234-2239); flag efectivo ENABLE_MODIS_B22_PRIMARY=False (leido hoy)",
+   "arrastre_n": 14,
+   "arrastre": [
+    "C_A81",
+    "C_A82",
+    "C_A83",
+    "C_A84",
+    "C_A85",
+    "C_A94",
+    "C_D11",
+    "C_D12",
+    "C_D13",
+    "C_D18",
+    "C_D19N",
+    "C_D9",
+    "C_NEW8",
+    "C_THR"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_GATE",
+   "etiqueta": "Compuerta bt > t_bg + 3 K en Tests 2 y 3 (= D22 abierta)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:2257"
+   ],
+   "estado_declarado": "ABIERTA",
+   "tipo": "premisa",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "la formula del paper no tiene condicion de temperatura (docs/MIROVA_DIVERGENCES.md:2261-2266); NTI_BT_SANITY_K=3.0 (leido hoy)",
+   "arrastre_n": 14,
+   "arrastre": [
+    "C_A81",
+    "C_A82",
+    "C_A83",
+    "C_A84",
+    "C_A85",
+    "C_A94",
+    "C_D11",
+    "C_D12",
+    "C_D13",
+    "C_D18",
+    "C_D19N",
+    "C_D9",
+    "C_NEW8",
+    "C_S133"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_MIN",
+   "etiqueta": "Conectiva min(C1, mu+C2 sigma) como lectura de MIROVA",
+   "donde": [
+    "experiments/_s137/EL_CIERRE_DE_S136_ES_CIRCULAR.md:8-10"
+   ],
+   "estado_declarado": "produccion; ENABLE_TESTS_23_PROSE_BRANCH=False (leido hoy)",
+   "tipo": "premisa",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "S136 midio que no reproduce a MIROVA: 3 de 3 negativos con falso positivo (CLAUDE.md:1152-1156)",
+   "arrastre_n": 4,
+   "arrastre": [
+    "C_D26",
+    "C_GAPA130",
+    "C_S136_3",
+    "C_S136_AR"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_PISO",
+   "etiqueta": "'El piso C1 gobierna el 100 % de MODIS y el 99,9 % de VIIRS' (S136)",
+   "donde": [
+    "experiments/_s136/POR_QUE_EL_RUIDO_NO_MUEVE_LA_DETECCION.md:18-21"
+   ],
+   "estado_declarado": "medido S136",
+   "tipo": "premisa",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "S145: el script lee solo el dNTI (Test 2); en el dETI el sigma gobierna en 58,7 % de V375 y 75,0 % de V750 (docs/PLAN_AUDITORIA_S146.md:19; docs/audit_s145/DIVERGENCIAS_MENORES_VERIFICADAS.md:35)",
+   "arrastre_n": 5,
+   "arrastre": [
+    "C_D20",
+    "C_D26",
+    "C_GAPA130",
+    "C_S136_3",
+    "C_S136_AR"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_BAT",
+   "etiqueta": "Criterio de la bateria del Apendice A: 9 de 9, caja de 5 km desde la cumbre (S136)",
+   "donde": [
+    "experiments/_s136/conformidad_apendice.py:46",
+    "docs/audit_s145/D21_D22_ESTADO_DEL_BLOQUEO.md:75-92"
+   ],
+   "estado_declarado": "fijado S136, 'no se mueve'",
+   "tipo": "premisa",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "S138 H-S138-03: no mide lo que se le hace decir (docs/AUDIT_S138.md:35-40); S145: el unico fallo del mejor brazo es del criterio (docs/audit_s145/A2_EL_FALLO_ES_DEL_CRITERIO.md:82-85)",
+   "arrastre_n": 14,
+   "arrastre": [
+    "C_A81",
+    "C_A82",
+    "C_A83",
+    "C_A84",
+    "C_A85",
+    "C_A94",
+    "C_D11",
+    "C_D13",
+    "C_D18",
+    "C_D19N",
+    "C_D21",
+    "C_D9",
+    "C_NEW8",
+    "C_S143"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_S137_A2",
+   "etiqueta": "S137: 'la bateria guarda distancias pero no posiciones' (caso A2 no verificable)",
+   "donde": [
+    "experiments/_s137/RESULTADO_BATERIA_B22.md:46-53 (citado por A2_EL_FALLO...:71-73)"
+   ],
+   "estado_declarado": "hipotesis no verificada",
+   "tipo": "premisa",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "falso: cada pasada guarda pc_lat/pc_lon (docs/audit_s145/A2_EL_FALLO_ES_DEL_CRITERIO.md:75-78)",
+   "arrastre_n": 14,
+   "arrastre": [
+    "C_A81",
+    "C_A82",
+    "C_A83",
+    "C_A84",
+    "C_A85",
+    "C_A94",
+    "C_D11",
+    "C_D13",
+    "C_D18",
+    "C_D19N",
+    "C_D21",
+    "C_D9",
+    "C_HA2",
+    "C_NEW8"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_535",
+   "etiqueta": "Regimen de datos previo al PR #535 (mascara de nube 260 K activa en V375) y al #571 (piso VRP)",
+   "donde": [
+    "CLAUDE.md:1194-1196 (A104)",
+    "docs/MIROVA_DIVERGENCES.md:2163-2169"
+   ],
+   "estado_declarado": "regla A104",
+   "tipo": "premisa",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "A104: una ventana que cruza #535 mezcla dos regimenes; V375 pasa de 62,1 % a 87,1 % en negativos limpios (CLAUDE.md:1194-1196)",
+   "arrastre_n": 6,
+   "arrastre": [
+    "C_A85",
+    "C_D13",
+    "C_D16",
+    "C_D9",
+    "C_NEW8",
+    "C_S136_AR"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_A54",
+   "etiqueta": "A54 / AUDIT_S86: el 95,4 % de los 'FP' son anomalias fisicamente reales",
+   "donde": [
+    "CLAUDE.md:642-661",
+    "docs/MISSION.md:25-31"
+   ],
+   "estado_declarado": "regla vinculante",
+   "tipo": "regla",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "matizada: parte del extra en nevados son FP topograficos (CLAUDE.md:804-806; docs/MIROVA_DIVERGENCES.md:1300-1301); S145: no existe campo por record que separe (b) de (d), la clasificacion S86 fue por volcan y a mano (docs/audit_s145/CLASSIFICATION_SUSTRATO_Y_DISENO.md:23-25,146-155)",
+   "arrastre_n": 3,
+   "arrastre": [
+    "C_D13",
+    "C_D9",
+    "C_NEW8"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_S99",
+   "etiqueta": "Hecho canonico S99: MIROVA NRT = un algoritmo por sensor, uniforme entre volcanes",
+   "donde": [
+    "docs/MISSION.md:82-87"
+   ],
+   "estado_declarado": "verificado S99",
+   "tipo": "premisa",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 5,
+   "arrastre": [
+    "C_A85",
+    "C_D18",
+    "C_D5",
+    "C_D8",
+    "C_DPCC"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_FENCE",
+   "etiqueta": "La cerca del frontend: mirovaEqVrp pone en cero todo record con distance_class != summit",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1475-1479"
+   ],
+   "estado_declarado": "vigente (display)",
+   "tipo": "premisa",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 3,
+   "arrastre": [
+    "C_A85",
+    "C_D9",
+    "C_NEW8"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_PICO",
+   "etiqueta": "D10: 'el pixel pico = el crater' (justificacion de keep_peak)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1207"
+   ],
+   "estado_declarado": "adoptado S100",
+   "tipo": "premisa",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "falso en los nevados de senal debil (docs/MIROVA_DIVERGENCES.md:2189-2192); keep_peak daba paridad por accidente (CLAUDE.md:1185)",
+   "arrastre_n": 5,
+   "arrastre": [
+    "C_D10",
+    "C_D5",
+    "C_D9",
+    "C_NEW8",
+    "P_A66"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_A13",
+   "etiqueta": "A13: Distancia_km de Villarrica fija en 0,84 km",
+   "donde": [
+    "CLAUDE.md:241-250"
+   ],
+   "estado_declarado": "FALSA (S124)",
+   "tipo": "regla",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "CLAUDE.md:241-246: vale 0,0 en 3284 de 3338; docs/MIROVA_DIVERGENCES.md:1138-1144",
+   "arrastre_n": 2,
+   "arrastre": [
+    "C_D11B",
+    "C_HV084"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_A12",
+   "etiqueta": "A12: ejemplo 'Lascar 21,6 K e Isluga ~20 K no necesitan kernel-bg'",
+   "donde": [
+    "CLAUDE.md:232-240"
+   ],
+   "estado_declarado": "ejemplo FALSO (S128/S131)",
+   "tipo": "regla",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "CLAUDE.md:235-238: Lascar 16,9 K e Isluga 8,3 K",
+   "arrastre_n": 3,
+   "arrastre": [
+    "C_D5",
+    "C_D8",
+    "C_DPCC"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_31",
+   "etiqueta": "D13: 'la cerca apaga el 31 % de la MAGNITUD'",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1468"
+   ],
+   "estado_declarado": "titulo vigente",
+   "tipo": "premisa",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "S145: el 31 % era fraccion de records; en magnitud 70,7 % (docs/PLAN_AUDITORIA_S146.md:20; docs/audit_s145/D13_CERCA_FRONTEND_REMEDIDA.md:58,137,212-213)",
+   "arrastre_n": 1,
+   "arrastre": [
+    "C_D13"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_QC",
+   "etiqueta": "'MIROVA hace QC visual manual a posteriori' (el cap de 5 MW lo reemplaza)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:333"
+   ],
+   "estado_declarado": "argumento S71",
+   "tipo": "premisa",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "el propio proyecto sostiene que el NRT no se supervisa a mano (docs/HYPOTHESIS_LOG.md:690-691; CLAUDE.md:1197-1199 A105)",
+   "arrastre_n": 3,
+   "arrastre": [
+    "C_D9",
+    "C_D9CAP",
+    "C_NEW8"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_F70",
+   "etiqueta": "Instrumento F70: nuestro regrid UTM (A/B de 4 brazos, S124)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1859-1863"
+   ],
+   "estado_declarado": "corrido S124",
+   "tipo": "premisa",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "centrado en el punto equivocado (docs/MIROVA_DIVERGENCES.md:1959-1962, 6 de 11 con mas de media celda); vecino mas cercano con huecos (docs/AUDIT_S138.md:135-136,322); sin bow tie (docs/MIROVA_DIVERGENCES.md:2369-2371, y docs/MIROVA_DIVERGENCES.md:1937-1939: regridear sin de-solapar infla)",
+   "arrastre_n": 2,
+   "arrastre": [
+    "C_D16",
+    "C_S136_AR"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_FLAGK1",
+   "etiqueta": "S100: se juzgo ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK por su nombre ('controla el reporte')",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:453-455"
+   ],
+   "estado_declarado": "decision S100",
+   "tipo": "premisa",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "S128: gobierna el POOL de mu/sigma, no el reporte (docs/MIROVA_DIVERGENCES.md:1326-1330)",
+   "arrastre_n": 14,
+   "arrastre": [
+    "C_A81",
+    "C_A82",
+    "C_A83",
+    "C_A84",
+    "C_A85",
+    "C_A94",
+    "C_D11",
+    "C_D13",
+    "C_D18",
+    "C_D19N",
+    "C_D9",
+    "C_GAPA115",
+    "C_NEW7",
+    "C_NEW8"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_OSF",
+   "etiqueta": "Conteos del OSF v2.5 usados como si fueran el NRT",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:437"
+   ],
+   "estado_declarado": "F1.4 S71",
+   "tipo": "premisa",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "A105: el OSF es filtrado, sus conteos no valen para el NRT (CLAUDE.md:1197-1199)",
+   "arrastre_n": 1,
+   "arrastre": [
+    "C_F14"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "P_A66",
+   "etiqueta": "A66/A67: area nadir fija = 'clon literal'",
+   "donde": [
+    "CLAUDE.md:739",
+    "CLAUDE.md:754"
+   ],
+   "estado_declarado": "adoptado; rebajado S138",
+   "tipo": "regla",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": "CLAUDE.md:739-740: el paper remuestrea; D17 sigue abierta",
+   "arrastre_n": 3,
+   "arrastre": [
+    "C_D5",
+    "C_D9",
+    "C_NEW8"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "C_A82",
+   "etiqueta": "A82: far->summit MODIS 'irreducible a 1 km, agotado, no reabrir'",
+   "donde": [
+    "CLAUDE.md:948-972",
+    "docs/MIROVA_DIVERGENCES.md:1365-1370"
+   ],
+   "estado_declarado": "REBAJADA S124 y S138",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "CLAUDE.md:948",
+    "CLAUDE.md:952",
+    "CLAUDE.md:953",
+    "CLAUDE.md:963",
+    "CLAUDE.md:967",
+    "CLAUDE.md:968",
+    "docs/MIROVA_DIVERGENCES.md:1368"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 11,
+   "arrastre": [
+    "C_A81",
+    "C_A83",
+    "C_A84",
+    "C_A85",
+    "C_A94",
+    "C_D11",
+    "C_D13",
+    "C_D18",
+    "C_D19N",
+    "C_D9",
+    "C_NEW8"
+   ],
+   "premisas_caidas_heredadas": {
+    "P_S114": {
+     "camino": [
+      "P_S114"
+     ],
+     "solo_explicitas": true
+    },
+    "P_B21": {
+     "camino": [
+      "P_B21"
+     ],
+     "solo_explicitas": true
+    },
+    "P_GATE": {
+     "camino": [
+      "P_GATE"
+     ],
+     "solo_explicitas": true
+    },
+    "P_BAT": {
+     "camino": [
+      "C_D11",
+      "C_D21",
+      "P_BAT"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S137_A2": {
+     "camino": [
+      "C_D11",
+      "C_D21",
+      "P_S137_A2"
+     ],
+     "solo_explicitas": true
+    },
+    "P_FLAGK1": {
+     "camino": [
+      "C_D11",
+      "C_GAPA115",
+      "C_NEW7",
+      "P_FLAGK1"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_D11",
+   "etiqueta": "D11 cara far->summit: CERRADA S114, CONDICIONADA S138",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1259",
+    "docs/MISSION.md:105-108",
+    "CLAUDE.md:1547-1550"
+   ],
+   "estado_declarado": "cerrada/condicionada (tres redacciones distintas)",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:1259",
+    "docs/MISSION.md:106",
+    "docs/MISSION.md:107",
+    "CLAUDE.md:1513",
+    "CLAUDE.md:1515"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 11,
+   "arrastre": [
+    "C_A81",
+    "C_A82",
+    "C_A83",
+    "C_A84",
+    "C_A85",
+    "C_A94",
+    "C_D13",
+    "C_D18",
+    "C_D19N",
+    "C_D9",
+    "C_NEW8"
+   ],
+   "premisas_caidas_heredadas": {
+    "P_S114": {
+     "camino": [
+      "P_S114"
+     ],
+     "solo_explicitas": true
+    },
+    "P_B21": {
+     "camino": [
+      "P_B21"
+     ],
+     "solo_explicitas": true
+    },
+    "P_GATE": {
+     "camino": [
+      "P_GATE"
+     ],
+     "solo_explicitas": true
+    },
+    "P_BAT": {
+     "camino": [
+      "C_D21",
+      "P_BAT"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S137_A2": {
+     "camino": [
+      "C_D21",
+      "P_S137_A2"
+     ],
+     "solo_explicitas": true
+    },
+    "P_FLAGK1": {
+     "camino": [
+      "C_GAPA115",
+      "C_NEW7",
+      "P_FLAGK1"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_A83",
+   "etiqueta": "A83: no existe discriminante fisico per-record; 'agotado'",
+   "donde": [
+    "CLAUDE.md:974-988"
+   ],
+   "estado_declarado": "vigente, sin marca",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "CLAUDE.md:983"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 1,
+   "arrastre": [
+    "C_A84"
+   ],
+   "premisas_caidas_heredadas": {
+    "P_B21": {
+     "camino": [
+      "P_B21"
+     ],
+     "solo_explicitas": true
+    },
+    "P_GATE": {
+     "camino": [
+      "P_GATE"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S114": {
+     "camino": [
+      "C_A82",
+      "P_S114"
+     ],
+     "solo_explicitas": true
+    },
+    "P_BAT": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_BAT"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S137_A2": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_S137_A2"
+     ],
+     "solo_explicitas": true
+    },
+    "P_FLAGK1": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_GAPA115",
+      "C_NEW7",
+      "P_FLAGK1"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_A84",
+   "etiqueta": "A84: la posicion within-inner del ctx_cluster es irreducible; no re-anclar",
+   "donde": [
+    "CLAUDE.md:989-1007"
+   ],
+   "estado_declarado": "vigente, sin marca",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "CLAUDE.md:989",
+    "CLAUDE.md:996",
+    "CLAUDE.md:1001"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_B21": {
+     "camino": [
+      "C_A83",
+      "P_B21"
+     ],
+     "solo_explicitas": true
+    },
+    "P_GATE": {
+     "camino": [
+      "C_A83",
+      "P_GATE"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S114": {
+     "camino": [
+      "C_A82",
+      "P_S114"
+     ],
+     "solo_explicitas": true
+    },
+    "P_BAT": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_BAT"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S137_A2": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_S137_A2"
+     ],
+     "solo_explicitas": true
+    },
+    "P_FLAGK1": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_GAPA115",
+      "C_NEW7",
+      "P_FLAGK1"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_D13",
+   "etiqueta": "D13: clasificacion CERRADA S126; 'no volver a plantearla'",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1501-1511",
+    "docs/MIROVA_DIVERGENCES.md:1545-1546"
+   ],
+   "estado_declarado": "cerrada documental",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:1504",
+    "docs/MIROVA_DIVERGENCES.md:1509",
+    "docs/MIROVA_DIVERGENCES.md:1545"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_A54": {
+     "camino": [
+      "P_A54"
+     ],
+     "solo_explicitas": true
+    },
+    "P_31": {
+     "camino": [
+      "P_31"
+     ],
+     "solo_explicitas": true
+    },
+    "P_535": {
+     "camino": [
+      "P_535"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S114": {
+     "camino": [
+      "C_A82",
+      "P_S114"
+     ],
+     "solo_explicitas": true
+    },
+    "P_B21": {
+     "camino": [
+      "C_A82",
+      "P_B21"
+     ],
+     "solo_explicitas": true
+    },
+    "P_GATE": {
+     "camino": [
+      "C_A82",
+      "P_GATE"
+     ],
+     "solo_explicitas": true
+    },
+    "P_BAT": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_BAT"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S137_A2": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_S137_A2"
+     ],
+     "solo_explicitas": true
+    },
+    "P_FLAGK1": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_GAPA115",
+      "C_NEW7",
+      "P_FLAGK1"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_NEW8",
+   "etiqueta": "NEW-8 (filtros de no-aptos 267-273): 'sigue abierto, A/B F2.1 no accionable' (S116)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:478-494",
+    "docs/MISSION.md:112"
+   ],
+   "estado_declarado": "abierto con prioridad rebajada",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:435"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 1,
+   "arrastre": [
+    "C_D9"
+   ],
+   "premisas_caidas_heredadas": {
+    "P_A54": {
+     "camino": [
+      "P_A54"
+     ],
+     "solo_explicitas": true
+    },
+    "P_A66": {
+     "camino": [
+      "C_D9",
+      "P_A66"
+     ],
+     "solo_explicitas": true
+    },
+    "P_535": {
+     "camino": [
+      "C_D9",
+      "P_535"
+     ],
+     "solo_explicitas": false
+    },
+    "P_QC": {
+     "camino": [
+      "C_D9",
+      "C_D9CAP",
+      "P_QC"
+     ],
+     "solo_explicitas": true
+    },
+    "P_PICO": {
+     "camino": [
+      "C_D9",
+      "P_A66",
+      "C_D10",
+      "P_PICO"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S114": {
+     "camino": [
+      "C_A82",
+      "P_S114"
+     ],
+     "solo_explicitas": true
+    },
+    "P_B21": {
+     "camino": [
+      "C_A82",
+      "P_B21"
+     ],
+     "solo_explicitas": true
+    },
+    "P_GATE": {
+     "camino": [
+      "C_A82",
+      "P_GATE"
+     ],
+     "solo_explicitas": true
+    },
+    "P_BAT": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_BAT"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S137_A2": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_S137_A2"
+     ],
+     "solo_explicitas": true
+    },
+    "P_FLAGK1": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_GAPA115",
+      "C_NEW7",
+      "P_FLAGK1"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_D9",
+   "etiqueta": "D9 path-D cirrus: EFECTIVAMENTE RESUELTA en sus dos caras (S113)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:534-538",
+    "docs/MISSION.md:102-103",
+    "CLAUDE.md:324",
+    "CLAUDE.md:1547"
+   ],
+   "estado_declarado": "resuelta, no reabrir",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:289",
+    "docs/MIROVA_DIVERGENCES.md:515",
+    "docs/MIROVA_DIVERGENCES.md:534",
+    "CLAUDE.md:324",
+    "CLAUDE.md:1513"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 1,
+   "arrastre": [
+    "C_NEW8"
+   ],
+   "premisas_caidas_heredadas": {
+    "P_A66": {
+     "camino": [
+      "P_A66"
+     ],
+     "solo_explicitas": true
+    },
+    "P_535": {
+     "camino": [
+      "P_535"
+     ],
+     "solo_explicitas": false
+    },
+    "P_QC": {
+     "camino": [
+      "C_D9CAP",
+      "P_QC"
+     ],
+     "solo_explicitas": true
+    },
+    "P_PICO": {
+     "camino": [
+      "P_A66",
+      "C_D10",
+      "P_PICO"
+     ],
+     "solo_explicitas": true
+    },
+    "P_A54": {
+     "camino": [
+      "C_NEW8",
+      "P_A54"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S114": {
+     "camino": [
+      "C_NEW8",
+      "C_A82",
+      "P_S114"
+     ],
+     "solo_explicitas": true
+    },
+    "P_B21": {
+     "camino": [
+      "C_NEW8",
+      "C_A82",
+      "P_B21"
+     ],
+     "solo_explicitas": true
+    },
+    "P_GATE": {
+     "camino": [
+      "C_NEW8",
+      "C_A82",
+      "P_GATE"
+     ],
+     "solo_explicitas": true
+    },
+    "P_BAT": {
+     "camino": [
+      "C_NEW8",
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_BAT"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S137_A2": {
+     "camino": [
+      "C_NEW8",
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_S137_A2"
+     ],
+     "solo_explicitas": true
+    },
+    "P_FLAGK1": {
+     "camino": [
+      "C_NEW8",
+      "C_A82",
+      "C_D11",
+      "C_GAPA115",
+      "C_NEW7",
+      "P_FLAGK1"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_D9CAP",
+   "etiqueta": "D9: 'el cap de 5 MW NO es un parche' (S71)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:327-333"
+   ],
+   "estado_declarado": "adoptado S71",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 2,
+   "arrastre": [
+    "C_D9",
+    "C_NEW8"
+   ],
+   "premisas_caidas_heredadas": {
+    "P_QC": {
+     "camino": [
+      "P_QC"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_D12",
+   "etiqueta": "D12: camino 'distance_class desde el cluster' NO ADOPTAR (S121); C2 peak-of-kernel refutado (S122)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1401-1406",
+    "CLAUDE.md:1546"
+   ],
+   "estado_declarado": "fenomeno abierto, caminos cerrados",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:1403",
+    "docs/MIROVA_DIVERGENCES.md:1405",
+    "CLAUDE.md:1512"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_B21": {
+     "camino": [
+      "P_B21"
+     ],
+     "solo_explicitas": true
+    },
+    "P_GATE": {
+     "camino": [
+      "P_GATE"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_A85",
+   "etiqueta": "A85 / gates intra-radio S84-S85: flip OFF, 'MANTENER OFF, cerrado' (S118-S119)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1441-1454",
+    "docs/MISSION.md:113-116",
+    "docs/HYPOTHESIS_LOG.md:22",
+    "CLAUDE.md:1008-1020"
+   ],
+   "estado_declarado": "resuelto",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:1421",
+    "docs/MIROVA_DIVERGENCES.md:1441",
+    "docs/MISSION.md:110"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_535": {
+     "camino": [
+      "P_535"
+     ],
+     "solo_explicitas": false
+    },
+    "P_S114": {
+     "camino": [
+      "C_A82",
+      "P_S114"
+     ],
+     "solo_explicitas": true
+    },
+    "P_B21": {
+     "camino": [
+      "C_A82",
+      "P_B21"
+     ],
+     "solo_explicitas": true
+    },
+    "P_GATE": {
+     "camino": [
+      "C_A82",
+      "P_GATE"
+     ],
+     "solo_explicitas": true
+    },
+    "P_BAT": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_BAT"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S137_A2": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_S137_A2"
+     ],
+     "solo_explicitas": true
+    },
+    "P_FLAGK1": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_GAPA115",
+      "C_NEW7",
+      "P_FLAGK1"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_A81",
+   "etiqueta": "A81: re-derivar distance_class simetrico es una trampa; no destapar NdC",
+   "donde": [
+    "CLAUDE.md:929-947"
+   ],
+   "estado_declarado": "vigente",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 1,
+   "arrastre": [
+    "C_A94"
+   ],
+   "premisas_caidas_heredadas": {
+    "P_S114": {
+     "camino": [
+      "C_A82",
+      "P_S114"
+     ],
+     "solo_explicitas": false
+    },
+    "P_B21": {
+     "camino": [
+      "C_A82",
+      "P_B21"
+     ],
+     "solo_explicitas": false
+    },
+    "P_GATE": {
+     "camino": [
+      "C_A82",
+      "P_GATE"
+     ],
+     "solo_explicitas": false
+    },
+    "P_BAT": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_BAT"
+     ],
+     "solo_explicitas": false
+    },
+    "P_S137_A2": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_S137_A2"
+     ],
+     "solo_explicitas": false
+    },
+    "P_FLAGK1": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_GAPA115",
+      "C_NEW7",
+      "P_FLAGK1"
+     ],
+     "solo_explicitas": false
+    }
+   }
+  },
+  {
+   "id": "C_A94",
+   "etiqueta": "A94: el bug de la etiqueta far rinde 1 noche de 946 (no priorizar)",
+   "donde": [
+    "CLAUDE.md:1132-1150"
+   ],
+   "estado_declarado": "vigente",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_S114": {
+     "camino": [
+      "C_A81",
+      "C_A82",
+      "P_S114"
+     ],
+     "solo_explicitas": false
+    },
+    "P_B21": {
+     "camino": [
+      "C_A81",
+      "C_A82",
+      "P_B21"
+     ],
+     "solo_explicitas": false
+    },
+    "P_GATE": {
+     "camino": [
+      "C_A81",
+      "C_A82",
+      "P_GATE"
+     ],
+     "solo_explicitas": false
+    },
+    "P_BAT": {
+     "camino": [
+      "C_A81",
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_BAT"
+     ],
+     "solo_explicitas": false
+    },
+    "P_S137_A2": {
+     "camino": [
+      "C_A81",
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_S137_A2"
+     ],
+     "solo_explicitas": false
+    },
+    "P_FLAGK1": {
+     "camino": [
+      "C_A81",
+      "C_A82",
+      "C_D11",
+      "C_GAPA115",
+      "C_NEW7",
+      "P_FLAGK1"
+     ],
+     "solo_explicitas": false
+    }
+   }
+  },
+  {
+   "id": "C_D10",
+   "etiqueta": "D10 ctxpeak (filtro contextual + keep_peak): ADOPTADO S100, 'el unico que cura sin destruir recall'",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1201-1214"
+   ],
+   "estado_declarado": "adoptado",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:1214"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 4,
+   "arrastre": [
+    "C_D5",
+    "C_D9",
+    "C_NEW8",
+    "P_A66"
+   ],
+   "premisas_caidas_heredadas": {
+    "P_PICO": {
+     "camino": [
+      "P_PICO"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_D5",
+   "etiqueta": "D5 magnitud: 'resuelta' / 'calibracion lograda'",
+   "donde": [
+    "docs/MISSION.md:100",
+    "docs/MIROVA_DIVERGENCES.md:145-146"
+   ],
+   "estado_declarado": "resuelta en MISSION; abierta en el catalogo",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_A66": {
+     "camino": [
+      "P_A66"
+     ],
+     "solo_explicitas": true
+    },
+    "P_A12": {
+     "camino": [
+      "C_D8",
+      "P_A12"
+     ],
+     "solo_explicitas": false
+    },
+    "P_PICO": {
+     "camino": [
+      "C_D10",
+      "P_PICO"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_D26",
+   "etiqueta": "D26: segundo pase sin filtros de no-aptos, 'efecto nulo bajo min'",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:2353-2359"
+   ],
+   "estado_declarado": "abierta, efecto nulo",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:2353"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_PISO": {
+     "camino": [
+      "P_PISO"
+     ],
+     "solo_explicitas": true
+    },
+    "P_MIN": {
+     "camino": [
+      "P_MIN"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_S136_3",
+   "etiqueta": "S136: tres frentes cerrados sin A/B (pool de mu/sigma, retiro de los Test 1 del pool, ajustar C2)",
+   "donde": [
+    "experiments/_s137/EL_CIERRE_DE_S136_ES_CIRCULAR.md:44-46",
+    "CLAUDE.md:1152-1158"
+   ],
+   "estado_declarado": "cerrados 'bajo min'",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 1,
+   "arrastre": [
+    "C_GAPA130"
+   ],
+   "premisas_caidas_heredadas": {
+    "P_MIN": {
+     "camino": [
+      "P_MIN"
+     ],
+     "solo_explicitas": true
+    },
+    "P_PISO": {
+     "camino": [
+      "P_PISO"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_S136_AR",
+   "etiqueta": "S136: banda 22 y remuestreo descartados 'por aritmetica' como palanca de deteccion",
+   "donde": [
+    "experiments/_s136/POR_QUE_EL_RUIDO_NO_MUEVE_LA_DETECCION.md:1-3,36-47"
+   ],
+   "estado_declarado": "cerrado sin run",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_PISO": {
+     "camino": [
+      "P_PISO"
+     ],
+     "solo_explicitas": true
+    },
+    "P_MIN": {
+     "camino": [
+      "P_MIN"
+     ],
+     "solo_explicitas": true
+    },
+    "P_F70": {
+     "camino": [
+      "C_D16",
+      "P_F70"
+     ],
+     "solo_explicitas": false
+    },
+    "P_535": {
+     "camino": [
+      "C_D16",
+      "P_535"
+     ],
+     "solo_explicitas": false
+    }
+   }
+  },
+  {
+   "id": "C_GAPA115",
+   "etiqueta": "GAP #A: RESUELTO S115 = mislabel, NO reabrir",
+   "donde": [
+    "docs/MISSION.md:109-110",
+    "docs/MIROVA_DIVERGENCES.md:1318-1320",
+    "CLAUDE.md:120"
+   ],
+   "estado_declarado": "resuelto en MISSION; REABIERTO S128 en el catalogo; marcado FALSO en CLAUDE.md",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:1319",
+    "docs/MISSION.md:110",
+    "CLAUDE.md:119",
+    "CLAUDE.md:120"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 12,
+   "arrastre": [
+    "C_A81",
+    "C_A82",
+    "C_A83",
+    "C_A84",
+    "C_A85",
+    "C_A94",
+    "C_D11",
+    "C_D13",
+    "C_D18",
+    "C_D19N",
+    "C_D9",
+    "C_NEW8"
+   ],
+   "premisas_caidas_heredadas": {
+    "P_FLAGK1": {
+     "camino": [
+      "C_NEW7",
+      "P_FLAGK1"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_NEW7",
+   "etiqueta": "NEW-7 / drift #1 (S100): flag K1 'OFF permanentemente; el codigo actual ya es fiel'",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:435",
+    "docs/MIROVA_DIVERGENCES.md:453-456",
+    "docs/MIROVA_DIVERGENCES.md:1028"
+   ],
+   "estado_declarado": "cerrado S100, sin marca en el lugar",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:435",
+    "docs/MIROVA_DIVERGENCES.md:455"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 13,
+   "arrastre": [
+    "C_A81",
+    "C_A82",
+    "C_A83",
+    "C_A84",
+    "C_A85",
+    "C_A94",
+    "C_D11",
+    "C_D13",
+    "C_D18",
+    "C_D19N",
+    "C_D9",
+    "C_GAPA115",
+    "C_NEW8"
+   ],
+   "premisas_caidas_heredadas": {
+    "P_FLAGK1": {
+     "camino": [
+      "P_FLAGK1"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_GAPA130",
+   "etiqueta": "GAP #A S130: 'documentado y dimensionado, sin mas inversion' (A/B sin sustrato)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1335-1358"
+   ],
+   "estado_declarado": "acotado, no cerrado",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_PISO": {
+     "camino": [
+      "P_PISO"
+     ],
+     "solo_explicitas": false
+    },
+    "P_MIN": {
+     "camino": [
+      "C_S136_3",
+      "P_MIN"
+     ],
+     "solo_explicitas": false
+    }
+   }
+  },
+  {
+   "id": "C_D16",
+   "etiqueta": "D16: 'la grilla UTM NO explica el sub-reporte', CERRADA (refutada) S124, NO REABRIR",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1857",
+    "docs/MIROVA_DIVERGENCES.md:1898-1899"
+   ],
+   "estado_declarado": "cerrada",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:1857",
+    "docs/MIROVA_DIVERGENCES.md:1886"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 1,
+   "arrastre": [
+    "C_S136_AR"
+   ],
+   "premisas_caidas_heredadas": {
+    "P_F70": {
+     "camino": [
+      "P_F70"
+     ],
+     "solo_explicitas": true
+    },
+    "P_535": {
+     "camino": [
+      "P_535"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_D18",
+   "etiqueta": "D18 caja 5x5: A/B S130 NO ADOPTAR; 'diferenciacion summit/scene casi inerte'",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1999",
+    "docs/MIROVA_DIVERGENCES.md:2062-2093"
+   ],
+   "estado_declarado": "abierta, prioridad baja",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:1999",
+    "docs/MIROVA_DIVERGENCES.md:2039",
+    "docs/MIROVA_DIVERGENCES.md:2067",
+    "docs/MIROVA_DIVERGENCES.md:2088"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_B21": {
+     "camino": [
+      "C_A82",
+      "P_B21"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S114": {
+     "camino": [
+      "C_A82",
+      "P_S114"
+     ],
+     "solo_explicitas": true
+    },
+    "P_GATE": {
+     "camino": [
+      "C_A82",
+      "P_GATE"
+     ],
+     "solo_explicitas": true
+    },
+    "P_BAT": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_BAT"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S137_A2": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_S137_A2"
+     ],
+     "solo_explicitas": true
+    },
+    "P_FLAGK1": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_GAPA115",
+      "C_NEW7",
+      "P_FLAGK1"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_D8",
+   "etiqueta": "D8 fondo de anillo contaminado: RESUELTO (kernel-bg opt-in por volcan)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1088-1127",
+    "docs/MISSION.md:100"
+   ],
+   "estado_declarado": "resuelto",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:1088",
+    "docs/MIROVA_DIVERGENCES.md:1090"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 2,
+   "arrastre": [
+    "C_D5",
+    "C_DPCC"
+   ],
+   "premisas_caidas_heredadas": {
+    "P_A12": {
+     "camino": [
+      "P_A12"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_DPCC",
+   "etiqueta": "D-PCC inner_radius: RESUELTO S62 ('inner=7 adoptado')",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1129-1136"
+   ],
+   "estado_declarado": "resuelto",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:1129"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_A12": {
+     "camino": [
+      "C_D8",
+      "P_A12"
+     ],
+     "solo_explicitas": false
+    }
+   }
+  },
+  {
+   "id": "C_S29",
+   "etiqueta": "S29: 'Lascar 64 % queda como limite fisico aceptado' del MODIS; D4 'cierra al limite del clon literal'",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:789-801",
+    "docs/MIROVA_DIVERGENCES.md:577",
+    "docs/MISSION.md:99"
+   ],
+   "estado_declarado": "cerrado S27/S29",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "C_D11B",
+   "etiqueta": "D11-bis: 'MIROVA nunca publica 0,0; incluso Villarrica da 0,84 fijo (A13)'",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1377-1380"
+   ],
+   "estado_declarado": "divergencia formal",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_A13": {
+     "camino": [
+      "P_A13"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_HV084",
+   "etiqueta": "H_S61_MIROVA_DIST_FIXED_VILLARRICA: CONFIRMADA",
+   "donde": [
+    "docs/HYPOTHESIS_LOG.md:361-373"
+   ],
+   "estado_declarado": "confirmada, sin marca",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/HYPOTHESIS_LOG.md:365"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_A13": {
+     "camino": [
+      "P_A13"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_H13",
+   "etiqueta": "H13: '3 sigma no es problematico; mantener cap MAX_SIGMA_COMPONENT_K=7'",
+   "donde": [
+    "docs/HYPOTHESIS_LOG.md:757-768"
+   ],
+   "estado_declarado": "refutada/resuelta S19, sin marca",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "C_HS68",
+   "etiqueta": "H_S68_ANTIPATRONES: 'anti-patrones mitigados, NO hay drift critico'",
+   "donde": [
+    "docs/HYPOTHESIS_LOG.md:160-174"
+   ],
+   "estado_declarado": "confirmada, sin marca",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/HYPOTHESIS_LOG.md:163"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "C_D20",
+   "etiqueta": "D20 banda 31 vs 32: 'numericamente despreciable' (calculo Planck S128)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:2219-2222"
+   ],
+   "estado_declarado": "hallazgo, despreciable",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:2194",
+    "docs/MIROVA_DIVERGENCES.md:2200",
+    "docs/MIROVA_DIVERGENCES.md:2205",
+    "docs/MIROVA_DIVERGENCES.md:2222"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_PISO": {
+     "camino": [
+      "P_PISO"
+     ],
+     "solo_explicitas": false
+    }
+   }
+  },
+  {
+   "id": "C_D21",
+   "etiqueta": "D21: 'ningun brazo cumple aun la bateria' (bloqueo)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:2232",
+    "docs/MIROVA_DIVERGENCES.md:2250-2251"
+   ],
+   "estado_declarado": "abierta, bloqueada",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 12,
+   "arrastre": [
+    "C_A81",
+    "C_A82",
+    "C_A83",
+    "C_A84",
+    "C_A85",
+    "C_A94",
+    "C_D11",
+    "C_D13",
+    "C_D18",
+    "C_D19N",
+    "C_D9",
+    "C_NEW8"
+   ],
+   "premisas_caidas_heredadas": {
+    "P_BAT": {
+     "camino": [
+      "P_BAT"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S137_A2": {
+     "camino": [
+      "P_S137_A2"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_HA2",
+   "etiqueta": "H_S137_A2_FLANCO: 'active, pendiente'",
+   "donde": [
+    "docs/HYPOTHESIS_LOG.md:1478-1485"
+   ],
+   "estado_declarado": "active",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_S137_A2": {
+     "camino": [
+      "P_S137_A2"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_S143",
+   "etiqueta": "H_S143_D22_D25: NO ADOPTAR (VIIRS 375)",
+   "donde": [
+    "docs/HYPOTHESIS_LOG.md:1507-1520"
+   ],
+   "estado_declarado": "resuelta: no adoptar",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_BAT": {
+     "camino": [
+      "P_BAT"
+     ],
+     "solo_explicitas": false
+    }
+   }
+  },
+  {
+   "id": "C_S133",
+   "etiqueta": "S133: A/B banda 22 en MODIS, NO ADOPTAR",
+   "donde": [
+    "docs/audit_s145/D21_D22_ESTADO_DEL_BLOQUEO.md:148-155",
+    "docs/MIROVA_DIVERGENCES.md:2252"
+   ],
+   "estado_declarado": "no adoptar",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_GATE": {
+     "camino": [
+      "P_GATE"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_THR",
+   "etiqueta": "S71: 'thresholds NO son el problema' (descarta tunear C2/sigma)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:403-405",
+    "docs/MIROVA_DIVERGENCES.md:504"
+   ],
+   "estado_declarado": "refutacion bibliografica, 'no perseguir'",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_B21": {
+     "camino": [
+      "P_B21"
+     ],
+     "solo_explicitas": false
+    }
+   }
+  },
+  {
+   "id": "C_F14",
+   "etiqueta": "F1.4: geofencing 25 km 'empiricamente optimo' (98,27 % de los records OSF)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:437",
+    "docs/MIROVA_DIVERGENCES.md:508"
+   ],
+   "estado_declarado": "refutado/no cambiar",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_OSF": {
+     "camino": [
+      "P_OSF"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_S45",
+   "etiqueta": "S45: 'D9 cluster selection: summit-priority confirmado Lascar' (titulo)",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:856",
+    "docs/MIROVA_DIVERGENCES.md:885"
+   ],
+   "estado_declarado": "titulo dice confirmado",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "C_D19N",
+   "etiqueta": "D19 (S134): 'D11/A82 quedan intactas'",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:2189-2192"
+   ],
+   "estado_declarado": "frase de relacion, sin marca",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {
+    "P_S114": {
+     "camino": [
+      "C_A82",
+      "P_S114"
+     ],
+     "solo_explicitas": true
+    },
+    "P_B21": {
+     "camino": [
+      "C_A82",
+      "P_B21"
+     ],
+     "solo_explicitas": true
+    },
+    "P_GATE": {
+     "camino": [
+      "C_A82",
+      "P_GATE"
+     ],
+     "solo_explicitas": true
+    },
+    "P_BAT": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_BAT"
+     ],
+     "solo_explicitas": true
+    },
+    "P_S137_A2": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_D21",
+      "P_S137_A2"
+     ],
+     "solo_explicitas": true
+    },
+    "P_FLAGK1": {
+     "camino": [
+      "C_A82",
+      "C_D11",
+      "C_GAPA115",
+      "C_NEW7",
+      "P_FLAGK1"
+     ],
+     "solo_explicitas": true
+    }
+   }
+  },
+  {
+   "id": "C_A77",
+   "etiqueta": "A77: VIIRS375 cubre el recall que MODIS no resuelve",
+   "donde": [
+    "CLAUDE.md:893-901"
+   ],
+   "estado_declarado": "vigente",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 12,
+   "arrastre": [
+    "C_A81",
+    "C_A82",
+    "C_A83",
+    "C_A84",
+    "C_A85",
+    "C_A94",
+    "C_D11",
+    "C_D13",
+    "C_D18",
+    "C_D19N",
+    "C_D9",
+    "C_NEW8"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "C_D14",
+   "etiqueta": "D14 mascara de nube: CERRADA S128 (cita verbatim) y apagada",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:1550",
+    "docs/MIROVA_DIVERGENCES.md:1632-1652",
+    "docs/MISSION.md:142"
+   ],
+   "estado_declarado": "cerrada",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/MIROVA_DIVERGENCES.md:1550",
+    "docs/MISSION.md:142"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "C_D25V",
+   "etiqueta": "D25 en M-band (S145): 'es fidelidad de magnitud, no recall'",
+   "donde": [
+    "docs/MIROVA_DIVERGENCES.md:2322-2336"
+   ],
+   "estado_declarado": "abierta, flag apagado",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "C_HV2",
+   "etiqueta": "H_S141_VECINO_FOCO_V2: resuelta como no confirmada",
+   "donde": [
+    "docs/HYPOTHESIS_LOG.md:1497-1505"
+   ],
+   "estado_declarado": "no confirmada",
+   "tipo": "cierre",
+   "lineas_censo": [],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 1,
+   "arrastre": [
+    "C_D25V"
+   ],
+   "premisas_caidas_heredadas": {}
+  },
+  {
+   "id": "C_S144",
+   "etiqueta": "H_S144_DIRECCION / frente keep_peak con direccion: CERRADO sin correr",
+   "donde": [
+    "docs/HYPOTHESIS_LOG.md:1536",
+    "docs/MIROVA_DIVERGENCES.md:2099-2108"
+   ],
+   "estado_declarado": "cerrado",
+   "tipo": "cierre",
+   "lineas_censo": [
+    "docs/HYPOTHESIS_LOG.md:1536"
+   ],
+   "caido_segun_el_proyecto": null,
+   "arrastre_n": 0,
+   "arrastre": [],
+   "premisas_caidas_heredadas": {}
+  }
+ ],
+ "aristas": [
+  {
+   "arriba": "C_A82",
+   "abajo": "P_S114",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "CLAUDE.md:965-966 'La auditoria de fidelidad file:line+adversarial confirmo que la deteccion MODIS YA es fiel'; CLAUDE.md:948-950 'La auditoria S114 en que se apoya cubrio umbrales, tests, kernel y second-run, NO la geometria del ROI'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_A82",
+   "abajo": "P_B21",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "CLAUDE.md:948 'los ejes que la regla da por agotados se barrieron sobre records producidos con banda 21 primaria (D21) y compuerta (D22)'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_A82",
+   "abajo": "P_GATE",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "CLAUDE.md:948 (misma frase)",
+   "nota": ""
+  },
+  {
+   "arriba": "C_A82",
+   "abajo": "C_A77",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "CLAUDE.md:970-971 'El recall MODIS lo cubre VIIRS375 (A77)'; docs/MIROVA_DIVERGENCES.md:1367-1368",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D11",
+   "abajo": "C_A82",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1365 'Veredicto (A82)'; docs/MISSION.md:107 'todos los ejes agotados, A82'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_A82",
+   "abajo": "C_D11",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "CLAUDE.md:957 'S114, cierre exhaustivo de D11-MODIS'; CLAUDE.md:971-972 'Detalle: docs/AUDIT_S114_PARITY_BY_SENSOR.md'",
+   "nota": "cita mutua: forma ciclo con la arista anterior"
+  },
+  {
+   "arriba": "C_D11",
+   "abajo": "P_S114",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1315-1317 'Auditoria de fidelidad file:line + adversarial: la deteccion MODIS YA es FIEL' (sin marca en el lugar)",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D11",
+   "abajo": "P_B21",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1259 'valen solo bajo banda 21 primaria y compuerta de 3 K, D21 y D22'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D11",
+   "abajo": "P_GATE",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1259",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D11",
+   "abajo": "C_GAPA115",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1318-1320 'Unico gap de fidelidad literal: GAP #A ... RESUELTO S115 = mislabel'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D11",
+   "abajo": "C_D21",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1259 'No se reabre el frente far->summit por la via espectral hasta consolidar D21/D22'; docs/audit_s145/D21_D22_ESTADO_DEL_BLOQUEO.md:264-267",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D21",
+   "abajo": "P_BAT",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:2232 'ningun brazo cumple aun la bateria'; docs/MIROVA_DIVERGENCES.md:2250-2251",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D21",
+   "abajo": "P_S137_A2",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:2251 'la de Eyjafjallajokull es de la evaluacion'; docs/audit_s145/A2_EL_FALLO_ES_DEL_CRITERIO.md:69-78",
+   "nota": ""
+  },
+  {
+   "arriba": "C_HA2",
+   "abajo": "P_S137_A2",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/HYPOTHESIS_LOG.md:1482-1485 'no se contrasto ... Estado: active ... pendiente' contra A2_EL_FALLO...:75-78 (verificable desde S137)",
+   "nota": ""
+  },
+  {
+   "arriba": "C_S143",
+   "abajo": "P_BAT",
+   "clase": "INFERIDA",
+   "relacion": "depende",
+   "evidencia": "el A/B de S143 nace del pre-registro que hereda la atribucion de la bateria (D22/D25 como palancas de A6); docs/audit_s145/D21_D22_ESTADO_DEL_BLOQUEO.md:156-162",
+   "nota": "el veredicto de S143 en si esta medido sobre produccion; lo heredado es la eleccion de brazos"
+  },
+  {
+   "arriba": "C_A83",
+   "abajo": "C_A82",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "CLAUDE.md:981 'Mecanismo (A82): a 1 km el foco sub-pixel real y el ruido topografico difuso son el MISMO objeto'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_A83",
+   "abajo": "P_B21",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/AUDIT_S138.md:94-96 'A82, A83, A84, el camino de D12 y el no adoptar B22 de S134 heredan la configuracion que S137 puso en duda (banda 21, compuerta)'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_A83",
+   "abajo": "P_GATE",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/AUDIT_S138.md:94-96",
+   "nota": ""
+  },
+  {
+   "arriba": "C_A84",
+   "abajo": "C_A82",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "CLAUDE.md:989-990 'irreducible igual que el far->summit (A82) ... instance-en-posicion de A82/A83'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_A84",
+   "abajo": "C_A83",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "CLAUDE.md:989-990, CLAUDE.md:994-995 'indistinguibles ... A83'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D12",
+   "abajo": "P_B21",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/AUDIT_S138.md:94-96",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D12",
+   "abajo": "P_GATE",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/AUDIT_S138.md:94-96",
+   "nota": ""
+  },
+  {
+   "arriba": "C_S133",
+   "abajo": "P_GATE",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/AUDIT_S138.md:94-96; docs/audit_s145/D21_D22_ESTADO_DEL_BLOQUEO.md:153-155 (paridad contra MIROVA con n=0 en tres casilleros)",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D13",
+   "abajo": "C_A82",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1503-1504 'mas el artefacto topografico A69 en los nevados, que a 1 km es irreducible (A82)'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D13",
+   "abajo": "P_A54",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1501-1503 'es en buena parte la categoria (b) de A54'; docs/MIROVA_DIVERGENCES.md:1509-1510",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D13",
+   "abajo": "P_31",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1468 (titulo) contra la tabla docs/MIROVA_DIVERGENCES.md:1483-1485, que rotula 'records apagados'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D13",
+   "abajo": "P_535",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1519-1520 ventana '2026-05-01 a 2026-08-28': entera antes de #535 (2026-08-28 23:00 UTC, CLAUDE.md:1194)",
+   "nota": ""
+  },
+  {
+   "arriba": "C_NEW8",
+   "abajo": "C_A82",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:493 'aplicarlo removeria senal real, killer A82'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_NEW8",
+   "abajo": "C_D9",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:480-482 'ya esta mitigado por otros frentes: D9 cap path-D 5 MW + gate/guard A46 + nadir/focal'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_NEW8",
+   "abajo": "P_A54",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:490-492 'son cat-b real sub-umbral (A54)'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D9",
+   "abajo": "C_NEW8",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:464-470 'Los 4 gaps documentales F1.2 explican mejor el drift remanente' (la causa raiz abierta de D9 apunta a NEW-8)",
+   "nota": "con la arista anterior forma ciclo de justificacion mutua"
+  },
+  {
+   "arriba": "C_D9",
+   "abajo": "P_FENCE",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:516-517 '0 fuga al dashboard (el gate far de mirovaEqVrp los esconde)'; docs/MIROVA_DIVERGENCES.md:535",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D9",
+   "abajo": "P_A66",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:526-529 'CURADA por las adopciones nadir/focal S102-S109 ... mediana 0,53x = calibracion clon-literal sana'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D9",
+   "abajo": "C_D9CAP",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:534-535 'FP de deteccion capeado (C, S71)'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D9CAP",
+   "abajo": "P_QC",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:333 'El cap 5 MW reemplaza programaticamente el QC visual que MIROVA hace manualmente'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D9",
+   "abajo": "P_535",
+   "clase": "INFERIDA",
+   "relacion": "depende",
+   "evidencia": "la verificacion S113 es de mayo-junio 2026 (docs/MIROVA_DIVERGENCES.md:527-528), regimen previo a #535; no re-medida despues",
+   "nota": "SOSPECHA de alcance: D9 es sobre todo MODIS, cuya mascara ya valia 0.0"
+  },
+  {
+   "arriba": "C_A85",
+   "abajo": "P_FENCE",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1446-1447 'costo = cola inflada 0,5-1,3 % (mayormente far, 42/46 filtradas por frontend)'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_A85",
+   "abajo": "P_S99",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1449-1450 'gate per-volcan quedo EXCLUIDO por MISSION l.77'; CLAUDE.md:1018-1020",
+   "nota": ""
+  },
+  {
+   "arriba": "C_A85",
+   "abajo": "C_A82",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1447 'peor caso difuso A69/A82 no-MIROVA-conf'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_A85",
+   "abajo": "P_535",
+   "clase": "INFERIDA",
+   "relacion": "depende",
+   "evidencia": "A/B run 28312968093 y verificacion S119 son de junio-julio 2026: regimen previo a #535; no re-verificado despues",
+   "nota": ""
+  },
+  {
+   "arriba": "C_A81",
+   "abajo": "C_A82",
+   "clase": "INFERIDA",
+   "relacion": "depende",
+   "evidencia": "CLAUDE.md:940 '73 de NdC = artefacto A69 (NO destapar)': la clasificacion de artefacto es la de A69/A82",
+   "nota": ""
+  },
+  {
+   "arriba": "C_A94",
+   "abajo": "C_A81",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "CLAUDE.md:1138-1139 'de las 4 noches que destaparia 3 son el artefacto de NdC que S113 ya dijo no destapar'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D10",
+   "abajo": "P_PICO",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1207 'conserva siempre el pixel pico (= crater)'; caida en docs/MIROVA_DIVERGENCES.md:2189-2192",
+   "nota": ""
+  },
+  {
+   "arriba": "P_A66",
+   "abajo": "C_D10",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1226-1228 'adoptar nadir + MANTENER ctxpeak'; CLAUDE.md:746-750",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D5",
+   "abajo": "P_A66",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MISSION.md:100 'D5 magnitud (nadir S102/103 + ctxpeak D10 S100)'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D5",
+   "abajo": "C_D10",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MISSION.md:100",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D26",
+   "abajo": "P_PISO",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:2359 'el piso gobierna y el efecto sobre el umbral es nulo (S136 midio que mu + C2 sigma > C1 en el 100 % de MODIS)'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D26",
+   "abajo": "P_MIN",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:2353 'efecto nulo bajo la conectiva min'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_S136_3",
+   "abajo": "P_MIN",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "CLAUDE.md:1154-1156; experiments/_s137/EL_CIERRE_DE_S136_ES_CIRCULAR.md:8-10",
+   "nota": ""
+  },
+  {
+   "arriba": "C_S136_3",
+   "abajo": "P_PISO",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "experiments/_s137/EL_CIERRE_DE_S136_ES_CIRCULAR.md:36-38",
+   "nota": ""
+  },
+  {
+   "arriba": "C_S136_AR",
+   "abajo": "P_PISO",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "experiments/_s136/POR_QUE_EL_RUIDO_NO_MUEVE_LA_DETECCION.md:18-21,36-47",
+   "nota": ""
+  },
+  {
+   "arriba": "C_S136_AR",
+   "abajo": "P_MIN",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "experiments/_s137/EL_CIERRE_DE_S136_ES_CIRCULAR.md:42-43 'correcta bajo min y falsa bajo max'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_GAPA130",
+   "abajo": "C_S136_3",
+   "clase": "INFERIDA",
+   "relacion": "depende",
+   "evidencia": "el retiro de los Test 1 del pool es uno de los tres frentes de C_S136_3 (EL_CIERRE...:44-46); bajo min con piso gobernando, mover el pool no puede mover el umbral aunque hubiera sustrato: el nulo del A/B de S130 tiene dos explicaciones y el catalogo solo nombra una (sustrato)",
+   "nota": ""
+  },
+  {
+   "arriba": "C_GAPA130",
+   "abajo": "P_PISO",
+   "clase": "INFERIDA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1331 dice que el K1 en el pool 'sube el umbral mu + C2 sigma'; eso solo importa donde el sigma gobierna: segun S136 nunca, segun S145 en 58,7-75 % de VIIRS",
+   "nota": ""
+  },
+  {
+   "arriba": "C_GAPA115",
+   "abajo": "C_NEW7",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1319-1321 repite la lectura de S100 ('fuera del pool m,sigma ... ya cubierto')",
+   "nota": ""
+  },
+  {
+   "arriba": "C_NEW7",
+   "abajo": "P_FLAGK1",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:453-455 contra docs/MIROVA_DIVERGENCES.md:1326-1330 ('Se lo juzgo por su NOMBRE y no por como lo lee el codigo, A89')",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D16",
+   "abajo": "P_F70",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1859-1863 (el A/B es el instrumento) contra docs/MIROVA_DIVERGENCES.md:1959-1962, docs/AUDIT_S138.md:135-136, docs/MIROVA_DIVERGENCES.md:1937-1939",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D16",
+   "abajo": "P_535",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1863 'ventana 2026-06-25..08-24': entera antes de #535",
+   "nota": ""
+  },
+  {
+   "arriba": "C_S136_AR",
+   "abajo": "C_D16",
+   "clase": "INFERIDA",
+   "relacion": "depende",
+   "evidencia": "S136 descarta el remuestreo tratandolo como promediado de ruido blanco (EL_CIERRE...: seccion 'Sobre el punto 2'); D16 es el antecedente empirico de que 'la grilla no aporta'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D18",
+   "abajo": "C_A82",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:2039-2041 y docs/MIROVA_DIVERGENCES.md:2065-2066 'refuta la hipotesis de que fuera la llave que A82 dejo abierta'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D18",
+   "abajo": "P_S99",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:2031-2032 'Y es per-volcan, que MISSION excluye'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D18",
+   "abajo": "P_B21",
+   "clase": "INFERIDA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:2085-2090 'las detecciones pasan con margen suficiente': con B21 el sigma del dNTI es ~4x mayor y el primer paso tiene ~55-60 px por escena; con B22 queda vacio en 80 de 84 (docs/MIROVA_DIVERGENCES.md:2246-2247). El margen es propiedad de la configuracion",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D8",
+   "abajo": "P_A12",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1100-1103 (tabla 'Bajo-Medio >20K: Lascar, Isluga, NO necesita') contra CLAUDE.md:235-238",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D8",
+   "abajo": "P_S99",
+   "clase": "INFERIDA",
+   "relacion": "depende",
+   "evidencia": "el fix es opt-in por volcan (docs/MIROVA_DIVERGENCES.md:1114-1127), lo que docs/MISSION.md:82-87 excluye; docs/MIROVA_DIVERGENCES.md:2316 lo dice: 'D8 quedo marcada resuelta por el kernel opt-in, pero la divergencia literal sigue vigente'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D5",
+   "abajo": "C_D8",
+   "clase": "INFERIDA",
+   "relacion": "depende",
+   "evidencia": "docs/MISSION.md:100-101 lista D8 entre las resueltas que 'no justifican features nuevas'; D25 (docs/MIROVA_DIVERGENCES.md:2316) la reabre de hecho",
+   "nota": ""
+  },
+  {
+   "arriba": "C_DPCC",
+   "abajo": "C_D8",
+   "clase": "INFERIDA",
+   "relacion": "depende",
+   "evidencia": "misma tanda S60-S62, misma metodologia de preview offline (A18)",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D11B",
+   "abajo": "P_A13",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:1379-1380 'incluso Villarrica al crater da 0,84 km fijo, A13'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_HV084",
+   "abajo": "P_A13",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/HYPOTHESIS_LOG.md:364-373 es el origen de A13; CLAUDE.md:241 la declara FALSA",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D20",
+   "abajo": "P_PISO",
+   "clase": "INFERIDA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:2219-2222 compara el corrimiento (hasta 0,0054) contra el margen de K1 (~0,14); si el umbral que decide es el piso C1 = 0,003 (S136, A103 CLAUDE.md:1190-1193), la vara pertinente es 0,003 y el corrimiento no es uniforme en una escena con gradiente 250-290 K (A69)",
+   "nota": ""
+  },
+  {
+   "arriba": "C_THR",
+   "abajo": "P_B21",
+   "clase": "INFERIDA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:403-405 descarta 'C2/sigma ni umbral' con Laiolo 2017; H_S137_SIGMA_MIROVA (docs/HYPOTHESIS_LOG.md:1458-1462) mide nuestro sigma del dNTI 10x el del autor con B21",
+   "nota": ""
+  },
+  {
+   "arriba": "C_F14",
+   "abajo": "P_OSF",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:437 '21,79 % records OSF v2.5 chilenos > 5 km ... cubre 98,27 % records'",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D19N",
+   "abajo": "C_A82",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:2191-2192 'D11/A82 quedan intactas' (S134) contra docs/MIROVA_DIVERGENCES.md:1259 (S138)",
+   "nota": ""
+  },
+  {
+   "arriba": "C_D25V",
+   "abajo": "C_HV2",
+   "clase": "EXPLICITA",
+   "relacion": "depende",
+   "evidencia": "docs/MIROVA_DIVERGENCES.md:2331-2333 'en VIIRS 375 el fondo del cumulo ya se midio ... y no cerro la brecha en ningun volcan (H_S141_VECINO_FOCO_V2)'",
+   "nota": ""
+  }
+ ]
+}
