@@ -160,6 +160,18 @@ def _documentos_vigilados(root):
     return sorted(out)
 
 
+# POR QUE: estas rutas existen solo en el disco del dueno porque git las ignora a proposito (el
+# archivo OSF pesa 99 MB, el de AVTOD y el indice de TIF son descargas). En el runner de CI no
+# estan. Un guard que mira el sistema de archivos daria verde en un computador y rojo en otro:
+# mediria la maquina y no el repo (leccion S142). Se declaran aca, y el guard las trata igual en
+# todas partes. La primera corrida en CI de este guard (PR #715) fallo exactamente por esto.
+RUTAS_SOLO_LOCALES_IGNORADAS_POR_GIT = {
+    "data/mirova_reference/VRP_GLOBAL_ARCHIVE_2025.csv",
+    "data/mirova_reference/avtod_reath2019_chile.csv",
+    "experiments/_s144_conteo_tif/_dl_tif/da4fe36e8920_index.csv",
+}
+
+
 def _citas_y_rotas(root, documentos):
     """(total_citas, rotas): rotas es un set de (doc_relativo, ruta_citada) que no existen en
     disco. `doc_relativo` es relativo a `root`, con '/': así la lista blanca es portable."""
@@ -170,6 +182,8 @@ def _citas_y_rotas(root, documentos):
         rel_doc = os.path.relpath(doc, root).replace(os.sep, "/")
         for m in sorted(set(_RE_CITA.findall(txt))):
             total += 1
+            if m in RUTAS_SOLO_LOCALES_IGNORADAS_POR_GIT:
+                continue
             if not os.path.exists(os.path.join(root, m)):
                 rotas.add((rel_doc, m))
     return total, rotas
