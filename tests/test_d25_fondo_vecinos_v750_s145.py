@@ -42,3 +42,21 @@ def test_sin_vecinos_no_alertados_cae_al_fondo_de_hoy_y_lo_cuenta():
     l_bg, n_sin = vrp_bg_neighbor_mean_v750(bt, alerta, [0], [0], 0.1234, max_half_px=3)
     assert n_sin == 1
     np.testing.assert_allclose(l_bg, [0.1234])
+
+
+def test_el_flag_de_v750_existe_y_esta_apagado_en_el_perfil_operacional():
+    """A45: el default operacional es OFF; encenderlo es una decision aparte, con A/B."""
+    import pipeline.profile as p
+    assert hasattr(p, "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750")
+    assert p.ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750 is False
+
+
+def test_los_dos_flags_son_independientes_y_no_se_confunden_por_subcadena():
+    """A92: ningun nombre es subcadena del otro, y el YAML declara los dos por separado."""
+    import pipeline.profile as p
+    i, m = "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375", "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750"
+    assert i not in m and m not in i
+    yaml_txt = (ROOT / "pipeline" / "profiles" / "mirova_equivalent.yaml").read_text(encoding="utf-8")
+    for clave in ("enable_vrp_bg_neighbor_mean_viirs375", "enable_vrp_bg_neighbor_mean_viirs750"):
+        assert re.search(r"^\s*" + clave + r"\s*:", yaml_txt, re.M), clave
+    assert getattr(p, i) is False and getattr(p, m) is False
