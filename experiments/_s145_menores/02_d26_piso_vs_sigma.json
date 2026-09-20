@@ -1,0 +1,509 @@
+{
+  "definiciones": {
+    "piso_gobierna": "min(C1, mu + C2*sigma) == C1, o sea mu + C2*sigma > C1: ensuciar sigma NO mueve el umbral",
+    "sigma_gobierna": "mu + C2*sigma <= C1: el termino estadistico es el menor y el umbral SI depende del pool mu/sigma",
+    "origen_de_mu_y_sigma": "fp_diag = PRIMER pase (first_pass_tests_2_and_3). El pool del SEGUNDO pase no se persiste.",
+    "umbrales_efectivos": {
+      "C1_summit": 0.003,
+      "C1_scene": 0.01,
+      "C2_dnti_summit": 5.0,
+      "C2_dnti_scene": 10.0,
+      "C2_deti_summit": 5.0,
+      "C2_deti_scene": 10.0
+    },
+    "conectiva_efectiva_hoy": "min  (ENABLE_TESTS_23_PROSE_BRANCH = False)"
+  },
+  "por_bucket": {
+    "MODIS": {
+      "ventana_utc": [
+        "2025-02-15 01:40",
+        "2026-09-20 02:45"
+      ],
+      "n_records": 12699,
+      "conteos": {
+        "con_diag_mu_sigma": 12166,
+        "n_records": 12699,
+        "piso_gobierna__deti_scene": 12166,
+        "piso_gobierna__deti_summit": 12166,
+        "piso_gobierna__dnti_scene": 12166,
+        "piso_gobierna__dnti_summit": 12166,
+        "piso_gobierna_los_4_umbrales": 12166,
+        "sin_diag_mu_sigma": 533
+      },
+      "porcentaje_sobre_records_con_diag": {
+        "piso_gobierna__deti_scene": 100.0,
+        "piso_gobierna__deti_summit": 100.0,
+        "piso_gobierna__dnti_scene": 100.0,
+        "piso_gobierna__dnti_summit": 100.0,
+        "piso_gobierna_los_4_umbrales": 100.0
+      },
+      "margen_estadistico_sobre_C1_mediana": {
+        "dnti_summit": 11.6,
+        "dnti_scene": 7.0,
+        "deti_summit": 11.2,
+        "deti_scene": 6.7
+      },
+      "ejemplos_donde_sigma_gobierna": {}
+    },
+    "VIIRS375": {
+      "ventana_utc": [
+        "2025-02-15 04:30",
+        "2026-09-19 06:48"
+      ],
+      "n_records": 25186,
+      "conteos": {
+        "algun_umbral_lo_decide_sigma": 12670,
+        "con_diag_mu_sigma": 21568,
+        "n_records": 25186,
+        "piso_gobierna__deti_scene": 8927,
+        "piso_gobierna__deti_summit": 19965,
+        "piso_gobierna__dnti_scene": 19764,
+        "piso_gobierna__dnti_summit": 21544,
+        "piso_gobierna_los_4_umbrales": 8898,
+        "sigma_gobierna__deti_scene": 12641,
+        "sigma_gobierna__deti_summit": 1603,
+        "sigma_gobierna__dnti_scene": 1804,
+        "sigma_gobierna__dnti_summit": 24,
+        "sin_diag_mu_sigma": 3618
+      },
+      "porcentaje_sobre_records_con_diag": {
+        "algun_umbral_lo_decide_sigma": 58.744,
+        "piso_gobierna__deti_scene": 41.39,
+        "piso_gobierna__deti_summit": 92.568,
+        "piso_gobierna__dnti_scene": 91.636,
+        "piso_gobierna__dnti_summit": 99.889,
+        "piso_gobierna_los_4_umbrales": 41.256,
+        "sigma_gobierna__deti_scene": 58.61,
+        "sigma_gobierna__deti_summit": 7.432,
+        "sigma_gobierna__dnti_scene": 8.364,
+        "sigma_gobierna__dnti_summit": 0.111
+      },
+      "margen_estadistico_sobre_C1_mediana": {
+        "dnti_summit": 2.3,
+        "dnti_scene": 1.4,
+        "deti_summit": 1.6,
+        "deti_scene": 1.2
+      },
+      "ejemplos_donde_sigma_gobierna": {
+        "dnti_summit": [
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-04-26 05:30",
+            "sensor": "VIIRS_NOAA21",
+            "mu": 2.1422400763450304e-05,
+            "sd": 0.0005336735097084782,
+            "mu_mas_c2_sigma": 0.00269,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-04-26 05:54",
+            "sensor": "VIIRS_SNPP",
+            "mu": 2.1145416935451193e-05,
+            "sd": 0.0005895501225910973,
+            "mu_mas_c2_sigma": 0.002969,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-06-08 05:24",
+            "sensor": "VIIRS_NOAA21",
+            "mu": 1.1924549891986518e-06,
+            "sd": 0.0004755855193665935,
+            "mu_mas_c2_sigma": 0.002379,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-06-08 05:54",
+            "sensor": "VIIRS_SNPP",
+            "mu": -3.6491194818284517e-07,
+            "sd": 0.0005358597333910414,
+            "mu_mas_c2_sigma": 0.002679,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-06-08 06:12",
+            "sensor": "VIIRS_NOAA20",
+            "mu": -6.739532416415203e-07,
+            "sd": 0.0005861526478319202,
+            "mu_mas_c2_sigma": 0.00293,
+            "c1": 0.003
+          }
+        ],
+        "dnti_scene": [
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-16 05:48",
+            "sensor": "VIIRS_SNPP",
+            "mu": -1.9303390480458623e-06,
+            "sd": 0.0009801971628319117,
+            "mu_mas_c2_sigma": 0.0098,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-16 06:12",
+            "sensor": "VIIRS_NOAA20",
+            "mu": -1.3850003045546087e-06,
+            "sd": 0.0009070313309254887,
+            "mu_mas_c2_sigma": 0.009069,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-18 05:12",
+            "sensor": "VIIRS_SNPP",
+            "mu": 2.4613454947154977e-06,
+            "sd": 0.0009707557927596184,
+            "mu_mas_c2_sigma": 0.00971,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-18 05:36",
+            "sensor": "VIIRS_NOAA20",
+            "mu": 1.5012822547021231e-05,
+            "sd": 0.0008725252826582481,
+            "mu_mas_c2_sigma": 0.00874,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-18 06:30",
+            "sensor": "VIIRS_NOAA21",
+            "mu": 6.644915819251266e-05,
+            "sd": 0.0009854990493662937,
+            "mu_mas_c2_sigma": 0.009921,
+            "c1": 0.01
+          }
+        ],
+        "deti_summit": [
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-21 05:54",
+            "sensor": "VIIRS_SNPP",
+            "mu": -4.4744098479881937e-07,
+            "sd": 0.0005963191573590522,
+            "mu_mas_c2_sigma": 0.002981,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-03-09 05:30",
+            "sensor": "VIIRS_NOAA21",
+            "mu": -1.7413672172806957e-07,
+            "sd": 0.00045177295131678416,
+            "mu_mas_c2_sigma": 0.002259,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-03-09 05:54",
+            "sensor": "VIIRS_SNPP",
+            "mu": 1.4180204600928213e-07,
+            "sd": 0.0005465447166707664,
+            "mu_mas_c2_sigma": 0.002733,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-03-11 05:18",
+            "sensor": "VIIRS_SNPP",
+            "mu": -1.5216269549451437e-07,
+            "sd": 0.0005385506371848346,
+            "mu_mas_c2_sigma": 0.002693,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-03-11 05:42",
+            "sensor": "VIIRS_NOAA20",
+            "mu": 8.349675248016648e-08,
+            "sd": 0.0005485903843721727,
+            "mu_mas_c2_sigma": 0.002743,
+            "c1": 0.003
+          }
+        ],
+        "deti_scene": [
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-15 05:42",
+            "sensor": "VIIRS_NOAA21",
+            "mu": -7.122844583898507e-07,
+            "sd": 0.0007540595636247772,
+            "mu_mas_c2_sigma": 0.00754,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-16 05:24",
+            "sensor": "VIIRS_NOAA21",
+            "mu": 7.381677982095885e-07,
+            "sd": 0.0006749248846362631,
+            "mu_mas_c2_sigma": 0.00675,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-16 05:48",
+            "sensor": "VIIRS_SNPP",
+            "mu": -1.0765938255033826e-07,
+            "sd": 0.0006938437640663888,
+            "mu_mas_c2_sigma": 0.006938,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-16 06:12",
+            "sensor": "VIIRS_NOAA20",
+            "mu": -2.0825017781916275e-06,
+            "sd": 0.000755495184026156,
+            "mu_mas_c2_sigma": 0.007553,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-17 05:06",
+            "sensor": "VIIRS_NOAA21",
+            "mu": 1.4479006236782737e-06,
+            "sd": 0.0008073526288684685,
+            "mu_mas_c2_sigma": 0.008075,
+            "c1": 0.01
+          }
+        ]
+      }
+    },
+    "VIIRS750": {
+      "ventana_utc": [
+        "2025-02-15 04:30",
+        "2026-09-19 06:48"
+      ],
+      "n_records": 24995,
+      "conteos": {
+        "algun_umbral_lo_decide_sigma": 17863,
+        "con_diag_mu_sigma": 23833,
+        "n_records": 24995,
+        "piso_gobierna__deti_scene": 5979,
+        "piso_gobierna__deti_summit": 19875,
+        "piso_gobierna__dnti_scene": 22621,
+        "piso_gobierna__dnti_summit": 23798,
+        "piso_gobierna_los_4_umbrales": 5970,
+        "sigma_gobierna__deti_scene": 17854,
+        "sigma_gobierna__deti_summit": 3958,
+        "sigma_gobierna__dnti_scene": 1212,
+        "sigma_gobierna__dnti_summit": 35,
+        "sin_diag_mu_sigma": 1162
+      },
+      "porcentaje_sobre_records_con_diag": {
+        "algun_umbral_lo_decide_sigma": 74.951,
+        "piso_gobierna__deti_scene": 25.087,
+        "piso_gobierna__deti_summit": 83.393,
+        "piso_gobierna__dnti_scene": 94.915,
+        "piso_gobierna__dnti_summit": 99.853,
+        "piso_gobierna_los_4_umbrales": 25.049,
+        "sigma_gobierna__deti_scene": 74.913,
+        "sigma_gobierna__deti_summit": 16.607,
+        "sigma_gobierna__dnti_scene": 5.085,
+        "sigma_gobierna__dnti_summit": 0.147
+      },
+      "margen_estadistico_sobre_C1_mediana": {
+        "dnti_summit": 2.7,
+        "dnti_scene": 1.7,
+        "deti_summit": 1.4,
+        "deti_scene": 1.2
+      },
+      "ejemplos_donde_sigma_gobierna": {
+        "dnti_summit": [
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-03-10 06:00",
+            "sensor": "VIIRS_NOAA20_750",
+            "mu": -3.946142431236566e-06,
+            "sd": 0.00057598502437092,
+            "mu_mas_c2_sigma": 0.002876,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-04-26 06:18",
+            "sensor": "VIIRS_NOAA20_750",
+            "mu": 4.009259109174353e-06,
+            "sd": 0.0005418736539711116,
+            "mu_mas_c2_sigma": 0.002713,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-05-03 05:24",
+            "sensor": "VIIRS_SNPP_750",
+            "mu": -2.949905369683975e-06,
+            "sd": 0.0005929772172600883,
+            "mu_mas_c2_sigma": 0.002962,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-06-08 04:36",
+            "sensor": "VIIRS_NOAA20_750",
+            "mu": 6.331034143099673e-06,
+            "sd": 0.0005203280727467935,
+            "mu_mas_c2_sigma": 0.002608,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-06-08 05:24",
+            "sensor": "VIIRS_NOAA21_750",
+            "mu": -4.389420679149612e-07,
+            "sd": 0.00046664815234499855,
+            "mu_mas_c2_sigma": 0.002333,
+            "c1": 0.003
+          }
+        ],
+        "dnti_scene": [
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-16 06:12",
+            "sensor": "VIIRS_NOAA20_750",
+            "mu": 6.0733189861705425e-06,
+            "sd": 0.000988428991047563,
+            "mu_mas_c2_sigma": 0.00989,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-21 04:42",
+            "sensor": "VIIRS_NOAA20_750",
+            "mu": -3.7777274677506707e-06,
+            "sd": 0.0009194076884168409,
+            "mu_mas_c2_sigma": 0.00919,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-21 05:54",
+            "sensor": "VIIRS_SNPP_750",
+            "mu": 4.393782911024643e-06,
+            "sd": 0.0008136972259844807,
+            "mu_mas_c2_sigma": 0.008141,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-21 06:18",
+            "sensor": "VIIRS_NOAA20_750",
+            "mu": -1.8309019144299047e-06,
+            "sd": 0.0009164447438721233,
+            "mu_mas_c2_sigma": 0.009163,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-27 06:06",
+            "sensor": "VIIRS_NOAA20_750",
+            "mu": 1.506402729898345e-05,
+            "sd": 0.0009874328222750945,
+            "mu_mas_c2_sigma": 0.009889,
+            "c1": 0.01
+          }
+        ],
+        "deti_summit": [
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-21 04:42",
+            "sensor": "VIIRS_NOAA20_750",
+            "mu": -6.096216318571037e-07,
+            "sd": 0.0005628301130446299,
+            "mu_mas_c2_sigma": 0.002814,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-21 05:54",
+            "sensor": "VIIRS_SNPP_750",
+            "mu": -1.4651004298509076e-06,
+            "sd": 0.0005770569346680405,
+            "mu_mas_c2_sigma": 0.002884,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-21 06:18",
+            "sensor": "VIIRS_NOAA20_750",
+            "mu": 2.7227000369381545e-06,
+            "sd": 0.0005772705169428424,
+            "mu_mas_c2_sigma": 0.002889,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-28 05:48",
+            "sensor": "VIIRS_NOAA20_750",
+            "mu": 2.5265502654915667e-08,
+            "sd": 0.0005990531854151267,
+            "mu_mas_c2_sigma": 0.002995,
+            "c1": 0.003
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-03-04 05:48",
+            "sensor": "VIIRS_SNPP_750",
+            "mu": 1.36623229239095e-06,
+            "sd": 0.0005242037867909797,
+            "mu_mas_c2_sigma": 0.002622,
+            "c1": 0.003
+          }
+        ],
+        "deti_scene": [
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-15 04:30",
+            "sensor": "VIIRS_SNPP_750",
+            "mu": -3.969249384918301e-06,
+            "sd": 0.0009704500613517886,
+            "mu_mas_c2_sigma": 0.009701,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-15 04:54",
+            "sensor": "VIIRS_NOAA20_750",
+            "mu": 2.5230237755900467e-06,
+            "sd": 0.0009496726790703274,
+            "mu_mas_c2_sigma": 0.009499,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-16 05:24",
+            "sensor": "VIIRS_NOAA21_750",
+            "mu": 1.5846371978460849e-06,
+            "sd": 0.0008103508420126036,
+            "mu_mas_c2_sigma": 0.008105,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-16 05:48",
+            "sensor": "VIIRS_SNPP_750",
+            "mu": 5.670199093522665e-07,
+            "sd": 0.0006330762978958193,
+            "mu_mas_c2_sigma": 0.006331,
+            "c1": 0.01
+          },
+          {
+            "volcan": "Chaiten",
+            "datetime_utc": "2025-02-16 06:12",
+            "sensor": "VIIRS_NOAA20_750",
+            "mu": 2.2360282614155978e-06,
+            "sd": 0.0006332194774226779,
+            "mu_mas_c2_sigma": 0.006334,
+            "c1": 0.01
+          }
+        ]
+      }
+    }
+  }
+}

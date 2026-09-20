@@ -1,0 +1,452 @@
+{
+  "perfil": "mirova_equivalent",
+  "flags_efectivos": {
+    "ENABLE_TESTS_23_PROSE_BRANCH": false,
+    "ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK": false,
+    "ENABLE_FIRST_PASS_TESTS_2_AND_3": true,
+    "ENABLE_SECOND_PASS_ADJACENT": true,
+    "ENABLE_SECOND_PASS_CONDITIONED": false,
+    "ENABLE_UNSUITABLE_FILTERS_267_273": true,
+    "ENABLE_MODIS_B22_PRIMARY": false,
+    "ENABLE_BT_SAT_SECONDARY_GUARD": true,
+    "ENABLE_DUAL_ROI_BT": true,
+    "ENABLE_DNTI_DUAL_ROI": true
+  },
+  "parametros_efectivos": {
+    "NTI_K1_NIGHT": -0.8,
+    "NTI_BT_SANITY_K": 3.0,
+    "BT_SAT_MIR_K_MODIS": 500.0,
+    "DNTI_CONTEXTUAL_C1_SUMMIT": 0.003,
+    "DNTI_CONTEXTUAL_C1_SCENE": 0.01,
+    "C2_DNTI_SUMMIT_NIGHT": 5.0,
+    "C2_DNTI_SCENE_NIGHT": 10.0,
+    "C2_DETI_SUMMIT_NIGHT": 5.0,
+    "C2_DETI_SCENE_NIGHT": 10.0,
+    "C1_SUMMIT_OVERRIDE": null,
+    "C2_SUMMIT_OVERRIDE": null,
+    "VIIRS_C2_OVERRIDE_NIGHT": null
+  },
+  "checks": {
+    "D23": {
+      "pregunta": "El hot_mask que sale de combine_hot_paths (con nti_path_hot) es pisado por fp_hot, la salida del primer pase?",
+      "k1_se_calcula": [
+        {
+          "archivo": "pipeline/process_modis.py",
+          "existe": true,
+          "n_matches": 1,
+          "matches": [
+            {
+              "linea": 666,
+              "texto": "& (nti > NTI_K1_NIGHT)"
+            }
+          ]
+        },
+        {
+          "archivo": "pipeline/process_viirs.py",
+          "existe": true,
+          "n_matches": 2,
+          "matches": [
+            {
+              "linea": 882,
+              "texto": "#   (B) NTI path: nti > NTI_K1_NIGHT  AND  bt > t_bg + NTI_BT_SANITY_K"
+            },
+            {
+              "linea": 1007,
+              "texto": "& (nti > NTI_K1_NIGHT)"
+            }
+          ]
+        },
+        {
+          "archivo": "pipeline/process_viirs_mod.py",
+          "existe": true,
+          "n_matches": 2,
+          "matches": [
+            {
+              "linea": 616,
+              "texto": "#   (B) NTI path: nti > NTI_K1_NIGHT  AND  bt > t_bg + NTI_BT_SANITY_K"
+            },
+            {
+              "linea": 650,
+              "texto": "& (nti > NTI_K1_NIGHT)"
+            }
+          ]
+        }
+      ],
+      "k1_entra_a_combine": [
+        {
+          "archivo": "pipeline/process_modis.py",
+          "existe": true,
+          "n_matches": 1,
+          "matches": [
+            {
+              "linea": 828,
+              "texto": "nti_path_hot=nti_path_hot,"
+            }
+          ]
+        },
+        {
+          "archivo": "pipeline/process_viirs.py",
+          "existe": true,
+          "n_matches": 1,
+          "matches": [
+            {
+              "linea": 1227,
+              "texto": "nti_path_hot=nti_path_hot,"
+            }
+          ]
+        },
+        {
+          "archivo": "pipeline/process_viirs_mod.py",
+          "existe": true,
+          "n_matches": 1,
+          "matches": [
+            {
+              "linea": 812,
+              "texto": "nti_path_hot=nti_path_hot,"
+            }
+          ]
+        }
+      ],
+      "hot_mask_pisado_por_fp_hot": [
+        {
+          "archivo": "pipeline/process_modis.py",
+          "existe": true,
+          "n_matches": 2,
+          "matches": [
+            {
+              "linea": 890,
+              "texto": "hot_mask_2d = fp_hot"
+            },
+            {
+              "linea": 911,
+              "texto": "# (necesitamos hot_mask_2d = fp_hot del bloque anterior y eti reusable del diag)."
+            }
+          ]
+        },
+        {
+          "archivo": "pipeline/process_viirs.py",
+          "existe": true,
+          "n_matches": 1,
+          "matches": [
+            {
+              "linea": 1299,
+              "texto": "hot_mask_2d = fp_hot"
+            }
+          ]
+        },
+        {
+          "archivo": "pipeline/process_viirs_mod.py",
+          "existe": true,
+          "n_matches": 1,
+          "matches": [
+            {
+              "linea": 878,
+              "texto": "hot_mask_2d = fp_hot"
+            }
+          ]
+        }
+      ],
+      "test1_mask_al_primer_pase": [
+        {
+          "archivo": "pipeline/process_modis.py",
+          "existe": true,
+          "n_matches": 1,
+          "matches": [
+            {
+              "linea": 885,
+              "texto": "test1_mask=_test1_mask_for_fp,"
+            }
+          ]
+        },
+        {
+          "archivo": "pipeline/process_viirs.py",
+          "existe": true,
+          "n_matches": 1,
+          "matches": [
+            {
+              "linea": 1291,
+              "texto": "test1_mask=_test1_mask_for_fp,"
+            }
+          ]
+        },
+        {
+          "archivo": "pipeline/process_viirs_mod.py",
+          "existe": true,
+          "n_matches": 1,
+          "matches": [
+            {
+              "linea": 873,
+              "texto": "test1_mask=_test1_mask_for_fp,"
+            }
+          ]
+        }
+      ],
+      "definicion_test1_mask_for_fp": [
+        {
+          "archivo": "pipeline/process_modis.py",
+          "existe": true,
+          "n_matches": 1,
+          "matches": [
+            {
+              "linea": 859,
+              "texto": "_test1_mask_for_fp = ("
+            }
+          ]
+        },
+        {
+          "archivo": "pipeline/process_viirs.py",
+          "existe": true,
+          "n_matches": 1,
+          "matches": [
+            {
+              "linea": 1268,
+              "texto": "_test1_mask_for_fp = ("
+            }
+          ]
+        },
+        {
+          "archivo": "pipeline/process_viirs_mod.py",
+          "existe": true,
+          "n_matches": 1,
+          "matches": [
+            {
+              "linea": 850,
+              "texto": "_test1_mask_for_fp = ("
+            }
+          ]
+        }
+      ]
+    },
+    "D24": {
+      "pregunta": "Los DN > 32767 (incluido 65533 = detector saturado) se convierten en NaN, y hay un segundo guard sobre BT?",
+      "umbral_invalid_si": {
+        "archivo": "pipeline/process_modis.py",
+        "existe": true,
+        "n_matches": 1,
+        "matches": [
+          {
+            "linea": 246,
+            "texto": "INVALID_SI_THRESHOLD = 32767"
+          }
+        ]
+      },
+      "nan_por_dn": {
+        "archivo": "pipeline/process_modis.py",
+        "existe": true,
+        "n_matches": 1,
+        "matches": [
+          {
+            "linea": 252,
+            "texto": "rad[dn > INVALID_SI_THRESHOLD] = np.nan"
+          }
+        ]
+      },
+      "guard_bt_secundario": {
+        "archivo": "pipeline/process_modis.py",
+        "existe": true,
+        "n_matches": 1,
+        "matches": [
+          {
+            "linea": 557,
+            "texto": "bt_mir = np.where(bt_mir > BT_SAT_MIR_K_MODIS, np.nan, bt_mir)"
+          }
+        ]
+      },
+      "merge_mir_bands": {
+        "archivo": "pipeline/process_modis.py",
+        "existe": true,
+        "n_matches": 2,
+        "matches": [
+          {
+            "linea": 334,
+            "texto": "return np.where(np.isnan(rad22), rad21, rad22)"
+          },
+          {
+            "linea": 335,
+            "texto": "return np.where(np.isnan(rad21), rad22, rad21)"
+          }
+        ]
+      }
+    },
+    "D26": {
+      "pregunta": "El segundo pase arma su bg_mask sin los filtros de no-aptos que el primer pase si aplica, y con que conectiva se combina?",
+      "bg_mask_segundo_pase": {
+        "archivo": "pipeline/detection_context.py",
+        "existe": true,
+        "n_matches": 1,
+        "matches": [
+          {
+            "linea": 923,
+            "texto": "bg_mask = (~active_mask) & np.isfinite(dnti) & np.isfinite(deti)"
+          }
+        ]
+      },
+      "filtros_no_aptos_primer_pase": {
+        "archivo": "pipeline/detection_context.py",
+        "existe": true,
+        "n_matches": 1,
+        "matches": [
+          {
+            "linea": 81,
+            "texto": "def build_unsuitable_mask("
+          }
+        ]
+      },
+      "uso_no_aptos_primer_pase": {
+        "archivo": "pipeline/detection_context.py",
+        "existe": true,
+        "n_matches": 2,
+        "matches": [
+          {
+            "linea": 81,
+            "texto": "def build_unsuitable_mask("
+          },
+          {
+            "linea": 492,
+            "texto": "bg_mask = build_unsuitable_mask("
+          }
+        ]
+      },
+      "conectiva": {
+        "archivo": "pipeline/detection_context.py",
+        "existe": true,
+        "n_matches": 2,
+        "matches": [
+          {
+            "linea": 525,
+            "texto": "combinar = max if use_prose_branch else min"
+          },
+          {
+            "linea": 943,
+            "texto": "combinar = max if use_prose_branch else min"
+          }
+        ]
+      },
+      "hay_gate_bt_en_segundo_pase": {
+        "archivo": "pipeline/detection_context.py",
+        "existe": true,
+        "n_matches": 1,
+        "matches": [
+          {
+            "linea": 607,
+            "texto": "sigma_summit = min(n_sigma_summit * std_bg, max_sigma_cap_k)"
+          }
+        ]
+      }
+    },
+    "D29": {
+      "pregunta": "El refit iterativo existe, esta encendido por defecto y algun caller lo apaga?",
+      "parametro": {
+        "archivo": "pipeline/detection_context.py",
+        "existe": true,
+        "n_matches": 1,
+        "matches": [
+          {
+            "linea": 704,
+            "texto": "iterative_refit: bool = True,"
+          }
+        ]
+      },
+      "bloque_refit": {
+        "archivo": "pipeline/detection_context.py",
+        "existe": true,
+        "n_matches": 1,
+        "matches": [
+          {
+            "linea": 770,
+            "texto": "if iterative_refit:"
+          }
+        ]
+      },
+      "criterio_outlier": {
+        "archivo": "pipeline/detection_context.py",
+        "existe": true,
+        "n_matches": 1,
+        "matches": [
+          {
+            "linea": 779,
+            "texto": "new_inliers = np.where(np.abs(residuals) <= outlier_sigma * sigma)[0]"
+          }
+        ]
+      },
+      "callers_que_lo_pasan": [
+        {
+          "archivo": "pipeline/process_modis.py",
+          "existe": true,
+          "n_matches": 0,
+          "matches": []
+        },
+        {
+          "archivo": "pipeline/process_viirs.py",
+          "existe": true,
+          "n_matches": 0,
+          "matches": []
+        },
+        {
+          "archivo": "pipeline/process_viirs_mod.py",
+          "existe": true,
+          "n_matches": 0,
+          "matches": []
+        },
+        {
+          "archivo": "pipeline/detection_context.py",
+          "existe": true,
+          "n_matches": 4,
+          "matches": [
+            {
+              "linea": 704,
+              "texto": "iterative_refit: bool = True,"
+            },
+            {
+              "linea": 721,
+              "texto": "2. **Iterative re-fit** (cuando ``iterative_refit=True``): hasta"
+            },
+            {
+              "linea": 740,
+              "texto": "iterative_refit: si True, refina excluyendo outliers >outlier_sigma·σ."
+            },
+            {
+              "linea": 770,
+              "texto": "if iterative_refit:"
+            }
+          ]
+        }
+      ],
+      "callers_de_la_funcion": [
+        {
+          "archivo": "pipeline/process_modis.py",
+          "existe": true,
+          "n_matches": 1,
+          "matches": [
+            {
+              "linea": 782,
+              "texto": "eti_2d = compute_eti_scene_quadratic(nti, nti_app, mask_valid_eti)"
+            }
+          ]
+        },
+        {
+          "archivo": "pipeline/process_viirs.py",
+          "existe": true,
+          "n_matches": 1,
+          "matches": [
+            {
+              "linea": 1173,
+              "texto": "eti_2d = compute_eti_scene_quadratic("
+            }
+          ]
+        },
+        {
+          "archivo": "pipeline/process_viirs_mod.py",
+          "existe": true,
+          "n_matches": 1,
+          "matches": [
+            {
+              "linea": 772,
+              "texto": "eti_2d = compute_eti_scene_quadratic(nti, nti_app_m, mask_valid_eti)"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

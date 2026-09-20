@@ -1,0 +1,1659 @@
+{
+  "generado_utc": "2026-09-20T05:26:54+00:00",
+  "etiqueta_ventana": "regimen_previo_pre535",
+  "ventana": {
+    "inicio": "2026-06-01",
+    "fin": "2026-08-25",
+    "por_que": "posterior al #571 (2026-08-31 20:34 UTC) y al #535 (2026-08-28 23:00 UTC)"
+  },
+  "sha_index_html": "24fba8a157136bf76509ed647c7d086d3f9f45aa",
+  "referencia_sha": {
+    "registro_vrp_consolidado.csv": "9b788da2c5a80920022221713e84d71828a52d3b",
+    "registro_vrp_ocr.csv": "7e3438046ca1e65eb80f20ae8b11c67e0ce5a453"
+  },
+  "n_filas_ref_nocturnas": 7270,
+  "control_identidad_predicado": [
+    [
+      0,
+      1,
+      1,
+      1,
+      0
+    ],
+    [
+      1,
+      0
+    ]
+  ],
+  "control_identidad_ok": true,
+  "definiciones": {
+    "cerca": "frontend/index.html l.1056 y l.1060: mirovaEqVrp devuelve 0 si distance_class existe y no es 'summit' (c1), o si pc.centroid_dist_km > inner_radius (c2)",
+    "mw_grafico": "isThermalArtifact(r,inner) ? 0 : mirovaEqVrpDisplay(r,inner,includeFar), que es la expresion de frontend/index.html l.2258, con USE_F5_CORE=true",
+    "sin_cerca": "lo mismo con includeFar=true, que es el toggle 'incluir lejanas' del dashboard",
+    "silenciado": "record que la cerca apaga y que sin ella el grafico dibujaria (mw>0)",
+    "pos": "MIROVA alerto en esa pasada (pareo +-120 s, CONS u OCR)",
+    "neg_limpio": "MIROVA miro esa pasada y no vio nada (RUTINA CONS con vrp 0, sin alerta ni FP)",
+    "far_ref": "MIROVA marco FALSO_POSITIVO: calor fuera del limite, sin informacion del crater",
+    "sin_info": "sin fila de referencia pareable: fuera de todo denominador"
+  },
+  "control_atribucion": {
+    "n_records_que_pasan_con_magnitud_distinta": 0,
+    "mw_de_diferencia_fuera_de_la_cerca": 0.0,
+    "n_apagados_que_igual_no_dibujarian": 3
+  },
+  "total": {
+    "n_records": 9962,
+    "n_cumulos_con_magnitud": 5541,
+    "n_no_summit_entre_cumulos_con_magnitud": 1929,
+    "pct_denominador_s124": 34.81,
+    "n_no_summit": 1932,
+    "pct_no_summit_sobre_records": 19.39,
+    "n_c2_cumulo_fuera_inner": 0,
+    "n_legacy_sin_cumulo": 3722,
+    "n_publica_hoy": 3610,
+    "mw_grafico_hoy": 1148.4,
+    "mw_grafico_sin_cerca": 4592.628,
+    "mw_apagados_por_la_cerca": 3444.229,
+    "pct_mw_apagados_sobre_sin_cerca": 74.99,
+    "n_silenciados": 1929,
+    "pct_silenciados_sobre_records": 19.36,
+    "etiquetas_de_los_silenciados": {
+      "neg_limpio": 1762,
+      "sin_info": 138,
+      "pos": 15,
+      "far_ref": 14
+    },
+    "etiquetas_de_todas_las_pasadas": {
+      "neg_limpio": 5706,
+      "sin_info": 3485,
+      "pos": 620,
+      "far_ref": 151
+    },
+    "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+    "mw_apagados_que_quedarian_si_se_quita_la_cerca": 3444.229
+  },
+  "por_sensor": {
+    "MODIS": {
+      "n_records": 2106,
+      "n_cumulos_con_magnitud": 2103,
+      "n_no_summit_entre_cumulos_con_magnitud": 1846,
+      "pct_denominador_s124": 87.78,
+      "n_no_summit": 1846,
+      "pct_no_summit_sobre_records": 87.65,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 2,
+      "n_publica_hoy": 256,
+      "mw_grafico_hoy": 585.605,
+      "mw_grafico_sin_cerca": 3984.002,
+      "mw_apagados_por_la_cerca": 3398.397,
+      "pct_mw_apagados_sobre_sin_cerca": 85.3,
+      "n_silenciados": 1846,
+      "pct_silenciados_sobre_records": 87.65,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 1731,
+        "sin_info": 97,
+        "pos": 15,
+        "far_ref": 3
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 1974,
+        "sin_info": 113,
+        "pos": 16,
+        "far_ref": 3
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 3398.397
+    },
+    "VIIRS375": {
+      "n_records": 3944,
+      "n_cumulos_con_magnitud": 2433,
+      "n_no_summit_entre_cumulos_con_magnitud": 12,
+      "pct_denominador_s124": 0.49,
+      "n_no_summit": 12,
+      "pct_no_summit_sobre_records": 0.3,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 1193,
+      "n_publica_hoy": 2420,
+      "mw_grafico_hoy": 203.503,
+      "mw_grafico_sin_cerca": 207.015,
+      "mw_apagados_por_la_cerca": 3.513,
+      "pct_mw_apagados_sobre_sin_cerca": 1.7,
+      "n_silenciados": 12,
+      "pct_silenciados_sobre_records": 0.3,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 7,
+        "far_ref": 5
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "pos": 509,
+        "far_ref": 138,
+        "sin_info": 1801,
+        "neg_limpio": 1496
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 3.513
+    },
+    "VIIRS750": {
+      "n_records": 3912,
+      "n_cumulos_con_magnitud": 1005,
+      "n_no_summit_entre_cumulos_con_magnitud": 71,
+      "pct_denominador_s124": 7.06,
+      "n_no_summit": 74,
+      "pct_no_summit_sobre_records": 1.89,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 2527,
+      "n_publica_hoy": 934,
+      "mw_grafico_hoy": 359.292,
+      "mw_grafico_sin_cerca": 401.611,
+      "mw_apagados_por_la_cerca": 42.319,
+      "pct_mw_apagados_sobre_sin_cerca": 10.54,
+      "n_silenciados": 71,
+      "pct_silenciados_sobre_records": 1.81,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 34,
+        "neg_limpio": 31,
+        "far_ref": 6
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "pos": 95,
+        "sin_info": 1571,
+        "neg_limpio": 2236,
+        "far_ref": 10
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 42.319
+    }
+  },
+  "por_volcan": {
+    "Lascar": {
+      "n_records": 790,
+      "n_cumulos_con_magnitud": 440,
+      "n_no_summit_entre_cumulos_con_magnitud": 176,
+      "pct_denominador_s124": 40.0,
+      "n_no_summit": 176,
+      "pct_no_summit_sobre_records": 22.28,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 201,
+      "n_publica_hoy": 264,
+      "mw_grafico_hoy": 60.853,
+      "mw_grafico_sin_cerca": 293.756,
+      "mw_apagados_por_la_cerca": 232.903,
+      "pct_mw_apagados_sobre_sin_cerca": 79.28,
+      "n_silenciados": 176,
+      "pct_silenciados_sobre_records": 22.28,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 132,
+        "sin_info": 27,
+        "pos": 15,
+        "far_ref": 2
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 299,
+        "sin_info": 306,
+        "pos": 159,
+        "far_ref": 26
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 232.903
+    },
+    "Lastarria": {
+      "n_records": 793,
+      "n_cumulos_con_magnitud": 360,
+      "n_no_summit_entre_cumulos_con_magnitud": 176,
+      "pct_denominador_s124": 48.89,
+      "n_no_summit": 176,
+      "pct_no_summit_sobre_records": 22.19,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 277,
+      "n_publica_hoy": 184,
+      "mw_grafico_hoy": 27.274,
+      "mw_grafico_sin_cerca": 254.333,
+      "mw_apagados_por_la_cerca": 227.058,
+      "pct_mw_apagados_sobre_sin_cerca": 89.28,
+      "n_silenciados": 176,
+      "pct_silenciados_sobre_records": 22.19,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 155,
+        "sin_info": 16,
+        "far_ref": 5
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 392,
+        "pos": 73,
+        "sin_info": 297,
+        "far_ref": 31
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 227.058
+    },
+    "Isluga": {
+      "n_records": 759,
+      "n_cumulos_con_magnitud": 532,
+      "n_no_summit_entre_cumulos_con_magnitud": 166,
+      "pct_denominador_s124": 31.2,
+      "n_no_summit": 166,
+      "pct_no_summit_sobre_records": 21.87,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 162,
+      "n_publica_hoy": 366,
+      "mw_grafico_hoy": 72.819,
+      "mw_grafico_sin_cerca": 289.763,
+      "mw_apagados_por_la_cerca": 216.944,
+      "pct_mw_apagados_sobre_sin_cerca": 74.87,
+      "n_silenciados": 166,
+      "pct_silenciados_sobre_records": 21.87,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 153,
+        "sin_info": 10,
+        "far_ref": 3
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 331,
+        "pos": 138,
+        "sin_info": 268,
+        "far_ref": 22
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 216.944
+    },
+    "Tupungatito": {
+      "n_records": 889,
+      "n_cumulos_con_magnitud": 482,
+      "n_no_summit_entre_cumulos_con_magnitud": 184,
+      "pct_denominador_s124": 38.17,
+      "n_no_summit": 185,
+      "pct_no_summit_sobre_records": 20.81,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 361,
+      "n_publica_hoy": 298,
+      "mw_grafico_hoy": 68.557,
+      "mw_grafico_sin_cerca": 545.908,
+      "mw_apagados_por_la_cerca": 477.351,
+      "pct_mw_apagados_sobre_sin_cerca": 87.44,
+      "n_silenciados": 184,
+      "pct_silenciados_sobre_records": 20.7,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 168,
+        "sin_info": 15,
+        "far_ref": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 489,
+        "sin_info": 328,
+        "pos": 54,
+        "far_ref": 18
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 477.351
+    },
+    "PlanchonPeteroa": {
+      "n_records": 889,
+      "n_cumulos_con_magnitud": 462,
+      "n_no_summit_entre_cumulos_con_magnitud": 171,
+      "pct_denominador_s124": 37.01,
+      "n_no_summit": 171,
+      "pct_no_summit_sobre_records": 19.24,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 392,
+      "n_publica_hoy": 291,
+      "mw_grafico_hoy": 62.958,
+      "mw_grafico_sin_cerca": 329.634,
+      "mw_apagados_por_la_cerca": 266.677,
+      "pct_mw_apagados_sobre_sin_cerca": 80.9,
+      "n_silenciados": 171,
+      "pct_silenciados_sobre_records": 19.24,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 160,
+        "sin_info": 10,
+        "far_ref": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 509,
+        "pos": 48,
+        "sin_info": 311,
+        "far_ref": 21
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 266.677
+    },
+    "NevadosDeChillan": {
+      "n_records": 940,
+      "n_cumulos_con_magnitud": 393,
+      "n_no_summit_entre_cumulos_con_magnitud": 187,
+      "pct_denominador_s124": 47.58,
+      "n_no_summit": 188,
+      "pct_no_summit_sobre_records": 20.0,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 397,
+      "n_publica_hoy": 206,
+      "mw_grafico_hoy": 44.879,
+      "mw_grafico_sin_cerca": 372.728,
+      "mw_apagados_por_la_cerca": 327.849,
+      "pct_mw_apagados_sobre_sin_cerca": 87.96,
+      "n_silenciados": 187,
+      "pct_silenciados_sobre_records": 19.89,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 17,
+        "neg_limpio": 170
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 591,
+        "sin_info": 330,
+        "far_ref": 14,
+        "pos": 5
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 327.849
+    },
+    "Llaima": {
+      "n_records": 963,
+      "n_cumulos_con_magnitud": 508,
+      "n_no_summit_entre_cumulos_con_magnitud": 197,
+      "pct_denominador_s124": 38.78,
+      "n_no_summit": 197,
+      "pct_no_summit_sobre_records": 20.46,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 442,
+      "n_publica_hoy": 311,
+      "mw_grafico_hoy": 67.619,
+      "mw_grafico_sin_cerca": 446.686,
+      "mw_apagados_por_la_cerca": 379.068,
+      "pct_mw_apagados_sobre_sin_cerca": 84.86,
+      "n_silenciados": 197,
+      "pct_silenciados_sobre_records": 20.46,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 188,
+        "sin_info": 9
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 662,
+        "sin_info": 295,
+        "far_ref": 6
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 379.068
+    },
+    "Villarrica": {
+      "n_records": 964,
+      "n_cumulos_con_magnitud": 544,
+      "n_no_summit_entre_cumulos_con_magnitud": 195,
+      "pct_denominador_s124": 35.85,
+      "n_no_summit": 195,
+      "pct_no_summit_sobre_records": 20.23,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 407,
+      "n_publica_hoy": 348,
+      "mw_grafico_hoy": 74.028,
+      "mw_grafico_sin_cerca": 443.17,
+      "mw_apagados_por_la_cerca": 369.142,
+      "pct_mw_apagados_sobre_sin_cerca": 83.3,
+      "n_silenciados": 195,
+      "pct_silenciados_sobre_records": 20.23,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 187,
+        "sin_info": 8
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 622,
+        "sin_info": 321,
+        "pos": 17,
+        "far_ref": 4
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 369.142
+    },
+    "Copahue": {
+      "n_records": 931,
+      "n_cumulos_con_magnitud": 533,
+      "n_no_summit_entre_cumulos_con_magnitud": 195,
+      "pct_denominador_s124": 36.59,
+      "n_no_summit": 196,
+      "pct_no_summit_sobre_records": 21.05,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 395,
+      "n_publica_hoy": 338,
+      "mw_grafico_hoy": 64.066,
+      "mw_grafico_sin_cerca": 382.974,
+      "mw_apagados_por_la_cerca": 318.909,
+      "pct_mw_apagados_sobre_sin_cerca": 83.27,
+      "n_silenciados": 195,
+      "pct_silenciados_sobre_records": 20.95,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 186,
+        "sin_info": 8,
+        "far_ref": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 631,
+        "sin_info": 291,
+        "far_ref": 5,
+        "pos": 4
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 318.909
+    },
+    "PuyehueCordonCaulle": {
+      "n_records": 998,
+      "n_cumulos_con_magnitud": 690,
+      "n_no_summit_entre_cumulos_con_magnitud": 68,
+      "pct_denominador_s124": 9.86,
+      "n_no_summit": 68,
+      "pct_no_summit_sobre_records": 6.81,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 257,
+      "n_publica_hoy": 621,
+      "mw_grafico_hoy": 486.131,
+      "mw_grafico_sin_cerca": 668.146,
+      "mw_apagados_por_la_cerca": 182.015,
+      "pct_mw_apagados_sobre_sin_cerca": 27.24,
+      "n_silenciados": 68,
+      "pct_silenciados_sobre_records": 6.81,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 60,
+        "sin_info": 8
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 518,
+        "sin_info": 374,
+        "pos": 104,
+        "far_ref": 2
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 182.015
+    },
+    "Chaiten": {
+      "n_records": 1046,
+      "n_cumulos_con_magnitud": 597,
+      "n_no_summit_entre_cumulos_con_magnitud": 214,
+      "pct_denominador_s124": 35.85,
+      "n_no_summit": 214,
+      "pct_no_summit_sobre_records": 20.46,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 431,
+      "n_publica_hoy": 383,
+      "mw_grafico_hoy": 119.217,
+      "mw_grafico_sin_cerca": 565.53,
+      "mw_apagados_por_la_cerca": 446.313,
+      "pct_mw_apagados_sobre_sin_cerca": 78.92,
+      "n_silenciados": 214,
+      "pct_silenciados_sobre_records": 20.46,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 203,
+        "sin_info": 10,
+        "far_ref": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 662,
+        "sin_info": 364,
+        "far_ref": 2,
+        "pos": 18
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 446.313
+    }
+  },
+  "por_volcan_y_sensor": {
+    "Lascar|MODIS": {
+      "n_records": 165,
+      "n_cumulos_con_magnitud": 165,
+      "n_no_summit_entre_cumulos_con_magnitud": 161,
+      "pct_denominador_s124": 97.58,
+      "n_no_summit": 161,
+      "pct_no_summit_sobre_records": 97.58,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 0,
+      "n_publica_hoy": 4,
+      "mw_grafico_hoy": 2.716,
+      "mw_grafico_sin_cerca": 230.172,
+      "mw_apagados_por_la_cerca": 227.456,
+      "pct_mw_apagados_sobre_sin_cerca": 98.82,
+      "n_silenciados": 161,
+      "pct_silenciados_sobre_records": 97.58,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 129,
+        "sin_info": 17,
+        "pos": 15
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 132,
+        "sin_info": 17,
+        "pos": 16
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 227.456
+    },
+    "Lascar|VIIRS375": {
+      "n_records": 314,
+      "n_cumulos_con_magnitud": 173,
+      "n_no_summit_entre_cumulos_con_magnitud": 3,
+      "pct_denominador_s124": 1.73,
+      "n_no_summit": 3,
+      "pct_no_summit_sobre_records": 0.96,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 60,
+      "n_publica_hoy": 170,
+      "mw_grafico_hoy": 33.648,
+      "mw_grafico_sin_cerca": 34.767,
+      "mw_apagados_por_la_cerca": 1.119,
+      "pct_mw_apagados_sobre_sin_cerca": 3.22,
+      "n_silenciados": 3,
+      "pct_silenciados_sobre_records": 0.96,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 1,
+        "far_ref": 2
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "pos": 101,
+        "far_ref": 26,
+        "sin_info": 139,
+        "neg_limpio": 48
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 1.119
+    },
+    "Lascar|VIIRS750": {
+      "n_records": 311,
+      "n_cumulos_con_magnitud": 102,
+      "n_no_summit_entre_cumulos_con_magnitud": 12,
+      "pct_denominador_s124": 11.76,
+      "n_no_summit": 12,
+      "pct_no_summit_sobre_records": 3.86,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 141,
+      "n_publica_hoy": 90,
+      "mw_grafico_hoy": 24.489,
+      "mw_grafico_sin_cerca": 28.817,
+      "mw_apagados_por_la_cerca": 4.328,
+      "pct_mw_apagados_sobre_sin_cerca": 15.02,
+      "n_silenciados": 12,
+      "pct_silenciados_sobre_records": 3.86,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 9,
+        "neg_limpio": 3
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "pos": 42,
+        "sin_info": 150,
+        "neg_limpio": 119
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 4.328
+    },
+    "Lastarria|MODIS": {
+      "n_records": 169,
+      "n_cumulos_con_magnitud": 168,
+      "n_no_summit_entre_cumulos_con_magnitud": 157,
+      "pct_denominador_s124": 93.45,
+      "n_no_summit": 157,
+      "pct_no_summit_sobre_records": 92.9,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 1,
+      "n_publica_hoy": 11,
+      "mw_grafico_hoy": 14.036,
+      "mw_grafico_sin_cerca": 227.717,
+      "mw_apagados_por_la_cerca": 213.681,
+      "pct_mw_apagados_sobre_sin_cerca": 93.84,
+      "n_silenciados": 157,
+      "pct_silenciados_sobre_records": 92.9,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 146,
+        "sin_info": 11
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 155,
+        "sin_info": 14
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 213.681
+    },
+    "Lastarria|VIIRS375": {
+      "n_records": 313,
+      "n_cumulos_con_magnitud": 112,
+      "n_no_summit_entre_cumulos_con_magnitud": 1,
+      "pct_denominador_s124": 0.89,
+      "n_no_summit": 1,
+      "pct_no_summit_sobre_records": 0.32,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 63,
+      "n_publica_hoy": 111,
+      "mw_grafico_hoy": 4.12,
+      "mw_grafico_sin_cerca": 4.21,
+      "mw_apagados_por_la_cerca": 0.091,
+      "pct_mw_apagados_sobre_sin_cerca": 2.16,
+      "n_silenciados": 1,
+      "pct_silenciados_sobre_records": 0.32,
+      "etiquetas_de_los_silenciados": {
+        "far_ref": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "pos": 73,
+        "sin_info": 167,
+        "far_ref": 27,
+        "neg_limpio": 46
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 0.091
+    },
+    "Lastarria|VIIRS750": {
+      "n_records": 311,
+      "n_cumulos_con_magnitud": 80,
+      "n_no_summit_entre_cumulos_con_magnitud": 18,
+      "pct_denominador_s124": 22.5,
+      "n_no_summit": 18,
+      "pct_no_summit_sobre_records": 5.79,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 213,
+      "n_publica_hoy": 62,
+      "mw_grafico_hoy": 9.119,
+      "mw_grafico_sin_cerca": 22.405,
+      "mw_apagados_por_la_cerca": 13.286,
+      "pct_mw_apagados_sobre_sin_cerca": 59.3,
+      "n_silenciados": 18,
+      "pct_silenciados_sobre_records": 5.79,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 9,
+        "far_ref": 4,
+        "sin_info": 5
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 191,
+        "sin_info": 116,
+        "far_ref": 4
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 13.286
+    },
+    "Isluga|MODIS": {
+      "n_records": 161,
+      "n_cumulos_con_magnitud": 161,
+      "n_no_summit_entre_cumulos_con_magnitud": 159,
+      "pct_denominador_s124": 98.76,
+      "n_no_summit": 159,
+      "pct_no_summit_sobre_records": 98.76,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 0,
+      "n_publica_hoy": 2,
+      "mw_grafico_hoy": 2.22,
+      "mw_grafico_sin_cerca": 214.842,
+      "mw_apagados_por_la_cerca": 212.622,
+      "pct_mw_apagados_sobre_sin_cerca": 98.97,
+      "n_silenciados": 159,
+      "pct_silenciados_sobre_records": 98.76,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 150,
+        "sin_info": 7,
+        "far_ref": 2
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 152,
+        "sin_info": 7,
+        "far_ref": 2
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 212.622
+    },
+    "Isluga|VIIRS375": {
+      "n_records": 299,
+      "n_cumulos_con_magnitud": 275,
+      "n_no_summit_entre_cumulos_con_magnitud": 1,
+      "pct_denominador_s124": 0.36,
+      "n_no_summit": 1,
+      "pct_no_summit_sobre_records": 0.33,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 20,
+      "n_publica_hoy": 274,
+      "mw_grafico_hoy": 28.132,
+      "mw_grafico_sin_cerca": 28.555,
+      "mw_apagados_por_la_cerca": 0.423,
+      "pct_mw_apagados_sobre_sin_cerca": 1.48,
+      "n_silenciados": 1,
+      "pct_silenciados_sobre_records": 0.33,
+      "etiquetas_de_los_silenciados": {
+        "far_ref": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "pos": 120,
+        "sin_info": 138,
+        "far_ref": 20,
+        "neg_limpio": 21
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 0.423
+    },
+    "Isluga|VIIRS750": {
+      "n_records": 299,
+      "n_cumulos_con_magnitud": 96,
+      "n_no_summit_entre_cumulos_con_magnitud": 6,
+      "pct_denominador_s124": 6.25,
+      "n_no_summit": 6,
+      "pct_no_summit_sobre_records": 2.01,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 142,
+      "n_publica_hoy": 90,
+      "mw_grafico_hoy": 42.467,
+      "mw_grafico_sin_cerca": 46.366,
+      "mw_apagados_por_la_cerca": 3.899,
+      "pct_mw_apagados_sobre_sin_cerca": 8.41,
+      "n_silenciados": 6,
+      "pct_silenciados_sobre_records": 2.01,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 3,
+        "sin_info": 3
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 158,
+        "sin_info": 123,
+        "pos": 18
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 3.899
+    },
+    "Tupungatito|MODIS": {
+      "n_records": 182,
+      "n_cumulos_con_magnitud": 182,
+      "n_no_summit_entre_cumulos_con_magnitud": 170,
+      "pct_denominador_s124": 93.41,
+      "n_no_summit": 170,
+      "pct_no_summit_sobre_records": 93.41,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 0,
+      "n_publica_hoy": 12,
+      "mw_grafico_hoy": 28.685,
+      "mw_grafico_sin_cerca": 500.458,
+      "mw_apagados_por_la_cerca": 471.773,
+      "pct_mw_apagados_sobre_sin_cerca": 94.27,
+      "n_silenciados": 170,
+      "pct_silenciados_sobre_records": 93.41,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 161,
+        "sin_info": 9
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 173,
+        "sin_info": 9
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 471.773
+    },
+    "Tupungatito|VIIRS375": {
+      "n_records": 355,
+      "n_cumulos_con_magnitud": 191,
+      "n_no_summit_entre_cumulos_con_magnitud": 1,
+      "pct_denominador_s124": 0.52,
+      "n_no_summit": 1,
+      "pct_no_summit_sobre_records": 0.28,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 164,
+      "n_publica_hoy": 190,
+      "mw_grafico_hoy": 11.362,
+      "mw_grafico_sin_cerca": 11.441,
+      "mw_apagados_por_la_cerca": 0.079,
+      "pct_mw_apagados_sobre_sin_cerca": 0.69,
+      "n_silenciados": 1,
+      "pct_silenciados_sobre_records": 0.28,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "pos": 52,
+        "sin_info": 180,
+        "far_ref": 15,
+        "neg_limpio": 108
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 0.079
+    },
+    "Tupungatito|VIIRS750": {
+      "n_records": 352,
+      "n_cumulos_con_magnitud": 109,
+      "n_no_summit_entre_cumulos_con_magnitud": 13,
+      "pct_denominador_s124": 11.93,
+      "n_no_summit": 14,
+      "pct_no_summit_sobre_records": 3.98,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 197,
+      "n_publica_hoy": 96,
+      "mw_grafico_hoy": 28.51,
+      "mw_grafico_sin_cerca": 34.009,
+      "mw_apagados_por_la_cerca": 5.499,
+      "pct_mw_apagados_sobre_sin_cerca": 16.17,
+      "n_silenciados": 13,
+      "pct_silenciados_sobre_records": 3.69,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 7,
+        "far_ref": 1,
+        "sin_info": 5
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 208,
+        "sin_info": 139,
+        "pos": 2,
+        "far_ref": 3
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 5.499
+    },
+    "PlanchonPeteroa|MODIS": {
+      "n_records": 183,
+      "n_cumulos_con_magnitud": 183,
+      "n_no_summit_entre_cumulos_con_magnitud": 168,
+      "pct_denominador_s124": 91.8,
+      "n_no_summit": 168,
+      "pct_no_summit_sobre_records": 91.8,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 0,
+      "n_publica_hoy": 15,
+      "mw_grafico_hoy": 26.075,
+      "mw_grafico_sin_cerca": 290.878,
+      "mw_apagados_por_la_cerca": 264.803,
+      "pct_mw_apagados_sobre_sin_cerca": 91.04,
+      "n_silenciados": 168,
+      "pct_silenciados_sobre_records": 91.8,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 160,
+        "sin_info": 8
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 175,
+        "sin_info": 8
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 264.803
+    },
+    "PlanchonPeteroa|VIIRS375": {
+      "n_records": 355,
+      "n_cumulos_con_magnitud": 219,
+      "n_no_summit_entre_cumulos_con_magnitud": 1,
+      "pct_denominador_s124": 0.46,
+      "n_no_summit": 1,
+      "pct_no_summit_sobre_records": 0.28,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 136,
+      "n_publica_hoy": 218,
+      "mw_grafico_hoy": 14.938,
+      "mw_grafico_sin_cerca": 15.066,
+      "mw_apagados_por_la_cerca": 0.128,
+      "pct_mw_apagados_sobre_sin_cerca": 0.85,
+      "n_silenciados": 1,
+      "pct_silenciados_sobre_records": 0.28,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "pos": 43,
+        "sin_info": 164,
+        "neg_limpio": 128,
+        "far_ref": 20
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 0.128
+    },
+    "PlanchonPeteroa|VIIRS750": {
+      "n_records": 351,
+      "n_cumulos_con_magnitud": 60,
+      "n_no_summit_entre_cumulos_con_magnitud": 2,
+      "pct_denominador_s124": 3.33,
+      "n_no_summit": 2,
+      "pct_no_summit_sobre_records": 0.57,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 256,
+      "n_publica_hoy": 58,
+      "mw_grafico_hoy": 21.945,
+      "mw_grafico_sin_cerca": 23.691,
+      "mw_apagados_por_la_cerca": 1.746,
+      "pct_mw_apagados_sobre_sin_cerca": 7.37,
+      "n_silenciados": 2,
+      "pct_silenciados_sobre_records": 0.57,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 1,
+        "far_ref": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 206,
+        "sin_info": 139,
+        "pos": 5,
+        "far_ref": 1
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 1.746
+    },
+    "NevadosDeChillan|MODIS": {
+      "n_records": 196,
+      "n_cumulos_con_magnitud": 194,
+      "n_no_summit_entre_cumulos_con_magnitud": 181,
+      "pct_denominador_s124": 93.3,
+      "n_no_summit": 181,
+      "pct_no_summit_sobre_records": 92.35,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 1,
+      "n_publica_hoy": 13,
+      "mw_grafico_hoy": 31.392,
+      "mw_grafico_sin_cerca": 356.499,
+      "mw_apagados_por_la_cerca": 325.107,
+      "pct_mw_apagados_sobre_sin_cerca": 91.19,
+      "n_silenciados": 181,
+      "pct_silenciados_sobre_records": 92.35,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 167,
+        "sin_info": 14
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 180,
+        "sin_info": 16
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 325.107
+    },
+    "NevadosDeChillan|VIIRS375": {
+      "n_records": 375,
+      "n_cumulos_con_magnitud": 157,
+      "n_no_summit_entre_cumulos_con_magnitud": 1,
+      "pct_denominador_s124": 0.64,
+      "n_no_summit": 1,
+      "pct_no_summit_sobre_records": 0.27,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 129,
+      "n_publica_hoy": 156,
+      "mw_grafico_hoy": 6.395,
+      "mw_grafico_sin_cerca": 6.514,
+      "mw_apagados_por_la_cerca": 0.119,
+      "pct_mw_apagados_sobre_sin_cerca": 1.83,
+      "n_silenciados": 1,
+      "pct_silenciados_sobre_records": 0.27,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "sin_info": 171,
+        "far_ref": 12,
+        "neg_limpio": 187,
+        "pos": 5
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 0.119
+    },
+    "NevadosDeChillan|VIIRS750": {
+      "n_records": 369,
+      "n_cumulos_con_magnitud": 42,
+      "n_no_summit_entre_cumulos_con_magnitud": 5,
+      "pct_denominador_s124": 11.9,
+      "n_no_summit": 6,
+      "pct_no_summit_sobre_records": 1.63,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 267,
+      "n_publica_hoy": 37,
+      "mw_grafico_hoy": 7.092,
+      "mw_grafico_sin_cerca": 9.715,
+      "mw_apagados_por_la_cerca": 2.623,
+      "pct_mw_apagados_sobre_sin_cerca": 27.0,
+      "n_silenciados": 5,
+      "pct_silenciados_sobre_records": 1.36,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 2,
+        "neg_limpio": 3
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "sin_info": 143,
+        "far_ref": 2,
+        "neg_limpio": 224
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 2.623
+    },
+    "Llaima|MODIS": {
+      "n_records": 204,
+      "n_cumulos_con_magnitud": 204,
+      "n_no_summit_entre_cumulos_con_magnitud": 195,
+      "pct_denominador_s124": 95.59,
+      "n_no_summit": 195,
+      "pct_no_summit_sobre_records": 95.59,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 0,
+      "n_publica_hoy": 9,
+      "mw_grafico_hoy": 18.214,
+      "mw_grafico_sin_cerca": 394.608,
+      "mw_apagados_por_la_cerca": 376.394,
+      "pct_mw_apagados_sobre_sin_cerca": 95.38,
+      "n_silenciados": 195,
+      "pct_silenciados_sobre_records": 95.59,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 188,
+        "sin_info": 7
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 197,
+        "sin_info": 7
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 376.394
+    },
+    "Llaima|VIIRS375": {
+      "n_records": 380,
+      "n_cumulos_con_magnitud": 240,
+      "n_no_summit_entre_cumulos_con_magnitud": 1,
+      "pct_denominador_s124": 0.42,
+      "n_no_summit": 1,
+      "pct_no_summit_sobre_records": 0.26,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 136,
+      "n_publica_hoy": 239,
+      "mw_grafico_hoy": 11.525,
+      "mw_grafico_sin_cerca": 12.321,
+      "mw_apagados_por_la_cerca": 0.797,
+      "pct_mw_apagados_sobre_sin_cerca": 6.47,
+      "n_silenciados": 1,
+      "pct_silenciados_sobre_records": 0.26,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "sin_info": 153,
+        "neg_limpio": 221,
+        "far_ref": 6
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 0.797
+    },
+    "Llaima|VIIRS750": {
+      "n_records": 379,
+      "n_cumulos_con_magnitud": 64,
+      "n_no_summit_entre_cumulos_con_magnitud": 1,
+      "pct_denominador_s124": 1.56,
+      "n_no_summit": 1,
+      "pct_no_summit_sobre_records": 0.26,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 306,
+      "n_publica_hoy": 63,
+      "mw_grafico_hoy": 37.88,
+      "mw_grafico_sin_cerca": 39.757,
+      "mw_apagados_por_la_cerca": 1.877,
+      "pct_mw_apagados_sobre_sin_cerca": 4.72,
+      "n_silenciados": 1,
+      "pct_silenciados_sobre_records": 0.26,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 244,
+        "sin_info": 135
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 1.877
+    },
+    "Villarrica|MODIS": {
+      "n_records": 204,
+      "n_cumulos_con_magnitud": 204,
+      "n_no_summit_entre_cumulos_con_magnitud": 190,
+      "pct_denominador_s124": 93.14,
+      "n_no_summit": 190,
+      "pct_no_summit_sobre_records": 93.14,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 0,
+      "n_publica_hoy": 13,
+      "mw_grafico_hoy": 28.719,
+      "mw_grafico_sin_cerca": 394.104,
+      "mw_apagados_por_la_cerca": 365.385,
+      "pct_mw_apagados_sobre_sin_cerca": 92.71,
+      "n_silenciados": 190,
+      "pct_silenciados_sobre_records": 93.14,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 186,
+        "sin_info": 4
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 200,
+        "sin_info": 4
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 365.385
+    },
+    "Villarrica|VIIRS375": {
+      "n_records": 381,
+      "n_cumulos_con_magnitud": 252,
+      "n_no_summit_entre_cumulos_con_magnitud": 0,
+      "pct_denominador_s124": 0.0,
+      "n_no_summit": 0,
+      "pct_no_summit_sobre_records": 0.0,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 129,
+      "n_publica_hoy": 252,
+      "mw_grafico_hoy": 20.634,
+      "mw_grafico_sin_cerca": 20.634,
+      "mw_apagados_por_la_cerca": 0.0,
+      "pct_mw_apagados_sobre_sin_cerca": 0.0,
+      "n_silenciados": 0,
+      "pct_silenciados_sobre_records": 0.0,
+      "etiquetas_de_los_silenciados": {},
+      "etiquetas_de_todas_las_pasadas": {
+        "sin_info": 166,
+        "neg_limpio": 200,
+        "pos": 11,
+        "far_ref": 4
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 0.0
+    },
+    "Villarrica|VIIRS750": {
+      "n_records": 379,
+      "n_cumulos_con_magnitud": 88,
+      "n_no_summit_entre_cumulos_con_magnitud": 5,
+      "pct_denominador_s124": 5.68,
+      "n_no_summit": 5,
+      "pct_no_summit_sobre_records": 1.32,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 278,
+      "n_publica_hoy": 83,
+      "mw_grafico_hoy": 24.675,
+      "mw_grafico_sin_cerca": 28.432,
+      "mw_apagados_por_la_cerca": 3.757,
+      "pct_mw_apagados_sobre_sin_cerca": 13.21,
+      "n_silenciados": 5,
+      "pct_silenciados_sobre_records": 1.32,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 4,
+        "neg_limpio": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 222,
+        "sin_info": 151,
+        "pos": 6
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 3.757
+    },
+    "Copahue|MODIS": {
+      "n_records": 195,
+      "n_cumulos_con_magnitud": 195,
+      "n_no_summit_entre_cumulos_con_magnitud": 187,
+      "pct_denominador_s124": 95.9,
+      "n_no_summit": 187,
+      "pct_no_summit_sobre_records": 95.9,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 0,
+      "n_publica_hoy": 8,
+      "mw_grafico_hoy": 18.206,
+      "mw_grafico_sin_cerca": 332.587,
+      "mw_apagados_por_la_cerca": 314.381,
+      "pct_mw_apagados_sobre_sin_cerca": 94.53,
+      "n_silenciados": 187,
+      "pct_silenciados_sobre_records": 95.9,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 183,
+        "sin_info": 4
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 191,
+        "sin_info": 4
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 314.381
+    },
+    "Copahue|VIIRS375": {
+      "n_records": 369,
+      "n_cumulos_con_magnitud": 262,
+      "n_no_summit_entre_cumulos_con_magnitud": 2,
+      "pct_denominador_s124": 0.76,
+      "n_no_summit": 2,
+      "pct_no_summit_sobre_records": 0.54,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 105,
+      "n_publica_hoy": 260,
+      "mw_grafico_hoy": 11.451,
+      "mw_grafico_sin_cerca": 12.097,
+      "mw_apagados_por_la_cerca": 0.646,
+      "pct_mw_apagados_sobre_sin_cerca": 5.34,
+      "n_silenciados": 2,
+      "pct_silenciados_sobre_records": 0.54,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 1,
+        "far_ref": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "sin_info": 151,
+        "neg_limpio": 210,
+        "far_ref": 5,
+        "pos": 3
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 0.646
+    },
+    "Copahue|VIIRS750": {
+      "n_records": 367,
+      "n_cumulos_con_magnitud": 76,
+      "n_no_summit_entre_cumulos_con_magnitud": 6,
+      "pct_denominador_s124": 7.89,
+      "n_no_summit": 7,
+      "pct_no_summit_sobre_records": 1.91,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 290,
+      "n_publica_hoy": 70,
+      "mw_grafico_hoy": 34.409,
+      "mw_grafico_sin_cerca": 38.291,
+      "mw_apagados_por_la_cerca": 3.882,
+      "pct_mw_apagados_sobre_sin_cerca": 10.14,
+      "n_silenciados": 6,
+      "pct_silenciados_sobre_records": 1.63,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 3,
+        "neg_limpio": 3
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 230,
+        "sin_info": 136,
+        "pos": 1
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 3.882
+    },
+    "PuyehueCordonCaulle|MODIS": {
+      "n_records": 213,
+      "n_cumulos_con_magnitud": 213,
+      "n_no_summit_entre_cumulos_con_magnitud": 66,
+      "pct_denominador_s124": 30.99,
+      "n_no_summit": 66,
+      "pct_no_summit_sobre_records": 30.99,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 0,
+      "n_publica_hoy": 147,
+      "mw_grafico_hoy": 358.582,
+      "mw_grafico_sin_cerca": 539.928,
+      "mw_apagados_por_la_cerca": 181.346,
+      "pct_mw_apagados_sobre_sin_cerca": 33.59,
+      "n_silenciados": 66,
+      "pct_silenciados_sobre_records": 30.99,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 59,
+        "sin_info": 7
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 196,
+        "sin_info": 17
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 181.346
+    },
+    "PuyehueCordonCaulle|VIIRS375": {
+      "n_records": 395,
+      "n_cumulos_con_magnitud": 272,
+      "n_no_summit_entre_cumulos_con_magnitud": 0,
+      "pct_denominador_s124": 0.0,
+      "n_no_summit": 0,
+      "pct_no_summit_sobre_records": 0.0,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 123,
+      "n_publica_hoy": 271,
+      "mw_grafico_hoy": 42.051,
+      "mw_grafico_sin_cerca": 42.051,
+      "mw_apagados_por_la_cerca": 0.0,
+      "pct_mw_apagados_sobre_sin_cerca": 0.0,
+      "n_silenciados": 0,
+      "pct_silenciados_sobre_records": 0.0,
+      "etiquetas_de_los_silenciados": {},
+      "etiquetas_de_todas_las_pasadas": {
+        "sin_info": 181,
+        "pos": 84,
+        "neg_limpio": 128,
+        "far_ref": 2
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 0.0
+    },
+    "PuyehueCordonCaulle|VIIRS750": {
+      "n_records": 390,
+      "n_cumulos_con_magnitud": 205,
+      "n_no_summit_entre_cumulos_con_magnitud": 2,
+      "pct_denominador_s124": 0.98,
+      "n_no_summit": 2,
+      "pct_no_summit_sobre_records": 0.51,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 134,
+      "n_publica_hoy": 203,
+      "mw_grafico_hoy": 85.498,
+      "mw_grafico_sin_cerca": 86.167,
+      "mw_apagados_por_la_cerca": 0.669,
+      "pct_mw_apagados_sobre_sin_cerca": 0.78,
+      "n_silenciados": 2,
+      "pct_silenciados_sobre_records": 0.51,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 1,
+        "sin_info": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 194,
+        "sin_info": 176,
+        "pos": 20
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 0.669
+    },
+    "Chaiten|MODIS": {
+      "n_records": 234,
+      "n_cumulos_con_magnitud": 234,
+      "n_no_summit_entre_cumulos_con_magnitud": 212,
+      "pct_denominador_s124": 90.6,
+      "n_no_summit": 212,
+      "pct_no_summit_sobre_records": 90.6,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 0,
+      "n_publica_hoy": 22,
+      "mw_grafico_hoy": 56.76,
+      "mw_grafico_sin_cerca": 502.209,
+      "mw_apagados_por_la_cerca": 445.449,
+      "pct_mw_apagados_sobre_sin_cerca": 88.7,
+      "n_silenciados": 212,
+      "pct_silenciados_sobre_records": 90.6,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 202,
+        "sin_info": 9,
+        "far_ref": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 223,
+        "sin_info": 10,
+        "far_ref": 1
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 445.449
+    },
+    "Chaiten|VIIRS375": {
+      "n_records": 408,
+      "n_cumulos_con_magnitud": 280,
+      "n_no_summit_entre_cumulos_con_magnitud": 1,
+      "pct_denominador_s124": 0.36,
+      "n_no_summit": 1,
+      "pct_no_summit_sobre_records": 0.25,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 128,
+      "n_publica_hoy": 279,
+      "mw_grafico_hoy": 19.249,
+      "mw_grafico_sin_cerca": 19.36,
+      "mw_apagados_por_la_cerca": 0.111,
+      "pct_mw_apagados_sobre_sin_cerca": 0.57,
+      "n_silenciados": 1,
+      "pct_silenciados_sobre_records": 0.25,
+      "etiquetas_de_los_silenciados": {
+        "sin_info": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 199,
+        "sin_info": 191,
+        "far_ref": 1,
+        "pos": 17
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 0.111
+    },
+    "Chaiten|VIIRS750": {
+      "n_records": 404,
+      "n_cumulos_con_magnitud": 83,
+      "n_no_summit_entre_cumulos_con_magnitud": 1,
+      "pct_denominador_s124": 1.2,
+      "n_no_summit": 1,
+      "pct_no_summit_sobre_records": 0.25,
+      "n_c2_cumulo_fuera_inner": 0,
+      "n_legacy_sin_cumulo": 303,
+      "n_publica_hoy": 82,
+      "mw_grafico_hoy": 43.208,
+      "mw_grafico_sin_cerca": 43.961,
+      "mw_apagados_por_la_cerca": 0.753,
+      "pct_mw_apagados_sobre_sin_cerca": 1.71,
+      "n_silenciados": 1,
+      "pct_silenciados_sobre_records": 0.25,
+      "etiquetas_de_los_silenciados": {
+        "neg_limpio": 1
+      },
+      "etiquetas_de_todas_las_pasadas": {
+        "neg_limpio": 240,
+        "sin_info": 163,
+        "pos": 1
+      },
+      "n_silenciados_que_el_filtro_de_artefacto_taparia": 0,
+      "mw_apagados_que_quedarian_si_se_quita_la_cerca": 0.753
+    }
+  },
+  "cruce_mirova_de_lo_silenciado": {
+    "n_silenciados": 1929,
+    "por_etiqueta": {
+      "neg_limpio": 1762,
+      "sin_info": 138,
+      "pos": 15,
+      "far_ref": 14
+    },
+    "mw_por_etiqueta": {
+      "pos": 24.632,
+      "neg_limpio": 3224.223,
+      "far_ref": 13.671,
+      "sin_info": 181.703
+    },
+    "en_noches_a94": {
+      "noches_con_alerta_de_mirova_hoy_sin_cubrir": [],
+      "n_noches_con_alerta_de_mirova_hoy_sin_cubrir": 0,
+      "noches_que_se_estrenarian_sin_confirmacion": [
+        "Chaiten 2026-06-11",
+        "Chaiten 2026-06-30",
+        "Chaiten 2026-07-14",
+        "Chaiten 2026-07-17",
+        "Chaiten 2026-07-31",
+        "Copahue 2026-07-13",
+        "Copahue 2026-07-16",
+        "Copahue 2026-08-04",
+        "Copahue 2026-08-15",
+        "Lascar 2026-07-01",
+        "Lascar 2026-07-02",
+        "Lascar 2026-07-03",
+        "Lascar 2026-07-04",
+        "Lascar 2026-07-05",
+        "Lascar 2026-07-06",
+        "Lascar 2026-07-16",
+        "Lascar 2026-07-20",
+        "Lascar 2026-07-21",
+        "Lascar 2026-07-28",
+        "Lascar 2026-08-11",
+        "Lascar 2026-08-12",
+        "Lascar 2026-08-15",
+        "Lascar 2026-08-16",
+        "Lascar 2026-08-18",
+        "Lascar 2026-08-19",
+        "Lascar 2026-08-24",
+        "Lastarria 2026-06-11",
+        "Lastarria 2026-07-03",
+        "Lastarria 2026-07-05",
+        "Lastarria 2026-07-18",
+        "Lastarria 2026-07-20",
+        "Lastarria 2026-07-21",
+        "Lastarria 2026-07-23",
+        "Lastarria 2026-07-28",
+        "Lastarria 2026-08-10",
+        "Lastarria 2026-08-14",
+        "Lastarria 2026-08-15",
+        "Lastarria 2026-08-16",
+        "Lastarria 2026-08-18",
+        "Lastarria 2026-08-20",
+        "Llaima 2026-07-16",
+        "Llaima 2026-07-31",
+        "Llaima 2026-08-15",
+        "NevadosDeChillan 2026-06-03",
+        "NevadosDeChillan 2026-06-12",
+        "NevadosDeChillan 2026-06-28",
+        "NevadosDeChillan 2026-07-08",
+        "NevadosDeChillan 2026-07-14",
+        "NevadosDeChillan 2026-07-16",
+        "NevadosDeChillan 2026-07-28",
+        "NevadosDeChillan 2026-08-03",
+        "NevadosDeChillan 2026-08-09",
+        "NevadosDeChillan 2026-08-11",
+        "NevadosDeChillan 2026-08-12",
+        "NevadosDeChillan 2026-08-14",
+        "NevadosDeChillan 2026-08-15",
+        "PlanchonPeteroa 2026-06-04",
+        "PlanchonPeteroa 2026-07-14",
+        "PlanchonPeteroa 2026-07-16",
+        "PlanchonPeteroa 2026-07-21",
+        "PlanchonPeteroa 2026-07-23",
+        "PlanchonPeteroa 2026-07-28",
+        "PlanchonPeteroa 2026-07-29",
+        "PlanchonPeteroa 2026-08-02",
+        "PlanchonPeteroa 2026-08-17",
+        "PlanchonPeteroa 2026-08-25",
+        "PuyehueCordonCaulle 2026-07-14",
+        "Tupungatito 2026-06-20",
+        "Tupungatito 2026-07-18",
+        "Tupungatito 2026-07-23",
+        "Tupungatito 2026-07-25",
+        "Tupungatito 2026-08-03",
+        "Tupungatito 2026-08-06",
+        "Tupungatito 2026-08-17",
+        "Villarrica 2026-07-08",
+        "Villarrica 2026-07-16",
+        "Villarrica 2026-08-03",
+        "Villarrica 2026-08-04"
+      ],
+      "n_noches_que_se_estrenarian_sin_confirmacion": 78,
+      "n_noches_volcan_en_la_ventana": 946,
+      "n_noches_volcan_que_publican_hoy": 868
+    },
+    "silenciados_pos_detalle": [
+      {
+        "vol": "Lascar",
+        "sensor": "MODIS",
+        "dt": "2026-06-03 07:45",
+        "dc": "far",
+        "pc_dist_km": 0.644,
+        "mw_sin_cerca": 4.849,
+        "noche_ya_cubierta": true
+      },
+      {
+        "vol": "Lascar",
+        "sensor": "MODIS",
+        "dt": "2026-06-07 01:40",
+        "dc": "far",
+        "pc_dist_km": 2.521,
+        "mw_sin_cerca": 2.56,
+        "noche_ya_cubierta": true
+      },
+      {
+        "vol": "Lascar",
+        "sensor": "MODIS",
+        "dt": "2026-06-08 07:40",
+        "dc": "far",
+        "pc_dist_km": 1.886,
+        "mw_sin_cerca": 0.262,
+        "noche_ya_cubierta": true
+      },
+      {
+        "vol": "Lascar",
+        "sensor": "MODIS",
+        "dt": "2026-06-13 07:35",
+        "dc": "far",
+        "pc_dist_km": 2.237,
+        "mw_sin_cerca": 0.328,
+        "noche_ya_cubierta": true
+      },
+      {
+        "vol": "Lascar",
+        "sensor": "MODIS",
+        "dt": "2026-06-16 07:50",
+        "dc": "far",
+        "pc_dist_km": 1.694,
+        "mw_sin_cerca": 0.459,
+        "noche_ya_cubierta": true
+      },
+      {
+        "vol": "Lascar",
+        "sensor": "MODIS",
+        "dt": "2026-06-17 01:40",
+        "dc": "far",
+        "pc_dist_km": 1.449,
+        "mw_sin_cerca": 0.06,
+        "noche_ya_cubierta": true
+      },
+      {
+        "vol": "Lascar",
+        "sensor": "MODIS",
+        "dt": "2026-06-21 07:45",
+        "dc": "far",
+        "pc_dist_km": 1.993,
+        "mw_sin_cerca": 0.459,
+        "noche_ya_cubierta": true
+      },
+      {
+        "vol": "Lascar",
+        "sensor": "MODIS",
+        "dt": "2026-06-24 01:15",
+        "dc": "far",
+        "pc_dist_km": 0.948,
+        "mw_sin_cerca": 1.786,
+        "noche_ya_cubierta": true
+      },
+      {
+        "vol": "Lascar",
+        "sensor": "MODIS",
+        "dt": "2026-06-24 08:00",
+        "dc": "far",
+        "pc_dist_km": 1.269,
+        "mw_sin_cerca": 2.293,
+        "noche_ya_cubierta": true
+      },
+      {
+        "vol": "Lascar",
+        "sensor": "MODIS",
+        "dt": "2026-06-26 07:40",
+        "dc": "far",
+        "pc_dist_km": 2.857,
+        "mw_sin_cerca": 2.687,
+        "noche_ya_cubierta": true
+      },
+      {
+        "vol": "Lascar",
+        "sensor": "MODIS",
+        "dt": "2026-06-27 01:35",
+        "dc": "far",
+        "pc_dist_km": 1.883,
+        "mw_sin_cerca": 2.083,
+        "noche_ya_cubierta": true
+      },
+      {
+        "vol": "Lascar",
+        "sensor": "MODIS",
+        "dt": "2026-06-29 07:55",
+        "dc": "far",
+        "pc_dist_km": 1.377,
+        "mw_sin_cerca": 0.459,
+        "noche_ya_cubierta": true
+      },
+      {
+        "vol": "Lascar",
+        "sensor": "MODIS",
+        "dt": "2026-07-09 07:40",
+        "dc": "far",
+        "pc_dist_km": 2.006,
+        "mw_sin_cerca": 0.655,
+        "noche_ya_cubierta": true
+      },
+      {
+        "vol": "Lascar",
+        "sensor": "MODIS",
+        "dt": "2026-07-30 07:55",
+        "dc": "far",
+        "pc_dist_km": 0.8,
+        "mw_sin_cerca": 1.704,
+        "noche_ya_cubierta": true
+      },
+      {
+        "vol": "Lascar",
+        "sensor": "MODIS",
+        "dt": "2026-08-21 01:20",
+        "dc": "far",
+        "pc_dist_km": 1.561,
+        "mw_sin_cerca": 3.988,
+        "noche_ya_cubierta": true
+      }
+    ]
+  },
+  "etiquetas_todas_las_pasadas": {
+    "neg_limpio": 5706,
+    "sin_info": 3485,
+    "pos": 620,
+    "far_ref": 151
+  }
+}
