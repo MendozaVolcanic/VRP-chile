@@ -173,10 +173,11 @@ def main():
     if hasattr(sys.stdout, "buffer"):
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", line_buffering=True)
     brazo = B.por_nombre((os.environ.get("BATERIA_BRAZO") or "").strip())
-    if not (os.environ.get("EARTHDATA_USERNAME") or "").strip() \
-            or not (os.environ.get("EARTHDATA_PASSWORD") or "").strip():
-        print("ERROR: EARTHDATA_USERNAME o EARTHDATA_PASSWORD vacios. En Actions un secreto ausente "
-              "llega como string vacio; sin credenciales no se mide nada. Salida 2.", flush=True)
+    # S146: se autentica SOLO por token, igual que el NRT. El login por usuario y clave con los
+    # secretos vencidos bloqueo la cuenta 10 minutos en la primera corrida (A71).
+    if not (os.environ.get("EARTHDATA_TOKEN") or "").strip():
+        print("ERROR: EARTHDATA_TOKEN vacio. En Actions un secreto ausente llega como string vacio; "
+              "sin token no se mide nada y el login por clave bloquea la cuenta. Salida 2.", flush=True)
         return 2
 
     import yaml
