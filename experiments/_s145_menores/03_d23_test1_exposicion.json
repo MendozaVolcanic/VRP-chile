@@ -1,0 +1,151 @@
+{
+  "definiciones": {
+    "records_con_k1": "diag_n_nti_path > 0 = hubo pixeles con NTI > K1 y BT > t_bg + 3 K dentro del ROI",
+    "k1_fuera_del_primer_pase_seguro": "n_nti_path > n_first_pass_pixels: por conteo sobran pixeles K1 que el primer pase no pudo contener (PISO, no total)",
+    "limite": "los records guardan conteos, no mascaras: el solape real entre la mascara K1 y fp_hot no es reconstruible desde disco"
+  },
+  "por_bucket": {
+    "MODIS": {
+      "ventana_utc": [
+        "2025-02-15 01:40",
+        "2026-09-20 02:45"
+      ],
+      "conteos": {
+        "con_diag_n_nti_path": 12699,
+        "max_pixeles_k1_en_un_record": 4,
+        "n_records": 12699,
+        "pixeles_k1_totales": 20,
+        "records_con_k1": 11
+      },
+      "pct_records_con_k1_sobre_con_diag": 0.087,
+      "pct_k1_fuera_seguro_sobre_con_diag": 0.0,
+      "piso_pixeles_k1_fuera_del_primer_pase": 0,
+      "casos": []
+    },
+    "VIIRS375": {
+      "ventana_utc": [
+        "2025-02-15 04:30",
+        "2026-09-19 06:48"
+      ],
+      "conteos": {
+        "con_diag_n_nti_path": 24023,
+        "max_pixeles_k1_en_un_record": 25,
+        "n_records": 25186,
+        "pixeles_k1_totales": 520,
+        "records_con_k1": 320,
+        "records_con_k1_fuera_del_primer_pase_seguro": 7,
+        "records_con_k1_mayor_igual_9": 8,
+        "records_con_k1_y_primer_pase_vacio": 6,
+        "sin_diag_n_nti_path": 1163
+      },
+      "pct_records_con_k1_sobre_con_diag": 1.332,
+      "pct_k1_fuera_seguro_sobre_con_diag": 0.029,
+      "piso_pixeles_k1_fuera_del_primer_pase": 8,
+      "casos": [
+        {
+          "volcan": "Lascar",
+          "datetime_utc": "2025-05-26 06:06",
+          "sensor": "VIIRS_NOAA21",
+          "n_nti_path": 1,
+          "n_first_pass_pixels": 0,
+          "n_anomalous_pixels": 0,
+          "vrp_mw": 1.56,
+          "t_max_k": 311.01,
+          "t_bg_k": 263.67,
+          "nti_max": -0.7725
+        },
+        {
+          "volcan": "Lascar",
+          "datetime_utc": "2025-06-01 05:48",
+          "sensor": "VIIRS_NOAA21",
+          "n_nti_path": 1,
+          "n_first_pass_pixels": 0,
+          "n_anomalous_pixels": 0,
+          "vrp_mw": 2.197,
+          "t_max_k": 319.26,
+          "t_bg_k": 265.59,
+          "nti_max": -0.722
+        },
+        {
+          "volcan": "Lascar",
+          "datetime_utc": "2025-06-09 05:48",
+          "sensor": "VIIRS_NOAA20",
+          "n_nti_path": 1,
+          "n_first_pass_pixels": 0,
+          "n_anomalous_pixels": 0,
+          "vrp_mw": 1.504,
+          "t_max_k": 310.92,
+          "t_bg_k": 267.87,
+          "nti_max": -0.7712
+        },
+        {
+          "volcan": "Lascar",
+          "datetime_utc": "2025-06-15 05:36",
+          "sensor": "VIIRS_NOAA20",
+          "n_nti_path": 1,
+          "n_first_pass_pixels": 0,
+          "n_anomalous_pixels": 0,
+          "vrp_mw": 2.492,
+          "t_max_k": 322.09,
+          "t_bg_k": 263.25,
+          "nti_max": -0.6965
+        },
+        {
+          "volcan": "Lascar",
+          "datetime_utc": "2025-06-17 05:48",
+          "sensor": "VIIRS_NOAA21",
+          "n_nti_path": 1,
+          "n_first_pass_pixels": 0,
+          "n_anomalous_pixels": 0,
+          "vrp_mw": 1.639,
+          "t_max_k": 312.03,
+          "t_bg_k": 262.93,
+          "nti_max": -0.7752
+        },
+        {
+          "volcan": "Lascar",
+          "datetime_utc": "2025-06-25 05:48",
+          "sensor": "VIIRS_NOAA20",
+          "n_nti_path": 1,
+          "n_first_pass_pixels": 0,
+          "n_anomalous_pixels": 0,
+          "vrp_mw": 1.462,
+          "t_max_k": 309.46,
+          "t_bg_k": 262.98,
+          "nti_max": -0.7991
+        },
+        {
+          "volcan": "NevadosDeChillan",
+          "datetime_utc": "2025-02-15 05:42",
+          "sensor": "VIIRS_NOAA21",
+          "n_nti_path": 10,
+          "n_first_pass_pixels": 8,
+          "n_anomalous_pixels": 14,
+          "vrp_mw": 0.073,
+          "t_max_k": 347.62,
+          "t_bg_k": 280.24,
+          "nti_max": -0.5525
+        }
+      ]
+    },
+    "VIIRS750": {
+      "ventana_utc": [
+        "2025-02-15 04:30",
+        "2026-09-19 06:48"
+      ],
+      "conteos": {
+        "con_diag_n_nti_path": 23833,
+        "max_pixeles_k1_en_un_record": 10,
+        "n_records": 24995,
+        "pixeles_k1_totales": 69,
+        "records_con_k1": 28,
+        "records_con_k1_mayor_igual_9": 1,
+        "sin_diag_n_nti_path": 1162
+      },
+      "pct_records_con_k1_sobre_con_diag": 0.117,
+      "pct_k1_fuera_seguro_sobre_con_diag": 0.0,
+      "piso_pixeles_k1_fuera_del_primer_pase": 0,
+      "casos": []
+    }
+  }
+}

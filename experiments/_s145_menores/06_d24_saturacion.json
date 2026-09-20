@@ -1,0 +1,101 @@
+{
+  "definiciones": {
+    "instrumento": "BT MIR maxima por record (t_max_k) contra los umbrales de saturacion de cada banda",
+    "sat_B21": "450.0-500.0 K (banda primaria hoy)",
+    "sat_B22": "335.0 K (banda primaria si se adopta D21)",
+    "instrumento_equivocado_del_catalogo": "sanity_cap_tocado cuenta VRP > 50 GW (store.py:130-144), o sea el bug F28 con los pixeles saturados COLANDOSE; con el fix vigente un pixel saturado es NaN y la magnitud BAJA, asi que ese contador no puede prenderse por saturacion",
+    "cota": "un pixel ya saturado es NaN y no entra en t_max_k: esto mide la distancia del corpus al regimen de D24, no los pixeles perdidos"
+  },
+  "por_bucket": {
+    "MODIS": {
+      "ventana_utc": [
+        "2025-02-15 01:40",
+        "2026-09-20 02:45"
+      ],
+      "conteos": {
+        "n_records": 12699
+      },
+      "t_max_k": {
+        "n": 12699,
+        "mediana": 281.02,
+        "p99": 295.21,
+        "p999": 303.3,
+        "maximo_observado": 334.4,
+        "margen_al_umbral_B21_nominal_K": 115.6,
+        "margen_al_umbral_B22_K": 0.6
+      },
+      "top10_records_mas_calientes": [
+        {
+          "t_max_k": 334.4,
+          "volcan": "NevadosDeChillan",
+          "datetime_utc": "2025-02-28 02:05",
+          "vrp_mw": 152.862,
+          "n_anomalous_pixels": 27
+        },
+        {
+          "t_max_k": 330.87,
+          "volcan": "NevadosDeChillan",
+          "datetime_utc": "2025-02-27 03:00",
+          "vrp_mw": 82.265,
+          "n_anomalous_pixels": 24
+        },
+        {
+          "t_max_k": 323.41,
+          "volcan": "NevadosDeChillan",
+          "datetime_utc": "2025-02-26 02:20",
+          "vrp_mw": 42.739,
+          "n_anomalous_pixels": 25
+        },
+        {
+          "t_max_k": 320.51,
+          "volcan": "NevadosDeChillan",
+          "datetime_utc": "2025-02-28 06:50",
+          "vrp_mw": 233.07,
+          "n_anomalous_pixels": 238
+        },
+        {
+          "t_max_k": 319.12,
+          "volcan": "NevadosDeChillan",
+          "datetime_utc": "2025-02-19 02:40",
+          "vrp_mw": 106.789,
+          "n_anomalous_pixels": 63
+        },
+        {
+          "t_max_k": 317.81,
+          "volcan": "NevadosDeChillan",
+          "datetime_utc": "2025-02-18 06:45",
+          "vrp_mw": 302.92,
+          "n_anomalous_pixels": 269
+        },
+        {
+          "t_max_k": 313.95,
+          "volcan": "NevadosDeChillan",
+          "datetime_utc": "2025-02-23 06:45",
+          "vrp_mw": 147.561,
+          "n_anomalous_pixels": 160
+        },
+        {
+          "t_max_k": 312.95,
+          "volcan": "NevadosDeChillan",
+          "datetime_utc": "2026-05-21 02:00",
+          "vrp_mw": 49.406,
+          "n_anomalous_pixels": 30
+        },
+        {
+          "t_max_k": 310.05,
+          "volcan": "NevadosDeChillan",
+          "datetime_utc": "2025-02-15 06:30",
+          "vrp_mw": 211.251,
+          "n_anomalous_pixels": 246
+        },
+        {
+          "t_max_k": 308.88,
+          "volcan": "NevadosDeChillan",
+          "datetime_utc": "2025-02-27 06:10",
+          "vrp_mw": 87.082,
+          "n_anomalous_pixels": 93
+        }
+      ]
+    }
+  }
+}
