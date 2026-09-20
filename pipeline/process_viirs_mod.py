@@ -145,6 +145,7 @@ from pipeline.profile import (
 from .anchor import resolve_honest_anchor  # S106 ancla espacial honesta
 from .single_pixel_mode import apply_single_pixel_mode
 from .vrp_regimes import cluster_focal_vrp_mw  # S112 magnitud núcleo-focal (A69/D11)
+from .vrp_regimes import neighbor_mean_radiance_background  # S145 D25 en M-band
 from .detection_context import (
     contextual_dnti_hot_mask,
     dual_roi_contextual_dnti_hot_mask,
@@ -407,6 +408,28 @@ def _regrid_viirs_mod_granule(bands: dict, geo: dict, center_lat: float,
                    for k in angulos},
     }
     return {k: g[k] for k in bands}, out_geo
+
+
+def vrp_bg_neighbor_mean_v750(bt_grid, alert_mask, hot_rows, hot_cols, legacy_l_bg, *, max_half_px):
+    """Fondo MIR por píxel para el VRP de VIIRS 750 con el flag D25 de M-band encendido (S145).
+
+    POR QUÉ UN ENVOLTORIO. `neighbor_mean_radiance_background` devuelve NaN para el píxel sin
+    vecinos no alertados dentro de `max_half_px`. Acá se decide el respaldo: el fondo que el bloque
+    usaría HOY (`legacy_l_bg`, que en M-band es la mediana del anillo o el L_bg efectivo del Test 1).
+    Así el flag nunca deja a un píxel sin fondo, y el respaldo queda contado en el record.
+
+    POR QUÉ NO SE REUSA EL DE I-BAND. El de `process_viirs.py` fija `I04_LAMBDA` (3,74 µm). Acá la
+    banda MIR es M13 (4,05 µm) y Planck no es plano entre las dos: usar la longitud equivocada
+    sesgaría el fondo de todo el sensor.
+
+    Returns:
+        (l_bg, n_sin_vecinos): radiancia de fondo por píxel (float64) y cuántos usaron el respaldo.
+    """
+    l_bk, _half = neighbor_mean_radiance_background(
+        bt_grid, alert_mask, hot_rows, hot_cols, M13_LAMBDA, max_half_px=max_half_px)
+    respaldo = np.broadcast_to(np.asarray(legacy_l_bg, dtype=np.float64), l_bk.shape)
+    sin_vecinos = ~np.isfinite(l_bk)
+    return np.where(sin_vecinos, respaldo, l_bk), int(np.count_nonzero(sin_vecinos))
 
 
 def calculate_vrp(l1b_path: Path, geo_path: Path,
