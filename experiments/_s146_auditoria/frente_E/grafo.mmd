@@ -1,0 +1,142 @@
+graph TD
+  P_S114(["Auditoria de fidelidad S114 (file:line + adversarial)"])
+  P_B21(["Configuracion banda 21 primaria (= D21 abierta)"])
+  P_GATE(["Compuerta bt  mayor que  t_bg + 3 K en Tests 2 y 3 (= D22 ..."])
+  P_MIN(["Conectiva min(C1, mu+C2 sigma) como lectura de MIROVA"])
+  P_PISO(["'El piso C1 gobierna el 100 % de MODIS y el 99,9 % de VIIR..."])
+  P_BAT(["Criterio de la bateria del Apendice A: 9 de 9, caja de 5 k..."])
+  P_S137_A2(["S137: 'la bateria guarda distancias pero no posiciones' (c..."])
+  P_535(["Regimen de datos previo al PR 535 (mascara de nube 260 K a..."])
+  P_A54(["A54 / AUDIT_S86: el 95,4 % de los 'FP' son anomalias fisic..."])
+  P_S99(["Hecho canonico S99: MIROVA NRT = un algoritmo por sensor, ..."])
+  P_FENCE(["La cerca del frontend: mirovaEqVrp pone en cero todo recor..."])
+  P_PICO(["D10: 'el pixel pico = el crater' (justificacion de keep_peak)"])
+  P_A13(["A13: Distancia_km de Villarrica fija en 0,84 km"])
+  P_A12(["A12: ejemplo 'Lascar 21,6 K e Isluga ~20 K no necesitan ke..."])
+  P_31(["D13: 'la cerca apaga el 31 % de la MAGNITUD'"])
+  P_QC(["'MIROVA hace QC visual manual a posteriori' (el cap de 5 M..."])
+  P_F70(["Instrumento F70: nuestro regrid UTM (A/B de 4 brazos, S124)"])
+  P_FLAGK1(["S100: se juzgo ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK por su..."])
+  P_OSF(["Conteos del OSF v2.5 usados como si fueran el NRT"])
+  P_A66(["A66/A67: area nadir fija = 'clon literal'"])
+  C_A82["A82: far a summit MODIS 'irreducible a 1 km, agotado, no r..."]
+  C_D11["D11 cara far a summit: CERRADA S114, CONDICIONADA S138"]
+  C_A83["A83: no existe discriminante fisico per-record; 'agotado'"]
+  C_A84["A84: la posicion within-inner del ctx_cluster es irreducib..."]
+  C_D13["D13: clasificacion CERRADA S126; 'no volver a plantearla'"]
+  C_NEW8["NEW-8 (filtros de no-aptos 267-273): 'sigue abierto, A/B F..."]
+  C_D9["D9 path-D cirrus: EFECTIVAMENTE RESUELTA en sus dos caras ..."]
+  C_D9CAP["D9: 'el cap de 5 MW NO es un parche' (S71)"]
+  C_D12["D12: camino 'distance_class desde el cluster' NO ADOPTAR (..."]
+  C_A85["A85 / gates intra-radio S84-S85: flip OFF, 'MANTENER OFF, ..."]
+  C_A81["A81: re-derivar distance_class simetrico es una trampa; no..."]
+  C_A94["A94: el bug de la etiqueta far rinde 1 noche de 946 (no pr..."]
+  C_D10["D10 ctxpeak (filtro contextual + keep_peak): ADOPTADO S100..."]
+  C_D5["D5 magnitud: 'resuelta' / 'calibracion lograda'"]
+  C_D26["D26: segundo pase sin filtros de no-aptos, 'efecto nulo ba..."]
+  C_S136_3["S136: tres frentes cerrados sin A/B (pool de mu/sigma, ret..."]
+  C_S136_AR["S136: banda 22 y remuestreo descartados 'por aritmetica' c..."]
+  C_GAPA115["GAP PR A: RESUELTO S115 = mislabel, NO reabrir"]
+  C_NEW7["NEW-7 / drift PR 1 (S100): flag K1 'OFF permanentemente; e..."]
+  C_GAPA130["GAP PR A S130: 'documentado y dimensionado, sin mas invers..."]
+  C_D16["D16: 'la grilla UTM NO explica el sub-reporte', CERRADA (r..."]
+  C_D18["D18 caja 5x5: A/B S130 NO ADOPTAR; 'diferenciacion summit/..."]
+  C_D8["D8 fondo de anillo contaminado: RESUELTO (kernel-bg opt-in..."]
+  C_DPCC["D-PCC inner_radius: RESUELTO S62 ('inner=7 adoptado')"]
+  C_S29["S29: 'Lascar 64 % queda como limite fisico aceptado' del M..."]
+  C_D11B["D11-bis: 'MIROVA nunca publica 0,0; incluso Villarrica da ..."]
+  C_HV084["H_S61_MIROVA_DIST_FIXED_VILLARRICA: CONFIRMADA"]
+  C_H13["H13: '3 sigma no es problematico; mantener cap MAX_SIGMA_C..."]
+  C_HS68["H_S68_ANTIPATRONES: 'anti-patrones mitigados, NO hay drift..."]
+  C_D20["D20 banda 31 vs 32: 'numericamente despreciable' (calculo ..."]
+  C_D21["D21: 'ningun brazo cumple aun la bateria' (bloqueo)"]
+  C_HA2["H_S137_A2_FLANCO: 'active, pendiente'"]
+  C_S143["H_S143_D22_D25: NO ADOPTAR (VIIRS 375)"]
+  C_S133["S133: A/B banda 22 en MODIS, NO ADOPTAR"]
+  C_THR["S71: 'thresholds NO son el problema' (descarta tunear C2/s..."]
+  C_F14["F1.4: geofencing 25 km 'empiricamente optimo' (98,27 % de ..."]
+  C_S45["S45: 'D9 cluster selection: summit-priority confirmado Las..."]
+  C_D19N["D19 (S134): 'D11/A82 quedan intactas'"]
+  C_A77["A77: VIIRS375 cubre el recall que MODIS no resuelve"]
+  C_D25V["D25 en M-band (S145): 'es fidelidad de magnitud, no recall'"]
+  C_HV2["H_S141_VECINO_FOCO_V2: resuelta como no confirmada"]
+  C_A82 --> P_S114
+  C_A82 --> P_B21
+  C_A82 --> P_GATE
+  C_A82 --> C_A77
+  C_D11 --> C_A82
+  C_A82 --> C_D11
+  C_D11 --> P_S114
+  C_D11 --> P_B21
+  C_D11 --> P_GATE
+  C_D11 --> C_GAPA115
+  C_D11 --> C_D21
+  C_D21 --> P_BAT
+  C_D21 --> P_S137_A2
+  C_HA2 --> P_S137_A2
+  C_S143 -.-> P_BAT
+  C_A83 --> C_A82
+  C_A83 --> P_B21
+  C_A83 --> P_GATE
+  C_A84 --> C_A82
+  C_A84 --> C_A83
+  C_D12 --> P_B21
+  C_D12 --> P_GATE
+  C_S133 --> P_GATE
+  C_D13 --> C_A82
+  C_D13 --> P_A54
+  C_D13 --> P_31
+  C_D13 --> P_535
+  C_NEW8 --> C_A82
+  C_NEW8 --> C_D9
+  C_NEW8 --> P_A54
+  C_D9 --> C_NEW8
+  C_D9 --> P_FENCE
+  C_D9 --> P_A66
+  C_D9 --> C_D9CAP
+  C_D9CAP --> P_QC
+  C_D9 -.-> P_535
+  C_A85 --> P_FENCE
+  C_A85 --> P_S99
+  C_A85 --> C_A82
+  C_A85 -.-> P_535
+  C_A81 -.-> C_A82
+  C_A94 --> C_A81
+  C_D10 --> P_PICO
+  P_A66 --> C_D10
+  C_D5 --> P_A66
+  C_D5 --> C_D10
+  C_D26 --> P_PISO
+  C_D26 --> P_MIN
+  C_S136_3 --> P_MIN
+  C_S136_3 --> P_PISO
+  C_S136_AR --> P_PISO
+  C_S136_AR --> P_MIN
+  C_GAPA130 -.-> C_S136_3
+  C_GAPA130 -.-> P_PISO
+  C_GAPA115 --> C_NEW7
+  C_NEW7 --> P_FLAGK1
+  C_D16 --> P_F70
+  C_D16 --> P_535
+  C_S136_AR -.-> C_D16
+  C_D18 --> C_A82
+  C_D18 --> P_S99
+  C_D18 -.-> P_B21
+  C_D8 --> P_A12
+  C_D8 -.-> P_S99
+  C_D5 -.-> C_D8
+  C_DPCC -.-> C_D8
+  C_D11B --> P_A13
+  C_HV084 --> P_A13
+  C_D20 -.-> P_PISO
+  C_THR -.-> P_B21
+  C_F14 --> P_OSF
+  C_D19N --> C_A82
+  C_D25V --> C_HV2
+  C_D12 -. tension .-> C_D9
+  C_S29 -. contradicho por .-> C_D12
+  C_S45 -. contradicho por .-> C_D11
+  C_HS68 -. contradicho por .-> P_A54
+  C_H13 -. contradicho por .-> P_S99
+  classDef caido fill:#f8d7da,stroke:#a33;
+  class P_S114,P_B21,P_GATE,P_MIN,P_PISO,P_BAT,P_S137_A2,P_535,P_A54,P_PICO,P_A13,P_A12,P_31,P_QC,P_F70,P_FLAGK1,P_OSF,P_A66 caido;
