@@ -134,3 +134,31 @@ def test_el_dict_de_salida_se_devuelve_una_sola_vez():
     s = _fuente_v750()
     assert s.count("    salida = {") == 1
     assert s.count("    return salida") == 1
+
+
+def test_con_el_flag_on_el_fondo_baja_y_la_magnitud_sube(monkeypatch):
+    """El punto entero del cambio, ejercido de punta a punta sobre una escena sintetica.
+
+    En la escena `nevado` del arnes de S142 el crater esta sobre un cono frio: la mediana del
+    anillo regional es mas tibia que sus vecinos inmediatos, asi que el fondo por vecinos baja y
+    el exceso sube. El arnes de M-band solo trae `nevado` y `plana` (ESCENAS_V750), no la
+    `nevado_vecino_tibio` que si existe en V375 y MODIS.
+
+    Los 6 tests de arriba son greps sobre el fuente: comprueban que el cableado ESTA ESCRITO. Este
+    comprueba que FUNCIONA, que es otra cosa (A110).
+    """
+    import pipeline.process_viirs_mod as pvm
+    sys.path.insert(0, str(ROOT / "tests"))
+    import arnes_sintetico_s142 as arnes
+
+    apagado = arnes.correr_v750("nevado")
+    monkeypatch.setattr(pvm, "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750", True)
+    encendido = arnes.correr_v750("nevado")
+
+    assert "diag_L_bg_vecinos_w_m2_sr_um" not in apagado
+    assert "diag_L_bg_vecinos_w_m2_sr_um" in encendido
+    assert encendido["vrp_mw"] >= apagado["vrp_mw"], (
+        "el fondo por vecinos no puede bajar la magnitud en una cumbre fria")
+    assert encendido["vrp_mw"] != apagado["vrp_mw"], (
+        "la escena no ejerce el camino: un test que pasa porque no toca el codigo es peor que "
+        "no tenerlo (A110). Elegir otra escena antes de dar esto por verificado")
