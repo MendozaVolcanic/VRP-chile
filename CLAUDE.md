@@ -1214,6 +1214,38 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   3 de 108 quedaron con pasadas de menos por cortes de NASA (`SEARCH_CMR_TIMEOUT`, A64). Contar las
   pasadas de cada brazo contra el control ANTES de mirar el veredicto
   (`experiments/_s143_evaluador/bajar_tramos.py --estricto`) y repetir el job corto sobre el mismo código.
+- **A109. Medir una detección contra un dato derivado del MISMO gránulo la infla por selección: es la
+  maldición del ganador** (S144, medido). Nuestro detector conserva el píxel porque fue el exceso local
+  más alto de ese gránulo VIIRS, y el GeoTIFF que MIROVA publica de esa pasada sale del **mismo**
+  gránulo. Preguntarle a esa imagen "¿hay algo ahí?" devuelve en parte lo que nuestro propio detector
+  puso, sea lava, borde de nube o ruido del detector: medido, el mismo contraste da **+0,1214 con la
+  imagen propia y +0,0786 con la de otra pasada de la misma noche**. **How to apply**: cuando compares
+  nuestra detección contra un producto externo, preguntá primero si ese producto deriva del mismo
+  gránulo que usó nuestro detector. Si deriva, la comparación no es independiente; el arreglo barato es
+  medir sobre **otra pasada de la misma noche** (gránulo distinto, mismo estado del volcán), con
+  separación de 45 a 120 min: debajo de 45 el residuo todavía vale +0,047 porque la nube dura.
+  Detalle y nulos: `docs/CIERRE_FRENTE_KEEP_PEAK_S144.md` §3.
+
+- **A110. Un control se valida midiendo su nulo, no razonándolo; cuatro controles "obvios" fallaron
+  seguidos** (S144, siete rondas de verificador con contexto limpio). Los cuatro parecían correctos por
+  argumento y los cuatro estaban rotos, cada uno de una forma distinta:
+  - **el punto reflejado** a través del cráter mide **textura del flanco**, no calor: nulo +0,1014
+    [+0,018, +0,197] sin nada que detectar, porque el estadístico es un máximo sobre un disco y el
+    flanco donde vive la detección es más rugoso (la celda exacta sí es simétrica: -0,0023);
+  - **el mismo punto en otras noches** es ciego por construcción a las fuentes **permanentes**, que son
+    justo la categoría b que A54 pide no destruir;
+  - **el intercambio de roles** (tomar una referencia como observado) **atenúa el sesgo exactamente
+    cinco veces** con 5 referencias: habría certificado como limpio un instrumento ya refutado;
+  - **el estrato hermano** (mismas detecciones, otra etiqueta del sistema externo) **no es un nivel de
+    instrumento**: contiene la señal, y restarlo hacía inalcanzable el positivo (+0,0120 = -0,0355 de
+    suelo + 0,0476 de efecto del sitio).
+  **How to apply**: (a) todo control lleva su nulo **medido** sobre datos donde no hay nada que
+  detectar, antes de usarlo; (b) desconfiá de cualquier control cuyo nulo no se pueda medir; (c) el
+  control bueno es el que se **cancela por construcción** (comparar dos puntos sorteados en el mismo
+  ráster da cero por simetría, y eso se comprueba); (d) un control que pasa en verde sobre un
+  instrumento ya refutado es la prueba de que el control está roto, y conviene tener ese caso de prueba
+  a mano.
+
 - **A39, enmienda S142**: "0 checks" recién abierto un PR es SIN DATO, no verde. #676 se mergeó así con el CI
   en rojo. Esperar el run con conclusión (`gh pr checks <N> --watch`) antes de mergear, y después de editar un
   documento correr `grep -rl <archivo> tests/` y la suite completa: un test puede leer ese documento.

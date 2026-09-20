@@ -2096,6 +2096,17 @@ Detalle: `docs/s129/ROI1_CAJA_VS_CIRCULO.md`.
 
 ## D19 — `keep_peak` publica como *summit* a 0,0 km un píxel del borde del disco del Test 1, más frío que el fondo; y el second pass corre sin conjunto activo — **ABIERTA (CONFIRMADA gravedad 5 por verificador limpio; probe A75 corrido S135: el cráter no está en el Test 1, y los conteos son del régimen de fondo previo a #537; decisión D1/D2 de Nicolás pendiente)** S134/S135
 
+**Medido S144 en el campo de MIROVA (frente cerrado, `docs/CIERRE_FRENTE_KEEP_PEAK_S144.md`).** El
+lugar donde `keep_peak` conserva su píxel **sí destaca** en la radiancia de MIROVA, medido en la imagen
+de otra pasada de la misma noche (que no eligió ese píxel): +0,0514 [+0,0264, +0,0766] de tasa de exceso
+contra otro punto de la misma banda. Pero el **86 % de ese efecto es permanente** (+0,0441 con rásteres
+de otras noches) y lo de esa noche vale +0,0073 [-0,0241, +0,0385]; tres cuartos lo pone el máximo sobre
+el disco y no la celda. O sea: **es un sitio tibio estable del terreno, no una anomalía de esa noche**.
+Eso NO autoriza a apagar `keep_peak`, porque la radiancia sola no separa relieve tibio de fuente
+permanente (A83): el frente que queda es de etiquetado (A72). Y la coincidencia de radio que sostuvo
+las 5 noches del A/B S143 resultó ser un fenómeno de **Lastarria** (12 de 15 pasadas; 1 de 19 fuera, y
+ahí el cúmulo está a 0,15 km del cráter).
+
 **El fenómeno.** En un cono nevado la temperatura MIR nocturna sigue la altitud: dentro de un
 disco de 3 km alrededor de la cumbre, el píxel más caliente es el borde del disco (cota más
 baja), no el cráter (A69).
