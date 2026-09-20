@@ -23,21 +23,42 @@
 extends: mirova_equivalent
 profile: experimental
 description: >
-  Laboratorio. Hereda la detección operacional completa y baja únicamente el
-  piso de magnitud, para ver la señal débil real que MIROVA no publica.
+  Laboratorio. Hereda la detección operacional completa. S147: sus pisos de
+  magnitud, que desde S130 lo hacían MÁS ciego que el operacional, quedaron en
+  0.0, así que hoy es idéntico al operacional salvo el directorio de salida. Su
+  diferenciación real está diseñada y sin implementar: sensibilidad por zona
+  (docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md).
 
 thresholds:
-  # Referencia medida sobre 1295 ALERTAS del CSV MIROVA: el mínimo que MIROVA
-  # publica es 0.010 MW (p05 = 0.05, mediana = 0.26). Nuestros pisos
-  # operacionales (VIIRS375 0.02 / VIIRS750 0.15 / MODIS 0.05) están POR ENCIMA
-  # de ese mínimo, así que hoy descartamos señal que MIROVA sí publicaría.
-  # Acá bajamos por debajo del umbral de MIROVA — que es el punto del perfil.
+  # ⚠️ S147: estos pisos se ponen en 0.0, y el texto de abajo explica por qué el
+  # razonamiento de S124 dejó de valer. Se conserva por historia.
   #
-  # Los pisos NO se ponen en 0.0 (como hacía la versión vieja): sin piso, cada
-  # fluctuación del fondo entra como detección y el perfil deja de ser útil.
-  min_vrp_mw_viirs375: 0.005
-  min_vrp_mw_viirs750: 0.05
-  min_vrp_mw_modis: 0.02
+  # Cuando S124 escribió este bloque, los pisos OPERACIONALES eran VIIRS375 0.02 /
+  # VIIRS750 0.15 / MODIS 0.05, así que poner 0.005 / 0.05 / 0.02 acá SÍ era bajarlos.
+  # Pero S130 sacó el piso del perfil operacional y lo dejó en 0.0 en los tres
+  # sensores, y nadie actualizó el laboratorio. Desde entonces, durante 17 sesiones,
+  # el perfil declarado "laboratorio para ver la señal débil que MIROVA no publica"
+  # fue estrictamente MÁS CIEGO que el operacional: medido en S147 sobre la ventana
+  # desde el 2026-08-29, sus pisos anulan 5 records de 1.755 con magnitud (1 de 969
+  # en VIIRS375, 4 de 265 en VIIRS750, 0 de 521 en MODIS) y no agregan ninguno.
+  # El comentario de `pipeline/store.py` que dice "el perfil experimental usa pisos
+  # más bajos" quedó falso en el mismo momento.
+  #
+  # El miedo original ("sin piso, cada fluctuación del fondo entra como detección")
+  # era razonable contra la configuración VIEJA del laboratorio, que además de no
+  # tener piso no tenía Test 1, ni dual-ROI, ni nadir fijo, ni ancla al cráter. Con
+  # la detección operacional heredada completa, el piso 0.0 es exactamente lo que
+  # corre hoy en producción: no es una apuesta, es la línea base.
+  #
+  # CONSECUENCIA, y es el punto: con esto el laboratorio queda IGUAL al operacional
+  # salvo el directorio de salida. O sea que hoy no aporta nada, y eso ahora está
+  # dicho en voz alta en vez de estar escondido detrás de tres números. La
+  # diferenciación real del laboratorio NO va por el piso de magnitud (que sólo
+  # recorta lo ya detectado) sino por el UMBRAL DE DETECCIÓN por zona:
+  # ver docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md.
+  min_vrp_mw_viirs375: 0.0
+  min_vrp_mw_viirs750: 0.0
+  min_vrp_mw_modis: 0.0
 
 output:
   # S124 — subdir NUEVO a proposito. `data/experimental/` contiene la serie

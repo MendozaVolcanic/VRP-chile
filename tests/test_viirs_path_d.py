@@ -57,6 +57,23 @@ def test_experimental_hereda_la_deteccion_operacional():
     Desde S124 `experimental` es `extends: mirova_equivalent` y diverge en UNA
     sola dimensión deliberada: el piso de magnitud. Este test es el guard de esa
     intención (A63) — si alguien vuelve a hacer divergir la detección, falla.
+
+    ⚠️ S147: la última línea de este test fijaba el piso en 0,005 y hubo que
+    cambiarla a 0,0. El motivo NO es que se relajara el guard, es que el piso de
+    0,005 había dejado de ser "más bajo que el operacional": S130 bajó los pisos
+    del operacional a 0,0 en los tres sensores y nadie actualizó el laboratorio,
+    así que durante 17 sesiones el perfil declarado "laboratorio para ver la señal
+    débil" fue estrictamente MÁS CIEGO que el instrumento que estudiaba (medido:
+    anulaba 5 records de 1.755 con magnitud en la ventana desde el 2026-08-29, y
+    no agregaba ninguno). O sea que este test estaba vigilando una intención que
+    ya no se cumplía, y lo hacía en verde.
+
+    Consecuencia: hoy `experimental` es idéntico al operacional salvo el
+    directorio de salida, y eso está dicho en voz alta en el YAML. Su
+    diferenciación real está diseñada y sin implementar, y va por el umbral de
+    DETECCIÓN por zona, no por el piso de magnitud, que sólo recorta lo ya
+    detectado: ver docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md.
+    Guard de la dirección: tests/test_guard_laboratorio_no_mas_ciego_s147.py.
     """
     import pipeline.profile as prof
     os.environ["VRP_PROFILE"] = "experimental"
@@ -65,8 +82,10 @@ def test_experimental_hereda_la_deteccion_operacional():
         # hereda la detección operacional...
         assert prof.ENABLE_DNTI_CONTEXTUAL_PATH is True
         assert prof.DNTI_CONTEXTUAL_C1 == 0.003
-        # ...y diverge SOLO en el piso de magnitud (0.02 operacional -> 0.005).
-        assert prof._cfg["thresholds"]["min_vrp_mw_viirs375"] == 0.005
+        # ...y S147: su piso queda en 0,0, igual que el operacional. Lo que se vigila
+        # ahora es la DIRECCIÓN, que es lo que importaba desde el principio: el
+        # laboratorio nunca puede quedar por ENCIMA del operacional.
+        assert prof._cfg["thresholds"]["min_vrp_mw_viirs375"] == 0.0
     finally:
         # Restore for downstream tests
         os.environ["VRP_PROFILE"] = "mirova_equivalent"
