@@ -1,0 +1,1862 @@
+{
+  "generado_utc": "2026-09-20T05:28:42+00:00",
+  "ventana": {
+    "inicio": "2026-09-01",
+    "fin": "2026-09-20",
+    "por_que": "el regimen actual empieza con el PR #571 (2026-08-31); una ventana que lo cruce mezcla dos regimenes (A104)"
+  },
+  "procedencia": {
+    "referencia": {
+      "registro_vrp_consolidado.csv": "9b788da2c5a80920022221713e84d71828a52d3b",
+      "registro_vrp_ocr.csv": "7e3438046ca1e65eb80f20ae8b11c67e0ce5a453"
+    },
+    "sha_index_html": "24fba8a157136bf76509ed647c7d086d3f9f45aa",
+    "sha_store_py": "7637541c10154edd37e9972f2bf99d4071874bed",
+    "sha_volcanic_features_yaml": "6f25ce41a316d7423af88b315a368bb10f2dce11",
+    "inner_radius_km": {
+      "Lascar": 5.0,
+      "Lastarria": 3.0,
+      "Isluga": 5.0,
+      "Tupungatito": 7.0,
+      "PlanchonPeteroa": 3.0,
+      "NevadosDeChillan": 5.0,
+      "Llaima": 5.0,
+      "Villarrica": 5.0,
+      "Copahue": 4.0,
+      "PuyehueCordonCaulle": 20.0,
+      "Chaiten": 5.0
+    }
+  },
+  "controles": {
+    "identidad_predicado_node": [
+      [
+        0,
+        1,
+        1,
+        1,
+        0
+      ],
+      [
+        1,
+        0
+      ]
+    ],
+    "identidad_predicado_ok": true,
+    "copia_del_cargador_coincide_con_banco": {
+      "n_records": [
+        2285,
+        2285
+      ],
+      "n_publicadas": [
+        1050,
+        1050
+      ],
+      "etiquetas": [
+        {
+          "neg_limpio": 1433,
+          "sin_info": 658,
+          "far_ref": 32,
+          "pos": 162
+        },
+        {
+          "neg_limpio": 1433,
+          "sin_info": 658,
+          "far_ref": 32,
+          "pos": 162
+        }
+      ],
+      "coincide": true
+    }
+  },
+  "definiciones": {
+    "publicada": "predicado del dashboard de frontend/index.html ejecutado con node (A97): isSummitDetection && isValidDetection && !isThermalArtifact && display>0",
+    "a_mirova_publico_esa_pasada": "etiqueta `pos` del banco: fila ALERTA de MIROVA (consolidado u OCR) nocturna a +-2 min de esa pasada",
+    "a_probable_misma_noche_otra_pasada": "no hay ALERTA en esa pasada pero SI en la misma noche de ese volcan, en cualquier sensor: el evento es el mismo, la pasada no es un extra",
+    "bcd_indistinguible": "publicamos, MIROVA no alerto ni esa pasada ni esa noche. Aca viven (b), (c) y (d) MEZCLADAS: no hay etiqueta por record",
+    "pool": "el conjunto bcd_indistinguible, que es sobre el que se prueban las reglas"
+  },
+  "cobertura": {
+    "n_records_nocturnos": 2285,
+    "n_publicadas": 1050,
+    "n_filas_referencia_nocturnas": 1856,
+    "etiquetas_del_banco_sobre_todos": {
+      "neg_limpio": 1433,
+      "sin_info": 658,
+      "far_ref": 32,
+      "pos": 162
+    },
+    "no_publicadas_por_artefacto_termico_del_frontend": 0,
+    "no_publicadas_por_artefacto_por_volcan": {}
+  },
+  "reparto": {
+    "total": {
+      "a_probable_misma_noche_otra_pasada": 257,
+      "a_mirova_publico_esa_pasada": 157,
+      "bcd_indistinguible": 621,
+      "sin_informacion_mirova_vio_fuera_del_limite": 15
+    },
+    "por_sensor": {
+      "MODIS": {
+        "bcd_indistinguible": 26,
+        "a_probable_misma_noche_otra_pasada": 25,
+        "a_mirova_publico_esa_pasada": 1
+      },
+      "VIIRS375": {
+        "a_probable_misma_noche_otra_pasada": 159,
+        "a_mirova_publico_esa_pasada": 143,
+        "bcd_indistinguible": 484,
+        "sin_informacion_mirova_vio_fuera_del_limite": 15
+      },
+      "VIIRS750": {
+        "a_mirova_publico_esa_pasada": 13,
+        "a_probable_misma_noche_otra_pasada": 73,
+        "bcd_indistinguible": 111
+      }
+    },
+    "por_volcan": {
+      "Lascar": {
+        "a_probable_misma_noche_otra_pasada": 23,
+        "a_mirova_publico_esa_pasada": 21,
+        "bcd_indistinguible": 35,
+        "sin_informacion_mirova_vio_fuera_del_limite": 1
+      },
+      "Lastarria": {
+        "a_probable_misma_noche_otra_pasada": 17,
+        "a_mirova_publico_esa_pasada": 9,
+        "bcd_indistinguible": 41,
+        "sin_informacion_mirova_vio_fuera_del_limite": 4
+      },
+      "Isluga": {
+        "a_mirova_publico_esa_pasada": 33,
+        "a_probable_misma_noche_otra_pasada": 45,
+        "bcd_indistinguible": 17,
+        "sin_informacion_mirova_vio_fuera_del_limite": 1
+      },
+      "Tupungatito": {
+        "bcd_indistinguible": 34,
+        "sin_informacion_mirova_vio_fuera_del_limite": 3,
+        "a_mirova_publico_esa_pasada": 26,
+        "a_probable_misma_noche_otra_pasada": 31
+      },
+      "PlanchonPeteroa": {
+        "bcd_indistinguible": 63,
+        "a_probable_misma_noche_otra_pasada": 19,
+        "a_mirova_publico_esa_pasada": 9,
+        "sin_informacion_mirova_vio_fuera_del_limite": 3
+      },
+      "NevadosDeChillan": {
+        "bcd_indistinguible": 66,
+        "a_probable_misma_noche_otra_pasada": 11,
+        "a_mirova_publico_esa_pasada": 4
+      },
+      "Llaima": {
+        "bcd_indistinguible": 84
+      },
+      "Villarrica": {
+        "bcd_indistinguible": 66,
+        "a_probable_misma_noche_otra_pasada": 18,
+        "a_mirova_publico_esa_pasada": 7
+      },
+      "Copahue": {
+        "bcd_indistinguible": 84,
+        "sin_informacion_mirova_vio_fuera_del_limite": 1
+      },
+      "PuyehueCordonCaulle": {
+        "bcd_indistinguible": 61,
+        "a_probable_misma_noche_otra_pasada": 69,
+        "a_mirova_publico_esa_pasada": 40,
+        "sin_informacion_mirova_vio_fuera_del_limite": 1
+      },
+      "Chaiten": {
+        "bcd_indistinguible": 70,
+        "sin_informacion_mirova_vio_fuera_del_limite": 1,
+        "a_mirova_publico_esa_pasada": 8,
+        "a_probable_misma_noche_otra_pasada": 24
+      }
+    },
+    "por_volcan_y_sensor": {
+      "Chaiten|MODIS": {
+        "a_probable_misma_noche_otra_pasada": 1,
+        "bcd_indistinguible": 3
+      },
+      "Chaiten|VIIRS375": {
+        "bcd_indistinguible": 54,
+        "sin_informacion_mirova_vio_fuera_del_limite": 1,
+        "a_mirova_publico_esa_pasada": 8,
+        "a_probable_misma_noche_otra_pasada": 20
+      },
+      "Chaiten|VIIRS750": {
+        "bcd_indistinguible": 13,
+        "a_probable_misma_noche_otra_pasada": 3
+      },
+      "Copahue|MODIS": {
+        "bcd_indistinguible": 1
+      },
+      "Copahue|VIIRS375": {
+        "bcd_indistinguible": 70,
+        "sin_informacion_mirova_vio_fuera_del_limite": 1
+      },
+      "Copahue|VIIRS750": {
+        "bcd_indistinguible": 13
+      },
+      "Isluga|VIIRS375": {
+        "a_mirova_publico_esa_pasada": 33,
+        "a_probable_misma_noche_otra_pasada": 20,
+        "bcd_indistinguible": 12,
+        "sin_informacion_mirova_vio_fuera_del_limite": 1
+      },
+      "Isluga|VIIRS750": {
+        "a_probable_misma_noche_otra_pasada": 25,
+        "bcd_indistinguible": 5
+      },
+      "Lascar|MODIS": {
+        "bcd_indistinguible": 1
+      },
+      "Lascar|VIIRS375": {
+        "a_probable_misma_noche_otra_pasada": 18,
+        "a_mirova_publico_esa_pasada": 18,
+        "bcd_indistinguible": 31,
+        "sin_informacion_mirova_vio_fuera_del_limite": 1
+      },
+      "Lascar|VIIRS750": {
+        "a_mirova_publico_esa_pasada": 3,
+        "a_probable_misma_noche_otra_pasada": 5,
+        "bcd_indistinguible": 3
+      },
+      "Lastarria|MODIS": {
+        "a_probable_misma_noche_otra_pasada": 1
+      },
+      "Lastarria|VIIRS375": {
+        "a_probable_misma_noche_otra_pasada": 15,
+        "a_mirova_publico_esa_pasada": 9,
+        "bcd_indistinguible": 38,
+        "sin_informacion_mirova_vio_fuera_del_limite": 4
+      },
+      "Lastarria|VIIRS750": {
+        "a_probable_misma_noche_otra_pasada": 1,
+        "bcd_indistinguible": 3
+      },
+      "Llaima|VIIRS375": {
+        "bcd_indistinguible": 67
+      },
+      "Llaima|VIIRS750": {
+        "bcd_indistinguible": 17
+      },
+      "NevadosDeChillan|MODIS": {
+        "bcd_indistinguible": 1
+      },
+      "NevadosDeChillan|VIIRS375": {
+        "bcd_indistinguible": 61,
+        "a_probable_misma_noche_otra_pasada": 11,
+        "a_mirova_publico_esa_pasada": 4
+      },
+      "NevadosDeChillan|VIIRS750": {
+        "bcd_indistinguible": 4
+      },
+      "PlanchonPeteroa|MODIS": {
+        "a_probable_misma_noche_otra_pasada": 1,
+        "bcd_indistinguible": 1
+      },
+      "PlanchonPeteroa|VIIRS375": {
+        "bcd_indistinguible": 47,
+        "a_probable_misma_noche_otra_pasada": 14,
+        "a_mirova_publico_esa_pasada": 8,
+        "sin_informacion_mirova_vio_fuera_del_limite": 3
+      },
+      "PlanchonPeteroa|VIIRS750": {
+        "bcd_indistinguible": 15,
+        "a_mirova_publico_esa_pasada": 1,
+        "a_probable_misma_noche_otra_pasada": 4
+      },
+      "PuyehueCordonCaulle|MODIS": {
+        "bcd_indistinguible": 13,
+        "a_probable_misma_noche_otra_pasada": 19
+      },
+      "PuyehueCordonCaulle|VIIRS375": {
+        "bcd_indistinguible": 30,
+        "a_probable_misma_noche_otra_pasada": 26,
+        "a_mirova_publico_esa_pasada": 32,
+        "sin_informacion_mirova_vio_fuera_del_limite": 1
+      },
+      "PuyehueCordonCaulle|VIIRS750": {
+        "bcd_indistinguible": 18,
+        "a_probable_misma_noche_otra_pasada": 24,
+        "a_mirova_publico_esa_pasada": 8
+      },
+      "Tupungatito|MODIS": {
+        "bcd_indistinguible": 2,
+        "a_probable_misma_noche_otra_pasada": 1
+      },
+      "Tupungatito|VIIRS375": {
+        "bcd_indistinguible": 24,
+        "sin_informacion_mirova_vio_fuera_del_limite": 3,
+        "a_mirova_publico_esa_pasada": 26,
+        "a_probable_misma_noche_otra_pasada": 20
+      },
+      "Tupungatito|VIIRS750": {
+        "bcd_indistinguible": 8,
+        "a_probable_misma_noche_otra_pasada": 10
+      },
+      "Villarrica|MODIS": {
+        "bcd_indistinguible": 4,
+        "a_mirova_publico_esa_pasada": 1,
+        "a_probable_misma_noche_otra_pasada": 2
+      },
+      "Villarrica|VIIRS375": {
+        "bcd_indistinguible": 50,
+        "a_probable_misma_noche_otra_pasada": 15,
+        "a_mirova_publico_esa_pasada": 5
+      },
+      "Villarrica|VIIRS750": {
+        "bcd_indistinguible": 12,
+        "a_mirova_publico_esa_pasada": 1,
+        "a_probable_misma_noche_otra_pasada": 1
+      }
+    },
+    "apoyo_positivo_de_b": {
+      "n_pool": 621,
+      "geo_class_extension": 0,
+      "cerca_de_feature_catalogada": 6,
+      "geo_class_reparto": {
+        "summit": 621
+      },
+      "sin_primary_cluster": 0
+    }
+  },
+  "reglas_candidatas_de_artefacto": {
+    "que_es_esto": "NO es un reparto de (d). Es el costo medido de cada regla sobre el unico estrato con etiqueta conocida (las pasadas que MIROVA confirmo, reales sin discusion). Una regla que destruye una fraccion apreciable de esas esta refutada como discriminante (A110).",
+    "global": {
+      "A80_nti_max_en_el_piso": {
+        "n_a": 414,
+        "marcadas_en_a": 397,
+        "frac_de_a_que_destruiria": 0.9589,
+        "n_resto": 621,
+        "marcadas_en_resto": 615,
+        "frac_del_resto_que_marca": 0.9903
+      },
+      "S87_t_bg_bajo_260K": {
+        "n_a": 414,
+        "marcadas_en_a": 77,
+        "frac_de_a_que_destruiria": 0.186,
+        "n_resto": 621,
+        "marcadas_en_resto": 254,
+        "frac_del_resto_que_marca": 0.409
+      },
+      "cumulo_de_un_pixel": {
+        "n_a": 414,
+        "marcadas_en_a": 264,
+        "frac_de_a_que_destruiria": 0.6377,
+        "n_resto": 621,
+        "marcadas_en_resto": 503,
+        "frac_del_resto_que_marca": 0.81
+      },
+      "sin_camino_BT": {
+        "n_a": 414,
+        "marcadas_en_a": 414,
+        "frac_de_a_que_destruiria": 1.0,
+        "n_resto": 621,
+        "marcadas_en_resto": 621,
+        "frac_del_resto_que_marca": 1.0
+      },
+      "A83_test1_k_menor_4K": {
+        "n_a": 414,
+        "marcadas_en_a": 145,
+        "frac_de_a_que_destruiria": 0.3502,
+        "n_resto": 621,
+        "marcadas_en_resto": 239,
+        "frac_del_resto_que_marca": 0.3849
+      }
+    },
+    "por_sensor": {
+      "A80_nti_max_en_el_piso": {
+        "n_a": 414,
+        "marcadas_en_a": 397,
+        "frac_de_a_que_destruiria": 0.9589,
+        "n_resto": 621,
+        "marcadas_en_resto": 615,
+        "frac_del_resto_que_marca": 0.9903,
+        "por_sensor": {
+          "MODIS": {
+            "a": [
+              23,
+              26
+            ],
+            "resto": [
+              25,
+              26
+            ]
+          },
+          "VIIRS375": {
+            "a": [
+              288,
+              302
+            ],
+            "resto": [
+              479,
+              484
+            ]
+          },
+          "VIIRS750": {
+            "a": [
+              86,
+              86
+            ],
+            "resto": [
+              111,
+              111
+            ]
+          }
+        }
+      },
+      "S87_t_bg_bajo_260K": {
+        "n_a": 414,
+        "marcadas_en_a": 77,
+        "frac_de_a_que_destruiria": 0.186,
+        "n_resto": 621,
+        "marcadas_en_resto": 254,
+        "frac_del_resto_que_marca": 0.409,
+        "por_sensor": {
+          "MODIS": {
+            "a": [
+              2,
+              26
+            ],
+            "resto": [
+              9,
+              26
+            ]
+          },
+          "VIIRS375": {
+            "a": [
+              61,
+              302
+            ],
+            "resto": [
+              181,
+              484
+            ]
+          },
+          "VIIRS750": {
+            "a": [
+              14,
+              86
+            ],
+            "resto": [
+              64,
+              111
+            ]
+          }
+        }
+      },
+      "cumulo_de_un_pixel": {
+        "n_a": 414,
+        "marcadas_en_a": 264,
+        "frac_de_a_que_destruiria": 0.6377,
+        "n_resto": 621,
+        "marcadas_en_resto": 503,
+        "frac_del_resto_que_marca": 0.81,
+        "por_sensor": {
+          "MODIS": {
+            "a": [
+              8,
+              26
+            ],
+            "resto": [
+              4,
+              26
+            ]
+          },
+          "VIIRS375": {
+            "a": [
+              227,
+              302
+            ],
+            "resto": [
+              469,
+              484
+            ]
+          },
+          "VIIRS750": {
+            "a": [
+              29,
+              86
+            ],
+            "resto": [
+              30,
+              111
+            ]
+          }
+        }
+      },
+      "sin_camino_BT": {
+        "n_a": 414,
+        "marcadas_en_a": 414,
+        "frac_de_a_que_destruiria": 1.0,
+        "n_resto": 621,
+        "marcadas_en_resto": 621,
+        "frac_del_resto_que_marca": 1.0,
+        "por_sensor": {
+          "MODIS": {
+            "a": [
+              26,
+              26
+            ],
+            "resto": [
+              26,
+              26
+            ]
+          },
+          "VIIRS375": {
+            "a": [
+              302,
+              302
+            ],
+            "resto": [
+              484,
+              484
+            ]
+          },
+          "VIIRS750": {
+            "a": [
+              86,
+              86
+            ],
+            "resto": [
+              111,
+              111
+            ]
+          }
+        }
+      },
+      "A83_test1_k_menor_4K": {
+        "n_a": 414,
+        "marcadas_en_a": 145,
+        "frac_de_a_que_destruiria": 0.3502,
+        "n_resto": 621,
+        "marcadas_en_resto": 239,
+        "frac_del_resto_que_marca": 0.3849,
+        "por_sensor": {
+          "MODIS": {
+            "a": [
+              25,
+              26
+            ],
+            "resto": [
+              21,
+              26
+            ]
+          },
+          "VIIRS375": {
+            "a": [
+              62,
+              302
+            ],
+            "resto": [
+              146,
+              484
+            ]
+          },
+          "VIIRS750": {
+            "a": [
+              58,
+              86
+            ],
+            "resto": [
+              72,
+              111
+            ]
+          }
+        }
+      }
+    },
+    "por_volcan": {
+      "A80_nti_max_en_el_piso": {
+        "n_a": 414,
+        "marcadas_en_a": 397,
+        "frac_de_a_que_destruiria": 0.9589,
+        "n_resto": 621,
+        "marcadas_en_resto": 615,
+        "frac_del_resto_que_marca": 0.9903,
+        "por_volcan": {
+          "Lascar": {
+            "a": [
+              43,
+              44
+            ],
+            "resto": [
+              34,
+              35
+            ]
+          },
+          "Lastarria": {
+            "a": [
+              25,
+              26
+            ],
+            "resto": [
+              39,
+              41
+            ]
+          },
+          "Isluga": {
+            "a": [
+              75,
+              78
+            ],
+            "resto": [
+              16,
+              17
+            ]
+          },
+          "Tupungatito": {
+            "a": [
+              51,
+              57
+            ],
+            "resto": [
+              34,
+              34
+            ]
+          },
+          "PlanchonPeteroa": {
+            "a": [
+              26,
+              28
+            ],
+            "resto": [
+              62,
+              63
+            ]
+          },
+          "NevadosDeChillan": {
+            "a": [
+              15,
+              15
+            ],
+            "resto": [
+              66,
+              66
+            ]
+          },
+          "Llaima": {
+            "a": [
+              0,
+              0
+            ],
+            "resto": [
+              84,
+              84
+            ]
+          },
+          "Villarrica": {
+            "a": [
+              21,
+              25
+            ],
+            "resto": [
+              66,
+              66
+            ]
+          },
+          "Copahue": {
+            "a": [
+              0,
+              0
+            ],
+            "resto": [
+              84,
+              84
+            ]
+          },
+          "PuyehueCordonCaulle": {
+            "a": [
+              109,
+              109
+            ],
+            "resto": [
+              61,
+              61
+            ]
+          },
+          "Chaiten": {
+            "a": [
+              32,
+              32
+            ],
+            "resto": [
+              69,
+              70
+            ]
+          }
+        }
+      },
+      "S87_t_bg_bajo_260K": {
+        "n_a": 414,
+        "marcadas_en_a": 77,
+        "frac_de_a_que_destruiria": 0.186,
+        "n_resto": 621,
+        "marcadas_en_resto": 254,
+        "frac_del_resto_que_marca": 0.409,
+        "por_volcan": {
+          "Lascar": {
+            "a": [
+              0,
+              44
+            ],
+            "resto": [
+              17,
+              35
+            ]
+          },
+          "Lastarria": {
+            "a": [
+              9,
+              26
+            ],
+            "resto": [
+              37,
+              41
+            ]
+          },
+          "Isluga": {
+            "a": [
+              1,
+              78
+            ],
+            "resto": [
+              5,
+              17
+            ]
+          },
+          "Tupungatito": {
+            "a": [
+              53,
+              57
+            ],
+            "resto": [
+              34,
+              34
+            ]
+          },
+          "PlanchonPeteroa": {
+            "a": [
+              6,
+              28
+            ],
+            "resto": [
+              18,
+              63
+            ]
+          },
+          "NevadosDeChillan": {
+            "a": [
+              2,
+              15
+            ],
+            "resto": [
+              16,
+              66
+            ]
+          },
+          "Llaima": {
+            "a": [
+              0,
+              0
+            ],
+            "resto": [
+              26,
+              84
+            ]
+          },
+          "Villarrica": {
+            "a": [
+              1,
+              25
+            ],
+            "resto": [
+              16,
+              66
+            ]
+          },
+          "Copahue": {
+            "a": [
+              0,
+              0
+            ],
+            "resto": [
+              22,
+              84
+            ]
+          },
+          "PuyehueCordonCaulle": {
+            "a": [
+              5,
+              109
+            ],
+            "resto": [
+              27,
+              61
+            ]
+          },
+          "Chaiten": {
+            "a": [
+              0,
+              32
+            ],
+            "resto": [
+              36,
+              70
+            ]
+          }
+        }
+      },
+      "cumulo_de_un_pixel": {
+        "n_a": 414,
+        "marcadas_en_a": 264,
+        "frac_de_a_que_destruiria": 0.6377,
+        "n_resto": 621,
+        "marcadas_en_resto": 503,
+        "frac_del_resto_que_marca": 0.81,
+        "por_volcan": {
+          "Lascar": {
+            "a": [
+              34,
+              44
+            ],
+            "resto": [
+              26,
+              35
+            ]
+          },
+          "Lastarria": {
+            "a": [
+              24,
+              26
+            ],
+            "resto": [
+              37,
+              41
+            ]
+          },
+          "Isluga": {
+            "a": [
+              51,
+              78
+            ],
+            "resto": [
+              14,
+              17
+            ]
+          },
+          "Tupungatito": {
+            "a": [
+              35,
+              57
+            ],
+            "resto": [
+              25,
+              34
+            ]
+          },
+          "PlanchonPeteroa": {
+            "a": [
+              23,
+              28
+            ],
+            "resto": [
+              50,
+              63
+            ]
+          },
+          "NevadosDeChillan": {
+            "a": [
+              15,
+              15
+            ],
+            "resto": [
+              62,
+              66
+            ]
+          },
+          "Llaima": {
+            "a": [
+              0,
+              0
+            ],
+            "resto": [
+              70,
+              84
+            ]
+          },
+          "Villarrica": {
+            "a": [
+              20,
+              25
+            ],
+            "resto": [
+              54,
+              66
+            ]
+          },
+          "Copahue": {
+            "a": [
+              0,
+              0
+            ],
+            "resto": [
+              70,
+              84
+            ]
+          },
+          "PuyehueCordonCaulle": {
+            "a": [
+              39,
+              109
+            ],
+            "resto": [
+              42,
+              61
+            ]
+          },
+          "Chaiten": {
+            "a": [
+              23,
+              32
+            ],
+            "resto": [
+              53,
+              70
+            ]
+          }
+        }
+      },
+      "sin_camino_BT": {
+        "n_a": 414,
+        "marcadas_en_a": 414,
+        "frac_de_a_que_destruiria": 1.0,
+        "n_resto": 621,
+        "marcadas_en_resto": 621,
+        "frac_del_resto_que_marca": 1.0,
+        "por_volcan": {
+          "Lascar": {
+            "a": [
+              44,
+              44
+            ],
+            "resto": [
+              35,
+              35
+            ]
+          },
+          "Lastarria": {
+            "a": [
+              26,
+              26
+            ],
+            "resto": [
+              41,
+              41
+            ]
+          },
+          "Isluga": {
+            "a": [
+              78,
+              78
+            ],
+            "resto": [
+              17,
+              17
+            ]
+          },
+          "Tupungatito": {
+            "a": [
+              57,
+              57
+            ],
+            "resto": [
+              34,
+              34
+            ]
+          },
+          "PlanchonPeteroa": {
+            "a": [
+              28,
+              28
+            ],
+            "resto": [
+              63,
+              63
+            ]
+          },
+          "NevadosDeChillan": {
+            "a": [
+              15,
+              15
+            ],
+            "resto": [
+              66,
+              66
+            ]
+          },
+          "Llaima": {
+            "a": [
+              0,
+              0
+            ],
+            "resto": [
+              84,
+              84
+            ]
+          },
+          "Villarrica": {
+            "a": [
+              25,
+              25
+            ],
+            "resto": [
+              66,
+              66
+            ]
+          },
+          "Copahue": {
+            "a": [
+              0,
+              0
+            ],
+            "resto": [
+              84,
+              84
+            ]
+          },
+          "PuyehueCordonCaulle": {
+            "a": [
+              109,
+              109
+            ],
+            "resto": [
+              61,
+              61
+            ]
+          },
+          "Chaiten": {
+            "a": [
+              32,
+              32
+            ],
+            "resto": [
+              70,
+              70
+            ]
+          }
+        }
+      },
+      "A83_test1_k_menor_4K": {
+        "n_a": 414,
+        "marcadas_en_a": 145,
+        "frac_de_a_que_destruiria": 0.3502,
+        "n_resto": 621,
+        "marcadas_en_resto": 239,
+        "frac_del_resto_que_marca": 0.3849,
+        "por_volcan": {
+          "Lascar": {
+            "a": [
+              17,
+              44
+            ],
+            "resto": [
+              9,
+              35
+            ]
+          },
+          "Lastarria": {
+            "a": [
+              8,
+              26
+            ],
+            "resto": [
+              12,
+              41
+            ]
+          },
+          "Isluga": {
+            "a": [
+              18,
+              78
+            ],
+            "resto": [
+              14,
+              17
+            ]
+          },
+          "Tupungatito": {
+            "a": [
+              16,
+              57
+            ],
+            "resto": [
+              13,
+              34
+            ]
+          },
+          "PlanchonPeteroa": {
+            "a": [
+              13,
+              28
+            ],
+            "resto": [
+              21,
+              63
+            ]
+          },
+          "NevadosDeChillan": {
+            "a": [
+              2,
+              15
+            ],
+            "resto": [
+              9,
+              66
+            ]
+          },
+          "Llaima": {
+            "a": [
+              0,
+              0
+            ],
+            "resto": [
+              39,
+              84
+            ]
+          },
+          "Villarrica": {
+            "a": [
+              14,
+              25
+            ],
+            "resto": [
+              31,
+              66
+            ]
+          },
+          "Copahue": {
+            "a": [
+              0,
+              0
+            ],
+            "resto": [
+              36,
+              84
+            ]
+          },
+          "PuyehueCordonCaulle": {
+            "a": [
+              41,
+              109
+            ],
+            "resto": [
+              33,
+              61
+            ]
+          },
+          "Chaiten": {
+            "a": [
+              16,
+              32
+            ],
+            "resto": [
+              22,
+              70
+            ]
+          }
+        }
+      }
+    }
+  },
+  "titulares": {
+    "frac_publicadas_de_las_nocturnas": 0.4595,
+    "frac_publicadas_atribuibles_a_mirova": 0.3943,
+    "frac_publicadas_en_el_pool_bcd": 0.5914,
+    "frac_del_pool_con_apoyo_positivo_de_b": 0.0097,
+    "n_volcanes_sin_una_sola_pasada_atribuible_a_mirova": 2,
+    "volcanes_sin_una_sola_pasada_atribuible_a_mirova": [
+      "Llaima",
+      "Copahue"
+    ],
+    "n_pares_volcan_sensor_que_publican_todas_las_noches": 12,
+    "n_pares_volcan_sensor": 31,
+    "viirs375_publica_todas_las_noches_en_n_volcanes": 11
+  },
+  "tablas_del_informe": {
+    "por_sensor": {
+      "MODIS": {
+        "publicadas": 52,
+        "a": 26,
+        "fuera_de_limite": 0,
+        "pool": 26
+      },
+      "VIIRS375": {
+        "publicadas": 801,
+        "a": 302,
+        "fuera_de_limite": 15,
+        "pool": 484
+      },
+      "VIIRS750": {
+        "publicadas": 197,
+        "a": 86,
+        "fuera_de_limite": 0,
+        "pool": 111
+      }
+    },
+    "por_volcan": {
+      "Lascar": {
+        "inner_radius_km": 5.0,
+        "publicadas": 80,
+        "a": 44,
+        "pool": 35
+      },
+      "Lastarria": {
+        "inner_radius_km": 3.0,
+        "publicadas": 71,
+        "a": 26,
+        "pool": 41
+      },
+      "Isluga": {
+        "inner_radius_km": 5.0,
+        "publicadas": 96,
+        "a": 78,
+        "pool": 17
+      },
+      "Tupungatito": {
+        "inner_radius_km": 7.0,
+        "publicadas": 94,
+        "a": 57,
+        "pool": 34
+      },
+      "PlanchonPeteroa": {
+        "inner_radius_km": 3.0,
+        "publicadas": 94,
+        "a": 28,
+        "pool": 63
+      },
+      "NevadosDeChillan": {
+        "inner_radius_km": 5.0,
+        "publicadas": 81,
+        "a": 15,
+        "pool": 66
+      },
+      "Llaima": {
+        "inner_radius_km": 5.0,
+        "publicadas": 84,
+        "a": 0,
+        "pool": 84
+      },
+      "Villarrica": {
+        "inner_radius_km": 5.0,
+        "publicadas": 91,
+        "a": 25,
+        "pool": 66
+      },
+      "Copahue": {
+        "inner_radius_km": 4.0,
+        "publicadas": 85,
+        "a": 0,
+        "pool": 84
+      },
+      "PuyehueCordonCaulle": {
+        "inner_radius_km": 20.0,
+        "publicadas": 171,
+        "a": 109,
+        "pool": 61
+      },
+      "Chaiten": {
+        "inner_radius_km": 5.0,
+        "publicadas": 103,
+        "a": 32,
+        "pool": 70
+      }
+    },
+    "n_noches_de_la_ventana": 20
+  },
+  "reparto_bajo_la_propuesta": {
+    "mirova_same_night": 257,
+    "mirova_confirmed": 157,
+    "mirova_silent": 433,
+    "no_reference": 188,
+    "mirova_saw_outside": 15
+  },
+  "inventario_historico_geo_class": {
+    "n_records_todos_los_volcanes": 62880,
+    "reparto": {
+      "None": 21979,
+      "summit": 39076,
+      "far": 1820,
+      "extension": 5
+    },
+    "n_con_geo_class": 40901,
+    "extension_una_por_una": [
+      "Lastarria|2025-10-26 02:45|MODIS_TERRA",
+      "Lastarria|2026-03-01 04:42|VIIRS_NOAA20_750",
+      "Lastarria|2026-04-29 05:24|VIIRS_NOAA21_750",
+      "Lastarria|2026-05-09 02:25|MODIS_TERRA",
+      "Lastarria|2026-09-19 02:10|MODIS_TERRA"
+    ]
+  },
+  "sustrato_de_campos": {
+    "t_bg_k": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 834,
+      "constante_sobre_lo_publicado": false,
+      "auc_a_vs_pool_global": 0.658,
+      "auc_a_vs_pool_por_volcan": {
+        "Lascar": 0.735,
+        "Lastarria": 0.868,
+        "Isluga": 0.669,
+        "Tupungatito": 0.971,
+        "PlanchonPeteroa": 0.564,
+        "NevadosDeChillan": 0.554,
+        "Villarrica": 0.741,
+        "PuyehueCordonCaulle": 0.944,
+        "Chaiten": 0.921
+      }
+    },
+    "t_max_k": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 785,
+      "constante_sobre_lo_publicado": false,
+      "auc_a_vs_pool_global": 0.672,
+      "auc_a_vs_pool_por_volcan": {
+        "Lascar": 0.786,
+        "Lastarria": 0.735,
+        "Isluga": 0.627,
+        "Tupungatito": 0.951,
+        "PlanchonPeteroa": 0.643,
+        "NevadosDeChillan": 0.704,
+        "Villarrica": 0.747,
+        "PuyehueCordonCaulle": 0.896,
+        "Chaiten": 0.793
+      }
+    },
+    "n_anomalous_pixels": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 87,
+      "constante_sobre_lo_publicado": false,
+      "auc_a_vs_pool_global": 0.668,
+      "auc_a_vs_pool_por_volcan": {
+        "Lascar": 0.544,
+        "Lastarria": 0.657,
+        "Isluga": 0.285,
+        "Tupungatito": 0.6,
+        "PlanchonPeteroa": 0.552,
+        "NevadosDeChillan": 0.69,
+        "Villarrica": 0.606,
+        "PuyehueCordonCaulle": 0.489,
+        "Chaiten": 0.633
+      }
+    },
+    "test1_k_observed": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 488,
+      "constante_sobre_lo_publicado": false,
+      "auc_a_vs_pool_global": 0.552,
+      "auc_a_vs_pool_por_volcan": {
+        "Lascar": 0.419,
+        "Lastarria": 0.453,
+        "Isluga": 0.858,
+        "Tupungatito": 0.624,
+        "PlanchonPeteroa": 0.407,
+        "NevadosDeChillan": 0.581,
+        "Villarrica": 0.438,
+        "PuyehueCordonCaulle": 0.657,
+        "Chaiten": 0.405
+      }
+    },
+    "diag_nti_max": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 494,
+      "constante_sobre_lo_publicado": false,
+      "auc_a_vs_pool_global": 0.666,
+      "auc_a_vs_pool_por_volcan": {
+        "Lascar": 0.733,
+        "Lastarria": 0.679,
+        "Isluga": 0.658,
+        "Tupungatito": 0.785,
+        "PlanchonPeteroa": 0.553,
+        "NevadosDeChillan": 0.688,
+        "Villarrica": 0.657,
+        "PuyehueCordonCaulle": 0.718,
+        "Chaiten": 0.662
+      }
+    },
+    "diag_n_bt_path": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 1,
+      "constante_sobre_lo_publicado": true,
+      "auc_a_vs_pool_global": null,
+      "auc_a_vs_pool_por_volcan": {
+        "Lascar": 0.5,
+        "Lastarria": 0.5,
+        "Isluga": 0.5,
+        "Tupungatito": 0.5,
+        "PlanchonPeteroa": 0.5,
+        "NevadosDeChillan": 0.5,
+        "Villarrica": 0.5,
+        "PuyehueCordonCaulle": 0.5,
+        "Chaiten": 0.5
+      }
+    },
+    "diag_n_nti_path": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 2,
+      "constante_sobre_lo_publicado": false,
+      "auc_a_vs_pool_global": 0.502,
+      "auc_a_vs_pool_por_volcan": {
+        "Lascar": 0.5,
+        "Lastarria": 0.5,
+        "Isluga": 0.477,
+        "Tupungatito": 0.509,
+        "PlanchonPeteroa": 0.5,
+        "NevadosDeChillan": 0.5,
+        "Villarrica": 0.5,
+        "PuyehueCordonCaulle": 0.5,
+        "Chaiten": 0.5
+      }
+    },
+    "diag_n_dnti_ctx_path": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 127,
+      "constante_sobre_lo_publicado": false,
+      "auc_a_vs_pool_global": 0.592,
+      "auc_a_vs_pool_por_volcan": {
+        "Lascar": 0.37,
+        "Lastarria": 0.47,
+        "Isluga": 0.418,
+        "Tupungatito": 0.643,
+        "PlanchonPeteroa": 0.517,
+        "NevadosDeChillan": 0.455,
+        "Villarrica": 0.5,
+        "PuyehueCordonCaulle": 0.266,
+        "Chaiten": 0.371
+      }
+    },
+    "diag_n_eti_path": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 1,
+      "constante_sobre_lo_publicado": true,
+      "auc_a_vs_pool_global": null,
+      "auc_a_vs_pool_por_volcan": {
+        "Lascar": 0.5,
+        "Lastarria": 0.5,
+        "Isluga": 0.5,
+        "Tupungatito": 0.5,
+        "PlanchonPeteroa": 0.5,
+        "NevadosDeChillan": 0.5,
+        "Villarrica": 0.5,
+        "PuyehueCordonCaulle": 0.5,
+        "Chaiten": 0.5
+      }
+    },
+    "pc_vrp": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 289,
+      "constante_sobre_lo_publicado": false,
+      "auc_a_vs_pool_global": 0.68,
+      "auc_a_vs_pool_por_volcan": {
+        "Lascar": 0.703,
+        "Lastarria": 0.689,
+        "Isluga": 0.692,
+        "Tupungatito": 0.687,
+        "PlanchonPeteroa": 0.545,
+        "NevadosDeChillan": 0.584,
+        "Villarrica": 0.542,
+        "PuyehueCordonCaulle": 0.647,
+        "Chaiten": 0.631
+      }
+    },
+    "pc_npix": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 31,
+      "constante_sobre_lo_publicado": false,
+      "auc_a_vs_pool_global": 0.57,
+      "auc_a_vs_pool_por_volcan": {
+        "Lascar": 0.472,
+        "Lastarria": 0.49,
+        "Isluga": 0.589,
+        "Tupungatito": 0.534,
+        "PlanchonPeteroa": 0.476,
+        "NevadosDeChillan": 0.47,
+        "Villarrica": 0.497,
+        "PuyehueCordonCaulle": 0.622,
+        "Chaiten": 0.501
+      }
+    },
+    "pc_dist": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 848,
+      "constante_sobre_lo_publicado": false,
+      "auc_a_vs_pool_global": 0.228,
+      "auc_a_vs_pool_por_volcan": {
+        "Lascar": 0.186,
+        "Lastarria": 0.382,
+        "Isluga": 0.153,
+        "Tupungatito": 0.214,
+        "PlanchonPeteroa": 0.367,
+        "NevadosDeChillan": 0.329,
+        "Villarrica": 0.295,
+        "PuyehueCordonCaulle": 0.154,
+        "Chaiten": 0.231
+      }
+    },
+    "geo_class": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 1,
+      "constante_sobre_lo_publicado": true,
+      "auc_a_vs_pool_global": null,
+      "auc_a_vs_pool_por_volcan": {}
+    },
+    "dc": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 1,
+      "constante_sobre_lo_publicado": true,
+      "auc_a_vs_pool_global": null,
+      "auc_a_vs_pool_por_volcan": {}
+    },
+    "triggered_test1": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 2,
+      "constante_sobre_lo_publicado": false,
+      "auc_a_vs_pool_global": null,
+      "auc_a_vs_pool_por_volcan": {}
+    },
+    "f5_core_vrp_mw": {
+      "n_publicadas": 1050,
+      "n_con_valor": 798,
+      "n_valores_distintos": 571,
+      "constante_sobre_lo_publicado": false,
+      "auc_a_vs_pool_global": 0.76,
+      "auc_a_vs_pool_por_volcan": {
+        "Lascar": 0.68,
+        "Lastarria": 0.778,
+        "Isluga": 0.821,
+        "Tupungatito": 0.865,
+        "PlanchonPeteroa": 0.588,
+        "NevadosDeChillan": 0.61,
+        "Villarrica": 0.527,
+        "PuyehueCordonCaulle": 0.904,
+        "Chaiten": 0.752
+      }
+    },
+    "n_excluded_water": {
+      "n_publicadas": 1050,
+      "n_con_valor": 801,
+      "n_valores_distintos": 1,
+      "constante_sobre_lo_publicado": true,
+      "auc_a_vs_pool_global": null,
+      "auc_a_vs_pool_por_volcan": {
+        "Lascar": 0.5,
+        "Lastarria": 0.5,
+        "Isluga": 0.5,
+        "Tupungatito": 0.5,
+        "PlanchonPeteroa": 0.5,
+        "NevadosDeChillan": 0.5,
+        "Villarrica": 0.5,
+        "PuyehueCordonCaulle": 0.5,
+        "Chaiten": 0.5
+      }
+    },
+    "final_hotspot_source": {
+      "n_publicadas": 1050,
+      "n_con_valor": 1050,
+      "n_valores_distintos": 5,
+      "constante_sobre_lo_publicado": false,
+      "auc_a_vs_pool_global": null,
+      "auc_a_vs_pool_por_volcan": {}
+    }
+  },
+  "caminos_de_deteccion": {
+    "a": {
+      "test1=True|dnti_ctx=False": 104,
+      "test1=True|dnti_ctx=True": 257,
+      "test1=False|dnti_ctx=False": 7,
+      "test1=False|dnti_ctx=True": 46
+    },
+    "pool": {
+      "test1=True|dnti_ctx=True": 279,
+      "test1=True|dnti_ctx=False": 280,
+      "test1=False|dnti_ctx=True": 50,
+      "test1=False|dnti_ctx=False": 12
+    }
+  },
+  "permanencia_del_sitio_publicado": {
+    "Chaiten|MODIS": {
+      "n_publicadas": 4,
+      "n_pasadas_nocturnas": 47,
+      "n_noches_publicadas": 4,
+      "n_noches_con_pasada": 20,
+      "mediana_dist_crater_km": 1.354,
+      "dispersion_mediana_del_centroide_km": 1.159
+    },
+    "Chaiten|VIIRS375": {
+      "n_publicadas": 83,
+      "n_pasadas_nocturnas": 91,
+      "n_noches_publicadas": 19,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 2.363,
+      "dispersion_mediana_del_centroide_km": 2.308
+    },
+    "Chaiten|VIIRS750": {
+      "n_publicadas": 16,
+      "n_pasadas_nocturnas": 90,
+      "n_noches_publicadas": 10,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 1.441,
+      "dispersion_mediana_del_centroide_km": 1.492
+    },
+    "Copahue|MODIS": {
+      "n_publicadas": 1,
+      "n_pasadas_nocturnas": 42,
+      "n_noches_publicadas": 1,
+      "n_noches_con_pasada": 20,
+      "mediana_dist_crater_km": 1.996,
+      "dispersion_mediana_del_centroide_km": null
+    },
+    "Copahue|VIIRS375": {
+      "n_publicadas": 71,
+      "n_pasadas_nocturnas": 85,
+      "n_noches_publicadas": 19,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 2.825,
+      "dispersion_mediana_del_centroide_km": 1.697
+    },
+    "Copahue|VIIRS750": {
+      "n_publicadas": 13,
+      "n_pasadas_nocturnas": 84,
+      "n_noches_publicadas": 8,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 1.405,
+      "dispersion_mediana_del_centroide_km": 0.905
+    },
+    "Isluga|VIIRS375": {
+      "n_publicadas": 66,
+      "n_pasadas_nocturnas": 71,
+      "n_noches_publicadas": 19,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 1.059,
+      "dispersion_mediana_del_centroide_km": 0.653
+    },
+    "Isluga|VIIRS750": {
+      "n_publicadas": 30,
+      "n_pasadas_nocturnas": 71,
+      "n_noches_publicadas": 15,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 1.372,
+      "dispersion_mediana_del_centroide_km": 0.828
+    },
+    "Lascar|MODIS": {
+      "n_publicadas": 1,
+      "n_pasadas_nocturnas": 35,
+      "n_noches_publicadas": 1,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 1.372,
+      "dispersion_mediana_del_centroide_km": null
+    },
+    "Lascar|VIIRS375": {
+      "n_publicadas": 68,
+      "n_pasadas_nocturnas": 74,
+      "n_noches_publicadas": 19,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 0.355,
+      "dispersion_mediana_del_centroide_km": 0.38
+    },
+    "Lascar|VIIRS750": {
+      "n_publicadas": 11,
+      "n_pasadas_nocturnas": 74,
+      "n_noches_publicadas": 9,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 0.188,
+      "dispersion_mediana_del_centroide_km": 0.261
+    },
+    "Lastarria|MODIS": {
+      "n_publicadas": 1,
+      "n_pasadas_nocturnas": 39,
+      "n_noches_publicadas": 1,
+      "n_noches_con_pasada": 20,
+      "mediana_dist_crater_km": 1.629,
+      "dispersion_mediana_del_centroide_km": null
+    },
+    "Lastarria|VIIRS375": {
+      "n_publicadas": 66,
+      "n_pasadas_nocturnas": 75,
+      "n_noches_publicadas": 19,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 2.268,
+      "dispersion_mediana_del_centroide_km": 1.497
+    },
+    "Lastarria|VIIRS750": {
+      "n_publicadas": 4,
+      "n_pasadas_nocturnas": 74,
+      "n_noches_publicadas": 3,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 1.438,
+      "dispersion_mediana_del_centroide_km": 0.707
+    },
+    "Llaima|VIIRS375": {
+      "n_publicadas": 67,
+      "n_pasadas_nocturnas": 89,
+      "n_noches_publicadas": 19,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 2.804,
+      "dispersion_mediana_del_centroide_km": 1.975
+    },
+    "Llaima|VIIRS750": {
+      "n_publicadas": 17,
+      "n_pasadas_nocturnas": 89,
+      "n_noches_publicadas": 9,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 1.571,
+      "dispersion_mediana_del_centroide_km": 1.36
+    },
+    "NevadosDeChillan|MODIS": {
+      "n_publicadas": 1,
+      "n_pasadas_nocturnas": 42,
+      "n_noches_publicadas": 1,
+      "n_noches_con_pasada": 20,
+      "mediana_dist_crater_km": 1.619,
+      "dispersion_mediana_del_centroide_km": null
+    },
+    "NevadosDeChillan|VIIRS375": {
+      "n_publicadas": 76,
+      "n_pasadas_nocturnas": 89,
+      "n_noches_publicadas": 19,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 2.367,
+      "dispersion_mediana_del_centroide_km": 2.453
+    },
+    "NevadosDeChillan|VIIRS750": {
+      "n_publicadas": 4,
+      "n_pasadas_nocturnas": 89,
+      "n_noches_publicadas": 3,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 0.964,
+      "dispersion_mediana_del_centroide_km": 1.067
+    },
+    "PlanchonPeteroa|MODIS": {
+      "n_publicadas": 2,
+      "n_pasadas_nocturnas": 44,
+      "n_noches_publicadas": 2,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 1.373,
+      "dispersion_mediana_del_centroide_km": null
+    },
+    "PlanchonPeteroa|VIIRS375": {
+      "n_publicadas": 72,
+      "n_pasadas_nocturnas": 82,
+      "n_noches_publicadas": 19,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 2.442,
+      "dispersion_mediana_del_centroide_km": 2.273
+    },
+    "PlanchonPeteroa|VIIRS750": {
+      "n_publicadas": 20,
+      "n_pasadas_nocturnas": 81,
+      "n_noches_publicadas": 11,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 1.394,
+      "dispersion_mediana_del_centroide_km": 1.202
+    },
+    "PuyehueCordonCaulle|MODIS": {
+      "n_publicadas": 32,
+      "n_pasadas_nocturnas": 47,
+      "n_noches_publicadas": 18,
+      "n_noches_con_pasada": 20,
+      "mediana_dist_crater_km": 2.779,
+      "dispersion_mediana_del_centroide_km": 2.74
+    },
+    "PuyehueCordonCaulle|VIIRS375": {
+      "n_publicadas": 89,
+      "n_pasadas_nocturnas": 91,
+      "n_noches_publicadas": 19,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 0.486,
+      "dispersion_mediana_del_centroide_km": 0.423
+    },
+    "PuyehueCordonCaulle|VIIRS750": {
+      "n_publicadas": 50,
+      "n_pasadas_nocturnas": 91,
+      "n_noches_publicadas": 19,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 0.873,
+      "dispersion_mediana_del_centroide_km": 0.761
+    },
+    "Tupungatito|MODIS": {
+      "n_publicadas": 3,
+      "n_pasadas_nocturnas": 41,
+      "n_noches_publicadas": 3,
+      "n_noches_con_pasada": 20,
+      "mediana_dist_crater_km": 1.293,
+      "dispersion_mediana_del_centroide_km": 0.827
+    },
+    "Tupungatito|VIIRS375": {
+      "n_publicadas": 73,
+      "n_pasadas_nocturnas": 82,
+      "n_noches_publicadas": 19,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 1.936,
+      "dispersion_mediana_del_centroide_km": 1.869
+    },
+    "Tupungatito|VIIRS750": {
+      "n_publicadas": 18,
+      "n_pasadas_nocturnas": 81,
+      "n_noches_publicadas": 13,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 1.24,
+      "dispersion_mediana_del_centroide_km": 0.834
+    },
+    "Villarrica|MODIS": {
+      "n_publicadas": 7,
+      "n_pasadas_nocturnas": 43,
+      "n_noches_publicadas": 7,
+      "n_noches_con_pasada": 20,
+      "mediana_dist_crater_km": 1.881,
+      "dispersion_mediana_del_centroide_km": 1.842
+    },
+    "Villarrica|VIIRS375": {
+      "n_publicadas": 70,
+      "n_pasadas_nocturnas": 89,
+      "n_noches_publicadas": 19,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 2.821,
+      "dispersion_mediana_del_centroide_km": 2.203
+    },
+    "Villarrica|VIIRS750": {
+      "n_publicadas": 14,
+      "n_pasadas_nocturnas": 89,
+      "n_noches_publicadas": 9,
+      "n_noches_con_pasada": 19,
+      "mediana_dist_crater_km": 1.507,
+      "dispersion_mediana_del_centroide_km": 1.436
+    }
+  },
+  "catalogo_volcanic_features": {
+    "volcanes_con_entrada": [
+      "Lastarria",
+      "PuyehueCordonCaulle"
+    ],
+    "n_features": 2,
+    "de_11_tier_a": 2
+  }
+}

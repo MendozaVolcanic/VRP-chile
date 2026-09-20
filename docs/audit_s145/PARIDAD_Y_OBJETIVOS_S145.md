@@ -59,9 +59,25 @@ Y dice cómo deben separarse: *"La distinción (1) vs (2) vive en el campo deriv
 `pc.classification` (diseño S87 Bloque 3) + en el frontend que separa visualmente las
 categorías"*.
 
-**Ese campo no existe.** Verificado el 2026-09-20 recorriendo los 11 JSON: ni un solo
-record tiene `classification`, ni en la raíz ni dentro de `primary_cluster`. En
-`pipeline/` la palabra aparece sólo en comentarios sobre el radio interno.
+⚠️ **CORREGIDO el mismo 2026-09-20, y el error fue mío.** La primera versión de este documento
+decía *"ese campo no existe"*, apoyada en que ningún record tiene la clave `classification`. Eso
+es cierto y es irrelevante: **la capacidad sí existe, con otro nombre**. El diseño S88 se partió
+en dos mitades:
+
+- `primary_cluster.geo_class` (`pipeline/store.py:509-538`, S88 Frente B), **persistido en 40.901
+  de 62.880 records**, con valores `summit` (39.076), `far` (1.820) y `extension` (**5**);
+- `_mirova_confirmed`, que vive **sólo** en `frontend/index.html:1415-1455` (`diario.html` y
+  `mosaico.html` no lo calculan nunca).
+
+Es el patrón **A89** en su forma más pura: busqué el nombre de la definición, el `grep` devolvió
+cero, y leí el cero como ausencia. La regla lo dice y aun así caí: el error suele ser de quien
+audita, no de quien escribió el código.
+
+**Lo que sí es cierto, y es el hallazgo que importa**: el mecanismo existe y **no está haciendo
+el trabajo**. `geo_class` valió `extension` **5 veces en 62.880 records**, todas en Lastarria, y
+en las 1.050 pasadas que el dashboard publica en la ventana medida vale `summit` en 1.050 de
+1.050. O sea: cero separación efectiva entre el objetivo 1 y el 2. La frase de `docs/MISSION.md`
+que nombra un campo `pc.classification` inexistente también conviene corregirla.
 
 Esa es la raíz de por qué el 86 % se lee como un defecto. Medido contra el objetivo 1, cada
 una de esas publicaciones es una divergencia. Medido contra el objetivo 2, son el producto.
