@@ -1,0 +1,88 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+CONTROLES {
+ "identidad_predicado": true,
+ "pub_identico_a_bp": true,
+ "s145_publicado": {
+  "MODIS": {
+   "n_neg_limpio": 438,
+   "tasa_pub_neg": 0.1142,
+   "n_pos": 1
+  },
+  "VIIRS375": {
+   "n_neg_limpio": 373,
+   "tasa_pub_neg": 0.8633,
+   "n_pos": 143
+  },
+  "VIIRS750": {
+   "n_neg_limpio": 622,
+   "tasa_pub_neg": 0.2138,
+   "n_pos": 18
+  }
+ },
+ "hoy_todo": {
+  "MODIS": {
+   "n_neg_limpio": 439,
+   "tasa_pub_neg": 0.1139,
+   "n_pos": 1
+  },
+  "VIIRS375": {
+   "n_neg_limpio": 373,
+   "tasa_pub_neg": 0.8633,
+   "n_pos": 143
+  },
+  "VIIRS750": {
+   "n_neg_limpio": 622,
+   "tasa_pub_neg": 0.2138,
+   "n_pos": 18
+  }
+ },
+ "hoy_con_corte_processed_utc_s145": {
+  "MODIS": {
+   "n_neg_limpio": 438,
+   "tasa_pub_neg": 0.1142,
+   "n_pos": 1
+  },
+  "VIIRS375": {
+   "n_neg_limpio": 363,
+   "tasa_pub_neg": 0.8623,
+   "n_pos": 140
+  },
+  "VIIRS750": {
+   "n_neg_limpio": 609,
+   "tasa_pub_neg": 0.2135,
+   "n_pos": 17
+  }
+ },
+ "n_records_hoy": 2360,
+ "n_records_al_corte": 2255,
+ "n_records_s145": 2285,
+ "control_centroides_ctx_sin_t1": {
+  "n": 180,
+  "n_centroide_distinto": 0
+ },
+ "coherencia_clasificador_T1_sin_trigger": 0,
+ "ejemplos_incoherentes": []
+}
+META {"ventana": ["2026-09-01", "2026-09-20"], "ultima_fila_ref": {"CONS": "2026-09-20 02:45:00", "OCR": "2026-09-19 06:24:00"}, "n_filas_ref_nocturnas": 1856, "etiquetas": {"neg_limpio": 1434, "sin_info": 732, "far_ref": 32, "pos": 162}, "generado_utc": "2026-09-20T11:02:08+00:00", "sha_index_html": "24fba8a157136bf76509ed647c7d086d3f9f45aa"}
+== MODIS
+   todo {'neg_limpio': {'n': 439, 'n_pub': 50, 'clases_pub': {'AMBOS': 1, 'CTX_SOLO': 38, 'RESCATE_SIN_DATO': 3, 'T1_SOLO': 8}}, 'pos': {'n': 1, 'n_pub': 1, 'clases_pub': {'CTX_SOLO': 1}}}
+   definitivo_hasta_ultimo_OCR {'neg_limpio': {'n': 426, 'n_pub': 50, 'clases_pub': {'AMBOS': 1, 'CTX_SOLO': 38, 'RESCATE_SIN_DATO': 3, 'T1_SOLO': 8}}, 'pos': {'n': 1, 'n_pub': 1, 'clases_pub': {'CTX_SOLO': 1}}}
+   provisorio_post_OCR {'neg_limpio': {'n': 13, 'n_pub': 0, 'clases_pub': {}}, 'pos': {'n': 0, 'n_pub': 0, 'clases_pub': {}}}
+   noches: {'n_noches_pos': 1, 'publicada_hoy': 1, 'sinT1_sigue_publicada': 1, 'sinCTX_se_pierde': 1}
+   nulo: {'T1_SOLO': {'observado': 0.16, 'nulo_media': -0.1297, 'nulo_p2.5': -0.86, 'nulo_p97.5': 0.16, 'n_neg_pub': 50, 'n_pos_pub': 1, 'fuera_del_nulo': False}, 'CTX_SOLO': {'observado': -0.24, 'nulo_media': 0.2098, 'nulo_p2.5': -0.24, 'nulo_p97.5': 0.78, 'n_neg_pub': 50, 'n_pos_pub': 1, 'fuera_del_nulo': False}, 'AMBOS': {'observado': 0.02, 'nulo_media': 0.02, 'nulo_p2.5': 0.02, 'nulo_p97.5': 0.02, 'n_neg_pub': 50, 'n_pos_pub': 1, 'fuera_del_nulo': False}, 'T1_SOBRE_CTX': {'observado': 0.0, 'nulo_media': 0.0, 'nulo_p2.5': 0.0, 'nulo_p97.5': 0.0, 'n_neg_pub': 50, 'n_pos_pub': 1, 'fuera_del_nulo': False}}
+== VIIRS375
+   todo {'neg_limpio': {'n': 373, 'n_pub': 322, 'clases_pub': {'AMBOS': 63, 'CTX_SOLO': 17, 'T1_SOBRE_CTX': 56, 'T1_SOLO': 186}}, 'pos': {'n': 143, 'n_pub': 143, 'clases_pub': {'AMBOS': 118, 'T1_SOBRE_CTX': 23, 'T1_SOLO': 2}}}
+   definitivo_hasta_ultimo_OCR {'neg_limpio': {'n': 373, 'n_pub': 322, 'clases_pub': {'AMBOS': 63, 'CTX_SOLO': 17, 'T1_SOBRE_CTX': 56, 'T1_SOLO': 186}}, 'pos': {'n': 143, 'n_pub': 143, 'clases_pub': {'AMBOS': 118, 'T1_SOBRE_CTX': 23, 'T1_SOLO': 2}}}
+   provisorio_post_OCR {'neg_limpio': {'n': 0, 'n_pub': 0, 'clases_pub': {}}, 'pos': {'n': 0, 'n_pub': 0, 'clases_pub': {}}}
+   noches: {'n_noches_pos': 75, 'publicada_hoy': 75, 'sinT1_sigue_publicada': 71, 'sinCTX_SIN_DATO': 42, 'sinCTX_sigue_publicada': 33, 'sinT1_SIN_DATO': 4}
+   nulo: {'T1_SOLO': {'observado': 0.5637, 'nulo_media': 0.3077, 'nulo_p2.5': 0.2506, 'nulo_p97.5': 0.3718, 'n_neg_pub': 322, 'n_pos_pub': 143, 'fuera_del_nulo': True}, 'CTX_SOLO': {'observado': 0.0528, 'nulo_media': 0.0154, 'nulo_p2.5': -0.0078, 'nulo_p97.5': 0.0427, 'n_neg_pub': 322, 'n_pos_pub': 143, 'fuera_del_nulo': True}, 'AMBOS': {'observado': -0.6295, 'nulo_media': -0.3073, 'nulo_p2.5': -0.3771, 'nulo_p97.5': -0.2357, 'n_neg_pub': 322, 'n_pos_pub': 143, 'fuera_del_nulo': True}, 'T1_SOBRE_CTX': {'observado': 0.0131, 'nulo_media': -0.0168, 'nulo_p2.5': -0.0778, 'nulo_p97.5': 0.0434, 'n_neg_pub': 322, 'n_pos_pub': 143, 'fuera_del_nulo': False}}
+== VIIRS750
+   todo {'neg_limpio': {'n': 622, 'n_pub': 133, 'clases_pub': {'AMBOS': 9, 'CTX_SOLO': 24, 'T1_SOBRE_CTX': 11, 'T1_SOLO': 89}}, 'pos': {'n': 18, 'n_pub': 13, 'clases_pub': {'AMBOS': 8, 'CTX_SOLO': 5}}}
+   definitivo_hasta_ultimo_OCR {'neg_limpio': {'n': 622, 'n_pub': 133, 'clases_pub': {'AMBOS': 9, 'CTX_SOLO': 24, 'T1_SOBRE_CTX': 11, 'T1_SOLO': 89}}, 'pos': {'n': 18, 'n_pub': 13, 'clases_pub': {'AMBOS': 8, 'CTX_SOLO': 5}}}
+   provisorio_post_OCR {'neg_limpio': {'n': 0, 'n_pub': 0, 'clases_pub': {}}, 'pos': {'n': 0, 'n_pub': 0, 'clases_pub': {}}}
+   noches: {'n_noches_pos': 14, 'publicada_hoy': 13, 'sinT1_SIN_DATO': 1, 'sinCTX_SIN_DATO': 6, 'sinT1_sigue_publicada': 11, 'sinCTX_se_pierde': 3, 'sinT1_se_pierde': 1, 'sinCTX_sigue_publicada': 4, 'no_publicada_hoy': 1}
+   nulo: {'T1_SOLO': {'observado': 0.6692, 'nulo_media': 0.2655, 'nulo_p2.5': -0.0064, 'nulo_p97.5': 0.5003, 'n_neg_pub': 133, 'n_pos_pub': 13, 'fuera_del_nulo': True}, 'CTX_SOLO': {'observado': -0.2042, 'nulo_media': -0.2259, 'nulo_p2.5': -0.4575, 'nulo_p97.5': -0.0353, 'n_neg_pub': 133, 'n_pos_pub': 13, 'fuera_del_nulo': False}, 'AMBOS': {'observado': -0.5477, 'nulo_media': -0.0749, 'nulo_p2.5': -0.2944, 'nulo_p97.5': 0.1278, 'n_neg_pub': 133, 'n_pos_pub': 13, 'fuera_del_nulo': True}, 'T1_SOBRE_CTX': {'observado': 0.0827, 'nulo_media': 0.0379, 'nulo_p2.5': -0.0862, 'nulo_p97.5': 0.0827, 'n_neg_pub': 133, 'n_pos_pub': 13, 'fuera_del_nulo': False}}
+CONTRAFACTUAL sin Test 1: {"MODIS": {"todo": {"neg_limpio": {"n": 439, "pub_hoy": 50, "tasa_hoy": 0.1139, "T1_SOLO": 8, "frac_T1_SOLO_de_lo_publicado": 0.16, "sinT1_pub_min": 39, "sinT1_pub_max": 42, "sinT1_tasa_min": 0.0888, "sinT1_tasa_max": 0.0957, "sinCTX_pub_seguro(T1_SOLO)": 8, "CTX_SOLO": 38, "frac_CTX_SOLO_de_lo_publicado": 0.76}, "pos": {"n": 1, "pub_hoy": 1, "tasa_hoy": 1.0, "T1_SOLO": 0, "frac_T1_SOLO_de_lo_publicado": 0.0, "sinT1_pub_min": 1, "sinT1_pub_max": 1, "sinT1_tasa_min": 1.0, "sinT1_tasa_max": 1.0, "sinCTX_pub_seguro(T1_SOLO)": 0, "CTX_SOLO": 1, "frac_CTX_SOLO_de_lo_publicado": 1.0}}, "hasta_2026-09-14": {"neg_limpio": {"n": 316, "pub_hoy": 32, "tasa_hoy": 0.1013, "T1_SOLO": 4, "frac_T1_SOLO_de_lo_publicado": 0.125, "sinT1_pub_min": 26, "sinT1_pub_max": 28, "sinT1_tasa_min": 0.0823, "sinT1_tasa_max": 0.0886, "sinCTX_pub_seguro(T1_SOLO)": 4, "CTX_SOLO": 25, "frac_CTX_SOLO_de_lo_publicado": 0.7812}, "pos": {"n": 1, "pub_hoy": 1, "tasa_hoy": 1.0, "T1_SOLO": 0, "frac_T1_SOLO_de_lo_publicado": 0.0, "sinT1_pub_min": 1, "sinT1_pub_max": 1, "sinT1_tasa_min": 1.0, "sinT1_tasa_max": 1.0, "sinCTX_pub_seguro(T1_SOLO)": 0, "CTX_SOLO": 1, "frac_CTX_SOLO_de_lo_publicado": 1.0}}}, "VIIRS375": {"todo": {"neg_limpio": {"n": 373, "pub_hoy": 322, "tasa_hoy": 0.8633, "T1_SOLO": 186, "frac_T1_SOLO_de_lo_publicado": 0.5776, "sinT1_pub_min": 80, "sinT1_pub_max": 136, "sinT1_tasa_min": 0.2145, "sinT1_tasa_max": 0.3646, "sinCTX_pub_seguro(T1_SOLO)": 186, "CTX_SOLO": 17, "frac_CTX_SOLO_de_lo_publicado": 0.0528}, "pos": {"n": 143, "pub_hoy": 143, "tasa_hoy": 1.0, "T1_SOLO": 2, "frac_T1_SOLO_de_lo_publicado": 0.014, "sinT1_pub_min": 118, "sinT1_pub_max": 141, "sinT1_tasa_min": 0.8252, "sinT1_tasa_max": 0.986, "sinCTX_pub_seguro(T1_SOLO)": 2, "CTX_SOLO": 0, "frac_CTX_SOLO_de_lo_publicado": 0.0}}, "hasta_2026-09-14": {"neg_limpio": {"n": 287, "pub_hoy": 249, "tasa_hoy": 0.8676, "T1_SOLO": 147, "frac_T1_SOLO_de_lo_publicado": 0.5904, "sinT1_pub_min": 59, "sinT1_pub_max": 102, "sinT1_tasa_min": 0.2056, "sinT1_tasa_max": 0.3554, "sinCTX_pub_seguro(T1_SOLO)": 147, "CTX_SOLO": 10, "frac_CTX_SOLO_de_lo_publicado": 0.0402}, "pos": {"n": 101, "pub_hoy": 101, "tasa_hoy": 1.0, "T1_SOLO": 0, "frac_T1_SOLO_de_lo_publicado": 0.0, "sinT1_pub_min": 87, "sinT1_pub_max": 101, "sinT1_tasa_min": 0.8614, "sinT1_tasa_max": 1.0, "sinCTX_pub_seguro(T1_SOLO)": 0, "CTX_SOLO": 0, "frac_CTX_SOLO_de_lo_publicado": 0.0}}}, "VIIRS750": {"todo": {"neg_limpio": {"n": 622, "pub_hoy": 133, "tasa_hoy": 0.2138, "T1_SOLO": 89, "frac_T1_SOLO_de_lo_publicado": 0.6692, "sinT1_pub_min": 33, "sinT1_pub_max": 44, "sinT1_tasa_min": 0.0531, "sinT1_tasa_max": 0.0707, "sinCTX_pub_seguro(T1_SOLO)": 89, "CTX_SOLO": 24, "frac_CTX_SOLO_de_lo_publicado": 0.1805}, "pos": {"n": 18, "pub_hoy": 13, "tasa_hoy": 0.7222, "T1_SOLO": 0, "frac_T1_SOLO_de_lo_publicado": 0.0, "sinT1_pub_min": 13, "sinT1_pub_max": 13, "sinT1_tasa_min": 0.7222, "sinT1_tasa_max": 0.7222, "sinCTX_pub_seguro(T1_SOLO)": 0, "CTX_SOLO": 5, "frac_CTX_SOLO_de_lo_publicado": 0.3846}}, "hasta_2026-09-14": {"neg_limpio": {"n": 487, "pub_hoy": 101, "tasa_hoy": 0.2074, "T1_SOLO": 74, "frac_T1_SOLO_de_lo_publicado": 0.7327, "sinT1_pub_min": 18, "sinT1_pub_max": 27, "sinT1_tasa_min": 0.037, "sinT1_tasa_max": 0.0554, "sinCTX_pub_seguro(T1_SOLO)": 74, "CTX_SOLO": 12, "frac_CTX_SOLO_de_lo_publicado": 0.1188}, "pos": {"n": 12, "pub_hoy": 8, "tasa_hoy": 0.6667, "T1_SOLO": 0, "frac_T1_SOLO_de_lo_publicado": 0.0, "sinT1_pub_min": 8, "sinT1_pub_max": 8, "sinT1_tasa_min": 0.6667, "sinT1_tasa_max": 0.6667, "sinCTX_pub_seguro(T1_SOLO)": 0, "CTX_SOLO": 3, "frac_CTX_SOLO_de_lo_publicado": 0.375}}}}
+SUSTRATO legacy: {"MODIS": {"n": 457, "diag_n_bt_path>0": 0, "diag_n_nti_path>0": 0, "diag_n_eti_path>0": 0, "triggered_test1": 16, "d9_capped": 59, "d9_capped_y_publicada": 7}, "VIIRS375": {"n": 954, "diag_n_bt_path>0": 0, "diag_n_nti_path>0": 5, "diag_n_eti_path>0": 0, "triggered_test1": 800, "d9_capped": 0, "d9_capped_y_publicada": 0}, "VIIRS750": {"n": 949, "diag_n_bt_path>0": 0, "diag_n_nti_path>0": 0, "diag_n_eti_path>0": 0, "triggered_test1": 200, "d9_capped": 0, "d9_capped_y_publicada": 0}}
+== CUALQUIERA noches: {'resumen': {'n_noches_pos': 78, 'publicada_hoy': 78, 'sinT1_sigue_publicada': 74, 'sinCTX_SIN_DATO': 32, 'sinCTX_sigue_publicada': 46, 'sinT1_SIN_DATO': 4}, 'noches_que_dependen_de_T1': [['Isluga', '2026-09-19', 'SIN_DATO', {'T1_SOBRE_CTX': 2, 'T1_SOLO': 3}], ['Lastarria', '2026-09-01', 'SIN_DATO', {'T1_SOLO': 1, 'T1_SOBRE_CTX': 2}], ['NevadosDeChillan', '2026-09-18', 'SIN_DATO', {'T1_SOBRE_CTX': 2, 'T1_SOLO': 2}], ['Villarrica', '2026-09-16', 'SIN_DATO', {'T1_SOLO': 1, 'T1_SOBRE_CTX': 1}]]}
+-> C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\experiments\_s146_fase1_sustrato\resultados_sustrato.json

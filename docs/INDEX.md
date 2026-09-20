@@ -77,7 +77,7 @@
 
 | Doc | Qué cierra / concluye | Sesión |
 |---|---|---|
-| AUDIT_S114_PARITY_BY_SENSOR.md | far→summit MODIS **irreducible** (A82); detección MODIS fiel a Coppola file:line | S114 |
+| AUDIT_S114_PARITY_BY_SENSOR.md | far→summit MODIS **irreducible** (A82); detección MODIS fiel a Coppola file:line ⚠️ **rebajado S146 (AUDIT_S146 V-02 y V-08)**: el «90 % pipeline-cráter» que sostiene el «irreducible» no tiene tasa base (89,1 % de 4.800 negativos contra 93,7 % de 158 positivos), y el «dual-ROI 5/10» que el mismo informe cita como fidelidad no está en la Tabla 1. Ver D11 y D31 del catálogo | S114 |
 | AUDIT_S116_FOLLOWUP.md | No existe discriminante físico universal cat-b vs artefacto (A83); refina A80 | S116 |
 | AUDIT_S116_C2_GATES.md · AUDIT_S118_C2_GATES_AB.md | Gates intra-radio: investigación → A/B real → **flip OFF** (A85) | S116-S118 |
 | AUDIT_S121_D12_AB.md | D12 ancla honesta MODIS: **NO ADOPTAR** (cura Láscar, destapa path-D) | S121 |

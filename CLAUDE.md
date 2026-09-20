@@ -103,6 +103,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   RSE (TIRVolcH, mismo grupo MIROVA) usa Stefan-Boltzmann igual que Coppola 2024 y nuestro código.
   La Eq.9 con k_TIR=60.17 de Aveni 2025 GRL es investigación no adoptada operacionalmente. Referencia
   correcta ahora: Coppola 2024 cap Springer Eq.16 + Aveni 2024 RSE Eq.5. Ver `docs/DRIFTS_S17.md`.
+  ⚠️ **Rebajada S146 (AUDIT_S146 C-06)**: la Ec. 5 de Aveni 2024 sí es Stefan-Boltzmann con
+  emisividad 1 y está bien citada, pero la **Ec. 16 del capítulo Springer es la potencia del
+  modelo de dos componentes** (`A_hot σ ε (T_hot⁴ − T_bk⁴)`, exige suponer T_hot), la misma que
+  el catálogo dice que el NRT no usa. Y **ningún paper dice cuál está «adoptado
+  operacionalmente»**: el «no adoptada» de la Ec. 9 es SOSPECHA, no cita. El cierre de D3 se
+  apoya en esa Ec. 16. Texto original conservado por historia.
 - **NTI / dNTI contextual**: el gate de detección usa los umbrales **N·σ de Coppola 2016a Tabla 1
   por dual-ROI** (NO 3σ uniforme — eso era el drift D2 histórico, ya resuelto). Verificado por
   auditoría de fidelidad file:line S114: el profile `mirova_equivalent.yaml` tiene
@@ -110,7 +116,19 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   true` (**C1 = 0.003 summit / 0.010 scene**, 0.02 día), Tests 2∧3 con la rama OR completa
   `min(C1, μ+C2·σ)`, σ **global per-imagen** (no del anillo), second-run (excluye activos, recomputa
   μ/σ), ETI por regresión cuadrática, kernel 8-vec aritmético. **La detección MODIS es FIEL a
-  Coppola 2016a** (S114). ⚠️ **FALSO desde S137, verificado contra el PDF**: la auditoría S114
+  Coppola 2016a** (S114). ⚠️ **Rebajada también en S146, dos caminos más** (AUDIT_S146 V-08 y
+  V-06): (a) el **test de temperatura de brillo con N·σ = 5 / 10 no está en la Tabla 1**, donde
+  C2 multiplica la desviación del dNTI y del dETI; el paper no tiene ningún test de temperatura
+  de brillo, así que es un préstamo de esos números a otra variable, y es justo la clase de path
+  que A69 marca como vulnerable al gradiente topográfico (cuánto decide hoy: **nada**, el camino
+  está apagado desde S40, `ENABLE_BT_PATH_HOT = False` leído de `pipeline.profile`, comprobado
+  por la Fase 1 de S146 y por su verificador; la divergencia es de atribución, no de
+  comportamiento, ver D31).
+  (b) el **Test 1 integrado en el ROI es un detector propio**: en `sp426.5.pdf` p. 6 el Test 1 es
+  por píxel contra K1, sin suma sobre el ROI, y la cita «Coppola 2015, Bull. Volcanol. 77:55»
+  corresponde a Heap et al., mecánica de rocas en andesita (DOI 10.1007/s00445-015-0938-7;
+  Crossref y OpenAlex dan 0 artículos de Coppola en esa revista en 2015, con control de
+  consulta). ⚠️ **FALSO desde S137, verificado contra el PDF**: la auditoría S114
   nunca miró los pasos previos a los Tests. Hoy hay dos divergencias literales abiertas con cita
   verbatim: **D21** (usamos la banda 21 como primaria; el paper usa la 22 y la 21 sólo donde la 22
   satura, p. 3) y **D22** (el primer paso exige `bt > t_bg + 3 K`; la fórmula de los Tests 2 y 3 no
@@ -321,7 +339,23 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   ruidoso. Para verdict robusto Tier A Muy Bajo: **multi-caso (3-5 ALERTAs)** +
   reportar moda + frecuencia, no single record. Mismo mecanismo que Tupungatito
   43% residual. Pendiente arquitectural S71+.
-- **A23. ⚠️ OBSOLETA desde S113 — verificado S125.** D9 quedó **CERRADA en sus dos
+- **A23. ⚠️ La declaración de obsolescencia cayó en parte, S146 (AUDIT_S146 V-01): D9 vuelve a
+  estar abierta SÓLO en la cara de co-validación del path D sobre fondo frío. De las tres
+  alternativas que esta regla manda probar, sigue descartado el gate por `t_bg` (anti-MIROVA) y el
+  tope de magnitud ya está adoptado y funciona; lo único vivo es la co-validación (Fase 3 del
+  plan).** Los denominadores de S113 se reproducen exactos sobre el commit
+  de junio (199 `far`, 214 `summit`), pero el numerador no: con cualquier definición en que
+  «confirmado» signifique que MIROVA publicó una alerta el máximo es **80 de 214 (37,4 %)**, y el
+  rango 201 a 211 sólo aparece contando cualquier fila de la referencia, incluidas las RUTINA («
+  MIROVA miró», no «MIROVA vio»). El «0 fuga» es circular, porque el dashboard oculta todo `far` por
+  construcción; el tope de 5 MW sí funciona (0 records sobre 5 MW). Y la lectura física tampoco se
+  sostiene: el volcán con más records es PCC (59 de 214, 2.236 m) y 3 de cada 4 son VIIRS 750
+  (sensor medido sobre la población de hoy, 162 de 216; el 59 de 214 es la población de junio).
+  O sea
+  que el argumento con que se descartó para siempre la co-validación del path D («mataría 207
+  detecciones reales») no tiene respaldo: entre 63 y 88 % de esa población no tiene alerta de MIROVA.
+  Lo que sigue se conserva por historia:
+  **⚠️ OBSOLETA desde S113 — verificado S125.** D9 quedó **CERRADA en sus dos
   caras** (`docs/MIROVA_DIVERGENCES.md:515`: «No quedan acciones abiertas en D9»). El
   A/B de 3 alternativas que esta regla manda correr sería reabrir trabajo cerrado
   (viola anti-A8). Se conserva el texto por historia:
@@ -883,7 +917,11 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   3.74µm) brillante + TIR (I05) frío → NTI enorme → VRP fantasma (760 MW ≈ 100× el máx de
   Láscar). MIROVA lo mostró "HIGH" en la imagen per-volcán, pero su consolidado (latest.php)
   Y nuestro pipeline (night-only) dieron ~0 → ambos inmunes. Confirma con caso real Coppola
-  2023 §2.5 (FP removidos a mano, ~5% tolerados "aleatorios en espacio/tiempo"). **How to
+  2023 §2.5 (FP removidos a mano, ~5% tolerados "aleatorios en espacio/tiempo" ⚠️ **cita
+  CORRUPTA, S146 (AUDIT_S146 C-05)**: §2.5 p. 4 sí dice que se supervisó a mano y que quedan
+  errores, pero no trae ni el «5 %» ni «random»; el «c. 5 %» de falsas está en Coppola 2016a
+  p. 9, otro paper, y «aleatorios en espacio/tiempo» no aparece en ninguno de los dos, queda
+  SIN LOCALIZAR. Cita original conservada por historia). **How to
   apply** (refina A11/A54): la ground-truth OCR contiene estos artefactos marcados "alta
   confianza" por el scraper (validación geométrica no distingue reflexión solar de lava) →
   en auditorías de recall, valores OCR VIIRS375 ALTOS en pasadas DIURNAS cerca del mediodía
@@ -937,7 +975,10 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   reconstruyendo la ventana que S113 pudo ver dan 2.579 contra los 2.527 declarados. **La conclusión
   de A81 vale entera**, el conteo absoluto no — ver A90 y `docs/s130/A81_DISCREPANCIA_RESUELTA.md`).
   La cara (b) es ~1000× más grande pero re-derivar simétrico es **trap A48/A18**: 98.8% MIROVA-
-  confirmadas pero impacto NETO recall = 84 noches, 73 de NdC = artefacto A69 (NO destapar); el resto
+  confirmadas pero impacto NETO recall = 84 noches, 73 de NdC = artefacto A69 (NO destapar
+  ⚠️ **ese «NO destapar» hereda la rebaja de A82, S146 (AUDIT_S146 V-02, frente E)**: la
+  clasificación de esas 73 como artefacto cuelga del «irreducible» de A82, cuyo número no tiene
+  tasa base. No es una decisión cerrada); el resto
   redundantes (otra pasada summit cubre la noche); el gate conservador S100 es correcto. **How to
   apply**: al cerrar una incoherencia de clasificación medí AMBAS direcciones del flip y crúzalas vs
   MIROVA (A62/A10) ANTES de elegir el predicado; preferí el fix UNIDIRECCIONAL que toca solo la cara
@@ -945,7 +986,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   ancla honesta — verificar data fresca antes de asumir el problema. Detalle:
   [[reference_s113_a46_bidirectional]] + `docs/S113_A46_COHERENCE_GUARD.md`.
 
-- **A82. ⚠️ REBAJADA S124: «agotado» ya no aplica.** ⚠️ **Rebajada también por la vía espectral en S138 (AUDIT_S138 C3)**: los ejes que la regla da por agotados se barrieron sobre records producidos con banda 21 primaria (D21) y compuerta `bt > t_bg + 3 K` (D22), las dos divergencias que S137 abrió; «irreducible» vale sólo bajo esa configuración. La auditoría S114 en que se
+- **A82. ⚠️ REBAJADA S124: «agotado» ya no aplica.** ⚠️ **Rebajada también por la vía espectral en S138 (AUDIT_S138 C3)**: los ejes que la regla da por agotados se barrieron sobre records producidos con banda 21 primaria (D21) y compuerta `bt > t_bg + 3 K` (D22), las dos divergencias que S137 abrió; «irreducible» vale sólo bajo esa configuración. ⚠️ **Y el número que sostiene el cierre no tiene tasa base, verificado S146 (AUDIT_S146 V-02)**: el «el pipeline encuentra el cráter 90 %» mide presencia de cúmulo, no detección. Con negativos limpios (pasadas donde MIROVA miró y todas sus filas son RUTINA) hay cúmulo con magnitud dentro del inner en **89,1 % de 4.800 pasadas MODIS**, contra **93,7 % de 158** cuando MIROVA alertó (ventana 2026-01-29 a 2026-08-28; después de #535, 86,0 % de 500 negativos y sólo 2 positivos): menos de 5 puntos de contraste, y 144 de esas 158 positivas son de Láscar. En VIIRS sí hay contraste (84,5 contra 62,1 en I-band; 47,5 contra 22,8 en M-band), así que el instrumento funciona y el problema es del número, no de la medición. Consecuencia: destapar la etiqueta destaparía por igual las noches con y sin actividad. **Esta rebaja baja también a A83, A84 y A85**, que citan el «irreducible / agotado» de A82 (A113). La auditoría S114 en que se
   apoya cubrió umbrales, tests, kernel y second-run — **NO la geometría del ROI**.
   S124 mostró que la grilla UTM de MIROVA no está replicada y que
   `geo_utils.get_grid_center()` (escrita en S98 justo para eso) **nunca se cableó**
@@ -971,7 +1012,18 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   es el equivocado para sub-píxel). Detalle: `docs/AUDIT_S114_PARITY_BY_SENSOR.md` +
   [[project_s114_estado]].
 
-- **A83. No existe un discriminante FÍSICO per-record universal que separe el foco débil real
+- **A83. ⚠️ REBAJADA S146 en su número, su etiqueta y su alcance** (AUDIT_S146 V-03): el AUC
+  **0,859 no tiene script** en el repo, vive sólo en `experiments/_s116_followup/c2_discriminator.json`.
+  Su etiqueta positiva es «MIROVA publicó una alerta», y todo lo demás se llamó artefacto, que por
+  A54 es en su mayoría señal real no publicada. Re-medido sobre el corpus de hoy con la misma
+  población y etiqueta (n = 4.547) el AUC global es **0,762**, y es **paradoja de Simpson**: la sola
+  variable «el record es VIIRS 375» da 0,706 contra esa etiqueta, y dentro de un mismo volcán y
+  sensor el AUC ponderado cae a **0,554** (11 estratos, varios bajo 0,50). La conclusión práctica
+  (no hay un escalar por record) sale **reforzada** bajo esa etiqueta; lo que A83 **no puede** hacer
+  es apagar la búsqueda de un discriminante real contra artefacto, porque nunca midió esa pregunta.
+  El «agotado» vale sólo contra la etiqueta de MIROVA. Hereda además la rebaja de A82 (A113). El
+  texto original se conserva por historia:
+  **No existe un discriminante FÍSICO per-record universal que separe el foco débil real
   (cat-b) del artefacto topográfico a resolución gruesa; el único eje que separa es el ESPACIAL**
   (S116, investigación read-only `docs/AUDIT_S116_FOLLOWUP.md`, precursor del A/B de gates intra-radio).
   Sobre 4560 records summit-intra (37% MIROVA-confirmados) se barrieron todos los candidatos físicos:
@@ -986,7 +1038,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   cualquier gate de este tipo (ej. intra-radio C2) debe ser **estratificado focal/nevado**, midiendo FN
   sobre cat-b real, no solo FP. (4) `nti_max` plano NO discrimina (A80 refinada: piso compartido).
 
-- **A84. La POSICIÓN within-inner del `ctx_cluster` es irreducible igual que el far→summit (A82); NO
+- **A84. ⚠️ Hereda la rebaja de A82, aplicada S146 (AUDIT_S146 V-02, E-01)**: el «irreducible igual
+  que el far→summit» se apoya en A82, y el número que sostenía a A82 no tiene tasa base. Lo que A84
+  midió por su cuenta (los `ctx_cluster` de Llaima y Lastarria indistinguibles) sigue en pie y el
+  frente A lo reprodujo; lo que queda sin respaldo, y condicionado igual que en A82, es el
+  «irreducible» heredado. Texto original:
+  **La POSICIÓN within-inner del `ctx_cluster` es irreducible igual que el far→summit (A82); NO
   re-anclar — instance-en-posición de A82/A83** (S117, cierre del backlog #1b con evidencia convergente).
   El sesgo topográfico N del `ctx_cluster` en nevados de señal débil (Llaima A69) NO se puede separar del
   offset within-inner **REAL** (Lastarria, campo fumarólico Lazufre, que el `ctx_cluster` justamente
@@ -1005,7 +1062,11 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   es el `primary_cluster` (todos los paths del hot_mask), no solo Tests 2/3 — pero quitarlo o snapearlo
   rompe Lastarria.
 
-- **A85. La selección de cluster vent-anchored es robusta a píxeles extra-radio; una cerca
+- **A85. ⚠️ Hereda la rebaja de A82, aplicada S146 (AUDIT_S146 V-02, E-01)**, y su «0 robos en 214
+  noches focales» quedó observado por el auditor B (hallazgo B-03, sólo leído, sin pasar por el
+  verificador): la población de 214 incluye noches donde el robo es imposible. La lección de método
+  (medir el daño antes de cercar) no cambia. Texto original:
+  **La selección de cluster vent-anchored es robusta a píxeles extra-radio; una cerca
   geométrica que "protege" la selección es carga sin beneficio — medir el robo real ANTES de
   cercar** (S118, A/B run 28312968093 + flip PR #474 + post-flip verde S119). Con las cercas
   intra-radio S84/S85 apagadas, la recaptura extra-radio volvió 4-6× al dato persistido y aun
@@ -1025,7 +1086,23 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   "hace N días" o "reciente", pedir la hora al servidor (`gh api -i <repo>` → header `Date`).
   Un timestamp leído hace 20 mensajes no es "ahora".
 
-- **A87. Un flag que se apaga NO prueba que el problema se fue** (S123). El auto-audit dejó
+- **A87. ⚠️ El EJEMPLO quedó SIN VERIFICAR, S146** (sospecha S-1 del verificador de la Fase 0,
+  seguida acá). El «482 píxeles del path BT ... en agosto» **no puede ser `diag_n_bt_path`**: ese
+  contador vale 0 en los 6.626 records de `data/mirova_equivalent/Villarrica.json` (barrido mes a
+  mes de abril a septiembre de 2026, y también por sensor en los 8), y el verificador de la Fase 1
+  lo midió en 0 en los 60.112 records de toda la historia del corpus
+  (`docs/audit_s146/FASE1_VERIFICADOR.md` §4); el flag `ENABLE_BT_PATH_HOT` está apagado desde el
+  2026-05-13. Busqué además **todos** los campos numéricos de ese archivo, en agregado, en la
+  ventana del 1 al 9 de agosto y por sensor, y **ninguno** reproduce «≈482 en agosto contra 0 en
+  abril-mayo» (el único que se acerca en agosto, `discarded_max_cluster_pixels` con 492, vale 420
+  en abril-mayo, no 0). Las medianas tampoco: `pc.vrp_mw` da 0,093 y 0,144 en abril y mayo contra
+  0,223 en agosto, no 0,060 contra 2,107. El número viene de `docs/AUDIT_S123.md:174` y de
+  `tasks/BLOQUE_ARRANQUE_S124.md:43`, que no dicen qué campo midieron ni con qué script. **No está
+  refutado, está SIN VERIFICAR**: o el corpus se reprocesó desde S123, o el «path BT» de esa frase
+  nombra otro contador. **No usar A87 como evidencia de que el camino de BT decide** (choca con
+  D31, donde ese camino está apagado). La LECCIÓN DE MÉTODO vale entera; el ejemplo no se
+  reproduce hoy. Texto original conservado por historia:
+  **Un flag que se apaga NO prueba que el problema se fue** (S123). El auto-audit dejó
   de marcar Villarrica (antes 7.70×) porque la magnitud sólo se evalúa en noches donde MIROVA
   también publicó, y ese `n` es chico. El mecanismo seguía vivo: 482 píxeles del path BT y
   2.107 MW medianos en agosto contra 0 y 0.060 en abril-mayo. **How to apply**: antes de
@@ -1182,6 +1259,15 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   detectadas; toda métrica nueva lleva negativos limpios (pasadas donde MIROVA miró y no vio nada).
 - **A99. Magnitud ~0,7 = conteo de píxeles × fondo de anillo más tibio** (S139): a igual conteo la razón
   es 0,995; el déficit es de selección (vecinos tibios que MIROVA suma), no de fórmula ni calibración.
+  ⚠️ **La frase que resume la regla quedó rebajada S146 (AUDIT_S146 V-12)**: ese 0,995 es el producto
+  de **dos factores opuestos** (píxel caliente 1,140 y fondo 0,873 sobre n = 342 pares), y además
+  **compensa entre volcanes**, de **0,66 en Copahue a 1,39 en Villarrica** (n = 8; el extremo con
+  muestra es Planchón Peteroa, 1,33 con 63, y el pareo es contra el OSF de 2025, anterior a #535),
+  con sólo **156 de 342**
+  pares entre 0,8 y 1,25. El subconjunto es el 23 % de los pares y está sesgado a lo simple (233 de
+  343 son de un solo píxel). A igual selección **no coincidimos**: discrepamos 14 % en un sentido y
+  13 % en el otro. Que el problema no esté en la fórmula sigue apoyado por otro script, pero **A99 ya
+  no puede apagar la búsqueda en k, área, banda o Planck**.
 - **A100. `keep_peak` daba paridad por accidente** con un píxel a ~3 km del cráter (S139): nunca apagarlo solo.
 - **A101. Las citas `file:line` se remapean por contenido** (`difflib` contra `origin/main`, sólo bloques
   idénticos), nunca por aritmética ni en citas históricas deliberadas como A6 y A49 (S141).
@@ -1280,6 +1366,28 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     delata es que las fallas **cambian de identidad** entre dos corridas del mismo estado. Vale para
     linters, builds y auditores automáticos.
 
+- **A113. Una rebaja se propaga a los hijos en el mismo PR: mientras el texto viejo siga sin marca
+  donde se lee primero, el cierre sigue vivo** (S146, hallazgo central de la auditoría). El proyecto
+  ya sabía que varios cierres habían caído, y aun así `docs/MISSION.md`, que es la puerta que toda
+  sesión lee antes de tocar el pipeline, seguía dando D9 por resuelta, D11 por «irreducible, todos
+  los ejes agotados», el GAP #A por «no reabrir» y NEW-8 por gap abierto cuando corre en producción
+  desde S72. La rebaja de A82 se había anotado en A82 y no había bajado a A83, A84, A85, D13, D18 ni
+  a la frase de D19 que la citan. El defecto dominante de los 89 cierres auditados **no fue falta de
+  evidencia** (de los 50 «sin respaldo» del censo S145, 27 se verifican, 5 en parte, 1 queda sin
+  evidencia, 7 se refutan y
+  10 no eran cierres): fue **falta de propagación**. Y el daño encadena, porque un cierre falso apaga
+  los frentes que cuelgan de él.
+  - **How to apply**: (a) cuando rebajes, refutes o matices una afirmación, en el **mismo PR** busca
+    quién la cita (`grep` del número, de la frase y del ID) y marca cada hijo, aunque el hijo esté en
+    otro archivo; (b) la marca va **al inicio del pasaje**, con el símbolo de advertencia, qué parte
+    cayó, en qué sesión y el puntero a la evidencia, y **conserva el texto viejo como historia**: se
+    degrada, no se borra; (c) el orden de prioridad es por **dónde se lee primero**, o sea
+    `docs/MISSION.md` y `CLAUDE.md` antes que el informe de la sesión, porque son los que cada sesión
+    hereda; (d) un encabezado que contradice a su propio cuerpo más abajo cuenta como texto sin
+    marcar. Es A95 vista desde el otro lado: A95 dice que un cierre hereda las premisas de su
+    lectura, A113 dice que la corrección tiene que heredarse también. Detalle: `docs/AUDIT_S146.md`
+    §2 y §8, `docs/audit_s146/FRENTE_E_GRAFO_DE_CIERRES.md`.
+
 - **A39, enmienda S142**: "0 checks" recién abierto un PR es SIN DATO, no verde. #676 se mergeó así con el CI
   en rojo. Esperar el run con conclusión (`gh pr checks <N> --watch`) antes de mergear, y después de editar un
   documento correr `grep -rl <archivo> tests/` y la suite completa: un test puede leer ese documento.
@@ -1310,6 +1418,11 @@ decisiones de umbrales, o cambios metodológicos:
 ## Arquitectura
 - `pipeline/`: fetch.py (earthaccess), process_modis.py, process_viirs.py, process_viirs_mod.py, store.py, scan_geometry.py
 - `frontend/` — **3 vistas live + 1 preview**, cada una con su copia de helpers (`mirovaEqVrp`, etc.): `index.html` (dashboard Chart.js+Leaflet), `diario.html` (tendencia 90d/volcán), `mosaico.html` (overview 48h/30d). **Un cambio de display/filtro (ej. supresión cirrus) debe replicarse en esas 3** (S92 L5). La cuarta, `comparacion.html`, **también se despliega** (`cp -r frontend/.`) y está enlazada desde `index.html`, pero se rotula a sí misma *"PREVIEW S115 · no es el dashboard live"* y **no lleva `mirovaEqVrp`** (0 usos, contra 25/8/8) — es deliberado, no un olvido: no la "arregles" replicándole el helper. Verificado S127. Verificación = preview real navegador (no `node --check`): sirven desde `/frontend/`, `BASE_PATH=/`, data en `/data/...`. GitHub Pages (deploy on push a `frontend/**`).
+- (⚠️ **«serie continua» es FALSO, verificado S146 (AUDIT_S146 V-15)**: hay un hueco de
+  **2025-11-16 a 2026-01-28** en 9 de los 11 Tier A, y en PCC es más largo (**111 días**, desde
+  2025-10-10). **Sólo Villarrica es continuo.** Consecuencia: los primeros 19 días de la referencia
+  del scraper (que parte el 2026-01-10) sólo se pueden parear en Villarrica. El texto que sigue se
+  conserva por historia.)
 - `volcanoes.yaml` (45 configurados · 11 Tier A con serie continua desde 2025-02 · 34 con
   una ventana corta de abril-2026 (67-94 records c/u) en `data/mirova_equivalent/`, fuera del
   cron NRT — corregido S131: antes decía «11 con data, 34 sin pull»)
@@ -1544,7 +1657,11 @@ en S35 durante ~70 sesiones y confundía a las sesiones frías):
    D2 y D3**~~ (ambas congeladas desde S27, sin plan activo; D2 quedó mitigada de facto por el
    loader CONS∪OCR de S86 — medida en 79,2 % en S128 y anotada en el doc en S131)
    y **D12** (FN MODIS; C2 peak-of-kernel refutado en S122, cierre formal pendiente
-   de Nicolás). **CERRADAS, no reabrir** (anti-A8): D9 (S113, sus dos caras),
+   de Nicolás). **CERRADAS, no reabrir** (anti-A8): (⚠️ **D9 salió de esta lista en S146**
+   (AUDIT_S146 V-01): el «207 de 214 confirmados» no se reproduce con ninguna definición basada
+   en alertas (máximo 80 de 214, 37,4 %) y el «0 fuga» es circular; sólo el tope de 5 MW se
+   confirma. Ver la rebaja de A23. El texto que sigue se conserva por historia.)
+   D9 (S113, sus dos caras),
    D11 cara far→summit (**⚠️ S125: leer con la rebaja de A82 — la auditoría S114
    en que se apoya nunca miró el eje geométrico del ROI, así que el "irreducible"
    vale para la vía espectral/de magnitud, NO bloquea una llegada por geometría**)

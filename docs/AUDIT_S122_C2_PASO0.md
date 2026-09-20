@@ -1,5 +1,11 @@
 # C2 Paso 0 (S122) — VEREDICTO: el blob path-D MODIS NO tiene núcleo → C2 NO viable, D12 irreducible a 1 km
 
+> ⚠️ **Documento histórico, con afirmaciones rebajadas en S146.** El «irreducible a 1 km» de
+> este informe hereda el de A82, cuya base numérica quedó sin tasa base, y las «76 noches reales
+> de FN» también se rebajaron. **No se marca línea por línea**: leer primero
+> `docs/AUDIT_S146.md` y el catálogo `docs/MIROVA_DIVERGENCES.md` antes de usar cualquier número
+> o cierre de acá. Texto original intacto, conservado por historia.
+
 > Análisis read-only `experiments/_s122_c2_paso0/paso0.py` (S91, números del script).
 > Data: `data/mirova_equivalent/` (versionado). Los píxeles del blob son **invariantes al
 > ancla** — verificado S122: el ancla honesta solo cambia `distance_class` (far→summit),

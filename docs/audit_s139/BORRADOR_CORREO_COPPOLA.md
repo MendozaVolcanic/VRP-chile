@@ -1,4 +1,9 @@
-# Borrador de correo a Diego Coppola (S139, ajustado S142)
+# Borrador de correo a Diego Coppola (S139, ajustado S142 y S146)
+
+> **Ajuste S146.** Se agrega una sola pregunta, la 13 (la antigua 13 pasa a ser 14): si el NRT
+> aplica algún test integrado sobre el ROI o algún test de temperatura de brillo, además de los
+> Tests 1 a 3 de SP426.5. Sale de la auditoría S146 (V-06 y V-08), que abrió D30 y D31 en el
+> catálogo. Sigue sin enviarse nada: el correo lo mandas tú desde tu cuenta.
 
 > **Ajuste S142.** Nicolás decidió "ajustar y enviar". Cambios respecto de S139: la pregunta 4 se
 > acota a lo que las lecturas de S141 no contestan (recorte a cero y tamaño de la vecindad,
@@ -57,7 +62,12 @@ reprocessing runs, we would be very grateful if you could clarify the following 
     hottest alerted pixel, or to the farthest one (as Max_Dist in the archive)?
 12. The ETI is labelled NTI minus NTIbk in Figure 3 and NTI minus NTIapp in Figure 4 of the 2016
     paper. Which one is computed in the current system?
-13. On 14 September 2026 the VIIRS 375 m GeoTIFFs offered on the website changed from geographic
+13. Besides Tests 1, 2 and 3 of SP426.5, does the operational near real time system apply any
+    additional detection step, in particular a test on the radiance integrated over the summit ROI
+    (rather than pixel by pixel), or a test on brightness temperature relative to the local
+    background? We ask because two such steps exist in our code (the second one currently
+    disabled) and we cannot trace them to your published description.
+14. On 14 September 2026 the VIIRS 375 m GeoTIFFs offered on the website changed from geographic
     coordinates to a UTM grid of 375 m cells. Is this UTM grid the one on which detection and the VRP
     are computed, and did the change affect how detections are computed or only how the image is exported?
 
@@ -89,4 +99,5 @@ Servicio Nacional de Geología y Minería (SERNAGEOMIN), Chile
 | 10 | `lbg_global_compatible` (MISSION, nota S125) |
 | 11 | semantica de FALSO_POSITIVO y Distancia_km del scraper (banco S139) |
 | 12 | ecuacion del ETI nunca escrita en SP426.5 (LECTURA_PDF S139) |
-| 13 | A106 (cambio de formato de TIF), D17 (grilla remuestreada) y el conteo de píxeles desde TIF |
+| 13 | **D30 y D31** (agregada en S146): el Test 1 integrado en el ROI y el test de temperatura de brillo con N·σ = 5 / 10 son caminos nuestros que ningún paper del grupo describe (AUDIT_S146 V-06 y V-08). Es la pregunta que más trabajo puede ahorrar del plan de paridad: si la respuesta es «no», queda resuelta la pregunta de fidelidad (los dos caminos son nuestros) sin necesidad de A/B; qué hacer con el Test 1 integrado sigue pidiendo la medición de recall de D30 |
+| 14 | A106 (cambio de formato de TIF), D17 (grilla remuestreada) y el conteo de píxeles desde TIF |

@@ -1,8 +1,24 @@
 {
-  "generado_utc": "2026-09-20T05:40:04+00:00",
+  "generado_utc": "2026-09-20T11:39:31+00:00",
   "por_que": "A95: un cierre hereda las premisas de la lectura con que se derivo, y apaga trabajo futuro",
   "control_de_instrumento": {
-    "con_patrones_vacios_da_cero": true,
+    "ok": true,
+    "detalle": {
+      "positivo_detectado": true,
+      "positivo_tipos": [
+        "cerrada",
+        "no_reabrir",
+        "despreciable"
+      ],
+      "positivo_sin_respaldo": true,
+      "negativo_silencioso": true,
+      "con_respaldo_detectado": [
+        "pr",
+        "script"
+      ],
+      "hay_filas": true
+    },
+    "como": "S146 (V-14, corregido por el verificador de la Fase 0): TRES casos sinteticos con respuesta conocida, corridos con las mismas funciones que el bucle principal (uno que el censo debe encontrar y clasificar bien, uno que no debe marcar, y uno con respaldo conocido que ejercita RESPALDOS). El control anterior evaluaba un any sobre una lista vacia y no podia fallar; el de la primera correccion tenia su propia copia del detector y dejaba pasar tres mutantes. Si falla, el script sale con codigo 1",
     "nota": "este censo busca por palabras clave: un cierre redactado con otras palabras NO aparece. Es un PISO del problema, no su medida completa"
   },
   "documentos_barridos": [
@@ -12,21 +28,21 @@
     "docs/HYPOTHESIS_LOG.md",
     "docs/META_RULES_S80.md"
   ],
-  "n_afirmaciones": 89,
+  "n_afirmaciones": 109,
   "por_tipo": {
-    "resuelta": 23,
-    "refutada": 19,
+    "resuelta": 24,
+    "refutada": 21,
+    "irreducible": 16,
+    "agotado": 12,
+    "no_reabrir": 10,
     "cerrada": 9,
-    "no_reabrir": 9,
-    "agotado": 8,
-    "despreciable": 7,
-    "irreducible": 7,
-    "es_fiel": 6,
-    "no_adoptar": 6,
-    "menor": 2,
-    "efecto_nulo": 2
+    "despreciable": 8,
+    "es_fiel": 7,
+    "no_adoptar": 7,
+    "efecto_nulo": 4,
+    "menor": 2
   },
-  "n_sin_respaldo_citable": 50,
+  "n_sin_respaldo_citable": 63,
   "afirmaciones": [
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
@@ -43,7 +59,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 289,
+      "linea": 302,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -55,7 +71,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 435,
+      "linea": 460,
       "tipos_de_cierre": [
         "es_fiel"
       ],
@@ -68,7 +84,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 455,
+      "linea": 509,
       "tipos_de_cierre": [
         "es_fiel"
       ],
@@ -80,7 +96,19 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 515,
+      "linea": 540,
+      "tipos_de_cierre": [
+        "irreducible"
+      ],
+      "respaldos_citados": [
+        "sesion"
+      ],
+      "sin_respaldo_citable": true,
+      "texto": "> hijas**. El «irreducible» vale sólo bajo esa configuración. Texto original abajo, conservado por"
+    },
+    {
+      "archivo": "docs/MIROVA_DIVERGENCES.md",
+      "linea": 607,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -92,7 +120,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 534,
+      "linea": 644,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -104,7 +132,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 656,
+      "linea": 766,
       "tipos_de_cierre": [
         "despreciable"
       ],
@@ -117,19 +145,33 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1088,
+      "linea": 1221,
       "tipos_de_cierre": [
         "resuelta"
       ],
       "respaldos_citados": [
+        "doc_interno",
         "sesion"
       ],
-      "sin_respaldo_citable": true,
-      "texto": "### D8 Background ring contaminado — RESUELTO"
+      "sin_respaldo_citable": false,
+      "texto": "### D8 Background ring contaminado — RESUELTO ⚠️ **matizado S146: leer D25 antes de tomarlo por cerrado**"
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1090,
+      "linea": 1223,
+      "tipos_de_cierre": [
+        "resuelta"
+      ],
+      "respaldos_citados": [
+        "doc_interno",
+        "sesion"
+      ],
+      "sin_respaldo_citable": false,
+      "texto": "> ⚠️ **S146 (`docs/AUDIT_S146.md` §2, frente A **A-07**).** «RESUELTO» vale para el parche"
+    },
+    {
+      "archivo": "docs/MIROVA_DIVERGENCES.md",
+      "linea": 1233,
       "tipos_de_cierre": [
         "refutada"
       ],
@@ -141,7 +183,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1129,
+      "linea": 1272,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -149,11 +191,11 @@
         "sesion"
       ],
       "sin_respaldo_citable": true,
-      "texto": "### D-PCC: inner_radius_km demasiado permisivo — RESUELTO S62"
+      "texto": "### D-PCC: inner_radius_km demasiado permisivo — RESUELTO S62 ⚠️ **NO: la adopción se revirtió a las nueve horas, en la misma S62 (PR #85, 2026-05-19); verificado S146**"
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1186,
+      "linea": 1339,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -165,7 +207,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1196,
+      "linea": 1349,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -178,7 +220,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1214,
+      "linea": 1367,
       "tipos_de_cierre": [
         "refutada"
       ],
@@ -190,7 +232,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1249,
+      "linea": 1402,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -203,7 +245,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1259,
+      "linea": 1412,
       "tipos_de_cierre": [
         "cerrada",
         "agotado",
@@ -221,7 +263,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1315,
+      "linea": 1476,
       "tipos_de_cierre": [
         "es_fiel"
       ],
@@ -233,7 +275,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1319,
+      "linea": 1480,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -245,7 +287,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1368,
+      "linea": 1529,
       "tipos_de_cierre": [
         "no_reabrir"
       ],
@@ -255,7 +297,31 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1403,
+      "linea": 1571,
+      "tipos_de_cierre": [
+        "no_adoptar"
+      ],
+      "respaldos_citados": [
+        "sesion"
+      ],
+      "sin_respaldo_citable": true,
+      "texto": "> existe). El «NO ADOPTAR» del A/B no cambia: lo que cambia es qué se creía haber recuperado."
+    },
+    {
+      "archivo": "docs/MIROVA_DIVERGENCES.md",
+      "linea": 1573,
+      "tipos_de_cierre": [
+        "irreducible"
+      ],
+      "respaldos_citados": [
+        "sesion"
+      ],
+      "sin_respaldo_citable": true,
+      "texto": "> «irreducible a 1 km» y hereda la misma premisa que A82, rebajada por la vía geométrica en S124"
+    },
+    {
+      "archivo": "docs/MIROVA_DIVERGENCES.md",
+      "linea": 1579,
       "tipos_de_cierre": [
         "no_adoptar"
       ],
@@ -268,7 +334,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1405,
+      "linea": 1581,
       "tipos_de_cierre": [
         "refutada"
       ],
@@ -280,7 +346,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1421,
+      "linea": 1597,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -293,7 +359,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1441,
+      "linea": 1617,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -308,17 +374,31 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1504,
+      "linea": 1680,
       "tipos_de_cierre": [
         "irreducible"
       ],
-      "respaldos_citados": [],
+      "respaldos_citados": [
+        "sesion"
+      ],
       "sin_respaldo_citable": true,
-      "texto": "que a 1 km es irreducible (A82). Levantar la cerca destaparía ambas cosas"
+      "texto": "que a 1 km es irreducible (A82). ⚠️ **S146 (AUDIT_S146 §2, A-11 / E-01): ese"
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1509,
+      "linea": 1681,
+      "tipos_de_cierre": [
+        "irreducible"
+      ],
+      "respaldos_citados": [
+        "sesion"
+      ],
+      "sin_respaldo_citable": true,
+      "texto": "«irreducible» hereda una premisa rebajada. A82 quedó rebajada por la vía"
+    },
+    {
+      "archivo": "docs/MIROVA_DIVERGENCES.md",
+      "linea": 1691,
       "tipos_de_cierre": [
         "no_reabrir"
       ],
@@ -328,7 +408,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1545,
+      "linea": 1744,
       "tipos_de_cierre": [
         "cerrada"
       ],
@@ -340,7 +420,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1550,
+      "linea": 1749,
       "tipos_de_cierre": [
         "cerrada"
       ],
@@ -353,7 +433,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1819,
+      "linea": 2018,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -363,20 +443,21 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1857,
+      "linea": 2056,
       "tipos_de_cierre": [
         "cerrada",
         "refutada"
       ],
       "respaldos_citados": [
+        "doc_interno",
         "sesion"
       ],
-      "sin_respaldo_citable": true,
-      "texto": "## D16 — La grilla UTM NO explica el sub-reporte — **CERRADA (refutada) S124**"
+      "sin_respaldo_citable": false,
+      "texto": "## D16 — La grilla UTM NO explica el sub-reporte — **CERRADA (refutada) S124** ⚠️ **título rebajado S146: lo refutado fue el regrid F70, no la grilla de MIROVA**"
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1886,
+      "linea": 2106,
       "tipos_de_cierre": [
         "no_adoptar"
       ],
@@ -386,7 +467,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 1999,
+      "linea": 2224,
       "tipos_de_cierre": [
         "menor",
         "no_adoptar"
@@ -399,7 +480,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 2039,
+      "linea": 2264,
       "tipos_de_cierre": [
         "irreducible"
       ],
@@ -411,7 +492,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 2067,
+      "linea": 2296,
       "tipos_de_cierre": [
         "no_adoptar"
       ],
@@ -423,7 +504,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 2088,
+      "linea": 2317,
       "tipos_de_cierre": [
         "es_fiel"
       ],
@@ -433,20 +514,58 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 2194,
+      "linea": 2424,
       "tipos_de_cierre": [
-        "despreciable"
+        "irreducible"
+      ],
+      "respaldos_citados": [
+        "sesion"
+      ],
+      "sin_respaldo_citable": true,
+      "texto": "D11) y A82 quedó rebajada también **por la vía espectral**: el «irreducible» y el «todos los ejes"
+    },
+    {
+      "archivo": "docs/MIROVA_DIVERGENCES.md",
+      "linea": 2425,
+      "tipos_de_cierre": [
+        "agotado"
       ],
       "respaldos_citados": [
         "paper",
         "sesion"
       ],
       "sin_respaldo_citable": false,
-      "texto": "## D20 — El NTI de MODIS se calcula con la banda 31 (11,03 µm); Coppola 2016a y Wright 2002 usan la banda 32 (12,02 µm) — **HALLAZGO, despreciable (cuantificado S128), registrado S135**"
+      "texto": "agotados» valen sólo bajo banda 21 primaria y compuerta de 3 K (D21 y D22, abiertas). La frase de"
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 2200,
+      "linea": 2428,
+      "tipos_de_cierre": [
+        "despreciable"
+      ],
+      "respaldos_citados": [
+        "doc_interno",
+        "paper",
+        "sesion"
+      ],
+      "sin_respaldo_citable": false,
+      "texto": "## D20 — El NTI de MODIS se calcula con la banda 31 (11,03 µm); Coppola 2016a y Wright 2002 usan la banda 32 (12,02 µm) — **HALLAZGO, despreciable (cuantificado S128), registrado S135** ⚠️ **«despreciable» rebajado S146 a «chico y no medido»**"
+    },
+    {
+      "archivo": "docs/MIROVA_DIVERGENCES.md",
+      "linea": 2432,
+      "tipos_de_cierre": [
+        "despreciable"
+      ],
+      "respaldos_citados": [
+        "sesion"
+      ],
+      "sin_respaldo_citable": true,
+      "texto": "> bandas va de 0,0001 a 250 K a 0,0054 a 290 K), pero **la vara con que se declaró despreciable es"
+    },
+    {
+      "archivo": "docs/MIROVA_DIVERGENCES.md",
+      "linea": 2451,
       "tipos_de_cierre": [
         "despreciable"
       ],
@@ -459,7 +578,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 2205,
+      "linea": 2456,
       "tipos_de_cierre": [
         "despreciable"
       ],
@@ -471,7 +590,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 2222,
+      "linea": 2473,
       "tipos_de_cierre": [
         "despreciable"
       ],
@@ -483,7 +602,7 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 2304,
+      "linea": 2555,
       "tipos_de_cierre": [
         "despreciable"
       ],
@@ -493,20 +612,33 @@
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 2353,
+      "linea": 2608,
       "tipos_de_cierre": [
         "efecto_nulo"
       ],
       "respaldos_citados": [
-        "paper",
+        "doc_interno",
         "sesion"
       ],
       "sin_respaldo_citable": false,
-      "texto": "## D26: El segundo pase calcula mu y sigma sin los filtros de no-aptos del paper (borde, dNTI < -0,1, K1). **ABIERTA, efecto nulo bajo la conectiva `min` (registrada S138)** S138"
+      "texto": "## D26: El segundo pase calcula mu y sigma sin los filtros de no-aptos del paper (borde, dNTI < -0,1, K1). **ABIERTA, efecto nulo bajo la conectiva `min` (registrada S138)** S138 ⚠️ **el «efecto nulo» cayó en S145; marcado acá en S146**"
     },
     {
       "archivo": "docs/MIROVA_DIVERGENCES.md",
-      "linea": 2377,
+      "linea": 2610,
+      "tipos_de_cierre": [
+        "efecto_nulo"
+      ],
+      "respaldos_citados": [
+        "doc_interno",
+        "sesion"
+      ],
+      "sin_respaldo_citable": false,
+      "texto": "> ⚠️ **S145, recogido en S146** (`docs/AUDIT_S146.md` §2). El «efecto nulo» de este encabezado se"
+    },
+    {
+      "archivo": "docs/MIROVA_DIVERGENCES.md",
+      "linea": 2640,
       "tipos_de_cierre": [
         "menor"
       ],
@@ -518,6 +650,18 @@
       ],
       "sin_respaldo_citable": false,
       "texto": "## D29: Refit iterativo a 3 sigma en la regresión cuadrática de NTIbk. **ABIERTA, menor (registrada S138)** S138"
+    },
+    {
+      "archivo": "docs/MIROVA_DIVERGENCES.md",
+      "linea": 2827,
+      "tipos_de_cierre": [
+        "es_fiel"
+      ],
+      "respaldos_citados": [
+        "paper"
+      ],
+      "sin_respaldo_citable": false,
+      "texto": "presenta dentro de la frase «la detección MODIS es FIEL a Coppola 2016a», y el perfil lo rotula"
     },
     {
       "archivo": "CLAUDE.md",
@@ -548,7 +692,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 112,
+      "linea": 118,
       "tipos_de_cierre": [
         "es_fiel"
       ],
@@ -561,7 +705,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 119,
+      "linea": 137,
       "tipos_de_cierre": [
         "efecto_nulo"
       ],
@@ -576,7 +720,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 120,
+      "linea": 138,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -591,7 +735,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 124,
+      "linea": 142,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -604,7 +748,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 324,
+      "linea": 358,
       "tipos_de_cierre": [
         "cerrada"
       ],
@@ -613,24 +757,37 @@
         "sesion"
       ],
       "sin_respaldo_citable": false,
-      "texto": "- **A23. ⚠️ OBSOLETA desde S113 — verificado S125.** D9 quedó **CERRADA en sus dos"
+      "texto": "**⚠️ OBSOLETA desde S113 — verificado S125.** D9 quedó **CERRADA en sus dos"
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 948,
+      "linea": 980,
       "tipos_de_cierre": [
-        "agotado",
         "irreducible"
       ],
       "respaldos_citados": [
         "sesion"
       ],
       "sin_respaldo_citable": true,
+      "texto": "clasificación de esas 73 como artefacto cuelga del «irreducible» de A82, cuyo número no tiene"
+    },
+    {
+      "archivo": "CLAUDE.md",
+      "linea": 989,
+      "tipos_de_cierre": [
+        "agotado",
+        "irreducible"
+      ],
+      "respaldos_citados": [
+        "pr",
+        "sesion"
+      ],
+      "sin_respaldo_citable": false,
       "texto": "- **A82. ⚠️ REBAJADA S124: «agotado» ya no aplica.** ⚠️ **Rebajada también por la vía espectral en S138 (AUDIT_S138 C3)**: los ejes que la regla da por agotados se barrieron sobre records producidos con banda 21 primaria (D21) y compuerta `bt > t_bg + 3 K` (D22), las dos divergencias que S137 abrió;"
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 952,
+      "linea": 993,
       "tipos_de_cierre": [
         "agotado"
       ],
@@ -642,7 +799,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 953,
+      "linea": 994,
       "tipos_de_cierre": [
         "no_reabrir"
       ],
@@ -652,7 +809,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 963,
+      "linea": 1004,
       "tipos_de_cierre": [
         "no_adoptar"
       ],
@@ -665,7 +822,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 965,
+      "linea": 1006,
       "tipos_de_cierre": [
         "es_fiel"
       ],
@@ -677,7 +834,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 967,
+      "linea": 1008,
       "tipos_de_cierre": [
         "no_reabrir"
       ],
@@ -687,7 +844,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 968,
+      "linea": 1009,
       "tipos_de_cierre": [
         "agotado"
       ],
@@ -699,7 +856,17 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 983,
+      "linea": 1024,
+      "tipos_de_cierre": [
+        "agotado"
+      ],
+      "respaldos_citados": [],
+      "sin_respaldo_citable": true,
+      "texto": "El «agotado» vale sólo contra la etiqueta de MIROVA. Hereda además la rebaja de A82 (A113). El"
+    },
+    {
+      "archivo": "CLAUDE.md",
+      "linea": 1035,
       "tipos_de_cierre": [
         "agotado"
       ],
@@ -709,7 +876,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 989,
+      "linea": 1041,
       "tipos_de_cierre": [
         "irreducible"
       ],
@@ -717,11 +884,35 @@
         "sesion"
       ],
       "sin_respaldo_citable": true,
-      "texto": "- **A84. La POSICIÓN within-inner del `ctx_cluster` es irreducible igual que el far→summit (A82); NO"
+      "texto": "- **A84. ⚠️ Hereda la rebaja de A82, aplicada S146 (AUDIT_S146 V-02, E-01)**: el «irreducible igual"
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 996,
+      "linea": 1045,
+      "tipos_de_cierre": [
+        "irreducible"
+      ],
+      "respaldos_citados": [
+        "sesion"
+      ],
+      "sin_respaldo_citable": true,
+      "texto": "«irreducible» heredado. Texto original:"
+    },
+    {
+      "archivo": "CLAUDE.md",
+      "linea": 1046,
+      "tipos_de_cierre": [
+        "irreducible"
+      ],
+      "respaldos_citados": [
+        "sesion"
+      ],
+      "sin_respaldo_citable": true,
+      "texto": "**La POSICIÓN within-inner del `ctx_cluster` es irreducible igual que el far→summit (A82); NO"
+    },
+    {
+      "archivo": "CLAUDE.md",
+      "linea": 1053,
       "tipos_de_cierre": [
         "agotado"
       ],
@@ -733,7 +924,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 1001,
+      "linea": 1058,
       "tipos_de_cierre": [
         "no_reabrir"
       ],
@@ -745,7 +936,19 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 1114,
+      "linea": 1101,
+      "tipos_de_cierre": [
+        "refutada"
+      ],
+      "respaldos_citados": [
+        "sesion"
+      ],
+      "sin_respaldo_citable": true,
+      "texto": "refutado, está SIN VERIFICAR**: o el corpus se reprocesó desde S123, o el «path BT» de esa frase"
+    },
+    {
+      "archivo": "CLAUDE.md",
+      "linea": 1191,
       "tipos_de_cierre": [
         "refutada"
       ],
@@ -757,7 +960,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 1160,
+      "linea": 1237,
       "tipos_de_cierre": [
         "agotado",
         "no_reabrir"
@@ -772,7 +975,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 1238,
+      "linea": 1324,
       "tipos_de_cierre": [
         "refutada"
       ],
@@ -782,20 +985,68 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 1246,
+      "linea": 1332,
       "tipos_de_cierre": [
         "refutada"
       ],
-      "respaldos_citados": [
-        "pr",
-        "sesion"
-      ],
-      "sin_respaldo_citable": false,
+      "respaldos_citados": [],
+      "sin_respaldo_citable": true,
       "texto": "instrumento ya refutado es la prueba de que el control está roto, y conviene tener ese caso de prueba"
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 1412,
+      "linea": 1337,
+      "tipos_de_cierre": [
+        "efecto_nulo"
+      ],
+      "respaldos_citados": [
+        "sesion"
+      ],
+      "sin_respaldo_citable": true,
+      "texto": "más estrecha que el enunciado: **D26** («efecto nulo bajo `min`») se apoyaba en un script que lee"
+    },
+    {
+      "archivo": "CLAUDE.md",
+      "linea": 1351,
+      "tipos_de_cierre": [
+        "refutada"
+      ],
+      "respaldos_citados": [
+        "doc_interno",
+        "script"
+      ],
+      "sin_respaldo_citable": false,
+      "texto": "lo mismo que refutado**: la salida honesta es SIN EVIDENCIA. Instrumento:"
+    },
+    {
+      "archivo": "CLAUDE.md",
+      "linea": 1372,
+      "tipos_de_cierre": [
+        "irreducible"
+      ],
+      "respaldos_citados": [
+        "doc_interno",
+        "sesion"
+      ],
+      "sin_respaldo_citable": false,
+      "texto": "sesión lee antes de tocar el pipeline, seguía dando D9 por resuelta, D11 por «irreducible, todos"
+    },
+    {
+      "archivo": "CLAUDE.md",
+      "linea": 1373,
+      "tipos_de_cierre": [
+        "agotado",
+        "no_reabrir"
+      ],
+      "respaldos_citados": [
+        "sesion"
+      ],
+      "sin_respaldo_citable": true,
+      "texto": "los ejes agotados», el GAP #A por «no reabrir» y NEW-8 por gap abierto cuando corre en producción"
+    },
+    {
+      "archivo": "CLAUDE.md",
+      "linea": 1559,
       "tipos_de_cierre": [
         "despreciable"
       ],
@@ -807,7 +1058,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 1512,
+      "linea": 1659,
       "tipos_de_cierre": [
         "refutada"
       ],
@@ -819,7 +1070,7 @@
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 1513,
+      "linea": 1660,
       "tipos_de_cierre": [
         "cerrada",
         "no_reabrir"
@@ -828,11 +1079,11 @@
         "sesion"
       ],
       "sin_respaldo_citable": true,
-      "texto": "de Nicolás). **CERRADAS, no reabrir** (anti-A8): D9 (S113, sus dos caras),"
+      "texto": "de Nicolás). **CERRADAS, no reabrir** (anti-A8): (⚠️ **D9 salió de esta lista en S146**"
     },
     {
       "archivo": "CLAUDE.md",
-      "linea": 1515,
+      "linea": 1666,
       "tipos_de_cierre": [
         "irreducible"
       ],
@@ -845,7 +1096,20 @@
     },
     {
       "archivo": "docs/MISSION.md",
-      "linea": 106,
+      "linea": 123,
+      "tipos_de_cierre": [
+        "agotado",
+        "irreducible"
+      ],
+      "respaldos_citados": [
+        "sesion"
+      ],
+      "sin_respaldo_citable": true,
+      "texto": "(AUDIT_S146 V-02): «irreducible» y «todos los ejes agotados» quedan rebajados acá igual que"
+    },
+    {
+      "archivo": "docs/MISSION.md",
+      "linea": 129,
       "tipos_de_cierre": [
         "cerrada",
         "irreducible"
@@ -860,7 +1124,7 @@
     },
     {
       "archivo": "docs/MISSION.md",
-      "linea": 107,
+      "linea": 130,
       "tipos_de_cierre": [
         "agotado"
       ],
@@ -874,21 +1138,20 @@
     },
     {
       "archivo": "docs/MISSION.md",
-      "linea": 110,
+      "linea": 140,
       "tipos_de_cierre": [
         "resuelta",
         "no_reabrir"
       ],
       "respaldos_citados": [
-        "run_ci",
         "sesion"
       ],
-      "sin_respaldo_citable": false,
+      "sin_respaldo_citable": true,
       "texto": "**RESUELTO S115 = mislabel, NO es gap** (DIVERGENCES:1292) — NO reabrir · VIIRS750 disperso"
     },
     {
       "archivo": "docs/MISSION.md",
-      "linea": 142,
+      "linea": 177,
       "tipos_de_cierre": [
         "cerrada"
       ],
@@ -1023,7 +1286,7 @@
     },
     {
       "archivo": "docs/HYPOTHESIS_LOG.md",
-      "linea": 472,
+      "linea": 478,
       "tipos_de_cierre": [
         "refutada"
       ],
@@ -1037,7 +1300,7 @@
     },
     {
       "archivo": "docs/HYPOTHESIS_LOG.md",
-      "linea": 632,
+      "linea": 638,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -1049,7 +1312,7 @@
     },
     {
       "archivo": "docs/HYPOTHESIS_LOG.md",
-      "linea": 662,
+      "linea": 668,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -1061,7 +1324,7 @@
     },
     {
       "archivo": "docs/HYPOTHESIS_LOG.md",
-      "linea": 724,
+      "linea": 730,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -1074,7 +1337,7 @@
     },
     {
       "archivo": "docs/HYPOTHESIS_LOG.md",
-      "linea": 743,
+      "linea": 749,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -1087,7 +1350,7 @@
     },
     {
       "archivo": "docs/HYPOTHESIS_LOG.md",
-      "linea": 780,
+      "linea": 786,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -1099,7 +1362,7 @@
     },
     {
       "archivo": "docs/HYPOTHESIS_LOG.md",
-      "linea": 817,
+      "linea": 823,
       "tipos_de_cierre": [
         "resuelta"
       ],
@@ -1111,7 +1374,7 @@
     },
     {
       "archivo": "docs/HYPOTHESIS_LOG.md",
-      "linea": 1536,
+      "linea": 1547,
       "tipos_de_cierre": [
         "cerrada"
       ],

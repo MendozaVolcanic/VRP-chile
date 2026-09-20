@@ -464,6 +464,12 @@ Otros 6: stat "Detecciones" ≠ tabla events count, fallback legacy sin distance
     - **`final_hotspot_source: test1` en 81/93 records (87%)** — Test 1 path dominante
   - Patrón idéntico a Lastarria (n_pix 71, src test1 89%), Isluga (n_pix 69, test1 56%) y PCC (n_pix 200-470, test1 dominante).
   - S59 razón teórica "ring frío glaciar empeoraría con kernel local" sigue siendo correcta físicamente — kernel-bg NO es la solución.
+- ⚠️ **S146 (AUDIT_S146 V-06, gravedad 5): la cita «Coppola 2015 §2.2 Eq.1» que aparece en este
+  bloque y más abajo es FALSA.** El artículo 55 del volumen 77 de *Bulletin of Volcanology* es de
+  Heap et al., mecánica de rocas en andesita; en `sp426.5.pdf` p. 6 el Test 1 es por píxel contra
+  K1, sin suma sobre el ROI. El Test 1 integrado en el ROI es un **detector propio** (ver D30 en
+  `docs/MIROVA_DIVERGENCES.md`). Las mediciones no cambian: lo que cae es el respaldo
+  bibliográfico. Texto original conservado por historia.
 - **Mecanismo común con PCC/Lastarria/Isluga**:
   - Test 1 path integrated-ROI (Coppola 2015 §2.2 Eq.1) en nuestro pipeline acepta 70-470 pixels anómalos por cluster summit.
   - MIROVA cluster típico es 1-5 pixels (según TIF visual).
@@ -891,6 +897,11 @@ Otros 6: stat "Detecciones" ≠ tabla events count, fallback legacy sin distance
 - **Estado**: **CONFIRMADA, NO FIX POSIBLE con Wooster pixel-level. Pendiente S50: Test 1 integrated VRP implementación.**
 - **Cobertura operacional actual**: fix audit S48 (H_S48_AUDIT_VRP_ZERO_FALSE_FN) cuenta correctamente TP por `test1+summit+dist<=inner` independientemente de `pc.vrp_mw`. Recall 97.2% logrado. El issue de **magnitud reportada** (pc.vrp=0 cuando MIROVA reporta 0.02-0.30 MW) queda como pendiente cosmético — no afecta operativa.
 - **Volcanes afectados**: NdC (89 records 30d), Lascar (15), Lastarria (9), Copahue/Isluga/Planchón/Villarrica (1-2 cada uno). Total 118 records con `test1+summit+pc.vrp=0`.
+- ⚠️ **S146 (AUDIT_S146 V-06, gravedad 5): «Coppola 2015 Eq.1» es una cita FALSA**, acá y en la
+  causa raíz de arriba. No existe ese artículo (el 77:55 de *Bull. Volcanol.* es de Heap et al.);
+  en `sp426.5.pdf` la Ec. 1 es el NTI (p. 4) y el Test 1 es por píxel contra K1 (p. 6). O sea que
+  el «SÍ» de la pregunta 1 de MISSION que sigue **no se sostiene por esta vía**: el Test 1
+  integrado es un detector propio (D30). Texto original conservado por historia.
 - **Acción S50**: implementar `Test 1 integrated VRP` per Coppola 2015 Eq.1. Pasa MISSION.md las 3 preguntas:
   1. ¿En papers core? SÍ — Coppola 2015 Eq.1 explícito sobre Stromboli para detección sub-pixel summit.
   2. (no necesita pregunta 2) — cubre Q1.
@@ -1489,7 +1500,7 @@ Pasa MISSION.md Q1 literal. Implementación scope mediano (kernel filter per hot
 
 - **Formulada**: S141 (2026-09-15), antes de correr el probe. Plan y criterio: `docs/superpowers/plans/2026-09-15-fase1-probe-vecinos.md`.
 - **Hipótesis**: donde MIROVA suma 3 o más píxeles y nosotros 1 (329 pasadas OSF 2025 pareadas), los 8 vecinos nativos del foco se pierden mayoritariamente en una sola etapa (primer pase, segundo pase, Test 1, filtro contextual con `keep_peak` o cúmulo), y su aporte con fondo local (media de vecinos no alertados, Campus et al. 2024 p. 3) cierra al menos la mitad de la diferencia entre el VRP del OSF y el publicado.
-- **Evidencia a favor**: S139 midió F_n 0,553 y R 0,995 a igual número de píxeles (la fórmula está bien, falta selección); siete textos del grupo MIROVA definen el fondo por píxel alertado (`docs/audit_s141/lectura/VERIFICADOR_LECTORES.md` V-07).
+- **Evidencia a favor**: S139 midió F_n 0,553 y R 0,995 a igual número de píxeles (la fórmula está bien, falta selección ⚠️ **ese 0,995 quedó rebajado S146, AUDIT_S146 V-12**: compensa dos factores opuestos, 1,140 de píxel caliente contra 0,873 de fondo sobre n = 342 pares, y compensa entre volcanes de 0,66 en Copahue a 1,39 en Villarrica, con sólo 156 de 342 pares entre 0,8 y 1,25; sigue apoyando «no es la fórmula» por otro script, pero ya no apaga la búsqueda en k, área, banda ni Planck); siete textos del grupo MIROVA definen el fondo por píxel alertado (`docs/audit_s141/lectura/VERIFICADOR_LECTORES.md` V-07).
 - **Evidencia en contra**: no se sabe cuáles píxeles nativos son los `Npix` de MIROVA (remuestreo, D17); los records de la muestra son del backfill de 2025 y el código de hoy puede publicar otro conteo (control P3).
 - **Criterio testable (pre-registrado, no se cambia)**: sobre candidatos con grilla consistente, n ≥ 10. (1) Una etapa con ≥ 50 % de los vecinos perdidos es la palanca del primer brazo del A/B; si no, DISPERSA; si `nunca_candidato` ≥ 50 %, la palanca es umbral o fondo de la detección. (2) Mediana de (aporte perdido con fondo local) / (VRP OSF − publicado): ≥ 0,5 cierra, < 0,2 no cierra, si no parcial. (3) Controles con ≥ 50 % de vecinos incluidos; si falla, INDETERMINADO. (4) Por estrato focal/nevado.
 - **Estado**: indeterminada (S141, 2026-09-15)
@@ -1500,7 +1511,7 @@ Pasa MISSION.md Q1 literal. Implementación scope mediano (kernel filter per hot
 - **Formulada**: S141 (2026-09-15), antes de cualquier corrida del instrumento v2. Reemplaza el pre-registro de la primera versión del v2 (PR #675, commit `1e5a6b7f9`), que no llegó a correrse y cuyo verificador pre-corrida (`experiments/_s141_fase1_probe/VERIFICADOR_V2_PRE_CORRIDA.md`) mostró que su rótulo de destino estaba fijado antes de correr (H3). Plan y criterio: `docs/superpowers/plans/2026-09-15-fase1-probe-vecinos-v2.md` §3 y §5.
 - **Hipótesis**: donde MIROVA suma 3 o más píxeles y hoy publicamos menos, con su píxel caliente a ≤ 0,75 km de nuestro centro, los `Npix−1` vecinos más calientes de nuestro centro que no entran al cúmulo quedan fuera mayoritariamente por un mismo test de la ruta que publicó (dNTI o dETI contra su umbral efectivo, compuerta `bt > t_bg + 3 K`, disco del Test 1), en al menos 2/3 de los volcanes y estable al sacar cada uno; y son más tibios, contra su fondo local, que los vecinos de un píxel de control a 3 a 6 km.
 - **Resultados imposible por construcción (declarados antes de correr)**: (1) un vecino alertado fuera del cúmulo, porque `cluster_hotspots` agrupa componentes 8-conexas (`pipeline/clustering.py:91-96`); (2) un vecino marcado y quitado en la ruta contextual, porque el segundo pase devuelve `active_mask | newly_active` (`pipeline/detection_context.py:948`) y nada filtra entre `process_viirs.py:1287` y `:1467` con los flags afirmados; (3) la compuerta de BT como única limitante en la ruta contextual con segundo pase, porque el segundo pase no la tiene (`detection_context.py:939-940`); (4) el pico excluido en la ruta del Test 1 (`keep_peak_rc`).
-- **Evidencia a favor**: S139 midió F_n 0,553 y R 0,995 a igual número de píxeles; H3 del verificador pre-corrida ubica la pérdida en la detección, no en el ensamblado.
+- **Evidencia a favor**: S139 midió F_n 0,553 y R 0,995 a igual número de píxeles (⚠️ **0,995 rebajado S146, AUDIT_S146 V-12: compensa dos factores opuestos y compensa entre volcanes, 0,66 a 1,39; ver la nota de la hipótesis anterior**); H3 del verificador pre-corrida ubica la pérdida en la detección, no en el ensamblado.
 - **Evidencia en contra**: los `Npix` de MIROVA están en su grilla remuestreada (D17); el control de contraste no está pareado en intensidad (H6); el estrato nevado no tiene candidatos nuevos.
 - **Criterio testable (pre-registrado, no se cambia)**: control del instrumento C1 ≥ 0,90, C2 ≥ 0,95, C3 alineación de BT e índices = 1,0, C4 réplica de márgenes = 1,0, si no INDETERMINADO:instrumento; ≥ 3 pasadas válidas por volcán y ≥ 3 volcanes evaluables por estrato, si no INDETERMINADO:pocos_volcanes; PATRON:ruta:limitante con fracción ≥ 0,60 en el agregado, compartido por ≥ 2/3 de los volcanes y estable dejando uno fuera, si no HETEROGENEO; contraste ≥ 1,0 K VECINOS_TIBIOS; fondo de vecinos y fondo del cúmulo (D25) ≥ 0,5 CIERRA, < 0,2 NO_CIERRA. Sólo PATRON con VECINOS_TIBIOS justifica un brazo de A/B sobre el test nombrado.
 - **Estado**: resuelta como **no confirmada** (S142, 2026-09-15). Focal: HETEROGENEO; nevado: INDETERMINADO:pocos_volcanes.
