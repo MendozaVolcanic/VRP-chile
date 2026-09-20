@@ -13,7 +13,9 @@
 # Variables     : tolerancia del pareo (120 s), tipo de fila de MIROVA (ALERTA, RUTINA, fuera de
 #                 limite), ventana movil de fechas.
 # Limitaciones  : (a) la referencia llega tarde (el canal OCR se atrasa dias), asi que un valor
-#                 puede cambiar entre corridas: por eso es ventana movil y no sello unico;
+#                 puede cambiar entre corridas: por eso es ventana movil y no sello unico, y por
+#                 eso cada pasada lleva ademas el booleano `provisorio` (S146, matiz 4 del
+#                 verificador) con el motivo;
 #                 (b) "MIROVA miro y no publico" NO distingue calor real que MIROVA no publica
 #                 (lago de lava, fumarolas, lacolito) de otra cosa: el dato no lo permite y el
 #                 rotulo no lo promete; (c) solo los 11 volcanes con serie continua y solo
@@ -64,7 +66,16 @@ OCR_DEFECTO = SNAP_OCR
 # POR QUE un piso: el 2026-08-28 23:00 UTC cambio el regimen (A104, PR #535 y #571). Una ventana
 # que lo cruce mezcla dos sistemas distintos. La ventana movil nunca baja de aca.
 PISO_REGIMEN = "2026-09-01"
-ESQUEMA = 1
+ESQUEMA = 2  # 2 (S146): cada entrada lleva `provisorio` y, si lo es, `motivo_provisorio`
+
+# POR QUE dos canales: MIROVA llega por el consolidado (al dia) y por el OCR (se atrasa dias). En
+# la quincena previa al corte, 17 de 57 alertas del OCR no tenian equivalente en el consolidado,
+# asi que un silencio posterior al ultimo dato de un canal puede darse vuelta cuando ese canal
+# llegue. Los nombres son para el texto que lee el geologo.
+CANALES = {"CONS": "consolidado", "OCR": "OCR"}
+# POR QUE solo estos dos valores: son los que afirman una AUSENCIA en la referencia. Una alerta ya
+# publicada no se deshace porque falte el otro canal.
+VALORES_REVISABLES = ("mirova_silent", "no_reference")
 
 # Los cinco valores del diseno aprobado (§5.2), con su lectura en lenguaje llano. Ninguno emite un
 # juicio fisico sobre la anomalia: todos describen QUE HIZO LA REFERENCIA con esa pasada.
@@ -77,29 +88,73 @@ VALORES = {
 }
 
 
-def valor_de(lab, alerta_esa_noche):
+def valor_de(lab, alerta_esa_noche, miro_esta_pasada=False):
     """Del rotulo del banco al valor del eje. Precedencia identica a la del informe de diseno:
     la alerta de la misma noche manda sobre fuera-de-limite y sobre el silencio, porque el evento
-    es el mismo y contarlo como "solo nuestro" inflaria la brecha."""
+    es el mismo y contarlo como "solo nuestro" inflaria la brecha.
+
+    POR QUE el tercer argumento (S146, matiz 3 del verificador). El banco exige, para su negativo
+    limpio, que ese sensor no haya tenido ALERTA ni fuera de limite en NINGUNA pasada de la noche
+    (`ns` en banco_paridad.py:281-284). Esa condicion es la correcta para MEDIR paridad, porque
+    saca del denominador las noches sucias, pero acaba mandando a `sin_info` pasadas que MIROVA si
+    listo con RUTINA y VRP 0. Para el rotulo del operador eso es una mentira: son 33 pasadas de la
+    ventana a las que la etiqueta les dice "MIROVA no listo esta pasada" cuando la fila existe. Se
+    corrige ACA, en la capa de clasificacion, sin tocar `banco_paridad.etiquetar`, que sigue
+    midiendo lo suyo. El fuera de limite de ESTA pasada conserva su precedencia: solo se rescata
+    la pasada cuyo unico impedimento era un fuera de limite de OTRA pasada."""
     if lab == "pos":
         return "mirova_confirmed"
     if alerta_esa_noche:
         return "mirova_same_night"
     if lab == "far_ref":
         return "mirova_saw_outside"
-    if lab == "neg_limpio":
+    if lab == "neg_limpio" or miro_esta_pasada:
         return "mirova_silent"
     return "no_reference"
 
 
+def miro_esta_pasada(filas):
+    """¿Hay fila del consolidado que diga "mire este granulo y no vi nada"? Misma definicion que
+    usa el banco para su negativo limpio (RUTINA, canal CONS, VRP 0), pero mirada SOLO en la
+    pasada, sin la condicion sobre el resto de la noche."""
+    return any(f["tipo"] == "RUTINA" and f["source"] == "CONS" and (f["vrp_mw"] or 0) == 0
+               for f in filas)
+
+
+def frontera_canales(filas_ref):
+    """Ultima fila REAL de cada canal. POR QUE real y no una fecha fija: el atraso del OCR cambia
+    solo, y un corte clavado en el codigo envejece en silencio (A90)."""
+    return {c: max((f["fecha_utc"][:19] for f in filas_ref if f["source"] == c), default=None)
+            for c in CANALES}
+
+
+def provisoriedad(valor, dt, frontera):
+    """(provisorio, motivo). Una pasada posterior al ultimo dato de un canal todavia puede cambiar
+    de valor cuando ese canal llegue; el operador tiene que verlo en la pasada, no en un informe.
+    Un canal sin ninguna fila cuenta como canal ausente, que es el caso mas provisorio de todos."""
+    if valor not in VALORES_REVISABLES:
+        return False, None
+    ts = dt.strftime("%Y-%m-%d %H:%M:%S")
+    atrasados = [f"{nombre} hasta {frontera.get(c)}" if frontera.get(c) else f"{nombre} sin filas"
+                 for c, nombre in CANALES.items() if not frontera.get(c) or ts > frontera[c]]
+    if not atrasados:
+        return False, None
+    return True, ("provisorio: la pasada es posterior al ultimo dato de la referencia ("
+                  + ", ".join(atrasados) + "); si ese canal trae una alerta, el valor cambia")
+
+
 def clasificar_pasadas(recs, filas_ref, coords, ventana):
-    """Agrega `valor` (y `dist_ref_km` cuando aplica) a cada pasada de `recs`, en el lugar."""
+    """Agrega `valor`, `provisorio`/`motivo_provisorio` (y `dist_ref_km` cuando aplica) a cada
+    pasada de `recs`, en el lugar."""
     por_vb, noche_sensor, noche_volcan, _ = bp.indexar_referencia(filas_ref, coords, ventana)
     bp.etiquetar(recs, por_vb, noche_sensor, noche_volcan)
+    frontera = frontera_canales(filas_ref)
     for r in recs:
         nv = noche_volcan.get((r["vol"], r["noche"]), {"alerta": False})
-        r["valor"] = valor_de(r["lab"], nv["alerta"])
+        miro = miro_esta_pasada(bp.parear(por_vb.get((r["vol"], r["b"]), []), r["dt"]))
+        r["valor"] = valor_de(r["lab"], nv["alerta"], miro)
         r["dist_ref_km"] = r["dist_ref"] if r["valor"] == "mirova_saw_outside" else None
+        r["provisorio"], r["motivo_provisorio"] = provisoriedad(r["valor"], r["dt"], frontera)
     return recs
 
 
@@ -135,7 +190,9 @@ def construir(data_dir, filas_ref, ventana, coords=None):
     recs = clasificar_pasadas(cargar_pasadas(data_dir, coords, ventana), filas_ref, coords, ventana)
     out = {vol: {} for vol in bp.VOLS}
     for r in recs:
-        e = {"valor": r["valor"]}
+        e = {"valor": r["valor"], "provisorio": r["provisorio"]}
+        if r["motivo_provisorio"]:
+            e["motivo_provisorio"] = r["motivo_provisorio"]
         if r["dist_ref_km"] is not None:
             e["dist_ref_km"] = round(float(r["dist_ref_km"]), 2)  # se redondea AL SERIALIZAR (S142)
         out[r["vol"]][r["clave"]] = e
@@ -175,6 +232,11 @@ def escribir(out_dir, por_volcan, ventana, procedencia):
             previas = json.loads(path.read_text(encoding="utf-8")).get("clasificacion", {})
         fuera = {k: v for k, v in previas.items() if not (ventana[0] <= k[:10] <= ventana[1])}
         doc = {"esquema": ESQUEMA, "volcan": vol, "valores": VALORES,
+               "provisorio": ("true cuando la pasada es posterior al ultimo dato de alguno de los "
+                              "dos canales de la referencia (consolidado y OCR): el valor puede "
+                              "cambiar cuando llegue el canal atrasado. Solo se marcan "
+                              + " y ".join(VALORES_REVISABLES) + ", que son los que afirman una "
+                              "ausencia"),
                "clave": "datetime_utc|sensor (la de deduplicacion de pipeline/store.py)",
                "ventana_ultima_corrida": list(ventana), "referencia": procedencia,
                "clasificacion": {**fuera, **nuevas}}

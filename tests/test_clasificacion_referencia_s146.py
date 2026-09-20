@@ -43,6 +43,12 @@ def _fila(fecha_hora, tipo, bucket="VIIRS375", source="CONS", vrp=0.0, dist=None
             "source": source, "tipo": tipo, "vrp_mw": vrp, "dist_km": dist}
 
 
+@pytest.fixture(scope="module")
+def referencia_real():
+    """La referencia del repo, leida una sola vez (consolidado + OCR del snapshot)."""
+    return cr.cargar_referencia()
+
+
 def _clasificar(recs, filas):
     coords = cr.bp._coords_por_volcan()
     cr.clasificar_pasadas(recs, filas, coords, ("2026-09-01", "2026-09-30"))
@@ -90,6 +96,88 @@ def test_rutina_que_solo_viene_del_ocr_no_cuenta_como_silencio():
     """Hereda la definicion del banco: el negativo limpio exige fila del consolidado."""
     assert _clasificar([_rec("2026-09-10 05:00")],
                        [_fila("2026-09-10 05:00", "RUTINA", source="OCR")]) == ["no_reference"]
+
+
+def test_rutina_en_esta_pasada_no_la_borra_un_fuera_de_limite_de_otra_pasada():
+    """Los 33 `no_reference` del matiz 3 del verificador (V-17). MIROVA listo ESTA pasada con
+    RUTINA y VRP 0, pero el banco la manda a `sin_info` porque ese sensor tuvo un fuera de limite
+    en OTRA pasada de la misma fecha (`ns["fp"]`, banco_paridad.py:281-284). Para esta pasada la
+    referencia si miro, asi que el texto "MIROVA no listo esta pasada" es falso y el valor honesto
+    es `mirova_silent`.
+    (1) Si la correccion se quitara, saldria no_reference, que es lo que salia antes. (2) Sin la
+    fila RUTINA el mismo par de filas da no_reference: el instrumento distingue los dos casos."""
+    rutina = _fila("2026-09-11 05:00", "RUTINA")
+    fuera_otra_pasada = _fila("2026-09-11 07:30", "FALSO_POSITIVO", vrp=0.8, dist=9.0)
+    assert _clasificar([_rec("2026-09-11 05:00")], [rutina, fuera_otra_pasada]) == ["mirova_silent"]
+    assert _clasificar([_rec("2026-09-11 05:00")], [fuera_otra_pasada]) == ["no_reference"]
+
+
+def test_el_fuera_de_limite_de_ESTA_pasada_sigue_mandando_sobre_el_silencio():
+    """Guarda de la correccion anterior: solo se rescata la pasada cuyo unico impedimento era un
+    fuera de limite AJENO. Si el fuera de limite es de esta misma pasada, manda el.
+    (1) Si la correccion se pasara de ancha (rescatar cualquier sin_info con RUTINA cerca), esto
+    daria mirova_silent. (2) El assert de arriba, con la misma forma, da otro valor."""
+    filas = [_fila("2026-09-12 05:00", "RUTINA"),
+             _fila("2026-09-12 05:01", "FALSO_POSITIVO", vrp=0.8, dist=7.0)]
+    assert _clasificar([_rec("2026-09-12 05:00")], filas) == ["mirova_saw_outside"]
+
+
+# ---------------------------------------------------------------- provisoriedad
+def _valores_y_prov(recs, filas):
+    coords = cr.bp._coords_por_volcan()
+    cr.clasificar_pasadas(recs, filas, coords, ("2026-09-01", "2026-09-30"))
+    return [(r["valor"], r["provisorio"]) for r in recs]
+
+
+def test_provisorio_marca_lo_posterior_al_ultimo_dato_de_un_canal():
+    """La referencia llega por dos canales y el OCR se atrasa dias: un silencio posterior a la
+    ultima fila de un canal puede cambiar cuando ese canal llegue (V-17, matiz 4).
+    (1) Si el campo no se calculara o fuera siempre False, los dos ultimos asserts fallan.
+    (2) La primera pasada, anterior a los dos cortes, sale False: no marca todo por costumbre."""
+    filas = [_fila("2026-09-04 05:00", "RUTINA"),
+             _fila("2026-09-05 05:00", "RUTINA", source="OCR"),   # ultima fila del canal OCR
+             _fila("2026-09-06 05:00", "RUTINA")]                 # ultima fila del consolidado
+    recs = [_rec("2026-09-04 05:00"), _rec("2026-09-06 05:00"), _rec("2026-09-07 05:00")]
+    assert _valores_y_prov(recs, filas) == [("mirova_silent", False), ("mirova_silent", True),
+                                            ("no_reference", True)]
+    assert "OCR" in recs[1]["motivo_provisorio"] and "2026-09-05" in recs[1]["motivo_provisorio"]
+    assert "consolidado" in recs[2]["motivo_provisorio"]
+    assert recs[0]["motivo_provisorio"] is None
+
+
+def test_provisorio_sale_de_la_ultima_fila_real_y_no_de_una_fecha_fija():
+    """Control de instrumento: con la MISMA pasada y una fila de OCR posterior, deja de ser
+    provisoria. (1) Si el corte estuviera clavado a una fecha, este test falla. (2) El caso
+    espejo del test anterior, con el mismo record, da True: el campo no es constante."""
+    base = [_fila("2026-09-06 05:00", "RUTINA")]
+    tarde = base + [_fila("2026-09-30 05:00", "RUTINA", source="OCR"),
+                    _fila("2026-09-30 05:00", "RUTINA")]
+    assert _valores_y_prov([_rec("2026-09-06 05:00")], tarde) == [("mirova_silent", False)]
+
+
+def test_provisorio_no_toca_lo_que_mirova_ya_publico():
+    """Una alerta publicada no se deshace porque falte el otro canal; lo provisorio es la ausencia.
+    (1) Si se marcara por fecha sin mirar el valor, este record saldria True. (2) El mismo corte
+    (OCR al 2026-09-02) si marca al silencio del test anterior: el instrumento no esta muerto."""
+    filas = [_fila("2026-09-02 05:00", "RUTINA", source="OCR"),
+             _fila("2026-09-07 05:00", "ALERTA_TERMICA", vrp=0.4)]
+    assert _valores_y_prov([_rec("2026-09-07 05:00")], filas) == [("mirova_confirmed", False)]
+
+
+def test_provisorio_en_la_salida_real(referencia_real):
+    """Sobre los records de verdad: el campo existe en todas las entradas, el motivo esta si y
+    solo si es provisoria, y ningun valor confirmado queda marcado.
+    (1) Si el campo no se persistiera, el primer assert falla. (2) Se exige n > 0 provisorias y
+    tambien n > 0 firmes: con el calculo muerto en cualquiera de los dos lados, falla."""
+    filas, _ = referencia_real
+    doc = cr.construir(DATA, filas, ("2026-09-01", "2026-09-20"))
+    ent = [e for d in doc.values() for e in d.values()]
+    assert len(ent) > 500
+    assert all(isinstance(e["provisorio"], bool) for e in ent)
+    assert all(("motivo_provisorio" in e) == e["provisorio"] for e in ent)
+    prov = [e for e in ent if e["provisorio"]]
+    assert 0 < len(prov) < len(ent)
+    assert all(e["valor"] in ("mirova_silent", "no_reference") for e in prov)
 
 
 # ---------------------------------------------------------------- vocabulario

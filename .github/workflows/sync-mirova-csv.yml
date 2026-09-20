@@ -1,4 +1,22 @@
-# F49/S77 — Sync auto del CSV consolidado MIROVA desde Mirova-v1.
+# F49/S77: sync auto de los CSV de MIROVA desde Mirova-v1 (consolidado + OCR).
+#
+# S146, por qué también el OCR:
+# - La referencia de MIROVA llega por DOS canales. El consolidado lo refresca
+#   este cron cada hora; el OCR sólo lo traía `audit-weekly.yml`, una vez por
+#   semana, así que el snapshot del repo se atrasaba hasta 7 días.
+# - Eso no es cosmético: en la quincena previa al corte medido en S146, 17 de
+#   57 alertas del canal OCR no tenían equivalente en el consolidado. Con el
+#   OCR atrasado, el eje de referencia (scripts/clasificar_referencia.py) rotula
+#   "MIROVA miró y no publicó nada" pasadas que el canal atrasado todavía puede
+#   confirmar. Por eso esas pasadas salen marcadas `provisorio` y por eso
+#   conviene que el atraso dure una hora y no una semana.
+# - El OCR va al snapshot `data/mirova_reference/mirova_v1_snapshot/`, que es la
+#   ruta que consume el código (scripts/referencia_mirova_unificada.py:43,
+#   scripts/auto_audit_weekly.py:48, scripts/build_c2ab_windows.py:64,
+#   scripts/paper_numbers.py:65). OJO: `data/mirova_reference/registro_vrp_ocr.csv`
+#   es OTRO archivo, congelado en marzo de 2026; NO se toca acá.
+# - `audit-weekly.yml` sigue bajando los dos a la misma ruta: es idempotente,
+#   escribe el mismo contenido y no hay que cambiarlo.
 #
 # Por qué existe:
 # - El scraper Mirova-v1 corre cada 5 min en su propio repo y commitea data
@@ -65,6 +83,48 @@ jobs:
             echo "Latest date: $(awk -F, 'NR==2{print $2}' latest_consolidado.csv | head -c 16)"
           fi
 
+      - name: Download fresh OCR CSV from Mirova-v1
+        id: ocr
+        run: |
+          # Mismas defensas que el consolidado (archivo temporal + cmp) más dos
+          # que el consolidado no tiene y que acá hacen falta: el OCR es la
+          # entrada de un rótulo que lee el geólogo, así que un archivo vacío o
+          # truncado es peor que un archivo viejo.
+          #
+          # POR QUE no aborta el job: este cron también sincroniza el
+          # consolidado. Si el OCR viene mal, se salta el OCR, el consolidado
+          # igual se commitea, y el último step deja la corrida en ROJO para que
+          # el fallo no pase en silencio (A87: un flag que se apaga solo no es
+          # prueba de que el problema se fue).
+          OCR=data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv
+          URL=https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_ocr.csv
+          changed=false; bad=false
+          if ! curl -fsSL "$URL" -o "$OCR.new"; then
+            echo "::error::no se pudo bajar el OCR desde Mirova-v1"
+            bad=true
+          else
+            nuevas=$(wc -l < "$OCR.new"); viejas=$(wc -l < "$OCR")
+            cabecera=$(head -1 "$OCR.new")
+            # Vacío / sin la cabecera esperada / más corto que lo que ya tenemos:
+            # el registro de MIROVA sólo crece, así que encogerse es truncamiento.
+            if [ "$nuevas" -lt 2 ] || ! printf '%s' "$cabecera" | grep -q "Fecha_Satelite_UTC" \
+               || [ "$nuevas" -lt "$viejas" ]; then
+              echo "::error::OCR invalido: lineas=$nuevas (previas=$viejas) cabecera='${cabecera:0:60}'"
+              rm -f "$OCR.new"
+              bad=true
+            elif cmp -s "$OCR" "$OCR.new"; then
+              echo "OCR sin cambios, skip commit"
+              rm -f "$OCR.new"
+            else
+              mv "$OCR.new" "$OCR"
+              changed=true
+              echo "OCR rows: $nuevas (antes $viejas)"
+              echo "OCR latest date: $(tail -1 "$OCR" | cut -d, -f2)"
+            fi
+          fi
+          echo "ocr_changed=$changed" >> "$GITHUB_OUTPUT"
+          echo "ocr_bad=$bad" >> "$GITHUB_OUTPUT"
+
       - name: Setup Python
         if: steps.changed.outputs.changed == 'true'
         uses: actions/setup-python@v6
@@ -80,7 +140,7 @@ jobs:
         if: steps.changed.outputs.changed == 'true'
         run: |
           set -e
-          # F54/S77 — el dashboard frontend NO lee latest_consolidado.csv
+          # F54/S77: el dashboard frontend NO lee latest_consolidado.csv
           # directamente. Lee data/mirova/<Volcano>.json (records filtrados
           # por volcán) generados por scripts/rebuild_mirova_from_consolidado.py.
           # Sin este step, sync del CSV mantenía latest_consolidado fresh pero
@@ -112,14 +172,19 @@ jobs:
           done
 
       - name: Commit and push if changed
-        if: steps.changed.outputs.changed == 'true'
+        if: steps.changed.outputs.changed == 'true' || steps.ocr.outputs.ocr_changed == 'true'
         run: |
           git config user.name "vrp-mirova-sync-bot"
           git config user.email "noreply@github.com"
-          git add latest_consolidado.csv data/mirova/
-          git commit -m "data(mirova): sync CSV + regenerate per-volcano JSONs (auto, F54)"
+          # S146: el OCR entra al mismo commit. `git add` de un archivo que no
+          # cambió no agrega nada, así que los tres caminos (sólo consolidado,
+          # sólo OCR, los dos) quedan cubiertos por una sola lista.
+          git add latest_consolidado.csv data/mirova/ \
+            data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv
+          git diff --staged --quiet && { echo "nada que commitear"; exit 0; }
+          git commit -m "data(mirova): sync CSV consolidado + OCR y JSONs por volcan (auto, F54/S146)"
           # S120 (cacería de bugs): push pelado rechazaba non-fast-forward cuando
-          # los jobs matrix del NRT pushean concurrente — retry con rebase
+          # los jobs matrix del NRT pushean concurrente, retry con rebase
           # (mismo patrón probado de nrt.yml).
           for attempt in 1 2 3 4 5; do
             git pull --rebase -X theirs origin main && git push && exit 0
@@ -128,3 +193,12 @@ jobs:
             sleep $((attempt * 10))
           done
           echo "all push attempts failed"; exit 1
+
+      - name: Fallar si el OCR vino mal
+        # Va DESPUES del push a proposito: el consolidado se sincroniza igual y la
+        # corrida queda en rojo, que es la unica forma de que el fallo del canal
+        # OCR se vea. Sin esto seria un warning que nadie lee.
+        if: always() && steps.ocr.outputs.ocr_bad == 'true'
+        run: |
+          echo "el OCR no se pudo sincronizar en esta corrida (ver el step de descarga)"
+          exit 1
