@@ -2319,6 +2319,23 @@ los Tier A. Hay que medirlo antes de proponer nada.
 
 **Fenómeno**: en una cumbre helada el cráter con lava sub-píxel está más frío en MIR que la mediana de un anillo lleno de valle tibio; su exceso sale negativo y se recorta a 0,0 MW aunque los Tests 2 y 3 lo hayan aceptado (Villarrica A6 con B22; Tupungatito 2026-08-21 05:30 UTC VIIRS_SNPP_750, cúmulo de 1 píxel summit en 0,0 MW, fondo 256,4 K). En noches-sensor: VIIRS750 33 de 246 noches ALERTA de MIROVA con el cráter en cero (ventana 2026-01-11 a 2026-09-07); **en noches de volcán, 0 de 33**: todas cubiertas por otra pasada (verificador S138 §3.d). Es fidelidad y magnitud, no recall. Y al revés, infla donde el anillo es más frío que el entorno del foco (glaciar de Tupungatito, A19). Gravedad 4.
 
+**S145, sustrato de M-band medido antes de cualquier A/B** (`experiments/_s145_d25_v750/sustrato.py`
+→ `sustrato.json`; ventana 2026-03-01 a 2026-09-20, los 11 Tier A, publicar = predicado del
+dashboard con node). Sobre **9338 pasadas nocturnas de VIIRS 750**: **1035** tienen el cúmulo en el
+cráter con 0,0 MW (las que el fondo por vecinos podría despegar) y **2301** ya tienen magnitud
+(2299 publican, y a ésas el cambio se la sube). Pero en **noches** (A94) el premio es **cero**: de
+las 48 pasadas de rescate con alerta de MIROVA, **ninguna** cae en una noche-volcán que otra pasada
+no cubra ya, y en cambio **20 noches** que MIROVA miró sin ver nada se estrenarían. De las 2299 que
+ya publican, MIROVA no vio nada en 1130 y alertó en 223. **Lectura**: en M-band D25 es fidelidad de
+magnitud, no recall, y su efecto dominante cae del lado de la sobre-publicación (A98). Se suma a
+que la razón de magnitud a igual conteo ya está en 0,995 (A99) y a que en VIIRS 375 el fondo del
+cúmulo **ya se midió con criterio pre-registrado y no cerró la brecha en ningún volcán**
+(`docs/HYPOTHESIS_LOG.md`, H_S141_VECINO_FOCO_V2, resuelta como no confirmada en S142). Los 1035
+son un **techo de exposición, no una predicción**: el script clasifica, no corre el pipeline.
+Plan con el flag apagado y A/B pre-registrado (criterio primario = sobre-publicación):
+`docs/superpowers/plans/2026-09-20-d25-fondo-vecinos-viirs750.md`. **Nada de esto está implementado
+en M-band**: `process_viirs_mod.py` sigue con la mediana del anillo.
+
 ---
 
 ## D26: El segundo pase calcula mu y sigma sin los filtros de no-aptos del paper (borde, dNTI < -0,1, K1). **ABIERTA, efecto nulo bajo la conectiva `min` (registrada S138)** S138
