@@ -60,3 +60,53 @@ def test_los_dos_flags_son_independientes_y_no_se_confunden_por_subcadena():
     for clave in ("enable_vrp_bg_neighbor_mean_viirs375", "enable_vrp_bg_neighbor_mean_viirs750"):
         assert re.search(r"^\s*" + clave + r"\s*:", yaml_txt, re.M), clave
     assert getattr(p, i) is False and getattr(p, m) is False
+
+
+def _fuente_v750():
+    return (ROOT / "pipeline" / "process_viirs_mod.py").read_text(encoding="utf-8")
+
+
+def test_los_tres_sitios_de_fondo_consultan_el_flag():
+    """Los 3 bloques que restan fondo en M-band deben pasar por el envoltorio cuando el flag esta ON.
+
+    Se cuenta la GUARDA, no el nombre suelto: un import sin cablear dejaria el flag inerte y este
+    test en verde (A89, el cero de un grep se lee como ausencia).
+    """
+    s = _fuente_v750()
+    guardas = re.findall(r"if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750:", s)
+    assert len(guardas) == 3, f"esperaba 3 guardas (sitios A, B y C), hay {len(guardas)}"
+    assert s.count("vrp_bg_neighbor_mean_v750(") == 4, "3 llamadas + la definicion"
+
+
+def test_el_recorte_a_cero_sigue_despues_del_fondo_nuevo():
+    """D25 cambia el FONDO; el recorte del exceso negativo es otra pregunta, abierta con el autor."""
+    s = _fuente_v750()
+    assert s.count("np.maximum(") >= 3
+    assert "ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750" in s
+
+
+def test_v750_no_nombra_el_flag_de_i_band():
+    """A92: el sensor equivocado leyendo el flag del otro es el modo de falla de esta familia."""
+    s = _fuente_v750()
+    assert not re.search(r"(?<![A-Za-z0-9_])ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375(?![A-Za-z0-9_])", s)
+    assert not re.search(r"(?<![A-Za-z0-9_])vrp_bg_neighbor_mean_v375(?![A-Za-z0-9_])", s)
+
+
+def test_el_contador_se_reinicia_solo_en_el_bloque_que_publica():
+    """Espejo exacto de la forma de I-band (tests/test_d25_fondo_vecinos_s142.py:216-219).
+
+    El bloque contextual ACUMULA (+=), el segundo recompute del Test 1 REINICIA (=), y el primero
+    no cuenta: si contara, el diagnostico describiria una poblacion distinta de la publicada.
+    """
+    s = _fuente_v750()
+    assert len(re.findall(r"_bg_vecinos_n_sin_vecinos \+= _n_sin", s)) == 1
+    assert len(re.findall(r"_bg_vecinos_n_sin_vecinos = _n_sin", s)) == 1
+    assert len(re.findall(r"diag_L_bg_vecinos = redondear_diag\(", s)) == 2
+
+
+def test_el_fondo_del_test1_promedia_sobre_la_union_de_alertados():
+    """Un vecino alertado por la ruta contextual no puede entrar al promedio del fondo del Test 1."""
+    s = _fuente_v750()
+    union = re.findall(
+        r"np\.asarray\(hot_mask_2d, dtype=bool\) \| np\.asarray\(test1_hot_filtered, dtype=bool\)", s)
+    assert len(union) == 2, f"los 2 bloques del Test 1 deben usar la union; hay {len(union)}"

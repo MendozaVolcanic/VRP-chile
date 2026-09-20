@@ -141,6 +141,8 @@ from pipeline.profile import (
     HONEST_ANCHOR_TEST1_MODE,
     ENABLE_FOCAL_CLUSTER_MAGNITUDE_VIIRS750,
     FOCAL_CLUSTER_KEEP_PEAK,
+    ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750,  # S145 D25 en M-band
+    VRP_BG_NEIGHBOR_MAX_HALF_PX,  # S145 D25: compartido con I-band
 )
 from .anchor import resolve_honest_anchor  # S106 ancla espacial honesta
 from .single_pixel_mode import apply_single_pixel_mode
@@ -998,12 +1000,27 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     hotspot_lon = None
     hotspot_dist_km = None
     anomaly_pixels = []
+    # S145 D25: acumuladores del fondo por vecinos. Existen siempre para que el bloque del flag no
+    # dependa del orden de ejecución; con el flag OFF no se tocan y no se publican.
+    _bg_vecinos_n_sin_vecinos = 0
+    diag_L_bg_vecinos = None
 
     if n_anomalous > 0:
         # Wooster MIR radiance method (Coppola 2015, Eq.7)
         hotpix_bt = bt[hot_rows, hot_cols]
         L_hot = bt_to_spectral_radiance(hotpix_bt, M13_LAMBDA)
         L_bg_rad = bt_to_spectral_radiance(np.float64(t_bg), M13_LAMBDA)
+        # D25 (S145): fondo = media de la radiancia de los vecinos NO alertados de cada píxel
+        # alertado (Coppola 2016a ec. 6; Fernandina 2025 p. 9; Campus 2024 p. 3). POR QUÉ: en la
+        # cumbre nevada la mediana del anillo 5-25 km es valle tibio y deja al cráter con exceso
+        # negativo, recortado a 0,0 MW. Va DESPUÉS del bloque de arriba a propósito: su resultado
+        # es el respaldo del píxel sin vecinos no alertados. Los alertados son hot_mask_2d entero.
+        if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750:
+            L_bg_rad, _n_sin = vrp_bg_neighbor_mean_v750(
+                bt, hot_mask_2d, hot_rows, hot_cols, L_bg_rad,
+                max_half_px=VRP_BG_NEIGHBOR_MAX_HALF_PX)
+            _bg_vecinos_n_sin_vecinos += _n_sin
+            diag_L_bg_vecinos = redondear_diag(float(np.nanmedian(L_bg_rad)))
         # Per-pixel area accounts for scan-angle elongation
         hotpix_area = pixel_areas[hot_rows, hot_cols]
         # S26: clip ΔL ≥ 0 (paridad MODIS/VIIRS 375m). Wooster physics.
@@ -1224,7 +1241,16 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         if len(t1_rows) > 0:
             t1_bt = bt[t1_rows, t1_cols]
             t1_L = bt_to_spectral_radiance(t1_bt, M13_LAMBDA)
-            t1_delta_L = np.maximum(t1_L - effective_L_bg, 0.0)
+            _t1_Lbg = effective_L_bg
+            if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750:
+                # D25 (S145): mismo fondo por vecinos que el bloque contextual. Los alertados son
+                # la UNIÓN del cúmulo final con los píxeles del Test 1 que se suman: un vecino
+                # alertado por la ruta contextual no puede entrar al promedio. Respaldo =
+                # effective_L_bg. Sin contador: este bloque no reconstruye anomaly_pixels.
+                _t1_Lbg, _n_sin = vrp_bg_neighbor_mean_v750(
+                    bt, np.asarray(hot_mask_2d, dtype=bool) | np.asarray(test1_hot_filtered, dtype=bool),
+                    t1_rows, t1_cols, effective_L_bg, max_half_px=VRP_BG_NEIGHBOR_MAX_HALF_PX)
+            t1_delta_L = np.maximum(t1_L - _t1_Lbg, 0.0)
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             vrp_mw = float(np.sum(t1_vrp))
@@ -1239,7 +1265,18 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         if len(t1_rows) > 0:
             t1_bt = bt[t1_rows, t1_cols]
             t1_L = bt_to_spectral_radiance(t1_bt, M13_LAMBDA)
-            t1_delta_L = np.maximum(t1_L - effective_L_bg, 0.0)
+            _t1_Lbg = effective_L_bg
+            if ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS750:
+                # D25 (S145): ídem bloque anterior. Este es el que reconstruye anomaly_pixels (lo
+                # que suma F5 en store.py), así que el contador y la mediana del fondo se REINICIAN
+                # acá: tienen que describir la población publicada y no la suma de dos bloques con
+                # píxeles distintos.
+                _t1_Lbg, _n_sin = vrp_bg_neighbor_mean_v750(
+                    bt, np.asarray(hot_mask_2d, dtype=bool) | np.asarray(test1_hot_filtered, dtype=bool),
+                    t1_rows, t1_cols, effective_L_bg, max_half_px=VRP_BG_NEIGHBOR_MAX_HALF_PX)
+                _bg_vecinos_n_sin_vecinos = _n_sin
+                diag_L_bg_vecinos = redondear_diag(float(np.nanmedian(_t1_Lbg)))
+            t1_delta_L = np.maximum(t1_L - _t1_Lbg, 0.0)
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp_arr = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             t1_vrp_2d[t1_rows, t1_cols] = t1_vrp_arr
