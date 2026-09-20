@@ -55,11 +55,13 @@ jobs:
           python-version: "3.11"
       - name: Credenciales presentes (un secreto ausente es string vacio, no error)
         env:
-          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
-          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
         run: |
-          if [ -z "$EARTHDATA_USERNAME" ] || [ -z "$EARTHDATA_PASSWORD" ]; then
-            echo "::error::EARTHDATA_USERNAME o EARTHDATA_PASSWORD vacios: no se mediria nada"
+          # S146: el NRT autentica por EARTHDATA_TOKEN. El par usuario y clave de los secretos esta
+          # vencido: la primera corrida (run 35507516244) lo uso, fallo con invalid_credentials y
+          # BLOQUEO la cuenta 10 minutos (regla A71). Sin token no se corre.
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacio: no se mediria nada y el login por clave bloquea la cuenta"
             exit 1
           fi
           echo "credenciales presentes"
@@ -126,8 +128,7 @@ jobs:
           pip install earthaccess numpy h5py scipy pyyaml
       - name: Correr el brazo (read-only)
         env:
-          EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
-          EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           VRP_PROFILE: mirova_equivalent
           VRP_DEST: /tmp/apendice_s146
           BATERIA_BRAZO: ${{ matrix.brazo }}
