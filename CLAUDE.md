@@ -1246,6 +1246,40 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   instrumento ya refutado es la prueba de que el control está roto, y conviene tener ese caso de prueba
   a mano.
 
+- **A111. Un cierre apaga trabajo futuro, y hereda las premisas de la lectura con que se derivó**
+  (S145, refuerzo de A95 con censo). Cuatro cayeron el mismo día, los cuatro porque la medición era
+  más estrecha que el enunciado: **D26** («efecto nulo bajo `min`») se apoyaba en un script que lee
+  sólo el dNTI, midió el Test 2 y habló de los dos (el sigma gobierna en 58,7 % de V375 y 75,0 % de
+  V750); **D13** titulaba «el 31 % de la MAGNITUD» y ese 31 % era fracción de **records** (en
+  magnitud, 70,7 %); el informe de **S137** dejó una hipótesis sin verificar porque «la batería
+  guarda distancias pero no posiciones» cuando cada pasada guarda `pc_lat`/`pc_lon`; y el
+  orquestador afirmó que `pc.classification` no existe cuando la capacidad existe como `geo_class`
+  (40.901 de 62.880 records). El cuarto lo cometió **quien estaba auditando los otros tres**. Y el
+  daño encadena: D11 estaba «cerrada» apoyada en D21 y D22, bloqueadas por un criterio que resultó
+  estar mal, así que un cierre falso apagaba tres frentes.
+  - **How to apply**: (a) un cierre que no cita script, run, PR, paper, documento ni
+    `archivo:línea` **no es un cierre, es una creencia** (censo S145: 50 de 89 son así); (b) si cita
+    un script, correrlo y comprobar que **mide lo que la afirmación dice**; (c) si cita un número,
+    preguntar qué numerador, qué denominador y qué ventana; (d) el que se derivó «sin necesidad de
+    A/B» es el primero a revisar, porque no tiene medición detrás; (e) **sin respaldo citable no es
+    lo mismo que refutado**: la salida honesta es SIN EVIDENCIA. Instrumento:
+    `experiments/_s145_censo_cierres/censo.py` (declara su límite: busca por palabras clave, es un
+    piso). Plan: `docs/PLAN_AUDITORIA_S146.md`.
+
+- **A112. Una suite corriendo en segundo plano mientras editas no mide lo que dice medir** (S145,
+  regla general del workspace). La línea base salió con 3 fallas, una en un test sobre el archivo
+  que yo estaba editando; re-corrida **sin tocar nada**, las 3 eran **otras tres**, justo las que el
+  plan predecía. pytest colecta al inicio pero lee cada archivo cuando le toca, así que un archivo
+  editado a mitad de corrida se lee en un estado que **nunca existió como conjunto**. No da error:
+  da un número plausible. Mismo modo de falla que A90 y A104, el instrumento mide otra cosa y falla
+  en silencio.
+  - **How to apply**: una línea base se corre sobre un **árbol quieto**; si fue en segundo plano, no
+    tocar ningún archivo hasta que termine. Si hubo edición, el resultado **no es línea base**: se
+    descarta, no se interpreta. A A50 (verificar contra `origin/main` antes de decir
+    «pre-existente») se le suma: comprobar que la corrida fue sobre un árbol quieto. El síntoma que
+    delata es que las fallas **cambian de identidad** entre dos corridas del mismo estado. Vale para
+    linters, builds y auditores automáticos.
+
 - **A39, enmienda S142**: "0 checks" recién abierto un PR es SIN DATO, no verde. #676 se mergeó así con el CI
   en rojo. Esperar el run con conclusión (`gh pr checks <N> --watch`) antes de mergear, y después de editar un
   documento correr `grep -rl <archivo> tests/` y la suite completa: un test puede leer ese documento.
