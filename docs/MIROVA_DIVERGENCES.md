@@ -870,6 +870,34 @@ Copahue               100% (1/1)    100% (1/1)       0
 TOTAL                  ~50%          80% (406/507)   +30 pp
 ```
 
+⚠️ **ESTA TABLA NO TIENE INSTRUMENTO, verificado S147** (`docs/audit_s147/VERIFICADOR_H_A01.md`,
+hallazgos H1 y H1-bis, verificador con contexto limpio). El commit que la escribió
+(`a7b567f00`, 2026-04-30) cambió **un solo archivo, y es este catálogo**: 46 líneas insertadas,
+ningún script, ningún JSON de resultados, ninguna salida. En el árbol completo de ese commit no
+existe ningún script de recall sobre 11 volcanes ni sobre 507 registros. Y no es sólo la búsqueda
+del verificador: el propio **libro de cuentas** del proyecto ya la tenía fichada en su lista
+`sin_instrumento` desde el 2026-08-30 (`docs/LIBRO_DE_CUENTAS.json`, entrada con el contexto
+`"TOTAL ~50% 80% (406/507) +30 pp"`), o sea **21 días antes de que S146 la discutiera**, y nadie
+conectó esa ficha con la adopción que este número justifica.
+
+Tres cosas más que caen con ella:
+- **La medición era circular** (H2): con el Test 1 encendido, su disparo fija por construcción
+  `final_hotspot_source = "test1"`, `distance_class = "summit"` y el recómputo de VRP, que son
+  las dos condiciones del predicado de acierto de la época. El brazo tratado escribía la hoja de
+  respuestas. El commit de S26 ya lo decía en voz alta: el Test 1 **ya disparaba** antes (15 de
+  19 gránulos) y el recall era 0 de 6 **sólo porque la etiqueta salía `far`**.
+- **El único A/B limpio dio 6 contra 6** (H3, S25, `experiments/54_test1_ab/REFS_FORENSE.md`):
+  ganancia cero. Los "+30 puntos" aparecen recién **después** de agregar la regla que fuerza la
+  etiqueta summit.
+- **No había un solo negativo limpio** (H6): el universo era `Tipo_Registro == "ALERTA_TERMICA"`
+  y nada más, habiendo **11.680 filas RUTINA** en el mismo archivo y la misma ventana, en
+  proporción 22,6 a 1. Una tasa sin tasa base no dice nada sobre discriminación.
+
+Y la fila de Nevados de Chillán delata que los dos brazos **no vieron las mismas pasadas** (H9):
+el denominador es el conteo de alertas de MIROVA y pasa de 3 a 4 entre brazos, cuando es la misma
+referencia externa y no puede cambiar. La tabla se conserva por historia; **no se usa como
+evidencia de nada**.
+
 **Conclusión**: Test 1 (Coppola 2015 §2.2 Eq.1) era exactamente lo que
 faltaba para los casos D4 catastróficos. La hipótesis se confirma sin
 ambigüedad — los 3 casos predichos como "más afectados" (Lastarria,
@@ -2649,9 +2677,21 @@ El paper (p. 3) corrige el solapamiento de barridos antes de remuestrear; el có
 un campo fumarólico) no levanta ningún píxel lo bastante como para cruzar un umbral por píxel, pero
 sí calienta un poco a varios vecinos a la vez. Nuestro Test 1 integrado aprovecha eso: suma el
 exceso de radiancia MIR de todo un disco de 3 km sobre el fondo de un anillo de 1 km y dispara si
-esa suma supera 3 sigmas propagadas. Es el mecanismo que en S27 subió el recall de 50 a 80 % y
+esa suma supera 3 sigmas propagadas. Es el mecanismo que en S27 subió el recall de 50 a 80 % (⚠️
+**ese número quedó SIN EVIDENCIA en S147**, no tiene script; ver la rebaja al final de esta D) y
 cerró D4, y es también el que A69 identifica como el que capta el valle tibio en los nevados,
 porque trabaja sobre **MIR absoluto**.
+
+⚠️ **Y la vara del disparo está mal armada, medido S147** (`docs/S147_TEST1_ESTADISTICO_CORREGIDO.md`):
+la suma **recorta** los excesos negativos a cero pero se compara contra la desviación de la suma
+**sin** recortar. Con ruido puro la suma recortada vale `0,399·N·sigma`, sigma se cancela y el
+criterio depende del **tamaño del disco**: se cumple con N mayor que 56,6, y el disco tiene ~201
+píxeles en VIIRS 375, 50 en VIIRS 750 y 28 en MODIS. Reproducido en S147 por dos caminos propios:
+un banco sintético sin nada caliente dispara en **38 o más de 40 escenas**
+(`tests/test_test1_estadistico_nulo_s147.py`), y sobre los records persistidos la mediana de
+`test1_k_observed` se sienta en **0,83 a 0,91 veces** el valor de reposo en los tres sensores
+pese a que sus discos difieren por un factor 7
+(`experiments/_s147/reposo_test1_en_records_reales.py`).
 
 **El paper** (`documentacion/sp426.5.pdf` p. 6, renderizada a imagen y leída así, no por la capa de
 texto, A95), verbatim:
@@ -2758,7 +2798,18 @@ los records VIIRS 375** y en el **22,21 % de los VIIRS 750**
 por el verificador). En la ventana de la Fase 1 son 800 de 954 (83,9 %) y 200 de 949 (21,1 %). (3) Es un Sistema de Decisiones Automatizadas bajo la Resolución CPLT
 N°372 y la ficha publicable declara una fuente que no se puede mostrar.
 
-**Lo que esta D NO dice**: no dice que el Test 1 integrado esté mal ni que haya que apagarlo. El
+**Lo que esta D NO dice**: no dice que el Test 1 integrado esté mal ni que haya que apagarlo. ⚠️
+**La frase que sigue CAYÓ en S147** (`docs/audit_s147/VERIFICADOR_H_A01.md`, hallazgos H1, H2 y
+H3, verificador con contexto limpio): (a) el "50 a 80 %" **no tiene instrumento**, el commit que
+lo declara (`a7b567f00`) cambia un solo archivo y es este catálogo, y en el árbol de ese commit no
+existe ningún script de recall sobre 11 volcanes ni sobre 507 registros; queda **SIN EVIDENCIA, no
+refutado**; (b) la medición **sí es circular**, aunque no por la disyunción que se le achacaba
+sino por la etiqueta: con el Test 1 encendido, su disparo fija por construcción
+`final_hotspot_source = "test1"`, `distance_class = "summit"` y el recómputo de VRP, que son las
+dos condiciones del predicado de acierto de la época; (c) el único A/B limpio del Test 1 encendido
+contra apagado (S25, `experiments/54_test1_ab/REFS_FORENSE.md:15-18`) dio **6 contra 6**, o sea
+ganancia cero, y los "+30 puntos" aparecen recién **después** de agregar la regla que fuerza la
+etiqueta summit. Texto original conservado por historia: El
 resultado empírico de S27 (recall 50 a 80 %) no se toca. Lo que sigue abierto es **cuánto de las
 4 noches SIN DATO y de las pasadas donde el Test 1 pisó a un cúmulo contextual (`T1_SOBRE_CTX`:
 56 en VIIRS 375, 11 en VIIRS 750, en negativos limpios publicados; más 23 en positivos de VIIRS
@@ -2834,3 +2885,77 @@ camino entero es de BT y está apagado.
 **Lo que esta D NO dice**: no propone tocar el código, porque no hay nada que apagar. Estado:
 **ABIERTA, descrita, sin decisión**; la acción es documental (los rótulos del perfil y de
 `CLAUDE.md`, que van con A45).
+
+## D32: MIROVA publica la SUMA del VRP de todos los píxeles alertados de la pasada; nosotros publicamos un recorte (el cúmulo, y en banda I su núcleo). **ABIERTA (registrada S147, verificada con contexto limpio, gravedad 4; prioridad MEDIA, no es la palanca del 0,7)** S146/S147
+
+**El fenómeno, primero.** Una anomalía térmica volcánica no ocupa un píxel: ocupa un puñado. El
+lago de lava calienta su propio píxel y entibia a los vecinos, y una colada reciente se extiende
+por el flanco. Cuánta energía se le atribuye al volcán depende entonces de una decisión que parece
+menor y no lo es: cuántos de esos píxeles se suman al informar la pasada.
+
+**Lo que hace MIROVA**, verificado renderizando las páginas a imagen (A95), no por la capa de texto:
+
+> Campus et al. 2024, *Bull. Volcanol.* 86:25, página impresa 3, §Methodology, Ec. 1: *«the
+> algorithm extracts the radiance of each alerted pixel ... and calculates the total MIR radiance
+> ... by summing the contribution of each pixel»*, `L_MIRhot = Σ L_alert`.
+
+> Campus et al. 2022, *Sensors* 22:1713, página impresa 7, §3.2: *«The NRT processing chain is made
+> of 4 successive steps: (i) download; (ii) resampling; (iii) hot-spot detection and (iv)
+> calculation of the VRP.»*
+
+> Coppola et al. 2026, *Scientific Data*, página índice 4: *«All resampled pixels exhibiting
+> anomalous thermal behavior within this area were retained for VRP calculation.»*
+
+La tercera cita viene del conjunto de datos publicado, así que por sí sola no valdría para el canal
+de tiempo casi real (A105). La segunda cierra esa objeción: la suma es el paso (iv) **de la cadena
+de tiempo casi real**, dicho con esas palabras. Lo exclusivo del archivo es el umbral de VRP por
+sensor y la clasificación por DBSCAN, y ninguno de los dos es la regla de suma.
+
+**Lo nuestro**: `ENABLE_SUM_VRP_REPORTING = False`. El tablero publica `f5_core_vrp_mw` (el núcleo
+del cúmulo) en banda I de VIIRS, y `primary_cluster.vrp_mw` en MODIS y VIIRS 750. Son **dos
+recortes encadenados**: primero el cúmulo de 8 conexos, después el núcleo.
+
+**Cuánto vale, medido** (verificador S147, 1.512 pares publicados, ventana 2026-03-01 a 2026-09-20
+partida por #535, magnitud publicada calculada con node ejecutando el propio `index.html`, A97):
+
+| | VIIRS 375 | VIIRS 750 |
+|---|---|---|
+| mediana de la razón, publicado | 0,706 | 0,572 a 0,725 según agregación |
+| mediana de la razón, sumando | 0,783 | 0,642 |
+| razón **agregada** (energía total) | 0,647 a **0,856** | 0,725 a **1,153** |
+
+O sea que cierra el **26 %** de la brecha en VIIRS 375, y en VIIRS 750 **la pasa de largo**: el
+17,4 % de los pares superaría 1,5 veces a MIROVA y el 7,3 % la superaría 10 veces.
+
+**Por qué NO es la palanca del déficit 0,7, y esto es lo que más importa de esta D.** Estratificado
+por volcán, la ganancia **no está donde está el déficit**. Láscar e Isluga, que son 538 de los
+1.285 pares de VIIRS 375, se mueven +0,031 y +0,015 y se quedan en 0,56 y 0,62. En 5 de 11
+volcanes el delta es exactamente 0,000, porque el record es de un solo píxel y la suma ya es el
+núcleo. El que más gana, Puyehue Cordón Caulle, **ya estaba en paridad** (1,037) y pasaría a
+sobreestimar un 72 % (1,719). Es la misma compensación entre volcanes que la rebaja S146 de A99.
+El déficit de Láscar e Isluga hay que buscarlo en el **fondo** (D25) o en la detección.
+
+**Tres cosas que hay que saber antes de intentar el A/B:**
+1. **El camino ya está andado**: `ENABLE_SUM_VRP_REPORTING` existe desde S37 y persiste
+   `vrp_mw_sum_active`. No hay que escribir el cálculo, sólo encender y reprocesar.
+2. **Pero suma una lista truncada**: `anomaly_pixels` es un top 100 por VRP en los dos
+   procesadores. Inmaterial en la población de hoy (mediana de la razón suma sobre escena 1,0000,
+   97,0 % dentro del 2 %), pero en un reproceso eruptivo mordería.
+3. **No toca la sobre-publicación**: la puerta de publicación usa `primary_cluster.vrp_mw` y
+   `distance_class`, no la magnitud mostrada. Cambiar de núcleo a suma no abre ni cierra
+   detecciones. Baja el riesgo de adoptarlo y baja también su premio.
+
+**Dato que acota la divergencia**: el archivo de MIROVA (`VRP_GLOBAL_ARCHIVE_2025.csv`) trae `Npix`
+y `Max_Dist`. En volcanes chilenos y pasadas nocturnas, la mediana de `Npix` es 3 en MODIS, 6 en
+VIIRS 750 y 3 en VIIRS 375, con `Max_Dist` mediana de 1,4 a 1,9 km. O sea que «todos los píxeles
+alertados de la caja de 50 por 50 km» es, en la práctica, **un puñado dentro de unos 2 km**: no es
+una suma de escena. Y nuestro conjunto alertado es comparable al suyo (mediana 2 contra 2): lo que
+difiere es **cuánto de él publicamos**. Eso da un criterio de aceptación que hoy no existe para
+este frente: comparar nuestro `Npix` contra el de MIROVA, no sólo la razón de magnitud.
+
+**Lo que esta D NO dice**: no dice que haya que encender la suma. La decisión no puede ser un
+encendido uniforme (rompería VIIRS 750), y por sensor es legítimo mientras por volcán siga excluido
+por MISSION. Estado: **ABIERTA, descrita, sin decisión**, prioridad media, por debajo de D25 y del
+frente del Test 1.
+
+**Consecuencia sobre las reglas**: rebaja la premisa de **A10** en `CLAUDE.md` (ver la marca ahí).

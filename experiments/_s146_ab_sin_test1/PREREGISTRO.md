@@ -18,6 +18,46 @@
 
 ---
 
+## Adenda S147: lo que cambió después del verificador con contexto limpio, ANTES de despachar
+
+> Un verificador que no participó de S146 recibió sólo la ruta de este documento y lo auditó con el
+> preámbulo anti-fabricación entero, re-corriendo los tres bancos. Entregó **18 hallazgos**, y dos
+> de ellos daban vuelta el veredicto del experimento por sí solos. Informe completo:
+> [`docs/audit_s147/VERIFICADOR_PREREGISTRO_AB.md`](../../docs/audit_s147/VERIFICADOR_PREREGISTRO_AB.md).
+> Todo lo de abajo se aplicó **antes de correr ningún brazo** y está commiteado antes del despacho.
+
+| # | qué estaba mal | qué se hizo |
+|---|---|---|
+| **H1** | El piso de recall de VIIRS 750 estaba escrito como tasa `0.667`, y el evaluador redondea `12/18` a `0.6667`: **`0.6667 >= 0.667` es falso**, o sea que el umbral rechazaba justo el valor que este documento decía aceptar, y el brazo salía NO ADOPTAR por la tercera cifra decimal | Los pisos de C1 pasan a **conteo**: `min_pasadas_positivas_publicadas` = 118 en VIIRS 375 y 12 en VIIRS 750. Sin redondeo no hay trampa posible y la derivación se comprueba a mano |
+| **H2** | La holgura de VIIRS 750 se derivaba restando "la pérdida segura de Cordón Caulle", que **no está entre las 13 que el control publica** (esa pasada hoy tiene publicación 0), así que el piso efectivo toleraba **cero** pérdidas | La holgura se redefine sobre lo que el control **sí** publica: 13 menos 1 de holgura por reproceso NRT contra estándar |
+| **H3** | Nada detectaba un **control** con pasadas de menos. C0 sólo falla si le faltan al brazo, y el control positivo comparaba sólo la intersección, así que un control al que le faltara el 30 % daba fracción idéntica 1,0 | `contar_pasadas.py` ahora falla también con `sobran`, y el control positivo exige cubrir al menos el 97 % de las pasadas de producción (`min_fraccion_cobertura_control`) |
+| **H6** | Ni la ventana ni la referencia estaban fijadas: lo fijo eran **las fechas, no el contenido**. Entre dos corridas del mismo banco con horas de diferencia el corpus pasó de 2.360 a 2.386 records y una vara cambió de clasificación por el borde de su corte | Los tres insumos que no son los brazos quedan **congelados** en `_congelado/` por `congelar_produccion.py`, con el sha de git de cada uno. El evaluador compara contra eso, no contra el corpus vivo |
+| **H5** | El techo de C3 del brazo C exigía apagar 3 de 3 pasadas en VIIRS 750, o sea **margen cero**, con C3 conjuntivo: NO ADOPTAR era casi seguro por construcción | El brazo C pasa a un **piso de pasadas apagadas** en su subclase (8 de 21 en VIIRS 375, 1 de 3 en VIIRS 750), que es lo que ese brazo puede mover |
+| **H4** | C4 comparaba la mediana del control sobre lo que publica el control contra la del brazo sobre lo que publica el brazo, **sin parear**: un brazo que deja de publicar el 20 % más chico movía la mediana 0,23, más del doble del umbral, sin degradar nada | C4 pasa a `razon_magnitud_pareada`, sobre las pasadas que los **dos** publican. La versión sin parear se sigue informando y no decide |
+| **H8** | El control de identidad del predicado se guardaba y **nunca se comparaba**: no podía fallar | Se pinea el esperado; si `frontend/index.html` cambió su predicado entre el pre-registro y la evaluación, el veredicto es INDECIDIBLE |
+| **H11** | La posición del cúmulo y el nulo por etiquetas barajadas se calculaban y **no decidían nada**: un brazo que mueve el cúmulo varios kilómetros salía ADOPTAR igual | Entran como **C7** (posición estable, tope 0 cúmulos movidos más de 500 m) y **C8** (contraste fuera del nulo barajado). C8 no decide en el brazo C, donde no tiene poder |
+| **H10** | El mecanismo es **bidireccional** y el documento sólo medía la baja: apagar el Test 1 también apaga su recómputo de magnitud, que cuando da 0 **tapa** la publicación. En el control hay 38 pasadas de VIIRS 750 y 3 de MODIS con el Test 1 disparando y publicación 0, y 3 de las de VIIRS 750 son positivas | Se agrega `ganancias_publicacion` al informe: las pasadas que el brazo publica y el control no, por sensor y etiqueta. Informa, no decide, pero sin eso C6 diría "la atribución queda refutada" cuando lo que pasó es un segundo mecanismo conocido |
+| **H9** | El nulo de `poder_recall.py` baraja **por record**, lo que destruye la correlación intra-noche, que es real. Rebarajando por bloques de noche, el azar **alcanza y supera** el observado de VIIRS 750 | **La conclusión principal no cambia** (las dos varas de noche siguen sin discriminar y VIIRS 375 aguanta sin moverse), pero la vara de pasada de **VIIRS 750 se rotula DÉBIL, no fuerte**, y su resultado se lee con esa salvedad |
+| **H12** | El piso de VIIRS 375 tolera perder hasta **25** pasadas con alerta mientras la Fase 1 predice perder 2, y la red de 0,5 MW cubre poco (126 de 143 están bajo ese valor) | Queda escrito con el número en `parametros.json`. El titular tiene que decir las pérdidas observadas **contra las 2 predichas**: "cumple C1" no significa "no perdimos recall" |
+| **H14** | El estrato `sin_info` es el **31,7 % del corpus** (757 records, 417 publicados) y no lo juzga ningún criterio | Se informa por sensor en el resultado. No decide: la referencia no dice nada de esas pasadas, así que no hay contra qué medirlas |
+| H13, H16, H17, H18 | Listas de noches inconsistentes entre sí, la fórmula del valor de reposo escrita de dos formas, la reparación de cobertura sin regla de parada, y dos parámetros que no pueden actuar | Corregidos abajo y en `parametros.json` |
+
+**Lo que el verificador declaró sano y no hay que volver a mirar**: los tres perfiles difieren
+exactamente en su único flag declarado (143 atributos, resueltos como los resuelve el código, no
+leyendo el YAML); la tabla de poder se reproduce exacta en sus seis filas; la elección de la
+**pasada** como vara decisoria está justificada, incluso adelgazando las publicaciones al régimen
+esperado del brazo; C1 y C3 juntos no los puede pasar un brazo que apague al azar (0,0 % y 0,1 %
+sobre 2.000 sorteos); los records se escriben también cuando no hay nada que detectar, así que la
+cobertura la fija la disponibilidad de gránulos; las etiquetas no dependen de nuestras
+detecciones, o sea que no hay circularidad; y el evaluador no es un sello de goma.
+
+**Regla de parada que faltaba (H17)**: un volcán con cobertura despareja se repite **a lo sumo dos
+veces** con el mismo código. Si a la tercera sigue despareja, ese volcán **sale del análisis con su
+nombre en el informe**, en vez de repetirse hasta que el instrumento dé el resultado que lo deja
+pasar.
+
+---
+
 ## 1. El fenómeno, primero
 
 De noche, sobre una cumbre volcánica, el satélite mide dos cosas en cada píxel: cuánto brilla en
@@ -141,7 +181,7 @@ los píxeles del Test 1, la prioridad de fuente que le entrega el cúmulo public
 de magnitud que está gateado por `source == 'test1'`, y la excepción del dashboard que muestra un
 record descartado cuando `triggered_test1` es verdadero. **No toca la máscara contextual**: con
 `ENABLE_FIRST_PASS_TESTS_2_AND_3` encendido, `hot_mask_2d` se sobrescribe con la salida del
-primer pase (`process_viirs.py:1300`) y el Test 1 nunca estuvo ahí; y **no toca el fondo**,
+primer pase (`process_viirs.py:1299`) y el Test 1 nunca estuvo ahí; y **no toca el fondo**,
 porque el `test1_mask` que recibe el primer pase es `nti_path_hot` (el camino por píxel, otro
 objeto) y sólo cuando `ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK` está encendido, que no lo está.
 
@@ -181,7 +221,13 @@ su propio ciclo A45.
 
 Si el brazo B gana pero se lleva recall que no queremos perder, el paso siguiente **no es volver
 atrás**: es **descontarle el nulo al Test 1**. La cuenta de la sección 1 dice que el estadístico
-tiene un piso de `0,3989 · sigma · N_ROI` bajo ruido puro; restarlo, o directamente no recortar a
+tiene un piso de `0,3989 · sigma · N_ROI` bajo ruido puro (⚠️ **ojo con la escala, H16 del
+verificador S147**: ese piso es el de la **suma cruda**, y el `0,3989 · raíz(N_ROI)` de la sección
+1 es el del estadístico ya **normalizado** por `sigma · raíz(N)`. Las dos son correctas para
+objetos distintos, y restar una donde va la otra se equivoca por un factor raíz(N), entre 5 y 14
+según el sensor. La receta completa, con su nulo medido y su control positivo, quedó escrita en
+[`docs/S147_TEST1_ESTADISTICO_CORREGIDO.md`](../../docs/S147_TEST1_ESTADISTICO_CORREGIDO.md) y su
+banco es `tests/test_test1_estadistico_nulo_s147.py`); restarlo, o directamente no recortar a
 cero los excesos negativos, deja un detector que sigue viendo el calor real integrado pero ya no
 dispara solo. Eso necesita **código nuevo detrás de un flag en `pipeline/`**, que está protegido,
 así que acá queda **descrito y no construido**. Es el brazo natural de una fase posterior.

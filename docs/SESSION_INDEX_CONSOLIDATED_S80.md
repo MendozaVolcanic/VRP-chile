@@ -50,7 +50,7 @@ oficial MIROVA, drifts cerrados D1 ✅ y D3 ✅, D2 con CAP empírico.
 |---|---|
 | S21 | D6 REFUTADO (std_bg local/global=0.81, glaciar Tupungatito afecta toda el área). Schema diag_* OBLIGATORIO. A6/A7 sobre lectura completa de callers. |
 | S22–S26 | Test 1 integrated-ROI implementación. Villarrica 0→6/6 detecciones. 21 PRs mergeados. |
-| **S27** | **MILESTONE Test 1 ON cierra D4**. Recall 50%→80%. Clon literal cercano. |
+| **S27** | **MILESTONE Test 1 ON cierra D4**. Recall 50%→80% ⚠️ **ese número quedó SIN INSTRUMENTO en S147** (no hay script; medición circular; el único A/B limpio dio 6 contra 6): `docs/audit_s147/VERIFICADOR_H_A01.md`. Y el Test 1 integrado **no es del paper**, es un detector propio (D30). |
 | S31 | FRONTIER 83.5% recall, ratio 3.72× — balance mejor histórico |
 | S32–S44 | D8 vent-anchored, Driver A+B, R2 píxel-level. F1 89.2%→89.9%. 260/16/0 tests |
 | S45–S47 | D9 summit-priority, F2.8 infraestructura. R2 scaffold. 305 tests. |

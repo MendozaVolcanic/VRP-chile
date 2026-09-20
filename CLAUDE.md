@@ -225,7 +225,19 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   - Lista completa en `~memory/reference_papers_mirova_canonical.md`.
 
 ## Reglas operacionales S60-S62 (aprendizajes adicionales)
-- **A10. Audit vs MIROVA usar `pc.vrp_mw` (NO `record.vrp_mw`)**: `record.vrp_mw` es sum
+- **A10. ⚠️ REBAJADA S147 en su premisa, por verificador con contexto limpio**
+  (`docs/audit_s147/VERIFICADOR_F_05.md`). La regla dice que `pc.vrp_mw` es «lo que MIROVA
+  reporta», y esa premisa **no la sostiene ni el paper ni el dato**. El paper: Campus et al. 2024
+  (Bull Volcanol 86:25, p. impresa 3, Ec. 1), Campus et al. 2022 (Sensors 22:1713, p. impresa 7,
+  §3.2 y §3.3) y Coppola et al. 2026 (Scientific Data, p. idx 4 y 5) dicen los tres, verificados
+  **renderizando la página a imagen**, que MIROVA suma el VRP de **todos los píxeles alertados** de
+  la pasada, y el §3.2 de Campus 2022 lo pone explícitamente como el paso (iv) de la cadena **de
+  tiempo casi real**, que es la que clonamos. El dato: sobre 1.512 pares publicados, `pc.vrp_mw` es
+  el **peor** de los cuatro candidatos contra MIROVA en VIIRS 375 (mediana 0,600, contra 0,706 del
+  núcleo que el tablero publica y 0,783 de la suma). **Lo que NO cambia**: `record.vrp_mw` sigue sin
+  ser el campo correcto (trae el tope D9 y la suma de escena), y el matiz S132 sobre `f5_core_vrp_mw`
+  sigue en pie. Lo que cae es la justificación de por qué. Ver **D32**. Texto original por historia:
+  **A10. Audit vs MIROVA usar `pc.vrp_mw` (NO `record.vrp_mw`)**: `record.vrp_mw` es sum
   scene-wide de todos hot_pixels; `pc.vrp_mw` (primary_cluster.vrp_mw) es solo cluster summit
   = lo que MIROVA reporta. Dashboard (`mirovaEqVrp`/`isValidDetection` en frontend/index.html,
   l. 1466 — la cita la vigila el guard G8; el `:680` original hoy es una fila de la lista de volcanes) usa pc.vrp_mw. Audits con
@@ -844,7 +856,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     desenlace **NO está en producción**: `ENABLE_TEST1_NTI_INTEGRAL = False` (verificado
     con `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p;
     print(p.ENABLE_TEST1_NTI_INTEGRAL)"`), y la rama `compute_test1_nti` existe **sólo en
-    `process_viirs.py:212/1111`** (era 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:59` y `process_viirs_mod.py:162`
+    `process_viirs.py:212/1111`** (era 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:62` (era 59 hasta S147, la cabecera FICHA creció al retirar la cita de D30) y `process_viirs_mod.py:162`
     (eran 674/665; líneas actualizadas S131) importan únicamente `compute_test1_mir`, sin alternativa. **La causa raíz que A69
     describe sigue viva en los 3 sensores.** Ni encendiendo el flag se cura MODIS/V750,
     que es donde el píxel grande amplifica el gradiente (A80). Caso de manual de A87:

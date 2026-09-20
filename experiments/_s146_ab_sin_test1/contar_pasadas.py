@@ -83,7 +83,12 @@ def main(argv=None):
                       "sobran": len(sobran), "archivos_faltantes": faltan_arch,
                       "faltan_por_volcan": dict(por_vol),
                       "ejemplos_faltantes": ["|".join(str(x) for x in k) for k in sorted(faltan)[:20]]})
-        if faltan or faltan_arch:
+        # S147 (verificador, H3): `sobran` tambien rompe la paridad. Se calculaba y no se usaba,
+        # asi que un CONTROL al que le faltan pasadas (corte de red de NASA sobre el, A64) dejaba
+        # a todos los brazos con sobran > 0 y faltan = 0, y el script imprimia COBERTURA PAREJA.
+        # El control es la referencia de todos los demas criterios: si le faltan a EL, nada se
+        # entera. La comparacion tiene que ser simetrica.
+        if faltan or sobran or faltan_arch:
             ok = False
 
     print("%-34s %8s %8s %8s  %s" % ("brazo", "pasadas", "faltan", "sobran", "faltan por volcan"))
@@ -96,7 +101,7 @@ def main(argv=None):
         Path(a.out).write_text(json.dumps({"ventana": list(ventana), "filas": filas},
                                           indent=1, ensure_ascii=False), encoding="utf-8")
     if ok:
-        print("COBERTURA PAREJA: ningun brazo tiene menos pasadas que el control")
+        print("COBERTURA PAREJA: los brazos y el control tienen exactamente las mismas pasadas")
         return 0
     print("::error::COBERTURA DESPAREJA. Repetir los jobs de los volcanes listados con el MISMO "
           "codigo y volver a contar ANTES de evaluar (A108).")

@@ -287,6 +287,19 @@ ENABLE_TEST1_NTI_INTEGRAL: bool = bool(_p.get("enable_test1_nti_integral", False
 # Ver docs/superpowers/specs/2026-06-10-test1-local-bg-nti-design.md.
 ENABLE_TEST1_LOCAL_BG_NTI: bool = bool(_p.get("enable_test1_local_bg_nti", False))
 
+# S147 — el Test 1 integrado medido contra SU PROPIO nulo (D30). El estadistico suma solo los
+# excesos POSITIVOS del disco, que es fisicamente correcto (un volcan agrega calor, no lo quita),
+# pero se compara contra sigma*sqrt(N), que es la desviacion de la suma SIN recortar. Con ruido
+# puro la suma recortada vale 0,399*N*sigma: sigma se cancela y el criterio pasa a depender del
+# TAMANO DEL DISCO, no del calor (se cumple con N > 56,6; el disco tiene ~201 pixeles en VIIRS
+# 375, 50 en 750 y 28 en MODIS). Con el flag encendido se resta la media nula y se divide por la
+# desviacion del estadistico RECORTADO, asi que el umbral k recupera su significado.
+# APAGADO: el cuanto lo decide el A/B, no el escritorio. Cota sobre lo persistido: apagaria el
+# 88 % de los disparos en VIIRS 375 sin poner en riesgo ninguna pasada positiva
+# (experiments/_s147/). Ver docs/S147_TEST1_ESTADISTICO_CORREGIDO.md y el banco
+# tests/test_test1_estadistico_nulo_s147.py.
+ENABLE_TEST1_NULL_CORRECTED: bool = bool(_p.get("enable_test1_null_corrected", False))
+
 # S106 — ancla espacial honesta (design 2026-06-11). Solo POSICIÓN del record
 # (final_hotspot_*), nunca magnitud/detección. OFF = comportamiento legacy.
 ENABLE_HONEST_ANCHOR: bool = bool(_p.get("enable_honest_anchor", False))

@@ -50,6 +50,8 @@ import banco_paridad as bp  # noqa: E402
 from referencia_mirova_unificada import cargar_referencia_unificada  # noqa: E402
 
 PARAMETROS = AQUI / "parametros.json"
+# S147 (verificador, H6): insumos congelados antes del despacho. Ver congelar_produccion.py.
+CONGELADO = AQUI / "_congelado"
 
 
 # --------------------------------------------------------------------------------------
@@ -231,6 +233,71 @@ def razon_magnitud(recs, n_min):
     return out
 
 
+def razon_magnitud_pareada(ctrl, brazo, n_min):
+    """S147 (verificador, H4): la razon de magnitud, PAREADA sobre las pasadas que los DOS publican.
+
+    POR QUE. La version sin parear calcula la mediana del control sobre lo que publica el control y
+    la del brazo sobre lo que publica el brazo, que es un subconjunto. Con eso, un brazo que deja
+    de publicar el 20 % de menor magnitud mueve la mediana hasta 0,23 SIN que cambie ni un vatio de
+    las que sobreviven, o sea mas del doble del umbral de 0,10: el criterio se dispara por la
+    seleccion, no por una degradacion. `posicion_cumulo` de este mismo archivo ya paraba bien, asi
+    que la inconsistencia era interna.
+
+    Devuelve por estrato: la mediana del control y la del brazo sobre EL MISMO conjunto de pasadas,
+    mas el conteo de pasadas que el brazo dejo de publicar (que se informa aparte y lo juzga C1).
+    """
+    ic = {clave(r): r for r in ctrl}
+    comunes = []
+    for r in brazo:
+        c = ic.get(clave(r))
+        if c is None or not (c["pub"] and r["pub"]):
+            continue
+        if c["lab"] != "pos" or not c.get("vrp_ref") or not r.get("vrp_ref"):
+            continue
+        comunes.append((c, r))
+    out = {}
+
+    def _mete(nombre, sel):
+        if len(sel) < n_min:
+            return
+        rc = [c["disp"] / c["vrp_ref"] for c, _ in sel]
+        rb = [r["disp"] / r["vrp_ref"] for _, r in sel]
+        out[nombre] = {"n": len(sel),
+                       "mediana_control": round(statistics.median(rc), 4),
+                       "mediana_brazo": round(statistics.median(rb), 4)}
+
+    for k, sel in _agrupar(comunes, lambda cr: (cr[1]["vol"], cr[1]["b"])).items():
+        _mete(f"{k[0]}|{k[1]}", sel)
+    for b in bp.BUCKETS:
+        _mete(f"TODOS|{b}", [cr for cr in comunes if cr[1]["b"] == b])
+    return out
+
+
+def ganancias_publicacion(ctrl, brazo):
+    """S147 (verificador, H10): el mecanismo es BIDIRECCIONAL y el pre-registro solo medía la baja.
+
+    Apagar el Test 1 tambien apaga el recomputo de magnitud gateado por source == 'test1'. Cuando
+    ese recomputo da 0, TAPA la publicacion; apagarlo devuelve el cumulo contextual, que puede
+    traer magnitud mayor que cero. Medido en el control de la ventana: 38 pasadas de VIIRS 750 y 3
+    de MODIS tienen el Test 1 disparando y publicacion 0, y 3 de las de VIIRS 750 son POSITIVAS.
+    O sea que el brazo puede SUBIR el recall y a la vez subir la publicacion en negativos.
+
+    Sin esto, C6 diria 'la atribucion del mecanismo queda refutada' cuando lo que paso es un
+    segundo mecanismo, conocido y declarado, que ningun criterio contemplaba.
+    """
+    ic = {clave(r): r for r in ctrl}
+    out = {b: {"pos": [], "neg_limpio": [], "far_ref": [], "sin_info": []} for b in bp.BUCKETS}
+    for r in brazo:
+        c = ic.get(clave(r))
+        if c is None or c["pub"] or not r["pub"]:
+            continue
+        lab = c["lab"]
+        if lab in out[r["b"]]:
+            out[r["b"]][lab].append("|".join(clave(r)))
+    return {b: {lab: {"n": len(v), "pasadas": v[:20]} for lab, v in d.items()}
+            for b, d in out.items()}
+
+
 def posicion_cumulo(ctrl, brazo):
     """Cuanto se mueve el cumulo publicado. Distancias al crater, y separacion entre el punto del
     control y el del brazo en las pasadas que los dos publican. Una diferencia de radios NO es una
@@ -366,14 +433,29 @@ def control_positivo_control(ctrl, produccion, par):
         dentro = t is not None and lo <= t <= hi
         bandas[b] = {"tasa": t, "banda": [lo, hi], "dentro": dentro}
         ok_banda = ok_banda and dentro
+    # S147 (verificador, H3): la COBERTURA DEL CONTROL contra produccion. Hasta S147 esto
+    # comparaba solo la INTERSECCION, asi que un control al que le faltaba el 30 % de las pasadas
+    # daba fraccion identica 1,0 y bandas dentro de rango (son tasas, no conteos) y pasaba. Y el
+    # control es la referencia de C1, C3, C4, C5 y del propio C0: si el corte de red de NASA le
+    # pega a EL, ningun otro criterio se entera, porque C0 solo falla cuando al BRAZO le faltan.
+    faltan_ctrl = sorted(set(ip) - {clave(r) for r in ctrl})
+    frac_cobertura = round(n / len(produccion), 4) if produccion else None
+    ok_cobertura = (frac_cobertura is not None
+                    and frac_cobertura >= par["min_fraccion_cobertura_control"])
     return {"n_pasadas_comparadas": n, "n_pasadas_produccion": len(produccion),
+            "n_pasadas_control": len(ctrl),
+            "n_faltan_al_control_contra_produccion": len(faltan_ctrl),
+            "faltan_al_control": ["|".join(k) for k in faltan_ctrl[:60]],
+            "faltan_al_control_por_volcan": dict(collections.Counter(k[0] for k in faltan_ctrl)),
+            "fraccion_cobertura_control": frac_cobertura,
+            "cobertura_control_ok": bool(ok_cobertura),
             "diferencias_por_campo": dict(difs),
             "fraccion_publicacion_identica": frac_pub_igual,
             "ejemplos": {k: v[:10] for k, v in ejemplos.items()},
             "bandas_tasa_pub_neg": bandas,
             "cumple": bool(n > 0 and frac_pub_igual is not None
                            and frac_pub_igual >= par["min_fraccion_publicacion_identica"]
-                           and ok_banda)}
+                           and ok_banda and ok_cobertura)}
 
 
 # --------------------------------------------------------------------------------------
@@ -441,15 +523,23 @@ def evaluar_brazo(nombre, ctrl, brazo, par):
     grandes = [p for p in res["pasadas_perdidas"]
                if (p["vrp_mirova_mw"] or 0) >= par["max_vrp_fn_aceptable_mw"]]
     res["pasadas_perdidas_grandes"] = grandes
-    pisos = par["piso_recall_pasada"]
+    # S147, verificador con contexto limpio (H1 y H2): el piso se compara en CONTEO, no en tasa
+    # redondeada. Antes el piso de VIIRS 750 era 0.667 y `_tasa` redondea 12/18 a 0.6667, asi que
+    # `0.6667 >= 0.667` daba False: el umbral RECHAZABA justo el valor que el pre-registro decia
+    # aceptar, y el brazo salia NO ADOPTAR por un error de redondeo en la tercera cifra. Con
+    # conteos no hay redondeo posible. La tasa se sigue informando, pero no decide.
+    pisos = par["min_pasadas_positivas_publicadas"]
     det1 = {}
     ok1 = not grandes
     for b, piso in pisos.items():
-        rb = mb["pasada_pos"][b]["recall"]
-        rc = mc["pasada_pos"][b]["recall"]
-        cumple = rb is not None and rb >= piso
-        det1[b] = {"control": rc, "brazo": rb, "piso": piso, "cumple": cumple,
-                   "n": mb["pasada_pos"][b]["n"]}
+        pb = mb["pasada_pos"][b]["publicadas"]
+        pc_ = mc["pasada_pos"][b]["publicadas"]
+        cumple = pb >= piso
+        det1[b] = {"control_publicadas": pc_, "brazo_publicadas": pb, "piso_conteo": piso,
+                   "cumple": cumple, "n": mb["pasada_pos"][b]["n"],
+                   "recall_control": mc["pasada_pos"][b]["recall"],
+                   "recall_brazo": mb["pasada_pos"][b]["recall"],
+                   "perdidas_contra_control": pc_ - pb}
         ok1 = ok1 and cumple
     c["C1_recall_pasada"] = bool(ok1)
     res["C1_detalle"] = det1
@@ -467,35 +557,54 @@ def evaluar_brazo(nombre, ctrl, brazo, par):
         and len(pv) <= par["max_noches_perdidas_volcan"]
         and len(ps) <= par["max_noches_perdidas_sensor"])
     # C3 baja la publicacion en negativos limpios (solo los sensores con poder).
-    techos = par["techo_tasa_pub_neg"]
+    # S147 (verificador, H5): dos formas. La de TECHO por tasa absoluta sirve cuando el brazo
+    # puede mover mucho (brazo B). Para un brazo que apaga una rama chica, un techo absoluto
+    # exige que la prediccion se cumpla entera y puede dejar margen CERO en un sensor: ahi el
+    # criterio es un PISO DE PASADAS APAGADAS en la subclase, que es lo que ese brazo puede mover.
     detalle = {}
     ok3 = True
-    for b, techo in techos.items():
-        t = mb["por_sensor"][b]["tasa_pub_neg"]
-        tc = mc["por_sensor"][b]["tasa_pub_neg"]
-        cumple = t is not None and t <= techo
-        detalle[b] = {"control": tc, "brazo": t, "techo": techo, "cumple": cumple,
-                      "caida_pp": round(100 * (tc - t), 2) if (t is not None and tc is not None) else None}
-        ok3 = ok3 and cumple
+    if "min_pasadas_apagadas_neg" in par:
+        for b, minimo in par["min_pasadas_apagadas_neg"].items():
+            pb = mb["por_sensor"][b]["n_neg_pub"]
+            pc_ = mc["por_sensor"][b]["n_neg_pub"]
+            apagadas = pc_ - pb
+            cumple = apagadas >= minimo
+            detalle[b] = {"control_publicadas_neg": pc_, "brazo_publicadas_neg": pb,
+                          "apagadas": apagadas, "minimo_apagadas": minimo, "cumple": cumple,
+                          "tasa_control": mc["por_sensor"][b]["tasa_pub_neg"],
+                          "tasa_brazo": mb["por_sensor"][b]["tasa_pub_neg"]}
+            ok3 = ok3 and cumple
+    else:
+        for b, techo in par["techo_tasa_pub_neg"].items():
+            t = mb["por_sensor"][b]["tasa_pub_neg"]
+            tc = mc["por_sensor"][b]["tasa_pub_neg"]
+            cumple = t is not None and t <= techo
+            detalle[b] = {"control": tc, "brazo": t, "techo": techo, "cumple": cumple,
+                          "caida_pp": round(100 * (tc - t), 2) if (t is not None and tc is not None) else None}
+            ok3 = ok3 and cumple
     c["C3_publicacion_negativos"] = ok3
     res["C3_detalle"] = detalle
-    # C4 la magnitud no se aleja de 1 en ningun estrato con n suficiente.
+    # C4 la magnitud no se aleja de 1 en ningun estrato con n suficiente. S147 (verificador, H4):
+    # PAREADO sobre las pasadas que los dos publican. La version sin parear medía la seleccion, no
+    # la degradacion: un brazo que deja de publicar el 20 % mas chico movia la mediana 0,23, mas
+    # del doble del umbral, sin cambiar ni un vatio de lo que sobrevive. La version sin parear se
+    # sigue guardando en el informe, pero NO decide.
+    res["razon_magnitud_pareada"] = razon_magnitud_pareada(ctrl, brazo, par["n_min_magnitud"])
     peor, ok4 = None, True
-    for k, v in res["razon_magnitud_control"].items():
-        w = res["razon_magnitud_brazo"].get(k)
-        if w is None:
-            continue
-        empeora = abs(w["mediana"] - 1) - abs(v["mediana"] - 1)
+    for k, v in res["razon_magnitud_pareada"].items():
+        empeora = abs(v["mediana_brazo"] - 1) - abs(v["mediana_control"] - 1)
         if peor is None or empeora > peor[1]:
             peor = (k, round(empeora, 4))
         if empeora > par["max_empeora_magnitud"]:
             ok4 = False
     c["C4_magnitud"] = ok4
     res["C4_peor_estrato"] = peor
+    res["C4_estratos_sin_muestra"] = sorted(
+        set(res["razon_magnitud_control"]) - set(res["razon_magnitud_pareada"]))
     # C5 el nulo estructural: de la nada no sale una publicacion.
     c["C5_nulo_estructural"] = res["nulo_estructural"]["n_publicadas_por_el_brazo"] == 0
     # C6 el orden por sensor que predice el mecanismo de F-01 (escrito antes de correr).
-    caidas = {b: (detalle[b]["caida_pp"] if b in detalle else None) for b in bp.BUCKETS}
+    caidas = {b: (detalle[b].get("caida_pp") if b in detalle else None) for b in bp.BUCKETS}
     for b in bp.BUCKETS:
         if caidas[b] is None:
             tc, t = mc["por_sensor"][b]["tasa_pub_neg"], mb["por_sensor"][b]["tasa_pub_neg"]
@@ -505,6 +614,18 @@ def evaluar_brazo(nombre, ctrl, brazo, par):
              and caidas["VIIRS375"] >= caidas["VIIRS750"] >= caidas["MODIS"])
     c["C6_orden_por_sensor_V375_V750_MODIS"] = bool(orden)
     res["C6_caidas_pp"] = caidas
+    # C7 (S147, verificador H11): el cumulo publicado no se muda. Se calculaba y no decidia. En un
+    # proyecto donde A61 nacio porque dos auditorias completas se perdieron el eje espacial, y
+    # donde el operador mira un mapa, ese es el eje que menos conviene dejar sin criterio.
+    c["C7_posicion_estable"] = bool(
+        res["posicion"]["n_movidos_mas_de_500_m"] <= par["max_cumulos_movidos_500m"])
+    # C8 (S147, verificador H11): el contraste entre positivos y negativos queda FUERA del nulo de
+    # etiquetas barajadas. Un brazo que apaga publicaciones al azar da las dos caidas iguales y
+    # cae dentro del nulo; hasta ahora eso salia ADOPTAR igual.
+    c["C8_fuera_del_nulo_barajado"] = bool(res["nulo_barajado"].get("fuera_del_nulo"))
+    # Informativo, no decide: las pasadas que el brazo publica y el control NO (H10). El mecanismo
+    # es bidireccional y hasta S147 ningun criterio lo miraba.
+    res["ganancias_publicacion"] = ganancias_publicacion(ctrl, brazo)
     res["criterios"] = c
     return res
 
@@ -537,10 +658,18 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--control", required=True, help="directorio de JSON del brazo de control")
     ap.add_argument("--brazo", action="append", default=[], help="directorio de un brazo (repetible)")
-    ap.add_argument("--produccion", default=str(ROOT / "data" / "mirova_equivalent"),
-                    help="directorio de produccion para el control positivo; 'no' lo salta")
-    ap.add_argument("--cons", required=True)
-    ap.add_argument("--ocr", required=True)
+    # S147 (verificador, H6): los tres insumos que NO son los brazos estan CONGELADOS en
+    # _congelado/, generados por congelar_produccion.py antes de despachar. El cron NRT escribe
+    # data/mirova_equivalent cada dos horas y el scraper sigue trayendo filas de MIROVA: entre dos
+    # corridas del mismo banco con horas de diferencia el corpus paso de 2.360 a 2.386 records y
+    # una vara de recall cambio de clasificacion por el borde de su corte. Los techos de C3 son
+    # tasas absolutas calibradas sobre denominadores fijos: si el denominador se mueve, un brazo
+    # puede cruzar un techo sin que el flag tenga nada que ver (A90).
+    ap.add_argument("--produccion", default=str(CONGELADO / "produccion_ventana.json"),
+                    help="JSON congelado (o directorio) de produccion para el control positivo; "
+                         "'no' lo salta")
+    ap.add_argument("--cons", default=str(CONGELADO / "registro_vrp_consolidado.csv"))
+    ap.add_argument("--ocr", default=str(CONGELADO / "registro_vrp_ocr.csv"))
     ap.add_argument("--parametros", default=str(PARAMETROS))
     ap.add_argument("--poder", default=str(AQUI / "poder_recall.json"),
                     help="salida de poder_recall.py: el nulo medido de cada vara de recall")
@@ -554,6 +683,14 @@ def main(argv=None):
     coords = bp._coords_por_volcan()
     inner = bp.inner_desde_html()
     identidad = bp.control_identidad_predicado()
+    # S147 (verificador, H8): el valor se guardaba en `meta` y NUNCA se comparaba, asi que el
+    # control no podia fallar. Si alguien toca isValidDetection en frontend/index.html entre el
+    # pre-registro y la evaluacion, el A/B mide con otro predicado que el que calibro los
+    # umbrales, y el informe diria igual que el control se corrio. Es el modo de falla de A110:
+    # un control que pasa en verde sobre un instrumento cambiado. El esperado es el mismo que
+    # pineaba el evaluador de S143 (experiments/_s143_evaluador/evaluar.py).
+    esperado = ([0, 1, 1, 1, 0], [1, 0])
+    identidad_ok = (list(identidad[0]), list(identidad[1])) == (esperado[0], esperado[1])
 
     filas = cargar_referencia_unificada(Path(a.cons), Path(a.ocr))
     por_vb, noche_sensor, noche_volcan, n_ref = bp.indexar_referencia(filas, coords, ventana)
@@ -576,7 +713,10 @@ def main(argv=None):
         # la prueba de que la vara discrimina viajen juntos (I-01).
         "poder_de_las_varas": (json.loads(Path(a.poder).read_text(encoding="utf-8"))["varas"]
                                if Path(a.poder).exists() else "NO MEDIDO: correr poder_recall.py"),
-        "control_identidad_predicado": {"guard_s139": identidad[0], "publica_no_publica": identidad[1]},
+        "control_identidad_predicado": {"guard_s139": identidad[0],
+                                        "publica_no_publica": identidad[1],
+                                        "esperado": [esperado[0], esperado[1]],
+                                        "coincide": bool(identidad_ok)},
         "volcanes": bp.VOLS}}
 
     if a.control_cargador:
@@ -595,12 +735,32 @@ def main(argv=None):
                               if mio.get(k) != suyo.get(k)][:20]}
 
     if a.produccion and a.produccion != "no" and Path(a.produccion).exists():
-        prod = preparar(a.produccion)
+        # S147 (H6): la produccion congelada viene como JSON ya cargado y etiquetado, con el
+        # predicado del operador ya evaluado con node. Un directorio se sigue aceptando, pero
+        # entonces se lee el corpus VIVO y eso es lo que H6 dice que no hay que hacer.
+        if Path(a.produccion).is_file():
+            crudo = json.loads(Path(a.produccion).read_text(encoding="utf-8"))
+            prod = []
+            for s in crudo["records"]:
+                r = dict(s)
+                r["dt"] = datetime.strptime(s["dt"], "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+                prod.append(r)
+            salida["meta"]["produccion_congelada"] = crudo["manifiesto"]
+        else:
+            prod = preparar(a.produccion)
+            salida["meta"]["produccion_congelada"] = "NO: se leyo el corpus vivo (ver H6)"
         salida["control_positivo"] = control_positivo_control(ctrl, prod, par)
         ctrl_ok = salida["control_positivo"]["cumple"]
     else:
         salida["control_positivo"] = {"cumple": False, "nota": "no se comparo contra produccion"}
         ctrl_ok = False
+    # S147 (verificador, H8): el predicado del operador tiene que ser el MISMO que calibro los
+    # umbrales. Si cambio, todo el A/B midio otra cosa y el veredicto es INDECIDIBLE.
+    if not identidad_ok:
+        ctrl_ok = False
+        salida["control_positivo"]["nota_identidad"] = (
+            "el predicado de frontend/index.html cambio respecto del pre-registro: "
+            f"{identidad} contra el esperado {esperado}")
 
     salida["brazos"] = []
     for d in a.brazo:

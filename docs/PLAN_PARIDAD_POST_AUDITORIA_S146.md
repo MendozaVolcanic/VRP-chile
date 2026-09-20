@@ -216,6 +216,18 @@ MODIS. No dice nada de las 2.285 pasadas de hoy. Hay que medirlo donde está la 
 el caso de manual). Por eso el criterio va en noches, lista las noches perdidas una por una, y por
 eso existe la alternativa de la Fase 2b.
 
+⚠️ **El riesgo se RE-DIMENSIONÓ en S147 y es bastante menor de lo que este párrafo dice**
+(`docs/audit_s147/VERIFICADOR_H_A01.md`, verificador con contexto limpio): (a) el "50 a 80 %" **no
+tiene ningún script** y queda SIN EVIDENCIA; (b) el único A/B limpio del Test 1 encendido contra
+apagado dio **6 contra 6**, ganancia cero; (c) la adopción se midió **sin un solo negativo limpio**
+habiendo 11.680 en el mismo archivo, así que era una métrica que por construcción sólo podía subir;
+(d) el camino contextual contra el que se comparó fue reemplazado 15 días después y **nadie volvió
+a medir** el aporte del Test 1 desde entonces. Y una cota propia sobre lo persistido
+(`experiments/_s147/cota_por_pasada_con_etiquetas.py`, ventana 2026-08-29 a 2026-09-20) no
+encuentra **ninguna pasada positiva** sostenida sólo por el Test 1 en VIIRS 375 (0 de 133) ni en
+VIIRS 750 (0 de 9). Sigue siendo una cota, no una re-ejecución: lo decide el A/B. **La unidad de
+recall, además, es la PASADA, no la noche** (la noche no discrimina, A94 y frente I).
+
 **Fase 2b, si el brazo fiel pierde recall que no se quiere perder**: los caminos propios no se
 borran, **se mudan**. El perfil `mirova_equivalent` queda literal y lo que vemos de más pasa al
 perfil `experimental` con `pc.classification` como lenguaje. Es la regla S143 aplicada: primero
