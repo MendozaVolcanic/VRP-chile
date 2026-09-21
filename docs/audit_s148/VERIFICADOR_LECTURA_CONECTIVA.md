@@ -111,7 +111,7 @@ y sigue siendo preliminar: 17 días, 129 positivas, ventana completa pendiente.
   ser el contraste positivas contra negativas, no P2 ni P3 solos.
 
 ### H6. `cobertura.txt` del run dice que el control no tiene ninguna pasada
-- **Dónde**: `experiments/_s146_ab_sin_test1/salidas/35548121381/cobertura.txt` en la rama de datos.
+- **Dónde**: el archivo `cobertura.txt` de las salidas del run 35548121381, que vive sólo en la rama de datos `origin/s146-ab/35548121381` (no en `main`).
 - **Cómo se ve**: `::error::el control no tiene ninguna pasada en la ventana: no hay nada que comparar`.
   Es falso respecto de los datos (el control tiene 2.315 records). Coincide con el defecto conocido
   del job `recolectar`. No afecta la lectura, que cuenta la cobertura por su cuenta.
