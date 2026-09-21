@@ -1,0 +1,19 @@
+# A/B S149. GEMELO del brazo B (_s146_ab_sin_test1): identico salvo el nombre y el directorio de salida.
+#
+# PARA QUE. En una ventana nueva (mayo, agosto, marzo) no hay una corrida anterior del brazo B contra la
+# cual comprobar que el reproceso es reproducible, y la produccion de esos meses es de otro regimen
+# (antes de #535), asi que tampoco sirve de referencia. El control positivo pasa a ser de
+# DETERMINISMO: el mismo perfil corrido dos veces sobre un volcan tiene que dar la misma decision de
+# publicar en al menos 98 de cada 100 pasadas. Si no, algo del reproceso no es reproducible y el A/B
+# no se interpreta. Cuesta un job por ventana.
+# NO OPERACIONAL: data_subdir aislado, fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s149_ab_sin_test1_gemelo
+description: >
+  Gemelo del brazo B, para el control positivo de determinismo.
+
+paths:
+  enable_test1_path: false
+
+output:
+  data_subdir: _s149_ab_sin_test1_gemelo
