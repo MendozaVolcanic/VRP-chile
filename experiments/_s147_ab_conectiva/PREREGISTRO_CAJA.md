@@ -4,6 +4,35 @@
 > [`PREREGISTRO.md`](PREREGISTRO.md), que cubre el brazo F (la conectiva). Misma ventana, mismos
 > volcanes, misma referencia congelada, mismo control (el brazo B, sin Test 1).
 
+## 0. Adenda S149: por qué se repite, y qué cambia (escrita ANTES de volver a correr)
+
+**El A/B de S148 no midió la caja.** El flag entregaba la caja sólo al primer pase; el segundo pase
+seguía usando el círculo per-volcán y recapturaba con el umbral sensible lo que el primero acababa de
+rechazar (`docs/audit_s148/POR_QUE_LA_CAJA_NO_APAGA.md`). Por eso Q1 dio 0 de 61 y Q2 0 de 50 con
+tasas idénticas al control: medía el cableado. El arreglo está en `main` desde el PR #738 (las seis
+máscaras de summit de los tres procesadores salen de `roi1_summit_mask`), con el flag apagado en
+producción y un guard por AST que lo vigila. **Esta es la primera corrida que puede medir D18.**
+
+Lo que cambia respecto del texto de abajo, y nada más:
+
+- **Q1 y Q2 usan los denominadores del control de ESTA corrida**, no los 63 y 42 escritos abajo (que
+  eran de otro run; en S148 fueron 61 y 50). La regla es la misma: en Q1 se apaga la mitad o más, con
+  redondeo hacia arriba; en Q2 cambia el 12 % o menos (la proporción de 5 sobre 42), con redondeo
+  hacia abajo.
+- **Q3 se retira como criterio.** No tiene sustrato: centrando la caja en el ancla de detección, que
+  es donde la centra el pipeline, hay 0 positivos publicados fuera de la caja sobre 135
+  (`experiments/_s148_caja_traza/origen_43_de_135.py`; el "43" de abajo centraba en la coordenada
+  nominal). Se informa el conteo y no decide.
+- **Se agrega la selectividad a una cola** (C8b, `evaluar.selectividad_supervivencia`, con su nulo
+  medido) y el estrato **RUTINA en noche con alerta** (`docs/S149_COSTO_OCULTO_MAX.md`), los dos
+  informativos para G y H, porque el recall por pasada solo no ve ese costo.
+- **Traza obligatoria si Q1 vuelve a dar cero** (A118): antes de escribir que la caja es inerte,
+  contar por etapa (primer pase, recaptura del segundo, cúmulo) qué pasó con los píxeles de fuera de
+  la caja, con `experiments/_s148_caja_traza/`.
+- Ventana, volcanes, referencia congelada y brazos: los mismos (2026-09-01 a 2026-09-20; B, G y H en
+  el MISMO run, para que vean los mismos gránulos). El brazo F de esa ventana ya está evaluado y no
+  se repite; la comparación de H contra F usa el F del run 35548121381.
+
 ## 1. El fenómeno, primero
 
 Un volcán activo tiene dos zonas con físicas distintas. **Sobre la cumbre** hay una fuente de
