@@ -1459,6 +1459,30 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     `pipeline/profiles/`). Hoy el laboratorio es **idéntico** al operacional salvo el directorio de
     salida; su diferenciación real está diseñada en `docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md`.
 
+- **A118. Un flag que cambia un umbral o una geometría tiene que llegar a TODOS sus consumidores;
+  y un evaluador sólo ve los estratos que etiqueta** (S148, dos casos la misma noche; regla
+  general). (1) `enable_roi1_box_paper` entregaba la caja de 5 × 5 km sólo al primer pase. El
+  segundo pase (`second_pass_adjacent`) seguía recibiendo el círculo de `inner_radius_km`
+  (`pipeline/process_viirs.py:1313`), corre sin condicionar sobre toda la escena, y recapturaba con
+  el umbral permisivo lo que el primero acababa de rechazar con el estricto: en los 51 negativos de
+  fuera de la caja el primer pase cayó de 86 a 7 píxeles, la recaptura subió de 98 a 175 y el cúmulo
+  publicado quedó idéntico en los 51. El cero estaba **bien medido** (el flag se leía desde
+  `pipeline.profile`, los diagnósticos cambiaban, el instrumento tenía control negativo y positivo)
+  y aun así **no medía la caja**: medía el cableado. D18 nunca se ha medido, y el «NO ADOPTAR» de
+  S130 probablemente salió de este mismo defecto (SOSPECHA). (2) El recall por pasada del A/B de la
+  conectiva daba 137 a 135 de 143; el costo serio estaba en un estrato que el evaluador no
+  etiqueta: 50 publicaciones apagadas en noches en que MIROVA sí alertó por **otra** pasada (84 a
+  34 de 171). Lo encontró el verificador con contexto limpio, no el evaluador.
+  - **How to apply**: (a) al agregar un flag de umbral, máscara o geometría, listar con `grep`
+    **todos** los sitios donde se usa el valor que reemplaza (acá `is_summit`, `inner_radius_km`) y
+    pasarlo a cada uno, o dejar escrito por qué no; (b) ante un A/B que «no cambia nada», A116 no
+    basta: además de comprobar que el flag se lee y que el instrumento puede dar distinto de cero,
+    **trazar por etapa** qué pasa con los píxeles que debían cambiar (A75), porque una etapa
+    posterior puede deshacer el efecto; (c) antes de creerle a un recall, preguntar qué pasadas
+    quedan **fuera** de las etiquetas del evaluador (ni positivas ni negativos limpios) y contarlas
+    aparte. Detalle: `docs/audit_s148/POR_QUE_LA_CAJA_NO_APAGA.md` y
+    `docs/audit_s148/VERIFICADOR_RESULTADO_CONECTIVA.md`.
+
 - **A39, enmienda S142**: "0 checks" recién abierto un PR es SIN DATO, no verde. #676 se mergeó así con el CI
   en rojo. Esperar el run con conclusión (`gh pr checks <N> --watch`) antes de mergear, y después de editar un
   documento correr `grep -rl <archivo> tests/` y la suite completa: un test puede leer ese documento.
