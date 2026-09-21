@@ -100,3 +100,31 @@ registros de los 22 jobs que cada brazo leyó el flag que declara.
   (SIN VERIFICAR).
 - El veredicto "tabla sola" se agregó a `medir_predicciones.py` en el mismo commit del resultado; el
   cambio es mecánico y el verificador comprobó que no altera ningún número.
+
+## 7. El recall por tramo de magnitud (agregado tras la observación de Nicolás)
+
+Nicolás: MIROVA publica bajo 0,5 MW muchas veces, y la réplica tiene que parecerse a eso. Tiene razón, y
+el criterio "ninguna pérdida de 0,5 MW o más" que heredaron estos pre-registros **protege muy poco**: en
+VIIRS 375 el 81 % de las alertas de MIROVA de mayo y el 88 % de las de septiembre están bajo 0,5 MW. La
+regla de Nicolás desde la sesión 10 es que **VIIRS captura todo lo que MIROVA publica, también lo débil,
+y sólo MODIS puede perder señal sub-píxel**; el corte de 0,5 MW se había colado a VIIRS por un resumen
+mal hecho en la memoria del agente. Medido con `recall_por_magnitud.py`
+(`resultados/recall_por_magnitud_sept_mayo.txt`), VIIRS 375, con tabla y OCR:
+
+| magnitud que publicó MIROVA | mayo: control, con `max` | septiembre: control, con `max` |
+|---|---|---|
+| bajo 0,05 MW | 13 y **11** de 15 | 8 y 8 de 8 |
+| 0,05 a 0,10 MW | 50 y **44** de 52 | 34 y 33 de 39 |
+| 0,10 a 0,20 MW | 66 y 65 de 66 | 40 y 39 de 41 |
+| 0,20 a 0,50 MW | 104 y 103 de 106 | 38 y 38 de 38 |
+| 0,50 MW o más | 55 y 53 de 57 (las 2 son las fuentes lejanas de la sección 3) | 17 y 17 de 17 |
+| **todas** | 288 y **276** de 296 (97 y 93 %) | 137 y 135 de 143 (96 y 94 %) |
+
+Lectura: de 0,10 MW hacia arriba `max` no cuesta casi nada (95 a 100 %). **El costo está bajo 0,10 MW**,
+donde conserva 55 de 67 en mayo (82 %) contra 63 del control, y 41 de 47 en septiembre contra 42. Es
+justo el tramo donde el foco apenas se despega del ruido de la escena, que es lo que `max` exige superar.
+Si eso es aceptable para la réplica lo decide Nicolás; ya no se juzga con el corte de 0,5 MW.
+
+**Y un hallazgo aparte, que no es de `max`**: en **VIIRS 750** el control publica sólo 14 de 22 alertas
+de 0,20 a 0,50 MW en mayo y 5 de 9 en septiembre; en total 77 y 72 % de las alertas. Ahí hay una brecha
+de recall por pasada que existe con o sin `max`, y que la cuenta por noches no deja ver.
