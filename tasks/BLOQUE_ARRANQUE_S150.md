@@ -6,6 +6,20 @@
 > quieto: **1638 passed, 4 skipped, 2 xfailed**. Un PR abierto a propósito: **#738**.
 > Ningún A/B ni agente quedó corriendo. No se despachó ningún workflow.
 
+> ⚠️ **ACTUALIZACION de las 13:20 UTC, manda sobre lo de abajo donde choquen.** Nicolás confirmó las
+> dos decisiones: (1) **#738 MERGEADO** (`0227dd7ac`; la caja llega al segundo pase, flag apagado;
+> suite sobre `main` 1645 passed; worktree borrado); (2) pre-registro v2 **APROBADO**, con orden
+> "mayo y marzo". **TRABAJO EN VUELO**: run **35599902448** (mayo, 11 volcanes, brazos B y F,
+> despachado 12:30 UTC desde `0227dd7ac`) y run **35599941522** (mayo, gemelo de Láscar, en espera
+> detrás del primero). **Marzo (Láscar; brazos B, J, K y gemelo) NO está despachado todavía**: GitHub
+> guarda un solo run pendiente por grupo, así que se despacha cuando termine el primero, con
+> `start=2026-03-01 end=2026-03-31 vols=["Lascar"]
+> brazos=["_s146_ab_sin_test1","_s149_ab_sin_test1_b22","_s149_ab_sin_test1_b22_max","_s149_ab_sin_test1_gemelo"]
+> control=_s149_ab_sin_test1_b22`. Las salidas quedan en ramas `s146-ab/<run>`. Además: **#742
+> mergeado** (22 tests dejaban el perfil cambiado para el siguiente; arreglo en `tests/conftest.py`,
+> y con eso el test con fuga de la sección d queda RESUELTO). Falta verificar que el primer NRT
+> posterior a #738 salga verde.
+
 ## a. Todo en una pantalla
 
 | qué | estado | evidencia |
