@@ -4,8 +4,8 @@
 > Criterios escritos y commiteados antes de correr (`experiments/_s149_prereg_invierno/PREREGISTRO_INVIERNO.md`,
 > v2 y enmienda A119 anteriores a esta evaluación). Evaluado con `evaluar_ventana.py`, probado antes
 > sobre septiembre. Todos los números salen de `experiments/_s149_prereg_invierno/resultados/mayo_*.txt`.
-> **Pendiente**: el control de determinismo (gemelo de Láscar, run 35599941522, corriendo al escribir
-> esto) y un verificador con contexto limpio, obligatorio porque la mejora supera el 30 %.
+> **Verificado con contexto limpio: se sostiene, con salvedades** (sección 6; una de ellas corrigió mi
+> lectura de la sección 3). **Pendiente**: el control de determinismo (gemelo de Láscar, run 35599941522).
 > **No autoriza nada en producción.**
 
 ## 0. En una frase
@@ -47,11 +47,22 @@ Chaitén 2, Isluga 1.
 | Isluga 2026-05-29 04:54, Suomi NPP | 0,86 MW | 0,013 MW a 4,9 km, borde (69 grados) | la tabla llega a 0,74 MW en Isluga ese mes (30 alertas, mediana 0,26) |
 
 Las dos son filas del OCR versión 21, de cuando la geometría estaba mal calibrada y no se medía
-distancia (A119), y las dos son de Suomi NPP, que la tabla casi no lista. La de Lastarria tiene todo
-el aspecto de un dígito mal leído (doce veces el máximo del mes); la de Isluga es plausible.
-**SIN VERIFICAR**: busqué las imágenes originales en el repo del scraper y esas carpetas ya no están.
-No se descartan por conveniencia: la regla de que decide la tabla se escribió antes de evaluar, y acá
-quedan informadas para que el verificador las mire.
+distancia (A119), y las dos son de Suomi NPP, que la tabla casi no lista.
+
+**Mi primera lectura estaba mal y el verificador la corrigió.** Escribí que la de Lastarria parecía un
+dígito mal leído. No lo es: en los dos gránulos hay una **fuente caliente lejana, real**. En Lastarria
+un píxel de 304 K que el brazo F arma como un cúmulo de 1,107 MW a **19,5 km** del cráter; en Isluga
+uno de 289 K, 0,49 MW a **18,6 km**. En pasadas vecinas la tabla de MIROVA lista falsos positivos de
+magnitud parecida a 16 a 18 km, y esas mismas noches da el cráter en 0,10 a 0,49 MW. O sea que el OCR
+leyó bien el número pero, como entonces no medía distancia, **rotuló como alerta del cráter algo que
+MIROVA misma clasifica como lejano**: exactamente el defecto que describe A119. Perder esas dos
+"alertas" es lo correcto.
+
+**Y un efecto que sí importa**: en esas dos pasadas `max` **mueve el cúmulo primario del cráter a la
+fuente lejana** (queda `far` y no se publica). El control veía en el cráter 0,033 y 0,013 MW. Es la
+misma competencia por el ancla que frenó el A/B sin Test 1 en S147: cuando `max` apaga el píxel débil
+del cráter, el cúmulo primario pasa a ser otro. Acá no cuesta una alerta real, pero es el mecanismo a
+vigilar en las ventanas que siguen.
 
 ## 4. VIIRS 750 y MODIS (se informan)
 
@@ -64,5 +75,28 @@ quedan informadas para que el verificador las mire.
 
 ## 5. Qué sigue
 
-Determinismo (gemelo), verificador con contexto limpio, y las ventanas que siguen en la cola. No se
-promedia con septiembre: son dos ventanas que dicen lo mismo por separado.
+Determinismo (gemelo) y las ventanas que siguen en la cola. No se promedia con septiembre: son dos
+ventanas que dicen lo mismo por separado.
+
+## 6. Salvedades del verificador con contexto limpio
+
+Informe: `docs/audit_s149/VERIFICADOR_RESULTADO_MAYO.md`. Reimplementó VIIRS 375 leyendo los JSON de
+los brazos y los CSV congelados directamente, sin ninguna diferencia de número, y comprobó en los
+registros de los 22 jobs que cada brazo leyó el flag que declara.
+
+- **La enmienda de qué etiqueta decide (A119, commit de las 13:48 UTC) es anterior a la evaluación
+  (17:32 UTC) pero no a todos los datos**: a esa hora ya habían terminado 6 de los 22 jobs, entre ellos
+  los de Lastarria e Isluga. No los descargué ni los miré antes de evaluar (la primera extracción de
+  este run es la de `evaluar_ventana.py`), pero eso no se puede probar desde el repo: queda declarado.
+  Y no cambia el resultado: excluir las positivas del OCR no favorece a `max`, que entre ellas conserva
+  89 de 93 (96 %), la misma tasa que en la tabla.
+- **"Los negativos salen siempre de la tabla" no es exacto**: el etiquetador excluye del negativo limpio
+  las noches con alerta del OCR. Con la tabla sola de punta a punta P1 da **31,3 a 3,7 %** (n 383) y
+  sigue cumpliendo.
+- **Por noche**: `max` pierde 2 de 138 noches con alerta de la tabla, Chaitén 05-19 e Isluga 05-25, las
+  dos bajo 0,1 MW.
+- De las 9 pasadas de Villarrica sólo 4 son de la tabla; las otras 5 vienen del OCR. `max` conserva las 9.
+- La composición por volcán de los negativos limpios de mayo no se comparó con la de septiembre
+  (SIN VERIFICAR).
+- El veredicto "tabla sola" se agregó a `medir_predicciones.py` en el mismo commit del resultado; el
+  cambio es mecánico y el verificador comprobó que no altera ningún número.
