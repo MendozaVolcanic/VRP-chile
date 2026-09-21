@@ -1,0 +1,35 @@
+# A/B S147. Brazo F: SIN el Test 1 integrado Y con la lectura de PROSA de la conectiva (max).
+#
+# EL FENOMENO. Quitado el Test 1 integrado (A/B S147, run 35521542153), la replica todavia publica
+# en el 28,7 % de las pasadas de VIIRS 375 en que MIROVA proceso el mismo granulo y no vio nada.
+# Ese residual es de UN solo pixel (92 %), bajo 0,05 MW (73 %), y vive donde la escena es mas
+# ruidosa: en el borde del barrido (donde VIIRS banda I no agrega muestras y el pixel es raiz(3)
+# veces mas ruidoso) y sobre fondo frio (nube). La celda borde con fondo frio publica 57 %; la de
+# nadir con fondo tibio, 9 %. MIROVA hace lo contrario: su eficiencia de deteccion por pasada CAE
+# 2,2 veces del nadir al borde (archivo OSF, 32.669 detecciones en volcanes de Chile).
+#
+# LA HIPOTESIS. Coppola 2016a p. 7 escribe los Tests 2 y 3 como "dNTI > C1 OR dNTI > mu + C2 sigma"
+# (manda el MENOR, `min`), pero la prosa de esa misma pagina dice que C1 es un minimo que hay que
+# superar y que en escenas muy variables decide la estadistica de toda la escena (manda el MAYOR,
+# `max`). La replica implementa `min`, y con `min` el piso fijo C1 gobierna el 99,9 % de los records
+# de VIIRS (S136): el contraste con la escena NUNCA decide, asi que el umbral no se adapta justo
+# donde la escena es ruidosa. La bateria del Apendice A ya mostro en MODIS que `min` detecta en los
+# tres casos donde el autor publica que su algoritmo NO detecta.
+#
+# QUE CAMBIA ESTE BRAZO respecto del brazo B (_s146_ab_sin_test1): UNA sola cosa, la conectiva.
+# El control de este brazo es el brazo B, no produccion.
+#
+# CRITERIO: pre-registrado y commiteado ANTES de correr, en
+# experiments/_s147_ab_conectiva/PREREGISTRO.md
+# NO OPERACIONAL: data_subdir aislado, fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s147_ab_sin_test1_max
+description: >
+  Brazo F: sin el Test 1 integrado y con la conectiva de prosa (max) en los Tests 2 y 3.
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+output:
+  data_subdir: _s147_ab_sin_test1_max
