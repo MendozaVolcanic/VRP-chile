@@ -1,5 +1,14 @@
 # A/B de la caja de 5 × 5 km, brazo G: lectura PRELIMINAR (S148)
 
+> ⚠️ **RESUELTO el mismo día: el «0 de 51» es un defecto de cableado, no una propiedad de la caja.**
+> El flag entrega la caja sólo al primer pase; el segundo pase sigue usando el círculo y recaptura
+> con el umbral permisivo lo que el primero rechazó (camino (b) del §3). Traza y medición en
+> `docs/audit_s148/POR_QUE_LA_CAJA_NO_APAGA.md`. Consecuencias: (1) los brazos G y H de este A/B
+> **no pueden responder la pregunta de la caja**, con o sin cobertura reparada; (2) la discrepancia
+> del §4 también quedó resuelta: el «43 de 135» del pre-registro centraba la caja en la coordenada
+> nominal de `volcanoes.yaml` y no en el ancla de detección, que es donde el pipeline la centra
+> (con el ancla da 0 de 135), así que **Q3 no tiene sustrato**; (3) D18 queda marcada.
+>
 > ⚠️ **ESTO NO ES EL VEREDICTO.** El run **35548604513** terminó con 22 de 22 reprocesos en verde,
 > pero la cobertura de la ventana completa salió despareja por el mismo corte de NASA del 18 al 20
 > de septiembre (A64): al brazo G le faltan 23 pasadas de Copahue, al brazo H 23 de Planchón

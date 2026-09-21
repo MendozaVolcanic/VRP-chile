@@ -1,0 +1,112 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+control _s146_ab_sin_test1 | brazo _s147_ab_sin_test1_caja | tramo ('2026-09-01', '2026-09-17') | pasadas 2022
+
+===== neg_limpio / cumulo del control dentro de la caja: 44 pasadas =====
+  B: primer pase = 0 pixeles en toda la escena: 18 de 44
+  G: primer pase = 0 pixeles en toda la escena: 24 de 44
+  G: recaptura del 2do pase > 0: 39 de 44
+  primer pase pierde pixeles en G respecto de B: 14 de 44
+  2do pase gana pixeles en G respecto de B: 14 de 44
+  lo que pierde el 1er pase == lo que gana el 2do: 41 de 44
+  n_anomalous_pixels igual en B y G: 41 de 44
+  cumulo primario identico (lat, lon, vrp, n_pixels): 44 de 44
+  G: cumulo publicado identificado entre los anomaly_pixels: 44 de 44
+  G: pixel mas caliente del cumulo con exceso BT < 3 K (no pudo entrar por el 1er pase): 31 de 44
+  G: cumulo con TODOS sus pixeles fuera de la caja: 0 de 44
+  G: cumulo con todos sus pixeles dentro del circulo inner: 44 de 44
+  suma pixeles primer pase  B=142  G=33
+  suma recaptura 2do pase   B=217  G=322
+  suma n_anomalous_pixels   B=359  G=355
+  exceso BT (K) del pixel mas caliente del cumulo publicado en G: min -6.64 mediana 1.78 max 7.97 (n=44); con exceso >= 3 K: 13
+  campos que difieren entre B y G (n pasadas): {'diag_mu_deti': 25, 'diag_sd_deti': 25, 'diag_n_dnti_ctx_path': 20, 'diag_n_first_pass_pixels': 14, 'diag_n_second_pass_recapture': 14, 'vrp_mir_mw': 3, 'n_anomalous_pixels': 3, 'vrp_mw': 3, 'diag_L_bg_local_w_m2_sr_um': 2}
+
+===== neg_limpio / cumulo del control fuera de la caja: 51 pasadas =====
+  B: primer pase = 0 pixeles en toda la escena: 23 de 51
+  G: primer pase = 0 pixeles en toda la escena: 47 de 51
+  G: recaptura del 2do pase > 0: 51 de 51
+  primer pase pierde pixeles en G respecto de B: 26 de 51
+  2do pase gana pixeles en G respecto de B: 26 de 51
+  lo que pierde el 1er pase == lo que gana el 2do: 49 de 51
+  n_anomalous_pixels igual en B y G: 49 de 51
+  cumulo primario identico (lat, lon, vrp, n_pixels): 51 de 51
+  G: cumulo publicado identificado entre los anomaly_pixels: 51 de 51
+  G: pixel mas caliente del cumulo con exceso BT < 3 K (no pudo entrar por el 1er pase): 28 de 51
+  G: cumulo con TODOS sus pixeles fuera de la caja: 51 de 51
+  G: cumulo con todos sus pixeles dentro del circulo inner: 49 de 51
+  suma pixeles primer pase  B=86  G=7
+  suma recaptura 2do pase   B=98  G=175
+  suma n_anomalous_pixels   B=184  G=182
+  exceso BT (K) del pixel mas caliente del cumulo publicado en G: min -6.39 mediana 2.58 max 10.87 (n=51); con exceso >= 3 K: 23
+  campos que difieren entre B y G (n pasadas): {'diag_mu_deti': 38, 'diag_n_dnti_ctx_path': 37, 'diag_sd_deti': 35, 'diag_n_first_pass_pixels': 26, 'diag_n_second_pass_recapture': 26, 'vrp_mir_mw': 2, 'n_anomalous_pixels': 2, 'vrp_mw': 2, 'diag_L_bg_local_w_m2_sr_um': 1}
+  detalle: vol, hora, fp_B, fp_G, sp_B, sp_G, anom_B, anom_G, px_persistidos_G, en_caja, fuera_caja, exceso_BT_cumulo_G, n_px_cumulo, dist_cumulo_km, inner_km
+    Chaiten 2026-09-02 06:48 1 0 0 1 1 1 1 0 1 3.84 1 2.957 5.0
+    Chaiten 2026-09-08 06:54 0 0 2 2 2 2 2 0 2 0.93 1 2.721 5.0
+    Chaiten 2026-09-09 04:54 0 0 2 2 2 2 2 0 2 -1.21 1 3.43 5.0
+    Chaiten 2026-09-09 06:36 0 0 1 1 1 1 1 0 1 0.84 1 3.737 5.0
+    Chaiten 2026-09-10 04:36 2 0 0 2 2 2 2 0 2 9.57 1 3.833 5.0
+    Chaiten 2026-09-16 05:06 2 0 0 2 2 2 2 0 2 3.35 1 3.332 5.0
+    Copahue 2026-09-02 06:42 5 0 1 5 6 5 5 0 5 7.68 1 2.779 4.0
+    Copahue 2026-09-07 06:48 0 0 1 1 1 1 1 0 1 0.13 1 3.677 4.0
+    Copahue 2026-09-15 04:42 0 0 4 4 4 4 4 0 4 0.65 1 3.355 4.0
+    Isluga 2026-09-08 06:48 0 0 4 4 4 4 4 0 4 2.39 2 4.153 5.0
+    Lascar 2026-09-06 05:42 4 4 1 1 5 5 3 0 3 0.51 1 4.847 5.0
+    Lascar 2026-09-08 05:06 2 1 4 5 6 6 5 1 4 4.46 1 3.524 5.0
+    Lascar 2026-09-08 05:54 1 0 0 1 1 1 1 0 1 7.52 1 4.842 5.0
+    Lascar 2026-09-08 06:30 3 0 3 6 6 6 6 0 6 6.47 3 4.573 5.0
+    Lascar 2026-09-09 04:48 1 0 0 1 1 1 1 0 1 8.3 1 3.902 5.0
+    Lascar 2026-09-17 06:24 0 0 3 3 3 3 3 0 3 2.58 1 4.248 5.0
+    Lastarria 2026-09-09 06:30 0 0 1 1 1 1 1 0 1 -1.99 1 2.645 3.0
+    Llaima 2026-09-01 04:48 2 0 1 3 3 3 3 0 3 5.26 1 2.923 5.0
+    Llaima 2026-09-02 04:30 0 0 2 2 2 2 2 0 2 0.56 1 2.649 5.0
+    Llaima 2026-09-02 06:42 3 0 1 4 4 4 4 0 4 4.51 1 2.882 5.0
+    Llaima 2026-09-09 04:54 0 0 4 4 4 4 4 0 4 1.01 2 4.853 5.0
+    Llaima 2026-09-10 04:36 0 0 2 2 2 2 2 1 1 0.53 1 3.855 5.0
+    Llaima 2026-09-10 05:18 0 0 6 6 6 6 6 0 6 0.9 1 4.177 5.0
+    Llaima 2026-09-10 05:54 0 0 6 6 6 6 6 0 6 0.59 1 4.49 5.0
+    Llaima 2026-09-10 06:12 0 0 6 6 6 6 6 1 5 0.54 1 4.726 5.0
+    Llaima 2026-09-15 06:18 1 0 0 1 1 1 1 0 1 3.48 1 4.67 5.0
+    NevadosDeChillan 2026-09-01 05:42 1 0 0 1 1 1 1 0 1 4.12 1 3.785 5.0
+    NevadosDeChillan 2026-09-01 06:24 1 0 0 1 1 1 1 0 1 3.94 1 3.937 5.0
+    NevadosDeChillan 2026-09-09 04:54 0 0 3 3 3 3 3 1 2 0.45 1 3.238 5.0
+    NevadosDeChillan 2026-09-11 05:00 0 0 2 2 2 2 2 0 2 0.18 1 4.38 5.0
+    PuyehueCordonCaulle 2026-09-01 05:42 0 0 1 1 1 1 1 0 1 -5.37 1 13.241 20.0
+    PuyehueCordonCaulle 2026-09-02 04:30 1 0 0 1 1 1 1 0 1 4.1 1 15.789 20.0
+    PuyehueCordonCaulle 2026-09-02 05:24 3 0 1 4 4 4 4 0 4 5.4 1 5.574 20.0
+    PuyehueCordonCaulle 2026-09-02 06:48 5 0 6 11 11 11 10 0 10 0.83 1 4.224 20.0
+    PuyehueCordonCaulle 2026-09-03 05:06 4 0 2 5 6 5 5 0 5 2.98 1 12.421 20.0
+    PuyehueCordonCaulle 2026-09-03 06:48 12 0 2 14 14 14 13 0 13 4.81 1 8.419 20.0
+    PuyehueCordonCaulle 2026-09-04 06:06 1 0 1 2 2 2 2 0 2 8.65 1 17.052 20.0
+    PuyehueCordonCaulle 2026-09-09 04:54 20 0 1 21 21 21 19 0 19 4.39 1 6.548 20.0
+    PuyehueCordonCaulle 2026-09-15 05:24 1 0 0 1 1 1 1 0 1 4.44 1 13.643 20.0
+    PuyehueCordonCaulle 2026-09-15 06:00 1 0 0 1 1 1 1 0 1 6.85 1 13.01 20.0
+    Tupungatito 2026-09-03 05:06 1 0 10 11 11 11 11 1 10 0.52 1 3.732 7.0
+    Tupungatito 2026-09-03 06:42 1 0 1 2 2 2 2 0 2 10.87 1 6.833 7.0
+    Tupungatito 2026-09-09 04:48 1 0 3 4 4 4 4 0 4 4.07 1 6.372 7.0
+    Villarrica 2026-09-02 06:42 0 0 1 1 1 1 1 0 1 0.29 1 4.103 5.0
+    Villarrica 2026-09-07 06:54 0 0 1 1 1 1 1 0 1 -6.39 1 4.141 5.0
+    Villarrica 2026-09-08 05:12 0 0 1 1 1 1 1 0 1 -4.76 1 2.79 5.0
+    Villarrica 2026-09-09 04:54 0 0 2 2 2 2 2 0 2 -1.51 1 4.598 5.0
+    Villarrica 2026-09-10 04:36 0 0 1 1 1 1 1 0 1 0.76 1 3.97 5.0
+    Villarrica 2026-09-10 05:18 1 1 2 2 3 3 2 0 2 2.82 1 3.324 5.0
+    Villarrica 2026-09-10 05:54 5 1 1 5 6 6 6 0 6 3.61 1 2.904 5.0
+    Villarrica 2026-09-10 06:12 0 0 1 1 1 1 1 0 1 -1.02 1 3.484 5.0
+
+===== pos / cumulo del control dentro de la caja: 125 pasadas =====
+  B: primer pase = 0 pixeles en toda la escena: 28 de 125
+  G: primer pase = 0 pixeles en toda la escena: 29 de 125
+  G: recaptura del 2do pase > 0: 90 de 125
+  primer pase pierde pixeles en G respecto de B: 10 de 125
+  2do pase gana pixeles en G respecto de B: 10 de 125
+  lo que pierde el 1er pase == lo que gana el 2do: 123 de 125
+  n_anomalous_pixels igual en B y G: 123 de 125
+  cumulo primario identico (lat, lon, vrp, n_pixels): 125 de 125
+  G: cumulo publicado identificado entre los anomaly_pixels: 125 de 125
+  G: pixel mas caliente del cumulo con exceso BT < 3 K (no pudo entrar por el 1er pase): 38 de 125
+  G: cumulo con TODOS sus pixeles fuera de la caja: 0 de 125
+  G: cumulo con todos sus pixeles dentro del circulo inner: 125 de 125
+  suma pixeles primer pase  B=210  G=170
+  suma recaptura 2do pase   B=267  G=300
+  suma n_anomalous_pixels   B=477  G=470
+  exceso BT (K) del pixel mas caliente del cumulo publicado en G: min -3.16 mediana 4.88 max 19.03 (n=125); con exceso >= 3 K: 87
+  campos que difieren entre B y G (n pasadas): {'diag_mu_deti': 75, 'diag_sd_deti': 73, 'diag_n_dnti_ctx_path': 63, 'diag_n_first_pass_pixels': 10, 'diag_n_second_pass_recapture': 10, 'vrp_mir_mw': 2, 'n_anomalous_pixels': 2, 'diag_L_bg_local_w_m2_sr_um': 2, 'vrp_mw': 2}
+filas 51 | fp_G=0: 47 | fp_B>0, sp_B=0, fp_G=0: 11 | fp_B=0 y fp_G=0 (ya eran solo 2do pase en B): 23 | fp_G>0: 4
