@@ -154,6 +154,7 @@ from .detection_context import (
     dual_roi_bt_threshold,
     compute_eti_scene_quadratic,
     compute_nti_and_nti_app,
+    roi1_summit_mask,
     second_pass_adjacent,
     combine_hot_paths,
     compute_bg_stats,
@@ -770,7 +771,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             & ~np.isnan(bt_mir)
         )
         eti_2d = compute_eti_scene_quadratic(nti, nti_app_m, mask_valid_eti)
-        is_summit = vent_dist_per_pixel <= inner_radius_km
+        # A118 (S149): la geometria del ROI1 sale de un solo lugar. Con el flag de la caja
+        # apagado `_roi1_mask` es None y esto ES el circulo de siempre; encendido, la caja
+        # llega tambien a este pase y no solo al primero (antes el segundo pase la deshacia).
+        is_summit = roi1_summit_mask(vent_dist_per_pixel, inner_radius_km, _roi1_mask)
         empty_active = np.zeros_like(mask_valid_eti, dtype=bool)
         first_pass_active = second_pass_adjacent(
             nti, eti_2d, empty_active,
@@ -889,7 +893,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             and not np.isnan(t_bg)):
         eti_for_second_pass = fp_diag.get("eti")
         if eti_for_second_pass is not None:
-            is_summit_mask = vent_dist_per_pixel <= inner_radius_km
+            # A118 (S149): la geometria del ROI1 sale de un solo lugar. Con el flag de la caja
+            # apagado `_roi1_mask` es None y esto ES el circulo de siempre; encendido, la caja
+            # llega tambien a este pase y no solo al primero (antes el segundo pase la deshacia).
+            is_summit_mask = roi1_summit_mask(vent_dist_per_pixel, inner_radius_km, _roi1_mask)
             # S46 Task 6 + Ronda 2 — overrides C1/C2 en second-pass.
             if VIIRS_C2_OVERRIDE_NIGHT is not None:
                 _c2_summit_sp = VIIRS_C2_OVERRIDE_NIGHT
