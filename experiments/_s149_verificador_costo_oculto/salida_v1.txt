@@ -1,0 +1,77 @@
+filas descartadas por nombre o sensor desconocido: {}
+
+=== A. Replica de la definicion del documento: tol 120 s, noche con alerta en cualquier sensor, pub node
+   discrepancias de etiqueta contra tabla.json (V375): 0 de 962
+A
+   todas            n 171 | RUTINA CONS VRP 0 109 | sin fila  62
+   publica B        n  84 | RUTINA CONS VRP 0  54 | sin fila  30
+   apagadas por F   n  50 | RUTINA CONS VRP 0  34 | sin fila  16
+   sobreviven a F   n  34 | RUTINA CONS VRP 0  20 | sin fila  14
+   tasa sobre RUTINA (n 109): B 49.5 % | F 18.3 %
+   F publica y B no (deberia ser 0): 0
+
+=== B. Igual pero pareo EXACTO al minuto (tol 0)
+B
+   todas            n 288 | RUTINA CONS VRP 0  24 | sin fila 264
+   publica B        n 188 | RUTINA CONS VRP 0  15 | sin fila 173
+   apagadas por F   n  54 | RUTINA CONS VRP 0  11 | sin fila  43
+   sobreviven a F   n 134 | RUTINA CONS VRP 0   4 | sin fila 130
+   tasa sobre RUTINA (n 24): B 62.5 % | F 16.7 %
+   F publica y B no (deberia ser 0): 0
+
+=== C. Igual que A con pub2 (port independiente del predicado)
+C
+   todas            n 171 | RUTINA CONS VRP 0 109 | sin fila  62
+   publica B        n  84 | RUTINA CONS VRP 0  54 | sin fila  30
+   apagadas por F   n  50 | RUTINA CONS VRP 0  34 | sin fila  16
+   sobreviven a F   n  34 | RUTINA CONS VRP 0  20 | sin fila  14
+   tasa sobre RUTINA (n 109): B 49.5 % | F 18.3 %
+   F publica y B no (deberia ser 0): 0
+
+=== D. Noche con alerta SOLO VIIRS 375 (la definicion de c1)
+D
+   todas            n 166 | RUTINA CONS VRP 0 107 | sin fila  59
+   publica B        n  83 | RUTINA CONS VRP 0  54 | sin fila  29
+   apagadas por F   n  49 | RUTINA CONS VRP 0  34 | sin fila  15
+   sobreviven a F   n  34 | RUTINA CONS VRP 0  20 | sin fila  14
+   tasa sobre RUTINA (n 107): B 50.5 % | F 18.7 %
+   F publica y B no (deberia ser 0): 0
+
+=== E. Tolerancia ancha 600 s (si cambia, hay filas cercanas de otra pasada)
+E
+   todas            n 170 | RUTINA CONS VRP 0 114 | sin fila  56
+   publica B        n  84 | RUTINA CONS VRP 0  56 | sin fila  28
+   apagadas por F   n  50 | RUTINA CONS VRP 0  35 | sin fila  15
+   sobreviven a F   n  34 | RUTINA CONS VRP 0  21 | sin fila  13
+   tasa sobre RUTINA (n 114): B 49.1 % | F 18.4 %
+   F publica y B no (deberia ser 0): 0
+
+=== F. Duplicados y ambiguedad del pareo
+   pasadas de la clase con mas de 1 fila pareada: 0
+   separacion minima entre filas CONS V375 consecutivas del mismo volcan: 1081 s | bajo 600 s: 0
+   separacion minima entre pasadas NUESTRAS V375 consecutivas: 360 s | bajo 600 s: 27
+       Isluga 2026-09-02 06:36:00 2026-09-02 06:42:00
+       Isluga 2026-09-07 06:06:00 2026-09-07 06:12:00
+       Isluga 2026-09-09 06:24:00 2026-09-09 06:30:00
+       Isluga 2026-09-20 06:18:00 2026-09-20 06:24:00
+       Lascar 2026-09-03 05:42:00 2026-09-03 05:48:00
+       Lascar 2026-09-05 06:00:00 2026-09-05 06:06:00
+       Lascar 2026-09-19 05:42:00 2026-09-19 05:48:00
+       Lastarria 2026-09-04 06:00:00 2026-09-04 06:06:00
+
+=== G. Por satelite: quien tiene fila y quien no (todas las V375 nocturnas de la tabla)
+   VIIRS_NOAA20   con fila  272 | sin fila   50 | % sin fila 15.5
+   VIIRS_NOAA21   con fila  283 | sin fila   27 | % sin fila 8.7
+   VIIRS_SNPP     con fila  132 | sin fila  198 | % sin fila 60.0
+   dentro de la clase (171):
+   VIIRS_NOAA20   RUTINA  41 | sin fila   8
+   VIIRS_NOAA21   RUTINA  44 | sin fila   5
+   VIIRS_SNPP     RUTINA  24 | sin fila  49
+   apagadas sin fila por satelite: {'VIIRS_SNPP': 14, 'VIIRS_NOAA20': 2}
+   apagadas sin fila por fecha: {'2026-09-02': 1, '2026-09-04': 1, '2026-09-08': 1, '2026-09-12': 1, '2026-09-13': 6, '2026-09-14': 3, '2026-09-18': 1, '2026-09-19': 2}
+   TODAS las sin fila V375 por fecha: {'2026-09-01': 12, '2026-09-02': 10, '2026-09-03': 19, '2026-09-04': 22, '2026-09-05': 1, '2026-09-06': 1, '2026-09-07': 14, '2026-09-08': 20, '2026-09-09': 14, '2026-09-10': 2, '2026-09-11': 9, '2026-09-12': 14, '2026-09-13': 15, '2026-09-14': 16, '2026-09-15': 7, '2026-09-16': 10, '2026-09-17': 13, '2026-09-18': 13, '2026-09-19': 19, '2026-09-20': 44}
+   TODAS las V375 por fecha:         {'2026-09-01': 50, '2026-09-02': 50, '2026-09-03': 55, '2026-09-04': 46, '2026-09-05': 40, '2026-09-06': 45, '2026-09-07': 56, '2026-09-08': 53, '2026-09-09': 47, '2026-09-10': 39, '2026-09-11': 45, '2026-09-12': 53, '2026-09-13': 49, '2026-09-14': 53, '2026-09-15': 42, '2026-09-16': 42, '2026-09-17': 49, '2026-09-18': 50, '2026-09-19': 54, '2026-09-20': 44}
+
+=== H. Las 34 por volcan y zona
+   {'Lascar': 2, 'Lastarria': 3, 'Isluga': 4, 'Tupungatito': 5, 'PlanchonPeteroa': 2, 'NevadosDeChillan': 1, 'Villarrica': 3, 'PuyehueCordonCaulle': 6, 'Chaiten': 8}
+   z>=52: 30 de 34
