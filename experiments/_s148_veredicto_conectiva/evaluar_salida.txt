@@ -1,0 +1,21 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+ventana 2026-09-01 a 2026-09-20 | referencia nocturna 1856 filas | sha index.html 24fba8a157
+control positivo del control: cumple=False | {"n_pasadas_comparadas": 2362, "fraccion_publicacion_identica": 1.0, "diferencias_por_campo": {}}
+
+=== _s147_ab_sin_test1_max -> INDECIDIBLE (el control positivo del brazo de control no se cumple)
+  cobertura: control 2386, brazo 2386, faltan 0 (pareja=True)
+  publicacion en negativos limpios: {"VIIRS375": {"control": 0.2976, "brazo": 0.0268, "techo": 0.45, "cumple": true, "caida_pp": 27.08}, "VIIRS750": {"control": 0.0595, "brazo": 0.0064, "techo": 0.12, "cumple": true, "caida_pp": 5.31}}
+  caidas pp por sensor: {'MODIS': 8.86, 'VIIRS375': 27.08, 'VIIRS750': 5.31}
+  recall por PASADA (la vara que decide): {"VIIRS375": {"control_publicadas": 137, "brazo_publicadas": 135, "piso_conteo": 118, "cumple": true, "n": 143, "recall_control": 0.958, "recall_brazo": 0.9441, "perdidas_contra_control": 2}, "VIIRS750": {"control_publicadas": 13, "brazo_publicadas": 13, "piso_conteo": 12, "cumple": true, "n": 18, "recall_control": 0.7222, "recall_brazo": 0.7222, "perdidas_contra_control": 0}}
+  pasadas perdidas: 2, de ellas con 0,5 MW o mas de MIROVA: 0
+     - Lastarria|VIIRS375|2026-09-04 06:24 | MIROVA 0.14 MW | nuestro control 0.0419 MW | fuente ctx_cluster
+     - Tupungatito|VIIRS375|2026-09-19 05:06 | MIROVA 0.05 MW | nuestro control 0.0504 MW | fuente ctx_cluster
+  noches perdidas (volcan, vara SIN poder): 1 [{'noche': 'Isluga|2026-09-19', 'vrp_mirova_mw': 0.06}]
+  noches perdidas (sensor, vara SIN poder): 1 [{'noche': 'Isluga|VIIRS375|2026-09-19', 'vrp_mirova_mw': 0.06}]
+  negativos publicados por magnitud (I-02): {"MODIS": {"lt0.02": 0, "0.02a0.05": 0, "ge0.05": 0, "n_neg": 440, "n_pub": 0}, "VIIRS375": {"lt0.02": 1, "0.02a0.05": 5, "ge0.05": 4, "n_neg": 373, "n_pub": 10}, "VIIRS750": {"lt0.02": 0, "0.02a0.05": 1, "ge0.05": 3, "n_neg": 622, "n_pub": 4}}
+  MODIS sin Cordon Caulle (I-04): control {"n": 394, "pub": 10, "tasa": 0.0254} brazo {"n": 394, "pub": 0, "tasa": 0.0}
+  negativos por plataforma (I-03): {"MODIS_TERRA": {"n": 223, "pub": 0, "tasa": 0.0}, "MODIS_AQUA": {"n": 217, "pub": 0, "tasa": 0.0}, "VIIRS_NOAA20_750": {"n": 236, "pub": 1, "tasa": 0.0042}, "VIIRS_NOAA21_750": {"n": 247, "pub": 3, "tasa": 0.0121}, "VIIRS_NOAA21": {"n": 161, "pub": 6, "tasa": 0.0373}, "VIIRS_SNPP": {"n": 55, "pub": 1, "tasa": 0.0182}, "VIIRS_SNPP_750": {"n": 139, "pub": 0, "tasa": 0.0}, "VIIRS_NOAA20": {"n": 157, "pub": 3, "tasa": 0.0191}}
+  nulo estructural: 0 publicadas de 1142 | nulo barajado: {"observado": -0.1082, "nulo_media": 0.0965, "nulo_p2.5": 0.0498, "nulo_p97.5": 0.146, "fuera_del_nulo": true}
+  criterios: {"C0_cobertura_pareja": true, "C1_recall_pasada": true, "C2_noches_dentro_de_lo_previsto": true, "C3_publicacion_negativos": true, "C4_magnitud": true, "C5_nulo_estructural": true, "C6_orden_por_sensor_V375_V750_MODIS": false, "C7_posicion_estable": false, "C8_fuera_del_nulo_barajado": true}
+
+-> experiments/_s148_veredicto_conectiva/resultado_F.json
