@@ -1,0 +1,19 @@
+alertas del loader: 2077 Counter({'CONS': 1507, 'OCR': 570})
+
+OCR por tramo: n | con dist_km | dist mediana | bucket
+   1 <03-01 41 23 3.01 {'VIIRS375': 38, 'VIIRS750': 3}
+   2 03-01..06-10 351 351 2.76 {'VIIRS375': 313, 'VIIRS750': 35, 'MODIS': 3}
+   3 06-11..06-12 6 6 1.9 {'VIIRS375': 6}
+   4 >=06-13 172 172 1.29 {'VIIRS375': 166, 'VIIRS750': 6}
+
+ALERTA_TERMICA_OCR por Confianza_Validacion (el loader no filtra por confianza): {'alta': 876, 'media': 26, 'baja': 1}
+
+Fraccion de alertas del loader que vienen SOLO del OCR, por bucket y mes:
+   MODIS 01 0%(2)  02 0%(14)  03 7%(27)  04 0%(21)  05 7%(14)  06 0%(14)  07 0%(2)  08 0%(2)  09 0%(1)
+   VIIRS750 01 6%(16)  02 8%(25)  03 37%(52)  04 22%(51)  05 6%(52)  06 8%(51)  07 5%(21)  08 7%(30)  09 5%(22)
+   VIIRS375 01 22%(68)  02 19%(120)  03 39%(198)  04 30%(218)  05 40%(328)  06 36%(258)  07 24%(158)  08 28%(152)  09 24%(160)
+
+Noches-ALERTA del loader por bucket: total 2026 | en 2026-01-10..01-28 y volcan != Villarrica (nuestra serie no existe ahi)
+   MODIS       83 |   2 (2.4 %)  -> techo de recall por este solo efecto: 97.6 %
+   VIIRS750   264 |  13 (4.9 %)  -> techo de recall por este solo efecto: 95.1 %
+   VIIRS375   974 |  43 (4.4 %)  -> techo de recall por este solo efecto: 95.6 %

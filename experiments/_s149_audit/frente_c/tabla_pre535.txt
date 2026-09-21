@@ -1,0 +1,37 @@
+VENTANA ('2026-06-13', '2026-08-28') | bandas {'focal': 10.0, 'nevado': 15.0}
+
+1. FALSAS por pasada en negativos limpios, por sensor y regimen (banda focal 10, nevado 15)
+   MODIS     focal   19.6 % (144/735)
+   MODIS     nevado  6.4 % (67/1049)
+   VIIRS375  focal   44.1 % (161/365)
+   VIIRS375  nevado  59.7 % (621/1040)
+   VIIRS750  focal   27.7 % (226/815)
+   VIIRS750  nevado  20.2 % (252/1246)
+   volcanes que cumplen su banda, por sensor:
+   MODIS     10 de 11: ['Lascar', 'Lastarria', 'Isluga', 'Tupungatito', 'PlanchonPeteroa', 'NevadosDeChillan', 'Llaima', 'Villarrica', 'Copahue', 'Chaiten']
+   VIIRS375  0 de 11: []
+   VIIRS750  2 de 11: ['NevadosDeChillan', 'Llaima']
+
+2. DETECCION por NOCHE de volcan y sensor (la unidad de la tabla) y por PASADA
+   MODIS     noches con alerta  12, perdidas por el sensor  11 | pasadas con alerta  13, perdidas  12 | de las pasadas perdidas: bajo 0,10 MW 0, 0,10 a 0,50 7, 0,50 o mas 5
+   VIIRS375  noches con alerta 248, perdidas por el sensor  10 | pasadas con alerta 419, perdidas  29 | de las pasadas perdidas: bajo 0,10 MW 23, 0,10 a 0,50 4, 0,50 o mas 2
+   VIIRS750  noches con alerta  63, perdidas por el sensor  10 | pasadas con alerta  72, perdidas  16 | de las pasadas perdidas: bajo 0,10 MW 0, 0,10 a 0,50 12, 0,50 o mas 4
+
+3. MAGNITUD: mediana nuestra/MIROVA por volcan con n >= 30 (banda 0,8 a 1,25)
+   VIIRS375  Lascar               n  81 mediana 0.54 NO CUMPLE
+   VIIRS375  Lastarria            n  48 mediana 0.41 NO CUMPLE
+   VIIRS375  Isluga               n 102 mediana 0.62 NO CUMPLE
+   VIIRS375  Tupungatito          n  39 mediana 0.83 CUMPLE
+   VIIRS375  PlanchonPeteroa      n  33 mediana 0.94 CUMPLE
+   VIIRS375  PuyehueCordonCaulle  n  58 mediana 0.98 CUMPLE
+
+4. MODIS Lascar por NOCHE: publica en noches con alerta MODIS contra noches sin alerta (neg limpio)
+   con alerta 8.3 % (1/12) | sin alerta 4.6 % (3/65)
+
+5. MIROVA CONTRA SI MISMA frente a las bandas
+   razon 750/375 de MIROVA, misma escena: n 78, mediana 1.04, fraccion de pares dentro de 0,8 a 1,25: 37.2 % (29/78)
+      Isluga               n  11 mediana 0.72 FUERA de la banda
+      Lascar               n  34 mediana 1.10 dentro
+      PuyehueCordonCaulle  n  17 mediana 1.31 FUERA de la banda
+   noches en que VIIRS750 de MIROVA alerta y VIIRS375 fue listado: 63 | VIIRS375 tambien alerta: 93.7 % (59/63)
+   noches en que VIIRS375 de MIROVA alerta y VIIRS750 fue listado: 248 | VIIRS750 tambien alerta: 23.8 % (59/248)

@@ -1,0 +1,106 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+records totales 11 Tier A: 60247 | rango 2025-02-15 01:40:00+00:00 a 2026-09-21 08:50:00+00:00
+sensores: Counter({'VIIRS_NOAA20': 8145, 'VIIRS_NOAA20_750': 8063, 'VIIRS_NOAA21': 8010, 'VIIRS_NOAA21_750': 7971, 'VIIRS_SNPP': 7951, 'VIIRS_SNPP_750': 7882, 'MODIS_AQUA': 6175, 'MODIS_TERRA': 6050})
+
+[M2a] huecos de mas de 5 dias sin NINGUN record, por volcan
+  Lascar               primero 2025-02-15 | huecos: ['2025-11-15 a 2026-01-29 (74 d)']
+  Lastarria            primero 2025-02-15 | huecos: ['2025-11-15 a 2026-01-29 (74 d)']
+  Isluga               primero 2025-02-15 | huecos: ['2025-11-15 a 2026-01-29 (74 d)']
+  Tupungatito          primero 2025-02-15 | huecos: ['2025-11-15 a 2026-01-29 (74 d)']
+  PlanchonPeteroa      primero 2025-02-15 | huecos: ['2025-11-15 a 2026-01-29 (74 d)']
+  NevadosDeChillan     primero 2025-02-15 | huecos: ['2025-11-15 a 2026-01-29 (74 d)']
+  Llaima               primero 2025-02-15 | huecos: ['2025-11-15 a 2026-01-29 (74 d)']
+  Villarrica           primero 2025-02-15 | huecos: ninguno
+  Copahue              primero 2025-02-15 | huecos: ['2025-11-15 a 2026-01-29 (74 d)']
+  PuyehueCordonCaulle  primero 2025-02-15 | huecos: ['2025-10-09 a 2026-01-29 (111 d)']
+  Chaiten              primero 2025-02-15 | huecos: ['2025-11-15 a 2026-01-29 (74 d)']
+
+[M2b] por sensor: primero, ultimo, huecos > 10 dias (los 11 volcanes juntos)
+  MODIS_AQUA         n=  6175 2025-02-15 a 2026-09-21 | sin huecos
+  MODIS_TERRA        n=  6050 2025-02-15 a 2026-09-21 | sin huecos
+  VIIRS_NOAA20       n=  8145 2025-02-15 a 2026-09-21 | sin huecos
+  VIIRS_NOAA20_750   n=  8063 2025-02-15 a 2026-09-21 | sin huecos
+  VIIRS_NOAA21       n=  8010 2025-02-15 a 2026-09-21 | sin huecos
+  VIIRS_NOAA21_750   n=  7971 2025-02-15 a 2026-09-21 | sin huecos
+  VIIRS_SNPP         n=  7951 2025-02-15 a 2026-09-21 | sin huecos
+  VIIRS_SNPP_750     n=  7882 2025-02-15 a 2026-09-21 | sin huecos
+
+[M2c] product_version por mes (todos los records): mes | n | % nrt | % standard | otros
+  2025-02 |  1607 |   0.0 | 100.0 | {}
+  2025-03 |  3672 |   0.0 | 100.0 | {}
+  2025-04 |  3577 |   0.0 | 100.0 | {}
+  2025-05 |  3672 |   0.0 | 100.0 | {}
+  2025-06 |  3525 |   0.0 | 100.0 | {}
+  2025-07 |  3670 |   0.0 | 100.0 | {}
+  2025-08 |  3696 |   0.0 | 100.0 | {}
+  2025-09 |  3531 |   0.0 | 100.0 | {}
+  2025-10 |  3416 |   0.0 | 100.0 | {}
+  2025-11 |  1734 |   0.0 | 100.0 | {}
+  2025-12 |   344 |   0.0 | 100.0 | {}
+  2026-01 |   662 |   0.0 | 100.0 | {}
+  2026-02 |  3314 |   0.0 | 100.0 | {}
+  2026-03 |  3542 |   0.0 | 100.0 | {}
+  2026-04 |  3433 |   0.0 | 100.0 | {}
+  2026-05 |  3682 |   0.0 | 100.0 | {}
+  2026-06 |  3520 |   0.0 | 100.0 | {}
+  2026-07 |  3495 |   2.8 |  97.2 | {}
+  2026-08 |  3660 |   1.7 |  98.3 | {}
+  2026-09 |  2495 |  17.3 |  82.7 | {}
+  por bucket, desde 2026-06: mes bucket %nrt n
+    ('2026-06', 'MODIS') 0.0 740
+    ('2026-06', 'VIIRS375') 0.0 1395
+    ('2026-06', 'VIIRS750') 0.0 1385
+    ('2026-07', 'MODIS') 0.0 759
+    ('2026-07', 'VIIRS375') 3.6 1374
+    ('2026-07', 'VIIRS750') 3.5 1362
+    ('2026-08', 'MODIS') 0.0 753
+    ('2026-08', 'VIIRS375') 2.2 1460
+    ('2026-08', 'VIIRS750') 2.2 1447
+    ('2026-09', 'MODIS') 31.7 498
+    ('2026-09', 'VIIRS375') 13.7 1001
+    ('2026-09', 'VIIRS750') 13.8 996
+  etiqueta contra nombre del granulo: {('MODIS', 'standard', 'granulo_std'): 12067, ('VIIRS375', 'standard', 'granulo_std'): 23888, ('VIIRS750', 'standard', 'granulo_std'): 23699, ('VIIRS375', 'nrt', 'granulo_NRT'): 218, ('VIIRS750', 'nrt', 'granulo_NRT'): 217, ('MODIS', 'nrt', 'granulo_NRT'): 158}
+
+buckets normalizados de la tabla: ['MODIS', 'VIIRS375', 'VIIRS750']
+
+[M3] bucket satelite | por mes: % de nuestras pasadas nocturnas con fila en la TABLA (n) [+solo OCR]
+                         2026-01         2026-02         2026-03         2026-04         2026-05         2026-06         2026-07         2026-08         2026-09        
+   MODIS AQUA            85% (61)+0      91% (328)+0     95% (372)+1     94% (350)+0     94% (367)+0     96% (385)+0     97% (373)+0     91% (375)+0     96% (255)+0    
+   MODIS TERRA           89% (53)+0      89% (317)+0     94% (359)+1     92% (346)+0     95% (366)+0     95% (355)+0     97% (386)+0     96% (378)+0     97% (243)+0    
+   VIIRS375 NOAA20       85% (68)+0      90% (444)+0     91% (488)+1     86% (484)+3     86% (490)+4     87% (462)+4     81% (501)+5     88% (504)+5     89% (335)+5    
+   VIIRS375 NOAA21       0% (78)+0       0% (434)+0      0% (491)+0      56% (459)+9     55% (486)+35    64% (474)+25    74% (483)+6     92% (477)+2     95% (325)+0    
+   VIIRS375 SNPP         26% (70)+5      21% (461)+28    20% (434)+59    20% (432)+41    22% (502)+59    27% (459)+45    14% (390)+26    30% (479)+31    32% (341)+29   
+   VIIRS750 NOAA20       85% (66)+0      90% (442)+0     94% (482)+0     82% (477)+3     94% (487)+0     87% (458)+0     81% (494)+0     86% (500)+0     86% (334)+0    
+   VIIRS750 NOAA21       0% (78)+0       0% (433)+0      0% (486)+0      81% (456)+0     69% (485)+0     79% (472)+1     68% (483)+0     92% (474)+0     91% (324)+0    
+   VIIRS750 SNPP         27% (70)+1      26% (455)+2     21% (430)+18    20% (429)+8     19% (499)+3     19% (455)+2     15% (385)+1     36% (473)+0     51% (338)+0    
+
+[M3 CONTROL: tabla desplazada 30 min, debe dar cerca de 0] bucket satelite | por mes: % de nuestras pasadas nocturnas con fila en la TABLA (n) [+solo OCR]
+                         2026-01         2026-02         2026-03         2026-04         2026-05         2026-06         2026-07         2026-08         2026-09        
+   MODIS AQUA            0% (61)+0       0% (328)+0      0% (372)+0      0% (350)+0      0% (367)+0      0% (385)+0      0% (373)+0      0% (375)+0      0% (255)+0     
+   MODIS TERRA           0% (53)+0       0% (317)+0      0% (359)+0      0% (346)+0      0% (366)+0      0% (355)+0      0% (386)+0      0% (378)+0      0% (243)+0     
+   VIIRS375 NOAA20       0% (68)+0       0% (444)+0      0% (488)+0      0% (484)+0      0% (490)+0      0% (462)+0      0% (501)+0      0% (504)+0      0% (335)+0     
+   VIIRS375 NOAA21       22% (78)+5      19% (434)+25    18% (491)+60    12% (459)+25    10% (486)+10    6% (474)+0      1% (483)+2      0% (477)+0      0% (325)+0     
+   VIIRS375 SNPP         0% (70)+0       0% (461)+0      0% (434)+0      0% (432)+0      0% (502)+0      0% (459)+0      0% (390)+0      0% (479)+0      0% (341)+0     
+   VIIRS750 NOAA20       0% (66)+0       0% (442)+0      0% (482)+0      0% (477)+0      0% (487)+0      0% (458)+0      0% (494)+0      0% (500)+0      0% (334)+0     
+   VIIRS750 NOAA21       23% (78)+1      25% (433)+2     18% (486)+17    12% (456)+1     9% (485)+0      5% (472)+0      1% (483)+0      0% (474)+0      0% (324)+0     
+   VIIRS750 SNPP         0% (70)+0       0% (455)+0      0% (430)+0      0% (429)+0      0% (499)+0      0% (455)+0      0% (385)+0      0% (473)+0      0% (338)+0     
+
+[M3b] filas nocturnas de la TABLA por bucket y mes, repartidas segun el satelite de NUESTRO record a +-120 s
+   VIIRS375 2026-01 n= 339 | NOAA20 17%  SNPP 5%  sin_record_nuestro 78%
+   VIIRS375 2026-02 n= 498 | NOAA20 80%  SNPP 20%
+   VIIRS375 2026-03 n= 541 | NOAA20 82%  SNPP 16%  sin_record_nuestro 2%
+   VIIRS375 2026-04 n= 761 | NOAA20 55%  NOAA21 34%  SNPP 11%  sin_record_nuestro 0%
+   VIIRS375 2026-05 n= 804 | NOAA20 52%  NOAA21 33%  SNPP 14%  sin_record_nuestro 0%
+   VIIRS375 2026-06 n= 830 | NOAA20 48%  NOAA21 37%  SNPP 15%
+   VIIRS375 2026-07 n= 818 | NOAA20 50%  NOAA21 44%  SNPP 7%
+   VIIRS375 2026-08 n=1027 | NOAA20 43%  NOAA21 43%  SNPP 14%  sin_record_nuestro 0%
+   VIIRS375 2026-09 n= 718 | NOAA20 42%  NOAA21 43%  SNPP 15%
+   VIIRS750 2026-01 n= 355 | NOAA20 16%  SNPP 5%  sin_record_nuestro 79%
+   VIIRS750 2026-02 n= 519 | NOAA20 77%  SNPP 23%  sin_record_nuestro 0%
+   VIIRS750 2026-03 n= 562 | NOAA20 80%  SNPP 16%  sin_record_nuestro 4%
+   VIIRS750 2026-04 n= 851 | NOAA20 46%  NOAA21 43%  SNPP 10%  sin_record_nuestro 1%
+   VIIRS750 2026-05 n= 890 | NOAA20 51%  NOAA21 38%  SNPP 11%
+   VIIRS750 2026-06 n= 862 | NOAA20 46%  NOAA21 43%  SNPP 10%  sin_record_nuestro 0%
+   VIIRS750 2026-07 n= 788 | NOAA20 51%  NOAA21 41%  SNPP 7%  sin_record_nuestro 1%
+   VIIRS750 2026-08 n=1043 | NOAA20 41%  NOAA21 42%  SNPP 16%  sin_record_nuestro 1%
+   VIIRS750 2026-09 n= 757 | NOAA20 38%  NOAA21 39%  SNPP 23%  sin_record_nuestro 0%
