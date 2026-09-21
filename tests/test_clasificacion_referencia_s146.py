@@ -170,6 +170,14 @@ def test_provisorio_en_la_salida_real(referencia_real):
     (1) Si el campo no se persistiera, el primer assert falla. (2) Se exige n > 0 provisorias y
     tambien n > 0 firmes: con el calculo muerto en cualquiera de los dos lados, falla."""
     filas, _ = referencia_real
+    # S149: la referencia del repo es un corpus VIVO (se sincroniza cada hora). Este test exigia al
+    # menos una pasada provisoria en la ventana fija del 1 al 20 de septiembre, o sea que dependia de
+    # que la referencia todavia NO hubiera alcanzado el 20. El 2026-09-21 el OCR lo alcanzo (commit
+    # automatico de datos c7110374f) y el test dejo a main en rojo sin que nadie tocara codigo: es
+    # A90, un conteo sobre un corpus vivo. Se corta la referencia real en una fecha FIJA, de modo que
+    # la frontera quede dentro de la ventana para siempre: antes del corte hay firmes, despues
+    # provisorias. Sigue siendo la salida real, sobre records reales.
+    filas = [f for f in filas if f["fecha_utc"][:10] <= "2026-09-14"]
     doc = cr.construir(DATA, filas, ("2026-09-01", "2026-09-20"))
     ent = [e for d in doc.values() for e in d.values()]
     assert len(ent) > 500
