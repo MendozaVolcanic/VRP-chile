@@ -1400,6 +1400,65 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     lectura, A113 dice que la corrección tiene que heredarse también. Detalle: `docs/AUDIT_S146.md`
     §2 y §8, `docs/audit_s146/FRENTE_E_GRAFO_DE_CIERRES.md`.
 
+- **A114. Una palanca que satura la métrica esconde todas las demás, y un A/B corrido bajo esa
+  saturación no midió nada** (S147, regla general del workspace). Con el Test 1 integrado encendido,
+  la publicación en negativos limpios de VIIRS 375 es **80 a 92 % en cualquier estrato**: por zona
+  del barrido, por temperatura del fondo, por lo que sea. Al sacarlo aparece estructura que siempre
+  estuvo ahí (18,6 / 25,0 / 38,1 % del nadir al borde; 12,2 / 27,9 / 42,0 % del fondo tibio al
+  frío; 57 % en la celda borde con fondo frío contra 9 % en nadir con fondo tibio). El daño concreto:
+  S130 corrió el A/B de la caja de 5 × 5 km (D18) con el Test 1 encendido, encontró que
+  «redistribuye, no recorta» y la cerró como NO ADOPTAR. No podía encontrar otra cosa: el Test 1
+  publica por su cuenta sin mirar los umbrales contextuales. Es A95 y A111 por otra puerta.
+  - **How to apply**: (a) antes de medir el efecto de una palanca, estratificar la métrica por dos o
+    tres variables físicas y mirar si **varía**; si da casi lo mismo en todos los estratos, algo la
+    está saturando y hay que sacarlo primero; (b) al leer un cierre viejo del tipo «sin beneficio» o
+    «inerte», preguntar qué otra cosa estaba encendida ese día; (c) el brazo de control de un A/B
+    debe ser el régimen donde la palanca **puede** actuar, no necesariamente producción.
+    Instrumento: `experiments/_s147_residual/estructura_del_residual.py`.
+
+- **A115. Si un criterio necesita un umbral, se le pregunta a la referencia antes de inventarlo: el
+  objetivo del proyecto ordena la decisión** (S147, error propio que corrigió Nicolás; regla general).
+  Agregué al evaluador un criterio de posición del cúmulo (C7) con un umbral inventado, cero cúmulos
+  movidos más de 500 m, y se lo llevé a Nicolás como una decisión de gusto: «cuánto movimiento
+  toleras». Tenía la referencia de MIROVA congelada en el mismo directorio. Medido contra ella, el
+  criterio dispara en **94 de 96 casos fuera del universo que MIROVA puede arbitrar**, o sea que no
+  sirve para la réplica; y al mirarlo así apareció algo mejor que el criterio (la estabilidad del
+  cúmulo: 1,3 % donde MIROVA alertó contra 22,8 % donde no vio nada, con el confusor de magnitud
+  controlado).
+  - **How to apply**: para `mirova_equivalent` toda decisión se mide contra la base de datos de
+    MIROVA (CSV del scraper, OSF, TIF), no se elige; para `experimental` MIROVA **no puede** ser la
+    vara, porque se busca lo que ella no publica, y la validación va contra actividad conocida de
+    OVDAS y SWIR de alta resolución. O sea que los dos perfiles no necesitan los mismos criterios
+    con distinto umbral: **necesitan criterios distintos**. Si te descubres preguntándole al dueño
+    «cuánto toleras», primero revisa si el dato ya lo contesta.
+
+- **A116. Medir el efecto antes de llamarlo arreglo, y medir el nulo antes de creerle a un cero**
+  (S147, tres casos el mismo día; refuerza S126 y A110). (1) El plan daba por verificado que
+  `diario.html` graficaba lo que `index.html` oculta: cierto en la forma (0 usos de
+  `isValidDetection` contra 18) y **falso en el efecto**, porque cambia 0 de 4.448 records: las dos
+  condiciones dependen del mismo número. Quedó como guarda de coherencia, dicho en voz alta.
+  (2) El nulo estructural del evaluador del A/B acusaba al brazo C de inventar 392 publicaciones
+  que **el control también publica**; y peor, le daba verde al brazo B no por no inventar sino
+  porque apaga el camino que las hace publicar: el único brazo al que el nulo le funcionaba era
+  aquel para el que la pregunta no aplicaba. (3) Mi propia columna «en riesgo» daba cero en todas
+  las filas porque pedía una condición que el predicado del tablero hace imposible.
+  - **How to apply**: un cambio se declara arreglo cuando se midió **cuántos casos mueve**; un cero
+    se acepta cuando se mostró que el instrumento **puede** dar distinto de cero sobre esos datos; y
+    un nulo se valida corriéndolo sobre el control contra sí mismo y sobre un caso que deba fallar.
+
+- **A117. Un perfil derivado se vigila por DIRECCIÓN, no por valor** (S147). El perfil `experimental`
+  existe para ver más que el operacional, y su única diferencia eran tres pisos de magnitud
+  (0,005 / 0,05 / 0,02 MW). S130 bajó los del operacional a 0,0 y nadie actualizó el laboratorio:
+  durante **17 sesiones** el laboratorio fue estrictamente más ciego que el instrumento que estudia
+  (anulaba 5 de 1.755 records y no agregaba ninguno), con un test de S124 en verde que fijaba el
+  valor viejo y un comentario de `store.py` diciendo lo contrario. `experimental_ndc_focus` tenía el
+  mismo defecto. Nadie recibió un error: un laboratorio que ve menos no se nota mirando una pantalla.
+  - **How to apply**: cuando un perfil se define **en relación** a otro, el guard compara los dos
+    (`tests/test_guard_laboratorio_no_mas_ciego_s147.py`), no fija un número; y al cambiar un
+    parámetro del perfil padre, buscar quién lo sobrescribe (`grep` de la clave en
+    `pipeline/profiles/`). Hoy el laboratorio es **idéntico** al operacional salvo el directorio de
+    salida; su diferenciación real está diseñada en `docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md`.
+
 - **A39, enmienda S142**: "0 checks" recién abierto un PR es SIN DATO, no verde. #676 se mergeó así con el CI
   en rojo. Esperar el run con conclusión (`gh pr checks <N> --watch`) antes de mergear, y después de editar un
   documento correr `grep -rl <archivo> tests/` y la suite completa: un test puede leer ese documento.

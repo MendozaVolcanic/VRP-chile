@@ -30,7 +30,12 @@ LIMITES DECLARADOS:
   un producto FILTRADO, A105) contra el reparto de NUESTRAS pasadas (2025 a 2026). Sirve para la
   forma de la curva, no como tasa absoluta.
 
-Uso: python experiments/_s147_residual/estructura_del_residual.py
+Uso:
+  python experiments/_s147_residual/estructura_del_residual.py       --datos <dir con un subdirectorio por brazo> --control <brazo de referencia> --brazo <brazo a leer>
+Para leer los A/B de la conectiva y de la caja (pre-registros en experiments/_s147_ab_conectiva/):
+el control es `_s146_ab_sin_test1` (el brazo B) y el brazo es `_s147_ab_sin_test1_max`, `_caja` o
+`_caja_max`. La razon borde sobre nadir (prediccion P2) y la celda borde con fondo frio (P3) salen
+de la tabla de zonas y del cruce.
 """
 from __future__ import annotations
 import json
@@ -81,14 +86,25 @@ def tasa(sel):
 
 
 def main():
+    global DATOS
+    import argparse
+    ap = argparse.ArgumentParser(description="Estructura del residual por zona del barrido y fondo")
+    ap.add_argument("--datos", default=str(DATOS),
+                    help="directorio con un subdirectorio por brazo (los JSON por volcan adentro)")
+    ap.add_argument("--control", default="_s146_ab_control",
+                    help="brazo que se imprime primero, como referencia")
+    ap.add_argument("--brazo", default="_s146_ab_sin_test1",
+                    help="brazo al que se le imprime ademas el cruce zona por fondo")
+    a = ap.parse_args()
+    DATOS = Path(a.datos)
     coords = bp._coords_por_volcan()
     inner = bp.inner_desde_html()
     filas = cargar_referencia_unificada(CONGELADO / "registro_vrp_consolidado.csv",
                                         CONGELADO / "registro_vrp_ocr.csv")
     por_vb, ns, nv, _ = bp.indexar_referencia(filas, coords, VENTANA)
 
-    for brazo, nombre in (("_s146_ab_control", "CONTROL (produccion)"),
-                          ("_s146_ab_sin_test1", "SIN TEST 1")):
+    for brazo, nombre in ((a.control, f"REFERENCIA ({a.control})"),
+                          (a.brazo, f"BRAZO ({a.brazo})")):
         d = [(r, x) for r, x in cargar(brazo, por_vb, ns, nv, coords, inner)
              if r["b"] == "VIIRS375" and x.get("sensor_zenith_deg") is not None
              and x.get("t_bg_k") is not None]
@@ -100,7 +116,7 @@ def main():
         for t in FONDOS:
             print(f"fondo {t:12} {tasa([r for r, x in d if fondo(x['t_bg_k']) == t and r['lab'] == 'neg_limpio']):>30} "
                   f"{tasa([r for r, x in d if fondo(x['t_bg_k']) == t and r['lab'] == 'pos']):>24}")
-        if brazo.endswith("sin_test1"):
+        if brazo == a.brazo:
             print("\n  cruce, solo negativos limpios:")
             print(f"  {'':16}" + "".join(f"{t:>22}" for t in FONDOS))
             for z in ZONAS:
