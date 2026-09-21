@@ -1,0 +1,49 @@
+negativas por zona {'medio': 55, 'nadir': 116, 'borde': 153} | positivas 129
+publica B: 220 (neg 95, pos 125) | publica F: 134 (neg 10, pos 124)
+observado: razon borde/nadir F = 0.253, positivas que sobreviven = 124
+
+## NULO 1: endurecimiento parejo. De las 220 publicadas por B se conservan 134 al azar, sin mirar etiqueta
+   positivas conservadas bajo el nulo: p2.5 69, mediana 76, p97.5 83, max 90 | observado 124 | P(nulo >= obs) = 0.00000
+   negativas conservadas bajo el nulo: p2.5 51, mediana 58, p97.5 65, min 44 | observado 10
+
+## NULO 2: solo dentro de las negativas. De las 95 publicadas por B se conservan 10 al azar: razon borde/nadir
+   razon bajo el nulo: p2.5 0.61, mediana 2.27, p97.5 inf | observado 0.253 | P(nulo <= obs) = 0.00220 | P(nulo <= 1.3) = 0.2566
+   borde con fondo frio conservadas bajo el nulo: mediana 4, p2.5 2 | observado 2 | P(nulo <= obs) = 0.0928
+
+## NULO 3: etiquetas de zona barajadas entre las 324 negativas (la zona no importa): razon F
+   P(razon <= 0.253) con la zona barajada = 0.0440 (mediana del nulo 1.01)
+
+## INCERTIDUMBRE de la razon F (2 de 153 contra 6 de 116): bootstrap por pasada
+   IC 95 % bootstrap: 0.00 a 1.17 | fraccion de remuestras con razon <= 1.3: 0.980
+
+## CORTE DE MAGNITUD EQUIVALENTE: si en vez de `max` se pusiera un piso de MW sobre lo que B publica
+   piso_MW  neg_pub  pos_pub  razon_b/n
+   0.000     95      125     2.10
+   0.020     66      122     1.56
+   0.030     43      119     0.95
+   0.040     32      112     0.82
+   0.050     24       99     0.69
+   0.060     14       93     0.65
+   0.080      8       79     1.01
+   0.100      4       65     0.38
+   piso mas alto que conserva >= 124 positivas: (0.0079, 85, 124) (piso, neg, pos)
+   magnitud B de las 85 negativas apagadas: mediana 0.0259 | de las 10 que sobreviven: mediana 0.0517 | de las 124 pos: mediana 0.1063
+   distancia al crater (B) de las 85 apagadas: mediana 2.96 km | de las 10 que sobreviven: 0.45 | de las pos: 0.28
+
+## POR VOLCAN (V375): negativas pub B -> F por zona, y positivas
+   Chaiten              nadir 4>1/11  medio 2>0/8  borde 8>0/12 | pos 8>8/8
+   Copahue              nadir 0>0/19  medio 0>0/9  borde 4>0/22 | pos 0>0/0
+   Isluga               nadir 0>0/1  medio 1>0/2  borde 1>0/3 | pos 31>31/32
+   Lascar               nadir 3>1/7  medio 2>2/4  borde 6>0/8 | pos 18>18/18
+   Lastarria            nadir 3>2/7  medio 0>0/1  borde 4>2/9 | pos 9>8/9
+   Llaima               nadir 2>0/17  medio 3>0/8  borde 5>0/26 | pos 0>0/0
+   NevadosDeChillan     nadir 1>0/14  medio 1>0/10  borde 6>0/21 | pos 1>1/3
+   PlanchonPeteroa      nadir 2>2/10  medio 0>0/3  borde 4>0/16 | pos 8>8/8
+   PuyehueCordonCaulle  nadir 5>0/8  medio 1>0/1  borde 9>0/9 | pos 27>27/27
+   Tupungatito          nadir 0>0/5  medio 0>0/0  borde 6>0/9 | pos 19>19/20
+   Villarrica           nadir 2>0/17  medio 2>0/9  borde 8>0/18 | pos 4>4/4
+
+## ZONA: el cenit del record cambia entre brazos? (el instrumento clasifica cada brazo con SU cenit)
+   VIIRS375 n=814 | cenit distinto en 240 | dif max 2.03 grados | cambian de zona 0 (de ellas neg: 0)
+   VIIRS750 n=809 | cenit distinto en 60 | dif max 0.86 grados | cambian de zona 1 (de ellas neg: 1)
+   MODIS n=399 | cenit distinto en 385 | dif max 2.62 grados | cambian de zona 10 (de ellas neg: 10)

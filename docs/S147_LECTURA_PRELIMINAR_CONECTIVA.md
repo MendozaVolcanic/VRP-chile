@@ -1,5 +1,13 @@
 # A/B de la conectiva: lectura PRELIMINAR (S147, después del cierre)
 
+> ⚠️ **S148: auditada por un verificador con contexto limpio. SE SOSTIENE CON SALVEDADES**, sin hallazgos
+> de gravedad 4 o 5 (`docs/audit_s148/VERIFICADOR_LECTURA_CONECTIVA.md`, scripts en
+> `experiments/_s148_verificador_conectiva/`). Tres salvedades que cambian cómo se lee lo de abajo:
+> (H1) «P2 se invierte» está sobre-enunciado: la razón 0,25 sale de 2 contra 6 publicaciones; lo
+> robusto es que P2 queda en 1,3 o menos. (H2) La magnitud publicada en las positivas BAJA con `max`
+> (la paridad contra MIROVA va de 0,781 a 0,716): el cúmulo pierde vecinos. (H3) Parte del recall de F
+> vive sólo del segundo pase, que corre sin píxeles del primero. Sigue sin ser el veredicto.
+
 > ⚠️ **ESTO NO ES EL VEREDICTO.** El run **35548121381** terminó con 22 de 22 reprocesos en verde
 > pero con el brazo de **control corto en 71 pasadas**. La regla pre-registrada es INDECIDIBLE hasta
 > reparar, y se respeta: la reparación está despachada (run **35558196104**, repetición 1 de 2).
