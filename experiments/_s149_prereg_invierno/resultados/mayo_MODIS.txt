@@ -1,0 +1,35 @@
+ventana ['2026-05-01', '2026-05-31'] | sensor MODIS | pasadas en ambos brazos: 733
+
+P1. publicacion en negativos limpios (n 668): control 8.7 % | brazo 0.0 %
+    INDECIDIBLE: el control ya publica 18 % o menos, el umbral se cumpliria sin que el brazo haga nada (H7)
+
+P2. razon de la tasa falsa borde sobre nadir
+    nadir  n 252 | control  22 | brazo   0
+    medio  n 169 | control  15 | brazo   0
+    borde  n 247 | control  21 | brazo   0
+    razon control 0.97 | brazo 0.00 | CUMPLE (umbral 1.3 o menos)
+
+P4. recall por pasada
+    positivas 11 | publica el control 0 | de esas conserva el brazo 0 | piso ceil(n_B x 118/141) = 0 | perdidas con 0.5 MW o mas: 0 | CUMPLE
+    con la tabla de MIROVA sola, sin OCR: positivas 11 | control 0 | brazo conserva 0 | piso 0 | perdidas con 0.5 MW o mas: 0 | CUMPLE
+    DECIDE: la version con la TABLA SOLA (la ventana empieza antes del 2026-06-13, A119); la otra se informa
+
+P5. pasadas que MIROVA lista con VRP 0 en noche con alerta del sensor
+    n 6 | control 0 (0.0 %) | brazo 0 (0.0 %) | razon brazo sobre control nan | un apagado parejo daria 0.00 | sin sustrato (menos de 20 publicadas por el control)
+       MODIS_TERRA: 3
+       MODIS_AQUA: 3
+       supervivencia de lo que publica el control en negativos limpios:   0 de  58 (0 %)
+       supervivencia de lo que publica el control en este estrato:        0 de   0 (0 %)
+       supervivencia de lo que publica el control en positivas:           0 de   0 (0 %)
+
+P6 (informativa, sin poder para decidir: H6). Villarrica y Nevados de Chillan, positivas una por una
+
+C8b. selectividad a una cola (misma definicion que evaluar.selectividad_supervivencia)
+    con tabla y OCR:                   sin sustrato
+    con la tabla sola (sin OCR):       sin sustrato
+
+Que etiqueta DECIDE en esta ventana (A119): SOLO la tabla; el OCR se informa aparte
+[referencia MIROVA] la ventana 2026-05-01 a 2026-05-31 pisa 3 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)

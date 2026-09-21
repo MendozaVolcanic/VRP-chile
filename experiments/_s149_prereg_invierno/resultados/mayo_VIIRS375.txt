@@ -1,0 +1,59 @@
+ventana ['2026-05-01', '2026-05-31'] | sensor VIIRS375 | pasadas en ambos brazos: 1478
+
+P1. publicacion en negativos limpios (n 349): control 30.1 % | brazo 2.3 %
+    CUMPLE (umbral: brazo en 18 % o menos)
+
+P2. razon de la tasa falsa borde sobre nadir
+    nadir  n  85 | control  13 | brazo   3
+    medio  n  70 | control  23 | brazo   1
+    borde  n 194 | control  69 | brazo   4
+    razon control 2.33 | brazo 0.58 | CUMPLE (umbral 1.3 o menos)
+
+P4. recall por pasada
+    positivas 296 | publica el control 288 | de esas conserva el brazo 276 | piso ceil(n_B x 118/141) = 242 | perdidas con 0.5 MW o mas: 2 | FALLA
+       perdida: Lastarria            2026-05-02 05:06 | MIROVA 2.360 MW | VIIRS_SNPP | alerta solo por OCR
+       perdida: Isluga               2026-05-25 06:30 | MIROVA 0.040 MW | VIIRS_NOAA20
+       perdida: Isluga               2026-05-29 04:54 | MIROVA 0.860 MW | VIIRS_SNPP | alerta solo por OCR
+       perdida: Tupungatito          2026-05-03 06:30 | MIROVA 0.060 MW | VIIRS_SNPP | alerta solo por OCR
+       perdida: Tupungatito          2026-05-18 06:48 | MIROVA 0.050 MW | VIIRS_SNPP
+       perdida: Tupungatito          2026-05-23 04:42 | MIROVA 0.120 MW | VIIRS_NOAA21
+       perdida: Tupungatito          2026-05-24 06:36 | MIROVA 0.050 MW | VIIRS_SNPP
+       perdida: PuyehueCordonCaulle  2026-05-03 05:06 | MIROVA 0.080 MW | VIIRS_NOAA20
+       perdida: PuyehueCordonCaulle  2026-05-05 05:54 | MIROVA 0.230 MW | VIIRS_SNPP | alerta solo por OCR
+       perdida: PuyehueCordonCaulle  2026-05-31 04:42 | MIROVA 0.020 MW | VIIRS_NOAA20
+       perdida: Chaiten              2026-05-19 05:06 | MIROVA 0.070 MW | VIIRS_NOAA20
+       perdida: Chaiten              2026-05-19 06:48 | MIROVA 0.050 MW | VIIRS_NOAA20
+    con la tabla de MIROVA sola, sin OCR: positivas 198 | control 195 | brazo conserva 187 | piso 164 | perdidas con 0.5 MW o mas: 0 | CUMPLE
+    DECIDE: la version con la TABLA SOLA (la ventana empieza antes del 2026-06-13, A119); la otra se informa
+
+P5. pasadas que MIROVA lista con VRP 0 en noche con alerta del sensor
+    n 159 | control 77 (48.4 %) | brazo 28 (17.6 %) | razon brazo sobre control 0.36 | un apagado parejo daria 0.62 | CUMPLE
+       VIIRS_NOAA20: 77
+       VIIRS_NOAA21: 48
+       VIIRS_SNPP: 34
+       supervivencia de lo que publica el control en negativos limpios:   8 de 105 (8 %)
+       supervivencia de lo que publica el control en este estrato:       28 de  77 (36 %)
+       supervivencia de lo que publica el control en positivas:         276 de 288 (96 %)
+
+P6 (informativa, sin poder para decidir: H6). Villarrica y Nevados de Chillan, positivas una por una
+    NevadosDeChillan   2026-05-02 05:24 | MIROVA 0.030 MW | control 0 | brazo 0
+    NevadosDeChillan   2026-05-14 05:48 | MIROVA 0.060 MW | control 0 | brazo 0
+    Villarrica         2026-05-11 06:00 | MIROVA 0.310 MW | control 1 | brazo 1
+    Villarrica         2026-05-14 05:48 | MIROVA 0.310 MW | control 1 | brazo 1
+    Villarrica         2026-05-15 06:06 | MIROVA 0.050 MW | control 1 | brazo 1
+    Villarrica         2026-05-17 05:48 | MIROVA 0.210 MW | control 1 | brazo 1
+    Villarrica         2026-05-19 05:54 | MIROVA 0.420 MW | control 1 | brazo 1
+    Villarrica         2026-05-22 05:54 | MIROVA 0.550 MW | control 1 | brazo 1
+    Villarrica         2026-05-26 06:00 | MIROVA 0.110 MW | control 1 | brazo 1
+    Villarrica         2026-05-30 05:48 | MIROVA 0.220 MW | control 1 | brazo 1
+    Villarrica         2026-05-31 06:06 | MIROVA 0.220 MW | control 1 | brazo 1
+
+C8b. selectividad a una cola (misma definicion que evaluar.selectividad_supervivencia)
+    con tabla y OCR:                   observado +0.8821 | p97,5 del nulo +0.4923 | CUMPLE
+    con la tabla sola (sin OCR):       observado +0.8828 | p97,5 del nulo +0.5165 | CUMPLE
+
+Que etiqueta DECIDE en esta ventana (A119): SOLO la tabla; el OCR se informa aparte
+[referencia MIROVA] la ventana 2026-05-01 a 2026-05-31 pisa 3 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
