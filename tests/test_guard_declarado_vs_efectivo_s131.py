@@ -150,11 +150,12 @@ CITAS_CLAUDE_MD = [
     ("frontend/index.html", 1466, "isValidDetection"),
     # S140: corridas por el import de product_version (8b) y por el fondo persistido (T7).
     ("pipeline/process_viirs.py", 83, "FLAG_DNS"),
-    ("pipeline/process_viirs_mod.py", 465, "Villarrica/PP/Lastarria/Chaiten/PCC"),
-    ("pipeline/process_viirs.py", 212, "compute_test1_nti"),
+    # S149: +1 en los tres procesadores por el import de roi1_summit_mask (A118, la caja al segundo pase).
+    ("pipeline/process_viirs_mod.py", 466, "Villarrica/PP/Lastarria/Chaiten/PCC"),
+    ("pipeline/process_viirs.py", 213, "compute_test1_nti"),
     # S147: 59 -> 62, la cabecera FICHA crecio al retirar la cita bibliografica de D30.
     ("pipeline/process_modis.py", 62, "compute_test1_mir"),
-    ("pipeline/process_viirs_mod.py", 162, "compute_test1_mir"),
+    ("pipeline/process_viirs_mod.py", 163, "compute_test1_mir"),
     ("scripts/build_c2ab_windows.py", 64, "registro_vrp_ocr.csv"),
 ]
 

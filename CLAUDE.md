@@ -856,7 +856,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     desenlace **NO está en producción**: `ENABLE_TEST1_NTI_INTEGRAL = False` (verificado
     con `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p;
     print(p.ENABLE_TEST1_NTI_INTEGRAL)"`), y la rama `compute_test1_nti` existe **sólo en
-    `process_viirs.py:212/1111`** (era 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:62` (era 59 hasta S147, la cabecera FICHA creció al retirar la cita de D30) y `process_viirs_mod.py:162`
+    `process_viirs.py:213/1112`** (era 212/1111 hasta S149, 211/1080 tras la 8b de S140, 210/1079 antes, 208/1070 antes de S135, y 958 antes); `process_modis.py:62` (era 59 hasta S147, la cabecera FICHA creció al retirar la cita de D30) y `process_viirs_mod.py:163`
     (eran 674/665; líneas actualizadas S131) importan únicamente `compute_test1_mir`, sin alternativa. **La causa raíz que A69
     describe sigue viva en los 3 sensores.** Ni encendiendo el flag se cura MODIS/V750,
     que es donde el píxel grande amplifica el gradiente (A80). Caso de manual de A87:
@@ -1150,7 +1150,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 
   **El corolario incómodo**: las cinco veces el error fue de quien estaba **auditando**,
   no de quien escribió el código — y dos de esas veces el texto correcto ya estaba en el
-  repo (el docstring de `process_viirs_mod.py:465` (era 439 tras la 8b de S140, 438 antes, 436 hasta S135, 416 en S131 y 409 antes) nombraba los 5 volcanes opt-in desde
+  repo (el docstring de `process_viirs_mod.py:466` (era 465 hasta S149, 439 tras la 8b de S140, 438 antes, 436 hasta S135, 416 en S131 y 409 antes) nombraba los 5 volcanes opt-in desde
   S72). La técnica se equivoca en la misma dirección que el defecto que busca, así que un
   hallazgo de la forma «esto está muerto» exige verificación cruzada antes de reportarse.
   Detalle: `docs/AUDIT_S127.md` + T9 en `docs/PROTOCOLO_AUDITORIA_PROFUNDA.md`.
@@ -1463,7 +1463,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   y un evaluador sólo ve los estratos que etiqueta** (S148, dos casos la misma noche; regla
   general). (1) `enable_roi1_box_paper` entregaba la caja de 5 × 5 km sólo al primer pase. El
   segundo pase (`second_pass_adjacent`) seguía recibiendo el círculo de `inner_radius_km`
-  (`pipeline/process_viirs.py:1313`), corre sin condicionar sobre toda la escena, y recapturaba con
+  (`pipeline/process_viirs.py:1313` al momento del hallazgo; **arreglado en S149**: los tres procesadores arman hoy esa máscara con `roi1_summit_mask(..., _roi1_mask)` y lo vigila `tests/test_guard_caja_llega_al_segundo_pase_s149.py`, con el flag todavía apagado), corre sin condicionar sobre toda la escena, y recapturaba con
   el umbral permisivo lo que el primero acababa de rechazar con el estricto: en los 51 negativos de
   fuera de la caja el primer pase cayó de 86 a 7 píxeles, la recaptura subió de 98 a 175 y el cúmulo
   publicado quedó idéntico en los 51. El cero estaba **bien medido** (el flag se leía desde
