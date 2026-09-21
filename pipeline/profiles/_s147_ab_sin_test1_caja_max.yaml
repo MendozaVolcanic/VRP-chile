@@ -1,0 +1,31 @@
+# A/B S147, segunda tanda. Ver experiments/_s147_ab_conectiva/PREREGISTRO_CAJA.md, escrito y
+# commiteado ANTES de correr.
+#
+# EL FENOMENO. MIROVA aplica sus umbrales permisivos (C1 = 0,003 y C2 = 5 de noche) solo dentro de
+# una CAJA de 5 x 5 km sobre la cumbre, y afuera sube a C1 = 0,01 y C2 = 10. Coppola et al. 2023
+# (Front. Earth Sci. 11:1240107, p. 3, vista en imagen) dice para que: "slightly higher thresholds
+# which reduce false alerts". La replica aplica los umbrales permisivos en un CIRCULO de 3 a 20 km
+# segun el volcan: el de 5 km cubre 3,1 veces la superficie de la caja, el de 20 km de Puyehue
+# Cordon Caulle 50 veces. El residual de sobre-publicacion, medido en S147, esta a 2,88 km de
+# mediana del crater, y el 60 % de sus cumulos cae FUERA de esa caja, contra el 32 % de lo que
+# MIROVA si alerto.
+#
+# POR QUE SE RE-MIDE. S130 corrio este mismo flag y concluyo NO ADOPTAR por ausencia de beneficio
+# ("redistribuye, no recorta"). Pero lo midio con el Test 1 integrado ENCENDIDO, que publica por su
+# cuenta sin mirar los umbrales contextuales y satura la tasa entre 80 y 92 % en cualquier estrato:
+# con el encendido, ninguna estructura es visible. Y su criterio no tenia negativos limpios, que no
+# existian como instrumento hasta S139.
+#
+# NO OPERACIONAL: data_subdir aislado, fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s147_ab_sin_test1_caja_max
+description: >
+  Brazo H: sin el Test 1 integrado, con la caja de 5 x 5 km del paper Y la conectiva de prosa (max).
+
+paths:
+  enable_test1_path: false
+  enable_roi1_box_paper: true
+  enable_tests_23_prose_branch: true
+
+output:
+  data_subdir: _s147_ab_sin_test1_caja_max
