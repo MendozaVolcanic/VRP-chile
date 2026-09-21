@@ -2251,6 +2251,21 @@ para un A/B, no para afirmar el origen exacto.
 
 ## D18 — El ROI1 del paper es una CAJA de 5 km igual para todos; el nuestro es un CÍRCULO de 3 a 20 km por volcán — **ABIERTA (A/B corrido S130 → NO ADOPTAR; divergencia de fidelidad literal, prioridad baja)** S129/S130
 
+> ⚠️ **S148: el «NO ADOPTAR, redistribuye y no recorta» de S130 y el «0 de 51» del brazo G de S148
+> NO miden la caja: miden un defecto de cableado.** `enable_roi1_box_paper` entrega la caja sólo
+> al primer pase. El segundo pase (`second_pass_adjacent`) recibe
+> `is_summit_mask = vent_dist_per_pixel <= inner_radius_km`, o sea el círculo de siempre
+> (`pipeline/process_viirs.py:1313`, y el mismo patrón en `process_modis.py:923` y
+> `process_viirs_mod.py:892`), corre sin condicionar sobre toda la escena y vuelve a capturar con
+> el umbral permisivo lo que el primer pase acaba de rechazar con el estricto. Medido en los 51
+> negativos limpios de fuera de la caja: el primer pase cae de 86 a 7 píxeles y la recaptura sube
+> de 98 a 175; el cúmulo publicado queda idéntico en los 51. **D18 nunca se ha medido con la caja
+> en los dos pases**, así que su «prioridad baja» no tiene respaldo. Que S130 corrió con este
+> mismo cableado es SOSPECHA razonable (el código del flag es de S130), no verificada.
+> Evidencia: `docs/audit_s148/POR_QUE_LA_CAJA_NO_APAGA.md`. Arreglarlo toca `pipeline/process_*.py`
+> (A45: tag y confirmación de Nicolás). El texto que sigue se conserva por historia.
+
+
 > **S141, citas del grupo verificadas renderizando las páginas** (`VERIFICADOR_LECTORES.md` V-02, V-06, V-10).
 > (1) El ROI de cumbre sigue siendo una caja de 5 × 5 km en 2023: «in the summit area (5 × 5 km) slightly lower thresholds
 > are applied», y a mayor distancia umbrales algo más altos «which reduce false alerts», sin valores (Coppola et al. 2023,
