@@ -1,0 +1,48 @@
+== a. C8 frente a un apagador AL AZAR (misma cantidad que F por volcan y sensor), 200 semillas
+  apagador al azar: contraste mediano 0.2147, rango 0.1528 a 0.2765 | 'fuera del nulo' (C8 cumplido) en 200 de 200
+  brazo F observado: -0.1082 (lado opuesto al apagador al azar)
+
+== b. poder de P2: si F apagara PAREJO las publicaciones del control en negativos V375 (sobreviven 10 de 111 al azar)
+  bajo apagado parejo P2<=1,3 se cumple por azar en 24.2 % de 5000 sorteos (razon indefinida en 8.0 %); P2<=0,25 en 0.24 %
+
+== c. noches con alerta: perdidas con definicion propia
+  unidad volcan (solo pasadas pos): noches con alerta 78 | control publica 74 | brazo 73 | perdidas [('Lastarria', '2026-09-04')]
+     variante cualquier pasada de esa noche: perdidas [('Isluga', '2026-09-19')]
+  unidad volcan+sensor (solo pasadas pos): noches con alerta 90 | control publica 83 | brazo 82 | perdidas [('Lastarria', 'VIIRS375', '2026-09-04')]
+     variante cualquier pasada de esa noche: perdidas [('Isluga', 'VIIRS375', '2026-09-19')]
+
+== d. MODIS y los otros: pasadas con pixeles de primer pase, ventana completa
+  MODIS n 467 | n_fp>0: B 465 F 1 | F publica 1, de ellas con n_fp==0: 0
+  VIIRS750 n 957 | n_fp>0: B 60 F 21 | F publica 26, de ellas con n_fp==0: 20
+  VIIRS375 n 962 | n_fp>0: B 348 F 229 | F publica 201, de ellas con n_fp==0: 52
+  MODIS neg_limpio n 440 | n_fp>0: B 439 F 0
+
+== e. cruce con resultado_F del documento
+   Chaiten|VIIRS375 {'n': 8, 'mediana_control': 1.3101, 'mediana_brazo': 1.249}
+   Isluga|VIIRS375 {'n': 31, 'mediana_control': 0.4692, 'mediana_brazo': 0.4692}
+   Lascar|VIIRS375 {'n': 18, 'mediana_control': 0.4775, 'mediana_brazo': 0.473}
+   Lastarria|VIIRS375 {'n': 8, 'mediana_control': 1.2108, 'mediana_brazo': 1.2108}
+   PlanchonPeteroa|VIIRS375 {'n': 8, 'mediana_control': 1.106, 'mediana_brazo': 1.106}
+   PuyehueCordonCaulle|VIIRS375 {'n': 32, 'mediana_control': 1.0602, 'mediana_brazo': 0.9185}
+   PuyehueCordonCaulle|VIIRS750 {'n': 8, 'mediana_control': 0.3361, 'mediana_brazo': 0.3361}
+   TODOS|VIIRS375 {'n': 135, 'mediana_control': 0.7895, 'mediana_brazo': 0.7129}
+   TODOS|VIIRS750 {'n': 13, 'mediana_control': 0.4, 'mediana_brazo': 0.4}
+   Tupungatito|VIIRS375 {'n': 24, 'mediana_control': 0.4365, 'mediana_brazo': 0.3774}
+   Villarrica|VIIRS375 {'n': 5, 'mediana_control': 1.0144, 'mediana_brazo': 1.0144}
+  C4_peor_estrato: ['TODOS|VIIRS375', 0.0766]
+  C4 sin muestra: []
+  posicion: pares 228 movidos 13 mediana 0.0 p90 0.377
+     {'pasada': 'Lastarria|VIIRS375|2026-09-02 05:18', 'km': 1.83, 'fuente_control': 'ctx_cluster', 'fuente_brazo': 'ctx_cluster'}
+     {'pasada': 'Lastarria|VIIRS375|2026-09-02 06:06', 'km': 0.762, 'fuente_control': 'ctx_cluster', 'fuente_brazo': 'ctx_cluster'}
+     {'pasada': 'Lastarria|VIIRS375|2026-09-04 06:00', 'km': 0.842, 'fuente_control': 'ctx_cluster', 'fuente_brazo': 'ctx_cluster'}
+     {'pasada': 'Lastarria|VIIRS375|2026-09-06 05:42', 'km': 0.776, 'fuente_control': 'ctx_cluster', 'fuente_brazo': 'ctx_cluster'}
+     {'pasada': 'Lastarria|VIIRS375|2026-09-11 05:54', 'km': 1.537, 'fuente_control': 'ctx_cluster', 'fuente_brazo': 'ctx_cluster'}
+     {'pasada': 'Lastarria|VIIRS375|2026-09-12 06:18', 'km': 1.281, 'fuente_control': 'ctx_cluster', 'fuente_brazo': 'ctx_cluster'}
+     {'pasada': 'Lastarria|VIIRS375|2026-09-14 05:42', 'km': 0.855, 'fuente_control': 'ctx_cluster', 'fuente_brazo': 'ctx_cluster'}
+     {'pasada': 'Lastarria|VIIRS375|2026-09-14 06:18', 'km': 0.767, 'fuente_control': 'ctx_cluster', 'fuente_brazo': 'ctx_cluster'}
+     {'pasada': 'Lastarria|VIIRS375|2026-09-15 05:18', 'km': 1.444, 'fuente_control': 'ctx_cluster', 'fuente_brazo': 'ctx_cluster'}
+     {'pasada': 'Lastarria|VIIRS375|2026-09-15 05:54', 'km': 1.194, 'fuente_control': 'ctx_cluster', 'fuente_brazo': 'ctx_cluster'}
+     {'pasada': 'Tupungatito|VIIRS375|2026-09-20 06:06', 'km': 3.06, 'fuente_control': 'ctx_cluster', 'fuente_brazo': 'ctx_cluster'}
+     {'pasada': 'Villarrica|MODIS|2026-09-04 07:50', 'km': 1.328, 'fuente_control': 'eruption', 'fuente_brazo': 'eruption'}
+     {'pasada': 'PuyehueCordonCaulle|VIIRS375|2026-09-16 05:42', 'km': 3.927, 'fuente_control': 'ctx_cluster', 'fuente_brazo': 'ctx_cluster'}
+  mi corrida del evaluador da el mismo bloque del brazo que el JSON del documento: True

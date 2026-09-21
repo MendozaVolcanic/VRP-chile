@@ -1,0 +1,51 @@
+== a. nulo barajado, reimplementado (obs, p2.5, p97.5, media)
+  brazo F real: (-0.1082, 0.0498, 0.146, 0.0965)
+  F apaga 175 de 338 | corte parejo de magnitud = 0.0852 MW, apaga 175
+  contrafactual endurecimiento parejo por magnitud (un solo corte en MW): (0.304, 0.2353, 0.3383, 0.2863)
+     ese contrafactual pierde positivas: 62 | deja negativos: 74
+     corte por sensor VIIRS375 0.0471 MW
+     corte por sensor VIIRS750 0.2670 MW
+     corte por sensor MODIS 10.6230 MW
+  contrafactual corte parejo POR SENSOR: (0.1047, 0.0704, 0.1666, 0.1187) | pierde positivas: 33 | deja negativos V375: 31
+  contrafactual apagado al azar dentro del estrato (debe caer DENTRO del nulo): (0.2215, 0.0498, 0.1391, 0.0961)
+
+== b. costos que el evaluador no cuenta
+  VIIRS375 sin_info 416 (B 161, F 48) | de ellas en noche con alerta de MIROVA en el volcan: 171 (B 84, F 34)
+  VIIRS375 far_ref 30 (B 15, F 8)
+  VIIRS750 sin_info 315 (B 26, F 9) | de ellas en noche con alerta de MIROVA en el volcan: 120 (B 16, F 9)
+  VIIRS750 far_ref 2 (B 0, F 0)
+  MODIS sin_info 26 (B 2, F 0) | de ellas en noche con alerta de MIROVA en el volcan: 5 (B 0, F 0)
+  MODIS far_ref 0 (B 0, F 0)
+  far_ref V375 que F apaga:
+     Lastarria VIIRS375 2026-09-08 05:06 dispB 0.0338
+     Isluga VIIRS375 2026-09-12 06:18 dispB 0.0115
+     Isluga VIIRS375 2026-09-17 05:36 dispB 0.1489
+     Isluga VIIRS375 2026-09-19 05:00 dispB 0.0364
+     PlanchonPeteroa VIIRS375 2026-09-10 05:54 dispB 0.0301
+     PlanchonPeteroa VIIRS375 2026-09-11 05:54 dispB 0.0145
+     PuyehueCordonCaulle VIIRS375 2026-09-10 04:36 dispB 0.0479
+  V375 sin_info en noche con alerta, apagadas por F: 50, por volcan {'Lascar': 2, 'Lastarria': 3, 'Isluga': 5, 'Tupungatito': 8, 'PlanchonPeteroa': 3, 'NevadosDeChillan': 1, 'Villarrica': 5, 'PuyehueCordonCaulle': 10, 'Chaiten': 13}
+     mediana dispB de esas: 0.0294 MW; con dispB>=0.1: 5
+
+== c. sensor_zenith_deg entre brazos (mismo granulo)
+  n 2386 | distintos >0.01: 817 | max 2.620 | >1 grado: 169 | cambian de zona: 13
+
+== d. magnitud par a par contra MIROVA, V375 positivas publicadas por ambos
+  pares 135 | cambian 31 | de los que cambian, F queda MAS CERCA de MIROVA en 11 y mas lejos en 20
+    Chaiten                cambian  1 | mas cerca  1 | mas lejos  0
+    Isluga                 cambian  1 | mas cerca  0 | mas lejos  1
+    Lascar                 cambian  4 | mas cerca  0 | mas lejos  4
+    PuyehueCordonCaulle    cambian 21 | mas cerca 10 | mas lejos 11
+    Tupungatito            cambian  3 | mas cerca  0 | mas lejos  3
+    Villarrica             cambian  1 | mas cerca  0 | mas lejos  1
+  B error log absoluto mediano 0.5097 | medio 0.6601
+  F error log absoluto mediano 0.5097 | medio 0.6669
+
+== e. selectividad por zona en negativos V375: supervivencia de las publicaciones del control
+   nadir: sobreviven 6 de 24
+   medio: sobreviven 2 de 17
+   borde: sobreviven 2 de 70
+   Fisher nadir contra borde: SignificanceResult(statistic=np.float64(11.333333333333334), pvalue=np.float64(0.0031443371571869866))
+   nadir mediana dispB de negativos publicados por el control: 0.0498 MW (n 24)
+   medio mediana dispB de negativos publicados por el control: 0.0370 MW (n 17)
+   borde mediana dispB de negativos publicados por el control: 0.0246 MW (n 70)
