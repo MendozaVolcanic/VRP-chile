@@ -1483,6 +1483,28 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
     aparte. Detalle: `docs/audit_s148/POR_QUE_LA_CAJA_NO_APAGA.md` y
     `docs/audit_s148/VERIFICADOR_RESULTADO_CONECTIVA.md`.
 
+- **A119. Antes de usar los CSV de la referencia de MIROVA, mirar desde cuándo sirve cada canal: la
+  base no tiene la misma calidad todo el año, y el defecto es NUESTRO, no de MIROVA** (S149, regla de
+  Nicolás). La tabla `latest.php` arrancó incompleta y el OCR de las imágenes estuvo inestable primero y
+  mal calibrado después. Un análisis que cruza uno de esos tramos sin saberlo no da error: da un número
+  plausible y equivocado. Ya estaba medido en S139 (`docs/audit_s139/MAPA_BASES_MIROVA_V1.md` §2) y en
+  S149 igual elegí una ventana de A/B sin mirarlo, porque vivía sólo en un informe.
+  - **Tabla** (canal CONS, de donde salen TODAS las RUTINA y todo MODIS): cobertura nocturna 86 % en
+    enero, 95 % en febrero, **99 a 100 % desde marzo**. Tupungatito no existe antes del 2026-02-14.
+    **MODIS está completo y es plano todo el año** (0 alertas MODIS dependen del OCR, medido S149).
+  - **OCR** (sólo aporta alertas VIIRS que la tabla no trae, 20 a 39 % de las de VIIRS 375 entre marzo y
+    agosto): inestable hasta el 2026-02-24, **geometría mal calibrada hasta el 2026-06-11**, **sin
+    distancia medida hasta el 2026-06-13**, versión 30.0 desde el 2026-08-06. Sin reproceso retroactivo.
+  - **Tasas por pasada de VIIRS**: la tabla expone más gránulos por noche desde abril (1,6 a 1,8 antes;
+    3,0 a 3,4 en agosto y septiembre). Una tasa por pasada anterior a abril no se compara con una posterior.
+  - **How to apply**: (a) en toda ventana que empiece antes del 2026-06-13 la etiqueta positiva que
+    DECIDE es la de la tabla sola, y el OCR se informa aparte; (b) VIIRS por pasada, desde abril; MODIS,
+    desde marzo sin reparos; enero no se usa; (c) no hace falta acordarse: los hitos viven en
+    `scripts/calidad_referencia_mirova.py` y `banco_paridad.indexar_referencia` los imprime por stderr
+    cada vez que se indexa una ventana que los pisa. Si el scraper cambia, se agrega el hito ahí y en el
+    documento de S139; (d) un script nuevo que lea los CSV sin pasar por `banco_paridad` llama a
+    `calidad_referencia_mirova.avisar(desde, hasta)` en su primera línea.
+
 - **A39, enmienda S142**: "0 checks" recién abierto un PR es SIN DATO, no verde. #676 se mergeó así con el CI
   en rojo. Esperar el run con conclusión (`gh pr checks <N> --watch`) antes de mergear, y después de editar un
   documento correr `grep -rl <archivo> tests/` y la suite completa: un test puede leer ese documento.
@@ -1684,6 +1706,7 @@ Para minimizar compactaciones automáticas ("session continued..."):
 - **Radios geofencing MIROVA-OVDAS**: cada volcán tiene radius_km propio
   (3-15 km). store.py usa `max_hotspot_dist_km` per-volcano, no global 5km.
   Refs: https://github.com/MendozaVolcanic/Mirova-v1
+- **La referencia MIROVA no sirve igual todo el año (A119)**: ver la regla y `scripts/calidad_referencia_mirova.py` antes de elegir una ventana.
 - **Refs MIROVA son NRT**: los CSV consolidado/OCR scrapeados de mirovaweb.it
   contienen datos NRT. Comparar contra NRT es operacionalmente correcto.
   OCR cubre ~80% VIIRS, MODIS completo. No re-scrapear para homogeneizar.

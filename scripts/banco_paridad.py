@@ -200,6 +200,13 @@ def es_fp(tipo):
 
 def indexar_referencia(filas, coords, ventana):
     """Filas nocturnas en ventana, indexadas por (volcan, sensor) y resumidas por noche."""
+    # A119 (S149): la referencia no tiene la misma calidad todo el ano. El aviso lo da el cargador,
+    # no la memoria de nadie. Solo imprime a stderr; no cambia ninguna fila ni ninguna etiqueta.
+    try:
+        from calidad_referencia_mirova import avisar as _avisar_calidad
+    except ImportError:
+        from scripts.calidad_referencia_mirova import avisar as _avisar_calidad
+    _avisar_calidad(ventana[0], ventana[1])
     por_vb = collections.defaultdict(list)
     noche_sensor = collections.defaultdict(lambda: {"alerta": False, "fp": False})
     noche_volcan = collections.defaultdict(lambda: {"alerta": False, "fp": False})
