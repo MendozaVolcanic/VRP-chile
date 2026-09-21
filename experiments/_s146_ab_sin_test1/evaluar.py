@@ -382,6 +382,67 @@ def nulo_estructural(ctrl, brazo):
             "ejemplos": ["|".join(clave(r)) for r in inventadas[:20]]}
 
 
+def selectividad_supervivencia(ctrl, brazo, n_iter, semilla, sensor=None):
+    """S149, reemplazo de C8. Sobre las pasadas que el CONTROL publica: supervivencia de las positivas
+    menos supervivencia de los negativos limpios, contra el nulo de barajar pos/neg SOLO entre esas
+    pasadas, dentro de cada volcan y sensor. Criterio a UNA cola: observado > p97,5.
+
+    POR QUE. El C8 de S147 pedia quedar FUERA del nulo de `nulo_barajado` a dos colas, y un apagador
+    al azar lo cumple en 200 de 200 semillas (verificador S148, H2): aquel nulo baraja sobre todas
+    las pasadas, publicadas o no, y un apagado al azar cae sistematicamente a un lado. Aca, bajo un
+    apagado al azar dentro del estrato, las etiquetas de las pasadas publicadas son intercambiables,
+    asi que el nulo queda calibrado por construccion. Medido (A110,
+    experiments/_s149_evaluador/c8_selectividad_salida.txt): el apagador al azar lo cumple 3 de 200
+    en VIIRS 375 y 1 de 200 en VIIRS 750; el brazo F lo cumple en los dos."""
+    ib = {clave(r): r for r in brazo}
+    pares = [(c, ib[clave(c)]) for c in ctrl
+             if c["lab"] in ("pos", "neg_limpio") and c["pub"] and clave(c) in ib
+             and (sensor is None or c["b"] == sensor)]
+    n_pos = sum(1 for c, _ in pares if c["lab"] == "pos")
+    n_neg = len(pares) - n_pos
+    if not n_pos or not n_neg:
+        return {"observado": None, "cumple": False, "nota": "sin positivas o sin negativos publicados por el control",
+                "n_pos": n_pos, "n_neg": n_neg}
+
+    def est(etiquetas):
+        pos = [r["pub"] for (_, r), lab in zip(pares, etiquetas) if lab == "pos"]
+        neg = [r["pub"] for (_, r), lab in zip(pares, etiquetas) if lab == "neg_limpio"]
+        return sum(pos) / len(pos) - sum(neg) / len(neg)
+
+    obs = est([c["lab"] for c, _ in pares])
+    rnd = random.Random(semilla)
+    grupos = _agrupar(list(range(len(pares))), lambda i: (pares[i][0]["vol"], pares[i][0]["b"]))
+    nulos = []
+    for _ in range(n_iter):
+        etiquetas = [None] * len(pares)
+        for idxs in grupos.values():
+            labs = [pares[i][0]["lab"] for i in idxs]
+            rnd.shuffle(labs)
+            for i, lab in zip(idxs, labs):
+                etiquetas[i] = lab
+        nulos.append(est(etiquetas))
+    nulos.sort()
+    hi = nulos[int(0.975 * (len(nulos) - 1))]
+    return {"observado": round(obs, 4), "nulo_media": round(sum(nulos) / len(nulos), 4),
+            "nulo_p97.5": round(hi, 4), "n_pos": n_pos, "n_neg": n_neg, "cumple": bool(obs > hi)}
+
+
+def rutina_en_noche_con_alerta(ctrl, brazo):
+    """S149, informativo. Pasadas sin_info donde la tabla de MIROVA lista ESA pasada con VRP 0 y la
+    noche tiene alerta por otra pasada del mismo sensor. Son negativos de PASADA que el negativo
+    limpio deja fuera por definicion; ahi vivia el costo que el recall por pasada no miraba
+    (docs/S149_COSTO_OCULTO_MAX.md). Por sensor: n, publica el control, publica el brazo."""
+    ib = {clave(r): r for r in brazo}
+    out = {}
+    for c in ctrl:
+        if c["lab"] == "sin_info" and c.get("rutina_pasada") and c.get("noche_con_alerta_sensor") and clave(c) in ib:
+            e = out.setdefault(c["b"], {"n": 0, "pub_control": 0, "pub_brazo": 0})
+            e["n"] += 1
+            e["pub_control"] += int(bool(c["pub"]))
+            e["pub_brazo"] += int(bool(ib[clave(c)]["pub"]))
+    return out
+
+
 def nulo_barajado(ctrl, brazo, n_iter, semilla):
     """Nulo por etiquetas barajadas DENTRO de cada volcan y sensor (Simpson, V-03).
 
@@ -453,11 +514,16 @@ def control_positivo_control(ctrl, produccion, par):
     bandas = {}
     ok_banda = True
     m = metricas(ctrl)
+    # S149: la banda esta calibrada para el control de PRODUCCION de septiembre. Con otro control
+    # (el brazo B) u otra ventana no aplica, y hacia imprimir INDECIDIBLE a un resultado con
+    # identidad y cobertura en 1,0 (defecto abierto de S148). Se apaga SOLO por parametro explicito,
+    # y la identidad contra la referencia y la cobertura siguen decidiendo.
+    aplica_banda = bool(par.get("banda_control_aplica", True))
     for b, (lo, hi) in par["banda_control_tasa_pub_neg"].items():
         t = m["por_sensor"][b]["tasa_pub_neg"]
         dentro = t is not None and lo <= t <= hi
         bandas[b] = {"tasa": t, "banda": [lo, hi], "dentro": dentro}
-        ok_banda = ok_banda and dentro
+        ok_banda = ok_banda and (dentro or not aplica_banda)
     # S147 (verificador, H3): la COBERTURA DEL CONTROL contra produccion. Hasta S147 esto
     # comparaba solo la INTERSECCION, asi que un control al que le faltaba el 30 % de las pasadas
     # daba fraccion identica 1,0 y bandas dentro de rango (son tasas, no conteos) y pasaba. Y el
@@ -478,6 +544,7 @@ def control_positivo_control(ctrl, produccion, par):
             "fraccion_publicacion_identica": frac_pub_igual,
             "ejemplos": {k: v[:10] for k, v in ejemplos.items()},
             "bandas_tasa_pub_neg": bandas,
+            "banda_control_aplica": aplica_banda,
             "cumple": bool(n > 0 and frac_pub_igual is not None
                            and frac_pub_igual >= par["min_fraccion_publicacion_identica"]
                            and ok_banda and ok_cobertura)}
@@ -648,6 +715,12 @@ def evaluar_brazo(nombre, ctrl, brazo, par):
     # etiquetas barajadas. Un brazo que apaga publicaciones al azar da las dos caidas iguales y
     # cae dentro del nulo; hasta ahora eso salia ADOPTAR igual.
     c["C8_fuera_del_nulo_barajado"] = bool(res["nulo_barajado"].get("fuera_del_nulo"))
+    # C8b (S149): el reemplazo calibrado de C8, por sensor. NO entra a `criterios_decisorios` de los
+    # A/B ya pre-registrados (esos parametros estan congelados); un pre-registro nuevo lo lista el.
+    res["selectividad"] = {b: selectividad_supervivencia(ctrl, brazo, par["n_barajados"], par["semilla"], b)
+                           for b in ("VIIRS375", "VIIRS750", "MODIS")}
+    c["C8b_selectividad_V375"] = bool(res["selectividad"]["VIIRS375"].get("cumple"))
+    res["rutina_en_noche_con_alerta"] = rutina_en_noche_con_alerta(ctrl, brazo)
     # Informativo, no decide: las pasadas que el brazo publica y el control NO (H10). El mecanismo
     # es bidireccional y hasta S147 ningun criterio lo miraba.
     res["ganancias_publicacion"] = ganancias_publicacion(ctrl, brazo)
