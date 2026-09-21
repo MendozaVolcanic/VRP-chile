@@ -1,0 +1,62 @@
+V375 pasadas: B 1478 | F 1478 | comunes 1478
+filas V375 en ventana: tabla 1691 (alertas 198) | OCR 191 (alertas 172)
+
+=== TABLA + OCR, con filtro diurno (como el evaluador)
+  etiquetas: {'sin_info': 773, 'neg_limpio': 349, 'far_ref': 60, 'pos': 296}
+  negativos limpios n 349 | B publica 105 (30.1 %) | F publica 8 (2.3 %)
+  positivas (todas)                          n 296 | B publica 288 | F conserva 276 | F gana 0
+  positivas con alguna alerta de la TABLA    n 198 | B publica 195 | F conserva 187 | F gana 0
+  positivas solo por OCR                     n  98 | B publica  93 | F conserva  89 | F gana 0
+  perdidas (B publica, F no), con TODAS las filas de referencia pareadas:
+     Chaiten              2026-05-19 05:06 VIIRS_NOAA20  z  43.8 | B pc_vrp 0.068 a 0.2 km | ref: CONS ALERTA_TERMICA 0.07 MW 05:06:01
+     Chaiten              2026-05-19 06:48 VIIRS_NOAA20  z  65.6 | B pc_vrp 0.053 a 0.4 km | ref: CONS ALERTA_TERMICA 0.05 MW 06:48:01
+     Isluga               2026-05-25 06:30 VIIRS_NOAA20  z  59.2 | B pc_vrp 0.014 a 0.8 km | ref: CONS ALERTA_TERMICA 0.04 MW 06:30:01
+     Isluga               2026-05-29 04:54 VIIRS_SNPP    z  69.0 | B pc_vrp 0.013 a 4.9 km | ref: OCR ALERTA_TERMICA_OCR 0.86 MW 04:54:00
+     Lastarria            2026-05-02 05:06 VIIRS_SNPP    z  59.5 | B pc_vrp 0.033 a 1.0 km | ref: OCR ALERTA_TERMICA_OCR 2.36 MW 05:06:00
+     PuyehueCordonCaulle  2026-05-03 05:06 VIIRS_NOAA20  z  46.0 | B pc_vrp 0.058 a 0.1 km | ref: CONS ALERTA_TERMICA 0.08 MW 05:06:01
+     PuyehueCordonCaulle  2026-05-05 05:54 VIIRS_SNPP    z   3.9 | B pc_vrp 0.012 a 8.8 km | ref: OCR ALERTA_TERMICA_OCR 0.23 MW 05:54:00
+     PuyehueCordonCaulle  2026-05-31 04:42 VIIRS_NOAA20  z  62.7 | B pc_vrp 0.014 a 0.6 km | ref: CONS ALERTA_TERMICA 0.02 MW 04:42:01
+     Tupungatito          2026-05-03 06:30 VIIRS_SNPP    z  54.3 | B pc_vrp 0.015 a 6.0 km | ref: OCR ALERTA_TERMICA_OCR 0.06 MW 06:30:00
+     Tupungatito          2026-05-18 06:48 VIIRS_SNPP    z  66.7 | B pc_vrp 0.054 a 4.0 km | ref: CONS ALERTA_TERMICA 0.05 MW 06:48:00
+     Tupungatito          2026-05-23 04:42 VIIRS_NOAA21  z  66.4 | B pc_vrp 0.076 a 7.0 km | ref: CONS ALERTA_TERMICA 0.12 MW 04:42:02
+     Tupungatito          2026-05-24 06:36 VIIRS_SNPP    z  59.3 | B pc_vrp 0.021 a 0.2 km | ref: CONS ALERTA_TERMICA 0.05 MW 06:36:00; OCR ALERTA_TERMICA_OCR 0.05 MW 06:36:00
+  positivas con mas de una alerta pareada: 42
+  perdidas con MAXIMO de cualquier alerta pareada >= 0,5 MW: [('Isluga', '05-29 04:54', 0.86), ('Lastarria', '05-02 05:06', 2.36)]
+  las 98 positivas solo-OCR, con la tabla sola quedan como: {'sin_info': 98}
+     por plataforma: {'VIIRS_NOAA21': 35, 'VIIRS_SNPP': 59, 'VIIRS_NOAA20': 4}
+
+=== TABLA + OCR, sin filtro diurno
+  etiquetas: {'sin_info': 803, 'neg_limpio': 319, 'far_ref': 60, 'pos': 296}
+  negativos limpios n 319 | B publica 100 (31.3 %) | F publica 8 (2.5 %)
+  positivas (todas)                          n 296 | B publica 288 | F conserva 276 | F gana 0
+  positivas con alguna alerta de la TABLA    n 198 | B publica 195 | F conserva 187 | F gana 0
+  positivas solo por OCR                     n  98 | B publica  93 | F conserva  89 | F gana 0
+  perdidas (B publica, F no), con TODAS las filas de referencia pareadas:
+     Chaiten              2026-05-19 05:06 VIIRS_NOAA20  z  43.8 | B pc_vrp 0.068 a 0.2 km | ref: CONS ALERTA_TERMICA 0.07 MW 05:06:01
+     Chaiten              2026-05-19 06:48 VIIRS_NOAA20  z  65.6 | B pc_vrp 0.053 a 0.4 km | ref: CONS ALERTA_TERMICA 0.05 MW 06:48:01
+     Isluga               2026-05-25 06:30 VIIRS_NOAA20  z  59.2 | B pc_vrp 0.014 a 0.8 km | ref: CONS ALERTA_TERMICA 0.04 MW 06:30:01
+     Isluga               2026-05-29 04:54 VIIRS_SNPP    z  69.0 | B pc_vrp 0.013 a 4.9 km | ref: OCR ALERTA_TERMICA_OCR 0.86 MW 04:54:00
+     Lastarria            2026-05-02 05:06 VIIRS_SNPP    z  59.5 | B pc_vrp 0.033 a 1.0 km | ref: OCR ALERTA_TERMICA_OCR 2.36 MW 05:06:00
+     PuyehueCordonCaulle  2026-05-03 05:06 VIIRS_NOAA20  z  46.0 | B pc_vrp 0.058 a 0.1 km | ref: CONS ALERTA_TERMICA 0.08 MW 05:06:01
+     PuyehueCordonCaulle  2026-05-05 05:54 VIIRS_SNPP    z   3.9 | B pc_vrp 0.012 a 8.8 km | ref: OCR ALERTA_TERMICA_OCR 0.23 MW 05:54:00
+     PuyehueCordonCaulle  2026-05-31 04:42 VIIRS_NOAA20  z  62.7 | B pc_vrp 0.014 a 0.6 km | ref: CONS ALERTA_TERMICA 0.02 MW 04:42:01
+     Tupungatito          2026-05-03 06:30 VIIRS_SNPP    z  54.3 | B pc_vrp 0.015 a 6.0 km | ref: OCR ALERTA_TERMICA_OCR 0.06 MW 06:30:00
+     Tupungatito          2026-05-18 06:48 VIIRS_SNPP    z  66.7 | B pc_vrp 0.054 a 4.0 km | ref: CONS ALERTA_TERMICA 0.05 MW 06:48:00
+     Tupungatito          2026-05-23 04:42 VIIRS_NOAA21  z  66.4 | B pc_vrp 0.076 a 7.0 km | ref: CONS ALERTA_TERMICA 0.12 MW 04:42:02
+     Tupungatito          2026-05-24 06:36 VIIRS_SNPP    z  59.3 | B pc_vrp 0.021 a 0.2 km | ref: CONS ALERTA_TERMICA 0.05 MW 06:36:00; OCR ALERTA_TERMICA_OCR 0.05 MW 06:36:00
+
+=== TABLA SOLA de punta a punta (el OCR no existe), con filtro
+  etiquetas: {'sin_info': 837, 'neg_limpio': 383, 'far_ref': 60, 'pos': 198}
+  negativos limpios n 383 | B publica 120 (31.3 %) | F publica 14 (3.7 %)
+  positivas (todas)                          n 198 | B publica 195 | F conserva 187 | F gana 0
+  positivas con alguna alerta de la TABLA    n 198 | B publica 195 | F conserva 187 | F gana 0
+  positivas solo por OCR                     n   0 | B publica   0 | F conserva   0 | F gana 0
+  perdidas (B publica, F no), con TODAS las filas de referencia pareadas:
+     Chaiten              2026-05-19 05:06 VIIRS_NOAA20  z  43.8 | B pc_vrp 0.068 a 0.2 km | ref: CONS ALERTA_TERMICA 0.07 MW 05:06:01
+     Chaiten              2026-05-19 06:48 VIIRS_NOAA20  z  65.6 | B pc_vrp 0.053 a 0.4 km | ref: CONS ALERTA_TERMICA 0.05 MW 06:48:01
+     Isluga               2026-05-25 06:30 VIIRS_NOAA20  z  59.2 | B pc_vrp 0.014 a 0.8 km | ref: CONS ALERTA_TERMICA 0.04 MW 06:30:01
+     PuyehueCordonCaulle  2026-05-03 05:06 VIIRS_NOAA20  z  46.0 | B pc_vrp 0.058 a 0.1 km | ref: CONS ALERTA_TERMICA 0.08 MW 05:06:01
+     PuyehueCordonCaulle  2026-05-31 04:42 VIIRS_NOAA20  z  62.7 | B pc_vrp 0.014 a 0.6 km | ref: CONS ALERTA_TERMICA 0.02 MW 04:42:01
+     Tupungatito          2026-05-18 06:48 VIIRS_SNPP    z  66.7 | B pc_vrp 0.054 a 4.0 km | ref: CONS ALERTA_TERMICA 0.05 MW 06:48:00
+     Tupungatito          2026-05-23 04:42 VIIRS_NOAA21  z  66.4 | B pc_vrp 0.076 a 7.0 km | ref: CONS ALERTA_TERMICA 0.12 MW 04:42:02
+     Tupungatito          2026-05-24 06:36 VIIRS_SNPP    z  59.3 | B pc_vrp 0.021 a 0.2 km | ref: CONS ALERTA_TERMICA 0.05 MW 06:36:00

@@ -148,6 +148,14 @@ positivas de la tabla sola**, y la versión con OCR se informa aparte. Los negat
 de P5 salen siempre de la tabla, así que P1, P2 y P5 no cambian. MODIS no depende del OCR en ningún mes.
 `medir_predicciones.py` ya imprime las dos versiones de P4.
 
+**Enmienda del recall (2026-09-21, DESPUES de evaluar mayo; declarada como tal).** Nicolás observó que
+MIROVA publica bajo 0,5 MW muchas veces y que la réplica debe parecerse a eso. El corte "ninguna pérdida
+de 0,5 MW o más" de P4 venía de un resumen mal hecho de su regla (que reserva ese corte para MODIS) y en
+VIIRS protege poco: 81 a 88 % de las alertas de MIROVA están bajo 0,5 MW. Desde esta enmienda **P4 en
+VIIRS se informa además por tramo de magnitud** (`recall_por_magnitud.py`) y el veredicto de recall lo da
+Nicolás mirando esa tabla; el corte de 0,5 MW queda sólo para MODIS. Como es posterior a un resultado, no
+se usa para declarar que mayo "cumple" nada nuevo: endurece el criterio, no lo afloja.
+
 **P3 no se usa**: en invierno casi todo el fondo es frío y la celda deja de ser un contraste.
 
 **Regla de decisión por ventana**: MERECE SEGUIR si P1, P2, P4 y C8b se cumplen; NO ADOPTAR si P4

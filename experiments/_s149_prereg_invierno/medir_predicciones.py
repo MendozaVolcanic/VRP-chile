@@ -44,7 +44,13 @@ print("    positivas %d | publica el control %d | de esas conserva el brazo %d |
     len(pos), nBp, nFp, piso4, MW_P4, len(graves), "CUMPLE" if nFp >= piso4 and not graves else "FALLA"))
 for r in perd: print("       perdida: %-20s %s | MIROVA %.3f MW | %s%s" % (r["vol"], r["dt"], r["ref"] or 0, r["plat"], " | alerta solo por OCR" if r["solo_ocr"] else ""))
 sin_ocr = [r for r in pos if not r["solo_ocr"]]
-print("    lo mismo con la tabla de MIROVA sola, sin OCR (H10): positivas %d | control %d | brazo conserva %d" % (len(sin_ocr), sum(r["pB"] for r in sin_ocr), sum(1 for r in sin_ocr if r["pB"] and r["pF"])))
+nB2 = sum(r["pB"] for r in sin_ocr); nF2 = sum(1 for r in sin_ocr if r["pB"] and r["pF"]); piso2 = math.ceil(nB2 * FRAC_P4[0] / FRAC_P4[1])
+graves2 = [r for r in sin_ocr if r["pB"] and not r["pF"] and (r["ref"] or 0) >= MW_P4]
+print("    con la tabla de MIROVA sola, sin OCR: positivas %d | control %d | brazo conserva %d | piso %d | perdidas con %.1f MW o mas: %d | %s" % (
+    len(sin_ocr), nB2, nF2, piso2, MW_P4, len(graves2), "CUMPLE" if nF2 >= piso2 and not graves2 else "FALLA"))
+# A119: antes del 2026-06-13 el OCR estaba mal calibrado y no media distancia; ahi decide la tabla sola
+print("    DECIDE: %s" % ("la version con tabla y OCR" if T["ventana"][0] >= "2026-06-13"
+                          else "la version con la TABLA SOLA (la ventana empieza antes del 2026-06-13, A119); la otra se informa"))
 print("\nP5. pasadas que MIROVA lista con VRP 0 en noche con alerta del sensor")
 e = [r for r in rows if r["lab"] == "sin_info" and r["rut"] and r["nal"]]
 if e:
