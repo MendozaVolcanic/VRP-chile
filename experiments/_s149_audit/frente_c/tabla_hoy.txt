@@ -1,0 +1,31 @@
+VENTANA ('2026-09-01', '2026-09-21') | bandas {'focal': 10.0, 'nevado': 15.0}
+
+1. FALSAS por pasada en negativos limpios, por sensor y regimen (banda focal 10, nevado 15)
+   MODIS     focal   19.4 % (41/211)
+   MODIS     nevado  7.1 % (19/268)
+   VIIRS375  focal   88.1 % (111/126)
+   VIIRS375  nevado  86.2 % (250/290)
+   VIIRS750  focal   28.1 % (78/278)
+   VIIRS750  nevado  19.3 % (80/414)
+   volcanes que cumplen su banda, por sensor:
+   MODIS     9 de 11: ['Lascar', 'Lastarria', 'Isluga', 'Tupungatito', 'PlanchonPeteroa', 'NevadosDeChillan', 'Llaima', 'Copahue', 'Chaiten']
+   VIIRS375  0 de 11: []
+   VIIRS750  2 de 11: ['Lastarria', 'NevadosDeChillan']
+
+2. DETECCION por NOCHE de volcan y sensor (la unidad de la tabla) y por PASADA
+   MODIS     noches con alerta   1, perdidas por el sensor   0 | pasadas con alerta   1, perdidas   0 | de las pasadas perdidas: bajo 0,10 MW 0, 0,10 a 0,50 0, 0,50 o mas 0
+   VIIRS375  noches con alerta  81, perdidas por el sensor   0 | pasadas con alerta 154, perdidas   0 | de las pasadas perdidas: bajo 0,10 MW 0, 0,10 a 0,50 0, 0,50 o mas 0
+   VIIRS750  noches con alerta  17, perdidas por el sensor   3 | pasadas con alerta  21, perdidas   7 | de las pasadas perdidas: bajo 0,10 MW 0, 0,10 a 0,50 7, 0,50 o mas 0
+
+3. MAGNITUD: mediana nuestra/MIROVA por volcan con n >= 30 (banda 0,8 a 1,25)
+   VIIRS375  Isluga               n  37 mediana 0.58 NO CUMPLE
+   VIIRS375  PuyehueCordonCaulle  n  32 mediana 1.06 CUMPLE
+
+4. MODIS Lascar por NOCHE: publica en noches con alerta MODIS contra noches sin alerta (neg limpio)
+   con alerta SIN DATO | sin alerta 4.8 % (1/21)
+
+5. MIROVA CONTRA SI MISMA frente a las bandas
+   razon 750/375 de MIROVA, misma escena: n 25, mediana 0.88, fraccion de pares dentro de 0,8 a 1,25: 20.0 % (5/25)
+      PuyehueCordonCaulle  n  14 mediana 1.02 dentro
+   noches en que VIIRS750 de MIROVA alerta y VIIRS375 fue listado: 17 | VIIRS375 tambien alerta: 88.2 % (15/17)
+   noches en que VIIRS375 de MIROVA alerta y VIIRS750 fue listado: 81 | VIIRS750 tambien alerta: 18.5 % (15/81)

@@ -1,0 +1,56 @@
+CONS filas 38677 rango 2026-01-10 19:06:00 a 2026-09-21 12:50:00
+OCR filas 994 rango 2026-01-20 05:12:00 a 2026-09-21 06:06:01
+Volcanes CONS: ['Chaiten', 'Copahue', 'Isluga', 'Lascar', 'Lastarria', 'Llaima', 'Nevados de Chillan', 'PlanchonPeteroa', 'Puyehue-Cordon Caulle', 'Tupungatito', 'Villarrica']
+Sensores CONS: Counter({'VIIRS': 14035, 'VIIRS375': 13370, 'MODIS': 11272})
+Tipos CONS: Counter({'RUTINA': 36288, 'ALERTA_TERMICA': 1507, 'FALSO_POSITIVO': 882})
+
+[H 01-16] primer FALSO_POSITIVO: 2026-01-15 17:54:01
+[H 01-16] RUTINA con VRP>0: 17 ultima: 2026-01-14 17:54:00
+[H 02-14] primera fila Tupungatito: 2026-02-14 06:06:01
+[H 02-23] Tupungatito con 5<dist<=7 y VRP>0 (tipo por fecha):
+     ('2026-02', 'ALERTA_TERMICA') 6
+     ('2026-02', 'FALSO_POSITIVO') 5
+     ('2026-03', 'ALERTA_TERMICA') 19
+     ('2026-04', 'ALERTA_TERMICA') 23
+     ('2026-05', 'ALERTA_TERMICA') 20
+     ('2026-06', 'ALERTA_TERMICA') 13
+     ('2026-07', 'ALERTA_TERMICA') 3
+     ('2026-08', 'ALERTA_TERMICA') 10
+     ('2026-09', 'ALERTA_TERMICA') 13
+     primeras 6: [('2026-02-16 05:30:01', 'FALSO_POSITIVO', '5.03'), ('2026-02-16 05:30:01', 'FALSO_POSITIVO', '5.21'), ('2026-02-17 05:12:01', 'FALSO_POSITIVO', '5.41'), ('2026-02-18 04:54:01', 'FALSO_POSITIVO', '5.41'), ('2026-02-22 05:18:01', 'FALSO_POSITIVO', '5.41'), ('2026-02-23 05:00:01', 'ALERTA_TERMICA', '5.72')]
+
+[cobertura CONS snapshot] mes | n filas | volcanes | % noches de volcan con fila nocturna M/V/V375 | filas nocturnas por noche de volcan M/V/V375
+  2026-01 |  2528 | 10 | 99.0 / 95.7 / 99.5 | 1.96 / 1.77 / 1.62 | (den = 21 dias x 10 volcanes)
+  2026-02 |  3514 | 11 | 94.3 / 95.6 / 95.3 | 2.01 / 1.74 / 1.69 | (den = 27 dias x 11 volcanes)
+  2026-03 |  3940 | 11 | 100.0 / 99.1 / 99.1 | 2.03 / 1.66 / 1.59 | (den = 30 dias x 11 volcanes)
+  2026-04 |  4923 | 11 | 99.1 / 99.7 / 100.0 | 2.02 / 2.61 / 2.32 | (den = 29 dias x 11 volcanes)
+  2026-05 |  4968 | 11 | 98.2 / 100.0 / 100.0 | 2.10 / 2.60 / 2.37 | (den = 30 dias x 11 volcanes)
+  2026-06 |  4981 | 11 | 100.0 / 100.0 / 100.0 | 2.12 / 2.62 / 2.55 | (den = 29 dias x 11 volcanes)
+  2026-07 |  5008 | 11 | 100.0 / 99.7 / 99.7 | 2.12 / 2.33 / 2.40 | (den = 30 dias x 11 volcanes)
+  2026-08 |  5246 | 11 | 100.0 / 100.0 / 100.0 | 2.08 / 3.05 / 3.00 | (den = 30 dias x 11 volcanes)
+  2026-09 |  3569 | 11 | 100.0 / 100.0 / 100.0 | 2.11 / 3.24 / 3.09 | (den = 20 dias x 11 volcanes)
+
+CONTROL POSITIVO (borrar 50 % de junio): solo la fila de junio debe bajar
+
+[cobertura control] mes | n filas | volcanes | % noches de volcan con fila nocturna M/V/V375 | filas nocturnas por noche de volcan M/V/V375
+  2026-06 |  2498 | 11 | 74.3 / 81.5 / 79.6 | 1.38 / 1.63 / 1.63 | (den = 29 dias x 11 volcanes)
+
+[OCR] mes | filas | ALERTA/FALSO | versiones | Distancia_km==0 | notas mojibake | metodos distintos | ALERTA_OCR / ALERTA cons
+  2026-01 |  31 |  18/ 13 | {'1.0': 31} |  31 |  29 |  7 | 18 / 70 = 0.26
+  2026-02 |  47 |  39/  8 | {'21.0': 18, '20.0': 10, '17.0': 7, '1.0': 12} |  45 |  47 | 11 | 39 / 134 = 0.29
+  2026-03 | 164 | 160/  4 | {'21.0': 164} | 160 | 164 |  1 | 160 / 179 = 0.89
+  2026-04 | 123 | 107/ 16 | {'21.0': 123} | 107 | 123 |  1 | 107 / 213 = 0.50
+  2026-05 | 206 | 183/ 23 | {'21.0': 206} | 183 | 204 |  1 | 183 / 260 = 0.70
+  2026-06 | 163 | 150/ 13 | {'29.2': 78, '29.1': 4, '21.0': 81} |  79 |  80 |  1 | 150 / 226 = 0.66
+  2026-07 |  76 |  69/  7 | {'29.2': 76} |   0 |   0 |  1 | 69 / 142 = 0.49
+  2026-08 |  98 |  92/  6 | {'30.0': 84, '29.2': 14} |   1 |   0 |  1 | 92 / 139 = 0.66
+  2026-09 |  86 |  85/  1 | {'30.0': 86} |   4 |   0 |  1 | 85 / 144 = 0.59
+Tipos OCR: Counter({'ALERTA_TERMICA_OCR': 903, 'FALSO_POSITIVO_OCR': 91})
+Sensores OCR: Counter({'VIIRS375': 877, 'VIIRS': 79, 'MODIS': 38})
+[H 06-13] primera fila OCR con Distancia_km>0 (por Fecha_Satelite): 2026-02-27 06:42:00 | por Fecha_Proceso: 2026-02-27 09:01:26
+[H 08-06] primera fila Version_OCR 30.0: satelite 2026-08-06 05:24:01 | proceso 2026-08-06 04:31:06
+[V30 geometria] filas con Zenith: 167 primera satelite 2026-08-06 05:24:01
+[mojibake] ultima fila con mojibake (proceso): 2026-06-12 12:01:30
+[A119 'MODIS no depende del OCR'] ALERTA_OCR por sensor: Counter({'VIIRS375': 791, 'VIIRS': 76, 'MODIS': 36})
+   ALERTA_OCR sin ALERTA cons en la misma llave (minuto), por sensor: Counter({'VIIRS375': 523, 'VIIRS': 44, 'MODIS': 3})
+[H202] filas CONS con VRP>=1000: 0 | max VRP cons: 347.13

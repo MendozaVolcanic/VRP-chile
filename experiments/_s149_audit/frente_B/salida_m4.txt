@@ -1,0 +1,37 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+(a) desfase a la fila de tabla VIIRS375 mas cercana, pasadas nocturnas nuestras desde 2026-01-29
+   NOAA20  n= 3748 | <=2min 87%  2-8min 3%  8-20min 2%  20-40min 0%  40-70min 5%  >70min 3%
+   SNPP    n= 3541 | <=2min 23%  2-8min 1%  8-20min 49%  20-40min 22%  40-70min 2%  >70min 3%
+   NOAA21  n=  802 | <=2min 93%  2-8min 2%  8-20min 0%  20-40min 0%  40-70min 4%  >70min 0%
+
+(b) primera fila de tabla que parea (+-120 s) con un record nuestro NOAA-21:
+    [datetime.datetime(2026, 4, 9, 5, 0, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 4, 9, 5, 0, tzinfo=datetime.timezone.utc), datetime.datetime(2026, 4, 9, 5, 0, tzinfo=datetime.timezone.utc)] | n total 1936
+   tasa por quincena (% con fila en tabla, n): quincena | NOAA20 | NOAA21 | SNPP
+    2026-01b |  85% ( 40) |   0% ( 52) |  26% ( 43)
+    2026-02a |  87% (242) |   0% (230) |  22% (239)
+    2026-02b |  93% (202) |   0% (204) |  21% (222)
+    2026-03a |  88% (234) |   0% (240) |  20% (179)
+    2026-03b |  93% (254) |   0% (251) |  20% (255)
+    2026-04a |  84% (241) |  44% (230) |  17% (231)
+    2026-04b |  88% (243) |  68% (229) |  23% (201)
+    2026-05a |  89% (240) |  62% (235) |  23% (243)
+    2026-05b |  84% (250) |  49% (251) |  22% (259)
+    2026-06a |  88% (234) |  57% (238) |  21% (223)
+    2026-06b |  86% (228) |  72% (236) |  33% (236)
+    2026-07a |  86% (242) |  86% (233) |  14% (155)
+    2026-07b |  76% (259) |  62% (250) |  14% (235)
+    2026-08a |  82% (246) |  90% (228) |  34% (218)
+    2026-08b |  93% (258) |  94% (249) |  26% (261)
+    2026-09a |  89% (244) |  95% (230) |  37% (249)
+    2026-09b |  89% ( 91) |  96% ( 95) |  21% ( 92)
+
+(c) SNPP desde 2026-02: % con fila en tabla segun cenit del sensor, y segun volcan
+    cenit: {'z20-40': '7% (702)', 'z40-55': '11% (814)', 'z<20': '12% (563)', 'z>=55': '43% (1423)', 'z?': '26% (39)'}
+    volcan: {'Chaiten': '21% (361)', 'Copahue': '24% (332)', 'Isluga': '27% (267)', 'Lascar': '25% (282)', 'Lastarria': '26% (290)', 'Llaima': '23% (340)', 'NevadosDeChillan': '23% (345)', 'PlanchonPeteroa': '24% (319)', 'PuyehueCordonCaulle': '22% (355)', 'Tupungatito': '21% (314)', 'Villarrica': '23% (336)'}
+    control NOAA20 por cenit: {'z20-40': '88% (786)', 'z40-55': '89% (880)', 'z<20': '85% (603)', 'z>=55': '86% (1444)', 'z?': '86% (35)'}
+    tipo de la fila de tabla cuando SI lista SNPP: {'ALERTA_TERMICA': 95, 'RUTINA': 708, 'FALSO_POSITIVO': 25}
+    idem NOAA20 (control): {'RUTINA': 2439, 'ALERTA_TERMICA': 646, 'FALSO_POSITIVO': 178}
+
+(d) ALERTA_TERMICA_OCR VIIRS375 nocturnas SIN fila de tabla a +-120 s: satelite de nuestro record a +-120 s, por tramo
+    desde 06-13 {'SNPP': 108, 'NOAA20': 17, 'NOAA21': 18} n = 143
+    antes 06-13 {'SNPP': 206, 'NOAA21': 59, 'NOAA20': 10, 'sin_record_nuestro': 12} n = 287
