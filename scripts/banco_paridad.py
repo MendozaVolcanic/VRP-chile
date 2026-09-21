@@ -273,6 +273,13 @@ def etiquetar(recs, por_vb, noche_sensor, noche_volcan):
         nv = noche_volcan.get((r["vol"], r["noche"]), {"alerta": False, "fp": False})
         r["dist_ref"] = None
         r["neg_estricto"] = False
+        # S149: dos campos ADITIVOS, no cambian ninguna etiqueta. `rutina_pasada`: la tabla de MIROVA
+        # lista ESTA pasada con VRP 0 (fila RUTINA del consolidado), haya o no alerta en otra pasada
+        # de la noche. El negativo limpio exige ademas una noche sin alerta, asi que una RUTINA en
+        # noche con alerta cae en sin_info y el evaluador no la veia (docs/S149_COSTO_OCULTO_MAX.md).
+        r["rutina_pasada"] = any(f["tipo"] == "RUTINA" and f["source"] == "CONS"
+                                 and (f["vrp_mw"] or 0) == 0 for f in filas)
+        r["noche_con_alerta_sensor"] = bool(ns["alerta"])
         if any(es_alerta(f["tipo"]) for f in filas):
             r["lab"] = "pos"
         elif any(es_fp(f["tipo"]) for f in filas):
