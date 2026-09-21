@@ -64,9 +64,9 @@
   "C2_noches_dentro_de_lo_previsto",
   "C3_publicacion_negativos",
   "C4_magnitud",
-  "C7_posicion_estable",
   "C8_fuera_del_nulo_barajado"
  ],
+ "_c7_informativo_por_que": "S148. C7 (posicion estable del cumulo) baja de decisorio a informativo. Se agrego en S147 con un umbral inventado (cero cumulos movidos mas de 500 m). Medido contra la referencia congelada de MIROVA, dispara en 94 de 96 casos FUERA del universo que MIROVA puede arbitrar (experiments/_s147_pos/), asi que no sirve como criterio de la replica (A115). Se sigue calculando e informando. El pre-registro de la conectiva (experiments/_s147_ab_conectiva/PREREGISTRO.md, seccion 4) ya declaraba la posicion del cumulo como informada y no decisoria, escrito antes de correr; este cambio alinea el evaluador con ese texto y se hace ANTES de leer el veredicto completo de los brazos F, G y H.",
  "_c7_c8_por_que": "S147, verificador H11. Los dos instrumentos existian y no decidian nada. C8 exige que el contraste entre positivos y negativos quede FUERA del nulo de etiquetas barajadas: un brazo que apaga publicaciones al azar da las dos caidas iguales, cae dentro del nulo, y hasta ahora salia ADOPTAR igual.",
  "_c0_c5_c6": "C0 (cobertura pareja) y C5 (nulo estructural) no son criterios de merito: si fallan, el veredicto es INDECIDIBLE y hay que repetir el job o arreglar el instrumento. C6 (el orden de la caida V375 >= V750 >= MODIS que predice el mecanismo de F-01) no decide la adopcion pero si falla sale en el titular: la atribucion del mecanismo queda refutada.",
 
@@ -81,8 +81,7 @@
     "C1_recall_pasada",
     "C2_noches_dentro_de_lo_previsto",
     "C3_publicacion_negativos",
-    "C4_magnitud",
-    "C7_posicion_estable"
+    "C4_magnitud"
    ],
    "_sin_c8_por_que": "C8 (contraste fuera del nulo barajado) NO decide en este brazo: apaga a lo sumo 21 pasadas de 322 en VIIRS 375 y 3 de 133 en VIIRS 750, asi que no tiene poder para salir del nulo aunque el efecto sea real. Se informa y no decide. Dejarlo decidiendo seria fabricar un NO ADOPTAR por falta de muestra, que es el mismo error que H5.",
    "_por_que": "Este brazo apaga una rama mucho mas chica. La Fase 1 la dimensiona en 21 pasadas de 322 publicadas en VIIRS 375 (subclase rival_debil) y 3 de 133 en VIIRS 750: el maximo posible es bajar de 0,863 a ~0,807 y de 0,214 a ~0,209, y del lado del recall arriesga 20 pasadas positivas de 143 en VIIRS 375 (123 de 143 = 0,86) y ninguna en VIIRS 750 (13 de 18 = 0,722). ADOPTAR en este brazo NO significa apagar el Test 1: significa recomendar el flip de enable_test1_priority_weak_cluster, que es un cambio mucho menor y con su propio ciclo A45."
