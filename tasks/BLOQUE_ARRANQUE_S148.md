@@ -1,5 +1,50 @@
 # Bloque de arranque S148
 
+> ## ⚡ ACTUALIZACIÓN posterior al cierre (2026-09-21, 03:36 UTC). LEER ANTES QUE EL RESTO
+>
+> El cierre de abajo se fijó con dos A/B en cola y quedó viejo a las tres horas. Lo que cambió:
+>
+> **1. El A/B de la conectiva (run 35548121381) terminó, y su cobertura salió DESPAREJA.** 22 de 22
+> reprocesos en verde, `recolectar` en rojo por el defecto conocido. Pero al brazo de **control** le
+> faltan 71 pasadas: Chaitén 24, Tupungatito 23 y Villarrica 24, todas del 18 al 20 de septiembre,
+> en todos los sensores (corte de disponibilidad de NASA para las fechas recientes, A64). **Lo cazó
+> el arreglo simétrico del contador que el verificador pidió esta misma sesión (H3)**: antes habría
+> impreso "COBERTURA PAREJA". Por la regla pre-registrada el veredicto es **INDECIDIBLE hasta
+> reparar**.
+>
+> **2. Reparación despachada: run 35558196104** (los tres volcanes del brazo B, repetición 1 de 2).
+> Queda en cola detrás del run 35548604513 (brazos G y H, la caja), que al momento de escribir
+> esto está corriendo.
+>
+> **3. Lectura PRELIMINAR sobre el tramo con cobertura exacta** (2026-09-01 a 2026-09-17, 2022
+> pasadas contra 2022). Detalle, salvedades y cómo retomarla:
+> **`docs/S147_LECTURA_PRELIMINAR_CONECTIVA.md`**. En VIIRS 375, pasar de la conectiva de fórmula
+> (`min`) a la de prosa (`max`): publicación en negativos limpios de **29,3 % a 3,1 %**; borde con
+> fondo frío de 61,8 % a 2,9 %; razón borde sobre nadir de 2,10 a **0,25** (la predicción que
+> decidía la hipótesis no sólo se cumple, se invierte, que es la forma de la curva de MIROVA);
+> recall por pasada de 125 a **124 de 129**. Se pierde un solo positivo en todos los sensores
+> (Lastarria 2026-09-04, 0,14 MW de MIROVA). Villarrica conserva 4 de 4.
+>
+> **4. TRES FRENOS, los tres obligatorios antes de proponer nada:**
+> - **No es el veredicto.** Son 17 de 20 días y falta el evaluador completo (magnitud pareada,
+>   posición del cúmulo, nulo barajado).
+> - **Una mejora de 90 % no se cree sin auditoría independiente.** Regla del proyecto (tabla de
+>   skills: A/B con mejora sobre 30 % exige depuración sistemática y audit independiente, caso
+>   S33). Lanzar un verificador con contexto limpio sobre la lectura antes de seguir.
+> - **En MODIS el "0 % de falsos" es un detector APAGADO, no fidelidad.** Con `max` sólo 1 de 399
+>   pasadas MODIS tiene píxeles del primer pase, contra 397 de 399 con `min`: la banda 21 infla el
+>   sigma (D21) y el umbral adaptativo mata el camino contextual. La batería del Apéndice A ya lo
+>   había mostrado. **En MODIS la conectiva no se adopta sola, va junto con la banda 22.**
+>
+> **5. Orden de trabajo corregido para S148**: (a) leer la reparación y dar el veredicto de F sobre
+> la ventana completa; (b) leer G y H; (c) auditor independiente sobre F; (d) recién entonces la
+> propuesta de réplica literal. Instrumento nuevo para leer por tramo y que aborta si la cobertura
+> no es exacta: `experiments/_s147_lectura/lectura_por_tramo.py`.
+>
+> Lo de abajo se conserva tal como se escribió en el cierre.
+
+---
+
 > Cierre de S147 (2026-09-21, 00:58 UTC según la hora del servidor). `main` en **`62c655f3f`** al
 > reunir la evidencia (el commit de este cierre va encima), verificado igual al remoto con
 > `git ls-remote`. **Sin PR abiertos.** Nueve PR de la sesión, del #717 al #726 (sin el #721), todos
