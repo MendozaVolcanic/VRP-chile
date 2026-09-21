@@ -50,6 +50,10 @@ name: "A/B S146: sin el Test 1 integrado en el ROI (tres brazos, once Tier A, tr
         description: 'Lista JSON de brazos'
         required: true
         default: '["_s146_ab_control","_s146_ab_sin_test1","_s146_ab_sin_prioridad_debil"]'
+      control:
+        description: 'Brazo que hace de control al contar cobertura en recolectar. Para los A/B de S147 (conectiva, caja) es _s146_ab_sin_test1'
+        required: true
+        default: "_s146_ab_control"
 
 # No entra al grupo push-main: este workflow no pushea a main. Se serializa consigo mismo para
 # que dos corridas no se pisen la rama de salida.
@@ -188,15 +192,28 @@ jobs:
         env:
           ARM_START: ${{ github.event.inputs.start }}
           ARM_END: ${{ github.event.inputs.end }}
+          ARM_CONTROL: ${{ github.event.inputs.control }}
         run: |
           set -euo pipefail
           set -o pipefail
+          # S148. El control se elige por entrada y los brazos se derivan de lo que llego, en vez
+          # de una lista fija: con la lista fija los brazos nuevos (conectiva, caja) nunca se
+          # contaban, y un relanzamiento parcial (un solo brazo, para reparar un corte de NASA)
+          # dejaba el job en rojo porque su control no estaba en la corrida. Un rojo que no es
+          # falla del experimento ensena a ignorar los rojos. Si el control no vino, se avisa y
+          # la cobertura se cuenta en local contra el control de la corrida original (A108).
+          CONTROL="salidas/${ARM_CONTROL}"
+          if [ ! -d "$CONTROL" ]; then
+            echo "::warning::el control ${ARM_CONTROL} no esta en esta corrida (relanzamiento parcial): la cobertura NO se conto aca, contarla en local antes de evaluar"
+            echo "COBERTURA NO CONTADA: el control ${ARM_CONTROL} no esta en esta corrida" | tee salidas/cobertura.txt
+            exit 0
+          fi
           ARGS=""
-          for d in salidas/_s146_ab_sin_test1 salidas/_s146_ab_sin_prioridad_debil; do
-            if [ -d "$d" ]; then ARGS="$ARGS --brazo $d"; fi
+          for d in salidas/_*; do
+            if [ -d "$d" ] && [ "$d" != "$CONTROL" ]; then ARGS="$ARGS --brazo $d"; fi
           done
           python experiments/_s146_ab_sin_test1/contar_pasadas.py \
-            --control salidas/_s146_ab_control \
+            --control "$CONTROL" \
             --inicio "$ARM_START" --fin "$ARM_END" \
             --out salidas/cobertura.json \
             $ARGS 2>&1 | tee salidas/cobertura.txt
