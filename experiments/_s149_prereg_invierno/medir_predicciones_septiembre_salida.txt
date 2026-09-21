@@ -1,0 +1,39 @@
+ventana ['2026-09-01', '2026-09-20'] | sensor VIIRS375 | pasadas en ambos brazos: 962
+
+P1. publicacion en negativos limpios (n 373): control 29.8 % | brazo 2.7 %
+    CUMPLE (umbral: brazo en 18 % o menos)
+
+P2. razon de la tasa falsa borde sobre nadir
+    nadir  n 130 | control  24 | brazo   6
+    medio  n  68 | control  17 | brazo   2
+    borde  n 175 | control  70 | brazo   2
+    razon control 2.17 | brazo 0.25 | CUMPLE (umbral 1.3 o menos)
+
+P4. recall por pasada
+    positivas 143 | publica el control 137 | de esas conserva el brazo 135 | piso ceil(n_B x 118/141) = 115 | perdidas con 0.5 MW o mas: 0 | CUMPLE
+       perdida: Lastarria            2026-09-04 06:24 | MIROVA 0.140 MW | VIIRS_NOAA20
+       perdida: Tupungatito          2026-09-19 05:06 | MIROVA 0.050 MW | VIIRS_NOAA20
+    lo mismo con la tabla de MIROVA sola, sin OCR (H10): positivas 113 | control 107 | brazo conserva 105
+
+P5. pasadas que MIROVA lista con VRP 0 en noche con alerta del sensor
+    n 107 | control 54 (50.5 %) | brazo 20 (18.7 %) | razon brazo sobre control 0.37 | un apagado parejo daria 0.47 | CUMPLE
+       VIIRS_NOAA21: 43
+       VIIRS_NOAA20: 41
+       VIIRS_SNPP: 23
+       supervivencia de lo que publica el control en negativos limpios:  10 de 111 (9 %)
+       supervivencia de lo que publica el control en este estrato:       20 de  54 (37 %)
+       supervivencia de lo que publica el control en positivas:         135 de 137 (99 %)
+
+P6 (informativa, sin poder para decidir: H6). Villarrica y Nevados de Chillan, positivas una por una
+    NevadosDeChillan   2026-09-05 05:48 | MIROVA 0.140 MW | control 0 | brazo 0
+    NevadosDeChillan   2026-09-14 05:42 | MIROVA 0.090 MW | control 0 | brazo 0
+    NevadosDeChillan   2026-09-15 06:18 | MIROVA 0.050 MW | control 1 | brazo 1
+    NevadosDeChillan   2026-09-18 05:24 | MIROVA 0.050 MW | control 0 | brazo 0
+    Villarrica         2026-09-14 05:42 | MIROVA 0.170 MW | control 1 | brazo 1
+    Villarrica         2026-09-15 06:00 | MIROVA 0.160 MW | control 1 | brazo 1
+    Villarrica         2026-09-16 06:00 | MIROVA 0.190 MW | control 1 | brazo 1
+    Villarrica         2026-09-17 05:42 | MIROVA 0.680 MW | control 1 | brazo 1
+    Villarrica         2026-09-19 05:48 | MIROVA 0.890 MW | control 1 | brazo 1
+
+C8b. selectividad a una cola (misma definicion que evaluar.selectividad_supervivencia)
+    observado +0.8953 | p97,5 del nulo +0.3571 | CUMPLE

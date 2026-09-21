@@ -1,0 +1,84 @@
+== 1. Alertas por ventana (pasada = volcan, sensor, minuto; noche por elevacion solar propia)
+  junio         VIIRS375 noche  238 (diurnas excluidas  20) | {'Isluga': 52, 'Lascar': 50, 'Puyehue-Cordon Caulle': 36, 'Lastarria': 33, 'PlanchonPeteroa': 28, 'Tupungatito': 27, 'Chaiten': 6, 'Villarrica': 3, 'Copahue': 2, 'Nevados de Chillan': 1}
+  junio         VIIRS750 noche   50 (diurnas excluidas   1) | {'Lascar': 27, 'Isluga': 10, 'Puyehue-Cordon Caulle': 8, 'PlanchonPeteroa': 3, 'Tupungatito': 1, 'Chaiten': 1}
+  junio         MODIS    noche   13 (diurnas excluidas   1) | {'Lascar': 13}
+  julio         VIIRS375 noche  155 (diurnas excluidas   3) | {'Isluga': 42, 'Puyehue-Cordon Caulle': 32, 'Lascar': 27, 'Lastarria': 23, 'PlanchonPeteroa': 12, 'Tupungatito': 9, 'Chaiten': 5, 'Villarrica': 3, 'Copahue': 1, 'Nevados de Chillan': 1}
+  julio         VIIRS750 noche   21 (diurnas excluidas   0) | {'Lascar': 10, 'Puyehue-Cordon Caulle': 6, 'Isluga': 4, 'PlanchonPeteroa': 1}
+  julio         MODIS    noche    2 (diurnas excluidas   0) | {'Lascar': 2}
+  agosto 01-27  VIIRS375 noche  126 (diurnas excluidas   7) | {'Isluga': 30, 'Lascar': 28, 'Lastarria': 18, 'Tupungatito': 16, 'Puyehue-Cordon Caulle': 16, 'Chaiten': 6, 'Villarrica': 5, 'Nevados de Chillan': 4, 'PlanchonPeteroa': 3}
+  agosto 01-27  VIIRS750 noche   26 (diurnas excluidas   2) | {'Lascar': 7, 'Puyehue-Cordon Caulle': 6, 'Villarrica': 6, 'Isluga': 4, 'Tupungatito': 1, 'PlanchonPeteroa': 1, 'Copahue': 1}
+  agosto 01-27  MODIS    noche    1 (diurnas excluidas   1) | {'Lascar': 1}
+  sept 01-20    VIIRS375 noche  122 (diurnas excluidas   4) | {'Isluga': 31, 'Puyehue-Cordon Caulle': 27, 'Tupungatito': 19, 'Lascar': 17, 'Chaiten': 8, 'Lastarria': 8, 'PlanchonPeteroa': 6, 'Villarrica': 3, 'Nevados de Chillan': 3}
+  sept 01-20    VIIRS750 noche   12 (diurnas excluidas   1) | {'Puyehue-Cordon Caulle': 7, 'Lascar': 3, 'Isluga': 1, 'PlanchonPeteroa': 1}
+  sept 01-20    MODIS    noche    1 (diurnas excluidas   0) | {'Villarrica': 1}
+
+== 2. Doble conteo: pasadas de alerta nocturna con fila CONS y fila OCR en el mismo minuto (agosto 01-27 y junio)
+   ('2026-08-01', '2026-08-27') pasadas con dos tipos de ALERTA en el mismo minuto: 45
+   ('2026-06-01', '2026-06-30') pasadas con dos tipos de ALERTA en el mismo minuto: 52
+
+== 3. Ventanas deslizantes de 27 dias, V375 nocturno, Villarrica + Chillan (del 2026-05-01 al 2026-08-27 como fin)
+   suma 11 (Villarrica 10, Chillan  1) ventana ('2026-05-11', '2026-06-06')
+   suma 10 (Villarrica  9, Chillan  1) ventana ('2026-05-14', '2026-06-09')
+   suma 10 (Villarrica  9, Chillan  1) ventana ('2026-05-13', '2026-06-08')
+   suma 10 (Villarrica  9, Chillan  1) ventana ('2026-05-12', '2026-06-07')
+   suma 10 (Villarrica  9, Chillan  1) ventana ('2026-05-10', '2026-06-05')
+   suma 10 (Villarrica  9, Chillan  1) ventana ('2026-05-09', '2026-06-04')
+   la ventana del pre-registro: (9, 5, 4, ('2026-08-01', '2026-08-27')) | puesto 15 de 154
+
+== 4. Ventanas deslizantes de 30 dias, MODIS nocturno, Lascar (todo el snapshot)
+   26 alertas MODIS Lascar en ('2026-03-01', '2026-03-30')
+   26 alertas MODIS Lascar en ('2026-02-28', '2026-03-29')
+   26 alertas MODIS Lascar en ('2026-02-27', '2026-03-28')
+   25 alertas MODIS Lascar en ('2026-03-04', '2026-04-02')
+   25 alertas MODIS Lascar en ('2026-03-02', '2026-03-31')
+   junio calendario: [(13, ('2026-06-01', '2026-06-30'))]
+   detalle junio Lascar MODIS:
+      ('2026-06-03 07:45', 1.15, ['ALERTA_TERMICA', 'ALERTA_TERMICA_OCR'], -44.9)
+      ('2026-06-07 01:40', 0.34, ['ALERTA_TERMICA'], -51.2)
+      ('2026-06-08 07:40', 0.42, ['ALERTA_TERMICA'], -46.4)
+      ('2026-06-13 07:35', 0.58, ['ALERTA_TERMICA'], -47.8)
+      ('2026-06-14 01:20', 0.37, ['ALERTA_TERMICA'], -46.4)
+      ('2026-06-16 07:50', 0.32, ['ALERTA_TERMICA'], -44.6)
+      ('2026-06-17 01:40', 0.35, ['ALERTA_TERMICA'], -50.8)
+      ('2026-06-21 07:45', 0.59, ['ALERTA_TERMICA'], -46.0)
+      ('2026-06-24 01:15', 0.27, ['ALERTA_TERMICA'], -44.9)
+      ('2026-06-24 08:00', 0.6, ['ALERTA_TERMICA'], -42.8)
+      ('2026-06-26 07:40', 0.24, ['ALERTA_TERMICA'], -47.4)
+      ('2026-06-27 01:35', 1.12, ['ALERTA_TERMICA', 'ALERTA_TERMICA_OCR'], -49.2)
+      ('2026-06-29 07:55', 0.51, ['ALERTA_TERMICA'], -44.1)
+   con 0,5 MW o mas: 6 de 13
+
+== 5. Sustrato de P6: alertas nocturnas V375 de Villarrica y Chillan en agosto 01-27, con su VRP
+   Villarrica VIIRS375 n 5 | con 0,15 MW o mas: 5 | con 0,5 o mas: 5
+        ('2026-08-18 05:48', 1.86, ['ALERTA_TERMICA', 'ALERTA_TERMICA_OCR'])
+        ('2026-08-19 06:06', 0.87, ['ALERTA_TERMICA_OCR'])
+        ('2026-08-21 05:48', 1.82, ['ALERTA_TERMICA', 'ALERTA_TERMICA_OCR'])
+        ('2026-08-23 05:54', 1.33, ['ALERTA_TERMICA', 'ALERTA_TERMICA_OCR'])
+        ('2026-08-24 05:36', 2.21, ['ALERTA_TERMICA', 'ALERTA_TERMICA_OCR'])
+   Villarrica VIIRS750 n 6 | con 0,15 MW o mas: 6 | con 0,5 o mas: 5
+        ('2026-08-13 05:42', 0.41, ['ALERTA_TERMICA'])
+        ('2026-08-18 05:48', 1.38, ['ALERTA_TERMICA', 'ALERTA_TERMICA_OCR'])
+        ('2026-08-19 06:06', 0.67, ['ALERTA_TERMICA'])
+        ('2026-08-21 05:48', 0.9, ['ALERTA_TERMICA'])
+        ('2026-08-23 05:54', 0.6, ['ALERTA_TERMICA'])
+        ('2026-08-24 05:36', 0.85, ['ALERTA_TERMICA'])
+   Nevados de Chillan VIIRS375 n 4 | con 0,15 MW o mas: 0 | con 0,5 o mas: 0
+        ('2026-08-18 05:48', 0.07, ['ALERTA_TERMICA', 'ALERTA_TERMICA_OCR'])
+        ('2026-08-20 05:12', 0.06, ['ALERTA_TERMICA'])
+        ('2026-08-20 06:06', 0.09, ['ALERTA_TERMICA', 'ALERTA_TERMICA_OCR'])
+        ('2026-08-26 05:54', 0.02, ['ALERTA_TERMICA', 'ALERTA_TERMICA_OCR'])
+   Nevados de Chillan VIIRS750 n 0 | con 0,15 MW o mas: 0 | con 0,5 o mas: 0
+
+== 6. Regimen del scraper dentro de las ventanas: filas CONS por dia (huecos) y version del OCR
+   ('2026-08-01', '2026-08-27') filas CONS por dia: min 123 mediana 172 max 208 | dias bajo la mitad de la mediana: []
+   ('2026-06-01', '2026-06-30') filas CONS por dia: min 123 mediana 168 max 209 | dias bajo la mitad de la mediana: []
+   OCR 2026-05 {('21.0', 'roi_temporal_v26'): 206}
+   OCR 2026-06 {('29.2', 'roi_temporal_v26'): 78, ('29.1', 'roi_temporal_v26'): 4, ('21.0', 'roi_temporal_v26'): 81}
+   OCR 2026-07 {('29.2', 'roi_temporal_v26'): 76}
+   OCR 2026-08 {('30.0', 'roi_temporal_v26'): 84, ('29.2', 'roi_temporal_v26'): 14}
+   OCR 2026-09 {('30.0', 'roi_temporal_v26'): 82}
+
+== 7. Filas por plataforma no disponibles en el CSV (sin columna de satelite): SIN VERIFICAR el 60 % de SNPP
+
+== 8. RUTINA VRP 0 en noche de volcan con alerta, V375, agosto 01-27 (sustrato de P5, en filas de referencia)
+   total 108 {'Isluga': 15, 'Lastarria': 11, 'Lascar': 16, 'Nevados de Chillan': 5, 'Chaiten': 13, 'Tupungatito': 14, 'PlanchonPeteroa': 9, 'Villarrica': 13, 'Puyehue-Cordon Caulle': 9, 'Copahue': 3}

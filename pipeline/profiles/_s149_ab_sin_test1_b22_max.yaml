@@ -1,0 +1,27 @@
+# A/B S149, brazo MODIS. Brazo K: sin Test 1, banda 22 primaria, conectiva de prosa (max).
+#
+# EL FENOMENO. En MODIS la banda 21 (la de rango alto, pensada para incendios) tiene unas diez veces
+# mas ruido que la banda 22. La replica usa la 21 como primaria (D21), y ese ruido infla la desviacion
+# del dNTI de la escena. Con la conectiva de formula (`min`) eso no importa, porque manda el piso C1;
+# con la de prosa (`max`) manda la estadistica de la escena, y una desviacion inflada por el ruido de
+# la banda 21 sube el umbral hasta apagar el detector (bateria del Apendice A, S136; A/B de S148).
+# O sea que en MODIS la conectiva no se puede juzgar sola: va junto con la banda 22, que es ademas
+# lo que el paper dice usar (Coppola 2016a p. 3).
+#
+# QUE CAMBIA: respecto del brazo J (_s149_ab_sin_test1_b22), UNA cosa: enable_tests_23_prose_branch.
+# CRITERIO: pre-registrado y commiteado ANTES de correr, en
+# experiments/_s149_prereg_invierno/PREREGISTRO_INVIERNO.md
+# NO OPERACIONAL: data_subdir aislado, fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s149_ab_sin_test1_b22_max
+description: >
+  Brazo K: sin el Test 1 integrado, banda 22 primaria en MODIS, conectiva de prosa (max).
+
+enable_modis_b22_primary: true
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+output:
+  data_subdir: _s149_ab_sin_test1_b22_max
