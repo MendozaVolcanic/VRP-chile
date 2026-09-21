@@ -6,6 +6,27 @@
 > quieto: **1638 passed, 4 skipped, 2 xfailed**. Un PR abierto a propósito: **#738**.
 > Ningún A/B ni agente quedó corriendo. No se despachó ningún workflow.
 
+> ⚠️⚠️ **ACTUALIZACION de las 15:40 UTC, manda sobre todo lo de abajo.** Nicolás pidió **más meses** y
+> recordó que los primeros meses de los CSV del scraper tienen defectos de OCR. Resultado:
+> (1) **Regla A119** (#744): la referencia no sirve igual todo el año; los hitos viven en
+> `scripts/calidad_referencia_mirova.py` y `banco_paridad.indexar_referencia` los avisa solo. Ya estaba
+> medido en `docs/audit_s139/MAPA_BASES_MIROVA_V1.md` §2 y lo repetí por no tener puntero; ahora lo hay
+> en la memoria y en `CLAUDE.md`. Tabla sana desde marzo, **MODIS completo todo el año**, OCR mal
+> calibrado hasta el 2026-06-11: antes del 2026-06-13 **decide la tabla sola**.
+> (2) **Pre-registro v3** (#745), aprobado: VIIRS abril a agosto (un mes por despacho, 11 volcanes, B
+> y F) y MODIS Láscar marzo a junio (J, K, gemelo). Referencia congelada por mes en `_congelado/`.
+> (3) **Cola de despachos**: `experiments/_s149_prereg_invierno/despachar_cola.sh` corre en segundo
+> plano EN LA SESION DE S149 y despacha de a una ventana; **si esa sesión murió, la cola se detuvo**:
+> leer `despachos.log` en esa carpeta (no está en git) o `gh run list --workflow
+> reproc-s146-ab-sin-test1.yml -L 15`, y relanzar con `bash despachar_cola.sh <índice siguiente>`. Orden:
+> 0 marzo_lascar, 1 abril, 2 abril_lascar, 3 mayo_lascar, 4 junio, 5 junio_lascar, 6 julio,
+> 7 julio_gemelo, 8 agosto, 9 agosto_gemelo. Antes de la cola ya estaban: 35599902448 (mayo B y F) y
+> 35599941522 (mayo gemelo). **Nada está evaluado todavía.** Para evaluar una ventana: extraer las
+> salidas del run con `git archive origin/s146-ab/<run> experiments/_s146_ab_sin_test1/salidas/<run>`,
+> contar cobertura, `armar_tabla.py` contra `_congelado/<mes>` y `medir_predicciones.py`.
+> (4) **#746**: `main` quedó en rojo por un test atado a la referencia viva (el commit automático de
+> datos alcanzó el 20 de septiembre); se corta la referencia en fecha fija. Base de la suite: **1651**.
+
 > ⚠️ **ACTUALIZACION de las 13:20 UTC, manda sobre lo de abajo donde choquen.** Nicolás confirmó las
 > dos decisiones: (1) **#738 MERGEADO** (`0227dd7ac`; la caja llega al segundo pase, flag apagado;
 > suite sobre `main` 1645 passed; worktree borrado); (2) pre-registro v2 **APROBADO**, con orden
