@@ -10,6 +10,36 @@
 > el gate completo del proyecto: brainstorming, verificación a nivel de píxel, tag defensivo y
 > confirmación de Nicolás (A45).
 
+## 0. Lo que agregó el verificador con contexto limpio (leer antes que el resto)
+
+Informe: `docs/audit_s148/VERIFICADOR_RESULTADO_CONECTIVA.md`, scripts en
+`experiments/_s148_verificador_resultado/`. **No logró romper el resultado central** (P1 a P4,
+magnitud pareada, cúmulos movidos y pasadas perdidas le salen iguales con cálculo propio, y el
+reemplazo de los tres volcanes reparados está limpio: 0 gránulos y 0 `product_version` distintos
+entre brazos en las 2386 pasadas). Sin hallazgos de gravedad 4 ni 5. Pero corrige cuatro cosas de
+este documento:
+
+1. **El costo del §4 está SUBCONTADO.** Fuera de las 143 pasadas positivas, el brazo apaga **50
+   publicaciones de VIIRS 375 en noches en que MIROVA sí alertó en ese volcán** por otra pasada
+   (el control publica 84 de 171 y el brazo 34), y 7 de 15 en pasadas con referencia lejana. El
+   evaluador no mira ese estrato. No está verificado a nivel de píxel que sean calor real, pero
+   son las candidatas más serias a señal verdadera que `max` apaga: en una noche con actividad,
+   el operador vería menos pasadas confirmándola. **Este es el costo que hay que medir antes de
+   cualquier adopción.**
+2. **C8 (nulo barajado) no sirve como prueba de selectividad**: un apagador al azar lo cumple en
+   200 de 200 semillas. La selectividad del brazo F se sostiene por otra vía (Fisher p = 0,003
+   sobre las zonas, P3, y el contraste queda del lado opuesto al de un corte parejo de magnitud).
+   La fila de C8 de la tabla del §2 no debe citarse como evidencia.
+3. **P2 con 10 sobrevivientes se cumple por azar en 24 % de los sorteos.** P2 "decide" en el
+   pre-registro, pero con esta muestra tiene poco poder; lo que carga el peso es P3 y Fisher.
+4. **Números que quedaron del tramo de 17 días**: en el §6 "30 de 124" es **34 de 135** sobre la
+   ventana completa, y "Nevados de Chillán aporta 1" son **4** positivas. Las noches afectadas son
+   dos según la definición: Lastarria 2026-09-04 además de Isluga 2026-09-19. Y la banda del
+   control que hace imprimir INDECIDIBLE falla también en VIIRS 750, no sólo en VIIRS 375.
+
+Lo que el verificador no pudo comprobar: el control positivo contra el run 35521542153 (ese
+brazo no estaba en su copia); eso lo corrí yo y está en `evaluar_salida.txt`.
+
 ## 1. El fenómeno
 
 De noche, cada píxel se compara con sus vecinos en un índice que cruza el infrarrojo medio con el

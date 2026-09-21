@@ -1,0 +1,165 @@
+== 0. cruce de instrumentos: pub node vs port propio; etiqueta evaluador vs port propio
+_s146_ab_sin_test1 pub distinto: 0 | etiquetas: {('neg_limpio', 'neg'): 1428, ('sin_info', 'sin_info'): 757, ('far_ref', 'far_ref'): 32, ('pos', 'pos'): 162, ('neg_limpio', 'sin_info'): 7}
+_s147_ab_sin_test1_max pub distinto: 0 | etiquetas: {('neg_limpio', 'neg'): 1428, ('sin_info', 'sin_info'): 757, ('far_ref', 'far_ref'): 32, ('pos', 'pos'): 162, ('neg_limpio', 'sin_info'): 7}
+etiqueta distinta entre brazos: 0
+
+== 1. granulos y product_version entre brazos, por tramo
+01-17 n 2022 granule distinto 0 pv distinto 0 pv ctrl {'standard': 2022} pv brazo {'standard': 2022} z distinto(>0.01) 661 t_bg distinto(>0.01) 0 t_bg None en uno solo 0
+18-20 n 364 granule distinto 0 pv distinto 0 pv ctrl {'standard': 111, 'nrt': 253} pv brazo {'standard': 111, 'nrt': 253} z distinto(>0.01) 156 t_bg distinto(>0.01) 0 t_bg None en uno solo 0
+reparados: n 680 granule distinto 0 pv distinto 0
+processed_utc ctrl reparados min/max: 2026-09-21T06:44:00Z 2026-09-21T07:41:55Z
+processed_utc ctrl resto     min/max: 2026-09-21T00:35:54Z 2026-09-21T03:24:28Z
+processed_utc brazo todos    min/max: 2026-09-21T00:35:57Z 2026-09-21T03:28:43Z
+  reparados 01-17 z distinto 185 t_bg distinto 0 t_max distinto 0 de 576
+  reparados 18-20 z distinto 36 t_bg distinto 0 t_max distinto 0 de 104
+  NO reparados: z distinto 596 t_bg distinto 0 t_max distinto 0 de 1706
+
+== 2. P1-P4 ventana completa, y sin 18-20, y solo 18-20
+-- COMPLETA VIIRS375 | neg 373 pos 143
+  B P1 111/373=29.8% | zonas {'nadir': (24, 130), 'medio': (17, 68), 'borde': (70, 175)} | z None 0 | P2 2.17 | P4 137/143
+  F P1 10/373=2.7% | zonas {'nadir': (6, 130), 'medio': (2, 68), 'borde': (2, 175)} | z None 0 | P2 0.25 | P4 135/143
+-- COMPLETA VIIRS750 | neg 622 pos 18
+  B P1 37/622=5.9% | zonas {'nadir': (21, 209), 'medio': (7, 129), 'borde': (9, 284)} | z None 0 | P2 0.32 | P4 13/18
+  F P1 4/622=0.6% | zonas {'nadir': (4, 208), 'medio': (0, 130), 'borde': (0, 284)} | z None 0 | P2 0.00 | P4 13/18
+-- COMPLETA MODIS | neg 440 pos 1
+  B P1 39/440=8.9% | zonas {'nadir': (16, 179), 'medio': (8, 114), 'borde': (15, 147)} | z None 0 | P2 1.14 | P4 1/1
+  F P1 0/440=0.0% | zonas {'nadir': (0, 178), 'medio': (0, 112), 'borde': (0, 150)} | z None 0 | P2 nan | P4 1/1
+-- SIN 18-20 VIIRS375 | neg 325 pos 129
+  B P1 95/325=29.2% | zonas {'nadir': (22, 117), 'medio': (12, 55), 'borde': (61, 153)} | z None 0 | P2 2.12 | P4 125/129
+  F P1 10/325=3.1% | zonas {'nadir': (6, 117), 'medio': (2, 55), 'borde': (2, 153)} | z None 0 | P2 0.25 | P4 124/129
+-- SOLO 18-20 VIIRS375 | neg 48 pos 14
+  B P1 16/48=33.3% | zonas {'nadir': (2, 13), 'medio': (5, 13), 'borde': (9, 22)} | z None 0 | P2 2.66 | P4 12/14
+  F P1 0/48=0.0% | zonas {'nadir': (0, 13), 'medio': (0, 13), 'borde': (0, 22)} | z None 0 | P2 nan | P4 11/14
+-- SOLO standard VIIRS375 | neg 352 pos 136
+  B P1 109/352=31.0% | zonas {'nadir': (24, 123), 'medio': (16, 65), 'borde': (69, 164)} | z None 0 | P2 2.16 | P4 131/136
+  F P1 10/352=2.8% | zonas {'nadir': (6, 123), 'medio': (2, 65), 'borde': (2, 164)} | z None 0 | P2 0.25 | P4 130/136
+-- SOLO nrt VIIRS375 | neg 21 pos 7
+  B P1 2/21=9.5% | zonas {'nadir': (0, 7), 'medio': (1, 3), 'borde': (1, 11)} | z None 0 | P2 nan | P4 6/7
+  F P1 0/21=0.0% | zonas {'nadir': (0, 7), 'medio': (0, 3), 'borde': (0, 11)} | z None 0 | P2 nan | P4 5/7
+-- SIN los tres reparados VIIRS375 | neg 273 pos 104
+  B P1 74/273=27.1% | zonas {'nadir': (18, 94), 'medio': (12, 48), 'borde': (44, 131)} | z None 0 | P2 1.75 | P4 99/104
+  F P1 9/273=3.3% | zonas {'nadir': (5, 94), 'medio': (2, 48), 'borde': (2, 131)} | z None 0 | P2 0.29 | P4 98/104
+
+== 2b. P3 borde con fondo frio, varios cortes de t_bg (no se cual uso el documento)
+cortes terciles t_bg: 258.8 268.25 n con t_bg 372
+  borde y t_bg<=258.80: B 43/73  F 2/73
+  borde y t_bg<=255.00: B 35/51  F 0/51
+  borde y t_bg<=260.00: B 45/77  F 2/77
+  borde y t_bg<=262.00: B 49/85  F 2/85
+  borde y t_bg<=265.00: B 55/108  F 2/108
+  borde y t_bg<=270.00: B 63/129  F 2/129
+
+== 3. positivas: transiciones y calidad de lo publicado
+VIIRS375 {(1, 1): 135, (1, 0): 2, (0, 0): 6}
+   PERDIDA Lastarria 2026-09-04 06:24 ref 0.14 dispB 0.0419 z 54.25
+   PERDIDA Tupungatito 2026-09-19 05:06 ref 0.05 dispB 0.0504 z 53.66
+VIIRS750 {(1, 1): 13, (0, 0): 5}
+MODIS {(1, 1): 1}
+pares pos V375 publicados por ambos: 135
+  razon disp F/B: mediana 1.000 min 0.249 | <0.5: 6 | <0.25: 1 | <0.9: 26 | >1.1: 0
+  movidas >0.5 km entre positivas: 1 | >2 km: 0
+  las 12 con mayor desplome de magnitud:
+     PuyehueCordonCaulle 2026-09-08 06:30 ref 0.190 dispB 0.4413 dispF 0.1097 q 0.25 mov 0.28 km distB 0.14 distF 0.14 npxB 3 npxF 1
+     Tupungatito 2026-09-18 06:42 ref 0.060 dispB 0.0583 dispF 0.0201 q 0.34 mov 0.00 km distB 0.23 distF 0.23 npxB 1 npxF 1
+     Lascar 2026-09-03 06:24 ref 0.050 dispB 0.0746 dispF 0.0320 q 0.43 mov 0.30 km distB 0.21 distF 0.51 npxB 2 npxF 1
+     PuyehueCordonCaulle 2026-09-14 06:42 ref 0.070 dispB 0.1638 dispF 0.0758 q 0.46 mov 0.41 km distB 0.18 distF 0.57 npxB 2 npxF 1
+     PuyehueCordonCaulle 2026-09-18 06:48 ref 0.300 dispB 0.6350 dispF 0.2957 q 0.47 mov 0.37 km distB 0.37 distF 0.47 npxB 3 npxF 2
+     PuyehueCordonCaulle 2026-09-11 05:00 ref 0.250 dispB 0.2385 dispF 0.1124 q 0.47 mov 0.26 km distB 0.24 distF 0.30 npxB 3 npxF 1
+     Chaiten 2026-09-13 05:18 ref 0.070 dispB 0.1184 dispF 0.0653 q 0.55 mov 0.30 km distB 0.32 distF 0.22 npxB 2 npxF 1
+     Lascar 2026-09-07 05:06 ref 0.130 dispB 0.0478 dispF 0.0277 q 0.58 mov 0.00 km distB 0.04 distF 0.04 npxB 1 npxF 1
+     PuyehueCordonCaulle 2026-09-18 05:06 ref 0.790 dispB 1.2244 dispF 0.7457 q 0.61 mov 0.18 km distB 0.36 distF 0.20 npxB 4 npxF 2
+     PuyehueCordonCaulle 2026-09-19 05:06 ref 0.130 dispB 0.2260 dispF 0.1482 q 0.66 mov 0.00 km distB 0.36 distF 0.36 npxB 2 npxF 2
+     PuyehueCordonCaulle 2026-09-08 05:54 ref 0.490 dispB 0.5892 dispF 0.3875 q 0.66 mov 0.20 km distB 0.16 distF 0.05 npxB 4 npxF 2
+     PuyehueCordonCaulle 2026-09-19 06:24 ref 0.790 dispB 0.4806 dispF 0.3190 q 0.66 mov 0.25 km distB 0.27 distF 0.10 npxB 4 npxF 2
+  positivas con desplazamiento >0.5 km:
+     Lastarria 2026-09-02 06:06 mov 0.76 km q 1.00 ref 0.100 dispB 0.0863 dispF 0.0863 distB 0.84 distF 1.23
+  B razon contra MIROVA: <0.5: 46 | <0.25: 7 | >2: 9 | n 135
+  F razon contra MIROVA: <0.5: 49 | <0.25: 8 | >2: 6 | n 135
+
+== 4. todos los cumulos movidos >500 m (cualquier etiqueta, cualquier sensor)
+pares 228 (publican ambos, con o sin posicion: 228 ) movidos 13 {('Lastarria', 'VIIRS375'): 10, ('Tupungatito', 'VIIRS375'): 1, ('Villarrica', 'MODIS'): 1, ('PuyehueCordonCaulle', 'VIIRS375'): 1}
+     PuyehueCordonCaulle VIIRS375 2026-09-16 05:42 3.93 km lab sin_info dispB 0.0798 dispF 0.0798
+     Tupungatito VIIRS375 2026-09-20 06:06 3.06 km lab sin_info dispB 0.0737 dispF 0.0737
+     Lastarria VIIRS375 2026-09-02 05:18 1.83 km lab sin_info dispB 0.0991 dispF 0.0991
+     Lastarria VIIRS375 2026-09-11 05:54 1.54 km lab neg_limpio dispB 0.0660 dispF 0.0371
+     Lastarria VIIRS375 2026-09-15 05:18 1.44 km lab sin_info dispB 0.0548 dispF 0.0548
+     Villarrica MODIS 2026-09-04 07:50 1.33 km lab pos dispB 3.8590 dispF 2.6980
+     Lastarria VIIRS375 2026-09-12 06:18 1.28 km lab neg_limpio dispB 0.0541 dispF 0.0541
+     Lastarria VIIRS375 2026-09-15 05:54 1.19 km lab sin_info dispB 0.0611 dispF 0.0611
+     Lastarria VIIRS375 2026-09-14 05:42 0.85 km lab neg_limpio dispB 0.0478 dispF 0.0478
+     Lastarria VIIRS375 2026-09-04 06:00 0.84 km lab sin_info dispB 0.0635 dispF 0.0635
+     Lastarria VIIRS375 2026-09-06 05:42 0.78 km lab sin_info dispB 0.1201 dispF 0.0873
+     Lastarria VIIRS375 2026-09-14 06:18 0.77 km lab sin_info dispB 0.0497 dispF 0.0497
+     Lastarria VIIRS375 2026-09-02 06:06 0.76 km lab pos dispB 0.0863 dispF 0.0863
+
+== 5. magnitud pareada contra MIROVA, V375, por volcan (todas las n, sin piso de 5)
+TODOS n 135 mediana B 0.7895 F 0.7129
+  Chaiten                n   8 B 1.3101 F 1.2490 | pares que cambian 1
+  Isluga                 n  31 B 0.4692 F 0.4692 | pares que cambian 1
+  Lascar                 n  18 B 0.4775 F 0.4730 | pares que cambian 4
+  Lastarria              n   8 B 1.2108 F 1.2108 | pares que cambian 0
+  NevadosDeChillan       n   1 B 0.0540 F 0.0540 | pares que cambian 0
+  PlanchonPeteroa        n   8 B 1.1060 F 1.1060 | pares que cambian 0
+  PuyehueCordonCaulle    n  32 B 1.0602 F 0.9185 | pares que cambian 21
+  Tupungatito            n  24 B 0.4365 F 0.3774 | pares que cambian 3
+  Villarrica             n   5 B 1.0144 F 1.0144 | pares que cambian 1
+
+== 6. por volcan: negativos y positivos, los tres sensores
+VIIRS375
+  Chaiten                neg  38: B  18 F   1 (ganadas por F 0) | pos   8: B   8 F   8
+  Copahue                neg  57: B   4 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  Isluga                 neg   9: B   4 F   0 (ganadas por F 0) | pos  33: B  31 F  31
+  Lascar                 neg  25: B  12 F   3 (ganadas por F 0) | pos  18: B  18 F  18
+  Lastarria              neg  24: B   8 F   4 (ganadas por F 0) | pos   9: B   9 F   8
+  Llaima                 neg  57: B  14 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  NevadosDeChillan       neg  48: B   8 F   0 (ganadas por F 0) | pos   4: B   1 F   1
+  PlanchonPeteroa        neg  35: B   9 F   2 (ganadas por F 0) | pos   8: B   8 F   8
+  PuyehueCordonCaulle    neg  18: B  15 F   0 (ganadas por F 0) | pos  32: B  32 F  32
+  Tupungatito            neg  14: B   6 F   0 (ganadas por F 0) | pos  26: B  25 F  24
+  Villarrica             neg  48: B  13 F   0 (ganadas por F 0) | pos   5: B   5 F   5
+VIIRS750
+  Chaiten                neg  65: B   4 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  Copahue                neg  62: B   0 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  Isluga                 neg  50: B   6 F   1 (ganadas por F 0) | pos   1: B   0 F   0
+  Lascar                 neg  48: B   2 F   1 (ganadas por F 0) | pos   3: B   3 F   3
+  Lastarria              neg  57: B   1 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  Llaima                 neg  65: B   4 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  NevadosDeChillan       neg  62: B   0 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  PlanchonPeteroa        neg  57: B   2 F   0 (ganadas por F 0) | pos   1: B   1 F   1
+  PuyehueCordonCaulle    neg  40: B  14 F   1 (ganadas por F 0) | pos  11: B   8 F   8
+  Tupungatito            neg  59: B   1 F   1 (ganadas por F 0) | pos   0: B   0 F   0
+  Villarrica             neg  57: B   3 F   0 (ganadas por F 0) | pos   2: B   1 F   1
+MODIS
+  Chaiten                neg  45: B   4 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  Copahue                neg  40: B   0 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  Isluga                 neg  33: B   0 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  Lascar                 neg  36: B   0 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  Lastarria              neg  36: B   1 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  Llaima                 neg  40: B   0 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  NevadosDeChillan       neg  41: B   0 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  PlanchonPeteroa        neg  44: B   1 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  PuyehueCordonCaulle    neg  46: B  29 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  Tupungatito            neg  40: B   1 F   0 (ganadas por F 0) | pos   0: B   0 F   0
+  Villarrica             neg  39: B   3 F   0 (ganadas por F 0) | pos   1: B   1 F   1
+
+== 7. todas las etiquetas V375: publicacion B y F
+   far_ref 30 B 15 F 8 F gana 0
+   neg_limpio 373 B 111 F 10 F gana 0
+   pos 143 B 137 F 135 F gana 0
+   sin_info 416 B 161 F 48 F gana 0
+
+== 8. dependencia 6.1: positivas V375 publicadas por F sin pixeles de primer pase
+  F publicadas 135 con n_fp==0: 34 | n_fp None: 0
+  tramo 01-17: F publicadas 124 con n_fp==0: 30
+  positivas por volcan V375: {'Lascar': 18, 'Lastarria': 9, 'Isluga': 33, 'Tupungatito': 26, 'PlanchonPeteroa': 8, 'NevadosDeChillan': 4, 'Villarrica': 5, 'PuyehueCordonCaulle': 32, 'Chaiten': 8}
+  negativos sobrevivientes en F (V375):
+     Lascar 2026-09-05 05:06 z 48.2 t_bg 265.33 dispF 0.0457 pubB 1
+     Lascar 2026-09-05 05:42 z 11.6 t_bg 265.65 dispF 0.1543 pubB 1
+     Lascar 2026-09-10 05:12 z 41.1 t_bg 263.1 dispF 0.0026 pubB 1
+     Lastarria 2026-09-11 05:54 z 11.0 t_bg 256.25 dispF 0.0371 pubB 1
+     Lastarria 2026-09-12 06:18 z 54.0 t_bg 258.56 dispF 0.0541 pubB 1
+     Lastarria 2026-09-14 05:42 z 1.4 t_bg 257.89 dispF 0.0478 pubB 1
+     Lastarria 2026-09-14 06:36 z 63.7 t_bg 257.56 dispF 0.0469 pubB 1
+     PlanchonPeteroa 2026-09-06 05:48 z 4.3 t_bg 261.35 dispF 0.0631 pubB 1
+     PlanchonPeteroa 2026-09-08 05:54 z 24.3 t_bg 263.05 dispF 0.0517 pubB 1
+     Chaiten 2026-09-15 05:24 z 22.0 t_bg 269.79 dispF 0.0433 pubB 1
