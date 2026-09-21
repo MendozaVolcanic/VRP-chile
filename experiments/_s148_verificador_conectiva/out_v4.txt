@@ -1,0 +1,36 @@
+## (a) port propio contra node (predicado real de frontend/index.html)
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+   inner del html: {'Lascar': 5.0, 'Lastarria': 3.0, 'Isluga': 5.0, 'Tupungatito': 7.0, 'PlanchonPeteroa': 3.0, 'NevadosDeChillan': 5.0, 'Llaima': 5.0, 'Villarrica': 5.0, 'Copahue': 4.0, 'PuyehueCordonCaulle': 20.0, 'Chaiten': 5.0}
+   _s146_ab_sin_test1: comparados 2022 | decision de publicar distinta 0 | magnitud publicada distinta 0
+      nocturnas segun mi criterio (solar_zenith>90) que el repo descarta: 0 | del repo que yo descarto: 0
+   _s147_ab_sin_test1_max: comparados 2022 | decision de publicar distinta 0 | magnitud publicada distinta 0
+      nocturnas segun mi criterio (solar_zenith>90) que el repo descarta: 0 | del repo que yo descarto: 0
+
+## (b) recall V375 por estrato del VRP que publico MIROVA
+   MIROVA <0.1     n= 42 | B publica  39 | F publica  39
+   MIROVA 0.1-0.2  n= 38 | B publica  37 | F publica  36
+   MIROVA 0.2-0.5  n= 36 | B publica  36 | F publica  36
+   MIROVA >=0.5    n= 13 | B publica  13 | F publica  13
+   MIROVA sin VRP  n=  0 | B publica   0 | F publica   0
+
+## (c) cobertura de la ventana completa y fechas
+   records B 2315, F 2386 | solo en F 71 | solo en B 0
+   solo en F por volcan: {'Tupungatito': 23, 'Villarrica': 24, 'Chaiten': 24}
+   solo en F por fecha: {'2026-09-18': 3, '2026-09-19': 36, '2026-09-20': 32}
+   fecha minima B 2026-09-01 01:55, F 2026-09-01 01:55 | maxima B 2026-09-20 08:10, F 2026-09-20 08:10
+   (corte de regimen #535 = 2026-08-28 23:00 UTC; records anteriores al corte: B 0, F 0)
+   tramo hasta 2026-09-17: comunes 2022 (todas, incluidas diurnas)
+   processed_utc B: 2026-09-21T00:35:54Z a 2026-09-21T03:26:46Z | F: 2026-09-21T00:35:57Z a 2026-09-21T03:28:43Z
+
+## (d) MODIS: pasadas con pixeles del primer pase (todas las etiquetas, tramo)
+   B 397 de 399 | F 1 de 399
+   VIIRS375 B 291 de 814 | F 200 de 814
+   VIIRS750 B 45 de 809 | F 18 de 809
+
+## (e) sigma del dNTI en F: positivas contra negativas V375 (el umbral sube donde no hay nada?)
+   pos nadir  n= 66 | mediana mu+5sigma dNTI 0.0058 | mediana mu+5sigma dETI 0.0032
+   pos medio  n= 38 | mediana mu+5sigma dNTI 0.0063 | mediana mu+5sigma dETI 0.0037
+   pos borde  n= 25 | mediana mu+5sigma dNTI 0.0068 | mediana mu+5sigma dETI 0.0051
+   neg nadir  n=116 | mediana mu+5sigma dNTI 0.0058 | mediana mu+5sigma dETI 0.0034
+   neg medio  n= 55 | mediana mu+5sigma dNTI 0.0067 | mediana mu+5sigma dETI 0.0039
+   neg borde  n=153 | mediana mu+5sigma dNTI 0.0073 | mediana mu+5sigma dETI 0.0056

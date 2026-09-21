@@ -1,0 +1,193 @@
+#### 1. PAREO: mismo granulo en los dos brazos?
+  VIIRS375 n 814 | granulo distinto 0 | product_version distinta 0 | plataforma distinta 0 | cenit distinto 240 | t_bg distinto 0
+     versiones B: {'standard': 814}  F: {'standard': 814}
+     granulo distinto por etiqueta: {}
+  VIIRS750 n 809 | granulo distinto 0 | product_version distinta 0 | plataforma distinta 0 | cenit distinto 60 | t_bg distinto 0
+     versiones B: {'standard': 809}  F: {'standard': 809}
+     granulo distinto por etiqueta: {}
+  MODIS n 399 | granulo distinto 0 | product_version distinta 0 | plataforma distinta 0 | cenit distinto 385 | t_bg distinto 0
+     versiones B: {'standard': 399}  F: {'standard': 399}
+     granulo distinto por etiqueta: {}
+
+#### 2. TRANSICIONES de publicacion B -> F por etiqueta
+  VIIRS375  neg      1->1   10  1->0   85  0->1    0  0->0  230
+  VIIRS375  pos      1->1  124  1->0    1  0->1    0  0->0    4
+  VIIRS375  far_ref  1->1    7  1->0    6  0->1    0  0->0   15
+  VIIRS375  sin_info 1->1   39  1->0   86  0->1    0  0->0  207
+  VIIRS750  neg      1->1    3  1->0   27  0->1    0  0->0  532
+  VIIRS750  pos      1->1   11  1->0    0  0->1    0  0->0    5
+  VIIRS750  far_ref  1->1    0  1->0    0  0->1    0  0->0    1
+  VIIRS750  sin_info 1->1    7  1->0   10  0->1    0  0->0  213
+  MODIS     neg      1->1    0  1->0   34  0->1    0  0->0  346
+  MODIS     pos      1->1    1  1->0    0  0->1    0  0->0    0
+  MODIS     far_ref  1->1    0  1->0    0  0->1    0  0->0    0
+  MODIS     sin_info 1->1    0  1->0    1  0->1    0  0->0   17
+
+#### 3. IDENTIDAD DEL CUMULO en las que publican los dos brazos (V375 y V750)
+  VIIRS375 pos n=124 | desplazamiento km: mediana 0.000, max 0.762, >0.5 km: 1, >1 km: 0
+      razon magnitud publicada F/B: mediana 1.000, p10 0.781, p90 1.000, min 0.249, max 1.000 | identica (1.000): 99 | F<B: 25 | F>B: 0
+      razon pc.vrp_mw F/B: mediana 1.000 | n_pixels cumulo B mediana 2.0, F mediana 1.0
+      suma magnitud publicada: B 20.988 MW, F 19.212 MW
+      movido ('Lastarria', 'VIIRS375', '2026-09-02 06:06') 0.76 km B dist 0.837 F dist 1.225 disp 0.0863 0.0863
+  VIIRS375 neg n=10 | desplazamiento km: mediana 0.000, max 1.537, >0.5 km: 3, >1 km: 2
+      razon magnitud publicada F/B: mediana 1.000, p10 1.000, p90 1.000, min 0.562, max 1.000 | identica (1.000): 9 | F<B: 1 | F>B: 0
+      razon pc.vrp_mw F/B: mediana 1.000 | n_pixels cumulo B mediana 1.0, F mediana 1.0
+      suma magnitud publicada: B 0.576 MW, F 0.547 MW
+      movido ('Lastarria', 'VIIRS375', '2026-09-11 05:54') 1.54 km B dist 1.272 F dist 2.237 disp 0.066 0.0371
+      movido ('Lastarria', 'VIIRS375', '2026-09-12 06:18') 1.28 km B dist 1.12 F dist 2.332 disp 0.0541 0.0541
+      movido ('Lastarria', 'VIIRS375', '2026-09-14 05:42') 0.85 km B dist 1.193 F dist 1.241 disp 0.0478 0.0478
+  VIIRS750 pos n=11 | desplazamiento km: mediana 0.000, max 0.394, >0.5 km: 0, >1 km: 0
+      razon magnitud publicada F/B: mediana 1.000, p10 1.000, p90 1.000, min 1.000, max 1.000 | identica (1.000): 11 | F<B: 0 | F>B: 0
+      razon pc.vrp_mw F/B: mediana 1.000 | n_pixels cumulo B mediana 1, F mediana 1
+      suma magnitud publicada: B 2.285 MW, F 2.285 MW
+  VIIRS750 neg n=3 | desplazamiento km: mediana 0.000, max 0.000, >0.5 km: 0, >1 km: 0
+      razon magnitud publicada F/B: mediana 1.000, p10 1.000, p90 1.000, min 1.000, max 1.000 | identica (1.000): 3 | F<B: 0 | F>B: 0
+      razon pc.vrp_mw F/B: mediana 1.000 | n_pixels cumulo B mediana 1, F mediana 1
+      suma magnitud publicada: B 0.198 MW, F 0.198 MW
+
+#### 4. MAGNITUD contra MIROVA en positivas V375 publicadas por los dos
+  n=124 | mediana nuestra/MIROVA: B 0.781, F 0.716
+
+#### 5. CAMINOS: pasadas con pixeles del primer pase, por brazo y etiqueta
+  VIIRS375
+    pos      B n= 129 | con primer pase>0:   97 | con n_anomalous_pixels>0:  129 | publica  125
+    pos      F n= 129 | con primer pase>0:   94 | con n_anomalous_pixels>0:  128 | publica  124
+    neg      B n= 325 | con primer pase>0:   78 | con n_anomalous_pixels>0:  144 | publica   95
+    neg      F n= 325 | con primer pase>0:   26 | con n_anomalous_pixels>0:   34 | publica   10
+    far_ref  B n=  28 | con primer pase>0:   28 | con n_anomalous_pixels>0:   28 | publica   13
+    far_ref  F n=  28 | con primer pase>0:   28 | con n_anomalous_pixels>0:   28 | publica    7
+    sin_info B n= 332 | con primer pase>0:   88 | con n_anomalous_pixels>0:  184 | publica  125
+    sin_info F n= 332 | con primer pase>0:   52 | con n_anomalous_pixels>0:   72 | publica   39
+  VIIRS750
+    pos      B n=  16 | con primer pase>0:    4 | con n_anomalous_pixels>0:   16 | publica   11
+    pos      F n=  16 | con primer pase>0:    3 | con n_anomalous_pixels>0:   15 | publica   11
+    neg      B n= 562 | con primer pase>0:   29 | con n_anomalous_pixels>0:   93 | publica   30
+    neg      F n= 562 | con primer pase>0:   11 | con n_anomalous_pixels>0:   20 | publica    3
+    far_ref  B n=   1 | con primer pase>0:    1 | con n_anomalous_pixels>0:    1 | publica    0
+    far_ref  F n=   1 | con primer pase>0:    1 | con n_anomalous_pixels>0:    1 | publica    0
+    sin_info B n= 230 | con primer pase>0:   11 | con n_anomalous_pixels>0:   46 | publica   17
+    sin_info F n= 230 | con primer pase>0:    3 | con n_anomalous_pixels>0:   16 | publica    7
+  MODIS
+    pos      B n=   1 | con primer pase>0:    1 | con n_anomalous_pixels>0:    1 | publica    1
+    pos      F n=   1 | con primer pase>0:    1 | con n_anomalous_pixels>0:    1 | publica    1
+    neg      B n= 380 | con primer pase>0:  379 | con n_anomalous_pixels>0:  380 | publica   34
+    neg      F n= 380 | con primer pase>0:    0 | con n_anomalous_pixels>0:    0 | publica    0
+    far_ref  B n=   0 | con primer pase>0:    0 | con n_anomalous_pixels>0:    0 | publica    0
+    far_ref  F n=   0 | con primer pase>0:    0 | con n_anomalous_pixels>0:    0 | publica    0
+    sin_info B n=  18 | con primer pase>0:   17 | con n_anomalous_pixels>0:   17 | publica    1
+    sin_info F n=  18 | con primer pase>0:    0 | con n_anomalous_pixels>0:    0 | publica    0
+
+#### 6. Que sostiene lo PUBLICADO en F (positivas y negativas, V375 y V750)
+  VIIRS375 pos publicadas en F: 124
+      diag_n_first_pass_pixels       >0 en   94 | mediana 1.0
+      diag_n_second_pass_recapture   >0 en   75 | mediana 1.0
+      n_dnti_ctx_path                >0 en  111 | mediana 2.0
+      diag_n_eti_path                >0 en    0 | mediana 0.0
+      n_bt_path                      >0 en    0 | mediana 0.0
+      n_nti_path                     >0 en    1 | mediana 0.0
+      n_nti_rel_path                 >0 en    0 | mediana 0.0
+      n_vent_pixels                  >0 en    0 | mediana 0.0
+      n_test1_pixels                 >0 en    0 | mediana 0.0
+      final_hotspot_source: {'ctx_cluster': 124}
+      triggered_test1: {False: 124}
+      publicadas en F SIN ningun pixel del primer pase: 30
+          ('Lascar', 'VIIRS375', '2026-09-03 06:24') {'diag_n_second_pass_recapture': 1, 'n_dnti_ctx_path': 1} ctx_cluster disp 0.032
+          ('Lascar', 'VIIRS375', '2026-09-07 05:06') {'diag_n_second_pass_recapture': 1} ctx_cluster disp 0.0277
+          ('Lascar', 'VIIRS375', '2026-09-12 06:18') {'diag_n_second_pass_recapture': 1} ctx_cluster disp 0.0267
+          ('Lastarria', 'VIIRS375', '2026-09-13 06:00') {'diag_n_second_pass_recapture': 2} ctx_cluster disp 0.0406
+          ('Lastarria', 'VIIRS375', '2026-09-15 06:18') {'diag_n_second_pass_recapture': 1} ctx_cluster disp 0.0422
+          ('Isluga', 'VIIRS375', '2026-09-10 06:06') {'diag_n_second_pass_recapture': 1} ctx_cluster disp 0.0278
+          ('Isluga', 'VIIRS375', '2026-09-14 06:12') {'diag_n_second_pass_recapture': 1, 'n_dnti_ctx_path': 1} ctx_cluster disp 0.0365
+          ('Tupungatito', 'VIIRS375', '2026-09-06 04:54') {'diag_n_second_pass_recapture': 1, 'n_dnti_ctx_path': 6} ctx_cluster disp 0.0173
+  VIIRS375 neg publicadas en F: 10
+      diag_n_first_pass_pixels       >0 en    6 | mediana 1.0
+      diag_n_second_pass_recapture   >0 en    6 | mediana 1.0
+      n_dnti_ctx_path                >0 en    6 | mediana 1.0
+      diag_n_eti_path                >0 en    0 | mediana 0.0
+      n_bt_path                      >0 en    0 | mediana 0.0
+      n_nti_path                     >0 en    0 | mediana 0.0
+      n_nti_rel_path                 >0 en    0 | mediana 0.0
+      n_vent_pixels                  >0 en    0 | mediana 0.0
+      n_test1_pixels                 >0 en    0 | mediana 0.0
+      final_hotspot_source: {'ctx_cluster': 10}
+      triggered_test1: {False: 10}
+      publicadas en F SIN ningun pixel del primer pase: 4
+          ('Lastarria', 'VIIRS375', '2026-09-11 05:54') {'diag_n_second_pass_recapture': 1} ctx_cluster disp 0.0371
+          ('Lastarria', 'VIIRS375', '2026-09-14 06:36') {'diag_n_second_pass_recapture': 1} ctx_cluster disp 0.0469
+          ('PlanchonPeteroa', 'VIIRS375', '2026-09-08 05:54') {'diag_n_second_pass_recapture': 1} ctx_cluster disp 0.0517
+          ('Chaiten', 'VIIRS375', '2026-09-15 05:24') {'diag_n_second_pass_recapture': 1} ctx_cluster disp 0.0433
+  VIIRS750 pos publicadas en F: 11
+      diag_n_first_pass_pixels       >0 en    3 | mediana 0
+      diag_n_second_pass_recapture   >0 en    8 | mediana 1
+      n_dnti_ctx_path                >0 en   10 | mediana 2
+      diag_n_eti_path                >0 en    0 | mediana 0
+      n_bt_path                      >0 en    0 | mediana 0
+      n_nti_path                     >0 en    0 | mediana 0
+      n_nti_rel_path                 >0 en    0 | mediana 0
+      n_vent_pixels                  >0 en    0 | mediana 0
+      n_test1_pixels                 >0 en    0 | mediana 0
+      final_hotspot_source: {'ctx_cluster': 11}
+      triggered_test1: {False: 11}
+      publicadas en F SIN ningun pixel del primer pase: 8
+          ('Lascar', 'VIIRS750', '2026-09-01 05:36') {'diag_n_second_pass_recapture': 1} ctx_cluster disp 0.069
+          ('Lascar', 'VIIRS750', '2026-09-02 06:06') {'diag_n_second_pass_recapture': 1, 'n_dnti_ctx_path': 1} ctx_cluster disp 0.17
+          ('Lascar', 'VIIRS750', '2026-09-14 05:36') {'diag_n_second_pass_recapture': 1, 'n_dnti_ctx_path': 1} ctx_cluster disp 0.208
+          ('PuyehueCordonCaulle', 'VIIRS750', '2026-09-11 05:00') {'diag_n_second_pass_recapture': 1, 'n_dnti_ctx_path': 19} ctx_cluster disp 0.057
+          ('PuyehueCordonCaulle', 'VIIRS750', '2026-09-11 05:54') {'diag_n_second_pass_recapture': 1, 'n_dnti_ctx_path': 19} ctx_cluster disp 0.052
+          ('PuyehueCordonCaulle', 'VIIRS750', '2026-09-13 05:18') {'diag_n_second_pass_recapture': 1, 'n_dnti_ctx_path': 36} ctx_cluster disp 0.052
+          ('PuyehueCordonCaulle', 'VIIRS750', '2026-09-17 05:42') {'diag_n_second_pass_recapture': 2, 'n_dnti_ctx_path': 2} ctx_cluster disp 0.346
+          ('PuyehueCordonCaulle', 'VIIRS750', '2026-09-17 06:30') {'diag_n_second_pass_recapture': 2, 'n_dnti_ctx_path': 2} ctx_cluster disp 0.113
+  VIIRS750 neg publicadas en F: 3
+      diag_n_first_pass_pixels       >0 en    0 | mediana 0
+      diag_n_second_pass_recapture   >0 en    3 | mediana 1
+      n_dnti_ctx_path                >0 en    3 | mediana 1
+      diag_n_eti_path                >0 en    0 | mediana 0
+      n_bt_path                      >0 en    0 | mediana 0
+      n_nti_path                     >0 en    0 | mediana 0
+      n_nti_rel_path                 >0 en    0 | mediana 0
+      n_vent_pixels                  >0 en    0 | mediana 0
+      n_test1_pixels                 >0 en    0 | mediana 0
+      final_hotspot_source: {'ctx_cluster': 3}
+      triggered_test1: {False: 3}
+      publicadas en F SIN ningun pixel del primer pase: 3
+          ('Lascar', 'VIIRS750', '2026-09-15 05:18') {'diag_n_second_pass_recapture': 1, 'n_dnti_ctx_path': 1} ctx_cluster disp 0.038
+          ('Isluga', 'VIIRS750', '2026-09-03 05:42') {'diag_n_second_pass_recapture': 1, 'n_dnti_ctx_path': 1} ctx_cluster disp 0.057
+          ('Tupungatito', 'VIIRS750', '2026-09-06 05:48') {'diag_n_second_pass_recapture': 1, 'n_dnti_ctx_path': 4} ctx_cluster disp 0.103
+  MODIS pos publicadas en F: 1
+      diag_n_first_pass_pixels       >0 en    1 | mediana 1
+      diag_n_second_pass_recapture   >0 en    0 | mediana 0
+      n_dnti_ctx_path                >0 en    0 | mediana 0
+      diag_n_eti_path                >0 en    0 | mediana 0
+      n_bt_path                      >0 en    0 | mediana 0
+      n_nti_path                     >0 en    0 | mediana 0
+      n_nti_rel_path                 >0 en    0 | mediana 0
+      n_vent_pixels                  >0 en    0 | mediana 0
+      n_test1_pixels                 >0 en    0 | mediana 0
+      final_hotspot_source: {'eruption': 1}
+      triggered_test1: {False: 1}
+      publicadas en F SIN ningun pixel del primer pase: 0
+
+#### 7. Las negativas V375 que sobreviven en F, una por una
+   ('Lascar', 'VIIRS375', '2026-09-05 05:06') z 48.2 medio t_bg 265.3 | B pub 1 disp 0.0457 dist 0.257 | F disp 0.0457 dist 0.257 npx 1 fp 1
+   ('Lascar', 'VIIRS375', '2026-09-05 05:42') z 11.6 nadir t_bg 265.6 | B pub 1 disp 0.1543 dist 0.031 | F disp 0.1543 dist 0.031 npx 2 fp 2
+   ('Lascar', 'VIIRS375', '2026-09-10 05:12') z 41.1 medio t_bg 263.1 | B pub 1 disp 0.0026 dist 0.108 | F disp 0.0026 dist 0.108 npx 1 fp 1
+   ('Lastarria', 'VIIRS375', '2026-09-11 05:54') z 11.0 nadir t_bg 256.2 | B pub 1 disp 0.066 dist 1.272 | F disp 0.0371 dist 2.237 npx 1 fp 0
+   ('Lastarria', 'VIIRS375', '2026-09-12 06:18') z 54.0 borde t_bg 258.6 | B pub 1 disp 0.0541 dist 1.12 | F disp 0.0541 dist 2.332 npx 1 fp 1
+   ('Lastarria', 'VIIRS375', '2026-09-14 05:42') z 1.4 nadir t_bg 257.9 | B pub 1 disp 0.0478 dist 1.193 | F disp 0.0478 dist 1.241 npx 1 fp 1
+   ('Lastarria', 'VIIRS375', '2026-09-14 06:36') z 63.7 borde t_bg 257.6 | B pub 1 disp 0.0469 dist 1.243 | F disp 0.0469 dist 1.243 npx 1 fp 0
+   ('PlanchonPeteroa', 'VIIRS375', '2026-09-06 05:48') z 4.3 nadir t_bg 261.4 | B pub 1 disp 0.0631 dist 0.446 | F disp 0.0631 dist 0.446 npx 1 fp 1
+   ('PlanchonPeteroa', 'VIIRS375', '2026-09-08 05:54') z 24.3 nadir t_bg 263.1 | B pub 1 disp 0.0517 dist 0.373 | F disp 0.0517 dist 0.373 npx 1 fp 0
+   ('Chaiten', 'VIIRS375', '2026-09-15 05:24') z 22.0 nadir t_bg 269.8 | B pub 1 disp 0.0433 dist 0.187 | F disp 0.0433 dist 0.187 npx 1 fp 0
+
+#### 8. Las positivas perdidas (B publica, F no) y ganadas, todos los sensores
+   ('Lastarria', 'VIIRS375', '2026-09-04 06:24') B pub 1 0.0419 -> F pub 0 0 | MIROVA [0.14]
+  positivas V375 que NINGUN brazo publica:
+     ('Isluga', 'VIIRS375', '2026-09-13 05:12') dc B summit F summit
+     ('Tupungatito', 'VIIRS375', '2026-09-17 04:48') dc B summit F summit
+     ('NevadosDeChillan', 'VIIRS375', '2026-09-05 05:48') dc B summit F summit
+     ('NevadosDeChillan', 'VIIRS375', '2026-09-14 05:42') dc B summit F summit
+
+#### 9. Umbral efectivo en F: mu + C2 sigma contra C1 (dNTI), V375, por zona, en negativas
+   nadir  n=116 | mediana mu+5sigma dNTI 0.0058 | fraccion con mu+5sigma > 0.003: 1.00
+   medio  n= 55 | mediana mu+5sigma dNTI 0.0067 | fraccion con mu+5sigma > 0.003: 1.00
+   borde  n=153 | mediana mu+5sigma dNTI 0.0073 | fraccion con mu+5sigma > 0.003: 1.00
