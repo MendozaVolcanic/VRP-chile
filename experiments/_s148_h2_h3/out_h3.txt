@@ -1,0 +1,113 @@
+#### 0. CONTROL DEL INSTRUMENTO: pasadas con primer pase>0 y recaptura=0 (todo pixel vino del primer pase)
+  VIIRS375 B pasadas 109 | pixeles 156 | con bt<=t_bg+3: 1 | exceso minimo 3.00 K
+  VIIRS375 F pasadas 114 | pixeles 150 | con bt<=t_bg+3: 1 | exceso minimo 3.00 K
+  VIIRS750 B pasadas 26 | pixeles 31 | con bt<=t_bg+3: 0 | exceso minimo 3.11 K
+  VIIRS750 F pasadas 14 | pixeles 14 | con bt<=t_bg+3: 0 | exceso minimo 3.07 K
+
+#### 1. PASADAS CON PRIMER PASE = 0 y algun pixel: los pixeles cumplen la compuerta de BT?
+  VIIRS375 B pasadas 194 | pixeles 397 | bt<=t_bg+3: 397 (100.0 %) | pasadas con ALGUN pixel sobre la compuerta: 0
+       exceso bt-t_bg: min -18.44 | p25 -3.65 | mediana -0.88 | p75 0.71 | max 2.99
+       otros caminos con pixeles en esas pasadas: {}
+  VIIRS375 F pasadas 62 | pixeles 78 | bt<=t_bg+3: 78 (100.0 %) | pasadas con ALGUN pixel sobre la compuerta: 0
+       exceso bt-t_bg: min -7.18 | p25 -0.70 | mediana 0.58 | p75 1.93 | max 2.99
+       otros caminos con pixeles en esas pasadas: {}
+  VIIRS750 B pasadas 111 | pixeles 138 | bt<=t_bg+3: 138 (100.0 %) | pasadas con ALGUN pixel sobre la compuerta: 0
+       exceso bt-t_bg: min -13.09 | p25 -2.93 | mediana -1.05 | p75 0.54 | max 2.96
+       otros caminos con pixeles en esas pasadas: {}
+  VIIRS750 F pasadas 34 | pixeles 37 | bt<=t_bg+3: 37 (100.0 %) | pasadas con ALGUN pixel sobre la compuerta: 0
+       exceso bt-t_bg: min -4.90 | p25 -1.24 | mediana 0.47 | p75 1.48 | max 2.69
+       otros caminos con pixeles en esas pasadas: {}
+
+#### 1b. En pasadas CON primer pase y CON recaptura: los pixeles bajo la compuerta caben en la recaptura?
+  VIIRS375 B pasadas 132 | pixeles recapturados 425 | pixeles bajo la compuerta 404 | pasadas con MAS pixeles bajo la compuerta que recapturados: 1
+  VIIRS375 F pasadas 59 | pixeles recapturados 84 | pixeles bajo la compuerta 72 | pasadas con MAS pixeles bajo la compuerta que recapturados: 0
+  VIIRS750 B pasadas 11 | pixeles recapturados 73 | pixeles bajo la compuerta 59 | pasadas con MAS pixeles bajo la compuerta que recapturados: 0
+  VIIRS750 F pasadas 0 | pixeles recapturados 0 | pixeles bajo la compuerta 0 | pasadas con MAS pixeles bajo la compuerta que recapturados: 0
+
+#### 2. PUBLICADAS SIN PRIMER PASE, por etiqueta, en F y en B
+  VIIRS375 pos      n= 129 | F publica  124, SIN primer pase  30 (de esas, tampoco tenian primer pase en B:  28) || B publica  125, SIN primer pase  28
+  VIIRS375 neg      n= 325 | F publica   10, SIN primer pase   4 (de esas, tampoco tenian primer pase en B:   4) || B publica   95, SIN primer pase  41
+  VIIRS375 far_ref  n=  28 | F publica    7, SIN primer pase   0 (de esas, tampoco tenian primer pase en B:   0) || B publica   13, SIN primer pase   0
+  VIIRS375 sin_info n= 332 | F publica   39, SIN primer pase  14 (de esas, tampoco tenian primer pase en B:  13) || B publica  125, SIN primer pase  64
+  VIIRS750 pos      n=  16 | F publica   11, SIN primer pase   8 (de esas, tampoco tenian primer pase en B:   7) || B publica   11, SIN primer pase   7
+  VIIRS750 neg      n= 562 | F publica    3, SIN primer pase   3 (de esas, tampoco tenian primer pase en B:   2) || B publica   30, SIN primer pase  15
+  VIIRS750 far_ref  n=   1 | F publica    0, SIN primer pase   0 (de esas, tampoco tenian primer pase en B:   0) || B publica    0, SIN primer pase   0
+  VIIRS750 sin_info n= 230 | F publica    7, SIN primer pase   6 (de esas, tampoco tenian primer pase en B:   5) || B publica   17, SIN primer pase  10
+
+#### 3. CREDIBILIDAD FISICA de las positivas V375 publicadas en F: sin primer pase contra con primer pase
+  SIN primer pase en F n=30
+     MIROVA MW min 0.020 p25 0.050 mediana 0.070 p75 0.110 max 0.450
+     nuestra F MW mediana 0.0743 | razon F/MIROVA: min 0.054 p25 0.640 mediana 1.034 p75 1.277 max 2.320 (n=30)
+     razon dentro de 0.5 a 2.0: 22 de 30 | distancia cumulo-crater km: mediana 0.26 max 1.23 | n_pixels mediana 1.0
+     exceso del pixel mas caliente sobre el fondo (K): min -3.16 p25 0.57 mediana 1.84 p75 2.39 max 2.99
+     t_bg_k mediana 271.0 | zona: {'medio': 6, 'borde': 9, 'nadir': 15}
+     volcan: {'Lascar': 3, 'Lastarria': 2, 'Isluga': 2, 'Tupungatito': 1, 'PlanchonPeteroa': 5, 'NevadosDeChillan': 1, 'Villarrica': 3, 'PuyehueCordonCaulle': 6, 'Chaiten': 7}
+  CON primer pase en F n=94
+     MIROVA MW min 0.030 p25 0.110 mediana 0.190 p75 0.360 max 2.220
+     nuestra F MW mediana 0.1111 | razon F/MIROVA: min 0.004 p25 0.397 mediana 0.601 p75 0.979 max 3.333 (n=94)
+     razon dentro de 0.5 a 2.0: 53 de 94 | distancia cumulo-crater km: mediana 0.27 max 1.28 | n_pixels mediana 1.0
+     exceso del pixel mas caliente sobre el fondo (K): min 2.73 p25 5.34 mediana 8.47 p75 13.07 max 66.52
+     t_bg_k mediana 266.2 | zona: {'medio': 32, 'borde': 13, 'nadir': 49}
+     volcan: {'Lascar': 15, 'Lastarria': 6, 'Isluga': 29, 'Tupungatito': 18, 'PlanchonPeteroa': 3, 'Villarrica': 1, 'PuyehueCordonCaulle': 21, 'Chaiten': 1}
+
+   por volcan: positivas publicadas en F, sin primer pase / total, y razon mediana F/MIROVA de cada grupo
+     Chaiten               7 /   8 | razon sin 1.224 | con 1.274
+     Isluga                2 /  31 | razon sin 0.478 | con 0.469
+     Lascar                3 /  18 | razon sin 0.381 | con 0.495
+     Lastarria             2 /   8 | razon sin 1.211 | con 1.627
+     NevadosDeChillan      1 /   1 | razon sin 0.054 | con   -  
+     PlanchonPeteroa       5 /   8 | razon sin 1.622 | con 1.011
+     PuyehueCordonCaulle   6 /  27 | razon sin 1.051 | con 0.804
+     Tupungatito           1 /  19 | razon sin 0.346 | con 0.521
+     Villarrica            3 /   4 | razon sin 1.029 | con 1.014
+
+#### 4. Las positivas V375 sin primer pase en F, una por una
+  Lascar               2026-09-03 06:24 z 49.5 t_bg 263.2 | fpB 1 spB 1 | spF 1 npx 1 dist 0.51 | excesos K [2.9] | F 0.0320 MW, MIROVA 0.050 (x0.64)
+  Lascar               2026-09-07 05:06 z 59.3 t_bg 265.6 | fpB 0 spB 2 | spF 1 npx 1 dist 0.04 | excesos K [2.28] | F 0.0277 MW, MIROVA 0.130 (x0.21)
+  Lascar               2026-09-12 06:18 z 55.6 t_bg 263.7 | fpB 0 spB 1 | spF 1 npx 1 dist 0.20 | excesos K [2.39] | F 0.0267 MW, MIROVA 0.070 (x0.38)
+  Lastarria            2026-09-13 06:00 z 32.1 t_bg 257.8 | fpB 0 spB 2 | spF 2 npx 1 dist 1.17 | excesos K [2.95, 2.86] | F 0.0406 MW, MIROVA 0.040 (x1.01)
+  Lastarria            2026-09-15 06:18 z 48.2 t_bg 257.9 | fpB 0 spB 1 | spF 1 npx 1 dist 1.23 | excesos K [2.26] | F 0.0422 MW, MIROVA 0.030 (x1.41)
+  Isluga               2026-09-10 06:06 z 32.2 t_bg 266.2 | fpB 0 spB 1 | spF 1 npx 1 dist 0.91 | excesos K [2.23] | F 0.0278 MW, MIROVA 0.080 (x0.35)
+  Isluga               2026-09-14 06:12 z 31.2 t_bg 266.1 | fpB 0 spB 1 | spF 1 npx 1 dist 0.84 | excesos K [2.89] | F 0.0365 MW, MIROVA 0.060 (x0.61)
+  Tupungatito          2026-09-06 04:54 z 58.5 t_bg 251.0 | fpB 0 spB 2 | spF 1 npx 1 dist 0.26 | excesos K [2.88] | F 0.0173 MW, MIROVA 0.050 (x0.35)
+  PlanchonPeteroa      2026-09-05 05:48 z  7.3 t_bg 260.5 | fpB 0 spB 1 | spF 1 npx 1 dist 0.27 | excesos K [1.47] | F 0.0811 MW, MIROVA 0.050 (x1.62)
+  PlanchonPeteroa      2026-09-13 06:00 z 33.2 t_bg 261.1 | fpB 0 spB 1 | spF 1 npx 1 dist 0.31 | excesos K [1.82] | F 0.0848 MW, MIROVA 0.090 (x0.94)
+  PlanchonPeteroa      2026-09-13 06:36 z 57.5 t_bg 261.4 | fpB 0 spB 1 | spF 1 npx 1 dist 0.53 | excesos K [-3.16] | F 0.0464 MW, MIROVA 0.020 (x2.32)
+  PlanchonPeteroa      2026-09-14 05:42 z  3.8 t_bg 264.8 | fpB 0 spB 1 | spF 1 npx 1 dist 0.38 | excesos K [2.16] | F 0.0818 MW, MIROVA 0.080 (x1.02)
+  PlanchonPeteroa      2026-09-15 06:18 z 47.7 t_bg 264.7 | fpB 0 spB 1 | spF 1 npx 1 dist 0.62 | excesos K [2.81] | F 0.0677 MW, MIROVA 0.040 (x1.69)
+  NevadosDeChillan     2026-09-15 06:18 z 45.8 t_bg 267.0 | fpB 0 spB 1 | spF 1 npx 1 dist 0.53 | excesos K [0.22] | F 0.0027 MW, MIROVA 0.050 (x0.05)
+  Villarrica           2026-09-14 05:42 z  3.4 t_bg 275.2 | fpB 0 spB 1 | spF 1 npx 1 dist 0.12 | excesos K [1.68] | F 0.1749 MW, MIROVA 0.170 (x1.03)
+  Villarrica           2026-09-15 06:00 z 12.9 t_bg 275.2 | fpB 0 spB 2 | spF 2 npx 2 dist 0.12 | excesos K [-2.56, -6.87] | F 0.2044 MW, MIROVA 0.160 (x1.28)
+  Villarrica           2026-09-16 06:00 z 23.2 t_bg 278.4 | fpB 0 spB 2 | spF 1 npx 1 dist 0.30 | excesos K [-1.33] | F 0.1398 MW, MIROVA 0.190 (x0.74)
+  PuyehueCordonCaulle  2026-09-06 05:30 z 32.5 t_bg 271.2 | fpB 0 spB 1 | spF 1 npx 1 dist 0.06 | excesos K [-0.12] | F 0.0727 MW, MIROVA 0.070 (x1.04)
+  PuyehueCordonCaulle  2026-09-06 06:36 z 59.7 t_bg 270.9 | fpB 0 spB 2 | spF 1 npx 1 dist 0.50 | excesos K [1.86] | F 0.1061 MW, MIROVA 0.100 (x1.06)
+  PuyehueCordonCaulle  2026-09-07 04:36 z 65.5 t_bg 271.1 | fpB 0 spB 5 | spF 3 npx 1 dist 0.16 | excesos K [0.57, -0.7, -1.21] | F 0.2882 MW, MIROVA 0.260 (x1.11)
+  PuyehueCordonCaulle  2026-09-07 05:12 z 50.7 t_bg 271.8 | fpB 0 spB 2 | spF 2 npx 2 dist 0.18 | excesos K [0.62, -0.8] | F 0.1994 MW, MIROVA 0.450 (x0.44)
+  PuyehueCordonCaulle  2026-09-13 07:00 z 69.6 t_bg 273.8 | fpB 0 spB 9 | spF 2 npx 1 dist 0.17 | excesos K [1.05, 0.26] | F 0.2605 MW, MIROVA 0.250 (x1.04)
+  PuyehueCordonCaulle  2026-09-14 06:42 z 60.0 t_bg 273.1 | fpB 4 spB 6 | spF 1 npx 1 dist 0.57 | excesos K [2.45] | F 0.0758 MW, MIROVA 0.070 (x1.08)
+  Chaiten              2026-09-06 04:54 z 53.1 t_bg 275.0 | fpB 0 spB 2 | spF 2 npx 1 dist 0.05 | excesos K [0.17, -0.26] | F 0.1346 MW, MIROVA 0.110 (x1.22)
+  Chaiten              2026-09-06 05:30 z 30.1 t_bg 274.7 | fpB 0 spB 1 | spF 1 npx 1 dist 0.08 | excesos K [-0.01] | F 0.0670 MW, MIROVA 0.070 (x0.96)
+  Chaiten              2026-09-06 05:48 z  6.4 t_bg 274.6 | fpB 0 spB 2 | spF 2 npx 2 dist 0.10 | excesos K [0.8, 0.11] | F 0.1512 MW, MIROVA 0.070 (x2.16)
+  Chaiten              2026-09-07 05:30 z 21.5 t_bg 275.0 | fpB 0 spB 2 | spF 2 npx 2 dist 0.12 | excesos K [2.99, 1.36] | F 0.1935 MW, MIROVA 0.110 (x1.76)
+  Chaiten              2026-09-12 05:36 z 12.6 t_bg 273.0 | fpB 0 spB 1 | spF 1 npx 1 dist 0.20 | excesos K [2.23] | F 0.0942 MW, MIROVA 0.070 (x1.35)
+  Chaiten              2026-09-13 05:18 z 36.6 t_bg 274.1 | fpB 0 spB 2 | spF 1 npx 1 dist 0.22 | excesos K [1.93] | F 0.0653 MW, MIROVA 0.070 (x0.93)
+  Chaiten              2026-09-17 05:42 z  3.2 t_bg 275.8 | fpB 0 spB 1 | spF 1 npx 1 dist 0.43 | excesos K [1.78] | F 0.0690 MW, MIROVA 0.060 (x1.15)
+
+#### 5. Las NEGATIVAS limpias publicadas en F sin primer pase (V375 y V750), una por una
+  VIIRS375 Lastarria            2026-09-11 05:54 z 11.2 nadir t_bg 256.2 | fpB 0 | spF 1 npx 1 dist 2.24 | excesos K [1.72] | F 0.0371 MW
+  VIIRS375 Lastarria            2026-09-14 06:36 z 63.7 borde t_bg 257.6 | fpB 0 | spF 1 npx 1 dist 1.24 | excesos K [2.4] | F 0.0469 MW
+  VIIRS375 PlanchonPeteroa      2026-09-08 05:54 z 24.3 nadir t_bg 263.1 | fpB 0 | spF 1 npx 1 dist 0.37 | excesos K [-0.59] | F 0.0517 MW
+  VIIRS375 Chaiten              2026-09-15 05:24 z 22.0 nadir t_bg 269.8 | fpB 0 | spF 1 npx 1 dist 0.19 | excesos K [-1.36] | F 0.0433 MW
+  VIIRS750 Lascar               2026-09-15 05:18 z 32.5 nadir t_bg 262.1 | fpB 0 | spF 1 npx 1 dist 0.15 | excesos K [0.47] | F 0.0380 MW
+  VIIRS750 Isluga               2026-09-03 05:42 z  3.5 nadir t_bg 268.0 | fpB 0 | spF 1 npx 1 dist 0.73 | excesos K [0.54] | F 0.0570 MW
+  VIIRS750 Tupungatito          2026-09-06 05:48 z  5.8 nadir t_bg 251.4 | fpB 1 | spF 1 npx 1 dist 0.17 | excesos K [1.98] | F 0.1030 MW
+
+#### 6. COTA: si el segundo pase NO corriera con el conjunto activo vacio (condicion (a) del paper) y la compuerta siguiera
+  VIIRS375 B pos: publica hoy 125 de 129 | a lo mas 97 (las publicadas que tienen primer pase)
+  VIIRS375 B neg: publica hoy 95 de 325 | a lo mas 54 (las publicadas que tienen primer pase)
+  VIIRS375 F pos: publica hoy 124 de 129 | a lo mas 94 (las publicadas que tienen primer pase)
+  VIIRS375 F neg: publica hoy 10 de 325 | a lo mas 6 (las publicadas que tienen primer pase)
+  VIIRS750 B pos: publica hoy 11 de 16 | a lo mas 4 (las publicadas que tienen primer pase)
+  VIIRS750 B neg: publica hoy 30 de 562 | a lo mas 15 (las publicadas que tienen primer pase)
+  VIIRS750 F pos: publica hoy 11 de 16 | a lo mas 3 (las publicadas que tienen primer pase)
+  VIIRS750 F neg: publica hoy 3 de 562 | a lo mas 0 (las publicadas que tienen primer pase)
