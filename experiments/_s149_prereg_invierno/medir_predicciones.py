@@ -65,11 +65,12 @@ print("\nP6 (informativa, sin poder para decidir: H6). Villarrica y Nevados de C
 for r in sorted(pos, key=lambda r: (r["vol"], r["dt"])):
     if r["vol"] in ("Villarrica", "NevadosDeChillan"): print("    %-18s %s | MIROVA %.3f MW | control %d | brazo %d" % (r["vol"], r["dt"], r["ref"] or 0, r["pB"], r["pF"]))
 print("\nC8b. selectividad a una cola (misma definicion que evaluar.selectividad_supervivencia)")
-pp = [r for r in rows if r["lab"] in ("pos", "neg_limpio") and r["pB"]]
-def est(labs):
-    p = [r["pF"] for r, l in zip(pp, labs) if l == "pos"]; n = [r["pF"] for r, l in zip(pp, labs) if l == "neg_limpio"]
-    return sum(p) / len(p) - sum(n) / len(n)
-if any(r["lab"] == "pos" for r in pp) and any(r["lab"] == "neg_limpio" for r in pp):
+def c8b(nombre, pp):
+    def est(labs):
+        p = [r["pF"] for r, l in zip(pp, labs) if l == "pos"]; n = [r["pF"] for r, l in zip(pp, labs) if l == "neg_limpio"]
+        return sum(p) / len(p) - sum(n) / len(n)
+    if not (any(r["lab"] == "pos" for r in pp) and any(r["lab"] == "neg_limpio" for r in pp)):
+        print("    %-34s sin sustrato" % nombre); return
     obs = est([r["lab"] for r in pp]); rnd = random.Random(149); g = collections.defaultdict(list)
     for i, r in enumerate(pp): g[r["vol"]].append(i)
     nul = []
@@ -80,5 +81,13 @@ if any(r["lab"] == "pos" for r in pp) and any(r["lab"] == "neg_limpio" for r in 
             for i, l in zip(idx, ls): labs[i] = l
         nul.append(est(labs))
     nul.sort(); hi = nul[int(.975 * 999)]
-    print("    observado %+.4f | p97,5 del nulo %+.4f | %s" % (obs, hi, "CUMPLE" if obs > hi else "FALLA"))
-else: print("    sin sustrato")
+    print("    %-34s observado %+.4f | p97,5 del nulo %+.4f | %s" % (nombre, obs, hi, "CUMPLE" if obs > hi else "FALLA"))
+base = [r for r in rows if r["lab"] in ("pos", "neg_limpio") and r["pB"]]
+c8b("con tabla y OCR:", base)
+# A119: en ventanas que empiezan antes del 2026-06-13 DECIDE esta, porque el OCR estaba mal calibrado
+c8b("con la tabla sola (sin OCR):", [r for r in base if not (r["lab"] == "pos" and r["solo_ocr"])])
+sys.path.insert(0, __import__("os").path.join(__import__("os").path.dirname(__import__("os").path.abspath(__file__)), "..", "..", "scripts"))
+import calidad_referencia_mirova as cal
+print()
+print("Que etiqueta DECIDE en esta ventana (A119):", cal.etiqueta_que_decide(T["ventana"][0]))
+cal.avisar(T["ventana"][0], T["ventana"][1], archivo=sys.stdout)

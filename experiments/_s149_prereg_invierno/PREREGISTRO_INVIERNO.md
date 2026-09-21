@@ -116,6 +116,15 @@ los tres estratos como uno esperaría físicamente: **negativos limpios 9 %, RUT
 un tercio de esas pasadas cae sobre el foco (`docs/S149_COSTO_OCULTO_MAX.md` §4). P5 sólo arbitra
 NOAA-20 y NOAA-21: la tabla de MIROVA casi no lista Suomi NPP.
 
+**Qué etiqueta decide (A119, agregado tras la observación de Nicolás, ANTES de evaluar ninguna
+ventana).** La referencia no tiene la misma calidad todo el año (`docs/audit_s139/MAPA_BASES_MIROVA_V1.md`
+§2; `calidad_referencia_por_mes_salida.txt`). El OCR estuvo mal calibrado hasta el 2026-06-11 y no midió
+distancia hasta el 2026-06-13, y en mayo un tercio de las alertas de VIIRS 375 viene sólo del OCR. Por
+eso, **en toda ventana que empiece antes del 2026-06-13 (mayo y marzo) P4 y C8b DECIDEN con las
+positivas de la tabla sola**, y la versión con OCR se informa aparte. Los negativos limpios y el estrato
+de P5 salen siempre de la tabla, así que P1, P2 y P5 no cambian. MODIS no depende del OCR en ningún mes.
+`medir_predicciones.py` ya imprime las dos versiones de P4.
+
 **P3 no se usa**: en invierno casi todo el fondo es frío y la celda deja de ser un contraste.
 
 **Regla de decisión por ventana**: MERECE SEGUIR si P1, P2, P4 y C8b se cumplen; NO ADOPTAR si P4
