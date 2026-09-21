@@ -1,5 +1,7 @@
 # Pre-registro: la conectiva `max` fuera de septiembre, y el brazo MODIS con banda 22 (S149)
 
+> **VERSION 3. APROBADA por Nicolás el 2026-09-21** (v2 con el orden "mayo y marzo"; la adenda v3 agrega
+> meses, ver sección 3). En vuelo al escribir esto: run 35599902448 (mayo). Texto original de la v2:
 > **VERSION 2, NO APROBADA. No se ha despachado nada.** La versión 1 pasó por un verificador con
 > contexto limpio que la dejó "apta con cambios" (`docs/audit_s149/VERIFICADOR_PREREGISTRO_INVIERNO.md`,
 > diez hallazgos, uno de gravedad 5). Esta versión los incorpora; la sección 9 dice qué cambió y por
@@ -75,6 +77,27 @@ reproduce el sustrato del snapshot vivo (296, 126 y 27).
 **Requisito de despacho**: los perfiles J, K y gemelo tienen que estar en `main` (el workflow corre
 desde `main`), y el paso que confirma el brazo imprime ahora también `conectiva_prosa`, `caja_roi1` y
 `modis_b22`, que antes no salían en el registro del job.
+
+### Adenda v3 (2026-09-21, aprobada por Nicolás): más meses
+
+Escrita con la ventana de mayo ya corriendo y **antes de evaluar ninguna ventana**; no cambia ningún
+criterio, sólo agrega ventanas. Motivo: un solo mes por estación deja el resultado a merced de esa
+quincena; y la calidad de la referencia por mes (A119) dice exactamente qué tramo es confiable.
+
+| ventana | volcanes | brazos | control |
+|---|---|---|---|
+| VIIRS: **abril, mayo, junio, julio y agosto 01 a 27**, un mes por despacho | los 11 Tier A | B, F | B |
+| MODIS: **marzo** | sólo Láscar | B, J, K, gemelo | J |
+| MODIS: **abril, mayo y junio** | sólo Láscar | J, K, gemelo (el B de Láscar sale del despacho VIIRS del mismo mes) | J |
+| determinismo: julio y agosto | sólo Láscar | gemelo | B del mismo mes |
+
+Sustrato MODIS de Láscar: 27, 22, 11 y 13 pasadas con alerta de marzo a junio (73 en total), todas de
+la tabla. Enero y febrero quedan fuera (tabla al 86 y 95 %, OCR inestable); marzo queda fuera para VIIRS
+(39 % de sus alertas depende del OCR y la tabla listaba menos gránulos por noche). Junio empieza antes
+del 2026-06-13, así que también decide la tabla sola. Cada ventana se evalúa por separado con la regla
+de la sección 5; **si discrepan se dice, no se promedia**, y además se informa el agregado de todas.
+Para MODIS la regla de la sección 7 se aplica al agregado de los cuatro meses (el umbral de sustrato
+pasa a: J publica al menos la mitad de las positivas del agregado) y se lista mes por mes.
 
 ## 4. Con qué se mide
 
