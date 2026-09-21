@@ -1,5 +1,16 @@
 # A/B de la caja de 5 × 5 km, brazo G: lectura PRELIMINAR (S148)
 
+> ⚠️ **CIERRE DEL FRENTE (S148, 09:30 UTC): la pregunta de la caja NO ES MEDIBLE con este cableado.**
+> La reparación de cobertura (run 35572961810, 7 de 7 en verde) dejó al brazo G con cobertura
+> exacta, 2386 contra 2386, y sobre la ventana completa da lo mismo que en el tramo: Q1 **0 de
+> 61**, Q2 **0 de 50**, Q3 sin sustrato (0 positivos fuera de la caja), Q4 137 de 143 en los dos
+> brazos, y las siete filas de tasas idénticas al control
+> (`experiments/_s148_caja/ventana_completa_G_salida.txt`). Eso **no es un veredicto sobre la
+> caja**: es la medida del defecto de cableado de abajo. Al brazo H le siguen faltando 23 pasadas
+> de Tupungatito; no se gasta otra reparación en él porque tampoco puede responder la pregunta.
+> **No escribir en ningún lado que la caja es inerte.** Lo que sigue: arreglar el cableado (A45,
+> decisión de Nicolás) y repetir G y H.
+>
 > ⚠️ **RESUELTO el mismo día: el «0 de 51» es un defecto de cableado, no una propiedad de la caja.**
 > El flag entrega la caja sólo al primer pase; el segundo pase sigue usando el círculo y recaptura
 > con el umbral permisivo lo que el primero rechazó (camino (b) del §3). Traza y medición en
