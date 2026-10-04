@@ -1,0 +1,66 @@
+pasadas: 3135 | en ambos brazos: 3135 | filas de referencia: 2516
+pasadas: 253 | en ambos brazos: 253 | filas de referencia: 2516
+== ventana agosto, 2026-08-01 a 2026-08-27 | control _s146_ab_sin_test1 | brazo _s147_ab_sin_test1_max
+   archivos del control: {'Chaiten': '35759688167', 'Copahue': '35759688167', 'Isluga': '35759688167', 'Lascar': '35759688167', 'Lastarria': '35759688167', 'Llaima': '35759688167', 'NevadosDeChillan': '35759688167', 'PlanchonPeteroa': '35759688167', 'PuyehueCordonCaulle': '35759688167', 'Tupungatito': '35759688167', 'Villarrica': '35759688167'}
+   archivos del brazo:   {'Chaiten': '35759688167', 'Copahue': '35759688167', 'Isluga': '35759688167', 'Lascar': '35759688167', 'Lastarria': '35759688167', 'Llaima': '35759688167', 'NevadosDeChillan': '35759688167', 'PlanchonPeteroa': '35759688167', 'PuyehueCordonCaulle': '35759688167', 'Tupungatito': '35759688167', 'Villarrica': '35759688167'}
+
+== COBERTURA (antes de mirar nada)
+   pasadas 3135 | en ambos brazos 3135 | volcanes 11
+   cobertura pareja: OK
+
+== DETERMINISMO (gemelo de B sobre ['Lascar']): 253 pasadas, en ambos 253, misma decision de publicar 253 (100.0 %) | OK
+
+== PREDICCIONES
+ventana ['2026-08-01', '2026-08-27'] | sensor VIIRS375 | pasadas en ambos brazos: 1243
+
+P1. publicacion en negativos limpios (n 568): control 34.7 % | brazo 3.7 %
+    CUMPLE (umbral: brazo en 18 % o menos)
+
+P2. razon de la tasa falsa borde sobre nadir
+    nadir  n 184 | control  46 | brazo  18
+    medio  n 114 | control  25 | brazo   2
+    borde  n 270 | control 126 | brazo   1
+    razon control 1.87 | brazo 0.04 | CUMPLE (umbral 1.3 o menos)
+
+P4. recall por pasada
+    positivas 125 | publica el control 120 | de esas conserva el brazo 110 | piso ceil(n_B x 118/141) = 101 | perdidas con 0.5 MW o mas: 2 | FALLA
+       perdida: Lascar               2026-08-17 05:00 | MIROVA 0.600 MW | VIIRS_SNPP | alerta solo por OCR
+       perdida: Lascar               2026-08-22 05:06 | MIROVA 1.650 MW | VIIRS_SNPP | alerta solo por OCR
+       perdida: Lastarria            2026-08-04 05:06 | MIROVA 0.200 MW | VIIRS_NOAA21 | alerta solo por OCR
+       perdida: Lastarria            2026-08-21 05:24 | MIROVA 0.150 MW | VIIRS_SNPP | alerta solo por OCR
+       perdida: Tupungatito          2026-08-21 06:30 | MIROVA 0.040 MW | VIIRS_NOAA21
+       perdida: PlanchonPeteroa      2026-08-14 04:36 | MIROVA 0.020 MW | VIIRS_NOAA20 | alerta solo por OCR
+       perdida: PlanchonPeteroa      2026-08-24 06:12 | MIROVA 0.040 MW | VIIRS_SNPP | alerta solo por OCR
+       perdida: PuyehueCordonCaulle  2026-08-22 05:30 | MIROVA 0.060 MW | VIIRS_NOAA20
+       perdida: Chaiten              2026-08-18 05:48 | MIROVA 0.060 MW | VIIRS_NOAA21
+       perdida: Chaiten              2026-08-23 06:54 | MIROVA 0.050 MW | VIIRS_NOAA20
+    con la tabla de MIROVA sola, sin OCR: positivas 91 | control 88 | brazo conserva 84 | piso 74 | perdidas con 0.5 MW o mas: 0 | CUMPLE
+    DECIDE: la version con tabla y OCR
+
+P5. pasadas que MIROVA lista con VRP 0 en noche con alerta del sensor
+    n 98 | control 48 (49.0 %) | brazo 10 (10.2 %) | razon brazo sobre control 0.21 | un apagado parejo daria 0.34 | CUMPLE
+       VIIRS_NOAA20: 42
+       VIIRS_NOAA21: 40
+       VIIRS_SNPP: 16
+       supervivencia de lo que publica el control en negativos limpios:  21 de 197 (11 %)
+       supervivencia de lo que publica el control en este estrato:       10 de  48 (21 %)
+       supervivencia de lo que publica el control en positivas:         110 de 120 (92 %)
+
+P6 (informativa, sin poder para decidir: H6). Villarrica y Nevados de Chillan, positivas una por una
+    NevadosDeChillan   2026-08-18 05:48 | MIROVA 0.070 MW | control 0 | brazo 0
+    NevadosDeChillan   2026-08-20 05:12 | MIROVA 0.060 MW | control 0 | brazo 0
+    NevadosDeChillan   2026-08-20 06:06 | MIROVA 0.090 MW | control 0 | brazo 0
+    NevadosDeChillan   2026-08-26 05:54 | MIROVA 0.020 MW | control 1 | brazo 1
+    Villarrica         2026-08-18 05:48 | MIROVA 1.860 MW | control 1 | brazo 1
+    Villarrica         2026-08-19 06:06 | MIROVA 0.870 MW | control 1 | brazo 1
+    Villarrica         2026-08-21 05:48 | MIROVA 1.820 MW | control 1 | brazo 1
+    Villarrica         2026-08-23 05:54 | MIROVA 1.330 MW | control 1 | brazo 1
+    Villarrica         2026-08-24 05:36 | MIROVA 2.210 MW | control 1 | brazo 1
+
+C8b. selectividad a una cola (misma definicion que evaluar.selectividad_supervivencia)
+    con tabla y OCR:                   observado +0.8101 | p97,5 del nulo +0.4078 | CUMPLE
+    con la tabla sola (sin OCR):       observado +0.8479 | p97,5 del nulo +0.4041 | CUMPLE
+
+Que etiqueta DECIDE en esta ventana (A119): tabla y OCR
+[referencia MIROVA] la ventana 2026-08-01 a 2026-08-27 pisa 1 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)

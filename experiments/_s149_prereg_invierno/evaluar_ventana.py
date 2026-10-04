@@ -8,6 +8,11 @@
   python evaluar_ventana.py --nombre mayo --desde 2026-05-01 --hasta 2026-05-31 \
       --control _s146_ab_sin_test1 --brazo _s147_ab_sin_test1_max --runs 35599902448 \
       [--gemelo _s149_ab_sin_test1_gemelo --runs-gemelo 35599941522] [--sensor VIIRS375] --tmp DIR
+
+S150: el gemelo es copia de B (_s146_ab_sin_test1). En las ventanas de Lascar el control es J (banda 22),
+y comparar el gemelo contra J medía cuanto se parecen B y J (90 %), no el determinismo. Por eso
+--control-gemelo (por defecto, el control) y --runs-control-gemelo (donde vive ese perfil, si es otro
+despacho). La linea de DETERMINISMO imprime contra que perfil comparo.
 """
 import argparse, collections, io, json, shutil, subprocess, sys, tarfile
 from pathlib import Path
@@ -38,10 +43,12 @@ def main():
     ap = argparse.ArgumentParser()
     for k in ("nombre", "desde", "hasta", "control", "brazo", "tmp"): ap.add_argument("--" + k, required=True)
     ap.add_argument("--runs", nargs="+", required=True); ap.add_argument("--gemelo"); ap.add_argument("--runs-gemelo", nargs="*", default=[])
+    ap.add_argument("--control-gemelo", help="perfil del que el gemelo es copia; por defecto --control")
+    ap.add_argument("--runs-control-gemelo", nargs="*", default=[], help="runs donde vive ese perfil; por defecto --runs")
     ap.add_argument("--sensor", default="VIIRS375"); ap.add_argument("--congelado", help="carpeta con los dos CSV; por defecto _congelado/<nombre>")
     a = ap.parse_args()
     tmp = Path(a.tmp) / a.nombre; shutil.rmtree(tmp, ignore_errors=True); tmp.mkdir(parents=True)
-    salidas = extraer(list(dict.fromkeys(a.runs + a.runs_gemelo)), tmp)
+    salidas = extraer(list(dict.fromkeys(a.runs + a.runs_gemelo + a.runs_control_gemelo)), tmp)
     dc, oc = unir(salidas, a.runs, a.control, tmp / "union"); db, ob = unir(salidas, a.runs, a.brazo, tmp / "union")
     print("== ventana %s, %s a %s | control %s | brazo %s" % (a.nombre, a.desde, a.hasta, a.control, a.brazo))
     print("   archivos del control:", {v: r for v, r in sorted(oc.items())}); print("   archivos del brazo:  ", {v: r for v, r in sorted(ob.items())})
@@ -71,14 +78,16 @@ def main():
     # ---- 3. determinismo
     if a.gemelo:
         dg, og = unir(salidas, a.runs_gemelo or a.runs, a.gemelo, tmp / "union"); tg = tmp / "tabla_gemelo.json"
+        pg = a.control_gemelo or a.control
+        dref, _ = unir(salidas, a.runs_control_gemelo or a.runs, pg, tmp / "union_ref_gemelo")
         dcl = tmp / "union" / "_control_lascar"; dcl.mkdir(exist_ok=True)
-        for f in dg.glob("*.json"): shutil.copy(dc / f.name, dcl / f.name)
+        for f in dg.glob("*.json"): shutil.copy(dref / f.name, dcl / f.name)
         subprocess.run([sys.executable, str(AQUI / "armar_tabla.py"), "--control", str(dcl), "--brazo", str(dg), "--cons", str(C / "registro_vrp_consolidado.csv"),
                         "--ocr", str(C / "registro_vrp_ocr.csv"), "--desde", a.desde, "--hasta", a.hasta, "--out", str(tg)], check=True, stderr=subprocess.DEVNULL)
         G = json.loads(tg.read_text(encoding="utf-8"))["pasadas"]; amb = [v for v in G.values() if len(v) == 2]
         ig = sum(1 for v in amb if v["control"]["pub"] == v["brazo"]["pub"])
-        print("\n== DETERMINISMO (gemelo de B sobre %s): %d pasadas, en ambos %d, misma decision de publicar %d (%.1f %%) | %s" % (
-            sorted(og), len(G), len(amb), ig, 100 * ig / len(amb) if amb else 0, "OK" if amb and ig / len(amb) >= .98 and len(amb) == len(G) else "FALLA: INDECIDIBLE"))
+        print("\n== DETERMINISMO (gemelo contra %s, sobre %s): %d pasadas, en ambos %d, misma decision de publicar %d (%.1f %%) | %s" % (
+            pg, sorted(og), len(G), len(amb), ig, 100 * ig / len(amb) if amb else 0, "OK" if amb and ig / len(amb) >= .98 and len(amb) == len(G) else "FALLA: INDECIDIBLE"))
     # ---- 4. predicciones
     print("\n== PREDICCIONES")
     sys.stdout.flush()
