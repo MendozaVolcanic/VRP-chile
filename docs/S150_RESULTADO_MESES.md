@@ -7,8 +7,11 @@
 > Todos los números salen de los archivos de `experiments/_s149_prereg_invierno/resultados/`; ninguno está
 > transcrito a mano desde otro lado.
 >
-> **Estado: SIN VERIFICADOR con contexto limpio todavía.** La mejora en negativos limpios supera el 30 %,
-> así que la regla del proyecto exige el verificador antes de que esto se use para decidir.
+> **Estado: VERIFICADO con contexto limpio** (`docs/audit_s150/VERIFICADOR_RESULTADO_MESES.md`). Todos los
+> números se reprodujeron; el arreglo del gemelo es correcto. El verificador encontró cuatro hallazgos de
+> gravedad 3 o más, ya incorporados abajo: las pérdidas fuertes de `max` son un **patrón** de cinco casos
+> (§3), `max` también recorta alertas reales del borde (§2), la comparación MODIS contra producción mezclaba
+> poblaciones (§5), y la enmienda del recall se usaba en una sola dirección (§0).
 
 ## 0. En una pantalla
 
@@ -20,13 +23,22 @@ y ruidoso, pasa por el camino más fácil. Por eso publicamos tanto en las noche
 
 **Lo que dicen los meses (VIIRS 375, brazo B sin Test 1 contra brazo F, que agrega `max`):**
 
-| mes | negativos limpios: B, F | borde/nadir de F | recall por pasada (etiqueta que decide) | P5 | C8b | regla del pre-registro |
-|---|---|---|---|---|---|---|
-| mayo | 30,1 % a 2,3 % | 0,58 | tabla sola: 187 de 195, 0 pérdidas de 0,5 MW o más | cumple | cumple | MERECE SEGUIR |
-| junio | 32,8 % a 1,5 % | 0,27 | tabla sola: 157 de 160, 0 pérdidas de 0,5 MW o más | cumple | cumple | MERECE SEGUIR |
-| julio | 46,5 % a 2,4 % | 0,09 | tabla y OCR: 150 de 153, 0 pérdidas de 0,5 MW o más | **falla** (0,40 contra nulo 0,35) | cumple | MERECE SEGUIR |
-| agosto | 34,7 % a 3,7 % | 0,04 | tabla y OCR: 110 de 120, **2 pérdidas de 0,5 MW o más** | cumple | cumple | **NO ADOPTAR por la letra de P4** (ver §3) |
-| abril | sin evaluar | | | | | INDECIDIBLE (cobertura) |
+| mes | negativos limpios: B, F | borde/nadir de F | recall por pasada (etiqueta que decide) | pérdidas de 0,5 MW o más con la etiqueta completa | P5 | C8b | letra de la sección 5 |
+|---|---|---|---|---|---|---|---|
+| mayo | 30,1 % a 2,3 % | 0,58 | tabla sola: 187 de 195 | 2 | cumple | cumple | MERECE SEGUIR (decide la tabla sola) |
+| junio | 32,8 % a 1,5 % | 0,27 | tabla sola: 157 de 160 | 1 (del 25, ya con OCR confiable) | cumple | cumple | MERECE SEGUIR (decide la tabla sola) |
+| julio | 46,5 % a 2,4 % | 0,09 | tabla y OCR: 150 de 153 | 0 | **falla** (0,40 contra nulo 0,35) | cumple | MERECE SEGUIR |
+| agosto | 34,7 % a 3,7 % | 0,04 | tabla y OCR: 110 de 120 | 2 | cumple | cumple | **NO ADOPTAR** |
+| abril | sin evaluar | | | | | | INDECIDIBLE (cobertura) |
+
+**Cómo leer la última columna (hallazgo H4 del verificador).** Esa columna aplica la letra de la sección 5,
+escrita antes de mayo. La enmienda del recall (2026-09-21, posterior a mayo) dice que en VIIRS el veredicto
+de recall lo da Nicolás mirando la tabla por tramo, y que la enmienda "endurece, no afloja". Aplicada en las
+dos direcciones, **el recall de los cuatro meses queda pendiente de Nicolás**, no sólo el de agosto: los
+"MERECE SEGUIR" de mayo a julio valen para P1, P2 y C8b, no para el recall. Y lo que pesa en esa decisión
+es doble: el tramo bajo 0,05 MW (F pierde entre 25 y 44 % de lo que B publica ahí) y las cinco pérdidas
+fuertes del §3, que en mayo y junio la regla A119 deja fuera del veredicto sólo por la fecha de inicio de la
+ventana.
 
 **Agregado de mayo a agosto** (`agregado_mayo_agosto.txt`): en negativos limpios B publica 692 de 1.895
 (36,5 %) y F 48 (2,5 %). De las alertas que B publica, F conserva 757 de 792 (95,6 %) con la etiqueta
@@ -40,10 +52,11 @@ completa y 542 de 560 (96,8 %) con la tabla sola.
 | J (banda 22) | 68 de 73 (93,2 %) [84,9 a 97,0] | 11 de 96 (11,5 %) [6,5 a 19,4] | **sí** |
 | K (banda 22 y `max`) | 67 de 73 (91,8 %) [83,2 a 96,2] | 2 de 96 (2,1 %) [0,6 a 7,3] | **sí** |
 
-Hoy MODIS en producción publica 11,7 % de las alertas contra 11,5 % de los negativos (AUDIT_S149): no
-discrimina. Con banda 22, en Láscar, sí. **La salvedad pesa**: sólo se corrió Láscar, que es el único
-volcán con alertas MODIS en esos meses; la tasa de falsos de J y K en los otros diez volcanes **no está
-medida** (ver §5).
+Con banda 22, en Láscar, MODIS separa alertas de negativos; con banda 21 y sin el Test 1 no ve nada.
+**Las salvedades pesan** (§5): sólo se corrió Láscar, que es el único volcán con alertas MODIS en esos meses,
+así que la tasa de falsos de J y K en los otros diez volcanes **no está medida**; y contra la producción de
+Láscar en esa misma población (8 de 73 alertas y 1 de 96 negativos publicados), J multiplica por once los
+falsos de Láscar y K por dos. Lo que cambia es que pasa a ver casi todas las alertas.
 
 ## 1. Cobertura y determinismo, antes de mirar nada
 
@@ -56,7 +69,11 @@ medida** (ver §5).
   el defecto conocido. Dentro de Láscar la cobertura es pareja en los cuatro meses.
 - **Determinismo**: el gemelo de B coincide con B en la decisión de publicar en el **100 %** de las
   pasadas, en marzo, abril, junio, julio y agosto, y en los tres sensores (`determinismo_lascar_contra_B.txt`
-  y la línea DETERMINISMO de cada resultado).
+  y la línea DETERMINISMO de cada resultado). En mayo el gemelo no tiene la noche del 2026-05-03 (corte de
+  NASA, `SEARCH_CMR_TIMEOUT`), así que el script lo marca FALLA por cobertura; en las 282 pasadas comunes
+  coincide 282 (verificador, H5). **No es determinista bit a bit** (H6): en junio y agosto hay diferencias de
+  punto flotante y algunos records MODIS cambian uno o dos píxeles; la decisión de publicar no cambió, y el
+  100 % está medido sólo en Láscar.
 
 **Defecto de instrumento encontrado y corregido.** `evaluar_ventana.py` comparaba el gemelo contra el
 `--control` de la ventana. En las ventanas de Láscar el control es J (banda 22), así que la primera
@@ -74,6 +91,12 @@ vio nada, y F entre 1,5 y 3,7 %. La tabla de terminado congelada pide 10 % en fo
 nadir. Con `max` se invierte (0,04 a 0,58): lo que queda está cerca del nadir, que es donde el píxel es
 chico y una anomalía tiene más chance de ser real. Es el mismo patrón de septiembre y mayo.
 
+**La otra cara, que `max` también corta en el borde (H2 del verificador).** Al borde el píxel crece y una
+fuente chica queda diluida, así que una alerta real llega con la misma debilidad que un falso. `max` pierde
+el 10,9 % de las alertas del borde que B publica, contra el 1,2 % en el nadir (agregado de mayo a agosto,
+`experiments/_s150_verificador/perdidas_por_satelite.py`). O sea que el recorte por zona no distingue del
+todo lo falso de lo real: separa por cuán diluido llega el píxel.
+
 **Recall por tramo de magnitud** (`recall_por_magnitud_jun_jul_ago.txt` y `..._sept_mayo.txt`). El costo
 de `max` está abajo de 0,10 MW:
 
@@ -85,24 +108,35 @@ de `max` está abajo de 0,10 MW:
 | 0,20 a 0,50 | 98 %, 97 % | 99 %, 97 % | 100 %, 100 % | 100 %, 98 % |
 | 0,50 o más | 96 %, 93 % | 98 %, 97 % | 91 %, 91 % | 94 %, 83 % |
 
-Los tramos bajo 0,10 MW son entre 21 y 33 % de las alertas de cada mes. Esta tabla es la que la enmienda
+Los tramos bajo 0,10 MW son entre 23 y 33 % de las alertas de cada mes. Esta tabla es la que la enmienda
 del pre-registro pone en manos de Nicolás para el veredicto de recall en VIIRS.
 
 **P5, julio, falla.** Entre las pasadas que MIROVA lista con VRP 0 en una noche en que sí alertó, F recorta
 a 0,40 de lo que publica B, y un apagado parejo daría 0,35. O sea que en julio `max` no es más selectivo que
 el azar en ese estrato. Es informativa: P5 no decide. Los otros tres meses cumplen (0,36, 0,28 y 0,21).
 
-## 3. Agosto: las dos alertas de 0,5 MW o más que `max` pierde
+## 3. Las alertas de 0,5 MW o más que `max` pierde: un patrón de cinco casos
 
-Las dos son de Láscar, de **Suomi NPP**, llegan **sólo por el OCR** (la tabla `latest.php` no las trae) y
-caen **al borde del barrido** (cenit del satélite de 63 y 59 grados):
+El primer borrador hablaba de "dos pérdidas de agosto". El verificador (H1) mostró que con la etiqueta
+completa son **cinco de mayo a agosto, todas con la misma firma**: **Suomi NPP**, **sólo por el OCR** (la
+tabla `latest.php` no las trae), **al borde del barrido** (cenit de 59 a 69 grados), B publicándolas con el
+1 a 4 % de la magnitud de MIROVA, y el cúmulo de F saltando lejos del cráter. Reproducido con mis tablas
+(`experiments/_s150_verificador/perdidas_por_satelite.py`):
 
-| pasada | MIROVA | lo que publicaba B | qué hace F |
-|---|---|---|---|
-| 2026-08-17 05:00 | 0,60 MW a 3,24 km | 0,024 MW, cúmulo a 1,5 km del cráter | el cúmulo salta a 24,6 km; no publica |
-| 2026-08-22 05:06 | 1,65 MW a 1,22 km | 0,018 MW, cúmulo a 0,3 km del cráter | el cúmulo salta a 8,2 km; no publica |
+| pasada | MIROVA | cenit | lo que publicaba B | cúmulo de F |
+|---|---|---|---|---|
+| Lastarria 2026-05-02 05:06 | 2,36 MW | 59,5° | 0,033 MW a 1,0 km | 19,5 km; no publica |
+| Isluga 2026-05-29 04:54 | 0,86 MW | 69,0° | 0,013 MW a 4,9 km | 18,6 km; no publica |
+| Láscar 2026-06-25 04:54 | 0,51 MW | 66,9° | 0,014 MW a 0,2 km | 21,3 km; no publica |
+| Láscar 2026-08-17 05:00 | 0,60 MW a 3,24 km | 63,4° | 0,024 MW a 1,5 km | 24,6 km; no publica |
+| Láscar 2026-08-22 05:06 | 1,65 MW a 1,22 km | 59,2° | 0,018 MW a 0,3 km | 8,2 km; no publica |
 
-Lectura física. **Sospecha**, no medido: en esas dos pasadas B ya veía el cráter apenas, con el 1 a 4 % de
+Mayo y junio no las cuentan en su veredicto porque ahí decide la tabla sola (A119), y la tabla casi no lista
+Suomi NPP: entre las alertas de Suomi NPP que B publica, 18 y 13 vienen de la tabla contra 55 y 44 sólo del
+OCR, en mayo y junio. La de junio es del 25, posterior al 2026-06-13, cuando el OCR ya mide distancia: queda
+fuera del veredicto por la fecha de inicio de la ventana, no por la calidad de esa fila.
+
+Lectura física. **Sospecha**, no medido: en estas pasadas B ya veía el cráter apenas, con el 1 a 4 % de
 la energía que reporta MIROVA. El píxel caliente estaba en el límite del umbral y `max`, que le exige
 pasar por los dos caminos, lo apagó. Las otras pasadas de esas noches que MIROVA da como alerta (NOAA-20
 a las 05:18 del 17, con 0,19 MW; NOAA-20 a las 05:24 y NOAA-21 a las 06:12 del 22, con 0,23 y 0,11 MW;
@@ -110,15 +144,18 @@ cenit de 32 a 50 grados) los dos brazos las publican; la de NOAA-21 de las 06:06
 con VRP 0. No es un problema general de Suomi NPP: la mediana mensual de la magnitud de B sobre la de
 MIROVA en Suomi NPP va de 0,56 a 1,00 entre mayo y agosto, dentro del rango de los otros dos satélites
 (`magnitud_por_satelite.txt`). Lo raro es que MIROVA dé 0,60 y 1,65 MW en Suomi NPP al borde del barrido,
-de tres a quince veces lo que da en las pasadas de menor ángulo de esas mismas noches. Eso queda **SIN
-VERIFICAR**: pide mirar las dos imágenes de MIROVA (`imagenes_satelitales/Lascar/2026-08-17/05-00-00_...`
-y `.../2026-08-22/05-06-00_...` en el repo Mirova-v1) y el gránulo.
+de tres a quince veces lo que da en las pasadas de menor ángulo de esas mismas noches. Un dato que apunta en
+esa dirección, sin probar nada (verificador): en las dos filas OCR de agosto la distancia coincide con la de
+la pasada vecina (3,24 contra 3,23 km el 17; 1,22 contra 1,22 km el 22), y una hora después, en la misma
+geometría de Suomi NPP al borde, la tabla lista la pasada como RUTINA con VRP 0 (06:42 del 17 y 06:48 del
+22). Que sea un artefacto del OCR o de MIROVA queda **SIN VERIFICAR**: pide mirar las cinco imágenes de
+MIROVA en el repo Mirova-v1 (`imagenes_satelitales/<volcán>/<fecha>/<hora>_..._VIIRS375_VRP.png`) y los
+gránulos. Y decide si el NO ADOPTAR de agosto descansa en una alerta real o en una fila mal leída.
 
 **Qué dice la regla.** Por la letra de P4 (sección 5 del pre-registro), "ninguna pérdida de 0,5 MW o más"
-falla y agosto da NO ADOPTAR. La enmienda del 2026-09-21, escrita después de mayo, dejó el corte de
-0,5 MW sólo para MODIS y el veredicto de recall en VIIRS en manos de Nicolás, mirando la tabla por tramo.
-No corresponde que yo elija cuál de las dos lecturas manda: se dice así y lo decide Nicolás. En las otras
-tres ventanas, ninguna pérdida pasa de 0,5 MW con la etiqueta que decide.
+falla en agosto, y con la etiqueta completa fallaría también en mayo y junio. Por la enmienda del recall, el
+corte de 0,5 MW queda sólo para MODIS y el veredicto de recall de VIIRS, en los cuatro meses, lo da Nicolás
+mirando la tabla por tramo y estos cinco casos (ver §0).
 
 ## 4. VIIRS 750: `max` casi no toca el recall, y el cero sigue ahí
 
@@ -137,10 +174,19 @@ alerta de 0,5 MW o más en VIIRS 750 (`agosto_VIIRS750.txt`). En julio C8b falla
 - K no publica más que J en negativos limpios: **cumple** (2 contra 11).
 - J publica al menos la mitad de las positivas: 68 de 73, **hay sustrato**.
 
-**Lo que no se puede decir todavía**: que la banda 22 arregla MODIS en la réplica. Estos 96 negativos
-limpios son todos de Láscar. La brecha de MODIS en producción viene sobre todo de los otros volcanes (11,5 %
-de negativos publicados en los 11). Hace falta un despacho de J y K sobre los 11 volcanes, con la misma
-ventana, para medir la tasa de falsos donde importa. No se pudo despachar hoy (§6).
+**Lo que no se puede decir todavía**: que la banda 22 arregla MODIS en la réplica. Salvedades (las tres
+últimas, del verificador, H3):
+- Estos 96 negativos limpios son todos de Láscar. La brecha de MODIS en producción viene sobre todo de los
+  otros volcanes. Hace falta un despacho de J y K sobre los 11 volcanes, con la misma ventana, para medir la
+  tasa de falsos donde importa. No se pudo despachar hoy (§6).
+- Contra la producción de Láscar en esta misma población (8 de 73 alertas y 1 de 96 negativos publicados),
+  J multiplica por once los falsos y K por dos. La comparación con el 11,5 % de AUDIT_S149 mezclaba
+  poblaciones. Y esos records de producción los escribió el código de esa época, no el de hoy.
+- 55 de las 73 positivas son fuertes (0,5 MW o más): es un sustrato fácil.
+- La magnitud pareada que la sección 7 pide informar no estaba: mediana de J sobre MIROVA **0,50**.
+- Los conteos usan el respaldo de la referencia del 2026-04-08 que `armar_tabla` carga sin figurar en el
+  manifiesto del congelado; con los CSV congelados solos dan 66 de 71 y 12 de 96 para J, 65 de 71 y 3 de 96
+  para K. No cambia la conclusión.
 
 **Informativo, D21**: con banda 21 y sin el Test 1, B no publica ni una de las 73 alertas MODIS de Láscar.
 Hoy, lo que MODIS publica en producción en Láscar lo publica el Test 1 integrado, no los Tests 2 y 3.
@@ -151,5 +197,10 @@ Hoy, lo que MODIS publica en producción en Láscar lo publica el Test 1 integra
   token de Earthdata venció el 2026-10-03. El NRT falla desde las 07:36 UTC de ese día
   (`EARTHDATA_CREDENTIAL_INVALID`, "Token ... has expired"). Rotarlo es de Nicolás.
 - **MODIS J y K en los 11 volcanes**: mismo bloqueo.
-- **Verificador con contexto limpio** sobre este resultado: pendiente; lo exige la mejora mayor que 30 %.
-- **Las dos imágenes de MIROVA de agosto** (§3): pendiente.
+- **Las cinco imágenes de MIROVA del §3**: pendiente. Es lo primero que conviene mirar, porque decide si la
+  pérdida fuerte de `max` es real.
+- **Que el job de GitHub haya aplicado los flags declarados**: los logs guardados en el repo no los imprimen
+  (SIN VERIFICAR, verificador).
+- Hallazgo menor del verificador sin corregir (H7): la versión "tabla sola" no reetiqueta de verdad, porque
+  el OCR sigue sacando pasadas de los negativos limpios y del estrato de P5. Reetiquetado de verdad, ningún
+  veredicto cambia.
