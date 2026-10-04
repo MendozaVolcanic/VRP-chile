@@ -1,0 +1,35 @@
+ventana ['2026-07-01', '2026-07-31'] | sensor VIIRS750 | pasadas en ambos brazos: 1362
+
+P1. publicacion en negativos limpios (n 734): control 9.8 % | brazo 1.4 %
+    INDECIDIBLE: el control ya publica 18 % o menos, el umbral se cumpliria sin que el brazo haga nada (H7)
+
+P2. razon de la tasa falsa borde sobre nadir
+    nadir  n 211 | control  22 | brazo   7
+    medio  n 173 | control   9 | brazo   0
+    borde  n 350 | control  41 | brazo   3
+    razon control 1.12 | brazo 0.26 | CUMPLE (umbral 1.3 o menos)
+
+P4. recall por pasada
+    positivas 21 | publica el control 14 | de esas conserva el brazo 13 | piso ceil(n_B x 118/141) = 12 | perdidas con 0.5 MW o mas: 0 | CUMPLE
+       perdida: Isluga               2026-07-13 05:18 | MIROVA 0.320 MW | VIIRS_NOAA21_750
+    con la tabla de MIROVA sola, sin OCR: positivas 20 | control 13 | brazo conserva 12 | piso 11 | perdidas con 0.5 MW o mas: 0 | CUMPLE
+    DECIDE: la version con tabla y OCR
+
+P5. pasadas que MIROVA lista con VRP 0 en noche con alerta del sensor
+    n 23 | control 0 (0.0 %) | brazo 0 (0.0 %) | razon brazo sobre control nan | un apagado parejo daria 0.28 | sin sustrato (menos de 20 publicadas por el control)
+       VIIRS_NOAA20_750: 15
+       VIIRS_NOAA21_750: 6
+       VIIRS_SNPP_750: 2
+       supervivencia de lo que publica el control en negativos limpios:  10 de  72 (14 %)
+       supervivencia de lo que publica el control en este estrato:        0 de   0 (0 %)
+       supervivencia de lo que publica el control en positivas:          13 de  14 (93 %)
+
+P6 (informativa, sin poder para decidir: H6). Villarrica y Nevados de Chillan, positivas una por una
+
+C8b. selectividad a una cola (misma definicion que evaluar.selectividad_supervivencia)
+    con tabla y OCR:                   observado +0.7897 | p97,5 del nulo +0.7897 | FALLA
+    con la tabla sola (sin OCR):       observado +0.7842 | p97,5 del nulo +0.7842 | FALLA
+
+Que etiqueta DECIDE en esta ventana (A119): tabla y OCR
+[referencia MIROVA] la ventana 2026-07-01 a 2026-07-31 pisa 1 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)

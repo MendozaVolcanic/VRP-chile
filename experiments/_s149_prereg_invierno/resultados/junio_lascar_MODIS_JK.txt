@@ -1,0 +1,48 @@
+pasadas: 275 | en ambos brazos: 275 | filas de referencia: 2554
+pasadas: 275 | en ambos brazos: 275 | filas de referencia: 2554
+== ventana junio_lascar, 2026-06-01 a 2026-06-30 | control _s149_ab_sin_test1_b22 | brazo _s149_ab_sin_test1_b22_max
+   archivos del control: {'Lascar': '35679063864'}
+   archivos del brazo:   {'Lascar': '35679063864'}
+
+== COBERTURA (antes de mirar nada)
+   pasadas 275 | en ambos brazos 275 | volcanes 1
+   cobertura pareja: OK
+
+== DETERMINISMO (gemelo contra _s146_ab_sin_test1, sobre ['Lascar']): 275 pasadas, en ambos 275, misma decision de publicar 275 (100.0 %) | OK
+
+== PREDICCIONES
+ventana ['2026-06-01', '2026-06-30'] | sensor MODIS | pasadas en ambos brazos: 57
+
+P1. publicacion en negativos limpios (n 32): control 6.2 % | brazo 3.1 %
+    INDECIDIBLE: el control ya publica 18 % o menos, el umbral se cumpliria sin que el brazo haga nada (H7)
+
+P2. razon de la tasa falsa borde sobre nadir
+    nadir  n   8 | control   1 | brazo   1
+    medio  n  11 | control   1 | brazo   0
+    borde  n  13 | control   0 | brazo   0
+    INDECIDIBLE: menos de 10 negativos limpios en nadir o en borde (H9)
+
+P4. recall por pasada
+    positivas 13 | publica el control 12 | de esas conserva el brazo 12 | piso ceil(n_B x 118/141) = 11 | perdidas con 0.5 MW o mas: 0 | CUMPLE
+    con la tabla de MIROVA sola, sin OCR: positivas 13 | control 12 | brazo conserva 12 | piso 11 | perdidas con 0.5 MW o mas: 0 | CUMPLE
+    DECIDE: la version con la TABLA SOLA (la ventana empieza antes del 2026-06-13, A119); la otra se informa
+
+P5. pasadas que MIROVA lista con VRP 0 en noche con alerta del sensor
+    n 7 | control 0 (0.0 %) | brazo 0 (0.0 %) | razon brazo sobre control nan | un apagado parejo daria 0.87 | sin sustrato (menos de 20 publicadas por el control)
+       MODIS_TERRA: 4
+       MODIS_AQUA: 3
+       supervivencia de lo que publica el control en negativos limpios:   1 de   2 (50 %)
+       supervivencia de lo que publica el control en este estrato:        0 de   0 (0 %)
+       supervivencia de lo que publica el control en positivas:          12 de  12 (100 %)
+
+P6 (informativa, sin poder para decidir: H6). Villarrica y Nevados de Chillan, positivas una por una
+
+C8b. selectividad a una cola (misma definicion que evaluar.selectividad_supervivencia)
+    con tabla y OCR:                   observado +0.5000 | p97,5 del nulo +0.5000 | FALLA
+    con la tabla sola (sin OCR):       observado +0.5000 | p97,5 del nulo +0.5000 | FALLA
+
+Que etiqueta DECIDE en esta ventana (A119): SOLO la tabla; el OCR se informa aparte
+[referencia MIROVA] la ventana 2026-06-01 a 2026-06-30 pisa 3 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)

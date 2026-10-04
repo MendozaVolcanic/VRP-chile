@@ -1,0 +1,41 @@
+ventana ['2026-08-01', '2026-08-27'] | sensor VIIRS750 | pasadas en ambos brazos: 1232
+
+P1. publicacion en negativos limpios (n 820): control 7.1 % | brazo 0.6 %
+    INDECIDIBLE: el control ya publica 18 % o menos, el umbral se cumpliria sin que el brazo haga nada (H7)
+
+P2. razon de la tasa falsa borde sobre nadir
+    nadir  n 268 | control  21 | brazo   4
+    medio  n 172 | control  13 | brazo   0
+    borde  n 380 | control  24 | brazo   1
+    razon control 0.81 | brazo 0.18 | CUMPLE (umbral 1.3 o menos)
+
+P4. recall por pasada
+    positivas 26 | publica el control 19 | de esas conserva el brazo 18 | piso ceil(n_B x 118/141) = 16 | perdidas con 0.5 MW o mas: 1 | FALLA
+       perdida: PuyehueCordonCaulle  2026-08-22 06:18 | MIROVA 0.650 MW | VIIRS_NOAA21_750
+    con la tabla de MIROVA sola, sin OCR: positivas 26 | control 19 | brazo conserva 18 | piso 16 | perdidas con 0.5 MW o mas: 1 | FALLA
+    DECIDE: la version con tabla y OCR
+
+P5. pasadas que MIROVA lista con VRP 0 en noche con alerta del sensor
+    n 48 | control 5 (10.4 %) | brazo 2 (4.2 %) | razon brazo sobre control 0.40 | un apagado parejo daria 0.28 | sin sustrato (menos de 20 publicadas por el control)
+       VIIRS_NOAA20_750: 25
+       VIIRS_NOAA21_750: 19
+       VIIRS_SNPP_750: 4
+       supervivencia de lo que publica el control en negativos limpios:   5 de  58 (9 %)
+       supervivencia de lo que publica el control en este estrato:        2 de   5 (40 %)
+       supervivencia de lo que publica el control en positivas:          18 de  19 (95 %)
+
+P6 (informativa, sin poder para decidir: H6). Villarrica y Nevados de Chillan, positivas una por una
+    Villarrica         2026-08-13 05:42 | MIROVA 0.410 MW | control 0 | brazo 0
+    Villarrica         2026-08-18 05:48 | MIROVA 1.380 MW | control 1 | brazo 1
+    Villarrica         2026-08-19 06:06 | MIROVA 0.670 MW | control 1 | brazo 1
+    Villarrica         2026-08-21 05:48 | MIROVA 0.900 MW | control 1 | brazo 1
+    Villarrica         2026-08-23 05:54 | MIROVA 0.600 MW | control 0 | brazo 0
+    Villarrica         2026-08-24 05:36 | MIROVA 0.850 MW | control 1 | brazo 1
+
+C8b. selectividad a una cola (misma definicion que evaluar.selectividad_supervivencia)
+    con tabla y OCR:                   observado +0.8612 | p97,5 del nulo +0.4419 | CUMPLE
+    con la tabla sola (sin OCR):       observado +0.8612 | p97,5 del nulo +0.4419 | CUMPLE
+
+Que etiqueta DECIDE en esta ventana (A119): tabla y OCR
+[referencia MIROVA] la ventana 2026-08-01 a 2026-08-27 pisa 1 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)

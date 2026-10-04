@@ -1,0 +1,32 @@
+ventana ['2026-08-01', '2026-08-27'] | sensor MODIS | pasadas en ambos brazos: 660
+
+P1. publicacion en negativos limpios (n 609): control 7.6 % | brazo 0.3 %
+    INDECIDIBLE: el control ya publica 18 % o menos, el umbral se cumpliria sin que el brazo haga nada (H7)
+
+P2. razon de la tasa falsa borde sobre nadir
+    nadir  n 228 | control  17 | brazo   0
+    medio  n 156 | control  11 | brazo   1
+    borde  n 225 | control  18 | brazo   1
+    razon control 1.07 | brazo 1.01 | CUMPLE (umbral 1.3 o menos)
+
+P4. recall por pasada
+    positivas 1 | publica el control 0 | de esas conserva el brazo 0 | piso ceil(n_B x 118/141) = 0 | perdidas con 0.5 MW o mas: 0 | CUMPLE
+    con la tabla de MIROVA sola, sin OCR: positivas 1 | control 0 | brazo conserva 0 | piso 0 | perdidas con 0.5 MW o mas: 0 | CUMPLE
+    DECIDE: la version con tabla y OCR
+
+P5. pasadas que MIROVA lista con VRP 0 en noche con alerta del sensor
+    n 1 | control 0 (0.0 %) | brazo 0 (0.0 %) | razon brazo sobre control nan | un apagado parejo daria 0.04 | sin sustrato (menos de 20 publicadas por el control)
+       MODIS_AQUA: 1
+       supervivencia de lo que publica el control en negativos limpios:   2 de  46 (4 %)
+       supervivencia de lo que publica el control en este estrato:        0 de   0 (0 %)
+       supervivencia de lo que publica el control en positivas:           0 de   0 (0 %)
+
+P6 (informativa, sin poder para decidir: H6). Villarrica y Nevados de Chillan, positivas una por una
+
+C8b. selectividad a una cola (misma definicion que evaluar.selectividad_supervivencia)
+    con tabla y OCR:                   sin sustrato
+    con la tabla sola (sin OCR):       sin sustrato
+
+Que etiqueta DECIDE en esta ventana (A119): tabla y OCR
+[referencia MIROVA] la ventana 2026-08-01 a 2026-08-27 pisa 1 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
