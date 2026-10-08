@@ -96,7 +96,7 @@ jobs:
             if [ "$ABIERTOS" = "0" ]; then
               python -c "import json; print('\n'.join('- '+a for a in json.load(open('data/audit_continuous/latest.json'))['cobertura']['avisos']))" > /tmp/avisos.txt
               gh issue create \
-                --title "⚠ Auto-audit semanal DEGRADADO — $(date -u +%F)" \
+                --title "⚠ Auto-audit semanal DEGRADADO: $(date -u +%F)" \
                 --body "$(printf 'El auto-audit semanal no puede interpretar esta ventana:\n\n%s\n\nUn DEGRADADO no es una falla de detección: suele ser un apagón del NRT (revisar nrt-healthcheck y el vencimiento de EARTHDATA_TOKEN) o el scraper de MIROVA detenido.\nDetalle: `data/audit_continuous/latest.json`.' "$(cat /tmp/avisos.txt)")"
             else
               echo "ya hay un issue DEGRADADO abierto; no se abre otro"

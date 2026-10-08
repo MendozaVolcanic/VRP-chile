@@ -1,5 +1,7 @@
 # Pre-registro S150: la réplica frente a una erupción (Nevados de Chillán, 2026-09-14 a 2026-10-07)
 
+> **VERSIÓN 3, APROBADA por Nicolás el 2026-10-08** ("1 sí", en la sesión S150). Despacho desde el
+> 2026-10-13 (producto estándar), con el comando de §2. Historia del encabezado:
 > **VERSIÓN 3, SIN APROBAR.** La v1 la declaró no despachable un verificador con contexto limpio
 > (`docs/audit_s150/VERIFICADOR_PREREGISTRO_NDC.md`); la v2 la revisó un segundo verificador
 > (`docs/audit_s150/VERIFICADOR_PREREGISTRO_NDC_V2.md`: "despachable con cambios acotados en el evaluador y en
