@@ -1,0 +1,53 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+(1) modo de un solo pixel, perfil: True 5.0 3
+   pixeles [1.6, 1.6, 1.6]: suma 4.800 -> publicado 1.6  (control sin modo: 4.800000000000001)
+   pixeles [1.7, 1.7, 1.7]: suma 5.100 -> publicado 5.1  (control sin modo: 5.1)
+   pixeles [2.45, 2.45]: suma 4.900 -> publicado 2.45  (control sin modo: 4.9)
+   pixeles [2.55, 2.55]: suma 5.100 -> publicado 5.1  (control sin modo: 5.1)
+   pixeles [4.9]: suma 4.900 -> publicado 4.9  (control sin modo: 4.9)
+   pixeles [2.655, 1.828]: suma 4.483 -> publicado 2.655  (control sin modo: 4.483)
+
+(2) MODIS pareado a ALERTA de tabla con MIROVA >= 2 MW (desde 2026-03-01):
+                volcan                dt       sensor  pc_vrp  pc_n focal focal_deg    spm  crater_sum  crater_n  n_anom  m_cons
+3311        Villarrica  2026-09-04 07:50   MODIS_AQUA   3.859     6  True     False  False      8.2139         8     140    4.75
+3567            Lascar  2026-03-07 07:35   MODIS_AQUA   2.031    11  True     False  False      7.2075        26      86    2.70
+3576            Lascar  2026-03-09 01:55  MODIS_TERRA   0.238     4  True      True  False      1.0715        12      26    2.02
+3591            Lascar  2026-03-11 01:35  MODIS_TERRA   2.024     4  True     False  False      2.1430         2      46    2.92
+3602            Lascar  2026-03-12 07:25   MODIS_AQUA   2.359     2  True     False   True      7.6007        24      67    2.22
+3611            Lascar  2026-03-14 01:55  MODIS_TERRA   0.536     5  True      True  False      0.8929        15      34    2.44
+3628            Lascar  2026-03-15 07:45   MODIS_AQUA   1.376     2  True     False   True      3.1450        19      70    2.22
+3670            Lascar  2026-03-20 07:40   MODIS_AQUA   1.442     9  True     False  False      2.8831        21      93    3.82
+3671            Lascar  2026-03-21 01:35  MODIS_TERRA   1.607     5  True     False  False      3.2146        18      45    2.64
+3710            Lascar  2026-03-26 01:35  MODIS_TERRA   1.667    14  True     False  False      1.7857         3      48    3.10
+3734            Lascar  2026-03-29 01:55  MODIS_TERRA   0.833     3  True     False   True      0.8334        13      29    2.94
+3813            Lascar  2026-04-07 07:35   MODIS_AQUA   0.590     7  True     False  False      6.0278        24      76    2.29
+7936  NevadosDeChillan  2026-10-01 01:45  MODIS_TERRA   4.167     7  True     False  False      4.2263        20      78    6.17
+7945  NevadosDeChillan  2026-10-01 08:35   MODIS_AQUA   2.293    18  True     False  False      3.2759        17      78    5.18
+   mediana pc/MIROVA: 0.573 | mediana suma crater/MIROVA: 0.744 | n: 14
+
+(3) records con pc > 5 MW y n_nti == 0, por estado del tope (toda la historia):
+fam    cap  
+MODIS  False    256
+V750   False     47
+dtype: int64
+   no recortados solo porque t_bg >= 270 K (pc > 5, n_nti == 0, cap False): 303
+                         v                dt    fam       pc      n      cd    cap  nnti     tbg      dc
+44491  PuyehueCordonCaulle  2025-04-27 07:00  MODIS  233.215  535.0   0.540  False     0  270.90  summit
+44879  PuyehueCordonCaulle  2025-05-30 07:05  MODIS  158.596  361.0   2.529  False     0  271.30  summit
+43803  PuyehueCordonCaulle  2025-02-27 06:10  MODIS  117.091  148.0   2.729  False     0  272.65     far
+44281  PuyehueCordonCaulle  2025-04-09 06:45  MODIS  109.751  326.0   3.870  False     0  279.07  summit
+43793  PuyehueCordonCaulle  2025-02-26 07:10  MODIS   95.381  191.0   7.251  False     0  280.48  summit
+44665  PuyehueCordonCaulle  2025-05-12 06:55  MODIS   84.105  350.0   3.682  False     0  274.29  summit
+43714  PuyehueCordonCaulle  2025-02-19 07:30  MODIS   71.056  162.0   4.997  False     0  280.48  summit
+43724  PuyehueCordonCaulle  2025-02-20 06:30  MODIS   64.733  147.0   7.119  False     0  278.48  summit
+47464  PuyehueCordonCaulle  2026-04-26 08:20  MODIS   60.181   86.0   5.009  False     0  270.07  summit
+44701  PuyehueCordonCaulle  2025-05-15 07:10  MODIS   54.543  168.0   1.226  False     0  272.08  summit
+44138  PuyehueCordonCaulle  2025-03-28 07:05  MODIS   44.280  184.0   4.028  False     0  274.29  summit
+67                 Chaiten  2025-02-20 06:30  MODIS   42.601   61.0   2.633  False     0  278.19  summit
+32461     NevadosDeChillan  2025-02-18 06:24   V750   38.770   13.0  16.899  False     0  282.86     far
+43684  PuyehueCordonCaulle  2025-02-17 06:10  MODIS   38.287   83.0   4.653  False     0  276.32     far
+138                Chaiten  2025-02-26 07:10  MODIS   35.615   39.0   2.790  False     0  277.27     far
+   de esos, con el cumulo dentro del inner (pc centroid <= 5 km): 261
+
+   pc > 5 MW con camino NTI encendido (el tope no podia actuar): 34
+   fraccion de records MODIS con pc > 0 y n_nti == 0: 0.999

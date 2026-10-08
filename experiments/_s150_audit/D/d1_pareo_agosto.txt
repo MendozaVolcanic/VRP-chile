@@ -1,0 +1,17 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-08-01 a 2026-08-27 pisa 1 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+ventana ('2026-08-01', '2026-08-27') | filas nocturnas de referencia 2516
+  MODIS    ALERTA n     1 | {'<=120s': 1}
+  MODIS    RUTINA n   618 | {'<=120s': 612, '120s-15min': 3, '>15min': 3}
+  MODIS    FP     n     1 | {'<=120s': 1}
+  VIIRS375 ALERTA n   170 | {'<=120s': 168, '>15min': 2}
+  VIIRS375 RUTINA n   742 | {'<=120s': 733, '>15min': 9}
+  VIIRS375 FP     n    66 | {'<=120s': 66}
+  VIIRS750 ALERTA n    27 | {'<=120s': 27}
+  VIIRS750 RUTINA n   888 | {'<=120s': 874, '>15min': 11, '120s-15min': 3}
+  VIIRS750 FP     n     3 | {'<=120s': 3}
+  ejemplos de ALERTA entre 120 s y 15 min de nuestra pasada mas cercana:
+pasadas nuestras de satelites DISTINTOS a +-120 s (mismo volcan y sensor): {} []
+pasadas nuestras del MISMO satelite a +-120 s (granulos contiguos o duplicados): {}
+CONTROL POSITIVO (+5 min): ALERTAS pareadas a +-120 s 5 de 198

@@ -1,0 +1,143 @@
+pasadas con pc: 16837 | pareadas a ALERTA de tabla con VRP>0: 1326
+
+(A) tope D9 (pc.d9_capped) en toda la ventana:
+d9        False  True 
+fam                   
+MODIS      4420    720
+VIIRS      3699     16
+VIIRS375   7982      0
+records con d9_capped por volcan:
+volcan               fam  
+Chaiten              MODIS    100
+                     VIIRS      5
+Copahue              MODIS     41
+                     VIIRS      2
+Isluga               MODIS     25
+Lascar               MODIS     19
+                     VIIRS      1
+Lastarria            MODIS     13
+Llaima               MODIS     76
+NevadosDeChillan     MODIS     59
+PlanchonPeteroa      MODIS     28
+                     VIIRS      3
+PuyehueCordonCaulle  MODIS    144
+                     VIIRS      1
+Tupungatito          MODIS    142
+                     VIIRS      4
+Villarrica           MODIS     73
+dtype: int64
+d9_capped pareados a ALERTA de tabla: 1
+          volcan                dt      sensor  pc_vrp  pc_n  pc_dist dclass    t_bg  m_cons  m_cons_dist
+3457  Villarrica  2026-09-25 08:05  MODIS_AQUA     5.0    15    2.953    far  254.26     0.9          0.0
+d9_capped pareados a OCR: 1
+      volcan                dt          sensor  pc_vrp  pc_n  dclass    t_bg  m_ocr
+3738  Lascar  2026-03-29 05:36  VIIRS_SNPP_750     5.0     2  summit  269.86    5.0
+
+predicado reconstruido del tope (t_bg<270 y n_nti==0) por familia, fraccion de pasadas con pc:
+fam
+MODIS       0.602
+VIIRS       0.822
+VIIRS375    0.657
+Name: cap_activo, dtype: float64
+idem en pasadas pareadas a ALERTA de tabla:
+           mean  size
+fam                  
+MODIS     0.564    78
+VIIRS     0.873   245
+VIIRS375  0.719  1003
+
+(C) mediana de razon contra MIROVA por familia y tramo de MIROVA (n, pc, suma crater, magnitud que ve el operador):
+                  n   r_pc  r_crater   r_op
+fam      tramo                             
+MODIS    <0.5    22  1.419     8.025  1.419
+         0.5-1   18  0.573     5.592  0.573
+         1-2     24  0.860     2.458  0.860
+         2-5     12  0.573     0.986  0.573
+         5-10     2  0.559     0.659  0.559
+VIIRS    <0.5   122  0.238     0.245  0.238
+         0.5-1   53  0.534     0.605  0.534
+         1-2     43  0.499     0.512  0.499
+         2-5     25  0.590     0.592  0.590
+         5-10     2  0.369     0.400  0.369
+VIIRS375 <0.5   853  0.642     0.795  0.745
+         0.5-1   84  0.408     0.665  0.591
+         1-2     44  0.579     0.625  0.613
+         2-5     20  0.553     0.745  0.730
+         5-10     2  0.566     0.566  0.566
+
+(C') idem solo desde 2026-04-01:
+                  n   r_pc  r_crater   r_op
+fam      tramo                             
+MODIS    <0.5    20  1.930     8.151  1.930
+         0.5-1   16  0.573     5.780  0.573
+         1-2     14  0.925     2.955  0.925
+         2-5      2  0.535     2.181  0.535
+         5-10     2  0.559     0.659  0.559
+VIIRS    <0.5   113  0.246     0.258  0.246
+         0.5-1   50  0.552     0.632  0.552
+         1-2     35  0.510     0.558  0.510
+         2-5     13  0.510     0.526  0.510
+         5-10     2  0.369     0.400  0.369
+VIIRS375 <0.5   768  0.647     0.802  0.747
+         0.5-1   76  0.412     0.669  0.596
+         1-2     37  0.579     0.668  0.645
+         2-5      9  0.615     0.769  0.728
+         5-10     2  0.566     0.566  0.566
+
+(C'') por volcan, solo MIROVA >= 2 MW:
+                            n   r_pc  r_crater   r_op
+volcan           fam                                 
+Lascar           MODIS     11  0.538     0.755  0.538
+                 VIIRS     23  0.592     0.633  0.592
+                 VIIRS375  16  0.487     0.745  0.730
+NevadosDeChillan MODIS      2  0.559     0.659  0.559
+                 VIIRS      4  0.319     0.359  0.319
+                 VIIRS375   5  0.578     0.578  0.578
+Villarrica       MODIS      1  0.812     1.729  0.812
+                 VIIRS375   1  0.860     0.860  0.860
+
+(B) modo de un solo pixel (spm) en pasadas pareadas:
+spm       False  True 
+fam                   
+MODIS        60     18
+VIIRS        33    212
+VIIRS375     24    979
+                  n   r_pc  r_crater
+fam      tramo                      
+MODIS    <0.5     6  1.006     5.600
+         0.5-1    4  0.297     6.772
+         1-2      5  0.166     0.998
+         2-5      3  0.620     1.417
+VIIRS    <0.5    98  0.112     0.111
+         0.5-1   47  0.531     0.567
+         1-2     41  0.499     0.512
+         2-5     24  0.591     0.613
+         5-10     2  0.369     0.400
+VIIRS375 <0.5   845  0.639     0.793
+         0.5-1   73  0.377     0.574
+         1-2     40  0.557     0.613
+         2-5     19  0.516     0.758
+         5-10     2  0.566     0.566
+
+(D) fragmentacion: pasadas pareadas donde crater_sum > 1,5 x pc y crater_sum > 0,5 MW:
+          sum  size
+fam                
+MODIS      59    78
+VIIRS      36   245
+VIIRS375   87  1003
+                volcan                dt          sensor  pc_vrp  pc_n  n_clu    spm  crater_sum  crater_n  m_cons
+3311        Villarrica  2026-09-04 07:50      MODIS_AQUA   3.859     6    100  False      8.2139         8    4.75
+3532            Lascar  2026-03-03 05:48    VIIRS_NOAA20   1.021     2      1   True      2.0224         2    2.41
+3567            Lascar  2026-03-07 07:35      MODIS_AQUA   2.031    11     60  False      7.2075        26    2.70
+3576            Lascar  2026-03-09 01:55     MODIS_TERRA   0.238     4     19  False      1.0715        12    2.02
+3602            Lascar  2026-03-12 07:25      MODIS_AQUA   2.359     2     46   True      7.6007        24    2.22
+3611            Lascar  2026-03-14 01:55     MODIS_TERRA   0.536     5     24  False      0.8929        15    2.44
+3628            Lascar  2026-03-15 07:45      MODIS_AQUA   1.376     2     48   True      3.1450        19    2.22
+3659            Lascar  2026-03-19 05:48    VIIRS_NOAA20   1.263     3      1   True      2.2869         3    2.76
+3670            Lascar  2026-03-20 07:40      MODIS_AQUA   1.442     9     66  False      2.8831        21    3.82
+3671            Lascar  2026-03-21 01:35     MODIS_TERRA   1.607     5     33  False      3.2146        18    2.64
+3699            Lascar  2026-03-24 05:54    VIIRS_NOAA20   1.193     2      1   True      2.0065         2    2.74
+3813            Lascar  2026-04-07 07:35      MODIS_AQUA   0.590     7     53  False      6.0278        24    2.29
+3826            Lascar  2026-04-09 05:54    VIIRS_NOAA20   0.990     2      3   True      1.8155         3    2.36
+7925  NevadosDeChillan  2026-09-29 06:36      VIIRS_SNPP   1.297     2      2   True      2.6830         4    2.11
+7926  NevadosDeChillan  2026-09-29 06:36  VIIRS_SNPP_750   0.329     2      2   True      0.6763         3    2.03
