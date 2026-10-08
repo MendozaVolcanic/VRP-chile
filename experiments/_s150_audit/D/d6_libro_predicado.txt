@@ -1,0 +1,24 @@
+   - 2026-01-16 (tabla, todos): antes los tipos de registro eran otros (17 filas RUTINA con VRP > 0; FALSO_POSITIVO no existia)
+   - 2026-02-14 (tabla, Tupungatito): antes Tupungatito no tiene ninguna fila
+   - 2026-02-23 (tabla, Tupungatito): antes su limite de alerta era 5 km y no 7
+   - 2026-03-01 (tabla, todos): antes la cobertura nocturna de la tabla era 86 % (enero) y 95 % (febrero); desde marzo 99 a 100 %
+   - 2026-03-01 (ocr, VIIRS): antes el OCR corrio con siete versiones y doce metodos de validacion distintos; capturo 0,26 a 0,29 alertas por alerta de la tabla contra 0,50 a 0,89 despues, y no hubo reproceso retroactivo
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+records 2026, cruce libro x tablero(node):
+   ('modis', '-', '-') 5257
+   ('modis', 'libro', '-') 9
+   ('modis', 'libro', 'tablero') 672
+   ('v375', '-', '-') 2389
+   ('v375', 'libro', '-') 811
+   ('v375', 'libro', 'tablero') 8423
+   ('v750', '-', '-') 8288
+   ('v750', 'libro', '-') 404
+   ('v750', 'libro', 'tablero') 2843
+v750  noches alerta  267 | recall con la reescritura del libro 83.52 % | con el tablero real 79.78 %
+v375  noches alerta 1005 | recall con la reescritura del libro 92.94 % | con el tablero real 92.34 %
+modis noches alerta   57 | recall con la reescritura del libro 12.28 % | con el tablero real 12.28 %
+CONTROL POSITIVO: libro_de_cuentas.r_recall_v750_dash() = 83.52
+ALERTAS nocturnas (elevacion solar <= 0) por sensor, frente al filtro horario de _s126_lib: [(('MODIS', 'la conserva'), 73), (('MODIS', 'la tira el filtro 3-9 h'), 59), (('VIIRS375', 'la conserva'), 1930), (('VIIRS750', 'la conserva'), 371)]

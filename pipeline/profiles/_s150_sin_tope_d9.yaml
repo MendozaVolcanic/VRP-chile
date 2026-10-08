@@ -1,0 +1,22 @@
+# Prueba S150 de Nevados de Chillan. Brazo T0: PRODUCCION sin el tope D9 de 5 MW.
+#
+# EL FENOMENO. El tope D9 (S72) recorta a 5 MW la magnitud de una deteccion que entro solo por el camino
+# contextual en un fondo frio, porque en junio de 2026 ese camino inflaba magnitudes bajo cirrus. Con el
+# camino de temperatura de brillo apagado, su condicion quedo reducida a "fondo bajo 270 K y ningun pixel
+# por NTI", o sea casi cualquier noche fria, y en la erupcion de Nevados de Chillan recorto 11 de 27
+# pasadas MODIS (verificador del pre-registro, H14; auditor C, C-01). Una erupcion real de mas de 5 MW
+# sobre un fondo frio se publica como 5,00 y el tablero la rotula "probablemente artefacto".
+#
+# QUE CAMBIA respecto de produccion (_s146_ab_control): UNA cosa, path_d_only_cap_mw = null (sin tope).
+# CRITERIO: pre-registrado y commiteado ANTES de correr, en experiments/_s150_ndc/PREREGISTRO_NDC.md
+# NO OPERACIONAL: data_subdir aislado, fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s150_sin_tope_d9
+description: >
+  Brazo T0: produccion sin el tope D9 de 5 MW sobre las detecciones solo contextuales en fondo frio.
+
+paths:
+  path_d_only_cap_mw: null
+
+output:
+  data_subdir: _s150_sin_tope_d9

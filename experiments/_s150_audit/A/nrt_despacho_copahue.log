@@ -1,0 +1,1080 @@
+﻿2026-10-08T18:31:31.1203348Z Current runner version: '2.337.0'
+2026-10-08T18:31:31.1231827Z ##[group]Runner Image Provisioner
+2026-10-08T18:31:31.1232729Z Hosted Compute Agent
+2026-10-08T18:31:31.1233854Z Version: 20261002.596
+2026-10-08T18:31:31.1234686Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-08T18:31:31.1235608Z Build Date: 2026-10-02T22:28:27Z
+2026-10-08T18:31:31.1236420Z Worker ID: {21249aa8-a99d-4320-b58b-2f87534619dd}
+2026-10-08T18:31:31.1237232Z Region: canadaeast
+2026-10-08T18:31:31.1237926Z Cloud: Azure
+2026-10-08T18:31:31.1238498Z ##[endgroup]
+2026-10-08T18:31:31.1240346Z ##[group]Operating System
+2026-10-08T18:31:31.1241121Z Ubuntu
+2026-10-08T18:31:31.1242171Z 24.04.5
+2026-10-08T18:31:31.1242890Z LTS
+2026-10-08T18:31:31.1243507Z ##[endgroup]
+2026-10-08T18:31:31.1244272Z ##[group]Runner Image
+2026-10-08T18:31:31.1244957Z Image: ubuntu-24.04
+2026-10-08T18:31:31.1245665Z Version: 20261004.327.1
+2026-10-08T18:31:31.1246988Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-08T18:31:31.1248707Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+2026-10-08T18:31:31.1249719Z ##[endgroup]
+2026-10-08T18:31:31.1250982Z ##[group]GITHUB_TOKEN Permissions
+2026-10-08T18:31:31.1253679Z Contents: write
+2026-10-08T18:31:31.1254663Z Metadata: read
+2026-10-08T18:31:31.1255279Z ##[endgroup]
+2026-10-08T18:31:31.1257592Z Secret source: Actions
+2026-10-08T18:31:31.1258649Z Cache mode: write
+2026-10-08T18:31:31.1259907Z Prepare workflow directory
+2026-10-08T18:31:31.1606162Z Prepare all required actions
+2026-10-08T18:31:31.1654163Z Getting action download info
+2026-10-08T18:31:31.4372078Z Download action repository 'actions/checkout@v5' (SHA:fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09)
+2026-10-08T18:31:31.5466723Z Download action repository 'actions/setup-python@v6' (SHA:ece7cb06caefa5fff74198d8649806c4678c61a1)
+2026-10-08T18:31:31.7533827Z Complete job name: process (Copahue)
+2026-10-08T18:31:31.8266673Z ##[group]Run if [ "$DISPATCH_VOLCANO" != "" ] && [ "$DISPATCH_VOLCANO" != "Copahue" ]; then
+2026-10-08T18:31:31.8267876Z [36;1mif [ "$DISPATCH_VOLCANO" != "" ] && [ "$DISPATCH_VOLCANO" != "Copahue" ]; then[0m
+2026-10-08T18:31:31.8268755Z [36;1m  echo "skip=true" >> $GITHUB_OUTPUT[0m
+2026-10-08T18:31:31.8269560Z [36;1m  echo "Skipping Copahue (dispatch filter=$DISPATCH_VOLCANO)"[0m
+2026-10-08T18:31:31.8270297Z [36;1melse[0m
+2026-10-08T18:31:31.8270813Z [36;1m  echo "skip=false" >> $GITHUB_OUTPUT[0m
+2026-10-08T18:31:31.8271664Z [36;1mfi[0m
+2026-10-08T18:31:31.8553854Z shell: /usr/bin/bash -e {0}
+2026-10-08T18:31:31.8554830Z env:
+2026-10-08T18:31:31.8555354Z   DISPATCH_VOLCANO: 
+2026-10-08T18:31:31.8555899Z ##[endgroup]
+2026-10-08T18:31:31.8955337Z ##[group]Run actions/checkout@v5
+2026-10-08T18:31:31.8955986Z with:
+2026-10-08T18:31:31.8956477Z   repository: MendozaVolcanic/VRP-chile
+2026-10-08T18:31:31.8960587Z   token: ***
+2026-10-08T18:31:31.8961055Z   ssh-strict: true
+2026-10-08T18:31:31.8961746Z   ssh-user: git
+2026-10-08T18:31:31.8962247Z   persist-credentials: true
+2026-10-08T18:31:31.8962773Z   clean: true
+2026-10-08T18:31:31.8963262Z   sparse-checkout-cone-mode: true
+2026-10-08T18:31:31.8963810Z   fetch-depth: 1
+2026-10-08T18:31:31.8964271Z   fetch-tags: false
+2026-10-08T18:31:31.8964760Z   show-progress: true
+2026-10-08T18:31:31.8965244Z   lfs: false
+2026-10-08T18:31:31.8965697Z   submodules: false
+2026-10-08T18:31:31.8966181Z   set-safe-directory: true
+2026-10-08T18:31:31.8966811Z   allow-unsafe-pr-checkout: false
+2026-10-08T18:31:31.8967359Z ##[endgroup]
+2026-10-08T18:31:31.9979943Z Syncing repository: MendozaVolcanic/VRP-chile
+2026-10-08T18:31:31.9982956Z ##[group]Getting Git version info
+2026-10-08T18:31:31.9984298Z Working directory is '/home/runner/work/VRP-chile/VRP-chile'
+2026-10-08T18:31:31.9986151Z [command]/usr/bin/git version
+2026-10-08T18:31:32.0067897Z git version 2.55.0
+2026-10-08T18:31:32.0095925Z ##[endgroup]
+2026-10-08T18:31:32.0114595Z Temporarily overriding HOME='/home/runner/work/_temp/6d596a31-4c7e-4e7e-b7a8-5888bae6bedd' before making global git config changes
+2026-10-08T18:31:32.0117930Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-08T18:31:32.0120941Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/VRP-chile/VRP-chile
+2026-10-08T18:31:32.0181225Z Deleting the contents of '/home/runner/work/VRP-chile/VRP-chile'
+2026-10-08T18:31:32.0187536Z ##[group]Initializing the repository
+2026-10-08T18:31:32.0193004Z [command]/usr/bin/git init /home/runner/work/VRP-chile/VRP-chile
+2026-10-08T18:31:32.0320323Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-08T18:31:32.0322142Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-08T18:31:32.0323641Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-08T18:31:32.0325030Z hint: call:
+2026-10-08T18:31:32.0326234Z hint:
+2026-10-08T18:31:32.0327219Z hint: 	git config --global init.defaultBranch <name>
+2026-10-08T18:31:32.0328448Z hint:
+2026-10-08T18:31:32.0329639Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-08T18:31:32.0331637Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-08T18:31:32.0333089Z hint:
+2026-10-08T18:31:32.0333866Z hint: 	git branch -m <name>
+2026-10-08T18:31:32.0334720Z hint:
+2026-10-08T18:31:32.0335836Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-08T18:31:32.0337763Z Initialized empty Git repository in /home/runner/work/VRP-chile/VRP-chile/.git/
+2026-10-08T18:31:32.0340854Z [command]/usr/bin/git remote add origin https://github.com/MendozaVolcanic/VRP-chile
+2026-10-08T18:31:32.0398355Z ##[endgroup]
+2026-10-08T18:31:32.0399283Z ##[group]Disabling automatic garbage collection
+2026-10-08T18:31:32.0401802Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-08T18:31:32.0435610Z ##[endgroup]
+2026-10-08T18:31:32.0436790Z ##[group]Setting up auth
+2026-10-08T18:31:32.0445220Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-08T18:31:32.0487096Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-08T18:31:32.0881900Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-08T18:31:32.0921777Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-08T18:31:32.1158318Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-08T18:31:32.1193574Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-08T18:31:32.1424348Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-08T18:31:32.1468539Z ##[endgroup]
+2026-10-08T18:31:32.1470170Z ##[group]Fetching the repository
+2026-10-08T18:31:32.1479897Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +327621e2c6f262f48edac8828c7dd4b800913bf2:refs/remotes/origin/main
+2026-10-08T18:32:12.6484642Z From https://github.com/MendozaVolcanic/VRP-chile
+2026-10-08T18:32:12.6485543Z  * [new ref]         327621e2c6f262f48edac8828c7dd4b800913bf2 -> origin/main
+2026-10-08T18:32:12.6489476Z ##[endgroup]
+2026-10-08T18:32:12.6492477Z ##[group]Determining the checkout info
+2026-10-08T18:32:12.6493788Z ##[endgroup]
+2026-10-08T18:32:12.6500398Z [command]/usr/bin/git sparse-checkout disable
+2026-10-08T18:32:12.6556136Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-08T18:32:12.6588782Z ##[group]Checking out the ref
+2026-10-08T18:32:12.6595518Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-10-08T18:32:14.1450340Z Updating files:   6% (225/3745)
+2026-10-08T18:32:14.5214552Z Updating files:   7% (263/3745)
+2026-10-08T18:32:14.7000872Z Updating files:   8% (300/3745)
+2026-10-08T18:32:14.7891977Z Updating files:   8% (336/3745)
+2026-10-08T18:32:15.0609203Z Updating files:   9% (338/3745)
+2026-10-08T18:32:15.0642870Z Updating files:  10% (375/3745)
+2026-10-08T18:32:15.0712283Z Updating files:  11% (412/3745)
+2026-10-08T18:32:15.0763383Z Updating files:  12% (450/3745)
+2026-10-08T18:32:15.0806722Z Updating files:  13% (487/3745)
+2026-10-08T18:32:15.0841601Z Updating files:  14% (525/3745)
+2026-10-08T18:32:15.0894098Z Updating files:  15% (562/3745)
+2026-10-08T18:32:15.0984641Z Updating files:  16% (600/3745)
+2026-10-08T18:32:15.1024964Z Updating files:  17% (637/3745)
+2026-10-08T18:32:15.1060595Z Updating files:  18% (675/3745)
+2026-10-08T18:32:15.1110828Z Updating files:  19% (712/3745)
+2026-10-08T18:32:15.1269961Z Updating files:  20% (749/3745)
+2026-10-08T18:32:15.1298274Z Updating files:  21% (787/3745)
+2026-10-08T18:32:15.1342636Z Updating files:  22% (824/3745)
+2026-10-08T18:32:15.1374586Z Updating files:  23% (862/3745)
+2026-10-08T18:32:15.1427919Z Updating files:  24% (899/3745)
+2026-10-08T18:32:15.1476966Z Updating files:  25% (937/3745)
+2026-10-08T18:32:15.1803017Z Updating files:  26% (974/3745)
+2026-10-08T18:32:15.1826752Z Updating files:  27% (1012/3745)
+2026-10-08T18:32:15.1869558Z Updating files:  28% (1049/3745)
+2026-10-08T18:32:15.1894673Z Updating files:  29% (1087/3745)
+2026-10-08T18:32:15.1922074Z Updating files:  30% (1124/3745)
+2026-10-08T18:32:15.1959010Z Updating files:  31% (1161/3745)
+2026-10-08T18:32:15.1991195Z Updating files:  32% (1199/3745)
+2026-10-08T18:32:15.2019097Z Updating files:  33% (1236/3745)
+2026-10-08T18:32:15.2795256Z Updating files:  34% (1274/3745)
+2026-10-08T18:32:15.2819822Z Updating files:  35% (1311/3745)
+2026-10-08T18:32:15.2864538Z Updating files:  36% (1349/3745)
+2026-10-08T18:32:15.2893310Z Updating files:  37% (1386/3745)
+2026-10-08T18:32:15.2924120Z Updating files:  38% (1424/3745)
+2026-10-08T18:32:15.2951773Z Updating files:  39% (1461/3745)
+2026-10-08T18:32:15.3078866Z Updating files:  40% (1498/3745)
+2026-10-08T18:32:15.3112892Z Updating files:  41% (1536/3745)
+2026-10-08T18:32:15.3139151Z Updating files:  42% (1573/3745)
+2026-10-08T18:32:15.3167173Z Updating files:  43% (1611/3745)
+2026-10-08T18:32:15.3199216Z Updating files:  44% (1648/3745)
+2026-10-08T18:32:15.3230135Z Updating files:  45% (1686/3745)
+2026-10-08T18:32:15.3287053Z Updating files:  46% (1723/3745)
+2026-10-08T18:32:15.3341878Z Updating files:  47% (1761/3745)
+2026-10-08T18:32:15.3386853Z Updating files:  48% (1798/3745)
+2026-10-08T18:32:15.3409744Z Updating files:  49% (1836/3745)
+2026-10-08T18:32:15.3437254Z Updating files:  50% (1873/3745)
+2026-10-08T18:32:15.3462686Z Updating files:  51% (1910/3745)
+2026-10-08T18:32:15.3484001Z Updating files:  52% (1948/3745)
+2026-10-08T18:32:15.3508902Z Updating files:  53% (1985/3745)
+2026-10-08T18:32:15.3541947Z Updating files:  54% (2023/3745)
+2026-10-08T18:32:15.3621744Z Updating files:  55% (2060/3745)
+2026-10-08T18:32:15.3859221Z Updating files:  56% (2098/3745)
+2026-10-08T18:32:15.3900385Z Updating files:  57% (2135/3745)
+2026-10-08T18:32:15.3921523Z Updating files:  58% (2173/3745)
+2026-10-08T18:32:15.3944575Z Updating files:  59% (2210/3745)
+2026-10-08T18:32:15.4003284Z Updating files:  60% (2247/3745)
+2026-10-08T18:32:15.4109370Z Updating files:  61% (2285/3745)
+2026-10-08T18:32:15.4230669Z Updating files:  62% (2322/3745)
+2026-10-08T18:32:15.4547132Z Updating files:  63% (2360/3745)
+2026-10-08T18:32:15.4577014Z Updating files:  64% (2397/3745)
+2026-10-08T18:32:15.4599030Z Updating files:  65% (2435/3745)
+2026-10-08T18:32:15.4627433Z Updating files:  66% (2472/3745)
+2026-10-08T18:32:15.4663336Z Updating files:  67% (2510/3745)
+2026-10-08T18:32:15.4691911Z Updating files:  68% (2547/3745)
+2026-10-08T18:32:15.4714215Z Updating files:  69% (2585/3745)
+2026-10-08T18:32:15.4774084Z Updating files:  70% (2622/3745)
+2026-10-08T18:32:15.4834631Z Updating files:  71% (2659/3745)
+2026-10-08T18:32:15.4862591Z Updating files:  72% (2697/3745)
+2026-10-08T18:32:15.4880000Z Updating files:  73% (2734/3745)
+2026-10-08T18:32:15.4907132Z Updating files:  74% (2772/3745)
+2026-10-08T18:32:15.4944350Z Updating files:  75% (2809/3745)
+2026-10-08T18:32:15.4973194Z Updating files:  76% (2847/3745)
+2026-10-08T18:32:15.4995717Z Updating files:  77% (2884/3745)
+2026-10-08T18:32:15.5018025Z Updating files:  78% (2922/3745)
+2026-10-08T18:32:15.5038344Z Updating files:  79% (2959/3745)
+2026-10-08T18:32:15.5074159Z Updating files:  80% (2996/3745)
+2026-10-08T18:32:15.5228764Z Updating files:  81% (3034/3745)
+2026-10-08T18:32:15.5433273Z Updating files:  82% (3071/3745)
+2026-10-08T18:32:15.5574072Z Updating files:  83% (3109/3745)
+2026-10-08T18:32:15.5642309Z Updating files:  84% (3146/3745)
+2026-10-08T18:32:15.5660391Z Updating files:  85% (3184/3745)
+2026-10-08T18:32:15.5677096Z Updating files:  86% (3221/3745)
+2026-10-08T18:32:15.5694307Z Updating files:  87% (3259/3745)
+2026-10-08T18:32:15.5712071Z Updating files:  88% (3296/3745)
+2026-10-08T18:32:15.5740677Z Updating files:  89% (3334/3745)
+2026-10-08T18:32:15.5766735Z Updating files:  90% (3371/3745)
+2026-10-08T18:32:15.5792281Z Updating files:  91% (3408/3745)
+2026-10-08T18:32:15.5827849Z Updating files:  92% (3446/3745)
+2026-10-08T18:32:15.5858246Z Updating files:  93% (3483/3745)
+2026-10-08T18:32:15.5886980Z Updating files:  94% (3521/3745)
+2026-10-08T18:32:15.5911139Z Updating files:  95% (3558/3745)
+2026-10-08T18:32:15.5935761Z Updating files:  96% (3596/3745)
+2026-10-08T18:32:15.5961647Z Updating files:  97% (3633/3745)
+2026-10-08T18:32:15.5986302Z Updating files:  98% (3671/3745)
+2026-10-08T18:32:15.6010911Z Updating files:  99% (3708/3745)
+2026-10-08T18:32:15.6011822Z Updating files: 100% (3745/3745)
+2026-10-08T18:32:15.6012331Z Updating files: 100% (3745/3745), done.
+2026-10-08T18:32:15.6065089Z Switched to a new branch 'main'
+2026-10-08T18:32:15.6072305Z branch 'main' set up to track 'origin/main'.
+2026-10-08T18:32:15.6125838Z ##[endgroup]
+2026-10-08T18:32:15.6176482Z [command]/usr/bin/git log -1 --format=%H
+2026-10-08T18:32:15.6203311Z 327621e2c6f262f48edac8828c7dd4b800913bf2
+2026-10-08T18:32:15.6399617Z ##[group]Run actions/setup-python@v6
+2026-10-08T18:32:15.6399928Z with:
+2026-10-08T18:32:15.6400139Z   python-version: 3.11
+2026-10-08T18:32:15.6400368Z   cache: pip
+2026-10-08T18:32:15.6400576Z   check-latest: false
+2026-10-08T18:32:15.6403655Z   token: ***
+2026-10-08T18:32:15.6403895Z   update-environment: true
+2026-10-08T18:32:15.6404155Z   allow-prereleases: false
+2026-10-08T18:32:15.6404402Z   freethreaded: false
+2026-10-08T18:32:15.6404620Z ##[endgroup]
+2026-10-08T18:32:15.7673973Z ##[group]Installed versions
+2026-10-08T18:32:15.7771083Z Successfully set up CPython (3.11.17)
+2026-10-08T18:32:15.7772183Z ##[endgroup]
+2026-10-08T18:32:16.1893953Z [command]/opt/hostedtoolcache/Python/3.11.17/x64/bin/pip cache dir
+2026-10-08T18:32:16.4747952Z /home/runner/.cache/pip
+2026-10-08T18:32:16.6235270Z Cache hit for: setup-python-Linux-x64-24.04-Ubuntu-python-3.11.17-pip-751f046ea75e643696f19a49373db4a45544f32ffe40eaf60c388095e2e4becf
+2026-10-08T18:32:17.5736963Z Received 86780056 of 86780056 (100.0%), 100.8 MBs/sec
+2026-10-08T18:32:17.5738356Z Cache Size: ~83 MB (86780056 B)
+2026-10-08T18:32:17.5804729Z [command]/usr/bin/tar -xf /home/runner/work/_temp/b698ecf4-107b-48ee-acb6-4d25834765d8/cache.tzst -P -C /home/runner/work/VRP-chile/VRP-chile --use-compress-program unzstd
+2026-10-08T18:32:17.7152025Z Cache restored successfully
+2026-10-08T18:32:17.7196256Z Cache restored from key: setup-python-Linux-x64-24.04-Ubuntu-python-3.11.17-pip-751f046ea75e643696f19a49373db4a45544f32ffe40eaf60c388095e2e4becf
+2026-10-08T18:32:17.7360059Z ##[group]Run pip install --upgrade pip
+2026-10-08T18:32:17.7360438Z [36;1mpip install --upgrade pip[0m
+2026-10-08T18:32:17.7360754Z [36;1msudo apt-get install -y libhdf4-dev[0m
+2026-10-08T18:32:17.7361077Z [36;1mpip install pyhdf[0m
+2026-10-08T18:32:17.7362189Z [36;1mpip install earthaccess numpy h5py scipy pyyaml[0m
+2026-10-08T18:32:17.7430837Z shell: /usr/bin/bash -e {0}
+2026-10-08T18:32:17.7431113Z env:
+2026-10-08T18:32:17.7431709Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:32:17.7432223Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+2026-10-08T18:32:17.7432687Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:32:17.7433081Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:32:17.7433485Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:32:17.7433886Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+2026-10-08T18:32:17.7434275Z ##[endgroup]
+2026-10-08T18:32:18.6123310Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages (26.2.1)
+2026-10-08T18:32:19.7671921Z Reading package lists...
+2026-10-08T18:32:19.9816779Z Building dependency tree...
+2026-10-08T18:32:19.9926015Z Reading state information...
+2026-10-08T18:32:20.1595329Z The following additional packages will be installed:
+2026-10-08T18:32:20.1599937Z   libhdf4-0 libjpeg-dev libjpeg-turbo8-dev libjpeg8-dev
+2026-10-08T18:32:20.1605069Z Suggested packages:
+2026-10-08T18:32:20.1605576Z   libhdf4-doc hdf4-tools
+2026-10-08T18:32:20.1970151Z The following NEW packages will be installed:
+2026-10-08T18:32:20.1975491Z   libhdf4-0 libhdf4-dev libjpeg-dev libjpeg-turbo8-dev libjpeg8-dev
+2026-10-08T18:32:20.2316557Z 0 upgraded, 5 newly installed, 0 to remove and 6 not upgraded.
+2026-10-08T18:32:20.2317166Z Need to get 1060 kB of archives.
+2026-10-08T18:32:20.2317551Z After this operation, 4236 kB of additional disk space will be used.
+2026-10-08T18:32:20.2318008Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+2026-10-08T18:32:20.2931591Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 libhdf4-0 amd64 4.2.16-4build1 [324 kB]
+2026-10-08T18:32:20.3260807Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libjpeg-turbo8-dev amd64 2.1.5-2ubuntu2 [295 kB]
+2026-10-08T18:32:20.3593845Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libjpeg8-dev amd64 8c-2ubuntu11 [1484 B]
+2026-10-08T18:32:20.3887088Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 libjpeg-dev amd64 8c-2ubuntu11 [1482 B]
+2026-10-08T18:32:20.4181427Z Get:6 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 libhdf4-dev amd64 4.2.16-4build1 [438 kB]
+2026-10-08T18:32:20.6873148Z Fetched 1060 kB in 0s (4826 kB/s)
+2026-10-08T18:32:20.7264940Z Selecting previously unselected package libhdf4-0:amd64.
+2026-10-08T18:32:20.7584410Z (Reading database ... 
+2026-10-08T18:32:20.7584908Z (Reading database ... 5%
+2026-10-08T18:32:20.7585252Z (Reading database ... 10%
+2026-10-08T18:32:20.7585566Z (Reading database ... 15%
+2026-10-08T18:32:20.7585855Z (Reading database ... 20%
+2026-10-08T18:32:20.7586135Z (Reading database ... 25%
+2026-10-08T18:32:20.7586427Z (Reading database ... 30%
+2026-10-08T18:32:20.7586722Z (Reading database ... 35%
+2026-10-08T18:32:20.7587007Z (Reading database ... 40%
+2026-10-08T18:32:20.7587287Z (Reading database ... 45%
+2026-10-08T18:32:20.7587570Z (Reading database ... 50%
+2026-10-08T18:32:20.8007060Z (Reading database ... 55%
+2026-10-08T18:32:21.1225316Z (Reading database ... 60%
+2026-10-08T18:32:21.3890712Z (Reading database ... 65%
+2026-10-08T18:32:21.6523102Z (Reading database ... 70%
+2026-10-08T18:32:22.0041312Z (Reading database ... 75%
+2026-10-08T18:32:22.3496827Z (Reading database ... 80%
+2026-10-08T18:32:22.9271917Z (Reading database ... 85%
+2026-10-08T18:32:23.4865568Z (Reading database ... 90%
+2026-10-08T18:32:24.0698795Z (Reading database ... 95%
+2026-10-08T18:32:24.0699959Z (Reading database ... 100%
+2026-10-08T18:32:24.0700828Z (Reading database ... 203191 files and directories currently installed.)
+2026-10-08T18:32:24.0744847Z Preparing to unpack .../libhdf4-0_4.2.16-4build1_amd64.deb ...
+2026-10-08T18:32:24.0782967Z Unpacking libhdf4-0:amd64 (4.2.16-4build1) ...
+2026-10-08T18:32:24.1044941Z Selecting previously unselected package libjpeg-turbo8-dev:amd64.
+2026-10-08T18:32:24.1173265Z Preparing to unpack .../libjpeg-turbo8-dev_2.1.5-2ubuntu2_amd64.deb ...
+2026-10-08T18:32:24.1183566Z Unpacking libjpeg-turbo8-dev:amd64 (2.1.5-2ubuntu2) ...
+2026-10-08T18:32:24.1450684Z Selecting previously unselected package libjpeg8-dev:amd64.
+2026-10-08T18:32:24.1578239Z Preparing to unpack .../libjpeg8-dev_8c-2ubuntu11_amd64.deb ...
+2026-10-08T18:32:24.1587476Z Unpacking libjpeg8-dev:amd64 (8c-2ubuntu11) ...
+2026-10-08T18:32:24.1779569Z Selecting previously unselected package libjpeg-dev:amd64.
+2026-10-08T18:32:24.1904873Z Preparing to unpack .../libjpeg-dev_8c-2ubuntu11_amd64.deb ...
+2026-10-08T18:32:24.1913553Z Unpacking libjpeg-dev:amd64 (8c-2ubuntu11) ...
+2026-10-08T18:32:24.2102534Z Selecting previously unselected package libhdf4-dev.
+2026-10-08T18:32:24.2228873Z Preparing to unpack .../libhdf4-dev_4.2.16-4build1_amd64.deb ...
+2026-10-08T18:32:24.2237118Z Unpacking libhdf4-dev (4.2.16-4build1) ...
+2026-10-08T18:32:24.2782177Z Setting up libjpeg-turbo8-dev:amd64 (2.1.5-2ubuntu2) ...
+2026-10-08T18:32:24.2807047Z Setting up libhdf4-0:amd64 (4.2.16-4build1) ...
+2026-10-08T18:32:24.2829177Z Setting up libhdf4-dev (4.2.16-4build1) ...
+2026-10-08T18:32:24.2850827Z Setting up libjpeg8-dev:amd64 (8c-2ubuntu11) ...
+2026-10-08T18:32:24.2871422Z Setting up libjpeg-dev:amd64 (8c-2ubuntu11) ...
+2026-10-08T18:32:24.2895441Z Processing triggers for libc-bin (2.39-0ubuntu8.9) ...
+2026-10-08T18:32:24.3435949Z Processing triggers for man-db (2.12.0-4build2) ...
+2026-10-08T18:32:24.3459239Z Not building database; man-db/auto-update is not 'true'.
+2026-10-08T18:32:25.6238648Z 
+2026-10-08T18:32:25.6239349Z Running kernel seems to be up-to-date.
+2026-10-08T18:32:25.6239688Z 
+2026-10-08T18:32:25.6239870Z No services need to be restarted.
+2026-10-08T18:32:25.6240103Z 
+2026-10-08T18:32:25.6240240Z No containers need to be restarted.
+2026-10-08T18:32:25.6240480Z 
+2026-10-08T18:32:25.6240647Z No user sessions are running outdated binaries.
+2026-10-08T18:32:25.6240939Z 
+2026-10-08T18:32:25.6241216Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+2026-10-08T18:32:27.4438380Z Collecting pyhdf
+2026-10-08T18:32:27.4455949Z   Using cached pyhdf-0.11.7-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (2.8 kB)
+2026-10-08T18:32:27.6358528Z Collecting numpy (from pyhdf)
+2026-10-08T18:32:27.6376789Z   Using cached numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
+2026-10-08T18:32:27.6414482Z Using cached pyhdf-0.11.7-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (3.3 MB)
+2026-10-08T18:32:27.6443342Z Using cached numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.9 MB)
+2026-10-08T18:32:27.7026761Z Installing collected packages: numpy, pyhdf
+2026-10-08T18:32:30.0134619Z 
+2026-10-08T18:32:30.0144013Z Successfully installed numpy-2.4.6 pyhdf-0.11.7
+2026-10-08T18:32:30.5552339Z Collecting earthaccess
+2026-10-08T18:32:30.5569950Z   Using cached earthaccess-0.17.0-py3-none-any.whl.metadata (6.7 kB)
+2026-10-08T18:32:30.5604554Z Requirement already satisfied: numpy in /opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages (2.4.6)
+2026-10-08T18:32:30.5993165Z Collecting h5py
+2026-10-08T18:32:30.6013796Z   Using cached h5py-3.16.0-cp311-cp311-manylinux_2_28_x86_64.whl.metadata (3.0 kB)
+2026-10-08T18:32:30.7277264Z Collecting scipy
+2026-10-08T18:32:30.7294790Z   Using cached scipy-1.17.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+2026-10-08T18:32:30.7761596Z Collecting pyyaml
+2026-10-08T18:32:30.7778886Z   Using cached pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+2026-10-08T18:32:30.7953406Z Collecting fsspec>=2025.2 (from earthaccess)
+2026-10-08T18:32:30.7967863Z   Using cached fsspec-2026.9.0-py3-none-any.whl.metadata (10 kB)
+2026-10-08T18:32:30.8280188Z Collecting importlib-resources>=6.3.2 (from earthaccess)
+2026-10-08T18:32:30.8295498Z   Using cached importlib_resources-7.1.0-py3-none-any.whl.metadata (4.0 kB)
+2026-10-08T18:32:30.8443274Z Collecting multimethod>=1.8 (from earthaccess)
+2026-10-08T18:32:30.8457611Z   Using cached multimethod-2.1-py3-none-any.whl.metadata (8.3 kB)
+2026-10-08T18:32:30.8721026Z Collecting pqdm>=0.1 (from earthaccess)
+2026-10-08T18:32:30.8736569Z   Using cached pqdm-0.2.0-py2.py3-none-any.whl.metadata (3.2 kB)
+2026-10-08T18:32:30.9034057Z Collecting python-cmr>=0.10.0 (from earthaccess)
+2026-10-08T18:32:30.9058317Z   Using cached python_cmr-0.13.0-py3-none-any.whl.metadata (10 kB)
+2026-10-08T18:32:30.9281137Z Collecting requests>=2.26 (from earthaccess)
+2026-10-08T18:32:30.9297019Z   Using cached requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+2026-10-08T18:32:30.9471006Z Collecting s3fs>=2025.2 (from earthaccess)
+2026-10-08T18:32:30.9486436Z   Using cached s3fs-2026.9.0-py3-none-any.whl.metadata (1.2 kB)
+2026-10-08T18:32:30.9627779Z Collecting tenacity>=8.0 (from earthaccess)
+2026-10-08T18:32:30.9643107Z   Using cached tenacity-9.2.1-py3-none-any.whl.metadata (1.4 kB)
+2026-10-08T18:32:30.9943992Z Collecting tinynetrc>=1.3.1 (from earthaccess)
+2026-10-08T18:32:30.9959228Z   Using cached tinynetrc-1.3.1-py2.py3-none-any.whl.metadata (2.9 kB)
+2026-10-08T18:32:31.0138220Z Collecting typing-extensions>=4.10.0 (from earthaccess)
+2026-10-08T18:32:31.0153588Z   Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+2026-10-08T18:32:31.0461953Z Collecting bounded-pool-executor (from pqdm>=0.1->earthaccess)
+2026-10-08T18:32:31.0477044Z   Using cached bounded_pool_executor-0.0.3-py3-none-any.whl.metadata (2.7 kB)
+2026-10-08T18:32:31.0760223Z Collecting tqdm (from pqdm>=0.1->earthaccess)
+2026-10-08T18:32:31.0776579Z   Using cached tqdm-4.70.1-py3-none-any.whl.metadata (57 kB)
+2026-10-08T18:32:31.0942638Z Collecting python-dateutil<3.0.0,>=2.8.2 (from python-cmr>=0.10.0->earthaccess)
+2026-10-08T18:32:31.0957718Z   Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-10-08T18:32:31.1122828Z Collecting six>=1.5 (from python-dateutil<3.0.0,>=2.8.2->python-cmr>=0.10.0->earthaccess)
+2026-10-08T18:32:31.1137552Z   Using cached six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-10-08T18:32:31.2282530Z Collecting charset_normalizer<4,>=2 (from requests>=2.26->earthaccess)
+2026-10-08T18:32:31.2300066Z   Using cached charset_normalizer-3.5.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (46 kB)
+2026-10-08T18:32:31.2462146Z Collecting idna<4,>=2.5 (from requests>=2.26->earthaccess)
+2026-10-08T18:32:31.2477698Z   Using cached idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+2026-10-08T18:32:31.2676565Z Collecting urllib3<3,>=1.26 (from requests>=2.26->earthaccess)
+2026-10-08T18:32:31.2691370Z   Using cached urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+2026-10-08T18:32:31.2856972Z Collecting certifi>=2023.5.7 (from requests>=2.26->earthaccess)
+2026-10-08T18:32:31.2872923Z   Using cached certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+2026-10-08T18:32:31.3098708Z Collecting aiobotocore<4.0.0,>=2.19.0 (from s3fs>=2025.2->earthaccess)
+2026-10-08T18:32:31.3114185Z   Using cached aiobotocore-3.9.2-py3-none-any.whl.metadata (32 kB)
+2026-10-08T18:32:31.8122600Z Collecting aiohttp!=4.0.0a0,!=4.0.0a1,>=3.9.0 (from s3fs>=2025.2->earthaccess)
+2026-10-08T18:32:31.8140994Z   Using cached aiohttp-3.14.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.3 kB)
+2026-10-08T18:32:31.8294684Z Collecting aioitertools<1.0.0,>=0.5.1 (from aiobotocore<4.0.0,>=2.19.0->s3fs>=2025.2->earthaccess)
+2026-10-08T18:32:31.8316087Z   Using cached aioitertools-0.13.0-py3-none-any.whl.metadata (3.3 kB)
+2026-10-08T18:32:32.0229865Z Collecting botocore<1.43.107,>=1.43.101 (from aiobotocore<4.0.0,>=2.19.0->s3fs>=2025.2->earthaccess)
+2026-10-08T18:32:32.0245905Z   Using cached botocore-1.43.106-py3-none-any.whl.metadata (5.6 kB)
+2026-10-08T18:32:32.0367838Z Collecting jmespath<2.0.0,>=0.7.1 (from aiobotocore<4.0.0,>=2.19.0->s3fs>=2025.2->earthaccess)
+2026-10-08T18:32:32.0382020Z   Using cached jmespath-1.1.0-py3-none-any.whl.metadata (7.6 kB)
+2026-10-08T18:32:32.2871501Z Collecting multidict<7.0.0,>=6.0.0 (from aiobotocore<4.0.0,>=2.19.0->s3fs>=2025.2->earthaccess)
+2026-10-08T18:32:32.2888139Z   Using cached multidict-6.9.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.3 kB)
+2026-10-08T18:32:32.6257832Z Collecting wrapt<3.0.0,>=1.10.10 (from aiobotocore<4.0.0,>=2.19.0->s3fs>=2025.2->earthaccess)
+2026-10-08T18:32:32.6274706Z   Using cached wrapt-2.5.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (7.6 kB)
+2026-10-08T18:32:32.6420556Z Collecting aiohappyeyeballs>=2.5.0 (from aiohttp!=4.0.0a0,!=4.0.0a1,>=3.9.0->s3fs>=2025.2->earthaccess)
+2026-10-08T18:32:32.6435568Z   Using cached aiohappyeyeballs-2.7.1-py3-none-any.whl.metadata (5.9 kB)
+2026-10-08T18:32:32.6540984Z Collecting aiosignal>=1.4.0 (from aiohttp!=4.0.0a0,!=4.0.0a1,>=3.9.0->s3fs>=2025.2->earthaccess)
+2026-10-08T18:32:32.6556186Z   Using cached aiosignal-1.4.0-py3-none-any.whl.metadata (3.7 kB)
+2026-10-08T18:32:32.6695281Z Collecting attrs>=17.3.0 (from aiohttp!=4.0.0a0,!=4.0.0a1,>=3.9.0->s3fs>=2025.2->earthaccess)
+2026-10-08T18:32:32.6711269Z   Using cached attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+2026-10-08T18:32:32.7279917Z Collecting frozenlist>=1.1.1 (from aiohttp!=4.0.0a0,!=4.0.0a1,>=3.9.0->s3fs>=2025.2->earthaccess)
+2026-10-08T18:32:32.7296121Z   Using cached frozenlist-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (20 kB)
+2026-10-08T18:32:32.7948958Z Collecting propcache>=0.2.0 (from aiohttp!=4.0.0a0,!=4.0.0a1,>=3.9.0->s3fs>=2025.2->earthaccess)
+2026-10-08T18:32:32.7965654Z   Using cached propcache-0.5.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (25 kB)
+2026-10-08T18:32:33.0201796Z Collecting yarl<2.0,>=1.25.1 (from aiohttp!=4.0.0a0,!=4.0.0a1,>=3.9.0->s3fs>=2025.2->earthaccess)
+2026-10-08T18:32:33.0218782Z   Using cached yarl-1.25.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (111 kB)
+2026-10-08T18:32:33.0472488Z Using cached earthaccess-0.17.0-py3-none-any.whl (76 kB)
+2026-10-08T18:32:33.0487005Z Using cached h5py-3.16.0-cp311-cp311-manylinux_2_28_x86_64.whl (5.0 MB)
+2026-10-08T18:32:33.0520443Z Using cached scipy-1.17.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (35.3 MB)
+2026-10-08T18:32:33.0663852Z Using cached pyyaml-6.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (806 kB)
+2026-10-08T18:32:33.0680154Z Using cached fsspec-2026.9.0-py3-none-any.whl (221 kB)
+2026-10-08T18:32:33.0695826Z Using cached importlib_resources-7.1.0-py3-none-any.whl (37 kB)
+2026-10-08T18:32:33.0709987Z Using cached multimethod-2.1-py3-none-any.whl (9.5 kB)
+2026-10-08T18:32:33.0724421Z Using cached pqdm-0.2.0-py2.py3-none-any.whl (6.8 kB)
+2026-10-08T18:32:33.0738178Z Using cached python_cmr-0.13.0-py3-none-any.whl (14 kB)
+2026-10-08T18:32:33.0752688Z Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-10-08T18:32:33.0767068Z Using cached requests-2.34.2-py3-none-any.whl (73 kB)
+2026-10-08T18:32:33.0782078Z Using cached charset_normalizer-3.5.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (269 kB)
+2026-10-08T18:32:33.0796181Z Using cached idna-3.20-py3-none-any.whl (69 kB)
+2026-10-08T18:32:33.0810048Z Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+2026-10-08T18:32:33.0824351Z Using cached urllib3-2.8.0-py3-none-any.whl (135 kB)
+2026-10-08T18:32:33.0838891Z Using cached certifi-2026.7.22-py3-none-any.whl (136 kB)
+2026-10-08T18:32:33.0853413Z Using cached s3fs-2026.9.0-py3-none-any.whl (33 kB)
+2026-10-08T18:32:33.0867124Z Using cached aiobotocore-3.9.2-py3-none-any.whl (102 kB)
+2026-10-08T18:32:33.0881851Z Using cached aiohttp-3.14.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.9 MB)
+2026-10-08T18:32:33.0902446Z Using cached aioitertools-0.13.0-py3-none-any.whl (24 kB)
+2026-10-08T18:32:33.0916345Z Using cached botocore-1.43.106-py3-none-any.whl (16.0 MB)
+2026-10-08T18:32:33.0987869Z Using cached jmespath-1.1.0-py3-none-any.whl (20 kB)
+2026-10-08T18:32:33.1002024Z Using cached multidict-6.9.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (320 kB)
+2026-10-08T18:32:33.1017010Z Using cached wrapt-2.5.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (239 kB)
+2026-10-08T18:32:33.1031887Z Using cached yarl-1.25.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (117 kB)
+2026-10-08T18:32:33.1046334Z Using cached aiohappyeyeballs-2.7.1-py3-none-any.whl (15 kB)
+2026-10-08T18:32:33.1060108Z Using cached aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+2026-10-08T18:32:33.1074069Z Using cached attrs-26.1.0-py3-none-any.whl (67 kB)
+2026-10-08T18:32:33.1088621Z Using cached frozenlist-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (231 kB)
+2026-10-08T18:32:33.1103533Z Using cached propcache-0.5.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (235 kB)
+2026-10-08T18:32:33.1117768Z Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-10-08T18:32:33.1137972Z Using cached tenacity-9.2.1-py3-none-any.whl (32 kB)
+2026-10-08T18:32:33.1146916Z Using cached tinynetrc-1.3.1-py2.py3-none-any.whl (3.9 kB)
+2026-10-08T18:32:33.1160802Z Using cached bounded_pool_executor-0.0.3-py3-none-any.whl (3.4 kB)
+2026-10-08T18:32:33.1174759Z Using cached tqdm-4.70.1-py3-none-any.whl (80 kB)
+2026-10-08T18:32:33.3816733Z Installing collected packages: tinynetrc, bounded-pool-executor, wrapt, urllib3, typing-extensions, tqdm, tenacity, six, scipy, pyyaml, propcache, multimethod, multidict, jmespath, importlib-resources, idna, h5py, fsspec, frozenlist, charset_normalizer, certifi, attrs, aioitertools, aiohappyeyeballs, yarl, requests, python-dateutil, pqdm, aiosignal, python-cmr, botocore, aiohttp, aiobotocore, s3fs, earthaccess
+2026-10-08T18:32:38.8319630Z 
+2026-10-08T18:32:38.8342769Z Successfully installed aiobotocore-3.9.2 aiohappyeyeballs-2.7.1 aiohttp-3.14.4 aioitertools-0.13.0 aiosignal-1.4.0 attrs-26.1.0 botocore-1.43.106 bounded-pool-executor-0.0.3 certifi-2026.7.22 charset_normalizer-3.5.2 earthaccess-0.17.0 frozenlist-1.8.0 fsspec-2026.9.0 h5py-3.16.0 idna-3.20 importlib-resources-7.1.0 jmespath-1.1.0 multidict-6.9.1 multimethod-2.1 pqdm-0.2.0 propcache-0.5.4 python-cmr-0.13.0 python-dateutil-2.9.0.post0 pyyaml-6.0.3 requests-2.34.2 s3fs-2026.9.0 scipy-1.17.1 six-1.17.0 tenacity-9.2.1 tinynetrc-1.3.1 tqdm-4.70.1 typing-extensions-4.16.0 urllib3-2.8.0 wrapt-2.5.0 yarl-1.25.1
+2026-10-08T18:32:38.9936654Z ##[group]Run set -o pipefail
+2026-10-08T18:32:38.9937015Z [36;1mset -o pipefail[0m
+2026-10-08T18:32:38.9937440Z [36;1m# S131: los inputs del dispatch entran por env (no interpolados en el shell)[0m
+2026-10-08T18:32:38.9937877Z [36;1mARGS=()[0m
+2026-10-08T18:32:38.9938205Z [36;1mif [ -n "$VRP_DATE" ]; then ARGS+=(--date "$VRP_DATE"); fi[0m
+2026-10-08T18:32:38.9938652Z [36;1mif [ -n "$VRP_START" ]; then ARGS+=(--start "$VRP_START"); fi[0m
+2026-10-08T18:32:38.9939085Z [36;1mif [ -n "$VRP_END" ]; then ARGS+=(--end "$VRP_END"); fi[0m
+2026-10-08T18:32:38.9939512Z [36;1mif [ "$VRP_OVERWRITE" = "true" ]; then ARGS+=(--overwrite); fi[0m
+2026-10-08T18:32:38.9939985Z [36;1mpython scripts/run_pipeline.py --profile mirova_equivalent \[0m
+2026-10-08T18:32:38.9940388Z [36;1m  --volcano Copahue \[0m
+2026-10-08T18:32:38.9940688Z [36;1m  "${ARGS[@]}" 2>&1 | tee -a pipeline.log[0m
+2026-10-08T18:32:39.0006130Z shell: /usr/bin/bash -e {0}
+2026-10-08T18:32:39.0006402Z env:
+2026-10-08T18:32:39.0006726Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:32:39.0007206Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+2026-10-08T18:32:39.0007696Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:32:39.0008121Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:32:39.0008704Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:32:39.0009135Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+2026-10-08T18:32:39.0013858Z   EARTHDATA_TOKEN: ***
+2026-10-08T18:32:39.0014146Z   EARTHDATA_USERNAME: ***
+2026-10-08T18:32:39.0014425Z   EARTHDATA_PASSWORD: ***
+2026-10-08T18:32:39.0014666Z   VRP_DATE: 
+2026-10-08T18:32:39.0014873Z   VRP_START: 
+2026-10-08T18:32:39.0015070Z   VRP_END: 
+2026-10-08T18:32:39.0015285Z   VRP_OVERWRITE: false
+2026-10-08T18:32:39.0015510Z ##[endgroup]
+2026-10-08T18:32:40.0927928Z [VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+2026-10-08T18:32:40.1886472Z === [VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent ===
+2026-10-08T18:32:40.1888095Z Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+2026-10-08T18:32:40.1888661Z 
+2026-10-08T18:32:40.1888825Z >>> Copahue | 2026-10-01
+2026-10-08T18:32:40.1889340Z [diag 18:32:40Z] AUTH_START volcano=Copahue date=2026-10-01
+2026-10-08T18:32:40.1926838Z [diag 18:32:40Z] AUTH_OK
+2026-10-08T18:32:40.1927331Z [diag 18:32:40Z] SEARCH_START MODIS_TERRA
+2026-10-08T18:32:40.5373496Z /opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+2026-10-08T18:32:40.5374833Z   self["size"] = self.size()
+2026-10-08T18:32:40.5382447Z [diag 18:32:40Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+2026-10-08T18:32:41.1869274Z   MODIS_TERRA: kept 1 of 2 granules (night filter)
+2026-10-08T18:32:41.1870015Z [diag 18:32:41Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10060410655,LAADS:10060029375]
+2026-10-08T18:32:41.1877310Z /opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+2026-10-08T18:32:41.1878818Z   total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+2026-10-08T18:32:45.0715095Z [diag 18:32:45Z] DOWNLOAD_DONE attempt=0 elapsed=3.9s n_files=2
+2026-10-08T18:32:45.0732401Z [diag 18:32:45Z] SEARCH_START MODIS_AQUA
+2026-10-08T18:32:45.3413100Z [diag 18:32:45Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+2026-10-08T18:32:45.5711921Z   MODIS_AQUA: kept 1 of 2 granules (night filter)
+2026-10-08T18:32:45.5713284Z [diag 18:32:45Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10061305211,LAADS:10061303427]
+2026-10-08T18:32:49.4752508Z [diag 18:32:49Z] DOWNLOAD_DONE attempt=0 elapsed=3.9s n_files=2
+2026-10-08T18:32:49.4769272Z [diag 18:32:49Z] SEARCH_START VIIRS_SNPP
+2026-10-08T18:32:49.7210364Z [diag 18:32:49Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+2026-10-08T18:32:49.9375361Z   VIIRS_SNPP: kept 1 of 3 granules (night filter)
+2026-10-08T18:32:49.9376356Z [diag 18:32:49Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10060450021,LAADS:10060446413]
+2026-10-08T18:32:54.6053375Z [diag 18:32:54Z] DOWNLOAD_DONE attempt=0 elapsed=4.7s n_files=2
+2026-10-08T18:32:54.6054215Z [diag 18:32:54Z] SEARCH_START VIIRS_NOAA20
+2026-10-08T18:32:54.8119434Z [diag 18:32:54Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+2026-10-08T18:32:55.1078461Z   VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+2026-10-08T18:32:55.1079490Z [diag 18:32:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10060278248,LAADS:10060274733]
+2026-10-08T18:32:59.9463775Z [diag 18:32:59Z] DOWNLOAD_DONE attempt=0 elapsed=4.8s n_files=2
+2026-10-08T18:32:59.9465328Z [diag 18:32:59Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10060343144,LAADS:10060336702]
+2026-10-08T18:33:04.5451115Z [diag 18:33:04Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+2026-10-08T18:33:04.5452095Z [diag 18:33:04Z] SEARCH_START VIIRS_NOAA21
+2026-10-08T18:33:04.7760642Z [diag 18:33:04Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+2026-10-08T18:33:05.0087870Z   VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+2026-10-08T18:33:05.0088856Z [diag 18:33:05Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10060259565,LAADS:10060256704]
+2026-10-08T18:33:09.4794029Z [diag 18:33:09Z] DOWNLOAD_DONE attempt=0 elapsed=4.5s n_files=2
+2026-10-08T18:33:09.4809826Z [diag 18:33:09Z] SEARCH_START VIIRS_SNPP_750
+2026-10-08T18:33:09.6980445Z [diag 18:33:09Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+2026-10-08T18:33:09.9003595Z   VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+2026-10-08T18:33:09.9004363Z [diag 18:33:09Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10060450025,LAADS:10060446416]
+2026-10-08T18:33:13.3347108Z [diag 18:33:13Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+2026-10-08T18:33:13.3362723Z [diag 18:33:13Z] SEARCH_START VIIRS_NOAA20_750
+2026-10-08T18:33:13.5510472Z [diag 18:33:13Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+2026-10-08T18:33:13.7870282Z   VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+2026-10-08T18:33:13.7871520Z [diag 18:33:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10060278252,LAADS:10060274734]
+2026-10-08T18:33:16.6790050Z [diag 18:33:16Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+2026-10-08T18:33:16.6791460Z [diag 18:33:16Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10060343156,LAADS:10060336703]
+2026-10-08T18:33:19.8646053Z [diag 18:33:19Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+2026-10-08T18:33:19.8646806Z [diag 18:33:19Z] SEARCH_START VIIRS_NOAA21_750
+2026-10-08T18:33:20.3280510Z [diag 18:33:20Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+2026-10-08T18:33:20.5655762Z   VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+2026-10-08T18:33:20.5656590Z [diag 18:33:20Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10060259569,LAADS:10060256708]
+2026-10-08T18:33:23.4376209Z [diag 18:33:23Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+2026-10-08T18:35:00.2480392Z   MODIS_TERRA | VRP=4.426 MW | T_bg=267.76 K | T_max=278.97 K | anomalous_px=121
+2026-10-08T18:35:00.2481145Z   STORE upgrade NRT->standard: 2026-10-01 08:35 MODIS_AQUA
+2026-10-08T18:35:00.2482368Z   MODIS_AQUA | VRP=5.0 MW | T_bg=268.77 K | T_max=277.88 K | anomalous_px=54
+2026-10-08T18:35:00.2483393Z   VIIRS_SNPP (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=278.28 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:35:00.2484427Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=275.29 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:35:00.2485452Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.031 MW | VRP_TIR=0.0 MW | T_max=276.39 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:35:00.2486220Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.049 MW | VRP_TIR=0.0 MW | T_max=278.8 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:35:00.2486931Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=267.7 K | T_max=274.46 K | anomalous_px=0
+2026-10-08T18:35:00.2487600Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=264.09 K | T_max=269.76 K | anomalous_px=0
+2026-10-08T18:35:00.2488283Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=266.31 K | T_max=272.23 K | anomalous_px=0
+2026-10-08T18:35:00.2488956Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=268.92 K | T_max=277.09 K | anomalous_px=0
+2026-10-08T18:35:00.2489628Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Copahue/20261001
+2026-10-08T18:35:00.2490022Z 
+2026-10-08T18:35:00.2490148Z >>> Copahue | 2026-10-02
+2026-10-08T18:35:00.2490520Z [diag 18:35:00Z] AUTH_START volcano=Copahue date=2026-10-02
+2026-10-08T18:35:00.2520828Z [diag 18:35:00Z] AUTH_OK
+2026-10-08T18:35:00.2521523Z [diag 18:35:00Z] SEARCH_START MODIS_TERRA
+2026-10-08T18:35:00.6688765Z [diag 18:35:00Z] SEARCH_DONE MODIS_TERRA n_l1b=1
+2026-10-08T18:35:00.6702363Z   MODIS_TERRA: kept 0 of 1 granules (night filter)
+2026-10-08T18:35:00.6703018Z [diag 18:35:00Z] SEARCH_START MODIS_AQUA
+2026-10-08T18:35:00.9889391Z [diag 18:35:00Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+2026-10-08T18:35:01.4994925Z   MODIS_AQUA: kept 1 of 2 granules (night filter)
+2026-10-08T18:35:01.4995601Z [diag 18:35:01Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10061566879,LAADS:10061417090]
+2026-10-08T18:35:04.6002179Z [diag 18:35:04Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+2026-10-08T18:35:04.6002894Z [diag 18:35:04Z] SEARCH_START VIIRS_SNPP
+2026-10-08T18:35:04.8709941Z [diag 18:35:04Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+2026-10-08T18:35:05.1320005Z   VIIRS_SNPP: kept 1 of 3 granules (night filter)
+2026-10-08T18:35:05.1320930Z [diag 18:35:05Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10061290616,LAADS:10061289725]
+2026-10-08T18:35:09.9000919Z [diag 18:35:09Z] DOWNLOAD_DONE attempt=0 elapsed=4.8s n_files=2
+2026-10-08T18:35:09.9002053Z [diag 18:35:09Z] SEARCH_START VIIRS_NOAA20
+2026-10-08T18:35:10.2507501Z [diag 18:35:10Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=2
+2026-10-08T18:35:10.5707613Z   VIIRS_NOAA20: kept 1 of 2 granules (night filter)
+2026-10-08T18:35:10.5708585Z [diag 18:35:10Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10061302773,LAADS:10061298950]
+2026-10-08T18:35:15.8984107Z [diag 18:35:15Z] DOWNLOAD_DONE attempt=0 elapsed=5.3s n_files=2
+2026-10-08T18:35:15.8984899Z [diag 18:35:15Z] SEARCH_START VIIRS_NOAA21
+2026-10-08T18:35:16.3117415Z [diag 18:35:16Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=4
+2026-10-08T18:35:16.5636689Z   VIIRS_NOAA21: kept 2 of 4 granules (night filter)
+2026-10-08T18:35:16.5637732Z [diag 18:35:16Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10061267643,LAADS:10061262469]
+2026-10-08T18:35:20.6547864Z [diag 18:35:20Z] DOWNLOAD_DONE attempt=0 elapsed=4.1s n_files=2
+2026-10-08T18:35:20.6548966Z [diag 18:35:20Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10061313037,LAADS:10061306871]
+2026-10-08T18:35:25.6405005Z [diag 18:35:25Z] DOWNLOAD_DONE attempt=0 elapsed=5.0s n_files=2
+2026-10-08T18:35:25.6405766Z [diag 18:35:25Z] SEARCH_START VIIRS_SNPP_750
+2026-10-08T18:35:25.9782830Z [diag 18:35:25Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+2026-10-08T18:35:26.2244272Z   VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+2026-10-08T18:35:26.2245272Z [diag 18:35:26Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10061290618,LAADS:10061289728]
+2026-10-08T18:35:29.4940907Z [diag 18:35:29Z] DOWNLOAD_DONE attempt=0 elapsed=3.3s n_files=2
+2026-10-08T18:35:29.4952483Z [diag 18:35:29Z] SEARCH_START VIIRS_NOAA20_750
+2026-10-08T18:35:29.7027979Z [diag 18:35:29Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=2
+2026-10-08T18:35:29.8972229Z   VIIRS_NOAA20_750: kept 1 of 2 granules (night filter)
+2026-10-08T18:35:29.8973461Z [diag 18:35:29Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10061302785,LAADS:10061298952]
+2026-10-08T18:35:32.9776300Z [diag 18:35:32Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+2026-10-08T18:35:32.9777160Z [diag 18:35:32Z] SEARCH_START VIIRS_NOAA21_750
+2026-10-08T18:35:33.3253774Z [diag 18:35:33Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=4
+2026-10-08T18:35:33.5784159Z   VIIRS_NOAA21_750: kept 2 of 4 granules (night filter)
+2026-10-08T18:35:33.5785216Z [diag 18:35:33Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10061267647,LAADS:10061262470]
+2026-10-08T18:35:42.3393177Z [diag 18:35:42Z] DOWNLOAD_DONE attempt=0 elapsed=8.8s n_files=2
+2026-10-08T18:35:42.3394498Z [diag 18:35:42Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10061313043,LAADS:10061306875]
+2026-10-08T18:35:45.4097827Z [diag 18:35:45Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+2026-10-08T18:37:31.4165157Z   STORE upgrade NRT->standard: 2026-10-02 07:35 MODIS_AQUA
+2026-10-08T18:37:31.4167620Z   MODIS_AQUA | VRP=5.0 MW | T_bg=252.45 K | T_max=273.94 K | anomalous_px=268
+2026-10-08T18:37:31.4168448Z   STORE upgrade NRT->standard: 2026-10-02 05:42 VIIRS_SNPP
+2026-10-08T18:37:31.4169153Z   VIIRS_SNPP (375m) | VRP_MIR=0.01 MW | VRP_TIR=0.0 MW | T_max=270.26 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:37:31.4169696Z   STORE upgrade NRT->standard: 2026-10-02 06:00 VIIRS_NOAA20
+2026-10-08T18:37:31.4170209Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.015 MW | VRP_TIR=0.0 MW | T_max=257.62 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:37:31.4171012Z   STORE upgrade NRT->standard: 2026-10-02 05:06 VIIRS_NOAA21
+2026-10-08T18:37:31.4172074Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.01 MW | VRP_TIR=0.0 MW | T_max=273.13 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:37:31.4172622Z   STORE upgrade NRT->standard: 2026-10-02 06:48 VIIRS_NOAA21
+2026-10-08T18:37:31.4173130Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.047 MW | VRP_TIR=0.0 MW | T_max=268.11 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:37:31.4173657Z   STORE upgrade NRT->standard: 2026-10-02 05:42 VIIRS_SNPP_750
+2026-10-08T18:37:31.4174141Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=227.37 K | T_max=238.22 K | anomalous_px=0
+2026-10-08T18:37:31.4174642Z   STORE upgrade NRT->standard: 2026-10-02 06:00 VIIRS_NOAA20_750
+2026-10-08T18:37:31.4175143Z   VIIRS_NOAA20_750 (750m) | VRP=1.037 MW | T_bg=225.97 K | T_max=256.28 K | anomalous_px=0
+2026-10-08T18:37:31.4175646Z   STORE upgrade NRT->standard: 2026-10-02 05:06 VIIRS_NOAA21_750
+2026-10-08T18:37:31.4176131Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=237.15 K | T_max=271.07 K | anomalous_px=0
+2026-10-08T18:37:31.4176623Z   STORE upgrade NRT->standard: 2026-10-02 06:48 VIIRS_NOAA21_750
+2026-10-08T18:37:31.4177101Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=224.93 K | T_max=265.77 K | anomalous_px=1
+2026-10-08T18:37:31.4177623Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Copahue/20261002
+2026-10-08T18:37:31.4177951Z 
+2026-10-08T18:37:31.4178061Z >>> Copahue | 2026-10-03
+2026-10-08T18:37:31.4178390Z [diag 18:37:31Z] AUTH_START volcano=Copahue date=2026-10-03
+2026-10-08T18:37:31.4237624Z [diag 18:37:31Z] AUTH_OK
+2026-10-08T18:37:31.4238174Z [diag 18:37:31Z] SEARCH_START MODIS_TERRA
+2026-10-08T18:37:31.7450399Z [diag 18:37:31Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+2026-10-08T18:37:32.6066013Z   MODIS_TERRA: kept 1 of 2 granules (night filter)
+2026-10-08T18:37:32.6067158Z [diag 18:37:32Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10061997954,LAADS:10061791338]
+2026-10-08T18:37:35.8419125Z [diag 18:37:35Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+2026-10-08T18:37:35.8419881Z [diag 18:37:35Z] SEARCH_START MODIS_AQUA
+2026-10-08T18:37:36.0560216Z [diag 18:37:36Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+2026-10-08T18:37:36.6458374Z   MODIS_AQUA: kept 1 of 3 granules (night filter)
+2026-10-08T18:37:36.6459354Z [diag 18:37:36Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10062130424,LAADS:10062097195]
+2026-10-08T18:37:40.1800161Z [diag 18:37:40Z] DOWNLOAD_DONE attempt=0 elapsed=3.5s n_files=2
+2026-10-08T18:37:40.1812669Z [diag 18:37:40Z] SEARCH_START VIIRS_SNPP
+2026-10-08T18:37:40.6192334Z [diag 18:37:40Z] SEARCH_DONE VIIRS_SNPP n_l1b=4
+2026-10-08T18:37:40.8352255Z   VIIRS_SNPP: kept 2 of 4 granules (night filter)
+2026-10-08T18:37:40.8353247Z [diag 18:37:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10061980899,LAADS:10061979972]
+2026-10-08T18:37:45.9983369Z [diag 18:37:45Z] DOWNLOAD_DONE attempt=0 elapsed=5.2s n_files=2
+2026-10-08T18:37:45.9984659Z [diag 18:37:45Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10062029966,LAADS:10062029458]
+2026-10-08T18:37:49.7429080Z [diag 18:37:49Z] DOWNLOAD_DONE attempt=0 elapsed=3.7s n_files=2
+2026-10-08T18:37:49.7432707Z [diag 18:37:49Z] SEARCH_START VIIRS_NOAA20
+2026-10-08T18:37:49.9435078Z [diag 18:37:49Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+2026-10-08T18:37:50.1477221Z   VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+2026-10-08T18:37:50.1477973Z [diag 18:37:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10061968249,LAADS:10061967648]
+2026-10-08T18:37:54.4195752Z [diag 18:37:54Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+2026-10-08T18:37:54.4196250Z [diag 18:37:54Z] SEARCH_START VIIRS_NOAA21
+2026-10-08T18:37:54.7520891Z [diag 18:37:54Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+2026-10-08T18:37:55.0278470Z   VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+2026-10-08T18:37:55.0279166Z [diag 18:37:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10061959019,LAADS:10061957769]
+2026-10-08T18:37:59.3687094Z [diag 18:37:59Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+2026-10-08T18:37:59.3688256Z [diag 18:37:59Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10061987053,LAADS:10061986785]
+2026-10-08T18:38:03.9895024Z [diag 18:38:03Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+2026-10-08T18:38:03.9895534Z [diag 18:38:03Z] SEARCH_START VIIRS_SNPP_750
+2026-10-08T18:38:04.2148684Z [diag 18:38:04Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=4
+2026-10-08T18:38:04.4509160Z   VIIRS_SNPP_750: kept 2 of 4 granules (night filter)
+2026-10-08T18:38:04.4510129Z [diag 18:38:04Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10061980903,LAADS:10061979974]
+2026-10-08T18:38:07.9788788Z [diag 18:38:07Z] DOWNLOAD_DONE attempt=0 elapsed=3.5s n_files=2
+2026-10-08T18:38:07.9790344Z [diag 18:38:07Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10062029976,LAADS:10062029460]
+2026-10-08T18:38:11.1339911Z [diag 18:38:11Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+2026-10-08T18:38:11.1342290Z [diag 18:38:11Z] SEARCH_START VIIRS_NOAA20_750
+2026-10-08T18:38:11.3624103Z [diag 18:38:11Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+2026-10-08T18:38:11.7347273Z   VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+2026-10-08T18:38:11.7348248Z [diag 18:38:11Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10061968253,LAADS:10061967650]
+2026-10-08T18:38:14.5325246Z [diag 18:38:14Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+2026-10-08T18:38:14.5332346Z [diag 18:38:14Z] SEARCH_START VIIRS_NOAA21_750
+2026-10-08T18:38:14.7505377Z [diag 18:38:14Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+2026-10-08T18:38:14.9967534Z   VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+2026-10-08T18:38:14.9968489Z [diag 18:38:14Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10061959025,LAADS:10061957774]
+2026-10-08T18:38:18.3550271Z [diag 18:38:18Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+2026-10-08T18:38:18.3551662Z [diag 18:38:18Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10061987063,LAADS:10061986786]
+2026-10-08T18:38:21.2675035Z [diag 18:38:21Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+2026-10-08T18:40:31.4943053Z   MODIS_TERRA | VRP=5.0 MW | T_bg=260.91 K | T_max=276.18 K | anomalous_px=119
+2026-10-08T18:40:31.4944006Z   MODIS_AQUA | VRP=3.663 MW | T_bg=263.27 K | T_max=277.88 K | anomalous_px=220
+2026-10-08T18:40:31.4945019Z   VIIRS_SNPP (375m) | VRP_MIR=0.023 MW | VRP_TIR=0.0 MW | T_max=275.49 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:40:31.4946057Z   VIIRS_SNPP (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=257.46 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:40:31.4947040Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.032 MW | VRP_TIR=0.0 MW | T_max=275.38 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:40:31.4948549Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.037 MW | VRP_TIR=0.0 MW | T_max=272.28 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:40:31.4949749Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.017 MW | VRP_TIR=0.0 MW | T_max=271.67 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:40:31.4950868Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=258.73 K | T_max=271.77 K | anomalous_px=0
+2026-10-08T18:40:31.4952231Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=239.53 K | T_max=250.39 K | anomalous_px=0
+2026-10-08T18:40:31.4953274Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=258.13 K | T_max=270.66 K | anomalous_px=0
+2026-10-08T18:40:31.4954309Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=255.38 K | T_max=269.26 K | anomalous_px=0
+2026-10-08T18:40:31.4955232Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=255.06 K | T_max=268.92 K | anomalous_px=0
+2026-10-08T18:40:31.4956090Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Copahue/20261003
+2026-10-08T18:40:31.4956630Z 
+2026-10-08T18:40:31.4956805Z >>> Copahue | 2026-10-04
+2026-10-08T18:40:31.4957309Z [diag 18:40:31Z] AUTH_START volcano=Copahue date=2026-10-04
+2026-10-08T18:40:31.4983309Z [diag 18:40:31Z] AUTH_OK
+2026-10-08T18:40:31.4985758Z [diag 18:40:31Z] SEARCH_START MODIS_TERRA
+2026-10-08T18:40:31.8394078Z [diag 18:40:31Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+2026-10-08T18:40:32.8158180Z   MODIS_TERRA: kept 1 of 2 granules (night filter)
+2026-10-08T18:40:32.8159356Z [diag 18:40:32Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10062623033,LAADS:10062562616]
+2026-10-08T18:40:37.3834180Z [diag 18:40:37Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+2026-10-08T18:40:37.3834902Z [diag 18:40:37Z] SEARCH_START MODIS_AQUA
+2026-10-08T18:40:37.9784279Z [diag 18:40:37Z] SEARCH_DONE MODIS_AQUA n_l1b=4
+2026-10-08T18:40:38.9222430Z   MODIS_AQUA: kept 2 of 4 granules (night filter)
+2026-10-08T18:40:38.9223376Z [diag 18:40:38Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10062764867,LAADS:10062678610]
+2026-10-08T18:40:42.9816166Z [diag 18:40:42Z] DOWNLOAD_DONE attempt=0 elapsed=4.1s n_files=2
+2026-10-08T18:40:42.9817181Z [diag 18:40:42Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10062764871,LAADS:10062729038]
+2026-10-08T18:40:45.7974883Z [diag 18:40:45Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+2026-10-08T18:40:45.7975365Z [diag 18:40:45Z] SEARCH_START VIIRS_SNPP
+2026-10-08T18:40:50.3081775Z [diag 18:40:50Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+2026-10-08T18:40:50.5476669Z   VIIRS_SNPP: kept 2 of 3 granules (night filter)
+2026-10-08T18:40:50.5477462Z [diag 18:40:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10062657802,LAADS:10062656753]
+2026-10-08T18:40:56.0529496Z [diag 18:40:56Z] DOWNLOAD_DONE attempt=0 elapsed=5.5s n_files=2
+2026-10-08T18:40:56.0530417Z [diag 18:40:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10062682440,LAADS:10062676373]
+2026-10-08T18:41:00.3266973Z [diag 18:41:00Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+2026-10-08T18:41:00.3267464Z [diag 18:41:00Z] SEARCH_START VIIRS_NOAA20
+2026-10-08T18:41:05.8333640Z [diag 18:41:05Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+2026-10-08T18:41:07.8546675Z   VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+2026-10-08T18:41:07.8547408Z [diag 18:41:07Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10062588611,LAADS:10062585655]
+2026-10-08T18:41:12.5931464Z [diag 18:41:12Z] DOWNLOAD_DONE attempt=0 elapsed=4.7s n_files=2
+2026-10-08T18:41:12.5942413Z [diag 18:41:12Z] SEARCH_START VIIRS_NOAA21
+2026-10-08T18:41:13.1930813Z [diag 18:41:13Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+2026-10-08T18:41:13.4218957Z   VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+2026-10-08T18:41:13.4220030Z [diag 18:41:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10062573370,LAADS:10062572262]
+2026-10-08T18:41:17.7351849Z [diag 18:41:17Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+2026-10-08T18:41:17.7352901Z [diag 18:41:17Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10062605557,LAADS:10062602223]
+2026-10-08T18:41:22.4947704Z [diag 18:41:22Z] DOWNLOAD_DONE attempt=0 elapsed=4.8s n_files=2
+2026-10-08T18:41:22.4948616Z [diag 18:41:22Z] SEARCH_START VIIRS_SNPP_750
+2026-10-08T18:41:22.7025190Z [diag 18:41:22Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+2026-10-08T18:41:22.9007239Z   VIIRS_SNPP_750: kept 2 of 3 granules (night filter)
+2026-10-08T18:41:22.9008067Z [diag 18:41:22Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10062657812,LAADS:10062656758]
+2026-10-08T18:41:25.7522638Z [diag 18:41:25Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+2026-10-08T18:41:25.7523930Z [diag 18:41:25Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10062682442,LAADS:10062676375]
+2026-10-08T18:41:29.0626120Z [diag 18:41:29Z] DOWNLOAD_DONE attempt=0 elapsed=3.3s n_files=2
+2026-10-08T18:41:29.0627265Z [diag 18:41:29Z] SEARCH_START VIIRS_NOAA20_750
+2026-10-08T18:41:29.2655205Z [diag 18:41:29Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+2026-10-08T18:41:29.4929394Z   VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+2026-10-08T18:41:29.4930463Z [diag 18:41:29Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10062588623,LAADS:10062585658]
+2026-10-08T18:41:32.6316660Z [diag 18:41:32Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+2026-10-08T18:41:32.6317605Z [diag 18:41:32Z] SEARCH_START VIIRS_NOAA21_750
+2026-10-08T18:41:32.9826554Z [diag 18:41:32Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+2026-10-08T18:41:33.2430371Z   VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+2026-10-08T18:41:33.2432057Z [diag 18:41:33Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10062573378,LAADS:10062572267]
+2026-10-08T18:41:36.9275782Z [diag 18:41:36Z] DOWNLOAD_DONE attempt=0 elapsed=3.7s n_files=2
+2026-10-08T18:41:36.9277255Z [diag 18:41:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10062605567,LAADS:10062602229]
+2026-10-08T18:41:40.0759068Z [diag 18:41:40Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+2026-10-08T18:43:54.1708632Z   MODIS_TERRA | VRP=5.0 MW | T_bg=266.46 K | T_max=279.23 K | anomalous_px=89
+2026-10-08T18:43:54.1709412Z   MODIS_AQUA | VRP=5.0 MW | T_bg=266.44 K | T_max=274.64 K | anomalous_px=34
+2026-10-08T18:43:54.1710061Z   MODIS_AQUA | VRP=5.0 MW | T_bg=264.91 K | T_max=276.32 K | anomalous_px=26
+2026-10-08T18:43:54.1710763Z   VIIRS_SNPP (375m) | VRP_MIR=0.049 MW | VRP_TIR=0.0 MW | T_max=273.97 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:43:54.1712031Z   VIIRS_SNPP (375m) | VRP_MIR=0.034 MW | VRP_TIR=0.0 MW | T_max=274.45 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:43:54.1712917Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.063 MW | VRP_TIR=0.0 MW | T_max=275.06 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:43:54.1713674Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=272.02 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:43:54.1714418Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.06 MW | VRP_TIR=0.0 MW | T_max=276.08 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:43:54.1715131Z   VIIRS_SNPP_750 (750m) | VRP=0.623 MW | T_bg=260.85 K | T_max=268.6 K | anomalous_px=1
+2026-10-08T18:43:54.1715812Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=261.07 K | T_max=268.44 K | anomalous_px=0
+2026-10-08T18:43:54.1716492Z   VIIRS_NOAA20_750 (750m) | VRP=2.369 MW | T_bg=263.29 K | T_max=270.81 K | anomalous_px=0
+2026-10-08T18:43:54.1717174Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=258.88 K | T_max=267.67 K | anomalous_px=0
+2026-10-08T18:43:54.1717838Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=264.76 K | T_max=273.34 K | anomalous_px=0
+2026-10-08T18:43:54.1718502Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Copahue/20261004
+2026-10-08T18:43:54.1718907Z 
+2026-10-08T18:43:54.1719049Z >>> Copahue | 2026-10-05
+2026-10-08T18:43:54.1719451Z [diag 18:43:54Z] AUTH_START volcano=Copahue date=2026-10-05
+2026-10-08T18:43:54.1742645Z [diag 18:43:54Z] AUTH_OK
+2026-10-08T18:43:54.1743211Z [diag 18:43:54Z] SEARCH_START MODIS_TERRA
+2026-10-08T18:43:54.5017154Z [diag 18:43:54Z] SEARCH_DONE MODIS_TERRA n_l1b=3
+2026-10-08T18:43:54.7510710Z   MODIS_TERRA: kept 1 of 3 granules (night filter)
+2026-10-08T18:43:54.7511995Z [diag 18:43:54Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10063102555,LAADS:10062948046]
+2026-10-08T18:43:57.8705012Z [diag 18:43:57Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+2026-10-08T18:43:57.8705599Z [diag 18:43:57Z] SEARCH_START MODIS_AQUA
+2026-10-08T18:43:58.2311193Z [diag 18:43:58Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+2026-10-08T18:43:58.6917678Z   MODIS_AQUA: kept 1 of 2 granules (night filter)
+2026-10-08T18:43:58.6918677Z [diag 18:43:58Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10065936839,LAADS:10065898349]
+2026-10-08T18:44:01.7874588Z [diag 18:44:01Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+2026-10-08T18:44:01.7875363Z [diag 18:44:01Z] SEARCH_START VIIRS_SNPP
+2026-10-08T18:44:02.2939032Z [diag 18:44:02Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+2026-10-08T18:44:02.5101680Z   VIIRS_SNPP: kept 2 of 3 granules (night filter)
+2026-10-08T18:44:02.5102896Z [diag 18:44:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10063099192,LAADS:10063098867]
+2026-10-08T18:44:06.6875943Z [diag 18:44:06Z] DOWNLOAD_DONE attempt=0 elapsed=4.2s n_files=2
+2026-10-08T18:44:06.6877034Z [diag 18:44:06Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10063156972,LAADS:10063147711]
+2026-10-08T18:44:11.9434768Z [diag 18:44:11Z] DOWNLOAD_DONE attempt=0 elapsed=5.3s n_files=2
+2026-10-08T18:44:11.9435574Z [diag 18:44:11Z] SEARCH_START VIIRS_NOAA20
+2026-10-08T18:44:12.1631747Z [diag 18:44:12Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+2026-10-08T18:44:12.3916019Z   VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+2026-10-08T18:44:12.3917158Z [diag 18:44:12Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10063093060,LAADS:10063092624]
+2026-10-08T18:44:16.8541886Z [diag 18:44:16Z] DOWNLOAD_DONE attempt=0 elapsed=4.5s n_files=2
+2026-10-08T18:44:16.8542961Z [diag 18:44:16Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10063111249,LAADS:10063106643]
+2026-10-08T18:44:21.0013024Z [diag 18:44:20Z] DOWNLOAD_DONE attempt=0 elapsed=4.1s n_files=2
+2026-10-08T18:44:21.0022841Z [diag 18:44:21Z] SEARCH_START VIIRS_NOAA21
+2026-10-08T18:44:21.2250391Z [diag 18:44:21Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+2026-10-08T18:44:21.4780527Z   VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+2026-10-08T18:44:21.4781825Z [diag 18:44:21Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10063098446,LAADS:10063090450]
+2026-10-08T18:44:26.0937103Z [diag 18:44:26Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+2026-10-08T18:44:26.0937682Z [diag 18:44:26Z] SEARCH_START VIIRS_SNPP_750
+2026-10-08T18:44:26.3695874Z [diag 18:44:26Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+2026-10-08T18:44:26.7293305Z   VIIRS_SNPP_750: kept 2 of 3 granules (night filter)
+2026-10-08T18:44:26.7294374Z [diag 18:44:26Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10063099200,LAADS:10063098872]
+2026-10-08T18:44:29.6726557Z [diag 18:44:29Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+2026-10-08T18:44:29.6727645Z [diag 18:44:29Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10063156980,LAADS:10063147716]
+2026-10-08T18:44:32.3038673Z [diag 18:44:32Z] DOWNLOAD_DONE attempt=0 elapsed=2.6s n_files=2
+2026-10-08T18:44:32.3039732Z [diag 18:44:32Z] SEARCH_START VIIRS_NOAA20_750
+2026-10-08T18:44:32.5104553Z [diag 18:44:32Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+2026-10-08T18:44:32.8011503Z   VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+2026-10-08T18:44:32.8012288Z [diag 18:44:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10063093070,LAADS:10063092625]
+2026-10-08T18:44:35.4714896Z [diag 18:44:35Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+2026-10-08T18:44:35.4716058Z [diag 18:44:35Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10063111261,LAADS:10063106644]
+2026-10-08T18:44:39.2446600Z [diag 18:44:39Z] DOWNLOAD_DONE attempt=0 elapsed=3.8s n_files=2
+2026-10-08T18:44:39.2452251Z [diag 18:44:39Z] SEARCH_START VIIRS_NOAA21_750
+2026-10-08T18:44:39.4824069Z [diag 18:44:39Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+2026-10-08T18:44:39.7392893Z   VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+2026-10-08T18:44:39.7393924Z [diag 18:44:39Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10063098448,LAADS:10063090452]
+2026-10-08T18:44:42.5767483Z [diag 18:44:42Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+2026-10-08T18:46:55.1740677Z   MODIS_TERRA | VRP=5.0 MW | T_bg=266.01 K | T_max=276.47 K | anomalous_px=46
+2026-10-08T18:46:55.1741894Z   MODIS_AQUA | VRP=91.145 MW | T_bg=271.3 K | T_max=279.36 K | anomalous_px=135
+2026-10-08T18:46:55.1742585Z   VIIRS_SNPP (375m) | VRP_MIR=0.046 MW | VRP_TIR=0.0 MW | T_max=275.61 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:46:55.1743317Z   VIIRS_SNPP (375m) | VRP_MIR=0.044 MW | VRP_TIR=0.0 MW | T_max=276.73 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:46:55.1744020Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.049 MW | VRP_TIR=0.0 MW | T_max=276.31 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:46:55.1744722Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.042 MW | VRP_TIR=0.0 MW | T_max=274.65 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:46:55.1745406Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.047 MW | VRP_TIR=0.0 MW | T_max=278.04 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:46:55.1746096Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=261.51 K | T_max=268.76 K | anomalous_px=0
+2026-10-08T18:46:55.1746705Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=265.87 K | T_max=272.19 K | anomalous_px=0
+2026-10-08T18:46:55.1747313Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=264.28 K | T_max=272.09 K | anomalous_px=0
+2026-10-08T18:46:55.1747923Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=263.89 K | T_max=268.98 K | anomalous_px=0
+2026-10-08T18:46:55.1748821Z   VIIRS_NOAA21_750 (750m) | VRP=2.28 MW | T_bg=267.67 K | T_max=275.55 K | anomalous_px=0
+2026-10-08T18:46:55.1749436Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Copahue/20261005
+2026-10-08T18:46:55.1749801Z 
+2026-10-08T18:46:55.1749919Z >>> Copahue | 2026-10-06
+2026-10-08T18:46:55.1750274Z [diag 18:46:55Z] AUTH_START volcano=Copahue date=2026-10-06
+2026-10-08T18:46:55.1771757Z [diag 18:46:55Z] AUTH_OK
+2026-10-08T18:46:55.1772227Z [diag 18:46:55Z] SEARCH_START MODIS_TERRA
+2026-10-08T18:46:55.4460984Z [diag 18:46:55Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+2026-10-08T18:46:56.0559176Z   MODIS_TERRA: kept 1 of 2 granules (night filter)
+2026-10-08T18:46:56.0559889Z [diag 18:46:56Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10064611903,LAADS:10064197003]
+2026-10-08T18:46:59.7662763Z [diag 18:46:59Z] DOWNLOAD_DONE attempt=0 elapsed=3.7s n_files=2
+2026-10-08T18:46:59.7672288Z [diag 18:46:59Z] SEARCH_START MODIS_AQUA
+2026-10-08T18:47:00.0225794Z [diag 18:47:00Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+2026-10-08T18:47:00.3554710Z   MODIS_AQUA: kept 1 of 2 granules (night filter)
+2026-10-08T18:47:00.3555390Z [diag 18:47:00Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10065990184,LAADS:10065947947]
+2026-10-08T18:47:04.4525368Z [diag 18:47:04Z] DOWNLOAD_DONE attempt=0 elapsed=4.1s n_files=2
+2026-10-08T18:47:04.4541525Z [diag 18:47:04Z] SEARCH_START VIIRS_SNPP
+2026-10-08T18:47:04.6633097Z [diag 18:47:04Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+2026-10-08T18:47:04.9222548Z   VIIRS_SNPP: kept 1 of 3 granules (night filter)
+2026-10-08T18:47:04.9223628Z [diag 18:47:04Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10064891603,LAADS:10064878322]
+2026-10-08T18:47:09.8136532Z [diag 18:47:09Z] DOWNLOAD_DONE attempt=0 elapsed=4.9s n_files=2
+2026-10-08T18:47:09.8153154Z [diag 18:47:09Z] SEARCH_START VIIRS_NOAA20
+2026-10-08T18:47:10.0327018Z [diag 18:47:10Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+2026-10-08T18:47:10.2577788Z   VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+2026-10-08T18:47:10.2578540Z [diag 18:47:10Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10064494297,LAADS:10064491407]
+2026-10-08T18:47:15.2747940Z [diag 18:47:15Z] DOWNLOAD_DONE attempt=0 elapsed=5.0s n_files=2
+2026-10-08T18:47:15.2748990Z [diag 18:47:15Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10064602177,LAADS:10064596597]
+2026-10-08T18:47:19.7022276Z [diag 18:47:19Z] DOWNLOAD_DONE attempt=0 elapsed=4.4s n_files=2
+2026-10-08T18:47:19.7023171Z [diag 18:47:19Z] SEARCH_START VIIRS_NOAA21
+2026-10-08T18:47:20.2118536Z [diag 18:47:20Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+2026-10-08T18:47:25.5067133Z   VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+2026-10-08T18:47:25.5070864Z [diag 18:47:25Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10064473599,LAADS:10064468028]
+2026-10-08T18:47:29.8217831Z [diag 18:47:29Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+2026-10-08T18:47:29.8218409Z [diag 18:47:29Z] SEARCH_START VIIRS_SNPP_750
+2026-10-08T18:47:32.9924188Z [diag 18:47:32Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+2026-10-08T18:47:35.2572832Z   VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+2026-10-08T18:47:35.2573925Z [diag 18:47:35Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10064891613,LAADS:10064878324]
+2026-10-08T18:47:38.8912519Z [diag 18:47:38Z] DOWNLOAD_DONE attempt=0 elapsed=3.6s n_files=2
+2026-10-08T18:47:38.8913014Z [diag 18:47:38Z] SEARCH_START VIIRS_NOAA20_750
+2026-10-08T18:47:39.7462347Z [diag 18:47:39Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+2026-10-08T18:47:39.9604011Z   VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+2026-10-08T18:47:39.9604716Z [diag 18:47:39Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10064494301,LAADS:10064491408]
+2026-10-08T18:47:42.6568192Z [diag 18:47:42Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+2026-10-08T18:47:42.6569382Z [diag 18:47:42Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10064602189,LAADS:10064596598]
+2026-10-08T18:47:45.6734685Z [diag 18:47:45Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+2026-10-08T18:47:45.6735475Z [diag 18:47:45Z] SEARCH_START VIIRS_NOAA21_750
+2026-10-08T18:47:45.9367507Z [diag 18:47:45Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+2026-10-08T18:47:46.2047029Z   VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+2026-10-08T18:47:46.2048038Z [diag 18:47:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10064473607,LAADS:10064468031]
+2026-10-08T18:47:49.0382423Z [diag 18:47:49Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+2026-10-08T18:49:36.5790302Z   MODIS_TERRA | VRP=5.0 MW | T_bg=249.85 K | T_max=266.01 K | anomalous_px=338
+2026-10-08T18:49:36.5791143Z   MODIS_AQUA | VRP=5.0 MW | T_bg=237.05 K | T_max=255.92 K | anomalous_px=444
+2026-10-08T18:49:36.5792478Z   VIIRS_SNPP (375m) | VRP_MIR=0.011 MW | VRP_TIR=0.0 MW | T_max=248.23 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:49:36.5793575Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.102 MW | VRP_TIR=0.0 MW | T_max=246.63 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:49:36.5794660Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.056 MW | VRP_TIR=0.0 MW | T_max=243.86 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:49:36.5795756Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.022 MW | VRP_TIR=0.0 MW | T_max=252.1 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:49:36.5796763Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=235.28 K | T_max=245.93 K | anomalous_px=0
+2026-10-08T18:49:36.5797662Z   VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=230.68 K | T_max=240.66 K | anomalous_px=0
+2026-10-08T18:49:36.5798340Z   VIIRS_NOAA20_750 (750m) | VRP=1.496 MW | T_bg=230.68 K | T_max=239.43 K | anomalous_px=0
+2026-10-08T18:49:36.5798971Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=237.15 K | T_max=250.0 K | anomalous_px=0
+2026-10-08T18:49:36.5799575Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Copahue/20261006
+2026-10-08T18:49:36.5799937Z 
+2026-10-08T18:49:36.5800057Z >>> Copahue | 2026-10-07
+2026-10-08T18:49:36.5800423Z [diag 18:49:36Z] AUTH_START volcano=Copahue date=2026-10-07
+2026-10-08T18:49:36.5826421Z [diag 18:49:36Z] AUTH_OK
+2026-10-08T18:49:36.5826920Z [diag 18:49:36Z] SEARCH_START MODIS_TERRA
+2026-10-08T18:49:36.9595665Z [diag 18:49:36Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+2026-10-08T18:49:37.1870769Z   MODIS_TERRA: kept 1 of 2 granules (night filter)
+2026-10-08T18:49:37.1871749Z [diag 18:49:37Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10066952475,LAADS:10066576425]
+2026-10-08T18:49:40.5262871Z [diag 18:49:40Z] DOWNLOAD_DONE attempt=0 elapsed=3.3s n_files=2
+2026-10-08T18:49:40.5263487Z [diag 18:49:40Z] SEARCH_START MODIS_AQUA
+2026-10-08T18:49:40.8581380Z [diag 18:49:40Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+2026-10-08T18:49:41.4354402Z   MODIS_AQUA: kept 1 of 2 granules (night filter)
+2026-10-08T18:49:41.4358840Z [diag 18:49:41Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10067380744,LAADS:10067073817]
+2026-10-08T18:49:45.1612940Z [diag 18:49:45Z] DOWNLOAD_DONE attempt=0 elapsed=3.7s n_files=2
+2026-10-08T18:49:45.1629316Z [diag 18:49:45Z] SEARCH_START VIIRS_SNPP
+2026-10-08T18:49:45.4116949Z [diag 18:49:45Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+2026-10-08T18:49:45.6121976Z   VIIRS_SNPP: kept 1 of 3 granules (night filter)
+2026-10-08T18:49:45.6122938Z [diag 18:49:45Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10066963647,LAADS:10066876011]
+2026-10-08T18:49:50.4069462Z [diag 18:49:50Z] DOWNLOAD_DONE attempt=0 elapsed=4.8s n_files=2
+2026-10-08T18:49:50.4089797Z [diag 18:49:50Z] SEARCH_START VIIRS_NOAA20
+2026-10-08T18:49:50.6689577Z [diag 18:49:50Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=2
+2026-10-08T18:49:50.8864695Z   VIIRS_NOAA20: kept 1 of 2 granules (night filter)
+2026-10-08T18:49:50.8865705Z [diag 18:49:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10066908175,LAADS:10066901235]
+2026-10-08T18:49:55.5425083Z [diag 18:49:55Z] DOWNLOAD_DONE attempt=0 elapsed=4.7s n_files=2
+2026-10-08T18:49:55.5425695Z [diag 18:49:55Z] SEARCH_START VIIRS_NOAA21
+2026-10-08T18:49:55.8600614Z [diag 18:49:55Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+2026-10-08T18:49:56.0967371Z   VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+2026-10-08T18:49:56.0968369Z [diag 18:49:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10066727931,LAADS:10066714697]
+2026-10-08T18:50:01.0429767Z [diag 18:50:01Z] DOWNLOAD_DONE attempt=0 elapsed=4.9s n_files=2
+2026-10-08T18:50:01.0430598Z [diag 18:50:01Z] SEARCH_START VIIRS_SNPP_750
+2026-10-08T18:50:01.3061675Z [diag 18:50:01Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+2026-10-08T18:50:01.5311137Z   VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+2026-10-08T18:50:01.5312425Z [diag 18:50:01Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10066963649,LAADS:10066876014]
+2026-10-08T18:50:04.8292547Z [diag 18:50:04Z] DOWNLOAD_DONE attempt=0 elapsed=3.3s n_files=2
+2026-10-08T18:50:04.8293267Z [diag 18:50:04Z] SEARCH_START VIIRS_NOAA20_750
+2026-10-08T18:50:05.2194748Z [diag 18:50:05Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=2
+2026-10-08T18:50:05.7744367Z   VIIRS_NOAA20_750: kept 1 of 2 granules (night filter)
+2026-10-08T18:50:05.7745528Z [diag 18:50:05Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10066908183,LAADS:10066901239]
+2026-10-08T18:50:09.0346278Z [diag 18:50:09Z] DOWNLOAD_DONE attempt=0 elapsed=3.3s n_files=2
+2026-10-08T18:50:09.0362284Z [diag 18:50:09Z] SEARCH_START VIIRS_NOAA21_750
+2026-10-08T18:50:09.2784325Z [diag 18:50:09Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+2026-10-08T18:50:09.5349213Z   VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+2026-10-08T18:50:09.5350210Z [diag 18:50:09Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10066727933,LAADS:10066714700]
+2026-10-08T18:50:12.3179626Z [diag 18:50:12Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+2026-10-08T18:51:34.5173820Z   MODIS_TERRA | VRP=5.0 MW | T_bg=268.59 K | T_max=277.61 K | anomalous_px=32
+2026-10-08T18:51:34.5174751Z   MODIS_AQUA | VRP=5.0 MW | T_bg=264.38 K | T_max=279.36 K | anomalous_px=85
+2026-10-08T18:51:34.5175684Z   VIIRS_SNPP (375m) | VRP_MIR=0.384 MW | VRP_TIR=0.0 MW | T_max=279.27 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:51:34.5176693Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.252 MW | VRP_TIR=0.0 MW | T_max=278.0 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:51:34.5177732Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.141 MW | VRP_TIR=0.0 MW | T_max=277.53 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:51:34.5178713Z   VIIRS_SNPP_750 (750m) | VRP=2.815 MW | T_bg=260.85 K | T_max=276.53 K | anomalous_px=0
+2026-10-08T18:51:34.5179670Z   VIIRS_NOAA20_750 (750m) | VRP=3.455 MW | T_bg=260.29 K | T_max=274.6 K | anomalous_px=0
+2026-10-08T18:51:34.5180642Z   VIIRS_NOAA21_750 (750m) | VRP=2.604 MW | T_bg=261.18 K | T_max=275.55 K | anomalous_px=0
+2026-10-08T18:51:34.5181824Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Copahue/20261007
+2026-10-08T18:51:34.5182375Z 
+2026-10-08T18:51:34.5182554Z >>> Copahue | 2026-10-08
+2026-10-08T18:51:34.5183433Z [diag 18:51:34Z] AUTH_START volcano=Copahue date=2026-10-08
+2026-10-08T18:51:34.5209699Z [diag 18:51:34Z] AUTH_OK
+2026-10-08T18:51:34.5210181Z [diag 18:51:34Z] SEARCH_START MODIS_TERRA
+2026-10-08T18:51:34.8034430Z [diag 18:51:34Z] SEARCH_DONE MODIS_TERRA n_l1b=1
+2026-10-08T18:51:35.5415834Z   MODIS_TERRA: kept 1 of 1 granules (night filter)
+2026-10-08T18:51:35.5416534Z [diag 18:51:35Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10068786332,LAADS:10068379071]
+2026-10-08T18:51:39.8114029Z [diag 18:51:39Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+2026-10-08T18:51:39.8114754Z [diag 18:51:39Z] SEARCH_START MODIS_AQUA
+2026-10-08T18:51:40.3592098Z [diag 18:51:40Z] SEARCH_DONE MODIS_AQUA n_l1b=1
+2026-10-08T18:51:46.5285358Z   MODIS_AQUA: kept 1 of 1 granules (night filter)
+2026-10-08T18:51:46.5286256Z [diag 18:51:46Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LANCEMODIS:3061543180,LAADS:10069101320]
+2026-10-08T18:51:49.8948256Z [diag 18:51:49Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+2026-10-08T18:51:49.8952270Z [diag 18:51:49Z] SEARCH_START VIIRS_SNPP
+2026-10-08T18:51:51.7872059Z [diag 18:51:51Z] SEARCH_DONE VIIRS_SNPP n_l1b=1
+2026-10-08T18:51:53.9784367Z   VIIRS_SNPP: kept 1 of 1 granules (night filter)
+2026-10-08T18:51:53.9785044Z [diag 18:51:53Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10068711629,LAADS:10068708395]
+2026-10-08T18:51:59.6053471Z [diag 18:51:59Z] DOWNLOAD_DONE attempt=0 elapsed=5.6s n_files=2
+2026-10-08T18:51:59.6054642Z [diag 18:51:59Z] SEARCH_START VIIRS_NOAA20
+2026-10-08T18:52:00.1547836Z [diag 18:52:00Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=1
+2026-10-08T18:52:00.3764972Z   VIIRS_NOAA20: kept 1 of 1 granules (night filter)
+2026-10-08T18:52:00.3766055Z [diag 18:52:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10068738484,LAADS:10068644167]
+2026-10-08T18:52:05.6478558Z [diag 18:52:05Z] DOWNLOAD_DONE attempt=0 elapsed=5.3s n_files=2
+2026-10-08T18:52:05.6479014Z [diag 18:52:05Z] SEARCH_START VIIRS_NOAA21
+2026-10-08T18:52:05.8794273Z [diag 18:52:05Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=2
+2026-10-08T18:52:06.1366612Z   VIIRS_NOAA21: kept 2 of 2 granules (night filter)
+2026-10-08T18:52:06.1367651Z [diag 18:52:06Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10068612241,LAADS:10068609666]
+2026-10-08T18:52:10.6042535Z [diag 18:52:10Z] DOWNLOAD_DONE attempt=0 elapsed=4.5s n_files=2
+2026-10-08T18:52:10.6043603Z [diag 18:52:10Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10068737412,LAADS:10068735168]
+2026-10-08T18:52:14.9105409Z [diag 18:52:14Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+2026-10-08T18:52:14.9106371Z [diag 18:52:14Z] SEARCH_START VIIRS_SNPP_750
+2026-10-08T18:52:15.1377994Z [diag 18:52:15Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=1
+2026-10-08T18:52:15.3565196Z   VIIRS_SNPP_750: kept 1 of 1 granules (night filter)
+2026-10-08T18:52:15.3566224Z [diag 18:52:15Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10068711633,LAADS:10068708397]
+2026-10-08T18:52:18.3187592Z [diag 18:52:18Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+2026-10-08T18:52:18.3188337Z [diag 18:52:18Z] SEARCH_START VIIRS_NOAA20_750
+2026-10-08T18:52:18.5124373Z [diag 18:52:18Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=1
+2026-10-08T18:52:18.7096728Z   VIIRS_NOAA20_750: kept 1 of 1 granules (night filter)
+2026-10-08T18:52:18.7097680Z [diag 18:52:18Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10068738486,LAADS:10068644170]
+2026-10-08T18:52:45.9666974Z [diag 18:52:45Z] DOWNLOAD_DONE attempt=0 elapsed=27.3s n_files=2
+2026-10-08T18:52:45.9667753Z [diag 18:52:45Z] SEARCH_START VIIRS_NOAA21_750
+2026-10-08T18:52:46.2493830Z [diag 18:52:46Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=2
+2026-10-08T18:52:46.5165454Z   VIIRS_NOAA21_750: kept 2 of 2 granules (night filter)
+2026-10-08T18:52:46.5166601Z [diag 18:52:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10068612245,LAADS:10068609671]
+2026-10-08T18:52:49.9062560Z [diag 18:52:49Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+2026-10-08T18:52:49.9064707Z [diag 18:52:49Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10068737416,LAADS:10068735171]
+2026-10-08T18:52:53.0997324Z [diag 18:52:53Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+2026-10-08T18:54:40.3600085Z   MODIS_TERRA | VRP=5.0 MW | T_bg=257.83 K | T_max=275.58 K | anomalous_px=151
+2026-10-08T18:54:40.3601053Z   MODIS_AQUA | VRP=53.992 MW | T_bg=273.58 K | T_max=282.83 K | anomalous_px=111
+2026-10-08T18:54:40.3602183Z   VIIRS_SNPP (375m) | VRP_MIR=0.063 MW | VRP_TIR=0.0 MW | T_max=279.01 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:54:40.3602896Z   VIIRS_NOAA20 (375m) | VRP_MIR=0.654 MW | VRP_TIR=0.0 MW | T_max=279.55 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:54:40.3603609Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.318 MW | VRP_TIR=0.0 MW | T_max=279.2 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:54:40.3604304Z   VIIRS_NOAA21 (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=278.42 K | VRP_VENT=0.0 MW (0px)
+2026-10-08T18:54:40.3604947Z   VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=250.02 K | T_max=275.21 K | anomalous_px=0
+2026-10-08T18:54:40.3605659Z   VIIRS_NOAA20_750 (750m) | VRP=6.374 MW | T_bg=258.13 K | T_max=276.54 K | anomalous_px=0
+2026-10-08T18:54:40.3606293Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=246.42 K | T_max=276.84 K | anomalous_px=0
+2026-10-08T18:54:40.3606898Z   VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=268.39 K | T_max=275.42 K | anomalous_px=0
+2026-10-08T18:54:40.3607824Z   Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/Copahue/20261008
+2026-10-08T18:54:40.3608192Z 
+2026-10-08T18:54:40.3608294Z Done.
+2026-10-08T18:54:40.4520951Z ##[group]Run python - <<'PYEOF'
+2026-10-08T18:54:40.4521753Z [36;1mpython - <<'PYEOF'[0m
+2026-10-08T18:54:40.4522041Z [36;1mimport json, os, sys[0m
+2026-10-08T18:54:40.4522369Z [36;1mfrom datetime import datetime, timezone, timedelta[0m
+2026-10-08T18:54:40.4522750Z [36;1mfrom pathlib import Path[0m
+2026-10-08T18:54:40.4523026Z [36;1mvol = "Copahue"[0m
+2026-10-08T18:54:40.4523331Z [36;1mp = Path(f"data/mirova_equivalent/{vol}.json")[0m
+2026-10-08T18:54:40.4523675Z [36;1mif not p.exists():[0m
+2026-10-08T18:54:40.4523998Z [36;1m    print(f"WARN {p}: no existe (primera corrida)")[0m
+2026-10-08T18:54:40.4524332Z [36;1m    sys.exit(0)[0m
+2026-10-08T18:54:40.4524589Z [36;1md = json.loads(p.read_text())[0m
+2026-10-08T18:54:40.4524898Z [36;1mrecords = d.get("records", [])[0m
+2026-10-08T18:54:40.4525181Z [36;1mif not records:[0m
+2026-10-08T18:54:40.4525462Z [36;1m    print(f"FAIL {p}: 0 records")[0m
+2026-10-08T18:54:40.4525745Z [36;1m    sys.exit(1)[0m
+2026-10-08T18:54:40.4526149Z [36;1mlast = records[-1].get("datetime_utc") or records[-1].get("acq_datetime_utc")[0m
+2026-10-08T18:54:40.4526570Z [36;1mif not last:[0m
+2026-10-08T18:54:40.4526960Z [36;1m    print(f"FAIL {p}: último record sin datetime_utc — schema corrupto")[0m
+2026-10-08T18:54:40.4527377Z [36;1m    sys.exit(1)[0m
+2026-10-08T18:54:40.4527625Z [36;1ms = last.replace("Z", "+00:00")[0m
+2026-10-08T18:54:40.4527939Z [36;1mlast_dt = datetime.fromisoformat(s)[0m
+2026-10-08T18:54:40.4528246Z [36;1mif last_dt.tzinfo is None:[0m
+2026-10-08T18:54:40.4528573Z [36;1m    last_dt = last_dt.replace(tzinfo=timezone.utc)[0m
+2026-10-08T18:54:40.4528956Z [36;1mage = datetime.now(timezone.utc) - last_dt[0m
+2026-10-08T18:54:40.4529297Z [36;1mhours = age.total_seconds() / 3600[0m
+2026-10-08T18:54:40.4529595Z [36;1mif age > timedelta(hours=72):[0m
+2026-10-08T18:54:40.4530001Z [36;1m    # S123: aviso, NO fallo. Anotación visible en la UI del run y en[0m
+2026-10-08T18:54:40.4530493Z [36;1m    # el summary; la alerta accionable la emite el healthcheck A58,[0m
+2026-10-08T18:54:40.4530969Z [36;1m    # que agrupa por incidente y no repite una vez por corrida.[0m
+2026-10-08T18:54:40.4531568Z [36;1m    msg = (f"{vol} stale: last_dt={last} ({hours:.1f}h > 72h). "[0m
+2026-10-08T18:54:40.4532013Z [36;1m           f"Probable NASA outage prolongado o bug silencioso. "[0m
+2026-10-08T18:54:40.4532474Z [36;1m           f"La alerta accionable la lleva nrt-healthcheck.yml (A58).")[0m
+2026-10-08T18:54:40.4532926Z [36;1m    print(f"::warning title=Tier A stale ({vol})::{msg}")[0m
+2026-10-08T18:54:40.4533335Z [36;1m    summary = os.environ.get("GITHUB_STEP_SUMMARY")[0m
+2026-10-08T18:54:40.4533665Z [36;1m    if summary:[0m
+2026-10-08T18:54:40.4533970Z [36;1m        with open(summary, "a", encoding="utf-8") as f:[0m
+2026-10-08T18:54:40.4534400Z [36;1m            f.write(f"\n### ⚠️ {vol}: records stale ({hours:.1f}h)\n\n{msg}\n")[0m
+2026-10-08T18:54:40.4534795Z [36;1m    sys.exit(0)[0m
+2026-10-08T18:54:40.4535080Z [36;1mprint(f"OK {p}: last_dt={last} ({hours:.1f}h)")[0m
+2026-10-08T18:54:40.4535394Z [36;1mPYEOF[0m
+2026-10-08T18:54:40.4597782Z shell: /usr/bin/bash -e {0}
+2026-10-08T18:54:40.4598051Z env:
+2026-10-08T18:54:40.4598335Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:54:40.4598802Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+2026-10-08T18:54:40.4599254Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:54:40.4599670Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:54:40.4600067Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:54:40.4600467Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+2026-10-08T18:54:40.4600803Z ##[endgroup]
+2026-10-08T18:54:40.6820282Z OK data/mirova_equivalent/Copahue.json: last_dt=2026-10-08 08:05 (10.8h)
+2026-10-08T18:54:40.7162695Z ##[group]Run set +e  # No abortar en errores intermedios — manejamos exit codes
+2026-10-08T18:54:40.7163694Z [36;1mset +e  # No abortar en errores intermedios — manejamos exit codes[0m
+2026-10-08T18:54:40.7164412Z [36;1mgit config user.name  "vrp-bot"[0m
+2026-10-08T18:54:40.7165016Z [36;1mgit config user.email "vrp-bot@github-actions"[0m
+2026-10-08T18:54:40.7165941Z [36;1m# Solo el archivo del volcán de este job (cada matrix tiene volcano único).[0m
+2026-10-08T18:54:40.7166932Z [36;1m# S120 (cacería, verificado empírico): git add con N pathspecs fatalea y[0m
+2026-10-08T18:54:40.7167849Z [36;1m# NO stagea NADA si UNO falta → data fresca descartada en silencio.[0m
+2026-10-08T18:54:40.7168582Z [36;1m# Un add por archivo aísla el que falte.[0m
+2026-10-08T18:54:40.7169252Z [36;1mgit add "data/mirova_equivalent/Copahue.json" 2>/dev/null[0m
+2026-10-08T18:54:40.7170004Z [36;1mgit add "data/experimental/Copahue.json" 2>/dev/null[0m
+2026-10-08T18:54:40.7170774Z [36;1mgit add "data/mirova/Copahue.json" 2>/dev/null[0m
+2026-10-08T18:54:40.7171859Z [36;1mgit diff --staged --quiet && { echo "No changes to commit for Copahue"; exit 0; }[0m
+2026-10-08T18:54:40.7172793Z [36;1mgit commit -m "NRT update Copahue $(date -u '+%Y-%m-%d %H:%M UTC')"[0m
+2026-10-08T18:54:40.7173477Z [36;1mfor attempt in 1 2 3 4 5; do[0m
+2026-10-08T18:54:40.7174121Z [36;1m  # -X theirs: en caso de conflict, aceptar el remoto (otros jobs)[0m
+2026-10-08T18:54:40.7174879Z [36;1m  # y aplicar nuestro cambio del volcán encima.[0m
+2026-10-08T18:54:40.7175617Z [36;1m  git pull --rebase -X theirs origin main && git push && exit 0[0m
+2026-10-08T18:54:40.7176434Z [36;1m  echo "push attempt $attempt failed, sleeping $((attempt * 10))s"[0m
+2026-10-08T18:54:40.7177287Z [36;1m  # Si rebase falla a mitad, abortarlo antes del próximo intento[0m
+2026-10-08T18:54:40.7177969Z [36;1m  git rebase --abort 2>/dev/null[0m
+2026-10-08T18:54:40.7178489Z [36;1m  sleep $((attempt * 10))[0m
+2026-10-08T18:54:40.7178966Z [36;1mdone[0m
+2026-10-08T18:54:40.7179395Z [36;1mecho "all push attempts failed"; exit 1[0m
+2026-10-08T18:54:40.7268416Z shell: /usr/bin/bash -e {0}
+2026-10-08T18:54:40.7268872Z env:
+2026-10-08T18:54:40.7269341Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:54:40.7270123Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib/pkgconfig
+2026-10-08T18:54:40.7270889Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:54:40.7271838Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:54:40.7272553Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.17/x64
+2026-10-08T18:54:40.7273271Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.17/x64/lib
+2026-10-08T18:54:40.7273846Z ##[endgroup]
+2026-10-08T18:54:42.1044582Z [main 99da7b8] NRT update Copahue 2026-10-08 18:54 UTC
+2026-10-08T18:54:42.1045484Z  1 file changed, 12944 insertions(+), 510 deletions(-)
+2026-10-08T18:54:46.3792003Z From https://github.com/MendozaVolcanic/VRP-chile
+2026-10-08T18:54:46.3792970Z  * branch            main       -> FETCH_HEAD
+2026-10-08T18:54:46.3793529Z    327621e..f510328  main       -> origin/main
+2026-10-08T18:54:47.4894644Z Rebasing (1/1)
+2026-10-08T18:54:47.4895208Z Successfully rebased and updated refs/heads/main.
+2026-10-08T18:54:50.9100509Z To https://github.com/MendozaVolcanic/VRP-chile
+2026-10-08T18:54:50.9101012Z    f510328..4a39ada  main -> main
+2026-10-08T18:54:50.9242063Z Post job cleanup.
+2026-10-08T18:54:51.0469758Z Cache hit occurred on the primary key setup-python-Linux-x64-24.04-Ubuntu-python-3.11.17-pip-751f046ea75e643696f19a49373db4a45544f32ffe40eaf60c388095e2e4becf, not saving cache.
+2026-10-08T18:54:51.0621033Z Post job cleanup.
+2026-10-08T18:54:51.1462223Z [command]/usr/bin/git version
+2026-10-08T18:54:51.1508997Z git version 2.55.0
+2026-10-08T18:54:51.1549012Z Temporarily overriding HOME='/home/runner/work/_temp/776abb59-deb0-450c-85bf-e6648c687ed2' before making global git config changes
+2026-10-08T18:54:51.1550608Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-08T18:54:51.1555062Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/VRP-chile/VRP-chile
+2026-10-08T18:54:51.1613677Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-08T18:54:51.1636600Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-08T18:54:51.1901594Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-08T18:54:51.1929415Z http.https://github.com/.extraheader
+2026-10-08T18:54:51.1942274Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-08T18:54:51.1978123Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-08T18:54:51.2272725Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-08T18:54:51.2313908Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-08T18:54:51.2737615Z Cleaning up orphan processes
