@@ -39,7 +39,8 @@ dos direcciones, **el recall de los cinco meses (abril a agosto) queda pendiente
 "MERECE SEGUIR" de mayo a julio valen para P1, P2 y C8b, no para el recall. Y lo que pesa en esa decisión
 es doble: el tramo bajo 0,05 MW (F pierde entre 25 y 44 % de lo que B publica ahí) y las cinco pérdidas
 fuertes del §3, que en mayo y junio la regla A119 deja fuera del veredicto sólo por la fecha de inicio de la
-ventana.
+ventana. ⚠️ **Actualizado S150**: esas cinco resultaron filas del OCR con la imagen de otra pasada
+(`docs/S150_IMAGENES_SNPP.md`); lo que queda para la decisión es el tramo bajo 0,10 MW.
 
 **Agregado de abril a agosto** (`agregado_abril_agosto.txt`): en negativos limpios B publica 829 de 2.324
 (35,7 %) y F 63 (2,7 %). De las alertas que B publica, F conserva 946 de 988 (95,7 %) con la etiqueta
@@ -120,6 +121,11 @@ el azar en ese estrato. Es informativa: P5 no decide. Los otros tres meses cumpl
 
 ## 3. Las alertas de 0,5 MW o más que `max` pierde: un patrón de cinco casos
 
+> ⚠️ **RESUELTO S150, mismo día: no son alertas reales** (`docs/S150_IMAGENES_SNPP.md`). En los cinco casos la
+> imagen que el scraper guardó con la hora de la pasada de Suomi NPP es, según su propia cabecera, la de una
+> pasada posterior (en uno, el mismo archivo md5 que la de NOAA-20 de las 05:24). El valor de la fila no
+> describe la pasada de Suomi NPP. El "SIN VERIFICAR" de abajo se conserva por historia.
+
 El primer borrador hablaba de "dos pérdidas de agosto". El verificador (H1) mostró que con la etiqueta
 completa son **cinco de mayo a agosto, todas con la misma firma**: **Suomi NPP**, **sólo por el OCR** (la
 tabla `latest.php` no las trae), **al borde del barrido** (cenit de 59 a 69 grados), B publicándolas con el
@@ -199,8 +205,8 @@ Hoy, lo que MODIS publica en producción en Láscar lo publica el Test 1 integra
 - ~~Abril~~: hecho el 2026-10-08 (§1). El token se rotó ese día; vence el 2026-12-07.
 - **MODIS J y K en los 11 volcanes**: ya no está bloqueado; queda subsumido en la prueba de Nevados de
   Chillán (`experiments/_s150_ndc/PREREGISTRO_NDC.md`), que mide el detector MODIS fuera de Láscar.
-- **Las cinco imágenes de MIROVA del §3**: pendiente. Es lo primero que conviene mirar, porque decide si la
-  pérdida fuerte de `max` es real.
+- ~~Las cinco imágenes de MIROVA del §3~~: hecho, `docs/S150_IMAGENES_SNPP.md`. La pérdida fuerte de `max` no es
+  real: las cinco filas tienen la imagen de otra pasada.
 - **Que el job de GitHub haya aplicado los flags declarados**: los logs guardados en el repo no los imprimen
   (SIN VERIFICAR, verificador).
 - Hallazgo menor del verificador sin corregir (H7): la versión "tabla sola" no reetiqueta de verdad, porque
