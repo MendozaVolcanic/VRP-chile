@@ -1,10 +1,12 @@
 # Pre-registro S150: la réplica frente a una erupción (Nevados de Chillán, 2026-09-14 a 2026-10-07)
 
-> **VERSIÓN 2, SIN APROBAR.** Reescrita tras el verificador con contexto limpio
-> (`docs/audit_s150/VERIFICADOR_PREREGISTRO_NDC.md`, veredicto de la v1: no despachable) y los auditores B y
-> C de S150. No se despacha nada hasta que (1) un segundo verificador limpio revise esta versión y (2)
-> Nicolás escriba "sí" (el candado `preregistro_aprobado` es suyo). **Fecha más temprana de despacho:
-> 2026-10-13** (§3). Escrito y commiteado antes de correr ningún brazo sobre esta ventana.
+> **VERSIÓN 3, SIN APROBAR.** La v1 la declaró no despachable un verificador con contexto limpio
+> (`docs/audit_s150/VERIFICADOR_PREREGISTRO_NDC.md`); la v2 la revisó un segundo verificador
+> (`docs/audit_s150/VERIFICADOR_PREREGISTRO_NDC_V2.md`: "despachable con cambios acotados en el evaluador y en
+> P5, volviendo a correr la prueba del evaluador con los controles que faltan"). La v3 hace esos cambios
+> (§9) y la prueba del evaluador da 10 de 10. Falta que Nicolás escriba "sí" (el candado
+> `preregistro_aprobado` es suyo). **Fecha más temprana de despacho: 2026-10-13** (§3). Escrito y
+> commiteado antes de correr ningún brazo sobre esta ventana.
 
 ## 1. Por qué esta prueba, y qué no puede decidir
 
@@ -52,7 +54,9 @@ erupción: el detector, el tope o la etiqueta.**
 
 Despacho: un solo run, `vols=["NevadosDeChillan"]`, `start=2026-09-14`, `end=2026-10-07`, los diez brazos,
 `control=_s146_ab_control`, **desde `main` con los perfiles ya mergeados** (el workflow imprime ahora la
-etiqueta y el tope de cada brazo). Diez jobs de un volcán y 24 días: del orden de una hora cada uno.
+etiqueta y el tope de cada brazo, y desde la v3 deja esa línea `FLAGS_BRAZO` como primera línea del log de
+cada job, que el evaluador lee). Diez jobs de un volcán y 24 días: 1,5 a 3 h cada uno, en dos tandas
+(`max-parallel` del workflow); el run entero, del orden de 4 a 6 h.
 
 ## 3. Ventana, referencia, fecha de despacho y sustrato
 
@@ -78,24 +82,34 @@ etiqueta y el tope de cada brazo). Diez jobs de un volcán y 24 días: del orden
 1. **Cobertura pareja** entre los diez brazos, y **cada alerta de 1 MW o más con record en todos los brazos**
    (A108). Si falla, se repite el job corto con el mismo código; no se interpreta.
 2. **Misma versión de producto por pasada** en las alertas de 1 MW o más. Si no, INDECIDIBLE y se re-despacha.
-3. **Determinismo**: G contra B, misma decisión de publicar en 98 de cada 100 pasadas o más, **en cada
+3. **Cableado de CADA brazo** (v2, N3: antes sólo se comprobaba E). Dos pruebas independientes: (a) la línea
+   `FLAGS_BRAZO` del log del job tiene que traer exactamente los flags que el brazo declara (Test 1,
+   conectiva, banda 22, etiqueta, tope, perfil y directorio); (b) la huella del flag en los records, donde
+   la hay: un brazo sin Test 1 no tiene ningún `triggered_test1`; uno sin tope no tiene ningún `d9_capped`;
+   en uno con la etiqueta desde el cúmulo, la etiqueta MODIS es la del centroide contra el inner de 5 km
+   **en las pasadas donde el cúmulo es el mismo que en su par sin la etiqueta** (v2, N4: no se exige igualdad
+   de magnitud entre dos jobs, que no son deterministas bit a bit). E además tiene que publicar la pasada
+   del 2026-10-01 08:35. Un brazo mal cableado deja INDECIDIBLE toda predicción que lo use, y se traza por
+   etapa (A75).
+4. **Determinismo**: G contra B, misma decisión de publicar en 98 de cada 100 pasadas o más, **en cada
    sensor por separado**.
-4. **Cableado de la etiqueta**: E tiene que ser **exactamente C0 reetiquetado**, pasada por pasada (misma
-   magnitud del cúmulo, mismo tope, etiqueta MODIS igual a la que da el centroide del cúmulo contra el
-   inner de 5 km), y publicar la pasada del 2026-10-01 08:35. Si no, el cableado está roto: INDECIDIBLE para
-   E, KE y KET, y se traza por etapa (A75).
-5. **Identidad del predicado del tablero**: el de node, a través de `armar_tabla.py`.
+5. **Identidad del predicado del tablero**: el de node, a través de `armar_tabla.py`; el evaluador imprime el
+   sha256 de `frontend/index.html` que usó (v2, N7).
 
 **El evaluador está probado antes de despachar** (`probar_medir_ndc.py`, sobre producción y la referencia
-congelada): con todos los brazos iguales a producción (salvo E reetiquetado) da controles OK, cableado OK y
-cero pérdidas; con una pérdida sembrada en la alerta VIIRS 375 del 2026-09-29 05:18 (5,73 MW), P1 la veta y
-lista esa pasada; con E sin reetiquetar, el control 4 acusa cableado roto. Seis de seis.
+congelada, con brazos fabricados que imitan la huella de cada flag y su línea `FLAGS_BRAZO`). Un nulo y un
+control positivo por cada defecto que dice detectar, **10 de 10**: nulo con controles, cableado y P1 a P5 en
+OK; pérdida sembrada en F (alerta VIIRS 375 del 2026-09-29 05:18, 5,73 MW) da P1 VETADO; la misma en B da P2
+VETADO; KE sin la alerta MODIS del 1-oct 08:35 da P4 FALLA; T0 publicando una pasada topada da P5 FALLA; un
+log de F con la conectiva `min` da F mal cableado y P1 INDECIDIBLE; T0 con `d9_capped` da T0 mal cableado; E
+sin reetiquetar da E mal cableado.
 
 ## 5. Predicciones y reglas (sección 5 a 9 de `medir_ndc.py`)
 
-Una pérdida es una alerta de MIROVA de 1 MW o más que el control publica y el brazo no. **Las pérdidas en
-pasadas donde el gemelo G también cambia de decisión respecto de B se descuentan** (no son atribuibles al
-brazo: verificador H6).
+Una pérdida es una alerta de MIROVA de 1 MW o más que el control publica y el brazo no. **Una pérdida en una
+pasada donde el gemelo G también cambia de decisión respecto de B no se descuenta: deja ese par
+INDECIDIBLE**, y esa regla sólo vale para los pares cuyo control es de la familia de B (G mide el ruido de B,
+no el de C0); contra C0 toda pérdida cuenta (v2, N5).
 
 | # | qué | regla | si falla |
 |---|---|---|---|
@@ -103,9 +117,9 @@ brazo: verificador H6).
 | **P2** (veto VIIRS) | B no pierde ninguna contra C0 | cero | quitar el Test 1 vetado en erupción |
 | **P3** (atribución MODIS) | J no pierde ninguna alerta MODIS de 1 MW o más contra B (banda 22), y K ninguna contra J (`max`) | cero en cada par | se atribuye la pérdida al ingrediente que la produce |
 | **P4** (candidato MODIS) | KE y KET publican **todas** las alertas MODIS de 1 MW o más | todas | el candidato completo no sirve en erupción |
-| **P5** (el tope no decide) | T0 contra C0 y KET contra KE: **ninguna decisión de publicar cambia**; el tope sólo mueve magnitud | cero cambios | el tope D9 decide publicación (afecta `isSummitDetection`, que lee `vrp_mw`) y hay que tratarlo como compuerta, no como cota |
+| **P5** (el tope no decide) | T0 contra C0 y KET contra KE, **sólo en las pasadas que el control tiene topadas** (las demás miden el ruido entre jobs y se informan aparte; v2, N2): ninguna decisión de publicar cambia | cero cambios | el tope D9 decide publicación y hay que tratarlo como compuerta, no como cota. **Mecanismo y dirección** (v2, N1): el filtro de cirrus del tablero (`isCirrusArtifact`, `frontend/index.html`) oculta un cúmulo de más de 10 MW con temperatura máxima bajo 0 °C; con el tope en 5 MW ese filtro nunca se activa. Quitar el tope puede entonces **ocultar** pasadas, no sólo mostrarlas: si KET contra KE falla porque se ocultan negativos, la lectura es "el tope hace visibles falsos positivos". En C0 contra T0 casi no hay sustrato (las topadas ya salen `far`) |
 | P6 (informativa) | costo MODIS: publicaciones en negativos limpios de reposo y de actividad por brazo, **separando las topadas en 5 MW** | se informa | el costo en falsos se decide en la corrida de 11 volcanes |
-| P7 (informativa) | recall por tramo (bajo y sobre 1 MW) y razón de magnitud contra MIROVA en actividad, por brazo y sensor; T0 y KET muestran la magnitud sin tope | se informa | |
+| P7 (informativa) | recall por tramo (bajo y sobre 1 MW) y razón de magnitud contra MIROVA en actividad, por brazo y sensor; además, la magnitud del cúmulo con y sin tope en cada pasada que C0 tiene topada (v2, N6) | se informa | P3 y P4 se deciden sobre una a tres alertas MODIS: son casos, no tasas (v2, N8) |
 | P8 (informativa) | lo que cada brazo publica el 26 y 27 de septiembre, antes de la primera alerta de MIROVA, con magnitud y distancia del cúmulo | se informa: sólo la cronología de OVDAS o un SWIR de alta resolución dirían si era calor real | |
 
 **Veredicto por brazo** (sólo con los controles de §4 en OK): VETADO si falla su P1, P2 o P4; P3 atribuye; P5
@@ -139,3 +153,19 @@ local de los brazos completos; el control 4 es el ensayo del cableado.
 | H6 (3): la cadena F contra B escondía pérdidas contra C0; veto cero con 2 % de tolerancia | P1 contra B y contra C0; pérdidas descontadas donde el gemelo cambia |
 | H14 (3): el tope D9 no estaba | brazos T0 y KET, P5, y P6 separa las topadas |
 | menores: perfiles fuera de main, el workflow no imprimía el flag, "13 alertas" eran 11, P7 censurada, alertas sin record | despacho desde main, el workflow imprime etiqueta y tope, cifra corregida, T0 y KET dan la magnitud sin tope, control 4.1 |
+
+## 9. Qué cambió de la versión 2 a la 3, y por qué
+
+| hallazgo del segundo verificador | cambio |
+|---|---|
+| N1 (3): P5 citaba el mecanismo equivocado | P5 nombra el filtro de cirrus del tablero y la dirección posible (quitar el tope puede ocultar) |
+| N2 (3): P5 y el determinismo no toleraban el ruido entre jobs | P5 sólo en las pasadas topadas por el control; el resto se informa como ruido |
+| N3 (3): verde sobre un brazo que no aplicó su flag | cableado de los diez brazos por log (`FLAGS_BRAZO`) y por huella en los records |
+| N4 (3): el cableado de E exigía igualdad exacta de magnitud | la etiqueta se compara sólo donde el cúmulo es el mismo |
+| N5 (3): el descuento por el gemelo borraba pérdidas | una pérdida ruidosa deja el par INDECIDIBLE, y sólo en la familia de B |
+| N6 (2): T0 no informaba la magnitud sin tope | se imprime pasada por pasada |
+| N7 (2): el control del predicado no lo corría nadie | el evaluador imprime el sha256 de `frontend/index.html` |
+| N8 (2): P3 y P4 sobre una o dos alertas | dicho en P7: son casos, no tasas |
+| N9 (2): la prueba truncaba la salida y no tenía positivos de P2 a P5 | salida completa por caso en archivo; positivos de P2, P4, P5, flag, tope y etiqueta (10 de 10) |
+| H13 de la v1 (1): "una hora por job" | 1,5 a 3 h por job, 4 a 6 h el run |
+| N10 (sin verificar): el token rotado | verificado: el NRT despachado el 2026-10-08 (run 37821953924) terminó en verde y rellenó el hueco del 3 al 8 de octubre |
