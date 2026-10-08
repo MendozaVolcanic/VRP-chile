@@ -1,0 +1,25 @@
+# Prueba S150 de Nevados de Chillan. Brazo KE: el brazo K de S149 + etiqueta MODIS derivada del cumulo.
+#
+# EL FENOMENO. Es el candidato completo para MODIS: sin el Test 1 integrado, banda 22 primaria (la que
+# usa el paper, Coppola 2016a p. 3), conectiva de prosa (max), y la etiqueta summit/far sacada del
+# cumulo y no del pixel mas caliente de la escena (ver _s150_etiqueta_cumulo.yaml). En Lascar, marzo a
+# junio, K separo alertas de negativos (91,8 % contra 2,1 %, docs/S150_RESULTADO_MESES.md); Nevados de
+# Chillan en erupcion es el primer sustrato MODIS fuera de Lascar.
+#
+# QUE CAMBIA respecto del brazo K (_s149_ab_sin_test1_b22_max): UNA cosa, la etiqueta MODIS.
+# CRITERIO: pre-registrado y commiteado ANTES de correr, en experiments/_s150_ndc/PREREGISTRO_NDC.md
+# NO OPERACIONAL: data_subdir aislado, fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s150_k_etiqueta
+description: >
+  Brazo KE: sin Test 1, banda 22 primaria, conectiva max y etiqueta MODIS desde el cumulo.
+
+enable_modis_b22_primary: true
+enable_modis_distance_class_from_cluster: true
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+output:
+  data_subdir: _s150_k_etiqueta

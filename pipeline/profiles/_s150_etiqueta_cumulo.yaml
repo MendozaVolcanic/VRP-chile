@@ -1,0 +1,21 @@
+# Prueba S150 de Nevados de Chillan. Brazo E: PRODUCCION + etiqueta MODIS derivada del cumulo.
+#
+# EL FENOMENO. En MODIS la etiqueta summit/far se deriva del pixel de MIR absoluta mas caliente de
+# toda la escena (`final_hotspot`), que a 1 km lo domina el gradiente de altitud o cualquier otro foco
+# (A69). Durante la erupcion de Nevados de Chillan, la pasada MODIS_AQUA del 2026-10-01 08:35 (MIROVA
+# 5,18 MW) tenia el cumulo a 0,9 km del crater con 2,29 MW, pero el pixel mas caliente de la escena cayo
+# a 32,8 km: la etiqueta quedo `far` y el tablero la oculto. Es el bug A46/A81 en vivo.
+#
+# QUE CAMBIA respecto de produccion (_s146_ab_control): UNA cosa, la etiqueta MODIS sale del
+# `primary_cluster` (flag S132, ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER).
+# CRITERIO: pre-registrado y commiteado ANTES de correr, en experiments/_s150_ndc/PREREGISTRO_NDC.md
+# NO OPERACIONAL: data_subdir aislado, fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s150_etiqueta_cumulo
+description: >
+  Brazo E: produccion con la etiqueta summit/far de MODIS derivada del cumulo primario.
+
+enable_modis_distance_class_from_cluster: true
+
+output:
+  data_subdir: _s150_etiqueta_cumulo
