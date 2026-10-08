@@ -88,3 +88,17 @@ jobs:
               --title "⚠ Auto-audit semanal FUERA DE BANDA — $(date -u +%F)" \
               --body "$(printf 'El auto-audit semanal (criterios eje2 S119, ventana rodante 60d) detectó paridad fuera de banda:\n\n%s\n\nDetalle: `data/audit_continuous/latest.json` · Bandas: recall crater ref-5pp, magnitud [0.5-2.0]x.\nProtocolo: verificar data fresca primero (A8), clasificar categoría física (A54) antes de proponer fix.' "$(cat /tmp/flags.txt)")"
           fi
+          # S150 (auditoria S150, D-02): DEGRADADO no abria issue, y es el veredicto de un apagon del NRT
+          # o de un scraper muerto, o sea justo lo que alguien tiene que saber. Un issue por incidente:
+          # si ya hay uno abierto con este titulo, no se abre otro.
+          if [ "$VERDICT" = "DEGRADADO" ]; then
+            ABIERTOS=$(gh issue list --state open --search "in:title Auto-audit semanal DEGRADADO" --json number --jq 'length')
+            if [ "$ABIERTOS" = "0" ]; then
+              python -c "import json; print('\n'.join('- '+a for a in json.load(open('data/audit_continuous/latest.json'))['cobertura']['avisos']))" > /tmp/avisos.txt
+              gh issue create \
+                --title "⚠ Auto-audit semanal DEGRADADO — $(date -u +%F)" \
+                --body "$(printf 'El auto-audit semanal no puede interpretar esta ventana:\n\n%s\n\nUn DEGRADADO no es una falla de detección: suele ser un apagón del NRT (revisar nrt-healthcheck y el vencimiento de EARTHDATA_TOKEN) o el scraper de MIROVA detenido.\nDetalle: `data/audit_continuous/latest.json`.' "$(cat /tmp/avisos.txt)")"
+            else
+              echo "ya hay un issue DEGRADADO abierto; no se abre otro"
+            fi
+          fi

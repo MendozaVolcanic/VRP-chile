@@ -44,9 +44,12 @@ reposo.
 **Arreglo por familia, en orden:**
 1. **Tú**: activar "Watch" en VRP-chile (al menos Issues) y revisar si llegan los correos de Actions.
 2. **Yo**: el monitor compara la fecha de la corrida más nueva contra la hora actual antes de cerrar, y
-   cuenta también las corridas `workflow_dispatch`.
+   cuenta también las corridas `workflow_dispatch`. **HECHO S150** (`scripts/nrt_monitor_decision.js`, `tests/test_nrt_monitor_decision_s150.py`):
+   ordena, usa las tres más nuevas y, si la más nueva tiene más de 12 h, no alerta ni cierra (SIN DATO).
 3. **Yo**: la auditoría semanal separa "noche sin datos nuestros" de "noche sin detección", y DEGRADADO abre
-   issue.
+   issue. **HECHO S150** (`scripts/auto_audit_weekly.py`, `tests/test_auto_audit_cobertura_s150.py`): el recall
+   excluye las noches sin ningún record nuestro y las informa como `noches_sin_datos`; la cobertura cuenta días
+   con datos y avisa si faltan más de un día al final de la ventana; DEGRADADO abre un issue (uno por incidente).
 4. **Yo, con tu visto bueno** (es configuración de tu Claude Code): un hook de inicio de sesión que lea los
    issues abiertos con etiqueta de alerta y los días que le quedan al token, y lo diga al empezar.
 
