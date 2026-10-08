@@ -24,25 +24,35 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      # S150: la decision vive en scripts/nrt_monitor_decision.js (probada en
+      # tests/test_nrt_monitor_decision_s150.py); hace falta el repo en disco para cargarla.
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/nrt_monitor_decision.js
+          sparse-checkout-cone-mode: false
       - name: Inspeccionar últimas 3 corridas del cron NRT
         uses: actions/github-script@v7
         with:
           script: |
+            // S150 (auditoria S150, A-2): sin filtro por evento (el cron externo despacha
+            // workflow_dispatch) y pidiendo mas de 3, porque la API puede devolverlas desordenadas o
+            // viejas; la funcion ordena, toma las 3 mas nuevas y se niega a decidir si son viejas.
+            const { decidir } = require(`${process.env.GITHUB_WORKSPACE}/scripts/nrt_monitor_decision.js`);
             const { data } = await github.rest.actions.listWorkflowRuns({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'nrt.yml',
-              per_page: 3,
+              per_page: 20,
               status: 'completed',
-              event: 'schedule',
             });
 
-            const runs = data.workflow_runs || [];
-            console.log(`Últimas ${runs.length} corridas completadas del cron NRT:`);
-            runs.forEach(r => console.log(`  ${r.created_at} → ${r.conclusion} (${r.html_url})`));
+            const d = decidir(data.workflow_runs || [], Date.now(), 12);
+            const runs = d.usadas;
+            console.log(`Decision: ${d.accion} (${d.motivo})`);
+            runs.forEach(r => console.log(`  ${r.created_at} [${r.event}] → ${r.conclusion} (${r.html_url})`));
 
-            if (runs.length < 3) {
-              console.log('Menos de 3 corridas completadas para evaluar — sin acción.');
+            if (d.accion === 'sin_dato') {
+              console.log('SIN DATO: no se alerta ni se cierra nada.');
               return;
             }
 
@@ -57,14 +67,14 @@ jobs:
             const abierto = existing.data.find(i => i.title === TITLE);
 
             const failures = runs.filter(r => r.conclusion === 'failure' || r.conclusion === 'timed_out');
-            if (failures.length < 3) {
+            if (d.accion !== 'alerta') {
               console.log(`Solo ${failures.length}/${runs.length} fallaron — sin alerta.`);
               // S123: señal de RECUPERACIÓN. Si las 3 últimas salieron verdes y
               // quedó un issue abierto, cerrarlo. Sin esto el issue queda en rojo
               // para siempre y deja de significar algo: #336 lleva abierto desde
               // el 2026-06-04 con 58 comentarios, atravesando varias caídas y
               // recuperaciones. El rojo permanente es indistinguible del ruido.
-              if (abierto && failures.length === 0) {
+              if (abierto && d.accion === 'recuperado') {
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
@@ -113,7 +123,7 @@ jobs:
               '\n\nVerificar:\n' +
               '1. ¿Cambió algo en el último merge a `main`?\n' +
               '2. ¿NASA Earthdata (CMR / LANCE) está caído? (https://lance.modaps.eosdis.nasa.gov/)\n' +
-              '3. ¿Credenciales `EARTHDATA_USERNAME`/`PASSWORD` siguen válidas? (revisar Settings → Secrets)\n' +
+              '3. ¿El secreto `EARTHDATA_TOKEN` venció? (dura 60 días; el issue de nrt-healthcheck avisa con 10 días. El par usuario y clave NO sirve de respaldo: está vencido, A71)\n' +
               '4. ¿Algún test rompiendo? (ver `pytest tests/`)\n\n' +
               'Generado por `.github/workflows/nrt-monitor.yml`.';
 

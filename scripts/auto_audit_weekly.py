@@ -260,6 +260,54 @@ def _csv_ultima_fecha(path):
         return None
 
 
+# --- S150 (auditoria S150, D-02): apagon no es falla de deteccion ---
+# El 2026-10-05 este audit abrio #757 ("recall VIIRS 375 bajo la banda") cuando 11 de sus 14 fallos eran
+# noches del apagon del NRT (token vencido) sin NINGUN record nuestro. Dos defectos: el denominador del
+# recall contaba esas noches, y la guarda de cobertura contaba dias con DETECCION en el crater (no dias con
+# DATOS) y no miraba la cola de la ventana, que es justo donde vive un apagon en curso: diez dias sin
+# datos al final dejan 83,6 %, sobre el umbral de 80 %. Test: tests/test_auto_audit_cobertura_s150.py.
+MAX_COLA_SIN_DATOS_DIAS = 1   # hoy puede no tener records todavia (el NRT procesa con retraso)
+
+
+def cobertura_de_ventana(dias_con_datos, win, hoy):
+    """Dias con CUALQUIER record nuestro (no solo con deteccion) y la cola sin datos al final."""
+    d0 = datetime.fromisoformat(win[0]).date()
+    dias_ventana = (hoy - d0).days + 1
+    dentro = {d for d in dias_con_datos if win[0] <= d <= win[1]}
+    pct = round(100.0 * len(dentro) / dias_ventana, 1)
+    ultimo = max(dentro) if dentro else None
+    cola = (hoy - datetime.fromisoformat(ultimo).date()).days if ultimo else dias_ventana
+    avisos = []
+    if pct < MIN_COVERAGE_PCT:
+        avisos.append(f"cobertura propia {pct}% < {MIN_COVERAGE_PCT}% ({len(dentro)}/{dias_ventana} días con datos)")
+    if cola > MAX_COLA_SIN_DATOS_DIAS:
+        avisos.append(f"{cola} días sin datos nuestros al final de la ventana (último dato {ultimo}): "
+                      "probable apagón del NRT en curso, revisar nrt-healthcheck y el token")
+    return {"cobertura_propia_pct": pct, "dias_con_datos": len(dentro), "dias_ventana": dias_ventana,
+            "ultimo_dia_con_datos": ultimo, "cola_sin_datos_dias": cola, "avisos": avisos}
+
+
+def recall_por_sensor(mir, vistos, ours, sensores, vols):
+    """Recall sobre noches con alerta de MIROVA EN QUE TENEMOS ALGUN RECORD. Las noches sin ningun record
+    nuestro del mismo sensor (apagon, gránulo no bajado) se informan aparte: no miramos != no vimos."""
+    out = {}
+    for s in sensores:
+        n = c = d = sin_datos = 0
+        for (vol, b, fecha) in mir:
+            if b != s or vol not in vols:
+                continue
+            if (vol, b, fecha) not in vistos:
+                sin_datos += 1
+                continue
+            n += 1
+            o = ours.get((vol, b, fecha))
+            c += bool(o and o["crater"]); d += bool(o and o["dash"])
+        out[s] = {"n_noches": n, "noches_sin_datos": sin_datos,
+                  "recall_crater_pct": round(c / n * 100, 1) if n else None,
+                  "recall_dash_pct": round(d / n * 100, 1) if n else None}
+    return out
+
+
 def main():
     today = datetime.now(timezone.utc).date()
     win = ((today - timedelta(days=WINDOW_DAYS)).isoformat(), today.isoformat())
@@ -292,6 +340,7 @@ def main():
 
     # 2. Nuestros records (mismos criterios crater/dash del eje2 S119) + integridad
     ours = defaultdict(lambda: {"crater": [], "dash": [], "npix": []})
+    vistos = set()   # S150: (vol, bucket, fecha) con al menos un record nuestro
     integrity = {"parse_errors": [], "duplicates_total": 0}
     for vol in VOLS:
         path = os.path.join(ROOT, "data", "mirova_equivalent", vol + ".json")
@@ -312,6 +361,7 @@ def main():
             b = our_bucket(rec.get("sensor", ""))
             if b is None:
                 continue
+            vistos.add((vol, b, dt[:10]))   # S150: hubo dato, haya o no deteccion
             pc = rec.get("primary_cluster") or {}
             vrp = pc.get("vrp_mw") or 0.0
             cdist = pc.get("centroid_dist_km")
@@ -359,12 +409,9 @@ def main():
                         else "3-5px" if _n <= 5 else "6+px")
                 ratios_by_npix[_bin].append(_r)
 
-    recall = {}
-    for s in SENSORS:
-        n = agg[s]["n"]
-        recall[s] = {"n_noches": n,
-                     "recall_crater_pct": round(agg[s]["c"] / n * 100, 1) if n else None,
-                     "recall_dash_pct": round(agg[s]["d"] / n * 100, 1) if n else None}
+    # S150 (D-02): el recall se mide sobre las noches en que tenemos algun record; las demas se
+    # informan como `noches_sin_datos` (no miramos != no vimos). `agg` queda sólo para la magnitud.
+    recall = recall_por_sensor(mir, vistos, ours, SENSORS, set(VOLS))
     magnitud = {v: {"n_noches": len(r), "ratio_mediano": round(statistics.median(r), 3)}
                 for v, r in sorted(ratios_by_vol.items())}
 
@@ -386,9 +433,9 @@ def main():
         flags.append(f"integridad: {integrity['duplicates_total']} records duplicados (datetime,sensor)")
 
     # --- S124: cobertura de la ventana, ANTES de interpretar los flags ---
-    dias_ventana = WINDOW_DAYS + 1
-    dias_nuestros = {d for (_v, _s, d) in ours.keys()}
-    cobertura_pct = round(100.0 * len(dias_nuestros) / dias_ventana, 1)
+    # S150 (D-02): dias con DATOS (no con deteccion) y la cola sin datos al final de la ventana.
+    cob = cobertura_de_ventana({d for (_v, _s, d) in vistos}, win, today)
+    dias_ventana, cobertura_pct = cob["dias_ventana"], cob["cobertura_propia_pct"]
 
     # Frescura del ground truth: se mide sobre TODO el CSV, no sobre las ALERTAS.
     # Un período sin alertas es información legítima (los volcanes pueden estar
@@ -401,12 +448,7 @@ def main():
         # así que se parsea vía datetime para no depender del import sombreado.
         gt_stale_dias = (today - datetime.fromisoformat(gt_ultima).date()).days
 
-    cobertura_avisos = []
-    if cobertura_pct < MIN_COVERAGE_PCT:
-        cobertura_avisos.append(
-            f"cobertura propia {cobertura_pct}% < {MIN_COVERAGE_PCT}% "
-            f"({len(dias_nuestros)}/{dias_ventana} días con datos): el recall de esta "
-            f"ventana NO es interpretable — las noches sin datos cuentan como fallos")
+    cobertura_avisos = list(cob["avisos"])
     if gt_stale_dias is None:
         cobertura_avisos.append("no se pudo leer la fecha del ground truth: referencia sospechosa")
     elif gt_stale_dias > MAX_GT_STALE_DAYS:
@@ -416,8 +458,10 @@ def main():
 
     cobertura = {
         "cobertura_propia_pct": cobertura_pct,
-        "dias_con_datos": len(dias_nuestros),
+        "dias_con_datos": cob["dias_con_datos"],
         "dias_ventana": dias_ventana,
+        "ultimo_dia_con_datos": cob["ultimo_dia_con_datos"],
+        "cola_sin_datos_dias": cob["cola_sin_datos_dias"],
         "gt_ultima_fecha_csv": gt_ultima,
         "gt_stale_dias": gt_stale_dias,
         # Transparencia: un filtro que descarta en silencio es tan malo como no
