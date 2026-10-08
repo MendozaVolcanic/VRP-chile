@@ -1,0 +1,25 @@
+# Prueba S150 de Nevados de Chillan. Brazo KET: el brazo KE sin el tope D9 de 5 MW.
+#
+# EL FENOMENO. El tope D9 nacio para frenar magnitudes infladas del camino contextual bajo cirrus, con la
+# banda 21 ruidosa y la conectiva `min`. El candidato completo de MODIS (KE: sin Test 1, banda 22, `max`,
+# etiqueta desde el cumulo) cambia justo esos tres ingredientes, asi que el tope puede haber quedado sin
+# objeto y en una erupcion recorta magnitud real. Ver _s150_sin_tope_d9.yaml.
+#
+# QUE CAMBIA respecto del brazo KE (_s150_k_etiqueta): UNA cosa, path_d_only_cap_mw = null.
+# CRITERIO: pre-registrado y commiteado ANTES de correr, en experiments/_s150_ndc/PREREGISTRO_NDC.md
+# NO OPERACIONAL: data_subdir aislado, fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s150_k_etiqueta_sin_tope
+description: >
+  Brazo KET: sin Test 1, banda 22, conectiva max, etiqueta MODIS desde el cumulo y sin el tope D9.
+
+enable_modis_b22_primary: true
+enable_modis_distance_class_from_cluster: true
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+  path_d_only_cap_mw: null
+
+output:
+  data_subdir: _s150_k_etiqueta_sin_tope
