@@ -62,9 +62,13 @@ cada job, que el evaluador lee). Diez jobs de un volcán y 24 días: 1,5 a 3 h c
 
 - **Ventana**: 2026-09-14 a 2026-10-07. Reposo del 14 al 27 de septiembre; actividad del 28 en adelante. No
   cruza el 2026-08-28 23:00 UTC (#535). Posterior al 2026-06-13: **decide la etiqueta con tabla y OCR** (A119).
-- **Referencia congelada** desde Mirova-v1 (commit `83aba69`), no desde el snapshot local, que el 2026-10-08
-  tenía su última sincronización el 2026-10-05: `_congelado_ndc/` con sha256 en `MANIFIESTO.json`
-  (`congelar_desde_remoto.py`). Los CSV están en git (forzados: `*.csv` está en `.gitignore`).
+- **Referencia congelada** desde Mirova-v1 (commit `83aba69`), no desde el snapshot local
+  `data/mirova_reference/mirova_v1_snapshot/`, cuyo último commit era del 2026-10-05: `_congelado_ndc/` con
+  sha256 en `MANIFIESTO.json` (`congelar_desde_remoto.py`). Los CSV están en git (forzados: `*.csv` está en
+  `.gitignore`). ⚠️ **Corregido S150 por el auditor A**: ese snapshot no lo actualiza la sincronización
+  horaria sino sólo la auditoría semanal; la sincronización no estaba detenida (`latest_consolidado.csv`
+  estaba al día). Y las 441 filas de diferencia eran de toda la ventana y de todos los volcanes, no sólo de
+  Nevados de Chillán. Congelar desde el remoto del dueño sigue siendo lo correcto (feedback S139).
 - **Fecha de despacho, 2026-10-13 o después** (verificador H5): NASA publica el producto estándar 3 a 5 días
   después de la adquisición, y los jobs corren en dos tandas; antes de esa fecha unos brazos podrían ver el
   gránulo de tiempo casi real y otros el estándar en las mismas pasadas fuertes. El evaluador además

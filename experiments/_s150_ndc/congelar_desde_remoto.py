@@ -2,8 +2,9 @@
 """S150. Congela la referencia de MIROVA para la prueba de Nevados de Chillan, bajandola del repo
 Mirova-v1 (la fuente del dueño), no del snapshot local de VRP Chile.
 
-POR QUE: el 2026-10-08 el snapshot local (data/mirova_reference/mirova_v1_snapshot/) tenia su ultima
-sincronizacion el 2026-10-05, asi que le faltaban los ultimos dias de la erupcion. La referencia es del
+POR QUE: el 2026-10-08 el snapshot local (data/mirova_reference/mirova_v1_snapshot/) tenia su ultimo commit
+el 2026-10-05, asi que le faltaban los ultimos dias de la erupcion. (Corregido S150, auditor A: ese snapshot
+solo lo actualiza la auditoria semanal; la sincronizacion horaria no estaba detenida.) La referencia es del
 remoto del dueño (feedback S139). Misma logica de recorte y manifiesto que
 experiments/_s149_prereg_invierno/congelar_referencia.py: [desde - 1 dia, hasta + 2 dias], sha256, filas,
 y ademas la hora de descarga y el commit de Mirova-v1 del que salio.
