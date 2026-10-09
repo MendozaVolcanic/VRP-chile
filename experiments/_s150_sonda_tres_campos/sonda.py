@@ -138,6 +138,8 @@ class Captura:
             self.cap["sp_kw"] = {k: ("ARRAY" if isinstance(v, np.ndarray) else v) for k, v in kw.items()
                                  if k not in ("nti", "eti", "active_mask")}
             self.cap["sp_out_n"] = int(np.sum(out))
+            am = kw.get("active_mask")
+            self.cap["sp_in_n"] = int(np.sum(am)) if am is not None else None   # diagnostico: debe ser = fp_hot
         return out
 
     def envolver_regrid(self, fn):
@@ -150,6 +152,15 @@ class Captura:
     def limpiar_pasada(self):
         self.cache.clear()
         self.cap.clear()
+
+
+def rss_max_mb():
+    """Memoria residente maxima del proceso hasta ahora, en MB (Linux: ru_maxrss en KB). None en Windows."""
+    try:
+        import resource
+        return round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0, 1)
+    except Exception:
+        return None
 
 
 def gname(g):
@@ -287,7 +298,7 @@ def procesar_pasada(ctx, pasada, l1b, geo, tif=None, campos_a_correr=None):
                     c_lat, c_lon, radio = centro_grilla[0], centro_grilla[1], max(vol["radius_km"], 26.0)
                 cap.capturar = (nombre_c == "max")
                 if cap.capturar:
-                    for k in ("fp_kw", "fp_hot", "fp_diag", "sp_kw", "sp_out_n", "geo_grilla", "fp_eti_id"):
+                    for k in ("fp_kw", "fp_hot", "fp_diag", "sp_kw", "sp_out_n", "sp_in_n", "geo_grilla", "fp_eti_id"):
                         cap.cap.pop(k, None)
                 rec = pv.calculate_vrp(
                     l1b, geo, c_lat, c_lon, radio,
@@ -309,6 +320,7 @@ def procesar_pasada(ctx, pasada, l1b, geo, tif=None, campos_a_correr=None):
                     rng = np.random.default_rng(int(ctx.rng_master.integers(1 << 31)))
                     ev = cp.evaluar_campo(cap.cap, g["lat"], g["lon"], fila["puntos_objetivo"], rng)
                     ev["sp_out_n_real"] = cap.cap.get("sp_out_n")
+                    ev["sp_in_n_real"] = cap.cap.get("sp_in_n")
                     if campo.startswith("tif_"):
                         ev["frac_celdas_con_dato"] = deposito.get("frac_celdas_con_dato")
                         ev["interp"] = deposito.get("info")
@@ -331,6 +343,7 @@ def procesar_pasada(ctx, pasada, l1b, geo, tif=None, campos_a_correr=None):
                 pv._regrid_viirs_granule = ctx.real_regrid
                 cap.capturar = True
                 cap.cap.pop("fp_kw", None)   # soltar los arrays del granulo entero
+                cap.cap.pop("fp_hot", None)
         deposito.clear()
     fila["ok"] = not fila["errores"]
     return fila
@@ -405,6 +418,7 @@ def main():
                     pass
         fila["stamp"] = stamp
         fila["segundos"] = round(time.time() - t0, 1)
+        fila["rss_max_mb"] = rss_max_mb()   # el piloto lee esto (DISENO §10 bis): memoria del job hasta aca
         (out_dir / nombre).write_text(json.dumps(ctx.cp.a_json(fila), ensure_ascii=False), encoding="utf-8")
         cobertura["pasadas"][pasada["clave"]] = {"ok": fila["ok"], "errores": fila["errores"][:5],
                                                  "campos": sorted(fila.get("campos", {})),

@@ -41,6 +41,7 @@ R_OBJ_SENS_KM = (0.5, 1.0)   # sensibilidad informada, no decide
 N_NULO = 50           # zonas nulas por pasada y campo
 SEP_NULO_KM = 3.0     # una zona nula queda a mas de esto de cualquier punto objetivo
 MARGEN_CROP = 3       # pixeles de margen fuera del ROI al recortar el granulo nativo
+TOPE_PIXELES = 4000   # tope de la tabla por pixel; NUNCA corta un pixel final o activo (verificador S150, hallazgo 7)
 
 
 # ---------------------------------------------------------------- radiancia <-> temperatura de brillo
@@ -272,7 +273,10 @@ def evaluar_campo(cap, lat, lon, puntos_obj, rng, guardar_pixeles=True):
 
     cap: {"fp_kw": kwargs con que el pipeline llamo a first_pass_tests_2_and_3 (arrays incluidos),
           "fp_diag": diag escalar que devolvio, "sp_kw": kwargs de la llamada real a second_pass_adjacent
-          (sin arrays), "fp_hot": la mascara real del primer pase, "sp_out": la mascara real final}.
+          (sin arrays), "fp_hot": la mascara real del primer pase sobre el granulo ENTERO, "sp_out_n": la
+          cantidad real de pixeles finales del segundo pase sobre el granulo ENTERO}.
+    Con fp_hot y sp_out_n se comprueba que la replica sobre el recorte cuenta lo mismo que la corrida
+    real sobre el granulo entero en max|con_compuerta (verificador S150, hallazgo 6): "identidad_escena".
     lat, lon: geolocalizacion de esa misma corrida (swath nativo o grilla).
     puntos_obj: [(lat, lon)] de lo que B publico (zona objetivo).
 
@@ -313,6 +317,23 @@ def evaluar_campo(cap, lat, lon, puntos_obj, rng, guardar_pixeles=True):
         for k in ("mu_dnti", "sd_dnti", "mu_deti", "sd_deti")}
     res["identidad_n_pool"] = (int(d.get("n_bg_used", -1)) == st["n_pool"])
 
+    # Radiancias y peso de I04 en la varianza de dNTI del pozo (verificador S150, hallazgo 5). El TIF de
+    # MIROVA trae solo I04; esto dice cuanto de la sigma que decide la fija I04 y cuanto I05. L_i05 sale
+    # del NTI por algebra exacta: NTI = (L4 - L5) / (L4 + L5)  =>  L5 = L4 (1 - NTI) / (1 + NTI), con
+    # L4 de la misma Planck que usa el pipeline (process_viirs.py:859-863). Linealizacion de primer orden:
+    # dNTI ~ 2 L5 / (L4 + L5)^2 dL4 - 2 L4 / (L4 + L5)^2 dL5. Solo informa, no decide.
+    L4 = bt_a_rad(bt, LAMBDA_I04)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        L5 = L4 * (1.0 - nti) / (1.0 + nti)
+        dL4 = L4 - _media8(L4); dL5 = L5 - _media8(L5)
+        s = (L4 + L5) ** 2
+        t4 = 2.0 * L5 / s * dL4; t5 = -2.0 * L4 / s * dL5
+    pz = pool & np.isfinite(t4) & np.isfinite(t5)
+    vd = float(np.var(dnti[pz])) if pz.any() else 0.0
+    res["primer_pase"]["frac_var_dnti_termino_i04"] = (float(np.var(t4[pz])) / vd) if vd > 0 else None
+    res["primer_pase"]["frac_var_dnti_termino_i05"] = (float(np.var(t5[pz])) / vd) if vd > 0 else None
+    res["primer_pase"]["frac_var_dnti_linealizada"] = (float(np.var((t4 + t5)[pz])) / vd) if vd > 0 else None
+
     obj = zona(la, lo, puntos_obj, R_OBJ_KM) & roi
     objs = {r: zona(la, lo, puntos_obj, r) & roi for r in R_OBJ_SENS_KM}
     nulos = [zona(la, lo, [p], R_OBJ_KM) & roi for p in zonas_nulas(la, lo, roi, puntos_obj, rng)]
@@ -324,6 +345,9 @@ def evaluar_campo(cap, lat, lon, puntos_obj, rng, guardar_pixeles=True):
     decis = {}
     arrays = {}
     interes = (obj | (roi & is_summit & finite & ((dnti > 0.003) | (deti > 0.003))))
+    # lo que el tope de la tabla NUNCA puede cortar: el objetivo y todo pixel de cumbre activo en el
+    # primer pase o final en alguna de las 8 variantes (si no, _nuevo_en_cumbre no ve una reapertura)
+    siempre = obj.copy()
     sp_kw = dict(cap.get("sp_kw") or {})
     pozo_d26 = {"roi": roi, "test1": test1,
                 "dnti_floor": A.get("unsuitable_dnti_floor", dc.UNSUITABLE_DNTI_FLOOR_DEFAULT),
@@ -377,17 +401,41 @@ def evaluar_campo(cap, lat, lon, puntos_obj, rng, guardar_pixeles=True):
                 }
                 if guardar_pixeles:
                     interes |= final & roi & is_summit
+                    siempre |= (final | hot1) & roi & is_summit
                     clave_a = "%s_%s" % (nombre_c, "cc" if con_compuerta else "sc")
                     a = arrays.setdefault(clave_a, {"dnti2": dnti2, "deti2": deti2, "hot1": hot1})
                     a["final" + ("_d26" if pz is not None else "")] = final
     res["decision"] = decis
 
+    # Identidad contra la corrida REAL sobre el granulo ENTERO (verificador S150, hallazgo 6), en
+    # max|con_compuerta, que es la corrida capturada: la replica sobre el recorte tiene que contar los
+    # mismos pixeles del primer pase que fp_hot y los mismos finales que second_pass_adjacent real.
+    # Fuera del ROI el ETI es NaN, asi que deberian coincidir; se comprueba, no se supone.
+    dmc = decis.get("max|con_compuerta") or {}
+    fp_hot = cap.get("fp_hot")
+    n_hot_real = int(np.sum(fp_hot)) if fp_hot is not None else None
+    n_fin_real = cap.get("sp_out_n")
+    res["identidad_escena"] = {
+        "n_hot_1_real": n_hot_real, "n_hot_1_replica": dmc.get("n_hot_1_escena"),
+        "n_final_real": n_fin_real, "n_final_replica": dmc.get("n_final_escena"),
+        # None solo si no hubo captura; el evaluador lo cuenta como falla de identidad
+        "ok": (None if n_hot_real is None or n_fin_real is None else
+               bool(n_hot_real == dmc.get("n_hot_1_escena") and int(n_fin_real) == dmc.get("n_final_escena")))}
+
     if guardar_pixeles:
         idx = np.flatnonzero(interes.ravel())
-        if idx.size > 4000:          # techo de tamano: se guardan los 4000 de mayor dNTI + todo el objetivo
-            orden = np.argsort(-np.nan_to_num(dnti.ravel()[idx], nan=-9))
-            keep = set(idx[orden[:4000]].tolist()) | set(np.flatnonzero(obj.ravel()).tolist())
-            idx = np.array(sorted(keep))
+        n_interes = int(idx.size)
+        if idx.size > TOPE_PIXELES:
+            # techo de tamano: TODO lo de `siempre` (objetivo y pixeles activos o finales de cumbre en
+            # alguna variante) y, con el cupo que quede, el resto por dNTI decreciente
+            fijos = np.flatnonzero((siempre & interes).ravel())
+            resto = np.setdiff1d(idx, fijos, assume_unique=True)
+            cupo = max(0, TOPE_PIXELES - fijos.size)
+            orden = np.argsort(-np.nan_to_num(dnti.ravel()[resto], nan=-9))
+            idx = np.union1d(fijos, resto[orden[:cupo]])
+        res["tabla_pixeles"] = {"n_interes": n_interes, "n_guardados": int(idx.size),
+                                "n_siempre": int((siempre & interes).sum()),
+                                "siempre_completo": bool(np.isin(np.flatnonzero((siempre & interes).ravel()), idx).all())}
         r, c = np.unravel_index(idx, nti.shape)
 
         def col(x, nd=6):
@@ -395,13 +443,12 @@ def evaluar_campo(cap, lat, lon, puntos_obj, rng, guardar_pixeles=True):
 
         def flag(x):
             return np.asarray(x).ravel()[idx].astype(int).tolist()
-        L4 = bt_a_rad(bt, LAMBDA_I04)
         # Con esto se rehace OFFLINE cualquier decision (min o max, con o sin compuerta, pozo del segundo
         # pase con o sin filtros D26) sin volver a bajar el granulo: bt - t_bg, dNTI y dETI de los dos
         # pases, y mu, sigma, mu2, sigma2 en res["primer_pase"] y en decision[...]["segundo_pase"].
         px = {"fila": r.tolist(), "col": c.tolist(), "lat": col(la, 5), "lon": col(lo, 5),
               "dist_ancla_km": col(A["dist_km"], 3), "cumbre": flag(is_summit), "objetivo": flag(obj),
-              "bt_i04": col(bt, 3), "bt_menos_tbg": col(bt - t_bg, 3), "L_i04": col(L4, 6),
+              "bt_i04": col(bt, 3), "bt_menos_tbg": col(bt - t_bg, 3), "L_i04": col(L4, 6), "L_i05": col(L5, 6),
               "nti": col(nti, 6), "dnti": col(dnti, 6), "deti": col(deti, 6), "pasa_compuerta": flag(gate_bt)}
         for k, a in arrays.items():
             px["dnti2_" + k] = col(a["dnti2"], 6); px["deti2_" + k] = col(a["deti2"], 6)

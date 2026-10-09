@@ -15,11 +15,19 @@ name: Probe S150 tres campos (sigma del campo, D22 y D26, VIIRS 375)
 # Autentica SOLO con EARTHDATA_TOKEN (A71: el par usuario y clave esta vencido y bloquea la cuenta).
 #
 # CANDADO. Corre solo con preregistro_aprobado = "si" Y con el sello SELLO_PREREGISTRO.txt presente y
-# coincidente (lo escribe sellar.py despues del verificador). Un run verde tiene que haber medido todo
-# (A108): cada lote sale en rojo si alguna pasada no se completo.
+# coincidente (lo escribe sellar.py despues del verificador). El sello fija los archivos de la sonda Y lo
+# que decide el resultado: pipeline/, frontend/index.html, scripts/banco_paridad.py,
+# scripts/run_pipeline.py, volcanoes.yaml y este yml (verificador S150, hallazgo 3). Un run verde tiene
+# que haber medido todo (A108): cada lote sale en rojo si alguna pasada no se completo.
 #
-# SALIDAS: artefactos por lote (90 dias) y una rama propia por corrida, s150-tres-campos-<run_id>, que no
-# caduca y no toca main (no compite con el candado push-main del NRT). Archivar en _archive/ al terminar.
+# PILOTO (obligatorio antes del despacho completo, DISENO §10 bis): piloto = "si" con lotes = "1". El
+# evaluador corre con --piloto: no corre el predicado ni imprime veredictos de deteccion, solo cobertura,
+# identidad, tiempo, memoria, volumen y validacion contra el TIF, y no se crea la rama de datos. El lote
+# del piloto se vuelve a correr en el despacho completo.
+#
+# SALIDAS: artefactos por lote (90 dias) y, fuera del piloto, una rama propia por corrida,
+# s150-tres-campos-<run_id>, que no caduca y no toca main (no compite con el candado push-main del NRT).
+# Archivar en _archive/ al terminar.
 "on":
   workflow_dispatch:
     inputs:
@@ -28,9 +36,13 @@ name: Probe S150 tres campos (sigma del campo, D22 y D26, VIIRS 375)
         required: true
         default: "no"
       lotes:
-        description: "Vacio = todos los lotes de pasadas.json. O una lista separada por comas (ej. '3' para un piloto)"
+        description: "Vacio = todos los lotes de pasadas.json. O una lista separada por comas (ej. '1' para el piloto)"
         required: false
         default: ""
+      piloto:
+        description: "'si' = piloto: sin veredictos de deteccion, sin rama de datos; exige lotes (DISENO §10 bis)"
+        required: true
+        default: "si"
 
 permissions:
   contents: write
@@ -45,11 +57,22 @@ jobs:
       - name: Candado del pre-registro
         env:
           APROBADO: ${{ github.event.inputs.preregistro_aprobado }}
+          PILOTO: ${{ github.event.inputs.piloto }}
+          LOTES: ${{ github.event.inputs.lotes }}
         run: |
           if [ "$APROBADO" != "si" ]; then
             echo "::error::preregistro_aprobado no es 'si': no se corre"
             exit 1
           fi
+          if [ "$PILOTO" != "si" ] && [ "$PILOTO" != "no" ]; then
+            echo "::error::piloto debe ser 'si' o 'no' (es '$PILOTO')"
+            exit 1
+          fi
+          if [ "$PILOTO" = "si" ] && [ -z "$LOTES" ]; then
+            echo "::error::un piloto debe nombrar sus lotes (DISENO §10 bis: lotes = 1)"
+            exit 1
+          fi
+          echo "piloto=$PILOTO lotes='$LOTES'"
       - name: Credenciales presentes (un secreto ausente es string vacio, no error)
         env:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
@@ -63,7 +86,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Sello del pre-registro (sha256 con finales LF)
+      - name: Sello del pre-registro (sha256 con finales LF; sonda, pipeline, predicado, arnes, catalogo y este yml)
         run: |
           set -eo pipefail
           python experiments/_s150_sonda_tres_campos/sellar.py --verificar
@@ -178,15 +201,19 @@ jobs:
         with:
           pattern: s150-tres-campos-lote-*
           path: experiments/_s150_sonda_tres_campos/out
-      - name: Evaluador (criterio sellado en DISENO.md; predicado del tablero con node)
+      - name: Evaluador (criterio sellado en DISENO.md; predicado del tablero con node; en el piloto, sin deteccion)
         id: medir
+        env:
+          PILOTO: ${{ github.event.inputs.piloto }}
         run: |
           set +e
           set -o pipefail
           pip install --upgrade pip
           pip install numpy pyyaml pandas
           node --version
-          python experiments/_s150_sonda_tres_campos/evaluar.py --out experiments/_s150_sonda_tres_campos/out \
+          BANDERA=""
+          if [ "$PILOTO" = "si" ]; then BANDERA="--piloto"; fi
+          python experiments/_s150_sonda_tres_campos/evaluar.py --out experiments/_s150_sonda_tres_campos/out $BANDERA \
             | tee experiments/_s150_sonda_tres_campos/out/evaluacion.txt
           echo "evaluador=$?" >> "$GITHUB_OUTPUT"
       - name: Subir la evaluacion
@@ -198,8 +225,8 @@ jobs:
             experiments/_s150_sonda_tres_campos/out/evaluacion.txt
             experiments/_s150_sonda_tres_campos/out/evaluacion.json
           retention-days: 90
-      - name: Guardar en una rama propia (no caduca, no toca main)
-        if: always()
+      - name: Guardar en una rama propia (no caduca, no toca main; nunca en el piloto)
+        if: always() && github.event.inputs.piloto != 'si'
         run: |
           set -eo pipefail
           RAMA="s150-tres-campos-${GITHUB_RUN_ID}"
