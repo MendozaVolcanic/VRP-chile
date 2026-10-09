@@ -1,0 +1,29 @@
+# A/B S150. Brazo F2: el brazo F de S147 (sin Test 1, conectiva max) SIN la compuerta D22 en VIIRS 375.
+#
+# EL FENOMENO. La conectiva max limpia la sobre-publicacion (de ~36 % a ~3 % en negativos limpios, abril a
+# agosto) pero pierde 36 alertas debiles de MIROVA con etiqueta confiable (docs/S150_ALERTAS_DEBILES_MAX.md).
+# De esas, 16 son un pixel apenas mas caliente que su fondo (-1,1 a +3,0 K): la compuerta D22 (exigir
+# BT > t_bg + 3 K antes de los Tests 2 y 3; el paper no la tiene, Coppola 2016a p. 7) las bloquea en el primer
+# pase, y con min solo las rescataba el segundo pase sin condicionar. Con max el segundo pase tambien las
+# rechaza. Si MIROVA no tiene esa compuerta, quitarla deberia devolverlas sin reabrir los falsos, que max
+# sigue filtrando por la estadistica de la escena.
+#
+# Ya se probo quitar D22 en S143 (NO ADOPTAR), pero con el Test 1 encendido y la conectiva min: esa
+# combinacion satura la metrica (A114). Encima de max es una pregunta nueva.
+#
+# QUE CAMBIA respecto del brazo F (_s147_ab_sin_test1_max): UNA cosa, enable_tests_23_no_bt_gate_viirs375.
+# El flag llega al primer y al segundo pase (process_viirs.py, _eti_gate_bt y apply_bt_gate).
+# CRITERIO: pre-registrado y commiteado ANTES de correr, en experiments/_s150_ab_d22/PREREGISTRO.md
+# NO OPERACIONAL: data_subdir aislado, fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s150_max_sin_d22
+description: >
+  Brazo F2: sin Test 1, conectiva max y sin la compuerta D22 (BT > t_bg + 3 K) en VIIRS 375.
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+  enable_tests_23_no_bt_gate_viirs375: true
+
+output:
+  data_subdir: _s150_max_sin_d22

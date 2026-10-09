@@ -140,7 +140,7 @@ jobs:
           mkdir -p logs
           # S150 (verificador del pre-registro de NdC, N3): la primera linea del log deja escrito que flags
           # LEYO este job, para que el evaluador compruebe el cableado de cada brazo desde el artefacto.
-          VRP_PROFILE="$ARM_PROFILE" python -c "import json, pipeline.profile as p; print('FLAGS_BRAZO ' + json.dumps({k: getattr(p, k) for k in ('PROFILE_NAME', 'DATA_SUBDIR', 'ENABLE_TEST1_PATH', 'ENABLE_TESTS_23_PROSE_BRANCH', 'ENABLE_MODIS_B22_PRIMARY', 'ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER', 'PATH_D_ONLY_CAP_MW')}))" | grep '^FLAGS_BRAZO ' > "logs/${ARM_PROFILE}_${ARM_VOLCANO}.log"
+          VRP_PROFILE="$ARM_PROFILE" python -c "import json, pipeline.profile as p; print('FLAGS_BRAZO ' + json.dumps({k: getattr(p, k) for k in ('PROFILE_NAME', 'DATA_SUBDIR', 'ENABLE_TEST1_PATH', 'ENABLE_TESTS_23_PROSE_BRANCH', 'ENABLE_MODIS_B22_PRIMARY', 'ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER', 'PATH_D_ONLY_CAP_MW', 'ENABLE_TESTS_23_NO_BT_GATE_VIIRS375')}))" | grep '^FLAGS_BRAZO ' > "logs/${ARM_PROFILE}_${ARM_VOLCANO}.log"
           python scripts/run_pipeline.py \
             --profile "$ARM_PROFILE" \
             --volcano "$ARM_VOLCANO" \
