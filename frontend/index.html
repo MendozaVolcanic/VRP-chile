@@ -1016,14 +1016,21 @@ function toMirovaDaily(records) {
   // Usado para registros que vienen del CSV consolidado MIROVA NRT (campo
   // VRP_MW directo). NO aplica mirovaEqVrp — los records MIROVA ya son
   // cluster-contiguos por construcción.
+  // S150 (decision de Nicolas, opcion a): la referencia incluye alertas leidas de la IMAGEN de MIROVA
+  // (source "ocr"). Cada punto diario recuerda si su valor maximo vino de ahi, para dibujarlo distinto
+  // (rombo hueco): un valor del OCR puede venir de la imagen de otra pasada (docs/S150_IMAGENES_SNPP.md).
   const m = new Map();
   for (const r of records) {
     const d = (r.datetime_utc || "").slice(0, 10); if (!d) continue;
     const v = parseFloat(r.VRP_MW ?? r.vrp_mw ?? 0);
-    if (!m.has(d) || v > m.get(d)) m.set(d, v);
+    if (!m.has(d) || v > m.get(d).y) m.set(d, { y: v, ocr: r.source === "ocr" });
   }
-  return [...m.entries()].sort().map(([x, y]) => ({ x, y }));
+  return [...m.entries()].sort().map(([x, p]) => ({ x, y: p.y, ocr: p.ocr }));
 }
+
+// S150: estilo de los puntos de MIROVA segun su origen (tabla: triangulo lleno; imagen/OCR: rombo hueco).
+function mirovaPointStyle(ctx) { return ctx.raw && ctx.raw.ocr ? "rectRot" : "triangle"; }
+function mirovaPointFill(color) { return (ctx) => (ctx.raw && ctx.raw.ocr ? "transparent" : color); }
 
 // S32 P2 — VRP "MIROVA-equivalent": cluster contiguo del cráter, no integrated
 // global. Coppola 2016a SP 426.5 §2.2 "neighbor pixels connectivity": MIROVA
@@ -2448,6 +2455,12 @@ function renderDetail() {
   const vrpCanvas = el("canvas"); vrpCanvas.id = "main-chart";
   vrpCW.appendChild(vrpCanvas);
   vrpPanel.appendChild(vrpCW);
+  // S150: que significa cada simbolo de MIROVA (decision de Nicolas, opcion a).
+  const mirovaNota = el("div");
+  mirovaNota.style.cssText = "font-size:0.75rem;color:#9aa;margin-top:4px;";
+  mirovaNota.innerHTML = "MIROVA: ▲ valor de su tabla publicada · ◇ hueco = valor leído de su imagen por OCR " +
+    "(puede corresponder a otra pasada de la misma noche; no usarlo para calibrar magnitud).";
+  vrpPanel.appendChild(mirovaNota);
   chartsGrid.appendChild(vrpPanel);
 
   const secPanel = el("div", "chart-panel");
@@ -3078,8 +3091,8 @@ function renderDetail() {
           label:"MIROVA MODIS (ref.)", data:toMirovaDaily(mByS.MODIS),
           type:"line", order:0,
           borderColor:"#ff8c00", borderDash:[5,3], backgroundColor:"transparent",
-          borderWidth:2, pointRadius:4, pointStyle:"triangle",
-          pointBackgroundColor:"#ff8c00", tension:0,
+          borderWidth:2, pointRadius:4, pointStyle:mirovaPointStyle, pointBorderColor:"#ff8c00",
+          pointBackgroundColor:mirovaPointFill("#ff8c00"), tension:0,
         });
       }
       if (sensorVisible.VIIRS375 && mByS.VIIRS375.length) {
@@ -3087,8 +3100,8 @@ function renderDetail() {
           label:"MIROVA VIIRS 375m (ref.)", data:toMirovaDaily(mByS.VIIRS375),
           type:"line", order:0,
           borderColor:"#e91e63", borderDash:[5,3], backgroundColor:"transparent",
-          borderWidth:2, pointRadius:4, pointStyle:"triangle",
-          pointBackgroundColor:"#e91e63", tension:0,
+          borderWidth:2, pointRadius:4, pointStyle:mirovaPointStyle, pointBorderColor:"#e91e63",
+          pointBackgroundColor:mirovaPointFill("#e91e63"), tension:0,
         });
       }
       if (sensorVisible.VIIRS750 && mByS.VIIRS750.length) {
@@ -3096,8 +3109,8 @@ function renderDetail() {
           label:"MIROVA VIIRS 750m (ref.)", data:toMirovaDaily(mByS.VIIRS750),
           type:"line", order:0,
           borderColor:"#00bcd4", borderDash:[5,3], backgroundColor:"transparent",
-          borderWidth:2, pointRadius:4, pointStyle:"triangle",
-          pointBackgroundColor:"#00bcd4", tension:0,
+          borderWidth:2, pointRadius:4, pointStyle:mirovaPointStyle, pointBorderColor:"#00bcd4",
+          pointBackgroundColor:mirovaPointFill("#00bcd4"), tension:0,
         });
       }
     }
@@ -3201,8 +3214,8 @@ function renderDetail() {
         data: toMirovaDaily(mFiltered),
         type: "line", order: 0,
         borderColor: "#ffc107", borderDash:[5,3], backgroundColor: "transparent",
-        borderWidth: 2.5, pointRadius: 4, pointStyle:"triangle",
-        pointBackgroundColor: "#ffc107", tension: 0,
+        borderWidth: 2.5, pointRadius: 4, pointStyle:mirovaPointStyle, pointBorderColor:"#ffc107",
+        pointBackgroundColor:mirovaPointFill("#ffc107"), tension: 0,
       });
     }
     return ds;

@@ -147,7 +147,7 @@ CITAS_CLAUDE_MD = [
     ("scripts/run_pipeline.py", 234, "get_detection_anchor"),
     ("scripts/run_pipeline.py", 244, "local_kernel_bg"),
     ("pipeline/geo_utils.py", 29, "get_grid_center"),
-    ("frontend/index.html", 1466, "isValidDetection"),
+    ("frontend/index.html", 1473, "isValidDetection"),
     # S140: corridas por el import de product_version (8b) y por el fondo persistido (T7).
     ("pipeline/process_viirs.py", 83, "FLAG_DNS"),
     # S149: +1 en los tres procesadores por el import de roi1_summit_mask (A118, la caja al segundo pase).
