@@ -4,6 +4,14 @@
 > de MIROVA". Imágenes bajadas de Mirova-v1 (commit `2866830`) a `experiments/_s150_imagenes_snpp/imagenes/` con
 > `bajar_y_comparar.py`; cabeceras leídas mirando cada imagen en esta sesión.
 
+> ⚠️ **CORREGIDO S150, mismo día** (agente del arreglo del scraper, PR MendozaVolcanic/Mirova-v1#20; esta
+> sesión no lo re-verificó): el **VRP** de las 5 filas SÍ es de su propia pasada (está en la celda de su hora en
+> las imágenes Latest10NTI de MIROVA, siempre con cenit de 59° o más). Lo que viene de la pasada posterior es
+> la **distancia y la clase ALERTA** (salen de la estrella de la imagen de distancias) y las imágenes guardadas.
+> O sea: eran detecciones de MIROVA con VRP real pero **sin saber si estaban en el cráter**. No son alertas
+> del cráter confirmadas, y tampoco artefactos probados. En el caso del 22 de agosto, MIROVA no llevó el
+> 1,65 MW ni a su serie ni a latest.php.
+
 ## 0. En una línea
 
 **En los cinco casos, la imagen que el scraper guardó con la hora de la pasada de Suomi NPP es, según su propia
