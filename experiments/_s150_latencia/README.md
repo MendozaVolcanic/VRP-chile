@@ -22,3 +22,8 @@ la ventaja de MIROVA es igual o mayor que la medida.
 **Para repetir.** Bajar `pages_runs.json` (`gh run list --workflow pages-deploy.yml -L 500 --json
 createdAt,updatedAt,conclusion`) y el CSV consolidado de Mirova-v1, correr `first_seen.py <Volcanes>` desde
 esta carpeta y después `pair.py` (ajustar la ventana de fechas en `pair.py`).
+
+**Desde S150 (PR siguiente a #768)** cada record nuevo trae `first_processed_utc`: la hora en que la pasada
+entró por primera vez a nuestros datos, que se hereda en el upgrade NRT a estándar y en los reprocesos. Para las
+pasadas posteriores a ese cambio, la latencia hasta el repo es `first_processed_utc - datetime_utc` sin
+recorrer el historial de git (falta sumar el deploy de Pages, unos 2 min en mediana).
