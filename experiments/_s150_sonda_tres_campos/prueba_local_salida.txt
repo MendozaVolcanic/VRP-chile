@@ -32,11 +32,11 @@ P2b. el tope de la tabla por pixel nunca corta un pixel activo o final de cumbre
 P3. de punta a punta con granulo sintetico: calculate_vrp REAL en los cinco campos
 WARNING: pyhdf not found. Install: conda install -c conda-forge pyhdf
 flags efectivos (leidos de pipeline.process_viirs): {'ENABLE_TESTS_23_PROSE_BRANCH': True, 'ENABLE_TESTS_23_NO_BT_GATE_VIIRS375': False, 'ENABLE_UTM_REGRID': False, 'ENABLE_FIRST_PASS_TESTS_2_AND_3': True, 'ENABLE_SECOND_PASS_ADJACENT': True, 'ENABLE_ROI1_BOX_PAPER': False, 'ENABLE_SECOND_PASS_CONDITIONED': False, 'CLOUD_MASK_BT_K': 0.0}
-    nativo   n_roi 14033 | sd_dNTI 0.0006876759262587525 | identidad 1er pase {'mu_dnti': 0.0, 'sd_dnti': 0.0, 'mu_deti': 0.0, 'sd_deti': 0.0} | obj_final max True min True | dc summit
-    utm_nn   n_roi 17956 | sd_dNTI 0.0007065367391808349 | identidad 1er pase {'mu_dnti': 0.0, 'sd_dnti': 0.0, 'mu_deti': 0.0, 'sd_deti': 0.0} | obj_final max True min True | dc summit
-    tif_nn   n_roi 17956 | sd_dNTI 0.0006720936167322758 | identidad 1er pase {'mu_dnti': 0.0, 'sd_dnti': 0.0, 'mu_deti': 0.0, 'sd_deti': 0.0} | obj_final max True min True | dc summit
-    tif_lin  n_roi 17956 | sd_dNTI 0.0004172487564783235 | identidad 1er pase {'mu_dnti': 0.0, 'sd_dnti': 0.0, 'mu_deti': 0.0, 'sd_deti': 0.0} | obj_final max True min True | dc summit
-    tif_cub  n_roi 17956 | sd_dNTI 0.0005262263865548237 | identidad 1er pase {'mu_dnti': 0.0, 'sd_dnti': 0.0, 'mu_deti': 0.0, 'sd_deti': 0.0} | obj_final max True min True | dc summit
+    nativo   n_roi 14033 | sd_dNTI 0.0006876759262587525 | identidad 1er pase {'mu_dnti': 0.0, 'sd_dnti': 0.0, 'mu_deti': 0.0, 'sd_deti': 0.0} | identidad escena True
+    utm_nn   n_roi 17956 | sd_dNTI 0.0007065367391808349 | identidad 1er pase {'mu_dnti': 0.0, 'sd_dnti': 0.0, 'mu_deti': 0.0, 'sd_deti': 0.0} | identidad escena True
+    tif_nn   n_roi 17956 | sd_dNTI 0.0006720936167322758 | identidad 1er pase {'mu_dnti': 0.0, 'sd_dnti': 0.0, 'mu_deti': 0.0, 'sd_deti': 0.0} | identidad escena True
+    tif_lin  n_roi 17956 | sd_dNTI 0.0004172487564783235 | identidad 1er pase {'mu_dnti': 0.0, 'sd_dnti': 0.0, 'mu_deti': 0.0, 'sd_deti': 0.0} | identidad escena True
+    tif_cub  n_roi 17956 | sd_dNTI 0.0005262263865548237 | identidad 1er pase {'mu_dnti': 0.0, 'sd_dnti': 0.0, 'mu_deti': 0.0, 'sd_deti': 0.0} | identidad escena True
   OK   las 15 corridas terminaron sin error: []
   OK   los cinco campos evaluados: ['nativo', 'tif_cub', 'tif_lin', 'tif_nn', 'utm_nn']
   OK   nativo  identidad con la funcion real (mu/sigma, mascara 1er pase, 2o pase)
@@ -90,18 +90,19 @@ P4. validacion contra un GeoTIFF REAL de MIROVA ya en disco (no se baja nada)
 P5. evaluar.py corre sobre la salida sintetica
   OK   el evaluador devuelve veredictos: {'H1_sigma_del_campo': 'INDETERMINADO POR INSTRUMENTO: sigma dNTI del nativo distinta del A/B en 1 de 1 pasadas (frac identica 0.0, minimo 0.95)', 'D22_D26_nativo': {'D22_predicado': 'INDETERMINADO POR INSTRUMENTO: sigma dNTI del nativo distinta del A/B en 1 de 1 pasadas (frac identica 0.0, minimo 0.95)', 'D22_tests': 'INDETERMINADO POR INSTRUMENTO: sigma dNTI del nativo distinta del A/B en 1 de 1 pasadas (frac identica 0.0, minimo 0.95)', 'D26_tests': 'INDETERMINADO POR INSTRUMENTO: sigma dNTI del nativo distinta del A/B en 1 de 1 pasadas (frac identica 0.0, minimo 0.95)', 'D22_D26_tests': 'INDETERMINADO POR INSTRUMENTO: sigma dNTI del nativo distinta del A/B en 1 de 1 pasadas (frac identica 0.0, minimo 0.95)'}, 'D22_D26_tif_lin': {'D22_predicado': 'INDETERMINADO POR INSTRUMENTO: sigma dNTI del nativo distinta del A/B en 1 de 1 pasadas (frac identica 0.0, minimo 0.95)', 'D22_tests': 'INDETERMINADO POR INSTRUMENTO: sigma dNTI del nativo distinta del A/B en 1 de 1 pasadas (frac identica 0.0, minimo 0.95)', 'D26_tests': 'INDETERMINADO POR INSTRUMENTO: sigma dNTI del nativo distinta del A/B en 1 de 1 pasadas (frac identica 0.0, minimo 0.95)', 'D22_D26_tests': 'INDETERMINADO POR INSTRUMENTO: sigma dNTI del nativo distinta del A/B en 1 de 1 pasadas (frac identica 0.0, minimo 0.95)'}}
   OK   identidad: 0 pares pasada-campo fallan
-        predicado del tablero (node) por corrida, la perdida sintetica: {'nativo|max': 1.0, 'nativo|min': 1.0, 'nativo|max_sin_compuerta': 1.0, 'utm_nn|max': 1.0, 'utm_nn|min': 1.0, 'utm_nn|max_sin_compuerta': 1.0, 'tif_lin|max': 1.0, 'tif_lin|min': 1.0, 'tif_lin|max_sin_compuerta': 1.0, 'tif_cub|max': 1.0, 'tif_cub|min': 1.0, 'tif_cub|max_sin_compuerta': 1.0, 'tif_nn|max': 1.0, 'tif_nn|min': 1.0, 'tif_nn|max_sin_compuerta': 1.0}
-  OK   el predicado corrio sobre las 15 corridas
+        predicado del tablero (node) por corrida, la perdida sintetica: {'nativo|max': 1, 'nativo|max_sin_compuerta': 1, 'nativo|min': 1, 'tif_cub|max': 1, 'tif_cub|max_sin_compuerta': 1, 'tif_cub|min': 1, 'tif_lin|max': 1, 'tif_lin|max_sin_compuerta': 1, 'tif_lin|min': 1, 'tif_nn|max': 1, 'tif_nn|max_sin_compuerta': 1, 'tif_nn|min': 1, 'utm_nn|max': 1, 'utm_nn|max_sin_compuerta': 1, 'utm_nn|min': 1}
+  OK   el predicado corrio sobre las 15 corridas y las 15 publican
+  OK   con un gate caido no se escribe la tabla H3 (V2-3)
         validacion: {'tif_lin': (1.0, True), 'tif_cub': (0.9703927783775181, False), 'tif_nn': (0.800095442754899, False)} | campo MIROVA elegido: tif_lin
   OK   con un TIF lineal conocido, el evaluador elige tif_lin
   OK   sin la sigma del record del A/B para comparar, H1 es INDETERMINADO POR INSTRUMENTO
 P6. clones que publican en TODO (la meta real, 365 pasadas): el nativo no reproduce el A/B
-        H1: INDETERMINADO POR INSTRUMENTO: reproduccion: el nativo no reproduce 32 de 32 perdidas confiables (maximo 2)
-        reproduccion por grupo: {'perdidas_confiables': (32, 32, 2), 'conservadas_debiles': (84, 0, 4)} | acuerdo agregado (informativo): {'nativo|max': 0.345, 'nativo|min': 0.885}
+        H1: INDETERMINADO POR INSTRUMENTO: reproduccion: el nativo no reproduce el A/B en 71 de 71 pasadas de muestra_negativos_d22 (maximo 3); reproduccion: el nativo no reproduce el A/B en 42 de 42 pasadas de n
+        reproduccion por grupo: {'conservada_debil': (84, 0, 4), 'muestra_negativos_d22': (71, 71, 3), 'negativo_b_no_publica': (42, 42, 2), 'perdidas_no_confiables_informativo': (10, 10, None), 'perdidas_confiables': (32, 32, 2), 'residual_apagado': (84, 84, 4), 'residual_sobrevive': (42, 0, 2)} | acuerdo agregado (informativo): {'nativo|max': 0.345, 'nativo|min': 0.885}
   OK   cobertura completa (365 de 365): la falla tiene que venir del instrumento
   OK   H1 da INDETERMINADO POR INSTRUMENTO por reproduccion (antes daba CONFIRMA con salvedad)
-  OK   y no llega a calcular los numeros de H1
-  OK   D22 y D26 en el nativo tambien quedan INDETERMINADO POR INSTRUMENTO
+  OK   y no escribe numeros de H1, ni tabla H3, ni mecanismo
+  OK   D22 y D26 en el nativo tambien quedan INDETERMINADO (por reproduccion; y por cobertura, sin perdidas D22 reproducidas)
   OK   la muestra D22 se comprueba contra la lista congelada
 P7. poblaciones sinteticas: cada veredicto sale cuando corresponde y solo entonces
         CONFIRMA esperado: CONFIRMA (R_L 0.81 sobre 32 perdidas reproducidas; dFP 0.035, brecha 0.330)
@@ -121,8 +122,8 @@ P7. poblaciones sinteticas: cada veredicto sale cuando corresponde y solo entonc
   OK   faltan 3 de 32 perdidas confiables (maximo 2): INDETERMINADO POR COBERTURA: faltan 3 de 32 perdidas confiab
   OK   2 perdidas que el nativo|max publica (maximo 2): CONFIRMA (R_L 0.80 sobre 30 perdidas reproducidas; dFP 0.035
   OK   3 perdidas que el nativo|max publica (maximo 2): INDETERMINADO POR INSTRUMENTO: reproduccion: el nativo no re
-        BRECHA esperado: INDETERMINADO POR INSTRUMENTO: brecha FP(nativo|min) - FP(nativo|max) = 0.000 < 0.10: el nativo no reproduce lo que `max` compro en falsos
-  OK   brecha bajo 0,10: INDETERMINADO POR INSTRUMENTO
+        BRECHA esperado: INDETERMINADO POR INSTRUMENTO: reproduccion: el nativo no reproduce el A/B en 71 de 71 pasadas de muestra_negativos_d22 (maximo 3); reproduccion: el nativo no r
+  OK   nativo|min sin publicar el residual (brecha 0): INDETERMINADO POR INSTRUMENTO, lo frena la reproduccion por grupo
         SIGMA esperado (45 pasadas con otra sigma): INDETERMINADO POR INSTRUMENTO: sigma dNTI del nativo distinta del A/B en 45 de 365 pasadas (frac identica 0.877, minimo 0.95)
   OK   sigma del nativo distinta del A/B en mas del 5 % (45 de 365): INDETERMINADO POR INSTRUMENTO
         CONTROL POSITIVO D22 esperado: INDETERMINADO POR INSTRUMENTO: control positivo: nativo|min no publica 1 de 14 perdidas D22 (maximo 0) | H1: CONFIRMA (R_L 0.81 sobre 31 perdidas rep
@@ -130,6 +131,19 @@ P7. poblaciones sinteticas: cada veredicto sale cuando corresponde y solo entonc
   OK   con la identidad de escena rota: INDETERMINADO (INDETERMINADO POR COBERTURA E INSTRUMENTO: faltan 32 de 32 perdidas co)
   OK   el modo piloto no calcula H1, D22 ni la tabla: solo cobertura, tiempo, memoria y validacion
         piloto: {"cobertura": {"esperadas": 2, "con_salida": 2, "completas": 2, "usables": 2}, "operativo": {"1": {"pasadas": 12, "segundos_total": 1200.0, "segundos_mediana": 100.0, "segundos_max": 100.0, "rss_max_mb": 900.0, "bytes_mediana": null, "bytes_max": null, "bytes_total": null}}, "campo_mirova": "tif_lin"}
+P7b. los caminos que encontro el segundo verificador (V2-1 a V2-10)
+  OK   V2-1: un M que no publica nada (ni las conservadas) da INDETERMINADO POR INSTRUMENTO, no REFUTA [INDETERMINADO POR INSTRUMENTO: M no publica las alertas de MIROVA que el nativo publica: conservadas 0.00 con ]
+  OK   V2-2: nativo|min publica los negativos que B no publico: no sale CONFIRMA [INDETERMINADO POR INSTRUMENTO: reproduccion: el nativo no reproduce el A/B en 42 de 42 pasadas de negativo_b_n]
+  OK   V2-2: nativo|max publica el 30 % del residual apagado (F: 0 %): no sale CONFIRMA [INDETERMINADO POR INSTRUMENTO: reproduccion: el nativo no reproduce el A/B en 27 de 84 pasadas de residual_apa]
+  OK   V2-2: la brecha de la corrida se informa contra la del A/B (766 / 2.324 = 0,330) [brecha 0.330, A/B 0.330]
+  OK   V2-3: lote 1 sin --piloto: ni tabla H3, ni mecanismo, ni tasas de D22, ni nulo [INDETERMINADO POR COBERTURA E INSTRUMENTO: faltan 30 de 32 perdidas confiables (maximo 2); grupo residual_apag]
+  OK   V2-3: clones que publican en todo (gate de reproduccion caido): ni tabla H3 ni mecanismo [INDETERMINADO POR INSTRUMENTO: reproduccion: el nativo no reproduce el A/B en 71 de 71 pasadas de muestra_nega]
+  OK   V2-3: el candado del yml rechaza lotes parciales fuera del piloto (y un piloto sin lotes) [{'no/1': 1, 'no/': 0, 'si/': 1, 'si/1': 0}]
+  OK   V2-4: el piloto informa la sigma contra el A/B y el mismo granulo, y avisa si no coinciden [sigma dNTI del nativo distinta del A/B en 12 de 12 pasadas (frac identica 0.0, minimo 0.95)]
+  OK   V2-5: pasadas duplicadas no fabrican CONFIRMA: INDETERMINADO POR INSTRUMENTO [INDETERMINADO POR INSTRUMENTO: pasadas duplicadas en la salida: 14 claves (ver instrumento.duplicadas)]
+  OK   V2-6: D22 con 11 perdidas reproducidas (promete 13 de 14): INDETERMINADO POR COBERTURA [INDETERMINADO POR COBERTURA: D22 decide sobre 11 perdidas reproducidas de 14 (pueden faltar 1)]
+  OK   V2-7: el log de la sonda no imprime ningun dato de deteccion [9 prints, 0 con datos de deteccion]
+  OK   V2-10: una sigma del A/B en NaN cuenta como distinta, no como identica [INDETERMINADO POR INSTRUMENTO: sigma dNTI del nativo distinta del A/B en 365 de 365 pasadas (frac identica 0.0]
 P8. el sello cubre la sonda, pipeline/, el predicado, el arnes, el catalogo y el yml, y puede fallar
   OK   el sello incluye raiz:pipeline/process_viirs.py
   OK   el sello incluye raiz:pipeline/detection_context.py
@@ -146,5 +160,6 @@ P8. el sello cubre la sonda, pipeline/, el predicado, el arnes, el catalogo y el
   OK   un cambio en pipeline/process_viirs.py rompe el sello
   OK   un archivo que no estaba en el sello lo rompe
   OK   un sello sin quien aprobo no vale
+  OK   comparar_sellos nombra lo que cambio entre dos sellos (V2-8) y nada si son iguales
 
-RESULTADO: 106 comprobaciones, TODO OK
+RESULTADO: 120 comprobaciones, 0 saltadas, TODO OK

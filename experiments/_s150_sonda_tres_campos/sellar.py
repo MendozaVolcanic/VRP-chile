@@ -85,6 +85,33 @@ def diferencias(texto):
     return mal
 
 
+def _entradas_de(texto):
+    out = {}
+    for l in texto.splitlines():
+        if l.strip() and not l.startswith("#"):
+            h, n = l.split(None, 1)
+            out[n.strip()] = h
+    return out
+
+
+def comparar_sellos(viejo, nuevo):
+    """Entradas que cambiaron entre dos textos de sello (segundo verificador, V2-8): un re-sello no impide
+    cambiar el criterio, pero asi queda a la vista QUE cambio. DISENO §10 bis lista lo unico que puede
+    cambiar entre el piloto y el despacho."""
+    a, b = _entradas_de(viejo), _entradas_de(nuevo)
+    return sorted(n for n in set(a) | set(b) if a.get(n) != b.get(n))
+
+
+def sellos_anteriores():
+    """Textos de sello commiteados antes en la historia de git (vacio si el runner no tiene historia)."""
+    rel = SELLO.relative_to(RAIZ).as_posix()
+    try:
+        shas = [s for s in _git("log", "--format=%H", "--", rel).split() if s]
+        return [(s, _git("show", "%s:%s" % (s, rel))) for s in shas]
+    except Exception:
+        return []
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--verificar", action="store_true")
@@ -112,6 +139,15 @@ def main():
     mal = diferencias(texto)
     for m in mal:
         print(m)
+    # V2-8: que cambio respecto del sello anterior distinto en la historia (informa, no decide)
+    previos = [(s, t) for s, t in sellos_anteriores() if comparar_sellos(t, texto)]
+    if previos:
+        s, t = previos[0]
+        print("cambios respecto del sello anterior (%s):" % s[:10])
+        for n in comparar_sellos(t, texto):
+            print("  ", n)
+    else:
+        print("sin sello anterior distinto en la historia disponible")
     print("SELLO COINCIDE" if not mal else "SELLO ROTO: %d diferencias" % len(mal))
     sys.exit(1 if mal else 0)
 

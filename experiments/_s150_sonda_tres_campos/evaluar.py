@@ -273,11 +273,25 @@ def _operativo(filas, tam):
 
 def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=None, piloto=False):
     filas, tam = _cargar(rutas)
-    filas = [f for f in filas if f.get("clave") in pasadas_meta]
+    fuentes = [("(en memoria %d)" % i) if isinstance(r, dict) else str(r) for i, r in enumerate(rutas)]
+    pares = [(f, s) for f, s in zip(filas, fuentes) if f.get("clave") in pasadas_meta]
     out = {"instrumento": {}, "h1": {}, "d22_d26": {}, "h3": {}, "veredictos": {}}
     meta = pasadas_meta
 
     # ---------------- 0. gates del instrumento
+    # Pasadas duplicadas (segundo verificador, V2-5): la misma clave dos veces (p. ej. la salida del piloto y la
+    # del despacho completo en la misma carpeta) contaria la pasada dos veces en cada tasa. Es una falla del
+    # instrumento: se informa con los archivos, se conserva la primera para los diagnosticos y no hay veredicto.
+    vistas, duplicadas = {}, collections.defaultdict(list)
+    for f, fuente in pares:
+        if f["clave"] in vistas:
+            duplicadas[f["clave"]].append(fuente)
+        else:
+            vistas[f["clave"]] = (f, fuente)
+    if duplicadas:
+        out["instrumento"]["duplicadas"] = {k: [vistas[k][1]] + v for k, v in list(duplicadas.items())[:20]}
+    filas = [v[0] for v in vistas.values()]
+
     ok = [f for f in filas if f.get("ok")]
     malas_id, n_pc = _identidad(ok)
     out["instrumento"]["identidad"] = {"pares_pasada_campo": n_pc, "fallan": len(malas_id), "ejemplos": malas_id[:10]}
@@ -285,7 +299,36 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
     identidad_ok = n_pc > 0 and len(malas_id) <= FRAC_MAX_FALLA_IDENTIDAD * n_pc
     usables = [f for f in ok if f["clave"] not in excluir]
 
+    # sigma dNTI del nativo contra el record del A/B, pasada por pasada (hallazgo 1, punto 5). Se compara con
+    # el brazo F, que es el mismo perfil que la corrida capturada (en el A/B B y F dan la misma sigma: el pozo
+    # del primer pase no depende de la conectiva ni de la compuerta). Va ANTES del piloto (V2-4): no es dato de
+    # deteccion y es el gate que mas probablemente gaste el despacho si NASA reproceso los granulos. Una sigma
+    # ausente, nula o no finita (NaN) cuenta como distinta (V2-10).
+    rel_sd, distintas = [], []
+    for f in usables:
+        ev = (f.get("campos") or {}).get("nativo") or {}
+        sd = (ev.get("primer_pase") or {}).get("sd_dnti"); sd_ab = (meta[f["clave"]].get("F") or {}).get("diag_sd_dnti")
+        if not (isinstance(sd, (int, float)) and isinstance(sd_ab, (int, float)) and math.isfinite(sd)
+                and math.isfinite(sd_ab) and sd_ab > 0):
+            distintas.append(f["clave"]); continue
+        rel = abs(sd - sd_ab) / sd_ab
+        rel_sd.append(rel)
+        if not rel < SD_REL_IDENTICA:
+            distintas.append(f["clave"])
+    frac_ident = (1 - len(distintas) / len(usables)) if usables else None
+    out["instrumento"]["sd_dnti_nativo_vs_record_ab"] = {
+        "n_usables": len(usables), "n_comparadas": len(rel_sd), "frac_identica": frac_ident,
+        "umbral_rel": SD_REL_IDENTICA, "minimo": FRAC_MIN_SD_IDENTICA, "mediana_rel": _med(rel_sd),
+        "distintas": distintas[:20]}
+    falla_sd = None
+    if frac_ident is None or frac_ident < FRAC_MIN_SD_IDENTICA:
+        falla_sd = "sigma dNTI del nativo distinta del A/B en %d de %d pasadas (frac identica %s, minimo %.2f)" % (
+            len(distintas), len(usables), None if frac_ident is None else round(frac_ident, 3), FRAC_MIN_SD_IDENTICA)
+    out["instrumento"]["mismo_granulo_que_ab"] = _tasa([int(bool(f.get("mismo_granulo_que_ab"))) for f in usables])
+
     if piloto:
+        out["instrumento"]["sd_dnti_falla"] = falla_sd
+        out["instrumento"]["duplicadas_falla"] = bool(duplicadas)
         # Piloto: solo lo que no es deteccion. La cobertura se mide contra los lotes presentes.
         lotes = {f.get("lote") for f in filas}
         meta_lotes = {k: m for k, m in meta.items() if m.get("lote") in lotes}
@@ -311,30 +354,12 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
         return pub.get((f["clave"], corrida))
 
     fallas_inst = []
+    if duplicadas:
+        fallas_inst.append("pasadas duplicadas en la salida: %d claves (ver instrumento.duplicadas)" % len(duplicadas))
     if not identidad_ok:
         fallas_inst.append("identidad: %d de %d pares pasada-campo fallan" % (len(malas_id), n_pc))
-
-    # sigma dNTI del nativo contra el record del A/B, pasada por pasada (hallazgo 1, punto 5). Se compara con
-    # el brazo F, que es el mismo perfil que la corrida capturada (en el A/B B y F dan la misma sigma: el pozo
-    # del primer pase no depende de la conectiva ni de la compuerta).
-    rel_sd, distintas = [], []
-    for f in usables:
-        ev = (f.get("campos") or {}).get("nativo") or {}
-        sd = (ev.get("primer_pase") or {}).get("sd_dnti"); sd_ab = (meta[f["clave"]].get("F") or {}).get("diag_sd_dnti")
-        if sd is None or not sd_ab:
-            distintas.append(f["clave"]); continue
-        rel = abs(sd - sd_ab) / sd_ab
-        rel_sd.append(rel)
-        if rel >= SD_REL_IDENTICA:
-            distintas.append(f["clave"])
-    frac_ident = (1 - len(distintas) / len(usables)) if usables else None
-    out["instrumento"]["sd_dnti_nativo_vs_record_ab"] = {
-        "n_usables": len(usables), "n_comparadas": len(rel_sd), "frac_identica": frac_ident,
-        "umbral_rel": SD_REL_IDENTICA, "minimo": FRAC_MIN_SD_IDENTICA, "mediana_rel": _med(rel_sd),
-        "distintas": distintas[:20]}
-    if frac_ident is None or frac_ident < FRAC_MIN_SD_IDENTICA:
-        fallas_inst.append("sigma dNTI del nativo distinta del A/B en %d de %d pasadas (frac identica %s, minimo %.2f)" % (
-            len(distintas), len(usables), None if frac_ident is None else round(frac_ident, 3), FRAC_MIN_SD_IDENTICA))
+    if falla_sd:
+        fallas_inst.append(falla_sd)
 
     # reproduccion del A/B: el acuerdo agregado de antes se informa, pero NO decide
     acuerdo = {}
@@ -342,33 +367,43 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
         xs = [(P(f, corrida), ref[meta[f["clave"]]["grupo"]]) for f in usables if P(f, corrida) is not None]
         acuerdo[corrida] = {"n": len(xs), "acuerdo": (sum(a == b for a, b in xs) / len(xs)) if xs else None}
     out["instrumento"]["acuerdo_agregado_ab_informativo"] = acuerdo
-    out["instrumento"]["mismo_granulo_que_ab"] = _tasa([int(bool(f.get("mismo_granulo_que_ab"))) for f in usables])
 
-    # gate de reproduccion POR GRUPO (hallazgo 1, punto 1): en las perdidas confiables nativo|max NO publica y
-    # nativo|min SI; en las conservadas debiles nativo|max SI publica. Las perdidas que el nativo reproduce son
-    # el denominador de R_L y de la recuperacion de D22.
+    # gate de reproduccion POR GRUPO (hallazgo 1, punto 1; extendido por V2-2): en cada pasada usable,
+    # nativo|max tiene que publicar lo que publico F y nativo|min lo que publico B, en SU grupo primario.
+    # Perdidas confiables: maximo 2 fallas. Cualquier otro grupo (conservadas, los tres negativos, la muestra
+    # D22): maximo el 5 % del grupo. Las perdidas no confiables no deciden nada y solo se informan. Las perdidas
+    # que el nativo reproduce son el denominador de R_L y de la recuperacion de D22.
     perd_conf = [f for f in usables if meta[f["clave"]]["grupo"] == "perdida" and meta[f["clave"]].get("etiqueta_confiable")]
-    conserv = [f for f in usables if meta[f["clave"]]["grupo"] == "conservada_debil"]
-    reproducidas, fallas_perd, fallas_cons = [], [], []
+    reproducidas = []
     if predicado_node:
-        for f in perd_conf:
-            if P(f, "nativo|max") == 0 and P(f, "nativo|min") == 1:
-                reproducidas.append(f)
-            else:
-                fallas_perd.append({"clave": f["clave"], "nativo|max": P(f, "nativo|max"), "nativo|min": P(f, "nativo|min")})
-        fallas_cons = [f["clave"] for f in conserv if P(f, "nativo|max") != 1]
-        max_cons = int(math.floor(MAX_FRAC_FALLAS_REPRO_CONSERVADAS * len(conserv)))
-        out["instrumento"]["reproduccion_por_grupo"] = {
-            "perdidas_confiables": {"n": len(perd_conf), "reproducidas": len(reproducidas), "fallas": len(fallas_perd),
-                                    "maximo": MAX_FALLAS_REPRO_PERDIDAS, "ejemplos": fallas_perd[:20]},
-            "conservadas_debiles": {"n": len(conserv), "fallas": len(fallas_cons), "maximo": max_cons,
-                                    "ejemplos": fallas_cons[:20]}}
-        if len(fallas_perd) > MAX_FALLAS_REPRO_PERDIDAS:
-            fallas_inst.append("reproduccion: el nativo no reproduce %d de %d perdidas confiables (maximo %d)" % (
-                len(fallas_perd), len(perd_conf), MAX_FALLAS_REPRO_PERDIDAS))
-        if len(fallas_cons) > max_cons:
-            fallas_inst.append("reproduccion: nativo|max no publica %d de %d conservadas debiles (maximo %d)" % (
-                len(fallas_cons), len(conserv), max_cons))
+        rep = {}
+        for g in sorted({meta[f["clave"]]["grupo"] for f in usables}):
+            fs = [f for f in usables if meta[f["clave"]]["grupo"] == g]
+            nombre = g
+            if g == "perdida":
+                fs_nc = [f for f in fs if not meta[f["clave"]].get("etiqueta_confiable")]
+                fs = [f for f in fs if meta[f["clave"]].get("etiqueta_confiable")]
+                nombre = "perdidas_confiables"
+                mal_nc = [f["clave"] for f in fs_nc if P(f, "nativo|max") != F_PUBLICA[g] or P(f, "nativo|min") != B_PUBLICA[g]]
+                rep["perdidas_no_confiables_informativo"] = {"n": len(fs_nc), "fallas": len(mal_nc), "ejemplos": mal_nc[:20]}
+            mal = []
+            for f in fs:
+                a, b = P(f, "nativo|max"), P(f, "nativo|min")
+                if a == F_PUBLICA[g] and b == B_PUBLICA[g]:
+                    if g == "perdida":
+                        reproducidas.append(f)
+                else:
+                    mal.append({"clave": f["clave"], "nativo|max": a, "nativo|min": b})
+            maximo = (MAX_FALLAS_REPRO_PERDIDAS if g == "perdida"
+                      else int(math.floor(MAX_FRAC_FALLAS_REPRO_CONSERVADAS * len(fs))))
+            rep[nombre] = {"n": len(fs), "fallas": len(mal), "maximo": maximo, "ejemplos": mal[:20],
+                           "esperado": {"nativo|max": F_PUBLICA[g], "nativo|min": B_PUBLICA[g]}}
+            if g == "perdida":
+                rep[nombre]["reproducidas"] = len(reproducidas)
+            if len(mal) > maximo:
+                fallas_inst.append("reproduccion: el nativo no reproduce el A/B en %d de %d pasadas de %s (maximo %d)" % (
+                    len(mal), len(fs), nombre, maximo))
+        out["instrumento"]["reproduccion_por_grupo"] = rep
 
     # validacion contra el TIF (con el gate de r_L por pasada)
     info_val, M, falla_val = _validacion(usables, meta)
@@ -411,7 +446,8 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
                     "residual_sobrevive": por_grupo(campo, cn, "residual_sobrevive"),
                     "negativo_b_no_publica": por_grupo(campo, cn, "negativo_b_no_publica"),
                     "fp_ponderado": fp(campo, cn)}
-    out["h3"]["tabla"] = tabla
+    # tabla, mecanismo y nulo se calculan aca pero SOLO se escriben en la salida si H1 llega a su regla (V2-3):
+    # con un gate caido, una tabla completa se leeria igual que un veredicto con salvedad.
     # mecanismo: razon de sigmas por grupo y AUC del margen z
     mec = {}
     for campo in ("utm_nn",) + CAMPOS_TIF:
@@ -429,7 +465,6 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
                           "z_obj_mediana": _med(v["z"]), "frac_var_dnti_i04_mediana": _med(v["fi04"]),
                           "n": len(v["sd_dnti"])} for g, v in por.items()}
         mec[campo]["auc_z_perdidas_vs_residual_apagado"] = _auc(por["perdida"]["z"], por["residual_apagado"]["z"])
-    out["h1"]["mecanismo"] = mec
 
     # nulo: fraccion de zonas nulas que pasan con max en M contra nativo con min (control debil, hallazgo 11)
     def nulo(campo, dec):
@@ -440,13 +475,16 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
             if ev.get("n_zonas_nulas") and d.get("nulo_final") is not None:
                 xs.append(d["nulo_final"] / ev["n_zonas_nulas"])
         return {"mediana": _med(xs), "media": (sum(xs) / len(xs) if xs else None), "n": len(xs)}
-    out["instrumento"]["nulo"] = {"nativo|min": nulo("nativo", "min|con_compuerta"), "nativo|max": nulo("nativo", "max|con_compuerta")}
+    nulos = {"nativo|min": nulo("nativo", "min|con_compuerta"), "nativo|max": nulo("nativo", "max|con_compuerta")}
     nulo_ok = None
     if M:
-        out["instrumento"]["nulo"]["%s|max" % M] = nulo(M, "max|con_compuerta")
-        a, b = out["instrumento"]["nulo"]["%s|max" % M]["media"], out["instrumento"]["nulo"]["nativo|min"]["media"]
+        nulos["%s|max" % M] = nulo(M, "max|con_compuerta")
+        a, b = nulos["%s|max" % M]["media"], nulos["nativo|min"]["media"]
         if a is not None and b is not None:
             nulo_ok = a <= b
+    # la brecha que el A/B da sobre esta misma muestra, con los pesos de la ventana (V2-2): 766 / 2.324 = 0,330
+    tot_neg = sum(totales[g] for g in GRUPOS_NEG)
+    brecha_ab = sum(totales[g] * (B_PUBLICA[g] - F_PUBLICA[g]) for g in GRUPOS_NEG) / tot_neg
 
     def indeterminado(fallas_c, fallas_i):
         if fallas_c and fallas_i:
@@ -472,15 +510,25 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
             v1 = "INDETERMINADO POR COBERTURA: faltan grupos para calcular H1"
         else:
             brecha = fpn_min - fpn_max; dfp = fpm - fpn_max
-            out["h1"]["numeros"] = {"campo": M, "recall_perdidas_reproducidas": rl, "n_perdidas_reproducidas": n_rl,
-                                    "fp_M_max": fpm, "fp_nativo_max": fpn_max, "fp_nativo_min": fpn_min,
-                                    "n_negativos_por_grupo": fp(M, "max")[1], "delta_fp": dfp, "brecha": brecha,
-                                    "brecha_minima": BRECHA_MIN,
-                                    "conservadas_M_max": rk_m, "conservadas_nativo_max": rk_n, "n_conservadas": n_rk_n,
-                                    "nulo_ok": nulo_ok}
+            numeros = {"campo": M, "recall_perdidas_reproducidas": rl, "n_perdidas_reproducidas": n_rl,
+                       "fp_M_max": fpm, "fp_nativo_max": fpn_max, "fp_nativo_min": fpn_min,
+                       "n_negativos_por_grupo": fp(M, "max")[1], "delta_fp": dfp, "brecha": brecha,
+                       "brecha_ab": brecha_ab, "brecha_menos_brecha_ab": brecha - brecha_ab, "brecha_minima": BRECHA_MIN,
+                       "conservadas_M_max": rk_m, "conservadas_nativo_max": rk_n, "n_conservadas": n_rk_n,
+                       "nulo_ok": nulo_ok}
+            # diagnosticos de los dos gates propios de H1 (estos si se escriben aunque fallen)
+            out["h1"]["gates_h1"] = {"brecha": brecha, "brecha_ab": brecha_ab, "brecha_minima": BRECHA_MIN,
+                                     "conservadas_M_max": rk_m, "conservadas_nativo_max": rk_n, "n_conservadas": n_rk_n,
+                                     "tolerancia_conservadas": H1_PERDIDA_CONSERVADAS}
             if brecha < BRECHA_MIN:
-                v1 = indeterminado([], ["brecha FP(nativo|min) - FP(nativo|max) = %.3f < %.2f: el nativo no "
-                                        "reproduce lo que `max` compro en falsos" % (brecha, BRECHA_MIN)])
+                v1 = indeterminado([], ["brecha FP(nativo|min) - FP(nativo|max) = %.3f < %.2f (en el A/B %.3f): el "
+                                        "nativo no reproduce lo que `max` compro en falsos" % (brecha, BRECHA_MIN, brecha_ab)])
+            elif rk_m < rk_n - H1_PERDIDA_CONSERVADAS:
+                # V2-1: un M que no publica las alertas de MIROVA que el nativo publica no es el campo donde
+                # MIROVA detecta; su "no recuperar" no dice nada sobre H1. Sin esto un M muerto daba REFUTA.
+                v1 = indeterminado([], ["M no publica las alertas de MIROVA que el nativo publica: conservadas %.2f "
+                                        "con %s|max contra %.2f con nativo|max (tolerancia %.2f)" % (
+                                            rk_m, M, rk_n, H1_PERDIDA_CONSERVADAS)])
             elif rl < H1_RECALL_REFUTA or dfp > H1_DFP_REFUTA * brecha:
                 v1 = "REFUTA (R_L %.2f sobre %d perdidas reproducidas; dFP %.3f, brecha %.3f)" % (rl, n_rl, dfp, brecha)
             elif rl >= H1_RECALL_CONFIRMA and dfp <= H1_DFP_CONFIRMA * brecha and rk_m >= rk_n - H1_PERDIDA_CONSERVADAS and nulo_ok:
@@ -488,7 +536,16 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
             else:
                 v1 = "INDETERMINADO (R_L %.2f sobre %d; dFP %.3f, brecha %.3f; conservadas %.2f contra %.2f; nulo %s)" % (
                     rl, n_rl, dfp, brecha, rk_m, rk_n, nulo_ok)
+            if not v1.startswith("INDETERMINADO POR"):
+                # H1 llego a su regla: recien ahora se escriben los numeros de deteccion (V2-3)
+                out["h1"]["numeros"] = numeros
+                out["h1"]["mecanismo"] = mec
+                out["h3"]["tabla"] = tabla
+                out["instrumento"]["nulo"] = nulos
     out["veredictos"]["H1_sigma_del_campo"] = v1
+    if "tabla" not in out["h3"]:
+        out["h3"] = "NO SE ESCRIBE: H1 no llego a su regla (gate caido); ver instrumento"
+        out["h1"].setdefault("mecanismo", "NO SE ESCRIBE: H1 no llego a su regla (gate caido)")
 
     # ---------------- 2. D22 y D26 por separado (campo nativo; y en M si existe)
     negd22 = set((negativos_d22 or {}).get("camino_d22") or [])
@@ -508,6 +565,13 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
         if len(no_pub_min) > MAX_FALLAS_CTRL_POS_D22:
             fallas_d22.append("control positivo: nativo|min no publica %d de %d perdidas D22 (maximo %d)" % (
                 len(no_pub_min), len(perd_d22), MAX_FALLAS_CTRL_POS_D22))
+    # V2-6: la cobertura de D22 se aplica a las perdidas sobre las que se DECIDE (las reproducidas), no solo a
+    # las usables: el gate general tolera 2 perdidas no reproducidas que pueden ser todas del camino D22.
+    fallas_cob_d22_rep = []
+    esp_d22 = tab_cob["perdida_confiable_d22"]["esperadas"]
+    if predicado_node and esp_d22 - len(perd_d22_rep) > MAX_FALTAN_PERDIDAS_D22:
+        fallas_cob_d22_rep.append("D22 decide sobre %d perdidas reproducidas de %d (pueden faltar %d)" % (
+            len(perd_d22_rep), esp_d22, MAX_FALTAN_PERDIDAS_D22))
     for campo in ("nativo",) + ((M,) if M else ()):
         variantes = {}
         if predicado_node:
@@ -535,14 +599,15 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
             pares = [(a, b) for a, b in pares if a is not None and b is not None]
             variantes["acuerdo_tests_predicado_D22"] = {"acuerdo": (sum(a == b for a, b in pares) / len(pares)) if pares else None,
                                                         "n": len(pares)}
-        dd[campo] = variantes
         ver = {}
         # gates de D22: los del instrumento (salvo la validacion del TIF, que solo importa en M), cobertura
-        # propia y control positivo. Si falla alguno, ninguna variante tiene veredicto.
-        f_c = fallas_cob + fallas_cob_d22
+        # propia (sobre las reproducidas) y control positivo. Si falla alguno, ninguna variante tiene veredicto
+        # y sus tasas NO se escriben (V2-3).
+        f_c = fallas_cob + fallas_cob_d22 + fallas_cob_d22_rep
         f_i = list(fallas_inst) + fallas_d22 + (["validacion: %s" % falla_val] if (campo != "nativo" and falla_val) else [])
         if muestra and negd22 and not dd["muestra_en_lista_congelada"]:
             f_i.append("la muestra de negativos D22 no es la lista congelada")
+        dd[campo] = variantes if not (f_c or f_i) else "NO SE ESCRIBE: gate caido; ver el veredicto"
         for nombre, v in variantes.items():
             if not isinstance(v, dict) or "recupera" not in v:
                 continue
@@ -579,7 +644,9 @@ def main():
     rutas = sorted(p for p in Path(a.out).rglob("*.json")
                    if not p.name.startswith("cobertura_") and p.name != "evaluacion.json")
     usar_pred = not (a.sin_predicado or a.piloto)
-    if usar_pred:
+    if not a.sin_predicado:
+        # tambien en el piloto (V2-9): ejercita las importaciones de banco_paridad y node con los casos de
+        # control del predicado, que no miran ningun dato de la sonda
         import banco_paridad as bp
         validos, pubs = bp.control_identidad_predicado()
         print("control del predicado: isValidDetection", validos, "| publicacion", pubs, "(esperado [1, 0])")

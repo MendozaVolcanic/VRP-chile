@@ -36,7 +36,7 @@ name: Probe S150 tres campos (sigma del campo, D22 y D26, VIIRS 375)
         required: true
         default: "no"
       lotes:
-        description: "Vacio = todos los lotes de pasadas.json. O una lista separada por comas (ej. '1' para el piloto)"
+        description: "Vacio = todos los lotes (obligatorio con piloto = no). Con piloto = si, la lista de lotes (ej. '1')"
         required: false
         default: ""
       piloto:
@@ -70,6 +70,12 @@ jobs:
           fi
           if [ "$PILOTO" = "si" ] && [ -z "$LOTES" ]; then
             echo "::error::un piloto debe nombrar sus lotes (DISENO §10 bis: lotes = 1)"
+            exit 1
+          fi
+          # V2-3: fuera del piloto se corren TODOS los lotes; un despacho parcial sin la bandera de piloto
+          # imprimiria detecciones de unas pocas pasadas
+          if [ "$PILOTO" = "no" ] && [ -n "$LOTES" ]; then
+            echo "::error::fuera del piloto lotes debe venir vacio (todos los lotes); es '$LOTES'"
             exit 1
           fi
           echo "piloto=$PILOTO lotes='$LOTES'"

@@ -327,12 +327,11 @@ def procesar_pasada(ctx, pasada, l1b, geo, tif=None, campos_a_correr=None):
                         if tif is not None and "L_I04" in deposito:
                             fila["validacion_tif"][campo] = cp.validar_contra_tif(deposito["L_I04"], tif)
                     fila["campos"][campo] = ev
-                    dmax = (ev.get("decision") or {}).get("max|con_compuerta", {})
-                    dmin = (ev.get("decision") or {}).get("min|con_compuerta", {})
-                    print("    %-8s n_roi %s | sd_dNTI %s | identidad 1er pase %s | obj_final max %s min %s | dc %s" % (
+                    # el log de Actions NO lleva ningun dato de deteccion (segundo verificador, V2-7): quien
+                    # ajuste algo despues del piloto no debe haber visto que campo detecta el objetivo
+                    print("    %-8s n_roi %s | sd_dNTI %s | identidad 1er pase %s | identidad escena %s" % (
                         campo, ev.get("n_roi"), (ev.get("primer_pase") or {}).get("sd_dnti"),
-                        ev.get("identidad_primer_pase"), dmax.get("objetivo_final"), dmin.get("objetivo_final"),
-                        (persistido or {}).get("distance_class")), flush=True)
+                        ev.get("identidad_primer_pase"), (ev.get("identidad_escena") or {}).get("ok")), flush=True)
             except Exception as e:
                 fila["errores"].append("%s: %s" % (clave_c, e))
                 fila["corridas"].setdefault(clave_c, {})["error"] = traceback.format_exc()[-3000:]

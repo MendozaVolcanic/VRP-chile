@@ -22,6 +22,8 @@ Lo que se puede probar sin bajar granulos, y por que importa cada cosa:
       cobertura insuficiente (el piloto, y el borde de 2 y 3 perdidas faltantes), reproduccion en su borde,
       brecha minima, sigma contra el A/B, control positivo de D22, identidad de escena y modo piloto. Un
       veredicto solo se cree si se le ve salir cuando corresponde y no salir cuando no (A110 d).
+  P7b. Un caso por hallazgo del segundo verificador (V2-1 a V2-7 y V2-10); cada uno falla con el evaluador
+      de 5eda5b942 y pasa con el nuevo.
   P8. El sello cubre la sonda, pipeline/, el predicado, el arnes, el catalogo y el yml, y se rompe.
 
   VRP_PROFILE=_s147_ab_sin_test1_max python prueba_local.py
@@ -49,6 +51,7 @@ import sonda  # noqa: E402
 
 FALLAS = []
 N_CHEQUEOS = [0]
+SALTADAS = [0]     # comprobaciones que no corrieron (P4 sin el TIF en disco, P8 sin bash): se dicen al final
 
 
 def chequear(cond, msg):
@@ -328,7 +331,8 @@ def p4_tif_real():
             ruta = base / p["tif"]["tif_path"]; clave = p["clave"]
             break
     if ruta is None:
-        print("  (sin TIF de perdida en disco; se omite)")
+        print("  (sin TIF de perdida en disco; se omiten las 5 comprobaciones de P4)")
+        SALTADAS[0] += 5
         return
     with rasterio.open(ruta) as ds:
         t = ds.read(1).astype(np.float64)
@@ -361,10 +365,12 @@ def p5_evaluador(salida):
                           predicado_node=True, negativos_d22={"camino_d22": []})
     chequear(isinstance(res, dict) and "veredictos" in res, "el evaluador devuelve veredictos: %s" % res.get("veredictos"))
     chequear(res["instrumento"]["identidad"]["fallan"] == 0, "identidad: 0 pares pasada-campo fallan")
-    t = res["h3"]["tabla"]
+    fila = json.loads(Path(salida).read_text(encoding="utf-8"))
+    pub = evaluar.predicado([fila])
     print("        predicado del tablero (node) por corrida, la perdida sintetica:",
-          {k: v["recall_perdidas_todas_absoluto"][0] for k, v in t.items()}, flush=True)
-    chequear(all(v["recall_perdidas_todas_absoluto"][1] == 1 for v in t.values()), "el predicado corrio sobre las 15 corridas")
+          {k[1]: v for k, v in sorted(pub.items())}, flush=True)
+    chequear(len(pub) == 15 and all(v == 1 for v in pub.values()), "el predicado corrio sobre las 15 corridas y las 15 publican")
+    chequear(isinstance(res["h3"], str), "con un gate caido no se escribe la tabla H3 (V2-3)")
     print("        validacion:", {k: (v["r_dL_mediana"], v["valido"]) for k, v in res["instrumento"]["validacion_tif"].items()},
           "| campo MIROVA elegido:", res["instrumento"]["campo_mirova"], flush=True)
     chequear(res["instrumento"]["campo_mirova"] == "tif_lin", "con un TIF lineal conocido, el evaluador elige tif_lin")
@@ -458,14 +464,15 @@ def p6_evaluador_grupos(salida, d):
     res = _corre(filas, meta, negd22)
     v = res["veredictos"]["H1_sigma_del_campo"]
     print("        H1:", v[:200], flush=True)
-    print("        reproduccion por grupo:", {k: (x["n"], x["fallas"], x["maximo"]) for k, x in res["instrumento"]["reproduccion_por_grupo"].items()},
+    print("        reproduccion por grupo:", {k: (x["n"], x["fallas"], x.get("maximo")) for k, x in res["instrumento"]["reproduccion_por_grupo"].items()},
           "| acuerdo agregado (informativo):", {k: round(x["acuerdo"], 3) for k, x in res["instrumento"]["acuerdo_agregado_ab_informativo"].items()}, flush=True)
     chequear(not res["instrumento"]["cobertura_fallas"], "cobertura completa (365 de 365): la falla tiene que venir del instrumento")
     chequear(v.startswith("INDETERMINADO POR INSTRUMENTO") and "reproduccion" in v and "CONFIRMA" not in v,
              "H1 da INDETERMINADO POR INSTRUMENTO por reproduccion (antes daba CONFIRMA con salvedad)")
-    chequear("numeros" not in res["h1"], "y no llega a calcular los numeros de H1")
-    chequear(all(x.startswith("INDETERMINADO POR INSTRUMENTO") for x in res["veredictos"]["D22_D26_nativo"].values()),
-             "D22 y D26 en el nativo tambien quedan INDETERMINADO POR INSTRUMENTO")
+    chequear("numeros" not in res["h1"] and isinstance(res["h3"], str) and not isinstance(res["h1"].get("mecanismo"), dict),
+             "y no escribe numeros de H1, ni tabla H3, ni mecanismo")
+    chequear(all(x.startswith("INDETERMINADO POR") and "reproduccion" in x for x in res["veredictos"]["D22_D26_nativo"].values()),
+             "D22 y D26 en el nativo tambien quedan INDETERMINADO (por reproduccion; y por cobertura, sin perdidas D22 reproducidas)")
     chequear(res["d22_d26"]["muestra_en_lista_congelada"] is True, "la muestra D22 se comprueba contra la lista congelada")
 
 
@@ -530,13 +537,16 @@ def p7_veredictos_sinteticos(salida):
         res = _corre(filas, meta, negd22)
         chequear(h1(res).startswith(espera), "%d perdidas que el nativo|max publica (maximo 2): %s" % (n_mal, h1(res)[:60]))
 
-    # guarda de brecha: si el nativo|min no publica el residual, `max` no compro nada que medir
+    # guarda de brecha: si el nativo|min no publica el residual, `max` no compro nada que medir. Desde que la
+    # reproduccion por grupo cubre los negativos (V2-2), ese caso lo frena ANTES la reproduccion: con ese gate en
+    # pie la brecha no puede bajar de ~0,27 (DISENO §5 bis), y la guarda queda como segundo candado.
     filas, meta, negd22 = poblacion(base, lambda m, i, c: 0 if (c == "nativo|min" and m["grupo"] in
                                                              ("residual_apagado", "muestra_negativos_d22"))
                                     else diseno_confirma(m, i, c))
     res = _corre(filas, meta, negd22)
     print("        BRECHA esperado:", h1(res)[:160], flush=True)
-    chequear(h1(res).startswith("INDETERMINADO POR INSTRUMENTO") and "brecha" in h1(res), "brecha bajo 0,10: INDETERMINADO POR INSTRUMENTO")
+    chequear(h1(res).startswith("INDETERMINADO POR INSTRUMENTO") and "residual_apagado" in h1(res),
+             "nativo|min sin publicar el residual (brecha 0): INDETERMINADO POR INSTRUMENTO, lo frena la reproduccion por grupo")
 
     # gate de sigma contra el A/B: 10 % de las pasadas con otra sigma (otro granulo u otro calculo)
     def otra_sigma(m):
@@ -579,6 +589,145 @@ def p7_veredictos_sinteticos(salida):
                                          "campo_mirova": res["instrumento"]["validacion_tif"]["campo_mirova"]}, ensure_ascii=False), flush=True)
 
 
+def p7b_segundo_verificador(salida):
+    """Un caso por hallazgo del segundo verificador (docs/audit_s150/VERIFICADOR2_SONDA_TRES_CAMPOS.md). Cada
+    caso falla con el evaluador de 5eda5b942 y pasa con el nuevo; una excepcion cuenta como FALLA (el codigo
+    viejo no tiene algunas claves), asi que el caso no puede pasar por no haber corrido."""
+    print("P7b. los caminos que encontro el segundo verificador (V2-1 a V2-10)", flush=True)
+    import evaluar
+    base = json.loads(Path(salida).read_text(encoding="utf-8"))
+    dc_ = diseno_confirma
+
+    def h1(res):
+        return res["veredictos"]["H1_sigma_del_campo"]
+
+    def caso(msg, fn):
+        try:
+            cond, detalle = fn()
+        except Exception as e:  # el evaluador viejo no tiene algunas claves: eso tambien es FALLA
+            cond, detalle = False, "excepcion %s: %s" % (type(e).__name__, e)
+        chequear(cond, "%s [%s]" % (msg, str(detalle)[:110]))
+
+    def v21():
+        r = _corre(*poblacion(base, lambda m, i, c: 0 if c.startswith("tif_") else dc_(m, i, c)))
+        return h1(r).startswith("INDETERMINADO POR INSTRUMENTO") and "M no publica" in h1(r), h1(r)
+    caso("V2-1: un M que no publica nada (ni las conservadas) da INDETERMINADO POR INSTRUMENTO, no REFUTA", v21)
+
+    def v22b():
+        def f(m, i, c):
+            if c == "nativo|min" and m["grupo"] == "negativo_b_no_publica":
+                return 1
+            return dc_(m, i, c, frac_residual=0.40)
+        r = _corre(*poblacion(base, f))
+        return h1(r).startswith("INDETERMINADO POR INSTRUMENTO") and "negativo_b_no_publica" in h1(r), h1(r)
+    caso("V2-2: nativo|min publica los negativos que B no publico: no sale CONFIRMA", v22b)
+
+    def v22c():
+        def f(m, i, c):
+            if c == "nativo|max" and m["grupo"] == "residual_apagado":
+                return int(i % 10 < 3)
+            return dc_(m, i, c, frac_residual=0.40)
+        r = _corre(*poblacion(base, f))
+        return h1(r).startswith("INDETERMINADO POR INSTRUMENTO") and "residual_apagado" in h1(r), h1(r)
+    caso("V2-2: nativo|max publica el 30 % del residual apagado (F: 0 %): no sale CONFIRMA", v22c)
+
+    def v22ab():
+        r = _corre(*poblacion(base, dc_))
+        g = r["h1"]["gates_h1"]
+        return abs(g["brecha_ab"] - 766 / 2324) < 1e-12 and abs(r["h1"]["numeros"]["brecha_menos_brecha_ab"]) < 1e-9, \
+            "brecha %.3f, A/B %.3f" % (g["brecha"], g["brecha_ab"])
+    caso("V2-2: la brecha de la corrida se informa contra la del A/B (766 / 2.324 = 0,330)", v22ab)
+
+    lote1 = {p["clave"] for p in json.loads((AQUI / "pasadas.json").read_text(encoding="utf-8"))["pasadas"] if p["lote"] == 1}
+
+    def v23a():
+        r = _corre(*poblacion(base, dc_, claves=lote1))
+        sin = isinstance(r["h3"], str) and not isinstance(r["h1"].get("mecanismo"), dict) and "numeros" not in r["h1"] \
+            and not isinstance(r["d22_d26"].get("nativo"), dict) and not isinstance(r["instrumento"].get("nulo"), dict)
+        return sin, h1(r)
+    caso("V2-3: lote 1 sin --piloto: ni tabla H3, ni mecanismo, ni tasas de D22, ni nulo", v23a)
+
+    def v23b():
+        r = _corre(*poblacion(base, lambda m, i, c: 1))
+        return isinstance(r["h3"], str) and not isinstance(r["h1"].get("mecanismo"), dict), h1(r)
+    caso("V2-3: clones que publican en todo (gate de reproduccion caido): ni tabla H3 ni mecanismo", v23b)
+
+    def v23yml():
+        import shutil
+        import subprocess
+        import yaml
+        bash = shutil.which("bash")
+        if not bash:
+            SALTADAS[0] += 1
+            return True, "sin bash: saltada"
+        wf = yaml.safe_load((RAIZ / ".github" / "workflows" / "probe-s150-tres-campos.yml").read_text(encoding="utf-8"))
+        paso = next(s for s in wf["jobs"]["preparar"]["steps"] if s.get("name") == "Candado del pre-registro")
+        res = {}
+        for piloto, lotes in (("no", "1"), ("no", ""), ("si", ""), ("si", "1")):
+            env = dict(os.environ, APROBADO="si", PILOTO=piloto, LOTES=lotes)
+            res[(piloto, lotes)] = subprocess.run([bash, "-c", paso["run"]], env=env, capture_output=True).returncode
+        esperado = {("no", "1"): 1, ("no", ""): 0, ("si", ""): 1, ("si", "1"): 0}
+        return res == esperado, {"%s/%s" % k: v for k, v in res.items()}
+    caso("V2-3: el candado del yml rechaza lotes parciales fuera del piloto (y un piloto sin lotes)", v23yml)
+
+    def v24():
+        filas, meta, negd22 = poblacion(base, dc_, claves=lote1)
+        r = _corre(filas, meta, negd22, piloto=True)
+        ins = r["instrumento"]
+        bien = "sd_dnti_nativo_vs_record_ab" in ins and "mismo_granulo_que_ab" in ins and ins.get("sd_dnti_falla") is None
+
+        def otra(m):
+            m["F"]["diag_sd_dnti"] *= 1.01
+        filas, meta, negd22 = poblacion(base, dc_, claves=lote1, cambiar_meta=otra)
+        r2 = _corre(filas, meta, negd22, piloto=True)
+        return bien and bool(r2["instrumento"].get("sd_dnti_falla")) and list(r2["veredictos"]) == ["PILOTO"], \
+            r2["instrumento"].get("sd_dnti_falla")
+    caso("V2-4: el piloto informa la sigma contra el A/B y el mismo granulo, y avisa si no coinciden", v24)
+
+    def v25():
+        filas, meta, negd22 = poblacion(base, lambda m, i, c: dc_(m, i, c, r_l=0.40, frac_residual=0.0))
+        rep = [f for f in filas if meta[f["clave"]]["grupo"] == "perdida" and meta[f["clave"]].get("etiqueta_confiable")
+               and f["corridas"]["tif_lin|max"]["record"] is not None]
+        r = evaluar.evaluar(filas + rep + rep, meta, TOTALES, predicado_node=True, negativos_d22=negd22)
+        return h1(r).startswith("INDETERMINADO POR INSTRUMENTO") and "duplicadas" in h1(r), h1(r)
+    caso("V2-5: pasadas duplicadas no fabrican CONFIRMA: INDETERMINADO POR INSTRUMENTO", v25)
+
+    def v26():
+        _, meta0, _ = poblacion(base, dc_, claves=set())
+        pc = sorted(k for k, m in meta0.items() if m["grupo"] == "perdida" and m.get("etiqueta_confiable"))
+        d22 = sorted(k for k in pc if meta0[k].get("camino_b") == "d22")
+        malas = set(d22[:2])
+        filas, meta, negd22 = poblacion(base, lambda m, i, c: 1 if (m["clave"] in malas and c == "nativo|max") else dc_(m, i, c),
+                                        claves=set(meta0) - {d22[2]})
+        r = evaluar.evaluar(filas, meta, TOTALES, predicado_node=True, negativos_d22=negd22)
+        v = r["veredictos"]["D22_D26_nativo"]["D22_predicado"]
+        return v.startswith("INDETERMINADO POR COBERTURA") and "reproducidas" in v, v
+    caso("V2-6: D22 con 11 perdidas reproducidas (promete 13 de 14): INDETERMINADO POR COBERTURA", v26)
+
+    def v27():
+        import re
+        src = (AQUI / "sonda.py").read_text(encoding="utf-8")
+        prints = []   # cada llamada a print completa, contando parentesis (anidados a cualquier profundidad)
+        for mt in re.finditer(r"\bprint\(", src):
+            prof, j = 0, mt.end() - 1
+            while j < len(src):
+                prof += {"(": 1, ")": -1}.get(src[j], 0)
+                if prof == 0:
+                    break
+                j += 1
+            prints.append(src[mt.start():j + 1])
+        malos = [p for p in prints if re.search(r"objetivo_final|obj_final|distance_class", p)]
+        return bool(prints) and not malos, "%d prints, %d con datos de deteccion" % (len(prints), len(malos))
+    caso("V2-7: el log de la sonda no imprime ningun dato de deteccion", v27)
+
+    def v210():
+        def nan(m):
+            m["F"]["diag_sd_dnti"] = float("nan")
+        r = _corre(*poblacion(base, dc_, cambiar_meta=nan))
+        return h1(r).startswith("INDETERMINADO POR INSTRUMENTO") and "sigma dNTI" in h1(r), h1(r)
+    caso("V2-10: una sigma del A/B en NaN cuenta como distinta, no como identica", v210)
+
+
 def p8_sello():
     print("P8. el sello cubre la sonda, pipeline/, el predicado, el arnes, el catalogo y el yml, y puede fallar", flush=True)
     import sellar
@@ -601,6 +750,10 @@ def p8_sello():
              "un archivo que no estaba en el sello lo rompe")
     sin_cab = [l for l in lineas if not l.startswith("# aprobo")]
     chequear(any("aprobo" in x for x in sellar.diferencias("\n".join(sin_cab))), "un sello sin quien aprobo no vale")
+    # V2-8: un re-sello que cambia una cota queda a la vista
+    chequear(sellar.comparar_sellos(txt, "\n".join(alterado)) == ["raiz:pipeline/process_viirs.py"]
+             and sellar.comparar_sellos(txt, txt) == [],
+             "comparar_sellos nombra lo que cambio entre dos sellos (V2-8) y nada si son iguales")
 
 
 def main():
@@ -614,9 +767,10 @@ def main():
         p5_evaluador(salida)
         p6_evaluador_grupos(salida, d)
         p7_veredictos_sinteticos(salida)
+        p7b_segundo_verificador(salida)
         p8_sello()
-    print("\nRESULTADO: %d comprobaciones, %s" % (N_CHEQUEOS[0], "TODO OK" if not FALLAS else "%d FALLAS: %s" % (len(FALLAS), FALLAS)),
-          flush=True)
+    print("\nRESULTADO: %d comprobaciones, %d saltadas, %s" % (
+        N_CHEQUEOS[0], SALTADAS[0], "TODO OK" if not FALLAS else "%d FALLAS: %s" % (len(FALLAS), FALLAS)), flush=True)
     sys.exit(1 if FALLAS else 0)
 
 
