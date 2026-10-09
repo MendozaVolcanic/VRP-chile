@@ -1,0 +1,84 @@
+name: Experimental diario (laboratorio congelado, 11 Tier A)
+
+# S150 (decision de Nicolas 2026-10-09). El perfil `experimental` quedo CONGELADO en la deteccion de
+# produccion de hoy (PR #771): conectiva min y Test 1 encendido, que ven las anomalias debiles reales que
+# MIROVA no publica. La replica va a cambiar para parecerse a MIROVA y dejara de verlas; este workflow
+# guarda desde ya lo que el laboratorio ve, para no perderlo.
+#
+# POR QUE APARTE DEL NRT: S141 saco el experimental del job del NRT porque ocupaba la mitad de cada
+# corrida (19 de 38 min en Lascar) y eso retrasa el dato operacional. Aca corre una vez al dia a las
+# 14:00 UTC, cuando ya llegaron todas las pasadas nocturnas (00 a 08 UTC + 1,4 a 3,5 h de NASA).
+#
+# CONCURRENCIA: grupo PROPIO, no `push-main`. GitHub guarda un solo run pendiente por grupo; en
+# `push-main` este workflow podria desplazar una corrida del NRT en espera. El push a main se protege con
+# el mismo bucle de reintentos pull --rebase del NRT (la otra forma que acepta el guard G4,
+# tests/test_guard_declarado_vs_efectivo_s131.py).
+#
+# A71: autentica SOLO con EARTHDATA_TOKEN y falla al instante si viene vacio.
+# A43: "on" entre comillas.
+"on":
+  schedule:
+    - cron: "0 14 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: experimental-diario
+  cancel-in-progress: false
+
+jobs:
+  process:
+    runs-on: ubuntu-24.04  # S150: fijado, como el NRT (ubuntu-latest migra a 26.04 desde el 2026-10-19)
+    timeout-minutes: 80
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      max-parallel: 4   # menos que el NRT: no compite por LANCE con el dato operacional
+      matrix:
+        volcano: [Lascar, PuyehueCordonCaulle, Lastarria, Isluga, Tupungatito, PlanchonPeteroa,
+                  Chaiten, Villarrica, NevadosDeChillan, Llaima, Copahue]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: Run VRP pipeline, experimental profile
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        timeout-minutes: 60
+        run: |
+          set -o pipefail
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacio. Sin token no se procesa nada, y el login por usuario y clave vencido bloquea la cuenta (A71)."
+            exit 1
+          fi
+          VRP_PROFILE=experimental python -c "import pipeline.profile as p; assert p.DATA_SUBDIR == 'experimental_v2', p.DATA_SUBDIR; print('perfil', p.PROFILE_NAME, '| test1', p.ENABLE_TEST1_PATH, '| conectiva_prosa', p.ENABLE_TESTS_23_PROSE_BRANCH)"
+          python scripts/run_pipeline.py --profile experimental --volcano "${{ matrix.volcano }}" 2>&1 | tee pipeline.log
+
+      - name: Commit experimental data
+        run: |
+          set +e
+          git config user.name  "vrp-bot"
+          git config user.email "vrp-bot@github-actions"
+          git add "data/experimental_v2/${{ matrix.volcano }}.json" 2>/dev/null
+          git diff --staged --quiet && { echo "Sin cambios para ${{ matrix.volcano }}"; exit 0; }
+          git commit -m "Experimental update ${{ matrix.volcano }} $(date -u '+%Y-%m-%d %H:%M UTC')"
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase -X theirs origin main && git push && exit 0
+            echo "push attempt $attempt failed, sleeping $((attempt * 10))s"
+            git rebase --abort 2>/dev/null
+            sleep $((attempt * 10))
+          done
+          echo "all push attempts failed"; exit 1
