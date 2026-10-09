@@ -1,0 +1,236 @@
+name: Probe S150 tres campos (sigma del campo, D22 y D26, VIIRS 375)
+
+# A43: "on" entre comillas.
+#
+# QUE HACE. Para cada pasada de experiments/_s150_sonda_tres_campos/pasadas.json (las 42 alertas de MIROVA
+# que la conectiva `max` pierde, sus controles y una muestra de los negativos del camino D22) baja el
+# granulo VIIRS 375 exacto y corre calculate_vrp REAL sobre cinco sustratos: el granulo nativo, la grilla
+# UTM de vecino que ya existe, y el granulo interpolado (vecino, lineal, cubico) a la grilla del GeoTIFF
+# de MIROVA. Guarda por pixel lo necesario para rehacer offline la decision con `min` y `max`, con y sin
+# la compuerta D22, y con el pozo del segundo pase con y sin filtros (D26). Diseno y criterio:
+# experiments/_s150_sonda_tres_campos/DISENO.md.
+#
+# SOLO LECTURA sobre el pipeline (A45/A75): los campos se arman reasignando flags y funciones en el
+# namespace de pipeline.process_viirs dentro del script; no se edita pipeline/, ningun perfil ni data/.
+# Autentica SOLO con EARTHDATA_TOKEN (A71: el par usuario y clave esta vencido y bloquea la cuenta).
+#
+# CANDADO. Corre solo con preregistro_aprobado = "si" Y con el sello SELLO_PREREGISTRO.txt presente y
+# coincidente (lo escribe sellar.py despues del verificador). Un run verde tiene que haber medido todo
+# (A108): cada lote sale en rojo si alguna pasada no se completo.
+#
+# SALIDAS: artefactos por lote (90 dias) y una rama propia por corrida, s150-tres-campos-<run_id>, que no
+# caduca y no toca main (no compite con el candado push-main del NRT). Archivar en _archive/ al terminar.
+"on":
+  workflow_dispatch:
+    inputs:
+      preregistro_aprobado:
+        description: "Escribe 'si' solo si el pre-registro fue aprobado por el verificador y el sello esta commiteado"
+        required: true
+        default: "no"
+      lotes:
+        description: "Vacio = todos los lotes de pasadas.json. O una lista separada por comas (ej. '3' para un piloto)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  preparar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      matriz: ${{ steps.plan.outputs.matriz }}
+    steps:
+      - name: Candado del pre-registro
+        env:
+          APROBADO: ${{ github.event.inputs.preregistro_aprobado }}
+        run: |
+          if [ "$APROBADO" != "si" ]; then
+            echo "::error::preregistro_aprobado no es 'si': no se corre"
+            exit 1
+          fi
+      - name: Credenciales presentes (un secreto ausente es string vacio, no error)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacio: no se mediria nada y el login por clave bloquea la cuenta (A71)"
+            exit 1
+          fi
+          echo "token presente"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Sello del pre-registro (sha256 con finales LF)
+        run: |
+          set -eo pipefail
+          python experiments/_s150_sonda_tres_campos/sellar.py --verificar
+      - name: Plan de lotes
+        id: plan
+        env:
+          LOTES: ${{ github.event.inputs.lotes }}
+        run: |
+          set -eo pipefail
+          M=$(python - <<'PY'
+          import json, os
+          d = json.load(open("experiments/_s150_sonda_tres_campos/pasadas.json", encoding="utf-8"))
+          todos = sorted({p["lote"] for p in d["pasadas"]})
+          pedido = [x.strip() for x in os.environ.get("LOTES", "").split(",") if x.strip()]
+          lotes = [int(x) for x in pedido] if pedido else todos
+          malos = [x for x in lotes if x not in todos]
+          if malos:
+              raise SystemExit("lotes inexistentes: %s" % malos)
+          print(json.dumps(lotes))
+          PY
+          )
+          echo "lotes: $M"
+          echo "matriz=$M" >> "$GITHUB_OUTPUT"
+
+  sonda:
+    needs: preparar
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        lote: ${{ fromJson(needs.preparar.outputs.matriz) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Instalar dependencias (y registrar versiones, H9 del verificador D22)
+        run: |
+          set -eo pipefail
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml pandas rasterio
+          mkdir -p "experiments/_s150_sonda_tres_campos/out/lote_${{ matrix.lote }}"
+          pip freeze > "experiments/_s150_sonda_tres_campos/out/lote_${{ matrix.lote }}/versiones.txt"
+      - name: Rutas de los GeoTIFF de MIROVA de este lote
+        id: tifs
+        env:
+          LOTE: ${{ matrix.lote }}
+        run: |
+          set -eo pipefail
+          python - <<'PY' > /tmp/rutas.txt
+          import json, os
+          d = json.load(open("experiments/_s150_sonda_tres_campos/pasadas.json", encoding="utf-8"))
+          print("README.md")   # nunca una lista vacia: sparse-checkout vacio bajaria los 17 GB
+          for p in d["pasadas"]:
+              if str(p["lote"]) == os.environ["LOTE"] and p.get("tif") and p["tif"].get("usable"):
+                  print(p["tif"]["tif_path"])
+          PY
+          echo "sha=$(python -c "import json;print(json.load(open('experiments/_s150_sonda_tres_campos/pasadas.json',encoding='utf-8'))['sha_indice_tif'])")" >> "$GITHUB_OUTPUT"
+          {
+            echo "rutas<<FIN_RUTAS"
+            cat /tmp/rutas.txt
+            echo "FIN_RUTAS"
+          } >> "$GITHUB_OUTPUT"
+          echo "TIF a bajar: $(($(wc -l < /tmp/rutas.txt) - 1))"
+      - name: Checkout disperso de mirova-tif-archive (solo esos archivos, fijado por sha; nunca el repo entero)
+        uses: actions/checkout@v4
+        with:
+          repository: MendozaVolcanic/mirova-tif-archive
+          ref: ${{ steps.tifs.outputs.sha }}
+          path: _tif_archive
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: ${{ steps.tifs.outputs.rutas }}
+          sparse-checkout-cone-mode: false
+      - name: Correr la sonda (read-only)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: _s147_ab_sin_test1_max
+          PROBE_LOTE: ${{ matrix.lote }}
+          TIF_DIR: ${{ github.workspace }}/_tif_archive
+          PROBE_OUT: ${{ github.workspace }}/experiments/_s150_sonda_tres_campos/out/lote_${{ matrix.lote }}
+        run: |
+          # S141: sin pipefail, `python ... | tee` devuelve el codigo de tee y un crash sale verde.
+          set -o pipefail
+          du -sh _tif_archive || true
+          python experiments/_s150_sonda_tres_campos/sonda.py | tee "$PROBE_OUT/report.txt"
+      - name: Subir la salida del lote
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s150-tres-campos-lote-${{ matrix.lote }}
+          path: experiments/_s150_sonda_tres_campos/out/lote_${{ matrix.lote }}/
+          retention-days: 90
+          if-no-files-found: error
+
+  evaluar:
+    needs: [preparar, sonda]
+    if: always() && needs.preparar.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Vaciar salidas viejas del checkout (que nada rancio pase por nuevo)
+        run: rm -rf experiments/_s150_sonda_tres_campos/out
+      - name: Bajar las salidas de todos los lotes
+        uses: actions/download-artifact@v4
+        with:
+          pattern: s150-tres-campos-lote-*
+          path: experiments/_s150_sonda_tres_campos/out
+      - name: Evaluador (criterio sellado en DISENO.md; predicado del tablero con node)
+        id: medir
+        run: |
+          set +e
+          set -o pipefail
+          pip install --upgrade pip
+          pip install numpy pyyaml pandas
+          node --version
+          python experiments/_s150_sonda_tres_campos/evaluar.py --out experiments/_s150_sonda_tres_campos/out \
+            | tee experiments/_s150_sonda_tres_campos/out/evaluacion.txt
+          echo "evaluador=$?" >> "$GITHUB_OUTPUT"
+      - name: Subir la evaluacion
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s150-tres-campos-evaluacion
+          path: |
+            experiments/_s150_sonda_tres_campos/out/evaluacion.txt
+            experiments/_s150_sonda_tres_campos/out/evaluacion.json
+          retention-days: 90
+      - name: Guardar en una rama propia (no caduca, no toca main)
+        if: always()
+        run: |
+          set -eo pipefail
+          RAMA="s150-tres-campos-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$RAMA"
+          git add -f experiments/_s150_sonda_tres_campos/out
+          if git diff --cached --quiet; then
+            echo "::error::no hay ninguna salida que guardar"
+            exit 1
+          fi
+          git commit -m "S150 sonda tres campos: salidas del run ${GITHUB_RUN_ID} (rama de datos, no mergear sin leer evaluacion.txt)"
+          OK=0
+          for attempt in 1 2 3 4 5; do
+            if git push origin "HEAD:refs/heads/$RAMA"; then OK=1; break; fi
+            echo "empuje fallido (intento $attempt), reintento en $((attempt * 10)) s"
+            sleep $((attempt * 10))
+          done
+          if [ "$OK" != "1" ]; then
+            echo "::error::no se pudo empujar la rama $RAMA; las salidas quedan SOLO en los artefactos"
+            exit 1
+          fi
+      - name: Veredicto del run (verde solo si todo se midio)
+        if: always()
+        env:
+          SONDA: ${{ needs.sonda.result }}
+          EVA: ${{ steps.medir.outputs.evaluador }}
+        run: |
+          echo "lotes: $SONDA ; evaluador: $EVA"
+          if [ "$SONDA" != "success" ] || [ "$EVA" != "0" ]; then
+            echo "::error::el run NO midio todo: lotes=$SONDA evaluador=$EVA"
+            exit 1
+          fi
+          echo "todo medido. El veredicto se LEE en evaluacion.txt, con DISENO.md al lado"
