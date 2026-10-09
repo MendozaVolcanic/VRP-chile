@@ -60,6 +60,23 @@ thresholds:
   min_vrp_mw_viirs750: 0.0
   min_vrp_mw_modis: 0.0
 
+# S150 (AUDIT_S149 Fase 0 tarea 3 y Fase 5; decision de Nicolas 2026-10-09): el laboratorio queda CONGELADO
+# en la deteccion de produccion de hoy. POR QUE: la replica va a cambiar (conectiva max, sin Test 1, banda 22,
+# etiqueta MODIS desde el cumulo, quizas sin tope D9 ni compuerta D22) para parecerse mas a MIROVA, y cada
+# uno de esos cambios hace que vea MENOS. Como este perfil hereda de mirova_equivalent, sin estas lineas se
+# arrastraria con la replica y perderiamos justo lo que hoy vemos de mas (las anomalias debiles reales que
+# MIROVA no publica). Cada valor de abajo es el de produccion al 2026-10-09; los vigila
+# tests/test_experimental_congelado_s150.py. Cambiarlos es una decision sobre el laboratorio, no un efecto
+# lateral de cambiar la replica.
+enable_modis_b22_primary: false
+enable_modis_distance_class_from_cluster: false
+
+paths:
+  enable_test1_path: true
+  enable_tests_23_prose_branch: false
+  enable_tests_23_no_bt_gate_viirs375: false
+  path_d_only_cap_mw: 5.0
+
 output:
   # S124 — subdir NUEVO a proposito. `data/experimental/` contiene la serie
   # generada con la configuracion vieja (S15), que producia ruido: en Nevados
