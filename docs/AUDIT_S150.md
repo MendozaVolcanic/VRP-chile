@@ -141,7 +141,7 @@ en vivo siguen contando como falso negativo las pasadas que nunca procesamos.
 | # | pregunta | recomendación |
 |---|---|---|
 | 1 | Despachar la prueba de Chillán desde el 2026-10-13 | **sí** |
-| 1b | El recall de `max` en VIIRS 375 (abril a agosto) | ya no hay pérdidas fuertes: las cinco de Suomi NPP eran filas del OCR con la imagen de otra pasada (`docs/S150_IMAGENES_SNPP.md`); la pregunta es sólo si se acepta perder parte del tramo bajo 0,10 MW en la réplica |
+| 1b | El recall de `max` en VIIRS 375 (abril a agosto) | ya no hay pérdidas fuertes CONFIRMADAS: las cinco de Suomi NPP tienen VRP real de su pasada pero la distancia y la clase de otra pasada, así que no se sabe si eran del cráter (`docs/S150_IMAGENES_SNPP.md`, corregido); la pregunta es sólo si se acepta perder parte del tramo bajo 0,10 MW en la réplica |
 | 2 | La línea de MIROVA del tablero: leer el OCR y todas las clases, o corregir el texto | **leer el OCR**: hoy oculta las alertas más fuertes |
 | 3 | El hook de inicio de sesión que lee issues abiertos y días del token | **sí**: es el único aviso que no depende de que alguien abra GitHub |
 | 4 | Fijar `ubuntu-24.04` en `nrt.yml` hasta probar 26.04 | **sí**: una línea, reversible |

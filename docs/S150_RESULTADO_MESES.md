@@ -121,6 +121,14 @@ el azar en ese estrato. Es informativa: P5 no decide. Los otros tres meses cumpl
 
 ## 3. Las alertas de 0,5 MW o más que `max` pierde: un patrón de cinco casos
 
+> ⚠️ **CORRECCIÓN POSTERIOR del marcador de abajo** (agente del arreglo del scraper, PR MendozaVolcanic/Mirova-v1#20; esta
+> sesión no lo re-verificó): el **VRP** de las 5 filas SÍ es de su propia pasada (está en la celda de su hora en
+> las imágenes Latest10NTI de MIROVA, siempre con cenit de 59° o más). Lo que viene de la pasada posterior es
+> la **distancia y la clase ALERTA** (salen de la estrella de la imagen de distancias) y las imágenes guardadas.
+> O sea: eran detecciones de MIROVA con VRP real pero **sin saber si estaban en el cráter**. No son alertas
+> del cráter confirmadas, y tampoco artefactos probados. En el caso del 22 de agosto, MIROVA no llevó el
+> 1,65 MW ni a su serie ni a latest.php.
+>
 > ⚠️ **RESUELTO S150, mismo día: no son alertas reales** (`docs/S150_IMAGENES_SNPP.md`). En los cinco casos la
 > imagen que el scraper guardó con la hora de la pasada de Suomi NPP es, según su propia cabecera, la de una
 > pasada posterior (en uno, el mismo archivo md5 que la de NOAA-20 de las 05:24). El valor de la fila no
