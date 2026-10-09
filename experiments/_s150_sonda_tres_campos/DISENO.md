@@ -9,8 +9,10 @@
 > veredictos (§10 bis), y las salvedades de los hallazgos que no se corrigen (§9). Un **segundo verificador**
 > (`docs/audit_s150/VERIFICADOR2_SONDA_TRES_CAMPOS.md`, sobre `5eda5b942`) confirmó esos cierres y encontró otros
 > caminos por los que salía un veredicto no diseñado; esta versión aplica sus cuatro cambios obligatorios (V2-1 a
-> V2-4) y los baratos (V2-5 a V2-10), cada uno con su caso en P7b que falla con el código de `5eda5b942`. **Todavía
-> no está aprobada**: falta que un verificador revise esta ronda. No se bajó ningún gránulo de NASA ni se
+> V2-4) y los baratos (V2-5 a V2-10), cada uno con su caso en P7b que falla con el código de `5eda5b942`. Un **tercer
+> verificador** (`docs/audit_s150/VERIFICADOR3_SONDA_TRES_CAMPOS.md`, sobre `aae4a4ed0`) confirmó las doce y encontró
+> cuatro huecos (N1, N2, N3, N5), cerrados aquí con su caso en P7c que falla con `aae4a4ed0`. **Todavía no está
+> aprobada**: falta que un verificador revise esta ronda. No se bajó ningún gránulo de NASA ni se
 > usaron credenciales. Nada de `pipeline/`, perfiles ni `data/` se tocó. El despacho exige (1) que un
 > verificador apruebe este documento, (2) que quien lo aprueba corra
 > `python sellar.py --aprobo "<nombre>" --informe <informe del verificador>` para sellar los archivos que
@@ -267,7 +269,7 @@ donde se dice otra cosa, y se fijan ahora para que no se puedan acomodar despué
 | control positivo de D22 | 0 fallas: `nativo|min` publica TODAS las pérdidas D22 usables | literal: las 14 las publicó B por definición; si `min` no publica una, el instrumento no puede ver su recuperación. Que falte un gránulo es cobertura (fila de arriba), no esto |
 | registro del TIF por pasada | r_L ≥ 0,90 con `tif_nn` | elección: el número que propuso el verificador. En P4 una sola celda de corrimiento deja r_L en 0,95; bajo 0,90 la escena no es la misma o no está registrada |
 | pasadas que pasan el registro | ≥ 50 % de las 135 con TIF usable | elección: si más de la mitad de los TIF no es la escena, el pareo mismo es sospechoso y la mediana vendría de un subconjunto que no es al azar |
-| brecha FP(nativo, min) − FP(nativo, max) | ≥ 0,10, e informada contra la del A/B (766 / 2.324 = 0,330) | elección: con brecha 0,10 la tolerancia de CONFIRMA (¼ de la brecha) es 0,025, del orden del error estándar de ΔFP (0,02 a 0,03, hallazgo 9): debajo de eso el criterio mide ruido. Desde V2-2 es un **segundo candado**: con la reproducción por grupo en pie la brecha no puede bajar de unos 0,27 (peor caso aritmético: 4 de 84 fallas en el residual apagado, 2 de 42 en los otros dos estratos, con los pesos de la ventana) |
+| brecha FP(nativo, min) − FP(nativo, max) | ≥ 0,10, e informada contra la del A/B (766 / 2.324 = 0,330) | elección: con brecha 0,10 la tolerancia de CONFIRMA (¼ de la brecha) es 0,025, del orden del error estándar de ΔFP (0,02 a 0,03, hallazgo 9): debajo de eso el criterio mide ruido. Desde V2-2 es un **segundo candado**: con la reproducción por grupo en pie la brecha sin parear no podía bajar de unos 0,27 (peor caso aritmético: 4 de 84 fallas en el residual apagado, 2 de 42 en los otros dos estratos, con los pesos de la ventana); desde N2 la brecha se calcula pareada y es, por construcción, la del A/B en esa muestra (0,330) |
 | M publica las conservadas como el nativo | R_K(M, max) ≥ R_K(nativo, max) − 0,10; si no, INDETERMINADO POR INSTRUMENTO | sin número nuevo: la misma cota que ya usaba CONFIRMA, adelantada a gate (V2-1). Un M que no publica las alertas de MIROVA que el nativo publica no es el campo donde MIROVA detecta, y su «no recuperar» daba REFUTA |
 
 Lo que **no** se cambió, a propósito: las cotas de H1 (½ y ¼) y de D22 (0,50 y 0,25), y las de validez del campo
@@ -297,6 +299,15 @@ Con `brecha = FP(nativo, min) − FP(nativo, max)` y `ΔFP = FP(M, max) − FP(n
 | **CONFIRMA** | R_L(M, max) ≥ 0,50 **y** ΔFP ≤ 0,25 · brecha **y** R_K(M, max) ≥ R_K(nativo, max) − 0,10 **y** zonas nulas sanas |
 | **REFUTA** | R_L(M, max) < 0,25, **o** ΔFP > 0,50 · brecha (el campo mueve pérdidas y falsos juntos, como bajar C2) |
 | INDETERMINADO | el resto |
+
+**Contraste pareado (tercer verificador, N2).** ΔFP, la brecha y R_K se calculan **sólo sobre las pasadas que el
+nativo reproduce** (las dos corridas del nativo iguales al A/B, §5.4), igual que R_L se calcula sólo sobre las
+pérdidas reproducidas. Así FP(nativo, max) y FP(nativo, min) son exactamente los del A/B en esa muestra, y los
+desvíos que tolera el 5 % del gate de reproducción no entran a la línea base: antes, desvíos tolerados que inflaban
+FP(nativo, max) llevaban un M que reabre el 30 % del residual de INDETERMINADO a CONFIRMA. La tabla H3 sigue
+informando las tasas sobre todas las pasadas usables. Consecuencia de diseño de V2-1, dicha aquí: REFUTA por recall
+sólo sale si M publica las conservadas como el nativo y pierde las pérdidas; un suavizado que mate todas las alertas
+débiles da INDETERMINADO POR INSTRUMENTO, no REFUTA, porque un campo que no ve lo que MIROVA vio no es el suyo.
 
 **Potencia (hallazgo 9).** Con unas 32 pérdidas reproducidas, el error estándar de R_L ronda 0,09: si la tasa real
 fuera exactamente 0,5, la cota de CONFIRMA se cruzaría la mitad de las veces. Es una cota pre-registrada, no una
@@ -341,9 +352,11 @@ Variantes, todas con `max`:
   **reproducidas** por el nativo (§5.4), igual que en H1. Un negativo cuenta como **reabierto** si
   la variante publica y `max` no (o, a nivel de tests, aparece un píxel de cumbre activo que `max` no tenía).
 - **Gates de D22**: los de §5 (identidad, cobertura general y la propia de D22 contada sobre las pérdidas
-  reproducidas, V2-6; σ contra el A/B, reproducción por grupo; la validación del TIF sólo cuando D22 se lee en M),
-  más el control positivo y que la muestra sea la lista congelada. Si falla uno, ninguna variante tiene veredicto y
-  sus tasas no se escriben (V2-3).
+  reproducidas, V2-6; σ contra el A/B, reproducción por grupo; la validación del TIF y la condición de V2-1, que M
+  publique las conservadas como el nativo, sólo cuando D22 se lee en M, N3), más el control positivo y que la
+  muestra sea la lista congelada. Si falla uno, ninguna variante tiene veredicto y sus tasas no se escriben (V2-3),
+  y la tabla H3 omite las filas `<campo>|max_sin_compuerta` de ese campo; si la frenada es la del nativo, las de
+  todos los campos (N1).
 - Reglas, para cada variante:
 
 | veredicto | condición |
@@ -494,7 +507,10 @@ de la grilla (y su centro, D17) del efecto de interpolar.
   qué entradas cambiaron (V2-8); si aparece cualquier otra, el despacho no se hace sin un verificador nuevo;
 - **su lote se vuelve a correr en el despacho completo.** El piloto no aporta pasadas a la evaluación, y si su
   salida queda en la misma carpeta que la del despacho, el evaluador lo detecta como pasadas duplicadas (V2-5);
-- el despacho completo exige `lotes` vacío: el yml rechaza `piloto = no` con una lista de lotes (V2-3).
+- el despacho completo exige `lotes` vacío: el yml rechaza `piloto = no` con una lista de lotes (V2-3). Y el piloto
+  corre **exactamente un lote**: «Plan de lotes» limpia la lista y, si con `piloto = si` no queda exactamente uno
+  (`" "`, `","` o `"1,2"`), falla (N5: antes `" "` pasaba el candado y corría los 35 lotes como piloto). Que la
+  interfaz de GitHub o `gh workflow run` recorten espacios está SIN VERIFICAR; el plan no depende de eso.
 Aun si alguien abriera los json por pasada del piloto, con 2 pérdidas no hay veredicto posible: el gate de
 cobertura exige 30 de 32 sobre `pasadas.json` entero (P7 lo comprueba con el lote 1).
 
@@ -521,8 +537,9 @@ el sello y el despacho no puede entrar ningún cambio a esas rutas: si entra, se
 | `campos.py` | funciones puras: interpolación, regrid a la grilla de MIROVA, evaluación por píxel, validación |
 | `sonda.py` | el runner de CI (descarga, cinco campos, captura, persistencia, salida por pasada) |
 | `evaluar.py` | el criterio de §5 a §8 |
-| `prueba_local.py`, `prueba_local_salida.txt` | prueba sin NASA: P0 a P8 (con P7b), 120 comprobaciones, todas OK; los 12 casos de P7b fallan con el código de `5eda5b942` |
+| `prueba_local.py`, `prueba_local_salida.txt` | prueba sin NASA: P0 a P8 (con P7b y P7c), 124 comprobaciones, todas OK; los 12 casos de P7b fallan con el código de `5eda5b942` y los 4 de P7c con el de `aae4a4ed0` |
 | `sellar.py` | escribe (con `--aprobo` y `--informe`) y verifica `SELLO_PREREGISTRO.txt` (lo corre quien aprueba, no esta sesión) |
 | `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\docs\audit_s150\VERIFICADOR_SONDA_TRES_CAMPOS.md` | el informe del verificador de la primera versión |
 | `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\docs\audit_s150\VERIFICADOR2_SONDA_TRES_CAMPOS.md` | el informe del segundo verificador, sobre `5eda5b942` |
+| `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\docs\audit_s150\VERIFICADOR3_SONDA_TRES_CAMPOS.md` | el informe del tercer verificador, sobre `aae4a4ed0` |
 | `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.github\workflows\probe-s150-tres-campos.yml` | el workflow (no despachado) |

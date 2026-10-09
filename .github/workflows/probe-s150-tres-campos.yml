@@ -40,7 +40,7 @@ name: Probe S150 tres campos (sigma del campo, D22 y D26, VIIRS 375)
         required: false
         default: ""
       piloto:
-        description: "'si' = piloto: sin veredictos de deteccion, sin rama de datos; exige lotes (DISENO §10 bis)"
+        description: "'si' = piloto: sin veredictos de deteccion, sin rama de datos; exige exactamente un lote (DISENO §10 bis)"
         required: true
         default: "si"
 
@@ -100,6 +100,7 @@ jobs:
         id: plan
         env:
           LOTES: ${{ github.event.inputs.lotes }}
+          PILOTO: ${{ github.event.inputs.piloto }}
         run: |
           set -eo pipefail
           M=$(python - <<'PY'
@@ -107,6 +108,12 @@ jobs:
           d = json.load(open("experiments/_s150_sonda_tres_campos/pasadas.json", encoding="utf-8"))
           todos = sorted({p["lote"] for p in d["pasadas"]})
           pedido = [x.strip() for x in os.environ.get("LOTES", "").split(",") if x.strip()]
+          # N5 (tercer verificador): lotes = " " o "," pasan el candado y, limpios, quedarian vacios = TODOS los
+          # lotes. Un piloto corre exactamente UN lote; fuera del piloto la lista limpia tiene que estar vacia.
+          if os.environ.get("PILOTO") == "si" and len(pedido) != 1:
+              raise SystemExit("un piloto corre exactamente un lote; la lista limpia es %s" % pedido)
+          if os.environ.get("PILOTO") != "si" and pedido:
+              raise SystemExit("fuera del piloto se corren todos los lotes; la lista limpia es %s" % pedido)
           lotes = [int(x) for x in pedido] if pedido else todos
           malos = [x for x in lotes if x not in todos]
           if malos:

@@ -24,6 +24,7 @@ Lo que se puede probar sin bajar granulos, y por que importa cada cosa:
       veredicto solo se cree si se le ve salir cuando corresponde y no salir cuando no (A110 d).
   P7b. Un caso por hallazgo del segundo verificador (V2-1 a V2-7 y V2-10); cada uno falla con el evaluador
       de 5eda5b942 y pasa con el nuevo.
+  P7c. Un caso por hallazgo del tercer verificador (N1, N2, N3, N5); cada uno falla con aae4a4ed0.
   P8. El sello cubre la sonda, pipeline/, el predicado, el arnes, el catalogo y el yml, y se rompe.
 
   VRP_PROFILE=_s147_ab_sin_test1_max python prueba_local.py
@@ -728,6 +729,76 @@ def p7b_segundo_verificador(salida):
     caso("V2-10: una sigma del A/B en NaN cuenta como distinta, no como identica", v210)
 
 
+def p7c_tercer_verificador(salida):
+    """Un caso por hallazgo del tercer verificador (docs/audit_s150/VERIFICADOR3_SONDA_TRES_CAMPOS.md): N1, N2,
+    N3 y N5. Cada uno falla con el codigo de aae4a4ed0 y pasa con el nuevo; una excepcion cuenta como FALLA."""
+    print("P7c. los caminos que encontro el tercer verificador (N1, N2, N3, N5)", flush=True)
+    base = json.loads(Path(salida).read_text(encoding="utf-8"))
+    dc_ = diseno_confirma
+
+    def h1(res):
+        return res["veredictos"]["H1_sigma_del_campo"]
+
+    def caso(msg, fn):
+        try:
+            cond, detalle = fn()
+        except Exception as e:
+            cond, detalle = False, "excepcion %s: %s" % (type(e).__name__, e)
+        chequear(cond, "%s [%s]" % (msg, str(detalle)[:110]))
+
+    _, meta0, _ = poblacion(base, dc_, claves=set())
+    pc = sorted(k for k, m in meta0.items() if m["grupo"] == "perdida" and m.get("etiqueta_confiable"))
+    d22 = sorted(k for k in pc if meta0[k].get("camino_b") == "d22")
+
+    def n2():
+        # nativo con desvios DENTRO del 5 % (2 de 42 y 4 de 84), todos inflando FP(nativo, max); M reabre el 30 %
+        def f(m, i, c):
+            g = m["grupo"]
+            if c == "nativo|max" and ((g == "negativo_b_no_publica" and i < 2) or (g == "residual_apagado" and i >= 80)):
+                return 1
+            return dc_(m, i, c, frac_residual=0.30)
+        r0 = _corre(*poblacion(base, lambda m, i, c: dc_(m, i, c, frac_residual=0.30)))
+        r1 = _corre(*poblacion(base, f))
+        return (h1(r0).startswith("INDETERMINADO (R_L") and h1(r1).startswith("INDETERMINADO (R_L")), \
+            "sano: %s | con desvios: %s" % (h1(r0)[:40], h1(r1)[:60])
+    caso("N2: desvios tolerados por el 5 % no convierten un INDETERMINADO en CONFIRMA (contraste pareado)", n2)
+
+    def n3():
+        r = _corre(*poblacion(base, lambda m, i, c: 0 if c.startswith("tif_") else dc_(m, i, c)))
+        vm = r["veredictos"].get("D22_D26_tif_lin") or {}
+        return bool(vm) and all(v.startswith("INDETERMINADO POR INSTRUMENTO") and "M no publica" in v for v in vm.values()), \
+            list(vm.values())[:1]
+    caso("N3: D22 leida en un M muerto no da NO RECUPERA: INDETERMINADO POR INSTRUMENTO", n3)
+
+    def n1():
+        r = _corre(*poblacion(base, lambda m, i, c: 0 if (m["clave"] in d22[:1] and c == "nativo|min") else dc_(m, i, c)))
+        t = r["h3"]["tabla"] if isinstance(r["h3"], dict) else None
+        return (h1(r).startswith("CONFIRMA") and t is not None and "nativo|max" in t
+                and not any(k.endswith("|max_sin_compuerta") for k in t)), \
+            "H1 %s | filas sin compuerta: %s" % (h1(r)[:20], [k for k in (t or {}) if k.endswith("max_sin_compuerta")])
+    caso("N1: con D22 frenada y H1 en pie, la tabla H3 no muestra las filas sin compuerta", n1)
+
+    def n5():
+        import shutil
+        import subprocess
+        import yaml
+        bash = shutil.which("bash")
+        if not bash:
+            SALTADAS[0] += 1
+            return True, "sin bash: saltada"
+        wf = yaml.safe_load((RAIZ / ".github" / "workflows" / "probe-s150-tres-campos.yml").read_text(encoding="utf-8"))
+        paso = next(s for s in wf["jobs"]["preparar"]["steps"] if s.get("id") == "plan")
+        res = {}
+        with tempfile.TemporaryDirectory() as td:
+            for piloto, lotes in (("si", " "), ("si", ","), ("si", "1,2"), ("si", "1"), ("no", "")):
+                env = dict(os.environ, PILOTO=piloto, LOTES=lotes, GITHUB_OUTPUT=str(Path(td) / "out.txt"))
+                res[(piloto, lotes)] = int(subprocess.run([bash, "-c", paso["run"]], env=env, cwd=str(RAIZ),
+                                                          capture_output=True).returncode != 0)
+        esperado = {("si", " "): 1, ("si", ","): 1, ("si", "1,2"): 1, ("si", "1"): 0, ("no", ""): 0}
+        return res == esperado, {"%s/%r" % k: v for k, v in res.items()}
+    caso("N5: el plan de lotes rechaza un piloto sin un lote valido (' ', ',', '1,2') y acepta '1'", n5)
+
+
 def p8_sello():
     print("P8. el sello cubre la sonda, pipeline/, el predicado, el arnes, el catalogo y el yml, y puede fallar", flush=True)
     import sellar
@@ -768,6 +839,7 @@ def main():
         p6_evaluador_grupos(salida, d)
         p7_veredictos_sinteticos(salida)
         p7b_segundo_verificador(salida)
+        p7c_tercer_verificador(salida)
         p8_sello()
     print("\nRESULTADO: %d comprobaciones, %d saltadas, %s" % (
         N_CHEQUEOS[0], SALTADAS[0], "TODO OK" if not FALLAS else "%d FALLAS: %s" % (len(FALLAS), FALLAS)), flush=True)

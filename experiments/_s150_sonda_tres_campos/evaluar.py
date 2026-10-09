@@ -375,6 +375,7 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
     # que el nativo reproduce son el denominador de R_L y de la recuperacion de D22.
     perd_conf = [f for f in usables if meta[f["clave"]]["grupo"] == "perdida" and meta[f["clave"]].get("etiqueta_confiable")]
     reproducidas = []
+    repro_claves = set()   # TODAS las pasadas (de cualquier grupo) donde las dos corridas del nativo son las del A/B
     if predicado_node:
         rep = {}
         for g in sorted({meta[f["clave"]]["grupo"] for f in usables}):
@@ -390,6 +391,7 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
             for f in fs:
                 a, b = P(f, "nativo|max"), P(f, "nativo|min")
                 if a == F_PUBLICA[g] and b == B_PUBLICA[g]:
+                    repro_claves.add(f["clave"])
                     if g == "perdida":
                         reproducidas.append(f)
                 else:
@@ -413,7 +415,9 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
     out["instrumento"]["campo_mirova"] = M
 
     # ---------------- 1. H1 (sigma del campo), unidad = publicacion por el predicado
-    def por_grupo(campo, corrida_nombre, grupo, solo_confiables=False):
+    def por_grupo(campo, corrida_nombre, grupo, solo_confiables=False, pareado=False):
+        """pareado=True: solo las pasadas que el nativo reproduce (tercer verificador, N2). Asi los desvios que
+        tolera el 5 % del gate de reproduccion no entran a la linea base de dFP, brecha y R_K."""
         xs = []
         for f in usables:
             m = meta[f["clave"]]
@@ -421,13 +425,15 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
                 continue
             if solo_confiables and not m.get("etiqueta_confiable"):
                 continue
+            if pareado and f["clave"] not in repro_claves:
+                continue
             xs.append(P(f, "%s|%s" % (campo, corrida_nombre)))
         return _tasa(xs)
 
-    def fp(campo, corrida_nombre):
+    def fp(campo, corrida_nombre, pareado=False):
         tot = sum(totales[g] for g in GRUPOS_NEG); acc = 0.0; ns = {}
         for g in GRUPOS_NEG:
-            t, n = por_grupo(campo, corrida_nombre, g)
+            t, n = por_grupo(campo, corrida_nombre, g, pareado=pareado)
             ns[g] = n
             if t is None:
                 return None, ns
@@ -493,6 +499,15 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
             return "INDETERMINADO POR COBERTURA: %s" % "; ".join(fallas_c)
         return "INDETERMINADO POR INSTRUMENTO: %s" % "; ".join(fallas_i)
 
+    # V2-1 como condicion propia (tercer verificador, N3: tambien frena D22 leida en M). Pareado (N2).
+    falla_rk_M = None
+    if predicado_node and M:
+        rk_m_, _ = por_grupo(M, "max", "conservada_debil", pareado=True)
+        rk_n_, _ = por_grupo("nativo", "max", "conservada_debil", pareado=True)
+        if rk_m_ is not None and rk_n_ is not None and rk_m_ < rk_n_ - H1_PERDIDA_CONSERVADAS:
+            falla_rk_M = ("M no publica las alertas de MIROVA que el nativo publica: conservadas %.2f con %s|max contra "
+                          "%.2f con nativo|max (tolerancia %.2f)" % (rk_m_, M, rk_n_, H1_PERDIDA_CONSERVADAS))
+
     # veredicto H1: primero todos los gates; la regla solo se aplica si pasan todos
     fallas_h1 = list(fallas_inst) + ([("validacion: %s" % falla_val)] if falla_val else [])
     if not predicado_node:
@@ -501,18 +516,22 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
         v1 = indeterminado(fallas_cob, fallas_h1)
     else:
         # R_L como contraste DENTRO de la corrida (hallazgo 1, punto 2): sobre las perdidas que el nativo
-        # reprodujo (nativo|max no publica), recuperada = M|max publica.
+        # reprodujo (nativo|max no publica), recuperada = M|max publica. dFP, brecha y R_K tambien PAREADOS
+        # (tercer verificador, N2): solo sobre las pasadas que el nativo reproduce, asi FP(nativo, max) y
+        # FP(nativo, min) son exactamente los del A/B en esa muestra y los desvios que tolera el 5 % no mueven
+        # la cota.
         rl, n_rl = _tasa([P(f, "%s|max" % M) for f in reproducidas])
-        fpm, fpn_max, fpn_min = fp(M, "max")[0], fp("nativo", "max")[0], fp("nativo", "min")[0]
-        rk_m, n_rk_m = por_grupo(M, "max", "conservada_debil")
-        rk_n, n_rk_n = por_grupo("nativo", "max", "conservada_debil")
+        fpm, fpn_max, fpn_min = fp(M, "max", True)[0], fp("nativo", "max", True)[0], fp("nativo", "min", True)[0]
+        rk_m, n_rk_m = por_grupo(M, "max", "conservada_debil", pareado=True)
+        rk_n, n_rk_n = por_grupo("nativo", "max", "conservada_debil", pareado=True)
         if None in (rl, fpm, fpn_max, fpn_min, rk_m, rk_n):
             v1 = "INDETERMINADO POR COBERTURA: faltan grupos para calcular H1"
         else:
             brecha = fpn_min - fpn_max; dfp = fpm - fpn_max
             numeros = {"campo": M, "recall_perdidas_reproducidas": rl, "n_perdidas_reproducidas": n_rl,
                        "fp_M_max": fpm, "fp_nativo_max": fpn_max, "fp_nativo_min": fpn_min,
-                       "n_negativos_por_grupo": fp(M, "max")[1], "delta_fp": dfp, "brecha": brecha,
+                       "n_negativos_por_grupo_pareados": fp(M, "max", True)[1], "delta_fp": dfp, "brecha": brecha,
+                       "pareado": "dFP, brecha y R_K sobre las pasadas que el nativo reproduce (N2)",
                        "brecha_ab": brecha_ab, "brecha_menos_brecha_ab": brecha - brecha_ab, "brecha_minima": BRECHA_MIN,
                        "conservadas_M_max": rk_m, "conservadas_nativo_max": rk_n, "n_conservadas": n_rk_n,
                        "nulo_ok": nulo_ok}
@@ -523,12 +542,10 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
             if brecha < BRECHA_MIN:
                 v1 = indeterminado([], ["brecha FP(nativo|min) - FP(nativo|max) = %.3f < %.2f (en el A/B %.3f): el "
                                         "nativo no reproduce lo que `max` compro en falsos" % (brecha, BRECHA_MIN, brecha_ab)])
-            elif rk_m < rk_n - H1_PERDIDA_CONSERVADAS:
+            elif falla_rk_M:
                 # V2-1: un M que no publica las alertas de MIROVA que el nativo publica no es el campo donde
                 # MIROVA detecta; su "no recuperar" no dice nada sobre H1. Sin esto un M muerto daba REFUTA.
-                v1 = indeterminado([], ["M no publica las alertas de MIROVA que el nativo publica: conservadas %.2f "
-                                        "con %s|max contra %.2f con nativo|max (tolerancia %.2f)" % (
-                                            rk_m, M, rk_n, H1_PERDIDA_CONSERVADAS)])
+                v1 = indeterminado([], [falla_rk_M])
             elif rl < H1_RECALL_REFUTA or dfp > H1_DFP_REFUTA * brecha:
                 v1 = "REFUTA (R_L %.2f sobre %d perdidas reproducidas; dFP %.3f, brecha %.3f)" % (rl, n_rl, dfp, brecha)
             elif rl >= H1_RECALL_CONFIRMA and dfp <= H1_DFP_CONFIRMA * brecha and rk_m >= rk_n - H1_PERDIDA_CONSERVADAS and nulo_ok:
@@ -605,6 +622,8 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
         # y sus tasas NO se escriben (V2-3).
         f_c = fallas_cob + fallas_cob_d22 + fallas_cob_d22_rep
         f_i = list(fallas_inst) + fallas_d22 + (["validacion: %s" % falla_val] if (campo != "nativo" and falla_val) else [])
+        if campo != "nativo" and falla_rk_M:
+            f_i.append(falla_rk_M)   # N3: D22 leida en un M que no publica lo que MIROVA publico no dice nada
         if muestra and negd22 and not dd["muestra_en_lista_congelada"]:
             f_i.append("la muestra de negativos D22 no es la lista congelada")
         dd[campo] = variantes if not (f_c or f_i) else "NO SE ESCRIBE: gate caido; ver el veredicto"
@@ -627,6 +646,16 @@ def evaluar(rutas, pasadas_meta, totales, predicado_node=True, negativos_d22=Non
                 ver[nombre] = "SELECTIVO: recupera %.2f de %d y reabre %.2f de %d" % (r, nr, a, na)
         out["veredictos"]["D22_D26_%s" % campo] = ver
     out["d22_d26"] = dd
+    # N1: si D22 esta frenada en un campo, la tabla H3 no puede mostrar su variante sin compuerta (seria leer por
+    # la otra puerta el numero que el gate acaba de frenar). Si esta frenada en el nativo, se omiten las filas sin
+    # compuerta de TODOS los campos, porque D22 en el nativo es la pregunta y las demas la orientan.
+    frenados = {c for c in ("nativo", M) if c and not isinstance(dd.get(c), dict)}
+    if isinstance(out["h3"], dict) and frenados:
+        quitar = [k for k in out["h3"]["tabla"] if k.endswith("|max_sin_compuerta")
+                  and ("nativo" in frenados or k.split("|")[0] in frenados)]
+        for k in quitar:
+            del out["h3"]["tabla"][k]
+        out["h3"]["omitidas_por_d22_frenado"] = sorted(quitar)
     return out
 
 
