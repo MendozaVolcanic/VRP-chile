@@ -1,5 +1,16 @@
 # Pre-registro S150: la conectiva max sin la compuerta D22 (abril a agosto de 2026)
 
+> ⚠️ **SUSPENDIDO, NO SE DESPACHA (S150, tras el verificador con contexto limpio,
+> `docs/audit_s150/VERIFICADOR_PREREGISTRO_D22.md`).** Tres razones: (1) el A/B no aísla la compuerta: en las
+> 14 pérdidas quitarla solo cambia el umbral del primer pase por el del segundo, calculado sin los filtros de
+> no aptos (D26), así que un P1 cumplido no diría que la causa es D22; (2) P1 y P2 casi se excluyen: hay 271
+> de 2.324 negativos limpios de VIIRS 375 por el mismo camino, y recuperar a la misma tasa en las dos
+> poblaciones cuesta unos +5,9 puntos de falsos; (3) el premio en noches (A94) es como mucho 4. Además P2 y
+> P4 no los implementaba ningún script y el determinismo al 98 % era laxo. La pregunta pasa a la sonda de
+> tres campos (`experiments/_s150_sonda_tres_campos/`), que guarda por píxel lo necesario para evaluar
+> offline la decisión con y sin la compuerta, sobre las pérdidas y sobre una muestra de esos negativos. El
+> texto de abajo se conserva por historia.
+
 > **SIN APROBAR TODAVÍA EN SU FORMA FINAL**: Nicolás aprobó el 2026-10-09 hacer esta prueba ("sí a todo",
 > orden: primero este A/B, después la sonda de tres campos). Falta el verificador con contexto limpio; el
 > despacho va después de él. Escrito y commiteado antes de correr.
