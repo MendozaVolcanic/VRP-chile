@@ -168,6 +168,7 @@ jobs:
             python scripts/rebuild_mirova_from_consolidado.py \
               "$stem" "$csvname" \
               --source latest_consolidado.csv \
+              --ocr data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv \
               || echo "  WARN: rebuild $stem failed (continuing)"
           done
 

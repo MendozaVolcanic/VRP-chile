@@ -93,6 +93,14 @@ Bajo" y "Bajo" (B-H4 y B-H5, V-1). Resultado: las dos pasadas más fuertes de la
 "CONS ∪ OCR". Las métricas en vivo cuentan como falso negativo las pasadas que nunca procesamos (12 de 17 eran
 del apagón). **Decisión tuya**: leer el OCR y aceptar todas las clases, o corregir el texto.
 
+**HECHO S150 (decisión de Nicolás 2026-10-09, opción a)**: `rebuild_mirova_from_consolidado.py --ocr` suma las
+alertas nocturnas del OCR marcadas `source: ocr` y acepta la escala completa de MIROVA (incluida "Medio", la
+etiqueta de la versión 21 del OCR); la tabla manda si las dos traen la misma pasada; las pasadas diurnas del
+OCR quedan fuera (A76). `index.html` y `diario.html` dibujan los puntos del OCR como rombo hueco, con una nota;
+`diario.html` deja de leer el CSV a mano y usa el mismo `data/mirova/<Volcán>.json`. Verificado en navegador:
+Chillán muestra 10,0 MW el 2026-10-01 en VIIRS 750 y 8,24 MW el 2026-10-05 en VIIRS 375. Pendiente: las métricas
+en vivo siguen contando como falso negativo las pasadas que nunca procesamos.
+
 ## 5. Familia 5: instrumentos
 
 - D-01 (matizado a 3): la auditoría semanal usa una vara "cráter" que no mira la etiqueta; en MODIS da 85,7 %

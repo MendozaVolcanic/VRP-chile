@@ -104,7 +104,7 @@ footer a:hover { text-decoration: underline; }
 
 <header>
   <h1>VRP Diario por Volcán Tier A</h1>
-  <div class="sub">Comparación VRP MIROVA-equivalente nuestro vs CSV consolidado MIROVA NRT · ventana 90d</div>
+  <div class="sub">Comparación VRP MIROVA-equivalente nuestro vs MIROVA NRT (tabla publicada ▲ e imagen por OCR ◇) · ventana 90d</div>
   <div class="ts-note">⏰ Todas las horas en UTC · click en una tarjeta para ampliar</div>
 </header>
 
@@ -387,7 +387,7 @@ function parseUtcMs(s) {
   if (!/[zZ]$|[+-]\d\d:?\d\d$/.test(str)) str += "Z";
   return new Date(str).getTime();
 }
-// S147 — réplica del predicado de publicación de index.html (l. 1466) y mosaico.html (l. 393).
+// S147 — réplica del predicado de publicación de index.html (l. 1473) y mosaico.html (l. 393).
 // Es una GUARDA DE COHERENCIA, no un arreglo: hoy no cambia ni un record, y eso está MEDIDO.
 //
 // De dónde viene. El frente G de la auditoría S146 reportó que esta vista graficaba records que
@@ -446,16 +446,36 @@ function mirovaBucket(s) {
 }
 
 function aggregateDailyMax(records, getter) {
+  // S150: el punto diario recuerda si su maximo vino del OCR de MIROVA (r.ocr), para dibujarlo distinto.
   const m = new Map();
   for (const r of records) {
     const v = getter(r);
     if (v == null || v <= 0) continue;
     const d = (r.datetime_utc || r.dt || "").slice(0, 10);
     if (!d) continue;
-    if (!m.has(d) || v > m.get(d)) m.set(d, v);
+    if (!m.has(d) || v > m.get(d).y) m.set(d, { y: v, ocr: !!r.ocr });
   }
-  return [...m.entries()].sort().map(([x, y]) => ({ x, y }));
+  return [...m.entries()].sort().map(([x, p]) => ({ x, y: p.y, ocr: p.ocr }));
 }
+
+// S150 (decision de Nicolas, opcion a): la referencia de MIROVA sale de data/mirova/<Volcan>.json, el mismo
+// archivo que usan index.html y mosaico.html (tabla + alertas nocturnas leidas de la imagen por OCR, marcadas
+// source "ocr"). Antes diario leia latest_consolidado.csv a mano y quedaba sin el OCR: en la erupcion de
+// Nevados de Chillan perdia las dos pasadas mas fuertes del 2026-10-01.
+async function loadMirovaRef(volc) {
+  try {
+    const r = await fetch(`${BASE_PATH}data/mirova/${encodeURIComponent(volc.name)}.json`);
+    if (!r.ok) return [];
+    const d = await r.json();
+    return (d.records || []).map(m => ({
+      dt: m.datetime_utc, volc: volc.csv, sensor: m.sensor, vrp: parseFloat(m.VRP_MW) || 0,
+      dist: Number.isFinite(parseFloat(m.distancia_km)) ? parseFloat(m.distancia_km) : null,
+      ocr: m.source === "ocr",
+    }));
+  } catch (e) { return []; }
+}
+function mirovaPointStyle(ctx) { return ctx.raw && ctx.raw.ocr ? "rectRot" : "triangle"; }
+function mirovaPointFill(color) { return (ctx) => (ctx.raw && ctx.raw.ocr ? "transparent" : color); }
 
 function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
   const ds = [];
@@ -499,8 +519,8 @@ function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
       label: `MIROVA ${MIROVA_SENSOR_LABEL[b]} (ref.)`, type: "line",
       data: aggregateDailyMax(mBuckets[b], r => r.vrp),
       borderColor: SENSOR_COLOR[b], backgroundColor: "transparent",
-      borderWidth: 2, borderDash: [5, 3], pointRadius: 3.5, pointStyle: "triangle",
-      pointBackgroundColor: SENSOR_COLOR[b], tension: 0.15, order: 0,
+      borderWidth: 2, borderDash: [5, 3], pointRadius: 3.5, pointStyle: mirovaPointStyle,
+      pointBorderColor: SENSOR_COLOR[b], pointBackgroundColor: mirovaPointFill(SENSOR_COLOR[b]), tension: 0.15, order: 0,
     });
   }
   return { datasets: ds, n_records: recs.length };
@@ -802,10 +822,8 @@ document.getElementById("btn-scale").addEventListener("click", () => {
 });
 
 async function init() {
-  const mirova = await loadMirovaCsv();
   for (const volc of TIER_A) {
-    const data = await loadVolcanoData(volc);
-    const mirovaForVolc = mirova.filter(r => r.volc === volc.csv);
+    const [data, mirovaForVolc] = await Promise.all([loadVolcanoData(volc), loadMirovaRef(volc)]);
     renderCard(volc, data, mirovaForVolc);
   }
 }
