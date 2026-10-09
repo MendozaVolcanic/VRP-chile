@@ -1,0 +1,60 @@
+casos: Counter({'conservada por F': 946, 'residual (neg. limpio que B publica)': 829, 'perdida por F': 37})
+sin TIF a +-180 s: {'conservada por F': 598, 'residual (neg. limpio que B publica)': 433, 'perdida por F': 27}
+solo con md5 reusado: {'conservada por F': 62, 'residual (neg. limpio que B publica)': 53}
+
+== conservada por F: n = 286
+   z ventana 3x3 (media/sd):     p25 6.58 med 9.40 p75 14.57 | > 5: 246 (86 %)
+   z ventana 3x3 (mediana/MAD):  p25 7.97 med 11.49 p75 18.16 | > 5: 259
+   z celda exacta:               p25 1.69 med 6.90 p75 11.06
+   sd_dL / MAD_dL (colas):       p25 1.17 med 1.20 p75 1.29
+   dNTI proxy en la grilla MIROVA (2 dL / L_TIR): p25 0.01 med 0.01 p75 0.02 | > C1 0,003: 272
+   sd dNTI proxy MIROVA / sd dNTI nuestro (misma pasada): p25 0.78 med 0.88 p75 0.98
+   NULO, z ventana sorteada:     mediana de medianas 1.15 | fraccion > 5 media 0.005
+
+== conservada por F, MIROVA < 0,10 MW: n = 77
+   z ventana 3x3 (media/sd):     p25 4.93 med 6.65 p75 8.53 | > 5: 57 (74 %)
+   z ventana 3x3 (mediana/MAD):  p25 6.06 med 8.34 p75 10.47 | > 5: 67
+   z celda exacta:               p25 2.03 med 5.57 p75 7.56
+   sd_dL / MAD_dL (colas):       p25 1.16 med 1.19 p75 1.23
+   dNTI proxy en la grilla MIROVA (2 dL / L_TIR): p25 0.00 med 0.01 p75 0.01 | > C1 0,003: 71
+   sd dNTI proxy MIROVA / sd dNTI nuestro (misma pasada): p25 0.75 med 0.84 p75 0.93
+   NULO, z ventana sorteada:     mediana de medianas 1.16 | fraccion > 5 media 0.005
+
+== conservada por F, MIROVA >= 0,5 MW (control positivo): n = 38
+   z ventana 3x3 (media/sd):     p25 14.38 med 21.57 p75 32.23 | > 5: 36 (95 %)
+   z ventana 3x3 (mediana/MAD):  p25 16.45 med 27.95 p75 43.33 | > 5: 36
+   z celda exacta:               p25 0.13 med 14.84 p75 28.54
+   sd_dL / MAD_dL (colas):       p25 1.25 med 1.33 p75 1.38
+   dNTI proxy en la grilla MIROVA (2 dL / L_TIR): p25 0.02 med 0.02 p75 0.03 | > C1 0,003: 36
+   sd dNTI proxy MIROVA / sd dNTI nuestro (misma pasada): p25 0.79 med 0.88 p75 0.98
+   NULO, z ventana sorteada:     mediana de medianas 1.02 | fraccion > 5 media 0.004
+
+== perdida por F: n = 10
+   z ventana 3x3 (media/sd):     p25 2.87 med 4.26 p75 4.81 | > 5: 2 (20 %)
+   z ventana 3x3 (mediana/MAD):  p25 4.01 med 5.39 p75 6.56 | > 5: 6
+   z celda exacta:               p25 2.43 med 4.26 p75 4.81
+   sd_dL / MAD_dL (colas):       p25 1.26 med 1.31 p75 1.40
+   dNTI proxy en la grilla MIROVA (2 dL / L_TIR): p25 0.00 med 0.00 p75 0.01 | > C1 0,003: 6
+   sd dNTI proxy MIROVA / sd dNTI nuestro (misma pasada): p25 0.56 med 0.65 p75 0.83
+   NULO, z ventana sorteada:     mediana de medianas 1.09 | fraccion > 5 media 0.005
+
+== residual (neg. limpio que B publica): n = 343
+   z ventana 3x3 (media/sd):     p25 1.68 med 2.26 p75 3.08 | > 5: 23 (7 %)
+   z ventana 3x3 (mediana/MAD):  p25 2.05 med 2.77 p75 3.88 | > 5: 55
+   z celda exacta:               p25 0.50 med 1.48 p75 2.50
+   sd_dL / MAD_dL (colas):       p25 1.13 med 1.22 p75 1.37
+   dNTI proxy en la grilla MIROVA (2 dL / L_TIR): p25 0.00 med 0.00 p75 0.00 | > C1 0,003: 83
+   sd dNTI proxy MIROVA / sd dNTI nuestro (misma pasada): p25 0.53 med 0.63 p75 0.79
+   NULO, z ventana sorteada:     mediana de medianas 1.14 | fraccion > 5 media 0.005
+
+perdidas, una por una:
+  Chaiten|VIIRS375|2026-05-19 05:06        MIROVA 0.07 | z ventana 3.93 | robusto 5.37 | z celda 3.93 | sd/MAD 1.37
+  Chaiten|VIIRS375|2026-05-19 06:48        MIROVA 0.05 | z ventana 4.59 | robusto 5.98 | z celda 4.59 | sd/MAD 1.30
+  Isluga|VIIRS375|2026-05-25 06:30         MIROVA 0.04 | z ventana 4.81 | robusto 5.41 | z celda 4.81 | sd/MAD 1.12
+  NevadosDeChillan|VIIRS375|2026-07-15 04:48 MIROVA 0.02 | z ventana 2.42 | robusto 2.73 | z celda 1.19 | sd/MAD 1.13
+  PlanchonPeteroa|VIIRS375|2026-06-17 06:06 MIROVA 0.07 | z ventana 4.59 | robusto 6.56 | z celda 4.59 | sd/MAD 1.43
+  Tupungatito|VIIRS375|2026-05-18 06:48    MIROVA 0.05 | z ventana 3.14 | robusto 4.01 | z celda 3.14 | sd/MAD 1.27
+  Tupungatito|VIIRS375|2026-05-23 04:42    MIROVA 0.12 | z ventana 2.87 | robusto 4.06 | z celda 2.43 | sd/MAD 1.40
+  Tupungatito|VIIRS375|2026-05-24 06:36    MIROVA 0.05 | z ventana 0.21 | robusto 0.59 | z celda 0.21 | sd/MAD 2.49
+  Tupungatito|VIIRS375|2026-07-21 04:30    MIROVA 0.01 | z ventana 5.55 | robusto 7.27 | z celda 5.55 | sd/MAD 1.31
+  Tupungatito|VIIRS375|2026-08-21 06:30    MIROVA 0.04 | z ventana 7.24 | robusto 9.19 | z celda 6.04 | sd/MAD 1.26
