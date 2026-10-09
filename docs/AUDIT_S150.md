@@ -147,6 +147,22 @@ en vivo siguen contando como falso negativo las pasadas que nunca procesamos.
 | 4 | Fijar `ubuntu-24.04` en `nrt.yml` hasta probar 26.04 | **sí**: una línea, reversible |
 | 5 | `first_processed_utc` en `store.py` (A45) y cron externo cada hora de 01 a 12 UTC | **sí** a las dos |
 
+### Decisiones de Nicolás registradas el 2026-10-09
+
+- **Regla de selección en la réplica: gana la anomalía MAYOR de la escena**, como MIROVA (que por eso a veces
+  reporta incendios). Comprobado en los datos de MIROVA: desde marzo, además de 1.398 alertas dentro del radio del
+  cráter, publicó **858 detecciones a una mediana de 20 km** (hasta 34,5 km) que el scraper rotula FALSO_POSITIVO
+  por distancia (`latest_consolidado.csv`). Producción hoy hace lo contrario: `enable_vent_anchored_clustering: true`
+  (S38, elige el cúmulo más cercano al cráter); la opción `vrp_max` de `pipeline/clustering.py` es la anomalía mayor.
+  **Pendiente: A/B con pre-registro** (`vent_anchored` contra `vrp_max`), midiendo además la paridad de distancias
+  contra MIROVA incluyendo sus detecciones lejanas. Va después del A/B de D22 y de la prueba de Chillán.
+- **Experimental**: congelado en la producción de hoy (PR #771); sus áreas se definen más adelante, con las
+  coordenadas de los rasgos reales.
+- **S149 §6**: se reabren las metas de la tabla del 2026-09-14 (por pasada y por tramo en VIIRS, mediana agregada en
+  magnitud, tasa falsa acotada por la tasa base de alerta del sensor); el día de la adopción se reprocesa la historia
+  desde el 2026-01-29 y además se marca el cambio de régimen en las vistas.
+- **Quedan para después**: la cronología de OVDAS de Chillán y las coordenadas de los rasgos reales.
+
 ## 9. Lo que esta auditoría no cubrió
 
 - La fidelidad al paper (cubierta en S138, S146 y S149) y la conectiva (medida en S149 y S150).
