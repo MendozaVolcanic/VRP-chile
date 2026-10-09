@@ -60,7 +60,7 @@ concurrency:
 
 jobs:
   plan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # S150: fijado; ubuntu-latest migra a 26.04 entre 2026-10-19 y 2026-11-19 (runner-images #14748). Cambiar despues de probar pyhdf en 26.04
     outputs:
       jobs: ${{ steps.split.outputs.jobs }}
     steps:
@@ -108,7 +108,7 @@ jobs:
 
   reproc:
     needs: plan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # S150: fijado; ubuntu-latest migra a 26.04 entre 2026-10-19 y 2026-11-19 (runner-images #14748). Cambiar despues de probar pyhdf en 26.04
     strategy:
       fail-fast: false
       # 8 y no mas: el free tier publico da 20 jobs concurrentes y el cron NRT
@@ -177,7 +177,7 @@ jobs:
     # (lo que no se pudo hacer cuando el primer intento murio por timeout). Pero
     # si el plan fallo no hay nada que unir y el merge corria en vacio.
     if: always() && needs.plan.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # S150: fijado; ubuntu-latest migra a 26.04 entre 2026-10-19 y 2026-11-19 (runner-images #14748). Cambiar despues de probar pyhdf en 26.04
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
