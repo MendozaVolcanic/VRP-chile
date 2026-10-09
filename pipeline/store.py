@@ -607,6 +607,24 @@ def append_record(volcano_name: str, record: dict,
         (r.get("datetime_utc"), r.get("sensor")): i
         for i, r in enumerate(store["records"])
     }
+
+    # S150 - sello de PRIMERA aparicion (aprobado por Nicolas 2026-10-09, A45 con tag
+    # pre-s150-first-processed-utc).
+    # POR QUE: la latencia del NRT (pasada del satelite -> dato visible) es parte del producto y
+    # se va a medir antes y despues del disparador externo del cron. `processed_utc` describe ESTA
+    # version del record y cambia en el upgrade NRT->estandar y en los reprocesos, asi que no dice
+    # cuando la pasada se vio por primera vez. Este campo se escribe una sola vez y se hereda en
+    # todo reemplazo. A un record anterior a S150 no se le inventa: queda sin el campo.
+    # Campo descriptivo: no entra en deteccion, magnitud ni en ninguna compuerta.
+    if key in existing_idx:
+        _prev_first = store["records"][existing_idx[key]].get("first_processed_utc")
+        if _prev_first:
+            record["first_processed_utc"] = _prev_first
+        else:
+            record.pop("first_processed_utc", None)
+    else:
+        record["first_processed_utc"] = record["processed_utc"]
+
     if key in existing_idx:
         existing = store["records"][existing_idx[key]]
         # S12: auto-upgrade NRT -> standard. If the previously stored record
