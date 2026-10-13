@@ -75,7 +75,11 @@ y dos verificadores, 2026-10-09).
   todas las versiones del CSV en la historia de Mirova-v1 (API de GitHub por sha, sin clonar) y del snapshot
   local, deduplicando por (volcán normalizado, sensor, fecha del satélite); (c) test en verde; (d) que
   `banco_paridad.indexar_referencia` lea la unión; (e) informar cuántas filas aporta cada versión.
-  Aceptación: el test pasa; las referencias congeladas de las pruebas nuevas salen de la unión.
+  Aceptación: el test pasa; las referencias congeladas de las pruebas nuevas salen de la unión; y
+  `tests/test_referencia_unificada_s139.py::test_la_principal_gana_y_el_respaldo_solo_agrega` vuelve a verde
+  **por la razón correcta**. Ese guard está rojo en `main` desde la caída (run 38413222685, 2026-10-13: el
+  respaldo agrega 21 alertas que la principal perdió, tope 17): es la alarma de la pérdida funcionando, no un
+  test roto. Prohibido ensancharle el rango para ponerlo verde.
 
 - [ ] **0.2 Qué mide `Clasificacion Mirova`.**
   Por qué: el criterio de victoria depende de "Bajo o superior", y la columna no es un corte del VRP por pasada
@@ -177,4 +181,7 @@ y dos verificadores, 2026-10-09).
 - Estado: NRT verde, pero el cron de GitHub corre con atraso (5 a 7 h entre corridas; cron externo sin configurar).
   `experimental-diario` corrió el 10, 11 y 12 de octubre. `audit-weekly` corrió el 12-oct 18:42. Sonda sin sellar.
   Issue #762 abierto (A/B S146 fallido del 8-oct; revisar si es residuo de algo ya cerrado).
+- El CI de `main` está ROJO por un solo guard de datos (`test_referencia_unificada_s139.py`, ver tarea 0.1),
+  comprobado con un run despachado sobre `main` (38413222685). Mientras siga rojo, ningún PR del loop pasa la
+  regla §2.6: la tarea 0.1 es la que lo destraba.
 - Próximo paso: tarea 0.1.
