@@ -184,7 +184,10 @@ y dos verificadores, 2026-10-09).
   MODIS siguen sin existir (A45). Texto original: con los flags de compuerta y de fondo que le faltan a MODIS
   (`audit_s146/A2_RESULTADO_VARA_CORREGIDA.md:285`). En MODIS, `max` solo apaga el detector (S147).
 
-- [ ] **1.7 La caja de 5 × 5 km (D18)**, medida por primera vez ahora que llega a los dos pases (#738), con el
+- [~] **1.7 La caja de 5 × 5 km (D18)** PRE-REGISTRO v2 en `main` (#800, `d5bc604f`; marca en D18 #802),
+  verificado; ESPERA el sello (D-8, #801): despacho reducido a D1/D2 (~35 min) y B/BC en V1 (~6 h). Hallazgo:
+  MIROVA mide `Distancia_km` desde el centro de su grilla. Texto original: medida por primera vez ahora que
+  llega a los dos pases (#738), con el
   Test 1 apagado en el brazo de control donde la palanca puede actuar (A114, A118).
 
 - [x] **1.8 Modo de un solo píxel en erupción** HECHA 2026-10-14 (#799, `7145a692`, verificada CONFIRMADO): el
@@ -216,8 +219,21 @@ y dos verificadores, 2026-10-09).
 | D-5 | Sello del probe de D25 en VIIRS 750 (tarea 1.5); pilotear Tupungatito con 10 pasadas | `experiments/_s151_d25_v750_disco/README.md`, verificador limpio con arreglos | #790 | #793 |
 | D-6 | A/B de anomalía mayor: sello de A1 y si se implementa el código de A2 (recomendación: esperar D-4) | `experiments/_s151_ab_vrp_max/PREREGISTRO.md`, verificador limpio con arreglos | #794 | #795 |
 | D-7 | Sello del A/B de F y K contra producción en los 11 volcanes (V1 costo, V2 veto; ~28 h) | `experiments/_s151_prereg_fk_11/PREREGISTRO.md`, verificador limpio con arreglos | #797 | #798 |
+| D-8 | Sello del A/B reducido de la caja (D1/D2 con K/KC, ~35 min; V1 con B/BC, ~6 h) | `experiments/_s151_prereg_caja/PREREGISTRO.md`, verificador limpio con arreglos | #800 | #801 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 17:54 UTC): vuelta 25, caja (1.7) en la cola (D-8) y marcada en D18
+- Arreglos de #800 aplicados: D1 resuelto con `distancia_mirova.py` (MIROVA mide desde el centro de su grilla;
+  dónde centra la caja queda en dos lecturas, 24,8 a 28,8 % contra 2,7 % fuera), decide sólo en los 8 centrados,
+  INDECIDIBLE por ruido, P3 sobre pares que cambian (el caso sembrado pasaba con todos los pares), Q1 por Fisher,
+  despacho reducido. Prueba 29 de 29. La suite pierde un test: comprobé que es el parametrizado por perfil de
+  `test_perfiles_sin_claves_duplicadas_s126` que se fue con el perfil gemelo eliminado. CI verde; #800 mergeado.
+- D-8 (#801) pide el sello. Marca S151 en D18 (#802, mergeado), conservando el texto viejo.
+- Estado: todo lo diseñado espera a Nicolás (D-2 a D-8 y la sonda 1.2); 1.11 bloqueada. Queda trabajo sin
+  sello: el pendiente (i) de 0.1 (`auto_audit_weekly.py` lee el snapshot crudo y no ve las alertas recuperadas)
+  y los arreglos del evaluador de Chillán.
+- Próximo paso: pendiente (i) de 0.1.
 
 ### 2026-10-14 (vuelta 24): verificador de #800: no vale la pena despachar V1 tal como está
 - Confirmado: cableado (24 llamadas; el tablero no deshace la caja), workflow, sustrato, prueba 28/28, suite.
