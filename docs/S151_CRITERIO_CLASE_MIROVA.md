@@ -2,8 +2,10 @@
 
 > Escrito 2026-10-14 por el loop autónomo (tarea 0.2 de `tasks/LOOP_OBJETIVOS.md`) y corregido el mismo día
 > con el verificador con contexto limpio de #780. Script: `scripts/clase_mirova.py`. Tests y control:
-> `tests/test_clase_mirova_s151.py`. Decisión pendiente para Nicolás: D-4 en la cola del loop (§5 de este
-> documento).
+> `tests/test_clase_mirova_s151.py`.
+>
+> ⚠️ **D-4 decidida el 2026-10-14: rige la lectura A** (Nicolás, en la conversación con el loop; issue #782
+> cerrado). La lectura B del §5 queda como dato informativo, no decide. El texto de §5 se conserva como historia.
 
 ## 1. La pregunta
 
