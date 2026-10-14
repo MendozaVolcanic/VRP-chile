@@ -212,6 +212,21 @@ y dos verificadores, 2026-10-09).
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-14 (servidor 13:53 UTC): vuelta 16, prueba de Chillán evaluada, en verificación limpia
+- Run 38560317428 terminado. `recolectar` en rojo sólo porque su chequeo de cobertura espera 11 volcanes y el run
+  era de uno: los 10 brazos tienen 259 pasadas, 0 faltan, 0 sobran (cobertura pareja).
+- `medir_ndc.py` en local sobre la rama `s146-ab/38560317428`: controles generales OK (cobertura, versión de
+  producto, cableado de los 10 brazos leído de FLAGS_BRAZO, determinismo G contra B 100 % en los tres sensores).
+  Veredictos: P1, P2, P3a, P3b, P4 (KE y KET), P5 T0 CUMPLE; P5 KET SIN DATO (sin pasadas topadas).
+- Lo que dice: ningún brazo pierde alertas de VIIRS de 1 MW o más (13 de 13 en VIIRS 375, 11 de 11 en VIIRS
+  750). MODIS: C0 publica 2 de 3 alertas de 1 MW o más; K, KE y KET las 3, con 0 negativos limpios publicados.
+  El tope D9 recortó 11 pasadas MODIS de C0 (sin tope, hasta 122,8 MW), todas negativos o lejanas, sin cambiar
+  ninguna decisión. E (sólo etiqueta) publica 33 negativos: bien descartado. Razón de magnitud mediana 0,39 a
+  0,68: subestimamos en erupción. Bajo 1 MW, F/K/KE/KET pierden una en VIIRS 375 y una en VIIRS 750 contra C0.
+- Salida guardada en la rama `loop/1.1-resultado-ndc`. Verificador limpio lanzado.
+- Próximo paso: veredicto del verificador; documento de resultado; la prueba sólo veta, lo que pasa sigue a una
+  corrida de los 11 volcanes con su propio pre-registro.
+
 ### 2026-10-14 (servidor 13:50 UTC): vuelta 15, 1.4 en la cola (D-6), Chillán con sus 10 brazos en verde
 - Arreglos de #794 aplicados por su agente (P2 redefinida como cambio cerca/lejos o de publicación; caja de
   50 × 50 km; K3 por corrida con fusión probada; `probar_evaluar.py` 12 de 12; protegidas no decisivas listadas;
