@@ -209,6 +209,20 @@ y dos verificadores, 2026-10-09).
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-14 (servidor 13:27 UTC): vuelta 13, pre-registro de 1.4 entregado (#794), en verificación
+- El flag `ENABLE_VENT_ANCHORED_CLUSTERING` existe pero no llega a todos sus consumidores (A118): con el Test 1
+  disparando en el cráter, la Regla D (`test1_integrated.py:175`) y el ancla (`anchor.py:67`) devuelven el cráter
+  justo en el caso de anomalía mayor. El brazo A1 (sólo el flag) sería casi inerte; la regla completa (A2) pide
+  un cambio de código con A45, descrito y NO implementado.
+- Sustrato: 359 detecciones lejanas nocturnas reproducidas (75 a más de 25 km), 245 publicadas, 152 protegidas
+  por la Regla D. Control C1 pasa en VIIRS 375 (0,952) y falla en VIIRS 750 (0,72) y MODIS (0,26): ahí sólo
+  cotas. C2 con nulo medido: razón 8,3 contra p95 3,40. C1 y C2 se ajustaron tras la primera salida (dicho).
+- P5 prevé que A2 pierde una alerta protegida de Láscar (NOAA-21 2026-10-01 05:18, 1,2 MW): veto con la
+  lectura A. El A/B no puede probar que MIROVA elija la mayor (distancia sin acimut, A93).
+- Agrega `ENABLE_VENT_ANCHORED_CLUSTERING` a la línea `FLAGS_BRAZO` del workflow compartido.
+- Verificador limpio lanzado sobre #794. Run de Chillán: 6 de 10 jobs en verde.
+- Próximo paso: veredicto de #794; si es sellable, D-6 a la cola; evaluación de Chillán.
+
 ### 2026-10-14 (servidor 13:22 UTC): vuelta 12, probe de D25 listo para el sello
 - Arreglos de #790 aplicados por su agente: criterio en CASOS (VALE sólo si el límite superior de Wilson de los
   negativos nuevos por 268 queda bajo el límite inferior del rescate por 28), regla 1 (apagar una alerta
