@@ -179,7 +179,9 @@ y dos verificadores, 2026-10-09).
   pasadas) en `main` (#790, `2b6a1be8`), verificado, con candado; ESPERA el sello (D-5, #793). El descarte de vecinos nublados bajo 255 K es de Coppola 2014 p. 3412, no del canon
   2016a (VERIFICADOR_DATOS D9): medirlo como variante, no como "lo que exige el paper".
 
-- [ ] **1.6 MODIS: banda 22 junto con `max`**, con los flags de compuerta y de fondo que le faltan a MODIS
+- [~] **1.6 MODIS: banda 22 junto con `max`** PRE-REGISTRO de F y K contra producción en los 11 volcanes en `main`
+  (#797, `2c174b5b`, verificado con arreglos); ESPERA el sello (D-7, #798). Los flags de compuerta y de fondo de
+  MODIS siguen sin existir (A45). Texto original: con los flags de compuerta y de fondo que le faltan a MODIS
   (`audit_s146/A2_RESULTADO_VARA_CORREGIDA.md:285`). En MODIS, `max` solo apaga el detector (S147).
 
 - [ ] **1.7 La caja de 5 × 5 km (D18)**, medida por primera vez ahora que llega a los dos pases (#738), con el
@@ -211,8 +213,19 @@ y dos verificadores, 2026-10-09).
 | D-4 | Alerta protegida: lectura A (alertas del scraper, 439 pasadas, recomendada) o B (todo VRP >= 1 MW, 992) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 |
 | D-5 | Sello del probe de D25 en VIIRS 750 (tarea 1.5); pilotear Tupungatito con 10 pasadas | `experiments/_s151_d25_v750_disco/README.md`, verificador limpio con arreglos | #790 | #793 |
 | D-6 | A/B de anomalía mayor: sello de A1 y si se implementa el código de A2 (recomendación: esperar D-4) | `experiments/_s151_ab_vrp_max/PREREGISTRO.md`, verificador limpio con arreglos | #794 | #795 |
+| D-7 | Sello del A/B de F y K contra producción en los 11 volcanes (V1 costo, V2 veto; ~28 h) | `experiments/_s151_prereg_fk_11/PREREGISTRO.md`, verificador limpio con arreglos | #797 | #798 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 15:35 UTC): vuelta 20, pre-registro de F/K mergeado, D-7 en la cola
+- Arreglos de #797 aplicados: logs de cada media ventana revisados (caso que fallaba con la versión anterior),
+  capas de la referencia congeladas con sha256 (`armar_tabla.py` gana `--historico` y `--respaldo` opcionales,
+  compatibles hacia atrás, revisado por mí), F derivado de K en V2, PENDIENTE DE REPETICIÓN en vez de VETADO,
+  casos V2, P6 implementado, control contra producción (umbral de 5 % del instrumento), ruido por pasadas
+  discordantes, alcance "veto de Láscar" dicho. Evaluador 37 de 37; suite 1705; CI verde. #797 mergeado.
+- D-7 (#798) pide el sello. Con esto, todo lo que queda en la cola espera a Nicolás (D-2 a D-7 y el sello de la
+  sonda, 1.2) salvo 1.7 (caja D18) y 1.8 (modo de un píxel), y los arreglos del evaluador de Chillán.
+- Próximo paso: 1.8 (modo de un solo píxel en erupción), que la prueba de Chillán ya dejó en disco.
 
 ### 2026-10-14 (vuelta 19): verificador de #797, sellable con arreglos
 - Confirmado con script propio: perfiles (G = C0 salvo nombre y directorio; los tres flags llegan a los tres
