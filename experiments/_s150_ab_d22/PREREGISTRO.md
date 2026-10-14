@@ -1,5 +1,15 @@
 # Pre-registro S150: la conectiva max sin la compuerta D22 (abril a agosto de 2026)
 
+> ⚠️ **S151 (loop, tarea 1.3): NO se rehace como A/B en GitHub; la pregunta queda para la sonda de tres
+> campos (tarea 1.2).** Con el criterio de victoria del 2026-10-13 (suma de errores bajo 1 MW,
+> `docs/S151_CRITERIO_CLASE_MIROVA.md`), las 14 pérdidas confiables del camino D22 son todas "Muy Bajo"
+> (0,03 a 0,08 MW, 9 de ellas en 0,05 MW o menos, donde el banner de MIROVA dice NONE), ninguna protegida. El
+> techo de ganancia es 14 pasadas (13 noches-volcán) contra una cota de reapertura de 271 negativos del mismo
+> camino (H4): el A/B sólo mejora el criterio si el primer pase sin compuerta reabre menos del 5,2 % de ellos,
+> y la investigación mide que el record no separa las dos poblaciones (AUC cercano a 0,5). Esa selectividad la
+> puede medir la sonda offline, píxel a píxel, sin gastar un A/B. Script y salida:
+> `experiments/_s151_d22_techo/`. El texto de abajo se conserva por historia.
+
 > ⚠️ **SUSPENDIDO, NO SE DESPACHA (S150, tras el verificador con contexto limpio,
 > `docs/audit_s150/VERIFICADOR_PREREGISTRO_D22.md`).** Tres razones: (1) el A/B no aísla la compuerta: en las
 > 14 pérdidas quitarla solo cambia el umbral del primer pase por el del segundo, calculado sin los filtros de
