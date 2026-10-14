@@ -213,6 +213,40 @@ y dos verificadores, 2026-10-09).
   coordenadas de los rasgos reales: Cerro Blanco, Pichi-Llaima, Lazufre, El Agrio). Su vara no es MIROVA
   (A115).
 
+**Agregadas por Nicolás el 2026-10-14 (en este orden; "puedes correr donde necesites": GitHub Actions incluido,
+siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
+
+- [ ] **1.12 (estudio D) Las alertas de 0,05 MW o menos: ¿MIROVA las considera anomalía?**
+  Por qué: el banner de MIROVA dice NONE en 9 pasadas que el scraper registra como alerta (0,02 a 0,05 MW,
+  `docs/S151_CRITERIO_CLASE_MIROVA.md` §5), y 9 de las 14 pérdidas débiles de D22 están en ese rango. Si MIROVA no
+  las ve como anomalía, toda suma de errores las cuenta mal (como alerta perdida o como acierto), incluida la del
+  A/B de F/K en curso. Es la vara de todas las pruebas: va primero.
+  Qué medir: cuántas alertas de la unión tienen VRP de 0,05 MW o menos, por sensor, volcán y tramo A119; qué dice
+  el banner (cuando hay) y el TIF de esas pasadas; si la frontera NONE / VERY LOW está en 0,05 MW o depende del
+  redondeo; y cuánto cambia la suma de errores de los resultados ya medidos (meses de S150, VIIRS 750, Chillán)
+  si esas pasadas se tratan como "MIROVA no vio nada". Control que pueda fallar.
+  Entregable: documento con la regla propuesta para el evaluador, y la regla queda como decisión para Nicolás
+  si cambia algún veredicto ya publicado.
+
+- [ ] **1.13 (estudio C) Alertas diurnas de MIROVA que la réplica no mira.**
+  Por qué: la réplica procesa sólo de noche (MIR contaminado por el sol), pero la tabla de MIROVA trae 37 alertas
+  entre las 13 y las 21 UTC, 19 de 1 MW o más (dato de la tarea 0.3, `docs/audit_s150/meta/`). Con la lectura A
+  son alertas protegidas que se pierden por construcción, y ningún evaluador las cuenta porque todos filtran el día.
+  Qué medir: la población completa de alertas diurnas en la unión (por sensor, volcán, hora y elevación solar);
+  cuáles son reales y cuáles reflejo solar en nubes (A76: VIIRS 375 cerca del mediodía sobre nube); qué haría la
+  réplica con ellas (¿procesa MIROVA el día para VIIRS?, Coppola 2016a y la tesis de Massimetti en
+  `documentacion/`, página renderizada); y cuánto pesan en el criterio. Sin tocar el pipeline.
+
+- [ ] **1.14 (estudio A) Presupuesto de la magnitud, pasada por pasada.**
+  Por qué: subestimamos la energía (Láscar 0,44, Isluga 0,52, Lastarria 0,56, Tupungatito 0,65 en el auto-audit
+  del 2026-10-14; 0,4 a 0,6 en la erupción de Chillán) y no sabemos cuánto viene de cada causa: cuántos píxeles
+  alertamos contra cuántos suma MIROVA (Campus 2022: suma de todos los alertados), cuánta energía trae cada píxel,
+  y cuánto resta el fondo (anillo contra vecinos, D25; A99 rebajada: dos factores opuestos que se compensan).
+  Qué medir: descomponer la razón contra MIROVA en esos factores por pasada, usando nuestros `anomaly_pixels` y,
+  donde se pueda, el conteo de píxeles calientes del TIF de MIROVA (A24: el TIF no es VRP sumable; A106: CRS y hora
+  de adquisición; A109). Resultado: qué palanca mueve la magnitud (conectiva, fondo, área o remuestreo D17) y
+  cuánto, para decidir el siguiente A/B. Control que pueda fallar.
+
 ## 5. Cola de decisiones para Nicolás (el loop agrega; Nicolás responde en el issue)
 
 | # | decisión | evidencia | PR / tag | issue |
@@ -227,6 +261,16 @@ y dos verificadores, 2026-10-09).
 | D-8 | Sello del A/B reducido de la caja (D1/D2 con K/KC, ~35 min; V1 con B/BC, ~6 h) | `experiments/_s151_prereg_caja/PREREGISTRO.md`, verificador limpio con arreglos | #800 | #801 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (vuelta 32): mapa de gaps y tres estudios nuevos en la cola (1.12, 1.13, 1.14)
+- A pedido de Nicolás, mapa de gaps con el auto-audit del 2026-10-14 (ventana de falsas 09-01 a 10-14):
+  publicación en negativos limpios VIIRS 375 88,6 %, VIIRS 750 24,5 %, MODIS 13 % (meta 10 %); recall del tablero
+  MODIS 30 % con el cráter detectado el 100 %, VIIRS 750 87 %, VIIRS 375 99 %; magnitud Láscar 0,44 a Villarrica
+  0,82 (Llaima 8,7 con n 1). La brecha dominante sigue siendo la sobre-publicación de VIIRS 375 (la ataca F/K).
+- Nicolás aprobó agregar D, C y A, en ese orden (1.12, 1.13, 1.14), con permiso de correr donde haga falta.
+  Propuestos y no agregados aún: B (remuestreo a la grilla de MIROVA, D17; espera lo que diga 1.14), E (pasadas de
+  MIROVA sin record nuestro, por satélite) y F (saturación en erupción).
+- Espacio medido: worktree ~0,9 GB; prueba de un evaluador ~2 GB de temporales; `.git` 9 GB; TIF archive 4 GB.
 
 ### 2026-10-14 (servidor 22:09 UTC): vuelta 31, D-6 = sigue; disco liberado; V1 arrancando
 - Nicolás rechazó cerrar la 1.4: la réplica existe para demostrar fidelidad a la metodología de MIROVA, y sin las
