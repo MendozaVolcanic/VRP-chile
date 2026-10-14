@@ -109,7 +109,7 @@ y dos verificadores, 2026-10-09).
   y su control. Si la columna resulta inservible y ningún paper da el umbral, la definición queda en la cola de
   decisiones (§5) con la alternativa medida, y el loop sigue evaluando con las dos lecturas en paralelo.
 
-- [ ] **0.3 Propagación A113 a las puertas de entrada.**
+- [~] **0.3 Propagación A113 a las puertas de entrada.** PR #784 (agente en worktree), en verificación limpia.
   Por qué: `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` confirmó P1 a P6 (bloque de arranque de S149,
   MISSION choca con las dos direcciones, veredicto S27, D8' contra la anomalía mayor, tope D9 con "0 sobre 5 MW"
   falso y 338 hoy, ficha SDA desactualizada) y el hallazgo del tablero (dice que el pipeline no marca el tope).
@@ -135,7 +135,8 @@ y dos verificadores, 2026-10-09).
   caídos; `scraper.py:140`). En plena erupción de Chillán es el caso que puede pasar. PR en Mirova-v1 con test
   del caso "1,234.5"; **el merge espera el sí de Nicolás** (es otro repo de producción).
 
-- [ ] **0.6 Marca de régimen en cada record** (perfil + sha del código; 0 de 65.206 records la tienen,
+- [~] **0.6 Marca de régimen en cada record** PR #785 con tag `pre-s151-marca-regimen`, en la cola (D-3, issue
+  #786); NO se mergea sin el sí de Nicolás. (perfil + sha del código; 0 de 65.206 records la tienen,
   VERIFICADOR_DATOS D7). Bloquea toda adopción futura. Toca `pipeline/store.py` → regla §1.1: plan + test + tag
   + PR, y a la cola de decisiones.
 
@@ -194,10 +195,24 @@ y dos verificadores, 2026-10-09).
 |---|---|---|---|---|
 | D-1 | Adoptar conectiva `max` en VIIRS 375 (criterio §1.2 por medir en 0.2) | `docs/S150_RESULTADO_MESES.md`, `docs/audit_s150/meta/AUDITOR_F2_NUMEROS.md` | pendiente | pendiente |
 | D-2 | Merge del arreglo del scraper Mirova-v1#19 (tarea 0.5) | CI verde de Mirova-v1#21; 4 tests | Mirova-v1#21 | #783 |
-| D-3 | Marca de régimen en `store.py` (tarea 0.6) | pendiente | pendiente | pendiente |
+| D-3 | Marca de régimen en `store.py` (tarea 0.6) | 4 tests, 3 fallaban antes; suite 1706 | #785, tag `pre-s151-marca-regimen` | #786 |
 | D-4 | Alerta protegida: lectura A (alertas del scraper, 439 pasadas, recomendada) o B (todo VRP >= 1 MW, 992) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 12:35 UTC): vuelta 7, 0.6 a la cola y 0.3 entregada por su agente
+- 0.6: `append_record` escribe `regimen = {perfil, codigo_sha, origen}` (GITHUB_SHA en Actions, git en local).
+  Tag `pre-s151-marca-regimen` antes del primer edit; test con 3 de 4 fallando antes; suite 1706. PR #785 NO
+  se mergea (store.py, §1.1); issue #786 (D-3).
+- 0.3: el agente abrió #784 (MISSION con el criterio de victoria y marcas P2 a P5, CLAUDE.md A23/A85/glosario,
+  encabezados D8', D9, D21, D27 y nota en D30, ficha SDA v1.7, INDEX con 14 documentos, comentarios del
+  frontend; contrato G8 de la l. 1473 a la 1483). Suite 1687 en su worktree. Recalculó: 1.565 cúmulos topados en
+  5,0 (277 summit), 343 sobre 5 MW. No hizo: "1.403" desde los datos (es un comentario, no texto visible),
+  P1 (memoria fuera del repo), tooltip "probablemente artefacto" (texto del operador, queda para Nicolás).
+  Verificador limpio lanzado sobre #784.
+- Run de Chillán 38560317428: primera tanda de 6 brazos corriendo, 4 en cola.
+- Próximo paso: veredicto del verificador de #784; mientras, tarea 1.5 (D25 sobre los negativos de VIIRS 750
+  en disco, sin correr nada).
 
 ### 2026-10-14 (servidor 12:29 UTC): vuelta 6, tarea 0.5 lista para el sí de Nicolás
 - `scraper.py` de Mirova-v1: `numero_tabla` acepta sólo comas de miles bien formadas (una coma decimal "0,5"
