@@ -217,6 +217,18 @@ y dos verificadores, 2026-10-09).
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-14 (servidor 15:57 UTC): vuelta 21, tarea 1.8 medida (#799), en verificación
+- NRT verde a las 14:52 UTC.
+- Agente entregó #799 con DECLARACION.md commiteada antes de mirar. Control de reconstrucción: la regla actual
+  reproduce `pc.vrp_mw` en 2.030 de 2.033 cúmulos de 2 o 3 píxeles (C0 de Chillán 42 de 42); control negativo
+  427 de 2.033; 254 records sin reconstruir (píxeles de VRP 0, casi todos MODIS).
+- Hallazgo: el modo casi no llega al operador. VIIRS 375 publica el núcleo F5' (no pasa por el modo); MODIS
+  publica cúmulos de más de 3 píxeles; sólo decide en VIIRS 750: 28 de 1.304 pares, 0 publicaciones cambian
+  en ninguna variante, 0 protegidas afectadas. En la erupción la razón contra MIROVA queda en 0,42 a 0,58 con
+  cualquier variante: el déficit es de cuántos píxeles alertamos, no de la regla de suma.
+- Recomendación del agente: no tocar el modo; apagarlo, si se quiere simplificar, como brazo extra de la corrida
+  F/K (#797). Verificador limpio lanzado.
+
 ### 2026-10-14 (servidor 15:35 UTC): vuelta 20, pre-registro de F/K mergeado, D-7 en la cola
 - Arreglos de #797 aplicados: logs de cada media ventana revisados (caso que fallaba con la versión anterior),
   capas de la referencia congeladas con sha256 (`armar_tabla.py` gana `--historico` y `--respaldo` opcionales,
