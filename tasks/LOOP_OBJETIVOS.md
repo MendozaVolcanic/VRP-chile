@@ -122,7 +122,7 @@ y dos verificadores, 2026-10-09).
   texto viejo). Correr `grep -rl <archivo> tests/` y la suite completa después (un test puede leer esos docs).
   Aceptación: cero guiones largos y medios en cada archivo tocado; suite verde; el guard G8 sigue verde.
 
-- [~] **0.4 Instrumentos chicos.** (a), (b) y (d) HECHAS 2026-10-14 (#781, squash `b2187648`); (c) en PR #791;
+- [x] **0.4 Instrumentos chicos.** HECHA 2026-10-14: (a), (b) y (d) en #781 (`b2187648`), (c) en #791 (`fecc3eae`);
   que espera a la 0.3 porque toca `CLAUDE.md`.
   (a) `evaluar_ventana.py` (en `experiments/_s149_prereg_invierno/` o donde lo ubique `git ls-files | grep
   evaluar_ventana`) deja de mandar stderr a DEVNULL, así el aviso A119 llega al log; (b) `scripts/calidad_referencia_mirova.py`
@@ -209,6 +209,18 @@ y dos verificadores, 2026-10-09).
 | D-4 | Alerta protegida: lectura A (alertas del scraper, 439 pasadas, recomendada) o B (todo VRP >= 1 MW, 992) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 13:07 UTC): vuelta 11, 0.4 completa, 1.5 con arreglos, 1.4 en diseño
+- 0.4c mergeada (#791, squash `fecc3eae`): la tarea 0.4 queda completa.
+- Verificador limpio de #790 (1.5): DESPACHABLE CON ARREGLOS. Cableado del probe, control C-P1 (puede fallar),
+  techo y los 268 reproducidos. Defecto que bloquea el sello: el criterio comparaba TASAS (Wilson x/28 contra
+  y/268) y daba VALE rescatando 28 con 225 negativos nuevos (2.031 de 2.461 combinaciones VALE suman más
+  falsos que rescates), contra la regla 2 del criterio de victoria; y no aplicaba la regla 1. Más: cobertura
+  completa no exigida, job verde sin datos con un `vols` mal escrito, y límites no dichos (la variante de nube
+  no separa nube de cumbre fría: anillo bajo 255 K en 56 de 339 pasadas). Arreglos devueltos a su agente.
+- 1.4 (pre-registro de `vrp_max`): agente diseñando en `VRP-Chile-loop-14`, sin despachar.
+- Run de Chillán 38560317428: 5 de 10 jobs en verde.
+- Próximo paso: arreglos de #790 y su entrada como pre-registro a sellar; PR de 1.4 y su verificador.
 
 ### 2026-10-14 (servidor 12:57 UTC): vuelta 10, 0.3 y 1.10 mergeadas, 0.4c y 1.5 en PR
 - 0.3: arreglos del verificador aplicados por su agente (criterio con D-4 y atribución del corte de 1 MW,
