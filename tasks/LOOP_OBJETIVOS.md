@@ -187,7 +187,9 @@ y dos verificadores, 2026-10-09).
 - [ ] **1.7 La caja de 5 × 5 km (D18)**, medida por primera vez ahora que llega a los dos pases (#738), con el
   Test 1 apagado en el brazo de control donde la palanca puede actuar (A114, A118).
 
-- [ ] **1.8 Modo de un solo píxel en erupción** (AUDIT_S150 familia 3: Chillán VIIRS 750 mostró 2,66, 11,08 y
+- [x] **1.8 Modo de un solo píxel en erupción** HECHA 2026-10-14 (#799, `7145a692`, verificada CONFIRMADO): el
+  modo sólo decide en VIIRS 750 (28 de 1.304 pares), 0 publicaciones cambian, 0 protegidas; la subestimación en
+  erupción es de cuántos píxeles alertamos. No se toca. (AUDIT_S150 familia 3: Chillán VIIRS 750 mostró 2,66, 11,08 y
   2,49 MW en 54 min).
 
 - [x] **1.9 Preferencia de MIROVA entre banda I y banda M** HECHA 2026-10-14 (#787, squash `cd23ae20`): el NRT
@@ -216,6 +218,17 @@ y dos verificadores, 2026-10-09).
 | D-7 | Sello del A/B de F y K contra producción en los 11 volcanes (V1 costo, V2 veto; ~28 h) | `experiments/_s151_prereg_fk_11/PREREGISTRO.md`, verificador limpio con arreglos | #797 | #798 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 16:16 UTC): vuelta 22, tarea 1.8 cerrada (#799)
+- Verificador limpio: CONFIRMADO en conclusión y recomendación (orden declaración antes que script, control que
+  elige píxeles sólo por centroide, 0 publicaciones por estructura: ninguna variante lleva un valor positivo a
+  cero; razones recalculadas con pareo y predicado propios). Arreglos de redacción aplicados: 12 cúmulos MODIS
+  ambiguos pasan a no reconstruibles (control 2.019 de 2.021), MODIS sí cambia magnitud en 536 negativos limpios
+  publicados (mediana 1,57 a 1,78 MW), VIIRS 750 en erupción sube la mediana de 0,418 a 0,498 aunque el error en
+  log no cambia, intervalo por volcán. CI verde; #799 mergeado.
+- Estado de la cola: todo lo escrito espera a Nicolás (D-2 a D-7 y el sello de 1.2); quedan 1.7 (caja D18) sin
+  pre-registro y 1.11 bloqueada. Los arreglos del evaluador de Chillán quedan como mejora para su próximo uso.
+- Próximo paso: pre-registro de 1.7 (la caja de 5 × 5 km), la última palanca sin diseño.
 
 ### 2026-10-14 (servidor 15:57 UTC): vuelta 21, tarea 1.8 medida (#799), en verificación
 - NRT verde a las 14:52 UTC.
