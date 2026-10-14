@@ -47,6 +47,12 @@ data/mirova_reference/*
 # Excepción S70-0 T5: CSV OCR universe (75 KB, ground truth para calibraciones S62-S63)
 !data/mirova_reference/registro_vrp_ocr.csv
 !data/mirova_reference/registro_vrp_ocr.csv.README.md
+# Excepción S150 tarea 0.1: filas que el consolidado de Mirova-v1 perdió (150 KB). Es referencia,
+# la leen los tests y audit-weekly la regenera y commitea: si se ignora, el git add de ese job falla.
+!data/mirova_reference/union_historica
+!data/mirova_reference/union_historica/*
+# Fixture de la tarea 0.1 (207 filas perdidas el 06-oct, generado desde el tag pre-s150-consolidado-perdida-207)
+!tests/datos_s150/*.csv
 
 # Backfill experimental outputs (regenerate with backfill script)
 data/mirova_equivalent_backfill_nov2025/

@@ -21,8 +21,11 @@ from scripts.referencia_mirova_unificada import (clave,  # noqa: E402
 LASCAR_CONS = ("Lascar", "MODIS", "2026-03-04 07:15", "CONS")
 
 
+# S150 (tarea 0.1 del loop): la union historica entra ANTES que el respaldo y hoy lo contiene
+# entero. Estos dos tests prueban la capa del respaldo, asi que la aislan con historico_path=None;
+# sin eso la alerta de Lascar llegaria por la historia y el test dejaria de probar el respaldo.
 def test_recupera_las_alertas_perdidas():
-    ref = cargar_referencia_unificada()
+    ref = cargar_referencia_unificada(historico_path=None)
     por_clave = {clave(a): a for a in ref}
     assert LASCAR_CONS in por_clave
     fila = por_clave[LASCAR_CONS]
@@ -31,7 +34,7 @@ def test_recupera_las_alertas_perdidas():
 
 
 def test_control_sin_respaldo_la_alerta_cons_no_esta():
-    sin = {clave(a) for a in cargar_referencia_unificada(respaldo_path=None)}
+    sin = {clave(a) for a in cargar_referencia_unificada(respaldo_path=None, historico_path=None)}
     assert LASCAR_CONS not in sin
     # la misma pasada si existe por OCR: por eso la clave lleva la fuente
     assert ("Lascar", "MODIS", "2026-03-04 07:15", "OCR") in sin
@@ -53,11 +56,18 @@ def test_la_principal_gana_y_el_respaldo_solo_agrega():
     principal = {clave(a): a for a in cargar_referencia_unificada(respaldo_path=None)}
     ref = {clave(a): a for a in cargar_referencia_unificada()}
     assert set(principal) <= set(ref)
-    assert all(ref[k] is not None and ref[k]["origen"] == "principal" for k in principal)
+    assert all(ref[k] is not None and ref[k]["origen"] in ("principal", "historico") for k in principal)
+    assert all(ref[k]["origen"] == "principal"
+               for k in (clave(a) for a in cargar_referencia_unificada(respaldo_path=None, historico_path=None)))
     extra = Counter(a["tipo"] for k, a in ref.items() if k not in principal)
-    # 17 medidas S140 contra el snapshot. Rango y no igualdad: si Mirova-v1 restaura filas
-    # (issue #19) y el auto-audit refresca el snapshot, el numero baja sin que haya defecto.
-    assert 1 <= extra["ALERTA_TERMICA"] <= 17, extra
+    # Historia del guard. S140: el respaldo agregaba 17 alertas sobre el snapshot, tope 17. El
+    # 2026-10-06 el consolidado perdio 207 filas mas, el respaldo paso a agregar 21 y el guard se
+    # puso rojo (run 38413222685): era la alarma de la perdida funcionando. S150 (tarea 0.1): la
+    # union historica de Mirova-v1 recupera esas filas y contiene TODO lo que el respaldo sabia
+    # (medido: el respaldo agrega 0 filas sobre snapshot + historia). El guard queda mas estricto,
+    # no mas ancho: cero alertas que solo el respaldo conozca. La alarma de caidas FUTURAS vive en
+    # test_referencia_union_historica_s150.py::test_la_union_no_esta_atrasada_respecto_del_snapshot.
+    assert extra["ALERTA_TERMICA"] == 0, extra
 
 
 def test_distancia_ocr_recuperada():
