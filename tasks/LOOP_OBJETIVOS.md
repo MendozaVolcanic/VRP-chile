@@ -224,6 +224,16 @@ y dos verificadores, 2026-10-09).
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-14 (servidor 20:14 UTC): vuelta 29, la sesión se reinició; aviso #779 revisado; loop re-armado
+- La sesión se reinició y la vuelta programada para las ~19:20 UTC no corrió. Se re-arma el loop.
+- Issue #779 (auto-audit FUERA DE BANDA): lo abrió el `audit-weekly` que despaché a las 11:41 UTC para probar la
+  unión. Flag: magnitud de Tupungatito 0,647 de MIROVA (n 23), bajo la banda de 0,7. No lo causa la unión: ese run
+  es anterior a #803 (el paso 1 todavía no la leía) y Tupungatito perdió una noche, no ganó. Es la ventana rodante:
+  el 2026-10-12 daba 0,707 con n 24 (ventana 08-13 a 10-12) y el 14 da 0,647 con n 23 (08-15 a 10-14). Un
+  promedio con n de dos decenas pegado al umbral cambia de lado por una sola noche (A87, A90). El déficit de fondo
+  es el conocido de régimen débil (S124), que es justo lo que miden las pruebas en espera (D-7, F/K). No se toca.
+- Sin respuestas en los issues de decisión; NRT verde a las 14:52 y uno en curso; disco 13 GB.
+
 ### 2026-10-14 (servidor 18:22 UTC): vuelta 28, el OCR medido (#805); el loop pasa a espera
 - OCR de Mirova-v1, 232 versiones diarias desde el 2026-01-20: 1.065 claves en la unión, 1.060 en la más nueva, 5
   perdidas (todas ALERTA_TERMICA_OCR; último día con ellas 20-ene, 5-feb, 22-feb), dentro del tramo inestable del
