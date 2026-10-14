@@ -9,14 +9,14 @@ Lo que se establecio (detalle y fuentes en `docs/S151_CRITERIO_CLASE_MIROVA.md`)
 - La columna `Clasificacion Mirova` la calcula el scraper de Mirova-v1 desde el VRP de la pasada
   (`volcanes.py:63`), no MIROVA. Cambio de escala en el tiempo: en el consolidado es coherente con el VRP
   desde febrero de 2026 y en el OCR desde julio; antes trae etiquetas de escalas retiradas.
-- Los cortes son los de la escala de MIROVA, Coppola et al. 2016a (Geol. Soc. Spec. Publ. 426, fig. 11,
-  p. 16 del PDF): 1, 10, 100 y 1.000 MW. Los nombres del paper (Low, Moderate...) estan corridos un nivel
-  respecto de los del sitio actual; el banner de mirovaweb hoy dice VERY LOW bajo 1 MW y LOW de 1 a 10.
 - El banner de la imagen (`Nivel_Anomalia_MIROVA`, unico campo que si viene de MIROVA) es por pasada y
-  separa sin error VERY_LOW (0,05 a 0,91 MW) de LOW (1,00 a 8,00 MW).
+  separa sin error VERY_LOW (0,05 a 0,91 MW) de LOW (1,00 a 8,00 MW). Es lo que sostiene el corte de 1 MW:
+  Coppola 2016a fig. 11 se contradice entre su pie (Low bajo 1 MW) y su figura (Low bajo 10 MW).
 
-Definicion operativa: una pasada es "alerta protegida" si es alerta (consolidado u OCR) y su VRP_MW es
-de 1 MW o mas, RECALCULADO desde el VRP, nunca leido de la columna.
+Definicion operativa (lectura A): una PASADA es "alerta protegida" si tiene una fila de alerta
+(consolidado u OCR) con VRP_MW de 1 MW o mas, RECALCULADO desde el VRP, nunca leido de la columna.
+Lectura B (decision D-4 de Nicolas, pendiente): toda pasada con VRP de 1 MW o mas, aunque el scraper la
+llame FALSO_POSITIVO por estar fuera de su radio.
 """
 from __future__ import annotations
 
@@ -50,10 +50,30 @@ def clase_por_vrp(vrp_mw: Optional[float]) -> str:
     return "Muy Alto"
 
 
-def alerta_protegida(fila: dict) -> bool:
-    """Fila normalizada (`tipo`, `vrp_mw`, como las de referencia_mirova_unificada)."""
+def alerta_protegida(fila: dict, umbral: float = UMBRAL_PROTEGIDA_MW, lectura: str = "A") -> bool:
+    """Fila normalizada (`tipo`, `vrp_mw`, como las de referencia_mirova_unificada).
+
+    Lectura A: alerta del scraper con VRP >= umbral. Lectura B: cualquier fila con VRP >= umbral salvo
+    RUTINA (incluye FALSO_POSITIVO, calor que MIROVA ve fuera del radio del scraper).
+    """
     v = fila.get("vrp_mw")
-    return fila.get("tipo") in TIPOS_ALERTA and v is not None and v >= UMBRAL_PROTEGIDA_MW
+    if v is None or v < umbral:
+        return False
+    if lectura == "A":
+        return fila.get("tipo") in TIPOS_ALERTA
+    if lectura == "B":
+        return fila.get("tipo") != "RUTINA"
+    raise ValueError(lectura)
+
+
+def clave_pasada(fila: dict) -> tuple:
+    """Una pasada es (volcan, sensor, hora al minuto): junta la fila del consolidado y la del OCR."""
+    return (fila["volcano"], fila["sensor_bucket"], fila["fecha_utc"][:16])
+
+
+def pasadas_protegidas(filas, umbral: float = UMBRAL_PROTEGIDA_MW, lectura: str = "A") -> set:
+    """Pasadas con al menos una fila protegida (filas como las de cargar_referencia_unificada)."""
+    return {clave_pasada(f) for f in filas if alerta_protegida(f, umbral, lectura)}
 
 
 def _float(v) -> Optional[float]:
@@ -97,6 +117,12 @@ def main(argv=None) -> int:
         print(f"columna 'Clasificacion Mirova' contra la clase recalculada, alertas del {nombre}, por mes:")
         for m, c in coherencia_por_mes(Path(p)).items():
             print(f"  {m}  {c}")
+    sys.path.insert(0, str(ROOT))
+    from scripts.referencia_mirova_unificada import cargar_referencia_unificada
+    ref = cargar_referencia_unificada()
+    for lectura in ("A", "B"):
+        pp = pasadas_protegidas(ref, lectura=lectura)
+        print(f"pasadas protegidas, lectura {lectura}: {len(pp)}  por sensor {dict(Counter(k[1] for k in pp))}")
     print("banner de MIROVA (Nivel_Anomalia_MIROVA) contra el VRP de la pasada:")
     por_banner = defaultdict(list)
     for f in filas_con_banner(Path(a.ocr)):
