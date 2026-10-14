@@ -59,13 +59,14 @@ energía: arriba de 1 MW perder una alerta no tiene compensación posible.
    «una alerta que MIROVA clasifique de Bajo para arriba»; el corte de 1 MW es la operacionalización
    hecha en la tarea 0.2 (PR #780), sostenida por el banner de MIROVA de hoy (ningún VERY LOW llega a
    1 MW, ningún LOW queda bajo 1 MW) y **no por el paper**, cuya figura 11 se contradice con su pie.
-   **Lectura A, la de por defecto**: una pasada de la referencia es **alerta protegida** si es alerta
-   (`ALERTA_TERMICA` del consolidado o `ALERTA_TERMICA_OCR`) y su VRP de la pasada es de **1 MW o
-   más**, recalculado desde el VRP y nunca leído de la columna `Clasificacion Mirova`, que la escribe
-   el scraper de Mirova-v1 y no MIROVA (439 pasadas en la unión histórica). **Lectura B, pendiente**:
-   toda pasada en que MIROVA ve 1 MW o más, a cualquier distancia (992 pasadas). Cuál vale es la
-   decisión D-4 de Nicolás (issue #782); mientras tanto el loop evalúa con las dos. Definición,
-   control y denominadores: `docs/S151_CRITERIO_CLASE_MIROVA.md` §2, §3 y §5.
+   **Rige la lectura A, decidida por Nicolás el 2026-10-14 (D-4, issue #782 cerrado)**: una pasada
+   de la referencia es **alerta protegida** si es alerta (`ALERTA_TERMICA` del consolidado o
+   `ALERTA_TERMICA_OCR`) y su VRP de la pasada es de **1 MW o más**, recalculado desde el VRP y nunca
+   leído de la columna `Clasificacion Mirova`, que la escribe el scraper de Mirova-v1 y no MIROVA (439
+   pasadas en la unión histórica). La lectura B (toda pasada en que MIROVA ve 1 MW o más, a cualquier
+   distancia, 992 pasadas) quedó descartada; los evaluadores que ya la calculan la siguen imprimiendo
+   como dato informativo, pero no decide. Definición, control y denominadores:
+   `docs/S151_CRITERIO_CLASE_MIROVA.md` §2, §3 y §5.
 2. **Dentro de «Muy Bajo»** (alertas bajo 1 MW, VERY LOW en el banner de MIROVA), **una alerta perdida
    y una publicación de más pesan igual**: se minimiza la suma de los dos errores.
 3. **Se mide en las dos direcciones, por sensor y por tramo de calidad de la referencia (A119)**, con
