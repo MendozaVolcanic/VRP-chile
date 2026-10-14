@@ -51,14 +51,24 @@ y dos verificadores, 2026-10-09).
 
 ## 2. Protocolo de cada vuelta
 
+0. **Dónde vive el estado.** El loop trabaja siempre en la rama `loop/activo` (la crea desde `main` la primera
+   vuelta, si no existe) y lee y escribe ESTE archivo ahí, no en `main`: la bitácora de una vuelta no puede
+   depender de que la anterior se haya mergeado. Al empezar cada vuelta, `git merge origin/main` en
+   `loop/activo` para recoger el NRT y lo mergeado. Cada tarea que produce código o documentos va en su propia
+   rama `loop/<tarea>` desde `main`, con su PR.
 1. `gh api -i repos/MendozaVolcanic/VRP-chile | grep -i ^date` (hora del servidor, A86); `git fetch origin
-   --prune && git pull --ff-only`; `df -h /c`.
+   --prune`; `git checkout loop/activo && git merge --no-edit origin/main`; `df -h /c`.
 2. Chequeos de parada (§1.5): `gh run list --workflow nrt.yml --limit 3`; issues abiertos con etiqueta de alerta.
 3. Si hay algo corriendo (run de GitHub, agente): revisar su estado. Si terminó, evaluarlo según su tarea.
 4. Si no, tomar la primera tarea `[ ]` de §3 o §4 cuyo bloqueo esté libre. Una tarea por vuelta.
 5. Anotar en la bitácora (§6): hora del servidor, tarea, acción, resultado con número y fuente, próximo paso.
-6. Commit de la bitácora (y de lo producido) a una rama `loop/<fecha>` y PR; merge si el CI está verde y el PR
-   no toca nada de §1.1 (A39 con su enmienda S142: esperar el run con conclusión).
+6. Commit de la bitácora en `loop/activo` y push. El PR de cada tarea se mergea si el CI está verde y no toca
+   nada de §1.1 (A39 con su enmienda S142: esperar el run con conclusión; si `gh pr merge` falla por el
+   worktree, `gh api --method PUT repos/MendozaVolcanic/VRP-chile/pulls/<N>/merge -f merge_method=squash`).
+   **Mientras el CI de `main` siga rojo por el guard de la referencia (tarea 0.1), ningún PR se mergea**: lo
+   producido se acumula en sus ramas y la tarea 0.1 va primero, porque es la que lo pone verde. La única
+   excepción la autorizó Nicolás para #777 (2026-10-14) y no se extiende a otros PR. `loop/activo` se mergea a
+   `main` con un PR propio cuando el CI esté verde, como mínimo una vez al día.
 7. Programar la próxima vuelta según lo que se espera: un run de A/B se mira a su duración esperada (no antes);
    sin nada corriendo, 20 a 30 min.
 
@@ -176,6 +186,15 @@ y dos verificadores, 2026-10-09).
 | D-3 | Marca de régimen en `store.py` (tarea 0.6) | pendiente | pendiente | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 10:22 UTC): plan actualizado y #777 mergeado por decisión de Nicolás
+- Nicolás autorizó mergear #777 con el CI rojo heredado de `main` (sólo el guard de la tarea 0.1).
+- Se agregó §2.0 (el estado vive en `loop/activo`) y la regla de §2.6 mientras `main` siga rojo.
+- Estado: NRT verde con corridas cada 5 a 6 h (09:17, 03:39, 22:17, 17:21 UTC; cron externo todavía sin
+  configurar); `experimental-diario` corrió el 13-oct 20:00 UTC; sonda de tres campos SIN SELLAR (#776, sin
+  `SELLO_PREREGISTRO.txt` en la rama); prueba de Chillán sin despachar (tarea 1.1, autorizada desde el 13-oct);
+  issue #762 abierto; disco 9,9 GB libres.
+- Próximo paso: tarea 0.1; la 1.1 puede ir en paralelo en cuanto 0.1 compruebe la referencia congelada de Chillán.
 
 ### 2026-10-13 (servidor 14:18 UTC): plan escrito, loop sin lanzar
 - Estado: NRT verde, pero el cron de GitHub corre con atraso (5 a 7 h entre corridas; cron externo sin configurar).
