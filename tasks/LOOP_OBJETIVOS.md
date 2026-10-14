@@ -217,7 +217,7 @@ y dos verificadores, 2026-10-09).
 siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 - [~] **1.12 (estudio D) Las alertas de 0,05 MW o menos: ¿MIROVA las considera anomalía?** EN CURSO 2026-10-14
-  (agente en `VRP-Chile-112`, rama `loop/1.12-alertas-minimas`).
+  (agente en `VRP-Chile-112`, rama `loop/1.12-alertas-minimas`). ENTREGADO #810, en verificación limpia.
   Por qué: el banner de MIROVA dice NONE en 9 pasadas que el scraper registra como alerta (0,02 a 0,05 MW,
   `docs/S151_CRITERIO_CLASE_MIROVA.md` §5), y 9 de las 14 pérdidas débiles de D22 están en ese rango. Si MIROVA no
   las ve como anomalía, toda suma de errores las cuenta mal (como alerta perdida o como acierto), incluida la del
@@ -229,7 +229,8 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   Entregable: documento con la regla propuesta para el evaluador, y la regla queda como decisión para Nicolás
   si cambia algún veredicto ya publicado.
 
-- [ ] **1.13 (estudio C) Alertas diurnas de MIROVA que la réplica no mira.**
+- [~] **1.13 (estudio C) Alertas diurnas de MIROVA que la réplica no mira.** EN CURSO 2026-10-14 (agente en
+  `VRP-Chile-113`, rama `loop/1.13-alertas-diurnas`).
   Por qué: la réplica procesa sólo de noche (MIR contaminado por el sol), pero la tabla de MIROVA trae 37 alertas
   entre las 13 y las 21 UTC, 19 de 1 MW o más (dato de la tarea 0.3, `docs/audit_s150/meta/`). Con la lectura A
   son alertas protegidas que se pierden por construcción, y ningún evaluador las cuenta porque todos filtran el día.
@@ -262,6 +263,17 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-8 | Sello del A/B reducido de la caja (D1/D2 con K/KC, ~35 min; V1 con B/BC, ~6 h) | `experiments/_s151_prereg_caja/PREREGISTRO.md`, verificador limpio con arreglos | #800 | #801 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (vuelta 35): estudio D entregado (#810) y en verificación; estudio C arrancado
+- #810 (sin verificar aún): 155 de 2.281 pasadas con alerta tienen 0,05 MW o menos, todas VIIRS 375 (Lastarria 55,
+  Tupungatito 26, Planchón Peteroa 18). Frontera del banner de MIROVA en VIIRS 375: NONE con 0,04 MW o menos, VERY
+  LOW desde 0,06, sin excepciones en tres muestras (banner OCR, color de la estrella, 2.702 imágenes de mayo leídas
+  con `leer_png_mirova.py`); 0,05 queda de los dos lados por redondeo. En mayo el corte de 1 MW VERY LOW / LOW
+  también se cumple en MODIS (7) y VIIRS 750 (19). Sacarlas a un estrato aparte no cambia ningún veredicto (meses
+  860/134 → 852/109; VIIRS 750 400/90 → 397/87; Chillán F/K 7 → 5) y baja el techo de D22 de 14 a 5. Regla
+  propuesta (estrato "mínima", ni pérdida ni acierto ni negativo) queda para Nicolás. El agente admite un `printf >>`.
+- 1.13 (alertas diurnas) arrancado con un agente en `VRP-Chile-113`.
+- V1: 2 jobs terminados en verde, 6 corriendo, 36 en espera; V2a en espera detrás.
 
 ### 2026-10-14 (servidor 23:07 UTC): vuelta 34, estudio TIF de la 1.4 entregado (#809), en verificación
 - Lo que trae (sin verificar todavía): 117 de 359 lejanas con TIF de su pasada. El TIF muestra un foco a la
