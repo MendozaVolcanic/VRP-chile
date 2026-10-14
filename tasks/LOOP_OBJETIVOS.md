@@ -214,6 +214,18 @@ y dos verificadores, 2026-10-09).
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-14 (vuelta 19): verificador de #797, sellable con arreglos
+- Confirmado con script propio: perfiles (G = C0 salvo nombre y directorio; los tres flags llegan a los tres
+  procesadores en los dos pases), ventanas (A104, A119), poder, sustrato (V1 protegidas A 4/21/12; V2 39/38/42;
+  836 negativos MODIS fuera de Láscar), `probar_evaluar_fk.py` 26 de 26 sin veredictos por construcción.
+- Obligatorios: (1) el evaluador sólo lee el log de la primera media ventana de V2; (2) la referencia no está
+  congelada entera (la capa de la unión histórica la reescribe `audit-weekly.yml` cada semana y el respaldo no
+  tiene sha). Además: F sólo con V1; pérdida de V2 sin repetición sale VETADO en vez de PENDIENTE; la prueba no
+  ejercita el camino V2; P6 sin script; falta control contra producción para atrapar un job verde sin datos.
+- Alcance que el documento debe decir: **el veto nuevo es Láscar** (en V2, 36 de 38, 39 de 42 y 39 de 39 de las
+  protegidas; los otros 9 volcanes, 3 o menos).
+- Arreglos devueltos a su agente, con la regla 1.7 (sólo Write y Edit) recalcada.
+
 ### 2026-10-14 (servidor 14:53 UTC): vuelta 18, pre-registro de F/K en los 11 volcanes (#797), en verificación
 - Paradas: NRT verde a las 09:17 UTC y uno nuevo en curso (14:52); disco 16 GB libres.
 - Agente entregó #797 (tareas 1.6 y la corrida de los 11 que pide Chillán): C0 contra F (VIIRS) y K (MODIS con
