@@ -230,7 +230,9 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   Entregable: documento con la regla propuesta para el evaluador, y la regla queda como decisión para Nicolás
   si cambia algún veredicto ya publicado.
 
-- [~] **1.13 (estudio C) Alertas diurnas de MIROVA que la réplica no mira.** ENTREGADO #812, en verificación
+- [x] **1.13 (estudio C) Alertas diurnas de MIROVA que la réplica no mira.** HECHA 2026-10-14 (#812, squash
+  `51b1977b`, verificada con arreglos): MIROVA sí procesa VIIRS de día; 40 pasadas diurnas usables (A119) contra
+  232 nocturnas; decisión D-10 (#813). Antes: ENTREGADO #812, en verificación
   limpia. Antes: EN CURSO 2026-10-14 (agente en
   `VRP-Chile-113`, rama `loop/1.13-alertas-diurnas`).
   Por qué: la réplica procesa sólo de noche (MIR contaminado por el sol), pero la tabla de MIROVA trae 37 alertas
@@ -265,8 +267,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-7 | ~~Sello del A/B de F y K~~ **APROBADO** (Nicolás, 2026-10-14); V1 en curso, run 38639658446 | `experiments/_s151_prereg_fk_11/PREREGISTRO.md`, verificador limpio con arreglos | #797 | #798 |
 | D-8 | Sello del A/B reducido de la caja (D1/D2 con K/KC, ~35 min; V1 con B/BC, ~6 h) | `experiments/_s151_prereg_caja/PREREGISTRO.md`, verificador limpio con arreglos | #800 | #801 |
 | D-9 | Alertas de 0,05 MW o menos (NONE en el banner): SN "MIROVA no vio nada" (recomendada) o SE estrato aparte; y 0,05 exacto | `experiments/_s151_alertas_minimas/README.md`, verificado | #810 | #811 |
+| D-10 | ¿Abrir el día en la réplica? (1, recomendada: cablear rama diurna VIIRS apagada por flag con A45 y A/B diurno; 2: dejarlo cerrado y escribirlo en el criterio) | `experiments/_s151_alertas_diurnas/README.md`, verificado | #812 | #813 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (vuelta 39): 1.13 cerrada (#812, D-10 #813)
+- Arreglos de #812: clase "real" circular rebajada (39 a SIN EVIDENCIA; 54 sin evidencia y 40 reflejo); nulo
+  nocturno por volcán (sólo informa en Láscar); A119 en el denominador (40 diurnas usables contra 232 nocturnas);
+  cita completa de Coppola 2016a; 50 MW marcado como del archivo curado (tabla NRT: 38 diurnas, máximo 15,81 MW);
+  la Tabla 1 diurna existe sólo en `process_modis.py` (VIIRS sin rama diurna; `store.py` rechaza VIIRS de día).
+  CI verde, mergeado. D-10 abierta (#813), recomendación: cablear la rama diurna VIIRS apagada con A45 y A/B.
+- Pendiente de propagación (A113): el docstring falso de `pipeline/store.py:180-185` (archivo protegido: va en el
+  PR de código de D-10 si es "1") y el texto de D27 en `docs/MIROVA_DIVERGENCES.md` (dice MODIS, son VIIRS 375).
 
 ### 2026-10-14 (servidor 23:39 UTC): vuelta 38, #812 en arreglos; #809 v2 cambia la conclusión, segundo verificador
 - #812 (alertas diurnas), verificador PARCIAL: conteos y papers confirmados; la clase "39 reales" es circular
