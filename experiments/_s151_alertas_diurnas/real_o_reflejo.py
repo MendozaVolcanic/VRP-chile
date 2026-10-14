@@ -173,6 +173,20 @@ def correr(filas, idx, ventana_h, p, detalle=False):
         mayor["fecha_utc"], mayor["volcano"], mayor["sensor_bucket"], mayor["vrp_mw"], mayor["source"], cl,
         "PASA" if cl in ("aislada", "desproporcionada") else "FALLA"))
 
+    # N1 estratificado (verificador S151): el 6,1 % agregado lo domina Lascar. Donde el nulo nocturno ya sale
+    # sospechoso, el instrumento no separa en ese volcan.
+    p("N1 por volcan: sospecha (aislada o desproporcionada) nocturna contra diurna, pasadas protegidas")
+    vols = sorted({f["volcano"] for f in noct} | {f["volcano"] for f in dia})
+
+    def tasa(fs, v):
+        c = Counter(clasificar(f["_m"], T) for f in fs if f["volcano"] == v)
+        return c["aislada"] + c["desproporcionada"], sum(c.values()) - c["sin_cobertura"]
+
+    for v in vols:
+        sn, nn = tasa(noct, v)
+        sd, nd = tasa(dia, v)
+        p("   %-20s noche %3d de %3d (%5.1f %%)   dia %3d de %3d (%5.1f %%)" % (
+            v, sn, nn, 100.0 * sn / max(nn, 1), sd, nd, 100.0 * sd / max(nd, 1)))
     # Por volcan
     p("Diurnas protegidas por volcan y clase:")
     por = defaultdict(Counter)

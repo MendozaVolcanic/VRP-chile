@@ -5,6 +5,11 @@ Fecha: 2026-10-14. Referencia: `scripts/referencia_mirova_unificada.cargar_refer
 `_reject_daytime`, perfil `mirova_equivalent`, `ENABLE_DAYTIME_MODIS = False`). Alerta protegida: lectura A
 (`scripts/clase_mirova.alerta_protegida`). Todo número sale de un `*_salida.txt` de esta carpeta.
 
+⚠️ **Corregido tras un verificador con contexto limpio** (mismo PR #812): la clase «39 reales» era circular y
+quedó en SIN EVIDENCIA; el nulo nocturno se estratificó por volcán; A119 se aplicó al denominador (40
+pasadas en vez de 94); la cita de Coppola 2016a se completó; la recomendación se reescribió en clave de
+fidelidad.
+
 ## 1. El fenómeno
 
 De día el canal de infrarrojo medio (3,7 a 4 µm) suma a la emisión térmica la luz solar reflejada. Una nube,
@@ -51,16 +56,22 @@ vecinas nocturnas. Resultado:
 
 Control positivo: las 8 diurnas de Nevados de Chillán en erupción (desde el 2026-09-28) salen consistentes.
 Control negativo: la de 760,6 MW sale desproporcionada. Con ventana de ±36 h: 34,0 % contra 8,4 %. La razón
-diurna mediana es 2,21 (nocturna 0,84). Lastarria es el caso extremo: VRP diurno mediano 2,87 MW contra
-0,09 MW de noche.
+diurna mediana es 2,21 (nocturna 0,84).
+
+⚠️ **El 6,1 % agregado lo domina Láscar** (261 de las 346 nocturnas). Estratificado por volcán, el nulo
+nocturno sólo es bajo en Láscar (1,1 % de noche contra 26,3 % de día) y en Nevados de Chillán (4,5 % contra
+11,1 %, con 9 diurnas). En Lastarria (3 de 3 de noche) e Isluga (8 de 10) el instrumento ya sospecha de las
+nocturnas, así que ahí **no separa nada**; en el resto la muestra nocturna protegida es de 0 a 17 pasadas.
 
 **b) Dónde caen las detecciones de MIROVA de día** (`distancia_dia_noche.py`, sólo tabla, porque la
 distancia del OCR puede venir de otra pasada). Fracción de filas con VRP > 0 a 3 km o menos, contra el azar
 (1,1 % para puntos uniformes en la grilla de 51 × 51 km). Control nocturno: Láscar, Villarrica, Chaitén,
 Isluga y Nevados de Chillán dan 44 a 89 veces el azar de noche (pasa). De día, todos los sensores juntos:
 VIIRS 375 4,6 veces el azar (contra 48,3 de noche), mediana 16,9 km. **Lastarria: 0 de 176 detecciones
-diurnas cerca del cráter** (mediana 10,7 km; de noche 73 %). De día sólo Láscar (12,9), Villarrica (14,0) y
-Nevados de Chillán (11,5) se amontonan en el cráter, y aun así muy por debajo de la noche.
+diurnas cerca del cráter** (mediana 10,7 km; de noche 73 %). Con todas las filas diurnas, Láscar (12,9),
+Villarrica (14,0) y Nevados de Chillán (11,5) parecían amontonarse en el cráter; **eso era circular**, porque
+esas filas incluyen las mismas alertas que se quieren clasificar. Sin las pasadas protegidas diurnas
+(`peso_criterio.py`) caen a 5,1, 7,6 y 0,0 veces el azar.
 
 **c) La pasada vecina en la tabla** (`pasada_vecina_tabla.py`). De noche, la pasada de la tabla más cercana
 (±60 min) repite la alerta protegida en 56 %; de día en 4,8 %. **Este instrumento no sirve para separar
@@ -72,38 +83,48 @@ en 25 de 35 casos, contra 18 de 288 de noche.
 **d) La imagen** (`tif_diurno.py`; sólo lectura local, sin pull). Contraste del cráter en el GeoTIFF I04 de
 MIROVA contra 30 puntos al azar del mismo ráster (control que se cancela: mediana -0,018 en 646 rásters).
 Control positivo: Láscar de noche con alerta da mediana 4,63 y 65 % sobre 3, contra -0,47 en RUTINA. De día
-el cráter no se destaca: Láscar 9 % sobre 3, Lastarria 0 %, Isluga 3 %. Límite: los TIF diurnos locales son
+el cráter no se destaca: Láscar 9 % sobre 3, Lastarria 0 %, Isluga 3 %. ⚠️ **Ese control positivo es
+nocturno; de día no hay ninguno** (ningún TIF diurno local de un foco conocido), así que no se sabe si el
+estadístico puede ver un foco real bajo el fondo solar (A110): el «no se destaca» de día no prueba ausencia.
+Límite: los TIF diurnos locales son
 casi todos del 9 al 19 de mayo, y ninguna alerta OCR diurna tiene su propia imagen (el TIF más cercano está
 18 min después y es otra pasada; en 6 de 8 esa pasada figura en la tabla como FALSO_POSITIVO y en 2 como
 RUTINA).
 
-**Clasificación combinada** (`peso_criterio.py`): de las 94 pasadas protegidas diurnas,
-- **39 real probable** (magnitud consistente y volcán con detección diurna amontonada en el cráter, corte de
-  10 veces el azar): Láscar 28, Nevados de Chillán 8, Villarrica 3;
+**Clasificación combinada** (`peso_criterio.py`, corregida tras el verificador): de las 94 pasadas
+protegidas diurnas,
 - **40 reflejo o Sol probable** (desproporcionada o aislada): Lastarria 19, Láscar 10, Isluga 5,
-  Tupungatito 2, y uno en Chaitén, Planchón-Peteroa, Villarrica y Nevados de Chillán;
-- **15 indeterminadas** (consistentes en magnitud, pero de día MIROVA nunca detecta en ese cráter): Lastarria 12,
-  Isluga 2, Puyehue-Cordón Caulle 1.
-
-El 39 es frágil: con un corte de 20 veces el azar ningún volcán califica y las 39 pasan a indeterminadas
-(con 5 veces no cambia nada). El rango honesto de reales es 0 a 54, con 39 como lectura central; el de reflejo,
-40 a 55.
+  Tupungatito 2, y uno en Chaitén, Planchón-Peteroa, Villarrica y Nevados de Chillán. Fuera de Láscar y
+  Chillán, el nulo nocturno de esos volcanes no permite afirmarlo (ver a).
+- **54 SIN EVIDENCIA** de que sean calor real: son consistentes en magnitud, pero ninguna prueba no circular
+  las confirma. La primera versión llamaba «real probable» a 39 de ellas (Láscar 28, Chillán 8, Villarrica 3)
+  con una concentración en el cráter que ellas mismas fabricaban. Sin las pasadas protegidas diurnas,
+  ningún volcán llega a 10 veces el azar (con 5 veces calificarían 31, sólo Láscar y Villarrica). Dejando
+  fuera sólo la propia pasada vuelven las 39, pero eso sigue siendo circular entre hermanas.
+- **75 de las 94 pasadas son sólo OCR**: no tienen distancia propia (la del OCR viene de otra pasada) y
+  heredan la clase espacial de su volcán.
+- La prueba de «alerta nocturna a 24 h o menos» **no discrimina**: la cumplen 39 de los 40 reflejos.
 
 ## 4. Qué dicen los papers (páginas renderizadas a 200 dpi, `renderizar_paginas.py`)
 
 - **Coppola et al. 2016a** (`sp426.5.pdf`), PDF p. 7, Tabla 1: parámetros distintos de noche y de día
   (K1 = -0,6, C1 = 0,02, C2 = 15 de día); la columna derecha dice que se separan porque «solar effects
-  amplify the variability» del NTI y el ETI. PDF p. 16 a 17, sección «False alerts»: las falsas alertas
-  ocurren principalmente en imágenes diurnas, en bordes de agua y nubes dispersas, y «typically radiate less
-  than 5 MW». 75 de nuestras 94 diurnas protegidas están bajo 5 MW.
+  amplify the variability» del NTI y el ETI. PDF p. 16 (última línea de la columna derecha) a p. 17
+  (primer párrafo de la columna izquierda), sección «False alerts»: las falsas alertas ocurren principalmente
+  en imágenes diurnas, en bordes de agua y nubes dispersas, y suelen radiar menos de 5 MW; **el mismo
+  párrafo cierra diciendo que reducir la tasa de falsas haría perder numerosas alertas genuinas de baja
+  intensidad (menos de 10 MW)**. O sea, el autor acepta esas falsas a cambio del recall bajo 10 MW. 75 de
+  nuestras 94 diurnas protegidas están bajo 5 MW y 87 bajo 10 MW: caen en el rango donde el paper dice que
+  conviven las falsas y las genuinas.
 - **Campus et al. 2022** (*Sensors* 22:1713), p. 16, §5, segundo párrafo: el MIROVA VIIRS se evaluó con
   todas las imágenes diurnas y nocturnas de 2021. p. 17, Tabla 4 y párrafo «Nighttime vs daytime data»: la
   frecuencia de alertas VIIRS baja de 51 % de noche a 20 % de día por los umbrales diurnos más altos,
   fijados contra el calentamiento y la reflexión solar. **MIROVA sí procesa VIIRS de día.**
 - **Coppola et al. 2026** (*Scientific Data*), PDF p. 7 a 8, «Data aggregation» y Tabla 1: el conjunto
   curado aplica un umbral mínimo de VRP **diurno de 5,0 × 10⁷ W (50 MW) en los tres sensores**, contra
-  10⁴ a 5 × 10⁶ W de noche. Ese conjunto no es el NRT (A105), pero dice que el propio grupo descarta toda
-  detección diurna bajo 50 MW. De nuestras 94, sólo la de 760,6 MW la pasa, y es el artefacto de A76.
+  10⁴ a 5 × 10⁶ W de noche. **Ese umbral es del conjunto curado, no del NRT** (A105): la tabla NRT publica
+  38 alertas diurnas, todas bajo 50 MW (máximo 15,81 MW). Sirve para saber qué piensa el grupo de lo diurno
+  débil, no para describir lo que MIROVA publica, que es la vara de la réplica.
 - **Tesis de Massimetti**: en las páginas que ubica la capa de texto, el día aparece sólo para SWIR de
   Sentinel 2 y Landsat 8 (PDF idx 38, p. 31; idx 138). Sobre si MIROVA procesa VIIRS de día: SIN LOCALIZAR.
 - **Coppola 2025** (capítulo Springer), p. 336, Tabla 2: umbral NTI -0,8 de noche y -0,6 de día, citado de
@@ -111,46 +132,59 @@ El 39 es frágil: con un corte de 20 veces el azar ningún volcán califica y la
 
 ## 5. Cuánto pesan en el criterio
 
-| sensor | tramo A119 | protegidas nocturnas (cuentan hoy) | diurnas | real | reflejo | indet. | diurnas en la tabla |
-|---|---|---|---|---|---|---|---|
-| MODIS | ene-feb | 9 | 0 | 0 | 0 | 0 | 0 |
-| MODIS | mar-12jun | 39 | 3 | 0 | 3 | 0 | 2 |
-| MODIS | 13jun-oct | 7 | 1 | 1 | 0 | 0 | 0 |
-| VIIRS 375 | ene-feb | 12 | 4 | 4 | 0 | 0 | 4 |
-| VIIRS 375 | mar-12jun | 98 | 54 | 22 | 20 | 12 | 5 |
-| VIIRS 375 | 13jun-oct | 38 | 26 | 10 | 13 | 3 | 6 |
-| VIIRS 750 | ene-feb | 19 | 0 | 0 | 0 | 0 | 0 |
-| VIIRS 750 | mar-12jun | 95 | 0 | 0 | 0 | 0 | 0 |
-| VIIRS 750 | 13jun-oct | 29 | 6 | 2 | 4 | 0 | 2 |
-| **total** | | **346** | **94** | **39** | **40** | **15** | **19** |
+A119 aplicado al denominador, igual de día y de noche: desde el 2026-06-13 cuenta todo; del 1 de marzo al
+12 de junio sólo cuenta una pasada con fila en la tabla (el OCR de ese tramo no decide); enero y febrero no
+se usan. De las 94 pasadas diurnas, 57 son de marzo al 12 de junio y 50 de ellas dependen sólo del OCR; otras 4 son
+de enero y febrero.
 
-Sin enero y febrero (A119): 306 nocturnas contra 90 diurnas, 35 reales. En marzo a 12 de junio, que es donde
-sólo la tabla decide, apenas 7 pasadas diurnas protegidas están en la tabla.
+| sensor | tramo A119 | nocturnas protegidas (A119) | diurnas (todas) | diurnas (A119) | reflejo | sin evidencia |
+|---|---|---|---|---|---|---|
+| MODIS | mar-12jun | 39 | 3 | 2 | 2 | 0 |
+| MODIS | 13jun-oct | 7 | 1 | 1 | 0 | 1 |
+| VIIRS 375 | ene-feb | 0 | 4 | 0 | 0 | 0 |
+| VIIRS 375 | mar-12jun | 57 | 54 | 5 | 0 | 5 |
+| VIIRS 375 | 13jun-oct | 38 | 26 | 26 | 13 | 13 |
+| VIIRS 750 | mar-12jun | 62 | 0 | 0 | 0 | 0 |
+| VIIRS 750 | 13jun-oct | 29 | 6 | 6 | 4 | 2 |
+| **total** | | **232** | **94** | **40** | **19** | **21** |
 
-En la unidad del operador (A94) la pérdida es mucho menor: de las 39 reales, **35 tienen una alerta nocturna
-protegida de MIROVA del mismo volcán a 24 h o menos**, o sea el evento la réplica sí lo puede ver de noche.
-Lo que se pierde es la pasada, no el episodio. Las 8 de Nevados de Chillán en erupción caen en ese caso.
+**Bajo A119 la brecha es de 40 pasadas diurnas protegidas contra 232 nocturnas** (7 de tabla hasta el 12 de
+junio y 33 desde el 13; Láscar 12, Chillán 9, Lastarria 6, Isluga 5, Villarrica 4, y una en Chaitén,
+Planchón-Peteroa, Puyehue-Cordón Caulle y Tupungatito). De esas 40, 19 tienen magnitud desproporcionada
+y 21 no tienen evidencia ni de reflejo ni de calor.
 
 ## 6. Recomendación
 
-1. **No abrir el día en la réplica para cerrar esta brecha.** Lo que se ganaría son 35 a 39 pasadas reales en
-   volcanes cuyo episodio ya se ve de noche, al costo de unas 40 a 55 publicaciones que son Sol o reflejo,
-   justo la clase que Coppola 2016a describe y que el conjunto curado de Coppola 2026 descarta entero. Además
-   el pipeline no tiene día para VIIRS, que trae 91 de las 97 filas protegidas diurnas: sería un detector nuevo con los
-   umbrales de la Tabla 1 diurna, y eso pide su propio A/B.
-2. **Decisión para Nicolás**: declarar en el criterio de victoria que las alertas diurnas quedan fuera de
-   «ninguna protegida se puede perder», con este conteo como respaldo, o contarlas como pérdida conocida
-   aparte. Hoy no las cuenta nadie y no está escrito.
-3. **Propagar (A113), sin tocar el pipeline en este PR**: el docstring de `pipeline/store.py:_reject_daytime`
+La vara de la réplica es lo que MIROVA publica (A115), y su NRT publica estas alertas sin supervisión humana.
+Separar real de reflejo es la vara del perfil `experimental`, no de la réplica: que una alerta diurna sea Sol
+**no** la saca del criterio de fidelidad.
+
+1. **Por qué no abrir el día todavía: el costo no está medido.** MIROVA VIIRS 375 publica alerta de día en
+   sólo 29 de 7.928 pasadas diurnas de la tabla (0,4 %), contra 17 % de noche. Un detector diurno nuestro
+   que no reproduzca esa parsimonia sobre-publicaría en cientos de pasadas donde MIROVA calla, y la brecha
+   de paridad ya es de sobre-publicación (A98). Ganar 40 pasadas a ciegas puede costar más que perderlas.
+2. **Siguiente paso propuesto: un A/B diurno con la Tabla 1 diurna**, medido contra los negativos diurnos
+   limpios de la tabla (pasadas diurnas RUTINA) y contra las 40 pasadas que A119 deja usar. Comprobado en el
+   código: `pipeline.profile` ya trae `NTI_K1_DAY = -0,6`, `DNTI_CONTEXTUAL_C1_DAY = 0,02` y
+   `N_SIGMA_MIR_DAY = 15` (`ENABLE_DAYTIME_MODIS = False`), pero **sólo `pipeline/process_modis.py` los usa**
+   (`_select_thresholds`, l. 361 a 375 y 493 a 495). `process_viirs.py` y `process_viirs_mod.py` no tienen
+   rama diurna (0 coincidencias de «daytime» o «DAY_»), y `store._reject_daytime` rechaza VIIRS de día con
+   cualquier flag. Para VIIRS, que trae 91 de las 97 filas protegidas diurnas, el A/B pide primero cablear
+   esos umbrales a los dos procesadores VIIRS y al filtro de `store.py` (A118: el flag tiene que llegar a
+   todos sus consumidores), con tag defensivo y confirmación de Nicolás (A45).
+3. **Mientras tanto: contar las diurnas como «pérdida conocida»**, aparte y declarada en el criterio de
+   victoria (40 pasadas bajo A119), en vez de dejarlas fuera de todo evaluador sin escribirlo.
+4. **Propagar (A113), sin tocar el pipeline en este PR**: el docstring de `pipeline/store.py:_reject_daytime`
    dice que VIIRS no tiene fuente MIROVA diurna; es falso (Campus 2022 p. 16 a 17, y 7.928 pasadas VIIRS 375
    diurnas en la tabla). D27 dice que MIROVA publica detecciones diurnas «de MODIS»; son sobre todo de VIIRS 375.
 
 ## 7. Lo que no se resolvió
 
-- Ninguna alerta OCR diurna tiene su propia imagen: el clasificador de real o reflejo es indirecto (magnitud
-  y geografía de las detecciones), no un examen píxel a píxel. Bajar las imágenes por la API de Mirova-v1
-  (`imagenes_satelitales/`) cerraría eso, y no se hizo por la regla de no traer datos.
-- La clase «real probable» depende de un corte por volcán que con 20 veces el azar deja cero reales.
-- Láscar: la magnitud dice real en 28 casos, pero la imagen diurna de mayo casi nunca muestra el cráter
-  (9 %). No se sabe si el VRP OCR diurno de Láscar es el cráter o la suma de calor de toda la escena.
+- Cuántas diurnas son calor real: SIN EVIDENCIA. La única prueba espacial era circular, y ninguna alerta OCR
+  diurna tiene su propia imagen. Bajar las imágenes por la API de Mirova-v1 (`imagenes_satelitales/`)
+  cerraría eso; no se hizo por la regla de no traer datos.
+- El nulo de la prueba de magnitud sólo es informativo en Láscar (y apenas en Chillán).
+- El estadístico del TIF no tiene control positivo diurno.
+- Láscar: la magnitud es consistente en 28 casos, pero la imagen diurna de mayo casi nunca muestra el
+  cráter (9 %). No se sabe si el VRP OCR diurno de Láscar es el cráter o la suma de calor de toda la escena.
 - Qué haría la réplica con estas pasadas si procesara el día: no medido (no se despachó nada).
