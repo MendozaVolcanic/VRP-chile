@@ -1,0 +1,84 @@
+== 1. FLAGS EFECTIVOS (pipeline.profile con VRP_PROFILE de cada brazo, A89)
+   K          _s149_ab_sin_test1_b22_max           caja False semilado 2.5 | Test1 False max True  b22 True  | dual 1er pase True, 2do pase True | C1 0.003/0.010 C2 5/10 | OK
+   KC         _s151_ab_sin_test1_b22_max_caja      caja True  semilado 2.5 | Test1 False max True  b22 True  | dual 1er pase True, 2do pase True | C1 0.003/0.010 C2 5/10 | OK
+   KG         _s151_ab_sin_test1_b22_max_gemelo    caja False semilado 2.5 | Test1 False max True  b22 True  | dual 1er pase True, 2do pase True | C1 0.003/0.010 C2 5/10 | OK
+   B          _s146_ab_sin_test1                   caja False semilado 2.5 | Test1 False max False b22 False | dual 1er pase True, 2do pase True | C1 0.003/0.010 C2 5/10 | OK
+   BC         _s147_ab_sin_test1_caja              caja True  semilado 2.5 | Test1 False max False b22 False | dual 1er pase True, 2do pase True | C1 0.003/0.010 C2 5/10 | OK
+   produccion mirova_equivalent                    caja False semilado 2.5 | Test1 True  max False b22 False | dual 1er pase True, 2do pase True | C1 0.003/0.010 C2 5/10 | OK
+   K contra KC difieren en ['ENABLE_ROI1_BOX_PAPER'] | esperado ['ENABLE_ROI1_BOX_PAPER'] | OK
+   K contra KG difieren en nada | esperado nada | OK
+   B contra BC difieren en ['ENABLE_ROI1_BOX_PAPER'] | esperado ['ENABLE_ROI1_BOX_PAPER'] | OK
+
+== 2. TRAZA DE LLAMADAS (AST): umbrales duales que reciben la caja
+   process_viirs.py: _roi1_mask armada [(772, 'None'), (774, 'roi_mask_bbox(lat, lon, vent_lat, vent_lon, ROI1_BOX_HALF_KM)')] | bajo `if ENABLE_ROI1_BOX_PAPER` SI
+      l.  987 dual_roi_bt_threshold              RECIBE LA CAJA | roi1_mask=_roi1_mask
+      l. 1064 dual_roi_contextual_dnti_hot_mask  RECIBE LA CAJA | roi1_mask=_roi1_mask
+      l. 1182 second_pass_adjacent               RECIBE LA CAJA | is_summit=is_summit, asignado en l. 1180 con roi1_summit_mask(vent_dist_per_pixel, inner_radius_km, _roi1_mask)
+      l. 1197 second_pass_adjacent               RECIBE LA CAJA | is_summit=is_summit, asignado en l. 1180 con roi1_summit_mask(vent_dist_per_pixel, inner_radius_km, _roi1_mask)
+      l. 1278 first_pass_tests_2_and_3           RECIBE LA CAJA | roi1_mask=_roi1_mask
+      l. 1331 second_pass_adjacent               RECIBE LA CAJA | is_summit=is_summit_mask, asignado en l. 1320 con roi1_summit_mask(vent_dist_per_pixel, inner_radius_km, _roi1_mask)
+      l. 1373 dual_roi_bt_threshold              RECIBE LA CAJA | roi1_mask=_roi1_mask
+      l. 1828 dual_roi_bt_threshold              RECIBE LA CAJA | roi1_mask=_roi1_mask
+   process_viirs_mod.py: _roi1_mask armada [(511, 'None'), (513, 'roi_mask_bbox(lat, lon, vent_lat, vent_lon, ROI1_BOX_HALF_KM)')] | bajo `if ENABLE_ROI1_BOX_PAPER` SI
+      l.  625 dual_roi_bt_threshold              RECIBE LA CAJA | roi1_mask=_roi1_mask
+      l.  698 dual_roi_contextual_dnti_hot_mask  RECIBE LA CAJA | roi1_mask=_roi1_mask
+      l.  779 second_pass_adjacent               RECIBE LA CAJA | is_summit=is_summit, asignado en l. 777 con roi1_summit_mask(vent_dist_per_pixel, inner_radius_km, _roi1_mask)
+      l.  794 second_pass_adjacent               RECIBE LA CAJA | is_summit=is_summit, asignado en l. 777 con roi1_summit_mask(vent_dist_per_pixel, inner_radius_km, _roi1_mask)
+      l.  860 first_pass_tests_2_and_3           RECIBE LA CAJA | roi1_mask=_roi1_mask
+      l.  910 second_pass_adjacent               RECIBE LA CAJA | is_summit=is_summit_mask, asignado en l. 899 con roi1_summit_mask(vent_dist_per_pixel, inner_radius_km, _roi1_mask)
+      l.  949 dual_roi_bt_threshold              RECIBE LA CAJA | roi1_mask=_roi1_mask
+      l. 1221 dual_roi_bt_threshold              RECIBE LA CAJA | roi1_mask=_roi1_mask
+   process_modis.py: _roi1_mask armada [(533, 'None'), (535, 'roi_mask_bbox(lat, lon, vent_lat, vent_lon, ROI1_BOX_HALF_KM)')] | bajo `if ENABLE_ROI1_BOX_PAPER` SI
+      l.  650 dual_roi_bt_threshold              RECIBE LA CAJA | roi1_mask=_roi1_mask
+      l.  692 dual_roi_contextual_dnti_hot_mask  RECIBE LA CAJA | roi1_mask=_roi1_mask
+      l.  794 second_pass_adjacent               RECIBE LA CAJA | is_summit=is_summit, asignado en l. 791 con roi1_summit_mask(vent_dist_per_pixel, inner_radius_km, _roi1_mask)
+      l.  811 second_pass_adjacent               RECIBE LA CAJA | is_summit=is_summit, asignado en l. 791 con roi1_summit_mask(vent_dist_per_pixel, inner_radius_km, _roi1_mask)
+      l.  875 first_pass_tests_2_and_3           RECIBE LA CAJA | roi1_mask=_roi1_mask
+      l.  931 second_pass_adjacent               RECIBE LA CAJA | is_summit=is_summit_mask, asignado en l. 930 con roi1_summit_mask(vent_dist_per_pixel, inner_radius_km, _roi1_mask)
+      l.  969 dual_roi_bt_threshold              RECIBE LA CAJA | roi1_mask=_roi1_mask
+      l. 1342 dual_roi_bt_threshold              RECIBE LA CAJA | roi1_mask=_roi1_mask
+   umbrales duales: todos reciben la caja
+
+   Consumidores que siguen usando el CIRCULO (inner_radius_km): no son umbrales; se listan para decidir
+      pipeline/process_viirs.py:725  with final_hotspot_dist_km <= inner_radius_km are tagged as "summit"
+      pipeline/process_viirs.py:1359  inner_radius_km=inner_radius_km,
+      pipeline/process_viirs.py:1529  inner_radius_km=_cluster_inner,
+      pipeline/process_viirs.py:1744  and test1_hotspot_dist_km <= inner_radius_km)
+      pipeline/process_viirs.py:1746  and hotspot_dist_km > inner_radius_km)
+      pipeline/process_viirs.py:1808  distance_class = "summit" if final_hotspot_dist_km <= inner_radius_km else "far"
+      pipeline/process_viirs.py:1989  strategy=_t1_strategy, inner_radius_km=_t1_inner,
+      pipeline/process_viirs.py:2099  inner_radius_km=inner_radius_km,
+      pipeline/process_viirs.py:2104  distance_class = ("summit" if final_hotspot_dist_km <= inner_radius_km
+      pipeline/process_viirs_mod.py:938  inner_radius_km=inner_radius_km,
+      pipeline/process_viirs_mod.py:1076  inner_radius_km=_cluster_inner,
+      pipeline/process_viirs_mod.py:1166  and test1_hotspot_dist_km <= inner_radius_km)
+      pipeline/process_viirs_mod.py:1168  and hotspot_dist_km > inner_radius_km)
+      pipeline/process_viirs_mod.py:1213  distance_class = "summit" if final_hotspot_dist_km <= inner_radius_km else "far"
+      pipeline/process_viirs_mod.py:1307  strategy=_t1_strategy, inner_radius_km=_t1_inner,
+      pipeline/process_viirs_mod.py:1387  inner_radius_km=inner_radius_km,
+      pipeline/process_viirs_mod.py:1392  distance_class = ("summit" if final_hotspot_dist_km <= inner_radius_km
+      pipeline/process_modis.py:320  return "summit" if d <= inner_km else "far"
+      pipeline/process_modis.py:720  inner_radius_km=inner_radius_km,
+      pipeline/process_modis.py:912  n_first_pass_summit = int(np.sum(fp_hot & (vent_dist_per_pixel <= inner_radius_km)))
+      pipeline/process_modis.py:959  inner_radius_km=inner_radius_km,
+      pipeline/process_modis.py:1119  inner_radius_km=_cluster_inner,
+      pipeline/process_modis.py:1280  and test1_hotspot_dist_km <= inner_radius_km)
+      pipeline/process_modis.py:1282  and hotspot_dist_km > inner_radius_km)
+      pipeline/process_modis.py:1408  strategy=_t1_strategy, inner_radius_km=_t1_inner,
+      pipeline/process_modis.py:1492  inner_radius_km=inner_radius_km,
+      pipeline/store.py:484  if _pc_vrp > 0 and _pc_cdist is not None and _pc_cdist > inner_radius_km:
+      pipeline/store.py:534  if pcd <= inner_radius_km:
+      pipeline/f5_core.py:85  and _hav_km(p["lat"], p["lon"], c_lat, c_lon) <= inner_km]
+      pipeline/clustering.py:150  inside = c["centroid_dist_km"] <= inner_radius_km
+      frontend/index.html:1047  // Cuando includeFar=true, devuelve pc.vrp_mw incluso si pc.centroid_dist_km > innerKm
+      frontend/index.html:1063  if (r.distance_class && r.distance_class !== "summit" && !includeFar) return 0;
+      frontend/index.html:1067  if (!includeFar && pc.centroid_dist_km != null && pc.centroid_dist_km > innerKm) return 0;
+      frontend/index.html:3200  // que valida pc.centroid_dist_km > innerKm. Antes usaba pc.vrp_mw sin validar →
+
+== 3. EFECTO con las funciones reales (escena sintetica de S148, mascara armada como en los procesadores)
+   conectiva min, exceso 0.006, pixel afuera de la caja   (dist 3.38 km, en caja False) | circulo: 1er pase True, final True | caja: 1er pase False, final False | OK
+   conectiva min, exceso 0.006, pixel adentro de la caja  (dist 1.50 km, en caja True) | circulo: 1er pase True, final True | caja: 1er pase True, final True | OK
+   conectiva max, exceso 0.015, pixel afuera de la caja   (dist 3.38 km, en caja False) | circulo: 1er pase True, final True | caja: 1er pase False, final False | OK
+   conectiva max, exceso 0.015, pixel adentro de la caja  (dist 1.50 km, en caja True) | circulo: 1er pase True, final True | caja: 1er pase True, final True | OK
+
+== RESUMEN: flags OK | umbrales con la caja OK | efecto OK

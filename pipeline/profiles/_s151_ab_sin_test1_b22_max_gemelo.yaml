@@ -1,0 +1,24 @@
+# A/B S151, tarea 1.7 del loop. Brazo KG: GEMELO del candidato K, identico salvo el nombre y el directorio.
+#
+# POR QUE EXISTE. El efecto que la caja puede tener sobre K es chico: en los datos que ya estan en disco, el
+# candidato publica en 18 dias de septiembre UN solo negativo limpio de VIIRS 375 cuyo calor del circulo cae
+# entero fuera de la caja (experiments/_s151_prereg_caja/sustrato_salida.txt). Con un efecto de pocas
+# pasadas, una sola pasada que cambie entre dos jobs identicos basta para fabricar una "mejora". El gemelo
+# mide ese ruido en los tres sensores, en el mismo run (S149 y S150 lo midieron en 100 % para el brazo B,
+# pero no para K ni en esta ventana).
+#
+# CRITERIO: pre-registrado y commiteado ANTES de correr, en experiments/_s151_prereg_caja/PREREGISTRO.md
+# NO OPERACIONAL: data_subdir aislado, fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s151_ab_sin_test1_b22_max_gemelo
+description: >
+  Brazo KG: gemelo de K (sin Test 1, banda 22 primaria en MODIS, conectiva max), para medir el ruido.
+
+enable_modis_b22_primary: true
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+output:
+  data_subdir: _s151_ab_sin_test1_b22_max_gemelo
