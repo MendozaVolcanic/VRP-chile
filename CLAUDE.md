@@ -1489,6 +1489,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   mal calibrado después. Un análisis que cruza uno de esos tramos sin saberlo no da error: da un número
   plausible y equivocado. Ya estaba medido en S139 (`docs/audit_s139/MAPA_BASES_MIROVA_V1.md` §2) y en
   S149 igual elegí una ventana de A/B sin mirarlo, porque vivía sólo en un informe.
+  - ⚠️ **Dos cifras de este punto cayeron en S151** (loop 0.4c, `docs/audit_s150/meta/VERIFICADOR_DATOS.md`
+    D5 y D6). (1) El «86 % en enero» es Tupungatito en el denominador (no tiene filas antes del 2026-02-14);
+    sin él, enero da 99,0 % en MODIS, 98,6 a 99,5 % en VIIRS 375 y 95,2 a 95,7 % en VIIRS 750, y febrero 98,2
+    a 99,6 %: enero no está «incompleto» al 86 %. (2) «0 alertas MODIS dependen del OCR» es falso: son 5 hoy,
+    todas de Láscar (4 nocturnas), y el número sube cada vez que el consolidado remoto pierde filas, así que
+    no es una propiedad de MIROVA. Texto original:
   - **Tabla** (canal CONS, de donde salen TODAS las RUTINA y todo MODIS): cobertura nocturna 86 % en
     enero, 95 % en febrero, **99 a 100 % desde marzo**. Tupungatito no existe antes del 2026-02-14.
     **MODIS está completo y es plano todo el año** (0 alertas MODIS dependen del OCR, medido S149).

@@ -37,6 +37,23 @@ def test_b_hitos_de_noaa21_y_suomi_npp():
     assert not any("NOAA-21" in a or "Suomi NPP" in a for a in avisos_de_ventana("2026-10-10", "2026-10-14"))
 
 
+def test_c_hito_de_enero_sin_el_86_de_tupungatito():
+    # VERIFICADOR_DATOS S150 D6: el "86 % en enero" contaba a Tupungatito (sin filas antes del 2026-02-14) en el
+    # denominador; sin el, 95 a 99,5 %. El hito no puede seguir diciendo 86 % como si fuera la cobertura.
+    from scripts.calidad_referencia_mirova import HITOS
+    texto = " ".join(que for _, _, _, que in HITOS)
+    assert "86 % (enero)" not in texto
+    assert "Tupungatito" in [quien for f, _, quien, _ in HITOS if f == "2026-02-14"]
+
+
+def test_c_claude_md_marca_las_dos_cifras_de_a119():
+    src = (ROOT / "CLAUDE.md").read_text(encoding="utf-8")
+    i = src.index("**A119.")
+    bloque = src[i:src.index("\n- **", i + 10)]
+    assert "S151" in bloque and "Tupungatito en el denominador" in bloque
+    assert "dependen del OCR" in bloque and "5 hoy" in bloque
+
+
 def perfiles_que_encienden(clave: str, perfiles_dir: Path = ROOT / "pipeline" / "profiles") -> list[str]:
     out = []
     for p in sorted(perfiles_dir.glob("*.yaml")):
