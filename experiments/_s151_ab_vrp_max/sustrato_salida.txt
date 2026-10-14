@@ -1,67 +1,67 @@
-== C3 sintetico: ok (seguro, sin_lejano, regla_D)
+== C3 sintetico: ok (seguro, sin_lejano, regla_D, las dos en esquina, cercano por cercano si y no)
 == C4 identidad del predicado (guard S139): ([0, 1, 1, 1, 0], [1, 0])
 referencia: snapshot CONS f3b4142136 OCR fabfe5f268; 44468 filas
 
 == 1. Universo: FALSO_POSITIVO de la tabla, nocturnas (hora UTC < 12), 2026-03-01 a 2026-10-09: 359 (VERIFICADOR_DATOS D2: 359)
    por sensor: {'VIIRS375': 332, 'MODIS': 10, 'VIIRS750': 17}
-   distancia de MIROVA > 25 km (fuera de nuestro disco de 25 km): 75
+   distancia de MIROVA > 25 km (dentro de nuestra caja de 50 x 50 km solo si cae hacia una esquina; sin acimut no se sabe): 75 ; > 35,4 km (fuera de la caja en cualquier rumbo): 0
 
 records de los 11 Tier A en la ventana: 25958 (nocturnos segun el filtro del pipeline: 25958)
 
 == C1 reproduccion de primary_cluster con vent_anchored reconstruido (ok / n), por factor x pixel nominal:
-   factor 1.5: MODIS 1376/5291 = 0.260, VIIRS375 7241/7672 = 0.944, VIIRS750 2461/3656 = 0.673
-   factor 2.2: MODIS 1095/5291 = 0.207, VIIRS375 7307/7672 = 0.952, VIIRS750 2636/3656 = 0.721
-   factor 3.0: MODIS 741/5291 = 0.140, VIIRS375 7204/7672 = 0.939, VIIRS750 2425/3656 = 0.663
-   MODIS: factor 1.5, 0.260; umbral 0.9: FALLA, el estimado se pasa a la cota posible
-   VIIRS375: factor 2.2, 0.952; umbral 0.9: PASA, vale el estimado
-   VIIRS750: factor 2.2, 0.721; umbral 0.9: FALLA, el estimado se pasa a la cota posible
+   factor 1.5: MODIS 1291/3228 = 0.400, VIIRS375 7252/7680 = 0.944, VIIRS750 2499/3693 = 0.677
+   factor 2.2: MODIS 1040/3228 = 0.322, VIIRS375 7319/7680 = 0.953, VIIRS750 2675/3693 = 0.724
+   factor 3.0: MODIS 717/3228 = 0.222, VIIRS375 7216/7680 = 0.940, VIIRS750 2463/3693 = 0.667
+   MODIS: factor 1.5, 0.400; umbral 0.9: FALLA, el estimado se pasa a la cota posible
+   VIIRS375: factor 2.2, 0.953; umbral 0.9: PASA, vale el estimado
+   VIIRS750: factor 2.2, 0.724; umbral 0.9: FALLA, el estimado se pasa a la cota posible
 
-pasadas que publican y que el brazo vrp_max reemplazaria por un cumulo lejano: 19; el predicado del tablero las sigue publicando en 0 (debe ser 0)
+pasadas que publican y que el brazo vrp_max reemplazaria por un cumulo lejano: 25; el predicado del tablero las sigue publicando en 0 (debe ser 0)
 
 == 2. Las 359: que hay en nuestra pasada pareada (+-2 min, mismo volcan y sensor)
    no_publica_cumulo_lejano                 28
    no_publica_sin_cumulo_con_energia        86
    publica_estimado                         1
-   publica_lejano_debil                     3
-   publica_no_observable                    35
+   publica_lejano_debil                     5
+   publica_no_observable                    33
    publica_regla_D                          152
-   publica_seguro                           1
-   publica_sin_lejano                       53
+   publica_seguro                           2
+   publica_sin_lejano                       52
 
 == 3. Pasadas nocturnas que hoy publican, por etiqueta y clase (todas las fechas de la ventana)
    etiqueta     |    seguro |  estimado |   posible | lejano_de |   regla_D | no_observ | sin_lejan
-   pos          |         2 |         0 |         6 |        86 |       189 |        95 |      1299
-   far_ref      |         1 |         1 |         0 |         3 |       154 |        35 |        53
-   neg_limpio   |         4 |         0 |       396 |        21 |       322 |       168 |      3377
-   sin_info     |        11 |         0 |        12 |        33 |       433 |       187 |      3811
+   pos          |         3 |         0 |         9 |        95 |       189 |        86 |      1295
+   far_ref      |         2 |         1 |         0 |         5 |       154 |        33 |        52
+   neg_limpio   |         6 |         0 |       412 |        15 |       322 |       175 |      3358
+   sin_info     |        13 |         0 |        14 |        41 |       433 |       185 |      3801
 
-== C2 enriquecimiento: 'lejano domina' entre las que publican: far_ref 156/247 = 0.632, neg_limpio 326/4288 = 0.076, razon 8.31; nulo barajado (200, dentro de volcan y sensor): mediana 2.95, p95 3.40: PASA
-   en positivas (MIROVA informo el crater): 191/1677
+== C2 enriquecimiento: 'lejano domina' entre las que publican: far_ref 157/247 = 0.636, neg_limpio 328/4288 = 0.076, razon 8.31; nulo barajado (200, dentro de volcan y sensor): mediana 2.93, p95 3.38: PASA
+   en positivas (MIROVA informo el crater): 192/1677
 
 == 2b. Distancia al objeto en far_ref donde nuestro pixel mas energetico esta lejos (A93: diferencia de
    RADIOS, cota inferior de la separacion; sin acimut no identifica el objeto)
-   desde el crater   : n 156, mediana |r_nuestro - r_MIROVA| 0.41 km, a 2 km o menos 134
-   desde el catalogo : n 156, mediana |r_nuestro - r_MIROVA| 0.33 km, a 2 km o menos 139
+   desde el crater   : n 157, mediana |r_nuestro - r_MIROVA| 0.41 km, a 2 km o menos 134
+   desde el catalogo : n 157, mediana |r_nuestro - r_MIROVA| 0.33 km, a 2 km o menos 139
 
 == 4. Techo en el criterio de victoria, por sensor y tramo A119 (solo pasadas que DECIDEN; brazo prod + vrp_max)
    perdidas = pos que hoy publican y quedarian en silencio; ganancias = neg_limpio que hoy publican y callarian
    cada celda: seguro / seguro+estimado / techo (seguro+estimado+posible+no_observable)
-   MODIS    T0_mar          pos publ    2 neg publ   77 | veto_A 0/0/1 ; perd_muybajo 0/0/0 ; gan_neg 0/0/53 ; veto_B_extra 0/0/0
-   MODIS    T1_abr_jun12    pos publ    5 neg publ  175 | veto_A 0/0/1 ; perd_muybajo 0/0/1 ; gan_neg 0/0/137 ; veto_B_extra 0/0/0
-   MODIS    T2_jun13_ago28  pos publ    1 neg publ  213 | veto_A 0/0/0 ; perd_muybajo 0/0/0 ; gan_neg 0/0/161 ; veto_B_extra 0/0/0
+   MODIS    T0_mar          pos publ    2 neg publ   77 | veto_A 0/0/1 ; perd_muybajo 0/0/0 ; gan_neg 0/0/58 ; veto_B_extra 0/0/0
+   MODIS    T1_abr_jun12    pos publ    5 neg publ  175 | veto_A 0/0/1 ; perd_muybajo 0/0/1 ; gan_neg 0/0/147 ; veto_B_extra 0/0/0
+   MODIS    T2_jun13_ago28  pos publ    1 neg publ  213 | veto_A 0/0/0 ; perd_muybajo 0/0/0 ; gan_neg 0/0/163 ; veto_B_extra 0/0/0
    MODIS    T3_ago29_oct08  pos publ    3 neg publ  110 | veto_A 0/0/3 ; perd_muybajo 0/0/0 ; gan_neg 0/0/88 ; veto_B_extra 0/0/0
    MODIS    T4_oct09        pos publ    0 neg publ    5 | veto_A 0/0/0 ; perd_muybajo 0/0/0 ; gan_neg 0/0/4 ; veto_B_extra 0/0/0
-   VIIRS375 T0_mar          pos publ  111 neg publ  216 | veto_A 0/0/0 ; perd_muybajo 0/0/9 ; gan_neg 0/0/8 ; veto_B_extra 0/0/0
+   VIIRS375 T0_mar          pos publ  111 neg publ  216 | veto_A 0/0/0 ; perd_muybajo 0/0/8 ; gan_neg 0/0/8 ; veto_B_extra 0/0/0
    VIIRS375 T1_abr_jun12    pos publ  414 neg publ  628 | veto_A 0/0/0 ; perd_muybajo 0/0/21 ; gan_neg 0/0/22 ; veto_B_extra 0/0/8
-   VIIRS375 T2_jun13_ago28  pos publ  324 neg publ  789 | veto_A 0/0/0 ; perd_muybajo 0/0/13 ; gan_neg 0/0/21 ; veto_B_extra 0/0/3
-   VIIRS375 T3_ago29_oct08  pos publ  206 neg publ  734 | veto_A 0/0/0 ; perd_muybajo 1/1/26 ; gan_neg 2/2/68 ; veto_B_extra 0/0/2
-   VIIRS375 T4_oct09        pos publ    5 neg publ   27 | veto_A 0/0/0 ; perd_muybajo 0/0/0 ; gan_neg 0/0/2 ; veto_B_extra 0/0/1
+   VIIRS375 T2_jun13_ago28  pos publ  324 neg publ  789 | veto_A 0/0/0 ; perd_muybajo 0/0/12 ; gan_neg 0/0/21 ; veto_B_extra 0/0/3
+   VIIRS375 T3_ago29_oct08  pos publ  206 neg publ  734 | veto_A 0/0/0 ; perd_muybajo 1/1/23 ; gan_neg 2/2/72 ; veto_B_extra 0/0/2
+   VIIRS375 T4_oct09        pos publ    5 neg publ   27 | veto_A 0/0/0 ; perd_muybajo 0/0/0 ; gan_neg 0/0/3 ; veto_B_extra 0/0/1
    VIIRS750 T0_mar          pos publ   27 neg publ  105 | veto_A 0/0/0 ; perd_muybajo 0/0/0 ; gan_neg 0/0/0 ; veto_B_extra 0/0/0
-   VIIRS750 T1_abr_jun12    pos publ   95 neg publ  393 | veto_A 0/0/0 ; perd_muybajo 0/0/1 ; gan_neg 2/2/3 ; veto_B_extra 0/0/0
-   VIIRS750 T2_jun13_ago28  pos publ   54 neg publ  484 | veto_A 0/0/0 ; perd_muybajo 0/0/0 ; gan_neg 0/0/0 ; veto_B_extra 0/0/0
-   VIIRS750 T3_ago29_oct08  pos publ   30 neg publ  321 | veto_A 0/0/0 ; perd_muybajo 0/0/0 ; gan_neg 0/0/1 ; veto_B_extra 0/0/0
+   VIIRS750 T1_abr_jun12    pos publ   95 neg publ  393 | veto_A 0/0/0 ; perd_muybajo 0/0/1 ; gan_neg 4/4/5 ; veto_B_extra 0/0/0
+   VIIRS750 T2_jun13_ago28  pos publ   54 neg publ  484 | veto_A 0/0/0 ; perd_muybajo 1/1/1 ; gan_neg 0/0/0 ; veto_B_extra 1/1/1
+   VIIRS750 T3_ago29_oct08  pos publ   30 neg publ  321 | veto_A 0/0/0 ; perd_muybajo 0/0/0 ; gan_neg 0/0/2 ; veto_B_extra 0/0/0
    VIIRS750 T4_oct09        pos publ    2 neg publ   11 | veto_A 0/0/0 ; perd_muybajo 0/0/0 ; gan_neg 0/0/0 ; veto_B_extra 0/0/0
-   positivas solo OCR antes del 2026-06-13 (no deciden, A119) en el techo: 27
+   positivas solo OCR antes del 2026-06-13 (no deciden, A119) en el techo: 26
 
 == 5. Las que el flag no alcanza (Regla D) pero el cambio de codigo prerequisito si, por etiqueta
    MODIS    neg_limpio   106
@@ -93,12 +93,12 @@ pasadas que publican y que el brazo vrp_max reemplazaria por un cumulo lejano: 1
    VIIRS750 T3_ago29_oct08     0 /    0 /   12 /    0
 
 == 6. Por volcan: pasadas que publican con clase seguro o estimado (todas las etiquetas)
-   Lascar                 1
-   Lastarria              4
+   Lascar                 2
+   Lastarria              5
    Isluga                 5
-   Tupungatito            3
+   Tupungatito            5
    PlanchonPeteroa        0
-   NevadosDeChillan       2
+   NevadosDeChillan       4
    Llaima                 1
    Villarrica             0
    Copahue                1
@@ -110,8 +110,22 @@ pasadas que publican y que el brazo vrp_max reemplazaria por un cumulo lejano: 1
    VIIRS375 pasadas  1944; deciden: pos 206 (protegidas A 12, publicadas 12), neg_limpio 832 (publicados 734), far_ref 67 (protegidas B 16)
    VIIRS750 pasadas  1932; deciden: pos 40 (protegidas A 10, publicadas 10), neg_limpio 1303 (publicados 321), far_ref 2 (protegidas B 2)
    MODIS    publicadas   115: A1 seguro 0, seguro+estimado 0, techo 93; solo A2 (regla_D) 22
-   VIIRS375 publicadas  1736: A1 seguro 4, seguro+estimado 5, techo 176; solo A2 (regla_D) 283
-   VIIRS750 publicadas   479: A1 seguro 0, seguro+estimado 0, techo 1; solo A2 (regla_D) 15
-   pasadas publicadas que el brazo A1 podria silenciar (todas las etiquetas): seguro 4, seguro+estimado 5, techo 270
+   VIIRS375 publicadas  1736: A1 seguro 4, seguro+estimado 5, techo 179; solo A2 (regla_D) 283
+   VIIRS750 publicadas   479: A1 seguro 0, seguro+estimado 0, techo 2; solo A2 (regla_D) 15
+   pasadas publicadas que el brazo A1 podria silenciar (todas las etiquetas): seguro 4, seguro+estimado 5, techo 274
    pasadas publicadas que solo el brazo A2 alcanza (regla_D): 320
    R4 en produccion (far_ref con cumulo lejano a 2 km de radio del de MIROVA): 5/70; far_ref con lejano dominante (lo que A2 podria mover): 54/70
+   far_ref dominantes que son de Regla D (C2 mide sobre todo la premisa de A2): 154 de 157 (toda la ventana del sustrato)
+   records con el cumulo publicado entre 25 y 36 km del crater (esquinas de la caja): 13
+   cambio CERCANO POR CERCANO en VIIRS 375 (el flag cambia el cumulo publicado por otro dentro del inner;
+   cambia la magnitud, no la publicacion). Incluye la eleccion entre cumulos del Test 1 en el disco de 3 km:
+     regla_D           publicadas 283, con 2 o mas cumulos reconstruidos 39, cambia la eleccion 24
+        ej. Lascar VIIRS_NOAA21 2026-09-09 05:30 pc 0.065 suma hoy 0.065 -> vrp_max 0.114 MW
+        ej. Lastarria VIIRS_NOAA20 2026-09-01 05:36 pc 0.044 suma hoy 0.044 -> vrp_max 0.110 MW
+        ej. Lastarria VIIRS_SNPP 2026-09-18 05:00 pc 0.014 suma hoy 0.014 -> vrp_max 0.033 MW
+        ej. Isluga VIIRS_NOAA20 2026-09-17 05:36 pc 0.075 suma hoy 0.127 -> vrp_max 0.297 MW
+     fuera_de_regla_D  publicadas 1453, con 2 o mas cumulos reconstruidos 377, cambia la eleccion 216
+        ej. Lascar VIIRS_NOAA21 2026-09-06 06:30 pc 0.019 suma hoy 0.019 -> vrp_max 0.029 MW
+        ej. Lascar VIIRS_NOAA20 2026-09-09 06:30 pc 0.027 suma hoy 0.027 -> vrp_max 0.098 MW
+        ej. Lascar VIIRS_NOAA21 2026-10-03 04:42 pc 0.009 suma hoy 0.009 -> vrp_max 0.041 MW
+        ej. Lastarria VIIRS_NOAA21 2026-09-03 05:48 pc 0.077 suma hoy 0.077 -> vrp_max 0.101 MW

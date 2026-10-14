@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 """Sustrato del A/B `vrp_max` contra `vent_anchored` (tarea 1.4 del loop), sobre los datos ya en disco.
 
-EL FENOMENO. En el recuadro de 25 km de un volcan puede haber mas de una fuente de calor de noche: el crater y,
-por ejemplo, un incendio, un salar que guarda calor o un campo geotermal. MIROVA informa UNA por pasada; segun
-la decision de Nicolas (2026-10-09) la de mayor energia. Nuestra replica elige el cumulo pegado al crater
-(`vent_anchored`). Las dos reglas dan lo mismo cuando no hay calor lejano, o cuando el lejano es mas debil que
-el del crater. Divergen solo en las pasadas con un cumulo lejano MAS FUERTE que el del crater.
+EL FENOMENO. En el recuadro de un volcan (una caja de 50 x 50 km centrada en el catalogo, hasta unos 35 km en
+las esquinas: `roi_mask_bbox`, `process_viirs.py:780`) puede haber mas de una fuente de calor de noche: el
+crater y, por ejemplo, un incendio, un salar que guarda calor o un campo geotermal. MIROVA informa UNA por
+pasada; segun la decision de Nicolas (2026-10-09) la de mayor energia. Nuestra replica elige el cumulo pegado
+al crater (`vent_anchored`). Las dos reglas divergen de dos maneras: (a) un cumulo lejano MAS FUERTE que el del
+crater (cambia la publicacion: el tablero calla lo lejano); (b) varios cumulos cerca del crater, incluidos los
+del Test 1 dentro del disco de 3 km, donde una regla toma el mas cercano y la otra el mas energetico (cambia la
+magnitud publicada, no la publicacion). La version 1 de este script decia que sin calor lejano daban lo mismo:
+era falso, lo encontro el verificador de #794.
 
 EL MECANISMO. `pipeline/clustering.py::cluster_hotspots` ya tiene la estrategia "vrp_max"; se usa cuando
 `ENABLE_VENT_ANCHORED_CLUSTERING` es False. Pero la seleccion no es el ultimo paso: si el Test 1 dispara en el
@@ -22,17 +26,25 @@ flag podria silenciarla, con tres grados:
   * estimado: agrupando los pixeles guardados por cercania (umbral validado por el control C1), el cumulo de
               mayor energia queda fuera del inner_radius; se confirma con el predicado del tablero (node);
   * posible:  la suma de los pixeles lejanos pesa mas que el pixel mas energetico del crater (techo).
-  Aparte: las protegidas por la Regla D (no cambian con el flag; si con el cambio de codigo prerequisito) y las
-  no observables (el record solo guarda los pixeles del Test 1 o llego al tope de 100 pixeles).
+  Aparte: las protegidas por la Regla D (el flag no las vuelve lejanas; si el cambio de codigo prerequisito) y
+  las no observables (el record solo guarda los pixeles del Test 1 o llego al tope de 100 pixeles). Y, cruzado
+  con todo lo anterior, el cambio CERCANO POR CERCANO (b), que solo se estima en VIIRS 375 (unico sensor que
+  pasa C1).
+La escena se arma con `anomaly_pixels` MAS `discarded_anomaly_pixels`: `store.py::_filter_pixels_by_distance`
+mueve a la segunda lista los pixeles a mas de `radius_km` (25 km) del catalogo, que el procesador SI agrupo (las
+esquinas de la caja). Y la Regla D se evalua con el pixel mas energetico de esa escena completa, porque `store.py`
+recalcula `hotspot_dist_km` despues de filtrar y el procesador decidio con el de antes. Sigue sin ser una cota
+exacta: el tope de 100 pixeles se aplica antes del filtro.
 Y el universo de la tarea: las 359 filas FALSO_POSITIVO nocturnas de la tabla (VERIFICADOR_DATOS D2).
 
 CONTROLES (pueden fallar):
-  C1 reproduccion: la regla `vent_anchored` reconstruida desde `anomaly_pixels` debe reproducir el
+  C1 reproduccion: la regla `vent_anchored` reconstruida desde los pixeles de la escena debe reproducir el
      `primary_cluster` guardado (centroide a 20 m y mismo numero de pixeles) en al menos 90 % de los records
-     reconstruibles. Si no, el "estimado" no vale y solo se informan las cotas.
-  C2 enriquecimiento: si los cumulos lejanos de nuestras escenas son los objetos que MIROVA lista lejos, la
-     tasa de "seguro" en far_ref tiene que superar a la de neg_limpio. Si no la supera, el sustrato mide calor
-     lejano que MIROVA no ve y la prediccion del A/B cambia de signo.
+     reconstruibles, POR SENSOR. Si no, el "estimado" de ese sensor no vale y solo se informan las cotas.
+  C2 enriquecimiento (version 2): "lejano domina" (seguro, estimado o regla_D) tiene que ser mas frecuente en
+     far_ref que en neg_limpio, por encima del p95 de un nulo barajado dentro de volcan y sensor. OJO: casi todas
+     las far_ref dominantes son de Regla D, asi que C2 mide sobre todo la premisa del brazo A2 (que nuestro
+     objeto lejano es el de MIROVA), no la del brazo A1.
   C3 sintetico: un record con un cumulo lejano mas fuerte tiene que dar "seguro"; uno sin lejano, "sin_lejano";
      uno con Test 1 y pixel maximo lejano, "regla_D". Si falla, el script aborta.
   C4 identidad del predicado: los casos del guard S139 (`bp.control_identidad_predicado`).
@@ -99,14 +111,40 @@ def elegir_vrp_max(cl):
     return sorted(cl, key=lambda c: c["vrp_mw"], reverse=True)[0]
 
 
+def escena(r):
+    """Pixeles que el procesador agrupo: los guardados mas los que store.py movio por estar a mas de 25 km."""
+    return [p for p in (r.get("anomaly_pixels") or []) + (r.get("discarded_anomaly_pixels") or [])
+            if p.get("lat") is not None]
+
+
+def hotspot_previo_km(r, pix):
+    """Distancia al catalogo del pixel mas energetico ANTES de store.py (la que uso la Regla D)."""
+    if r.get("discarded_anomaly_pixels") and pix:
+        return max(pix, key=lambda p: p.get("vrp_mw") or 0).get("dist_km")
+    return r.get("hotspot_dist_km")
+
+
+def cambio_cercano(pix, ancla, inner, thr_km):
+    """(b): el cumulo de mayor energia queda dentro del inner pero NO es el que elige vent_anchored.
+
+    Devuelve (cambia, vrp del elegido hoy, vrp del elegido por vrp_max) en suma por pixel, o (False, None, None)."""
+    if not pix:
+        return False, None, None
+    cl = agrupar(pix, ancla, thr_km)
+    va, vm = elegir_vent_anchored(cl, inner), elegir_vrp_max(cl)
+    if vm["centroid_dist_km"] > inner or vm is va:
+        return False, va["vrp_mw"], vm["vrp_mw"]
+    return True, va["vrp_mw"], vm["vrp_mw"]
+
+
 def clasificar(r, ancla, inner, thr_km):
     """Clase de una pasada que hoy publica, para el brazo `prod + vrp_max` (flag apagado, codigo de hoy)."""
-    pix = [p for p in (r.get("anomaly_pixels") or []) if p.get("lat") is not None]
+    pix = escena(r)
     for p in pix:
         p["_d"] = C.haversine_km(p["lat"], p["lon"], ancla[0], ancla[1])
     lejos = [p for p in pix if p["_d"] > inner]
     cerca = [p for p in pix if p["_d"] <= inner]
-    hs = r.get("hotspot_dist_km")
+    hs = hotspot_previo_km(r, pix)
     if r.get("triggered_test1") and hs is not None and hs > inner:
         return "regla_D", None
     if not lejos:
@@ -150,7 +188,7 @@ def control_c1(xs, ancla, inner):
         for x in xs:
             r = x["rec"]
             pc = r.get("primary_cluster")
-            pix = [p for p in (r.get("anomaly_pixels") or []) if p.get("lat") is not None]
+            pix = escena(r)
             if not pc or not pix or len(pix) >= 100 or pc.get("centroid_lat") is None:
                 continue
             thr = fac * NOMINAL_KM[x["b"]]
@@ -174,11 +212,23 @@ def control_c3(ancla_ej=(-23.36, -67.73), inner=5.0):
         "regla_D": {"anomaly_pixels": [dict(p_cr)], "hotspot_dist_km": 20.4, "triggered_test1": True,
                     "n_anomalous_pixels": 30},
     }
+    # esquina: el pixel lejano a ~30 km lo movio store.py a discarded_anomaly_pixels y recalculo el hotspot
+    p_esq = {"lat": -23.36, "lon": -67.436, "vrp_mw": 1.5, "dist_km": 30.0}
+    casos["seguro_esquina"] = {"anomaly_pixels": [dict(p_cr)], "discarded_anomaly_pixels": [dict(p_esq)],
+                               "hotspot_dist_km": 0.0, "triggered_test1": False, "n_anomalous_pixels": 2}
+    casos["regla_D_esquina"] = {"anomaly_pixels": [dict(p_cr)], "discarded_anomaly_pixels": [dict(p_esq)],
+                                "hotspot_dist_km": 0.0, "triggered_test1": True, "n_anomalous_pixels": 2}
     for esperado, r in casos.items():
         got, _ = clasificar(r, ancla_ej, inner, 0.6)
-        if got != esperado:
+        if got != esperado.replace("_esquina", ""):
             raise SystemExit(f"C3 FALLA: esperaba {esperado}, dio {got}")
-    return "ok (seguro, sin_lejano, regla_D)"
+    # cercano por cercano: dos cumulos dentro del inner, el mas energetico a 2 km
+    pix = [{"lat": -23.36, "lon": -67.73, "vrp_mw": 0.1}, {"lat": -23.378, "lon": -67.73, "vrp_mw": 0.9}]
+    ok = cambio_cercano(pix, ancla_ej, inner, 0.6)
+    no = cambio_cercano(pix[:1], ancla_ej, inner, 0.6)
+    if not (ok[0] and not no[0]):
+        raise SystemExit(f"C3 FALLA en cercano por cercano: {ok} {no}")
+    return "ok (seguro, sin_lejano, regla_D, las dos en esquina, cercano por cercano si y no)"
 
 
 def sha(path):
@@ -215,8 +265,9 @@ def main():
     P(f"\n== 1. Universo: FALSO_POSITIVO de la tabla, nocturnas (hora UTC < 12), {VENTANA[0]} a {VENTANA[1]}: {len(univ)}"
       " (VERIFICADOR_DATOS D2: 359)")
     P("   por sensor:", dict(collections.Counter(f["sensor_bucket"] for f in univ)))
-    P("   distancia de MIROVA > 25 km (fuera de nuestro disco de 25 km):",
-      sum(1 for f in univ if (f["dist_km"] or 0) > 25.0))
+    P("   distancia de MIROVA > 25 km (dentro de nuestra caja de 50 x 50 km solo si cae hacia una esquina; sin"
+      " acimut no se sabe):", sum(1 for f in univ if (f["dist_km"] or 0) > 25.0),
+      "; > 35,4 km (fuera de la caja en cualquier rumbo):", sum(1 for f in univ if (f["dist_km"] or 0) > 35.36))
 
     recs = C.cargar_records(C.ROOT / "data" / "mirova_equivalent", VENTANA, coords)
     P(f"\nrecords de los 11 Tier A en la ventana: {len(recs)} (nocturnos segun el filtro del pipeline: "
@@ -422,9 +473,38 @@ def main():
     dom_fr = sum(1 for x in fr if x["clase"] in DOM)
     P(f"   R4 en produccion (far_ref con cumulo lejano a 2 km de radio del de MIROVA): {r4}/{len(fr)}; "
       f"far_ref con lejano dominante (lo que A2 podria mover): {dom_fr}/{len(fr)}")
+    P(f"   far_ref dominantes que son de Regla D (C2 mide sobre todo la premisa de A2): "
+      f"{sum(1 for x in noct if x['pub'] and x['lab'] == 'far_ref' and x['clase'] == 'regla_D')} de "
+      f"{sum(1 for x in noct if x['pub'] and x['lab'] == 'far_ref' and x['clase'] in DOM)} (toda la ventana del sustrato)")
+    esq = sum(1 for x in t3 if 25.0 < ((x["rec"].get("primary_cluster") or {}).get("centroid_dist_km") or 0) <= 36.0)
+    P(f"   records con el cumulo publicado entre 25 y 36 km del crater (esquinas de la caja): {esq}")
+
+    # (b) cercano por cercano, solo VIIRS 375 (unico sensor que pasa C1), pasadas publicadas
+    P("   cambio CERCANO POR CERCANO en VIIRS 375 (el flag cambia el cumulo publicado por otro dentro del inner;")
+    P("   cambia la magnitud, no la publicacion). Incluye la eleccion entre cumulos del Test 1 en el disco de 3 km:")
+    thr375 = mejor["VIIRS375"] * NOMINAL_KM["VIIRS375"]
+    v3 = [x for x in t3 if x["b"] == "VIIRS375" and x["pub"]]
+    cc = {}
+    for grupo, sel in (("regla_D", [x for x in v3 if x["clase"] == "regla_D"]),
+                       ("fuera_de_regla_D", [x for x in v3 if x["clase"] != "regla_D"])):
+        n2 = cambia = 0
+        ejemplos = []
+        for x in sel:
+            pix = escena(x["rec"])
+            if len(agrupar(pix, ancla[x["vol"]], thr375)) >= 2:
+                n2 += 1
+            ch, va, vm = cambio_cercano(pix, ancla[x["vol"]], inner[x["vol"]], thr375)
+            if ch:
+                cambia += 1
+                ejemplos.append(f"{x['vol']} {x['rec']['sensor']} {x['rec']['datetime_utc']} pc {(x['rec'].get('primary_cluster') or {}).get('vrp_mw')} "
+                                f"suma hoy {va:.3f} -> vrp_max {vm:.3f} MW")
+        cc[grupo] = [len(sel), n2, cambia]
+        P(f"     {grupo:17s} publicadas {len(sel)}, con 2 o mas cumulos reconstruidos {n2}, cambia la eleccion {cambia}")
+        for e in ejemplos[:4]:
+            P(f"        ej. {e}")
 
     resumen = {"t3": {"cambia_A1": cambia_A1, "cambia_A2_regla_D": cambia_A2, "r4_produccion": [r4, len(fr)],
-                      "far_ref_dominante": [dom_fr, len(fr)]},
+                      "far_ref_dominante": [dom_fr, len(fr)], "pc_esquina_25_36": esq, "cercano_por_cercano_V375": cc},
                "ventana": VENTANA, "n_universo": len(univ), "c1": {str(k): v for k, v in c1.items()},
                "c1_factor": mejor, "c1_tasa": {b: round(v, 4) for b, v in mejor_tasa.items()}, "c1_pasa": c1_pasa,
                "c2": {"far_ref": [ka, na], "neg_limpio": [kb, nb], "razon": round(rz, 3), "nulo_p95": round(p95, 3),
