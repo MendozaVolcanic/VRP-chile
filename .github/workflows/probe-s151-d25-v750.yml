@@ -10,6 +10,10 @@ name: "Probe S151, fondo por vecinos (D25) sobre los 268 negativos de VIIRS 750 
 "on":
   workflow_dispatch:
     inputs:
+      preregistro_aprobado:
+        description: "Escribe si SOLO con el criterio de experiments/_s151_d25_v750_disco/ sellado por Nicolas (regla 1.6 del loop)"
+        required: true
+        default: "no"
       vols:
         description: "Lista JSON de volcanes (pilotear con [\"Tupungatito\"] o [\"Isluga\"] y max_pasadas 10)"
         required: true
@@ -35,6 +39,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Candado del pre-registro
+        run: |
+          if [ "${{ github.event.inputs.preregistro_aprobado }}" != "si" ]; then
+            echo "Pre-registro sin sello de Nicolas: no se corre (regla 1.6 del loop)"; exit 1
+          fi
       - name: Token presente
         env:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
