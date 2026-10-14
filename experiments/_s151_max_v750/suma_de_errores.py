@@ -4,51 +4,56 @@
 POR QUE. El criterio de Nicolas (2026-10-13; tasks/LOOP_OBJETIVOS.md §1.2) veta todo cambio que pierda una
 alerta protegida (VRP de la pasada >= 1 MW, docs/S151_CRITERIO_CLASE_MIROVA.md) y, por debajo, suma alertas
 perdidas y publicaciones de mas con el mismo peso. VERIFICADOR_DATOS S150 D4 encontro que `max` (brazo F)
-pierde en VIIRS 750 cuatro alertas que el brazo sin Test 1 (B) publicaba: 0,65, 0,41, 0,39 y 0,32 MW. Ninguna
-llega a 1 MW, asi que no vetan; queda saber si la suma de errores mejora o empeora.
+pierde en VIIRS 750 cuatro alertas que el brazo sin Test 1 (B) publicaba: 0,65, 0,41, 0,39 y 0,32 MW.
 
-Fuente: las salidas del evaluador por mes (experiments/_s149_prereg_invierno/resultados/<mes>_VIIRS750.txt),
-control = B, brazo = F (S150_RESULTADO_MESES.md §4). Los numeros se leen de esos archivos, no se transcriben.
+Fuente: `pasadas_viirs750_B_F.csv` (extraer_tablas.py, desde las tablas por pasada de armar_tabla.py del A/B de
+meses, control B, brazo F, referencia congelada por mes). Se cuenta pasada por pasada (version 1 contaba desde
+porcentajes redondeados; el verificador limpio de la 1.10 pidio esto).
 
-Limite: el evaluador da el recall como "de lo que publica el control, cuanto conserva el brazo"; no cuenta
-positivas que el brazo publique y el control no. Para la suma se supone 0 de esas (cota conservadora contra F:
-si existieran, F tendria menos errores, no mas). Los negativos publicados salen del porcentaje redondeado a
-una decima, asi que cada conteo tiene un error de +-1 pasada.
+Limites que el numero NO cubre (verificador de la 1.10): (1) compara contra B, sin Test 1; produccion lo tiene
+encendido; (2) las publicaciones en pasadas sin etiqueta ("sin_info", "far_ref") no entran en la suma (B 309,
+F 114: favorece a F, pero no es un negativo limpio); (3) la razon de magnitud, tercera metrica del criterio,
+no esta aqui; (4) con la lectura B del criterio (D-4, #782) F pierde una pasada protegida, Nevados de Chillan
+2026-07-23 06:30: MIROVA vio 1,52 MW a 29,56 km (FALSO_POSITIVO del scraper) y B publico otro objeto, 0,051 MW a
+4,18 km; F no publico. Con la lectura A no pierde ninguna.
 """
-import re
+import csv
 import sys
+from collections import defaultdict
 from pathlib import Path
 
-RES = Path(__file__).resolve().parents[1] / "_s149_prereg_invierno" / "resultados"
+CSV = Path(__file__).resolve().parent / "pasadas_viirs750_B_F.csv"
 MESES = ["abril", "mayo", "junio", "julio", "agosto"]
-P1 = re.compile(r"^P1\. publicacion en negativos limpios \(n (\d+)\): control ([\d.]+) % \| brazo ([\d.]+) %")
-P4 = re.compile(r"^\s+positivas (\d+) \| publica el control (\d+) \| de esas conserva el brazo (\d+) \|.*?perdidas con 0\.5 MW o mas: (\d+)")
-
-
-def leer(mes):
-    neg = pos = None
-    for linea in (RES / f"{mes}_VIIRS750.txt").read_text(encoding="utf-8").splitlines():
-        if neg is None and (m := P1.match(linea)):
-            neg = (int(m[1]), float(m[2]), float(m[3]))
-        elif pos is None and (m := P4.match(linea)):
-            pos = tuple(int(x) for x in m.groups())
-    if neg is None or pos is None:
-        raise ValueError(f"{mes}: no encontre P1 o P4")
-    return neg, pos
 
 
 def main():
-    tot = {"c": 0, "b": 0, "perd": 0}
-    print("mes      | alertas sin publicar  | negativos publicados | suma de errores | perdidas >=0,5 MW")
-    print("         | control  brazo        | control  brazo       | control  brazo  |")
-    for mes in MESES:
-        (n_neg, pc, pb), (n_pos, pub_c, cons_b, perd05) = leer(mes)
-        miss_c, miss_b = n_pos - pub_c, n_pos - cons_b
-        neg_c, neg_b = round(n_neg * pc / 100), round(n_neg * pb / 100)
-        e_c, e_b = miss_c + neg_c, miss_b + neg_b
-        tot["c"] += e_c; tot["b"] += e_b; tot["perd"] += pub_c - cons_b
-        print(f"{mes:8s} | {miss_c:5d}  {miss_b:5d}         | {neg_c:5d}  {neg_b:5d}        | {e_c:5d}  {e_b:5d}   | {perd05}")
-    print(f"total    | suma de errores: control {tot['c']}, brazo {tot['b']} | alertas que el brazo deja de publicar: {tot['perd']}")
+    c = defaultdict(lambda: defaultdict(int))
+    perdidas = []
+    with open(CSV, encoding="utf-8") as fh:
+        for r in csv.DictReader(fh):
+            m, lab, b, f = r["mes"], r["lab"], int(r["pub_B"]), int(r["pub_F"])
+            if lab == "pos":
+                c[m]["miss_B"] += 1 - b
+                c[m]["miss_F"] += 1 - f
+                c[m]["solo_F"] += int(f and not b)
+                if b and not f:
+                    perdidas.append((r["clave"], r["vrp_ref"]))
+            elif lab == "neg_limpio":
+                c[m]["neg_B"] += b
+                c[m]["neg_F"] += f
+    print("mes      | alertas sin publicar | negativos publicados | suma de errores | positivas que solo F publica")
+    print("         | B      F             | B      F             | B      F        |")
+    tot_b = tot_f = 0
+    for m in MESES:
+        x = c[m]
+        eb, ef = x["miss_B"] + x["neg_B"], x["miss_F"] + x["neg_F"]
+        tot_b += eb; tot_f += ef
+        print(f"{m:8s} | {x['miss_B']:3d}  {x['miss_F']:3d}             | {x['neg_B']:3d}  {x['neg_F']:3d}             | "
+              f"{eb:3d}  {ef:3d}       | {x['solo_F']}")
+    print(f"total    | suma de errores B {tot_b}, F {tot_f}")
+    print("positivas que B publica y F no (clave, VRP de MIROVA en MW):")
+    for k, v in perdidas:
+        print(f"  {k}  {v}")
     return 0
 
 
