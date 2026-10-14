@@ -181,7 +181,8 @@ y dos verificadores, 2026-10-09).
   2016a (VERIFICADOR_DATOS D9): medirlo como variante, no como "lo que exige el paper".
 
 - [~] **1.6 MODIS: banda 22 junto con `max`** PRE-REGISTRO de F y K contra producción en los 11 volcanes en `main`
-  (#797, `2c174b5b`, verificado con arreglos); ESPERA el sello (D-7, #798). Los flags de compuerta y de fondo de
+  (#797, `2c174b5b`, verificado con arreglos); APROBADO por Nicolás el 2026-10-14 (D-7). V1 DESPACHADO 21:21 UTC,
+  run 38639658446 (~12,5 h); faltan V2a y V2b, uno a la vez. Los flags de compuerta y de fondo de
   MODIS siguen sin existir (A45). Texto original: con los flags de compuerta y de fondo que le faltan a MODIS
   (`audit_s146/A2_RESULTADO_VARA_CORREGIDA.md:285`). En MODIS, `max` solo apaga el detector (S147).
 
@@ -216,13 +217,35 @@ y dos verificadores, 2026-10-09).
 | D-1 | Adoptar conectiva `max` en VIIRS 375 (criterio §1.2 por medir en 0.2) | `docs/S150_RESULTADO_MESES.md`, `docs/audit_s150/meta/AUDITOR_F2_NUMEROS.md` | pendiente | pendiente |
 | D-2 | Merge del arreglo del scraper Mirova-v1#19 (tarea 0.5) | CI verde de Mirova-v1#21; 4 tests | Mirova-v1#21 | #783 |
 | D-3 | Marca de régimen en `store.py` (tarea 0.6) | 4 tests, 3 fallaban antes; suite 1706 | #785, tag `pre-s151-marca-regimen` | #786 |
-| D-4 | Alerta protegida: lectura A (alertas del scraper, 439 pasadas, recomendada) o B (todo VRP >= 1 MW, 992) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 |
+| D-4 | ~~Alerta protegida: lectura A o B~~ **DECIDIDA: A** (Nicolás, 2026-10-14; propagada en #808) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 (cerrado) |
 | D-5 | Sello del probe de D25 en VIIRS 750 (tarea 1.5); pilotear Tupungatito con 10 pasadas | `experiments/_s151_d25_v750_disco/README.md`, verificador limpio con arreglos | #790 | #793 |
 | D-6 | A/B de anomalía mayor: sello de A1 y si se implementa el código de A2 (recomendación: esperar D-4) | `experiments/_s151_ab_vrp_max/PREREGISTRO.md`, verificador limpio con arreglos | #794 | #795 |
-| D-7 | Sello del A/B de F y K contra producción en los 11 volcanes (V1 costo, V2 veto; ~28 h) | `experiments/_s151_prereg_fk_11/PREREGISTRO.md`, verificador limpio con arreglos | #797 | #798 |
+| D-7 | ~~Sello del A/B de F y K~~ **APROBADO** (Nicolás, 2026-10-14); V1 en curso, run 38639658446 | `experiments/_s151_prereg_fk_11/PREREGISTRO.md`, verificador limpio con arreglos | #797 | #798 |
 | D-8 | Sello del A/B reducido de la caja (D1/D2 con K/KC, ~35 min; V1 con B/BC, ~6 h) | `experiments/_s151_prereg_caja/PREREGISTRO.md`, verificador limpio con arreglos | #800 | #801 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 21:22 UTC): vuelta 30, Nicolás decide D-4 = A y aprueba D-7; V1 despachado tras probar todo
+- Nicolás en la conversación: "A y Si, recuerda probar todo lo necesario". D-4: lectura A (issue #782 comentado
+  y cerrado; propagado a MISSION, CLAUDE.md y S151_CRITERIO en #808, CI verde, mergeado). D-7: aprobado (registrado
+  en #798). No existe `sellar.py` en el repo: el sello es su "sí" más el candado `preregistro_aprobado=si`.
+- Pruebas previas al despacho, todas en verde:
+  - Perfiles C0, F, K y G leídos desde `pipeline.profile`: Test 1, conectiva y banda 22 como lo declarado;
+    `diff_perfiles.py` idéntico a la salida commiteada.
+  - Referencia congelada de V1 y V2: 8 de 8 archivos con el sha256 LF del manifiesto, commiteados en git.
+  - Workflow: `FLAGS_BRAZO` trae todas las claves que el evaluador revisa; token renovado el 2026-10-08; 0 runs
+    vivos en el grupo.
+  - Prueba del evaluador: 37 de 37, idéntica caso por caso a `probar_salida.txt`. La primera corrida la corté yo
+    con un `timeout` de 25 min y salida con búfer: no imprimió nada; se repitió sin límite y con `-u`.
+  - Piloto en GitHub (run 38634276942, Láscar, 2026-09-30 a 10-01, los 4 brazos): 4 jobs verdes, 18 pasadas por
+    brazo sin faltantes (la recolección en rojo sólo por los 10 volcanes ausentes); `evaluar_fk.py` sobre sus
+    salidas reales: referencia OK, cobertura pareja, C0 contra producción OK, cableado de los 4 OK, determinismo
+    100 % en los tres sensores. Veredictos del piloto no se miran.
+- V1 despachado 21:21 UTC: run 38639658446 (sha 402447f33), 2026-08-29 a 10-08, 11 volcanes, C0/F/K/G. Queda en
+  cola esperando máquinas; V2a se encola sólo cuando V1 esté `in_progress` (un despacho mientras V1 figura
+  pendiente podría desplazarlo).
+- Próximo paso: encolar V2a con V1 corriendo; V2b cuando V2a arranque; evaluar cada ventana al terminar, con
+  verificador limpio.
 
 ### 2026-10-14 (servidor 20:14 UTC): vuelta 29, la sesión se reinició; aviso #779 revisado; loop re-armado
 - La sesión se reinició y la vuelta programada para las ~19:20 UTC no corrió. Se re-arma el loop.
