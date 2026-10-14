@@ -1641,9 +1641,9 @@ Métricas derivadas:
   callar donde MIROVA calla también es parte de la réplica. Ninguna alerta protegida (alerta de
   MIROVA de 1 MW o más) se puede perder; bajo 1 MW, una alerta perdida y una publicación de más pesan
   igual. Nicolás decidió «de Bajo para arriba»; el corte de 1 MW lo puso la tarea 0.2 (PR #780) y lo
-  sostiene el banner de MIROVA, no el paper. Por defecto rige la lectura A (alertas del scraper de
-  1 MW o más, 439 pasadas); la lectura B (toda pasada de 1 MW o más a cualquier distancia, 992) es la
-  decisión pendiente D-4 (issue #782), y el loop evalúa con las dos
+  sostiene el banner de MIROVA, no el paper. Rige la lectura A (alertas del scraper de 1 MW o más,
+  439 pasadas), decidida por Nicolás el 2026-10-14 (D-4, issue #782 cerrado); la lectura B (toda
+  pasada de 1 MW o más a cualquier distancia, 992) quedó descartada y sólo se informa
   (`docs/S151_CRITERIO_CLASE_MIROVA.md`). Texto original: **Para `mirova_equivalent` priorizamos recall sobre precision**.
 - **F1** = media armónica de ambas. Un solo número para comparar.
 - **Ratio ours/mirova** = VRP nuestro / VRP MIROVA en la misma noche. 1.0 =
