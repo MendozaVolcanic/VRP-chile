@@ -60,7 +60,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 os.environ.setdefault("VRP_PROFILE", "mirova_equivalent")
 
 from auto_audit_weekly import _coords_por_volcan, es_pasada_diurna_descartada  # noqa: E402
-from referencia_mirova_unificada import (RESPALDO_20260408, SNAP_CONS,  # noqa: E402
+from referencia_mirova_unificada import (HISTORICO_RECUPERADAS,  # noqa: E402
+                                         RESPALDO_20260408, SNAP_CONS,
                                          SNAP_OCR, bajar_remoto,
                                          cargar_referencia_unificada)
 
@@ -462,6 +463,7 @@ def main(argv=None):
         procedencia = {"fuente": "remoto", "commit_cons": info["registro_vrp_consolidado.csv"]["sha"],
                        "commit_ocr": info["registro_vrp_ocr.csv"]["sha"]}
     procedencia["sha_respaldo_20260408"] = sha_git(RESPALDO_20260408)
+    procedencia["sha_union_historica"] = sha_git(HISTORICO_RECUPERADAS)  # S150 tarea 0.1
 
     coords = _coords_por_volcan()
     inner = inner_desde_html()

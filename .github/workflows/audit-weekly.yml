@@ -39,7 +39,7 @@ concurrency:
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
 
@@ -57,6 +57,17 @@ jobs:
           curl -fsSL -o data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv \
             https://raw.githubusercontent.com/MendozaVolcanic/Mirova-v1/main/monitoreo_satelital/registro_vrp_ocr.csv
 
+      # S150 (tarea 0.1 del loop): el consolidado de Mirova-v1 pierde filas en silencio y el snapshot
+      # recien bajado hereda la perdida. Se regenera la union historica en la misma corrida para que
+      # las filas perdidas sigan en la referencia. Si falla (API de GitHub), el audit corre igual y la
+      # alarma la da test_la_union_no_esta_atrasada_respecto_del_snapshot en la suite.
+      - name: Union historica del consolidado (S150)
+        continue-on-error: true
+        timeout-minutes: 25
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/referencia_mirova_unificada.py --union-historica
+
       - name: Run weekly audit
         run: python scripts/auto_audit_weekly.py
 
@@ -65,7 +76,7 @@ jobs:
           set +e
           git config user.name  "vrp-bot"
           git config user.email "vrp-bot@github-actions"
-          git add data/audit_continuous/ data/mirova_reference/mirova_v1_snapshot/
+          git add data/audit_continuous/ data/mirova_reference/mirova_v1_snapshot/ data/mirova_reference/union_historica/
           git diff --staged --quiet && { echo "no changes"; exit 0; }
           git commit -m "audit(auto): paridad semanal vs MIROVA (auto-audit S120)"
           for attempt in 1 2 3 4 5; do
