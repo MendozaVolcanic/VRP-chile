@@ -81,8 +81,13 @@ def caja(base, apagar=True):
 
 
 def ocultar(B, k):
-    """Apaga la publicacion de una pasada. La etiqueta "far" sola no basta: una pasada MODIS de Lascar seguia publicada
-    por el tablero (isSummitDetection la acepta por el cumulo). Por eso tambien se lleva a cero la magnitud del cumulo."""
+    """Apaga la publicacion de una pasada. Se pone la etiqueta "far" y ademas se lleva a cero la magnitud del cumulo.
+
+    S151 (loop): la version anterior decia que "far" sola no bastaba porque isSummitDetection aceptaba la pasada
+    por el cumulo. Es FALSO: con el predicado real del tablero (banco_paridad.correr_node), un record MODIS con
+    distance_class "far" y un cumulo de 2 MW a 0,8 km da summit 0 y publica 0 (con "summit", publica 1). Si en la
+    prueba la pasada seguia publicada, la causa era otra (lo mas probable, otro record con la misma clave). Se
+    conserva el cero de la magnitud porque no hace dano."""
     v = k.split("|")[0]; n = 0
     for r in B[v]["records"]:
         if clave_rec(v, r) == k:
