@@ -2,8 +2,11 @@
 
 > Escrito el 2026-10-14 por el loop autónomo, en `loop/1.12-alertas-minimas`. Todo número sale de un script de
 > esta carpeta con su salida guardada al lado: `censo_salida.txt`, `frontera_salida.txt`, `suma_salida.txt`,
-> `extraer_salida.txt`. Ningún número está transcrito a mano desde otro documento.
-> **Estado: sin verificador con contexto limpio todavía.**
+> `extraer_salida.txt`, `cotejar_salida.txt`. Ningún número está transcrito a mano desde otro documento.
+> **Estado: revisado por un verificador con contexto limpio** (números CONFIRMADOS; presentación PARCIAL). Sus
+> cinco puntos se corrigieron en esta versión: pasadas distintas en vez de muestras sumadas (§2), redondeo o
+> truncado no identificable (§2), refuerzo del control (§2), SN como lectura tan literal como SE y poco poder del
+> "ningún veredicto cambia" (§3 y §4), y cotejo del CSV contra su fuente (§3).
 
 ## 0. En una pantalla
 
@@ -20,18 +23,25 @@ cambio, llama ALERTA a todo VRP mayor que cero dentro de su radio. La réplica s
    0,05 MW o menos; nocturnas, 155 de 2.156 (7,2 %). **Todas son VIIRS 375** (9,1 % de sus alertas
    nocturnas): la alerta más baja de VIIRS 750 es de 0,09 MW y la de MODIS de 0,13. Se concentran en
    Lastarria (55, el 22 % de sus alertas nocturnas), Tupungatito (26) y Planchón Peteroa (18).
-2. **Dónde está la frontera.** En VIIRS 375 el banner dice NONE con 0,04 MW o menos y VERY LOW con 0,06 o
-   más, **sin una sola excepción** en tres muestras limpias; en 0,05 exacto salen los dos lados. Es lo que
-   produce un corte en el VRP verdadero entre 0,045 y 0,055 MW con el valor publicado redondeado a dos
-   decimales. La distancia al cráter y el ángulo de vista no explican el borde. **En VIIRS 750 la frontera
-   no está resuelta** (una imagen NONE con 0,15 MW, una VERY LOW con 0,18).
+2. **Dónde está la frontera.** En VIIRS 375, contando cada pasada una vez y con dos instrumentos (el OCR de
+   Mirova-v1 y una lectura propia de las imágenes de mayo), hay **14 pasadas distintas NONE con 0,04 MW o
+   menos y ninguna VERY LOW**, y **20 VERY LOW con 0,06 exacto y ninguna NONE** (283 VERY LOW con 0,06 o
+   más). Con 14 casos y cero excepciones, la probabilidad de que una pasada de 0,04 o menos sea VERY LOW
+   todavía puede llegar al 19,3 % (cota superior al 95 %). En 0,05 exacto salen los dos lados, 5 NONE y 5
+   VERY LOW. Calza con un corte en el VRP verdadero entre 0,045 y 0,06 MW, con el valor publicado redondeado
+   o truncado a dos decimales: **cuál de los dos no es identificable** con estos datos. La distancia al
+   cráter y el ángulo de vista no explican el borde. **En VIIRS 750 la frontera no está resuelta** (una
+   imagen NONE con 0,15 MW, una VERY LOW con 0,18).
 3. **Cuánto cambia la suma de errores.** **Ningún veredicto cambia** en los tres resultados ya medidos (meses
-   de S150, VIIRS 750, Chillán): el brazo que ganaba sigue ganando en los tres escenarios y por más margen. Lo
-   que sí cambia es el **techo del A/B de D22**: de 14 pérdidas recuperables quedan 5 (entre 5 y 8 si las de
-   0,05 se dan por dudosas).
-4. **Regla propuesta (§4):** en VIIRS 375, una alerta del scraper con VRP de 0,05 MW o menos va a un **estrato
-   aparte** ("mínima"): no cuenta como alerta perdida ni como acierto, ni como negativo limpio; se informa
-   sola. La regla no está cableada; es una decisión para Nicolás (§5).
+   de S150, VIIRS 750, Chillán), pero esa frase **tiene poco poder**: B y F difieren de 6 a 8 veces, así que
+   ningún tratamiento de 155 pasadas podía darlas vuelta, y F, K, KE y KET empatan en los tres escenarios.
+   Lo que sí cambia es el **techo del A/B de D22**: de 14 pérdidas recuperables quedan 5 (entre 5 y 8 si
+   las de 0,05 se dan por dudosas).
+4. **Dos lecturas literales (§4), las dos para Nicolás.** "MIROVA no vio nada" (SN: la pasada mínima cuenta
+   como negativo) y "estrato aparte" (SE: no cuenta para ningún lado). SN calza con la letra de MISSION
+   (negativo limpio es "MIROVA miró y no vio nada", y eso dice un banner NONE); SE crea una tercera categoría
+   que MISSION no tiene. Aparte va el tratamiento de 0,05 exacto (65 pasadas; en la muestra con banner, 5 de 10 NONE). Nada está
+   cableado.
 
 ## 1. Cuántas son (`censo.py`, `censo_salida.txt`)
 
@@ -57,6 +67,9 @@ salida.
 
 ### Tres muestras, dos instrumentos
 
+A y B salen del **mismo** OCR y comparten 96 pasadas de VIIRS 375; no son observaciones independientes. Por
+eso las cifras que deciden (más abajo, "pasadas distintas") cuentan cada pasada una vez.
+
 - **A. Banner leído por el OCR de Mirova-v1** (`Nivel_Anomalia_MIROVA`, versión 30, agosto a octubre): 137
   pasadas. Bajo 1 MW sólo hay VIIRS 375.
 - **B. Color de la estrella del gráfico de distancias**, que el OCR anota en la nota de validación desde la
@@ -76,9 +89,11 @@ salida.
 
 ### VIIRS 375: la hipótesis y el control que puede fallar
 
-**H**: el banner dice NONE si el VRP verdadero está bajo un umbral entre 0,045 y 0,055 MW, y el VRP publicado
-es el verdadero redondeado a dos decimales. H predice cero NONE con 0,06 o más y cero VERY LOW con 0,04 o
-menos; sólo 0,05 puede salir de los dos lados.
+**H**: el banner dice NONE si el VRP verdadero está bajo un umbral, y el VRP publicado es el verdadero con dos
+decimales. Si se publica redondeado, el umbral está entre 0,045 y 0,055 MW; si se publica truncado (MIROVA
+trunca el VRP que dibuja en la imagen), entre 0,05 y 0,06. Las dos versiones predicen lo mismo sobre el valor
+publicado: cero NONE con 0,06 o más, cero VERY LOW con 0,04 o menos, y los dos lados en 0,05. **No se pueden
+distinguir con estos datos**; lo único que se puede decir es que el umbral está entre 0,045 y 0,06 MW.
 
 | muestra | NONE con <= 0,04 | VERY LOW con <= 0,04 | 0,05: NONE / VERY LOW | NONE con >= 0,06 | violaciones de H fuera de 0,05 |
 |---|---|---|---|---|---|
@@ -93,12 +108,36 @@ la suya y la estrella sale del gráfico de otra. Ahí H se viola 13 veces. En la
 reglas desplazadas fallan en cada muestra limpia: "NONE si VRP <= 0,03" da 6, 7 y 4 violaciones; "NONE si
 VRP <= 0,06" da 11, 17 y 6. La muestra tiene poder para distinguir la frontera (A110).
 
+**Refuerzo del control.** Si las 13 violaciones vienen de que la estrella es de otra pasada, en el consolidado
+tiene que aparecer, cerca, una pasada del mismo volcán y sensor cuyo VRP cuadre con el color (gris con más de 0
+y hasta 0,05; verde con 0,05 o más). Pasa en **11 de 13**, y en las 11 es justamente **la pasada siguiente**
+con VRP mayor que 0 (por ejemplo, Láscar 2026-08-30 05:54 con 0,17 MW y estrella gris: la siguiente, 06:18,
+tiene 0,04). Nulo: la pasada siguiente cuadra con el color contrario en 1 de 13. Las dos que no cuadran son
+pasadas de la tarde (Nevados de Chillán 2026-08-25 17:36 en VIIRS 375 y Planchón Peteroa 2026-08-14 17:42 en
+VIIRS 750, que es la única violación fuera de VIIRS 375).
+
+**Pasadas distintas de VIIRS 375** (A, B con par en el consolidado y C juntas, cada pasada una vez; 307
+pasadas, ninguna con etiquetas distintas entre muestras):
+
+| VRP publicado | NONE | VERY LOW o más |
+|---|---|---|
+| 0,04 o menos | 14 | 0 |
+| 0,05 | 5 | 5 |
+| 0,06 | 0 | 20 |
+| más de 0,06 | 0 | 263 |
+
+Cota superior al 95 % (cero casos en n, exacta) de que una pasada de 0,04 o menos sea VERY LOW: **19,3 %**
+(n = 14); de que una de 0,06 exacto sea NONE: 13,9 % (n = 20). De las 44 pasadas de 0,06 MW o menos, 32 vienen
+del OCR y 12 de la lectura propia.
+
 El borde de 0,05 no lo separa otra variable: en A los dos NONE de 0,05 son de Tupungatito a 5,3 y 5,4 km, pero
 en C los tres NONE de 0,05 están a 1,55 km (Lastarria), 4,8 km (Tupungatito) y 0,0 km (Chaitén), y Tupungatito
 tiene VERY LOW de 0,06 a 0,10 MW a 5,27 y 5,41 km. El ángulo cenital tampoco (NONE de 0,04 con 3° y con 63°).
 
-**Conclusión para VIIRS 375**: con 0,04 MW o menos MIROVA no ve anomalía; con 0,06 o más sí; en 0,05 es una
-moneda (5 NONE y 3 VERY LOW entre A y C, que no se solapan). El 0,05 es el redondeo, no una regla distinta.
+**Conclusión para VIIRS 375**: con 0,04 MW o menos MIROVA no ve anomalía en ninguna de las 14 pasadas
+observadas; con 0,06 o más sí, en todas; en 0,05 es una moneda (5 NONE y 5 VERY LOW). Ese 0,05 mixto lo
+explica el paso de dos decimales del valor publicado, sea redondeo o truncado, sin necesidad de una regla
+distinta; cuál de los dos, no se sabe.
 
 ### VIIRS 750 y MODIS
 
@@ -134,6 +173,12 @@ que SE excluye coincide en cada brazo con las alertas que la etiqueta original m
 Ese último control encontró un defecto propio: la primera versión guardaba un índice por `id()` y en julio y
 agosto excluía con el índice de otro mes.
 
+Cotejo del CSV contra su fuente (`cotejar_tablas.py`, `cotejar_salida.txt`): `pasadas_meses_B_F.csv` coincide
+campo por campo (clave, etiqueta, VRP de MIROVA, publicación de B y de F, ventana) con las tablas por pasada de
+S150 en **VIIRS 375 y VIIRS 750: 13.677 pasadas, 0 diferencias**. La fuente es una sola: las tres copias de cada
+mes que hay en los scratchpads de S150 tienen el mismo sha256. Que esas tablas sean las del resultado publicado
+lo respalda que S0 reproduce sus totales exactos.
+
 | resultado | brazos | S0 | SE | SN | ¿cambia el veredicto? |
 |---|---|---|---|---|---|
 | meses abril a agosto, VIIRS 375 | B / F | 860 / 134 | 852 / 109 | 904 / 138 | no: F gana en los tres |
@@ -147,6 +192,12 @@ son mínimas). Tratarlas como estrato aparte le quita a F más errores que a B. 
 nada" convierte las que B publicó en falsas alarmas (B sube de 860 a 904). En los dos casos F se aleja de B.
 En Chillán el efecto es de 1 a 3 errores por brazo.
 
+**Cuánto vale "ningún veredicto cambia".** Poco. B y F difieren de 6 a 8 veces (860 contra 134, 852 contra
+109, 904 contra 138): ningún tratamiento de las mínimas podía darlos vuelta, así que el resultado no pone a
+prueba la regla. En Chillán F, K, KE y KET empatan en los tres escenarios (7, 5 y 6), y C0, B y J quedan lejos.
+Una comparación entre brazos parecidos, como la del A/B de F y K que corre ahora, es donde la regla puede
+decidir algo.
+
 **El A/B de F y K que corre ahora (D-7)** compara contra C0, que es producción con el Test 1 encendido y
 publica casi todo lo débil. Con SE o SN su P2 se vuelve algo más favorable a los candidatos que callan las
 mínimas; no se puede cuantificar hasta que el run termine. El pre-registro ya dejó el borde de 0,05 MW como
@@ -157,34 +208,47 @@ límite declarado (§8).
 Nicolás. Ese tramo es exactamente el que MIROVA llama NONE: lo que pesa en la decisión de recall es el tramo de
 0,05 (dudoso) a 0,10 MW, que MIROVA sí llama VERY LOW.
 
-## 4. Regla propuesta para el evaluador (no cableada)
+## 4. Qué hacer con las mínimas en el evaluador (no cableado)
 
-> En VIIRS 375, una pasada cuya alerta del scraper tiene VRP de **0,05 MW o menos** (VRP de la pasada,
-> consolidado antes que OCR) es **"mínima"**: no cuenta como alerta perdida ni como acierto, ni como negativo
-> limpio. Se informa aparte, con su conteo y cuántas publica cada brazo. La noche no cambia de etiqueta.
-> MODIS y VIIRS 750 no tienen alertas en ese rango; la regla no los toca.
+Lo que los datos de MIROVA fijan (A115): en VIIRS 375, una alerta del scraper con VRP de **0,04 MW o menos**
+(VRP de la pasada, consolidado antes que OCR) es una pasada que MIROVA llama **NONE**. Ninguna de las 14
+observadas salió VERY LOW. MODIS y VIIRS 750 no tienen alertas en ese rango. Lo que **no** fijan es cómo
+contarlas, y hay dos lecturas, las dos literales:
 
-Por qué así y no otra cosa, desde los datos de MIROVA (A115):
+- **SN, "MIROVA no vio nada": la pasada cuenta como negativo.** La regla 3 del criterio de victoria
+  (`docs/MISSION.md`) define negativo limpio como "pasadas donde MIROVA miró y no vio nada", y un banner
+  NONE es MIROVA diciendo, en su propia imagen, que no ve anomalía. La regla 2 define "Muy Bajo" como alertas
+  "VERY LOW en el banner de MIROVA", así que una pasada NONE tampoco es Muy Bajo. En esta lectura, un brazo
+  que la publica comete una falsa alarma. Costo: re-etiqueta noches enteras (otras pasadas de esa noche pueden
+  volverse negativo limpio) y trata como silencio una señal que MIROVA sí registró en su tabla y dibujó con
+  estrella gris.
+- **SE, estrato aparte: la pasada no cuenta para ningún lado** (ni alerta perdida, ni acierto, ni negativo
+  limpio) y se informa sola, con cuántas publica cada brazo. Es el escenario que no afirma de qué lado cae el
+  error. Pero **crea una tercera categoría que MISSION no tiene**: hoy toda pasada es alerta, negativo limpio
+  u "otra" sin etiqueta (`sin_info`, `far_ref`), y agregar una cuarta es cambiar el criterio, no aplicarlo.
 
-- **El umbral lo pone MIROVA, no nosotros.** Con 0,04 o menos el banner dice NONE en las tres muestras limpias
-  sin excepción; con 0,06 o más dice VERY LOW sin excepción. El criterio de victoria define "Muy Bajo" como
-  "alertas bajo 1 MW, VERY LOW en el banner de MIROVA" (`docs/MISSION.md`): una pasada NONE no es Muy Bajo
-  según su propia letra.
-- **0,05 va adentro del estrato** porque ahí MIROVA dice NONE o VERY LOW según un tercer decimal que no se
-  publica (5 contra 3). Cualquier lado que se eligiera afirmaría algo que el dato no sabe.
-- **Estrato aparte y no "negativo".** MIROVA no las llama anomalía, pero sí las publica en su tabla y las
-  dibuja (estrella gris). Contarlas como negativo limpio diría que MIROVA "calló", y no calló: publicó el
-  número y dijo que no alcanza. SN además depende de re-etiquetar noches enteras por una señal que MIROVA sí
-  registró. SE es el único escenario que no afirma de qué lado cae el error, y no cambia ningún veredicto.
-- **Por qué no cablear sin preguntar.** Mueve la vara de todas las pruebas y cambia la lectura de un
-  veredicto ya publicado: el techo del A/B de D22 baja de 14 a 5.
+Las dos dejan los veredictos ya medidos donde estaban (§3, con el poder escaso que allí se dice). Las cifras del
+§3 usan el corte con 0,05 incluido, el más amplio; con el corte en 0,04 el efecto es menor. La elección entre
+SN y SE es de Nicolás.
 
-## 5. Decisión para Nicolás
+**Sub-decisión aparte: 0,05 exacto.** Son 65 pasadas de las 155, y en la muestra con banner MIROVA las llama
+VERY LOW en 5 de 10. Meterlas en el tratamiento de las mínimas trata como NONE a una mitad que MIROVA llama
+VERY LOW; dejarlas como alerta hace lo contrario con la otra mitad. Cualquier lado afirma algo que el dato no
+sabe (el tercer decimal no se publica). Las opciones son: igual que las de 0,04 o menos, como alerta (lo de
+hoy), o en un estrato aparte aunque las de 0,04 vayan como negativo.
 
-¿Se adopta la regla del §4 (estrato aparte para VIIRS 375 con VRP de 0,05 MW o menos) en el evaluador del
-loop y en la suma del criterio? Recomendación del loop: **sí**, con SE. Si se adopta, hay que agregarla a la
-definición del criterio en `docs/MISSION.md` y a `scripts/clase_mirova.py`, con su test, y re-leer el techo de
-D22 con 5 pérdidas en vez de 14.
+**Por qué no se cableó.** Mueve la vara de todas las pruebas y cambia la lectura de un resultado ya publicado:
+el techo del A/B de D22 baja de 14 a 5 (5 a 8 según lo que se decida para 0,05).
+
+## 5. Decisiones para Nicolás
+
+1. **Las de 0,04 MW o menos en VIIRS 375: ¿SN (negativo, la letra de la regla 3 de MISSION) o SE (estrato
+   aparte, categoría nueva)?** El loop se inclinaba por SE porque no afirma el lado del error; la letra de
+   MISSION favorece SN. Las dos son defendibles.
+2. **Las de 0,05 exacto: ¿igual que las de 0,04, como alerta, o aparte?**
+
+Lo que se decida va a la definición del criterio en `docs/MISSION.md` y a `scripts/clase_mirova.py`, con su
+test, y obliga a re-leer el techo de D22.
 
 ## 6. Lo que no se pudo resolver
 
@@ -210,5 +274,6 @@ D22 con 5 pérdidas en vez de 14.
 - `extraer_tablas.py`, `extraer_salida.txt`, `pasadas_meses_B_F.csv`, `pasadas_ndc.csv`: copia en el repo de
   las tablas por pasada de los meses de S150 y de Chillán, que vivían sólo en scratchpads (la parte de VIIRS
   750 es idéntica a `experiments/_s151_max_v750/pasadas_viirs750_B_F.csv`, comprobado).
+- `cotejar_tablas.py`, `cotejar_salida.txt`: cotejo del CSV de los meses contra las tablas fuente (§3).
 - `suma_errores.py`, `suma_salida.txt`: §3. Necesita la referencia congelada de los meses
   (`experiments/_s149_prereg_invierno/_congelado/<mes>/`, en `.gitignore`; se verifica contra el manifiesto).
