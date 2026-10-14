@@ -214,6 +214,21 @@ y dos verificadores, 2026-10-09).
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-14 (servidor 14:53 UTC): vuelta 18, pre-registro de F/K en los 11 volcanes (#797), en verificación
+- Paradas: NRT verde a las 09:17 UTC y uno nuevo en curso (14:52); disco 16 GB libres.
+- Agente entregó #797 (tareas 1.6 y la corrida de los 11 que pide Chillán): C0 contra F (VIIRS) y K (MODIS con
+  banda 22 y `max`), más gemelo G de C0 (perfil nuevo `_s151_ab_control_gemelo.yaml`). Hallazgo: en el régimen
+  actual casi no hay protegidas que producción publique (MODIS 3, VIIRS 375 12, VIIRS 750 10): el veto no tendría
+  poder. Dos ventanas: V1 2026-08-29 a 10-08 (costo; incluye la erupción de Chillán y 836 negativos limpios de
+  MODIS fuera de Láscar) y V2 2026-03-01 a 06-12 sólo tabla (poder del veto: pérdida detectable con 80 % de 4,3 %
+  en VIIRS 375 y 3,8 % en VIIRS 750). Predicciones P1 veto, P2 suma de errores con ruido del gemelo, P3 magnitud,
+  P4 movimiento del cúmulo (objeción de S147, tope 0,048). Evaluador 26 de 26; reproduce la suma de Chillán.
+  Duración estimada en serie ~28 h. Sin resolver: flags de compuerta y fondo de MODIS no existen (A45), recall
+  MODIS fuera de Láscar sin sustrato, tope D9 sin probar, lectura B espera D-4.
+- El agente reconoce dos ediciones con heredoc de Python y dos `sed` sin efecto, contra la regla 1.7: anotado.
+- Verificador limpio lanzado sobre #797.
+- Próximo paso: veredicto de #797; si es sellable, D-7 a la cola.
+
 ### 2026-10-14 (servidor 14:08 UTC): vuelta 17, prueba de Chillán cerrada (#796)
 - Verificador limpio: PARCIAL. Reprodujo la salida idéntica y recalculó por su cuenta, sin el evaluador, las
   decisiones clave. Confirmado: 0 pérdidas VIIRS de 1 MW o más; MODIS, C0 pierde 2026-10-01 08:35 (5,18 MW) y la
