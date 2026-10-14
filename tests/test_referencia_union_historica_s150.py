@@ -106,6 +106,25 @@ def test_control_la_alarma_de_atraso_dispara():
     assert _dias_de_atraso("2026-10-14T11:06:03Z", "2026-10-13 23:00") <= 8
 
 
+def test_reintentos_ante_fallo_transitorio(monkeypatch):
+    import time
+    from scripts.referencia_mirova_unificada import _con_reintentos
+    monkeypatch.setattr(time, "sleep", lambda s: None)
+    llamadas = []
+
+    def falla_dos_veces():
+        llamadas.append(1)
+        if len(llamadas) < 3:
+            raise OSError("red")
+        return "ok"
+    assert _con_reintentos(falla_dos_veces) == "ok" and len(llamadas) == 3
+
+    def siempre_falla():
+        raise OSError("red caida")
+    with pytest.raises(OSError):
+        _con_reintentos(siempre_falla)
+
+
 def test_las_filas_historicas_solo_agregan():
     # La fila del remoto de hoy gana siempre; la union historica solo aporta claves ausentes.
     sin = {clave(f): f for f in cargar_referencia_unificada(historico_path=None, respaldo_path=None)}

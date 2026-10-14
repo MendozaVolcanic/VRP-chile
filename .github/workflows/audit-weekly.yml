@@ -62,11 +62,26 @@ jobs:
       # las filas perdidas sigan en la referencia. Si falla (API de GitHub), el audit corre igual y la
       # alarma la da test_la_union_no_esta_atrasada_respecto_del_snapshot en la suite.
       - name: Union historica del consolidado (S150)
+        id: union
         continue-on-error: true
         timeout-minutes: 25
         env:
           GH_TOKEN: ${{ github.token }}
         run: python scripts/referencia_mirova_unificada.py --union-historica
+
+      # Verificador de #778: el push de este bot no dispara tests.yml, asi que sin este paso una union
+      # que no se regenero solo se notaria en el proximo push humano, con la perdida ya commiteada.
+      - name: Issue si la union historica no se regenero
+        if: steps.union.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ABIERTOS=$(gh issue list --state open --search "in:title Union historica MIROVA sin regenerar" --json number --jq 'length')
+          if [ "$ABIERTOS" = "0" ]; then
+            gh issue create \
+              --title "Union historica MIROVA sin regenerar $(date -u +%F)" \
+              --body "El paso --union-historica de audit-weekly fallo (run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID). El snapshot del consolidado se refresco igual: si Mirova-v1 perdio filas esta semana, no estan en la referencia. Correr scripts/referencia_mirova_unificada.py --union-historica y commitear data/mirova_reference/union_historica/."
+          fi
 
       - name: Run weekly audit
         run: python scripts/auto_audit_weekly.py

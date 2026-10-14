@@ -118,6 +118,8 @@ def cargar_referencia_unificada(cons_path: Path = SNAP_CONS, ocr_path: Path = SN
     La fila principal gana siempre; despues entran las filas que la historia de Mirova-v1 tuvo y
     perdio (origen "historico") y al final las del respaldo, cada una solo si su clave no existe
     todavia. `historico_path=None` o `respaldo_path=None` apagan esa capa (control de instrumento).
+    Desde S150 la historia entra por defecto: un experimento anterior (S141 a S149) que llame a esta
+    funcion sin argumentos y se vuelva a correr hoy mide contra mas filas que cuando se congelo.
     """
     filas = {clave(f): f for f in leer_pasadas(Path(cons_path), "CONS", "principal")}
     for f in leer_pasadas(Path(ocr_path), "OCR", "principal"):
@@ -150,18 +152,30 @@ def bajar_remoto(dest: Path) -> dict:
     return info
 
 
+def _con_reintentos(fn, intentos: int = 4):
+    """Reintenta ante fallos transitorios de red o de la API (verificador de #778: 318 llamadas
+    seguidas sin reintento abortaban la union entera por un solo error)."""
+    import time
+    for i in range(intentos):
+        try:
+            return fn()
+        except Exception:
+            if i == intentos - 1:
+                raise
+            time.sleep(5 * (i + 1))
+
+
 def versiones_diarias(nombre: str, desde: str, hasta: str) -> list[dict]:
     """Ultimo commit de cada dia que toco `nombre`, de `desde` a `hasta` (AAAA-MM-DD, UTC)."""
     from datetime import date, timedelta
     d, fin = date.fromisoformat(desde), date.fromisoformat(hasta)
     vistas, out = set(), []
     while d <= fin:
-        r = subprocess.run(
-            ["gh", "api", f"repos/{REPO_MIROVA}/commits?path={RUTA_REMOTA}/{nombre}"
-             f"&until={d.isoformat()}T23:59:59Z&per_page=1",
-             "-q", '.[0] | .sha + " " + .commit.committer.date'],
-            capture_output=True, text=True, check=True)
-        partes = r.stdout.split()
+        cmd = ["gh", "api", f"repos/{REPO_MIROVA}/commits?path={RUTA_REMOTA}/{nombre}"
+               f"&until={d.isoformat()}T23:59:59Z&per_page=1",
+               "-q", '.[0] | .sha + " " + .commit.committer.date']
+        partes = _con_reintentos(lambda: subprocess.run(cmd, capture_output=True, text=True,
+                                                         check=True).stdout.split())
         if len(partes) == 2 and partes[0] not in vistas:
             vistas.add(partes[0])
             out.append({"dia": d.isoformat(), "sha": partes[0], "fecha_commit": partes[1]})
@@ -172,8 +186,10 @@ def versiones_diarias(nombre: str, desde: str, hasta: str) -> list[dict]:
 def _bajar_version(nombre: str, sha: str) -> tuple[list[str], list[dict]]:
     """Encabezado y filas crudas de una version del CSV remoto, sin escribir a disco."""
     import io
-    with urllib.request.urlopen(URL_RAW.format(sha=sha, nombre=nombre), timeout=120) as resp:
-        texto = resp.read().decode("utf-8")
+    def _leer():
+        with urllib.request.urlopen(URL_RAW.format(sha=sha, nombre=nombre), timeout=120) as resp:
+            return resp.read().decode("utf-8")
+    texto = _con_reintentos(_leer)
     lector = csv.DictReader(io.StringIO(texto))
     return list(lector.fieldnames or []), list(lector)
 
