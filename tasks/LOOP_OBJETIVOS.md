@@ -78,7 +78,8 @@ y dos verificadores, 2026-10-09).
   `main` verde en el run 38558333297). Pendientes que deja: (i) RESUELTO 2026-10-14 (#803): el auto-audit
   ya suma la unión histórica en el paso 1 (30 alertas más, 2 en la ventana de 60 días); (ii) sólo las 207 del 06-oct tienen testigo
   independiente en la suite; (iii) 372 claves de tipo cambiante, al menos 318 del cambio masivo
-  EVIDENCIA_DIARIA a RUTINA del 21-ene; (iv) el OCR no se recorrió.
+  EVIDENCIA_DIARIA a RUTINA del 21-ene; (iv) RESUELTO 2026-10-14 (#805): el OCR perdió 5 alertas, todas en su
+  tramo inestable (hasta el 2026-02-24); no se agregan, y `experiments/_s151_ocr_perdidas/medir.py` lo repite.
   Por qué: el consolidado remoto de Mirova-v1 perdió filas en silencio al menos cinco veces (21-ene, 23-abr,
   25-ago, 26-ago y 06-oct, 207 filas con 8 alertas) y nunca las repuso (`docs/audit_s150/meta/VERIFICADOR_DATOS.md`
   D1). Una referencia congelada desde el remoto de hoy no las tiene. El snapshot previo a la última caída está
@@ -222,6 +223,18 @@ y dos verificadores, 2026-10-09).
 | D-8 | Sello del A/B reducido de la caja (D1/D2 con K/KC, ~35 min; V1 con B/BC, ~6 h) | `experiments/_s151_prereg_caja/PREREGISTRO.md`, verificador limpio con arreglos | #800 | #801 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 18:22 UTC): vuelta 28, el OCR medido (#805); el loop pasa a espera
+- OCR de Mirova-v1, 232 versiones diarias desde el 2026-01-20: 1.065 claves en la unión, 1.060 en la más nueva, 5
+  perdidas (todas ALERTA_TERMICA_OCR; último día con ellas 20-ene, 5-feb, 22-feb), dentro del tramo inestable del
+  OCR. No se agregan a la referencia; el script queda para repetirlo. #805 mergeado.
+- **Resumen del día.** Hechas: 0.1, 0.2, 0.3, 0.4, 1.1, 1.3, 1.8, 1.9, 1.10 y los pendientes (i) y (iv) de 0.1.
+  Diseñadas, verificadas y en `main`, esperando el sello de Nicolás: 1.5 (D-5, #793), 1.4 (D-6, #795), 1.6 (D-7,
+  #798), 1.7 (D-8, #801); además la sonda 1.2. Esperan su decisión: D-2 (#783, Mirova-v1#21), D-3 (#786, #785),
+  D-4 (#782). Bloqueada: 1.11 (cronología OVDAS). Sin cola autónoma que valga una vuelta propia: los arreglos del
+  evaluador de Chillán sólo sirven si se vuelve a usar, y (ii)/(iii) de 0.1 son de bajo efecto.
+- Próximo paso: modo espera. Revisar cada hora los issues `decision-nicolas`, el NRT y el disco; actuar apenas
+  llegue un sello o una decisión.
 
 ### 2026-10-14 (servidor 18:11 UTC): vuelta 27, la etiqueta far sí oculta (nota falsa corregida, #804)
 - La nota del evaluador de la caja decía que el tablero publica una pasada `far` por su cúmulo. Con el predicado
