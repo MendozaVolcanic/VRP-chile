@@ -169,10 +169,10 @@ y dos verificadores, 2026-10-09).
   clasificación NULO la escribe el scraper. Medir distancias desde el cráter y no desde el catálogo
   (`process_viirs.py:754`, AUDITOR_F1). Pre-registro, verificador, sello, despacho.
 
-- [~] **1.5 D25, fondo por vecinos, primero sin correr nada:** MAGNITUD SIN MEDIR (no hay vecinos en records ni
-  gránulos en disco); techo: cualquier magnitud positiva publicaría los 268 negativos y las 28 alertas. Probe de
-  sólo lectura sobre 339 gránulos escrito y SIN despachar (#790, en verificación limpia; necesita sello). sobre los 268 negativos de VIIRS 750 ya en disco
-  (`AUDIT_S149.md:139`). El descarte de vecinos nublados bajo 255 K es de Coppola 2014 p. 3412, no del canon
+- [~] **1.5 D25, fondo por vecinos, primero sin correr nada:** sobre los 268 negativos de VIIRS 750 ya en disco
+  (`AUDIT_S149.md:139`). ESTADO 2026-10-14: magnitud SIN MEDIR (no hay vecinos en records ni gránulos en disco);
+  techo: cualquier magnitud positiva publicaría los 268 negativos y las 28 alertas. Probe de sólo lectura (356
+  pasadas) en `main` (#790, `2b6a1be8`), verificado, con candado; ESPERA el sello (D-5, #793). El descarte de vecinos nublados bajo 255 K es de Coppola 2014 p. 3412, no del canon
   2016a (VERIFICADOR_DATOS D9): medirlo como variante, no como "lo que exige el paper".
 
 - [ ] **1.6 MODIS: banda 22 junto con `max`**, con los flags de compuerta y de fondo que le faltan a MODIS
@@ -186,14 +186,12 @@ y dos verificadores, 2026-10-09).
 
 - [x] **1.9 Preferencia de MIROVA entre banda I y banda M** HECHA 2026-10-14 (#787, squash `cd23ae20`): el NRT
   NO tiene preferencia (13.964 pasadas con las dos bandas, 246 con alerta en las dos); la regla es del archivo.
-  Palanca descartada para la réplica. (`FRENTE_F_FIDELIDAD_VIIRS.md:474`, F-07): se mide
-  en minutos con la referencia.
+  Palanca descartada para la réplica. Origen: `FRENTE_F_FIDELIDAD_VIIRS.md:474`, F-07.
 
 - [x] **1.10 Las 4 alertas de VIIRS 750 de 0,32 a 0,65 MW que `max` pierde** HECHA 2026-10-14 (#789, squash
-  `28d03ba0`, verificador PARCIAL con arreglos aplicados). Antes:
-  `loop/1.10-max-v750`, en verificación limpia): todas Muy Bajo; contra B la suma de errores baja de 400 a 90
-  (abril a agosto). Es contra B (sin Test 1), no contra producción. Texto original: (VERIFICADOR_DATOS D4): su clase
-  según 0.2 decide si `max` en VIIRS 750 cumple el criterio de §1.2.
+  `28d03ba0`, verificador PARCIAL con arreglos aplicados): todas Muy Bajo; contra B la suma de errores baja de
+  400 a 90 (abril a agosto, contada por pasada). Es contra B (sin Test 1), no contra producción; con la lectura B
+  de D-4, F pierde una pasada protegida de otro objeto (Chillán 2026-07-23). Origen: VERIFICADOR_DATOS D4.
 
 - [ ] **1.11 Experimental** (bloqueado hasta que Nicolás entregue la cronología OVDAS de Chillán y las
   coordenadas de los rasgos reales: Cerro Blanco, Pichi-Llaima, Lazufre, El Agrio). Su vara no es MIROVA
@@ -207,8 +205,22 @@ y dos verificadores, 2026-10-09).
 | D-2 | Merge del arreglo del scraper Mirova-v1#19 (tarea 0.5) | CI verde de Mirova-v1#21; 4 tests | Mirova-v1#21 | #783 |
 | D-3 | Marca de régimen en `store.py` (tarea 0.6) | 4 tests, 3 fallaban antes; suite 1706 | #785, tag `pre-s151-marca-regimen` | #786 |
 | D-4 | Alerta protegida: lectura A (alertas del scraper, 439 pasadas, recomendada) o B (todo VRP >= 1 MW, 992) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 |
+| D-5 | Sello del probe de D25 en VIIRS 750 (tarea 1.5); pilotear Tupungatito con 10 pasadas | `experiments/_s151_d25_v750_disco/README.md`, verificador limpio con arreglos | #790 | #793 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 13:22 UTC): vuelta 12, probe de D25 listo para el sello
+- Arreglos de #790 aplicados por su agente: criterio en CASOS (VALE sólo si el límite superior de Wilson de los
+  negativos nuevos por 268 queda bajo el límite inferior del rescate por 28), regla 1 (apagar una alerta
+  protegida que el control publica es NO VALE; se sumaron 17 protegidas, 356 pasadas), cobertura completa
+  exigida, salida 2 con lista vacía. Autoprueba 6 de 6; el caso trampa (28 rescatadas con 225 negativos) da NO
+  VALE.
+- Revisión propia antes del merge: el workflow no tenía candado de sello; agregué `preregistro_aprobado`
+  (falla si no es "si"). Esperé el run del commit nuevo ("0 checks" era SIN DATO, A39); CI verde; #790 mergeado.
+- Cola: D-5 (#793) pide el sello del probe. PR diario de `loop/activo` a `main`: #792 (merge commit).
+- Ordené tres entradas de la cola de tareas que mis reemplazos habían dejado con frases pegadas.
+- Run de Chillán 38560317428: 6 de 10 jobs en verde. Agente de 1.4 en curso.
+- Próximo paso: PR de 1.4 y su verificador; evaluación de Chillán cuando termine.
 
 ### 2026-10-14 (servidor 13:07 UTC): vuelta 11, 0.4 completa, 1.5 con arreglos, 1.4 en diseño
 - 0.4c mergeada (#791, squash `fecc3eae`): la tarea 0.4 queda completa.
