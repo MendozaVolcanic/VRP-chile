@@ -217,7 +217,8 @@ y dos verificadores, 2026-10-09).
 siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 - [~] **1.12 (estudio D) Las alertas de 0,05 MW o menos: ¿MIROVA las considera anomalía?** EN CURSO 2026-10-14
-  (agente en `VRP-Chile-112`, rama `loop/1.12-alertas-minimas`). ENTREGADO #810, en verificación limpia.
+  HECHA 2026-10-14 (#810, squash `f14b31ac`, verificada): en VIIRS 375 MIROVA llama NONE a 0,04 MW o menos y
+  VERY LOW a 0,06 o más; 155 alertas del scraper de 0,05 o menos. Cómo contarlas: decisión D-9 (#811).
   Por qué: el banner de MIROVA dice NONE en 9 pasadas que el scraper registra como alerta (0,02 a 0,05 MW,
   `docs/S151_CRITERIO_CLASE_MIROVA.md` §5), y 9 de las 14 pérdidas débiles de D22 están en ese rango. Si MIROVA no
   las ve como anomalía, toda suma de errores las cuenta mal (como alerta perdida o como acierto), incluida la del
@@ -261,8 +262,21 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-6 | ~~A/B de anomalía mayor~~ **DECIDIDA: SIGUE** (Nicolás, 2026-10-14; estudio TIF primero) | `experiments/_s151_ab_vrp_max/PREREGISTRO.md`, verificador limpio con arreglos | #794 | #795 |
 | D-7 | ~~Sello del A/B de F y K~~ **APROBADO** (Nicolás, 2026-10-14); V1 en curso, run 38639658446 | `experiments/_s151_prereg_fk_11/PREREGISTRO.md`, verificador limpio con arreglos | #797 | #798 |
 | D-8 | Sello del A/B reducido de la caja (D1/D2 con K/KC, ~35 min; V1 con B/BC, ~6 h) | `experiments/_s151_prereg_caja/PREREGISTRO.md`, verificador limpio con arreglos | #800 | #801 |
+| D-9 | Alertas de 0,05 MW o menos (NONE en el banner): SN "MIROVA no vio nada" (recomendada) o SE estrato aparte; y 0,05 exacto | `experiments/_s151_alertas_minimas/README.md`, verificado | #810 | #811 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 23:28 UTC): vuelta 36, 1.12 cerrada (#810, D-9 #811); TIF congelados re-verificados
+- #810: verificador CONFIRMADO en números; arreglos de presentación aplicados (14 y 20 pasadas distintas, cota
+  19,3 %; 0,05 con 5 y 5; "redondeo o truncado"; SN y SE como dos lecturas; cotejo de tablas 13.677 pasadas sin
+  diferencias). CI verde, mergeado. Decisión D-9 abierta (#811), recomendación SN.
+- #809 (verificador PARCIAL): firme que MIROVA no elige el cráter y que vemos sus objetos lejanos (nulo de otras
+  noches: 0,08 esperadas, 39 observadas); no demostrado "suma" contra "mayor" (p 0,005 a 0,12 sacando un caso);
+  36 alertas con MIROVA en el cráter y nuestro píxel fuerte lejos sin explicar. Arreglos devueltos al agente.
+- TIF de MIROVA: Nicolás creía que había TIF. Re-verificado contra el remoto y el servidor: el repo
+  `mirova-tif-archive` está vivo y tiene TIF hasta el 22-sep; los 33 TIF que sirve MIROVA tienen Last-Modified del
+  22-sep (PNG del día), y el TIF de Láscar VIIRS 375 bajado hoy es byte a byte el archivado el 22-sep 10:26.
+  Anotado en `MAPA_WORKSPACE.md` y en memoria (`reference_mirova_tif_congelados_20260922.md`).
 
 ### 2026-10-14 (vuelta 35): estudio D entregado (#810) y en verificación; estudio C arrancado
 - #810 (sin verificar aún): 155 de 2.281 pasadas con alerta tienen 0,05 MW o menos, todas VIIRS 375 (Lastarria 55,
