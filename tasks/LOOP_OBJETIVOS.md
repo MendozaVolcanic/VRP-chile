@@ -230,7 +230,8 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   Entregable: documento con la regla propuesta para el evaluador, y la regla queda como decisión para Nicolás
   si cambia algún veredicto ya publicado.
 
-- [~] **1.13 (estudio C) Alertas diurnas de MIROVA que la réplica no mira.** EN CURSO 2026-10-14 (agente en
+- [~] **1.13 (estudio C) Alertas diurnas de MIROVA que la réplica no mira.** ENTREGADO #812, en verificación
+  limpia. Antes: EN CURSO 2026-10-14 (agente en
   `VRP-Chile-113`, rama `loop/1.13-alertas-diurnas`).
   Por qué: la réplica procesa sólo de noche (MIR contaminado por el sol), pero la tabla de MIROVA trae 37 alertas
   entre las 13 y las 21 UTC, 19 de 1 MW o más (dato de la tarea 0.3, `docs/audit_s150/meta/`). Con la lectura A
@@ -240,7 +241,8 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   réplica con ellas (¿procesa MIROVA el día para VIIRS?, Coppola 2016a y la tesis de Massimetti en
   `documentacion/`, página renderizada); y cuánto pesan en el criterio. Sin tocar el pipeline.
 
-- [ ] **1.14 (estudio A) Presupuesto de la magnitud, pasada por pasada.**
+- [~] **1.14 (estudio A) Presupuesto de la magnitud, pasada por pasada.** EN CURSO 2026-10-14 (agente en
+  `VRP-Chile-114`, rama `loop/1.14-presupuesto-magnitud`).
   Por qué: subestimamos la energía (Láscar 0,44, Isluga 0,52, Lastarria 0,56, Tupungatito 0,65 en el auto-audit
   del 2026-10-14; 0,4 a 0,6 en la erupción de Chillán) y no sabemos cuánto viene de cada causa: cuántos píxeles
   alertamos contra cuántos suma MIROVA (Campus 2022: suma de todos los alertados), cuánta energía trae cada píxel,
@@ -265,6 +267,17 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-9 | Alertas de 0,05 MW o menos (NONE en el banner): SN "MIROVA no vio nada" (recomendada) o SE estrato aparte; y 0,05 exacto | `experiments/_s151_alertas_minimas/README.md`, verificado | #810 | #811 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (vuelta 37): estudio C entregado (#812) en verificación; estudio A arrancado
+- #812 (sin verificar aún): 135 filas de alerta diurnas, 97 protegidas (94 pasadas) contra 346 pasadas protegidas
+  nocturnas; VIIRS 375 85 de 97; Láscar 39, Lastarria 31, Chillán 10. Clasificación: 39 reales probables (Láscar,
+  Chillán, Villarrica), 40 reflejo o sol (Lastarria, Láscar, Isluga), 15 indeterminadas; la clase real es frágil.
+  Papers (renderizados): Campus 2022 dice que MIROVA SÍ procesa VIIRS de día (alertas 51 % noche, 20 % día);
+  Coppola 2016a: falsas sobre todo diurnas y bajo 5 MW; Coppola 2026: umbral diurno de 50 MW en el archivo curado.
+  El docstring de `store._reject_daytime` diría que VIIRS no tiene fuente diurna de MIROVA (falso). Recomendación
+  del agente: no abrir el día. Ojo: choca con el criterio de fidelidad que Nicolás pidió para D-6; va a él.
+- 1.14 (presupuesto de la magnitud) arrancado con un agente en `VRP-Chile-114`.
+- V1: 4 jobs verdes, 6 corriendo, 34 en espera.
 
 ### 2026-10-14 (servidor 23:28 UTC): vuelta 36, 1.12 cerrada (#810, D-9 #811); TIF congelados re-verificados
 - #810: verificador CONFIRMADO en números; arreglos de presentación aplicados (14 y 20 pasadas distintas, cota
