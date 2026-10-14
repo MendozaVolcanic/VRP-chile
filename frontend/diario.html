@@ -269,6 +269,10 @@ function mirovaEqVrp(r, volcanoName) {
 // S100: default Núcleo F5' (coherencia con index.html; S97 lo cambió allí pero no
 // aquí — S92 L5). El usuario puede apagarlo y se recuerda (storage "false").
 let USE_F5_CORE = sessionStorage.getItem("diario_f5_core") !== "false";
+// ⚠️ S151 (A113; docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md, hallazgo V-1): "el pipeline
+// no deja marca en el record" es falso desde S71 (commit 84c7d312e): cada cúmulo topado lleva
+// primary_cluster.d9_capped = true. Reconocerlo por el valor sigue funcionando igual. Detalle en
+// la marca S151 del mismo bloque en index.html. Texto original conservado:
 // S132 R8 — el 5,00 MW no es una medición sino un valor CENSURADO: cuando el path D
 // contextual dispara sobre cirrus, la suma cruda de la escena (80-510 MW: cientos de
 // píxeles apenas tibios sobre fondo gélido, no un foco volcánico) se recorta al tope
