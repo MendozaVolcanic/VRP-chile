@@ -95,8 +95,10 @@ y dos verificadores, 2026-10-09).
   respaldo agrega 21 alertas que la principal perdió, tope 17): es la alarma de la pérdida funcionando, no un
   test roto. Prohibido ensancharle el rango para ponerlo verde.
 
-- [~] **0.2 Qué mide `Clasificacion Mirova`.** IMPLEMENTADA 2026-10-14 (#780, en verificación): alerta
-  protegida = alerta con VRP de la pasada >= 1 MW recalculado; la columna es del scraper y no sirve.
+- [x] **0.2 Qué mide `Clasificacion Mirova`.** HECHA 2026-10-14 (#780, squash `03c44eed`, verificada): alerta
+  protegida = PASADA con alerta del scraper y VRP >= 1 MW recalculado (lectura A, 439 pasadas); la columna es
+  del scraper y no sirve; el corte lo sostiene el banner de MIROVA, no el paper (fig. 11 se contradice).
+  Lectura B (VRP >= 1 MW a cualquier distancia, 992) en la decisión D-4 (#782): evaluar con las dos.
   Por qué: el criterio de victoria depende de "Bajo o superior", y la columna no es un corte del VRP por pasada
   (Muy Bajo 1.372 filas de 0,01 a 0,99 MW; Bajo 265 de 0,04 a 8,75; Moderado 4 de 13,1 a 15,8; medido en
   `latest_consolidado.csv` el 2026-10-13). Hipótesis a probar: el nivel es el de la página del volcán en ese
@@ -119,7 +121,8 @@ y dos verificadores, 2026-10-09).
   texto viejo). Correr `grep -rl <archivo> tests/` y la suite completa después (un test puede leer esos docs).
   Aceptación: cero guiones largos y medios en cada archivo tocado; suite verde; el guard G8 sigue verde.
 
-- [ ] **0.4 Instrumentos chicos.**
+- [~] **0.4 Instrumentos chicos.** (a), (b) y (d) HECHAS 2026-10-14 (#781, squash `b2187648`); falta (c),
+  que espera a la 0.3 porque toca `CLAUDE.md`.
   (a) `evaluar_ventana.py` (en `experiments/_s149_prereg_invierno/` o donde lo ubique `git ls-files | grep
   evaluar_ventana`) deja de mandar stderr a DEVNULL, así el aviso A119 llega al log; (b) `scripts/calidad_referencia_mirova.py`
   gana los hitos de NOAA-21 y de Suomi NPP (con fuente); (c) A119 en `CLAUDE.md`: el "86 % en enero" es
@@ -191,8 +194,25 @@ y dos verificadores, 2026-10-09).
 | D-1 | Adoptar conectiva `max` en VIIRS 375 (criterio §1.2 por medir en 0.2) | `docs/S150_RESULTADO_MESES.md`, `docs/audit_s150/meta/AUDITOR_F2_NUMEROS.md` | pendiente | pendiente |
 | D-2 | Merge del arreglo del scraper Mirova-v1#19 (tarea 0.5) | pendiente | pendiente | pendiente |
 | D-3 | Marca de régimen en `store.py` (tarea 0.6) | pendiente | pendiente | pendiente |
+| D-4 | Alerta protegida: lectura A (alertas del scraper, 439 pasadas, recomendada) o B (todo VRP >= 1 MW, 992) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 12:24 UTC): vuelta 5, 0.2 verificada y mergeada, 0.4 (a, b, d) mergeada, 0.3 en curso
+- Verificador limpio de #780: regla de 1 MW CONFIRMADA, pero (i) los conteos eran filas: por pasada son 2.280
+  alertas y **439 protegidas** (377 pasadas están en consolidado y OCR); (ii) Coppola 2016a fig. 11 se
+  contradice (pie: Low bajo 1 MW; figura: bajo 10 MW, banner "VERY HIGH" con 6.797 MW), comprobado sobre la
+  imagen renderizada: el corte lo sostiene el banner de hoy; (iii) los controles no llamaban a la función;
+  (iv) lectura B: MIROVA marca LOW pasadas que el scraper llama FALSO_POSITIVO (992 pasadas con VRP >= 1 MW).
+  Todo corregido en #780; D-4 a Nicolás (issue #782, etiqueta `decision-nicolas` creada). CI verde, merge.
+- 0.4: (a) `evaluar_ventana.py` deja pasar el stderr (aviso A119); (b) hitos de NOAA-21 (2026-04-09, cifra
+  heredada de `AUDIT_S149.md:56`) y de Suomi NPP (2026-10-09, Mirova-v1#20): septiembre ya no es ventana
+  limpia y los dos tests de S149 se actualizaron a eso; (d) `ENABLE_TEST1_NULL_CORRECTED` fuera de las colas,
+  con guard. Tests que fallaban antes; suite 1695; CI verde; #781 mergeado. Sin verificador limpio: son
+  arreglos de instrumento con su test, no resultados.
+- 0.3 delegada a un agente en el worktree `VRP-Chile-loop-03`, rama `loop/0.3-propagacion-a113` (abre PR, no
+  mergea). Run de Chillán 38560317428 en curso.
+- Próximo paso: PR de 0.3 con su verificador limpio; después 0.4 (c) y 0.5 (scraper Mirova-v1#19).
 
 ### 2026-10-14 (servidor 12:10 UTC): vuelta 4, tarea 0.2 implementada, PR #780 en verificación
 - La hipótesis del plan (nivel agregado de la página) queda REFUTADA. La columna `Clasificacion Mirova` la
