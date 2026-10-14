@@ -18,6 +18,15 @@ atrasa). `main()` lo baja, registra el sha y guarda copia ignorada en `experimen
 Los tests usan el snapshot commiteado, que es subconjunto exacto del remoto, para no depender de red.
 
 Clave de una pasada: (volcano, sensor_bucket, Fecha_Satelite_UTC al minuto, source).
+
+Union historica (S150, tarea 0.1 del loop). El respaldo de abril no alcanza: el consolidado volvio
+a perder filas el 23-abr, 25-ago, 26-ago y 06-oct (docs/audit_s150/meta/VERIFICADOR_DATOS.md D1),
+y la ultima caida se llevo 207 filas con 8 alertas. `--union-historica` recorre la historia del
+consolidado en Mirova-v1 tomando la ultima version de cada dia (por la API, sin clonar: el repo
+pesa 13 GB y el archivo tiene decenas de miles de versiones) y guarda en `HISTORICO_RECUPERADAS`
+solo las filas que la version mas nueva ya no trae. Muestreo diario y no por commit porque las
+filas perdidas son viejas (las 207 del 06-oct tienen fecha de satelite de enero a octubre): una
+fila que naciera y se perdiera dentro del mismo dia se escaparia, y eso queda declarado.
 """
 from __future__ import annotations
 
@@ -42,6 +51,9 @@ SNAP = ROOT / "data" / "mirova_reference" / "mirova_v1_snapshot"
 SNAP_CONS = SNAP / "registro_vrp_consolidado.csv"
 SNAP_OCR = SNAP / "registro_vrp_ocr.csv"
 RESPALDO_20260408 = SNAP / "registro_vrp_consolidado_respaldo_20260408.csv"
+UNION_DIR = ROOT / "data" / "mirova_reference" / "union_historica"
+HISTORICO_RECUPERADAS = UNION_DIR / "consolidado_filas_perdidas.csv"
+HISTORICO_PROCEDENCIA = UNION_DIR / "procedencia.json"
 
 REPO_MIROVA = "MendozaVolcanic/Mirova-v1"
 RUTA_REMOTA = "monitoreo_satelital"
@@ -99,15 +111,22 @@ def clave(fila: dict) -> tuple:
 
 
 def cargar_referencia_unificada(cons_path: Path = SNAP_CONS, ocr_path: Path = SNAP_OCR,
-                                respaldo_path: Optional[Path] = RESPALDO_20260408) -> list[dict]:
-    """Union de consolidado + OCR principales con el respaldo del consolidado.
+                                respaldo_path: Optional[Path] = RESPALDO_20260408,
+                                historico_path: Optional[Path] = HISTORICO_RECUPERADAS) -> list[dict]:
+    """Union de consolidado + OCR principales con la historia y el respaldo del consolidado.
 
-    La fila principal gana siempre; del respaldo solo entran pasadas cuya clave no existe en el
-    consolidado principal. `respaldo_path=None` devuelve solo lo principal (control de instrumento).
+    La fila principal gana siempre; despues entran las filas que la historia de Mirova-v1 tuvo y
+    perdio (origen "historico") y al final las del respaldo, cada una solo si su clave no existe
+    todavia. `historico_path=None` o `respaldo_path=None` apagan esa capa (control de instrumento).
+    Desde S150 la historia entra por defecto: un experimento anterior (S141 a S149) que llame a esta
+    funcion sin argumentos y se vuelva a correr hoy mide contra mas filas que cuando se congelo.
     """
     filas = {clave(f): f for f in leer_pasadas(Path(cons_path), "CONS", "principal")}
     for f in leer_pasadas(Path(ocr_path), "OCR", "principal"):
         filas.setdefault(clave(f), f)
+    if historico_path is not None:
+        for f in leer_pasadas(Path(historico_path), "CONS", "historico"):
+            filas.setdefault(clave(f), f)
     if respaldo_path is not None:
         for f in leer_pasadas(Path(respaldo_path), "CONS", "respaldo_20260408"):
             filas.setdefault(clave(f), f)
@@ -133,13 +152,127 @@ def bajar_remoto(dest: Path) -> dict:
     return info
 
 
+def _con_reintentos(fn, intentos: int = 4):
+    """Reintenta ante fallos transitorios de red o de la API (verificador de #778: 318 llamadas
+    seguidas sin reintento abortaban la union entera por un solo error)."""
+    import time
+    for i in range(intentos):
+        try:
+            return fn()
+        except Exception:
+            if i == intentos - 1:
+                raise
+            time.sleep(5 * (i + 1))
+
+
+def versiones_diarias(nombre: str, desde: str, hasta: str) -> list[dict]:
+    """Ultimo commit de cada dia que toco `nombre`, de `desde` a `hasta` (AAAA-MM-DD, UTC)."""
+    from datetime import date, timedelta
+    d, fin = date.fromisoformat(desde), date.fromisoformat(hasta)
+    vistas, out = set(), []
+    while d <= fin:
+        cmd = ["gh", "api", f"repos/{REPO_MIROVA}/commits?path={RUTA_REMOTA}/{nombre}"
+               f"&until={d.isoformat()}T23:59:59Z&per_page=1",
+               "-q", '.[0] | .sha + " " + .commit.committer.date']
+        partes = _con_reintentos(lambda: subprocess.run(cmd, capture_output=True, text=True,
+                                                         check=True).stdout.split())
+        if len(partes) == 2 and partes[0] not in vistas:
+            vistas.add(partes[0])
+            out.append({"dia": d.isoformat(), "sha": partes[0], "fecha_commit": partes[1]})
+        d += timedelta(days=1)
+    return out
+
+
+def _bajar_version(nombre: str, sha: str) -> tuple[list[str], list[dict]]:
+    """Encabezado y filas crudas de una version del CSV remoto, sin escribir a disco."""
+    import io
+    def _leer():
+        with urllib.request.urlopen(URL_RAW.format(sha=sha, nombre=nombre), timeout=120) as resp:
+            return resp.read().decode("utf-8")
+    texto = _con_reintentos(_leer)
+    lector = csv.DictReader(io.StringIO(texto))
+    return list(lector.fieldnames or []), list(lector)
+
+
+def _clave_cruda(r: dict) -> Optional[tuple]:
+    vol = normalize_volcano_name(r.get("Volcan"))
+    fecha = (r.get("Fecha_Satelite_UTC") or "").strip()
+    if vol is None or len(fecha) < 16:
+        return None
+    return (vol, normalize_sensor(r.get("Sensor")), fecha[:16], "CONS")
+
+
+def union_historica(desde: str, hasta: str, hilos: int = 6) -> dict:
+    """Recorre las versiones diarias del consolidado y escribe las filas que la mas nueva perdio.
+
+    Por clave se conserva la fila de la ULTIMA version que la tuvo. Devuelve la procedencia: por
+    version, cuantas filas trae y cuantas de las perdidas aporta por ultima vez.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+    nombre = "registro_vrp_consolidado.csv"
+    versiones = versiones_diarias(nombre, desde, hasta)
+    ultima: dict[tuple, tuple[dict, str]] = {}
+    tipos: dict[tuple, set] = {}
+    columnas: list[str] = []
+    claves_nueva: set = set()
+    with ThreadPoolExecutor(hilos) as ex:
+        for v, (cab, filas) in zip(versiones, ex.map(lambda v: _bajar_version(nombre, v["sha"]), versiones)):
+            columnas += [c for c in cab if c not in columnas]
+            claves_v = set()
+            for r in filas:
+                k = _clave_cruda(r)
+                if k is None:
+                    continue
+                claves_v.add(k)
+                ultima[k] = (r, v["sha"])
+                tipos.setdefault(k, set()).add((r.get("Tipo_Registro") or "").strip())
+            v["n_claves"] = len(claves_v)
+            claves_nueva = claves_v
+    perdidas = {k: ultima[k] for k in ultima if k not in claves_nueva}
+    UNION_DIR.mkdir(parents=True, exist_ok=True)
+    with open(HISTORICO_RECUPERADAS, "w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=columnas + ["Version_Mirova_v1"], extrasaction="ignore")
+        w.writeheader()
+        for k in sorted(perdidas):
+            r, sha = perdidas[k]
+            w.writerow({**r, "Version_Mirova_v1": sha})
+    aporte = Counter(sha for _, sha in perdidas.values())
+    for v in versiones:
+        v["aporta_perdidas"] = aporte.get(v["sha"], 0)
+    procedencia = {
+        "repo": REPO_MIROVA, "archivo": f"{RUTA_REMOTA}/{nombre}", "muestreo": "ultima version de cada dia UTC",
+        "desde": desde, "hasta": hasta, "n_versiones": len(versiones),
+        "version_mas_nueva": versiones[-1] if versiones else None,
+        "n_claves_union": len(ultima), "n_perdidas": len(perdidas),
+        "perdidas_por_tipo": dict(Counter((r.get("Tipo_Registro") or "").strip() for r, _ in perdidas.values())),
+        "claves_con_tipo_cambiante": sum(len(t) > 1 for t in tipos.values()),
+        "versiones": versiones,
+    }
+    HISTORICO_PROCEDENCIA.write_text(json.dumps(procedencia, indent=1, ensure_ascii=False), encoding="utf-8")
+    return procedencia
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--snapshot", action="store_true",
                     help="usar el snapshot commiteado en vez del remoto (sin red)")
     ap.add_argument("--dest", default=str(ROOT / "experiments" / "_s140" / "_dl_referencia"))
     ap.add_argument("--salida", default=None, help="JSON con las filas y la procedencia")
+    ap.add_argument("--union-historica", action="store_true",
+                    help="regenerar las filas perdidas desde la historia de Mirova-v1 y salir")
+    ap.add_argument("--desde", default="2025-12-01")
+    ap.add_argument("--hasta", default=None, help="AAAA-MM-DD; por defecto hoy UTC")
     a = ap.parse_args(argv)
+
+    if a.union_historica:
+        from datetime import datetime, timezone
+        hasta = a.hasta or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        p = union_historica(a.desde, hasta)
+        resumen = {k: v for k, v in p.items() if k != "versiones"}
+        print(json.dumps(resumen, indent=1, ensure_ascii=False))
+        print("versiones que aportan perdidas:",
+              [(v["dia"], v["aporta_perdidas"]) for v in p["versiones"] if v["aporta_perdidas"]])
+        return 0
 
     if a.snapshot:
         procedencia = {"fuente": "snapshot", "cons": str(SNAP_CONS), "ocr": str(SNAP_OCR)}
