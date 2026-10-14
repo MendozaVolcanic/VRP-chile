@@ -75,8 +75,8 @@ y dos verificadores, 2026-10-09).
 ## 3. Bloque 0: higiene antes de medir (en orden; sin esto las pruebas miden con una vara rota)
 
 - [x] **0.1 Referencia de MIROVA desde la unión histórica.** HECHA 2026-10-14 (#778, squash `46947bda`;
-  `main` verde en el run 38558333297). Pendientes que deja: (i) `auto_audit_weekly.py` lee el snapshot crudo
-  con `load_mirova_alertas` y no ve las 40 alertas recuperadas; (ii) sólo las 207 del 06-oct tienen testigo
+  `main` verde en el run 38558333297). Pendientes que deja: (i) RESUELTO 2026-10-14 (#803): el auto-audit
+  ya suma la unión histórica en el paso 1 (30 alertas más, 2 en la ventana de 60 días); (ii) sólo las 207 del 06-oct tienen testigo
   independiente en la suite; (iii) 372 claves de tipo cambiante, al menos 318 del cambio masivo
   EVIDENCIA_DIARIA a RUTINA del 21-ene; (iv) el OCR no se recorrió.
   Por qué: el consolidado remoto de Mirova-v1 perdió filas en silencio al menos cinco veces (21-ene, 23-abr,
@@ -222,6 +222,14 @@ y dos verificadores, 2026-10-09).
 | D-8 | Sello del A/B reducido de la caja (D1/D2 con K/KC, ~35 min; V1 con B/BC, ~6 h) | `experiments/_s151_prereg_caja/PREREGISTRO.md`, verificador limpio con arreglos | #800 | #801 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 18:02 UTC): vuelta 26, pendiente (i) de 0.1 resuelto (#803)
+- `auto_audit_weekly.py`: el paso 1 (noches con alerta de MIROVA, base del recall) cargaba sólo el snapshot
+  crudo. Nueva `alertas_mirova()` suma la unión histórica (la fila del snapshot gana). Entran 30 alertas, 2 en la
+  ventana de 60 días (Láscar VIIRS 375, PCC VIIRS 750). Test con control sin capa (fallaba antes); suite 1712;
+  CI verde; #803 mergeado. La parte de publicación ya usaba la referencia unificada.
+- Próximo paso: la pasada MODIS etiquetada `far` que el tablero igual publica (vista de paso por el agente de
+  1.7): ver si es un defecto del predicado (familia A46) o un comportamiento documentado.
 
 ### 2026-10-14 (servidor 17:54 UTC): vuelta 25, caja (1.7) en la cola (D-8) y marcada en D18
 - Arreglos de #800 aplicados: D1 resuelto con `distancia_mirova.py` (MIROVA mide desde el centro de su grilla;
