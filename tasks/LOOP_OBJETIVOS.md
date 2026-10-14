@@ -219,6 +219,19 @@ y dos verificadores, 2026-10-09).
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-14 (servidor 17:07 UTC): vuelta 23, pre-registro de la caja (#800), en verificación
+- Paradas: NRT verde 14:52 UTC; disco 11 GB libres (bajó de 16 GB: limpiar worktrees al cerrar cada tarea).
+- Agente entregó #800: el flag de la caja llega a las 24 llamadas de umbral dual en los dos pases de los tres
+  procesadores (comprobado por profile, AST y efecto con funciones reales); los consumidores con círculo no son
+  umbrales. Sin prerequisito A45; agregó la clave a `FLAGS_BRAZO`. Hallazgo: `max` y la caja apagan la misma
+  población: sobre K la caja sólo apaga 1 negativo de VIIRS 375 en V1 (sobre B, 55); MIROVA tiene 0,9 a 2,2 % de
+  sus alertas VIIRS 375 fuera de su caja, B publica 25,6 % fuera, F/K 1,6 %. Veto con dos protegidas expuestas
+  (Láscar MODIS 2026-03-27, Isluga VIIRS 375 2026-06-10). Brazos K/KC con gemelo KG y B/BC como control positivo;
+  ~16 h. Sin resolver: la caja va centrada en el cráter y MIROVA la centra en su grilla (2 a 7,6 km en Tupungatito,
+  PCC y Planchón Peteroa). Evaluador 28 de 28.
+- Verificador limpio lanzado; se le pidió evaluar también si conviene NO despachar y cerrar D18 sobre el
+  candidato con el sustrato medido.
+
 ### 2026-10-14 (servidor 16:16 UTC): vuelta 22, tarea 1.8 cerrada (#799)
 - Verificador limpio: CONFIRMADO en conclusión y recomendación (orden declaración antes que script, control que
   elige píxeles sólo por centroide, 0 publicaciones por estructura: ninguna variante lleva un valor positivo a
