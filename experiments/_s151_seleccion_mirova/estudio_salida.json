@@ -28,6 +28,16 @@
     0,
     44
    ],
+   "MODIS|otras_noches": [
+    0,
+    0.0,
+    4
+   ],
+   "MODIS|sin_coincidencia": [
+    4,
+    2,
+    0
+   ],
    "VIIRS375|px": [
     4,
     57,
@@ -40,6 +50,16 @@
     0,
     546
    ],
+   "VIIRS375|otras_noches": [
+    39,
+    0.4,
+    84
+   ],
+   "VIIRS375|sin_coincidencia": [
+    15,
+    9,
+    30
+   ],
    "VIIRS750|px": [
     2,
     3,
@@ -51,6 +71,16 @@
     3,
     0,
     33
+   ],
+   "VIIRS750|otras_noches": [
+    3,
+    0.0,
+    4
+   ],
+   "VIIRS750|sin_coincidencia": [
+    0,
+    0,
+    1
    ]
   },
   "n5": {
@@ -67,15 +97,41 @@
   },
   "p3": {
    "MODIS": {
-    "Z_CAL": {
-     "lejanas_con_crater_caliente": 2,
-     "de_lejanas": 4,
-     "crater_pesa_mas_que_el_lejano": 0
+    "T1|crater z >= Z_CAL|foco de escena": {
+     "lejos": 2,
+     "cerca": 0
     },
-    "mediana_alertas": {
-     "lejanas_con_crater_caliente": 2,
-     "de_lejanas": 4,
-     "crater_pesa_mas_que_el_lejano": 0
+    "T1|crater z >= Z_CAL|foco en nuestro pixel": {
+     "lejos": 1,
+     "cerca": 0
+    },
+    "T1|crater z >= Z_CAL|cualquiera de los dos": {
+     "lejos": 2,
+     "cerca": 0
+    },
+    "T1|crater z >= mediana de las alertas|foco de escena": {
+     "lejos": 2,
+     "cerca": 0
+    },
+    "T1|crater z >= mediana de las alertas|foco en nuestro pixel": {
+     "lejos": 1,
+     "cerca": 0
+    },
+    "T1|crater z >= mediana de las alertas|cualquiera de los dos": {
+     "lejos": 2,
+     "cerca": 0
+    },
+    "T1_fuerza|13.6-20.0": {
+     "lejos": 0,
+     "cerca": 0
+    },
+    "T1_fuerza|20.0-40.0": {
+     "lejos": 1,
+     "cerca": 0
+    },
+    "T1_fuerza|40.0-inf": {
+     "lejos": 1,
+     "cerca": 0
     },
     "T4_1xZ_FAR": {
      "alertas_con_foco_lejano": 0,
@@ -88,18 +144,75 @@
     "nuestros_ambos": {
      "lejos": 6,
      "cerca": 16
+    },
+    "P4": {
+     "alertas": 16,
+     "alertas_con_foco": 0,
+     "nulo_alertas": 0.0,
+     "lejanas": 6,
+     "lejanas_con_foco": 1,
+     "nulo_lejanas": 0.05,
+     "fuera_25_5": [
+      0,
+      0
+     ],
+     "lejano_pesa_mas": [
+      0,
+      1
+     ],
+     "sitio_alertado_otra_pasada": [
+      0,
+      0
+     ],
+     "medianas_cerca": {},
+     "medianas_lejos": {
+      "e_hot": 6.005,
+      "e_cr": 1.021,
+      "ratio": 0.769,
+      "z_hot": 22.311,
+      "hot_d_o": 23.535,
+      "q_lej": 0.521,
+      "q_suma": 0.589
+     },
+     "mann_whitney": {}
     }
    },
    "VIIRS375": {
-    "Z_CAL": {
-     "lejanas_con_crater_caliente": 28,
-     "de_lejanas": 84,
-     "crater_pesa_mas_que_el_lejano": 0
+    "T1|crater z >= Z_CAL|foco de escena": {
+     "lejos": 22,
+     "cerca": 5
     },
-    "mediana_alertas": {
-     "lejanas_con_crater_caliente": 8,
-     "de_lejanas": 84,
-     "crater_pesa_mas_que_el_lejano": 0
+    "T1|crater z >= Z_CAL|foco en nuestro pixel": {
+     "lejos": 18,
+     "cerca": 14
+    },
+    "T1|crater z >= Z_CAL|cualquiera de los dos": {
+     "lejos": 27,
+     "cerca": 15
+    },
+    "T1|crater z >= mediana de las alertas|foco de escena": {
+     "lejos": 7,
+     "cerca": 2
+    },
+    "T1|crater z >= mediana de las alertas|foco en nuestro pixel": {
+     "lejos": 7,
+     "cerca": 8
+    },
+    "T1|crater z >= mediana de las alertas|cualquiera de los dos": {
+     "lejos": 8,
+     "cerca": 9
+    },
+    "T1_fuerza|10.6-20.0": {
+     "lejos": 5,
+     "cerca": 10
+    },
+    "T1_fuerza|20.0-40.0": {
+     "lejos": 12,
+     "cerca": 5
+    },
+    "T1_fuerza|40.0-inf": {
+     "lejos": 10,
+     "cerca": 0
     },
     "T3": {
      "calibracion": [
@@ -115,7 +228,15 @@
       0.181,
       0.7575
      ],
-     "n": 8
+     "n": 8,
+     "sin_dbt_sobre_3K": [
+      7,
+      0.1091
+     ],
+     "loo_p": [
+      0.0054,
+      0.1195
+     ]
     },
     "T4_1xZ_FAR": {
      "alertas_con_foco_lejano": 6,
@@ -128,18 +249,89 @@
     "nuestros_ambos": {
      "lejos": 42,
      "cerca": 36
+    },
+    "P4": {
+     "alertas": 36,
+     "alertas_con_foco": 15,
+     "nulo_alertas": 0.1,
+     "lejanas": 42,
+     "lejanas_con_foco": 38,
+     "nulo_lejanas": 0.65,
+     "fuera_25_5": [
+      0,
+      0
+     ],
+     "lejano_pesa_mas": [
+      12,
+      38
+     ],
+     "sitio_alertado_otra_pasada": [
+      3,
+      5
+     ],
+     "medianas_cerca": {
+      "e_hot": 0.32,
+      "e_cr": 0.197,
+      "ratio": 0.261,
+      "z_hot": 15.29,
+      "hot_d_o": 16.485,
+      "q_cr": 0.118,
+      "q_suma": 0.547
+     },
+     "medianas_lejos": {
+      "e_hot": 0.58,
+      "e_cr": 0.109,
+      "ratio": 0.781,
+      "z_hot": 28.694,
+      "hot_d_o": 19.317,
+      "q_lej": 0.109,
+      "q_suma": 0.185
+     },
+     "mann_whitney": {
+      "e_hot": 0.003,
+      "ratio": 0.0001,
+      "z_hot": 0.0001,
+      "hot_d_o": 0.5211,
+      "e_cr": 0.0338
+     }
     }
    },
    "VIIRS750": {
-    "Z_CAL": {
-     "lejanas_con_crater_caliente": 1,
-     "de_lejanas": 4,
-     "crater_pesa_mas_que_el_lejano": 0
+    "T1|crater z >= Z_CAL|foco de escena": {
+     "lejos": 1,
+     "cerca": 1
     },
-    "mediana_alertas": {
-     "lejanas_con_crater_caliente": 0,
-     "de_lejanas": 4,
-     "crater_pesa_mas_que_el_lejano": 0
+    "T1|crater z >= Z_CAL|foco en nuestro pixel": {
+     "lejos": 1,
+     "cerca": 0
+    },
+    "T1|crater z >= Z_CAL|cualquiera de los dos": {
+     "lejos": 1,
+     "cerca": 1
+    },
+    "T1|crater z >= mediana de las alertas|foco de escena": {
+     "lejos": 0,
+     "cerca": 1
+    },
+    "T1|crater z >= mediana de las alertas|foco en nuestro pixel": {
+     "lejos": 0,
+     "cerca": 0
+    },
+    "T1|crater z >= mediana de las alertas|cualquiera de los dos": {
+     "lejos": 0,
+     "cerca": 1
+    },
+    "T1_fuerza|10.8-20.0": {
+     "lejos": 0,
+     "cerca": 0
+    },
+    "T1_fuerza|20.0-40.0": {
+     "lejos": 0,
+     "cerca": 1
+    },
+    "T1_fuerza|40.0-inf": {
+     "lejos": 1,
+     "cerca": 0
     },
     "T4_1xZ_FAR": {
      "alertas_con_foco_lejano": 1,
@@ -152,6 +344,45 @@
     "nuestros_ambos": {
      "lejos": 1,
      "cerca": 5
+    },
+    "P4": {
+     "alertas": 5,
+     "alertas_con_foco": 1,
+     "nulo_alertas": 0.0,
+     "lejanas": 1,
+     "lejanas_con_foco": 1,
+     "nulo_lejanas": 0.0,
+     "fuera_25_5": [
+      0,
+      0
+     ],
+     "lejano_pesa_mas": [
+      1,
+      1
+     ],
+     "sitio_alertado_otra_pasada": [
+      0,
+      0
+     ],
+     "medianas_cerca": {
+      "e_hot": 0.85,
+      "e_cr": 0.263,
+      "ratio": 0.51,
+      "z_hot": 11.388,
+      "hot_d_o": 20.591,
+      "q_cr": 0.141,
+      "q_suma": 0.768
+     },
+     "medianas_lejos": {
+      "e_hot": 1.255,
+      "e_cr": 0.139,
+      "ratio": 0.956,
+      "z_hot": 141.518,
+      "hot_d_o": 22.613,
+      "q_lej": 0.082,
+      "q_suma": 0.127
+     },
+     "mann_whitney": {}
     }
    }
   }
@@ -185,6 +416,16 @@
     0,
     385
    ],
+   "VIIRS375|otras_noches": [
+    28,
+    0.0,
+    42
+   ],
+   "VIIRS375|sin_coincidencia": [
+    11,
+    8,
+    3
+   ],
    "VIIRS750|px": [
     0,
     1,
@@ -196,6 +437,16 @@
     1,
     0,
     11
+   ],
+   "VIIRS750|otras_noches": [
+    1,
+    0.0,
+    1
+   ],
+   "VIIRS750|sin_coincidencia": [
+    0,
+    0,
+    0
    ]
   },
   "n5": {
@@ -212,15 +463,41 @@
   },
   "p3": {
    "VIIRS375": {
-    "Z_CAL": {
-     "lejanas_con_crater_caliente": 16,
-     "de_lejanas": 42,
-     "crater_pesa_mas_que_el_lejano": 0
+    "T1|crater z >= Z_CAL|foco de escena": {
+     "lejos": 14,
+     "cerca": 3
     },
-    "mediana_alertas": {
-     "lejanas_con_crater_caliente": 7,
-     "de_lejanas": 42,
-     "crater_pesa_mas_que_el_lejano": 0
+    "T1|crater z >= Z_CAL|foco en nuestro pixel": {
+     "lejos": 12,
+     "cerca": 9
+    },
+    "T1|crater z >= Z_CAL|cualquiera de los dos": {
+     "lejos": 16,
+     "cerca": 9
+    },
+    "T1|crater z >= mediana de las alertas|foco de escena": {
+     "lejos": 7,
+     "cerca": 0
+    },
+    "T1|crater z >= mediana de las alertas|foco en nuestro pixel": {
+     "lejos": 6,
+     "cerca": 4
+    },
+    "T1|crater z >= mediana de las alertas|cualquiera de los dos": {
+     "lejos": 7,
+     "cerca": 4
+    },
+    "T1_fuerza|10.6-20.0": {
+     "lejos": 2,
+     "cerca": 6
+    },
+    "T1_fuerza|20.0-40.0": {
+     "lejos": 8,
+     "cerca": 3
+    },
+    "T1_fuerza|40.0-inf": {
+     "lejos": 6,
+     "cerca": 0
     },
     "T3": {
      "calibracion": [
@@ -236,7 +513,15 @@
       0.178,
       0.5603
      ],
-     "n": 7
+     "n": 7,
+     "sin_dbt_sobre_3K": [
+      7,
+      0.0484
+     ],
+     "loo_p": [
+      0.0041,
+      0.1071
+     ]
     },
     "T4_1xZ_FAR": {
      "alertas_con_foco_lejano": 3,
@@ -249,18 +534,89 @@
     "nuestros_ambos": {
      "lejos": 32,
      "cerca": 23
+    },
+    "P4": {
+     "alertas": 23,
+     "alertas_con_foco": 9,
+     "nulo_alertas": 0.1,
+     "lejanas": 32,
+     "lejanas_con_foco": 28,
+     "nulo_lejanas": 0.0,
+     "fuera_25_5": [
+      0,
+      0
+     ],
+     "lejano_pesa_mas": [
+      8,
+      28
+     ],
+     "sitio_alertado_otra_pasada": [
+      1,
+      0
+     ],
+     "medianas_cerca": {
+      "e_hot": 0.307,
+      "e_cr": 0.175,
+      "ratio": 0.261,
+      "z_hot": 15.29,
+      "hot_d_o": 14.233,
+      "q_cr": 0.185,
+      "q_suma": 0.547
+     },
+     "medianas_lejos": {
+      "e_hot": 0.606,
+      "e_cr": 0.113,
+      "ratio": 0.766,
+      "z_hot": 29.636,
+      "hot_d_o": 19.317,
+      "q_lej": 0.102,
+      "q_suma": 0.185
+     },
+     "mann_whitney": {
+      "e_hot": 0.0169,
+      "ratio": 0.0025,
+      "z_hot": 0.0005,
+      "hot_d_o": 0.162,
+      "e_cr": 0.162
+     }
     }
    },
    "VIIRS750": {
-    "Z_CAL": {
-     "lejanas_con_crater_caliente": 1,
-     "de_lejanas": 1,
-     "crater_pesa_mas_que_el_lejano": 0
+    "T1|crater z >= Z_CAL|foco de escena": {
+     "lejos": 1,
+     "cerca": 0
     },
-    "mediana_alertas": {
-     "lejanas_con_crater_caliente": 0,
-     "de_lejanas": 1,
-     "crater_pesa_mas_que_el_lejano": 0
+    "T1|crater z >= Z_CAL|foco en nuestro pixel": {
+     "lejos": 1,
+     "cerca": 0
+    },
+    "T1|crater z >= Z_CAL|cualquiera de los dos": {
+     "lejos": 1,
+     "cerca": 0
+    },
+    "T1|crater z >= mediana de las alertas|foco de escena": {
+     "lejos": 0,
+     "cerca": 0
+    },
+    "T1|crater z >= mediana de las alertas|foco en nuestro pixel": {
+     "lejos": 0,
+     "cerca": 0
+    },
+    "T1|crater z >= mediana de las alertas|cualquiera de los dos": {
+     "lejos": 0,
+     "cerca": 0
+    },
+    "T1_fuerza|10.8-20.0": {
+     "lejos": 0,
+     "cerca": 0
+    },
+    "T1_fuerza|20.0-40.0": {
+     "lejos": 0,
+     "cerca": 0
+    },
+    "T1_fuerza|40.0-inf": {
+     "lejos": 1,
+     "cerca": 0
     },
     "T4_1xZ_FAR": {
      "alertas_con_foco_lejano": 0,
@@ -273,6 +629,45 @@
     "nuestros_ambos": {
      "lejos": 1,
      "cerca": 2
+    },
+    "P4": {
+     "alertas": 2,
+     "alertas_con_foco": 1,
+     "nulo_alertas": 0.0,
+     "lejanas": 1,
+     "lejanas_con_foco": 1,
+     "nulo_lejanas": 0.0,
+     "fuera_25_5": [
+      0,
+      0
+     ],
+     "lejano_pesa_mas": [
+      1,
+      1
+     ],
+     "sitio_alertado_otra_pasada": [
+      0,
+      0
+     ],
+     "medianas_cerca": {
+      "e_hot": 0.85,
+      "e_cr": 0.263,
+      "ratio": 0.51,
+      "z_hot": 11.388,
+      "hot_d_o": 20.591,
+      "q_cr": 0.141,
+      "q_suma": 0.768
+     },
+     "medianas_lejos": {
+      "e_hot": 1.255,
+      "e_cr": 0.139,
+      "ratio": 0.956,
+      "z_hot": 141.518,
+      "hot_d_o": 22.613,
+      "q_lej": 0.082,
+      "q_suma": 0.127
+     },
+     "mann_whitney": {}
     }
    }
   }

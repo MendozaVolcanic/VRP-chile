@@ -195,6 +195,8 @@ def main():
         # mejor celda doblara la correlacion de la segunda, y casi ninguna lo cumple porque pasadas vecinas comparten
         # rasgos fijos de la escena.
         buenas = cal[cal.z_mini >= 10]
+        P("   (criterio de calibracion escrito DESPUES de la primera corrida; coordenadas del foco del TIF leidas de"
+          " pasadas.csv con 5 decimales desde la revision del PR #809; antes tenian 4 cifras significativas)")
         P(f"   miniaturas encontradas {len(cal)}; en {len(buenas)} la celda mas correlacionada muestra el foco (z >= 10 a "
           f"+-2 km de donde lo pone el TIF); nulo, la misma ventana en las otras nueve celdas: z mediano "
           f"{cal.z_otras_celdas.median():.1f}, sobre 10 en {int((cal.z_otras_celdas >= 10).sum())} de {len(cal)}")
@@ -225,6 +227,8 @@ def main():
     v_c, u_c = latlon_a_uv(*CRATER, bounds_l, 134, 134)
     clat, clon = (bounds_l[1] + bounds_l[3]) / 2, (bounds_l[0] + bounds_l[2]) / 2
     P(f"   nuestro pixel lejano en la miniatura: fila {v_h:.1f}, columna {u_h:.1f}; crater: fila {v_c:.1f}, columna {u_c:.1f}")
+    P("   OJO: el z de la miniatura es exceso local de LUMINANCIA de la imagen (escala de color desconocida), no MW:"
+      " 'mas fuerte que el crater' compara luminancias dentro de una misma miniatura, no energias")
     res["caso"] = {}
     for hora, k in CASO["05-54-00"].items():
         z = zfield(lam["05-54-00"][k])

@@ -67,6 +67,7 @@ DESPLAZ_KM = 3.0
 R_NULO_CRATER_KM = 8.0
 ATRIB_K = 1.0     # |dBT| maximo para dar por verificado que el TIF es de la misma pasada (S147 midio 0,2 K)
 ATRIB_NO_K = 5.0  # |dBT| sobre el cual el TIF se da por de OTRA pasada
+N_OTRAS = 20      # puntos de otras noches por pasada para el nulo de posicion
 
 
 def sha(p):
@@ -113,10 +114,14 @@ def escena(rec):
             if p.get("lat") is not None]
 
 
-def medir_pasada(f, fila_tif, rec, ancla, gc, lim, inner, rec_ajeno=None):
+def medir_pasada(f, fila_tif, rec, ancla, gc, lim, inner, rec_ajeno=None, hot_ajenos=()):
     """Todas las medidas de una pasada sobre su TIF. Devuelve dict o None si el TIF no se puede leer.
 
-    rec_ajeno: record nuestro de OTRA pasada del mismo volcan y sensor, para el nulo del control de atribucion."""
+    rec_ajeno: record nuestro de OTRA pasada del mismo volcan y sensor, para el nulo del control de atribucion.
+    hot_ajenos: (lat, lon) de nuestro pixel alertado de mas VRP en OTRAS noches del mismo volcan y sensor (a mas de
+    5 km del crater): nulo de posicion. Responde "con que frecuencia coincidiria por azar un pixel nuestro que cae
+    donde solemos alertar", que es mas exigente que girar el foco (el punto girado queda a 5 km o mas del foco
+    casi por construccion; observacion del verificador del PR #809)."""
     b = f["sensor_bucket"]
     R = T.leer(T.ruta_tif(fila_tif), b)
     if R is None:
@@ -174,6 +179,23 @@ def medir_pasada(f, fila_tif, rec, ancla, gc, lim, inner, rec_ajeno=None):
         m["n_px"] = len(px)
         m["dbt"], m["n_dbt"] = T.dbt_mediana(R, px)
         m["hot_lat"], m["hot_lon"] = rec.get("hotspot_lat"), rec.get("hotspot_lon")
+        m["sat"] = rec.get("sensor")
+        tol = T.COINCIDE_KM[b]
+        if m["hot_lat"] is not None:
+            # el TIF alrededor de NUESTRO pixel alertado de mas VRP: foco mas fuerte a <= tol, su energia y donde cae
+            m["hot_d_o"] = float(T.dist_km(m["hot_lat"], m["hot_lon"], o_lat, o_lon))
+            m["hot_d_cr"] = float(T.dist_km(m["hot_lat"], m["hot_lon"], ancla[0], ancla[1]))
+            m["hot_en_raster"] = T.celda(R, m["hot_lat"], m["hot_lon"]) is not None
+            fh = T.foco_en(R, T.dist_desde(R, m["hot_lat"], m["hot_lon"]) <= tol)
+            if fh:
+                m["z_hot"], m["e_hot"] = fh[0], T.energia_mw(R, fh[1], fh[2])
+            # nulo de otras noches: el mismo estadistico en los puntos donde alertamos otras noches
+            zs = []
+            for la, lo in hot_ajenos:
+                fa = T.foco_en(R, T.dist_desde(R, la, lo) <= tol)
+                if fa:
+                    zs.append(fa[0])
+            m["z_hot_otras"] = zs
         pc = rec.get("primary_cluster") or {}
         m["pc_lat"], m["pc_lon"], m["pc_vrp"] = pc.get("centroid_lat"), pc.get("centroid_lon"), pc.get("vrp_mw")
         # nuestro calor en el crater (inner) y lejos (fuera del corte, desde el centro de grilla)
@@ -211,6 +233,7 @@ def medir_pasada(f, fila_tif, rec, ancla, gc, lim, inner, rec_ajeno=None):
             rot = [(la, lo) for la, lo in rot if T.celda(R, la, lo)]
             m["d_ring_px_nulo"] = [dmin(la, lo) for la, lo in rot]
             m["d_ring_hot_nulo"] = [dh(la, lo) for la, lo in rot]
+            m["d_ring_hot_otras"] = [float(T.dist_km(la, lo, m["ring_lat"], m["ring_lon"])) for la, lo in hot_ajenos]
     return m
 
 
@@ -227,6 +250,7 @@ def main():
         print(*a, file=out)
 
     rng = random.Random(SEMILLA)
+    rng_otras = random.Random(SEMILLA + 1)
     coords = C._coords_por_volcan()
     ancla, inner, _ = C.anclas_y_inner()
     gc = centro_grilla_yaml()
@@ -319,8 +343,13 @@ def main():
             otros = [x for x in idx[(f["volcano"], f["sensor_bucket"])]
                      if abs((x["dt"] - t).total_seconds()) > 3 * 3600 and escena(x["rec"])]
             ajeno = rng.choice(otros)["rec"] if otros else None
+            # nulo de otras noches (generador aparte para no mover los sorteos de la version anterior)
+            hots = [(x["rec"]["hotspot_lat"], x["rec"]["hotspot_lon"]) for x in idx[(f["volcano"], f["sensor_bucket"])]
+                    if abs((x["dt"] - t).total_seconds()) > 3 * 3600 and x["rec"].get("hotspot_lat") is not None
+                    and float(T.dist_km(x["rec"]["hotspot_lat"], x["rec"]["hotspot_lon"], *ancla[f["volcano"]])) > 5.0]
+            hots = rng_otras.sample(hots, min(N_OTRAS, len(hots)))
             m = medir_pasada(f2, fila, rec_de(f), ancla[f["volcano"]], gc[f["volcano"]], lim[f["volcano"]],
-                             inner[f["volcano"]], rec_ajeno=ajeno)
+                             inner[f["volcano"]], rec_ajeno=ajeno, hot_ajenos=hots)
             if m is None:
                 no_legibles[grupo] += 1
                 continue
@@ -357,6 +386,68 @@ def main():
       f" analisis se repite despues solo con las verificadas.")
     df_todo = df
     df = df[df.atrib != "rechazada"].copy()
+
+    def analizar_cerca_lejos(amb, s, Z_ID, df_all):
+        """P4 (pedido del verificador del PR #809): pasadas en que nuestro pixel alertado de mas VRP esta a mas de
+        5 km del crater y nuestro cumulo esta en el inner. En las ALERTAS MIROVA informo el crater: si el TIF tiene un
+        foco en nuestro pixel lejano, ni "la mayor" ni "la suma" lo explican, salvo que MIROVA no haya alertado ese
+        foco. Se compara con las LEJANAS del mismo patron, donde MIROVA si informo lejos."""
+        tol = T.COINCIDE_KM[s]
+        cerca, lejos = amb[amb.grupo == "alerta"], amb[amb.grupo == "lejana"]
+        zc, zl = cerca.z_hot >= Z_ID[s], lejos.z_hot >= Z_ID[s]
+        esp_c = sum(float((np.array(x) >= Z_ID[s]).mean()) for x in cerca.z_hot_otras if isinstance(x, list) and x)
+        esp_l = sum(float((np.array(x) >= Z_ID[s]).mean()) for x in lejos.z_hot_otras if isinstance(x, list) and x)
+        P(f"\n   P4 {s}: nuestro pixel de mas VRP a mas de 5 km del crater y nuestro cumulo en el inner.")
+        P(f"      alertas (MIROVA informo el crater): {len(cerca)}; el TIF tiene un foco z >= {Z_ID[s]:.1f} a <= {tol} km de"
+          f" ese pixel en {int(zc.sum())} (nulo de otras noches: se esperan {esp_c:.1f})")
+        P(f"      lejanas (MIROVA informo lejos): {len(lejos)}; con foco del TIF en nuestro pixel {int(zl.sum())} (nulo: {esp_l:.1f})")
+        lj_all = df_all[(df_all.grupo == "lejana") & df_all.ring_id & (df_all.sensor == s)]
+
+        def veces(x):
+            d = T.dist_km(lj_all.ring_lat.values, lj_all.ring_lon.values, x.hot_lat, x.hot_lon)
+            return int(((d <= 2.0) & (lj_all.fecha_utc.values != x.fecha_utc)).sum())
+        A, B = cerca[zc].copy(), lejos[zl].copy()
+        for g in (A, B):
+            g["ratio"] = np.log10(g.e_hot / g.e_cr.clip(lower=1e-3))
+            g["veces"] = [veces(x) for x in g.itertuples()] if len(g) else []
+            g["q_cr"] = np.log10(g.e_cr.clip(lower=1e-3) / g.vrp_csv)
+            g["q_lej"] = np.log10(g.e_hot / g.vrp_csv)
+            g["q_suma"] = np.log10((g.e_cr + g.e_hot) / g.vrp_csv)
+        if len(A):
+            P("      las alertas con foco en nuestro pixel lejano, una por una (energia del TIF = exceso x Wooster):")
+            for x in A.sort_values("fecha_utc").itertuples():
+                P(f"        {x.vol:16s} {x.fecha_utc} {str(x.sat):13s} VRP MIROVA {x.vrp_csv:5.2f} a {x.dist_csv_real:5.2f} km |"
+                  f" TIF crater {x.e_cr:5.2f} MW z {x.z_cr:5.1f} | lejano {x.e_hot:5.2f} MW z {x.z_hot:6.1f} a {x.hot_d_o:5.1f} km"
+                  f" del centro{' (en el raster)' if x.hot_en_raster else ' (FUERA del raster)'} | MIROVA alerta ese sitio en"
+                  f" otras {x.veces} pasadas | {x.atrib}")
+
+        def med(g, c):
+            return f"{g[c].median():+.2f}" if len(g) else "nan"
+        P(f"      {'':42s} {'cerca (alertas)':>16s} {'lejos (lejanas)':>16s}")
+        for c, nom in (("e_hot", "energia del lejano, MW (mediana)"), ("e_cr", "energia del crater, MW"),
+                       ("ratio", "log10(lejano / crater)"), ("z_hot", "z del lejano"), ("hot_d_o", "km del lejano al centro"),
+                       ("q_cr", "log10(crater TIF / VRP MIROVA)"), ("q_lej", "log10(lejano TIF / VRP MIROVA)"),
+                       ("q_suma", "log10(crater+lejano / VRP MIROVA)")):
+            P(f"      {nom:42s} {med(A, c):>16s} {med(B, c):>16s}")
+        for nom, fa in (("lejano a mas de 25,5 km del centro", lambda g: int((g.hot_d_o > 25.5).sum())),
+                        ("lejano pesa mas que el crater (TIF)", lambda g: int((g.e_hot > g.e_cr).sum())),
+                        ("MIROVA alerta ese sitio en otra pasada", lambda g: int((g.veces > 0).sum()))):
+            P(f"      {nom:42s} {str(fa(A)) + ' de ' + str(len(A)):>16s} {str(fa(B)) + ' de ' + str(len(B)):>16s}")
+        P(f"      por volcan: cerca {dict(collections.Counter(A.vol))}; lejos {dict(collections.Counter(B.vol))}")
+        P(f"      por satelite: cerca {dict(collections.Counter(A.sat))}; lejos {dict(collections.Counter(B.sat))}")
+        pv = {}
+        if len(A) >= 3 and len(B) >= 3:
+            for c in ("e_hot", "ratio", "z_hot", "hot_d_o", "e_cr"):
+                pv[c] = round(float(mannwhitneyu(A[c], B[c]).pvalue), 4)
+            P(f"      Mann-Whitney cerca contra lejos: {pv}")
+        return {"alertas": len(cerca), "alertas_con_foco": int(zc.sum()), "nulo_alertas": round(esp_c, 2),
+                "lejanas": len(lejos), "lejanas_con_foco": int(zl.sum()), "nulo_lejanas": round(esp_l, 2),
+                "fuera_25_5": [int((A.hot_d_o > 25.5).sum()), int((B.hot_d_o > 25.5).sum())],
+                "lejano_pesa_mas": [int((A.e_hot > A.e_cr).sum()), int((B.e_hot > B.e_cr).sum())],
+                "sitio_alertado_otra_pasada": [int((A.veces > 0).sum()), int((B.veces > 0).sum())],
+                "medianas_cerca": {c: round(float(A[c].median()), 3) for c in ("e_hot", "e_cr", "ratio", "z_hot", "hot_d_o", "q_cr", "q_suma")} if len(A) else {},
+                "medianas_lejos": {c: round(float(B[c].median()), 3) for c in ("e_hot", "e_cr", "ratio", "z_hot", "hot_d_o", "q_lej", "q_suma")} if len(B) else {},
+                "mann_whitney": pv}
 
     def analizar(df, titulo, umbrales=None):
         """Todo el analisis sobre un subconjunto de pasadas. Devuelve los umbrales y los resultados."""
@@ -425,6 +516,26 @@ def main():
                 P(f"   {s:9s} {'cualquier pixel nuestro (escena)' if campo == 'px' else 'nuestro pixel alertado de mas VRP':34s}"
                   f" a <= {tol} km: real {sum(real)}/{len(real)} ({100 * sum(real) / max(len(real), 1):5.1f} %)  nulo girado "
                   f"{sum(nulos)}/{len(nulos)} ({100 * sum(nulos) / max(len(nulos), 1):5.1f} %)")
+            # El nulo girado da cero casi por construccion: cada punto girado 30 grados o mas queda a 5 km o mas del
+            # foco. Nulo de OTRAS NOCHES: nuestro pixel alertado de mas VRP de otras noches del mismo volcan y sensor
+            # (a mas de 5 km del crater). Esperanza de coincidencias = suma, por pasada, de la fraccion de esos puntos
+            # que cae a <= tol del foco de MIROVA.
+            esp, n_esp = 0.0, 0
+            for xs in d.d_ring_hot_otras:
+                xs = [v for v in (xs if isinstance(xs, list) else []) if v == v]
+                if xs:
+                    esp += sum(v <= tol for v in xs) / len(xs)
+                    n_esp += 1
+            obs = int((d.d_ring_hot <= tol).sum())
+            P(f"   {s:9s} nulo de otras noches: se esperan {esp:.2f} coincidencias del pixel de mas VRP en {n_esp} pasadas;"
+              f" se observan {obs}")
+            res_p1b[(s, "otras_noches")] = (obs, round(esp, 3), n_esp)
+            sin = d[d.hot_lat.notna() & ~(d.d_ring_hot <= tol)]
+            nada = d[d.hot_lat.isna()]
+            P(f"   {s:9s} con pixel alertado nuestro y sin coincidencia: {len(sin)}; de ellas con distancia del CSV > 25,5 km"
+              f" (esquina de la grilla de 51 km de MIROVA, fuera de nuestro radio de 25 km) {int((sin.dist_csv_real > 25.5).sum())}."
+              f" Sin pixel alertado nuestro: {len(nada)} (con distancia del CSV > 25,5 km: {int((nada.dist_csv_real > 25.5).sum())})")
+            res_p1b[(s, "sin_coincidencia")] = (len(sin), int((sin.dist_csv_real > 25.5).sum()), len(nada))
         d = df[df.z_en_nuestro_far.notna() & df.z_en_nuestro_far_nulo.notna()] if "z_en_nuestro_far" in df else df.iloc[:0]
         P("   al reves: z del TIF donde esta NUESTRO pixel lejano mas energetico, contra el mismo punto girado")
         for g in ("lejana", "alerta", "rutina"):
@@ -470,20 +581,31 @@ def main():
             P(f"\n   ---- {s}: lejanas con foco identificado {len(lj)}, alertas {len(al)}. Umbral de 'calor en el crater': "
               f"Z_CAL {Z_CAL[s]:.2f} (p95 del nulo) y, estricto, la mediana del crater en las alertas {zc_alerta:.2f}")
             r = {}
-            for nombre, zc in (("Z_CAL", Z_CAL[s]), ("mediana_alertas", zc_alerta)):
-                h = lj[lj.z_cr >= zc]
-                mayor_ok = int((h.e_ring >= h.e_cr).sum())
-                r[nombre] = {"lejanas_con_crater_caliente": len(h), "de_lejanas": len(lj),
-                             "crater_pesa_mas_que_el_lejano": int((h.e_cr > h.e_ring).sum())}
-                P(f"   T1 [{nombre}] lejanas con calor en el crater: {len(h)} de {len(lj)} (rutina, crater sobre el mismo umbral: "
-                  f"{int((df[(df.grupo == 'rutina') & (df.sensor == s)].z_cr >= zc).sum())} de "
-                  f"{int(((df.grupo == 'rutina') & (df.sensor == s) & df.z_cr.notna()).sum())}). MIROVA informo LEJOS en todas: "
-                  f"R2 y R3 en contra {len(h)}, R4 a favor {len(h)}")
-                P(f"   T2 [{nombre}] de esas, el lejano pesa mas (R1 a favor) {mayor_ok}; el crater pesa mas y MIROVA igual "
-                  f"informo lejos (R1 en contra, R4 a favor) {len(h) - mayor_ok}")
-                for x in h[h.e_cr > h.e_ring].itertuples():
-                    P(f"        {x.vol} {x.fecha_utc}: VRP MIROVA {x.vrp_csv} a {x.dist_csv_real} km; TIF crater {x.e_cr:.2f} MW "
-                      f"(z {x.z_cr:.1f}), lejano {x.e_ring:.2f} MW (z {x.z_ring:.1f}), suma {x.e_cr + x.e_ring:.2f}")
+            # T1 SIMETRICO (reemplaza la version 1, que contaba solo filas lejanas y por eso era circular): todas las
+            # pasadas con TIF (lejanas y alertas), con calor en el crater Y un foco lejano fuerte a la vez, contando
+            # cuantas informo MIROVA lejos y cuantas cerca. Dos definiciones de "foco lejano fuerte":
+            #   escena: el foco mas fuerte fuera del corte del scraper y a mas de 5 km del crater, z >= Z_FAR;
+            #   nuestro: a <= tol de nuestro pixel alertado de mas VRP, si esta a mas de 5 km del crater, z >= Z_ID.
+            # R2 y R3 predicen "cerca" en todas; R1 y R4 predicen "lejos" si el lejano estaba alertado por MIROVA.
+            ambos = df[df.grupo.isin(["lejana", "alerta"]) & (df.sensor == s) & df.z_cr.notna()].copy()
+            f_esc = ambos.z_far >= Z_FAR[s]
+            f_nue = (ambos.hot_d_cr > 5.0) & (ambos.z_hot >= Z_ID[s])
+            P("   T1 simetrico: calor en el crater y foco lejano fuerte a la vez -> MIROVA informo lejos / cerca")
+            for nombre, zc in (("crater z >= Z_CAL", Z_CAL[s]), ("crater z >= mediana de las alertas", zc_alerta)):
+                for fn, fl in (("foco de escena", f_esc), ("foco en nuestro pixel", f_nue), ("cualquiera de los dos", f_esc | f_nue)):
+                    h = ambos[(ambos.z_cr >= zc) & fl]
+                    nl, nc = int((h.grupo == "lejana").sum()), int((h.grupo == "alerta").sum())
+                    r[f"T1|{nombre}|{fn}"] = {"lejos": nl, "cerca": nc}
+                    P(f"      [{nombre}; {fn}] lejos {nl:3d}  cerca {nc:3d}")
+            # la misma tabla por FUERZA del foco lejano (el mayor z de las dos definiciones), crater con Z_CAL
+            zl = np.fmax(np.where(f_esc, ambos.z_far, np.nan), np.where(f_nue, ambos.z_hot, np.nan))
+            h = ambos[(ambos.z_cr >= Z_CAL[s]) & (f_esc | f_nue)].assign(zl=zl[((ambos.z_cr >= Z_CAL[s]) & (f_esc | f_nue)).values])
+            P("      por fuerza del foco lejano (crater z >= Z_CAL):")
+            for a_, b_ in ((Z_ID[s], 20.0), (20.0, 40.0), (40.0, np.inf)):
+                hh = h[(h.zl >= a_) & (h.zl < b_)]
+                nl, nc = int((hh.grupo == "lejana").sum()), int((hh.grupo == "alerta").sum())
+                r[f"T1_fuerza|{a_:.1f}-{b_}"] = {"lejos": nl, "cerca": nc}
+                P(f"         z del lejano {a_:5.1f} a {b_:>5}: lejos {nl:3d}  cerca {nc:3d}")
             # T3 magnitud: si MIROVA informa la suma (R4), en las lejanas con crater caliente el VRP debe parecerse a
             # lejano+crater; si informa la mayor (R1), al lejano solo. La calibracion sale de las lejanas con crater frio.
             frio = lj[lj.z_cr < Z_CAL[s]]
@@ -507,6 +629,24 @@ def main():
                 r["T3"] = {"calibracion": [round(float(q0.median()), 3), len(frio)], "calibracion_con_ruido": round(float(q0n.median()), 3),
                            "solo_lejano": [round(float(q1.median()), 3), round(float(p1), 4)],
                            "lejano_mas_crater": [round(float(q2.median()), 3), round(float(p2), 4)], "n": len(cal)}
+                # robustez de T3: sacando un caso a la vez, por volcan, y rechazando el TIF dudoso sobre 3 K
+                loo = [mannwhitneyu(q1.drop(i), q0).pvalue for i in q1.index]
+                P(f"      T3 sacando un caso a la vez: p del 'solo el lejano' entre {min(loo):.3f} y {max(loo):.3f}")
+                for x in cal.itertuples():
+                    P(f"        {x.vol} {x.fecha_utc}: VRP {x.vrp_csv}, TIF lejano {x.e_ring:.2f} MW, crater {x.e_cr:.2f} MW,"
+                      f" dBT {x.dbt if x.dbt == x.dbt else float('nan'):.2f} K ({x.atrib})")
+                for nom, sel in (("Lascar", cal.vol == "Lascar"), ("otros volcanes", cal.vol != "Lascar")):
+                    qq = q1[sel.values]
+                    if len(qq):
+                        P(f"      T3 {nom}: n={len(qq)}, solo el lejano {qq.median():+.3f}"
+                          + (f" (p={mannwhitneyu(qq, q0).pvalue:.3f})" if len(qq) >= 3 else ""))
+                ok3 = ~(cal.dbt > 3.0).values
+                if ok3.sum() >= 3:
+                    p3 = mannwhitneyu(q1[ok3], q0).pvalue
+                    P(f"      T3 rechazando el TIF con dBT > 3 K: n={int(ok3.sum())}, solo el lejano {q1[ok3].median():+.3f}"
+                      f" (p={p3:.3f})")
+                    r["T3"]["sin_dbt_sobre_3K"] = [int(ok3.sum()), round(float(p3), 4)]
+                r["T3"]["loo_p"] = [round(float(min(loo)), 4), round(float(max(loo)), 4)]
             # T4 alertas (MIROVA informo el crater) con un foco lejano fuerte en el TIF
             for fac in (1.0, 2.0):
                 a4 = al[al.z_far >= fac * Z_FAR[s]]
@@ -534,13 +674,12 @@ def main():
             # gana la Regla D), asi que aqui solo se cuenta que informo MIROVA.
             dd = df[df.grupo.isin(["lejana", "alerta"]) & (df.sensor == s) & df.record & df.hot_lat.notna() & df.pc_lat.notna()].copy()
             if len(dd):
-                anc = ancla
-                dd["hot_d_cr"] = [float(T.dist_km(x.hot_lat, x.hot_lon, *anc[x.vol])) for x in dd.itertuples()]
-                dd["pc_d_cr"] = [float(T.dist_km(x.pc_lat, x.pc_lon, *anc[x.vol])) for x in dd.itertuples()]
+                dd["pc_d_cr"] = [float(T.dist_km(x.pc_lat, x.pc_lon, *ancla[x.vol])) for x in dd.itertuples()]
                 amb = dd[(dd.hot_d_cr > 5.0) & (dd.pc_d_cr <= dd.vol.map(inner))]
-                P(f"   NUESTROS: hotspot a mas de 5 km del crater y cumulo en el inner: {len(amb)}; MIROVA informo lejos "
-                  f"{int((amb.grupo == 'lejana').sum())}, cerca {int((amb.grupo == 'alerta').sum())}")
+                P(f"   NUESTROS: pixel alertado de mas VRP a mas de 5 km del crater y cumulo en el inner: {len(amb)}; MIROVA"
+                  f" informo lejos {int((amb.grupo == 'lejana').sum())}, cerca {int((amb.grupo == 'alerta').sum())}")
                 r["nuestros_ambos"] = {"lejos": int((amb.grupo == "lejana").sum()), "cerca": int((amb.grupo == "alerta").sum())}
+                r["P4"] = analizar_cerca_lejos(amb, s, Z_ID, df)
             res_p3[s] = r
         return {"z_id": Z_ID, "z_cal": Z_CAL, "z_far": Z_FAR, "p1b": {f"{k[0]}|{k[1]}": v for k, v in res_p1b.items()},
                 "n5": {k: [v[0], round(float(v[1]), 3), float(v[2])] for k, v in res_n5.items()}, "p3": res_p3}
@@ -552,8 +691,11 @@ def main():
 
     # tabla por pasada (sin listas)
     df_todo["ring_id"] = [r.z_ring >= Z_ID[r.sensor] if pd.notna(r.z_ring) else False for r in df_todo.itertuples()]
-    cols = [c for c in df_todo.columns if not c.endswith("_nulo") or c in ("z_cr_nulo", "z_en_nuestro_far_nulo")]
-    df_todo[cols].to_csv(AQUI / "pasadas.csv", index=False, float_format="%.4g")
+    # sin las columnas de listas; 7 cifras significativas para que lat/lon conserven 5 decimales (la version 1
+    # guardaba 4 cifras y movia los puntos hasta medio km; observacion del verificador del PR #809)
+    cols = [c for c in df_todo.columns if (not c.endswith("_nulo") or c in ("z_cr_nulo", "z_en_nuestro_far_nulo"))
+            and not c.endswith("_otras")]
+    df_todo[cols].to_csv(AQUI / "pasadas.csv", index=False, float_format="%.7g")
     (AQUI / "estudio_salida.txt").write_text(out.getvalue(), encoding="utf-8")
     js = {"principal": R_main, "verificadas": R_ver, "n_medidas": dict(collections.Counter(df_todo.grupo)),
           "atribucion": {f"{g}|{a}": int(n) for (g, a), n in df_todo.groupby(["grupo", "atrib"]).size().items()},
