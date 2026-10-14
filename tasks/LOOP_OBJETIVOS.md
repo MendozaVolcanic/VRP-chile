@@ -268,6 +268,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-14 (servidor 23:39 UTC): vuelta 38, #812 en arreglos; #809 v2 cambia la conclusión, segundo verificador
+- #812 (alertas diurnas), verificador PARCIAL: conteos y papers confirmados; la clase "39 reales" es circular
+  (sacando las propias alertas, Chillán cae de 11,5 a 0 veces el azar y con el corte de 10 la clase real queda en
+  0); 50 de las 94 pasadas dependen de OCR que A119 no deja decidir (quedan ~40); el umbral diurno de 50 MW es del
+  archivo curado, no del NRT (la tabla NRT publica 38 diurnas, todas bajo 50 MW). La recomendación pasa a clave de
+  fidelidad: A/B diurno con la Tabla 1 diurna ya en el código, contra negativos diurnos limpios. Arreglos devueltos.
+- #809 v2: lo que decide si MIROVA informa lejos es la FUERZA del foco lejano (z 15 contra 29, 0,32 contra 0,58
+  MW); en 15 de las 36 alertas "cráter con foco lejano" el VRP de MIROVA calza con el cráter solo; en 21 nuestro
+  píxel lejano no es un objeto que MIROVA vea. Sospecha: umbral de escena más exigente (dual ROI). "Suma" contra
+  "mayor" sigue sin demostrar. Análisis nuevo: segundo verificador limpio lanzado.
+- Paradas: NRT corriendo (23:06); disco 20 GB. V1: 4 verdes, 6 corriendo, 34 en espera.
+
 ### 2026-10-14 (vuelta 37): estudio C entregado (#812) en verificación; estudio A arrancado
 - #812 (sin verificar aún): 135 filas de alerta diurnas, 97 protegidas (94 pasadas) contra 346 pasadas protegidas
   nocturnas; VIIRS 375 85 de 97; Láscar 39, Lastarria 31, Chillán 10. Clasificación: 39 reales probables (Láscar,
