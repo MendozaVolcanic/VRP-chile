@@ -1,0 +1,419 @@
+TAREA 1.8: modo de un solo pixel contra MIROVA (records en disco, sin correr el pipeline)
+referencia: filas 44468, ultima 2026-10-14 08:35:00 | index.html sha 077ccf3369eeb51485fcca1a17de420e0f81d77f | c0 38560317428/_s146_ab_control/NevadosDeChillan.json
+
+====================================================================================================
+FUENTE prod: 23631 records nocturnos en ventana
+
+1. RECONSTRUCCION (cumulos de 2 a 3 pixeles; n1 y n>3 no cambian con ninguna variante)
+  MODIS     ident  1081 | no_ident   240 | n1   1241 | n>3   2848 | sin cumulo     18
+  VIIRS375  ident   675 | no_ident     1 | n1   6561 | n>3     50 | sin cumulo   1849
+  VIIRS750  ident   282 | no_ident    13 | n1   1666 | n>3   1385 | sin cumulo   5721
+
+2. CONTROL de la reconstruccion (tolerancia 0.0015 MW, aprueba con >= 99 %)
+  modo activo, 2-3 px, identificados: 2033 | reproduce pc.vrp_mw con el pico: 2030 (99.852 %) -> PASA
+  control negativo, la SUMA reproduce pc.vrp_mw en: 427 de 2033 (debe ser minoria)
+  sin modo, sin foco ni tope, identificados: 4 | la suma reproduce: 4
+    falla: {"vol": "PlanchonPeteroa", "dt": "2026-07-11 02:30", "sensor": "MODIS_TERRA", "pers": 1.016, "pico": 0.7912, "suma": 1.9996, "focal_magnitude": true, "focal_degraded": true, "d9_capped": null}
+    falla: {"vol": "Villarrica", "dt": "2026-07-04 07:50", "sensor": "MODIS_AQUA", "pers": 0.476, "pico": 0.6362, "suma": 1.1068, "focal_magnitude": true, "focal_degraded": true, "d9_capped": null}
+    falla: {"vol": "Chaiten", "dt": "2026-03-25 07:40", "sensor": "MODIS_AQUA", "pers": 0.605, "pico": 0.6086, "suma": 1.8065, "focal_magnitude": null, "focal_degraded": null, "d9_capped": null}
+
+3. PARES con alerta de MIROVA: 1674 (deciden 1472; solo OCR antes del 13-jun, aparte: 202)
+
+4. PUBLICACIONES que cambian contra la regla actual (predicado del tablero, todos los records)
+  B_off  lo {'desconocido': 254} | hi {'desconocido': 254}
+  B_sum  lo {'desconocido': 255} | hi {'desconocido': 255}
+  C      lo {'desconocido': 254} | hi {'desconocido': 254}
+  D      lo {'desconocido': 255} | hi {'desconocido': 255}
+  alertas protegidas que cambian de publicacion (lectura A / B), todas las variantes y extremos: 0 / 0
+  pasadas con alerta por sensor, estado del cumulo y si publicamos: {'MODIS|ident|False': 16, 'MODIS|n1|False': 4, 'MODIS|n>3|False': 57, 'MODIS|n>3|True': 11, 'VIIRS375|ident|True': 395, 'VIIRS375|n1|False': 28, 'VIIRS375|n1|True': 848, 'VIIRS375|n>3|True': 38, 'VIIRS375|sin_pc|False': 17, 'VIIRS750|ident|False': 5, 'VIIRS750|ident|True': 62, 'VIIRS750|n1|False': 41, 'VIIRS750|n1|True': 117, 'VIIRS750|n>3|False': 3, 'VIIRS750|n>3|True': 31, 'VIIRS750|no_ident|True': 1}
+  pasadas con alerta que NO publicamos, por etiqueta de distancia: {'MODIS|ident|far': 16, 'MODIS|n1|far': 4, 'MODIS|n>3|far': 57, 'VIIRS375|n1|summit': 28, 'VIIRS375|sin_pc|None': 17, 'VIIRS750|ident|summit': 5, 'VIIRS750|n1|summit': 41, 'VIIRS750|n>3|summit': 3}
+
+5. RAZON nuestra/MIROVA por variante (pares comunes; mediana [IC95] | |log10| mediana | dif. pareada vs A [IC95])
+  [todo lo] pares 1304, afectados por alguna variante 28
+     A      med  0.698 [0.672, 0.728]   p25-p75 0.475-1.015  <0,5 0.28 >2 0.04 |log| 0.201 
+     B_off  med  0.700 [0.675, 0.734]   p25-p75 0.479-1.026  <0,5 0.28 >2 0.04 |log| 0.200 dif -0.0010 [-0.0022, 0.0001]
+     B_sum  med  0.700 [0.675, 0.733]   p25-p75 0.479-1.026  <0,5 0.28 >2 0.04 |log| 0.200 dif -0.0010 [-0.0021, 0.0002]
+     C      med  0.699 [0.674, 0.729]   p25-p75 0.477-1.020  <0,5 0.28 >2 0.04 |log| 0.201 dif -0.0001 [-0.0009, 0.0008]
+     D      med  0.698 [0.672, 0.732]   p25-p75 0.476-1.016  <0,5 0.28 >2 0.04 |log| 0.201 dif -0.0001 [-0.0008, 0.0006]
+  [todo hi] igual al extremo lo en todas las variantes
+  [solo_afectados lo] pares 28, afectados por alguna variante 28
+     A      med  0.627 [0.433, 0.824]   p25-p75 0.391-0.896  <0,5 0.43 >2 0.07 |log| 0.270 
+     B_off  med  0.856 [0.558, 1.039]   p25-p75 0.509-1.127  <0,5 0.21 >2 0.07 |log| 0.201 dif -0.0443 [-0.0932, 0.008]
+     B_sum  med  0.856 [0.558, 1.039]   p25-p75 0.509-1.127  <0,5 0.21 >2 0.07 |log| 0.201 dif -0.0443 [-0.0919, 0.0114]
+     C      med  0.717 [0.5, 0.929]     p25-p75 0.468-1.031  <0,5 0.32 >2 0.07 |log| 0.240 dif -0.0030 [-0.0389, 0.0415]
+     D      med  0.696 [0.479, 0.941]   p25-p75 0.425-0.965  <0,5 0.43 >2 0.07 |log| 0.264 dif -0.0057 [-0.0344, 0.0262]
+  [solo_afectados hi] igual al extremo lo en todas las variantes
+  [solo_afectados|reposo lo] pares 21, afectados por alguna variante 21
+     A      med  0.659 [0.461, 0.824]   p25-p75 0.429-0.881  <0,5 0.43 >2 0.05 |log| 0.226 
+     B_off  med  0.898 [0.563, 1.003]   p25-p75 0.558-1.074  <0,5 0.14 >2 0.05 |log| 0.194 dif -0.0554 [-0.1136, 0.0062]
+     B_sum  med  0.898 [0.563, 1.003]   p25-p75 0.558-1.074  <0,5 0.14 >2 0.05 |log| 0.194 dif -0.0554 [-0.1112, 0.0058]
+     C      med  0.700 [0.502, 0.929]   p25-p75 0.485-0.952  <0,5 0.29 >2 0.05 |log| 0.226 dif +0.0073 [-0.0314, 0.0525]
+     D      med  0.659 [0.461, 0.929]   p25-p75 0.429-0.941  <0,5 0.43 >2 0.05 |log| 0.226 dif +0.0104 [-0.0113, 0.0466]
+  [solo_afectados|reposo hi] igual al extremo lo en todas las variantes
+  [solo_afectados|erupcion lo] pares 7, afectados por alguna variante 7
+     A      med  0.587 [0.295, 1.587]   p25-p75 0.324-0.913  <0,5 0.43 >2 0.14 |log| 0.378 
+     B_off  med  0.813 [0.414, 2.462]   p25-p75 0.456-1.448  <0,5 0.43 >2 0.14 |log| 0.303 dif -0.0110 [-0.0924, 0.096]
+     B_sum  med  0.813 [0.414, 2.462]   p25-p75 0.456-1.448  <0,5 0.43 >2 0.14 |log| 0.303 dif -0.0110 [-0.1021, 0.0976]
+     C      med  0.813 [0.414, 1.909]   p25-p75 0.456-1.448  <0,5 0.43 >2 0.14 |log| 0.303 dif -0.0340 [-0.1006, 0.0583]
+     D      med  0.813 [0.414, 1.927]   p25-p75 0.456-1.252  <0,5 0.43 >2 0.14 |log| 0.303 dif -0.0539 [-0.1064, -0.0025]
+  [solo_afectados|erupcion hi] igual al extremo lo en todas las variantes
+  [reposo lo] pares 1247, afectados por alguna variante 21
+     A      med  0.704 [0.675, 0.734]   p25-p75 0.478-1.015  <0,5 0.28 >2 0.04 |log| 0.198 
+     B_off  med  0.705 [0.679, 0.74]    p25-p75 0.481-1.027  <0,5 0.27 >2 0.04 |log| 0.197 dif -0.0009 [-0.002, 0.0001]
+     B_sum  med  0.705 [0.679, 0.74]    p25-p75 0.481-1.027  <0,5 0.27 >2 0.04 |log| 0.197 dif -0.0009 [-0.0021, 0.0001]
+     C      med  0.704 [0.678, 0.737]   p25-p75 0.480-1.022  <0,5 0.28 >2 0.04 |log| 0.198 dif +0.0001 [-0.0005, 0.0009]
+     D      med  0.704 [0.677, 0.736]   p25-p75 0.478-1.016  <0,5 0.28 >2 0.04 |log| 0.198 dif +0.0002 [-0.0002, 0.0008]
+  [reposo hi] igual al extremo lo en todas las variantes
+  [reposo|MODIS lo] pares 9, afectados por alguna variante 0
+     A      med  0.799 [0.425, 0.965]   p25-p75 0.538-0.919  <0,5 0.22 >2 0.11 |log| 0.159 
+     B_off  med  0.799 [0.425, 0.919]   p25-p75 0.538-0.919  <0,5 0.22 >2 0.11 |log| 0.159 dif +0.0000 [0.0, 0.0]
+     B_sum  med  0.799 [0.425, 0.965]   p25-p75 0.538-0.919  <0,5 0.22 >2 0.11 |log| 0.159 dif +0.0000 [0.0, 0.0]
+     C      med  0.799 [0.425, 0.965]   p25-p75 0.538-0.919  <0,5 0.22 >2 0.11 |log| 0.159 dif +0.0000 [0.0, 0.0]
+     D      med  0.799 [0.425, 0.965]   p25-p75 0.538-0.919  <0,5 0.22 >2 0.11 |log| 0.159 dif +0.0000 [0.0, 0.0]
+  [reposo|MODIS hi] igual al extremo lo en todas las variantes
+  [reposo|MODIS|mar-jun12 lo] pares 7, afectados por alguna variante 0
+     A      med  0.693 [0.425, 0.919]   p25-p75 0.481-0.859  <0,5 0.29 >2 0.14 |log| 0.269 
+     B_off  med  0.693 [0.425, 0.919]   p25-p75 0.481-0.859  <0,5 0.29 >2 0.14 |log| 0.269 dif +0.0000 [0.0, 0.0]
+     B_sum  med  0.693 [0.425, 0.919]   p25-p75 0.481-0.859  <0,5 0.29 >2 0.14 |log| 0.269 dif +0.0000 [0.0, 0.0]
+     C      med  0.693 [0.425, 0.919]   p25-p75 0.481-0.859  <0,5 0.29 >2 0.14 |log| 0.269 dif +0.0000 [0.0, 0.0]
+     D      med  0.693 [0.425, 0.919]   p25-p75 0.481-0.859  <0,5 0.29 >2 0.14 |log| 0.269 dif +0.0000 [0.0, 0.0]
+  [reposo|MODIS|mar-jun12 hi] igual al extremo lo en todas las variantes
+  [reposo|MODIS|jun13-oct lo] pares 2, afectados por alguna variante 0
+     A      med  0.889 [0.812, 0.965]   p25-p75 0.851-0.927  <0,5 0.00 >2 0.00 |log| 0.053 
+     B_off  med  0.889 [0.812, 0.965]   p25-p75 0.851-0.927  <0,5 0.00 >2 0.00 |log| 0.053 dif +0.0000 [0.0, 0.0]
+     B_sum  med  0.889 [0.812, 0.965]   p25-p75 0.851-0.927  <0,5 0.00 >2 0.00 |log| 0.053 dif +0.0000 [0.0, 0.0]
+     C      med  0.889 [0.812, 0.965]   p25-p75 0.851-0.927  <0,5 0.00 >2 0.00 |log| 0.053 dif +0.0000 [0.0, 0.0]
+     D      med  0.889 [0.812, 0.965]   p25-p75 0.851-0.927  <0,5 0.00 >2 0.00 |log| 0.053 dif +0.0000 [0.0, 0.0]
+  [reposo|MODIS|jun13-oct hi] igual al extremo lo en todas las variantes
+  [reposo|VIIRS375 lo] pares 1063, afectados por alguna variante 0
+     A      med  0.719 [0.69, 0.748]    p25-p75 0.487-1.033  <0,5 0.26 >2 0.04 |log| 0.188 
+     B_off  med  0.719 [0.689, 0.748]   p25-p75 0.487-1.033  <0,5 0.26 >2 0.04 |log| 0.188 dif +0.0000 [0.0, 0.0]
+     B_sum  med  0.719 [0.689, 0.748]   p25-p75 0.487-1.033  <0,5 0.26 >2 0.04 |log| 0.188 dif +0.0000 [0.0, 0.0]
+     C      med  0.719 [0.69, 0.748]    p25-p75 0.487-1.033  <0,5 0.26 >2 0.04 |log| 0.188 dif +0.0000 [0.0, 0.0]
+     D      med  0.719 [0.689, 0.748]   p25-p75 0.487-1.033  <0,5 0.26 >2 0.04 |log| 0.188 dif +0.0000 [0.0, 0.0]
+  [reposo|VIIRS375 hi] igual al extremo lo en todas las variantes
+  [reposo|VIIRS375|mar-jun12 lo] pares 414, afectados por alguna variante 0
+     A      med  0.713 [0.671, 0.761]   p25-p75 0.498-1.029  <0,5 0.26 >2 0.03 |log| 0.193 
+     B_off  med  0.713 [0.671, 0.757]   p25-p75 0.498-1.029  <0,5 0.26 >2 0.03 |log| 0.193 dif +0.0000 [0.0, 0.0]
+     B_sum  med  0.713 [0.671, 0.758]   p25-p75 0.498-1.029  <0,5 0.26 >2 0.03 |log| 0.193 dif +0.0000 [0.0, 0.0]
+     C      med  0.713 [0.672, 0.761]   p25-p75 0.498-1.029  <0,5 0.26 >2 0.03 |log| 0.193 dif +0.0000 [0.0, 0.0]
+     D      med  0.713 [0.67, 0.757]    p25-p75 0.498-1.029  <0,5 0.26 >2 0.03 |log| 0.193 dif +0.0000 [0.0, 0.0]
+  [reposo|VIIRS375|mar-jun12 hi] igual al extremo lo en todas las variantes
+  [reposo|VIIRS375|jun13-oct lo] pares 649, afectados por alguna variante 0
+     A      med  0.719 [0.685, 0.768]   p25-p75 0.483-1.040  <0,5 0.26 >2 0.04 |log| 0.182 
+     B_off  med  0.719 [0.685, 0.768]   p25-p75 0.483-1.040  <0,5 0.26 >2 0.04 |log| 0.182 dif +0.0000 [0.0, 0.0]
+     B_sum  med  0.719 [0.685, 0.77]    p25-p75 0.483-1.040  <0,5 0.26 >2 0.04 |log| 0.182 dif +0.0000 [0.0, 0.0]
+     C      med  0.719 [0.685, 0.769]   p25-p75 0.483-1.040  <0,5 0.26 >2 0.04 |log| 0.182 dif +0.0000 [0.0, 0.0]
+     D      med  0.719 [0.684, 0.771]   p25-p75 0.483-1.040  <0,5 0.26 >2 0.04 |log| 0.182 dif +0.0000 [0.0, 0.0]
+  [reposo|VIIRS375|jun13-oct hi] igual al extremo lo en todas las variantes
+  [reposo|VIIRS750 lo] pares 175, afectados por alguna variante 21
+     A      med  0.572 [0.523, 0.659]   p25-p75 0.396-0.922  <0,5 0.38 >2 0.08 |log| 0.287 
+     B_off  med  0.576 [0.54, 0.689]    p25-p75 0.407-0.966  <0,5 0.34 >2 0.08 |log| 0.272 dif -0.0067 [-0.0142, 0.0008]
+     B_sum  med  0.576 [0.536, 0.696]   p25-p75 0.407-0.966  <0,5 0.34 >2 0.08 |log| 0.272 dif -0.0067 [-0.0142, 0.0011]
+     C      med  0.575 [0.533, 0.672]   p25-p75 0.396-0.941  <0,5 0.36 >2 0.08 |log| 0.279 dif +0.0009 [-0.0035, 0.0062]
+     D      med  0.572 [0.522, 0.659]   p25-p75 0.396-0.935  <0,5 0.38 >2 0.08 |log| 0.287 dif +0.0012 [-0.0013, 0.0053]
+  [reposo|VIIRS750 hi] igual al extremo lo en todas las variantes
+  [reposo|VIIRS750|mar-jun12 lo] pares 94, afectados por alguna variante 17
+     A      med  0.614 [0.536, 0.734]   p25-p75 0.467-0.844  <0,5 0.30 >2 0.11 |log| 0.271 
+     B_off  med  0.640 [0.558, 0.755]   p25-p75 0.504-0.928  <0,5 0.23 >2 0.11 |log| 0.258 dif -0.0155 [-0.0269, -0.004]
+     B_sum  med  0.640 [0.558, 0.755]   p25-p75 0.504-0.928  <0,5 0.23 >2 0.11 |log| 0.258 dif -0.0155 [-0.0271, -0.0039]
+     C      med  0.634 [0.547, 0.741]   p25-p75 0.492-0.862  <0,5 0.27 >2 0.11 |log| 0.266 dif -0.0016 [-0.0076, 0.0057]
+     D      med  0.614 [0.536, 0.741]   p25-p75 0.467-0.862  <0,5 0.30 >2 0.11 |log| 0.271 dif -0.0010 [-0.003, 0.0009]
+  [reposo|VIIRS750|mar-jun12 hi] igual al extremo lo en todas las variantes
+  [reposo|VIIRS750|jun13-oct lo] pares 81, afectados por alguna variante 4
+     A      med  0.517 [0.437, 0.696]   p25-p75 0.310-1.018  <0,5 0.47 >2 0.05 |log| 0.318 
+     B_off  med  0.517 [0.437, 0.721]   p25-p75 0.310-1.033  <0,5 0.47 >2 0.05 |log| 0.318 dif +0.0037 [-0.0034, 0.0126]
+     B_sum  med  0.517 [0.448, 0.696]   p25-p75 0.310-1.033  <0,5 0.47 >2 0.05 |log| 0.318 dif +0.0037 [-0.0035, 0.0131]
+     C      med  0.517 [0.437, 0.682]   p25-p75 0.310-1.018  <0,5 0.47 >2 0.05 |log| 0.318 dif +0.0038 [0.0, 0.0117]
+     D      med  0.517 [0.437, 0.682]   p25-p75 0.310-1.018  <0,5 0.47 >2 0.05 |log| 0.318 dif +0.0038 [0.0, 0.0117]
+  [reposo|VIIRS750|jun13-oct hi] igual al extremo lo en todas las variantes
+  [erupcion lo] pares 57, afectados por alguna variante 7
+     A      med  0.578 [0.508, 0.698]   p25-p75 0.385-0.798  <0,5 0.35 >2 0.05 |log| 0.245 
+     B_off  med  0.578 [0.508, 0.748]   p25-p75 0.410-0.910  <0,5 0.35 >2 0.05 |log| 0.245 dif -0.0013 [-0.0134, 0.0119]
+     B_sum  med  0.578 [0.508, 0.753]   p25-p75 0.410-0.910  <0,5 0.35 >2 0.05 |log| 0.245 dif -0.0013 [-0.0145, 0.0118]
+     C      med  0.578 [0.508, 0.751]   p25-p75 0.410-0.910  <0,5 0.35 >2 0.05 |log| 0.245 dif -0.0042 [-0.0151, 0.0066]
+     D      med  0.578 [0.508, 0.748]   p25-p75 0.410-0.910  <0,5 0.35 >2 0.05 |log| 0.245 dif -0.0066 [-0.017, -0.0001]
+  [erupcion hi] igual al extremo lo en todas las variantes
+  [erupcion|MODIS lo] pares 2, afectados por alguna variante 0
+     A      med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 
+     B_off  med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+     B_sum  med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+     C      med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+     D      med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+  [erupcion|MODIS hi] igual al extremo lo en todas las variantes
+  [erupcion|MODIS|jun13-oct lo] pares 2, afectados por alguna variante 0
+     A      med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 
+     B_off  med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+     B_sum  med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+     C      med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+     D      med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+  [erupcion|MODIS|jun13-oct hi] igual al extremo lo en todas las variantes
+  [erupcion|VIIRS375 lo] pares 34, afectados por alguna variante 0
+     A      med  0.584 [0.542, 0.698]   p25-p75 0.455-0.775  <0,5 0.27 >2 0.03 |log| 0.240 
+     B_off  med  0.584 [0.542, 0.698]   p25-p75 0.455-0.775  <0,5 0.27 >2 0.03 |log| 0.240 dif +0.0000 [0.0, 0.0]
+     B_sum  med  0.584 [0.542, 0.698]   p25-p75 0.455-0.775  <0,5 0.27 >2 0.03 |log| 0.240 dif +0.0000 [0.0, 0.0]
+     C      med  0.584 [0.542, 0.698]   p25-p75 0.455-0.775  <0,5 0.27 >2 0.03 |log| 0.240 dif +0.0000 [0.0, 0.0]
+     D      med  0.584 [0.542, 0.698]   p25-p75 0.455-0.775  <0,5 0.27 >2 0.03 |log| 0.240 dif +0.0000 [0.0, 0.0]
+  [erupcion|VIIRS375 hi] igual al extremo lo en todas las variantes
+  [erupcion|VIIRS375|jun13-oct lo] pares 34, afectados por alguna variante 0
+     A      med  0.584 [0.542, 0.698]   p25-p75 0.455-0.775  <0,5 0.27 >2 0.03 |log| 0.240 
+     B_off  med  0.584 [0.542, 0.698]   p25-p75 0.455-0.775  <0,5 0.27 >2 0.03 |log| 0.240 dif +0.0000 [0.0, 0.0]
+     B_sum  med  0.584 [0.54, 0.698]    p25-p75 0.455-0.775  <0,5 0.27 >2 0.03 |log| 0.240 dif +0.0000 [0.0, 0.0]
+     C      med  0.584 [0.53, 0.698]    p25-p75 0.455-0.775  <0,5 0.27 >2 0.03 |log| 0.240 dif +0.0000 [0.0, 0.0]
+     D      med  0.584 [0.535, 0.698]   p25-p75 0.455-0.775  <0,5 0.27 >2 0.03 |log| 0.240 dif +0.0000 [0.0, 0.0]
+  [erupcion|VIIRS375|jun13-oct hi] igual al extremo lo en todas las variantes
+  [erupcion|VIIRS750 lo] pares 21, afectados por alguna variante 7
+     A      med  0.418 [0.324, 1.038]   p25-p75 0.285-0.910  <0,5 0.52 >2 0.10 |log| 0.381 
+     B_off  med  0.498 [0.335, 1.131]   p25-p75 0.285-1.108  <0,5 0.52 >2 0.10 |log| 0.381 dif -0.0037 [-0.0398, 0.0335]
+     B_sum  med  0.498 [0.335, 1.131]   p25-p75 0.285-1.108  <0,5 0.52 >2 0.10 |log| 0.381 dif -0.0037 [-0.0402, 0.0322]
+     C      med  0.498 [0.335, 1.131]   p25-p75 0.285-1.108  <0,5 0.52 >2 0.10 |log| 0.378 dif -0.0113 [-0.0469, 0.0163]
+     D      med  0.498 [0.335, 1.108]   p25-p75 0.285-1.038  <0,5 0.52 >2 0.10 |log| 0.378 dif -0.0180 [-0.0475, -0.0001]
+  [erupcion|VIIRS750 hi] igual al extremo lo en todas las variantes
+  [erupcion|VIIRS750|jun13-oct lo] pares 21, afectados por alguna variante 7
+     A      med  0.418 [0.295, 1.038]   p25-p75 0.285-0.910  <0,5 0.52 >2 0.10 |log| 0.381 
+     B_off  med  0.498 [0.335, 1.131]   p25-p75 0.285-1.108  <0,5 0.52 >2 0.10 |log| 0.381 dif -0.0037 [-0.0383, 0.0311]
+     B_sum  med  0.498 [0.335, 1.131]   p25-p75 0.285-1.108  <0,5 0.52 >2 0.10 |log| 0.381 dif -0.0037 [-0.0405, 0.0331]
+     C      med  0.498 [0.335, 1.131]   p25-p75 0.285-1.108  <0,5 0.52 >2 0.10 |log| 0.378 dif -0.0113 [-0.0441, 0.0163]
+     D      med  0.498 [0.335, 1.108]   p25-p75 0.285-1.038  <0,5 0.52 >2 0.10 |log| 0.378 dif -0.0180 [-0.0468, -0.0002]
+  [erupcion|VIIRS750|jun13-oct hi] igual al extremo lo en todas las variantes
+
+   REGLA DE DECISION (DECLARACION.md §4), por variante y extremo:
+     B_off  lo: no gana: reposo IC [-0.002, 0.0001] no queda bajo 0; erupcion IC [-0.0134, 0.0119] no queda bajo 0
+     B_off  hi: no gana: reposo IC [-0.002, 0.0002] no queda bajo 0; erupcion IC [-0.0144, 0.0109] no queda bajo 0
+     B_sum  lo: no gana: reposo IC [-0.0021, 0.0001] no queda bajo 0; erupcion IC [-0.0145, 0.0118] no queda bajo 0
+     B_sum  hi: no gana: reposo IC [-0.002, 0.0002] no queda bajo 0; erupcion IC [-0.0141, 0.0112] no queda bajo 0
+     C      lo: no gana: reposo IC [-0.0005, 0.0009] no queda bajo 0; erupcion IC [-0.0151, 0.0066] no queda bajo 0
+     C      hi: no gana: reposo IC [-0.0005, 0.0009] no queda bajo 0; erupcion IC [-0.0153, 0.0057] no queda bajo 0
+     D      lo: no gana: reposo IC [-0.0002, 0.0008] no queda bajo 0
+     D      hi: no gana: reposo IC [-0.0002, 0.0008] no queda bajo 0
+
+   por volcan (reposo, extremo lo; sensor: n pares, mediana A / B_sum / C / D)
+   Lascar               MODIS n8 0.75/0.75/0.75/0.75 | VIIRS375 n208 0.55/0.55/0.55/0.55 | VIIRS750 n99 0.52/0.53/0.53/0.52
+   Lastarria            VIIRS375 n144 0.61/0.61/0.61/0.61
+   Isluga               VIIRS375 n239 0.60/0.60/0.60/0.60 | VIIRS750 n26 1.44/1.44/1.44/1.44
+   Tupungatito          VIIRS375 n132 0.71/0.71/0.71/0.71 | VIIRS750 n2 0.07/0.07/0.07/0.07
+   PlanchonPeteroa      VIIRS375 n95 0.96/0.96/0.96/0.96 | VIIRS750 n3 1.67/1.67/1.67/1.67
+   NevadosDeChillan     VIIRS375 n10 1.12/1.12/1.12/1.12
+   Llaima               VIIRS375 n2 1.29/1.29/1.29/1.29
+   Villarrica           MODIS n1 0.81/0.81/0.81/0.81 | VIIRS375 n21 0.87/0.87/0.87/0.87 | VIIRS750 n5 0.88/0.88/0.88/0.88
+   Copahue              VIIRS375 n5 1.01/1.01/1.01/1.01 | VIIRS750 n1 1.33/1.33/1.33/1.33
+   PuyehueCordonCaulle  VIIRS375 n164 1.03/1.03/1.03/1.03 | VIIRS750 n37 0.68/0.70/0.68/0.68
+   Chaiten              VIIRS375 n43 1.30/1.30/1.30/1.30 | VIIRS750 n2 1.15/1.15/1.15/1.15
+
+6. BARRIDO descriptivo del umbral (sobre la entrada del modo), extremo lo: mediana |log10 razon|
+   reposo|MODIS       n    9  T0.25:0.159  T0.5:0.159  T1.0:0.159  T2.0:0.159  T3.0:0.159  T5.0:0.159  Tinf:0.159
+   reposo|VIIRS750    n  175  T0.25:0.272  T0.5:0.272  T1.0:0.279  T2.0:0.287  T3.0:0.287  T5.0:0.287  Tinf:0.287
+   erupcion|MODIS     n    2  T0.25:0.203  T0.5:0.203  T1.0:0.203  T2.0:0.203  T3.0:0.203  T5.0:0.203  Tinf:0.203
+   erupcion|VIIRS750  n   21  T0.25:0.381  T0.5:0.381  T1.0:0.378  T2.0:0.378  T3.0:0.378  T5.0:0.381  Tinf:0.381
+   erupcion|VIIRS375  n   34  T0.25:0.240  T0.5:0.240  T1.0:0.240  T2.0:0.240  T3.0:0.240  T5.0:0.240  Tinf:0.240
+
+7. NEGATIVOS LIMPIOS: publicaciones y magnitud publicada (mediana / suma, MW)
+   reposo|MODIS       n  4824 (excl. 233)  A:537/1.567/1438.496  B_off:537/1.669/1453.623  B_sum:537/1.779/1475.213  C:537/1.669/1452.06  D:537/1.661/1448.941
+   erupcion|MODIS     n    21 (excl. 0)  A:0/None/0.0  B_off:0/None/0.0  B_sum:0/None/0.0  C:0/None/0.0  D:0/None/0.0
+   reposo|VIIRS375    n  3298 (excl. 1)  A:2237/0.0446/118.714  B_off:2237/0.0446/118.714  B_sum:2237/0.0446/118.714  C:2237/0.0446/118.714  D:2237/0.0446/118.714
+   erupcion|VIIRS375  n    10 (excl. 0)  A:10/0.023/0.302  B_off:10/0.023/0.302  B_sum:10/0.023/0.302  C:10/0.023/0.302  D:10/0.023/0.302
+   reposo|VIIRS750    n  5341 (excl. 3)  A:1226/0.2655/643.021  B_off:1226/0.2705/667.945  B_sum:1226/0.2705/668.644  C:1226/0.2655/660.429  D:1226/0.2655/654.698
+   erupcion|VIIRS750  n    18 (excl. 0)  A:9/0.115/1.33  B_off:9/0.115/1.443  B_sum:9/0.115/1.443  C:9/0.115/1.329  D:9/0.115/1.329
+
+8. CHILLAN EN ERUPCION, pares MODIS y VIIRS 750 (MIROVA | A | B_off | B_sum | C | D; n px; marcas)
+   2026-09-28 04:42 VIIRS_NOAA21_750    0.23 CONS | 0.549 | 0.795 | 0.795 | 0.549 | 0.549 | n2 ident {}
+   2026-09-29 05:18 VIIRS_NOAA20_750    5.48 CONS | 2.11 | 2.11 | 2.11 | 2.11 | 2.11 | n1 n1 {}
+   2026-09-29 06:00 VIIRS_NOAA21_750    2.52 CONS | 0.717 | 0.717 | 0.717 | 0.717 | 0.717 | n2 ident {}
+   2026-09-29 06:36 VIIRS_SNPP_750      2.03 CONS | 0.329 | 0.33 | 0.33 | 0.33 | 0.33 | n2 ident {}
+   2026-09-29 07:20 MODIS_AQUA          0.13 CONS | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | n1 n1 {'focal_magnitude': True, 'focal_degraded': True}
+   2026-10-01 01:45 MODIS_TERRA         6.17 CONS | 4.167 | 4.167 | 4.167 | 4.167 | 4.167 | n7 n>3 {'focal_magnitude': True}
+   2026-10-01 04:42 VIIRS_NOAA20_750    0.09 CONS | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | n1 n1 {}
+   2026-10-01 05:24 VIIRS_NOAA21_750    9.00 OCR  | 2.655 | 4.483 | 4.483 | 4.483 | 4.483 | n2 ident {}
+   2026-10-01 06:00 VIIRS_SNPP_750     10.00 OCR  | 11.084 | 11.084 | 11.084 | 11.084 | 11.084 | n3 ident {}
+   2026-10-01 06:18 VIIRS_NOAA20_750    7.06 CONS | 2.491 | 2.922 | 2.922 | 2.922 | 2.922 | n2 ident {}
+   2026-10-01 08:35 MODIS_AQUA          5.18 CONS | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | n18 n>3 {'focal_magnitude': True}
+   2026-10-04 06:06 VIIRS_NOAA21_750    2.30 CONS | 1.812 | 1.869 | 1.869 | 1.869 | 1.869 | n2 ident {}
+   2026-10-05 05:06 VIIRS_NOAA20_750    3.43 CONS | 1.435 | 1.435 | 1.435 | 1.435 | 1.435 | n2 ident {}
+   2026-10-05 05:48 VIIRS_NOAA21_750    7.86 CONS | 7.152 | 7.152 | 7.152 | 7.152 | 7.152 | n1 n1 {}
+   2026-10-05 06:24 VIIRS_SNPP_750      7.00 OCR  | 3.983 | 3.983 | 3.983 | 3.983 | 3.983 | n2 ident {}
+   2026-10-05 06:48 VIIRS_NOAA20_750    2.66 CONS | 0.259 | 0.259 | 0.259 | 0.259 | 0.259 | n2 ident {}
+   2026-10-05 07:50 MODIS_AQUA          3.50 CONS | 2.031 | 2.031 | 2.031 | 2.031 | 2.031 | n4 n>3 {'focal_magnitude': True}
+   2026-10-09 05:30 VIIRS_NOAA20_750    0.35 CONS | 0.396 | 0.396 | 0.396 | 0.396 | 0.396 | n1 n1 {}
+   2026-10-09 06:12 VIIRS_NOAA21_750    0.82 CONS | 0.851 | 1.173 | 1.173 | 1.173 | 0.851 | n2 ident {}
+   2026-10-10 04:54 VIIRS_SNPP_750      2.48 CONS | 0.243 | 0.243 | 0.243 | 0.243 | 0.243 | n2 ident {}
+   2026-10-10 05:12 VIIRS_NOAA20_750    6.42 CONS | 1.747 | 1.747 | 1.747 | 1.747 | 1.747 | n2 ident {}
+   2026-10-10 05:54 VIIRS_NOAA21_750   13.13 CONS | 10.481 | 10.481 | 10.481 | 10.481 | 10.481 | n2 ident {}
+   2026-10-10 06:54 VIIRS_NOAA20_750   15.26 CONS | 1.916 | 1.916 | 1.916 | 1.916 | 1.916 | n4 n>3 {}
+   2026-10-10 07:40 MODIS_AQUA          3.95 CONS | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | n5 n>3 {'focal_magnitude': True}
+   2026-10-11 05:36 VIIRS_NOAA21_750    1.03 CONS | 2.478 | 2.478 | 2.478 | 2.478 | 2.478 | n4 n>3 {}
+   2026-10-12 05:18 VIIRS_NOAA21_750    8.44 CONS | 3.46 | 3.46 | 3.46 | 3.46 | 3.46 | n1 n1 {}
+   2026-10-12 05:54 VIIRS_SNPP_750      0.40 CONS | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | n3 ident {}
+   2026-10-12 07:20 MODIS_AQUA          2.18 CONS | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | n6 n>3 {'focal_magnitude': True}
+   2026-10-14 06:18 VIIRS_NOAA21_750    2.00 CONS | 1.173 | 2.933 | 2.933 | 2.933 | 2.933 | n3 ident {}
+
+====================================================================================================
+FUENTE c0: 259 records nocturnos en ventana
+
+1. RECONSTRUCCION (cumulos de 2 a 3 pixeles; n1 y n>3 no cambian con ninguna variante)
+  MODIS     ident    10 | no_ident     1 | n1      6 | n>3     31 | sin cumulo      0
+  VIIRS375  ident    19 | no_ident     0 | n1     78 | n>3      2 | sin cumulo      7
+  VIIRS750  ident    14 | no_ident     0 | n1     10 | n>3     16 | sin cumulo     65
+
+2. CONTROL de la reconstruccion (tolerancia 0.0015 MW, aprueba con >= 99 %)
+  modo activo, 2-3 px, identificados: 42 | reproduce pc.vrp_mw con el pico: 42 (100.000 %) -> PASA
+  control negativo, la SUMA reproduce pc.vrp_mw en: 13 de 42 (debe ser minoria)
+  sin modo, sin foco ni tope, identificados: 1 | la suma reproduce: 1
+
+3. PARES con alerta de MIROVA: 40 (deciden 40; solo OCR antes del 13-jun, aparte: 0)
+
+4. PUBLICACIONES que cambian contra la regla actual (predicado del tablero, todos los records)
+  B_off  lo {'desconocido': 1} | hi {'desconocido': 1}
+  B_sum  lo {'desconocido': 1} | hi {'desconocido': 1}
+  C      lo {'desconocido': 1} | hi {'desconocido': 1}
+  D      lo {'desconocido': 1} | hi {'desconocido': 1}
+  alertas protegidas que cambian de publicacion (lectura A / B), todas las variantes y extremos: 0 / 0
+  pasadas con alerta por sensor, estado del cumulo y si publicamos: {'MODIS|n1|False': 1, 'MODIS|n>3|False': 1, 'MODIS|n>3|True': 2, 'VIIRS375|ident|True': 14, 'VIIRS375|n1|True': 7, 'VIIRS375|n>3|True': 2, 'VIIRS750|ident|True': 10, 'VIIRS750|n1|False': 1, 'VIIRS750|n1|True': 2}
+  pasadas con alerta que NO publicamos, por etiqueta de distancia: {'MODIS|n1|far': 1, 'MODIS|n>3|far': 1, 'VIIRS750|n1|summit': 1}
+
+5. RAZON nuestra/MIROVA por variante (pares comunes; mediana [IC95] | |log10| mediana | dif. pareada vs A [IC95])
+  [todo lo] pares 37, afectados por alguna variante 5
+     A      med  0.573 [0.548, 0.748]   p25-p75 0.385-0.910  <0,5 0.35 >2 0.05 |log| 0.257 
+     B_off  med  0.573 [0.548, 0.748]   p25-p75 0.418-0.910  <0,5 0.35 >2 0.05 |log| 0.257 dif -0.0041 [-0.0215, 0.0156]
+     B_sum  med  0.573 [0.548, 0.78]    p25-p75 0.418-0.910  <0,5 0.35 >2 0.05 |log| 0.257 dif -0.0041 [-0.0205, 0.0133]
+     C      med  0.573 [0.548, 0.754]   p25-p75 0.418-0.910  <0,5 0.35 >2 0.05 |log| 0.257 dif -0.0084 [-0.0228, 0.0]
+     D      med  0.573 [0.548, 0.748]   p25-p75 0.418-0.910  <0,5 0.35 >2 0.05 |log| 0.257 dif -0.0084 [-0.0229, 0.0]
+  [todo hi] igual al extremo lo en todas las variantes
+  [solo_afectados lo] pares 5, afectados por alguna variante 5
+     A      med  0.353 [0.162, 2.387]   p25-p75 0.295-0.788  <0,5 0.60 >2 0.20 |log| 0.452 
+     B_off  med  0.498 [0.163, 3.457]   p25-p75 0.414-0.813  <0,5 0.60 >2 0.20 |log| 0.383 dif -0.0302 [-0.1274, 0.1172]
+     B_sum  med  0.498 [0.163, 3.457]   p25-p75 0.414-0.813  <0,5 0.60 >2 0.20 |log| 0.383 dif -0.0302 [-0.1274, 0.1172]
+     C      med  0.498 [0.163, 2.387]   p25-p75 0.414-0.813  <0,5 0.60 >2 0.20 |log| 0.378 dif -0.0623 [-0.1274, -0.0007]
+     D      med  0.498 [0.163, 2.387]   p25-p75 0.414-0.813  <0,5 0.60 >2 0.20 |log| 0.378 dif -0.0623 [-0.1274, -0.0007]
+  [solo_afectados hi] igual al extremo lo en todas las variantes
+  [solo_afectados|erupcion lo] pares 5, afectados por alguna variante 5
+     A      med  0.353 [0.162, 2.387]   p25-p75 0.295-0.788  <0,5 0.60 >2 0.20 |log| 0.452 
+     B_off  med  0.498 [0.163, 3.457]   p25-p75 0.414-0.813  <0,5 0.60 >2 0.20 |log| 0.383 dif -0.0302 [-0.1274, 0.1172]
+     B_sum  med  0.498 [0.163, 3.457]   p25-p75 0.414-0.813  <0,5 0.60 >2 0.20 |log| 0.383 dif -0.0302 [-0.1274, 0.1172]
+     C      med  0.498 [0.163, 2.387]   p25-p75 0.414-0.813  <0,5 0.60 >2 0.20 |log| 0.378 dif -0.0623 [-0.1274, -0.0003]
+     D      med  0.498 [0.163, 2.387]   p25-p75 0.414-0.813  <0,5 0.60 >2 0.20 |log| 0.378 dif -0.0623 [-0.1274, -0.0003]
+  [solo_afectados|erupcion hi] igual al extremo lo en todas las variantes
+  [reposo lo] pares 3, afectados por alguna variante 0
+     A      med  1.040 [0.946, 1.12]    p25-p75 0.993-1.080  <0,5 0.00 >2 0.00 |log| 0.024 
+     B_off  med  1.040 [0.946, 1.12]    p25-p75 0.993-1.080  <0,5 0.00 >2 0.00 |log| 0.024 dif +0.0000 [0.0, 0.0]
+     B_sum  med  1.040 [0.946, 1.12]    p25-p75 0.993-1.080  <0,5 0.00 >2 0.00 |log| 0.024 dif +0.0000 [0.0, 0.0]
+     C      med  1.040 [0.946, 1.12]    p25-p75 0.993-1.080  <0,5 0.00 >2 0.00 |log| 0.024 dif +0.0000 [0.0, 0.0]
+     D      med  1.040 [0.946, 1.12]    p25-p75 0.993-1.080  <0,5 0.00 >2 0.00 |log| 0.024 dif +0.0000 [0.0, 0.0]
+  [reposo hi] igual al extremo lo en todas las variantes
+  [reposo|VIIRS375 lo] pares 3, afectados por alguna variante 0
+     A      med  1.040 [0.946, 1.12]    p25-p75 0.993-1.080  <0,5 0.00 >2 0.00 |log| 0.024 
+     B_off  med  1.040 [0.946, 1.12]    p25-p75 0.993-1.080  <0,5 0.00 >2 0.00 |log| 0.024 dif +0.0000 [0.0, 0.0]
+     B_sum  med  1.040 [0.946, 1.12]    p25-p75 0.993-1.080  <0,5 0.00 >2 0.00 |log| 0.024 dif +0.0000 [0.0, 0.0]
+     C      med  1.040 [0.946, 1.12]    p25-p75 0.993-1.080  <0,5 0.00 >2 0.00 |log| 0.024 dif +0.0000 [0.0, 0.0]
+     D      med  1.040 [0.946, 1.12]    p25-p75 0.993-1.080  <0,5 0.00 >2 0.00 |log| 0.024 dif +0.0000 [0.0, 0.0]
+  [reposo|VIIRS375 hi] igual al extremo lo en todas las variantes
+  [reposo|VIIRS375|jun13-oct lo] pares 3, afectados por alguna variante 0
+     A      med  1.040 [0.946, 1.12]    p25-p75 0.993-1.080  <0,5 0.00 >2 0.00 |log| 0.024 
+     B_off  med  1.040 [0.946, 1.12]    p25-p75 0.993-1.080  <0,5 0.00 >2 0.00 |log| 0.024 dif +0.0000 [0.0, 0.0]
+     B_sum  med  1.040 [0.946, 1.12]    p25-p75 0.993-1.080  <0,5 0.00 >2 0.00 |log| 0.024 dif +0.0000 [0.0, 0.0]
+     C      med  1.040 [0.946, 1.12]    p25-p75 0.993-1.080  <0,5 0.00 >2 0.00 |log| 0.024 dif +0.0000 [0.0, 0.0]
+     D      med  1.040 [0.946, 1.12]    p25-p75 0.993-1.080  <0,5 0.00 >2 0.00 |log| 0.024 dif +0.0000 [0.0, 0.0]
+  [reposo|VIIRS375|jun13-oct hi] igual al extremo lo en todas las variantes
+  [erupcion lo] pares 34, afectados por alguna variante 5
+     A      med  0.561 [0.506, 0.638]   p25-p75 0.361-0.752  <0,5 0.38 >2 0.06 |log| 0.276 
+     B_off  med  0.561 [0.508, 0.638]   p25-p75 0.415-0.752  <0,5 0.38 >2 0.06 |log| 0.276 dif -0.0044 [-0.0219, 0.0152]
+     B_sum  med  0.561 [0.508, 0.638]   p25-p75 0.415-0.752  <0,5 0.38 >2 0.06 |log| 0.276 dif -0.0044 [-0.0232, 0.0168]
+     C      med  0.561 [0.508, 0.627]   p25-p75 0.415-0.752  <0,5 0.38 >2 0.06 |log| 0.276 dif -0.0092 [-0.0251, -0.0]
+     D      med  0.561 [0.508, 0.627]   p25-p75 0.415-0.752  <0,5 0.38 >2 0.06 |log| 0.276 dif -0.0092 [-0.0255, -0.0]
+  [erupcion hi] igual al extremo lo en todas las variantes
+  [erupcion|MODIS lo] pares 2, afectados por alguna variante 0
+     A      med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 
+     B_off  med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+     B_sum  med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+     C      med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+     D      med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+  [erupcion|MODIS hi] igual al extremo lo en todas las variantes
+  [erupcion|MODIS|jun13-oct lo] pares 2, afectados por alguna variante 0
+     A      med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 
+     B_off  med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+     B_sum  med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+     C      med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+     D      med  0.628 [0.58, 0.675]    p25-p75 0.604-0.652  <0,5 0.00 >2 0.00 |log| 0.203 dif +0.0000 [0.0, 0.0]
+  [erupcion|MODIS|jun13-oct hi] igual al extremo lo en todas las variantes
+  [erupcion|VIIRS375 lo] pares 20, afectados por alguna variante 0
+     A      med  0.563 [0.518, 0.59]    p25-p75 0.434-0.749  <0,5 0.30 >2 0.05 |log| 0.262 
+     B_off  med  0.563 [0.518, 0.59]    p25-p75 0.434-0.749  <0,5 0.30 >2 0.05 |log| 0.262 dif +0.0000 [0.0, 0.0]
+     B_sum  med  0.563 [0.518, 0.59]    p25-p75 0.434-0.749  <0,5 0.30 >2 0.05 |log| 0.262 dif +0.0000 [0.0, 0.0]
+     C      med  0.563 [0.518, 0.59]    p25-p75 0.434-0.749  <0,5 0.30 >2 0.05 |log| 0.262 dif +0.0000 [0.0, 0.0]
+     D      med  0.563 [0.518, 0.59]    p25-p75 0.434-0.749  <0,5 0.30 >2 0.05 |log| 0.262 dif +0.0000 [0.0, 0.0]
+  [erupcion|VIIRS375 hi] igual al extremo lo en todas las variantes
+  [erupcion|VIIRS375|jun13-oct lo] pares 20, afectados por alguna variante 0
+     A      med  0.563 [0.518, 0.59]    p25-p75 0.434-0.749  <0,5 0.30 >2 0.05 |log| 0.262 
+     B_off  med  0.563 [0.518, 0.59]    p25-p75 0.434-0.749  <0,5 0.30 >2 0.05 |log| 0.262 dif +0.0000 [0.0, 0.0]
+     B_sum  med  0.563 [0.518, 0.59]    p25-p75 0.434-0.749  <0,5 0.30 >2 0.05 |log| 0.262 dif +0.0000 [0.0, 0.0]
+     C      med  0.563 [0.524, 0.59]    p25-p75 0.434-0.749  <0,5 0.30 >2 0.05 |log| 0.262 dif +0.0000 [0.0, 0.0]
+     D      med  0.563 [0.518, 0.59]    p25-p75 0.434-0.749  <0,5 0.30 >2 0.05 |log| 0.262 dif +0.0000 [0.0, 0.0]
+  [erupcion|VIIRS375|jun13-oct hi] igual al extremo lo en todas las variantes
+  [erupcion|VIIRS750 lo] pares 12, afectados por alguna variante 5
+     A      med  0.402 [0.295, 0.788]   p25-p75 0.292-0.818  <0,5 0.58 >2 0.08 |log| 0.396 
+     B_off  med  0.458 [0.335, 0.861]   p25-p75 0.360-0.837  <0,5 0.58 >2 0.08 |log| 0.381 dif -0.0126 [-0.0676, 0.0533]
+     B_sum  med  0.458 [0.285, 0.861]   p25-p75 0.360-0.837  <0,5 0.58 >2 0.08 |log| 0.381 dif -0.0126 [-0.0646, 0.0495]
+     C      med  0.458 [0.335, 0.861]   p25-p75 0.360-0.837  <0,5 0.58 >2 0.08 |log| 0.378 dif -0.0260 [-0.0696, -0.0001]
+     D      med  0.458 [0.335, 0.814]   p25-p75 0.360-0.837  <0,5 0.58 >2 0.08 |log| 0.378 dif -0.0260 [-0.0696, -0.0001]
+  [erupcion|VIIRS750 hi] igual al extremo lo en todas las variantes
+  [erupcion|VIIRS750|jun13-oct lo] pares 12, afectados por alguna variante 5
+     A      med  0.402 [0.295, 0.788]   p25-p75 0.292-0.818  <0,5 0.58 >2 0.08 |log| 0.396 
+     B_off  med  0.458 [0.335, 0.813]   p25-p75 0.360-0.837  <0,5 0.58 >2 0.08 |log| 0.381 dif -0.0126 [-0.0646, 0.0533]
+     B_sum  med  0.458 [0.335, 0.813]   p25-p75 0.360-0.837  <0,5 0.58 >2 0.08 |log| 0.381 dif -0.0126 [-0.0646, 0.044]
+     C      med  0.458 [0.335, 0.861]   p25-p75 0.360-0.837  <0,5 0.58 >2 0.08 |log| 0.378 dif -0.0260 [-0.0696, -0.0001]
+     D      med  0.458 [0.335, 0.861]   p25-p75 0.360-0.837  <0,5 0.58 >2 0.08 |log| 0.378 dif -0.0260 [-0.0704, -0.0001]
+  [erupcion|VIIRS750|jun13-oct hi] igual al extremo lo en todas las variantes
+
+   REGLA DE DECISION (DECLARACION.md §4), por variante y extremo:
+     B_off  lo: no gana: reposo IC [0.0, 0.0] no queda bajo 0; erupcion IC [-0.0219, 0.0152] no queda bajo 0
+     B_off  hi: no gana: reposo IC [0.0, 0.0] no queda bajo 0; erupcion IC [-0.0239, 0.016] no queda bajo 0
+     B_sum  lo: no gana: reposo IC [0.0, 0.0] no queda bajo 0; erupcion IC [-0.0232, 0.0168] no queda bajo 0
+     B_sum  hi: no gana: reposo IC [0.0, 0.0] no queda bajo 0; erupcion IC [-0.0232, 0.0164] no queda bajo 0
+     C      lo: no gana: reposo IC [0.0, 0.0] no queda bajo 0; erupcion IC [-0.0251, -0.0] no queda bajo 0
+     C      hi: no gana: reposo IC [0.0, 0.0] no queda bajo 0; erupcion IC [-0.0258, -0.0] no queda bajo 0
+     D      lo: no gana: reposo IC [0.0, 0.0] no queda bajo 0; erupcion IC [-0.0255, -0.0] no queda bajo 0
+     D      hi: no gana: reposo IC [0.0, 0.0] no queda bajo 0; erupcion IC [-0.0248, -0.0] no queda bajo 0
+
+   por volcan (reposo, extremo lo; sensor: n pares, mediana A / B_sum / C / D)
+   Lascar               
+   Lastarria            
+   Isluga               
+   Tupungatito          
+   PlanchonPeteroa      
+   NevadosDeChillan     VIIRS375 n3 1.04/1.04/1.04/1.04
+   Llaima               
+   Villarrica           
+   Copahue              
+   PuyehueCordonCaulle  
+   Chaiten              
+
+6. BARRIDO descriptivo del umbral (sobre la entrada del modo), extremo lo: mediana |log10 razon|
+   erupcion|MODIS     n    2  T0.25:0.203  T0.5:0.203  T1.0:0.203  T2.0:0.203  T3.0:0.203  T5.0:0.203  Tinf:0.203
+   erupcion|VIIRS750  n   12  T0.25:0.381  T0.5:0.381  T1.0:0.378  T2.0:0.378  T3.0:0.378  T5.0:0.396  Tinf:0.396
+   erupcion|VIIRS375  n   20  T0.25:0.262  T0.5:0.262  T1.0:0.262  T2.0:0.262  T3.0:0.262  T5.0:0.262  Tinf:0.262
+
+7. NEGATIVOS LIMPIOS: publicaciones y magnitud publicada (mediana / suma, MW)
+   reposo|MODIS       n    27 (excl. 1)  A:0/None/0.0  B_off:0/None/0.0  B_sum:0/None/0.0  C:0/None/0.0  D:0/None/0.0
+   erupcion|MODIS     n    11 (excl. 0)  A:0/None/0.0  B_off:0/None/0.0  B_sum:0/None/0.0  C:0/None/0.0  D:0/None/0.0
+   reposo|VIIRS375    n    32 (excl. 0)  A:27/0.0523/1.339  B_off:27/0.0523/1.339  B_sum:27/0.0523/1.339  C:27/0.0523/1.339  D:27/0.0523/1.339
+   erupcion|VIIRS375  n    10 (excl. 0)  A:10/0.023/0.302  B_off:10/0.023/0.302  B_sum:10/0.023/0.302  C:10/0.023/0.302  D:10/0.023/0.302
+   reposo|VIIRS750    n    44 (excl. 0)  A:6/0.206/1.973  B_off:6/0.206/1.973  B_sum:6/0.206/1.973  C:6/0.206/1.973  D:6/0.206/1.973
+   erupcion|VIIRS750  n    15 (excl. 0)  A:7/0.152/1.226  B_off:7/0.152/1.339  B_sum:7/0.152/1.339  C:7/0.152/1.225  D:7/0.152/1.225
+
+8. CHILLAN EN ERUPCION, pares MODIS y VIIRS 750 (MIROVA | A | B_off | B_sum | C | D; n px; marcas)
+   2026-09-28 04:42 VIIRS_NOAA21_750    0.23 CONS | 0.549 | 0.795 | 0.795 | 0.549 | 0.549 | n2 ident {}
+   2026-09-29 05:18 VIIRS_NOAA20_750    5.48 CONS | 2.11 | 2.11 | 2.11 | 2.11 | 2.11 | n1 n1 {}
+   2026-09-29 06:00 VIIRS_NOAA21_750    2.52 CONS | 0.717 | 0.717 | 0.717 | 0.717 | 0.717 | n2 ident {}
+   2026-09-29 06:36 VIIRS_SNPP_750      2.03 CONS | 0.329 | 0.33 | 0.33 | 0.33 | 0.33 | n2 ident {}
+   2026-09-29 07:20 MODIS_AQUA          0.13 CONS | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | n1 n1 {'focal_magnitude': True, 'focal_degraded': True}
+   2026-10-01 01:45 MODIS_TERRA         6.17 CONS | 4.167 | 4.167 | 4.167 | 4.167 | 4.167 | n7 n>3 {'focal_magnitude': True}
+   2026-10-01 04:42 VIIRS_NOAA20_750    0.09 CONS | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | n1 n1 {}
+   2026-10-01 05:24 VIIRS_NOAA21_750    9.00 OCR  | 2.655 | 4.483 | 4.483 | 4.483 | 4.483 | n2 ident {}
+   2026-10-01 06:00 VIIRS_SNPP_750     10.00 OCR  | 11.084 | 11.084 | 11.084 | 11.084 | 11.084 | n3 ident {}
+   2026-10-01 06:18 VIIRS_NOAA20_750    7.06 CONS | 2.491 | 2.922 | 2.922 | 2.922 | 2.922 | n2 ident {}
+   2026-10-01 08:35 MODIS_AQUA          5.18 CONS | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | n18 n>3 {'focal_magnitude': True}
+   2026-10-04 06:06 VIIRS_NOAA21_750    2.30 CONS | 1.812 | 1.869 | 1.869 | 1.869 | 1.869 | n2 ident {}
+   2026-10-05 05:06 VIIRS_NOAA20_750    3.43 CONS | 1.435 | 1.435 | 1.435 | 1.435 | 1.435 | n2 ident {}
+   2026-10-05 05:48 VIIRS_NOAA21_750    7.86 CONS | 7.152 | 7.152 | 7.152 | 7.152 | 7.152 | n1 n1 {}
+   2026-10-05 06:24 VIIRS_SNPP_750      7.00 OCR  | 3.983 | 3.983 | 3.983 | 3.983 | 3.983 | n2 ident {}
+   2026-10-05 06:48 VIIRS_NOAA20_750    2.66 CONS | 0.259 | 0.259 | 0.259 | 0.259 | 0.259 | n2 ident {}
+   2026-10-05 07:50 MODIS_AQUA          3.50 CONS | 2.031 | 2.031 | 2.031 | 2.031 | 2.031 | n4 n>3 {'focal_magnitude': True}
