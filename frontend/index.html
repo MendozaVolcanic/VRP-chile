@@ -1091,6 +1091,16 @@ function mirovaEqVrp(r, innerKm = 10, includeFar = false) {
 // borra una detección). Trade-off: sube levemente los ya-bien-calibrados (PCC
 // 0.51×→1.89×). Reversible: cambiar el default a false. El toggle Cluster sigue.
 let USE_F5_CORE = persistedFlag("vrp_f5_core", true);
+// ⚠️ S151 (A113; docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md, hallazgo V-1): dos frases del
+// comentario de abajo cayeron. (1) "El pipeline no deja marca en el record" es falso desde S71
+// (commit 84c7d312e, 2026-05-20): el pipeline escribe primary_cluster.d9_capped = true en cada
+// cúmulo topado, así que el flag que el comentario da por pendiente ya existe con otro nombre.
+// Reconocer el tope por el valor sigue funcionando igual: al 2026-10-14 los 1.565 cúmulos en 5,0
+// exacto llevan la marca y no hay ninguna marca fuera de ellos. (2) El "1.403" era un conteo de
+// S132 escrito a mano que no se actualizaba (A90); el conteo vigente sale de los datos con
+// experiments/_s150_meta_audit/verif_docs/contar_topados_d9.py. Además, el tope se arma con el
+// fondo de la escena bajo 270 K y sin píxeles por temperatura ni por NTI absoluto, sin mirar si
+// hay cirrus (pipeline/process_modis.py:1009). Texto original conservado:
 // S132 R8 — el 5,00 MW que aparece en varias tarjetas NO es una medición: es un valor
 // CENSURADO. Cuando el path D contextual dispara sobre cirrus, la suma cruda de la escena
 // llega a 80-510 MW —cientos de píxeles apenas tibios sobre un fondo gélido, no un foco

@@ -221,6 +221,20 @@ pixels del TIF como VRP. El patrón replicable de 5 pasos está documentado en
 
 ### D9 — Path D (dNTI contextual) dispara FPs y amplifica magnitud en cirrus alto frío
 
+> ⚠️ **Estado S151 (marca agregada por la regla A113; fuente `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md`
+> P5): ABIERTA desde S146 en la cara de co-validación del path D (ver la rebaja de A23 en `CLAUDE.md`), y
+> el tope de 5 MW no está validado.** Que el tope «funciona» sólo quiere decir que recorta: no está medido
+> que lo recortado sea artefacto (`docs/AUDIT_S146.md` C-02). El tope se arma con el fondo de la escena
+> bajo 270 K y sin ningún píxel por temperatura ni por NTI absoluto (`pipeline/process_modis.py:1009`), sin
+> mirar si hay cirrus. Corpus al 2026-10-14 (65.705 records,
+> `experiments/_s150_meta_audit/verif_docs/contar_topados_d9.py`): 1.565 cúmulos topados en 5,0 exacto
+> (277 `summit`), los 1.565 con `primary_cluster.d9_capped`, y 343 cúmulos **sobre** 5 MW. En Nevados de
+> Chillán, en erupción desde el 2026-09-28, el tope actuó en 7 pasadas MODIS entre el 2026-09-28 y el
+> 2026-10-13, todas etiquetadas `far` con el cúmulo a 0,7 a 4,7 km del cráter (consulta directa a
+> `data/mirova_equivalent/NevadosDeChillan.json`); si lo recortado era erupción está SIN VERIFICAR
+> (sospecha de AUDITOR_C C-01 en S150, que no pasó por el verificador). El texto de abajo se conserva por
+> historia.
+
 > Nota: D8 está reservado en este doc para la entrada histórica "Background ring contaminado — RESUELTO" (S60-S62). Esta es D9.
 
 **Fenómeno físico**: en invierno austral, los volcanes del norte de Chile (Lastarria, Lascar, Isluga) sufren cobertura frecuente de **cirrus alto** (nubes finas a -25/-30°C, ~10 km altitud). Estas nubes son transparentes a la radiación térmica del volcán pero **enfrían el background MODIS** de los pixels vecinos a 245-270 K. El pixel del cráter (que irradia a su temperatura normal ~270 K) aparece **+25 K relativo al fondo enfriado**, disparando el path D dNTI contextual como anomalía. La fórmula Wooster `vrp_mw = 18.9 × A_pix × BT⁸` aplicada sobre BT=270 K produce un número grande **aunque NO hay radiación volcánica anómala** — es contraste térmico nube-roca amplificado por la potencia 8 de Wooster.
@@ -785,6 +799,14 @@ y sumar (que es lo que hacemos hoy y pierde señal sub-pixel distribuida).
 
 ## H_S27_1 — Test 1 integrated-ROI activado en `_mirova_literal` (S27 cierre D4)
 
+> ⚠️ **S147, marca agregada en S151 (A113; `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P3): la
+> última frase de la marca de S146 que sigue («lo que cae es el respaldo bibliográfico, no el resultado
+> empírico de S27») también cayó.** El resultado empírico quedó SIN EVIDENCIA y circular en S147 (ver la
+> marca de S147 dentro de D30, «Lo que esta D NO dice», y `docs/audit_s147/VERIFICADOR_H_A01.md`), y S149
+> mostró que el `_mirova_literal` de S27 (commit `db602040b`, 2026-04-29) no tenía el ETI ni los Tests 2
+> y 3, que entraron el 2026-05-15 (`958a7a189`). Las dos marcas de S146 de esta sección se conservan por
+> historia.
+>
 > ⚠️ **S146 (AUDIT_S146 §3 V-06, gravedad 5): la cita «Coppola 2015 §2.2 Eq.1» es FALSA, y
 > aparece muchas veces en todo este bloque.** El artículo 55 del volumen 77 de *Bulletin of
 > Volcanology* es de Heap et al., mecánica de rocas en andesita; en `sp426.5.pdf` p. 6 el Test 1
@@ -827,6 +849,10 @@ señal espacialmente distribuida sub-σ pixel-individual.
 
 **Pasa las 3 preguntas de docs/MISSION.md**:
 1. Test 1 ES Coppola 2015 §2.2 Eq.1, paper MIROVA core foundational.
+   - ⚠️ **S147, marca agregada en S151**: la frase final de la marca de S146 que sigue («Nada de lo
+     medido abajo cambia: lo que cae es el respaldo bibliográfico, no el resultado empírico de S27»)
+     cayó también; el resultado empírico quedó SIN EVIDENCIA y circular (marca de S147 en D30). Se
+     conserva por historia.
    - ⚠️ **FALSO, verificado S146 (AUDIT_S146 §3 V-06, gravedad 5; ver D30 al final de este
      archivo).** El artículo 55 del volumen 77 de *Bulletin of Volcanology* es de **Heap et al.**,
      mecánica de rocas en andesita (DOI 10.1007/s00445-015-0938-7); Crossref y OpenAlex no
@@ -1365,6 +1391,18 @@ Cuando S62+S63 completen:
 ---
 
 ## D8' Cluster selection Puyehue (S35) — RESUELTO S38
+
+> ⚠️ **Reabierta como pregunta en S150, marca agregada en S151** (A113; decisión de Nicolás del
+> 2026-10-09 en `docs/AUDIT_S150.md` §8; fuente `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P4):
+> **la réplica debe elegir la anomalía MAYOR de la escena, como MIROVA**, y la hipótesis de esta entrada
+> («el criterio de MIROVA no es `vrp_mw desc`») va en contra de esa decisión. Producción sigue en
+> `vent_anchored` (`ENABLE_VENT_ANCHORED_CLUSTERING = True`, leído de `pipeline.profile`) hasta el A/B
+> pre-registrado `vent_anchored` contra `vrp_max` (pendiente, después de D22 y de la prueba de Chillán).
+> Ojo con el tamaño del fenómeno: las 858 detecciones lejanas de MIROVA desde marzo con que se sostuvo
+> la decisión son en su mayoría **diurnas** (498 entre 13 y 21 UTC, 360 de noche, que es lo único que la
+> réplica procesa; `docs/audit_s150/meta/AUDITOR_F2_NUMEROS.md` H1, confirmado por
+> `docs/audit_s150/meta/VERIFICADOR_DATOS.md` D2 con 499 y 359 según dónde caiga una fila de las 12:25 UTC).
+> Un pre-registro que use 858 infla 2,4 veces lo esperable. Texto original por historia:
 
 **Cierre formal S86** (resuelve auditoría I-C4).
 
@@ -2525,6 +2563,17 @@ umbrales. Si algún día se hace, medir también el ETI (regresión NTI vs NTI_b
 
 ## D21: La banda MIR de MODIS: usamos la 21 como primaria; Coppola 2016a usa la 22 y la 21 sólo donde la 22 satura. **ABIERTA (medida S133 en magnitud y S137 en detección; ningún brazo cumple aún la batería)** S137 ⚠️ **El «ningún brazo cumple» cayó S146 (AUDIT_S146 §4, frente E E-08)**: con la vara corregida en el caso A2 el mejor brazo (banda 22, sin compuerta de temperatura, fondo local, conectiva `max`) pasa de 8 a **9 de 9**, y producción baja de 6 a **5 de 9**. Eso **levanta el bloqueo de criterio** que pesaba sobre D21, D22 y D11; no autoriza adoptar nada (9 de 9 en nueve escenas MODIS es fidelidad al Apéndice A, no dice nada de la sobre-publicación). Tres brazos quedan INDECIDIBLES por no guardar posición. Texto original conservado por historia
 
+> ⚠️ **S150, marca agregada en S151** (A113; `docs/audit_s150/meta/AUDITOR_F4_PROPAGACION.md` F4-06):
+> **con banda 22, en Láscar, MODIS separa alertas de negativos; con banda 21 y sin el Test 1 no ve nada.**
+> Marzo a junio de 2026 (`docs/S150_RESULTADO_MESES.md`, tabla de MODIS; confirmado por
+> `docs/audit_s150/VERIFICADOR_RESULTADO_MESES.md` A13): banda 21 sin Test 1, 0 de 73 alertas y 0 de 96
+> negativos limpios; banda 22, 68 de 73 y 11 de 96; banda 22 con conectiva `max`, 67 de 73 y 2 de 96.
+> Salvedades: sólo Láscar (el único volcán con alertas MODIS en esos meses), así que la tasa de falsos en
+> los otros diez volcanes no está medida; y la producción de Láscar en la misma población publica 8 de 73
+> alertas y 1 de 96 negativos. Producción sigue en banda 21 (`ENABLE_MODIS_B22_PRIMARY = False`, leído de
+> `pipeline.profile`). La línea de A82 y la ficha SDA que dicen que a 1 km el foco débil y el gradiente
+> son «indistinguibles» quedan en tensión con esta medición en Láscar (F4-07).
+
 **El paper** (`documentacion/sp426.5.pdf`, p. 3, verbatim): *"we built a corrected spectral band
 centred at 3.959 um (hereby called band L21ok), by using the L21 or L22 radiance, depending on band 22
 saturation (or not), respectively"*. La 22 manda; la 21 entra sólo donde la 22 satura.
@@ -2667,6 +2716,18 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
 ---
 
 ## D27: El día no existe: la Tabla 1 diurna (K1 = -0,6, C1 = 0,02, C2 = 15) está escrita y nunca se ejecuta. **DELIBERADA (MISSION: sólo noche), registrada S138 para que conste como divergencia literal** S138
+
+> ⚠️ **S151, marca agregada por la regla A113: «deliberada» y «no se propone cambiar» quedan como
+> pregunta, no como cierre.** El criterio de victoria que Nicolás fijó el 2026-10-13 (`docs/MISSION.md`,
+> sección «Criterio de victoria de la réplica») no acepta perder alertas protegidas de MIROVA (1 MW o
+> más), y la réplica pierde por construcción todas las diurnas. Tamaño, medido sobre la tabla sola
+> (`latest_consolidado.csv`, 2026-01-11 a 2026-10-14, sin OCR): de 1.642 filas `ALERTA_TERMICA`, 37
+> caen entre 13 y 21 UTC (pasadas de la tarde en Chile, el mismo corte de
+> `docs/audit_s150/meta/AUDITOR_F2_NUMEROS.md` H1), y 19 de ellas son de 1 MW o más (15 VIIRS 375,
+> 2 VIIRS 750, 2 MODIS; Láscar 9, Nevados de Chillán 8, Villarrica 2), contra 233 protegidas de noche.
+> Ojo con A76: de día MIROVA publica también reflexión solar sobre nubes, así que esas 19 no son todas
+> calor volcánico. Ningún A/B nocturno mide estas pérdidas; si entran o no al criterio es decisión de
+> Nicolás. El texto de abajo se conserva por historia.
 
 `_select_thresholds` (`process_modis.py:357-380`), `ENABLE_DAYTIME_MODIS = False`, `run_pipeline.py:185-195`, `store.py:171-182`. El paper procesa pasadas diurnas y advierte que ahí están la mayoría de sus falsas alertas (p. 16-17; A76). MIROVA publica detecciones diurnas de MODIS que el operador no verá acá. Gravedad 2 (recall de día; riesgo de falsos positivos si se activara). No se propone cambiar.
 
@@ -2812,6 +2873,13 @@ los records VIIRS 375** y en el **22,21 % de los VIIRS 750**
 (`docs/audit_s138/EJE_2_matriz_conformidad_pdf.md:112`, citado por el auditor C de S146; no pasó
 por el verificador). En la ventana de la Fase 1 son 800 de 954 (83,9 %) y 200 de 949 (21,1 %). (3) Es un Sistema de Decisiones Automatizadas bajo la Resolución CPLT
 N°372 y la ficha publicable declara una fuente que no se puede mostrar.
+
+⚠️ **S151 (A113)**: hasta S150 las dos marcas de S146 de la sección H_S27_1, mil líneas más arriba,
+decían en presente lo contrario de la marca de S147 que sigue («no cae el resultado empírico de S27»);
+desde S151 llevan una marca encima que remite acá. Además S149 mostró que el `_mirova_literal` contra
+el que S27 midió no tenía el ETI ni los Tests 2 y 3 (commit `db602040b` del 2026-04-29 contra
+`958a7a189` del 2026-05-15, `docs/AUDIT_S149.md` §0), y el «NO ADOPTAR» del A/B sin Test 1 de S147
+cayó (`docs/AUDIT_S149.md` §0). Fuente: `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P3.
 
 **Lo que esta D NO dice**: no dice que el Test 1 integrado esté mal ni que haya que apagarlo. ⚠️
 **La frase que sigue CAYÓ en S147** (`docs/audit_s147/VERIFICADOR_H_A01.md`, hallazgos H1, H2 y

@@ -18,6 +18,15 @@ Si encontramos que MIROVA tiene un comportamiento que no queremos (FPs en
 lagos, sub-detección sub-pixel, etc.), eso queda como hallazgo documentado
 pero **NO** es licencia para divergir metodológicamente.
 
+⚠️ **Rebajada S147 a S151, el objetivo (2) y el párrafo «Importante» que lo sigue** (decisiones de
+Nicolás del 2026-09-21 y del 2026-10-13; marca agregada en S151 por la regla A113, fuente
+`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P2): la réplica `mirova_equivalent` publica lo que
+MIROVA publica y calla donde MIROVA calla (`docs/AUDIT_S149.md` §0). Lo que MIROVA no publica ya no
+vive en la réplica clasificado por `pc.classification`: va al perfil `experimental`, congelado en la
+producción del 2026-10-09 (PR #771, `docs/AUDIT_S150.md` §8). Cómo se pesan una alerta perdida y una
+publicación de más ya no está abierto: lo fija la sección «Criterio de victoria de la réplica», más
+abajo. Texto original conservado por historia:
+
 **Objetivo (2) — Extensión volcánica documentada** (SECUNDARIO reporte).
 Reportar las detecciones que el algoritmo Coppola 2016a captura pero que
 MIROVA NRT no publica por scope operacional (sub-complejos volcánicos,
@@ -34,6 +43,30 @@ SERNAGEOMIN — no eliminarlo.
 core). La distinción (1) vs (2) vive en el campo derivado `pc.classification`
 (diseño S87 Bloque 3) + en el frontend que separa visualmente las
 categorías. No se introducen gates adicionales para "limpiar" (2).
+
+## Criterio de victoria de la réplica (decidido por Nicolás el 2026-10-13)
+
+> Agregado en S151 (tarea 0.3 del loop; la decisión está en `tasks/LOOP_OBJETIVOS.md` §1, regla 2).
+> Manda sobre toda frase anterior que diga cómo pesar una alerta perdida contra una publicación de
+> más, incluido el glosario de `CLAUDE.md` («priorizamos recall sobre precision»).
+
+**Por qué.** El operador de OVDAS lee la réplica como leería a MIROVA. Una alerta con energía que
+MIROVA publicó y nosotros no es un evento que el operador no ve; una publicación donde MIROVA calló es
+una falsa alarma que le enseña a desconfiar. Las dos fallas cuestan, pero no igual en todo el rango de
+energía: arriba de 1 MW perder una alerta no tiene compensación posible.
+
+1. **En la réplica no se acepta ningún cambio que pierda una alerta protegida.** Una pasada de la
+   referencia es **alerta protegida** si es alerta (`ALERTA_TERMICA` del consolidado o
+   `ALERTA_TERMICA_OCR`) y su VRP de la pasada es de **1 MW o más**, recalculado desde el VRP y nunca
+   leído de la columna `Clasificacion Mirova`, que la escribe el scraper de Mirova-v1 y no MIROVA.
+   El corte de 1 MW coincide con el límite entre VERY LOW y LOW del banner de MIROVA. Definición,
+   control y denominador: `docs/S151_CRITERIO_CLASE_MIROVA.md` (llega con el PR #780).
+2. **Dentro de «Muy Bajo»** (alertas bajo 1 MW, VERY LOW en el banner de MIROVA), **una alerta perdida
+   y una publicación de más pesan igual**: se minimiza la suma de los dos errores.
+3. **Se mide en las dos direcciones, por sensor y por tramo de calidad de la referencia (A119)**, con
+   tres métricas: recall de las alertas de MIROVA, publicación en negativos limpios (pasadas donde
+   MIROVA miró y no vio nada) y razón de magnitud contra MIROVA.
+4. Los umbrales de cada prueba salen de los datos de MIROVA, no se eligen (A115).
 
 ## Las 3 preguntas vinculantes
 
@@ -96,6 +129,17 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
 2. **Si NO está en papers**, ¿cierra una divergencia ya documentada en
    `docs/MIROVA_DIVERGENCES.md`?**
    **El catálogo VIVO es el doc — esta lista es resumen (actualizada S105, AUDIT_S105):**
+   - ⚠️ **S151, sobre el «se confirma el tope de 5 MW» del ítem que sigue**
+     (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P5): «se confirma» sólo quiere decir que el
+     tope recorta. No está medido que lo recortado sea artefacto (`docs/AUDIT_S146.md` C-02: el
+     «no es parche» del tope no lo sostiene el paper). Corpus al 2026-10-14 (65.705 records): 1.565
+     cúmulos topados en 5,0 exacto (277 `summit`), los 1.565 con `primary_cluster.d9_capped`, y 343
+     cúmulos **sobre** 5 MW (110 `summit`); el «0 records sobre 5 MW» de A23 vale sólo para la
+     población de S113. Script: `experiments/_s150_meta_audit/verif_docs/contar_topados_d9.py`.
+   - ⚠️ **S151: D8' ya no está resuelta** (`docs/MIROVA_DIVERGENCES.md`, marca bajo el encabezado de
+     D8'): Nicolás decidió el 2026-10-09 que la réplica elija la anomalía MAYOR de la escena, como
+     MIROVA (`docs/AUDIT_S150.md` §8), y la entrada D8' de la lista de «Resueltas» de más abajo dice
+     lo contrario. Producción sigue con el cúmulo más cercano al cráter hasta el A/B pre-registrado.
    - ⚠️ **REBAJADA S146: esta lista de «Resueltas» se lee primero y varias entradas ya
      cayeron dentro del propio proyecto** (`docs/AUDIT_S146.md` §2, V-13, V-01, V-06). **D9 no
      está cerrada**: el «207 de 214 confirmados» no se reproduce con ninguna definición en que
@@ -198,6 +242,12 @@ path" requiere primero**: (a) verificar que el frontend no hace ya esa
 supresión, (b) clasificar la categoría físicamente (E S86) de los
 records que el gate filtraría, (c) confirmar que ninguno pertenece a (b).
 
+⚠️ **S151, sobre el párrafo que sigue** (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P4): habla
+de **cercas** alrededor de la selección, no de la regla de selección, y eso sigue en pie. Pero mide el
+éxito como «0 robos de cluster», y bajo la regla de la anomalía mayor (decidida por Nicolás el
+2026-10-09, A/B pendiente, `docs/AUDIT_S150.md` §8) que un cúmulo lejano más fuerte gane es
+fidelidad a MIROVA, no robo: «0 robos» deja de ser la vara de ese A/B. Texto original:
+
 **Cierre de la familia (S118)**: el A/B real con reproc (run 28312968093,
 criterio pre-registrado "robo de cluster espacial") demostró que las cercas
 no protegían nada — 0 robos en 214 noches focales MIROVA-confirmadas; la
@@ -224,12 +274,22 @@ justificando contra papers MIROVA core.
 
 ## Si encontrás que el literal puro pierde recall
 
+⚠️ **Rebajada S147 y S149, marca agregada en S151** (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md`
+P3): el A/B de S27 midió contra un perfil `_mirova_literal` (commit `db602040b`, 2026-04-29) que no
+tenía ni el ETI ni el Test 1; los Tests 2 y 3 con ETI entraron al código el 2026-05-15 (`958a7a189`),
+según `git log -S` (`docs/AUDIT_S149.md` §0). Y el «recall 50 a 80 %» que cerró D4 quedó SIN
+EVIDENCIA y circular (`docs/audit_s147/VERIFICADOR_H_A01.md`; marca de S147 dentro de D30 en
+`docs/MIROVA_DIVERGENCES.md`). O sea: **«el literal pierde recall» no está medido**, y no sirve para
+defender el Test 1 integrado, que es un detector propio (D30). Texto original por historia:
+
 Esa es señal de que MIROVA usa un mecanismo que no replicamos todavía. La
 respuesta correcta NO es agregar parche — es **investigar qué mecanismo
 documentado en papers MIROVA core estamos pasando por alto**.
 
 Hipótesis abiertas (S28+, ver `~memory/project_s27_mirova_literal_negativo.md`):
-- H_S27_1: Test 1 summit-only más agresivo (Coppola 2016a SP426.5 §2.2 Eq.1).
+- H_S27_1 (⚠️ **cita falsa, S146 V-06, marca agregada S151**: `sp426.5.pdf` no tiene §2.2, su Ec. 1
+  es el NTI y el Test 1 es por píxel contra K1, p. 6; ver `docs/MIROVA_DIVERGENCES.md` H_S27_1 y D30.
+  Texto original:) Test 1 summit-only más agresivo (Coppola 2016a SP426.5 §2.2 Eq.1).
 - H_S27_2: dNTI con C1 negativo (cooling) además de positivo.
 - H_S27_3: path TIR-only Aveni 2024 RSE TIRVolcH.
 - H_S27_4: composición paths cascada vs OR (cómo MIROVA combina internamente).
@@ -248,7 +308,8 @@ Antes de marcar una sesión como completa, responder explícitamente:
 - Divergencias actuales: `docs/MIROVA_DIVERGENCES.md`
 - Papers MIROVA canonical: `~memory/reference_papers_mirova_canonical.md`
 - Parches no-MIROVA inventario: `~memory/project_s26_parches_no_mirova.md`
-- A/B literal puro NO APROBADO: `~memory/project_s27_mirova_literal_negativo.md`
+- ⚠️ **SIN EVIDENCIA desde S147, marca agregada S151** (ver la marca bajo el título de la sección del
+  literal puro, más arriba). Texto original: A/B literal puro NO APROBADO: `~memory/project_s27_mirova_literal_negativo.md`
 
 ---
 
