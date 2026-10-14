@@ -37,15 +37,18 @@ Format: data/{volcano_name}.json
 }
 """
 
+import functools
 import json
 import math
 import os
+import subprocess
 from pathlib import Path
 from datetime import datetime, timezone
 
 from pipeline.f5_core import es_viirs_iband, f5_core_vrp_mw
 from pipeline.profile import (
     DATA_SUBDIR,
+    PROFILE_NAME,
     MIN_VRP_MW_VIIRS375,
     MIN_VRP_MW_VIIRS750,
     MIN_VRP_MW_MODIS,
@@ -68,6 +71,26 @@ SANITY_CAP_VRP_MW = 50000.0
 # (Coppola 2025 Cap.11) y VIIRS clampea antes; una BT de 566 K como la del
 # granule de Lastarria del 2026-04-23 solo sale de un flag DN no enmascarado.
 BT_PHYSICAL_MAX_K = 500.0
+
+
+@functools.lru_cache(maxsize=1)
+def _sha_git_local():
+    """Sha del checkout cuando no corre en GitHub Actions; None si no hay git."""
+    try:
+        out = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True,
+                             cwd=Path(__file__).parent, timeout=10)
+        sha = out.stdout.strip()
+        return sha if out.returncode == 0 and len(sha) == 40 else None
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def _marca_regimen() -> dict:
+    """Perfil y version del codigo que producen ESTE record (S151, loop 0.6)."""
+    sha_actions = os.environ.get("GITHUB_SHA")
+    if sha_actions:
+        return {"perfil": PROFILE_NAME, "codigo_sha": sha_actions, "origen": "actions"}
+    return {"perfil": PROFILE_NAME, "codigo_sha": _sha_git_local(), "origen": "local"}
 
 
 def _apply_vrp_floor(record: dict) -> None:
@@ -497,6 +520,14 @@ def append_record(volcano_name: str, record: dict,
     # falsa de meses despues de cualquier reproceso.
     # Campo descriptivo: no entra en deteccion, magnitud ni en ninguna compuerta.
     record["processed_utc"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    # S151 (loop 0.6, A45 con tag pre-s151-marca-regimen): marca de REGIMEN.
+    # POR QUE: 0 de 65.206 records decian con que perfil y con que codigo se produjeron
+    # (VERIFICADOR_DATOS S150 D7). Un JSON mezcla meses, reprocesos parciales y cambios de flags;
+    # sin la marca, comparar antes y despues de un cambio (A104) obliga a adivinar el regimen por
+    # fechas de merge, y eso falla en silencio con los reprocesos. Se reescribe en cada version del
+    # record, como processed_utc. Campo descriptivo: no entra en deteccion, magnitud ni compuertas.
+    record["regimen"] = _marca_regimen()
 
     # S19 M4 2026-04-24: sanity cap físico antes del piso por sensor.
     # 50,000 MW = 1.3x el P99.99 del archivo OSF v2.5 (615k filas globales
