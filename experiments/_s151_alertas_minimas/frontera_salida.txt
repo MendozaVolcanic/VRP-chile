@@ -1,0 +1,198 @@
+== A. Banner leido por el OCR de Mirova-v1 (Nivel_Anomalia_MIROVA, snapshot del repo)
+   cobertura por sensor y banner: {'MODIS': {'LOW': 1}, 'VIIRS375': {'VERY_LOW': 107, 'LOW': 13, 'NONE': 9}, 'VIIRS750': {'LOW': 7}}
+  todas las filas con banner (los tres sensores): n=137
+     VRP 0.02  NONE 2
+     VRP 0.03  NONE 1
+     VRP 0.04  NONE 4
+     VRP 0.05  NONE 2  VERY_LOW 3
+     VRP 0.06  VERY_LOW 8
+     VRP 0.07  VERY_LOW 12
+     VRP 0.08  VERY_LOW 3
+     VRP 0.09  VERY_LOW 7
+     VRP 0.10  VERY_LOW 2
+     VRP 0.11  VERY_LOW 4
+     VRP 0.12  VERY_LOW 7
+     VRP > 0.12: {'LOW': 21, 'VERY_LOW': 61}
+     violaciones de la regla 'NONE si VRP <= c': c=0.02: 7  c=0.03: 6  c=0.04: 2  c=0.05: 3  c=0.06: 11  c=0.07: 23  c=0.08: 26
+     H (redondeo, umbral entre 0,045 y 0,055): violaciones fuera de 0,05 = 0
+   corte VERY LOW / LOW (1 MW) por sensor:
+     MODIS    filas VERY LOW o LOW 1, en el lado equivocado de 1 MW: 0
+     VIIRS375 filas VERY LOW o LOW 120, en el lado equivocado de 1 MW: 0
+     VIIRS750 filas VERY LOW o LOW 7, en el lado equivocado de 1 MW: 0
+   VRP del OCR contra el del consolidado en la misma pasada (filas con banner): igual 123, distinto 7, sin fila en el consolidado 7
+   detalle de 0,04 a 0,06 MW (para ver si algo distinto del VRP separa el borde, por ejemplo la distancia):
+     0.04  NONE      Tupungatito    2026-08-16 05:42:01  dist 1.35 km  cenit 5.0
+     0.04  NONE      Tupungatito    2026-08-21 06:30:02  dist 2.3 km  cenit 63.0
+     0.04  NONE      Lastarria      2026-09-01 05:36:01  dist 1.62 km  cenit 12.0
+     0.04  NONE      Villarrica     2026-09-22 05:48:01  dist 1.08 km  cenit 3.0
+     0.05  VERY_LOW  Tupungatito    2026-09-06 05:30:00  dist 2.3 km  cenit 34.0
+     0.05  VERY_LOW  Nevados de Chi 2026-09-15 06:18:01  dist 0.41 km  cenit 45.0
+     0.05  NONE      Tupungatito    2026-09-17 04:48:02  dist 5.41 km  cenit 62.0
+     0.05  VERY_LOW  Lastarria      2026-09-21 06:06:01  dist 1.35 km  cenit 32.0
+     0.05  NONE      Tupungatito    2026-10-08 05:48:01  dist 5.27 km  cenit 5.0
+     0.06  VERY_LOW  Chaiten        2026-08-18 05:48:02  dist 0.41 km  cenit 14.0
+     0.06  VERY_LOW  Tupungatito    2026-08-21 04:54:02  dist 5.27 km  cenit 58.0
+     0.06  VERY_LOW  Isluga         2026-08-22 05:24:01  dist 0.95 km  cenit 44.0
+     0.06  VERY_LOW  Puyehue-Cordon 2026-08-22 05:30:01  dist 8.11 km  cenit 23.0
+     0.06  VERY_LOW  Chaiten        2026-08-24 05:36:02  dist 0.41 km  cenit 
+     0.06  VERY_LOW  Tupungatito    2026-09-12 05:36:01  dist 5.27 km  cenit 15.0
+     0.06  VERY_LOW  Chaiten        2026-09-17 05:42:01  dist 0.81 km  cenit 3.0
+     0.06  VERY_LOW  Isluga         2026-10-06 06:24:01  dist 0.54 km  cenit 48.0
+
+== B. Color de la estrella del grafico de distancias (nota del OCR, version 29 en adelante)
+   por version: {'31.0': 8, '30.0': 160, '29.2': 113, '29.1': 4, '21.0': 4} | por sensor: {'MODIS': 2, 'VIIRS375': 270, 'VIIRS750': 17}
+   estrella contra banner, filas que tienen los dos: {('VERDE', 'LOW'): 17, ('VERDE', 'VERY_LOW'): 83, ('NONE', 'NONE'): 7}
+  estrella gris = NONE, verde = anomalia: n=289
+     VRP 0.02  NONE 2
+     VRP 0.03  NONE 2
+     VRP 0.04  NONE 5  VERDE 5
+     VRP 0.05  NONE 3  VERDE 5
+     VRP 0.06  NONE 1  VERDE 16
+     VRP 0.07  VERDE 14
+     VRP 0.08  VERDE 7
+     VRP 0.09  VERDE 9
+     VRP 0.10  VERDE 3
+     VRP 0.11  VERDE 5
+     VRP 0.12  NONE 1  VERDE 4
+     VRP > 0.12: {'VERDE': 201, 'NONE': 6}
+     violaciones de la regla 'NONE si VRP <= c': c=0.02: 18  c=0.03: 16  c=0.04: 16  c=0.05: 18  c=0.06: 33  c=0.07: 47  c=0.08: 54
+     H (redondeo, umbral entre 0,045 y 0,055): violaciones fuera de 0,05 = 13
+  estrella, solo pasadas tambien en el consolidado con el mismo VRP: n=148
+     VRP 0.02  NONE 2
+     VRP 0.03  NONE 2
+     VRP 0.04  NONE 5
+     VRP 0.05  NONE 2  VERDE 4
+     VRP 0.06  VERDE 13
+     VRP 0.07  VERDE 13
+     VRP 0.08  VERDE 5
+     VRP 0.09  VERDE 8
+     VRP 0.10  VERDE 2
+     VRP 0.11  VERDE 5
+     VRP 0.12  VERDE 4
+     VRP > 0.12: {'VERDE': 83}
+     violaciones de la regla 'NONE si VRP <= c': c=0.02: 9  c=0.03: 7  c=0.04: 2  c=0.05: 4  c=0.06: 17  c=0.07: 30  c=0.08: 35
+     H (redondeo, umbral entre 0,045 y 0,055): violaciones fuera de 0,05 = 0
+  estrella, filas sin par en el consolidado (pueden llevar la imagen de otra pasada): n=141
+     VRP 0.04  VERDE 5
+     VRP 0.05  NONE 1  VERDE 1
+     VRP 0.06  NONE 1  VERDE 3
+     VRP 0.07  VERDE 1
+     VRP 0.08  VERDE 2
+     VRP 0.09  VERDE 1
+     VRP 0.10  VERDE 1
+     VRP 0.12  NONE 1
+     VRP > 0.12: {'VERDE': 118, 'NONE': 6}
+     violaciones de la regla 'NONE si VRP <= c': c=0.02: 9  c=0.03: 9  c=0.04: 14  c=0.05: 14  c=0.06: 16  c=0.07: 17  c=0.08: 19
+     H (redondeo, umbral entre 0,045 y 0,055): violaciones fuera de 0,05 = 13
+
+== C. Banner leido en las imagenes VRP de mayo del archivo local (tres sensores)
+   imagenes VRP de un sensor: 2702; hora leida: 2702; lectura del banner por mascara y por color coinciden: 2702
+   control de la hora: adquisicion posterior a la modificacion del archivo en 0 imagenes; desfase en horas: mediana 4.5, p95 10.5, max 18.7
+   pasadas distintas (volcan, sensor, hora): 1969; con dos banners distintos entre copias: 0
+     detalle C: VIIRS750 0.18 VERY_LOW  PlanchonPeteroa      2026-05-09 05:42  dist 2.37 km  ALERTA_TERMICA
+     detalle C: VIIRS375 0.06 VERY_LOW  Lastarria            2026-05-09 05:42  dist 2.4 km  ALERTA_TERMICA
+     detalle C: VIIRS375 0.05 NONE      Lastarria            2026-05-10 06:12  dist 1.55 km  ALERTA_TERMICA
+     detalle C: VIIRS375 0.06 VERY_LOW  Lastarria            2026-05-12 06:24  dist 1.19 km  ALERTA_TERMICA
+     detalle C: VIIRS375 0.06 VERY_LOW  NevadosDeChillan     2026-05-14 05:48  dist 0.38 km  ALERTA_TERMICA
+     detalle C: VIIRS750 0.15 NONE      Isluga               2026-05-15 05:24  dist 1.06 km  ALERTA_TERMICA
+     detalle C: VIIRS375 0.04 NONE      Lastarria            2026-05-15 06:18  dist 1.19 km  ALERTA_TERMICA
+     detalle C: VIIRS375 0.06 VERY_LOW  Lastarria            2026-05-16 06:00  dist 1.35 km  ALERTA_TERMICA
+     detalle C: VIIRS375 0.06 VERY_LOW  Tupungatito          2026-05-17 05:42  dist 5.21 km  ALERTA_TERMICA
+     detalle C: VIIRS375 0.06 VERY_LOW  Isluga               2026-05-18 06:12  dist 0.53 km  ALERTA_TERMICA
+     detalle C: VIIRS375 0.05 NONE      Tupungatito          2026-05-18 06:48  dist 4.8 km  ALERTA_TERMICA
+     detalle C: VIIRS375 0.05 NONE      Chaiten              2026-05-19 06:48  dist 0.0 km  ALERTA_TERMICA
+   sin pasada en la referencia a +-120 s: {'VIIRS750': 14}
+   pareadas con VRP 0 en la referencia (sensor, banner): {('MODIS', 'NONE'): 531, ('VIIRS750', 'NONE'): 760, ('VIIRS375', 'NONE'): 510}
+  VIIRS375, pasadas con VRP > 0: n=127
+     VRP 0.03  NONE 2
+     VRP 0.04  NONE 1
+     VRP 0.05  NONE 3
+     VRP 0.06  VERY_LOW 6
+     VRP 0.07  VERY_LOW 3
+     VRP 0.08  VERY_LOW 4
+     VRP 0.09  VERY_LOW 2
+     VRP 0.10  VERY_LOW 3
+     VRP 0.11  VERY_LOW 1
+     VRP 0.12  VERY_LOW 3
+     VRP 0.14  VERY_LOW 4
+     VRP 0.15  VERY_LOW 1
+     VRP 0.16  VERY_LOW 1
+     VRP 0.17  VERY_LOW 2
+     VRP 0.18  VERY_LOW 3
+     VRP 0.20  VERY_LOW 2
+     VRP 0.21  VERY_LOW 2
+     VRP 0.22  VERY_LOW 3
+     VRP 0.23  VERY_LOW 1
+     VRP 0.24  VERY_LOW 3
+     VRP 0.25  VERY_LOW 3
+     VRP 0.26  VERY_LOW 1
+     VRP 0.27  VERY_LOW 3
+     VRP 0.28  VERY_LOW 1
+     VRP 0.30  VERY_LOW 1
+     VRP 0.31  VERY_LOW 4
+     VRP 0.35  VERY_LOW 1
+     VRP 0.36  VERY_LOW 1
+     VRP 0.37  VERY_LOW 3
+     VRP 0.38  VERY_LOW 1
+     VRP 0.41  VERY_LOW 1
+     VRP 0.45  VERY_LOW 2
+     VRP 0.46  VERY_LOW 1
+     VRP 0.51  VERY_LOW 1
+     VRP 0.52  VERY_LOW 1
+     VRP 0.53  VERY_LOW 1
+     VRP 0.55  VERY_LOW 1
+     VRP 0.62  VERY_LOW 2
+     VRP 0.64  VERY_LOW 2
+     VRP 0.77  VERY_LOW 2
+     VRP 0.78  VERY_LOW 1
+     VRP 0.79  VERY_LOW 3
+     VRP 0.80  VERY_LOW 1
+     VRP 0.82  VERY_LOW 2
+     VRP 0.84  VERY_LOW 1
+     VRP 0.96  VERY_LOW 1
+     VRP 0.99  VERY_LOW 1
+     VRP 1.01  LOW 1
+     VRP 1.17  LOW 1
+     VRP 1.19  LOW 1
+     VRP > 1.20: {'LOW': 30, 'MODERATE': 1}
+     violaciones de la regla 'NONE si VRP <= c': c=0.02: 6  c=0.03: 4  c=0.04: 3  c=0.05: 0  c=0.06: 6  c=0.07: 9  c=0.08: 13
+     H (redondeo, umbral entre 0,045 y 0,055): violaciones fuera de 0,05 = 0
+     corte VERY LOW / LOW en 1 MW, filas en el lado equivocado: 0 de 120
+  VIIRS750, pasadas con VRP > 0: n=20
+     VRP 0.15  NONE 1
+     VRP 0.18  VERY_LOW 1
+     VRP 0.24  VERY_LOW 2
+     VRP 0.26  VERY_LOW 1
+     VRP 0.27  VERY_LOW 1
+     VRP 0.33  VERY_LOW 1
+     VRP 0.39  VERY_LOW 1
+     VRP 0.45  VERY_LOW 1
+     VRP 0.53  VERY_LOW 1
+     VRP 0.66  VERY_LOW 1
+     VRP 0.69  VERY_LOW 1
+     VRP 0.82  VERY_LOW 1
+     VRP 0.87  VERY_LOW 1
+     VRP 0.88  VERY_LOW 1
+     VRP 0.99  VERY_LOW 1
+     VRP > 1.20: {'LOW': 4}
+     violaciones de la regla 'NONE si VRP <= c': c=0.02: 1  c=0.03: 1  c=0.04: 1  c=0.05: 1  c=0.06: 1  c=0.07: 1  c=0.08: 1
+     H (redondeo, umbral entre 0,045 y 0,055): violaciones fuera de 0,05 = 1
+     corte VERY LOW / LOW en 1 MW, filas en el lado equivocado: 0 de 19
+  MODIS, pasadas con VRP > 0: n=7
+     VRP 0.34  VERY_LOW 1
+     VRP 0.39  VERY_LOW 1
+     VRP 0.76  VERY_LOW 1
+     VRP 0.84  VERY_LOW 1
+     VRP 0.86  VERY_LOW 1
+     VRP 1.07  LOW 1
+     VRP > 1.20: {'LOW': 1}
+     violaciones de la regla 'NONE si VRP <= c': c=0.02: 0  c=0.03: 0  c=0.04: 0  c=0.05: 0  c=0.06: 0  c=0.07: 0  c=0.08: 0
+     H (redondeo, umbral entre 0,045 y 0,055): violaciones fuera de 0,05 = 0
+     corte VERY LOW / LOW en 1 MW, filas en el lado equivocado: 0 de 7
+
+== RESUMEN del control
+   A (OCR banner)       reglas con el minimo de violaciones (2): [0.04] | reglas desplazadas c=0,03 y c=0,06: 6, 11
+   B (estrella)         reglas con el minimo de violaciones (16): [0.03, 0.04] | reglas desplazadas c=0,03 y c=0,06: 16, 33
+   B con par en CONS    reglas con el minimo de violaciones (2): [0.04] | reglas desplazadas c=0,03 y c=0,06: 7, 17
+   C VIIRS375 (mayo)    reglas con el minimo de violaciones (0): [0.05] | reglas desplazadas c=0,03 y c=0,06: 4, 6
+   H fuera de 0,05: A 0, B 13 (con par en CONS 0, sin par 13), C VIIRS375 0, C VIIRS750 1, C MODIS 0
