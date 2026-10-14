@@ -2291,6 +2291,17 @@ para un A/B, no para afirmar el origen exacto.
 
 ## D18 — El ROI1 del paper es una CAJA de 5 km igual para todos; el nuestro es un CÍRCULO de 3 a 20 km por volcán — **ABIERTA (A/B corrido S130 → NO ADOPTAR; divergencia de fidelidad literal, prioridad baja)** S129/S130
 
+> ⚠️ **S151 (loop, tarea 1.7, `experiments/_s151_prereg_caja/`, PR #800, verificado): medido sin correr nada,
+> y con un A/B reducido esperando sello (D-8, issue #801).** (1) Desde #738 el flag de la caja llega a las 24
+> llamadas de umbral dual en los dos pases de los tres procesadores. (2) Sobre el candidato K (sin Test 1, `max`,
+> banda 22), en los 8 volcanes donde nuestra caja centrada en el cráter coincide con la de MIROVA, el neto de la
+> caja es cero: `max` ya apaga la misma población. (3) **MIROVA mide `Distancia_km` desde el centro de su grilla,
+> no desde el cráter** (Tupungatito 34 de 40, PCC 38 de 50, Planchón Peteroa 17 de 17 alertas VIIRS 375 a menos
+> de 1 km de la distancia centro-cráter; `distancia_mirova.py`), así que en esos 3 volcanes no se puede saber
+> dónde centra su caja: si en la grilla, publica fuera de ella el 24,8 a 28,8 % de sus alertas VIIRS 375 de la
+> ventana; si en el cráter, el 2,7 %. «MIROVA calla fuera de la caja» sólo se sostiene en los 8 centrados (0,9 a
+> 2,2 %). El texto de abajo se conserva por historia.
+
 > ⚠️ **S148: el «NO ADOPTAR, redistribuye y no recorta» de S130 y el «0 de 51» del brazo G de S148
 > NO miden la caja: miden un defecto de cableado.** `enable_roi1_box_paper` entrega la caja sólo
 > al primer pase. El segundo pase (`second_pass_adjacent`) recibe
