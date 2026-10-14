@@ -25,6 +25,12 @@ HITOS = [
     ("2026-06-11", "ocr", "VIIRS", "antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable"),
     ("2026-06-13", "ocr", "VIIRS", "antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia"),
     ("2026-08-06", "ocr", "VIIRS", "cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)"),
+    # S151 (loop 0.4b). Los dos que pedian docs/AUDIT_S149.md:128 y VERIFICADOR_DOCUMENTOS S150 P7.
+    ("2026-04-09", "tabla", "NOAA-21", "antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; "
+     "cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)"),
+    ("2026-10-09", "ocr", "Suomi NPP", "antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada "
+     "(la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; "
+     "evidencia en el commit 9a305c9db (#774)"),
 ]
 FUENTE = "docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2"
 
