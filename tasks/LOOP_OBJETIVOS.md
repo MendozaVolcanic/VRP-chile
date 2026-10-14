@@ -130,7 +130,8 @@ y dos verificadores, 2026-10-09).
   (d) sacar `ENABLE_TEST1_NULL_CORRECTED` de toda cola (ningún procesador lo lee, VERIFICADOR_DATOS D8).
   Cada arreglo con su test que falla antes.
 
-- [ ] **0.5 Scraper de Mirova-v1 con VRP de 1.000 MW o más** (issue MendozaVolcanic/Mirova-v1#19, 36 ciclos
+- [~] **0.5 Scraper de Mirova-v1 con VRP de 1.000 MW o más** PR Mirova-v1#21 listo con CI verde; espera el sí
+  de Nicolás (issue #783). (issue MendozaVolcanic/Mirova-v1#19, 36 ciclos
   caídos; `scraper.py:140`). En plena erupción de Chillán es el caso que puede pasar. PR en Mirova-v1 con test
   del caso "1,234.5"; **el merge espera el sí de Nicolás** (es otro repo de producción).
 
@@ -192,11 +193,21 @@ y dos verificadores, 2026-10-09).
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
 | D-1 | Adoptar conectiva `max` en VIIRS 375 (criterio §1.2 por medir en 0.2) | `docs/S150_RESULTADO_MESES.md`, `docs/audit_s150/meta/AUDITOR_F2_NUMEROS.md` | pendiente | pendiente |
-| D-2 | Merge del arreglo del scraper Mirova-v1#19 (tarea 0.5) | pendiente | pendiente | pendiente |
+| D-2 | Merge del arreglo del scraper Mirova-v1#19 (tarea 0.5) | CI verde de Mirova-v1#21; 4 tests | Mirova-v1#21 | #783 |
 | D-3 | Marca de régimen en `store.py` (tarea 0.6) | pendiente | pendiente | pendiente |
 | D-4 | Alerta protegida: lectura A (alertas del scraper, 439 pasadas, recomendada) o B (todo VRP >= 1 MW, 992) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 12:35 UTC): vuelta 6, tarea 0.5 lista para el sí de Nicolás
+- `scraper.py` de Mirova-v1: `numero_tabla` acepta sólo comas de miles bien formadas (una coma decimal "0,5"
+  levanta error en vez de leerse 5) y una fila ilegible se salta con ADVERTENCIA en la bitácora en vez de botar
+  el ciclo. Test nuevo `tests/test_numero_tabla.py`: 4 de 4 contra el arreglo, falla contra el original.
+  Rama y commits por la API (sin clonar). PR Mirova-v1#21, CI verde completo (run 38563906601). Issue #783.
+- El clasificador de permisos bloqueó ejecutar en local código bajado de Mirova-v1 (después de la corrida de
+  tests): no se vuelve a correr código de otro repo en local; la prueba la da su CI.
+- 0.3 sigue con su agente. Run de Chillán 38560317428 en curso.
+- Próximo paso: PR de 0.3 y su verificador; luego 0.4 (c) y 0.6 (marca de régimen, va a la cola por §1.1).
 
 ### 2026-10-14 (servidor 12:24 UTC): vuelta 5, 0.2 verificada y mergeada, 0.4 (a, b, d) mergeada, 0.3 en curso
 - Verificador limpio de #780: regla de 1 MW CONFIRMADA, pero (i) los conteos eran filas: por pasada son 2.280
