@@ -3,14 +3,16 @@
 # EL FENOMENO. MIROVA aplica el umbral permisivo de cumbre (C1 0,003, C2 5 de noche) solo en una caja de
 # 5 x 5 km sobre el crater, y el estricto de escena (C1 0,010, C2 10) en todo lo demas (Coppola 2016a p. 6;
 # Coppola et al. 2023 p. 3: "slightly higher thresholds which reduce false alerts"). La replica aplica el
-# permisivo en un circulo de 3 a 20 km segun el volcan. La base de MIROVA concuerda con la caja: de sus
-# alertas VIIRS 375 de la ventana V1, en los 8 volcanes cuyo punto de referencia es el crater, entre 0,9 y
-# 2,2 % caen fuera de ella (experiments/_s151_prereg_caja/prediccion_mirova_salida.txt).
+# permisivo en un circulo de 3 a 20 km segun el volcan. En los 8 volcanes cuyo centro de grilla de MIROVA
+# esta junto al crater, entre 0,9 y 2,2 % de sus alertas VIIRS 375 de V1 caen fuera de la caja; con los 11,
+# si la caja de MIROVA se centra donde mide su distancia (el centro de grilla), entre 24,8 y 28,8 %
+# (experiments/_s151_prereg_caja/distancia_mirova_salida.txt). Esta caja se centra en el crater.
 #
 # POR QUE AHORA. D18 nunca se midio: S130 la corrio con el Test 1 encendido, que satura la metrica (A114), y
 # S148 con la caja solo en el primer pase (A118). #738 la cableo a los dos pases.
 #
 # QUE CAMBIA respecto del brazo K (_s149_ab_sin_test1_b22_max): UNA cosa, enable_roi1_box_paper.
+# USO (version 2 del pre-registro): solo en las dos pasadas dirigidas al veto (D1 Lascar, D2 Isluga).
 # CRITERIO: pre-registrado y commiteado ANTES de correr, en experiments/_s151_prereg_caja/PREREGISTRO.md
 # NO OPERACIONAL: data_subdir aislado, fuera del cron NRT, nunca se commitea a data/.
 extends: mirova_equivalent

@@ -33,9 +33,10 @@ sys.stdout.reconfigure(encoding="utf-8")
 AQUI = Path(__file__).resolve().parent; RAIZ = AQUI.parents[1]
 sys.path.insert(0, str(RAIZ))
 
-BRAZOS = {"K": "_s149_ab_sin_test1_b22_max", "KC": "_s151_ab_sin_test1_b22_max_caja", "KG": "_s151_ab_sin_test1_b22_max_gemelo",
+# Version 2 del pre-registro: el gemelo KG salio del despacho (y su perfil del repo); K y KC corren solo en las dirigidas.
+BRAZOS = {"K": "_s149_ab_sin_test1_b22_max", "KC": "_s151_ab_sin_test1_b22_max_caja",
           "B": "_s146_ab_sin_test1", "BC": "_s147_ab_sin_test1_caja", "produccion": "mirova_equivalent"}
-CAJA_DECLARADA = {"K": False, "KC": True, "KG": False, "B": False, "BC": True, "produccion": False}
+CAJA_DECLARADA = {"K": False, "KC": True, "B": False, "BC": True, "produccion": False}
 FLAGS = ("PROFILE_NAME", "DATA_SUBDIR", "ENABLE_ROI1_BOX_PAPER", "ROI1_BOX_HALF_KM", "ENABLE_TEST1_PATH",
          "ENABLE_TESTS_23_PROSE_BRANCH", "ENABLE_MODIS_B22_PRIMARY", "ENABLE_FIRST_PASS_TESTS_2_AND_3",
          "ENABLE_DUAL_ROI_FIRST_PASS", "ENABLE_SECOND_PASS_ADJACENT", "ENABLE_DUAL_ROI_SECOND_PASS",
@@ -89,7 +90,7 @@ def seccion_flags():
             f["DNTI_CONTEXTUAL_C1_SUMMIT"], f["DNTI_CONTEXTUAL_C1_SCENE"], f["C2_DNTI_SUMMIT_NIGHT"], f["C2_DNTI_SCENE_NIGHT"],
             "OK" if not probs else ("(produccion, informa) " if n == "produccion" else "PROBLEMA: ") + "; ".join(probs)))
     # los pares de la prueba difieren SOLO en la caja (y el gemelo en nada), salvo nombre y directorio
-    for a, b in (("K", "KC"), ("K", "KG"), ("B", "BC")):
+    for a, b in (("K", "KC"), ("B", "BC")):
         if "error" in fl[a] or "error" in fl[b]:
             continue
         dif = sorted(k for k in FLAGS if k not in ("PROFILE_NAME", "DATA_SUBDIR") and fl[a][k] != fl[b][k])

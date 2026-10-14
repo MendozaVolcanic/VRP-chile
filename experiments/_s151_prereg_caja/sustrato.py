@@ -376,6 +376,23 @@ def main():
                 print("   %-36s %-28s %-8s publicadas %4d, fuera %4d (%.1f %%) | alertas %4d, fuera %3d | negativos %4d, fuera %3d" % (
                     etiqueta, brazo, s, len(rr), len(fuera), 100 * len(fuera) / len(rr), len(pos), len(posf), len(neg), len(negf)))
 
+    # Arreglo D2 del verificador del PR #800: Puyehue Cordon Caulle, Tupungatito y Planchon Peteroa tienen el centro de
+    # grilla de MIROVA lejos del crater, y la caja del brazo se centra en el crater: alli la caja del brazo no es la de
+    # MIROVA. Lo que decide se cuenta solo en los 8 centrados; los 3 corridos se informan aparte. El TECHO por sensor
+    # es lo que la caja puede mover la suma bajo 1 MW en V1 (41 dias): expuestas por mes en los runs mensuales por
+    # 41/30, redondeado hacia arriba, con un minimo de 1.
+    print("\n== CENTRADOS CONTRA CORRIDOS, runs mensuales: publicadas EXPUESTAS por grupo de MIROVA")
+    mens = [r for r in todos if r["run"] != "38560317428"]
+    for brazo, sensores in ((B, SENS), (F, ("VIIRS375", "VIIRS750")), (K, ("MODIS",))):
+        for s in sensores:
+            meses = len({r["mes"] for r in mens if r["brazo"] == brazo and r["b"] == s})
+            for etq, sel_v in (("8 centrados", lambda v: v in centrados), ("3 corridos", lambda v: v not in centrados)):
+                rr = [r for r in mens if r["brazo"] == brazo and r["b"] == s and sel_v(r["vol"]) and r["pub"] and r["cat"] == "expuesta"]
+                c = collections.Counter(grupo(r) for r in rr)
+                techo = max(1, math.ceil((c["neg_limpio"] + c["muy_bajo"] + c["protegida_A"] + c["protegida_B"]) / max(meses, 1) * 41 / 30))
+                print("   %-28s %-8s %-12s expuestas: protegidas A %d, solo B %d, Muy Bajo %d, negativos %d, otras %d | meses %d | techo V1 %d" % (
+                    brazo, s, etq, c["protegida_A"], c["protegida_B"], c["muy_bajo"], c["neg_limpio"], c["otras"], meses, techo))
+
     print("\n== PASADAS EXPUESTAS DEL CANDIDATO (F en VIIRS, K en MODIS) que son alertas de MIROVA: las unicas que la caja puede perder")
     for r in sorted(todos, key=lambda r: r["dt"]):
         cand = (r["brazo"] == F and r["b"] != "MODIS") or (r["brazo"] == K and r["b"] == "MODIS")

@@ -1,269 +1,258 @@
 # Pre-registro S151 (tarea 1.7 del loop): la caja de 5 × 5 km (D18), medida por primera vez
 
-> **VERSIÓN 1, SIN APROBAR, SIN DESPACHAR.** Escrito y commiteado antes de correr ningún brazo. Falta el verificador
-> con contexto limpio y el "sí" de Nicolás (el candado `preregistro_aprobado` del workflow es suyo). Todos los
-> números salen de los scripts de esta carpeta, con su salida al lado: `cableado_salida.txt`,
-> `sustrato_salida.txt`, `prediccion_mirova_salida.txt` y `probar_salida.txt`.
+> **VERSIÓN 2, SIN APROBAR, SIN DESPACHAR.** La versión 1 la revisó un verificador con contexto limpio: confirmó el
+> cableado, el workflow, el sustrato, la prueba y la suite, y dijo "no vale la pena despachar V1 tal como está" por
+> cuatro defectos (D1 a D4). La versión 2 los corrige (§10). Falta el "sí" de Nicolás (el candado
+> `preregistro_aprobado` del workflow es suyo). Todos los números salen de los scripts de esta carpeta, con su salida
+> al lado: `cableado_salida.txt`, `sustrato_salida.txt`, `prediccion_mirova_salida.txt`, `distancia_mirova_salida.txt`
+> y `probar_salida.txt`.
 
 ## 1. El fenómeno, y la pregunta
 
 **El fenómeno.** De noche, un píxel tibio cerca de un volcán puede ser lava, una fumarola de alta temperatura, o
 nada: roca oscura sin nieve, el borde de una nube, ruido del sensor. MIROVA resuelve esa ambigüedad con dos
 umbrales según el lugar. En una **caja de 5 × 5 km sobre la cumbre**, donde una fuente de calor es esperable, usa
-el umbral permisivo (de noche C1 = 0,003 y C2 = 5); en todo lo demás usa el estricto (C1 = 0,010 y C2 = 10),
+el umbral permisivo (de noche C1 = 0,003 y C2 = 5); en todo lo demás, el estricto (C1 = 0,010 y C2 = 10),
 "slightly higher thresholds which reduce false alerts" (Coppola et al. 2023, Front. Earth Sci. 11:1240107, p. 3;
 la caja, Coppola 2016a p. 6). La réplica aplica el permisivo en un **círculo de `inner_radius_km`**, de 3 a 20 km
 según el volcán (los radios del KML de MIROVA, que en MIROVA clasifican, no fijan umbrales). Es la divergencia D18.
 
-**Qué dice la base de MIROVA** (`prediccion_mirova.py`, A115). Si MIROVA usa la caja, sus alertas tienen que caer
-casi todas adentro: afuera sólo pasa calor fuerte. En V1, en los 8 volcanes cuyo punto de referencia de MIROVA es
-el cráter, de 223 alertas VIIRS 375, **218 están a 2,5 km o menos** (dentro de la caja con cualquier acimut), 3
-entre 2,5 y 3,54 km (depende del acimut, que el CSV no trae, A93) y 2 sobre 3,54 km (fuera con cualquier
-acimut). VIIRS 750: 34 de 34 adentro; MODIS: 8 de 8. De abril a octubre, sólo la tabla: 573 de 600, 165 de 166 y
-59 de 59. O sea, **entre 0,9 y 2,2 % de las alertas VIIRS 375 de MIROVA en V1 caen fuera de su caja**. El control
-de ese script (que toda fila FALSO_POSITIVO del scraper esté sobre el límite de su volcán) falló en la primera
-versión porque supuse 5 km para todos; Lastarria y Planchón Peteroa tienen 3: corregido, da 0 de 73 y 0 de 340.
+**Hallazgo previo al A/B: desde dónde mide MIROVA, y cuánto publica fuera de su caja** (`distancia_mirova.py`).
+- `Distancia_km` la calcula MIROVA (el scraper la copia de `latest.php`; Mirova-v1, `reconciliar_latest.py`) y es un
+  desplazamiento en celdas enteras de su grilla (D15: 100 % de 10.085 filas MODIS y 11.810 VIIRS 375).
+- **Se mide desde el centro de su grilla, no desde el cráter.** Donde el centro de grilla está lejos del cráter, las
+  alertas se amontonan a esa distancia: en Tupungatito (centro a 4,86 km del cráter, D17) la mediana es 5,21 km y
+  **34 de 40** alertas VIIRS 375 de V1 caen a menos de 1 km de 4,86 km, contra **0 de 40** a menos de 1 km de 0; en
+  Puyehue Cordón Caulle (7,57 km) la mediana es 7,83 km, 38 de 50 contra 0; en Planchón Peteroa (2,02 km), 17 de 17
+  contra 0. El calor está en el cráter y la distancia se cuenta desde el centro de grilla.
+- **Dónde centra MIROVA su caja no se puede establecer con estos datos.** Coppola 2016a centra la grilla y la caja en
+  lo mismo, "the volcano's summit", sin dar la coordenada. Dos lecturas, con su número (VIIRS 375):
 
-**Qué hace hoy la réplica** (`sustrato.py`, mismos 8 volcanes, cúmulo publicado fuera de la caja). El brazo B
-(sin Test 1, conectiva `min`) publica fuera de la caja el **25,6 %** de sus pasadas VIIRS 375 en lo que hay en
-disco de V1 (70 de 273; 50 de sus 89 negativos limpios publicados), y el 20,0 % de abril a septiembre. El
-candidato F/K (sin Test 1, conectiva `max`, banda 22 en MODIS) publica fuera **1,6 %** (2 de 128) y 1,5 % (16 de
-1.086): **ya está en la banda de MIROVA**. La conectiva `max` y la caja atacan la misma población: el calor
-débil de la corona, que con `max` ya no pasa.
+| lectura | centro de la caja de MIROVA | V1, 11 volcanes, fuera de su caja | abril a octubre, tabla sola |
+|---|---|---|---|
+| **L1** | el centro de grilla (el mismo punto desde el que mide) | **82 de 330 (24,8 %)**, con las ambiguas de 2,5 a 3,54 km **95 (28,8 %)**; 80 de las 107 de Tupungatito, Puyehue Cordón Caulle y Planchón Peteroa | 268 de 941 (28,5 %) a 290 (30,8 %) |
+| **L2** | el cráter | **9 de 330 (2,7 %)** fuera con seguridad (cota inferior por desigualdad triangular) | 4 de 941 (0,4 %) |
+| las dos | en los **8 volcanes con el centro de grilla junto al cráter** | **5 de 223 (0,9 a 2,2 %)** | 27 de 600 como máximo (4,5 %) |
 
-**La pregunta.** Con el Test 1 apagado en el control (donde la palanca puede actuar, A114) y la caja en los dos
-pases (#738, A118): ¿la caja acerca la réplica a MIROVA según el criterio de victoria de `docs/MISSION.md`
-(ninguna alerta protegida perdida; bajo 1 MW, menor suma de alertas perdidas y publicaciones de más; en las dos
-direcciones, por sensor, con recall, publicación en negativos limpios y razón de magnitud), con las dos lecturas
-de alerta protegida de `docs/S151_CRITERIO_CLASE_MIROVA.md` (A por defecto, B pendiente en #782)?
+  En VIIRS 750, L1 da 12 de 47 en V1 (25,5 %) y L2 0; en MODIS, 0 de 8 con las dos.
+- **Lo que esto significa.** La premisa "MIROVA calla fuera de la caja" **se sostiene en los 8 volcanes centrados y
+  no se puede afirmar para los 11**. Si L1 es cierta, en Tupungatito y Puyehue Cordón Caulle el cráter queda **fuera**
+  de la caja de MIROVA: MIROVA lo detecta con el umbral estricto y aun así publica ahí un cuarto de todas sus alertas
+  VIIRS 375, y esas alertas no son más fuertes que las de adentro (mediana 0,14 MW contra 0,18 en V1; 0,18 contra
+  0,17 de abril a octubre, `prediccion_mirova_salida.txt`), así que el umbral estricto no se nota en lo que publica
+  (el VRP no es la variable del test: es una pista, no una prueba). Y nuestra caja, centrada en el cráter, haría lo
+  contrario que la de MIROVA en esos volcanes: les daría el umbral permisivo. **Esto pesa más que el A/B**: para esos
+  tres volcanes, ninguna caja centrada en el cráter puede acercar la réplica a MIROVA si L1 es cierta, y centrarla en
+  el centro de grilla (`get_grid_center()`, D17) es tocar `pipeline/process_*.py` (A45). Por eso el A/B **decide sólo
+  en los 8 centrados** (§7) y los otros tres se informan aparte.
 
-**Lo que ya se midió de la caja, y por qué no vale.** S130 la cerró como NO ADOPTAR con el Test 1 encendido, que
-publica por su cuenta y satura la métrica entre 80 y 92 % (A114). S148 la corrió sin Test 1, pero el flag sólo
-llegaba al primer pase y el segundo recapturaba con el umbral permisivo (A118): 0 de 51 negativos cambiaron. La
-adenda S149 al pre-registro de S147 (`experiments/_s147_ab_conectiva/PREREGISTRO_CAJA.md` §0) planeó repetir G y
-H en septiembre y nunca se despachó. Este pre-registro la reemplaza: suma el criterio de victoria, el candidato K
-como control, el gemelo, la referencia congelada de la unión y las dirigidas al veto.
+**Qué hace hoy la réplica** (`sustrato.py`, 8 centrados, cúmulo publicado fuera de la caja). El brazo B (sin Test 1,
+conectiva `min`) publica fuera de la caja el **25,6 %** de sus pasadas VIIRS 375 en lo que hay en disco de V1 (70 de
+273; 50 de sus 89 negativos limpios) y el 20,0 % de abril a septiembre. El candidato F/K (sin Test 1, conectiva
+`max`, banda 22 en MODIS) publica fuera **1,6 %** (2 de 128) y 1,5 % (16 de 1.086): **ya está en la banda de MIROVA**.
+
+**La pregunta.** Con el Test 1 apagado (A114) y la caja en los dos pases (#738, A118): en los 8 volcanes donde la caja
+del brazo coincide con la de MIROVA, ¿(a) la caja hace lo que el paper dice, y (b) sobre el candidato, pierde alguna
+alerta protegida (criterio de victoria de `docs/MISSION.md`, lecturas A y B de `docs/S151_CRITERIO_CLASE_MIROVA.md`)?
+
+**Lo que ya se midió de la caja, y por qué no vale.** S130 con el Test 1 encendido (A114); S148 con la caja sólo en
+el primer pase (A118: 0 de 51 negativos cambiaron). La adenda S149 (`experiments/_s147_ab_conectiva/PREREGISTRO_CAJA.md`
+§0) planeó repetir G y H en septiembre y nunca se despachó; este pre-registro la reemplaza.
 
 ## 2. ¿Llega el flag a todos sus consumidores? (`cableado.py`)
 
 Tres caminos que no comparten supuestos:
 
-1. **Flags efectivos** leídos de `pipeline.profile` con `VRP_PROFILE` de cada brazo (A89). Los cinco brazos tienen
-   umbral dual en los dos pases (`ENABLE_DUAL_ROI_FIRST_PASS` y `ENABLE_DUAL_ROI_SECOND_PASS` en verdadero), C1
-   0,003 contra 0,010 y C2 5 contra 10, ningún override que achique la diferencia, Test 1 apagado. K contra KC y B
-   contra BC difieren **sólo** en `ENABLE_ROI1_BOX_PAPER`; K contra KG en nada.
-2. **Traza de llamadas por AST** en los tres procesadores. `_roi1_mask = roi_mask_bbox(lat, lon, vent_lat,
-   vent_lon, ROI1_BOX_HALF_KM)` se arma bajo `if ENABLE_ROI1_BOX_PAPER` en los tres. Las **24 llamadas** a
-   funciones de umbral dual (`first_pass_tests_2_and_3`, `dual_roi_bt_threshold`,
-   `dual_roi_contextual_dnti_hot_mask`, `second_pass_adjacent`), 8 por procesador, reciben la caja: por
-   `roi1_mask=_roi1_mask` o por un `is_summit` armado con `roi1_summit_mask(..., _roi1_mask)`.
-3. **Efecto con las funciones reales** sobre la escena sintética de S148, con la máscara armada como la arman hoy
-   los procesadores: un píxel a 3,38 km (en el círculo de 5, fuera de la caja) con un exceso entre los dos
-   umbrales se publica con el círculo y **no** con la caja, con `min` (exceso 0,006) y con `max` (0,015); uno
-   idéntico a 1,5 km (dentro de la caja) se publica en los dos casos.
+1. **Flags efectivos** leídos de `pipeline.profile` con `VRP_PROFILE` de cada brazo (A89): los cuatro brazos tienen
+   umbral dual en los dos pases, C1 0,003 contra 0,010 y C2 5 contra 10, ningún override, Test 1 apagado; K contra KC y
+   B contra BC difieren **sólo** en `ENABLE_ROI1_BOX_PAPER`.
+2. **Traza de llamadas por AST**: `_roi1_mask = roi_mask_bbox(lat, lon, vent_lat, vent_lon, ROI1_BOX_HALF_KM)` se arma
+   bajo `if ENABLE_ROI1_BOX_PAPER` en los tres procesadores, y las **24 llamadas** a funciones de umbral dual (8 por
+   procesador: primer pase, segundo pase, umbral de BT, dNTI dual) reciben la caja.
+3. **Efecto con las funciones reales** (escena sintética de S148, máscara armada como en los procesadores): un píxel a
+   3,38 km con un exceso entre los dos umbrales se publica con el círculo y no con la caja, con `min` y con `max`; uno
+   a 1,5 km, en los dos casos.
 
-**Respuesta: sí, a todo consumidor de umbral.** Los consumidores que siguen con el círculo no son umbrales y,
-uno por uno, no deshacen la caja:
+**Respuesta: sí, a todo consumidor de umbral.** Los que siguen con el círculo no son umbrales y no deshacen la caja:
 
-| consumidor | dónde | qué hace con el círculo | ¿necesita la caja? |
-|---|---|---|---|
-| etiqueta `distance_class` | `process_viirs.py:1808/2104`, `process_viirs_mod.py:1213/1392`, `process_modis.py:320` | summit si el hotspot final cae en el círculo | No. El círculo es el radio del KML de MIROVA, que en MIROVA clasifica; la caja del paper fija umbrales, no qué se publica. Un píxel de la corona que pasa el umbral estricto es alerta en MIROVA también (Coppola 2023: el estricto existe para detectar coladas en los flancos) |
-| gate del tablero | `frontend/index.html:1063/1067` (`mirovaEqVrp`) | publica si `distance_class` es summit y el cúmulo cae en el círculo | No, por lo mismo; es nuestro equivalente del límite del scraper, que también es el `inner_radius_km` (control de `prediccion_mirova.py`) |
-| selección del cúmulo | `clustering.py:150` (`vent_anchored`) | prefiere cúmulos con centroide en el círculo | No: elige entre lo ya alertado, no vuelve a alertar nada |
-| ancla honesta | `resolve_honest_anchor` en los tres; `process_modis.py:912` (semillas del primer pase en el círculo) | decide la posición publicada | No: posición, no umbral. Con la caja, menos semillas de la corona pasan, y eso se ve en P4 |
-| magnitud | `store.py:559` y `f5_core.py:85` (núcleo VIIRS 375), `store.py:484/534` (reetiquetado A46, `geo_class`) | ancla el núcleo y etiqueta | No: la magnitud cambia sólo por el conjunto de píxeles, que ya trae la caja |
-| Test 1, gates intra-radio | `process_viirs.py:1744`, `apply_*intra_radio_gate` | | Apagados en los cinco brazos |
+| consumidor | dónde | ¿necesita la caja? |
+|---|---|---|
+| etiqueta `distance_class` | `process_viirs.py:1808/2104`, `process_viirs_mod.py:1213/1392`, `process_modis.py:320` | No: el círculo es el radio del KML de MIROVA, que clasifica; la caja fija umbrales. Un píxel de la corona que pasa el umbral estricto es alerta también en MIROVA |
+| gate del tablero | `frontend/index.html:1063/1067` | No, por lo mismo; es nuestro equivalente del límite del scraper, que también es `inner_radius_km` (control de `prediccion_mirova.py`) |
+| selección del cúmulo | `clustering.py:150` | No: elige entre lo ya alertado |
+| ancla honesta | `resolve_honest_anchor`; `process_modis.py:912` | No: posición, no umbral |
+| magnitud | `store.py:559`, `f5_core.py:85`, `store.py:484/534` | No: cambia sólo por el conjunto de píxeles, que ya trae la caja |
+| Test 1, gates intra-radio | | apagados en los cuatro brazos |
 
-**No hay prerequisito A45.** Lo único que faltaba era de instrumento, no de pipeline: la línea `FLAGS_BRAZO` del
-workflow no traía la caja, así que el evaluador no podía probar el cableado desde el artefacto. Este PR agrega
-`ENABLE_ROI1_BOX_PAPER` y `ROI1_BOX_HALF_KM` a esa línea (como hizo #794 con el ancla). La prueba del evaluador
-lo confirma con los logs **reales** del run 38560317428: sin esa clave, el brazo sale ROTO.
-
-**Límite declarado, que este A/B no toca.** La caja se centra en el ancla de detección (el cráter). MIROVA la
-centra en el centro de **su** grilla, que según los TIF está a 4,78 km del cráter en Tupungatito, 7,58 en Puyehue
-Cordón Caulle y 2,00 en Planchón Peteroa (S147; D15, D17). En esos tres la caja de este A/B no cae donde cae la de
-MIROVA: P4 los excluye y Q1 los informa aparte en la lectura.
+**No hay prerequisito A45 para medir la caja centrada en el cráter.** Faltaba la clave de la caja en la línea
+`FLAGS_BRAZO` del workflow; este PR la agrega (como #794). **Sí lo habría para la caja de MIROVA bajo L1** en los tres
+volcanes corridos (centrarla en el centro de grilla), y queda fuera de esta prueba (§9).
 
 ## 3. Brazos, y por qué cada uno
 
-| brazo | perfil | qué es | por qué está |
+| brazo | perfil | dónde corre | por qué está |
 |---|---|---|---|
-| **K** | `_s149_ab_sin_test1_b22_max` | el candidato vivo | el control de la decisión. La caja sólo puede actuar sin el Test 1 (A114), y lo adoptable sin Test 1 es K (en VIIRS es F; en MODIS, F con banda 21 apaga el detector, S147). Si la caja no se mide sobre el candidato, no se mide sobre nada que se vaya a adoptar |
-| **KC** | `_s151_ab_sin_test1_b22_max_caja` (nuevo, YAML de experimento) | K más la caja | el brazo |
-| **KG** | `_s151_ab_sin_test1_b22_max_gemelo` (nuevo) | K otra vez | el efecto esperado es de pocas pasadas (§4): una sola pasada que cambie entre dos jobs idénticos fabricaría una "mejora". El ruido del brazo B se midió en S149/S150 (100 %), el de K no |
-| **B** | `_s146_ab_sin_test1` | sin Test 1, conectiva `min` | control positivo de la palanca: aquí la caja tiene sustrato de sobra (55 negativos expuestos en 18 días). Si la caja no apaga nada en B, un cero en K no dice "inerte" sino "instrumento roto" (A116, A118) |
-| **BC** | `_s147_ab_sin_test1_caja` (existe desde S147, sin cambios) | B más la caja | el mismo perfil del A/B de S148; lo que cambió es el código (#738) |
+| **B** | `_s146_ab_sin_test1` | V1 | control del mecanismo: aquí la caja tiene sustrato (43 negativos expuestos en los 8 centrados en lo que hay en disco de V1) |
+| **BC** | `_s147_ab_sin_test1_caja` (existe desde S147, sin cambios) | V1 | B más la caja; lo que cambió desde S148 es el código (#738) |
+| **K** | `_s149_ab_sin_test1_b22_max` | D1, D2 | el candidato vivo; la caja sólo puede actuar sin el Test 1 |
+| **KC** | `_s151_ab_sin_test1_b22_max_caja` (nuevo, YAML de experimento) | D1, D2 | K más la caja |
 
-**Brazos que no están.** F y FC: en VIIRS son K y KC (la banda 22 sólo la lee `process_modis.py`). H (F más la
-caja): es FC. El control de producción: con el Test 1 encendido la palanca no tiene dónde actuar (A114).
+**Por qué K y KC no corren en V1** (arreglos D2 y D3 del verificador). En los 8 centrados, la caja casi no tiene
+dónde actuar sobre el candidato, y lo poco se cancela: de abril a septiembre, F en VIIRS 375 tiene **5 negativos
+expuestos contra 4 Muy Bajo y 1 protegida expuestas** (la caja ganaría 5 y perdería 5); en VIIRS 750, 3 contra 1; en
+MODIS, K tiene 0 contra 1 Muy Bajo y 1 protegida (`sustrato_salida.txt`, "CENTRADOS CONTRA CORRIDOS"). El techo de lo
+que la caja puede mover la suma en 41 días es **3, 1 y 1 pasadas**. Además, P4 de KC ya se cumple sin la caja (K
+publica fuera 1,6 %, bajo el techo de MIROVA de 5,1 %), y en V1 **ninguna protegida publicada por el candidato está
+expuesta**, así que el veto en V1 no puede fallar por la caja. Ningún resultado de K contra KC en V1 cambiaría la
+decisión; las dos únicas protegidas del candidato que la caja puede perder están fuera de V1 y se miden en D1 y D2.
+**El gemelo de K salió con ellos** (y su perfil, del repo). El evaluador conserva las reglas de K, KC y KG en V1 con
+los arreglos de ruido (§7) por si alguien los corre después; la prueba las ejercita.
 
-## 4. Sustrato: dónde puede actuar la caja (`sustrato.py`)
+## 4. Sustrato (`sustrato.py`)
 
-**La cuenta.** Para cada pasada publicada, con la posición de cada píxel alertado del record: **intacta** si tiene
-al menos un píxel dentro del círculo y de la caja (ese píxel conserva el umbral permisivo, el cúmulo de la cumbre
-sobrevive); **expuesta** si todo su calor del círculo cae en la corona (círculo menos caja): sólo ésas puede
-apagar la caja. Es un **techo**: cuántas sobreviven al umbral estricto no se sabe sin el dNTI por píxel, que el
-record no guarda (S130 pagó por confundir dónde cae con si sobrevive).
+**La cuenta.** Para cada pasada publicada, con la posición de cada píxel alertado: **intacta** si tiene al menos un
+píxel dentro del círculo y de la caja (conserva el umbral permisivo y el cúmulo de la cumbre sobrevive);
+**expuesta** si todo su calor del círculo cae en la corona (círculo menos caja): sólo ésas puede apagar la caja. Es un
+**techo**: cuántas sobreviven al umbral estricto no se sabe sin el dNTI por píxel.
 
-**Datos**: las ramas de salida de los A/B ya corridos (`origin/s146-ab/<run>`, leídas con `git show`): B y F de
-abril a septiembre en los 11 volcanes, K en Láscar de marzo a junio, y C0, B, F y K de Chillán (run
-38560317428). Referencia: la congelada de V1 para septiembre y octubre; la unión del repo antes, con la tabla sola
-hasta el 2026-06-12 (A119).
+**Datos**: ramas de salida de los A/B ya corridos (`origin/s146-ab/<run>`, con `git show`): B y F de abril a
+septiembre en los 11 volcanes, K en Láscar de marzo a junio, y C0, B, F y K de Chillán (run 38560317428). Referencia:
+la congelada de V1 para septiembre y octubre; la unión del repo antes, con la tabla sola hasta el 2026-06-12 (A119).
 
 **Controles, los cuatro pasan**: C1 la geometría reproduce el área teórica de la caja dentro del círculo en los 11
-volcanes (por ejemplo 0,3170 contra 0,3183 con 5 km; Lastarria 0,8499 contra 0,8420, la diferencia es la de 111
-km por grado contra el radio terrestre que el pipeline también usa); C2 reproduce **los seis números** de S148
-(`origen_43_de_135_salida.txt`: VIIRS 375 0 de 135 y 58 de 105, VIIRS 750 1 de 13 y 21 de 36, MODIS 0 de 1 y 15
-de 39), que con la caja centrada en la coordenada nominal darían 43 de 135: el control puede fallar; C3 ningún
-píxel en caja-menos-círculo en volcanes con radio de 3,6 km o más; C4 el radio del tablero y el de
-`volcanoes.yaml` coinciden.
+volcanes; C2 reproduce **los seis números** de S148 (`origen_43_de_135_salida.txt`), que con la caja centrada en la
+coordenada nominal darían otros (43 de 135): puede fallar; C3 ningún píxel en caja menos círculo donde el radio es de
+3,6 km o más; C4 el radio del tablero y el de `volcanoes.yaml` coinciden.
 
-**Lo que hay en disco de V1** (septiembre 1 a 18 en los 11, Chillán hasta el 10-07):
-
-| brazo | sensor | negativos publicados | expuestos | Muy Bajo expuestas | protegidas expuestas (A / B) |
-|---|---|---|---|---|---|
-| B | VIIRS 375 | 119 | **55** | 0 | 0 / 1 |
-| B | VIIRS 750 | 36 | **19** | 1 | 0 / 0 |
-| B | MODIS | 36 | **11** | 0 | 0 / 0 |
-| F (= K en VIIRS) | VIIRS 375 | 11 | **1** | 0 | 0 / 0 |
-| F | VIIRS 750 | 3 | **0** | 1 | 0 / 0 |
-| K | MODIS (sólo Chillán en disco) | 0 | 0 | 0 | 0 / 0 |
-
-De abril a septiembre, F publica en VIIRS 375 **22 negativos expuestos** (4,4 por mes de abril a agosto) y 5 Muy
-Bajo expuestas; en VIIRS 750, 13 y 2. Más de la mitad de lo expuesto de F es Puyehue Cordón Caulle.
-
-**Poder.** (a) **El veto no tiene sustrato en V1**: ninguna protegida publicada por el candidato está expuesta, así
-que la caja sólo podría perder una por un cambio de selección del cúmulo, que el A/B mide igual. En los seis meses
-hay **dos** protegidas expuestas del candidato: Láscar MODIS 2026-03-27 07:10 (1,0 MW, un píxel a 3,2 km) e Isluga
-VIIRS 375 2026-06-10 04:48 (2,15 MW, un píxel a 3,25 km), más 8 Muy Bajo expuestas. Por eso hay dos dirigidas (§5).
-(b) **La suma**: el techo extrapolado a 41 días es de unas 8 pasadas en VIIRS 375 (6 negativos y 1 a 2 Muy Bajo),
-4 en VIIRS 750 y 25 en MODIS (el techo de B; el de K fuera de Láscar no se conoce). Contra un control que en V1
-publica unos 25 negativos limpios de VIIRS 375 en 41 días (11 en 18), la caja puede mover la suma del candidato
-**a lo más un tercio**, y lo más probable es mucho menos. (c) **El mecanismo** (B contra BC) sí tiene poder: 55
-negativos expuestos en 18 días, unos 125 en V1.
+**Poder.**
+- **Mecanismo (B contra BC, 8 centrados)**: en lo que hay en disco de V1, B publica 89 negativos limpios VIIRS 375, 43
+  de ellos expuestos y el resto con calor en la caja; extrapolado a 41 días, unos 100 expuestos. Q1 compara dos proporciones
+  de ese tamaño: tiene poder de sobra.
+- **Veto (K contra KC)**: sin sustrato en V1. En seis meses hay **dos** protegidas expuestas del candidato, Láscar
+  MODIS 2026-03-27 07:10 (1,0 MW, un píxel a 3,2 km del cráter) e Isluga VIIRS 375 2026-06-10 04:48 (2,15 MW, un píxel
+  a 3,25 km), más la Muy Bajo MODIS de Láscar del 2026-03-14 (0,97 MW). Las dirigidas D1 y D2 son exactamente esas.
+  Con dos casos, el veto detecta una pérdida si ocurre en ellos; no dice nada de una tasa.
 
 ## 5. Ventanas y despacho (no despachar sin el "sí" de Nicolás)
 
-- **V1, 2026-08-29 a 2026-10-08**, 11 volcanes, los cinco brazos. Régimen de hoy (después del 2026-08-28 23:00 UTC,
-  #535, A104); posterior al 2026-06-13, así que decide tabla y OCR (A119), con las filas sólo del OCR de Suomi NPP
-  como en el pre-registro de F y K (no deciden con la lectura A). Es la misma ventana y **la misma referencia
-  congelada** que F y K (`experiments/_s151_prereg_fk_11/_congelado_v1`, con sus capas y manifiesto): los dos
-  A/B quedan comparables y no se congela otra copia.
-- **D1, 2026-03-14 a 2026-03-27, Láscar**, K y KC: la protegida MODIS expuesta del 03-27 y la Muy Bajo del 03-14.
-  **D2, 2026-06-10, Isluga**, K y KC: la protegida VIIRS 375 expuesta. Las dos antes del 2026-06-13: decide la
-  tabla sola, con la referencia congelada de V2 de F y K (`_congelado_v2`, 2026-03-01 a 06-12). Sin gemelo: una
-  pérdida queda PENDIENTE DE REPETICIÓN y se repite el job una vez (mismo camino que F y K, §5 de su pre-registro).
-  Las dirigidas sólo tienen veto: no hay suma ni magnitud que leer en 14 días de un volcán.
+- **V1, 2026-08-29 a 2026-10-08**, 11 volcanes, **B y BC**: régimen de hoy (después de #535, A104), decide tabla y OCR
+  (A119), con la misma referencia congelada que F y K (`experiments/_s151_prereg_fk_11/_congelado_v1`).
+- **D1, 2026-03-14 a 2026-03-27, Láscar**, y **D2, 2026-06-10, Isluga**, K y KC. Antes del 2026-06-13: decide la
+  tabla sola, con `_congelado_v2` de F y K (2026-03-01 a 06-12). Sin gemelo: una pérdida queda PENDIENTE DE
+  REPETICIÓN y se repite el job una vez.
 
 ```
 ONCE='["Lascar","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","NevadosDeChillan","Llaima","Villarrica","Copahue","PuyehueCordonCaulle","Chaiten"]'
-CINCO='["_s149_ab_sin_test1_b22_max","_s151_ab_sin_test1_b22_max_caja","_s151_ab_sin_test1_b22_max_gemelo","_s146_ab_sin_test1","_s147_ab_sin_test1_caja"]'
 DOS='["_s149_ab_sin_test1_b22_max","_s151_ab_sin_test1_b22_max_caja"]'
-gh workflow run reproc-s146-ab-sin-test1.yml --ref main -f preregistro_aprobado=si -f start=2026-08-29 -f end=2026-10-08 -f vols="$ONCE" -f brazos="$CINCO" -f control=_s149_ab_sin_test1_b22_max
 gh workflow run reproc-s146-ab-sin-test1.yml --ref main -f preregistro_aprobado=si -f start=2026-03-14 -f end=2026-03-27 -f vols='["Lascar"]' -f brazos="$DOS" -f control=_s149_ab_sin_test1_b22_max
 gh workflow run reproc-s146-ab-sin-test1.yml --ref main -f preregistro_aprobado=si -f start=2026-06-10 -f end=2026-06-10 -f vols='["Isluga"]' -f brazos="$DOS" -f control=_s149_ab_sin_test1_b22_max
+gh workflow run reproc-s146-ab-sin-test1.yml --ref main -f preregistro_aprobado=si -f start=2026-08-29 -f end=2026-10-08 -f vols="$ONCE" -f brazos='["_s146_ab_sin_test1","_s147_ab_sin_test1_caja"]' -f control=_s146_ab_sin_test1
 ```
 
-**Desde `main` con este PR mergeado** (los dos perfiles nuevos y la línea de `FLAGS_BRAZO` tienen que estar en
-`main`; un run despachado antes deja todos los brazos ROTOS por falta de la clave, y eso es lo correcto).
-Autentica sólo con `EARTHDATA_TOKEN`. **Grupo de concurrencia**: `s146-ab-sin-test1` corre uno a la vez y GitHub
-guarda **un solo run pendiente**: un despacho nuevo desplaza al que espera. El A/B de F y K (tres despachos, unas
-28 h, espera su sello en #798) comparte el grupo. Regla: antes de cada despacho,
-`gh run list --workflow reproc-s146-ab-sin-test1.yml --json status -q '[.[]|select(.status!="completed")]|length'`
-tiene que dar **0**; así ningún despacho desplaza a otro, venga de este pre-registro o del de F y K, y nunca hay
-más de dos A/B vivos. El orden entre los dos pre-registros lo decide el que se selle primero.
+**Desde `main` con este PR mergeado** (el perfil de KC y la línea de `FLAGS_BRAZO` tienen que estar en `main`; un run
+despachado antes deja los brazos ROTOS por falta de la clave, y eso es lo correcto). Autentica sólo con
+`EARTHDATA_TOKEN`. **Grupo de concurrencia**: `s146-ab-sin-test1` corre uno a la vez y guarda **un solo run
+pendiente**: un despacho nuevo desplaza al que espera. El A/B de F y K (#798, unas 28 h) comparte el grupo. Regla:
+antes de cada despacho, `gh run list --workflow reproc-s146-ab-sin-test1.yml --json status -q
+'[.[]|select(.status!="completed")]|length'` tiene que dar **0**; así nadie desplaza a nadie y nunca hay más de dos A/B
+vivos. Orden: D1 y D2 primero (son cortos y deciden el veto), V1 después.
 
-**Duración** (de `experiments/_s151_prereg_fk_11/duracion_runs_salida.txt`: 2,20 min por día de ventana y job sin
-Test 1, el job más lento 1,42 veces la mediana): V1, 55 jobs de ~90 min (peor ~128, bajo el tope de 300 con el
-margen de A15), con 6 en paralelo **~15 h**; D1, 2 jobs de ~31 min; D2, 2 jobs de minutos. Total ~16 h de grupo.
+**Duración** (`experiments/_s151_prereg_fk_11/duracion_runs_salida.txt`: 2,20 min por día de ventana y job sin Test 1;
+el job más lento, 1,42 veces la mediana): D1, 2 jobs de ~31 min; D2, 2 jobs de minutos (**~35 min las dos**); V1, **22
+jobs** de ~90 min (peor ~128, bajo el tope de 300 con el margen de A15), con 6 en paralelo **~6 h**. Total ~6,6 h de
+grupo (la versión 1 pedía ~16 h).
 
 ## 6. Controles, antes de mirar ningún resultado (secciones 1 a 5 de `evaluar_caja.py`)
 
-1. **Cobertura** (A108): las mismas pasadas en los brazos, toda protegida con record en todos, y K contra
-   producción (`data/mirova_equivalent/`): si en un volcán y sensor a K le falta más del 5 % de las pasadas que
-   producción tiene, cobertura corta (el 5 % es del instrumento, heredado, elegido). Si falla, INDECIDIBLE y se
-   repite el job corto con el mismo código.
+1. **Cobertura** (A108): las mismas pasadas en los brazos de cada despacho, toda protegida con record en todos, y el
+   primer brazo contra producción (si en un volcán y sensor le falta más del 5 % de las pasadas de producción, la
+   cobertura es corta; el 5 % es del instrumento, heredado, elegido). Si falla, INDECIDIBLE y se repite el job corto.
 2. **Versión del producto**: ninguna protegida con versión distinta entre brazos.
-3. **Cableado**, de la línea `FLAGS_BRAZO` de **cada** job: perfil, directorio y los cinco flags declarados (Test 1,
-   conectiva, banda 22, caja, semilado 2,5), más los de producción que el log traiga; **un log sin la clave de la
-   caja es ROTO**; y ningún record con `triggered_test1`.
-4. **Huella de la caja en los records** (A116, A118): BC tiene que tener **menos** píxeles alertados en la corona
-   que B. Si no, la caja no actuó: todo INDECIDIBLE y, antes de escribir nada, la traza por etapa de
-   `experiments/_s148_caja_traza/`. La de KC contra K se informa (puede no tener sustrato).
-5. **Determinismo**: KG contra K, misma decisión de publicar en 98 de cada 100 pasadas o más, por sensor (umbral
-   heredado de S149 y S150). Y la **referencia** es la congelada, entera (sha256 LF de los CSV y de las capas).
-6. **Q2, control interno del mecanismo**: de los negativos limpios que B publica con calor **dentro** de la caja,
-   BC cambia la publicación en el 12 % o menos (heredado de S147, 5 de 42: elegido, no medido). La caja no
-   debería tocar lo que está adentro; si lo toca, el resultado no se interpreta.
+3. **Cableado** de la línea `FLAGS_BRAZO` de cada job: perfil, directorio y los cinco flags declarados (Test 1,
+   conectiva, banda 22, caja, semilado 2,5), más los de producción que traiga; **un log sin la clave de la caja es
+   ROTO**; ningún record con `triggered_test1`.
+4. **Huella de la caja** (A116, A118): BC tiene que tener **menos** píxeles alertados en la corona que B. Si no, la caja
+   no actuó: mecanismo INDECIDIBLE y, antes de escribir nada, la traza por etapa de `experiments/_s148_caja_traza/`. Y
+   como D1 y D2 corren el mismo código, **un mecanismo INDECIDIBLE deja INDECIDIBLE también el veto** (`--combinar`):
+   un CUMPLE de KC sin prueba de que la caja actúa no vale.
+5. **Referencia congelada** entera (sha256 LF de los CSV y de las capas contra el manifiesto).
 
 ## 7. Predicciones y reglas (secciones 6 a 10 de `evaluar_caja.py`, que las implementa tal cual)
 
-Todo por pasada, por sensor y por lectura (A y B), contra K. "Publica" es el predicado del tablero ejecutado con
-node (A97). Alerta protegida: `scripts/clase_mirova.alerta_protegida`.
+Todo por pasada, por sensor, **en los 8 volcanes centrados**; Tupungatito, Puyehue Cordón Caulle y Planchón Peteroa se
+imprimen aparte y no deciden. "Publica" es el predicado del tablero ejecutado con node (A97).
 
 | # | qué | regla | predicción, y de dónde sale |
 |---|---|---|---|
-| **P1** veto | protegidas que K publica y KC no | VETADO con una pérdida neta; INDECIDIBLE si sólo hay ruidosas (KG también cambia); PENDIENTE DE REPETICIÓN sin gemelo (D1, D2); CUMPLE con cero o todas descartadas por la repetición; SIN SUSTRATO si K no publica ninguna | **V1: CUMPLE** con las dos lecturas (cero protegidas expuestas en disco). **D2 (Isluga): CUMPLE**: MIROVA alertó esa pasada a 3,75 km, fuera de su propia caja con cualquier acimut, o sea que la detectó con su umbral estricto. **D1 (Láscar 03-27): sin predicción**: MIROVA la ubica a 1,41 km (dentro de su caja, umbral permisivo) y nuestro píxel MODIS cae a 3,2 km; si KC la pierde, la causa es la posición del píxel (D17), no la caja, y el veto la cuenta igual |
-| **P2** suma bajo 1 MW | Muy Bajo perdidas + publicaciones en negativos limpios; ruido = pasadas discordantes K contra KG | GANA si KC < K − ruido; PIERDE si KC > K + ruido; si no, EMPATE | **VIIRS 375: GANA por 1 a 8 pasadas**; VIIRS 750: EMPATE o GANA por 4 o menos; MODIS: sin predicción (el sustrato de K fuera de Láscar no se conoce) |
-| P2b techo (informa) | \|suma KC − suma K\| contra el techo de §4 (8, 4 y 25) | DENTRO o FUERA | **DENTRO** en los tres. FUERA quiere decir que la caja actúa por un camino que el sustrato no ve (selección del cúmulo, píxeles que no están en el record) y se traza antes de leer |
-| **P3** magnitud | d = \|log10(KC/MIROVA)\| − \|log10(K/MIROVA)\| en alertas que publican los dos; ruido = mediana de d del gemelo | FALLA si el intervalo bootstrap al 95 % de la mediana de d queda sobre 0 **y** la mediana supera el ruido; con menos de 5 pares, SIN SUSTRATO | **CUMPLE** (7 Muy Bajo de F en disco tienen calor dentro y fuera de la caja, todas de Puyehue Cordón Caulle) |
-| **P4** posición, contra MIROVA | fracción de publicaciones con el cúmulo fuera de la caja, 8 volcanes centrados | CUMPLE si no supera el Wilson superior al 95 % de lo que MIROVA tiene fuera de su caja en V1 (VIIRS 375: 5 de 223, **5,1 %**; VIIRS 750: 0 de 34; MODIS: 0 de 8) | **KC CUMPLE** (K ya está en 1,6 %). **BC CUMPLE**: si la caja es lo que separa a MIROVA de B, la fracción de B (25,6 %) cae a la de MIROVA. Si BC queda sobre el 5,1 %, nuestro umbral estricto deja pasar más que el de MIROVA y la caja no basta |
-| **Q1** mecanismo | negativos limpios expuestos que B publica: los que BC apaga | CUMPLE con la mitad o más (la regla Q1 de S147); FALLA si menos; SIN SUSTRATO si no hay | **CUMPLE**: el residual tiene exceso mínimo (mediana +0,31 K sobre su fondo, S147), su dNTI apenas pasa 0,003 y no debería pasar 0,010 |
+| **Q1** mecanismo | de los negativos limpios que B publica, los que BC apaga: los expuestos contra los que tienen calor en la caja | CUMPLE si la fracción apagada de los expuestos supera a la de adentro con la prueba exacta de Fisher a una cola, p < 0,05; FALLA si no; SIN SUSTRATO si un grupo está vacío. **El nulo es la tasa de cambio de lo de adentro, medida en el mismo run** (arreglo D4: la versión 1 exigía "la mitad o más", elegido; se sigue informando) | **CUMPLE**: el residual tiene exceso mínimo (mediana +0,31 K sobre su fondo, S147), su dNTI apenas pasa 0,003 y no debería pasar 0,010 |
+| **Q2** control | de los negativos limpios de B con calor en la caja, los que BC cambia | CUMPLE con el 12 % o menos. **Umbral del instrumento, elegido** (heredado de S147, 5 de 42), sin nulo medido. FALLA deja todo INDECIDIBLE | CUMPLE |
+| **P4** posición, contra MIROVA | fracción de publicaciones de BC con el cúmulo fuera de la caja | CUMPLE si no supera el Wilson superior al 95 % de lo que MIROVA tiene fuera de su caja en los 8 centrados en V1 (VIIRS 375: 5 de 223, **5,1 %**; VIIRS 750: 0 de 34; MODIS: 0 de 8) | **CUMPLE**: si la caja es lo que separa a MIROVA de B, el 25,6 % de B cae a la banda de MIROVA. Si BC queda sobre el 5,1 %, nuestro umbral estricto deja pasar más que el de MIROVA |
+| **P1** veto, D1 y D2 | protegidas que K publica y KC no | VETADO con una pérdida que la repetición confirma; PENDIENTE DE REPETICIÓN sin repetición; CUMPLE con cero; SIN SUSTRATO si K no publica ninguna | **D2 (Isluga): CUMPLE**: MIROVA la ubica a 3,75 km de su centro de grilla (0,37 km del cráter): con L1 está fuera de su caja con cualquier acimut, o sea que la detectó con su umbral estricto; con L2 queda entre 3,38 y 4,12 km del cráter, probablemente fuera. **D1 (Láscar 03-27): sin predicción**: MIROVA la ubica a 1,41 km de su centro (dentro de su caja, umbral permisivo) y nuestro píxel MODIS cae a 3,2 km del cráter; si KC la pierde, la causa es la posición del píxel (D17), no la caja, y el veto la cuenta igual |
 
-**Veredicto de KC por ventana y lectura** (`global_ventana`), en este orden: controles o cableado de K, KC o KG
-fallidos, INDECIDIBLE; sin huella en BC o Q2 FALLA, INDECIDIBLE (el control positivo no pasó); un P1 VETADO, NO
-CUMPLE (veto); un P1, P2 o P3 INDECIDIBLE, INDECIDIBLE; un P1 PENDIENTE, PENDIENTE DE REPETICIÓN; un P2 PIERDE, NO
-CUMPLE (suma); ningún P2 GANA, **NO CUMPLE (no mejora el criterio: la caja es inerte sobre el candidato)**; si no,
-CUMPLE, que se degrada a "CUMPLE EN DETECCIÓN, FALLA EN MAGNITUD (decide Nicolás)" con un P3 FALLA, y anota "veto
-sin sustrato" y "publica fuera de la caja más que MIROVA (P4)" cuando corresponde. En D1 y D2 sólo el veto.
-**Final** (`--combinar`): el peor estado de V1, D1 y D2, por lectura (NO CUMPLE por veto, NO CUMPLE por suma,
-INDECIDIBLE, PENDIENTE, NO CUMPLE por inerte, CUMPLE EN DETECCIÓN, CUMPLE). **Mecanismo** aparte: LA CAJA ACTÚA
-(Q1 CUMPLE), LA CAJA NO APAGA (Q1 FALLA) o INDECIDIBLE.
+**Si alguien corre K, KC y KG en V1** (fuera de este despacho), el evaluador aplica además, en los 8 centrados:
+- **Determinismo**: las pasadas discordantes K contra KG tienen que ser **menos que el techo** de §3 (3, 1 y 1). Con el
+  98 % de la versión 1 se admitían unas 16 discordantes en 832 pasadas, el doble de lo que la caja puede mover.
+- **P2 suma**: GANA si KC < K menos el ruido; PIERDE si KC > K más el ruido; EMPATE **sólo** si las sumas son iguales y
+  el ruido es cero; **un cambio que no supera el ruido es INDECIDIBLE** (la versión 1 lo leía como "inerte").
+- **P3 magnitud**, **sólo sobre los pares cuya magnitud cambia**: con todos los pares, la caja perfecta daba d = 0
+  [0, 0] por construcción, y en la prueba un caso con 6 pares divididos por 20 da mediana 0,000 [0,0, 0,0] sobre los 22
+  pares (CUMPLE falso) y FALLA sobre los 6 que cambian. Con menos de 5 pares que cambian, SIN SUSTRATO.
+- El veredicto "inerte" sale sólo si las tres P2 son EMPATE exacto.
 
-**Predicción global**: KC **CUMPLE por un margen chico** (entre 1 y 10 pasadas sumando los tres sensores) en las
-dos lecturas, y el mecanismo **LA CAJA ACTÚA**. Lo que se aprendería: la caja hace lo que el paper dice, pero sobre
-el candidato casi no queda qué hacerle, porque `max` ya apagó esa misma población. Si en vez de eso KC sale
-"inerte", la conclusión es la misma con otro número; si sale VETADO, la caja cuesta una alerta y no se adopta.
+**Veredicto de KC por ventana y lectura** (`global_ventana`, en D1 y D2): controles o cableado fallidos, INDECIDIBLE;
+una pérdida confirmada, NO CUMPLE (veto); una sin repetición, PENDIENTE DE REPETICIÓN; ninguna, CUMPLE (veto); K sin
+protegidas publicadas, SIN SUSTRATO. **Mecanismo** (V1): LA CAJA ACTÚA (Q1 CUMPLE), LA CAJA NO APAGA (Q1 FALLA) o
+INDECIDIBLE (sin huella o Q2 FALLA). **Final** (`--combinar v1.json d1.json d2.json`): el peor estado de D1 y D2 por
+lectura, y INDECIDIBLE si el mecanismo de V1 no pasó su control (salvo un veto, que es definitivo).
+
+**Predicción global**: KC **CUMPLE (veto)** con las dos lecturas y el mecanismo **LA CAJA ACTÚA** con P4 de BC en la
+banda de MIROVA. Lo que se aprendería: la caja hace lo que el paper dice, sobre el candidato no cuesta las dos alertas
+que podía costar, y no queda nada más que medirle en los 8 centrados porque `max` ya apagó esa población. Lo que no se
+aprendería es qué hacer en los tres volcanes corridos: eso lo decide primero dónde centra MIROVA su caja (§1).
 
 ## 8. La prueba del evaluador (`probar_evaluar_caja.py`, salida en `probar_salida.txt`)
 
 Brazos fabricados desde los records de producción de V1 (11 volcanes, `triggered_test1` en falso), la referencia
-congelada de V1 y la línea `FLAGS_BRAZO` como la escribe el workflow con este PR. "Aplicar la caja" a un brazo
-fabricado es quitarle los píxeles de la corona y apagar las pasadas expuestas: la caja perfectamente eficaz.
-Cada veredicto tiene un caso que lo produce y otro que no:
+congelada de V1 y la línea `FLAGS_BRAZO` como la escribe el workflow con este PR. "Aplicar la caja" es quitar los
+píxeles de la corona y apagar las pasadas expuestas: la caja perfectamente eficaz. Cada veredicto tiene un caso que lo
+produce y otro que no:
 
-- **nulo** (cinco brazos idénticos): sin huella en BC, global INDECIDIBLE. Un brazo igual a su control no puede
-  pasar por una caja que no hace nada.
-- **efectiva**: controles y huella OK, Q1 y Q2 CUMPLE, LA CAJA ACTÚA; P1 y P2 los que dicta la base, calculados
-  por otro camino (la base de producción tiene 6 protegidas VIIRS 375 expuestas: sale VETADO, como debe).
-- **inerte** (KC igual a K, BC con la caja): NO CUMPLE (inerte), mecanismo ACTÚA, P2 EMPATE en los tres sensores.
-- **veto**, **gemelo**: VETADO; INDECIDIBLE si KG también la oculta. **gana**, **pierde**, **empate** (10 contra 20
-  discordantes), **magnitud** (VIIRS 750 por 20: FALLA EN MAGNITUD), **p4** (cúmulos corridos 4 km: P4 FALLA y el
-  global lo anota), **noapaga** (corona quitada sin apagar: LA CAJA NO APAGA), **q2** (la caja apaga también lo de
-  adentro: Q2 FALLA, INDECIDIBLE).
-- **Controles**: log sin la clave de la caja, ROTO; log con la caja apagada, ROTO; una pasada de menos, cobertura
-  despareja; gemelo distinto en 100 pasadas, determinismo FALLA; capa histórica alterada, referencia_ok falso.
-- **Dirigida D1**: K y KC iguales, CUMPLE (veto); KC pierde una protegida MODIS, PENDIENTE DE REPETICIÓN; la
-  repetición la vuelve a perder, NO CUMPLE (veto); no la pierde, CUMPLE (veto).
-- **Logs reales** del run 38560317428 (workflow sin la clave de la caja): K ROTO, INDECIDIBLE.
-- **Combinar** inerte, D1 y veto: NO CUMPLE (veto); inerte y D1: NO CUMPLE (no mejora).
+- **Con el despacho de la versión 2**: `mec` (BC con la caja: sin veredicto de KC, LA CAJA ACTÚA con Fisher, Q2
+  CUMPLE); `mec_nulo` (BC igual a B: sin huella, INDECIDIBLE); `noapaga` (corona quitada sin apagar: LA CAJA NO APAGA);
+  `q2` (la caja toca lo de adentro: Q2 FALLA); D1 con CUMPLE, PENDIENTE, NO CUMPLE y CUMPLE con la repetición; y
+  `combinar` (mecanismo y D1: CUMPLE (veto); mecanismo sin huella y D1: INDECIDIBLE; con un veto: NO CUMPLE).
+- **Con K, KC y KG en V1**: `nulo`, `inerte` (EMPATE con ruido 0 y P3 SIN SUSTRATO porque ningún par cambia), `veto`,
+  `gemelo`, `corrido` (una pérdida en un volcán corrido no decide), `gana` (y P2b fuera del techo), `pierde`,
+  **`ruido_chico`** (KC cambia 1 dentro de un ruido de 2: INDECIDIBLE, no inerte), **`gana_ruido`** (5 contra ruido 1:
+  GANA), **`ruido_grande`** (20 discordantes, no menos que el techo: determinismo FALLA), **`p3_cambian`** (6 pares
+  divididos por 20: FALLA sólo con los pares que cambian), `p4`, y los controles `sinclave`, `cajafalsa`, `cobert`,
+  `determ`, `capa_mod` y `log_real` (los logs reales del run 38560317428, sin la clave de la caja: K ROTO).
 
-Resultado: **28 de 28**. Dos fallas de la primera corrida eran de la prueba, no del evaluador, y quedan dichas en
-el código: la semilla de D1 (la pasada del 03-27) no está publicada en los records de producción, así que el caso
-no probaba nada; y ocultar una pasada sólo con la etiqueta `far` no la despublica en MODIS (el tablero la acepta
-por el cúmulo), así que ahora también se lleva a cero la magnitud del cúmulo. Uso:
-`python probar_evaluar_caja.py <TMP> <DIR_NDC>`, con `<DIR_NDC>/logs` bajado de la rama `s146-ab/38560317428`.
+Resultado: **29 de 29**. Uso: `python probar_evaluar_caja.py <TMP> <DIR_NDC>`, con `<DIR_NDC>/logs` bajado de la rama
+`s146-ab/38560317428`.
 
 ## 9. Lo que este A/B no puede decir
 
-- **Si adoptar.** Eso es A45: verificador limpio sobre el resultado, tag defensivo y el "sí" de Nicolás. Y la caja
-  sólo tiene sentido junto con K: sobre producción (Test 1 encendido) no tiene dónde actuar.
-- **El veto en V1**: sin sustrato de exposición. Lo que el veto puede decir viene de dos pasadas dirigidas.
-- **La caja de MIROVA en Tupungatito, Puyehue Cordón Caulle y Planchón Peteroa**: centrada en otro punto (§2).
-- **Cuál cúmulo es el de MIROVA**: P4 compara fracciones, no pasadas; `Distancia_km` no trae acimut (A93).
-- **K en MODIS fuera de Láscar**: no hay datos previos; P2 en MODIS no tiene predicción.
-- **La dirección inversa** (caja menos círculo, donde la caja afloja): sólo existe en Lastarria y Planchón
-  Peteroa, y un cúmulo a más de 3 km queda fuera del gate del tablero; de abril a septiembre, B tiene 19 y 22
-  pasadas MODIS sin publicar con calor ahí (columna `rev` de `sustrato_salida.txt`). Si KC publica alguna nueva de esas, se ve como recuperada en P1 o como cambio en P2.
-- **El borde de 0,05 MW y la simetría en logaritmo de P3**: los mismos límites del pre-registro de F y K (§8 allá).
+- **Si adoptar.** Eso es A45: verificador limpio sobre el resultado, tag defensivo y el "sí" de Nicolás. Y la caja sólo
+  tiene sentido junto con K: sobre producción (Test 1 encendido) no tiene dónde actuar.
+- **Dónde centra MIROVA su caja** (L1 o L2), y por lo tanto **nada sobre Tupungatito, Puyehue Cordón Caulle y
+  Planchón Peteroa**. Para medir la caja de MIROVA bajo L1 hay que centrarla en el centro de grilla, que es código de
+  `pipeline/process_*.py` (A45); antes conviene una prueba que distinga L1 de L2 (por ejemplo, si MIROVA alerta en la
+  esquina de su grilla con la misma energía que en el centro).
+- **La suma, la magnitud y la posición de KC sobre el candidato**: no se miden (§3); el sustrato las deja en un neto
+  de cero a tres pasadas en los 8 centrados.
+- **El veto como tasa**: son dos pasadas, no una muestra.
+- **Cuál cúmulo es el de MIROVA**: P4 compara fracciones; `Distancia_km` no trae acimut (A93).
+- **La dirección inversa** (caja menos círculo, donde la caja afloja): sólo en Lastarria y Planchón Peteroa; de abril a
+  septiembre, B tiene 19 y 22 pasadas MODIS sin publicar con calor ahí (columna `rev` de `sustrato_salida.txt`).
 - **Los otros 34 volcanes** no corren.
+
+## 10. Qué cambió de la versión 1 a la 2 (verificador con contexto limpio del PR #800)
+
+| defecto | cambio | dónde se ve |
+|---|---|---|
+| D1 (grave): el 0,9 a 2,2 % excluía los volcanes donde la distancia sí ubica la alerta respecto de la caja de MIROVA | `distancia_mirova.py`: la distancia se mide desde el centro de grilla (34 de 40, 38 de 50 y 17 de 17 alertas a la distancia centro-cráter); con los 11, 24,8 a 28,8 % fuera bajo L1 y 2,7 % bajo L2; la premisa vale sólo en los 8 centrados | §1, `distancia_mirova_salida.txt`, cabecera del perfil KC |
+| D2: P2 lo decidía Puyehue Cordón Caulle, donde la caja del brazo está descentrada | todo decide en los 8 centrados; los 3 se informan aparte; techos recalculados (3, 1 y 1) | §3, §7, caso `corrido` |
+| D3: veredictos casi seguros por construcción | P3 sólo sobre pares que cambian; dicho que P4 de KC ya se cumple y que el veto en V1 no tiene sustrato; K y KC salen de V1 | §3, §7, casos `inerte` y `p3_cambian` |
+| D4: el ruido se leía como "inerte"; umbrales elegidos | cambio dentro del ruido es INDECIDIBLE; discordantes menos que el techo; Q1 por Fisher contra el nulo del propio run; Q2 marcado como umbral del instrumento | §7, casos `ruido_chico`, `gana_ruido`, `ruido_grande` |
+| Despacho | D1 y D2 con K y KC (~35 min) y V1 sólo con B y BC (22 jobs, ~6 h); el perfil del gemelo sale del repo | §5 |
