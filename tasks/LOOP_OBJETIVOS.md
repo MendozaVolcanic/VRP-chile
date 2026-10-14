@@ -179,7 +179,9 @@ y dos verificadores, 2026-10-09).
 - [ ] **1.8 Modo de un solo píxel en erupción** (AUDIT_S150 familia 3: Chillán VIIRS 750 mostró 2,66, 11,08 y
   2,49 MW en 54 min).
 
-- [ ] **1.9 Preferencia de MIROVA entre banda I y banda M** (`FRENTE_F_FIDELIDAD_VIIRS.md:474`, F-07): se mide
+- [x] **1.9 Preferencia de MIROVA entre banda I y banda M** HECHA 2026-10-14 (#787, squash `cd23ae20`): el NRT
+  NO tiene preferencia (13.964 pasadas con las dos bandas, 246 con alerta en las dos); la regla es del archivo.
+  Palanca descartada para la réplica. (`FRENTE_F_FIDELIDAD_VIIRS.md:474`, F-07): se mide
   en minutos con la referencia.
 
 - [ ] **1.10 Las 4 alertas de VIIRS 750 de 0,32 a 0,65 MW que `max` pierde** (VERIFICADOR_DATOS D4): su clase
@@ -199,6 +201,22 @@ y dos verificadores, 2026-10-09).
 | D-4 | Alerta protegida: lectura A (alertas del scraper, 439 pasadas, recomendada) o B (todo VRP >= 1 MW, 992) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 12:44 UTC): vuelta 8, 1.9 cerrada, 0.3 con arreglos, 1.5 delegada
+- 1.9: en la tabla `latest.php` MIROVA lista las dos bandas VIIRS de la misma pasada en 13.964 casos (todos los
+  meses; control: misma hora al segundo en el 100 %) y alerta en las dos a la vez en 246 (sólo 375: 947; sólo
+  750: 32). La preferencia por 750 m de Coppola 2026 es del archivo OSF (A105), no del NRT: no es palanca de
+  la réplica. Marca en F-07. CI verde, #787 mergeado.
+- Verificador limpio de #784 (0.3): MERGEABLE CON ARREGLOS. Reprodujo todos los números (1.565 topados, 343
+  sobre 5 MW, 32.401 de 42.929 en modo de un píxel, 7 de Chillán, 37 diurnas), 14 marcas con evidencia correcta,
+  G8 intacto, frontend sólo comentarios. Arreglos: el criterio de MISSION no menciona D-4 ni que el corte de
+  1 MW es del loop; puntero AUDIT_S149 §0 que es §3 l. 72; contradicción H_S27_1/D30 contra P3; dos frases de
+  la ficha que dicen más de lo medido; A82 sin marca. Devueltos al agente de 0.3.
+- 1.5 (D25 sobre los 268 negativos de VIIRS 750) delegada a un agente en `VRP-Chile-loop-15`.
+- Falta propia: el script de 1.9 se escribió con un heredoc (prohibido por §1.7). El archivo quedó bien y se
+  verificó; desde ahora los archivos se escriben sólo con Write y Edit.
+- Run de Chillán 38560317428 en curso.
+- Próximo paso: revisar los arreglos de #784 y mergear; resultado de 1.5; 0.4 (c) tras 0.3.
 
 ### 2026-10-14 (servidor 12:35 UTC): vuelta 7, 0.6 a la cola y 0.3 entregada por su agente
 - 0.6: `append_record` escribe `regimen = {perfil, codigo_sha, origen}` (GITHUB_SHA en Actions, git en local).
