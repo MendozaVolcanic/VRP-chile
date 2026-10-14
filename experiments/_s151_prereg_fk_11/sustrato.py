@@ -162,7 +162,13 @@ def cargar_filas(ref, solo_tabla):
     (principal, historico y respaldo), que es el reetiquetado DE VERDAD que A119 pide antes del 2026-06-13:
     una alerta solo del OCR no es positiva y tampoco saca a la pasada de los negativos (S150, hallazgo H7)."""
     ref = Path(ref)
-    filas = cargar_referencia_unificada(ref / "registro_vrp_consolidado.csv", ref / "registro_vrp_ocr.csv")
+    # Las dos capas (historica de la union y respaldo) tambien CONGELADAS y explicitas (verificador del PR #797,
+    # punto 2): el cargador las leeria del repo, y audit-weekly.yml reescribe la historica cada semana.
+    hist, resp = ref / "consolidado_filas_perdidas.csv", ref / "respaldo_20260408.csv"
+    if not (hist.exists() and resp.exists()):
+        raise SystemExit("%s no trae las capas congeladas: correr congelar.py capas" % ref)
+    filas = cargar_referencia_unificada(ref / "registro_vrp_consolidado.csv", ref / "registro_vrp_ocr.csv",
+                                        historico_path=hist, respaldo_path=resp)
     return [f for f in filas if f["source"] == "CONS"] if solo_tabla else filas
 
 
@@ -214,6 +220,8 @@ def una_ventana(nombre, desde, hasta, ref, solo_tabla, datos, vols):
     # Umbral del INSTRUMENTO, no del A/B: el corrimiento no llega a cero porque, donde MIROVA alerta casi todas
     # las noches (Lascar, Lastarria, Tupungatito en VIIRS de marzo a junio), la pasada de otro satelite una
     # semana despues cae a menos de 2 minutos de una fila por azar. Lo que se exige es que el pareo se derrumbe.
+    # El 25 % lo ELEGI yo, sin nulo medido (verificador del PR #797, 6e), y C3 no decide nada del A/B: solo dice
+    # si este conteo pareaba por hora y no por casualidad.
     ok3 = pos_real > 0 and pos_3 <= 0.25 * pos_real
     print("== C3. alertas pareadas con la referencia real %d, con la corrida 7 dias %d (%.1f %%) | %s (exige 25 %% o menos)" % (
         pos_real, pos_3, 100 * pos_3 / max(pos_real, 1), "OK" if ok3 else "FALLA"))
@@ -235,6 +243,8 @@ def una_ventana(nombre, desde, hasta, ref, solo_tabla, datos, vols):
         # A119 (b): una tasa VIIRS por pasada anterior a abril no se compara; en V2 VIIRS decide desde abril.
         c_sens = tabla([r for r in recs if r["b"] == "MODIS" or r["noche"] >= INICIO_VIIRS_POR_PASADA], lambda r: (r["b"],))
         imprimir(c_sens, [(s,) for s in SENS], "LO QUE DECIDE: MODIS toda la ventana, VIIRS desde %s (A119)" % INICIO_VIIRS_POR_PASADA)
+        imprimir(tabla([r for r in recs if r["b"] == "MODIS" or r["noche"] >= INICIO_VIIRS_POR_PASADA], lambda r: (r["b"], r["vol"])),
+                 [(s, v) for s in SENS for v in bp.VOLS], "LO QUE DECIDE, POR SENSOR Y VOLCAN")
     print("\n== PODER DEL VETO (cero perdidas de protegidas que el control publica; produccion como estimacion del control)")
     for s in SENS:
         x = c_sens[(s,)]

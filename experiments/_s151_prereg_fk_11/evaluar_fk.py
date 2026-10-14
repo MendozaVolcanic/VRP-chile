@@ -67,6 +67,8 @@ MOV_KM = 0.5                             # S147, experiments/_s147_pos/estabilid
 S147_MOVIDAS_EN_ALERTA = (2, 149)        # estabilidad_salida.txt: "alerto 2 de 149"
 N_MIN_MAGNITUD = 5
 N_BOOT, SEMILLA = 2000, 0
+MAX_FALTA_CONTRA_PRODUCCION = 0.05       # umbral del instrumento (elegido): pasadas de produccion que C0 puede no traer
+BANDA_P6 = (0.80, 0.92)                  # A114: publicacion en negativos limpios de VIIRS 375 con el Test 1 encendido
 
 
 def sha_lf(p):
@@ -98,20 +100,28 @@ def fusionar(raices, tmp, brazos, vols):
     return dst
 
 
+CAPA_HISTORICO, CAPA_RESPALDO = "consolidado_filas_perdidas.csv", "respaldo_20260408.csv"
+
+
 def archivos_ref(cfg, tmp):
-    """(consolidado, ocr) que se le pasan a armar_tabla. Con `solo_tabla`, el OCR es un CSV con solo el
-    encabezado: reetiquetado de verdad (S150, H7), una alerta solo del OCR no es positiva."""
+    """(consolidado, ocr, capas) que se le pasan a armar_tabla y a la proteccion. Con `solo_tabla`, el OCR es un
+    CSV con solo el encabezado: reetiquetado de verdad (S150, H7), una alerta solo del OCR no es positiva.
+    `capas` son las copias congeladas de la capa historica de la union y del respaldo del 2026-04-08 (verificador
+    del PR #797, punto 2); None si el congelado no las trae, y entonces el cargador usa las del repo."""
     cons, ocr = cfg["ref"] / "registro_vrp_consolidado.csv", cfg["ref"] / "registro_vrp_ocr.csv"
     if cfg["solo_tabla"]:
         vacio = tmp / "ocr_vacio.csv"
         vacio.write_text(ocr.read_text(encoding="utf-8").splitlines()[0] + "\n", encoding="utf-8")
         ocr = vacio
-    return cons, ocr
+    capas = {"historico": cfg["ref"] / CAPA_HISTORICO, "respaldo": cfg["ref"] / CAPA_RESPALDO}
+    return cons, ocr, (capas if all(p.exists() for p in capas.values()) else None)
 
 
-def tabla(control, brazo, cons, ocr, desde, hasta, out):
+def tabla(control, brazo, ref, desde, hasta, out):
+    cons, ocr, capas = ref
+    extra = ["--historico", str(capas["historico"]), "--respaldo", str(capas["respaldo"])] if capas else []
     r = subprocess.run([sys.executable, str(ARMAR), "--control", str(control), "--brazo", str(brazo), "--cons", str(cons),
-                        "--ocr", str(ocr), "--desde", desde, "--hasta", hasta, "--out", str(out)],
+                        "--ocr", str(ocr), "--desde", desde, "--hasta", hasta, "--out", str(out)] + extra,
                        capture_output=True, text=True, encoding="utf-8")
     if r.returncode != 0:
         raise SystemExit("armar_tabla fallo:\n" + r.stderr[-3000:])
@@ -133,21 +143,45 @@ def crudos(raiz, nombre, vols, desde, hasta):
     return out
 
 
+def claves_produccion(dprod, vols, desde, hasta):
+    """Pasadas (volcan|sensor|hora) que produccion tiene en la ventana, agrupadas por (volcan, sensor)."""
+    out = collections.defaultdict(set)
+    for v in vols:
+        p = dprod / (v + ".json")
+        if not p.exists():
+            continue
+        for r in json.load(open(p, encoding="utf-8"))["records"]:
+            b = bp.bucket(r.get("sensor")); t = r.get("datetime_utc", "")
+            if b is not None and desde <= t[:10] <= hasta:
+                out[(v, b)].add("|".join((v, b, t[:16])))
+    return out
+
+
 def flags_leidos(logs, nombre, vol):
+    """La linea FLAGS_BRAZO del log de ESTE brazo y volcan en CADA directorio de logs, como [(dir, flags o None)].
+
+    Verificador del PR #797, punto 1: la version anterior devolvia el primer log que encontraba, asi que con dos
+    --logs (V2a y V2b) un job de V2b mal cableado pasaba sin que nadie lo leyera. Cada despacho es un job
+    distinto y cada uno tiene que probar su cableado: un directorio sin el log cuenta como problema."""
+    out = []
     for d in logs:
-        p = Path(d) / ("%s_%s.log" % (BRAZOS[nombre], vol))
+        p = Path(d) / ("%s_%s.log" % (BRAZOS[nombre], vol)); fl = None
         if p.exists():
             for linea in p.read_text(encoding="utf-8", errors="replace").splitlines():
                 if linea.startswith("FLAGS_BRAZO "):
-                    return json.loads(linea[len("FLAGS_BRAZO "):])
-    return None
+                    fl = json.loads(linea[len("FLAGS_BRAZO "):]); break
+        out.append((Path(d).as_posix(), fl))
+    return out
 
 
-def proteccion(claves_, cons, ocr, desde, hasta):
+def proteccion(claves_, ref, desde, hasta):
     """Por pasada: protegida (lectura A y B, clase_mirova) y si la A descansa SOLO en filas del OCR de Suomi NPP,
-    tramo en que la distancia y la clase del OCR pueden ser de otra pasada (A119, hito 2026-10-09)."""
+    tramo en que la distancia y la clase del OCR pueden ser de otra pasada (A119, hito 2026-10-09). Lee la misma
+    referencia que armar_tabla, con las mismas capas."""
+    cons, ocr, capas = ref
     coords = bp._coords_por_volcan()
-    filas = ev.cargar_referencia_unificada(Path(cons), Path(ocr))
+    kw = {"historico_path": capas["historico"], "respaldo_path": capas["respaldo"]} if capas else {}
+    filas = ev.cargar_referencia_unificada(Path(cons), Path(ocr), **kw)
     por_vb, _, _, _ = bp.indexar_referencia(filas, coords, (desde, hasta))
     out = {}
     for k in claves_:
@@ -159,6 +193,27 @@ def proteccion(claves_, cons, ocr, desde, hasta):
         out[k] = {"A": bool(pa), "B": any(cm.alerta_protegida(f, lectura="B") for f in ff),
                   "alerta_solo_ocr": bool(al) and all(f["source"] == "OCR" for f in al)}
     return out
+
+
+def referencia_congelada(dref, capas, capas_del_repo):
+    """La referencia ENTERA tiene que ser la congelada: los dos CSV principales y las dos capas, cada uno con su
+    sha256 LF igual al del manifiesto. Sin capas congeladas el cargador leeria las del repo, que audit-weekly.yml
+    reescribe cada semana: eso pone referencia_ok en False, salvo con --capas-del-repo (solo para la prueba sobre
+    el congelado de #796, que es anterior a esta regla)."""
+    man = dref / "MANIFIESTO.json"
+    if not man.exists():
+        print("   referencia SIN MANIFIESTO: no es una referencia congelada")
+        return False
+    m = json.loads(man.read_text(encoding="utf-8"))
+    malos = [f for f, d in m["archivos"].items() if sha_lf(dref / f) != d["sha256"]]
+    if capas is None or "capas" not in m:
+        print("   referencia congelada %s: principales %s | capas NO congeladas (el cargador usa las del repo)%s" % (
+            m["fuente"], "OK" if not malos else "CAMBIO %s" % malos, ", aceptado por --capas-del-repo" if capas_del_repo else ""))
+        return not malos and bool(capas_del_repo)
+    malos += [f for f, d in m["capas"].items() if sha_lf(dref / f) != d["sha256"]]
+    print("   referencia congelada %s: principales y capas (%s) %s" % (
+        m["fuente"], ", ".join("%s %d filas" % (f, d["filas"]) for f, d in m["capas"].items()), "OK" if not malos else "CAMBIO %s" % malos))
+    return not malos
 
 
 # ---------------------------------------------------------------- contabilidad
@@ -190,6 +245,20 @@ def suma_errores(T, lado, prot, lectura, cfg, sensor, excluir_snpp):
         elif x["lab"] in ("sin_info", "far_ref") and not prot[k][lectura]:
             otras += x["pub"]
     return perd, negp, otras, n_mb, n_neg
+
+
+def errores_por_pasada(T, lado, prot, lectura, cfg, sensor, excluir_snpp):
+    """Las pasadas que cuentan como error en la suma de P2 (misma definicion que suma_errores)."""
+    out = set()
+    for k, v in T.items():
+        if lado not in v or k.split("|")[1] != sensor or not decide_sensor(k, cfg):
+            continue
+        x = v[lado]
+        if excluir_snpp and ocr_snpp(k, x, prot):
+            continue
+        if (x["lab"] == "pos" and not prot[k][lectura] and not x["pub"]) or (x["lab"] == "neg_limpio" and x["pub"]):
+            out.add(k)
+    return out
 
 
 def bootstrap_mediana(d, semilla=SEMILLA, n=N_BOOT):
@@ -251,24 +320,14 @@ def evaluar(a):
     print("== VENTANA %s: %s a %s | volcanes %d | brazos %s | %s" % (a.ventana, cfg["desde"], cfg["hasta"], len(vols), brazos,
           "decide la tabla sola (OCR reetiquetado fuera)" if cfg["solo_tabla"] else "decide tabla y OCR"))
     print("   predicado del tablero: frontend/index.html sha256", sha_html)
-    man = cfg["ref"] / "MANIFIESTO.json"
-    if man.exists():
-        m = json.loads(man.read_text(encoding="utf-8"))
-        ok_ref = all(sha_lf(cfg["ref"] / f) == d["sha256"] for f, d in m["archivos"].items())
-        hist = RAIZ / "data" / "mirova_reference" / "union_historica" / "consolidado_filas_perdidas.csv"
-        ok_hist = m.get("historico_sha256") in (None, sha_lf(hist))
-        print("   referencia congelada %s: sha256 %s | capa historica %s" % (m["fuente"], "OK" if ok_ref else "CAMBIO",
-              "igual" if ok_hist else "DISTINTA a la del congelado (solo agrega claves que la copia no trae; se informa)"))
-        res["referencia_ok"] = ok_ref
-    else:
-        res["referencia_ok"] = True
+    ref = archivos_ref(cfg, tmp)
+    res["referencia_ok"] = referencia_congelada(cfg["ref"], ref[2], a.capas_del_repo)
 
-    cons, ocr = archivos_ref(cfg, tmp)
     pares = [("C0", n) for n in brazos if n != "C0"] + ([("F", "K")] if {"F", "K"} <= set(brazos) else [])
-    T = {p: tabla(raiz / BRAZOS[p[0]], raiz / BRAZOS[p[1]], cons, ocr, cfg["desde"], cfg["hasta"], tmp / ("t_%s_%s.json" % p)) for p in pares}
+    T = {p: tabla(raiz / BRAZOS[p[0]], raiz / BRAZOS[p[1]], ref, cfg["desde"], cfg["hasta"], tmp / ("t_%s_%s.json" % p)) for p in pares}
     R = {n: crudos(raiz, n, vols, cfg["desde"], cfg["hasta"]) for n in brazos}
     todas = set().union(*[set(t) for t in T.values()])
-    prot = proteccion(todas, cons, ocr, cfg["desde"], cfg["hasta"])
+    prot = proteccion(todas, ref, cfg["desde"], cfg["hasta"])
     base = T[pares[0]]   # cualquiera de los pares con C0: el lado control es C0
 
     # ---------------- sustrato que el evaluador ve
@@ -291,8 +350,20 @@ def evaluar(a):
     sin_rec = {k: [n for n in brazos if k not in claves_[n]] for k in protegidas}
     sin_rec = {k: v for k, v in sin_rec.items() if v}
     print("   protegidas (A o B) sin record en algun brazo:", sin_rec or "ninguna")
-    res["cobertura_ok"] = not (mal or sin_rec)
-    print("   " + ("cobertura pareja: OK" if res["cobertura_ok"] else "COBERTURA DESPAREJA: INDECIDIBLE. Repetir los jobs cortos con el mismo codigo."))
+    # Verificador del PR #797, 6b: la paridad entre brazos no ve un job verde sin datos que le pase a TODOS los
+    # brazos por igual (A108, S141). Se compara C0 con lo que produccion tiene de esa ventana: si en algun volcan y
+    # sensor C0 no trae mas del 5 % de las pasadas que produccion si trae, el reproceso quedo corto. El 5 % es un
+    # umbral del INSTRUMENTO, elegido, no medido contra MIROVA.
+    prod = claves_produccion(Path(a.produccion), vols, cfg["desde"], cfg["hasta"])
+    cortos = []
+    for (v, s), ks in sorted(prod.items()):
+        falta = {k for k in ks if k not in claves_["C0"]}
+        if len(falta) > MAX_FALTA_CONTRA_PRODUCCION * len(ks):
+            cortos.append("%s %s: faltan %d de %d" % (v, s, len(falta), len(ks)))
+    print("   C0 contra produccion (%s): %s" % (Path(a.produccion).name, "; ".join(cortos) if cortos else
+          "en ningun volcan y sensor falta mas del %d %% de las pasadas de produccion" % (100 * MAX_FALTA_CONTRA_PRODUCCION)))
+    res["cobertura_ok"] = not (mal or sin_rec or cortos)
+    print("   " + ("cobertura pareja: OK" if res["cobertura_ok"] else "COBERTURA DESPAREJA O CORTA: INDECIDIBLE. Repetir los jobs cortos con el mismo codigo."))
 
     # ---------------- 2. version de producto
     print("\n== 2. VERSION DEL PRODUCTO POR PASADA")
@@ -306,18 +377,21 @@ def evaluar(a):
     cable = {}
     for n in brazos:
         prob = []
+        if not a.logs:
+            prob.append("sin --logs: no hay con que probar el cableado")
         for v in vols:
-            fl = flags_leidos(a.logs, n, v)
-            if fl is None:
-                prob.append("%s: sin linea FLAGS_BRAZO" % v); continue
-            if fl.get("PROFILE_NAME") != BRAZOS[n] or fl.get("DATA_SUBDIR") != BRAZOS[n]:
-                prob.append("%s: perfil o directorio %s" % (v, fl.get("PROFILE_NAME")))
-            leido = tuple(fl.get(c) for c in CLAVES)
-            if leido != DECLARADO[n]:
-                prob.append("%s: flags leidos %s contra declarados %s" % (v, leido, DECLARADO[n]))
-            for c, val in EXTRA.items():
-                if c in fl and fl[c] != val:
-                    prob.append("%s: %s=%s, produccion %s" % (v, c, fl[c], val))
+            for d, fl in flags_leidos(a.logs, n, v):
+                donde = "%s (%s)" % (v, d.rstrip("/").split("/")[-2] if d.count("/") else d)
+                if fl is None:
+                    prob.append("%s: sin linea FLAGS_BRAZO" % donde); continue
+                if fl.get("PROFILE_NAME") != BRAZOS[n] or fl.get("DATA_SUBDIR") != BRAZOS[n]:
+                    prob.append("%s: perfil o directorio %s" % (donde, fl.get("PROFILE_NAME")))
+                leido = tuple(fl.get(c) for c in CLAVES)
+                if leido != DECLARADO[n]:
+                    prob.append("%s: flags leidos %s contra declarados %s" % (donde, leido, DECLARADO[n]))
+                for c, val in EXTRA.items():
+                    if c in fl and fl[c] != val:
+                        prob.append("%s: %s=%s, produccion %s" % (donde, c, fl[c], val))
         if not DECLARADO[n][0] and any(x["t1"] for x in R[n].values()):
             prob.append("declara sin Test 1 y hay records con triggered_test1")
         cable[n] = prob
@@ -348,7 +422,7 @@ def evaluar(a):
         rr = Path(a.repeticion)
         for p in pares:
             if p[0] == "C0" and all((rr / BRAZOS[x]).exists() for x in p):
-                T_rep[p] = tabla(rr / BRAZOS[p[0]], rr / BRAZOS[p[1]], cons, ocr, cfg["desde"], cfg["hasta"], tmp / ("rep_%s_%s.json" % p))
+                T_rep[p] = tabla(rr / BRAZOS[p[0]], rr / BRAZOS[p[1]], ref, cfg["desde"], cfg["hasta"], tmp / ("rep_%s_%s.json" % p))
 
     # ---------------- 5. P1 veto
     print("\n== 5. P1, VETO: alertas protegidas que C0 publica y el candidato no (por pasada)")
@@ -359,7 +433,7 @@ def evaluar(a):
         for lectura in ("A", "B"):
             for s in SENS_CANDIDATO[X] + SENS_INFORMA.get(X, ()):
                 pref = "P1" if s in SENS_CANDIDATO[X] else "P1inf"
-                netas, ruidosas, snpp, recup, n_pub = [], [], [], [], 0
+                netas, ruidosas, pendientes, descartadas, snpp, recup, n_pub = [], [], [], [], [], [], 0
                 for k, v in T[par].items():
                     if len(v) != 2 or k.split("|")[1] != s or not prot[k][lectura] or not decide_sensor(k, cfg):
                         continue
@@ -372,13 +446,22 @@ def evaluar(a):
                     if b["pub"]:
                         continue
                     linea = "%s | MIROVA %s MW | %s | lab %s" % (k, c["vrp_ref"], c["plataforma"], c["lab"])
+                    # §5. Con la repeticion de los jobs de ese volcan (--repeticion), la pasada se decide ahi: si se
+                    # vuelve a perder es neta, si no, es ruido confirmado y no cuenta. Sin repeticion: ruidosa si el
+                    # gemelo de C0 (o, en VIIRS, F contra K) tambien cambia; PENDIENTE DE REPETICION si la ventana
+                    # no tiene gemelo (V2); neta en otro caso.
+                    rep = T_rep.get(par, {}).get(k)
                     if lectura == "A" and not cfg["solo_tabla"] and ocr_snpp(k, c, prot):
                         snpp.append(linea)
+                    elif rep is not None and len(rep) == 2:
+                        if rep["control"]["pub"] and not rep["brazo"]["pub"]:
+                            netas.append(linea + " | se repite en la repeticion")
+                        else:
+                            descartadas.append(linea + " | no se repite en la repeticion: ruido confirmado")
                     elif k in ruido_c0 or (s != "MODIS" and k in ruido_cand):
                         ruidosas.append(linea)
-                    elif par in T_rep and k in T_rep[par] and len(T_rep[par][k]) == 2 and not (
-                            T_rep[par][k]["control"]["pub"] and not T_rep[par][k]["brazo"]["pub"]):
-                        ruidosas.append(linea + " | no se repite en la repeticion")
+                    elif "G" not in brazos:
+                        pendientes.append(linea)
                     else:
                         netas.append(linea)
                 if not (controles and res["cableado"]["C0"] and res["cableado"][X]):
@@ -387,6 +470,8 @@ def evaluar(a):
                     ver = "VETADO"
                 elif ruidosas:
                     ver = "INDECIDIBLE"
+                elif pendientes:
+                    ver = "PENDIENTE DE REPETICION"
                 elif n_pub == 0:
                     ver = "SIN SUSTRATO"
                 else:
@@ -394,10 +479,12 @@ def evaluar(a):
                 res["veredicto"]["%s|%s|%s|%s" % (pref, X, s, lectura)] = ver
                 if pref == "P1inf":
                     ver += " (informativo: F no se adopta sin K)"
-                print("   %s lectura %s %-8s protegidas que C0 publica %3d | perdidas netas %d, ruidosas %d, solo OCR Suomi NPP %d | recuperadas %d | %s" % (
-                    X, lectura, s, n_pub, len(netas), len(ruidosas), len(snpp), len(recup), ver))
+                print("   %s lectura %s %-8s protegidas que C0 publica %3d | perdidas netas %d, ruidosas %d, pendientes %d, descartadas por repeticion %d, solo OCR Suomi NPP %d | recuperadas %d | %s" % (
+                    X, lectura, s, n_pub, len(netas), len(ruidosas), len(pendientes), len(descartadas), len(snpp), len(recup), ver))
                 for l in netas: print("      perdida: " + l)
-                for l in ruidosas: print("      perdida ruidosa: " + l)
+                for l in ruidosas: print("      perdida ruidosa (se resuelve repitiendo los jobs de C0 y %s de ese volcan, §5): %s" % (X, l))
+                for l in pendientes: print("      perdida PENDIENTE DE REPETICION (ventana sin gemelo, §5): " + l)
+                for l in descartadas: print("      " + l)
                 for l in snpp: print("      solo OCR Suomi NPP (no decide; mirar la cabecera de la imagen, docs/S150_IMAGENES_SNPP.md): " + l)
                 for k in recup: print("      recuperada (C0 no la publica): %s | MIROVA %s MW" % (k, T[par][k]["control"]["vrp_ref"]))
 
@@ -418,7 +505,13 @@ def evaluar(a):
                     lectura, s, n, filas_s[n][0], filas_s[n][3], filas_s[n][1], filas_s[n][4], sum(filas_s[n][:2]), sum(tot[:2]), filas_s[n][2]))
             s0 = sum(filas_s["C0"][:2])
             if "G" in brazos:
-                ruido = abs(sum(filas_s["G"][:2]) - s0); fuente = "gemelo"
+                # Verificador del PR #797, 6d: el ruido no es solo la diferencia NETA de las sumas (dos pasadas que
+                # cambian en sentidos opuestos se cancelan), sino las pasadas DISCORDANTES: donde C0 y su gemelo no
+                # coinciden en si hay error. Es una cota superior de la neta y es la que se usa.
+                Tg = T[("C0", "G")]
+                e0 = errores_por_pasada(Tg, "control", prot, lectura, cfg, s, excluir)
+                eg = errores_por_pasada(Tg, "brazo", prot, lectura, cfg, s, excluir)
+                ruido = len(e0 ^ eg); fuente = "gemelo: %d pasadas discordantes, diferencia neta %d" % (ruido, abs(sum(filas_s["G"][:2]) - s0))
                 res["ruido_frac"]["%s|%s" % (s, lectura)] = ruido / s0 if s0 else 0.0
             elif a.ruido_de:
                 fr = json.load(open(a.ruido_de, encoding="utf-8"))["ruido_frac"].get("%s|%s" % (s, lectura), 0.0)
@@ -502,6 +595,16 @@ def evaluar(a):
             print("   %-8s %-3s recall %4d de %4d | protegidas A %3d de %3d | negativos limpios publicados %4d de %5d (%.1f %%)" % (
                 s, n, sum(x["pub"] for x in pos), len(pos), sum(x["pub"] for x in pa), len(pa), sum(x["pub"] for x in neg), len(neg),
                 100 * sum(x["pub"] for x in neg) / len(neg) if neg else 0))
+    # P6 (informativa): C0 en negativos limpios de VIIRS 375 tiene que caer en la banda de A114 con el Test 1
+    # encendido; fuera de ella el reproceso no se parece a produccion y hay que saber por que antes de leer lo demas.
+    neg0 = [v["control"] for k, v in base.items() if "control" in v and k.split("|")[1] == "VIIRS375"
+            and decide_sensor(k, cfg) and v["control"]["lab"] == "neg_limpio"]
+    tasa = sum(x["pub"] for x in neg0) / len(neg0) if neg0 else None
+    res["P6"] = {"tasa": tasa, "n": len(neg0),
+                 "dentro": None if tasa is None else BANDA_P6[0] <= tasa <= BANDA_P6[1]}
+    print("\n   P6 (informa): C0 publica en negativos limpios de VIIRS 375 %s | banda de A114 %.0f a %.0f %% -> %s" % (
+        "%d de %d (%.1f %%)" % (sum(x["pub"] for x in neg0), len(neg0), 100 * tasa) if neg0 else "SIN SUSTRATO",
+        100 * BANDA_P6[0], 100 * BANDA_P6[1], "SIN SUSTRATO" if tasa is None else ("DENTRO" if res["P6"]["dentro"] else "FUERA: investigar antes de leer el resto")))
     print("\n   MODIS fuera de Lascar (S150 midio K solo en Lascar), negativos limpios publicados:")
     partes = []
     for n in brazos:
@@ -521,6 +624,11 @@ def evaluar(a):
 
     # ---------------- veredicto de la ventana por candidato
     res["global"] = {X: {l: global_ventana(res, X, l) for l in ("A", "B")} for X in ("F", "K") if X in brazos}
+    if "F" not in brazos and "K" in brazos:
+        # Verificador del PR #797, punto 3: en V2 no corre F, pero en VIIRS F y K son el mismo codigo (la banda 22
+        # solo la lee process_modis.py), asi que el VIIRS de F se deriva de K. Sin esto, el "peor de las dos
+        # ventanas" de F seria solo V1, con el poder de V1 (12,6 %).
+        res["global"]["F"] = {l: global_ventana(res, "F", l, fuente="K") + " [derivado de K: mismo codigo en VIIRS]" for l in ("A", "B")}
     print("\n== VEREDICTO DE LA VENTANA %s (reglas de §6):" % a.ventana)
     for X, d in res["global"].items():
         for l, v in d.items():
@@ -529,19 +637,23 @@ def evaluar(a):
     return 0
 
 
-def global_ventana(res, X, lectura):
-    """§6 del pre-registro. Orden: controles, veto, suma, magnitud; el movimiento agrega una condicion."""
-    v = res["veredicto"]
-    if not (res["controles_ok"] and res["cableado"].get("C0") and res["cableado"].get(X)):
+def global_ventana(res, X, lectura, fuente=None):
+    """§6 del pre-registro. Orden: controles, veto, suma, magnitud; el movimiento agrega una condicion.
+    `fuente`: brazo del que se leen los veredictos (F en V2 se lee de K, en los sensores de F)."""
+    v = res["veredicto"]; Y = fuente or X
+    if not (res["controles_ok"] and res["cableado"].get("C0") and res["cableado"].get(Y)):
         return "INDECIDIBLE"
     sens = SENS_CANDIDATO[X]
-    p1 = [v.get("P1|%s|%s|%s" % (X, s, lectura)) for s in sens]
-    p2 = [v.get("P2|%s|%s|%s" % (X, s, lectura)) for s in sens]
-    p3 = [v.get("P3|%s|%s" % (X, s)) for s in sens]
+    p1 = [v.get("P1|%s|%s|%s" % (Y, s, lectura)) for s in sens]
+    p2 = [v.get("P2|%s|%s|%s" % (Y, s, lectura)) for s in sens]
+    p3 = [v.get("P3|%s|%s" % (Y, s)) for s in sens]
+    X = Y
     if "VETADO" in p1:
         return "NO CUMPLE (veto)"
     if "INDECIDIBLE" in p1 + p2 + p3:
         return "INDECIDIBLE"
+    if "PENDIENTE DE REPETICION" in p1:
+        return "PENDIENTE DE REPETICION"
     if "PIERDE" in p2:
         return "NO CUMPLE (suma de errores)"
     if "GANA" not in p2:
@@ -557,9 +669,10 @@ def global_ventana(res, X, lectura):
 
 
 def combinar(archivos):
-    """§6: el candidato cumple solo si cumple en las dos ventanas; el peor estado manda."""
+    """§6: el candidato cumple solo si cumple en las dos ventanas; el peor estado manda. Un NO CUMPLE en una
+    ventana es definitivo aunque la otra este INDECIDIBLE o PENDIENTE."""
     rs = [json.load(open(f, encoding="utf-8")) for f in archivos]
-    orden = ("INDECIDIBLE", "NO CUMPLE", "CUMPLE EN DETECCION", "CUMPLE")
+    orden = ("NO CUMPLE", "INDECIDIBLE", "PENDIENTE DE REPETICION", "CUMPLE EN DETECCION", "CUMPLE")
     print("== VEREDICTO COMBINADO (%s)" % ", ".join(r["ventana"] for r in rs))
     for X in ("F", "K"):
         for l in ("A", "B"):
@@ -584,6 +697,8 @@ def main():
     # solo para la prueba del evaluador (probar_evaluar_fk.py): no cambian ninguna regla
     ap.add_argument("--vols"); ap.add_argument("--desde"); ap.add_argument("--hasta"); ap.add_argument("--ref")
     ap.add_argument("--solo-tabla", dest="solo_tabla", choices=("si", "no")); ap.add_argument("--brazos")
+    ap.add_argument("--capas-del-repo", dest="capas_del_repo", action="store_true")
+    ap.add_argument("--produccion", default=str(RAIZ / "data" / "mirova_equivalent"))
     a = ap.parse_args()
     if a.combinar:
         return combinar(a.combinar)
