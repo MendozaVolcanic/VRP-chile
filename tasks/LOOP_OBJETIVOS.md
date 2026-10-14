@@ -223,6 +223,15 @@ y dos verificadores, 2026-10-09).
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-14 (servidor 18:11 UTC): vuelta 27, la etiqueta far sí oculta (nota falsa corregida, #804)
+- La nota del evaluador de la caja decía que el tablero publica una pasada `far` por su cúmulo. Con el predicado
+  real (`banco_paridad.correr_node`): MODIS con `far` y cúmulo de 2 MW a 0,8 km da `[0, 1, 0, 0, 0]` (no publica);
+  con `summit`, `[1, 1, 0, 2, 1]`. No hay defecto del tablero; la nota era falsa y se corrigió (#804, mergeado).
+- Falta propia: escribí en el PR "la prueba sigue pasando" antes de correrla bien (el script pide argumentos).
+  La corrí después con el log del run de Chillán: 29 de 29, y recién entonces mergeé.
+- Próximo paso: pendiente (iv) de 0.1, la unión histórica del canal OCR (el consolidado perdió filas; el OCR
+  nunca se revisó).
+
 ### 2026-10-14 (servidor 18:02 UTC): vuelta 26, pendiente (i) de 0.1 resuelto (#803)
 - `auto_audit_weekly.py`: el paso 1 (noches con alerta de MIROVA, base del recall) cargaba sólo el snapshot
   crudo. Nueva `alertas_mirova()` suma la unión histórica (la fila del snapshot gana). Entran 30 alertas, 2 en la
