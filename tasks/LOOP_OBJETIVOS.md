@@ -164,7 +164,9 @@ y dos verificadores, 2026-10-09).
   con los hallazgos de su verificador (`docs/audit_s150/VERIFICADOR_PREREGISTRO_D22.md`), el criterio de §1.2 y
   la referencia de 0.1; verificador limpio; sello de Nicolás; despacho.
 
-- [ ] **1.4 A/B de anomalía mayor (`vrp_max`) contra `vent_anchored`** (decisión de Nicolás para la réplica).
+- [~] **1.4 A/B de anomalía mayor (`vrp_max`) contra `vent_anchored`** PRE-REGISTRO en `main` (#794, `1795676b`,
+  verificado con arreglos); ESPERA a Nicolás (D-6, #795): A1 casi inerte (el flag no llega a la Regla D ni al
+  ancla), A2 necesita código (A45) y P5 prevé un veto con la lectura A. (decisión de Nicolás para la réplica).
   Universo de comparación: 359 detecciones lejanas nocturnas de MIROVA, no 858 (VERIFICADOR_DATOS D2); la
   clasificación NULO la escribe el scraper. Medir distancias desde el cráter y no desde el catálogo
   (`process_viirs.py:754`, AUDITOR_F1). Pre-registro, verificador, sello, despacho.
@@ -206,8 +208,19 @@ y dos verificadores, 2026-10-09).
 | D-3 | Marca de régimen en `store.py` (tarea 0.6) | 4 tests, 3 fallaban antes; suite 1706 | #785, tag `pre-s151-marca-regimen` | #786 |
 | D-4 | Alerta protegida: lectura A (alertas del scraper, 439 pasadas, recomendada) o B (todo VRP >= 1 MW, 992) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 |
 | D-5 | Sello del probe de D25 en VIIRS 750 (tarea 1.5); pilotear Tupungatito con 10 pasadas | `experiments/_s151_d25_v750_disco/README.md`, verificador limpio con arreglos | #790 | #793 |
+| D-6 | A/B de anomalía mayor: sello de A1 y si se implementa el código de A2 (recomendación: esperar D-4) | `experiments/_s151_ab_vrp_max/PREREGISTRO.md`, verificador limpio con arreglos | #794 | #795 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 13:50 UTC): vuelta 15, 1.4 en la cola (D-6), Chillán con sus 10 brazos en verde
+- Arreglos de #794 aplicados por su agente (P2 redefinida como cambio cerca/lejos o de publicación; caja de
+  50 × 50 km; K3 por corrida con fusión probada; `probar_evaluar.py` 12 de 12; protegidas no decisivas listadas;
+  INERTE exige 0 silenciadas y 0 nuevas). Diff del workflow revisado por mí: sólo agrega una clave a
+  `FLAGS_BRAZO`. CI verde, #794 mergeado.
+- D-6 (#795): recomendación del loop, no despachar hasta D-4; con la lectura A, A2 nace vetado por P5 y A1 casi
+  no mide.
+- Prueba de Chillán 38560317428: los 10 brazos terminaron en verde; falta el job de recolección.
+- Próximo paso: evaluar Chillán con `medir_ndc.py` y su verificador limpio.
 
 ### 2026-10-14 (servidor 13:37 UTC aprox.): vuelta 14, verificador de #794: sellable con arreglos
 - Confirmado: flag y perfil (única diferencia), Regla D y ancla ciegas al flag por `hotspot_dist_km`, sustrato
