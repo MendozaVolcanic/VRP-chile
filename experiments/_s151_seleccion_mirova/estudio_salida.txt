@@ -1,0 +1,255 @@
+referencia: snapshot CONS sha256 ef8e68eaae56; 44468 filas. TIF: indice en commit 3660cdfa77
+corte del scraper por volcan (ALERTA mas lejana, FALSO_POSITIVO mas cercana -> corte), medido desde el centro de grilla:
+   Lascar                 5.00   6.39 ->   5.70 km
+   Lastarria              2.73   3.77 ->   3.25 km
+   Isluga                 4.14   6.39 ->   5.26 km
+   Tupungatito            6.55   5.03 ->   5.03 km
+   PlanchonPeteroa        2.52   3.46 ->   2.99 km
+   NevadosDeChillan       4.28   5.22 ->   4.75 km
+   Llaima                 2.93  10.63 ->   6.78 km
+   Villarrica             2.00   7.01 ->   4.50 km
+   Copahue                3.75   6.05 ->   4.90 km
+   PuyehueCordonCaulle   18.04  20.53 ->  19.29 km
+   Chaiten                4.52   5.22 ->   4.87 km
+
+== universo: lejanas nocturnas 359 (D2: 359) por sensor {'VIIRS375': 332, 'MODIS': 10, 'VIIRS750': 17}; alertas 1377; rutina 15721
+indice de TIF: 21873 filas, adquisiciones 2026-05-09 04:48:01+00:00 a 2026-09-22 07:40:00+00:00; filas con md5 ambiguo (mismo archivo con otra hora de adquisicion, A106): 2023
+
+== pareo con el TIF de la misma pasada (adquisicion a +-120 s):
+   lejanas: {'sin_tif': 222, 'ok': 114, 'md5_ambiguo': 20, 'varias_versiones': 3}
+   lejanas por ventana del archivo de TIF: {'antes del 2026-05-09': 84, 'dentro': 248, 'despues del 2026-09-22': 27}
+   alertas: {'sin_tif': 814, 'ok': 458, 'md5_ambiguo': 79, 'varias_versiones': 26}
+   rutina: {'sin_tif': 9305, 'ok': 5716, 'varias_versiones': 195, 'md5_ambiguo': 505}
+   rutina muestreada (semilla 151, hasta 150 por sensor): 450
+   TIF bajados y con md5 correcto: 1048 de 1051 (cache C:\Users\nmend\AppData\Local\Temp\claude\C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile\cc89671c-1a9a-4960-b2b7-508d0fd7e9de\scratchpad\tifs\cache_s151)
+
+== pasadas medidas: {'lejana': 117, 'alerta': 482, 'rutina': 448}; TIF no legibles: {'rutina': 1}; por sensor y grupo:
+grupo   sensor  
+alerta  MODIS        17
+        VIIRS375    386
+        VIIRS750     79
+lejana  MODIS         8
+        VIIRS375    103
+        VIIRS750      6
+rutina  MODIS       150
+        VIIRS375    149
+        VIIRS750    149
+
+== Atribucion (A106): BT del TIF menos BT de nuestros pixeles de la MISMA pasada, contra el nulo de los pixeles de OTRA pasada (mas de 3 h) del mismo volcan y sensor sobre el mismo TIF
+   MODIS     misma pasada: n=174 |dBT| mediana 5.64 K, <=1 K 2.3 %, <=2 K 6.3 %   | nulo otra pasada: n=175 mediana 10.29 K, <=1 K 6.3 %, <=2 K 12.6 %
+   VIIRS375  misma pasada: n=559 |dBT| mediana 0.61 K, <=1 K 61.9 %, <=2 K 74.6 %   | nulo otra pasada: n=635 mediana 5.00 K, <=1 K 21.3 %, <=2 K 31.7 %
+   VIIRS750  misma pasada: n=128 |dBT| mediana 1.27 K, <=1 K 45.3 %, <=2 K 66.4 %   | nulo otra pasada: n=224 mediana 6.03 K, <=1 K 16.1 %, <=2 K 24.6 %
+   verificada <= 1.0 K, rechazada > 5.0 K, dudosa entre medio; MODIS sin dato: {('alerta', 'dudosa'): 184, ('alerta', 'rechazada'): 40, ('alerta', 'sin_dato'): 25, ('alerta', 'verificada'): 233, ('lejana', 'dudosa'): 20, ('lejana', 'rechazada'): 8, ('lejana', 'sin_dato'): 42, ('lejana', 'verificada'): 47, ('rutina', 'dudosa'): 14, ('rutina', 'rechazada'): 17, ('rutina', 'sin_dato'): 293, ('rutina', 'verificada'): 124}
+   las RECHAZADAS salen del analisis principal (65); las dudosas y sin dato se quedan; todo el analisis se repite despues solo con las verificadas.
+
+
+############################ SIN LAS RECHAZADAS POR ATRIBUCION: 982 pasadas
+
+== Georreferencia (cada TIF): distancia del centro del raster al centro de grilla de volcanoes.yaml
+                     median    max
+vol                               
+Chaiten               0.408  0.493
+Copahue               0.081  0.271
+Isluga                0.308  0.396
+Lascar                0.160  0.215
+Lastarria             0.091  0.212
+Llaima                0.080  0.272
+NevadosDeChillan      0.257  0.345
+PlanchonPeteroa       0.010  0.267
+PuyehueCordonCaulle   0.166  0.237
+Tupungatito           0.262  0.350
+Villarrica            0.256  0.344
+   CRS: {'EPSG:4326': 971, 'EPSG:32719': 9, 'EPSG:32718': 2}; crater fuera del raster: 0
+   N4 control positivo: z del crater contra z de discos a 8 km (mediana; fraccion crater > nulo)
+   alerta  MODIS     n=  17 z_crater   4.25 nulo   2.27 crater>nulo  82.4 %
+   alerta  VIIRS375  n= 351 z_crater   7.20 nulo   2.34 crater>nulo  96.9 %
+   alerta  VIIRS750  n=  73 z_crater   6.05 nulo   1.97 crater>nulo  87.7 %
+   lejana  MODIS     n=   8 z_crater   1.14 nulo   1.80 crater>nulo  50.0 %
+   lejana  VIIRS375  n=  97 z_crater   2.14 nulo   2.18 crater>nulo  47.4 %
+   lejana  VIIRS750  n=   4 z_crater   2.39 nulo   2.63 crater>nulo  25.0 %
+   rutina  MODIS     n= 149 z_crater   1.14 nulo   1.89 crater>nulo  30.9 %
+   rutina  VIIRS375  n= 134 z_crater   1.66 nulo   2.13 crater>nulo  36.6 %
+   rutina  VIIRS750  n= 139 z_crater   1.34 nulo   1.99 crater>nulo  30.2 %
+
+== N1 umbrales del nulo RUTINA (p95, MIROVA miro y no alerto nada): foco en el anillo Z_ID / calor en un disco del radio del crater Z_CAL / foco mas fuerte de toda la zona lejana Z_FAR
+   MODIS     Z_ID  13.58   Z_CAL   3.28   Z_FAR  17.82
+   VIIRS375  Z_ID  10.58   Z_CAL   3.28   Z_FAR  20.11
+   VIIRS750  Z_ID  10.82   Z_CAL   3.36   Z_FAR  19.33
+   (la zona lejana tiene miles de pixeles, por eso su maximo es alto aun sin nada: por eso tiene su propio nulo)
+
+== P1a. Hay calor en el anillo a la distancia del CSV? (fraccion con foco sobre Z_ID; N1 da 5 % por construccion en rutina)
+   MODIS     lejana  n=   8 foco identificado    4 ( 50.0 %), z mediano  13.90
+   MODIS     alerta  n=  17 foco identificado    0 (  0.0 %), z mediano   4.92
+   MODIS     rutina  n= 150 foco identificado    8 (  5.3 %), z mediano   5.02
+   VIIRS375  lejana  n=  97 foco identificado   84 ( 86.6 %), z mediano  32.13
+   VIIRS375  alerta  n= 350 foco identificado   16 (  4.6 %), z mediano   4.90
+   VIIRS375  rutina  n= 137 foco identificado    7 (  5.1 %), z mediano   4.96
+   VIIRS750  lejana  n=   4 foco identificado    4 (100.0 %), z mediano  59.52
+   VIIRS750  alerta  n=  74 foco identificado    2 (  2.7 %), z mediano   3.37
+   VIIRS750  rutina  n= 144 foco identificado    8 (  5.6 %), z mediano   4.92
+   N2 anillo corrido +-3 km, lejanas: el anillo del CSV gana en 94 de 109 (86.2 %); con foco identificado: 89 de 92
+   N2 en rutina (nulo): gana en 120 de 427 (28.1 %)
+
+== P1b. Coincidencia en POSICION del foco identificado con nuestra pasada (N3: el mismo foco girado)
+   lejanas con foco identificado: 92; con record nuestro 92
+   MODIS     cualquier pixel nuestro (escena)   a <= 2.0 km: real 2/4 ( 50.0 %)  nulo girado 2/44 (  4.5 %)
+   MODIS     nuestro pixel alertado de mas VRP  a <= 2.0 km: real 0/4 (  0.0 %)  nulo girado 0/44 (  0.0 %)
+   VIIRS375  cualquier pixel nuestro (escena)   a <= 1.0 km: real 4/57 (  7.0 %)  nulo girado 1/579 (  0.2 %)
+   VIIRS375  nuestro pixel alertado de mas VRP  a <= 1.0 km: real 39/54 ( 72.2 %)  nulo girado 0/546 (  0.0 %)
+   VIIRS750  cualquier pixel nuestro (escena)   a <= 1.5 km: real 2/3 ( 66.7 %)  nulo girado 0/33 (  0.0 %)
+   VIIRS750  nuestro pixel alertado de mas VRP  a <= 1.5 km: real 3/3 (100.0 %)  nulo girado 0/33 (  0.0 %)
+   al reves: z del TIF donde esta NUESTRO pixel lejano mas energetico, contra el mismo punto girado
+   lejana  MODIS     n=   7 z   0.32 nulo   0.00; sobre Z_CAL 1 (nulo 0)
+   lejana  VIIRS375  n=   9 z   2.54 nulo   0.04; sobre Z_CAL 4 (nulo 0)
+   lejana  VIIRS750  n=   3 z  21.56 nulo   0.00; sobre Z_CAL 2 (nulo 0)
+   alerta  MODIS     n=  15 z  -0.25 nulo  -0.05; sobre Z_CAL 0 (nulo 0)
+   alerta  VIIRS375  n=  51 z   1.59 nulo  -0.07; sobre Z_CAL 17 (nulo 0)
+   alerta  VIIRS750  n=   6 z   0.14 nulo  -0.13; sobre Z_CAL 2 (nulo 0)
+   rutina  MODIS     n= 144 z   0.53 nulo   0.00; sobre Z_CAL 10 (nulo 1)
+   rutina  VIIRS375  n=  10 z   1.72 nulo  -0.00; sobre Z_CAL 2 (nulo 0)
+   rutina  VIIRS750  n=   9 z   2.11 nulo   0.00; sobre Z_CAL 3 (nulo 0)
+
+== N5. La energia del foco en el TIF (exceso x Wooster) contra el VRP que publica MIROVA (Spearman)
+   lejana  (foco del anillo): n=92 rho=0.889 p=2.4e-32; log10(energia TIF / VRP MIROVA) mediana +0.08 (p25 +0.01, p75 +0.25)
+   alerta  (foco del crater): n=441 rho=0.809 p=2.2e-103; log10(energia TIF / VRP MIROVA) mediana +0.14 (p25 +0.03, p75 +0.31)
+
+== P2/P3. Calor en el crater Y lejos en la misma pasada: que informa MIROVA y que regla lo predice
+
+   ---- MODIS: lejanas con foco identificado 4, alertas 17. Umbral de 'calor en el crater': Z_CAL 3.28 (p95 del nulo) y, estricto, la mediana del crater en las alertas 4.25
+   T1 [Z_CAL] lejanas con calor en el crater: 2 de 4 (rutina, crater sobre el mismo umbral: 24 de 149). MIROVA informo LEJOS en todas: R2 y R3 en contra 2, R4 a favor 2
+   T2 [Z_CAL] de esas, el lejano pesa mas (R1 a favor) 2; el crater pesa mas y MIROVA igual informo lejos (R1 en contra, R4 a favor) 0
+   T1 [mediana_alertas] lejanas con calor en el crater: 2 de 4 (rutina, crater sobre el mismo umbral: 13 de 149). MIROVA informo LEJOS en todas: R2 y R3 en contra 2, R4 a favor 2
+   T2 [mediana_alertas] de esas, el lejano pesa mas (R1 a favor) 2; el crater pesa mas y MIROVA igual informo lejos (R1 en contra, R4 a favor) 0
+   T4 alertas (MIROVA informo el crater) con foco lejano z >= 1 x Z_FAR (17.8): 0 de 17; lejano pesa mas que el crater en 0
+   T4 alertas (MIROVA informo el crater) con foco lejano z >= 2 x Z_FAR (35.6): 0 de 17; lejano pesa mas que el crater en 0
+   P(MIROVA informa lejos | foco lejano del TIF con z >= X), rutina pesada x13.6:
+      X=   17.8: lejanas 3, alertas 0, rutina 8 (pesada 109) ->   2.7 %
+      X=   35.6: lejanas 1, alertas 0, rutina 0 (pesada 0) -> 100.0 %
+      X=   71.3: lejanas 1, alertas 0, rutina 0 (pesada 0) -> 100.0 %
+   NUESTROS: hotspot a mas de 5 km del crater y cumulo en el inner: 22; MIROVA informo lejos 6, cerca 16
+
+   ---- VIIRS375: lejanas con foco identificado 84, alertas 351. Umbral de 'calor en el crater': Z_CAL 3.28 (p95 del nulo) y, estricto, la mediana del crater en las alertas 7.20
+   T1 [Z_CAL] lejanas con calor en el crater: 28 de 84 (rutina, crater sobre el mismo umbral: 20 de 134). MIROVA informo LEJOS en todas: R2 y R3 en contra 28, R4 a favor 28
+   T2 [Z_CAL] de esas, el lejano pesa mas (R1 a favor) 28; el crater pesa mas y MIROVA igual informo lejos (R1 en contra, R4 a favor) 0
+   T1 [mediana_alertas] lejanas con calor en el crater: 8 de 84 (rutina, crater sobre el mismo umbral: 4 de 134). MIROVA informo LEJOS en todas: R2 y R3 en contra 8, R4 a favor 8
+   T2 [mediana_alertas] de esas, el lejano pesa mas (R1 a favor) 8; el crater pesa mas y MIROVA igual informo lejos (R1 en contra, R4 a favor) 0
+   T3 log10(energia TIF / VRP MIROVA), mediana [p25, p75]: lejanas con crater frio (calibracion) +0.106 [+0.035, +0.245] n=56 (con su crater frio sumado, ruido: +0.130); con crater caliente (estricto), solo el lejano +0.020 [-0.036, +0.041] (Mann-Whitney contra la calibracion p=0.046) y lejano+crater +0.181 [+0.125, +0.189] (contra la calibracion con ruido p=0.757) n=8
+   T4 alertas (MIROVA informo el crater) con foco lejano z >= 1 x Z_FAR (20.1): 6 de 351; lejano pesa mas que el crater en 6
+        Lastarria 2026-05-09 05:42:02: VRP MIROVA 0.06 a 2.4 km; TIF crater 0.10 MW (z 4.1), lejano 1.26 MW (z 22.9) a 10.0 km del centro
+        Tupungatito 2026-05-14 05:48:02: VRP MIROVA 0.21 a 6.55 km; TIF crater 0.23 MW (z 47.1), lejano 0.40 MW (z 23.5) a 17.6 km del centro
+        Llaima 2026-05-15 06:24:01: VRP MIROVA 0.08 a 1.88 km; TIF crater 0.06 MW (z 1.1), lejano 0.26 MW (z 25.0) a 12.4 km del centro
+        Lascar 2026-06-28 05:00:02: VRP MIROVA 0.3 a 1.19 km; TIF crater 0.31 MW (z 10.7), lejano 0.58 MW (z 24.3) a 22.4 km del centro
+        Isluga 2026-09-19 05:42:02: VRP MIROVA 0.06 a 0.53 km; TIF crater 0.08 MW (z 5.6), lejano 0.51 MW (z 20.5) a 7.8 km del centro
+        Isluga 2026-09-22 04:48:02: VRP MIROVA 0.06 a 0.53 km; TIF crater 0.18 MW (z 4.8), lejano 1.00 MW (z 22.7) a 21.0 km del centro
+   T4 alertas (MIROVA informo el crater) con foco lejano z >= 2 x Z_FAR (40.2): 0 de 351; lejano pesa mas que el crater en 0
+   P(MIROVA informa lejos | foco lejano del TIF con z >= X), rutina pesada x12.2:
+      X=   20.1: lejanas 70, alertas 6, rutina 7 (pesada 86) ->  43.3 %
+      X=   40.2: lejanas 39, alertas 0, rutina 0 (pesada 0) -> 100.0 %
+      X=   80.4: lejanas 11, alertas 0, rutina 0 (pesada 0) -> 100.0 %
+   NUESTROS: hotspot a mas de 5 km del crater y cumulo en el inner: 78; MIROVA informo lejos 42, cerca 36
+
+   ---- VIIRS750: lejanas con foco identificado 4, alertas 73. Umbral de 'calor en el crater': Z_CAL 3.36 (p95 del nulo) y, estricto, la mediana del crater en las alertas 6.05
+   T1 [Z_CAL] lejanas con calor en el crater: 1 de 4 (rutina, crater sobre el mismo umbral: 16 de 139). MIROVA informo LEJOS en todas: R2 y R3 en contra 1, R4 a favor 1
+   T2 [Z_CAL] de esas, el lejano pesa mas (R1 a favor) 1; el crater pesa mas y MIROVA igual informo lejos (R1 en contra, R4 a favor) 0
+   T1 [mediana_alertas] lejanas con calor en el crater: 0 de 4 (rutina, crater sobre el mismo umbral: 3 de 139). MIROVA informo LEJOS en todas: R2 y R3 en contra 0, R4 a favor 0
+   T2 [mediana_alertas] de esas, el lejano pesa mas (R1 a favor) 0; el crater pesa mas y MIROVA igual informo lejos (R1 en contra, R4 a favor) 0
+   T4 alertas (MIROVA informo el crater) con foco lejano z >= 1 x Z_FAR (19.3): 1 de 73; lejano pesa mas que el crater en 1
+        PuyehueCordonCaulle 2026-05-16 05:12:02: VRP MIROVA 0.82 a 8.55 km; TIF crater 0.90 MW (z 7.7), lejano 3.61 MW (z 22.6) a 19.9 km del centro
+   T4 alertas (MIROVA informo el crater) con foco lejano z >= 2 x Z_FAR (38.7): 0 de 73; lejano pesa mas que el crater en 0
+   P(MIROVA informa lejos | foco lejano del TIF con z >= X), rutina pesada x15.3:
+      X=   19.3: lejanas 4, alertas 1, rutina 8 (pesada 122) ->   3.1 %
+      X=   38.7: lejanas 3, alertas 0, rutina 3 (pesada 46) ->   6.1 %
+      X=   77.3: lejanas 1, alertas 0, rutina 0 (pesada 0) -> 100.0 %
+   NUESTROS: hotspot a mas de 5 km del crater y cumulo en el inner: 6; MIROVA informo lejos 1, cerca 5
+
+
+############################ SOLO LAS VERIFICADAS (|dBT| <= 1 K): 404 pasadas
+
+== Georreferencia (cada TIF): distancia del centro del raster al centro de grilla de volcanoes.yaml
+                     median    max
+vol                               
+Chaiten               0.408  0.408
+Copahue               0.009  0.271
+Isluga                0.308  0.308
+Lascar                0.084  0.215
+Lastarria             0.091  0.212
+Llaima                0.011  0.272
+NevadosDeChillan      0.257  0.257
+PlanchonPeteroa       0.010  0.267
+PuyehueCordonCaulle   0.166  0.190
+Tupungatito           0.262  0.262
+Villarrica            0.256  0.256
+   CRS: {'EPSG:4326': 395, 'EPSG:32719': 7, 'EPSG:32718': 2}; crater fuera del raster: 0
+   N4 control positivo: z del crater contra z de discos a 8 km (mediana; fraccion crater > nulo)
+   alerta  VIIRS375  n= 205 z_crater   7.04 nulo   2.34 crater>nulo  97.6 %
+   alerta  VIIRS750  n=  28 z_crater   4.16 nulo   2.04 crater>nulo  82.1 %
+   lejana  VIIRS375  n=  46 z_crater   2.66 nulo   2.19 crater>nulo  52.2 %
+   lejana  VIIRS750  n=   1 z_crater   3.66 nulo   2.50 crater>nulo 100.0 %
+   rutina  VIIRS375  n=  95 z_crater   1.55 nulo   2.18 crater>nulo  32.6 %
+   rutina  VIIRS750  n=  29 z_crater   1.57 nulo   2.14 crater>nulo  34.5 %
+
+== N1 umbrales del nulo RUTINA (p95, MIROVA miro y no alerto nada): foco en el anillo Z_ID / calor en un disco del radio del crater Z_CAL / foco mas fuerte de toda la zona lejana Z_FAR [heredados del analisis principal]
+   MODIS     Z_ID  13.58   Z_CAL   3.28   Z_FAR  17.82
+   VIIRS375  Z_ID  10.58   Z_CAL   3.28   Z_FAR  20.11
+   VIIRS750  Z_ID  10.82   Z_CAL   3.36   Z_FAR  19.33
+   (la zona lejana tiene miles de pixeles, por eso su maximo es alto aun sin nada: por eso tiene su propio nulo)
+
+== P1a. Hay calor en el anillo a la distancia del CSV? (fraccion con foco sobre Z_ID; N1 da 5 % por construccion en rutina)
+   VIIRS375  lejana  n=  46 foco identificado   42 ( 91.3 %), z mediano  29.64
+   VIIRS375  alerta  n= 204 foco identificado   10 (  4.9 %), z mediano   5.01
+   VIIRS375  rutina  n=  95 foco identificado    6 (  6.3 %), z mediano   5.14
+   VIIRS750  lejana  n=   1 foco identificado    1 (100.0 %), z mediano 141.52
+   VIIRS750  alerta  n=  28 foco identificado    0 (  0.0 %), z mediano   3.21
+   VIIRS750  rutina  n=  29 foco identificado    1 (  3.4 %), z mediano   5.43
+   N2 anillo corrido +-3 km, lejanas: el anillo del CSV gana en 44 de 47 (93.6 %); con foco identificado: 43 de 43
+   N2 en rutina (nulo): gana en 33 de 121 (27.3 %)
+
+== P1b. Coincidencia en POSICION del foco identificado con nuestra pasada (N3: el mismo foco girado)
+   lejanas con foco identificado: 43; con record nuestro 43
+   VIIRS375  cualquier pixel nuestro (escena)   a <= 1.0 km: real 1/42 (  2.4 %)  nulo girado 1/418 (  0.2 %)
+   VIIRS375  nuestro pixel alertado de mas VRP  a <= 1.0 km: real 28/39 ( 71.8 %)  nulo girado 0/385 (  0.0 %)
+   VIIRS750  cualquier pixel nuestro (escena)   a <= 1.5 km: real 0/1 (  0.0 %)  nulo girado 0/11 (  0.0 %)
+   VIIRS750  nuestro pixel alertado de mas VRP  a <= 1.5 km: real 1/1 (100.0 %)  nulo girado 0/11 (  0.0 %)
+   al reves: z del TIF donde esta NUESTRO pixel lejano mas energetico, contra el mismo punto girado
+   lejana  VIIRS375  n=   4 z   3.56 nulo  -0.07; sobre Z_CAL 2 (nulo 0)
+   lejana  VIIRS750  n=   1 z   3.23 nulo   0.00; sobre Z_CAL 0 (nulo 0)
+   alerta  VIIRS375  n=  37 z   1.02 nulo  -0.13; sobre Z_CAL 8 (nulo 0)
+   alerta  VIIRS750  n=   3 z   0.00 nulo   0.08; sobre Z_CAL 1 (nulo 0)
+   rutina  VIIRS375  n=  10 z   1.72 nulo  -0.00; sobre Z_CAL 2 (nulo 0)
+   rutina  VIIRS750  n=   4 z   1.53 nulo   0.01; sobre Z_CAL 1 (nulo 0)
+
+== N5. La energia del foco en el TIF (exceso x Wooster) contra el VRP que publica MIROVA (Spearman)
+   lejana  (foco del anillo): n=43 rho=0.867 p=5.8e-14; log10(energia TIF / VRP MIROVA) mediana +0.08 (p25 +0.03, p75 +0.23)
+   alerta  (foco del crater): n=233 rho=0.777 p=2.9e-48; log10(energia TIF / VRP MIROVA) mediana +0.19 (p25 +0.07, p75 +0.37)
+
+== P2/P3. Calor en el crater Y lejos en la misma pasada: que informa MIROVA y que regla lo predice
+
+   ---- VIIRS375: lejanas con foco identificado 42, alertas 205. Umbral de 'calor en el crater': Z_CAL 3.28 (p95 del nulo) y, estricto, la mediana del crater en las alertas 7.04
+   T1 [Z_CAL] lejanas con calor en el crater: 16 de 42 (rutina, crater sobre el mismo umbral: 15 de 95). MIROVA informo LEJOS en todas: R2 y R3 en contra 16, R4 a favor 16
+   T2 [Z_CAL] de esas, el lejano pesa mas (R1 a favor) 16; el crater pesa mas y MIROVA igual informo lejos (R1 en contra, R4 a favor) 0
+   T1 [mediana_alertas] lejanas con calor en el crater: 7 de 42 (rutina, crater sobre el mismo umbral: 4 de 95). MIROVA informo LEJOS en todas: R2 y R3 en contra 7, R4 a favor 7
+   T2 [mediana_alertas] de esas, el lejano pesa mas (R1 a favor) 7; el crater pesa mas y MIROVA igual informo lejos (R1 en contra, R4 a favor) 0
+   T3 log10(energia TIF / VRP MIROVA), mediana [p25, p75]: lejanas con crater frio (calibracion) +0.149 [+0.057, +0.296] n=26 (con su crater frio sumado, ruido: +0.216); con crater caliente (estricto), solo el lejano +0.028 [-0.008, +0.042] (Mann-Whitney contra la calibracion p=0.048) y lejano+crater +0.178 [+0.108, +0.185] (contra la calibracion con ruido p=0.560) n=7
+   T4 alertas (MIROVA informo el crater) con foco lejano z >= 1 x Z_FAR (20.1): 3 de 205; lejano pesa mas que el crater en 3
+        Lastarria 2026-05-09 05:42:02: VRP MIROVA 0.06 a 2.4 km; TIF crater 0.10 MW (z 4.1), lejano 1.26 MW (z 22.9) a 10.0 km del centro
+        Isluga 2026-09-19 05:42:02: VRP MIROVA 0.06 a 0.53 km; TIF crater 0.08 MW (z 5.6), lejano 0.51 MW (z 20.5) a 7.8 km del centro
+        Isluga 2026-09-22 04:48:02: VRP MIROVA 0.06 a 0.53 km; TIF crater 0.18 MW (z 4.8), lejano 1.00 MW (z 22.7) a 21.0 km del centro
+   T4 alertas (MIROVA informo el crater) con foco lejano z >= 2 x Z_FAR (40.2): 0 de 205; lejano pesa mas que el crater en 0
+   P(MIROVA informa lejos | foco lejano del TIF con z >= X), rutina pesada x17.6:
+      X=   20.1: lejanas 33, alertas 3, rutina 4 (pesada 71) ->  31.0 %
+      X=   40.2: lejanas 16, alertas 0, rutina 0 (pesada 0) -> 100.0 %
+      X=   80.4: lejanas 6, alertas 0, rutina 0 (pesada 0) -> 100.0 %
+   NUESTROS: hotspot a mas de 5 km del crater y cumulo en el inner: 55; MIROVA informo lejos 32, cerca 23
+
+   ---- VIIRS750: lejanas con foco identificado 1, alertas 28. Umbral de 'calor en el crater': Z_CAL 3.36 (p95 del nulo) y, estricto, la mediana del crater en las alertas 4.16
+   T1 [Z_CAL] lejanas con calor en el crater: 1 de 1 (rutina, crater sobre el mismo umbral: 6 de 29). MIROVA informo LEJOS en todas: R2 y R3 en contra 1, R4 a favor 1
+   T2 [Z_CAL] de esas, el lejano pesa mas (R1 a favor) 1; el crater pesa mas y MIROVA igual informo lejos (R1 en contra, R4 a favor) 0
+   T1 [mediana_alertas] lejanas con calor en el crater: 0 de 1 (rutina, crater sobre el mismo umbral: 3 de 29). MIROVA informo LEJOS en todas: R2 y R3 en contra 0, R4 a favor 0
+   T2 [mediana_alertas] de esas, el lejano pesa mas (R1 a favor) 0; el crater pesa mas y MIROVA igual informo lejos (R1 en contra, R4 a favor) 0
+   T4 alertas (MIROVA informo el crater) con foco lejano z >= 1 x Z_FAR (19.3): 0 de 28; lejano pesa mas que el crater en 0
+   T4 alertas (MIROVA informo el crater) con foco lejano z >= 2 x Z_FAR (38.7): 0 de 28; lejano pesa mas que el crater en 0
+   P(MIROVA informa lejos | foco lejano del TIF con z >= X), rutina pesada x75.9:
+      X=   19.3: lejanas 1, alertas 0, rutina 2 (pesada 152) ->   0.7 %
+      X=   38.7: lejanas 1, alertas 0, rutina 1 (pesada 76) ->   1.3 %
+      X=   77.3: lejanas 1, alertas 0, rutina 0 (pesada 0) -> 100.0 %
+   NUESTROS: hotspot a mas de 5 km del crater y cumulo en el inner: 3; MIROVA informo lejos 1, cerca 2
