@@ -263,6 +263,22 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-14 (servidor 23:07 UTC): vuelta 34, estudio TIF de la 1.4 entregado (#809), en verificación
+- Lo que trae (sin verificar todavía): 117 de 359 lejanas con TIF de su pasada. El TIF muestra un foco a la
+  distancia del CSV en 84 de 97 lejanas VIIRS 375 (5 % en RUTINA); nuestro píxel de más VRP cae a 1 km o menos de
+  ese foco en 39 de 54, control girado 0 de 546. Pero `anomaly_pixels` casi nunca lo guarda (4 de 57): la Regla D
+  rehace la lista con los píxeles del Test 1.
+- Regla de selección: "el cráter si hay algo en el cráter" y "la más cercana al centro" refutadas (28 lejanas con
+  calor en el cráter, MIROVA informó lejos en todas); "la mayor" y "la suma de lo alertado" aciertan la dirección,
+  y la magnitud de MIROVA en 8 casos estrictos favorece la suma (p = 0,046), que es lo que dicen los papers (A10,
+  D32). `vrp_max` no sería lo que hace MIROVA: cambia el diseño del A/B y va a Nicolás antes de escribir A2.
+- Láscar 2026-10-01 05:18: la fila de 1,2 MW es sólo OCR con la distancia de otra pasada; la miniatura de MIROVA
+  muestra el foco lejano más fuerte que el cráter. La P5 del pre-registro (veto) queda sin respaldo.
+- Operacional: MIROVA habría dejado de actualizar sus GeoTIFF el 2026-09-22 (Last-Modified); `mirova-tif-archive`
+  ya no guardaría TIF nuevos. Si el verificador lo confirma, va a `MAPA_WORKSPACE.md` (pipeline que dejó de producir).
+- El agente reconoce haber editado con heredoc o sed un par de veces antes de corregirse; contenido final revisado.
+- Verificador limpio lanzado sobre #809.
+
 ### 2026-10-14 (servidor 22:37 UTC): vuelta 33, V2a encolado detrás de V1, estudio D (1.12) arrancado
 - V1: 6 jobs en curso (el máximo) y 38 en espera; el estado global "queued" es un desfase de GitHub. V2a
   despachado (run 38648773684) y quedó `pending` en el grupo detrás de V1, sin desplazarlo (comprobado 30 s
