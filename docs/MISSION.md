@@ -55,12 +55,17 @@ MIROVA publicó y nosotros no es un evento que el operador no ve; una publicaci�
 una falsa alarma que le enseña a desconfiar. Las dos fallas cuestan, pero no igual en todo el rango de
 energía: arriba de 1 MW perder una alerta no tiene compensación posible.
 
-1. **En la réplica no se acepta ningún cambio que pierda una alerta protegida.** Una pasada de la
-   referencia es **alerta protegida** si es alerta (`ALERTA_TERMICA` del consolidado o
-   `ALERTA_TERMICA_OCR`) y su VRP de la pasada es de **1 MW o más**, recalculado desde el VRP y nunca
-   leído de la columna `Clasificacion Mirova`, que la escribe el scraper de Mirova-v1 y no MIROVA.
-   El corte de 1 MW coincide con el límite entre VERY LOW y LOW del banner de MIROVA. Definición,
-   control y denominador: `docs/S151_CRITERIO_CLASE_MIROVA.md` (llega con el PR #780).
+1. **En la réplica no se acepta ningún cambio que pierda una alerta protegida.** Nicolás lo dijo como
+   «una alerta que MIROVA clasifique de Bajo para arriba»; el corte de 1 MW es la operacionalización
+   hecha en la tarea 0.2 (PR #780), sostenida por el banner de MIROVA de hoy (ningún VERY LOW llega a
+   1 MW, ningún LOW queda bajo 1 MW) y **no por el paper**, cuya figura 11 se contradice con su pie.
+   **Lectura A, la de por defecto**: una pasada de la referencia es **alerta protegida** si es alerta
+   (`ALERTA_TERMICA` del consolidado o `ALERTA_TERMICA_OCR`) y su VRP de la pasada es de **1 MW o
+   más**, recalculado desde el VRP y nunca leído de la columna `Clasificacion Mirova`, que la escribe
+   el scraper de Mirova-v1 y no MIROVA (439 pasadas en la unión histórica). **Lectura B, pendiente**:
+   toda pasada en que MIROVA ve 1 MW o más, a cualquier distancia (992 pasadas). Cuál vale es la
+   decisión D-4 de Nicolás (issue #782); mientras tanto el loop evalúa con las dos. Definición,
+   control y denominadores: `docs/S151_CRITERIO_CLASE_MIROVA.md` §2, §3 y §5.
 2. **Dentro de «Muy Bajo»** (alertas bajo 1 MW, VERY LOW en el banner de MIROVA), **una alerta perdida
    y una publicación de más pesan igual**: se minimiza la suma de los dos errores.
 3. **Se mide en las dos direcciones, por sensor y por tramo de calidad de la referencia (A119)**, con

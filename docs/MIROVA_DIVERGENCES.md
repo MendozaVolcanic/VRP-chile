@@ -803,9 +803,11 @@ y sumar (que es lo que hacemos hoy y pierde señal sub-pixel distribuida).
 > última frase de la marca de S146 que sigue («lo que cae es el respaldo bibliográfico, no el resultado
 > empírico de S27») también cayó.** El resultado empírico quedó SIN EVIDENCIA y circular en S147 (ver la
 > marca de S147 dentro de D30, «Lo que esta D NO dice», y `docs/audit_s147/VERIFICADOR_H_A01.md`), y S149
-> mostró que el `_mirova_literal` de S27 (commit `db602040b`, 2026-04-29) no tenía el ETI ni los Tests 2
-> y 3, que entraron el 2026-05-15 (`958a7a189`). Las dos marcas de S146 de esta sección se conservan por
-> historia.
+> mostró que el `_mirova_literal` de S27 (commit `db602040b`, 2026-04-29) no era el literal: no tenía el
+> ETI ni su regresión cuadrática ni el Test 1 (`enable_test1_path: false`); sí tenía un contraste dNTI
+> contextual de 8 vecinos sin ETI y la compuerta de BT de 5/10 sigma. Los Tests 2 y 3 con ETI entraron el
+> 2026-05-15 (`958a7a189`); matiz de `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P3. Las dos marcas
+> de S146 de esta sección se conservan por historia.
 >
 > ⚠️ **S146 (AUDIT_S146 §3 V-06, gravedad 5): la cita «Coppola 2015 §2.2 Eq.1» es FALSA, y
 > aparece muchas veces en todo este bloque.** El artículo 55 del volumen 77 de *Bulletin of
@@ -2877,9 +2879,11 @@ N°372 y la ficha publicable declara una fuente que no se puede mostrar.
 ⚠️ **S151 (A113)**: hasta S150 las dos marcas de S146 de la sección H_S27_1, mil líneas más arriba,
 decían en presente lo contrario de la marca de S147 que sigue («no cae el resultado empírico de S27»);
 desde S151 llevan una marca encima que remite acá. Además S149 mostró que el `_mirova_literal` contra
-el que S27 midió no tenía el ETI ni los Tests 2 y 3 (commit `db602040b` del 2026-04-29 contra
-`958a7a189` del 2026-05-15, `docs/AUDIT_S149.md` §0), y el «NO ADOPTAR» del A/B sin Test 1 de S147
-cayó (`docs/AUDIT_S149.md` §0). Fuente: `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P3.
+el que S27 midió no era el literal (`docs/AUDIT_S149.md` §0): no tenía el ETI ni su regresión
+cuadrática ni el Test 1; sí tenía un contraste dNTI contextual de 8 vecinos sin ETI (commit
+`db602040b` del 2026-04-29; los Tests 2 y 3 con ETI entraron con `958a7a189` el 2026-05-15). Y el
+«NO ADOPTAR» del A/B sin Test 1 de S147 cayó (`docs/AUDIT_S149.md` §3, l. 72). Fuente:
+`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P3.
 
 **Lo que esta D NO dice**: no dice que el Test 1 integrado esté mal ni que haya que apagarlo. ⚠️
 **La frase que sigue CAYÓ en S147** (`docs/audit_s147/VERIFICADOR_H_A01.md`, hallazgos H1, H2 y
