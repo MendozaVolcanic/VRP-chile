@@ -4,6 +4,14 @@
 > en disco. Lo declarado antes de mirar está en `DECLARACION.md`, en su propio commit (7b2171ca0). Todo número
 > de este documento sale de `medir_modo_un_pixel.py`, con su salida en `salida.txt` y `resultado.json`.
 > No toca `pipeline/` ni los perfiles. No despacha nada.
+>
+> **Correcciones posteriores al resultado** (verificador con contexto limpio de #799, mismo día). Confirmó la
+> conclusión y la recomendación y pidió cinco arreglos y uno menor, todos aplicados después de ver el resultado y
+> marcados en §8: (D1) un cúmulo con más de un conjunto de píxeles posible pasa a no reconstruible; (D2) MODIS sí
+> cambia de magnitud en negativos limpios; (D3) la frase sobre la subestimación de la erupción era falsa en VIIRS
+> 750; (D4) el "62 de 211" no contaba pasadas donde el número cambia; (D5) la recomendación del brazo extra se
+> matiza; y se agrega el intervalo por volcán que pedía la declaración. Ninguna cifra de las pasadas con alerta
+> se movió; sí el control y las sumas MODIS en negativos limpios.
 
 ## 1. La pregunta
 
@@ -27,12 +35,15 @@ lo que ve el operador no siempre es ese número:
   y no pasa por el modo. De 1.281 pasadas con alerta que publicamos, 395 tienen el modo activo con 2 o 3
   píxeles, y **en ninguna** el número publicado cambia con ninguna variante.
 - **MODIS**: la magnitud focal (`cluster_focal_vrp_mw`) corre antes que el modo; cuando ningún píxel del cúmulo
-  es contextual, el foco ya es el píxel pico y apagar el modo no cambia nada. Y en la práctica no llega al
-  tablero: de 88 pasadas MODIS con alerta desde marzo publicamos 11, **todas con más de 3 píxeles**; las 77 que
-  no publicamos, incluidas las 16 con cúmulo de 2 o 3 píxeles, llevan la etiqueta `far` (el problema de A82,
-  otro frente).
-- **VIIRS 750** es el único sensor donde el modo decide el número publicado: 62 de 211 pasadas con alerta
-  publicadas.
+  es contextual, el foco ya es el píxel pico y apagar el modo no cambia nada. **En las pasadas con alerta** no
+  llega al tablero: de 88 pasadas MODIS con alerta desde marzo publicamos 11, **todas con más de 3 píxeles**; las
+  77 que no publicamos, incluidas las 16 con cúmulo de 2 o 3 píxeles, llevan la etiqueta `far` (el problema de
+  A82, otro frente). **En los negativos limpios sí llega** (corrección D2): en reposo MODIS publica 536 pasadas
+  donde MIROVA no vio nada, y ahí la magnitud cambia con las variantes (§4).
+- **VIIRS 750** es el único sensor donde el modo puede decidir el número publicado en una pasada con alerta: de
+  211 publicadas, 62 tienen un cúmulo identificado de 2 o 3 píxeles, y entre los 1.304 pares que deciden el
+  número cambia con alguna variante en **28** (corrección D4: la versión anterior presentaba los 62 como pasadas
+  donde el modo decide; no se desglosó por qué los demás no cambian).
 - El tope D9 de 5 MW se aplica **antes** que el modo, y todas las variantes dejan los cúmulos de 1 a 3 píxeles
   bajo 5 MW salvo los que ya estaban sobre 5. Ninguna variante cruza la regla de cirrus (10 MW con `t_max` bajo
   273,15 K) ni lleva una magnitud a cero.
@@ -44,20 +55,29 @@ se llama "sub-MW" pero vale 5 MW.
 ## 3. Control de la reconstrucción
 
 Los píxeles de cada cúmulo se aíslan buscando entre `anomaly_pixels` y `discarded_anomaly_pixels` el conjunto cuyo
-promedio simple reproduce el centroide persistido (así lo calcula `pipeline/clustering.py`). Se identifican exacto
-1.081 cúmulos MODIS de 2 o 3 píxeles (240 no, porque tienen píxeles con VRP 0 que no se guardan), 675 de VIIRS
-375 (1 no) y 282 de VIIRS 750 (13 no).
+promedio simple reproduce el centroide persistido (así lo calcula `pipeline/clustering.py`), y se exige que ese
+conjunto sea **único**. Se identifican exacto 1.069 cúmulos MODIS de 2 o 3 píxeles (240 no, porque tienen
+píxeles con VRP 0 que no se guardan, y 12 ambiguos), 675 de VIIRS 375 (1 no) y 282 de VIIRS 750 (13 no).
 
 | control | resultado | criterio fijado antes |
 |---|---|---|
-| regla actual reconstruida contra `pc.vrp_mw` persistido, producción | **2.030 de 2.033 (99,85 %): PASA** | 0,0015 MW, 99 % |
+| regla actual reconstruida contra `pc.vrp_mw` persistido, producción | **2.019 de 2.021 (99,90 %): PASA** | 0,0015 MW, 99 % |
 | lo mismo, brazo de control C0 de la prueba de Chillán | 42 de 42: PASA | igual |
-| control negativo: la suma reproduce lo persistido | 427 de 2.033 (los cúmulos con vecinos de VRP casi 0) | debe ser minoría |
+| control negativo: la suma reproduce lo persistido | 425 de 2.021 (los cúmulos con vecinos de VRP casi 0) | debe ser minoría |
 | sin modo, sin foco ni tope: la suma reproduce lo persistido | 4 de 4 | |
 
-Las 3 fallas son dos MODIS con magnitud focal y un Chaitén MODIS cuyos píxeles guardados no son los que sumó el
-cúmulo (asimetría A46); están listadas en `resultado.json`. Los records no reconstruibles (254 en producción) se
-dejan fuera de toda comparación; entre las pasadas con alerta que publicamos hay sólo uno (VIIRS 750).
+Las 2 fallas son un Villarrica MODIS con magnitud focal y un Chaitén MODIS cuyos píxeles guardados no son los que
+sumó el cúmulo (asimetría A46); están listadas en `resultado.json`. Los records no reconstruibles (266 en
+producción) se dejan fuera de toda comparación; entre las pasadas con alerta que publicamos hay sólo uno (VIIRS
+750).
+
+**Corrección D1, posterior al resultado.** La primera versión tomaba el primer conjunto que reproducía el
+centroide. El verificador encontró 12 cúmulos MODIS con más de un conjunto posible, 10 de ellos con distinto pico
+o suma; una de las 3 fallas del control original (Planchón Peteroa 2026-07-11 02:30) era esto, porque el conjunto
+alternativo da pico 1,0157 contra 1,016 persistido. Ahora un cúmulo ambiguo queda no reconstruible. El control
+pasó de 2.030 de 2.033 (99,85 %) a 2.019 de 2.021 (99,90 %). Ninguno de los 12 está entre las pasadas con alerta
+que publicamos (uno es una alerta MODIS no publicada, etiqueta `far`), así que la tabla de §4 no se mueve; sí se
+mueven las sumas MODIS en negativos limpios.
 
 ## 4. Resultado
 
@@ -76,7 +96,11 @@ más cerca de MIROVA).
 | erupción, todos | 57 | 0,578 | 0,578, dif -0,0013 [-0,0134, 0,0119] | igual | 0,578, -0,0042 [-0,0151, 0,0066] | 0,578, -0,0066 [-0,0170, -0,0001] |
 | erupción, VIIRS 750 | 21 | 0,418 | 0,498, dif -0,0037 [-0,0398, 0,0335] | igual | 0,498, -0,0113 | 0,498, -0,0180 [-0,0475, -0,0001] |
 | erupción, sólo los 7 afectados | 7 | 0,587 | 0,813, dif -0,0110 [-0,0924, 0,0960] | igual | 0,813, -0,0340 | 0,813, -0,0539 [-0,1064, -0,0025] |
-| erupción, brazo C0 (todos) | 34 | 0,561 | 0,561, dif -0,0044 | igual | -0,0092 [-0,0251, -0,0] | -0,0092 [-0,0255, -0,0] |
+| erupción, brazo C0 (todos) | 34 | 0,561 | 0,561, dif -0,0044 | igual | -0,0092 [-0,0251, -0,0] | -0,0092 [-0,0251, -0,0] |
+
+El intervalo por volcán que pedía la declaración se agregó después del resultado (`salida.txt` §5, "por volcán",
+y `resultado.json`): en ningún volcán cambia la mediana salvo Láscar VIIRS 750 (0,52 a 0,53 con la suma, 99
+pares) y Puyehue Cordón Caulle VIIRS 750 (0,68 a 0,70, 37 pares), las dos dentro de su intervalo.
 
 Por tramo A119, en VIIRS 750 de reposo: de marzo al 12 de junio el modo apagado mejora con intervalo entero bajo
 cero (dif -0,0155 [-0,0269, -0,0040], 94 pares, 17 afectados); del 13 de junio en adelante no (+0,0037, 81 pares,
@@ -84,8 +108,14 @@ cero (dif -0,0155 [-0,0269, -0,0040], 94 pares, 17 afectados); del 13 de junio e
 
 **Publicaciones que cambian: ninguna**, en ninguna variante ni extremo, ni en pasadas con alerta ni en
 negativos limpios; **alertas protegidas afectadas: 0 en la lectura A y 0 en la B.** En negativos limpios cambia
-sólo la magnitud de lo que ya publicamos (VIIRS 750 de reposo: suma 643 MW con la regla actual, 668 con la suma,
-660 con C, 655 con D, sobre 1.226 publicaciones).
+sólo la magnitud de lo que ya publicamos, y ahí sí entra MODIS (corrección D2):
+
+| negativos limpios de reposo | publicaciones | actual (A) | modo apagado | suma | C | D |
+|---|---|---|---|---|---|---|
+| MODIS, mediana / suma (MW) | 536 | 1,5695 / 1.437,6 | 1,676 / 1.452,7 | 1,7815 / 1.473,5 | 1,676 / 1.451,1 | 1,665 / 1.448,0 |
+| VIIRS 750, suma (MW) | 1.226 | 643,0 | 667,9 | 668,6 | 660,4 | 654,7 |
+
+En MODIS son 10 records menos que en la primera versión (243 excluidos contra 233) por la corrección D1.
 
 **La secuencia de AUDIT_S150, reconstruida.** Con la suma, las tres pasadas del 2026-10-01 dan 4,48, 11,08 y
 2,92 MW contra 9,0, 10,0 y 7,06 de MIROVA: el salto baja de 4,2 veces a 2,5 veces pero no desaparece. Lo que
@@ -101,16 +131,20 @@ regla de la declaración pide intervalo entero bajo cero en los dos regímenes.
 ## 5. Lo que esto dice y lo que no
 
 - **El modo de un solo píxel es casi inerte para la paridad de magnitud**: toca el 2 % de los pares y sólo en
-  VIIRS 750. La subestimación de la erupción (razón mediana 0,42 a 0,58) es igual en todas las variantes: su causa
-  está en cuántos píxeles alerta nuestro detector, no en cómo se suman.
+  VIIRS 750. En la erupción la mediana de la razón sí sube con la suma en VIIRS 750 (0,418 a 0,498), pero el
+  error típico no baja: la mediana de |log10 razón| queda en 0,381 con la regla actual y con la suma (0,378 con
+  C y D), y en todos los sensores juntos la razón mediana queda en 0,578 con cualquier variante. Lo que falta
+  está en cuántos píxeles alerta nuestro detector, no en cómo se suman (corrección D3: la versión anterior decía
+  que la subestimación era igual en todas las variantes, y en VIIRS 750 la mediana no lo es).
 - La premisa de S77 (sumar infla en reposo) **no se sostiene hoy en VIIRS 750**: en los 21 pares de reposo
   afectados la suma lleva la mediana de 0,66 a 0,90 de MIROVA. Son 21 pares, casi todos de marzo a junio, y el
   intervalo toca cero: es SOSPECHA, no hallazgo.
 - El barrido descriptivo del umbral (`salida.txt` §6) apunta a lo mismo: en VIIRS 750 de reposo, cuanto más bajo
   el umbral (más suma), menor el error (0,272 con 0,25 MW contra 0,287 con 5 MW); en erupción el mínimo está
   entre 1 y 3 MW (0,378 contra 0,381). Un umbral leído de esa curva no gana nada aquí (A115).
-- Los records con píxeles de VRP 0 no guardados (254) quedan fuera. Afectan casi sólo a MODIS, que no publica
-  cúmulos de 2 o 3 píxeles con alerta, así que no mueven el resultado, pero no están medidos.
+- Los records no reconstruibles (266: píxeles de VRP 0 no guardados o conjunto ambiguo) quedan fuera. Afectan
+  casi sólo a MODIS, que no publica cúmulos de 2 o 3 píxeles con alerta, así que no mueven la razón contra
+  MIROVA, pero sí faltan en las sumas de negativos limpios.
 - Chillán en erupción son 21 pares de VIIRS 750 en 10 días: casos, no tasas.
 
 ## 6. Recomendación
@@ -118,10 +152,12 @@ regla de la declaración pide intervalo entero bajo cero en los dos regímenes.
 No cambiar el modo ahora. No hay variante que gane con la regla declarada, no cambia ninguna publicación y el
 efecto de magnitud es chico frente a la subestimación de la erupción, que viene de otra parte. Si se quiere
 simplificar después, el candidato es **apagarlo** (sale de la réplica una regla que no está en los papers de
-MIROVA, A10 rebajada: MIROVA suma los píxeles alertados), y la medición que lo decidiría es una corrida del frente
-de los 11 volcanes que ya se pre-registra (F/K, #797), leyendo VIIRS 750 con y sin el modo como brazo extra, en
-vez de un A/B propio. El frente que sí mueve la magnitud en erupción es el del número de píxeles alertados
-(conectiva `max`, fondo por vecinos D25).
+MIROVA, A10 rebajada: MIROVA suma los píxeles alertados). Para decidirlo no hace falta una corrida: la
+reconstrucción offline ya es exacta en el 99,90 % de los cúmulos afectados y nada aguas abajo del modo depende de
+su valor (ni la detección, ni la etiqueta, ni la publicación, que no cambia en ninguna variante). Un brazo extra
+en la corrida F/K de 11 volcanes (#797) sólo agregaría los 266 no reconstruibles y los datos futuros (corrección
+D5: la versión anterior lo presentaba como la medición que decidiría). El frente que sí mueve la magnitud en
+erupción es el del número de píxeles alertados (conectiva `max`, fondo por vecinos D25).
 
 ## 7. Reproducir
 
@@ -130,5 +166,20 @@ git archive origin/s146-ab/38560317428 experiments/_s146_ab_sin_test1/salidas/38
 python experiments/_s151_modo_un_pixel/medir_modo_un_pixel.py --c0 <temporal>/experiments/_s146_ab_sin_test1/salidas/38560317428/_s146_ab_control/NevadosDeChillan.json
 ```
 
-Necesita `node` (predicado del tablero). Tarda unos 75 s. La referencia es el snapshot del repo (última fila
-2026-10-14 08:35), con la unión histórica y el respaldo de abril.
+Necesita `node` (predicado del tablero). Tarda unos dos minutos. La referencia es el snapshot del repo (última
+fila 2026-10-14 08:35), con la unión histórica y el respaldo de abril.
+
+## 8. Registro de cambios posteriores al resultado
+
+Todos del 2026-10-14, pedidos por el verificador con contexto limpio de #799, que confirmó la conclusión y la
+recomendación. Se hacen después de ver el resultado, por eso se marcan: ninguno cambia la regla de decisión ni las
+variantes de `DECLARACION.md`.
+
+| id | qué cambió | por qué | efecto en cifras |
+|---|---|---|---|
+| D1 | `identificar` exige un conjunto único; si hay más de uno, el cúmulo es "ambiguo" y no reconstruible | 12 cúmulos MODIS tenían más de un conjunto posible, 10 con distinto pico o suma | control 99,85 % a 99,90 %; no reconstruibles 254 a 266; sumas MODIS en negativos limpios; nada en pasadas con alerta |
+| D2 | se dice que MODIS sí cambia de magnitud en negativos limpios | la frase "no llega al tablero" valía sólo para las alertas | ninguno (texto) |
+| D3 | se corrige la frase sobre la subestimación de la erupción | en VIIRS 750 la mediana sube de 0,418 a 0,498; lo que no baja es la mediana de \|log10\| | ninguno (texto) |
+| D4 | "62 de 211" pasa a "62 identificados, 28 donde el número cambia" | 62 contaba cúmulos, no pasadas afectadas | ninguno (texto) |
+| D5 | se matiza la recomendación del brazo extra | la reconstrucción offline ya es exacta y nada aguas abajo depende del valor | ninguno (texto) |
+| menor | intervalo de 95 % por volcán | lo pedía `DECLARACION.md` §4 y el script no lo calculaba | sólo agrega intervalos; los intervalos de C0 se mueven en el tercer decimal porque la semilla del remuestreo se consume en otro orden |

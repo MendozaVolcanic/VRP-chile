@@ -81,11 +81,16 @@ def identificar(pc, pix):
             and abs(p["lat"] - clat) < 0.08 and abs(p["lon"] - clon) < 0.1]
     pool.sort(key=lambda p: (p["lat"] - clat) ** 2 + (p["lon"] - clon) ** 2)
     pool = pool[:60]
+    hallados = []
     for comb in itertools.combinations(pool, n):
         if (abs(sum(p["lat"] for p in comb) / n - clat) < TOL_CENTROIDE
                 and abs(sum(p["lon"] for p in comb) / n - clon) < TOL_CENTROIDE):
-            return [float(p.get("vrp_mw") or 0.0) for p in comb]
-    return None
+            hallados.append([float(p.get("vrp_mw") or 0.0) for p in comb])
+    # Correccion posterior al resultado (verificador de #799, D1): si mas de un conjunto reproduce el
+    # centroide, no se sabe cual es el cumulo y el record queda NO reconstruible ("ambiguo").
+    if len(hallados) > 1:
+        return "AMBIGUO"
+    return hallados[0] if hallados else None
 
 
 def variantes_de(pc):
@@ -105,6 +110,8 @@ def variantes_de(pc):
     vr = pc.get("_vrps")
     if vr is None:
         return "no_ident", {k: None for k in todos}, None
+    if vr == "AMBIGUO":
+        return "ambiguo", {k: None for k in todos}, None
     pico, suma = max(vr), sum(vr)
     spm = pc.get("single_pixel_mode") is True
     capado = pc.get("d9_capped") is True
@@ -315,8 +322,9 @@ def main(argv=None):
         res["estados"] = {"%s|%s" % k: v for k, v in sorted(est.items())}
         say("\n1. RECONSTRUCCION (cumulos de 2 a 3 pixeles; n1 y n>3 no cambian con ninguna variante)")
         for b in ("MODIS", "VIIRS375", "VIIRS750"):
-            say("  %-9s ident %5d | no_ident %5d | n1 %6d | n>3 %6d | sin cumulo %6d" % (
-                b, est[(b, "ident")], est[(b, "no_ident")], est[(b, "n1")], est[(b, "n>3")], est[(b, "sin_pc")]))
+            say("  %-9s ident %5d | no_ident %5d | ambiguo %3d | n1 %6d | n>3 %6d | sin cumulo %6d" % (
+                b, est[(b, "ident")], est[(b, "no_ident")], est[(b, "ambiguo")], est[(b, "n1")], est[(b, "n>3")],
+                est[(b, "sin_pc")]))
         ctl = [r for r in recs if r["estado"] == "ident" and r.get("spm") is True]
         ok_max = [r for r in ctl if abs(round(r["pico_suma"][0], 3) - r["pers"]) <= TOL_CONTROL_MW]
         ok_suma = [r for r in ctl if abs(round(r["pico_suma"][1], 3) - r["pers"]) <= TOL_CONTROL_MW]
@@ -474,7 +482,8 @@ def main(argv=None):
                         rz.append(None if (mv is None or not mv[0] or mv[1] <= 0) else mv[1] / r["ref_vrp"])
                     if any(x is None for x in rz):
                         continue
-                    con_ic = k in VARIANTES and not nom.startswith("vol|")
+                    # IC tambien por volcan (lo pide DECLARACION.md §4; agregado despues del resultado)
+                    con_ic = k in VARIANTES
                     s = resumen_razon(list(zip(rz, g)), rng, con_ic)
                     if k != "A":
                         d = np.abs(np.log10(np.array(rz))) - logA
@@ -543,8 +552,9 @@ def main(argv=None):
             for b in ("MODIS", "VIIRS375", "VIIRS750"):
                 f = tabla.get("vol|%s|%s|lo" % (v, b))
                 if f and f.get("A"):
-                    partes.append("%s n%d %.2f/%.2f/%.2f/%.2f" % (b, f["n_pares"], f["A"]["mediana"], f["B_sum"]["mediana"],
-                                                              f["C"]["mediana"], f["D"]["mediana"]))
+                    partes.append("%s n%d %.2f %s/%.2f/%.2f/%.2f" % (
+                        b, f["n_pares"], f["A"]["mediana"], f["A"].get("ic95_mediana"), f["B_sum"]["mediana"],
+                        f["C"]["mediana"], f["D"]["mediana"]))
             say("   %-20s %s" % (v, " | ".join(partes)))
 
         say("\n6. BARRIDO descriptivo del umbral (sobre la entrada del modo), extremo lo: mediana |log10 razon|")

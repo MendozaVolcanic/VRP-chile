@@ -14,7 +14,8 @@
  },
  "prod": {
   "estados": {
-   "MODIS|ident": 1081,
+   "MODIS|ambiguo": 12,
+   "MODIS|ident": 1069,
    "MODIS|n1": 1241,
    "MODIS|n>3": 2848,
    "MODIS|no_ident": 240,
@@ -31,25 +32,14 @@
    "VIIRS750|sin_pc": 5721
   },
   "control": {
-   "n_modo_activo_multipixel_ident": 2033,
-   "reproduce_con_max": 2030,
-   "fraccion": 0.99852,
+   "n_modo_activo_multipixel_ident": 2021,
+   "reproduce_con_max": 2019,
+   "fraccion": 0.99901,
    "PASA": true,
-   "negativo_reproduce_con_suma": 427,
+   "negativo_reproduce_con_suma": 425,
    "sin_modo_no_focal_no_capado_ident": 4,
    "sin_modo_reproduce_con_suma": 4,
    "fallas": [
-    {
-     "vol": "PlanchonPeteroa",
-     "dt": "2026-07-11 02:30",
-     "sensor": "MODIS_TERRA",
-     "pers": 1.016,
-     "pico": 0.7912,
-     "suma": 1.9996,
-     "focal_magnitude": true,
-     "focal_degraded": true,
-     "d9_capped": null
-    },
     {
      "vol": "Villarrica",
      "dt": "2026-07-04 07:50",
@@ -77,74 +67,75 @@
   "variantes": {},
   "cambios_publicacion": {
    "B_off|lo": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "B_off|hi": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "B_sum|lo": {
-    "desconocido": 255
+    "desconocido": 267
    },
    "B_sum|hi": {
-    "desconocido": 255
+    "desconocido": 267
    },
    "C|lo": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "C|hi": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "D|lo": {
-    "desconocido": 255
+    "desconocido": 267
    },
    "D|hi": {
-    "desconocido": 255
+    "desconocido": 267
    },
    "T0.25|lo": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "T0.25|hi": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "T0.5|lo": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "T0.5|hi": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "T1.0|lo": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "T1.0|hi": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "T2.0|lo": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "T2.0|hi": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "T3.0|lo": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "T3.0|hi": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "T5.0|lo": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "T5.0|hi": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "Tinf|lo": {
-    "desconocido": 254
+    "desconocido": 266
    },
    "Tinf|hi": {
-    "desconocido": 254
+    "desconocido": 266
    }
   },
   "pares_por_estado": {
-   "MODIS|ident|False": 16,
+   "MODIS|ambiguo|False": 1,
+   "MODIS|ident|False": 15,
    "MODIS|n1|False": 4,
    "MODIS|n>3|False": 57,
    "MODIS|n>3|True": 11,
@@ -162,7 +153,8 @@
    "VIIRS750|no_ident|True": 1
   },
   "no_publicadas_por_etiqueta": {
-   "MODIS|ident|far": 16,
+   "MODIS|ambiguo|far": 1,
+   "MODIS|ident|far": 15,
    "MODIS|n1|far": 4,
    "MODIS|n>3|far": 57,
    "VIIRS375|n1|summit": 28,
@@ -4064,7 +4056,10 @@
      "n": 8,
      "n_noches": 8,
      "mediana": 0.746,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.463,
+      0.965
+     ],
      "p25": 0.51,
      "p75": 0.931,
      "frac_bajo_0_5": 0.25,
@@ -4075,53 +4070,77 @@
      "n": 8,
      "n_noches": 8,
      "mediana": 0.746,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.425,
+      0.965
+     ],
      "p25": 0.51,
      "p75": 0.931,
      "frac_bajo_0_5": 0.25,
      "frac_sobre_2": 0.125,
      "mediana_abs_log10": 0.214,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 8,
      "n_noches": 8,
      "mediana": 0.746,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.481,
+      0.965
+     ],
      "p25": 0.51,
      "p75": 0.931,
      "frac_bajo_0_5": 0.25,
      "frac_sobre_2": 0.125,
      "mediana_abs_log10": 0.214,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 8,
      "n_noches": 8,
      "mediana": 0.746,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.425,
+      0.965
+     ],
      "p25": 0.51,
      "p75": 0.931,
      "frac_bajo_0_5": 0.25,
      "frac_sobre_2": 0.125,
      "mediana_abs_log10": 0.214,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 8,
      "n_noches": 8,
      "mediana": 0.746,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.425,
+      0.965
+     ],
      "p25": 0.51,
      "p75": 0.931,
      "frac_bajo_0_5": 0.25,
      "frac_sobre_2": 0.125,
      "mediana_abs_log10": 0.214,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 8,
@@ -4222,7 +4241,10 @@
      "n": 208,
      "n_noches": 130,
      "mediana": 0.552,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.512,
+      0.617
+     ],
      "p25": 0.411,
      "p75": 0.7,
      "frac_bajo_0_5": 0.409,
@@ -4233,53 +4255,77 @@
      "n": 208,
      "n_noches": 130,
      "mediana": 0.552,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.512,
+      0.607
+     ],
      "p25": 0.411,
      "p75": 0.7,
      "frac_bajo_0_5": 0.409,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.258,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 208,
      "n_noches": 130,
      "mediana": 0.552,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.512,
+      0.612
+     ],
      "p25": 0.411,
      "p75": 0.7,
      "frac_bajo_0_5": 0.409,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.258,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 208,
      "n_noches": 130,
      "mediana": 0.552,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.509,
+      0.617
+     ],
      "p25": 0.411,
      "p75": 0.7,
      "frac_bajo_0_5": 0.409,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.258,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 208,
      "n_noches": 130,
      "mediana": 0.552,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.508,
+      0.612
+     ],
      "p25": 0.411,
      "p75": 0.7,
      "frac_bajo_0_5": 0.409,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.258,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 208,
@@ -4380,7 +4426,10 @@
      "n": 99,
      "n_noches": 81,
      "mediana": 0.519,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.491,
+      0.562
+     ],
      "p25": 0.398,
      "p75": 0.692,
      "frac_bajo_0_5": 0.424,
@@ -4391,53 +4440,77 @@
      "n": 99,
      "n_noches": 81,
      "mediana": 0.534,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.508,
+      0.567
+     ],
      "p25": 0.421,
      "p75": 0.726,
      "frac_bajo_0_5": 0.374,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.272,
      "dif_media_abs_log10_vs_A": -0.016,
-     "ic95_dif": null
+     "ic95_dif": [
+      -0.0258,
+      -0.0072
+     ]
     },
     "B_sum": {
      "n": 99,
      "n_noches": 81,
      "mediana": 0.534,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.507,
+      0.567
+     ],
      "p25": 0.421,
      "p75": 0.726,
      "frac_bajo_0_5": 0.374,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.272,
      "dif_media_abs_log10_vs_A": -0.016,
-     "ic95_dif": null
+     "ic95_dif": [
+      -0.0252,
+      -0.007
+     ]
     },
     "C": {
      "n": 99,
      "n_noches": 81,
      "mediana": 0.531,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.501,
+      0.563
+     ],
      "p25": 0.398,
      "p75": 0.706,
      "frac_bajo_0_5": 0.394,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.275,
      "dif_media_abs_log10_vs_A": -0.0045,
-     "ic95_dif": null
+     "ic95_dif": [
+      -0.0089,
+      -0.001
+     ]
     },
     "D": {
      "n": 99,
      "n_noches": 81,
      "mediana": 0.519,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.495,
+      0.558
+     ],
      "p25": 0.398,
      "p75": 0.692,
      "frac_bajo_0_5": 0.424,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.285,
      "dif_media_abs_log10_vs_A": -0.0014,
-     "ic95_dif": null
+     "ic95_dif": [
+      -0.0032,
+      -0.0
+     ]
     },
     "T0.25": {
      "n": 99,
@@ -4538,7 +4611,10 @@
      "n": 144,
      "n_noches": 113,
      "mediana": 0.606,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.502,
+      0.739
+     ],
      "p25": 0.35,
      "p75": 1.028,
      "frac_bajo_0_5": 0.417,
@@ -4549,53 +4625,77 @@
      "n": 144,
      "n_noches": 113,
      "mediana": 0.606,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.507,
+      0.734
+     ],
      "p25": 0.35,
      "p75": 1.028,
      "frac_bajo_0_5": 0.417,
      "frac_sobre_2": 0.062,
      "mediana_abs_log10": 0.286,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 144,
      "n_noches": 113,
      "mediana": 0.606,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.498,
+      0.734
+     ],
      "p25": 0.35,
      "p75": 1.028,
      "frac_bajo_0_5": 0.417,
      "frac_sobre_2": 0.062,
      "mediana_abs_log10": 0.286,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 144,
      "n_noches": 113,
      "mediana": 0.606,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.502,
+      0.731
+     ],
      "p25": 0.35,
      "p75": 1.028,
      "frac_bajo_0_5": 0.417,
      "frac_sobre_2": 0.062,
      "mediana_abs_log10": 0.286,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 144,
      "n_noches": 113,
      "mediana": 0.606,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.498,
+      0.739
+     ],
      "p25": 0.35,
      "p75": 1.028,
      "frac_bajo_0_5": 0.417,
      "frac_sobre_2": 0.062,
      "mediana_abs_log10": 0.286,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 144,
@@ -4696,7 +4796,10 @@
      "n": 239,
      "n_noches": 143,
      "mediana": 0.599,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.569,
+      0.622
+     ],
      "p25": 0.441,
      "p75": 0.821,
      "frac_bajo_0_5": 0.368,
@@ -4707,53 +4810,77 @@
      "n": 239,
      "n_noches": 143,
      "mediana": 0.599,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.575,
+      0.626
+     ],
      "p25": 0.441,
      "p75": 0.821,
      "frac_bajo_0_5": 0.368,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.223,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 239,
      "n_noches": 143,
      "mediana": 0.599,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.568,
+      0.63
+     ],
      "p25": 0.441,
      "p75": 0.821,
      "frac_bajo_0_5": 0.368,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.223,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 239,
      "n_noches": 143,
      "mediana": 0.599,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.567,
+      0.63
+     ],
      "p25": 0.441,
      "p75": 0.821,
      "frac_bajo_0_5": 0.368,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.223,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 239,
      "n_noches": 143,
      "mediana": 0.599,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.568,
+      0.63
+     ],
      "p25": 0.441,
      "p75": 0.821,
      "frac_bajo_0_5": 0.368,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.223,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 239,
@@ -4854,7 +4981,10 @@
      "n": 26,
      "n_noches": 26,
      "mediana": 1.435,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.916,
+      2.919
+     ],
      "p25": 0.836,
      "p75": 3.27,
      "frac_bajo_0_5": 0.231,
@@ -4865,53 +4995,77 @@
      "n": 26,
      "n_noches": 26,
      "mediana": 1.435,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.889,
+      3.036
+     ],
      "p25": 0.836,
      "p75": 3.27,
      "frac_bajo_0_5": 0.231,
      "frac_sobre_2": 0.385,
      "mediana_abs_log10": 0.413,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 26,
      "n_noches": 26,
      "mediana": 1.435,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.889,
+      2.919
+     ],
      "p25": 0.836,
      "p75": 3.27,
      "frac_bajo_0_5": 0.231,
      "frac_sobre_2": 0.385,
      "mediana_abs_log10": 0.413,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 26,
      "n_noches": 26,
      "mediana": 1.435,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.889,
+      3.036
+     ],
      "p25": 0.836,
      "p75": 3.27,
      "frac_bajo_0_5": 0.231,
      "frac_sobre_2": 0.385,
      "mediana_abs_log10": 0.413,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 26,
      "n_noches": 26,
      "mediana": 1.435,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.889,
+      2.919
+     ],
      "p25": 0.836,
      "p75": 3.27,
      "frac_bajo_0_5": 0.231,
      "frac_sobre_2": 0.385,
      "mediana_abs_log10": 0.413,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 26,
@@ -5012,7 +5166,10 @@
      "n": 132,
      "n_noches": 82,
      "mediana": 0.711,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.661,
+      0.778
+     ],
      "p25": 0.499,
      "p75": 0.941,
      "frac_bajo_0_5": 0.258,
@@ -5023,53 +5180,77 @@
      "n": 132,
      "n_noches": 82,
      "mediana": 0.711,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.67,
+      0.772
+     ],
      "p25": 0.499,
      "p75": 0.941,
      "frac_bajo_0_5": 0.258,
      "frac_sobre_2": 0.015,
      "mediana_abs_log10": 0.186,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 132,
      "n_noches": 82,
      "mediana": 0.711,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.67,
+      0.772
+     ],
      "p25": 0.499,
      "p75": 0.941,
      "frac_bajo_0_5": 0.258,
      "frac_sobre_2": 0.015,
      "mediana_abs_log10": 0.186,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 132,
      "n_noches": 82,
      "mediana": 0.711,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.67,
+      0.793
+     ],
      "p25": 0.499,
      "p75": 0.941,
      "frac_bajo_0_5": 0.258,
      "frac_sobre_2": 0.015,
      "mediana_abs_log10": 0.186,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 132,
      "n_noches": 82,
      "mediana": 0.711,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.662,
+      0.778
+     ],
      "p25": 0.499,
      "p75": 0.941,
      "frac_bajo_0_5": 0.258,
      "frac_sobre_2": 0.015,
      "mediana_abs_log10": 0.186,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 132,
@@ -5170,7 +5351,10 @@
      "n": 2,
      "n_noches": 2,
      "mediana": 0.072,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.053,
+      0.09
+     ],
      "p25": 0.062,
      "p75": 0.081,
      "frac_bajo_0_5": 1.0,
@@ -5181,53 +5365,77 @@
      "n": 2,
      "n_noches": 2,
      "mediana": 0.072,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.053,
+      0.09
+     ],
      "p25": 0.062,
      "p75": 0.081,
      "frac_bajo_0_5": 1.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 1.159,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 2,
      "n_noches": 2,
      "mediana": 0.072,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.053,
+      0.09
+     ],
      "p25": 0.062,
      "p75": 0.081,
      "frac_bajo_0_5": 1.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 1.159,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 2,
      "n_noches": 2,
      "mediana": 0.072,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.053,
+      0.09
+     ],
      "p25": 0.062,
      "p75": 0.081,
      "frac_bajo_0_5": 1.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 1.159,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 2,
      "n_noches": 2,
      "mediana": 0.072,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.053,
+      0.09
+     ],
      "p25": 0.062,
      "p75": 0.081,
      "frac_bajo_0_5": 1.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 1.159,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 2,
@@ -5328,7 +5536,10 @@
      "n": 95,
      "n_noches": 70,
      "mediana": 0.957,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.822,
+      1.046
+     ],
      "p25": 0.723,
      "p75": 1.198,
      "frac_bajo_0_5": 0.011,
@@ -5339,53 +5550,77 @@
      "n": 95,
      "n_noches": 70,
      "mediana": 0.957,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.822,
+      1.062
+     ],
      "p25": 0.723,
      "p75": 1.198,
      "frac_bajo_0_5": 0.011,
      "frac_sobre_2": 0.042,
      "mediana_abs_log10": 0.109,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 95,
      "n_noches": 70,
      "mediana": 0.957,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.822,
+      1.062
+     ],
      "p25": 0.723,
      "p75": 1.198,
      "frac_bajo_0_5": 0.011,
      "frac_sobre_2": 0.042,
      "mediana_abs_log10": 0.109,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 95,
      "n_noches": 70,
      "mediana": 0.957,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.822,
+      1.045
+     ],
      "p25": 0.723,
      "p75": 1.198,
      "frac_bajo_0_5": 0.011,
      "frac_sobre_2": 0.042,
      "mediana_abs_log10": 0.109,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 95,
      "n_noches": 70,
      "mediana": 0.957,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.822,
+      1.062
+     ],
      "p25": 0.723,
      "p75": 1.198,
      "frac_bajo_0_5": 0.011,
      "frac_sobre_2": 0.042,
      "mediana_abs_log10": 0.109,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 95,
@@ -5486,7 +5721,10 @@
      "n": 3,
      "n_noches": 3,
      "mediana": 1.669,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.067,
+      12.5
+     ],
      "p25": 1.368,
      "p75": 7.084,
      "frac_bajo_0_5": 0.0,
@@ -5497,53 +5735,77 @@
      "n": 3,
      "n_noches": 3,
      "mediana": 1.669,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.067,
+      12.5
+     ],
      "p25": 1.368,
      "p75": 7.084,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.333,
      "mediana_abs_log10": 0.222,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 3,
      "n_noches": 3,
      "mediana": 1.669,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.067,
+      12.5
+     ],
      "p25": 1.368,
      "p75": 7.084,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.333,
      "mediana_abs_log10": 0.222,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 3,
      "n_noches": 3,
      "mediana": 1.669,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.067,
+      12.5
+     ],
      "p25": 1.368,
      "p75": 7.084,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.333,
      "mediana_abs_log10": 0.222,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 3,
      "n_noches": 3,
      "mediana": 1.669,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.067,
+      12.5
+     ],
      "p25": 1.368,
      "p75": 7.084,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.333,
      "mediana_abs_log10": 0.222,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 3,
@@ -5644,7 +5906,10 @@
      "n": 10,
      "n_noches": 9,
      "mediana": 1.118,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.031,
+      1.258
+     ],
      "p25": 1.054,
      "p75": 1.228,
      "frac_bajo_0_5": 0.0,
@@ -5655,53 +5920,77 @@
      "n": 10,
      "n_noches": 9,
      "mediana": 1.118,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.021,
+      1.258
+     ],
      "p25": 1.054,
      "p75": 1.228,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.052,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 10,
      "n_noches": 9,
      "mediana": 1.118,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.021,
+      1.258
+     ],
      "p25": 1.054,
      "p75": 1.228,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.052,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 10,
      "n_noches": 9,
      "mediana": 1.118,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.021,
+      1.258
+     ],
      "p25": 1.054,
      "p75": 1.228,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.052,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 10,
      "n_noches": 9,
      "mediana": 1.118,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.04,
+      1.258
+     ],
      "p25": 1.054,
      "p75": 1.228,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.052,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 10,
@@ -5802,7 +6091,10 @@
      "n": 2,
      "n_noches": 2,
      "mediana": 1.288,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.026,
+      1.55
+     ],
      "p25": 1.157,
      "p75": 1.419,
      "frac_bajo_0_5": 0.0,
@@ -5813,53 +6105,77 @@
      "n": 2,
      "n_noches": 2,
      "mediana": 1.288,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.026,
+      1.55
+     ],
      "p25": 1.157,
      "p75": 1.419,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.101,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 2,
      "n_noches": 2,
      "mediana": 1.288,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.026,
+      1.55
+     ],
      "p25": 1.157,
      "p75": 1.419,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.101,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 2,
      "n_noches": 2,
      "mediana": 1.288,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.026,
+      1.55
+     ],
      "p25": 1.157,
      "p75": 1.419,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.101,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 2,
      "n_noches": 2,
      "mediana": 1.288,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.026,
+      1.55
+     ],
      "p25": 1.157,
      "p75": 1.419,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.101,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 2,
@@ -5960,7 +6276,10 @@
      "n": 1,
      "n_noches": 1,
      "mediana": 0.812,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.812,
+      0.812
+     ],
      "p25": 0.812,
      "p75": 0.812,
      "frac_bajo_0_5": 0.0,
@@ -5971,53 +6290,77 @@
      "n": 1,
      "n_noches": 1,
      "mediana": 0.812,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.812,
+      0.812
+     ],
      "p25": 0.812,
      "p75": 0.812,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.09,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 1,
      "n_noches": 1,
      "mediana": 0.812,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.812,
+      0.812
+     ],
      "p25": 0.812,
      "p75": 0.812,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.09,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 1,
      "n_noches": 1,
      "mediana": 0.812,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.812,
+      0.812
+     ],
      "p25": 0.812,
      "p75": 0.812,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.09,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 1,
      "n_noches": 1,
      "mediana": 0.812,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.812,
+      0.812
+     ],
      "p25": 0.812,
      "p75": 0.812,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.09,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 1,
@@ -6118,7 +6461,10 @@
      "n": 21,
      "n_noches": 21,
      "mediana": 0.868,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.819,
+      0.938
+     ],
      "p25": 0.805,
      "p75": 0.97,
      "frac_bajo_0_5": 0.0,
@@ -6129,53 +6475,77 @@
      "n": 21,
      "n_noches": 21,
      "mediana": 0.868,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.819,
+      0.938
+     ],
      "p25": 0.805,
      "p75": 0.97,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.065,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 21,
      "n_noches": 21,
      "mediana": 0.868,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.819,
+      0.938
+     ],
      "p25": 0.805,
      "p75": 0.97,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.065,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 21,
      "n_noches": 21,
      "mediana": 0.868,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.819,
+      0.938
+     ],
      "p25": 0.805,
      "p75": 0.97,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.065,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 21,
      "n_noches": 21,
      "mediana": 0.868,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.819,
+      0.938
+     ],
      "p25": 0.805,
      "p75": 0.97,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.065,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 21,
@@ -6276,7 +6646,10 @@
      "n": 5,
      "n_noches": 5,
      "mediana": 0.879,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.437,
+      1.179
+     ],
      "p25": 0.504,
      "p75": 1.109,
      "frac_bajo_0_5": 0.2,
@@ -6287,53 +6660,77 @@
      "n": 5,
      "n_noches": 5,
      "mediana": 0.879,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.437,
+      1.179
+     ],
      "p25": 0.504,
      "p75": 1.109,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.071,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 5,
      "n_noches": 5,
      "mediana": 0.879,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.437,
+      1.179
+     ],
      "p25": 0.504,
      "p75": 1.109,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.071,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 5,
      "n_noches": 5,
      "mediana": 0.879,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.437,
+      1.179
+     ],
      "p25": 0.504,
      "p75": 1.109,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.071,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 5,
      "n_noches": 5,
      "mediana": 0.879,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.437,
+      1.179
+     ],
      "p25": 0.504,
      "p75": 1.109,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.071,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 5,
@@ -6434,7 +6831,10 @@
      "n": 5,
      "n_noches": 5,
      "mediana": 1.012,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.451,
+      1.618
+     ],
      "p25": 0.765,
      "p75": 1.41,
      "frac_bajo_0_5": 0.2,
@@ -6445,53 +6845,77 @@
      "n": 5,
      "n_noches": 5,
      "mediana": 1.012,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.451,
+      1.618
+     ],
      "p25": 0.765,
      "p75": 1.41,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.149,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 5,
      "n_noches": 5,
      "mediana": 1.012,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.451,
+      1.618
+     ],
      "p25": 0.765,
      "p75": 1.41,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.149,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 5,
      "n_noches": 5,
      "mediana": 1.012,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.451,
+      1.618
+     ],
      "p25": 0.765,
      "p75": 1.41,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.149,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 5,
      "n_noches": 5,
      "mediana": 1.012,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.451,
+      1.618
+     ],
      "p25": 0.765,
      "p75": 1.41,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.149,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 5,
@@ -6592,7 +7016,10 @@
      "n": 1,
      "n_noches": 1,
      "mediana": 1.333,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.333,
+      1.333
+     ],
      "p25": 1.333,
      "p75": 1.333,
      "frac_bajo_0_5": 0.0,
@@ -6603,53 +7030,77 @@
      "n": 1,
      "n_noches": 1,
      "mediana": 1.333,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.333,
+      1.333
+     ],
      "p25": 1.333,
      "p75": 1.333,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.125,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 1,
      "n_noches": 1,
      "mediana": 1.333,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.333,
+      1.333
+     ],
      "p25": 1.333,
      "p75": 1.333,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.125,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 1,
      "n_noches": 1,
      "mediana": 1.333,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.333,
+      1.333
+     ],
      "p25": 1.333,
      "p75": 1.333,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.125,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 1,
      "n_noches": 1,
      "mediana": 1.333,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.333,
+      1.333
+     ],
      "p25": 1.333,
      "p75": 1.333,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.125,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 1,
@@ -6750,7 +7201,10 @@
      "n": 164,
      "n_noches": 79,
      "mediana": 1.032,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.963,
+      1.138
+     ],
      "p25": 0.755,
      "p75": 1.442,
      "frac_bajo_0_5": 0.049,
@@ -6761,53 +7215,77 @@
      "n": 164,
      "n_noches": 79,
      "mediana": 1.032,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.963,
+      1.135
+     ],
      "p25": 0.755,
      "p75": 1.442,
      "frac_bajo_0_5": 0.049,
      "frac_sobre_2": 0.104,
      "mediana_abs_log10": 0.132,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 164,
      "n_noches": 79,
      "mediana": 1.032,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.963,
+      1.135
+     ],
      "p25": 0.755,
      "p75": 1.442,
      "frac_bajo_0_5": 0.049,
      "frac_sobre_2": 0.104,
      "mediana_abs_log10": 0.132,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 164,
      "n_noches": 79,
      "mediana": 1.032,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.958,
+      1.135
+     ],
      "p25": 0.755,
      "p75": 1.442,
      "frac_bajo_0_5": 0.049,
      "frac_sobre_2": 0.104,
      "mediana_abs_log10": 0.132,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 164,
      "n_noches": 79,
      "mediana": 1.032,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.958,
+      1.135
+     ],
      "p25": 0.755,
      "p75": 1.442,
      "frac_bajo_0_5": 0.049,
      "frac_sobre_2": 0.104,
      "mediana_abs_log10": 0.132,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 164,
@@ -6908,7 +7386,10 @@
      "n": 37,
      "n_noches": 32,
      "mediana": 0.682,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.424,
+      0.797
+     ],
      "p25": 0.364,
      "p75": 1.007,
      "frac_bajo_0_5": 0.405,
@@ -6919,53 +7400,77 @@
      "n": 37,
      "n_noches": 32,
      "mediana": 0.696,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.424,
+      0.958
+     ],
      "p25": 0.364,
      "p75": 1.119,
      "frac_bajo_0_5": 0.378,
      "frac_sobre_2": 0.081,
      "mediana_abs_log10": 0.25,
      "dif_media_abs_log10_vs_A": 0.0112,
-     "ic95_dif": null
+     "ic95_dif": [
+      -0.0107,
+      0.0346
+     ]
     },
     "B_sum": {
      "n": 37,
      "n_noches": 32,
      "mediana": 0.696,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.424,
+      0.958
+     ],
      "p25": 0.364,
      "p75": 1.119,
      "frac_bajo_0_5": 0.378,
      "frac_sobre_2": 0.081,
      "mediana_abs_log10": 0.25,
      "dif_media_abs_log10_vs_A": 0.0112,
-     "ic95_dif": null
+     "ic95_dif": [
+      -0.0099,
+      0.036
+     ]
     },
     "C": {
      "n": 37,
      "n_noches": 32,
      "mediana": 0.682,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.375,
+      0.824
+     ],
      "p25": 0.364,
      "p75": 1.033,
      "frac_bajo_0_5": 0.405,
      "frac_sobre_2": 0.081,
      "mediana_abs_log10": 0.267,
      "dif_media_abs_log10_vs_A": 0.0161,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.038
+     ]
     },
     "D": {
      "n": 37,
      "n_noches": 32,
      "mediana": 0.682,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.424,
+      0.789
+     ],
      "p25": 0.364,
      "p75": 1.018,
      "frac_bajo_0_5": 0.405,
      "frac_sobre_2": 0.081,
      "mediana_abs_log10": 0.244,
      "dif_media_abs_log10_vs_A": 0.0095,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0272
+     ]
     },
     "T0.25": {
      "n": 37,
@@ -7066,7 +7571,10 @@
      "n": 43,
      "n_noches": 35,
      "mediana": 1.297,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.217,
+      1.474
+     ],
      "p25": 0.99,
      "p75": 1.725,
      "frac_bajo_0_5": 0.023,
@@ -7077,53 +7585,77 @@
      "n": 43,
      "n_noches": 35,
      "mediana": 1.297,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.224,
+      1.478
+     ],
      "p25": 0.99,
      "p75": 1.725,
      "frac_bajo_0_5": 0.023,
      "frac_sobre_2": 0.163,
      "mediana_abs_log10": 0.147,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 43,
      "n_noches": 35,
      "mediana": 1.297,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.22,
+      1.478
+     ],
      "p25": 0.99,
      "p75": 1.725,
      "frac_bajo_0_5": 0.023,
      "frac_sobre_2": 0.163,
      "mediana_abs_log10": 0.147,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 43,
      "n_noches": 35,
      "mediana": 1.297,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.21,
+      1.478
+     ],
      "p25": 0.99,
      "p75": 1.725,
      "frac_bajo_0_5": 0.023,
      "frac_sobre_2": 0.163,
      "mediana_abs_log10": 0.147,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 43,
      "n_noches": 35,
      "mediana": 1.297,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.213,
+      1.474
+     ],
      "p25": 0.99,
      "p75": 1.725,
      "frac_bajo_0_5": 0.023,
      "frac_sobre_2": 0.163,
      "mediana_abs_log10": 0.147,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 43,
@@ -7224,7 +7756,10 @@
      "n": 2,
      "n_noches": 2,
      "mediana": 1.15,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.15,
+      1.15
+     ],
      "p25": 1.15,
      "p75": 1.15,
      "frac_bajo_0_5": 0.0,
@@ -7235,53 +7770,77 @@
      "n": 2,
      "n_noches": 2,
      "mediana": 1.15,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.15,
+      1.15
+     ],
      "p25": 1.15,
      "p75": 1.15,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.061,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 2,
      "n_noches": 2,
      "mediana": 1.15,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.15,
+      1.15
+     ],
      "p25": 1.15,
      "p75": 1.15,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.061,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 2,
      "n_noches": 2,
      "mediana": 1.15,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.15,
+      1.15
+     ],
      "p25": 1.15,
      "p75": 1.15,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.061,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 2,
      "n_noches": 2,
      "mediana": 1.15,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.15,
+      1.15
+     ],
      "p25": 1.15,
      "p75": 1.15,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.061,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 2,
@@ -7383,8 +7942,8 @@
      "n_noches": 718,
      "mediana": 0.698,
      "ic95_mediana": [
-      0.672,
-      0.727
+      0.673,
+      0.728
      ],
      "p25": 0.475,
      "p75": 1.015,
@@ -7397,8 +7956,8 @@
      "n_noches": 718,
      "mediana": 0.7,
      "ic95_mediana": [
-      0.675,
-      0.733
+      0.674,
+      0.731
      ],
      "p25": 0.479,
      "p75": 1.026,
@@ -7407,8 +7966,8 @@
      "mediana_abs_log10": 0.2,
      "dif_media_abs_log10_vs_A": -0.001,
      "ic95_dif": [
-      -0.0021,
-      0.0003
+      -0.0022,
+      0.0002
      ]
     },
     "B_sum": {
@@ -7417,7 +7976,7 @@
      "mediana": 0.7,
      "ic95_mediana": [
       0.675,
-      0.733
+      0.731
      ],
      "p25": 0.479,
      "p75": 1.026,
@@ -7427,7 +7986,7 @@
      "dif_media_abs_log10_vs_A": -0.001,
      "ic95_dif": [
       -0.0021,
-      0.0003
+      0.0002
      ]
     },
     "C": {
@@ -7436,7 +7995,7 @@
      "mediana": 0.699,
      "ic95_mediana": [
       0.674,
-      0.73
+      0.731
      ],
      "p25": 0.477,
      "p75": 1.02,
@@ -7455,7 +8014,7 @@
      "mediana": 0.698,
      "ic95_mediana": [
       0.674,
-      0.732
+      0.73
      ],
      "p25": 0.476,
      "p75": 1.016,
@@ -7569,7 +8128,7 @@
      "mediana": 0.627,
      "ic95_mediana": [
       0.429,
-      0.806
+      0.824
      ],
      "p25": 0.391,
      "p75": 0.896,
@@ -7578,25 +8137,6 @@
      "mediana_abs_log10": 0.27
     },
     "B_off": {
-     "n": 28,
-     "n_noches": 27,
-     "mediana": 0.856,
-     "ic95_mediana": [
-      0.558,
-      1.074
-     ],
-     "p25": 0.509,
-     "p75": 1.127,
-     "frac_bajo_0_5": 0.214,
-     "frac_sobre_2": 0.071,
-     "mediana_abs_log10": 0.201,
-     "dif_media_abs_log10_vs_A": -0.0443,
-     "ic95_dif": [
-      -0.094,
-      0.0074
-     ]
-    },
-    "B_sum": {
      "n": 28,
      "n_noches": 27,
      "mediana": 0.856,
@@ -7611,8 +8151,27 @@
      "mediana_abs_log10": 0.201,
      "dif_media_abs_log10_vs_A": -0.0443,
      "ic95_dif": [
-      -0.091,
-      0.0082
+      -0.092,
+      0.0067
+     ]
+    },
+    "B_sum": {
+     "n": 28,
+     "n_noches": 27,
+     "mediana": 0.856,
+     "ic95_mediana": [
+      0.561,
+      1.039
+     ],
+     "p25": 0.509,
+     "p75": 1.127,
+     "frac_bajo_0_5": 0.214,
+     "frac_sobre_2": 0.071,
+     "mediana_abs_log10": 0.201,
+     "dif_media_abs_log10_vs_A": -0.0443,
+     "ic95_dif": [
+      -0.0918,
+      0.0126
      ]
     },
     "C": {
@@ -7620,8 +8179,8 @@
      "n_noches": 27,
      "mediana": 0.717,
      "ic95_mediana": [
-      0.502,
-      0.929
+      0.498,
+      0.941
      ],
      "p25": 0.468,
      "p75": 1.031,
@@ -7630,8 +8189,8 @@
      "mediana_abs_log10": 0.24,
      "dif_media_abs_log10_vs_A": -0.003,
      "ic95_dif": [
-      -0.0386,
-      0.0395
+      -0.0412,
+      0.0374
      ]
     },
     "D": {
@@ -7639,7 +8198,7 @@
      "n_noches": 27,
      "mediana": 0.696,
      "ic95_mediana": [
-      0.485,
+      0.479,
       0.941
      ],
      "p25": 0.425,
@@ -7649,8 +8208,8 @@
      "mediana_abs_log10": 0.264,
      "dif_media_abs_log10_vs_A": -0.0057,
      "ic95_dif": [
-      -0.0349,
-      0.0263
+      -0.035,
+      0.0272
      ]
     },
     "T0.25": {
@@ -7777,8 +8336,8 @@
      "mediana_abs_log10": 0.194,
      "dif_media_abs_log10_vs_A": -0.0554,
      "ic95_dif": [
-      -0.1091,
-      0.0077
+      -0.1121,
+      0.0083
      ]
     },
     "B_sum": {
@@ -7796,8 +8355,8 @@
      "mediana_abs_log10": 0.194,
      "dif_media_abs_log10_vs_A": -0.0554,
      "ic95_dif": [
-      -0.1096,
-      0.0078
+      -0.1118,
+      0.0051
      ]
     },
     "C": {
@@ -7815,8 +8374,8 @@
      "mediana_abs_log10": 0.226,
      "dif_media_abs_log10_vs_A": 0.0073,
      "ic95_dif": [
-      -0.0302,
-      0.0512
+      -0.0305,
+      0.0479
      ]
     },
     "D": {
@@ -7834,8 +8393,8 @@
      "mediana_abs_log10": 0.226,
      "dif_media_abs_log10_vs_A": 0.0104,
      "ic95_dif": [
-      -0.0118,
-      0.0432
+      -0.0107,
+      0.0441
      ]
     },
     "T0.25": {
@@ -7962,8 +8521,8 @@
      "mediana_abs_log10": 0.303,
      "dif_media_abs_log10_vs_A": -0.011,
      "ic95_dif": [
-      -0.0922,
-      0.0961
+      -0.0989,
+      0.0996
      ]
     },
     "B_sum": {
@@ -7972,7 +8531,7 @@
      "mediana": 0.813,
      "ic95_mediana": [
       0.414,
-      2.462
+      2.135
      ],
      "p25": 0.456,
      "p75": 1.448,
@@ -7981,8 +8540,8 @@
      "mediana_abs_log10": 0.303,
      "dif_media_abs_log10_vs_A": -0.011,
      "ic95_dif": [
-      -0.0924,
-      0.0961
+      -0.0922,
+      0.0976
      ]
     },
     "C": {
@@ -7991,7 +8550,7 @@
      "mediana": 0.813,
      "ic95_mediana": [
       0.414,
-      1.927
+      1.909
      ],
      "p25": 0.456,
      "p75": 1.448,
@@ -8000,7 +8559,7 @@
      "mediana_abs_log10": 0.303,
      "dif_media_abs_log10_vs_A": -0.034,
      "ic95_dif": [
-      -0.1019,
+      -0.1022,
       0.0563
      ]
     },
@@ -8019,7 +8578,7 @@
      "mediana_abs_log10": 0.303,
      "dif_media_abs_log10_vs_A": -0.0539,
      "ic95_dif": [
-      -0.1035,
+      -0.1064,
       -0.0025
      ]
     },
@@ -8124,7 +8683,7 @@
      "mediana": 0.704,
      "ic95_mediana": [
       0.678,
-      0.735
+      0.736
      ],
      "p25": 0.478,
      "p75": 1.015,
@@ -8137,8 +8696,8 @@
      "n_noches": 706,
      "mediana": 0.705,
      "ic95_mediana": [
-      0.679,
-      0.74
+      0.678,
+      0.737
      ],
      "p25": 0.481,
      "p75": 1.027,
@@ -8148,7 +8707,7 @@
      "dif_media_abs_log10_vs_A": -0.0009,
      "ic95_dif": [
       -0.002,
-      0.0002
+      0.0001
      ]
     },
     "B_sum": {
@@ -8156,8 +8715,8 @@
      "n_noches": 706,
      "mediana": 0.705,
      "ic95_mediana": [
-      0.679,
-      0.74
+      0.678,
+      0.738
      ],
      "p25": 0.481,
      "p75": 1.027,
@@ -8166,8 +8725,8 @@
      "mediana_abs_log10": 0.197,
      "dif_media_abs_log10_vs_A": -0.0009,
      "ic95_dif": [
-      -0.002,
-      0.0002
+      -0.0021,
+      0.0001
      ]
     },
     "C": {
@@ -8176,7 +8735,7 @@
      "mediana": 0.704,
      "ic95_mediana": [
       0.678,
-      0.737
+      0.739
      ],
      "p25": 0.48,
      "p75": 1.022,
@@ -8194,7 +8753,7 @@
      "n_noches": 706,
      "mediana": 0.704,
      "ic95_mediana": [
-      0.675,
+      0.678,
       0.735
      ],
      "p25": 0.478,
@@ -8341,7 +8900,7 @@
      "n_noches": 9,
      "mediana": 0.799,
      "ic95_mediana": [
-      0.538,
+      0.425,
       0.965
      ],
      "p25": 0.538,
@@ -8864,7 +9423,7 @@
      "mediana": 0.719,
      "ic95_mediana": [
       0.689,
-      0.747
+      0.748
      ],
      "p25": 0.487,
      "p75": 1.033,
@@ -8877,7 +9436,7 @@
      "n_noches": 689,
      "mediana": 0.719,
      "ic95_mediana": [
-      0.69,
+      0.689,
       0.748
      ],
      "p25": 0.487,
@@ -8896,7 +9455,7 @@
      "n_noches": 689,
      "mediana": 0.719,
      "ic95_mediana": [
-      0.69,
+      0.687,
       0.748
      ],
      "p25": 0.487,
@@ -9049,7 +9608,7 @@
      "mediana": 0.713,
      "ic95_mediana": [
       0.671,
-      0.757
+      0.76
      ],
      "p25": 0.498,
      "p75": 1.029,
@@ -9062,8 +9621,8 @@
      "n_noches": 307,
      "mediana": 0.713,
      "ic95_mediana": [
-      0.672,
-      0.759
+      0.671,
+      0.756
      ],
      "p25": 0.498,
      "p75": 1.029,
@@ -9082,7 +9641,7 @@
      "mediana": 0.713,
      "ic95_mediana": [
       0.671,
-      0.76
+      0.761
      ],
      "p25": 0.498,
      "p75": 1.029,
@@ -9101,7 +9660,7 @@
      "mediana": 0.713,
      "ic95_mediana": [
       0.671,
-      0.761
+      0.757
      ],
      "p25": 0.498,
      "p75": 1.029,
@@ -9119,8 +9678,8 @@
      "n_noches": 307,
      "mediana": 0.713,
      "ic95_mediana": [
-      0.671,
-      0.761
+      0.672,
+      0.757
      ],
      "p25": 0.498,
      "p75": 1.029,
@@ -9248,7 +9807,7 @@
      "mediana": 0.719,
      "ic95_mediana": [
       0.684,
-      0.769
+      0.771
      ],
      "p25": 0.483,
      "p75": 1.04,
@@ -9286,7 +9845,7 @@
      "mediana": 0.719,
      "ic95_mediana": [
       0.684,
-      0.766
+      0.771
      ],
      "p25": 0.483,
      "p75": 1.04,
@@ -9304,7 +9863,7 @@
      "n_noches": 382,
      "mediana": 0.719,
      "ic95_mediana": [
-      0.684,
+      0.685,
       0.771
      ],
      "p25": 0.483,
@@ -9419,7 +9978,7 @@
      "mediana": 0.572,
      "ic95_mediana": [
       0.517,
-      0.67
+      0.659
      ],
      "p25": 0.396,
      "p75": 0.922,
@@ -9433,25 +9992,6 @@
      "mediana": 0.576,
      "ic95_mediana": [
       0.536,
-      0.689
-     ],
-     "p25": 0.407,
-     "p75": 0.966,
-     "frac_bajo_0_5": 0.343,
-     "frac_sobre_2": 0.08,
-     "mediana_abs_log10": 0.272,
-     "dif_media_abs_log10_vs_A": -0.0067,
-     "ic95_dif": [
-      -0.0145,
-      0.0008
-     ]
-    },
-    "B_sum": {
-     "n": 175,
-     "n_noches": 152,
-     "mediana": 0.576,
-     "ic95_mediana": [
-      0.542,
       0.696
      ],
      "p25": 0.407,
@@ -9461,8 +10001,27 @@
      "mediana_abs_log10": 0.272,
      "dif_media_abs_log10_vs_A": -0.0067,
      "ic95_dif": [
+      -0.0137,
+      0.0007
+     ]
+    },
+    "B_sum": {
+     "n": 175,
+     "n_noches": 152,
+     "mediana": 0.576,
+     "ic95_mediana": [
+      0.536,
+      0.698
+     ],
+     "p25": 0.407,
+     "p75": 0.966,
+     "frac_bajo_0_5": 0.343,
+     "frac_sobre_2": 0.08,
+     "mediana_abs_log10": 0.272,
+     "dif_media_abs_log10_vs_A": -0.0067,
+     "ic95_dif": [
       -0.0143,
-      0.001
+      0.0007
      ]
     },
     "C": {
@@ -9471,7 +10030,7 @@
      "mediana": 0.575,
      "ic95_mediana": [
       0.531,
-      0.665
+      0.672
      ],
      "p25": 0.396,
      "p75": 0.941,
@@ -9480,7 +10039,7 @@
      "mediana_abs_log10": 0.279,
      "dif_media_abs_log10_vs_A": 0.0009,
      "ic95_dif": [
-      -0.0037,
+      -0.0035,
       0.0063
      ]
     },
@@ -9489,7 +10048,7 @@
      "n_noches": 152,
      "mediana": 0.572,
      "ic95_mediana": [
-      0.517,
+      0.518,
       0.659
      ],
      "p25": 0.396,
@@ -9500,7 +10059,7 @@
      "dif_media_abs_log10_vs_A": 0.0012,
      "ic95_dif": [
       -0.0013,
-      0.005
+      0.0052
      ]
     },
     "T0.25": {
@@ -9603,7 +10162,7 @@
      "n_noches": 79,
      "mediana": 0.614,
      "ic95_mediana": [
-      0.536,
+      0.535,
       0.735
      ],
      "p25": 0.467,
@@ -9618,7 +10177,7 @@
      "mediana": 0.64,
      "ic95_mediana": [
       0.558,
-      0.755
+      0.753
      ],
      "p25": 0.504,
      "p75": 0.928,
@@ -9627,7 +10186,7 @@
      "mediana_abs_log10": 0.258,
      "dif_media_abs_log10_vs_A": -0.0155,
      "ic95_dif": [
-      -0.0269,
+      -0.0275,
       -0.0043
      ]
     },
@@ -9646,8 +10205,8 @@
      "mediana_abs_log10": 0.258,
      "dif_media_abs_log10_vs_A": -0.0155,
      "ic95_dif": [
-      -0.0268,
-      -0.004
+      -0.0272,
+      -0.0038
      ]
     },
     "C": {
@@ -9656,7 +10215,7 @@
      "mediana": 0.634,
      "ic95_mediana": [
       0.551,
-      0.735
+      0.738
      ],
      "p25": 0.492,
      "p75": 0.862,
@@ -9665,8 +10224,8 @@
      "mediana_abs_log10": 0.266,
      "dif_media_abs_log10_vs_A": -0.0016,
      "ic95_dif": [
-      -0.0079,
-      0.0054
+      -0.0075,
+      0.0053
      ]
     },
     "D": {
@@ -9674,8 +10233,8 @@
      "n_noches": 79,
      "mediana": 0.614,
      "ic95_mediana": [
-      0.536,
-      0.735
+      0.539,
+      0.741
      ],
      "p25": 0.467,
      "p75": 0.862,
@@ -9685,7 +10244,7 @@
      "dif_media_abs_log10_vs_A": -0.001,
      "ic95_dif": [
       -0.003,
-      0.0008
+      0.0009
      ]
     },
     "T0.25": {
@@ -9788,8 +10347,8 @@
      "n_noches": 73,
      "mediana": 0.517,
      "ic95_mediana": [
-      0.451,
-      0.689
+      0.437,
+      0.684
      ],
      "p25": 0.31,
      "p75": 1.018,
@@ -9802,7 +10361,7 @@
      "n_noches": 73,
      "mediana": 0.517,
      "ic95_mediana": [
-      0.437,
+      0.448,
       0.696
      ],
      "p25": 0.31,
@@ -9813,7 +10372,7 @@
      "dif_media_abs_log10_vs_A": 0.0037,
      "ic95_dif": [
       -0.0033,
-      0.0135
+      0.0123
      ]
     },
     "B_sum": {
@@ -9822,7 +10381,7 @@
      "mediana": 0.517,
      "ic95_mediana": [
       0.437,
-      0.721
+      0.696
      ],
      "p25": 0.31,
      "p75": 1.033,
@@ -9831,8 +10390,8 @@
      "mediana_abs_log10": 0.318,
      "dif_media_abs_log10_vs_A": 0.0037,
      "ic95_dif": [
-      -0.0032,
-      0.0135
+      -0.0034,
+      0.0131
      ]
     },
     "C": {
@@ -9841,7 +10400,7 @@
      "mediana": 0.517,
      "ic95_mediana": [
       0.437,
-      0.696
+      0.689
      ],
      "p25": 0.31,
      "p75": 1.018,
@@ -9851,7 +10410,7 @@
      "dif_media_abs_log10_vs_A": 0.0038,
      "ic95_dif": [
       0.0,
-      0.0115
+      0.0117
      ]
     },
     "D": {
@@ -9860,7 +10419,7 @@
      "mediana": 0.517,
      "ic95_mediana": [
       0.437,
-      0.689
+      0.682
      ],
      "p25": 0.31,
      "p75": 1.018,
@@ -9974,7 +10533,7 @@
      "mediana": 0.578,
      "ic95_mediana": [
       0.508,
-      0.698
+      0.723
      ],
      "p25": 0.385,
      "p75": 0.798,
@@ -9988,7 +10547,7 @@
      "mediana": 0.578,
      "ic95_mediana": [
       0.508,
-      0.748
+      0.76
      ],
      "p25": 0.41,
      "p75": 0.91,
@@ -9997,8 +10556,8 @@
      "mediana_abs_log10": 0.245,
      "dif_media_abs_log10_vs_A": -0.0013,
      "ic95_dif": [
-      -0.0144,
-      0.0109
+      -0.0135,
+      0.0119
      ]
     },
     "B_sum": {
@@ -10016,8 +10575,8 @@
      "mediana_abs_log10": 0.245,
      "dif_media_abs_log10_vs_A": -0.0013,
      "ic95_dif": [
-      -0.0141,
-      0.0112
+      -0.0137,
+      0.0119
      ]
     },
     "C": {
@@ -10026,7 +10585,7 @@
      "mediana": 0.578,
      "ic95_mediana": [
       0.508,
-      0.748
+      0.751
      ],
      "p25": 0.41,
      "p75": 0.91,
@@ -10035,8 +10594,8 @@
      "mediana_abs_log10": 0.245,
      "dif_media_abs_log10_vs_A": -0.0042,
      "ic95_dif": [
-      -0.0153,
-      0.0057
+      -0.0157,
+      0.0053
      ]
     },
     "D": {
@@ -10054,7 +10613,7 @@
      "mediana_abs_log10": 0.245,
      "dif_media_abs_log10_vs_A": -0.0066,
      "ic95_dif": [
-      -0.0168,
+      -0.0171,
       -0.0001
      ]
     },
@@ -10580,7 +11139,7 @@
      "n_noches": 12,
      "mediana": 0.584,
      "ic95_mediana": [
-      0.542,
+      0.53,
       0.698
      ],
      "p25": 0.455,
@@ -10713,7 +11272,7 @@
      "n_noches": 12,
      "mediana": 0.584,
      "ic95_mediana": [
-      0.542,
+      0.53,
       0.698
      ],
      "p25": 0.455,
@@ -10765,7 +11324,7 @@
      "n_noches": 12,
      "mediana": 0.584,
      "ic95_mediana": [
-      0.535,
+      0.542,
       0.698
      ],
      "p25": 0.455,
@@ -10898,7 +11457,7 @@
      "n_noches": 10,
      "mediana": 0.418,
      "ic95_mediana": [
-      0.295,
+      0.29,
       1.038
      ],
      "p25": 0.285,
@@ -10913,7 +11472,7 @@
      "mediana": 0.498,
      "ic95_mediana": [
       0.335,
-      1.14
+      1.131
      ],
      "p25": 0.285,
      "p75": 1.108,
@@ -10922,8 +11481,8 @@
      "mediana_abs_log10": 0.381,
      "dif_media_abs_log10_vs_A": -0.0037,
      "ic95_dif": [
-      -0.0389,
-      0.033
+      -0.039,
+      0.0331
      ]
     },
     "B_sum": {
@@ -10942,7 +11501,7 @@
      "dif_media_abs_log10_vs_A": -0.0037,
      "ic95_dif": [
       -0.0389,
-      0.0334
+      0.0321
      ]
     },
     "C": {
@@ -10960,8 +11519,8 @@
      "mediana_abs_log10": 0.378,
      "dif_media_abs_log10_vs_A": -0.0113,
      "ic95_dif": [
-      -0.0441,
-      0.0145
+      -0.0429,
+      0.0142
      ]
     },
     "D": {
@@ -10970,7 +11529,7 @@
      "mediana": 0.498,
      "ic95_mediana": [
       0.335,
-      1.039
+      1.073
      ],
      "p25": 0.285,
      "p75": 1.038,
@@ -10979,8 +11538,8 @@
      "mediana_abs_log10": 0.378,
      "dif_media_abs_log10_vs_A": -0.018,
      "ic95_dif": [
-      -0.0479,
-      -0.0005
+      -0.0478,
+      -0.0001
      ]
     },
     "T0.25": {
@@ -11097,6 +11656,25 @@
      "n_noches": 10,
      "mediana": 0.498,
      "ic95_mediana": [
+      0.285,
+      1.131
+     ],
+     "p25": 0.285,
+     "p75": 1.108,
+     "frac_bajo_0_5": 0.524,
+     "frac_sobre_2": 0.095,
+     "mediana_abs_log10": 0.381,
+     "dif_media_abs_log10_vs_A": -0.0037,
+     "ic95_dif": [
+      -0.0404,
+      0.032
+     ]
+    },
+    "B_sum": {
+     "n": 21,
+     "n_noches": 10,
+     "mediana": 0.498,
+     "ic95_mediana": [
       0.335,
       1.131
      ],
@@ -11107,27 +11685,8 @@
      "mediana_abs_log10": 0.381,
      "dif_media_abs_log10_vs_A": -0.0037,
      "ic95_dif": [
-      -0.0389,
-      0.0331
-     ]
-    },
-    "B_sum": {
-     "n": 21,
-     "n_noches": 10,
-     "mediana": 0.498,
-     "ic95_mediana": [
-      0.341,
-      1.131
-     ],
-     "p25": 0.285,
-     "p75": 1.108,
-     "frac_bajo_0_5": 0.524,
-     "frac_sobre_2": 0.095,
-     "mediana_abs_log10": 0.381,
-     "dif_media_abs_log10_vs_A": -0.0037,
-     "ic95_dif": [
-      -0.0386,
-      0.0306
+      -0.038,
+      0.033
      ]
     },
     "C": {
@@ -11145,8 +11704,8 @@
      "mediana_abs_log10": 0.378,
      "dif_media_abs_log10_vs_A": -0.0113,
      "ic95_dif": [
-      -0.0457,
-      0.0161
+      -0.0432,
+      0.0167
      ]
     },
     "D": {
@@ -11155,7 +11714,7 @@
      "mediana": 0.498,
      "ic95_mediana": [
       0.335,
-      1.108
+      1.085
      ],
      "p25": 0.285,
      "p75": 1.038,
@@ -11164,8 +11723,8 @@
      "mediana_abs_log10": 0.378,
      "dif_media_abs_log10_vs_A": -0.018,
      "ic95_dif": [
-      -0.047,
-      -0.0005
+      -0.0473,
+      -0.0002
      ]
     },
     "T0.25": {
@@ -11267,7 +11826,10 @@
      "n": 8,
      "n_noches": 8,
      "mediana": 0.746,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.464,
+      0.965
+     ],
      "p25": 0.51,
      "p75": 0.931,
      "frac_bajo_0_5": 0.25,
@@ -11278,53 +11840,77 @@
      "n": 8,
      "n_noches": 8,
      "mediana": 0.746,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.463,
+      0.965
+     ],
      "p25": 0.51,
      "p75": 0.931,
      "frac_bajo_0_5": 0.25,
      "frac_sobre_2": 0.125,
      "mediana_abs_log10": 0.214,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 8,
      "n_noches": 8,
      "mediana": 0.746,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.425,
+      0.965
+     ],
      "p25": 0.51,
      "p75": 0.931,
      "frac_bajo_0_5": 0.25,
      "frac_sobre_2": 0.125,
      "mediana_abs_log10": 0.214,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 8,
      "n_noches": 8,
      "mediana": 0.746,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.481,
+      0.965
+     ],
      "p25": 0.51,
      "p75": 0.931,
      "frac_bajo_0_5": 0.25,
      "frac_sobre_2": 0.125,
      "mediana_abs_log10": 0.214,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 8,
      "n_noches": 8,
      "mediana": 0.746,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.464,
+      0.965
+     ],
      "p25": 0.51,
      "p75": 0.931,
      "frac_bajo_0_5": 0.25,
      "frac_sobre_2": 0.125,
      "mediana_abs_log10": 0.214,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 8,
@@ -11425,7 +12011,10 @@
      "n": 208,
      "n_noches": 130,
      "mediana": 0.552,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.512,
+      0.61
+     ],
      "p25": 0.411,
      "p75": 0.7,
      "frac_bajo_0_5": 0.409,
@@ -11436,53 +12025,77 @@
      "n": 208,
      "n_noches": 130,
      "mediana": 0.552,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.512,
+      0.607
+     ],
      "p25": 0.411,
      "p75": 0.7,
      "frac_bajo_0_5": 0.409,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.258,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 208,
      "n_noches": 130,
      "mediana": 0.552,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.508,
+      0.607
+     ],
      "p25": 0.411,
      "p75": 0.7,
      "frac_bajo_0_5": 0.409,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.258,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 208,
      "n_noches": 130,
      "mediana": 0.552,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.512,
+      0.607
+     ],
      "p25": 0.411,
      "p75": 0.7,
      "frac_bajo_0_5": 0.409,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.258,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 208,
      "n_noches": 130,
      "mediana": 0.552,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.512,
+      0.617
+     ],
      "p25": 0.411,
      "p75": 0.7,
      "frac_bajo_0_5": 0.409,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.258,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 208,
@@ -11583,7 +12196,10 @@
      "n": 99,
      "n_noches": 81,
      "mediana": 0.519,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.491,
+      0.558
+     ],
      "p25": 0.398,
      "p75": 0.692,
      "frac_bajo_0_5": 0.424,
@@ -11594,53 +12210,77 @@
      "n": 99,
      "n_noches": 81,
      "mediana": 0.534,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.509,
+      0.572
+     ],
      "p25": 0.421,
      "p75": 0.726,
      "frac_bajo_0_5": 0.374,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.272,
      "dif_media_abs_log10_vs_A": -0.016,
-     "ic95_dif": null
+     "ic95_dif": [
+      -0.0255,
+      -0.0074
+     ]
     },
     "B_sum": {
      "n": 99,
      "n_noches": 81,
      "mediana": 0.534,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.509,
+      0.569
+     ],
      "p25": 0.421,
      "p75": 0.726,
      "frac_bajo_0_5": 0.374,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.272,
      "dif_media_abs_log10_vs_A": -0.016,
-     "ic95_dif": null
+     "ic95_dif": [
+      -0.0254,
+      -0.0072
+     ]
     },
     "C": {
      "n": 99,
      "n_noches": 81,
      "mediana": 0.531,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.5,
+      0.567
+     ],
      "p25": 0.398,
      "p75": 0.706,
      "frac_bajo_0_5": 0.394,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.275,
      "dif_media_abs_log10_vs_A": -0.0045,
-     "ic95_dif": null
+     "ic95_dif": [
+      -0.0088,
+      -0.0011
+     ]
     },
     "D": {
      "n": 99,
      "n_noches": 81,
      "mediana": 0.519,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.495,
+      0.56
+     ],
      "p25": 0.398,
      "p75": 0.692,
      "frac_bajo_0_5": 0.424,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.285,
      "dif_media_abs_log10_vs_A": -0.0014,
-     "ic95_dif": null
+     "ic95_dif": [
+      -0.0032,
+      -0.0
+     ]
     },
     "T0.25": {
      "n": 99,
@@ -11741,7 +12381,10 @@
      "n": 144,
      "n_noches": 113,
      "mediana": 0.606,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.491,
+      0.739
+     ],
      "p25": 0.35,
      "p75": 1.028,
      "frac_bajo_0_5": 0.417,
@@ -11752,53 +12395,77 @@
      "n": 144,
      "n_noches": 113,
      "mediana": 0.606,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.498,
+      0.731
+     ],
      "p25": 0.35,
      "p75": 1.028,
      "frac_bajo_0_5": 0.417,
      "frac_sobre_2": 0.062,
      "mediana_abs_log10": 0.286,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 144,
      "n_noches": 113,
      "mediana": 0.606,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.502,
+      0.731
+     ],
      "p25": 0.35,
      "p75": 1.028,
      "frac_bajo_0_5": 0.417,
      "frac_sobre_2": 0.062,
      "mediana_abs_log10": 0.286,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 144,
      "n_noches": 113,
      "mediana": 0.606,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.498,
+      0.748
+     ],
      "p25": 0.35,
      "p75": 1.028,
      "frac_bajo_0_5": 0.417,
      "frac_sobre_2": 0.062,
      "mediana_abs_log10": 0.286,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 144,
      "n_noches": 113,
      "mediana": 0.606,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.496,
+      0.739
+     ],
      "p25": 0.35,
      "p75": 1.028,
      "frac_bajo_0_5": 0.417,
      "frac_sobre_2": 0.062,
      "mediana_abs_log10": 0.286,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 144,
@@ -11899,7 +12566,10 @@
      "n": 239,
      "n_noches": 143,
      "mediana": 0.599,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.569,
+      0.627
+     ],
      "p25": 0.441,
      "p75": 0.821,
      "frac_bajo_0_5": 0.368,
@@ -11910,53 +12580,77 @@
      "n": 239,
      "n_noches": 143,
      "mediana": 0.599,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.567,
+      0.622
+     ],
      "p25": 0.441,
      "p75": 0.821,
      "frac_bajo_0_5": 0.368,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.223,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 239,
      "n_noches": 143,
      "mediana": 0.599,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.569,
+      0.624
+     ],
      "p25": 0.441,
      "p75": 0.821,
      "frac_bajo_0_5": 0.368,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.223,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 239,
      "n_noches": 143,
      "mediana": 0.599,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.569,
+      0.63
+     ],
      "p25": 0.441,
      "p75": 0.821,
      "frac_bajo_0_5": 0.368,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.223,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 239,
      "n_noches": 143,
      "mediana": 0.599,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.569,
+      0.63
+     ],
      "p25": 0.441,
      "p75": 0.821,
      "frac_bajo_0_5": 0.368,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.223,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 239,
@@ -12057,7 +12751,10 @@
      "n": 26,
      "n_noches": 26,
      "mediana": 1.435,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.921,
+      3.036
+     ],
      "p25": 0.836,
      "p75": 3.27,
      "frac_bajo_0_5": 0.231,
@@ -12068,53 +12765,77 @@
      "n": 26,
      "n_noches": 26,
      "mediana": 1.435,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.889,
+      2.919
+     ],
      "p25": 0.836,
      "p75": 3.27,
      "frac_bajo_0_5": 0.231,
      "frac_sobre_2": 0.385,
      "mediana_abs_log10": 0.413,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 26,
      "n_noches": 26,
      "mediana": 1.435,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.888,
+      2.919
+     ],
      "p25": 0.836,
      "p75": 3.27,
      "frac_bajo_0_5": 0.231,
      "frac_sobre_2": 0.385,
      "mediana_abs_log10": 0.413,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 26,
      "n_noches": 26,
      "mediana": 1.435,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.888,
+      2.919
+     ],
      "p25": 0.836,
      "p75": 3.27,
      "frac_bajo_0_5": 0.231,
      "frac_sobre_2": 0.385,
      "mediana_abs_log10": 0.413,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 26,
      "n_noches": 26,
      "mediana": 1.435,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.888,
+      2.919
+     ],
      "p25": 0.836,
      "p75": 3.27,
      "frac_bajo_0_5": 0.231,
      "frac_sobre_2": 0.385,
      "mediana_abs_log10": 0.413,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 26,
@@ -12215,7 +12936,10 @@
      "n": 132,
      "n_noches": 82,
      "mediana": 0.711,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.67,
+      0.793
+     ],
      "p25": 0.499,
      "p75": 0.941,
      "frac_bajo_0_5": 0.258,
@@ -12226,53 +12950,77 @@
      "n": 132,
      "n_noches": 82,
      "mediana": 0.711,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.67,
+      0.772
+     ],
      "p25": 0.499,
      "p75": 0.941,
      "frac_bajo_0_5": 0.258,
      "frac_sobre_2": 0.015,
      "mediana_abs_log10": 0.186,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 132,
      "n_noches": 82,
      "mediana": 0.711,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.661,
+      0.772
+     ],
      "p25": 0.499,
      "p75": 0.941,
      "frac_bajo_0_5": 0.258,
      "frac_sobre_2": 0.015,
      "mediana_abs_log10": 0.186,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 132,
      "n_noches": 82,
      "mediana": 0.711,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.665,
+      0.772
+     ],
      "p25": 0.499,
      "p75": 0.941,
      "frac_bajo_0_5": 0.258,
      "frac_sobre_2": 0.015,
      "mediana_abs_log10": 0.186,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 132,
      "n_noches": 82,
      "mediana": 0.711,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.67,
+      0.783
+     ],
      "p25": 0.499,
      "p75": 0.941,
      "frac_bajo_0_5": 0.258,
      "frac_sobre_2": 0.015,
      "mediana_abs_log10": 0.186,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 132,
@@ -12373,7 +13121,10 @@
      "n": 2,
      "n_noches": 2,
      "mediana": 0.072,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.053,
+      0.09
+     ],
      "p25": 0.062,
      "p75": 0.081,
      "frac_bajo_0_5": 1.0,
@@ -12384,53 +13135,77 @@
      "n": 2,
      "n_noches": 2,
      "mediana": 0.072,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.053,
+      0.09
+     ],
      "p25": 0.062,
      "p75": 0.081,
      "frac_bajo_0_5": 1.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 1.159,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 2,
      "n_noches": 2,
      "mediana": 0.072,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.053,
+      0.09
+     ],
      "p25": 0.062,
      "p75": 0.081,
      "frac_bajo_0_5": 1.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 1.159,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 2,
      "n_noches": 2,
      "mediana": 0.072,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.053,
+      0.09
+     ],
      "p25": 0.062,
      "p75": 0.081,
      "frac_bajo_0_5": 1.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 1.159,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 2,
      "n_noches": 2,
      "mediana": 0.072,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.053,
+      0.09
+     ],
      "p25": 0.062,
      "p75": 0.081,
      "frac_bajo_0_5": 1.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 1.159,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 2,
@@ -12531,7 +13306,10 @@
      "n": 95,
      "n_noches": 70,
      "mediana": 0.957,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.83,
+      1.062
+     ],
      "p25": 0.723,
      "p75": 1.198,
      "frac_bajo_0_5": 0.011,
@@ -12542,53 +13320,77 @@
      "n": 95,
      "n_noches": 70,
      "mediana": 0.957,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.822,
+      1.062
+     ],
      "p25": 0.723,
      "p75": 1.198,
      "frac_bajo_0_5": 0.011,
      "frac_sobre_2": 0.042,
      "mediana_abs_log10": 0.109,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 95,
      "n_noches": 70,
      "mediana": 0.957,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.822,
+      1.062
+     ],
      "p25": 0.723,
      "p75": 1.198,
      "frac_bajo_0_5": 0.011,
      "frac_sobre_2": 0.042,
      "mediana_abs_log10": 0.109,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 95,
      "n_noches": 70,
      "mediana": 0.957,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.822,
+      1.062
+     ],
      "p25": 0.723,
      "p75": 1.198,
      "frac_bajo_0_5": 0.011,
      "frac_sobre_2": 0.042,
      "mediana_abs_log10": 0.109,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 95,
      "n_noches": 70,
      "mediana": 0.957,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.822,
+      1.046
+     ],
      "p25": 0.723,
      "p75": 1.198,
      "frac_bajo_0_5": 0.011,
      "frac_sobre_2": 0.042,
      "mediana_abs_log10": 0.109,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 95,
@@ -12689,7 +13491,10 @@
      "n": 3,
      "n_noches": 3,
      "mediana": 1.669,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.067,
+      12.5
+     ],
      "p25": 1.368,
      "p75": 7.084,
      "frac_bajo_0_5": 0.0,
@@ -12700,53 +13505,77 @@
      "n": 3,
      "n_noches": 3,
      "mediana": 1.669,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.067,
+      12.5
+     ],
      "p25": 1.368,
      "p75": 7.084,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.333,
      "mediana_abs_log10": 0.222,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 3,
      "n_noches": 3,
      "mediana": 1.669,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.067,
+      12.5
+     ],
      "p25": 1.368,
      "p75": 7.084,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.333,
      "mediana_abs_log10": 0.222,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 3,
      "n_noches": 3,
      "mediana": 1.669,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.067,
+      12.5
+     ],
      "p25": 1.368,
      "p75": 7.084,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.333,
      "mediana_abs_log10": 0.222,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 3,
      "n_noches": 3,
      "mediana": 1.669,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.067,
+      12.5
+     ],
      "p25": 1.368,
      "p75": 7.084,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.333,
      "mediana_abs_log10": 0.222,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 3,
@@ -12847,7 +13676,10 @@
      "n": 10,
      "n_noches": 9,
      "mediana": 1.118,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.992,
+      1.258
+     ],
      "p25": 1.054,
      "p75": 1.228,
      "frac_bajo_0_5": 0.0,
@@ -12858,53 +13690,77 @@
      "n": 10,
      "n_noches": 9,
      "mediana": 1.118,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.04,
+      1.258
+     ],
      "p25": 1.054,
      "p75": 1.228,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.052,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 10,
      "n_noches": 9,
      "mediana": 1.118,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.993,
+      1.258
+     ],
      "p25": 1.054,
      "p75": 1.228,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.052,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 10,
      "n_noches": 9,
      "mediana": 1.118,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.031,
+      1.258
+     ],
      "p25": 1.054,
      "p75": 1.228,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.052,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 10,
      "n_noches": 9,
      "mediana": 1.118,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.993,
+      1.258
+     ],
      "p25": 1.054,
      "p75": 1.228,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.052,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 10,
@@ -13005,7 +13861,10 @@
      "n": 2,
      "n_noches": 2,
      "mediana": 1.288,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.026,
+      1.55
+     ],
      "p25": 1.157,
      "p75": 1.419,
      "frac_bajo_0_5": 0.0,
@@ -13016,53 +13875,77 @@
      "n": 2,
      "n_noches": 2,
      "mediana": 1.288,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.026,
+      1.55
+     ],
      "p25": 1.157,
      "p75": 1.419,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.101,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 2,
      "n_noches": 2,
      "mediana": 1.288,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.026,
+      1.55
+     ],
      "p25": 1.157,
      "p75": 1.419,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.101,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 2,
      "n_noches": 2,
      "mediana": 1.288,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.026,
+      1.55
+     ],
      "p25": 1.157,
      "p75": 1.419,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.101,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 2,
      "n_noches": 2,
      "mediana": 1.288,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.026,
+      1.55
+     ],
      "p25": 1.157,
      "p75": 1.419,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.101,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 2,
@@ -13163,7 +14046,10 @@
      "n": 1,
      "n_noches": 1,
      "mediana": 0.812,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.812,
+      0.812
+     ],
      "p25": 0.812,
      "p75": 0.812,
      "frac_bajo_0_5": 0.0,
@@ -13174,53 +14060,77 @@
      "n": 1,
      "n_noches": 1,
      "mediana": 0.812,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.812,
+      0.812
+     ],
      "p25": 0.812,
      "p75": 0.812,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.09,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 1,
      "n_noches": 1,
      "mediana": 0.812,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.812,
+      0.812
+     ],
      "p25": 0.812,
      "p75": 0.812,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.09,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 1,
      "n_noches": 1,
      "mediana": 0.812,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.812,
+      0.812
+     ],
      "p25": 0.812,
      "p75": 0.812,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.09,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 1,
      "n_noches": 1,
      "mediana": 0.812,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.812,
+      0.812
+     ],
      "p25": 0.812,
      "p75": 0.812,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.09,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 1,
@@ -13321,7 +14231,10 @@
      "n": 21,
      "n_noches": 21,
      "mediana": 0.868,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.819,
+      0.938
+     ],
      "p25": 0.805,
      "p75": 0.97,
      "frac_bajo_0_5": 0.0,
@@ -13332,53 +14245,77 @@
      "n": 21,
      "n_noches": 21,
      "mediana": 0.868,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.819,
+      0.938
+     ],
      "p25": 0.805,
      "p75": 0.97,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.065,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 21,
      "n_noches": 21,
      "mediana": 0.868,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.819,
+      0.938
+     ],
      "p25": 0.805,
      "p75": 0.97,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.065,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 21,
      "n_noches": 21,
      "mediana": 0.868,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.819,
+      0.938
+     ],
      "p25": 0.805,
      "p75": 0.97,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.065,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 21,
      "n_noches": 21,
      "mediana": 0.868,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.819,
+      0.938
+     ],
      "p25": 0.805,
      "p75": 0.97,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.065,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 21,
@@ -13479,7 +14416,10 @@
      "n": 5,
      "n_noches": 5,
      "mediana": 0.879,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.437,
+      1.179
+     ],
      "p25": 0.504,
      "p75": 1.109,
      "frac_bajo_0_5": 0.2,
@@ -13490,53 +14430,77 @@
      "n": 5,
      "n_noches": 5,
      "mediana": 0.879,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.437,
+      1.179
+     ],
      "p25": 0.504,
      "p75": 1.109,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.071,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 5,
      "n_noches": 5,
      "mediana": 0.879,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.437,
+      1.179
+     ],
      "p25": 0.504,
      "p75": 1.109,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.071,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 5,
      "n_noches": 5,
      "mediana": 0.879,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.437,
+      1.179
+     ],
      "p25": 0.504,
      "p75": 1.109,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.071,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 5,
      "n_noches": 5,
      "mediana": 0.879,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.437,
+      1.179
+     ],
      "p25": 0.504,
      "p75": 1.109,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.071,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 5,
@@ -13637,7 +14601,10 @@
      "n": 5,
      "n_noches": 5,
      "mediana": 1.012,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.451,
+      1.618
+     ],
      "p25": 0.765,
      "p75": 1.41,
      "frac_bajo_0_5": 0.2,
@@ -13648,53 +14615,77 @@
      "n": 5,
      "n_noches": 5,
      "mediana": 1.012,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.451,
+      1.618
+     ],
      "p25": 0.765,
      "p75": 1.41,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.149,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 5,
      "n_noches": 5,
      "mediana": 1.012,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.451,
+      1.618
+     ],
      "p25": 0.765,
      "p75": 1.41,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.149,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 5,
      "n_noches": 5,
      "mediana": 1.012,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.451,
+      1.618
+     ],
      "p25": 0.765,
      "p75": 1.41,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.149,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 5,
      "n_noches": 5,
      "mediana": 1.012,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.451,
+      1.618
+     ],
      "p25": 0.765,
      "p75": 1.41,
      "frac_bajo_0_5": 0.2,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.149,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 5,
@@ -13795,7 +14786,10 @@
      "n": 1,
      "n_noches": 1,
      "mediana": 1.333,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.333,
+      1.333
+     ],
      "p25": 1.333,
      "p75": 1.333,
      "frac_bajo_0_5": 0.0,
@@ -13806,53 +14800,77 @@
      "n": 1,
      "n_noches": 1,
      "mediana": 1.333,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.333,
+      1.333
+     ],
      "p25": 1.333,
      "p75": 1.333,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.125,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 1,
      "n_noches": 1,
      "mediana": 1.333,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.333,
+      1.333
+     ],
      "p25": 1.333,
      "p75": 1.333,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.125,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 1,
      "n_noches": 1,
      "mediana": 1.333,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.333,
+      1.333
+     ],
      "p25": 1.333,
      "p75": 1.333,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.125,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 1,
      "n_noches": 1,
      "mediana": 1.333,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.333,
+      1.333
+     ],
      "p25": 1.333,
      "p75": 1.333,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.125,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 1,
@@ -13953,7 +14971,10 @@
      "n": 164,
      "n_noches": 79,
      "mediana": 1.032,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.963,
+      1.135
+     ],
      "p25": 0.755,
      "p75": 1.442,
      "frac_bajo_0_5": 0.049,
@@ -13964,53 +14985,77 @@
      "n": 164,
      "n_noches": 79,
      "mediana": 1.032,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.963,
+      1.134
+     ],
      "p25": 0.755,
      "p75": 1.442,
      "frac_bajo_0_5": 0.049,
      "frac_sobre_2": 0.104,
      "mediana_abs_log10": 0.132,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 164,
      "n_noches": 79,
      "mediana": 1.032,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.963,
+      1.135
+     ],
      "p25": 0.755,
      "p75": 1.442,
      "frac_bajo_0_5": 0.049,
      "frac_sobre_2": 0.104,
      "mediana_abs_log10": 0.132,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 164,
      "n_noches": 79,
      "mediana": 1.032,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.963,
+      1.135
+     ],
      "p25": 0.755,
      "p75": 1.442,
      "frac_bajo_0_5": 0.049,
      "frac_sobre_2": 0.104,
      "mediana_abs_log10": 0.132,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 164,
      "n_noches": 79,
      "mediana": 1.032,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.963,
+      1.135
+     ],
      "p25": 0.755,
      "p75": 1.442,
      "frac_bajo_0_5": 0.049,
      "frac_sobre_2": 0.104,
      "mediana_abs_log10": 0.132,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 164,
@@ -14111,7 +15156,10 @@
      "n": 37,
      "n_noches": 32,
      "mediana": 0.682,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.419,
+      0.77
+     ],
      "p25": 0.364,
      "p75": 1.007,
      "frac_bajo_0_5": 0.405,
@@ -14122,53 +15170,77 @@
      "n": 37,
      "n_noches": 32,
      "mediana": 0.696,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.473,
+      0.941
+     ],
      "p25": 0.364,
      "p75": 1.119,
      "frac_bajo_0_5": 0.378,
      "frac_sobre_2": 0.081,
      "mediana_abs_log10": 0.25,
      "dif_media_abs_log10_vs_A": 0.0112,
-     "ic95_dif": null
+     "ic95_dif": [
+      -0.0096,
+      0.035
+     ]
     },
     "B_sum": {
      "n": 37,
      "n_noches": 32,
      "mediana": 0.696,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.424,
+      0.958
+     ],
      "p25": 0.364,
      "p75": 1.119,
      "frac_bajo_0_5": 0.378,
      "frac_sobre_2": 0.081,
      "mediana_abs_log10": 0.25,
      "dif_media_abs_log10_vs_A": 0.0112,
-     "ic95_dif": null
+     "ic95_dif": [
+      -0.0108,
+      0.0353
+     ]
     },
     "C": {
      "n": 37,
      "n_noches": 32,
      "mediana": 0.682,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.375,
+      0.797
+     ],
      "p25": 0.364,
      "p75": 1.033,
      "frac_bajo_0_5": 0.405,
      "frac_sobre_2": 0.081,
      "mediana_abs_log10": 0.267,
      "dif_media_abs_log10_vs_A": 0.0161,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0382
+     ]
     },
     "D": {
      "n": 37,
      "n_noches": 32,
      "mediana": 0.682,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.424,
+      0.824
+     ],
      "p25": 0.364,
      "p75": 1.018,
      "frac_bajo_0_5": 0.405,
      "frac_sobre_2": 0.081,
      "mediana_abs_log10": 0.244,
      "dif_media_abs_log10_vs_A": 0.0095,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0269
+     ]
     },
     "T0.25": {
      "n": 37,
@@ -14269,7 +15341,10 @@
      "n": 43,
      "n_noches": 35,
      "mediana": 1.297,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.217,
+      1.474
+     ],
      "p25": 0.99,
      "p75": 1.725,
      "frac_bajo_0_5": 0.023,
@@ -14280,53 +15355,77 @@
      "n": 43,
      "n_noches": 35,
      "mediana": 1.297,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.217,
+      1.474
+     ],
      "p25": 0.99,
      "p75": 1.725,
      "frac_bajo_0_5": 0.023,
      "frac_sobre_2": 0.163,
      "mediana_abs_log10": 0.147,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 43,
      "n_noches": 35,
      "mediana": 1.297,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.217,
+      1.474
+     ],
      "p25": 0.99,
      "p75": 1.725,
      "frac_bajo_0_5": 0.023,
      "frac_sobre_2": 0.163,
      "mediana_abs_log10": 0.147,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 43,
      "n_noches": 35,
      "mediana": 1.297,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.217,
+      1.474
+     ],
      "p25": 0.99,
      "p75": 1.725,
      "frac_bajo_0_5": 0.023,
      "frac_sobre_2": 0.163,
      "mediana_abs_log10": 0.147,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 43,
      "n_noches": 35,
      "mediana": 1.297,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.22,
+      1.474
+     ],
      "p25": 0.99,
      "p75": 1.725,
      "frac_bajo_0_5": 0.023,
      "frac_sobre_2": 0.163,
      "mediana_abs_log10": 0.147,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 43,
@@ -14427,7 +15526,10 @@
      "n": 2,
      "n_noches": 2,
      "mediana": 1.15,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.15,
+      1.15
+     ],
      "p25": 1.15,
      "p75": 1.15,
      "frac_bajo_0_5": 0.0,
@@ -14438,53 +15540,77 @@
      "n": 2,
      "n_noches": 2,
      "mediana": 1.15,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.15,
+      1.15
+     ],
      "p25": 1.15,
      "p75": 1.15,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.061,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 2,
      "n_noches": 2,
      "mediana": 1.15,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.15,
+      1.15
+     ],
      "p25": 1.15,
      "p75": 1.15,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.061,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 2,
      "n_noches": 2,
      "mediana": 1.15,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.15,
+      1.15
+     ],
      "p25": 1.15,
      "p75": 1.15,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.061,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 2,
      "n_noches": 2,
      "mediana": 1.15,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      1.15,
+      1.15
+     ],
      "p25": 1.15,
      "p75": 1.15,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.061,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 2,
@@ -14590,8 +15716,8 @@
    "B_off|hi": {
     "gana": false,
     "motivos": [
-     "reposo IC [-0.002, 0.0002] no queda bajo 0",
-     "erupcion IC [-0.0144, 0.0109] no queda bajo 0"
+     "reposo IC [-0.002, 0.0001] no queda bajo 0",
+     "erupcion IC [-0.0135, 0.0119] no queda bajo 0"
     ]
    },
    "B_sum|lo": {
@@ -14604,8 +15730,8 @@
    "B_sum|hi": {
     "gana": false,
     "motivos": [
-     "reposo IC [-0.002, 0.0002] no queda bajo 0",
-     "erupcion IC [-0.0141, 0.0112] no queda bajo 0"
+     "reposo IC [-0.0021, 0.0001] no queda bajo 0",
+     "erupcion IC [-0.0137, 0.0119] no queda bajo 0"
     ]
    },
    "C|lo": {
@@ -14619,7 +15745,7 @@
     "gana": false,
     "motivos": [
      "reposo IC [-0.0005, 0.0009] no queda bajo 0",
-     "erupcion IC [-0.0153, 0.0057] no queda bajo 0"
+     "erupcion IC [-0.0157, 0.0053] no queda bajo 0"
     ]
    },
    "D|lo": {
@@ -14638,56 +15764,56 @@
   "negativos_limpios": {
    "reposo|MODIS": {
     "n": 5057,
-    "n_excluidos_no_reconstruibles": 233,
+    "n_excluidos_no_reconstruibles": 243,
     "A|lo": {
-     "publica": 537,
-     "mediana": 1.567,
-     "suma": 1438.496
+     "publica": 536,
+     "mediana": 1.5695,
+     "suma": 1437.579
     },
     "A|hi": {
-     "publica": 537,
-     "mediana": 1.567,
-     "suma": 1438.496
+     "publica": 536,
+     "mediana": 1.5695,
+     "suma": 1437.579
     },
     "B_off|lo": {
-     "publica": 537,
-     "mediana": 1.669,
-     "suma": 1453.623
+     "publica": 536,
+     "mediana": 1.676,
+     "suma": 1452.706
     },
     "B_off|hi": {
-     "publica": 537,
-     "mediana": 1.76,
-     "suma": 1465.132
+     "publica": 536,
+     "mediana": 1.7625,
+     "suma": 1463.429
     },
     "B_sum|lo": {
-     "publica": 537,
-     "mediana": 1.779,
-     "suma": 1475.213
+     "publica": 536,
+     "mediana": 1.7815,
+     "suma": 1473.51
     },
     "B_sum|hi": {
-     "publica": 537,
-     "mediana": 1.779,
-     "suma": 1475.213
+     "publica": 536,
+     "mediana": 1.7815,
+     "suma": 1473.51
     },
     "C|lo": {
-     "publica": 537,
-     "mediana": 1.669,
-     "suma": 1452.06
+     "publica": 536,
+     "mediana": 1.676,
+     "suma": 1451.143
     },
     "C|hi": {
-     "publica": 537,
-     "mediana": 1.76,
-     "suma": 1463.262
+     "publica": 536,
+     "mediana": 1.7625,
+     "suma": 1461.559
     },
     "D|lo": {
-     "publica": 537,
-     "mediana": 1.661,
-     "suma": 1448.941
+     "publica": 536,
+     "mediana": 1.665,
+     "suma": 1448.024
     },
     "D|hi": {
-     "publica": 537,
-     "mediana": 1.661,
-     "suma": 1448.941
+     "publica": 536,
+     "mediana": 1.665,
+     "suma": 1448.024
     }
    },
    "erupcion|MODIS": {
@@ -15591,6 +16717,25 @@
      "mediana": 0.573,
      "ic95_mediana": [
       0.548,
+      0.78
+     ],
+     "p25": 0.418,
+     "p75": 0.91,
+     "frac_bajo_0_5": 0.351,
+     "frac_sobre_2": 0.054,
+     "mediana_abs_log10": 0.257,
+     "dif_media_abs_log10_vs_A": -0.0041,
+     "ic95_dif": [
+      -0.0214,
+      0.0153
+     ]
+    },
+    "B_sum": {
+     "n": 37,
+     "n_noches": 9,
+     "mediana": 0.573,
+     "ic95_mediana": [
+      0.548,
       0.748
      ],
      "p25": 0.418,
@@ -15600,11 +16745,11 @@
      "mediana_abs_log10": 0.257,
      "dif_media_abs_log10_vs_A": -0.0041,
      "ic95_dif": [
-      -0.0215,
+      -0.0206,
       0.0156
      ]
     },
-    "B_sum": {
+    "C": {
      "n": 37,
      "n_noches": 9,
      "mediana": 0.573,
@@ -15617,29 +16762,10 @@
      "frac_bajo_0_5": 0.351,
      "frac_sobre_2": 0.054,
      "mediana_abs_log10": 0.257,
-     "dif_media_abs_log10_vs_A": -0.0041,
-     "ic95_dif": [
-      -0.0205,
-      0.0133
-     ]
-    },
-    "C": {
-     "n": 37,
-     "n_noches": 9,
-     "mediana": 0.573,
-     "ic95_mediana": [
-      0.548,
-      0.754
-     ],
-     "p25": 0.418,
-     "p75": 0.91,
-     "frac_bajo_0_5": 0.351,
-     "frac_sobre_2": 0.054,
-     "mediana_abs_log10": 0.257,
      "dif_media_abs_log10_vs_A": -0.0084,
      "ic95_dif": [
-      -0.0228,
-      0.0
+      -0.0229,
+      -0.0
      ]
     },
     "D": {
@@ -15648,7 +16774,7 @@
      "mediana": 0.573,
      "ic95_mediana": [
       0.548,
-      0.748
+      0.78
      ],
      "p25": 0.418,
      "p75": 0.91,
@@ -15657,7 +16783,7 @@
      "mediana_abs_log10": 0.257,
      "dif_media_abs_log10_vs_A": -0.0084,
      "ic95_dif": [
-      -0.0229,
+      -0.0231,
       0.0
      ]
     },
@@ -16009,7 +17135,7 @@
      "dif_media_abs_log10_vs_A": -0.0623,
      "ic95_dif": [
       -0.1274,
-      -0.0003
+      -0.0007
      ]
     },
     "D": {
@@ -16028,7 +17154,7 @@
      "dif_media_abs_log10_vs_A": -0.0623,
      "ic95_dif": [
       -0.1274,
-      -0.0003
+      -0.0007
      ]
     },
     "T0.25": {
@@ -16686,8 +17812,8 @@
      "n_noches": 6,
      "mediana": 0.561,
      "ic95_mediana": [
-      0.506,
-      0.638
+      0.518,
+      0.627
      ],
      "p25": 0.361,
      "p75": 0.752,
@@ -16700,8 +17826,8 @@
      "n_noches": 6,
      "mediana": 0.561,
      "ic95_mediana": [
-      0.508,
-      0.638
+      0.518,
+      0.627
      ],
      "p25": 0.415,
      "p75": 0.752,
@@ -16710,8 +17836,8 @@
      "mediana_abs_log10": 0.276,
      "dif_media_abs_log10_vs_A": -0.0044,
      "ic95_dif": [
-      -0.0219,
-      0.0152
+      -0.0228,
+      0.0174
      ]
     },
     "B_sum": {
@@ -16719,8 +17845,8 @@
      "n_noches": 6,
      "mediana": 0.561,
      "ic95_mediana": [
-      0.508,
-      0.638
+      0.518,
+      0.675
      ],
      "p25": 0.415,
      "p75": 0.752,
@@ -16729,8 +17855,8 @@
      "mediana_abs_log10": 0.276,
      "dif_media_abs_log10_vs_A": -0.0044,
      "ic95_dif": [
-      -0.0232,
-      0.0168
+      -0.0225,
+      0.0164
      ]
     },
     "C": {
@@ -16738,7 +17864,7 @@
      "n_noches": 6,
      "mediana": 0.561,
      "ic95_mediana": [
-      0.508,
+      0.518,
       0.627
      ],
      "p25": 0.415,
@@ -16767,7 +17893,7 @@
      "mediana_abs_log10": 0.276,
      "dif_media_abs_log10_vs_A": -0.0092,
      "ic95_dif": [
-      -0.0255,
+      -0.0251,
       -0.0
      ]
     },
@@ -17478,7 +18604,7 @@
      "n_noches": 6,
      "mediana": 0.563,
      "ic95_mediana": [
-      0.524,
+      0.518,
       0.59
      ],
      "p25": 0.434,
@@ -17612,7 +18738,7 @@
      "mediana": 0.402,
      "ic95_mediana": [
       0.295,
-      0.788
+      0.789
      ],
      "p25": 0.292,
      "p75": 0.818,
@@ -17621,6 +18747,25 @@
      "mediana_abs_log10": 0.396
     },
     "B_off": {
+     "n": 12,
+     "n_noches": 5,
+     "mediana": 0.458,
+     "ic95_mediana": [
+      0.335,
+      0.813
+     ],
+     "p25": 0.36,
+     "p75": 0.837,
+     "frac_bajo_0_5": 0.583,
+     "frac_sobre_2": 0.083,
+     "mediana_abs_log10": 0.381,
+     "dif_media_abs_log10_vs_A": -0.0126,
+     "ic95_dif": [
+      -0.0676,
+      0.0586
+     ]
+    },
+    "B_sum": {
      "n": 12,
      "n_noches": 5,
      "mediana": 0.458,
@@ -17635,27 +18780,8 @@
      "mediana_abs_log10": 0.381,
      "dif_media_abs_log10_vs_A": -0.0126,
      "ic95_dif": [
-      -0.0676,
-      0.0533
-     ]
-    },
-    "B_sum": {
-     "n": 12,
-     "n_noches": 5,
-     "mediana": 0.458,
-     "ic95_mediana": [
-      0.285,
-      0.861
-     ],
-     "p25": 0.36,
-     "p75": 0.837,
-     "frac_bajo_0_5": 0.583,
-     "frac_sobre_2": 0.083,
-     "mediana_abs_log10": 0.381,
-     "dif_media_abs_log10_vs_A": -0.0126,
-     "ic95_dif": [
       -0.0646,
-      0.0495
+      0.0533
      ]
     },
     "C": {
@@ -17683,7 +18809,7 @@
      "mediana": 0.458,
      "ic95_mediana": [
       0.335,
-      0.814
+      1.108
      ],
      "p25": 0.36,
      "p75": 0.837,
@@ -17692,7 +18818,7 @@
      "mediana_abs_log10": 0.378,
      "dif_media_abs_log10_vs_A": -0.026,
      "ic95_dif": [
-      -0.0696,
+      -0.069,
       -0.0001
      ]
     },
@@ -17796,7 +18922,7 @@
      "n_noches": 5,
      "mediana": 0.402,
      "ic95_mediana": [
-      0.295,
+      0.285,
       0.788
      ],
      "p25": 0.292,
@@ -17811,7 +18937,7 @@
      "mediana": 0.458,
      "ic95_mediana": [
       0.335,
-      0.813
+      0.861
      ],
      "p25": 0.36,
      "p75": 0.837,
@@ -17820,7 +18946,7 @@
      "mediana_abs_log10": 0.381,
      "dif_media_abs_log10_vs_A": -0.0126,
      "ic95_dif": [
-      -0.0646,
+      -0.0676,
       0.0533
      ]
     },
@@ -17830,7 +18956,7 @@
      "mediana": 0.458,
      "ic95_mediana": [
       0.335,
-      0.813
+      0.861
      ],
      "p25": 0.36,
      "p75": 0.837,
@@ -17839,8 +18965,8 @@
      "mediana_abs_log10": 0.381,
      "dif_media_abs_log10_vs_A": -0.0126,
      "ic95_dif": [
-      -0.0646,
-      0.044
+      -0.0676,
+      0.0533
      ]
     },
     "C": {
@@ -17868,7 +18994,7 @@
      "mediana": 0.458,
      "ic95_mediana": [
       0.335,
-      0.861
+      0.813
      ],
      "p25": 0.36,
      "p75": 0.837,
@@ -17877,7 +19003,7 @@
      "mediana_abs_log10": 0.378,
      "dif_media_abs_log10_vs_A": -0.026,
      "ic95_dif": [
-      -0.0704,
+      -0.0696,
       -0.0001
      ]
     },
@@ -17980,7 +19106,10 @@
      "n": 3,
      "n_noches": 3,
      "mediana": 1.04,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.946,
+      1.12
+     ],
      "p25": 0.993,
      "p75": 1.08,
      "frac_bajo_0_5": 0.0,
@@ -17991,53 +19120,77 @@
      "n": 3,
      "n_noches": 3,
      "mediana": 1.04,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.946,
+      1.12
+     ],
      "p25": 0.993,
      "p75": 1.08,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.024,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 3,
      "n_noches": 3,
      "mediana": 1.04,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.946,
+      1.12
+     ],
      "p25": 0.993,
      "p75": 1.08,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.024,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 3,
      "n_noches": 3,
      "mediana": 1.04,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.946,
+      1.12
+     ],
      "p25": 0.993,
      "p75": 1.08,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.024,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 3,
      "n_noches": 3,
      "mediana": 1.04,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.946,
+      1.12
+     ],
      "p25": 0.993,
      "p75": 1.08,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.024,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 3,
@@ -18140,7 +19293,7 @@
      "mediana": 0.573,
      "ic95_mediana": [
       0.548,
-      0.768
+      0.748
      ],
      "p25": 0.385,
      "p75": 0.91,
@@ -18153,8 +19306,8 @@
      "n_noches": 9,
      "mediana": 0.573,
      "ic95_mediana": [
-      0.547,
-      0.813
+      0.548,
+      0.78
      ],
      "p25": 0.418,
      "p75": 0.91,
@@ -18163,8 +19316,8 @@
      "mediana_abs_log10": 0.257,
      "dif_media_abs_log10_vs_A": -0.0041,
      "ic95_dif": [
-      -0.0214,
-      0.0134
+      -0.0212,
+      0.0138
      ]
     },
     "B_sum": {
@@ -18173,7 +19326,7 @@
      "mediana": 0.573,
      "ic95_mediana": [
       0.548,
-      0.753
+      0.751
      ],
      "p25": 0.418,
      "p75": 0.91,
@@ -18182,8 +19335,8 @@
      "mediana_abs_log10": 0.257,
      "dif_media_abs_log10_vs_A": -0.0041,
      "ic95_dif": [
-      -0.0205,
-      0.0146
+      -0.0209,
+      0.0151
      ]
     },
     "C": {
@@ -18192,26 +19345,7 @@
      "mediana": 0.573,
      "ic95_mediana": [
       0.548,
-      0.748
-     ],
-     "p25": 0.418,
-     "p75": 0.91,
-     "frac_bajo_0_5": 0.351,
-     "frac_sobre_2": 0.054,
-     "mediana_abs_log10": 0.257,
-     "dif_media_abs_log10_vs_A": -0.0084,
-     "ic95_dif": [
-      -0.0233,
-      0.0
-     ]
-    },
-    "D": {
-     "n": 37,
-     "n_noches": 9,
-     "mediana": 0.573,
-     "ic95_mediana": [
-      0.548,
-      0.748
+      0.78
      ],
      "p25": 0.418,
      "p75": 0.91,
@@ -18221,6 +19355,25 @@
      "dif_media_abs_log10_vs_A": -0.0084,
      "ic95_dif": [
       -0.0229,
+      0.0
+     ]
+    },
+    "D": {
+     "n": 37,
+     "n_noches": 9,
+     "mediana": 0.573,
+     "ic95_mediana": [
+      0.548,
+      0.781
+     ],
+     "p25": 0.418,
+     "p75": 0.91,
+     "frac_bajo_0_5": 0.351,
+     "frac_sobre_2": 0.054,
+     "mediana_abs_log10": 0.257,
+     "dif_media_abs_log10_vs_A": -0.0084,
+     "ic95_dif": [
+      -0.0233,
       0.0
      ]
     },
@@ -19250,7 +20403,7 @@
      "mediana": 0.561,
      "ic95_mediana": [
       0.495,
-      0.643
+      0.627
      ],
      "p25": 0.361,
      "p75": 0.752,
@@ -19263,8 +20416,8 @@
      "n_noches": 6,
      "mediana": 0.561,
      "ic95_mediana": [
-      0.498,
-      0.66
+      0.518,
+      0.627
      ],
      "p25": 0.415,
      "p75": 0.752,
@@ -19273,8 +20426,8 @@
      "mediana_abs_log10": 0.276,
      "dif_media_abs_log10_vs_A": -0.0044,
      "ic95_dif": [
-      -0.0239,
-      0.016
+      -0.0229,
+      0.0164
      ]
     },
     "B_sum": {
@@ -19293,7 +20446,7 @@
      "dif_media_abs_log10_vs_A": -0.0044,
      "ic95_dif": [
       -0.0232,
-      0.0164
+      0.016
      ]
     },
     "C": {
@@ -19311,7 +20464,7 @@
      "mediana_abs_log10": 0.276,
      "dif_media_abs_log10_vs_A": -0.0092,
      "ic95_dif": [
-      -0.0258,
+      -0.0251,
       -0.0
      ]
     },
@@ -19321,7 +20474,7 @@
      "mediana": 0.561,
      "ic95_mediana": [
       0.508,
-      0.66
+      0.627
      ],
      "p25": 0.415,
      "p75": 0.752,
@@ -19330,7 +20483,7 @@
      "mediana_abs_log10": 0.276,
      "dif_media_abs_log10_vs_A": -0.0092,
      "ic95_dif": [
-      -0.0248,
+      -0.0251,
       -0.0
      ]
     },
@@ -20175,7 +21328,7 @@
      "mediana": 0.402,
      "ic95_mediana": [
       0.295,
-      0.849
+      0.789
      ],
      "p25": 0.292,
      "p75": 0.818,
@@ -20198,8 +21351,8 @@
      "mediana_abs_log10": 0.381,
      "dif_media_abs_log10_vs_A": -0.0126,
      "ic95_dif": [
-      -0.0646,
-      0.0495
+      -0.0676,
+      0.0563
      ]
     },
     "B_sum": {
@@ -20208,7 +21361,7 @@
      "mediana": 0.458,
      "ic95_mediana": [
       0.335,
-      0.814
+      0.861
      ],
      "p25": 0.36,
      "p75": 0.837,
@@ -20217,7 +21370,7 @@
      "mediana_abs_log10": 0.381,
      "dif_media_abs_log10_vs_A": -0.0126,
      "ic95_dif": [
-      -0.0676,
+      -0.0646,
       0.0562
      ]
     },
@@ -20227,7 +21380,7 @@
      "mediana": 0.458,
      "ic95_mediana": [
       0.335,
-      0.813
+      0.861
      ],
      "p25": 0.36,
      "p75": 0.837,
@@ -20236,7 +21389,7 @@
      "mediana_abs_log10": 0.378,
      "dif_media_abs_log10_vs_A": -0.026,
      "ic95_dif": [
-      -0.0689,
+      -0.0705,
       -0.0001
      ]
     },
@@ -20246,7 +21399,7 @@
      "mediana": 0.458,
      "ic95_mediana": [
       0.335,
-      0.813
+      0.861
      ],
      "p25": 0.36,
      "p75": 0.837,
@@ -20360,7 +21513,7 @@
      "mediana": 0.402,
      "ic95_mediana": [
       0.295,
-      0.788
+      0.789
      ],
      "p25": 0.292,
      "p75": 0.818,
@@ -20374,7 +21527,7 @@
      "mediana": 0.458,
      "ic95_mediana": [
       0.335,
-      0.813
+      0.861
      ],
      "p25": 0.36,
      "p75": 0.837,
@@ -20383,8 +21536,8 @@
      "mediana_abs_log10": 0.381,
      "dif_media_abs_log10_vs_A": -0.0126,
      "ic95_dif": [
-      -0.0676,
-      0.0586
+      -0.0646,
+      0.0533
      ]
     },
     "B_sum": {
@@ -20402,8 +21555,8 @@
      "mediana_abs_log10": 0.381,
      "dif_media_abs_log10_vs_A": -0.0126,
      "ic95_dif": [
-      -0.0646,
-      0.0562
+      -0.0676,
+      0.0533
      ]
     },
     "C": {
@@ -20412,7 +21565,7 @@
      "mediana": 0.458,
      "ic95_mediana": [
       0.335,
-      0.813
+      0.861
      ],
      "p25": 0.36,
      "p75": 0.837,
@@ -20421,7 +21574,7 @@
      "mediana_abs_log10": 0.378,
      "dif_media_abs_log10_vs_A": -0.026,
      "ic95_dif": [
-      -0.0697,
+      -0.0696,
       -0.0001
      ]
     },
@@ -20431,7 +21584,7 @@
      "mediana": 0.458,
      "ic95_mediana": [
       0.335,
-      0.813
+      0.861
      ],
      "p25": 0.36,
      "p75": 0.837,
@@ -20543,7 +21696,10 @@
      "n": 3,
      "n_noches": 3,
      "mediana": 1.04,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.946,
+      1.12
+     ],
      "p25": 0.993,
      "p75": 1.08,
      "frac_bajo_0_5": 0.0,
@@ -20554,53 +21710,77 @@
      "n": 3,
      "n_noches": 3,
      "mediana": 1.04,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.946,
+      1.12
+     ],
      "p25": 0.993,
      "p75": 1.08,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.024,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "B_sum": {
      "n": 3,
      "n_noches": 3,
      "mediana": 1.04,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.946,
+      1.12
+     ],
      "p25": 0.993,
      "p75": 1.08,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.024,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "C": {
      "n": 3,
      "n_noches": 3,
      "mediana": 1.04,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.946,
+      1.12
+     ],
      "p25": 0.993,
      "p75": 1.08,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.024,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "D": {
      "n": 3,
      "n_noches": 3,
      "mediana": 1.04,
-     "ic95_mediana": null,
+     "ic95_mediana": [
+      0.946,
+      1.12
+     ],
      "p25": 0.993,
      "p75": 1.08,
      "frac_bajo_0_5": 0.0,
      "frac_sobre_2": 0.0,
      "mediana_abs_log10": 0.024,
      "dif_media_abs_log10_vs_A": 0.0,
-     "ic95_dif": null
+     "ic95_dif": [
+      0.0,
+      0.0
+     ]
     },
     "T0.25": {
      "n": 3,
@@ -20700,28 +21880,28 @@
     "gana": false,
     "motivos": [
      "reposo IC [0.0, 0.0] no queda bajo 0",
-     "erupcion IC [-0.0219, 0.0152] no queda bajo 0"
+     "erupcion IC [-0.0228, 0.0174] no queda bajo 0"
     ]
    },
    "B_off|hi": {
     "gana": false,
     "motivos": [
      "reposo IC [0.0, 0.0] no queda bajo 0",
-     "erupcion IC [-0.0239, 0.016] no queda bajo 0"
+     "erupcion IC [-0.0229, 0.0164] no queda bajo 0"
     ]
    },
    "B_sum|lo": {
     "gana": false,
     "motivos": [
      "reposo IC [0.0, 0.0] no queda bajo 0",
-     "erupcion IC [-0.0232, 0.0168] no queda bajo 0"
+     "erupcion IC [-0.0225, 0.0164] no queda bajo 0"
     ]
    },
    "B_sum|hi": {
     "gana": false,
     "motivos": [
      "reposo IC [0.0, 0.0] no queda bajo 0",
-     "erupcion IC [-0.0232, 0.0164] no queda bajo 0"
+     "erupcion IC [-0.0232, 0.016] no queda bajo 0"
     ]
    },
    "C|lo": {
@@ -20735,21 +21915,21 @@
     "gana": false,
     "motivos": [
      "reposo IC [0.0, 0.0] no queda bajo 0",
-     "erupcion IC [-0.0258, -0.0] no queda bajo 0"
+     "erupcion IC [-0.0251, -0.0] no queda bajo 0"
     ]
    },
    "D|lo": {
     "gana": false,
     "motivos": [
      "reposo IC [0.0, 0.0] no queda bajo 0",
-     "erupcion IC [-0.0255, -0.0] no queda bajo 0"
+     "erupcion IC [-0.0251, -0.0] no queda bajo 0"
     ]
    },
    "D|hi": {
     "gana": false,
     "motivos": [
      "reposo IC [0.0, 0.0] no queda bajo 0",
-     "erupcion IC [-0.0248, -0.0] no queda bajo 0"
+     "erupcion IC [-0.0251, -0.0] no queda bajo 0"
     ]
    }
   },
