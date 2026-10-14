@@ -125,7 +125,19 @@ def poblacion(coords, inner, rev=None, rev_ref=None):
     for x, p in zip(recs, pubs):
         x["pub"] = p[4]
     bp.etiquetar(recs, por_vb, ns, nv)
+    # VRP de MIROVA de la pasada (máximo de sus filas de alerta pareadas): lo usa la regla 1 del
+    # criterio de victoria (docs/MISSION.md, alerta protegida = alerta con 1 MW o más, lectura A).
+    for x in recs:
+        alertas = [f for f in bp.parear(por_vb.get((x["vol"], x["b"]), []), x["dt"]) if bp.es_alerta(f["tipo"])]
+        x["mirova_vrp_alerta"] = max(((f["vrp_mw"] or 0) for f in alertas), default=None)
     return recs
+
+
+def variantes_umbral():
+    """Umbral de nube de la variante (b), leído del módulo que usa el probe (no se copia el número)."""
+    sys.path.insert(0, str(HERE))
+    import variantes
+    return variantes.UMBRAL_NUBE_K
 
 
 def clave(x):
@@ -179,6 +191,21 @@ def main():
                                "negativos_nuevos_hoy": sorted(map(list, hoyN - N149)),
                                "alertas_S149_que_faltan_hoy": sorted(map(list, P149 - hoyP))},
     }
+    # Atribución de los negativos nuevos (A90): datos de S149 con el arnés de HOY separan el efecto
+    # del arnés (#778) del efecto del corpus (records que cambiaron después de S149).
+    viejos = {clave(x): x for x in poblacion(coords, inner, s149["rev"])}
+    N149_arnes_hoy = {k for k, x in viejos.items() if x["lab"] == "neg_limpio" and s0(x, inner)}
+    atrib = []
+    for k in sorted(hoyN - N149):
+        x = viejos.get(k)
+        pc = ((x or {}).get("r") or {}).get("primary_cluster") or {}
+        atrib.append({"pasada": list(k),
+                      "causa": "arnes (datos de S149 con el arnes de hoy ya la incluyen)" if k in N149_arnes_hoy
+                      else "corpus (el record cambio despues de S149)",
+                      "en_S149_lab": (x or {}).get("lab"), "en_S149_pc_vrp_mw": pc.get("vrp_mw"),
+                      "en_S149_distance_class": ((x or {}).get("r") or {}).get("distance_class")})
+    out["controles"]["C4_contiene_a_S149"]["atribucion_de_los_nuevos"] = atrib
+    out["controles"]["C4_contiene_a_S149"]["negativos_datos_S149_arnes_hoy"] = len(N149_arnes_hoy)
 
     # ---- qué persiste el record de los vecinos
     claves = collections.Counter()
@@ -239,16 +266,38 @@ def main():
         pc = r.get("primary_cluster") or {}
         return {"clase": clase, "volcan": x["vol"], "pasada_utc": r["datetime_utc"], "sensor": r["sensor"],
                 "granule": r.get("granule"), "product_version": r.get("product_version"),
-                "en_s149": en_s149(x), "persistido": {
+                "en_s149": en_s149(x), "mirova_vrp_alerta_mw": x.get("mirova_vrp_alerta"),
+                "processed_utc": r.get("processed_utc"), "persistido": {
                     "pc_vrp_mw": pc.get("vrp_mw"), "pc_n_pixels": pc.get("n_pixels"),
                     "pc_centroid_dist_km": pc.get("centroid_dist_km"), "vrp_mw": r.get("vrp_mw"),
                     "t_bg_k": r.get("t_bg_k"), "final_hotspot_source": r.get("final_hotspot_source"),
                     "triggered_test1": r.get("triggered_test1"),
                     "diag_n_first_pass_pixels": r.get("diag_n_first_pass_pixels")}}
-    lista = [fila(x, "neg_cero") for x in N] + [fila(x, "alerta_cero") for x in P] + [fila(x, "control_publica") for x in ctrl]
+    # Regla 1 del criterio de victoria: TODAS las alertas protegidas (VRP de MIROVA >= 1 MW) que hoy
+    # publicamos entran al probe, para ver si algún brazo las apaga. Las 40 al azar quedan iguales.
+    en_ctrl = {clave(x) for x in ctrl}
+    prot = [x for x in PUB if x["lab"] == "pos" and (x.get("mirova_vrp_alerta") or 0) >= 1.0
+            and clave(x) not in en_ctrl]
+    out["alertas_protegidas_que_publican_hoy"] = {
+        "en_control_publica": sum(1 for x in ctrl if x["lab"] == "pos" and (x.get("mirova_vrp_alerta") or 0) >= 1.0),
+        "agregadas_aparte": len(prot)}
+    lista = ([fila(x, "neg_cero") for x in N] + [fila(x, "alerta_cero") for x in P]
+             + [fila(x, "control_publica") for x in ctrl] + [fila(x, "protegida_publica") for x in prot])
     (HERE / "pasadas.json").write_text(json.dumps(lista, indent=1, ensure_ascii=False), encoding="utf-8")
     out["pasadas_json"] = {"neg_cero": len(N), "alerta_cero": len(P), "control_publica": len(ctrl),
+                           "protegida_publica": len(prot), "total": len(lista),
                            "sin_granule": sum(1 for f in lista if not f["granule"])}
+    # Cifras de lo que el probe NO distingue (README, sección de límites).
+    frio = [f for f in lista if (f["persistido"]["t_bg_k"] or 999) < variantes_umbral()]
+    out["limites_del_probe"] = {
+        "t_bg_k_m13_bajo_255": {"n": len(frio), "de": len(lista),
+                                "por_volcan": dict(collections.Counter(f["volcan"] for f in frio)),
+                                "por_volcan_total": dict(collections.Counter(f["volcan"] for f in lista))},
+        "sin_processed_utc": sum(1 for f in lista if not f.get("processed_utc")),
+        "rutina_en_noche_con_alerta_en_cero_fuera_del_probe": sum(
+            1 for x in recs if x["lab"] == "sin_info" and x.get("rutina_pasada")
+            and x.get("noche_con_alerta_sensor") and s0(x, inner)),
+    }
     (HERE / "techo.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
     print(json.dumps(out, indent=1, ensure_ascii=False))
     if not (c1 and c2 and c3):

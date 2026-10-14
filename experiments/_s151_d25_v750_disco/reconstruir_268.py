@@ -7,7 +7,10 @@ Para que el probe mida "los 268" y no "unos 271", aquí se rehace el cálculo co
 en el commit de S149: los JSON de `data/mirova_equivalent/`, el snapshot de la referencia (los tres
 CSV), `volcanoes.yaml`, `frontend/index.html` (predicado) y los scripts del arnés. Medido: con los
 JSON y el arnés de ese commit da 3.118 negativos limpios, 268 en la condición y 28 alertas, que son
-los números del informe; con el arnés de hoy (el cargador de Loop 0.1, #778) da 270.
+los números del informe. Hoy da 271, por dos causas distintas (atribución en techo.json, control C4):
+los JSON de S149 leídos con el arnés de hoy (el cargador de Loop 0.1, #778) dan 270, y eso explica a
+Chaitén 2026-08-17 06:12 y Nevados de Chillán 2026-06-29 06:24; el tercero, Isluga 2026-09-21 05:42, es
+del corpus: en S149 su cúmulo tenía 0,025 MW y hoy tiene 0,0 (A90).
 
 Corre el arnés viejo en un subproceso aislado (otro sys.path) para no mezclar módulos.
 Salida: lista_268_s149.json. USO: python experiments/_s151_d25_v750_disco/reconstruir_268.py

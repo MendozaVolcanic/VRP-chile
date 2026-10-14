@@ -8,7 +8,8 @@ magnitud positiva bajo 10 MW los hace publicar a todos (techo.json, controles C1
 la pregunta se reduce al SIGNO del contraste del cráter contra sus vecinos, que sólo el granule conoce.
 
 QUÉ HACE. Por cada pasada de pasadas.json (268+3 negativos en cero, 28 alertas en cero, 40 pasadas que
-ya publican como control) baja el L1B y el GEO del MISMO granule que el record (nombre exacto) y corre
+ya publican como control y 17 alertas protegidas de 1 MW o más que hoy publicamos, para la regla 1 del
+criterio de victoria de docs/MISSION.md) baja el L1B y el GEO del MISMO granule que el record (nombre exacto) y corre
 `process_viirs_mod.calculate_vrp` tres veces en el mismo proceso, cambiando sólo el global del módulo:
   control  flag D25 apagado (producción). Debe reproducir el record persistido (control C-P1).
   a        flag D25 encendido: media de la radiancia de los vecinos NO alertados (canon 2016a ec. 6),
@@ -173,6 +174,11 @@ def main():
     tope = int(os.environ.get("PROBE_MAX", "0") or 0)
     if tope:
         lista = lista[:tope]
+    if not lista:
+        # un volcán mal escrito en `vols` deja la lista vacía y el job saldría verde sin datos (S141).
+        # Va ANTES de auth(): falla sin tocar la red.
+        print(f"lista vacía para PROBE_VOL={f_vol!r}: nombre mal escrito o sin pasadas", flush=True)
+        sys.exit(2)
     print(f"{len(lista)} pasadas | perfil {os.environ['VRP_PROFILE']} | max_half_px {pvm.VRP_BG_NEIGHBOR_MAX_HALF_PX}", flush=True)
     auth()
     vols = {v["name"]: v for v in load_volcanoes()}
