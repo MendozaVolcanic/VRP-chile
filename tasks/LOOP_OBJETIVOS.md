@@ -216,7 +216,8 @@ y dos verificadores, 2026-10-09).
 **Agregadas por Nicolás el 2026-10-14 (en este orden; "puedes correr donde necesites": GitHub Actions incluido,
 siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
-- [ ] **1.12 (estudio D) Las alertas de 0,05 MW o menos: ¿MIROVA las considera anomalía?**
+- [~] **1.12 (estudio D) Las alertas de 0,05 MW o menos: ¿MIROVA las considera anomalía?** EN CURSO 2026-10-14
+  (agente en `VRP-Chile-112`, rama `loop/1.12-alertas-minimas`).
   Por qué: el banner de MIROVA dice NONE en 9 pasadas que el scraper registra como alerta (0,02 a 0,05 MW,
   `docs/S151_CRITERIO_CLASE_MIROVA.md` §5), y 9 de las 14 pérdidas débiles de D22 están en ese rango. Si MIROVA no
   las ve como anomalía, toda suma de errores las cuenta mal (como alerta perdida o como acierto), incluida la del
@@ -261,6 +262,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-8 | Sello del A/B reducido de la caja (D1/D2 con K/KC, ~35 min; V1 con B/BC, ~6 h) | `experiments/_s151_prereg_caja/PREREGISTRO.md`, verificador limpio con arreglos | #800 | #801 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 22:37 UTC): vuelta 33, V2a encolado detrás de V1, estudio D (1.12) arrancado
+- V1: 6 jobs en curso (el máximo) y 38 en espera; el estado global "queued" es un desfase de GitHub. V2a
+  despachado (run 38648773684) y quedó `pending` en el grupo detrás de V1, sin desplazarlo (comprobado 30 s
+  después). V2b se despacha cuando V2a arranque.
+- 1.12 (estudio D) arrancado con un agente en `VRP-Chile-112`. Siguen corriendo el estudio TIF de la 1.4.
 
 ### 2026-10-14 (vuelta 32): mapa de gaps y tres estudios nuevos en la cola (1.12, 1.13, 1.14)
 - A pedido de Nicolás, mapa de gaps con el auto-audit del 2026-10-14 (ventana de falsas 09-01 a 10-14):
