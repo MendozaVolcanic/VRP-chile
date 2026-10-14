@@ -219,6 +219,16 @@ y dos verificadores, 2026-10-09).
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-14 (vuelta 24): verificador de #800: no vale la pena despachar V1 tal como está
+- Confirmado: cableado (24 llamadas; el tablero no deshace la caja), workflow, sustrato, prueba 28/28, suite.
+- D1 grave: si `Distancia_km` de MIROVA se mide desde el centro de su caja (lo que afirma el §2), MIROVA publica
+  fuera de su propia caja entre 24,8 y 28,8 % de sus alertas VIIRS 375 de V1, igual que B (25,6 %), no 0,9 a
+  2,2 %: la premisa "MIROVA calla fuera de la caja" no se sostendría en el NRT. Punto de medición SIN VERIFICAR.
+- D2: el "gana" lo decide PCC, con la caja del brazo descentrada; en los 8 volcanes centrados el neto es casi
+  cero. D3: P3, P4 y P1 casi seguros por construcción. D4: el ruido se leía como "inerte".
+- Arreglos devueltos a su agente: establecer desde qué punto mide MIROVA, decidir sólo en los 8 centrados,
+  INDECIDIBLE por ruido, P3 sobre pares que cambian, y despacho reducido a D1 y D2 (~35 min) más B/BC en V1.
+
 ### 2026-10-14 (servidor 17:07 UTC): vuelta 23, pre-registro de la caja (#800), en verificación
 - Paradas: NRT verde 14:52 UTC; disco 11 GB libres (bajó de 16 GB: limpiar worktrees al cerrar cada tarea).
 - Agente entregó #800: el flag de la caja llega a las 24 llamadas de umbral dual en los dos pases de los tres
