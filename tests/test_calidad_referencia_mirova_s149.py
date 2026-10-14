@@ -14,9 +14,16 @@ sys.path.insert(0, os.path.join(RAIZ, "scripts"))
 import calidad_referencia_mirova as cal  # noqa: E402
 
 
-def test_septiembre_no_pisa_nada():
-    assert cal.avisos_de_ventana("2026-09-01", "2026-09-20") == []
+def test_septiembre_pisa_solo_suomi_npp():
+    # S151 (loop 0.4b): hasta S150 septiembre no pisaba nada; desde que se registro el defecto de
+    # Suomi NPP en el OCR (arreglado el 2026-10-09 en Mirova-v1#20), septiembre pisa ese hito y solo ese.
+    av = cal.avisos_de_ventana("2026-09-01", "2026-09-20")
+    assert len(av) == 1 and "Suomi NPP" in av[0], av
     assert cal.etiqueta_que_decide("2026-09-01") == "tabla y OCR"
+
+
+def test_despues_del_arreglo_de_suomi_npp_no_pisa_nada():
+    assert cal.avisos_de_ventana("2026-10-10", "2026-10-14") == []
 
 
 def test_mayo_avisa_del_ocr_y_decide_solo_la_tabla():
@@ -42,5 +49,5 @@ def test_indexar_la_referencia_dispara_el_aviso(capsys):
     import banco_paridad as bp
     bp.indexar_referencia([], {}, ("2026-05-01", "2026-05-31"))
     assert "[referencia MIROVA]" in capsys.readouterr().err
-    bp.indexar_referencia([], {}, ("2026-09-01", "2026-09-20"))
+    bp.indexar_referencia([], {}, ("2026-10-10", "2026-10-14"))
     assert "[referencia MIROVA]" not in capsys.readouterr().err
