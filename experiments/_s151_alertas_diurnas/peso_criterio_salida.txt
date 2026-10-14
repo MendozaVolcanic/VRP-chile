@@ -1,0 +1,47 @@
+Concentracion diurna en el crater (veces el azar; n filas diurnas VRP > 0 de la tabla)
+   volcan                 circular (todas) sin pasadas protegidas dia
+   Chaiten                     5.7 (n= 16)              5.7 (n= 16)
+   Copahue                     0.0 (n= 37)              0.0 (n= 37)
+   Isluga                      2.3 (n= 40)              2.3 (n= 40)
+   Lascar                     12.9 (n= 99)              5.1 (n= 90)
+   Lastarria                   0.0 (n=179)              0.0 (n=179)
+   Llaima                      0.0 (n= 67)              0.0 (n= 67)
+   NevadosDeChillan           11.5 (n= 63)              0.0 (n= 55)
+   PlanchonPeteroa             0.0 (n= 24)              0.0 (n= 24)
+   PuyehueCordonCaulle         0.0 (n=  8)              0.0 (n=  8)
+   Tupungatito                 3.1 (n= 29)              3.1 (n= 29)
+   Villarrica                 14.0 (n= 26)              7.6 (n= 24)
+
+Clases de las 94 pasadas protegidas diurnas:
+   corte  5, sin pasadas protegidas: {'SIN EVIDENCIA': 23, 'real probable': 31, 'reflejo o Sol probable': 40}
+   corte  5, leave-one-out:          {'SIN EVIDENCIA': 15, 'real probable': 39, 'reflejo o Sol probable': 40}
+   corte 10, sin pasadas protegidas: {'SIN EVIDENCIA': 54, 'reflejo o Sol probable': 40}
+   corte 10, leave-one-out:          {'SIN EVIDENCIA': 15, 'real probable': 39, 'reflejo o Sol probable': 40}
+   corte 20, sin pasadas protegidas: {'SIN EVIDENCIA': 54, 'reflejo o Sol probable': 40}
+   corte 20, leave-one-out:          {'SIN EVIDENCIA': 54, 'reflejo o Sol probable': 40}
+Pasadas solo OCR (sin distancia propia; heredan la concentracion de su volcan): 75 de 94
+
+A119 aplicado (desde 2026-06-13 todo; marzo al 12 de junio solo con fila en la tabla; ene-feb fuera)
+   sensor    tramo         noche_A119  dia_total   dia_A119    reflejo  sin_evid.
+   MODIS     T0 ene-feb             0          0          0          0          0
+   MODIS     T1 mar-12jun          39          3          2          2          0
+   MODIS     T2 13jun-oct           7          1          1          0          1
+   VIIRS375  T0 ene-feb             0          4          0          0          0
+   VIIRS375  T1 mar-12jun          57         54          5          0          5
+   VIIRS375  T2 13jun-oct          38         26         26         13         13
+   VIIRS750  T0 ene-feb             0          0          0          0          0
+   VIIRS750  T1 mar-12jun          62          0          0          0          0
+   VIIRS750  T2 13jun-oct          29          6          6          4          2
+   TOTAL                          232         94         40         19         21
+   (sin_evid. junta 'real probable' y 'SIN EVIDENCIA': con la concentracion no circular no hay reales)
+   usables por A119: 40 (7 de tabla hasta el 12 de junio, 33 desde el 13 de junio)
+   por volcan: {'Chaiten': 1, 'Isluga': 5, 'Lascar': 12, 'Lastarria': 6, 'NevadosDeChillan': 9, 'PlanchonPeteroa': 1, 'PuyehueCordonCaulle': 1, 'Tupungatito': 1, 'Villarrica': 4}
+
+Alerta nocturna de MIROVA del mismo volcan a <= 24 h (no discrimina: la cumplen tambien los reflejos)
+   real probable              0 pasadas: con alerta nocturna: 0; con alerta nocturna protegida: 0
+   SIN EVIDENCIA             54 pasadas: con alerta nocturna: 54; con alerta nocturna protegida: 38
+   reflejo o Sol probable    40 pasadas: con alerta nocturna: 39; con alerta nocturna protegida: 3
+
+Protegidas diurnas de 50 MW o mas (umbral diurno del conjunto CURADO de Coppola et al. 2026, no del NRT): 1 -> ['2026-06-15 17:24 Lascar 760.6 MW']
+Alertas diurnas de la TABLA NRT (ALERTA_TERMICA): 38, VRP maximo 15.81 MW
+Protegidas diurnas bajo 5 MW: 75 de 94; bajo 10 MW: 87 de 94

@@ -1,0 +1,129 @@
+ENABLE_DAYTIME_MODIS (perfil mirova_equivalent) = False
+C2 regla sintetica (6 casos con respuesta conocida): 6 de 6 correctos -> PASA
+C1 tabla sola latest_consolidado.csv: 1651 ALERTA_TERMICA; hora 13-21 UTC: 38, de ellas >= 1 MW: 20 (D27 dice 1.642 / 37 / 19) -> NO REPRODUCE
+   corte 13-20: 38 (20 >= 1 MW); corte 13-21: 38 (20)
+   detalle >= 1 MW 13-21 UTC: MODIS NevadosDeChillan 2, MODIS Villarrica 1, VIIRS NevadosDeChillan 2, VIIRS375 Lascar 9, VIIRS375 NevadosDeChillan 5, VIIRS375 Villarrica 1
+C1' misma cuenta sobre latest_consolidado.csv del commit 1f73c2006 (18:37 UTC de hoy): 1650 / 37 / 19 -> PASA
+
+Referencia unificada: 44469 filas, 2026-01-10 19:06:00 a 2026-10-14 13:05:00
+filas sin coordenadas: {}
+
+Contexto: TODAS las filas de la tabla (CONS), por sensor y luz (MIROVA si procesa el dia):
+   MODIS     dia    filas  6192  ALERTA    5 (0.1 %)  FALSO_POSITIVO   33  RUTINA  6154
+   MODIS     noche  filas  6357  ALERTA  104 (1.6 %)  FALSO_POSITIVO   11  RUTINA  6242
+   VIIRS375  dia    filas  7928  ALERTA   29 (0.4 %)  FALSO_POSITIVO  436  RUTINA  7463
+   VIIRS375  noche  filas  7183  ALERTA 1236 (17.2 %)  FALSO_POSITIVO  385  RUTINA  5562
+   VIIRS750  dia    filas  8290  ALERTA    4 (0.0 %)  FALSO_POSITIVO   72  RUTINA  8214
+   VIIRS750  noche  filas  7458  ALERTA  312 (4.2 %)  FALSO_POSITIVO   21  RUTINA  7125
+
+C3 regla de elevacion (descartada) contra corte 13-21 UTC, filas de alerta:
+   descartada=False  hora13-21=False : 2523
+   descartada=True  hora13-21=True : 135
+
+FILAS de alerta (CONS + OCR, lectura A cuenta las dos): 2658; diurnas (la replica las descarta): 135; nocturnas: 2523
+FILAS protegidas (lectura A, >= 1 MW): diurnas 97, nocturnas 440
+
+Diurnas por sensor y canal (filas):
+   ('MODIS', 'CONS')                        5
+   ('MODIS', 'OCR')                         4
+   ('VIIRS375', 'CONS')                     29
+   ('VIIRS375', 'OCR')                      89
+   ('VIIRS750', 'CONS')                     4
+   ('VIIRS750', 'OCR')                      4
+
+Diurnas protegidas por sensor y canal (filas):
+   ('MODIS', 'CONS')                        2
+   ('MODIS', 'OCR')                         4
+   ('VIIRS375', 'CONS')                     15
+   ('VIIRS375', 'OCR')                      70
+   ('VIIRS750', 'CONS')                     2
+   ('VIIRS750', 'OCR')                      4
+
+Diurnas por volcan (filas; entre parentesis protegidas):
+   Chaiten                                  6
+   Isluga                                   9
+   Lascar                                   50
+   Lastarria                                35
+   NevadosDeChillan                         14
+   PlanchonPeteroa                          1
+   PuyehueCordonCaulle                      7
+   Tupungatito                              5
+   Villarrica                               8
+
+  protegidas por volcan:
+   Chaiten                                  1
+   Isluga                                   7
+   Lascar                                   39
+   Lastarria                                31
+   NevadosDeChillan                         10
+   PlanchonPeteroa                          1
+   PuyehueCordonCaulle                      1
+   Tupungatito                              2
+   Villarrica                               5
+
+Diurnas por hora UTC (filas):
+   13                                       4
+   17                                       51
+   18                                       66
+   19                                       12
+   20                                       2
+
+Diurnas por banda de elevacion solar (grados):
+   00-10                                    1
+   10-20                                    4
+   20-30                                    8
+   30-40                                    34
+   40-50                                    54
+   50-60                                    22
+   60-70                                    12
+
+  protegidas por banda de elevacion solar:
+   10-20                                    2
+   20-30                                    1
+   30-40                                    29
+   40-50                                    44
+   50-60                                    16
+   60-70                                    5
+
+Diurnas por mes:
+   2026-01                                  1
+   2026-02                                  8
+   2026-03                                  19
+   2026-04                                  15
+   2026-05                                  36
+   2026-06                                  23
+   2026-07                                  5
+   2026-08                                  12
+   2026-09                                  7
+   2026-10                                  9
+
+  protegidas por mes:
+   2026-02                                  4
+   2026-03                                  11
+   2026-04                                  10
+   2026-05                                  33
+   2026-06                                  18
+   2026-07                                  1
+   2026-08                                  7
+   2026-09                                  5
+   2026-10                                  8
+
+Diurnas protegidas por clase de VRP:
+   1-10 MW                                  90
+   10-100 MW                                6
+   >=100 MW                                 1
+
+PASADAS (volcan, sensor, minuto; junta CONS y OCR), por sensor y tramo A119:
+   sensor     tramo                              dia_al noche_al   dia_prot noche_prot
+   MODIS      T0 ene-feb (no se usa)                  0       16          0          9
+   MODIS      T1 mar-12jun (decide la tabla)          4       65          3         39
+   MODIS      T2 13jun-oct (tabla y OCR)              3       23          1          7
+   VIIRS375   T0 ene-feb (no se usa)                  7      186          4         12
+   VIIRS375   T1 mar-12jun (decide la tabla)         67      801         54         98
+   VIIRS375   T2 13jun-oct (tabla y OCR)             36      712         26         38
+   VIIRS750   T0 ene-feb (no se usa)                  1       41          0         19
+   VIIRS750   T1 mar-12jun (decide la tabla)          1      183          0         95
+   VIIRS750   T2 13jun-oct (tabla y OCR)              6      129          6         29
+   TOTAL                                            125     2156         94        346
+
+Alertas a menos de 3 grados del horizonte (cerca del terminador, sensibles a la hora): 0 (0 protegidas)
