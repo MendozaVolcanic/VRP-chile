@@ -143,7 +143,9 @@ y dos verificadores, 2026-10-09).
 
 ## 4. Bloque 1: pruebas (cola, en orden; una tarea puede avanzar mientras otra espera un sello o un run)
 
-- [~] **1.1 Prueba de Nevados de Chillán** DESPACHADA 2026-10-14 11:58 UTC, run 38560317428 (4 a 6 h). La
+- [x] **1.1 Prueba de Nevados de Chillán** HECHA 2026-10-14 (#796, `014fa659`, `docs/S151_RESULTADO_NDC.md`,
+  verificador PARCIAL): ningún candidato vetado; F/K pasan y quedan para la corrida de los 11 volcanes; quitar el
+  tope D9 quedó sin probar. Despachada 2026-10-14 11:58 UTC, run 38560317428 (4 a 6 h). La
   congelada no perdió filas de Chillán en la ventana (le faltan 12 de otros volcanes, 1 alerta de Láscar),
   así que no se re-congeló. (pre-registro v3 APROBADO, `experiments/_s150_ndc/PREREGISTRO_NDC.md`;
   despacho autorizado desde el 2026-10-13). Antes de despachar: comprobar que `_congelado_ndc` no perdió filas de
@@ -211,6 +213,20 @@ y dos verificadores, 2026-10-09).
 | D-6 | A/B de anomalía mayor: sello de A1 y si se implementa el código de A2 (recomendación: esperar D-4) | `experiments/_s151_ab_vrp_max/PREREGISTRO.md`, verificador limpio con arreglos | #794 | #795 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 14:08 UTC): vuelta 17, prueba de Chillán cerrada (#796)
+- Verificador limpio: PARCIAL. Reprodujo la salida idéntica y recalculó por su cuenta, sin el evaluador, las
+  decisiones clave. Confirmado: 0 pérdidas VIIRS de 1 MW o más; MODIS, C0 pierde 2026-10-01 08:35 (5,18 MW) y la
+  recuperan E, F, J, K, KE, KET (K con 1,08 MW). Salvedades: P5 del tope es vacuo (el tope no toca la etiqueta
+  `far` y en la familia K no llega a 5 MW): quitar el tope quedó sin probar; P4 no prueba la etiqueta (KE = K).
+- Suma de errores bajo 1 MW (tres sensores, reposo y actividad): C0 52, B 17, J 23, F/K/KE/KET 7. Las pérdidas
+  débiles de VIIRS 375 las causa quitar el Test 1; la de VIIRS 750 (09-28 04:42, 0,23 MW) es de `max`.
+- Documento `docs/S151_RESULTADO_NDC.md` con evidencia del verificador; CI verde; #796 mergeado.
+- Pendiente para una próxima vez: arreglos del evaluador (P5 SIN SUSTRATO, costo VIIRS y recall en reposo,
+  mediana para n par, control positivo de P3).
+- Próximo paso: con 1.1 cerrada, lo que queda en la cola espera a Nicolás (sellos D-5, 1.2, D-6; decisiones D-2,
+  D-3, D-4) o no está escrito todavía (1.6, 1.7, 1.8). Siguiente: pre-registro de la corrida de los 11 volcanes
+  para F/K, o 1.6 (MODIS banda 22 con `max`), que este resultado ya informa.
 
 ### 2026-10-14 (servidor 13:53 UTC): vuelta 16, prueba de Chillán evaluada, en verificación limpia
 - Run 38560317428 terminado. `recolectar` en rojo sólo porque su chequeo de cobertura espera 11 volcanes y el run
