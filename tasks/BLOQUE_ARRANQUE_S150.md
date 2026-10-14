@@ -136,6 +136,10 @@ mide contra la base de datos de MIROVA (CSV, OSF, TIF), no se elige.
    c) Diseñar cómo el experimental conserva `min` cuando la réplica pase a `max` (hoy los dos perfiles
       son idénticos salvo el directorio; ver docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md).
    d) Investigar el test con fuga de estado de la sección d.
+   e) ⚠️ **Sacado de la cola en S151 (loop 0.4d)**: el brazo del estadístico corregido no se puede correr,
+      `ENABLE_TEST1_NULL_CORRECTED` no lo pasa ningún procesador (VERIFICADOR_DATOS S150 D8) y un brazo que
+      lo encienda sale igual al control; antes hay que cablearlo (A45). Lo vigila
+      `tests/test_instrumentos_chicos_s151.py`. Texto original:
    e) Arrastre de S147 y S146: brazo del Test 1 con el estadístico corregido para el experimental;
       centro de la caja; verificador del frente I, tope de Villarrica al operador,
       pc.classification al tablero.

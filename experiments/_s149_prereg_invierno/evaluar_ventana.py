@@ -57,7 +57,7 @@ def main():
     if a.congelado: C = Path(a.congelado)
     tabla = tmp / "tabla.json"
     subprocess.run([sys.executable, str(AQUI / "armar_tabla.py"), "--control", str(dc), "--brazo", str(db), "--cons", str(C / "registro_vrp_consolidado.csv"),
-                    "--ocr", str(C / "registro_vrp_ocr.csv"), "--desde", a.desde, "--hasta", a.hasta, "--out", str(tabla)], check=True, stderr=subprocess.DEVNULL)
+                    "--ocr", str(C / "registro_vrp_ocr.csv"), "--desde", a.desde, "--hasta", a.hasta, "--out", str(tabla)], check=True)  # stderr visible: lleva el aviso A119 (loop 0.4a)
     T = json.loads(tabla.read_text(encoding="utf-8"))["pasadas"]
     # ---- 2. cobertura, ANTES de mirar resultados
     print("\n== COBERTURA (antes de mirar nada)")
@@ -83,7 +83,7 @@ def main():
         dcl = tmp / "union" / "_control_lascar"; dcl.mkdir(exist_ok=True)
         for f in dg.glob("*.json"): shutil.copy(dref / f.name, dcl / f.name)
         subprocess.run([sys.executable, str(AQUI / "armar_tabla.py"), "--control", str(dcl), "--brazo", str(dg), "--cons", str(C / "registro_vrp_consolidado.csv"),
-                        "--ocr", str(C / "registro_vrp_ocr.csv"), "--desde", a.desde, "--hasta", a.hasta, "--out", str(tg)], check=True, stderr=subprocess.DEVNULL)
+                        "--ocr", str(C / "registro_vrp_ocr.csv"), "--desde", a.desde, "--hasta", a.hasta, "--out", str(tg)], check=True)  # stderr visible: lleva el aviso A119 (loop 0.4a)
         G = json.loads(tg.read_text(encoding="utf-8"))["pasadas"]; amb = [v for v in G.values() if len(v) == 2]
         ig = sum(1 for v in amb if v["control"]["pub"] == v["brazo"]["pub"])
         print("\n== DETERMINISMO (gemelo contra %s, sobre %s): %d pasadas, en ambos %d, misma decision de publicar %d (%.1f %%) | %s" % (
