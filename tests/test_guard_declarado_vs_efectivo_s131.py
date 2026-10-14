@@ -147,7 +147,10 @@ CITAS_CLAUDE_MD = [
     ("scripts/run_pipeline.py", 234, "get_detection_anchor"),
     ("scripts/run_pipeline.py", 244, "local_kernel_bg"),
     ("pipeline/geo_utils.py", 29, "get_grid_center"),
-    ("frontend/index.html", 1473, "isValidDetection"),
+    # S151: 1473 -> 1483, +10 por la marca A113 sobre el tope D9 (tarea 0.3 del loop, sólo comentario).
+    ("frontend/index.html", 1483, "isValidDetection"),
+    # S151: predicado del tope D9, citado en la marca S151 de A23.
+    ("pipeline/process_modis.py", 1009, "_path_d_cap_active"),
     # S140: corridas por el import de product_version (8b) y por el fondo persistido (T7).
     ("pipeline/process_viirs.py", 83, "FLAG_DNS"),
     # S149: +1 en los tres procesadores por el import de roi1_summit_mask (A118, la caja al segundo pase).
