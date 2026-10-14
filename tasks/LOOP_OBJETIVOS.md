@@ -156,7 +156,9 @@ y dos verificadores, 2026-10-09).
   difieren en más del 5 % de las pasadas, no se despacha el resto (§10 bis del DISENO); si no, despacho completo
   y evaluación con su `evaluar.py`.
 
-- [ ] **1.3 A/B de D22, pre-registro v2.** Con la tabla sola, el camino D22 pesa 12 de 24 pérdidas débiles de
+- [x] **1.3 A/B de D22, pre-registro v2.** RESUELTA SIN A/B 2026-10-14 (#788): las 14 pérdidas confiables son
+  Muy Bajo (0,03 a 0,08 MW); techo 14 pasadas contra 271 negativos reabribles; sólo gana si reabre menos del
+  5,2 %. La selectividad la mide la sonda (1.2). Texto original: Con la tabla sola, el camino D22 pesa 12 de 24 pérdidas débiles de
   `max` (VERIFICADOR_DATOS D3). Rehacer el pre-registro suspendido (`experiments/_s150_ab_d22/PREREGISTRO.md`)
   con los hallazgos de su verificador (`docs/audit_s150/VERIFICADOR_PREREGISTRO_D22.md`), el criterio de §1.2 y
   la referencia de 0.1; verificador limpio; sello de Nicolás; despacho.
@@ -184,7 +186,9 @@ y dos verificadores, 2026-10-09).
   Palanca descartada para la réplica. (`FRENTE_F_FIDELIDAD_VIIRS.md:474`, F-07): se mide
   en minutos con la referencia.
 
-- [ ] **1.10 Las 4 alertas de VIIRS 750 de 0,32 a 0,65 MW que `max` pierde** (VERIFICADOR_DATOS D4): su clase
+- [~] **1.10 Las 4 alertas de VIIRS 750 de 0,32 a 0,65 MW que `max` pierde** MEDIDA 2026-10-14 (rama
+  `loop/1.10-max-v750`, en verificación limpia): todas Muy Bajo; contra B la suma de errores baja de 400 a 90
+  (abril a agosto). Es contra B (sin Test 1), no contra producción. Texto original: (VERIFICADOR_DATOS D4): su clase
   según 0.2 decide si `max` en VIIRS 750 cumple el criterio de §1.2.
 
 - [ ] **1.11 Experimental** (bloqueado hasta que Nicolás entregue la cronología OVDAS de Chillán y las
@@ -201,6 +205,19 @@ y dos verificadores, 2026-10-09).
 | D-4 | Alerta protegida: lectura A (alertas del scraper, 439 pasadas, recomendada) o B (todo VRP >= 1 MW, 992) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 12:47 UTC): vuelta 9, 1.10 medida y 1.3 resuelta sin A/B
+- 1.10: `experiments/_s151_max_v750/suma_de_errores.py` lee las salidas del evaluador de abril a agosto
+  (control B, brazo F): suma de errores 400 contra 90; F deja de publicar 4 alertas (todas Muy Bajo, D4) y apaga
+  unas 300 publicaciones en negativos limpios. Compara contra B, no contra producción: es evidencia para una
+  decisión combinada (sin Test 1 + `max`), no una adopción. Verificador limpio lanzado.
+- 1.3: `experiments/_s151_d22_techo/techo.py`: las 14 pérdidas confiables del camino D22 son Muy Bajo de 0,03 a
+  0,08 MW (9 en 0,05 o menos, zona NONE del banner). Techo 14 pasadas (13 noches) contra 271 negativos que
+  podría reabrir: sólo mejora si reabre menos del 5,2 %. No se gasta el A/B; la pregunta va a la sonda (1.2).
+  PR #788. Marca en el pre-registro suspendido.
+- Agentes: arreglos de 0.3 (#784), medición 1.5 (D25 en disco) y verificador de 1.10, los tres en curso.
+- Run de Chillán 38560317428 en curso.
+- Próximo paso: CI de #788 y merge; veredictos de los agentes.
 
 ### 2026-10-14 (servidor 12:44 UTC): vuelta 8, 1.9 cerrada, 0.3 con arreglos, 1.5 delegada
 - 1.9: en la tabla `latest.php` MIROVA lista las dos bandas VIIRS de la misma pasada en 13.964 casos (todos los
