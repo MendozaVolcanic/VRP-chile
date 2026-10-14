@@ -209,6 +209,17 @@ y dos verificadores, 2026-10-09).
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-14 (servidor 13:37 UTC aprox.): vuelta 14, verificador de #794: sellable con arreglos
+- Confirmado: flag y perfil (única diferencia), Regla D y ancla ciegas al flag por `hotspot_dist_km`, sustrato
+  recalculado (359 = V375 332 + V750 17 + MODIS 10; 75 a más de 25 km; 245 publicadas; 152 con Regla D), el
+  cambio de `FLAGS_BRAZO` no toca la prueba de Chillán (fijada al sha f3b41421), grupo y ventana T3 correctos.
+- Obligatorios: (1) P2 fallaría por construcción: el flag también elige entre cúmulos del Test 1 cercanos (24
+  de 42 pasadas con 2 o más cúmulos cambian; 217 cambian cercano por cercano fuera de la Regla D); (2) el ROI es
+  una caja de 50 × 50 km (hasta ~35 km), no un disco de 25 km, y `store.py:320` borra lo que está más allá, así
+  que el "techo" no es cota; (3) K3 rompe con dos medias ventanas (22 logs). Más: veredictos no probados en
+  `probar_evaluar.py`, tabla §1.2 incompleta, protegidas "informadas aparte" no implementadas.
+- Arreglos devueltos a su agente.
+
 ### 2026-10-14 (servidor 13:27 UTC): vuelta 13, pre-registro de 1.4 entregado (#794), en verificación
 - El flag `ENABLE_VENT_ANCHORED_CLUSTERING` existe pero no llega a todos sus consumidores (A118): con el Test 1
   disparando en el cráter, la Regla D (`test1_integrated.py:175`) y el ancla (`anchor.py:67`) devuelven el cráter
