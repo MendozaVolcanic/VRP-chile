@@ -1,0 +1,65 @@
+name: "Probe S151, fondo por vecinos (D25) sobre los 268 negativos de VIIRS 750 (solo lectura)"
+
+# Tarea 1.5 del loop. Criterio pre-registrado en experiments/_s151_d25_v750_disco/analizar_probe.py y
+# README.md (escritos antes de cualquier corrida). Solo lectura: no escribe en data/, no commitea.
+# Un job por volcan; los tres brazos (control, a canon, b con descarte de nube 255 K) corren en el
+# mismo proceso sobre el mismo granule, que se borra al terminar cada pasada.
+# A43: "on" entre comillas. S141: pipefail con tee y el script sale 2 si falta una pasada.
+# S146/A71: autentica SOLO por EARTHDATA_TOKEN y falla al instante si viene vacio (el par usuario y
+# clave de los secretos esta vencido y bloquea la cuenta).
+"on":
+  workflow_dispatch:
+    inputs:
+      vols:
+        description: "Lista JSON de volcanes (pilotear con [\"Copahue\"], 3 pasadas)"
+        required: true
+        default: '["Isluga","NevadosDeChillan","Lascar","Tupungatito","PuyehueCordonCaulle","PlanchonPeteroa","Lastarria","Villarrica","Chaiten","Llaima","Copahue"]'
+      max_pasadas:
+        description: "Tope de pasadas por volcan (0 = todas)"
+        required: false
+        default: "0"
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        vol: ${{ fromJSON(github.event.inputs.vols) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml pandas
+      - name: Probe tres brazos
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          PROBE_VOL: ${{ matrix.vol }}
+          PROBE_MAX: ${{ github.event.inputs.max_pasadas }}
+          VRP_PROFILE: mirova_equivalent
+        run: |
+          set -o pipefail
+          cd experiments/_s151_d25_v750_disco
+          mkdir -p out
+          python probe_d25_v750.py | tee "out/report_${PROBE_VOL}.txt"
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s151-probe-d25-v750-${{ matrix.vol }}
+          path: experiments/_s151_d25_v750_disco/out/
+          retention-days: 30
+          if-no-files-found: error
