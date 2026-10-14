@@ -18,10 +18,20 @@ def main():
     ap = argparse.ArgumentParser()
     for k in ("control", "brazo", "cons", "ocr", "desde", "hasta", "out"):
         ap.add_argument("--" + k, required=True)
+    # S151 (verificador del PR #797, punto 2): las dos capas que el cargador agrega por defecto desde el repo
+    # (historica de la union y respaldo del 2026-04-08) se pueden pasar congeladas. Sin estos argumentos el
+    # comportamiento es el de siempre, asi que los usos anteriores no cambian.
+    ap.add_argument("--historico", default=None)
+    ap.add_argument("--respaldo", default=None)
     a = ap.parse_args()
     ventana = (a.desde, a.hasta)
     coords = bp._coords_por_volcan(); inner = bp.inner_desde_html()
-    filas = ev.cargar_referencia_unificada(Path(a.cons), Path(a.ocr))
+    capas = {}
+    if a.historico:
+        capas["historico_path"] = Path(a.historico)
+    if a.respaldo:
+        capas["respaldo_path"] = Path(a.respaldo)
+    filas = ev.cargar_referencia_unificada(Path(a.cons), Path(a.ocr), **capas)
     por_vb, ns, nv, n_ref = bp.indexar_referencia(filas, coords, ventana)
     tabla = {}
     for rol, d in (("control", a.control), ("brazo", a.brazo)):
