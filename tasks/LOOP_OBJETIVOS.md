@@ -109,7 +109,8 @@ y dos verificadores, 2026-10-09).
   y su control. Si la columna resulta inservible y ningún paper da el umbral, la definición queda en la cola de
   decisiones (§5) con la alternativa medida, y el loop sigue evaluando con las dos lecturas en paralelo.
 
-- [~] **0.3 Propagación A113 a las puertas de entrada.** PR #784 (agente en worktree), en verificación limpia.
+- [x] **0.3 Propagación A113 a las puertas de entrada.** HECHA 2026-10-14 (#784, squash `88e97d84`, verificada y con
+  arreglos). Quedan para Nicolás: tooltip "probablemente artefacto" (texto del operador) y P1 (memoria, fuera del repo).
   Por qué: `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` confirmó P1 a P6 (bloque de arranque de S149,
   MISSION choca con las dos direcciones, veredicto S27, D8' contra la anomalía mayor, tope D9 con "0 sobre 5 MW"
   falso y 338 hoy, ficha SDA desactualizada) y el hallazgo del tablero (dice que el pipeline no marca el tope).
@@ -121,7 +122,7 @@ y dos verificadores, 2026-10-09).
   texto viejo). Correr `grep -rl <archivo> tests/` y la suite completa después (un test puede leer esos docs).
   Aceptación: cero guiones largos y medios en cada archivo tocado; suite verde; el guard G8 sigue verde.
 
-- [~] **0.4 Instrumentos chicos.** (a), (b) y (d) HECHAS 2026-10-14 (#781, squash `b2187648`); falta (c),
+- [~] **0.4 Instrumentos chicos.** (a), (b) y (d) HECHAS 2026-10-14 (#781, squash `b2187648`); (c) en PR #791;
   que espera a la 0.3 porque toca `CLAUDE.md`.
   (a) `evaluar_ventana.py` (en `experiments/_s149_prereg_invierno/` o donde lo ubique `git ls-files | grep
   evaluar_ventana`) deja de mandar stderr a DEVNULL, así el aviso A119 llega al log; (b) `scripts/calidad_referencia_mirova.py`
@@ -168,7 +169,9 @@ y dos verificadores, 2026-10-09).
   clasificación NULO la escribe el scraper. Medir distancias desde el cráter y no desde el catálogo
   (`process_viirs.py:754`, AUDITOR_F1). Pre-registro, verificador, sello, despacho.
 
-- [ ] **1.5 D25, fondo por vecinos, primero sin correr nada:** sobre los 268 negativos de VIIRS 750 ya en disco
+- [~] **1.5 D25, fondo por vecinos, primero sin correr nada:** MAGNITUD SIN MEDIR (no hay vecinos en records ni
+  gránulos en disco); techo: cualquier magnitud positiva publicaría los 268 negativos y las 28 alertas. Probe de
+  sólo lectura sobre 339 gránulos escrito y SIN despachar (#790, en verificación limpia; necesita sello). sobre los 268 negativos de VIIRS 750 ya en disco
   (`AUDIT_S149.md:139`). El descarte de vecinos nublados bajo 255 K es de Coppola 2014 p. 3412, no del canon
   2016a (VERIFICADOR_DATOS D9): medirlo como variante, no como "lo que exige el paper".
 
@@ -186,7 +189,8 @@ y dos verificadores, 2026-10-09).
   Palanca descartada para la réplica. (`FRENTE_F_FIDELIDAD_VIIRS.md:474`, F-07): se mide
   en minutos con la referencia.
 
-- [~] **1.10 Las 4 alertas de VIIRS 750 de 0,32 a 0,65 MW que `max` pierde** MEDIDA 2026-10-14 (rama
+- [x] **1.10 Las 4 alertas de VIIRS 750 de 0,32 a 0,65 MW que `max` pierde** HECHA 2026-10-14 (#789, squash
+  `28d03ba0`, verificador PARCIAL con arreglos aplicados). Antes:
   `loop/1.10-max-v750`, en verificación limpia): todas Muy Bajo; contra B la suma de errores baja de 400 a 90
   (abril a agosto). Es contra B (sin Test 1), no contra producción. Texto original: (VERIFICADOR_DATOS D4): su clase
   según 0.2 decide si `max` en VIIRS 750 cumple el criterio de §1.2.
@@ -205,6 +209,23 @@ y dos verificadores, 2026-10-09).
 | D-4 | Alerta protegida: lectura A (alertas del scraper, 439 pasadas, recomendada) o B (todo VRP >= 1 MW, 992) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 12:57 UTC): vuelta 10, 0.3 y 1.10 mergeadas, 0.4c y 1.5 en PR
+- 0.3: arreglos del verificador aplicados por su agente (criterio con D-4 y atribución del corte de 1 MW,
+  puntero AUDIT_S149 §3, H_S27_1/D30 iguales a P3, ficha SDA, A82 marcada, cita nueva en G8). Revisado por mí:
+  0 guiones, criterio de MISSION correcto. CI verde, #784 mergeado.
+- 1.10: verificador PARCIAL: la suma 400 contra 90 es exacta pasada por pasada y no hay positivas que sólo F
+  publique; con la lectura B, F pierde una pasada protegida de OTRO objeto (Chillán VIIRS 750 2026-07-23 06:30,
+  FALSO_POSITIVO de MIROVA de 1,52 MW a 29,6 km; B publicaba 0,051 MW a 4,2 km). Tablas por pasada versionadas
+  (CSV de 400 KB) y cuenta por pasada. #789 mergeado.
+- 0.4c: A119 en CLAUDE.md y el hito de enero corregidos con las cifras de VERIFICADOR_DATOS D5/D6. PR #791.
+- 1.5: los 268 negativos se reconstruyen exactos (271 hoy, por el cargador de #778). La magnitud queda SIN MEDIR:
+  los records no guardan vecinos no alertados y no hay gránulos de VIIRS 750 en disco. Techo: con cualquier
+  magnitud positiva publicarían los 268 negativos y las 28 alertas (el tablero no corta bajo 10 MW); decide el
+  signo del contraste cráter contra vecinos. Probe de sólo lectura (339 gránulos, tres brazos) escrito y SIN
+  despachar, PR #790, en verificación limpia; después va a la cola como pre-registro a sellar.
+- Run de Chillán 38560317428: 2 jobs terminados en verde, el resto corriendo o en cola.
+- Próximo paso: merge de #791 con CI; veredicto de #790 y su entrada en la cola de sellos.
 
 ### 2026-10-14 (servidor 12:47 UTC): vuelta 9, 1.10 medida y 1.3 resuelta sin A/B
 - 1.10: `experiments/_s151_max_v750/suma_de_errores.py` lee las salidas del evaluador de abril a agosto
