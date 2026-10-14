@@ -74,7 +74,11 @@ y dos verificadores, 2026-10-09).
 
 ## 3. Bloque 0: higiene antes de medir (en orden; sin esto las pruebas miden con una vara rota)
 
-- [ ] **0.1 Referencia de MIROVA desde la unión histórica.**
+- [x] **0.1 Referencia de MIROVA desde la unión histórica.** HECHA 2026-10-14 (#778, squash `46947bda`;
+  `main` verde en el run 38558333297). Pendientes que deja: (i) `auto_audit_weekly.py` lee el snapshot crudo
+  con `load_mirova_alertas` y no ve las 40 alertas recuperadas; (ii) sólo las 207 del 06-oct tienen testigo
+  independiente en la suite; (iii) 372 claves de tipo cambiante, al menos 318 del cambio masivo
+  EVIDENCIA_DIARIA a RUTINA del 21-ene; (iv) el OCR no se recorrió.
   Por qué: el consolidado remoto de Mirova-v1 perdió filas en silencio al menos cinco veces (21-ene, 23-abr,
   25-ago, 26-ago y 06-oct, 207 filas con 8 alertas) y nunca las repuso (`docs/audit_s150/meta/VERIFICADOR_DATOS.md`
   D1). Una referencia congelada desde el remoto de hoy no las tiene. El snapshot previo a la última caída está
@@ -186,6 +190,20 @@ y dos verificadores, 2026-10-09).
 | D-3 | Marca de régimen en `store.py` (tarea 0.6) | pendiente | pendiente | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 11:45 UTC): vuelta 2, tarea 0.1 verificada, mergeada y `main` en verde
+- Verificador con contexto limpio sobre #778 (informe en el temporal de la sesión, resumido acá): CONFIRMA 1, 2,
+  3, 4, 6 y 7. Ubicó las cinco caídas commit a commit por el salto de tamaño (21-ene 07:35, 23-abr 14:38,
+  25-ago 18:44, 26-ago 18:37, 06-oct 01:42 UTC): siempre un commit que duplica filas y el siguiente que
+  deduplica perdiendo claves. Las pérdidas exactas coinciden con las 794 del muestreo diario, ninguna fila nació
+  el mismo día de su caída, y el tipo guardado es el del commit previo a cada caída (0 diferencias). PARCIAL en
+  5: la alarma de atraso dependía de un push humano y las 318 llamadas no tenían reintento.
+- Arreglado en #778 antes del merge: issue automático si `--union-historica` falla en `audit-weekly`, y
+  reintentos con test. CI del PR verde (run 38557916419), merge squash `46947bda`, `main` verde (run 38558333297).
+- `audit-weekly` despachado sobre `main` (run 38558346837) para medir en GitHub la duración del paso de la
+  unión y que el commit pase el `.gitignore` (el verificador lo dejó SIN VERIFICAR).
+- Próximo paso: revisar ese run; después, tarea 1.1 (comprobar `_congelado_ndc` contra la unión y despachar la
+  prueba de Chillán) o 0.2 si 1.1 se traba. Desde ahora los PR del loop se pueden mergear con CI verde (§2.6).
 
 ### 2026-10-14 (servidor 10:47 a 11:20 UTC): vuelta 1, tarea 0.1 implementada, PR #778 abierto
 - Paradas: NRT verde 09:17 UTC; disco 22 GB libres; sin issues de alerta salvo #762; `main` rojo sólo por el
