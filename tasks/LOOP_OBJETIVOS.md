@@ -74,7 +74,11 @@ y dos verificadores, 2026-10-09).
 
 ## 3. Bloque 0: higiene antes de medir (en orden; sin esto las pruebas miden con una vara rota)
 
-- [ ] **0.1 Referencia de MIROVA desde la unión histórica.**
+- [x] **0.1 Referencia de MIROVA desde la unión histórica.** HECHA 2026-10-14 (#778, squash `46947bda`;
+  `main` verde en el run 38558333297). Pendientes que deja: (i) `auto_audit_weekly.py` lee el snapshot crudo
+  con `load_mirova_alertas` y no ve las 40 alertas recuperadas; (ii) sólo las 207 del 06-oct tienen testigo
+  independiente en la suite; (iii) 372 claves de tipo cambiante, al menos 318 del cambio masivo
+  EVIDENCIA_DIARIA a RUTINA del 21-ene; (iv) el OCR no se recorrió.
   Por qué: el consolidado remoto de Mirova-v1 perdió filas en silencio al menos cinco veces (21-ene, 23-abr,
   25-ago, 26-ago y 06-oct, 207 filas con 8 alertas) y nunca las repuso (`docs/audit_s150/meta/VERIFICADOR_DATOS.md`
   D1). Una referencia congelada desde el remoto de hoy no las tiene. El snapshot previo a la última caída está
@@ -91,7 +95,10 @@ y dos verificadores, 2026-10-09).
   respaldo agrega 21 alertas que la principal perdió, tope 17): es la alarma de la pérdida funcionando, no un
   test roto. Prohibido ensancharle el rango para ponerlo verde.
 
-- [ ] **0.2 Qué mide `Clasificacion Mirova`.**
+- [x] **0.2 Qué mide `Clasificacion Mirova`.** HECHA 2026-10-14 (#780, squash `03c44eed`, verificada): alerta
+  protegida = PASADA con alerta del scraper y VRP >= 1 MW recalculado (lectura A, 439 pasadas); la columna es
+  del scraper y no sirve; el corte lo sostiene el banner de MIROVA, no el paper (fig. 11 se contradice).
+  Lectura B (VRP >= 1 MW a cualquier distancia, 992) en la decisión D-4 (#782): evaluar con las dos.
   Por qué: el criterio de victoria depende de "Bajo o superior", y la columna no es un corte del VRP por pasada
   (Muy Bajo 1.372 filas de 0,01 a 0,99 MW; Bajo 265 de 0,04 a 8,75; Moderado 4 de 13,1 a 15,8; medido en
   `latest_consolidado.csv` el 2026-10-13). Hipótesis a probar: el nivel es el de la página del volcán en ese
@@ -102,7 +109,8 @@ y dos verificadores, 2026-10-09).
   y su control. Si la columna resulta inservible y ningún paper da el umbral, la definición queda en la cola de
   decisiones (§5) con la alternativa medida, y el loop sigue evaluando con las dos lecturas en paralelo.
 
-- [ ] **0.3 Propagación A113 a las puertas de entrada.**
+- [x] **0.3 Propagación A113 a las puertas de entrada.** HECHA 2026-10-14 (#784, squash `88e97d84`, verificada y con
+  arreglos). Quedan para Nicolás: tooltip "probablemente artefacto" (texto del operador) y P1 (memoria, fuera del repo).
   Por qué: `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` confirmó P1 a P6 (bloque de arranque de S149,
   MISSION choca con las dos direcciones, veredicto S27, D8' contra la anomalía mayor, tope D9 con "0 sobre 5 MW"
   falso y 338 hoy, ficha SDA desactualizada) y el hallazgo del tablero (dice que el pipeline no marca el tope).
@@ -114,7 +122,8 @@ y dos verificadores, 2026-10-09).
   texto viejo). Correr `grep -rl <archivo> tests/` y la suite completa después (un test puede leer esos docs).
   Aceptación: cero guiones largos y medios en cada archivo tocado; suite verde; el guard G8 sigue verde.
 
-- [ ] **0.4 Instrumentos chicos.**
+- [x] **0.4 Instrumentos chicos.** HECHA 2026-10-14: (a), (b) y (d) en #781 (`b2187648`), (c) en #791 (`fecc3eae`);
+  que espera a la 0.3 porque toca `CLAUDE.md`.
   (a) `evaluar_ventana.py` (en `experiments/_s149_prereg_invierno/` o donde lo ubique `git ls-files | grep
   evaluar_ventana`) deja de mandar stderr a DEVNULL, así el aviso A119 llega al log; (b) `scripts/calidad_referencia_mirova.py`
   gana los hitos de NOAA-21 y de Suomi NPP (con fuente); (c) A119 en `CLAUDE.md`: el "86 % en enero" es
@@ -122,17 +131,21 @@ y dos verificadores, 2026-10-09).
   (d) sacar `ENABLE_TEST1_NULL_CORRECTED` de toda cola (ningún procesador lo lee, VERIFICADOR_DATOS D8).
   Cada arreglo con su test que falla antes.
 
-- [ ] **0.5 Scraper de Mirova-v1 con VRP de 1.000 MW o más** (issue MendozaVolcanic/Mirova-v1#19, 36 ciclos
+- [~] **0.5 Scraper de Mirova-v1 con VRP de 1.000 MW o más** PR Mirova-v1#21 listo con CI verde; espera el sí
+  de Nicolás (issue #783). (issue MendozaVolcanic/Mirova-v1#19, 36 ciclos
   caídos; `scraper.py:140`). En plena erupción de Chillán es el caso que puede pasar. PR en Mirova-v1 con test
   del caso "1,234.5"; **el merge espera el sí de Nicolás** (es otro repo de producción).
 
-- [ ] **0.6 Marca de régimen en cada record** (perfil + sha del código; 0 de 65.206 records la tienen,
+- [~] **0.6 Marca de régimen en cada record** PR #785 con tag `pre-s151-marca-regimen`, en la cola (D-3, issue
+  #786); NO se mergea sin el sí de Nicolás. (perfil + sha del código; 0 de 65.206 records la tienen,
   VERIFICADOR_DATOS D7). Bloquea toda adopción futura. Toca `pipeline/store.py` → regla §1.1: plan + test + tag
   + PR, y a la cola de decisiones.
 
 ## 4. Bloque 1: pruebas (cola, en orden; una tarea puede avanzar mientras otra espera un sello o un run)
 
-- [ ] **1.1 Prueba de Nevados de Chillán** (pre-registro v3 APROBADO, `experiments/_s150_ndc/PREREGISTRO_NDC.md`;
+- [~] **1.1 Prueba de Nevados de Chillán** DESPACHADA 2026-10-14 11:58 UTC, run 38560317428 (4 a 6 h). La
+  congelada no perdió filas de Chillán en la ventana (le faltan 12 de otros volcanes, 1 alerta de Láscar),
+  así que no se re-congeló. (pre-registro v3 APROBADO, `experiments/_s150_ndc/PREREGISTRO_NDC.md`;
   despacho autorizado desde el 2026-10-13). Antes de despachar: comprobar que `_congelado_ndc` no perdió filas de
   la ventana 2026-09-14 a 2026-10-07 contra la unión de 0.1 (si perdió, re-congelar y anotarlo). Despacho: un run
   de `reproc-s146-ab-sin-test1.yml`, volcán NevadosDeChillan, del 2026-09-14 al 2026-10-07, los 10 brazos,
@@ -144,7 +157,9 @@ y dos verificadores, 2026-10-09).
   difieren en más del 5 % de las pasadas, no se despacha el resto (§10 bis del DISENO); si no, despacho completo
   y evaluación con su `evaluar.py`.
 
-- [ ] **1.3 A/B de D22, pre-registro v2.** Con la tabla sola, el camino D22 pesa 12 de 24 pérdidas débiles de
+- [x] **1.3 A/B de D22, pre-registro v2.** RESUELTA SIN A/B 2026-10-14 (#788): las 14 pérdidas confiables son
+  Muy Bajo (0,03 a 0,08 MW); techo 14 pasadas contra 271 negativos reabribles; sólo gana si reabre menos del
+  5,2 %. La selectividad la mide la sonda (1.2). Texto original: Con la tabla sola, el camino D22 pesa 12 de 24 pérdidas débiles de
   `max` (VERIFICADOR_DATOS D3). Rehacer el pre-registro suspendido (`experiments/_s150_ab_d22/PREREGISTRO.md`)
   con los hallazgos de su verificador (`docs/audit_s150/VERIFICADOR_PREREGISTRO_D22.md`), el criterio de §1.2 y
   la referencia de 0.1; verificador limpio; sello de Nicolás; despacho.
@@ -154,7 +169,9 @@ y dos verificadores, 2026-10-09).
   clasificación NULO la escribe el scraper. Medir distancias desde el cráter y no desde el catálogo
   (`process_viirs.py:754`, AUDITOR_F1). Pre-registro, verificador, sello, despacho.
 
-- [ ] **1.5 D25, fondo por vecinos, primero sin correr nada:** sobre los 268 negativos de VIIRS 750 ya en disco
+- [~] **1.5 D25, fondo por vecinos, primero sin correr nada:** MAGNITUD SIN MEDIR (no hay vecinos en records ni
+  gránulos en disco); techo: cualquier magnitud positiva publicaría los 268 negativos y las 28 alertas. Probe de
+  sólo lectura sobre 339 gránulos escrito y SIN despachar (#790, en verificación limpia; necesita sello). sobre los 268 negativos de VIIRS 750 ya en disco
   (`AUDIT_S149.md:139`). El descarte de vecinos nublados bajo 255 K es de Coppola 2014 p. 3412, no del canon
   2016a (VERIFICADOR_DATOS D9): medirlo como variante, no como "lo que exige el paper".
 
@@ -167,10 +184,15 @@ y dos verificadores, 2026-10-09).
 - [ ] **1.8 Modo de un solo píxel en erupción** (AUDIT_S150 familia 3: Chillán VIIRS 750 mostró 2,66, 11,08 y
   2,49 MW en 54 min).
 
-- [ ] **1.9 Preferencia de MIROVA entre banda I y banda M** (`FRENTE_F_FIDELIDAD_VIIRS.md:474`, F-07): se mide
+- [x] **1.9 Preferencia de MIROVA entre banda I y banda M** HECHA 2026-10-14 (#787, squash `cd23ae20`): el NRT
+  NO tiene preferencia (13.964 pasadas con las dos bandas, 246 con alerta en las dos); la regla es del archivo.
+  Palanca descartada para la réplica. (`FRENTE_F_FIDELIDAD_VIIRS.md:474`, F-07): se mide
   en minutos con la referencia.
 
-- [ ] **1.10 Las 4 alertas de VIIRS 750 de 0,32 a 0,65 MW que `max` pierde** (VERIFICADOR_DATOS D4): su clase
+- [x] **1.10 Las 4 alertas de VIIRS 750 de 0,32 a 0,65 MW que `max` pierde** HECHA 2026-10-14 (#789, squash
+  `28d03ba0`, verificador PARCIAL con arreglos aplicados). Antes:
+  `loop/1.10-max-v750`, en verificación limpia): todas Muy Bajo; contra B la suma de errores baja de 400 a 90
+  (abril a agosto). Es contra B (sin Test 1), no contra producción. Texto original: (VERIFICADOR_DATOS D4): su clase
   según 0.2 decide si `max` en VIIRS 750 cumple el criterio de §1.2.
 
 - [ ] **1.11 Experimental** (bloqueado hasta que Nicolás entregue la cronología OVDAS de Chillán y las
@@ -182,10 +204,170 @@ y dos verificadores, 2026-10-09).
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
 | D-1 | Adoptar conectiva `max` en VIIRS 375 (criterio §1.2 por medir en 0.2) | `docs/S150_RESULTADO_MESES.md`, `docs/audit_s150/meta/AUDITOR_F2_NUMEROS.md` | pendiente | pendiente |
-| D-2 | Merge del arreglo del scraper Mirova-v1#19 (tarea 0.5) | pendiente | pendiente | pendiente |
-| D-3 | Marca de régimen en `store.py` (tarea 0.6) | pendiente | pendiente | pendiente |
+| D-2 | Merge del arreglo del scraper Mirova-v1#19 (tarea 0.5) | CI verde de Mirova-v1#21; 4 tests | Mirova-v1#21 | #783 |
+| D-3 | Marca de régimen en `store.py` (tarea 0.6) | 4 tests, 3 fallaban antes; suite 1706 | #785, tag `pre-s151-marca-regimen` | #786 |
+| D-4 | Alerta protegida: lectura A (alertas del scraper, 439 pasadas, recomendada) o B (todo VRP >= 1 MW, 992) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 13:07 UTC): vuelta 11, 0.4 completa, 1.5 con arreglos, 1.4 en diseño
+- 0.4c mergeada (#791, squash `fecc3eae`): la tarea 0.4 queda completa.
+- Verificador limpio de #790 (1.5): DESPACHABLE CON ARREGLOS. Cableado del probe, control C-P1 (puede fallar),
+  techo y los 268 reproducidos. Defecto que bloquea el sello: el criterio comparaba TASAS (Wilson x/28 contra
+  y/268) y daba VALE rescatando 28 con 225 negativos nuevos (2.031 de 2.461 combinaciones VALE suman más
+  falsos que rescates), contra la regla 2 del criterio de victoria; y no aplicaba la regla 1. Más: cobertura
+  completa no exigida, job verde sin datos con un `vols` mal escrito, y límites no dichos (la variante de nube
+  no separa nube de cumbre fría: anillo bajo 255 K en 56 de 339 pasadas). Arreglos devueltos a su agente.
+- 1.4 (pre-registro de `vrp_max`): agente diseñando en `VRP-Chile-loop-14`, sin despachar.
+- Run de Chillán 38560317428: 5 de 10 jobs en verde.
+- Próximo paso: arreglos de #790 y su entrada como pre-registro a sellar; PR de 1.4 y su verificador.
+
+### 2026-10-14 (servidor 12:57 UTC): vuelta 10, 0.3 y 1.10 mergeadas, 0.4c y 1.5 en PR
+- 0.3: arreglos del verificador aplicados por su agente (criterio con D-4 y atribución del corte de 1 MW,
+  puntero AUDIT_S149 §3, H_S27_1/D30 iguales a P3, ficha SDA, A82 marcada, cita nueva en G8). Revisado por mí:
+  0 guiones, criterio de MISSION correcto. CI verde, #784 mergeado.
+- 1.10: verificador PARCIAL: la suma 400 contra 90 es exacta pasada por pasada y no hay positivas que sólo F
+  publique; con la lectura B, F pierde una pasada protegida de OTRO objeto (Chillán VIIRS 750 2026-07-23 06:30,
+  FALSO_POSITIVO de MIROVA de 1,52 MW a 29,6 km; B publicaba 0,051 MW a 4,2 km). Tablas por pasada versionadas
+  (CSV de 400 KB) y cuenta por pasada. #789 mergeado.
+- 0.4c: A119 en CLAUDE.md y el hito de enero corregidos con las cifras de VERIFICADOR_DATOS D5/D6. PR #791.
+- 1.5: los 268 negativos se reconstruyen exactos (271 hoy, por el cargador de #778). La magnitud queda SIN MEDIR:
+  los records no guardan vecinos no alertados y no hay gránulos de VIIRS 750 en disco. Techo: con cualquier
+  magnitud positiva publicarían los 268 negativos y las 28 alertas (el tablero no corta bajo 10 MW); decide el
+  signo del contraste cráter contra vecinos. Probe de sólo lectura (339 gránulos, tres brazos) escrito y SIN
+  despachar, PR #790, en verificación limpia; después va a la cola como pre-registro a sellar.
+- Run de Chillán 38560317428: 2 jobs terminados en verde, el resto corriendo o en cola.
+- Próximo paso: merge de #791 con CI; veredicto de #790 y su entrada en la cola de sellos.
+
+### 2026-10-14 (servidor 12:47 UTC): vuelta 9, 1.10 medida y 1.3 resuelta sin A/B
+- 1.10: `experiments/_s151_max_v750/suma_de_errores.py` lee las salidas del evaluador de abril a agosto
+  (control B, brazo F): suma de errores 400 contra 90; F deja de publicar 4 alertas (todas Muy Bajo, D4) y apaga
+  unas 300 publicaciones en negativos limpios. Compara contra B, no contra producción: es evidencia para una
+  decisión combinada (sin Test 1 + `max`), no una adopción. Verificador limpio lanzado.
+- 1.3: `experiments/_s151_d22_techo/techo.py`: las 14 pérdidas confiables del camino D22 son Muy Bajo de 0,03 a
+  0,08 MW (9 en 0,05 o menos, zona NONE del banner). Techo 14 pasadas (13 noches) contra 271 negativos que
+  podría reabrir: sólo mejora si reabre menos del 5,2 %. No se gasta el A/B; la pregunta va a la sonda (1.2).
+  PR #788. Marca en el pre-registro suspendido.
+- Agentes: arreglos de 0.3 (#784), medición 1.5 (D25 en disco) y verificador de 1.10, los tres en curso.
+- Run de Chillán 38560317428 en curso.
+- Próximo paso: CI de #788 y merge; veredictos de los agentes.
+
+### 2026-10-14 (servidor 12:44 UTC): vuelta 8, 1.9 cerrada, 0.3 con arreglos, 1.5 delegada
+- 1.9: en la tabla `latest.php` MIROVA lista las dos bandas VIIRS de la misma pasada en 13.964 casos (todos los
+  meses; control: misma hora al segundo en el 100 %) y alerta en las dos a la vez en 246 (sólo 375: 947; sólo
+  750: 32). La preferencia por 750 m de Coppola 2026 es del archivo OSF (A105), no del NRT: no es palanca de
+  la réplica. Marca en F-07. CI verde, #787 mergeado.
+- Verificador limpio de #784 (0.3): MERGEABLE CON ARREGLOS. Reprodujo todos los números (1.565 topados, 343
+  sobre 5 MW, 32.401 de 42.929 en modo de un píxel, 7 de Chillán, 37 diurnas), 14 marcas con evidencia correcta,
+  G8 intacto, frontend sólo comentarios. Arreglos: el criterio de MISSION no menciona D-4 ni que el corte de
+  1 MW es del loop; puntero AUDIT_S149 §0 que es §3 l. 72; contradicción H_S27_1/D30 contra P3; dos frases de
+  la ficha que dicen más de lo medido; A82 sin marca. Devueltos al agente de 0.3.
+- 1.5 (D25 sobre los 268 negativos de VIIRS 750) delegada a un agente en `VRP-Chile-loop-15`.
+- Falta propia: el script de 1.9 se escribió con un heredoc (prohibido por §1.7). El archivo quedó bien y se
+  verificó; desde ahora los archivos se escriben sólo con Write y Edit.
+- Run de Chillán 38560317428 en curso.
+- Próximo paso: revisar los arreglos de #784 y mergear; resultado de 1.5; 0.4 (c) tras 0.3.
+
+### 2026-10-14 (servidor 12:35 UTC): vuelta 7, 0.6 a la cola y 0.3 entregada por su agente
+- 0.6: `append_record` escribe `regimen = {perfil, codigo_sha, origen}` (GITHUB_SHA en Actions, git en local).
+  Tag `pre-s151-marca-regimen` antes del primer edit; test con 3 de 4 fallando antes; suite 1706. PR #785 NO
+  se mergea (store.py, §1.1); issue #786 (D-3).
+- 0.3: el agente abrió #784 (MISSION con el criterio de victoria y marcas P2 a P5, CLAUDE.md A23/A85/glosario,
+  encabezados D8', D9, D21, D27 y nota en D30, ficha SDA v1.7, INDEX con 14 documentos, comentarios del
+  frontend; contrato G8 de la l. 1473 a la 1483). Suite 1687 en su worktree. Recalculó: 1.565 cúmulos topados en
+  5,0 (277 summit), 343 sobre 5 MW. No hizo: "1.403" desde los datos (es un comentario, no texto visible),
+  P1 (memoria fuera del repo), tooltip "probablemente artefacto" (texto del operador, queda para Nicolás).
+  Verificador limpio lanzado sobre #784.
+- Run de Chillán 38560317428: primera tanda de 6 brazos corriendo, 4 en cola.
+- Próximo paso: veredicto del verificador de #784; mientras, tarea 1.5 (D25 sobre los negativos de VIIRS 750
+  en disco, sin correr nada).
+
+### 2026-10-14 (servidor 12:29 UTC): vuelta 6, tarea 0.5 lista para el sí de Nicolás
+- `scraper.py` de Mirova-v1: `numero_tabla` acepta sólo comas de miles bien formadas (una coma decimal "0,5"
+  levanta error en vez de leerse 5) y una fila ilegible se salta con ADVERTENCIA en la bitácora en vez de botar
+  el ciclo. Test nuevo `tests/test_numero_tabla.py`: 4 de 4 contra el arreglo, falla contra el original.
+  Rama y commits por la API (sin clonar). PR Mirova-v1#21, CI verde completo (run 38563906601). Issue #783.
+- El clasificador de permisos bloqueó ejecutar en local código bajado de Mirova-v1 (después de la corrida de
+  tests): no se vuelve a correr código de otro repo en local; la prueba la da su CI.
+- 0.3 sigue con su agente. Run de Chillán 38560317428 en curso.
+- Próximo paso: PR de 0.3 y su verificador; luego 0.4 (c) y 0.6 (marca de régimen, va a la cola por §1.1).
+
+### 2026-10-14 (servidor 12:24 UTC): vuelta 5, 0.2 verificada y mergeada, 0.4 (a, b, d) mergeada, 0.3 en curso
+- Verificador limpio de #780: regla de 1 MW CONFIRMADA, pero (i) los conteos eran filas: por pasada son 2.280
+  alertas y **439 protegidas** (377 pasadas están en consolidado y OCR); (ii) Coppola 2016a fig. 11 se
+  contradice (pie: Low bajo 1 MW; figura: bajo 10 MW, banner "VERY HIGH" con 6.797 MW), comprobado sobre la
+  imagen renderizada: el corte lo sostiene el banner de hoy; (iii) los controles no llamaban a la función;
+  (iv) lectura B: MIROVA marca LOW pasadas que el scraper llama FALSO_POSITIVO (992 pasadas con VRP >= 1 MW).
+  Todo corregido en #780; D-4 a Nicolás (issue #782, etiqueta `decision-nicolas` creada). CI verde, merge.
+- 0.4: (a) `evaluar_ventana.py` deja pasar el stderr (aviso A119); (b) hitos de NOAA-21 (2026-04-09, cifra
+  heredada de `AUDIT_S149.md:56`) y de Suomi NPP (2026-10-09, Mirova-v1#20): septiembre ya no es ventana
+  limpia y los dos tests de S149 se actualizaron a eso; (d) `ENABLE_TEST1_NULL_CORRECTED` fuera de las colas,
+  con guard. Tests que fallaban antes; suite 1695; CI verde; #781 mergeado. Sin verificador limpio: son
+  arreglos de instrumento con su test, no resultados.
+- 0.3 delegada a un agente en el worktree `VRP-Chile-loop-03`, rama `loop/0.3-propagacion-a113` (abre PR, no
+  mergea). Run de Chillán 38560317428 en curso.
+- Próximo paso: PR de 0.3 con su verificador limpio; después 0.4 (c) y 0.5 (scraper Mirova-v1#19).
+
+### 2026-10-14 (servidor 12:10 UTC): vuelta 4, tarea 0.2 implementada, PR #780 en verificación
+- La hipótesis del plan (nivel agregado de la página) queda REFUTADA. La columna `Clasificacion Mirova` la
+  calcula el scraper desde el VRP de la pasada (Mirova-v1 `volcanes.py:63`); ya estaba en S139 H110 y no llegó
+  al plan (A50). Coherente con el VRP desde febrero (consolidado) y julio (OCR); antes, escalas retiradas.
+- Cortes de MIROVA: Coppola 2016a fig. 11 (p. 16, página renderizada): 1, 10, 100, 1.000 MW, nombres corridos
+  un nivel respecto del sitio actual. Banner `Nivel_Anomalia_MIROVA` (único campo de MIROVA): por pasada,
+  VERY LOW 0,05 a 0,91 MW (107), LOW 1,00 a 8,00 MW (20), NONE 0,02 a 0,05 MW (9 alertas del scraper).
+- Definición: alerta protegida = alerta (CONS u OCR) con VRP >= 1 MW recalculado. Unión: 536 de 2.657
+  alertas (VIIRS 375 254, VIIRS 750 189, MODIS 93); leyendo la columna serían 764. Las dos lecturas del
+  criterio dan el mismo corte: no queda decisión para Nicolás. Consecuencia para 1.10: las 4 alertas de
+  VIIRS 750 de 0,32 a 0,65 MW son "Muy Bajo", suma de errores, no veto.
+- Suite local 1694 passed. Verificador limpio lanzado en worktree aparte. Run de Chillán 38560317428 en curso.
+- Próximo paso: veredicto del verificador sobre #780 y merge si CI verde; luego tarea 0.3.
+
+### 2026-10-14 (servidor 11:58 UTC): vuelta 3, auto-audit comprobado y prueba de Chillán despachada
+- `audit-weekly` (run 38558346837) verde: el paso de la unión tardó 11 min en GitHub (tope 25) y su commit
+  `f3b414213` pasó el `.gitignore`. Cierra lo que el verificador de #778 dejó SIN VERIFICAR.
+- Tarea 1.1: `_congelado_ndc` (bajado el 08-oct, después de la caída del 06-oct) contra la unión, ventana
+  2026-09-14 a 2026-10-07: 0 filas de más, 0 tipos distintos, le faltan 12 (11 RUTINA y 1 ALERTA_TERMICA, de
+  Isluga, Chaitén, Láscar, PCC, Tupungatito y Villarrica), **ninguna de Nevados de Chillán**. La prueba sólo
+  evalúa Chillán: no se re-congela. Los 10 perfiles existen en `main`; sin otros A/B corriendo.
+- Despacho: run 38560317428, `NevadosDeChillan`, 2026-09-14 a 2026-10-07, 10 brazos, control
+  `_s146_ab_control`, desde `main`, `preregistro_aprobado=si` (aprobado por Nicolás el 2026-10-08).
+- Nicolás preguntó (2026-10-14) si el loop necesitaba su autorización para seguir: no, salvo los sellos, la
+  cronología OVDAS y los merges de otro repo. El loop no espera runs largos: avanza con la próxima tarea libre.
+- Próximo paso: tarea 0.2 mientras corre el run; el run se evalúa con `medir_ndc.py` cuando termine.
+
+### 2026-10-14 (servidor 11:45 UTC): vuelta 2, tarea 0.1 verificada, mergeada y `main` en verde
+- Verificador con contexto limpio sobre #778 (informe en el temporal de la sesión, resumido acá): CONFIRMA 1, 2,
+  3, 4, 6 y 7. Ubicó las cinco caídas commit a commit por el salto de tamaño (21-ene 07:35, 23-abr 14:38,
+  25-ago 18:44, 26-ago 18:37, 06-oct 01:42 UTC): siempre un commit que duplica filas y el siguiente que
+  deduplica perdiendo claves. Las pérdidas exactas coinciden con las 794 del muestreo diario, ninguna fila nació
+  el mismo día de su caída, y el tipo guardado es el del commit previo a cada caída (0 diferencias). PARCIAL en
+  5: la alarma de atraso dependía de un push humano y las 318 llamadas no tenían reintento.
+- Arreglado en #778 antes del merge: issue automático si `--union-historica` falla en `audit-weekly`, y
+  reintentos con test. CI del PR verde (run 38557916419), merge squash `46947bda`, `main` verde (run 38558333297).
+- `audit-weekly` despachado sobre `main` (run 38558346837) para medir en GitHub la duración del paso de la
+  unión y que el commit pase el `.gitignore` (el verificador lo dejó SIN VERIFICAR).
+- Próximo paso: revisar ese run; después, tarea 1.1 (comprobar `_congelado_ndc` contra la unión y despachar la
+  prueba de Chillán) o 0.2 si 1.1 se traba. Desde ahora los PR del loop se pueden mergear con CI verde (§2.6).
+
+### 2026-10-14 (servidor 10:47 a 11:20 UTC): vuelta 1, tarea 0.1 implementada, PR #778 abierto
+- Paradas: NRT verde 09:17 UTC; disco 22 GB libres; sin issues de alerta salvo #762; `main` rojo sólo por el
+  guard de la tarea 0.1 (run 38549663327: 1 failed, 1670 passed). Rama `loop/activo` creada desde `main`.
+- Hallazgo de instrumento: Mirova-v1 pesa 13 GB y el consolidado tiene unas 285 versiones por día (17.700 sólo
+  desde el 13-ago), así que no se puede bajar cada versión. Las 207 filas del 06-oct son viejas (fechas de
+  satélite de 2026-01-12 a 2026-10-05), por eso alcanza con la última versión de cada día.
+- Resultado (`data/mirova_reference/union_historica/procedencia.json`): 277 versiones diarias, la historia
+  arranca alrededor del 2026-01-10. 794 filas perdidas (737 RUTINA, 40 ALERTA_TERMICA, 17 FALSO_POSITIVO), en
+  cinco caídas cuyo último día con las filas es 20-ene (37), 22-abr (162), 24-ago (202), 25-ago (186) y
+  05-oct (207). El respaldo de abril aporta **0** filas sobre snapshot + historia (antes aportaba 21 alertas
+  sobre el snapshot solo). Cero fantasmas a 15 min o menos.
+- Guard S139: pasa de "1 a 17 alertas del respaldo" a "0 alertas" (más estricto); la alarma de caídas futuras
+  pasa a un test de atraso de la unión (8 días) y a `audit-weekly.yml`, que la regenera con el snapshot.
+- Suite local 1688 passed, 4 skipped, 2 xfailed. PR #778, rama `loop/0.1-union-historica`.
+- Abierto, sin resolver: 372 claves cambiaron de `Tipo_Registro` entre versiones (para las vivas gana la de
+  hoy, como antes); el OCR no se recorrió.
+- Próximo paso: verificador con contexto limpio sobre #778 (lanzado en un worktree aparte) y CI de #778. Si
+  los dos dan bien, merge (es la tarea que pone verde `main`) y se marca 0.1. Después, tarea 1.1 (comprobar
+  `_congelado_ndc` contra la unión) o 0.2.
 
 ### 2026-10-14 (servidor 10:22 UTC): plan actualizado y #777 mergeado por decisión de Nicolás
 - Nicolás autorizó mergear #777 con el CI rojo heredado de `main` (sólo el guard de la tarea 0.1).
