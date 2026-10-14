@@ -168,8 +168,11 @@ y dos verificadores, 2026-10-09).
   la referencia de 0.1; verificador limpio; sello de Nicolás; despacho.
 
 - [~] **1.4 A/B de anomalía mayor (`vrp_max`) contra `vent_anchored`** PRE-REGISTRO en `main` (#794, `1795676b`,
-  verificado con arreglos); ESPERA a Nicolás (D-6, #795): A1 casi inerte (el flag no llega a la Regla D ni al
-  ancla), A2 necesita código (A45) y P5 prevé un veto con la lectura A. (decisión de Nicolás para la réplica).
+  verificado con arreglos). D-6 DECIDIDA 2026-10-14: SIGUE (Nicolás: la réplica debe reproducir también las
+  anomalías lejanas para demostrar fidelidad a la metodología; distancia similar más TIF bastan para identificar
+  el objeto). Paso 1 en curso: estudio con TIF y distancia de qué objeto informa MIROVA y si es la mayor (rama
+  `loop/1.4-estudio-tif`); paso 2: código de A2 con tag y PR sin merge (A45); paso 3: A/B con R4 como métrica
+  central. Antes: A1 casi inerte (el flag no llega a la Regla D ni al ancla) y P5 prevé un veto con la lectura A.
   Universo de comparación: 359 detecciones lejanas nocturnas de MIROVA, no 858 (VERIFICADOR_DATOS D2); la
   clasificación NULO la escribe el scraper. Medir distancias desde el cráter y no desde el catálogo
   (`process_viirs.py:754`, AUDITOR_F1). Pre-registro, verificador, sello, despacho.
@@ -219,11 +222,24 @@ y dos verificadores, 2026-10-09).
 | D-3 | Marca de régimen en `store.py` (tarea 0.6) | 4 tests, 3 fallaban antes; suite 1706 | #785, tag `pre-s151-marca-regimen` | #786 |
 | D-4 | ~~Alerta protegida: lectura A o B~~ **DECIDIDA: A** (Nicolás, 2026-10-14; propagada en #808) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 (cerrado) |
 | D-5 | Sello del probe de D25 en VIIRS 750 (tarea 1.5); pilotear Tupungatito con 10 pasadas | `experiments/_s151_d25_v750_disco/README.md`, verificador limpio con arreglos | #790 | #793 |
-| D-6 | A/B de anomalía mayor: sello de A1 y si se implementa el código de A2 (recomendación: esperar D-4) | `experiments/_s151_ab_vrp_max/PREREGISTRO.md`, verificador limpio con arreglos | #794 | #795 |
+| D-6 | ~~A/B de anomalía mayor~~ **DECIDIDA: SIGUE** (Nicolás, 2026-10-14; estudio TIF primero) | `experiments/_s151_ab_vrp_max/PREREGISTRO.md`, verificador limpio con arreglos | #794 | #795 |
 | D-7 | ~~Sello del A/B de F y K~~ **APROBADO** (Nicolás, 2026-10-14); V1 en curso, run 38639658446 | `experiments/_s151_prereg_fk_11/PREREGISTRO.md`, verificador limpio con arreglos | #797 | #798 |
 | D-8 | Sello del A/B reducido de la caja (D1/D2 con K/KC, ~35 min; V1 con B/BC, ~6 h) | `experiments/_s151_prereg_caja/PREREGISTRO.md`, verificador limpio con arreglos | #800 | #801 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (servidor 22:09 UTC): vuelta 31, D-6 = sigue; disco liberado; V1 arrancando
+- Nicolás rechazó cerrar la 1.4: la réplica existe para demostrar fidelidad a la metodología de MIROVA, y sin las
+  anomalías lejanas no se puede saber si hacemos lo que ellos hacen ni defender mejoras; la distancia similar
+  permite suponer el mismo objeto y el TIF muestra los píxeles. Mi recomendación de cerrarla razonaba sólo desde el
+  criterio de victoria (lectura A) y dejaba fuera la fidelidad: corregida. Registrado en #795.
+- Lanzado un agente (worktree `VRP-Chile-tif`) para el paso 1: con TIF de `../mirova-tif-archive` (lectura local,
+  sin pull) y distancia, qué objeto informa MIROVA cuando hay calor lejano, si es la mayor, y el caso Láscar
+  2026-10-01 05:18 (MIROVA dio el cráter mientras nuestro píxel más energético estaba a 19,7 km).
+- Disco: había bajado a 8,9 GB por ~9 GB de carpetas temporales de las pruebas de evaluadores en mi scratchpad;
+  borradas (rutas literales, tras un bloqueo del chequeo de seguridad por usar variables): 18 GB libres.
+- V1 (run 38639658446): los jobs ya empezaron en `ubuntu-24.04` (la cola era espera de máquinas; GitHub Actions
+  operacional), pero el run aún figura `queued`; V2a sigue sin encolar hasta verlo `in_progress`.
 
 ### 2026-10-14 (servidor 21:22 UTC): vuelta 30, Nicolás decide D-4 = A y aprueba D-7; V1 despachado tras probar todo
 - Nicolás en la conversación: "A y Si, recuerda probar todo lo necesario". D-4: lectura A (issue #782 comentado
