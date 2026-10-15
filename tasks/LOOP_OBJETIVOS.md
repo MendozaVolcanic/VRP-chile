@@ -280,6 +280,13 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 06:48 UTC (vuelta 53): disco bajó a 12 GB; liberado a 26 GB
+- El disco cayó de 22 a 12 GB libres en tres horas: eran salidas de autopruebas de los agentes y verificadores
+  (`probar_*`, `tmp_probar`, `prueba`, 2,2 GB cada una) en el temporal. Borradas sólo esas carpetas regenerables
+  de verificaciones ya terminadas; quedan informes y scripts. 26 GB libres. Regla para los próximos agentes: que
+  sus autopruebas escriban en una carpeta que borren al terminar.
+- NRT verde 03:20 UTC. F/K V1 20 de 44. Caja D1, tercer intento del brazo caja en curso.
+
 ### 2026-10-15 ~06:00 UTC (vuelta 52): #822 en main; caja D1 sigue despareja por NASA
 - #822 (infraestructura del A/B diurno) mergeado tras arreglos: 7 de 7 mutaciones atrapadas, control del nulo que
   falla con el nulo roto (se compara contra la fracción que el propio nulo deja sobre su p95, no un 5 % fijo, porque
