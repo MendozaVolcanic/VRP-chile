@@ -144,18 +144,29 @@ coordenada nominal darían otros (43 de 135): puede fallar; C3 ningún píxel en
 ```
 ONCE='["Lascar","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","NevadosDeChillan","Llaima","Villarrica","Copahue","PuyehueCordonCaulle","Chaiten"]'
 DOS='["_s149_ab_sin_test1_b22_max","_s151_ab_sin_test1_b22_max_caja"]'
-gh workflow run reproc-s146-ab-sin-test1.yml --ref main -f preregistro_aprobado=si -f start=2026-03-14 -f end=2026-03-27 -f vols='["Lascar"]' -f brazos="$DOS" -f control=_s149_ab_sin_test1_b22_max
-gh workflow run reproc-s146-ab-sin-test1.yml --ref main -f preregistro_aprobado=si -f start=2026-06-10 -f end=2026-06-10 -f vols='["Isluga"]' -f brazos="$DOS" -f control=_s149_ab_sin_test1_b22_max
-gh workflow run reproc-s146-ab-sin-test1.yml --ref main -f preregistro_aprobado=si -f start=2026-08-29 -f end=2026-10-08 -f vols="$ONCE" -f brazos='["_s146_ab_sin_test1","_s147_ab_sin_test1_caja"]' -f control=_s146_ab_sin_test1
+gh workflow run reproc-s151-ab-caja.yml --ref main -f preregistro_aprobado=si -f start=2026-03-14 -f end=2026-03-27 -f vols='["Lascar"]' -f brazos="$DOS" -f control=_s149_ab_sin_test1_b22_max
+gh workflow run reproc-s151-ab-caja.yml --ref main -f preregistro_aprobado=si -f start=2026-06-10 -f end=2026-06-10 -f vols='["Isluga"]' -f brazos="$DOS" -f control=_s149_ab_sin_test1_b22_max
+gh workflow run reproc-s151-ab-caja.yml --ref main -f preregistro_aprobado=si -f start=2026-08-29 -f end=2026-10-08 -f vols="$ONCE" -f brazos='["_s146_ab_sin_test1","_s147_ab_sin_test1_caja"]' -f control=_s146_ab_sin_test1
 ```
+
+**Cambio de infraestructura (S151, después de la aprobación D-8 del 2026-10-15, issue #801).** Los comandos de arriba
+despachaban por `reproc-s146-ab-sin-test1.yml`; ahora van por `reproc-s151-ab-caja.yml`, copia de aquel con su propio
+grupo de concurrencia. Ventanas, brazos, controles y criterio **no cambian**: el reproceso, la línea `FLAGS_BRAZO`, la
+cuenta de cobertura y el guard son los mismos pasos. La razón es de cola: GitHub guarda un solo run pendiente por grupo,
+y el grupo `s146-ab-sin-test1` lo ocupa el A/B de F y K (V1 corriendo, V2a pendiente); un despacho de la caja ahí
+habría desplazado a V2a. Lo que sí cambia es dónde quedan las salidas: rama `s151-ab-caja/<run>`, con el árbol bajo
+`experiments/_s151_prereg_caja/salidas/<run>/` (`<brazo>/<volcán>.json` y `logs/<brazo>_<volcán>.log`), y artefactos
+`s151caja-*`. `evaluar_caja.py` no depende del nombre del workflow ni de la rama: se apunta con
+`--raiz experiments/_s151_prereg_caja/salidas/<run> --logs experiments/_s151_prereg_caja/salidas/<run>/logs` sobre un
+checkout de esa rama (o una copia de la carpeta).
 
 **Desde `main` con este PR mergeado** (el perfil de KC y la línea de `FLAGS_BRAZO` tienen que estar en `main`; un run
 despachado antes deja los brazos ROTOS por falta de la clave, y eso es lo correcto). Autentica sólo con
-`EARTHDATA_TOKEN`. **Grupo de concurrencia**: `s146-ab-sin-test1` corre uno a la vez y guarda **un solo run
-pendiente**: un despacho nuevo desplaza al que espera. El A/B de F y K (#798, unas 28 h) comparte el grupo. Regla:
-antes de cada despacho, `gh run list --workflow reproc-s146-ab-sin-test1.yml --json status -q
-'[.[]|select(.status!="completed")]|length'` tiene que dar **0**; así nadie desplaza a nadie y nunca hay más de dos A/B
-vivos. Orden: D1 y D2 primero (son cortos y deciden el veto), V1 después.
+`EARTHDATA_TOKEN`. **Grupo de concurrencia**: `s151-ab-caja` corre uno a la vez y guarda **un solo run pendiente**: un
+despacho nuevo desplaza al que espera, también entre D1, D2 y V1. El A/B de F y K va en su propio grupo
+(`s146-ab-sin-test1`) y corre en paralelo, así que hay a lo más dos A/B vivos. Regla: antes de cada despacho,
+`gh run list --workflow reproc-s151-ab-caja.yml --json status -q '[.[]|select(.status!="completed")]|length'` tiene
+que dar **0**. Orden: D1 y D2 primero (son cortos y deciden el veto), V1 después.
 
 **Duración** (`experiments/_s151_prereg_fk_11/duracion_runs_salida.txt`: 2,20 min por día de ventana y job sin Test 1;
 el job más lento, 1,42 veces la mediana): D1, 2 jobs de ~31 min; D2, 2 jobs de minutos (**~35 min las dos**); V1, **22

@@ -1,0 +1,287 @@
+name: "A/B S151: la caja de 5 x 5 km (D18), sin el Test 1 integrado"
+
+# POR QUE EXISTE ESTE ARCHIVO (S151, tarea 1.7, infraestructura). Es copia de
+# reproc-s146-ab-sin-test1.yml con lo minimo cambiado: nombre, grupo de concurrencia, prefijo de
+# artefactos, rama y directorio de salida, y los textos y defaults de las entradas. La razon es
+# de cola, no de metodo: GitHub guarda UN solo run pendiente por grupo de concurrencia, y en el
+# grupo s146-ab-sin-test1 corre el A/B de F y K. Despachar la caja por ese workflow desplazaria
+# al run de F y K que espera. Con grupo propio los dos A/B corren en paralelo (regla del loop:
+# hasta 2 A/B vivos). Los pasos de reproceso, cableado, cobertura y guard son los mismos.
+#
+# EL FENOMENO. La caja de 5 x 5 km centrada en el crater es la region de cumbre del paper
+# (ROI1, D18): lo que cae en la corona (circulo de inner_radius_km menos la caja) deja de
+# tratarse como cumbre y pasa al umbral estricto. Este A/B mide si eso apaga publicaciones donde
+# MIROVA no vio nada sin perder sus alertas protegidas. Corre sin el Test 1 integrado, porque
+# con el encendido el Test 1 publica por su cuenta y satura la metrica (A114).
+#
+# BRAZOS (perfiles aislados, cada uno con su data_subdir; A47), segun la ventana:
+#   V1  _s146_ab_sin_test1  contra  _s147_ab_sin_test1_caja            (mecanismo)
+#   D1, D2  _s149_ab_sin_test1_b22_max  contra  _s151_ab_sin_test1_b22_max_caja  (veto)
+#
+# NO DESPACHAR sin el pre-registro aprobado: experiments/_s151_prereg_caja/PREREGISTRO.md (§5
+# fija ventanas, brazos y comandos). El candado de abajo (preregistro_aprobado) impide que este
+# workflow corra sin ese "si" explicito.
+#
+# NO COMMITEA A main. Cada brazo escribe en su data_subdir aislado; las salidas salen por dos
+# caminos a la vez, porque los artefactos caducan a los 90 dias y en este proyecto ya se perdieron
+# salidas asi: (a) artefacto por job, (b) rama propia de la corrida, s151-ab-caja/<run_id>, con
+# los archivos bajo experiments/_s151_prereg_caja/salidas/<run_id>/ (<brazo>/<volcan>.json y
+# logs/<brazo>_<volcan>.log, el mismo arbol que lee evaluar_caja.py con --raiz y --logs).
+#
+# A43: la clave "on" va entre comillas (Norway Problem de YAML 1.1).
+# A71: se autentica SOLO con EARTHDATA_TOKEN. El par usuario y clave de los secretos esta vencido
+#      y su reintento de login BLOQUEO la cuenta 10 minutos. Sin token, el job falla al instante.
+# A15: timeout >= 1,3 veces la duracion esperada (1,5 a 3 h por job) y muy por debajo del tope
+#      duro de 6 h de GitHub.
+"on":
+  workflow_dispatch:
+    inputs:
+      preregistro_aprobado:
+        description: "Escribe si SOLO con experiments/_s151_prereg_caja/PREREGISTRO.md aprobado por Nicolas (D-8, issue #801)"
+        required: true
+        default: "no"
+      start:
+        description: "Inicio YYYY-MM-DD (por pre-registro: V1 2026-08-29, D1 2026-03-14, D2 2026-06-10)"
+        required: true
+        default: "2026-08-29"
+      end:
+        description: "Fin YYYY-MM-DD inclusive (por pre-registro: V1 2026-10-08, D1 2026-03-27, D2 2026-06-10)"
+        required: true
+        default: "2026-10-08"
+      vols:
+        description: 'Lista JSON de volcanes. La lista corta sirve para REPETIR un job que quedo con pasadas de menos por un corte de NASA'
+        required: true
+        default: '["Lascar","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","NevadosDeChillan","Llaima","Villarrica","Copahue","PuyehueCordonCaulle","Chaiten"]'
+      brazos:
+        description: 'Lista JSON de brazos (V1: B y BC; D1 y D2: K y KC, ver §5 del pre-registro)'
+        required: true
+        default: '["_s146_ab_sin_test1","_s147_ab_sin_test1_caja"]'
+      control:
+        description: 'Brazo que hace de control al contar cobertura en recolectar (V1: _s146_ab_sin_test1; D1 y D2: _s149_ab_sin_test1_b22_max)'
+        required: true
+        default: "_s146_ab_sin_test1"
+
+# No entra al grupo push-main: este workflow no pushea a main. Se serializa consigo mismo, en un
+# grupo PROPIO y distinto del de reproc-s146-ab-sin-test1.yml: GitHub guarda un solo run pendiente
+# por grupo, y compartirlo con el A/B de F y K haria que un despacho desplazara al otro.
+concurrency:
+  group: s151-ab-caja
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  reproc:
+    if: github.event.inputs.preregistro_aprobado == 'si'
+    runs-on: ubuntu-24.04  # S150: fijado; ubuntu-latest migra a 26.04 entre 2026-10-19 y 2026-11-19 (runner-images #14748). Cambiar despues de probar pyhdf en 26.04
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      # Un volcan y un brazo por job, cada uno escribiendo en su propio data_subdir: dos procesos
+      # sobre el mismo directorio corrompen los JSON (A47). max-parallel 6 deja lugar al cron NRT
+      # dentro del tope de 20 jobs concurrentes y no satura a NASA.
+      max-parallel: 6
+      matrix:
+        volcano: ${{ fromJSON(github.event.inputs.vols) }}
+        profile: ${{ fromJSON(github.event.inputs.brazos) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Credenciales presentes (un secreto ausente se resuelve a string vacio, no a error)
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "$EARTHDATA_TOKEN" ]; then
+            echo "::error::EARTHDATA_TOKEN vacio. Sin token no se mide nada, y el login por usuario y clave con la credencial vencida bloquea la cuenta (A71). No se reintenta."
+            exit 1
+          fi
+          echo "credenciales presentes"
+
+      - name: Dependencias
+        run: |
+          set -euo pipefail
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+
+      - name: El brazo LEE lo que declara (y escribe donde declara)
+        env:
+          VRP_PROFILE: ${{ matrix.profile }}
+        run: |
+          set -euo pipefail
+          python -c "import pipeline.profile as p; \
+            print('brazo', p.PROFILE_NAME, \
+            '| test1_path', p.ENABLE_TEST1_PATH, \
+            '| prioridad_debil', p.ENABLE_TEST1_PRIORITY_WEAK_CLUSTER, \
+            '| conectiva_prosa', p.ENABLE_TESTS_23_PROSE_BRANCH, \
+            '| caja_roi1', p.ENABLE_ROI1_BOX_PAPER, \
+            '| modis_b22', p.ENABLE_MODIS_B22_PRIMARY, \
+            '| etiqueta_modis_cumulo', p.ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER, \
+            '| tope_d9_mw', p.PATH_D_ONLY_CAP_MW, \
+            '| sensores', p.SENSOR_MODIS, p.SENSOR_VIIRS_375, p.SENSOR_VIIRS_750, \
+            '| subdir', p.DATA_SUBDIR); \
+            assert p.DATA_SUBDIR == p.PROFILE_NAME, 'el brazo escribiria fuera de su subdir'"
+
+      - name: Reproceso del brazo
+        env:
+          # Solo el token (A71). Ni EARTHDATA_USERNAME ni EARTHDATA_PASSWORD entran al entorno.
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          # Las entradas viajan por env y NO se interpolan dentro del run (S128).
+          ARM_START: ${{ github.event.inputs.start }}
+          ARM_END: ${{ github.event.inputs.end }}
+          ARM_PROFILE: ${{ matrix.profile }}
+          ARM_VOLCANO: ${{ matrix.volcano }}
+        timeout-minutes: 300
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          mkdir -p logs
+          # S150 (verificador del pre-registro de NdC, N3): la primera linea del log deja escrito que flags
+          # LEYO este job, para que el evaluador compruebe el cableado de cada brazo desde el artefacto.
+          # S151 (tarea 1.4): se agrega ENABLE_VENT_ANCHORED_CLUSTERING, el flag del A/B de la anomalia mayor.
+          # S151 (tarea 1.7): se agregan ENABLE_ROI1_BOX_PAPER y ROI1_BOX_HALF_KM, la caja de 5 x 5 km (D18).
+          VRP_PROFILE="$ARM_PROFILE" python -c "import json, pipeline.profile as p; print('FLAGS_BRAZO ' + json.dumps({k: getattr(p, k) for k in ('PROFILE_NAME', 'DATA_SUBDIR', 'ENABLE_TEST1_PATH', 'ENABLE_TESTS_23_PROSE_BRANCH', 'ENABLE_MODIS_B22_PRIMARY', 'ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER', 'PATH_D_ONLY_CAP_MW', 'ENABLE_TESTS_23_NO_BT_GATE_VIIRS375', 'ENABLE_VENT_ANCHORED_CLUSTERING', 'ENABLE_ROI1_BOX_PAPER', 'ROI1_BOX_HALF_KM')}))" | grep '^FLAGS_BRAZO ' > "logs/${ARM_PROFILE}_${ARM_VOLCANO}.log"
+          python scripts/run_pipeline.py \
+            --profile "$ARM_PROFILE" \
+            --volcano "$ARM_VOLCANO" \
+            --start "$ARM_START" \
+            --end "$ARM_END" \
+            --overwrite 2>&1 | tee -a "logs/${ARM_PROFILE}_${ARM_VOLCANO}.log"
+
+      - name: Subir el JSON del brazo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s151caja-${{ matrix.profile }}-${{ matrix.volcano }}
+          path: |
+            data/${{ matrix.profile }}/${{ matrix.volcano }}.json
+            logs/${{ matrix.profile }}_${{ matrix.volcano }}.log
+          retention-days: 90
+          if-no-files-found: error
+
+  recolectar:
+    needs: reproc
+    if: always() && github.event.inputs.preregistro_aprobado == 'si'
+    runs-on: ubuntu-24.04  # S150: fijado; ubuntu-latest migra a 26.04 entre 2026-10-19 y 2026-11-19 (runner-images #14748). Cambiar despues de probar pyhdf en 26.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Dependencias minimas
+        run: pip install pyyaml
+
+      - name: Bajar los artefactos de todos los brazos
+        uses: actions/download-artifact@v4
+        with:
+          pattern: s151caja-*
+          path: recolectado
+          merge-multiple: true
+
+      - name: Ordenar por brazo
+        env:
+          BRAZOS: ${{ github.event.inputs.brazos }}
+        run: |
+          set -euo pipefail
+          mkdir -p salidas
+          # download-artifact con merge-multiple deja los JSON bajo data/<brazo>/<volcan>.json
+          if [ -d recolectado/data ]; then cp -r recolectado/data/. salidas/; fi
+          if [ -d recolectado/logs ]; then mkdir -p salidas/logs && cp -r recolectado/logs/. salidas/logs/; fi
+          find salidas -name '*.json' | sort | sed -n '1,200p'
+
+      - name: COBERTURA PAREJA antes de mirar nada (A108)
+        env:
+          ARM_START: ${{ github.event.inputs.start }}
+          ARM_END: ${{ github.event.inputs.end }}
+          ARM_CONTROL: ${{ github.event.inputs.control }}
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          # S148. El control se elige por entrada y los brazos se derivan de lo que llego, en vez
+          # de una lista fija: con la lista fija los brazos nuevos (conectiva, caja) nunca se
+          # contaban, y un relanzamiento parcial (un solo brazo, para reparar un corte de NASA)
+          # dejaba el job en rojo porque su control no estaba en la corrida. Un rojo que no es
+          # falla del experimento ensena a ignorar los rojos. Si el control no vino, se avisa y
+          # la cobertura se cuenta en local contra el control de la corrida original (A108).
+          CONTROL="salidas/${ARM_CONTROL}"
+          if [ ! -d "$CONTROL" ]; then
+            echo "::warning::el control ${ARM_CONTROL} no esta en esta corrida (relanzamiento parcial): la cobertura NO se conto aca, contarla en local antes de evaluar"
+            echo "COBERTURA NO CONTADA: el control ${ARM_CONTROL} no esta en esta corrida" | tee salidas/cobertura.txt
+            exit 0
+          fi
+          ARGS=""
+          for d in salidas/_*; do
+            if [ -d "$d" ] && [ "$d" != "$CONTROL" ]; then ARGS="$ARGS --brazo $d"; fi
+          done
+          python experiments/_s146_ab_sin_test1/contar_pasadas.py \
+            --control "$CONTROL" \
+            --inicio "$ARM_START" --fin "$ARM_END" \
+            --out salidas/cobertura.json \
+            $ARGS 2>&1 | tee salidas/cobertura.txt
+
+      - name: Publicar las salidas en una rama propia de esta corrida
+        if: always()
+        env:
+          RAMA: s151-ab-caja/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -z "$(ls -A salidas 2>/dev/null)" ]; then
+            echo "::error::no llego ninguna salida: no hay nada que publicar"
+            exit 1
+          fi
+          git checkout -b "$RAMA"
+          mkdir -p "experiments/_s151_prereg_caja/salidas/${GITHUB_RUN_ID}"
+          cp -r salidas/. "experiments/_s151_prereg_caja/salidas/${GITHUB_RUN_ID}/"
+          git add -f "experiments/_s151_prereg_caja/salidas/${GITHUB_RUN_ID}"
+          git commit -m "S151 A/B de la caja de 5 x 5 km (D18): salidas crudas de la corrida ${GITHUB_RUN_ID} (no toca main)"
+          # Reintento propio. Este workflow NO pushea a main y por eso no entra al grupo
+          # push-main (ocupado ~50 min de cada 2 h por el NRT, que ademas desplaza al run
+          # encolado). El guard G4 de tests/test_guard_declarado_vs_efectivo_s131.py detecta
+          # "git push" por texto y no distingue rama de main: el reintento lo satisface, pero
+          # esta aca por su propia razon, que es que si el push se cae por red se pierde la
+          # unica copia durable (el artefacto caduca).
+          for attempt in 1 2 3 4 5; do
+            if git push origin "$RAMA"; then
+              echo "salidas en la rama $RAMA"
+              exit 0
+            fi
+            echo "push fallido, intento $attempt"
+            sleep $((attempt * 10))
+          done
+          echo "::error::no se pudo publicar la rama $RAMA en 5 intentos; queda el artefacto"
+          exit 1
+
+      - name: Subir tambien todo junto como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s151caja-todo
+          path: salidas
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Guard declarado contra efectivo (al final, sobre el arbol con los perfiles nuevos)
+        if: always()
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          pip install pytest
+          python -m pytest tests/test_guard_declarado_vs_efectivo_s131.py -q 2>&1 | tee salidas/guard.txt
