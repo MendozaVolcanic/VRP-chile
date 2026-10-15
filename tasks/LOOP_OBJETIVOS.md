@@ -216,8 +216,7 @@ y dos verificadores, 2026-10-09).
 **Agregadas por Nicolás el 2026-10-14 (en este orden; "puedes correr donde necesites": GitHub Actions incluido,
 siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
-- [~] **1.12 (estudio D) Las alertas de 0,05 MW o menos: ¿MIROVA las considera anomalía?** EN CURSO 2026-10-14
-  HECHA 2026-10-14 (#810, squash `f14b31ac`, verificada): en VIIRS 375 MIROVA llama NONE a 0,04 MW o menos y
+- [x] **1.12 (estudio D) Las alertas de 0,05 MW o menos: ¿MIROVA las considera anomalía?** HECHA 2026-10-14 (#810, squash `f14b31ac`, verificada): en VIIRS 375 MIROVA llama NONE a 0,04 MW o menos y
   VERY LOW a 0,06 o más; 155 alertas del scraper de 0,05 o menos. Cómo contarlas: decisión D-9 (#811).
   Por qué: el banner de MIROVA dice NONE en 9 pasadas que el scraper registra como alerta (0,02 a 0,05 MW,
   `docs/S151_CRITERIO_CLASE_MIROVA.md` §5), y 9 de las 14 pérdidas débiles de D22 están en ese rango. Si MIROVA no
@@ -275,6 +274,16 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-10 | ¿Abrir el día en la réplica? (1, recomendada: cablear rama diurna VIIRS apagada por flag con A45 y A/B diurno; 2: dejarlo cerrado y escribirlo en el criterio) | `experiments/_s151_alertas_diurnas/README.md`, verificado | #812 | #813 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-15 00:51 UTC (vuelta 44): propagación A113 de la 1.13 a D27 (#815)
+- Todas las tareas de la cola esperan un sello, una decisión o el A/B de F/K, así que la vuelta tomó la
+  propagación pendiente (A113): segunda marca S151 en D27 (`docs/MIROVA_DIVERGENCES.md`): el día es sobre todo
+  VIIRS 375 (94 pasadas protegidas; 40 usables bajo A119 contra 232 nocturnas), MIROVA sí procesa VIIRS de día
+  (Campus 2022 p. 16 y 17), la Tabla 1 diurna sólo está en `process_modis.py` (A118); y nota en el docstring de
+  `tests/test_daytime_modis.py`. El docstring de `store.py` queda para el PR de código de D-10 (archivo protegido).
+  Suite 1710 passed (worktree `VRP-Chile-d27`). PR #815, espera CI.
+- Estado: V1 de F/K con 6 de 44 jobs terminados a las 3,5 h (32 en cola); V2a pendiente detrás. NRT verde
+  (23:06 UTC). Disco 23 GB. Corregida la marca de 1.12 (decía EN CURSO y HECHA a la vez).
 
 ### 2026-10-14 (vuelta 43): 1.14 cerrada (#814 mergeado, `33c42ab5`)
 - Siete arreglos aplicados (`5c4c9705`): reparto con las dos bisagras y Shapley, D17 retirado, efecto de D25 por
