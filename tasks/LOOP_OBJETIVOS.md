@@ -275,6 +275,19 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 04:10 UTC (vuelta 48): D-3 mergeado, caja D1 y probe D25 completo despachados
+- D-3: #785 mergeado (`37ed449b`) con CI verde tras actualizarlo. Falta ver `regimen` en la próxima corrida NRT.
+- D-2: dos corridas del scraper verdes con el arreglo; #783 cerrado. Mirova-v1#19 lo cerré por error y lo
+  reabrí: #21 arregla sólo la coma de miles; siguen las filas perdidas y el mojibake del OCR.
+- D-8: workflow propio `reproc-s151-ab-caja.yml` (#818, grupo `s151-ab-caja`), diff revisado línea a línea
+  (sólo nombre, grupo, nombres de salida y textos); D1 despachado (Láscar 03-14 a 03-27, run 38679191229).
+  D2 y V1 van después, de a uno.
+- D-5: piloto 9 de 10 con C-P1 en 9; la décima perdida porque NASA reprocesó el gránulo. Enmienda antes de
+  correr las 356 y sin mirar alertas (#819): L1B de la misma adquisición, marcado, C-P1 decide. Probe completo
+  despachado (11 volcanes, todas las pasadas, run 38679955131). Dato temprano sin valor de veredicto: en los 9
+  negativos el brazo a (canon) da 0,15 a 0,34 MW y el b casi siempre 0.
+- Agentes vivos: D-9 y D-10. A/B vivos: F/K y caja (tope 2).
+
 ### 2026-10-15 03:50 UTC (vuelta 47): Nicolás aprueba las seis recomendaciones ("probar todas las opciones")
 - D-2: Mirova-v1#21 mergeado (`40ef1a45`; `scraper.py` y tests sin cambios en main desde la base). Falta ver la
   siguiente corrida verde del scraper.
