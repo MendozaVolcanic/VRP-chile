@@ -26,7 +26,6 @@ Salida: sustrato_salida.txt (stdout) y sustrato.json.
 """
 from __future__ import annotations
 
-import io
 import json
 import os
 import sys
@@ -38,7 +37,9 @@ os.environ.setdefault("VRP_PROFILE", "mirova_equivalent")
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+# reconfigure y no un TextIOWrapper nuevo: evaluar_diurno.py importa este módulo, y un segundo
+# envoltorio cerraría el flujo al recolectarse el primero (lección de evaluar_fk.py).
+sys.stdout.reconfigure(encoding="utf-8")
 
 from pipeline.store import _solar_elevation  # noqa: E402
 from auto_audit_weekly import _coords_por_volcan  # noqa: E402
@@ -80,20 +81,31 @@ def dia_local(fila):
     return dt.date().isoformat()
 
 
-def main():
-    coords = _coords_por_volcan()
-    # C2: casos con respuesta conocida (Láscar).
-    lat, lon = coords["Lascar"]
-    assert _solar_elevation(lat, lon, datetime(2026, 6, 15, 5, 0)) < 0, "C2: Láscar 05 UTC no es noche"
-    assert _solar_elevation(lat, lon, datetime(2026, 6, 15, 17, 24)) > 0, "C2: Láscar 17:24 UTC no es día"
+# Regla D-9 en modo SE (PR #820): la fila de una alerta mínima pasa a este tipo, que sigue siendo
+# alerta para el resumen del día (como en banco_paridad, «la noche no cambia») pero no cuenta como
+# alerta de la pasada ni como RUTINA. Con la regla original no aparece nunca.
+TIPO_MINIMA_SE = "ALERTA_MINIMA_SE"
 
-    filas = [f for f in cargar_referencia_unificada() if f["volcano"] in coords]
-    diurnas = [f for f in filas if es_dia(f, coords)]
+
+def huella(claves):
+    """sha256 de la lista ordenada de claves de pasada: identidad del conjunto, no sólo su tamaño
+    (verificador del PR #822, hueco 4). La usan main() al escribir sustrato.json y evaluar_diurno.py
+    al comprobar que la referencia que lee es la del pre-registro."""
+    import hashlib
+    return hashlib.sha256("\n".join(sorted("|".join(k) for k in claves)).encode("utf-8")).hexdigest()
+
+
+def universo(filas, coords):
+    """Las poblaciones del pre-registro sobre filas ya normalizadas (y, si se pidió, con la regla
+    D-9 aplicada). La usan main() y evaluar_diurno.py, para que el evaluador mida sobre la MISMA
+    población que este script contó (S151, tarea del A/B diurno). Devuelve claves de pasada
+    (volcán, sensor, 'YYYY-MM-DD HH:MM')."""
+    diurnas = [f for f in filas if f["volcano"] in coords and es_dia(f, coords)]
 
     # Pasadas con alerta (cualquier sensor, cualquier fuente) por volcán y día local.
     alerta_dia = set()
     for f in diurnas:
-        if f["tipo"] in TIPOS_ALERTA:
+        if f["tipo"] in TIPOS_ALERTA or f["tipo"] == TIPO_MINIMA_SE:
             alerta_dia.add((f["volcano"], dia_local(f)))
 
     # Positivos: pasadas VIIRS diurnas protegidas y usables bajo A119.
@@ -124,6 +136,21 @@ def main():
         t0 = datetime.strptime(k[2], "%Y-%m-%d %H:%M")
         return any(abs((h - t0).total_seconds()) <= 120 for h in horas_alerta[(k[0], k[1])])
     con_alerta_cualquiera = {k for k in tabla if alerta_cerca(k)}
+    return {"pos": pos, "tabla": tabla, "neg": neg, "con_alerta_tabla": con_alerta_tabla,
+            "con_alerta_cualquiera": con_alerta_cualquiera}
+
+
+def main():
+    coords = _coords_por_volcan()
+    # C2: casos con respuesta conocida (Láscar).
+    lat, lon = coords["Lascar"]
+    assert _solar_elevation(lat, lon, datetime(2026, 6, 15, 5, 0)) < 0, "C2: Láscar 05 UTC no es noche"
+    assert _solar_elevation(lat, lon, datetime(2026, 6, 15, 17, 24)) > 0, "C2: Láscar 17:24 UTC no es día"
+
+    filas = [f for f in cargar_referencia_unificada() if f["volcano"] in coords]
+    U = universo(filas, coords)
+    pos, tabla, neg = U["pos"], U["tabla"], U["neg"]
+    con_alerta_tabla, con_alerta_cualquiera = U["con_alerta_tabla"], U["con_alerta_cualquiera"]
 
     total_pos = len(pos)
     print("Positivos VIIRS diurnos protegidos usables bajo A119 (toda la referencia): %d" % total_pos)
@@ -167,6 +194,10 @@ def main():
             "con_alerta_por_sensor": {s: por_sensor[s][1] for s in VIIRS},
             "con_alerta_tabla_u_ocr_por_sensor": {s: por_sensor[s][2] for s in VIIRS},
             "parsimonia_mirova": pars,
+            # Identidad de cada conjunto por sensor (agregado S151 tras el verificador del PR #822):
+            # el evaluador compara estas huellas, no sólo los conteos.
+            "huellas": {s: {"neg": huella(k for k in n if k[1] == s), "tabla": huella(k for k in t if k[1] == s),
+                            "alerta": huella(k for k in ac if k[1] == s)} for s in VIIRS},
         })
     fuera = sorted("|".join(k) for k in pos if k not in cubiertos)
     out["positivos_fuera_de_ventana"] = fuera
