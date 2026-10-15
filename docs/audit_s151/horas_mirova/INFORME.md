@@ -1,6 +1,9 @@
 # Horas de MIROVA y conversiones de hora del scraper Mirova-v1
 
-Auditoría de sólo lectura, 2026-10-15. Carpeta: `C:\Users\nmend\AppData\Local\Temp\claude\auditoria_horas\`.
+Auditoría de sólo lectura, 2026-10-15, pedida por Nicolás. Se guarda aquí con sus scripts y salidas chicas; no se
+copian los insumos grandes (`cons.csv`, `ocr.csv` y `commits_*.csv`, que `s2_listar_commits.py` regenera desde la API
+de GitHub) ni las copias del código de Mirova-v1 (`src/`). Carpeta original:
+`C:\Users\nmend\AppData\Local\Temp\claude\auditoria_horas\`.
 Código de Mirova-v1 leído por la API de GitHub en el commit `9a51564bf6` (copias en `...\auditoria_horas\src\`).
 CSV: copia de hoy (`cons.csv`, 42.722 filas, pasadas del 2026-01-10 al 2026-10-15; `ocr.csv`, 1.061 filas).
 
