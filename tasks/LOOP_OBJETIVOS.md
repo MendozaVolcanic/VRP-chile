@@ -294,6 +294,23 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 19:18 UTC (vuelta 64): tarea 1 del plan de Mirova-v1 a medias; el lector depende de desempates
+- Paradas: NRT verde (14:40 UTC; el cron de GitHub corre cada 4 a 6 h, no cada 2), disco 26 GB. F/K V1 intento 2
+  pendiente detrás de V2a; W1 diurna intento 2 en curso.
+- Tarea 1 del plan: `dist_serie.py` portado en el worktree
+  `C:\Users\nmend\OneDrive\Escritorio\claude\Automatizacion web\Automatizacion web\Mirova-v1-distaprox`, rama
+  `feat/distancia-aprox`, commit local `2a3e7121` (WIP, sin PR). scipy no está en `requirements.txt` de Mirova-v1,
+  así que la correlación pasa a OpenCV (`cv2.filter2D` con ancla `((w-1)//2, (h-1)//2)`; la de por defecto corre un
+  píxel en plantillas de lado par, lo atrapó el test de equivalencia). Tres tests en verde.
+- **Hallazgo:** el número de marcadores que lee el estudio depende del desempate de picos. El puntaje de un cuadrado
+  empata en filas vecinas y el ruido de punto flotante (1e-16) decide. El lector del estudio es estable consigo mismo
+  (0 de 449 imágenes cambian), pero el port sin redondear cambia el número de marcadores en 118 de 449, y redondeado
+  con orden estable en 42 de 449. **Las cifras del control (4,5 % de error, 98,5 % dibujadas) valen para el lector
+  del estudio, no para el port.** Antes de la tarea 2 hay que volver a correr el control con `dist_serie.py`
+  (`experiments/_s151_distancia_ocr/scripts/control_dist.py` cambiando el import) y elegir un desempate con sentido
+  físico (por ejemplo el centro de la meseta de empate), no el que dé menos diferencias.
+- Nicolás suspende el PC ahora. Próxima vuelta: ese re-control, y después la tarea 2.
+
 ### 2026-10-15 18:45 UTC (vuelta 63): plan de la distancia aproximada en Mirova-v1; estudio y verificador al repo
 - Paradas: NRT verde (14:40 UTC), disco 25 GB. F/K V1 intento 2 PENDIENTE detrás de V2a (38648773684, corriendo);
   W1 diurna intento 2 en curso.
