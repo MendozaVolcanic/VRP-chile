@@ -61,7 +61,7 @@ _early_args, _ = _early.parse_known_args()
 if _early_args.profile:
     os.environ["VRP_PROFILE"] = _early_args.profile
 
-from pipeline import fetch, process_modis, process_viirs, process_viirs_mod, store
+from pipeline import fetch, process_modis, process_viirs, process_viirs_mod, store, diurno  # S151 D-10
 from pipeline import profile as vrp_profile
 from pipeline.geo_utils import get_detection_anchor
 
@@ -172,9 +172,9 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
     """Download and process all granules for a volcano on a given date.
 
     Args:
-        nighttime_only: If True, skip daytime passes (solar elevation > 0°).
-            MIROVA only uses nighttime data because reflected solar radiation
-            in the MIR band (~4µm) creates massive false positives during daytime.
+        nighttime_only: If True, skip daytime passes (solar elevation > 0°). S151: MIROVA
+            processes VIIRS by day too (Campus 2022 p. 16-17); VIIRS daytime is opened by the
+            profile flag ENABLE_DAYTIME_VIIRS through pipeline/diurno.py (D-10, OFF).
         skip_noaa20: If True, skip NOAA-20 VIIRS products (useful when NASA
             downloads are slow/unreliable).
     """
@@ -182,9 +182,9 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
 
     volcano_tmp = TMP_DIR / volcano["name"] / date.strftime("%Y%m%d")
 
-    def _check_night(l1b_path: Path) -> bool:
-        """Return True if granule is nighttime (or if nighttime_only is disabled)."""
-        if not nighttime_only:
+    def _check_night(l1b_path: Path, platform: str = "") -> bool:
+        """True si se procesa: noche, nighttime_only apagado, o VIIRS con rama diurna (D-10)."""
+        if not diurno.aplica_filtro_nocturno(nighttime_only, platform):
             return True
         dt = _parse_granule_datetime(l1b_path.name)
         if dt is None:
@@ -224,7 +224,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                 geo_by_time = {_time_key(g.name): g for g in geo_files}
 
                 for l1b in l1b_files:
-                    if not _check_night(l1b):
+                    if not _check_night(l1b, platform):
                         continue
                     geo = geo_by_time.get(_time_key(l1b.name))
                     if geo is None:
@@ -267,7 +267,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                 geo_by_time = {_time_key(g.name): g for g in geo_files}
 
                 for l1b in l1b_files:
-                    if not _check_night(l1b):
+                    if not _check_night(l1b, platform):
                         continue
                     geo = geo_by_time.get(_time_key(l1b.name))
                     if geo is None:
@@ -314,7 +314,7 @@ def process_date(volcano: dict, date: datetime, nighttime_only: bool = True,
                 geo_by_time = {_time_key(g.name): g for g in geo_files}
 
                 for l1b in l1b_files:
-                    if not _check_night(l1b):
+                    if not _check_night(l1b, platform):
                         continue
                     geo = geo_by_time.get(_time_key(l1b.name))
                     if geo is None:
@@ -446,6 +446,11 @@ def main():
     nighttime_only = not args.no_night_filter
     if nighttime_only:
         print("Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.")
+    # S151 D-10: el perfil puede abrir el día sólo para VIIRS. Se avisa en el log para que una
+    # corrida del A/B diurno no se confunda con una nocturna (con el flag apagado no se imprime).
+    if diurno.flag_viirs_diurno():
+        print("Rama diurna VIIRS ABIERTA por perfil (ENABLE_DAYTIME_VIIRS): VIIRS se procesa de "
+              "día con la Tabla 1 diurna de Coppola 2016a; MODIS sigue con su propia regla.")
 
     if args.skip_noaa20:
         print("Skipping NOAA-20 VIIRS products.")
