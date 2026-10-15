@@ -271,6 +271,15 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-14 (vuelta 41): estudio TIF de la 1.4 mergeado (#809 v3, `e1074caa`)
+- v3 con los arreglos del segundo verificador: dual ROI REFUTADO como mecanismo (ya encendido en los dos pases;
+  en 7 de 15 alertas el primer pase alertó el píxel lejano); no es factor único (logística n 53: pico lejano más
+  pico cráter AIC 30,7 contra 40,9 del lejano solo, p 0,0005), frontera blanda (z 18 a 26: 5 cerca, 10 lejos);
+  tabla simétrica con prueba continua p 9e-5 y permutación por volcán p 0,0001. Sigue firme: el VRP de MIROVA
+  calza con el cráter solo (+0,12 contra +0,55). Suite 1710 passed; CI verde; mergeado.
+- La 1.4 sigue `[~]`: el diseño del brazo A2 (anomalía mayor) espera el resultado de F/K, porque la SOSPECHA nueva
+  es la conectiva `min`, que el A/B mide. No inventar un umbral fuera de la cumbre antes de eso.
+
 ### 2026-10-14 (vuelta 40): 1.14 entregada (#814), en verificación
 - Estudio del presupuesto de la magnitud (PR #814, sin verificar): reconstruye las razones del auto-audit en 11 de
   11; VIIRS 375 2025 contra el OSF, R 0,69 = recorte 43 %, selección 29 %, fondo 28 %. De las palancas ya
