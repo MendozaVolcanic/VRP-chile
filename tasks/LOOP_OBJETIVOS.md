@@ -294,6 +294,23 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 ~17:30 UTC (vuelta 61): PAUSA pedida por Nicolás (reinicio por memoria)
+- Hecho desde la vuelta 60: alertas diurnas de MIROVA en el tablero como soles (#831, ningún número publicado cambia);
+  columnas UTC en el scraper (Mirova-v1#24, verificado tras la primera corrida: 42.755 filas, 15 columnas, LF, 114
+  vacías esperadas; issue Mirova-v1#23 abierto sólo por el punto 4, cron de respaldo: falta saber qué servicio
+  externo dispara el scraper).
+- Estudio de distancia OCR (`C:\Users\nmend\AppData\Local\Temp\claude\distancia_ocr\INFORME.md`): `Dist.png` es una
+  serie de tiempo de 30 días; la distancia de una pasada se lee en imágenes posteriores (error mediana 0,08 km en
+  1.549 pasadas V375 de control). Chillán 22,13 MW cerca (0,4 a 1,5 km); Villarrica 15-oct 06:42 lejos (21,5 km).
+- QUEDÓ CORRIENDO al pausar (se pierde con el reinicio): verificador limpio del estudio, que además compara las 451
+  distancias que midió el OCR contra la lectura por serie de tiempo (sospechas: geometría mal calibrada antes del
+  06-11; distancia de otra pasada hasta el 10-09, Mirova-v1#20). Relanzarlo; salida esperada en
+  `C:\Users\nmend\AppData\Local\Temp\claude\verifdist\`.
+- Pendientes con Nicolás: arreglo MxD03 en producción (A45, probe #828); D-10 en curso (W1 diurna run 38723828037);
+  F/K V1 (run 38639658446) con un job fallido de Villarrica gemelo que hay que repetir al terminar; hito A119 de V31.1
+  con fecha real 2026-10-15; implementar en Mirova-v1 la distancia aproximada (archivar `Dist.png`, columna
+  `Distancia_aprox_km` con rango) si el verificador la confirma (Nicolás ya dijo sí).
+
 ### 2026-10-15 13:46 UTC (vuelta 60): pasadas sin geometría publicadas (Mirova-v1#22, #830); auditoría de horas (#829)
 - A pedido de Nicolás: la pasada de Chillán 05:00 (22,13 MW V375, 14 MW V750) y otras 11 que el OCR rechazaba por
   V31 se guardan como `ALERTA_SIN_GEOMETRIA_OCR` (VRP de su celda, distancia vacía). Verificador limpio PARCIAL con
