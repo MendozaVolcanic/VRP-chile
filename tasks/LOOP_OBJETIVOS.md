@@ -280,6 +280,17 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 07:21 UTC (vuelta 54): caja D1 evaluada: PENDIENTE DE REPETICIÓN; repetición despachada
+- Tercer intento: cobertura pareja (132 contra 132). La recolección quedó roja sólo porque no pudo publicar la rama
+  `s151-ab-caja/<run_id>` (ya existía del primer intento; defecto del workflow en reintentos: nombrar la rama
+  con el intento o forzar). Evaluado en local desde el artefacto `s151caja-todo` del tercer intento.
+- `evaluar_caja.py --ventana D1`: controles OK, cableado K y KC OK, la caja actuó (corona 3 a 1 píxel). VIIRS 375 y
+  750 CUMPLEN el veto en lecturas A y B. MODIS: una protegida que K publica y KC no, Láscar 2026-03-27 07:10
+  MODIS_AQUA (MIROVA 1,0 MW; el único píxel de K está en la corona): PENDIENTE DE REPETICIÓN, como manda el
+  pre-registro sin gemelo. Las cinco variantes de D-9 dan lo mismo.
+- Repetición de D1 despachada (run 38698329137); se evalúa con `--repeticion`. Salida en el scratchpad
+  (`caja_d1_v3/eval_d1.txt`), se commitea con el veredicto.
+
 ### 2026-10-15 06:48 UTC (vuelta 53): disco bajó a 12 GB; liberado a 26 GB
 - El disco cayó de 22 a 12 GB libres en tres horas: eran salidas de autopruebas de los agentes y verificadores
   (`probar_*`, `tmp_probar`, `prueba`, 2,2 GB cada una) en el temporal. Borradas sólo esas carpetas regenerables
