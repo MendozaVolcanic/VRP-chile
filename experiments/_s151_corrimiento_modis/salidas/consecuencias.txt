@@ -1,0 +1,49 @@
+1. Corrimiento predicho a lo largo del barrido (km, hacia el sensor) en los records MODIS nocturnos de produccion
+volcan               sat        n mediana     p90     max   >=2km
+Lascar               AQUA     243   +1.86   +6.31   +9.21     48%
+Lascar               TERRA    243   +1.62   +5.15   +9.30     41%
+Lastarria            AQUA     251   +1.78   +6.26   +9.37     47%
+Lastarria            TERRA    236   +1.69   +6.10   +9.29     44%
+Isluga               AQUA     240   +1.82   +6.39   +9.21     48%
+Isluga               TERRA    228   +1.70   +5.82   +9.28     42%
+Tupungatito          AQUA     275   +1.92   +6.28   +9.25     48%
+Tupungatito          TERRA    270   +1.70   +5.45   +9.31     46%
+PlanchonPeteroa      AQUA     280   +1.93   +6.21   +9.29     48%
+PlanchonPeteroa      TERRA    285   +1.98   +7.51   +9.57     50%
+NevadosDeChillan     AQUA     282   +1.84   +6.39   +9.30     49%
+NevadosDeChillan     TERRA    287   +1.89   +6.35   +9.57     48%
+Copahue              AQUA     286   +1.79   +6.30   +9.30     46%
+Copahue              TERRA    284   +1.96   +6.13   +9.57     49%
+Llaima               AQUA     292   +1.84   +6.44   +9.31     46%
+Llaima               TERRA    281   +1.91   +5.60   +9.57     47%
+Villarrica           AQUA     697   +1.88   +6.28   +9.33     48%
+Villarrica           TERRA    678   +1.87   +5.65   +9.57     48%
+PuyehueCordonCaulle  AQUA     309   +1.89   +7.01   +9.49     49%
+PuyehueCordonCaulle  TERRA    307   +1.91   +7.30   +9.57     49%
+Chaiten              AQUA     330   +2.07   +6.97   +9.33     51%
+Chaiten              TERRA    317   +2.08   +6.86   +9.43     51%
+
+2. Etiqueta summit/far (distancia al crater contra inner_radius_km) antes y despues de mover la posicion
+   reportada el corrimiento predicho, records MODIS nocturnos. ESTO NO PREDICE LAS ETIQUETAS DEL PIPELINE
+   CORREGIDO: en produccion casi todos los pixeles anomalos cercanos son un disco de ruido que el umbral de
+   cumbre marca DENTRO del circulo medido con la geolocalizacion (densidad 4 a 7 veces mayor adentro que afuera,
+   ver README); con la geolocalizacion corregida ese disco se volveria a centrar en el crater. Lo que cuenta es
+   cuantas etiquetas quedan a menos de un corrimiento del borde, o sea cuantas dependen de la geolocalizacion.
+   Las columnas 'con alerta' se limitan a pasadas con ALERTA_TERMICA MODIS de MIROVA (+-6 min).
+volcan               inner | final n / s->f / f->s    | cumulo n / s->f / f->s   | final con alerta       | cumulo con alerta     
+Lascar                   5 |    485       0        0 |    485      85        4 |    86      0       0 |    86      1       0
+Lastarria                3 |    485       3        5 |    485     157        8 |     0      0       0 |     0      0       0
+Isluga                   5 |    466       2        2 |    466      88        2 |     0      0       0 |     0      0       0
+Tupungatito              7 |    545       5        1 |    545      59        4 |     0      0       0 |     0      0       0
+PlanchonPeteroa          3 |    561       5        2 |    561     192        7 |     0      0       0 |     0      0       0
+NevadosDeChillan         5 |    566       6        0 |    566     137       10 |     6      0       0 |     6      1       1
+Copahue                  4 |    569       2        0 |    569     148        3 |     0      0       0 |     0      0       0
+Llaima                   5 |    572       6        2 |    572     136        6 |     0      0       0 |     0      0       0
+Villarrica               5 |   1373      24       10 |   1373     252       11 |     3      0       0 |     3      0       0
+PuyehueCordonCaulle     20 |    611      25       20 |    611       0        2 |     0      0       0 |     0      0       0
+Chaiten                  5 |    645      12        8 |    645     135        4 |     0      0       0 |     0      0       0
+TOTAL                      |   6878      90       50 |   6878    1389       61 |    95      0       0 |    95      2       1
+
+3. Las dos pasadas que la caja de 5 x 5 km apaga en el brazo K (Lascar, PR #825), con la posicion corregida
+   2026-03-27 07:10 AQUA lado der cenit 39.9: reportado dN +0.24 dE +3.20 (|max| 3.20 km); corrimiento predicho 2.39 km; corregido dN +0.71 dE +0.85 (|max| 0.85 km; la caja es 2,5)
+   2026-03-14 07:05 AQUA lado der cenit 44.6: reportado dN +0.12 dE +3.47 (|max| 3.47 km); corrimiento predicho 2.95 km; corregido dN +0.69 dE +0.57 (|max| 0.69 km; la caja es 2,5)
