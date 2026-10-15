@@ -243,8 +243,13 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   réplica con ellas (¿procesa MIROVA el día para VIIRS?, Coppola 2016a y la tesis de Massimetti en
   `documentacion/`, página renderizada); y cuánto pesan en el criterio. Sin tocar el pipeline.
 
-- [~] **1.14 (estudio A) Presupuesto de la magnitud, pasada por pasada.** EN CURSO 2026-10-14 (agente en
-  `VRP-Chile-114`, rama `loop/1.14-presupuesto-magnitud`).
+- [x] **1.14 (estudio A) Presupuesto de la magnitud, pasada por pasada.** HECHA 2026-10-14 (#814, `33c42ab5`,
+  verificado PARCIAL y con los siete arreglos aplicados). Resultado: el reparto selección/fondo es una identidad que
+  depende de la bisagra (fondo 21 a 64 % del déficit V375; Shapley 43 %); la dependencia con el ángulo NO es D17
+  (el Npix de MIROVA no crece con el área) y queda SIN ATRIBUIR; D25 es la palanca que más mueve (×1,28, sube de
+  1,00 en nadir a 1,20 en el borde). Siguiente: pre-registro de D25 como brazo sobre C0 y sobre F (negativos limpios
+  medidos en F, porque en C0 el Test 1 satura, A114), coordinado con #793 y con el resultado de F/K; se escribe
+  cuando F/K se evalúe. El estudio B (remuestreo D17) pierde su motivación principal.
   Por qué: subestimamos la energía (Láscar 0,44, Isluga 0,52, Lastarria 0,56, Tupungatito 0,65 en el auto-audit
   del 2026-10-14; 0,4 a 0,6 en la erupción de Chillán) y no sabemos cuánto viene de cada causa: cuántos píxeles
   alertamos contra cuántos suma MIROVA (Campus 2022: suma de todos los alertados), cuánta energía trae cada píxel,
@@ -270,6 +275,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-10 | ¿Abrir el día en la réplica? (1, recomendada: cablear rama diurna VIIRS apagada por flag con A45 y A/B diurno; 2: dejarlo cerrado y escribirlo en el criterio) | `experiments/_s151_alertas_diurnas/README.md`, verificado | #812 | #813 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-14 (vuelta 43): 1.14 cerrada (#814 mergeado, `33c42ab5`)
+- Siete arreglos aplicados (`5c4c9705`): reparto con las dos bisagras y Shapley, D17 retirado, efecto de D25 por
+  ángulo con intervalo [1,07; 1,33] en el borde, régimen de código separado de la ventana (0 de 17.450 records de
+  producción abril-agosto con hora de proceso), "la que más mueve", C2 MODIS acotado a 2026, OSF sin verificar
+  como vara NRT. Suite 1710 passed; CI verde; mergeado. Worktree `VRP-Chile-114` se puede retirar.
 
 ### 2026-10-14 (vuelta 42): verificador de #814 PARCIAL, arreglos enviados
 - Confirmado: reconstrucción 11 de 11 y factores de las palancas (D25 1,2788). Caído: el reparto selección/fondo
