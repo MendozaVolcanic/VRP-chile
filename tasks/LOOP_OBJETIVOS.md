@@ -271,6 +271,17 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-14 (vuelta 40): 1.14 entregada (#814), en verificación
+- Estudio del presupuesto de la magnitud (PR #814, sin verificar): reconstruye las razones del auto-audit en 11 de
+  11; VIIRS 375 2025 contra el OSF, R 0,69 = recorte 43 %, selección 29 %, fondo 28 %. De las palancas ya
+  construidas, sólo D25 acerca la magnitud (×1,28, medido en brazos `literal` de junio a agosto, antes de #535);
+  `max` 0,93 y quitar el Test 1 0,88. Recomienda un A/B de D25 aislado en VIIRS 375 sobre producción. Controles
+  que fallaron: cúmulo de un píxel en MODIS (79 a 87 %) y fondo por píxel cuando dispara el Test 1. El agente
+  usó `sed -i` una vez (anotado, §1.7).
+- Verificador limpio lanzado sobre #814 (identidad contra medición, OSF filtrado A105, régimen de las palancas
+  A104, firma de D17). V1 de F/K corriendo (GitHub lo muestra "queued"), V2a pendiente detrás; NRT verde 23:06
+  UTC; disco 21 GB libres.
+
 ### 2026-10-14 (vuelta 39): 1.13 cerrada (#812, D-10 #813)
 - Arreglos de #812: clase "real" circular rebajada (39 a SIN EVIDENCIA; 54 sin evidencia y 40 reflejo); nulo
   nocturno por volcán (sólo informa en Láscar); A119 en el denominador (40 diurnas usables contra 232 nocturnas);
