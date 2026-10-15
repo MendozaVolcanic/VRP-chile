@@ -253,6 +253,12 @@ da:
   K 7**, controles OK, P1 VIIRS CUMPLE, y K recupera la alerta MODIS del 2026-10-01 08:35 (5,18 MW).
 - **Combinar** nulo y veto: K NO CUMPLE.
 
+> ⚠️ **Nota del 2026-10-15 (D-9, issue #811), posterior al sello; no cambia ninguna regla de este documento.**
+> `evaluar_fk.py` ganó una sección 10 que INFORMA P2 y el veredicto con las reglas de las alertas mínimas (SN,
+> SE, original y las variantes con 0,04); decide la etiqueta original, como se escribió aquí (`README.md`). La
+> autoprueba ganó 4 comprobaciones de esa sección y hoy da **41 de 41** (`probar_salida.txt`): las 37 de abajo
+> siguen todas OK. Texto original:
+
 Resultado: **37 de 37** comprobaciones (`probar_salida.txt`), sobre el evaluador tal como queda commiteado. El
 caso `v2_cable`, corrido con el evaluador de la versión 1 (`git show` del commit anterior), da "K OK" en el
 cableado: es el defecto 1, y la versión 2 lo atrapa. Uso:
@@ -275,7 +281,10 @@ sus logs).
   esa época (antes de #535): da el orden de magnitud del poder, no el resultado.
 - **Las pasadas `sin_info` y `far_ref`** no entran en la suma (no son negativos limpios); se informan como
   "otras publicadas" (en V1, producción publica 742 de 852 en VIIRS 375).
-- **El borde de 0,05 MW**: MIROVA dice NONE en pasadas que el scraper registra como alerta Muy Bajo
+- ⚠️ **Decidido después del sello, D-9 (2026-10-15, issue #811): regla SN, las alertas de 0,05 MW o menos cuentan
+  como "MIROVA no vio nada".** Este A/B sigue decidiendo con la regla original y la sección 10 de `evaluar_fk.py`
+  informa SN, SE y las variantes con 0,04 (`README.md`). Texto original:
+  **El borde de 0,05 MW**: MIROVA dice NONE en pasadas que el scraper registra como alerta Muy Bajo
   (`docs/S151_CRITERIO_CLASE_MIROVA.md` §5); de qué lado cae el error en señales mínimas queda abierto.
 - **La métrica de magnitud es simétrica en logaritmo**: no dice si subestimar es preferible a sobrestimar. Que el
   caso de 4 veces no fallara no es un defecto del criterio (acercarse a 1 en log es acercarse a MIROVA), pero

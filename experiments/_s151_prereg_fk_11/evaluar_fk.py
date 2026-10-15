@@ -14,6 +14,9 @@ QUE MIDE, POR PASADA (la unidad en que el operador vive la alerta, A94), por sen
   P2 suma de errores bajo 1 MW: alertas Muy Bajo que el brazo no publica + publicaciones en negativos limpios.
   P3 razon de magnitud contra MIROVA, pareada sobre las alertas que publican los dos.
   P4 movimiento del cumulo publicado (S147: apagar el Test 1 compite por el ancla).
+  10 (INFORMA, agregada tras la decision D-9 del 2026-10-15, issue #811): P2 y el veredicto de la ventana con
+     las reglas de las alertas de 0,05 MW o menos (SN, SE, original y variantes con 0,04). DECIDE la original,
+     la vigente al sellar el pre-registro (README.md de esta carpeta).
 Y los controles antes de mirar: cobertura pareja (A108), version de producto por pasada, cableado leido de la
 linea FLAGS_BRAZO del log y de la huella en los records, determinismo (gemelo de C0, y F contra K en VIIRS,
 porque la banda 22 solo la lee process_modis.py).
@@ -192,6 +195,110 @@ def proteccion(claves_, ref, desde, hasta):
         al = [f for f in ff if bp.es_alerta(f["tipo"])]
         out[k] = {"A": bool(pa), "B": any(cm.alerta_protegida(f, lectura="B") for f in ff),
                   "alerta_solo_ocr": bool(al) and all(f["source"] == "OCR" for f in al)}
+    return out
+
+
+def etiquetas_regla(claves_, ref, desde, hasta, modo, umbral=None):
+    """Etiqueta de cada pasada con la regla D-9 de las alertas minimas (issue #811), con el mismo etiquetador y
+    la misma referencia que armar_tabla. Solo para la seccion 10, que INFORMA: el pre-registro se escribio antes
+    de D-9 y decide con la etiqueta original."""
+    cons, ocr, capas = ref
+    kw = {"historico_path": capas["historico"], "respaldo_path": capas["respaldo"]} if capas else {}
+    filas = ev.cargar_referencia_unificada(Path(cons), Path(ocr), **kw)
+    por_vb, ns, nv, _ = bp.indexar_referencia(filas, bp._coords_por_volcan(), (desde, hasta),
+                                              regla_minimas=modo, umbral_minima_mw=umbral)
+    recs = []
+    for k in claves_:
+        vol, b, t = k.split("|")
+        dt = datetime.strptime(t, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+        recs.append({"vol": vol, "b": b, "dt": dt, "noche": dt.strftime("%Y-%m-%d"), "clave": k})
+    bp.etiquetar(recs, por_vb, ns, nv)
+    return {r["clave"]: r["lab"] for r in recs}
+
+
+# Reglas de D-9 que se informan: (nombre, modo, umbral). "original" es la que decide (pre-registro anterior a D-9).
+REGLAS_D9 = (("original", "original", None), ("SN", "SN", cm.UMBRAL_MINIMA_MW), ("SE", "SE", cm.UMBRAL_MINIMA_MW),
+             ("SN_004", "SN", cm.UMBRAL_MINIMA_VARIANTE_MW), ("SE_004", "SE", cm.UMBRAL_MINIMA_VARIANTE_MW))
+
+
+def p2_tres_reglas(res, T, pares, brazos, prot, cfg, ref, todas, controles, ruido_de):
+    """Seccion 10 (INFORMA, no decide): la suma de P2 y el veredicto de la ventana con cada regla de D-9.
+
+    Por que asi. El pre-registro se escribio y se sello antes de la decision D-9: su veredicto se queda con la
+    etiqueta original (seccion 6 y `res["global"]`). Nicolas pidio probar todas las opciones, asi que aqui se
+    recalcula P2 con SN (la decidida), SE y la original, y con la variante que deja 0,05 exacto como alerta
+    (umbral 0,04). Las publicaciones de cada brazo no cambian: solo la etiqueta de MIROVA. Control: la etiqueta
+    original re-calculada aqui tiene que ser la de la tabla de armar_tabla; si una pasada difiere, se conserva la
+    de la tabla y la regla solo mueve las pasadas que ella misma cambia. P1 no cambia (las protegidas tienen 1 MW
+    o mas) y P3 se queda con la etiqueta original."""
+    print("\n== 10. P2 Y VEREDICTO CON LAS REGLAS DE D-9 (issue #811; INFORMA. Decide la del pre-registro: original)")
+    claves_ = sorted(todas)
+    base = etiquetas_regla(claves_, ref, cfg["desde"], cfg["hasta"], "original")
+    tabla_lab = {}
+    for t in T.values():
+        for k, v in t.items():
+            for x in v.values():
+                tabla_lab.setdefault(k, x["lab"])
+    distintas = sum(1 for k in claves_ if k in tabla_lab and tabla_lab[k] != base[k])
+    print("   control: etiqueta original re-calculada igual a la de la tabla en %d de %d pasadas" % (len(claves_) - distintas, len(claves_)))
+    excluir = not cfg["solo_tabla"]
+    out = {"control_distintas": distintas}
+    for nombre, modo, umbral in REGLAS_D9:
+        labs = base if modo == "original" else etiquetas_regla(claves_, ref, cfg["desde"], cfg["hasta"], modo, umbral)
+        nuevo = {k: (labs[k] if labs[k] != base[k] else tabla_lab.get(k, base[k])) for k in claves_}
+        cambian = collections.Counter((tabla_lab.get(k), nuevo[k]) for k in claves_ if nuevo[k] != tabla_lab.get(k))
+        Tx = {p: {k: {lado: dict(x, lab=nuevo[k]) for lado, x in v.items()} for k, v in t.items()} for p, t in T.items()}
+        ver, suma, suma_total = dict(res["veredicto"]), {}, {}
+        for lectura in ("A", "B"):
+            for s in SENS:
+                s_ = {}
+                for n in brazos:
+                    par = ("C0", n) if n != "C0" else pares[0]; lado = "brazo" if n != "C0" else "control"
+                    s_[n] = sum(suma_errores(Tx[par], lado, prot, lectura, cfg, s, excluir)[:2])
+                    suma["%s|%s|%s" % (n, s, lectura)] = s_[n]
+                    suma_total["%s|%s|%s" % (n, s, lectura)] = sum(suma_errores(Tx[par], lado, prot, lectura, cfg, s, False)[:2])
+                s0 = s_["C0"]
+                if "G" in brazos:
+                    Tg = Tx[("C0", "G")]
+                    ruido = len(errores_por_pasada(Tg, "control", prot, lectura, cfg, s, excluir)
+                                ^ errores_por_pasada(Tg, "brazo", prot, lectura, cfg, s, excluir))
+                elif ruido_de:
+                    ruido = json.load(open(ruido_de, encoding="utf-8"))["ruido_frac"].get("%s|%s" % (s, lectura), 0.0) * s0
+                else:
+                    ruido = 0.0
+                for X in ("F", "K"):
+                    if X not in brazos or s not in SENS_CANDIDATO[X]:
+                        continue
+                    sx = s_[X]
+                    if not (controles and res["cableado"]["C0"] and res["cableado"][X]):
+                        v_ = "INDECIDIBLE"
+                    elif sx < s0 - ruido:
+                        v_ = "GANA"
+                    elif sx > s0 + ruido:
+                        v_ = "PIERDE"
+                    else:
+                        v_ = "EMPATE"
+                    ver["P2|%s|%s|%s" % (X, s, lectura)] = v_
+        rx = dict(res, veredicto=ver)
+        glob = {X: {l: global_ventana(rx, X, l) for l in ("A", "B")} for X in ("F", "K") if X in brazos}
+        if "F" not in brazos and "K" in brazos:
+            glob["F"] = {l: global_ventana(rx, "F", l, fuente="K") + " [derivado de K: mismo codigo en VIIRS]" for l in ("A", "B")}
+        out[nombre] = {"suma": suma, "suma_total": suma_total, "P2": {k: v for k, v in ver.items() if k.startswith("P2|")}, "global": glob,
+                       "cambian": {"%s->%s" % k: n for k, n in cambian.items()}}
+        print("   regla %-8s (%s, umbral %s) etiquetas que cambian: %s" % (nombre, modo, umbral, dict(out[nombre]["cambian"]) or "ninguna"))
+        for lectura in ("A", "B"):
+            for s in SENS:
+                print("      lectura %s %-8s suma %s | P2 %s" % (lectura, s, " ".join("%s %d" % (n, suma["%s|%s|%s" % (n, s, lectura)]) for n in brazos),
+                      " ".join("%s %s" % (X, ver["P2|%s|%s|%s" % (X, s, lectura)]) for X in ("F", "K") if "P2|%s|%s|%s" % (X, s, lectura) in ver)))
+        for X, d in glob.items():
+            for l, v in d.items():
+                print("      veredicto de la ventana %s lectura %s: %s%s" % (X, l, v, "" if v == res["global"][X][l] else "   <-- DISTINTO del que decide"))
+    # Autocontrol: la regla original de esta seccion tiene que dar exactamente la suma y los P2 de la seccion 6.
+    igual = all(out["original"]["suma"]["%s|%s|%s" % (n, s, l)] == res["suma"]["%s|%s|%s" % (n, s, l)]["decide"]
+                for n in brazos for s in SENS for l in ("A", "B")) and \
+        all(out["original"]["P2"][k] == v for k, v in res["veredicto"].items() if k.startswith("P2|"))
+    out["autocontrol_original_ok"] = igual
+    print("   autocontrol: la regla original reproduce la seccion 6: %s" % ("OK" if igual else "FALLA (la seccion 10 no es comparable)"))
     return out
 
 
@@ -633,6 +740,8 @@ def evaluar(a):
     for X, d in res["global"].items():
         for l, v in d.items():
             print("   %s lectura %s: %s" % (X, l, v))
+    # Decision D-9 (issue #811) posterior al pre-registro: se informa con las tres reglas, no decide.
+    res["reglas_d9"] = p2_tres_reglas(res, T, pares, brazos, prot, cfg, ref, todas, controles, a.ruido_de)
     Path(a.out).write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
     return 0
 
@@ -681,6 +790,19 @@ def combinar(archivos):
                 continue
             peor = min(estados, key=lambda e: next(i for i, o in enumerate(orden) if e[1].startswith(o)))
             print("   %s lectura %s: %s | por ventana %s" % (X, l, peor[1], estados))
+    # D-9 (issue #811): el mismo peor-de-las-ventanas con cada regla de las alertas minimas. INFORMA; lo que
+    # decide es lo de arriba (la etiqueta original del pre-registro).
+    if all("reglas_d9" in r for r in rs):
+        print("== CON LAS REGLAS DE D-9 (informa; decide lo de arriba)")
+        for nombre, _, _ in REGLAS_D9:
+            for X in ("F", "K"):
+                for l in ("A", "B"):
+                    estados = [(r["ventana"], r["reglas_d9"][nombre]["global"][X][l]) for r in rs
+                               if X in r["reglas_d9"][nombre]["global"]]
+                    if not estados:
+                        continue
+                    peor = min(estados, key=lambda e: next(i for i, o in enumerate(orden) if e[1].startswith(o)))
+                    print("   regla %-8s %s lectura %s: %s" % (nombre, X, l, peor[1]))
     return 0
 
 

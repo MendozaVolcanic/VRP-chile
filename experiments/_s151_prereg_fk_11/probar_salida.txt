@@ -1,13 +1,17 @@
-semillas V1: protegida NevadosDeChillan|VIIRS375|2026-09-28 04:42 | solo OCR Suomi NPP Isluga|VIIRS375|2026-09-09 06:06 | solo lectura B Isluga|VIIRS375|2026-08-30 05:18 | negativos publicados 734 | Muy Bajo publicadas 239
+semillas V1: protegida NevadosDeChillan|VIIRS375|2026-09-28 04:42 | solo OCR Suomi NPP Isluga|VIIRS375|2026-09-09 06:06 | solo lectura B Isluga|VIIRS375|2026-08-30 05:18 | negativos publicados 734 | Muy Bajo publicadas 239 (de 0,05 MW o menos 33)
 semillas V2: protegida de marzo Lascar|VIIRS375|2026-03-02 06:06 | protegida de V2b Lascar|VIIRS375|2026-04-21 05:30
 ndc: suma total lectura A {'C0': 52, 'F': 7, 'K': 7}
-== RESUMEN (salida completa de cada caso en C:\Users\nmend\AppData\Local\Temp\claude\C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile\cc89671c-1a9a-4960-b2b7-508d0fd7e9de\scratchpad\probar)
+ndc: suma total lectura A con D-9 {'SN': {'C0': 55, 'F': 6, 'K': 6}, 'SE': {'C0': 52, 'F': 5, 'K': 5}}
+== RESUMEN (salida completa de cada caso en C:\Users\nmend\AppData\Local\Temp\claude\C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile\cc89671c-1a9a-4960-b2b7-508d0fd7e9de\scratchpad\probar_d9)
    OK    nulo: controles OK
    OK    nulo: P1 sin perdidas
    OK    nulo: P2 EMPATE en todo
    OK    nulo: P3 y P4 CUMPLE
    OK    nulo: K NO CUMPLE (no gana)
    OK    nulo: P6 implementado y C0 dentro de la banda
+   OK    nulo: la seccion 10 (reglas D-9) reproduce con la regla original la seccion 6
+   OK    minimas: decide la original -> P2 PIERDE en VIIRS 375 y global NO CUMPLE (suma), sin cambio por D-9
+   OK    minimas: seccion 10 -> SN GANA, SE EMPATE, original PIERDE (informa)
    OK    veto: P1 K VIIRS375 A y B VETADO
    OK    veto: global K NO CUMPLE (veto)
    OK    gemelo: perdida donde el gemelo de C0 tambien cambia -> INDECIDIBLE
@@ -38,5 +42,6 @@ ndc: suma total lectura A {'C0': 52, 'F': 7, 'K': 7}
    OK    ndc: suma de errores C0 52, F 7, K 7 (verificador de #796)
    OK    ndc: controles OK y P1 VIIRS CUMPLE en F y K
    OK    ndc: K recupera la MODIS del 2026-10-01 08:35
+   OK    ndc: seccion 10 reproduce el estudio D-9 (SN 55/6/6, SE 52/5/5)
    OK    combinar: nulo y veto -> K NO CUMPLE
-37 de 37
+41 de 41

@@ -41,7 +41,7 @@ sys.path.insert(0, str(AQUI))
 import banco_paridad as BP  # noqa: E402
 from referencia_mirova_unificada import SNAP_CONS, SNAP_OCR, cargar_referencia_unificada  # noqa: E402
 import comun as C  # noqa: E402
-from b_regimen_actual import fila_alerta, MINIMA_V375  # noqa: E402
+from b_regimen_actual import fila_alerta, pasada_minima  # noqa: E402
 
 TIF_DEFECTO = Path("C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/mirova-tif-archive")
 ARCH2OURS = {"ChillanNevadosde": "NevadosDeChillan"}
@@ -104,8 +104,9 @@ def main(argv=None):
             dt = datetime.strptime(r["datetime_utc"], "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
             if BP.es_pasada_diurna_descartada("VIIRS375", lat0, lon0, dt):
                 continue
-            al = fila_alerta(BP.parear(por_vb.get((vol, "VIIRS375"), []), dt))
-            if al is None or al["vrp_mw"] <= MINIMA_V375:
+            pareadas = BP.parear(por_vb.get((vol, "VIIRS375"), []), dt)
+            al = fila_alerta(pareadas)
+            if al is None or pasada_minima(pareadas, "VIIRS375"):   # D-9: predicado unico de clase_mirova (A102)
                 continue
             c = ixv[(ixv.acq - pd.Timestamp(dt)).abs().dt.total_seconds() <= 120]
             if c.empty:

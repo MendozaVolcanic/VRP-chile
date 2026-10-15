@@ -179,6 +179,9 @@ PUB = [k for k in v375 if cen(k) and L[k]["pub"]]
 V750_ALERTA = sorted(k for k in L if cen(k) and k.split("|")[1] == "VIIRS750" and L[k]["lab"] == "pos" and L[k]["pub"] and L[k].get("vrp_ref"))
 print("semillas: protegida centrada %s | protegida corrida %s | negativos centrados publicados V375 %d | Muy Bajo %d | alertas V750 %d" % (
     K_PROT, K_PROT_CORR, len(NEG_PUB), len(MB_PUB), len(V750_ALERTA)))
+# D-9 (issue #811): alertas Muy Bajo centradas de 0,05 MW o menos que K publica (las que MIROVA llama NONE)
+MIN_PUB = [k for k in MB_PUB if L[k].get("vrp_ref") is not None and L[k]["vrp_ref"] <= C.E.cm.UMBRAL_MINIMA_MW + 1e-9]
+print("semilla D-9: alertas centradas de 0,05 MW o menos que K publica %d" % len(MIN_PUB))
 
 
 def brazos(kc=None, bc=None, kg=None):
@@ -196,6 +199,7 @@ r = correr("mec", solo_b(caja(BASE)), cinco=False)
 MEC = TMP / "mec" / "res.json"
 chk["mec: sin KC no hay veredicto de KC; LA CAJA ACTUA (Q1 por Fisher, Q2 CUMPLE)"] = r.get("global") is None and V_(r, "Q1|BC") == "CUMPLE" \
     and V_(r, "Q2|BC") == "CUMPLE" and r.get("mecanismo", "").startswith("LA CAJA ACTUA") and r.get("controles_ok") is True
+D9_AUTO = {"mec": r.get("reglas_d9", {}).get("autocontrol_original_ok") is True}
 r = correr("mec_nulo", solo_b(copy.deepcopy(BASE)), cinco=False)
 MEC_NULO = TMP / "mec_nulo" / "res.json"
 chk["mec_nulo: BC igual a B -> sin huella, mecanismo INDECIDIBLE"] = r.get("huella", {}).get("BC") is False and r.get("mecanismo", "").startswith("INDECIDIBLE")
@@ -218,6 +222,7 @@ tk = json.loads((TMP / "d1" / "tmp" / "t_K_KC.json").read_text(encoding="utf-8")
 P27 = next(k for k, v in sorted(tk.items()) if "|MODIS|" in k and v["control"]["lab"] == "pos" and v["control"]["pub"] and (v["control"]["vrp_ref"] or 0) >= 1)
 print("semilla D1: %s" % P27)
 chk["d1: K y KC iguales -> veto CUMPLE"] = G(r) == "CUMPLE (veto)" and V_(r, "P1|MODIS|A") == "CUMPLE"
+D9_AUTO["d1"] = r.get("reglas_d9", {}).get("autocontrol_original_ok") is True
 B = {"K": copy.deepcopy(BD), "KC": copy.deepcopy(BD)}; ocultar(B["KC"], P27)
 r = correr("d1_pend", B, ventana="D1")
 chk["d1_pend: KC la pierde, sin gemelo -> PENDIENTE DE REPETICION"] = V_(r, "P1|MODIS|A") == "PENDIENTE DE REPETICION" and G(r) == "PENDIENTE DE REPETICION"
@@ -242,6 +247,8 @@ r = correr("inerte", brazos())
 chk["inerte: P2 EMPATE con ruido 0, P3 SIN SUSTRATO (ningun par cambia), NO CUMPLE (inerte)"] = \
     all(V_(r, "P2|%s|A" % s) == "EMPATE" for s in C.SENS) and all(V_(r, "P3|%s" % s) == "SIN SUSTRATO" for s in C.SENS) \
     and G(r) == "NO CUMPLE (no mejora el criterio: la caja es inerte sobre el candidato)"
+D9_AUTO["inerte"] = r.get("reglas_d9", {}).get("autocontrol_original_ok") is True
+chk["D-9: la seccion 11 con la regla original reproduce lo que decide (mec, d1, inerte)"] = all(D9_AUTO.values()) and len(D9_AUTO) == 3
 B = brazos(); ocultar(B["KC"], K_PROT); r = correr("veto", B)
 chk["veto: protegida centrada -> VETADO, NO CUMPLE (veto)"] = V_(r, "P1|VIIRS375|A") == "VETADO" and G(r) == "NO CUMPLE (veto)"
 B = brazos(); ocultar(B["KC"], K_PROT); ocultar(B["KG"], K_PROT); r = correr("gemelo", B)
@@ -253,6 +260,17 @@ B = brazos(); [ocultar(B["KC"], k) for k in NEG_PUB]; r = correr("gana", B)
 chk["gana: P2 GANA, CUMPLE, P2b FUERA del techo"] = V_(r, "P2|VIIRS375|A") == "GANA" and G(r).startswith("CUMPLE") and (V_(r, "P2b|VIIRS375|A") or "").startswith("FUERA")
 B = brazos(); [ocultar(B["KC"], k) for k in MB_PUB]; r = correr("pierde", B)
 chk["pierde: P2 PIERDE, NO CUMPLE (suma)"] = V_(r, "P2|VIIRS375|A") == "PIERDE" and G(r) == "NO CUMPLE (suma de errores)"
+# D-9: KC calla justo las alertas centradas de 0,05 MW o menos. Decide la original: PIERDE. La seccion 11 informa
+# SN GANA (K las publica y son falsas alarmas) y SE sin perdidas (salen de la cuenta). Prueba que la seccion puede
+# dar otro veredicto sin tocar el que decide (A116).
+B = brazos(); [ocultar(B["KC"], k) for k in MIN_PUB]; r = correr("minimas", B)
+d9 = r.get("reglas_d9", {})
+chk["minimas: decide la original -> P2 PIERDE, NO CUMPLE (suma), sin cambio por D-9"] = \
+    V_(r, "P2|VIIRS375|A") == "PIERDE" and G(r) == "NO CUMPLE (suma de errores)"
+chk["minimas: seccion 11 -> SN GANA, SE no PIERDE, original PIERDE (informa)"] = \
+    d9.get("SN", {}).get("veredicto", {}).get("P2|VIIRS375|A") == "GANA" \
+    and d9.get("SE", {}).get("veredicto", {}).get("P2|VIIRS375|A") == "EMPATE" \
+    and d9.get("original", {}).get("veredicto", {}).get("P2|VIIRS375|A") == "PIERDE"
 B = brazos(); [ocultar(B["KG"], k) for k in NEG_PUB[:2]]; ocultar(B["KC"], NEG_PUB[5]); r = correr("ruido_chico", B)
 chk["ruido_chico: cambio de 1 dentro de un ruido de 2 -> P2 INDECIDIBLE, global INDECIDIBLE (no inerte)"] = \
     r.get("determinismo_ok") is True and V_(r, "P2|VIIRS375|A") == "INDECIDIBLE" and G(r) == "INDECIDIBLE"

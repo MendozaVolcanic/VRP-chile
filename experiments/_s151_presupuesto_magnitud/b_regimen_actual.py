@@ -35,11 +35,12 @@ import banco_paridad as BP  # noqa: E402
 from referencia_mirova_unificada import SNAP_CONS, SNAP_OCR, bajar_remoto, cargar_referencia_unificada  # noqa: E402
 from pipeline.f5_core import f5_core_vrp_mw  # noqa: E402
 import comun as C  # noqa: E402
+from clase_mirova import es_alerta_minima  # noqa: E402
 
 TRAMOS = {"pre_535": ("2026-04-01", "2026-08-28"), "post_535": ("2026-08-29", "2026-10-14")}
 VENTANA_AUDIT = ("2026-08-15", "2026-10-14")
 AUDIT_LATEST = ROOT / "data" / "audit_continuous" / "latest.json"
-MINIMA_V375 = 0.05
+# D-9: la constante propia MINIMA_V375 = 0.05 se retiro; el predicado vive en scripts/clase_mirova.py (pasada_minima).
 
 
 def cargar(coords, ventana):
@@ -79,12 +80,23 @@ def fila_alerta(filas):
     return al[0]
 
 
+def pasada_minima(filas, b):
+    """D-9 (issue #811), con el predicado unico de scripts/clase_mirova.py y su definicion por pasada: TODAS las
+    alertas pareadas a +-120 s tienen VRP de 0,05 MW o menos (A102: antes esta carpeta tenia su propia copia, por
+    fila). Sobre la referencia de este estudio (commits e54c101 y 03cab0e) da lo mismo que la copia vieja: 0 de 2.111
+    alertas de VIIRS 375 cambian de lado."""
+    al = [f for f in filas if BP.es_alerta(f["tipo"]) and (f["vrp_mw"] or 0) > 0]
+    return bool(al) and all(es_alerta_minima(f["vrp_mw"], b) for f in al)
+
+
 def emparejar(recs, por_vb, shift_h=0):
     out = []
     for x in recs:
         filas = BP.parear(por_vb.get((x["vol"], x["b"]), []), x["dt"] + timedelta(hours=shift_h))
         a = fila_alerta(filas)
         if a is not None:
+            if shift_h == 0:
+                x["minima_d9"] = pasada_minima(filas, x["b"])
             out.append((x, a))
     return out
 
@@ -97,7 +109,7 @@ def separar(x, a):
          "dist_ref": a["dist_km"], "D": x["disp"], "pub": x["pub"], "z": r.get("sensor_zenith_deg"),
          "banda_z": C.banda_z(r.get("sensor_zenith_deg")), "fuente": r.get("final_hotspot_source"),
          "n_px_guardados": len(r.get("anomaly_pixels") or [])}
-    if b == "VIIRS375" and v_m <= MINIMA_V375:
+    if x.get("minima_d9", es_alerta_minima(v_m, b)):
         return f, "mirova_minima_le_0p05"
     if not x["pub"] or not (x["disp"] and x["disp"] > 0):
         return f, "no_publicada"

@@ -1,6 +1,7 @@
 semillas: protegida centrada Lascar|VIIRS375|2026-10-01 05:18 | protegida corrida PlanchonPeteroa|VIIRS375|2026-08-31 06:00 | negativos centrados publicados V375 540 | Muy Bajo 159 | alertas V750 22
+semilla D-9: alertas centradas de 0,05 MW o menos que K publica 21
 semilla D1: Lascar|MODIS|2026-03-26 01:35
-== RESUMEN (salida completa de cada caso en C:\Users\nmend\AppData\Local\Temp\claude\C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile\cc89671c-1a9a-4960-b2b7-508d0fd7e9de\scratchpad\probar_caja2)
+== RESUMEN (salida completa de cada caso en C:\Users\nmend\AppData\Local\Temp\claude\C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile\cc89671c-1a9a-4960-b2b7-508d0fd7e9de\scratchpad\probar_caja_d9)
    OK    mec: sin KC no hay veredicto de KC; LA CAJA ACTUA (Q1 por Fisher, Q2 CUMPLE)
    OK    mec_nulo: BC igual a B -> sin huella, mecanismo INDECIDIBLE
    OK    noapaga: corona quitada sin apagar -> LA CAJA NO APAGA
@@ -14,11 +15,14 @@ semilla D1: Lascar|MODIS|2026-03-26 01:35
    OK    combinar: mec, d1 y un veto -> NO CUMPLE (veto)
    OK    nulo: sin huella en BC -> INDECIDIBLE (control positivo)
    OK    inerte: P2 EMPATE con ruido 0, P3 SIN SUSTRATO (ningun par cambia), NO CUMPLE (inerte)
+   OK    D-9: la seccion 11 con la regla original reproduce lo que decide (mec, d1, inerte)
    OK    veto: protegida centrada -> VETADO, NO CUMPLE (veto)
    OK    gemelo: el gemelo tambien la oculta -> P1 INDECIDIBLE
    OK    corrido: perdida en un volcan corrido -> no decide (se informa)
    OK    gana: P2 GANA, CUMPLE, P2b FUERA del techo
    OK    pierde: P2 PIERDE, NO CUMPLE (suma)
+   OK    minimas: decide la original -> P2 PIERDE, NO CUMPLE (suma), sin cambio por D-9
+   OK    minimas: seccion 11 -> SN GANA, SE no PIERDE, original PIERDE (informa)
    OK    ruido_chico: cambio de 1 dentro de un ruido de 2 -> P2 INDECIDIBLE, global INDECIDIBLE (no inerte)
    OK    gana_ruido: 5 menos con ruido 1 -> GANA
    OK    ruido_grande: ruido 20 no menor que el techo 3 -> determinismo FALLA, INDECIDIBLE
@@ -30,4 +34,4 @@ semilla D1: Lascar|MODIS|2026-03-26 01:35
    OK    determ: gemelo distinto en 100 pasadas -> INDECIDIBLE
    OK    capa_mod: capa cambiada -> referencia_ok False, INDECIDIBLE
    OK    log_real: el log real de K (sin la clave de la caja) -> K ROTO, INDECIDIBLE
-29 de 29
+32 de 32

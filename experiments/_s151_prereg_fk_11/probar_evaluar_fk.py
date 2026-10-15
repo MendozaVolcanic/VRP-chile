@@ -94,13 +94,15 @@ K_B = next(k for k in sorted(v375) if P[k]["B"] and not P[k]["A"] and L[k]["pub"
 NEG_PUB = sorted(k for k in v375 if L[k]["lab"] == "neg_limpio" and L[k]["pub"])
 MB_PUB = sorted(k for k in v375 if L[k]["lab"] == "pos" and not P[k]["A"] and L[k]["pub"])
 PUB_V375 = sorted(k for k in v375 if L[k]["pub"])
+# D-9 (issue #811): alertas Muy Bajo de 0,05 MW o menos que C0 publica (las que MIROVA llama NONE en su banner)
+MIN_PUB = sorted(k for k in MB_PUB if L[k].get("vrp_ref") is not None and L[k]["vrp_ref"] <= E.cm.UMBRAL_MINIMA_MW + 1e-9)
 BASE2 = recortar(V2["desde"], V2["hasta"])
 L2, P2 = etiquetas(BASE2, "V2")
 v375_2 = sorted(k for k in L2 if k.split("|")[1] == "VIIRS375" and P2[k]["A"] and L2[k]["pub"] and L2[k]["lab"] == "pos")
 K2_MARZO = next(k for k in v375_2 if k.split("|")[2] < "2026-04-01")
 K2_ABRIL = next(k for k in v375_2 if k.split("|")[2][:10] > CORTE_V2)
-print("semillas V1: protegida %s | solo OCR Suomi NPP %s | solo lectura B %s | negativos publicados %d | Muy Bajo publicadas %d" % (
-    K_PROT, K_SNPP, K_B, len(NEG_PUB), len(MB_PUB)))
+print("semillas V1: protegida %s | solo OCR Suomi NPP %s | solo lectura B %s | negativos publicados %d | Muy Bajo publicadas %d (de 0,05 MW o menos %d)" % (
+    K_PROT, K_SNPP, K_B, len(NEG_PUB), len(MB_PUB), len(MIN_PUB)))
 print("semillas V2: protegida de marzo %s | protegida de V2b %s" % (K2_MARZO, K2_ABRIL))
 
 
@@ -186,6 +188,19 @@ chk["nulo: P3 y P4 CUMPLE"] = all(V_(r, "P3|%s|%s" % (X, s)) in ("CUMPLE", "SIN 
 chk["nulo: K NO CUMPLE (no gana)"] = r.get("global", {}).get("K", {}).get("A") == "NO CUMPLE (no gana en ningun sensor)"
 chk["nulo: P6 implementado y C0 dentro de la banda"] = r.get("P6", {}).get("dentro") is True
 NULO = TMP / "nulo" / "res.json"
+chk["nulo: la seccion 10 (reglas D-9) reproduce con la regla original la seccion 6"] = r.get("reglas_d9", {}).get("autocontrol_original_ok") is True \
+    and r["reglas_d9"].get("control_distintas") == 0
+
+# D-9: F y K callan justo las alertas de 0,05 MW o menos. Con la etiqueta original (la que decide) eso es perder
+# alertas: PIERDE. Con SN, C0 las publica y son falsas alarmas: GANA. Con SE salen de la cuenta: EMPATE. Es el
+# caso que prueba que la seccion 10 puede dar un veredicto distinto del que decide (A116) sin cambiarlo.
+B = brazos(); [ocultar(B[n], k) for n in ("F", "K") for k in MIN_PUB]; r = correr("minimas", B)
+d9 = r.get("reglas_d9", {})
+chk["minimas: decide la original -> P2 PIERDE en VIIRS 375 y global NO CUMPLE (suma), sin cambio por D-9"] = \
+    V_(r, "P2|K|VIIRS375|A") == "PIERDE" and r.get("global", {}).get("K", {}).get("A") == "NO CUMPLE (suma de errores)"
+chk["minimas: seccion 10 -> SN GANA, SE EMPATE, original PIERDE (informa)"] = \
+    d9.get("SN", {}).get("P2", {}).get("P2|K|VIIRS375|A") == "GANA" and d9.get("SE", {}).get("P2", {}).get("P2|K|VIIRS375|A") == "EMPATE" \
+    and d9.get("original", {}).get("P2", {}).get("P2|K|VIIRS375|A") == "PIERDE"
 
 B = brazos(); ocultar(B["F"], K_PROT); ocultar(B["K"], K_PROT); r = correr("veto", B)
 chk["veto: P1 K VIIRS375 A y B VETADO"] = V_(r, "P1|K|VIIRS375|A") == "VETADO" and V_(r, "P1|K|VIIRS375|B") == "VETADO"
@@ -313,6 +328,12 @@ print("ndc: suma total lectura A", suma)
 chk["ndc: suma de errores C0 52, F 7, K 7 (verificador de #796)"] = suma == {"C0": 52, "F": 7, "K": 7}
 chk["ndc: controles OK y P1 VIIRS CUMPLE en F y K"] = r.get("controles_ok") is True and all(V_(r, "P1|%s|%s|A" % (X, s)) == "CUMPLE" for X in "FK" for s in ("VIIRS375", "VIIRS750"))
 chk["ndc: K recupera la MODIS del 2026-10-01 08:35"] = "recuperada (C0 no la publica): NevadosDeChillan|MODIS|2026-10-01 08:35" in out
+# D-9: la seccion 10 sobre Chillan tiene que dar lo que midio el estudio por su camino
+# (experiments/_s151_alertas_minimas/suma_salida.txt: SN C0 55, F 6, K 6; SE C0 52, F 5, K 5).
+d9 = r.get("reglas_d9", {})
+suma_d9 = {g: {n: sum(d9.get(g, {}).get("suma_total", {}).get("%s|%s|A" % (n, s), -999) for s in E.SENS) for n in ("C0", "F", "K")} for g in ("SN", "SE")}
+print("ndc: suma total lectura A con D-9", suma_d9)
+chk["ndc: seccion 10 reproduce el estudio D-9 (SN 55/6/6, SE 52/5/5)"] = suma_d9 == {"SN": {"C0": 55, "F": 6, "K": 6}, "SE": {"C0": 52, "F": 5, "K": 5}}
 
 rc = subprocess.run([sys.executable, str(AQUI / "evaluar_fk.py"), "--combinar", str(NULO), str(VETO)], capture_output=True, text=True, encoding="utf-8")
 (TMP / "combinar.txt").write_text(rc.stdout + rc.stderr, encoding="utf-8")

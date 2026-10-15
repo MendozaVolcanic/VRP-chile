@@ -67,12 +67,28 @@ energía: arriba de 1 MW perder una alerta no tiene compensación posible.
    distancia, 992 pasadas) quedó descartada; los evaluadores que ya la calculan la siguen imprimiendo
    como dato informativo, pero no decide. Definición, control y denominadores:
    `docs/S151_CRITERIO_CLASE_MIROVA.md` §2, §3 y §5.
-2. **Dentro de «Muy Bajo»** (alertas bajo 1 MW, VERY LOW en el banner de MIROVA), **una alerta perdida
+2. ⚠️ **Precisada por D-9 (2026-10-15, punto 5)**: «Muy Bajo» empieza arriba de 0,05 MW en VIIRS 375; las
+   alertas del scraper de 0,05 MW o menos son pasadas que el banner llama NONE y cuentan como «MIROVA no vio
+   nada». Texto original:
+   **Dentro de «Muy Bajo»** (alertas bajo 1 MW, VERY LOW en el banner de MIROVA), **una alerta perdida
    y una publicación de más pesan igual**: se minimiza la suma de los dos errores.
 3. **Se mide en las dos direcciones, por sensor y por tramo de calidad de la referencia (A119)**, con
    tres métricas: recall de las alertas de MIROVA, publicación en negativos limpios (pasadas donde
    MIROVA miró y no vio nada) y razón de magnitud contra MIROVA.
 4. Los umbrales de cada prueba salen de los datos de MIROVA, no se eligen (A115).
+5. ⚠️ **Agregado por D-9, decidida por Nicolás el 2026-10-15 (issue #811): las alertas mínimas cuentan
+   como «MIROVA no vio nada» (regla SN).** El scraper llama ALERTA a todo VRP mayor que cero, pero en
+   VIIRS 375 el banner de MIROVA dice NONE en las 14 pasadas observadas de 0,04 MW o menos y VERY LOW en
+   las de 0,06 MW o más; en 0,05 exacto sale de los dos lados (`experiments/_s151_alertas_minimas/README.md`
+   §2). Una pasada de VIIRS 375 cuyas alertas del scraper tienen todas **0,05 MW o menos** (sin ninguna otra
+   alerta por encima de eso a menos de 120 s, así que una protegida nunca se toca) no es «Muy Bajo»:
+   cuenta como pasada en que MIROVA no vio nada, y si la noche no tiene otra alerta es negativo limpio
+   (regla 3). Las protegidas no cambian. Como Nicolás pidió probar todas las opciones, cada evaluación
+   informa además SE (estrato aparte), la regla original y la variante con 0,05 exacto como alerta
+   (umbral 0,04), y dice si algún veredicto cambia. Un pre-registro sellado antes de D-9 decide con la
+   regla que tenía e informa las otras. Función única: `scripts/clase_mirova.py::aplicar_regla_minimas`.
+   Detalle: `docs/S151_CRITERIO_CLASE_MIROVA.md` (nota D-9) y
+   `experiments/_s151_alertas_minimas/veredictos_tres_reglas.md`.
 
 ## Las 3 preguntas vinculantes
 
