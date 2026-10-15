@@ -1394,6 +1394,15 @@ Cuando S62+S63 completen:
 
 ## D8' Cluster selection Puyehue (S35) — RESUELTO S38
 
+> ⚠️ **S151, segunda marca (A113, tarea 1.4 del loop, PR #809 verificado dos veces):** el estudio sobre
+> los GeoTIFF de MIROVA (`experiments/_s151_seleccion_mirova/README.md`) dice que MIROVA no elige el cráter
+> por ser el cráter: informa el foco lejano cuando es fuerte (15 de 15 pasadas con z ≥ 30 en el TIF; 12 de
+> 27 bajo ese corte; prueba continua p = 9e-5) y la fuerza del lejano y el calor del cráter pesan los dos.
+> Eso apoya la decisión del 2026-10-09, pero **«la mayor» contra «la suma» no está demostrado**, y en las
+> 15 alertas del cráter con un foco débil en nuestro píxel lejano el VRP de MIROVA es el del cráter solo.
+> El mecanismo dual ROI quedó refutado como causa; la candidata es la conectiva `min` (SOSPECHA), así que
+> el brazo que elige la mayor espera el A/B de F y K.
+
 > ⚠️ **Reabierta como pregunta en S150, marca agregada en S151** (A113; decisión de Nicolás del
 > 2026-10-09 en `docs/AUDIT_S150.md` §8; fuente `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P4):
 > **la réplica debe elegir la anomalía MAYOR de la escena, como MIROVA**, y la hipótesis de esta entrada
