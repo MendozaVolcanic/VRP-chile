@@ -168,8 +168,11 @@ y dos verificadores, 2026-10-09).
   la referencia de 0.1; verificador limpio; sello de Nicolás; despacho.
 
 - [~] **1.4 A/B de anomalía mayor (`vrp_max`) contra `vent_anchored`** PRE-REGISTRO en `main` (#794, `1795676b`,
-  verificado con arreglos); ESPERA a Nicolás (D-6, #795): A1 casi inerte (el flag no llega a la Regla D ni al
-  ancla), A2 necesita código (A45) y P5 prevé un veto con la lectura A. (decisión de Nicolás para la réplica).
+  verificado con arreglos). D-6 DECIDIDA 2026-10-14: SIGUE (Nicolás: la réplica debe reproducir también las
+  anomalías lejanas para demostrar fidelidad a la metodología; distancia similar más TIF bastan para identificar
+  el objeto). Paso 1 en curso: estudio con TIF y distancia de qué objeto informa MIROVA y si es la mayor (rama
+  `loop/1.4-estudio-tif`); paso 2: código de A2 con tag y PR sin merge (A45); paso 3: A/B con R4 como métrica
+  central. Antes: A1 casi inerte (el flag no llega a la Regla D ni al ancla) y P5 prevé un veto con la lectura A.
   Universo de comparación: 359 detecciones lejanas nocturnas de MIROVA, no 858 (VERIFICADOR_DATOS D2); la
   clasificación NULO la escribe el scraper. Medir distancias desde el cráter y no desde el catálogo
   (`process_viirs.py:754`, AUDITOR_F1). Pre-registro, verificador, sello, despacho.
@@ -181,7 +184,8 @@ y dos verificadores, 2026-10-09).
   2016a (VERIFICADOR_DATOS D9): medirlo como variante, no como "lo que exige el paper".
 
 - [~] **1.6 MODIS: banda 22 junto con `max`** PRE-REGISTRO de F y K contra producción en los 11 volcanes en `main`
-  (#797, `2c174b5b`, verificado con arreglos); ESPERA el sello (D-7, #798). Los flags de compuerta y de fondo de
+  (#797, `2c174b5b`, verificado con arreglos); APROBADO por Nicolás el 2026-10-14 (D-7). V1 DESPACHADO 21:21 UTC,
+  run 38639658446 (~12,5 h); faltan V2a y V2b, uno a la vez. Los flags de compuerta y de fondo de
   MODIS siguen sin existir (A45). Texto original: con los flags de compuerta y de fondo que le faltan a MODIS
   (`audit_s146/A2_RESULTADO_VARA_CORREGIDA.md:285`). En MODIS, `max` solo apaga el detector (S147).
 
@@ -209,6 +213,51 @@ y dos verificadores, 2026-10-09).
   coordenadas de los rasgos reales: Cerro Blanco, Pichi-Llaima, Lazufre, El Agrio). Su vara no es MIROVA
   (A115).
 
+**Agregadas por Nicolás el 2026-10-14 (en este orden; "puedes correr donde necesites": GitHub Actions incluido,
+siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
+
+- [x] **1.12 (estudio D) Las alertas de 0,05 MW o menos: ¿MIROVA las considera anomalía?** HECHA 2026-10-14 (#810, squash `f14b31ac`, verificada): en VIIRS 375 MIROVA llama NONE a 0,04 MW o menos y
+  VERY LOW a 0,06 o más; 155 alertas del scraper de 0,05 o menos. Cómo contarlas: decisión D-9 (#811).
+  Por qué: el banner de MIROVA dice NONE en 9 pasadas que el scraper registra como alerta (0,02 a 0,05 MW,
+  `docs/S151_CRITERIO_CLASE_MIROVA.md` §5), y 9 de las 14 pérdidas débiles de D22 están en ese rango. Si MIROVA no
+  las ve como anomalía, toda suma de errores las cuenta mal (como alerta perdida o como acierto), incluida la del
+  A/B de F/K en curso. Es la vara de todas las pruebas: va primero.
+  Qué medir: cuántas alertas de la unión tienen VRP de 0,05 MW o menos, por sensor, volcán y tramo A119; qué dice
+  el banner (cuando hay) y el TIF de esas pasadas; si la frontera NONE / VERY LOW está en 0,05 MW o depende del
+  redondeo; y cuánto cambia la suma de errores de los resultados ya medidos (meses de S150, VIIRS 750, Chillán)
+  si esas pasadas se tratan como "MIROVA no vio nada". Control que pueda fallar.
+  Entregable: documento con la regla propuesta para el evaluador, y la regla queda como decisión para Nicolás
+  si cambia algún veredicto ya publicado.
+
+- [x] **1.13 (estudio C) Alertas diurnas de MIROVA que la réplica no mira.** HECHA 2026-10-14 (#812, squash
+  `51b1977b`, verificada con arreglos): MIROVA sí procesa VIIRS de día; 40 pasadas diurnas usables (A119) contra
+  232 nocturnas; decisión D-10 (#813). Antes: ENTREGADO #812, en verificación
+  limpia. Antes: EN CURSO 2026-10-14 (agente en
+  `VRP-Chile-113`, rama `loop/1.13-alertas-diurnas`).
+  Por qué: la réplica procesa sólo de noche (MIR contaminado por el sol), pero la tabla de MIROVA trae 37 alertas
+  entre las 13 y las 21 UTC, 19 de 1 MW o más (dato de la tarea 0.3, `docs/audit_s150/meta/`). Con la lectura A
+  son alertas protegidas que se pierden por construcción, y ningún evaluador las cuenta porque todos filtran el día.
+  Qué medir: la población completa de alertas diurnas en la unión (por sensor, volcán, hora y elevación solar);
+  cuáles son reales y cuáles reflejo solar en nubes (A76: VIIRS 375 cerca del mediodía sobre nube); qué haría la
+  réplica con ellas (¿procesa MIROVA el día para VIIRS?, Coppola 2016a y la tesis de Massimetti en
+  `documentacion/`, página renderizada); y cuánto pesan en el criterio. Sin tocar el pipeline.
+
+- [x] **1.14 (estudio A) Presupuesto de la magnitud, pasada por pasada.** HECHA 2026-10-14 (#814, `33c42ab5`,
+  verificado PARCIAL y con los siete arreglos aplicados). Resultado: el reparto selección/fondo es una identidad que
+  depende de la bisagra (fondo 21 a 64 % del déficit V375; Shapley 43 %); la dependencia con el ángulo NO es D17
+  (el Npix de MIROVA no crece con el área) y queda SIN ATRIBUIR; D25 es la palanca que más mueve (×1,28, sube de
+  1,00 en nadir a 1,20 en el borde). Siguiente: pre-registro de D25 como brazo sobre C0 y sobre F (negativos limpios
+  medidos en F, porque en C0 el Test 1 satura, A114), coordinado con #793 y con el resultado de F/K; se escribe
+  cuando F/K se evalúe. El estudio B (remuestreo D17) pierde su motivación principal.
+  Por qué: subestimamos la energía (Láscar 0,44, Isluga 0,52, Lastarria 0,56, Tupungatito 0,65 en el auto-audit
+  del 2026-10-14; 0,4 a 0,6 en la erupción de Chillán) y no sabemos cuánto viene de cada causa: cuántos píxeles
+  alertamos contra cuántos suma MIROVA (Campus 2022: suma de todos los alertados), cuánta energía trae cada píxel,
+  y cuánto resta el fondo (anillo contra vecinos, D25; A99 rebajada: dos factores opuestos que se compensan).
+  Qué medir: descomponer la razón contra MIROVA en esos factores por pasada, usando nuestros `anomaly_pixels` y,
+  donde se pueda, el conteo de píxeles calientes del TIF de MIROVA (A24: el TIF no es VRP sumable; A106: CRS y hora
+  de adquisición; A109). Resultado: qué palanca mueve la magnitud (conectiva, fondo, área o remuestreo D17) y
+  cuánto, para decidir el siguiente A/B. Control que pueda fallar.
+
 ## 5. Cola de decisiones para Nicolás (el loop agrega; Nicolás responde en el issue)
 
 | # | decisión | evidencia | PR / tag | issue |
@@ -216,13 +265,192 @@ y dos verificadores, 2026-10-09).
 | D-1 | Adoptar conectiva `max` en VIIRS 375 (criterio §1.2 por medir en 0.2) | `docs/S150_RESULTADO_MESES.md`, `docs/audit_s150/meta/AUDITOR_F2_NUMEROS.md` | pendiente | pendiente |
 | D-2 | Merge del arreglo del scraper Mirova-v1#19 (tarea 0.5) | CI verde de Mirova-v1#21; 4 tests | Mirova-v1#21 | #783 |
 | D-3 | Marca de régimen en `store.py` (tarea 0.6) | 4 tests, 3 fallaban antes; suite 1706 | #785, tag `pre-s151-marca-regimen` | #786 |
-| D-4 | Alerta protegida: lectura A (alertas del scraper, 439 pasadas, recomendada) o B (todo VRP >= 1 MW, 992) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 |
+| D-4 | ~~Alerta protegida: lectura A o B~~ **DECIDIDA: A** (Nicolás, 2026-10-14; propagada en #808) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 (cerrado) |
 | D-5 | Sello del probe de D25 en VIIRS 750 (tarea 1.5); pilotear Tupungatito con 10 pasadas | `experiments/_s151_d25_v750_disco/README.md`, verificador limpio con arreglos | #790 | #793 |
-| D-6 | A/B de anomalía mayor: sello de A1 y si se implementa el código de A2 (recomendación: esperar D-4) | `experiments/_s151_ab_vrp_max/PREREGISTRO.md`, verificador limpio con arreglos | #794 | #795 |
-| D-7 | Sello del A/B de F y K contra producción en los 11 volcanes (V1 costo, V2 veto; ~28 h) | `experiments/_s151_prereg_fk_11/PREREGISTRO.md`, verificador limpio con arreglos | #797 | #798 |
+| D-6 | ~~A/B de anomalía mayor~~ **DECIDIDA: SIGUE** (Nicolás, 2026-10-14; estudio TIF primero) | `experiments/_s151_ab_vrp_max/PREREGISTRO.md`, verificador limpio con arreglos | #794 | #795 |
+| D-7 | ~~Sello del A/B de F y K~~ **APROBADO** (Nicolás, 2026-10-14); V1 en curso, run 38639658446 | `experiments/_s151_prereg_fk_11/PREREGISTRO.md`, verificador limpio con arreglos | #797 | #798 |
 | D-8 | Sello del A/B reducido de la caja (D1/D2 con K/KC, ~35 min; V1 con B/BC, ~6 h) | `experiments/_s151_prereg_caja/PREREGISTRO.md`, verificador limpio con arreglos | #800 | #801 |
+| D-9 | Alertas de 0,05 MW o menos (NONE en el banner): SN "MIROVA no vio nada" (recomendada) o SE estrato aparte; y 0,05 exacto | `experiments/_s151_alertas_minimas/README.md`, verificado | #810 | #811 |
+| D-10 | ¿Abrir el día en la réplica? (1, recomendada: cablear rama diurna VIIRS apagada por flag con A45 y A/B diurno; 2: dejarlo cerrado y escribirlo en el criterio) | `experiments/_s151_alertas_diurnas/README.md`, verificado | #812 | #813 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-15 00:51 UTC (vuelta 44): propagación A113 de la 1.13 a D27 (#815)
+- Todas las tareas de la cola esperan un sello, una decisión o el A/B de F/K, así que la vuelta tomó la
+  propagación pendiente (A113): segunda marca S151 en D27 (`docs/MIROVA_DIVERGENCES.md`): el día es sobre todo
+  VIIRS 375 (94 pasadas protegidas; 40 usables bajo A119 contra 232 nocturnas), MIROVA sí procesa VIIRS de día
+  (Campus 2022 p. 16 y 17), la Tabla 1 diurna sólo está en `process_modis.py` (A118); y nota en el docstring de
+  `tests/test_daytime_modis.py`. El docstring de `store.py` queda para el PR de código de D-10 (archivo protegido).
+  Suite 1710 passed (worktree `VRP-Chile-d27`). PR #815, espera CI.
+- Estado: V1 de F/K con 6 de 44 jobs terminados a las 3,5 h (32 en cola); V2a pendiente detrás. NRT verde
+  (23:06 UTC). Disco 23 GB. Corregida la marca de 1.12 (decía EN CURSO y HECHA a la vez).
+
+### 2026-10-14 (vuelta 43): 1.14 cerrada (#814 mergeado, `33c42ab5`)
+- Siete arreglos aplicados (`5c4c9705`): reparto con las dos bisagras y Shapley, D17 retirado, efecto de D25 por
+  ángulo con intervalo [1,07; 1,33] en el borde, régimen de código separado de la ventana (0 de 17.450 records de
+  producción abril-agosto con hora de proceso), "la que más mueve", C2 MODIS acotado a 2026, OSF sin verificar
+  como vara NRT. Suite 1710 passed; CI verde; mergeado. Worktree `VRP-Chile-114` se puede retirar.
+
+### 2026-10-14 (vuelta 42): verificador de #814 PARCIAL, arreglos enviados
+- Confirmado: reconstrucción 11 de 11 y factores de las palancas (D25 1,2788). Caído: el reparto selección/fondo
+  es una identidad cuyo reparto depende de la bisagra (V375 32/21 o -12/64); la atribución al remuestreo D17
+  (el Npix de MIROVA no crece con el área; D25 sí actúa sobre la parte del ángulo, 1,00 a 1,20); "brazos antes
+  de #535" es falso en código (S143-S149 son posteriores); "la única palanca" (keep_peak 1,05 y D22 1,03 también
+  mueven); recomendación sobre producción saturada por el Test 1 (A114) → medir D25 sobre producción y sobre F.
+- Arreglos (a) a (g) enviados al agente de la 1.14. Aviso: `test_perfil_operacional_reproduce_el_golden_bit_a_bit`
+  falló una vez en una corrida con -x del verificador y pasó en tres posteriores; causa SIN VERIFICAR (vigilar).
+
+### 2026-10-14 (vuelta 41): estudio TIF de la 1.4 mergeado (#809 v3, `e1074caa`)
+- v3 con los arreglos del segundo verificador: dual ROI REFUTADO como mecanismo (ya encendido en los dos pases;
+  en 7 de 15 alertas el primer pase alertó el píxel lejano); no es factor único (logística n 53: pico lejano más
+  pico cráter AIC 30,7 contra 40,9 del lejano solo, p 0,0005), frontera blanda (z 18 a 26: 5 cerca, 10 lejos);
+  tabla simétrica con prueba continua p 9e-5 y permutación por volcán p 0,0001. Sigue firme: el VRP de MIROVA
+  calza con el cráter solo (+0,12 contra +0,55). Suite 1710 passed; CI verde; mergeado.
+- La 1.4 sigue `[~]`: el diseño del brazo A2 (anomalía mayor) espera el resultado de F/K, porque la SOSPECHA nueva
+  es la conectiva `min`, que el A/B mide. No inventar un umbral fuera de la cumbre antes de eso.
+
+### 2026-10-14 (vuelta 40): 1.14 entregada (#814), en verificación
+- Estudio del presupuesto de la magnitud (PR #814, sin verificar): reconstruye las razones del auto-audit en 11 de
+  11; VIIRS 375 2025 contra el OSF, R 0,69 = recorte 43 %, selección 29 %, fondo 28 %. De las palancas ya
+  construidas, sólo D25 acerca la magnitud (×1,28, medido en brazos `literal` de junio a agosto, antes de #535);
+  `max` 0,93 y quitar el Test 1 0,88. Recomienda un A/B de D25 aislado en VIIRS 375 sobre producción. Controles
+  que fallaron: cúmulo de un píxel en MODIS (79 a 87 %) y fondo por píxel cuando dispara el Test 1. El agente
+  usó `sed -i` una vez (anotado, §1.7).
+- Verificador limpio lanzado sobre #814 (identidad contra medición, OSF filtrado A105, régimen de las palancas
+  A104, firma de D17). V1 de F/K corriendo (GitHub lo muestra "queued"), V2a pendiente detrás; NRT verde 23:06
+  UTC; disco 21 GB libres.
+
+### 2026-10-14 (vuelta 39): 1.13 cerrada (#812, D-10 #813)
+- Arreglos de #812: clase "real" circular rebajada (39 a SIN EVIDENCIA; 54 sin evidencia y 40 reflejo); nulo
+  nocturno por volcán (sólo informa en Láscar); A119 en el denominador (40 diurnas usables contra 232 nocturnas);
+  cita completa de Coppola 2016a; 50 MW marcado como del archivo curado (tabla NRT: 38 diurnas, máximo 15,81 MW);
+  la Tabla 1 diurna existe sólo en `process_modis.py` (VIIRS sin rama diurna; `store.py` rechaza VIIRS de día).
+  CI verde, mergeado. D-10 abierta (#813), recomendación: cablear la rama diurna VIIRS apagada con A45 y A/B.
+- Pendiente de propagación (A113): el docstring falso de `pipeline/store.py:180-185` (archivo protegido: va en el
+  PR de código de D-10 si es "1") y el texto de D27 en `docs/MIROVA_DIVERGENCES.md` (dice MODIS, son VIIRS 375).
+
+### 2026-10-14 (servidor 23:39 UTC): vuelta 38, #812 en arreglos; #809 v2 cambia la conclusión, segundo verificador
+- #812 (alertas diurnas), verificador PARCIAL: conteos y papers confirmados; la clase "39 reales" es circular
+  (sacando las propias alertas, Chillán cae de 11,5 a 0 veces el azar y con el corte de 10 la clase real queda en
+  0); 50 de las 94 pasadas dependen de OCR que A119 no deja decidir (quedan ~40); el umbral diurno de 50 MW es del
+  archivo curado, no del NRT (la tabla NRT publica 38 diurnas, todas bajo 50 MW). La recomendación pasa a clave de
+  fidelidad: A/B diurno con la Tabla 1 diurna ya en el código, contra negativos diurnos limpios. Arreglos devueltos.
+- #809 v2: lo que decide si MIROVA informa lejos es la FUERZA del foco lejano (z 15 contra 29, 0,32 contra 0,58
+  MW); en 15 de las 36 alertas "cráter con foco lejano" el VRP de MIROVA calza con el cráter solo; en 21 nuestro
+  píxel lejano no es un objeto que MIROVA vea. Sospecha: umbral de escena más exigente (dual ROI). "Suma" contra
+  "mayor" sigue sin demostrar. Análisis nuevo: segundo verificador limpio lanzado.
+- Paradas: NRT corriendo (23:06); disco 20 GB. V1: 4 verdes, 6 corriendo, 34 en espera.
+
+### 2026-10-14 (vuelta 37): estudio C entregado (#812) en verificación; estudio A arrancado
+- #812 (sin verificar aún): 135 filas de alerta diurnas, 97 protegidas (94 pasadas) contra 346 pasadas protegidas
+  nocturnas; VIIRS 375 85 de 97; Láscar 39, Lastarria 31, Chillán 10. Clasificación: 39 reales probables (Láscar,
+  Chillán, Villarrica), 40 reflejo o sol (Lastarria, Láscar, Isluga), 15 indeterminadas; la clase real es frágil.
+  Papers (renderizados): Campus 2022 dice que MIROVA SÍ procesa VIIRS de día (alertas 51 % noche, 20 % día);
+  Coppola 2016a: falsas sobre todo diurnas y bajo 5 MW; Coppola 2026: umbral diurno de 50 MW en el archivo curado.
+  El docstring de `store._reject_daytime` diría que VIIRS no tiene fuente diurna de MIROVA (falso). Recomendación
+  del agente: no abrir el día. Ojo: choca con el criterio de fidelidad que Nicolás pidió para D-6; va a él.
+- 1.14 (presupuesto de la magnitud) arrancado con un agente en `VRP-Chile-114`.
+- V1: 4 jobs verdes, 6 corriendo, 34 en espera.
+
+### 2026-10-14 (servidor 23:28 UTC): vuelta 36, 1.12 cerrada (#810, D-9 #811); TIF congelados re-verificados
+- #810: verificador CONFIRMADO en números; arreglos de presentación aplicados (14 y 20 pasadas distintas, cota
+  19,3 %; 0,05 con 5 y 5; "redondeo o truncado"; SN y SE como dos lecturas; cotejo de tablas 13.677 pasadas sin
+  diferencias). CI verde, mergeado. Decisión D-9 abierta (#811), recomendación SN.
+- #809 (verificador PARCIAL): firme que MIROVA no elige el cráter y que vemos sus objetos lejanos (nulo de otras
+  noches: 0,08 esperadas, 39 observadas); no demostrado "suma" contra "mayor" (p 0,005 a 0,12 sacando un caso);
+  36 alertas con MIROVA en el cráter y nuestro píxel fuerte lejos sin explicar. Arreglos devueltos al agente.
+- TIF de MIROVA: Nicolás creía que había TIF. Re-verificado contra el remoto y el servidor: el repo
+  `mirova-tif-archive` está vivo y tiene TIF hasta el 22-sep; los 33 TIF que sirve MIROVA tienen Last-Modified del
+  22-sep (PNG del día), y el TIF de Láscar VIIRS 375 bajado hoy es byte a byte el archivado el 22-sep 10:26.
+  Anotado en `MAPA_WORKSPACE.md` y en memoria (`reference_mirova_tif_congelados_20260922.md`).
+
+### 2026-10-14 (vuelta 35): estudio D entregado (#810) y en verificación; estudio C arrancado
+- #810 (sin verificar aún): 155 de 2.281 pasadas con alerta tienen 0,05 MW o menos, todas VIIRS 375 (Lastarria 55,
+  Tupungatito 26, Planchón Peteroa 18). Frontera del banner de MIROVA en VIIRS 375: NONE con 0,04 MW o menos, VERY
+  LOW desde 0,06, sin excepciones en tres muestras (banner OCR, color de la estrella, 2.702 imágenes de mayo leídas
+  con `leer_png_mirova.py`); 0,05 queda de los dos lados por redondeo. En mayo el corte de 1 MW VERY LOW / LOW
+  también se cumple en MODIS (7) y VIIRS 750 (19). Sacarlas a un estrato aparte no cambia ningún veredicto (meses
+  860/134 → 852/109; VIIRS 750 400/90 → 397/87; Chillán F/K 7 → 5) y baja el techo de D22 de 14 a 5. Regla
+  propuesta (estrato "mínima", ni pérdida ni acierto ni negativo) queda para Nicolás. El agente admite un `printf >>`.
+- 1.13 (alertas diurnas) arrancado con un agente en `VRP-Chile-113`.
+- V1: 2 jobs terminados en verde, 6 corriendo, 36 en espera; V2a en espera detrás.
+
+### 2026-10-14 (servidor 23:07 UTC): vuelta 34, estudio TIF de la 1.4 entregado (#809), en verificación
+- Lo que trae (sin verificar todavía): 117 de 359 lejanas con TIF de su pasada. El TIF muestra un foco a la
+  distancia del CSV en 84 de 97 lejanas VIIRS 375 (5 % en RUTINA); nuestro píxel de más VRP cae a 1 km o menos de
+  ese foco en 39 de 54, control girado 0 de 546. Pero `anomaly_pixels` casi nunca lo guarda (4 de 57): la Regla D
+  rehace la lista con los píxeles del Test 1.
+- Regla de selección: "el cráter si hay algo en el cráter" y "la más cercana al centro" refutadas (28 lejanas con
+  calor en el cráter, MIROVA informó lejos en todas); "la mayor" y "la suma de lo alertado" aciertan la dirección,
+  y la magnitud de MIROVA en 8 casos estrictos favorece la suma (p = 0,046), que es lo que dicen los papers (A10,
+  D32). `vrp_max` no sería lo que hace MIROVA: cambia el diseño del A/B y va a Nicolás antes de escribir A2.
+- Láscar 2026-10-01 05:18: la fila de 1,2 MW es sólo OCR con la distancia de otra pasada; la miniatura de MIROVA
+  muestra el foco lejano más fuerte que el cráter. La P5 del pre-registro (veto) queda sin respaldo.
+- Operacional: MIROVA habría dejado de actualizar sus GeoTIFF el 2026-09-22 (Last-Modified); `mirova-tif-archive`
+  ya no guardaría TIF nuevos. Si el verificador lo confirma, va a `MAPA_WORKSPACE.md` (pipeline que dejó de producir).
+- El agente reconoce haber editado con heredoc o sed un par de veces antes de corregirse; contenido final revisado.
+- Verificador limpio lanzado sobre #809.
+
+### 2026-10-14 (servidor 22:37 UTC): vuelta 33, V2a encolado detrás de V1, estudio D (1.12) arrancado
+- V1: 6 jobs en curso (el máximo) y 38 en espera; el estado global "queued" es un desfase de GitHub. V2a
+  despachado (run 38648773684) y quedó `pending` en el grupo detrás de V1, sin desplazarlo (comprobado 30 s
+  después). V2b se despacha cuando V2a arranque.
+- 1.12 (estudio D) arrancado con un agente en `VRP-Chile-112`. Siguen corriendo el estudio TIF de la 1.4.
+
+### 2026-10-14 (vuelta 32): mapa de gaps y tres estudios nuevos en la cola (1.12, 1.13, 1.14)
+- A pedido de Nicolás, mapa de gaps con el auto-audit del 2026-10-14 (ventana de falsas 09-01 a 10-14):
+  publicación en negativos limpios VIIRS 375 88,6 %, VIIRS 750 24,5 %, MODIS 13 % (meta 10 %); recall del tablero
+  MODIS 30 % con el cráter detectado el 100 %, VIIRS 750 87 %, VIIRS 375 99 %; magnitud Láscar 0,44 a Villarrica
+  0,82 (Llaima 8,7 con n 1). La brecha dominante sigue siendo la sobre-publicación de VIIRS 375 (la ataca F/K).
+- Nicolás aprobó agregar D, C y A, en ese orden (1.12, 1.13, 1.14), con permiso de correr donde haga falta.
+  Propuestos y no agregados aún: B (remuestreo a la grilla de MIROVA, D17; espera lo que diga 1.14), E (pasadas de
+  MIROVA sin record nuestro, por satélite) y F (saturación en erupción).
+- Espacio medido: worktree ~0,9 GB; prueba de un evaluador ~2 GB de temporales; `.git` 9 GB; TIF archive 4 GB.
+
+### 2026-10-14 (servidor 22:09 UTC): vuelta 31, D-6 = sigue; disco liberado; V1 arrancando
+- Nicolás rechazó cerrar la 1.4: la réplica existe para demostrar fidelidad a la metodología de MIROVA, y sin las
+  anomalías lejanas no se puede saber si hacemos lo que ellos hacen ni defender mejoras; la distancia similar
+  permite suponer el mismo objeto y el TIF muestra los píxeles. Mi recomendación de cerrarla razonaba sólo desde el
+  criterio de victoria (lectura A) y dejaba fuera la fidelidad: corregida. Registrado en #795.
+- Lanzado un agente (worktree `VRP-Chile-tif`) para el paso 1: con TIF de `../mirova-tif-archive` (lectura local,
+  sin pull) y distancia, qué objeto informa MIROVA cuando hay calor lejano, si es la mayor, y el caso Láscar
+  2026-10-01 05:18 (MIROVA dio el cráter mientras nuestro píxel más energético estaba a 19,7 km).
+- Disco: había bajado a 8,9 GB por ~9 GB de carpetas temporales de las pruebas de evaluadores en mi scratchpad;
+  borradas (rutas literales, tras un bloqueo del chequeo de seguridad por usar variables): 18 GB libres.
+- V1 (run 38639658446): los jobs ya empezaron en `ubuntu-24.04` (la cola era espera de máquinas; GitHub Actions
+  operacional), pero el run aún figura `queued`; V2a sigue sin encolar hasta verlo `in_progress`.
+
+### 2026-10-14 (servidor 21:22 UTC): vuelta 30, Nicolás decide D-4 = A y aprueba D-7; V1 despachado tras probar todo
+- Nicolás en la conversación: "A y Si, recuerda probar todo lo necesario". D-4: lectura A (issue #782 comentado
+  y cerrado; propagado a MISSION, CLAUDE.md y S151_CRITERIO en #808, CI verde, mergeado). D-7: aprobado (registrado
+  en #798). No existe `sellar.py` en el repo: el sello es su "sí" más el candado `preregistro_aprobado=si`.
+- Pruebas previas al despacho, todas en verde:
+  - Perfiles C0, F, K y G leídos desde `pipeline.profile`: Test 1, conectiva y banda 22 como lo declarado;
+    `diff_perfiles.py` idéntico a la salida commiteada.
+  - Referencia congelada de V1 y V2: 8 de 8 archivos con el sha256 LF del manifiesto, commiteados en git.
+  - Workflow: `FLAGS_BRAZO` trae todas las claves que el evaluador revisa; token renovado el 2026-10-08; 0 runs
+    vivos en el grupo.
+  - Prueba del evaluador: 37 de 37, idéntica caso por caso a `probar_salida.txt`. La primera corrida la corté yo
+    con un `timeout` de 25 min y salida con búfer: no imprimió nada; se repitió sin límite y con `-u`.
+  - Piloto en GitHub (run 38634276942, Láscar, 2026-09-30 a 10-01, los 4 brazos): 4 jobs verdes, 18 pasadas por
+    brazo sin faltantes (la recolección en rojo sólo por los 10 volcanes ausentes); `evaluar_fk.py` sobre sus
+    salidas reales: referencia OK, cobertura pareja, C0 contra producción OK, cableado de los 4 OK, determinismo
+    100 % en los tres sensores. Veredictos del piloto no se miran.
+- V1 despachado 21:21 UTC: run 38639658446 (sha 402447f33), 2026-08-29 a 10-08, 11 volcanes, C0/F/K/G. Queda en
+  cola esperando máquinas; V2a se encola sólo cuando V1 esté `in_progress` (un despacho mientras V1 figura
+  pendiente podría desplazarlo).
+- Próximo paso: encolar V2a con V1 corriendo; V2b cuando V2a arranque; evaluar cada ventana al terminar, con
+  verificador limpio.
+
+### 2026-10-14 (servidor 20:14 UTC): vuelta 29, la sesión se reinició; aviso #779 revisado; loop re-armado
+- La sesión se reinició y la vuelta programada para las ~19:20 UTC no corrió. Se re-arma el loop.
+- Issue #779 (auto-audit FUERA DE BANDA): lo abrió el `audit-weekly` que despaché a las 11:41 UTC para probar la
+  unión. Flag: magnitud de Tupungatito 0,647 de MIROVA (n 23), bajo la banda de 0,7. No lo causa la unión: ese run
+  es anterior a #803 (el paso 1 todavía no la leía) y Tupungatito perdió una noche, no ganó. Es la ventana rodante:
+  el 2026-10-12 daba 0,707 con n 24 (ventana 08-13 a 10-12) y el 14 da 0,647 con n 23 (08-15 a 10-14). Un
+  promedio con n de dos decenas pegado al umbral cambia de lado por una sola noche (A87, A90). El déficit de fondo
+  es el conocido de régimen débil (S124), que es justo lo que miden las pruebas en espera (D-7, F/K). No se toca.
+- Sin respuestas en los issues de decisión; NRT verde a las 14:52 y uno en curso; disco 13 GB.
 
 ### 2026-10-14 (servidor 18:22 UTC): vuelta 28, el OCR medido (#805); el loop pasa a espera
 - OCR de Mirova-v1, 232 versiones diarias desde el 2026-01-20: 1.065 claves en la unión, 1.060 en la más nueva, 5
