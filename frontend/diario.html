@@ -104,7 +104,7 @@ footer a:hover { text-decoration: underline; }
 
 <header>
   <h1>VRP Diario por Volcán Tier A</h1>
-  <div class="sub">Comparación VRP MIROVA-equivalente nuestro vs MIROVA NRT (tabla publicada ▲ e imagen por OCR ◇) · ventana 90d</div>
+  <div class="sub">Comparación VRP MIROVA-equivalente nuestro vs MIROVA NRT (tabla publicada ▲ e imagen por OCR ◇; ✕ = VRP de su imagen con distancia desconocida, la imagen de MIROVA era de otra pasada) · ventana 90d</div>
   <div class="ts-note">⏰ Todas las horas en UTC · click en una tarjeta para ampliar</div>
 </header>
 
@@ -457,9 +457,9 @@ function aggregateDailyMax(records, getter) {
     if (v == null || v <= 0) continue;
     const d = (r.datetime_utc || r.dt || "").slice(0, 10);
     if (!d) continue;
-    if (!m.has(d) || v > m.get(d).y) m.set(d, { y: v, ocr: !!r.ocr });
+    if (!m.has(d) || v > m.get(d).y) m.set(d, { y: v, ocr: !!r.ocr, sinGeo: !!r.sinGeo });
   }
-  return [...m.entries()].sort().map(([x, p]) => ({ x, y: p.y, ocr: p.ocr }));
+  return [...m.entries()].sort().map(([x, p]) => ({ x, y: p.y, ocr: p.ocr, sinGeo: p.sinGeo }));
 }
 
 // S150 (decision de Nicolas, opcion a): la referencia de MIROVA sale de data/mirova/<Volcan>.json, el mismo
@@ -475,11 +475,21 @@ async function loadMirovaRef(volc) {
       dt: m.datetime_utc, volc: volc.csv, sensor: m.sensor, vrp: parseFloat(m.VRP_MW) || 0,
       dist: Number.isFinite(parseFloat(m.distancia_km)) ? parseFloat(m.distancia_km) : null,
       ocr: m.source === "ocr",
+      sinGeo: m.sin_geometria === true,
     }));
   } catch (e) { return []; }
 }
-function mirovaPointStyle(ctx) { return ctx.raw && ctx.raw.ocr ? "rectRot" : "triangle"; }
+// V31.1 (Mirova-v1, 2026-10-15): pasada con VRP leido de su imagen pero SIN distancia propia (la imagen de
+// distancia de MIROVA ya era de otra pasada): X y tooltip. Su dist queda null, asi que no entra a la mediana.
+function mirovaPointStyle(ctx) {
+  if (ctx.raw && ctx.raw.sinGeo) return "crossRot";
+  return ctx.raw && ctx.raw.ocr ? "rectRot" : "triangle";
+}
 function mirovaPointFill(color) { return (ctx) => (ctx.raw && ctx.raw.ocr ? "transparent" : color); }
+// La X es de trazo fino: un poco mas grande para que se distinga del rombo a simple vista.
+function mirovaPointRadius(base) { return (ctx) => (ctx.raw && ctx.raw.sinGeo ? base + 3 : base); }
+const MIROVA_SIN_GEO_TXT = "distancia desconocida (la imagen de MIROVA era de otra pasada)";
+function mirovaSufijoSinGeo(item) { return item && item.raw && item.raw.sinGeo ? " · " + MIROVA_SIN_GEO_TXT : ""; }
 
 function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
   const ds = [];
@@ -523,7 +533,7 @@ function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
       label: `MIROVA ${MIROVA_SENSOR_LABEL[b]} (ref.)`, type: "line",
       data: aggregateDailyMax(mBuckets[b], r => r.vrp),
       borderColor: SENSOR_COLOR[b], backgroundColor: "transparent",
-      borderWidth: 2, borderDash: [5, 3], pointRadius: 3.5, pointStyle: mirovaPointStyle,
+      borderWidth: 2, borderDash: [5, 3], pointRadius: mirovaPointRadius(3.5), pointStyle: mirovaPointStyle,
       pointBorderColor: SENSOR_COLOR[b], pointBackgroundColor: mirovaPointFill(SENSOR_COLOR[b]), tension: 0.15, order: 0,
     });
   }
@@ -542,7 +552,7 @@ function chartConfig(datasets) {
         tooltip: { callbacks: {
           title: (items) => items[0].parsed.x ?
             new Date(items[0].parsed.x).toISOString().slice(0,10) : "",
-          label: (item) => `${item.dataset.label}: ${item.parsed.y.toFixed(2)} MW`
+          label: (item) => `${item.dataset.label}: ${item.parsed.y.toFixed(2)} MW${mirovaSufijoSinGeo(item)}`
         }}
       },
       scales: {

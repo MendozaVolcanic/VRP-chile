@@ -50,6 +50,21 @@ DEFAULT_SOURCE = REPO / "latest_consolidado.csv"
 CLASES_ALERTA = {"Muy Bajo", "Bajo", "Medio", "Moderado", "Alto", "Muy Alto"}
 RAIZ_REAL = Path(__file__).resolve().parent.parent   # REPO puede apuntar a otro lado en los tests
 
+# V31.1 de Mirova-v1 (2026-10-15): MIROVA tiene una sola imagen de distancia por volcan y sensor. Si el OCR
+# corre cuando MIROVA ya proceso la pasada siguiente, esa imagen es de la otra pasada; desde V31.1 el scraper
+# guarda igual el VRP de la pasada (sale de su propia celda en Latest10NTI) con la distancia VACIA y la clase
+# SIN_GEOMETRIA. Caso: Nevados de Chillan 2026-10-15 05:00 UTC, 22,13 MW en VIIRS 375, que la tabla nunca
+# trajo. Entran a la serie de MIROVA con `sin_geometria: true` y `distancia_km: null` (desconocida, nunca 0),
+# y el tablero las dibuja con su propia marca.
+CLASE_SIN_GEOMETRIA = "SIN_GEOMETRIA"
+METODO_SIN_GEOMETRIA = "vrp_sin_geometria_propia"
+
+
+def _es_sin_geometria(r):
+    return (r.get("_fuente") == "ocr"
+            and ((r.get("Clasificacion Mirova") or "").strip() == CLASE_SIN_GEOMETRIA
+                 or (r.get("Metodo_Validacion") or "").strip() == METODO_SIN_GEOMETRIA))
+
 
 def _coords(json_stem):
     import yaml
@@ -136,7 +151,8 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
         if vrp <= 0:
             continue
         clas = (r.get("Clasificacion Mirova") or "").strip()
-        if clas not in VALID_CLASSES:
+        sin_geo = _es_sin_geometria(r)
+        if clas not in VALID_CLASSES and not sin_geo:
             rejected_clases[clas] += 1
             continue
         dt_raw = (r.get("Fecha_Satelite_UTC") or "").strip()
@@ -155,14 +171,20 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
             dist = float(r.get("Distancia_km") or 0)
         except ValueError:
             dist = 0.0
-        kept.append({
+        rec = {
             "datetime_utc": dt_str,
             "sensor": sensor,
             "VRP_MW": round(vrp, 3),
             "distancia_km": round(dist, 2),
             "clasificacion": (r.get("Clasificacion Mirova") or "").strip(),
             "source": r.get("_fuente", "consolidado"),
-        })
+        }
+        if sin_geo:
+            # Clave solo en estas filas: los JSON de hoy (sin ellas) quedan byte a byte iguales.
+            rec["distancia_km"] = None
+            rec["clasificacion"] = CLASE_SIN_GEOMETRIA
+            rec["sin_geometria"] = True
+        kept.append(rec)
 
     print(f"  rejected by clasificacion: {dict(rejected_clases)}")
     print(f"  with VRP > 0 AND clasificacion in {sorted(VALID_CLASSES)}: {len(kept)}")
@@ -170,7 +192,8 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
     # Defense in depth: hard-fail if any NULO snuck through. Impossible with
     # the filter above, but if a future edit weakens VALID_CLASSES this check
     # will catch it before it contaminates a ref file. See L7.10.
-    leaked = [r for r in kept if (r.get("clasificacion") or "").strip() not in VALID_CLASSES]
+    leaked = [r for r in kept if (r.get("clasificacion") or "").strip() not in VALID_CLASSES
+              and not r.get("sin_geometria")]
     assert not leaked, f"FATAL: {len(leaked)} records leaked past clasificacion filter"
 
     # Dedupe (datetime, sensor). S150: si la tabla y el OCR traen la misma pasada, manda la tabla (texto con

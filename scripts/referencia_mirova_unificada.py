@@ -27,6 +27,20 @@ pesa 13 GB y el archivo tiene decenas de miles de versiones) y guarda en `HISTOR
 solo las filas que la version mas nueva ya no trae. Muestreo diario y no por commit porque las
 filas perdidas son viejas (las 207 del 06-oct tienen fecha de satelite de enero a octubre): una
 fila que naciera y se perdiera dentro del mismo dia se escaparia, y eso queda declarado.
+
+Filas OCR sin geometria propia (V31.1 de Mirova-v1, 2026-10-15). MIROVA mantiene una sola imagen de
+distancia por volcan y sensor; cuando el OCR corre despues de que MIROVA proceso la pasada siguiente,
+esa imagen ya es de la otra pasada. Desde V31.1 el scraper guarda igual el VRP de la pasada (sale de su
+propia celda en Latest10NTI) con `Distancia_km` VACIA, `Clasificacion Mirova` = SIN_GEOMETRIA y
+`Metodo_Validacion` = vrp_sin_geometria_propia. Caso: Nevados de Chillan 2026-10-15 05:00 UTC, 22,13 MW
+en VIIRS 375, ausente de la tabla. Aca esas filas salen con `sin_geometria=True` y `dist_km=None`
+(desconocida, NUNCA 0 ni la que se pueda leer de la nota). Que cambia cuando lleguen al CSV:
+- lectura A del criterio de victoria (`clase_mirova.alerta_protegida`): no usa la distancia, asi que una
+  de 1 MW o mas cuenta como alerta protegida y una pasada que antes no estaba pasa a existir;
+- `banco_paridad.etiquetar`: la pasada pasa a "pos" y su noche a "noche con alerta" (antes podia quedar
+  como negativo limpio si la tabla tenia una RUTINA en otra pasada de esa noche);
+- analisis por distancia (cercana o lejana): estas filas quedan "sin distancia" y no entran a ninguno de
+  los dos lados. Mientras el CSV no las tenga, nada de lo ya publicado cambia (la marca es aditiva).
 """
 from __future__ import annotations
 
@@ -60,11 +74,21 @@ RUTA_REMOTA = "monitoreo_satelital"
 URL_RAW = f"https://raw.githubusercontent.com/{REPO_MIROVA}/{{sha}}/{RUTA_REMOTA}/{{nombre}}"
 
 
+METODO_SIN_GEOMETRIA = "vrp_sin_geometria_propia"
+CLASE_SIN_GEOMETRIA = "SIN_GEOMETRIA"
+
+
 def _float(v) -> Optional[float]:
     try:
         return float(str(v).strip())
     except (TypeError, ValueError):
         return None
+
+
+def es_sin_geometria(r: dict) -> bool:
+    """Fila cruda del CSV OCR que Mirova-v1 guardo con VRP propio y SIN distancia ni clase (V31.1)."""
+    return ((r.get("Metodo_Validacion") or "").strip() == METODO_SIN_GEOMETRIA
+            or (r.get("Clasificacion Mirova") or "").strip() == CLASE_SIN_GEOMETRIA)
 
 
 def leer_pasadas(path: Path, source: str, origen: str) -> list[dict]:
@@ -83,7 +107,11 @@ def leer_pasadas(path: Path, source: str, origen: str) -> list[dict]:
                 continue
             bucket = normalize_sensor(r.get("Sensor"))
             dist = _float(r.get("Distancia_km"))
-            if source == "OCR" and not (dist and dist > 0):
+            sin_geo = source == "OCR" and es_sin_geometria(r)
+            if sin_geo:
+                # V31.1: la distancia es desconocida; no se busca en la nota ni se lee como 0.
+                dist = None
+            elif source == "OCR" and not (dist and dist > 0):
                 # Las filas OCR traen Distancia_km=0; la distancia vive en la nota (F-B2, S139).
                 dist = parse_ocr_distance(r.get("Nota_Validacion", ""))
             fila = {
@@ -98,6 +126,7 @@ def leer_pasadas(path: Path, source: str, origen: str) -> list[dict]:
                 "dist_km": dist,
                 "clasificacion": (r.get("Clasificacion Mirova") or "").strip(),
                 "ultima_actualizacion": (r.get("Ultima_Actualizacion") or "").strip(),
+                "sin_geometria": sin_geo,
             }
             k = clave(fila)
             previa = por_clave.get(k)

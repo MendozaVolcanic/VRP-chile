@@ -1023,14 +1023,24 @@ function toMirovaDaily(records) {
   for (const r of records) {
     const d = (r.datetime_utc || "").slice(0, 10); if (!d) continue;
     const v = parseFloat(r.VRP_MW ?? r.vrp_mw ?? 0);
-    if (!m.has(d) || v > m.get(d).y) m.set(d, { y: v, ocr: r.source === "ocr" });
+    if (!m.has(d) || v > m.get(d).y) m.set(d, { y: v, ocr: r.source === "ocr", sinGeo: r.sin_geometria === true });
   }
-  return [...m.entries()].sort().map(([x, p]) => ({ x, y: p.y, ocr: p.ocr }));
+  return [...m.entries()].sort().map(([x, p]) => ({ x, y: p.y, ocr: p.ocr, sinGeo: p.sinGeo }));
 }
 
 // S150: estilo de los puntos de MIROVA segun su origen (tabla: triangulo lleno; imagen/OCR: rombo hueco).
-function mirovaPointStyle(ctx) { return ctx.raw && ctx.raw.ocr ? "rectRot" : "triangle"; }
+// V31.1 (Mirova-v1, 2026-10-15): una pasada con VRP leido de su imagen pero SIN distancia propia (la imagen de
+// distancia de MIROVA ya era de otra pasada) se dibuja con una X y lo dice el tooltip. Su distancia es
+// desconocida, no 0: no entra a ningun calculo por distancia.
+function mirovaPointStyle(ctx) {
+  if (ctx.raw && ctx.raw.sinGeo) return "crossRot";
+  return ctx.raw && ctx.raw.ocr ? "rectRot" : "triangle";
+}
 function mirovaPointFill(color) { return (ctx) => (ctx.raw && ctx.raw.ocr ? "transparent" : color); }
+// La X es de trazo fino: un poco mas grande para que se distinga del rombo a simple vista.
+function mirovaPointRadius(base) { return (ctx) => (ctx.raw && ctx.raw.sinGeo ? base + 3 : base); }
+const MIROVA_SIN_GEO_TXT = "distancia desconocida (la imagen de MIROVA era de otra pasada)";
+function mirovaSufijoSinGeo(ctx) { return ctx && ctx.raw && ctx.raw.sinGeo ? " · " + MIROVA_SIN_GEO_TXT : ""; }
 
 // S32 P2 — VRP "MIROVA-equivalent": cluster contiguo del cráter, no integrated
 // global. Coppola 2016a SP 426.5 §2.2 "neighbor pixels connectivity": MIROVA
@@ -2469,7 +2479,8 @@ function renderDetail() {
   const mirovaNota = el("div");
   mirovaNota.style.cssText = "font-size:0.75rem;color:#9aa;margin-top:4px;";
   mirovaNota.innerHTML = "MIROVA: ▲ valor de su tabla publicada · ◇ hueco = valor leído de su imagen por OCR " +
-    "(puede corresponder a otra pasada de la misma noche; no usarlo para calibrar magnitud).";
+    "(puede corresponder a otra pasada de la misma noche; no usarlo para calibrar magnitud) · " +
+    "✕ = VRP leído de su imagen con " + MIROVA_SIN_GEO_TXT + ".";
   vrpPanel.appendChild(mirovaNota);
   chartsGrid.appendChild(vrpPanel);
 
@@ -3101,7 +3112,7 @@ function renderDetail() {
           label:"MIROVA MODIS (ref.)", data:toMirovaDaily(mByS.MODIS),
           type:"line", order:0,
           borderColor:"#ff8c00", borderDash:[5,3], backgroundColor:"transparent",
-          borderWidth:2, pointRadius:4, pointStyle:mirovaPointStyle, pointBorderColor:"#ff8c00",
+          borderWidth:2, pointRadius:mirovaPointRadius(4), pointStyle:mirovaPointStyle, pointBorderColor:"#ff8c00",
           pointBackgroundColor:mirovaPointFill("#ff8c00"), tension:0,
         });
       }
@@ -3110,7 +3121,7 @@ function renderDetail() {
           label:"MIROVA VIIRS 375m (ref.)", data:toMirovaDaily(mByS.VIIRS375),
           type:"line", order:0,
           borderColor:"#e91e63", borderDash:[5,3], backgroundColor:"transparent",
-          borderWidth:2, pointRadius:4, pointStyle:mirovaPointStyle, pointBorderColor:"#e91e63",
+          borderWidth:2, pointRadius:mirovaPointRadius(4), pointStyle:mirovaPointStyle, pointBorderColor:"#e91e63",
           pointBackgroundColor:mirovaPointFill("#e91e63"), tension:0,
         });
       }
@@ -3119,7 +3130,7 @@ function renderDetail() {
           label:"MIROVA VIIRS 750m (ref.)", data:toMirovaDaily(mByS.VIIRS750),
           type:"line", order:0,
           borderColor:"#00bcd4", borderDash:[5,3], backgroundColor:"transparent",
-          borderWidth:2, pointRadius:4, pointStyle:mirovaPointStyle, pointBorderColor:"#00bcd4",
+          borderWidth:2, pointRadius:mirovaPointRadius(4), pointStyle:mirovaPointStyle, pointBorderColor:"#00bcd4",
           pointBackgroundColor:mirovaPointFill("#00bcd4"), tension:0,
         });
       }
@@ -3224,7 +3235,7 @@ function renderDetail() {
         data: toMirovaDaily(mFiltered),
         type: "line", order: 0,
         borderColor: "#ffc107", borderDash:[5,3], backgroundColor: "transparent",
-        borderWidth: 2.5, pointRadius: 4, pointStyle:mirovaPointStyle, pointBorderColor:"#ffc107",
+        borderWidth: 2.5, pointRadius: mirovaPointRadius(4), pointStyle:mirovaPointStyle, pointBorderColor:"#ffc107",
         pointBackgroundColor:mirovaPointFill("#ffc107"), tension: 0,
       });
     }
@@ -3248,7 +3259,7 @@ function renderDetail() {
           tooltip: {
             backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
             titleColor:"#e0e6f0", bodyColor:"#7a8fa6",
-            callbacks: { label: ctx => " " + ctx.dataset.label + ": " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(3) : "\u2014") + " MW" }
+            callbacks: { label: ctx => " " + ctx.dataset.label + ": " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(3) : "\u2014") + " MW" + mirovaSufijoSinGeo(ctx) }
           }
         },
         scales: {
@@ -3367,7 +3378,7 @@ function renderDetail() {
             tooltip: {
               backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
               titleColor:"#e0e6f0", bodyColor:"#7a8fa6",
-              callbacks: { label: ctx => " " + ctx.dataset.label + ": " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(3) : "\u2014") + " MW" }
+              callbacks: { label: ctx => " " + ctx.dataset.label + ": " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(3) : "\u2014") + " MW" + mirovaSufijoSinGeo(ctx) }
             }
           },
           scales: {

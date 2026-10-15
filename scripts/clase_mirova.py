@@ -21,6 +21,10 @@ Definicion operativa (lectura A): una PASADA es "alerta protegida" si tiene una 
 (consolidado u OCR) con VRP_MW de 1 MW o mas, RECALCULADO desde el VRP, nunca leido de la columna.
 Lectura B (decision D-4 de Nicolas, pendiente): toda pasada con VRP de 1 MW o mas, aunque el scraper la
 llame FALSO_POSITIVO por estar fuera de su radio.
+
+La lectura A no usa la distancia. Por eso las filas OCR que Mirova-v1 guarda desde V31.1 sin distancia
+(clase SIN_GEOMETRIA: la imagen de distancia de MIROVA ya era de otra pasada, el VRP si es de la suya)
+cuentan como alerta protegida si su VRP es de 1 MW o mas (ver referencia_mirova_unificada).
 """
 from __future__ import annotations
 
@@ -195,6 +199,11 @@ def coherencia_por_mes(path: Path) -> dict:
     with open(path, encoding="utf-8") as fh:
         for r in csv.DictReader(fh):
             if (r.get("Tipo_Registro") or "").strip() not in TIPOS_ALERTA:
+                continue
+            if (r.get("Clasificacion Mirova") or "").strip() == "SIN_GEOMETRIA":
+                # V31.1 de Mirova-v1: la fila trae el VRP de su pasada pero no su clase, a proposito (la
+                # imagen de distancia era de otra pasada). No es incoherencia de escala: va aparte.
+                por_mes[(r.get("Fecha_Satelite_UTC") or "")[:7]]["sin_geometria"] += 1
                 continue
             ok = (r.get("Clasificacion Mirova") or "").strip() == clase_por_vrp(_float(r.get("VRP_MW")))
             por_mes[(r.get("Fecha_Satelite_UTC") or "")[:7]]["coherente" if ok else "incoherente"] += 1
