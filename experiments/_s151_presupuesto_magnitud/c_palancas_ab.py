@@ -127,7 +127,9 @@ def medir(A, B, por_vb):
         if not (pa and pb):
             continue
         f = {"vol": xa["vol"], "b": xa["b"], "noche_id": xa["noche_id"], "V_M": al["vrp_mw"],
-             "R_A": xa["disp"] / al["vrp_mw"], "R_B": xb["disp"] / al["vrp_mw"]}
+             "R_A": xa["disp"] / al["vrp_mw"], "R_B": xb["disp"] / al["vrp_mw"],
+             "banda_z": C.banda_z(xa["rec"].get("sensor_zenith_deg")),
+             "ln_BA": math.log(xb["disp"] / xa["disp"])}
         for lado, x in (("A", xa), ("B", xb)):
             s_in, n_pos, _, _ = C.pixeles_inner(x["rec"], x["vol"])
             f[f"n_{lado}"] = n_pos
@@ -135,6 +137,49 @@ def medir(A, B, por_vb):
             f[f"ln_G_{lado}"] = math.log(s_in / al["vrp_mw"]) if s_in > 0 else float("nan")
         filas.append(f)
     return filas, cuenta, solo_b
+
+
+BANDAS = ("0-20", "20-35", "35-50", "50-90")
+
+
+def _rango_proc(recs):
+    """[min, max, n con processed_utc, n] de la hora de proceso de los records de un brazo."""
+    ps = sorted((x["rec"].get("processed_utc") or x["rec"].get("first_processed_utc")) for x in recs.values()
+                if (x["rec"].get("processed_utc") or x["rec"].get("first_processed_utc")))
+    return [ps[0] if ps else None, ps[-1] if ps else None, len(ps), len(recs)]
+
+
+def por_angulo(filas, semilla=C.SEMILLA, n_boot=1000):
+    """Arreglo (c) del verificador de #814: factor B/A por banda de angulo cenital, con IC por noche.
+
+    Dos lecturas: (1) media geometrica de B/A en cada banda; (2) efecto de la banda contra 0-20 con efecto fijo
+    por volcan (comun.efecto_cenital), que quita la mezcla de volcanes entre bandas."""
+    if len(filas) < 20:
+        return None
+
+    def una(sub):
+        gmb = {bz: (math.exp(np.mean([f["ln_BA"] for f in sub if f["banda_z"] == bz]))
+                    if any(f["banda_z"] == bz for f in sub) else float("nan")) for bz in BANDAS}
+        ef = C.efecto_cenital(sub, "ln_BA")
+        efb = {bz: (math.exp(ef[bz][0]) if ef.get(bz) and ef[bz][0] is not None else float("nan")) for bz in BANDAS}
+        return gmb, efb
+
+    p_gm, p_ef = una(filas)
+    por = collections.defaultdict(list)
+    for f in filas:
+        por[f["noche_id"]].append(f)
+    noches = list(por)
+    rng = random.Random(semilla)
+    bs = [una([f for _ in noches for f in por[noches[rng.randrange(len(noches))]]]) for _ in range(n_boot)]
+    out = {}
+    for bz in BANDAS:
+        g = [b[0][bz] for b in bs]
+        e = [b[1][bz] for b in bs]
+        out[bz] = {"n": sum(1 for f in filas if f["banda_z"] == bz),
+                   "B_sobre_A_gm": [round(p_gm[bz], 4), round(float(np.nanpercentile(g, 2.5)), 4), round(float(np.nanpercentile(g, 97.5)), 4)],
+                   "efecto_fijo_volcan_vs_0_20": [round(p_ef[bz], 4), round(float(np.nanpercentile(e, 2.5)), 4),
+                                                  round(float(np.nanpercentile(e, 97.5)), 4)]}
+    return out
 
 
 def resumen(filas, semilla=C.SEMILLA, n_boot=C.N_BOOT):
@@ -192,7 +237,9 @@ def main(argv=None):
         filas, cuenta, solo_b = medir(A, B, por_vb)
         item = {"palanca": nombre, "ventana": ventana, "records_A": len(A), "records_B": len(B),
                 "publicacion_en_positivos": {f"{k[0]}|{k[1]}" if isinstance(k, tuple) else k: v for k, v in sorted(cuenta.items(), key=str)},
-                "por_sensor": {}, "por_volcan": {}, "solo_B_publica": {}}
+                "por_sensor": {}, "por_volcan": {}, "solo_B_publica": {},
+                # arreglo (b): regimen de CODIGO (cuando se proceso) separado de la ventana de calendario
+                "processed_utc_A_B": [_rango_proc(A), _rango_proc(B)]}
         for b in ("VIIRS375", "VIIRS750", "MODIS"):
             sb_ = [f for f in solo_b if f["b"] == b]
             if len(sb_) >= 5:
@@ -223,6 +270,10 @@ def main(argv=None):
     for (nombre, b), sub in agrup.items():
         r = resumen(sub)
         if r:
+            if b == "VIIRS375" and nombre in ("fondo_vecinos_D25", "literal_entero", "conectiva_max", "quitar_keep_peak",
+                                              "quitar_compuerta_D22"):
+                r["por_angulo"] = por_angulo(sub)
+                txt.append(f"POR ANGULO {nombre}|{b}: {json.dumps(r['por_angulo'])}")
             out["agrupado"][f"{nombre}|{b}"] = r
             txt.append(f"AGRUPADO {nombre}|{b}: n {r['n_pasadas']} B/A {r['factor_B_sobre_A']} cierra {r['frac_deficit_cerrado']} "
                        f"R_A {r['R_gm_A']} R_B {r['R_gm_B']} (rec {r['factor_por_recorte']}, G {r['factor_por_G']})")

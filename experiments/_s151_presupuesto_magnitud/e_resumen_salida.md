@@ -15,6 +15,42 @@
 | VIIRS750|Lascar | 17 / 15 | 0,57 [0,50; 0,65] | 0,81 [0,72; 0,90] | 0,78 [0,71; 0,85] | 0,88 [0,81; 0,97] | 0,91 [0,89; 0,93] | 39 % [23; 53] / 44 % [30; 60] / 17 % [14; 21] | 22 % [6; 38] |
 | MODIS|Lascar | 35 / 33 | 0,47 [0,33; 0,63] | 0,53 [0,39; 0,67] | 1,86 [1,51; 2,29] | 0,88 [0,78; 0,99] | 0,47 [0,42; 0,53] | 84 % [59; 117] / -82 % [-158; -44] / 98 % [70; 151] | 16 % [1; 44] |
 
+### Tabla A2. El reparto selección / fondo depende de la bisagra (verificador de #814, arreglo a)
+
+Sobre las pasadas donde existen las dos bisagras. Los IC cubren sólo el muestreo, no la elección de bisagra.
+
+| estrato | pasadas (excluidas) | rec | sel / fondo, bisagra nuestra | sel / fondo, bisagra MIROVA | sel / fondo, Shapley | Test 1 dispara |
+|---|---|---|---|---|---|---|
+| VIIRS375 | 1438 (36) | 47 % [38; 58] | 32 % [22; 41] / 21 % [15; 26] | -12 % [-25; 0] / 64 % [57; 72] | 10 % [-1; 20] / 43 % [37; 48] | 1462 de 1474 |
+| VIIRS375|sin_kernel | 741 (10) | 2 % [1; 3] | 63 % [60; 66] / 35 % [32; 38] | 34 % [28; 39] / 64 % [59; 70] | 48 % [44; 52] / 49 % [46; 53] | 746 de 751 |
+| VIIRS375|con_kernel | 697 (26) | 268 % [179; 462] | -120 % [-258; -55] / -48 % [-117; -11] | -233 % [-435; -138] / 65 % [34; 103] | -177 % [-344; -98] / 9 % [-34; 36] | 716 de 723 |
+| VIIRS375|Lascar | 383 (7) | 1 % [0; 1] | 71 % [68; 74] / 28 % [25; 31] | 46 % [39; 53] / 53 % [46; 60] | 59 % [54; 63] / 40 % [36; 45] | 390 de 390 |
+| VIIRS375|Isluga | 333 (0) | 3 % [2; 5] | 59 % [53; 63] / 38 % [34; 43] | 25 % [15; 33] / 72 % [64; 81] | 42 % [35; 48] / 55 % [49; 62] | 330 de 333 |
+| VIIRS375|Lastarria | 230 (23) | 62 % [45; 87] | -4 % [-30; 13] / 42 % [29; 54] | -51 % [-86; -25] / 89 % [67; 112] | -28 % [-57; -6] / 66 % [49; 81] | 251 de 253 |
+| VIIRS750|Lascar | 17 (0) | 39 % [23; 53] | 44 % [30; 60] / 17 % [14; 21] | 23 % [8; 39] / 38 % [31; 48] | 34 % [19; 50] / 28 % [23; 34] | 17 de 17 |
+| MODIS|Lascar | 31 (4) | 99 % [71; 140] | -101 % [-220; -52] / 102 % [67; 187] | -138 % [-287; -78] / 140 % [85; 265] | -120 % [-249; -66] / 121 % [77; 225] | 35 de 35 |
+
+### Tabla A3. Por banda de ángulo cenital (media geométrica; Npix y n+ en mediana)
+
+| estrato | banda | n | Npix MIROVA | n+ nuestro | F_n | F_hot | F_bg | R |
+|---|---|---|---|---|---|---|---|---|
+| VIIRS375 | 0-20 | 371 | 3,00 | 2,00 | 0,76 | 1,35 | 0,92 | 0,83 |
+| VIIRS375 | 20-35 | 333 | 3,00 | 2,00 | 0,66 | 1,33 | 0,94 | 0,72 |
+| VIIRS375 | 35-50 | 360 | 4,00 | 1,50 | 0,58 | 1,33 | 0,91 | 0,63 |
+| VIIRS375 | 50-90 | 410 | 3,00 | 2,00 | 0,87 | 1,06 | 0,84 | 0,59 |
+| VIIRS375|sin_kernel | 0-20 | 169 | 3,00 | 2,00 | 0,53 | 1,71 | 0,85 | 0,76 |
+| VIIRS375|sin_kernel | 20-35 | 165 | 5,00 | 2,00 | 0,41 | 1,72 | 0,87 | 0,61 |
+| VIIRS375|sin_kernel | 35-50 | 210 | 5,00 | 1,00 | 0,36 | 1,70 | 0,82 | 0,51 |
+| VIIRS375|sin_kernel | 50-90 | 207 | 4,00 | 1,00 | 0,45 | 1,40 | 0,73 | 0,45 |
+| VIIRS375|Lascar | 0-20 | 76 | 5,00 | 2,00 | 0,48 | 1,79 | 0,93 | 0,80 |
+| VIIRS375|Lascar | 20-35 | 102 | 5,50 | 2,00 | 0,35 | 1,86 | 0,91 | 0,60 |
+| VIIRS375|Lascar | 35-50 | 113 | 6,00 | 2,00 | 0,32 | 1,78 | 0,86 | 0,48 |
+| VIIRS375|Lascar | 50-90 | 99 | 4,00 | 2,00 | 0,55 | 1,30 | 0,70 | 0,50 |
+| VIIRS375|Isluga | 0-20 | 84 | 3,00 | 1,00 | 0,53 | 1,71 | 0,80 | 0,72 |
+| VIIRS375|Isluga | 20-35 | 55 | 3,00 | 1,00 | 0,50 | 1,56 | 0,84 | 0,65 |
+| VIIRS375|Isluga | 35-50 | 88 | 4,00 | 1,00 | 0,40 | 1,67 | 0,80 | 0,54 |
+| VIIRS375|Isluga | 50-90 | 106 | 5,00 | 1,00 | 0,37 | 1,50 | 0,75 | 0,40 |
+
 ## Tabla B. 2026 contra la referencia NRT: R = F_rec x G (media geometrica [IC 95 % por noche])
 
 | tramo | estrato | pasadas / noches | R | F_rec | G | parte de G que depende del angulo (factor medio) | fraccion del deficit por angulo | S_all / V_M |
@@ -143,11 +179,56 @@ Agrupado por palanca:
 - fondo_vecinos_D25|VIIRS375 (solo B publica): 10 pasadas, R 0,62 [0,30; 1,06]
 - quitar_compuerta_D22|VIIRS375 (solo B publica): 55 pasadas, R 0,81 [0,62; 1,02]
 
+### Tabla C2. Factor B/A por banda de ángulo cenital, VIIRS 375 (verificador de #814, arreglo c)
+
+| palanca | banda | pasadas | B/A en la banda | efecto contra 0-20 con efecto fijo por volcán |
+|---|---|---|---|---|
+| conectiva_max|VIIRS375 | 0-20 | 240 | 0,97 [0,95; 0,98] | 1,00 [1,00; 1,00] |
+| conectiva_max|VIIRS375 | 20-35 | 203 | 0,95 [0,93; 0,96] | 0,98 [0,95; 1,00] |
+| conectiva_max|VIIRS375 | 35-50 | 184 | 0,94 [0,92; 0,96] | 0,98 [0,95; 1,00] |
+| conectiva_max|VIIRS375 | 50-90 | 197 | 0,85 [0,82; 0,89] | 0,91 [0,88; 0,95] |
+| fondo_vecinos_D25|VIIRS375 | 0-20 | 135 | 1,18 [1,12; 1,24] | 1,00 [1,00; 1,00] |
+| fondo_vecinos_D25|VIIRS375 | 20-35 | 121 | 1,22 [1,13; 1,33] | 1,08 [1,00; 1,17] |
+| fondo_vecinos_D25|VIIRS375 | 35-50 | 102 | 1,36 [1,20; 1,56] | 1,17 [1,05; 1,33] |
+| fondo_vecinos_D25|VIIRS375 | 50-90 | 110 | 1,41 [1,27; 1,60] | 1,20 [1,07; 1,33] |
+| literal_entero|VIIRS375 | 0-20 | 137 | 1,17 [1,12; 1,23] | 1,00 [1,00; 1,00] |
+| literal_entero|VIIRS375 | 20-35 | 124 | 1,18 [1,12; 1,24] | 1,04 [0,98; 1,10] |
+| literal_entero|VIIRS375 | 35-50 | 104 | 1,24 [1,15; 1,34] | 1,08 [1,02; 1,15] |
+| literal_entero|VIIRS375 | 50-90 | 113 | 1,35 [1,23; 1,52] | 1,16 [1,05; 1,30] |
+| quitar_keep_peak|VIIRS375 | 0-20 | 137 | 1,04 [1,00; 1,09] | 1,00 [1,00; 1,00] |
+| quitar_keep_peak|VIIRS375 | 20-35 | 124 | 1,02 [1,00; 1,06] | 1,00 [0,96; 1,04] |
+| quitar_keep_peak|VIIRS375 | 35-50 | 104 | 1,02 [1,00; 1,06] | 1,01 [0,96; 1,05] |
+| quitar_keep_peak|VIIRS375 | 50-90 | 113 | 1,11 [1,04; 1,21] | 1,10 [1,01; 1,20] |
+| quitar_compuerta_D22|VIIRS375 | 0-20 | 129 | 1,01 [1,00; 1,02] | 1,00 [1,00; 1,00] |
+| quitar_compuerta_D22|VIIRS375 | 20-35 | 115 | 1,03 [1,01; 1,07] | 1,03 [1,00; 1,06] |
+| quitar_compuerta_D22|VIIRS375 | 35-50 | 94 | 1,03 [1,01; 1,05] | 1,03 [1,00; 1,05] |
+| quitar_compuerta_D22|VIIRS375 | 50-90 | 85 | 1,08 [1,04; 1,14] | 1,07 [1,03; 1,13] |
+
+### Hora de proceso de cada brazo (régimen de código, arreglo b)
+
+- nulo_gemelo [2026-03 Lascar]: A 2026-09-21T18:34:17Z a 2026-09-21T19:33:28Z (285 de 285); B 2026-09-21T18:34:12Z a 2026-09-21T19:26:44Z (285 de 285)
+- quitar_test1 [2026-09-01/20]: A 2026-09-20T16:06:03Z a 2026-09-20T20:23:44Z (2362 de 2362); B 2026-09-20T16:06:03Z a 2026-09-20T20:36:03Z (2362 de 2362)
+- conectiva_max [2026-05]: A 2026-09-21T12:32:16Z a 2026-09-21T17:16:42Z (3682 de 3682); B 2026-09-21T12:32:18Z a 2026-09-21T17:30:39Z (3682 de 3682)
+- conectiva_max [2026-06]: A 2026-09-22T02:18:37Z a 2026-09-22T06:49:43Z (3520 de 3520); B 2026-09-22T02:18:36Z a 2026-09-22T06:53:39Z (3520 de 3520)
+- conectiva_max [2026-07]: A 2026-09-22T12:42:37Z a 2026-09-22T17:11:29Z (3497 de 3497); B 2026-09-22T12:42:27Z a 2026-09-22T17:10:47Z (3497 de 3497)
+- conectiva_max [2026-08]: A 2026-09-22T18:18:00Z a 2026-09-22T22:04:37Z (3135 de 3135); B 2026-09-22T18:18:21Z a 2026-09-22T22:15:36Z (3135 de 3135)
+- conectiva_max [2026-09-01/20]: A 2026-09-21T00:35:54Z a 2026-09-21T03:26:46Z (2315 de 2315); B 2026-09-21T00:35:57Z a 2026-09-21T03:28:43Z (2386 de 2386)
+- modis_banda22 [2026-03 Lascar]: A 2026-09-21T18:34:17Z a 2026-09-21T19:33:28Z (285 de 285); B 2026-09-21T18:34:35Z a 2026-09-21T19:34:16Z (285 de 285)
+- modis_banda22_max [2026-03 Lascar]: A 2026-09-21T18:34:17Z a 2026-09-21T19:33:28Z (285 de 285); B 2026-09-21T18:34:50Z a 2026-09-21T19:39:27Z (285 de 285)
+- modis_banda22 [2026-06 Lascar]: A 2026-09-22T06:56:49Z a 2026-09-22T07:45:48Z (275 de 275); B 2026-09-22T06:56:56Z a 2026-09-22T07:44:34Z (275 de 275)
+- modis_banda22_max [2026-06 Lascar]: A 2026-09-22T06:56:49Z a 2026-09-22T07:45:48Z (275 de 275); B 2026-09-22T06:56:51Z a 2026-09-22T07:50:51Z (275 de 275)
+- fondo_vecinos_D25 [2026-06/08]: A 2026-09-17T19:46:59Z a 2026-09-19T02:08:35Z (3400 de 3400); B 2026-09-17T19:47:20Z a 2026-09-19T16:10:29Z (3400 de 3400)
+- literal_entero [2026-06/08]: A 2026-09-17T19:47:28Z a 2026-09-19T01:51:09Z (3400 de 3400); B 2026-09-17T19:47:20Z a 2026-09-19T16:10:29Z (3400 de 3400)
+- quitar_keep_peak [2026-06/08]: A 2026-09-17T19:46:59Z a 2026-09-19T02:43:29Z (3400 de 3400); B 2026-09-17T19:47:20Z a 2026-09-19T16:10:29Z (3400 de 3400)
+- quitar_compuerta_D22 [2026-06/08]: A 2026-09-17T19:47:01Z a 2026-09-19T02:07:36Z (3400 de 3400); B 2026-09-17T19:47:20Z a 2026-09-19T16:10:29Z (3400 de 3400)
+- parte B, tramo pre_535 (producción): None a None (0 de 17450 records con hora de proceso)
+- parte B, tramo post_535 (producción): 2026-09-03T03:19:02Z a 2026-10-14T23:26:58Z (4879 de 5460 records con hora de proceso)
+
 ## Controles
 
-- Parte A: {"C2_cumulo_un_pixel": {"n": 869, "acierto": 1.0, "pasa": true}, "C3_f5_replica": {"n": 1499, "acierto": 1.0, "pasa": true}, "C4_fondo_implicito_vs_anillo": {"n_pixeles": 2008, "acierto": 0.9338, "pasa": true}, "C5_pareo_corrido_6h": {"pares_corridos": 0, "pares_reales": 1552, "fraccion": 0.0, "pasa": true}, "C7_identidad": {"max_error_relativo_codigo": 2.298161660974074e-14, "pasa": true, "max_error_relativo_osf_vrp_vs_kA_suma": 8.899824921471122e-08}}
-- Parte B, C6 (auto-audit reproducido): pasa = True, fuera de tolerancia []; referencia {"fuente": "remoto", "commit_cons": "7c6af1c0c1c8afd58d7bfc70e37aba2ff862c015", "commit_ocr": "03cab0e74aa2bb672c2b113f8f380af50e0a36e0"}
+- Parte A: {"C2_cumulo_un_pixel": {"n": 869, "acierto": 1.0, "pasa": true}, "C3_f5_replica": {"n": 1499, "acierto": 1.0, "pasa": true}, "C4_fondo_implicito_vs_anillo": {"n_pixeles": 2008, "acierto": 0.9338, "pasa": true, "por_sensor_y_test1": {"MODIS|test1": [524, 524, 1.0], "VIIRS375|sin_test1": [7, 7, 1.0], "VIIRS375|test1": [1317, 1450, 0.9083], "VIIRS750|test1": [27, 27, 1.0]}}, "C5_pareo_corrido_6h": {"pares_corridos": 0, "pares_reales": 1552, "fraccion": 0.0, "pasa": true}, "C7_identidad": {"max_error_relativo_codigo": 2.298161660974074e-14, "pasa": true, "max_error_relativo_osf_vrp_vs_kA_suma": 8.899824921471122e-08}}
+- Parte B, C6 (auto-audit reproducido): pasa = True, fuera de tolerancia []; referencia {"fuente": "remoto", "commit_cons": "e54c1018af65a6062e2d6c08a4bd5a9d371012fb", "commit_ocr": "03cab0e74aa2bb672c2b113f8f380af50e0a36e0"}
 - Parte B pre_535: {"C1_pixel_desde_bt_y_fondo": {"n_pixeles": 0, "acierto": null, "pasa": false, "por_sensor_y_test1": {}}, "C2_cumulo_un_pixel": {"n": 6868, "acierto": 0.9029, "pasa": false, "por_sensor_y_test1": {"MODIS|sin_test1": [675, 778, 0.8676], "MODIS|test1": [3, 7, 0.4286], "VIIRS375|sin_test1": [148, 158, 0.9367], "VIIRS375|test1": [4110, 4624, 0.8888], "VIIRS750|sin_test1": [961, 991, 0.9697], "VIIRS750|test1": [304, 310, 0.9806]}}, "C3_f5_replica": {"n": 4778, "acierto": 1.0, "pasa": true}, "C5_pareo_corrido_6h": {"positivos_corridos": 3, "positivos_reales": 1287, "fraccion": 0.0023, "pasa": true}}
 - Parte B post_535: {"C1_pixel_desde_bt_y_fondo": {"n_pixeles": 24722, "acierto": 0.962, "pasa": true, "por_sensor_y_test1": {"MODIS|sin_test1": [23017, 23101, 0.9964], "MODIS|test1": [53, 213, 0.2488], "VIIRS375|sin_test1": [117, 117, 1.0], "VIIRS375|test1": [474, 800, 0.5925], "VIIRS750|sin_test1": [69, 74, 0.9324], "VIIRS750|test1": [52, 417, 0.1247]}}, "C2_cumulo_un_pixel": {"n": 2370, "acierto": 0.9734, "pasa": false, "por_sensor_y_test1": {"MODIS|sin_test1": [175, 222, 0.7883], "MODIS|test1": [2, 4, 0.5], "VIIRS375|sin_test1": [104, 107, 0.972], "VIIRS375|test1": [1670, 1672, 0.9988], "VIIRS750|sin_test1": [271, 279, 0.9713], "VIIRS750|test1": [85, 86, 0.9884]}}, "C3_f5_replica": {"n": 1978, "acierto": 1.0, "pasa": true}, "C5_pareo_corrido_6h": {"positivos_corridos": 0, "positivos_reales": 360, "fraccion": 0.0, "pasa": true}}
-- Parte C referencia: {"commit_cons": "7c6af1c0c1c8afd58d7bfc70e37aba2ff862c015", "commit_ocr": "03cab0e74aa2bb672c2b113f8f380af50e0a36e0"}; nulo gemelo B/A: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
+- Parte C referencia: {"commit_cons": "e54c1018af65a6062e2d6c08a4bd5a9d371012fb", "commit_ocr": "03cab0e74aa2bb672c2b113f8f380af50e0a36e0"}; nulo gemelo B/A: [[1.0, 1.0, 1.0], [1.0, 1.0, 1.0]]
 - Parte D: ventana TIF local ['2026-05-09', '2026-05-20'], T1 {'pasadas': 52, 'atribuidas': 27}, T2 {'n': 27, 'frac_dentro_3pct': 0.1852, 'pasa': False, 'mediana_razon': 1.0491}

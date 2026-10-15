@@ -50,6 +50,26 @@ def main():
                  f"{ic(ang.get('factor_medio'))} | {ic(r['ln_bg'])} | {pct(r['frac_ln_rec'], r['R_gm'][0])} / "
                  f"{pct(r['frac_ln_sel'], r['R_gm'][0])} / {pct(r['frac_ln_bg'], r['R_gm'][0])} | "
                  f"{pct(ang.get('frac'), r['R_gm'][0])} |")
+    L += ["", "### Tabla A2. El reparto selección / fondo depende de la bisagra (verificador de #814, arreglo a)", "",
+          "Sobre las pasadas donde existen las dos bisagras. Los IC cubren sólo el muestreo, no la elección de bisagra.", "",
+          "| estrato | pasadas (excluidas) | rec | sel / fondo, bisagra nuestra | sel / fondo, bisagra MIROVA | sel / fondo, Shapley | Test 1 dispara |",
+          "|---|---|---|---|---|---|---|"]
+    for k in ("VIIRS375", "VIIRS375|sin_kernel", "VIIRS375|con_kernel", "VIIRS375|Lascar", "VIIRS375|Isluga",
+              "VIIRS375|Lastarria", "VIIRS750|Lascar", "MODIS|Lascar"):
+        r = A["reparto"].get(k)
+        bi = (r or {}).get("bisagras")
+        if not bi:
+            continue
+        rg = r["R_gm"][0]
+        L.append(f"| {k} | {bi['n_pasadas']} ({bi['excluidas_sin_bisagra_alternativa']}) | {pct(bi['frac_rec'], rg)} | "
+                 + " | ".join(f"{pct(bi[h]['frac_sel'], rg)} / {pct(bi[h]['frac_bg'], rg)}" for h in ("bisagra_nuestra", "bisagra_mirova", "shapley"))
+                 + f" | {r['test1_dispara'][0]} de {r['test1_dispara'][1]} |")
+    L += ["", "### Tabla A3. Por banda de ángulo cenital (media geométrica; Npix y n+ en mediana)", "",
+          "| estrato | banda | n | Npix MIROVA | n+ nuestro | F_n | F_hot | F_bg | R |", "|---|---|---|---|---|---|---|---|---|"]
+    for k in ("VIIRS375", "VIIRS375|sin_kernel", "VIIRS375|Lascar", "VIIRS375|Isluga"):
+        for bz, d in A["reparto"][k]["por_banda_z"].items():
+            L.append(f"| {k} | {bz} | {d['n']} | {f3(d['Npix_mediana'])} | {f3(d['n_pos_mediana'])} | {f3(d['F_n'])} | "
+                     f"{f3(d['F_hot'])} | {f3(d['F_bg'])} | {f3(d['R'])} |")
     L += ["", "## Tabla B. 2026 contra la referencia NRT: R = F_rec x G (media geometrica [IC 95 % por noche])", "",
           "| tramo | estrato | pasadas / noches | R | F_rec | G | parte de G que depende del angulo (factor medio) | fraccion del deficit por angulo | S_all / V_M |",
           "|---|---|---|---|---|---|---|---|---|"]
@@ -76,6 +96,18 @@ def main():
                  f"R_A {ic(r['R_gm_A'])}, R_B {ic(r['R_gm_B'])}")
     for k, r in Cc.get("agrupado_solo_B", {}).items():
         L.append(f"- {k} (solo B publica): {r['n']} pasadas, R {ic(r['R_gm'])}")
+    L += ["", "### Tabla C2. Factor B/A por banda de ángulo cenital, VIIRS 375 (verificador de #814, arreglo c)", "",
+          "| palanca | banda | pasadas | B/A en la banda | efecto contra 0-20 con efecto fijo por volcán |", "|---|---|---|---|---|"]
+    for k, r in Cc["agrupado"].items():
+        for bz, d in (r.get("por_angulo") or {}).items():
+            L.append(f"| {k} | {bz} | {d['n']} | {ic(d['B_sobre_A_gm'])} | {ic(d['efecto_fijo_volcan_vs_0_20'])} |")
+    L += ["", "### Hora de proceso de cada brazo (régimen de código, arreglo b)", ""]
+    for it in Cc["comparaciones"]:
+        a_, b_ = it["processed_utc_A_B"]
+        L.append(f"- {it['palanca']} [{it['ventana']}]: A {a_[0]} a {a_[1]} ({a_[2]} de {a_[3]}); B {b_[0]} a {b_[1]} ({b_[2]} de {b_[3]})")
+    for t, tr in B["tramos"].items():
+        p = tr["processed_utc"]
+        L.append(f"- parte B, tramo {t} (producción): {p[0]} a {p[1]} ({p[2]} de {p[3]} records con hora de proceso)")
     D = json.load(open(AQUI / "d_tif_fondo_salida.json", encoding="utf-8"))
     L += ["", "## Controles", "",
           f"- Parte A: {json.dumps(A['controles'], ensure_ascii=False)}",

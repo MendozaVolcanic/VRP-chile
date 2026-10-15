@@ -147,6 +147,13 @@ def controles(recs, positivos, por_vb):
                                     "fraccion": round(frac, 4), "pasa": frac <= 0.02}}
 
 
+def _rango_proc(recs):
+    """[min, max, n con hora de proceso, n] (processed_utc o first_processed_utc)."""
+    ps = sorted((x["rec"].get("processed_utc") or x["rec"].get("first_processed_utc")) for x in recs
+                if (x["rec"].get("processed_utc") or x["rec"].get("first_processed_utc")))
+    return [ps[0] if ps else None, ps[-1] if ps else None, len(ps), len(recs)]
+
+
 def _tasas(cnt):
     """{(sensor, grupo, acierto): n} -> {"sensor|grupo": [aciertos, total, fraccion]}."""
     out = collections.defaultdict(lambda: [0, 0])
@@ -225,7 +232,9 @@ def main(argv=None):
                 filas.append(f)
         tr = {"ventana": ventana, "records_nocturnos": len(recs), "positivos": len(pos),
               "excluidas": {f"{b}|{m}": n for (b, m), n in sorted(excl.items())},
-              "controles": controles(recs, pos, por_vb), "reparto": {}}
+              "controles": controles(recs, pos, por_vb), "reparto": {},
+              # arreglo (b): regimen de CODIGO de los records (hora de proceso), aparte de la ventana de calendario
+              "processed_utc": _rango_proc(recs)}
         for b in ("VIIRS375", "VIIRS750", "MODIS"):
             for vol in [None] + C.VOLS:
                 sub = [f for f in filas if f["b"] == b and (vol is None or f["vol"] == vol)]

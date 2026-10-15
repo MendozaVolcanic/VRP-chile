@@ -119,6 +119,20 @@ def factores(f):
     f["ln_bg"] = math.log((f["Lh"] - lbg) / (f["Lh"] - f["Lbk_M"]))
     f["banda_z"] = C.banda_z(f["satzen"])
     f["ln_sel"] = f["ln_n"] + f["ln_hot"]
+    # Verificador de #814 (arreglo a): la particion selección / fondo depende de la bisagra. Arriba la bisagra es
+    # NUESTRO nivel caliente (fondo medido a Lh); la alternativa es el caliente de MIROVA (fondo medido a Lh_M).
+    # El promedio de las dos ordenes es el valor de Shapley de dos factores. ln_rec, ln_n y el producto no cambian.
+    if f["Lh_M"] > lbg:
+        f["ln_hot2"] = math.log((f["Lh"] - lbg) / (f["Lh_M"] - lbg))
+        f["ln_bg2"] = math.log((f["Lh_M"] - lbg) / (f["Lh_M"] - f["Lbk_M"]))
+        f["ln_sel2"] = f["ln_n"] + f["ln_hot2"]
+        f["ln_sel_sh"] = (f["ln_sel"] + f["ln_sel2"]) / 2
+        f["ln_bg_sh"] = (f["ln_bg"] + f["ln_bg2"]) / 2
+    else:
+        for k in ("ln_hot2", "ln_bg2", "ln_sel2", "ln_sel_sh", "ln_bg_sh"):
+            f[k] = float("nan")
+    f["ln_selbg"] = f["ln_sel"] + f["ln_bg"]
+    f["test1"] = bool(f["rec"].get("triggered_test1"))
     return None
 
 
@@ -147,7 +161,7 @@ def main(argv=None):
         if f["b"] == "VIIRS375" and f["rec"].get("f5_core_vrp_mw") is not None:
             rec = f5_core_vrp_mw(f["rec"], C.INNER[f["vol"]])
             c3.append(rec is not None and abs(rec - f["rec"]["f5_core_vrp_mw"]) <= 0.001)
-    c4 = []
+    c4, c4_por = [], defaultdict(list)
     for f in filas:
         r = f["rec"]
         if f["kernel"] or f["fuente"] == "test1_roi" or not r.get("t_bg_k"):
@@ -157,11 +171,14 @@ def main(argv=None):
             if (p.get("vrp_mw") or 0) > 0 and p.get("bt_k"):
                 limp = C.planck(p["bt_k"], f["b"]) - p["vrp_mw"] * 1e6 / C.KA[f["b"]]
                 c4.append(abs(limp - lring) / lring <= 0.01)
+                c4_por[f"{f['b']}|{'test1' if r.get('triggered_test1') else 'sin_test1'}"].append(c4[-1])
     out["controles"] = {
         "C2_cumulo_un_pixel": {"n": len(c2), "acierto": round(float(np.mean(c2)), 4) if c2 else None, "pasa": bool(c2) and np.mean(c2) >= 0.98},
         "C3_f5_replica": {"n": len(c3), "acierto": round(float(np.mean(c3)), 4) if c3 else None, "pasa": bool(c3) and np.mean(c3) >= 0.99},
         "C4_fondo_implicito_vs_anillo": {"n_pixeles": len(c4), "acierto": round(float(np.mean(c4)), 4) if c4 else None,
-                                         "pasa": bool(c4) and np.mean(c4) >= 0.90},
+                                         "pasa": bool(c4) and np.mean(c4) >= 0.90,
+                                         "por_sensor_y_test1": {k: [int(sum(v)), len(v), round(float(np.mean(v)), 4)]
+                                                                for k, v in sorted(c4_por.items())}},
         "C5_pareo_corrido_6h": {"pares_corridos": len(neg), "pares_reales": len(filas), "fraccion": round(c5, 4), "pasa": c5 <= 0.02},
     }
     # ---- factores
@@ -193,6 +210,30 @@ def main(argv=None):
                                                 sum(1 for f in sub if f["banda_z"] == bz)]
                                            for bz in ("0-20", "20-35", "35-50", "50-90")}
             rep["angulo_en_sel"] = C.frac_angulo_con_ic(sub, "ln_sel")
+            rep["angulo_en_bg"] = C.frac_angulo_con_ic(sub, "ln_bg")
+            rep["angulo_en_sel_x_bg"] = C.frac_angulo_con_ic(sub, "ln_selbg")
+            # arreglo (a): reparto con las dos bisagras y Shapley, sobre las pasadas donde la alternativa existe
+            alt = [f for f in sub if np.isfinite(f["ln_bg2"])]
+            r2 = C.reparto_con_ic(alt, ["ln_rec", "ln_sel", "ln_bg", "ln_sel2", "ln_bg2", "ln_sel_sh", "ln_bg_sh"])
+            if r2:
+                rep["bisagras"] = {"n_pasadas": r2["n_pasadas"], "excluidas_sin_bisagra_alternativa": len(sub) - len(alt),
+                                   "frac_rec": r2["frac_ln_rec"],
+                                   "bisagra_nuestra": {"frac_sel": r2["frac_ln_sel"], "frac_bg": r2["frac_ln_bg"],
+                                                       "F_sel": r2["ln_sel"], "F_bg": r2["ln_bg"]},
+                                   "bisagra_mirova": {"frac_sel": r2["frac_ln_sel2"], "frac_bg": r2["frac_ln_bg2"],
+                                                      "F_sel": r2["ln_sel2"], "F_bg": r2["ln_bg2"]},
+                                   "shapley": {"frac_sel": r2["frac_ln_sel_sh"], "frac_bg": r2["frac_ln_bg_sh"],
+                                               "F_sel": r2["ln_sel_sh"], "F_bg": r2["ln_bg_sh"]}}
+            # arreglo (c): si el angulo fuera remuestreo, el Npix de MIROVA creceria hacia el borde
+            rep["por_banda_z"] = {bz: {"n": len(s), "Npix_mediana": float(np.median([f["Npix"] for f in s])),
+                                       "n_pos_mediana": float(np.median([f["n_pos"] for f in s])),
+                                       "F_n": round(C.gm([math.exp(f["ln_n"]) for f in s]), 3),
+                                       "F_hot": round(C.gm([math.exp(f["ln_hot"]) for f in s]), 3),
+                                       "F_bg": round(C.gm([math.exp(f["ln_bg"]) for f in s]), 3),
+                                       "R": round(C.gm([f["R"] for f in s]), 3)}
+                                  for bz in ("0-20", "20-35", "35-50", "50-90")
+                                  for s in [[f for f in sub if f["banda_z"] == bz]] if s}
+            rep["test1_dispara"] = [sum(f["test1"] for f in sub), len(sub)]
             out["reparto"][nombre] = rep
 
     for b in ("VIIRS375", "VIIRS750", "MODIS"):

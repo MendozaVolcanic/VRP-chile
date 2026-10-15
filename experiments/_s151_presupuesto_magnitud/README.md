@@ -1,193 +1,214 @@
 # Tarea 1.14 (estudio A): presupuesto de la magnitud, pasada por pasada
 
-> Escrito el 2026-10-14 por el loop (tarea 1.14 de `tasks/LOOP_OBJETIVOS.md`). Sin correr el pipeline: sólo
-> records en disco, salidas de A/B ya corridos (ramas `s146-ab/<run>`, extraídas con `git archive <ref> <ruta>`
-> a un temporal fuera del repo, y el zip de S143) y la referencia de MIROVA. No toca `pipeline/` ni los perfiles.
-> No despacha nada. Definiciones y tolerancias en [`PREREGISTRO.md`](PREREGISTRO.md), escrito antes de correr
-> (mismo commit: git no prueba el orden). Todas las tablas salen de `e_resumen.py` (`e_resumen_salida.md`).
+> Escrito el 2026-10-14 por el loop (tarea 1.14 de `tasks/LOOP_OBJETIVOS.md`) y corregido el mismo día con los
+> siete arreglos del verificador con contexto limpio de #814 (veredicto PARCIAL; §7). Sin correr el pipeline:
+> sólo records en disco, salidas de A/B ya corridos (ramas `s146-ab/<run>`, extraídas con `git archive <ref>
+> <ruta>` a un temporal fuera del repo, y el zip de S143) y la referencia de MIROVA. No toca `pipeline/` ni los
+> perfiles. No despacha nada. Definiciones y tolerancias en [`PREREGISTRO.md`](PREREGISTRO.md), escrito antes
+> de correr (mismo commit: git no prueba el orden). Todas las tablas salen de `e_resumen.py`
+> (`e_resumen_salida.md`), que lee las salidas JSON de los scripts.
 
 ## En una línea
 
-**En VIIRS 375 el déficit de magnitud se reparte en tres partes de tamaño parecido, y la única palanca ya
-construida que lo mueve en la dirección correcta es el fondo por vecinos (D25): en los mismos records cierra el
-60 % del déficit (factor 1,28 [1,21; 1,35]), sobre todo en Isluga y Tupungatito.** La conectiva `max` y quitar
-el Test 1 lo empeoran. La parte que depende del ángulo de la pasada (la firma del remuestreo de MIROVA, D17) es
-el otro tercio y no tiene palanca construida. En MODIS la magnitud no se puede medir hoy (casi no publicamos
-en pasadas con alerta), y en 2025 la explicaba casi entera el fondo.
+**En VIIRS 375 el déficit de magnitud no se puede repartir con precisión entre «contamos menos píxeles» y
+«restamos más fondo»: el reparto depende de la bisagra que se elija, y con las dos razonables el fondo va de
+21 a 64 % del déficit.** Lo que sí está medido con nuestros datos: el recorte del tablero pesa poco en Láscar,
+Isluga y Tupungatito y mucho en Lastarria. Entre las palancas ya construidas, la que más mueve la magnitud hacia
+MIROVA es el fondo por vecinos (D25): factor 1,28 [1,21; 1,35] en los mismos records, cerca del 60 % del déficit
+de su brazo de comparación, más en las pasadas oblicuas. Quitar keep_peak (1,05) y quitar la compuerta D22 (1,03)
+también van en la dirección correcta, mucho menos; la conectiva `max` y quitar el Test 1 la bajan. La
+dependencia con el ángulo de la pasada **no** se puede atribuir al remuestreo de MIROVA (D17).
 
 ## 1. El fenómeno
 
 Un foco volcánico chico (fumarola, lago de lava, domo) ocupa una fracción de un píxel. MIROVA calcula la
 potencia de una pasada como k·A·Σ(L_píxel − L_fondo) sobre **todos** los píxeles que alertó (Campus et al. 2022,
-§3.2; D32), con el fondo de cada uno igual a la media de sus vecinos no alertados (Campus 2024; D25), y sobre su
-imagen remuestreada a una grilla de celdas de área fija. Nosotros usamos la misma fórmula con el mismo k y la
-misma A (S139, verificado de nuevo acá: el OSF cumple VRP = k·A·(ΣL_hot − ΣL_bk) con error relativo máximo
-8,9e-8). Entonces la diferencia sólo puede venir de tres cosas:
+§3.2; D32), con el fondo de cada uno igual a la media de sus vecinos no alertados (Campus 2024; D25). Nosotros
+usamos la misma fórmula con el mismo k y la misma A (S139; acá el OSF cumple VRP = k·A·(ΣL_hot − ΣL_bk) con
+error relativo máximo 8,9e-8). La diferencia puede venir de:
 
-- **Qué sumamos (selección)**: cuántos píxeles entran y qué tan calientes son. En una pasada oblicua el píxel
-  real de VIIRS crece; MIROVA lo reparte en más celdas de su grilla y las suma todas; nosotros contamos un
-  píxel con área de nadir. Eso hace que el déficit crezca con el ángulo cenital.
-- **Cuánto restamos (fondo)**: restamos la mediana de un anillo de 5 a 25 km (o un fondo local del Test 1 en
-  las pasadas donde dispara); MIROVA, la media de los vecinos del píxel. En un cono nevado con valles tibios el
-  anillo es más tibio que los vecinos del cráter, y cada kelvin de fondo de más se come parte de un exceso que
-  es de pocos kelvin.
-- **Qué publicamos (recorte)**: el tablero no muestra la suma de nuestros alertados sino el núcleo F5' (VIIRS
-  375) o el cúmulo con el modo de un píxel (VIIRS 750 y MODIS).
+- **Qué sumamos (selección)**: cuántos píxeles entran (alertamos menos) y qué tan calientes son (los nuestros
+  son los más calientes del foco).
+- **Cuánto restamos (fondo)**: la mediana de un anillo de 5 a 25 km, o el fondo del Test 1 en las pasadas
+  donde dispara; MIROVA, la media de los vecinos. En un cono nevado con valles tibios el anillo es más tibio
+  que los vecinos del cráter, y cada kelvin de fondo de más se come parte de un exceso de pocos kelvin.
+- **Qué publicamos (recorte)**: el tablero muestra el núcleo F5' (VIIRS 375) o el cúmulo con el modo de un
+  píxel (VIIRS 750 y MODIS), no la suma de nuestros alertados.
 
-## 2. La identidad que se descompone
+## 2. Qué es medición y qué es identidad
 
-Por pasada, con D lo publicado, S_in la suma de nuestros alertados dentro del inner, V_M el VRP de MIROVA:
+Por pasada, con D lo publicado, S_in la suma de nuestros alertados dentro del inner y V_M el VRP de MIROVA:
 
-    R = D / V_M = F_rec · F_sel · F_bg        F_sel = F_n · F_hot
+    R = D / V_M = F_rec · F_n · F_hot · F_bg
 
-F_rec = D / S_in; F_n = píxeles nuestros con energía / Npix de MIROVA; F_hot y F_bg separan el exceso por píxel
-en nivel caliente y fondo, usando como bisagra el fondo de MIROVA. Es exacta (control C7: 2,3e-14) pero
-necesita Npix y la radiancia de fondo de MIROVA, que sólo trae el **OSF v2.5 de 2025** (parte A). En 2026 la
-referencia NRT trae sólo el VRP, y la razón se separa en **F_rec · G** (parte B), donde G junta conteo, nivel y
-fondo. Dentro de F_sel (o de G) se aísla la parte que depende del ángulo cenital: el efecto de cada banda de
-ángulo contra la de nadir (0 a 20°), con efecto fijo por volcán. Las fracciones del déficit son en escala
-logarítmica: media de ln F sobre media de ln R. Intervalos al 95 % por bootstrap de **noches** (2.000 réplicas;
-1.000 para el ángulo), porque las pasadas de una misma noche no son independientes. Con R casi 1 la fracción no
-significa nada y se marca así.
+- **F_rec = D / S_in es lo único medido sólo con nuestros datos.**
+- F_n, F_hot y F_bg necesitan el Npix y las radiancias de MIROVA, que sólo trae el **OSF v2.5 de 2025** (parte
+  A). El fondo nuestro que entra (Lbg) es el **implícito**, definido para que la suma de nuestros píxeles cierre:
+  el producto reproduce R **por construcción** (error 2,3e-14). Eso no es un control de la física, es aritmética.
+- El reparto entre F_hot y F_bg exige una **bisagra**: medir el fondo a nuestro nivel caliente o al de MIROVA. Las
+  dos son igual de legítimas y dan repartos muy distintos (Tabla A2). Se informan las dos y el promedio de las
+  dos órdenes, que es el valor de Shapley. **Los intervalos cubren sólo el muestreo (bootstrap por noche), no la
+  elección de la bisagra.**
+- En 2026 la referencia NRT trae sólo el VRP, y la razón se separa en **F_rec · G** (parte B).
+- **No está verificado que el OSF de 2025 valga como vara del NRT** (A105: el OSF es un producto filtrado con
+  clase automática): no hay solape entre el OSF y la referencia NRT del scraper con qué comprobarlo.
 
 ## 3. Resultados
 
-### 3.1 VIIRS 375, el sensor que publica (tablas completas en `e_resumen_salida.md`)
+### 3.1 VIIRS 375, 2025 contra el OSF (parte A; tablas completas en `e_resumen_salida.md`)
 
-**2025, descomposición exacta contra el OSF** (1.474 pasadas, 948 noches):
+R 0,69 [0,66; 0,71] en 1.474 pasadas. Reparto del déficit en escala logarítmica, sobre las pasadas donde existen
+las dos bisagras:
 
-| estrato | R | F_rec | F_sel | de F_sel, ángulo | F_bg | reparto rec / sel / fondo | dentro de sel, ángulo |
-|---|---|---|---|---|---|---|---|
-| VIIRS 375, todos | 0,69 [0,66; 0,71] | 0,85 [0,82; 0,87] | 0,90 [0,86; 0,93] | 0,87 [0,84; 0,90] | 0,90 [0,88; 0,93] | 43 % / 29 % / 28 % | 37 % [27; 48] |
-| sin kernel local (Láscar, Isluga, Copahue) | 0,56 [0,54; 0,58] | 0,99 [0,98; 0,99] | 0,70 [0,68; 0,72] | 0,79 [0,76; 0,82] | 0,81 [0,79; 0,83] | 2 % / 62 % / 36 % | 41 % [35; 47] |
-| Láscar | 0,57 [0,54; 0,59] | 1,00 | 0,68 [0,66; 0,70] | 0,79 [0,75; 0,82] | 0,84 [0,82; 0,86] | 1 % / 69 % / 30 % | 42 % [35; 49] |
-| Isluga | 0,54 [0,51; 0,58] | 0,98 | 0,70 [0,66; 0,74] | 0,78 [0,72; 0,82] | 0,79 [0,77; 0,81] | 3 % / 59 % / 38 % | 42 % [33; 51] |
-| Lastarria | 0,61 [0,55; 0,68] | 0,80 [0,77; 0,83] | 1,01 [0,94; 1,09] | 0,96 [0,85; 1,09] | 0,75 [0,68; 0,82] | 45 % / -3 % / 58 % | 8 % [-19; 33] |
-
-Tupungatito no tiene pasadas clase 1 del OSF pareadas en 2025 (S139 ya lo había visto).
-
-**2026 contra la referencia NRT** (R = F_rec · G):
-
-| tramo | estrato | pasadas / noches | R | F_rec | G | de G, ángulo | fracción del déficit por ángulo |
-|---|---|---|---|---|---|---|---|
-| abr a ago (antes de #535) | todos | 916 / 543 | 0,61 [0,58; 0,65] | 0,88 [0,86; 0,91] | 0,69 [0,65; 0,74] | 0,83 [0,77; 0,89] | 38 % [25; 52] |
-| | Láscar | 200 / 110 | 0,47 [0,43; 0,51] | 1,00 | 0,47 [0,43; 0,51] | 0,71 [0,64; 0,79] | 45 % [33; 56] |
-| | Isluga | 192 / 108 | 0,54 [0,49; 0,58] | 0,98 | 0,55 [0,50; 0,60] | 0,77 [0,69; 0,85] | 42 % [27; 55] |
-| | Lastarria | 119 / 79 | 0,35 [0,28; 0,43] | 0,86 [0,81; 0,90] | 0,41 [0,32; 0,51] | 0,75 [0,54; 1,07] | 27 % [-7; 56] |
-| | Tupungatito | 104 / 68 | 0,61 [0,55; 0,67] | 1,00 | 0,61 [0,55; 0,67] | 0,86 [0,75; 0,98] | 31 % [4; 57] |
-| 29 ago a 14 oct (después) | todos | 259 / 144 | 0,66 [0,59; 0,72] | 0,89 [0,85; 0,93] | 0,74 [0,65; 0,83] | 0,85 [0,73; 0,96] | 38 % [12; 68] |
-| | Láscar | 41 / 22 | 0,60 [0,53; 0,70] | 0,97 | 0,62 [0,53; 0,73] | 0,94 [0,79; 1,14] | 12 % [-31; 39] |
-| | Isluga | 73 / 37 | 0,53 [0,46; 0,61] | 0,98 | 0,54 [0,47; 0,62] | 0,76 [0,62; 0,90] | 43 % [20; 67] |
-| | Tupungatito | 25 / 16 | 0,41 [0,26; 0,60] | 1,00 | 0,41 [0,26; 0,60] | 0,55 [0,33; 0,97] | 67 % [4; 120] |
-| | Nevados de Chillán | 34 / 14 | 0,57 [0,48; 0,70] | 0,91 | 0,63 [0,51; 0,80] | 0,74 [0,54; 0,98] | 53 % [4; 101] |
-
-**Lo que dicen juntas.** En los volcanes con déficit grande (Láscar, Isluga, Tupungatito) el recorte del tablero
-no pesa (F_rec 0,97 a 1,00): publicamos lo que alertamos. El déficit está entero en G, y G se parte en una
-parte que depende del ángulo (0,71 a 0,86 en el tramo largo) y una de nadir. En 2025, donde se puede separar,
-la parte de nadir es fondo (0,79 a 0,84) más un resto chico de selección (0,86 a 0,90 a nadir, que se lee en
-`F_sel por banda z` de `a_osf_exacto_salida.txt`). Lastarria es otro caso: ahí pesan el recorte y el fondo, no
-el ángulo. Los volcanes con kernel local (Puyehue-Cordón Caulle, Chaitén, Planchón-Peteroa, Villarrica) están
-cerca de 1 o sobre 1, y Cordón Caulle compensa un recorte grande (F_rec 0,56) con una suma que duplica a MIROVA
-(inner de 20 km): sumar todos los alertados no lo arreglaría, lo empeoraría.
-
-### 3.2 Las palancas ya construidas, medidas en las mismas pasadas (parte C)
-
-| palanca (brazo A → brazo B) | ventana | pasadas | B / A | déficit de A que cierra | por volcán |
+| estrato | pasadas | recorte | selección / fondo, bisagra nuestra | bisagra MIROVA | Shapley |
 |---|---|---|---|---|---|
-| **fondo por vecinos D25** (literal sin D25 → literal) | jun a ago | 468 | **1,28 [1,21; 1,35]** | **60 % [51; 70]** | Isluga 1,72, Tupungatito 2,37, Láscar 1,20, Lastarria 0,91, volcanes con kernel 0,99 a 1,00 |
-| literal entero (control → D22+D25+sin keep_peak) | jun a ago | 478 | 1,23 [1,18; 1,28] | 55 % [46; 65] | |
-| quitar keep_peak | jun a ago | 478 | 1,05 [1,02; 1,07] | 22 % [12; 33] | |
-| quitar la compuerta D22 | jun a ago | 423 | 1,03 [1,02; 1,05] | 17 % [9; 27] | |
-| conectiva `max` (sobre la base sin Test 1) | may a sep, 5 meses | 824 | **0,93 [0,91; 0,94]** | **-18 % [-24; -14]** | Láscar, Isluga y Tupungatito casi 1; Lastarria 0,88 a 0,93; Cordón Caulle 0,74 a 0,86 según el mes |
-| quitar el Test 1 integrado | 1 a 20 sep | 124 | 0,88 [0,81; 0,94] | -38 % [-66; -19] | Tupungatito 0,63, Láscar 0,80 |
-| banda 22 con `max` en MODIS (efecto sobre VIIRS 375, sólo Láscar) | mar y jun | 92 | 0,98 [0,96; 0,99] | -4 % | |
-| **nulo**: gemelo del control | mar, Láscar | 88 | **1,00 exacto** | 0 % | |
+| VIIRS 375, todos | 1.438 | 47 % [38; 58] | 32 % / 21 % | -12 % / 64 % | 10 % / 43 % |
+| sin kernel local (Láscar, Isluga, Copahue) | 741 | 2 % | 63 % / 35 % | 34 % / 64 % | 48 % / 49 % |
+| Láscar | 383 | 1 % | 71 % / 28 % | 46 % / 53 % | 59 % / 40 % |
+| Isluga | 333 | 3 % | 59 % / 38 % | 25 % / 72 % | 42 % / 55 % |
+| Lastarria | 230 | 62 % [45; 87] | -4 % / 42 % | -51 % / 89 % | -28 % / 66 % |
 
-El fondo D25 mueve **G** (factor por G 1,28; por recorte 1,00), y en Isluga y Tupungatito sube también el número
-de píxeles con energía (mediana 1 a 2): con un fondo más frío, píxeles que hoy quedan recortados a 0 MW
-empiezan a aportar. Por eso su efecto en Isluga (1,72) es mayor que lo que la parte A atribuye al fondo solo
-(F_bg de Isluga en 2025: 0,79): mueve fondo y conteo a la vez. Los brazos de A/B son todos de antes de #535 salvo el de
-quitar el Test 1, y el de D25 viene del contexto `literal` (sin compuerta, sin keep_peak, segundo pase
-condicionado), no de producción.
+**Lectura.** En Láscar e Isluga el recorte no pesa: el déficit es selección más fondo, y según la bisagra el
+fondo es entre un cuarto y tres cuartos de él (Shapley: mitad y mitad). En Lastarria pesan el recorte y el fondo.
+En los volcanes con kernel local (Cordón Caulle con inner de 20 km, Chaitén, Planchón-Peteroa, Villarrica) R está
+cerca de 1 o sobre 1 y las fracciones no significan nada. Tupungatito no tiene pares clase 1 del OSF en 2025.
 
-### 3.3 VIIRS 750 y MODIS
+### 3.2 El ángulo de la pasada no es la firma del remuestreo (arreglo c)
 
-- **VIIRS 750**: el recorte sí pesa (F_rec 0,71 en los dos tramos de 2026: el cúmulo publicado
-  con el modo de un píxel y la magnitud focal contra la suma de los alertados del inner, tarea 1.8). En 2025
-  (sólo Láscar, 17 pasadas) el reparto fue recorte 39 %, selección 44 %, fondo 17 %. La conectiva `max` y el
-  Test 1 no cambian ninguna pasada de VIIRS 750 (B/A 1,00 en 118 y 13 pasadas). En la erupción de Chillán
-  (post #535, 21 pasadas) R 0,47 con F_rec 0,78 y G 0,61; n chico.
-- **MODIS**: en 2026 casi no hay qué medir: con alerta de MIROVA publicamos 6 pasadas antes de #535 y ninguna
-  después (45 y 7 no publicadas, la etiqueta `far` de A82). En 2025 (Láscar, 35 pasadas) el fondo explicaba
-  el déficit entero (F_bg 0,47 [0,42; 0,53], 4,2 K de fondo de más), con una selección que **suma más** que
-  MIROVA (F_sel 1,86) y un recorte de 0,53 que no es interpretable (control C2 falla en MODIS, ver §4). Con la
-  banda 22 MODIS publica 37 pasadas con alerta en Láscar, con R 0,42 [0,34; 0,52].
+El déficit crece con el ángulo cenital (VIIRS 375 sin kernel: R 0,76 a nadir, 0,45 en el borde). Si eso fuera el
+remuestreo de MIROVA (D17), su Npix crecería hacia el borde, porque un píxel oblicuo más grande se repartiría en
+más celdas. **No crece**: medianas de 3, 5, 5 y 4 en las cuatro bandas (Tabla A3), y en Isluga 3, 3, 4 y 5 sin
+saltos que sigan al área. Lo que sí cambia con el ángulo es el fondo: F_bg cae de 0,85 a nadir a 0,73 en el
+borde (sin kernel), y en Láscar de 0,93 a 0,70. O sea que parte de la dependencia angular es fondo, no conteo, y
+el «37 % por ángulo» de la versión anterior (calculado dentro de la selección) no se puede leer como el tamaño
+de D17. Queda **SIN ATRIBUIR**: la dependencia existe, su mecanismo no está identificado.
 
-## 4. Controles (cada uno podía fallar)
+### 3.3 VIIRS 375, 2026 contra la referencia NRT (parte B)
+
+| tramo de calendario | estrato | pasadas / noches | R | F_rec | G |
+|---|---|---|---|---|---|
+| abr a ago | todos | 916 / 543 | 0,61 [0,58; 0,65] | 0,88 [0,86; 0,91] | 0,69 [0,65; 0,74] |
+| | Láscar | 200 / 110 | 0,47 [0,43; 0,51] | 1,00 | 0,47 [0,43; 0,51] |
+| | Isluga | 192 / 108 | 0,54 [0,49; 0,58] | 0,98 | 0,55 [0,50; 0,60] |
+| | Lastarria | 119 / 79 | 0,35 [0,28; 0,43] | 0,86 [0,81; 0,90] | 0,41 [0,32; 0,51] |
+| | Tupungatito | 104 / 68 | 0,61 [0,55; 0,67] | 1,00 | 0,61 [0,55; 0,67] |
+| 29 ago a 14 oct | todos | 259 / 144 | 0,66 [0,59; 0,72] | 0,89 [0,85; 0,93] | 0,74 [0,65; 0,83] |
+| | Láscar | 41 / 22 | 0,60 [0,53; 0,70] | 0,97 | 0,62 [0,53; 0,73] |
+| | Isluga | 73 / 37 | 0,53 [0,46; 0,61] | 0,98 | 0,54 [0,47; 0,62] |
+| | Tupungatito | 25 / 16 | 0,41 [0,26; 0,60] | 1,00 | 0,41 [0,26; 0,60] |
+| | Nevados de Chillán | 34 / 14 | 0,57 [0,48; 0,70] | 0,91 | 0,63 [0,51; 0,80] |
+
+El F_rec es medición pura y confirma lo de 2025: en Láscar, Isluga y Tupungatito publicamos lo que alertamos, y
+todo el déficit está en G (selección y fondo juntos, sin forma de separarlos sin el Npix de MIROVA).
+
+**Régimen de código contra ventana de calendario (arreglo b).** El tramo «abr a ago» de producción es de
+**código anterior a #535**: ninguno de sus 17.450 records tiene hora de proceso. El tramo «29 ago a 14 oct» se
+procesó del 2026-09-03 al 2026-10-14 (4.879 de 5.460 con hora). En cambio **todos los brazos de A/B de la
+parte C se procesaron entre el 2026-09-17 y el 2026-09-22, con código posterior a #535**, aunque cubran ventanas
+de marzo a septiembre. La versión anterior decía que los brazos eran «de antes de #535»: era falso. Consecuencia:
+la parte B y la parte C **no son comparables en los mismos meses**; un mismo junio es código viejo en B y código
+nuevo en C.
+
+### 3.4 Las palancas ya construidas, medidas en las mismas pasadas (parte C)
+
+| palanca (brazo A → brazo B) | ventana de calendario | pasadas | B / A | déficit de A que cierra |
+|---|---|---|---|---|
+| **fondo por vecinos D25** (literal sin D25 → literal) | jun a ago | 468 | **1,28 [1,21; 1,35]** | 60 % [51; 70] |
+| literal entero (control → D22 + D25 + sin keep_peak) | jun a ago | 478 | 1,23 [1,18; 1,28] | 55 % [46; 65] |
+| quitar keep_peak | jun a ago | 478 | 1,05 [1,02; 1,07] | 22 % [12; 33] |
+| quitar la compuerta D22 | jun a ago | 423 | 1,03 [1,02; 1,05] | 17 % [9; 27] |
+| conectiva `max` (sobre la base sin Test 1) | may a sep | 824 | 0,93 [0,91; 0,94] | -18 % [-24; -14] |
+| quitar el Test 1 integrado | 1 a 20 sep | 124 | 0,88 [0,81; 0,94] | -38 % [-66; -19] |
+| **nulo**: gemelo del control | mar, Láscar | 88 | **1,00 exacto** | 0 % |
+
+Por volcán, D25: Isluga 1,72, Tupungatito 2,37, Láscar 1,20, Lastarria 0,91 (empeora), y 0,99 a 1,00 en los
+volcanes con kernel local. **El 1,28 se midió dentro del brazo `literal`** (sin compuerta, sin keep_peak, segundo
+pase condicionado): ningún brazo corrido es «producción más D25».
+
+**D25 por banda de ángulo** (Tabla C2): 1,18 [1,12; 1,24] a nadir, 1,22, 1,36 y 1,41 [1,27; 1,60] en el borde;
+con efecto fijo por volcán, 1,00 / 1,08 [1,00; 1,17] / 1,17 [1,05; 1,33] / 1,20 [1,07; 1,33]. **D25 sí actúa sobre
+la dependencia angular**, coherente con que el fondo empeore hacia el borde (§3.2). La versión anterior decía lo
+contrario.
+
+### 3.5 VIIRS 750 y MODIS
+
+- **VIIRS 750**: el recorte pesa (F_rec 0,71 en los dos tramos de 2026: el cúmulo con el modo de un píxel y la
+  magnitud focal contra la suma de los alertados del inner, tarea 1.8). En 2025 (sólo Láscar, 17 pasadas) el
+  recorte es 39 %; selección y fondo, 44 / 17 % con nuestra bisagra y 23 / 38 % con la de MIROVA. La conectiva
+  `max` y el Test 1 no cambian ninguna pasada de VIIRS 750.
+- **MODIS**: en 2026 publicamos 6 pasadas con alerta antes de #535 y ninguna después (45 y 7 no publicadas, la
+  etiqueta `far` de A82): no hay magnitud que descomponer. En 2025 (Láscar, 35 pasadas) el fondo explicaba más
+  que todo el déficit con cualquier bisagra (F_bg 0,47 [0,42; 0,53] con la nuestra) y la selección suma **más**
+  que MIROVA. Con la banda 22, MODIS publica 37 pasadas con alerta en Láscar, con R 0,42 [0,34; 0,52].
+
+## 4. Controles
 
 | control | resultado | consecuencia |
 |---|---|---|
-| C3 réplica del núcleo F5' | 100 % en las tres poblaciones (1.499, 4.778, 1.978) | lo publicado en VIIRS 375 sale exactamente de los píxeles: F_rec es recorte puro |
-| C2 cúmulo de un píxel reconstruido | 2025: 100 % (869). 2026: VIIRS 375 89 a 94 % antes de #535 (falla en records con Test 1) y 97 a 100 % después; VIIRS 750 97 a 98 %; **MODIS 79 a 87 %** | **F_rec de MODIS queda SIN DATO como recorte puro**: su `pc.vrp_mw` no siempre sale de los píxeles guardados (magnitud focal). En VIIRS 750 queda justo bajo el 98 % pre-registrado y se informa marcado. En VIIRS 375 no afecta: lo publicado es el núcleo F5', que C3 reconstruye entero |
-| C1 píxel = k·A·(L(bt) − fondo del anillo) | agregado 96,2 % (pasa), pero **sólo en records sin Test 1**: MODIS 99,6 %, VIIRS 375 100 %, VIIRS 750 93 %; con Test 1: 59 %, 12 % y 25 % | hallazgo: en las pasadas donde dispara el Test 1 el VRP por píxel usa **otro fondo** (el anillo intermedio o el global del Test 1), no el del anillo de 5 a 25 km. La descomposición no lo supone (usa el fondo implícito exacto), pero «nuestro fondo» es una mezcla |
-| C4 fondo implícito contra anillo (2025) | 93,4 % de 2.008 píxeles | pasa |
+| C6 auto-audit reproducido | 11 de 11 volcanes dentro de ±0,05 | los datos se cargan igual que en el auto-audit. No prueba que el auto-audit mida un objeto limpio: junta VIIRS 375 con VIIRS 750 y su ventana cruza #535 |
+| C3 réplica del núcleo F5' | 100 % (1.499, 4.778 y 1.978 records) | en VIIRS 375 F_rec es recorte puro |
+| C2 cúmulo de un píxel | **2025: 100 % de 869**. 2026: VIIRS 375 89 a 94 % antes de #535 y 97 a 100 % después; VIIRS 750 97 a 98 %; **MODIS 79 a 87 %** | la falla de MODIS es **sólo de 2026**: ahí su `pc.vrp_mw` no siempre sale de los píxeles guardados (magnitud focal) y su F_rec queda SIN DATO como recorte puro. El F_rec de MODIS 2025 sí es recorte |
+| C4 fondo implícito contra anillo (2025) | 93,4 % de 2.008 píxeles; VIIRS 375 con Test 1: 90,8 % de 1.450 | **en 2025 el Test 1 dispara en 1.462 de 1.474 pares VIIRS 375**, y aun así el fondo implícito es sobre todo el del anillo |
+| C1 píxel = k·A·(L(bt) − fondo del anillo), 2026 | sin Test 1: MODIS 99,6 %, VIIRS 375 100 %, VIIRS 750 93 %; con Test 1: 25 %, 59 % y 12 % | en 2026 las pasadas con Test 1 usan otro fondo por píxel. Es de 2026; no se aplica a la parte A |
 | C5 pareo corrido 6 h | 0 de 1.552 (A); 3 de 1.287 y 0 de 360 (B) | el pareo no empareja azar |
-| C6 auto-audit reproducido | 11 de 11 volcanes dentro de ±0,05 (Láscar 0,442, Isluga 0,516, Lastarria 0,559, Tupungatito 0,647 exactos) | estamos midiendo los mismos objetos que el auto-audit |
-| C7 identidad | 2,3e-14 (código); 8,9e-8 (consistencia del OSF) | ver enmienda 1 |
-| nulo de la parte C | gemelo del control: B/A = 1,00 exacto en 88 pasadas; la banda 22 de MODIS deja VIIRS en 1,00 exacto | el instrumento de brazos no inventa efectos |
-| T2 campo del TIF comparable (parte D) | **falla**: sólo 18,5 % de 27 pasadas con el anillo del TIF a ±3 % del nuestro (mediana 1,049) | **el fondo medido en el GeoTIFF de MIROVA queda SIN DATO** |
+| C7 identidad | 2,3e-14 (código); 8,9e-8 (consistencia del OSF) | es aritmética, no física (§2) |
+| nulo de la parte C | gemelo: B/A = 1,00 exacto en 88 pasadas; la banda 22 deja VIIRS en 1,00 exacto | el instrumento de brazos no inventa efectos |
+| T2 campo del TIF comparable (parte D) | **falla**: 18,5 % de 27 pasadas con el anillo del TIF a ±3 % del nuestro | el fondo medido en el GeoTIFF de MIROVA queda SIN DATO |
 
-## 5. Lo que recomiendo para el siguiente A/B
+## 5. Recomendación para el siguiente A/B
 
-**El fondo por vecinos (D25) en VIIRS 375, aislado sobre la base de producción**, con el flag que ya existe y
-está apagado (`ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375`). Por qué éste y no otro:
+**Medir D25 en VIIRS 375 como brazo propio, sobre producción (C0) y también sobre la base F** (sin Test 1),
+con el flag que ya existe y está apagado (`ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375`). Por qué:
 
-1. Es la única palanca construida que mueve la magnitud hacia MIROVA: cierra 60 % [51; 70] del déficit en los
-   mismos records, y en Isluga y Tupungatito casi entero (77 y 89 %). Las otras dos que existen (conectiva
-   `max`, quitar el Test 1) la bajan.
-2. Es fidelidad literal (siete textos del grupo MIROVA, D25), no un parche: pasa la pregunta 1 de MISSION.
-3. Nunca se midió solo sobre producción: S143 lo midió dentro de `literal`, y antes de #535.
+1. Es la palanca construida que más mueve la magnitud hacia MIROVA (1,28, y más en las pasadas oblicuas), y es
+   fidelidad literal (siete textos del grupo MIROVA, D25). Quitar keep_peak y quitar D22 también ayudan, pero
+   poco (1,05 y 1,03).
+2. Nunca se midió aislado: el 1,28 es dentro de `literal`.
+3. **Sobre producción la sobre-publicación está saturada**: con el Test 1 encendido, producción publica en 734 de
+   832 negativos limpios de VIIRS 375 (`experiments/_s151_prereg_fk_11/PREREGISTRO.md`, V1). Ahí el costo de D25
+   en sobre-publicación (+0,052 en S143, medido sin keep_peak) no se vería (A114). Por eso **los negativos limpios
+   se miden sobre F**, donde la métrica no está saturada.
+4. Coordinarlo con el probe de D25 en VIIRS 750 (D-5, #793) y con el resultado del A/B de F y K (D-7, #798): si se
+   adopta F, la base cambia (sin Test 1 la magnitud baja a 0,88 de producción y `max` a 0,93), y D25 es lo que
+   podría devolverla.
 
-Lo que el A/B tiene que mirar además de la magnitud: (a) **la sobre-publicación**, porque en S143 D25 la subía
-(+0,052 en negativos limpios, H_S143_D22_D25) y la brecha dominante del proyecto sigue siendo ésa (A98); (b)
-**Lastarria**, que empeora con D25 (0,91), y los volcanes con kernel local, donde no cambia nada; (c) el estrato
-de ángulo, porque D25 no toca la parte que depende del ángulo y no hay que leer su efecto como si cerrara todo.
+Lo que el A/B tiene que mirar además: Lastarria, que empeora con D25; los volcanes con kernel local, donde no
+cambia nada; y el efecto por banda de ángulo.
 
-**Lo que no recomiendo todavía**: el remuestreo (D17, estudio B propuesto). Es el otro tercio del déficit (37 %
-en 2025, 38 % en 2026 en VIIRS 375; 41 a 45 % en Láscar e Isluga), pero no está construido y su tamaño medido
-acá es una cota: la dependencia con el ángulo también puede venir de que el foco se diluye en un píxel más
-grande, cosa que el remuestreo no arregla. Va después de D25, con este presupuesto como línea base.
-
-**Para la decisión D-1 (conectiva `max`)**: su costo en magnitud es 7 % [6; 9] en VIIRS 375 (824 pasadas, cinco
-meses), concentrado en Lastarria y Cordón Caulle. No cambia el veredicto de sobre-publicación, pero es un costo
-que la decisión debe conocer.
+**Para la decisión D-1 (conectiva `max`)**: cuesta 7 % de magnitud en VIIRS 375 (824 pasadas, cinco meses), y más
+en el borde del barrido (0,85 en la banda de 50° o más).
 
 ## 6. Lo que no se pudo resolver
 
-- **El conteo de MIROVA en 2026.** No hay OSF de 2026; el GeoTIFF no trae la máscara de alertados (A24), y su
-  campo no pasó el control de comparabilidad (T2). La separación conteo contra fondo en 2026 sale sólo de los
-  brazos de A/B, no de MIROVA.
-- **El archivo local de TIF llega al 2026-05-20**, no al 2026-09-22: el checkout de `mirova-tif-archive` está
-  atrasado y la regla prohíbe pull. La parte D usó 11 días (52 pasadas con alerta, 27 atribuidas), todas antes
-  de #535.
-- **Ningún brazo de D25 después de #535**: el factor 1,28 es de junio a agosto.
-- **MODIS en el régimen actual**: sin pasadas con alerta publicadas no hay razón que descomponer; el problema
-  ahí es la etiqueta (A82), no la magnitud.
-- **Tupungatito en 2025**: sin pares del OSF; su reparto sólo viene de 2026 y de los brazos.
-- **La parte de nadir de G en 2026** (fondo más selección a nadir) no se separa sin Npix; se infiere de 2025.
+- **El reparto selección contra fondo** no está identificado: depende de la bisagra (§2, §3.1).
+- **El mecanismo de la dependencia angular**: no es el conteo remuestreado de MIROVA (su Npix no crece), y el
+  fondo explica una parte; el resto queda sin atribuir.
+- **La validez del OSF 2025 como vara del NRT** (A105): sin solape con qué comprobarla.
+- **El conteo de MIROVA en 2026**: no hay OSF de 2026; el GeoTIFF no trae la máscara de alertados (A24) y su
+  campo no pasó el control T2. El archivo local de TIF llega sólo al 2026-05-20 (checkout atrasado, sin pull).
+- **D25 sobre producción y sobre F**: no hay brazo corrido; el 1,28 es del contexto `literal`.
+- **MODIS en el régimen actual**: sin pasadas con alerta publicadas no hay razón que descomponer (A82).
+- **Tupungatito en 2025**: sin pares del OSF.
 
 ## 7. Enmiendas posteriores a ver datos (declaradas)
 
-1. **C7**: el pre-registro pedía error < 1e-9 entre el producto de los factores y D / V_M. Dio 8,9e-8 porque
-   el producto reproduce D / (k·A·Npix·(L_hot − L_bk)), no D / V_M: la diferencia es la consistencia del propio
-   OSF. Se separaron las dos cosas; la identidad de código da 2,3e-14.
-2. **C1**: el pre-registro excluía sólo `final_hotspot_source == test1_roi`. El agregado pasa (96,2 %) porque
-   MODIS aporta casi todos los píxeles; el desglose por sensor y por Test 1 se agregó después de ver el
-   resultado, y es el que se informa.
-3. Se agregaron después de la primera corrida: el factor de selección F_sel = F_n · F_hot (F_n solo exagera
-   porque MIROVA suma vecinos tibios de poco exceso), la fracción del ángulo con intervalo y la marca «R casi 1».
-4. La parte D (TIF) se escribió después de A, B y C; sus controles están en el docstring de `d_tif_fondo.py`,
-   escritos antes de correrla.
+1. **C7**: el pre-registro pedía error < 1e-9 contra D / V_M; dio 8,9e-8 porque el producto reproduce
+   D / (k·A·Npix·(L_hot − L_bk)), no D / V_M. Se separaron las dos cosas.
+2. **C1**: el pre-registro excluía sólo `test1_roi`. El agregado pasaba (96,2 %) porque MODIS aporta casi todos
+   los píxeles; el desglose por sensor y por Test 1 es el que se informa.
+3. Agregados tras la primera corrida: F_sel = F_n · F_hot, la fracción del ángulo con intervalo y la marca
+   «R casi 1». La parte D (TIF) se escribió después de A, B y C, con sus controles en el docstring de
+   `d_tif_fondo.py` antes de correrla.
+4. **Verificador con contexto limpio de #814** (PARCIAL; confirmó la reconstrucción y los factores de las
+   palancas). Arreglos aplicados en el mismo PR: (a) reparto como rango con las dos bisagras y Shapley, y aviso de
+   que la descomposición es una identidad y de que el IC sólo cubre el muestreo; (b) régimen de código separado
+   de la ventana de calendario, con la hora de proceso de cada brazo y de cada tramo; (c) retirada la atribución
+   del ángulo a D17 y la frase «D25 no toca la parte del ángulo», con el efecto de D25 por banda con intervalo;
+   (d) «la única palanca» pasó a «la que más mueve»; (e) recomendación de medir D25 sobre C0 y sobre F, con
+   negativos limpios en F; (f) la falla de C2 en MODIS acotada a 2026; (g) la validez del OSF como vara del NRT,
+   declarada sin verificar. Lo que cayó de la versión anterior: «tres tercios», «el ángulo es D17» y «D25 no toca
+   el ángulo». Lo que sigue en pie: F_rec, los factores de las palancas y la recomendación de medir D25, ahora
+   con otro diseño.
 
 ## 8. Reproducir
 
@@ -201,6 +222,7 @@ python d_tif_fondo.py --tif-dir <ruta local de mirova-tif-archive>
 python e_resumen.py
 ```
 
-Referencia de MIROVA usada en B y C: consolidado `7c6af1c0c1c8afd58d7bfc70e37aba2ff862c015`, OCR
-`03cab0e74aa2bb672c2b113f8f380af50e0a36e0`. Records de `data/mirova_equivalent/` en la base de la rama
-(`b316b9295`). Los CSV de pares (`*_pares.csv`) quedan fuera de git por `.gitignore` y se regeneran.
+La referencia de MIROVA se baja en cada corrida y su sha queda en las salidas (la corrida final de B y C usó el
+consolidado `e54c1018af65a6062e2d6c08a4bd5a9d371012fb` y el OCR `03cab0e74aa2bb672c2b113f8f380af50e0a36e0`; con
+los consolidados de corridas anteriores los factores de C no cambiaron). Records de `data/mirova_equivalent/` en
+la base de la rama (`b316b9295`). Los CSV de pares quedan fuera de git por `.gitignore` y se regeneran.
