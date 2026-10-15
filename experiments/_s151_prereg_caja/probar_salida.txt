@@ -1,0 +1,33 @@
+semillas: protegida centrada Lascar|VIIRS375|2026-10-01 05:18 | protegida corrida PlanchonPeteroa|VIIRS375|2026-08-31 06:00 | negativos centrados publicados V375 540 | Muy Bajo 159 | alertas V750 22
+semilla D1: Lascar|MODIS|2026-03-26 01:35
+== RESUMEN (salida completa de cada caso en C:\Users\nmend\AppData\Local\Temp\claude\C--Users-nmend-OneDrive-Escritorio-claude-Volcanologia-VRP-Chile\cc89671c-1a9a-4960-b2b7-508d0fd7e9de\scratchpad\probar_caja2)
+   OK    mec: sin KC no hay veredicto de KC; LA CAJA ACTUA (Q1 por Fisher, Q2 CUMPLE)
+   OK    mec_nulo: BC igual a B -> sin huella, mecanismo INDECIDIBLE
+   OK    noapaga: corona quitada sin apagar -> LA CAJA NO APAGA
+   OK    q2: la caja toca lo de adentro -> Q2 FALLA, mecanismo INDECIDIBLE
+   OK    d1: K y KC iguales -> veto CUMPLE
+   OK    d1_pend: KC la pierde, sin gemelo -> PENDIENTE DE REPETICION
+   OK    d1_rep_si: la repeticion la vuelve a perder -> NO CUMPLE (veto)
+   OK    d1_rep_no: la repeticion no la pierde -> CUMPLE (veto)
+   OK    combinar: mec y d1 -> KC CUMPLE (veto)
+   OK    combinar: mec_nulo y d1 -> INDECIDIBLE (el mecanismo no paso)
+   OK    combinar: mec, d1 y un veto -> NO CUMPLE (veto)
+   OK    nulo: sin huella en BC -> INDECIDIBLE (control positivo)
+   OK    inerte: P2 EMPATE con ruido 0, P3 SIN SUSTRATO (ningun par cambia), NO CUMPLE (inerte)
+   OK    veto: protegida centrada -> VETADO, NO CUMPLE (veto)
+   OK    gemelo: el gemelo tambien la oculta -> P1 INDECIDIBLE
+   OK    corrido: perdida en un volcan corrido -> no decide (se informa)
+   OK    gana: P2 GANA, CUMPLE, P2b FUERA del techo
+   OK    pierde: P2 PIERDE, NO CUMPLE (suma)
+   OK    ruido_chico: cambio de 1 dentro de un ruido de 2 -> P2 INDECIDIBLE, global INDECIDIBLE (no inerte)
+   OK    gana_ruido: 5 menos con ruido 1 -> GANA
+   OK    ruido_grande: ruido 20 no menor que el techo 3 -> determinismo FALLA, INDECIDIBLE
+   OK    p3_cambian: 6 pares VIIRS 750 por 20 -> P3 FALLA solo con los pares que cambian
+   OK    p4: cumulos fuera de la caja -> P4 de KC FALLA y el global lo anota
+   OK    sinclave: log sin la clave de la caja -> KC ROTO, INDECIDIBLE
+   OK    cajafalsa: log con la caja apagada -> KC ROTO
+   OK    cobert: a KC le falta una pasada -> INDECIDIBLE
+   OK    determ: gemelo distinto en 100 pasadas -> INDECIDIBLE
+   OK    capa_mod: capa cambiada -> referencia_ok False, INDECIDIBLE
+   OK    log_real: el log real de K (sin la clave de la caja) -> K ROTO, INDECIDIBLE
+29 de 29

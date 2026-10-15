@@ -117,6 +117,33 @@
 | s132/AB_DISTANCE_CLASS_MODIS.md | A/B corrido: NO ADOPTAR (falló C2, mal calibrado — A91) | S132 |
 | s131/REMUESTREO_LEY_DE_AREA.md | El área explica el gradiente cenital entero; ATBD 4,38× | S131 |
 
+### Agregados S151: documentos de S147 a S150 que faltaban en el índice
+
+> Tarea 0.3 del loop (`tasks/LOOP_OBJETIVOS.md`), hallazgo F4-14 de
+> `audit_s150/meta/AUDITOR_F4_PROPAGACION.md`: doce documentos de la raíz de `docs/` agregados desde el
+> 2026-09-20 no estaban acá; al indexarlos aparecieron dos más (`LIBRO_DE_PRUEBAS.md` y
+> `S147_TEST1_ESTADISTICO_CORREGIDO.md`). Los informes de las subcarpetas `audit_s147/` a `audit_s150/`
+> se alcanzan desde AUDIT_S149 y AUDIT_S150, y desde la fila de `audit_s150/meta/` de abajo.
+
+| Doc | Qué es o qué concluye | Sesión |
+|---|---|---|
+| audit_s150/meta/ (carpeta) | Meta-auditoría de las auditorías pasadas: cuatro auditores (pendientes, números, vara retroactiva, propagación) y dos verificadores con contexto limpio (datos y documentos). Fuente del plan del loop autónomo | S150 |
+| S151_CRITERIO_CLASE_MIROVA.md | Qué es una alerta protegida: alerta de MIROVA con VRP de la pasada de 1 MW o más, recalculado, nunca leído de la columna `Clasificacion Mirova` (que escribe el scraper). Operacionaliza el «de Bajo para arriba» de Nicolás con el banner de MIROVA (no con el paper). Lectura A por defecto (439 pasadas); la lectura B (992, a cualquier distancia) es la decisión pendiente D-4, issue #782; el loop evalúa con las dos. PR #780 | S151 |
+| S150_RESULTADO_MESES.md | La conectiva `max` y la banda 22 mes a mes, marzo a agosto; verificado con contexto limpio. En MODIS, con banda 22, Láscar separa alertas de negativos | S150 |
+| S150_IMAGENES_SNPP.md | Las cinco «alertas fuertes» de Suomi NPP que `max` perdía son filas del OCR con la distancia y la clase de otra pasada (el VRP sí es suyo) | S150 |
+| S150_ALERTAS_DEBILES_MAX.md | Las alertas de MIROVA que `max` pierde y por qué. **Sin verificador con contexto limpio**: orienta, no decide | S150 |
+| PLAN_AUDITORIA_S150.md | Plan de AUDIT_S150, con el NRT caído cinco días y Nevados de Chillán en erupción | S150 |
+| S149_RESULTADO_CONECTIVA_MAYO.md | Mayo repite septiembre: con `max`, VIIRS 375 baja de 30,1 a 2,3 % de publicación donde MIROVA no vio nada; verificado con salvedades | S149 |
+| S149_COSTO_OCULTO_MAX.md | De las 50 publicaciones que `max` apaga en noches con alerta por otra pasada, en 34 MIROVA listó esa misma pasada como RUTINA con VRP 0; verificado con salvedades | S149 |
+| PLAN_AUDITORIA_S149.md | Plan de AUDIT_S149: el eje nuevo es el conocimiento perdido o deformado al resumirlo | S149 |
+| S148_RESULTADO_AB_CONECTIVA.md | A/B de la conectiva (brazo F) sobre la ventana completa de septiembre: hipótesis confirmada en VIIRS 375; no autoriza producción | S148 |
+| S148_LECTURA_PRELIMINAR_CAJA.md | La caja de 5 × 5 km no era medible: el flag sólo llegaba al primer pase. ⚠️ Cableado arreglado en S149 (PR #738, A118); la caja (D18) sigue sin medir | S148 |
+| S147_RESULTADO_AB_SIN_TEST1.md | A/B sin el Test 1 integrado (run 35521542153). ⚠️ Su «NO ADOPTAR» cayó en S149 (`AUDIT_S149.md` §3, l. 72) | S147 |
+| S147_LECTURA_PRELIMINAR_CONECTIVA.md | Lectura preliminar del A/B de la conectiva (1 a 17 de septiembre); no es veredicto; auditada en S148 con salvedades | S147 |
+| S147_TEST1_ESTADISTICO_CORREGIDO.md | D30, cara del estadístico: el Test 1 integrado medido contra su propio nulo; el arreglo entra apagado por omisión | S147 |
+| DISENO_SENSIBILIDAD_POR_ZONA_S147.md | Diseño para bajar el umbral sólo donde puede haber procesos volcánicos, en el perfil experimental; no es adopción y nunca entra a la réplica | S147 |
+| LIBRO_DE_PRUEBAS.md | Registro único de las pruebas del proyecto, generado por `scripts/libro_de_pruebas.py`; no se edita a mano | S146 |
+
 ## HISTÓRICO-CERRADO (referencia, NO fuente de verdad actual)
 
 ### Auditorías y sesiones superseded

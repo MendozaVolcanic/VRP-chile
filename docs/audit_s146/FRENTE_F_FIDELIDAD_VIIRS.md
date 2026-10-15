@@ -473,6 +473,13 @@ canal NRT que clonamos. El número mide el tamaño de un efecto, no una obligaci
 
 ### F-07 · MIROVA tiene una regla de preferencia entre I-band y M-band; nosotros publicamos las dos en paralelo
 
+> ⚠️ **Medido S151 (loop 1.9): la regla es del archivo, NO del NRT.** En la tabla `latest.php` (consolidado de
+> la referencia unificada) MIROVA lista las dos bandas de la misma pasada en **13.964** casos, todos los meses de
+> enero a octubre de 2026, con la misma hora al segundo (control: 100 %), y publica alerta en las dos a la vez en
+> **246**, sólo en 375 m en 947 y sólo en 750 m en 32. O sea que el canal NRT que clonamos publica las dos bandas
+> en paralelo, igual que nosotros: imitar la preferencia por 750 m nos alejaría de la réplica. Script y salida:
+> `experiments/_s151_preferencia_i_m/`. El texto original queda como historia.
+
 **GRAVEDAD 2 · CONFIANZA ALTA en la cita, con salvedad A105**
 
 Coppola 2026, p. idx 6 (imagen): *"For coincident VIIRS detections, the 750 m observation was retained

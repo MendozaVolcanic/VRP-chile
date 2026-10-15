@@ -19,7 +19,10 @@ HITOS = [
     ("2026-01-16", "tabla", "todos", "antes los tipos de registro eran otros (17 filas RUTINA con VRP > 0; FALSO_POSITIVO no existia)"),
     ("2026-02-14", "tabla", "Tupungatito", "antes Tupungatito no tiene ninguna fila"),
     ("2026-02-23", "tabla", "Tupungatito", "antes su limite de alerta era 5 km y no 7"),
-    ("2026-03-01", "tabla", "todos", "antes la cobertura nocturna de la tabla era 86 % (enero) y 95 % (febrero); desde marzo 99 a 100 %"),
+    # S151 (loop 0.4c, VERIFICADOR_DATOS S150 D6): el "86 % (enero)" de S139 contaba a Tupungatito (sin filas
+    # hasta el 2026-02-14, hito propio arriba) en el denominador y desde el 10-ene, dia sin noche.
+    ("2026-03-01", "tabla", "todos", "antes, sin contar a Tupungatito, la cobertura nocturna de la tabla en enero (desde el 11) "
+     "era 99,0 % en MODIS, 98,6 a 99,5 % en VIIRS 375 y 95,2 a 95,7 % en VIIRS 750, y en febrero 98,2 a 99,6 %; desde marzo 99 a 100 %"),
     ("2026-03-01", "ocr", "VIIRS", "antes el OCR corrio con siete versiones y doce metodos de validacion distintos; capturo 0,26 a 0,29 alertas por alerta de la tabla contra 0,50 a 0,89 despues, y no hubo reproceso retroactivo"),
     ("2026-04-01", "tabla", "VIIRS por pasada", "antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)"),
     ("2026-06-11", "ocr", "VIIRS", "antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable"),

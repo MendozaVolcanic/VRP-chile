@@ -1,0 +1,127 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+predicado del tablero: frontend/index.html sha256 304bfb5521c3df67ce3fde4697e2179a1b74a536c273789af16b15bd2b865e8d
+
+== 0. SUSTRATO (pasadas nocturnas procesadas por C0, etiqueta del evaluador)
+   MODIS    reposo    alertas   0 (1 MW o mas   0) | negativos limpios  28
+   MODIS    actividad alertas   4 (1 MW o mas   3) | negativos limpios  11
+   VIIRS375 reposo    alertas   3 (1 MW o mas   0) | negativos limpios  32
+   VIIRS375 actividad alertas  20 (1 MW o mas  13) | negativos limpios  10
+   VIIRS750 reposo    alertas   0 (1 MW o mas   0) | negativos limpios  44
+   VIIRS750 actividad alertas  13 (1 MW o mas  11) | negativos limpios  15
+
+== 1. COBERTURA
+   alertas de 1 MW o mas sin record en algun brazo: ninguna
+   cobertura pareja: OK
+
+== 2. VERSION DEL PRODUCTO POR PASADA
+   pasadas con version distinta entre brazos: 0 (alertas de 1 MW o mas: 0) 
+
+== 3. CABLEADO DE CADA BRAZO
+   C0   OK
+   T0   OK
+   E    OK
+   B    OK
+   F    OK
+   J    OK
+   K    OK
+   KE   OK
+   KET  OK
+   G    OK
+   etiqueta E (contra C0): 48 pasadas MODIS con el mismo cumulo, 0 con etiqueta que no sale del cumulo
+   etiqueta KE (contra K): 4 pasadas MODIS con el mismo cumulo, 0 con etiqueta que no sale del cumulo
+   etiqueta KET (contra KE): 4 pasadas MODIS con el mismo cumulo, 0 con etiqueta que no sale del cumulo
+   E publica 2026-10-01 08:35: 1
+
+== 4. DETERMINISMO (G contra B)
+   MODIS    48 pasadas, misma decision 48 (100.0 %) | OK
+   VIIRS375 106 pasadas, misma decision 106 (100.0 %) | OK
+   VIIRS750 105 pasadas, misma decision 105 (100.0 %) | OK
+
+== CONTROLES GENERALES: OK
+
+== 5. VETOS VIIRS (alertas de 1 MW o mas)
+   P1: CUMPLE
+   P2: CUMPLE
+
+== 6. MODIS
+   P3a_banda22: CUMPLE
+   P3b_max: CUMPLE
+   P4 KE publica 3 de 3 alertas MODIS de 1 MW o mas: CUMPLE | 
+   P4 KET publica 3 de 3 alertas MODIS de 1 MW o mas: CUMPLE | 
+   P5 T0 contra C0: pasadas topadas en el control 11, cambia la decision en 0 | ruido en las 248 no topadas: 0
+      P5 T0: CUMPLE
+   P5 KET contra KE: pasadas topadas en el control 0, cambia la decision en 0 | ruido en las 259 no topadas: 0
+      P5 KET: SIN DATO
+   magnitud de las pasadas topadas en C0, con y sin tope (cumulo):
+      NevadosDeChillan|MODIS|2026-09-20 01:10 | lab neg_limpio | C0 5.000 | T0 7.738
+      NevadosDeChillan|MODIS|2026-09-20 08:10 | lab neg_limpio | C0 5.000 | T0 122.793
+      NevadosDeChillan|MODIS|2026-09-22 07:45 | lab neg_limpio | C0 5.000 | T0 10.418
+      NevadosDeChillan|MODIS|2026-09-23 01:30 | lab neg_limpio | C0 5.000 | T0 6.052
+      NevadosDeChillan|MODIS|2026-09-23 08:25 | lab neg_limpio | C0 5.000 | T0 13.17
+      NevadosDeChillan|MODIS|2026-09-24 02:10 | lab neg_limpio | C0 5.000 | T0 18.632
+      NevadosDeChillan|MODIS|2026-09-24 07:25 | lab neg_limpio | C0 5.000 | T0 16.709
+      NevadosDeChillan|MODIS|2026-09-28 08:15 | lab neg_limpio | C0 5.000 | T0 8.191
+      NevadosDeChillan|MODIS|2026-09-30 07:55 | lab neg_limpio | C0 5.000 | T0 36.628
+      NevadosDeChillan|MODIS|2026-10-02 07:35 | lab neg_limpio | C0 5.000 | T0 60.807
+      NevadosDeChillan|MODIS|2026-10-06 01:45 | lab far_ref | C0 5.000 | T0 10.536
+
+== 7. COSTO MODIS (informativo): publicaciones en negativos limpios
+   C0   reposo    negativos limpios  28 | publica   0 (topadas en 5 MW: 0)
+   C0   actividad negativos limpios  11 | publica   0 (topadas en 5 MW: 0)
+   T0   reposo    negativos limpios  28 | publica   0 (topadas en 5 MW: 0)
+   T0   actividad negativos limpios  11 | publica   0 (topadas en 5 MW: 0)
+   E    reposo    negativos limpios  28 | publica  22 (topadas en 5 MW: 5)
+   E    actividad negativos limpios  11 | publica  11 (topadas en 5 MW: 3)
+   B    reposo    negativos limpios  28 | publica   0 (topadas en 5 MW: 0)
+   B    actividad negativos limpios  11 | publica   0 (topadas en 5 MW: 0)
+   J    reposo    negativos limpios  28 | publica   4 (topadas en 5 MW: 0)
+   J    actividad negativos limpios  11 | publica   2 (topadas en 5 MW: 0)
+   K    reposo    negativos limpios  28 | publica   0 (topadas en 5 MW: 0)
+   K    actividad negativos limpios  11 | publica   0 (topadas en 5 MW: 0)
+   KE   reposo    negativos limpios  28 | publica   0 (topadas en 5 MW: 0)
+   KE   actividad negativos limpios  11 | publica   0 (topadas en 5 MW: 0)
+   KET  reposo    negativos limpios  28 | publica   0 (topadas en 5 MW: 0)
+   KET  actividad negativos limpios  11 | publica   0 (topadas en 5 MW: 0)
+
+== 8. RECALL POR TRAMO Y MAGNITUD EN ACTIVIDAD (informativo)
+   C0   MODIS    bajo 1 MW 0 de 1 | 1 MW o mas 2 de 3 | razon de magnitud mediana 0.68 (n 2)
+   C0   VIIRS375 bajo 1 MW 7 de 7 | 1 MW o mas 13 de 13 | razon de magnitud mediana 0.57 (n 20)
+   C0   VIIRS750 bajo 1 MW 1 de 2 | 1 MW o mas 11 de 11 | razon de magnitud mediana 0.42 (n 12)
+   T0   MODIS    bajo 1 MW 0 de 1 | 1 MW o mas 2 de 3 | razon de magnitud mediana 0.68 (n 2)
+   T0   VIIRS375 bajo 1 MW 7 de 7 | 1 MW o mas 13 de 13 | razon de magnitud mediana 0.57 (n 20)
+   T0   VIIRS750 bajo 1 MW 1 de 2 | 1 MW o mas 11 de 11 | razon de magnitud mediana 0.42 (n 12)
+   B    MODIS    bajo 1 MW 0 de 1 | 1 MW o mas 2 de 3 | razon de magnitud mediana 0.68 (n 2)
+   B    VIIRS375 bajo 1 MW 6 de 7 | 1 MW o mas 13 de 13 | razon de magnitud mediana 0.55 (n 19)
+   B    VIIRS750 bajo 1 MW 1 de 2 | 1 MW o mas 11 de 11 | razon de magnitud mediana 0.42 (n 12)
+   F    MODIS    bajo 1 MW 0 de 1 | 1 MW o mas 3 de 3 | razon de magnitud mediana 0.58 (n 3)
+   F    VIIRS375 bajo 1 MW 6 de 7 | 1 MW o mas 13 de 13 | razon de magnitud mediana 0.55 (n 19)
+   F    VIIRS750 bajo 1 MW 0 de 2 | 1 MW o mas 11 de 11 | razon de magnitud mediana 0.39 (n 11)
+   J    MODIS    bajo 1 MW 0 de 1 | 1 MW o mas 3 de 3 | razon de magnitud mediana 0.64 (n 3)
+   J    VIIRS375 bajo 1 MW 6 de 7 | 1 MW o mas 13 de 13 | razon de magnitud mediana 0.55 (n 19)
+   J    VIIRS750 bajo 1 MW 1 de 2 | 1 MW o mas 11 de 11 | razon de magnitud mediana 0.42 (n 12)
+   K    MODIS    bajo 1 MW 0 de 1 | 1 MW o mas 3 de 3 | razon de magnitud mediana 0.64 (n 3)
+   K    VIIRS375 bajo 1 MW 6 de 7 | 1 MW o mas 13 de 13 | razon de magnitud mediana 0.55 (n 19)
+   K    VIIRS750 bajo 1 MW 0 de 2 | 1 MW o mas 11 de 11 | razon de magnitud mediana 0.39 (n 11)
+   KE   MODIS    bajo 1 MW 0 de 1 | 1 MW o mas 3 de 3 | razon de magnitud mediana 0.64 (n 3)
+   KE   VIIRS375 bajo 1 MW 6 de 7 | 1 MW o mas 13 de 13 | razon de magnitud mediana 0.55 (n 19)
+   KE   VIIRS750 bajo 1 MW 0 de 2 | 1 MW o mas 11 de 11 | razon de magnitud mediana 0.39 (n 11)
+   KET  MODIS    bajo 1 MW 0 de 1 | 1 MW o mas 3 de 3 | razon de magnitud mediana 0.64 (n 3)
+   KET  VIIRS375 bajo 1 MW 6 de 7 | 1 MW o mas 13 de 13 | razon de magnitud mediana 0.55 (n 19)
+   KET  VIIRS750 bajo 1 MW 0 de 2 | 1 MW o mas 11 de 11 | razon de magnitud mediana 0.39 (n 11)
+
+== 9. ANTES DE LA PRIMERA ALERTA (26 y 27 de septiembre, informativo)
+   C0   publica 7:
+      NevadosDeChillan|VIIRS375|2026-09-26 05:18 | 0.053 MW a 2.986 km
+      NevadosDeChillan|VIIRS375|2026-09-26 05:54 | 0.055 MW a 2.728 km
+      NevadosDeChillan|VIIRS375|2026-09-26 06:12 | 0.089 MW a 2.488 km
+      NevadosDeChillan|VIIRS375|2026-09-27 05:00 | 0.077 MW a 2.953 km
+      NevadosDeChillan|VIIRS375|2026-09-27 05:36 | 0.021 MW a 3.317 km
+      NevadosDeChillan|VIIRS375|2026-09-27 05:54 | 0.055 MW a 2.963 km
+      NevadosDeChillan|VIIRS750|2026-09-26 05:54 | 0.017 MW a 1.383 km
+   B    publica 2:
+      NevadosDeChillan|VIIRS375|2026-09-27 05:36 | 0.021 MW a 3.317 km
+      NevadosDeChillan|VIIRS375|2026-09-27 05:54 | 0.002 MW a 4.353 km
+   F    publica 0:
+   KE   publica 0:
+
+== VEREDICTOS (deciden solo con los controles generales en OK): {"P1": "CUMPLE", "P2": "CUMPLE", "P3a_banda22": "CUMPLE", "P3b_max": "CUMPLE", "P4_KE": "CUMPLE", "P4_KET": "CUMPLE", "P5_T0": "CUMPLE", "P5_KET": "SIN DATO"}

@@ -1,0 +1,196 @@
+== C1. union historica completa: protegidas {'A': 439, 'B': 992} | esperado {'A': 439, 'B': 992} | OK
+
+== C4. Sobre el C0 del run de Nevados de Chillan, contra la seccion 0 de medir_ndc.py
+   MODIS    reposo    alertas, de 1 MW o mas, negativos limpios: (0, 0, 28) | esperado (0, 0, 28) | OK
+   MODIS    actividad alertas, de 1 MW o mas, negativos limpios: (4, 3, 11) | esperado (4, 3, 11) | OK
+   VIIRS375 reposo    alertas, de 1 MW o mas, negativos limpios: (3, 0, 32) | esperado (3, 0, 32) | OK
+   VIIRS375 actividad alertas, de 1 MW o mas, negativos limpios: (20, 13, 10) | esperado (20, 13, 10) | OK
+   VIIRS750 reposo    alertas, de 1 MW o mas, negativos limpios: (0, 0, 44) | esperado (0, 0, 44) | OK
+   VIIRS750 actividad alertas, de 1 MW o mas, negativos limpios: (13, 11, 15) | esperado (13, 11, 15) | OK
+   C4: OK
+
+
+######## VENTANA V1: 2026-08-29 a 2026-10-08 | 11 Tier A | referencia _congelado_v1 | decide la etiqueta: tabla y OCR
+   records nocturnos en la ventana: 4834 (de C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP-Chile-loop-16\data\mirova_equivalent)
+== C2. protegidas (A) desde la referencia 37 = con record nuestro 37 + sin record 0 | desde los records 37 | OK
+== C3. alertas pareadas con la referencia real 310, con la corrida 7 dias 14 (4.5 %) | OK (exige 25 % o menos)
+
+== SUSTRATO POR SENSOR (pA: protegidas lectura A; pApu: las que produccion publica; snpp: pA solo por OCR de Suomi NPP; MBajo: alertas bajo 1 MW; pB: protegidas lectura B; negl: negativos limpios; otras: sin_info y far_ref)
+                                   pasad alert |   pA pApu snpp | MBajo MBpub |   pB pBpu |  negl negpu | otras otpub
+   MODIS                             958     8 |    4    3    0 |     4     0 |    4    3 |   906   110 |    44     2
+   VIIRS375                         1944   260 |   21   21    9 |   239   239 |   37   36 |   832   734 |   852   742
+   VIIRS750                         1932    42 |   12   12    2 |    30    20 |   14   12 |  1303   321 |   587   126
+
+== POR SENSOR Y VOLCAN
+                                   pasad alert |   pA pApu snpp | MBajo MBpub |   pB pBpu |  negl negpu | otras otpub
+   MODIS|Lascar                       77     2 |    0    0    0 |     2     0 |    0    0 |    70     3 |     5     0
+   MODIS|Lastarria                    80     0 |    0    0    0 |     0     0 |    0    0 |    75     5 |     5     0
+   MODIS|Isluga                       71     0 |    0    0    0 |     0     0 |    0    0 |    68     2 |     3     0
+   MODIS|Tupungatito                  89     0 |    0    0    0 |     0     0 |    0    0 |    87     6 |     2     0
+   MODIS|PlanchonPeteroa              91     0 |    0    0    0 |     0     0 |    0    0 |    89     4 |     2     0
+   MODIS|NevadosDeChillan             87     4 |    3    2    0 |     1     0 |    3    2 |    76     1 |     7     0
+   MODIS|Llaima                       86     0 |    0    0    0 |     0     0 |    0    0 |    85     3 |     1     0
+   MODIS|Villarrica                   91     2 |    1    1    0 |     1     0 |    1    1 |    83    14 |     6     0
+   MODIS|Copahue                      87     0 |    0    0    0 |     0     0 |    0    0 |    83     3 |     4     0
+   MODIS|PuyehueCordonCaulle         100     0 |    0    0    0 |     0     0 |    0    0 |    96    61 |     4     2
+   MODIS|Chaiten                      99     0 |    0    0    0 |     0     0 |    0    0 |    94     8 |     5     0
+   VIIRS375|Lascar                   156    41 |    1    1    0 |    40    40 |    4    4 |    41    35 |    74    66
+   VIIRS375|Lastarria                161    22 |    0    0    0 |    22    22 |    3    3 |    44    39 |    95    80
+   VIIRS375|Isluga                   152    66 |    3    3    3 |    63    63 |    8    8 |    12    10 |    74    67
+   VIIRS375|Tupungatito              174    32 |    3    3    3 |    29    29 |    6    6 |    46    42 |    96    81
+   VIIRS375|PlanchonPeteroa          175    15 |    1    1    0 |    14    14 |    2    2 |    80    74 |    80    71
+   VIIRS375|NevadosDeChillan         183    25 |   13   13    3 |    12    12 |   13   13 |    86    76 |    72    60
+   VIIRS375|Llaima                   188     1 |    0    0    0 |     1     1 |    1    0 |   123   101 |    64    49
+   VIIRS375|Villarrica               187     6 |    0    0    0 |     6     6 |    0    0 |   105    90 |    76    65
+   VIIRS375|Copahue                  181     2 |    0    0    0 |     2     2 |    0    0 |   115    99 |    64    57
+   VIIRS375|PuyehueCordonCaulle      193    37 |    0    0    0 |    37    37 |    0    0 |    80    78 |    76    74
+   VIIRS375|Chaiten                  194    13 |    0    0    0 |    13    13 |    0    0 |   100    90 |    81    72
+   VIIRS750|Lascar                   155    10 |    0    0    0 |    10     6 |    0    0 |    84     7 |    61     7
+   VIIRS750|Lastarria                159     0 |    0    0    0 |     0     0 |    1    0 |   116     7 |    43     3
+   VIIRS750|Isluga                   152     3 |    0    0    0 |     3     2 |    1    0 |   104    32 |    45    16
+   VIIRS750|Tupungatito              171     0 |    0    0    0 |     0     0 |    0    0 |   123    30 |    48     7
+   VIIRS750|PlanchonPeteroa          172     1 |    0    0    0 |     1     1 |    0    0 |   125    35 |    46     6
+   VIIRS750|NevadosDeChillan         182    13 |   11   11    2 |     2     1 |   11   11 |   114    21 |    55     5
+   VIIRS750|Llaima                   188     0 |    0    0    0 |     0     0 |    0    0 |   136    32 |    52    12
+   VIIRS750|Villarrica               187     2 |    0    0    0 |     2     1 |    0    0 |   127    25 |    58     9
+   VIIRS750|Copahue                  180     0 |    0    0    0 |     0     0 |    0    0 |   131    31 |    49    11
+   VIIRS750|PuyehueCordonCaulle      193    12 |    1    1    0 |    11     8 |    1    1 |   109    67 |    72    39
+   VIIRS750|Chaiten                  193     1 |    0    0    0 |     1     1 |    0    0 |   134    34 |    58    11
+
+== NEVADOS DE CHILLAN POR FASE (actividad desde 2026-09-28)
+                                   pasad alert |   pA pApu snpp | MBajo MBpub |   pB pBpu |  negl negpu | otras otpub
+   MODIS|reposo                       64     0 |    0    0    0 |     0     0 |    0    0 |    62     1 |     2     0
+   MODIS|actividad                    23     4 |    3    2    0 |     1     0 |    3    2 |    14     0 |     5     0
+   VIIRS375|reposo                   136     4 |    0    0    0 |     4     4 |    0    0 |    76    66 |    56    45
+   VIIRS375|actividad                 47    21 |   13   13    3 |     8     8 |   13   13 |    10    10 |    16    15
+   VIIRS750|reposo                   135     0 |    0    0    0 |     0     0 |    0    0 |    96    12 |    39     1
+   VIIRS750|actividad                 47    13 |   11   11    2 |     2     1 |   11   11 |    18     9 |    16     4
+
+== SIN LASCAR (S150 midio MODIS solo en Lascar)
+                                   pasad alert |   pA pApu snpp | MBajo MBpub |   pB pBpu |  negl negpu | otras otpub
+   MODIS                             881     6 |    4    3    0 |     2     0 |    4    3 |   836   107 |    39     2
+   VIIRS375                         1788   219 |   20   20    9 |   199   199 |   33   32 |   791   699 |   778   676
+   VIIRS750                         1777    32 |   12   12    2 |    20    14 |   14   12 |  1219   314 |   526   119
+
+== PODER DEL VETO (cero perdidas de protegidas que el control publica; produccion como estimacion del control)
+   MODIS    lectura A: n 3 | p=1%: 0.03 p=2%: 0.06 p=5%: 0.14 p=10%: 0.27 | fraccion detectable al 80 %: 41.5 %
+   MODIS    lectura B: n 3 | p=1%: 0.03 p=2%: 0.06 p=5%: 0.14 p=10%: 0.27 | fraccion detectable al 80 %: 41.5 %
+   VIIRS375 lectura A: n 12 | p=1%: 0.11 p=2%: 0.22 p=5%: 0.46 p=10%: 0.72 | fraccion detectable al 80 %: 12.6 %
+   VIIRS375 lectura B: n 36 | p=1%: 0.30 p=2%: 0.52 p=5%: 0.84 p=10%: 0.98 | fraccion detectable al 80 %: 4.4 %
+   VIIRS750 lectura A: n 10 | p=1%: 0.10 p=2%: 0.18 p=5%: 0.40 p=10%: 0.65 | fraccion detectable al 80 %: 14.9 %
+   VIIRS750 lectura B: n 12 | p=1%: 0.11 p=2%: 0.22 p=5%: 0.46 p=10%: 0.72 | fraccion detectable al 80 %: 12.6 %
+
+
+######## VENTANA V2: 2026-03-01 a 2026-06-12 | 11 Tier A | referencia _congelado_v2 (SOLO TABLA) | decide la etiqueta: SOLO la tabla; el OCR se informa aparte
+   records nocturnos en la ventana: 12023 (de C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP-Chile-loop-16\data\mirova_equivalent)
+== C2. protegidas (A) desde la referencia 158 = con record nuestro 158 + sin record 0 | desde los records 158 | OK
+== C3. alertas pareadas con la referencia real 754, con la corrida 7 dias 120 (15.9 %) | OK (exige 25 % o menos)
+
+== SUSTRATO POR SENSOR (pA: protegidas lectura A; pApu: las que produccion publica; snpp: pA solo por OCR de Suomi NPP; MBajo: alertas bajo 1 MW; pB: protegidas lectura B; negl: negativos limpios; otras: sin_info y far_ref)
+                                   pasad alert |   pA pApu snpp | MBajo MBpub |   pB pBpu |  negl negpu | otras otpub
+   MODIS                            2443    65 |   39    6    0 |    26     1 |   45    6 |  2254   252 |   124     9
+   VIIRS375                         4809   539 |   57   56    0 |   482   469 |  104   90 |  1376   919 |  2894  2160
+   VIIRS750                         4771   150 |   62   62    0 |    88    60 |   66   63 |  2338   500 |  2283   601
+
+== POR SENSOR Y VOLCAN
+                                   pasad alert |   pA pApu snpp | MBajo MBpub |   pB pBpu |  negl negpu | otras otpub
+   MODIS|Lascar                      193    65 |   39    6    0 |    26     1 |   40    6 |    81     1 |    47     0
+   MODIS|Lastarria                   192     0 |    0    0    0 |     0     0 |    0    0 |   188     6 |     4     0
+   MODIS|Isluga                      185     0 |    0    0    0 |     0     0 |    0    0 |   178     7 |     7     1
+   MODIS|Tupungatito                 223     0 |    0    0    0 |     0     0 |    0    0 |   214     5 |     9     1
+   MODIS|PlanchonPeteroa             228     0 |    0    0    0 |     0     0 |    1    0 |   223    10 |     5     1
+   MODIS|NevadosDeChillan            225     0 |    0    0    0 |     0     0 |    1    0 |   217     6 |     8     0
+   MODIS|Llaima                      229     0 |    0    0    0 |     0     0 |    3    0 |   217     8 |    12     0
+   MODIS|Villarrica                  233     0 |    0    0    0 |     0     0 |    0    0 |   226    12 |     7     2
+   MODIS|Copahue                     227     0 |    0    0    0 |     0     0 |    0    0 |   218     1 |     9     0
+   MODIS|PuyehueCordonCaulle         249     0 |    0    0    0 |     0     0 |    0    0 |   241   159 |     8     4
+   MODIS|Chaiten                     259     0 |    0    0    0 |     0     0 |    0    0 |   251    37 |     8     0
+   VIIRS375|Lascar                   384   114 |   55   55    0 |    59    57 |   66   62 |    18     6 |   252   196
+   VIIRS375|Lastarria                390    93 |    0    0    0 |    93    91 |    4    3 |    34    14 |   263   201
+   VIIRS375|Isluga                   374    87 |    1    0    0 |    86    84 |    7    5 |    33    25 |   254   220
+   VIIRS375|Tupungatito              427    87 |    0    0    0 |    87    82 |    1    1 |    57    36 |   283   229
+   VIIRS375|PlanchonPeteroa          431    54 |    0    0    0 |    54    54 |    6    6 |    92    70 |   285   233
+   VIIRS375|NevadosDeChillan         454     4 |    0    0    0 |     4     2 |    5    0 |   187    39 |   263    52
+   VIIRS375|Llaima                   466     1 |    0    0    0 |     1     1 |    9    8 |   218   162 |   247   184
+   VIIRS375|Villarrica               465     6 |    0    0    0 |     6     6 |    1    1 |   210   168 |   249   196
+   VIIRS375|Copahue                  448     2 |    0    0    0 |     2     2 |    3    3 |   202   171 |   244   195
+   VIIRS375|PuyehueCordonCaulle      480    74 |    1    1    0 |    73    73 |    1    1 |   132   100 |   274   237
+   VIIRS375|Chaiten                  490    17 |    0    0    0 |    17    17 |    1    0 |   193   128 |   280   217
+   VIIRS750|Lascar                   379    93 |   59   59    0 |    34    30 |   59   59 |    55     8 |   231   113
+   VIIRS750|Lastarria                379     0 |    0    0    0 |     0     0 |    0    0 |   220    65 |   159    39
+   VIIRS750|Isluga                   371    25 |    0    0    0 |    25    15 |    0    0 |   155    38 |   191    50
+   VIIRS750|Tupungatito              425    11 |    0    0    0 |    11     1 |    0    0 |   212    30 |   202    31
+   VIIRS750|PlanchonPeteroa          430     4 |    0    0    0 |     4     1 |    1    1 |   228    41 |   198    32
+   VIIRS750|NevadosDeChillan         448     0 |    0    0    0 |     0     0 |    2    0 |   244    17 |   204    11
+   VIIRS750|Llaima                   465     0 |    0    0    0 |     0     0 |    1    0 |   250    42 |   215    36
+   VIIRS750|Villarrica               465     0 |    0    0    0 |     0     0 |    0    0 |   251    44 |   214    53
+   VIIRS750|Copahue                  446     0 |    0    0    0 |     0     0 |    0    0 |   247    25 |   199    27
+   VIIRS750|PuyehueCordonCaulle      475    17 |    3    3    0 |    14    13 |    3    3 |   213   126 |   245   157
+   VIIRS750|Chaiten                  488     0 |    0    0    0 |     0     0 |    0    0 |   263    64 |   225    52
+
+== NEVADOS DE CHILLAN POR FASE (actividad desde 2026-09-28)
+                                   pasad alert |   pA pApu snpp | MBajo MBpub |   pB pBpu |  negl negpu | otras otpub
+   MODIS|reposo                      225     0 |    0    0    0 |     0     0 |    1    0 |   217     6 |     8     0
+   MODIS|actividad                     0     0 |    0    0    0 |     0     0 |    0    0 |     0     0 |     0     0
+   VIIRS375|reposo                   454     4 |    0    0    0 |     4     2 |    5    0 |   187    39 |   263    52
+   VIIRS375|actividad                  0     0 |    0    0    0 |     0     0 |    0    0 |     0     0 |     0     0
+   VIIRS750|reposo                   448     0 |    0    0    0 |     0     0 |    2    0 |   244    17 |   204    11
+   VIIRS750|actividad                  0     0 |    0    0    0 |     0     0 |    0    0 |     0     0 |     0     0
+
+== SIN LASCAR (S150 midio MODIS solo en Lascar)
+                                   pasad alert |   pA pApu snpp | MBajo MBpub |   pB pBpu |  negl negpu | otras otpub
+   MODIS                            2250     0 |    0    0    0 |     0     0 |    5    0 |  2173   251 |    77     9
+   VIIRS375                         4425   425 |    2    1    0 |   423   412 |   38   28 |  1358   913 |  2642  1964
+   VIIRS750                         4392    57 |    3    3    0 |    54    30 |    7    4 |  2283   492 |  2052   488
+
+== LO QUE DECIDE: MODIS toda la ventana, VIIRS desde 2026-04-01 (A119)
+                                   pasad alert |   pA pApu snpp | MBajo MBpub |   pB pBpu |  negl negpu | otras otpub
+   MODIS                            2443    65 |   39    6    0 |    26     1 |   45    6 |  2254   252 |   124     9
+   VIIRS375                         3396   426 |   38   37    0 |   388   377 |   80   67 |  1010   671 |  1960  1474
+   VIIRS750                         3373   117 |   42   42    0 |    75    53 |   46   43 |  1829   395 |  1427   364
+
+== LO QUE DECIDE, POR SENSOR Y VOLCAN
+                                   pasad alert |   pA pApu snpp | MBajo MBpub |   pB pBpu |  negl negpu | otras otpub
+   MODIS|Lascar                      193    65 |   39    6    0 |    26     1 |   40    6 |    81     1 |    47     0
+   MODIS|Lastarria                   192     0 |    0    0    0 |     0     0 |    0    0 |   188     6 |     4     0
+   MODIS|Isluga                      185     0 |    0    0    0 |     0     0 |    0    0 |   178     7 |     7     1
+   MODIS|Tupungatito                 223     0 |    0    0    0 |     0     0 |    0    0 |   214     5 |     9     1
+   MODIS|PlanchonPeteroa             228     0 |    0    0    0 |     0     0 |    1    0 |   223    10 |     5     1
+   MODIS|NevadosDeChillan            225     0 |    0    0    0 |     0     0 |    1    0 |   217     6 |     8     0
+   MODIS|Llaima                      229     0 |    0    0    0 |     0     0 |    3    0 |   217     8 |    12     0
+   MODIS|Villarrica                  233     0 |    0    0    0 |     0     0 |    0    0 |   226    12 |     7     2
+   MODIS|Copahue                     227     0 |    0    0    0 |     0     0 |    0    0 |   218     1 |     9     0
+   MODIS|PuyehueCordonCaulle         249     0 |    0    0    0 |     0     0 |    0    0 |   241   159 |     8     4
+   MODIS|Chaiten                     259     0 |    0    0    0 |     0     0 |    0    0 |   251    37 |     8     0
+   VIIRS375|Lascar                   271    85 |   36   36    0 |    49    47 |   45   41 |    16     5 |   170   124
+   VIIRS375|Lastarria                274    75 |    0    0    0 |    75    73 |    3    2 |    21     4 |   178   126
+   VIIRS375|Isluga                   264    67 |    1    0    0 |    66    64 |    5    4 |    23    17 |   174   155
+   VIIRS375|Tupungatito              303    64 |    0    0    0 |    64    60 |    1    1 |    42    26 |   197   161
+   VIIRS375|PlanchonPeteroa          305    44 |    0    0    0 |    44    44 |    6    6 |    60    44 |   201   164
+   VIIRS375|NevadosDeChillan         321     3 |    0    0    0 |     3     2 |    5    0 |   138    35 |   180    43
+   VIIRS375|Llaima                   329     1 |    0    0    0 |     1     1 |    9    8 |   166   126 |   162   127
+   VIIRS375|Villarrica               328     5 |    0    0    0 |     5     5 |    1    1 |   159   130 |   164   132
+   VIIRS375|Copahue                  317     2 |    0    0    0 |     2     2 |    3    3 |   152   130 |   163   135
+   VIIRS375|PuyehueCordonCaulle      338    65 |    1    1    0 |    64    64 |    1    1 |    91    65 |   182   163
+   VIIRS375|Chaiten                  346    15 |    0    0    0 |    15    15 |    1    0 |   142    89 |   189   144
+   VIIRS750|Lascar                   266    69 |   39   39    0 |    30    26 |   39   39 |    40     8 |   157    64
+   VIIRS750|Lastarria                268     0 |    0    0    0 |     0     0 |    0    0 |   175    51 |    93    21
+   VIIRS750|Isluga                   263    20 |    0    0    0 |    20    13 |    0    0 |   118    34 |   125    34
+   VIIRS750|Tupungatito              301     8 |    0    0    0 |     8     1 |    0    0 |   167    23 |   126    26
+   VIIRS750|PlanchonPeteroa          304     4 |    0    0    0 |     4     1 |    1    1 |   179    35 |   121    25
+   VIIRS750|NevadosDeChillan         320     0 |    0    0    0 |     0     0 |    2    0 |   193    15 |   127     6
+   VIIRS750|Llaima                   329     0 |    0    0    0 |     0     0 |    1    0 |   197    33 |   132    21
+   VIIRS750|Villarrica               328     0 |    0    0    0 |     0     0 |    0    0 |   198    33 |   130    29
+   VIIRS750|Copahue                  316     0 |    0    0    0 |     0     0 |    0    0 |   195    20 |   121    14
+   VIIRS750|PuyehueCordonCaulle      334    16 |    3    3    0 |    13    12 |    3    3 |   159    93 |   159    99
+   VIIRS750|Chaiten                  344     0 |    0    0    0 |     0     0 |    0    0 |   208    50 |   136    25
+
+== PODER DEL VETO (cero perdidas de protegidas que el control publica; produccion como estimacion del control)
+   MODIS    lectura A: n 6 | p=1%: 0.06 p=2%: 0.11 p=5%: 0.26 p=10%: 0.47 | fraccion detectable al 80 %: 23.5 %
+   MODIS    lectura B: n 6 | p=1%: 0.06 p=2%: 0.11 p=5%: 0.26 p=10%: 0.47 | fraccion detectable al 80 %: 23.5 %
+   VIIRS375 lectura A: n 37 | p=1%: 0.31 p=2%: 0.53 p=5%: 0.85 p=10%: 0.98 | fraccion detectable al 80 %: 4.3 %
+   VIIRS375 lectura B: n 67 | p=1%: 0.49 p=2%: 0.74 p=5%: 0.97 p=10%: 1.00 | fraccion detectable al 80 %: 2.4 %
+   VIIRS750 lectura A: n 42 | p=1%: 0.34 p=2%: 0.57 p=5%: 0.88 p=10%: 0.99 | fraccion detectable al 80 %: 3.8 %
+   VIIRS750 lectura B: n 43 | p=1%: 0.35 p=2%: 0.58 p=5%: 0.89 p=10%: 0.99 | fraccion detectable al 80 %: 3.7 %
+
+== CONTROLES: C1 True | C4 True | C2 y C3 por ventana [True, True]

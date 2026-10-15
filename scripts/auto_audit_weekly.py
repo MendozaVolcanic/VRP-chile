@@ -46,6 +46,8 @@ import yaml  # noqa: E402
 SNAP = os.path.join(ROOT, "data", "mirova_reference", "mirova_v1_snapshot")
 CONS = os.path.join(SNAP, "registro_vrp_consolidado.csv")
 OCR = os.path.join(SNAP, "registro_vrp_ocr.csv")
+# S151 (loop, pendiente i de la tarea 0.1): filas que el consolidado remoto perdio en silencio (#778).
+HISTORICO = os.path.join(ROOT, "data", "mirova_reference", "union_historica", "consolidado_filas_perdidas.csv")
 OUTDIR = os.path.join(ROOT, "data", "audit_continuous")
 VOLCANOES_YAML = os.path.join(ROOT, "volcanoes.yaml")
 
@@ -57,6 +59,26 @@ WINDOW_DAYS = 60
 # (experiments/_s142_linea_base/linea_base_post535.json). Una ventana que cruza el corte mezcla
 # regímenes y el número sube solo. Recall y magnitud no se recortan: el recall no se movió.
 INICIO_REGIMEN_FALSAS = "2026-09-01"
+
+
+def alertas_mirova(cons=CONS, ocr=OCR, historico=HISTORICO):
+    """ALERTAs de MIROVA del snapshot (CONS u OCR) mas las que el remoto perdio (union historica, #778).
+
+    POR QUE: el consolidado de Mirova-v1 perdio 40 ALERTA_TERMICA en cinco caidas y el snapshot las hereda.
+    Sin esta capa una alerta perdida no cuenta como alerta y su noche sale del recall. La fila del snapshot
+    gana siempre; la historica solo agrega pasadas (volcan, sensor, minuto) que no estan. `historico=None`
+    apaga la capa (control).
+    """
+    alertas = load_mirova_alertas(cons_path=cons, ocr_path=ocr)
+    if historico is None:
+        return alertas
+    clave = lambda a: (a["volcano"], a["sensor_bucket"], (a["fecha_utc"] or "")[:16])  # noqa: E731
+    vistas = {clave(a) for a in alertas}
+    for a in load_mirova_alertas(cons_path=historico, ocr_path=None):
+        if clave(a) not in vistas:
+            vistas.add(clave(a))
+            alertas.append(a)
+    return alertas
 
 
 def ventana_falsas(today):
@@ -316,7 +338,7 @@ def main():
         return bool(dt) and win[0] <= dt[:10] <= win[1]
 
     # 1. MIROVA (loader canónico, CONS ∪ OCR): noches ALERTA por (vol, bucket, fecha)
-    alertas = load_mirova_alertas(cons_path=CONS, ocr_path=OCR)
+    alertas = alertas_mirova()
     coords = _coords_por_volcan()
     mir = defaultdict(float)
     n_diurnas_excluidas = 0
