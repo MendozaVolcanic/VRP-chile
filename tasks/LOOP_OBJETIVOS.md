@@ -280,6 +280,14 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 ~06:00 UTC (vuelta 52): #822 en main; caja D1 sigue despareja por NASA
+- #822 (infraestructura del A/B diurno) mergeado tras arreglos: 7 de 7 mutaciones atrapadas, control del nulo que
+  falla con el nulo roto (se compara contra la fracción que el propio nulo deja sobre su p95, no un 5 % fijo, porque
+  D toma pocos valores). Listo para despachar cuando se libere un cupo de A/B.
+- Caja D1, segundo intento: control 132, caja 130; faltan Láscar 2026-03-17 04:42 y 06:24 VIIRS_NOAA20_750, por un
+  `502 Bad Gateway` de NASA al buscar ese producto (A108). Tercer intento lanzado con el mismo código.
+- F/K V1: 18 de 44 jobs.
+
 ### 2026-10-15 (vuelta 51): 1.5 cerrada condicionada (#823); #822 en arreglos
 - Verificador del probe D25 V750: falla la detección, no el fondo (magnitud de un píxel, 0,072 MW/K; razón contra
   MIROVA 1,19 en 28 rescates; AUC 0,861). #823 mergeado, #793 cerrado. Implicancia: D25 sólo tiene sentido junto
