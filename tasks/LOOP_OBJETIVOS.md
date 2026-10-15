@@ -160,7 +160,9 @@ y dos verificadores, 2026-10-09).
   difieren en más del 5 % de las pasadas, no se despacha el resto (§10 bis del DISENO); si no, despacho completo
   y evaluación con su `evaluar.py`.
 
-- [x] **1.3 A/B de D22, pre-registro v2.** RESUELTA SIN A/B 2026-10-14 (#788): las 14 pérdidas confiables son
+- [x] **1.3 A/B de D22, pre-registro v2.** ⚠️ S151, D-9 (#820, verificador): bajo la regla SN el techo baja de
+  14 a 5 pasadas (8 con umbral 0,04) y el equilibrio de 5,2 % a cerca de 1,8 %; refuerza la resolución sin A/B.
+  RESUELTA SIN A/B 2026-10-14 (#788): las 14 pérdidas confiables son
   Muy Bajo (0,03 a 0,08 MW); techo 14 pasadas contra 271 negativos reabribles; sólo gana si reabre menos del
   5,2 %. La selectividad la mide la sonda (1.2). Texto original: Con la tabla sola, el camino D22 pesa 12 de 24 pérdidas débiles de
   `max` (VERIFICADOR_DATOS D3). Rehacer el pre-registro suspendido (`experiments/_s150_ab_d22/PREREGISTRO.md`)
@@ -274,6 +276,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-10 | ~~¿Abrir el día en la réplica?~~ **DECIDIDA: 1** (Nicolás, 2026-10-15): rama diurna VIIRS apagada por flag (tag `pre-s151-rama-diurna-viirs`) y A/B diurno; código en curso | `experiments/_s151_alertas_diurnas/README.md`, verificado | #812 | #813 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-15 (vuelta 49): verificadores de D-9 (#820) y D-10 (#821), los dos PARCIAL; arreglos enviados
+- #821 (rama diurna VIIRS apagada): código CONFIRMADO (bit a bit con el flag apagado, el flag llega a todos los
+  consumidores, umbrales de la Tabla 1 renderizada, 4 mutaciones atrapadas). Pre-registro diurno a corregir: G2 usaba
+  como vara la sobre-publicación nocturna (defecto conocido) en vez de la parsimonia de MIROVA de día (0,4 %); falta
+  cobertura diurna y `q_noche` con perfil de control. Confirmado un defecto latente en la rama diurna de MODIS (S90):
+  sin C2 diurno y su flag no abre fetch ni run_pipeline (A118); va como marca en D27, no se arregla aquí. El frontend
+  asume pasadas nocturnas (corregir antes de cualquier flip).
+- #820 (regla SN): default "original" reproduce bit a bit; F/K intacto (41 de 41). Falla: las protegidas no están
+  a salvo por construcción (contraejemplo CONS 0,04 + OCR 1,5 en el mismo minuto; hoy no ocurre, 440 de 440);
+  el evaluador de la caja no informa las reglas; hijos sin marcar; dos copias del predicado (A102). Marcada aquí la
+  tarea 1.3 (techo 14 a 5 bajo SN).
 
 ### 2026-10-15 04:10 UTC (vuelta 48): D-3 mergeado, caja D1 y probe D25 completo despachados
 - D-3: #785 mergeado (`37ed449b`) con CI verde tras actualizarlo. Falta ver `regimen` en la próxima corrida NRT.
