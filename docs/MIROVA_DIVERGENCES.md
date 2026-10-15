@@ -2730,6 +2730,20 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
 
 ## D27: El día no existe: la Tabla 1 diurna (K1 = -0,6, C1 = 0,02, C2 = 15) está escrita y nunca se ejecuta. **DELIBERADA (MISSION: sólo noche), registrada S138 para que conste como divergencia literal** S138
 
+> ⚠️ **S151, segunda marca (A113, hija de la tarea 1.13 del loop, PR #812 verificado; decisión D-10,
+> issue #813).** Tres cosas de abajo quedan corregidas. (1) **El día no es sobre todo MODIS: es VIIRS 375.**
+> Con el OCR junto a la tabla son 94 pasadas protegidas diurnas (97 filas: 85 VIIRS 375, 6 MODIS, 6 VIIRS
+> 750), sólo 19 de ellas con fila en la tabla; aplicando A119 al denominador quedan **40 usables contra 232
+> nocturnas**. (2) **MIROVA sí procesa VIIRS de día** (Campus et al. 2022, *Sensors* 22:1713, p. 16, §5,
+> segundo párrafo, y p. 17, Tabla 4, páginas renderizadas): la frase «VIIRS solo de noche (sin fuente
+> MIROVA-core diurna)» del docstring de `pipeline/store.py` (`_reject_daytime`) es falsa; el docstring está
+> en un archivo protegido (A45) y se corrige en el PR de código de D-10 si Nicolás elige abrir el día. (3) La
+> Tabla 1 diurna existe sólo en `pipeline/process_modis.py` (`_select_thresholds`); `process_viirs.py` y
+> `process_viirs_mod.py` no tienen rama diurna, así que encender `ENABLE_DAYTIME_MODIS` no tocaría el día de
+> VIIRS (A118). Separar calor real de reflejo solar no se pudo: de las 40, 19 tienen magnitud
+> desproporcionada (reflejo probable) y 21 quedan SIN EVIDENCIA; la clase «real» de la primera versión era
+> circular. Detalle: `experiments/_s151_alertas_diurnas/README.md` §2 a §6.
+
 > ⚠️ **S151, marca agregada por la regla A113: «deliberada» y «no se propone cambiar» quedan como
 > pregunta, no como cierre.** El criterio de victoria que Nicolás fijó el 2026-10-13 (`docs/MISSION.md`,
 > sección «Criterio de victoria de la réplica») no acepta perder alertas protegidas de MIROVA (1 MW o
