@@ -3,6 +3,33 @@
 Fecha: 2026-10-14. Sólo lectura. No toca `pipeline/` ni el perfil. Nada despachado.
 Revisado por un verificador con contexto limpio (PR #790): arreglos D1 a D4 aplicados en esta versión.
 
+## Resultado del probe (2026-10-15, run 38679955131, verificado PARCIAL)
+
+**En una línea: con la detección de hoy, los dos brazos NO VALEN; pero no falla el fondo, falla la detección.**
+D25 da la magnitud correcta y destapa que alertamos donde MIROVA no alerta.
+
+- **Validez:** 356 de 356 pasadas con los tres brazos; C-P1 en 354 (las 14 con L1B reprocesado incluidas); el
+  control nunca llama al fondo por vecinos y cada brazo lo llama 467 veces. Salida:
+  `analizar_probe_resultado_salida.txt` y `resultado_probe.json`.
+- **Brazo a (canon, Coppola 2016a ec. 6):** publica en los 268 negativos de cero y en las 28 alertas de cero.
+  **Brazo b** (además, fuera los vecinos bajo 255 K): 187 de 268 y 25 de 28; apaga 2 de los 40 que ya publican
+  (Puyehue-Cordón Caulle 2026-08-07 05:54 y Villarrica 2026-07-17 06:42, ninguna con alerta de MIROVA). Ninguna
+  protegida apagada. Regla 2 (Wilson sobre casos): a 24,6 contra 268; b 20,4 contra 200,9. **NO VALE** los dos.
+- **Por qué el 100 %** (verificador, `verificador_resultado/`): no es defecto del cableado. La magnitud es el
+  exceso de un solo píxel (0,072 MW por kelvin en los cúmulos de un píxel; mediana 0,17 MW, unos 2,5 K). El fondo
+  no queda bajo el píxel por construcción (403 de 1.555 píxeles alertados quedan bajo sus vecinos), pero el
+  detector ya eligió cúmulos que están sobre sus vecinos en NTI, así que con piso de magnitud 0 todo cúmulo
+  alertado publica (inferido del diseño, SIN VERIFICAR píxel a píxel).
+- **D25 sí separa por magnitud y calza con MIROVA:** AUC 0,861 del VRP del brazo a, alertas contra negativos; en
+  las 28 alertas rescatadas la razón nuestra sobre MIROVA tiene mediana **1,19**, con 13 de 28 entre 0,8 y 1,25.
+- **Lectura:** lo medido es «todo cúmulo que hoy alertamos publica con D25», no «D25 contra MIROVA». El defecto
+  es la sobre-detección (A98). **El cierre queda CONDICIONADO a la detección de hoy** (A95, A114): si cambia la
+  detección (conectiva `max`, caja D18, D22), D25 en VIIRS 750 se vuelve a medir, junto con ese cambio.
+- **VIIRS 375: SIN EVIDENCIA.** Sólo se transfiere la forma: con piso 0, D25 hace publicar todo cúmulo alertado
+  que supere a sus vecinos.
+- Defectos de la verificación: emparejamiento píxel y temperatura por cercanía; posición de los rescates contra
+  MIROVA no revisada (A107).
+
 ## El fenómeno
 
 En una cumbre nevada, de noche, el píxel de 750 m del cráter queda más frío que la mediana del anillo
