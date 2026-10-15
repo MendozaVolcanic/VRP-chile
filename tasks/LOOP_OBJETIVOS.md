@@ -179,7 +179,10 @@ y dos verificadores, 2026-10-09).
   clasificación NULO la escribe el scraper. Medir distancias desde el cráter y no desde el catálogo
   (`process_viirs.py:754`, AUDITOR_F1). Pre-registro, verificador, sello, despacho.
 
-- [~] **1.5 D25, fondo por vecinos, primero sin correr nada:** sobre los 268 negativos de VIIRS 750 ya en disco
+- [x] **1.5 D25, fondo por vecinos, primero sin correr nada:** HECHA 2026-10-15 (#823, verificado PARCIAL): probe
+  válido, los dos brazos NO VALEN con la detección de hoy porque con piso 0 todo cúmulo alertado publica; D25 calza
+  la magnitud con MIROVA (mediana 1,19 en 28 rescates, AUC 0,861). Cierre CONDICIONADO a la detección: re-medir D25
+  junto con el cambio de detección que se adopte (conectiva, caja, D22). VIIRS 375 sin evidencia. Texto previo: sobre los 268 negativos de VIIRS 750 ya en disco
   (`AUDIT_S149.md:139`). ESTADO 2026-10-14: magnitud SIN MEDIR (no hay vecinos en records ni gránulos en disco);
   techo: cualquier magnitud positiva publicaría los 268 negativos y las 28 alertas. Probe de sólo lectura (356
   pasadas) en `main` (#790, `2b6a1be8`), verificado, con candado; ESPERA el sello (D-5, #793). El descarte de vecinos nublados bajo 255 K es de Coppola 2014 p. 3412, no del canon
@@ -276,6 +279,14 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-10 | ~~¿Abrir el día en la réplica?~~ **DECIDIDA: 1** (Nicolás, 2026-10-15): rama diurna VIIRS apagada por flag (tag `pre-s151-rama-diurna-viirs`) y A/B diurno; código en curso | `experiments/_s151_alertas_diurnas/README.md`, verificado | #812 | #813 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-15 (vuelta 51): 1.5 cerrada condicionada (#823); #822 en arreglos
+- Verificador del probe D25 V750: falla la detección, no el fondo (magnitud de un píxel, 0,072 MW/K; razón contra
+  MIROVA 1,19 en 28 rescates; AUC 0,861). #823 mergeado, #793 cerrado. Implicancia: D25 sólo tiene sentido junto
+  con una detección más parsimoniosa; candidato natural, medirlo encima del brazo F/K que salga del A/B en curso.
+- #822 (A/B diurno), verificador PARCIAL: el control del nulo era tautológico y la autoprueba dejaba pasar 4 de 7
+  mutaciones; arreglos enviados. Costo estimado del A/B diurno ~130 a 150 h de runner (SIN VERIFICAR).
+- Caja D1: job del brazo caja repetido, en curso.
 
 ### 2026-10-15 (vuelta 50): #820 y #821 en main; probe D25 V750 terminado, NO VALE en sus dos brazos (por verificar)
 - #821 (rama diurna VIIRS apagada) y #820 (regla SN, protegidas a salvo por construcción) mergeados con CI verde
