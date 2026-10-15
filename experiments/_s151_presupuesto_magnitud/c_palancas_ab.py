@@ -33,7 +33,7 @@ sys.path.insert(0, str(AQUI))
 import banco_paridad as BP  # noqa: E402
 from referencia_mirova_unificada import bajar_remoto, cargar_referencia_unificada  # noqa: E402
 import comun as C  # noqa: E402
-from b_regimen_actual import fila_alerta, MINIMA_V375  # noqa: E402
+from b_regimen_actual import fila_alerta, pasada_minima  # noqa: E402
 
 SAL = "experiments/_s146_ab_sin_test1/salidas"
 
@@ -113,10 +113,11 @@ def medir(A, B, por_vb):
         if xb is None:
             cuenta["sin_par_en_B"] += 1
             continue
-        al = fila_alerta(BP.parear(por_vb.get((xa["vol"], xa["b"]), []), xa["dt"]))
+        pareadas = BP.parear(por_vb.get((xa["vol"], xa["b"]), []), xa["dt"])
+        al = fila_alerta(pareadas)
         if al is None:
             continue
-        if xa["b"] == "VIIRS375" and al["vrp_mw"] <= MINIMA_V375:
+        if pasada_minima(pareadas, xa["b"]):   # D-9: predicado unico de scripts/clase_mirova.py (A102)
             cuenta[(xa["b"], "minima")] += 1
             continue
         pa, pb = bool(xa["pub"]) and (xa["disp"] or 0) > 0, bool(xb["pub"]) and (xb["disp"] or 0) > 0

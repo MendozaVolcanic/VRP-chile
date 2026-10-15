@@ -48,8 +48,29 @@ de la que decide (sección 10 de `evaluar_fk.py`).
 exacto se deja como alerta. La razón física: de las 14 alertas que `max` pierde por el camino de D22, 9 son de
 0,05 MW o menos, o sea pasadas en que MIROVA, en su propia imagen, dice no ver anomalía.
 
+**Implicancia para la tarea 1.3 (el A/B de D22): el umbral de equilibrio baja de 5,2 % a 1,8 %.** La tarea 1.3
+concluyó que quitar la compuerta D22 sólo gana si reabre menos de 14 de los 271 negativos limpios que el mismo
+camino puede reabrir (`experiments/_s151_d22_techo/salida.txt`). Con SN cambian las dos partes de esa razón
+(`techo_d22_bajo_sn.py`, salida en `techo_d22_bajo_sn_salida.txt`):
+
+| regla | lo que el A/B puede recuperar | negativos que puede reabrir | umbral de equilibrio |
+|---|---|---|---|
+| original | 14 | 271 | 5,2 % |
+| SN (la decidida) | 5 | 277 | **1,8 %** |
+| SN_004 (0,05 como alerta) | 8 | 275 | 2,9 % |
+
+El denominador sube porque las pasadas que dejan de ser alerta, y otras de las mismas noches que quedan sin alerta,
+pasan a ser negativos limpios del mismo estrato (B las publica, F no, y el record de B va por el camino D22): 6 con
+SN, 4 con SN_004. Tres de las 6 son pérdidas de la lista de D22 (Chaitén 23-ago, Isluga 25-may y Tupungatito
+22-abr), que con SN pasan de "alerta que el A/B recuperaría" a "negativo que el A/B reabriría". Control: con la
+regla original la misma cuenta da los 271 del verificador (`docs/audit_s150/VERIFICADOR_PREREGISTRO_D22.md` H4).
+Físicamente: lo que el A/B de D22 iba a recuperar era, en su mayoría, calor que MIROVA en su propia imagen dice no
+ver; sin eso quedan 5 pasadas de 0,06 a 0,08 MW contra 277 pasadas que pueden encenderse. Refuerza no gastar ese A/B.
+(La tarea 1.3 vive en `tasks/LOOP_OBJETIVOS.md`, en otra rama; su marca la pone el coordinador.)
+
 **SN castiga a quien publica lo mínimo.** Con SN, F sube de 63 a 92 negativos limpios publicados en VIIRS 375:
-las pasadas mínimas que F sí publicaba pasan a ser falsas alarmas. Con SE salen de la cuenta y F baja a 109. Las
+las pasadas mínimas que F sí publicaba pasan a ser falsas alarmas. Con SE salen de la cuenta y la suma de F baja de
+134 a 109. Las
 dos son lecturas literales; SN es la decidida porque es la letra de la regla 3 del criterio de victoria.
 
 ## Archivos
@@ -58,3 +79,5 @@ dos son lecturas literales; SN es la decidida porque es la letra de la regla 3 d
   (`experiments/_s149_prereg_invierno/_congelado/<mes>/`, en `.gitignore`; se verifica contra el manifiesto).
   Uso: `python veredictos_tres_reglas.py --congelado-meses DIR > veredictos_tres_reglas_salida.txt`.
 - `veredictos_tres_reglas_salida.txt`: la salida.
+- `techo_d22_bajo_sn.py` y `techo_d22_bajo_sn_salida.txt`: el umbral de equilibrio de D22 con cada regla. Baja los
+  records de B de las ramas `s146-ab/<run>` de S150 con `git archive` con ruta, a la carpeta de `--tmp`.

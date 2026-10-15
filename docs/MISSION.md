@@ -80,7 +80,8 @@ energía: arriba de 1 MW perder una alerta no tiene compensación posible.
    como «MIROVA no vio nada» (regla SN).** El scraper llama ALERTA a todo VRP mayor que cero, pero en
    VIIRS 375 el banner de MIROVA dice NONE en las 14 pasadas observadas de 0,04 MW o menos y VERY LOW en
    las de 0,06 MW o más; en 0,05 exacto sale de los dos lados (`experiments/_s151_alertas_minimas/README.md`
-   §2). Una alerta del scraper de VIIRS 375 con VRP de la pasada de **0,05 MW o menos** no es «Muy Bajo»:
+   §2). Una pasada de VIIRS 375 cuyas alertas del scraper tienen todas **0,05 MW o menos** (sin ninguna otra
+   alerta por encima de eso a menos de 120 s, así que una protegida nunca se toca) no es «Muy Bajo»:
    cuenta como pasada en que MIROVA no vio nada, y si la noche no tiene otra alerta es negativo limpio
    (regla 3). Las protegidas no cambian. Como Nicolás pidió probar todas las opciones, cada evaluación
    informa además SE (estrato aparte), la regla original y la variante con 0,05 exacto como alerta

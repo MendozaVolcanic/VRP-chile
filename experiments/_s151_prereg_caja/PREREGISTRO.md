@@ -6,6 +6,15 @@
 > `preregistro_aprobado` del workflow es suyo). Todos los números salen de los scripts de esta carpeta, con su salida
 > al lado: `cableado_salida.txt`, `sustrato_salida.txt`, `prediccion_mirova_salida.txt`, `distancia_mirova_salida.txt`
 > y `probar_salida.txt`.
+>
+> ⚠️ **Nota del 2026-10-15 (D-9, issue #811), posterior al sello; no cambia ningún criterio de este documento.**
+> Nicolás decidió que las alertas del scraper de VIIRS 375 con VRP de 0,05 MW o menos (las que el banner de MIROVA
+> llama NONE) cuenten como "MIROVA no vio nada" (regla SN), con SE y la regla original informadas. Este pre-registro
+> se escribió antes: **decide con la regla original** (la etiqueta del scraper), tal como está escrito en §6 y §7.
+> `evaluar_caja.py` ganó una sección 11 que INFORMA el veredicto de cada ventana con SN, SE, la original y las
+> variantes con umbral 0,04 (0,05 exacto como alerta), y lo mismo en `--combinar`; marca "DISTINTO del que decide"
+> cuando no coincide. El veto (P1) no depende de la etiqueta; lo que puede moverse es el mecanismo (Q1, Q2, P4), P2 y
+> P3. Las salidas de los runs ya despachados se leen igual: el JSON conserva todas sus claves y suma `reglas_d9`.
 
 ## 1. El fenómeno, y la pregunta
 
@@ -238,6 +247,11 @@ produce y otro que no:
   GANA), **`ruido_grande`** (20 discordantes, no menos que el techo: determinismo FALLA), **`p3_cambian`** (6 pares
   divididos por 20: FALLA sólo con los pares que cambian), `p4`, y los controles `sinclave`, `cajafalsa`, `cobert`,
   `determ`, `capa_mod` y `log_real` (los logs reales del run 38560317428, sin la clave de la caja: K ROTO).
+
+> ⚠️ **Nota del 2026-10-15 (D-9), posterior al sello**: la autoprueba ganó 3 comprobaciones de la sección 11
+> informativa (el autocontrol de la regla original en `mec`, `d1` e `inerte`, y el caso `minimas`, donde decide PIERDE
+> y la sección 11 informa SN GANA y SE EMPATE) y hoy da **32 de 32**; las 29 de antes siguen OK con las mismas líneas
+> (`probar_salida.txt`). Texto original:
 
 Resultado: **29 de 29**. Uso: `python probar_evaluar_caja.py <TMP> <DIR_NDC>`, con `<DIR_NDC>/logs` bajado de la rama
 `s146-ab/38560317428`.

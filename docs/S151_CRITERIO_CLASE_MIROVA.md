@@ -9,7 +9,8 @@
 >
 > ⚠️ **D-9 decidida el 2026-10-15: las alertas mínimas cuentan como "MIROVA no vio nada" (regla SN)** (Nicolás,
 > issue #811; estudio en `experiments/_s151_alertas_minimas/README.md`). Una pasada de alerta del scraper en
-> VIIRS 375 con VRP de **0,05 MW o menos** (VRP de la pasada, consolidado antes que OCR) es una pasada que el
+> VIIRS 375 con VRP de **0,05 MW o menos** (todas sus filas de alerta, consolidado y OCR, y ninguna otra alerta del
+> mismo volcán y sensor a menos de 120 s por encima de eso, así que una protegida nunca se toca) es una pasada que el
 > banner de MIROVA llama NONE: no es alerta "Muy Bajo" y, si la noche no tiene otra alerta, es negativo limpio.
 > Las protegidas (1 MW o más, lectura A) no cambian. Condición de Nicolás: probar todas las opciones, así que
 > cada evaluación informa también SE (estrato aparte) y la regla original, y la variante con 0,05 exacto
