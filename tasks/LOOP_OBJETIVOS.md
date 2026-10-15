@@ -294,6 +294,26 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 18:10 UTC (vuelta 62): loop retomado tras el reinicio; dos jobs repetidos; Nicolás suspende el PC ~19:20 UTC
+- Paradas: NRT verde (14:40 UTC), disco 26 GB, sin alerta nueva (#779 sigue abierto; #824 es el watchdog, ver abajo).
+- F/K V1 (run 38639658446) TERMINÓ: 43 jobs verdes, falló Villarrica gemelo («el runner perdió comunicación con el
+  servidor», 08:59 a 11:16 UTC) y por eso `recolectar` marca COBERTURA DESPAREJA (A108). Repetido con el mismo código
+  (`gh run rerun --failed`, intento 2): queda PENDIENTE en el grupo `s146-ab-sin-test1` detrás de V2a (run
+  38648773684, que ya corre: 6 jobs en curso y 16 en cola; el watchdog #824 lo veía «pending» por la cola del grupo).
+  Al terminar V2a corre el gemelo; recién entonces contar cobertura y evaluar con `evaluar_fk.py` + verificador limpio.
+  Ojo: no despachar V2b mientras el intento 2 de V1 espere, porque lo desplazaría del grupo.
+- W1 del A/B diurno (run 38723828037): el brazo diurno `_s151_ab_diurno_on` tardó **1 h 50 min** (Láscar, 20 días),
+  sobre el umbral de 1,5 h del pre-registro (§7.1): **W2 a W6 se despachan partidas en mitades**. El control falló
+  igual que el gemelo («perdió comunicación», a las 2 h); repetido (intento 2, en curso). Evaluar W1 al terminar.
+- Hito A119 de V31.1: el comentario decía «fecha de merge PENDIENTE»; corregido a 2026-10-15 13:46 UTC
+  (Mirova-v1#22, `0bd5b88b`) en #832 (sólo comentario; 14 tests de la referencia en verde). Se mergea con CI verde.
+- Verificador limpio del estudio de distancias OCR relanzado (salida en
+  `C:\Users\nmend\AppData\Local\Temp\claude\verifdist\VERIFICADOR.md`), con plazo de 40 min por la suspensión; incluye
+  la comparación de las 451 distancias del OCR contra la lectura por serie de tiempo, por tramo. Si no termina antes
+  de suspender, se relanza al volver, retomando lo que haya escrito.
+- Esperan a Nicolás: arreglo MxD03 en producción (A45, probe #828) y qué servicio dispara el cron del scraper
+  (Mirova-v1#23, punto 4).
+
 ### 2026-10-15 ~17:30 UTC (vuelta 61): PAUSA pedida por Nicolás (reinicio por memoria)
 - Hecho desde la vuelta 60: alertas diurnas de MIROVA en el tablero como soles (#831, ningún número publicado cambia);
   columnas UTC en el scraper (Mirova-v1#24, verificado tras la primera corrida: 42.755 filas, 15 columnas, LF, 114
