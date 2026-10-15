@@ -275,6 +275,14 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 01:26 UTC (vuelta 45): propagación A113 de la 1.4 (#817); #815 y #816 mergeados
+- #815 (D27) y el merge diario #816 entraron a `main` con CI verde.
+- Propagado el estudio TIF de la 1.4 (#809) a `docs/MISSION.md`, la marca de D8' y `docs/AUDIT_S150.md` §8:
+  MIROVA informa el lejano cuando es fuerte, la mayor contra la suma no está demostrado, el VRP del cráter no
+  incluye el lejano débil, el brazo A2 espera F/K. Suite 1710 passed. PR #817, espera CI.
+- Estado: V1 de F/K 7 de 44 jobs a las 4 h (más lento que las ~12,5 h estimadas); NRT último verde 23:06 UTC,
+  vigilar que aparezca la corrida de la 01 UTC (límite de parada: 12 h). Disco 22 GB.
+
 ### 2026-10-15 00:51 UTC (vuelta 44): propagación A113 de la 1.13 a D27 (#815)
 - Todas las tareas de la cola esperan un sello, una decisión o el A/B de F/K, así que la vuelta tomó la
   propagación pendiente (A113): segunda marca S151 en D27 (`docs/MIROVA_DIVERGENCES.md`): el día es sobre todo
