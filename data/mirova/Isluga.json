@@ -2,7 +2,7 @@
   "volcano": "Isluga",
   "source": "registro_vrp_consolidado.csv (text-scraped from mirovaweb.it) + registro_vrp_ocr.csv (OCR de las imagenes)",
   "note": "S150: incluye alertas del OCR marcadas source='ocr' (valores leidos de la imagen de MIROVA; pueden traer la imagen de otra pasada, docs/S150_IMAGENES_SNPP.md). Para calibrar magnitud usar solo source='consolidado'.",
-  "generated_at": "2026-10-15T13:24:14Z",
+  "generated_at": "2026-10-15T18:16:49Z",
   "records": [
     {
       "datetime_utc": "2026-01-13 18:12",
@@ -10,7 +10,8 @@
       "VRP_MW": 0.23,
       "distancia_km": 2.52,
       "clasificacion": "Bajo",
-      "source": "consolidado"
+      "source": "consolidado",
+      "dia": true
     },
     {
       "datetime_utc": "2026-01-26 05:18",
@@ -2965,6 +2966,15 @@
       "source": "consolidado"
     },
     {
+      "datetime_utc": "2026-10-11 06:06",
+      "sensor": "VIIRS375",
+      "VRP_MW": 0.19,
+      "distancia_km": null,
+      "clasificacion": "SIN_GEOMETRIA",
+      "source": "ocr",
+      "sin_geometria": true
+    },
+    {
       "datetime_utc": "2026-10-11 06:30",
       "sensor": "VIIRS375",
       "VRP_MW": 0.14,
@@ -2995,6 +3005,100 @@
       "distancia_km": 0.53,
       "clasificacion": "Muy Bajo",
       "source": "consolidado"
+    },
+    {
+      "datetime_utc": "2026-10-14 05:12",
+      "sensor": "VIIRS375",
+      "VRP_MW": 0.08,
+      "distancia_km": null,
+      "clasificacion": "SIN_GEOMETRIA",
+      "source": "ocr",
+      "sin_geometria": true
+    }
+  ],
+  "nota_dia": "S151: 'dia': true marca una pasada con el Sol sobre el horizonte del volcan (pipeline.store._solar_elevation > 0). De dia el infrarrojo medio suma luz solar reflejada y parte de estas alertas son reflejo en nubes, no calor (A76; experiments/_s151_alertas_diurnas/README.md). La replica es solo nocturna. 'records' trae lo de siempre (la tabla a cualquier hora, ahora con la marca, y el OCR nocturno); 'records_dia_ocr' trae las alertas diurnas del OCR, solo para dibujar en el tablero como referencia. No usarlas en metricas de paridad.",
+  "records_dia_ocr": [
+    {
+      "datetime_utc": "2026-05-16 18:12",
+      "sensor": "VIIRS375",
+      "VRP_MW": 3.34,
+      "distancia_km": 0.0,
+      "clasificacion": "Medio",
+      "source": "ocr",
+      "dia": true
+    },
+    {
+      "datetime_utc": "2026-05-22 17:24",
+      "sensor": "VIIRS375",
+      "VRP_MW": 0.6,
+      "distancia_km": 0.0,
+      "clasificacion": "Bajo",
+      "source": "ocr",
+      "dia": true
+    },
+    {
+      "datetime_utc": "2026-06-07 17:24",
+      "sensor": "VIIRS375",
+      "VRP_MW": 1.05,
+      "distancia_km": 0.0,
+      "clasificacion": "Medio",
+      "source": "ocr",
+      "dia": true
+    },
+    {
+      "datetime_utc": "2026-06-21 18:36",
+      "sensor": "VIIRS",
+      "VRP_MW": 37.0,
+      "distancia_km": 0.81,
+      "clasificacion": "Moderado",
+      "source": "ocr",
+      "dia": true
+    },
+    {
+      "datetime_utc": "2026-07-25 17:24",
+      "sensor": "VIIRS375",
+      "VRP_MW": 1.37,
+      "distancia_km": 0.68,
+      "clasificacion": "Bajo",
+      "source": "ocr",
+      "dia": true
+    },
+    {
+      "datetime_utc": "2026-08-31 17:30",
+      "sensor": "VIIRS375",
+      "VRP_MW": 15.44,
+      "distancia_km": 0.54,
+      "clasificacion": "Moderado",
+      "source": "ocr",
+      "dia": true
+    },
+    {
+      "datetime_utc": "2026-09-04 18:30",
+      "sensor": "VIIRS",
+      "VRP_MW": 22.0,
+      "distancia_km": 0.0,
+      "clasificacion": "Moderado",
+      "source": "ocr",
+      "dia": true
+    },
+    {
+      "datetime_utc": "2026-09-14 18:42",
+      "sensor": "VIIRS375",
+      "VRP_MW": 4.0,
+      "distancia_km": 1.08,
+      "clasificacion": "Bajo",
+      "source": "ocr",
+      "dia": true
+    },
+    {
+      "datetime_utc": "2026-10-13 18:18",
+      "sensor": "VIIRS375",
+      "VRP_MW": 1.46,
+      "distancia_km": null,
+      "clasificacion": "SIN_GEOMETRIA",
+      "source": "ocr",
+      "sin_geometria": true,
+      "dia": true
     }
   ]
 }
