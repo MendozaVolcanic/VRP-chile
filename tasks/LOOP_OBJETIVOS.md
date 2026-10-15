@@ -194,7 +194,9 @@ y dos verificadores, 2026-10-09).
   MODIS siguen sin existir (A45). Texto original: con los flags de compuerta y de fondo que le faltan a MODIS
   (`audit_s146/A2_RESULTADO_VARA_CORREGIDA.md:285`). En MODIS, `max` solo apaga el detector (S147).
 
-- [~] **1.7 La caja de 5 × 5 km (D18)** PRE-REGISTRO v2 en `main` (#800, `d5bc604f`; marca en D18 #802),
+- [x] **1.7 La caja de 5 × 5 km (D18)** HECHA 2026-10-15 (#825, verificada): **NO CUMPLE (veto)** en D1, por una
+  protegida MODIS de Láscar cuyo píxel cae en la corona; el cierre vale con la geolocalización MODIS de hoy (ver
+  1.15). D2 y V1 no se despachan. Texto previo: PRE-REGISTRO v2 en `main` (#800, `d5bc604f`; marca en D18 #802),
   verificado; ESPERA el sello (D-8, #801): despacho reducido a D1/D2 (~35 min) y B/BC en V1 (~6 h). Hallazgo:
   MIROVA mide `Distancia_km` desde el centro de su grilla. Texto original: medida por primera vez ahora que
   llega a los dos pases (#738), con el
@@ -263,6 +265,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   de adquisición; A109). Resultado: qué palanca mueve la magnitud (conectiva, fondo, área o remuestreo D17) y
   cuánto, para decidir el siguiente A/B. Control que pueda fallar.
 
+- [~] **1.15 (agregada por el loop el 2026-10-15, de sólo lectura) El píxel MODIS del cráter corrido hacia el
+  sensor.** EN CURSO.
+  Por qué: el verificador del veto de la caja (#825) encontró en Láscar que el píxel MODIS del cráter aparece
+  corrido hacia el lado del sensor y que el corrimiento crece con el ángulo de visión (Aqua +1,1 km a 17°, +3,5 km
+  a 45°; Terra -0,9 a -2,2 km a 31°; n = 13). Si es real y general, decide la etiqueta summit/far de MODIS (A46,
+  A81, D11), la posición de cada auditoría espacial (A61) y el veto de la caja. Candidatos: la interpolación de
+  la geolocación de 5 a 1 km (`_interp_geo`, `pipeline/process_modis.py:342`) o el paralaje de cumbres altas
+  sobre el elipsoide. Qué medir: el corrimiento por volcán (altura de 2.200 a 5.600 m), por satélite y por ángulo,
+  contra la geolocación oficial MOD03/MYD03 de 1 km y contra la posición de MIROVA (TIF hasta el 22-sep, A106);
+  separar paralaje (proporcional a altura por tangente del ángulo) de error de interpolación. Sin tocar el
+  pipeline. Control que pueda fallar: VIIRS, cuya geolocación es nativa por píxel, no debería mostrarlo.
+
 ## 5. Cola de decisiones para Nicolás (el loop agrega; Nicolás responde en el issue)
 
 | # | decisión | evidencia | PR / tag | issue |
@@ -279,6 +293,14 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-10 | ~~¿Abrir el día en la réplica?~~ **DECIDIDA: 1** (Nicolás, 2026-10-15): rama diurna VIIRS apagada por flag (tag `pre-s151-rama-diurna-viirs`) y A/B diurno; código en curso | `experiments/_s151_alertas_diurnas/README.md`, verificado | #812 | #813 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-15 (vuelta 56): caja vetada y verificada (#825); tarea 1.15 nueva, en curso
+- Verificador del veto D1: CONFIRMADO como resultado del pre-registro (repetición idéntica, mismo código en los
+  dos brazos, 1,0 MW es protegida en el filo). Atribución PARCIAL: es posición del píxel MODIS, pero no D17; el
+  píxel del cráter MODIS aparece corrido hacia el sensor creciendo con el ángulo (hasta 3,5 km a 45°, n = 13).
+  Resultado y marca en D18 en #825; cierre condicionado a la geolocalización MODIS de hoy.
+- 1.15 agregada (de sólo lectura, sin tocar el pipeline): medir ese corrimiento en los 11 volcanes, separar
+  paralaje de interpolación, control VIIRS que pueda fallar, contraste con TIF de MIROVA. Agente lanzado.
 
 ### 2026-10-15 10:55 UTC (vuelta 55): caja D1 VETADA (por verificar); W1 del A/B diurno despachada
 - Repetición de D1 (run 38698329137): cobertura 132 contra 132 (la recolección marca DESPAREJA porque cuenta los
