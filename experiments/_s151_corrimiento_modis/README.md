@@ -192,7 +192,7 @@ pero no el bow tie entre barridos ni el paralaje residual entre puntos de la gri
 | `mirova_tif.py` | pico del cráter en los GeoTIFF MODIS de MIROVA |
 | `consecuencias.py` | tamaño del corrimiento en producción, etiquetas, pérdidas de la caja |
 | `probe_mod03.py`, `probe_mod03_propuesta.yml` | probe propuesto contra MxD03, no corrido |
-| `salidas/` | salidas de todo lo anterior (sin `corrimiento_pasadas_produccion.csv`, 3,7 MB, que se regenera con `medir_corrimiento.py`) |
+| `salidas/` | salidas de todo lo anterior. `corrimiento_pasadas_s149_ab_sin_test1_b22_max.csv` (una fila por pasada del brazo K) va con `git add -f` porque el repo ignora los CSV; `corrimiento_pasadas_produccion.csv` (3,7 MB) no se sube y se regenera con `medir_corrimiento.py` |
 
 Para repetir, los brazos de A/B se bajan de los runs citados a una carpeta `<run_id>/<brazo>/<vol>.json` y se
 pasa con `--cache`; los TIF van a una carpeta temporal con `--tmp`.
