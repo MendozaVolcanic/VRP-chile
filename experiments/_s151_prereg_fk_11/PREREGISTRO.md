@@ -253,6 +253,12 @@ da:
   K 7**, controles OK, P1 VIIRS CUMPLE, y K recupera la alerta MODIS del 2026-10-01 08:35 (5,18 MW).
 - **Combinar** nulo y veto: K NO CUMPLE.
 
+> ⚠️ **Nota del 2026-10-15 (D-9, issue #811), posterior al sello; no cambia ninguna regla de este documento.**
+> `evaluar_fk.py` ganó una sección 10 que INFORMA P2 y el veredicto con las reglas de las alertas mínimas (SN,
+> SE, original y las variantes con 0,04); decide la etiqueta original, como se escribió aquí (`README.md`). La
+> autoprueba ganó 4 comprobaciones de esa sección y hoy da **41 de 41** (`probar_salida.txt`): las 37 de abajo
+> siguen todas OK. Texto original:
+
 Resultado: **37 de 37** comprobaciones (`probar_salida.txt`), sobre el evaluador tal como queda commiteado. El
 caso `v2_cable`, corrido con el evaluador de la versión 1 (`git show` del commit anterior), da "K OK" en el
 cableado: es el defecto 1, y la versión 2 lo atrapa. Uso:

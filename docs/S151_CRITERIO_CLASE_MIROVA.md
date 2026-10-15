@@ -6,6 +6,21 @@
 >
 > ⚠️ **D-4 decidida el 2026-10-14: rige la lectura A** (Nicolás, en la conversación con el loop; issue #782
 > cerrado). La lectura B del §5 queda como dato informativo, no decide. El texto de §5 se conserva como historia.
+>
+> ⚠️ **D-9 decidida el 2026-10-15: las alertas mínimas cuentan como "MIROVA no vio nada" (regla SN)** (Nicolás,
+> issue #811; estudio en `experiments/_s151_alertas_minimas/README.md`). Una pasada de alerta del scraper en
+> VIIRS 375 con VRP de **0,05 MW o menos** (VRP de la pasada, consolidado antes que OCR) es una pasada que el
+> banner de MIROVA llama NONE: no es alerta "Muy Bajo" y, si la noche no tiene otra alerta, es negativo limpio.
+> Las protegidas (1 MW o más, lectura A) no cambian. Condición de Nicolás: probar todas las opciones, así que
+> cada evaluación informa también SE (estrato aparte) y la regla original, y la variante con 0,05 exacto
+> contado como alerta (umbral 0,04), porque el estudio no pudo decidir ese borde. Función única:
+> `scripts/clase_mirova.py::aplicar_regla_minimas(filas, modo="SN" | "SE" | "original")`; en el etiquetador
+> compartido entra por `scripts/banco_paridad.py::indexar_referencia(regla_minimas=...)`, cuyo valor por
+> defecto sigue siendo "original" para que los resultados ya publicados se reproduzcan; un evaluador nuevo pasa
+> el modo explícito. Re-conteo de lo publicado con las cinco variantes: ningún veredicto de brazo cambia, el
+> techo de D22 cae de 14 a 5 (`experiments/_s151_alertas_minimas/veredictos_tres_reglas.md`). El A/B de F y K
+> (pre-registro anterior a D-9) decide con la regla original e informa las otras. Esto cierra el punto "MIROVA
+> dice NONE para 9 pasadas" del §5, que se conserva como historia.
 
 ## 1. La pregunta
 
@@ -102,7 +117,8 @@ las del OCR se informan aparte.
   truncado a entero (1,0 a 8,0); **MODIS no tiene ni una pasada con banner**. El corte está observado en
   VIIRS 375 y se extiende a los otros sensores por la escala del scraper, no por observación. El banner
   sólo existe desde agosto de 2026 y no hay MODERATE ni más arriba en la muestra.
-- **MIROVA dice NONE para 9 pasadas que el scraper registra como alerta** (0,02 a 0,05 MW). En el borde de
+- ⚠️ **Decidido en D-9 (2026-10-15, issue #811): regla SN, ver la nota del inicio.** Texto original:
+  **MIROVA dice NONE para 9 pasadas que el scraper registra como alerta** (0,02 a 0,05 MW). En el borde de
   0,05 MW hay pasadas con NONE y con VERY LOW, probablemente por el redondeo del VRP mostrado. Si esas
   pasadas cuentan como alerta "Muy Bajo" en la suma de errores o como pasadas donde MIROVA no vio nada
   cambia el lado del error en señales mínimas. Queda anotado; no afecta a las protegidas.

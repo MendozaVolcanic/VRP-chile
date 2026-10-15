@@ -1635,7 +1635,11 @@ Métricas derivadas:
 - **Precision** = TP / (TP+FP). De lo que gritamos, cuánto era real. Baja =
   ruido de falsa alarma, operador deja de confiar.
 - **Recall** = TP / (TP+FN). De lo real, cuánto detectamos. Baja = perdemos
-  eventos. ⚠️ **Rebajada S151** (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P2; criterio de
+  eventos. ⚠️ **Precisada por D-9 (Nicolás, 2026-10-15, issue #811)**: una alerta del scraper de VIIRS 375
+  con VRP de 0,05 MW o menos, que el banner de MIROVA llama NONE, no entra al recall: cuenta como «MIROVA
+  no vio nada» (regla SN). Cada evaluación informa también SE (estrato aparte) y la regla original
+  (`docs/MISSION.md`, criterio de victoria, punto 5; `scripts/clase_mirova.py::aplicar_regla_minimas`).
+  Marca anterior conservada: ⚠️ **Rebajada S151** (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P2; criterio de
   victoria decidido por Nicolás el 2026-10-13, en `docs/MISSION.md`, sección «Criterio de victoria de
   la réplica»): en la réplica el recall se mide **contra MIROVA** y en las dos direcciones, porque
   callar donde MIROVA calla también es parte de la réplica. Ninguna alerta protegida (alerta de
