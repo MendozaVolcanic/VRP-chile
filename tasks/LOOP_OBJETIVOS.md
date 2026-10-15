@@ -275,6 +275,17 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 02:03 UTC (vuelta 46): sin tarea libre; #817 mergeado; ritmo del NRT y de V1
+- #817 (propagación de la 1.4) en `main` con CI verde. Ninguna tarea de §3 y §4 está libre: todas esperan un sello
+  o decisión de Nicolás (D-2, D-3, D-5, D-8, D-9, D-10, sonda 1.2) o el A/B de F/K.
+- NRT: última corrida 23:06 UTC (todas verdes desde el 2026-10-08 22:55). Es el atraso crónico del cron de GitHub
+  (4 a 5 corridas por día; hueco máximo reciente 11 h, 2026-10-12 08:38 a 19:37), no una falla. Ojo: un hueco así
+  queda a 1 h de la condición de parada de §1.5 sin que nada esté roto. El remedio, el cron externo `10 1-12 * * *`
+  que Nicolás aprobó en S150 (decisión 5, `docs/AUDIT_S150.md`), sigue sin configurar y pide una credencial que el
+  loop no puede crear (§1.7): queda para Nicolás.
+- V1 de F/K: 10 de 44 jobs en 4,7 h con 6 en paralelo; a ese ritmo termina cerca de las 17 a 19 UTC del 15-oct,
+  no a las ~10 UTC que estimaba el pre-registro. V2a sigue pendiente detrás. Disco 22 GB.
+
 ### 2026-10-15 01:26 UTC (vuelta 45): propagación A113 de la 1.4 (#817); #815 y #816 mergeados
 - #815 (D27) y el merge diario #816 entraron a `main` con CI verde.
 - Propagado el estudio TIF de la 1.4 (#809) a `docs/MISSION.md`, la marca de D8' y `docs/AUDIT_S150.md` §8:
