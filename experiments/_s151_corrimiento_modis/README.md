@@ -13,7 +13,7 @@
   del brazo K, 88 de ellas de Láscar. Ahí el modelo geométrico explica buena parte del corrimiento, pero el
   tamaño depende del modelo de ajuste (0,90 sin término libre, 1,20 con él) y queda un residuo que se aleja
   del sensor. En producción no se ve: está enmascarado (sección 3).
-- **Lo que decide es el probe contra MxD03.** Está en un PR aparte y todavía no se ha corrido (sección 6).
+- **Lo que decide es el probe contra MxD03.** Está en el PR #827 y todavía no se ha corrido (sección 6).
 
 Estudio de sólo lectura: no toca `pipeline/`.
 
@@ -225,7 +225,7 @@ pero no el bow tie entre barridos ni el paralaje residual entre los puntos de la
 - **Qué cambiaría:** la latitud y longitud de todo píxel, hotspot, cúmulo y distancia en los records MODIS.
   Y potencialmente qué píxeles pasan los umbrales de cumbre, porque el círculo de cumbre se recentra.
 
-## 6. El probe que decide (PR aparte), con el criterio escrito antes de correrlo
+## 6. El probe que decide (PR #827), con el criterio escrito antes de correrlo
 
 El probe compara píxel a píxel la geolocalización que da hoy `_interp_geo` contra la de MxD03 en 7
 gránulos MODIS de Láscar:
