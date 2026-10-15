@@ -9,7 +9,11 @@ Lo que se establecio (detalle y fuentes en `docs/S151_CRITERIO_CLASE_MIROVA.md`)
 - La columna `Clasificacion Mirova` la calcula el scraper de Mirova-v1 desde el VRP de la pasada
   (`volcanes.py:63`), no MIROVA. Cambio de escala en el tiempo: en el consolidado es coherente con el VRP
   desde febrero de 2026 y en el OCR desde julio; antes trae etiquetas de escalas retiradas.
-- El banner de la imagen (`Nivel_Anomalia_MIROVA`, unico campo que si viene de MIROVA) es por pasada y
+- [Marca D-9, 2026-10-15, issue #811: el borde de abajo de VERY_LOW no es 0,05 limpio. En VIIRS 375 el
+  banner dice NONE en todas las pasadas observadas de 0,04 MW o menos y en 0,05 exacto sale de los dos lados
+  (experiments/_s151_alertas_minimas/README.md §2); por eso las alertas de 0,05 o menos se cuentan con la
+  regla SN de abajo (aplicar_regla_minimas). El corte de 1 MW no cambia. Texto original:]
+  El banner de la imagen (`Nivel_Anomalia_MIROVA`, unico campo que si viene de MIROVA) es por pasada y
   separa sin error VERY_LOW (0,05 a 0,91 MW) de LOW (1,00 a 8,00 MW). Es lo que sostiene el corte de 1 MW:
   Coppola 2016a fig. 11 se contradice entre su pie (Low bajo 1 MW) y su figura (Low bajo 10 MW).
 
@@ -24,6 +28,7 @@ import argparse
 import csv
 import sys
 from collections import Counter, defaultdict
+from datetime import datetime
 from pathlib import Path
 from typing import NamedTuple, Optional
 
@@ -97,6 +102,12 @@ SENSORES_MINIMA = ("VIIRS375",)
 MODOS_MINIMAS = ("SN", "SE", "original")
 MODO_MINIMAS = "SN"
 TIPO_MINIMA_SE = "ALERTA_MINIMA_SE"
+VENTANA_S = 120   # la del pareo del etiquetador (banco_paridad.TOL_S)
+
+
+def _instante(fecha_utc: str) -> datetime:
+    return datetime.strptime(fecha_utc[:19] if len(fecha_utc) >= 19 else fecha_utc[:16],
+                             "%Y-%m-%d %H:%M:%S" if len(fecha_utc) >= 19 else "%Y-%m-%d %H:%M")
 
 
 class ReglaMinimas(NamedTuple):
@@ -112,21 +123,33 @@ def es_alerta_minima(vrp_mw: Optional[float], sensor: str, umbral_mw: float = UM
 def aplicar_regla_minimas(filas, modo: str = MODO_MINIMAS, umbral_mw: float = UMBRAL_MINIMA_MW) -> ReglaMinimas:
     """Unica implementacion de la regla D-9, sobre filas normalizadas de la referencia (referencia_mirova_unificada).
 
-    El VRP de la pasada es el de su fila de alerta del consolidado si existe, si no el del OCR: el mismo orden
-    que usa el evaluador (`experiments/_s146_ab_sin_test1/evaluar.py::anotar_vrp_mirova`), para que el umbral
-    corte las mismas pasadas que el evaluador ve. Las protegidas (1 MW o mas) nunca son minimas.
+    Una pasada (clave_pasada: volcan, sensor, minuto) es minima solo si TODAS sus filas de alerta tienen VRP de
+    `umbral_mw` o menos, y ademas ninguna otra fila de alerta del mismo volcan y sensor a menos de VENTANA_S
+    segundos lo supera (el etiquetador parea a +-120 s, y la misma pasada puede caer en dos minutos). Asi una
+    alerta protegida (1 MW o mas), o cualquiera sobre el umbral, nunca se reescribe: lo garantiza la
+    construccion, no la referencia de hoy (verificador de #820; contraejemplo: consolidado 0,04 y OCR 1,5 MW en
+    el mismo minuto). Una fila de alerta sin VRP tambien impide la minima (no se sabe su magnitud).
+    La version anterior tomaba el VRP del consolidado antes que el del OCR, como `anotar_vrp_mirova`; sobre la
+    referencia de hoy las dos dan las mismas 155 pasadas (veredictos_tres_reglas_salida.txt, controles).
     """
     if modo not in MODOS_MINIMAS:
         raise ValueError("modo %r: tiene que ser uno de %s" % (modo, MODOS_MINIMAS))
     por_pasada = defaultdict(list)
+    altas = defaultdict(list)   # (volcan, sensor) -> instantes de alertas que NO son minimas
     for f in filas:
-        if f.get("tipo") in TIPOS_ALERTA and f.get("vrp_mw") is not None:
-            por_pasada[clave_pasada(f)].append(f)
+        if f.get("tipo") not in TIPOS_ALERTA:
+            continue
+        por_pasada[clave_pasada(f)].append(f)
+        if not es_alerta_minima(f.get("vrp_mw"), f.get("sensor_bucket"), umbral_mw):
+            altas[(f["volcano"], f["sensor_bucket"])].append(_instante(f["fecha_utc"]))
     minimas = set()
     for k, fs in por_pasada.items():
-        vrp = sorted(fs, key=lambda f: f.get("source") != "CONS")[0]["vrp_mw"]
-        if es_alerta_minima(vrp, k[1], umbral_mw):
-            minimas.add(k)
+        if not all(es_alerta_minima(f.get("vrp_mw"), k[1], umbral_mw) for f in fs):
+            continue
+        ts = [_instante(f["fecha_utc"]) for f in fs]
+        if any(abs((a - t).total_seconds()) <= VENTANA_S for a in altas.get((k[0], k[1]), []) for t in ts):
+            continue
+        minimas.add(k)
     if modo == "original" or not minimas:
         return ReglaMinimas(list(filas), minimas)
     out = []

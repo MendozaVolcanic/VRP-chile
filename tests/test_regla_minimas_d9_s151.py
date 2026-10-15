@@ -27,7 +27,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from scripts.clase_mirova import (MODO_MINIMAS, MODOS_MINIMAS,  # noqa: E402
                                   TIPO_MINIMA_SE, UMBRAL_MINIMA_MW,
                                   alerta_protegida, aplicar_regla_minimas,
-                                  es_alerta_minima)
+                                  es_alerta_minima, pasadas_protegidas)
 
 
 def _f(vrp, tipo="ALERTA_TERMICA", sensor="VIIRS375", hora="2026-09-10 05:30:00", source="CONS",
@@ -105,16 +105,43 @@ def test_modo_invalido():
         aplicar_regla_minimas(_filas(), "sn")
 
 
-def test_vrp_de_la_pasada_es_el_del_consolidado_antes_que_el_ocr():
-    # consolidado 0,06 y OCR 0,04 en la misma pasada: el VRP es 0,06, no es minima; nada cambia
+def test_una_pasada_es_minima_solo_si_todas_sus_alertas_lo_son():
+    # Verificador de #820: la version anterior tomaba el VRP del consolidado y reescribia TODAS las filas de la
+    # pasada, asi que una fila del OCR por encima del umbral desaparecia con ella.
+    # consolidado 0,06 y OCR 0,04 en la misma pasada: no es minima; nada cambia
     a = [_f(0.06, source="CONS"), _f(0.04, tipo="ALERTA_TERMICA_OCR", source="OCR", hora="2026-09-10 05:30:40")]
     assert [f["tipo"] for f in aplicar_regla_minimas(a).filas] == ["ALERTA_TERMICA", "ALERTA_TERMICA_OCR"]
-    # consolidado 0,04 y OCR 0,08: el VRP es 0,04, minima; las dos filas de alerta de la pasada cambian
+    # consolidado 0,04 y OCR 0,08: el OCR supera el umbral, no es minima; nada cambia
     b = [_f(0.04, source="CONS"), _f(0.08, tipo="ALERTA_TERMICA_OCR", source="OCR", hora="2026-09-10 05:30:40")]
-    assert [f["tipo"] for f in aplicar_regla_minimas(b).filas] == ["RUTINA", "RUTINA"]
+    out = aplicar_regla_minimas(b)
+    assert [f["tipo"] for f in out.filas] == ["ALERTA_TERMICA", "ALERTA_TERMICA_OCR"] and not out.minimas
+    # consolidado 0,04 y OCR 0,03: las dos son minimas; las dos filas cambian
+    d = [_f(0.04, source="CONS"), _f(0.03, tipo="ALERTA_TERMICA_OCR", source="OCR", hora="2026-09-10 05:30:40")]
+    assert [f["tipo"] for f in aplicar_regla_minimas(d).filas] == ["RUTINA", "RUTINA"]
     # solo OCR con 0,03: minima
     c = [_f(0.03, tipo="ALERTA_TERMICA_OCR", source="OCR")]
     assert aplicar_regla_minimas(c).filas[0]["tipo"] == "RUTINA"
+
+
+@pytest.mark.parametrize("modo", ["SN", "SE"])
+def test_contraejemplo_del_verificador_la_protegida_no_desaparece(modo):
+    # verif820/contraej.py: consolidado 0,04 y OCR 1,5 MW en el mismo minuto.
+    filas = [_f(0.04, vol="Lascar"), _f(1.5, tipo="ALERTA_TERMICA_OCR", source="OCR", vol="Lascar")]
+    out = aplicar_regla_minimas(filas, modo)
+    assert pasadas_protegidas(out.filas) == pasadas_protegidas(filas) == {("Lascar", "VIIRS375", "2026-09-10 05:30")}
+    assert out.filas == filas and not out.minimas
+
+
+@pytest.mark.parametrize("modo", ["SN", "SE"])
+def test_ventana_de_120_s_entre_minutos_distintos(modo):
+    # La misma pasada puede caer en dos minutos (consolidado 05:30:50, OCR 05:31:20). El etiquetador parea a
+    # +-120 s, asi que la regla tambien: una alerta por encima del umbral a menos de 120 s impide la minima.
+    filas = [_f(0.04, hora="2026-09-10 05:30:50"), _f(1.5, tipo="ALERTA_TERMICA_OCR", source="OCR", hora="2026-09-10 05:31:20")]
+    out = aplicar_regla_minimas(filas, modo)
+    assert out.filas == filas and not out.minimas
+    # a mas de 120 s son pasadas distintas y la minima si cuenta
+    lejos = [_f(0.04, hora="2026-09-10 05:30:00"), _f(1.5, tipo="ALERTA_TERMICA_OCR", source="OCR", hora="2026-09-10 05:33:30")]
+    assert aplicar_regla_minimas(lejos, modo).minimas == {("Lastarria", "VIIRS375", "2026-09-10 05:30")}
 
 
 @pytest.mark.parametrize("modo", ["SN", "SE", "original"])
