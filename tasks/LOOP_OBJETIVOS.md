@@ -280,6 +280,17 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 10:55 UTC (vuelta 55): caja D1 VETADA (por verificar); W1 del A/B diurno despachada
+- Repetición de D1 (run 38698329137): cobertura 132 contra 132 (la recolección marca DESPAREJA porque cuenta los
+  otros 10 volcanes que la ventana no corre: otro defecto del workflow en ventanas de un volcán). Con
+  `--repeticion`, la pérdida MODIS de Láscar 2026-03-27 07:10 (MIROVA 1,0 MW, único píxel de K en la corona) queda
+  confirmada: **KC NO CUMPLE (veto)** en lecturas A y B, también con las cinco reglas de D-9. VIIRS 375 y 750
+  cumplen. El pre-registro ya preveía que en D1 la causa sería la posición del píxel MODIS (D17), no la caja.
+  Verificador limpio lanzado antes de aceptar.
+- Con la caja en espera del verificador, el cupo va al A/B diurno: W1 (Láscar, 2026-03-01 a 03-20, mide la
+  duración del brazo diurno) despachada, run 38723828037. W2 a W6, mejor después de F/K (§7.1 del pre-registro).
+- NRT verde 08:52 UTC. Disco 25 GB.
+
 ### 2026-10-15 07:21 UTC (vuelta 54): caja D1 evaluada: PENDIENTE DE REPETICIÓN; repetición despachada
 - Tercer intento: cobertura pareja (132 contra 132). La recolección quedó roja sólo porque no pudo publicar la rama
   `s151-ab-caja/<run_id>` (ya existía del primer intento; defecto del workflow en reintentos: nombrar la rama
