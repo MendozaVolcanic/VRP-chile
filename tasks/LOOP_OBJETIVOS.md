@@ -277,6 +277,17 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 (vuelta 50): #820 y #821 en main; probe D25 V750 terminado, NO VALE en sus dos brazos (por verificar)
+- #821 (rama diurna VIIRS apagada) y #820 (regla SN, protegidas a salvo por construcción) mergeados con CI verde
+  tras sus verificadores; D-9 (#811) cerrado. #822 (infraestructura del A/B diurno) en verificación limpia.
+- Caja D1 (run 38679191229): cobertura DESPAREJA (control 132 pasadas, caja 124: `SEARCH_CMR_TIMEOUT` de NASA
+  en el brazo caja, A108). Repetido el job del brazo caja con el mismo código; no se evalúa hasta que la
+  cobertura cuadre.
+- Probe D25 V750 (run 38679955131): válido (356 de 356, C-P1 354, 14 con L1B reprocesado y las 14 con C-P1).
+  Brazo a (canon): enciende los 268 negativos de cero y las 28 alertas; brazo b (vecinos bajo 255 K fuera):
+  187 de 268 y 25 de 28, apaga 2 de 40 que publican. Ninguna protegida apagada. Los dos NO VALE (regla 2).
+  Verificador limpio lanzado: busca si "enciende todo" es física o construcción del fondo por vecinos.
+
 ### 2026-10-15 (vuelta 49): verificadores de D-9 (#820) y D-10 (#821), los dos PARCIAL; arreglos enviados
 - #821 (rama diurna VIIRS apagada): código CONFIRMADO (bit a bit con el flag apagado, el flag llega a todos los
   consumidores, umbrales de la Tabla 1 renderizada, 4 mutaciones atrapadas). Pre-registro diurno a corregir: G2 usaba
