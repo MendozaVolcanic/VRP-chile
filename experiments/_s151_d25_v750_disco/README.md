@@ -64,6 +64,22 @@ exceso en un píxel de 750 m vale **~0,08 MW**.
 C4 contiene exactamente a las 268 y 28 de S149. Los cuatro pasan. `control_sintetico.py` valida la cadena
 del fondo con cinco casos de respuesta conocida: pasan los cinco.
 
+## Sello, piloto y enmienda (2026-10-15)
+
+Nicolás selló el probe el 2026-10-15 (D-5, issue #793). **Piloto** Tupungatito, 10 pasadas, run 38678279921:
+9 de 10 con los tres brazos y C-P1 en las 9; el cableado funciona (el control nunca llama al fondo por
+vecinos). La décima falló porque NASA reprocesó el gránulo: el archivo exacto del record
+(`VJ102MOD.A2026169.0542.021.2026169113420.nc`) ya no está y el buscador devuelve el de la misma adquisición
+producido el día 174. Con la regla original de cobertura completa, cualquier reproceso así deja el probe
+INDECIDIBLE sin que el instrumento esté mal.
+
+**Enmienda, escrita antes de correr las 356 y sin mirar ninguna alerta** (las 10 del piloto son negativos en
+cero, sin rescate posible que mirar): si el L1B exacto no existe, se usa el de la misma adquisición y la pasada
+queda marcada `l1b_reprocesado`. El control C-P1 (que el brazo control reproduzca el record persistido) decide
+si sirve, como para cualquier otra pasada, y el umbral de 90 % no cambia. El analizador informa cuántas pasadas
+usaron un L1B reprocesado y cuántas de ellas pasan C-P1. Criterio, brazos y reglas 1 y 2 no cambian; la
+autoprueba da la misma salida.
+
 ## El probe propuesto (escrito, NO despachado)
 
 `probe_d25_v750.py` + `.github/workflows/probe-s151-d25-v750.yml`. Un job por volcán, **356 pasadas**:
