@@ -294,6 +294,15 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 12:27 UTC (vuelta 59): F/K V1 con un job fallido; W1 diurna lleva 1,5 h
+- F/K V1: 33 jobs verdes, 6 corriendo, 4 en cola y **1 fallido** (Villarrica, gemelo `_s151_ab_control_gemelo`,
+  08:59 a 11:16 UTC; el log no está disponible mientras el run sigue vivo). Cuando el run termine: leer el error y
+  repetir ese job con el mismo código antes de evaluar (A108).
+- W1 del A/B diurno (Láscar, 20 días) sigue corriendo a 1,5 h: según el pre-registro (§7.1), si pasa de 1,5 h
+  hay que partir W2 a W6 en mitades.
+- #828 (resultado del probe MxD03) espera CI. NRT verde 08:52 UTC. Disco 21 GB. Decisiones pedidas a Nicolás: arreglo
+  MxD03 (A45) y las dos partes del rechazo V31 de Mirova-v1.
+
 ### 2026-10-15 ~13:00 UTC (vuelta 58): probe MxD03 PARCIAL verificado (#828); diagnóstico de Mirova-v1 a pedido de Nicolás
 - Probe contra MxD03: la grilla de 5 km coincide con MxD03 en el offset 2 en los dos ejes; nuestra posición MODIS se
   aparta 1,2 a 2,6 km donde importa. Arreglo de producción (leer MxD03) justificado; espera tag y sí (A45). La caja
