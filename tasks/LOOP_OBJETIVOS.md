@@ -294,6 +294,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 ~13:00 UTC (vuelta 58): probe MxD03 PARCIAL verificado (#828); diagnóstico de Mirova-v1 a pedido de Nicolás
+- Probe contra MxD03: la grilla de 5 km coincide con MxD03 en el offset 2 en los dos ejes; nuestra posición MODIS se
+  aparta 1,2 a 2,6 km donde importa. Arreglo de producción (leer MxD03) justificado; espera tag y sí (A45). La caja
+  sigue vetada con premisa «en duda», a re-medir tras el arreglo.
+- Nicolás reportó un VRP de 22 MW de Chillán (VIIRS 375, 2026-10-15 05:00) que Mirova-v1 no registró. Causa: la tabla
+  `latest.php` nunca lo publicó, y el OCR lo leyó pero lo rechazó por la regla V31 (Mirova-v1#20) porque la imagen de
+  distancia era de la pasada de las 06:00. Una pasada que la tabla salta y no es la última se pierde siempre. El dato
+  está en `ocr_rechazos_cabecera.csv` (13 filas; también la de VIIRS 750 de las 05:00 y la de ayer 18:42). Propuesto:
+  guardar esas filas con VRP y sin distancia en Mirova-v1 (espera sí) y leer los rechazos en la referencia unificada.
+- TIF: el visor sigue sirviendo el archivo del 22-sep (Last-Modified 22-sep 09:29, md5 `5ad2f851` idéntico al
+  archivado); la cabecera «15-Oct 06:00» viene de la base de datos, no del TIF.
+
 ### 2026-10-15 (vuelta 57): 1.15, el corrimiento MODIS es un defecto de código (verificado PARCIAL)
 - #826: `_interp_geo` ignora el offset 2 de la grilla de 5 km (Data Dictionary C7 p. 66): frame s rotulado como
   0,99778·s + 2; 1,0 km a 17°, 3,0 a 45°, 5,0 a 55° hacia el nadir del lado del frame 0. CONFIRMADO por el
