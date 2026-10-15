@@ -20,6 +20,10 @@ QUE DECIDE (version 2, tras el verificador del PR #800):
   - Si alguien corre K, KC y KG en V1 (--brazos), el evaluador tambien aplica P2 y P3 con las reglas de ruido de la
     version 2: un cambio que no supera el ruido es INDECIDIBLE, no "inerte"; el ruido tiene que ser menor que el techo
     de lo que la caja puede mover; P3 se mide solo sobre los pares cuya magnitud cambia.
+  - Seccion 11 (INFORMA, agregada tras la decision D-9 del 2026-10-15, issue #811): el mismo evaluador, sobre las
+    mismas tablas, con las reglas de las alertas de 0,05 MW o menos (SN, SE, original y variantes con 0,04). DECIDE
+    la original, vigente al sellar el pre-registro (nota D-9 en PREREGISTRO.md). El JSON suma la clave `reglas_d9`
+    y conserva todas las anteriores.
 
 Uso:
   python evaluar_caja.py --ventana V1 --raiz <run V1> --logs <run V1>/logs --out v1.json       (B y BC)
@@ -131,10 +135,14 @@ def evaluar(a):
     res["referencia_ok"] = E.referencia_congelada(cfg["ref"], ref[2], a.capas_del_repo)
 
     pares = [p for p in (("K", "KC"), ("K", "KG"), ("B", "BC")) if set(p) <= set(brazos)]
-    T = {p: E.tabla(raiz / BRAZOS[p[0]], raiz / BRAZOS[p[1]], ref, cfg["desde"], cfg["hasta"], tmp / ("t_%s_%s.json" % p)) for p in pares}
+    # D-9 (seccion 11): la corrida anidada con otra regla reusa las tablas de la principal (mismas publicaciones).
+    T = getattr(a, "_T_base", None) or {p: E.tabla(raiz / BRAZOS[p[0]], raiz / BRAZOS[p[1]], ref, cfg["desde"], cfg["hasta"], tmp / ("t_%s_%s.json" % p)) for p in pares}
+    a._T_base = T
     R = {n: E.crudos(raiz, n, vols, cfg["desde"], cfg["hasta"]) for n in brazos}
     PX = {n: clases_por_pasada(raiz, n, vols, cfg["desde"], cfg["hasta"], anclas, inner) for n in brazos}
     todas = set().union(*[set(t) for t in T.values()])
+    if getattr(a, "_regla", None) is not None:
+        T = reetiquetar(a, T, todas, ref, cfg)
     prot = E.proteccion(todas, ref, cfg["desde"], cfg["hasta"])
 
     # ---------------- 1. cobertura
@@ -226,8 +234,7 @@ def evaluar(a):
     if ("K", "KC") not in T:
         res["global"] = None; res["mecanismo"] = mecanismo(res)
         print("\n== VEREDICTO DE LA VENTANA %s: no hay K ni KC (solo mecanismo) | mecanismo: %s" % (a.ventana, res["mecanismo"]))
-        Path(a.out).write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
-        return 0
+        return cerrar(a, res)
     TK = T[("K", "KC")]
     decide = res["controles_ok"] and res["cableado"]["K"] and res["cableado"]["KC"] and res["cableado"].get("KG", True) and huella_ok and q2_ok
 
@@ -276,8 +283,7 @@ def evaluar(a):
         print("\n== VEREDICTO DE LA VENTANA %s (solo veto, sin gemelo):" % a.ventana)
         for l, v in res["global"].items():
             print("   KC lectura %s: %s" % (l, v))
-        Path(a.out).write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
-        return 0
+        return cerrar(a, res)
 
     # ---------------- 8. P2 suma (solo si se corre K, KC y KG en V1)
     print("\n== 8. P2, SUMA DE ERRORES BAJO 1 MW, 8 centrados (arreglo D4: un cambio dentro del ruido es INDECIDIBLE, no inerte)")
@@ -326,6 +332,70 @@ def evaluar(a):
     for l, v in res["global"].items():
         print("   KC lectura %s: %s" % (l, v))
     print("   mecanismo (B -> BC): %s" % res["mecanismo"])
+    return cerrar(a, res)
+
+
+# ---------------------------------------------------------------- D-9 (issue #811), seccion 11: INFORMA, no decide
+def reetiquetar(a, T, todas, ref, cfg):
+    """Las tablas con la etiqueta de MIROVA segun la regla D-9 de `a._regla` (modo, umbral); las publicaciones no
+    cambian. Como en evaluar_fk.p2_tres_reglas: si la etiqueta original re-calculada difiere de la de la tabla en una
+    pasada, se conserva la de la tabla y la regla solo mueve las pasadas que ella misma cambia."""
+    modo, umbral = a._regla
+    claves_ = sorted(todas)
+    base = E.etiquetas_regla(claves_, ref, cfg["desde"], cfg["hasta"], "original")
+    labs = base if modo == "original" else E.etiquetas_regla(claves_, ref, cfg["desde"], cfg["hasta"], modo, umbral)
+    tabla_lab = {}
+    for t in T.values():
+        for k, v in t.items():
+            for x in v.values():
+                tabla_lab.setdefault(k, x["lab"])
+    nuevo = {k: (labs[k] if labs[k] != base[k] else tabla_lab.get(k, base[k])) for k in claves_}
+    a._distintas = sum(1 for k in claves_ if k in tabla_lab and tabla_lab[k] != base[k])
+    a._cambian = {"%s->%s" % kk: n for kk, n in collections.Counter(
+        (tabla_lab.get(k), nuevo[k]) for k in claves_ if nuevo[k] != tabla_lab.get(k)).items()}
+    return {p: {k: {lado: dict(x, lab=nuevo[k]) for lado, x in v.items()} for k, v in t.items()} for p, t in T.items()}
+
+
+def seccion_d9(a, res):
+    """El pre-registro de la caja se sello antes de D-9 y DECIDE con la etiqueta original (todo lo de arriba). Aqui
+    se vuelve a correr el mismo evaluador sobre las mismas tablas con cada regla (SN, SE, original y las variantes con
+    0,04), en silencio, y se informa su veredicto. La regla original tiene que reproducir lo de arriba (autocontrol).
+    P1 (el veto) no depende de la etiqueta; lo que puede moverse es el mecanismo (Q1, Q2, P4), P2 y P3."""
+    import contextlib, copy, io
+    print("\n== 11. VEREDICTO CON LAS REGLAS DE D-9 (issue #811; INFORMA. Decide la del pre-registro: original)")
+    out = {}
+    for nombre, modo, umbral in E.REGLAS_D9:
+        b = copy.copy(a); b._regla = (modo, umbral)
+        with contextlib.redirect_stdout(io.StringIO()):
+            evaluar(b)
+        r = b._res
+        out[nombre] = {"global": r.get("global"), "mecanismo": r.get("mecanismo"), "veredicto": r["veredicto"],
+                       "cambian": b._cambian, "control_distintas": b._distintas}
+        dif = sorted(k for k in set(r["veredicto"]) | set(res["veredicto"]) if r["veredicto"].get(k) != res["veredicto"].get(k))
+        print("   regla %-8s (%s, umbral %s) etiquetas que cambian: %s | control, original re-calculada distinta de la tabla en %d" % (
+            nombre, modo, umbral, b._cambian or "ninguna", b._distintas))
+        for l in ("A", "B"):
+            if r.get("global"):
+                g = r["global"][l]
+                print("      KC lectura %s: %s%s" % (l, g, "" if g == (res.get("global") or {}).get(l) else "   <-- DISTINTO del que decide"))
+        if r.get("mecanismo") is not None:
+            print("      mecanismo: %s%s" % (r["mecanismo"], "" if r["mecanismo"] == res.get("mecanismo") else "   <-- DISTINTO del que decide"))
+        if dif:
+            print("      veredictos distintos del que decide: %s" % ", ".join("%s %s -> %s" % (k, res["veredicto"].get(k), r["veredicto"].get(k)) for k in dif))
+    o = out["original"]
+    out["autocontrol_original_ok"] = (o["global"] == res.get("global") and o["mecanismo"] == res.get("mecanismo")
+                                      and o["veredicto"] == res["veredicto"])
+    print("   autocontrol: la regla original reproduce lo que decide: %s" % ("OK" if out["autocontrol_original_ok"] else "FALLA (la seccion 11 no es comparable)"))
+    return out
+
+
+def cerrar(a, res):
+    """Fin de una ventana. En la corrida anidada de la seccion 11 solo devuelve el resultado; en la principal agrega la
+    seccion 11 y escribe la salida (el JSON conserva todas las claves de antes y suma `reglas_d9`)."""
+    if getattr(a, "_regla", None) is not None:
+        a._res = res
+        return 0
+    res["reglas_d9"] = seccion_d9(a, res)
     Path(a.out).write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
     return 0
 
@@ -424,22 +494,32 @@ def combinar(archivos):
     """§7: el peor estado de las ventanas con KC manda, por lectura; y si el mecanismo de V1 no paso su control (sin
     huella o Q2 FALLA), el veto de las dirigidas no se puede leer: la caja podria no haber actuado."""
     rs = [json.load(open(f, encoding="utf-8")) for f in archivos]
+    print("== VEREDICTO COMBINADO (%s)" % ", ".join(r["ventana"] for r in rs))
+    _combinar(rs, "   ")
+    # D-9 (issue #811): lo mismo con cada regla de las alertas minimas. INFORMA; decide lo de arriba.
+    if all("reglas_d9" in r for r in rs):
+        print("== CON LAS REGLAS DE D-9 (informa; decide lo de arriba)")
+        for nombre, _, _ in E.REGLAS_D9:
+            _combinar([{**r, "global": r["reglas_d9"][nombre]["global"], "mecanismo": r["reglas_d9"][nombre]["mecanismo"]}
+                       for r in rs], "   regla %-8s " % nombre)
+    return 0
+
+
+def _combinar(rs, pref):
     orden = ("NO CUMPLE (veto)", "NO CUMPLE (suma", "INDECIDIBLE", "PENDIENTE DE REPETICION", "NO CUMPLE (no mejora", "CUMPLE EN DETECCION", "CUMPLE", "SIN SUSTRATO")
     mec = [(r["ventana"], r.get("mecanismo")) for r in rs if r.get("mecanismo")]
     mec_mal = [m for m in mec if m[1].startswith("INDECIDIBLE")]
-    print("== VEREDICTO COMBINADO (%s)" % ", ".join(r["ventana"] for r in rs))
     for l in ("A", "B"):
         estados = [(r["ventana"], r["global"][l]) for r in rs if r.get("global")]
         if not estados:
-            print("   KC lectura %s: SIN VENTANA CON KC" % l); continue
+            print("%sKC lectura %s: SIN VENTANA CON KC" % (pref, l)); continue
         peor = min(estados, key=lambda e: next(i for i, o in enumerate(orden) if e[1].startswith(o)))
         final = peor[1]
         if mec_mal and not final.startswith("NO CUMPLE (veto)"):
             final = "INDECIDIBLE (el mecanismo de %s no paso su control)" % mec_mal[0][0]
-        print("   KC lectura %s: %s | por ventana %s" % (l, final, estados))
+        print("%sKC lectura %s: %s | por ventana %s" % (pref, l, final, estados))
     for m in mec:
-        print("   mecanismo (%s): %s" % m)
-    return 0
+        print("%smecanismo (%s): %s" % ((pref,) + m))
 
 
 def main():

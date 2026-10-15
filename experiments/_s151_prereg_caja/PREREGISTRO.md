@@ -6,6 +6,15 @@
 > `preregistro_aprobado` del workflow es suyo). Todos los números salen de los scripts de esta carpeta, con su salida
 > al lado: `cableado_salida.txt`, `sustrato_salida.txt`, `prediccion_mirova_salida.txt`, `distancia_mirova_salida.txt`
 > y `probar_salida.txt`.
+>
+> ⚠️ **Nota del 2026-10-15 (D-9, issue #811), posterior al sello; no cambia ningún criterio de este documento.**
+> Nicolás decidió que las alertas del scraper de VIIRS 375 con VRP de 0,05 MW o menos (las que el banner de MIROVA
+> llama NONE) cuenten como "MIROVA no vio nada" (regla SN), con SE y la regla original informadas. Este pre-registro
+> se escribió antes: **decide con la regla original** (la etiqueta del scraper), tal como está escrito en §6 y §7.
+> `evaluar_caja.py` ganó una sección 11 que INFORMA el veredicto de cada ventana con SN, SE, la original y las
+> variantes con umbral 0,04 (0,05 exacto como alerta), y lo mismo en `--combinar`; marca "DISTINTO del que decide"
+> cuando no coincide. El veto (P1) no depende de la etiqueta; lo que puede moverse es el mecanismo (Q1, Q2, P4), P2 y
+> P3. Las salidas de los runs ya despachados se leen igual: el JSON conserva todas sus claves y suma `reglas_d9`.
 
 ## 1. El fenómeno, y la pregunta
 
@@ -144,18 +153,29 @@ coordenada nominal darían otros (43 de 135): puede fallar; C3 ningún píxel en
 ```
 ONCE='["Lascar","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","NevadosDeChillan","Llaima","Villarrica","Copahue","PuyehueCordonCaulle","Chaiten"]'
 DOS='["_s149_ab_sin_test1_b22_max","_s151_ab_sin_test1_b22_max_caja"]'
-gh workflow run reproc-s146-ab-sin-test1.yml --ref main -f preregistro_aprobado=si -f start=2026-03-14 -f end=2026-03-27 -f vols='["Lascar"]' -f brazos="$DOS" -f control=_s149_ab_sin_test1_b22_max
-gh workflow run reproc-s146-ab-sin-test1.yml --ref main -f preregistro_aprobado=si -f start=2026-06-10 -f end=2026-06-10 -f vols='["Isluga"]' -f brazos="$DOS" -f control=_s149_ab_sin_test1_b22_max
-gh workflow run reproc-s146-ab-sin-test1.yml --ref main -f preregistro_aprobado=si -f start=2026-08-29 -f end=2026-10-08 -f vols="$ONCE" -f brazos='["_s146_ab_sin_test1","_s147_ab_sin_test1_caja"]' -f control=_s146_ab_sin_test1
+gh workflow run reproc-s151-ab-caja.yml --ref main -f preregistro_aprobado=si -f start=2026-03-14 -f end=2026-03-27 -f vols='["Lascar"]' -f brazos="$DOS" -f control=_s149_ab_sin_test1_b22_max
+gh workflow run reproc-s151-ab-caja.yml --ref main -f preregistro_aprobado=si -f start=2026-06-10 -f end=2026-06-10 -f vols='["Isluga"]' -f brazos="$DOS" -f control=_s149_ab_sin_test1_b22_max
+gh workflow run reproc-s151-ab-caja.yml --ref main -f preregistro_aprobado=si -f start=2026-08-29 -f end=2026-10-08 -f vols="$ONCE" -f brazos='["_s146_ab_sin_test1","_s147_ab_sin_test1_caja"]' -f control=_s146_ab_sin_test1
 ```
+
+**Cambio de infraestructura (S151, después de la aprobación D-8 del 2026-10-15, issue #801).** Los comandos de arriba
+despachaban por `reproc-s146-ab-sin-test1.yml`; ahora van por `reproc-s151-ab-caja.yml`, copia de aquel con su propio
+grupo de concurrencia. Ventanas, brazos, controles y criterio **no cambian**: el reproceso, la línea `FLAGS_BRAZO`, la
+cuenta de cobertura y el guard son los mismos pasos. La razón es de cola: GitHub guarda un solo run pendiente por grupo,
+y el grupo `s146-ab-sin-test1` lo ocupa el A/B de F y K (V1 corriendo, V2a pendiente); un despacho de la caja ahí
+habría desplazado a V2a. Lo que sí cambia es dónde quedan las salidas: rama `s151-ab-caja/<run>`, con el árbol bajo
+`experiments/_s151_prereg_caja/salidas/<run>/` (`<brazo>/<volcán>.json` y `logs/<brazo>_<volcán>.log`), y artefactos
+`s151caja-*`. `evaluar_caja.py` no depende del nombre del workflow ni de la rama: se apunta con
+`--raiz experiments/_s151_prereg_caja/salidas/<run> --logs experiments/_s151_prereg_caja/salidas/<run>/logs` sobre un
+checkout de esa rama (o una copia de la carpeta).
 
 **Desde `main` con este PR mergeado** (el perfil de KC y la línea de `FLAGS_BRAZO` tienen que estar en `main`; un run
 despachado antes deja los brazos ROTOS por falta de la clave, y eso es lo correcto). Autentica sólo con
-`EARTHDATA_TOKEN`. **Grupo de concurrencia**: `s146-ab-sin-test1` corre uno a la vez y guarda **un solo run
-pendiente**: un despacho nuevo desplaza al que espera. El A/B de F y K (#798, unas 28 h) comparte el grupo. Regla:
-antes de cada despacho, `gh run list --workflow reproc-s146-ab-sin-test1.yml --json status -q
-'[.[]|select(.status!="completed")]|length'` tiene que dar **0**; así nadie desplaza a nadie y nunca hay más de dos A/B
-vivos. Orden: D1 y D2 primero (son cortos y deciden el veto), V1 después.
+`EARTHDATA_TOKEN`. **Grupo de concurrencia**: `s151-ab-caja` corre uno a la vez y guarda **un solo run pendiente**: un
+despacho nuevo desplaza al que espera, también entre D1, D2 y V1. El A/B de F y K va en su propio grupo
+(`s146-ab-sin-test1`) y corre en paralelo, así que hay a lo más dos A/B vivos. Regla: antes de cada despacho,
+`gh run list --workflow reproc-s151-ab-caja.yml --json status -q '[.[]|select(.status!="completed")]|length'` tiene
+que dar **0**. Orden: D1 y D2 primero (son cortos y deciden el veto), V1 después.
 
 **Duración** (`experiments/_s151_prereg_fk_11/duracion_runs_salida.txt`: 2,20 min por día de ventana y job sin Test 1;
 el job más lento, 1,42 veces la mediana): D1, 2 jobs de ~31 min; D2, 2 jobs de minutos (**~35 min las dos**); V1, **22
@@ -227,6 +247,11 @@ produce y otro que no:
   GANA), **`ruido_grande`** (20 discordantes, no menos que el techo: determinismo FALLA), **`p3_cambian`** (6 pares
   divididos por 20: FALLA sólo con los pares que cambian), `p4`, y los controles `sinclave`, `cajafalsa`, `cobert`,
   `determ`, `capa_mod` y `log_real` (los logs reales del run 38560317428, sin la clave de la caja: K ROTO).
+
+> ⚠️ **Nota del 2026-10-15 (D-9), posterior al sello**: la autoprueba ganó 3 comprobaciones de la sección 11
+> informativa (el autocontrol de la regla original en `mec`, `d1` e `inerte`, y el caso `minimas`, donde decide PIERDE
+> y la sección 11 informa SN GANA y SE EMPATE) y hoy da **32 de 32**; las 29 de antes siguen OK con las mismas líneas
+> (`probar_salida.txt`). Texto original:
 
 Resultado: **29 de 29**. Uso: `python probar_evaluar_caja.py <TMP> <DIR_NDC>`, con `<DIR_NDC>/logs` bajado de la rama
 `s146-ab/38560317428`.

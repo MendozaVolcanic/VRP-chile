@@ -7,6 +7,12 @@
 > cinco puntos se corrigieron en esta versión: pasadas distintas en vez de muestras sumadas (§2), redondeo o
 > truncado no identificable (§2), refuerzo del control (§2), SN como lectura tan literal como SE y poco poder del
 > "ningún veredicto cambia" (§3 y §4), y cotejo del CSV contra su fuente (§3).
+>
+> ⚠️ **Decidido el 2026-10-15 (D-9, issue #811): SN**, con 0,05 exacto contado como "MIROVA no vio nada" y la
+> variante con 0,05 como alerta informada al lado. Ya está cableado: `scripts/clase_mirova.py::aplicar_regla_minimas`
+> (modos SN, SE y original), en el etiquetador por `banco_paridad.indexar_referencia(regla_minimas=...)`. Los
+> veredictos publicados, re-contados con las cinco variantes: `veredictos_tres_reglas.md`. Lo que §4 y §5 dicen
+> como "no cableado" y "decisiones para Nicolás" se conserva como historia.
 
 ## 0. En una pantalla
 

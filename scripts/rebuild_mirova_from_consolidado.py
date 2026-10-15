@@ -50,6 +50,27 @@ DEFAULT_SOURCE = REPO / "latest_consolidado.csv"
 CLASES_ALERTA = {"Muy Bajo", "Bajo", "Medio", "Moderado", "Alto", "Muy Alto"}
 RAIZ_REAL = Path(__file__).resolve().parent.parent   # REPO puede apuntar a otro lado en los tests
 
+# V31.1 de Mirova-v1 (2026-10-15): MIROVA tiene una sola imagen de distancia por volcan y sensor. Si el OCR
+# corre cuando MIROVA ya proceso la pasada siguiente, esa imagen es de la otra pasada; desde V31.1 el scraper
+# guarda igual el VRP de la pasada (sale de su propia celda en Latest10NTI) con tipo propio
+# ALERTA_SIN_GEOMETRIA_OCR, la distancia VACIA y la clase SIN_GEOMETRIA. Caso: Nevados de Chillan 2026-10-15
+# 05:00 UTC, 22,13 MW en VIIRS 375, que la tabla nunca trajo. Entran a la serie de MIROVA del tablero (lo que
+# aprobo Nicolas) con `sin_geometria: true` y `distancia_km: null` (desconocida, nunca 0), y el tablero las
+# dibuja con su propia marca. No son alerta del criterio de victoria (ver clase_mirova).
+TIPO_SIN_GEOMETRIA = "ALERTA_SIN_GEOMETRIA_OCR"
+CLASE_SIN_GEOMETRIA = "SIN_GEOMETRIA"
+METODO_SIN_GEOMETRIA = "vrp_sin_geometria_propia"
+
+
+def _es_sin_geometria(r):
+    if r.get("_fuente") != "ocr":
+        return False
+    tipo = (r.get("Tipo_Registro") or "").strip()
+    return tipo == TIPO_SIN_GEOMETRIA or (
+        tipo == "ALERTA_TERMICA_OCR"
+        and ((r.get("Clasificacion Mirova") or "").strip() == CLASE_SIN_GEOMETRIA
+             or (r.get("Metodo_Validacion") or "").strip() == METODO_SIN_GEOMETRIA))
+
 
 def _coords(json_stem):
     import yaml
@@ -67,18 +88,32 @@ def _es_noche(latlon, fecha):
     return _solar_elevation(latlon[0], latlon[1], dt) <= 0
 
 
-def _filas_ocr(path, names, latlon=None):
+def _es_dia(latlon, dt):
+    """Pasada diurna: Sol sobre el horizonte del volcan (elevacion > 0), la misma regla de _es_noche y del
+    pipeline (store._solar_elevation + _reject_daytime). Sin coordenadas no se decide: se trata como noche,
+    que es lo que hacia el script antes (sin coordenadas no filtraba nada)."""
+    if latlon is None:
+        return False
+    return not _es_noche(latlon, dt.strftime("%Y-%m-%d %H:%M"))
+
+
+def _filas_ocr(path, names):
     """Alertas del OCR (valores leidos de las imagenes de MIROVA). FALSO_POSITIVO_OCR queda fuera: es la
     etiqueta del scraper para lo que no pudo confirmar. Ojo (docs/S150_IMAGENES_SNPP.md): una fila del OCR
     puede traer la imagen de otra pasada; por eso salen marcadas `source: ocr` y el tablero las dibuja
-    distinto. Solo pasadas NOCTURNAS: el pipeline no procesa el dia, y entre las diurnas del OCR estan los
-    artefactos solares de MIROVA (A76: Lascar 2026-06-15 17:24, 760 MW "Alto")."""
+    distinto.
+
+    S151 (aprobado por Nicolas el 2026-10-15): hasta aca este filtro dejaba fuera las pasadas DIURNAS del OCR.
+    Ahora entran todas, y rebuild() las separa: las diurnas del OCR van a `records_dia_ocr` con `dia: true`,
+    nunca a `records`. Por que aparte: de dia el infrarrojo medio suma luz solar reflejada, y parte de esas
+    alertas son reflejo en nubes y no calor (A76: Lascar 2026-06-15 17:24, 760 MW "Alto";
+    experiments/_s151_alertas_diurnas/README.md: 40 de 94 pasadas protegidas diurnas con magnitud
+    desproporcionada). El tablero las dibuja como referencia marcada "dia"; ningun consumidor de `records`
+    las ve, asi que ningun numero publicado cambia."""
     with open(path, encoding="utf-8-sig") as f:
-        filas = [r for r in csv.DictReader(f)
-                 if (r.get("Volcan") or "").strip() in names and (r.get("Tipo_Registro") or "").strip() == "ALERTA_TERMICA_OCR"]
-    if latlon is None:
-        return filas
-    return [r for r in filas if (r.get("Fecha_Satelite_UTC") or "")[:16] and _es_noche(latlon, r["Fecha_Satelite_UTC"])]
+        return [r for r in csv.DictReader(f)
+                if (r.get("Volcan") or "").strip() in names
+                and (r.get("Tipo_Registro") or "").strip() in ("ALERTA_TERMICA_OCR", TIPO_SIN_GEOMETRIA)]
 
 
 def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = None) -> None:
@@ -103,8 +138,9 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
     matched = [r for r in rows if (r.get("Volcan") or "").strip() in names]
     print(f"Total CSV rows: {len(rows)}")
     print(f"Matching {names}: {len(matched)}")
+    latlon = _coords(json_stem)
     if ocr:
-        filas_ocr = _filas_ocr(Path(ocr), names, _coords(json_stem))
+        filas_ocr = _filas_ocr(Path(ocr), names)
         for r in filas_ocr:
             r["_fuente"] = "ocr"
         print(f"OCR alerts for {names}: {len(filas_ocr)} (from {ocr})")
@@ -136,7 +172,8 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
         if vrp <= 0:
             continue
         clas = (r.get("Clasificacion Mirova") or "").strip()
-        if clas not in VALID_CLASSES:
+        sin_geo = _es_sin_geometria(r)
+        if clas not in VALID_CLASSES and not sin_geo:
             rejected_clases[clas] += 1
             continue
         dt_raw = (r.get("Fecha_Satelite_UTC") or "").strip()
@@ -155,14 +192,25 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
             dist = float(r.get("Distancia_km") or 0)
         except ValueError:
             dist = 0.0
-        kept.append({
+        rec = {
             "datetime_utc": dt_str,
             "sensor": sensor,
             "VRP_MW": round(vrp, 3),
             "distancia_km": round(dist, 2),
             "clasificacion": (r.get("Clasificacion Mirova") or "").strip(),
             "source": r.get("_fuente", "consolidado"),
-        })
+        }
+        if sin_geo:
+            # Clave solo en estas filas: los JSON de hoy (sin ellas) quedan byte a byte iguales.
+            rec["distancia_km"] = None
+            rec["clasificacion"] = CLASE_SIN_GEOMETRIA
+            rec["sin_geometria"] = True
+        if _es_dia(latlon, dt):
+            # S151: clave solo en las pasadas diurnas (las nocturnas quedan byte a byte iguales). La tabla de
+            # MIROVA siempre entro a `records` a cualquier hora; desde aca esas filas diurnas llevan la marca
+            # para que el tablero las distinga. Las diurnas del OCR son nuevas y van aparte (ver abajo).
+            rec["dia"] = True
+        kept.append(rec)
 
     print(f"  rejected by clasificacion: {dict(rejected_clases)}")
     print(f"  with VRP > 0 AND clasificacion in {sorted(VALID_CLASSES)}: {len(kept)}")
@@ -170,7 +218,8 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
     # Defense in depth: hard-fail if any NULO snuck through. Impossible with
     # the filter above, but if a future edit weakens VALID_CLASSES this check
     # will catch it before it contaminates a ref file. See L7.10.
-    leaked = [r for r in kept if (r.get("clasificacion") or "").strip() not in VALID_CLASSES]
+    leaked = [r for r in kept if (r.get("clasificacion") or "").strip() not in VALID_CLASSES
+              and not r.get("sin_geometria")]
     assert not leaked, f"FATAL: {len(leaked)} records leaked past clasificacion filter"
 
     # Dedupe (datetime, sensor). S150: si la tabla y el OCR traen la misma pasada, manda la tabla (texto con
@@ -186,8 +235,14 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
                 by_key[key] = rec
         elif rec["VRP_MW"] > prev["VRP_MW"]:
             by_key[key] = rec
-    deduped = sorted(by_key.values(), key=lambda r: (r["datetime_utc"], r["sensor"]))
-    print(f"  after dedupe: {len(deduped)}")
+    todas = sorted(by_key.values(), key=lambda r: (r["datetime_utc"], r["sensor"]))
+    # S151: las diurnas del OCR se separan DESPUES del dedupe, asi una diurna del OCR que repite una pasada de
+    # la tabla sigue perdiendo contra la tabla, igual que antes. `records` queda con lo mismo de siempre (la
+    # tabla a cualquier hora y el OCR nocturno), y ningun consumidor que lea `records` ve un numero distinto.
+    deduped = [r for r in todas if not (r.get("dia") and r["source"] == "ocr")]
+    dia_ocr = [r for r in todas if r.get("dia") and r["source"] == "ocr"]
+    print(f"  after dedupe: {len(deduped)} (+ {len(dia_ocr)} diurnas del OCR en records_dia_ocr; "
+          f"{sum(1 for r in deduped if r.get('dia'))} diurnas de la tabla marcadas dia en records)")
 
     sensors = Counter(r["sensor"] for r in deduped)
     print(f"  sensors: {dict(sensors)}")
@@ -209,6 +264,15 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "records": deduped,
     }
+    if ocr:
+        output["nota_dia"] = (
+            "S151: 'dia': true marca una pasada con el Sol sobre el horizonte del volcan (pipeline.store."
+            "_solar_elevation > 0). De dia el infrarrojo medio suma luz solar reflejada y parte de estas alertas "
+            "son reflejo en nubes, no calor (A76; experiments/_s151_alertas_diurnas/README.md). La replica es "
+            "solo nocturna. 'records' trae lo de siempre (la tabla a cualquier hora, ahora con la marca, y el OCR "
+            "nocturno); 'records_dia_ocr' trae las alertas diurnas del OCR, solo para dibujar en el tablero como "
+            "referencia. No usarlas en metricas de paridad.")
+        output["records_dia_ocr"] = dia_ocr
     dest.write_text(json.dumps(output, indent=2), encoding="utf-8")
     print(f"  wrote: {dest}")
 

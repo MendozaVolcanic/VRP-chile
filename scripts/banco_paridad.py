@@ -60,9 +60,11 @@ sys.path.insert(0, str(ROOT / "scripts"))
 os.environ.setdefault("VRP_PROFILE", "mirova_equivalent")
 
 from auto_audit_weekly import _coords_por_volcan, es_pasada_diurna_descartada  # noqa: E402
+from clase_mirova import TIPO_MINIMA_SE, aplicar_regla_minimas  # noqa: E402
 from referencia_mirova_unificada import (HISTORICO_RECUPERADAS,  # noqa: E402
                                          RESPALDO_20260408, SNAP_CONS,
-                                         SNAP_OCR, bajar_remoto,
+                                         SNAP_OCR, TIPO_SIN_GEOMETRIA,
+                                         bajar_remoto,
                                          cargar_referencia_unificada)
 
 DATA = ROOT / "data" / "mirova_equivalent"
@@ -192,15 +194,28 @@ def zbin(z):
 
 # ---------------------------------------------------------------- referencia
 def es_alerta(tipo):
-    return tipo.startswith("ALERTA")
+    # V31.1: ALERTA_SIN_GEOMETRIA_OCR empieza por ALERTA pero NO es alerta del criterio (no se sabe si
+    # cae dentro del radio). Va como estrato aparte (es_sin_geometria): no cambia ninguna noche.
+    return tipo.startswith("ALERTA") and not es_sin_geometria(tipo)
+
+
+def es_sin_geometria(tipo):
+    return tipo == TIPO_SIN_GEOMETRIA
 
 
 def es_fp(tipo):
     return tipo.startswith("FALSO_POSITIVO")
 
 
-def indexar_referencia(filas, coords, ventana):
-    """Filas nocturnas en ventana, indexadas por (volcan, sensor) y resumidas por noche."""
+def indexar_referencia(filas, coords, ventana, regla_minimas="original", umbral_minima_mw=None):
+    """Filas nocturnas en ventana, indexadas por (volcan, sensor) y resumidas por noche.
+
+    `regla_minimas` (decision D-9, issue #811): "SN", "SE" u "original", aplicada por
+    `clase_mirova.aplicar_regla_minimas` antes de indexar (el resumen por noche ya la ve). Aca el valor por
+    defecto es "original" A PROPOSITO: este etiquetador lo comparten mas de 70 scripts de resultados ya
+    publicados, que tienen que reproducirse tal cual. La regla decidida es SN; un evaluador nuevo pasa el modo
+    explicito e informa los tres (`docs/S151_CRITERIO_CLASE_MIROVA.md` §D-9).
+    """
     # A119 (S149): la referencia no tiene la misma calidad todo el ano. El aviso lo da el cargador,
     # no la memoria de nadie. Solo imprime a stderr; no cambia ninguna fila ni ninguna etiqueta.
     try:
@@ -208,6 +223,9 @@ def indexar_referencia(filas, coords, ventana):
     except ImportError:
         from scripts.calidad_referencia_mirova import avisar as _avisar_calidad
     _avisar_calidad(ventana[0], ventana[1])
+    if regla_minimas != "original":
+        kw = {} if umbral_minima_mw is None else {"umbral_mw": umbral_minima_mw}
+        filas = aplicar_regla_minimas(filas, regla_minimas, **kw).filas
     por_vb = collections.defaultdict(list)
     noche_sensor = collections.defaultdict(lambda: {"alerta": False, "fp": False})
     noche_volcan = collections.defaultdict(lambda: {"alerta": False, "fp": False})
@@ -288,8 +306,11 @@ def etiquetar(recs, por_vb, noche_sensor, noche_volcan):
         r["rutina_pasada"] = any(f["tipo"] == "RUTINA" and f["source"] == "CONS"
                                  and (f["vrp_mw"] or 0) == 0 for f in filas)
         r["noche_con_alerta_sensor"] = bool(ns["alerta"])
-        if any(es_alerta(f["tipo"]) for f in filas):
-            r["lab"] = "pos"
+        alertas = [f for f in filas if es_alerta(f["tipo"])]
+        if alertas:
+            # D-9, modo SE: si todas las alertas de la pasada son minimas, la pasada va a un estrato aparte
+            # ("minima"): ni alerta ni negativo. La noche no cambia, porque TIPO_MINIMA_SE empieza por ALERTA.
+            r["lab"] = "minima" if all(f["tipo"] == TIPO_MINIMA_SE for f in alertas) else "pos"
         elif any(es_fp(f["tipo"]) for f in filas):
             r["lab"] = "far_ref"
             r["dist_ref"] = next((f["dist_km"] for f in filas if es_fp(f["tipo"]) and f["dist_km"] is not None), None)
@@ -297,6 +318,11 @@ def etiquetar(recs, por_vb, noche_sensor, noche_volcan):
               and not ns["alerta"] and not ns["fp"]):
             r["lab"] = "neg_limpio"
             r["neg_estricto"] = not nv["alerta"] and not nv["fp"]
+        elif any(es_sin_geometria(f["tipo"]) for f in filas) and not any(f["tipo"] == "RUTINA" for f in filas):
+            # V31.1: MIROVA vio calor en ESTA pasada pero no se sabe donde (la imagen de distancia era de
+            # otra). Estrato aparte: ni alerta ni negativo. Nunca le gana a una alerta, a un
+            # FALSO_POSITIVO ni a una RUTINA de la misma pasada (por eso va despues de las tres).
+            r["lab"] = "sin_geometria"
         else:
             r["lab"] = "sin_info"
 
@@ -343,7 +369,12 @@ def metricas(recs, sin_record, filtro):
               "tasa_pub_neg_estricto_noche_volcan": _tasa(c["neg_estricto_pub"], c["neg_estricto"]),
               "n_far_ref": c["far_ref"], "n_sin_info": c["sin_info"],
               "pos_sin_record": sum(v for (vol, b), v in sin_record.items() if filtro({"vol": vol, "b": b}))}
-    noches = collections.defaultdict(lambda: {"labs": set(), "pub": 0})
+    if c["sin_geometria"]:
+        # V31.1: estrato aparte (MIROVA vio calor en la pasada, sin distancia). Fuera del recall y de los
+        # negativos; la clave solo aparece si hay alguna, asi la salida sin estas filas queda igual.
+        pasada["n_sin_geometria"] = c["sin_geometria"]
+        pasada["tasa_pub_sin_geometria"] = _tasa(c["sin_geometria_pub"], c["sin_geometria"])
+    noches =collections.defaultdict(lambda: {"labs": set(), "pub": 0})
     for r in sel:
         e = noches[(r["vol"], r["noche"])]
         e["labs"].add(r["lab"])

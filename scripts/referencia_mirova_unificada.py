@@ -27,6 +27,27 @@ pesa 13 GB y el archivo tiene decenas de miles de versiones) y guarda en `HISTOR
 solo las filas que la version mas nueva ya no trae. Muestreo diario y no por commit porque las
 filas perdidas son viejas (las 207 del 06-oct tienen fecha de satelite de enero a octubre): una
 fila que naciera y se perdiera dentro del mismo dia se escaparia, y eso queda declarado.
+
+Filas OCR sin geometria propia (V31.1 de Mirova-v1, 2026-10-15). MIROVA mantiene una sola imagen de
+distancia por volcan y sensor; cuando el OCR corre despues de que MIROVA proceso la pasada siguiente,
+esa imagen ya es de la otra pasada. Desde V31.1 el scraper guarda igual el VRP de la pasada (sale de su
+propia celda en Latest10NTI) con `Tipo_Registro` = ALERTA_SIN_GEOMETRIA_OCR, `Distancia_km` VACIA,
+`Clasificacion Mirova` = SIN_GEOMETRIA y `Metodo_Validacion` = vrp_sin_geometria_propia. Caso: Nevados
+de Chillan 2026-10-15 05:00 UTC, 22,13 MW en VIIRS 375, ausente de la tabla. Aca esas filas salen con
+`tipo` = TIPO_SIN_GEOMETRIA, `sin_geometria=True` y `dist_km=None` (desconocida, NUNCA 0 ni la que se
+pueda leer de la nota). Son un ESTRATO APARTE (decision del coordinador del loop, 2026-10-15, la
+conservadora): se publican en el tablero, pero no son alerta del criterio de victoria. Que cambia
+cuando lleguen al CSV:
+- lectura A (`clase_mirova.alerta_protegida`, "alerta del scraper dentro del radio"): NO las cuenta,
+  porque de estas filas no se sabe la distancia. Si entraran, el criterio cambiaria hacia atras sin que
+  nadie lo decidiera (el backfill trae 8 de 1 MW o mas, entre ellas Chaiten 2026-10-11 04:36 VIIRS 750
+  a 67 grados de cenit con las vecinas en RUTINA, e Isluga 18:18 diurna). La lectura B (informativa,
+  cualquier distancia) si las cuenta;
+- `banco_paridad`: `es_alerta` no las cuenta y no cambian la noche; `etiquetar` les da la etiqueta
+  "sin_geometria" solo si la pasada no tiene alerta, FALSO_POSITIVO ni RUTINA de la tabla (nunca les
+  ganan) y `metricas` las informa aparte;
+- analisis por distancia (cercana o lejana): quedan "sin distancia", fuera de los dos lados.
+Mientras el CSV no las tenga, nada de lo ya publicado cambia.
 """
 from __future__ import annotations
 
@@ -60,11 +81,32 @@ RUTA_REMOTA = "monitoreo_satelital"
 URL_RAW = f"https://raw.githubusercontent.com/{REPO_MIROVA}/{{sha}}/{RUTA_REMOTA}/{{nombre}}"
 
 
+TIPO_SIN_GEOMETRIA = "ALERTA_SIN_GEOMETRIA_OCR"
+METODO_SIN_GEOMETRIA = "vrp_sin_geometria_propia"
+CLASE_SIN_GEOMETRIA = "SIN_GEOMETRIA"
+
+
 def _float(v) -> Optional[float]:
     try:
         return float(str(v).strip())
     except (TypeError, ValueError):
         return None
+
+
+def es_sin_geometria(r: dict) -> bool:
+    """Fila cruda del CSV OCR que Mirova-v1 guardo con VRP propio y SIN distancia ni clase (V31.1).
+
+    Por el tipo propio, o por la marca en una fila que todavia se llame alerta (defensa: una version
+    del scraper que la guardara como ALERTA_TERMICA_OCR igual queda fuera de la lectura A). Una fila
+    con la marca que `reconciliar_latest` paso a FALSO_POSITIVO_OCR NO es sin geometria: la tabla le
+    dio la distancia de esa misma pasada.
+    """
+    tipo = (r.get("Tipo_Registro") or "").strip()
+    if tipo == TIPO_SIN_GEOMETRIA:
+        return True
+    marca = ((r.get("Metodo_Validacion") or "").strip() == METODO_SIN_GEOMETRIA
+             or (r.get("Clasificacion Mirova") or "").strip() == CLASE_SIN_GEOMETRIA)
+    return marca and tipo.startswith("ALERTA")
 
 
 def leer_pasadas(path: Path, source: str, origen: str) -> list[dict]:
@@ -83,7 +125,11 @@ def leer_pasadas(path: Path, source: str, origen: str) -> list[dict]:
                 continue
             bucket = normalize_sensor(r.get("Sensor"))
             dist = _float(r.get("Distancia_km"))
-            if source == "OCR" and not (dist and dist > 0):
+            sin_geo = source == "OCR" and es_sin_geometria(r)
+            if sin_geo:
+                # V31.1: la distancia es desconocida; no se busca en la nota ni se lee como 0.
+                dist = None
+            elif source == "OCR" and not (dist and dist > 0):
                 # Las filas OCR traen Distancia_km=0; la distancia vive en la nota (F-B2, S139).
                 dist = parse_ocr_distance(r.get("Nota_Validacion", ""))
             fila = {
@@ -93,11 +139,13 @@ def leer_pasadas(path: Path, source: str, origen: str) -> list[dict]:
                 "fecha_utc": fecha,
                 "source": source,
                 "origen": origen,
-                "tipo": (r.get("Tipo_Registro") or "").strip(),
+                # V31.1: el tipo propio manda (no es alerta de la lectura A)
+                "tipo": TIPO_SIN_GEOMETRIA if sin_geo else (r.get("Tipo_Registro") or "").strip(),
                 "vrp_mw": _float(r.get("VRP_MW")),
                 "dist_km": dist,
                 "clasificacion": (r.get("Clasificacion Mirova") or "").strip(),
                 "ultima_actualizacion": (r.get("Ultima_Actualizacion") or "").strip(),
+                "sin_geometria": sin_geo,
             }
             k = clave(fila)
             previa = por_clave.get(k)

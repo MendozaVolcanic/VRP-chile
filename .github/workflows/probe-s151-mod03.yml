@@ -1,0 +1,72 @@
+name: "Probe S151, geolocalizacion MODIS: _interp_geo contra MxD03 en Lascar (solo lectura)"
+
+# Tarea 1.15 del loop (PR #826). Criterio pre-registrado en experiments/_s151_probe_mod03/README.md,
+# escrito antes de cualquier corrida. Solo lectura: no escribe en data/, no commitea, no hace push; el
+# resultado queda como artefacto. Baja 7 pares MxD021KM + MxD03 de Lascar y borra cada HDF al usarlo.
+# A43: "on" entre comillas. S141: pipefail con tee; el script sale 2 si falta un granulo.
+# S146/A71: autentica SOLO por EARTHDATA_TOKEN y falla al instante si viene vacio (el par usuario y
+# clave de los secretos esta vencido y bloquea la cuenta).
+"on":
+  workflow_dispatch:
+    inputs:
+      preregistro_aprobado:
+        description: "Escribe si SOLO con el criterio de experiments/_s151_probe_mod03/README.md sellado (regla 1.6 del loop)"
+        required: true
+        default: "no"
+
+concurrency:
+  group: probe-s151-mod03
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04  # pyhdf probado en 24.04 (ver nrt.yml)
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    steps:
+      - name: Candado del pre-registro
+        run: |
+          if [ "${{ github.event.inputs.preregistro_aprobado }}" != "si" ]; then
+            echo "Pre-registro sin sello: no se corre (regla 1.6 del loop)"; exit 1
+          fi
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml
+      - name: Prueba sintetica (el instrumento puede dar CONFIRMA y REFUTA)
+        env:
+          VRP_PROFILE: mirova_equivalent
+        run: |
+          set -o pipefail
+          mkdir -p experiments/_s151_probe_mod03/out
+          python experiments/_s151_probe_mod03/probar_probe.py | tee experiments/_s151_probe_mod03/out/prueba_sintetica.txt
+      - name: Probe contra MxD03
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+        run: |
+          set -o pipefail
+          python experiments/_s151_probe_mod03/probe_mod03.py --out experiments/_s151_probe_mod03/out 2>&1 | tee experiments/_s151_probe_mod03/out/probe.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s151-probe-mod03
+          path: |
+            experiments/_s151_probe_mod03/out/*.json
+            experiments/_s151_probe_mod03/out/*.txt
+            experiments/_s151_probe_mod03/out/*.log
+          retention-days: 30
+          if-no-files-found: error

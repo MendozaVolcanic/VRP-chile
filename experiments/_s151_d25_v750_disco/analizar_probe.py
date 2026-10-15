@@ -90,6 +90,9 @@ def evaluar(filas, esperadas, brazos=("a", "b")):
     out = {"pasadas_esperadas": len(esperadas), "pasadas_leidas": len(filas), "con_tres_brazos": len(ok),
            "faltan": faltan[:20], "n_faltan": len(faltan),
            "control_p1": sum(1 for f in ok if f.get("control_p1")),
+           # Enmienda S151 (2026-10-15): pasadas con el L1B de la misma adquisición pero otra producción.
+           "l1b_reprocesado": sum(1 for f in ok if f.get("l1b_reprocesado")),
+           "l1b_reprocesado_con_cp1": sum(1 for f in ok if f.get("l1b_reprocesado") and f.get("control_p1")),
            "llamadas_fondo_por_brazo": {b: sum(len(f[b].get("llamadas_fondo") or []) for f in ok)
                                         for b in ("control",) + tuple(brazos)}}
     llam = out["llamadas_fondo_por_brazo"]

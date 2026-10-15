@@ -37,15 +37,19 @@ Format: data/{volcano_name}.json
 }
 """
 
+import functools
 import json
 import math
 import os
+import subprocess
 from pathlib import Path
 from datetime import datetime, timezone
 
 from pipeline.f5_core import es_viirs_iband, f5_core_vrp_mw
+from pipeline.diurno import flag_viirs_diurno  # S151 D-10 rama diurna VIIRS (OFF)
 from pipeline.profile import (
     DATA_SUBDIR,
+    PROFILE_NAME,
     MIN_VRP_MW_VIIRS375,
     MIN_VRP_MW_VIIRS750,
     MIN_VRP_MW_MODIS,
@@ -68,6 +72,26 @@ SANITY_CAP_VRP_MW = 50000.0
 # (Coppola 2025 Cap.11) y VIIRS clampea antes; una BT de 566 K como la del
 # granule de Lastarria del 2026-04-23 solo sale de un flag DN no enmascarado.
 BT_PHYSICAL_MAX_K = 500.0
+
+
+@functools.lru_cache(maxsize=1)
+def _sha_git_local():
+    """Sha del checkout cuando no corre en GitHub Actions; None si no hay git."""
+    try:
+        out = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True,
+                             cwd=Path(__file__).parent, timeout=10)
+        sha = out.stdout.strip()
+        return sha if out.returncode == 0 and len(sha) == 40 else None
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def _marca_regimen() -> dict:
+    """Perfil y version del codigo que producen ESTE record (S151, loop 0.6)."""
+    sha_actions = os.environ.get("GITHUB_SHA")
+    if sha_actions:
+        return {"perfil": PROFILE_NAME, "codigo_sha": sha_actions, "origen": "actions"}
+    return {"perfil": PROFILE_NAME, "codigo_sha": _sha_git_local(), "origen": "local"}
 
 
 def _apply_vrp_floor(record: dict) -> None:
@@ -176,16 +200,26 @@ def _solar_elevation(lat: float, lon: float, dt_utc: datetime) -> float:
     return math.degrees(math.asin(max(-1.0, min(1.0, sin_elev))))
 
 
-def _reject_daytime(sensor: str, solar_elev_deg: float, enable_daytime_modis: bool) -> bool:
-    """S90 — ¿rechazar este record diurno? (clon literal MIROVA).
+def _reject_daytime(sensor: str, solar_elev_deg: float, enable_daytime_modis: bool,
+                    enable_daytime_viirs: bool = False) -> bool:
+    """S90/S151: ¿rechazar este record diurno?
 
-    De noche (solar_elev <= 0) NUNCA se rechaza. De día se rechaza salvo que sea
-    MODIS con el flag ON: MIROVA procesa MODIS de día (Coppola 2016a Tabla 1) pero
-    VIIRS solo de noche (sin fuente MIROVA-core diurna; el n=8 diurno es Di Bella,
-    NO MIROVA — regla A9). Con el flag OFF se rechaza todo el diurno (histórico)."""
+    De noche (solar_elev <= 0) NUNCA se rechaza. De día se rechaza salvo que el sensor
+    tenga su rama diurna encendida: MODIS con `enable_daytime_modis` (S90) y VIIRS 375 o
+    750 con `enable_daytime_viirs` (S151, D-10). Con los dos flags apagados se rechaza
+    todo el diurno (comportamiento histórico, bit a bit).
+
+    ⚠️ S151 (D27, segunda marca; PR #812): este docstring decía que MIROVA procesa VIIRS
+    «solo de noche (sin fuente MIROVA-core diurna; el n=8 diurno es Di Bella)». Es FALSO:
+    MIROVA procesa VIIRS de día (Campus et al. 2022, Sensors 22:1713, p. 16 §5, segundo
+    párrafo, y p. 17 Tabla 4, páginas renderizadas), con la Tabla 1 diurna de Coppola 2016a
+    (p. 7). Rechazar el VIIRS diurno es una decisión de la réplica, no de MIROVA, y desde
+    D-10 se abre con un flag para medirla en un A/B."""
     if solar_elev_deg <= 0:
         return False
     if enable_daytime_modis and str(sensor).startswith("MODIS"):
+        return False
+    if enable_daytime_viirs and str(sensor).startswith("VIIRS"):
         return False
     return True
 
@@ -498,6 +532,14 @@ def append_record(volcano_name: str, record: dict,
     # Campo descriptivo: no entra en deteccion, magnitud ni en ninguna compuerta.
     record["processed_utc"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
+    # S151 (loop 0.6, A45 con tag pre-s151-marca-regimen): marca de REGIMEN.
+    # POR QUE: 0 de 65.206 records decian con que perfil y con que codigo se produjeron
+    # (VERIFICADOR_DATOS S150 D7). Un JSON mezcla meses, reprocesos parciales y cambios de flags;
+    # sin la marca, comparar antes y despues de un cambio (A104) obliga a adivinar el regimen por
+    # fechas de merge, y eso falla en silencio con los reprocesos. Se reescribe en cada version del
+    # record, como processed_utc. Campo descriptivo: no entra en deteccion, magnitud ni compuertas.
+    record["regimen"] = _marca_regimen()
+
     # S19 M4 2026-04-24: sanity cap físico antes del piso por sensor.
     # 50,000 MW = 1.3x el P99.99 del archivo OSF v2.5 (615k filas globales
     # 2000-2025) y 0.71x el récord histórico documentado por MIROVA (~70 GW
@@ -588,13 +630,16 @@ def append_record(volcano_name: str, record: dict,
 
     # Safety net: reject daytime records (solar contamination → false VRP).
     # S90: con ENABLE_DAYTIME_MODIS, MODIS diurno SÍ se acepta (Coppola 2016a
-    # params día); VIIRS diurno sigue rechazado. Flag OFF = rechazo histórico.
+    # params día). S151 D-10: con ENABLE_DAYTIME_VIIRS (leído vivo por
+    # pipeline/diurno.py, el mismo que abre fetch, run_pipeline y los procesadores)
+    # se acepta VIIRS diurno. Flags OFF = rechazo histórico.
     if volcano_lat is not None and volcano_lon is not None:
         dt_str = record.get("datetime_utc", "")
         try:
             dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
             elev = _solar_elevation(volcano_lat, volcano_lon, dt)
-            if _reject_daytime(record.get("sensor", ""), elev, ENABLE_DAYTIME_MODIS):
+            if _reject_daytime(record.get("sensor", ""), elev, ENABLE_DAYTIME_MODIS,
+                               enable_daytime_viirs=flag_viirs_diurno()):
                 print(f"  STORE REJECT daytime: {dt_str} {record.get('sensor')} "
                       f"(solar elev={elev:.1f}°)")
                 return

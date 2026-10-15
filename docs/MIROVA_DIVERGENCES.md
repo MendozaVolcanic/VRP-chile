@@ -2300,6 +2300,15 @@ para un A/B, no para afirmar el origen exacto.
 
 ## D18 — El ROI1 del paper es una CAJA de 5 km igual para todos; el nuestro es un CÍRCULO de 3 a 20 km por volcán — **ABIERTA (A/B corrido S130 → NO ADOPTAR; divergencia de fidelidad literal, prioridad baja)** S129/S130
 
+> ⚠️ **S151, resultado del A/B (D-8 sellado por Nicolás el 2026-10-15; `experiments/_s151_prereg_caja/resultado_d1/`,
+> verificado): KC NO CUMPLE (veto) en D1.** Pierde una alerta protegida MODIS de Láscar (2026-03-27 07:10, MIROVA
+> 1,0 MW) cuyo único píxel nuestro cae a 3,2 km del cráter, en la corona; la repetición lo confirma y el veto es
+> definitivo según el pre-registro. VIIRS 375 y 750 sin pérdidas en D1. **El cierre vale con la geolocalización
+> MODIS de hoy**: el verificador encontró que el píxel del cráter MODIS aparece corrido hacia el lado del sensor,
+> creciendo con el ángulo de visión (hasta 3,5 km a 45° en Láscar, n = 13 pasadas; mecanismo SIN VERIFICAR:
+> interpolación de 5 a 1 km en `process_modis.py:342` o paralaje de la cumbre). No es D17. Si se corrige, la caja
+> se vuelve a medir. D2 y V1 no se despacharon: no pueden cambiar el veredicto.
+
 > ⚠️ **S151 (loop, tarea 1.7, `experiments/_s151_prereg_caja/`, PR #800, verificado): medido sin correr nada,
 > y con un A/B reducido esperando sello (D-8, issue #801).** (1) Desde #738 el flag de la caja llega a las 24
 > llamadas de umbral dual en los dos pases de los tres procesadores. (2) Sobre el candidato K (sin Test 1, `max`,
@@ -2463,7 +2472,8 @@ MIROVA corrobora más los `ctx_cluster` que los `test1_roi` dentro de cada volc�
 
 **Lo que MIROVA hace**: Coppola 2016a integra el ROI y publica el cúmulo; la posición «en el
 cráter» de una integral de ROI es una convención que el frontend declara
-(`frontend/index.html:2779-2784`). **La magnitud del píxel único no la cubre ninguna convención.**
+(`frontend/index.html:2880-2885`, el comentario «S106 ancla honesta» sobre `isHonestTest1`; era
+2779-2784 cuando se escribió, remapeada por contenido en V31.1, A101). **La magnitud del píxel único no la cubre ninguna convención.**
 
 **Segunda cara** (`detection_context.py:877-879` vs `:518-523`): `second_pass_adjacent` corre con
 conjunto activo vacío en 2.295/3.164 records, sin restricción de adyacencia y sin la compuerta
@@ -2738,6 +2748,37 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
 ---
 
 ## D27: El día no existe: la Tabla 1 diurna (K1 = -0,6, C1 = 0,02, C2 = 15) está escrita y nunca se ejecuta. **DELIBERADA (MISSION: sólo noche), registrada S138 para que conste como divergencia literal** S138
+
+> ⚠️ **S151, tercera marca (decisión D-10 de Nicolás, 2026-10-15, opción 1; issue #813).** La rama
+> diurna de VIIRS 375 y 750 quedó **cableada y APAGADA** (`ENABLE_DAYTIME_VIIRS = False`, tag
+> defensivo `pre-s151-rama-diurna-viirs`). Con el flag encendido el día se abre en los cinco
+> consumidores que lo cerraban (filtro previo a la descarga en `fetch.py`, salto del gránulo en
+> `scripts/run_pipeline.py`, umbrales de los dos procesadores VIIRS, rechazo en `store.py`, y la
+> auditoría semanal que reusa esa regla), todos leyendo el flag a través de `pipeline/diurno.py`
+> (A118). De día los Tests 2 y 3 usan K1 = -0,6, C1 = 0,02 y **C2 = 15** (Tabla 1, p. 7, página
+> renderizada). El docstring falso de `_reject_daytime` quedó corregido. Producción no cambió (golden
+> S142 bit a bit). **«Deliberada» pasa a «pendiente de A/B»**:
+> `experiments/_s151_ab_diurno/PREREGISTRO.md`. Lo que de día queda como de noche porque el paper no
+> da número (Test 1 integrado sobre MIR absoluto, compuerta de D22, magnitud diurna, tope D9, filtros
+> «unsuitable», consistencia TIR) y lo que hay que corregir antes de un flip (el frontend da por hecho
+> que toda pasada es nocturna): `pipeline/diurno.py`, sección PREGUNTAS.
+>
+> **Defecto LATENTE de la rama diurna de MODIS (A118), confirmado por el verificador con contexto
+> limpio del PR #821, NO corregido en ese PR** (fuera de alcance; el flag `ENABLE_DAYTIME_MODIS` está
+> apagado, así que hoy no actúa). Dos caras, las dos de la clase «el flag no llega a todos sus
+> consumidores»: (1) **el C2 diurno no llega a los Tests 2 y 3.** `_select_thresholds`
+> (`pipeline/process_modis.py:361-383`) devuelve sólo K1, N·σ del camino de BT y C1; no tiene claves de
+> C2. Por eso el primer pase (`process_modis.py:798-804`, y su réplica en l. 815-821) y el bloque del
+> primer pase con overrides (`process_modis.py:862-863` y 888-891) siguen con `C2_DNTI_*_NIGHT` y
+> `C2_DETI_*_NIGHT`, o sea 5 y 10, contra 15 de la Tabla 1 diurna. (2) **El flag no abre las dos
+> compuertas previas.** Ni `pipeline/fetch.py` (filtro previo a la descarga, l. 825, hoy vía
+> `diurno.aplica_filtro_nocturno`, que sólo abre VIIRS) ni `scripts/run_pipeline.py` (`_check_night`,
+> l. 185) miran `ENABLE_DAYTIME_MODIS`: sin `--no-night-filter`, el MODIS diurno nunca se baja ni se
+> procesa, que es exactamente el defecto con que el A/B de S92 midió cero
+> (`experiments/_s92_daytime_diag/FINDINGS.md`). Encender `ENABLE_DAYTIME_MODIS` hoy produciría una
+> rama diurna a medias. Arreglo cuando se abra MODIS de día: claves de C2 en `_select_thresholds` con
+> rebinding de los cuatro nombres de C2, y `diurno.aplica_filtro_nocturno` extendida a MODIS con su
+> propio flag, con tests como los de `tests/test_rama_diurna_viirs_s151.py`.
 
 > ⚠️ **S151, segunda marca (A113, hija de la tarea 1.13 del loop, PR #812 verificado; decisión D-10,
 > issue #813).** Tres cosas de abajo quedan corregidas. (1) **El día no es sobre todo MODIS: es VIIRS 375.**

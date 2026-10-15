@@ -3,6 +3,33 @@
 Fecha: 2026-10-14. Sólo lectura. No toca `pipeline/` ni el perfil. Nada despachado.
 Revisado por un verificador con contexto limpio (PR #790): arreglos D1 a D4 aplicados en esta versión.
 
+## Resultado del probe (2026-10-15, run 38679955131, verificado PARCIAL)
+
+**En una línea: con la detección de hoy, los dos brazos NO VALEN; pero no falla el fondo, falla la detección.**
+D25 da la magnitud correcta y destapa que alertamos donde MIROVA no alerta.
+
+- **Validez:** 356 de 356 pasadas con los tres brazos; C-P1 en 354 (las 14 con L1B reprocesado incluidas); el
+  control nunca llama al fondo por vecinos y cada brazo lo llama 467 veces. Salida:
+  `analizar_probe_resultado_salida.txt` y `resultado_probe.json`.
+- **Brazo a (canon, Coppola 2016a ec. 6):** publica en los 268 negativos de cero y en las 28 alertas de cero.
+  **Brazo b** (además, fuera los vecinos bajo 255 K): 187 de 268 y 25 de 28; apaga 2 de los 40 que ya publican
+  (Puyehue-Cordón Caulle 2026-08-07 05:54 y Villarrica 2026-07-17 06:42, ninguna con alerta de MIROVA). Ninguna
+  protegida apagada. Regla 2 (Wilson sobre casos): a 24,6 contra 268; b 20,4 contra 200,9. **NO VALE** los dos.
+- **Por qué el 100 %** (verificador, `verificador_resultado/`): no es defecto del cableado. La magnitud es el
+  exceso de un solo píxel (0,072 MW por kelvin en los cúmulos de un píxel; mediana 0,17 MW, unos 2,5 K). El fondo
+  no queda bajo el píxel por construcción (403 de 1.555 píxeles alertados quedan bajo sus vecinos), pero el
+  detector ya eligió cúmulos que están sobre sus vecinos en NTI, así que con piso de magnitud 0 todo cúmulo
+  alertado publica (inferido del diseño, SIN VERIFICAR píxel a píxel).
+- **D25 sí separa por magnitud y calza con MIROVA:** AUC 0,861 del VRP del brazo a, alertas contra negativos; en
+  las 28 alertas rescatadas la razón nuestra sobre MIROVA tiene mediana **1,19**, con 13 de 28 entre 0,8 y 1,25.
+- **Lectura:** lo medido es «todo cúmulo que hoy alertamos publica con D25», no «D25 contra MIROVA». El defecto
+  es la sobre-detección (A98). **El cierre queda CONDICIONADO a la detección de hoy** (A95, A114): si cambia la
+  detección (conectiva `max`, caja D18, D22), D25 en VIIRS 750 se vuelve a medir, junto con ese cambio.
+- **VIIRS 375: SIN EVIDENCIA.** Sólo se transfiere la forma: con piso 0, D25 hace publicar todo cúmulo alertado
+  que supere a sus vecinos.
+- Defectos de la verificación: emparejamiento píxel y temperatura por cercanía; posición de los rescates contra
+  MIROVA no revisada (A107).
+
 ## El fenómeno
 
 En una cumbre nevada, de noche, el píxel de 750 m del cráter queda más frío que la mediana del anillo
@@ -63,6 +90,22 @@ exceso en un píxel de 750 m vale **~0,08 MW**.
 299; C3 el campo que se muta es el que decide (814 que hoy publican: intactas 814, con magnitud cero 0);
 C4 contiene exactamente a las 268 y 28 de S149. Los cuatro pasan. `control_sintetico.py` valida la cadena
 del fondo con cinco casos de respuesta conocida: pasan los cinco.
+
+## Sello, piloto y enmienda (2026-10-15)
+
+Nicolás selló el probe el 2026-10-15 (D-5, issue #793). **Piloto** Tupungatito, 10 pasadas, run 38678279921:
+9 de 10 con los tres brazos y C-P1 en las 9; el cableado funciona (el control nunca llama al fondo por
+vecinos). La décima falló porque NASA reprocesó el gránulo: el archivo exacto del record
+(`VJ102MOD.A2026169.0542.021.2026169113420.nc`) ya no está y el buscador devuelve el de la misma adquisición
+producido el día 174. Con la regla original de cobertura completa, cualquier reproceso así deja el probe
+INDECIDIBLE sin que el instrumento esté mal.
+
+**Enmienda, escrita antes de correr las 356 y sin mirar ninguna alerta** (las 10 del piloto son negativos en
+cero, sin rescate posible que mirar): si el L1B exacto no existe, se usa el de la misma adquisición y la pasada
+queda marcada `l1b_reprocesado`. El control C-P1 (que el brazo control reproduzca el record persistido) decide
+si sirve, como para cualquier otra pasada, y el umbral de 90 % no cambia. El analizador informa cuántas pasadas
+usaron un L1B reprocesado y cuántas de ellas pasan C-P1. Criterio, brazos y reglas 1 y 2 no cambian; la
+autoprueba da la misma salida.
 
 ## El probe propuesto (escrito, NO despachado)
 

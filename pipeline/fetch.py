@@ -816,8 +816,13 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             if not l1b_granules:
                 continue
 
-            # Pre-download nighttime filter — skip daytime granules entirely
-            if nighttime_only:
+            # Pre-download nighttime filter: skip daytime granules entirely.
+            # S151 D-10: con ENABLE_DAYTIME_VIIRS las plataformas VIIRS NO se filtran
+            # (MIROVA procesa VIIRS de día, Campus et al. 2022 p. 16-17). Es la primera
+            # de las compuertas del día; si sólo se abriera la del procesador, el gránulo
+            # diurno nunca llegaría a bajarse (lo que le pasó al A/B MODIS de S92).
+            from pipeline.diurno import aplica_filtro_nocturno
+            if aplica_filtro_nocturno(nighttime_only, platform):
                 before = len(l1b_granules)
                 l1b_granules = _filter_nighttime_granules(l1b_granules, lat, lon)
                 after = len(l1b_granules)

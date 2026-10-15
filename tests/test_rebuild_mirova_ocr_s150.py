@@ -51,7 +51,7 @@ def armar(tmp_path, monkeypatch):
         fila(OCR_COLS, "2026-10-01 06:18:00", "VIIRS", "7.0", "ALERTA_TERMICA_OCR", "Bajo"),   # la tabla manda
         fila(OCR_COLS, "2026-09-29 05:00:00", "VIIRS375", "0.4", "FALSO_POSITIVO_OCR", "Bajo", dist="19.5"),
         fila(OCR_COLS, "2026-09-28 04:42:00", "VIIRS375", "2.58", "ALERTA_TERMICA_OCR", "Medio"),   # version 21 del OCR
-        fila(OCR_COLS, "2026-09-30 18:30:00", "VIIRS375", "760.6", "ALERTA_TERMICA_OCR", "Alto"),   # diurna: fuera (A76)
+        fila(OCR_COLS, "2026-09-30 18:30:00", "VIIRS375", "760.6", "ALERTA_TERMICA_OCR", "Alto"),   # diurna: fuera de records (A76); S151: va a records_dia_ocr
     ])
     monkeypatch.setattr(rb, "REPO", tmp_path)
     rb.rebuild("NevadosDeChillan", "Nevados de Chillan", source=cons, ocr=ocr)

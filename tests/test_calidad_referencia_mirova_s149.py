@@ -14,11 +14,12 @@ sys.path.insert(0, os.path.join(RAIZ, "scripts"))
 import calidad_referencia_mirova as cal  # noqa: E402
 
 
-def test_septiembre_pisa_solo_suomi_npp():
+def test_septiembre_pisa_solo_suomi_npp_y_v31_1():
     # S151 (loop 0.4b): hasta S150 septiembre no pisaba nada; desde que se registro el defecto de
-    # Suomi NPP en el OCR (arreglado el 2026-10-09 en Mirova-v1#20), septiembre pisa ese hito y solo ese.
+    # Suomi NPP en el OCR (arreglado el 2026-10-09 en Mirova-v1#20), septiembre pisa ese hito. Desde V31.1
+    # (Mirova-v1#22) pisa tambien el de las filas sin geometria, que empiezan el 2026-10-10.
     av = cal.avisos_de_ventana("2026-09-01", "2026-09-20")
-    assert len(av) == 1 and "Suomi NPP" in av[0], av
+    assert len(av) == 2 and "Suomi NPP" in av[0] and "ALERTA_SIN_GEOMETRIA_OCR" in av[1], av
     assert cal.etiqueta_que_decide("2026-09-01") == "tabla y OCR"
 
 
