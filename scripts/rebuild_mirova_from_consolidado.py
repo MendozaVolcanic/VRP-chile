@@ -52,18 +52,24 @@ RAIZ_REAL = Path(__file__).resolve().parent.parent   # REPO puede apuntar a otro
 
 # V31.1 de Mirova-v1 (2026-10-15): MIROVA tiene una sola imagen de distancia por volcan y sensor. Si el OCR
 # corre cuando MIROVA ya proceso la pasada siguiente, esa imagen es de la otra pasada; desde V31.1 el scraper
-# guarda igual el VRP de la pasada (sale de su propia celda en Latest10NTI) con la distancia VACIA y la clase
-# SIN_GEOMETRIA. Caso: Nevados de Chillan 2026-10-15 05:00 UTC, 22,13 MW en VIIRS 375, que la tabla nunca
-# trajo. Entran a la serie de MIROVA con `sin_geometria: true` y `distancia_km: null` (desconocida, nunca 0),
-# y el tablero las dibuja con su propia marca.
+# guarda igual el VRP de la pasada (sale de su propia celda en Latest10NTI) con tipo propio
+# ALERTA_SIN_GEOMETRIA_OCR, la distancia VACIA y la clase SIN_GEOMETRIA. Caso: Nevados de Chillan 2026-10-15
+# 05:00 UTC, 22,13 MW en VIIRS 375, que la tabla nunca trajo. Entran a la serie de MIROVA del tablero (lo que
+# aprobo Nicolas) con `sin_geometria: true` y `distancia_km: null` (desconocida, nunca 0), y el tablero las
+# dibuja con su propia marca. No son alerta del criterio de victoria (ver clase_mirova).
+TIPO_SIN_GEOMETRIA = "ALERTA_SIN_GEOMETRIA_OCR"
 CLASE_SIN_GEOMETRIA = "SIN_GEOMETRIA"
 METODO_SIN_GEOMETRIA = "vrp_sin_geometria_propia"
 
 
 def _es_sin_geometria(r):
-    return (r.get("_fuente") == "ocr"
-            and ((r.get("Clasificacion Mirova") or "").strip() == CLASE_SIN_GEOMETRIA
-                 or (r.get("Metodo_Validacion") or "").strip() == METODO_SIN_GEOMETRIA))
+    if r.get("_fuente") != "ocr":
+        return False
+    tipo = (r.get("Tipo_Registro") or "").strip()
+    return tipo == TIPO_SIN_GEOMETRIA or (
+        tipo == "ALERTA_TERMICA_OCR"
+        and ((r.get("Clasificacion Mirova") or "").strip() == CLASE_SIN_GEOMETRIA
+             or (r.get("Metodo_Validacion") or "").strip() == METODO_SIN_GEOMETRIA))
 
 
 def _coords(json_stem):
@@ -90,7 +96,8 @@ def _filas_ocr(path, names, latlon=None):
     artefactos solares de MIROVA (A76: Lascar 2026-06-15 17:24, 760 MW "Alto")."""
     with open(path, encoding="utf-8-sig") as f:
         filas = [r for r in csv.DictReader(f)
-                 if (r.get("Volcan") or "").strip() in names and (r.get("Tipo_Registro") or "").strip() == "ALERTA_TERMICA_OCR"]
+                 if (r.get("Volcan") or "").strip() in names
+                 and (r.get("Tipo_Registro") or "").strip() in ("ALERTA_TERMICA_OCR", TIPO_SIN_GEOMETRIA)]
     if latlon is None:
         return filas
     return [r for r in filas if (r.get("Fecha_Satelite_UTC") or "")[:16] and _es_noche(latlon, r["Fecha_Satelite_UTC"])]

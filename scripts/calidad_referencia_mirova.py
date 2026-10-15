@@ -34,6 +34,13 @@ HITOS = [
     ("2026-10-09", "ocr", "Suomi NPP", "antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada "
      "(la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; "
      "evidencia en el commit 9a305c9db (#774)"),
+    # V31.1 (2026-10-15, Mirova-v1#22; fecha de merge PENDIENTE al escribir esto, corregir el texto al mergear).
+    # La fecha del hito es la primera pasada que el backfill recupera, no la del merge: desde ella el OCR trae
+    # el estrato completo una vez que el backfill corre.
+    ("2026-10-10", "ocr", "VIIRS y MODIS", "antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y "
+     "cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia "
+     "de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del "
+     "log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A"),
 ]
 FUENTE = "docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2"
 

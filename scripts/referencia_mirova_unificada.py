@@ -31,16 +31,23 @@ fila que naciera y se perdiera dentro del mismo dia se escaparia, y eso queda de
 Filas OCR sin geometria propia (V31.1 de Mirova-v1, 2026-10-15). MIROVA mantiene una sola imagen de
 distancia por volcan y sensor; cuando el OCR corre despues de que MIROVA proceso la pasada siguiente,
 esa imagen ya es de la otra pasada. Desde V31.1 el scraper guarda igual el VRP de la pasada (sale de su
-propia celda en Latest10NTI) con `Distancia_km` VACIA, `Clasificacion Mirova` = SIN_GEOMETRIA y
-`Metodo_Validacion` = vrp_sin_geometria_propia. Caso: Nevados de Chillan 2026-10-15 05:00 UTC, 22,13 MW
-en VIIRS 375, ausente de la tabla. Aca esas filas salen con `sin_geometria=True` y `dist_km=None`
-(desconocida, NUNCA 0 ni la que se pueda leer de la nota). Que cambia cuando lleguen al CSV:
-- lectura A del criterio de victoria (`clase_mirova.alerta_protegida`): no usa la distancia, asi que una
-  de 1 MW o mas cuenta como alerta protegida y una pasada que antes no estaba pasa a existir;
-- `banco_paridad.etiquetar`: la pasada pasa a "pos" y su noche a "noche con alerta" (antes podia quedar
-  como negativo limpio si la tabla tenia una RUTINA en otra pasada de esa noche);
-- analisis por distancia (cercana o lejana): estas filas quedan "sin distancia" y no entran a ninguno de
-  los dos lados. Mientras el CSV no las tenga, nada de lo ya publicado cambia (la marca es aditiva).
+propia celda en Latest10NTI) con `Tipo_Registro` = ALERTA_SIN_GEOMETRIA_OCR, `Distancia_km` VACIA,
+`Clasificacion Mirova` = SIN_GEOMETRIA y `Metodo_Validacion` = vrp_sin_geometria_propia. Caso: Nevados
+de Chillan 2026-10-15 05:00 UTC, 22,13 MW en VIIRS 375, ausente de la tabla. Aca esas filas salen con
+`tipo` = TIPO_SIN_GEOMETRIA, `sin_geometria=True` y `dist_km=None` (desconocida, NUNCA 0 ni la que se
+pueda leer de la nota). Son un ESTRATO APARTE (decision del coordinador del loop, 2026-10-15, la
+conservadora): se publican en el tablero, pero no son alerta del criterio de victoria. Que cambia
+cuando lleguen al CSV:
+- lectura A (`clase_mirova.alerta_protegida`, "alerta del scraper dentro del radio"): NO las cuenta,
+  porque de estas filas no se sabe la distancia. Si entraran, el criterio cambiaria hacia atras sin que
+  nadie lo decidiera (el backfill trae 8 de 1 MW o mas, entre ellas Chaiten 2026-10-11 04:36 VIIRS 750
+  a 67 grados de cenit con las vecinas en RUTINA, e Isluga 18:18 diurna). La lectura B (informativa,
+  cualquier distancia) si las cuenta;
+- `banco_paridad`: `es_alerta` no las cuenta y no cambian la noche; `etiquetar` les da la etiqueta
+  "sin_geometria" solo si la pasada no tiene alerta, FALSO_POSITIVO ni RUTINA de la tabla (nunca les
+  ganan) y `metricas` las informa aparte;
+- analisis por distancia (cercana o lejana): quedan "sin distancia", fuera de los dos lados.
+Mientras el CSV no las tenga, nada de lo ya publicado cambia.
 """
 from __future__ import annotations
 
@@ -74,6 +81,7 @@ RUTA_REMOTA = "monitoreo_satelital"
 URL_RAW = f"https://raw.githubusercontent.com/{REPO_MIROVA}/{{sha}}/{RUTA_REMOTA}/{{nombre}}"
 
 
+TIPO_SIN_GEOMETRIA = "ALERTA_SIN_GEOMETRIA_OCR"
 METODO_SIN_GEOMETRIA = "vrp_sin_geometria_propia"
 CLASE_SIN_GEOMETRIA = "SIN_GEOMETRIA"
 
@@ -86,9 +94,19 @@ def _float(v) -> Optional[float]:
 
 
 def es_sin_geometria(r: dict) -> bool:
-    """Fila cruda del CSV OCR que Mirova-v1 guardo con VRP propio y SIN distancia ni clase (V31.1)."""
-    return ((r.get("Metodo_Validacion") or "").strip() == METODO_SIN_GEOMETRIA
-            or (r.get("Clasificacion Mirova") or "").strip() == CLASE_SIN_GEOMETRIA)
+    """Fila cruda del CSV OCR que Mirova-v1 guardo con VRP propio y SIN distancia ni clase (V31.1).
+
+    Por el tipo propio, o por la marca en una fila que todavia se llame alerta (defensa: una version
+    del scraper que la guardara como ALERTA_TERMICA_OCR igual queda fuera de la lectura A). Una fila
+    con la marca que `reconciliar_latest` paso a FALSO_POSITIVO_OCR NO es sin geometria: la tabla le
+    dio la distancia de esa misma pasada.
+    """
+    tipo = (r.get("Tipo_Registro") or "").strip()
+    if tipo == TIPO_SIN_GEOMETRIA:
+        return True
+    marca = ((r.get("Metodo_Validacion") or "").strip() == METODO_SIN_GEOMETRIA
+             or (r.get("Clasificacion Mirova") or "").strip() == CLASE_SIN_GEOMETRIA)
+    return marca and tipo.startswith("ALERTA")
 
 
 def leer_pasadas(path: Path, source: str, origen: str) -> list[dict]:
@@ -121,7 +139,8 @@ def leer_pasadas(path: Path, source: str, origen: str) -> list[dict]:
                 "fecha_utc": fecha,
                 "source": source,
                 "origen": origen,
-                "tipo": (r.get("Tipo_Registro") or "").strip(),
+                # V31.1: el tipo propio manda (no es alerta de la lectura A)
+                "tipo": TIPO_SIN_GEOMETRIA if sin_geo else (r.get("Tipo_Registro") or "").strip(),
                 "vrp_mw": _float(r.get("VRP_MW")),
                 "dist_km": dist,
                 "clasificacion": (r.get("Clasificacion Mirova") or "").strip(),
