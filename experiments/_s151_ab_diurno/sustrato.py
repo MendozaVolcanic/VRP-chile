@@ -110,6 +110,20 @@ def main():
     neg = {k: v for k, v in tabla.items()
            if all(x["tipo"] == "RUTINA" for x in v) and (k[0], dia_local(v[0])) not in alerta_dia}
     con_alerta_tabla = {k for k, v in tabla.items() if any(x["tipo"] in TIPOS_ALERTA for x in v)}
+    # Parsimonia con el OCR (verificador PR #821): una pasada de la tabla cuenta como «MIROVA
+    # alertó» si hay una fila de alerta de CUALQUIER fuente del mismo volcán y sensor a 120 s o
+    # menos (la tolerancia de banco_paridad). Sin esto la vara de G2 subestima a MIROVA, porque
+    # el OCR trae alertas diurnas que la tabla no lista.
+    horas_alerta = defaultdict(list)
+    for f in diurnas:
+        if f["sensor_bucket"] in VIIRS and f["tipo"] in TIPOS_ALERTA:
+            horas_alerta[(f["volcano"], f["sensor_bucket"])].append(
+                datetime.strptime(f["fecha_utc"][:16], "%Y-%m-%d %H:%M"))
+
+    def alerta_cerca(k):
+        t0 = datetime.strptime(k[2], "%Y-%m-%d %H:%M")
+        return any(abs((h - t0).total_seconds()) <= 120 for h in horas_alerta[(k[0], k[1])])
+    con_alerta_cualquiera = {k for k in tabla if alerta_cerca(k)}
 
     total_pos = len(pos)
     print("Positivos VIIRS diurnos protegidos usables bajo A119 (toda la referencia): %d" % total_pos)
@@ -136,11 +150,22 @@ def main():
               % (nombre, ini, fin, "Lascar" if vols else "11 TierA", len(p), cuenta["VIIRS375"][0],
                  cuenta["VIIRS750"][0], len(n), cuenta["VIIRS375"][1], cuenta["VIIRS750"][1],
                  len(t), len(a), pars))
+        # Parsimonia por sensor (vara de G2 del pre-registro, se compara por sensor).
+        ac = [k for k in con_alerta_cualquiera if dentro(k)]
+        por_sensor = {s: (sum(1 for k in t if k[1] == s), sum(1 for k in a if k[1] == s),
+                          sum(1 for k in ac if k[1] == s)) for s in VIIRS}
+        print("    por sensor (alerta de tabla / alerta de tabla u OCR / pasadas de tabla): " + "  ".join(
+            "%s %d/%d/%d" % (s, por_sensor[s][1], por_sensor[s][2], por_sensor[s][0]) for s in VIIRS))
         out["ventanas"].append({
             "nombre": nombre, "inicio": ini, "fin": fin, "volcanes": vols or "11 Tier A",
             "positivos": sorted("|".join(k) for k in p),
+            "positivos_por_fuente": {fu: sum(1 for k in p if pos[k]["source"] == fu)
+                                     for fu in ("CONS", "OCR")},
             "n_negativos_limpios": {s: cuenta[s][1] for s in VIIRS},
             "n_pasadas_tabla": len(t), "n_pasadas_tabla_con_alerta": len(a),
+            "pasadas_tabla_por_sensor": {s: por_sensor[s][0] for s in VIIRS},
+            "con_alerta_por_sensor": {s: por_sensor[s][1] for s in VIIRS},
+            "con_alerta_tabla_u_ocr_por_sensor": {s: por_sensor[s][2] for s in VIIRS},
             "parsimonia_mirova": pars,
         })
     fuera = sorted("|".join(k) for k in pos if k not in cubiertos)
@@ -151,8 +176,27 @@ def main():
     tot_n = sum(sum(w["n_negativos_limpios"].values()) for w in out["ventanas"])
     print("Total ventanas: pasadas VIIRS diurnas de tabla %d, con alerta %d (parsimonia %.4f), negativos limpios %d"
           % (tot_t, tot_a, tot_a / max(tot_t, 1), tot_n))
+    # Totales W2 a W6 por sensor (W1 se informa aparte: tramo A119 anterior a abril).
+    w26 = [w for w in out["ventanas"] if w["nombre"] != "W1"]
+    tot_s = {s: (sum(w["pasadas_tabla_por_sensor"][s] for w in w26),
+                 sum(w["con_alerta_por_sensor"][s] for w in w26),
+                 sum(w["n_negativos_limpios"][s] for w in w26),
+                 sum(w["con_alerta_tabla_u_ocr_por_sensor"][s] for w in w26)) for s in VIIRS}
+    for s in VIIRS:
+        print("W2-W6 %s: pasadas diurnas de tabla %d, con alerta de tabla %d (%.4f), con alerta de tabla u OCR"
+              " %d (p_MIROVA %.4f), negativos limpios %d"
+              % (s, tot_s[s][0], tot_s[s][1], tot_s[s][1] / max(tot_s[s][0], 1), tot_s[s][3],
+                 tot_s[s][3] / max(tot_s[s][0], 1), tot_s[s][2]))
+    pos_fuente = {fu: sum(1 for k in pos if pos[k]["source"] == fu) for fu in ("CONS", "OCR")}
+    w2 = next(w for w in out["ventanas"] if w["nombre"] == "W2")
+    print("Positivos por fuente (todas las ventanas): %s; W2: %d positivos, %s, alertas de tabla en W2: %d"
+          % (pos_fuente, len(w2["positivos"]), w2["positivos_por_fuente"], w2["n_pasadas_tabla_con_alerta"]))
     out["totales"] = {"pasadas_tabla": tot_t, "con_alerta": tot_a, "negativos_limpios": tot_n,
-                      "positivos_cubiertos": len(cubiertos), "positivos_total": total_pos}
+                      "positivos_cubiertos": len(cubiertos), "positivos_total": total_pos,
+                      "w2_w6_por_sensor": {s: {"pasadas_tabla": tot_s[s][0], "con_alerta": tot_s[s][1],
+                                              "con_alerta_tabla_u_ocr": tot_s[s][3],
+                                              "negativos_limpios": tot_s[s][2]} for s in VIIRS},
+                      "positivos_por_fuente": pos_fuente}
     (Path(__file__).parent / "sustrato.json").write_text(
         json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
 

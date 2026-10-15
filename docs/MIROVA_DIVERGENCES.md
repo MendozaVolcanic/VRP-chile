@@ -2748,12 +2748,27 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
 > (A118). De día los Tests 2 y 3 usan K1 = -0,6, C1 = 0,02 y **C2 = 15** (Tabla 1, p. 7, página
 > renderizada). El docstring falso de `_reject_daytime` quedó corregido. Producción no cambió (golden
 > S142 bit a bit). **«Deliberada» pasa a «pendiente de A/B»**:
-> `experiments/_s151_ab_diurno/PREREGISTRO.md`. Hallazgo de paso, no corregido (fuera de alcance):
-> la rama diurna de MODIS (S90, `_select_thresholds`) rebinda el N·σ del camino de BT pero **no el C2
-> de los Tests 2 y 3** (de día seguiría con 5 y 10), y su flag no abre `fetch.py` ni `run_pipeline.py`
-> (el defecto de S92, que hoy sólo se esquiva con `--no-night-filter`). Lo que de día queda como de
-> noche porque el paper no da número (Test 1 integrado sobre MIR absoluto, compuerta de D22, tope D9,
-> consistencia TIR): `pipeline/diurno.py`, sección PREGUNTAS.
+> `experiments/_s151_ab_diurno/PREREGISTRO.md`. Lo que de día queda como de noche porque el paper no
+> da número (Test 1 integrado sobre MIR absoluto, compuerta de D22, magnitud diurna, tope D9, filtros
+> «unsuitable», consistencia TIR) y lo que hay que corregir antes de un flip (el frontend da por hecho
+> que toda pasada es nocturna): `pipeline/diurno.py`, sección PREGUNTAS.
+>
+> **Defecto LATENTE de la rama diurna de MODIS (A118), confirmado por el verificador con contexto
+> limpio del PR #821, NO corregido en ese PR** (fuera de alcance; el flag `ENABLE_DAYTIME_MODIS` está
+> apagado, así que hoy no actúa). Dos caras, las dos de la clase «el flag no llega a todos sus
+> consumidores»: (1) **el C2 diurno no llega a los Tests 2 y 3.** `_select_thresholds`
+> (`pipeline/process_modis.py:361-383`) devuelve sólo K1, N·σ del camino de BT y C1; no tiene claves de
+> C2. Por eso el primer pase (`process_modis.py:798-804`, y su réplica en l. 815-821) y el bloque del
+> primer pase con overrides (`process_modis.py:862-863` y 888-891) siguen con `C2_DNTI_*_NIGHT` y
+> `C2_DETI_*_NIGHT`, o sea 5 y 10, contra 15 de la Tabla 1 diurna. (2) **El flag no abre las dos
+> compuertas previas.** Ni `pipeline/fetch.py` (filtro previo a la descarga, l. 825, hoy vía
+> `diurno.aplica_filtro_nocturno`, que sólo abre VIIRS) ni `scripts/run_pipeline.py` (`_check_night`,
+> l. 185) miran `ENABLE_DAYTIME_MODIS`: sin `--no-night-filter`, el MODIS diurno nunca se baja ni se
+> procesa, que es exactamente el defecto con que el A/B de S92 midió cero
+> (`experiments/_s92_daytime_diag/FINDINGS.md`). Encender `ENABLE_DAYTIME_MODIS` hoy produciría una
+> rama diurna a medias. Arreglo cuando se abra MODIS de día: claves de C2 en `_select_thresholds` con
+> rebinding de los cuatro nombres de C2, y `diurno.aplica_filtro_nocturno` extendida a MODIS con su
+> propio flag, con tests como los de `tests/test_rama_diurna_viirs_s151.py`.
 
 > ⚠️ **S151, segunda marca (A113, hija de la tarea 1.13 del loop, PR #812 verificado; decisión D-10,
 > issue #813).** Tres cosas de abajo quedan corregidas. (1) **El día no es sobre todo MODIS: es VIIRS 375.**

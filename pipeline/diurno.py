@@ -49,6 +49,27 @@ inventan umbrales):
 - Compuerta de consistencia TIR y VRP TIR (I05): «sólo noche» en vrptir.py; sin cambio.
 - Overrides de experimento C1_SUMMIT_OVERRIDE y C2_SUMMIT_OVERRIDE (None en producción): si se
   fijaran, también actuarían de día. El override VIIRS_C2_OVERRIDE_NIGHT sí se anula de día.
+- MAGNITUD diurna (agregado tras el verificador del PR #821). El VRP es k·ΔL_MIR, con ΔL_MIR la
+  radiancia MIR del píxel menos la del fondo. De día el reflejo solar entra a las dos, pero no en la
+  misma proporción cuando el píxel y su fondo reflejan distinto (borde de nube, nieve, salar): la
+  diferencia queda dentro de ΔL_MIR y se lee como potencia volcánica. Ningún paper da corrección
+  diurna de la magnitud, así que queda la de noche. Lo mismo vale para las dos cosas que se apoyan en
+  esa magnitud: el tope D9 (5 MW con fondo bajo 270 K) y los pisos de magnitud del predicado del
+  dashboard (`isValidDetection`), calibrados todos sobre pasadas nocturnas.
+- Filtros «unsuitable» de Coppola 2016a §267-273 (píxeles con dNTI o dETI bajo -0,1 fuera de la
+  estadística μ y σ de los Tests 2 y 3, `detection_context.build_unsuitable_mask`;
+  `ENABLE_UNSUITABLE_FILTERS_267_273`, encendido en producción): de día quedan con el -0,1 de noche.
+  El paper lo da sin separar noche y día; no se sabe si con la variabilidad diurna del NTI sigue
+  siendo el corte adecuado.
+- FRONTEND (anotado, no cambiado): `frontend/index.html` da por hecho que toda pasada es nocturna,
+  en el texto del panel de ayuda («El día», l. 451) y en el estado de frescura (l. 1627 a 1670, con
+  el «hueco diurno» entre el racimo nocturno de una noche y el de la siguiente). Con el flag apagado
+  no pesa; antes de cualquier flip hay que corregirlo, porque un record diurno caería en medio del
+  hueco y cambiaría lo que el operador lee como «atrasado».
+- CONSUMIDOR INDIRECTO: `scripts/clasificacion_referencia.py` reusa `banco_paridad` y, por ella,
+  `es_pasada_diurna_descartada`, así que también sigue al flag: con el flag encendido su partición
+  de la referencia incluye pasadas VIIRS diurnas. Es lo coherente con el pipeline, pero cualquier
+  cifra que produzca bajo un perfil con el flag encendido no se compara con las de hoy.
 """
 from __future__ import annotations
 
