@@ -126,8 +126,12 @@ def bajar_par(vol, fila):
         if not got:
             return None, f"descarga fallida {key} {stamp}"
         out.append(got[0])
+    # Enmienda S151 (2026-10-15, tras el piloto y antes de correr las 356): NASA reprocesa los granules y el
+    # archivo exacto del record (misma adquisición, otra fecha de producción) puede no existir ya. En vez de
+    # perder la pasada se usa el de la misma adquisición y se deja anotado; el control C-P1 (que el brazo
+    # control reproduzca el record persistido) decide si sirve, igual que para cualquier otra pasada.
     if out[0].name != l1b_nombre:
-        return None, f"L1B distinto del persistido: {out[0].name} contra {l1b_nombre}"
+        return tuple(out), f"L1B reprocesado: {out[0].name} en lugar de {l1b_nombre}"
     return tuple(out), None
 
 
@@ -191,6 +195,8 @@ def main():
             if par is None:
                 res["error"] = err
             else:
+                if err:
+                    res["l1b_reprocesado"] = err
                 for brazo in ("control", "a", "b"):
                     res[brazo] = correr(vol, par, brazo)
                 res["control_p1"] = control_p1(fila["persistido"], res["control"])
@@ -206,7 +212,7 @@ def main():
         print(f"  {fila['clase']:15s} {fila['volcan']} {fila['pasada_utc']} {fila['sensor']}: ok={res['ok']} "
               f"cp1={res.get('control_p1')} pc_vrp persist={fila['persistido']['pc_vrp_mw']} "
               f"control={pcs['control'].get('vrp_mw')} a={pcs['a'].get('vrp_mw')} b={pcs['b'].get('vrp_mw')} "
-              f"err={res.get('error')}", flush=True)
+              f"err={res.get('error')} l1b={res.get('l1b_reprocesado', 'exacto')}", flush=True)
         d = OUT / fila["volcan"]
         d.mkdir(parents=True, exist_ok=True)
         nombre = f"{fila['pasada_utc'].replace(' ', '_').replace(':', '')}_{fila['sensor']}.json"
