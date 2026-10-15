@@ -313,6 +313,21 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   de suspender, se relanza al volver, retomando lo que haya escrito.
 - Esperan a Nicolás: arreglo MxD03 en producción (A45, probe #828) y qué servicio dispara el cron del scraper
   (Mirova-v1#23, punto 4).
+- **Cierre de la vuelta**: #832 mergeado (`4a0967a3`). Verificador de distancias OCR TERMINADO
+  (`C:\Users\nmend\AppData\Local\Temp\claude\verifdist\VERIFICADOR.md`, scripts en `...\verifdist\scripts\v2_*.py`):
+  **SÍ con cambios**. El control del §4 se reproduce exacto; sacando la noche del calado el error de decisión sigue en
+  4,5 % (no es circular). Población: en el control ninguna ALERTA es lejana; en ALERTA el único error medido es cerca
+  leído como lejos (4,9 %), y lejos leído como cerca no tiene muestra. **Hallazgo:** del 06-13 al 10-08 la distancia
+  que el OCR sí midió discrepa más de 2 km en 36 de 152 y 51 de 207 pasadas (~24 %; 23 y 25 cambian de lado del
+  límite). En las 218 que también están en la tabla, el OCR falla en 25 y la serie en 7; esas 25 son sesgo geométrico
+  del OCR (PCC 3,5 km donde la tabla da 7,7; Tupungatito), no otra pasada. Las 15 sin geometría quedan PARCIAL (imágenes
+  de 7 h a 1,4 d, fuera del rango controlado); Villarrica 21,5 km SIN VERIFICAR; V750 y MODIS SIN VERIFICAR.
+  Cambios exigidos para Mirova-v1: (1) eliminar sólo con la tabla, nunca con distancias OCR; (2) imagen de 1 a 25 días,
+  si no la fila queda pendiente; (3) guardar los pareos del calado y no escribir con calado débil; (4) declarar el
+  error por población; (5) sólo VIIRS 375; (6) aplicar la columna también a las 451 medidas (o marcar la
+  discrepancia), `Distancia_km` intacta. **Próxima vuelta (tras la suspensión):** implementar en Mirova-v1 con esos seis
+  cambios (aprobado por Nicolás si el verificador salía bien), en PR con CI; y evaluar si la referencia unificada de
+  VRP Chile debe dejar de usar la distancia OCR del 06-13 al 10-08 para summit/far (decisión para Nicolás).
 
 ### 2026-10-15 ~17:30 UTC (vuelta 61): PAUSA pedida por Nicolás (reinicio por memoria)
 - Hecho desde la vuelta 60: alertas diurnas de MIROVA en el tablero como soles (#831, ningún número publicado cambia);
