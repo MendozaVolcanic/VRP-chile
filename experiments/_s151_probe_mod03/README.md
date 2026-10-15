@@ -3,6 +3,24 @@
 **Estado: escrito, probado con datos sintéticos, NO corrido.** Este README fija el criterio antes de la
 primera corrida.
 
+## Resultado (run 38733452917, 2026-10-15; verificador limpio PARCIAL, `resultado/`)
+
+**Veredicto del criterio pre-registrado: PARCIAL.** La condición 2 se cumple (en el lado del frame 0 con cenit de 30° o
+más, nuestra posición se aparta de MxD03 2,58, 2,21 y 1,15 km hacia el sensor) y no hay ninguna de REFUTA, pero la
+condición 1 falla en dos gránulos (residuos +0,36 y -0,45 km contra la tolerancia de 0,3).
+
+- **El defecto existe y la grilla lo dice sola:** la geolocalización de 5 km del L1B coincide con MxD03 en el offset 2,
+  en los dos ejes y en los 7 gránulos (0,0000 km), contra 2,6 km en el frame 0 y 2,27 km en la línea 0. El offset 2 a lo
+  largo de la traza, que el PR #826 dejó SIN VERIFICAR, queda confirmado.
+- **Por qué el modelo no calza exacto** (compatible, no medido): `_interp_geo` trae el terreno sólo en los nodos de 5 km;
+  el relieve de 300 a 450 m a escala de 1 km por tan θ da 0,2 a 0,45 km con el signo observado; el de 43° es el único
+  donde la interpolación cruza entre barridos (bow tie), lo que explica su traza.
+- **Control independiente:** en los 3 gránulos donde el píxel más brillante de banda 22 cae en el cráter, MxD03 lo
+  ubica a 0,13, 0,18 y 0,35 km del vent y `_interp_geo` a 1,29, 1,02 y 1,10 km.
+- **Consecuencia:** leer MxD03 queda justificado, calce o no el modelo; corregir sólo el offset del zoom dejaría 0,2 a
+  1 km por terreno y bow tie. La caja (D18) mantiene el veto con su premisa «en duda» y se vuelve a medir después del
+  arreglo. SIN VERIFICAR: otros volcanes y la posición MxD03 del píxel del veto.
+
 ## Por qué
 
 El estudio del PR #826 (`experiments/_s151_corrimiento_modis/`) encontró que, en MODIS, el píxel del
