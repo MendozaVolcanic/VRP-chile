@@ -294,6 +294,19 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 13:46 UTC (vuelta 60): pasadas sin geometría publicadas (Mirova-v1#22, #830); auditoría de horas (#829)
+- A pedido de Nicolás: la pasada de Chillán 05:00 (22,13 MW V375, 14 MW V750) y otras 11 que el OCR rechazaba por
+  V31 se guardan como `ALERTA_SIN_GEOMETRIA_OCR` (VRP de su celda, distancia vacía). Verificador limpio PARCIAL con
+  arreglos aplicados: tipo propio, LF, hito A119, cita remapeada. Decisión conservadora mía: se publican en el
+  tablero (✕ grande, «distancia desconocida») pero NO cuentan en la lectura A (estrato aparte; 440 protegidas
+  antes y después). Mergeados #830 (`a116d262`) y después Mirova-v1#22 (`0bd5b88b`). Pendiente: comprobar que el
+  OCR de las 14:00 UTC agrega las 13 filas, que el sync las lleva a `data/mirova/` y que el tablero las muestra
+  (deploy cada 2 h); corregir el texto del hito A119 con la fecha real del merge (2026-10-15).
+- Auditoría de horas de Mirova-v1 (#829 mergeado): conversiones correctas (0 de 42.722 mal); `Fecha_Proceso_GitHub`
+  está en hora de Chile; la noche queda completa en MIROVA cerca de las 07:00 a 07:30 hora de Chile. Issue
+  Mirova-v1#23 con cuatro defectos menores; los puntos 1 y 2 (columnas UTC aditivas) los aplico tras V31.
+- Probe MxD03 (#828 mergeado): arreglo de producción justificado, espera el sí de Nicolás.
+
 ### 2026-10-15 12:27 UTC (vuelta 59): F/K V1 con un job fallido; W1 diurna lleva 1,5 h
 - F/K V1: 33 jobs verdes, 6 corriendo, 4 en cola y **1 fallido** (Villarrica, gemelo `_s151_ab_control_gemelo`,
   08:59 a 11:16 UTC; el log no está disponible mientras el run sigue vivo). Cuando el run termine: leer el error y
