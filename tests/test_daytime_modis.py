@@ -51,14 +51,16 @@ def test_scene_is_day_from_modis_filename():
 
 
 def test_store_daytime_gate_decision():
-    """_reject_daytime: literal MIROVA. De noche nunca rechaza. De día rechaza
-    salvo MODIS con el flag ON (VIIRS diurno SIEMPRE rechazado — sin fuente
-    MIROVA-core diurna para VIIRS).
+    """_reject_daytime con el flag VIIRS en su valor por defecto (apagado). De noche
+    nunca rechaza. De día rechaza salvo MODIS con su flag ON.
 
-    ⚠️ S151 (D27, segunda marca; PR #812): la razón es falsa, MIROVA sí procesa
-    VIIRS de día (Campus et al. 2022, Sensors 22:1713, p. 16 y 17). El test fija
-    el comportamiento de hoy de la réplica, no lo que hace MIROVA; si Nicolás
-    abre el día (D-10, issue #813) este test cambia junto con store.py."""
+    ⚠️ S151 (D27, segunda marca; PR #812): la razón que daba este test («VIIRS diurno
+    SIEMPRE rechazado, sin fuente MIROVA-core diurna para VIIRS») era falsa: MIROVA sí
+    procesa VIIRS de día (Campus et al. 2022, Sensors 22:1713, p. 16 y 17). Desde D-10
+    (issue #813) el rechazo del VIIRS diurno es una decisión de la réplica con flag propio
+    (`enable_daytime_viirs`, apagado); lo que fija este test es que el flag de MODIS no
+    abre VIIRS. El caso con el flag VIIRS encendido vive en
+    tests/test_rama_diurna_viirs_s151.py."""
     from pipeline.store import _reject_daytime
     # Noche (elev <= 0): nunca rechaza, sin importar sensor/flag.
     assert _reject_daytime("MODIS_AQUA", -10.0, True) is False
@@ -66,7 +68,7 @@ def test_store_daytime_gate_decision():
     # Día + flag OFF: rechaza todo (comportamiento histórico).
     assert _reject_daytime("MODIS_AQUA", 12.0, False) is True
     assert _reject_daytime("VIIRS_NOAA20", 12.0, False) is True
-    # Día + flag ON: MODIS pasa, VIIRS sigue rechazado (literal MIROVA).
+    # Día + flag MODIS ON: MODIS pasa; VIIRS sigue rechazado porque su flag es otro.
     assert _reject_daytime("MODIS_TERRA", 12.0, True) is False
     assert _reject_daytime("VIIRS_NOAA20", 12.0, True) is True
     assert _reject_daytime("VIIRS_NOAA20_750", 12.0, True) is True

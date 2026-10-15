@@ -463,6 +463,13 @@ paths:
   # Plan: docs/superpowers/plans/2026-09-20-d25-fondo-vecinos-viirs750.md
   enable_vrp_bg_neighbor_mean_viirs750: false
 
+  # S151 D-10 (issue #813): rama diurna VIIRS 375 y 750. MIROVA procesa VIIRS de día (Campus et
+  # al. 2022, Sensors 22:1713, p. 16-17) con la Tabla 1 diurna de Coppola 2016a (K1 -0,6, C1 0,02,
+  # C2 15). Con ON el flag abre, sólo para VIIRS, el filtro previo a la descarga, el salto del
+  # gránulo, los umbrales del procesador y el rechazo de store (pipeline/diurno.py). OFF hasta el
+  # A/B diurno: experiments/_s151_ab_diurno/PREREGISTRO.md (A45).
+  enable_daytime_viirs: false
+
   # S71 ADOPCIÓN — Opción C cap magnitud path D D9 (defensa intermedia).
   # Cuando el firing es contextual-only (BT/NTI duros = 0) Y t_bg <270K (cirrus
   # alto), capear pc.vrp_mw a 5 MW. Resuelve el bug D9 (path D contextual infla

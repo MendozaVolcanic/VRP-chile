@@ -206,6 +206,18 @@ DNTI_CONTEXTUAL_C1_DAY: float = float(_t.get("dnti_contextual_c1_day", 0.02))
 # (comportamiento histórico "MIR solo nocturno"). ON = procesar MODIS diurno con
 # params día + dejar pasar el gate de store.py. NO toca operacional hasta validar A/B.
 ENABLE_DAYTIME_MODIS: bool = bool(_p.get("enable_daytime_modis", False))
+# S151 D-10 (issue #813): rama diurna VIIRS 375 y 750 (opt-in, OFF).
+# POR QUÉ: MIROVA procesa VIIRS también de día (Campus et al. 2022, Sensors 22:1713, p. 16 §5 y
+# p. 17 Tabla 4), con la columna diurna de la Tabla 1 de Coppola 2016a (p. 7). La réplica perdía
+# por construcción esas alertas (40 pasadas protegidas usables bajo A119,
+# experiments/_s151_alertas_diurnas/README.md §5). OFF = comportamiento histórico, bit a bit.
+# Se lee SÓLO a través de pipeline/diurno.py (A118: un flag, una lectura, todos los consumidores).
+ENABLE_DAYTIME_VIIRS: bool = bool(_p.get("enable_daytime_viirs", False))
+# C2 diurno de los Tests 2 y 3 (Coppola 2016a p. 7, Tabla 1, columna Daytime: 15 en ROI1 y ROI2,
+# página renderizada S151). MODIS no lo usa: su rama diurna (S90) sólo rebinda el N·σ del camino
+# de BT, no el C2 de los Tests 2 y 3 (anotado como pregunta en el PR de D-10).
+C2_DNTI_DAY: float = float(_t.get("c2_dnti_day", 15.0))
+C2_DETI_DAY: float = float(_t.get("c2_deti_day", 15.0))
 
 # S32 P2 Driver B — Test 1 pixel-level filter (Coppola 2016a Tabla 1 aplicado
 # a la mask Test 1 antes de sumar VRP). Cuando Test 1 integrated-ROI dispara,

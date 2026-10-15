@@ -41,6 +41,7 @@ sys.path.insert(0, ROOT)
 from pipeline.mirova_csv_loader import load_mirova_alertas  # noqa: E402
 from pipeline.store import _reject_daytime, _solar_elevation  # noqa: E402
 from pipeline.profile import ENABLE_DAYTIME_MODIS  # noqa: E402
+from pipeline.diurno import flag_viirs_diurno  # noqa: E402  S151 D-10
 import yaml  # noqa: E402
 
 SNAP = os.path.join(ROOT, "data", "mirova_reference", "mirova_v1_snapshot")
@@ -233,6 +234,8 @@ def medir_falsas_ventana(win):
 # Se reusa `_reject_daytime` de store.py A PROPÓSITO en vez de un umbral propio:
 # la auditoría debe excluir EXACTAMENTE lo que el pipeline excluye. Si algún día
 # se activa MODIS diurno (ENABLE_DAYTIME_MODIS), la auditoría lo sigue sola.
+# S151 D-10: lo mismo para VIIRS diurno (ENABLE_DAYTIME_VIIRS, leído vivo por
+# pipeline/diurno.py, el mismo valor que ven fetch, run_pipeline y los procesadores).
 _BUCKET_SENSOR = {"MODIS": "MODIS_TERRA",
                   "VIIRS375": "VIIRS_SNPP",       # sin sufijo = I-band 375 m (A48)
                   "VIIRS750": "VIIRS_SNPP_750"}
@@ -247,7 +250,8 @@ def es_pasada_diurna_descartada(bucket, lat, lon, dt_utc) -> bool:
     """¿El pipeline habría descartado esta pasada por diurna?"""
     elev = _solar_elevation(lat, lon, dt_utc)
     return _reject_daytime(bucket_representative_sensor(bucket), elev,
-                           ENABLE_DAYTIME_MODIS)
+                           ENABLE_DAYTIME_MODIS,
+                           enable_daytime_viirs=flag_viirs_diurno())
 
 
 def _coords_por_volcan():
