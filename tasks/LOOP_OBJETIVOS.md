@@ -294,6 +294,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 18:45 UTC (vuelta 63): plan de la distancia aproximada en Mirova-v1; estudio y verificador al repo
+- Paradas: NRT verde (14:40 UTC), disco 25 GB. F/K V1 intento 2 PENDIENTE detrás de V2a (38648773684, corriendo);
+  W1 diurna intento 2 en curso.
+- Tarea: plan de implementación (`writing-plans`) en `tasks/PLAN_MIROVA_V1_DISTANCIA_APROX.md`, con los seis cambios
+  del verificador. No se implementa en esta vuelta porque Nicolás suspende el PC (~19:15 UTC). Decisión del plan:
+  **no re-archivar las `Dist.png` en Mirova-v1**, porque el poller de `mirova-tif-archive` ya las guarda desde el
+  05-09 con índice y md5, y se leen por raw sin clonar. Si Nicolás quiere una copia en Mirova-v1, se agrega una tarea.
+- Estudio y verificador copiados del temporal a `experiments/_s151_distancia_ocr/` (informe, scripts y salidas de
+  texto; sin los datos de 79 MB), para que no dependan de `AppData\Local\Temp`.
+- Próxima vuelta: ejecutar el plan, tarea 1 (`executing-plans`), en un worktree de `Mirova-v1-codigo` sobre
+  `origin/main`.
+
 ### 2026-10-15 18:10 UTC (vuelta 62): loop retomado tras el reinicio; dos jobs repetidos; Nicolás suspende el PC ~19:20 UTC
 - Paradas: NRT verde (14:40 UTC), disco 26 GB, sin alerta nueva (#779 sigue abierto; #824 es el watchdog, ver abajo).
 - F/K V1 (run 38639658446) TERMINÓ: 43 jobs verdes, falló Villarrica gemelo («el runner perdió comunicación con el
