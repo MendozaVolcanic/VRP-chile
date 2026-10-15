@@ -1,0 +1,33 @@
+n 91
+   ('AQUA', 'der', 'sensorE', '07') 23
+   ('AQUA', 'izq', 'sensorW', '07') 25
+   ('AQUA', 'izq', 'sensorW', '08') 4
+   ('TERRA', 'der', 'sensorW', '01') 20
+   ('TERRA', 'izq', 'sensorE', '01') 19
+M2b interp lado der (reproduce PR)                      n= 91 rms 0.937 | +0.90[+0.80,+1.01]
+M2b bootstrap por noche (fecha)                         n= 91 rms 0.937 | +0.90[+0.80,+1.01]
+M2b bootstrap por mes                                   n= 91 rms 0.937 | +0.90[+0.83,+1.01]
+interp lado INVERTIDO solo                              n= 91 rms 1.164 | +0.15[+0.01,+0.33]
+libre tan z en lado der / lado izq                      n= 91 rms 0.942 | +2.80[+2.51,+3.09]  -0.00[-0.33,+0.26]
+M2b solo AQUA                                           n= 52 rms 0.940 | +0.77[+0.61,+0.90]
+  libre der/izq solo AQUA                               n= 52 rms 0.940 | +2.16[+1.28,+2.62]  +0.74[+0.31,+1.22]
+M2b solo TERRA                                          n= 39 rms 0.879 | +0.78[+0.61,+0.97]
+  libre der/izq solo TERRA                              n= 39 rms 0.876 | +1.41[+0.58,+2.35]  +1.20[+0.09,+2.23]
+Solo Lascar M2b                                         n= 88 rms 0.949 | +0.92[+0.81,+1.01]
+M2b + libre tan z (simetrico)                           n= 91 rms 0.924 | +1.20[+1.04,+1.34]  -0.77[-1.06,-0.47]
+M2b + componente E fija por satelite                    n= 91 rms 0.937 | +0.90[+0.80,+1.01]
+residuo u - 0.90*pred (mediana) por sat/lado:
+  AQUA der n=23  u_med +1.34  pred_med +1.21  resid_med +0.06  v_med -0.79
+  AQUA izq n=29  u_med -0.28  pred_med +0.08  resid_med -0.51  v_med -0.45
+  TERRA der n=20  u_med +1.32  pred_med +1.41  resid_med -0.00  v_med -0.40
+  TERRA izq n=19  u_med -0.19  pred_med -0.13  resid_med -0.02  v_med +0.24
+relieve Lascar {0.4511} h_vent {5.201}
+
+--- desplazamiento fijo por (volcan, satelite): la interpolacion solo se identifica dentro de cada satelite ---
+M2b, fijo por volcan+sat                                n= 91 rms 0.914 | +0.77[+0.65,+0.88]
+libre tan z simetrico, fijo por volcan+sat              n= 91 rms 0.921 | +1.37[+1.15,+1.61]
+libre der/izq, fijo por volcan+sat                      n= 91 rms 0.914 | +1.96[+1.41,+2.37]  +0.79[+0.42,+1.23]
+M2b + libre simetrico, fijo por volcan+sat              n= 91 rms 0.914 | +1.04[-0.42,+1.43]  -0.49[-1.19,+1.94]
+interp invertido, fijo por volcan+sat                   n= 91 rms 0.935 | +0.68[+0.54,+0.89]
+solo offsets volcan+sat (columna nula)                  n= 91 rms 1.042 | +0.00[+0.00,+0.00]
+solo offsets volcan (columna nula)                      n= 91 rms 1.171 | +0.00[+0.00,+0.00]
