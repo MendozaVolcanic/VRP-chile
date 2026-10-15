@@ -47,7 +47,8 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from scipy.stats import mannwhitneyu, spearmanr
+from scipy.optimize import minimize
+from scipy.stats import chi2, mannwhitneyu, spearmanr
 
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parents[1]
@@ -68,6 +69,7 @@ R_NULO_CRATER_KM = 8.0
 ATRIB_K = 1.0     # |dBT| maximo para dar por verificado que el TIF es de la misma pasada (S147 midio 0,2 K)
 ATRIB_NO_K = 5.0  # |dBT| sobre el cual el TIF se da por de OTRA pasada
 N_OTRAS = 20      # puntos de otras noches por pasada para el nulo de posicion
+N_PERM = 10000    # sorteos de la permutacion dentro de volcan
 
 
 def sha(p):
@@ -189,6 +191,13 @@ def medir_pasada(f, fila_tif, rec, ancla, gc, lim, inner, rec_ajeno=None, hot_aj
             fh = T.foco_en(R, T.dist_desde(R, m["hot_lat"], m["hot_lon"]) <= tol)
             if fh:
                 m["z_hot"], m["e_hot"] = fh[0], T.energia_mw(R, fh[1], fh[2])
+                # exceso del pixel pico solo (sin la ventana 3 x 3, que en Isluga mezcla vecinos y no separa;
+                # verificador 2 del PR #809). Lo mismo para el crater, para poder hacer la razon con la misma vara.
+                m["e_hot_pico"] = float(max(R["hp"][fh[1], fh[2]], 0.0) * T.K_WOOSTER_W[b] / 1e6)
+                if fc:
+                    m["e_cr_pico"] = float(max(R["hp"][fc[1], fc[2]], 0.0) * T.K_WOOSTER_W[b] / 1e6)
+            m["recaptura"] = rec.get("diag_n_second_pass_recapture")
+            m["n_primer_pase"] = rec.get("diag_n_first_pass_pixels")
             # nulo de otras noches: el mismo estadistico en los puntos donde alertamos otras noches
             zs = []
             for la, lo in hot_ajenos:
@@ -235,6 +244,18 @@ def medir_pasada(f, fila_tif, rec, ancla, gc, lim, inner, rec_ajeno=None, hot_aj
             m["d_ring_hot_nulo"] = [dh(la, lo) for la, lo in rot]
             m["d_ring_hot_otras"] = [float(T.dist_km(la, lo, m["ring_lat"], m["ring_lon"])) for la, lo in hot_ajenos]
     return m
+
+
+def logit_ll(X, y):
+    """Logistica por maxima verosimilitud (sin statsmodels): devuelve (log-verosimilitud, AIC)."""
+    Xs = (X - X.mean(axis=0)) / X.std(axis=0)
+    Xs = np.column_stack([np.ones(len(y)), Xs])
+
+    def nll(b):
+        t = Xs @ b
+        return float(np.sum(np.logaddexp(0, t) - y * t))
+    r = minimize(nll, np.zeros(Xs.shape[1]), method="BFGS")
+    return -r.fun, 2 * Xs.shape[1] + 2 * r.fun
 
 
 def frac(xs):
@@ -435,11 +456,58 @@ def main():
             P(f"      {nom:42s} {str(fa(A)) + ' de ' + str(len(A)):>16s} {str(fa(B)) + ' de ' + str(len(B)):>16s}")
         P(f"      por volcan: cerca {dict(collections.Counter(A.vol))}; lejos {dict(collections.Counter(B.vol))}")
         P(f"      por satelite: cerca {dict(collections.Counter(A.sat))}; lejos {dict(collections.Counter(B.sat))}")
+        for g in (A, B):
+            g["ratio_pico"] = np.log10(g.e_hot_pico.clip(lower=1e-3) / g.e_cr_pico.clip(lower=1e-3))
+        for c, nom in (("e_hot_pico", "exceso del PIXEL PICO lejano, MW"), ("e_cr_pico", "exceso del pixel pico del crater, MW"),
+                       ("ratio_pico", "log10(pico lejano / pico crater)")):
+            P(f"      {nom:42s} {med(A, c):>16s} {med(B, c):>16s}")
         pv = {}
         if len(A) >= 3 and len(B) >= 3:
-            for c in ("e_hot", "ratio", "z_hot", "hot_d_o", "e_cr"):
+            for c in ("e_hot", "e_hot_pico", "ratio", "ratio_pico", "z_hot", "hot_d_o", "e_cr", "e_cr_pico"):
                 pv[c] = round(float(mannwhitneyu(A[c], B[c]).pvalue), 4)
             P(f"      Mann-Whitney cerca contra lejos: {pv}")
+            # permutacion DENTRO de volcan (la fuerza no la explica la mezcla de volcanes)
+            AB = pd.concat([A.assign(y=0), B.assign(y=1)])
+            obs = AB[AB.y == 1].z_hot.mean() - AB[AB.y == 0].z_hot.mean()
+            rp = np.random.default_rng(SEMILLA)
+            cuenta = 0
+            for _ in range(N_PERM):
+                y = AB.y.to_numpy().copy()
+                for v in AB.vol.unique():
+                    ix = np.where(AB.vol.values == v)[0]
+                    y[ix] = rp.permutation(y[ix])
+                cuenta += (AB.z_hot.values[y == 1].mean() - AB.z_hot.values[y == 0].mean()) >= obs
+            p_perm = (cuenta + 1) / (N_PERM + 1)
+            P(f"      permutacion de la etiqueta dentro de cada volcan, z del lejano: p = {p_perm:.4f} ({N_PERM} sorteos)")
+            pv["perm_dentro_volcan_z"] = round(float(p_perm), 4)
+            # Regresion logistica (MIROVA informo lejos = 1), por maxima verosimilitud: fuerza absoluta, crater,
+            # las dos, y la razon. AIC y prueba de razon de verosimilitud del termino del crater.
+            mods = {"z del lejano": ["lz"], "pico lejano": ["le"], "pico crater": ["lc"],
+                    "pico lejano + pico crater": ["le", "lc"], "z lejano + pico crater": ["lz", "lc"],
+                    "razon pico lejano / pico crater": ["lr"]}
+            X = pd.DataFrame({"lz": np.log10(AB.z_hot), "le": np.log10(AB.e_hot_pico.clip(lower=1e-3)),
+                              "lc": np.log10(AB.e_cr_pico.clip(lower=1e-3))})
+            X["lr"] = X["le"] - X["lc"]
+            ll = {}
+            P(f"      logistica, n = {len(AB)} (lejos 1, cerca 0):")
+            for nom, cols in mods.items():
+                ll[nom], aic = logit_ll(X[cols].values, AB.y.values)
+                P(f"         {nom:34s} logL {ll[nom]:7.2f}  AIC {aic:6.1f}")
+                pv[f"AIC|{nom}"] = round(aic, 1)
+            p_cr = chi2.sf(2 * (ll["pico lejano + pico crater"] - ll["pico lejano"]), 1)
+            P(f"         el crater agregado al pico lejano: razon de verosimilitud p = {p_cr:.4g}")
+            pv["LR_crater"] = float(p_cr)
+            # frontera: pasadas con z del lejano entre 18 y 26
+            fr = AB[(AB.z_hot >= 18) & (AB.z_hot <= 26)].sort_values("z_hot")
+            P(f"      frontera z 18 a 26: cerca {int((fr.y == 0).sum())}, lejos {int((fr.y == 1).sum())}")
+            for x in fr.itertuples():
+                P(f"         {x.vol:16s} {x.fecha_utc} {'lejos' if x.y else 'cerca'} z {x.z_hot:5.1f} pico lejano"
+                  f" {x.e_hot_pico:5.2f} MW pico crater {x.e_cr_pico:5.2f} MW")
+        # en las alertas con foco: nuestro pixel lejano, lo alerto el primer pase o la recaptura del segundo?
+        if len(A):
+            P(f"      nuestras alertas con foco lejano: recaptura del segundo pase = 0 (el primer pase, Tests 2 y 3, lo"
+              f" alerto) en {int((A.recaptura == 0).sum())} de {len(A)}")
+            pv["recaptura_cero"] = [int((A.recaptura == 0).sum()), len(A)]
         return {"alertas": len(cerca), "alertas_con_foco": int(zc.sum()), "nulo_alertas": round(esp_c, 2),
                 "lejanas": len(lejos), "lejanas_con_foco": int(zl.sum()), "nulo_lejanas": round(esp_l, 2),
                 "fuera_25_5": [int((A.hot_d_o > 25.5).sum()), int((B.hot_d_o > 25.5).sum())],
@@ -606,6 +674,22 @@ def main():
                 nl, nc = int((hh.grupo == "lejana").sum()), int((hh.grupo == "alerta").sum())
                 r[f"T1_fuerza|{a_:.1f}-{b_}"] = {"lejos": nl, "cerca": nc}
                 P(f"         z del lejano {a_:5.1f} a {b_:>5}: lejos {nl:3d}  cerca {nc:3d}")
+            # Los cortes 20 y 40 vienen de la v1 y se eligieron sabiendo que sobre 40 habia 0 "cerca" (verificador 2):
+            # se agrega la prueba continua, sin cortes, y otro corte (30).
+            hl, hc = h[h.grupo == "lejana"].zl, h[h.grupo == "alerta"].zl
+            if len(hl) >= 3 and len(hc) >= 3:
+                pc_ = float(mannwhitneyu(hl, hc).pvalue)
+                P(f"         prueba continua (Mann-Whitney del z del lejano, lejos contra cerca): p = {pc_:.2g}; corte z >= 30:"
+                  f" lejos {int((hl >= 30).sum())} cerca {int((hc >= 30).sum())}; z < 30: lejos {int((hl < 30).sum())}"
+                  f" cerca {int((hc < 30).sum())}")
+                r["T1_fuerza_continua_p"] = pc_
+                r["T1_corte30"] = {"lejos": int((hl >= 30).sum()), "cerca": int((hc >= 30).sum())}
+            # cuantas "cerca" de esta tabla son las mismas alertas de P4 (foco en nuestro pixel lejano)
+            hc_p4 = h[(h.grupo == "alerta") & f_nue.loc[h.index]]
+            en_p4 = hc_p4[[float(T.dist_km(x.pc_lat, x.pc_lon, *ancla[x.vol])) <= inner[x.vol] if pd.notna(x.pc_lat) else False
+                           for x in hc_p4.itertuples()]]
+            P(f"         de las {len(hc)} 'cerca' de esta tabla, {len(hc_p4)} tienen foco en nuestro pixel lejano y {len(en_p4)}"
+              f" son ademas casos de P4 (nuestro cumulo en el inner): esta tabla CONTIENE a P4")
             # T3 magnitud: si MIROVA informa la suma (R4), en las lejanas con crater caliente el VRP debe parecerse a
             # lejano+crater; si informa la mayor (R1), al lejano solo. La calibracion sale de las lejanas con crater frio.
             frio = lj[lj.z_cr < Z_CAL[s]]

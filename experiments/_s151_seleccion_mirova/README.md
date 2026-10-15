@@ -1,8 +1,8 @@
 # Tarea 1.4: qué objeto informa MIROVA cuando hay calor lejos del cráter
 
 Estudio sin correr el pipeline, previo a cualquier código para que la réplica elija como MIROVA. Fecha
-2026-10-14, versión 2 tras el verificador con contexto limpio del PR #809 (veredicto PARCIAL; sus seis puntos
-están atendidos en §8). Scripts y salidas en esta carpeta; los TIF y las láminas se bajan a un cache **fuera del
+2026-10-14, versión 3 tras dos verificadores con contexto limpio del PR #809 (los dos PARCIAL; sus puntos están
+atendidos en §8). Scripts y salidas en esta carpeta; los TIF y las láminas se bajan a un cache **fuera del
 repo** (variable `VRP_TIF_CACHE`, 111 MB), por raw.githubusercontent, sin pull ni clone.
 
 | script | salida | qué mide |
@@ -13,11 +13,13 @@ repo** (variable `VRP_TIF_CACHE`, 111 MB), por raw.githubusercontent, sin pull n
 
 ## En una línea
 
-**MIROVA no elige el cráter por ser el cráter: lo que decide si informa lejos es la FUERZA del foco lejano.**
-Con calor en el cráter y un foco lejano a la vez, MIROVA informa lejos 10 de 10 veces si el foco lejano es fuerte
-(z ≥ 40 en el TIF), 12 de 17 si es mediano y 5 de 15 si es débil; en las 15 alertas del cráter con un foco débil
-en nuestro píxel lejano, el VRP que publica es el del cráter solo. Eso se parece a un umbral de detección más
-exigente lejos del cráter, no a una regla de selección. **"La mayor" contra "la suma" NO está demostrado.**
+**MIROVA no elige el cráter por ser el cráter. Que informe lejos depende de la fuerza del foco lejano, absoluta o
+relativa al cráter (los datos no las separan), con el cráter como segundo predictor.** Con calor en el cráter y un
+foco lejano a la vez, MIROVA informa lejos en las 15 de 15 pasadas con foco lejano de z ≥ 30 en el TIF, y en 12 de
+27 bajo ese corte (prueba continua p = 9e-5). En las 15 alertas del cráter con un foco débil en nuestro píxel
+lejano, el VRP que publica es el del cráter solo: ese foco no entró en su VRP. La causa candidata en nuestro lado
+es la conectiva `min` de los Tests 2 y 3 (SOSPECHA, §4). **"La mayor" contra "la suma" NO está demostrado**, y el
+diseño del brazo A2 queda en espera del A/B de F y K (§4).
 
 ## 1. El fenómeno y por qué el TIF sirve
 
@@ -91,37 +93,59 @@ las 42 lejanas del mismo patrón nuestro, donde MIROVA sí informó lejos.
   noches: 0,1). En las otras 21 el TIF no tiene nada ahí: nuestro píxel lejano no es un objeto que MIROVA vea.
 - En las lejanas: 38 de 42 (nulo 0,7).
 
+La energía del foco se mide como el **exceso del píxel pico** por Wooster (la suma 3 × 3 de la versión 2 mezcla
+vecinos y en Isluga no separa; se conserva en la salida).
+
 | las 15 alertas contra las 38 lejanas con foco en nuestro píxel | cerca (MIROVA: cráter) | lejos (MIROVA: lejos) | Mann-Whitney |
 |---|---|---|---|
 | z del foco lejano (mediana) | 15,3 | 28,7 | p = 0,0001 |
-| energía del foco lejano en el TIF | 0,32 MW | 0,58 MW | p = 0,003 |
-| log10(lejano / cráter) en el TIF | +0,26 | +0,78 | p = 0,0001 |
-| energía del cráter en el TIF | 0,20 MW | 0,11 MW | p = 0,034 |
+| exceso del píxel pico lejano | 0,13 MW | 0,29 MW | p < 0,0001 |
+| exceso del píxel pico del cráter | 0,06 MW | 0,04 MW | p = 0,008 |
+| log10(pico lejano / pico cráter) | +0,34 | +1,01 | p < 0,0001 |
 | distancia del lejano al centro de grilla | 16,5 km | 19,3 km | p = 0,52 |
 | lejano a más de 25,5 km del centro | 0 de 15 | 0 de 38 | |
 | MIROVA alerta ese sitio en otra pasada (a 2 km) | 3 de 15 | 5 de 38 | |
-| log10(cráter TIF / VRP MIROVA) | **+0,12** | | |
+| log10(cráter TIF, suma 3 × 3 / VRP MIROVA) | **+0,12** | | |
 | log10(cráter + lejano TIF / VRP MIROVA) | +0,55 | | |
 
-Lo que las distingue es **la fuerza del foco lejano**, no la distancia, ni la esquina de la grilla, ni que el
-sitio sea recurrente. Y en las 15 el VRP que MIROVA publica calza con el **cráter solo** (+0,12, igual que la
-calibración de las alertas, +0,14), no con cráter más lejano (+0,55): **el foco lejano no entró en el VRP de
-MIROVA**. En 12 de las 15 el foco lejano pesa más que el cráter en el TIF, así que si MIROVA lo hubiera alertado,
-"la mayor" informaría lejos y "la suma" también. Lo más simple compatible es que MIROVA **no lo alertó**: el foco
-pasa nuestra prueba y no la de MIROVA.
+- Permutando la etiqueta **dentro de cada volcán** (10.000 sorteos), la diferencia en z del lejano da p = 0,0001:
+  no la produce la mezcla de volcanes.
+- **No es un factor único.** Regresión logística (lejos = 1, n = 53), AIC: z del lejano 49,2; pico lejano 40,9;
+  razón pico lejano / pico cráter 44,2; pico cráter solo 59,4; **pico lejano más pico cráter 30,7**. Agregar el
+  cráter al pico lejano mejora la verosimilitud con p = 0,0005. O sea: **fuerza absoluta o relativa del lejano, sin
+  separar, con el cráter como segundo predictor** (más cráter, más "cerca"). Parte de eso es selección: en las
+  alertas MIROVA alertó el cráter, así que ahí el cráter tiene que estar caliente.
+- **La frontera es blanda**: con z del lejano entre 18 y 26 hay 5 "cerca" y 10 "lejos", y en Isluga el
+  2026-09-19 la pasada de las 05:00 se informó lejos con z 24,4 y la de las 05:42 cerca con z 20,5.
+- No separan la distancia al centro, la esquina de la grilla ni que el sitio sea recurrente.
+- En las 15 el VRP que MIROVA publica calza con el **cráter solo** (+0,12, igual que la calibración de las alertas,
+  +0,14), no con cráter más lejano (+0,55): **el foco lejano no entró en el VRP de MIROVA**. En 12 de las 15 el
+  foco lejano pesa más que el cráter en el TIF, así que si MIROVA lo hubiera alertado, "la mayor" informaría lejos
+  y "la suma" también. Lo más simple compatible es que MIROVA **no lo alertó**: el foco pasa nuestra prueba y no la
+  de MIROVA.
 
 Volcanes de las 15: Isluga 6, Láscar 5, Lastarria 2, Llaima 1, Puyehue Cordón Caulle 1. Satélites: NOAA-21 11,
 NOAA-20 4 (en las 38 lejanas: NOAA-21 19, NOAA-20 14, Suomi NPP 5). Cada caso con fecha, energías y distancia
-está en `estudio_salida.txt` §P4. Solo verificadas: 9 de 23 alertas con foco, mismas diferencias (z p = 0,0005).
+está en `estudio_salida.txt` §P4. Solo verificadas: 9 de 23 alertas con foco, mismas diferencias (z p = 0,0005;
+permutación dentro de volcán p = 0,0005; pico lejano más cráter AIC 17,3 contra 24,8 del pico lejano solo).
 
-**SOSPECHA del mecanismo, sin medir**: Coppola 2016a usa umbrales más exigentes fuera de la caja de la cumbre
-(5σ en la cumbre contra 10σ en la escena, Tabla 1; CLAUDE.md del proyecto). Un foco lejano débil pasa un umbral
-de cumbre y no el de escena. Eso explicaría un corte por fuerza sin ninguna regla de selección.
+**Por qué nuestro detector alerta focos que MIROVA no (SOSPECHA).** La versión 2 proponía el umbral más exigente
+fuera de la cumbre (dual ROI). **Eso quedó refutado**: en `pipeline.profile` (leído hoy) el dual ROI está
+encendido en los dos pases (`ENABLE_DUAL_ROI_FIRST_PASS` y `_SECOND_PASS` en True; C1 0,003 en la cumbre y 0,010
+en la escena; C2 5 y 10), los 15 píxeles lejanos quedan fuera de nuestro inner, así que ya les aplicamos el umbral
+de escena, y en 7 de las 15 `diag_n_second_pass_recapture = 0`, o sea que los alertó el primer pase (Tests 2 y 3),
+no la recaptura. El candidato ya medido es la **conectiva `min`** de los Tests 2 y 3
+(`ENABLE_TESTS_23_PROSE_BRANCH = False`, S148): con `min` basta superar el menor de los dos umbrales (el piso C1 o
+μ + C2·σ), y S148 midió que `max`
+baja los falsos de VIIRS 375 de 29,8 a 2,7 %. Es SOSPECHA porque los flags leídos son los de hoy, no los de la
+fecha de cada record. **El A/B de F y K en curso (conectiva `max`, run 38639658446) puede contestarla**: si con
+`max` esos píxeles lejanos débiles dejan de alertarse, la causa era la conectiva.
 
 **Costo para un brazo A2.** Si la réplica eligiera la anomalía mayor con nuestro detector actual, en estas 36
 pasadas informaría lejos donde MIROVA informó el cráter: en las 15 con foco real porque nuestro detector alerta
 focos que MIROVA no alerta, y en las 21 sin foco porque ahí nuestro píxel lejano ni siquiera es un objeto visible
-en la imagen de MIROVA. Antes de cambiar la selección hay que igualar **qué se alerta lejos del cráter**.
+en la imagen de MIROVA. **El diseño del brazo A2 queda en espera del resultado de F y K**, y antes de inventar un
+umbral fuera de la cumbre hay que medir la conectiva.
 
 ## 5. P2 y P3: la tabla simétrica
 
@@ -143,6 +167,13 @@ fuerte" de dos maneras: el más fuerte de la escena fuera del corte del scraper 
 
 Solo verificadas: 2 contra 6, 8 contra 3 y 6 contra 0 en los mismos tramos de fuerza.
 
+Tres advertencias sobre esta tabla:
+- **Contiene a §4**: de sus 15 "cerca", 14 son los mismos casos de P4. No es evidencia independiente.
+- **Los cortes 20 y 40 vienen de la versión 1** y se eligieron sabiendo que sobre 40 había 0 "cerca". Sin cortes,
+  la prueba continua (Mann-Whitney del z del lejano, lejos contra cerca) da **p = 9e-5**; con otro corte, z ≥ 30:
+  **15 lejos contra 0 cerca**, y bajo 30, 12 contra 15. Solo verificadas: p = 0,0008; z ≥ 30, 8 contra 0.
+- El z del foco lejano es la mayor de las dos definiciones; la logística de §4 dice que el cráter también pesa.
+
 **Veredicto de P3, por regla:**
 - **El cráter si hay algo en el cráter** y **el más cercano al centro**: en contra con **10 de 10** cuando el foco
   lejano es fuerte (27 en total con cualquier fuerza). A favor sólo cuando el foco lejano es débil, y ahí (§4) el
@@ -150,7 +181,9 @@ Solo verificadas: 2 contra 6, 8 contra 3 y 6 contra 0 en los mismos tramos de fu
 - **La mayor** y **la suma de todo lo alertado** (con la distancia del más lejano): las dos predicen lejos si el
   foco lejano está alertado. Ninguna queda refutada, porque los casos "cerca" son focos que MIROVA muy
   probablemente no alertó, y ninguna se separa de la otra con la dirección.
-- **Un corte por fuerza** (MIROVA alerta lejos del cráter sólo focos fuertes): es lo que mejor describe la tabla.
+- **Un corte blando por fuerza absoluta o relativa del foco lejano, con el cráter como segundo predictor**: es lo
+  que mejor describe los datos. No es una regla de selección medida: es lo que se ve desde fuera sin saber qué
+  píxeles alertó MIROVA.
 
 ## 6. T3: magnitud, "la mayor" contra "la suma"
 
@@ -209,6 +242,17 @@ día (`data/png/Lascar/20261001_123714_VIIRS375_Latest10NTI.png`) las celdas de 
    de 0,66 a 0,42 km en mediana; se dice que el criterio es posterior a la primera corrida y que el z de la
    miniatura es luminancia.
 6. Se dice cuántas de las lejanas sin coincidencia caen en la esquina de la grilla de MIROVA (§3).
+
+Versión 3 (segundo verificador, sobre 8394d0a63; confirmó la separación por fuerza y que el VRP de MIROVA calza
+con el cráter solo):
+
+1. La SOSPECHA del dual ROI quedó refutada (§4) y se reemplazó por la conectiva `min`, también como SOSPECHA,
+   con el A/B de F y K como prueba.
+2. "La fuerza decide" pasó a "fuerza absoluta o relativa, sin separar, con el cráter como segundo predictor"
+   (logística, §4), con la frontera blanda y el caso de Isluga.
+3. §5 dice que contiene a §4, que sus cortes son de la v1, y agrega la prueba continua y el corte en 30.
+4. La energía del foco lejano es el exceso del píxel pico, no la suma 3 × 3.
+5. El brazo A2 queda en espera de F y K; antes de un umbral nuevo fuera de la cumbre, medir la conectiva.
 
 ## 9. Lo que no se pudo resolver
 

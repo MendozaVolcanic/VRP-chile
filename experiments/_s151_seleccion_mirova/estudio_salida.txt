@@ -133,6 +133,7 @@ Villarrica            0.256  0.344
          z del lejano  13.6 a  20.0: lejos   0  cerca   0
          z del lejano  20.0 a  40.0: lejos   1  cerca   0
          z del lejano  40.0 a   inf: lejos   1  cerca   0
+         de las 0 'cerca' de esta tabla, 0 tienen foco en nuestro pixel lejano y 0 son ademas casos de P4 (nuestro cumulo en el inner): esta tabla CONTIENE a P4
    T4 alertas (MIROVA informo el crater) con foco lejano z >= 1 x Z_FAR (17.8): 0 de 17; lejano pesa mas que el crater en 0
    T4 alertas (MIROVA informo el crater) con foco lejano z >= 2 x Z_FAR (35.6): 0 de 17; lejano pesa mas que el crater en 0
    P(MIROVA informa lejos | foco lejano del TIF con z >= X), rutina pesada x13.6:
@@ -158,6 +159,9 @@ Villarrica            0.256  0.344
       MIROVA alerta ese sitio en otra pasada               0 de 0           0 de 1
       por volcan: cerca {}; lejos {'Llaima': 1}
       por satelite: cerca {}; lejos {'MODIS_AQUA': 1}
+      exceso del PIXEL PICO lejano, MW                        nan            +1.52
+      exceso del pixel pico del crater, MW                    nan            +0.29
+      log10(pico lejano / pico crater)                        nan            +0.72
 
    ---- VIIRS375: lejanas con foco identificado 84, alertas 351. Umbral de 'calor en el crater': Z_CAL 3.28 (p95 del nulo) y, estricto, la mediana del crater en las alertas 7.20
    T1 simetrico: calor en el crater y foco lejano fuerte a la vez -> MIROVA informo lejos / cerca
@@ -171,6 +175,8 @@ Villarrica            0.256  0.344
          z del lejano  10.6 a  20.0: lejos   5  cerca  10
          z del lejano  20.0 a  40.0: lejos  12  cerca   5
          z del lejano  40.0 a   inf: lejos  10  cerca   0
+         prueba continua (Mann-Whitney del z del lejano, lejos contra cerca): p = 9.2e-05; corte z >= 30: lejos 15 cerca 0; z < 30: lejos 12 cerca 15
+         de las 15 'cerca' de esta tabla, 14 tienen foco en nuestro pixel lejano y 14 son ademas casos de P4 (nuestro cumulo en el inner): esta tabla CONTIENE a P4
    T3 log10(energia TIF / VRP MIROVA), mediana [p25, p75]: lejanas con crater frio (calibracion) +0.106 [+0.035, +0.245] n=56 (con su crater frio sumado, ruido: +0.130); con crater caliente (estricto), solo el lejano +0.020 [-0.036, +0.041] (Mann-Whitney contra la calibracion p=0.046) y lejano+crater +0.181 [+0.125, +0.189] (contra la calibracion con ruido p=0.757) n=8
       T3 sacando un caso a la vez: p del 'solo el lejano' entre 0.005 y 0.120
         Lascar 2026-05-09 04:48:01: VRP 2.7, TIF lejano 2.78 MW, crater 0.43 MW, dBT 0.46 K (verificada)
@@ -231,7 +237,36 @@ Villarrica            0.256  0.344
       MIROVA alerta ese sitio en otra pasada              3 de 15          5 de 38
       por volcan: cerca {'Lastarria': 2, 'Isluga': 6, 'Llaima': 1, 'Lascar': 5, 'PuyehueCordonCaulle': 1}; lejos {'Lascar': 6, 'Isluga': 9, 'Tupungatito': 4, 'PlanchonPeteroa': 5, 'Copahue': 5, 'NevadosDeChillan': 5, 'Chaiten': 1, 'Villarrica': 1, 'Llaima': 1, 'Lastarria': 1}
       por satelite: cerca {'VIIRS_NOAA21': 11, 'VIIRS_NOAA20': 4}; lejos {'VIIRS_NOAA20': 14, 'VIIRS_NOAA21': 19, 'VIIRS_SNPP': 5}
-      Mann-Whitney cerca contra lejos: {'e_hot': 0.003, 'ratio': 0.0001, 'z_hot': 0.0001, 'hot_d_o': 0.5211, 'e_cr': 0.0338}
+      exceso del PIXEL PICO lejano, MW                      +0.13            +0.29
+      exceso del pixel pico del crater, MW                  +0.06            +0.04
+      log10(pico lejano / pico crater)                      +0.34            +1.01
+      Mann-Whitney cerca contra lejos: {'e_hot': 0.003, 'e_hot_pico': 0.0, 'ratio': 0.0001, 'ratio_pico': 0.0, 'z_hot': 0.0001, 'hot_d_o': 0.5211, 'e_cr': 0.0338, 'e_cr_pico': 0.0079}
+      permutacion de la etiqueta dentro de cada volcan, z del lejano: p = 0.0001 (10000 sorteos)
+      logistica, n = 53 (lejos 1, cerca 0):
+         z del lejano                       logL  -22.60  AIC   49.2
+         pico lejano                        logL  -18.45  AIC   40.9
+         pico crater                        logL  -27.68  AIC   59.4
+         pico lejano + pico crater          logL  -12.33  AIC   30.7
+         z lejano + pico crater             logL  -21.75  AIC   49.5
+         razon pico lejano / pico crater    logL  -20.10  AIC   44.2
+         el crater agregado al pico lejano: razon de verosimilitud p = 0.0004699
+      frontera z 18 a 26: cerca 5, lejos 10
+         PlanchonPeteroa  2026-07-13 05:24:02 lejos z  18.8 pico lejano  0.31 MW pico crater  0.04 MW
+         Lascar           2026-09-20 05:24:02 cerca z  18.9 pico lejano  0.13 MW pico crater  0.10 MW
+         Isluga           2026-05-10 06:12:01 lejos z  19.2 pico lejano  0.23 MW pico crater  0.07 MW
+         Llaima           2026-08-09 05:18:02 lejos z  19.3 pico lejano  0.16 MW pico crater  0.01 MW
+         Isluga           2026-09-19 05:42:02 cerca z  20.5 pico lejano  0.19 MW pico crater  0.05 MW
+         Isluga           2026-09-12 06:18:02 lejos z  21.0 pico lejano  0.24 MW pico crater  0.04 MW
+         Isluga           2026-09-21 05:42:00 lejos z  21.1 pico lejano  0.21 MW pico crater  0.10 MW
+         Isluga           2026-05-29 06:36:00 lejos z  21.1 pico lejano  0.24 MW pico crater  0.04 MW
+         PlanchonPeteroa  2026-09-11 05:54:01 lejos z  22.1 pico lejano  0.14 MW pico crater  0.01 MW
+         Isluga           2026-09-22 04:48:02 cerca z  22.7 pico lejano  0.23 MW pico crater  0.05 MW
+         Lascar           2026-06-28 05:00:02 cerca z  24.3 pico lejano  0.20 MW pico crater  0.09 MW
+         Isluga           2026-09-19 05:00:01 lejos z  24.4 pico lejano  0.21 MW pico crater  0.02 MW
+         Isluga           2026-07-01 05:00:01 lejos z  24.4 pico lejano  0.20 MW pico crater  0.03 MW
+         Llaima           2026-05-15 06:24:01 cerca z  25.0 pico lejano  0.16 MW pico crater  0.01 MW
+         Lascar           2026-09-21 05:06:02 lejos z  25.4 pico lejano  0.21 MW pico crater  0.07 MW
+      nuestras alertas con foco lejano: recaptura del segundo pase = 0 (el primer pase, Tests 2 y 3, lo alerto) en 7 de 15
 
    ---- VIIRS750: lejanas con foco identificado 4, alertas 73. Umbral de 'calor en el crater': Z_CAL 3.36 (p95 del nulo) y, estricto, la mediana del crater en las alertas 6.05
    T1 simetrico: calor en el crater y foco lejano fuerte a la vez -> MIROVA informo lejos / cerca
@@ -245,6 +280,7 @@ Villarrica            0.256  0.344
          z del lejano  10.8 a  20.0: lejos   0  cerca   0
          z del lejano  20.0 a  40.0: lejos   0  cerca   1
          z del lejano  40.0 a   inf: lejos   1  cerca   0
+         de las 1 'cerca' de esta tabla, 0 tienen foco en nuestro pixel lejano y 0 son ademas casos de P4 (nuestro cumulo en el inner): esta tabla CONTIENE a P4
    T4 alertas (MIROVA informo el crater) con foco lejano z >= 1 x Z_FAR (19.3): 1 de 73; lejano pesa mas que el crater en 1
         PuyehueCordonCaulle 2026-05-16 05:12:02: VRP MIROVA 0.82 a 8.55 km; TIF crater 0.90 MW (z 7.7), lejano 3.61 MW (z 22.6) a 19.9 km del centro
    T4 alertas (MIROVA informo el crater) con foco lejano z >= 2 x Z_FAR (38.7): 0 de 73; lejano pesa mas que el crater en 0
@@ -273,6 +309,10 @@ Villarrica            0.256  0.344
       MIROVA alerta ese sitio en otra pasada               0 de 1           0 de 1
       por volcan: cerca {'Isluga': 1}; lejos {'Tupungatito': 1}
       por satelite: cerca {'VIIRS_NOAA21_750': 1}; lejos {'VIIRS_NOAA20_750': 1}
+      exceso del PIXEL PICO lejano, MW                      +0.56            +1.04
+      exceso del pixel pico del crater, MW                  +0.13            +0.03
+      log10(pico lejano / pico crater)                      +0.64            +1.59
+      nuestras alertas con foco lejano: recaptura del segundo pase = 0 (el primer pase, Tests 2 y 3, lo alerto) en 0 de 1
 
 
 ############################ SOLO LAS VERIFICADAS (|dBT| <= 1 K): 404 pasadas
@@ -352,6 +392,8 @@ Villarrica            0.256  0.256
          z del lejano  10.6 a  20.0: lejos   2  cerca   6
          z del lejano  20.0 a  40.0: lejos   8  cerca   3
          z del lejano  40.0 a   inf: lejos   6  cerca   0
+         prueba continua (Mann-Whitney del z del lejano, lejos contra cerca): p = 0.00076; corte z >= 30: lejos 8 cerca 0; z < 30: lejos 8 cerca 9
+         de las 9 'cerca' de esta tabla, 9 tienen foco en nuestro pixel lejano y 9 son ademas casos de P4 (nuestro cumulo en el inner): esta tabla CONTIENE a P4
    T3 log10(energia TIF / VRP MIROVA), mediana [p25, p75]: lejanas con crater frio (calibracion) +0.149 [+0.057, +0.296] n=26 (con su crater frio sumado, ruido: +0.216); con crater caliente (estricto), solo el lejano +0.028 [-0.008, +0.042] (Mann-Whitney contra la calibracion p=0.048) y lejano+crater +0.178 [+0.108, +0.185] (contra la calibracion con ruido p=0.560) n=7
       T3 sacando un caso a la vez: p del 'solo el lejano' entre 0.004 y 0.107
         Lascar 2026-05-09 04:48:01: VRP 2.7, TIF lejano 2.78 MW, crater 0.43 MW, dBT 0.46 K (verificada)
@@ -402,7 +444,31 @@ Villarrica            0.256  0.256
       MIROVA alerta ese sitio en otra pasada               1 de 9          0 de 28
       por volcan: cerca {'Lastarria': 2, 'Isluga': 4, 'Lascar': 3}; lejos {'Lascar': 4, 'Tupungatito': 4, 'Copahue': 5, 'Chaiten': 1, 'PlanchonPeteroa': 2, 'Villarrica': 1, 'Isluga': 7, 'NevadosDeChillan': 3, 'Llaima': 1}
       por satelite: cerca {'VIIRS_NOAA21': 8, 'VIIRS_NOAA20': 1}; lejos {'VIIRS_NOAA20': 8, 'VIIRS_NOAA21': 16, 'VIIRS_SNPP': 4}
-      Mann-Whitney cerca contra lejos: {'e_hot': 0.0169, 'ratio': 0.0025, 'z_hot': 0.0005, 'hot_d_o': 0.162, 'e_cr': 0.162}
+      exceso del PIXEL PICO lejano, MW                      +0.13            +0.31
+      exceso del pixel pico del crater, MW                  +0.06            +0.04
+      log10(pico lejano / pico crater)                      +0.34            +1.01
+      Mann-Whitney cerca contra lejos: {'e_hot': 0.0169, 'e_hot_pico': 0.0001, 'ratio': 0.0025, 'ratio_pico': 0.0003, 'z_hot': 0.0005, 'hot_d_o': 0.162, 'e_cr': 0.162, 'e_cr_pico': 0.0269}
+      permutacion de la etiqueta dentro de cada volcan, z del lejano: p = 0.0005 (10000 sorteos)
+      logistica, n = 37 (lejos 1, cerca 0):
+         z del lejano                       logL  -12.71  AIC   29.4
+         pico lejano                        logL  -10.40  AIC   24.8
+         pico crater                        logL  -17.19  AIC   38.4
+         pico lejano + pico crater          logL   -5.65  AIC   17.3
+         z lejano + pico crater             logL  -11.55  AIC   29.1
+         razon pico lejano / pico crater    logL  -10.14  AIC   24.3
+         el crater agregado al pico lejano: razon de verosimilitud p = 0.00205
+      frontera z 18 a 26: cerca 3, lejos 7
+         PlanchonPeteroa  2026-07-13 05:24:02 lejos z  18.8 pico lejano  0.31 MW pico crater  0.04 MW
+         Lascar           2026-09-20 05:24:02 cerca z  18.9 pico lejano  0.13 MW pico crater  0.10 MW
+         Llaima           2026-08-09 05:18:02 lejos z  19.3 pico lejano  0.16 MW pico crater  0.01 MW
+         Isluga           2026-09-19 05:42:02 cerca z  20.5 pico lejano  0.19 MW pico crater  0.05 MW
+         Isluga           2026-09-12 06:18:02 lejos z  21.0 pico lejano  0.24 MW pico crater  0.04 MW
+         Isluga           2026-09-21 05:42:00 lejos z  21.1 pico lejano  0.21 MW pico crater  0.10 MW
+         Isluga           2026-09-22 04:48:02 cerca z  22.7 pico lejano  0.23 MW pico crater  0.05 MW
+         Isluga           2026-09-19 05:00:01 lejos z  24.4 pico lejano  0.21 MW pico crater  0.02 MW
+         Isluga           2026-07-01 05:00:01 lejos z  24.4 pico lejano  0.20 MW pico crater  0.03 MW
+         Lascar           2026-09-21 05:06:02 lejos z  25.4 pico lejano  0.21 MW pico crater  0.07 MW
+      nuestras alertas con foco lejano: recaptura del segundo pase = 0 (el primer pase, Tests 2 y 3, lo alerto) en 4 de 9
 
    ---- VIIRS750: lejanas con foco identificado 1, alertas 28. Umbral de 'calor en el crater': Z_CAL 3.36 (p95 del nulo) y, estricto, la mediana del crater en las alertas 4.16
    T1 simetrico: calor en el crater y foco lejano fuerte a la vez -> MIROVA informo lejos / cerca
@@ -416,6 +482,7 @@ Villarrica            0.256  0.256
          z del lejano  10.8 a  20.0: lejos   0  cerca   0
          z del lejano  20.0 a  40.0: lejos   0  cerca   0
          z del lejano  40.0 a   inf: lejos   1  cerca   0
+         de las 0 'cerca' de esta tabla, 0 tienen foco en nuestro pixel lejano y 0 son ademas casos de P4 (nuestro cumulo en el inner): esta tabla CONTIENE a P4
    T4 alertas (MIROVA informo el crater) con foco lejano z >= 1 x Z_FAR (19.3): 0 de 28; lejano pesa mas que el crater en 0
    T4 alertas (MIROVA informo el crater) con foco lejano z >= 2 x Z_FAR (38.7): 0 de 28; lejano pesa mas que el crater en 0
    P(MIROVA informa lejos | foco lejano del TIF con z >= X), rutina pesada x75.9:
@@ -443,3 +510,7 @@ Villarrica            0.256  0.256
       MIROVA alerta ese sitio en otra pasada               0 de 1           0 de 1
       por volcan: cerca {'Isluga': 1}; lejos {'Tupungatito': 1}
       por satelite: cerca {'VIIRS_NOAA21_750': 1}; lejos {'VIIRS_NOAA20_750': 1}
+      exceso del PIXEL PICO lejano, MW                      +0.56            +1.04
+      exceso del pixel pico del crater, MW                  +0.13            +0.03
+      log10(pico lejano / pico crater)                      +0.64            +1.59
+      nuestras alertas con foco lejano: recaptura del segundo pase = 0 (el primer pase, Tests 2 y 3, lo alerto) en 0 de 1
