@@ -149,6 +149,12 @@ en vivo siguen contando como falso negativo las pasadas que nunca procesamos.
 
 ### Decisiones de Nicolás registradas el 2026-10-09
 
+> ⚠️ **S151 (A113):** la primera decisión de abajo (anomalía MAYOR) ya tiene estudio sobre los TIF de
+> MIROVA (tarea 1.4, PR #809): la apoya en que MIROVA informa el foco lejano cuando es fuerte, pero
+> «la mayor» contra «la suma» no está demostrado y, cuando informa el cráter, su VRP no incluye el foco
+> lejano débil. Ver la marca S151 de D8' en `docs/MIROVA_DIVERGENCES.md`. El «858 detecciones» de abajo
+> son en su mayoría diurnas: de noche son 359.
+
 - **Regla de selección en la réplica: gana la anomalía MAYOR de la escena**, como MIROVA (que por eso a veces
   reporta incendios). Comprobado en los datos de MIROVA: desde marzo, además de 1.398 alertas dentro del radio del
   cráter, publicó **858 detecciones a una mediana de 20 km** (hasta 34,5 km) que el scraper rotula FALSO_POSITIVO

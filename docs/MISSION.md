@@ -146,6 +146,13 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
      D8'): Nicolás decidió el 2026-10-09 que la réplica elija la anomalía MAYOR de la escena, como
      MIROVA (`docs/AUDIT_S150.md` §8), y la entrada D8' de la lista de «Resueltas» de más abajo dice
      lo contrario. Producción sigue con el cúmulo más cercano al cráter hasta el A/B pre-registrado.
+     ⚠️ **Matiz S151 (tarea 1.4 del loop, PR #809, dos verificadores con contexto limpio):** sobre los
+     GeoTIFF de MIROVA, MIROVA informa el foco lejano cuando es fuerte (15 de 15 con z ≥ 30) y el cráter
+     cuando el lejano es débil; la fuerza del lejano y el calor del cráter pesan los dos, y «la mayor»
+     contra «la suma» **no está demostrado**. Además, cuando informa el cráter, su VRP es el del cráter
+     solo, sin el foco lejano débil que nosotros sí alertamos (causa candidata: la conectiva `min`,
+     SOSPECHA). El diseño del brazo que elija la mayor espera el A/B de F y K
+     (`experiments/_s151_seleccion_mirova/README.md`).
    - ⚠️ **REBAJADA S146: esta lista de «Resueltas» se lee primero y varias entradas ya
      cayeron dentro del propio proyecto** (`docs/AUDIT_S146.md` §2, V-13, V-01, V-06). **D9 no
      está cerrada**: el «207 de 214 confirmados» no se reproduce con ninguna definición en que
