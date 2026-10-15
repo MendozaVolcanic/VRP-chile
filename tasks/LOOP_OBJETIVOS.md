@@ -294,6 +294,15 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 (vuelta 57): 1.15, el corrimiento MODIS es un defecto de código (verificado PARCIAL)
+- #826: `_interp_geo` ignora el offset 2 de la grilla de 5 km (Data Dictionary C7 p. 66): frame s rotulado como
+  0,99778·s + 2; 1,0 km a 17°, 3,0 a 45°, 5,0 a 55° hacia el nadir del lado del frame 0. CONFIRMADO por el
+  verificador. MxD03 (1 km, con terreno) se baja y `calculate_vrp` lo ignora (`process_modis.py:470`). No es
+  paralaje dominante. Exagerado: el «coeficiente negativo», la fila M4, el veto de la caja (queda «en duda», no
+  caído); la medición descansa en el brazo K y casi sólo Láscar; en producción el efecto queda enmascarado.
+  Arreglos y un probe despachable contra MxD03 pedidos al agente. Persistido en memoria.
+- D-3 cerrado: la corrida NRT de las 08:52 UTC ya escribe `regimen`. D-8 cerrado (#801). Quedan abiertos: D-10.
+
 ### 2026-10-15 (vuelta 56): caja vetada y verificada (#825); tarea 1.15 nueva, en curso
 - Verificador del veto D1: CONFIRMADO como resultado del pre-registro (repetición idéntica, mismo código en los
   dos brazos, 1,0 MW es protegida en el filo). Atribución PARCIAL: es posición del píxel MODIS, pero no D17; el
