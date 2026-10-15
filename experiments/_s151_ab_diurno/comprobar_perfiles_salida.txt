@@ -1,0 +1,16 @@
+== mirova_equivalent
+   ENABLE_DAYTIME_VIIRS (pipeline.profile) = False | diurno.flag_viirs_diurno() = False | DATA_SUBDIR = mirova_equivalent
+   filtro nocturno de fetch y run_pipeline (True = se descarta el día): {'VIIRS_SNPP': True, 'VIIRS_NOAA20': True, 'VIIRS_NOAA21_750': True, 'MODIS_AQUA': True, 'MODIS_TERRA': True}
+   store descarta Láscar 2026-06-15 17:24 UTC (día): {'VIIRS375': True, 'VIIRS750': True, 'MODIS': True} | 05:00 UTC (noche): {'VIIRS375': False, 'VIIRS750': False, 'MODIS': False}
+== _s151_ab_diurno_control
+   ENABLE_DAYTIME_VIIRS (pipeline.profile) = False | diurno.flag_viirs_diurno() = False | DATA_SUBDIR = _s151_ab_diurno_control
+   filtro nocturno de fetch y run_pipeline (True = se descarta el día): {'VIIRS_SNPP': True, 'VIIRS_NOAA20': True, 'VIIRS_NOAA21_750': True, 'MODIS_AQUA': True, 'MODIS_TERRA': True}
+   store descarta Láscar 2026-06-15 17:24 UTC (día): {'VIIRS375': True, 'VIIRS750': True, 'MODIS': True} | 05:00 UTC (noche): {'VIIRS375': False, 'VIIRS750': False, 'MODIS': False}
+== _s151_ab_diurno_on
+   ENABLE_DAYTIME_VIIRS (pipeline.profile) = True | diurno.flag_viirs_diurno() = True | DATA_SUBDIR = _s151_ab_diurno_on
+   filtro nocturno de fetch y run_pipeline (True = se descarta el día): {'VIIRS_SNPP': False, 'VIIRS_NOAA20': False, 'VIIRS_NOAA21_750': False, 'MODIS_AQUA': True, 'MODIS_TERRA': True}
+   store descarta Láscar 2026-06-15 17:24 UTC (día): {'VIIRS375': False, 'VIIRS750': False, 'MODIS': True} | 05:00 UTC (noche): {'VIIRS375': False, 'VIIRS750': False, 'MODIS': False}
+== _s151_ab_diurno_control difiere de mirova_equivalent en 2 constantes de pipeline.profile: ['DATA_SUBDIR', 'PROFILE_NAME']
+== _s151_ab_diurno_on difiere de mirova_equivalent en 3 constantes de pipeline.profile: ['DATA_SUBDIR', 'ENABLE_DAYTIME_VIIRS', 'PROFILE_NAME']
+
+RESULTADO: OK, cada brazo lee lo que declara

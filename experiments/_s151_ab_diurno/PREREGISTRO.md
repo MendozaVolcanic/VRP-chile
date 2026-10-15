@@ -1,11 +1,13 @@
-# Pre-registro del A/B diurno de VIIRS (D-10, issue #813): BORRADOR, NO DESPACHABLE
+# Pre-registro del A/B diurno de VIIRS (D-10, issue #813)
 
-Estado: **borrador** (2026-10-15, revisado tras el verificador con contexto limpio del PR #821).
-**No se puede despachar**: el workflow no existe, los dos perfiles de brazo no existen y el evaluador
-diurno no está escrito (sección 7). Este documento fija qué se mide y con qué vara ANTES de mirar un
-solo dato del A/B. Todo número de acá sale de `experiments/_s151_ab_diurno/sustrato.py` (salida en
-`sustrato_salida.txt` y `sustrato.json`) o del estudio `experiments/_s151_alertas_diurnas/`; ninguno
-se transcribe a mano de memoria.
+Estado: **completo, espera el verificador con contexto limpio y la aprobación de Nicolás** (2026-10-15).
+El workflow, los dos perfiles de brazo y el evaluador con su autoprueba existen (sección 7, todo en
+verde); faltan el token vigente y el «si» del candado. El criterio (secciones 4 a 6) **no cambió**
+respecto del borrador revisado tras el verificador del PR #821: lo que la implementación dejó como duda
+está en la sección 9, como pregunta, sin arreglarlo a escondidas. Este documento fija qué se mide y con
+qué vara ANTES de mirar un solo dato del A/B. Todo número de acá sale de
+`experiments/_s151_ab_diurno/sustrato.py` (salida en `sustrato_salida.txt` y `sustrato.json`) o del
+estudio `experiments/_s151_alertas_diurnas/`; ninguno se transcribe a mano de memoria.
 
 ## 1. El fenómeno y la pregunta
 
@@ -34,13 +36,21 @@ pasa, el A/B lo dice; no se corrige antes de medir.
 
 ## 2. Brazos
 
-| brazo | perfil (por crear) | diferencia con `mirova_equivalent` |
+| brazo | perfil | diferencia con `mirova_equivalent` |
 |---|---|---|
-| control | `_s151_ab_diurno_control` | ninguna (sólo `data_subdir` propio, A47) |
-| diurno | `_s151_ab_diurno_on` | `enable_daytime_viirs: true` y nada más |
+| control | `pipeline/profiles/_s151_ab_diurno_control.yaml` | ninguna (sólo `data_subdir` propio, A47) |
+| diurno | `pipeline/profiles/_s151_ab_diurno_on.yaml` | `enable_daytime_viirs: true` (sección `paths:`, de donde la lee `pipeline/profile.py`, A89) y nada más |
 
 El brazo diurno corre **sin** `--no-night-filter`: lo que se prueba es que el flag abre por sí solo
 las cinco compuertas (A118; en S92 el A/B diurno de MODIS abrió una y midió cero).
+
+Comprobado con `pipeline.profile` en un proceso limpio por perfil, no con el YAML
+(`comprobar_perfiles.py`, salida en `comprobar_perfiles_salida.txt`): `ENABLE_DAYTIME_VIIRS` y
+`diurno.flag_viirs_diurno()` dan True sólo en el brazo diurno; el filtro nocturno de `fetch.py` y de
+`run_pipeline.py` (`diurno.aplica_filtro_nocturno`) se abre para VIIRS 375 y 750 y no para MODIS; la
+regla de store deja de descartar la pasada diurna de Láscar del 2026-06-15 17:24 sólo en VIIRS; y cada
+brazo difiere de producción en todas las constantes de `pipeline.profile` sólo en `PROFILE_NAME`,
+`DATA_SUBDIR` y, el diurno, `ENABLE_DAYTIME_VIIRS`.
 
 ## 3. Ventanas (tramos A119) y sustrato medido
 
@@ -168,7 +178,10 @@ el brazo (sección 5, cobertura diurna); las no procesadas se cuentan aparte.
 - Cualquier mejora de más de 30 % en una métrica exige auditoría independiente antes de aceptarla
   (regla de skills del proyecto).
 
-## 7. Qué falta antes de poder despachar (candado)
+## 7. Requisitos antes de despachar (candado) y su estado
+
+Estado al 2026-10-15: los puntos 1 a 3 están hechos (cada uno con su línea **Hecho**); quedan el 4 y el 5.
+El texto de cada requisito es el del borrador y se conserva.
 
 1. **Workflow propio** `.github/workflows/reproc-s151-ab-diurno.yml`, con:
    - grupo de concurrencia **propio** `s151-ab-diurno` (`cancel-in-progress: false`). POR QUÉ:
@@ -191,7 +204,25 @@ el brazo (sección 5, cobertura diurna); las no procesadas se cuentan aparte.
      de gránulos VIIRS que el control; una ventana de 18 a 20 días por job puede acercarse al tope de
      6 h. Si el job corto de W1 (Láscar, 2 jobs) tarda más de 1,5 h, partir W2 a W6 en mitades.
    - salidas por artefacto y por rama propia (`s151-ab-diurno/<run_id>`), nunca a main.
+
+   **Hecho.** Copia de `reproc-s151-ab-caja.yml` con lo mínimo cambiado: grupo `s151-ab-diurno`,
+   `max-parallel: 3`, candado, sólo `EARTHDATA_TOKEN` con falla inmediata si viene vacío, `"on":` entre
+   comillas, artefactos `s151diurno-*`, rama `s151-ab-diurno/<run_id>` y salidas en
+   `experiments/_s151_ab_diurno/salidas/<run_id>/`. La línea `FLAGS_BRAZO` trae `ENABLE_DAYTIME_VIIRS` y
+   `ENABLE_DAYTIME_MODIS`; el paso «El brazo LEE lo que declara» además falla si el flag diurno no es el
+   que corresponde al nombre del brazo. `run_pipeline.py` corre sin `--no-night-filter` y con
+   `nighttime_only` en su valor por defecto (True): es `diurno.aplica_filtro_nocturno(True, plataforma)`
+   el que abre VIIRS en `fetch.py` (filtro previo a la descarga) y en `run_pipeline.py` (salto del
+   gránulo), así que el workflow no anula el flag. El log entero va al artefacto. Un cambio que no estaba
+   en el borrador: el paso `recolectar` cuenta la cobertura con `contar_pasadas_noche.py` y no con
+   `experiments/_s146_ab_sin_test1/contar_pasadas.py`, porque éste exige las mismas pasadas en los dos
+   brazos y el brazo diurno tiene por diseño las de día (saldría siempre «despareja»). El nuevo compara
+   SÓLO las noches, en las dos direcciones, y controla el día aparte (control sin día, brazo diurno con
+   VIIRS diurno y sin MODIS diurno; nulos 1 y 3). `timeout-minutes` 330 por job y 300 por paso, como la
+   caja; la regla de partir W2 a W6 si W1 tarda más de 1,5 h sigue en pie.
 2. **Perfiles de brazo** de la sección 2, con `data_subdir` propio.
+
+   **Hecho**, comprobado con `pipeline.profile` (sección 2).
 3. **Evaluador diurno** (`experiments/_s151_ab_diurno/evaluar.py`), con sus controles corridos en
    verde antes del primer despacho: el nulo barajado del punto 5.5, la clasificación de cobertura del
    punto 5.4, el control contra sí mismo (debe dar M2 = M3 = 0 y nulo 2 sin diferencias) y un caso
@@ -199,6 +230,34 @@ el brazo (sección 5, cobertura diurna); las no procesadas se cuentan aparte.
    `es_pasada_diurna_descartada` bajo el perfil operacional, porque esa función sigue al flag y con el
    flag apagado tira justamente las pasadas diurnas que se quieren medir; y M5 no puede calcularse
    bajo el perfil del brazo diurno (§4). Etiqueta día y noche por elevación solar explícita.
+
+   **Hecho**, con el nombre `evaluar_diurno.py` (no `evaluar.py`) y su autoprueba
+   `probar_evaluar_diurno.py` (salida en `probar_salida.txt`: **36 de 36** comprobaciones en verde).
+   Cómo cumple lo pedido:
+   - las poblaciones salen de `sustrato.universo`, la misma función que contó el sustrato (se extrajo
+     de `sustrato.main` sin cambiar su salida, comprobado con `diff` contra `sustrato_salida.txt`), y el
+     evaluador exige que la referencia que lee reproduzca `sustrato.json` ventana por ventana;
+   - la referencia se indexa con `banco_paridad.indexar_referencia` con la rama diurna encendida en
+     `pipeline.profile` SÓLO mientras indexa, y el evaluador mide las dos caras de la trampa A118: con el
+     flag encendido el índice ve las 5.095 pasadas del universo, con el flag apagado ve cero filas VIIRS
+     diurnas (caso 12 de la autoprueba: 0 de 1.201 en W2);
+   - «publica» es el predicado del dashboard ejecutado con node (`banco_paridad.correr_node`, A97);
+     día y noche de cada record por `pipeline.diurno.pasada_es_diurna` (elevación solar explícita);
+   - M5 se calcula sobre los records nocturnos del CONTROL, etiquetados con el flag apagado;
+   - el nulo barajado (5.5) se muestrea con la hipergeométrica por estrato volcán × sensor, que es
+     exactamente el barajado de etiquetas (ver el docstring del evaluador), y sus dos controles corren en
+     cada evaluación (ver §9, pregunta 2);
+   - la cobertura diurna (5.4) clasifica cada positivo y cada pasada diurna de la tabla en no procesada,
+     procesada sin publicar o publicada, con el motivo del log cuando lo hay;
+   - el control contra sí mismo (caso 7) da cero publicaciones diurnas, noches idénticas e INDECIDIBLE
+     por el nulo 1; el caso que debe fallar por G2 (caso 2) falla;
+   - el cableado se prueba desde el log: la línea `FLAGS_BRAZO` y la ausencia, en el brazo diurno, de
+     las dos huellas de una compuerta cerrada para VIIRS («SKIP daytime» de `run_pipeline.py` y
+     «kept N of M granules (night filter)» de `fetch.py`).
+   La regla D-9 de alertas mínimas decide con «original» (este pre-registro no dice otra cosa). En
+   `main` todavía no existe `clase_mirova.aplicar_regla_minimas` (PR #820 sin mergear): la sección 12
+   del evaluador queda **PENDIENTE** y, cuando el PR se mergee, informa SN y SE aparte sin tocar lo que
+   decide (caso 13 de la autoprueba, con una regla neutra inyectada).
 4. **Token vigente** en los secretos (se rota cada 50 días).
 5. **Aprobación de Nicolás** de este pre-registro y de su verificador con contexto limpio.
 
@@ -215,3 +274,97 @@ el brazo (sección 5, cobertura diurna); las no procesadas se cuentan aparte.
   compuerta de D22, magnitud diurna, tope D9, filtros «unsuitable», consistencia TIR):
   `pipeline/diurno.py`, PREGUNTAS. Si el A/B sale saturado por el Test 1, la pregunta siguiente es
   esa, no los umbrales de la Tabla 1.
+
+## 9. Preguntas para el verificador (huecos que dejó la implementación, sin arreglar a escondidas)
+
+Cada una dice qué hace hoy el evaluador. Ninguna cambia un umbral de la sección 6.
+
+1. **G3 compara también sin `first_processed_utc`.** El nulo 2 excluye `updated`, `processed_utc` y
+   `regimen`; los records traen además `first_processed_utc`, la hora en que store guardó el record por
+   primera vez, que difiere siempre entre dos jobs. Con la lista literal, G3 fallaría en toda corrida
+   real. El evaluador lo excluye (`VOLATILES`) y lo imprime. ¿Hay otro campo volátil que deba entrar?
+2. **El control del nulo barajado.** §5.5 pide que, con etiquetas ya barajadas, «el percentil 95 quede
+   alrededor de cero». Con estratos volcán × sensor de tasas distintas el centro del nulo **no** es
+   cero (en el caso 1 de la autoprueba la mediana del nulo W2 a W6 es +0,025; corregir eso es para lo
+   que se estratifica). El evaluador controla otra cosa, que es la propiedad que importa: 1.000 brazos
+   que publican al azar dentro de cada estrato (la misma cuenta por estrato que el brazo real) tienen
+   que pasar G1 en no más de 5 % + 3 errores estándar (7,1 %; tolerancia elegida), y un brazo que
+   publica sólo en los positivos tiene que pasarlo. ¿Es aceptable ese reemplazo?
+3. **G2 y el veredicto por sensor.** El flag es uno para VIIRS 375 y 750, así que no se puede adoptar
+   un sensor sin el otro. El evaluador pide G2 en los dos para ADOPTAR; si falla en uno, el veredicto es
+   «DECIDE NICOLAS CON M4». ¿Correcto?
+4. **Qué hace G3 cuando falla.** §5.2 dice que una diferencia nocturna «se resuelve antes de mirar M1 a
+   M4». El evaluador da INDECIDIBLE y separa: pasadas que faltan o sobran, o versión de producto
+   distinta, «COBERTURA NOCTURNA DESPAREJA (repetir el job)»; mismos records con campos distintos,
+   «FALLA (defecto del cableado)».
+5. **La referencia no está congelada.** El evaluador lee por defecto el snapshot del repo, que
+   `sync-mirova-csv.yml` actualiza cada hora, y exige que reproduzca `sustrato.json` ventana por
+   ventana (positivos, negativos, pasadas y alertas por sensor, los 37 y la parsimonia 13/2.511 y
+   2/2.483); si no, INDECIDIBLE. Hoy la reproduce (caso 1). Los sha256 (fin de línea LF) de los cuatro
+   archivos con que se contó, para recuperarlos con `git show <commit>:<ruta>` y pasarlos con `--cons`,
+   `--ocr`, `--respaldo` y `--historico` si el snapshot cambia:
+   - `data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado.csv` 9f8542374de2ea5051349938da7c6598500561c4bd0013a81a364332106c2353
+   - `data/mirova_reference/mirova_v1_snapshot/registro_vrp_ocr.csv` a2e8cb67df34ed4899418cefacea78594e7abfa33f829e7251e29f66f760c11b
+   - `data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado_respaldo_20260408.csv` 183aff7f38c6ca9ef93c8e0951f8190dd12be2690d54dbacb7d7acabaaa93568
+   - `data/mirova_reference/union_historica/consolidado_filas_perdidas.csv` 5a68bd7fb4c386044422934239c5c857e2f00488a8c6ea21e1a754f7966e3abd
+
+   ¿Se congela antes de despachar (patrón `experiments/_s151_prereg_fk_11/congelar.py`)? Congelar desde
+   el remoto de Mirova-v1 podría no reproducir `sustrato.json` y obligaría a recontar el sustrato.
+6. **El 10 % de §5.4 sólo mira positivos.** Las pasadas de la tabla no procesadas salen de los
+   denominadores de M2 y M3 (y del `n` de G2) sin regla de repetición. Si los cortes de NASA no son al
+   azar (por ejemplo, un día entero), M2 y G2 se miden sobre una muestra sesgada. Hoy sólo se informa.
+7. **«Depende del OCR» y G2.** Si G1 pasa sólo con W2, el veredicto es «DEPENDE DEL OCR, DECIDE
+   NICOLAS» y se imprime G2 por sensor al lado; G2 no lo cambia.
+8. **Avisos que no deciden**: q_neg de 0,80 o más se marca como banda de saturación (A114, 80 a 92 %),
+   y un M1 de 0,30 o más exige auditoría independiente (la mejora es contra un M1 de 0 en el control).
+   Los dos son informativos; ¿alguno debería decidir?
+9. **La regla D-9 en SN y SE recalcula `p_MIROVA`** sobre la referencia modificada (en SN una alerta
+   mínima pasa a RUTINA y sale del numerador). Es sólo informativo; la regla original usa 13/2.511 y
+   2/2.483 fijos.
+10. **No procesada es «sin record a 120 s»**, sin distinguir búsqueda vacía, descarga fallida o un
+    procesador que devolvió None (por ejemplo, el volcán fuera del barrido). El log no nombra cada
+    gránulo procesado, así que el motivo sólo aparece cuando hay una línea «SKIP daytime», «ERROR
+    processing» o «No geolocation match»; el resto sale como «sin rastro en el log».
+11. **Pareo por volcán, sensor (375 o 750) y 120 s, no por plataforma.** Igual que `banco_paridad`.
+    Si dos plataformas del mismo sensor pasaran a menos de 120 s una de otra, se toma el record más
+    cercano.
+
+## 10. Comandos de despacho y de evaluación
+
+El workflow sólo se puede despachar desde `main` (limitación de `workflow_dispatch`), así que primero
+se mergea este PR. **Una ventana por despacho, y la siguiente recién cuando la anterior empezó a
+correr**: el grupo `s151-ab-diurno` guarda un solo run pendiente y un tercer despacho desplazaría al
+que espera. Mejor todavía, despachar cuando el A/B de F/K haya terminado (§7.1).
+
+```
+# W1 primero: job corto (Láscar, 2 jobs) para medir la duración del brazo diurno.
+gh workflow run reproc-s151-ab-diurno.yml --ref main -f preregistro_aprobado=si -f start=2026-03-01 -f end=2026-03-20 -f vols='["Lascar"]'
+
+# W2 a W6, 11 Tier A (22 jobs cada una). Si W1 tardó más de 1,5 h, partir cada una en dos mitades.
+V='["Lascar","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","NevadosDeChillan","Llaima","Villarrica","Copahue","PuyehueCordonCaulle","Chaiten"]'
+gh workflow run reproc-s151-ab-diurno.yml --ref main -f preregistro_aprobado=si -f start=2026-06-13 -f end=2026-06-30 -f vols="$V"
+gh workflow run reproc-s151-ab-diurno.yml --ref main -f preregistro_aprobado=si -f start=2026-07-20 -f end=2026-07-31 -f vols="$V"
+gh workflow run reproc-s151-ab-diurno.yml --ref main -f preregistro_aprobado=si -f start=2026-08-13 -f end=2026-08-31 -f vols="$V"
+gh workflow run reproc-s151-ab-diurno.yml --ref main -f preregistro_aprobado=si -f start=2026-09-01 -f end=2026-09-20 -f vols="$V"
+gh workflow run reproc-s151-ab-diurno.yml --ref main -f preregistro_aprobado=si -f start=2026-10-01 -f end=2026-10-14 -f vols="$V"
+```
+
+Antes de mirar cualquier resultado: leer `cobertura.txt` de cada corrida (paso `recolectar`, A108). Si
+falta una noche o un volcán, repetir ese job con la lista corta de `vols` y el mismo código.
+
+Evaluación, con las seis corridas juntas (cada salida vive en la rama `s151-ab-diurno/<run_id>`, bajo
+`experiments/_s151_ab_diurno/salidas/<run_id>/`):
+
+```
+python experiments/_s151_ab_diurno/evaluar_diurno.py \
+  --raiz experiments/_s151_ab_diurno/salidas/<run_W1> --raiz experiments/_s151_ab_diurno/salidas/<run_W2> \
+  --raiz experiments/_s151_ab_diurno/salidas/<run_W3> --raiz experiments/_s151_ab_diurno/salidas/<run_W4> \
+  --raiz experiments/_s151_ab_diurno/salidas/<run_W5> --raiz experiments/_s151_ab_diurno/salidas/<run_W6> \
+  --out experiments/_s151_ab_diurno/resultado.json > experiments/_s151_ab_diurno/resultado_salida.txt
+```
+
+Una repetición por cobertura (§5.4) se agrega como otra `--raiz` DESPUÉS de la original (si una pasada
+está en las dos, gana la última). Si la ventana ya se repitió y siguen faltando positivos, se agrega
+`--repetidas W<n>` para que salga del veredicto como cobertura insuficiente. Antes de la
+evaluación real, volver a correr `python experiments/_s151_ab_diurno/probar_evaluar_diurno.py`: tiene
+que seguir dando todas sus comprobaciones en verde sobre el mismo código.

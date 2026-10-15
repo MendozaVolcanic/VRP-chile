@@ -1,0 +1,17 @@
+# A/B S151 diurno (D-10, issue #813). Brazo CONTROL: produccion tal cual.
+#
+# EL FENOMENO. De dia el canal de infrarrojo medio suma a la emision termica la luz solar
+# reflejada. La replica descarta todo VIIRS diurno; MIROVA no (Campus et al. 2022, Sensors
+# 22:1713, p. 16 y 17). Este brazo es la produccion de hoy, con la rama diurna APAGADA, reprocesada
+# con el mismo codigo y en el mismo run que el brazo diurno: sirve para el nulo 2 del pre-registro
+# (las noches de los dos brazos tienen que ser identicas) y para la referencia nocturna M5.
+#
+# CRITERIO: pre-registrado ANTES de correr, en experiments/_s151_ab_diurno/PREREGISTRO.md.
+# NO OPERACIONAL: data_subdir aislado (A47), fuera del cron NRT, nunca se commitea a data/.
+extends: mirova_equivalent
+profile: _s151_ab_diurno_control
+description: >
+  Control del A/B diurno: flags identicos a mirova_equivalent (enable_daytime_viirs en false).
+
+output:
+  data_subdir: _s151_ab_diurno_control
