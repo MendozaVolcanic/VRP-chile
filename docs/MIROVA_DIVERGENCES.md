@@ -2300,6 +2300,15 @@ para un A/B, no para afirmar el origen exacto.
 
 ## D18 — El ROI1 del paper es una CAJA de 5 km igual para todos; el nuestro es un CÍRCULO de 3 a 20 km por volcán — **ABIERTA (A/B corrido S130 → NO ADOPTAR; divergencia de fidelidad literal, prioridad baja)** S129/S130
 
+> ⚠️ **S151, resultado del A/B (D-8 sellado por Nicolás el 2026-10-15; `experiments/_s151_prereg_caja/resultado_d1/`,
+> verificado): KC NO CUMPLE (veto) en D1.** Pierde una alerta protegida MODIS de Láscar (2026-03-27 07:10, MIROVA
+> 1,0 MW) cuyo único píxel nuestro cae a 3,2 km del cráter, en la corona; la repetición lo confirma y el veto es
+> definitivo según el pre-registro. VIIRS 375 y 750 sin pérdidas en D1. **El cierre vale con la geolocalización
+> MODIS de hoy**: el verificador encontró que el píxel del cráter MODIS aparece corrido hacia el lado del sensor,
+> creciendo con el ángulo de visión (hasta 3,5 km a 45° en Láscar, n = 13 pasadas; mecanismo SIN VERIFICAR:
+> interpolación de 5 a 1 km en `process_modis.py:342` o paralaje de la cumbre). No es D17. Si se corrige, la caja
+> se vuelve a medir. D2 y V1 no se despacharon: no pueden cambiar el veredicto.
+
 > ⚠️ **S151 (loop, tarea 1.7, `experiments/_s151_prereg_caja/`, PR #800, verificado): medido sin correr nada,
 > y con un A/B reducido esperando sello (D-8, issue #801).** (1) Desde #738 el flag de la caja llega a las 24
 > llamadas de umbral dual en los dos pases de los tres procesadores. (2) Sobre el candidato K (sin Test 1, `max`,
