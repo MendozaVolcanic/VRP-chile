@@ -149,7 +149,8 @@ CITAS_CLAUDE_MD = [
     ("pipeline/geo_utils.py", 29, "get_grid_center"),
     # S151: 1473 -> 1483, +10 por la marca A113 sobre el tope D9 (tarea 0.3 del loop, sólo comentario).
     # V31.1: 1483 -> 1493, +10 por la marca de MIROVA sin distancia (helpers de estilo y tooltip).
-    ("frontend/index.html", 1493, "isValidDetection"),
+    # S151: 1493 -> 1578, +85 por las alertas diurnas de MIROVA con sol (helpers, modo del tooltip, loader).
+    ("frontend/index.html", 1578, "isValidDetection"),
     # S151: predicado del tope D9, citado en la marca S151 de A23.
     ("pipeline/process_modis.py", 1009, "_path_d_cap_active"),
     # S140: corridas por el import de product_version (8b) y por el fondo persistido (T7).

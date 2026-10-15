@@ -88,19 +88,32 @@ def _es_noche(latlon, fecha):
     return _solar_elevation(latlon[0], latlon[1], dt) <= 0
 
 
-def _filas_ocr(path, names, latlon=None):
+def _es_dia(latlon, dt):
+    """Pasada diurna: Sol sobre el horizonte del volcan (elevacion > 0), la misma regla de _es_noche y del
+    pipeline (store._solar_elevation + _reject_daytime). Sin coordenadas no se decide: se trata como noche,
+    que es lo que hacia el script antes (sin coordenadas no filtraba nada)."""
+    if latlon is None:
+        return False
+    return not _es_noche(latlon, dt.strftime("%Y-%m-%d %H:%M"))
+
+
+def _filas_ocr(path, names):
     """Alertas del OCR (valores leidos de las imagenes de MIROVA). FALSO_POSITIVO_OCR queda fuera: es la
     etiqueta del scraper para lo que no pudo confirmar. Ojo (docs/S150_IMAGENES_SNPP.md): una fila del OCR
     puede traer la imagen de otra pasada; por eso salen marcadas `source: ocr` y el tablero las dibuja
-    distinto. Solo pasadas NOCTURNAS: el pipeline no procesa el dia, y entre las diurnas del OCR estan los
-    artefactos solares de MIROVA (A76: Lascar 2026-06-15 17:24, 760 MW "Alto")."""
+    distinto.
+
+    S151 (aprobado por Nicolas el 2026-10-15): hasta aca este filtro dejaba fuera las pasadas DIURNAS del OCR.
+    Ahora entran todas, y rebuild() las separa: las diurnas del OCR van a `records_dia_ocr` con `dia: true`,
+    nunca a `records`. Por que aparte: de dia el infrarrojo medio suma luz solar reflejada, y parte de esas
+    alertas son reflejo en nubes y no calor (A76: Lascar 2026-06-15 17:24, 760 MW "Alto";
+    experiments/_s151_alertas_diurnas/README.md: 40 de 94 pasadas protegidas diurnas con magnitud
+    desproporcionada). El tablero las dibuja como referencia marcada "dia"; ningun consumidor de `records`
+    las ve, asi que ningun numero publicado cambia."""
     with open(path, encoding="utf-8-sig") as f:
-        filas = [r for r in csv.DictReader(f)
-                 if (r.get("Volcan") or "").strip() in names
-                 and (r.get("Tipo_Registro") or "").strip() in ("ALERTA_TERMICA_OCR", TIPO_SIN_GEOMETRIA)]
-    if latlon is None:
-        return filas
-    return [r for r in filas if (r.get("Fecha_Satelite_UTC") or "")[:16] and _es_noche(latlon, r["Fecha_Satelite_UTC"])]
+        return [r for r in csv.DictReader(f)
+                if (r.get("Volcan") or "").strip() in names
+                and (r.get("Tipo_Registro") or "").strip() in ("ALERTA_TERMICA_OCR", TIPO_SIN_GEOMETRIA)]
 
 
 def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = None) -> None:
@@ -125,8 +138,9 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
     matched = [r for r in rows if (r.get("Volcan") or "").strip() in names]
     print(f"Total CSV rows: {len(rows)}")
     print(f"Matching {names}: {len(matched)}")
+    latlon = _coords(json_stem)
     if ocr:
-        filas_ocr = _filas_ocr(Path(ocr), names, _coords(json_stem))
+        filas_ocr = _filas_ocr(Path(ocr), names)
         for r in filas_ocr:
             r["_fuente"] = "ocr"
         print(f"OCR alerts for {names}: {len(filas_ocr)} (from {ocr})")
@@ -191,6 +205,11 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
             rec["distancia_km"] = None
             rec["clasificacion"] = CLASE_SIN_GEOMETRIA
             rec["sin_geometria"] = True
+        if _es_dia(latlon, dt):
+            # S151: clave solo en las pasadas diurnas (las nocturnas quedan byte a byte iguales). La tabla de
+            # MIROVA siempre entro a `records` a cualquier hora; desde aca esas filas diurnas llevan la marca
+            # para que el tablero las distinga. Las diurnas del OCR son nuevas y van aparte (ver abajo).
+            rec["dia"] = True
         kept.append(rec)
 
     print(f"  rejected by clasificacion: {dict(rejected_clases)}")
@@ -216,8 +235,14 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
                 by_key[key] = rec
         elif rec["VRP_MW"] > prev["VRP_MW"]:
             by_key[key] = rec
-    deduped = sorted(by_key.values(), key=lambda r: (r["datetime_utc"], r["sensor"]))
-    print(f"  after dedupe: {len(deduped)}")
+    todas = sorted(by_key.values(), key=lambda r: (r["datetime_utc"], r["sensor"]))
+    # S151: las diurnas del OCR se separan DESPUES del dedupe, asi una diurna del OCR que repite una pasada de
+    # la tabla sigue perdiendo contra la tabla, igual que antes. `records` queda con lo mismo de siempre (la
+    # tabla a cualquier hora y el OCR nocturno), y ningun consumidor que lea `records` ve un numero distinto.
+    deduped = [r for r in todas if not (r.get("dia") and r["source"] == "ocr")]
+    dia_ocr = [r for r in todas if r.get("dia") and r["source"] == "ocr"]
+    print(f"  after dedupe: {len(deduped)} (+ {len(dia_ocr)} diurnas del OCR en records_dia_ocr; "
+          f"{sum(1 for r in deduped if r.get('dia'))} diurnas de la tabla marcadas dia en records)")
 
     sensors = Counter(r["sensor"] for r in deduped)
     print(f"  sensors: {dict(sensors)}")
@@ -239,6 +264,15 @@ def rebuild(json_stem: str, csv_volcano: str, source: Path = None, ocr: Path = N
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "records": deduped,
     }
+    if ocr:
+        output["nota_dia"] = (
+            "S151: 'dia': true marca una pasada con el Sol sobre el horizonte del volcan (pipeline.store."
+            "_solar_elevation > 0). De dia el infrarrojo medio suma luz solar reflejada y parte de estas alertas "
+            "son reflejo en nubes, no calor (A76; experiments/_s151_alertas_diurnas/README.md). La replica es "
+            "solo nocturna. 'records' trae lo de siempre (la tabla a cualquier hora, ahora con la marca, y el OCR "
+            "nocturno); 'records_dia_ocr' trae las alertas diurnas del OCR, solo para dibujar en el tablero como "
+            "referencia. No usarlas en metricas de paridad.")
+        output["records_dia_ocr"] = dia_ocr
     dest.write_text(json.dumps(output, indent=2), encoding="utf-8")
     print(f"  wrote: {dest}")
 

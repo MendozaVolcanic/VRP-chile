@@ -179,14 +179,17 @@ def _rebuild(tmp_path, monkeypatch, filas_ocr):
 
 def test_rebuild_las_incluye_con_marca(tmp_path, monkeypatch):
     out = _rebuild(tmp_path, monkeypatch, [_sin_geo(), _sin_geo(sensor="VIIRS", vrp="14.0"),
-                                           _sin_geo(t="2026-10-14 18:42:02", vrp="4.24")])   # diurna: fuera
+                                           _sin_geo(t="2026-10-14 18:42:02", vrp="4.24")])   # diurna: fuera de records
     por = {(r["datetime_utc"], r["sensor"]): r for r in out["records"]}
     r = por[("2026-10-15 05:00", "VIIRS375")]
     assert r["VRP_MW"] == 22.13 and r["source"] == "ocr"
     assert r["distancia_km"] is None and r["sin_geometria"] is True
     assert r["clasificacion"] == "SIN_GEOMETRIA"
     assert por[("2026-10-15 05:00", "VIIRS")]["VRP_MW"] == 14.0
-    assert ("2026-10-14 18:42", "VIIRS375") not in por          # el OCR diurno sigue fuera (A76)
+    assert ("2026-10-14 18:42", "VIIRS375") not in por          # el OCR diurno sigue fuera de records (A76)
+    # S151: desde la serie diurna del tablero entra aparte, con sus dos marcas (tests/test_rebuild_mirova_diurnas_s151.py)
+    (d,) = out["records_dia_ocr"]
+    assert d["datetime_utc"] == "2026-10-14 18:42" and d["dia"] is True and d["sin_geometria"] is True
     # las filas de siempre no cambian: ni la clave nueva ni la distancia
     assert por[("2026-10-14 06:18", "VIIRS375")] == {
         "datetime_utc": "2026-10-14 06:18", "sensor": "VIIRS375", "VRP_MW": 2.54, "distancia_km": 0.84,

@@ -966,7 +966,7 @@ async function loadVolcano(v, opts = {}) {
   // Solo los 11 Tier A (hasMirova=true) tienen data operacional. Los 34 restantes
   // quedan como tarjetas "sin datos" — ni data propia ni refs MIROVA.
   if (!v.hasMirova) {
-    allData[v.name] = { records: [], mirovaRecords: [], updated: null };
+    allData[v.name] = { records: [], mirovaRecords: [], mirovaDiaOcr: [], updated: null };
     return;
   }
   const suffix = full ? "" : "_recent";
@@ -981,6 +981,9 @@ async function loadVolcano(v, opts = {}) {
   allData[v.name] = {
     records:       data?.records   || [],
     mirovaRecords: mirova?.records || [],
+    // S151: alertas diurnas del OCR de MIROVA, SOLO para dibujar (con un sol). Van aparte de mirovaRecords
+    // para que ninguna metrica, confirmacion ni tarjeta cambie (ver toMirovaDiaPoints).
+    mirovaDiaOcr:  mirova?.records_dia_ocr || [],
     updated:       data?.updated   || null,
   };
   // S89 #3: etiquetar mirova_confirmed por-record (cruce con CSV MIROVA, capa
@@ -1041,6 +1044,88 @@ function mirovaPointFill(color) { return (ctx) => (ctx.raw && ctx.raw.ocr ? "tra
 function mirovaPointRadius(base) { return (ctx) => (ctx.raw && ctx.raw.sinGeo ? base + 3 : base); }
 const MIROVA_SIN_GEO_TXT = "distancia desconocida (la imagen de MIROVA era de otra pasada)";
 function mirovaSufijoSinGeo(ctx) { return ctx && ctx.raw && ctx.raw.sinGeo ? " · " + MIROVA_SIN_GEO_TXT : ""; }
+
+// S151 (aprobado por Nicolas, 2026-10-15): alertas DIURNAS de MIROVA, como referencia marcada con un sol. La
+// replica es solo nocturna (la rama diurna VIIRS esta apagada y en A/B, D-10). De dia el infrarrojo medio suma
+// luz solar reflejada, y parte de estas alertas son reflejo en nubes y no calor (A76: Lascar 2026-06-15, 760 MW
+// al mediodia; experiments/_s151_alertas_diurnas/README.md: 40 de 94 pasadas protegidas diurnas con magnitud
+// desproporcionada). Por eso no se mezclan con la linea nocturna de MIROVA. Vienen de data/mirova/<Volcan>.json
+// por dos lados: las de la tabla, en `records` con `dia: true` (siempre estuvieron ahi, sin marca), y las del
+// OCR, en `records_dia_ocr` (nuevas, fuera de `records` para que ninguna metrica cambie).
+const MIROVA_DIA_TXT = "pasada diurna: puede incluir reflejo solar";
+const MIROVA_DIA_RAYOS = "#ffc400";
+function mirovaEsDia(r) { return !!r && r.dia === true; }
+// Sol: rayos dorados alrededor de un disco del color del sensor. Mismas convenciones que la serie nocturna:
+// disco lleno = tabla, disco hueco = OCR, X dentro = distancia desconocida.
+const _iconosSol = new Map();
+function mirovaIconoSol(color, hueco, sinGeo) {
+  const k = color + "|" + hueco + "|" + sinGeo;
+  if (_iconosSol.has(k)) return _iconosSol.get(k);
+  const n = 20, c = n / 2, cv = document.createElement("canvas");
+  cv.width = n; cv.height = n;
+  const g = cv.getContext("2d");
+  g.strokeStyle = MIROVA_DIA_RAYOS; g.lineWidth = 1.6; g.lineCap = "round";
+  for (let i = 0; i < 8; i++) {
+    const a = i * Math.PI / 4;
+    g.beginPath(); g.moveTo(c + 6 * Math.cos(a), c + 6 * Math.sin(a));
+    g.lineTo(c + 9.2 * Math.cos(a), c + 9.2 * Math.sin(a)); g.stroke();
+  }
+  g.beginPath(); g.arc(c, c, 4.2, 0, 2 * Math.PI);
+  g.lineWidth = 1.8; g.strokeStyle = color;
+  if (!hueco) { g.fillStyle = color; g.fill(); }
+  g.stroke();
+  if (sinGeo) {
+    g.lineWidth = 1.4; g.strokeStyle = hueco ? color : "#ffffff";
+    g.beginPath(); g.moveTo(c - 2.4, c - 2.4); g.lineTo(c + 2.4, c + 2.4);
+    g.moveTo(c + 2.4, c - 2.4); g.lineTo(c - 2.4, c + 2.4); g.stroke();
+  }
+  _iconosSol.set(k, cv);
+  return cv;
+}
+// Un punto por dia y sensor (el maximo diurno). Guarda la hora y el sensor: con interaction "index" el tooltip
+// puede juntar puntos de distintas fechas, asi que la etiqueta del sol se describe sola.
+// sensorInfo(s) -> { color, label } del sensor del CSV de MIROVA, o null para no dibujarlo.
+function toMirovaDiaPoints(records, sensorInfo) {
+  const m = new Map();
+  for (const r of records) {
+    const d = (r.datetime_utc || "").slice(0, 10); if (!d) continue;
+    const s = r.sensor || r.Sensor || "";
+    const info = sensorInfo(s); if (!info) continue;
+    const v = parseFloat(r.VRP_MW ?? r.vrp_mw ?? 0);
+    if (!(v > 0)) continue;
+    const k = d + "|" + s;
+    if (!m.has(k) || v > m.get(k).y) {
+      m.set(k, { x: d, y: v, dt: r.datetime_utc, sensor: info.label, color: info.color,
+                 ocr: r.source === "ocr", sinGeo: r.sin_geometria === true, dia: true });
+    }
+  }
+  return [...m.values()].sort((a, b) => (a.x < b.x ? -1 : a.x > b.x ? 1 : 0));
+}
+function mirovaDiaDataset(points) {
+  return {
+    label: "☀ MIROVA pasada diurna (ref.)", data: points, type: "line", showLine: false, order: 0,
+    borderColor: MIROVA_DIA_RAYOS, backgroundColor: MIROVA_DIA_RAYOS,
+    pointRadius: 8, pointHoverRadius: 9, mirovaDia: true,
+    pointStyle: (ctx) => (ctx.raw ? mirovaIconoSol(ctx.raw.color, ctx.raw.ocr, ctx.raw.sinGeo) : "circle"),
+  };
+}
+// El modo "index" de Chart.js alinea los puntos por POSICION en el arreglo, no por fecha, y la serie del sol tiene
+// pocas fechas: con "index" su tooltip mostraba el sol de otro dia o ninguno. Este modo es "index" para todo lo
+// demas (sin cambio) y agrega el sol solo cuando el cursor esta encima de el.
+if (typeof Chart !== "undefined" && !Chart.Interaction.modes.indexMasSol) {
+  Chart.Interaction.modes.indexMasSol = function (chart, e, options, useFinalPosition) {
+    const esSol = (it) => !!chart.data.datasets[it.datasetIndex].mirovaDia;
+    const base = Chart.Interaction.modes.index(chart, e, options, useFinalPosition).filter(it => !esSol(it));
+    const sol = Chart.Interaction.modes.point(chart, e, { intersect: true }, useFinalPosition).filter(esSol);
+    return base.concat(sol);
+  };
+}
+// Lineas extra del tooltip del sol (en lineas aparte para que no se corten en un grafico angosto).
+function mirovaLineasDia(ctx) {
+  const p = ctx && ctx.raw;
+  if (!p || !p.dia) return [];
+  return ["    " + p.sensor + " · " + p.dt + " UTC" + (p.ocr ? " (OCR)" : ""), "    " + MIROVA_DIA_TXT];
+}
 
 // S32 P2 — VRP "MIROVA-equivalent": cluster contiguo del cráter, no integrated
 // global. Coppola 2016a SP 426.5 §2.2 "neighbor pixels connectivity": MIROVA
@@ -2274,6 +2359,10 @@ function renderDetail() {
   const d = allData[v.name] || { records: [], mirovaRecords: [] };
   const filtered   = filterDays(d.records, currentDays);
   const mFiltered  = filterDays(d.mirovaRecords, currentDays);
+  // S151: la linea de MIROVA es solo nocturna (como la replica); lo diurno va aparte, con un sol. Lo diurno
+  // junta las filas de la tabla marcadas `dia` y las del OCR de `records_dia_ocr`.
+  const mNoche     = mFiltered.filter(r => !mirovaEsDia(r));
+  const mDia       = mFiltered.filter(mirovaEsDia).concat(filterDays(d.mirovaDiaOcr || [], currentDays));
 
   // S33 bug fix: pasar inner_radius_km del volcán a mirovaEqVrp para validar
   // pc.centroid_dist_km. Sin esto, clusters far en Salar Atacama se reportaban
@@ -2480,7 +2569,9 @@ function renderDetail() {
   mirovaNota.style.cssText = "font-size:0.75rem;color:#9aa;margin-top:4px;";
   mirovaNota.innerHTML = "MIROVA: ▲ valor de su tabla publicada · ◇ hueco = valor leído de su imagen por OCR " +
     "(puede corresponder a otra pasada de la misma noche; no usarlo para calibrar magnitud) · " +
-    "✕ = VRP leído de su imagen con " + MIROVA_SIN_GEO_TXT + ".";
+    "✕ = VRP leído de su imagen con " + MIROVA_SIN_GEO_TXT + " · " +
+    "☀ = alerta de MIROVA en " + MIROVA_DIA_TXT + " (nuestra réplica es sólo nocturna; " +
+    "disco lleno = tabla, hueco = OCR).";
   vrpPanel.appendChild(mirovaNota);
   chartsGrid.appendChild(vrpPanel);
 
@@ -3092,7 +3183,7 @@ function renderDetail() {
       if (noaa375.length)   ds.push({ label:"VIIRS NOAA-20 375m", data:toDailyMax(noaa375,   eqVrp), backgroundColor:"#f06292cc", borderColor:"#f06292", borderWidth:1, borderRadius:2, borderSkipped:false });
       if (noaa21_375.length) ds.push({ label:"VIIRS NOAA-21 375m",data:toDailyMax(noaa21_375,eqVrp), backgroundColor:"#f8bbd0cc", borderColor:"#f8bbd0", borderWidth:1, borderRadius:2, borderSkipped:false });
     }
-    if (sensorVisible.MIROVA && mFiltered.length) {
+    if (sensorVisible.MIROVA && (mNoche.length || mDia.length)) {
       // S76 P1 — separar referencia MIROVA por sensor con paleta apareada a la
       // nuestra + dash + triángulos. Permite leer side-by-side: "MODIS Aqua
       // naranja sólida" (nuestro) vs "MIROVA MODIS naranja discontinua con
@@ -3100,8 +3191,9 @@ function renderDetail() {
       // también apaga la referencia MIROVA correspondiente (coherencia).
       // Sensor labels en CSV consolidado: "MODIS", "VIIRS375" (I-band),
       // "VIIRS" (= M-band 750m, naming histórico MIROVA).
+      // S151: las lineas son solo nocturnas (mNoche); las diurnas van al dataset del sol, abajo.
       const mByS = { MODIS: [], VIIRS375: [], VIIRS750: [] };
-      for (const r of mFiltered) {
+      for (const r of mNoche) {
         const s = r.sensor || r.Sensor || "";
         if (s === "MODIS") mByS.MODIS.push(r);
         else if (s === "VIIRS375") mByS.VIIRS375.push(r);
@@ -3134,6 +3226,14 @@ function renderDetail() {
           pointBackgroundColor:mirovaPointFill("#00bcd4"), tension:0,
         });
       }
+      // S151: alertas diurnas de MIROVA, un sol por dia y sensor, con el color del sensor y el mismo toggle.
+      const diaPts = toMirovaDiaPoints(mDia, (s) => {
+        if (s === "MODIS")    return sensorVisible.MODIS    ? { color: "#ff8c00", label: "MODIS" } : null;
+        if (s === "VIIRS375") return sensorVisible.VIIRS375 ? { color: "#e91e63", label: "VIIRS 375m" } : null;
+        if (s === "VIIRS")    return sensorVisible.VIIRS750 ? { color: "#00bcd4", label: "VIIRS 750m" } : null;
+        return null;
+      });
+      if (diaPts.length) ds.push(mirovaDiaDataset(diaPts));
     }
     return ds;
   }
@@ -3229,15 +3329,24 @@ function renderDetail() {
     // ya muestra nuestra serie agregada (max diario all-sensors) y conviene
     // una sola línea MIROVA de referencia agregada para no saturar el panel
     // secundario. El detalle per-sensor vive en el chart principal.
-    if (mFiltered.length && sensorVisible.MIROVA !== false) {
+    // S151: la linea agregada tambien es solo nocturna; las diurnas, con su sol (todos los sensores, igual que
+    // la linea).
+    if (mNoche.length && sensorVisible.MIROVA !== false) {
       ds.push({
         label: "MIROVA (referencia, max diario all-sensors)",
-        data: toMirovaDaily(mFiltered),
+        data: toMirovaDaily(mNoche),
         type: "line", order: 0,
         borderColor: "#ffc107", borderDash:[5,3], backgroundColor: "transparent",
         borderWidth: 2.5, pointRadius: mirovaPointRadius(4), pointStyle:mirovaPointStyle, pointBorderColor:"#ffc107",
         pointBackgroundColor:mirovaPointFill("#ffc107"), tension: 0,
       });
+    }
+    if (mDia.length && sensorVisible.MIROVA !== false) {
+      const diaPts = toMirovaDiaPoints(mDia, (s) => (
+        s === "MODIS" ? { color: "#ff8c00", label: "MODIS" }
+        : s === "VIIRS375" ? { color: "#e91e63", label: "VIIRS 375m" }
+        : s === "VIIRS" ? { color: "#00bcd4", label: "VIIRS 750m" } : null));
+      if (diaPts.length) ds.push(mirovaDiaDataset(diaPts));
     }
     return ds;
   }
@@ -3253,13 +3362,13 @@ function renderDetail() {
       plugins: [mirovaBandsPlugin],
       options: {
         responsive: true, maintainAspectRatio: false,
-        interaction: { mode:"index", intersect:false },
+        interaction: { mode:"indexMasSol", intersect:false },  // S151: "index" + el sol bajo el cursor
         plugins: {
           legend: { labels: { color:"#7a8fa6", font:{size:11}, boxWidth:12, padding:12 } },
           tooltip: {
             backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
             titleColor:"#e0e6f0", bodyColor:"#7a8fa6",
-            callbacks: { label: ctx => " " + ctx.dataset.label + ": " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(3) : "\u2014") + " MW" + mirovaSufijoSinGeo(ctx) }
+            callbacks: { label: ctx => [" " + ctx.dataset.label + ": " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(3) : "\u2014") + " MW" + mirovaSufijoSinGeo(ctx)].concat(mirovaLineasDia(ctx)) }
           }
         },
         scales: {
@@ -3372,13 +3481,13 @@ function renderDetail() {
         plugins: [mirovaBandsPlugin],
         options: {
           responsive: true, maintainAspectRatio: false,
-          interaction: { mode:"index", intersect:false },
+          interaction: { mode:"indexMasSol", intersect:false },  // S151: "index" + el sol bajo el cursor
           plugins: {
             legend: { labels: { color:"#7a8fa6", font:{size:11}, boxWidth:12, padding:12 } },
             tooltip: {
               backgroundColor:"#0f3460", borderColor:"#1a3a5c", borderWidth:1,
               titleColor:"#e0e6f0", bodyColor:"#7a8fa6",
-              callbacks: { label: ctx => " " + ctx.dataset.label + ": " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(3) : "\u2014") + " MW" + mirovaSufijoSinGeo(ctx) }
+              callbacks: { label: ctx => [" " + ctx.dataset.label + ": " + (ctx.parsed.y != null ? ctx.parsed.y.toFixed(3) : "\u2014") + " MW" + mirovaSufijoSinGeo(ctx)].concat(mirovaLineasDia(ctx)) }
             }
           },
           scales: {
