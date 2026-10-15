@@ -87,6 +87,14 @@ def dia_local(fila):
 TIPO_MINIMA_SE = "ALERTA_MINIMA_SE"
 
 
+def huella(claves):
+    """sha256 de la lista ordenada de claves de pasada: identidad del conjunto, no sólo su tamaño
+    (verificador del PR #822, hueco 4). La usan main() al escribir sustrato.json y evaluar_diurno.py
+    al comprobar que la referencia que lee es la del pre-registro."""
+    import hashlib
+    return hashlib.sha256("\n".join(sorted("|".join(k) for k in claves)).encode("utf-8")).hexdigest()
+
+
 def universo(filas, coords):
     """Las poblaciones del pre-registro sobre filas ya normalizadas (y, si se pidió, con la regla
     D-9 aplicada). La usan main() y evaluar_diurno.py, para que el evaluador mida sobre la MISMA
@@ -186,6 +194,10 @@ def main():
             "con_alerta_por_sensor": {s: por_sensor[s][1] for s in VIIRS},
             "con_alerta_tabla_u_ocr_por_sensor": {s: por_sensor[s][2] for s in VIIRS},
             "parsimonia_mirova": pars,
+            # Identidad de cada conjunto por sensor (agregado S151 tras el verificador del PR #822):
+            # el evaluador compara estas huellas, no sólo los conteos.
+            "huellas": {s: {"neg": huella(k for k in n if k[1] == s), "tabla": huella(k for k in t if k[1] == s),
+                            "alerta": huella(k for k in ac if k[1] == s)} for s in VIIRS},
         })
     fuera = sorted("|".join(k) for k in pos if k not in cubiertos)
     out["positivos_fuera_de_ventana"] = fuera

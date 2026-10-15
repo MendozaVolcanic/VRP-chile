@@ -10,8 +10,9 @@ pre-registro pide es otra cosa, y este script lo cuenta por separado:
     direcciones (faltan y sobran, como S147 H3). El flag no toca la noche, así que una diferencia es un
     corte de NASA (A64) o un defecto del cableado; en los dos casos se repite el job antes de evaluar.
   * DÍA (nulo 1, A116): el control no puede traer NINGUNA pasada diurna (store la rechaza) y el brazo
-    diurno no puede traer pasadas MODIS diurnas (la rama de D-10 es sólo VIIRS). Si el brazo diurno no
-    trae ni una pasada VIIRS diurna, el cableado falló (el caso S92) y se avisa.
+    diurno no puede traer pasadas MODIS diurnas (la rama de D-10 es sólo VIIRS). Si al brazo diurno le
+    falta TODA pasada diurna de VIIRS 375 o de VIIRS 750 (se exige cada sensor por separado), esa compuerta
+    no se abrió (el caso S92) y se avisa.
 
 Día y noche por la MISMA regla del pipeline (`pipeline.diurno.pasada_es_diurna`, elevación solar > 0
 sobre el volcán a la hora del record), nunca por `es_pasada_diurna_descartada`, que sigue al flag.
@@ -107,8 +108,12 @@ def main(argv=None):
             mal.append("%s: noches desparejas (faltan %d, sobran %d, archivos %s)" % (fila["brazo"], len(faltan), len(sobran), faltan_arch))
         if db.get("MODIS"):
             mal.append("%s: %d pasadas MODIS diurnas (la rama de D-10 es sólo VIIRS)" % (fila["brazo"], db["MODIS"]))
-        if fila["brazo"] == "_s151_ab_diurno_on" and not (db.get("VIIRS375") or db.get("VIIRS750")):
-            mal.append("%s: CERO pasadas VIIRS diurnas, el cableado no abrió el día (caso S92): INDECIDIBLE" % fila["brazo"])
+        # Por sensor (verificador del PR #822, hueco 6): 375 y 750 son dos compuertas; «375 o 750» dejaba pasar
+        # una compuerta de 750 cerrada sin aviso.
+        mudos = [s for s in ("VIIRS375", "VIIRS750") if not db.get(s)]
+        if fila["brazo"] == "_s151_ab_diurno_on" and mudos:
+            mal.append("%s: CERO pasadas diurnas de %s, el cableado no abrió el día en ese sensor (caso S92): INDECIDIBLE"
+                       % (fila["brazo"], ", ".join(mudos)))
     print("%-28s %8s %7s %7s  %-40s %s" % ("brazo", "noche", "faltan", "sobran", "pasadas diurnas por sensor", "faltan/sobran por volcán"))
     for f in filas:
         print("%-28s %8d %7d %7d  %-40s %s" % (f["brazo"], f["noche"], f["faltan"], f["sobran"], f["dia_por_sensor"] or "-",

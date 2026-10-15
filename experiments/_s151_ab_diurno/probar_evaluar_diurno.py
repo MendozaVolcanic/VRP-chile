@@ -25,8 +25,16 @@ Casos (respuesta esperada entre paréntesis):
   11 g2_borde           umbral binomial a cobertura completa                   (20 en VIIRS 375 y 6 en VIIRS 750, §6)
   12 trampa_a118        indexar_referencia con el flag apagado                  (no ve ninguna pasada diurna del universo)
   13 regla_minimas      sin la regla en el árbol: PENDIENTE; con una regla neutra inyectada: SN y SE iguales a original
-  14 cobertura          contar_pasadas_noche.py (paso recolectar del workflow) sobre los casos 1, 7 y 8, y sin las
-                        noches de un volcán en el brazo diurno                (0, 1, 0 y 1)
+  14 cobertura          contar_pasadas_noche.py (paso recolectar del workflow) sobre los casos 1, 7, 19 y 8, y sin
+                        las noches de un volcán en el brazo diurno            (0, 1, 1, 0 y 1)
+  Agregados tras el verificador del PR #822 (cada uno atrapa una mutación de mutar_evaluador.py):
+  15 lascar_todo        publica todo Láscar de día y nada más                  (G1 FALLA; atrapa estrato_unico)
+  16 g2_un_sensor       G2 cumple en 375 y falla en 750                         (DECIDE NICOLAS CON M4, no ADOPTAR; atrapa g2_any)
+  17 volatiles          noches con processed_utc y first_processed_utc distintos (G3 CUMPLE; atrapa volatiles)
+  18 granulo_distinto   una noche con otro nombre de gránulo                    (G3 cobertura, no cableado)
+  19 v750_cerrado       el brazo diurno sin ninguna pasada diurna de 750        (INDECIDIBLE por nulo 1 de VIIRS750)
+  20 tabla_sin_procesar 15 % de la tabla VIIRS 375 de W5 sin procesar           (PENDIENTE DE REPETICION antes de G2)
+  21 control_nulo       el control del nulo con el nulo ×0,3 y corrido −0,5     (FALLA; sin romper, OK; atrapa nulo_angosto)
 """
 from __future__ import annotations
 
@@ -81,16 +89,25 @@ def noches(UW):
 
 
 def escribir(dirc, UW, publica, sacar=(), diurno_igual_control=False, flags_diurno=None, cambiar_noche=False,
-             linea_extra=""):
+             linea_extra="", volatiles_distintos=False, granulo_distinto=False):
     """Escribe <dirc>/<brazo>/<vol>.json y <dirc>/logs/<brazo>_<vol>.log."""
     por = {n: {v: [] for v in bp.VOLS} for n in ED.BRAZOS}
     i = 0
     for vol, b, t in noches(UW):
         i += 1
         for n in ED.BRAZOS:
-            por[n][vol].append(record(vol, b, t, NO, False, i))
+            r = record(vol, b, t, NO, False, i)
+            if n == "diurno" and volatiles_distintos:
+                # Dos jobs guardan el mismo record a horas distintas: no es una diferencia de medición.
+                r.update({"processed_utc": "2026-10-16T09:%02d:00Z" % (i % 60),
+                          "first_processed_utc": "2026-10-16T09:%02d:30Z" % (i % 60)})
+            por[n][vol].append(r)
     if cambiar_noche:
         por["diurno"]["Lascar"][0] = dict(por["diurno"]["Lascar"][0], t_max_k=999.0)
+    if granulo_distinto:
+        # La misma pasada con otro nombre de gránulo (NASA la reprodujo entre los dos jobs): cobertura, no cableado.
+        r = por["diurno"]["Lascar"][0]
+        por["diurno"]["Lascar"][0] = dict(r, granule=r["granule"].replace("sintetico", "reproducido"))
     if not diurno_igual_control:
         for w in ED.VENTANAS:
             for k in sorted(UW[w]["pos"] | UW[w]["tabla"]):
@@ -140,6 +157,12 @@ def main():
         pos_w3 = sorted(UW["W3"]["pos"])
         rnd = random.Random(7)
         azar = {k for w in ED.VENTANAS for k in UW[w]["pos"] | UW[w]["tabla"] if rnd.random() < 0.30}
+        # Seis negativos de VIIRS 750 en W4: con las 2 protegidas de tabla de 750 suman 8 publicaciones y G2 falla
+        # en 750 (desde 6, caso 11); en 375 sigue en 6 de 2.511, lejos de 20.
+        seis_v750 = set(sorted(k for k in UW["W4"]["neg"] if k[1] == "VIIRS750")[:6])
+        todo_v750 = {k for w in ED.VENTANAS for k in UW[w]["pos"] | UW[w]["tabla"] if k[1] == "VIIRS750"}
+        t5 = sorted(k for k in UW["W5"]["tabla"] - UW["W5"]["pos"] if k[1] == "VIIRS375")
+        quince_w5 = set(t5[: int(0.15 * len(t5)) + 1])
         casos = [
             ("1 solo_protegidas", dict(publica=lambda w, k, U: k in U[w]["pos"]), []),
             ("2 todo_publica", dict(publica=lambda w, k, U: True), []),
@@ -156,6 +179,12 @@ def main():
                                      linea_extra="  SKIP daytime: VJ102IMG.A2026166.1724.021.2026166190000.nc (solar elev=40.1°)"), []),
             ("10b filtro_de_fetch", dict(publica=lambda w, k, U: k in U[w]["pos"],
                                          linea_extra="  VIIRS_NOAA20: kept 3 of 6 granules (night filter)"), []),
+            ("15 lascar_todo", dict(publica=lambda w, k, U: k[0] == "Lascar"), []),
+            ("16 g2_un_sensor", dict(publica=lambda w, k, U: k in U[w]["pos"] or k in seis_v750), []),
+            ("17 volatiles", dict(publica=lambda w, k, U: k in U[w]["pos"], volatiles_distintos=True), []),
+            ("18 granulo_distinto", dict(publica=lambda w, k, U: k in U[w]["pos"], granulo_distinto=True), []),
+            ("19 v750_cerrado", dict(publica=lambda w, k, U: k in U[w]["pos"], sacar=todo_v750), []),
+            ("20 tabla_sin_procesar", dict(publica=lambda w, k, U: k in U[w]["pos"], sacar=quince_w5), []),
         ]
         salidas = {}
         for nombre, kw, extra in casos:
@@ -208,6 +237,29 @@ def main():
                 chequear(n, res["veredicto"].startswith("INDECIDIBLE") and "cableado del brazo diurno" in res["veredicto"], "INDECIDIBLE: el log muestra un VIIRS saltado por diurno")
             elif n == "filtro_de_fetch":
                 chequear(n, res["veredicto"].startswith("INDECIDIBLE") and "cableado del brazo diurno" in res["veredicto"], "INDECIDIBLE: el log muestra el filtro nocturno de fetch aplicado a VIIRS")
+            elif n == "lascar_todo":
+                # Publica todo Láscar de día y nada más: dentro del volcán no discrimina. Con el nulo estratificado D
+                # queda en el p95 (FALLA); con un nulo sin estratos pasaría (mutación estrato_unico).
+                r1 = res["G1_W2W6"]
+                chequear(n, r1["veredicto"] == "FALLA", "G1 FALLA (D %+.4f, p95 %+.4f)" % (r1["D"], r1["p95"]))
+                chequear(n, res["veredicto"].startswith("NO ADOPTAR"), "veredicto NO ADOPTAR")
+            elif n == "g2_un_sensor":
+                chequear(n, g["VIIRS375"]["veredicto"] == "CUMPLE" and g["VIIRS750"]["veredicto"] == "FALLA",
+                         "G2 cumple en 375 y falla en 750 (%s)" % {s: (g[s]["publicadas"], g[s]["procesadas"]) for s in ED.VIIRS})
+                chequear(n, not res["veredicto"].startswith("ADOPTAR") and res["veredicto"].startswith("DECIDE NICOLAS CON M4"),
+                         "con G2 en un solo sensor no da ADOPTAR: DECIDE NICOLAS CON M4")
+            elif n == "volatiles":
+                chequear(n, res["G3"] == "CUMPLE" and res["veredicto"].startswith("ADOPTAR"),
+                         "processed_utc y first_processed_utc distintos entre brazos no son defecto de cableado (G3 %s)" % res["G3"])
+            elif n == "granulo_distinto":
+                chequear(n, res["G3"].startswith("COBERTURA") and res["veredicto"].startswith("INDECIDIBLE"),
+                         "otro gránulo en la misma pasada cuenta como cobertura, no como cableado (G3 %s)" % res["G3"][:40])
+            elif n == "v750_cerrado":
+                chequear(n, res["veredicto"].startswith("INDECIDIBLE") and "VIIRS750" in res["veredicto"],
+                         "compuerta de VIIRS 750 cerrada: el nulo 1 por sensor la atrapa (%s)" % res["veredicto"][:90])
+            elif n == "tabla_sin_procesar":
+                chequear(n, res["veredicto"].startswith("PENDIENTE DE REPETICION") and "W5" in res["veredicto"],
+                         "%d pasadas de tabla VIIRS 375 de W5 sin procesar (más del 10 %%): PENDIENTE DE REPETICION antes de G2" % len(quince_w5))
 
         print("\n== caso 11 g2_borde")
         u375 = ED.umbral_g2(2511, 13 / 2511)
@@ -239,10 +291,26 @@ def main():
             res = salidas["1 solo_protegidas"][0]
             chequear("regla_minimas", set(res["regla_minimas"]) == {"SN", "SE"}, "la regla existe: SN y SE informados")
 
+        print("\n== caso 21 control del nulo: tiene que FALLAR con el nulo roto a propósito (verificador del PR #822)")
+        cls1 = salidas["1 solo_protegidas"][0]["cls"]
+        orig = ED.nulo_barajado
+        try:
+            for etq, roto in (("sin romper", None),
+                              ("nulo x0,3", lambda est, rng, n=ED.N_BARAJADOS: None if orig(est, rng, n) is None else 0.3 * orig(est, rng, n)),
+                              ("nulo corrido -0,5", lambda est, rng, n=ED.N_BARAJADOS: None if orig(est, rng, n) is None else orig(est, rng, n) - 0.5)):
+                if roto:
+                    ED.nulo_barajado = roto
+                for caso_cls, nom in ((cls1, "caso 1"), (salidas["3 azar"][0]["cls"], "caso 3")):
+                    r = ED.controles_del_nulo(caso_cls, ED.DECIDEN, ED.np.random.default_rng(0))
+                    chequear("control_nulo", r["ok"] is (roto is None), "%s, %s: %s -> %s" % (etq, nom, r["texto"], "OK" if r["ok"] else "FALLA"))
+        finally:
+            ED.nulo_barajado = orig
+
         print("\n== caso 14 cobertura del workflow (contar_pasadas_noche.py, el paso «recolectar»)")
         import contar_pasadas_noche as CP
         for caso, esperado, txt in (("1", 0, "caso 1: noches parejas, día como se espera -> 0"),
                                     ("7", 1, "caso 7: el brazo diurno sin ninguna pasada VIIRS diurna -> 1 (caso S92)"),
+                                    ("19", 1, "caso 19: el brazo diurno sin pasadas diurnas de VIIRS 750 -> 1 (por sensor)"),
                                     ("8", 0, "caso 8: el conteo mira pasadas, no campos; el cambio de campo lo atrapa G3 -> 0")):
             d = tmp / caso
             with contextlib.redirect_stdout(io.StringIO()):

@@ -4,7 +4,7 @@ Universo real del pre-registro: {'W1': (5, 47, 77), 'W2': (12, 1099, 1189), 'W3'
    [OK] veredicto ADOPTAR
    [OK] G1 cumple con y sin W2 (D 1.000, p95 0.056)
    [OK] G2 cumple en los dos sensores ({'VIIRS375': (6, 2511), 'VIIRS750': (2, 2483)})
-   [OK] controles del nulo: brazos al azar que el nulo da por «discrimina»: 0.028 (tope 0.071) | brazo que publica sólo en positivos pasa G1: sí
+   [OK] controles del nulo: permutaciones reales de pos/neg por estrato sobre el p95: 0.031 contra 0.034 del nulo (± 0.023) | brazo que publica sólo en positivos pasa G1: sí
    [OK] G3, referencia e índice OK
    [OK] M1 = 1 y M2 = 0
 
@@ -14,7 +14,7 @@ Universo real del pre-registro: {'W1': (5, 47, 77), 'W2': (12, 1099, 1189), 'W3'
    [OK] M2 = 1
 
 == caso 3 azar -> NO ADOPTAR (G1 falla en W2 a W6: FALLA)
-   [OK] G1 FALLA (D -0.002, p95 +0.124)
+   [OK] G1 FALLA (D +0.030, p95 +0.124)
    [OK] veredicto NO ADOPTAR
 
 == caso 4 una_no_procesada -> ADOPTAR (G1, G2 y G3; antes del flip: R2 por píxel, verificador independiente y el frontend corregido, §6 y §8)
@@ -33,7 +33,7 @@ Universo real del pre-registro: {'W1': (5, 47, 77), 'W2': (12, 1099, 1189), 'W3'
    [OK] G1 pasa con W2 y falla sin W2
    [OK] veredicto DEPENDE DEL OCR, DECIDE NICOLAS
 
-== caso 7 control_vs_si -> INDECIDIBLE (cableado del brazo diurno; nulo 1 en W1; nulo 1 en W2; nulo 1 en W3)
+== caso 7 control_vs_si -> INDECIDIBLE (cableado del brazo diurno; nulo 1 en W1 (VIIRS375, VIIRS750); nulo 1 en W2 (VIIRS375, VIIRS750); nulo 1 en W3 (VIIRS375, VIIRS750))
    [OK] INDECIDIBLE por el nulo 1 (el instrumento no puede dar distinto de cero)
    [OK] noches idénticas (G3)
    [OK] cero publicaciones diurnas (M2 y M3 sin pasadas procesadas: {'M2': {'publicadas': 0, 'procesadas': 0, 'no_procesadas': 4700, 'tasa': None}, 'M3': {'publicadas': 0, 'procesadas': 0, 'no_procesadas': 4994, 'tasa': None}})
@@ -50,6 +50,26 @@ Universo real del pre-registro: {'W1': (5, 47, 77), 'W2': (12, 1099, 1189), 'W3'
 == caso 10b filtro_de_fetch -> INDECIDIBLE (cableado del brazo diurno)
    [OK] INDECIDIBLE: el log muestra el filtro nocturno de fetch aplicado a VIIRS
 
+== caso 15 lascar_todo -> NO ADOPTAR (G1 falla en W2 a W6: FALLA)
+   [OK] G1 FALLA (D +0.1375, p95 +0.1375)
+   [OK] veredicto NO ADOPTAR
+
+== caso 16 g2_un_sensor -> DECIDE NICOLAS CON M4 (G1 y G3 cumplen, G2 {'VIIRS375': 'CUMPLE', 'VIIRS750': 'FALLA'})
+   [OK] G2 cumple en 375 y falla en 750 ({'VIIRS375': (6, 2511), 'VIIRS750': (8, 2483)})
+   [OK] con G2 en un solo sensor no da ADOPTAR: DECIDE NICOLAS CON M4
+
+== caso 17 volatiles -> ADOPTAR (G1, G2 y G3; antes del flip: R2 por píxel, verificador independiente y el frontend corregido, §6 y §8)
+   [OK] processed_utc y first_processed_utc distintos entre brazos no son defecto de cableado (G3 CUMPLE)
+
+== caso 18 granulo_distinto -> INDECIDIBLE (G3: COBERTURA NOCTURNA DESPAREJA (repetir el job, A108); se resuelve antes de mirar M1 a M4)
+   [OK] otro gránulo en la misma pasada cuenta como cobertura, no como cableado (G3 COBERTURA NOCTURNA DESPAREJA (repetir el)
+
+== caso 19 v750_cerrado -> INDECIDIBLE (nulo 1 en W1 (VIIRS750); nulo 1 en W2 (VIIRS750); nulo 1 en W3 (VIIRS750); nulo 1 en W4 (VIIRS750))
+   [OK] compuerta de VIIRS 750 cerrada: el nulo 1 por sensor la atrapa (INDECIDIBLE (nulo 1 en W1 (VIIRS750); nulo 1 en W2 (VIIRS750); nulo 1 en W3 (VIIRS750); nu)
+
+== caso 20 tabla_sin_procesar -> PENDIENTE DE REPETICION (W5)
+   [OK] 87 pasadas de tabla VIIRS 375 de W5 sin procesar (más del 10 %): PENDIENTE DE REPETICION antes de G2
+
 == caso 11 g2_borde
    [OK] a cobertura completa G2 falla desde 20 (VIIRS 375) y 6 (VIIRS 750); el pre-registro dice 20 y 6
    [OK] 19 pasa y 20 falla en VIIRS 375
@@ -62,18 +82,27 @@ Universo real del pre-registro: {'W1': (5, 47, 77), 'W2': (12, 1099, 1189), 'W3'
    [OK] sin la regla en el árbol, la sección queda PENDIENTE
    [OK] con una regla neutra inyectada, SN y SE informan el mismo veredicto que original (ADOPTAR (G1, G2 y G3)
 
+== caso 21 control del nulo: tiene que FALLAR con el nulo roto a propósito (verificador del PR #822)
+   [OK] sin romper, caso 1: permutaciones reales de pos/neg por estrato sobre el p95: 0.032 contra 0.030 del nulo (± 0.021) | brazo que publica sólo en positivos pasa G1: sí -> OK
+   [OK] sin romper, caso 3: permutaciones reales de pos/neg por estrato sobre el p95: 0.045 contra 0.042 del nulo (± 0.025) | brazo que publica sólo en positivos pasa G1: sí -> OK
+   [OK] nulo x0,3, caso 1: permutaciones reales de pos/neg por estrato sobre el p95: 0.512 contra 0.033 del nulo (± 0.022) | brazo que publica sólo en positivos pasa G1: sí -> FALLA
+   [OK] nulo x0,3, caso 3: permutaciones reales de pos/neg por estrato sobre el p95: 0.250 contra 0.043 del nulo (± 0.025) | brazo que publica sólo en positivos pasa G1: sí -> FALLA
+   [OK] nulo corrido -0,5, caso 1: permutaciones reales de pos/neg por estrato sobre el p95: 1.000 contra 0.033 del nulo (± 0.022) | brazo que publica sólo en positivos pasa G1: sí -> FALLA
+   [OK] nulo corrido -0,5, caso 3: permutaciones reales de pos/neg por estrato sobre el p95: 1.000 contra 0.043 del nulo (± 0.025) | brazo que publica sólo en positivos pasa G1: sí -> FALLA
+
 == caso 14 cobertura del workflow (contar_pasadas_noche.py, el paso «recolectar»)
    [OK] caso 1: noches parejas, día como se espera -> 0 (devolvió 0)
    [OK] caso 7: el brazo diurno sin ninguna pasada VIIRS diurna -> 1 (caso S92) (devolvió 1)
+   [OK] caso 19: el brazo diurno sin pasadas diurnas de VIIRS 750 -> 1 (por sensor) (devolvió 1)
    [OK] caso 8: el conteo mira pasadas, no campos; el cambio de campo lo atrapa G3 -> 0 (devolvió 0)
    [OK] al brazo diurno le faltan las noches de Villarrica -> 1 (devolvió 1)
 
-AUTOPRUEBA: 36 de 36 comprobaciones OK
+AUTOPRUEBA: 51 de 51 comprobaciones OK
 
 ====================================================================================================
 Salida completa del evaluador en el caso 1 (solo_protegidas), como ejemplo:
 ====================================================================================================
-== A/B DIURNO DE VIIRS (D-10) | raíces ['C:\\Users\\nmend\\AppData\\Local\\Temp\\probar_diurno_bxhfeujz\\1']
+== A/B DIURNO DE VIIRS (D-10) | raíces ['C:\\Users\\nmend\\AppData\\Local\\Temp\\probar_diurno_lshx4w98\\1']
    predicado del tablero: frontend/index.html sha256 096c61f408dfd13d9beaf52acd0c4da044ee26a99f94b29c9dedc5552dc4f0c9
    referencia: consolidado registro_vrp_consolidado.csv sha256 9f8542374de2ea50 | ocr registro_vrp_ocr.csv sha256 a2e8cb67df34ed48 | respaldo registro_vrp_consolidado_respaldo_20260408.csv sha256 183aff7f38c6ca9e | historico consolidado_filas_perdidas.csv sha256 5a68bd7fb4c38604
    ventanas con los dos brazos: ['W1', 'W2', 'W3', 'W4', 'W5', 'W6'] | records control 933, diurno 6028 (pasadas repetidas entre raíces, gana la última: 0/0)
@@ -83,13 +112,13 @@ Salida completa del evaluador en el caso 1 (solo_protegidas), como ejemplo:
    diurno   OK
    fuera de la palanca los dos brazos leyeron lo mismo: OK
 
-== 2. NULO 1 (§5.1): records diurnos con umbrales diurnos en el brazo diurno, ninguno en el control
-   W1: brazo diurno 77 records VIIRS diurnos con diag_umbrales_diurnos, 0 MODIS diurnos | control 0 diurnos -> OK
-   W2: brazo diurno 1201 records VIIRS diurnos con diag_umbrales_diurnos, 0 MODIS diurnos | control 0 diurnos -> OK
-   W3: brazo diurno 835 records VIIRS diurnos con diag_umbrales_diurnos, 0 MODIS diurnos | control 0 diurnos -> OK
-   W4: brazo diurno 1069 records VIIRS diurnos con diag_umbrales_diurnos, 0 MODIS diurnos | control 0 diurnos -> OK
-   W5: brazo diurno 1129 records VIIRS diurnos con diag_umbrales_diurnos, 0 MODIS diurnos | control 0 diurnos -> OK
-   W6: brazo diurno 784 records VIIRS diurnos con diag_umbrales_diurnos, 0 MODIS diurnos | control 0 diurnos -> OK
+== 2. NULO 1 (§5.1, por sensor): records diurnos con umbrales diurnos en el brazo diurno, ninguno en el control
+   W1: brazo diurno records diurnos con diag_umbrales_diurnos {'VIIRS375': 37, 'VIIRS750': 40}, 0 MODIS diurnos | control 0 diurnos -> OK
+   W2: brazo diurno records diurnos con diag_umbrales_diurnos {'VIIRS375': 584, 'VIIRS750': 617}, 0 MODIS diurnos | control 0 diurnos -> OK
+   W3: brazo diurno records diurnos con diag_umbrales_diurnos {'VIIRS375': 425, 'VIIRS750': 410}, 0 MODIS diurnos | control 0 diurnos -> OK
+   W4: brazo diurno records diurnos con diag_umbrales_diurnos {'VIIRS375': 544, 'VIIRS750': 525}, 0 MODIS diurnos | control 0 diurnos -> OK
+   W5: brazo diurno records diurnos con diag_umbrales_diurnos {'VIIRS375': 579, 'VIIRS750': 550}, 0 MODIS diurnos | control 0 diurnos -> OK
+   W6: brazo diurno records diurnos con diag_umbrales_diurnos {'VIIRS375': 399, 'VIIRS750': 385}, 0 MODIS diurnos | control 0 diurnos -> OK
 
 == 3. REFERENCIA: la base que se lee reproduce sustrato.json del pre-registro? SÍ
 
@@ -191,14 +220,14 @@ Salida completa del evaluador en el caso 1 (solo_protegidas), como ejemplo:
    W6 Láscar                VIIRS750    -   (0/0)                0.0 % (0/30)             0.0 % (0/34)          
    W6 resto                 VIIRS750  100.0 % (2/2)              0.0 % (0/335)            0.6 % (2/351)         
 
-== 7. G3, NOCHES INTACTAS (nulos 2 y 3): records nocturnos control 933, diurno 933 | faltan 0, sobran 0 [] | versión de producto distinta 0 | campos distintos ninguno [] -> CUMPLE
+== 7. G3, NOCHES INTACTAS (nulos 2 y 3): records nocturnos control 933, diurno 933 | faltan 0, sobran 0 [] | versión de producto o gránulo distintos 0 | campos distintos ninguno [] -> CUMPLE
    campos excluidos de la comparación: ('updated', 'processed_utc', 'regimen', 'first_processed_utc') (first_processed_utc agregado, ver PREGUNTAS del pre-registro)
 
 == 8. G1 Y G2 (regla de alertas mínimas: original, la que decide)
    G1 W2 a W6 (decide)           M1 100.0 % - q_neg   0.0 % = +1.0000 | p95 del nulo barajado +0.0561 (mediana +0.0247) | 32 positivos, 4700 negativos procesados -> CUMPLE
    G1 W3 a W6 (sin W2, decide)   M1 100.0 % - q_neg   0.0 % = +1.0000 | p95 del nulo barajado +0.0447 (mediana -0.0056) | 20 positivos, 3601 negativos procesados -> CUMPLE
    G1 W1 (informa, A119)         M1 100.0 % - q_neg   0.0 % = +1.0000 | p95 del nulo barajado +0.3362 (mediana +0.1149) | 5 positivos, 47 negativos procesados -> CUMPLE
-   controles del nulo (§5.5): brazos al azar que el nulo da por «discrimina»: 0.028 (tope 0.071) | brazo que publica sólo en positivos pasa G1: sí -> OK
+   controles del nulo (§5.5): permutaciones reales de pos/neg por estrato sobre el p95: 0.031 contra 0.034 del nulo (± 0.023) | brazo que publica sólo en positivos pasa G1: sí -> OK
    G2 VIIRS375 publica en 6 de 2511 pasadas diurnas de la tabla procesadas | p_MIROVA 13/2511 = 0.0052 (Clopper-Pearson 95 % [0.0028, 0.0088]) | P(X >= 6) = 0.9894 | falla desde 20 -> CUMPLE
    G2 VIIRS750 publica en 2 de 2483 pasadas diurnas de la tabla procesadas | p_MIROVA 2/2483 = 0.0008 (Clopper-Pearson 95 % [0.0001, 0.0029]) | P(X >= 2) = 0.5941 | falla desde 6 -> CUMPLE
 

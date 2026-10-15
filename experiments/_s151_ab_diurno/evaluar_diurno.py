@@ -191,6 +191,15 @@ def control_referencia(UW, ruta_json):
                                    ("con alerta", sum(1 for k in u["alerta"] if k[1] == s), e["con_alerta_tabla_u_ocr_por_sensor"][s])):
                 if mio != suyo:
                     dif.append("%s %s %s: %d contra %d" % (w, s, etq, mio, suyo))
+            # Identidad, no sólo tamaño (verificador del PR #822, hueco 4): mismo conteo con otras pasadas
+            # también es otra referencia.
+            hu = e.get("huellas", {}).get(s)
+            if hu is None:
+                dif.append("%s %s: sustrato.json sin huellas (anterior al PR #822), no se puede comparar identidad" % (w, s))
+                continue
+            for etq, conj in (("neg", u["neg"]), ("tabla", u["tabla"]), ("alerta", u["alerta"])):
+                if S.huella(k for k in conj if k[1] == s) != hu[etq]:
+                    dif.append("%s %s: las pasadas «%s» no son las del pre-registro (huella distinta)" % (w, s, etq))
     tot_pos = sum(len(UW[w]["pos"]) for w in VENTANAS)
     if tot_pos != POSITIVOS_PREREGISTRO:
         dif.append("positivos totales %d contra %d" % (tot_pos, POSITIVOS_PREREGISTRO))
@@ -372,7 +381,10 @@ def noches_identicas(rc, rd):
     ejemplos = []
     for k in sorted(set(nc) & set(nd)):
         a_, b_ = nc[k], nd[k]
-        if a_.get("product_version") != b_.get("product_version"):
+        # Otra versión de producto u otro gránulo (el nombre trae la hora de producción de NASA: un gránulo
+        # reprocesado entre los dos jobs) es otra entrada, no otro cableado: cuenta como cobertura (A108,
+        # verificador del PR #822, hueco 1), igual que en contar_pasadas_noche.py.
+        if a_.get("product_version") != b_.get("product_version") or a_.get("granule") != b_.get("granule"):
             version.append("|".join(k))
             continue
         dif = [c for c in set(a_) | set(b_) if c not in VOLATILES and a_.get(c) != b_.get(c)]
@@ -414,47 +426,101 @@ def estratos_de(cls, ventanas, publicado=None):
     return [tuple(v) for v in est.values()]
 
 
-def g1(cls, ventanas, rng):
-    """M1 − q_neg contra el percentil 95 del nulo barajado. Devuelve dict con el veredicto."""
+# Igualdad numérica, no umbral: cuando el nulo es degenerado (por ejemplo, un brazo que publica TODO un estrato y
+# nada en los demás) cada muestra del nulo es exactamente el D observado, y dos cuentas de punto flotante del mismo
+# número pueden diferir en el último bit. «Supera el p95» se lee como «lo supera por más que eso».
+EPS_D = 1e-12
+
+
+def d_de(cls, ventanas):
+    """M1, q_neg y D = M1 − q_neg sobre positivos y negativos PROCESADOS. Es la única cuenta de D: la usan G1 y el
+    control (a) del nulo, para que el control pase por el mismo código que decide."""
     pos = [k for k, c in cls.items() if c["ventana"] in ventanas and "pos" in c["pob"] and c["estado"] != "no_procesada"]
     neg = [k for k, c in cls.items() if c["ventana"] in ventanas and "neg" in c["pob"] and c["estado"] != "no_procesada"]
     if not pos or not neg:
-        return {"veredicto": "SIN SUSTRATO", "n_pos": len(pos), "n_neg": len(neg)}
+        return None, None, None, len(pos), len(neg)
     m1 = sum(cls[k]["estado"] == "publicada" for k in pos) / len(pos)
     qn = sum(cls[k]["estado"] == "publicada" for k in neg) / len(neg)
+    return m1, qn, m1 - qn, len(pos), len(neg)
+
+
+def g1(cls, ventanas, rng, con_nulo=False):
+    """M1 − q_neg contra el percentil 95 del nulo barajado. Devuelve dict con el veredicto."""
+    m1, qn, d, npos, nneg = d_de(cls, ventanas)
+    if d is None:
+        return {"veredicto": "SIN SUSTRATO", "n_pos": npos, "n_neg": nneg}
     nulo = nulo_barajado(estratos_de(cls, ventanas), rng)
     p95 = float(np.percentile(nulo, PERCENTIL_NULO))
-    d = m1 - qn
-    return {"veredicto": "CUMPLE" if d > p95 else "FALLA", "M1": m1, "q_neg": qn, "D": d, "p95": p95,
-            "mediana_nulo": float(np.median(nulo)), "n_pos": len(pos), "n_neg": len(neg)}
+    out = {"veredicto": "CUMPLE" if d > p95 + EPS_D else "FALLA", "M1": m1, "q_neg": qn, "D": d, "p95": p95,
+           "mediana_nulo": float(np.median(nulo)), "n_pos": npos, "n_neg": nneg}
+    if con_nulo:
+        out["_nulo"] = nulo
+    return out
+
+
+def grupos_de(cls, ventanas):
+    """Pasadas procesadas positivas o negativas, agrupadas por estrato (vol, sensor), con su etiqueta original."""
+    grupos = collections.defaultdict(list)
+    for k, c in cls.items():
+        if c["ventana"] in ventanas and c["estado"] != "no_procesada" and ({"pos", "neg"} & c["pob"]):
+            grupos[(k[0], k[1])].append(k)
+    return [(ks, ["pos" in cls[k]["pob"] for k in ks]) for ks in grupos.values()]
+
+
+_POS, _NEG = frozenset({"pos"}), frozenset({"neg"})
+
+
+def permutar_pob(cls, grupos, rng):
+    """Una copia de `cls` con las etiquetas pos/neg PERMUTADAS dentro de cada estrato (vol, sensor), sobre las
+    pasadas procesadas; la publicación de cada pasada queda donde estaba. Es un brazo que no discrimina por
+    construcción, armado con los datos de este run. `grupos` sale de grupos_de (se arma una vez por control)."""
+    out = {}
+    for ks, etiquetas in grupos:
+        perm = list(etiquetas)
+        rng.shuffle(perm)
+        for k, es_pos in zip(ks, perm):
+            c = cls[k]
+            out[k] = {"ventana": c["ventana"], "pob": _POS if es_pos else _NEG, "estado": c["estado"]}
+    return out
 
 
 def controles_del_nulo(cls, ventanas, rng):
-    """§5.5, antes de usar el nulo, sobre la estructura de estratos de ESTE run:
-    (a) brazos que publican al azar dentro de cada estrato (la misma cantidad K_s que el brazo real): la fracción
-        que el nulo deja pasar como «discrimina» tiene que ser compatible con 5 % (tope: 5 % + 3 errores estándar);
+    """§5.5, antes de usar el nulo, sobre la estructura de estratos de ESTE run. Los dos controles pasan por el
+    código que decide (d_de y g1), no sólo por el que arma el nulo (verificador del PR #822: el control anterior
+    comparaba muestras del nulo contra su propio p95 y seguía en «OK» con el nulo roto a propósito):
+    (a) N_BRAZOS_AZAR permutaciones REALES de las etiquetas pos/neg dentro de cada estrato sobre `cls`; para cada
+        una se calcula D con `d_de` y se cuenta cuántas superan el p95 que da `g1` sobre los datos reales. Esa
+        fracción tiene que coincidir, dentro de 3 errores estándar, con la que el propio nulo pone sobre su p95:
+        5 % cuando D es continuo, menos cuando D toma pocos valores y hay empates en el p95 (por eso la vara es la
+        fracción del nulo y no un 5 % fijo; con un 5 % fijo un brazo con pocas publicaciones haría fallar el
+        control sin que el nulo esté mal). Un nulo angosto o corrido hace subir la fracción de las permutaciones
+        lejos de la del nulo, y el control falla.
     (b) un brazo sintético que publica exactamente en los positivos procesados tiene que pasar G1.
     PREGUNTA anotada (PREREGISTRO §9): el pre-registro pide que con etiquetas ya barajadas «el percentil 95 quede
     alrededor de cero»; con estratos de tasa distinta el centro del nulo NO es cero (es lo que el estrato corrige),
     así que se controla la tasa de falsos «discrimina», que es la propiedad que importa."""
-    est = estratos_de(cls, ventanas)
-    if not est or not sum(e[1] for e in est) or not sum(e[0] - e[1] for e in est):
+    real = g1(cls, ventanas, rng, con_nulo=True)
+    if "D" not in real:
         return {"ok": False, "texto": "sin sustrato para controlar el nulo"}
-    nulo = nulo_barajado(est, rng)
-    p95 = float(np.percentile(nulo, PERCENTIL_NULO))
-    # (a) brazos al azar: cada uno es UNA muestra del mismo barajado; se cuentan las que superan el p95.
-    azar = nulo_barajado(est, rng, n=N_BRAZOS_AZAR)
-    tasa_falsa = float(np.mean(azar > p95))
-    tope = 0.05 + 3 * math.sqrt(0.05 * 0.95 / N_BRAZOS_AZAR)
+    p95, nulo = real["p95"], real.pop("_nulo")
+    esperada = float(np.mean(nulo > p95 + EPS_D))
+    sobre = 0
+    grupos = grupos_de(cls, ventanas)
+    for _ in range(N_BRAZOS_AZAR):
+        d = d_de(permutar_pob(cls, grupos, rng), ventanas)[2]
+        sobre += d is not None and d > p95 + EPS_D
+    frac = sobre / N_BRAZOS_AZAR
+    tol = 3 * math.sqrt(esperada * (1 - esperada) / N_BRAZOS_AZAR) + 3 * math.sqrt(esperada * (1 - esperada) / len(nulo))
+    ok_a = abs(frac - esperada) <= tol
     # (b) brazo perfecto.
     est_b = estratos_de(cls, ventanas, publicado=lambda k, c: "pos" in c["pob"])
     nulo_b = nulo_barajado(est_b, rng)
     d_b = 1.0 - 0.0
-    pasa_b = d_b > float(np.percentile(nulo_b, PERCENTIL_NULO))
-    ok = tasa_falsa <= tope and pasa_b
-    return {"ok": ok, "tasa_falsa": tasa_falsa, "tope": tope, "perfecto_pasa": pasa_b,
-            "texto": "brazos al azar que el nulo da por «discrimina»: %.3f (tope %.3f) | brazo que publica sólo en positivos pasa G1: %s"
-                     % (tasa_falsa, tope, "sí" if pasa_b else "NO")}
+    pasa_b = d_b > float(np.percentile(nulo_b, PERCENTIL_NULO)) + EPS_D
+    ok = ok_a and pasa_b
+    return {"ok": ok, "frac_permutaciones": frac, "frac_nulo": esperada, "tolerancia": tol, "perfecto_pasa": pasa_b,
+            "texto": "permutaciones reales de pos/neg por estrato sobre el p95: %.3f contra %.3f del nulo (± %.3f) | brazo que publica sólo en positivos pasa G1: %s"
+                     % (frac, esperada, tol, "sí" if pasa_b else "NO")}
 
 
 def binomial_g2(x, n, p):
@@ -557,10 +623,22 @@ def evaluar_regla(filas, coords, modo, rc, rd, a, rng, decide):
         motivos = motivos_log(a.logs, "diurno", bp.VOLS)
         print("\n== 5. COBERTURA DIURNA (§5.4): positivos y pasadas diurnas de la tabla en el brazo diurno")
         print("   %-3s %-8s %-28s %-28s %s" % ("W", "sensor", "positivos: no proc/sin pub/pub", "tabla: no proc/sin pub/pub", "motivo en el log de las no procesadas"))
+    motivo_cob = {}
     for w in ventanas_con_datos:
         npos = [c for k, c in cls.items() if c["ventana"] == w and "pos" in c["pob"]]
         nop = sum(c["estado"] == "no_procesada" for c in npos)
+        corta = []
         if npos and nop > MAX_NO_PROCESADAS_POS * len(npos):
+            corta.append("positivos %d de %d" % (nop, len(npos)))
+        # El mismo 10 % sobre las pasadas de la TABLA, por ventana y sensor, antes de G2 (verificador del PR #822,
+        # hueco 5): las no procesadas salen del n de G2, y un corte de NASA de un día entero no es al azar.
+        for s in VIIRS:
+            xs = [c for k, c in cls.items() if c["ventana"] == w and "tabla" in c["pob"] and k[1] == s]
+            nt = sum(c["estado"] == "no_procesada" for c in xs)
+            if xs and nt > MAX_NO_PROCESADAS_POS * len(xs):
+                corta.append("tabla %s %d de %d" % (s, nt, len(xs)))
+        if corta:
+            motivo_cob[w] = corta
             (excluidas if w in a.repetidas else repetir).append(w)
         if decide:
             for s in VIIRS:
@@ -573,9 +651,9 @@ def evaluar_regla(filas, coords, modo, rc, rd, a, rng, decide):
                 print("   %-3s %-8s %-28s %-28s %s" % (w, s, cuenta["pos"], cuenta["tabla"], dict(mot) or "-"))
     if decide:
         for w in repetir:
-            print("   %s: más del 10 %% de sus positivos sin procesar: REPETIR el job corto antes de evaluar (§5.4)" % w)
+            print("   %s: más del 10 %% sin procesar (%s): REPETIR el job corto antes de evaluar (§5.4)" % (w, "; ".join(motivo_cob[w])))
         for w in excluidas:
-            print("   %s: ya repetida y siguen faltando: COBERTURA INSUFICIENTE, no entra al veredicto (§5.4)" % w)
+            print("   %s: ya repetida y siguen faltando (%s): COBERTURA INSUFICIENTE, no entra al veredicto (§5.4)" % (w, "; ".join(motivo_cob[w])))
     res["repetir"], res["excluidas"] = repetir, excluidas
     dec = tuple(w for w in DECIDEN if w in ventanas_con_datos and w not in excluidas)
     sin2 = tuple(w for w in SIN_W2 if w in ventanas_con_datos and w not in excluidas)
@@ -694,18 +772,24 @@ def evaluar(a):
         controles.append("los brazos leyeron flags distintos fuera de la palanca")
 
     # ---------------- 2. nulo 1: el instrumento puede dar distinto de cero
-    print("\n== 2. NULO 1 (§5.1): records diurnos con umbrales diurnos en el brazo diurno, ninguno en el control")
+    # POR SENSOR (verificador del PR #822, hueco 6): VIIRS 375 y 750 son dos procesadores y dos compuertas; con
+    # «375 o 750» una compuerta de 750 cerrada pasaba sin aviso. Se exige cada sensor que tiene pasadas diurnas
+    # de la tabla en la ventana (sustrato.json; hoy, los dos en las seis).
+    tabla_por_sensor = {w["nombre"]: w["pasadas_tabla_por_sensor"]
+                        for w in json.loads(Path(a.sustrato).read_text(encoding="utf-8"))["ventanas"]}
+    print("\n== 2. NULO 1 (§5.1, por sensor): records diurnos con umbrales diurnos en el brazo diurno, ninguno en el control")
     for w in presentes:
         c = VENTANA[w]
         dentro = lambda x: c["desde"] <= x["t"][:10] <= c["hasta"] and x["vol"] in c["vols"]  # noqa: E731
-        nd = sum(1 for x in rd if dentro(x) and x["dia"] and x["b"] in VIIRS and x["diag_dia"])
+        nd = {s: sum(1 for x in rd if dentro(x) and x["dia"] and x["b"] == s and x["diag_dia"]) for s in VIIRS}
         nmod = sum(1 for x in rd if dentro(x) and x["dia"] and x["b"] == "MODIS")
         ncd = sum(1 for x in rc if dentro(x) and x["dia"])
-        ok = nd > 0 and ncd == 0 and nmod == 0
-        print("   %s: brazo diurno %d records VIIRS diurnos con diag_umbrales_diurnos, %d MODIS diurnos | control %d diurnos -> %s"
-              % (w, nd, nmod, ncd, "OK" if ok else "FALLA"))
+        mudos = [s for s in VIIRS if tabla_por_sensor[w][s] > 0 and nd[s] == 0]
+        ok = not mudos and ncd == 0 and nmod == 0
+        print("   %s: brazo diurno records diurnos con diag_umbrales_diurnos %s, %d MODIS diurnos | control %d diurnos -> %s"
+              % (w, nd, nmod, ncd, "OK" if ok else "FALLA" + (" (sin records diurnos en %s)" % mudos if mudos else "")))
         if not ok:
-            controles.append("nulo 1 en %s" % w)
+            controles.append("nulo 1 en %s" % w + (" (%s)" % ", ".join(mudos) if mudos else ""))
 
     # ---------------- 3, 4, 5, 6, G1 y G2 con la regla original (decide)
     res = evaluar_regla(filas, coords, "original", rc, rd, a, rng, decide=True)
@@ -725,7 +809,7 @@ def evaluar(a):
         res["G3"] = "FALLA (noches distintas campo a campo: defecto del cableado)"
     else:
         res["G3"] = "CUMPLE"
-    print("\n== 7. G3, NOCHES INTACTAS (nulos 2 y 3): records nocturnos control %d, diurno %d | faltan %d, sobran %d %s | versión de producto distinta %d | campos distintos %s %s -> %s"
+    print("\n== 7. G3, NOCHES INTACTAS (nulos 2 y 3): records nocturnos control %d, diurno %d | faltan %d, sobran %d %s | versión de producto o gránulo distintos %d | campos distintos %s %s -> %s"
           % (ni["n_control"], ni["n_diurno"], ni["faltan"], ni["sobran"], ni["ej_cobertura"], ni["version_distinta"],
              ni["campos_distintos"] or "ninguno", ni["ejemplos"], res["G3"]))
     print("   campos excluidos de la comparación: %s (first_processed_utc agregado, ver PREGUNTAS del pre-registro)" % (VOLATILES,))

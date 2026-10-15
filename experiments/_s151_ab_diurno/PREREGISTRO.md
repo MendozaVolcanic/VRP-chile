@@ -232,7 +232,8 @@ El texto de cada requisito es el del borrador y se conserva.
    bajo el perfil del brazo diurno (§4). Etiqueta día y noche por elevación solar explícita.
 
    **Hecho**, con el nombre `evaluar_diurno.py` (no `evaluar.py`) y su autoprueba
-   `probar_evaluar_diurno.py` (salida en `probar_salida.txt`: **36 de 36** comprobaciones en verde).
+   `probar_evaluar_diurno.py` (salida en `probar_salida.txt`: **51 de 51** comprobaciones en verde tras
+   los arreglos del verificador del PR #822; eran 36 y dejaban pasar 4 de 7 mutaciones, ver §9).
    Cómo cumple lo pedido:
    - las poblaciones salen de `sustrato.universo`, la misma función que contó el sustrato (se extrajo
      de `sustrato.main` sin cambiar su salida, comprobado con `diff` contra `sustrato_salida.txt`), y el
@@ -279,11 +280,39 @@ El texto de cada requisito es el del borrador y se conserva.
 
 Cada una dice qué hace hoy el evaluador. Ninguna cambia un umbral de la sección 6.
 
+**Actualización tras el verificador con contexto limpio del PR #822** (veredicto PARCIAL: perfiles, flag,
+workflow, G1 y G2 confirmados; el control del nulo no podía fallar y la autoprueba dejaba pasar 4 de 7
+mutaciones). Se marcan abajo los puntos que cambiaron; el texto anterior queda como historia. Además:
+- **Nulo 1 por sensor** (§5.1): el evaluador y `contar_pasadas_noche.py` aceptaban VIIRS 375 **o** VIIRS
+  750, así que una compuerta de 750 cerrada pasaba sin aviso. Hoy se exige cada sensor que tiene pasadas
+  diurnas de la tabla en la ventana (los dos en las seis; caso 19 de la autoprueba).
+- **Mutaciones**: `mutar_evaluador.py` (equivalente en el repo del `mutar.py` del verificador, mismas
+  siete mutaciones) corre la autoprueba contra el evaluador roto a propósito; salida en
+  `mutaciones_salida.txt`. Los casos 15 a 21 de la autoprueba nacieron para atrapar las cuatro que
+  sobrevivían.
+
 1. **G3 compara también sin `first_processed_utc`.** El nulo 2 excluye `updated`, `processed_utc` y
    `regimen`; los records traen además `first_processed_utc`, la hora en que store guardó el record por
    primera vez, que difiere siempre entre dos jobs. Con la lista literal, G3 fallaría en toda corrida
    real. El evaluador lo excluye (`VOLATILES`) y lo imprime. ¿Hay otro campo volátil que deba entrar?
-2. **El control del nulo barajado.** §5.5 pide que, con etiquetas ya barajadas, «el percentil 95 quede
+   **Confirmado por el verificador, con un faltante ya resuelto:** `granule` trae la hora de producción
+   de NASA; si cambia entre los dos jobs (gránulo reprocesado) G3 lo llamaba «defecto del cableado». Hoy
+   cuenta como cobertura, igual que la versión de producto y que en `contar_pasadas_noche.py` (caso 18).
+   El caso 17 comprueba que `processed_utc` y `first_processed_utc` distintos no hacen fallar G3.
+2. ⚠️ **Rebajado por el verificador del PR #822: el control descrito abajo era tautológico.** Comparaba
+   muestras de `nulo_barajado` contra el p95 de esa misma función, nunca tocaba el código que calcula D,
+   y con el nulo roto a propósito (×0,3 o corrido en −0,5) seguía dando «OK». **Hoy** el control (a)
+   permuta de verdad las etiquetas pos/neg dentro de cada estrato sobre la tabla de clases del run,
+   calcula D con la misma función que usa G1 (`d_de`), 1.000 veces, y cuenta cuántas superan el p95 de
+   G1. Esa fracción tiene que coincidir, dentro de 3 errores estándar, con la que el propio nulo pone
+   sobre su p95: es 5 % cuando D es continuo y menos cuando D toma pocos valores y hay empates en el p95
+   (con un 5 % fijo, un brazo con pocas publicaciones haría fallar el control sin que el nulo esté mal;
+   en el caso 1 la del nulo es 3,0 % y la de las permutaciones 3,2 %). Con el nulo ×0,3 la fracción sube
+   a 0,51 y con el nulo corrido a 1,00: el control FALLA, que es lo que tiene que hacer (caso 21). La comparación «D supera el p95» se
+   lee con una holgura de 1e-12 (`EPS_D`), igualdad numérica y no umbral: cuando el nulo es degenerado
+   (un brazo que publica todo un estrato y nada en los demás, caso 15) cada muestra del nulo ES el D
+   observado. Texto anterior, como historia:
+   **El control del nulo barajado.** §5.5 pide que, con etiquetas ya barajadas, «el percentil 95 quede
    alrededor de cero». Con estratos volcán × sensor de tasas distintas el centro del nulo **no** es
    cero (en el caso 1 de la autoprueba la mediana del nulo W2 a W6 es +0,025; corregir eso es para lo
    que se estratifica). El evaluador controla otra cosa, que es la propiedad que importa: 1.000 brazos
@@ -292,11 +321,13 @@ Cada una dice qué hace hoy el evaluador. Ninguna cambia un umbral de la secció
    publica sólo en los positivos tiene que pasarlo. ¿Es aceptable ese reemplazo?
 3. **G2 y el veredicto por sensor.** El flag es uno para VIIRS 375 y 750, así que no se puede adoptar
    un sensor sin el otro. El evaluador pide G2 en los dos para ADOPTAR; si falla en uno, el veredicto es
-   «DECIDE NICOLAS CON M4». ¿Correcto?
+   «DECIDE NICOLAS CON M4». ¿Correcto? **Confirmado por el verificador**; el caso 16 (G2 cumple en 375 y
+   falla en 750) lo fija en la autoprueba.
 4. **Qué hace G3 cuando falla.** §5.2 dice que una diferencia nocturna «se resuelve antes de mirar M1 a
    M4». El evaluador da INDECIDIBLE y separa: pasadas que faltan o sobran, o versión de producto
    distinta, «COBERTURA NOCTURNA DESPAREJA (repetir el job)»; mismos records con campos distintos,
-   «FALLA (defecto del cableado)».
+   «FALLA (defecto del cableado)». Desde el verificador del PR #822 el gránulo distinto también cuenta
+   como cobertura (punto 1).
 5. **La referencia no está congelada.** El evaluador lee por defecto el snapshot del repo, que
    `sync-mirova-csv.yml` actualiza cada hora, y exige que reproduzca `sustrato.json` ventana por
    ventana (positivos, negativos, pasadas y alertas por sensor, los 37 y la parsimonia 13/2.511 y
@@ -310,7 +341,23 @@ Cada una dice qué hace hoy el evaluador. Ninguna cambia un umbral de la secció
 
    ¿Se congela antes de despachar (patrón `experiments/_s151_prereg_fk_11/congelar.py`)? Congelar desde
    el remoto de Mirova-v1 podría no reproducir `sustrato.json` y obligaría a recontar el sustrato.
-6. **El 10 % de §5.4 sólo mira positivos.** Las pasadas de la tabla no procesadas salen de los
+
+   **Commits de recuperación, comprobados en esta sesión** (`git log` de cada archivo y sha256 LF de
+   `git show <commit>:<ruta>`, los cuatro iguales a los de arriba): el OCR en **7b74435** (sync del
+   2026-10-14 22:17 UTC); el consolidado y la capa histórica en **f3b4142** (auditoría semanal del
+   2026-10-14 11:53 UTC); el respaldo del 2026-04-08 en **068773f** (#653, no cambió desde entonces).
+   **Y el control ya no compara sólo conteos** (verificador, hueco 4): `sustrato.json` guarda ahora, por
+   ventana y sensor, la huella sha256 de la lista ordenada de negativos, de pasadas de la tabla y de
+   pasadas con alerta (`sustrato.huella`), y el evaluador exige las mismas huellas: el mismo conteo con
+   otras pasadas también es otra referencia. Agregar las huellas no cambió ninguna otra cifra de
+   `sustrato.json` ni de `sustrato_salida.txt` (comprobado campo a campo).
+6. ⚠️ **Cerrado tras el verificador del PR #822, que lo dio por no aceptable.** Hoy la misma regla del 10 %
+   de §5.4 se aplica también a las pasadas de la tabla, por ventana y por sensor, ANTES de G2: si más del
+   10 % de las pasadas diurnas de la tabla de un sensor en una ventana quedan sin procesar, la ventana se
+   repite, y si ya se repitió sale del veredicto como cobertura insuficiente (caso 20). **Esto extiende
+   el alcance de la regla de §5.4 (de los positivos a la tabla) sin tocar su umbral**; se dice acá para
+   que no pase por un detalle de implementación. Texto anterior, como historia:
+   **El 10 % de §5.4 sólo mira positivos.** Las pasadas de la tabla no procesadas salen de los
    denominadores de M2 y M3 (y del `n` de G2) sin regla de repetición. Si los cortes de NASA no son al
    azar (por ejemplo, un día entero), M2 y G2 se miden sobre una muestra sesgada. Hoy sólo se informa.
 7. **«Depende del OCR» y G2.** Si G1 pasa sólo con W2, el veredicto es «DEPENDE DEL OCR, DECIDE
@@ -335,6 +382,12 @@ El workflow sólo se puede despachar desde `main` (limitación de `workflow_disp
 se mergea este PR. **Una ventana por despacho, y la siguiente recién cuando la anterior empezó a
 correr**: el grupo `s151-ab-diurno` guarda un solo run pendiente y un tercer despacho desplazaría al
 que espera. Mejor todavía, despachar cuando el A/B de F/K haya terminado (§7.1).
+
+**Costo estimado, SIN VERIFICAR** (verificador del PR #822, de una sola corrida comparable): con ~3,2
+minutos de runner por día y brazo (run 38679191229) y el brazo diurno estimado al doble del control, las
+seis ventanas (W1 de 20 días con Láscar; W2 a W6 con 11 volcanes y 18, 12, 19, 20 y 14 días) suman del
+orden de **130 a 150 h de runner** y **~2 días de reloj con `max-parallel: 3`**. No se midió el brazo
+diurno: el job corto de W1 es el que lo mide, y si tarda más de 1,5 h se parten W2 a W6 (§7.1).
 
 ```
 # W1 primero: job corto (Láscar, 2 jobs) para medir la duración del brazo diurno.
