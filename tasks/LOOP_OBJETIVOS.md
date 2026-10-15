@@ -263,17 +263,31 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
 | D-1 | Adoptar conectiva `max` en VIIRS 375 (criterio §1.2 por medir en 0.2) | `docs/S150_RESULTADO_MESES.md`, `docs/audit_s150/meta/AUDITOR_F2_NUMEROS.md` | pendiente | pendiente |
-| D-2 | Merge del arreglo del scraper Mirova-v1#19 (tarea 0.5) | CI verde de Mirova-v1#21; 4 tests | Mirova-v1#21 | #783 |
-| D-3 | Marca de régimen en `store.py` (tarea 0.6) | 4 tests, 3 fallaban antes; suite 1706 | #785, tag `pre-s151-marca-regimen` | #786 |
+| D-2 | ~~Merge del arreglo del scraper Mirova-v1#19 (tarea 0.5)~~ **HECHO** (Nicolás, 2026-10-15; squash `40ef1a45`) | CI verde de Mirova-v1#21; 4 tests | Mirova-v1#21 | #783 |
+| D-3 | Marca de régimen en `store.py` (tarea 0.6): **APROBADA** (Nicolás, 2026-10-15), se mergea con el CI del PR actualizado | 4 tests, 3 fallaban antes; suite 1706 | #785, tag `pre-s151-marca-regimen` | #786 |
 | D-4 | ~~Alerta protegida: lectura A o B~~ **DECIDIDA: A** (Nicolás, 2026-10-14; propagada en #808) | `docs/S151_CRITERIO_CLASE_MIROVA.md` §5 | #780 | #782 (cerrado) |
-| D-5 | Sello del probe de D25 en VIIRS 750 (tarea 1.5); pilotear Tupungatito con 10 pasadas | `experiments/_s151_d25_v750_disco/README.md`, verificador limpio con arreglos | #790 | #793 |
+| D-5 | ~~Sello del probe de D25 en VIIRS 750~~ **SELLADO** (Nicolás, 2026-10-15); piloto Tupungatito 10 pasadas, run 38678279921 | `experiments/_s151_d25_v750_disco/README.md`, verificador limpio con arreglos | #790 | #793 |
 | D-6 | ~~A/B de anomalía mayor~~ **DECIDIDA: SIGUE** (Nicolás, 2026-10-14; estudio TIF primero) | `experiments/_s151_ab_vrp_max/PREREGISTRO.md`, verificador limpio con arreglos | #794 | #795 |
 | D-7 | ~~Sello del A/B de F y K~~ **APROBADO** (Nicolás, 2026-10-14); V1 en curso, run 38639658446 | `experiments/_s151_prereg_fk_11/PREREGISTRO.md`, verificador limpio con arreglos | #797 | #798 |
-| D-8 | Sello del A/B reducido de la caja (D1/D2 con K/KC, ~35 min; V1 con B/BC, ~6 h) | `experiments/_s151_prereg_caja/PREREGISTRO.md`, verificador limpio con arreglos | #800 | #801 |
-| D-9 | Alertas de 0,05 MW o menos (NONE en el banner): SN "MIROVA no vio nada" (recomendada) o SE estrato aparte; y 0,05 exacto | `experiments/_s151_alertas_minimas/README.md`, verificado | #810 | #811 |
-| D-10 | ¿Abrir el día en la réplica? (1, recomendada: cablear rama diurna VIIRS apagada por flag con A45 y A/B diurno; 2: dejarlo cerrado y escribirlo en el criterio) | `experiments/_s151_alertas_diurnas/README.md`, verificado | #812 | #813 |
+| D-8 | ~~Sello del A/B reducido de la caja~~ **SELLADO** (Nicolás, 2026-10-15); workflow propio con otro grupo de concurrencia en preparación para no desplazar a F/K | `experiments/_s151_prereg_caja/PREREGISTRO.md`, verificador limpio con arreglos | #800 | #801 |
+| D-9 | ~~Alertas de 0,05 MW o menos~~ **DECIDIDA: SN** (Nicolás, 2026-10-15), informando también SE y la regla original en cada evaluación; implementación en curso | `experiments/_s151_alertas_minimas/README.md`, verificado | #810 | #811 |
+| D-10 | ~~¿Abrir el día en la réplica?~~ **DECIDIDA: 1** (Nicolás, 2026-10-15): rama diurna VIIRS apagada por flag (tag `pre-s151-rama-diurna-viirs`) y A/B diurno; código en curso | `experiments/_s151_alertas_diurnas/README.md`, verificado | #812 | #813 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-15 03:50 UTC (vuelta 47): Nicolás aprueba las seis recomendaciones ("probar todas las opciones")
+- D-2: Mirova-v1#21 mergeado (`40ef1a45`; `scraper.py` y tests sin cambios en main desde la base). Falta ver la
+  siguiente corrida verde del scraper.
+- D-3: #785 estaba 142 commits atrás; actualizado, CI re-corriendo; se mergea en verde y se comprueba que el NRT
+  escribe `regimen`.
+- D-5: piloto del probe D25 V750 despachado (Tupungatito, 10 pasadas, run 38678279921).
+- D-8: la caja comparte grupo con F/K (desplazaría a V2a): un agente prepara `reproc-s151-ab-caja.yml` con grupo
+  propio; con F/K son 2 A/B, el tope.
+- D-9: agente implementa SN como regla única, informando SE y la original, sin cambiar a escondidas el veredicto
+  pre-registrado de F/K; re-evalúa los veredictos publicados con las tres.
+- D-10: agente cablea la rama diurna VIIRS apagada (tag `pre-s151-rama-diurna-viirs`, A118 sobre todos los
+  consumidores, golden bit a bit) y escribe el borrador del pre-registro del A/B diurno.
+- #798 y #795 cerrados (ya decididos; el seguimiento sigue aquí). Agentes activos: 3.
 
 ### 2026-10-15 02:03 UTC (vuelta 46): sin tarea libre; #817 mergeado; ritmo del NRT y de V1
 - #817 (propagación de la 1.4) en `main` con CI verde. Ninguna tarea de §3 y §4 está libre: todas esperan un sello
