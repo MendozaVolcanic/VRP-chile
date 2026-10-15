@@ -294,6 +294,22 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-15 22:55 a 23:55 UTC (vuelta 65): el lector portado pasa el re-control; tarea 1 del plan hecha
+- Paradas: disco 25 GB; NRT verde a las 19:41 UTC, otro en cola desde las 22:53 (cola de GitHub). V2a en 6 de 22.
+- W1 diurna intento 2: el control repetido salió bien, pero vio 183 noches de Láscar contra 181 del brazo diurno
+  (corrió 7 h antes; probablemente pasadas que llegaron tarde a NASA, A108). `recolectar` además no pudo publicar
+  la rama (5 intentos). Repetido el brazo diurno con el mismo código (intento 3, en curso).
+- Re-control del estudio con tres lectores, 429 imágenes y 1.368 pasadas de control (`experiments/_s151_distancia_ocr/recontrol/`):
+  | lector | dibujadas | único: n, mediana / p90 | dentro del intervalo | cerca/lejos erradas |
+  |---|---|---|---|---|
+  | estudio (scipy) | 98,5 % | 726, 0,08 / 0,64 km | 97,6 % | 40 de 1.353 |
+  | port (orden estable) | 98,5 % | 722, 0,09 / 0,64 | 98,1 % | 40 |
+  | port, centro de la meseta | 98,6 % | 726, 0,07 / 0,64 | 97,9 % (ancho mediano 0,41 km contra 0,54) | 41 |
+  El desempate de picos cambia marcadores sueltos pero no el control. Elegido el centro de la meseta por razón
+  física (el marcador está centrado en la distancia), no por la cifra. Tarea 1 HECHA (`cb72ac51`, local; suite de
+  Mirova-v1 88 verde). El push por git a Mirova-v1 se corta en `send-pack`: al abrir el PR, subir por la API.
+- Próxima vuelta: tarea 2 del plan (calado del eje de tiempo sólo con la tabla).
+
 ### 2026-10-15 19:18 UTC (vuelta 64): tarea 1 del plan de Mirova-v1 a medias; el lector depende de desempates
 - Paradas: NRT verde (14:40 UTC; el cron de GitHub corre cada 4 a 6 h, no cada 2), disco 26 GB. F/K V1 intento 2
   pendiente detrás de V2a; W1 diurna intento 2 en curso.

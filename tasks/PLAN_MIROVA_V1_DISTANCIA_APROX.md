@@ -51,6 +51,11 @@ Nicolás prefiere tener la copia en Mirova-v1, se agrega una tarea; está anotad
 
 ## Tarea 1: portar el lector del panel
 
+**HECHA (vuelta 65, 2026-10-15):** commits locales `2a3e7121` y `cb72ac51` en `feat/distancia-aprox` (worktree
+`Mirova-v1-distaprox`; el push por git se corta, subir por la API al abrir el PR). OpenCV en vez de scipy, desempate
+de picos al centro de la meseta y re-control del estudio en `experiments/_s151_distancia_ocr/recontrol/`. Suite de
+Mirova-v1: 88 en verde.
+
 **Archivos:** crear `dist_serie.py` (copiar `dist_png.py` del estudio entero, sin cambios de lógica) y
 `tests/test_dist_serie.py`. Fixture: bajar por raw dos `Dist.png` de VIIRS 375 del índice: la de Chillán que usa
 `salidas/zoom_chillan_0518.png` y la de Villarrica del 2026-10-15. Guardarlas en `tests/fixtures/dist/`.
