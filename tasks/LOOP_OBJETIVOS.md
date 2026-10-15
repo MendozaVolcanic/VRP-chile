@@ -271,6 +271,15 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-14 (vuelta 42): verificador de #814 PARCIAL, arreglos enviados
+- Confirmado: reconstrucción 11 de 11 y factores de las palancas (D25 1,2788). Caído: el reparto selección/fondo
+  es una identidad cuyo reparto depende de la bisagra (V375 32/21 o -12/64); la atribución al remuestreo D17
+  (el Npix de MIROVA no crece con el área; D25 sí actúa sobre la parte del ángulo, 1,00 a 1,20); "brazos antes
+  de #535" es falso en código (S143-S149 son posteriores); "la única palanca" (keep_peak 1,05 y D22 1,03 también
+  mueven); recomendación sobre producción saturada por el Test 1 (A114) → medir D25 sobre producción y sobre F.
+- Arreglos (a) a (g) enviados al agente de la 1.14. Aviso: `test_perfil_operacional_reproduce_el_golden_bit_a_bit`
+  falló una vez en una corrida con -x del verificador y pasó en tres posteriores; causa SIN VERIFICAR (vigilar).
+
 ### 2026-10-14 (vuelta 41): estudio TIF de la 1.4 mergeado (#809 v3, `e1074caa`)
 - v3 con los arreglos del segundo verificador: dual ROI REFUTADO como mecanismo (ya encendido en los dos pases;
   en 7 de 15 alertas el primer pase alertó el píxel lejano); no es factor único (logística n 53: pico lejano más
