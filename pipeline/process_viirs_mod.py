@@ -10,7 +10,7 @@
 # Variables     : NTI/dNTI, T de fondo, umbrales N·sigma, area de pixel 750m (nadir-fijo), distancia al
 #                 crater.
 # Limitaciones  : Mayor area de pixel amplifica el gradiente topografico crater-nieve (A69/A80); dispersion
-#                 del centroide; solo noche por contaminacion solar.
+#                 del centroide; solo noche en produccion (rama diurna D-10 apagada por flag, diurno.py).
 # Refs/datos    : Coppola 2016a, Massimetti tesis (adaptacion VIIRS). Entrenamiento: No aplica (sin ML).
 #                 Ficha: docs/FICHA_SDA_VRP_CHILE.md
 # ════════════════════════════════════════════════════════════════════
@@ -469,6 +469,28 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
 
     Returns dict with VRP or None if granule does not cover volcano.
     """
+    # S151 D-10 (issue #813): RAMA DIURNA VIIRS 750, apagada por flag (ENABLE_DAYTIME_VIIRS).
+    # POR QUÉ: MIROVA procesa VIIRS también de día (Campus et al. 2022, Sensors 22:1713, p. 16 §5
+    # y p. 17 Tabla 4) con la columna diurna de la Tabla 1 de Coppola 2016a (p. 7): K1 = -0,6,
+    # C1 = 0,02 y C2 = 15 en las dos ROI. Mismo REBINDING LOCAL que process_viirs.py y
+    # process_modis.py (S90): los nombres de umbral se re-asignan como locales y cada call-site de
+    # abajo toma el valor de la pasada (A49). Con el flag apagado son los mismos objetos globales
+    # del módulo, de día y de noche: bit a bit el procesador anterior. Lo que de día queda como de
+    # noche porque el paper no da número: pipeline/diurno.py, PREGUNTAS.
+    _TH = _umbrales_de_la_pasada(l1b_path.name, volcano_lat, volcano_lon)
+    NTI_K1_NIGHT = _TH["nti_k1"]                      # noche -0,8 / día -0,6
+    N_SIGMA_MIR_SUMMIT = _TH["n_sigma_summit"]        # noche 5 / día 15 (camino de BT, apagado)
+    N_SIGMA_MIR_SCENE = _TH["n_sigma_scene"]          # noche 10 / día 15 (camino de BT, apagado)
+    DNTI_CONTEXTUAL_C1 = _TH["c1"]                    # noche 0,003 / día 0,02
+    DNTI_CONTEXTUAL_C1_SUMMIT = _TH["c1_summit"]      # noche 0,003 / día 0,02
+    DNTI_CONTEXTUAL_C1_SCENE = _TH["c1_scene"]        # noche 0,010 / día 0,02
+    C2_DNTI_SUMMIT_NIGHT = _TH["c2_dnti_summit"]      # noche 5 / día 15
+    C2_DNTI_SCENE_NIGHT = _TH["c2_dnti_scene"]        # noche 10 / día 15
+    C2_DETI_SUMMIT_NIGHT = _TH["c2_deti_summit"]      # noche 5 / día 15
+    C2_DETI_SCENE_NIGHT = _TH["c2_deti_scene"]        # noche 10 / día 15
+    VIIRS_C2_OVERRIDE_NIGHT = _TH["viirs_c2_override"]  # override nocturno; de día None
+    _umbrales_diurnos = bool(_TH.get("dia", False))
+
     bands = read_viirs_mod_l1b(l1b_path)
     if "M13" not in bands:
         return None
@@ -1478,7 +1500,40 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         salida["diag_L_bg_vecinos_w_m2_sr_um"] = diag_L_bg_vecinos
         salida["diag_bg_vecinos_n_sin_vecinos"] = int(_bg_vecinos_n_sin_vecinos)
 
+    # S151 D-10: marca de que esta pasada se evaluó con la Tabla 1 diurna. Sólo aparece cuando la
+    # rama diurna actuó (flag ON y Sol sobre el horizonte); con el flag OFF la salida es la de hoy.
+    if _umbrales_diurnos:
+        salida["diag_umbrales_diurnos"] = True
+
     return salida
+
+
+def _umbrales_de_la_pasada(nombre_granulo: str, volcano_lat: float, volcano_lon: float) -> dict:
+    """S151 D-10: umbrales de detección de esta pasada (noche, o Tabla 1 diurna con el flag ON).
+
+    Igual que en process_viirs.py: la noche sale de los GLOBALES de este módulo (con el flag
+    apagado se devuelven esos mismos objetos), y la decisión día/noche usa la fecha del record y
+    la regla de store.py vía pipeline/diurno.py. Va al final del archivo, junto a
+    `_parse_datetime`, para no correr la cita `process_viirs_mod.py:466` que vigila el contrato G8.
+    """
+    from .diurno import flag_viirs_diurno, pasada_es_diurna, umbrales_viirs
+    noche = {
+        "nti_k1": NTI_K1_NIGHT,
+        "n_sigma_summit": N_SIGMA_MIR_SUMMIT,
+        "n_sigma_scene": N_SIGMA_MIR_SCENE,
+        "c1": DNTI_CONTEXTUAL_C1,
+        "c1_summit": DNTI_CONTEXTUAL_C1_SUMMIT,
+        "c1_scene": DNTI_CONTEXTUAL_C1_SCENE,
+        "c2_dnti_summit": C2_DNTI_SUMMIT_NIGHT,
+        "c2_dnti_scene": C2_DNTI_SCENE_NIGHT,
+        "c2_deti_summit": C2_DETI_SUMMIT_NIGHT,
+        "c2_deti_scene": C2_DETI_SCENE_NIGHT,
+        "viirs_c2_override": VIIRS_C2_OVERRIDE_NIGHT,
+    }
+    habilitado = flag_viirs_diurno()
+    es_dia = habilitado and pasada_es_diurna(_parse_datetime(nombre_granulo),
+                                            volcano_lat, volcano_lon)
+    return umbrales_viirs(es_dia=es_dia, habilitado=habilitado, noche=noche)
 
 
 def _parse_datetime(filename: str) -> str:

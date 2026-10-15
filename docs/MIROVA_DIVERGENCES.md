@@ -2739,6 +2739,22 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
 
 ## D27: El día no existe: la Tabla 1 diurna (K1 = -0,6, C1 = 0,02, C2 = 15) está escrita y nunca se ejecuta. **DELIBERADA (MISSION: sólo noche), registrada S138 para que conste como divergencia literal** S138
 
+> ⚠️ **S151, tercera marca (decisión D-10 de Nicolás, 2026-10-15, opción 1; issue #813).** La rama
+> diurna de VIIRS 375 y 750 quedó **cableada y APAGADA** (`ENABLE_DAYTIME_VIIRS = False`, tag
+> defensivo `pre-s151-rama-diurna-viirs`). Con el flag encendido el día se abre en los cinco
+> consumidores que lo cerraban (filtro previo a la descarga en `fetch.py`, salto del gránulo en
+> `scripts/run_pipeline.py`, umbrales de los dos procesadores VIIRS, rechazo en `store.py`, y la
+> auditoría semanal que reusa esa regla), todos leyendo el flag a través de `pipeline/diurno.py`
+> (A118). De día los Tests 2 y 3 usan K1 = -0,6, C1 = 0,02 y **C2 = 15** (Tabla 1, p. 7, página
+> renderizada). El docstring falso de `_reject_daytime` quedó corregido. Producción no cambió (golden
+> S142 bit a bit). **«Deliberada» pasa a «pendiente de A/B»**:
+> `experiments/_s151_ab_diurno/PREREGISTRO.md`. Hallazgo de paso, no corregido (fuera de alcance):
+> la rama diurna de MODIS (S90, `_select_thresholds`) rebinda el N·σ del camino de BT pero **no el C2
+> de los Tests 2 y 3** (de día seguiría con 5 y 10), y su flag no abre `fetch.py` ni `run_pipeline.py`
+> (el defecto de S92, que hoy sólo se esquiva con `--no-night-filter`). Lo que de día queda como de
+> noche porque el paper no da número (Test 1 integrado sobre MIR absoluto, compuerta de D22, tope D9,
+> consistencia TIR): `pipeline/diurno.py`, sección PREGUNTAS.
+
 > ⚠️ **S151, segunda marca (A113, hija de la tarea 1.13 del loop, PR #812 verificado; decisión D-10,
 > issue #813).** Tres cosas de abajo quedan corregidas. (1) **El día no es sobre todo MODIS: es VIIRS 375.**
 > Con el OCR junto a la tabla son 94 pasadas protegidas diurnas (97 filas: 85 VIIRS 375, 6 MODIS, 6 VIIRS
