@@ -63,7 +63,8 @@ from auto_audit_weekly import _coords_por_volcan, es_pasada_diurna_descartada  #
 from clase_mirova import TIPO_MINIMA_SE, aplicar_regla_minimas  # noqa: E402
 from referencia_mirova_unificada import (HISTORICO_RECUPERADAS,  # noqa: E402
                                          RESPALDO_20260408, SNAP_CONS,
-                                         SNAP_OCR, bajar_remoto,
+                                         SNAP_OCR, TIPO_SIN_GEOMETRIA,
+                                         bajar_remoto,
                                          cargar_referencia_unificada)
 
 DATA = ROOT / "data" / "mirova_equivalent"
@@ -193,7 +194,13 @@ def zbin(z):
 
 # ---------------------------------------------------------------- referencia
 def es_alerta(tipo):
-    return tipo.startswith("ALERTA")
+    # V31.1: ALERTA_SIN_GEOMETRIA_OCR empieza por ALERTA pero NO es alerta del criterio (no se sabe si
+    # cae dentro del radio). Va como estrato aparte (es_sin_geometria): no cambia ninguna noche.
+    return tipo.startswith("ALERTA") and not es_sin_geometria(tipo)
+
+
+def es_sin_geometria(tipo):
+    return tipo == TIPO_SIN_GEOMETRIA
 
 
 def es_fp(tipo):
@@ -311,6 +318,11 @@ def etiquetar(recs, por_vb, noche_sensor, noche_volcan):
               and not ns["alerta"] and not ns["fp"]):
             r["lab"] = "neg_limpio"
             r["neg_estricto"] = not nv["alerta"] and not nv["fp"]
+        elif any(es_sin_geometria(f["tipo"]) for f in filas) and not any(f["tipo"] == "RUTINA" for f in filas):
+            # V31.1: MIROVA vio calor en ESTA pasada pero no se sabe donde (la imagen de distancia era de
+            # otra). Estrato aparte: ni alerta ni negativo. Nunca le gana a una alerta, a un
+            # FALSO_POSITIVO ni a una RUTINA de la misma pasada (por eso va despues de las tres).
+            r["lab"] = "sin_geometria"
         else:
             r["lab"] = "sin_info"
 
@@ -357,7 +369,12 @@ def metricas(recs, sin_record, filtro):
               "tasa_pub_neg_estricto_noche_volcan": _tasa(c["neg_estricto_pub"], c["neg_estricto"]),
               "n_far_ref": c["far_ref"], "n_sin_info": c["sin_info"],
               "pos_sin_record": sum(v for (vol, b), v in sin_record.items() if filtro({"vol": vol, "b": b}))}
-    noches = collections.defaultdict(lambda: {"labs": set(), "pub": 0})
+    if c["sin_geometria"]:
+        # V31.1: estrato aparte (MIROVA vio calor en la pasada, sin distancia). Fuera del recall y de los
+        # negativos; la clave solo aparece si hay alguna, asi la salida sin estas filas queda igual.
+        pasada["n_sin_geometria"] = c["sin_geometria"]
+        pasada["tasa_pub_sin_geometria"] = _tasa(c["sin_geometria_pub"], c["sin_geometria"])
+    noches =collections.defaultdict(lambda: {"labs": set(), "pub": 0})
     for r in sel:
         e = noches[(r["vol"], r["noche"])]
         e["labs"].add(r["lab"])

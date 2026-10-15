@@ -21,6 +21,13 @@ Definicion operativa (lectura A): una PASADA es "alerta protegida" si tiene una 
 (consolidado u OCR) con VRP_MW de 1 MW o mas, RECALCULADO desde el VRP, nunca leido de la columna.
 Lectura B (decision D-4 de Nicolas, pendiente): toda pasada con VRP de 1 MW o mas, aunque el scraper la
 llame FALSO_POSITIVO por estar fuera de su radio.
+
+Filas sin geometria (V31.1 de Mirova-v1, tipo ALERTA_SIN_GEOMETRIA_OCR): la imagen de distancia de
+MIROVA ya era de otra pasada, el VRP si es de la suya. La lectura A es "alerta del scraper dentro del
+radio" y de estas filas no se sabe la distancia, asi que NO son alerta protegida bajo A (decision del
+coordinador del loop, 2026-10-15, la conservadora: si entraran, el criterio cambiaria hacia atras sin
+que nadie lo decidiera). Bajo B si cuentan. Se informan como estrato aparte (ver
+referencia_mirova_unificada y banco_paridad).
 """
 from __future__ import annotations
 
@@ -194,7 +201,14 @@ def coherencia_por_mes(path: Path) -> dict:
     por_mes = defaultdict(Counter)
     with open(path, encoding="utf-8") as fh:
         for r in csv.DictReader(fh):
-            if (r.get("Tipo_Registro") or "").strip() not in TIPOS_ALERTA:
+            tipo = (r.get("Tipo_Registro") or "").strip()
+            if tipo == "ALERTA_SIN_GEOMETRIA_OCR" or (
+                    tipo in TIPOS_ALERTA and (r.get("Clasificacion Mirova") or "").strip() == "SIN_GEOMETRIA"):
+                # V31.1 de Mirova-v1: la fila trae el VRP de su pasada pero no su clase, a proposito (la
+                # imagen de distancia era de otra pasada). No es incoherencia de escala: va aparte.
+                por_mes[(r.get("Fecha_Satelite_UTC") or "")[:7]]["sin_geometria"] += 1
+                continue
+            if tipo not in TIPOS_ALERTA:
                 continue
             ok = (r.get("Clasificacion Mirova") or "").strip() == clase_por_vrp(_float(r.get("VRP_MW")))
             por_mes[(r.get("Fecha_Satelite_UTC") or "")[:7]]["coherente" if ok else "incoherente"] += 1
@@ -216,6 +230,9 @@ def main(argv=None) -> int:
     for lectura in ("A", "B"):
         pp = pasadas_protegidas(ref, lectura=lectura)
         print(f"pasadas protegidas, lectura {lectura}: {len(pp)}  por sensor {dict(Counter(k[1] for k in pp))}")
+    sg = {clave_pasada(f) for f in ref if f.get("sin_geometria") and (f.get("vrp_mw") or 0) >= UMBRAL_PROTEGIDA_MW}
+    if sg:   # sin estas filas la salida queda identica a la de antes de V31.1
+        print(f"estrato aparte, sin geometria (V31.1) de {UMBRAL_PROTEGIDA_MW} MW o mas, fuera de la lectura A: {len(sg)}")
     print("banner de MIROVA (Nivel_Anomalia_MIROVA) contra el VRP de la pasada:")
     por_banner = defaultdict(list)
     for f in filas_con_banner(Path(a.ocr)):

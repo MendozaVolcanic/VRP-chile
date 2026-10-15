@@ -36,7 +36,9 @@ def confiable(r):
 
 
 def vrp_mirova(r):
-    vs = [m["vrp_mw"] for m in r["mirova"] if m.get("vrp_mw") is not None and "ALERTA" in m.get("tipo", "")]
+    # V31.1: ALERTA_SIN_GEOMETRIA_OCR no es alerta del criterio (no se sabe si cae dentro del radio)
+    vs = [m["vrp_mw"] for m in r["mirova"] if m.get("vrp_mw") is not None and "ALERTA" in m.get("tipo", "")
+          and m.get("tipo") != "ALERTA_SIN_GEOMETRIA_OCR"]
     return max(vs) if vs else None
 
 
