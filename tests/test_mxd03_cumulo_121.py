@@ -286,7 +286,7 @@ def _caso(filas_por_vol, medidas_por_vol):
         pob["volcanes"][vol] = {"N": n, "muestra": filas, "inner_radius_km": 5.0}
         pob["jobs"][vol] = {"volcan": vol, "granulos": [f["clave"] for f in filas]}
         if vol in medidas_por_vol:
-            sal[vol] = {"job": vol, "volcan": vol, "completo": True, "brazos": list(E.BRAZOS),
+            sal[vol] = {"job": vol, "volcan": vol, "completo": True, "brazos": list(E.BRAZOS), "commit": "abc123",
                         "granulos": medidas_por_vol[vol]}
     return pob, sal
 
@@ -448,6 +448,36 @@ def test_las_alertas_bajo_1_mw_entran_exactas():
     assert c["alertas_perdidas"] == 6 and c["intervalo"] == [6.0, 6.0] and r["veredicto"] == "EMPEORA"
 
 
+def test_artefactos_de_dos_commits_dan_incompleto():
+    """A108, verificador v2: el despacho partido en dos (Lascar-2 y los otros 11) puede correr sobre dos
+    pipelines. Si los JSON traen mas de un commit, el veredicto no se da."""
+    fa, ma = _limpio("a")
+    fb, mb = _limpio("b")
+    pob, sal = _caso({"a": fa, "b": fb}, {"a": ma, "b": mb})
+    r = E.evaluar(pob, sal)
+    assert r["veredicto"] == "SIN CAMBIO OBSERVADO" and r["commits"] == ["abc123"]
+    sal["b"]["commit"] = "def456"
+    r = E.evaluar(pob, sal)
+    assert r["veredicto"] == "INCOMPLETO" and any("commit" in x for x in r["motivos_incompleto"])
+
+
+def test_artefacto_sin_commit_da_incompleto():
+    f, m = _limpio()
+    pob, sal = _caso({"a": f}, {"a": m})
+    del sal["a"]["commit"]
+    assert E.evaluar(pob, sal)["veredicto"] == "INCOMPLETO"
+
+
+def test_el_probe_escribe_el_commit_y_el_ref():
+    """El JSON del job guarda GITHUB_SHA y GITHUB_REF (o el HEAD local si no corre en Actions)."""
+    import probe_cumulo as Q
+    with patch.dict(os.environ, {"GITHUB_SHA": "0123abcd", "GITHUB_REF": "refs/heads/main"}):
+        assert Q.procedencia() == {"commit": "0123abcd", "ref": "refs/heads/main"}
+    with patch.dict(os.environ, {"GITHUB_SHA": "", "GITHUB_REF": ""}):
+        local = Q.procedencia()
+    assert local["commit"] and len(local["commit"]) == 40
+
+
 def test_tramo_a119_de_modis():
     assert E.tramo_a119("2026-04-20 01:30") == "desde 2026-03-01"
     assert E.tramo_a119("2026-10-11 01:30") == "desde 2026-10-10"
@@ -464,7 +494,8 @@ def _sintetico_real(fn_pub):
             m = _medida(c, cprima=(True if i == 0 else None))
             m["pub"] = {b: fn_pub(x["volcan"], c, b) for b in E.BRAZOS}
             meds.append(m)
-        sal[j] = {"job": j, "volcan": x["volcan"], "completo": True, "brazos": list(E.BRAZOS), "granulos": meds}
+        sal[j] = {"job": j, "volcan": x["volcan"], "completo": True, "brazos": list(E.BRAZOS), "granulos": meds,
+                  "commit": "abc123"}
     return pob, sal
 
 

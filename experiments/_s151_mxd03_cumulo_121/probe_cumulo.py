@@ -152,6 +152,20 @@ def medir_granulo(l1b, geo, volcan, latlon_m, datos, vent, clave, feats=None, co
 
 
 # ------------------------------------------------------------------ E/S (solo en el runner)
+def procedencia():
+    """Commit y ref con que corrio el job (verificador v2, A108): el despacho partido en dos puede caer
+    sobre dos pipelines, y el evaluador tiene que poder verlo. En Actions, GITHUB_SHA y GITHUB_REF; fuera,
+    el HEAD del repo."""
+    commit = os.environ.get("GITHUB_SHA", "").strip()
+    ref = os.environ.get("GITHUB_REF", "").strip()
+    if not commit:
+        import subprocess
+        commit = subprocess.run(["git", "-C", str(RAIZ), "rev-parse", "HEAD"], capture_output=True,
+                                text=True).stdout.strip()
+        ref = ref or "local"
+    return {"commit": commit or None, "ref": ref or None}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--job", required=True)
@@ -180,7 +194,7 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     hdf = out / "hdf"
     destino = out / f"{args.job}.json"
-    estado = {"job": args.job, "volcan": vol, "inner_radius_km": inner, "completo": False,
+    estado = {"job": args.job, "volcan": vol, "inner_radius_km": inner, "completo": False, **procedencia(),
               "brazos": list(BRAZOS), "granulos": []}
     n_cprima = 0
     for clave in job["granulos"]:

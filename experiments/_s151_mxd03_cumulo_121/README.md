@@ -314,7 +314,8 @@ Para cada comparación X contra Y (lista abajo):
 
 1. **INVALIDO**: algún C' difiere de su C; un brazo vio el flag al revés o ningún brazo llamó a
    `derivar_distance_class`; o el ruido aplicado difiere del pedido en más de 10 m.
-2. **INCOMPLETO**: falta la salida de un job pedido; **falta cualquier gránulo pedido** (los de
+2. **INCOMPLETO**: los artefactos traen más de un commit o alguno no lo trae; falta la salida de un job
+   pedido; **falta cualquier gránulo pedido** (los de
    `archivo_cmr.json` no son pedidos); los brazos no tienen la misma cantidad de gránulos medidos; o un
    job no corrió ningún C'. Se repite el job sobre el mismo código (A108). El evaluador cuenta los
    gránulos y los records por brazo **antes** de dar cualquier veredicto (`conteo_por_brazo`).
@@ -393,13 +394,21 @@ que lo produce y un control que no (A116), incluidos MEJORA y EMPEORA con la pob
 - **Disco del runner.** Igual que la 1.17: cada par pesa 100 a 150 MB y se borra apenas se usa.
 
 Primero **un job suelto para cronometrar** (uno de los más cargados: 48 gránulos del censo de Láscar), y
-sólo si termina bajo los 70 min, los otros 11:
+sólo si termina bajo los 70 min, los otros 11. **Los dos despachos tienen que correr sobre el mismo
+commit**: se fija un tag sobre el commit de `main` después del merge y los dos se despachan desde ese
+tag, que se anota en la bitácora del loop junto con los dos run id.
 
 ```
-gh workflow run probe-s151-mxd03-cumulo-121.yml --ref main -f preregistro_aprobado=si -f jobs='["Lascar-2"]'
-gh workflow run probe-s151-mxd03-cumulo-121.yml --ref main -f preregistro_aprobado=si \
+git tag s151-1.21-probe <commit de main tras el merge> && git push origin s151-1.21-probe
+gh workflow run probe-s151-mxd03-cumulo-121.yml --ref s151-1.21-probe -f preregistro_aprobado=si -f jobs='["Lascar-2"]'
+gh workflow run probe-s151-mxd03-cumulo-121.yml --ref s151-1.21-probe -f preregistro_aprobado=si \
   -f jobs='["Lascar-1","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","NevadosDeChillan","Llaima","Villarrica","Copahue","PuyehueCordonCaulle","Chaiten"]'
 ```
+
+Cada JSON de job guarda `commit` (`GITHUB_SHA`) y `ref` (`GITHUB_REF`), y el evaluador da **INCOMPLETO**
+si los artefactos traen más de un commit o alguno no lo trae (`commits` en el resumen): un veredicto que
+mezcle dos pipelines no se da (A108). El tag sólo hace que eso no pase; el evaluador es el que lo
+comprueba.
 
 El evaluador de cada despacho saldrá INCOMPLETO porque sólo ve sus propios jobs; el veredicto se saca en
 local con los 12 artefactos juntos (`python evaluar_cumulo.py <carpeta>`).

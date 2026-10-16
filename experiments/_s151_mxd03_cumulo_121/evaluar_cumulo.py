@@ -222,6 +222,13 @@ def evaluar(pob, salidas, ausentes=(), esperados=None, prediccion=None):
     # ---- cobertura (A108): todo lo pedido medido, y todos los brazos en cada granulo medido
     incompleto = []
     faltan_jobs = [j for j in esperados if j not in salidas]
+    # un solo pipeline (verificador v2, A108): todos los artefactos del mismo commit
+    commits = sorted({str(s.get("commit")) for j, s in salidas.items() if j in esperados})
+    sin_commit = sorted(j for j, s in salidas.items() if j in esperados and not s.get("commit"))
+    if sin_commit:
+        incompleto.append("artefactos sin commit: %s" % sin_commit)
+    if len([c for c in commits if c != "None"]) > 1:
+        incompleto.append("artefactos de mas de un commit (dos pipelines): %s" % commits)
     if faltan_jobs:
         incompleto.append("faltan jobs: %s" % faltan_jobs)
     sin_medir = [f["clave"] for f in pedidas if f.get("estado") != "ok"]
@@ -291,6 +298,10 @@ def evaluar(pob, salidas, ausentes=(), esperados=None, prediccion=None):
             if p is None:
                 continue
             g = "protegidas" if f["prot"] else ("fuente_test1" if p.get("fuente") == "test1" else "resto")
+            if ((f["brazos"]["C"] or {}).get("fuente")) == "test1":   # la fuente medida hoy, no la guardada
+                h = replay.setdefault("fuente_test1_medida_en_C", {"acuerdo": 0, "de": 0})
+                h["de"] += 1
+                h["acuerdo"] += f["pub"]["CC"] == p["pub_cc_replay"]
             r = replay.setdefault(g, {"acuerdo": 0, "de": 0, "CC_medido_1_replay_0": 0, "CC_medido_0_replay_1": 0})
             r["de"] += 1
             r["acuerdo"] += f["pub"]["CC"] == p["pub_cc_replay"]
@@ -310,6 +321,7 @@ def evaluar(pob, salidas, ausentes=(), esperados=None, prediccion=None):
             "motivos_invalido": invalido[:50], "motivos_incompleto": incompleto,
             "ausentes_del_archivo": {"n": len([a for a in ausentes if a["volcan"] in vols]),
                                      "en_censo": aus_censo},
+            "commits": [c for c in commits if c != "None"],
             "conteo_por_brazo": conteo, "comparaciones": comps, "banda_modelo_traza": banda,
             "c_igual_a_guardada": {"si": sum(1 for f in ok if f.get("c_igual_a_guardada")), "de": len(ok)},
             "deriva_protegidas": {"distintas": deriva_prot, "de": len(prot_ok)},
