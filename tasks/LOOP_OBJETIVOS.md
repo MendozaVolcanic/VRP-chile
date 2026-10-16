@@ -277,6 +277,24 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   separar paralaje (proporcional a altura por tangente del ángulo) de error de interpolación. Sin tocar el
   pipeline. Control que pueda fallar: VIIRS, cuya geolocación es nativa por píxel, no debería mostrarlo.
 
+- [ ] **1.16 (agregada por Nicolás el 2026-10-16) Repaso con material crudo.** Va **después de cerrar el arreglo de
+  G3** del evaluador diurno (rama `loop/diurno-g3-tolerancia`). De sólo lectura; entregable de **una página**.
+  Por qué: dos defectos de este mes estuvieron escondidos porque se auditaba sobre material ya digerido: el
+  corrimiento MODIS (meses en nuestros JSON; lo destapó la geolocalización oficial MOD03, #828) y la distancia del
+  OCR (discrepa en ~24 % de las pasadas del 06-13 al 10-08; lo destapó leer `Dist.png` como serie de tiempo,
+  `experiments/_s151_distancia_ocr/`). Y los «verificadores limpios» son otra instancia de Claude: atrapan errores
+  de lógica, pero no son un árbitro independiente. Origen: el prompt de «versión más profunda, no más grande»
+  (qué haría un especialista, material más crudo, métodos, quién más mostraría que está bien), conversado en la
+  sesión vrp 151.
+  Qué entregar: un inventario de las conclusiones VIGENTES que se apoyan sólo en material digerido (nuestros JSON,
+  el CSV del scraper, resúmenes de papers, texto extraído de PDF), y para cada una: (a) el material crudo que la
+  confirmaría o la tumbaría (L1B, MOD03/VNP03, GeoTIFF y OSF de MIROVA, página renderizada del paper); (b) el
+  árbitro externo (base de MIROVA para la réplica; OVDAS, Sentinel-2 y Landsat en onda corta para el experimental;
+  MOD03 para posición; Coppola para el código); (c) el método (píxel a píxel contra la oficial, sintéticos con
+  respuesta conocida, el detector sobre los casos publicados por MIROVA); (d) un orden de ataque por lo que
+  decide. No re-litigar los A/B ya pre-registrados: su vara está fijada. La reescritura del plan cabe en una página;
+  si no cabe, se prioriza, no se alarga.
+
 ## 5. Cola de decisiones para Nicolás (el loop agrega; Nicolás responde en el issue)
 
 | # | decisión | evidencia | PR / tag | issue |
