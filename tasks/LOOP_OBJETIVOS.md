@@ -351,6 +351,20 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 13:09 UTC (vuelta 99): Mirova-v1 ya escribe `Distancia_aprox_*`; D-13 sigue esperando sus runs
+- Sesión S152 retomada con `/loop`. Chequeos: NRT verde (08:45, 39 min; la `workflow_dispatch` del cron externo de
+  las 13:00 está en cola); disco 20 GB libres; abiertos #779 (auto-audit fuera de banda, ya revisado en la vuelta 29),
+  #813 (D-10) y #824 (watchdog: los A/B en cola, ruido conocido).
+- **Mirova-v1, CONFIRMADO**: el OCR de las 13:00 (run 38904540596) restauró la caché completa, calculó la distancia
+  aproximada en 33 s (13:02:53 a 13:03:26) y commiteó `f8a2ee01`. Contra su padre `13b5ddb5` (el commit del OCR de
+  13:02): 1.090 filas en los dos; 231 con `Distancia_aprox_km` (antes 0); métodos: pendiente 244, solapado 241, único
+  231, ambiguo 172, sin_control 132, sin_marcador 48, calado_debil 22. **`Distancia_km` y las otras 24 columnas
+  originales, idénticas byte a byte en las 1.090 líneas** (prefijo crudo de cada línea, sin CR en ninguno de los dos).
+  No hace falta arreglo de `restore-keys` (decisión 4 del bloque S152 queda sin objeto mientras siga así).
+- D-13: V2a intento 2 (38648773684) corre, 12 de 22 jobs verdes; W2b (38853273752) corre, 15 de 22; V1 intento 3
+  (38639658446) y W2a intento 2 (38853230521) pendientes detrás de ellos. Nada que unir todavía.
+- Próximo: pre-registro de la 1.21.
+
 ### 2026-10-16 ~13:00 UTC (vuelta 98): historia de Mirova-v1 completa; cron externo creado por Nicolás
 - Segunda corrida de `distancia_aprox_historia.yml` (run 38902737639) terminó en verde a las 12:59: 1.090 filas sin
   `sin_tiempo` (todas calculadas), caché completa `mirova-dist-hist-38902737639` (47 MB), la más nueva. El OCR de las
