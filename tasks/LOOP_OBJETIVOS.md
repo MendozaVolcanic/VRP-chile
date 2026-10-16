@@ -311,6 +311,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   MIROVA 353 K; el corpus ya llegó a 354,24 K, y un píxel borrado no aparece en `t_max`. Qué: en las pasadas de
   Chillán desde el 2026-09-28, contar en VNP02IMG/VJ102IMG (bit de saturación de I04) y MOD021KM (SI = 65533) los
   píxeles saturados, y recalcular el VRP con y sin ellos contra lo que MIROVA publicó (9,0, 10,0 y 8,24 MW).
+- [ ] **1.21 (agregada por el loop el 2026-10-16, del resultado de la 1.17) MxD03 junto con la etiqueta desde el
+  cúmulo.** El probe 1.17 dio PIERDE PROTEGIDA por la letra, pero las 2 pérdidas vienen de que `distance_class` sale del
+  hotspot final (`ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER = False`), no de la posición. Probe de tres brazos sobre la
+  misma población (C; MxD03; MxD03 + etiqueta desde el cúmulo), con la regla 1 como compuerta, el término a lo largo
+  de la traza agregado al modelo de corrimiento y un brazo con ruido de posición como control real. Pre-registro,
+  verificador, sello de Nicolás. Informe del verificador de la 1.17 en `verif_117r`.
 - [ ] **1.20 (agregada por el loop el 2026-10-16, del verificador de la 1.18) Techos que borran señal válida.** De sólo
   lectura. (1) Techo M15 de 343 K en `pipeline/process_viirs_mod.py:182` contra M15 válido hasta 374 K: ¿cuántos
   píxeles y records del corpus borra, y cuánto VRP cambia? (2) I04 de NOAA-21 con LUT máx 361,00 K contra el corte de
@@ -344,6 +350,24 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-16 ~13:20 UTC (vuelta 97): verificador del resultado 1.17: PARCIAL; las 2 pérdidas son A46, no posición
+- `C:\Users\nmend\AppData\Local\Temp\claude\verif_117r\VERIFICADOR.md`. PIERDE PROTEGIDA es lo que manda la letra del
+  pre-registro (`evaluar_mxd03.py:164-181`), con 470 de 471 gránulos. Pero las 2 pérdidas de Láscar Terra (04-20 y
+  04-30 01:30) NO son de posición: con MxD03 el cúmulo queda igual y más cerca del cráter (0,72 → 0,23 km; 0,86 →
+  0,48 km); el Test 1 de 3 km deja de disparar (inferido), gana `eruption` en el borde del Salar a 19 y 21 km, y
+  `distance_class` sale del hotspot final porque `ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER = False`
+  (`process_modis.py:1293-1310`, `1328-1330`, `319`); sin rescate F47 porque el Salar está dentro de 25 km
+  (`store.py:393`). Es A46/A81. MIROVA publica las dos a 1,0 km (1,36 y 1,34 MW). En protegidas M gana 9 y pierde 2.
+- El «control» no es control: `_interp_geo` también corre la posición a lo largo de la traza (2 − 0,00197·línea km),
+  término ausente en el modelo de #828 (r = 0,955 bajo 30° de cenit); explica el 1,1 a 1,3 km medido contra 0,4. Δ no
+  interpretable. «Otra detección» en 97 de 100 no distingue nada (se enciende en 460 de 470); la partición útil:
+  36 mismo píxel reubicado, 32 cambio de fuente del hotspot, 32 otro píxel máximo. C contra producción: 462 de 470 en
+  etiqueta (las 8 restantes son negativos limpios); píxeles anómalos difieren en 248 casos (deriva de código).
+- Consecuencia para Nicolás: el arreglo MxD03 solo NO pasa la regla 1 tal como se pre-registró, pero la causa de las
+  pérdidas es el etiquetado por hotspot final. Propuesta: tarea 1.21, probe de tres brazos (C; MxD03; MxD03 + etiqueta
+  desde el cúmulo) con la misma vara, más el término a lo largo de la traza en el modelo y un brazo con ruido como
+  control real. Nada se adopta.
 
 ### 2026-10-16 ~12:50 UTC (vuelta 96): probe 1.17 evaluado: PIERDE PROTEGIDA (por verificar); el cron de Mirova-v1 aún no escribe
 - Probe 1.17 (run 38894508138): 470 de 471 gránulos (falta 1 de Tupungatito, bajo el tope); C' = C en 24 de 24;
