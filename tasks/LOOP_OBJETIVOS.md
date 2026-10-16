@@ -352,6 +352,13 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~16:15 UTC (vuelta 118): arreglo de `unir_intentos.py` delegado (worktree propio)
+- Subagente en rama `loop/unir-intentos-tolerancia` desde `main`: floats con tolerancia relativa más piso absoluto
+  (criterio de G3, #833); `anomaly_pixels` como conjunto, y diferencias de conjunto admitidas sólo con los campos de
+  decisión de los evaluadores iguales (leídos de `evaluar_fk.py`, `evaluar_diurno.py` y el predicado del tablero, con
+  `archivo:línea`), contadas e informadas; todo lo demás sigue bloqueando. Tests en los dos lados, prueba real con
+  Chaitén control de V2a. PR sin merge; después verificador limpio.
+
 ### 2026-10-16 16:09 UTC (vuelta 117): V2a intento 2 despareja (6 de Chaitén); la unión estricta choca con ruido de máquina
 - V2a intento 2 (38648773684) terminó: 22 jobs de proceso verdes, `recolectar` rojo por dos razones. (1) Cobertura:
   control 5.876 pasadas, brazo `_s149_ab_sin_test1_b22_max` 5.870 (faltan 6, todas de Chaitén). (2) El push de la rama
