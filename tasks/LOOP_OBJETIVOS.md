@@ -351,6 +351,20 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 14:10 UTC (vuelta 109): verificador del pre-registro 1.21: SELLABLE CON ARREGLOS (dos bloqueantes)
+- `C:\Users\nmend\AppData\Local\Temp\claude\verif_121\VERIFICADOR.md`. Comprobado: 39 de 39 tests, sha256 de la
+  muestra, cobertura del estimador, replay coherente con A82 (88,3 % de negativos limpios contra 89,1 %), consumidores
+  del flag (`process_modis.py:1330` y `:1497`), workflow (candado, token, `"on":`, grupo propio, 95 min contra 70).
+- Bloqueante 1: la rama del Test 1 no está modelada. `derivar_distance_class` recibe el cúmulo del camino de erupción
+  y después ese cúmulo se reemplaza por el del Test 1 (`:1425`/`:1440`), que es el guardado. Con el flag encendido la
+  etiqueta sale `far` por el Salar a 14,98 km con el cúmulo publicado a 0,375 km (`verif_121\scripts\test1_rama2.py`,
+  pipeline real). 126 records con fuente `test1`, 4 protegidas de Láscar, dos son las pérdidas de la 1.17. El «46 de
+  46» es una cota. Para A45: con el flag, la etiqueta sale de un cúmulo distinto del que se publica.
+- Bloqueante 2: FRÁGIL global (`evaluar_cumulo.py:262-263`) en vez de por pasada.
+- No bloqueantes: nulo anisótropo sobre 50° de cenit; poder bajo (MEJORA casi inalcanzable en la principal); las 37
+  protegidas ganadas no entran en Δ; comentario 14/12 gránulos; cronometrar un job antes de los 12.
+- Arreglos devueltos al autor (mismo PR). Después, segunda vuelta del verificador.
+
 ### 2026-10-16 14:08 UTC (vuelta 108): espera
 - NRT 13:00 verde (37 min 43 s); 13:30 corriendo, 14:00 pendiente: siempre una en cola con el cron de 30 min, sin
   desplazamientos hasta ahora (las tres corridas existen). D-13: V2a intento 2 17 de 22 verdes; W2b 20 de 22; V1 y
