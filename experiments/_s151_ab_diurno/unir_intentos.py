@@ -8,6 +8,12 @@ los intentos). Antes de unir hay que comprobar que en los gránulos comunes los 
 lo dicen, la unión es una corrida completa con el mismo código. Si no, no se une y se informa. En W1: 325
 comunes, 0 distintos; la unión cubre las 183 noches del control.
 
+Primero se mira si un intento SOLO ya cubre todas las pasadas de la unión (verificador del PR #841, opción A).
+Si alguno lo hace, se entrega ese intento ENTERO (el primero en el orden de la línea de comandos), sin mezclar
+records de dos corridas en un mismo archivo; los comunes se comparan igual, pero sólo para informar. Sobre V2a,
+21 de 22 archivos tienen un intento completo. Sólo cuando ninguno cubre todo se mezcla record a record con la
+regla de abajo, y ahí cualquier diferencia que no sea ruido bloquea.
+
 Por qué no basta `!=` (medido en el A/B F/K V2a, run 38648773684, intento 1 y re-run sobre el MISMO commit):
 en 8 de 22 archivos difieren TODOS los records comunes, y no por el código.
   1. Ruido de máquina. `diag_mu_deti` difiere hasta 5,1e-10 relativo (1,3e-15 absoluto) y `diag_sd_deti`
@@ -17,11 +23,21 @@ en 8 de 22 archivos difieren TODOS los records comunes, y no por el código.
      cubre los valores casi cero (mu del dETI) y está 11 órdenes bajo el umbral físico más fino del dETI
      (C1 = 3e-3); una diferencia de 1e-3 relativo sobre un valor de orden 1e-2 no pasa. Los enteros, bools,
      None y strings se comparan exactos. El test fija los dos lados (5e-10 une, 1e-3 no).
-  2. Píxel de borde. En 11.642 records comunes, 24 traen `anomaly_pixels` distinto: 9 sólo en el orden y 15
-     con otro conjunto (0 a 2 píxeles). Los 15 son MODIS del control, `distance_class = far`, `vrp_mw` topado
-     en 5,0 (tope D9) y campos difusos de 56 a 90 píxeles: un píxel en el borde del umbral entra o sale con el
-     ruido de la regresión. Ese píxel arrastra campos que se calculan desde el conjunto de píxeles (la lista
-     y el conteo de descartados, el píxel más caliente y la geometría de visión evaluada en él, `vrp_mir_mw`).
+  2. Empates en el recorte de la lista de píxeles (lo que el código llama «borde»). En 11.642 records comunes,
+     24 traen `anomaly_pixels` distinto: 9 sólo en el orden y 15 con otro conjunto, más 1 con sólo
+     `discarded_anomaly_pixels` distinto. Ningún píxel cruza un umbral: la máscara de detección es la misma
+     en los dos intentos (`n_anomalous_pixels`, de 273 a 789, y `primary_cluster` idénticos). Lo que cambia
+     es cuáles entran a la lista guardada, que se recorta a los 100 de mayor VRP con
+     `np.argsort(-per_pixel_vrp_mw)[:100]` (`pipeline/process_modis.py:1085`), un orden NO estable: en los 16
+     casos la lista mide exactamente 100 y cada píxel que entra o sale tiene el mismo `vrp_mw` que el mínimo
+     de la lista, valor que comparten de 1 a 45 píxeles (se intercambian hasta 8 por lado). Después
+     `pipeline/store.py:285-301` reparte esa lista por distancia y recalcula `vrp_mir_mw` y `hotspot_*`, y de
+     ahí salen los derivados distintos. Los dos records que siguen bloqueando la mezcla (Isluga MODIS_TERRA
+     2026-03-28 01:15 y Chillán MODIS_AQUA 2026-04-17 07:30) tienen además un empate en el MÁXIMO (dos píxeles
+     de 3,3930 y de 2,6865 MW): el que el sort deja primero pasa a `final_hotspot`, y con él la geometría de
+     visión evaluada ahí, incluido `sensor_zenith_deg`. Todos son MODIS del control, `far`, topados en 5,0 MW.
+     SOSPECHA no verificada: que el orden de los empates cambie con la CPU por el despacho SIMD del sort de
+     numpy, el mismo patrón que OpenBLAS en el ETI. (Medido por el verificador del PR #841, `a3_empates.py`.)
 
 Regla de comparación de un record común (`comparar`):
   * igual / tolerancia / orden: idéntico, idéntico salvo floats dentro de la tolerancia, o idéntico salvo el
@@ -49,19 +65,24 @@ CAMPOS_DECISION sale de leer los consumidores, no de adivinar (A89):
   * `experiments/_s151_prereg_fk_11/evaluar_fk.py:145` product_version y triggered_test1.
   * `experiments/_s151_ab_diurno/evaluar_diurno.py:261` diag_umbrales_diurnos; l. 417 product_version y granule.
   * datetime_utc y sensor van además en la clave.
-Ojo con el G3 de `evaluar_diurno.py:420`: compara TODOS los campos entre los dos brazos, así que un record de
-borde puede aparecer ahí como diferencia de campos derivados. No es de la unión (los brazos son jobs distintos
-y ya corren en CPUs distintas), pero la lista de `_union_intentos` permite rastrearlo.
+La clave es la PASADA, (sensor, datetime_utc al minuto), igual que agrupan los evaluadores
+(`_s146_ab_sin_test1/evaluar.py:109-110`, `evaluar_diurno.py:253`), no el gránulo. Con el gránulo en la clave
+(vuelta 68), la misma pasada con otro gránulo o versión (NRT contra estándar, o un reproceso de NASA entre
+intentos) salía dos veces y `armar_tabla.py:43` se quedaba en silencio con la última. Ahora se comparan, y
+`granule` y `product_version` distintos son una diferencia que bloquea la mezcla.
+Nota de diseño: CAMPOS_DECISION y DERIVADOS_DEL_BORDE son disjuntos (se comprueba al importar), así que en un
+record de borde quien bloquea es la lista cerrada de derivados: todo campo distinto que no esté en ella
+bloquea. CAMPOS_DECISION documenta de dónde sale cada campo; agregarle uno no cambia la regla.
+Estándar incoherente PENDIENTE (otro PR): el G3 de `evaluar_diurno.py:386-401 y 420` compara las listas de
+píxeles POSICIONALMENTE, así que marcaría como diferencia los 8 records de orden y los 14 de borde que esta
+herramienta declara «mismo pipeline» (`verif_841/a4_g3.py`). No lo crea la unión: entre los dos brazos, que
+son jobs distintos, el mismo empate del sort puede dar FALLA de G3. `evaluar_fk.py` no tiene G3 campo a campo.
 
-Resultado sobre V2a (22 archivos, 11.642 comunes): unen 20 (con la vuelta 68, 14). Se admiten 8 records por
-píxel de borde, todos de Copahue control. No unen Isluga y Nevados de Chillán control, por un record cada uno
-(MODIS_TERRA 2026-03-28 01:15 y MODIS_AQUA 2026-04-17 07:30): el píxel de borde cambia el píxel más caliente
-(hasta 6,8 km) y con él `sensor_zenith_deg` (hasta 0,7°), que decide la zona del barrido. En esos dos archivos
-quedan además 2 y 4 records de borde que sí cumplirían la regla.
+Resultado sobre V2a: ver el informe del PR (se vuelve a correr en cada cambio, no se fija aquí).
 
-Para los records comunes la unión conserva el del PRIMER intento en el orden de la línea de comandos
+En la mezcla, para los records comunes se conserva el del PRIMER intento en el orden de la línea de comandos
 (determinista); los que sólo están en un intento posterior se agregan. Los metadatos del documento salen del
-primer intento.
+primer intento. Con un intento entero, todo (records y metadatos) sale de ese intento.
 
 Uso: python unir_intentos.py --out <json> [--volcan V] <intento1.json> <intento2.json> [...]
 Sale con 1 si no une; con 0 si une.
@@ -101,10 +122,12 @@ DERIVADOS_DEL_BORDE = {
     "vrp_mir_mw": "suma de VRP MIR de los píxeles",
 }
 _VIIRS375 = ("VIIRS_SNPP", "VIIRS_NOAA20", "VIIRS_NOAA21")
+assert not set(CAMPOS_DECISION) & set(DERIVADOS_DEL_BORDE), "un campo no puede decidir y ser derivado a la vez"
 
 
 def clave(r):
-    return (r.get("sensor"), r.get("datetime_utc"), r.get("granule"))
+    """La pasada, como la agrupan los evaluadores: (sensor, minuto). Sin el gránulo (verificador del PR #841)."""
+    return (r.get("sensor"), (r.get("datetime_utc") or "")[:16])
 
 
 def iguales(a, b):
@@ -193,7 +216,8 @@ def _predicado(pares, volcan):
 
 
 def unir(docs, volcan):
-    """(salida o None, informe). Conserva el record del primer intento en los comunes."""
+    """(salida o None, informe). Si un intento solo cubre todas las pasadas, lo entrega entero e informa los
+    comunes; si no, mezcla conservando el record del primer intento y bloquea ante cualquier diferencia real."""
     union, origen = {}, {}
     estados = {e: 0 for e in ("igual", "tolerancia", "orden", "borde", "distinto")}
     distintos, borde, nuevos = [], [], []
@@ -214,6 +238,25 @@ def unir(docs, volcan):
                                   distance_class=union[k].get("distance_class"), vrp_mw=union[k].get("vrp_mw"),
                                   _par=(union[k], r)))
         nuevos.append(n)
+    entero = None
+    for i, d in enumerate(docs):
+        ks = [clave(r) for r in d["records"]]
+        if len(set(ks)) == len(ks) and set(ks) == set(union):
+            entero = i
+            break
+    if entero is not None:
+        for b in borde + distintos:
+            b.pop("_par", None)
+        inf = {"ok": True, "modo": "intento_entero", "intento_entero": entero + 1, "volcan": volcan,
+               "por_intento": [len(d["records"]) for d in docs], "nuevos_por_intento": nuevos,
+               "comunes": sum(estados.values()), "estados": estados, "borde": borde, "distintos": distintos,
+               "union": len(union)}
+        salida = dict(docs[entero])
+        salida["_union_intentos"] = {"regla": "un intento cubre todas las pasadas: se usa entero, sin mezclar",
+                                     "intento_entero": entero + 1, "tolerancia": [REL_TOL, ABS_TOL],
+                                     "por_intento": inf["por_intento"], "estados": estados,
+                                     "borde_informado": borde, "distintos_informados": distintos}
+        return salida, inf
     if borde and not distintos:
         try:
             malos = _predicado([b["_par"] for b in borde], volcan)
@@ -231,14 +274,14 @@ def unir(docs, volcan):
         borde = [b for j, b in enumerate(borde) if j not in malos]
     for b in borde + distintos:
         b.pop("_par", None)
-    inf = {"ok": not distintos, "volcan": volcan, "por_intento": [len(d["records"]) for d in docs],
+    inf = {"ok": not distintos, "modo": "mezcla", "intento_entero": None, "volcan": volcan, "por_intento": [len(d["records"]) for d in docs],
            "nuevos_por_intento": nuevos, "comunes": sum(estados.values()), "estados": estados,
            "borde": borde, "distintos": distintos, "union": len(union)}
     if distintos:
         return None, inf
     salida = {c: v for c, v in docs[0].items() if c != "records"}
     salida["records"] = sorted(union.values(), key=lambda r: (r["datetime_utc"], r["sensor"]))
-    salida["_union_intentos"] = {"regla": "comunes: se conserva el record del primer intento",
+    salida["_union_intentos"] = {"regla": "mezcla: en los comunes se conserva el record del primer intento",
                                  "tolerancia": [REL_TOL, ABS_TOL], "por_intento": inf["por_intento"],
                                  "estados": estados, "borde": borde}
     return salida, inf
@@ -253,6 +296,16 @@ def main():
     docs = [json.load(open(p, encoding="utf-8")) for p in a.intentos]
     volcan = a.volcan or docs[0].get("volcano") or Path(a.intentos[0]).stem
     salida, inf = unir(docs, volcan)
+    if inf["modo"] == "intento_entero":
+        for b in inf["borde"] + inf["distintos"]:
+            print("  informado (no se mezcla) %s intentos %s: pixeles %s, campos %s, derivados %s"
+                  % ("|".join(map(str, b["clave"])), b["intentos"], b.get("pixeles"), b.get("campos"),
+                     b.get("campos_derivados")))
+        json.dump(salida, open(a.out, "w", encoding="utf-8"))
+        print("%s: intentos %s -> usa ENTERO el intento %d (%d records, cubre las %d pasadas); comunes %d %s"
+              % (volcan, inf["por_intento"], inf["intento_entero"], len(salida["records"]), inf["union"],
+                 inf["comunes"], inf["estados"]))
+        return
     for b in inf["borde"]:
         print("  borde admitido %s intentos %s: pixeles %s, %s %s MW, derivados distintos %s"
               % ("|".join(map(str, b["clave"])), b["intentos"], b["pixeles"], b["distance_class"], b["vrp_mw"],
