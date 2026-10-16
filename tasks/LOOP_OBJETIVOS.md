@@ -347,10 +347,22 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-13 (texto original) | Cobertura de los A/B largos: ¿repetir y unir intentos (A108, ~20 h por vuelta y puede abrir huecos nuevos) o evaluar sobre la intersección de pasadas presentes en todos los brazos, informando las excluidas (desviación registrada; la pérdida es por descarga, independiente del brazo)? Recomendación del loop: intersección, con la regla del 5 % del control contra producción como compuerta | `C:\Users\nmend\AppData\Local\Temp\claude\fk_v1\detalle_cobertura.txt` (V1: 31 de 44 jobs cortos, 0,5 a 1,4 % por job; C0 de PCC falla el 5 %) | F/K V1, V2a, diurno | pendiente |
 | D-12 | ~~Merge de la columna~~ **HECHO** (Nicolás, 2026-10-16): Mirova-v1#25 mergeado 11:43 UTC (`2eac1758`); historia despachada (run 38895687049); hito A119 en #838 | | | cerrada |
 | D-12 (texto original) | Merge de la columna `Distancia_aprox_*` en el scraper (Mirova-v1 es producción) | verificador limpio en dos vueltas: sin bloqueos; `Distancia_km` y columnas viejas byte a byte iguales; umbral 5 provisional | Mirova-v1#25 (`f774a5d`) | pendiente |
+| D-15 | Commit de V2b de F/K: el pre-registro dice `--ref main` (`PREREGISTRO.md:139`), pero desde el commit de V1 y V2a (`402447f3` y `7b74435e`, mismo `pipeline/`) entraron #785 (marca de régimen en `store.py`), #821 (rama diurna apagada por flag, `process_viirs_mod.py`) y #822 (perfiles diurnos). Con `main`, la ventana V2 mezclaría dos pipelines (A108). Recomendación del loop: despachar V2b desde un tag en `7b74435e` | `git diff --stat 7b74435ed origin/main -- pipeline/` | tag propuesto `s151-fk-v2-codigo` | pendiente |
 | D-14 | Sello del probe 1.21 (C, CC, M, MC, R, RC) y merge de #840 (el clasificador de permisos le negó el merge al loop el 2026-10-16) | `experiments/_s151_mxd03_cumulo_121/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_cumulo_121_verif/`) más revisión del último diff | #840 (`2d9be9a9`) | pendiente |
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-16 17:20 UTC (vuelta 125): V2 se evalúa con V2a y V2b juntas; el commit de V2b va a D-15
+- `evaluar_fk.py` evalúa la ventana V2 con los dos despachos (`--raiz` de V2a y de V2b) y el ruido del gemelo de V1
+  (`--ruido-de v1.json`): V2a sola no se evalúa. Falta V1 intento 3 (corriendo) y V2b (sin despachar).
+- Commits: V1 `402447f3` y V2a `7b74435e` tienen el mismo `pipeline/` (diff vacío); W2a y W2b, `8b2bcd79`, igual a
+  `main` en `pipeline/`. Pero entre `7b74435e` y `main` entraron #785, #821 y #822 en `pipeline/`: V2b con
+  `--ref main` mezclaría pipelines dentro de V2. Pregunta a Nicolás (D-15); recomendación: tag en `7b74435e`. No hay
+  apuro: V2b no puede arrancar antes de que termine V1 (~12 h en su grupo).
+- W3 (2026-07-20 a 07-31) va partida en mitades (§7.1 del pre-registro diurno: W1 tardó 2,5 h); W3a = 07-20 a 07-25,
+  con `--ref main` (mismo `pipeline/` que W2). No se encola mientras W2a intento 2 figure `queued` a nivel de run
+  (regla de la vuelta 31: un despacho detrás de un run no `in_progress` puede desplazarlo).
 
 ### 2026-10-16 17:18 UTC (vuelta 124): #841 en main; V2a lista para evaluar
 - Último arreglo de #841 (`9d4ff60e`, CI run 38938003528 verde): una sola regla en los dos modos, cualquier `distinto`
