@@ -351,6 +351,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~13:50 UTC (vuelta 105): verificador del informe del paper: ENTREGAR CON CORRECCIONES
+- `C:\Users\nmend\AppData\Local\Temp\claude\paper_s152\VERIFICADOR_INFORME_PAPER.md`: 33 ítems revisados, 19
+  CONFIRMADO, 14 CORREGIR, 0 REFUTADO. Las 14 FALSA son 12 errores independientes (6-3, 6-14 y 6-16 son la misma
+  premisa: «la referencia no tiene negativos»); 5-5 pasa a DESACTUALIZADA y 5-24 (D18) a REBAJADA. Grave 1: el 86,1 %
+  de negativos limpios es posterior a #535 y no vale para la ventana del paper (antes, ~62 % por pasada). Grave 2: las
+  diurnas no se excluyen, pero excluirlas mueve el recall V375 de 0,931 a 0,936. Grave 4: por noche el argumento sale
+  más fuerte (98,2 % de los negativos limpios MODIS con cúmulo en el cráter). 6-13 (30/193, 210/214) se localiza en
+  el `numbers.json` previo a #604. V750 246 a 244: dos alertas de PCC borradas del consolidado, que también mueven
+  Isluga en `sec6:116`. Sin renderizar PDF; 13 ítems sin revisar uno por uno.
+- El autor del informe aplica las correcciones (v2, `...\paper_s152\INFORME_CAMBIOS_PAPER_v2.md`); después se
+  entrega a Nicolás.
+
 ### 2026-10-16 13:36 UTC (vuelta 104): sin nada que evaluar; el cron externo cada 30 min ya apila NRT
 - Hora del servidor 13:36 (la vuelta 103 decía «~13:50», hora estimada y equivocada; corregida a ~13:30, A86).
 - NRT: la `workflow_dispatch` de las 13:00 (38904541728) sigue corriendo a los 36 min y la de las 13:30
