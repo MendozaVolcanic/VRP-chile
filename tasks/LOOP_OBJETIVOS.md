@@ -351,7 +351,7 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-16 ~13:50 UTC (vuelta 105): verificador del informe del paper: ENTREGAR CON CORRECCIONES
+### 2026-10-16 13:45 UTC (vuelta 105): verificador del informe del paper: ENTREGAR CON CORRECCIONES
 - `C:\Users\nmend\AppData\Local\Temp\claude\paper_s152\VERIFICADOR_INFORME_PAPER.md`: 33 ítems revisados, 19
   CONFIRMADO, 14 CORREGIR, 0 REFUTADO. Las 14 FALSA son 12 errores independientes (6-3, 6-14 y 6-16 son la misma
   premisa: «la referencia no tiene negativos»); 5-5 pasa a DESACTUALIZADA y 5-24 (D18) a REBAJADA. Grave 1: el 86,1 %
