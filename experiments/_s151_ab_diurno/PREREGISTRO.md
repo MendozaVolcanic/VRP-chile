@@ -421,3 +421,22 @@ está en las dos, gana la última). Si la ventana ya se repitió y siguen faltan
 `--repetidas W<n>` para que salga del veredicto como cobertura insuficiente. Antes de la
 evaluación real, volver a correr `python experiments/_s151_ab_diurno/probar_evaluar_diurno.py`: tiene
 que seguir dando todas sus comprobaciones en verde sobre el mismo código.
+
+## 11. Desviaciones registradas DESPUÉS de ver datos
+
+**D1 (2026-10-16, vuelta 70 del loop): tolerancia numérica en G3.** W1 (run 38723828037, sólo informa) dio G3 FALLA:
+`diag_mu_deti` (179 noches) y `diag_sd_deti` (170) distintos entre control y brazo diurno, y ningún otro campo, ni
+anidado. Mecanismo reproducido por un verificador con contexto limpio: `np.polyfit` pasa por LAPACK de OpenBLAS, que
+elige el kernel por CPU, y el último bit de la regresión del ETI cambia entre runners; MODIS también difiere y no lee
+`ENABLE_DAYTIME_VIIRS`. Por eso G3 compara floats con tolerancia relativa 1e-9 más un piso absoluto 1e-14 (μ del dETI
+es casi cero: la diferencia relativa a μ llegó a 1,4e-11, pero contra σ del dETI no pasó de 5,4e-14; el umbral físico
+más fino, C1, es 3e-3), y enteros, bools, None y strings exactos, recursivo en listas y dicts. Es un cambio del
+instrumento hecho después de ver datos; el motivo es mecánico y no depende del resultado (W1 sigue INDECIDIBLE).
+Lo fijan la autoprueba (casos 22 a 22g, 57 de 57) y las mutaciones: 8 de 8 sobre la comparación nueva y 7 de 7 sobre
+las de siempre. Informe del verificador: `C:\Users\nmend\AppData\Local\Temp\claude\verif_g3\VERIFICADOR.md`.
+
+**Nota de procedimiento (W1):** cada intento del brazo diurno perdió pasadas nocturnas distintas por descarga. Se
+unieron los dos intentos con `unir_intentos.py` (se niega si un gránulo común difiere; 325 comunes idénticos), lo que
+equivale a pasar las dos raíces como dice el párrafo de arriba. La evaluación de W1 usó `--repetidas W1` sin necesidad
+(no faltaban positivos); como W1 sólo informa, no cambia nada, y en W2 a W6 no se usa salvo en el caso que describe
+este documento.
