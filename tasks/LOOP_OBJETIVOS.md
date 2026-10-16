@@ -352,6 +352,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 15:11 UTC (vuelta 114): W2b terminó con cobertura nocturna PAREJA; espera a W2a para evaluar W2
+- W2b (run 38853273752) 23 de 23 verdes. `contar_pasadas_noche.py` del job `recolectar`: control 1.069 noches y brazo
+  diurno 1.069, 0 faltan y 0 sobran; brazo diurno con 438 pasadas diurnas V375 y 433 V750, sin MODIS diurno.
+  Artefacto `s151diurno-todo` bajado a `C:\Users\nmend\AppData\Local\Temp\claude\w2b_38853273752\todo\` (46 archivos).
+  No se evalúa sola: G1 a G3 se calculan sobre W2 a W6 juntas (PREREGISTRO §4); W2 se arma uniendo W2a y W2b.
+- W2a intento 2 (38853230521) arrancó (3 en curso, 19 en cola). **W3 NO se despacha todavía** aunque el grupo
+  `s151-ab-diurno` ya no tiene pendiente: si W2a vuelve a salir despareja, su repetición desplazaría a W3 en el grupo.
+  Se despacha cuando W2a quede pareja.
+- NRT: la corrida `schedule` de las 14:32 esperó 26 min el grupo `push-main` (la de las 14:00 tardó 58 min) y arrancó a
+  las 14:58; la `workflow_dispatch` de las 15:00 quedó pendiente. Siempre una en cola. V2a intento 2 18 de 22; V1
+  intento 3 pendiente. #840 sigue abierto (D-14). Disco 18 GB.
+
 ### 2026-10-16 14:43 UTC (vuelta 113): pre-registro 1.21 listo para el sello (D-14); merge negado al loop
 - Último arreglo en #840 (`2d9be9a9`, CI run 38917337264, 1.885 pasan): `procedencia()` escribe `commit` y `ref` en cada
   artefacto; el evaluador da INCOMPLETO sin commit o con más de uno; tres tests nuevos que fallaban antes. README: los
