@@ -352,6 +352,16 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 17:02 UTC (vuelta 122): arreglos de #841 aplicados (`dd4cae1d`, CI verde); segunda verificación
+- Clave por pasada (sensor, minuto) sin gránulo; intento entero cuando uno solo cubre todas las pasadas (comunes
+  informados); mecanismo corregido (empates en el top-100); tests de 20 a 31, matan las mutaciones que sobrevivían.
+  V2a: unen 22 de 22 (21 con intento entero: Isluga control el 1, el resto el 2; sólo Chaitén `b22_max` mezcla, 592
+  comunes idénticos). Uniones en el scratchpad de la sesión (`union_v2a\`).
+- Punto que juzga el verificador: con intento entero, una diferencia real en los comunes sólo se informa, no bloquea.
+  Además, si la clave sin gránulo puede fusionar dos pasadas legítimas. Y cuenta la cobertura unida con
+  `contar_pasadas.py`.
+- Disco 7,4 GB.
+
 ### 2026-10-16 16:51 UTC (vuelta 121): verificador de #841: MERGEABLE CON ARREGLOS; la vuelta 117 erró el mecanismo
 - `experiments/_s151_unir_intentos_verif/VERIFICADOR_V1.md` (scripts a1 a a6 en `C:\Users\nmend\AppData\Local\Temp\claude\verif_841\`).
   Se sostiene: 20 de 22 unen, 8 de borde (Copahue); en 4.209 records unidos sólo difieren `diag_mu_deti` (5,1e-10),
