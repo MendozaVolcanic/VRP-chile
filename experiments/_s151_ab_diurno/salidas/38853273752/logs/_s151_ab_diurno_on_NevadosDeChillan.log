@@ -1,0 +1,775 @@
+FLAGS_BRAZO {"PROFILE_NAME": "_s151_ab_diurno_on", "DATA_SUBDIR": "_s151_ab_diurno_on", "ENABLE_DAYTIME_VIIRS": true, "ENABLE_DAYTIME_MODIS": false, "ENABLE_TEST1_PATH": true, "ENABLE_TESTS_23_PROSE_BRANCH": false, "ENABLE_MODIS_B22_PRIMARY": false, "ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER": false, "PATH_D_ONLY_CAP_MW": 5.0, "ENABLE_TESTS_23_NO_BT_GATE_VIIRS375": false, "ENABLE_VENT_ANCHORED_CLUSTERING": true, "ENABLE_ROI1_BOX_PAPER": false}
+[VRP profile=_s151_ab_diurno_on] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s151_ab_diurno_on
+=== [VRP profile=_s151_ab_diurno_on] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s151_ab_diurno_on ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Rama diurna VIIRS ABIERTA por perfil (ENABLE_DAYTIME_VIIRS): VIIRS se procesa de día con la Tabla 1 diurna de Coppola 2016a; MODIS sigue con su propia regla.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Nevados de Chillán | 2026-06-22
+[diag 11:54:56Z] AUTH_START volcano=NevadosDeChillan date=2026-06-22
+[diag 11:54:56Z] AUTH_OK
+[diag 11:54:56Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 11:54:56Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 11:54:56Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:9862522679,LAADS:9862494596]
+/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 11:54:59Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+[diag 11:54:59Z] SEARCH_START MODIS_AQUA
+[diag 11:54:59Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 11:55:00Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:9863052071,LAADS:9862675564]
+[diag 11:55:03Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 11:55:03Z] SEARCH_START VIIRS_SNPP
+[diag 11:55:03Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+[diag 11:55:03Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9862457845,LAADS:9862442474]
+[diag 11:55:09Z] DOWNLOAD_DONE attempt=0 elapsed=5.9s n_files=2
+[diag 11:55:09Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9864078052,LAADS:9864053290]
+[diag 11:55:15Z] DOWNLOAD_DONE attempt=0 elapsed=6.3s n_files=2
+[diag 11:55:15Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9864351283,LAADS:9864341366]
+[diag 11:55:22Z] DOWNLOAD_DONE attempt=0 elapsed=6.7s n_files=2
+[diag 11:55:22Z] SEARCH_START VIIRS_NOAA20
+[diag 11:55:22Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+[diag 11:55:22Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9862223548,LAADS:9862220492]
+[diag 11:55:27Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+[diag 11:55:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9862323816,LAADS:9862307903]
+[diag 11:55:31Z] DOWNLOAD_DONE attempt=0 elapsed=4.5s n_files=2
+[diag 11:55:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9863906781,LAADS:9863868356]
+[diag 11:55:38Z] DOWNLOAD_DONE attempt=0 elapsed=6.1s n_files=2
+[diag 11:55:38Z] SEARCH_START VIIRS_NOAA21
+[diag 11:55:38Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+[diag 11:55:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9862220184,LAADS:9862205983]
+[diag 11:55:43Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+[diag 11:55:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9863540673,LAADS:9863509671]
+[diag 11:55:48Z] DOWNLOAD_DONE attempt=0 elapsed=5.8s n_files=2
+[diag 11:55:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9863791818,LAADS:9863742153]
+[diag 11:56:12Z] DOWNLOAD_DONE attempt=0 elapsed=23.7s n_files=2
+[diag 11:56:12Z] SEARCH_START VIIRS_SNPP_750
+[diag 11:56:12Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+[diag 11:56:12Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9862457851,LAADS:9862442475]
+[diag 11:56:16Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+[diag 11:56:16Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9864078056,LAADS:9864053291]
+[diag 11:56:35Z] DOWNLOAD_DONE attempt=0 elapsed=19.1s n_files=2
+[diag 11:56:35Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9864351287,LAADS:9864341369]
+[diag 11:56:40Z] DOWNLOAD_DONE attempt=0 elapsed=5.5s n_files=2
+[diag 11:56:40Z] SEARCH_START VIIRS_NOAA20_750
+[diag 11:56:41Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+[diag 11:56:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9862223558,LAADS:9862220498]
+[diag 11:56:44Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+[diag 11:56:44Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9862323828,LAADS:9862307905]
+[diag 11:56:46Z] DOWNLOAD_DONE attempt=0 elapsed=2.5s n_files=2
+[diag 11:56:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9863906785,LAADS:9863868357]
+[diag 11:56:51Z] DOWNLOAD_DONE attempt=0 elapsed=5.1s n_files=2
+[diag 11:56:51Z] SEARCH_START VIIRS_NOAA21_750
+[diag 11:56:51Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+[diag 11:56:52Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9862220196,LAADS:9862205987]
+[diag 11:56:55Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 11:56:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9863540675,LAADS:9863509672]
+[diag 11:57:00Z] DOWNLOAD_DONE attempt=0 elapsed=5.4s n_files=2
+[diag 11:57:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9863791820,LAADS:9863742157]
+[diag 11:57:06Z] DOWNLOAD_DONE attempt=0 elapsed=5.6s n_files=2
+  MODIS_TERRA | VRP=5.0 MW | T_bg=263.09 K | T_max=275.27 K | anomalous_px=107
+  MODIS_AQUA | VRP=5.0 MW | T_bg=268.32 K | T_max=278.48 K | anomalous_px=45
+  VIIRS_SNPP (375m) | VRP_MIR=0.036 MW | VRP_TIR=0.0 MW | T_max=275.17 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.599 MW | VRP_TIR=0.0 MW | T_max=304.01 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.145 MW | VRP_TIR=0.0 MW | T_max=292.44 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.034 MW | VRP_TIR=0.0 MW | T_max=275.58 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.34 MW | VRP_TIR=0.0 MW | T_max=303.94 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.038 MW | VRP_TIR=0.0 MW | T_max=290.0 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.373 MW | VRP_TIR=0.0 MW | T_max=301.48 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.207 MW | VRP_TIR=0.0 MW | T_max=295.38 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=264.76 K | T_max=272.06 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=2.43 MW | T_bg=271.35 K | T_max=279.52 K | anomalous_px=5
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=266.23 K | T_max=273.68 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=264.09 K | T_max=270.95 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0.64 MW | T_bg=271.53 K | T_max=282.37 K | anomalous_px=1
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=265.17 K | T_max=273.05 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=15.74 MW | T_bg=271.7 K | T_max=280.57 K | anomalous_px=17
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=272.0 K | T_max=281.53 K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/NevadosDeChillan/20260622
+
+>>> Nevados de Chillán | 2026-06-23
+[diag 12:01:57Z] AUTH_START volcano=NevadosDeChillan date=2026-06-23
+[diag 12:01:57Z] AUTH_OK
+[diag 12:01:57Z] SEARCH_START MODIS_TERRA
+[diag 12:01:58Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 12:01:58Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:9864842610,LAADS:9864597850]
+[diag 12:02:01Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 12:02:01Z] SEARCH_START MODIS_AQUA
+[diag 12:02:01Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+  MODIS_AQUA: kept 1 of 3 granules (night filter)
+[diag 12:02:02Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:9865271488,LAADS:9864998701]
+[diag 12:02:05Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+[diag 12:02:05Z] SEARCH_START VIIRS_SNPP
+[diag 12:02:05Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+[diag 12:02:05Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9864796188,LAADS:9864793190]
+[diag 12:02:10Z] DOWNLOAD_DONE attempt=0 elapsed=4.9s n_files=2
+[diag 12:02:10Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9865951833,LAADS:9865920334]
+[diag 12:02:19Z] DOWNLOAD_DONE attempt=0 elapsed=8.3s n_files=2
+[diag 12:02:19Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9865953972,LAADS:9865942139]
+[diag 12:02:26Z] DOWNLOAD_DONE attempt=0 elapsed=7.0s n_files=2
+[diag 12:02:26Z] SEARCH_START VIIRS_NOAA20
+[diag 12:02:26Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=2
+[diag 12:02:26Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9864885975,LAADS:9864882924]
+[diag 12:02:30Z] DOWNLOAD_DONE attempt=0 elapsed=4.4s n_files=2
+[diag 12:02:30Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9865675656,LAADS:9865652695]
+[diag 12:02:37Z] DOWNLOAD_DONE attempt=0 elapsed=6.4s n_files=2
+[diag 12:02:37Z] SEARCH_START VIIRS_NOAA21
+[diag 12:02:37Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+[diag 12:02:37Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9864696894,LAADS:9864692266]
+[diag 12:02:42Z] DOWNLOAD_DONE attempt=0 elapsed=4.9s n_files=2
+[diag 12:02:42Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9864840786,LAADS:9864834979]
+[diag 12:02:46Z] DOWNLOAD_DONE attempt=0 elapsed=4.1s n_files=2
+[diag 12:02:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9865633296,LAADS:9865625742]
+[diag 12:02:53Z] DOWNLOAD_DONE attempt=0 elapsed=7.2s n_files=2
+[diag 12:02:53Z] SEARCH_START VIIRS_SNPP_750
+[diag 12:02:54Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+[diag 12:02:54Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9864796196,LAADS:9864793194]
+[diag 12:02:57Z] DOWNLOAD_DONE attempt=0 elapsed=3.8s n_files=2
+[diag 12:02:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9865951841,LAADS:9865920335]
+[diag 12:03:03Z] DOWNLOAD_DONE attempt=0 elapsed=5.7s n_files=2
+[diag 12:03:03Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9865953974,LAADS:9865942140]
+[diag 12:03:10Z] DOWNLOAD_DONE attempt=0 elapsed=6.5s n_files=2
+[diag 12:03:10Z] SEARCH_START VIIRS_NOAA20_750
+[diag 12:03:10Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=2
+[diag 12:03:10Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9864885977,LAADS:9864882926]
+[diag 12:03:13Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 12:03:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9865675662,LAADS:9865652698]
+[diag 12:03:19Z] DOWNLOAD_DONE attempt=0 elapsed=5.6s n_files=2
+[diag 12:03:19Z] SEARCH_START VIIRS_NOAA21_750
+[diag 12:03:19Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+[diag 12:03:19Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9864696900,LAADS:9864692268]
+[diag 12:03:29Z] DOWNLOAD_DONE attempt=0 elapsed=10.0s n_files=2
+[diag 12:03:29Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9864840796,LAADS:9864834982]
+[diag 12:03:33Z] DOWNLOAD_DONE attempt=0 elapsed=3.6s n_files=2
+[diag 12:03:33Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9865633306,LAADS:9865625744]
+[diag 12:03:38Z] DOWNLOAD_DONE attempt=0 elapsed=5.8s n_files=2
+  MODIS_TERRA | VRP=67.145 MW | T_bg=270.16 K | T_max=281.72 K | anomalous_px=98
+  MODIS_AQUA | VRP=38.332 MW | T_bg=270.07 K | T_max=279.36 K | anomalous_px=81
+  VIIRS_SNPP (375m) | VRP_MIR=0.043 MW | VRP_TIR=0.0 MW | T_max=277.24 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.152 MW | VRP_TIR=0.0 MW | T_max=294.54 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.249 MW | VRP_TIR=0.0 MW | T_max=291.91 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.064 MW | VRP_TIR=0.0 MW | T_max=276.95 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.226 MW | VRP_TIR=0.0 MW | T_max=297.69 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.058 MW | VRP_TIR=0.0 MW | T_max=275.87 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.049 MW | VRP_TIR=0.0 MW | T_max=274.9 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.247 MW | VRP_TIR=0.0 MW | T_max=296.42 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=265.33 K | T_max=272.33 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=272.19 K | T_max=282.1 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=272.06 K | T_max=280.34 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=265.59 K | T_max=272.91 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=273.58 K | T_max=285.95 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=265.97 K | T_max=272.9 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=265.97 K | T_max=272.0 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=275.28 K | T_max=288.09 K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/NevadosDeChillan/20260623
+
+>>> Nevados de Chillán | 2026-06-24
+[diag 12:06:46Z] AUTH_START volcano=NevadosDeChillan date=2026-06-24
+[diag 12:06:46Z] AUTH_OK
+[diag 12:06:46Z] SEARCH_START MODIS_TERRA
+[diag 12:06:47Z] SEARCH_DONE MODIS_TERRA n_l1b=4
+  MODIS_TERRA: kept 2 of 4 granules (night filter)
+[diag 12:06:47Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:9866834595,LAADS:9866225123]
+[diag 12:06:50Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 12:06:50Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:9866834603,LAADS:9866424541]
+[diag 12:06:53Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+[diag 12:06:53Z] SEARCH_START MODIS_AQUA
+[diag 12:06:53Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 12:06:54Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:9867312063,LAADS:9867291470]
+[diag 12:06:57Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 12:06:57Z] SEARCH_START VIIRS_SNPP
+[diag 12:06:57Z] SEARCH_DONE VIIRS_SNPP n_l1b=4
+[diag 12:06:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9866813160,LAADS:9866809296]
+[diag 12:07:02Z] DOWNLOAD_DONE attempt=0 elapsed=5.0s n_files=2
+[diag 12:07:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9866836273,LAADS:9866829129]
+[diag 12:07:06Z] DOWNLOAD_DONE attempt=0 elapsed=4.2s n_files=2
+[diag 12:07:06Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9867752134,LAADS:9867745606]
+[diag 12:07:14Z] DOWNLOAD_DONE attempt=0 elapsed=7.6s n_files=2
+[diag 12:07:14Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9867826173,LAADS:9867820473]
+[diag 12:07:21Z] DOWNLOAD_DONE attempt=0 elapsed=6.7s n_files=2
+[diag 12:07:21Z] SEARCH_START VIIRS_NOAA20
+[diag 12:07:21Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+[diag 12:07:21Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9866730301,LAADS:9866722484]
+[diag 12:07:26Z] DOWNLOAD_DONE attempt=0 elapsed=4.8s n_files=2
+[diag 12:07:26Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9867741867,LAADS:9867733552]
+[diag 12:07:32Z] DOWNLOAD_DONE attempt=0 elapsed=6.3s n_files=2
+[diag 12:07:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9867724489,LAADS:9867715345]
+[diag 12:07:39Z] DOWNLOAD_DONE attempt=0 elapsed=6.8s n_files=2
+[diag 12:07:39Z] SEARCH_START VIIRS_NOAA21
+[diag 12:07:40Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+[diag 12:07:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9870265260,LAADS:9870261793]
+[diag 12:07:45Z] DOWNLOAD_DONE attempt=0 elapsed=4.9s n_files=2
+[diag 12:07:45Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9870285087,LAADS:9870268814]
+[diag 12:07:49Z] DOWNLOAD_DONE attempt=0 elapsed=4.4s n_files=2
+[diag 12:07:49Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9870467282,LAADS:9870432313]
+[diag 12:07:57Z] DOWNLOAD_DONE attempt=0 elapsed=7.5s n_files=2
+[diag 12:07:57Z] SEARCH_START VIIRS_SNPP_750
+[diag 12:07:57Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=4
+[diag 12:07:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9866813170,LAADS:9866809297]
+[diag 12:08:01Z] DOWNLOAD_DONE attempt=0 elapsed=4.1s n_files=2
+[diag 12:08:01Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9866836277,LAADS:9866829136]
+[diag 12:08:05Z] DOWNLOAD_DONE attempt=0 elapsed=3.7s n_files=2
+[diag 12:08:05Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9867752140,LAADS:9867745608]
+[diag 12:08:11Z] DOWNLOAD_DONE attempt=0 elapsed=6.2s n_files=2
+[diag 12:08:11Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9867826183,LAADS:9867820477]
+[diag 12:08:18Z] DOWNLOAD_DONE attempt=0 elapsed=6.4s n_files=2
+[diag 12:08:18Z] SEARCH_START VIIRS_NOAA20_750
+[diag 12:08:18Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+[diag 12:08:18Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9866730303,LAADS:9866722485]
+[diag 12:08:22Z] DOWNLOAD_DONE attempt=0 elapsed=3.5s n_files=2
+[diag 12:08:22Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9867741873,LAADS:9867733553]
+[diag 12:08:28Z] DOWNLOAD_DONE attempt=0 elapsed=6.0s n_files=2
+[diag 12:08:28Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9867724495,LAADS:9867715347]
+[diag 12:08:34Z] DOWNLOAD_DONE attempt=0 elapsed=6.3s n_files=2
+[diag 12:08:34Z] SEARCH_START VIIRS_NOAA21_750
+[diag 12:08:34Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+[diag 12:08:35Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9870265276,LAADS:9870261807]
+[diag 12:08:38Z] DOWNLOAD_DONE attempt=0 elapsed=3.5s n_files=2
+[diag 12:08:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9870285117,LAADS:9870268827]
+[diag 12:08:41Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 12:08:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9870467294,LAADS:9870432318]
+[diag 12:08:47Z] DOWNLOAD_DONE attempt=0 elapsed=5.8s n_files=2
+  MODIS_TERRA | VRP=5.0 MW | T_bg=268.99 K | T_max=281.72 K | anomalous_px=41
+  MODIS_AQUA | VRP=5.0 MW | T_bg=260.24 K | T_max=273.94 K | anomalous_px=317
+  VIIRS_SNPP (375m) | VRP_MIR=0.02 MW | VRP_TIR=0.0 MW | T_max=274.18 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.029 MW | VRP_TIR=0.0 MW | T_max=267.69 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.249 MW | VRP_TIR=0.0 MW | T_max=297.36 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.141 MW | VRP_TIR=0.0 MW | T_max=297.36 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.028 MW | VRP_TIR=0.0 MW | T_max=275.69 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.452 MW | VRP_TIR=0.0 MW | T_max=297.97 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.13 MW | VRP_TIR=0.0 MW | T_max=294.85 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.03 MW | VRP_TIR=0.0 MW | T_max=274.49 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.022 MW | VRP_TIR=0.0 MW | T_max=276.33 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.37 MW | VRP_TIR=0.0 MW | T_max=298.9 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=259.93 K | T_max=268.12 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=256.11 K | T_max=263.4 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=266.93 K | T_max=272.33 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=268.12 K | T_max=278.01 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=257.09 K | T_max=271.81 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=268.82 K | T_max=277.12 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=266.31 K | T_max=274.48 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=259.67 K | T_max=271.85 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=259.93 K | T_max=270.91 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=1.112 MW | T_bg=272.0 K | T_max=284.22 K | anomalous_px=1
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/NevadosDeChillan/20260624
+
+>>> Nevados de Chillán | 2026-06-25
+[diag 12:13:34Z] AUTH_START volcano=NevadosDeChillan date=2026-06-25
+[diag 12:13:34Z] AUTH_OK
+[diag 12:13:34Z] SEARCH_START MODIS_TERRA
+[diag 12:13:34Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 12:13:34Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:9868571307,LAADS:9868115012]
+[diag 12:13:37Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 12:13:37Z] SEARCH_START MODIS_AQUA
+[diag 12:13:38Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 12:13:38Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:9868964576,LAADS:9868713045]
+[diag 12:13:41Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 12:13:41Z] SEARCH_START VIIRS_SNPP
+[diag 12:13:41Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+[diag 12:13:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9868559065,LAADS:9868551330]
+[diag 12:13:47Z] DOWNLOAD_DONE attempt=0 elapsed=5.3s n_files=2
+[diag 12:13:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9868688919,LAADS:9868681657]
+[diag 12:13:52Z] DOWNLOAD_DONE attempt=0 elapsed=5.1s n_files=2
+[diag 12:13:52Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9869353013,LAADS:9869338900]
+[diag 12:13:59Z] DOWNLOAD_DONE attempt=0 elapsed=6.9s n_files=2
+[diag 12:13:59Z] SEARCH_START VIIRS_NOAA20
+[diag 12:13:59Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=4
+[diag 12:13:59Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9868444285,LAADS:9868440942]
+[diag 12:14:04Z] DOWNLOAD_DONE attempt=0 elapsed=5.0s n_files=2
+[diag 12:14:04Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9868529604,LAADS:9868520468]
+[diag 12:14:08Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+[diag 12:14:08Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9869125904,LAADS:9869120308]
+[diag 12:14:15Z] DOWNLOAD_DONE attempt=0 elapsed=6.9s n_files=2
+[diag 12:14:15Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9869226874,LAADS:9869221718]
+[diag 12:14:23Z] DOWNLOAD_DONE attempt=0 elapsed=7.8s n_files=2
+[diag 12:14:23Z] SEARCH_START VIIRS_NOAA21
+[diag 12:14:23Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=2
+[diag 12:14:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9868506600,LAADS:9868500059]
+[diag 12:14:28Z] DOWNLOAD_DONE attempt=0 elapsed=4.0s n_files=2
+[diag 12:14:28Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9869208756,LAADS:9869200843]
+[diag 12:14:35Z] DOWNLOAD_DONE attempt=0 elapsed=7.1s n_files=2
+[diag 12:14:35Z] SEARCH_START VIIRS_SNPP_750
+[diag 12:14:35Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+[diag 12:14:35Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9868559073,LAADS:9868551333]
+[diag 12:14:38Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 12:14:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9868688931,LAADS:9868681661]
+[diag 12:14:41Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+[diag 12:14:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9869353019,LAADS:9869338903]
+[diag 12:15:54Z] DOWNLOAD_DONE attempt=0 elapsed=73.0s n_files=2
+[diag 12:15:54Z] SEARCH_START VIIRS_NOAA20_750
+[diag 12:15:55Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=4
+[diag 12:15:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9868444291,LAADS:9868440944]
+[diag 12:15:58Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+[diag 12:15:58Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9868529614,LAADS:9868520471]
+[diag 12:16:01Z] DOWNLOAD_DONE attempt=0 elapsed=3.7s n_files=2
+[diag 12:16:01Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9869125912,LAADS:9869120309]
+[diag 12:16:08Z] DOWNLOAD_DONE attempt=0 elapsed=6.6s n_files=2
+[diag 12:16:08Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9869226878,LAADS:9869221721]
+[diag 12:16:15Z] DOWNLOAD_DONE attempt=0 elapsed=6.8s n_files=2
+[diag 12:16:15Z] SEARCH_START VIIRS_NOAA21_750
+[diag 12:16:15Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=2
+[diag 12:16:16Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9868506614,LAADS:9868500061]
+[diag 12:16:19Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 12:16:19Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9869208760,LAADS:9869200848]
+[diag 12:16:25Z] DOWNLOAD_DONE attempt=0 elapsed=6.2s n_files=2
+  MODIS_TERRA | VRP=45.001 MW | T_bg=273.36 K | T_max=282.88 K | anomalous_px=84
+  MODIS_AQUA | VRP=11.663 MW | T_bg=274.29 K | T_max=282.33 K | anomalous_px=28
+  VIIRS_SNPP (375m) | VRP_MIR=0.027 MW | VRP_TIR=0.0 MW | T_max=279.93 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.063 MW | VRP_TIR=0.0 MW | T_max=280.14 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.097 MW | VRP_TIR=0.0 MW | T_max=298.9 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.041 MW | VRP_TIR=0.0 MW | T_max=280.55 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.122 MW | VRP_TIR=0.0 MW | T_max=295.54 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.04 MW | VRP_TIR=0.0 MW | T_max=289.32 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.064 MW | VRP_TIR=0.0 MW | T_max=280.28 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.583 MW | VRP_TIR=0.0 MW | T_max=300.51 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=267.28 K | T_max=274.33 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=268.12 K | T_max=275.45 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=273.28 K | T_max=288.11 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=268.34 K | T_max=275.95 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=273.05 K | T_max=281.13 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=270.06 K | T_max=279.41 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=269.77 K | T_max=278.06 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=278.89 K | T_max=295.17 K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/NevadosDeChillan/20260625
+
+>>> Nevados de Chillán | 2026-06-26
+[diag 12:19:37Z] AUTH_START volcano=NevadosDeChillan date=2026-06-26
+[diag 12:19:37Z] AUTH_OK
+[diag 12:19:37Z] SEARCH_START MODIS_TERRA
+[diag 12:19:38Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 12:19:42Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:9870025825,LAADS:9869765203]
+[diag 12:19:45Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+[diag 12:19:45Z] SEARCH_START MODIS_AQUA
+[diag 12:19:45Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 12:19:46Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:9870596353,LAADS:9870237222]
+[diag 12:19:49Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+[diag 12:19:49Z] SEARCH_START VIIRS_SNPP
+[diag 12:19:52Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+[diag 12:19:52Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9869996011,LAADS:9869993933]
+[diag 12:19:56Z] DOWNLOAD_DONE attempt=0 elapsed=4.4s n_files=2
+[diag 12:19:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9870162864,LAADS:9870154013]
+[diag 12:20:00Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+[diag 12:20:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9871052091,LAADS:9871049125]
+[diag 12:20:08Z] DOWNLOAD_DONE attempt=0 elapsed=7.5s n_files=2
+[diag 12:20:08Z] SEARCH_START VIIRS_NOAA20
+[diag 12:20:08Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+[diag 12:20:09Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9869860895,LAADS:9869857181]
+[diag 12:20:14Z] DOWNLOAD_DONE attempt=0 elapsed=5.2s n_files=2
+[diag 12:20:14Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9870024217,LAADS:9870017045]
+[diag 12:20:18Z] DOWNLOAD_DONE attempt=0 elapsed=4.0s n_files=2
+[diag 12:20:18Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9870949259,LAADS:9870945399]
+[diag 12:20:24Z] DOWNLOAD_DONE attempt=0 elapsed=6.7s n_files=2
+[diag 12:20:24Z] SEARCH_START VIIRS_NOAA21
+[diag 12:20:25Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+[diag 12:20:25Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9870510998,LAADS:9870495391]
+[diag 12:20:30Z] DOWNLOAD_DONE attempt=0 elapsed=5.2s n_files=2
+[diag 12:20:30Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9870903708,LAADS:9870896069]
+[diag 12:20:36Z] DOWNLOAD_DONE attempt=0 elapsed=6.0s n_files=2
+[diag 12:20:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9870903709,LAADS:9870895906]
+[diag 12:20:42Z] DOWNLOAD_DONE attempt=0 elapsed=6.1s n_files=2
+[diag 12:20:42Z] SEARCH_START VIIRS_SNPP_750
+[diag 12:20:42Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+[diag 12:20:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9869996017,LAADS:9869993935]
+[diag 12:20:46Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+[diag 12:20:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9870162874,LAADS:9870154017]
+[diag 12:20:50Z] DOWNLOAD_DONE attempt=0 elapsed=3.7s n_files=2
+[diag 12:20:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9871052095,LAADS:9871049130]
+[diag 12:20:55Z] DOWNLOAD_DONE attempt=0 elapsed=5.3s n_files=2
+[diag 12:20:55Z] SEARCH_START VIIRS_NOAA20_750
+[diag 12:20:55Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+[diag 12:20:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9869860897,LAADS:9869857182]
+[diag 12:20:59Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 12:20:59Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9870024229,LAADS:9870017049]
+[diag 12:21:02Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 12:21:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9870949263,LAADS:9870945400]
+[diag 12:21:08Z] DOWNLOAD_DONE attempt=0 elapsed=6.1s n_files=2
+[diag 12:21:08Z] SEARCH_START VIIRS_NOAA21_750
+[diag 12:21:08Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+[diag 12:21:08Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9870511028,LAADS:9870495405]
+[diag 12:21:11Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+[diag 12:21:11Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9870903712,LAADS:9870896070]
+[diag 12:21:17Z] DOWNLOAD_DONE attempt=0 elapsed=6.0s n_files=2
+[diag 12:21:17Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9870903713,LAADS:9870895907]
+[diag 12:21:23Z] DOWNLOAD_DONE attempt=0 elapsed=5.9s n_files=2
+  MODIS_TERRA | VRP=5.0 MW | T_bg=255.75 K | T_max=274.33 K | anomalous_px=93
+  MODIS_AQUA | VRP=68.276 MW | T_bg=271.69 K | T_max=282.58 K | anomalous_px=112
+  VIIRS_SNPP (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=272.7 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.039 MW | VRP_TIR=0.0 MW | T_max=277.49 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.127 MW | VRP_TIR=0.0 MW | T_max=295.16 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.098 MW | VRP_TIR=0.0 MW | T_max=276.31 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.039 MW | VRP_TIR=0.0 MW | T_max=275.2 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.068 MW | VRP_TIR=0.0 MW | T_max=291.11 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.057 MW | VRP_TIR=0.0 MW | T_max=277.54 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.221 MW | VRP_TIR=0.0 MW | T_max=296.06 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.034 MW | VRP_TIR=0.0 MW | T_max=273.03 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=259.69 K | T_max=264.57 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=265.51 K | T_max=273.28 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=268.6 K | T_max=285.14 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0.034 MW | T_bg=261.41 K | T_max=270.81 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=263.69 K | T_max=270.36 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=263.29 K | T_max=279.09 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=266.16 K | T_max=275.81 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=276.2 K | T_max=286.75 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=243.8 K | T_max=255.06 K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/NevadosDeChillan/20260626
+
+>>> Nevados de Chillán | 2026-06-27
+[diag 12:24:53Z] AUTH_START volcano=NevadosDeChillan date=2026-06-27
+[diag 12:24:53Z] AUTH_OK
+[diag 12:24:53Z] SEARCH_START MODIS_TERRA
+[diag 12:24:53Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 12:24:53Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:9871924986,LAADS:9871339714]
+[diag 12:24:56Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 12:24:56Z] SEARCH_START MODIS_AQUA
+[diag 12:24:56Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 12:24:57Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:9872335834,LAADS:9872185805]
+[diag 12:25:00Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 12:25:00Z] SEARCH_START VIIRS_SNPP
+[diag 12:25:00Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+[diag 12:25:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9872015393,LAADS:9872009047]
+[diag 12:25:05Z] DOWNLOAD_DONE attempt=0 elapsed=4.7s n_files=2
+[diag 12:25:05Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9872947225,LAADS:9872930818]
+[diag 12:25:12Z] DOWNLOAD_DONE attempt=0 elapsed=6.8s n_files=2
+[diag 12:25:12Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9873197977,LAADS:9873195759]
+[diag 12:25:18Z] DOWNLOAD_DONE attempt=0 elapsed=6.3s n_files=2
+[diag 12:25:18Z] SEARCH_START VIIRS_NOAA20
+[diag 12:25:18Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+[diag 12:25:18Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9871807994,LAADS:9871804173]
+[diag 12:25:23Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+[diag 12:25:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9871877165,LAADS:9871874167]
+[diag 12:25:27Z] DOWNLOAD_DONE attempt=0 elapsed=4.1s n_files=2
+[diag 12:25:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9872968769,LAADS:9872957039]
+[diag 12:25:33Z] DOWNLOAD_DONE attempt=0 elapsed=6.1s n_files=2
+[diag 12:25:33Z] SEARCH_START VIIRS_NOAA21
+[diag 12:25:33Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+[diag 12:25:34Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9871720776,LAADS:9871716321]
+[diag 12:25:39Z] DOWNLOAD_DONE attempt=0 elapsed=5.0s n_files=2
+[diag 12:25:39Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9872628194,LAADS:9872614989]
+[diag 12:25:45Z] DOWNLOAD_DONE attempt=0 elapsed=6.3s n_files=2
+[diag 12:25:45Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9872885327,LAADS:9872872138]
+[diag 12:25:52Z] DOWNLOAD_DONE attempt=0 elapsed=7.1s n_files=2
+[diag 12:25:52Z] SEARCH_START VIIRS_SNPP_750
+[diag 12:25:52Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+[diag 12:25:53Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9872015397,LAADS:9872009048]
+[diag 12:25:55Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+[diag 12:25:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9872947235,LAADS:9872930819]
+[diag 12:26:01Z] DOWNLOAD_DONE attempt=0 elapsed=5.9s n_files=2
+[diag 12:26:01Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9873197985,LAADS:9873195761]
+[diag 12:26:06Z] DOWNLOAD_DONE attempt=0 elapsed=5.3s n_files=2
+[diag 12:26:06Z] SEARCH_START VIIRS_NOAA20_750
+[diag 12:26:07Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+[diag 12:26:08Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9871808000,LAADS:9871804174]
+[diag 12:26:11Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 12:26:11Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9871877175,LAADS:9871874169]
+[diag 12:26:14Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+[diag 12:26:14Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9872968771,LAADS:9872957040]
+[diag 12:26:20Z] DOWNLOAD_DONE attempt=0 elapsed=5.2s n_files=2
+[diag 12:26:20Z] SEARCH_START VIIRS_NOAA21_750
+[diag 12:26:21Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+[diag 12:26:22Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9871720780,LAADS:9871716323]
+[diag 12:26:25Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 12:26:25Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9872628196,LAADS:9872614992]
+[diag 12:26:30Z] DOWNLOAD_DONE attempt=0 elapsed=5.6s n_files=2
+[diag 12:26:30Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9872885337,LAADS:9872872141]
+[diag 12:26:35Z] DOWNLOAD_DONE attempt=0 elapsed=4.9s n_files=2
+  MODIS_TERRA | VRP=5.0 MW | T_bg=268.18 K | T_max=282.65 K | anomalous_px=83
+  MODIS_AQUA | VRP=16.709 MW | T_bg=272.46 K | T_max=280.2 K | anomalous_px=28
+  VIIRS_SNPP (375m) | VRP_MIR=0.057 MW | VRP_TIR=0.0 MW | T_max=277.04 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.128 MW | VRP_TIR=0.0 MW | T_max=287.18 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.029 MW | VRP_TIR=0.0 MW | T_max=274.43 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.071 MW | VRP_TIR=0.0 MW | T_max=276.82 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.37 MW | VRP_TIR=0.0 MW | T_max=290.6 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.028 MW | VRP_TIR=0.0 MW | T_max=278.51 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.455 MW | VRP_TIR=0.0 MW | T_max=287.51 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.133 MW | VRP_TIR=0.0 MW | T_max=292.03 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=261.51 K | T_max=274.07 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=261.51 K | T_max=269.55 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=252.04 K | T_max=267.34 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=261.41 K | T_max=272.64 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=262.06 K | T_max=274.35 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=264.96 K | T_max=276.33 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0.246 MW | T_bg=260.44 K | T_max=270.75 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=266.74 K | T_max=277.21 K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/NevadosDeChillan/20260627
+
+>>> Nevados de Chillán | 2026-06-28
+[diag 12:30:03Z] AUTH_START volcano=NevadosDeChillan date=2026-06-28
+[diag 12:30:03Z] AUTH_OK
+[diag 12:30:03Z] SEARCH_START MODIS_TERRA
+[diag 12:30:03Z] SEARCH_DONE MODIS_TERRA n_l1b=3
+  MODIS_TERRA: kept 1 of 3 granules (night filter)
+[diag 12:30:04Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:9873836338,LAADS:9873527154]
+[diag 12:30:07Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+[diag 12:30:07Z] SEARCH_START MODIS_AQUA
+[diag 12:30:07Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 12:30:08Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:9874211058,LAADS:9873981071]
+[diag 12:30:11Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+[diag 12:30:11Z] SEARCH_START VIIRS_SNPP
+[diag 12:30:11Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+[diag 12:30:11Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9873777900,LAADS:9873774278]
+[diag 12:30:15Z] DOWNLOAD_DONE attempt=0 elapsed=4.4s n_files=2
+[diag 12:30:15Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9874681837,LAADS:9874677444]
+[diag 12:30:25Z] DOWNLOAD_DONE attempt=0 elapsed=9.5s n_files=2
+[diag 12:30:25Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9874693299,LAADS:9874687313]
+[diag 12:30:32Z] DOWNLOAD_DONE attempt=0 elapsed=7.6s n_files=2
+[diag 12:30:32Z] SEARCH_START VIIRS_NOAA20
+[diag 12:30:34Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=2
+[diag 12:30:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9873787131,LAADS:9873785043]
+[diag 12:30:41Z] DOWNLOAD_DONE attempt=0 elapsed=5.2s n_files=2
+[diag 12:30:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9874547824,LAADS:9874539736]
+[diag 12:30:48Z] DOWNLOAD_DONE attempt=0 elapsed=7.0s n_files=2
+[diag 12:30:48Z] SEARCH_START VIIRS_NOAA21
+[diag 12:30:49Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=4
+[diag 12:30:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9873669465,LAADS:9873659380]
+[diag 12:33:03Z] DOWNLOAD_DONE attempt=0 elapsed=132.9s n_files=2
+[diag 12:33:03Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9873814131,LAADS:9873807837]
+[diag 12:33:07Z] DOWNLOAD_DONE attempt=0 elapsed=4.0s n_files=2
+[diag 12:33:07Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9874384181,LAADS:9874377871]
+[diag 12:33:14Z] DOWNLOAD_DONE attempt=0 elapsed=7.5s n_files=2
+[diag 12:33:14Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9874496004,LAADS:9874493743]
+[diag 12:33:22Z] DOWNLOAD_DONE attempt=0 elapsed=7.2s n_files=2
+[diag 12:33:22Z] SEARCH_START VIIRS_SNPP_750
+[diag 12:33:22Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+[diag 12:33:22Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9873777908,LAADS:9873774284]
+[diag 12:33:26Z] DOWNLOAD_DONE attempt=0 elapsed=3.7s n_files=2
+[diag 12:33:26Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9874681843,LAADS:9874677448]
+[diag 12:33:32Z] DOWNLOAD_DONE attempt=0 elapsed=6.2s n_files=2
+[diag 12:33:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9874693307,LAADS:9874687315]
+[diag 12:33:40Z] DOWNLOAD_DONE attempt=0 elapsed=7.6s n_files=2
+[diag 12:33:40Z] SEARCH_START VIIRS_NOAA20_750
+[diag 12:33:40Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=2
+[diag 12:33:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9873787137,LAADS:9873785047]
+[diag 12:33:43Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+[diag 12:33:43Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9874547830,LAADS:9874539740]
+[diag 12:33:48Z] DOWNLOAD_DONE attempt=0 elapsed=5.0s n_files=2
+[diag 12:33:48Z] SEARCH_START VIIRS_NOAA21_750
+[diag 12:33:48Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=4
+[diag 12:33:48Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9873669469,LAADS:9873659382]
+[diag 12:33:51Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+[diag 12:33:51Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9873814139,LAADS:9873807842]
+[diag 12:33:55Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 12:33:55Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9874384187,LAADS:9874377874]
+[diag 12:34:01Z] DOWNLOAD_DONE attempt=0 elapsed=6.0s n_files=2
+[diag 12:34:01Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9874496008,LAADS:9874493744]
+[diag 12:34:06Z] DOWNLOAD_DONE attempt=0 elapsed=5.7s n_files=2
+  MODIS_TERRA | VRP=52.799 MW | T_bg=270.91 K | T_max=282.42 K | anomalous_px=99
+  MODIS_AQUA | VRP=26.931 MW | T_bg=270.49 K | T_max=279.07 K | anomalous_px=55
+  VIIRS_SNPP (375m) | VRP_MIR=0.062 MW | VRP_TIR=0.0 MW | T_max=276.65 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.068 MW | VRP_TIR=0.0 MW | T_max=302.13 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.462 MW | VRP_TIR=0.0 MW | T_max=299.57 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.064 MW | VRP_TIR=0.0 MW | T_max=275.9 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.106 MW | VRP_TIR=0.0 MW | T_max=300.68 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.031 MW | VRP_TIR=0.0 MW | T_max=275.36 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.038 MW | VRP_TIR=0.0 MW | T_max=275.09 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=None K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.127 MW | VRP_TIR=0.0 MW | T_max=297.41 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=265.69 K | T_max=271.91 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=262.16 K | T_max=278.77 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=264.38 K | T_max=274.83 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=265.77 K | T_max=272.37 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=8.311 MW | T_bg=263.09 K | T_max=275.47 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=266.55 K | T_max=272.9 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=265.57 K | T_max=271.39 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=267.85 K | T_max=280.46 K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/NevadosDeChillan/20260628
+
+>>> Nevados de Chillán | 2026-06-29
+[diag 12:37:33Z] AUTH_START volcano=NevadosDeChillan date=2026-06-29
+[diag 12:37:33Z] AUTH_OK
+[diag 12:37:33Z] SEARCH_START MODIS_TERRA
+[diag 12:37:34Z] SEARCH_DONE MODIS_TERRA n_l1b=4
+  MODIS_TERRA: kept 2 of 4 granules (night filter)
+[diag 12:37:34Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:9875472678,LAADS:9874899270]
+[diag 12:37:37Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+[diag 12:37:37Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:9875472687,LAADS:9875104780]
+[diag 12:37:41Z] DOWNLOAD_DONE attempt=0 elapsed=3.3s n_files=2
+[diag 12:37:41Z] SEARCH_START MODIS_AQUA
+[diag 12:37:41Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+  MODIS_AQUA: kept 2 of 3 granules (night filter)
+[diag 12:37:41Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:9875937904,LAADS:9875787809]
+[diag 12:37:44Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+[diag 12:37:44Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:9878196650,LAADS:9878196141]
+[diag 12:37:48Z] DOWNLOAD_DONE attempt=0 elapsed=4.4s n_files=2
+[diag 12:37:48Z] SEARCH_START VIIRS_SNPP
+[diag 12:37:48Z] SEARCH_DONE VIIRS_SNPP n_l1b=5
+[diag 12:37:49Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9875403198,LAADS:9875398272]
+[diag 12:37:53Z] DOWNLOAD_DONE attempt=0 elapsed=4.5s n_files=2
+[diag 12:37:53Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9875403199,LAADS:9875397734]
+[diag 12:37:57Z] DOWNLOAD_DONE attempt=0 elapsed=4.2s n_files=2
+[diag 12:37:57Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9875652940,LAADS:9875636708]
+[diag 12:38:07Z] DOWNLOAD_DONE attempt=0 elapsed=9.7s n_files=2
+[diag 12:38:07Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9876206959,LAADS:9876204172]
+[diag 12:38:14Z] DOWNLOAD_DONE attempt=0 elapsed=7.0s n_files=2
+[diag 12:38:14Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9876349139,LAADS:9876335124]
+[diag 12:39:10Z] DOWNLOAD_DONE attempt=0 elapsed=56.4s n_files=2
+[diag 12:39:10Z] SEARCH_START VIIRS_NOAA20
+[diag 12:39:12Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+[diag 12:39:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9875338224,LAADS:9875331558]
+[diag 12:39:18Z] DOWNLOAD_DONE attempt=0 elapsed=4.6s n_files=2
+[diag 12:39:18Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9876216287,LAADS:9876204954]
+[diag 12:39:24Z] DOWNLOAD_DONE attempt=0 elapsed=5.8s n_files=2
+[diag 12:39:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9876196585,LAADS:9876192312]
+[diag 12:39:30Z] DOWNLOAD_DONE attempt=0 elapsed=6.5s n_files=2
+[diag 12:39:30Z] SEARCH_START VIIRS_NOAA21
+[diag 12:39:31Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+[diag 12:39:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9875242239,LAADS:9875234153]
+[diag 12:39:35Z] DOWNLOAD_DONE attempt=0 elapsed=4.4s n_files=2
+[diag 12:39:35Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9875430194,LAADS:9875426386]
+[diag 12:39:40Z] DOWNLOAD_DONE attempt=0 elapsed=4.5s n_files=2
+[diag 12:39:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9876167417,LAADS:9876161142]
+[diag 12:39:46Z] DOWNLOAD_DONE attempt=0 elapsed=6.3s n_files=2
+[diag 12:39:46Z] SEARCH_START VIIRS_SNPP_750
+[diag 12:39:46Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=5
+[diag 12:39:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9875403206,LAADS:9875398273]
+[diag 12:39:50Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 12:39:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9875403207,LAADS:9875397741]
+[diag 12:39:53Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+[diag 12:39:53Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9875652952,LAADS:9875636710]
+[diag 12:39:56Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 12:39:56Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9876206967,LAADS:9876204177]
+[diag 12:40:01Z] DOWNLOAD_DONE attempt=0 elapsed=5.6s n_files=2
+[diag 12:40:01Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9876349153,LAADS:9876335127]
+[diag 12:40:07Z] DOWNLOAD_DONE attempt=0 elapsed=6.3s n_files=2
+[diag 12:40:07Z] SEARCH_START VIIRS_NOAA20_750
+[diag 12:40:08Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+[diag 12:40:08Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9875338228,LAADS:9875331559]
+[diag 12:40:11Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+[diag 12:40:11Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9876216297,LAADS:9876204956]
+[diag 12:40:17Z] DOWNLOAD_DONE attempt=0 elapsed=5.8s n_files=2
+[diag 12:40:17Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9876196591,LAADS:9876192315]
+[diag 12:40:22Z] DOWNLOAD_DONE attempt=0 elapsed=5.4s n_files=2
+[diag 12:40:22Z] SEARCH_START VIIRS_NOAA21_750
+[diag 12:40:22Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+[diag 12:40:22Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9875242243,LAADS:9875234154]
+[diag 12:40:25Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+[diag 12:40:25Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9875430206,LAADS:9875426394]
+[diag 12:40:28Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+[diag 12:40:28Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9876167431,LAADS:9876161144]
+[diag 12:40:34Z] DOWNLOAD_DONE attempt=0 elapsed=6.2s n_files=2
+  MODIS_TERRA | VRP=14.167 MW | T_bg=273.36 K | T_max=282.65 K | anomalous_px=21
+  MODIS_AQUA | VRP=77.188 MW | T_bg=272.46 K | T_max=284.29 K | anomalous_px=121
+  VIIRS_SNPP (375m) | VRP_MIR=0.043 MW | VRP_TIR=0.0 MW | T_max=280.31 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=None K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=279.86 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.193 MW | VRP_TIR=0.0 MW | T_max=297.48 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.372 MW | VRP_TIR=0.0 MW | T_max=298.53 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.052 MW | VRP_TIR=0.0 MW | T_max=280.17 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.259 MW | VRP_TIR=0.0 MW | T_max=301.4 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.303 MW | VRP_TIR=0.0 MW | T_max=293.23 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.032 MW | VRP_TIR=0.0 MW | T_max=279.8 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.085 MW | VRP_TIR=0.0 MW | T_max=279.68 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=1.644 MW | VRP_TIR=0.0 MW | T_max=301.16 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=267.95 K | T_max=275.21 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=268.76 K | T_max=271.06 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=273.68 K | T_max=281.43 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=276.88 K | T_max=284.97 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=268.5 K | T_max=276.54 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=276.54 K | T_max=286.6 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=274.22 K | T_max=280.83 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=268.39 K | T_max=275.42 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=269.09 K | T_max=276.46 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0.433 MW | T_bg=280.13 K | T_max=293.46 K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/NevadosDeChillan/20260629
+
+>>> Nevados de Chillán | 2026-06-30
+[diag 12:44:38Z] AUTH_START volcano=NevadosDeChillan date=2026-06-30
+[diag 12:44:38Z] AUTH_OK
+[diag 12:44:38Z] SEARCH_START MODIS_TERRA
+[diag 12:44:39Z] SEARCH_DONE MODIS_TERRA n_l1b=3
+  MODIS_TERRA: kept 1 of 3 granules (night filter)
+[diag 12:44:39Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:9876969497,LAADS:9876963891]
+[diag 12:44:42Z] DOWNLOAD_DONE attempt=0 elapsed=3.3s n_files=2
+[diag 12:44:42Z] SEARCH_START MODIS_AQUA
+[diag 12:44:43Z] SEARCH_DONE MODIS_AQUA n_l1b=4
+  MODIS_AQUA: kept 3 of 4 granules (night filter)
+[diag 12:44:43Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:9879741356,LAADS:9878331722]
+[diag 12:44:46Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 12:44:46Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:9879741208,LAADS:9878332117]
+[diag 12:44:49Z] DOWNLOAD_DONE attempt=0 elapsed=3.4s n_files=2
+[diag 12:44:49Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:9879741216,LAADS:9878332300]
+[diag 12:44:52Z] DOWNLOAD_DONE attempt=0 elapsed=3.1s n_files=2
+[diag 12:44:52Z] SEARCH_START VIIRS_SNPP
+[diag 12:44:53Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+[diag 12:44:53Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9876935458,LAADS:9876930244]
+[diag 12:44:58Z] DOWNLOAD_DONE attempt=0 elapsed=4.8s n_files=2
+[diag 12:44:58Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9877583023,LAADS:9877552708]
+[diag 12:45:02Z] DOWNLOAD_DONE attempt=0 elapsed=4.3s n_files=2
+[diag 12:45:02Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:9883044702,LAADS:9882947688]
+[diag 12:45:09Z] DOWNLOAD_DONE attempt=0 elapsed=7.1s n_files=2
+[diag 12:45:09Z] SEARCH_START VIIRS_NOAA20
+[diag 12:45:09Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=4
+[diag 12:45:09Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9876849388,LAADS:9876843114]
+[diag 12:45:14Z] DOWNLOAD_DONE attempt=0 elapsed=4.5s n_files=2
+[diag 12:45:14Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9876849389,LAADS:9876847198]
+[diag 12:45:18Z] DOWNLOAD_DONE attempt=0 elapsed=4.5s n_files=2
+[diag 12:45:18Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9881185190,LAADS:9881155050]
+[diag 12:45:24Z] DOWNLOAD_DONE attempt=0 elapsed=6.0s n_files=2
+[diag 12:45:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:9882167163,LAADS:9882062026]
+[diag 12:45:32Z] DOWNLOAD_DONE attempt=0 elapsed=7.2s n_files=2
+[diag 12:45:32Z] SEARCH_START VIIRS_NOAA21
+[diag 12:45:32Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=2
+[diag 12:45:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9876887288,LAADS:9876884261]
+[diag 12:45:37Z] DOWNLOAD_DONE attempt=0 elapsed=4.5s n_files=2
+[diag 12:45:37Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:9881693118,LAADS:9881625626]
+[diag 12:45:44Z] DOWNLOAD_DONE attempt=0 elapsed=6.8s n_files=2
+[diag 12:45:44Z] SEARCH_START VIIRS_SNPP_750
+[diag 12:45:44Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+[diag 12:45:44Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9876935460,LAADS:9876930246]
+[diag 12:45:47Z] DOWNLOAD_DONE attempt=0 elapsed=3.2s n_files=2
+[diag 12:45:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9877583031,LAADS:9877552713]
+[diag 12:45:51Z] DOWNLOAD_DONE attempt=0 elapsed=3.3s n_files=2
+[diag 12:45:51Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:9883044716,LAADS:9882947693]
+[diag 12:45:57Z] DOWNLOAD_DONE attempt=0 elapsed=6.4s n_files=2
+[diag 12:45:57Z] SEARCH_START VIIRS_NOAA20_750
+[diag 12:45:59Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=4
+[diag 12:46:00Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9876849394,LAADS:9876843115]
+[diag 12:46:03Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 12:46:03Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9876849395,LAADS:9876847201]
+[diag 12:46:06Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 12:46:06Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9881185198,LAADS:9881155063]
+[diag 12:46:12Z] DOWNLOAD_DONE attempt=0 elapsed=5.6s n_files=2
+[diag 12:46:12Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:9882167169,LAADS:9882062032]
+[diag 12:46:18Z] DOWNLOAD_DONE attempt=0 elapsed=6.2s n_files=2
+[diag 12:46:18Z] SEARCH_START VIIRS_NOAA21_750
+[diag 12:46:19Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=2
+[diag 12:46:21Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9876887300,LAADS:9876884262]
+[diag 12:46:24Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+[diag 12:46:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:9881693130,LAADS:9881625640]
+[diag 12:46:29Z] DOWNLOAD_DONE attempt=0 elapsed=5.4s n_files=2
+  MODIS_TERRA | VRP=77.264 MW | T_bg=272.34 K | T_max=284.21 K | anomalous_px=106
+  MODIS_AQUA | VRP=11.467 MW | T_bg=273.21 K | T_max=281.02 K | anomalous_px=20
+  MODIS_AQUA | VRP=0 MW | T_bg=272.46 K | T_max=280.75 K | anomalous_px=1
+  MODIS_AQUA | VRP=13.629 MW | T_bg=270.49 K | T_max=280.2 K | anomalous_px=23
+  VIIRS_SNPP (375m) | VRP_MIR=0.046 MW | VRP_TIR=0.0 MW | T_max=278.61 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.065 MW | VRP_TIR=0.0 MW | T_max=278.01 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.403 MW | VRP_TIR=0.0 MW | T_max=302.26 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.062 MW | VRP_TIR=0.0 MW | T_max=279.1 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=276.96 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=1.139 MW | VRP_TIR=0.0 MW | T_max=302.68 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.265 MW | VRP_TIR=0.0 MW | T_max=298.43 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.076 MW | VRP_TIR=0.0 MW | T_max=278.21 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.822 MW | VRP_TIR=0.0 MW | T_max=298.71 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=266.41 K | T_max=273.02 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=266.41 K | T_max=272.75 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=270.32 K | T_max=282.76 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=267.85 K | T_max=275.1 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=266.48 K | T_max=273.18 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=2.105 MW | T_bg=265.04 K | T_max=273.05 K | anomalous_px=4
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=268.82 K | T_max=280.73 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=268.57 K | T_max=276.07 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0.208 MW | T_bg=270.1 K | T_max=287.51 K | anomalous_px=10
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/NevadosDeChillan/20260630
+
+Done.
