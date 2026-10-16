@@ -371,6 +371,36 @@ def flags_iguales(raices, logs):
 
 
 # ---------------------------------------------------------------- nulos
+# Tolerancia de G3 (vuelta 70 del loop, 2026-10-16; desviación registrada en PREREGISTRO.md). W1 real (run
+# 38723828037) dio FALLA con diag_mu_deti (179 noches) y diag_sd_deti (170) distintos, y nada más: ni hojas anidadas
+# ni el dNTI del mismo pool. Mecanismo reproducido por el verificador limpio (verif_g3): np.polyfit pasa por LAPACK
+# de OpenBLAS, que elige el kernel por CPU, y cambia el último bit de la regresión del ETI entre runners. MODIS
+# también difiere y no lee el flag, así que el flag no es la causa. Comparar floats con != mide la máquina (S142).
+# La diferencia relativa a mu llega a 1,4e-11 porque mu es casi cero (no "1e-16", cifra que estaba mal); contra la
+# escala natural |dmu|/sigma <= 5,4e-14. Por eso la tolerancia lleva un piso ABSOLUTO de 1e-14 (el umbral físico
+# más fino del dETI, C1, es 3e-3) además de la relativa de 1e-9. Los enteros se comparan exactos.
+# La autoprueba fija los dos lados: casos 22 (CUMPLE) y 22b a 22g (FALLA), uno por cada mutación que sobrevivía.
+G3_REL_TOL, G3_ABS_TOL = 1e-9, 1e-14
+
+
+def iguales(a, b):
+    """Igualdad campo a campo: floats con tolerancia (G3_REL_TOL, G3_ABS_TOL), enteros, bools, None y strings
+    exactos, recursiva en listas y dicts (anomaly_pixels)."""
+    if isinstance(a, bool) or isinstance(b, bool):
+        return a == b
+    if isinstance(a, int) and isinstance(b, int):
+        return a == b
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        if isinstance(a, float) and isinstance(b, float) and math.isnan(a) and math.isnan(b):
+            return True
+        return math.isclose(a, b, rel_tol=G3_REL_TOL, abs_tol=G3_ABS_TOL)
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(iguales(a[k], b[k]) for k in a)
+    if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
+        return len(a) == len(b) and all(iguales(x, y) for x, y in zip(a, b))
+    return a == b
+
+
 def noches_identicas(rc, rd):
     """Nulo 2 y 3: records nocturnos de los dos brazos, campo a campo salvo VOLATILES. Devuelve un dict con la
     cobertura (faltan/sobran) y las diferencias de campos, separando las de versión de producto (A108)."""
@@ -387,7 +417,7 @@ def noches_identicas(rc, rd):
         if a_.get("product_version") != b_.get("product_version") or a_.get("granule") != b_.get("granule"):
             version.append("|".join(k))
             continue
-        dif = [c for c in set(a_) | set(b_) if c not in VOLATILES and a_.get(c) != b_.get(c)]
+        dif = [c for c in set(a_) | set(b_) if c not in VOLATILES and not iguales(a_.get(c), b_.get(c))]
         if dif:
             campos.update(dif)
             if len(ejemplos) < 5:
