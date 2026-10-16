@@ -334,6 +334,13 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 05:55 UTC (vuelta 76): tarea 1.17 en preparación (subagente, worktree propio)
+- Paradas: NRT verde 03:15 UTC; disco 21 GB.
+- 1.17 delegada: extender el probe de #828 a los 11 volcanes (records MODIS a 3 km o menos del límite summit/far más
+  un control), re-etiquetar con el predicado del tablero, tope de gránulos por job, borrar cada gránulo. Worktree
+  `../VRP-Chile-117`, rama `loop/1.17-mxd03-etiquetas`; PR sin merge ni despacho (lo hago yo con CI verde).
+  Sigue en paralelo el verificador de Mirova-v1#25.
+
 ### 2026-10-16 ~05:35 UTC (vuelta 75): tarea 1.16 hecha; tres tareas nuevas en la cola (1.17 a 1.19)
 - Inventario de material crudo (`experiments/_s151_repaso_crudo/INVENTARIO.md`, sólo lectura sobre `8b2bcd79`). Revisé
   a mano tres de sus citas (`process_modis.py:342` y `:470-471`, `VERIFICADOR_AUDITORIA.md:205-206`): calzan. Orden de
