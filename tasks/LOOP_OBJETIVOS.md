@@ -332,7 +332,15 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-9 | ~~Alertas de 0,05 MW o menos~~ **DECIDIDA: SN** (Nicolás, 2026-10-15), informando también SE y la regla original en cada evaluación; implementación en curso | `experiments/_s151_alertas_minimas/README.md`, verificado | #810 | #811 |
 | D-10 | ~~¿Abrir el día en la réplica?~~ **DECIDIDA: 1** (Nicolás, 2026-10-15): rama diurna VIIRS apagada por flag (tag `pre-s151-rama-diurna-viirs`) y A/B diurno; código en curso | `experiments/_s151_alertas_diurnas/README.md`, verificado | #812 | #813 |
 
+| D-11 | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
+
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-16 ~07:15 UTC (vuelta 81): pre-registro 1.17 listo para el sello (#837 en main)
+- #837 mergeado (CI verde, `b130fa72`): Δ de la regla 2 decidido sólo con el estrato A (Wilson por volcán), B summit y
+  las alertas en conteo exacto; B far, fuera y control como prueba del modelo (cambio ahí = INDETERMINADO con motivo).
+  Ancho bajo el nulo de ±2.265 a ±44, fijado por test; MEJORA alcanzable. Verificador: los cinco arreglos de la
+  primera vuelta están y éste era el único pendiente. Pido el sello a Nicolás (D-11).
 
 ### 2026-10-16 06:58 UTC (vuelta 80): F/K V2a terminó despareja; repetida completa para unir intentos
 - V2a (run 38648773684, 2026-03-01 a 04-20): 22 jobs verdes; `recolectar` marca COBERTURA DESPAREJA. No son gránulos
