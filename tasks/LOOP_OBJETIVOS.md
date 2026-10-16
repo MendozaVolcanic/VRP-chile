@@ -352,6 +352,23 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 16:51 UTC (vuelta 121): verificador de #841: MERGEABLE CON ARREGLOS; la vuelta 117 erró el mecanismo
+- `experiments/_s151_unir_intentos_verif/VERIFICADOR_V1.md` (scripts a1 a a6 en `C:\Users\nmend\AppData\Local\Temp\claude\verif_841\`).
+  Se sostiene: 20 de 22 unen, 8 de borde (Copahue); en 4.209 records unidos sólo difieren `diag_mu_deti` (5,1e-10),
+  `diag_sd_deti` (4e-12) y un ulp de `final_hotspot_lat`; los 61 campos más los anidados de `primary_cluster`
+  revisados contra los siete consumidores: no falta ningún campo de decisión.
+- **Corrección a la vuelta 117:** no hay píxeles que crucen un umbral. En los 16 casos la lista `anomaly_pixels` mide
+  exactamente 100 y el píxel que cambia empata en VRP con el mínimo de la lista: es el corte top-100 con
+  `np.argsort(...)[:100]` (`process_modis.py:1085`), no estable ante empates; la máscara de detección es idéntica en
+  los dos intentos. El pipeline SÍ es reproducible en la detección; lo que varía es qué píxel empatado se guarda.
+- Bloqueantes: (1) la clave de `unir_intentos.py:106-107` incluye `granule` y los evaluadores agrupan por pasada sin
+  gránulo (`evaluar.py:109-110`, `evaluar_diurno.py:253`): dos gránulos de la misma pasada se unirían en silencio;
+  (2) sobreviven tres mutaciones (ignorar el predicado, quitar `abs_tol`, sacar `granule`); (3) el docstring describe
+  el mecanismo falso. Los 2 residuales: empate de VRP en el píxel más caliente, `evaluar_fk.py` no lee la zona; regla
+  recomendada: si un intento solo cubre todas las claves de la unión, se usa entero (Isluga 457, Chillán 550). G3
+  (`evaluar_diurno.py:420`) compara listas por posición: estándar incoherente, anotado, no se toca en este PR.
+- Arreglos devueltos al autor (mismo PR).
+
 ### 2026-10-16 16:47 UTC (vuelta 120): espera
 - NRT verde 16:25 (15:30, 55 min); disco 7,5 GB estable. V1 intento 3: 6 en curso, 38 en cola; W2a intento 2: 7 de
   22 verdes. Verificador de #841 en curso; #840 sigue abierto (D-14).
