@@ -337,6 +337,13 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 07:31 UTC (vuelta 82): 1.19 arrancada; esperan D-11 y D-12
+- Paradas: NRT verde 03:15 UTC; disco 21 GB. El job de Villarrica gemelo (V1 intento 2) lleva 1 h en cola de runners;
+  V2a intento 2 pendiente detrás. W2a en 12 de 22; saturación 1.18 en 4 de 11.
+- 1.19 delegada (sólo lectura, local): salto de Npix y VRP/Npix en las zonas de agregación VIIRS sobre el OSF global
+  (ángulos del User Guide renderizado) y fuente sintética; control que pueda fallar. Salida en
+  `C:\Users\nmend\AppData\Local\Temp\claude\angular_119\`.
+
 ### 2026-10-16 ~07:45 UTC: Mirova-v1#25, segunda vuelta del verificador: sin bloqueos de producción
 - Arreglos de la primera vuelta aplicados (`43ebe33`): backfill después del push del OCR (un solo escritor), presupuesto
   de 5 min, historia a mano sin escribir el repo, errores por fila con reintento y aviso, marcador compartido →
