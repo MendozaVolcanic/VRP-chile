@@ -351,7 +351,15 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-16 ~13:50 UTC (vuelta 103): informe del paper entregado por su agente, en verificación; #839 en main
+### 2026-10-16 13:36 UTC (vuelta 104): sin nada que evaluar; el cron externo cada 30 min ya apila NRT
+- Hora del servidor 13:36 (la vuelta 103 decía «~13:50», hora estimada y equivocada; corregida a ~13:30, A86).
+- NRT: la `workflow_dispatch` de las 13:00 (38904541728) sigue corriendo a los 36 min y la de las 13:30
+  (38908317829) quedó pendiente detrás. Evidencia directa para la decisión 1 del bloque S152 (cadencia): con 30 min
+  siempre hay una corrida esperando.
+- D-13: V2a intento 2 15 de 22 verdes; W2b 17 de 22; V1 intento 3 y W2a intento 2 pendientes. Disco 19 GB.
+- En curso: subagente de la 1.21 y verificador del informe del paper.
+
+### 2026-10-16 ~13:30 UTC (vuelta 103): informe del paper entregado por su agente, en verificación; #839 en main
 - Informe `C:\Users\nmend\AppData\Local\Temp\claude\paper_s152\INFORME_CAMBIOS_PAPER.md` (69 ítems: 14 FALSA, 18
   REBAJADA, 10 DESACTUALIZADA, 13 FALTA, 13 SIN CAMBIO, 1 SIN LOCALIZAR). Comprobados por el orquestador dos de los
   graves: `sec5_methods.md:6-14` dice que MODIS lee MOD03/MYD03 y `process_modis.py:470` dice que `geo_path` no se
