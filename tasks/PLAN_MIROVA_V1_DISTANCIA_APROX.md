@@ -98,6 +98,10 @@ OCR, comprobado fallando sin el filtro. Suite de Mirova-v1: 95 en verde.
 
 ## Tarea 4: elección de la imagen, de 1 a 25 días (cambio 2)
 
+**HECHA (vuelta 68):** commit local `28589c7d`. `imagen_para` elige la más reciente del rango; un md5 repetido vale
+por su primera aparición (la copia re-servida tiene la antigüedad de la original). Tres tests, vistos fallar sin la
+implementación. Suite de Mirova-v1: 98 en verde.
+
 **Archivos:** `dist_serie.py` (portar `imagen_para`, que usa `index_png.csv`) y el test.
 
 - [ ] Paso 1: tests con un índice sintético: con una imagen de 0,3 días y otra de 3 días gana la de 3; si sólo hay

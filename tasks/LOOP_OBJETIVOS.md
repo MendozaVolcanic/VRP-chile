@@ -294,6 +294,14 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 01:09 UTC (vuelta 68): tarea 4 del plan de Mirova-v1 hecha (imagen de 1 a 25 días)
+- Paradas: NRT verde 22:53 UTC; disco 24 GB. W1 diurna intento 3 lleva 2 h 13 min (el intento 1 tardó 1 h 50; el
+  control que murió por «perder comunicación» lo hizo a las 2 h). Si vuelve a morir, es el runner y no el código:
+  pensar en partir la ventana de 20 días antes de repetir otra vez.
+- `imagen_para` (más reciente de 1 a 25 días; md5 repetido por su primera aparición, A106); commit local `28589c7d`;
+  suite de Mirova-v1 98 en verde.
+- Próxima vuelta: W1 si terminó; si no, tarea 5 (umbral de calado débil medido contra el control, incluido el borde).
+
 ### 2026-10-16 00:46 UTC (vuelta 67): tarea 3 del plan de Mirova-v1 hecha (eliminación sólo con la tabla)
 - Paradas: NRT verde 22:53 UTC; disco 24 GB. W1 diurna intento 3 sigue a 1 h 50 min (el intento 1 tardó lo mismo).
 - `otras_de` y `eliminar` portados con el filtro de la tabla; commit local `7b14c37d`; cinco tests nuevos (único,
