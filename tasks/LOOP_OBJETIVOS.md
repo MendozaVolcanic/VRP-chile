@@ -334,6 +334,16 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~07:20 UTC (vuelta 79): 1.18 despachada (#836); arreglos de 1.17 en main (#835), segunda verificación
+- 1.18 (#836, CI verde, `9011b584`): medición descriptiva de saturación en Chillán desde el 2026-09-28 (VIIRS 375 y 750,
+  151 pasadas cada uno; MODIS 79; noche y día aparte), conteo de saturados por bit de calidad y por SI = 65533, VRP con
+  y sin ellos a un piso explícito, cruce con MIROVA. Run 38863912173 (11 jobs, 6 a la vez, 60 a 90 min estimado; ~87 GB
+  bajados y borrados en los runners). Sin veredicto, sin candado.
+- 1.17 corregida (#835, `bca47c6a`): banda por record según el corrimiento predicho, censo de 88 pasadas con alerta
+  de MIROVA (46 protegidas), regla 1 como compuerta, brazo C', JSON por gránulo; 471 gránulos en 12 jobs. Candado
+  puesto. El mismo verificador revisa la segunda vuelta antes de pedir el sello a Nicolás.
+- Worktrees 117b y 118 retirados; disco 21 GB. Sigue en curso: arreglos de Mirova-v1#25.
+
 ### 2026-10-16 ~06:50 UTC (vuelta 78): verificador del pre-registro 1.17: SELLABLE CON ARREGLOS (cambian el diseño)
 - Cumple: el brazo MxD03 lleva la posición oficial a todos los lugares donde decide (parche en `read_modis_l1b`), y la
   prueba sintética distingue corrimiento presente de ausente; auth sólo token.
