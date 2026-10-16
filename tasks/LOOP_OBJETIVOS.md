@@ -334,6 +334,16 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~06:30 UTC (vuelta 77): 1.17 en main con candado (#834); verificador del pre-registro lanzado
+- #834 mergeado (CI verde, `b9d65830`): probe que corre cada gránulo MODIS dos veces por el pipeline de producción
+  (posición interpolada contra MxD03) y re-etiqueta con el predicado del tablero. Población de 364 gránulos (A: hotspot
+  a 3 km o menos del límite, tope 30 por volcán; B: sólo el cúmulo cerca, tope 8; control a más de 6 km, tope 6).
+  Prueba sintética: 2 km de corrimiento da summit->far, cero da todo igual. Tiene candado: no corre sin el sello de
+  Nicolás (regla 1.6). Los umbrales «poco < 2 %, mucho >= 5 %» los eligió el agente (A115): el verificador revisa si
+  deben salir de la regla de victoria (alertas protegidas) en vez de publicaciones.
+- Verificador limpio del pre-registro en curso (`C:\Users\nmend\AppData\Local\Temp\claude\verif_117\`). Con su
+  informe, el sello pasa a Nicolás. En paralelo, el subagente de Mirova-v1#25 aplica los arreglos de su verificador.
+
 ### 2026-10-16 ~06:05 UTC: verificador de Mirova-v1#25: MERGEABLE CON ARREGLOS
 - Bien: CSV escrito de una vez, columnas viejas byte a byte iguales sobre copia del CSV real, `Distancia_km` intacta,
   idempotente, 0 violaciones de `ambiguo` en 389 filas, README como complemento (192/192 y 158/161 reproducidos).
