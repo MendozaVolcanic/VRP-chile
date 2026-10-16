@@ -351,6 +351,19 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 13:49 UTC (vuelta 106): informe del paper v2 entregado a Nicolás (punto 4 del pedido)
+- `experiments/_s152_paper_revision/INFORME_CAMBIOS_PAPER_v2.md` (con la v1 y el verificador al lado): 69 filas, 10
+  FALSA (errores independientes), 19 REBAJADA, 13 DESACTUALIZADA, 13 FALTA, 14 SIN CAMBIO. Los 5 más graves: «no hay
+  negativos» (V375 publica en 60,7 % de los negativos limpios por pasada y 79,8 % por noche antes de #535); MxD03 no
+  se lee; la lectura de MODIS en §6; Methods no describe la magnitud publicada (D25, modo un píxel, tope D9, F5') y
+  cierra D18 con un A/B que no midió la caja; las diurnas no se excluyen (efecto chico).
+- Desacuerdo autor/verificador resuelto a favor del autor por el orquestador: el «100 % por noche» de V375 es de los
+  tramos posteriores a #535 y #571 (`experiments/_s142_linea_base/RESULTADOS.md:29-30`), no del anterior.
+- Sin verificar: 13 filas no revisadas por un tercero y todas las citas a PDF (ninguna página renderizada). Nada se
+  reescribe en `docs/paper/` sin el visto bueno de Nicolás; decisiones previas que el informe le deja: ventana de
+  validación (posterior a #535 o por tramos A119) y si `paper_numbers.py` adopta la unión histórica, la regla SN y los
+  negativos limpios.
+
 ### 2026-10-16 13:45 UTC (vuelta 105): verificador del informe del paper: ENTREGAR CON CORRECCIONES
 - `C:\Users\nmend\AppData\Local\Temp\claude\paper_s152\VERIFICADOR_INFORME_PAPER.md`: 33 ítems revisados, 19
   CONFIRMADO, 14 CORREGIR, 0 REFUTADO. Las 14 FALSA son 12 errores independientes (6-3, 6-14 y 6-16 son la misma
