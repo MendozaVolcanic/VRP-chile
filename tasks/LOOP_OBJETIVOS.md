@@ -294,6 +294,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 00:46 UTC (vuelta 67): tarea 3 del plan de Mirova-v1 hecha (eliminación sólo con la tabla)
+- Paradas: NRT verde 22:53 UTC; disco 24 GB. W1 diurna intento 3 sigue a 1 h 50 min (el intento 1 tardó lo mismo).
+- `otras_de` y `eliminar` portados con el filtro de la tabla; commit local `7b14c37d`; cinco tests nuevos (único,
+  ambiguo, solapado, sin marcador, OCR que no descuenta, propia pasada excluida). Suite de Mirova-v1 95 en verde.
+- Próxima vuelta: evaluar W1 si terminó; si no, tarea 4 (imagen de 1 a 25 días).
+
 ### 2026-10-16 00:18 UTC (vuelta 66): tarea 2 del plan de Mirova-v1 hecha (calado sólo con la tabla)
 - Paradas: NRT verde 22:53 UTC; disco 24 GB; W1 diurna intento 3 en curso; V2a corriendo.
 - `calibrar` portado con el filtro `solo_tabla` (cambio 1 del verificador), commit local `45d8105c`; test de que una

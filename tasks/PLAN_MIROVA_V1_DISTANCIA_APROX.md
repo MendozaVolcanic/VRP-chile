@@ -85,6 +85,9 @@ calado en el borde (>= +0,76) cuenta como débil.
 
 ## Tarea 3: eliminación sólo con la tabla (cambio 1)
 
+**HECHA (vuelta 67):** commit local `7b14c37d`. `otras_de` y `eliminar` (devuelve dict). Cinco tests, incluido el de
+OCR, comprobado fallando sin el filtro. Suite de Mirova-v1: 95 en verde.
+
 **Archivos:** `dist_serie.py` (portar `eliminar` y `otras_de`) y el test.
 
 - [ ] Paso 1: tests sintéticos con marcadores dados (sin imagen): (a) un marcador sobrante da `unico`; (b) dos
