@@ -334,6 +334,17 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~06:05 UTC: verificador de Mirova-v1#25: MERGEABLE CON ARREGLOS
+- Bien: CSV escrito de una vez, columnas viejas byte a byte iguales sobre copia del CSV real, `Distancia_km` intacta,
+  idempotente, 0 violaciones de `ambiguo` en 389 filas, README como complemento (192/192 y 158/161 reproducidos).
+- Arreglos pedidos al subagente del PR: (1) el backfill no puede compartir job con el OCR (`cancel-in-progress` y 15
+  min de presupuesto hacían perder el commit del OCR): workflow propio o después del push, presupuesto corto en cron y
+  la historia una vez a mano; (2) errores por fila con reintento, anotación de advertencia, sin todo o nada; (3) el
+  umbral 4 no se replica (8,5 % de error entre 4 y 7 pareos en una muestra disjunta contra 3,8 % global): re-derivar
+  con las dos muestras; (4) marcador reclamado por dos filas de la misma noche → `ambiguo` (37 de 270); (5) pareos
+  enteros, `*.tmp` ignorado, poda de caché; (6) tests para 3 mutaciones que sobrevivían. Informe:
+  `C:\Users\nmend\AppData\Local\Temp\claude\verif_pr25\VERIFICADOR.md`. El merge sigue esperando a Nicolás.
+
 ### 2026-10-16 05:55 UTC (vuelta 76): tarea 1.17 en preparación (subagente, worktree propio)
 - Paradas: NRT verde 03:15 UTC; disco 21 GB.
 - 1.17 delegada: extender el probe de #828 a los 11 volcanes (records MODIS a 3 km o menos del límite summit/far más
