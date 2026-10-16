@@ -352,6 +352,15 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~15:55 UTC (vuelta 116): la caída del disco es Windows Update (6,4 GB), no el loop
+- Búsqueda de archivos de más de 200 MB escritos en los últimos 50 min (workspace, `AppData\Local`, `ProgramData`,
+  `Windows\Temp`, Descargas): ninguno. `C:\Windows\SoftwareDistribution\Download` suma 6,4 GB con escrituras de
+  15:17 a 15:40 UTC, la ventana de la caída. Papelera 0. Ajeno al loop y a la configuración que el loop puede tocar.
+- Worktree del autor de la 1.21: git ya lo había dado de baja y la carpeta quedó vacía (0 MB) y borrada; los 936 MB se
+  habían liberado en el primer intento. Disco 8,9 GB, sobre la parada de 3 GB; se vigila en cada vuelta. Si sigue
+  bajando, se detiene el loop y se le pide a Nicolás liberar espacio (Liberador de espacio tras instalar la
+  actualización).
+
 ### 2026-10-16 15:44 UTC (vuelta 115): el disco bajó de 18 a 9 GB en media hora; investigando
 - `df -h /c`: 18 GB a las 15:11, 9,1 GB a las 15:44, 8,9 GB a las 15:47 y 9,6 GB a las 15:50: no baja de forma
   continua. La parada (§1.5) es 3 GB. `AppData/Local/Temp` suma 1,6 GB; el worktree del autor de la 1.21
