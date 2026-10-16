@@ -353,6 +353,13 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 17:51 UTC (vuelta 126): W3a despachada (run 38942908101)
+- W2a intento 2 figura `queued` a nivel de run con 12 jobs verdes y 2 en curso: es el desfase de GitHub ya visto en
+  la vuelta 33 (V2a se encoló detrás de V1 en ese estado sin desplazarlo); un run con jobs corriendo no es pendiente.
+  W3a despachada con el comando del pre-registro (`PREREGISTRO.md:399`) partido en su primera mitad: `--ref main`,
+  2026-07-20 a 07-25, 11 Tier A (mismo `pipeline/` que W2, vuelta 125). A los 40 s: W3a `pending`, W2a sigue `queued` con sus jobs: sin desplazamiento. W3b se despacha cuando W3a arranque.
+- NRT verde 17:40. V1 intento 3: 5 verdes, 4 en curso, 35 en cola. Disco 8,1 GB. Esperan a Nicolás D-14 y D-15.
+
 ### 2026-10-16 17:20 UTC (vuelta 125): V2 se evalúa con V2a y V2b juntas; el commit de V2b va a D-15
 - `evaluar_fk.py` evalúa la ventana V2 con los dos despachos (`--raiz` de V2a y de V2b) y el ruido del gemelo de V1
   (`--ruido-de v1.json`): V2a sola no se evalúa. Falta V1 intento 3 (corriendo) y V2b (sin despachar).
