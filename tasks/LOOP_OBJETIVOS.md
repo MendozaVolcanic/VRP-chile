@@ -352,7 +352,7 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-16 ~15:55 UTC (vuelta 116): la caída del disco es Windows Update (6,4 GB), no el loop
+### 2026-10-16 15:51 UTC (vuelta 116): la caída del disco es Windows Update (6,4 GB), no el loop
 - Búsqueda de archivos de más de 200 MB escritos en los últimos 50 min (workspace, `AppData\Local`, `ProgramData`,
   `Windows\Temp`, Descargas): ninguno. `C:\Windows\SoftwareDistribution\Download` suma 6,4 GB con escrituras de
   15:17 a 15:40 UTC, la ventana de la caída. Papelera 0. Ajeno al loop y a la configuración que el loop puede tocar.
