@@ -35,6 +35,14 @@ Casos (respuesta esperada entre paréntesis):
   19 v750_cerrado       el brazo diurno sin ninguna pasada diurna de 750        (INDECIDIBLE por nulo 1 de VIIRS750)
   20 tabla_sin_procesar 15 % de la tabla VIIRS 375 de W5 sin procesar           (PENDIENTE DE REPETICION antes de G2)
   21 control_nulo       el control del nulo con el nulo ×0,3 y corrido −0,5     (FALLA; sin romper, OK; atrapa nulo_angosto)
+  Agregados en la vuelta 70 del loop (W1 real dio G3 FALLA por ruido de punto flotante entre runners):
+  22 ruido_flotante     noches con floats que difieren en 2e-16 relativo         (G3 CUMPLE)
+  22b diferencia_real   noches con floats que difieren en 1e-6 relativo          (G3 FALLA)
+  22c pixel_distinto    1e-6 sólo dentro de anomaly_pixels                       (G3 FALLA; atrapa listas o dicts siempre iguales)
+  22d pixel_extra       el brazo diurno con un píxel más                         (G3 FALLA; atrapa el largo de la lista)
+  22e none_vs_cero      None en el control, 0.0 en el diurno                     (G3 FALLA; atrapa None igual a todo)
+  22f relativo_1e8      floats que difieren en 1e-8 relativo                     (G3 FALLA; atrapa rel_tol=5e-7)
+  22g absoluto_5e13     diag_mu_deti 2e-8 con 5e-13 absoluto de diferencia       (G3 FALLA; atrapa abs_tol=1e-12)
 """
 from __future__ import annotations
 
@@ -89,7 +97,8 @@ def noches(UW):
 
 
 def escribir(dirc, UW, publica, sacar=(), diurno_igual_control=False, flags_diurno=None, cambiar_noche=False,
-             linea_extra="", volatiles_distintos=False, granulo_distinto=False):
+             linea_extra="", volatiles_distintos=False, granulo_distinto=False, ruido_relativo=None,
+             modificar_noche=None):
     """Escribe <dirc>/<brazo>/<vol>.json y <dirc>/logs/<brazo>_<vol>.log."""
     por = {n: {v: [] for v in bp.VOLS} for n in ED.BRAZOS}
     i = 0
@@ -97,6 +106,15 @@ def escribir(dirc, UW, publica, sacar=(), diurno_igual_control=False, flags_diur
         i += 1
         for n in ED.BRAZOS:
             r = record(vol, b, t, NO, False, i)
+            if ruido_relativo is not None:
+                # Valor real de W1 (Láscar MODIS Terra 2026-03-01 01:40, diag_mu_deti), también dentro de una lista
+                # de píxeles: el brazo diurno lo trae multiplicado por (1 + ruido_relativo).
+                f = (1 + ruido_relativo) if n == "diurno" else 1.0
+                r["diag_mu_deti"] = -9.871330774512634e-06 * f
+                r["anomaly_pixels"] = [{"lat": -23.37, "lon": -67.73, "eti": 4.920530419179312e-07 * f}]
+            if modificar_noche is not None:
+                # (brazo, record) -> None: cambia el record nocturno en el lugar (casos 22c a 22g).
+                modificar_noche(n, r)
             if n == "diurno" and volatiles_distintos:
                 # Dos jobs guardan el mismo record a horas distintas: no es una diferencia de medición.
                 r.update({"processed_utc": "2026-10-16T09:%02d:00Z" % (i % 60),
@@ -183,6 +201,19 @@ def main():
             ("16 g2_un_sensor", dict(publica=lambda w, k, U: k in U[w]["pos"] or k in seis_v750), []),
             ("17 volatiles", dict(publica=lambda w, k, U: k in U[w]["pos"], volatiles_distintos=True), []),
             ("18 granulo_distinto", dict(publica=lambda w, k, U: k in U[w]["pos"], granulo_distinto=True), []),
+            ("22 ruido_flotante", dict(publica=lambda w, k, U: k in U[w]["pos"], ruido_relativo=2e-16), []),
+            ("22b diferencia_real", dict(publica=lambda w, k, U: k in U[w]["pos"], ruido_relativo=1e-6), []),
+            # 22c a 22g, del verificador limpio de la vuelta 70: cada uno atrapa una mutación de iguales() que
+            # 22b no atrapaba, porque 22b mete el ruido también en el primer nivel.
+            ("22c pixel_distinto", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=lambda n, r: r.update(
+                anomaly_pixels=[{"lat": -23.37, "lon": -67.73, "eti": 4.920530419179312e-07 * (1 + (1e-6 if n == "diurno" else 0))}])), []),
+            ("22d pixel_extra", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=lambda n, r: r.update(
+                anomaly_pixels=[{"lat": -23.37, "lon": -67.73, "eti": 4.9e-07}] * (2 if n == "diurno" else 1))), []),
+            ("22e none_vs_cero", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=lambda n, r: r.update(
+                diag_sd_deti=0.0 if n == "diurno" else None)), []),
+            ("22f relativo_1e8", dict(publica=lambda w, k, U: k in U[w]["pos"], ruido_relativo=1e-8), []),
+            ("22g absoluto_5e13", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=lambda n, r: r.update(
+                diag_mu_deti=2e-8 + (5e-13 if n == "diurno" else 0.0))), []),
             ("19 v750_cerrado", dict(publica=lambda w, k, U: k in U[w]["pos"], sacar=todo_v750), []),
             ("20 tabla_sin_procesar", dict(publica=lambda w, k, U: k in U[w]["pos"], sacar=quince_w5), []),
         ]
@@ -231,6 +262,14 @@ def main():
                 chequear(n, m["M2"]["publicadas"] == 0 and m["M3"]["publicadas"] == 0 and m["M3"]["procesadas"] == 0, "cero publicaciones diurnas (M2 y M3 sin pasadas procesadas: %s)" % {x: m[x] for x in ("M2", "M3")})
             elif n == "noche_distinta":
                 chequear(n, res["G3"].startswith("FALLA") and res["veredicto"].startswith("INDECIDIBLE"), "G3 FALLA (%s) e INDECIDIBLE" % res["noches"]["campos_distintos"])
+            elif n == "ruido_flotante":
+                # W1 real (run 38723828037): diag_mu_deti y diag_sd_deti difieren en ~1e-16 relativo entre runners
+                # (la regresión del ETI suma en otro orden); vrp_mw y los píxeles son idénticos. No es cableado.
+                chequear(n, res["G3"] == "CUMPLE" and res["veredicto"].startswith("ADOPTAR"),
+                         "ruido de punto flotante de 2e-16 no es defecto de cableado (G3 %s)" % res["G3"])
+            elif n in ("diferencia_real", "pixel_distinto", "pixel_extra", "none_vs_cero", "relativo_1e8", "absoluto_5e13"):
+                chequear(n, res["G3"].startswith("FALLA"),
+                         "diferencia real en las noches: G3 FALLA (G3 %s, %s)" % (res["G3"][:20], res["noches"]["campos_distintos"]))
             elif n == "cableado_roto":
                 chequear(n, res["veredicto"].startswith("INDECIDIBLE") and "cableado del brazo diurno" in res["veredicto"], "INDECIDIBLE por cableado")
             elif n == "skip_daytime":
