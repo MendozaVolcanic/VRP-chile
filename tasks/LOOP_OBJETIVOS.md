@@ -337,11 +337,22 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-9 | ~~Alertas de 0,05 MW o menos~~ **DECIDIDA: SN** (Nicolás, 2026-10-15), informando también SE y la regla original en cada evaluación; implementación en curso | `experiments/_s151_alertas_minimas/README.md`, verificado | #810 | #811 |
 | D-10 | ~~¿Abrir el día en la réplica?~~ **DECIDIDA: 1** (Nicolás, 2026-10-15): rama diurna VIIRS apagada por flag (tag `pre-s151-rama-diurna-viirs`) y A/B diurno; código en curso | `experiments/_s151_alertas_diurnas/README.md`, verificado | #812 | #813 |
 
-| D-13 | Cobertura de los A/B largos: ¿repetir y unir intentos (A108, ~20 h por vuelta y puede abrir huecos nuevos) o evaluar sobre la intersección de pasadas presentes en todos los brazos, informando las excluidas (desviación registrada; la pérdida es por descarga, independiente del brazo)? Recomendación del loop: intersección, con la regla del 5 % del control contra producción como compuerta | `C:\Users\nmend\AppData\Local\Temp\claude\fk_v1\detalle_cobertura.txt` (V1: 31 de 44 jobs cortos, 0,5 a 1,4 % por job; C0 de PCC falla el 5 %) | F/K V1, V2a, diurno | pendiente |
+| D-13 | **DECIDIDA: repetir y unir intentos (A108)** (Nicolás, 2026-10-16), aunque tome más tiempo | V1 intento 3 y W2a intento 2 despachados | F/K, diurno | cerrada |
+| D-13 (texto original) | Cobertura de los A/B largos: ¿repetir y unir intentos (A108, ~20 h por vuelta y puede abrir huecos nuevos) o evaluar sobre la intersección de pasadas presentes en todos los brazos, informando las excluidas (desviación registrada; la pérdida es por descarga, independiente del brazo)? Recomendación del loop: intersección, con la regla del 5 % del control contra producción como compuerta | `C:\Users\nmend\AppData\Local\Temp\claude\fk_v1\detalle_cobertura.txt` (V1: 31 de 44 jobs cortos, 0,5 a 1,4 % por job; C0 de PCC falla el 5 %) | F/K V1, V2a, diurno | pendiente |
 | D-12 | Merge de la columna `Distancia_aprox_*` en el scraper (Mirova-v1 es producción) | verificador limpio en dos vueltas: sin bloqueos; `Distancia_km` y columnas viejas byte a byte iguales; umbral 5 provisional | Mirova-v1#25 (`f774a5d`) | pendiente |
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-16 ~12:00 UTC (vuelta 94): D-13 decidida: repetir y unir intentos
+- Nicolás decidió repetir los jobs y unir intentos (A108), aunque tome más tiempo; nada de intersección. Despachados:
+  F/K V1 intento 3 completo (run 38639658446, pendiente en `s146-ab-sin-test1` detrás de V2a intento 2) y W2a intento 2
+  completo (run 38853230521, pendiente en `s151-ab-diurno` detrás de W2b).
+- Procedimiento para cada A/B: unir los intentos de cada brazo con `experiments/_s151_ab_diurno/unir_intentos.py`
+  (exige records comunes idénticos) y contar cobertura con el instrumento del pre-registro; si sigue despareja, otra
+  vuelta. **No despachar V2b ni W3 mientras haya un pendiente en su grupo**: el grupo guarda un solo pendiente y el
+  nuevo desplazaría al que espera.
+- En curso: probe 1.17 (run 38894508138), V2a intento 2, W2b.
 
 ### 2026-10-16 ~11:50 UTC (vuelta 93): D-11 sellado por Nicolás; probe 1.17 despachado
 - Nicolás selló el pre-registro de la 1.17. Despachado `probe-s151-mxd03-etiquetas.yml` con `preregistro_aprobado=si`,
