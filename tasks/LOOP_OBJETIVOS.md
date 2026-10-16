@@ -334,6 +334,13 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~07:40 UTC: segunda vuelta del verificador de 1.17: SELLABLE CON UN ARREGLO
+- Los cinco arreglos están en main. Ningún filtro pierde alertas: las 3 protegidas fuera del censo son diurnas (MODIS
+  sólo procesa la noche). Falta uno: simulado sin cambios, el intervalo de Δ de la regla 2 da ±2.265, con 97 % del
+  ancho en estratos que el modelo declara inmóviles; MEJORA y EMPEORA eran inalcanzables. Pedido al autor: Δ sólo con
+  A más B summit y alertas en conteo exacto; B far, fuera y control como prueba del modelo (cambio ahí =
+  INDETERMINADO con motivo); test del ancho máximo bajo el nulo.
+
 ### 2026-10-16 ~07:20 UTC (vuelta 79): 1.18 despachada (#836); arreglos de 1.17 en main (#835), segunda verificación
 - 1.18 (#836, CI verde, `9011b584`): medición descriptiva de saturación en Chillán desde el 2026-09-28 (VIIRS 375 y 750,
   151 pasadas cada uno; MODIS 79; noche y día aparte), conteo de saturados por bit de calidad y por SI = 65533, VRP con
