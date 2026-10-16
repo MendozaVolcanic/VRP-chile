@@ -307,10 +307,15 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   probe en GitHub Actions (pyhdf sólo en Linux) que reubica `anomaly_pixels` y `final_hotspot` con MxD03 y re-etiqueta
   con el predicado del tablero (A97); recuento por volcán, satélite y cenit. Informa la decisión del arreglo MxD03
   (A45), que sigue siendo de Nicolás. Autenticación sólo con `EARTHDATA_TOKEN`.
-- [ ] **1.18 Saturación en la erupción de Chillán, leída en el L1B.** Por qué: nuestro techo I04 es 361,77 K y el de
+- [x] **1.18 HECHA (vuelta 86): 0 saturados en 385 gránulos, confirmado por verificador; ver bitácora.** Saturación en la erupción de Chillán, leída en el L1B. Por qué: nuestro techo I04 es 361,77 K y el de
   MIROVA 353 K; el corpus ya llegó a 354,24 K, y un píxel borrado no aparece en `t_max`. Qué: en las pasadas de
   Chillán desde el 2026-09-28, contar en VNP02IMG/VJ102IMG (bit de saturación de I04) y MOD021KM (SI = 65533) los
   píxeles saturados, y recalcular el VRP con y sin ellos contra lo que MIROVA publicó (9,0, 10,0 y 8,24 MW).
+- [ ] **1.20 (agregada por el loop el 2026-10-16, del verificador de la 1.18) Techos que borran señal válida.** De sólo
+  lectura. (1) Techo M15 de 343 K en `pipeline/process_viirs_mod.py:182` contra M15 válido hasta 374 K: ¿cuántos
+  píxeles y records del corpus borra, y cuánto VRP cambia? (2) I04 de NOAA-21 con LUT máx 361,00 K contra el corte de
+  361,27 K: ¿la defensa secundaria queda muerta en ese satélite? Cada uno con su control positivo. Toca producción (A45):
+  sólo medir y proponer.
 - [x] **1.19 HECHA (vuelta 85, verificador PARCIAL: sólo el escalón de 52,66° se sostiene; sin palanca que pre-registrar).** Dependencia angular de la magnitud V375 sobre el OSF global.** Por qué: hoy «SIN ATRIBUIR» con 33 a 44
   pares por bin. Qué: buscar el salto en Npix y VRP/Npix en los límites de las zonas de agregación VIIRS (ángulos del
   User Guide del SDR, página renderizada) en las 252.374 filas de 375 m del OSF; y un sintético subpíxel de energía
@@ -336,6 +341,20 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-11 | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-16 ~08:30 UTC (vuelta 86): verificador de la 1.18: cero de saturación CONFIRMADO; dos hallazgos latentes
+- `experiments/_s151_saturacion_chillan/verificador/VERIFICADOR.md`. El instrumento puede dar distinto de cero: lee el
+  bit 4 (Saturation, Tabla C.1) y el SI crudo antes del lector de producción, y en estos mismos gránulos marca I04
+  saturado en 59 y MODIS B22 = 65533 en 8, todos fuera de la caja de 25 km; el brazo «sin» reproduce producción exacto
+  (182/182 `t_max_k`, 157/157 `pc.vrp_mw`). El 348,3 K era diurno; el máximo nocturno es 347,12 K (10-15 06:36),
+  14,7 K bajo el techo. La pasada de 22,13 MW de MIROVA (10-15 05:00 V375) la damos en 10,36 MW, sin saturados: el
+  déficit en erupción no es saturación. PARCIAL el cruce con MIROVA: el job no exporta `GH_TOKEN` y la referencia quedó
+  en el snapshot del 10-14 08:35 (faltan once alertas finales, todas medidas con 0 saturados).
+- **Hallazgos latentes (no activos en esta ventana), para Nicolás:** (1) en NOAA-21 la LUT de I04 llega a 361,00 K,
+  bajo el corte de producción de 361,27 K: la defensa secundaria nunca dispara en ese satélite; (2) el techo de M15 en
+  `pipeline/process_viirs_mod.py:182` (343 K) borra M15 válido hasta 374 K, que en erupción puede ser señal real del
+  TIR. Los dos tocan producción (A45): quedan como tarea 1.20 de sólo lectura (medir cuántos records afectaría) antes
+  de proponer nada. 1.18 HECHA.
 
 ### 2026-10-16 ~08:15 UTC (vuelta 85): verificador de la 1.19: PARCIAL; la conclusión fuerte cae
 - `experiments/_s151_angular_119/verificador/VERIFICADOR.md`. Ángulos de zona CONFIRMADOS (31,589° y 44,680° de barrido,
