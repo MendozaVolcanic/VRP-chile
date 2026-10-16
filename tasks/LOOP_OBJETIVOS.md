@@ -311,7 +311,7 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   MIROVA 353 K; el corpus ya llegó a 354,24 K, y un píxel borrado no aparece en `t_max`. Qué: en las pasadas de
   Chillán desde el 2026-09-28, contar en VNP02IMG/VJ102IMG (bit de saturación de I04) y MOD021KM (SI = 65533) los
   píxeles saturados, y recalcular el VRP con y sin ellos contra lo que MIROVA publicó (9,0, 10,0 y 8,24 MW).
-- [ ] **1.19 Dependencia angular de la magnitud V375 sobre el OSF global.** Por qué: hoy «SIN ATRIBUIR» con 33 a 44
+- [x] **1.19 HECHA (vuelta 85, verificador PARCIAL: sólo el escalón de 52,66° se sostiene; sin palanca que pre-registrar).** Dependencia angular de la magnitud V375 sobre el OSF global.** Por qué: hoy «SIN ATRIBUIR» con 33 a 44
   pares por bin. Qué: buscar el salto en Npix y VRP/Npix en los límites de las zonas de agregación VIIRS (ángulos del
   User Guide del SDR, página renderizada) en las 252.374 filas de 375 m del OSF; y un sintético subpíxel de energía
   fijada por física antes de correr, pasado por la huella VNP03 y por el detector. Decide la palanca de magnitud
@@ -337,6 +337,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~08:15 UTC (vuelta 85): verificador de la 1.19: PARCIAL; la conclusión fuerte cae
+- `experiments/_s151_angular_119/verificador/VERIFICADOR.md`. Ángulos de zona CONFIRMADOS (31,589° y 44,680° de barrido,
+  36,32° y 52,66° de cenit; M13 no se agrega, así que V750 no es réplica segura). Escalón en el OSF: sólo el de 52,66° es
+  robusto (+0,12 con contraste local, placebo máx 0,086); el de 36,32° cae dentro del placebo y lo empuja el VRP total,
+  no el Npix (al revés del mecanismo); la caída de Npix desaparece con nudos cada 2°; el nulo pre-registrado (barajado)
+  se cambió sin declararlo. «Un tercio del límite físico»: razonamiento REFUTADO (con remuestreo, ±0,405/±0,693 es el
+  límite de una fuente subpíxel; una extensa da 0). Aplanado: no circular, pero la selección no estaba pre-registrada,
+  excluye a Chillán sin decirlo y es casi sólo Láscar (Isluga sola, 1,33). Sintético tautológico. La ley nueva es ~15 %
+  más suave que el área geolocalizada de S133, se pasa con todos los volcanes (1,26) y no cierra D17.
+- Consecuencia: la 1.19 queda con UN hallazgo (escalón real de MIROVA a 52,66° en el OSF) y SIN palanca que pre-registrar.
+  No se propone A/B. La dependencia angular de nuestra magnitud sigue en gran parte SIN ATRIBUIR. La 1.19 queda hecha.
+
 ### 2026-10-16 08:02 UTC (vuelta 84): 1.18 terminada: en la erupción de Chillán no saturó ningún píxel (por verificar)
 - Run 38863912173, 12 jobs verdes, 385 gránulos de Chillán del 2026-09-28 al 2026-10-16 (V375 152, V750 154, MODIS 79,
   noche y día). 0 píxeles saturados en el radio interior y en la escena, en los tres sensores; el VRP con y sin ellos
@@ -348,6 +360,10 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   F/K: el job de Villarrica gemelo sigue esperando runner; V2a intento 2 pendiente. W2a 13 de 22.
 
 ### 2026-10-16 ~08:00 UTC (vuelta 83): 1.19 terminada (por verificar): la agregación del VIIRS explica la dependencia angular
+⚠️ **Rebajado en la vuelta 85 (verificador limpio, PARCIAL):** sólo el escalón de 52,66° se sostiene; el de 36,32° cae
+dentro del placebo y lo empuja el VRP total, no el Npix; el «tercio del límite» está mal razonado; el aplanado es casi
+sólo Láscar; el sintético era tautológico; la palanca casi no se distingue del área de S133. Ver la entrada de la
+vuelta 85. Texto original:
 - `experiments/_s151_angular_119/` (predicciones en `PREREGISTRO.md` antes de correr; cada número con su script). En
   el OSF global de MIROVA (V375 noche, 208.293 filas, 158 volcanes, efecto fijo volcán × mes) VRP/Npix sube +0,135 y
   +0,216 en ln en los límites de zona de agregación (36,32° y 52,66° de cenit, de los ATBD de geolocalización e imagen
