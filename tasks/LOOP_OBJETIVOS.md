@@ -351,6 +351,16 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~13:50 UTC (vuelta 103): informe del paper entregado por su agente, en verificación; #839 en main
+- Informe `C:\Users\nmend\AppData\Local\Temp\claude\paper_s152\INFORME_CAMBIOS_PAPER.md` (69 ítems: 14 FALSA, 18
+  REBAJADA, 10 DESACTUALIZADA, 13 FALTA, 13 SIN CAMBIO, 1 SIN LOCALIZAR). Comprobados por el orquestador dos de los
+  graves: `sec5_methods.md:6-14` dice que MODIS lee MOD03/MYD03 y `process_modis.py:470` dice que `geo_path` no se
+  usa; `sec6_validation.md:31-34` dice que las filas diurnas se excluyen y `scripts/paper_numbers.py` no filtra por
+  hora (grep). El resto, verificador limpio en curso (`...\paper_s152\VERIFICADOR_INFORME_PAPER.md`). No se entrega
+  a Nicolás antes del veredicto.
+- PR #839 (IndexError del probe de saturación) mergeado con CI verde (pytest 2 min 16 s), squash `57c70ee5`; worktree
+  y rama borrados.
+
 ### 2026-10-16 ~13:25 UTC (vuelta 102): IndexError del probe de saturación arreglado (PR #839, CI pendiente)
 - `experiments/_s151_saturacion_chillan/probe_saturacion.py`: un tramo sin días (ventana de 3 días en 6 tramos, run
   38882932077) escribe su JSON con 0 pasadas y sale con 0, sin token ni red. Test nuevo parametrizado (normal y
