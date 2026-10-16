@@ -351,6 +351,16 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 14:28 UTC (vuelta 110): arreglos de la 1.21 aplicados (#840 en `bce08032`, CI verde); segunda verificación
+- CI run 38915427957: 1.882 pasan (45 tests nuevos). Bloqueante 1: README rebajado a cota (CC publicaría 42 a 46
+  protegidas, 0 a 4 pérdidas), grupo `fuente_test1` (126 records, 4 protegidas, 113 negativos limpios), espía con los
+  cuatro argumentos y el resultado, replay por grupo, caso sintético TEST1 con mutación, nota A45. Bloqueante 2:
+  FRÁGIL por intersección de pasadas con control negativo. Cobertura con verdad negativa: MEJORA sale 5 %, 46 % y 92 %
+  de las veces si se apaga el 50, 70 y 90 % de las 587 falsas de C. No aplicado: la anisotropía del nulo sobre 50°
+  (documentada, 1,24×; las dos pérdidas de la 1.17 están bajo 20°).
+- Segunda vuelta del verificador lanzada (`verif_121\VERIFICADOR_V2.md`).
+- D-13: V2a intento 2 18 de 22; W2b 21 de 22; V1 y W2a pendientes.
+
 ### 2026-10-16 14:10 UTC (vuelta 109): verificador del pre-registro 1.21: SELLABLE CON ARREGLOS (dos bloqueantes)
 - `C:\Users\nmend\AppData\Local\Temp\claude\verif_121\VERIFICADOR.md`. Comprobado: 39 de 39 tests, sha256 de la
   muestra, cobertura del estimador, replay coherente con A82 (88,3 % de negativos limpios contra 89,1 %), consumidores
