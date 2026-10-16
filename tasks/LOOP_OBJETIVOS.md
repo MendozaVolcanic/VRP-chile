@@ -312,6 +312,17 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 05:00 UTC (vuelta 72): G3 del evaluador diurno arreglado y verificado; PR #833 en CI
+- Verificador limpio de G3: SELLABLE CON ARREGLOS. Mecanismo reproducido (OpenBLAS elige kernel por CPU y cambia el
+  último bit de la regresión del ETI; MODIS también difiere y no lee el flag). Corrigió una cifra mía: no era
+  «~1e-16 relativo» sino hasta 1,4e-11 relativo a μ (μ casi cero), 5,4e-14 contra σ; con tolerancia relativa sola,
+  W2 a W6 habrían fallado en falso. Arreglos aplicados: piso absoluto 1e-14, enteros/None/strings exactos, casos 22c a
+  22g. Autoprueba 57 de 57; mutaciones 8 de 8 nuevas y 7 de 7 de siempre; desviación D1 en `PREREGISTRO.md` §11.
+  PR [#833](https://github.com/MendozaVolcanic/VRP-chile/pull/833), CI corriendo; se mergea en verde (no toca
+  producción).
+- Siguiente: con #833 en main, despachar W2 partida en dos mitades (06-13 a 06-21 y 06-22 a 06-30), la segunda cuando
+  la primera ya corra (el grupo guarda un solo pendiente). Después, la tarea 1.16.
+
 ### 2026-10-16 04:20 UTC (vuelta 71): la distancia del OCR acierta el lado; trabajo en paralelo
 - Nicolás pidió avanzar en paralelo cuidando disco y procesos. Computador despierto mientras haya trabajo; disco
   21 GB. La sesión aparte para Mirova-v1 tareas 5 a 8 no arrancó: el worktree pedía 23,1 GB libres y había 21,8. La
