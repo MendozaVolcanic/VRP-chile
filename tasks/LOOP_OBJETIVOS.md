@@ -343,6 +343,20 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~10:00 UTC (vuelta 91): verificador de la 1.20: PARCIAL; riesgo VIVO de saturación de I04 en Chillán
+- `experiments/_s151_techos_120/verificador/VERIFICADOR.md`. (1) Código: la cadena NaN-M15 → sin NTI ni caminos B y D
+  es correcta, pero el Test 1 NO rescata en general (`process_viirs_mod.py:1196-1215`: sólo si es la única fuente o si
+  el pico contextual queda fuera del inner); con halo cerca del cráter, el píxel saturado queda como agujero también
+  dentro de 3 km. (2) La cota física se sostiene (I05 de la gemela V375: máx 319,51 K), aunque con emisividad 0,7 a 0,9
+  baja a 16 a 30 MW; el «M15 implícito» es una cota inferior. (3) **I04: el techo efectivo es ~354 K, no 359 K** (los
+  máximos se amontonan en 353,3 a 354,2 K; el cálculo en centro de banda sobrestima 6 a 7 K), y **Suomi NPP ya dio
+  355,96 K en el cráter de Chillán el 2026-10-16**: la pérdida por el bit de saturación es un riesgo vivo en la erupción.
+  (4) El indicio de feb-2025 está a 12 a 19 km al oeste y se mueve entre noches: probablemente un incendio, no el volcán.
+  (5) La propuesta choca con D24 (sigue borrando por el bit desde ~352 K); en V750 sería más fiel conservar M15 recortado
+  y marcarlo.
+- Medición de saturación re-despachada sobre lo reciente (run 38882932077, desde 2026-10-14; descriptiva, sin
+  veredicto) para ver si el bit ya borró píxeles del cráter. Esto alimenta D24 y la decisión de Nicolás; nada se toca.
+
 ### 2026-10-16 ~09:30 UTC (vuelta 90): 1.20 terminada, SIN verificador todavía: ningún techo borra señal hoy
 - `experiments/_s151_techos_120/` (informe y scripts). Techo M15 343 K (`process_viirs_mod.py:182`): pone NaN sólo en
   M15, el píxel pierde NTI y sólo el Test 1 lo rescata a menos de 3 km del cráter; se activaría con 32 a 37 MW por
