@@ -312,6 +312,19 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~05:10 UTC (vuelta 73): Mirova-v1#25 (distancia aproximada) abierto con CI verde; en verificación
+- Subagente terminó las tareas 5 a 8 del plan: [Mirova-v1#25](https://github.com/MendozaVolcanic/Mirova-v1/pull/25)
+  (12 archivos, 117 tests en verde, subido por la API). Umbral `PAREOS_MINIMOS = 4`, medido con el lector portado: 38
+  erradas de 1.240 decididas (3,1 %); los calados en el borde no yerran más (8 de 8 con el umbral). Backfill sobre
+  copia del CSV real (31 min con caché vacía; 6 a 30 s en régimen): de las 15 sin geometría, 7 coinciden con el
+  estudio, 4 de VIIRS 750 quedan `sin_control` y 4 `pendiente` (Chillán 22 MW y Villarrica tenían imagen de menos de
+  1 día); del reparto 163/48/34/35, 242 de 280 coinciden y las 38 restantes tienen causa listada. Marcador a la cifra
+  OCR más otro: `ambiguo`. Fuera del plan: `scraper_ocr.py` borraba columnas nuevas al guardar (ahora las conserva) y
+  el paso del workflow tiene timeout de 20 min y presupuesto de 15.
+- Verificador limpio lanzado (riesgo de producción primero: que una falla del backfill no rompa el OCR ni deje el CSV
+  a medio escribir). El merge espera a Nicolás (Mirova-v1 es producción). Pendiente tras el merge: hito A119 en
+  `scripts/calidad_referencia_mirova.py`.
+
 ### 2026-10-16 05:00 UTC (vuelta 72): G3 del evaluador diurno arreglado y verificado; PR #833 en CI
 - Verificador limpio de G3: SELLABLE CON ARREGLOS. Mecanismo reproducido (OpenBLAS elige kernel por CPU y cambia el
   último bit de la regresión del ETI; MODIS también difiere y no lee el flag). Corrigió una cifra mía: no era
