@@ -352,6 +352,24 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 16:09 UTC (vuelta 117): V2a intento 2 despareja (6 de Chaitén); la unión estricta choca con ruido de máquina
+- V2a intento 2 (38648773684) terminó: 22 jobs de proceso verdes, `recolectar` rojo por dos razones. (1) Cobertura:
+  control 5.876 pasadas, brazo `_s149_ab_sin_test1_b22_max` 5.870 (faltan 6, todas de Chaitén). (2) El push de la rama
+  `s146-ab/38648773684` falla en los 5 intentos porque la rama ya la publicó el intento 1 (06:31 UTC): **todo re-run
+  de este workflow deja `recolectar` en rojo**; es el «rojo conocido» de S147, ahora con causa. El artefacto quedó.
+- Unión (`unir_intentos.py`; intento 1 desde la rama, intento 2 desde `s146ab-todo`; mismo commit, es re-run): se
+  unen 14 de 22 archivos (0 distintos); en 8 **todos** los records comunes difieren. Causa medida sobre Chaitén control:
+  `diag_mu_deti` y `diag_sd_deti` difieren hasta 5,1e-10 relativo (regresión del ETI en otra CPU, el caso G3),
+  `final_hotspot_lat` 1,7e-16. Además, en 11.642 records comunes, **15 traen otro conjunto de `anomaly_pixels`** (9
+  más difieren sólo en el orden): los 15 son MODIS del control (Copahue 8, Isluga 3, Chillán 4), todos `far`, todos
+  con `vrp_mw` topado en 5,0 (D9) y campo difuso de 56 a 90 píxeles; un píxel en el borde del umbral entra o sale
+  (diferencia de 0 a 2 píxeles). En los 15, `distance_class`, `vrp_mw`, `primary_cluster.vrp_mw` y `triggered_test1`
+  son idénticos: no cambia ninguna publicación. Salidas en `C:\Users\nmend\AppData\Local\Temp\claude\v2a_38648773684\`.
+- Próximo (vuelta propia, rama desde `main`, TDD y verificador limpio, como G3 en #833): `unir_intentos.py` compara
+  floats con tolerancia relativa más piso absoluto, y admite diferencias de `anomaly_pixels` sólo si los campos de
+  publicación son idénticos, contándolas e informándolas. Para Nicolás: el pipeline no es reproducible bit a bit entre
+  runners en los campos difusos topados por D9 (15 de 11.642), sin efecto en lo publicado.
+
 ### 2026-10-16 15:51 UTC (vuelta 116): la caída del disco es Windows Update (6,4 GB), no el loop
 - Búsqueda de archivos de más de 200 MB escritos en los últimos 50 min (workspace, `AppData\Local`, `ProgramData`,
   `Windows\Temp`, Descargas): ninguno. `C:\Windows\SoftwareDistribution\Download` suma 6,4 GB con escrituras de
