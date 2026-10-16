@@ -312,6 +312,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 05:24 UTC (vuelta 74): tarea 1.16 arrancada (subagente de sólo lectura)
+- Paradas: NRT verde 03:15 UTC; disco 21 GB. V2a en 18 de 22; W2a con 3 jobs corriendo y 19 en cola; W2b y la
+  repetición de V1 pendientes en sus grupos.
+- 1.16 en curso: inventario de una página en `C:\Users\nmend\AppData\Local\Temp\claude\repaso_crudo\INVENTARIO.md`.
+  En paralelo, el verificador limpio de Mirova-v1#25. Dos agentes.
+
 ### 2026-10-16 ~05:10 UTC (vuelta 73): Mirova-v1#25 (distancia aproximada) abierto con CI verde; en verificación
 - Subagente terminó las tareas 5 a 8 del plan: [Mirova-v1#25](https://github.com/MendozaVolcanic/Mirova-v1/pull/25)
   (12 archivos, 117 tests en verde, subido por la API). Umbral `PAREOS_MINIMOS = 4`, medido con el lector portado: 38
