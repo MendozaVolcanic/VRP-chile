@@ -351,6 +351,11 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 14:08 UTC (vuelta 108): espera
+- NRT 13:00 verde (37 min 43 s); 13:30 corriendo, 14:00 pendiente: siempre una en cola con el cron de 30 min, sin
+  desplazamientos hasta ahora (las tres corridas existen). D-13: V2a intento 2 17 de 22 verdes; W2b 20 de 22; V1 y
+  W2a siguen pendientes. Verificador de la 1.21 en curso. Disco 19 GB.
+
 ### 2026-10-16 13:57 UTC (vuelta 107): pre-registro 1.21 entregado (PR #840, CI verde, sin merge); verificador lanzado
 - PR #840 (`loop/1.21-prereg`, head `f3fb8d7a`), CI run 38911168165: 1.876 pasan (base 1.837, +39 nuevos). Seis brazos
   más C': C, CC (etiqueta desde el cúmulo sin MxD03), M, MC, R y RC (traslación rígida de la grilla del tamaño del
