@@ -156,7 +156,7 @@ def test_pixel_de_borde_con_decision_igual_une_e_informa():
 
 
 @pytest.mark.parametrize("campo, valor", [("vrp_mw", 4.0), ("distance_class", "summit"),
-                                          ("sensor_zenith_deg", 31.9), ("n_anomalous_pixels", 327),
+                                          ("n_anomalous_pixels", 327), ("triggered_test1", True),
                                           ("primary_cluster", {"n_pixels": 77, "vrp_mw": 5.0,
                                                                "centroid_lat": -37.9, "centroid_lon": -71.1,
                                                                "centroid_dist_km": 14.2, "d9_capped": True})])
@@ -234,18 +234,19 @@ def test_sin_predicado_un_record_de_borde_no_une(monkeypatch):
     assert "sin node" in inf["distintos"][0]["predicado"]
 
 
+
 # ---------------------------------------------------------------- la clave es la pasada, no el granulo
-def test_misma_pasada_otro_granulo_no_sale_dos_veces():
+def test_misma_pasada_otro_granulo_bloquea_aunque_haya_intento_entero():
     """Verificador del PR #841, a6: con el granulo en la clave esto daba ok y 2 records de la misma pasada, y
-    armar_tabla.py:43 se quedaba en silencio con el del intento 2. Mata la mutacion «granule en la clave»."""
+    armar_tabla.py:43 se quedaba en silencio con el del intento 2 (mata «granule en la clave»). Y vuelta 2, a9:
+    otro granulo u otra version en un comun es A108 (repetir el job), no se elige en silencio aunque los dos
+    intentos cubran todo."""
     a = rec_modis()
     b = rec_modis(granule="MOD021KM.NRT.otro.hdf", product_version="nrt", vrp_mw=99.0)
     salida, inf = unir(doc(a), doc(b))
-    pasada = [r for r in salida["records"] if (r["sensor"], r["datetime_utc"]) == (a["sensor"], a["datetime_utc"])]
-    assert len(pasada) == 1 and pasada[0]["granule"] == a["granule"]
+    assert not inf["ok"] and salida is None
     assert inf["comunes"] == 1 and inf["estados"]["distinto"] == 1
     assert {"granule", "product_version", "vrp_mw"} <= set(inf["distintos"][0]["campos"])
-    assert salida["_union_intentos"]["distintos_informados"] == inf["distintos"]
 
 
 def test_misma_pasada_otro_granulo_bloquea_la_mezcla():
@@ -255,17 +256,57 @@ def test_misma_pasada_otro_granulo_bloquea_la_mezcla():
     assert not inf["ok"] and {"granule", "product_version"} <= set(inf["distintos"][0]["campos"])
 
 
-# ---------------------------------------------------------------- intento entero
-def test_intento_que_cubre_todo_se_usa_entero_e_informa():
-    """Los dos residuales de V2a: el empate en el maximo mueve sensor_zenith_deg, que sigue siendo campo de
-    decision. Si un intento cubre todas las pasadas, se entrega entero y la diferencia sólo se informa."""
+# ---------------------------------------------------------------- intento entero: misma regla que la mezcla
+@pytest.mark.parametrize("campo, valor", [("triggered_test1", True), ("distance_class", "summit"),
+                                          ("vrp_mw", 99.0), ("product_version", "nrt")])
+def test_intento_entero_bloquea_una_diferencia_real(campo, valor):
+    """Vuelta 2 del verificador (v2_a9): con un intento que cubre todo, una diferencia de decision en un comun
+    daba ok y sólo quedaba informada, y evaluar_fk.py no lee _union_intentos. Ahora bloquea igual que la mezcla."""
+    a = rec_modis()
+    b = rec_modis(**{campo: valor})
+    salida, inf = unir(doc(a), doc(b, SOLO2))
+    assert not inf["ok"] and salida is None
+    assert campo in inf["distintos"][0]["campos"]
+
+
+@pytest.mark.skipif(not HAY_NODE, reason="el predicado del tablero corre con node")
+def test_intento_que_cubre_todo_se_usa_entero_con_el_empate_como_borde():
+    """Los dos residuales de V2a: el empate en el maximo mueve sensor_zenith_deg. En MODIS es derivado (su único
+    lector en la cadena, banco_paridad.py:464-469, filtra VIIRS 375), así que es borde, pasa el predicado y se
+    entrega el intento que cubre todo, entero."""
     a = rec_modis(processed_utc="INTENTO1")
     b = rec_modis(processed_utc="INTENTO2", anomaly_pixels=a["anomaly_pixels"][:-1], sensor_zenith_deg=31.9)
     salida, inf = unir(doc(a), doc(b, SOLO2))
     assert inf["ok"] and inf["modo"] == "intento_entero" and inf["intento_entero"] == 2
     assert salida["records"] == doc(b, SOLO2)["records"]
-    assert inf["estados"]["distinto"] == 1 and "sensor_zenith_deg" in inf["distintos"][0]["campos"]
-    assert "sensor_zenith_deg" in ui.CAMPOS_DECISION
+    assert inf["estados"]["borde"] == 1 and inf["estados"]["distinto"] == 0
+    assert "sensor_zenith_deg" in inf["borde"][0]["campos_derivados"]
+
+
+def test_intento_entero_corre_el_predicado_sobre_el_borde(monkeypatch):
+    monkeypatch.setattr(ui, "_predicado", lambda pares, volcan: [0])
+    a = rec_modis()
+    b = rec_modis(anomaly_pixels=a["anomaly_pixels"][:-1])
+    salida, inf = unir(doc(a), doc(b, SOLO2))
+    assert not inf["ok"] and inf["distintos"][0]["campos"] == ["predicado del tablero"]
+
+
+def test_cenit_en_viirs375_sigue_decidiendo():
+    """En VIIRS 375 sensor_zenith_deg arma la zona del barrido (banco_paridad.py:464-469): un empate que lo mueve
+    bloquea, aunque el núcleo esté guardado y el tablero no lea los píxeles."""
+    v = dict(sensor="VIIRS_SNPP", f5_core_vrp_mw=0.3)
+    a = rec_modis(**v)
+    b = rec_modis(anomaly_pixels=a["anomaly_pixels"][:-1], sensor_zenith_deg=31.9, **v)
+    salida, inf = unir(doc(dict(SOLO1, **v), a), doc(b, dict(SOLO2, **v)))
+    assert not inf["ok"] and "sensor_zenith_deg" in inf["distintos"][0]["campos"]
+
+
+def test_intento_con_pasada_duplicada_no_se_usa_entero():
+    """Mata la mutacion «quitar el chequeo de duplicados del modo entero»: un intento con la misma pasada dos
+    veces no es una corrida limpia (store.py:650-653 deduplica por esa clave), así que no se entrega entero."""
+    a = rec_modis(processed_utc="INTENTO1")
+    salida, inf = unir(doc(a, copy.deepcopy(a)), doc(rec_modis(processed_utc="INTENTO2")))
+    assert inf["ok"] and inf["intento_entero"] == 2 and len(salida["records"]) == 1
 
 
 def test_con_dos_intentos_completos_gana_el_primero():
@@ -295,19 +336,32 @@ def _par(brazo, vol):
     return (I1 / brazo / (vol + ".json"), I2 / "i2" / brazo / (vol + ".json"))
 
 
-@pytest.mark.parametrize("vol, entero, n, borde, distinto", [
-    ("Chaiten", 2, 601, 0, 0),           # i2 cubre la union; 570 tolerancia + 4 orden
-    ("Isluga", 1, 457, 2, 1),            # residual: empate en el maximo, se informa
-    ("NevadosDeChillan", 2, 550, 4, 1),  # residual: idem
-])
-def test_real_control_v2a(vol, entero, n, borde, distinto):
+def _docs(vol):
     rutas = _par("_s146_ab_control", vol)
     if not all(p.exists() for p in rutas):
         pytest.skip("salidas de V2a (run 38648773684) no estan en disco")
-    docs = [json.loads(p.read_text(encoding="utf-8")) for p in rutas]
-    salida, inf = ui.unir(docs, vol)
+    return [json.loads(p.read_text(encoding="utf-8")) for p in rutas]
+
+
+@pytest.mark.skipif(not HAY_NODE, reason="el predicado del tablero corre con node")
+@pytest.mark.parametrize("vol, entero, n, borde", [
+    ("Chaiten", 2, 601, 0),           # i2 cubre la union; 570 tolerancia + 4 orden
+    ("Isluga", 1, 457, 3),            # residual: el empate en el maximo es borde, predicado igual
+    ("NevadosDeChillan", 2, 550, 5),  # residual: idem
+])
+def test_real_control_v2a(vol, entero, n, borde):
+    salida, inf = ui.unir(_docs(vol), vol)
     assert inf["ok"] and inf["modo"] == "intento_entero" and inf["intento_entero"] == entero
     assert len(salida["records"]) == n == inf["union"]
-    assert inf["estados"]["borde"] == borde and inf["estados"]["distinto"] == distinto
-    for x in inf["distintos"]:
-        assert x["campos"] == ["sensor_zenith_deg"]
+    assert inf["estados"]["borde"] == borde and inf["estados"]["distinto"] == 0
+
+
+@pytest.mark.parametrize("campo", ["triggered_test1", "distance_class", "vrp_mw", "product_version"])
+def test_real_lascar_con_un_comun_cambiado_no_une(campo):
+    """v2_a9 del verificador sobre datos reales: Láscar control, un comun del intento que cubre todo cambiado."""
+    docs = _docs("Lascar")
+    r = docs[1]["records"][0]
+    r[campo] = {"triggered_test1": not r.get("triggered_test1"), "distance_class": "summit",
+                "vrp_mw": 99.0, "product_version": "nrt"}[campo]
+    salida, inf = ui.unir(docs, "Lascar")
+    assert not inf["ok"] and salida is None and campo in inf["distintos"][0]["campos"]
