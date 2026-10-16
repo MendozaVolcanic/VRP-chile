@@ -343,6 +343,16 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 11:24 UTC (vuelta 92): Chillán a 355,96 K sin saturar; W2a despareja (va a D-13)
+- Medición de saturación sobre 10-14 a 10-16 (run 38882932077): 3 tramos V375 fallaron por un defecto menor del probe
+  (ventana de 3 días en 6 tramos: los tramos sin días caen con `IndexError` al imprimir; arreglo pendiente: salir con 0
+  si no hay días). Los tres días se midieron. 58 pasadas, **0 píxeles con bit de saturación**, incluida la de
+  2026-10-16 06:18 (Suomi NPP, noche) con I04 válido de **355,96 K** en el interior. El «techo efectivo ~354 K» del
+  verificador de la 1.20 no se cumple en esta pasada: hoy todavía no satura. Riesgo vigente, sin pérdida medida.
+- W2a del A/B diurno (run 38853230521): 22 jobs verdes; `recolectar` marca 2 noches de Láscar de más en el brazo diurno
+  (al control le faltan 2). Mismo patrón de pérdidas por descarga: entra en D-13. W2b corriendo (7 de 22).
+- NRT verde 08:45 UTC; disco 21 GB.
+
 ### 2026-10-16 ~10:00 UTC (vuelta 91): verificador de la 1.20: PARCIAL; riesgo VIVO de saturación de I04 en Chillán
 - `experiments/_s151_techos_120/verificador/VERIFICADOR.md`. (1) Código: la cadena NaN-M15 → sin NTI ni caminos B y D
   es correcta, pero el Test 1 NO rescata en general (`process_viirs_mod.py:1196-1215`: sólo si es la única fuente o si
