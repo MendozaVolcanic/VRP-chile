@@ -352,6 +352,16 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 15:44 UTC (vuelta 115): el disco bajó de 18 a 9 GB en media hora; investigando
+- `df -h /c`: 18 GB a las 15:11, 9,1 GB a las 15:44, 8,9 GB a las 15:47 y 9,6 GB a las 15:50: no baja de forma
+  continua. La parada (§1.5) es 3 GB. `AppData/Local/Temp` suma 1,6 GB; el worktree del autor de la 1.21
+  (`.claude/worktrees/agent-aa3ef748ab319056b`, limpio, HEAD `2d9be9a9` = remoto) 936 MB, no se pudo borrar todavía
+  (la sesión quedó con el cwd adentro). Proceso ajeno al loop corriendo desde las 15:30 UTC: `run_ciclo.py` de
+  `Empresas\Autoscan\autoscan-chile\ejecutar_ciclo.bat` (scraper con Playwright, otro proyecto de Nicolás); no se
+  toca. Búsqueda de archivos grandes recientes en curso.
+- Otra `workflow_dispatch` del NRT cancelada (15:00, run 38920346960, desplazada por la de las 15:30). D-13: V2a
+  intento 2 19 de 22; W2a intento 2 2 verdes, 3 en curso, 17 en cola; V1 pendiente.
+
 ### 2026-10-16 15:11 UTC (vuelta 114): W2b terminó con cobertura nocturna PAREJA; espera a W2a para evaluar W2
 - W2b (run 38853273752) 23 de 23 verdes. `contar_pasadas_noche.py` del job `recolectar`: control 1.069 noches y brazo
   diurno 1.069, 0 faltan y 0 sobran; brazo diurno con 438 pasadas diurnas V375 y 433 V750, sin MODIS diurno.
