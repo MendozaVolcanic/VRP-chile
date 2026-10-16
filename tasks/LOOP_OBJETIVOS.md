@@ -294,6 +294,25 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 01:31 UTC (vuelta 69): W1 del A/B diurno evaluada (informa); G3 del evaluador mide la máquina
+- Paradas: NRT verde 22:53 UTC; disco 24 GB. V2a de F/K sigue.
+- W1 intento 3: el brazo diurno tardó **2 h 30 min** (intento 1: 1 h 50). Volvió a faltar 1 noche, pero OTRA: cada
+  intento pierde pasadas sueltas distintas por descarga (intento 1 sin 03-20 MODIS y 03-18 NOAA-20; intento 3 sin
+  03-14 NOAA-20). En los 325 gránulos comunes los records son idénticos, así que se unieron los dos intentos
+  (`experiments/_s151_ab_diurno/unir_intentos.py`, que se niega a unir si un común difiere): 183 noches contra 183.
+- Evaluación (`evaluar_diurno.py`, salida en `experiments/_s151_ab_diurno/salidas/38723828037_union/`). W1 sólo
+  informa (A119); decide W2 a W6. Láscar VIIRS 375 de día: **recupera las 5 alertas protegidas diurnas** (100 %),
+  pero **publica en 13 de 18 negativos diurnos limpios (72,2 %)** contra una parsimonia de MIROVA de 0,5 %; VIIRS 750
+  1 de 24 (4,2 %). G1 de W1 falla contra el nulo barajado. Es el riesgo escrito en el pre-registro: el Test 1 suma MIR
+  absoluto y de día el Sol calienta todo el disco. Veredicto formal INDECIDIBLE (sin W2 a W6).
+- **Defecto del evaluador:** G3 («noches intactas») da FALLA porque compara floats con `!=`. `diag_mu_deti` y
+  `diag_sd_deti` difieren en ~1e-16 relativo en 179 de 183 noches (regresión del ETI sumada en otro orden en otro
+  runner); `vrp_mw`, píxeles y dNTI son idénticos. Mismo modo de falla que S142 («golden que mide la máquina»).
+  Antes de W2 a W6: G3 con tolerancia relativa (p. ej. 1e-9) y un test con este caso, más verificador limpio, porque
+  es un cambio del evaluador después de ver datos (el motivo es mecánico, no el resultado).
+- Duración para W2 a W6 en mitades: el brazo diurno tarda unos 2 a 2,5 h por 20 días de un volcán.
+- Próxima vuelta: arreglo de G3 con su test (rama propia); después, despachar W2 partida.
+
 ### 2026-10-16 01:09 UTC (vuelta 68): tarea 4 del plan de Mirova-v1 hecha (imagen de 1 a 25 días)
 - Paradas: NRT verde 22:53 UTC; disco 24 GB. W1 diurna intento 3 lleva 2 h 13 min (el intento 1 tardó 1 h 50; el
   control que murió por «perder comunicación» lo hizo a las 2 h). Si vuelve a morir, es el runner y no el código:
