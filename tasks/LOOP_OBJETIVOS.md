@@ -352,6 +352,16 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16  2026 UTC (vuelta 124): #841 en main; V2a lista para evaluar
+- Último arreglo de #841 (`9d4ff60e`, CI run 38938003528 verde): una sola regla en los dos modos, cualquier `distinto`
+  bloquea también con intento entero; `sensor_zenith_deg` derivado fuera de VIIRS 375 (único lector en la cadena F/K:
+  `cenital_neg_v375`, `banco_paridad.py:464-469`; fuera de ella, `_s149_prereg_invierno/medir_predicciones.py:12,31`
+  si se corre con MODIS, anotado). 42 tests; 8 mutaciones mueren. V2a: 22 de 22, records idénticos a la vuelta anterior.
+  Diff revisado por el orquestador. **Mergeado** (squash `1a6f595b`). Merge de `origin/main` en `loop/activo` con el
+  conflicto add/add resuelto con la versión de main (42 tests en verde). Worktree del autor retirado; disco 8,1 GB.
+- Próximo: evaluar V2a con `evaluar_fk.py` sobre las uniones (cobertura pareja medida en la vuelta 123: 5.876 por
+  brazo) y verificador limpio. V2b sigue sin despacharse (V1 intento 3 corre en su grupo).
+
 ### 2026-10-16 17:06 UTC (vuelta 123): segunda verificación de #841: un bloqueante; **cobertura de V2a unida PAREJA**
 - `experiments/_s151_unir_intentos_verif/VERIFICADOR_V2.md`. Uniones rehechas por el verificador (`v2_a7_reunir.py`):
   idénticas record por record a las del autor. **`contar_pasadas.py` sobre las uniones (2026-03-01 a 04-20): control
