@@ -312,6 +312,23 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 04:20 UTC (vuelta 71): la distancia del OCR acierta el lado; trabajo en paralelo
+- Nicolás pidió avanzar en paralelo cuidando disco y procesos. Computador despierto mientras haya trabajo; disco
+  21 GB. La sesión aparte para Mirova-v1 tareas 5 a 8 no arrancó: el worktree pedía 23,1 GB libres y había 21,8. La
+  tarea corre como subagente de este hilo, en el worktree `Mirova-v1-distaprox` (no necesita uno nuevo).
+- Medición en sesión aparte (`experiments/_s151_distancia_ocr/cambian_lado/INFORME.md`, sólo lectura): si la referencia
+  usara la distancia de la serie en vez de la del OCR (06-13 a 10-08), 19 protegidas pasarían de cráter a lejana y 1 al
+  revés. **Pero en las 197 pasadas OCR que también están en la tabla, el OCR acierta el lado en las 197; la serie, 146
+  de 153.** El sesgo de distancia del OCR (PCC, Tupungatito) es real y no cruza el límite. De los 20 cambios de
+  protegidas, sólo 10 son firmes (todos diurnos: Lastarria 6, Isluga 3, Láscar 1); 8 nocturnos caen en el patrón que el
+  control mostró ambiguo (5 de 9 errores) y la ganancia de Láscar 08-21 es un error de la serie. Veredictos ya
+  publicados: Chillán, VIIRS 750 y la caja no cambian; en los meses de S150, F gana igual; F/K V1 (sin evaluar) perdería
+  7 protegidas si se aplicara la serie, 6 en el patrón ambiguo.
+- **Consecuencia (corrige las vueltas 62 y 63, A113):** NO hay que reemplazar la distancia del OCR por la de la serie
+  para decidir cráter o lejana. `Distancia_aprox_*` es complemento para las filas sin distancia; se lo dije al subagente
+  de Mirova-v1. Las 10 protegidas diurnas firmes quedan como pregunta para la referencia (las diurnas además dependen
+  de D-10). Memoria corregida.
+
 ### 2026-10-16 01:31 UTC (vuelta 69): W1 del A/B diurno evaluada (informa); G3 del evaluador mide la máquina
 - Paradas: NRT verde 22:53 UTC; disco 24 GB. V2a de F/K sigue.
 - W1 intento 3: el brazo diurno tardó **2 h 30 min** (intento 1: 1 h 50). Volvió a faltar 1 noche, pero OTRA: cada
@@ -423,7 +440,9 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   (`C:\Users\nmend\AppData\Local\Temp\claude\verifdist\VERIFICADOR.md`, scripts en `...\verifdist\scripts\v2_*.py`):
   **SÍ con cambios**. El control del §4 se reproduce exacto; sacando la noche del calado el error de decisión sigue en
   4,5 % (no es circular). Población: en el control ninguna ALERTA es lejana; en ALERTA el único error medido es cerca
-  leído como lejos (4,9 %), y lejos leído como cerca no tiene muestra. **Hallazgo:** del 06-13 al 10-08 la distancia
+  leído como lejos (4,9 %), y lejos leído como cerca no tiene muestra. ⚠️ **El «23 y 25 cambian de lado» que sigue
+  cayó en la vuelta 71**: es OCR contra serie, no contra la verdad; contra la tabla, el OCR acierta el lado en 197 de
+  197 pasadas (`experiments/_s151_distancia_ocr/cambian_lado/INFORME.md`). **Hallazgo:** del 06-13 al 10-08 la distancia
   que el OCR sí midió discrepa más de 2 km en 36 de 152 y 51 de 207 pasadas (~24 %; 23 y 25 cambian de lado del
   límite). En las 218 que también están en la tabla, el OCR falla en 25 y la serie en 7; esas 25 son sesgo geométrico
   del OCR (PCC 3,5 km donde la tabla da 7,7; Tupungatito), no otra pasada. Las 15 sin geometría quedan PARCIAL (imágenes

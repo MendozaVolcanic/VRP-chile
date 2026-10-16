@@ -1,0 +1,158 @@
+== A119 (avisos de calidad de la ventana, a stdout para que queden en la salida)
+[referencia MIROVA] la ventana 2026-06-13 a 2026-10-08 pisa 3 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+referencia: remoto Mirova-v1, {  "registro_vrp_consolidado.csv": {   "sha": "756526e177db104956f41a567433c1031a7dc635",   "path": "C:\\Users\\nmend\\AppData\\Local\\Temp\\claude\\cambian_lado\\_dl\\registro_vrp_consolidado.csv"  },  "registro_vrp_ocr.csv": {   "sha": "99dd36ad981a13daa3d01121dc964728ab0baedf",   "path": "C:\\Users\\nmend\\AppData\\Local\\Temp\\claude\\cambian_lado\\_dl\\registro_vrp_ocr.csv"  } }
+lecturas del verificador: 451 filas OCR con Distancia_km > 0 (todas las fechas)
+
+== 1. filas OCR de la ventana 2026-06-13 a 2026-10-08: 396; por tipo {'ALERTA_TERMICA_OCR': 374, 'FALSO_POSITIVO_OCR': 22}
+   tipo incoherente con dist OCR <= limite: 0 []
+   sin distancia OCR (None o 0): 5 {'ALERTA_TERMICA_OCR': 5}
+   estado de la lectura por fila: {'sin_lectura': 27, 'cerca': 257, 'sin_marcador': 10, 'lejos': 60, 'indecidible': 42}
+   por sensor: {'VIIRS375': {'sin_lectura': 7, 'cerca': 257, 'sin_marcador': 10, 'lejos': 60, 'indecidible': 42}, 'VIIRS750': {'sin_lectura': 19}, 'MODIS': {'sin_lectura': 1}}
+   filas que cambian de lado: 48
+
+== 2. CONTROL: filas OCR de la ventana con la misma pasada en la tabla (+-180 s, ALERTA o FALSO_POSITIVO con distancia)
+   iv_contiene_tabla: 164
+   iv_n: 177
+   n: 197
+   ocr_a_0p6_de_tabla: 147
+   ocr_acierta: 197
+   ocr_acierta_en_decididas: 153
+   ocr_copia_exacta_de_tabla: 24
+   ocr_propio_acierta: 173
+   ocr_propio_n: 173
+   ocr_propio_serie_acierta: 133
+   ocr_propio_serie_decide: 138
+   ocr_propio_tipo_ALERTA_TERMICA_OCR: 173
+   serie_acierta: 146
+   serie_decide: 153
+   serie_no_decide_indecidible: 24
+   serie_no_decide_sin_marcador: 3
+   v375_con_lectura: 180
+   v375_ocr_acierta: 180
+   casos en que alguna de las dos fuentes yerra el lado (volcan, hora, tabla, ocr, lado OCR, intervalo serie, lado serie):
+      ('Lascar', '2026-06-25 06:00', 'tabla', 1.5, 'ocr', 1.62, 'cerca', 'serie', (20.87, 20.87), 'lejos')
+      ('Tupungatito', '2026-06-25 06:00', 'tabla', 4.89, 'ocr', 4.86, 'cerca', 'serie', (18.92, 18.92), 'lejos')
+      ('Lascar', '2026-06-28 05:54', 'tabla', 1.5, 'ocr', 1.62, 'cerca', 'serie', (8.54, 8.54), 'lejos')
+      ('Lascar', '2026-08-09 06:06', 'tabla', 1.13, 'ocr', 1.22, 'cerca', 'serie', (24.66, 24.66), 'lejos')
+      ('Lascar', '2026-08-21 06:30', 'tabla', 27.67, 'ocr', 27.67, 'lejos', 'serie', (1.22, 1.22), 'cerca')
+      ('Lascar', '2026-10-02 06:00', 'tabla', 25.99, 'ocr', 25.99, 'lejos', 'serie', (1.22, 1.22), 'cerca')
+      ('Lascar', '2026-10-08 05:42', 'tabla', 1.19, 'ocr', 1.22, 'cerca', 'serie', (21.95, 21.95), 'lejos')
+
+== 3. PASADAS (volcan, sensor, minuto) con fila OCR en la ventana
+
+   --- protegidas (lectura A, VRP >= 1 MW)
+   pasadas con fila OCR en la ventana que hoy son protegidas (lectura A, VRP >= 1 MW): 61 (de 396 pasadas)
+   de esas, sin fila de la tabla en la misma clave (dependen sólo del OCR): 43; estado de la lectura: {'sin_lectura': 10, 'lejos': 19, 'sin_marcador': 6, 'cerca': 8}
+     por sensor: {'VIIRS375': 34, 'VIIRS750': 9}
+   PIERDEN (crater -> lejana): 19  nocturnas 9
+   GANAN   (lejana -> crater): 1  nocturnas 1
+     ('Isluga', 'VIIRS375', 'pierde', 'diurna'): 3
+     ('Isluga', 'VIIRS375', 'pierde', 'noct'): 4
+     ('Lascar', 'VIIRS375', 'gana', 'noct'): 1
+     ('Lascar', 'VIIRS375', 'pierde', 'diurna'): 1
+     ('Lascar', 'VIIRS375', 'pierde', 'noct'): 1
+     ('Lastarria', 'VIIRS375', 'pierde', 'diurna'): 6
+     ('Tupungatito', 'VIIRS375', 'pierde', 'noct'): 4
+     PIERDE Isluga               VIIRS375 2026-06-17 05:06 VRP    1.64 OCR 0.95 serie (15.72, 15.72) (lejos) tabla - noct
+     PIERDE Isluga               VIIRS375 2026-07-25 17:24 VRP    1.37 OCR 0.68 serie (18.43, 18.43) (lejos) tabla - DIURNA
+     PIERDE Isluga               VIIRS375 2026-08-31 17:30 VRP   15.44 OCR 0.54 serie (15.31, 15.31) (lejos) tabla - DIURNA
+     PIERDE Isluga               VIIRS375 2026-09-09 06:06 VRP    1.91 OCR 0.81 serie (24.12, 24.8) (lejos) tabla - noct
+     PIERDE Isluga               VIIRS375 2026-09-14 18:42 VRP    4.00 OCR 1.08 serie (15.04, 15.04) (lejos) tabla - DIURNA
+     PIERDE Isluga               VIIRS375 2026-09-28 05:12 VRP    1.63 OCR 0.95 serie (16.53, 16.53) (lejos) tabla - noct
+     PIERDE Isluga               VIIRS375 2026-10-03 05:18 VRP    1.62 OCR 0.95 serie (22.9, 22.9) (lejos) tabla - noct
+     PIERDE Lascar               VIIRS375 2026-09-19 17:30 VRP    1.86 OCR 1.22 serie (17.07, 17.07) (lejos) tabla - DIURNA
+     PIERDE Lascar               VIIRS375 2026-10-01 05:18 VRP    1.20 OCR 1.22 serie (20.19, 20.19) (lejos) tabla - noct
+     PIERDE Lastarria            VIIRS375 2026-06-15 17:24 VRP   19.26 OCR 1.49 serie (12.6, 12.6) (lejos) tabla - DIURNA
+     PIERDE Lastarria            VIIRS375 2026-06-28 17:30 VRP    4.58 OCR 2.31 serie (10.16, 10.16) (lejos) tabla - DIURNA
+     PIERDE Lastarria            VIIRS375 2026-06-28 18:06 VRP    1.51 OCR 2.31 serie (10.16, 10.16) (lejos) tabla - DIURNA
+     PIERDE Lastarria            VIIRS375 2026-06-28 18:24 VRP    4.31 OCR 1.62 serie (10.16, 10.16) (lejos) tabla - DIURNA
+     PIERDE Lastarria            VIIRS375 2026-06-29 17:42 VRP    4.01 OCR 2.7 serie (10.7, 11.38) (lejos) tabla - DIURNA
+     PIERDE Lastarria            VIIRS375 2026-06-30 17:24 VRP    5.31 OCR 1.49 serie (10.7, 10.7) (lejos) tabla - DIURNA
+     PIERDE Tupungatito          VIIRS375 2026-08-01 05:00 VRP    1.25 OCR 5.41 serie (15.41, 15.41) (lejos) tabla - noct
+     PIERDE Tupungatito          VIIRS375 2026-09-14 06:18 VRP    2.22 OCR 2.97 serie (13.11, 13.11) (lejos) tabla - noct
+     PIERDE Tupungatito          VIIRS375 2026-09-28 05:18 VRP    2.51 OCR 5.27 serie (22.7, 22.7) (lejos) tabla - noct
+     PIERDE Tupungatito          VIIRS375 2026-09-29 04:54 VRP    1.86 OCR 5.68 serie (9.73, 9.73) (lejos) tabla - noct
+     GANA   Lascar               VIIRS375 2026-08-21 06:30 VRP    1.08 OCR 27.67 serie (1.22, 1.22) (cerca) tabla FALSO_POSITIVO noct
+
+   --- alertas de cualquier VRP (> 0)
+   pasadas con fila OCR en la ventana que hoy son alertas de cualquier VRP (> 0): 374 (de 396 pasadas)
+   de esas, sin fila de la tabla en la misma clave (dependen sólo del OCR): 196; estado de la lectura: {'cerca': 122, 'sin_marcador': 7, 'sin_lectura': 10, 'lejos': 41, 'indecidible': 16}
+     por sensor: {'VIIRS375': 187, 'VIIRS750': 9}
+   PIERDEN (crater -> lejana): 41  nocturnas 29
+   GANAN   (lejana -> crater): 2  nocturnas 2
+     ('Isluga', 'VIIRS375', 'pierde', 'diurna'): 3
+     ('Isluga', 'VIIRS375', 'pierde', 'noct'): 7
+     ('Lascar', 'VIIRS375', 'gana', 'noct'): 2
+     ('Lascar', 'VIIRS375', 'pierde', 'diurna'): 1
+     ('Lascar', 'VIIRS375', 'pierde', 'noct'): 7
+     ('Lastarria', 'VIIRS375', 'pierde', 'diurna'): 7
+     ('Lastarria', 'VIIRS375', 'pierde', 'noct'): 7
+     ('NevadosDeChillan', 'VIIRS375', 'pierde', 'diurna'): 1
+     ('PlanchonPeteroa', 'VIIRS375', 'pierde', 'noct'): 2
+     ('Tupungatito', 'VIIRS375', 'pierde', 'noct'): 6
+     PIERDE Isluga               VIIRS375 2026-06-17 05:06 VRP    1.64 OCR 0.95 serie (15.72, 15.72) (lejos) tabla - noct
+     PIERDE Isluga               VIIRS375 2026-06-17 05:42 VRP    0.33 OCR 0.95 serie (15.72, 15.72) (lejos) tabla - noct
+     PIERDE Isluga               VIIRS375 2026-07-25 17:24 VRP    1.37 OCR 0.68 serie (18.43, 18.43) (lejos) tabla - DIURNA
+     PIERDE Isluga               VIIRS375 2026-08-26 05:30 VRP    0.47 OCR 0.95 serie (24.8, 24.8) (lejos) tabla - noct
+     PIERDE Isluga               VIIRS375 2026-08-31 17:30 VRP   15.44 OCR 0.54 serie (15.31, 15.31) (lejos) tabla - DIURNA
+     PIERDE Isluga               VIIRS375 2026-09-09 06:06 VRP    1.91 OCR 0.81 serie (24.12, 24.8) (lejos) tabla - noct
+     PIERDE Isluga               VIIRS375 2026-09-14 18:42 VRP    4.00 OCR 1.08 serie (15.04, 15.04) (lejos) tabla - DIURNA
+     PIERDE Isluga               VIIRS375 2026-09-20 06:00 VRP    0.49 OCR 0.68 serie (24.25, 24.8) (lejos) tabla - noct
+     PIERDE Isluga               VIIRS375 2026-09-28 05:12 VRP    1.63 OCR 0.95 serie (16.53, 16.53) (lejos) tabla - noct
+     PIERDE Isluga               VIIRS375 2026-10-03 05:18 VRP    1.62 OCR 0.95 serie (22.9, 22.9) (lejos) tabla - noct
+     PIERDE Lascar               VIIRS375 2026-06-25 04:54 VRP    0.51 OCR 1.62 serie (20.87, 20.87) (lejos) tabla - noct
+     PIERDE Lascar               VIIRS375 2026-06-28 05:36 VRP    0.75 OCR 1.62 serie (8.54, 8.54) (lejos) tabla - noct
+     PIERDE Lascar               VIIRS375 2026-07-24 05:48 VRP    0.61 OCR 0.81 serie (6.64, 6.64) (lejos) tabla - noct
+     PIERDE Lascar               VIIRS375 2026-09-14 06:18 VRP    0.31 OCR 0.95 serie (22.09, 24.8) (lejos) tabla - noct
+     PIERDE Lascar               VIIRS375 2026-09-19 17:30 VRP    1.86 OCR 1.22 serie (17.07, 17.07) (lejos) tabla - DIURNA
+     PIERDE Lascar               VIIRS375 2026-10-01 05:18 VRP    1.20 OCR 1.22 serie (20.19, 20.19) (lejos) tabla - noct
+     PIERDE Lascar               VIIRS375 2026-10-01 05:54 VRP    0.29 OCR 1.22 serie (20.19, 20.19) (lejos) tabla - noct
+     PIERDE Lascar               VIIRS375 2026-10-08 05:24 VRP    0.54 OCR 1.22 serie (21.95, 21.95) (lejos) tabla - noct
+     PIERDE Lastarria            VIIRS375 2026-06-15 17:24 VRP   19.26 OCR 1.49 serie (12.6, 12.6) (lejos) tabla - DIURNA
+     PIERDE Lastarria            VIIRS375 2026-06-16 17:54 VRP    0.81 OCR 2.43 serie (10.3, 10.98) (lejos) tabla - DIURNA
+     PIERDE Lastarria            VIIRS375 2026-06-17 05:06 VRP    0.46 OCR 2.43 serie (21.41, 21.41) (lejos) tabla - noct
+     PIERDE Lastarria            VIIRS375 2026-06-17 05:42 VRP    0.09 OCR 2.43 serie (21.41, 21.41) (lejos) tabla - noct
+     PIERDE Lastarria            VIIRS375 2026-06-28 17:30 VRP    4.58 OCR 2.31 serie (10.16, 10.16) (lejos) tabla - DIURNA
+     PIERDE Lastarria            VIIRS375 2026-06-28 18:06 VRP    1.51 OCR 2.31 serie (10.16, 10.16) (lejos) tabla - DIURNA
+     PIERDE Lastarria            VIIRS375 2026-06-28 18:24 VRP    4.31 OCR 1.62 serie (10.16, 10.16) (lejos) tabla - DIURNA
+     PIERDE Lastarria            VIIRS375 2026-06-29 17:42 VRP    4.01 OCR 2.7 serie (10.7, 11.38) (lejos) tabla - DIURNA
+     PIERDE Lastarria            VIIRS375 2026-06-30 17:24 VRP    5.31 OCR 1.49 serie (10.7, 10.7) (lejos) tabla - DIURNA
+     PIERDE Lastarria            VIIRS375 2026-07-07 06:06 VRP    0.06 OCR 1.49 serie (24.8, 24.8) (lejos) tabla - noct
+     PIERDE Lastarria            VIIRS375 2026-08-01 05:00 VRP    0.57 OCR 1.62 serie (20.6, 20.6) (lejos) tabla - noct
+     PIERDE Lastarria            VIIRS375 2026-08-21 05:24 VRP    0.15 OCR 2.43 serie (5.69, 5.69) (lejos) tabla - noct
+     PIERDE Lastarria            VIIRS375 2026-08-25 05:48 VRP    0.22 OCR 1.62 serie (10.16, 10.16) (lejos) tabla - noct
+     PIERDE Lastarria            VIIRS375 2026-09-21 05:42 VRP    0.21 OCR 1.35 serie (24.39, 24.39) (lejos) tabla - noct
+     PIERDE NevadosDeChillan     VIIRS375 2026-08-25 17:36 VRP    0.60 OCR 3.11 serie (11.62, 11.62) (lejos) tabla - DIURNA
+     PIERDE PlanchonPeteroa      VIIRS375 2026-06-16 06:06 VRP    0.74 OCR 2.03 serie (13.82, 13.82) (lejos) tabla - noct
+     PIERDE PlanchonPeteroa      VIIRS375 2026-09-15 06:00 VRP    0.51 OCR 2.03 serie (22.76, 22.76) (lejos) tabla - noct
+     PIERDE Tupungatito          VIIRS375 2026-06-25 04:54 VRP    0.69 OCR 4.86 serie (18.92, 18.92) (lejos) tabla - noct
+     PIERDE Tupungatito          VIIRS375 2026-08-01 05:00 VRP    1.25 OCR 5.41 serie (15.41, 15.41) (lejos) tabla - noct
+     PIERDE Tupungatito          VIIRS375 2026-09-14 05:00 VRP    0.10 OCR 5.41 serie (13.11, 13.11) (lejos) tabla - noct
+     PIERDE Tupungatito          VIIRS375 2026-09-14 06:18 VRP    2.22 OCR 2.97 serie (13.11, 13.11) (lejos) tabla - noct
+     PIERDE Tupungatito          VIIRS375 2026-09-28 05:18 VRP    2.51 OCR 5.27 serie (22.7, 22.7) (lejos) tabla - noct
+     PIERDE Tupungatito          VIIRS375 2026-09-29 04:54 VRP    1.86 OCR 5.68 serie (9.73, 9.73) (lejos) tabla - noct
+     GANA   Lascar               VIIRS375 2026-08-21 06:30 VRP    1.08 OCR 27.67 serie (1.22, 1.22) (cerca) tabla FALSO_POSITIVO noct
+     GANA   Lascar               VIIRS375 2026-10-02 06:00 VRP    0.58 OCR 25.99 serie (1.22, 1.22) (cerca) tabla FALSO_POSITIVO noct
+
+   de los cambios de alerta de cualquier VRP, VIIRS 375 con VRP <= 0,05 (no son alerta bajo la regla SN): 0
+
+== 4. PROTEGIDAS de la ventana que dependen solo del OCR, por volcan y sensor y estado de la lectura
+   ('Chaiten', 'VIIRS375', 'sin_lectura'): 1
+   ('Isluga', 'VIIRS375', 'lejos'): 7
+   ('Isluga', 'VIIRS750', 'sin_lectura'): 2
+   ('Lascar', 'VIIRS375', 'cerca'): 1
+   ('Lascar', 'VIIRS375', 'lejos'): 2
+   ('Lascar', 'VIIRS375', 'sin_marcador'): 6
+   ('Lascar', 'VIIRS750', 'sin_lectura'): 1
+   ('Lastarria', 'VIIRS375', 'lejos'): 6
+   ('NevadosDeChillan', 'VIIRS375', 'cerca'): 4
+   ('NevadosDeChillan', 'VIIRS750', 'sin_lectura'): 3
+   ('PlanchonPeteroa', 'VIIRS750', 'sin_lectura'): 1
+   ('PuyehueCordonCaulle', 'VIIRS375', 'cerca'): 1
+   ('PuyehueCordonCaulle', 'VIIRS750', 'sin_lectura'): 1
+   ('Tupungatito', 'VIIRS375', 'lejos'): 4
+   ('Tupungatito', 'VIIRS750', 'sin_lectura'): 1
+   ('Villarrica', 'VIIRS375', 'cerca'): 2
