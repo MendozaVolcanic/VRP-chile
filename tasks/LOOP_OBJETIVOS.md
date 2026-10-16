@@ -352,7 +352,7 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-16  2026 UTC (vuelta 124): #841 en main; V2a lista para evaluar
+### 2026-10-16 17:18 UTC (vuelta 124): #841 en main; V2a lista para evaluar
 - Último arreglo de #841 (`9d4ff60e`, CI run 38938003528 verde): una sola regla en los dos modos, cualquier `distinto`
   bloquea también con intento entero; `sensor_zenith_deg` derivado fuera de VIIRS 375 (único lector en la cadena F/K:
   `cenital_neg_v375`, `banco_paridad.py:464-469`; fuera de ella, `_s149_prereg_invierno/medir_predicciones.py:12,31`
