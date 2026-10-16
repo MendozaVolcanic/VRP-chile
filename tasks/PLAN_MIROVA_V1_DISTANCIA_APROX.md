@@ -68,6 +68,12 @@ Mirova-v1: 88 en verde.
 
 ## Tarea 2: calado del eje de tiempo, sólo con la tabla (cambio 1)
 
+**HECHA (vuelta 66):** commit local `45d8105c`. `calibrar`, `marcadores_t`, `pareos`, `solo_tabla`. Corrección al
+texto de abajo: la fixture de Chillán NO cala en +0,48 a +0,53 (eso es la mediana por mes) sino en +0,76, uno de los 7
+de 429 calados en el borde de la búsqueda; el test exige reproducir el calado del estudio. El test de las filas OCR se
+comprobó fallando con el filtro quitado. Suite de Mirova-v1: 90 en verde. Para la tarea 5: decidir con el control si un
+calado en el borde (>= +0,76) cuenta como débil.
+
 **Archivos:** `dist_serie.py` (portar `calibrar_imagen`, `marcadores_t` y `pareos` de `control_dist.py`) y el test.
 
 - [ ] Paso 1: test. `calibrar(imagen, conocidas)` recibe sólo filas de `latest.php` (la tabla) y devuelve

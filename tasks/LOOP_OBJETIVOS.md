@@ -294,6 +294,16 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 00:18 UTC (vuelta 66): tarea 2 del plan de Mirova-v1 hecha (calado sólo con la tabla)
+- Paradas: NRT verde 22:53 UTC; disco 24 GB; W1 diurna intento 3 en curso; V2a corriendo.
+- `calibrar` portado con el filtro `solo_tabla` (cambio 1 del verificador), commit local `45d8105c`; test de que una
+  fila OCR no suma pareos, comprobado fallando sin el filtro. Suite de Mirova-v1 90 en verde.
+- Hallazgo menor: la imagen de Chillán del 10-15 14:06 UTC cala con desfase +0,76 d, en el borde de la búsqueda (7 de
+  429 imágenes del control lo hacen; la mediana por mes es +0,48 a +0,53). Queda para la tarea 5: medir con el control
+  si esos calados en el borde yerran más, y si es así tratarlos como débiles. La pasada de 22 MW del 10-15 05:00 sale
+  de esta imagen, así que importa.
+- Próxima vuelta: tarea 3 (eliminación sólo con la tabla).
+
 ### 2026-10-15 22:55 a 23:55 UTC (vuelta 65): el lector portado pasa el re-control; tarea 1 del plan hecha
 - Paradas: disco 25 GB; NRT verde a las 19:41 UTC, otro en cola desde las 22:53 (cola de GitHub). V2a en 6 de 22.
 - W1 diurna intento 2: el control repetido salió bien, pero vio 183 noches de Láscar contra 181 del brazo diurno
