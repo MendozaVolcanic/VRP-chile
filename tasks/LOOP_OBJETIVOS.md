@@ -334,6 +334,16 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 06:58 UTC (vuelta 80): F/K V2a terminó despareja; repetida completa para unir intentos
+- V2a (run 38648773684, 2026-03-01 a 04-20): 22 jobs verdes; `recolectar` marca COBERTURA DESPAREJA. No son gránulos
+  reprocesados: 53 pasadas sólo en el control y 51 sólo en el brazo `_s149_ab_sin_test1_b22_max`, repartidas en 10
+  volcanes. Caídas sueltas de descarga en los dos brazos, como en W1. Repetida completa (intento 2, pendiente en el
+  grupo `s146-ab-sin-test1` detrás de la repetición de V1, que ya tiene su job creado); después se unen los dos
+  intentos de cada brazo con `experiments/_s151_ab_diurno/unir_intentos.py` (exige records comunes idénticos) y se
+  cuenta la cobertura otra vez. V2b no se despacha hasta que esto cierre.
+- Corriendo: W2a (8 de 22), la medición de saturación 1.18 (6 en curso), la repetición de V1 (1 job en cola).
+  NRT verde 03:15 UTC. Disco 20 GB.
+
 ### 2026-10-16 ~07:40 UTC: segunda vuelta del verificador de 1.17: SELLABLE CON UN ARREGLO
 - Los cinco arreglos están en main. Ningún filtro pierde alertas: las 3 protegidas fuera del censo son diurnas (MODIS
   sólo procesa la noche). Falta uno: simulado sin cambios, el intervalo de Δ de la regla 2 da ±2.265, con 97 % del
