@@ -354,6 +354,30 @@ def test_evaluador_main_avisa_calidad_y_escribe(tmp_path, capsys):
     assert "|" in (tmp_path / "t.md").read_text(encoding="utf-8")
 
 
+@pytest.mark.parametrize("listar", [False, True])
+def test_tramo_sin_dias_sale_cero_y_deja_su_json(tmp_path, monkeypatch, listar):
+    """Ventana de 3 dias en 6 tramos: los tramos 3 a 5 quedan sin dias (run 38882932077 cayo con IndexError).
+
+    Un tramo vacio no es una falla: sale con 0, escribe su JSON con 0 pasadas (asi el evaluador ve que se
+    corrio) y no pide token ni red. El mismo tramo con dias sigue exigiendo el token (control).
+    """
+    monkeypatch.delenv("EARTHDATA_TOKEN", raising=False)
+    monkeypatch.setattr(P, "buscar_pares", lambda *a, **k: pytest.fail("un tramo vacio no busca en el CMR"))
+    args = ["probe_saturacion.py", "--familia", "V375", "--desde", "2026-10-14", "--hasta", "2026-10-16",
+            "--tramo", "4", "--n-tramos", "6", "--out", str(tmp_path)] + (["--listar"] if listar else [])
+    monkeypatch.setattr(sys, "argv", args)
+    P.main()
+    nombre = ("lista_V375_t4.json" if listar else "sat_V375_t4.json")
+    d = json.loads((tmp_path / nombre).read_text(encoding="utf-8"))
+    assert d["dias"] == [] and d.get("pasadas", d.get("pares")) == []
+    if not listar:
+        assert E.cargar_salidas(tmp_path) == [], "el evaluador lee el tramo vacio sin romperse"
+        # control: el tramo 0 de la misma ventana tiene un dia y sin token debe negarse
+        monkeypatch.setattr(sys, "argv", args[:8] + ["0"] + args[9:])
+        with pytest.raises(SystemExit, match="EARTHDATA_TOKEN"):
+            P.main()
+
+
 # ------------------------------------------------------------------ 7: workflow
 def test_workflow_token_unico_on_entre_comillas_y_timeout():
     import yaml

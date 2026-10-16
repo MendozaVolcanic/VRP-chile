@@ -310,6 +310,22 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     etiqueta = "%s_t%d" % (a.familia, a.tramo)
 
+    # POR QUE: con una ventana de menos dias que tramos (3 dias en 6), los ultimos tramos quedan vacios y el
+    # print de dias[0] caia con IndexError (run 38882932077). Un tramo vacio no es una falla: deja su JSON con
+    # 0 pasadas, asi el evaluador distingue "corrido y sin dias" de "no corrido", y no pide token ni red.
+    if not dias:
+        if a.listar:
+            res = {"familia": a.familia, "dias": [], "n": 0, "n_noche": 0, "mb_total": 0.0, "pares": []}
+            nombre = "lista_%s.json" % etiqueta
+        else:
+            res = {"volcan": VOLCAN, "familia": a.familia, "tramo": a.tramo, "dias": [],
+                   "inner_radius_km": volcan["inner_radius_km"], "minutos": 0.0, "pasadas": []}
+            nombre = "sat_%s.json" % etiqueta
+        (out / nombre).write_text(json.dumps(res, indent=1, ensure_ascii=False), encoding="utf-8")
+        print("%s: tramo sin dias (ventana %s a %s en %d tramos); 0 pasadas" % (etiqueta, a.desde, hasta,
+                                                                                a.n_tramos), flush=True)
+        return
+
     if a.listar:
         pares = buscar_pares(a.familia, volcan, dias)
         filas = []
