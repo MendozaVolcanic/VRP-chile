@@ -343,6 +343,19 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~09:30 UTC (vuelta 90): 1.20 terminada, SIN verificador todavía: ningún techo borra señal hoy
+- `experiments/_s151_techos_120/` (informe y scripts). Techo M15 343 K (`process_viirs_mod.py:182`): pone NaN sólo en
+  M15, el píxel pierde NTI y sólo el Test 1 lo rescata a menos de 3 km del cráter; se activaría con 32 a 37 MW por
+  píxel como cota absoluta. Por cota física, 26.181 de 26.185 records V750 no pudieron alcanzarlo; los 4 restantes
+  (Chillán, feb-2025) tienen M15 implícito de 292 a 301 K. Sin control positivo. Qué hace MIROVA con M15: SIN VERIFICAR.
+  NOAA-21: LUT de I04 361,00 K contra corte 361,27 K confirmado en 46 gránulos, pero el bit 4 sí funciona (263 píxeles
+  en 23 gránulos) y no hay `t_max_k` de 360,5 K o más en 26.386 records V375: pesa poco.
+- Propuesta (A45, sin implementar): techo = tope de la LUT de cada gránulo; antes, probes P1 (flags de NOAA-21) y P2
+  (control positivo en erupciones efusivas grandes). Laterales: el V750 más caliente del corpus es 364,86 K (Chillán
+  2025-02-27 05:42 SNPP); y un indicio de que en esa erupción el bit borró I04 saturado de un foco a 15 km (I04 353,6 K
+  contra M13 361,2 K en la misma pasada de NOAA-21): la cara V375 de D24, por medir.
+- Falta el verificador limpio (regla 1.3) antes de darlo por aceptado: primera tarea de la próxima sesión.
+
 ### 2026-10-16 09:05 UTC (vuelta 89): 1.20 arrancada (techos M15 y NOAA-21, sólo lectura)
 - Paradas: NRT corriendo desde 08:45 UTC (último verde 03:15); disco 21 GB. V2a intento 2 con 6 jobs en curso; W2a 19
   de 22. Esperan a Nicolás: D-11, D-12, D-13.
