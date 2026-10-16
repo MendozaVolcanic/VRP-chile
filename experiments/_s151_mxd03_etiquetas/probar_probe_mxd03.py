@@ -6,6 +6,9 @@
 #             brazo C ve el foco a 4 km (summit, publica) y el brazo M a 6 km (far, no publica).
 #             El probe tiene que medir el corrimiento (2 km) y el cambio summit->far, 1->0.
 #   AUSENTE:  las dos geolocalizaciones coinciden. El probe tiene que dar "igual" en todo.
+#   RELLENO:  como AUSENTE, pero MxD03 trae relleno (-999) en una esquina lejos del crater: "igual".
+# En los tres casos corre tambien el brazo C' (la lat/lon interpolada por el mismo parche que M), que
+# tiene que dar un record identico al del brazo C.
 # Uso: python probar_probe_mxd03.py   (sale con codigo 1 si algo falla; necesita node)
 import os
 import sys
@@ -47,30 +50,35 @@ def escena(foco_km_norte=6.0, seed=1):
             "lat": lat.astype(np.float32), "lon": lon.astype(np.float32), "angles": {}}
 
 
-def _caso(corrimiento_km):
+def _caso(corrimiento_km, relleno=False):
     verdad = escena()
     interp = dict(verdad)
     interp["lat"] = (verdad["lat"] - corrimiento_km / 111.32).astype(np.float32)  # corrida hacia el sur
-    rc, rm = P.medir_granulo(L1B, Path("geo.hdf"), VOLCAN, (verdad["lat"], verdad["lon"]), datos=interp)
+    lat_m, lon_m = verdad["lat"].copy(), verdad["lon"].copy()
+    if relleno:   # MxD03 trae -999 (NaN tras limpiar) en una esquina a 50 km del crater, fuera del ROI
+        lat_m[:6, :6] = np.nan
+        lon_m[:6, :6] = np.nan
+    rc, rm, rcp = P.medir_granulo(L1B, Path("geo.hdf"), VOLCAN, (lat_m, lon_m), datos=interp, con_cprima=True)
     pub_c, pub_m = P.publica([rc, rm], VOLCAN["inner_radius_km"])
     return {"c": P.resumir(rc), "m": P.resumir(rm), "pub": (pub_c, pub_m),
             "comparacion": P.comparar(P.resumir(rc), P.resumir(rm), pub_c, pub_m),
-            "desplazamiento": P.desplazamiento_crater(interp["lat"], interp["lon"],
-                                                      verdad["lat"], verdad["lon"], VENT)}
+            "cprima_igual": P.registros_iguales(rc, rcp),
+            "desplazamiento": P.desplazamiento_crater(interp["lat"], interp["lon"], lat_m, lon_m, VENT)}
 
 
 def correr():
-    return _caso(CORRIMIENTO_KM), _caso(0.0)
+    return {"presente": _caso(CORRIMIENTO_KM), "ausente": _caso(0.0), "relleno": _caso(0.0, relleno=True)}
 
 
 def main():
-    presente, ausente = correr()
+    r = correr()
     fallas = []
-    for nombre, caso in (("PRESENTE", presente), ("AUSENTE", ausente)):
-        print("%-8s desplazamiento %s | C %s | M %s | %s" % (
-            nombre, caso["desplazamiento"], {k: caso["c"][k] for k in ("dc", "final_dist", "pc_dist")},
-            {k: caso["m"][k] for k in ("dc", "final_dist", "pc_dist")}, caso["comparacion"]))
-    if presente["comparacion"]["etiqueta"] != "summit->far" or presente["comparacion"]["pub"] != "1->0":
+    for nombre, caso in r.items():
+        print("%-8s desplazamiento %s | C %s | M %s | %s | C' igual a C: %s" % (
+            nombre.upper(), caso["desplazamiento"], {k: caso["c"][k] for k in ("dc", "final_dist", "pc_dist")},
+            {k: caso["m"][k] for k in ("dc", "final_dist", "pc_dist")}, caso["comparacion"], caso["cprima_igual"]))
+    presente, ausente, relleno = r["presente"], r["ausente"], r["relleno"]
+    if presente["comparacion"] != {"etiqueta": "summit->far", "pub": "1->0", "deteccion_cambia": False}:
         fallas.append("PRESENTE: el probe no vio el cambio summit->far / 1->0")
     if abs(presente["desplazamiento"]["km"] - CORRIMIENTO_KM) > 0.05:
         fallas.append("PRESENTE: midio %.3f km en vez de %.1f" % (presente["desplazamiento"]["km"], CORRIMIENTO_KM))
@@ -78,10 +86,14 @@ def main():
         fallas.append("AUSENTE: el probe invento un cambio")
     if ausente["desplazamiento"]["km"] > 1e-6:
         fallas.append("AUSENTE: midio un corrimiento que no existe")
+    if relleno["comparacion"]["etiqueta"] != "igual" or relleno["comparacion"]["pub"] != "igual":
+        fallas.append("RELLENO: el NaN de MxD03 lejos del crater cambio la etiqueta o la publicacion")
+    if not all(c["cprima_igual"] for c in r.values()):
+        fallas.append("C': la lat/lon interpolada por el parche no da el mismo record que el brazo C")
     if fallas:
         print("FALLAS:", *fallas, sep="\n  ")
         sys.exit(1)
-    print("OK: el probe distingue un corrimiento presente (summit->far, 1->0, 2 km) de uno ausente")
+    print("OK: corrimiento presente (summit->far, 1->0, 2 km), ausente (igual), relleno lejano (igual) y C' == C")
 
 
 if __name__ == "__main__":
