@@ -337,10 +337,20 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-9 | ~~Alertas de 0,05 MW o menos~~ **DECIDIDA: SN** (Nicolás, 2026-10-15), informando también SE y la regla original en cada evaluación; implementación en curso | `experiments/_s151_alertas_minimas/README.md`, verificado | #810 | #811 |
 | D-10 | ~~¿Abrir el día en la réplica?~~ **DECIDIDA: 1** (Nicolás, 2026-10-15): rama diurna VIIRS apagada por flag (tag `pre-s151-rama-diurna-viirs`) y A/B diurno; código en curso | `experiments/_s151_alertas_diurnas/README.md`, verificado | #812 | #813 |
 
+| D-13 | Cobertura de los A/B largos: ¿repetir y unir intentos (A108, ~20 h por vuelta y puede abrir huecos nuevos) o evaluar sobre la intersección de pasadas presentes en todos los brazos, informando las excluidas (desviación registrada; la pérdida es por descarga, independiente del brazo)? Recomendación del loop: intersección, con la regla del 5 % del control contra producción como compuerta | `C:\Users\nmend\AppData\Local\Temp\claude\fk_v1\detalle_cobertura.txt` (V1: 31 de 44 jobs cortos, 0,5 a 1,4 % por job; C0 de PCC falla el 5 %) | F/K V1, V2a, diurno | pendiente |
 | D-12 | Merge de la columna `Distancia_aprox_*` en el scraper (Mirova-v1 es producción) | verificador limpio en dos vueltas: sin bloqueos; `Distancia_km` y columnas viejas byte a byte iguales; umbral 5 provisional | Mirova-v1#25 (`f774a5d`) | pendiente |
 | D-11 | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-16 ~08:55 UTC (vuelta 88): F/K V1 sin evaluar: cobertura despareja en los cuatro brazos (D-13)
+- Unión de intentos (43 del 1 más el gemelo del 2) contada con `contar_pasadas.py` (ventana 08-29 a 10-08): C0 4.754,
+  F 4.779 (faltan 39, sobran 64), K 4.798 (22, 66), G 4.791 (29, 66); contra la unión de 4.820, a C0 le faltan 66.
+  31 de 44 jobs cortos; ningún caso de gránulo distinto: son pasadas ausentes, casi siempre noches enteras (cortes de
+  NASA, 0,5 a 1,4 % por job, A108). El control de PCC falla la regla del 5 % contra producción (V375 5,7 %, V750 7,3 %).
+  No se evaluó. Detalle en `C:\Users\nmend\AppData\Local\Temp\claude\fk_v1\` (cobertura y `detalle_cobertura.*`).
+- Tercera vez (W1, V2a, V1): es propiedad de los A/B largos, no mala suerte. Decisión D-13 para Nicolás: repetir y unir
+  (A108) o evaluar sobre la intersección como desviación registrada. Mientras, nada se evalúa.
 
 ### 2026-10-16 08:34 UTC (vuelta 87): F/K V1 completa; evaluación delegada
 - V1 intento 2: el gemelo de Villarrica salió verde (44 jobs verdes en total entre los dos intentos; `recolectar` del
