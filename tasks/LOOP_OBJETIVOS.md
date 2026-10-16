@@ -336,6 +336,14 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~07:45 UTC: Mirova-v1#25, segunda vuelta del verificador: sin bloqueos de producción
+- Arreglos de la primera vuelta aplicados (`43ebe33`): backfill después del push del OCR (un solo escritor), presupuesto
+  de 5 min, historia a mano sin escribir el repo, errores por fila con reintento y aviso, marcador compartido →
+  `ambiguo` (33 filas), umbral recalculado con las dos muestras (5). Segunda vuelta: commit del OCR a salvo ante
+  cancelación, sin choques de push, ningún error en silencio; `Distancia_km` y las 25 columnas viejas byte a byte iguales.
+  Pendiente sólo de texto: el umbral 5 no es estable (bootstrap: 1 en 43 %, 5 o 6 en 35 %) → PROVISIONAL; y `exit 1`
+  tras 5 pushes rechazados. Pedido al autor. Después: merge de Nicolás.
+
 ### 2026-10-16 ~07:15 UTC (vuelta 81): pre-registro 1.17 listo para el sello (#837 en main)
 - #837 mergeado (CI verde, `b130fa72`): Δ de la regla 2 decidido sólo con el estrato A (Wilson por volcán), B summit y
   las alertas en conteo exacto; B far, fuera y control como prueba del modelo (cambio ahí = INDETERMINADO con motivo).
