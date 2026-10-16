@@ -352,6 +352,10 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 16:47 UTC (vuelta 120): espera
+- NRT verde 16:25 (15:30, 55 min); disco 7,5 GB estable. V1 intento 3: 6 en curso, 38 en cola; W2a intento 2: 7 de
+  22 verdes. Verificador de #841 en curso; #840 sigue abierto (D-14).
+
 ### 2026-10-16 16:39 UTC (vuelta 119): `unir_intentos.py` con tolerancia en PR #841 (CI verde); verificador lanzado
 - #841 (`loop/unir-intentos-tolerancia`): tolerancias del G3 (1e-9 relativa, 1e-14 absoluta; `diag_mu_deti` difiere
   5,1e-10 relativo pero 1,3e-15 absoluto); `anomaly_pixels` como conjunto; conjuntos distintos admitidos sólo con los
