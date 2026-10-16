@@ -352,7 +352,22 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-16 ~16:15 UTC (vuelta 118): arreglo de `unir_intentos.py` delegado (worktree propio)
+### 2026-10-16 16:39 UTC (vuelta 119): `unir_intentos.py` con tolerancia en PR #841 (CI verde); verificador lanzado
+- #841 (`loop/unir-intentos-tolerancia`): tolerancias del G3 (1e-9 relativa, 1e-14 absoluta; `diag_mu_deti` difiere
+  5,1e-10 relativo pero 1,3e-15 absoluto); `anomaly_pixels` como conjunto; conjuntos distintos admitidos sólo con los
+  campos de decisión iguales (lista con origen: `banco_paridad.py:136` `CAMPOS_JS`, `:282`/`:467`
+  `sensor_zenith_deg`, `_s146_ab_sin_test1/evaluar.py:92-96`, `evaluar_fk.py:145`, `evaluar_diurno.py:261`, y dos
+  condicionales en `index.html:1149`, `:1238`, `:1289`) y el predicado del tablero con node igual en los dos records.
+  `unir_intentos.py` no estaba en `main` (venía de `loop/activo`, `4aa21ec8e`): al integrar `loop/activo` habrá un
+  conflicto add/add que se resuelve con la versión del PR.
+- V2a: unen 20 de 22 archivos (antes 14); 8 records admitidos por píxel de borde (Copahue control). Siguen sin unir
+  Isluga y Chillán control, un record MODIS cada uno (Terra 03-28 01:15 y Aqua 04-17 07:30): el píxel de borde cambió
+  el píxel más caliente (Isluga 6,8 km) y `sensor_zenith_deg` hasta 0,7°. El verificador juzga si bloquear es lo
+  correcto y propone la regla mínima.
+- Disco 7,5 GB: Windows Update sigue en 6,43 GB; la baja nueva (~1,1 GB) es el worktree del autor de #841 (0,9 GB),
+  que se borra cuando el verificador termine de leerlo.
+
+### 2026-10-16 16:15 UTC (vuelta 118): arreglo de `unir_intentos.py` delegado (worktree propio)
 - Subagente en rama `loop/unir-intentos-tolerancia` desde `main`: floats con tolerancia relativa más piso absoluto
   (criterio de G3, #833); `anomaly_pixels` como conjunto, y diferencias de conjunto admitidas sólo con los campos de
   decisión de los evaluadores iguales (leídos de `evaluar_fk.py`, `evaluar_diurno.py` y el predicado del tablero, con
