@@ -21,6 +21,13 @@ BANDA_FRAC = 0.10        # si mas de 10 % de los granulos se corre mas que su ba
 MAX_FALTAN = 0.20        # mas de 20 % de la muestra de un volcan sin medir -> INCOMPLETO
 CONTROL_MAX = 0.10       # mas de 10 % del control cambia de etiqueta -> se anota
 ESTRATOS_MUESTREADOS = ("A", "B_summit", "B_far", "control", "fuera")
+# v3 (tercera vuelta del verificador): Delta se decide con los estratos donde el modelo de corrimiento
+# predice movimiento (A, expandido con Wilson por volcan) mas los censos en conteo exacto. Los estratos
+# que el modelo declara inmoviles no suman ancho: son la prueba del modelo, y cualquier cambio en ellos
+# deja el veredicto en INDETERMINADO con el motivo explicito.
+ESTRATOS_DELTA = ("A", "B_summit")
+ESTRATOS_INMOVILES = ("B_far", "fuera", "control")
+MOTIVO_MODELO = "el modelo de corrimiento no explica esto"
 # Lectura informativa de magnitud (v1): publicaciones movidas estimadas / publicaciones MODIS del tramo
 POCO_PUB, MUCHO_PUB = 0.02, 0.05
 BINES_CENIT = ((0, 20), (20, 35), (35, 50), (50, 91))
@@ -97,7 +104,8 @@ def evaluar(pob, salidas, esperados=None):
               "perdidas_detalle": [{"volcan": f["volcan"], "clave": f["clave"], "datetime_utc": f["datetime_utc"]}
                                    for f in prot if cambio(f, "pub", "1->0")]}
 
-    # ---- regla 2: balance bajo 1 MW. Alertas (censo, exacto) + negativos limpios (estimados por estrato)
+    # ---- regla 2: balance bajo 1 MW. Alertas (censo, exacto) + negativos limpios de A (Wilson por
+    # volcan) y de B summit (censo). Un estrato medido entero entra exacto, sin Wilson.
     alertas = [f for f in ok if f["lab"] == "pos" and not f["prot"]]
     a_perd = sum(cambio(f, "pub", "1->0") for f in alertas)
     a_gan = sum(cambio(f, "pub", "0->1") for f in alertas)
@@ -105,7 +113,7 @@ def evaluar(pob, salidas, esperados=None):
            "observadas_perdidas": 0, "por_estrato": {}}
     for vol in sorted(vol_pedidos):
         N = pob["volcanes"][vol]["N"]
-        for e in ESTRATOS_MUESTREADOS:
+        for e in ESTRATOS_DELTA:
             Ne = (N.get(e) or {}).get("neg_limpio", 0)
             if not Ne:
                 continue
@@ -113,8 +121,12 @@ def evaluar(pob, salidas, esperados=None):
             kg = sum(cambio(f, "pub", "0->1") for f in s)
             kp = sum(cambio(f, "pub", "1->0") for f in s)
             n = len(s)
-            gl, gh = wilson(kg, n)
-            pl, ph = wilson(kp, n)
+            if n >= Ne:   # medido entero: conteo exacto
+                gl = gh = kg / n
+                pl = ph = kp / n
+            else:
+                gl, gh = wilson(kg, n)
+                pl, ph = wilson(kp, n)
             neg["ganadas_est"] += Ne * kg / n if n else 0.0
             neg["perdidas_est"] += Ne * kp / n if n else 0.0
             neg["lo"] += Ne * gl - Ne * ph
@@ -128,6 +140,16 @@ def evaluar(pob, salidas, esperados=None):
               "negativos_limpios": {k: (round(v, 1) if isinstance(v, float) else v) for k, v in neg.items()},
               "delta_errores": round(delta, 1),
               "delta_intervalo": [round(base + neg["lo"], 1), round(base + neg["hi"], 1)]}
+
+    # ---- prueba del modelo: los estratos que el modelo declara inmoviles
+    falla = [{"volcan": f["volcan"], "clave": f["clave"], "estrato": f["estrato"],
+              "etiqueta": f["comparacion"]["etiqueta"], "pub": f["comparacion"]["pub"],
+              "deteccion_cambia": f["comparacion"]["deteccion_cambia"],
+              "desplazamiento_km": (f.get("desplazamiento") or {}).get("km"),
+              "corrimiento_predicho_km": f.get("corrimiento_predicho_km")}
+             for f in ok if f["estrato"] in ESTRATOS_INMOVILES and (cambio(f, "etiqueta") or cambio(f, "pub"))]
+    motivos_indet = ["%s: %s %s cambia (etiqueta %s, publicacion %s)" % (
+        MOTIVO_MODELO, x["volcan"], x["clave"], x["etiqueta"], x["pub"]) for x in falla]
 
     # ---- anotaciones de instrumento
     excede = [f for f in ok if f.get("corrimiento_predicho_km") is not None and f.get("desplazamiento")
@@ -147,6 +169,8 @@ def evaluar(pob, salidas, esperados=None):
         ver = "PIERDE PROTEGIDA"
     elif banda_corta:
         ver = "BANDA CORTA"
+    elif falla:
+        ver = "INDETERMINADO"
     elif not hubo_cambio:
         ver = "SIN CAMBIO OBSERVADO"
     elif regla2["delta_intervalo"][1] < 0:
@@ -212,6 +236,7 @@ def evaluar(pob, salidas, esperados=None):
                         "protegida": f["prot"], "vrp_ref": f.get("vrp_ref"), "pub": f["comparacion"]["pub"]}
                        for f in ok if f["lab"] == "pos" and cambio(f, "pub")]
     return {"veredicto": ver, "motivos_incompleto": motivos_incompleto, "cprima_distinto": cprima_mal,
+            "motivos_indeterminado": motivos_indet, "modelo_falla": {"n": len(falla), "casos": falla},
             "regla1": regla1, "regla2": regla2, "banda_corta": banda_corta,
             "banda_excedida": {"n": len(excede), "de": len(ok)},
             "control_cambia": control_cambia, "control": {"n": len(ctrl), "cambia_etiqueta": ctrl_k},

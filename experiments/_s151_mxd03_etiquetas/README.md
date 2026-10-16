@@ -1,6 +1,6 @@
 # Probe S151, tarea 1.17: etiquetas summit/far de MODIS re-medidas con MxD03 en los 11 volcanes
 
-**Estado: versión 2, escrita y probada con datos sintéticos, NO corrida.** Este README fija la
+**Estado: versión 3, escrita y probada con datos sintéticos, NO corrida.** Este README fija la
 población, el estimador y el criterio antes de la primera corrida. La muestra y su reparto en jobs
 están fijados en `poblacion.json`.
 
@@ -14,6 +14,13 @@ versión aplica sus cinco arreglos:
 3. la vara principal es el criterio de victoria de la réplica, con censo de las alertas de MIROVA;
 4. se agrega un control negativo real, el brazo C';
 5. el JSON se escribe por gránulo.
+
+La segunda vuelta del verificador (sobre #835) la dio por «sellable con un arreglo», y la versión 3 lo
+aplica. Simulado el nulo (todo medido, nada cambia), el intervalo de Δ daba [−2.265, +2.265], y con un
+solo 0→1 salía INDETERMINADO, así que MEJORA y EMPEORA eran inalcanzables. El 97 % de ese ancho venía
+de B far, fuera y control, que el propio modelo declara inmóviles y que se muestrean con 3 a 6 gránulos
+por volcán. Desde la v3 esos tres estratos no suman ancho a Δ: son la prueba del modelo. Bajo el nulo,
+Δ queda en **[−44, +44]**, y un test fija que el ancho no pase de 90.
 
 ## Por qué
 
@@ -133,10 +140,16 @@ fuera 3 por volcán.
   pasan de 1 a 0 (perdidas) y de 0 a 1 (ganadas).
 - **Regla 2 (balance bajo 1 MW).** Mide el cambio en la suma de errores de M contra C, Δ:
   *perdidas − ganadas en las alertas no protegidas* (censo, exacto), más *0→1 − 1→0 en los negativos
-  limpios*. El segundo término se estima por volcán y estrato: *N* · *k* / *n*, con *N* la cantidad de
-  negativos limpios de ese estrato en la población. El intervalo suma las cotas de Wilson de cada
-  estrato. Una alerta perdida y una publicación de más pesan igual (regla 2 de `docs/MISSION.md`).
-  Δ < 0 quiere decir que M se parece más a MIROVA.
+  limpios* de los estratos donde el modelo predice movimiento: **A**, expandido por volcán como
+  *N* · *k* / *n* con su intervalo de Wilson, y **B summit**, que es censo. Un estrato medido entero
+  entra en conteo exacto, sin Wilson. *N* es la cantidad de negativos limpios del estrato en la
+  población. Una alerta perdida y una publicación de más pesan igual (regla 2 de `docs/MISSION.md`).
+  Δ < 0 quiere decir que M se parece más a MIROVA. Bajo el nulo con `poblacion.json`, el intervalo es
+  [−44, +44]: Láscar, Nevados de Chillán, Isluga, Tupungatito, Llaima y Copahue tienen A medido entero
+  (ancho cero), y el resto lo ponen los cinco volcanes con A muestreado.
+- **Prueba del modelo (B far, fuera y control).** El modelo de corrimiento dice que ahí la posición no
+  alcanza a cruzar el límite. Estos estratos no entran a Δ: se miden para comprobar esa afirmación.
+  Todo cambio de etiqueta o de publicación ahí se lista con su corrimiento medido y el predicho.
 - **Magnitud (informativa).** Bruto (1→0 y 0→1 observados), neto, cambios por tipo («misma detección,
   otra etiqueta» contra «otra detección»), publicaciones movidas estimadas sobre las 622 del tramo, y
   la tabla volcán × satélite × cenit (0 a 20, 20 a 35, 35 a 50 y más de 50 grados) con el corrimiento
@@ -159,11 +172,13 @@ El veredicto principal se decide en este orden:
    regla 1: el arreglo no es aceptable en la réplica tal como está.
 4. **BANDA CORTA**: en más de 10 % de los gránulos medidos, el corrimiento en el cráter supera la banda
    predicha. La población quedó corta, y el balance no se declara.
-5. **SIN CAMBIO OBSERVADO**: ningún gránulo cambia ni etiqueta ni publicación. Se informa igual el
-   intervalo de Δ, que con muestras chicas es ancho.
-6. **MEJORA**: la cota superior de Δ queda bajo 0.
-7. **EMPEORA**: la cota inferior de Δ queda sobre 0.
-8. **INDETERMINADO**: en cualquier otro caso.
+5. **INDETERMINADO, «el modelo de corrimiento no explica esto»**: cualquier cambio de etiqueta o de
+   publicación en B far, fuera o control. El motivo se lista caso por caso (`motivos_indeterminado`).
+6. **SIN CAMBIO OBSERVADO**: ningún gránulo cambia ni etiqueta ni publicación. Se informa igual el
+   intervalo de Δ.
+7. **MEJORA**: la cota superior de Δ queda bajo 0.
+8. **EMPEORA**: la cota inferior de Δ queda sobre 0.
+9. **INDETERMINADO**: en cualquier otro caso.
 
 El cero de Δ no es un umbral elegido: es el punto en que M y C cometen los mismos errores contra
 MIROVA (A115, regla 4 de `docs/MISSION.md`).
@@ -215,7 +230,7 @@ repetir jobs sueltos, usa `-f jobs='["Lascar-2"]'` y evalúa en local juntando t
   es menor que 0,1 K y cae en la columna de deriva (C contra lo guardado).
 - El brazo C corre el código de hoy, no el que produjo cada record. El efecto del arreglo se mide C
   contra M, con el mismo código.
-- El negativo del balance se estima con 3 a 30 gránulos por estrato. Si casi nada cambia, el
-  intervalo de Δ queda ancho; el lado de las alertas, en cambio, es censo y no tiene ese problema.
+- Δ sólo cubre lo que el modelo predice que se mueve. Si el modelo se equivoca en B far, fuera o
+  control, el probe no lo cuantifica: lo detecta, lo lista y deja el veredicto en INDETERMINADO.
 - Que MIROVA use MxD03 está SIN VERIFICAR: SP426.5 p. 3 habla de «pixel(s) geolocation» sin nombrar el
   producto.
