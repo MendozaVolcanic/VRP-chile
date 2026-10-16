@@ -339,10 +339,19 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 | D-13 | **DECIDIDA: repetir y unir intentos (A108)** (Nicolás, 2026-10-16), aunque tome más tiempo | V1 intento 3 y W2a intento 2 despachados | F/K, diurno | cerrada |
 | D-13 (texto original) | Cobertura de los A/B largos: ¿repetir y unir intentos (A108, ~20 h por vuelta y puede abrir huecos nuevos) o evaluar sobre la intersección de pasadas presentes en todos los brazos, informando las excluidas (desviación registrada; la pérdida es por descarga, independiente del brazo)? Recomendación del loop: intersección, con la regla del 5 % del control contra producción como compuerta | `C:\Users\nmend\AppData\Local\Temp\claude\fk_v1\detalle_cobertura.txt` (V1: 31 de 44 jobs cortos, 0,5 a 1,4 % por job; C0 de PCC falla el 5 %) | F/K V1, V2a, diurno | pendiente |
-| D-12 | Merge de la columna `Distancia_aprox_*` en el scraper (Mirova-v1 es producción) | verificador limpio en dos vueltas: sin bloqueos; `Distancia_km` y columnas viejas byte a byte iguales; umbral 5 provisional | Mirova-v1#25 (`f774a5d`) | pendiente |
+| D-12 | ~~Merge de la columna~~ **HECHO** (Nicolás, 2026-10-16): Mirova-v1#25 mergeado 11:43 UTC (`2eac1758`); historia despachada (run 38895687049); hito A119 en #838 | | | cerrada |
+| D-12 (texto original) | Merge de la columna `Distancia_aprox_*` en el scraper (Mirova-v1 es producción) | verificador limpio en dos vueltas: sin bloqueos; `Distancia_km` y columnas viejas byte a byte iguales; umbral 5 provisional | Mirova-v1#25 (`f774a5d`) | pendiente |
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-16 ~12:15 UTC (vuelta 95): D-12 hecha: distancia aproximada en producción de Mirova-v1
+- Nicolás aprobó el merge. Mirova-v1#25 mergeado (squash `2eac1758`, 11:43 UTC; CI verde en `f774a5d`, lo verificado).
+  Historia despachada una vez (`distancia_aprox_historia.yml`, run 38895687049, presupuesto 45 min; no escribe el
+  repo, deja los calados en la caché). Hito A119 de la columna en `scripts/calidad_referencia_mirova.py` (#838,
+  `a0b6545d`): complementaria, sólo VIIRS 375, desde el 2026-04-14, umbral provisional.
+- Pendiente: comprobar que la historia termina y que el siguiente cron del OCR escribe `Distancia_aprox_*` en el CSV
+  con `Distancia_km` intacta.
 
 ### 2026-10-16 ~12:00 UTC (vuelta 94): D-13 decidida: repetir y unir intentos
 - Nicolás decidió repetir los jobs y unir intentos (A108), aunque tome más tiempo; nada de intersección. Despachados:
