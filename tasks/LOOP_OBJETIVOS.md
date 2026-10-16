@@ -337,6 +337,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~08:00 UTC (vuelta 83): 1.19 terminada (por verificar): la agregación del VIIRS explica la dependencia angular
+- `experiments/_s151_angular_119/` (predicciones en `PREREGISTRO.md` antes de correr; cada número con su script). En
+  el OSF global de MIROVA (V375 noche, 208.293 filas, 158 volcanes, efecto fijo volcán × mes) VRP/Npix sube +0,135 y
+  +0,216 en ln en los límites de zona de agregación (36,32° y 52,66° de cenit, de los ATBD de geolocalización e imagen
+  leídos renderizados; el SDR User's Guide no está en `documentacion/`), sobre el máximo de 89 placebos (0,079); se
+  replica en SNPP y NOAA-20; MODIS (sin agregación) no salta; el VRP total no salta (energía conservada).
+- En Láscar, Isluga y Copahue (sin kernel local), corregir R por la huella con agregación aplana la razón de 1,88× a
+  1,09× (0,80 a 0,87); el control con huella suave falla (2,83). Con todos los volcanes, 0,87 a 1,10. El sintético por
+  `calculate_vrp` sigue la huella (pendiente 0,995). Palanca sugerida: área según la huella nativa con agregación (no el
+  espaciado geolocalizado de S133). Límites: pares de 2025 (antes de #535), huella modelada (+4 % en el borde), sin PSF.
+- Verificador limpio lanzado (`C:\Users\nmend\AppData\Local\Temp\claude\verif_119\`). Nada se adopta (§1.1).
+
 ### 2026-10-16 07:31 UTC (vuelta 82): 1.19 arrancada; esperan D-11 y D-12
 - Paradas: NRT verde 03:15 UTC; disco 21 GB. El job de Villarrica gemelo (V1 intento 2) lleva 1 h en cola de runners;
   V2a intento 2 pendiente detrás. W2a en 12 de 22; saturación 1.18 en 4 de 11.
