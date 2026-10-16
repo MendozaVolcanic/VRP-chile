@@ -4,19 +4,23 @@
 # POR QUE. El probe de #828 (experiments/_s151_probe_mod03/) midio en 7 granulos, casi todos de
 # Lascar, que `_interp_geo` (pipeline/process_modis.py:342) deja el pixel corrido de 1 a 3 km respecto
 # de MxD03. De esa posicion cuelgan la etiqueta summit/far y la publicacion en el tablero. Este probe
-# corre, para cada granulo de la muestra (poblacion.json), el pipeline de produccion DOS veces sobre
-# el mismo L1B:
-#   brazo C: tal cual (lat/lon de `_interp_geo`), que es lo que produccion hace hoy;
-#   brazo M: identico, salvo que lat/lon salen de MxD03 (lo unico que cambia es la posicion).
-# Las dos salidas pasan por `store.append_record` (en un directorio temporal) y por el predicado del
+# corre, para cada granulo de su job (poblacion.json), el pipeline de produccion sobre el mismo L1B:
+#   brazo C : tal cual (lat/lon de `_interp_geo`), que es lo que produccion hace hoy;
+#   brazo M : identico, salvo que lat/lon salen de MxD03 (lo unico que cambia es la posicion);
+#   brazo C': la lat/lon de `_interp_geo` pasada por el MISMO parche que el brazo M. Tiene que dar un
+#             record identico al de C: si no, el parche (copia, cast, NaN) fabrica diferencias y el
+#             probe no mide lo que dice (control negativo real, verificador de #834, punto 4).
+# Las salidas pasan por `store.append_record` (en un directorio temporal) y por el predicado del
 # tablero ejecutado con node desde frontend/index.html (A97), igual que en scripts/banco_paridad.py.
-# Lo que cambie entre C y M es el efecto del arreglo MxD03 sobre lo que el operador ve.
 #
-# Los angulos (cenit, acimut) siguen saliendo de `_interp_geo` en los dos brazos: el cenit solo se
+# Los angulos (cenit, acimut) siguen saliendo de `_interp_geo` en todos los brazos: el cenit solo se
 # persiste para estudio (A_pix es nadir fijo, A66) y asi el brazo M aisla la posicion.
 #
+# El JSON del job se reescribe despues de cada granulo (escritura atomica): si el job muere por
+# timeout, lo medido queda y el evaluador cuenta lo que falta.
+#
 # Uso (Linux con pyhdf): EARTHDATA_TOKEN=... VRP_PROFILE=mirova_equivalent \
-#     python probe_etiquetas.py --volcan Lascar --out out [--presupuesto-min 70]
+#     python probe_etiquetas.py --job Lascar-1 --out out [--presupuesto-min 70]
 import argparse
 import json
 import math
@@ -40,6 +44,8 @@ from pipeline import store  # noqa: E402
 from pipeline.geo_utils import get_detection_anchor  # noqa: E402
 
 RELLENO_MXD03 = -999.0
+N_CPRIMA = 2                                          # granulos por job con brazo C'
+MARCAS_DE_HORA = ("processed_utc", "first_processed_utc")
 
 
 # ------------------------------------------------------------------ argumentos de produccion
@@ -76,9 +82,9 @@ def argumentos_append_record(volcan, overwrite, volcanic_features=None):
 def procesar_brazo(l1b, geo, volcan, latlon=None, volcanic_features=None, lector=None):
     """Corre calculate_vrp + store.append_record como produccion y devuelve el record guardado.
 
-    `latlon=(lat, lon)` reemplaza la geolocalizacion que entrega read_modis_l1b (brazo M); None
-    deja la de `_interp_geo` (brazo C). El store escribe en un directorio temporal, nunca en data/.
-    `lector` permite leer el HDF una sola vez por granulo (por defecto, read_modis_l1b de produccion).
+    `latlon=(lat, lon)` reemplaza la geolocalizacion que entrega read_modis_l1b (brazos M y C'); None
+    deja la de `_interp_geo` sin pasar por el parche (brazo C). El store escribe en un directorio
+    temporal, nunca en data/. `lector` permite leer el HDF una sola vez por granulo.
     """
     lector = lector or pm.read_modis_l1b
 
@@ -104,6 +110,23 @@ def procesar_brazo(l1b, geo, volcan, latlon=None, volcanic_features=None, lector
     return recs[-1] if recs else None
 
 
+def _copia(d):
+    return {k: (v.copy() if isinstance(v, np.ndarray) else v) for k, v in d.items()}
+
+
+def medir_granulo(l1b, geo, volcan, latlon_m, volcanic_features=None, datos=None, con_cprima=False):
+    """Brazos C, M (y C' si se pide) sobre el mismo L1B. `datos`: lo que ya devolvio read_modis_l1b;
+    cada brazo recibe una copia. Devuelve (rc, rm, rcp) con rcp None si no se corrio C'."""
+    lector = None if datos is None else (lambda _p: _copia(datos))
+    rc = procesar_brazo(l1b, geo, volcan, None, volcanic_features, lector)
+    rm = procesar_brazo(l1b, geo, volcan, latlon_m, volcanic_features, lector)
+    rcp = None
+    if con_cprima:
+        base = datos if datos is not None else pm.read_modis_l1b(l1b)
+        rcp = procesar_brazo(l1b, geo, volcan, (base["lat"].copy(), base["lon"].copy()), volcanic_features, lector)
+    return rc, rm, rcp
+
+
 # ------------------------------------------------------------------ medidas
 def limpiar_relleno(a):
     a = np.asarray(a, dtype=np.float32).copy()
@@ -122,6 +145,15 @@ def desplazamiento_crater(lat_i, lon_i, lat_m, lon_m, vent):
     dn, de = _ne_km(float(lat_m[i, j]), float(lon_m[i, j]), float(lat_i[i, j]), float(lon_i[i, j]))
     return {"linea": int(i), "frame": int(j), "dn_km": round(dn, 3), "de_km": round(de, 3),
             "km": round(math.hypot(dn, de), 3)}
+
+
+def registros_iguales(a, b):
+    """Igualdad exacta de dos records, salvo las marcas de hora del proceso."""
+    if a is None or b is None:
+        return a is None and b is None
+    sa = {k: v for k, v in a.items() if k not in MARCAS_DE_HORA}
+    sb = {k: v for k, v in b.items() if k not in MARCAS_DE_HORA}
+    return json.dumps(sa, sort_keys=True) == json.dumps(sb, sort_keys=True)
 
 
 def resumir(rec):
@@ -168,17 +200,13 @@ def publica(records, inner):
     return out
 
 
-def _copia(d):
-    return {k: (v.copy() if isinstance(v, np.ndarray) else v) for k, v in d.items()}
-
-
-def medir_granulo(l1b, geo, volcan, latlon_m, volcanic_features=None, datos=None):
-    """Los dos brazos sobre el mismo L1B, sin el predicado (se corre en lote al final).
-    `datos`: lo que ya devolvio read_modis_l1b para este granulo; cada brazo recibe una copia."""
-    lector = None if datos is None else (lambda _p: _copia(datos))
-    rc = procesar_brazo(l1b, geo, volcan, None, volcanic_features, lector)
-    rm = procesar_brazo(l1b, geo, volcan, latlon_m, volcanic_features, lector)
-    return rc, rm
+def guardar(path, estado):
+    """Escritura atomica: el archivo siempre es un JSON valido, aunque el job muera a mitad."""
+    path = Path(path)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump(estado, fh, indent=1, ensure_ascii=False)
+    os.replace(tmp, path)
 
 
 # ------------------------------------------------------------------ E/S (solo en el runner)
@@ -204,7 +232,7 @@ def _leer_mxd03(path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--volcan", required=True)
+    ap.add_argument("--job", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--poblacion", default=str(AQUI / "poblacion.json"))
     ap.add_argument("--presupuesto-min", type=float, default=70.0)
@@ -215,23 +243,28 @@ def main():
     from pipeline.fetch import auth
     auth()
     t0 = time.time()
-    pob = json.load(open(args.poblacion, encoding="utf-8"))["volcanes"][args.volcan]
-    volcan = rp.load_volcanoes(args.volcan)[0]
+    pob = json.load(open(args.poblacion, encoding="utf-8"))
+    job = pob["jobs"][args.job]
+    vol = job["volcan"]
+    por_clave = {g["clave"]: g for g in pob["volcanes"][vol]["muestra"]}
+    inner = pob["volcanes"][vol]["inner_radius_km"]
+    volcan = rp.load_volcanoes(vol)[0]
     vent = get_detection_anchor(volcan)
     feats = rp.VOLCANIC_FEATURES.get(volcan["name"])
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     hdf = out / "hdf"
-    filas, records_c, records_m = [], [], []
-    for g in pob["muestra"]:
-        fila = dict(g)
-        filas.append(fila)
-        records_c.append(None)
-        records_m.append(None)
+    destino = out / f"{args.job}.json"
+    estado = {"job": args.job, "volcan": vol, "inner_radius_km": inner, "completo": False, "granulos": []}
+    n_cprima = 0
+    for clave in job["granulos"]:
+        fila = {"clave": clave, "estrato": por_clave[clave]["estrato"], "censo": por_clave[clave]["censo"]}
         if (time.time() - t0) / 60.0 > args.presupuesto_min:
             fila["estado"] = "sin_tiempo"
+            estado["granulos"].append(fila)
+            guardar(destino, estado)
             continue
-        prod, patron = g["clave"].split(".", 1)
+        prod, patron = clave.split(".", 1)
         l1b = geo = None
         try:
             l1b = _bajar(prod, patron, hdf)
@@ -239,40 +272,41 @@ def main():
             if l1b is None or geo is None:
                 fila["estado"] = "error"
                 fila["error"] = "no encontrado o no bajado (%s)" % ("L1B" if l1b is None else "MxD03")
-                continue
-            lat_m, lon_m = _leer_mxd03(geo)
-            d = pm.read_modis_l1b(l1b)
-            fila["desplazamiento"] = desplazamiento_crater(d["lat"], d["lon"], lat_m, lon_m, vent)
-            fila["mxd03_relleno_cerca"] = bool(np.isnan(lat_m[
-                max(fila["desplazamiento"]["linea"] - 30, 0):fila["desplazamiento"]["linea"] + 31,
-                max(fila["desplazamiento"]["frame"] - 30, 0):fila["desplazamiento"]["frame"] + 31]).any())
-            rc, rm = medir_granulo(l1b, geo, volcan, (lat_m, lon_m), feats, datos=d)
-            records_c[-1], records_m[-1] = rc, rm
-            fila["c"], fila["m"] = resumir(rc), resumir(rm)
-            fila["estado"] = "ok"
-        except Exception as e:  # un granulo roto no tumba el volcan; queda contado como error
+            else:
+                lat_m, lon_m = _leer_mxd03(geo)
+                d = pm.read_modis_l1b(l1b)
+                fila["desplazamiento"] = desplazamiento_crater(d["lat"], d["lon"], lat_m, lon_m, vent)
+                i, j = fila["desplazamiento"]["linea"], fila["desplazamiento"]["frame"]
+                fila["mxd03_relleno_cerca"] = bool(np.isnan(lat_m[max(i - 30, 0):i + 31, max(j - 30, 0):j + 31]).any())
+                con_cp = n_cprima < N_CPRIMA
+                rc, rm, rcp = medir_granulo(l1b, geo, volcan, (lat_m, lon_m), feats, datos=d, con_cprima=con_cp)
+                pub_c, pub_m = publica([rc, rm], inner)
+                fila["c"], fila["m"] = resumir(rc), resumir(rm)
+                fila["pub_c"], fila["pub_m"] = pub_c, pub_m
+                fila["comparacion"] = comparar(fila["c"], fila["m"], pub_c, pub_m)
+                fila["cprima_igual"] = registros_iguales(rc, rcp) if con_cp else None
+                n_cprima += int(con_cp)
+                g = por_clave[clave]
+                fila["c_igual_a_guardada"] = ((fila["c"] or {}).get("dc") == g.get("dc_guardada")
+                                              and pub_c == g.get("pub_guardada"))
+                fila["estado"] = "ok"
+        except Exception as e:  # un granulo roto no tumba el job; queda contado como error
             fila["estado"] = "error"
             fila["error"] = "%s: %s" % (type(e).__name__, e)
         finally:
             for p in (l1b, geo):
                 if p is not None:
                     Path(p).unlink(missing_ok=True)
-        print(json.dumps({k: fila.get(k) for k in ("clave", "estrato", "estado", "desplazamiento")},
+        estado["granulos"].append(fila)
+        estado["minutos"] = round((time.time() - t0) / 60.0, 1)
+        guardar(destino, estado)
+        print(json.dumps({k: fila.get(k) for k in ("clave", "estrato", "estado", "comparacion", "cprima_igual")},
                          ensure_ascii=False), flush=True)
-    inner = pob["inner_radius_km"]
-    pub_c, pub_m = publica(records_c, inner), publica(records_m, inner)
-    for fila, pc_, pm_ in zip(filas, pub_c, pub_m):
-        if fila.get("estado") != "ok":
-            continue
-        fila["pub_c"], fila["pub_m"] = pc_, pm_
-        fila["comparacion"] = comparar(fila["c"], fila["m"], pc_, pm_)
-        fila["c_igual_a_guardada"] = (fila["c"] or {}).get("dc") == fila.get("dc_guardada") and pc_ == fila.get("pub_guardada")
-    res = {"volcan": args.volcan, "inner_radius_km": inner, "N": pob["N"], "n_pub_tramo": pob["n_pub_tramo"],
-           "minutos": round((time.time() - t0) / 60.0, 1), "granulos": filas}
-    with open(out / f"{args.volcan}.json", "w", encoding="utf-8") as fh:
-        json.dump(res, fh, indent=1, ensure_ascii=False)
-    n_ok = sum(1 for f in filas if f.get("estado") == "ok")
-    print("%s: %d de %d granulos medidos en %.1f min" % (args.volcan, n_ok, len(filas), res["minutos"]))
+    estado["completo"] = True
+    guardar(destino, estado)
+    n_ok = sum(1 for f in estado["granulos"] if f.get("estado") == "ok")
+    print("%s: %d de %d granulos medidos en %.1f min" % (args.job, n_ok, len(job["granulos"]),
+                                                         (time.time() - t0) / 60.0))
 
 
 if __name__ == "__main__":

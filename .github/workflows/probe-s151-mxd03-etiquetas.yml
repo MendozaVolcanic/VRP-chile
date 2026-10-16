@@ -1,9 +1,10 @@
 name: "Probe S151 1.17, etiquetas MODIS re-medidas con MxD03 en los 11 volcanes (solo lectura)"
 
-# Tarea 1.17 del loop. Criterio pre-registrado en experiments/_s151_mxd03_etiquetas/README.md,
-# escrito antes de cualquier corrida; la muestra esta fijada en poblacion.json (git). Solo lectura:
-# no escribe en data/, no commitea, no hace push; el resultado queda como artefacto. Por volcan baja
-# hasta 44 pares MxD021KM + MxD03 y borra cada HDF al usarlo.
+# Tarea 1.17 del loop, version 2 (arreglos del verificador de #834). Criterio pre-registrado en
+# experiments/_s151_mxd03_etiquetas/README.md, escrito antes de cualquier corrida; la muestra y su
+# reparto en jobs estan fijados en poblacion.json (git). Solo lectura: no escribe en data/, no
+# commitea, no hace push; el resultado queda como artefacto. Cada job baja hasta 48 pares
+# MxD021KM + MxD03 y borra cada HDF al usarlo; el JSON del job se reescribe despues de cada granulo.
 # A43: "on" entre comillas. S141: pipefail con tee. A15: timeout 90 min para un presupuesto interno
 # de 70 min (el script deja de bajar granulos al pasarlo y los marca "sin_tiempo").
 # S146/A71: autentica SOLO por EARTHDATA_TOKEN y falla al instante si viene vacio.
@@ -14,17 +15,53 @@ name: "Probe S151 1.17, etiquetas MODIS re-medidas con MxD03 en los 11 volcanes 
         description: "Escribe si SOLO con el criterio de experiments/_s151_mxd03_etiquetas/README.md sellado (regla 1.6 del loop)"
         required: true
         default: "no"
-      volcanes:
-        description: "Lista JSON de volcanes (por defecto los 11 Tier A)"
+      jobs:
+        description: "Lista JSON de jobs de poblacion.json (vacio: todos). Ej: [\"Lascar-1\"]"
         required: false
-        default: '["Lascar","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","NevadosDeChillan","Llaima","Villarrica","Copahue","PuyehueCordonCaulle","Chaiten"]'
+        default: ""
 
 concurrency:
   group: probe-s151-mxd03-etiquetas
   cancel-in-progress: false
 
 jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      jobs: ${{ steps.lista.outputs.jobs }}
+    steps:
+      - name: Candado del pre-registro
+        run: |
+          if [ "${{ github.event.inputs.preregistro_aprobado }}" != "si" ]; then
+            echo "Pre-registro sin sello: no se corre (regla 1.6 del loop)"; exit 1
+          fi
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - name: Lista de jobs desde poblacion.json
+        id: lista
+        env:
+          PEDIDOS: ${{ github.event.inputs.jobs }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          todos = list(json.load(open("experiments/_s151_mxd03_etiquetas/poblacion.json", encoding="utf-8"))["jobs"])
+          pedidos = os.environ.get("PEDIDOS", "").strip()
+          sel = json.loads(pedidos) if pedidos else todos
+          malos = [j for j in sel if j not in todos]
+          if malos:
+              raise SystemExit("jobs que no estan en poblacion.json: %s" % malos)
+          print("jobs=" + json.dumps(sel))
+          PY
+
   probe:
+    needs: plan
     runs-on: ubuntu-24.04  # pyhdf probado en 24.04 (ver nrt.yml)
     timeout-minutes: 90
     permissions:
@@ -33,13 +70,8 @@ jobs:
       fail-fast: false
       max-parallel: 4
       matrix:
-        volcan: ${{ fromJSON(github.event.inputs.volcanes) }}
+        job: ${{ fromJSON(needs.plan.outputs.jobs) }}
     steps:
-      - name: Candado del pre-registro
-        run: |
-          if [ "${{ github.event.inputs.preregistro_aprobado }}" != "si" ]; then
-            echo "Pre-registro sin sello: no se corre (regla 1.6 del loop)"; exit 1
-          fi
       - name: Token presente
         env:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
@@ -56,28 +88,27 @@ jobs:
           pip install pyhdf
           pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
           node --version
-      - name: Prueba sintetica (el instrumento distingue corrimiento presente de ausente)
+      - name: Prueba sintetica (presente, ausente, relleno y C' igual a C)
         env:
           VRP_PROFILE: mirova_equivalent
         run: |
           set -o pipefail
           mkdir -p out
-          python experiments/_s151_mxd03_etiquetas/probar_probe_mxd03.py | tee out/prueba_sintetica_${{ matrix.volcan }}.txt
-      - name: Probe del volcan
+          python experiments/_s151_mxd03_etiquetas/probar_probe_mxd03.py | tee out/prueba_sintetica_${{ matrix.job }}.txt
+      - name: Probe del job
         env:
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           VRP_PROFILE: mirova_equivalent
           VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
         run: |
           set -o pipefail
-          python experiments/_s151_mxd03_etiquetas/probe_etiquetas.py --volcan "${{ matrix.volcan }}" \
-            --out out --presupuesto-min 70 2>&1 | tee out/probe_${{ matrix.volcan }}.log
-          rm -rf out/hdf
+          python experiments/_s151_mxd03_etiquetas/probe_etiquetas.py --job "${{ matrix.job }}" \
+            --out out --presupuesto-min 70 2>&1 | tee out/probe_${{ matrix.job }}.log
       - name: Upload artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: s151-mxd03-etq-${{ matrix.volcan }}
+          name: s151-mxd03-etq-${{ matrix.job }}
           path: |
             out/*.json
             out/*.txt
@@ -86,8 +117,8 @@ jobs:
           if-no-files-found: error
 
   agregar:
-    needs: probe
-    if: always() && github.event.inputs.preregistro_aprobado == 'si'
+    needs: [plan, probe]
+    if: always() && needs.plan.result == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
@@ -102,9 +133,12 @@ jobs:
           pattern: s151-mxd03-etq-*
           path: salidas
       - name: Evaluar con el criterio pre-registrado
+        env:
+          JOBS: ${{ needs.plan.outputs.jobs }}
         run: |
           set -o pipefail
-          python experiments/_s151_mxd03_etiquetas/evaluar_mxd03.py salidas --salida salidas/resumen.json | tee salidas/veredicto.txt
+          python experiments/_s151_mxd03_etiquetas/evaluar_mxd03.py salidas --jobs "$JOBS" \
+            --salida salidas/resumen.json | tee salidas/veredicto.txt
       - name: Upload resumen
         if: always()
         uses: actions/upload-artifact@v4

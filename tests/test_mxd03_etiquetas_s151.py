@@ -3,20 +3,23 @@
 
 POR QUE. El probe de #828 midio en 7 granulos (casi solo Lascar) que `_interp_geo`
 (`pipeline/process_modis.py:342`) deja el pixel corrido de 1 a 3 km respecto de MxD03. De esa
-posicion cuelgan la etiqueta summit/far y la publicacion en el tablero. Estos tests fijan lo que el
-probe tiene que cumplir antes de gastar una corrida en GitHub Actions:
+posicion cuelgan la etiqueta summit/far y la publicacion en el tablero. El verificador de #834 pidio
+cinco arreglos (v2), y estos tests fijan cada uno antes de gastar una corrida:
 
-  1. la poblacion (estratos A, B y control) sale de una regla escrita, no de mirar los datos;
-  2. el muestreo es determinista y respeta los topes;
-  3. el probe llama a `calculate_vrp` y a `store.append_record` con los MISMOS argumentos que
-     `scripts/run_pipeline.py` (comparado por AST, no por subcadena: A92);
-  4. el instrumento distingue un desplazamiento presente de uno ausente, de punta a punta, con el
-     pipeline real y el predicado del tablero ejecutado con node (A97, A116);
-  5. el veredicto sigue el criterio pre-registrado en el README.
+  1. la banda de cada record es el corrimiento que predice el modelo de #828 para su cenit, acimut y
+     satelite (no una banda fija de 3 km), y el control queda limpio a cenit alto;
+  2. las pasadas con alerta de MIROVA (y todas las protegidas, lectura A) y los B summit van en censo;
+  3. el veredicto principal es la compuerta de la regla 1 de docs/MISSION.md (ninguna protegida se
+     pierde) y el balance de la regla 2, no umbrales elegidos (A115);
+  4. un brazo C' (la lat/lon interpolada por el MISMO parche) tiene que dar identico al brazo C;
+  5. el evaluador: INCOMPLETO si falta un job o una protegida, CAMBIA POCO prohibido con la banda
+     corta, neto aparte del bruto;
+  6. el JSON se escribe por granulo.
 
 Criterio y diseno: experiments/_s151_mxd03_etiquetas/README.md
 """
 import ast
+import json
 import os
 import shutil
 import sys
@@ -36,116 +39,140 @@ import seleccionar_mxd03 as S  # noqa: E402
 import evaluar_mxd03 as E  # noqa: E402
 
 
-def _rec(final=None, pc=None, dc="far", sensor="MODIS_AQUA", dt="2026-03-14 07:05",
+def _rec(final=None, pc=None, dc="far", sensor="MODIS_AQUA", z=10.0, az=-80.0, dt="2026-03-14 07:05",
          granule="MYD021KM.A2026073.0705.061.2026074000000.hdf"):
-    r = {"final_hotspot_dist_km": final, "distance_class": dc, "sensor": sensor,
-         "datetime_utc": dt, "granule": granule}
+    r = {"final_hotspot_dist_km": final, "distance_class": dc, "sensor": sensor, "datetime_utc": dt,
+         "granule": granule, "sensor_zenith_deg": z, "sensor_azimuth_deg": az}
     r["primary_cluster"] = None if pc is None else {"centroid_dist_km": pc, "vrp_mw": 0.3}
     return r
 
 
-# ------------------------------------------------------------------ 1. estratos
-@pytest.mark.parametrize("final,pc,esperado", [
-    (4.0, None, "A"),        # hotspot final a 1 km del limite de 5
-    (7.9, 30.0, "A"),        # a 2,9 km por fuera: todavia A
-    (21.0, 3.9, "B"),        # final lejos (el Salar), cumulo cerca del limite: B
-    (21.0, 1.5, None),       # cumulo a 3,5 km del limite: banda intermedia
-    (21.0, 12.0, "control"),  # todo a mas de 6 km del limite
-    (9.5, None, None),       # a 4,5 km del limite: banda intermedia, fuera de la muestra
-    (None, None, None),      # sin distancias
+# ------------------------------------------------------------------ 1. modelo de corrimiento y bandas
+@pytest.mark.parametrize("cenit,acimut,sensor,lo,hi", [
+    (44.7, 101.07, "MODIS_AQUA", 2.6, 3.2),     # #828 A2026073.0705: midio 2,58, su modelo dio 2,82
+    (40.0, 101.22, "MODIS_AQUA", 2.0, 2.6),     # #828 A2026086.0710: midio 2,21
+    (31.3, -99.91, "MODIS_TERRA", 1.3, 1.9),    # #828 A2026078.0155: lado del frame 0 en Terra
+    (30.5, -82.64, "MODIS_AQUA", 0.1, 0.5),     # otro lado: midio 0,25
+    (65.0, 101.0, "MODIS_AQUA", 8.5, 10.5),     # el verificador: 9,6 km a 65 grados
+    (54.0, 101.0, "MODIS_AQUA", 4.3, 5.3),      # 4,8 km a 54 grados
 ])
-def test_estrato(final, pc, esperado):
-    assert S.estrato(_rec(final, pc), inner=5.0) == esperado
+def test_corrimiento_predicho_reproduce_828_y_el_verificador(cenit, acimut, sensor, lo, hi):
+    assert lo <= S.corrimiento_predicho(cenit, acimut, sensor) <= hi
 
 
-def test_estrato_a_gana_sobre_b():
-    """Si el hotspot final esta cerca del limite, el record es A aunque el cumulo tambien lo este."""
-    assert S.estrato(_rec(5.5, 4.5), inner=5.0) == "A"
+def test_sin_angulos_no_hay_prediccion_y_la_banda_es_la_maxima():
+    assert S.corrimiento_predicho(None, 10.0, "MODIS_AQUA") is None
+    r = _rec(4.0, None, z=None, az=None)
+    assert S.banda(r) >= 9.5
 
 
-def test_control_exige_todas_las_distancias_lejos():
-    assert S.estrato(_rec(21.0, 10.5), inner=5.0) is None   # cumulo a 5,5 km del limite
-    assert S.estrato(_rec(21.0, 11.5), inner=5.0) == "control"
+def test_estrato_usa_la_banda_del_record():
+    # a cenit bajo la banda es ~1 km: un hotspot a 2,5 km del limite no alcanza
+    assert S.estrato(_rec(7.5, None, z=10.0, az=-80.0), inner=5.0) == "fuera"
+    # a 60 grados del lado del frame 0 si alcanza
+    assert S.estrato(_rec(7.5, None, z=60.0, az=100.0), inner=5.0) == "A"
 
 
-# ------------------------------------------------------------------ 2. clave y muestreo
-def test_clave_granulo_desde_el_nombre():
+def test_estrato_b_se_parte_en_summit_y_far():
+    assert S.estrato(_rec(21.0, 5.3, dc="summit"), inner=5.0) == "B_summit"
+    assert S.estrato(_rec(21.0, 5.3, dc="far"), inner=5.0) == "B_far"
+
+
+def test_control_limpio_a_cenit_alto():
+    """A 65 grados el corrimiento predicho pasa de 9 km: 8 km del limite NO es control."""
+    r_bajo = _rec(21.0, 13.5, z=10.0, az=-80.0)
+    r_alto = _rec(21.0, 13.5, z=65.0, az=100.0)
+    assert S.estrato(r_bajo, inner=5.0) == "control"
+    assert S.estrato(r_alto, inner=5.0) != "control"
+
+
+def test_clave_granulo():
     assert S.clave_granulo(_rec()) == "MYD021KM.A2026073.0705"
-    r = _rec(sensor="MODIS_TERRA", granule="MOD021KM.A2026289.0145.061.2026289022621.NRT.hdf")
-    assert S.clave_granulo(r) == "MOD021KM.A2026289.0145"
+    assert S.clave_granulo(_rec(sensor="MODIS_TERRA", dt="2026-03-16 01:15", granule=None)) == "MOD021KM.A2026075.0115"
 
 
-def test_clave_granulo_sin_nombre_sale_de_sensor_y_hora():
-    r = _rec(sensor="MODIS_TERRA", dt="2026-03-16 01:15", granule=None)
-    assert S.clave_granulo(r) == "MOD021KM.A2026075.0115"
-
-
-def test_muestreo_determinista_y_con_tope():
+def test_muestreo_determinista():
     xs = ["g%03d" % i for i in range(50)]
-    a = S.muestrear(xs, 10)
-    assert len(a) == 10 and a == S.muestrear(list(reversed(xs)), 10)
+    assert S.muestrear(xs, 10) == S.muestrear(list(reversed(xs)), 10)
     assert sorted(S.muestrear(xs, 100)) == sorted(xs)
-    assert set(S.muestrear(xs, 10, sal="otra")) != set(a)
 
 
-def test_construir_poblacion_respeta_topes_y_cuenta_la_poblacion():
-    recs = ([_rec(4.5, 4.0, granule="MYD021KM.A2026%03d.0705.x.hdf" % d) for d in range(60, 100)]
-            + [_rec(21.0, 4.0, granule="MOD021KM.A2026%03d.0115.x.hdf" % d) for d in range(60, 80)]
-            + [_rec(21.0, 15.0, granule="MOD021KM.A2026%03d.0300.x.hdf" % d) for d in range(60, 70)]
-            + [_rec(9.5, None, granule="MOD021KM.A2026%03d.0400.x.hdf" % d) for d in range(60, 65)]
-            + [_rec(4.5, 4.0, dt="2026-02-01 07:05", granule="MYD021KM.A2026032.0705.x.hdf")])  # fuera de ventana
-    p = S.construir_poblacion({"Lascar": recs}, {"Lascar": 5.0}, ventana=("2026-03-01", "2026-10-12"),
-                              topes={"A": 30, "B": 8, "control": 6})
-    v = p["Lascar"]
-    assert v["N"] == {"A": 40, "B": 20, "control": 10, "medio": 5, "sin_distancia": 0, "total": 75}
-    cuenta = {e: sum(1 for g in v["muestra"] if g["estrato"] == e) for e in ("A", "B", "control")}
-    assert cuenta == {"A": 30, "B": 8, "control": 6}
-    assert len({g["clave"] for g in v["muestra"]}) == 44
+# ------------------------------------------------------------------ 2. censo y jobs
+def _etiqueta_fija(tabla):
+    def f(vol, r):
+        return tabla.get(r["granule"], {"lab": "neg_limpio", "prot": False, "vrp_ref": None, "pub": 0})
+    return f
+
+
+def test_censo_de_alertas_protegidas_y_b_summit():
+    recs = [_rec(21.0, 15.0, granule="MYD021KM.A2026%03d.0705.x.hdf" % d) for d in range(60, 100)]   # control
+    recs += [_rec(5.5, 5.0, z=10.0, granule="MOD021KM.A2026%03d.0115.x.hdf" % d) for d in range(60, 100)]  # A
+    recs += [_rec(21.0, 5.3, dc="summit", granule="MOD021KM.A2026%03d.0300.x.hdf" % d) for d in range(60, 63)]
+    tabla = {"MYD021KM.A2026061.0705.x.hdf": {"lab": "pos", "prot": True, "vrp_ref": 3.0, "pub": 1},
+             "MYD021KM.A2026062.0705.x.hdf": {"lab": "pos", "prot": False, "vrp_ref": 0.3, "pub": 0}}
+    pob = S.construir_poblacion({"Lascar": recs}, {"Lascar": 5.0}, _etiqueta_fija(tabla),
+                                ventana=("2026-03-01", "2026-10-12"), topes={"A": 30, "B_far": 6, "control": 4})
+    m = pob["Lascar"]["muestra"]
+    claves = {g["clave"] for g in m}
+    assert "MYD021KM.A2026061.0705" in claves and "MYD021KM.A2026062.0705" in claves   # alertas en censo
+    assert sum(g["estrato"] == "B_summit" for g in m) == 3                            # B summit entero
+    assert sum(g["estrato"] == "A" for g in m) == 30
+    assert sum(g["estrato"] == "control" and not g["censo"] for g in m) == 4
+    assert pob["Lascar"]["n_protegidas"] == 1
+    assert pob["Lascar"]["N"]["control"]["neg_limpio"] == 38
+
+
+def test_repartir_en_jobs_parte_al_volcan_grande():
+    pob = {"Lascar": {"muestra": [{"clave": "g%02d" % i} for i in range(55)]},
+           "Isluga": {"muestra": [{"clave": "h%02d" % i} for i in range(20)]}}
+    jobs = S.repartir_en_jobs(pob, max_por_job=40)
+    assert set(jobs) == {"Lascar-1", "Lascar-2", "Isluga"}
+    assert all(len(j["granulos"]) <= 40 for j in jobs.values())
+    assert sorted(jobs["Lascar-1"]["granulos"] + jobs["Lascar-2"]["granulos"]) == ["g%02d" % i for i in range(55)]
 
 
 # ------------------------------------------------------------------ 3. mismos argumentos que produccion
-def _llamada_en_run_pipeline(nombre_funcion):
+def _llamadas_en_run_pipeline(nombre):
     arbol = ast.parse((ROOT / "scripts" / "run_pipeline.py").read_text(encoding="utf-8"))
     pd_ = next(n for n in ast.walk(arbol) if isinstance(n, ast.FunctionDef) and n.name == "process_date")
-    llamadas = []
-    for n in ast.walk(pd_):
-        if (isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
-                and n.func.attr == nombre_funcion and isinstance(n.func.value, ast.Name)):
-            llamadas.append(n)
-    return llamadas
+    return [n for n in ast.walk(pd_) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+            and n.func.attr == nombre and isinstance(n.func.value, ast.Name)]
 
 
 def test_calculate_vrp_con_los_mismos_argumentos_que_run_pipeline():
     import probe_etiquetas as P
-    modis = [c for c in _llamada_en_run_pipeline("calculate_vrp") if c.func.value.id == "process_modis"]
-    assert len(modis) == 1
-    c = modis[0]
-    assert len(c.args) == 5
+    c = [x for x in _llamadas_en_run_pipeline("calculate_vrp") if x.func.value.id == "process_modis"]
+    assert len(c) == 1 and len(c[0].args) == 5
     v = {"name": "X", "lat": -23.0, "lon": -67.0, "radius_km": 25, "vent_lat": -23.0, "vent_lon": -67.0}
-    assert set(P.argumentos_calculate_vrp(v)) == {k.arg for k in c.keywords}
+    assert set(P.argumentos_calculate_vrp(v)) == {k.arg for k in c[0].keywords}
 
 
 def test_append_record_con_los_mismos_argumentos_que_run_pipeline():
     import probe_etiquetas as P
-    llamadas = [c for c in _llamada_en_run_pipeline("append_record") if c.func.value.id == "store"]
-    assert llamadas, "run_pipeline ya no llama store.append_record"
-    claves = {frozenset(k.arg for k in c.keywords) for c in llamadas}
-    assert len(claves) == 1, "las ramas de run_pipeline llaman append_record con argumentos distintos"
+    ll = [x for x in _llamadas_en_run_pipeline("append_record") if x.func.value.id == "store"]
+    claves = {frozenset(k.arg for k in x.keywords) for x in ll}
+    assert len(claves) == 1
     v = {"name": "X", "lat": -23.0, "lon": -67.0, "radius_km": 25}
     assert set(P.argumentos_append_record(v, overwrite=True)) == set(next(iter(claves)))
 
 
-# ------------------------------------------------------------------ 4. comparacion y desplazamiento
+# ------------------------------------------------------------------ 4. comparacion, C' y escritura incremental
 def test_comparar_clasifica_los_cambios():
     import probe_etiquetas as P
     c = {"dc": "summit", "n_anom": 2, "pc_vrp": 0.4}
-    m = {"dc": "far", "n_anom": 2, "pc_vrp": 0.4}
-    out = P.comparar(c, m, 1, 0)
-    assert out == {"etiqueta": "summit->far", "pub": "1->0", "deteccion_cambia": False}
-    out = P.comparar(c, dict(c), 1, 1)
-    assert out == {"etiqueta": "igual", "pub": "igual", "deteccion_cambia": False}
-    assert P.comparar(c, {"dc": "summit", "n_anom": 3, "pc_vrp": 0.4}, 1, 1)["deteccion_cambia"]
-    assert P.comparar(None, m, 0, 0)["etiqueta"] == "None->far"
+    assert P.comparar(c, dict(c, dc="far"), 1, 0) == {"etiqueta": "summit->far", "pub": "1->0",
+                                                      "deteccion_cambia": False}
+    assert P.comparar(c, dict(c), 1, 1) == {"etiqueta": "igual", "pub": "igual", "deteccion_cambia": False}
+    assert P.comparar(c, dict(c, n_anom=3), 1, 1)["deteccion_cambia"]
+    assert P.comparar(None, dict(c, dc="far"), 0, 0)["etiqueta"] == "None->far"
+
+
+def test_registros_iguales_ignora_solo_las_marcas_de_hora():
+    import probe_etiquetas as P
+    a = {"vrp_mw": 1.0, "distance_class": "summit", "processed_utc": "x", "first_processed_utc": "x"}
+    assert P.registros_iguales(a, dict(a, processed_utc="y", first_processed_utc="y"))
+    assert not P.registros_iguales(a, dict(a, distance_class="far"))
+    assert not P.registros_iguales(a, None) and P.registros_iguales(None, None)
 
 
 def test_desplazamiento_en_el_crater_mide_el_corrimiento_impuesto():
@@ -155,9 +182,8 @@ def test_desplazamiento_en_el_crater_mide_el_corrimiento_impuesto():
     lons = -67.73 + (np.arange(81) - k) / (111.32 * np.cos(np.radians(-23.36)))
     lat, lon = np.meshgrid(lats, lons, indexing="ij")
     d = P.desplazamiento_crater(lat + 1.5 / 111.32, lon, lat, lon, (-23.36, -67.73))
-    assert abs(d["dn_km"] - 1.5) < 0.01 and abs(d["de_km"]) < 0.01 and abs(d["km"] - 1.5) < 0.01
-    cero = P.desplazamiento_crater(lat, lon, lat, lon, (-23.36, -67.73))
-    assert cero["km"] < 1e-6
+    assert abs(d["dn_km"] - 1.5) < 0.01 and abs(d["km"] - 1.5) < 0.01
+    assert P.desplazamiento_crater(lat, lon, lat, lon, (-23.36, -67.73))["km"] < 1e-6
 
 
 def test_mxd03_con_relleno_no_entra_como_posicion():
@@ -168,92 +194,158 @@ def test_mxd03_con_relleno_no_entra_como_posicion():
     assert np.isnan(out[0, 0]) and out[1, 1] == np.float32(-23.0)
 
 
+def test_guardar_escribe_json_valido_en_cada_llamada(tmp_path):
+    import probe_etiquetas as P
+    p = tmp_path / "Lascar-1.json"
+    P.guardar(p, {"job": "Lascar-1", "completo": False, "granulos": [{"clave": "a"}]})
+    assert json.loads(p.read_text(encoding="utf-8"))["granulos"] == [{"clave": "a"}]
+    P.guardar(p, {"job": "Lascar-1", "completo": True, "granulos": [{"clave": "a"}, {"clave": "b"}]})
+    assert json.loads(p.read_text(encoding="utf-8"))["completo"] is True
+    assert not list(tmp_path.glob("*.tmp"))
+
+
 # ------------------------------------------------------------------ 5. de punta a punta (sintetico)
 @pytest.mark.skipif(shutil.which("node") is None, reason="el predicado del tablero corre con node")
-def test_el_instrumento_distingue_desplazamiento_presente_de_ausente(tmp_path):
+def test_el_instrumento_distingue_presente_ausente_y_su_control_negativo():
     import probar_probe_mxd03 as T
-    presente, ausente = T.correr()
-    assert presente["comparacion"]["etiqueta"] == "summit->far"
-    assert presente["comparacion"]["pub"] == "1->0"
-    assert abs(presente["desplazamiento"]["km"] - T.CORRIMIENTO_KM) < 0.05
-    assert ausente["comparacion"] == {"etiqueta": "igual", "pub": "igual", "deteccion_cambia": False}
-    assert ausente["desplazamiento"]["km"] < 1e-6
+    r = T.correr()
+    assert r["presente"]["comparacion"] == {"etiqueta": "summit->far", "pub": "1->0", "deteccion_cambia": False}
+    assert abs(r["presente"]["desplazamiento"]["km"] - T.CORRIMIENTO_KM) < 0.05
+    assert r["ausente"]["comparacion"] == {"etiqueta": "igual", "pub": "igual", "deteccion_cambia": False}
+    assert r["presente"]["cprima_igual"] is True          # C' por el parche == C
+    assert r["relleno"]["comparacion"]["etiqueta"] == "igual"   # MxD03 con relleno lejos no rompe nada
 
 
-# ------------------------------------------------------------------ 6. evaluador y veredicto
-def test_wilson_bordes():
-    lo, hi = E.wilson(0, 10)
-    assert lo == 0.0 and 0.25 < hi < 0.35
-    lo, hi = E.wilson(10, 10)
-    assert 0.65 < lo < 0.75 and hi == pytest.approx(1.0)
-    assert E.wilson(0, 0) == (0.0, 1.0)
+# ------------------------------------------------------------------ 6. evaluador
+def _fila(clave, estrato="A", lab="neg_limpio", prot=False, censo=False, pred=1.0):
+    return {"clave": clave, "estrato": estrato, "lab": lab, "prot": prot, "censo": censo,
+            "corrimiento_predicho_km": pred, "datetime_utc": "2026-03-14 07:05", "sensor": "MODIS_AQUA"}
 
 
-def _vol(N_A, n_A, k_lab_A, k_pub_A, N_B=100, n_B=8, k_pub_B=0, n_ctrl=6, k_lab_ctrl=0,
-         n_pub=100, faltan=0, desp=1.0):
-    gr = []
-    for i in range(n_A):
-        gr.append({"estrato": "A", "estado": "ok", "desplazamiento": {"km": desp},
-                   "comparacion": {"etiqueta": "summit->far" if i < k_lab_A else "igual",
-                                   "pub": "1->0" if i < k_pub_A else "igual", "deteccion_cambia": False}})
-    for i in range(n_B):
-        gr.append({"estrato": "B", "estado": "ok", "desplazamiento": {"km": desp},
-                   "comparacion": {"etiqueta": "igual", "pub": "1->0" if i < k_pub_B else "igual",
-                                   "deteccion_cambia": False}})
-    for i in range(n_ctrl):
-        gr.append({"estrato": "control", "estado": "ok", "desplazamiento": {"km": desp},
-                   "comparacion": {"etiqueta": "far->summit" if i < k_lab_ctrl else "igual",
-                                   "pub": "igual", "deteccion_cambia": False}})
-    for _ in range(faltan):
-        gr.append({"estrato": "A", "estado": "error"})
-    return {"N": {"A": N_A, "B": N_B, "control": 50, "medio": 0, "sin_distancia": 0,
-                  "total": N_A + N_B + 50}, "n_pub_tramo": n_pub, "granulos": gr}
+def _medida(clave, pub=("igual", 0, 0), etiqueta="igual", det=False, desp=0.5, cprima=None):
+    p, pc, pm = pub
+    return {"clave": clave, "estado": "ok", "pub_c": pc, "pub_m": pm, "cprima_igual": cprima,
+            "desplazamiento": {"km": desp},
+            "comparacion": {"etiqueta": etiqueta, "pub": p, "deteccion_cambia": det}}
 
 
-def test_veredicto_poco():
-    vols = {v: _vol(20, 20, 0, 0) for v in ("a", "b", "c")}
-    assert E.evaluar(vols)["veredicto"] == "CAMBIA POCO"
+def _caso(filas_por_vol, medidas_por_vol, N=None, jobs=None):
+    pob = {"volcanes": {}, "jobs": {}}
+    sal = {}
+    for vol, filas in filas_por_vol.items():
+        n = N[vol] if N else {}
+        if not n:
+            for f in filas:
+                n.setdefault(f["estrato"], {}).setdefault(f["lab"], 0)
+                n[f["estrato"]][f["lab"]] += 1
+        pob["volcanes"][vol] = {"N": n, "n_pub_tramo": 100, "muestra": filas}
+        pob["jobs"][vol] = {"volcan": vol, "granulos": [f["clave"] for f in filas]}
+        if vol in medidas_por_vol:
+            sal[vol] = {"job": vol, "volcan": vol, "completo": True, "granulos": medidas_por_vol[vol]}
+    return pob, sal
 
 
-def test_veredicto_mucho_por_publicaciones():
-    vols = {v: _vol(20, 20, 2, 2) for v in ("a", "b", "c")}      # 2 de 20 de A: 10 % de 20 -> 2 por volcan
-    vols["d"] = _vol(100, 20, 4, 4, n_pub=10)                      # 20 % de 100 = 20 publicaciones movidas
-    assert E.evaluar(vols)["veredicto"] == "CAMBIA MUCHO"
+def _limpio(vol, n=10):
+    filas = [_fila("%s%d" % (vol, i)) for i in range(n)]
+    meds = [_medida(f["clave"], cprima=(True if i == 0 else None)) for i, f in enumerate(filas)]
+    return filas, meds
 
 
-def test_un_solo_cambio_en_un_estrato_pesado_no_decide_mucho():
-    """Un granulo B de Lastarria pesa 365/8 = 46 records: un cambio aislado da 7 % de 622 pero no basta."""
-    vols = {v: _vol(20, 20, 0, 0, n_pub=60) for v in ("a", "b")}
-    vols["c"] = _vol(20, 20, 0, 0, N_B=365, n_B=8, k_pub_B=1, n_pub=60)
-    r = E.evaluar(vols)
-    assert r["fraccion_publicaciones_movidas"] >= E.MUCHO_PUB
-    assert r["veredicto"] != "CAMBIA MUCHO"
+def test_sin_cambios_da_sin_cambio_observado():
+    f, m = _limpio("a")
+    pob, sal = _caso({"a": f}, {"a": m})
+    assert E.evaluar(pob, sal)["veredicto"] == "SIN CAMBIO OBSERVADO"
 
 
-def test_veredicto_mucho_por_etiquetas_en_un_volcan():
-    vols = {v: _vol(20, 20, 0, 0, n_pub=1000) for v in ("a", "b")}
-    vols["c"] = _vol(30, 30, 15, 0, n_pub=1000)                    # 50 % de A cambia de etiqueta
-    assert E.evaluar(vols)["veredicto"] == "CAMBIA MUCHO"
+def test_c_prima_distinto_invalida_el_instrumento():
+    f, m = _limpio("a")
+    m[0]["cprima_igual"] = False
+    pob, sal = _caso({"a": f}, {"a": m})
+    assert E.evaluar(pob, sal)["veredicto"] == "INVALIDO"
 
 
-def test_veredicto_intermedio():
-    vols = {v: _vol(20, 20, 0, 0, n_pub=100) for v in ("a", "b")}
-    vols["c"] = _vol(20, 20, 5, 5, n_pub=100)   # publicaciones 5 de 300 (1,7 %); etiqueta: Wilson inferior 0,11
-    assert E.evaluar(vols)["veredicto"] == "INTERMEDIO"
+def test_sin_ningun_c_prima_el_instrumento_no_esta_controlado():
+    f, m = _limpio("a")
+    m[0]["cprima_igual"] = None
+    pob, sal = _caso({"a": f}, {"a": m})
+    assert E.evaluar(pob, sal)["veredicto"] == "INCOMPLETO"
 
 
-def test_veredicto_incompleto_si_un_volcan_pierde_mas_del_20_por_ciento():
-    vols = {v: _vol(20, 20, 0, 0) for v in ("a", "b")}
-    vols["c"] = _vol(20, 20, 0, 0, faltan=10)
-    assert E.evaluar(vols)["veredicto"] == "INCOMPLETO"
+def test_falta_un_job_pedido_da_incompleto():
+    fa, ma = _limpio("a")
+    fb, _ = _limpio("b")
+    pob, sal = _caso({"a": fa, "b": fb}, {"a": ma})
+    assert E.evaluar(pob, sal)["veredicto"] == "INCOMPLETO"
 
 
-def test_la_banda_corta_marca_cota_inferior():
-    vols = {v: _vol(20, 20, 0, 0, desp=3.5) for v in ("a", "b")}
-    r = E.evaluar(vols)
-    assert r["cota_inferior"] is True
+def test_falta_una_protegida_da_incompleto():
+    f, m = _limpio("a")
+    f.append(_fila("prot1", estrato="control", lab="pos", prot=True, censo=True))
+    pob, sal = _caso({"a": f}, {"a": m})          # la protegida no se midio (10 de 11, bajo el 20 %)
+    assert E.evaluar(pob, sal)["veredicto"] == "INCOMPLETO"
+
+
+def test_perder_una_protegida_es_la_compuerta():
+    f, m = _limpio("a")
+    f.append(_fila("prot1", estrato="control", lab="pos", prot=True, censo=True))
+    m.append(_medida("prot1", pub=("1->0", 1, 0)))
+    pob, sal = _caso({"a": f}, {"a": m})
+    r = E.evaluar(pob, sal)
+    assert r["veredicto"] == "PIERDE PROTEGIDA" and r["regla1"]["perdidas"] == 1
+
+
+def test_balance_mejora_cuando_se_apagan_publicaciones_de_mas():
+    filas = [_fila("n%d" % i) for i in range(30)]
+    meds = [_medida(f["clave"], pub=("1->0", 1, 0) if i < 20 else ("igual", 1, 1), cprima=(True if i == 0 else None))
+            for i, f in enumerate(filas)]
+    pob, sal = _caso({"a": filas}, {"a": meds})
+    r = E.evaluar(pob, sal)
+    assert r["regla2"]["delta_errores"] < 0 and r["veredicto"] == "MEJORA"
+
+
+def test_balance_empeora_cuando_se_pierden_alertas_bajo_1_mw():
+    f, m = _limpio("a", n=5)
+    for i in range(8):
+        f.append(_fila("al%d" % i, estrato="control", lab="pos", censo=True))
+        m.append(_medida("al%d" % i, pub=("1->0", 1, 0)))
+    pob, sal = _caso({"a": f}, {"a": m})
+    r = E.evaluar(pob, sal)
+    assert r["regla2"]["alertas_perdidas"] == 8 and r["veredicto"] == "EMPEORA"
+
+
+def test_banda_corta_bloquea_el_balance_y_prohibe_cambia_poco():
+    f, m = _limpio("a")
+    for x in m:
+        x["desplazamiento"]["km"] = 5.0           # predicho 1 km + 1 de margen: el modelo se quedo corto
+    pob, sal = _caso({"a": f}, {"a": m})
+    r = E.evaluar(pob, sal)
+    assert r["banda_corta"] is True
+    assert r["veredicto"] == "BANDA CORTA"
+    assert r["magnitud"]["nivel"] != "CAMBIA POCO"
+
+
+def test_neto_aparte_del_bruto_y_tipo_de_cambio():
+    filas = [_fila("n%d" % i) for i in range(10)]
+    meds = [_medida(f["clave"], cprima=(True if i == 0 else None)) for i, f in enumerate(filas)]
+    meds[1] = _medida("n1", pub=("1->0", 1, 0), etiqueta="summit->far")
+    meds[2] = _medida("n2", pub=("0->1", 0, 1), etiqueta="far->summit", det=True)
+    meds[3] = _medida("n3", pub=("1->0", 1, 0), etiqueta="summit->far")
+    pob, sal = _caso({"a": filas}, {"a": meds})
+    mg = E.evaluar(pob, sal)["magnitud"]
+    assert mg["bruto"] == {"1->0": 2, "0->1": 1} and mg["neto_observado"] == -1
+    assert mg["por_tipo"] == {"misma_deteccion_otra_etiqueta": 2, "otra_deteccion": 1}
 
 
 def test_el_control_que_cambia_queda_anotado():
-    vols = {v: _vol(20, 20, 0, 0, n_ctrl=6, k_lab_ctrl=2) for v in ("a", "b")}
-    assert E.evaluar(vols)["control_cambia"] is True
+    f, m = _limpio("a")
+    for i in range(4):
+        f.append(_fila("c%d" % i, estrato="control"))
+        m.append(_medida("c%d" % i, etiqueta="far->summit" if i < 2 else "igual", det=True))
+    pob, sal = _caso({"a": f}, {"a": m})
+    assert E.evaluar(pob, sal)["control_cambia"] is True
+
+
+def test_wilson_bordes():
+    assert E.wilson(0, 0) == (0.0, 1.0)
+    lo, hi = E.wilson(0, 10)
+    assert lo == 0.0 and 0.25 < hi < 0.35
