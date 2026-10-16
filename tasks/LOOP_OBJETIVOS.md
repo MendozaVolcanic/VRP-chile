@@ -351,6 +351,19 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 13:57 UTC (vuelta 107): pre-registro 1.21 entregado (PR #840, CI verde, sin merge); verificador lanzado
+- PR #840 (`loop/1.21-prereg`, head `f3fb8d7a`), CI run 38911168165: 1.876 pasan (base 1.837, +39 nuevos). Seis brazos
+  más C': C, CC (etiqueta desde el cúmulo sin MxD03), M, MC, R y RC (traslación rígida de la grilla del tamaño del
+  corrimiento medido, como nulo). El flag se cambia en el módulo porque `process_modis.py:173` lo importa por valor;
+  consumidores: dos llamadas a `derivar_distance_class` (l. 1328 y 1495). Misma muestra que la 1.17 (sha256 fijado).
+  Modelo con término a lo largo de la traza: bajo 20° de cenit mediana medida 1,171 km contra 1,275 predicha
+  (r = 0,981); gránulos fuera de banda 87 a 4 de 470. Estimador cambiado tras medir su cobertura (Dirichlet ½ cubría
+  0 de 300 el efecto grande).
+- **Predicción previa (no decide):** el replay de la etiqueta desde el cúmulo recupera 46 de 46 protegidas pero
+  publica 4.454 de 5.047 negativos limpios (C 587): Δ +3.829, MC saldría EMPEORA por la regla 2. Coherente con A82
+  (cúmulo dentro del inner en 89 % de los negativos limpios MODIS). Sin cronometrar: tiempo por job.
+- Verificador limpio lanzado (`C:\Users\nmend\AppData\Local\Temp\claude\verif_121\`). El sello espera su veredicto.
+
 ### 2026-10-16 13:49 UTC (vuelta 106): informe del paper v2 entregado a Nicolás (punto 4 del pedido)
 - `experiments/_s152_paper_revision/INFORME_CAMBIOS_PAPER_v2.md` (con la v1 y el verificador al lado): 69 filas, 10
   FALSA (errores independientes), 19 REBAJADA, 13 DESACTUALIZADA, 13 FALTA, 14 SIN CAMBIO. Los 5 más graves: «no hay
