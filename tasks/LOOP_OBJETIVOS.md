@@ -343,6 +343,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 09:05 UTC (vuelta 89): 1.20 arrancada (techos M15 y NOAA-21, sólo lectura)
+- Paradas: NRT corriendo desde 08:45 UTC (último verde 03:15); disco 21 GB. V2a intento 2 con 6 jobs en curso; W2a 19
+  de 22. Esperan a Nicolás: D-11, D-12, D-13.
+- 1.20 delegada: qué borra el techo de M15 en 343 K y si la defensa de saturación de I04 queda muerta en NOAA-21; con
+  control positivo y sin tocar el pipeline. Salida en `C:\Users\nmend\AppData\Local\Temp\claude\techos_120\`.
+
 ### 2026-10-16 ~08:55 UTC (vuelta 88): F/K V1 sin evaluar: cobertura despareja en los cuatro brazos (D-13)
 - Unión de intentos (43 del 1 más el gemelo del 2) contada con `contar_pasadas.py` (ventana 08-29 a 10-08): C0 4.754,
   F 4.779 (faltan 39, sobran 64), K 4.798 (22, 66), G 4.791 (29, 66); contra la unión de 4.820, a C0 le faltan 66.
