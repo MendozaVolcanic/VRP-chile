@@ -322,6 +322,9 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   producción).
 - Siguiente: con #833 en main, despachar W2 partida en dos mitades (06-13 a 06-21 y 06-22 a 06-30), la segunda cuando
   la primera ya corra (el grupo guarda un solo pendiente). Después, la tarea 1.16.
+- **Hecho en la misma vuelta:** #833 mergeado (CI verde, `8b2bcd79`). W2a despachada (run 38853230521, 06-13 a 06-21,
+  11 volcanes, ya con jobs corriendo) y W2b después (run 38853273752, 06-22 a 06-30, pendiente en el grupo). Quedan 2
+  A/B en GitHub: F/K (V2a corriendo, repetición de V1 pendiente) y el diurno. W3 a W6 se despachan cuando W2 termine.
 
 ### 2026-10-16 04:20 UTC (vuelta 71): la distancia del OCR acierta el lado; trabajo en paralelo
 - Nicolás pidió avanzar en paralelo cuidando disco y procesos. Computador despierto mientras haya trabajo; disco
