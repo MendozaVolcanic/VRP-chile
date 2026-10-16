@@ -1,0 +1,137 @@
+name: "Probe S151 1.18, pixeles saturados en el L1B de Nevados de Chillan (solo lectura)"
+
+# Tarea 1.18 del loop. Medicion DESCRIPTIVA, sin umbral ni veredicto: cuenta en el L1B (VIIRS 375,
+# VIIRS 750 y MODIS, de dia y de noche) los pixeles que produccion borra por saturacion, recalcula el VRP
+# con y sin ellos con el mismo calculate_vrp y lo cruza con lo que MIROVA publico.
+# Diseno y piso del pixel saturado: experiments/_s151_saturacion_chillan/README.md.
+# Solo lectura: no escribe en data/, no commitea, no hace push; el resultado queda como artefacto.
+# Borra cada granulo apenas lo usa.
+# A43: "on" entre comillas. S141: pipefail con tee. S146/A71: autentica SOLO por EARTHDATA_TOKEN y
+# falla al instante si viene vacio.
+# A15: CMR al 2026-10-16 (listado local, solo metadatos): V375 151 pares (48 GB), V750 151 (27 GB),
+# MODIS 79 (12 GB) del 2026-09-28 al 2026-10-16. Ritmo medido en el probe D25 V750 (run 38679955131,
+# Chillan 54 pasadas con 3 brazos en 25 min, unos 28 s por pasada); V375 pesa el doble por par, se
+# estima 60 a 75 s. Tramos: V375 en 6 (unos 25 pares, 25 a 35 min), V750 en 3 (unos 50, ~25 min),
+# MODIS en 2 (unos 40, ~20 min). Presupuesto interno 60 min (el script deja de bajar al pasarlo y marca
+# "sin_tiempo"); timeout 80 = 60 x 1,3.
+"on":
+  workflow_dispatch:
+    inputs:
+      desde:
+        description: "Primer dia (AAAA-MM-DD)"
+        required: true
+        default: "2026-09-28"
+      hasta:
+        description: "Ultimo dia (AAAA-MM-DD); vacio = hoy UTC"
+        required: false
+        default: ""
+
+concurrency:
+  group: probe-s151-saturacion-chillan
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04  # pyhdf probado en 24.04 (ver nrt.yml)
+    timeout-minutes: 80
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        include:
+          - {familia: V375, tramo: 0, n: 6}
+          - {familia: V375, tramo: 1, n: 6}
+          - {familia: V375, tramo: 2, n: 6}
+          - {familia: V375, tramo: 3, n: 6}
+          - {familia: V375, tramo: 4, n: 6}
+          - {familia: V375, tramo: 5, n: 6}
+          - {familia: V750, tramo: 0, n: 3}
+          - {familia: V750, tramo: 1, n: 3}
+          - {familia: V750, tramo: 2, n: 3}
+          - {familia: MODIS, tramo: 0, n: 2}
+          - {familia: MODIS, tramo: 1, n: 2}
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas pytest
+          node --version
+      - name: Prueba sintetica (el conteo encuentra los saturados sembrados)
+        env:
+          VRP_PROFILE: mirova_equivalent
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python -m pytest -q tests/test_saturacion_chillan_s151.py 2>&1 | tee out/prueba_sintetica_${{ matrix.familia }}_t${{ matrix.tramo }}.txt
+      - name: Probe del tramo
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          HASTA="${{ github.event.inputs.hasta }}"
+          python experiments/_s151_saturacion_chillan/probe_saturacion.py --familia ${{ matrix.familia }} \
+            --desde "${{ github.event.inputs.desde }}" ${HASTA:+--hasta "$HASTA"} \
+            --tramo ${{ matrix.tramo }} --n-tramos ${{ matrix.n }} --out out --presupuesto-min 60 \
+            2>&1 | tee out/probe_${{ matrix.familia }}_t${{ matrix.tramo }}.log
+          rm -rf out/hdf
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s151-sat-chillan-${{ matrix.familia }}-t${{ matrix.tramo }}
+          path: |
+            out/*.json
+            out/*.txt
+            out/*.log
+          retention-days: 30
+          if-no-files-found: error
+
+  agregar:
+    needs: probe
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: pip install numpy pyyaml
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: s151-sat-chillan-*
+          path: salidas
+      - name: Cruzar con lo que MIROVA publico (descriptivo, sin veredicto)
+        run: |
+          set -o pipefail
+          python experiments/_s151_saturacion_chillan/evaluar_saturacion.py salidas \
+            --salida salidas/resumen.json --tabla salidas/tabla.md 2>&1 | tee salidas/resumen.txt
+      - name: Upload resumen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s151-sat-chillan-resumen
+          path: |
+            salidas/resumen.json
+            salidas/tabla.md
+            salidas/resumen.txt
+          retention-days: 30
+          if-no-files-found: error
