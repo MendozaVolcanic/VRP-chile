@@ -351,6 +351,16 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~13:00 UTC (vuelta 98): historia de Mirova-v1 completa; cron externo creado por Nicolás
+- Segunda corrida de `distancia_aprox_historia.yml` (run 38902737639) terminó en verde a las 12:59: 1.090 filas sin
+  `sin_tiempo` (todas calculadas), caché completa `mirova-dist-hist-38902737639` (47 MB), la más nueva. El OCR de las
+  13:00 debería restaurarla y escribir `Distancia_aprox_*` en segundos. Comprobar en la próxima sesión.
+- Nicolás creó el cron externo del NRT en cron-job.org. A las 12:56 UTC no había ninguna corrida `workflow_dispatch`:
+  falta el «Test run» (204 esperado) o esperar a las 01:10 UTC. Pendiente anotar el vencimiento del token en
+  `REGISTRO_CREDENCIALES.md` (Nicolás da la fecha, nunca el valor).
+- Sesión cerrada por contexto (84 %). Próxima: `/retomar` y relanzar el `/loop`; primero verificar la escritura de
+  la columna, unir y contar V1, V2a y W2a (D-13), y pre-registrar la 1.21.
+
 ### 2026-10-16 ~13:20 UTC (vuelta 97): verificador del resultado 1.17: PARCIAL; las 2 pérdidas son A46, no posición
 - `C:\Users\nmend\AppData\Local\Temp\claude\verif_117r\VERIFICADOR.md`. PIERDE PROTEGIDA es lo que manda la letra del
   pre-registro (`evaluar_mxd03.py:164-181`), con 470 de 471 gránulos. Pero las 2 pérdidas de Láscar Terra (04-20 y
