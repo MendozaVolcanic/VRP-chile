@@ -339,9 +339,14 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 | D-13 | Cobertura de los A/B largos: ¿repetir y unir intentos (A108, ~20 h por vuelta y puede abrir huecos nuevos) o evaluar sobre la intersección de pasadas presentes en todos los brazos, informando las excluidas (desviación registrada; la pérdida es por descarga, independiente del brazo)? Recomendación del loop: intersección, con la regla del 5 % del control contra producción como compuerta | `C:\Users\nmend\AppData\Local\Temp\claude\fk_v1\detalle_cobertura.txt` (V1: 31 de 44 jobs cortos, 0,5 a 1,4 % por job; C0 de PCC falla el 5 %) | F/K V1, V2a, diurno | pendiente |
 | D-12 | Merge de la columna `Distancia_aprox_*` en el scraper (Mirova-v1 es producción) | verificador limpio en dos vueltas: sin bloqueos; `Distancia_km` y columnas viejas byte a byte iguales; umbral 5 provisional | Mirova-v1#25 (`f774a5d`) | pendiente |
-| D-11 | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
+| D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-16 ~11:50 UTC (vuelta 93): D-11 sellado por Nicolás; probe 1.17 despachado
+- Nicolás selló el pre-registro de la 1.17. Despachado `probe-s151-mxd03-etiquetas.yml` con `preregistro_aprobado=si`,
+  run 38894508138, sobre `d9b10482` (contiene #837, `b130fa72`). 471 gránulos en 12 jobs, 1,5 a 2 h estimado. Al
+  terminar: contar cobertura, evaluar con el evaluador del pre-registro (regla 1 como compuerta), verificador limpio.
 
 ### 2026-10-16 11:24 UTC (vuelta 92): Chillán a 355,96 K sin saturar; W2a despareja (va a D-13)
 - Medición de saturación sobre 10-14 a 10-16 (run 38882932077): 3 tramos V375 fallaron por un defecto menor del probe
