@@ -306,7 +306,7 @@ def test_balance_mejora_cuando_se_apagan_publicaciones_de_mas():
 def test_balance_empeora_cuando_se_pierden_alertas_bajo_1_mw():
     f, m = _limpio("a", n=5)
     for i in range(8):
-        f.append(_fila("al%d" % i, estrato="control", lab="pos", censo=True))
+        f.append(_fila("al%d" % i, estrato="A", lab="pos", censo=True))
         m.append(_medida("al%d" % i, pub=("1->0", 1, 0)))
     pob, sal = _caso({"a": f}, {"a": m})
     r = E.evaluar(pob, sal)
@@ -349,3 +349,72 @@ def test_wilson_bordes():
     assert E.wilson(0, 0) == (0.0, 1.0)
     lo, hi = E.wilson(0, 10)
     assert lo == 0.0 and 0.25 < hi < 0.35
+
+
+# ------------------------------------------------------------------ 7. tercera vuelta: el intervalo de Delta
+# El verificador de #835 simulo el nulo (todo medido, nada cambia) con la poblacion real y obtuvo
+# Delta en [-2.265, +2.265]: con un solo 0->1 salia INDETERMINADO y MEJORA/EMPEORA eran inalcanzables.
+# El 97 % del ancho venia de B far, fuera y control, que el modelo declara inmoviles y que se muestrean
+# con 3 a 6 granulos por volcan. Desde v3 Delta se decide con A expandido (Wilson por volcan) mas los
+# censos en conteo exacto; los estratos inmoviles son la prueba del modelo.
+ANCHO_MAX_NULO = 90.0    # ancho total (hi - lo) de Delta bajo el nulo con poblacion.json; medido en v3: 88,0
+
+
+def _nulo_real():
+    pob = json.loads((EXP / "poblacion.json").read_text(encoding="utf-8"))
+    sal = {}
+    for j, x in pob["jobs"].items():
+        sal[j] = {"job": j, "volcan": x["volcan"], "completo": True, "granulos": [
+            _medida(c, cprima=(True if i == 0 else None)) for i, c in enumerate(x["granulos"])]}
+    return pob, sal
+
+
+def test_nulo_con_la_poblacion_real_tiene_ancho_acotado():
+    pob, sal = _nulo_real()
+    r = E.evaluar(pob, sal)
+    lo, hi = r["regla2"]["delta_intervalo"]
+    assert r["veredicto"] == "SIN CAMBIO OBSERVADO"
+    assert hi - lo <= ANCHO_MAX_NULO, "el intervalo de Delta bajo el nulo volvio a inflarse: %s" % [lo, hi]
+    assert hi - lo > 0, "A se muestrea: bajo el nulo su Wilson no puede dar ancho cero"
+
+
+def test_un_cambio_en_a_no_vuelve_inalcanzable_el_veredicto():
+    """Con la poblacion real, apagar 30 publicaciones de mas en A tiene que poder dar MEJORA."""
+    pob, sal = _nulo_real()
+    mover = {(v, g["clave"]) for v, d in pob["volcanes"].items() for g in d["muestra"]
+             if g["estrato"] == "A" and g["lab"] == "neg_limpio" and not g["censo"]}
+    for s in sal.values():
+        for g in s["granulos"]:
+            if (s["volcan"], g["clave"]) in mover:
+                g.update(pub_c=1, pub_m=0, comparacion={"etiqueta": "summit->far", "pub": "1->0",
+                                                        "deteccion_cambia": False})
+    assert E.evaluar(pob, sal)["veredicto"] == "MEJORA"
+
+
+def test_censo_entero_no_lleva_wilson():
+    filas = [_fila("bs%d" % i, estrato="B_summit", censo=True) for i in range(7)]
+    meds = [_medida(f["clave"], cprima=(True if i == 0 else None)) for i, f in enumerate(filas)]
+    pob, sal = _caso({"a": filas}, {"a": meds})
+    assert E.evaluar(pob, sal)["regla2"]["delta_intervalo"] == [0.0, 0.0]
+
+
+@pytest.mark.parametrize("estrato", ["B_far", "fuera", "control"])
+def test_cambio_en_estrato_inmovil_es_prueba_del_modelo(estrato):
+    f, m = _limpio("a")
+    f.append(_fila("x1", estrato=estrato))
+    m.append(_medida("x1", etiqueta="far->summit"))
+    pob, sal = _caso({"a": f}, {"a": m})
+    r = E.evaluar(pob, sal)
+    assert r["veredicto"] == "INDETERMINADO"
+    assert any("el modelo de corrimiento no explica esto" in x for x in r["motivos_indeterminado"])
+    assert r["modelo_falla"]["n"] == 1
+
+
+def test_un_estrato_inmovil_sin_cambios_no_entra_al_intervalo():
+    f, m = _limpio("a", n=4)
+    for i in range(3):
+        f.append(_fila("bf%d" % i, estrato="B_far"))
+        m.append(_medida("bf%d" % i))
+    pob, sal = _caso({"a": f}, {"a": m}, N={"a": {"A": {"neg_limpio": 4}, "B_far": {"neg_limpio": 2000}}})
+    lo, hi = E.evaluar(pob, sal)["regla2"]["delta_intervalo"]
+    assert hi - lo < 4.0     # solo A (4 records, 4 medidos: exacto); los 2.000 de B far no suman ancho
