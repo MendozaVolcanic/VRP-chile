@@ -6,6 +6,12 @@
 #             dentro de la cerca de 25 km, sin rescate F47). Sin corrimiento. Tiene que dar C far / 0,
 #             CC summit / 1, M = C, MC = CC, R = C, RC = CC, y el espia del flag False en C, M, R y True
 #             en CC, MC, RC.
+#   TEST1:    la rama del Test 1 (verificador del pre-registro, bloqueante 1). Disco de 5 pixeles a +1,0 K
+#             sobre el crater (dispara el Test 1, fuente final test1) y el Salar de 330 K a 15 km. El
+#             camino de erupcion solo tiene el Salar, y es ese cumulo el que entra a derivar_distance_class
+#             (process_modis.py:1328) antes de que el del Test 1 lo reemplace (:1425/:1440). Tiene que dar
+#             C summit / 1 y CC far / 0, con el cumulo de la etiqueta a ~15 km y el guardado en el crater.
+#             Un modelo que ignore esa rama (el replay de predecir_etiqueta_cumulo.py) dice CC 1.
 #   POSICION: el PRESENTE de la 1.17 (foco a 6 km al norte, inner 5 km, `_interp_geo` corrida 2 km al sur):
 #             C summit / 1, M far / 0, y lo mismo con la etiqueta del cumulo (CC 1, MC 0). El ruido se
 #             aplica con 2,000 km.
@@ -50,6 +56,25 @@ def escena_a46(crater_km=4.0, far_km=15.0, seed=1):
             "lat": lat.astype(np.float32), "lon": lon.astype(np.float32), "angles": {}}
 
 
+def escena_test1(dt=1.0, radio=1, far_km=15, seed=1):
+    """La escena de experiments verif_121 test1_rama2.py: fondo a 262 K con ruido de 0,4 K, disco de
+    radio `radio` pixeles a +`dt` K sobre el crater y un pixel de 330 K a `far_km` al sur."""
+    rng = np.random.default_rng(seed)
+    bt_mir = rng.normal(262.0, 0.4, (N, N))
+    bt_tir = bt_mir.copy()
+    k = N // 2
+    yy, xx = np.mgrid[0:N, 0:N]
+    bt_mir[(yy - k) ** 2 + (xx - k) ** 2 <= radio ** 2] += dt
+    bt_mir[k + far_km, k], bt_tir[k + far_km, k] = 330.0, 268.0
+    lats = T.VENT[0] + (k - np.arange(N)) / 111.32
+    lons = T.VENT[1] + (np.arange(N) - k) / (111.32 * np.cos(np.radians(T.VENT[0])))
+    lat, lon = np.meshgrid(lats, lons, indexing="ij")
+    return {"band21": pm.bt_to_radiance(bt_mir, pm.BAND21_LAMBDA).astype(np.float32),
+            "band22": pm.bt_to_radiance(bt_mir, pm.BAND22_LAMBDA).astype(np.float32),
+            "band31": pm.bt_to_radiance(bt_tir, pm.BAND31_LAMBDA).astype(np.float32),
+            "lat": lat.astype(np.float32), "lon": lon.astype(np.float32), "angles": {}}
+
+
 def _caso(verdad, corrimiento_km=0.0, relleno=False):
     interp = dict(verdad)
     interp["lat"] = (verdad["lat"] - corrimiento_km / 111.32).astype(np.float32)
@@ -62,7 +87,7 @@ def _caso(verdad, corrimiento_km=0.0, relleno=False):
 
 
 def correr():
-    return {"etiqueta": _caso(escena_a46()), "posicion": _caso(T.escena(), T.CORRIMIENTO_KM),
+    return {"etiqueta": _caso(escena_a46()), "test1": _caso(escena_test1()), "posicion": _caso(T.escena(), T.CORRIMIENTO_KM),
             "ausente": _caso(T.escena()), "relleno": _caso(T.escena(), relleno=True)}
 
 
@@ -88,6 +113,19 @@ def fallas_de(r):
         fallas.append("ETIQUETA: publicaciones %s" % [e["pub"][b] for b in Q.BRAZOS])
     if any(e["flag_visto"][b] == [] for b in Q.BRAZOS):
         fallas.append("ETIQUETA: algun brazo no llamo a derivar_distance_class")
+    t = r["test1"]
+    if (t["brazos"]["C"] or {}).get("fuente") != "test1":
+        fallas.append("TEST1: la fuente final de C no es test1 (%s)" % (t["brazos"]["C"] or {}).get("fuente"))
+    if [t["pub"][b] for b in Q.BRAZOS] != [1, 0, 1, 0, 1, 0] or _dc(t, "CC") != "far":
+        fallas.append("TEST1: publicaciones %s, CC %s" % ([t["pub"][b] for b in Q.BRAZOS], _dc(t, "CC")))
+    ce = t["cumulo_etiqueta"]["CC"] or {}
+    if not ce.get("distinto") or (ce.get("vio_km") or 0) < 10 or (ce.get("guardado_km") or 99) > 1:
+        fallas.append("TEST1: el espia no registro que se etiqueto con otro cumulo: %s" % ce)
+    if t["cumulo_etiqueta"]["C"]["distinto"] is not True:
+        fallas.append("TEST1: en C tambien se etiqueta con otro cumulo y el espia tiene que verlo")
+    for nombre in ("etiqueta", "posicion", "ausente"):
+        if any((r[nombre]["cumulo_etiqueta"][b] or {}).get("distinto") for b in ("CC", "MC", "RC")):
+            fallas.append("%s: cumulo de la etiqueta distinto del guardado fuera de la rama del Test 1" % nombre)
     p = r["posicion"]
     if (p["pub"]["C"], p["pub"]["M"], p["pub"]["CC"], p["pub"]["MC"]) != (1, 0, 1, 0):
         fallas.append("POSICION: C, M, CC, MC publican %s" % [p["pub"][b] for b in ("C", "M", "CC", "MC")])
@@ -114,7 +152,7 @@ def main():
     if fallas:
         print("FALLAS:", *fallas, sep="\n  ")
         sys.exit(1)
-    print("OK: etiqueta A46 (C far, CC summit), posicion (C 1, M 0), ausente y relleno iguales, ruido aplicado, "
+    print("OK: etiqueta A46 (C far, CC summit), rama del Test 1 (C 1, CC 0, etiqueta con el cumulo del Salar), posicion (C 1, M 0), ausente y relleno iguales, ruido aplicado, "
           "flag visto en cada brazo y C' == C")
 
 

@@ -16,6 +16,15 @@
 # `replay_cumulo` aplica eso a un record guardado. Es un MODELO de la cadena, no la cadena: el probe lo
 # compara contra el brazo CC medido sobre el L1B, granulo por granulo ("prueba del replay").
 #
+# LA RAMA QUE EL REPLAY NO VE (verificador del pre-registro, bloqueante 1). Cuando la fuente final es
+# `test1`, `derivar_distance_class` (process_modis.py:1328) recibe el cumulo del camino de ERUPCION, y
+# despues ese cumulo se reemplaza por el del Test 1 (:1425/:1440), que es el que se guarda y se publica.
+# El replay solo ve el guardado. Con el flag encendido, un record con Test 1 en el crater y erupcion en
+# el Salar puede quedar `far` y apagarse, y el replay dice que publica. En la poblacion son 126 records
+# con fuente `test1` (4 protegidas de Lascar Terra, dos de ellas las perdidas de la 1.17). Por eso en esa
+# fuente la prediccion es una COTA SUPERIOR de lo que CC publica, no una prediccion, y se cuenta aparte
+# (grupo `fuente_test1`).
+#
 # Fuentes fijadas (reproducible): records de data/mirova_equivalent/ en el commit DATA_COMMIT (el de
 # poblacion.json de la 1.17; este script comprueba que reproduce sus N por estrato) y la referencia de
 # MIROVA en los commits de Mirova-v1 que guarda poblacion.json.
@@ -135,7 +144,8 @@ def main():
             if g is not None:
                 lab_distinto += (g["lab"] != lab) or (g["prot"] != prot)
                 pub_distinto += g["pub_guardada"] != a
-                salida["granulos"]["%s|%s" % (vol, k)] = {"pub_c_guardada": a, "pub_cc_replay": b}
+                salida["granulos"]["%s|%s" % (vol, k)] = {"pub_c_guardada": a, "pub_cc_replay": b,
+                                                          "fuente": r.get("final_hotspot_source")}
             filas_pob.append([k, S.estrato(r, inner), lab, int(prot), a, b])
             # por que no se re-estratifica: con la etiqueta del cumulo lo que decide es la distancia del
             # cumulo al limite; se cuenta cuantos records la tienen dentro de la banda del peor caso
@@ -145,6 +155,10 @@ def main():
             banda = (banda if banda is not None else MC.corrimiento_predicho_traza(65.0, 1.0, "MODIS_AQUA")) + 1.0
             cuenta["cumulo_cerca_del_limite"] += int(pcd is not None and abs(pcd - inner) <= banda)
             grupo = "protegida" if prot else lab
+            if r.get("final_hotspot_source") == "test1":
+                cuenta["fuente_test1|" + grupo + "|n"] += 1
+                cuenta["fuente_test1|" + grupo + "|pub_C"] += a
+                cuenta["fuente_test1|" + grupo + "|pub_CC_cota"] += b
             cuenta[grupo + "|n"] += 1
             cuenta[grupo + "|pub_C"] += a
             cuenta[grupo + "|pub_CC"] += b

@@ -1,10 +1,23 @@
 # Probe S151, tarea 1.21: MxD03 junto con la etiqueta MODIS desde el cúmulo, con un brazo de ruido
 
-**Estado: versión 1, escrita y probada con datos sintéticos, NO corrida.** Este README fija la
+**Estado: versión 2, escrita y probada con datos sintéticos, NO corrida.** Este README fija la
 población, los brazos, el estimador, los estados y el criterio antes de la primera corrida. Lo sella
 Nicolás después de que un verificador con contexto limpio lo revise (regla 1.6 del loop). La decisión
 de producción sigue siendo suya (A45): nada de esto toca `pipeline/process_*.py`, `pipeline/store.py`
 ni `pipeline/profiles/mirova_equivalent.yaml`.
+
+La versión 1 (#840, head `f3fb8d7a`) la revisó un verificador con contexto limpio y la dio por «sellable
+con arreglos» (informe fuera del repo: `C:\Users\nmend\AppData\Local\Temp\claude\verif_121\VERIFICADOR.md`,
+scripts en `scripts\`). La versión 2 aplica sus dos bloqueantes y los no bloqueantes:
+
+1. **La rama del Test 1 no estaba modelada** (sección «La rama del Test 1»): la predicción pasa a ser
+   cota en esa fuente, el espía guarda los argumentos, la prueba del replay se informa por grupo, hay un
+   caso sintético TEST1 y una nota para la decisión A45.
+2. **FRÁGIL era global**: ahora es por pasada, con su control negativo.
+3. No bloqueantes: poder declarado en unidades del operador con escenarios de verdad negativa; las
+   protegidas ganadas y la deriva de C puestas delante; la anisotropía del nulo escrita en Límites (no
+   corregida, ver ahí por qué); el conteo del estrato «sin» corregido; despacho de un job suelto para
+   cronometrar antes de los 12.
 
 ## Por qué
 
@@ -67,6 +80,40 @@ Tres defensas fijan esto:
    `test_los_consumidores_del_flag_son_las_dos_llamadas_a_derivar` fallan si aparece otro consumidor.
 3. **La mutación.** `test_si_el_brazo_mc_no_cambia_el_flag_la_prueba_falla` corre la prueba sintética
    con el brazo MC en etiqueta de producción y exige que falle.
+
+## La rama del Test 1: el flag llega, pero con otra entrada (verificador, bloqueante 1)
+
+El flag llega a sus dos consumidores, pero lo que **consume** no es siempre el cúmulo que se publica.
+`derivar_distance_class` (`process_modis.py:1328`) recibe el `primary_cluster` del camino de erupción.
+Si la fuente final es `test1` (`:1381`), ese cúmulo se **reemplaza** después por el del Test 1
+(`:1425` y `:1440`), que es el que se guarda y el que el tablero publica.
+
+En el volcán: el Test 1 ve calor en el cráter, el camino de erupción sólo encontró el Salar dentro de la
+cerca, y con el flag encendido la etiqueta sale del Salar. El caso sintético TEST1 lo reproduce con el
+pipeline real (disco de 5 píxeles a +1,0 K en el cráter, Salar de 330 K a 15 km): C publica con la
+etiqueta `summit`; CC queda `far` y no publica, etiquetado con un cúmulo a 14,98 km mientras el guardado
+está a 0,375 km (`probar_probe_cumulo.py`, caso TEST1). El replay, que sólo ve el cúmulo guardado, dice
+que CC publica (`test_el_replay_no_ve_la_rama_del_test1`).
+
+En la población hay **126 records con fuente `test1`**: 4 protegidas, 1 alerta bajo 1 MW, 113
+negativos limpios y 8 sin información (`fuente_test1|*` en `prediccion_cumulo.json`). Las 4 protegidas
+son de Láscar Terra, C las publica, y **dos son las pérdidas de la 1.17** (`MOD021KM.A2026110.0130` y
+`MOD021KM.A2026120.0130`). Las 4 están en la muestra.
+
+Qué cambia en el probe por esto:
+
+- **El espía guarda los cuatro argumentos y el resultado** de cada llamada (`derivar` en el JSON), y
+  `cumulo_etiqueta` compara el cúmulo con que se etiquetó contra el guardado. El evaluador cuenta por
+  brazo los gránulos etiquetados con otro cúmulo (`etiqueta_con_otro_cumulo`).
+- **La prueba del replay se informa por grupo** (protegidas, fuente `test1`, resto). Su credibilidad se
+  decide sólo con el resto: en la fuente `test1` el replay no puede acertar por construcción.
+- `tipos_de_cambio` atribuye el cúmulo con el guardado; en esos gránulos no es el que etiquetó, y se
+  cruza con `etiqueta_con_otro_cumulo`.
+
+**Para la decisión de producción (A45), salga lo que salga:** encender el flag tal como está crea una
+asimetría A46 dentro del propio flag. En los records del Test 1 la etiqueta sale de un cúmulo (el de
+erupción, que puede ser el Salar) y la magnitud que se publica sale de otro (el del Test 1). Si Nicolás
+quisiera adoptar la etiqueta del cúmulo, primero habría que decidir de cuál cúmulo.
 
 ## Qué se mide
 
@@ -165,17 +212,24 @@ cadena, no la cadena: el probe lo compara contra el CC medido (prueba del replay
 
 | grupo de la población | n | publica C (guardado) | publica CC (replay) | 0→1 | 1→0 |
 |---|---|---|---|---|---|
-| alertas protegidas | 46 | 9 | 46 | 37 | 0 |
+| alertas protegidas | 46 | 9 | 46 (cota) | 37 | 0 (cota) |
 | alertas bajo 1 MW | 42 | 2 | 40 | 38 | 0 |
 | negativos limpios | 5.047 | 587 | **4.454** | 3.867 | 0 |
+| de ellos, fuente `test1` (protegidas + bajo 1 MW + negativos) | 4 + 1 + 113 | 4 + 1 + 106 | sin predicción | | |
 
-Δ predicho de CC contra C: **+3.829** errores contra MIROVA. Leído como geólogo: casi todas las escenas
+**En la fuente `test1` el replay da una cota, no una predicción.** Por la rama de arriba, CC puede
+apagar ahí lo que C publica: de las 46 protegidas, CC publicaría **entre 42 y 46**, y las pérdidas van
+**de 0 a 4**, así que CC y la principal **pueden salir PIERDE PROTEGIDA**. Pasa si, en la geometría de
+C, el camino de erupción no tenía un cúmulo en el cráter; desde los records no se sabe. En los negativos
+limpios, la misma rama puede apagar hasta 106. Δ predicho de CC contra C: **+3.829** errores contra
+MIROVA, con la rama del Test 1 tomada a favor (una cota superior de lo que CC publica). Leído como geólogo: casi todas las escenas
 MODIS de los 11 volcanes tienen un cúmulo pequeño con energía sobre el edificio (a 1 km el foco débil y
 el gradiente topográfico se parecen, A69, A82). Sacar la etiqueta del cúmulo recupera las 46 alertas
-protegidas, pero también publica 9 de cada 10 noches en que MIROVA miró y no vio nada. Es la cara
+protegidas (como cota), pero también publica 9 de cada 10 noches en que MIROVA miró y no vio nada. Es la cara
 far→summit de A81 a escala de MODIS, y concuerda con lo que midió S150 en Nevados de Chillán (el brazo E
 publicaba 22 de 28 negativos limpios en reposo). **Si el probe confirma esto, MC sale EMPEORA y el
-arreglo no es adoptable en la réplica tal como está**, por el balance y no por la compuerta.
+arreglo no es adoptable en la réplica tal como está**, por el balance; y puede caer además por la
+compuerta si la rama del Test 1 apaga alguna de las 4 protegidas de esa fuente.
 
 Lo que el probe agrega sobre la predicción: (1) la regla 1 exacta con el código de hoy y el L1B, en los
 cuatro brazos; (2) el efecto de la posición sobre las protegidas, contra su nulo; (3) la validación del
@@ -195,30 +249,50 @@ Para cada comparación X contra Y (lista abajo):
   +1 suavizadas con medio conteo, para que una celda de 4 gránulos sin cambios no declare varianza cero.
   Las celdas medidas enteras entran exactas. Intervalo normal al 95 %. Los 12 negativos limpios del
   estrato «sin» (records sin distancias, fuera de los estratos desde la 1.17) no entran.
-- **Por qué este intervalo y no otro: se midió su cobertura** (A110). `cobertura_estimador.py` toma cinco
+- **Por qué este intervalo y no otro: se midió su cobertura** (A110). `cobertura_estimador.py` toma diez
   escenarios donde el valor de cada gránulo de la población es conocido, repite 300 veces el muestreo
   con el mismo n por celda de la muestra real y cuenta cuántas veces el intervalo contiene el total
-  verdadero (`cobertura_estimador_salida.txt`):
+  verdadero y cuántas decide el signo (`cobertura_estimador_salida.txt`). Con verdad negativa, «decide
+  el signo» es la probabilidad de MEJORA; con positiva, la de EMPEORA.
 
 | escenario | total verdadero | cobertura | ancho mediano | decide el signo |
 |---|---|---|---|---|
-| replay (efecto de la etiqueta) | +3.867 | 1,000 | 1.078 | 1,000 |
+| replay (efecto de la etiqueta) | +3.867 | 0,997 | 1.077 | 1,000 |
 | nulo | 0 | 1,000 | 789 | 1,000 |
-| raro (2 % de 0→1 y 2 % de 1→0 al azar) | +20 | 1,000 | 837 | 0,000 |
-| A_solo (30 % de 0→1 sólo en el estrato A) | +133 | 1,000 | 791 | 0,000 |
-| mezcla (replay más 5 % de 1→0) | +3.466 | 0,987 | 1.159 | 1,000 |
+| raro (2 % de 0→1 y 2 % de 1→0 al azar) | +28 | 1,000 | 836 | 0,000 |
+| A_solo (30 % de 0→1 sólo en el estrato A) | +155 | 1,000 | 791 | 0,000 |
+| mezcla (replay más 5 % de 1→0) | +3.431 | 0,993 | 1.165 | 1,000 |
+| apaga 50 % de las publicaciones de C en negativos limpios | −290 | 1,000 | 833 | 0,050 |
+| apaga 70 % | −410 | 1,000 | 843 | 0,463 |
+| apaga 90 % | −540 | 1,000 | 850 | 0,917 |
+| enciende 5 % de los negativos limpios que C no publica | +223 | 1,000 | 838 | 0,020 |
+| enciende 10 % | +414 | 1,000 | 881 | 0,393 |
+
+  La cobertura casi siempre de 1,000 contra un nominal de 95 % quiere decir que el intervalo es
+  **conservador**: el ancho bajo el nulo (±394,4) lo fija el medio conteo de suavizado en las 32 celdas
+  de 2 a 6 gránulos, no los datos.
 
   Una posterior de Dirichlet de Jeffreys por celda, la primera versión, **cubrió 0 de 300 veces** el
-  efecto grande: con 2 a 6 gránulos en 32 de las 37 celdas que se expanden el medio conteo arrastra la media hacia un tercio y el
-  sesgo se suma en el mismo sentido en todas ellas. Por eso se descartó. El intervalo de Wilson sumado
-  por celda de la 1.17 cubre siempre, pero es tan ancho (4.484 bajo el nulo) que **no decide el signo ni
-  del efecto grande**; se informa al lado.
+  efecto grande: con 2 a 6 gránulos en 32 de las 37 celdas que se expanden, el medio conteo arrastra la
+  media hacia un tercio y el sesgo se suma en el mismo sentido en todas ellas. Por eso se descartó. El
+  intervalo de Wilson sumado por celda de la 1.17 cubre siempre, pero es tan ancho (4.484 bajo el nulo)
+  que **no decide el signo ni del efecto grande** (0,003); se informa al lado.
 - **Control del estimador con respuesta conocida.** Con los valores del replay en los 471 gránulos de la
   muestra, el intervalo es [+3.199,6; +4.273,3] y contiene el +3.867 del censo
   (`test_control_del_estimador_con_respuesta_conocida`).
-- **Poder, dicho antes de correr.** Bajo el nulo con esta muestra, Δ queda en **[−394,4; +394,4]**. Un
-  efecto de la posición menor que unos 400 errores en la población sale INDETERMINADO en la regla 2
-  (los escenarios raro y A_solo nunca deciden el signo). La regla 1 es censo y no tiene ese límite.
+- **Poder, dicho antes de correr y en unidades del operador.** C publica 587 negativos limpios en la
+  población, que son sus falsas alarmas MODIS del tramo. **MEJORA exige que el brazo apague unas 7 de
+  cada 10 de esas falsas alarmas** sin perder alertas (con 7 de 10 sale MEJORA la mitad de las veces;
+  con 9 de 10, 9 de cada 10 veces). Del otro lado, EMPEORA necesita unas 400 publicaciones de más
+  (encender el 10 % de lo que C calla da EMPEORA 4 de cada 10 veces). Con una etiqueta que sólo agrega
+  publicaciones, **en la principal MEJORA, y con ella «adoptable», es inalcanzable en la práctica**: lo
+  que este probe puede entregar es EMPEORA, PIERDE PROTEGIDA o INDETERMINADO. La regla 1 es censo y no
+  tiene este límite.
+- **Lo que Δ no cuenta, por la letra de `docs/MISSION.md`.** Las protegidas **ganadas** (37 predichas en
+  CC, como cota) no entran en Δ: la regla 1 sólo prohíbe perder, y la regla 2 es para alertas bajo 1 MW.
+  Si Nicolás quiere que una protegida recuperada compense publicaciones de más, es una decisión suya y no
+  está en este criterio. Y C es el código de hoy, no lo publicado: el evaluador informa aparte, en
+  `deriva_protegidas`, las protegidas donde C no coincide con lo guardado.
 
 ## Comparaciones
 
@@ -261,13 +335,19 @@ los mismos errores contra MIROVA (A115, regla 4 de `docs/MISSION.md`).
 
 Anotaciones que no cambian el veredicto:
 
-- **FRÁGIL** (en principal, posicion_produccion y posicion_cumulo): su nulo también pierde al menos una
-  protegida. La pérdida sigue contando (la regla 1 mira lo que ve el operador), pero no es atribuible a
-  MxD03: la publicación de esa pasada se rompe con cualquier corrimiento de ese tamaño.
+- **FRÁGIL** (en principal, posicion_produccion y posicion_cumulo): su nulo pierde **la misma pasada**
+  protegida (intersección de `perdidas_detalle`, listada en `fragil_pasadas`). Que el nulo pierda otra
+  protegida no la vuelve frágil; esas quedan en `perdidas_que_el_nulo_no_pierde`. La pérdida sigue
+  contando (la regla 1 mira lo que ve el operador), pero no es atribuible a MxD03: la publicación de esa
+  pasada también se rompe con un sorteo de un corrimiento al azar del mismo tamaño en km (ver la
+  anisotropía en Límites).
 - **modelo_corto**: más de 10 % de los gránulos con el corrimiento medido sobre el predicho con su línea
   más 1 km.
-- **prueba del replay**: acuerdo entre la publicación CC medida y la del replay. Bajo 90 %, la
-  predicción de arriba no se usa para estudiar variantes.
+- **prueba del replay**: acuerdo entre la publicación CC medida y la del replay, por grupo
+  (protegidas, fuente `test1`, resto). Si el resto queda bajo 90 %, la predicción de arriba no se usa
+  para estudiar variantes. El grupo `test1` se informa para medir el tamaño de la rama, no para juzgar al
+  replay.
+- **etiqueta con otro cúmulo**: gránulos donde el brazo se etiquetó con un cúmulo distinto del publicado.
 - **deriva**: C contra lo guardado en `data/` (sólo etiqueta y publicación, como en la 1.17). El efecto
   se mide brazo contra brazo con el mismo código, así que la deriva no decide.
 - **tipos de cambio** (la partición del verificador de la 1.17): cambia la fuente del hotspot final, el
@@ -280,7 +360,10 @@ Lo que cada resultado le diría a Nicolás:
 |---|---|
 | MEJORA | MxD03 + etiqueta del cúmulo pasa las dos reglas: candidato a A45 |
 | EMPEORA (lo predicho) | la etiqueta del cúmulo publica de más; el arreglo no entra así, y la pregunta pasa a ser qué filtro sobre el cúmulo (fuera de esta tarea) |
-| PIERDE PROTEGIDA | la compuerta cae aun con la etiqueta del cúmulo; mirar `perdidas_detalle` y FRÁGIL |
+| PIERDE PROTEGIDA | la compuerta cae aun con la etiqueta del cúmulo; mirar `perdidas_detalle`, FRÁGIL y si son de la fuente `test1` (la etiqueta salió del cúmulo de erupción, no del publicado) |
+
+En cualquiera de los casos vale la nota de la sección «La rama del Test 1»: con el flag encendido la
+etiqueta de los records del Test 1 sale de un cúmulo distinto del que se publica.
 | INDETERMINADO | el efecto es menor que lo que esta muestra puede resolver (unos 400 errores) |
 
 ## Prueba del instrumento
@@ -291,6 +374,7 @@ brazos y C'. El workflow la corre antes de cada job y `tests/test_mxd03_cumulo_1
 | caso | escena | qué debe salir | qué sale |
 |---|---|---|---|
 | ETIQUETA | píxel de 285 K a 4 km del cráter (fuera del disco de 3 km del Test 1) y de 330 K a 15 km (dentro de la cerca de 25 km); sin corrimiento | C, M, R `far` / 0; CC, MC, RC `summit` / 1; espía `False` en C, M, R y `True` en CC, MC, RC | **así**: el mecanismo de las dos pérdidas de la 1.17 |
+| TEST1 | disco de 5 píxeles a +1,0 K en el cráter (dispara el Test 1) y Salar de 330 K a 15 km | C, M, R `summit` / 1; CC, MC, RC `far` / 0; el espía de CC registra el cúmulo del Salar (~15 km) contra el guardado en el cráter | **así**: la rama que el replay no ve |
 | POSICIÓN | foco de 335 K a 6 km al norte (inner 5), `_interp_geo` corrida 2 km al sur | C y CC publican, M y MC no; ruido de 2,000 km | **así** |
 | AUSENTE | geolocalizaciones iguales | brazos de una misma etiqueta iguales; ruido 0 | **así** |
 | RELLENO | como AUSENTE, MxD03 en NaN en una esquina | igual | **así** |
@@ -308,9 +392,17 @@ que lo produce y un control que no (A116), incluidos MEJORA y EMPEORA con la pob
   correr: ningún brazo extra se cronometró sobre un L1B real.
 - **Disco del runner.** Igual que la 1.17: cada par pesa 100 a 150 MB y se borra apenas se usa.
 
+Primero **un job suelto para cronometrar** (uno de los más cargados: 48 gránulos del censo de Láscar), y
+sólo si termina bajo los 70 min, los otros 11:
+
 ```
-gh workflow run probe-s151-mxd03-cumulo-121.yml --ref main -f preregistro_aprobado=si
+gh workflow run probe-s151-mxd03-cumulo-121.yml --ref main -f preregistro_aprobado=si -f jobs='["Lascar-2"]'
+gh workflow run probe-s151-mxd03-cumulo-121.yml --ref main -f preregistro_aprobado=si \
+  -f jobs='["Lascar-1","Lastarria","Isluga","Tupungatito","PlanchonPeteroa","NevadosDeChillan","Llaima","Villarrica","Copahue","PuyehueCordonCaulle","Chaiten"]'
 ```
+
+El evaluador de cada despacho saldrá INCOMPLETO porque sólo ve sus propios jobs; el veredicto se saca en
+local con los 12 artefactos juntos (`python evaluar_cumulo.py <carpeta>`).
 
 Sólo con el criterio sellado y el PR mergeado: `workflow_dispatch` no corre desde una rama. Para
 repetir jobs sueltos, `-f jobs='["Lascar-2"]'` y evaluar en local con todos los artefactos juntos:
@@ -341,9 +433,18 @@ repetir jobs sueltos, `-f jobs='["Lascar-2"]'` y evaluar en local con todos los 
 - El replay es un modelo de la cadena de etiquetas, no la cadena; su acuerdo se mide en la corrida.
 - C corre el código de hoy, no el que produjo cada record (la 1.17 midió que los píxeles anómalos
   difieren en 248 de 470). El efecto se mide brazo contra brazo con el mismo código.
-- R es una traslación rígida de rumbo al azar. No reproduce la forma del campo de corrimiento real
-  (que crece hacia el borde del barrido); reproduce su tamaño en el cráter, que es lo que mueve la
-  etiqueta.
+- **El nulo es anisótropo sobre 50° de cenit, y no se corrigió.** R reproduce el tamaño del corrimiento
+  en km, pero lo que mueve la etiqueta es el corrimiento en píxeles, y el píxel MODIS es más ancho a lo
+  ancho del barrido. El verificador midió sobre los 470 gránulos de la 1.17 (su `anisotropia.py`): bajo
+  35° el rumbo al azar y el real valen lo mismo en píxeles (razón 1,00 y 0,97); sobre 50° (224 gránulos)
+  el real va 91 % por el eje del barrido y el rumbo al azar es **24 % más grande en píxeles** (mediana
+  1,24). El nulo perturba ahí más que MxD03, así que **sesga FRÁGIL y `M_contra_ruido` a favor de
+  MxD03** en la mitad de cenit alto de la muestra. Las dos pérdidas de la 1.17 son de cenit bajo (15,6° y
+  17,4°), donde el nulo sí es comparable. No se corrigió porque sortear el rumbo en píxeles exige la
+  dirección del barrido en el cráter de cada gránulo real, que la prueba sintética no puede ejercitar
+  (sus escenas no traen ángulos): un arreglo que sólo corre sobre el L1B quedaría sin control antes del
+  sello. Al leer el resultado, FRÁGIL y `M_contra_ruido` se leen por separado bajo y sobre 50°
+  (`cortes`, bin de cenit).
 - Que el Test 1 deje de disparar por la posición en las dos pérdidas de la 1.17 sigue SIN VERIFICAR
   hasta esta corrida (ahora se guarda `triggered_test1` por brazo).
 - Que MIROVA use MxD03 sigue SIN VERIFICAR (SP426.5 p. 3 habla de «pixel(s) geolocation» sin nombrar el

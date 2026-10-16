@@ -11,7 +11,11 @@
 #   nulo   : nada cambia;
 #   raro   : 2 % de 0->1 y 2 % de 1->0 al azar en toda la poblacion;
 #   A_solo : 0->1 en 30 % de los negativos limpios del estrato A y nada en el resto (efecto localizado);
-#   mezcla : el replay, mas 5 % de 1->0 al azar.
+#   mezcla : el replay, mas 5 % de 1->0 al azar;
+#   apaga_50 / apaga_70 / apaga_90: el brazo apaga ese porcentaje de las publicaciones que C hace en
+#            negativos limpios (verdad NEGATIVA: la unica via a MEJORA; verificador del pre-registro);
+#   enciende_5 / enciende_10: enciende ese porcentaje de los negativos limpios que C no publica.
+# "decide el signo" es, con verdad negativa, la probabilidad de MEJORA; con positiva, la de EMPEORA.
 # Uso: python cobertura_estimador.py [--reps 400]   (escribe cobertura_estimador_salida.txt)
 import argparse
 import json
@@ -39,8 +43,9 @@ def celdas_poblacion(pob, pred):
         for clave, estrato, lab, prot, pub_c, pub_cc in filas:
             if lab != "neg_limpio" or estrato == "sin":   # como en evaluar_cumulo
                 continue
-            out.setdefault((vol, estrato), {"replay": [], "n": n_muestra.get((vol, estrato), 0)})
+            out.setdefault((vol, estrato), {"replay": [], "pub_c": [], "n": n_muestra.get((vol, estrato), 0)})
             out[(vol, estrato)]["replay"].append(pub_cc - pub_c)
+            out[(vol, estrato)]["pub_c"].append(pub_c)
     return out
 
 
@@ -53,7 +58,12 @@ def escenarios(celdas, rng):
         raro = np.where(u < 0.02, 1, np.where(u > 0.98, -1, 0))
         a_solo = (rng.random(N) < 0.30).astype(int) if k[1] == "A" else np.zeros(N, dtype=int)
         mezcla = np.where(rng.random(N) < 0.05, -1, rep)
+        pc = np.array(c["pub_c"])
         out[k] = {"replay": rep, "nulo": np.zeros(N, dtype=int), "raro": raro, "A_solo": a_solo, "mezcla": mezcla}
+        for f in (50, 70, 90):
+            out[k]["apaga_%d" % f] = np.where((pc == 1) & (rng.random(N) < f / 100.0), -1, 0)
+        for f in (5, 10):
+            out[k]["enciende_%d" % f] = np.where((pc == 0) & (rng.random(N) < f / 100.0), 1, 0)
     return out
 
 
@@ -90,7 +100,8 @@ def main():
     celdas = celdas_poblacion(pob, pred)
     esc = escenarios(celdas, rng)
     lineas = []
-    for nombre in ("replay", "nulo", "raro", "A_solo", "mezcla"):
+    for nombre in ("replay", "nulo", "raro", "A_solo", "mezcla", "apaga_50", "apaga_70", "apaga_90",
+                   "enciende_5", "enciende_10"):
         verdad = int(sum(e[nombre].sum() for e in esc.values()))
         for mnombre, m in metodos().items():
             dentro, anchos, signo_ok = 0, [], 0
@@ -105,7 +116,7 @@ def main():
                 dentro += lo <= verdad <= hi
                 anchos.append(hi - lo)
                 signo_ok += (lo > 0) if verdad > 0 else ((hi < 0) if verdad < 0 else (lo <= 0 <= hi))
-            lineas.append("%-7s verdad %6d | %-36s cobertura %.3f | ancho mediano %7.1f | decide el signo %.3f" % (
+            lineas.append("%-11s verdad %6d | %-36s cobertura %.3f | ancho mediano %7.1f | decide el signo %.3f" % (
                 nombre, verdad, mnombre, dentro / a.reps, float(np.median(anchos)), signo_ok / a.reps))
             print(lineas[-1], flush=True)
     (AQUI / "cobertura_estimador_salida.txt").write_text("reps %d\n" % a.reps + "\n".join(lineas) + "\n",

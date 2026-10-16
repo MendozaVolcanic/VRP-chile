@@ -66,17 +66,35 @@ EXTRA = ("triggered_test1", "test1_k_observed", "hotspot_dist_km", "discarded_re
 # ------------------------------------------------------------------ un brazo, con el flag en memoria
 def procesar(l1b, geo, volcan, latlon, feats, lector, cumulo):
     """Un brazo: probe_etiquetas.procesar_brazo con el flag del modulo process_modis fijado a `cumulo`.
-    Devuelve (record, lista ordenada de los `desde_cluster` que vio derivar_distance_class)."""
-    vistos = []
+    Devuelve (record, lista ordenada de los `desde_cluster` que vio derivar_distance_class, llamadas).
+    `llamadas` guarda los cuatro argumentos y el resultado de cada llamada (verificador del
+    pre-registro, bloqueante 1): en la rama del Test 1 (process_modis.py:1381) el cumulo que entra a
+    `derivar_distance_class` (:1328) es el del camino de erupcion, y despues se reemplaza por el del
+    Test 1 (:1425/:1440), que es el que se guarda y se publica. Sin los argumentos no se sabe con que
+    cumulo se etiqueto."""
+    llamadas = []
     real = pm.derivar_distance_class
 
     def espia(*a, **k):
-        vistos.append(bool(a[3] if len(a) > 3 else k["desde_cluster"]))
-        return real(*a, **k)
+        args = list(a) + [k[n] for n in ("final_dist_km", "pc_dist_km", "inner_km", "desde_cluster")[len(a):]]
+        r = real(*a, **k)
+        llamadas.append([None if x is None else float(x) for x in args[:3]] + [bool(args[3]), r])
+        return r
 
     with patch.object(pm, FLAG, bool(cumulo)), patch.object(pm, "derivar_distance_class", espia):
         rec = P.procesar_brazo(l1b, geo, volcan, latlon, feats, lector)
-    return rec, sorted(set(vistos))
+    return rec, sorted({c[3] for c in llamadas}), llamadas
+
+
+def cumulo_de_la_etiqueta(rec, llamadas):
+    """Distancia del cumulo con que se etiqueto (ultima llamada a derivar) contra la del cumulo guardado
+    y publicado. `distinto` es True si difieren en mas de 1 m: el caso de la rama del Test 1."""
+    if rec is None or not llamadas:
+        return None
+    vio = llamadas[-1][1]
+    guardado = (rec.get("primary_cluster") or {}).get("centroid_dist_km")
+    distinto = (vio is None) != (guardado is None) or (vio is not None and abs(vio - guardado) > 1e-3)
+    return {"vio_km": vio, "guardado_km": guardado, "distinto": bool(distinto)}
 
 
 # ------------------------------------------------------------------ el ruido
@@ -116,17 +134,19 @@ def medir_granulo(l1b, geo, volcan, latlon_m, datos, vent, clave, feats=None, co
     lat_r, lon_r = trasladar(datos["lat"], datos["lon"], desp["km"], ang)
     aplicado = P.desplazamiento_crater(lat_r, lon_r, datos["lat"], datos["lon"], vent)
     pos = {"interp": None, "mxd03": latlon_m, "ruido": (lat_r, lon_r)}
-    recs, vistos = {}, {}
+    recs, vistos, llamadas = {}, {}, {}
     for b in BRAZOS:
-        recs[b], vistos[b] = procesar(l1b, geo, volcan, pos[POSICION[b]], feats, lector, CUMULO[b])
+        recs[b], vistos[b], llamadas[b] = procesar(l1b, geo, volcan, pos[POSICION[b]], feats, lector, CUMULO[b])
     inner = volcan.get("inner_radius_km")
     pubs = P.publica([recs[b] for b in BRAZOS], inner)
     fila = {"desplazamiento": desp, "ruido": {"km_objetivo": desp["km"], "angulo_grados": round(ang, 3),
                                               "km_aplicado": aplicado["km"]},
             "brazos": {b: resumir(recs[b]) for b in BRAZOS}, "pub": dict(zip(BRAZOS, pubs)),
-            "flag_visto": vistos, "cprima_igual": None}
+            "flag_visto": vistos, "derivar": llamadas,
+            "cumulo_etiqueta": {b: cumulo_de_la_etiqueta(recs[b], llamadas[b]) for b in BRAZOS},
+            "cprima_igual": None}
     if con_cprima:
-        rcp, _ = procesar(l1b, geo, volcan, (datos["lat"].copy(), datos["lon"].copy()), feats, lector, False)
+        rcp, _, _ = procesar(l1b, geo, volcan, (datos["lat"].copy(), datos["lon"].copy()), feats, lector, False)
         fila["cprima_igual"] = P.registros_iguales(recs["C"], rcp)
     return fila
 

@@ -140,7 +140,7 @@ def comparar(X, Y, ok, pob, vols):
     for vol in sorted(vols):
         for e, cuenta in sorted(pob["volcanes"][vol]["N"].items()):
             N = cuenta.get("neg_limpio", 0)
-            if not N or e == "sin":   # 14 granulos sin distancias: fuera de los estratos desde la 1.17
+            if not N or e == "sin":   # estrato sin distancias (18 records, 12 negativos limpios): fuera desde la 1.17
                 continue
             vals = [d(f) for f in ok if f["volcan"] == vol and f["estrato"] == e and f["lab"] == "neg_limpio"]
             celdas["%s/%s" % (vol, e)] = (vals, N)
@@ -260,7 +260,15 @@ def evaluar(pob, salidas, ausentes=(), esperados=None, prediccion=None):
 
     comps = {nombre: comparar(X, Y, ok, pob, vols) for X, Y, nombre, _ in COMPARACIONES}
     for nombre, nulo in NULO_DE.items():
-        comps[nombre]["fragil"] = comps[nulo]["regla1"]["perdidas"] > 0
+        # FRAGIL es por PASADA (verificador del pre-registro, bloqueante 2): la misma protegida se pierde
+        # tambien con el sorteo de un corrimiento al azar. Que el nulo pierda OTRA protegida no dice nada
+        # de esta.
+        propias = {(x["volcan"], x["clave"]) for x in comps[nombre]["regla1"]["perdidas_detalle"]}
+        del_nulo = {(x["volcan"], x["clave"]) for x in comps[nulo]["regla1"]["perdidas_detalle"]}
+        comunes = sorted(propias & del_nulo)
+        comps[nombre]["fragil"] = bool(comunes)
+        comps[nombre]["fragil_pasadas"] = ["%s|%s" % x for x in comunes]
+        comps[nombre]["perdidas_que_el_nulo_no_pierde"] = ["%s|%s" % x for x in sorted(propias - del_nulo)]
     if invalido:
         ver = "INVALIDO"
     elif incompleto:
@@ -274,18 +282,38 @@ def evaluar(pob, salidas, ausentes=(), esperados=None, prediccion=None):
              "casos": exc[:30]}
     replay = None
     if prediccion:
-        pares = [(f["pub"]["CC"], prediccion["granulos"]["%s|%s" % (f["volcan"], f["clave"])]["pub_cc_replay"])
-                 for f in ok if "%s|%s" % (f["volcan"], f["clave"]) in prediccion["granulos"]]
-        acuerdo = sum(a == b for a, b in pares)
-        replay = {"acuerdo": acuerdo, "de": len(pares),
-                  "creible": bool(pares) and acuerdo / len(pares) >= REPLAY_MIN,
-                  "prediccion_delta_poblacion_CC_vs_C": prediccion["total"].get("delta")}
+        # por grupo (verificador del pre-registro, bloqueante 1c): en la fuente test1 el replay no ve el
+        # cumulo con que se etiqueta, asi que ahi su prediccion es una cota y se informa aparte; la
+        # credibilidad se decide con el resto.
+        replay = {}
+        for f in ok:
+            p = prediccion["granulos"].get("%s|%s" % (f["volcan"], f["clave"]))
+            if p is None:
+                continue
+            g = "protegidas" if f["prot"] else ("fuente_test1" if p.get("fuente") == "test1" else "resto")
+            r = replay.setdefault(g, {"acuerdo": 0, "de": 0, "CC_medido_1_replay_0": 0, "CC_medido_0_replay_1": 0})
+            r["de"] += 1
+            r["acuerdo"] += f["pub"]["CC"] == p["pub_cc_replay"]
+            r["CC_medido_1_replay_0"] += f["pub"]["CC"] == 1 and p["pub_cc_replay"] == 0
+            r["CC_medido_0_replay_1"] += f["pub"]["CC"] == 0 and p["pub_cc_replay"] == 1
+        resto = replay.get("resto", {"acuerdo": 0, "de": 0})
+        replay["creible_fuera_de_test1"] = bool(resto["de"]) and resto["acuerdo"] / resto["de"] >= REPLAY_MIN
+        replay["prediccion_delta_poblacion_CC_vs_C_cota"] = prediccion["total"].get("delta")
+    otro_cumulo = {}
+    for b in BRAZOS:
+        cl = [f["clave"] for f in ok if ((f.get("cumulo_etiqueta") or {}).get(b) or {}).get("distinto")]
+        otro_cumulo[b] = {"n": len(cl), "claves": cl[:30]}
+    prot_ok = [f for f in ok if f["prot"]]
+    deriva_prot = [{"volcan": f["volcan"], "clave": f["clave"], "pub_guardada": f.get("pub_guardada"),
+                    "pub_C": f["pub"]["C"]} for f in prot_ok if f.get("pub_guardada") != f["pub"]["C"]]
     return {"veredicto": ver, "adoptable_en_la_replica": ver == "MEJORA",
             "motivos_invalido": invalido[:50], "motivos_incompleto": incompleto,
             "ausentes_del_archivo": {"n": len([a for a in ausentes if a["volcan"] in vols]),
                                      "en_censo": aus_censo},
             "conteo_por_brazo": conteo, "comparaciones": comps, "banda_modelo_traza": banda,
             "c_igual_a_guardada": {"si": sum(1 for f in ok if f.get("c_igual_a_guardada")), "de": len(ok)},
+            "deriva_protegidas": {"distintas": deriva_prot, "de": len(prot_ok)},
+            "etiqueta_con_otro_cumulo": otro_cumulo,
             "prueba_del_replay": replay}
 
 

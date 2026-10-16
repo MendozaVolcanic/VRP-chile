@@ -124,7 +124,7 @@ def test_parchear_pipeline_profile_no_llega_y_parchear_el_modulo_si():
     lector = lambda _p: P._copia(d)  # noqa: E731
     with patch.object(prof, FLAG, True):
         mal = P.procesar_brazo(T.T.L1B, Path("g.hdf"), T.T.VOLCAN, None, None, lector)
-    bien, visto = Q.procesar(T.T.L1B, Path("g.hdf"), T.T.VOLCAN, None, None, lector, True)
+    bien, visto, _ = Q.procesar(T.T.L1B, Path("g.hdf"), T.T.VOLCAN, None, None, lector, True)
     assert mal["distance_class"] == "far"
     assert bien["distance_class"] == "summit" and visto == [True]
 
@@ -136,6 +136,46 @@ def test_prueba_sintetica_completa():
     assert T.fallas_de(r) == []
     e = r["etiqueta"]
     assert e["flag_visto"] == {"C": [False], "CC": [True], "M": [False], "MC": [True], "R": [False], "RC": [True]}
+    t = r["test1"]
+    assert t["brazos"]["C"]["fuente"] == "test1" and t["pub"]["C"] == 1 and t["pub"]["CC"] == 0
+    # el espia guarda los cuatro argumentos y el resultado: CC se etiqueto con el cumulo del Salar
+    final, pc, inner, desde, res = t["derivar"]["CC"][-1]
+    assert desde is True and res == "far" and pc > 10 and inner == 5
+    assert t["cumulo_etiqueta"]["CC"]["distinto"] and t["cumulo_etiqueta"]["CC"]["guardado_km"] < 1
+
+
+@pytest.mark.skipif(not NODE, reason="el predicado del tablero corre con node")
+def test_el_replay_no_ve_la_rama_del_test1():
+    """Bloqueante 1 del verificador, medido: sobre el record de produccion de la escena TEST1, el replay
+    dice que CC publica, y el brazo CC medido no publica. Por eso en fuente test1 la prediccion es cota."""
+    import predecir_etiqueta_cumulo as PR
+    import probar_probe_cumulo as T
+    import probe_cumulo as Q
+    import probe_etiquetas as P
+    d = T.escena_test1()
+    rec_c, _, _ = Q.procesar(T.T.L1B, Path("g.hdf"), T.T.VOLCAN, None, None, lambda _p: P._copia(d), False)
+    rec_cc, _, _ = Q.procesar(T.T.L1B, Path("g.hdf"), T.T.VOLCAN, None, None, lambda _p: P._copia(d), True)
+    assert rec_c["final_hotspot_source"] == "test1"
+    assert P.publica([PR.replay_cumulo(rec_c, 5.0), rec_cc], 5.0) == [1, 0]
+
+
+@pytest.mark.skipif(not NODE, reason="el predicado del tablero corre con node")
+def test_la_prueba_sintetica_falla_si_se_ignora_la_rama_del_test1():
+    """Mutacion: un instrumento que publicara CC en la escena TEST1 (lo que dice el replay) es atrapado."""
+    import probar_probe_cumulo as T
+    r = T.correr()
+    r["test1"]["pub"]["CC"] = 1
+    assert any(f.startswith("TEST1") for f in T.fallas_de(r))
+    r = T.correr()
+    r["test1"]["cumulo_etiqueta"]["CC"]["distinto"] = False
+    assert any(f.startswith("TEST1") for f in T.fallas_de(r))
+
+
+def test_la_prediccion_declara_la_fuente_test1_como_cota():
+    t = _json(EXP / "prediccion_cumulo.json")["total"]
+    assert sum(v for k, v in t.items() if k.startswith("fuente_test1|") and k.endswith("|n")) == 126
+    assert t["fuente_test1|protegida|n"] == 4 and t["fuente_test1|protegida|pub_C"] == 4
+    assert "COTA SUPERIOR" in (EXP / "predecir_etiqueta_cumulo.py").read_text(encoding="utf-8")
 
 
 @pytest.mark.skipif(not NODE, reason="el predicado del tablero corre con node")
@@ -328,12 +368,48 @@ def test_estado_pierde_protegida_y_su_control_negativo():
     assert E.evaluar(*_caso({"a": f}, {"a": m}))["veredicto"] == "SIN CAMBIO OBSERVADO"
 
 
-def test_fragil_cuando_el_ruido_tambien_pierde_la_protegida():
+def test_fragil_cuando_el_ruido_tambien_pierde_la_misma_pasada():
     f, m = _limpio()
     f.append(_fila("p1", estrato="control", lab="pos", prot=True, censo=True))
     m.append(_medida("p1", pub={"C": 1, "MC": 0, "CC": 1, "M": 1, "R": 1, "RC": 0}))
     r = E.evaluar(*_caso({"a": f}, {"a": m}))
-    assert r["veredicto"] == "PIERDE PROTEGIDA" and r["comparaciones"]["principal"]["fragil"] is True
+    c = r["comparaciones"]["principal"]
+    assert r["veredicto"] == "PIERDE PROTEGIDA" and c["fragil"] is True and c["fragil_pasadas"] == ["a|p1"]
+
+
+def test_no_es_fragil_si_el_ruido_pierde_otra_pasada():
+    """Control negativo del bloqueante 2: el nulo pierde una protegida distinta de la que pierde MC."""
+    f, m = _limpio()
+    f.append(_fila("p1", estrato="control", lab="pos", prot=True, censo=True))
+    f.append(_fila("p2", estrato="control", lab="pos", prot=True, censo=True))
+    m.append(_medida("p1", pub={"C": 1, "MC": 0, "CC": 1, "M": 1, "R": 1, "RC": 1}))
+    m.append(_medida("p2", pub={"C": 1, "MC": 1, "CC": 1, "M": 1, "R": 1, "RC": 0}))
+    r = E.evaluar(*_caso({"a": f}, {"a": m}))
+    c = r["comparaciones"]["principal"]
+    assert r["veredicto"] == "PIERDE PROTEGIDA" and c["fragil"] is False
+    assert c["perdidas_que_el_nulo_no_pierde"] == ["a|p1"]
+    assert r["comparaciones"]["nulo_de_principal"]["regla1"]["perdidas"] == 1
+
+
+def test_prueba_del_replay_por_grupo():
+    f, m = _limpio()
+    pred = {"total": {"delta": 1}, "granulos": {}}
+    for i, x in enumerate(f):
+        pred["granulos"]["a|%s" % x["clave"]] = {"pub_cc_replay": 0, "pub_c_guardada": 0,
+                                                  "fuente": "test1" if i < 3 else "eruption"}
+    for x in m[:3]:
+        x["pub"]["CC"] = 1          # la rama del Test 1: el medido no es el replay
+    r = E.evaluar(*_caso({"a": f}, {"a": m}), prediccion=pred)["prueba_del_replay"]
+    assert r["fuente_test1"] == {"acuerdo": 0, "de": 3, "CC_medido_1_replay_0": 3, "CC_medido_0_replay_1": 0}
+    assert r["resto"]["acuerdo"] == 7 and r["creible_fuera_de_test1"] is True
+
+
+def test_deriva_de_c_sobre_las_protegidas():
+    f, m = _limpio()
+    f.append(dict(_fila("p1", estrato="control", lab="pos", prot=True, censo=True), pub_guardada=1))
+    m.append(_medida("p1", pub={b: 0 for b in E.BRAZOS}))
+    r = E.evaluar(*_caso({"a": f}, {"a": m}))
+    assert r["deriva_protegidas"]["distintas"][0]["clave"] == "p1"
 
 
 def _muchos(n_cambian, cambio, n=40):
@@ -451,8 +527,11 @@ def test_la_cobertura_medida_quedo_escrita():
                      r"decide el signo ([\d.]+)", x)
         if m:
             cob[(m.group(1), m.group(3).split(" ")[0])] = (float(m.group(4)), float(m.group(6)))
-    for esc in ("replay", "nulo", "raro", "A_solo", "mezcla"):
+    for esc in ("replay", "nulo", "raro", "A_solo", "mezcla", "apaga_50", "apaga_70", "apaga_90",
+                "enciende_5", "enciende_10"):
         assert cob[(esc, "principal")][0] >= 0.95, esc
+    # poder (verificador del pre-registro): MEJORA exige apagar la mayoria de las falsas alarmas de C
+    assert cob[("apaga_50", "principal")][1] < 0.2 and cob[("apaga_90", "principal")][1] > 0.6
     assert cob[("replay", "principal")][1] == 1.0 and cob[("mezcla", "principal")][1] == 1.0
     assert cob[("replay", "dirichlet_1/2")][0] < 0.5
 
