@@ -351,6 +351,17 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 14:39 UTC (vuelta 112): el cron externo ya desplazó una corrida (evidencia para la decisión 1)
+- La `workflow_dispatch` de las 14:30 (run 38916263593) quedó `cancelled` con 0 jobs a las 14:32:35: la desplazó la
+  corrida `schedule` de GitHub de las 14:32 (`nrt.yml:12`, `0 */2 * * *`), porque el grupo `push-main`
+  (`nrt.yml:56`) guarda un solo pendiente. Sin pérdida de datos (la siguiente procesa el mismo día), pero el grupo es
+  COMPARTIDO con los demás workflows que pushean a main (`sync-mirova-csv` y otros): con el NRT siempre en espera,
+  cualquiera de ellos puede ser el desplazado, el modo de falla que perdió el job `merge` en S125 y S126. Refuerza
+  bajar la cadencia del cron externo (recomendado `10 1-12 * * *` UTC) o apagar el `schedule` de `nrt.yml` si el
+  externo lo reemplaza; decide Nicolás.
+- D-13: V2a intento 2 18 de 22; W2b 21 de 22. #840 cambió de head (`2d9be9a9`): el autor está empujando el último
+  arreglo, sin informe todavía. Disco 19 GB.
+
 ### 2026-10-16 14:33 UTC (vuelta 111): segunda verificación de la 1.21: SELLABLE CON ARREGLOS (uno, chico)
 - `experiments/_s151_mxd03_cumulo_121_verif/VERIFICADOR_V2.md`. Los dos bloqueantes de la v1, arreglados en el
   código (mutaciones de código propias del verificador: las tres hacen fallar el caso TEST1; FRÁGIL global hace fallar
