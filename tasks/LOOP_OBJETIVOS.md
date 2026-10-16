@@ -337,6 +337,16 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 08:02 UTC (vuelta 84): 1.18 terminada: en la erupción de Chillán no saturó ningún píxel (por verificar)
+- Run 38863912173, 12 jobs verdes, 385 gránulos de Chillán del 2026-09-28 al 2026-10-16 (V375 152, V750 154, MODIS 79,
+  noche y día). 0 píxeles saturados en el radio interior y en la escena, en los tres sensores; el VRP con y sin ellos
+  es idéntico. El cero tiene margen físico: la BT válida más alta del interior fue 348,3 K en V375 (2026-10-08 19:30),
+  bajo nuestro techo de 361,77 K y el de MIROVA, 353 K; V750 326,9 K; MODIS 307,1 K. La saturación no explica el
+  déficit de magnitud en Chillán (de noche, V375 suma 118 MW donde las alertas de MIROVA suman 169; conjuntos distintos).
+  Referencia: snapshot (falló la bajada remota). Salida en `experiments/_s151_saturacion_chillan/resultado_38863912173/`.
+- Verificador limpio lanzado (`C:\Users\nmend\AppData\Local\Temp\claude\verif_118\`). En curso también el de la 1.19.
+  F/K: el job de Villarrica gemelo sigue esperando runner; V2a intento 2 pendiente. W2a 13 de 22.
+
 ### 2026-10-16 ~08:00 UTC (vuelta 83): 1.19 terminada (por verificar): la agregación del VIIRS explica la dependencia angular
 - `experiments/_s151_angular_119/` (predicciones en `PREREGISTRO.md` antes de correr; cada número con su script). En
   el OSF global de MIROVA (V375 noche, 208.293 filas, 158 volcanes, efecto fijo volcán × mes) VRP/Npix sube +0,135 y
