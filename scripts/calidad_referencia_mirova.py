@@ -41,6 +41,13 @@ HITOS = [
      "cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia "
      "de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del "
      "log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A"),
+    # Distancia aproximada por serie de tiempo (Mirova-v1#25, mergeado el 2026-10-16 11:43 UTC, squash 2eac1758;
+    # estudio y verificadores en experiments/_s151_distancia_ocr/). La fecha es la primera pasada con imagen archivada
+    # dentro del panel de 30 dias (el archivo de Dist.png empieza el 2026-05-09).
+    ("2026-04-14", "ocr", "VIIRS 375", "antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). "
+     "Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; "
+     "no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS "
+     "375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)"),
 ]
 FUENTE = "docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2"
 
