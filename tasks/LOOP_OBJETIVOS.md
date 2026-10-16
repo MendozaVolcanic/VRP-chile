@@ -345,6 +345,19 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~12:50 UTC (vuelta 96): probe 1.17 evaluado: PIERDE PROTEGIDA (por verificar); el cron de Mirova-v1 aún no escribe
+- Probe 1.17 (run 38894508138): 470 de 471 gránulos (falta 1 de Tupungatito, bajo el tope); C' = C en 24 de 24;
+  autoprueba 41 de 41. Regla 1: de 46 protegidas, C publica 9 y M 16; **se pierden 2** (Láscar Terra 04-20 y 04-30
+  01:30: el cúmulo sigue en el cráter con la misma magnitud, pero el hotspot final salta a 19 a 21 km; posible
+  asimetría A46, no posición) y se ganan 9. Regla 2: Δ = −49,9 [−153,1; +62,6]. 22 cambios en estratos «inmóviles» y
+  97 de 100 cambios son «otra detección»; a cenit bajo el corrimiento medido (1,1 a 1,3 km) triplica el del modelo.
+  Salida: `C:\Users\nmend\AppData\Local\Temp\claude\mxd03_117\`. Verificador limpio lanzado (`verif_117r`).
+- Mirova-v1 tras #25: la corrida OCR de las 12:00 falló en el paso de la distancia aproximada (caché fría, push
+  rechazado y timeout de 10 min) y la de las 12:20 quedó cancelada en ese paso; en las dos el commit del OCR y el
+  guardado de la caché salieron bien (sin pérdida de datos). Causa: el cron restaura la caché `mirova-dist-*` más
+  reciente y la de la historia (12:07) quedó tapada por la parcial de las 12:12. La caché crece en cada corrida y
+  debería converger; vigilando la de las 12:30 antes de proponer un arreglo (toca producción: sólo con el sí de Nicolás).
+
 ### 2026-10-16 ~12:15 UTC (vuelta 95): D-12 hecha: distancia aproximada en producción de Mirova-v1
 - Nicolás aprobó el merge. Mirova-v1#25 mergeado (squash `2eac1758`, 11:43 UTC; CI verde en `f774a5d`, lo verificado).
   Historia despachada una vez (`distancia_aprox_historia.yml`, run 38895687049, presupuesto 45 min; no escribe el
