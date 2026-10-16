@@ -342,6 +342,14 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 08:34 UTC (vuelta 87): F/K V1 completa; evaluación delegada
+- V1 intento 2: el gemelo de Villarrica salió verde (44 jobs verdes en total entre los dos intentos; `recolectar` del
+  intento parcial no cuenta cobertura, como está diseñado). Evaluación delegada: unir intentos, contar cobertura con el
+  instrumento del repo, `evaluar_fk.py` sin tocar la vara (regla D-9 SN, informando SE y original); después verificador
+  limpio. Salida en `C:\Users\nmend\AppData\Local\Temp\claude\fk_v1\`.
+- V2a intento 2 ya corre (6 jobs en curso). W2a 16 de 22. NRT verde 03:15 UTC (5 h 19 min; vigilar el umbral de 12 h).
+  Disco 21 GB.
+
 ### 2026-10-16 ~08:30 UTC (vuelta 86): verificador de la 1.18: cero de saturación CONFIRMADO; dos hallazgos latentes
 - `experiments/_s151_saturacion_chillan/verificador/VERIFICADOR.md`. El instrumento puede dar distinto de cero: lee el
   bit 4 (Saturation, Tabla C.1) y el SI crudo antes del lector de producción, y en estos mismos gránulos marca I04
