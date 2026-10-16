@@ -351,6 +351,26 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~13:25 UTC (vuelta 102): IndexError del probe de saturación arreglado (PR #839, CI pendiente)
+- `experiments/_s151_saturacion_chillan/probe_saturacion.py`: un tramo sin días (ventana de 3 días en 6 tramos, run
+  38882932077) escribe su JSON con 0 pasadas y sale con 0, sin token ni red. Test nuevo parametrizado (normal y
+  `--listar`) con control (el tramo con días sigue exigiendo `EARTHDATA_TOKEN`): rojo antes, 24 de 24 después.
+  Rama `loop/probe-sat-tramos-vacios` en el worktree `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP-Chile-s152-sat`
+  (A44: el árbol compartido lo lee un subagente). Se mergea con el CI verde (sólo `experiments/` y `tests/`).
+
+### 2026-10-16 ~13:20 UTC (vuelta 101): revisión del paper delegada (sólo lectura)
+- Subagente sobre `docs/paper/` (sec4, sec5, sec6, `numbers.json`, `TABLAS.md`) contra lo cambiado desde el
+  2026-09-15: distancia OCR, corrimiento MODIS y MxD03, saturación, agregación VIIRS, alerta protegida y criterio de
+  victoria, más las marcas ⚠️ de S146 a S151. Entrega un informe en
+  `C:\Users\nmend\AppData\Local\Temp\claude\paper_s152\INFORME_CAMBIOS_PAPER.md`; no reescribe nada (lo decide Nicolás).
+
+### 2026-10-16 ~13:15 UTC (vuelta 100): pre-registro de la 1.21 delegado (worktree propio)
+- Subagente en worktree aislado, rama `loop/1.21-prereg` desde `main`: brazos C, M (MxD03), MC (MxD03 + `distance_class`
+  desde el cúmulo, flag sólo en memoria y trazado a todos sus consumidores, A89/A118) y ruido de posición como control
+  real (A110); término a lo largo de la traza en el modelo de corrimiento; regla 1 como compuerta en las dos
+  direcciones (A81); candado `preregistro_aprobado=si`, sólo `EARTHDATA_TOKEN`, grupo de concurrencia que no desplace a
+  F/K ni al diurno. Entrega un PR sin merge y sin despacho; después, verificador limpio y recién ahí el sello.
+
 ### 2026-10-16 13:09 UTC (vuelta 99): Mirova-v1 ya escribe `Distancia_aprox_*`; D-13 sigue esperando sus runs
 - Sesión S152 retomada con `/loop`. Chequeos: NRT verde (08:45, 39 min; la `workflow_dispatch` del cron externo de
   las 13:00 está en cola); disco 20 GB libres; abiertos #779 (auto-audit fuera de banda, ya revisado en la vuelta 29),
