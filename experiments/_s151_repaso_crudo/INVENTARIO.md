@@ -1,0 +1,29 @@
+# Tarea 1.16: conclusiones vigentes que se apoyan sólo en material digerido
+
+Repo: `C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile`, leído en `origin/main` (`8b2bcd79`) el
+2026-10-16. Sólo lectura. Los A/B ya pre-registrados (F/K, caja, D25 V750, diurno, `vrp_max`) no se tocan: su
+vara está fijada. El orden es por lo que decide cada conclusión, no por lo fácil que sea atacarla.
+
+## Orden de ataque
+
+| # | conclusión vigente | se apoya en (digerido) | (a) crudo que la confirma o la tumba | (b) árbitro externo | (c) método | (d) qué decide |
+|---|---|---|---|---|---|---|
+| 1 | Las etiquetas summit/far de MODIS de todo el corpus: D12 (Láscar pierde alertas por el píxel del Salar), el recall MODIS de A81/A82, la etiqueta `far` de Chillán (AUDIT_S150 §2) | lat/lon de nuestros JSON, calculadas con `_interp_geo` (`pipeline/process_modis.py:342`, usada en `:291-293`); MxD03 se baja y se ignora (`:470-471`). El probe #828 midió 7 gránulos, casi sólo Láscar, y dejó «SIN VERIFICAR: otros volcanes y la posición MxD03 del píxel del veto» (`experiments/_s151_probe_mod03/README.md:22`) | MxD03/MYD03 de cada gránulo MODIS con record summit o far cerca del límite, más el MOD021KM (el JSON no guarda fila ni columna, sólo `granule`, lat y lon) | MOD03 de NASA para la posición; la base de MIROVA (tabla) para saber qué pasadas alertó | píxel a píxel: reubicar cada `anomaly_pixels` y `final_hotspot` con MxD03, re-etiquetar con el mismo predicado del tablero (A97) y recontar D12 y el recall MODIS por volcán, sensor y cenit | el arreglo de producción (A45, espera a Nicolás), toda auditoría espacial MODIS (A61) y si D12 y la cara MODIS de D11 siguen siendo lo que dicen |
+| 2 | «El píxel VIIRS 375 saturado nunca se ha borrado» (AUDIT_S150 §3, C-02) y el borrado de los MODIS de DN 65533 (D24, `docs/MIROVA_DIVERGENCES.md:2673`) | `t_max` de nuestros JSON; el propio verificador anota que «un píxel borrado no aparece en `t_max`», así que ese cero no distingue «no saturó» de «saturó y se borró» (`docs/audit_s150/VERIFICADOR_AUDITORIA.md:205-206`). Techo nuestro 361,77 K (`pipeline/process_viirs.py:373`) contra 353 K de MIROVA (F-12, `docs/audit_s146/FRENTE_F_FIDELIDAD_VIIRS.md:524`); el máximo del corpus, 354,24 K, ya pasa el de MIROVA | VNP02IMG/VJ102IMG (bit de calidad de saturación de I04) y MOD021KM (SI = 65533) de las pasadas de Chillán desde el 2026-09-28 | la base de MIROVA (tabla y OCR) de esas mismas pasadas: 9,0, 10,0 y 8,24 MW | contar en el L1B los píxeles saturados de cada pasada y recalcular el VRP con y sin ellos contra lo que MIROVA publicó | la magnitud en erupción, con un volcán erupcionando hoy; el JSON no lo puede contestar por construcción |
+| 3 | La dependencia de la magnitud V375 con el ángulo: «SIN ATRIBUIR» (`experiments/_s151_presupuesto_magnitud/README.md:84`), con la firma de diente de sierra de las zonas de agregación «sub-potenciada» (`docs/AUDIT_S128.md:698-703`) | razón contra el CSV y Npix del OSF en 4 bandas de cenit; 33 a 44 pares por bin | OSF v2.5 global de MIROVA (252.374 filas de 375 m, con SatZen y Npix, `docs/audit_s139/MAGNITUD_DESCOMPOSICION_OSF.md:46`) y la huella real del píxel en VNP03IMG | el OSF de MIROVA | (i) buscar el salto en Npix y en VRP/Npix en los límites de zona de agregación sobre el OSF global, que da la potencia que faltó (los ángulos del límite se toman del User Guide del SDR, no de memoria); (ii) fuente sintética subpíxel con energía conocida, pasada por la huella VNP03 y por nuestro detector | qué palanca de magnitud se pre-registra después de D25 (Láscar 0,44, Isluga 0,52 en el auto-audit) |
+| 4 | A54 y A68: el 95,4 % de los «falsos positivos» son señal volcánica real no publicada (cat-b: Lazufre, Cerro Blanco, Pichi-Llaima, El Agrio); la rebaja de A83 todavía la cita | posiciones de nuestros JSON contra literatura (`docs/AUDIT_S86.md:17`, 1.707 records); ningún píxel de onda corta: el scraper de `NPixHot` de MIROVA OLI/MSI sigue sin código (`docs/AUDIT_S134.md:87`) | Sentinel-2 MSI L1C (B12, B11, 20 m) y Landsat 8/9 OLI (B7, B6, 30 m, incluidas sus adquisiciones nocturnas), en las coordenadas de cada rasgo | OVDAS, Sentinel-2 y Landsat; `NPixHot` de MIROVA como segunda opinión | índice de calor en onda corta (método NHI) por rasgo y mes contra un punto de control del mismo flanco; sólo valida fuentes persistentes, porque el SWIR es casi siempre diurno | el diseño del perfil experimental (1.11) y la regla A72 (corregir en el algoritmo si es artefacto, en el tablero si es real); bloqueado en parte por las coordenadas que entrega Nicolás |
+| 5 | D20: NTI de MODIS con banda 31 en vez de 32, «chico y no medido» (`docs/MIROVA_DIVERGENCES.md:2541`) | sólo razonamiento | banda 32, que ya viene en cada MOD021KM que bajamos | Coppola 2016a (página renderizada) para la fórmula; base de MIROVA para el efecto | el detector con B32 sobre la batería del Apéndice A (`tests/test_conformidad_apendice_s136.py`) y sobre las pasadas pareadas | fidelidad MODIS; barato, decide poco |
+
+## Ya tienen respaldo crudo (no repetir)
+
+k·A de los tres sensores (100 % de las filas del OSF, `MAGNITUD_DESCOMPOSICION_OSF.md:46`); el sesgo topográfico
+A69 (probe sobre L1B, S104); la distancia del OCR (`Dist.png`, 197 de 197 en el lado,
+`experiments/_s151_distancia_ocr/cambian_lado/INFORME.md`); el desplazamiento de `_interp_geo` (MxD03, #828);
+D21, D22, D30, D31 y A105 (página renderizada). El VRP del OCR se cotejó contra la tabla en las llaves compartidas
+(61 de 327 difieren por truncado, `docs/audit_s139/MAPA_BASES_MIROVA_V1.md:314`).
+
+## Sobre los verificadores
+
+En las filas 1 a 4 el árbitro no es otra instancia de Claude: es NASA (MxD03, L1B), MIROVA (OSF, tabla, OCR) o
+el SWIR. El sintético con respuesta conocida (fila 3) es el único árbitro de código que no depende de quien
+escribió el detector, siempre que la respuesta se fije por física antes de correrlo.

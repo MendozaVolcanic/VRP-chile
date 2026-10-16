@@ -277,7 +277,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   separar paralaje (proporcional a altura por tangente del ángulo) de error de interpolación. Sin tocar el
   pipeline. Control que pueda fallar: VIIRS, cuya geolocación es nativa por píxel, no debería mostrarlo.
 
-- [ ] **1.16 (agregada por Nicolás el 2026-10-16) Repaso con material crudo.** Va **después de cerrar el arreglo de
+- [x] **1.16 HECHA 2026-10-16 (vuelta 75):** `experiments/_s151_repaso_crudo/INVENTARIO.md`, cinco conclusiones en
+  orden de ataque (citas archivo:línea revisadas): (1) etiquetas summit/far MODIS del corpus con MxD03 → tarea 1.17;
+  (2) saturación en erupción, que el JSON no puede contestar → 1.18; (3) dependencia angular de la magnitud V375 con el
+  OSF global y un sintético → 1.19; (4) cat-b de A54 contra SWIR (espera las coordenadas de Nicolás, 1.11); (5) D20,
+  banda 32. Texto original:
+  **1.16 (agregada por Nicolás el 2026-10-16) Repaso con material crudo.** Va **después de cerrar el arreglo de
   G3** del evaluador diurno (rama `loop/diurno-g3-tolerancia`). De sólo lectura; entregable de **una página**.
   Por qué: dos defectos de este mes estuvieron escondidos porque se auditaba sobre material ya digerido: el
   corrimiento MODIS (meses en nuestros JSON; lo destapó la geolocalización oficial MOD03, #828) y la distancia del
@@ -295,6 +300,23 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   decide. No re-litigar los A/B ya pre-registrados: su vara está fijada. La reescritura del plan cabe en una página;
   si no cabe, se prioriza, no se alarga.
 
+**Agregadas por el loop el 2026-10-16, del inventario de la 1.16 (todas de sólo lectura; árbitro externo, no Claude).**
+
+- [ ] **1.17 Etiquetas summit/far MODIS re-medidas con MxD03 en los 11 volcanes.** Por qué: #828 midió 7 gránulos,
+  casi sólo Láscar; D12, el recall MODIS (A81/A82) y el `far` de Chillán se apoyan en posiciones de `_interp_geo`. Qué:
+  probe en GitHub Actions (pyhdf sólo en Linux) que reubica `anomaly_pixels` y `final_hotspot` con MxD03 y re-etiqueta
+  con el predicado del tablero (A97); recuento por volcán, satélite y cenit. Informa la decisión del arreglo MxD03
+  (A45), que sigue siendo de Nicolás. Autenticación sólo con `EARTHDATA_TOKEN`.
+- [ ] **1.18 Saturación en la erupción de Chillán, leída en el L1B.** Por qué: nuestro techo I04 es 361,77 K y el de
+  MIROVA 353 K; el corpus ya llegó a 354,24 K, y un píxel borrado no aparece en `t_max`. Qué: en las pasadas de
+  Chillán desde el 2026-09-28, contar en VNP02IMG/VJ102IMG (bit de saturación de I04) y MOD021KM (SI = 65533) los
+  píxeles saturados, y recalcular el VRP con y sin ellos contra lo que MIROVA publicó (9,0, 10,0 y 8,24 MW).
+- [ ] **1.19 Dependencia angular de la magnitud V375 sobre el OSF global.** Por qué: hoy «SIN ATRIBUIR» con 33 a 44
+  pares por bin. Qué: buscar el salto en Npix y VRP/Npix en los límites de las zonas de agregación VIIRS (ángulos del
+  User Guide del SDR, página renderizada) en las 252.374 filas de 375 m del OSF; y un sintético subpíxel de energía
+  fijada por física antes de correr, pasado por la huella VNP03 y por el detector. Decide la palanca de magnitud
+  después de D25.
+
 ## 5. Cola de decisiones para Nicolás (el loop agrega; Nicolás responde en el issue)
 
 | # | decisión | evidencia | PR / tag | issue |
@@ -311,6 +333,14 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-10 | ~~¿Abrir el día en la réplica?~~ **DECIDIDA: 1** (Nicolás, 2026-10-15): rama diurna VIIRS apagada por flag (tag `pre-s151-rama-diurna-viirs`) y A/B diurno; código en curso | `experiments/_s151_alertas_diurnas/README.md`, verificado | #812 | #813 |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-16 ~05:35 UTC (vuelta 75): tarea 1.16 hecha; tres tareas nuevas en la cola (1.17 a 1.19)
+- Inventario de material crudo (`experiments/_s151_repaso_crudo/INVENTARIO.md`, sólo lectura sobre `8b2bcd79`). Revisé
+  a mano tres de sus citas (`process_modis.py:342` y `:470-471`, `VERIFICADOR_AUDITORIA.md:205-206`): calzan. Orden de
+  ataque: posiciones MODIS con MxD03 en todo el corpus, saturación en Chillán leída en el L1B, dependencia angular con
+  el OSF global; después cat-b contra SWIR y D20. En las filas 1 a 4 el árbitro es NASA, MIROVA o el SWIR.
+- Encoladas como 1.17, 1.18 y 1.19. Próxima tarea libre: 1.17 (probe en Actions; cuenta como A/B para el tope de 2
+  sólo si reprocesa, y no reprocesa: lee gránulos y records).
 
 ### 2026-10-16 05:24 UTC (vuelta 74): tarea 1.16 arrancada (subagente de sólo lectura)
 - Paradas: NRT verde 03:15 UTC; disco 21 GB. V2a en 18 de 22; W2a con 3 jobs corriendo y 19 en cola; W2b y la
