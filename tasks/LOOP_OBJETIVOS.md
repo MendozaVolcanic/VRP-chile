@@ -351,6 +351,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 14:33 UTC (vuelta 111): segunda verificación de la 1.21: SELLABLE CON ARREGLOS (uno, chico)
+- `experiments/_s151_mxd03_cumulo_121_verif/VERIFICADOR_V2.md`. Los dos bloqueantes de la v1, arreglados en el
+  código (mutaciones de código propias del verificador: las tres hacen fallar el caso TEST1; FRÁGIL global hace fallar
+  el test nuevo). Cobertura re-corrida idéntica. Anisotropía: no bloquea (la principal no usa el nulo; las dos pérdidas
+  de la 1.17 a 15,6° y 17,4°).
+- Bloqueante nuevo: dos despachos (Lascar-2 para cronometrar y los 11) con `--ref main` sin commit en los JSON; si
+  `pipeline/` cambia entre ellos, el veredicto mezcla pipelines. Arreglo pedido al autor: `GITHUB_SHA` por job y
+  evaluador INCOMPLETO con más de un commit.
+- Para el sello de Nicolás: MEJORA es inalcanzable en la práctica en la principal (lo esperable es EMPEORA, PIERDE
+  PROTEGIDA o INDETERMINADO); las 37 protegidas ganadas no entran en el balance (letra de MISSION, decisión suya si
+  deben compensar); encender el flag tal cual crea una asimetría A46 nueva en los records del Test 1.
+
 ### 2026-10-16 14:28 UTC (vuelta 110): arreglos de la 1.21 aplicados (#840 en `bce08032`, CI verde); segunda verificación
 - CI run 38915427957: 1.882 pasan (45 tests nuevos). Bloqueante 1: README rebajado a cota (CC publicaría 42 a 46
   protegidas, 0 a 4 pérdidas), grupo `fuente_test1` (126 records, 4 protegidas, 113 negativos limpios), espía con los
