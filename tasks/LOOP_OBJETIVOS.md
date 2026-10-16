@@ -334,6 +334,17 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 ~06:50 UTC (vuelta 78): verificador del pre-registro 1.17: SELLABLE CON ARREGLOS (cambian el diseño)
+- Cumple: el brazo MxD03 lleva la posición oficial a todos los lugares donde decide (parche en `read_modis_l1b`), y la
+  prueba sintética distingue corrimiento presente de ausente; auth sólo token.
+- No cumple: (a) la banda fija de 3 km no basta: el modelo de #828 predice 4,8 km a 54° y 9,6 km a 65° de cenit; 34 %
+  de los records supera 3 km y el estrato medio sin medir tiene 197 de 622 publicaciones; (b) ninguna de las 48 pasadas
+  MODIS protegidas de MIROVA del tramo (Láscar 40, Chillán 6, Villarrica 2) está en la muestra. Además el evaluador
+  daba «cambia poco» con la cota inferior encendida y no marcaba INCOMPLETO si faltaba un volcán (los dos probados).
+- Arreglos pedidos al agente del probe (worktree nuevo `../VRP-Chile-117b`): banda por record según corrimiento
+  predicho, censo de las 48 protegidas con la regla 1 como compuerta, control negativo C', JSON incremental, evaluador
+  corregido. El sello sigue esperando. En curso también: arreglos de Mirova-v1#25 y preparación de 1.18.
+
 ### 2026-10-16 ~06:30 UTC (vuelta 77): 1.17 en main con candado (#834); verificador del pre-registro lanzado
 - #834 mergeado (CI verde, `b9d65830`): probe que corre cada gránulo MODIS dos veces por el pipeline de producción
   (posición interpolada contra MxD03) y re-etiqueta con el predicado del tablero. Población de 364 gránulos (A: hotspot
