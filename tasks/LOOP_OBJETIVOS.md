@@ -352,6 +352,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-16 17:06 UTC (vuelta 123): segunda verificación de #841: un bloqueante; **cobertura de V2a unida PAREJA**
+- `experiments/_s151_unir_intentos_verif/VERIFICADOR_V2.md`. Uniones rehechas por el verificador (`v2_a7_reunir.py`):
+  idénticas record por record a las del autor. **`contar_pasadas.py` sobre las uniones (2026-03-01 a 04-20): control
+  5.876, brazo `_s149_ab_sin_test1_b22_max` 5.876, 0 faltan, 0 sobran, salida 0.** Clave (sensor, minuto) = la de
+  deduplicación de `pipeline/store.py:650-653`. Mutaciones: mueren 16 de 17.
+- Bloqueante: el modo intento entero acepta diferencias reales (con `triggered_test1` invertido, `summit`, `vrp_mw`
+  99 o `product_version` nrt en un común de Láscar da `ok=True` e informa), y `evaluar_fk.py` no lee el informe.
+  Regla pedida al autor, igual en los dos modos: todo común clasificado, predicado sobre los de borde, cualquier
+  `distinto` bloquea; `sensor_zenith_deg` derivado fuera de VIIRS 375 (único lector `cenital_neg_v375`, a comprobar).
+- Después de ese arreglo: merge de #841 con el CI verde y evaluación de V2a con `evaluar_fk.py` sobre las uniones,
+  con su verificador limpio.
+
 ### 2026-10-16 17:02 UTC (vuelta 122): arreglos de #841 aplicados (`dd4cae1d`, CI verde); segunda verificación
 - Clave por pasada (sensor, minuto) sin gránulo; intento entero cuando uno solo cubre todas las pasadas (comunes
   informados); mecanismo corregido (empates en el top-100); tests de 20 a 31, matan las mutaciones que sobrevivían.
