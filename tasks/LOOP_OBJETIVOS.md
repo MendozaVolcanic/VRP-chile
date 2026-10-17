@@ -380,6 +380,14 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 18:18 UTC (vuelta 162): arreglos de la 1.23 aplicados (#846 en `c101f9cc`); segunda verificación
+- Nulo en km (20 rumbos geográficos del tamaño en km del corrimiento real): el pipeline usa la posición sólo como
+  distancia en km; `invariante_km.py`, grilla regular 1 × 2 km: CV del cruce de los círculos de 3, 5 y 25 km 0,03 a 0,07
+  en km contra 0,24 a 0,30 en píxeles. Con bow tie ninguna unidad es invariante (CV 0,18 a 0,49 en km): se informa por
+  cenit (`tamano_del_nulo`). Caso sintético SIERRA con test que falla con ±2 líneas. README: «M mueve k tanto como el
+  azar»; lectura 4 con signo pre-registrada. K = 19 también cumple (anotado). CI 39057051690 verde, suite 2.022.
+- Segunda vuelta del verificador lanzada (`verif_123\VERIFICADOR_V2.md`).
+
 ### 2026-10-17 18:16 UTC (vuelta 161): 1.24 en PR #847 (G3 con `comparar()`, CI verde); verificador lanzado
 - `noches_identicas` clasifica cada par nocturno control/diurno con `unir_intentos.comparar`; `borde` y
   `hotspot_escena` pasan por `unir_intentos._predicado` (node, por volcán); si el tablero difiere o no corre, el par es
