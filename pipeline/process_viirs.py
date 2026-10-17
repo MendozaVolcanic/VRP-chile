@@ -51,7 +51,7 @@ from .scan_geometry import (viirs_pixel_areas, resolve_viirs_pixel_areas,
                             roi_mask_bbox, observation_geometry, attr_scale_factor)
 from .exclusion_zones import filter_hot_mask, guard_exclude_zones
 from .clustering import cluster_hotspots, cluster_pixels_geographic
-from .anomaly_pixels import build_anomaly_pixels
+from .anomaly_pixels import build_anomaly_pixels, orden_vrp_descendente
 from .vrp_regimes import compute_local_background
 from .path_d_cap import apply_d9_scene_cap  # F50/S77
 from .product_version import product_version_from_granule  # S140 8b
@@ -1517,7 +1517,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 # Records eruptivos típicamente tienen 1000-4000 pixels; los top
                 # 100 capturan >95% de la señal VRP y bastan para visualización.
                 # n_anomalous_pixels conserva el count total.
-                sorted_indices = np.argsort(-per_pixel_vrp_mw)[:100]
+                # S151 1.22: desempate explícito por (fila, columna). Con BT cuantizada, área fija y
+                # fondo escalar hay empates EXACTOS de VRP, y el argsort por defecto los ordenaba
+                # distinto según la CPU del runner: otro hotspot (primer elemento) y otro top-100
+                # con el mismo commit. Ver pipeline/anomaly_pixels.py::orden_vrp_descendente.
+                sorted_indices = orden_vrp_descendente(per_pixel_vrp_mw, hot_rows, hot_cols)[:100]
                 for idx in sorted_indices:
                     r, c = int(hot_rows[idx]), int(hot_cols[idx])
                     anomaly_pixels.append({
