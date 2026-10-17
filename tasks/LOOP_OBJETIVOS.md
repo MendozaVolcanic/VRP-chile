@@ -360,7 +360,7 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   `w3a_38942908101\i1\`, intento 2 del artefacto 12083033867): 65 comunes, 0 distintos (60 por tolerancia, 4 por
   orden); usa entero el intento 2 (69 pasadas). Unión en
   `C:\Users\nmend\AppData\Local\Temp\claude\w3a_38942908101\union\`; los otros 21 archivos son los del intento 1.
-- W3b (38985239552): 3 en curso, 19 en cola. V1 intento 3: 28 verdes, 6 en curso, 10 en cola. NRT verde 00:43.
+- W3b (38985239552): 3 en curso, 19 en cola. **W4a despachada** (38987988455, 2026-08-13 a 08-22, primera mitad de W4, `--ref main`): `pending`, W3b sin desplazar a los 40 s. V1 intento 3: 28 verdes, 6 en curso, 10 en cola. NRT verde 00:43.
   Disco 6,8 GB. Esperan D-14, D-15 y D-16.
 
 ### 2026-10-17 00:09 UTC (vuelta 127): el PC estuvo suspendido ~6 h; W2a pareja; W3a repetida; W3b despachada; D-16
