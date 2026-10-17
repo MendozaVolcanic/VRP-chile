@@ -391,6 +391,19 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 23:35 UTC (vuelta 177, S153): #847 mergeado; instrumento de F/K fijado en `2766c198`
+- **#847 mergeado** (squash `2766c198`; CI verde en `369e201e`). Mutaciones con el árbol quieto: **15 de 15** (sin
+  mutación, autoprueba verde; `u_sin_recorte_lleno` y `u_fuera_del_corte` atrapadas por sus casos 23d y 23e;
+  `volatiles` rc=3 es la guarda de coherencia, no una caída). Autoprueba 69 de 69; tests 128.
+- **Instrumento de la regla de adopción de K (#848, §3) fijado en `2766c198`**: con ese `evaluar_fk.py` y ese
+  `unir_intentos.py` se re-une y re-evalúa V1 y se evalúa V2.
+- Runs: V2b repetida 6 de 8 (2 en curso); W5a repetida pendiente detrás de W5b (14 de 22). **W6a se despacha cuando
+  la repetición de W5a arranque.**
+- NRT: última corrida 20:09 UTC (programada, verde). La programada de las 22:00 no apareció (GitHub omite a veces); el
+  cron externo nuevo (`10 1-12 * * *`) arranca a la 01:10. Revisar que haya corrida verde antes de las 02:00 UTC.
+- Worktrees del #847 y del tablero: `git worktree remove` dio «Permission denied» (archivos tomados por Windows); el
+  disco subió a 9,5 GB igual. Borrar las carpetas a mano después.
+
 ### 2026-10-17 ~23:40 UTC (vuelta 176, S153): #849 en main y publicado; la localización de VIIRS 375 la decide el Test 1
 - **#849 mergeado** (squash `60c45833`, CI verde); Pages desplegado; R8: `index`, `diario`, `mosaico` y `periodo.js`
   dan 200, y en el sitio público la noche del 1-oct de Chillán carga con su franja, «máx 1 oct» y sin errores.
