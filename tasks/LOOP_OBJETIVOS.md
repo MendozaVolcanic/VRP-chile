@@ -366,6 +366,25 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 13:42 UTC (vuelta 144): verificador de F/K V1: PARCIAL; el CUMPLE de lectura A se sostiene con matices
+- `experiments/_s151_prereg_fk_11/resultado_v1/VERIFICADOR.md`. Se sostiene: reproducción exacta (0 claves
+  distintas); el código mide lo que dice (protegidas, negativos limpios, exclusión Suomi NPP solo OCR, D-9); la unión
+  no contamina (órdenes 1-3 y 3-1 dan 0 diferencias; la unión sin D-16 da INDECIDIBLE, lo correcto); cuatro defectos
+  sembrados salen como deben (VETADO, veto sólo de K, PIERDE 750 contra 734, FALLA de P3).
+- Las 21 alertas V375 que F y K dejan: 11 de 0,05 MW o menos, 8 Muy Bajo (0,06 a 0,21) y 2 de 1 MW o más:
+  Tupungatito 09-28 (2,51) y 09-29 (1,86), protegidas A que descansan sólo en el OCR de Suomi NPP (la §5 las aparta por
+  el hito, la §9 las cuenta: 19 de 21, sin contradicción). Todo indica objetos lejanos (OCR «lejos», cúmulo de F a 9,4 y
+  21,6 km, C0 publicaba 0,05 MW en el cráter por el Test 1), pero coincide en radio, no en posición. **Falta la
+  revisión de la cabecera de la imagen que exige el pre-registro.**
+- No se sostiene: (1) P3 no puede fallar en V375 como está escrita (51,9 % de los pares con d exactamente 0); en los 115
+  que cambian, F queda bajo C0 en 98 (~28 % menos), signos p = 0,00035, media de d +0,048 [+0,026, +0,074]: sin el Test
+  1 la magnitud se aleja de MIROVA. (2) El veto de la lectura B es efecto del pareo por pasada: C0 publicaba un píxel
+  del cráter (0,012 a 0,10 MW) y el objeto de MIROVA está a 11 a 28 km; F lo encuentra lejos y lo calla como `far`.
+  (3) Los «far_ref» sí tienen VRP en MIROVA (corregido arriba).
+- Para Nicolás antes de V2: el CUMPLE de V1 descansa en Chillán en erupción (10 de las 12 protegidas que deciden en
+  V375); el poder de veto está en V2 (Láscar). Informar junto a la regla sellada la media de d con su intervalo y los
+  signos. No determinismo MODIS de magnitud en el control (Llaima 10-06 01:45, 4,28/3,57 MW), sin cambio de decisión.
+
 ### 2026-10-17 13:41 UTC (vuelta 143): #843 (D-16 a) en main
 - Arreglos del verificador aplicados (`9732f218`, CI verde, suite local 1.981): m1, m2 y las tres condiciones nuevas
   (a, b, c; centroide en `store.py:397-399`), 14 de 14 mutaciones mueren. Del `mutaciones.py` del verificador siguen
@@ -387,7 +406,8 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   100 % en los tres sensores, autocontrol de la regla original OK, etiqueta original reproducida en 4.820 de 4.820.
 - Veredicto de la ventana V1 (§6, regla original): **F y K CUMPLEN con lectura A** (0 protegidas perdidas en los tres
   sensores; 2 de VIIRS 375 sólo OCR Suomi NPP, apartadas por el hito); **NO CUMPLEN con lectura B** (12 pérdidas en
-  VIIRS 375: 10 «far_ref» sin VRP en MIROVA y Tupungatito 09-28 2,51 MW y 09-29 1,86 MW). P2 lectura A: MODIS 114 a
+  VIIRS 375: 10 «far_ref» sin VRP en MIROVA [⚠️ FALSO, verificador vuelta 144: tienen 1,07 a 3,98 MW
+  (FALSO_POSITIVO); el «None» es que la tabla no llena `vrp_ref` en `far_ref`] y Tupungatito 09-28 2,51 MW y 09-29 1,86 MW). P2 lectura A: MODIS 114 a
   4 (F) / 10 (K); VIIRS 375 734 a 37; VIIRS 750 331 a 26; ruido del gemelo 0. Negativos limpios publicados V375 88,2 %
   a 2,5 %, V750 24,6 % a 0,9 %, MODIS 12,3 % a 0,0 (F) / 0,8 % (K). Recall V375 260 a 239 (16 Muy Bajo perdidas de
   194). P3 CUMPLE en V375 y V750 (d mediana 0, razones C0 0,748 contra F 0,620); MODIS sin sustrato (n 3). P4 CUMPLE.
