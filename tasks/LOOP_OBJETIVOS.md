@@ -380,6 +380,10 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 17:13 UTC (vuelta 157): espera
+- V2b 11 de 22; W5a 12 de 22; W5b pendiente. NRT verde 16:56. Disco 10,7 GB (dos worktrees de agentes activos).
+  En curso: G3 (1.24) y pre-registro 1.23.
+
 ### 2026-10-17 16:41 UTC (vuelta 156): pre-registro de la 1.23 (MxD03 sola) delegado
 - Agente en worktree, rama `loop/1.23-prereg` (`experiments/_s151_mxd03_sola_123/`): nulo con ~20 rumbos por gránulo y
   anisotropía corregida; vara de posición independiente (cúmulo VIIRS 375 de la misma noche o TIF UTM de MIROVA, con
