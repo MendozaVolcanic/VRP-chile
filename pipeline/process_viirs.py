@@ -1,7 +1,7 @@
 # ════════════════════════════════════════════════════════════════════
 # FICHA SDA · process_viirs.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
 # Objetivo      : Detectar y cuantificar anomalias termicas en granulos VIIRS I-band 375m
-#                 (VNP02IMG/VJ102IMG) — el sensor de mayor resolucion espacial, clave para focos sub-pixel
+#                 (VNP02IMG/VJ102IMG): el sensor de mayor resolucion espacial, clave para focos sub-pixel
 #                 debiles.
 # Lógica        : Misma cascada MIROVA-style que MODIS adaptada a 375m: deteccion contextual/ROI sobre I04,
 #                 fondo local por anillo, VRP por Wooster. En regimen de muy baja energia recupera focos
@@ -18,7 +18,7 @@
 #                 aplica (sin ML). Ficha: docs/FICHA_SDA_VRP_CHILE.md
 # ════════════════════════════════════════════════════════════════════
 """
-process_viirs.py — Calculate VRP from VIIRS VNP02IMG / VJ102IMG L1B granules.
+process_viirs.py: Calculate VRP from VIIRS VNP02IMG / VJ102IMG L1B granules.
 
 Algorithm: adapted from TIRVolcH (Aveni et al. 2024, RSE) and
            MODIS-to-VIIRS transition (Campus et al. 2022, Sensors).
@@ -73,8 +73,8 @@ from pipeline.constants import C1, C2  # 2hc², hc/k Planck radiation
 # For VIIRS I4 (3.74 µm, 375 m) use 18.0 per Laiolo et al. 2024
 # (s00445-024-01721-z, Vulcano VIIRS 375m), not 18.9 which is calibrated for
 # MODIS B21 at 3.959 µm / 1 km. Difference comes from band center and pixel
-# footprint in the Planck→Stefan-Boltzmann approximation over 600–1500 K.
-WOOSTER_COEFF = 18.0   # W/m² per (W/m²/sr/µm) — VIIRS I4 375m
+# footprint in the Planck→Stefan-Boltzmann approximation over 600-1500 K.
+WOOSTER_COEFF = 18.0   # W/m² per (W/m²/sr/µm), VIIRS I4 375m
 
 # Band wavelengths (µm)
 I04_LAMBDA = 3.740
@@ -283,11 +283,11 @@ def _compute_vrp_tir_with_gate(
     legacy_n_sigma: float = 4.0,
     enable_output: bool = True,
 ) -> float:
-    """F46 (S77, A45) — Computa vrp_tir_mw con gate de consistencia MIR/NTI.
+    """F46 (S77, A45), Computa vrp_tir_mw con gate de consistencia MIR/NTI.
 
     **F46 provisional S81**: si `enable_output=False`, retorna 0.0 inmediato
     (silencia el campo hasta que el fix Coppola 2024 Eq.16 con background
-    subtraction esté implementado — auditoría S81 detectó 726 records >1000×
+    subtraction esté implementado, auditoría S81 detectó 726 records >1000×
     vs vrp_mir_mw post-S77 gate, evidenciando que el gate Opción A+B
     actual no es suficiente). Ver docs/F46_VRP_TIR_GATE_S81.md.
 
@@ -305,7 +305,7 @@ def _compute_vrp_tir_with_gate(
     Cuando `enable_gate=False`: comportamiento legacy `max(0.5, 4σ)` sin gate.
 
     Returns:
-        float — vrp_tir en MW (Stefan-Boltzmann sobre máscara efectiva).
+        float: vrp_tir en MW (Stefan-Boltzmann sobre máscara efectiva).
     """
     if not enable_output:
         return 0.0
@@ -352,12 +352,12 @@ def read_viirs_l1b(l1b_path: Path) -> dict:
 
     Returns:
         {
-          "I04": ndarray float32 — brightness temperature (K) for band I04
-          "I05": ndarray float32 — brightness temperature (K) for band I05
+          "I04": ndarray float32, brightness temperature (K) for band I04
+          "I05": ndarray float32, brightness temperature (K) for band I05
         }
 
     Calibration uses the built-in BT LUT (I04_brightness_temperature_lut).
-    Flag values (65532–65535) are replaced with NaN.
+    Flag values (65532-65535) are replaced with NaN.
     """
     if not H5_AVAILABLE:
         raise ImportError("h5py required. Install: pip install h5py")
@@ -379,7 +379,7 @@ def read_viirs_l1b(l1b_path: Path) -> dict:
             if band not in obs:
                 continue
             dn = obs[band][:]                                   # uint16, shape (lines, pixels)
-            # F2.8 H2 — leer quality_flags SDS si está disponible
+            # F2.8 H2: leer quality_flags SDS si está disponible
             qf_key = f"{band}_quality_flags"
             qf = obs[qf_key][:] if qf_key in obs else None
             lut_key = f"{band}_brightness_temperature_lut"
@@ -458,7 +458,7 @@ def read_viirs_geo(geo_path: Path) -> dict:
             sz = np.zeros_like(lat)
         sz[np.isnan(lat)] = np.nan
 
-        # S122 — resto de la geometría de observación (mismo archivo ya abierto).
+        # S122: resto de la geometría de observación (mismo archivo ya abierto).
         # Solo para estudio posterior; no entra en detección ni magnitud.
         # VNP03/VJ103 guarda los angulos como enteros escalados (scale_factor
         # 0.01): sin aplicarlo, 63.32 grados se leeria como 6332 (bug detectado
@@ -497,7 +497,7 @@ def _regrid_viirs_granule(bands: dict, geo: dict, center_lat: float,
     tanto como de su temperatura: sobre un volcán nevado, un vecino elongado
     promedia nieve, roca y valle en proporciones distintas en cada pasada, y el
     fondo que se le resta al foco es un objeto diferente cada noche. MIROVA lo
-    elimina ANTES de detectar — Campus 2024 (L102-104): *"after an initial
+    elimina ANTES de detectar: Campus 2024 (L102-104): *"after an initial
     resampling of the original granule in a regular 50x50 km UTM grid"*.
 
     El schema de salida es el mismo que el de los lectores, así que todo el
@@ -510,7 +510,7 @@ def _regrid_viirs_granule(bands: dict, geo: dict, center_lat: float,
     I-bands allows the recognition of anomalies otherwise undetectable"*).
 
     Todas las bandas son requeridas: a diferencia de MODIS, VIIRS no usa un
-    centinela NaN para saturación — clampea la radiancia y marca un bit de
+    centinela NaN para saturación, clampea la radiancia y marca un bit de
     calidad aparte (A37). Un NaN acá es dato ausente de verdad, y sin TIR no
     hay NTI.
     """
@@ -550,12 +550,12 @@ from pipeline.scan_geometry import haversine_km
 
 
 def _compute_vrptir_aveni_diagnostic(bt5_2d, hot5_mask_2d, t_bg_i05):
-    """F31 Task A2 — VRPTIR Aveni 2025 GRL diagnostic-only.
+    """F31 Task A2: VRPTIR Aveni 2025 GRL diagnostic-only.
 
     Calcula VRP_TIR per Aveni 2025 GRL Eq.9 sobre los pixels ya detectados
     como hot por nuestro pipeline TIR (subset de `hot5_mask_2d`). Es un
     proxy de TIRVolcH real (Aveni 2024 RSE requeriría baseline 10yr
-    cloud-free pre-computed — pendiente plan F31 Task A1+ futuro).
+    cloud-free pre-computed: pendiente plan F31 Task A1+ futuro).
 
     Solo cuenta pixels dentro del rango validez Aveni 300-600 K (features
     moderate-to-low-temperature: crater lakes, fumarole fields, hydrotermal).
@@ -564,7 +564,7 @@ def _compute_vrptir_aveni_diagnostic(bt5_2d, hot5_mask_2d, t_bg_i05):
 
     Args:
         bt5_2d: array 2D BT VIIRS I5 (K)
-        hot5_mask_2d: máscara bool 2D — pixels detectados como hot
+        hot5_mask_2d: máscara bool 2D, pixels detectados como hot
                       por nuestro pipeline TIR (proxy TIRVolcH).
         t_bg_i05: BT background I5 (K), median del ring de fondo.
 
@@ -640,7 +640,7 @@ def apply_corona_magnitude_v375(
     """Recomputa el VRP del clúster con la corona Eq.6 (Coppola 2016a).
 
     POR QUÉ: el fondo del Test 1 en VIIRS 375 sale hoy del anillo [1,5-3] km al
-    cráter, que es el 75 % del área del propio ROI de 3 km — cada píxel se compara
+    cráter, que es el 75 % del área del propio ROI de 3 km, cada píxel se compara
     contra la media de sus propios tres cuartos exteriores, y el clip a cero se
     queda con la mitad de arriba. Es un fondo autorreferente: la suma crece con la
     cantidad de píxeles, no con la energía del volcán.
@@ -654,10 +654,10 @@ def apply_corona_magnitude_v375(
     valor: vuelve el VRP regional tal cual con `degraded=True`, para que el fallback
     quede explícito en el record y se pueda contar después.
 
-    S127 — devuelve TAMBIÉN los VRP por píxel bajo el fondo de la corona. Sin eso el
+    S127: devuelve TAMBIÉN los VRP por píxel bajo el fondo de la corona. Sin eso el
     call site no tiene con qué alimentar a `apply_single_pixel_mode`, que corre después
     y reemplaza el total por `max(per_pixel)`: con los valores del fondo regional ese
-    máximo revierte el recompute. Pasó en el A/B de S126 — la corona corrió en 1.179
+    máximo revierte el recompute. Pasó en el A/B de S126, la corona corrió en 1.179
     records y sólo cambió el número publicado en 15; los 1.164 restantes tenían
     `single_pixel_mode=True`. `None` significa "la corona no aplicó, seguí con los VRP
     que ya tenías" y obliga al call site a ser explícito.
@@ -757,7 +757,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     bands = read_viirs_l1b(l1b_path)
     geo = read_viirs_geo(geo_path)
 
-    # F70.2 — sustrato geométrico. Con el flag apagado (operacional hoy) esta
+    # F70.2: sustrato geométrico. Con el flag apagado (operacional hoy) esta
     # rama no se ejecuta y el procesador es idéntico al anterior.
     if ENABLE_UTM_REGRID:
         bands, geo = _regrid_viirs_granule(bands, geo, volcano_lat, volcano_lon)
@@ -788,11 +788,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         vent_dist_per_pixel = dist
 
 
-    # D18 (S130) — la geometria del ROI1. El paper dice CAJA de 5x5 km igual para
+    # D18 (S130): la geometria del ROI1. El paper dice CAJA de 5x5 km igual para
     # todos (SP426.5: "the inner region (ROI1) consists of a box (5 x 5 km) centred
     # on the volcano's summit"); nosotros usamos un circulo de radio inner_radius_km
-    # que va de 3 a 20 km segun el volcan. Con el flag OFF —el default y lo
-    # operacional— `_roi1_mask` queda en None y rige el circulo de siempre.
+    # que va de 3 a 20 km segun el volcan. Con el flag OFF , el default y lo
+    # operacional,  `_roi1_mask` queda en None y rige el circulo de siempre.
     # Se centra en el MISMO punto que la distancia per-pixel de arriba (el vent
     # efectivo), para que la caja y el circulo sean comparables en el A/B.
     _roi1_mask = None
@@ -813,23 +813,23 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # Cloud tops are typically <260K. Excluding them prevents:
     #  (a) artificially low T_bg from cloudy background pixels
     #  (b) false negatives from cloudy ROI pixels hiding real anomalies
-    # This is a simple threshold approach — no extra download needed.
+    # This is a simple threshold approach, no extra download needed.
     #
-    # S125 — el umbral sale del PERFIL, no de un literal. Antes era
+    # S125: el umbral sale del PERFIL, no de un literal. Antes era
     # `CLOUD_BT_THRESHOLD = 260.0` escrito a mano, así que este sensor ignoraba
     # `cloud_mask_bt_k` mientras MODIS sí la leía (process_modis.py:505,715).
     # Consecuencia: `MISSION.md` declara la máscara removida desde S27 (Laiolo
     # 2026: MIROVA no aplica "cloud-contamination automatic filtering") y seguía
     # viva en VIIRS 375 solamente.
     #
-    # Medido en NdC jun-ago 2026: 15 de 88 noches quedaron CIEGAS — el filtro
+    # Medido en NdC jun-ago 2026: 15 de 88 noches quedaron CIEGAS, el filtro
     # descartó 13.200-17.300 píxeles del ROI contra ~1.100 en una noche normal,
     # dejando CERO fondo. En esas pasadas no queda registrado NI SIQUIERA el
     # t_max del cráter: se aplica a `roi_mask` además de `bg_mask`. A 3.200 m en
     # invierno austral la nieve irradia en el mismo rango que el tope de una nube
     # baja, así que el criterio no los distingue.
     #
-    # ⚠️ S126 — CORRECCIÓN. La versión anterior de este comentario decía que el
+    # ⚠️ S126, CORRECCIÓN. La versión anterior de este comentario decía que el
     # cambio era "NO-OP en producción a propósito" porque `mirova_equivalent.yaml`
     # fijaría `cloud_mask_bt_k: 260.0`. Es FALSO: ese YAML declara `0.0` desde S29
     # (`git log -S cloud_mask_bt_k`) y el PR #535 no lo tocó. O sea que al mergear
@@ -840,8 +840,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     #   NdC 8.204 → 13.388 (mín 0 → 1.259) · Villarrica 7.473 → 14.038 (mín 0 →
     #   6.388) · Láscar 5.219 → 13.178 (mín 0 → 8.931).
     #
-    # El destino es probablemente el correcto —`MISSION.md` y Laiolo 2026 dicen que
-    # MIROVA NRT no filtra nubes, y el perfil lo declara así desde S29— pero se
+    # El destino es probablemente el correcto , `MISSION.md` y Laiolo 2026 dicen que
+    # MIROVA NRT no filtra nubes, y el perfil lo declara así desde S29,  pero se
     # llegó sin la compuerta: el A/B que debía decidirlo corre recién en S126
     # (perfiles `_s125_cloudmask_{on,off}`), y ahora valida algo YA VIVO.
     # Detalle: docs/S126_CLOUDMASK_YA_ESTA_VIVA.md
@@ -860,7 +860,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # --- NTI: Normalized Thermal Index (Coppola 2015) ---
     # NTI = (L_MIR - L_TIR) / (L_MIR + L_TIR) per-pixel
     # Anomaly when NTI_pixel > NTI_bg_median + NTI_threshold
-    # This is MIROVA's primary detection method — filters solar contamination
+    # This is MIROVA's primary detection method, filters solar contamination
     # and works contextually against local background.
     nti_max = float("nan")
     nti_bg = float("nan")
@@ -870,7 +870,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # que compute_bg_stats reciba un argumento válido aunque I05 no esté.
     # Cuando nti es None y enable_test1_k1_bg_exclude=False (default OFF),
     # compute_bg_stats opera como legacy. Cuando flag ON sin I05, levanta error
-    # (configuración inválida — drift #1b requiere NTI para detectar K1 active).
+    # (configuración inválida, drift #1b requiere NTI para detectar K1 active).
     nti = None
     # S22.1 paridad MODIS schema (H_S21_11): diagnósticos siempre presentes
     # aunque no haya bandas válidas. Reseteados a valores reales en el path BT.
@@ -902,7 +902,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 nti_max = float(np.max(roi_nti_valid))
                 n_nti_anomalous = int(np.sum(roi_nti_valid > nti_threshold))
 
-    # --- MIR channel I04 (3.74 um) — high-temperature features ---
+    # --- MIR channel I04 (3.74 um), high-temperature features ---
     # F1 (S9): Dual-PATH detection (logical OR), mirroring process_modis.py.
     # A pixel is hot if EITHER:
     #   (A) BT path: bt > t_bg + max(ANOMALY_THRESHOLD_K, N_SIGMA*std_bg)
@@ -922,13 +922,13 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # condicional, para evitar UnboundLocalError cuando "I04" no esta en bands
     # o len(bg_vals) < 10 (granules con poco data utilizable).
     n_dnti_ctx_path = 0
-    n_eti_path = 0  # S37 H_D8_5 — mismo motivo (paridad MODIS pattern).
+    n_eti_path = 0  # S37 H_D8_5, mismo motivo (paridad MODIS pattern).
     # S27: cluster aggregation defaults (mismo motivo: evitar UnboundLocalError
     # si rama "I04" no se ejecuta).
     n_hotspots_clustered = 0
     primary_cluster = None
     ctx_cluster_anchor = None  # S106 ancla honesta (snapshot cluster contextual)
-    # S25 Path Test 1 — defaults antes del bloque I04 (mismo patrón S16)
+    # S25 Path Test 1: defaults antes del bloque I04 (mismo patrón S16)
     test1_triggered = False
     test1_n_contrib = 0
     test1_k_obs = 0.0
@@ -951,15 +951,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     # S142 D25: sólo se escriben al record con el flag ON (record idéntico con OFF).
     diag_L_bg_vecinos = None
     _bg_vecinos_n_sin_vecinos = 0
-    # S46 drift23 — first_pass_tests_2_and_3 diag (default outside I04 block).
+    # S46 drift23: first_pass_tests_2_and_3 diag (default outside I04 block).
     fp_diag = None
-    # S46 Task 5 Drift #4 — second_pass_adjacent recapture counter (default 0).
+    # S46 Task 5 Drift #4, second_pass_adjacent recapture counter (default 0).
     n_second_pass_recapture = 0
     # S46 hotfix bug Task 2: n_bg_i04 pre-Task2 era len(bg_vals); ahora
     # compute_bg_stats retorna n_bg directamente. Default 0 evita
     # UnboundLocalError en return dict línea 1125 cuando I04 ausente.
     n_bg_i04 = 0
-    # S71 D9 Opción C — default OFF cuando I04 no está presente (sin t_bg_i04
+    # S71 D9 Opción C, default OFF cuando I04 no está presente (sin t_bg_i04
     # válido no se puede gatear). Mismo patrón que n_bt_path / n_nti_path.
     _path_d_cap_active = False
 
@@ -1005,7 +1005,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 r_max, c_max = np.unravel_index(flat_idx_max, roi_bt_full.shape)
                 t_max_dist_km_diag = float(dist[r_max, c_max])
 
-            # Path A — BT path (existing classic threshold)
+            # Path A: BT path (existing classic threshold)
             # S26: si ENABLE_DUAL_ROI_BT, usar threshold dual summit/scene
             # (Coppola 2016a Tabla 1) en lugar del N_SIGMA_MIR uniforme.
             if (ENABLE_DUAL_ROI_BT and inner_radius_km is not None
@@ -1024,7 +1024,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             if not ENABLE_BT_PATH_HOT:
                 bt_path_hot = np.zeros_like(bt_path_hot, dtype=bool)
 
-            # Path B — NTI path (Coppola 2015 Test 1, night).
+            # Path B: NTI path (Coppola 2015 Test 1, night).
             # Only valid if NTI was successfully computed (needs both I04+I05).
             if "I05" in bands and not np.isnan(nti_bg):
                 nti_path_hot = (
@@ -1037,11 +1037,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             else:
                 nti_path_hot = np.zeros_like(bt_path_hot)
 
-            # Path C — NTI relative path (Session 11).
+            # Path C: NTI relative path (Session 11).
             # Uses the contextual NTI threshold (nti_bg + max(0.005, 3*sigma))
             # instead of the absolute NTI_K1_NIGHT floor. This detects weak
             # fumarolic signals (0.05-0.3 MW) where the NTI shifts by ~0.01
-            # above background — too small for the -0.8 absolute floor but
+            # above background: too small for the -0.8 absolute floor but
             # clearly anomalous against the local sigma (~0.002-0.004).
             # Gated by enable_nti_relative_path (experimental only).
             if (ENABLE_NTI_RELATIVE_PATH
@@ -1060,7 +1060,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             else:
                 nti_rel_hot = np.zeros_like(bt_path_hot)
 
-            # S71 D9 Opción A — gate atmosférico path D contextual.
+            # S71 D9 Opción A, gate atmosférico path D contextual.
             # Cirrus alto enfría t_bg_i04 → infla dNTI/dETI artificialmente.
             # Omitir el firing contextual (legacy path D + first-pass Tests 2&3)
             # cuando t_bg_i04 < min_k. Ver experiments/127_path_d_tbg_calibration/.
@@ -1070,7 +1070,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 and t_bg_i04 < PATH_D_ATM_GATE_TBG_MIN_K
             )
 
-            # Path D — dNTI contextual 8-vecinos (P3.2 + P3.1 S15, Coppola 2016a).
+            # Path D: dNTI contextual 8-vecinos (P3.2 + P3.1 S15, Coppola 2016a).
             # P3.2: anomaly requires the pixel to stand out from its immediate
             # neighbors, not from the ring average -- immune to uniformly warm
             # terrain (Lastarria hidrotermal, ratio 19.87 pre-P3.2).
@@ -1083,7 +1083,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     and "I05" in bands
                     and not np.isnan(nti_bg)
                     and not _path_d_atm_gate_skip):
-                # S72 F2.3 — Coppola 2016a SP 426.5 §267-273 también aplican a
+                # S72 F2.3: Coppola 2016a SP 426.5 §267-273 también aplican a
                 # path D contextual cuando el flag está ON. Default mantiene
                 # comportamiento post-F1.2.a operacional.
                 if ENABLE_DNTI_DUAL_ROI and inner_radius_km is not None:
@@ -1109,7 +1109,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             else:
                 dnti_ctx_hot = np.zeros_like(bt_path_hot)
 
-            # Path Test 1 — integrated-ROI MIR (Coppola 2015 §2.2 Eq.1).
+            # Path Test 1: integrated-ROI MIR (Coppola 2015 §2.2 Eq.1).
             # Suma el exceso de radiancia MIR sobre la ROI vent y compara
             # contra σ_bg propagado (cae como √N). Detecta señales sub-pixel
             # espacialmente extendidas (lava lake Villarrica 0.05-0.21 MW)
@@ -1126,12 +1126,12 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             if (ENABLE_TEST1_PATH
                     and vent_lat is not None and vent_lon is not None):
                 if ENABLE_TEST1_NTI_INTEGRAL:
-                    # S104 V2 — Test1 integra exceso de NTI (MIR−TIR), no MIR absoluto.
+                    # S104 V2: Test1 integra exceso de NTI (MIR−TIR), no MIR absoluto.
                     # Cancela el gradiente topográfico de los nevados (valle tibio = NTI
                     # plano → no dispara; lava débil = NTI elevado en cráter → dispara
                     # ahí). El VRP usa L_bg_mir sobre los píxeles NTI-elegidos.
                     # docs/AUDIT_S104_VIIRS_POSITION_OFFSET.md.
-                    # S105 — fondo LOCAL sobre NTI (realineamiento MIROVA Eq.13) cuando
+                    # S105: fondo LOCAL sobre NTI (realineamiento MIROVA Eq.13) cuando
                     # el flag está ON; si no, fondo del anillo entero (V2). A49.
                     _local_bg = ((TEST1_LOCAL_BG_RING_IN_KM, TEST1_LOCAL_BG_RING_OUT_KM)
                                  if ENABLE_TEST1_LOCAL_BG_NTI else None)
@@ -1146,7 +1146,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         min_local_bg_pixels=TEST1_MIN_LOCAL_BG_PIXELS,
                     )
                 else:
-                    # S104 V1 (REFUTADO por A/B, flag default OFF) — co-validación NTI
+                    # S104 V1 (REFUTADO por A/B, flag default OFF), co-validación NTI
                     # per-píxel: apaga el Test1 (señal difusa sin firma per-píxel).
                     test1_nti_mask = None
                     if ENABLE_TEST1_NTI_COVALIDATION:
@@ -1176,7 +1176,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                                         if ENABLE_TEST1_NTI_INTEGRAL
                                         else test1_res.get("L_bg"))
 
-            # S37 H_D8_5 — path ETI cuadrático scene-wide VIIRS I04/I05.
+            # S37 H_D8_5: path ETI cuadrático scene-wide VIIRS I04/I05.
             # I04 (3.74 μm MIR) + I05 (11.45 μm TIR) entran al cómputo de
             # NTI / NTI_app. Tests 2 ∧ 3 sobre dNTI/dETI (8-vecinos).
             # Opcional second-pass que recapture marginales contaminados.
@@ -1262,7 +1262,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 enable_test1_k1_retire_from_hot_mask=ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK,
             )
 
-            # S46 Drift #2+#3 — first-pass Tests 2 ∧ 3 (Coppola 2016a SP426.5:316-325).
+            # S46 Drift #2+#3, first-pass Tests 2 ∧ 3 (Coppola 2016a SP426.5:316-325).
             # Reemplaza hot_mask_2d con la conjunción Test 2 ∧ Test 3 + dual-ROI Tabla 2.
             # Paths legacy se calcularon arriba (diag) pero no contribuyen cuando ON.
             n_first_pass = 0
@@ -1280,8 +1280,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     lambda_mir_um=I04_LAMBDA,
                     lambda_tir_um=11.450,
                 )
-                # S46 Task 6 Variante 13 — override C2 con Di Bella n=12 (solo VIIRS).
-                # S46 Ronda 2 — C1/C2 summit override (los 3 sensores).
+                # S46 Task 6 Variante 13, override C2 con Di Bella n=12 (solo VIIRS).
+                # S46 Ronda 2: C1/C2 summit override (los 3 sensores).
                 # Precedencia: VIIRS_C2_OVERRIDE_NIGHT > C2_SUMMIT_OVERRIDE > defaults Tabla 1.
                 _c1_sum = C1_SUMMIT_OVERRIDE if C1_SUMMIT_OVERRIDE is not None else DNTI_CONTEXTUAL_C1_SUMMIT
                 if VIIRS_C2_OVERRIDE_NIGHT is not None:
@@ -1293,12 +1293,12 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 else:
                     _c2_summit_v13 = C2_DNTI_SUMMIT_NIGHT
                     _c2_scene_v13 = C2_DNTI_SCENE_NIGHT
-                # S72 F1.2 — pasar Test 1 K1 mask como unsuitable bg si flag
+                # S72 F1.2: pasar Test 1 K1 mask como unsuitable bg si flag
                 # retire ON (Coppola 2016a SP 426.5 §298-300).
                 _test1_mask_for_fp = (
                     nti_path_hot if ENABLE_TEST1_K1_RETIRE_FROM_HOT_MASK else None
                 )
-                # S72 F2.3 — floors §267-273 controlables vía flag.
+                # S72 F2.3: floors §267-273 controlables vía flag.
                 _unsuit_dnti = -0.1 if ENABLE_UNSUITABLE_FILTERS_267_273 else -np.inf
                 _unsuit_deti = -0.1 if ENABLE_UNSUITABLE_FILTERS_267_273 else -np.inf
                 fp_hot, fp_diag = first_pass_tests_2_and_3(
@@ -1329,7 +1329,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 hot_mask_2d = fp_hot
                 n_first_pass = fp_diag["n_first_pass_pixels"]
 
-            # S46 Task 5 Drift #4 — second_pass_adjacent recapture
+            # S46 Task 5 Drift #4, second_pass_adjacent recapture
             # (paper SP426.5:347-356). Tras el first-pass, recompute dNTI/dETI
             # excluyendo active pixels del 8-vecino mean → recaptura pixels
             # marginales adyacentes que el first-pass perdió por contaminación.
@@ -1344,7 +1344,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     # apagado `_roi1_mask` es None y esto ES el circulo de siempre; encendido, la caja
                     # llega tambien a este pase y no solo al primero (antes el segundo pase la deshacia).
                     is_summit_mask = roi1_summit_mask(vent_dist_per_pixel, inner_radius_km, _roi1_mask)
-                    # S46 Task 6 + Ronda 2 — override C1/C2 también en second-pass.
+                    # S46 Task 6 + Ronda 2, override C1/C2 también en second-pass.
                     if VIIRS_C2_OVERRIDE_NIGHT is not None:
                         _c2_summit_sp = VIIRS_C2_OVERRIDE_NIGHT
                         _c2_scene_sp = VIIRS_C2_OVERRIDE_NIGHT
@@ -1374,7 +1374,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         conditioned=ENABLE_SECOND_PASS_CONDITIONED,
                         use_prose_branch=ENABLE_TESTS_23_PROSE_BRANCH,
                     )
-                    # S85 F-S81-B' — gate intra-radio sobre pixels NUEVOS del
+                    # S85 F-S81-B': gate intra-radio sobre pixels NUEVOS del
                     # second pass. Default OFF; ON via profile A/B. Ver
                     # docs/F_S81_B_PRIME_SECOND_PASS_GATE.md.
                     if ENABLE_SECOND_PASS_INTRA_RADIO_GATE:
@@ -1389,7 +1389,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         np.sum(final_active_mask & ~hot_mask_2d))
                     hot_mask_2d = final_active_mask
 
-            # S33 Driver B Phase 2 — filtro dual-ROI 5σ summit / 10σ scene a
+            # S33 Driver B Phase 2, filtro dual-ROI 5σ summit / 10σ scene a
             # la mask final combinada (Coppola 2016a Tabla 1). Pixels que
             # entraron via dNTI/NTI/Test1 pero no superan BT > t_bg + 5σ summit
             # (o 10σ scene) son removidos del cluster reportado. Garantiza que
@@ -1409,7 +1409,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 )
                 hot_mask_2d = hot_mask_2d & final_thr_mask
 
-            # S71 D9 Opción B — co-validación path D contextual. Cuando ON, el
+            # S71 D9 Opción B, co-validación path D contextual. Cuando ON, el
             # firing contextual (first_pass / dnti_ctx / Test 1) solo cuenta si
             # BT path O NTI path también dispararon. Si los paths "duros" no
             # vieron nada → descartar la contribución contextual (probable cirrus FP).
@@ -1421,7 +1421,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             # S16 P3.6: filtrar pixels en exclude_zones (cuerpos de agua/salares
             # irradiando calor nocturno que bbox 50x50 km incluye -> FPs masivos).
             # Whitelist active_water_bodies preserva (lagos crateres activos).
-            # S27 T3: guard ENABLE_EXCLUDE_ZONES — en _mirova_literal queda en
+            # S27 T3: guard ENABLE_EXCLUDE_ZONES, en _mirova_literal queda en
             # False (parche no documentado en papers MIROVA).
             exclude_zones, active_water_bodies = guard_exclude_zones(
                 exclude_zones, active_water_bodies, enabled=ENABLE_EXCLUDE_ZONES)
@@ -1433,7 +1433,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             n_bt_path = int(np.sum(bt_path_hot))
             n_nti_path = int(np.sum(nti_path_hot))
 
-            # S71 D9 Opción C — predicado para cap magnitud path D contextual-only.
+            # S71 D9 Opción C, predicado para cap magnitud path D contextual-only.
             # Activo cuando firing solo contextual (BT/NTI duros = 0) AND t_bg
             # bajo umbral cirrus. Se aplica en cada sitio donde primary_cluster
             # se asigna (eruption inicial + Test 1 recompute).
@@ -1449,7 +1449,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             hot_rows, hot_cols = np.where(hot_mask_2d)
             n_anomalous = len(hot_rows)
 
-            # S27 — cluster aggregation alineado con MIROVA n_hotspots
+            # S27: cluster aggregation alineado con MIROVA n_hotspots
             # (Coppola 2016a connectivity ~1km). Cierre divergencia D1.
             # S27: cluster aggregation se mueve abajo (post per_pixel_vrp_mw)
             # para incluir vrp_mw del cluster contiguo principal.
@@ -1464,7 +1464,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 # 5-25km (comportamiento legacy).
                 # S59 H_S58_PER_VOL: combinar profile flag con field per-vol
                 # local_kernel_bg_compatible. Solo aplica si AMBOS true. Evita
-                # regresion Tupungatito (ring frio por glaciar — kernel local
+                # regresion Tupungatito (ring frio por glaciar, kernel local
                 # empeoraria, gradiente p10 < BT_hot). Vols candidatos opt-in:
                 # Villarrica (lago N), Copahue (El Agrio activo), Planchon
                 # (laguna crater), Llaima (lago Conguillio).
@@ -1496,7 +1496,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     _bg_vecinos_n_sin_vecinos += _n_sin
                     diag_L_bg_vecinos = redondear_diag(float(np.nanmedian(L_bg)))
 
-                # S26: clip a 0 — Wooster requiere ΔL ≥ 0 por física.
+                # S26: clip a 0, Wooster requiere ΔL ≥ 0 por física.
                 # Bug detectado cuando Test 1 (path D nuevo) o NTI agregaba
                 # pixels hot vs L_bg LOCAL (3km) pero más fríos que t_bg_i04
                 # GLOBAL (anillo 5-25km). VRP_MIR salía negativo (-26 MW).
@@ -1533,7 +1533,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 hotspot_lon = anomaly_pixels[0]["lon"]
                 hotspot_dist_km = anomaly_pixels[0]["dist_km"]
 
-                # S27 — cluster aggregation con vrp_mw del cluster principal
+                # S27: cluster aggregation con vrp_mw del cluster principal
                 # (Coppola 2016a). Cierre D1. Construimos mapa 2D de VRPs y
                 # agrupamos componentes conexos 8-vec.
                 vrp_per_pixel_2d = np.zeros_like(hot_mask_2d, dtype=float)
@@ -1558,14 +1558,14 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 if _clusters:
                     _c = _clusters[0]
                     _vrp_c = float(_c["vrp_mw"])
-                    # S126 — corona Eq.6 (Coppola 2016a) en el path CONTEXTUAL.
+                    # S126: corona Eq.6 (Coppola 2016a) en el path CONTEXTUAL.
                     # POR QUÉ ACÁ Y NO SÓLO EN TEST 1: el primer cableado (#539) puso
                     # la corona sólo en el bloque Test 1, y el A/B salió idéntico al
                     # control en los 5 volcanes. El diagnóstico: de las 80 noches que
                     # se comparan contra MIROVA, 77 vienen de ESTE path y sólo 3 del
                     # Test 1, así que la corona no llegaba adonde se mide. Es el mismo
                     # modo de falla que el brazo A de S125. MODIS la tiene justamente
-                    # acá (process_modis.py:1049), no en su bloque Test 1 — se había
+                    # acá (process_modis.py:1049), no en su bloque Test 1, se había
                     # replicado el bloque equivocado.
                     # Acá el fondo es `t_bg_i04`, el anillo GLOBAL 5-25 km, que en los
                     # nevados cae sobre el valle tibio de baja altitud y no representa
@@ -1579,7 +1579,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         ring_px=LOCAL_CLUSTER_MAG_RING_PX,
                         min_corona=LOCAL_CLUSTER_MAG_MIN_CORONA,
                     )
-                    # S71 D9 Opción C — cap si firing contextual-only en cirrus.
+                    # S71 D9 Opción C, cap si firing contextual-only en cirrus.
                     _d9_capped = False
                     if _path_d_cap_active and _vrp_c > PATH_D_ONLY_CAP_MW:
                         _vrp_c = PATH_D_ONLY_CAP_MW
@@ -1595,7 +1595,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         primary_cluster["d9_capped"] = True
                     if _corona_degraded is not None:
                         primary_cluster["corona_degraded"] = bool(_corona_degraded)
-                    # F52-B S77 (A45) — single-pixel mode régimen sub-MW.
+                    # F52-B S77 (A45): single-pixel mode régimen sub-MW.
                     # S127: los VRP por píxel tienen que salir del MISMO fondo que
                     # produjo `pc.vrp_mw`. Si la corona aplicó, el array regional
                     # `vrp_per_pixel_2d` quedó obsoleto y alimentar al modo con él
@@ -1609,7 +1609,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                         threshold_mw=SUB_MW_REGIME_THRESHOLD_MW,
                         max_pixels=SINGLE_PIXEL_MAX_CLUSTER_PIXELS,
                     )
-                    # S106 ancla honesta — snapshot del cluster CONTEXTUAL.
+                    # S106 ancla honesta: snapshot del cluster CONTEXTUAL.
                     # Con first-pass ON, hot_mask_2d = Tests 2∧3 (+second pass)
                     # SIN píxeles Test1 → este cluster es la posición MIROVA-real.
                     # El recompute S31+ (src=test1) pisa primary_cluster más
@@ -1620,10 +1620,10 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             valid_roi = roi_bt_full[~np.isnan(roi_bt_full)]
             t_max_i04 = float(np.max(valid_roi)) if len(valid_roi) else float("nan")
 
-    # --- TIR channel I05 (11.45 um) — TIRVolcH, low-temperature features ---
+    # --- TIR channel I05 (11.45 um), TIRVolcH, low-temperature features ---
     vrp_tir_mw = 0.0
     t_max_i05 = float("nan")
-    vrptir_aveni_diag = None  # F31 A2 — populated solo si ENABLE_VRPTIR_AVENI
+    vrptir_aveni_diag = None  # F31 A2, populated solo si ENABLE_VRPTIR_AVENI
 
     if "I05" in bands:
         bt5 = bands["I05"]
@@ -1631,7 +1631,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         if len(bg_vals5) >= 10:
             t_bg_i05 = float(np.median(bg_vals5))
             std_bg5 = float(np.std(bg_vals5))
-            # F46 (S77, A45) — Opción A+B: gate consistencia MIR/NTI sobre
+            # F46 (S77, A45), Opción A+B: gate consistencia MIR/NTI sobre
             # hot_mask_2d (MIR/NTI final post-paths) + threshold subido a
             # max(3K, 6σ). Cuando flag OFF, comportamiento legacy max(0.5, 4σ)
             # sin gate. Ver docs/F46_VRP_TIR_BUG_S76.md §5.3.
@@ -1664,7 +1664,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             valid_roi5 = roi_bt5[~np.isnan(roi_bt5)]
             t_max_i05 = float(np.max(valid_roi5)) if len(valid_roi5) else float("nan")
 
-            # F31 A2 — VRPTIR Aveni 2025 GRL diagnostic-only (opt-in).
+            # F31 A2: VRPTIR Aveni 2025 GRL diagnostic-only (opt-in).
             # Devuelve None salvo que ENABLE_VRPTIR_AVENI=True. NO entra a
             # clasificación summit/far ni a final_hotspot_*. Pixels usados =
             # subset del hot_mask TIR existente ∩ rango 300-600 K. Proxy
@@ -1674,7 +1674,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
 
     # --- Vent-scale detection (weak fumarolic signals, VIIRS only) ---
     # Designed to match MIROVA VIIRS375 sensitivity for point-source fumarolic
-    # anomalies (~0.1–2 MW). Uses the single hottest pixel in a tight ROI
+    # anomalies (~0.1-2 MW). Uses the single hottest pixel in a tight ROI
     # around the known vent, evaluated against the SAME regional background
     # (t_bg_i04) already computed from the volcano reference annulus.
     # Using a shared background avoids biases from separate vent-centered rings
@@ -1711,12 +1711,12 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                                  vent_hotspot_lon_candidate)
                 )
                 # S12 fix F1: apply sigma gating (N_SIGMA_VENT was imported
-                # but never used — the fixed 1K threshold fired on every
+                # but never used: the fixed 1K threshold fired on every
                 # overpass where the crater was slightly warmer than background,
                 # producing ~85% of all FPs system-wide).
                 # S12 fix F1b: CAP sigma contribution (MAX_VENT_SIGMA_CONTRIB_K).
                 # Without the cap, orographically-complex backgrounds produced
-                # thresholds of 6–10 K that killed real 1–2 K sub-pixel signals
+                # thresholds of 6-10 K that killed real 1-2 K sub-pixel signals
                 # at Tupungatito and Lastarria (recall drops 54%->10% and 76%->34%).
                 if not np.isnan(std_bg_i04):
                     sigma_contrib = min(N_SIGMA_VENT * std_bg_i04, MAX_VENT_SIGMA_CONTRIB_K)
@@ -1785,7 +1785,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         and (n_eti_path or 0) == 0
     )
 
-    # S111 Parte A (design 2026-06-16-test1-lowmag) — ¿el Test1 gana la fuente (y con
+    # S111 Parte A (design 2026-06-16-test1-lowmag), ¿el Test1 gana la fuente (y con
     # ella el recompute de magnitud del Test1 integrado, gateado por source=='test1')?
     # Unifica Regla D (S30) + only_test1 (S44) + cluster-rival-débil (S111). Con el flag
     # ENABLE_TEST1_PRIORITY_WEAK_CLUSTER OFF, el helper devuelve True solo para las dos
@@ -1840,9 +1840,9 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
     #       el lago lateral calienta el global por encima del cráter glaciar.
     #   (b) si sumamos todos los hot pixels (no solo Test 1), VRP infla por
     #       contribuciones far (562 MW vs MIROVA 0.05 MW).
-    # MIROVA reporta solo cráter usando bg local — replicamos exactamente.
+    # MIROVA reporta solo cráter usando bg local, replicamos exactamente.
     vrp_mir_mw_test1_only = None  # diag
-    # S32 P2 Driver B — Test 1 pixel-level filter (Coppola 2016a Tabla 1).
+    # S32 P2 Driver B: Test 1 pixel-level filter (Coppola 2016a Tabla 1).
     # Cuando Test 1 dispara, MIROVA reporta sum solo de pixels que también
     # superan threshold dual-ROI 5σ summit / 10σ scene. Sin este filtro
     # nuestra mask test1_hot suma 14-49 pixels marginales → factor 8-30× MIROVA.
@@ -1864,11 +1864,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         )
         test1_hot_filtered = test1_hot & pixel_thr_mask
 
-    # S99 Candidato C — filtro CONTEXTUAL (la vía más fiel a MIROVA). Intersecta los
+    # S99 Candidato C: filtro CONTEXTUAL (la vía más fiel a MIROVA). Intersecta los
     # píxeles del Test 1 con la máscara contextual dNTI (anómalos vs sus 8 vecinos,
     # Tests 2/3 SP426.5). Corta el halo nival (roca-tibia-entre-roca-tibia, no anómala
     # vs vecinos) conservando el cráter (anómalo vs vecinos). Flag OFF default. Riesgo
-    # FN del cráter embebido — medido en A/B con canario. NO usa keep-peak (forma pura).
+    # FN del cráter embebido, medido en A/B con canario. NO usa keep-peak (forma pura).
     if (ENABLE_TEST1_CONTEXTUAL_FILTER and final_hotspot_source == "test1"
             and "I04" in bands and dnti_ctx_hot is not None
             and test1_hot_filtered is not None and bool(test1_hot_filtered.any())):
@@ -1882,15 +1882,15 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         test1_hot_filtered = apply_contextual_test1_filter(
             test1_hot_filtered, dnti_ctx_hot, keep_peak_rc=_ctx_peak_rc)
 
-    # S33 D4 fix — effective L_bg para Test 1 VRP recompute. En volcanes con
+    # S33 D4 fix: effective L_bg para Test 1 VRP recompute. En volcanes con
     # geotermal crónico ring 1-3km cráter (Lascar cráter permanente, Lastarria
     # fumarolas), test1_L_bg_local está contaminado → ΔL clip 0 → vrp=0
     # falsos negativos. Cuando flag ON, usar L_bg(t_bg_i04) global del anillo
     # background 5-25km.
     # S39 D4 per-volcano: combinar profile flag con field lbg_global_compatible
-    # de volcanoes.yaml — solo aplica si AMBOS son true. Evita regresión
+    # de volcanoes.yaml: solo aplica si AMBOS son true. Evita regresión
     # Tupungatito glaciar (combo C.1 S38 mostró -1 TP con D4 universal).
-    # S112 Q3 — anillo INTERMEDIO con PRECEDENCIA sobre el global (design
+    # S112 Q3: anillo INTERMEDIO con PRECEDENCIA sobre el global (design
     # 2026-06-16-test1-lowmag). El global 5-25km sobre-estima la magnitud Muy Bajo
     # (~4.4× MIROVA en NdC); un anillo [r_in,r_out] fuera del halo crónico pero a
     # altitud similar es el fondo "Goldilocks". NaN-safe (cae al global/local).
@@ -1921,7 +1921,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         global_lbg=_t1_global_lbg,
         local_lbg=test1_L_bg_local)
 
-    # S99 Candidato B — recorte de compacidad ESPACIAL del path Test 1 (flag OFF
+    # S99 Candidato B: recorte de compacidad ESPACIAL del path Test 1 (flag OFF
     # default). El Test 1 integrado marca el anillo nival difuso entero sobre el
     # glaciar; el VRP suma ese halo → factor ~8-30× MIROVA. Recortar al foco
     # compacto alrededor del píxel de máxima energía (conservando SIEMPRE el pico
@@ -1996,11 +1996,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp_arr = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
             t1_vrp_2d[t1_rows, t1_cols] = t1_vrp_arr
-            # S94 (A45) — gap A07: el path Test1 calculaba la magnitud pero dejaba
+            # S94 (A45): gap A07: el path Test1 calculaba la magnitud pero dejaba
             # anomaly_pixels=[] vacío (Tupungatito/Villarrica) → bloqueaba F5' display
             # y rompía el mapa de píxeles del dashboard. Poblar desde t1_vrp_2d (los
             # mismos píxeles que ya alimentan pc.vrp_mw). NO cambia detección ni
-            # magnitud — solo serializa píxeles ya calculados.
+            # magnitud: solo serializa píxeles ya calculados.
             anomaly_pixels = build_anomaly_pixels(t1_vrp_2d, lat, lon, dist, bt)
             # S38: aplicar strategy vent-anchored al cluster Test 1.
             _t1_strategy = ("vent_anchored"
@@ -2017,7 +2017,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             if t1_clusters:
                 top = t1_clusters[0]  # mayor VRP (helper ordena desc cuando vrp dado)
                 _vrp_t = float(top["vrp_mw"])
-                # S126 — fondo de CORONA (Coppola 2016a Eq.6) en vez del anillo fijo
+                # S126: fondo de CORONA (Coppola 2016a Eq.6) en vez del anillo fijo
                 # [1,5-3] km al cráter, que solapa el 75 % del ROI de 3 km que mide
                 # (fondo autorreferente; ver docs/S126_COSTO_FILTRO_CONTEXTUAL.md).
                 # Sólo magnitud y post-selección: la detección y la posición ya
@@ -2033,7 +2033,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     ring_px=LOCAL_CLUSTER_MAG_RING_PX,
                     min_corona=LOCAL_CLUSTER_MAG_MIN_CORONA,
                 )
-                # S71 D9 Opción C — cap si firing contextual-only en cirrus.
+                # S71 D9 Opción C, cap si firing contextual-only en cirrus.
                 _d9_capped_t = False
                 if _path_d_cap_active and _vrp_t > PATH_D_ONLY_CAP_MW:
                     _vrp_t = PATH_D_ONLY_CAP_MW
@@ -2049,8 +2049,8 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                     primary_cluster["d9_capped"] = True
                 if _corona_degraded_t is not None:
                     primary_cluster["corona_degraded"] = bool(_corona_degraded_t)
-                # F52-B S77 (A45) — single-pixel mode régimen sub-MW.
-                # S127 — mismo fondo que produjo el total (ver bloque contextual).
+                # F52-B S77 (A45): single-pixel mode régimen sub-MW.
+                # S127: mismo fondo que produjo el total (ver bloque contextual).
                 _pix_vrps_t = (_corona_pix_t if _corona_pix_t is not None else
                                [float(t1_vrp_2d[_i, _j])
                                 for (_i, _j) in top["pixel_indices"]])
@@ -2062,7 +2062,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
                 )
                 n_hotspots_clustered = len(t1_clusters)
 
-    # S99 DF-1 — Eq.16 lava lake sub-píxel (Coppola 2024). Para volcanes lava lake
+    # S99 DF-1: Eq.16 lava lake sub-píxel (Coppola 2024). Para volcanes lava lake
     # magmático (Villarrica), la fuente Test 1 trae señal sub-píxel cuyo VRP Wooster/
     # suma está fuera de rango. Recomputar pc.vrp_mw desde el píxel pico vía Eq.15+16
     # (despeja A_hot asumiendo T_e, Stefan-Boltzmann) = magnitud estilo MIROVA. Flag
@@ -2088,7 +2088,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         primary_cluster["vrp_method"] = "lava_lake_eq16"
         vrp_mir_mw = _ll["vrp_mw"]
 
-    # S106 — ancla espacial honesta (design 2026-06-11 §3.1). SOLO posición:
+    # S106: ancla espacial honesta (design 2026-06-11 §3.1). SOLO posición:
     # todos los bloques de magnitud de arriba ya corrieron con la semántica
     # legacy (final_hotspot_source interno). Acá se pisa la POSICIÓN del
     # record con la cascada honesta y se recalcula distance_class.
@@ -2166,7 +2166,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "diag_n_nti_path": n_nti_path,
         "diag_n_dnti_ctx_path": n_dnti_ctx_path,
         "diag_n_eti_path": n_eti_path,  # S37 H_D8_5
-        # S46 drift23 — first_pass_tests_2_and_3 diag fields (Task 4 wiring).
+        # S46 drift23: first_pass_tests_2_and_3 diag fields (Task 4 wiring).
         # Persistir n_first_pass_pixels + estadísticos μ/σ del background usados
         # en la regla μ+C2σ. Ausentes (0/None) si flag OFF, I04 no presente, o
         # sin background válido.
@@ -2182,7 +2182,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
             fp_diag["sd_deti"] if fp_diag is not None else None),
         "diag_n_bg_used_first_pass": (
             fp_diag["n_bg_used"] if fp_diag is not None else 0),
-        # S46 Task 5 — second_pass_adjacent recapture diag (Drift #4).
+        # S46 Task 5: second_pass_adjacent recapture diag (Drift #4).
         "diag_n_second_pass_recapture": n_second_pass_recapture,
         # S25 Path Test 1 (Coppola 2015 Eq.1) integrated-ROI MIR
         "triggered_test1": test1_triggered,
@@ -2209,7 +2209,7 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         "granule": name,
         "product_version": product_version_from_granule(name),  # S140 (8b): detector único
         "datetime_utc": _parse_datetime(name),
-        # S122 — geometría de observación en el punto reportado (research).
+        # S122: geometría de observación en el punto reportado (research).
         **observation_geometry(
             geo["lat"], geo["lon"], geo.get("angles"),
             final_hotspot_lat if final_hotspot_lat is not None else vent_lat,
@@ -2217,13 +2217,13 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         ),
     }
 
-    # F31 A2 — merge diagnostic VRPTIR Aveni si flag ON. Con flag OFF
+    # F31 A2: merge diagnostic VRPTIR Aveni si flag ON. Con flag OFF
     # (default operacional mirova_equivalent) los 3 campos NO aparecen en el
     # record y el frontend / store / audit no los ve. Backward-compat estricto.
     if vrptir_aveni_diag is not None:
         record.update(vrptir_aveni_diag)
 
-    # S106 ancla honesta — diag del NTI-peak (solo modo nti_peak con peak hallado;
+    # S106 ancla honesta: diag del NTI-peak (solo modo nti_peak con peak hallado;
     # backward-compat: con flag OFF los campos no aparecen).
     if ENABLE_HONEST_ANCHOR and _ha_nti_peak is not None:
         record["nti_peak_lat"] = _ha_nti_peak["lat"]

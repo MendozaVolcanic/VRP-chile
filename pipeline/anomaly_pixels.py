@@ -19,7 +19,7 @@ def build_anomaly_pixels(vrp_2d, lat, lon, dist, bt, top_n: int = 100):
     Args:
         vrp_2d: grid 2D de VRP por píxel [MW] (0 donde no hay anomalía).
         lat, lon, dist, bt: grids 2D alineados (lat/lon grados, dist km al centro
-            del volcán — convención existente, NO desde el vent; bt en K).
+            del volcán, convención existente, NO desde el vent; bt en K).
         top_n: cap de píxeles persistidos (default 100, evita bloat del JSON;
             captura >95% de la señal VRP en records eruptivos).
 
