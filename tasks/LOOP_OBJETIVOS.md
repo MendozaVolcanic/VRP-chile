@@ -382,6 +382,29 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 22:27 UTC (vuelta 173, S153): regla de adopción de K en PR #848; 1.23 completa y evaluada (POR VERIFICAR)
+- **Regla de adopción de K** (pedido de Nicolás: «continúa con lo que recomiendas», opción A): PR #848,
+  `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`, abierto ANTES de evaluar V2 (la hora del PR es la prueba).
+  Verificador limpio de la v1: APROBABLE CON ARREGLOS (`C:\Users\nmend\AppData\Local\Temp\claude\verif_regla_fk\`);
+  la v2 aplica sus diez arreglos. Puntos que deciden: manda la más estricta entre la regla original y SN; tope de dos
+  repeticiones; instrumento fijado en el commit de #847; el laboratorio congelado en C0 es la sombra hasta 29
+  protegidas, con `git revert` pre-autorizado; la magnitud no bloquea salvo que una protegida cruce 1 MW hacia abajo.
+  **Espera el sí de Nicolás; no se mergea sin él.**
+- **1.23 completa:** 24 de 24 medios jobs verdes (runs 39066031570 y 39068703857, tag `s151-1.23-probe`). Evaluada en
+  local (`C:\Users\nmend\AppData\Local\Temp\claude\p123_all\evaluar_local.log`): MEDIDO, adoptable False (letra: M
+  pierde 2 protegidas, gana 9 de 46; pérdidas como el azar p 0,90); **vara principal MXD03 MÁS CERCA**, n 76, dd 0,62
+  km [0,32; 0,96]; dos varas amplias INDECIDIBLE; Test 1: M cruza como el azar. Verificador limpio lanzado
+  (`verif_123_resultado`).
+- **Coordinación:** la sesión «vrp loop v2» (S152) seguía viva; confirmó que detuvo su agente y no despacha más. #847
+  queda en S153. Su agente había dejado el arreglo de `borde` sin commitear; un archivo cambió durante mi corrida de
+  mutaciones (A112), así que esa corrida se descartó.
+- **#847:** con los arreglos del verificador V2 (`borde` sólo si el recorte cortó, `n_anomalous_pixels` > 100, y sólo
+  con píxeles del VRP mínimo de la lista): tests 128 verdes; autoprueba 69 de 69; uniones reales de W2a, V1 y V2a y G3
+  de W2 idénticos a los de antes (los 108 y 23 pares `borde` reales cumplen las dos condiciones). Mutaciones corriendo.
+- Pedido nuevo de Nicolás: selector de fechas en el tablero y auditoría de sus interacciones. Agente de auditoría
+  (sólo lectura) lanzado.
+- Runs: W5a repetida pendiente; V2b repetida 6 en curso; W5b 8 de 22. Disco 8,3 GB (worktree nuevo de la regla).
+
 ### 2026-10-17 20:55 UTC (vuelta 172, S153): W5a despareja y repetida; 1.23 completa despachada; #847 en verificación
 - **Cron externo del NRT:** Nicolás lo dejó en `10 1-12 * * *` UTC (decisión 1 del bloque S153, cerrada).
 - **W5a (39032518643) terminó con `recolectar` en rojo por COBERTURA, no por la rama existente:** control 1.184 noches,
