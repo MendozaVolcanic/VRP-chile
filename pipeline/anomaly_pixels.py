@@ -13,6 +13,35 @@ from __future__ import annotations
 import numpy as np
 
 
+def orden_vrp_descendente(vrps, rows, cols):
+    """Índices que ordenan los píxeles por VRP descendente, con desempate por (fila, columna).
+
+    POR QUÉ (S151, tarea 1.22). En MODIS la temperatura de brillo sale de enteros escalados del
+    L1B y toma valores discretos; con el área fija de nadir (A66) y el fondo del anillo como un
+    solo número, dos píxeles con el mismo entero tienen un VRP por píxel IDÉNTICO bit a bit, y esos
+    empates son frecuentes. `np.argsort` por defecto no es estable y numpy lo despacha a una ruta
+    SIMD distinta según la CPU (AVX2, AVX-512 o ninguna), así que el orden de los empates, y con él
+    el hotspot de escena (primer elemento) y qué píxeles entran al top-100, cambiaba de un runner a
+    otro con el mismo commit (medido: Llaima Terra 2026-10-06 01:45, `vrp_mw` 4,281 contra 3,568).
+
+    La clave (VRP descendente, fila, columna) depende sólo de la identidad del píxel, no de su
+    posición en el arreglo ni de la CPU: define una permutación ÚNICA, que `np.lexsort` (estable)
+    devuelve igual en cualquier máquina. Para los valores distintos el orden es el de siempre; sólo
+    fija cuál de los empatados va primero, que antes era cualquiera. Los NaN van al final, como en
+    el `argsort` anterior.
+
+    Args:
+        vrps: VRP por píxel [MW], 1D.
+        rows, cols: fila y columna de cada píxel en la grilla del gránulo, 1D, alineadas con vrps.
+
+    Returns:
+        np.ndarray de índices sobre `vrps` (el llamador recorta a top-N).
+    """
+    vrps = np.asarray(vrps, dtype=np.float64)
+    # lexsort ordena por la ÚLTIMA clave primero: -vrp, luego fila, luego columna.
+    return np.lexsort((np.asarray(cols), np.asarray(rows), -vrps))
+
+
 def build_anomaly_pixels(vrp_2d, lat, lon, dist, bt, top_n: int = 100):
     """Top-N píxeles anómalos (vrp>0) ordenados por VRP descendente.
 
@@ -32,7 +61,8 @@ def build_anomaly_pixels(vrp_2d, lat, lon, dist, bt, top_n: int = 100):
     if len(rows) == 0:
         return []
     vrps = vrp_2d[rows, cols]
-    order = np.argsort(-vrps)[:top_n]
+    # S151 1.22: desempate explícito, independiente de la CPU (ver orden_vrp_descendente).
+    order = orden_vrp_descendente(vrps, rows, cols)[:top_n]
     out = []
     for k in order:
         r, c = int(rows[k]), int(cols[k])
