@@ -379,6 +379,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 14:34 UTC (vuelta 149): tarea 1.24 (G3 del diurno con `comparar()`) delegada
+- Agente en worktree, rama `loop/diurno-g3-comparar`: el G3 («noches intactas») clasifica cada par nocturno
+  control/diurno con `unir_intentos.comparar` más el predicado de node; `distinto` es FALLA, y `orden`, `borde` y
+  `hotspot_escena` se informan. Desviación del pre-registro registrada (motivo mecánico, como #833). Prueba: W2 unido en
+  los dos órdenes debe dar el mismo G3. Sin mirar G1 ni G2. Después, verificador limpio.
+
 ### 2026-10-17 14:32 UTC (vuelta 148): W4 completa (W4b pareja); W5b despachada
 - W4b (39000333548) 23 de 23 verdes: 1.069 contra 1.069 noches, 0 y 0; 427 y 425 pasadas diurnas V375/V750. Con W4a
   (vuelta 136) **W4 completa**. W5a (39032518643) corre; **W5b despachada** (39041204976, 2026-09-11 a 09-20),
