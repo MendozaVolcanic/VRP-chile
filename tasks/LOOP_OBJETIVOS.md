@@ -321,7 +321,14 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   misma población (C; MxD03; MxD03 + etiqueta desde el cúmulo), con la regla 1 como compuerta, el término a lo largo
   de la traza agregado al modelo de corrimiento y un brazo con ruido de posición como control real. Pre-registro,
   verificador, sello de Nicolás. Informe del verificador de la 1.17 en `verif_117r`.
-- [ ] **1.23 (agregada por el loop el 2026-10-17, del verificador de la 1.21) MxD03 sola: lo que falta para decidirla.**
+- [x] **1.23 HECHA 2026-10-17 (vuelta 174, verificador CONFIRMADO con matices):** en Láscar, bajo 35° de cenit,
+  MxD03 pone el píxel caliente donde VIIRS ve el calor (vara principal MXD03 MÁS CERCA, dd 0,62 km [0,32; 0,96], n 76;
+  Terra y Aqua lo dan por separado, control que cancela un sesgo constante de la vara). Por la letra sigue PIERDE
+  PROTEGIDA (2 de Láscar) y no es adoptable; las 2 pérdidas son el Test 1 cruzando su umbral (σ_bg sube, ΔL baja), lo
+  mismo que rompe cualquier corrimiento de ese tamaño (cada una se sigue publicando en 7 de 20 nulos); el Test 1 con
+  signo dio MIXTO. No dice nada del borde del barrido ni de otros volcanes. Resultado en
+  `experiments/_s151_mxd03_sola_123/resultado/`. Siguiente: D-19. Texto original:
+  **1.23 (agregada por el loop el 2026-10-17, del verificador de la 1.21) MxD03 sola: lo que falta para decidirla.**
   Por qué: la 1.21 no la refuta ni la prueba; sus 2 pérdidas son el Test 1 de Láscar cruzando el umbral (4,81 a 2,56
   y 3,28 a 2,83) con ~0,4 km de corrimiento, y el nulo (un solo rumbo por gránulo) pierde 4. Qué: (1) nulo con ~20
   rumbos por gránulo para tener distribución; (2) una vara de posición independiente (cúmulo VIIRS 375 de la misma
@@ -355,6 +362,8 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
+| D-19 | MxD03 después de la 1.23: las 2 protegidas que pierde caen por el **Test 1**, que K elimina. Propuesta del loop: no adoptarla sobre producción de hoy; si K se adopta (#848), pre-registrar MxD03 **sobre K** (sin Test 1 el mecanismo de esas pérdidas no existe), con Láscar bajo 35° como vara y el borde del barrido aparte | `experiments/_s151_mxd03_sola_123/resultado/` (evaluación y verificador CONFIRMADO) | | pendiente |
+| D-20 | Regla de adopción de K escrita antes de evaluar V2 (opción A, pedida por Nicolás el 2026-10-17) | `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`, verificador limpio con arreglos aplicados | #848 | pendiente |
 | D-1 | Adoptar conectiva `max` en VIIRS 375 (criterio §1.2 por medir en 0.2) | `docs/S150_RESULTADO_MESES.md`, `docs/audit_s150/meta/AUDITOR_F2_NUMEROS.md` | pendiente | pendiente |
 | D-2 | ~~Merge del arreglo del scraper Mirova-v1#19 (tarea 0.5)~~ **HECHO** (Nicolás, 2026-10-15; squash `40ef1a45`) | CI verde de Mirova-v1#21; 4 tests | Mirova-v1#21 | #783 |
 | D-3 | Marca de régimen en `store.py` (tarea 0.6): **APROBADA** (Nicolás, 2026-10-15), se mergea con el CI del PR actualizado | 4 tests, 3 fallaban antes; suite 1706 | #785, tag `pre-s151-marca-regimen` | #786 |
@@ -381,6 +390,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-17 ~22:45 UTC (vuelta 174, S153): 1.23 CONFIRMADA; auditoría del tablero; D-19 y D-20 a la cola
+- **1.23, verificador limpio CONFIRMADO con matices** (`experiments/_s151_mxd03_sola_123/resultado/VERIFICADOR.md`):
+  reproducido idéntico; 24 de 24 medios jobs, todos con un commit, ninguno `sin_tiempo` (Tupungatitoa 14 de 15, el L1B
+  faltante no era un gránulo pedido); vara 2D atada al ancla (0,145 km), así que el veredicto equivale a «MxD03 pone el
+  píxel donde VIIRS ve el calor»; control Terra contra Aqua pasa. **Corrección al resumen de la vuelta 173:** «gana 9
+  de 46, p 0,0952» mezcla dos conteos (el 9 es el total; bajo 35°, que decide, son 8). Decisión D-19 a la cola.
+- **Auditoría del tablero** (pedido de Nicolás, informe en `C:\Users\nmend\AppData\Local\Temp\claude\audit_tablero\`):
+  un solo control de período (desplegable de `index.html`); el mapa del detalle no obedece sensores ni el criterio
+  del gráfico (`frontend/index.html:2944`); rótulos de ventana falsos (`:2394`, tabla NRT, refresco, CSV). Propuesta B
+  (selector por noche o rango con `frontend/periodo.js`, clic en barra, mapa con el criterio del gráfico) espera el sí
+  de Nicolás.
 
 ### 2026-10-17 22:27 UTC (vuelta 173, S153): regla de adopción de K en PR #848; 1.23 completa y evaluada (POR VERIFICAR)
 - **Regla de adopción de K** (pedido de Nicolás: «continúa con lo que recomiendas», opción A): PR #848,
