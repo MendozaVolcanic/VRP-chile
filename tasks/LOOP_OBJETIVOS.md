@@ -354,6 +354,26 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 04:23 UTC (vuelta 135): **LOOP DETENIDO** por disco (§1.5): 3,04 GB libres
+- Disco: 3,30 (03:39), 3,29 (03:50), 3,05 y 3,04 GB (04:23). Causa: Windows Update instalando
+  (`SoftwareDistribution` de 6,43 a 0,97 GB; vuelta 133); el Temp del loop suma ~0,7 GB. Los siguientes pasos de la
+  cola son evaluaciones locales (`evaluar_fk.py`, `evaluar_diurno.py`) que dejan ~2 GB de temporales (medido en la
+  vuelta 32): cruzarían la línea de 3 GB. Se detiene antes, de forma ordenada. Issue `loop-detenido` abierto.
+- **Para retomar:** que Nicolás reinicie (Windows termina de instalar) y corra el Liberador de espacio con «Limpieza
+  de actualizaciones de Windows»; con 10 GB libres o más, relanzar el `/loop`.
+- **Runs en GitHub (siguen solos, no dependen del disco):**
+  - F/K V1 intento 3 (38639658446): 43 de 44 verdes, 1 en curso. **Sin unir ni evaluar.** Unir con los intentos 1 y 2
+    (rama `s146-ab/38639658446` y artefactos) con `unir_intentos.py`, contar con `contar_pasadas.py`
+    (2026-08-29 a 10-08) y evaluar con `evaluar_fk.py --ventana V1`.
+  - F/K V2a: **unida y pareja** (5.876 por brazo, vuelta 123), uniones en el scratchpad de la sesión
+    (`union_v2a\`). Se evalúa como V2 junto con V2b, que espera D-15.
+  - Diurno W2: completa salvo D-16 (Copahue `_s151_ab_diurno_on`); W2a en `w2a_38853230521\`, W2b en
+    `w2b_38853273752\` (Temp del loop). W3: completa (W3a unida en `w3a_38942908101\union\` para el control de PCC,
+    W3b 38985239552 pareja). W4a (38987988455) corriendo, W4b (39000333548) pendiente. W5 y W6 sin despachar.
+    **Ninguna ventana del diurno evaluada**: G1 a G3 se calculan sobre W2 a W6 juntas.
+- Esperan a Nicolás: cadencia del cron externo, fecha del token, D-14 (sello y merge de #840), D-15 (commit de
+  V2b), D-16 (Copahue en W2a).
+
 ### 2026-10-17 03:50 UTC (vuelta 134): W3b pareja (W3 completa); W4b despachada; disco estable en 3,29 GB
 - W3b (38985239552) 23 de 23 verdes: 730 contra 730 noches, 0 y 0; 276 y 276 pasadas diurnas V375/V750. Con W3a
   (vuelta 128) **W3 está completa**. W4a corre (3 en curso); **W4b despachada** (39000333548, 2026-08-23 a 08-31,
