@@ -382,6 +382,11 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 20:25 UTC (vuelta 171): CIERRE de S152 por contexto; bloque de arranque S153
+- `tasks/BLOQUE_ARRANQUE_S153.md`. Se fijó con trabajo en curso: agente del arreglo de #847 vivo; runs 39066031570
+  (1.23 `Lascar-2a`), 39033530622 (V2b), 39032518643 (W5a) y 39041204976 (W5b, pendiente). Sin evaluar: V2b, 1.23 y el
+  diurno W2 a W6 (espera #847 y W6). W6a y W6b sin despachar (`--ref s151-diurno-codigo`).
+
 ### 2026-10-17 20:24 UTC (vuelta 170): tests de main verdes tras #844; #845 mergeado
 - Tests de `main` sobre `eed583b4` (#844): **verde** (20:23). CI de #845 sobre la rama actualizada (`0ab92264`): verde;
   **#845 mergeado** (squash `061b6f59`). `loop/activo` sincronizada.
