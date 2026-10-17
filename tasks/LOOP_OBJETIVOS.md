@@ -380,6 +380,10 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 16:09 UTC (vuelta 155): espera; worktree de la 1.22 retirado
+- Worktree del autor de #844 retirado (limpio, HEAD `7c6f36d6` = remoto); disco 12,1 GB. V2b 8 de 22 verdes; W5a 8 de
+  22; W5b pendiente. NRT verde 16:02. En curso: agente del G3 (1.24).
+
 ### 2026-10-17 16:05 UTC (vuelta 154): arreglos de #844 aplicados; cosmético aparte en #845; los dos esperan a Nicolás
 - #844 (`7c6f36d6c`, CI 39047262701 verde, suite local 1.994): producción reducida a `anomaly_pixels.py` +31/−1,
   `process_modis.py`, `process_viirs.py` y `process_viirs_mod.py` +6/−2 cada uno, `regrid.py` +5/−1 (`kind="stable"`,
