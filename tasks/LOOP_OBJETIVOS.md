@@ -354,6 +354,15 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 00:46 UTC (vuelta 128): W3a completa tras la repetición; W3b corriendo
+- W3a intento 2 (repetición del job del control de PCC): `recolectar` cuenta **699 contra 699 noches, PAREJA**; su
+  rojo es sólo el push de la rama existente. `unir_intentos.py` sobre el control de PCC (intento 1 de
+  `w3a_38942908101\i1\`, intento 2 del artefacto 12083033867): 65 comunes, 0 distintos (60 por tolerancia, 4 por
+  orden); usa entero el intento 2 (69 pasadas). Unión en
+  `C:\Users\nmend\AppData\Local\Temp\claude\w3a_38942908101\union\`; los otros 21 archivos son los del intento 1.
+- W3b (38985239552): 3 en curso, 19 en cola. V1 intento 3: 28 verdes, 6 en curso, 10 en cola. NRT verde 00:43.
+  Disco 6,8 GB. Esperan D-14, D-15 y D-16.
+
 ### 2026-10-17 00:09 UTC (vuelta 127): el PC estuvo suspendido ~6 h; W2a pareja; W3a repetida; W3b despachada; D-16
 - El despertar de las 18:24 UTC corrió a las 00:09 (PC suspendido). NRT verde 23:59. Disco 7,0 GB.
 - **W2a intento 2 (38853230521): COBERTURA PAREJA por sí solo** (control 1.085 noches, brazo diurno 1.085, 0 y 0; 425
