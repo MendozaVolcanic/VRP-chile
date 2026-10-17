@@ -161,7 +161,7 @@ from .detection_context import (
     first_pass_tests_2_and_3,
 )
 from .test1_integrated import compute_test1_mir
-from .anomaly_pixels import build_anomaly_pixels
+from .anomaly_pixels import build_anomaly_pixels, orden_vrp_descendente
 from .second_pass_intra_radio import apply_second_pass_intra_radio_gate  # S85 F-S81-B'
 
 # M-band wavelengths (µm)
@@ -1062,7 +1062,11 @@ def calculate_vrp(l1b_path: Path, geo_path: Path,
         # Build list of TOP-100 anomalous pixels sorted by VRP (descending).
         # S26: cap a 100 (paridad MODIS/VIIRS 375m) para evitar bloat JSON
         # >100MB GitHub limit. n_anomalous_pixels conserva el count total.
-        sorted_indices = np.argsort(-per_pixel_vrp_mw)[:100]
+        # S151 1.22: desempate explícito por (fila, columna). Con BT cuantizada, área fija y
+        # fondo escalar hay empates EXACTOS de VRP, y el argsort por defecto los ordenaba
+        # distinto según la CPU del runner: otro hotspot (primer elemento) y otro top-100
+        # con el mismo commit. Ver pipeline/anomaly_pixels.py::orden_vrp_descendente.
+        sorted_indices = orden_vrp_descendente(per_pixel_vrp_mw, hot_rows, hot_cols)[:100]
         for idx in sorted_indices:
             r, c = int(hot_rows[idx]), int(hot_cols[idx])
             anomaly_pixels.append({
