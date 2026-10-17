@@ -382,6 +382,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 20:24 UTC (vuelta 170): tests de main verdes tras #844; #845 mergeado
+- Tests de `main` sobre `eed583b4` (#844): **verde** (20:23). CI de #845 sobre la rama actualizada (`0ab92264`): verde;
+  **#845 mergeado** (squash `061b6f59`). `loop/activo` sincronizada.
+- NRT: la `workflow_dispatch` de las 20:00 volvió a quedar cancelada por desplazamiento; la siguiente corre con el
+  desempate nuevo. 1.23 `Lascar-2a` en curso; V2b 18 de 22; W5a 21 de 22; W5b pendiente. Disco 10,1 GB.
+
 ### 2026-10-17 20:20 UTC (vuelta 169): Nicolás aprueba lo recomendado; 1.23 despachada; #844 en main; token sin vencimiento
 - **D-18:** #846 mergeado (squash `eb97779f`); tag `s151-1.23-probe` en `eb97779f`; medio job suelto `Lascar-2a`
   despachado para cronometrar (run 39066031570). Si termina bajo el umbral del README, los otros 23 desde el MISMO tag.
