@@ -354,6 +354,10 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 01:46 UTC (vuelta 130): espera
+- W3b 9 de 22 verdes; W4a pendiente; V1 intento 3 31 de 44. NRT verde 01:16. Disco 8,8 GB estable (monitor
+  detenido tras 15 min en 8 GB). Esperan D-14, D-15 y D-16.
+
 ### 2026-10-17 01:19 UTC (vuelta 129): el disco baja otra vez (6,5 a 6,2 GB en minutos); buscando la causa
 - `df -h /c`: 6,8 GB (00:46), 6,5 GB (01:19), 6,2 GB (~01:24). Descartados: Windows Update (6,43 GB, sin cambio),
   Temp (1,67 GB; `Temp\claude` 1,38 GB), Autoscan (0,13 GB escritos en 10 h). Búsqueda en todo C: de archivos de más
