@@ -318,7 +318,10 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   de la traza agregado al modelo de corrimiento y un brazo con ruido de posición como control real. Pre-registro,
   verificador, sello de Nicolás. Informe del verificador de la 1.17 en `verif_117r`.
 - [ ] **1.22 (agregada el 2026-10-17, D-16 b aprobada por Nicolás) Desempate determinista del hotspot de escena
-  MODIS.** Por qué: dos corridas del mismo commit eligen distinto el píxel más caliente de la escena
+  MODIS.** ⚠️ Corregido el 2026-10-17 por el autor de #843: el píxel que cambia NO es el `np.nanargmax` de
+  `process_modis.py:1218` (`diag_t_max_dist_km` es idéntico en los dos intentos), sino el primero de
+  `np.argsort(-per_pixel_vrp_mw)` (`:1085-1099`), el mismo top-100 no estable; en los records del Test 1 esa lista
+  se reemplaza en `:1399`. Texto original: Por qué: dos corridas del mismo commit eligen distinto el píxel más caliente de la escena
   (`np.nanargmax(roi_bt_full)`, `pipeline/process_modis.py:1218`) con la misma BT máxima; cambia `final_hotspot_source`
   y el `vrp_mw` del record (V1 Llaima 4,281/3,568; W2a Copahue 4,782/1,834), no lo publicado. Qué: confirmar el
   mecanismo (SOSPECHA: ulps de log/exp según la CPU) con un sintético y con los dos casos; proponer un desempate
@@ -362,6 +365,20 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-17 13:18 UTC (vuelta 139): D-16 (a) en PR #843 (CI verde); V1 unida y PAREJA; verificador lanzado
+- #843 (`loop/unir-intentos-hotspot-escena`): categoría `hotspot_escena`, sólo MODIS, `t_max_k` igual, cúmulo presente,
+  lista cerrada de campos, predicado de node igual; si cambian fuente, etiqueta o `vrp_mw`, la diferencia debe ser
+  exactamente el rescate (`store.py:390-422`). 35 tests y 8 mutaciones atrapadas. Suite local: 1.963 pasan.
+- Magnitud de los evaluadores: P3 de `evaluar_fk.py:379-389` usa `disp` (`mirovaEqVrpDisplay`, en MODIS con cúmulo
+  `pc.vrp_mw`), no el `vrp_mw` del record: se admite. El G3 de `evaluar_diurno.py:404-420` sí lee el record crudo y
+  **su veredicto depende del orden de los intentos** (Copahue 06-18 07:30: nada con el intento 1 primero, 9 campos
+  distintos con el orden invertido).
+- **V1: 44 de 44 unen, 2 casos admitidos (Llaima control, Terra 09-24 02:05 y 10-06 01:45), cobertura PAREJA: 4.820
+  pasadas en los cuatro brazos, 0 y 0** (`C:\Users\nmend\AppData\Local\Temp\claude\v1_38639658446\union_d16\`).
+  Copahue W2a: 1 caso, intento 1 entero.
+- La causa real del desempate (top-100 de `:1085`, no `:1218`) corregida en la tarea 1.22. Verificador limpio de #843
+  lanzado (`C:\Users\nmend\AppData\Local\Temp\claude\verif_843\`). Después: merge y evaluación de V1.
 
 ### 2026-10-17 13:00 UTC (vuelta 138): 1.21 Láscar-2 en 16 min; los otros 11 despachados desde el mismo tag
 - Probe 1.21, job suelto Láscar-2 (run 39033482528, tag `s151-1.21-probe` = `e472c673`): verde, **16 min 25 s**
