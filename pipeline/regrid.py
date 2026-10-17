@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ============================================================================
-# FICHA SDA — Nivel 1 (Res. CPLT N°372)
-# Módulo      : regrid.py — resampleo del swath a grilla UTM regular (F70)
+# FICHA SDA: Nivel 1 (Res. CPLT N°372)
+# Módulo      : regrid.py, resampleo del swath a grilla UTM regular (F70)
 # Rol         : PRE-PROCESAMIENTO geométrico. No decide ni clasifica: prepara
 #               el sustrato de área constante sobre el que la detección corre
 #               sin cambios. Flag-OFF hasta veredicto del A/B F70.3.
@@ -16,7 +16,7 @@
 # ============================================================================
 """Resampleo del swath satelital a la grilla regular que MIROVA usa.
 
-POR QUÉ (el fenómeno físico): un píxel de satélite no es un cuadrado fijo —
+POR QUÉ (el fenómeno físico): un píxel de satélite no es un cuadrado fijo:
 lejos del nadir se estira hasta ~10 km² (MODIS). Cuando el algoritmo pregunta
 "¿este píxel es más caliente que sus vecinos?", la respuesta depende de la
 geometría de esos vecinos tanto como de su temperatura: sobre un volcán con
@@ -27,7 +27,7 @@ replica ese paso.
 
 DECISIÓN DOCUMENTADA (la única no-literal): los papers no especifican el
 interpolador. Usamos VECINO MÁS CERCANO por defecto porque conserva
-radiancias que el sensor midió de verdad — promediar inventaría mezclas.
+radiancias que el sensor midió de verdad, promediar inventaría mezclas.
 Queda parametrizado (`method`) para el análisis de sensibilidad de F70.1.
 """
 import math
@@ -39,7 +39,7 @@ def _utm_like_xy(lat, lon, clat, clon):
     """Coordenadas locales en km respecto del centro (aproximación local).
 
     Para una ventana de ±25 km, la proyección transversal local (equirectangular
-    escalada por cos(lat) del centro) difiere de UTM verdadero en <0.1% —
+    escalada por cos(lat) del centro) difiere de UTM verdadero en <0.1%:
     muy por debajo del tamaño de celda. Se mantiene sin dependencia de pyproj
     para que el módulo sea puro-numpy y trivial de testear; si F70.2 detecta
     que la diferencia importa en volcanes extremos, se cambia por pyproj acá
@@ -59,18 +59,18 @@ def regrid_to_utm(lat2d, lon2d, bands: dict, center_lat: float,
 
     Args:
         lat2d, lon2d: geolocalización del swath (cualquier shape 2D).
-        bands: {nombre: array 2D} — todas con la MISMA shape que lat2d.
+        bands: {nombre: array 2D}, todas con la MISMA shape que lat2d.
             Se regrillan juntas para que compartan geometría celda a celda
             (una celda con MIR pero sin TIR rompería el NTI aguas abajo).
         center_lat/lon: centro de la grilla (mirova_center del volcán).
         cell_km: lado de la celda (1.0 MODIS/VIIRS750; 0.375 VIIRS I-band).
         half_km: semiancho de la ventana (25.5 → grilla 51×51 de 1 km).
-        method: "nearest" (default y única implementación por ahora — ver
+        method: "nearest" (default y única implementación por ahora, ver
             docstring del módulo).
         required: nombres de las bandas que DEBEN traer valor finito para que
             una muestra pueda representar a su celda. Default: todas.
             POR QUÉ existe: en MODIS un NaN en la banda 21 no es dato ausente
-            sino SATURACIÓN — y un detector saturado es, por definición, el
+            sino SATURACIÓN, y un detector saturado es, por definición, el
             píxel más caliente del granule (A37/F28). Si ese NaN descalificara
             la muestra, el regrillado perdería justo el píxel que el algoritmo
             busca. El llamador declara entonces `required=("band22","band31")`
@@ -79,7 +79,7 @@ def regrid_to_utm(lat2d, lon2d, bands: dict, center_lat: float,
     Returns:
         dict con: una matriz (n×n, float64, NaN donde no hubo muestra) por
         banda; "suitable" (bool, celdas con muestra válida en TODAS las
-        bandas); "cell_area_km2" (constante — el punto de todo esto);
+        bandas); "cell_area_km2" (constante, el punto de todo esto);
         "n" (lado de la grilla).
     """
     if method != "nearest":
@@ -90,12 +90,12 @@ def regrid_to_utm(lat2d, lon2d, bands: dict, center_lat: float,
     x, y = x.ravel(), y.ravel()
 
     # índice de celda de cada muestra del swath (col desde el Oeste, fila
-    # desde el Norte — orientación de imagen, consistente con los procesadores)
+    # desde el Norte: orientación de imagen, consistente con los procesadores)
     ix = np.floor((x + half_km) / cell_km).astype(np.int64)
     iy = np.floor((half_km - y) / cell_km).astype(np.int64)
     dentro = (ix >= 0) & (ix < n) & (iy >= 0) & (iy < n)
 
-    # validez: la muestra debe traer valor finito en las bandas REQUERIDAS —
+    # validez: la muestra debe traer valor finito en las bandas REQUERIDAS:
     # así las matrices de salida comparten geometría exactamente. Por defecto
     # se exigen todas; ver el argumento `required` para el caso saturación.
     flat = {k: np.asarray(v, dtype=np.float64).ravel() for k, v in bands.items()}
@@ -110,7 +110,7 @@ def regrid_to_utm(lat2d, lon2d, bands: dict, center_lat: float,
     # distancia de cada muestra al centro de SU celda: en caso de duplicados
     # en una celda gana la más cercana (se escriben de peor a mejor, la
     # última escritura queda). Un NaN nunca compite: ya quedó fuera de
-    # `validas` — por eso un píxel inválido no desplaza a un valor real.
+    # `validas`, por eso un píxel inválido no desplaza a un valor real.
     cx = (ix + 0.5) * cell_km - half_km
     cy = half_km - (iy + 0.5) * cell_km
     d2 = (x - cx) ** 2 + (y - cy) ** 2
