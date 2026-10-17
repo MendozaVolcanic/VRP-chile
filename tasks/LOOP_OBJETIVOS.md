@@ -381,6 +381,10 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 19:51 UTC (vuelta 168): espera
+- V2b 18 de 22 (4 en curso); W5a 21 de 22; W5b pendiente. NRT verde 19:46. Disco 10,4 GB. El autor de #847 aplica el
+  arreglo de `borde` en `comparar()` y rehace las uniones de W2, V1 y V2a.
+
 ### 2026-10-17 19:28 UTC (vuelta 167): verificador de #847 (G3): MERGEABLE CON ARREGLOS; hueco en `borde` también en `unir_intentos`
 - `experiments/_s151_ab_diurno_g3_verif/VERIFICADOR_V1.md`. Se sostiene: W2 reproducido byte a byte (44 uniones), G3
   nuevo CUMPLE en los dos órdenes con los conteos declarados y el viejo FALLA; el nuevo da FALLA con diferencias reales
