@@ -380,6 +380,10 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 17:44 UTC (vuelta 158): espera; PR #846 (pre-registro 1.23) abierto, sin informe aún
+- #846 abierto por el agente de la 1.23, que sigue con trabajo en segundo plano: se verifica cuando entregue. Agente
+  del G3 (1.24) sin PR todavía (lleva ~3 h). V2b 12 de 22; W5a 13 de 22; W5b pendiente. NRT verde 16:56. Disco 10,8 GB.
+
 ### 2026-10-17 17:13 UTC (vuelta 157): espera
 - V2b 11 de 22; W5a 12 de 22; W5b pendiente. NRT verde 16:56. Disco 10,7 GB (dos worktrees de agentes activos).
   En curso: G3 (1.24) y pre-registro 1.23.
