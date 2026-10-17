@@ -354,6 +354,13 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 03:50 UTC (vuelta 134): W3b pareja (W3 completa); W4b despachada; disco estable en 3,29 GB
+- W3b (38985239552) 23 de 23 verdes: 730 contra 730 noches, 0 y 0; 276 y 276 pasadas diurnas V375/V750. Con W3a
+  (vuelta 128) **W3 está completa**. W4a corre (3 en curso); **W4b despachada** (39000333548, 2026-08-23 a 08-31,
+  `--ref main`), `pending`, W4a sin desplazar a los 40 s.
+- V1 intento 3: 39 de 44 verdes. NRT verde 03:24. Disco 3,29 GB, estable desde las 03:39 (monitor de parada activo).
+- Estado del A/B diurno: W1 informada; W2 completa salvo D-16 (Copahue); W3 completa; W4 corriendo; faltan W5 y W6.
+
 ### 2026-10-17 03:39 UTC (vuelta 133): disco en 3,30 GB, a 0,3 GB de la parada; es Windows instalando la actualización
 - `df -k`: 3,30 GB libres (5,9 a las 03:18). `C:\Windows\SoftwareDistribution` bajó de 6,43 a 0,97 GB: la actualización
   descargada se está **instalando** (se expande en el almacén de componentes; `WinSxS\Temp` 0,65 GB, `servicing`
