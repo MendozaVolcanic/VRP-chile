@@ -372,6 +372,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   Nicolás: D-16. Implicación para la evaluación: el G3 del diurno («noches intactas», control contra brazo en
   runners distintos) puede fallar por estos empates aunque no haya efecto.
 - Corrección a la vuelta 121: además del top-100, hay un segundo desempate que no es estable (el hotspot de escena).
+  El hotspot de escena sale de `np.nanargmax(roi_bt_full)` (`pipeline/process_modis.py:1218`), que con un empate
+  EXACTO devuelve siempre el primero; para que cambie entre runners las BT tienen que diferir en el último bit.
+  SOSPECHA de mecanismo (sin verificar): numpy usa rutinas vectorizadas distintas de `log`/`exp` según la CPU
+  (AVX-512 contra AVX2) y difieren en ulps; en la inversión de Planck dos píxeles casi empatados cambian de orden. Si
+  es así, el arreglo de producción no es `kind="stable"` sino un desempate explícito (por índice) sobre BT redondeada,
+  o aceptar la no reproducibilidad y medirla. A45: decide Nicolás.
 
 ### 2026-10-16 17:51 UTC (vuelta 126): W3a despachada (run 38942908101)
 - W2a intento 2 figura `queued` a nivel de run con 12 jobs verdes y 2 en curso: es el desfase de GitHub ya visto en
