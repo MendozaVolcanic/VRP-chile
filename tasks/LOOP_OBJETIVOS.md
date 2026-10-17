@@ -380,6 +380,23 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 18:01 UTC (vuelta 160): verificador del pre-registro 1.23: SELLABLE CON ARREGLOS (dos bloqueantes)
+- `experiments/_s151_mxd03_sola_123_verif/VERIFICADOR_V1.md`. 37 de 37 tests; `sensibilidad_test1_121.py` y
+  `saltos_de_cumulo_121.py` reproducen idéntico. En pie: la vara VIIRS no está atada al ancla (Láscar: 127 pasadas
+  `ctx_cluster` de 1 a 4 píxeles, ninguna exactamente en el ancla; Lastarria a 2,26 km) y compara posiciones 2D; las tres
+  reglas del autor son elecciones de instrumento declaradas con su poder simulado; workflow correcto.
+- Bloqueante 1: `jacobiano()` (`probe_sola.py:75`) deriva con ±2 líneas, y en el borde del barrido (bow tie) el
+  espaciado de `_interp_geo` alterna entre f y 2-f km por línea: sobre 50° de cenit, en 67 de 223 gránulos, el nulo
+  mueve más del doble de km que MxD03 (p90 de 3 a 8 veces; modelo, SIN VERIFICAR en un gránulo real). Sesga hacia
+  adoptar; los INVALIDO no lo ven. Arreglo: barrido entero o nulo en km, caso sintético en diente de sierra, razón km
+  del nulo / km de M por cenit.
+- Bloqueante 2: **«MxD03 mueve k menos que el azar» NO se sostiene** (IC de la diferencia de medianas [−0,21; +0,20],
+  signo 69 contra 72; corrige lo dicho en la vuelta 159). Con signo y por etiqueta, en las alertas de MIROVA M sube k
+  más que R en 33 contra 18 (p = 0,049) y en los negativos baja (30 contra 43): lo que haría una posición mejor, un
+  indicio con un solo sorteo. Arreglo: corregir el README y pre-registrar la lectura con signo por etiqueta.
+- Arreglos devueltos al autor (mismo PR). Para el sello: por la letra MxD03 vuelve a dar PIERDE PROTEGIDA; la vara habla
+  de Láscar a cenit bajo y medio y casi seguro dará MXD03 MÁS CERCA (#828 ya lo midió contra el cráter).
+
 ### 2026-10-17 17:45 UTC (vuelta 159): pre-registro 1.23 entregado (PR #846, CI verde); verificador lanzado
 - `experiments/_s151_mxd03_sola_123/` (`4cc5e0134`, suite local 2.018). Nulo: 20 rumbos equiespaciados por gránulo,
   del tamaño del corrimiento real en PÍXELES de la propia grilla (corrige la anisotropía sin ángulos); K=20 es el
