@@ -57,7 +57,14 @@ Regla de comparación de un record común (`comparar`):
     distintos sólo por la regla de borde), y los únicos campos distintos están en CAMPOS_HOTSPOT_ESCENA (lista
     cerrada). Si cambian `final_hotspot_source`, `discarded_reason` o `vrp_mw`, tiene que ser exactamente el
     rescate por cúmulo de `pipeline/store.py:390-422` (un solo lado `cluster_rescue`, con su etiqueta y con
-    `vrp_mw` igual a `pc.vrp_mw`). El predicado del tablero con node tiene que dar lo mismo, como en el borde.
+    `vrp_mw` igual a `pc.vrp_mw`). Además (verificador del PR #843): (a) la geometría de visión, el ancla final
+    y `hotspot_dist_km` sólo cambian si se movió `hotspot_lat/lon`; (b) el ancla final sólo cambia con el
+    rescate, o con la misma fuente y final == hotspot en los dos lados (rama eruption); (c) en el lado rescatado
+    `hotspot_*` es el centroide del cúmulo (`store.py:397-399`). Lo que estas reglas NO acotan, porque el record no
+    guarda con qué compararlo: el `vrp_mw` del lado no rescatado (la suma de escena del Test 1) y la distancia del
+    hotspot del lado no rescatado (el `max_hotspot_dist_km` del volcán no viaja en el record). Ninguno de los dos
+    lo lee un evaluador de F/K; el predicado del tablero lee `vrp_mw` sólo cuando vale 0 (frontend/index.html:1596).
+    El predicado del tablero con node tiene que dar lo mismo, como en el borde.
     Se une conservando el record que entrega la unión (`conservado`: el del primer intento en la mezcla, el del
     intento entero si lo hay) y cada caso se lista con los valores de los dos lados, por stdout y en
     `_union_intentos["hotspot_escena"]`.
@@ -87,6 +94,11 @@ Qué magnitud y qué campos leen los evaluadores (condición 5 de D-16 a; leído
     con el orden invertido, ve 9 campos distintos en esa noche y daría FALLA. El mismo empate entre los jobs de
     los dos brazos produce eso sin unión de por medio: es el mismo pendiente del G3 que la comparación posicional
     de píxeles (abajo), y se arregla en el evaluador, no aquí.
+    REGLA DE USO (verificador del PR #843): el G3 del diurno compara el record crudo, por posición en las listas,
+    y no lee `_union_intentos`. Por eso el diurno NO se evalúa sobre una unión que tenga casos `hotspot_escena`,
+    `borde` u `orden` hasta que el G3 clasifique cada par nocturno con `comparar()` más el predicado del tablero
+    (`distinto` hace FALLA; los otros se cuentan aparte). Ese cambio del evaluador es desviación del pre-registro
+    y va registrado en su propio PR. F/K sí puede usar estas uniones: sus métricas no leen esos campos.
 
 CAMPOS_DECISION sale de leer los consumidores, no de adivinar (A89):
   * `scripts/banco_paridad.py:136` CAMPOS_JS, lo que se le pasa al predicado del tablero: primary_cluster
@@ -191,6 +203,11 @@ CAMPOS_HOTSPOT_ESCENA = {
 _RESCATE = "single_pixel_far_overridden_by_cluster"
 _CAMPOS_DEL_RESCATE = {"final_hotspot_source", "discarded_reason", "vrp_mw"}
 _AUSENTE = "<ausente>"
+_HOTSPOT = ("hotspot_lat", "hotspot_lon", "hotspot_dist_km")
+_ANCLA_FINAL = {"final_hotspot_lat", "final_hotspot_lon", "final_hotspot_dist_km"}
+# lo que se evalua en el hotspot o lo sigue: no puede cambiar si el hotspot no se movio (verificador del PR #843, a)
+_SIGUEN_AL_HOTSPOT = _ANCLA_FINAL | {"hotspot_dist_km", "sensor_zenith_deg", "sensor_azimuth_deg",
+                                     "solar_zenith_deg", "solar_azimuth_deg"}
 
 
 def _rescate_coherente(a, b):
@@ -202,8 +219,24 @@ def _rescate_coherente(a, b):
         return False
     r = lados[0]
     otro = b if r is a else a
-    return (r.get("discarded_reason") == _RESCATE and otro.get("discarded_reason") is None
-            and iguales(r.get("vrp_mw"), (r.get("primary_cluster") or {}).get("vrp_mw")))
+    if r.get("discarded_reason") != _RESCATE:
+        return False
+    if otro.get("discarded_reason") is not None:
+        return False
+    return iguales(r.get("vrp_mw"), (r.get("primary_cluster") or {}).get("vrp_mw"))
+
+
+def _final_es_hotspot(a, b):
+    """Misma fuente en los dos lados y ancla final == hotspot en cada uno: la rama `eruption` de
+    process_modis.py:1307-1310, donde el ancla final sigue al hotspot."""
+    return all(a.get("final_hotspot_source") == b.get("final_hotspot_source") and
+               all(iguales(r.get("final_" + c), r.get(c)) for c in _HOTSPOT) for r in (a, b))
+
+
+def _hotspot_en_el_cumulo(r):
+    """El rescate escribe el centroide del cumulo en hotspot_* (store.py:397-399)."""
+    pc = r.get("primary_cluster") or {}
+    return all(iguales(r.get(c), pc.get(c.replace("hotspot", "centroid"))) for c in _HOTSPOT)
 
 
 def motivo_no_escena(a, b, dif):
@@ -218,6 +251,18 @@ def motivo_no_escena(a, b, dif):
     rescate = _CAMPOS_DEL_RESCATE & set(dif)
     if rescate and not _rescate_coherente(a, b):
         return "%s distintos sin el rescate por cumulo de store.py:390-422" % sorted(rescate)
+    # verificador del PR #843: (a) la geometria y el ancla final siguen al hotspot; (b) el ancla final sólo
+    # cambia con el rescate, o en la rama eruption (misma fuente, final == hotspot); (c) el lado rescatado tiene
+    # el hotspot en el centroide del cumulo
+    d = set(dif)
+    movio = bool({"hotspot_lat", "hotspot_lon"} & d)
+    if (d & _SIGUEN_AL_HOTSPOT) and not movio:
+        return "%s distintos sin que se mueva el hotspot" % sorted(d & _SIGUEN_AL_HOTSPOT)
+    if (d & _ANCLA_FINAL) and not (_rescate_coherente(a, b) or _final_es_hotspot(a, b)):
+        return "ancla final distinta sin rescate ni fuente eruption con final == hotspot"
+    for r in (a, b):
+        if r.get("final_hotspot_source") == "cluster_rescue" and not _hotspot_en_el_cumulo(r):
+            return "rescate con el hotspot fuera del centroide del cumulo (store.py:397-399)"
     return None
 
 

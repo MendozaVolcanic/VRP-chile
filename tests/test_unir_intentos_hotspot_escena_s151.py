@@ -80,6 +80,8 @@ def rec_rescate(**cambios):
 
 SOLO1 = rec_test1(datetime_utc="2026-06-01 07:30", granule="solo1.hdf")
 SOLO2 = rec_test1(datetime_utc="2026-06-02 07:30", granule="solo2.hdf")
+# el pixel mas caliente en otro lugar, sin rescate (la forma de Llaima control 2026-09-24 02:05)
+MOVIDO = {"hotspot_lat": -38.0, "hotspot_lon": -71.5, "hotspot_dist_km": 7.1}
 
 
 def doc(*recs):
@@ -121,7 +123,7 @@ def test_rescate_por_otro_hotspot_une_e_informa():
 @pytest.mark.skipif(not HAY_NODE, reason="el predicado del tablero corre con node")
 def test_solo_cambia_el_hotspot_une():
     """La forma de Llaima control 2026-09-24 02:05: el hotspot se mueve y nada mas (ningun rescate)."""
-    b = rec_test1(hotspot_lat=-38.63, hotspot_lon=-71.76, hotspot_dist_km=7.1)
+    b = rec_test1(**MOVIDO)
     salida, inf = mezcla(rec_test1(), b)
     assert inf["ok"] and inf["estados"]["hotspot_escena"] == 1
     assert sorted(inf["hotspot_escena"][0]["campos"]) == ["hotspot_dist_km", "hotspot_lat", "hotspot_lon"]
@@ -171,13 +173,13 @@ def test_bloquea_si_difiere_la_bt_maxima():
 
 
 def test_bloquea_sin_bt_maxima():
-    salida, inf = mezcla(rec_test1(t_max_k=None), rec_test1(t_max_k=None, hotspot_dist_km=7.1))
+    salida, inf = mezcla(rec_test1(t_max_k=None), rec_test1(t_max_k=None, **MOVIDO))
     assert not inf["ok"] and "BT" in inf["distintos"][0]["no_es_hotspot_escena"]
 
 
 def test_bloquea_sin_cumulo():
     """Sin cumulo el tablero publica `vrp_mw` (frontend/index.html:1148-1149) y el rescate no existe."""
-    salida, inf = mezcla(rec_test1(primary_cluster=None), rec_test1(primary_cluster=None, hotspot_dist_km=7.1))
+    salida, inf = mezcla(rec_test1(primary_cluster=None), rec_test1(primary_cluster=None, **MOVIDO))
     assert not inf["ok"] and "cumulo" in inf["distintos"][0]["no_es_hotspot_escena"]
 
 
@@ -192,11 +194,72 @@ def test_bloquea_si_el_rescate_no_toma_la_magnitud_del_cumulo():
 
 
 def test_bloquea_si_los_dos_lados_son_rescate():
-    salida, inf = mezcla(rec_rescate(), rec_rescate(vrp_mw=1.834, hotspot_dist_km=0.95))
-    # sólo cambia el hotspot: eso une; pero si ademas cambia el vrp_mw entre dos rescates, no hay mecanismo
-    assert inf["ok"]
+    """Dos rescates no tienen nada que pueda diferir: el hotspot de los dos es el centroide del cumulo."""
     salida, inf = mezcla(rec_rescate(), rec_rescate(vrp_mw=1.9))
     assert not inf["ok"]
+
+
+# ---------------------------------------------------------------- verificador del PR #843
+def test_bloquea_si_el_lado_no_rescatado_trae_etiqueta():
+    """Mata m1 del verificador (quitar «el otro lado no trae etiqueta de descarte»)."""
+    salida, inf = mezcla(rec_test1(discarded_reason="eruption_hotspot_too_far"), rec_rescate())
+    assert not inf["ok"] and "rescate" in inf["distintos"][0]["no_es_hotspot_escena"]
+
+
+@pytest.mark.parametrize("etiqueta", [None, "<sin clave>", "cluster_too_large_for_volcano"])
+def test_bloquea_si_el_rescate_no_trae_su_etiqueta(etiqueta):
+    """Mata m2 del verificador (quitar «el rescate trae su etiqueta», store.py:422)."""
+    b = rec_rescate(discarded_reason=etiqueta)
+    if etiqueta == "<sin clave>":
+        del b["discarded_reason"]
+    salida, inf = mezcla(rec_test1(), b)
+    assert not inf["ok"] and "rescate" in inf["distintos"][0]["no_es_hotspot_escena"]
+
+
+@pytest.mark.parametrize("campo, valor", [("solar_zenith_deg", 120.0), ("sensor_zenith_deg", 60.0),
+                                          ("hotspot_dist_km", 7.1), ("final_hotspot_dist_km", 3.0)])
+def test_a_geometria_y_ancla_final_solo_si_se_mueve_el_hotspot(campo, valor):
+    """(a), LAX4 a LAX6: lo que se evalua en el hotspot no cambia si el hotspot no se movio."""
+    salida, inf = mezcla(rec_test1(), rec_test1(**{campo: valor}))
+    assert not inf["ok"] and "hotspot" in inf["distintos"][0]["no_es_hotspot_escena"]
+
+
+def test_b_ancla_final_sin_rescate_con_fuente_test1_bloquea():
+    """(b), LAX6 con el hotspot movido: con fuente test1 el ancla final es el centroide del Test 1
+    (process_modis.py:1296-1298), que no depende del hotspot."""
+    salida, inf = mezcla(rec_test1(), rec_test1(final_hotspot_lat=-37.65, **MOVIDO))
+    assert not inf["ok"] and "ancla final" in inf["distintos"][0]["no_es_hotspot_escena"]
+
+
+def rec_eruption(**cambios):
+    """Fuente eruption: el ancla final ES el hotspot (process_modis.py:1307-1310)."""
+    r = rec_test1(final_hotspot_source="eruption", final_hotspot_lat=-37.79802, final_hotspot_lon=-71.40227,
+                  final_hotspot_dist_km=20.31)
+    r.update(cambios)
+    return r
+
+
+ERUPTION_MOVIDO = {"hotspot_lat": -37.8, "hotspot_lon": -71.3, "hotspot_dist_km": 9.0,
+                   "final_hotspot_lat": -37.8, "final_hotspot_lon": -71.3, "final_hotspot_dist_km": 9.0}
+
+
+@pytest.mark.skipif(not HAY_NODE, reason="el predicado del tablero corre con node")
+def test_b_ancla_final_con_fuente_eruption_y_final_igual_al_hotspot_une():
+    """(b), rama permitida: misma fuente y final == hotspot en los dos lados."""
+    salida, inf = mezcla(rec_eruption(), rec_eruption(**ERUPTION_MOVIDO))
+    assert inf["ok"] and inf["estados"]["hotspot_escena"] == 1
+
+
+def test_b_ancla_final_con_fuente_eruption_y_final_distinto_del_hotspot_bloquea():
+    b = rec_eruption(**dict(ERUPTION_MOVIDO, final_hotspot_lat=-37.81))
+    salida, inf = mezcla(rec_eruption(), b)
+    assert not inf["ok"] and "ancla final" in inf["distintos"][0]["no_es_hotspot_escena"]
+
+
+def test_c_el_lado_rescatado_tiene_el_hotspot_en_el_cumulo():
+    """(c): el rescate escribe el centroide del cumulo en hotspot_* (store.py:397-399)."""
+    salida, inf = mezcla(rec_test1(), rec_rescate(hotspot_lat=-37.9))
+    assert not inf["ok"] and "centroide" in inf["distintos"][0]["no_es_hotspot_escena"]
 
 
 @pytest.mark.parametrize("campo, valor", [("n_anomalous_pixels", 12), ("triggered_test1", False),
@@ -231,7 +294,7 @@ def test_el_predicado_ve_la_diferencia_de_clase():
 
 # ---------------------------------------------------------------- mutaciones: cada condicion importa
 MUTACIONES = {
-    # (texto viejo, texto nuevo, caso que tiene que dejar de bloquear)
+    # (texto viejo, texto nuevo, caso que tiene que dejar de bloquear[, "une": el caso une y la mutacion lo bloquea])
     "sin_modis": ('    if not str(a.get("sensor") or "").startswith("MODIS_"):',
                   '    if False:', "viirs"),
     "sin_bt_presente": ('    if a.get("t_max_k") is None or b.get("t_max_k") is None:', '    if False:', "sin_bt"),
@@ -243,6 +306,18 @@ MUTACIONES = {
     "sin_cumulo_presente": ('    if not a.get("primary_cluster"):', '    if False:', "sin_cumulo"),
     "sin_coherencia_rescate": ('    if rescate and not _rescate_coherente(a, b):', '    if False:', "vrp_sin_rescate"),
     "sin_predicado": ('    a_probar, nb = borde + escena, len(borde)', '    a_probar, nb = borde, len(borde)', "predicado"),
+    # m1 y m2 del verificador del PR #843
+    "m1_otro_lado_sin_etiqueta": ('    if otro.get("discarded_reason") is not None:', '    if False:', "otro_con_etiqueta"),
+    "m2_rescate_sin_su_etiqueta": ('    if r.get("discarded_reason") != _RESCATE:', '    if False:', "rescate_sin_etiqueta"),
+    # (a), (b) y (c) del verificador del PR #843
+    "a_sin_hotspot_movido": ('    if (d & _SIGUEN_AL_HOTSPOT) and not movio:', '    if False:', "geometria_quieta"),
+    "b_sin_ancla_final": ('    if (d & _ANCLA_FINAL) and not (_rescate_coherente(a, b) or _final_es_hotspot(a, b)):',
+                          '    if False:', "final_test1"),
+    "b_rama_eruption_rota": ('    return all(a.get("final_hotspot_source") == b.get("final_hotspot_source") and',
+                             '    return False and all(a.get("final_hotspot_source") == b.get("final_hotspot_source") and',
+                             "final_eruption", "une"),
+    "c_sin_hotspot_en_el_cumulo": ('        if r.get("final_hotspot_source") == "cluster_rescue" and not _hotspot_en_el_cumulo(r):',
+                                   '        if False:', "rescate_fuera_del_cumulo"),
 }
 
 
@@ -254,13 +329,19 @@ def _caso(nombre, mod, monkeypatch):
         monkeypatch.setattr(mod, "_predicado", lambda pares, volcan: [])
     a, b = {
         "viirs": (en_viirs(rec_test1()), en_viirs(rec_rescate())),
-        "sin_bt": (rec_test1(t_max_k=None), rec_test1(t_max_k=None, hotspot_dist_km=7.1)),
+        "sin_bt": (rec_test1(t_max_k=None), rec_test1(t_max_k=None, **MOVIDO)),
         "bt": (rec_test1(), rec_rescate(t_max_k=274.31)),
         "cumulo": (rec_test1(), rec_rescate(primary_cluster=dict(PC, n_pixels=12))),
         "clase": (rec_test1(), rec_rescate(distance_class="far")),
-        "sin_cumulo": (rec_test1(primary_cluster=None), rec_test1(primary_cluster=None, hotspot_dist_km=7.1)),
+        "sin_cumulo": (rec_test1(primary_cluster=None), rec_test1(primary_cluster=None, **MOVIDO)),
         "vrp_sin_rescate": (rec_test1(), rec_test1(vrp_mw=3.9)),
         "predicado": (rec_test1(), rec_rescate()),
+        "otro_con_etiqueta": (rec_test1(discarded_reason="eruption_hotspot_too_far"), rec_rescate()),
+        "rescate_sin_etiqueta": (rec_test1(), rec_rescate(discarded_reason=None)),
+        "geometria_quieta": (rec_test1(), rec_test1(solar_zenith_deg=120.0)),
+        "final_test1": (rec_test1(), rec_test1(final_hotspot_lat=-37.65, **MOVIDO)),
+        "final_eruption": (rec_eruption(), rec_eruption(**ERUPTION_MOVIDO)),
+        "rescate_fuera_del_cumulo": (rec_test1(), rec_rescate(hotspot_lat=-37.9)),
     }[nombre]
     salida, inf = mod.unir([doc(SOLO1, a), doc(b, SOLO2)], "Copahue")
     return inf["ok"]
@@ -268,9 +349,10 @@ def _caso(nombre, mod, monkeypatch):
 
 @pytest.mark.parametrize("mut", sorted(MUTACIONES))
 def test_cada_condicion_importa(mut, monkeypatch):
-    viejo, nuevo, caso = MUTACIONES[mut]
-    assert not _caso(caso, ui, monkeypatch), "sin mutacion el caso %s tiene que bloquear" % caso
-    assert _caso(caso, cargar((viejo, nuevo)), monkeypatch), "la mutacion %s sobrevive: el caso une igual" % mut
+    viejo, nuevo, caso, *une = MUTACIONES[mut]
+    une = bool(une)
+    assert _caso(caso, ui, monkeypatch) == une, "sin mutacion el caso %s tiene que %s" % (caso, "unir" if une else "bloquear")
+    assert _caso(caso, cargar((viejo, nuevo)), monkeypatch) != une, "la mutacion %s sobrevive" % mut
 
 
 # ---------------------------------------------------------------- datos reales
