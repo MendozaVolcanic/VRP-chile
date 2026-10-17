@@ -6,6 +6,7 @@
 <title>VRP Chile — Vista Diaria · 11 Tier A</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas -->
 <style>
 :root {
   --bg: #0a1628; --panel: #0f1a2a; --border: #1a3a5c;
@@ -98,14 +99,24 @@ footer a:hover { text-decoration: underline; }
          records ya tienen modelo S42. -->
     <button id="btn-scale" class="btn-ui">📈 Escala: Lineal</button>
     <button id="btn-mag" class="btn-ui" title="Magnitud (solo el número, NO la detección): 'Cluster' = pc.vrp_mw actual. 'Núcleo F5'' = D2-safe v2 (S95): suma solo el núcleo de 0.75 km del píxel de máxima energía + lava real (bt≥295K), curando la sobre-estimación del halo glaciar. APLICA SOLO a VIIRS 375m (I-band): MODIS y VIIRS 750m conservan el Cluster en ambos modos (el ancla energía-máxima en píxeles coarse puede inflar). Ver docs/F5_CALIBRATION_S95.md.">▣ Magnitud: Cluster</button>
-    <a href="index.html" class="btn-ui">🏠 Dashboard principal</a>
+    <!-- S153: período. Por defecto 90 días, como antes; el cambio recarga la página con el período en la URL. -->
+    <label for="periodo-sel" style="color:var(--muted);font-size:.9em">Período</label>
+    <select id="periodo-sel" class="btn-ui">
+      <option value="30">30 días</option><option value="90">90 días</option><option value="180">6 meses</option>
+      <option value="365">1 año</option><option value="0">Todo</option><option value="rango">Noche o rango…</option>
+    </select>
+    <span id="periodo-rango" hidden>
+      <input type="date" id="periodo-desde" aria-label="Desde (fecha UTC)"> a <input type="date" id="periodo-hasta" aria-label="Hasta (fecha UTC)">
+    </span>
+    <a href="index.html" class="btn-ui" id="link-index">🏠 Dashboard principal</a>
+    <a href="mosaico.html" class="btn-ui" id="link-mosaico">▦ Mosaico</a>
   </div>
 </div>
 
 <header>
   <h1>VRP Diario por Volcán Tier A</h1>
-  <div class="sub">Comparación VRP MIROVA-equivalente nuestro vs MIROVA NRT (tabla publicada ▲ e imagen por OCR ◇; ✕ = VRP de su imagen con distancia desconocida, la imagen de MIROVA era de otra pasada; ☀ = alerta de MIROVA en pasada diurna, puede incluir reflejo solar, nuestra réplica es sólo nocturna) · ventana 90d</div>
-  <div class="ts-note">⏰ Todas las horas en UTC · click en una tarjeta para ampliar</div>
+  <div class="sub">Comparación VRP MIROVA-equivalente nuestro vs MIROVA NRT (tabla publicada ▲ e imagen por OCR ◇; ✕ = VRP de su imagen con distancia desconocida, la imagen de MIROVA era de otra pasada; ☀ = alerta de MIROVA en pasada diurna, puede incluir reflejo solar, nuestra réplica es sólo nocturna) · <span id="periodo-rotulo">ventana 90d</span></div>
+  <div class="ts-note">⏰ Todas las horas en UTC · botón ⛶ para ampliar una tarjeta</div>
 </header>
 
 <div class="legend">
@@ -152,7 +163,10 @@ const TIER_A = [
   { name: "Isluga",              region: "Tarapacá",     csv: "Isluga" }
 ];
 
-const WINDOW_DAYS = 90;
+// S153: el período sale de la URL (?dias= / ?desde=&hasta=, frontend/periodo.js); por defecto 90 días como antes.
+const DIAS_POR_DEFECTO = 90;
+const PERIODO = Periodo.desdeURL(location.search, DIAS_POR_DEFECTO);
+const enPeriodo = (ms) => { const [t0, t1] = Periodo.intervalo(PERIODO, Date.now()); return ms >= t0 && ms <= t1; };
 const charts = {};
 let currentScale = "linear";
 let modalChart = null;
@@ -177,7 +191,8 @@ async function loadVolcanoData(volc) {
   // al completo si el deploy aún no generó _recent (nunca romper).
   const name = encodeURIComponent(volc.name);
   try {
-    let r = await fetch(`${BASE_PATH}data/mirova_equivalent/${name}_recent.json`);
+    // S153: un período fuera de la ventana liviana pide el JSON completo.
+    let r = Periodo.necesitaHistoria(PERIODO) ? { ok: false } : await fetch(`${BASE_PATH}data/mirova_equivalent/${name}_recent.json`);
     if (!r.ok) r = await fetch(`${BASE_PATH}data/mirova_equivalent/${name}.json`);
     if (!r.ok) return null;
     return await r.json();
@@ -564,10 +579,9 @@ function mirovaSufijoSinGeo(item) { return item && item.raw && item.raw.sinGeo ?
 
 function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
   const ds = [];
-  const cutoff = Date.now() - WINDOW_DAYS * 86400000;
   const recs = (jsonData?.records || []).filter(r => {
     const t = parseUtcMs(r.datetime_utc);
-    return t >= cutoff && eqVrpDisplay(r, volcanoName) > 0;  // S92: excluir artefacto cirrus
+    return enPeriodo(t) && eqVrpDisplay(r, volcanoName) > 0;  // S92: excluir artefacto cirrus; S153: período
   });
 
   const buckets = { MODIS: [], VIIRS750: [], VIIRS375: [] };
@@ -589,7 +603,7 @@ function buildDatasets(jsonData, mirovaForVolc, volcanoName) {
   // color que nuestras barras) en vez de 1 línea agregada all-sensors. Comparación
   // justa: "MODIS naranja sólida" (nuestro) vs "MIROVA MODIS naranja discontinua con
   // triángulos" (referencia mismo sensor). Paridad con index.html (S76 P1).
-  const enVentana = r => parseUtcMs(r.dt) >= cutoff && r.vrp > 0;  // S115 #6: parseUtcMs, no new Date crudo
+  const enVentana = r => enPeriodo(parseUtcMs(r.dt)) && r.vrp > 0;  // S115 #6: parseUtcMs, no new Date crudo; S153: período
   const mirovaWindowed = mirovaForVolc.filter(enVentana);
   // S151: las lineas son solo nocturnas; lo diurno (tabla marcada `dia` + OCR diurno) va con un sol, aparte.
   const mDia = mirovaWindowed.filter(r => r.dia).concat((mirovaForVolc.diaOcr || []).filter(enVentana));
@@ -657,14 +671,13 @@ function applyS38Filter(records) {
 }
 
 function computeStats(jsonData, mirovaForVolc, volcanoName) {
-  const cutoff = Date.now() - WINDOW_DAYS * 86400000;
   // S38: aplicar filtro post-S38 antes del filtro de ventana temporal.
   const baseRecs = applyS38Filter(jsonData?.records || []);
-  const recs = baseRecs.filter(r => parseUtcMs(r.datetime_utc) >= cutoff);
+  const recs = baseRecs.filter(r => enPeriodo(parseUtcMs(r.datetime_utc)));   // S153: período
   const detRecs = recs.filter(r => eqVrpDisplay(r, volcanoName) > 0);  // S92: excluir cirrus
   const mirovaWindowed = mirovaForVolc.filter(r => {
     const t = parseUtcMs(r.dt);  // S115 #6: Fecha_Satelite_UTC sin 'Z' → parseUtcMs (no new Date crudo = hora local)
-    return t >= cutoff && r.vrp > 0;
+    return enPeriodo(t) && r.vrp > 0;
   });
   const ourMaxVrp = detRecs.reduce((a, r) => Math.max(a, eqVrpDisplay(r, volcanoName)), 0);
   // S102 #5 — mediana del máximo DIARIO (robusta a un pico aislado, p.ej. un
@@ -828,7 +841,7 @@ function renderCard(volc, jsonData, mirovaForVolc) {
   if (n_records === 0 && datasets.length === 0) {
     while (wrap.firstChild) wrap.removeChild(wrap.firstChild);
     const msg = el("div", "no-data");
-    msg.textContent = "Sin detecciones nuestras ni alertas MIROVA en últimos 90 días";
+    msg.textContent = "Sin detecciones nuestras ni alertas MIROVA en " + Periodo.rotulo(PERIODO);
     wrap.appendChild(msg);
     return;
   }
@@ -841,7 +854,7 @@ function openModal(volcName) {
   if (!volc) return;
   const display = volc.display || volc.name;
   const t = document.getElementById("modal-title");
-  t.textContent = `${display} (${volc.region}) · 90d`;
+  t.textContent = `${display} (${volc.region}) · ${Periodo.rotuloCorto(PERIODO)}`;
   document.getElementById("modal").style.display = "block";
   if (modalChart) modalChart.destroy();
   const original = charts[volcName];
@@ -917,7 +930,35 @@ document.getElementById("btn-scale").addEventListener("click", () => {
   }
 });
 
+// S153: controles del período. Cambiarlo recarga la página con el período en la URL (los otros conmutadores de esta
+// vista ya recargan). Los enlaces a las otras vistas llevan la noche o el rango; una ventana móvil no se pasa, porque
+// cada vista tiene la suya por defecto.
+function initPeriodo() {
+  const sel = document.getElementById("periodo-sel"), caja = document.getElementById("periodo-rango");
+  const inD = document.getElementById("periodo-desde"), inH = document.getElementById("periodo-hasta");
+  const ir = (p) => { location.search = Periodo.aURL(p, location.search, DIAS_POR_DEFECTO); };
+  if (Periodo.esRango(PERIODO)) { sel.value = "rango"; caja.hidden = false; inD.value = PERIODO.desde; inH.value = PERIODO.hasta; }
+  else {
+    sel.value = String(PERIODO.dias);
+    if (sel.value !== String(PERIODO.dias)) {
+      const o = document.createElement("option"); o.value = String(PERIODO.dias); o.textContent = Periodo.rotulo(PERIODO);
+      sel.insertBefore(o, sel.querySelector('option[value="rango"]')); sel.value = o.value;
+    }
+  }
+  document.getElementById("periodo-rotulo").textContent = Periodo.rotulo(PERIODO);
+  sel.addEventListener("change", () => {
+    if (sel.value === "rango") { caja.hidden = false; inD.value = inD.value || new Date().toISOString().slice(0, 10); inH.value = inH.value || inD.value; ir({ desde: inD.value, hasta: inH.value }); }
+    else ir({ dias: parseInt(sel.value, 10) });
+  });
+  const leer = () => { const d = Periodo.fechaValida(inD.value), h = Periodo.fechaValida(inH.value) || d; if (d) ir(d <= h ? { desde: d, hasta: h } : { desde: h, hasta: d }); };
+  inD.addEventListener("change", leer); inH.addEventListener("change", leer);
+  const q = Periodo.esRango(PERIODO) ? Periodo.aURL(PERIODO, "", -1) : "";
+  document.getElementById("link-index").href = "index.html" + q;
+  document.getElementById("link-mosaico").href = "mosaico.html" + q;
+}
+
 async function init() {
+  initPeriodo();
   for (const volc of TIER_A) {
     const [data, mirovaForVolc] = await Promise.all([loadVolcanoData(volc), loadMirovaRef(volc)]);
     renderCard(volc, data, mirovaForVolc);

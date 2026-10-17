@@ -8,7 +8,13 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas -->
   <style>
+    .rango-ctl { display:inline-flex; gap:4px; align-items:center; }
+    .rango-ctl[hidden] { display:none; }
+    .rango-ctl input[type=date] { background:#0f3460; color:#e0e6f0; border:1px solid #1a3a5c; border-radius:4px; padding:2px 4px; font-size:.85em; }
+    .periodo-franja { margin:6px 0; padding:6px 10px; border-left:3px solid #ffb347; background:rgba(255,179,71,.08); font-size:.85em; color:#e0e6f0; }
+    .periodo-franja[hidden] { display:none; }
     :root {
       --bg: #1a1a2e; --surface: #16213e; --card: #0f3460;
       --border: #1a3a5c; --text: #e0e6f0; --muted: #7a8fa6;
@@ -407,7 +413,7 @@
     <span id="updated-label"></span>
     <!-- F30 Bug 8 fix (S74): timestamp visible del último auto-refresh global. -->
     <span id="last-refresh-ts" style="font-size: 0.72rem; color: var(--muted); margin-left: 8px;" title="Último refresh automático global (15 min interval)"></span>
-    <a href="diario.html" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">📊 Vista Diaria</a>
+    <a href="diario.html" id="link-diario" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">📊 Vista Diaria</a> <a href="mosaico.html" id="link-mosaico" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">▦ Mosaico</a>
     <a href="experimental/" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;">🧪 Laboratorio</a>
     <a href="comparacion.html" style="color:#7a8fa6;text-decoration:none;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;" title="Preview S115: vistas de validación vs MIROVA (histograma distancia, scatter 1:1, extensión PCC)">⚖️ Comparación</a>
     <button id="btn-about" style="background:transparent;color:#7a8fa6;border:1px solid #1a3a5c;padding:4px 10px;border-radius:4px;font-size:0.85rem;cursor:pointer;">ℹ️ Acerca de</button>
@@ -613,7 +619,13 @@
       <option value="180">6 meses</option>
       <option value="365">1 año</option>
       <option value="0">Todo</option>
+      <option value="rango">Noche o rango…</option>
     </select>
+    <span class="rango-ctl" id="rango-ctl" hidden>
+      <button class="scale-btn" id="btn-noche-ant" title="Noche anterior">◀</button>
+      <input type="date" id="rango-desde" aria-label="Desde (fecha UTC)"> a <input type="date" id="rango-hasta" aria-label="Hasta (fecha UTC)">
+      <button class="scale-btn" id="btn-noche-sig" title="Noche siguiente">▶</button>
+    </span>
   </div>
   <div style="display:flex;gap:6px;align-items:center;">
     <label>Escala </label>
@@ -642,6 +654,7 @@
   </div>
   <div class="sensor-legend" id="sensor-legend"></div>
 </div>
+<div class="periodo-franja" id="periodo-franja" hidden></div>
 
 <main>
   <div class="overview-section" id="overview-section">
@@ -874,7 +887,10 @@ let currentVolcano = VOLCANOES[0];
   const qsMatch = qsVol && VOLCANOES.find(v => v.name === qsVol);
   if (qsMatch) currentVolcano = qsMatch;
 }
-let currentDays = 30;  // S26 D: default 30 días (antes 7). Las refs MIROVA Villarrica históricas necesitan al menos 30d para visibilidad. Toggle a 90d/180d para historia completa.
+// S153: el período es una ventana móvil ({dias: N}, por defecto 30 desde S26 D) o una noche o rango en fechas UTC
+// ({desde, hasta}), leído de la URL (?dias= / ?desde=&hasta=) por frontend/periodo.js. Sin parámetros, lo de siempre.
+const DIAS_POR_DEFECTO = 30;
+let currentPeriodo = Periodo.desdeURL(location.search, DIAS_POR_DEFECTO);
 let logScale = persistedFlag("vrp_log_scale", false);
 // S18: por defecto el dashboard solo cuenta detecciones dentro del radio del
 // cráter (summit). Las lejanas (far) siguen visibles en los conteos 🎯/📍, en
@@ -1369,7 +1385,7 @@ function isThermalArtifact(r, innerKm = 10) {
 //     el mismo sensor bucket → FP.
 //   - ratio_med = mediana de (ours/mirova) sobre pares matcheados (calibración).
 //
-// Caveat: se calcula sobre la ventana actual del chart (currentDays) — los
+// Caveat: se calcula sobre la ventana actual del chart (currentPeriodo, S153) — los
 // números varían según el rango seleccionado. Records MIROVA con clasificación
 // RUTINA / NULO se excluyen para no penalizar falsos negativos triviales.
 // S89 — parseo UTC robusto de timestamps "YYYY-MM-DD HH:MM". Los campos
@@ -2357,12 +2373,12 @@ function renderDetail() {
 
   const v = currentVolcano;
   const d = allData[v.name] || { records: [], mirovaRecords: [] };
-  const filtered   = filterDays(d.records, currentDays);
-  const mFiltered  = filterDays(d.mirovaRecords, currentDays);
+  const filtered   = Periodo.filtrar(d.records, currentPeriodo);        // S153: noche o rango
+  const mFiltered  = Periodo.filtrar(d.mirovaRecords, currentPeriodo);
   // S151: la linea de MIROVA es solo nocturna (como la replica); lo diurno va aparte, con un sol. Lo diurno
   // junta las filas de la tabla marcadas `dia` y las del OCR de `records_dia_ocr`.
   const mNoche     = mFiltered.filter(r => !mirovaEsDia(r));
-  const mDia       = mFiltered.filter(mirovaEsDia).concat(filterDays(d.mirovaDiaOcr || [], currentDays));
+  const mDia       = mFiltered.filter(mirovaEsDia).concat(Periodo.filtrar(d.mirovaDiaOcr || [], currentPeriodo));
 
   // S33 bug fix: pasar inner_radius_km del volcán a mirovaEqVrp para validar
   // pc.centroid_dist_km. Sin esto, clusters far en Salar Atacama se reportaban
@@ -2391,8 +2407,9 @@ function renderDetail() {
   const dh = el("div", "detail-header");
   const dt = el("div", "detail-title"); dt.textContent = v.display;
   const badge = el("span", "alert-badge " + level.cls);
-  badge.textContent = level.label + " · máx 30 d";   // S131 A2: rótulo de la ventana
-  badge.title = "Nivel del MÁXIMO de la ventana de 30 días. La tarjeta muestra la última pasada (48 h).";
+  // S131 A2: rótulo de la ventana; S153: sale del período elegido (antes decía «30 d» con cualquier período)
+  badge.textContent = level.label + " · máx " + Periodo.rotuloCorto(currentPeriodo);
+  badge.title = "Nivel del MÁXIMO del período (" + Periodo.rotulo(currentPeriodo) + "). La tarjeta muestra la última pasada (48 h).";
   const dc = el("div", "detail-coords");
   // coords will be added from volcanoes config — hardcoded for now
   dh.append(dt, badge);
@@ -2486,7 +2503,7 @@ function renderDetail() {
   // VIIRS750 (M-band) NO lo usa MIROVA para estos volcanes → no se reporta acá.
   const metrics = computeMetrics(filtered, mFiltered, innerKm, includeFarDistance);
   const tipText = "Calculado contra CONS+OCR del CSV consolidado MIROVA en la ventana actual del chart (" +
-                  (currentDays ? currentDays + "d" : "todo") + "). " +
+                  Periodo.rotulo(currentPeriodo) + "). " +
                   "Records MIROVA con clasificación RUTINA o NULO no cuentan como FN. " +
                   "Match por sensor bucket con tolerancia temporal ±60 min. " +
                   "MIROVA publica los 3 sensores (VIIRS375 I-band detecta más; " +
@@ -2941,8 +2958,11 @@ function renderDetail() {
 
     // Hotspot markers from detections — show ALL anomalous pixels per record
     // Include vent-only detections (no hotspot_lat but vrp > 0 from vent-path)
+    // S153 (auditoría del tablero, decisión de Nicolás): el mapa dibuja lo mismo que el gráfico. Antes filtraba por
+    // `vrp_mw ?? vrp_mir_mw` sin los sensores: en Villarrica, 30 d, 18 detecciones del gráfico no estaban en el mapa
+    // (vrp_mw = 0 con cúmulo con energía) y apagar MODIS no quitaba sus marcadores.
     const hotspots = filtered
-      .filter(r => (r.vrp_mw ?? r.vrp_mir_mw ?? 0) > 0)
+      .filter(r => isSensorVisible(r) && eqVrp(r) > 0)
       .sort((a, b) => a.datetime_utc.localeCompare(b.datetime_utc));
 
     const colorMap = {
@@ -3363,6 +3383,16 @@ function renderDetail() {
       options: {
         responsive: true, maintainAspectRatio: false,
         interaction: { mode:"indexMasSol", intersect:false },  // S151: "index" + el sol bajo el cursor
+        // S153: clic en una barra = ver esa noche (UTC) en todo el panel, mapa incluido.
+        onClick: (evt, els, chart) => {
+          if (!els || !els.length) return;
+          const pt = chart.data.datasets[els[0].datasetIndex]?.data?.[els[0].index];
+          const f = Periodo.fechaDeX(pt && pt.x);
+          // Diferido: aplicarPeriodo redibuja y destruye este gráfico; hacerlo dentro de su propio evento deja a
+          // Chart.js procesando el clic sobre un gráfico destruido («reading 'handleEvent'»).
+          if (f) setTimeout(() => aplicarPeriodo(Periodo.noche(f)), 0);
+        },
+        onHover: (evt, els) => { if (evt.native && evt.native.target) evt.native.target.style.cursor = els && els.length ? "pointer" : ""; },
         plugins: {
           legend: { labels: { color:"#7a8fa6", font:{size:11}, boxWidth:12, padding:12 } },
           tooltip: {
@@ -3538,6 +3568,7 @@ function buildLegend() {
       buildCards();
       buildAlertSummary();
       buildOverviewMap();
+      buildNRTTable();   // S153: la tabla también obedece los sensores
     });
     legend.appendChild(item);
   });
@@ -3623,7 +3654,11 @@ function updateHotspotLayer() {
   volcList.forEach(v => {
     const d = allData[v.name];
     if (!d) return;
-    const recs = filterDays(d.records, currentDays);
+    const recs = Periodo.filtrar(d.records, currentPeriodo);   // S153: noche o rango
+    const innerKmV = v.inner_radius_km ?? 10;
+    // S153: la misma magnitud y el mismo criterio que el gráfico del detalle (respeta «Solo cráter» y no muestra
+    // artefactos térmicos). Antes la capa usaba `r.vrp_mw`, la suma de toda la escena (A10), e ignoraba «Solo cráter».
+    const vrpTablero = (r) => isThermalArtifact(r, innerKmV) ? 0 : mirovaEqVrpDisplay(r, innerKmV, includeFarDistance);
     // S106 P1.5 (AUDIT_S106): el overview multi-volcán reproducía el sesgo
     // topográfico que S106 vino a corregir — filtraba por hotspot_lat (píxel
     // suelto) y excluía los records con ancla honesta (test1_roi sin hotspot_lat).
@@ -3655,8 +3690,12 @@ function updateHotspotLayer() {
       // pero con vrp_mir_mw>0 o vrp_tir_mw>0) NO deben aparecer en la capa
       // overview de hotspots. Antes vrpRaw=vrp_mir_mw + fallback vrpShow los
       // renderizaba con tamaño no nulo, sugiriendo actividad real.
-      if (!isValidDetection(r)) return;
-      const vrpFinal = r.vrp_mw ?? 0;
+      // S153 (decisión de Nicolás): decide el criterio del gráfico (eqVrp > 0), que NO pasa por isValidDetection;
+      // así la capa, el mapa del detalle y el gráfico dibujan lo mismo. La tarjeta sigue con isSummitDetection: esa
+      // diferencia (familia A46) queda abierta y no se toca acá.
+      const vrpFinal = vrpTablero(r);
+      if (!(vrpFinal > 0)) return;
+      const vrpEscena = r.vrp_mw ?? 0;
       // F46 (S76 hotfix): vrp_tir_mw puede estar inflado por Stefan-Boltzmann
       // absoluto sobre mask 4σ generoso en terreno heterogéneo (nieve/lago/cirrus).
       // 143 records afectados ventana 2026-01-31..2026-05-17, hasta 9606 MW
@@ -3688,7 +3727,8 @@ function updateHotspotLayer() {
         `<b>${v.display}</b>${isFiltered ? ' <span style="color:#f44;font-size:.8em">(filtrado)</span>' : ''}<br>` +
         `${r.datetime_utc} UTC<br>` +
         `<span style="color:${color}">${r.sensor}</span><br>` +
-        `VRP final: <b>${vrpFinal.toFixed(3)} MW</b><br>` +
+        `VRP (tablero): <b>${vrpFinal.toFixed(3)} MW</b><br>` +
+        (Math.abs(vrpEscena - vrpFinal) > 1e-6 ? `VRP escena completa: ${vrpEscena.toFixed(3)} MW<br>` : '') +
         (vrpRaw > 0 ? `VRP MIR crudo: ${vrpRaw.toFixed(3)} MW<br>` : '') +
         (vrpVent > 0 ? `VRP vent: ${vrpVent.toFixed(3)} MW<br>` : '') +
         `Dist cráter: ${dist}<br>` +
@@ -3802,6 +3842,7 @@ function buildNRTTable() {
       // metía records con vrp_mw=0 + discarded_reason (eruption_hotspot_too_far),
       // mostrándolos como "detecciones" recientes en la tabla NRT global.
       if (!isValidDetection(r)) continue;  // H3 (S77): helper global
+      if (!isSensorVisible(r)) continue;   // S153: la tabla obedece la leyenda de sensores, como el resto
       // S100 coherencia: aplicar el MISMO gate de distancia que tarjetas/resumen/
       // mapa (mirovaEqVrp = distance_class==summit && centroid<=inner, salvo
       // toggle "incluir lejanas"). Sin esto la tabla mostraba clusters lejanos
@@ -3954,6 +3995,63 @@ function renderMirovaFreshness() {
   }
 }
 
+// ── Período (S153) ────────────────────────────────────────────────────────────
+// Pone el desplegable, las fechas y ◀ ▶ de acuerdo con currentPeriodo, y la franja que avisa qué se está viendo.
+function sincronizarControlesPeriodo() {
+  const sel = document.getElementById("days-select");
+  const ctl = document.getElementById("rango-ctl");
+  const rango = Periodo.esRango(currentPeriodo);
+  if (rango) {
+    sel.value = "rango";
+    document.getElementById("rango-desde").value = currentPeriodo.desde;
+    document.getElementById("rango-hasta").value = currentPeriodo.hasta;
+  } else {
+    sel.value = String(currentPeriodo.dias);
+    if (sel.value !== String(currentPeriodo.dias)) {   // ?dias=N que no está en la lista: se agrega la opción
+      const o = document.createElement("option");
+      o.value = String(currentPeriodo.dias); o.textContent = Periodo.rotulo(currentPeriodo);
+      sel.insertBefore(o, sel.querySelector('option[value="rango"]'));
+      sel.value = o.value;
+    }
+  }
+  ctl.hidden = !rango;
+  // Los enlaces a las otras vistas llevan la noche o el rango (una ventana móvil no: cada vista tiene la suya).
+  const q = rango ? Periodo.aURL(currentPeriodo, "", -1) : "";
+  for (const [id, pag] of [["link-diario", "diario.html"], ["link-mosaico", "mosaico.html"]]) {
+    const a = document.getElementById(id); if (a) a.href = pag + q;
+  }
+  const franja = document.getElementById("periodo-franja");
+  if (Periodo.esPorDefecto(currentPeriodo, DIAS_POR_DEFECTO)) { franja.hidden = true; franja.textContent = ""; }
+  else {
+    franja.hidden = false;
+    franja.textContent = "Viendo " + Periodo.rotulo(currentPeriodo) +
+      " en el detalle, su gráfico, su mapa y la capa Anomalías. Las tarjetas, la barra «Estado actual» y los íconos" +
+      " del mapa general siguen mostrando el estado actual (48 h).";
+  }
+}
+
+// Cambia el período, lo escribe en la URL (enlace compartible) y redibuja lo que depende de él.
+async function aplicarPeriodo(p) {
+  currentPeriodo = p;
+  try {
+    history.replaceState(null, "", location.pathname + Periodo.aURL(p, location.search, DIAS_POR_DEFECTO) + location.hash);
+  } catch (e) { /* file:// o vista previa sin history: el período sigue funcionando, sólo no queda en la URL */ }
+  sincronizarControlesPeriodo();
+  // S120: la ventana liviana cubre 100 días; si el período sale de ella, se bajan los JSON completos una sola vez.
+  if (!_fullHistoryLoaded && Periodo.necesitaHistoria(p)) {
+    const sel = document.getElementById("days-select");
+    sel.disabled = true;
+    document.body.style.cursor = "progress";
+    await Promise.all(VOLCANOES.map(v => loadVolcano(v, { full: true })));
+    _fullHistoryLoaded = true;
+    sel.disabled = false;
+    document.body.style.cursor = "";
+  }
+  buildCards();
+  renderDetail();
+  updateHotspotLayer();
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
   buildLegend();
@@ -3961,23 +4059,29 @@ async function init() {
   setInterval(updateClock, 1000);
 
   // Days
-  document.getElementById("days-select").addEventListener("change", async e => {
-    currentDays = parseInt(e.target.value);
-    // S120: la ventana liviana cubre 100 días. Si el usuario pide más historia
-    // (>90 días o "Todo"=0), bajar los JSON completos una sola vez, bajo demanda.
-    if (!_fullHistoryLoaded && (currentDays === 0 || currentDays > 90)) {
-      const sel = e.target;
-      sel.disabled = true;
-      document.body.style.cursor = "progress";
-      await Promise.all(VOLCANOES.map(v => loadVolcano(v, { full: true })));
-      _fullHistoryLoaded = true;
-      sel.disabled = false;
-      document.body.style.cursor = "";
+  // S153: el desplegable elige una ventana móvil o «Noche o rango…»; las fechas y ◀ ▶ mueven el rango.
+  const selDias = document.getElementById("days-select");
+  const inDesde = document.getElementById("rango-desde");
+  const inHasta = document.getElementById("rango-hasta");
+  selDias.addEventListener("change", e => {
+    if (e.target.value === "rango") {
+      // Por defecto, la última noche con datos del volcán elegido (o la de hoy UTC).
+      const recs = (allData[currentVolcano.name] || {}).records || [];
+      const ult = recs.reduce((m, r) => (r.datetime_utc > m ? r.datetime_utc : m), "").slice(0, 10) || new Date().toISOString().slice(0, 10);
+      aplicarPeriodo(Periodo.esRango(currentPeriodo) ? currentPeriodo : Periodo.noche(ult));
+    } else {
+      aplicarPeriodo({ dias: parseInt(e.target.value, 10) });
     }
-    buildCards();
-    renderDetail();
-    updateHotspotLayer();
   });
+  const leerRango = () => {
+    const d = Periodo.fechaValida(inDesde.value), h = Periodo.fechaValida(inHasta.value) || d;
+    if (d) aplicarPeriodo(d <= h ? { desde: d, hasta: h } : { desde: h, hasta: d });
+  };
+  inDesde.addEventListener("change", leerRango);
+  inHasta.addEventListener("change", leerRango);
+  document.getElementById("btn-noche-ant").addEventListener("click", () => aplicarPeriodo(Periodo.desplazar(currentPeriodo, -1)));
+  document.getElementById("btn-noche-sig").addEventListener("click", () => aplicarPeriodo(Periodo.desplazar(currentPeriodo, 1)));
+  sincronizarControlesPeriodo();
 
   // Hotspot layer toggle
   const hotspotBtn = document.getElementById("hotspot-layer-btn");
@@ -4042,6 +4146,7 @@ async function init() {
     buildOverviewMap();
     renderDetail();
     buildAlertSummary();   // S129 V3: la barra depende de includeFarDistance (:3053)
+    buildNRTTable();       // S153: la tabla depende de includeFarDistance y no se redibujaba
   });
   document.getElementById("btn-include-far").addEventListener("click", () => {
     includeFarDistance = true;
@@ -4052,6 +4157,7 @@ async function init() {
     buildOverviewMap();
     renderDetail();
     buildAlertSummary();   // S129 V3: la barra depende de includeFarDistance (:3053)
+    buildNRTTable();       // S153: la tabla depende de includeFarDistance y no se redibujaba
   });
 
   // S27: toggle "Solo principal" (default) vs "Todos los pixels". MIROVA
@@ -4114,7 +4220,9 @@ async function init() {
   }
 
   // Load all volcanoes in parallel
-  await Promise.all(VOLCANOES.map(v => loadVolcano(v)));
+  // S153: si la URL pide un período fuera de la ventana liviana, se baja la historia completa desde el principio.
+  if (Periodo.necesitaHistoria(currentPeriodo)) _fullHistoryLoaded = true;
+  await Promise.all(VOLCANOES.map(v => loadVolcano(v, { full: _fullHistoryLoaded })));
 
   // S132 R7 — abrir en un volcán que TENGA data. `VOLCANOES[0]` es Taapaca, que está
   // configurado pero fuera del cron NRT, así que el panel de detalle arrancaba diciendo
