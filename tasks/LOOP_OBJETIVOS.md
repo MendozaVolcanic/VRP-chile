@@ -379,6 +379,14 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 15:05 UTC (vuelta 150): tarea 1.22 (desempate del top-100 MODIS) delegada; toca producción
+- Agente en worktree, rama `loop/1.22-desempate-top100`: tag defensivo `pre-s151-desempate-top100` sobre `main`
+  antes del primer edit; confirmar el mecanismo con los records de los casos reales (¿empate exacto o en ulps?),
+  buscar otros desempates de la cadena MODIS, proponer un desempate determinista con un test que falle antes, medir
+  cuántos records del corpus podrían cambiar. **PR sin merge (A45, §1.1): decide Nicolás.**
+- Runs: V2b 6 de 22 verdes; W5a 2 de 22; W5b pendiente. NRT verde 14:52. Disco 12,7 GB. Agentes vivos: G3 (1.24) y 1.22.
+- Worktree del autor de #843 sigue bloqueado por el proceso de esta sesión; se limpia al cerrarla.
+
 ### 2026-10-17 14:34 UTC (vuelta 149): tarea 1.24 (G3 del diurno con `comparar()`) delegada
 - Agente en worktree, rama `loop/diurno-g3-comparar`: el G3 («noches intactas») clasifica cada par nocturno
   control/diurno con `unir_intentos.comparar` más el predicado de node; `distinto` es FALLA, y `orden`, `borde` y
