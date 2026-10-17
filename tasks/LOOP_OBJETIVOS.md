@@ -382,6 +382,23 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 20:55 UTC (vuelta 172, S153): W5a despareja y repetida; 1.23 completa despachada; #847 en verificación
+- **Cron externo del NRT:** Nicolás lo dejó en `10 1-12 * * *` UTC (decisión 1 del bloque S153, cerrada).
+- **W5a (39032518643) terminó con `recolectar` en rojo por COBERTURA, no por la rama existente:** control 1.184 noches,
+  brazo diurno 1.153; faltan 46 (NevadosDeChillan 30, PlanchonPeteroa 16) y sobran 15 (NevadosDeChillan 9, Llaima 6).
+  Intento 1 resguardado en `C:\Users\nmend\AppData\Local\Temp\claude\w5a_39032518643\i1\` (artefacto `s151diurno-todo`).
+  **Repetidos los tres volcanes, los dos brazos**, misma ventana 2026-09-01 a 09-10, `--ref s151-diurno-codigo`
+  (`pipeline/` idéntico al de W5a, `7b825ba0`: diff vacío): run 39068611598, pendiente detrás de W5b. **W6a se
+  despacha recién cuando este run arranque** (un solo pendiente por grupo `s151-ab-diurno`).
+- **1.23:** `Lascar-2a` midió 24 de 24 gránulos en 13,4 min (umbral 50), prueba sintética OK. Despachados los otros
+  23 medios jobs desde el mismo tag `s151-1.23-probe`: run 39068703857. Evaluar en local con los 24 artefactos.
+- **#847:** el agente de S152 dejó el arreglo de `borde` SIN commitear en su worktree (10 archivos: `borde` sólo con
+  `anomaly_pixels` + `discarded_anomaly_pixels` = 100 en los dos lados; G3 INDECIDIBLE si el predicado no corre). Los
+  4 tests nuevos fallan con el `unir_intentos.py` de la rama (comprobado en copia aparte) y pasan con el nuevo (126
+  verdes); autoprueba 68 de 68. Mutaciones corriendo. Segunda vuelta del verificador limpio lanzada
+  (`C:\Users\nmend\AppData\Local\Temp\claude\verif_847_v2\`), que además reproduce las uniones de W2a, V1 y V2a.
+- V2b 18 de 22; W5b corriendo. Disco 11 GB.
+
 ### 2026-10-17 20:25 UTC (vuelta 171): CIERRE de S152 por contexto; bloque de arranque S153
 - `tasks/BLOQUE_ARRANQUE_S153.md`. Se fijó con trabajo en curso: agente del arreglo de #847 vivo; runs 39066031570
   (1.23 `Lascar-2a`), 39033530622 (V2b), 39032518643 (W5a) y 39041204976 (W5b, pendiente). Sin evaluar: V2b, 1.23 y el
