@@ -1,0 +1,60 @@
+Granulos con C, M y R medidos: 469
+
+(1) Donde se calcula el Test 1 (k > 0 en C) y la k del ruido puro esperada por geometria
+  cenit     n  calculado    k_C med    n_roi     n_bg    k_ruido
+  0-10     31         30      1.785     28.0     24.9       2.11
+  10-20    62         59       2.33     25.7     22.8       2.02
+  20-30    64         51       1.93     21.5     19.1       1.85
+  30-50    90          9       1.87     13.6     12.1       1.47
+  50-90   222          0       None      6.4      5.7       1.01
+
+(2) Cuanto se mueve k con MxD03 (M) y con el corrimiento al azar del mismo tamano en km (R)
+  todos   n=126  km med 1.300 | |dk| M 0.515, R 0.595 | |dk|/km M 0.416, R 0.462 | M>R 59, R>M 65 | k_C med 2.04, k_C entre 2 y 4: 55
+  Lascar  n=53  km med 1.337 | |dk| M 0.550, R 0.670 | |dk|/km M 0.425, R 0.479 | M>R 22, R>M 30 | k_C med 2.17, k_C entre 2 y 4: 29
+  otros   n=73  km med 1.260 | |dk| M 0.500, R 0.570 | |dk|/km M 0.401, R 0.446 | M>R 37, R>M 35 | k_C med 1.93, k_C entre 2 y 4: 26
+
+(3) Cruces del umbral (k = 3.0) respecto de C
+  M: {'de': 149, 'dispara_C_no_M': 17, 'dispara_M_no_C': 19}
+  R: {'de': 149, 'dispara_C_no_R': 15, 'dispara_R_no_C': 14}
+
+(4) Protegidas de Lascar: k y disparo en C, M y R
+  MOD021KM.A2026060.0140 cenit 10.59 corr 1.545 km | k C 2.71 M 2.86 R 1.62 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MOD021KM.A2026065.0135 cenit 11.23 corr 1.977 km | k C 2.08 M 2.92 R 2.75 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MOD021KM.A2026068.0155 cenit 30.73 corr 1.890 km | k C 0.00 M 0.00 R 1.85 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MOD021KM.A2026070.0135 cenit  9.86 corr 1.451 km | k C 4.42 M 4.76 R 2.60 | dispara 110 | fuente {'C': 'cluster_rescue', 'M': 'cluster_rescue', 'R': 'eruption'} | pub {'C': 1, 'M': 1, 'R': 0}
+  MOD021KM.A2026073.0155 cenit 29.70 corr 1.450 km | k C 0.00 M 0.00 R 0.00 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MOD021KM.A2026075.0135 cenit 12.68 corr 0.863 km | k C 2.45 M 3.14 R 2.16 | dispara 010 | fuente {'C': 'eruption', 'M': 'cluster_rescue', 'R': 'eruption'} | pub {'C': 0, 'M': 1, 'R': 0}
+  MOD021KM.A2026078.0155 cenit 29.71 corr 1.160 km | k C 0.00 M 0.00 R 0.00 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MOD021KM.A2026080.0135 cenit 12.77 corr 0.456 km | k C 2.56 M 2.75 R 5.16 | dispara 001 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'test1'} | pub {'C': 0, 'M': 0, 'R': 1}
+  MOD021KM.A2026083.0155 cenit 29.15 corr 1.348 km | k C 2.34 M 0.00 R 3.20 | dispara 001 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'cluster_rescue'} | pub {'C': 0, 'M': 0, 'R': 1}
+  MOD021KM.A2026085.0135 cenit 11.58 corr 0.496 km | k C 5.44 M 3.74 R 3.74 | dispara 111 | fuente {'C': 'test1', 'M': 'test1', 'R': 'test1'} | pub {'C': 1, 'M': 1, 'R': 1}
+  MOD021KM.A2026088.0155 cenit 28.96 corr 1.699 km | k C 2.92 M 0.00 R 0.00 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MOD021KM.A2026095.0135 cenit 13.12 corr 1.730 km | k C 3.30 M 3.20 R 1.67 | dispara 110 | fuente {'C': 'test1', 'M': 'cluster_rescue', 'R': 'eruption'} | pub {'C': 1, 'M': 1, 'R': 0}
+  MOD021KM.A2026098.0150 cenit 27.02 corr 2.131 km | k C 0.00 M 2.15 R 0.00 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MOD021KM.A2026108.0150 cenit 25.74 corr 1.370 km | k C 2.32 M 3.19 R 2.22 | dispara 010 | fuente {'C': 'eruption', 'M': 'test1', 'R': 'eruption'} | pub {'C': 0, 'M': 1, 'R': 0}
+  MOD021KM.A2026110.0130 cenit 15.64 corr 0.390 km | k C 4.81 M 2.56 R 3.31 | dispara 101 | fuente {'C': 'test1', 'M': 'eruption', 'R': 'test1'} | pub {'C': 1, 'M': 0, 'R': 1}
+  MOD021KM.A2026113.0150 cenit 24.73 corr 1.299 km | k C 1.70 M 2.19 R 1.03 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MOD021KM.A2026115.0130 cenit 18.10 corr 0.596 km | k C 1.64 M 1.79 R 1.19 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MOD021KM.A2026120.0130 cenit 17.46 corr 1.302 km | k C 3.28 M 2.83 R 1.69 | dispara 100 | fuente {'C': 'test1', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 1, 'M': 0, 'R': 0}
+  MOD021KM.A2026123.0145 cenit 23.26 corr 2.039 km | k C 1.60 M 1.51 R 2.07 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MOD021KM.A2026130.0125 cenit 21.19 corr 1.337 km | k C 2.14 M 2.37 R 2.43 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MOD021KM.A2026178.0135 cenit 10.47 corr 1.036 km | k C 2.68 M 2.67 R 2.47 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MYD021KM.A2026061.0740 cenit 21.23 corr 1.576 km | k C 2.11 M 1.52 R 2.73 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MYD021KM.A2026063.0715 cenit 26.33 corr 1.637 km | k C 0.00 M 0.00 R 1.50 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MYD021KM.A2026064.0755 cenit 47.48 corr 1.987 km | k C 0.00 M 0.00 R 0.00 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MYD021KM.A2026066.0735 cenit  8.47 corr 1.846 km | k C 1.66 M 3.15 R 2.27 | dispara 010 | fuente {'C': 'eruption', 'M': 'cluster_rescue', 'R': 'eruption'} | pub {'C': 0, 'M': 1, 'R': 0}
+  MYD021KM.A2026068.0710 cenit 36.93 corr 1.868 km | k C 0.00 M 0.00 R 0.00 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MYD021KM.A2026069.0750 cenit 39.14 corr 1.007 km | k C 0.00 M 0.00 R 0.00 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MYD021KM.A2026071.0725 cenit  5.56 corr 2.145 km | k C 2.41 M 5.99 R 3.17 | dispara 011 | fuente {'C': 'eruption', 'M': 'test1', 'R': 'test1'} | pub {'C': 0, 'M': 1, 'R': 1}
+  MYD021KM.A2026074.0745 cenit 28.65 corr 1.357 km | k C 2.06 M 4.31 R 2.44 | dispara 010 | fuente {'C': 'eruption', 'M': 'test1', 'R': 'eruption'} | pub {'C': 0, 'M': 1, 'R': 0}
+  MYD021KM.A2026076.0720 cenit 19.20 corr 1.699 km | k C 2.71 M 9.56 R 4.11 | dispara 011 | fuente {'C': 'eruption', 'M': 'test1', 'R': 'test1'} | pub {'C': 0, 'M': 1, 'R': 1}
+  MYD021KM.A2026079.0740 cenit 16.32 corr 1.686 km | k C 2.75 M 3.85 R 2.46 | dispara 010 | fuente {'C': 'eruption', 'M': 'test1', 'R': 'eruption'} | pub {'C': 0, 'M': 1, 'R': 0}
+  MYD021KM.A2026086.0710 cenit 41.12 corr 2.315 km | k C 0.00 M 0.00 R 0.00 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MYD021KM.A2026087.0750 cenit 34.88 corr 1.371 km | k C 0.00 M 1.98 R 0.00 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MYD021KM.A2026094.0720 cenit 25.23 corr 1.333 km | k C 1.56 M 0.00 R 1.84 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MYD021KM.A2026097.0735 cenit  9.18 corr 1.986 km | k C 2.20 M 1.84 R 2.12 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MYD021KM.A2026102.0730 cenit  5.93 corr 1.460 km | k C 1.47 M 1.61 R 2.17 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MYD021KM.A2026115.0735 cenit  0.49 corr 0.702 km | k C 2.94 M 2.77 R 1.69 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MYD021KM.A2026118.0750 cenit 32.91 corr 1.460 km | k C 1.15 M 0.00 R 0.00 | dispara 000 | fuente {'C': 'eruption', 'M': 'eruption', 'R': 'eruption'} | pub {'C': 0, 'M': 0, 'R': 0}
+  MYD021KM.A2026123.0745 cenit 22.04 corr 0.651 km | k C 4.17 M 3.02 R 2.51 | dispara 110 | fuente {'C': 'cluster_rescue', 'M': 'cluster_rescue', 'R': 'eruption'} | pub {'C': 1, 'M': 1, 'R': 0}
+  MYD021KM.A2026154.0745 cenit 14.14 corr 1.733 km | k C 2.73 M 3.14 R 3.20 | dispara 011 | fuente {'C': 'eruption', 'M': 'test1', 'R': 'test1'} | pub {'C': 0, 'M': 1, 'R': 1}

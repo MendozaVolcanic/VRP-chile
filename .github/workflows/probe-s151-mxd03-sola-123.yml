@@ -1,0 +1,157 @@
+name: "Probe S151 1.23, MxD03 sola contra 20 nulos en km y una vara VIIRS (solo lectura)"
+
+# Tarea 1.23 del loop. Criterio pre-registrado en experiments/_s151_mxd03_sola_123/README.md, escrito
+# antes de cualquier corrida. La muestra es la de la 1.17, sin tocar (poblacion.json; un test fija su
+# sha256), partida en 24 medios jobs (jobs_123.py). Solo lectura: no escribe en data/, no commitea, no
+# hace push; el resultado queda como artefacto. Cada job baja hasta 24 pares MxD021KM + MxD03, corre 22
+# brazos (C, M y 20 nulos) mas C' en dos granulos, y borra cada HDF al usarlo.
+# A43: "on" entre comillas. S141: pipefail con tee. A15: duracion predicha con lo MEDIDO en la 1.17 y la
+# 1.21 (presupuesto_tiempo_salida.txt): peor caso 27,2 min por medio job. El script deja de bajar
+# granulos a los 50 min (los marca "sin_tiempo") y el job tiene 75 min (50 x 1,3 = 65, mas la instalacion).
+# S146/A71: autentica SOLO por EARTHDATA_TOKEN y falla al instante si viene vacio; nunca usuario y clave.
+# Grupo de concurrencia propio: no desplaza a los A/B en curso ni a la 1.21.
+"on":
+  workflow_dispatch:
+    inputs:
+      preregistro_aprobado:
+        description: "Escribe si SOLO con el criterio de experiments/_s151_mxd03_sola_123/README.md sellado (regla 1.6 del loop)"
+        required: true
+        default: "no"
+      jobs:
+        description: "Lista JSON de medios jobs de jobs_123.py (vacio: los 24). Ej: [\"Lascar-2a\"]"
+        required: false
+        default: ""
+
+concurrency:
+  group: probe-s151-mxd03-sola-123
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      jobs: ${{ steps.lista.outputs.jobs }}
+    steps:
+      - name: Candado del pre-registro
+        run: |
+          if [ "${{ github.event.inputs.preregistro_aprobado }}" != "si" ]; then
+            echo "Pre-registro sin sello: no se corre (regla 1.6 del loop)"; exit 1
+          fi
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - name: Lista de medios jobs desde jobs_123.py
+        id: lista
+        env:
+          PEDIDOS: ${{ github.event.inputs.jobs }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, sys
+          sys.path.insert(0, "experiments/_s151_mxd03_sola_123")
+          import jobs_123 as J
+          todos = list(J.partir(J.cargar()))
+          pedidos = os.environ.get("PEDIDOS", "").strip()
+          sel = json.loads(pedidos) if pedidos else todos
+          malos = [j for j in sel if j not in todos]
+          if malos:
+              raise SystemExit("jobs que no estan en jobs_123.py: %s" % malos)
+          print("jobs=" + json.dumps(sel))
+          PY
+
+  probe:
+    needs: plan
+    runs-on: ubuntu-24.04  # pyhdf probado en 24.04 (ver nrt.yml)
+    timeout-minutes: 75
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        job: ${{ fromJSON(needs.plan.outputs.jobs) }}
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+          node --version
+      - name: Prueba sintetica (nulo en km, anisotropia, bow tie, espia del Test 1, pixel por indice y C' igual a C)
+        env:
+          VRP_PROFILE: mirova_equivalent
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python experiments/_s151_mxd03_sola_123/probar_probe_sola.py | tee out/prueba_sintetica_${{ matrix.job }}.txt
+      - name: Probe del medio job
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          python experiments/_s151_mxd03_sola_123/probe_sola.py --job "${{ matrix.job }}" \
+            --out out --presupuesto-min 50 2>&1 | tee out/probe_${{ matrix.job }}.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s151-mxd03-sola-${{ matrix.job }}
+          path: |
+            out/*.json
+            out/*.txt
+            out/*.log
+          retention-days: 30
+          if-no-files-found: error
+
+  agregar:
+    needs: [plan, probe]
+    if: always() && needs.plan.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: pip install numpy pyyaml
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: s151-mxd03-sola-*
+          path: salidas
+      - name: Evaluar con el criterio pre-registrado
+        env:
+          JOBS: ${{ needs.plan.outputs.jobs }}
+        run: |
+          set -o pipefail
+          python experiments/_s151_mxd03_sola_123/evaluar_sola.py salidas --jobs "$JOBS" \
+            --salida salidas/resumen.json | tee salidas/veredicto.txt
+      - name: Upload resumen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s151-mxd03-sola-123-resumen
+          path: |
+            salidas/resumen.json
+            salidas/veredicto.txt
+          retention-days: 30
+          if-no-files-found: error
