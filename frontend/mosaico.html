@@ -20,6 +20,7 @@
 -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script src="periodo.js"></script><!-- S153: período (noche o rango) común a las tres vistas -->
 <style>
 :root {
   --bg: #1a1a2e; --surface: #16213e; --card: #0f3460;
@@ -161,8 +162,15 @@ footer a:hover { text-decoration: underline; }
   <div class="header-right">
     <span class="status-label"><span class="status-dot"></span><span id="updated-label">Cargando…</span></span>
     <div class="nav-links">
-      <a href="index.html" class="nav-link">🏠 Detallado</a>
-      <a href="diario.html" class="nav-link">📊 Diario</a>
+      <a href="index.html" class="nav-link" id="link-index">🏠 Detallado</a>
+      <a href="diario.html" class="nav-link" id="link-diario">📊 Diario</a>
+      <!-- S153: período del mini gráfico; por defecto 30 días, como antes. El valor de la tarjeta sigue siendo 48 h. -->
+      <select id="periodo-sel" class="nav-link" style="background:transparent;color:inherit;font:inherit;" aria-label="Período del mini gráfico">
+        <option value="30">30 días</option><option value="90">90 días</option><option value="rango">Noche o rango…</option>
+      </select>
+      <span id="periodo-rango" hidden>
+        <input type="date" id="periodo-desde" aria-label="Desde (fecha UTC)"> a <input type="date" id="periodo-hasta" aria-label="Hasta (fecha UTC)">
+      </span>
       <a href="mosaico.html" class="nav-link active">🗺️ Mosaico</a>
       <button id="btn-mag" class="nav-link" style="cursor:pointer;border:1px solid currentColor;background:transparent;font:inherit;color:inherit;" title="Magnitud (solo el número, NO la detección): 'Cluster' = pc.vrp_mw actual. 'Núcleo F5'' = D2-safe v2 (S95): suma solo el núcleo de 0.75 km del píxel de máxima energía + lava real (bt≥295K), curando la sobre-estimación del halo glaciar. Ver docs/F5_CALIBRATION_S95.md.">▣ Cluster</button>
     </div>
@@ -172,8 +180,9 @@ footer a:hover { text-decoration: underline; }
 <div class="intro">
   <b>Vista panorámica</b> al estilo Mirova-v1: un volcán por tarjeta, ordenados de norte a sur
   por latitud (CVZ → SVZ → Austral). Cada tarjeta muestra la serie del VRP MIROVA-equivalente
-  (cluster <i>summit-only</i>, dentro del <code>inner_radius_km</code> oficial) en los últimos 30 días.
-  Click en una tarjeta abre el dashboard detallado de ese volcán.
+  (cluster <i>summit-only</i>, dentro del <code>inner_radius_km</code> oficial) en <span id="periodo-rotulo">los últimos 30 días</span>;
+  el número de cada tarjeta es la última pasada de 48 h. Click en una tarjeta abre el dashboard detallado de ese volcán
+  con el mismo período.
 </div>
 
 <main>
@@ -452,6 +461,33 @@ async function fetchJSON(url) {
 
 const allData = {};   // { volcanoName: { records, mirovaRecords, updated } }
 
+// S153: período del mini gráfico, leído de la URL (?dias= / ?desde=&hasta=); por defecto 30 días, como antes.
+const DIAS_POR_DEFECTO = 30;
+const PERIODO = Periodo.desdeURL(location.search, DIAS_POR_DEFECTO);
+function initPeriodo() {
+  const sel = document.getElementById("periodo-sel"), caja = document.getElementById("periodo-rango");
+  const inD = document.getElementById("periodo-desde"), inH = document.getElementById("periodo-hasta");
+  const ir = (p) => { location.search = Periodo.aURL(p, location.search, DIAS_POR_DEFECTO); };
+  if (Periodo.esRango(PERIODO)) { sel.value = "rango"; caja.hidden = false; inD.value = PERIODO.desde; inH.value = PERIODO.hasta; }
+  else {
+    sel.value = String(PERIODO.dias);
+    if (sel.value !== String(PERIODO.dias)) {
+      const o = document.createElement("option"); o.value = String(PERIODO.dias); o.textContent = Periodo.rotulo(PERIODO);
+      sel.insertBefore(o, sel.querySelector('option[value="rango"]')); sel.value = o.value;
+    }
+  }
+  document.getElementById("periodo-rotulo").textContent = Periodo.esRango(PERIODO) ? Periodo.rotulo(PERIODO) : "los " + Periodo.rotulo(PERIODO);
+  sel.addEventListener("change", () => {
+    if (sel.value === "rango") { caja.hidden = false; inD.value = inD.value || new Date().toISOString().slice(0, 10); inH.value = inH.value || inD.value; ir({ desde: inD.value, hasta: inH.value }); }
+    else ir({ dias: parseInt(sel.value, 10) });
+  });
+  const leer = () => { const d = Periodo.fechaValida(inD.value), h = Periodo.fechaValida(inH.value) || d; if (d) ir(d <= h ? { desde: d, hasta: h } : { desde: h, hasta: d }); };
+  inD.addEventListener("change", leer); inH.addEventListener("change", leer);
+  const q = Periodo.esRango(PERIODO) ? Periodo.aURL(PERIODO, "", -1) : "";
+  document.getElementById("link-index").href = "index.html" + q;
+  document.getElementById("link-diario").href = "diario.html" + q;
+}
+
 // S129 V2: "Actualizado" mostraba el reloj DEL NAVEGADOR, no la fecha del dato — un
 // JSON congelado se leia fresco, que es justo lo contrario de lo que esa etiqueta
 // sirve. Ahora reporta el `updated` mas reciente de los once volcanes cargados.
@@ -472,7 +508,8 @@ async function loadVolcano(v) {
   // red real (mismo modo de falla que se arregló en index.html). Fallback al completo si
   // el deploy aún no generó _recent (nunca romper).
   const [dataRecent, mirova] = await Promise.all([
-    fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + "_recent.json"),
+    // S153: un período fuera de la ventana liviana pide el JSON completo.
+    Periodo.necesitaHistoria(PERIODO) ? null : fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + "_recent.json"),
     fetchJSON(BASE_PATH + "data/mirova/" + v.name + ".json"),
   ]);
   const data = dataRecent || await fetchJSON(BASE_PATH + "data/mirova_equivalent/" + v.name + ".json");
@@ -578,15 +615,18 @@ function monitoringFreshness(records) {
 // Bins simples por día UTC; render con Chart.js bar para visual MIROVA-like.
 function buildSparklineData(records, innerKm) {
   const ms = 86400000;
-  const days = 30;
-  const now = Date.now();
-  const t0 = now - days * ms;
+  // S153: el intervalo sale del período (por defecto los últimos 30 días, como antes). «Todo» se acota a un año
+  // para que el mini gráfico siga siendo legible.
+  const ahora = Date.now();
+  let [t0, now] = Periodo.intervalo(PERIODO, ahora);
+  if (!Number.isFinite(t0)) t0 = ahora - 365 * ms;
+  if (!Number.isFinite(now) || now > ahora) now = ahora;
   // S120 (cacería de bugs): los records de HOY caían en idx=days (dayStart es la
   // medianoche de hace 30 días) y el guard los descartaba — el sparkline nunca
-  // mostraba el día en curso. nBins = days+1 incluye el día parcial de hoy.
-  const nBins = days + 1;
-  const bins = new Array(nBins).fill(0);
+  // mostraba el día en curso. nBins = días+1 incluye el día parcial del final.
   const dayStart = Math.floor(t0 / ms) * ms;
+  const nBins = Math.floor((now - dayStart) / ms) + 1;
+  const bins = new Array(nBins).fill(0);
   for (const r of records) {
     const t = parseUtcMs(r.datetime_utc);
     if (!Number.isFinite(t) || t < t0 || t > now) continue;
@@ -681,7 +721,9 @@ function renderMosaico() {
 
     const card = el("div", { className: "mini-card " + level.cardCls });
     card.addEventListener("click", () => {
-      window.location.href = "index.html?volcano=" + encodeURIComponent(v.name);
+      // S153: lleva la noche o el rango (una ventana móvil no, cada vista tiene la suya por defecto).
+      window.location.href = "index.html?volcano=" + encodeURIComponent(v.name) +
+        (Periodo.esRango(PERIODO) ? "&desde=" + PERIODO.desde + "&hasta=" + PERIODO.hasta : "");
     });
 
     // Header
@@ -765,6 +807,7 @@ function setupMagToggle() {
 
 async function init() {
   document.getElementById("updated-label").textContent = "Cargando…";
+  initPeriodo();   // S153
   setupMagToggle();
   await Promise.all(TIER_A.map(v => loadVolcano(v)));
   renderMirovaFreshness();
