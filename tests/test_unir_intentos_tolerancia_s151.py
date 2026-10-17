@@ -38,12 +38,23 @@ def rec_modis(**cambios):
         "diag_sd_deti": 0.0071, "diag_n_eti_path": 4,
         "primary_cluster": {"n_pixels": 78, "vrp_mw": 5.0, "centroid_lat": -37.9, "centroid_lon": -71.1,
                             "centroid_dist_km": 14.2, "d9_capped": True},
-        "anomaly_pixels": [{"lat": -37.90 - 0.01 * i, "lon": -71.10, "vrp_mw": 0.1 + 0.01 * i, "bt_k": 280.0}
-                           for i in range(5)],
-        "discarded_anomaly_pixels": [], "discarded_n_pixels": 0,
+        # el ultimo guardado empata con el minimo de la lista (0,05, el de los descartados): es el que un desempate
+        # en el puesto 100 puede cambiar (verificador V2 del PR #847)
+        "anomaly_pixels": [{"lat": -37.90 - 0.01 * i, "lon": -71.10, "vrp_mw": 0.1 + 0.01 * i if i < 4 else 0.05,
+                            "bt_k": 280.0} for i in range(5)],
+        # La lista guardada viene del recorte top-100 (pipeline/process_modis.py:1085) y store la reparte por
+        # distancia: 5 dentro y 95 descartados suman los 100 del recorte, que es donde el empate puede actuar.
+        "discarded_anomaly_pixels": [{"lat": -38.30 - 0.001 * i, "lon": -71.40, "vrp_mw": 0.05, "bt_k": 278.0}
+                                     for i in range(95)], "discarded_n_pixels": 95,
     }
     r.update(cambios)
     return r
+
+
+def empate(a):
+    """El ultimo pixel guardado sale y entra otro del mismo VRP: lo que deja un desempate distinto en el corte."""
+    ultimo = a["anomaly_pixels"][-1]
+    return a["anomaly_pixels"][:-1] + [dict(ultimo, lat=ultimo["lat"] - 0.005)]
 
 
 SOLO1 = rec_modis(datetime_utc="2026-03-01 02:10", granule="solo1.hdf")
@@ -142,7 +153,8 @@ def test_pixel_de_borde_con_decision_igual_une_e_informa():
     a = rec_modis()
     extra = {"lat": -37.99, "lon": -71.12, "vrp_mw": 0.05, "bt_k": 279.0}
     b = rec_modis(anomaly_pixels=a["anomaly_pixels"] + [extra], vrp_mir_mw=48.2,
-                  hotspot_lat=-37.99, discarded_anomaly_pixels=[extra], discarded_n_pixels=1)
+                  hotspot_lat=-37.99, discarded_anomaly_pixels=a["discarded_anomaly_pixels"][:-1],
+                  discarded_n_pixels=94)
     a["hotspot_lat"] = -37.90
     salida, inf = mezcla(a, b)
     assert inf["ok"] and inf["estados"]["borde"] == 1
@@ -162,7 +174,7 @@ def test_pixel_de_borde_con_decision_igual_une_e_informa():
                                                                "centroid_dist_km": 14.2, "d9_capped": True})])
 def test_pixel_de_borde_con_decision_distinta_no_une(campo, valor):
     a = rec_modis()
-    b = rec_modis(anomaly_pixels=a["anomaly_pixels"][:-1], **{campo: valor})
+    b = rec_modis(anomaly_pixels=empate(a), **{campo: valor})
     salida, inf = mezcla(a, b)
     assert not inf["ok"] and inf["estados"]["distinto"] == 1
     assert campo in inf["distintos"][0]["campos"]
@@ -172,7 +184,7 @@ def test_pixel_de_borde_con_decision_distinta_no_une(campo, valor):
 def test_pixel_de_borde_mueve_vrp_mir_mw_con_cumulo_une():
     """Con primary_cluster el predicado no lee vrp_mir_mw (frontend/index.html:1148-1149): es derivado."""
     a = rec_modis()
-    b = rec_modis(anomaly_pixels=a["anomaly_pixels"][:-1], vrp_mir_mw=49.5)
+    b = rec_modis(anomaly_pixels=empate(a), vrp_mir_mw=49.5)
     salida, inf = mezcla(a, b)
     assert inf["ok"] and inf["borde"][0]["campos_derivados"] == ["vrp_mir_mw"]
 
@@ -180,23 +192,79 @@ def test_pixel_de_borde_mueve_vrp_mir_mw_con_cumulo_une():
 def test_pixel_de_borde_mueve_vrp_mir_mw_sin_cumulo_no_une():
     """Sin primary_cluster ni vrp_mw, vrp_mir_mw es la magnitud que publica el tablero."""
     a = rec_modis(primary_cluster=None, vrp_mw=None)
-    b = rec_modis(primary_cluster=None, vrp_mw=None, anomaly_pixels=a["anomaly_pixels"][:-1], vrp_mir_mw=49.5)
+    b = rec_modis(primary_cluster=None, vrp_mw=None, anomaly_pixels=empate(a), vrp_mir_mw=49.5)
     salida, inf = mezcla(a, b)
     assert not inf["ok"] and "vrp_mir_mw" in inf["distintos"][0]["campos"]
 
 
 def test_pixel_de_borde_con_campo_no_derivado_distinto_no_une():
     a = rec_modis()
-    b = rec_modis(anomaly_pixels=a["anomaly_pixels"][:-1], diag_n_eti_path=7)
+    b = rec_modis(anomaly_pixels=empate(a), diag_n_eti_path=7)
     salida, inf = mezcla(a, b)
     assert not inf["ok"] and "diag_n_eti_path" in inf["distintos"][0]["campos"]
+
+
+def test_lista_de_100_sin_recorte_no_une():
+    """Verificador V2 del PR #847: con exactamente 100 pixeles detectados la lista tambien mide 100, pero el recorte
+    no corto nada (n_anomalous_pixels = 100). Un pixel distinto ahi es otra deteccion."""
+    a = rec_modis(n_anomalous_pixels=100)
+    b = rec_modis(n_anomalous_pixels=100, anomaly_pixels=empate(a))
+    est, det = ui.comparar(a, b)
+    assert est == "distinto" and det["sin_recorte"] == [100, 100] and det["n_anomalous_pixels"] == [100, 100]
+
+
+def test_pixel_cambiado_fuera_del_corte_no_une():
+    """Verificador V2 del PR #847: un desempate en el puesto 100 solo cambia pixeles del VRP minimo de la lista.
+    Cambiar el mas caliente, con la lista llena y todo lo demas igual, es otra deteccion."""
+    a = rec_modis()
+    caliente = max(a["anomaly_pixels"], key=lambda p: p["vrp_mw"])
+    otros = [p for p in a["anomaly_pixels"] if p is not caliente]
+    b = rec_modis(anomaly_pixels=otros + [dict(caliente, lat=caliente["lat"] - 0.005)])
+    est, det = ui.comparar(a, b)
+    assert est == "distinto" and det.get("fuera_del_corte") is True
+    assert ui.comparar(a, rec_modis(anomaly_pixels=empate(a)))[0] == "borde"   # control: el del puesto 100 si
+
+
+def test_conjunto_distinto_con_lista_corta_no_une():
+    """Verificador del PR #847: con menos de 100 pixeles el recorte top-100 no corta nada, asi que un conjunto
+    distinto no puede venir del desempate. Es un cambio de deteccion y bloquea, aunque todo lo demas sea igual."""
+    a = rec_modis(discarded_anomaly_pixels=[], discarded_n_pixels=0)
+    b = rec_modis(discarded_anomaly_pixels=[], discarded_n_pixels=0, anomaly_pixels=empate(a))
+    est, det = ui.comparar(a, b)
+    assert est == "distinto" and det["sin_recorte"] == [5, 5] and "anomaly_pixels" in det["campos"]
+    salida, inf = mezcla(a, b)
+    assert not inf["ok"]
+
+
+@pytest.mark.parametrize("lado", [0, 1])
+def test_conjunto_distinto_con_lista_llena_en_un_solo_lado_no_une(lado):
+    a = rec_modis()
+    b = rec_modis(anomaly_pixels=empate(a), discarded_anomaly_pixels=a["discarded_anomaly_pixels"][:-1])
+    x, y = (a, b) if lado == 0 else (b, a)
+    assert ui.comparar(x, y)[0] == "distinto"
+
+
+def test_conjunto_distinto_con_lista_corta_en_viirs_no_une():
+    """El caso sembrado por el verificador del PR #847: VIIRS 375 con nucleo y 4 pixeles, uno desplazado y
+    vrp_mir_mw x 1,3. El tablero no lee los pixeles, pero el recorte no pudo actuar."""
+    v = dict(sensor="VIIRS_NOAA20", f5_core_vrp_mw=0.3, discarded_anomaly_pixels=[], discarded_n_pixels=0)
+    a = rec_modis(**v)
+    b = rec_modis(anomaly_pixels=empate(a), vrp_mir_mw=48.2 * 1.3, **v)
+    assert ui.comparar(a, b)[0] == "distinto"
+
+
+def test_orden_con_lista_corta_sigue_uniendo():
+    """Un orden distinto con el mismo conjunto no es un cambio de deteccion (el sort no es estable en ningun largo)."""
+    a = rec_modis(discarded_anomaly_pixels=[], discarded_n_pixels=0)
+    b = rec_modis(discarded_anomaly_pixels=[], discarded_n_pixels=0, anomaly_pixels=list(reversed(a["anomaly_pixels"])))
+    assert ui.comparar(a, b)[0] == "orden"
 
 
 def test_pixel_de_borde_en_viirs375_sin_nucleo_no_une():
     """En VIIRS 375 sin f5_core_vrp_mw el tablero recalcula la magnitud desde anomaly_pixels
     (frontend/index.html:1238-1239 y 1289), asi que los pixeles deciden."""
     a = rec_modis(sensor="VIIRS_SNPP")
-    b = rec_modis(sensor="VIIRS_SNPP", anomaly_pixels=a["anomaly_pixels"][:-1])
+    b = rec_modis(sensor="VIIRS_SNPP", anomaly_pixels=empate(a))
     salida, inf = unir(doc(dict(SOLO1, sensor="VIIRS_SNPP"), a), doc(b, dict(SOLO2, sensor="VIIRS_SNPP")))
     assert inf["modo"] == "mezcla"
     assert not inf["ok"] and "anomaly_pixels" in inf["distintos"][0]["campos"]
@@ -216,7 +284,7 @@ def test_si_el_predicado_da_distinto_no_une(monkeypatch):
     """Mata la mutacion «ignorar el resultado del predicado» (malos = [])."""
     monkeypatch.setattr(ui, "_predicado", lambda pares, volcan: [0])
     a = rec_modis()
-    b = rec_modis(anomaly_pixels=a["anomaly_pixels"][:-1])
+    b = rec_modis(anomaly_pixels=empate(a))
     salida, inf = mezcla(a, b)
     assert not inf["ok"] and salida is None
     assert inf["distintos"][0]["campos"] == ["predicado del tablero"]
@@ -228,7 +296,7 @@ def test_sin_predicado_un_record_de_borde_no_une(monkeypatch):
         raise RuntimeError("sin node")
     monkeypatch.setattr(ui, "_predicado", roto)
     a = rec_modis()
-    b = rec_modis(anomaly_pixels=a["anomaly_pixels"][:-1])
+    b = rec_modis(anomaly_pixels=empate(a))
     salida, inf = mezcla(a, b)
     assert not inf["ok"] and inf["distintos"][0]["campos"] == ["predicado del tablero"]
     assert "sin node" in inf["distintos"][0]["predicado"]
@@ -275,7 +343,7 @@ def test_intento_que_cubre_todo_se_usa_entero_con_el_empate_como_borde():
     lector en la cadena, banco_paridad.py:464-469, filtra VIIRS 375), así que es borde, pasa el predicado y se
     entrega el intento que cubre todo, entero."""
     a = rec_modis(processed_utc="INTENTO1")
-    b = rec_modis(processed_utc="INTENTO2", anomaly_pixels=a["anomaly_pixels"][:-1], sensor_zenith_deg=31.9)
+    b = rec_modis(processed_utc="INTENTO2", anomaly_pixels=empate(a), sensor_zenith_deg=31.9)
     salida, inf = unir(doc(a), doc(b, SOLO2))
     assert inf["ok"] and inf["modo"] == "intento_entero" and inf["intento_entero"] == 2
     assert salida["records"] == doc(b, SOLO2)["records"]
@@ -286,7 +354,7 @@ def test_intento_que_cubre_todo_se_usa_entero_con_el_empate_como_borde():
 def test_intento_entero_corre_el_predicado_sobre_el_borde(monkeypatch):
     monkeypatch.setattr(ui, "_predicado", lambda pares, volcan: [0])
     a = rec_modis()
-    b = rec_modis(anomaly_pixels=a["anomaly_pixels"][:-1])
+    b = rec_modis(anomaly_pixels=empate(a))
     salida, inf = unir(doc(a), doc(b, SOLO2))
     assert not inf["ok"] and inf["distintos"][0]["campos"] == ["predicado del tablero"]
 
@@ -296,7 +364,7 @@ def test_cenit_en_viirs375_sigue_decidiendo():
     bloquea, aunque el núcleo esté guardado y el tablero no lea los píxeles."""
     v = dict(sensor="VIIRS_SNPP", f5_core_vrp_mw=0.3)
     a = rec_modis(**v)
-    b = rec_modis(anomaly_pixels=a["anomaly_pixels"][:-1], sensor_zenith_deg=31.9, **v)
+    b = rec_modis(anomaly_pixels=empate(a), sensor_zenith_deg=31.9, **v)
     salida, inf = unir(doc(dict(SOLO1, **v), a), doc(b, dict(SOLO2, **v)))
     assert not inf["ok"] and "sensor_zenith_deg" in inf["distintos"][0]["campos"]
 

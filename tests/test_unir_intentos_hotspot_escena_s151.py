@@ -84,6 +84,11 @@ SOLO2 = rec_test1(datetime_utc="2026-06-02 07:30", granule="solo2.hdf")
 MOVIDO = {"hotspot_lat": -38.0, "hotspot_lon": -71.5, "hotspot_dist_km": 7.1}
 
 
+# vrp 0,48, igual al ultimo guardado y a ULTIMO_FUERA: el minimo de la lista llena (verificador V2 del PR #847)
+LEJOS_89 = [{"lat": -38.1 - 0.001 * i, "lon": -71.5, "dist_km": 30.0, "bt_k": 250.0, "vrp_mw": 0.48} for i in range(89)]
+ULTIMO_FUERA = {"lat": -37.87, "lon": -71.21, "dist_km": 30.0, "bt_k": 245.0, "vrp_mw": 0.48}
+
+
 def doc(*recs):
     return {"volcano": "Copahue", "updated": "x", "records": [copy.deepcopy(r) for r in recs]}
 
@@ -132,12 +137,22 @@ def test_solo_cambia_el_hotspot_une():
 @pytest.mark.skipif(not HAY_NODE, reason="el predicado del tablero corre con node")
 def test_con_pixel_de_borde_ademas_une_por_las_dos_reglas():
     """Si ademas los pixeles difieren como conjunto, la regla de borde de #841 sigue valiendo para ellos."""
-    a = rec_test1()
-    b = rec_rescate(anomaly_pixels=a["anomaly_pixels"][:-1], vrp_mir_mw=4.6)
+    # con la lista llena (11 + 89 = los 100 del recorte top-100), que es donde el empate puede actuar (PR #847)
+    a = rec_test1(discarded_anomaly_pixels=LEJOS_89, n_anomalous_pixels=130)
+    b = rec_rescate(anomaly_pixels=a["anomaly_pixels"][:-1], discarded_anomaly_pixels=LEJOS_89 + [ULTIMO_FUERA],
+                    vrp_mir_mw=4.6, n_anomalous_pixels=130)
     salida, inf = mezcla(a, b)
     assert inf["ok"] and inf["estados"]["hotspot_escena"] == 1 and inf["estados"]["borde"] == 0
     h = inf["hotspot_escena"][0]
     assert h["pixeles"]["anomaly_pixels"] == [11, 10] and "vrp_mir_mw" in h["campos"]
+
+
+def test_con_pixeles_distintos_y_lista_corta_bloquea():
+    """PR #847: con 11 pixeles el recorte top-100 no corta nada; un conjunto distinto es otra deteccion."""
+    a = rec_test1()
+    b = rec_rescate(anomaly_pixels=a["anomaly_pixels"][:-1], vrp_mir_mw=4.6)
+    salida, inf = mezcla(a, b)
+    assert not inf["ok"] and inf["distintos"][0]["sin_recorte"] == [11, 10]
 
 
 @pytest.mark.skipif(not HAY_NODE, reason="el predicado del tablero corre con node")
@@ -316,6 +331,8 @@ MUTACIONES = {
     "b_rama_eruption_rota": ('    return all(a.get("final_hotspot_source") == b.get("final_hotspot_source") and',
                              '    return False and all(a.get("final_hotspot_source") == b.get("final_hotspot_source") and',
                              "final_eruption", "une"),
+    # PR #847: un conjunto de pixeles distinto sólo es empate si el recorte top-100 corrio en los dos lados
+    "sin_recorte_lleno": ('    if conjunto and not (lista_llena(x) and lista_llena(y)):', '    if False:', "lista_corta"),
     "c_sin_hotspot_en_el_cumulo": ('        if r.get("final_hotspot_source") == "cluster_rescue" and not _hotspot_en_el_cumulo(r):',
                                    '        if False:', "rescate_fuera_del_cumulo"),
 }
@@ -342,6 +359,7 @@ def _caso(nombre, mod, monkeypatch):
         "final_test1": (rec_test1(), rec_test1(final_hotspot_lat=-37.65, **MOVIDO)),
         "final_eruption": (rec_eruption(), rec_eruption(**ERUPTION_MOVIDO)),
         "rescate_fuera_del_cumulo": (rec_test1(), rec_rescate(hotspot_lat=-37.9)),
+        "lista_corta": (rec_test1(), rec_test1(anomaly_pixels=rec_test1()["anomaly_pixels"][:-1] + [ULTIMO_FUERA])),
     }[nombre]
     salida, inf = mod.unir([doc(SOLO1, a), doc(b, SOLO2)], "Copahue")
     return inf["ok"]

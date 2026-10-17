@@ -52,6 +52,17 @@ Regla de comparación de un record común (`comparar`):
     predicado del tablero ejecutado con node (A97, `scripts/banco_paridad.py::correr_node`, con el mismo
     record recortado que le pasan los evaluadores) da lo mismo con los dos records. Cada unión de este tipo
     se informa record por record, por stdout y en la clave `_union_intentos` del JSON de salida.
+    (e) (verificadores V1 y V2 del PR #847, 2026-10-17) el recorte top-100 cortó algo en los dos lados: la lista
+    guardada (anomaly_pixels más discarded_anomaly_pixels) mide TOPE_PIXELES (100) **y** `n_anomalous_pixels`, que
+    conserva el total detectado, es mayor que 100. La lista sola no basta: con exactamente 100 detectados también
+    mide 100 sin recorte (8 records en los intentos, 43 en el corpus, verificador V2). Si no, otro píxel es otra
+    detección: `distinto`, con `sin_recorte` en el detalle.
+    (f) (verificador V2 del PR #847) cada píxel que está en una lista y no en la otra tiene el VRP mínimo de su
+    lista, y los dos mínimos coinciden: un desempate en el puesto 100 no puede cambiar otro píxel. Si no,
+    `distinto` con `fuera_del_corte`. Medido: los 108 pares `borde` reales entre intentos (W2a, F/K V1 y V2a) y los
+    23 entre brazos de W2 cumplen (e) y (f), y las uniones y el G3 de W2 salen idénticos a los de antes. Vale también para hotspot_escena con píxeles distintos. No se limita a MODIS:
+    el empate existe en VIIRS con lista llena (W2a, Tupungatito VIIRS_NOAA21_750 2026-06-17 17:30). Medido antes del
+    cambio entre intentos (W2a, F/K V1 y V2a): 0 pares borde con lista corta de 108 (107 MODIS y 1 VIIRS, todos llenos).
   * hotspot_escena (decisión D-16 a de Nicolás, 2026-10-17): sólo MODIS, misma BT máxima de escena (`t_max_k`
     presente en los dos e igual), mismo cúmulo (presente), misma clase y los mismos píxeles (como conjunto, o
     distintos sólo por la regla de borde), y los únicos campos distintos están en CAMPOS_HOTSPOT_ESCENA (lista
@@ -94,6 +105,10 @@ Qué magnitud y qué campos leen los evaluadores (condición 5 de D-16 a; leído
     con el orden invertido, ve 9 campos distintos en esa noche y daría FALLA. El mismo empate entre los jobs de
     los dos brazos produce eso sin unión de por medio: es el mismo pendiente del G3 que la comparación posicional
     de píxeles (abajo), y se arregla en el evaluador, no aquí.
+    RESUELTO por la desviación D2 del pre-registro (rama loop/diurno-g3-comparar, 2026-10-17): el G3 ya clasifica
+    cada par nocturno con `comparar()` más `_predicado` (evaluar_diurno.py, `noches_identicas`); `distinto` hace
+    FALLA y `orden`, `borde` y `hotspot_escena` se informan aparte. Sobre W2 unido en los dos órdenes da el mismo
+    veredicto. El texto que sigue se conserva por historia.
     REGLA DE USO (verificador del PR #843): el G3 del diurno compara el record crudo, por posición en las listas,
     y no lee `_union_intentos`. Por eso el diurno NO se evalúa sobre una unión que tenga casos `hotspot_escena`,
     `borde` u `orden` hasta que el G3 clasifique cada par nocturno con `comparar()` más el predicado del tablero
@@ -128,7 +143,7 @@ intentos) salía dos veces y `armar_tabla.py:43` se quedaba en silencio con la �
 Nota de diseño: CAMPOS_DECISION y DERIVADOS_DEL_BORDE son disjuntos (se comprueba al importar), así que en un
 record de borde quien bloquea es la lista cerrada de derivados: todo campo distinto que no esté en ella
 bloquea. CAMPOS_DECISION documenta de dónde sale cada campo; agregarle uno no cambia la regla.
-Estándar incoherente PENDIENTE (otro PR): el G3 de `evaluar_diurno.py:386-401 y 420` compara las listas de
+Estándar incoherente RESUELTO por la desviación D2 (ver arriba); texto original por historia: el G3 de `evaluar_diurno.py:386-401 y 420` compara las listas de
 píxeles POSICIONALMENTE, así que marcaría como diferencia los 8 records de orden y los 14 de borde que esta
 herramienta declara «mismo pipeline» (`verif_841/a4_g3.py`). No lo crea la unión: entre los dos brazos, que
 son jobs distintos, el mismo empate del sort puede dar FALLA de G3. `evaluar_fk.py` no tiene G3 campo a campo.
@@ -305,6 +320,57 @@ def mismo_multiconjunto(a, b):
     return True
 
 
+# El recorte de la lista de píxeles guardada: np.argsort(-vrp)[:100] en pipeline/process_modis.py:1085,
+# process_viirs.py:1520, process_viirs_mod.py:1065 y anomaly_pixels.py:16 (top_n=100, la del Test 1; líneas en
+# `a278acd2` y en el tag `s151-diurno-codigo`; desde #844 el de MODIS desempata de forma determinista). store.py
+# reparte después esa lista en anomaly_pixels y discarded_anomaly_pixels (store.py:284-291), así que la suma de
+# las dos mide el tope sólo cuando el recorte actuó.
+TOPE_PIXELES = 100
+
+
+def n_lista(r):
+    return len(r.get("anomaly_pixels") or []) + len(r.get("discarded_anomaly_pixels") or [])
+
+
+def lista_llena(r):
+    """El recorte top-100 cortó algo: la lista guardada mide el tope y el pipeline detectó más píxeles que eso
+    (`n_anomalous_pixels` conserva el total, process_modis.py:1084 en `a278acd2`). Con exactamente 100 detectados la
+    lista también mide 100 sin que el recorte actúe (verificador V2 del PR #847: 8 records en los intentos)."""
+    return n_lista(r) == TOPE_PIXELES and (r.get("n_anomalous_pixels") or 0) > TOPE_PIXELES
+
+
+def solo_en_el_corte(x, y):
+    """Un desempate en el recorte sólo puede cambiar píxeles que empatan con el VRP mínimo de la lista (el que queda
+    en el puesto 100). Devuelve True si cada píxel que está en una lista y no en la otra tiene el VRP mínimo de su
+    lista, y los dos mínimos coinciden (verificador V2 del PR #847: antes se admitía cambiar hasta el más caliente)."""
+    cx = list(x.get("anomaly_pixels") or []) + list(x.get("discarded_anomaly_pixels") or [])
+    cy = list(y.get("anomaly_pixels") or []) + list(y.get("discarded_anomaly_pixels") or [])
+    if not cx or not cy:
+        return False
+
+    def sobrantes(a, b):
+        libres = list(range(len(b)))
+        fuera = []
+        for p in a:
+            for j, i in enumerate(libres):
+                if iguales(p, b[i]):
+                    del libres[j]
+                    break
+            else:
+                fuera.append(p)
+        return fuera
+
+    vx = [p.get("vrp_mw") for p in cx]
+    vy = [p.get("vrp_mw") for p in cy]
+    if any(not isinstance(v, (int, float)) for v in vx + vy):
+        return False
+    mx, my = min(vx), min(vy)
+    if not iguales(float(mx), float(my)):
+        return False
+    return (all(iguales(float(p["vrp_mw"]), float(mx)) for p in sobrantes(cx, cy))
+            and all(iguales(float(p["vrp_mw"]), float(my)) for p in sobrantes(cy, cx)))
+
+
 def comparar(a, b):
     """Estado de un record común: ('igual'|'tolerancia'|'orden'|'borde'|'distinto', detalle)."""
     x = {c: v for c, v in a.items() if c not in PROCESO}
@@ -319,6 +385,16 @@ def comparar(a, b):
     conjunto = [c for c in orden if not mismo_multiconjunto(x.get(c), y.get(c))]
     if not no_tol and not conjunto:
         return ("orden" if orden else "tolerancia"), {"listas_reordenadas": orden}
+    # Verificador del PR #847: un conjunto de píxeles distinto sólo puede venir del desempate si el recorte
+    # top-100 corrió, o sea si la lista guardada (anomaly + discarded) mide TOPE_PIXELES en los dos lados. Con
+    # menos, el recorte no cortó nada y un píxel distinto es otra detección.
+    if conjunto and not (lista_llena(x) and lista_llena(y)):
+        return "distinto", {"campos": sorted(set(conjunto) | set(no_tol)),
+                            "sin_recorte": [n_lista(x), n_lista(y)],
+                            "n_anomalous_pixels": [x.get("n_anomalous_pixels"), y.get("n_anomalous_pixels")]}
+    # Verificador V2 del PR #847: con el recorte activo, sólo pueden cambiar los píxeles del puesto 100.
+    if conjunto and not solo_en_el_corte(x, y):
+        return "distinto", {"campos": sorted(set(conjunto) | set(no_tol)), "fuera_del_corte": True}
     motivo = motivo_no_escena(a, b, no_tol)
 
     def por_borde(c):
