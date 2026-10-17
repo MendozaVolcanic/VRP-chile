@@ -354,6 +354,10 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 02:37 UTC (vuelta 131): espera
+- W3b 15 de 22 verdes; W4a pendiente; V1 intento 3 35 de 44. NRT verde 02:20. Disco 8,5 GB. Las cuatro decisiones
+  (cron, D-14, D-15, D-16) explicadas a Nicolás en la conversación; sin respuesta todavía.
+
 ### 2026-10-17 01:46 UTC (vuelta 130): espera
 - W3b 9 de 22 verdes; W4a pendiente; V1 intento 3 31 de 44. NRT verde 01:16. Disco 8,8 GB estable (monitor
   detenido tras 15 min en 8 GB). Esperan D-14, D-15 y D-16.
