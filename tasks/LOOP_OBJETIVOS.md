@@ -366,6 +366,19 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 13:29 UTC (vuelta 141): F/K V1 evaluada (POR VERIFICAR): con lectura A, F y K CUMPLEN
+- `evaluar_fk.py --ventana V1` sobre `union_d16` (salida en `experiments/_s151_prereg_fk_11/resultado_v1/`).
+  Controles generales OK: cobertura pareja, versión 0 distintas, cableado de C0, F, K y G OK, determinismo del gemelo
+  100 % en los tres sensores, autocontrol de la regla original OK, etiqueta original reproducida en 4.820 de 4.820.
+- Veredicto de la ventana V1 (§6, regla original): **F y K CUMPLEN con lectura A** (0 protegidas perdidas en los tres
+  sensores; 2 de VIIRS 375 sólo OCR Suomi NPP, apartadas por el hito); **NO CUMPLEN con lectura B** (12 pérdidas en
+  VIIRS 375: 10 «far_ref» sin VRP en MIROVA y Tupungatito 09-28 2,51 MW y 09-29 1,86 MW). P2 lectura A: MODIS 114 a
+  4 (F) / 10 (K); VIIRS 375 734 a 37; VIIRS 750 331 a 26; ruido del gemelo 0. Negativos limpios publicados V375 88,2 %
+  a 2,5 %, V750 24,6 % a 0,9 %, MODIS 12,3 % a 0,0 (F) / 0,8 % (K). Recall V375 260 a 239 (16 Muy Bajo perdidas de
+  194). P3 CUMPLE en V375 y V750 (d mediana 0, razones C0 0,748 contra F 0,620); MODIS sin sustrato (n 3). P4 CUMPLE.
+- Mejora de más de 30 %: verificador limpio y auditoría independiente lanzados (`C:\Users\nmend\AppData\Local\Temp\claude\verif_fk_v1\`).
+  El veredicto final de F/K es el peor de V1 y V2; V2 espera V2b (corriendo).
+
 ### 2026-10-17 13:28 UTC (vuelta 140): verificador de #843: MERGEABLE CON ARREGLOS (no bloquean F/K); V1 en evaluación
 - `C:\Users\nmend\AppData\Local\Temp\claude\verif_843\VERIFICADOR.md`. Confirmado con datos: el píxel sale del
   `argsort` de `process_modis.py:1085-1099`; P3 de F/K lee `disp` (`pc.vrp_mw` en MODIS con cúmulo) y
