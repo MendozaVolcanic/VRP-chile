@@ -354,6 +354,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 01:19 UTC (vuelta 129): el disco baja otra vez (6,5 a 6,2 GB en minutos); buscando la causa
+- `df -h /c`: 6,8 GB (00:46), 6,5 GB (01:19), 6,2 GB (~01:24). Descartados: Windows Update (6,43 GB, sin cambio),
+  Temp (1,67 GB; `Temp\claude` 1,38 GB), Autoscan (0,13 GB escritos en 10 h). Búsqueda en todo C: de archivos de más
+  de 30 MB modificados en 20 min, en curso; monitor que avisa bajo 4 GB (la parada es 3 GB).
+- Runs: W3b 6 verdes, 3 en curso; W4a pendiente; V1 intento 3 31 verdes, 6 en curso, 7 en cola. NRT verde 01:16.
+
 ### 2026-10-17 00:46 UTC (vuelta 128): W3a completa tras la repetición; W3b corriendo
 - W3a intento 2 (repetición del job del control de PCC): `recolectar` cuenta **699 contra 699 noches, PAREJA**; su
   rojo es sólo el push de la rama existente. `unir_intentos.py` sobre el control de PCC (intento 1 de
