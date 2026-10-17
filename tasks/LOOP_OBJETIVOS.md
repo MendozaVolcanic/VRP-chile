@@ -380,6 +380,22 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 17:45 UTC (vuelta 159): pre-registro 1.23 entregado (PR #846, CI verde); verificador lanzado
+- `experiments/_s151_mxd03_sola_123/` (`4cc5e0134`, suite local 2.018). Nulo: 20 rumbos equiespaciados por gránulo,
+  del tamaño del corrimiento real en PÍXELES de la propia grilla (corrige la anisotropía sin ángulos); K=20 es el
+  primer K con p mínimo 1/21 < 0,05. Vara: cúmulo VIIRS 375 de la misma noche (publicado y alertado por MIROVA, sin
+  cúmulos del Test 1), congelada en `vara_viirs.json`, contra el píxel MODIS más caliente por índice; control de sesgo
+  por Terra contra Aqua. TIF de MIROVA descartados (1 gránulo en la ventana UTM). 24 medios jobs, peor caso 27 min,
+  presupuesto 50, timeout 75.
+- **Medido ya sobre los artefactos de la 1.21 (por verificar):** el Test 1 MODIS vive en su piso de ruido (k medio 1,8 a
+  2,3; ruido puro 2,1; umbral 3); MxD03 mueve k menos que el azar (0,52 contra 0,60) y cruza el umbral parecido (36
+  contra 29 de 149): la fragilidad es del Test 1 integrado a 1 km. Sobre 50°: MxD03 elige otro cúmulo en 41 gránulos
+  contra 30 del sorteo.
+- Poder: por la letra MxD03 vuelve a dar PIERDE PROTEGIDA (es determinista): el probe no la hace adoptable; dice si sus
+  pérdidas y ganancias se distinguen del azar y qué posición está más cerca de lo que ve VIIRS. La vara habla de
+  Láscar (70 de 76 gránulos) y de cenit bajo (2 sobre 50°).
+- Verificador limpio lanzado (`C:\Users\nmend\AppData\Local\Temp\claude\verif_123\`).
+
 ### 2026-10-17 17:44 UTC (vuelta 158): espera; PR #846 (pre-registro 1.23) abierto, sin informe aún
 - #846 abierto por el agente de la 1.23, que sigue con trabajo en segundo plano: se verifica cuando entregue. Agente
   del G3 (1.24) sin PR todavía (lleva ~3 h). V2b 12 de 22; W5a 13 de 22; W5b pendiente. NRT verde 16:56. Disco 10,8 GB.
