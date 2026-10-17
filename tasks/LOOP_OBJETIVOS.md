@@ -380,6 +380,13 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 16:41 UTC (vuelta 156): pre-registro de la 1.23 (MxD03 sola) delegado
+- Agente en worktree, rama `loop/1.23-prereg` (`experiments/_s151_mxd03_sola_123/`): nulo con ~20 rumbos por gránulo y
+  anisotropía corregida; vara de posición independiente (cúmulo VIIRS 375 de la misma noche o TIF UTM de MIROVA, con
+  dirección); sensibilidad del Test 1 de Láscar a ~0,4 km; casos de borde del barrido como Chillán 10-12 07:20;
+  estados con controles, regla 1 en las dos direcciones, commit por artefacto. Sin despacho: verificador y sello.
+- Runs: V2b 11 de 22; W5a 10 de 22; W5b pendiente. NRT verde 16:02. Disco 12,0 GB. Agentes vivos: G3 (1.24) y 1.23.
+
 ### 2026-10-17 16:09 UTC (vuelta 155): espera; worktree de la 1.22 retirado
 - Worktree del autor de #844 retirado (limpio, HEAD `7c6f36d6` = remoto); disco 12,1 GB. V2b 8 de 22 verdes; W5a 8 de
   22; W5b pendiente. NRT verde 16:02. En curso: agente del G3 (1.24).
