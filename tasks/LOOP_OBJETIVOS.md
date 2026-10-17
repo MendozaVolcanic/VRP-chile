@@ -381,6 +381,9 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 19:19 UTC (vuelta 166): espera
+- V2b 18 de 22 (4 en curso); W5a 18 de 22; W5b pendiente. NRT verde 19:07. Disco 10,9 GB. Verificador de #847 en curso.
+
 ### 2026-10-17 18:48 UTC (vuelta 165): espera
 - V2b 15 de 22; W5a 17 de 22; W5b pendiente. NRT verde 18:27. Disco 10,8 GB. Verificador de #847 (G3) en curso.
   Esperan a Nicolás: D-17 (#844, #845), D-18 (#846), cron externo y fecha del token.
