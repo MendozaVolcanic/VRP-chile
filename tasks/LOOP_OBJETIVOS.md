@@ -379,6 +379,23 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 15:37 UTC (vuelta 151): 1.22 en PR #844 (producción, SIN merge); mecanismo confirmado; verificador lanzado
+- Tag `pre-s151-desempate-top100` en `4943bfb79`. PR #844 (`loop/1.22-desempate-top100`), CI verde (1.976 pasan, 28
+  saltados); suite local 1.990. **Mecanismo confirmado por el autor:** de 6.482 pares MODIS entre intentos (V1, V2a,
+  W2a) difieren 153, todos empates EXACTOS (mismo `vrp_mw` a 4 decimales y `bt_k` a 2, el mismo entero del L1B). En el
+  mismo computador y numpy 2.4.4, `NPY_DISABLE_CPU_FEATURES=X86_V3` cambia el top-100 del `argsort` por defecto; el orden
+  estable no cambia. Llaima 10-06 y Copahue 06-18: empate en el primer puesto entre un píxel dentro y uno fuera de
+  `radius_km`, que decide el rescate.
+- Arreglo: `orden_vrp_descendente` en `pipeline/anomaly_pixels.py`, `np.lexsort((cols, rows, -vrp))`, en los tres
+  procesadores y en `build_anomaly_pixels` (A102); sin flag. Test `tests/test_guard_desempate_top100_s151.py` (dos
+  subprocesos con y sin SIMD). Efecto en el corpus (13.353 records MODIS): 43,0 % con más de 100 píxeles (lista
+  guardada puede cambiar), 10,7 % con empate en el primer puesto, **50 con el empate a ambos lados del inner y el
+  cúmulo dentro: pueden cambiar su publicación** (hacia dónde, sin reprocesar, no se sabe). Golden S142: 2 píxeles
+  empatados cambian de lugar. Commit 2 cosmético (guiones fuera de 229 líneas en 4 archivos de producción).
+- Puntos para el verificador: sin flag bajo A45; si el test corre en CI; los 50 records; sacar el commit cosmético.
+  Sin verificar: CPU de cada runner; `diag_mu_deti`/`diag_sd_deti` difieren en ~44 % de los pares en ~1e-10 (sospecha
+  `polyfit` sobre OpenBLAS, no arreglado); numpy no fijado en `requirements.txt`.
+
 ### 2026-10-17 15:05 UTC (vuelta 150): tarea 1.22 (desempate del top-100 MODIS) delegada; toca producción
 - Agente en worktree, rama `loop/1.22-desempate-top100`: tag defensivo `pre-s151-desempate-top100` sobre `main`
   antes del primer edit; confirmar el mecanismo con los records de los casos reales (¿empate exacto o en ulps?),
