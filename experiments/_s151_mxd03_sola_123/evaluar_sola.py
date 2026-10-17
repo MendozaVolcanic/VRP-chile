@@ -49,6 +49,10 @@ B_BOOT, SEMILLA = 1000, 20261017
 SALTO_PAR = 4             # pares de nulos (k, k + 4): separacion 1,18 veces la de C y M
 TOL_SALTO_KM = 1.5        # la tolerancia de tipos_de_cambio de la 1.21
 BINS_CENIT = ((0, 20), (20, 35), (35, 50), (50, 90))
+CENIT_COMPARABLE = 35.0   # verificador v2: sobre 35 grados el bow tie hace de C - M un diente de sierra
+#                          dentro de cada barrido, y ninguna traslacion rigida lo imita; ahi el nulo no
+#                          es comparable y las lecturas contra el azar quedan descriptivas
+SIN_NULO = "SIN NULO COMPARABLE (BOW TIE)"
 
 
 def _cargar(p):
@@ -380,9 +384,11 @@ def _salto(a, b, corr):
 
 def borde_lectura(ok):
     """Saltos de cumulo (otro objeto: el cumulo publicado se mueve mas que el corrimiento + 1,5 km) por
-    cenit, M contra los 20 nulos. El corrimiento de cada nulo es su km aplicado."""
+    cenit, M contra los 20 nulos. El corrimiento de cada nulo es su km aplicado. Bajo CENIT_COMPARABLE el
+    rango da un estado; en los cortes que llegan a 35 grados o mas el estado es SIN NULO COMPARABLE y los
+    conteos quedan como descripcion (verificador v2)."""
     out = {}
-    for lo, hi in BINS_CENIT + ((0, 90),):
+    for lo, hi in BINS_CENIT + ((0, int(CENIT_COMPARABLE)), (0, 90)):
         sel = [f for f in ok if f.get("sensor_zenith_deg") is not None and lo <= f["sensor_zenith_deg"] < hi]
         if not sel:
             continue
@@ -392,6 +398,9 @@ def borde_lectura(ok):
             nul.append(sum(_salto(f["brazos"]["C"], f["brazos"][b], f["nulos"][k]["km_aplicado"]) for f in sel))
         lec = lectura_rango(obs, nul, "MXD03 SALTA MAS QUE EL AZAR", "MXD03 SALTA MENOS QUE EL AZAR",
                             "SALTA COMO EL AZAR")
+        if hi > CENIT_COMPARABLE:
+            lec["estado_si_el_nulo_fuera_comparable"] = lec["estado"]
+            lec["estado"] = SIN_NULO
         lec["n"] = len(sel)
         lec["saltos_M_que_cambian_publicacion"] = [
             {"volcan": f["volcan"], "clave": f["clave"], "pub_C": f["pub"]["C"], "pub_M": f["pub"]["M"],
@@ -399,6 +408,39 @@ def borde_lectura(ok):
             if _salto(f["brazos"]["C"], f["brazos"]["M"], f["desplazamiento"]["km"]) and f["pub"]["C"] != f["pub"]["M"]]
         out["%d-%d" % (lo, hi)] = lec
     return out
+
+
+def rangos(sel):
+    """Rango de M entre los 20 nulos, sobre los granulos `sel` (los de cenit bajo 35 grados): las dos
+    direcciones de la regla 1 en las protegidas (censo) y el balance de la regla 2 SIN expandir a la
+    poblacion (alertas bajo 1 MW: perdidas menos ganadas; negativos limpios: publicaciones agregadas menos
+    quitadas). Sin expandir, porque el estimador de la 1.21 reparte cada celda sobre todos los cenits y
+    una submuestra por cenit no la representa; para un rango basta con aplicar el mismo conteo a M y a los
+    nulos."""
+    def cuenta(b):
+        pr = [f for f in sel if f["prot"]]
+        L = sum(f["pub"]["C"] == 1 and f["pub"][b] == 0 for f in pr)
+        G = sum(f["pub"]["C"] == 0 and f["pub"][b] == 1 for f in pr)
+        d = 0
+        for f in sel:
+            x = f["pub"][b] - f["pub"]["C"]
+            if f["lab"] == "pos" and not f["prot"]:
+                d -= x
+            elif f["lab"] == "neg_limpio":
+                d += x
+        return L, G, d
+    m = cuenta("M")
+    n = [cuenta(b) for b in NULOS]
+    return {"protegidas": sum(1 for f in sel if f["prot"]), "granulos": len(sel),
+            "perdidas": lectura_rango(m[0], [x[0] for x in n], "PERDIDAS ESPECIFICAS DE MXD03",
+                                      "MENOS PERDIDAS QUE EL AZAR", "PERDIDAS COMO EL AZAR"),
+            "ganadas": lectura_rango(m[1], [x[1] for x in n], "GANANCIAS ESPECIFICAS DE MXD03",
+                                     "MENOS GANANCIAS QUE EL AZAR", "GANANCIAS COMO EL AZAR"),
+            "neto": lectura_rango(m[1] - m[0], [x[1] - x[0] for x in n], "NETO MEJOR QUE EL AZAR",
+                                  "NETO PEOR QUE EL AZAR", "NETO COMO EL AZAR"),
+            "balance": dict(lectura_rango(m[2], [x[2] for x in n], "BALANCE PEOR QUE EL AZAR",
+                                          "BALANCE MEJOR QUE EL AZAR", "BALANCE COMO EL AZAR"),
+                            nota="muestra sin expandir, cenit bajo 35 grados")}
 
 
 # ------------------------------------------------------------------ evaluacion completa
@@ -469,6 +511,8 @@ def evaluar(pob, salidas, ausentes=(), esperados=None, tabla_vara=None):
     comp_M = E21.comparar("M", "C", ok, pob, vols)
     comp_N = {b: E21.comparar(b, "C", ok, pob, vols) for b in NULOS}
     prot = [f for f in ok if f["prot"]]
+    bajo = [f for f in ok if f.get("sensor_zenith_deg") is not None and f["sensor_zenith_deg"] < CENIT_COMPARABLE]
+    principal = rangos(bajo)
     perd = {b: c["regla1"]["perdidas"] for b, c in comp_N.items()}
     gan = {b: c["regla1"]["ganadas"] for b, c in comp_N.items()}
     regla1 = {
@@ -477,21 +521,27 @@ def evaluar(pob, salidas, ausentes=(), esperados=None, tabla_vara=None):
         "C_pierde_lo_que_M_publica": [f["clave"] for f in prot if f["pub"]["M"] == 1 and f["pub"]["C"] == 0],
         "publica_C": sum(f["pub"]["C"] for f in prot), "publica_M": sum(f["pub"]["M"] for f in prot),
         "de": len(prot),
-        "perdidas": lectura_rango(comp_M["regla1"]["perdidas"], list(perd.values()),
-                                  "PERDIDAS ESPECIFICAS DE MXD03", "MENOS PERDIDAS QUE EL AZAR", "PERDIDAS COMO EL AZAR"),
-        "ganadas": lectura_rango(comp_M["regla1"]["ganadas"], list(gan.values()),
-                                 "GANANCIAS ESPECIFICAS DE MXD03", "MENOS GANANCIAS QUE EL AZAR", "GANANCIAS COMO EL AZAR"),
-        "neto": lectura_rango(comp_M["regla1"]["ganadas"] - comp_M["regla1"]["perdidas"],
-                              [gan[b] - perd[b] for b in NULOS],
-                              "NETO MEJOR QUE EL AZAR", "NETO PEOR QUE EL AZAR", "NETO COMO EL AZAR"),
+        # el rango PRINCIPAL es bajo 35 grados de cenit, donde el nulo es comparable (verificador v2)
+        "cenit_maximo_del_rango": CENIT_COMPARABLE, "protegidas_bajo_el_corte": principal["protegidas"],
+        "perdidas": principal["perdidas"], "ganadas": principal["ganadas"], "neto": principal["neto"],
+        # anotacion: el mismo rango sobre todos los cenits (mezcla el tramo donde el nulo no es comparable)
+        "total": {
+            "perdidas": lectura_rango(comp_M["regla1"]["perdidas"], list(perd.values()),
+                                      "PERDIDAS ESPECIFICAS DE MXD03", "MENOS PERDIDAS QUE EL AZAR", "PERDIDAS COMO EL AZAR"),
+            "ganadas": lectura_rango(comp_M["regla1"]["ganadas"], list(gan.values()),
+                                     "GANANCIAS ESPECIFICAS DE MXD03", "MENOS GANANCIAS QUE EL AZAR", "GANANCIAS COMO EL AZAR"),
+            "neto": lectura_rango(comp_M["regla1"]["ganadas"] - comp_M["regla1"]["perdidas"],
+                                  [gan[b] - perd[b] for b in NULOS],
+                                  "NETO MEJOR QUE EL AZAR", "NETO PEOR QUE EL AZAR", "NETO COMO EL AZAR")},
         # fragilidad por pasada: de los nulos, cuantos pierden (o ganan) cada protegida
         "por_pasada": [{"clave": f["clave"], "datetime_utc": f["datetime_utc"], "vrp_ref": f.get("vrp_ref"),
                         "pub_C": f["pub"]["C"], "pub_M": f["pub"]["M"],
                         "nulos_que_publican": sum(f["pub"][b] for b in NULOS)} for f in prot],
     }
     balance = {"M": comp_M["regla2"], "veredicto_M_contra_C": comp_M["veredicto"],
-               "rango": lectura_rango(comp_M["regla2"]["delta"], [c["regla2"]["delta"] for c in comp_N.values()],
-                                      "BALANCE PEOR QUE EL AZAR", "BALANCE MEJOR QUE EL AZAR", "BALANCE COMO EL AZAR")}
+               "rango": principal["balance"],
+               "rango_total": lectura_rango(comp_M["regla2"]["delta"], [c["regla2"]["delta"] for c in comp_N.values()],
+                                            "BALANCE PEOR QUE EL AZAR", "BALANCE MEJOR QUE EL AZAR", "BALANCE COMO EL AZAR")}
 
     varas = {}
     if tabla_vara:
@@ -582,7 +632,8 @@ def main():
     if r["test1"]:
         print("  test 1: %s | con signo: %s" % (r["test1"]["cruces"]["estado"], r["test1"]["con_signo"]["estado"]))
     if r["borde"]:
-        print("  borde (50-90): %s" % (r["borde"].get("50-90") or {}).get("estado"))
+        print("  borde: bajo 35 grados %s | sobre 35, descriptivo: %s" % (
+            (r["borde"].get("0-35") or {}).get("estado"), (r["borde"].get("50-90") or {}).get("estado")))
 
 
 if __name__ == "__main__":

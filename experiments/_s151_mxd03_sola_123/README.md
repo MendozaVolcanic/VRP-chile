@@ -1,6 +1,6 @@
 # Probe S151, tarea 1.23: MxD03 sola, contra un nulo con distribución y una vara de otro instrumento
 
-**Estado: versión 2, escrita y probada con datos sintéticos, NO corrida.** Este README fija la población,
+**Estado: versión 3, escrita y probada con datos sintéticos, NO corrida.** Este README fija la población,
 los brazos, la vara, los estados y el criterio antes de la primera corrida. Lo sella Nicolás después de
 que un verificador con contexto limpio lo revise (regla 1.6 del loop). La decisión de producción sigue
 siendo suya (A45): nada de esto toca `pipeline/`, `pipeline/store.py` ni `pipeline/profiles/`.
@@ -18,6 +18,19 @@ scripts en la misma carpeta). La versión 2 aplica:
    la lectura 4 se pre-registra con signo, separando alertas de negativos limpios, con su control.
 3. Menores: la justificación de K = 20 se corrige (K = 19 también cumple p ≤ 0,05), la hipótesis del
    04-20 se baja a lo que es, y la vara se informa también con el centro del píxel caliente, sin 3 × 3.
+
+La segunda vuelta del verificador (sobre `c101f9cc9`, informe en
+`C:\Users\nmend\AppData\Local\Temp\claude\verif_123\VERIFICADOR_V2.md`, con `campo_bowtie.py`) dio
+«sellable con arreglos». La versión 3 aplica:
+
+4. **Sobre 35° de cenit el nulo no es comparable, y lo que depende de él queda descriptivo.** El problema
+   en el borde no es la unidad sino la forma del campo (sección «El nulo»). La lectura 5 emite SIN NULO
+   COMPARABLE (BOW TIE) en todo corte que llegue a 35° o más, con los conteos al lado; un test falla si
+   vuelve a emitir un estado contra el azar ahí.
+5. **El rango principal de las reglas 1 y 2 se da bajo 35°** (39 de las 46 protegidas, incluidas las dos
+   que M pierde), y el de todos los cenits va como anotación.
+6. `cruces_de_borde` agrega el círculo de `radius_km` (25 km en los Tier A), el ROI de escena; y hay tests
+   para los estados SENAL DE POSICION PEOR y MIXTO de la lectura 4.
 
 ## Por qué
 
@@ -161,11 +174,22 @@ donde se midió; el nulo de la 1.21 (en km) tenía la unidad correcta y le falta
 píxel sólo importaría para estructuras del tamaño del píxel (el anillo de 1 km), y el Test 1 ya no se
 calcula sobre ~30° (9 de 90 entre 30 y 50°, 0 de 222 sobre 50°).
 
+**Sobre 35° el problema es la forma del campo, no la unidad (versión 3).** Con bow tie, MxD03 no es una
+traslación de `_interp_geo`. Dentro de cada barrido de 10 líneas, C - M a lo largo de la traza es un
+diente de sierra: según el modelo del verificador (`campo_bowtie.py`, la misma interpolación del
+pipeline, SIN VERIFICAR sobre un gránulo real) casi no hay corrimiento en las líneas 2 a 7, y en las
+líneas extremas del barrido vale ±1,2 km con huella 1,3 km (unos 35 a 40°), ±2,2 con 1,55 y ±3,8 con 1,95.
+El nulo toma el tamaño del corrimiento de UN píxel, el más cercano al cráter, que depende de la fase de la
+línea, y ninguna traslación rígida reproduce cómo M entrevera las líneas sobre el inner o el ROI. Por
+eso, **sobre 35° de cenit, todo lo que compara a M contra el nulo queda descriptivo**: la lectura 5 da SIN
+NULO COMPARABLE (BOW TIE), y el rango principal de las reglas 1 y 2 se toma bajo 35°.
+
 **Lo que el km no arregla, dicho antes de correr.** Sobre la grilla con bow tie **ninguna** de las dos
 unidades es invariante (CV de 0,18 a 0,49 en km y de 0,23 a 0,33 en píxeles, misma salida): los centros
 de píxel de `_interp_geo` se amontonan de a pares cada 5 líneas, y cuántos cruzan un borde depende de si
 la traslación va a lo largo o a lo ancho. Por eso la versión 2 mide, por gránulo, cuánto **perturba** cada
-nulo frente a M en esa misma unidad (centros que cambian de lado del disco de 1 y 3 km y del inner) y lo
+nulo frente a M en esa misma unidad (centros que cambian de lado del disco de 1 y 3 km, del inner y del
+círculo de `radius_km`, 25 km en los Tier A) y lo
 informa por cenit en `tamano_del_nulo`, junto con la razón de módulos en píxeles. Las lecturas que
 dependen del borde del barrido (la 5 y los cortes sobre 50°) se leen con esa anotación al lado.
 
@@ -252,7 +276,8 @@ Por gránulo, además de lo de la 1.21 (`resumir` de `probe_cumulo.py`):
 
 - el jacobiano (±5 líneas, ±2 frames), el corrimiento real en km y en píxeles y, por nulo, rumbo,
   vector, km pedido, km aplicado, módulo en píxeles y su razón contra el de M;
-- por brazo, cuántos centros de píxel cambian de lado del disco de 1 y 3 km y del inner frente a C;
+- por brazo, cuántos centros de píxel cambian de lado del disco de 1 y 3 km, del inner y del círculo de
+  `radius_km` (25 km) frente a C;
 - por brazo, lo que vio el Test 1 (espía sobre `compute_test1_mir`): `triggered`, `n_roi`, `n_bg`,
   `L_bg`, `sigma_bg`, `delta_L_integrated`, `k_sigma_observed`, la distancia y temperatura del píxel más
   caliente del disco, si cae en el anillo de fondo y qué fracción de ΔL aporta;
@@ -288,12 +313,20 @@ Con el rango de Monte Carlo (p = (1 + nulos que igualan o pasan a M) / 21):
 | PERDIDAS COMO EL AZAR | ninguna de las dos |
 
 y lo mismo para G (GANANCIAS ESPECIFICAS DE MXD03, MENOS GANANCIAS QUE EL AZAR, GANANCIAS COMO EL AZAR)
-y para el neto G - L. Por pasada protegida se informa en cuántos de los 20 nulos se publica: es la
-fragilidad de esa pasada, sin umbral.
+y para el neto G - L. **El rango que decide la lectura se toma sobre los gránulos de cenit bajo 35°**,
+donde el nulo es comparable (versión 3): 39 de las 46 protegidas, incluidas las dos que M pierde (15,6° y
+17,5°); C publica 9 de esas 39 y M 15. El mismo rango sobre todos los cenits se informa en `total`, como
+anotación. La letra de la regla 1 (PIERDE PROTEGIDA si M pierde alguna) mira todas las protegidas, como
+siempre. Por pasada protegida se informa en cuántos de los 20 nulos se publica: es la fragilidad de esa
+pasada, sin umbral.
 
 **Lectura 2, el balance de la regla 2**: el Δ de M contra C con su intervalo (MEJORA / EMPEORA /
-INDETERMINADO, como en la 1.21) y su rango entre los 20 Δ de los nulos (BALANCE MEJOR, PEOR o COMO EL
-AZAR).
+INDETERMINADO, como en la 1.21, sobre todos los cenits) y su rango entre los nulos (BALANCE MEJOR, PEOR o
+COMO EL AZAR). El rango principal es bajo 35°, con el conteo de la muestra **sin expandir** (alertas bajo
+1 MW: perdidas menos ganadas; negativos limpios: publicaciones agregadas menos quitadas): el estimador de
+la 1.21 reparte cada celda sobre todos los cenits, y una submuestra por cenit no la representa; para un
+rango basta con aplicar el mismo conteo a M y a los nulos. El rango con el Δ expandido sobre todos los
+cenits va en `rango_total`, como anotación.
 
 **Lectura 3, la vara.** Por gránulo, dd = |C - v| - |M - v| (km; positivo, M más cerca), λ = proyección
 de (v - C) sobre (M - C) en unidades de |M - C| (1 donde dice M, 0 donde dice C) y el residuo
@@ -339,8 +372,11 @@ log k = log ΔL - log σ - ½ log n en los cambios C → M y C → nulos, y cuá
 entra o sale del anillo, y cuántas de esas coinciden con un cruce del umbral.
 
 **Lectura 5, el borde del barrido.** Por cenit, cuántos cúmulos de M son otro objeto (se mueven más que
-el corrimiento más 1,5 km) contra los 20 nulos (el corrimiento de cada nulo es el suyo): MXD03 SALTA MAS,
-MENOS o COMO EL AZAR, con la lista de los saltos de M que cambian la publicación.
+el corrimiento más 1,5 km) contra los 20 nulos (el corrimiento de cada nulo es el suyo), con la lista de
+los saltos de M que cambian la publicación. Bajo 35° (cortes 0 a 20, 20 a 35 y 0 a 35): MXD03 SALTA MAS,
+MENOS o COMO EL AZAR. **En todo corte que llegue a 35° o más (35 a 50, 50 a 90 y el total): SIN NULO
+COMPARABLE (BOW TIE)**, con los conteos de M y de los nulos como descripción y el estado que habría dado
+guardado aparte; `test_borde_sobre_35_no_da_veredicto_contra_el_azar` falla si vuelve a dar un veredicto.
 
 **Anotaciones** que no cambian nada: el tamaño del nulo por cenit (`tamano_del_nulo`), C contra lo
 guardado en `data/` (deriva) y, en local con `--art121`, C y M contra los de la 1.21.
@@ -355,8 +391,8 @@ guardado en `data/` (deriva) y, en local con `--art121`, C y M contra los de la 
 | INDECIDIBLE, SESGO POR SATELITE o SIN VARA | cualquiera | la vara no decide; queda la letra de la regla 1 y las lecturas contra el nulo |
 
 En cualquier caso la vara habla **de Láscar** (70 de 76) y de cenit bajo y medio: no contesta el borde del
-barrido (2 gránulos sobre 50°). El borde se contesta sólo con la lectura 5, contra el nulo, sin vara
-externa.
+barrido (2 gránulos sobre 50°). **El borde del barrido no se contesta con este instrumento**: ni la vara
+llega (2 gránulos) ni el nulo es comparable ahí (versión 3). La lectura 5 sobre 35° es una descripción.
 
 ## Poder, dicho antes de correr
 
@@ -372,8 +408,10 @@ una que no publica se gana con qG). El único sorteo de la 1.21 dio qL ≈ 0,44 
 | | 0,135 | 0,054 | 0,331 | 0,359 |
 | | 0,20 | 0,314 | 0,001 | 0,000 |
 
-Lectura: si el nulo se parece al único sorteo de la 1.21, las pérdidas de M saldrán COMO EL AZAR casi
-seguro, y las ganancias saldrán ESPECIFICAS una de cada tres veces. Decir que M gana más que el azar
+Bajo 35° (el rango principal desde la versión 3) las pérdidas son las mismas (2 de 9) y las ganancias 8
+de 30; con qG = 0,135 la probabilidad de GANANCIAS ESPECIFICAS sube de 0,33 a 0,43 con K = 20 (misma
+salida). Lectura: si el nulo se parece al único sorteo de la 1.21, las pérdidas de M saldrán COMO EL AZAR
+casi seguro, y las ganancias saldrán ESPECIFICAS entre una de cada tres y casi una de cada dos veces. Decir que M gana más que el azar
 exige que el nulo gane bastante menos que 5 de 37. La población no da para más: hay 46 protegidas en
 total y C publica sólo 9.
 

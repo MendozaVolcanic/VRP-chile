@@ -17,6 +17,9 @@ from pathlib import Path
 
 C_PUBLICA, C_NO_PUBLICA = 9, 37        # protegidas de la muestra: 46, C publica 9 (1.21, verificado)
 L_M, G_M = 2, 9                        # lo que M dio en la 1.17 y en la 1.21
+# bajo 35 grados de cenit (rango principal desde la version 3): 39 protegidas, C publica las mismas 9,
+# M 15; M pierde las mismas 2 y gana 8 (artefactos de la 1.21)
+C_NO_PUBLICA_35, G_M_35 = 30, 8
 
 
 def cola_alta(n, q, x):
@@ -40,15 +43,16 @@ def main():
     buf = io.StringIO()
     p = lambda *x: print(*x, file=buf)  # noqa: E731
     p("p de Monte Carlo minimo: K=19 %.4f, K=20 %.4f, K=40 %.4f" % (1 / 20, 1 / 21, 1 / 41))
-    p("\nPerdidas: M pierde %d de las %d protegidas que C publica" % (L_M, C_PUBLICA))
+    p("\nPerdidas (igual en todos los cenits y bajo 35 grados): M pierde %d de las %d protegidas que C publica" % (L_M, C_PUBLICA))
     for q in (0.05, 0.10, 0.22, 0.44):
         p("  qL %.2f: P(un nulo pierde >= %d) %.3f | P(PERDIDAS ESPECIFICAS) K=20 %.3f, K=40 %.3f" % (
             q, L_M, cola_alta(C_PUBLICA, q, L_M), p_especifico(C_PUBLICA, q, L_M, 20), p_especifico(C_PUBLICA, q, L_M, 40)))
-    p("\nGanancias: M gana %d de las %d protegidas que C no publica" % (G_M, C_NO_PUBLICA))
-    for q in (0.05, 0.08, 0.10, 0.135, 0.20):
-        p("  qG %.3f: P(un nulo gana >= %d) %.3f | P(GANANCIAS ESPECIFICAS) K=20 %.3f, K=40 %.3f" % (
-            q, G_M, cola_alta(C_NO_PUBLICA, q, G_M), p_especifico(C_NO_PUBLICA, q, G_M, 20),
-            p_especifico(C_NO_PUBLICA, q, G_M, 40)))
+    for nombre, no_pub, g_m in (("todos los cenits", C_NO_PUBLICA, G_M),
+                                ("bajo 35 grados (el rango principal)", C_NO_PUBLICA_35, G_M_35)):
+        p("\nGanancias, %s: M gana %d de las %d protegidas que C no publica" % (nombre, g_m, no_pub))
+        for q in (0.05, 0.08, 0.10, 0.135, 0.20):
+            p("  qG %.3f: P(un nulo gana >= %d) %.3f | P(GANANCIAS ESPECIFICAS) K=20 %.3f, K=40 %.3f" % (
+                q, g_m, cola_alta(no_pub, q, g_m), p_especifico(no_pub, q, g_m, 20), p_especifico(no_pub, q, g_m, 40)))
     sys.stdout.write(buf.getvalue())
     if a.salida:
         Path(a.salida).write_text(buf.getvalue(), encoding="utf-8")

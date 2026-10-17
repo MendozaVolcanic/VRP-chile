@@ -408,16 +408,70 @@ def test_test1_propiedad_del_test1_y_especifica():
     assert ES.evaluar(*_caso(f, m))["test1"]["cruces"]["estado"] == "MXD03 CRUZA MAS QUE EL AZAR"
 
 
-def test_borde_salta_mas_que_el_azar():
+def _saltos(cenit):
     f, m = [], []
     for i in range(10):
-        f.append(_fila("b%d" % i, cenit=60.0))
+        f.append(_fila("b%d" % i, cenit=cenit))
         pc = {b: (-23.37, -67.73) for b in ES.BRAZOS}
         pc["M"] = (-23.37 + 9.0 / 111.32, -67.73)        # el cumulo de M salta 9 km (corrimiento 1 km)
         m.append(_medida("b%d" % i, pc=pc))
-    r = ES.evaluar(*_caso(f, m))
-    assert r["borde"]["50-90"]["estado"] == "MXD03 SALTA MAS QUE EL AZAR"
+    return ES.evaluar(*_caso(f, m))["borde"]
+
+
+def test_borde_bajo_35_da_veredicto_contra_el_azar():
+    b = _saltos(10.0)
+    assert b["0-20"]["estado"] == "MXD03 SALTA MAS QUE EL AZAR"
+    assert b["0-35"]["estado"] == "MXD03 SALTA MAS QUE EL AZAR"
     assert ES.evaluar(*_caso(*_limpio()))["borde"]["0-20"]["estado"] == "SALTA COMO EL AZAR"
+
+
+@pytest.mark.parametrize("cenit", [36.0, 49.0, 60.0])
+def test_borde_sobre_35_no_da_veredicto_contra_el_azar(cenit):
+    """Verificador v2: sobre 35 grados el bow tie hace de C - M un diente de sierra que ninguna traslacion
+    rigida imita. Ahi la lectura 5 es descriptiva: si el evaluador vuelve a emitir un estado contra el
+    azar en un corte que llega a 35 grados o mas, este test falla. Los conteos se siguen informando."""
+    b = _saltos(cenit)
+    contra_el_azar = {"MXD03 SALTA MAS QUE EL AZAR", "MXD03 SALTA MENOS QUE EL AZAR", "SALTA COMO EL AZAR"}
+    for corte, lec in b.items():
+        hi = float(corte.split("-")[1])
+        if hi > ES.CENIT_COMPARABLE:
+            assert lec["estado"] == ES.SIN_NULO, (corte, lec["estado"])
+            assert lec["estado"] not in contra_el_azar and lec["observado"] == 10
+    assert b["0-90"]["estado"] == ES.SIN_NULO
+
+
+def test_el_rango_principal_de_las_reglas_1_y_2_es_bajo_35():
+    """Verificador v2: una protegida que M pierde a 60 grados (donde el nulo no es comparable) no entra al
+    rango principal; si entra al total, que queda como anotacion."""
+    f, m = _limpio()
+    f.append(_fila("p0", lab="pos", prot=True, cenit=10.0))
+    m.append(_medida("p0", pub=_pub(1, 1, [1] * 20)))
+    f.append(_fila("p1", lab="pos", prot=True, cenit=60.0))
+    m.append(_medida("p1", pub=_pub(1, 0, [1] * 20)))
+    r = ES.evaluar(*_caso(f, m))["regla1"]
+    assert r["letra"] == "PIERDE PROTEGIDA"                    # la letra mira todas
+    assert r["protegidas_bajo_el_corte"] == 1
+    assert r["perdidas"]["observado"] == 0 and r["total"]["perdidas"]["observado"] == 1
+    assert r["total"]["perdidas"]["estado"] == "PERDIDAS ESPECIFICAS DE MXD03"
+    assert r["perdidas"]["estado"] != "PERDIDAS ESPECIFICAS DE MXD03"
+
+
+def _con_signo(m_alerta, m_negativo):
+    f, m = [], []
+    for i in range(12):
+        lab = "pos" if i < 6 else "neg_limpio"
+        f.append(_fila("s%d" % i, lab=lab, prot=False))
+        t1 = {"C": _t1(2.0), "M": _t1(2.0 + (m_alerta if lab == "pos" else m_negativo))}
+        for k, b in enumerate(ES.NULOS):
+            t1[b] = _t1(2.0 + (0.3 if (k + i) % 2 else -0.3))
+        m.append(_medida("s%d" % i, test1=t1))
+    return ES.evaluar(*_caso(f, m))["test1"]["con_signo"]["estado"]
+
+
+def test_test1_con_signo_peor_y_mixto():
+    assert _con_signo(-0.8, 0.8) == "SENAL DE POSICION PEOR"
+    assert _con_signo(0.8, 0.0) == "MIXTO"
+    assert _con_signo(0.8, -0.8) == "SENAL DE POSICION MEJOR"
 
 
 # ---- la vara

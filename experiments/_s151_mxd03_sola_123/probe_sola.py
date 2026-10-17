@@ -288,7 +288,8 @@ def medir_granulo(l1b, geo, volcan, latlon_m, datos, vent, clave, feats=None, co
             "pub": dict(zip(brazos, pubs)),
             "pico": pico_por_indice(datos, posiciones, latlon_m[0], latlon_m[1], vent, float(inner or 5.0)),
             "cruces_de_borde": cruces_de_borde(posiciones, vent, desp["linea"], desp["frame"],
-                                               (1.0, 3.0, float(inner or 5.0))),
+                                               tuple(sorted({1.0, 3.0, float(inner or 5.0),
+                                                             float(volcan.get("radius_km") or 25.0)}))),
             "cprima_igual": None}
     if con_cprima:
         rcp, _ = procesar(l1b, geo, volcan, (lat.copy(), lon.copy()), feats, lector)
