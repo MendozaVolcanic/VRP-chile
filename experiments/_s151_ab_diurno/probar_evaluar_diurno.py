@@ -46,9 +46,13 @@ Casos (respuesta esperada entre paréntesis):
   Agregados con la desviación D2 (2026-10-17: el G3 clasifica cada par con unir_intentos.comparar más el predicado
   del tablero). Cada uno atrapa una mutación g3_* de mutar_evaluador.py:
   23  orden_pixeles     los mismos dos píxeles en otro orden                     (G3 CUMPLE, pares «orden»; atrapa g3_orden_falla)
-  23b borde_v375_f5     otro píxel en la lista y otro hotspot, VIIRS 375 con
+  23b borde_v375_f5     otro píxel en la lista (llena: 100 con los descartados) y otro hotspot, VIIRS 375 con
                         f5_core_vrp_mw (el tablero no lee los píxeles)          (G3 CUMPLE, pares «borde»; atrapa g3_borde_falla)
   23c borde_v375_sin_f5 lo mismo sin f5_core_vrp_mw (el tablero SÍ los lee)      (G3 FALLA)
+  23d borde_lista_corta lo de 23b con la lista de 2 píxeles: el recorte top-100 no
+                        cortó nada, otro píxel es otra detección (PR #847)      (G3 FALLA; atrapa u_sin_recorte_lleno)
+  23e borde_fuera_del_corte lo de 23b, pero cambia el píxel más caliente y no el del
+                        puesto 100: un desempate no puede hacerlo (verificador V2) (G3 FALLA; atrapa u_fuera_del_corte)
   24  hotspot_escena    MODIS: un brazo con el rescate por cúmulo y el otro no   (G3 CUMPLE, pares «hotspot_escena»; atrapa g3_escena_falla)
   24b escena_predicado  lo mismo con el cúmulo en 0 MW: comparar lo admite y el
                         predicado del tablero da distinto (isSummitDetection)   (G3 FALLA; atrapa g3_sin_predicado)
@@ -116,11 +120,25 @@ def noche_orden(n, r):
     r["anomaly_pixels"] = [dict(P1), dict(P2)] if n == "control" else [dict(P2), dict(P1)]
 
 
-def noche_borde(con_f5):
-    """El empate del recorte top-100: entra otro píxel del mismo VRP y con él cambia el hotspot de escena."""
+# vrp 0,04, igual a P2 y P3: el mínimo de la lista llena, el único que un desempate en el corte puede cambiar
+LEJOS_98 = [{"lat": -23.6 - 0.001 * i, "lon": -67.9, "vrp_mw": 0.04, "bt_k": 277.0} for i in range(98)]
+
+
+def noche_borde(con_f5, llena=True, caliente=False):
+    """El empate del recorte top-100: entra otro píxel del mismo VRP y con él cambia el hotspot de escena. Con
+    `llena` la lista guardada mide los 100 del recorte (2 guardados + 98 descartados), donde el empate puede
+    actuar; sin `llena` mide 2 y el recorte no cortó nada, así que otro píxel es otra detección (PR #847)."""
     def f(n, r):
-        r.update(anomaly_pixels=[dict(P1), dict(P2 if n == "control" else P3)],
-                 hotspot_lat=-23.36 if n == "control" else -23.38, hotspot_lon=-67.73)
+        if caliente:   # cambia el píxel más caliente, no el del corte: un desempate en el puesto 100 no puede hacerlo
+            otro = dict(P1, lat=P1["lat"] - 0.02)
+            r.update(anomaly_pixels=[dict(P1 if n == "control" else otro), dict(P2)],
+                     hotspot_lat=-23.36 if n == "control" else -23.38, hotspot_lon=-67.73)
+        else:
+            r.update(anomaly_pixels=[dict(P1), dict(P2 if n == "control" else P3)],
+                     hotspot_lat=-23.36 if n == "control" else -23.38, hotspot_lon=-67.73)
+        if llena:
+            r["discarded_anomaly_pixels"] = [dict(q) for q in LEJOS_98]
+            r["n_anomalous_pixels"] = 140     # >100: el recorte cortó (verificador V2 del PR #847)
         if con_f5:
             r["f5_core_vrp_mw"] = 0.0
     return f
@@ -233,7 +251,11 @@ def main():
         pos_w2 = sorted(UW["W2"]["pos"])
         pos_w3 = sorted(UW["W3"]["pos"])
         rnd = random.Random(7)
-        azar = {k for w in ED.VENTANAS for k in UW[w]["pos"] | UW[w]["tabla"] if rnd.random() < 0.30}
+        # sorted: iterar el conjunto sin ordenar sigue el hash de los strings, que cambia con PYTHONHASHSEED en cada
+        # proceso; el sorteo «al azar» salía distinto por proceso (D de -0,094 a +0,030 con PYTHONHASHSEED 0 a 5) y
+        # a veces G1 pasaba, como debe pasar un sorteo de cada veinte contra un p95 (D +0,154 contra p95 +0,123 en
+        # la corrida de mutaciones del PR #847). Con el orden fijo, D -0,001 contra p95 +0,125 con cualquier semilla.
+        azar = {k for w in ED.VENTANAS for k in sorted(UW[w]["pos"] | UW[w]["tabla"]) if rnd.random() < 0.30}
         # Seis negativos de VIIRS 750 en W4: con las 2 protegidas de tabla de 750 suman 8 publicaciones y G2 falla
         # en 750 (desde 6, caso 11); en 375 sigue en 6 de 2.511, lejos de 20.
         seis_v750 = set(sorted(k for k in UW["W4"]["neg"] if k[1] == "VIIRS750")[:6])
@@ -276,6 +298,8 @@ def main():
             ("23 orden_pixeles", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=noche_orden), []),
             ("23b borde_v375_f5", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=noche_borde(True)), []),
             ("23c borde_v375_sin_f5", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=noche_borde(False)), []),
+            ("23d borde_lista_corta", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=noche_borde(True, llena=False)), []),
+            ("23e borde_fuera_del_corte", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=noche_borde(True, caliente=True)), []),
             ("24 hotspot_escena", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=noche_escena(0.4)), []),
             ("24b escena_predicado", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=noche_escena(0.0)), []),
             ("25 clase_una_noche", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=noche_clase_una()), []),
@@ -343,10 +367,11 @@ def main():
                          "pares «%s» admitidos e informados: G3 %s, %s" % (cat, res["G3"], e))
                 chequear(n, len(res["noches"]["admitidos"][cat]) == e[cat] and "admitido (%s, informa)" % cat in txt,
                          "cada par «%s» queda listado en la salida (%d)" % (cat, len(res["noches"]["admitidos"][cat])))
-            elif n in ("borde_v375_sin_f5", "escena_predicado", "clase_una_noche"):
+            elif n in ("borde_v375_sin_f5", "borde_lista_corta", "borde_fuera_del_corte", "escena_predicado", "clase_una_noche"):
                 e = res["noches"]["estados"]
-                esperado = {"borde_v375_sin_f5": res["noches"]["n_control"], "escena_predicado": res["noches"]["n_control"],
-                            "clase_una_noche": 1}[n]
+                esperado = {"borde_v375_sin_f5": res["noches"]["n_control"], "borde_lista_corta": res["noches"]["n_control"],
+                            "borde_fuera_del_corte": res["noches"]["n_control"],
+                            "escena_predicado": res["noches"]["n_control"], "clase_una_noche": 1}[n]
                 chequear(n, res["G3"].startswith("FALLA") and e["distinto"] == esperado and res["veredicto"].startswith("INDECIDIBLE"),
                          "G3 FALLA con %d pares distintos (esperados %d; %s)" % (e["distinto"], esperado, res["noches"]["campos_distintos"]))
                 if n == "escena_predicado":

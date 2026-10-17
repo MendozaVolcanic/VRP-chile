@@ -469,6 +469,36 @@ porque el evaluador mutado se caía (KeyError), no por el veredicto: se arregló
 excluye sus campos de proceso por su cuenta). Lo que esta regla hereda de `comparar` y no acota (VERIFICADOR_843.md §4,
 LAX1 a LAX7) sigue sin acotar: el `vrp_mw` y la distancia del hotspot del lado no rescatado.
 
+**D2, arreglo del verificador del PR #847 (2026-10-17, misma rama).** El verificador con contexto limpio
+(`C:\Users\nmend\AppData\Local\Temp\claude\verif_847\VERIFICADOR.md`, sin versionar) sembró diferencias en W2 y
+encontró que `borde` se admitía donde el desempate no puede actuar: en VIIRS 375 (Chaitén, 4 píxeles) y VIIRS 750
+(1 píxel), cambiar o agregar un píxel sin tocar el conteo daba CUMPLE, y un píxel desplazado con `vrp_mir_mw` ×1,3
+también. Con menos de 100 píxeles el recorte top-100 no corta nada, así que otro conjunto es otra detección, y la
+rama diurna es VIIRS. Arreglo en `unir_intentos.comparar` (vale para el G3 y para las uniones de intentos): un
+conjunto de píxeles distinto sólo es `borde` (o `hotspot_escena` con píxeles distintos) si el recorte top-100
+cortó en los dos lados: la lista guardada (`anomaly_pixels` más `discarded_anomaly_pixels`) mide 100 **y**
+`n_anomalous_pixels`, el total detectado, supera 100 (el tope de `pipeline/process_modis.py:1085`,
+`process_viirs.py:1520`, `process_viirs_mod.py:1065` y `anomaly_pixels.py:16`, líneas en `a278acd2`); si no, es
+`distinto` con `sin_recorte` en el detalle. Y cada píxel que cambia tiene que empatar con el VRP mínimo de su lista
+(el del puesto 100); si no, `distinto` con `fuera_del_corte`. Estas dos condiciones las pidió la segunda vuelta del
+verificador (`VERIFICADOR_V2.md` en el temporal `verif_847_v2`, sin versionar): con la lista sola, 100 detectados
+exactos pasaban como recorte, y se admitía cambiar hasta el píxel más caliente. Con ellas, las uniones de W2a, V1
+y V2a y el G3 de W2 salen idénticos (los 108 y 23 pares `borde` reales empatan en el mínimo). No se limita a MODIS: entre los intentos de W2a hay un
+`borde` VIIRS 750 con la lista llena (Tupungatito VIIRS_NOAA21_750 2026-06-17 17:30), así que el empate existe también
+en VIIRS. Medido antes del cambio: entre intentos, 0 pares con conjunto distinto y lista corta de 108 (W2a 16,
+F/K V1 76, V2a 16), y entre los brazos de W2, 0 de 27. Con el comparar nuevo, las uniones de W2a (dos órdenes),
+F/K V1 y V2a salen byte a byte iguales a las del comparar de `origin/main` (22, 43 y 22 archivos; el 44.º de V1
+sólo existe en un intento), y el G3 sobre W2 no cambia. Además: si el predicado del tablero no corre, el G3 ya no
+dice FALLA (cableado) sino INDECIDIBLE, y `mutar_evaluador.py` sólo acepta como atrapada una aserción del import si
+es una de las dos guardas de coherencia. Lo fijan el caso 23b con la lista llena, los casos nuevos 23d (lista corta,
+FALLA) y 23e (cambia el píxel más caliente, FALLA), las mutaciones `u_sin_recorte_lleno` y `u_fuera_del_corte`
+(sobre `unir_intentos.py`) y los tests de `unir_intentos`. De paso
+apareció un defecto previo de la autoprueba, no del G3: el caso 3 (azar) sorteaba iterando un conjunto, cuyo
+orden sigue el hash de los strings y cambia con PYTHONHASHSEED en cada proceso, así que su D variaba por proceso
+(de -0,094 a +0,030 con las semillas 0 a 5) y en una corrida de mutaciones G1 pasó (D +0,154 contra p95 +0,123) y
+la autoprueba falló sin mutación. Ahora sortea sobre el conjunto ordenado (D -0,001 contra p95 +0,125 con
+cualquier semilla); el esperado (G1 FALLA) no cambia.
+
 **Nota de procedimiento (W1):** cada intento del brazo diurno perdió pasadas nocturnas distintas por descarga. Se
 unieron los dos intentos con `unir_intentos.py` (se niega si un gránulo común difiere; 325 comunes idénticos), lo que
 equivale a pasar las dos raíces como dice el párrafo de arriba. La evaluación de W1 usó `--repetidas W1` sin necesidad

@@ -421,6 +421,7 @@ def noches_identicas(rc, rd, predicado=None):
     estados = {e: 0 for e in G3_CATEGORIAS}
     admitidos = {e: [] for e in ("orden", "borde", "hotspot_escena")}
     a_probar = collections.defaultdict(list)          # vol -> [(clave, control, diurno, estado, detalle)]
+    sin_predicado = []                                 # pares que el predicado del tablero no pudo juzgar
 
     def anotar_distinto(k, det):
         estados["distinto"] += 1
@@ -450,13 +451,12 @@ def noches_identicas(rc, rd, predicado=None):
     for vol, lista in sorted(a_probar.items()):
         try:
             malos = set(predicado([(x[1], x[2]) for x in lista], vol))
-        except Exception as e:  # sin node o sin el volcán en el tablero: no se puede probar, cuenta como distinto
-            malos, motivo = set(range(len(lista))), "predicado del tablero no se pudo correr: %s" % e
-        else:
-            motivo = "predicado del tablero distinto"
+        except Exception as e:  # sin node o sin el volcán en el tablero: no se sabe, el G3 queda INDECIDIBLE
+            sin_predicado.extend("%s: %s" % ("|".join(x[0]), e) for x in lista)
+            continue
         for j, (k, _, _, est, det) in enumerate(lista):
             if j in malos:
-                anotar_distinto(k, {"campos": [motivo]})
+                anotar_distinto(k, {"campos": ["predicado del tablero distinto"]})
             else:
                 estados[est] += 1
                 admitidos[est].append("%s: píxeles (control, diurno) %s, campos distintos %s"
@@ -464,15 +464,21 @@ def noches_identicas(rc, rd, predicado=None):
                                          det.get("campos") if est == "hotspot_escena" else det.get("campos_derivados")))
     return {"n_control": len(nc), "n_diurno": len(nd), "faltan": len(faltan), "sobran": len(sobran),
             "ej_cobertura": ["|".join(k) for k in (faltan + sobran)[:5]], "version_distinta": len(version),
-            "estados": estados, "admitidos": admitidos, "campos_distintos": dict(campos), "ejemplos": ejemplos}
+            "estados": estados, "admitidos": admitidos, "campos_distintos": dict(campos), "ejemplos": ejemplos,
+            "sin_predicado": len(sin_predicado), "ej_sin_predicado": sin_predicado[:3]}
 
 
 def veredicto_g3(ni):
-    """Cobertura primero (A108); después, FALLA si algún par quedó fuera de G3_ADMITIDAS."""
+    """Cobertura primero (A108); después, FALLA si algún par quedó fuera de G3_ADMITIDAS; después, INDECIDIBLE si
+    el predicado del tablero no pudo juzgar algún par de borde o hotspot_escena."""
     if ni["faltan"] or ni["sobran"] or ni["version_distinta"]:
         return "COBERTURA NOCTURNA DESPAREJA (repetir el job, A108)"
     if any(n for e, n in ni["estados"].items() if e not in G3_ADMITIDAS):
         return "FALLA (noches distintas: defecto del cableado)"
+    if ni.get("sin_predicado"):
+        # verificador del PR #847: sin node no se sabe si esos pares son distintos; no es un defecto del cableado
+        return "INDECIDIBLE (el predicado del tablero no corrió en %d pares, p. ej. %s)" % (
+            ni["sin_predicado"], ni["ej_sin_predicado"][:1])
     return "CUMPLE"
 
 

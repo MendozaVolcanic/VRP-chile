@@ -49,6 +49,7 @@ RESCATE = "single_pixel_far_overridden_by_cluster"
 P1 = {"lat": -37.85, "lon": -71.17, "vrp_mw": 0.05, "bt_k": 280.0}
 P2 = {"lat": -37.86, "lon": -71.16, "vrp_mw": 0.04, "bt_k": 279.0}
 P3 = {"lat": -37.84, "lon": -71.18, "vrp_mw": 0.04, "bt_k": 279.0}
+LEJOS = {"lat": -38.3, "lon": -71.4, "vrp_mw": 0.04, "bt_k": 277.0}   # empata con P2 y P3: el mínimo de la lista
 PC = {"vrp_mw": 0.4, "centroid_lat": -37.85, "centroid_lon": -71.17, "centroid_dist_km": 1.0, "n_pixels": 2}
 
 
@@ -58,7 +59,10 @@ def base(**kw):
          "primary_cluster": dict(PC), "vrp_mw": 3.0, "final_hotspot_source": "test1",
          "hotspot_lat": -38.1, "hotspot_lon": -71.4, "hotspot_dist_km": 30.0,
          "final_hotspot_lat": -37.86, "final_hotspot_lon": -71.17, "final_hotspot_dist_km": 1.2,
-         "anomaly_pixels": [dict(P1), dict(P2)], "diag_mu_deti": -9.871330774512634e-06,
+         # 2 guardados + 98 descartados = los 100 del recorte top-100, donde el desempate puede actuar (PR #847)
+         "anomaly_pixels": [dict(P1), dict(P2)], "discarded_anomaly_pixels": [dict(LEJOS, lat=-38.3 - 0.001 * i)
+                                                                         for i in range(98)],
+         "diag_mu_deti": -9.871330774512634e-06, "n_anomalous_pixels": 140,   # >100: el recorte cortó (verificador V2)
          "processed_utc": "2026-10-15T00:00:00Z", "first_processed_utc": "2026-10-15T00:00:00Z"}
     r.update(kw)
     return r
@@ -128,6 +132,26 @@ def test_borde_se_admite_si_el_tablero_da_lo_mismo_y_falla_si_no():
     assert v.startswith("FALLA") and ni["campos_distintos"] == {"predicado del tablero distinto": 1}
 
 
+@pytest.mark.parametrize("sensor", ["MODIS_AQUA", "VIIRS_NOAA20", "VIIRS_NOAA21_750"])
+def test_borde_con_lista_corta_falla(sensor):
+    """Verificador del PR #847: con menos de 100 píxeles el recorte top-100 no corta nada, así que otro conjunto
+    de píxeles es otra detección, no un empate. Es la población de la rama diurna (VIIRS)."""
+    a = base(sensor=sensor, f5_core_vrp_mw=0.3, discarded_anomaly_pixels=[])
+    for b in (dict(a, anomaly_pixels=[dict(P1), dict(P3)]),                       # un píxel desplazado
+              dict(a, anomaly_pixels=[dict(P1), dict(P3)], vrp_mir_mw=1.3),       # y vrp_mir_mw distinto
+              dict(a, anomaly_pixels=[dict(P1), dict(P2), dict(P3)])):            # un píxel de más
+        v, ni = g3([(a, b)])
+        assert v.startswith("FALLA") and ni["estados"]["distinto"] == 1, (sensor, b["anomaly_pixels"])
+
+
+def test_borde_en_viirs_con_lista_llena_se_admite():
+    """El empate del recorte también existe en VIIRS (W2a, Tupungatito VIIRS_NOAA21_750 2026-06-17 17:30, lista
+    llena): no se restringe a MODIS."""
+    a = base(sensor="VIIRS_NOAA21_750")
+    v, ni = g3([(a, dict(a, anomaly_pixels=[dict(P1), dict(P3)]))])
+    assert v == "CUMPLE" and ni["estados"]["borde"] == 1
+
+
 def test_hotspot_escena_se_admite_si_el_tablero_da_lo_mismo_y_falla_si_no():
     a = base()
     assert U.comparar(a, rescatado(a))[0] == "hotspot_escena"
@@ -137,12 +161,17 @@ def test_hotspot_escena_se_admite_si_el_tablero_da_lo_mismo_y_falla_si_no():
     assert v.startswith("FALLA") and ni["estados"]["hotspot_escena"] == 0
 
 
-def test_predicado_que_no_corre_cuenta_como_distinto():
+def test_predicado_que_no_corre_es_indecidible_no_falla():
+    """Verificador del PR #847: si node no corre, no se sabe si el par es distinto. Es INDECIDIBLE, no un defecto
+    del cableado; y un distinto real en otra noche sigue dando FALLA."""
     def roto(p, vol):
         raise RuntimeError("sin node")
     a = base()
     v, ni = g3([(a, rescatado(a))], predicado=roto)
-    assert v.startswith("FALLA") and "no se pudo correr" in next(iter(ni["campos_distintos"]))
+    assert v.startswith("INDECIDIBLE") and "sin node" in v
+    assert ni["sin_predicado"] == 1 and ni["estados"]["distinto"] == 0 and ni["estados"]["hotspot_escena"] == 0
+    v, ni = g3([(a, rescatado(a)), (a, dict(a, distance_class="far"))], predicado=roto)
+    assert v.startswith("FALLA")
 
 
 def test_el_predicado_recibe_cada_volcan_con_sus_pares():

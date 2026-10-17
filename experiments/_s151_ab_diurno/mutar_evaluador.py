@@ -3,7 +3,8 @@
 
 POR QUÉ (A110, A116). Que la autoprueba dé todo en verde dice poco si también daría verde con el evaluador roto.
 Este script es el equivalente, dentro del repo, del `mutar.py` del verificador con contexto limpio del PR #822
-(las siete de entonces, mismos textos de reemplazo, más las seis g3_* de la desviación D2 del pre-registro): copia evaluar_diurno.py a un directorio temporal, le aplica
+(las siete de entonces, mismos textos de reemplazo, más las seis g3_* de la desviación D2 del pre-registro y
+u_sin_recorte_lleno y u_fuera_del_corte, que mutan unir_intentos.py): copia evaluar_diurno.py a un directorio temporal, le aplica
 UNA mutación, la registra como el módulo `evaluar_diurno` y corre probar_evaluar_diurno.py contra ella, en un
 proceso aparte por mutación. Una mutación queda ATRAPADA si la autoprueba sale con código distinto de 0; «ninguna»
 (el evaluador sin tocar) tiene que salir con 0. Salida: mutaciones_salida.txt.
@@ -20,6 +21,7 @@ import runpy
 import subprocess
 import sys
 import tempfile
+import types
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
@@ -47,18 +49,41 @@ MUT = {
                              'G3_ADMITIDAS = ("igual", "tolerancia", "orden", "borde", "hotspot_escena", "distinto")'),
     "g3_sin_predicado": ('            malos = set(predicado([(x[1], x[2]) for x in lista], vol))',
                          '            malos = set()'),
+    # Verificador del PR #847: la regla de la lista llena vive en unir_intentos.comparar; la mutación se aplica a
+    # ESE archivo (tercer elemento) y el evaluador sin tocar la importa.
+    "u_sin_recorte_lleno": ('    if conjunto and not (lista_llena(x) and lista_llena(y)):', '    if False:',
+                            "unir_intentos.py"),
+    # Verificador V2 del PR #847: con el recorte activo, sólo pueden cambiar los píxeles del puesto 100.
+    "u_fuera_del_corte": ('    if conjunto and not solo_en_el_corte(x, y):', '    if False:', "unir_intentos.py"),
 }
+
+
+# Los mensajes de las guardas de coherencia de evaluar_diurno.py al importar (tolerancia y campos de proceso).
+GUARDAS_DE_IMPORT = ("G3 y unir_intentos con tolerancias distintas",
+                     "G3 y unir_intentos excluyen campos de proceso distintos")
 
 
 def una(nombre):
     src = (AQUI / "evaluar_diurno.py").read_text(encoding="utf-8")
     src = src.replace("AQUI = Path(__file__).resolve().parent", "AQUI = Path(r\"%s\")" % AQUI)
-    if nombre != "ninguna":
-        a, b = MUT[nombre]
+    destino = MUT[nombre][2] if nombre != "ninguna" and len(MUT[nombre]) > 2 else "evaluar_diurno.py"
+    tmp = Path(tempfile.mkdtemp(prefix="mutar_diurno_"))
+    if destino != "evaluar_diurno.py":
+        # el archivo mutado se registra con su nombre corto antes de importar el evaluador, que lo encuentra ahí
+        otro = (AQUI / destino).read_text(encoding="utf-8")
+        a, b = MUT[nombre][:2]
+        if otro.count(a) != 1:
+            raise SystemExit("la mutación %s no encuentra su texto exactamente una vez" % nombre)
+        # se ejecuta con el __file__ del archivo real: `_predicado` arma la raíz del repo desde ahí
+        mo = types.ModuleType(Path(destino).stem)
+        mo.__file__ = str(AQUI / destino)
+        sys.modules[Path(destino).stem] = mo
+        exec(compile(otro.replace(a, b), str(AQUI / destino), "exec"), mo.__dict__)
+    elif nombre != "ninguna":
+        a, b = MUT[nombre][:2]
         if src.count(a) != 1:
             raise SystemExit("la mutación %s no encuentra su texto exactamente una vez" % nombre)
         src = src.replace(a, b)
-    tmp = Path(tempfile.mkdtemp(prefix="mutar_diurno_"))
     ruta = tmp / "evaluar_diurno.py"
     ruta.write_text(src, encoding="utf-8")
     for p in (str(RAIZ / "scripts"), str(RAIZ), str(AQUI)):
@@ -71,6 +96,9 @@ def una(nombre):
     except AssertionError as e:
         # Desde D2 la mutación «volatiles» la para la guarda de coherencia con unir_intentos.PROCESO al importar,
         # antes de llegar a la autoprueba (el caso 17 ya no puede verla: comparar excluye PROCESO por su cuenta).
+        # Sólo cuenta si es ESA guarda (verificador del PR #847): cualquier otra aserción del import es una caída.
+        if str(e) not in GUARDAS_DE_IMPORT:
+            raise
         sys.__stdout__.write("MUTACION %s rc=3\n   el evaluador mutado no importa: %s\n" % (nombre, e))
         return 3
     buf, rc = io.StringIO(), 0
