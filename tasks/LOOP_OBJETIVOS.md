@@ -347,11 +347,31 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-13 (texto original) | Cobertura de los A/B largos: ¿repetir y unir intentos (A108, ~20 h por vuelta y puede abrir huecos nuevos) o evaluar sobre la intersección de pasadas presentes en todos los brazos, informando las excluidas (desviación registrada; la pérdida es por descarga, independiente del brazo)? Recomendación del loop: intersección, con la regla del 5 % del control contra producción como compuerta | `C:\Users\nmend\AppData\Local\Temp\claude\fk_v1\detalle_cobertura.txt` (V1: 31 de 44 jobs cortos, 0,5 a 1,4 % por job; C0 de PCC falla el 5 %) | F/K V1, V2a, diurno | pendiente |
 | D-12 | ~~Merge de la columna~~ **HECHO** (Nicolás, 2026-10-16): Mirova-v1#25 mergeado 11:43 UTC (`2eac1758`); historia despachada (run 38895687049); hito A119 en #838 | | | cerrada |
 | D-12 (texto original) | Merge de la columna `Distancia_aprox_*` en el scraper (Mirova-v1 es producción) | verificador limpio en dos vueltas: sin bloqueos; `Distancia_km` y columnas viejas byte a byte iguales; umbral 5 provisional | Mirova-v1#25 (`f774a5d`) | pendiente |
+| D-16 | W2a del A/B diurno: el intento 2 solo es completo y parejo (1.085 noches por brazo), pero `unir_intentos.py` (#841) bloquea Copahue `_s151_ab_diurno_on` porque un record MODIS Aqua (2026-06-18 07:30) difiere en un campo de decisión entre intentos del MISMO commit: `final_hotspot_source` test1 contra cluster_rescue, hotspot a 20,31 contra 0,94 km, `vrp_mw` 4,782 contra 1,834; los 11 `anomaly_pixels`, `distance_class` (summit), `primary_cluster.vrp_mw` (1,834) y la BT máxima (274,29 K) idénticos. SOSPECHA: empate de BT máxima desempatado según la CPU. Opciones: (a) usar el intento 2 entero e informar el record; (b) repetir Copahue otra vez; (c) arreglar el desempate en producción (A45). Recomendación: (a) para W2 y (c) como tarea propia | bitácora vuelta 127 | | pendiente |
 | D-15 | Commit de V2b de F/K: el pre-registro dice `--ref main` (`PREREGISTRO.md:139`), pero desde el commit de V1 y V2a (`402447f3` y `7b74435e`, mismo `pipeline/`) entraron #785 (marca de régimen en `store.py`), #821 (rama diurna apagada por flag, `process_viirs_mod.py`) y #822 (perfiles diurnos). Con `main`, la ventana V2 mezclaría dos pipelines (A108). Recomendación del loop: despachar V2b desde un tag en `7b74435e` | `git diff --stat 7b74435ed origin/main -- pipeline/` | tag propuesto `s151-fk-v2-codigo` | pendiente |
 | D-14 | Sello del probe 1.21 (C, CC, M, MC, R, RC) y merge de #840 (el clasificador de permisos le negó el merge al loop el 2026-10-16) | `experiments/_s151_mxd03_cumulo_121/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_cumulo_121_verif/`) más revisión del último diff | #840 (`2d9be9a9`) | pendiente |
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-17 00:09 UTC (vuelta 127): el PC estuvo suspendido ~6 h; W2a pareja; W3a repetida; W3b despachada; D-16
+- El despertar de las 18:24 UTC corrió a las 00:09 (PC suspendido). NRT verde 23:59. Disco 7,0 GB.
+- **W2a intento 2 (38853230521): COBERTURA PAREJA por sí solo** (control 1.085 noches, brazo diurno 1.085, 0 y 0; 425
+  y 420 pasadas diurnas V375/V750). El rojo de `recolectar` es sólo el push de la rama, que ya existía (mismo defecto
+  que V2a). Con W2b (vuelta 114), W2 está completa.
+- **W3a (38942908101): despareja**: al control de PCC le faltan 4 noches (diurno 699, control 695). Intento 1
+  resguardado (rama `s151-ab-diurno/38942908101` y `C:\Users\nmend\AppData\Local\Temp\claude\w3a_38942908101\i1\`);
+  repetido sólo el job `reproc (PuyehueCordonCaulle, _s151_ab_diurno_control)`, en curso desde las 00:11.
+  **W3b despachada** (38985239552, 2026-07-26 a 07-31, `--ref main`), pendiente; W3a intento 2 sigue vivo.
+- Unión de W2a con `unir_intentos.py` de main (`1a6f595b`): 21 de 22 unen (casi todos con un intento entero; muchos
+  comunes por tolerancia). **Copahue `_s151_ab_diurno_on` NO une**: de 5 comunes con diferencias, 4 son empates en el
+  top-100 (74+26 y 72+28 = 100) y uno difiere en decisión: MODIS Aqua 2026-06-18 07:30, `final_hotspot_source`
+  test1/cluster_rescue, hotspot 20,31/0,94 km, `vrp_mw` 4,782/1,834, con `anomaly_pixels` (11), clase, cúmulo y BT
+  máxima (274,29 K) idénticos. SOSPECHA: empate de la BT máxima de escena desempatado distinto según la CPU (no
+  verificado: el píxel de 20 km no está en la lista guardada). La regla bloquea, como debe; no se ablanda sin
+  Nicolás: D-16. Implicación para la evaluación: el G3 del diurno («noches intactas», control contra brazo en
+  runners distintos) puede fallar por estos empates aunque no haya efecto.
+- Corrección a la vuelta 121: además del top-100, hay un segundo desempate que no es estable (el hotspot de escena).
 
 ### 2026-10-16 17:51 UTC (vuelta 126): W3a despachada (run 38942908101)
 - W2a intento 2 figura `queued` a nivel de run con 12 jobs verdes y 2 en curso: es el desfase de GitHub ya visto en
