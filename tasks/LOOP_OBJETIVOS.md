@@ -381,6 +381,10 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 18:48 UTC (vuelta 165): espera
+- V2b 15 de 22; W5a 17 de 22; W5b pendiente. NRT verde 18:27. Disco 10,8 GB. Verificador de #847 (G3) en curso.
+  Esperan a Nicolás: D-17 (#844, #845), D-18 (#846), cron externo y fecha del token.
+
 ### 2026-10-17 18:38 UTC (vuelta 164): pre-registro 1.23 listo para el sello (D-18)
 - #846 en `e87a5e176` (CI 39058449134 verde, suite 2.027): sobre 35° la lectura 5 da «SIN NULO COMPARABLE (BOW TIE)»
   con test; rangos de las reglas 1 y 2 bajo 35° (39 de 46 protegidas, incluidas las 2 que pierde M), todos los cenits
