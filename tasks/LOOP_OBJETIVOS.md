@@ -391,6 +391,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 ~23:40 UTC (vuelta 176, S153): #849 en main y publicado; la localización de VIIRS 375 la decide el Test 1
+- **#849 mergeado** (squash `60c45833`, CI verde); Pages desplegado; R8: `index`, `diario`, `mosaico` y `periodo.js`
+  dan 200, y en el sitio público la noche del 1-oct de Chillán carga con su franja, «máx 1 oct» y sin errores.
+- **Localización (pedido de Nicolás), POR VERIFICAR** (`experiments/_s153_localizacion/`): en producción, casi todo lo
+  que VIIRS 375 publica viene del Test 1 y su cúmulo cae a 2 a 3 km del cráter, en el borde del disco de 3 km
+  (Villarrica 2,73 km, Llaima 2,75, Copahue 2,71; Láscar 0,37). Con K, sobre V1, las mismas publicaciones se juntan en
+  el cráter: Villarrica 0,18 km (100 % bajo 1 km), Tupungatito 0,20 (95 %), Chaitén 0,20 (100 %), Planchón Peteroa 0,40
+  (95 %); Lastarria queda en 1,29 km (campo fumarólico real, A69). O sea que la sobre-publicación y la mala posición
+  de VIIRS 375 son el mismo mecanismo. Pide verificador limpio antes de usarlo en el paquete de adopción de K.
+- **La referencia de MIROVA cubre sólo los 11 Tier A** (el consolidado de Mirova-v1 no tiene ninguna fila de los otros
+  34). Los otros 34 no tienen contra qué medir la réplica.
+
 ### 2026-10-17 ~23:00 UTC (vuelta 175, S153): selector de noche o rango del tablero (opción B, aprobada por Nicolás)
 - Rama `loop/tablero-periodo` (worktree `.claude/worktrees/s153-tablero`), diseño en
   `docs/superpowers/specs/2026-10-17-selector-periodo-tablero-design.md`. `frontend/periodo.js` nuevo (sólo funciones
