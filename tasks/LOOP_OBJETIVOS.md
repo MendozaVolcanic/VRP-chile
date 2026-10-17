@@ -366,6 +366,20 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 13:55 UTC (vuelta 145): cabeceras de las 11 protegidas solo OCR Suomi NPP de V1 (POR VERIFICAR)
+- `experiments/_s151_prereg_fk_11/resultado_v1/CABECERAS_SNPP.md` (scripts e imágenes en
+  `C:\Users\nmend\AppData\Local\Temp\claude\cabeceras_snpp_v1\`). Lista con `proteccion()` de `evaluar_fk.py`: 11
+  pasadas (Isluga V375 3, Chillán V375 3 y V750 2, Tupungatito V375 3), igual que `v1.log` l. 11-12. C0 publica las 11;
+  F y K todas menos Tupungatito 09-28 y 09-29.
+- En las 11 el «Last Update» de la imagen es de una pasada POSTERIOR: distancia y clase de otra pasada. Dos imágenes
+  con md5 idéntico bajo dos horas (Isluga 09-28 05:12 = 06:18; Chillán 10-01 06:00 = 18:42).
+- Distancia propia (serie «Last Month» de imágenes posteriores, leída a ojo, cruzada con la tabla y `Distancia_aprox_*`
+  del CSV `f1467a71`): Chillán (5) bajo 5 km, cráter; **Tupungatito 09-28 ~22,6 km y 09-29 ~9,6 km, sobre el inner de 7
+  km: con su clase propia no serían protegidas A** (F/K a 23,9 y 9,3 km desde `mirova_center`, sólo radios); Isluga 09-09
+  ~24 km, 09-28 ~16,7 km, 10-03 ambigua; Tupungatito 09-14 ambigua. Efecto lateral: dos filas de Isluga que los tres
+  brazos publican son lejanas para MIROVA y hoy cuentan como coincidencia en la lectura A.
+- Límites: valores leídos a ojo; imágenes de la rama main de Mirova-v1, no de un commit fijo. Se verifica junto con V2.
+
 ### 2026-10-17 13:42 UTC (vuelta 144): verificador de F/K V1: PARCIAL; el CUMPLE de lectura A se sostiene con matices
 - `experiments/_s151_prereg_fk_11/resultado_v1/VERIFICADOR.md`. Se sostiene: reproducción exacta (0 claves
   distintas); el código mide lo que dice (protegidas, negativos limpios, exclusión Suomi NPP solo OCR, D-9); la unión
