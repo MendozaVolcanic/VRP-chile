@@ -381,6 +381,20 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 19:28 UTC (vuelta 167): verificador de #847 (G3): MERGEABLE CON ARREGLOS; hueco en `borde` también en `unir_intentos`
+- `experiments/_s151_ab_diurno_g3_verif/VERIFICADOR_V1.md`. Se sostiene: W2 reproducido byte a byte (44 uniones), G3
+  nuevo CUMPLE en los dos órdenes con los conteos declarados y el viejo FALLA; el nuevo da FALLA con diferencias reales
+  sembradas (píxel de más, `vrp_mw` ×1,5 y ×(1+1e-6), `pc.vrp_mw`, `distance_class`, `vrp_mir_mw`; record que aparece
+  o desaparece da COBERTURA DESPAREJA); autoprueba 67/67, mutaciones 13/13 sin caídas; D2 bien escrita.
+- **Bloqueante:** `borde` se admite con listas cortas, donde el recorte top-100 no actúa: en VIIRS (Chaitén 4 píxeles,
+  V750 1 píxel) cambiar o agregar un píxel sin tocar el conteo da CUMPLE. Eso es detección, no empate, y la rama diurna
+  es VIIRS. En W2 no pasa (los 27 `borde`/`orden` reales son MODIS con lista llena). **El mismo `borde` vive en
+  `comparar()` de `unir_intentos.py` (main, #841/#843): afecta también a las uniones.** Arreglo pedido en el mismo PR:
+  `borde` sólo con `len(anomaly_pixels) + len(discarded_anomaly_pixels) == 100` en los dos lados; rehacer las uniones
+  de W2, F/K V1 y V2a con el `comparar()` nuevo y comprobar que no cambian.
+- No bloqueante: holgura heredada de `hotspot_escena` (riesgo bajo, `ENABLE_DAYTIME_MODIS=False`); node caído debería
+  dar INDECIDIBLE; `except AssertionError` de `mutar_evaluador.py` demasiado amplio.
+
 ### 2026-10-17 19:19 UTC (vuelta 166): espera
 - V2b 18 de 22 (4 en curso); W5a 18 de 22; W5b pendiente. NRT verde 19:07. Disco 10,9 GB. Verificador de #847 en curso.
 
