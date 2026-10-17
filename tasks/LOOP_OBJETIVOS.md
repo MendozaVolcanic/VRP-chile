@@ -379,6 +379,14 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 14:32 UTC (vuelta 148): W4 completa (W4b pareja); W5b despachada
+- W4b (39000333548) 23 de 23 verdes: 1.069 contra 1.069 noches, 0 y 0; 427 y 425 pasadas diurnas V375/V750. Con W4a
+  (vuelta 136) **W4 completa**. W5a (39032518643) corre; **W5b despachada** (39041204976, 2026-09-11 a 09-20),
+  `pending`, W5a sin desplazar. Faltan W6a y W6b.
+- V2b (39033530622): 4 verdes, 6 en curso, 12 en cola. NRT verde 14:17. Disco 13,9 GB.
+- Diurno: W2 a W4 completos (W2 con el caso D-16 de Copahue). No se evalúa hasta que el G3 compare con `comparar()`
+  más el predicado (verificador de #843): próxima vuelta, tarea 1.24.
+
 ### 2026-10-17 14:07 UTC (vuelta 147): verificador de la 1.21: CONFIRMADO; tarea 1.23 agregada
 - `experiments/_s151_mxd03_cumulo_121/resultado/VERIFICADOR.md`. Resumen idéntico reproducido; conteos iguales con
   script propio; delta de MC = −38 (alertas bajo 1 MW) + 3.582,5 (negativos limpios). Cobertura: 12 jobs, un commit,
