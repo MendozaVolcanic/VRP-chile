@@ -43,6 +43,16 @@ Casos (respuesta esperada entre paréntesis):
   22e none_vs_cero      None en el control, 0.0 en el diurno                     (G3 FALLA; atrapa None igual a todo)
   22f relativo_1e8      floats que difieren en 1e-8 relativo                     (G3 FALLA; atrapa rel_tol=5e-7)
   22g absoluto_5e13     diag_mu_deti 2e-8 con 5e-13 absoluto de diferencia       (G3 FALLA; atrapa abs_tol=1e-12)
+  Agregados con la desviación D2 (2026-10-17: el G3 clasifica cada par con unir_intentos.comparar más el predicado
+  del tablero). Cada uno atrapa una mutación g3_* de mutar_evaluador.py:
+  23  orden_pixeles     los mismos dos píxeles en otro orden                     (G3 CUMPLE, pares «orden»; atrapa g3_orden_falla)
+  23b borde_v375_f5     otro píxel en la lista y otro hotspot, VIIRS 375 con
+                        f5_core_vrp_mw (el tablero no lee los píxeles)          (G3 CUMPLE, pares «borde»; atrapa g3_borde_falla)
+  23c borde_v375_sin_f5 lo mismo sin f5_core_vrp_mw (el tablero SÍ los lee)      (G3 FALLA)
+  24  hotspot_escena    MODIS: un brazo con el rescate por cúmulo y el otro no   (G3 CUMPLE, pares «hotspot_escena»; atrapa g3_escena_falla)
+  24b escena_predicado  lo mismo con el cúmulo en 0 MW: comparar lo admite y el
+                        predicado del tablero da distinto (isSummitDetection)   (G3 FALLA; atrapa g3_sin_predicado)
+  25  clase_una_noche   una sola noche con distance_class distinta              (G3 FALLA; atrapa g3_distinto_admitido)
 """
 from __future__ import annotations
 
@@ -94,6 +104,55 @@ def noches(UW):
                 out.append((vol, "VIIRS375", d.strftime("%Y-%m-%d") + " 06:00"))
             d += timedelta(days=1)
     return out
+
+
+# Casos 23 a 25 (desviación D2). Píxeles y pares de records con la forma de los del pipeline.
+P1 = {"lat": -23.37, "lon": -67.73, "vrp_mw": 0.05, "bt_k": 280.0}
+P2 = {"lat": -23.36, "lon": -67.72, "vrp_mw": 0.04, "bt_k": 279.0}
+P3 = {"lat": -23.38, "lon": -67.74, "vrp_mw": 0.04, "bt_k": 279.0}
+
+
+def noche_orden(n, r):
+    r["anomaly_pixels"] = [dict(P1), dict(P2)] if n == "control" else [dict(P2), dict(P1)]
+
+
+def noche_borde(con_f5):
+    """El empate del recorte top-100: entra otro píxel del mismo VRP y con él cambia el hotspot de escena."""
+    def f(n, r):
+        r.update(anomaly_pixels=[dict(P1), dict(P2 if n == "control" else P3)],
+                 hotspot_lat=-23.36 if n == "control" else -23.38, hotspot_lon=-67.73)
+        if con_f5:
+            r["f5_core_vrp_mw"] = 0.0
+    return f
+
+
+def noche_escena(pc_vrp):
+    """Rescate por cúmulo (store.py:390-422) en el brazo diurno y no en el control, con todo lo demás igual: el par
+    que unir_intentos.comparar llama `hotspot_escena`. Con pc_vrp = 0 el lado rescatado queda con vrp_mw 0 y
+    etiqueta de descarte, y isSummitDetection (frontend/index.html:1596) lo baja de summit: sólo el predicado lo ve."""
+    pc = {"vrp_mw": pc_vrp, "centroid_lat": -38.0, "centroid_lon": -71.0, "centroid_dist_km": 1.0, "n_pixels": 2}
+
+    def f(n, r):
+        r.update(sensor="MODIS_AQUA", t_max_k=280.0, triggered_test1=pc_vrp > 0, primary_cluster=dict(pc))
+        if n == "control":
+            r.update(vrp_mw=3.0, final_hotspot_source="test1", hotspot_lat=-38.3, hotspot_lon=-71.3,
+                     hotspot_dist_km=30.0, final_hotspot_lat=-38.01, final_hotspot_lon=-71.01, final_hotspot_dist_km=1.2)
+        else:
+            r.update(vrp_mw=pc_vrp, final_hotspot_source="cluster_rescue",
+                     discarded_reason="single_pixel_far_overridden_by_cluster", hotspot_lat=-38.0, hotspot_lon=-71.0,
+                     hotspot_dist_km=1.0, final_hotspot_lat=-38.0, final_hotspot_lon=-71.0, final_hotspot_dist_km=1.0)
+    return f
+
+
+def noche_clase_una():
+    """distance_class distinta en UNA noche del brazo diurno (la primera que escribe)."""
+    hecho = []
+
+    def f(n, r):
+        if n == "diurno" and not hecho:
+            r["distance_class"] = "far"
+            hecho.append(1)
+    return f
 
 
 def escribir(dirc, UW, publica, sacar=(), diurno_igual_control=False, flags_diurno=None, cambiar_noche=False,
@@ -214,6 +273,12 @@ def main():
             ("22f relativo_1e8", dict(publica=lambda w, k, U: k in U[w]["pos"], ruido_relativo=1e-8), []),
             ("22g absoluto_5e13", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=lambda n, r: r.update(
                 diag_mu_deti=2e-8 + (5e-13 if n == "diurno" else 0.0))), []),
+            ("23 orden_pixeles", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=noche_orden), []),
+            ("23b borde_v375_f5", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=noche_borde(True)), []),
+            ("23c borde_v375_sin_f5", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=noche_borde(False)), []),
+            ("24 hotspot_escena", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=noche_escena(0.4)), []),
+            ("24b escena_predicado", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=noche_escena(0.0)), []),
+            ("25 clase_una_noche", dict(publica=lambda w, k, U: k in U[w]["pos"], modificar_noche=noche_clase_una()), []),
             ("19 v750_cerrado", dict(publica=lambda w, k, U: k in U[w]["pos"], sacar=todo_v750), []),
             ("20 tabla_sin_procesar", dict(publica=lambda w, k, U: k in U[w]["pos"], sacar=quince_w5), []),
         ]
@@ -270,6 +335,23 @@ def main():
             elif n in ("diferencia_real", "pixel_distinto", "pixel_extra", "none_vs_cero", "relativo_1e8", "absoluto_5e13"):
                 chequear(n, res["G3"].startswith("FALLA"),
                          "diferencia real en las noches: G3 FALLA (G3 %s, %s)" % (res["G3"][:20], res["noches"]["campos_distintos"]))
+            elif n in ("orden_pixeles", "borde_v375_f5", "hotspot_escena"):
+                # Lo que un mismo pipeline produce entre dos runners (desviación D2): se admite y se informa aparte.
+                cat = {"orden_pixeles": "orden", "borde_v375_f5": "borde", "hotspot_escena": "hotspot_escena"}[n]
+                e = res["noches"]["estados"]
+                chequear(n, res["G3"] == "CUMPLE" and e[cat] == res["noches"]["n_control"] > 0 and e["distinto"] == 0,
+                         "pares «%s» admitidos e informados: G3 %s, %s" % (cat, res["G3"], e))
+                chequear(n, len(res["noches"]["admitidos"][cat]) == e[cat] and "admitido (%s, informa)" % cat in txt,
+                         "cada par «%s» queda listado en la salida (%d)" % (cat, len(res["noches"]["admitidos"][cat])))
+            elif n in ("borde_v375_sin_f5", "escena_predicado", "clase_una_noche"):
+                e = res["noches"]["estados"]
+                esperado = {"borde_v375_sin_f5": res["noches"]["n_control"], "escena_predicado": res["noches"]["n_control"],
+                            "clase_una_noche": 1}[n]
+                chequear(n, res["G3"].startswith("FALLA") and e["distinto"] == esperado and res["veredicto"].startswith("INDECIDIBLE"),
+                         "G3 FALLA con %d pares distintos (esperados %d; %s)" % (e["distinto"], esperado, res["noches"]["campos_distintos"]))
+                if n == "escena_predicado":
+                    chequear(n, set(res["noches"]["campos_distintos"]) == {"predicado del tablero distinto"},
+                             "lo atrapa el predicado del tablero, no comparar (%s)" % res["noches"]["campos_distintos"])
             elif n == "cableado_roto":
                 chequear(n, res["veredicto"].startswith("INDECIDIBLE") and "cableado del brazo diurno" in res["veredicto"], "INDECIDIBLE por cableado")
             elif n == "skip_daytime":

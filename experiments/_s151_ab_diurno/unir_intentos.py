@@ -94,6 +94,10 @@ Qué magnitud y qué campos leen los evaluadores (condición 5 de D-16 a; leído
     con el orden invertido, ve 9 campos distintos en esa noche y daría FALLA. El mismo empate entre los jobs de
     los dos brazos produce eso sin unión de por medio: es el mismo pendiente del G3 que la comparación posicional
     de píxeles (abajo), y se arregla en el evaluador, no aquí.
+    RESUELTO por la desviación D2 del pre-registro (rama loop/diurno-g3-comparar, 2026-10-17): el G3 ya clasifica
+    cada par nocturno con `comparar()` más `_predicado` (evaluar_diurno.py, `noches_identicas`); `distinto` hace
+    FALLA y `orden`, `borde` y `hotspot_escena` se informan aparte. Sobre W2 unido en los dos órdenes da el mismo
+    veredicto. El texto que sigue se conserva por historia.
     REGLA DE USO (verificador del PR #843): el G3 del diurno compara el record crudo, por posición en las listas,
     y no lee `_union_intentos`. Por eso el diurno NO se evalúa sobre una unión que tenga casos `hotspot_escena`,
     `borde` u `orden` hasta que el G3 clasifique cada par nocturno con `comparar()` más el predicado del tablero
@@ -128,7 +132,7 @@ intentos) salía dos veces y `armar_tabla.py:43` se quedaba en silencio con la �
 Nota de diseño: CAMPOS_DECISION y DERIVADOS_DEL_BORDE son disjuntos (se comprueba al importar), así que en un
 record de borde quien bloquea es la lista cerrada de derivados: todo campo distinto que no esté en ella
 bloquea. CAMPOS_DECISION documenta de dónde sale cada campo; agregarle uno no cambia la regla.
-Estándar incoherente PENDIENTE (otro PR): el G3 de `evaluar_diurno.py:386-401 y 420` compara las listas de
+Estándar incoherente RESUELTO por la desviación D2 (ver arriba); texto original por historia: el G3 de `evaluar_diurno.py:386-401 y 420` compara las listas de
 píxeles POSICIONALMENTE, así que marcaría como diferencia los 8 records de orden y los 14 de borde que esta
 herramienta declara «mismo pipeline» (`verif_841/a4_g3.py`). No lo crea la unión: entre los dos brazos, que
 son jobs distintos, el mismo empate del sort puede dar FALLA de G3. `evaluar_fk.py` no tiene G3 campo a campo.

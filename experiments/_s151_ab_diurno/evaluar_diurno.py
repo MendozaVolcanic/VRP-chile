@@ -23,8 +23,9 @@ QUÉ REUSA, SIN REIMPLEMENTAR.
 
 QUÉ DECIDE (§6): G1 (discrimina: M1 − q_neg sobre el percentil 95 de un nulo barajado dentro de volcán ×
 sensor, en W2 a W6 y en W3 a W6), G2 (binomial de una cola contra la parsimonia diurna de MIROVA, por sensor,
-W2 a W6), G3 (noches idénticas). W1 se informa aparte (A119). La regla D-9 de alertas mínimas decide con
-«original»; si `clase_mirova.aplicar_regla_minimas` existe (PR #820), SN y SE se INFORMAN en una sección aparte.
+W2 a W6), G3 (noches idénticas, cada par clasificado con unir_intentos.comparar más el predicado del tablero:
+desviación D2 del pre-registro). W1 se informa aparte (A119). La regla D-9 de alertas mínimas decide con «original»;
+si `clase_mirova.aplicar_regla_minimas` existe (PR #820), SN y SE se INFORMAN en una sección aparte.
 
 EL NULO BARAJADO, por qué es exacto con la hipergeométrica. Barajar las etiquetas positivo/negativo dentro de un
 estrato con n pasadas, P positivas y K publicadas sólo cambia cuántas publicadas caen en positivas, X, y X sigue
@@ -63,6 +64,7 @@ from scipy import stats  # noqa: E402
 import banco_paridad as bp  # noqa: E402
 import clase_mirova as cm  # noqa: E402
 import sustrato as S  # noqa: E402
+import unir_intentos as U  # noqa: E402  (G3: comparar y el predicado del tablero, desviación D2)
 from pipeline.diurno import pasada_es_diurna  # noqa: E402
 from referencia_mirova_unificada import (HISTORICO_RECUPERADAS, RESPALDO_20260408,  # noqa: E402
                                          SNAP_CONS, SNAP_OCR, cargar_referencia_unificada)
@@ -381,34 +383,52 @@ def flags_iguales(raices, logs):
 # más fino del dETI, C1, es 3e-3) además de la relativa de 1e-9. Los enteros se comparan exactos.
 # La autoprueba fija los dos lados: casos 22 (CUMPLE) y 22b a 22g (FALLA), uno por cada mutación que sobrevivía.
 G3_REL_TOL, G3_ABS_TOL = 1e-9, 1e-14
+# Desde la desviación D2 (2026-10-17) la comparación la hace `unir_intentos.comparar`, que usa SU tolerancia y
+# excluye SU lista de campos de proceso. Las dos tienen que ser las de este archivo: si alguien cambia una sola, el
+# evaluador deja de decir lo que el pre-registro anota, y eso se ve al importar, no en un veredicto.
+assert (G3_REL_TOL, G3_ABS_TOL) == (U.REL_TOL, U.ABS_TOL), "G3 y unir_intentos con tolerancias distintas"
+assert set(VOLATILES) == U.PROCESO, "G3 y unir_intentos excluyen campos de proceso distintos"
+
+# G3 por par nocturno control/diurno (desviación D2 del pre-registro, 2026-10-17; regla mínima del verificador del
+# PR #843, VERIFICADOR_843.md §3). Antes: record crudo campo a campo con las listas de píxeles por POSICIÓN. Eso
+# fallaba por dos causas que no son del experimento: (1) los brazos corren en runners distintos y el recorte top-100
+# de `np.argsort(-per_pixel_vrp_mw)` de process_modis.py:1085-1099 desempata distinto (orden, conjunto de la lista y
+# a veces el hotspot de escena, con el rescate por cúmulo de store.py:390-422 detrás); (2) con ventanas unidas, el
+# veredicto dependía del orden de los intentos (W2a Copahue 2026-06-18 07:30: 9 campos con el orden (2,1), ninguno
+# con (1,2)). Ahora cada par se clasifica con `unir_intentos.comparar` (la MISMA regla que decide si dos intentos
+# del mismo código dicen lo mismo) y los de `borde` y `hotspot_escena` pasan además por el predicado del tablero con
+# node (`unir_intentos._predicado`): si el tablero da distinto, el par es `distinto`. `igual` y `tolerancia` son lo
+# que el G3 ya admitía; `orden`, `borde` y `hotspot_escena` se admiten y se INFORMAN aparte, par por par.
+# Cualquier par fuera de G3_ADMITIDAS hace FALLA.
+G3_ADMITIDAS = ("igual", "tolerancia", "orden", "borde", "hotspot_escena")
+# Las categorías de unir_intentos.comparar, todas, aparte de cuáles se admiten (una mutación de G3_ADMITIDAS
+# tiene que cambiar el veredicto, no romper el conteo).
+G3_CATEGORIAS = ("igual", "tolerancia", "orden", "borde", "hotspot_escena", "distinto")
 
 
-def iguales(a, b):
-    """Igualdad campo a campo: floats con tolerancia (G3_REL_TOL, G3_ABS_TOL), enteros, bools, None y strings
-    exactos, recursiva en listas y dicts (anomaly_pixels)."""
-    if isinstance(a, bool) or isinstance(b, bool):
-        return a == b
-    if isinstance(a, int) and isinstance(b, int):
-        return a == b
-    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
-        if isinstance(a, float) and isinstance(b, float) and math.isnan(a) and math.isnan(b):
-            return True
-        return math.isclose(a, b, rel_tol=G3_REL_TOL, abs_tol=G3_ABS_TOL)
-    if isinstance(a, dict) and isinstance(b, dict):
-        return a.keys() == b.keys() and all(iguales(a[k], b[k]) for k in a)
-    if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
-        return len(a) == len(b) and all(iguales(x, y) for x, y in zip(a, b))
-    return a == b
-
-
-def noches_identicas(rc, rd):
-    """Nulo 2 y 3: records nocturnos de los dos brazos, campo a campo salvo VOLATILES. Devuelve un dict con la
-    cobertura (faltan/sobran) y las diferencias de campos, separando las de versión de producto (A108)."""
+def noches_identicas(rc, rd, predicado=None):
+    """Nulo 2 y 3: cada par nocturno (vol, sensor, minuto) de los dos brazos, clasificado con unir_intentos.comparar
+    (sin VOLATILES) y, si es `borde` o `hotspot_escena`, con el predicado del tablero. Devuelve la cobertura
+    (faltan/sobran, versión de producto o gránulo distintos, A108), el conteo por categoría, los pares admitidos
+    de orden/borde/hotspot_escena (para informarlos) y los campos de los pares distintos.
+    `predicado(pares, volcan)` devuelve los índices de los pares en que el tablero difiere (por defecto el de
+    unir_intentos, con node); se puede inyectar para probar que el paso importa."""
+    predicado = predicado or U._predicado
     nc = {(r["vol"], r["sensor"], r["t"]): r["raw"] for r in rc if not r["dia"]}
     nd = {(r["vol"], r["sensor"], r["t"]): r["raw"] for r in rd if not r["dia"]}
     faltan, sobran = sorted(set(nc) - set(nd)), sorted(set(nd) - set(nc))
-    campos, version = collections.Counter(), []
-    ejemplos = []
+    campos, version, ejemplos = collections.Counter(), [], []
+    estados = {e: 0 for e in G3_CATEGORIAS}
+    admitidos = {e: [] for e in ("orden", "borde", "hotspot_escena")}
+    a_probar = collections.defaultdict(list)          # vol -> [(clave, control, diurno, estado, detalle)]
+
+    def anotar_distinto(k, det):
+        estados["distinto"] += 1
+        cs = det.get("campos") or sorted(det.get("pixeles") or []) or ["(sin campo: %s)" % det]
+        campos.update(cs)
+        if len(ejemplos) < 5:
+            ejemplos.append("%s: %s" % ("|".join(k), sorted(cs)[:6]))
+
     for k in sorted(set(nc) & set(nd)):
         a_, b_ = nc[k], nd[k]
         # Otra versión de producto u otro gránulo (el nombre trae la hora de producción de NASA: un gránulo
@@ -417,14 +437,43 @@ def noches_identicas(rc, rd):
         if a_.get("product_version") != b_.get("product_version") or a_.get("granule") != b_.get("granule"):
             version.append("|".join(k))
             continue
-        dif = [c for c in set(a_) | set(b_) if c not in VOLATILES and not iguales(a_.get(c), b_.get(c))]
-        if dif:
-            campos.update(dif)
-            if len(ejemplos) < 5:
-                ejemplos.append("%s: %s" % ("|".join(k), sorted(dif)[:6]))
+        est, det = U.comparar({c: v for c, v in a_.items() if c not in VOLATILES},
+                              {c: v for c, v in b_.items() if c not in VOLATILES})
+        if est in ("borde", "hotspot_escena"):
+            a_probar[k[0]].append((k, a_, b_, est, det))
+        elif est == "distinto":
+            anotar_distinto(k, det)
+        else:
+            estados[est] += 1
+            if est == "orden":
+                admitidos["orden"].append("%s: %s" % ("|".join(k), det.get("listas_reordenadas")))
+    for vol, lista in sorted(a_probar.items()):
+        try:
+            malos = set(predicado([(x[1], x[2]) for x in lista], vol))
+        except Exception as e:  # sin node o sin el volcán en el tablero: no se puede probar, cuenta como distinto
+            malos, motivo = set(range(len(lista))), "predicado del tablero no se pudo correr: %s" % e
+        else:
+            motivo = "predicado del tablero distinto"
+        for j, (k, _, _, est, det) in enumerate(lista):
+            if j in malos:
+                anotar_distinto(k, {"campos": [motivo]})
+            else:
+                estados[est] += 1
+                admitidos[est].append("%s: píxeles (control, diurno) %s, campos distintos %s"
+                                      % ("|".join(k), det.get("pixeles") or "iguales como conjunto",
+                                         det.get("campos") if est == "hotspot_escena" else det.get("campos_derivados")))
     return {"n_control": len(nc), "n_diurno": len(nd), "faltan": len(faltan), "sobran": len(sobran),
             "ej_cobertura": ["|".join(k) for k in (faltan + sobran)[:5]], "version_distinta": len(version),
-            "campos_distintos": dict(campos), "ejemplos": ejemplos}
+            "estados": estados, "admitidos": admitidos, "campos_distintos": dict(campos), "ejemplos": ejemplos}
+
+
+def veredicto_g3(ni):
+    """Cobertura primero (A108); después, FALLA si algún par quedó fuera de G3_ADMITIDAS."""
+    if ni["faltan"] or ni["sobran"] or ni["version_distinta"]:
+        return "COBERTURA NOCTURNA DESPAREJA (repetir el job, A108)"
+    if any(n for e, n in ni["estados"].items() if e not in G3_ADMITIDAS):
+        return "FALLA (noches distintas: defecto del cableado)"
+    return "CUMPLE"
 
 
 def nulo_barajado(estratos, rng, n=N_BARAJADOS):
@@ -833,15 +882,13 @@ def evaluar(a):
 
     # ---------------- 7. G3 (nulos 2 y 3)
     ni = noches_identicas(rc, rd)
-    if ni["faltan"] or ni["sobran"] or ni["version_distinta"]:
-        res["G3"] = "COBERTURA NOCTURNA DESPAREJA (repetir el job, A108)"
-    elif ni["campos_distintos"]:
-        res["G3"] = "FALLA (noches distintas campo a campo: defecto del cableado)"
-    else:
-        res["G3"] = "CUMPLE"
-    print("\n== 7. G3, NOCHES INTACTAS (nulos 2 y 3): records nocturnos control %d, diurno %d | faltan %d, sobran %d %s | versión de producto o gránulo distintos %d | campos distintos %s %s -> %s"
+    res["G3"] = veredicto_g3(ni)
+    print("\n== 7. G3, NOCHES INTACTAS (nulos 2 y 3; pares clasificados con unir_intentos.comparar más el predicado del tablero, desviación D2): records nocturnos control %d, diurno %d | faltan %d, sobran %d %s | versión de producto o gránulo distintos %d | pares por categoría %s | campos de los distintos %s %s -> %s"
           % (ni["n_control"], ni["n_diurno"], ni["faltan"], ni["sobran"], ni["ej_cobertura"], ni["version_distinta"],
-             ni["campos_distintos"] or "ninguno", ni["ejemplos"], res["G3"]))
+             ni["estados"], ni["campos_distintos"] or "ninguno", ni["ejemplos"], res["G3"]))
+    for est in ("orden", "borde", "hotspot_escena"):
+        for x in ni["admitidos"][est]:
+            print("   admitido (%s, informa): %s" % (est, x))
     print("   campos excluidos de la comparación: %s (first_processed_utc agregado, ver PREGUNTAS del pre-registro)" % (VOLATILES,))
     res["noches"] = ni
 
