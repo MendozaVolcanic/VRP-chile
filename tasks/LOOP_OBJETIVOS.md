@@ -354,6 +354,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 03:18 UTC (vuelta 132): espera; disco en 5,9 GB (ciclo externo)
+- W3b 19 de 22 verdes, 3 en curso; W4a pendiente; V1 intento 3 37 de 44. NRT verde 02:53.
+- Disco en ciclos: 9,6, 8,9, 7,5, 6,2, 8,9, 8,5 y ahora 5,9 GB. Lo del loop en el Temp suma ~0,7 GB (sin cambio);
+  la causa es externa (SOSPECHA: Windows Update, que ya escribió hoy). Monitor que avisa bajo 4 GB; con 3 GB, parada
+  (§1.5) y aviso a Nicolás.
+
 ### 2026-10-17 02:37 UTC (vuelta 131): espera
 - W3b 15 de 22 verdes; W4a pendiente; V1 intento 3 35 de 44. NRT verde 02:20. Disco 8,5 GB. Las cuatro decisiones
   (cron, D-14, D-15, D-16) explicadas a Nicolás en la conversación; sin respuesta todavía.
