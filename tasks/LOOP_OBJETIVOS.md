@@ -366,6 +366,10 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 13:33 UTC (vuelta 142): espera
+- 1.21 (39034846297): 8 de 12 verdes. V2b: 6 en curso, 16 en cola. W4b 20 de 22; W5a pendiente. #843 en `5a1ddae9`
+  (el autor aplica los arreglos). Verificador de F/K V1 en curso. NRT verde 12:59. Disco 14,4 GB.
+
 ### 2026-10-17 13:29 UTC (vuelta 141): F/K V1 evaluada (POR VERIFICAR): con lectura A, F y K CUMPLEN
 - `evaluar_fk.py --ventana V1` sobre `union_d16` (salida en `experiments/_s151_prereg_fk_11/resultado_v1/`).
   Controles generales OK: cobertura pareja, versión 0 distintas, cableado de C0, F, K y G OK, determinismo del gemelo
