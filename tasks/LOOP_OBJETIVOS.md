@@ -363,6 +363,14 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 13:00 UTC (vuelta 138): 1.21 Láscar-2 en 16 min; los otros 11 despachados desde el mismo tag
+- Probe 1.21, job suelto Láscar-2 (run 39033482528, tag `s151-1.21-probe` = `e472c673`): verde, **16 min 25 s**
+  (12:41:34 a 12:57:59), bajo el umbral de 70 min del README. **Despachados los otros 11** desde el mismo tag (run
+  39034846297, mismo `e472c673`). Al terminar: evaluar en local con los artefactos de los dos runs juntos (el
+  evaluador da INCOMPLETO si traen más de un commit).
+- V2b (39033530622): 6 en curso, 16 en cola. W4b 16 de 22; W5a pendiente. NRT verde 12:59. Disco 15,1 GB.
+  D-16 (a): el agente sigue con trabajo en segundo plano.
+
 ### 2026-10-17 12:43 UTC (vuelta 137): Nicolás aprueba todo; #840 mergeado, 1.21 y V2b despachadas, D-16 (a) en curso
 - Nicolás: «sí a todo» (las cuatro recomendaciones). Hecho:
   - D-14: #840 mergeado (squash `e472c673`, CI verde en `2d9be9a9`). Tag `s151-1.21-probe` en `e472c673`.
