@@ -366,6 +366,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 13:59 UTC (vuelta 146): probe 1.21 evaluado (POR VERIFICAR): EMPEORA
+- Runs 39033482528 (Láscar-2) y 39034846297 (los otros 11), tag `s151-1.21-probe` (`e472c673`): 13 jobs verdes; un
+  solo commit en los 12 artefactos. `evaluar_cumulo.py` en local (salida en
+  `experiments/_s151_mxd03_cumulo_121/resultado/`): **VEREDICTO EMPEORA**, no adoptable. MC contra C: 0 protegidas
+  perdidas, 36 ganadas de 46, delta +3.544,5 [3.006,8; 4.082,2]. CC contra C EMPEORA (+3.695). M contra C PIERDE
+  PROTEGIDA (2 perdidas, 9 ganadas, delta −31,6 [−432,5; 369,4], FRÁGIL). MC contra CC PIERDE PROTEGIDA (1). Nulos:
+  R contra C PIERDE PROTEGIDA (4 perdidas); RC contra CC INDETERMINADO. C igual a la guardada en 462 de 470; deriva de
+  protegidas 0 de 46; 1 gránulo ausente del archivo (fuera de censo).
+- Lectura: etiquetar desde el cúmulo hace que casi toda noche tranquila con un cúmulo cerca del cráter se publique;
+  MxD03 sola pierde 2 protegidas, pero mover la posición al azar pierde 4: no se distingue del ruido. Verificador
+  limpio lanzado (`C:\Users\nmend\AppData\Local\Temp\claude\verif_121r\`).
+
 ### 2026-10-17 13:55 UTC (vuelta 145): cabeceras de las 11 protegidas solo OCR Suomi NPP de V1 (POR VERIFICAR)
 - `experiments/_s151_prereg_fk_11/resultado_v1/CABECERAS_SNPP.md` (scripts e imágenes en
   `C:\Users\nmend\AppData\Local\Temp\claude\cabeceras_snpp_v1\`). Lista con `proteccion()` de `evaluar_fk.py`: 11
