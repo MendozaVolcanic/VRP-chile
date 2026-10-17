@@ -366,6 +366,21 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 13:28 UTC (vuelta 140): verificador de #843: MERGEABLE CON ARREGLOS (no bloquean F/K); V1 en evaluación
+- `C:\Users\nmend\AppData\Local\Temp\claude\verif_843\VERIFICADOR.md`. Confirmado con datos: el píxel sale del
+  `argsort` de `process_modis.py:1085-1099`; P3 de F/K lee `disp` (`pc.vrp_mw` en MODIS con cúmulo) y
+  `evaluar_fk.py` no lee `vrp_mw`, `hotspot_*`, `final_hotspot_*`, `z` ni `fuente`; la unión de V1 rehecha sale
+  idéntica en 44 de 44 y da 4.820 por brazo. Arreglos pedidos al autor: dos tests (mutaciones m1 y m2 sobreviven) y
+  tres condiciones más estrictas (geometría sólo si se movió el hotspot; `final_hotspot_*` sólo con rescate o con
+  `final == hotspot`; en el rescatado `hotspot_*` = centroide del cúmulo, `store.py:398-400`).
+- G3 del diurno: con el orden (2,1) Copahue 06-18 da 9 campos distintos, más 4 noches de borde ya conocidas. Una
+  FALLA de G3 da INDECIDIBLE (`evaluar_diurno.py:750`): el error posible es el conservador. Regla mínima propuesta: el
+  G3 clasifica cada par con `comparar()` más el predicado; `distinto` falla y `orden`, `borde` y `hotspot_escena` se
+  informan. Es una desviación del pre-registro: **el diurno no se evalúa sobre uniones con esos casos hasta
+  arreglarlo** (tarea propia, a proponer a Nicolás).
+- **Evaluación de V1 lanzada**: `evaluar_fk.py --ventana V1` sobre `union_d16` con los logs del intento 3, salida en
+  `C:\Users\nmend\AppData\Local\Temp\claude\v1_38639658446\eval\`.
+
 ### 2026-10-17 13:18 UTC (vuelta 139): D-16 (a) en PR #843 (CI verde); V1 unida y PAREJA; verificador lanzado
 - #843 (`loop/unir-intentos-hotspot-escena`): categoría `hotspot_escena`, sólo MODIS, `t_max_k` igual, cúmulo presente,
   lista cerrada de campos, predicado de node igual; si cambian fuente, etiqueta o `vrp_mw`, la diferencia debe ser
