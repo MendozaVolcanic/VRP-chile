@@ -366,6 +366,17 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 13:41 UTC (vuelta 143): #843 (D-16 a) en main
+- Arreglos del verificador aplicados (`9732f218`, CI verde, suite local 1.981): m1, m2 y las tres condiciones nuevas
+  (a, b, c; centroide en `store.py:397-399`), 14 de 14 mutaciones mueren. Del `mutaciones.py` del verificador siguen
+  admitidas 4 (LAX1/LAX2 `vrp_mw` del lado no rescatado, LAX3 hotspot a 30 km sin rescate, LAX7 a 200 km): no se
+  pueden acotar desde el record (no guarda la suma de escena del Test 1 ni `max_hotspot_dist_km`); documentado, y
+  ninguna la lee F/K. Casos reales: los tres entran. Unión de V1 rehecha (`union_d16_v2\`): 44 de 44 idénticas a
+  `union_d16`, 4.820 por brazo. Nota del G3 en el docstring.
+- El PR sólo toca `unir_intentos.py` y su test (`gh pr view --json files`); el diff contra main mostraba 10 JSON de
+  `data/` por el desfase de la rama, no por el PR. **Mergeado** (squash `dc0b7e26`); `loop/activo` sincronizada sin
+  conflicto. Worktree del autor bloqueado por su proceso: se retira después, sin forzar.
+
 ### 2026-10-17 13:33 UTC (vuelta 142): espera
 - 1.21 (39034846297): 8 de 12 verdes. V2b: 6 en curso, 16 en cola. W4b 20 de 22; W5a pendiente. #843 en `5a1ddae9`
   (el autor aplica los arreglos). Verificador de F/K V1 en curso. NRT verde 12:59. Disco 14,4 GB.
