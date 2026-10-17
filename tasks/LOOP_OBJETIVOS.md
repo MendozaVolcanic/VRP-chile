@@ -397,7 +397,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   4 tests nuevos fallan con el `unir_intentos.py` de la rama (comprobado en copia aparte) y pasan con el nuevo (126
   verdes); autoprueba 68 de 68. Mutaciones corriendo. Segunda vuelta del verificador limpio lanzada
   (`C:\Users\nmend\AppData\Local\Temp\claude\verif_847_v2\`), que además reproduce las uniones de W2a, V1 y V2a.
-- V2b 18 de 22; W5b corriendo. Disco 11 GB.
+- **F/K V2b (39033530622) terminó con `recolectar` en rojo por COBERTURA:** control 6.124 pasadas, K 6.096; faltan
+  46 (Llaima 38, Villarrica 6, Chaitén 2) y sobran 18 (Llaima 10, Villarrica 5, Copahue 3; contado en local con
+  `contar_pasadas.claves`). Intento 1 en `C:\Users\nmend\AppData\Local\Temp\claude\v2b_39033530622\i1\`. Repetidos
+  Llaima, Villarrica, Chaitén y Copahue en los dos brazos, misma ventana 2026-04-21 a 06-12, desde el tag
+  `s151-fk-v2-codigo` (`pipeline/` idéntico a `7b74435e`): run 39068999603. Después: unir con `unir_intentos.py`.
+- W5b corriendo. Disco 11 GB.
 
 ### 2026-10-17 20:25 UTC (vuelta 171): CIERRE de S152 por contexto; bloque de arranque S153
 - `tasks/BLOQUE_ARRANQUE_S153.md`. Se fijó con trabajo en curso: agente del arreglo de #847 vivo; runs 39066031570
