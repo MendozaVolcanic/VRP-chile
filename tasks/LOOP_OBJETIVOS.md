@@ -391,6 +391,21 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 ~23:00 UTC (vuelta 175, S153): selector de noche o rango del tablero (opción B, aprobada por Nicolás)
+- Rama `loop/tablero-periodo` (worktree `.claude/worktrees/s153-tablero`), diseño en
+  `docs/superpowers/specs/2026-10-17-selector-periodo-tablero-design.md`. `frontend/periodo.js` nuevo (sólo funciones
+  nuevas; los helpers del predicado no se movieron) con su prueba en node (12 casos, fallaba antes del módulo). En
+  `index.html`: «Noche o rango…» con fechas y ◀ ▶, URL compartible (`?desde=&hasta=`), franja de período, clic en una
+  barra del gráfico lleva esa noche al panel, mapa del detalle y capa «Anomalías» con el criterio del gráfico
+  (`eqVrp > 0` y sensores), rótulos del nivel y de las métricas con el período, tabla NRT con sensores y redibujada con
+  «Sólo cráter», enlace a mosaico. `diario.html` y `mosaico.html` con su selector y enlaces que llevan el rango. G8
+  remapeado 1578 a 1594 (test y `CLAUDE.md`).
+- Verificado en el navegador local (zona horaria `America/Santiago`): por defecto las tres vistas muestran lo mismo que
+  antes (30, 90 y 31 días); Villarrica 30 d: el mapa dibuja las 158 detecciones del gráfico (antes faltaban 18) y apagar
+  MODIS quita exactamente sus 13; clic real en la barra más alta lleva al 2026-09-19; enlace a 2026-05-01..03 baja la
+  historia completa y filtra 30 pasadas de Láscar; el error de Chart.js al redibujar dentro de su propio clic se arregló
+  difiriendo el cambio.
+
 ### 2026-10-17 ~22:45 UTC (vuelta 174, S153): 1.23 CONFIRMADA; auditoría del tablero; D-19 y D-20 a la cola
 - **1.23, verificador limpio CONFIRMADO con matices** (`experiments/_s151_mxd03_sola_123/resultado/VERIFICADOR.md`):
   reproducido idéntico; 24 de 24 medios jobs, todos con un commit, ninguno `sin_tiempo` (Tupungatitoa 14 de 15, el L1B
