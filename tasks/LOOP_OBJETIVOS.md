@@ -380,6 +380,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 18:22 UTC (vuelta 163): segunda verificación de la 1.23: SELLABLE CON ARREGLOS (chicos)
+- `experiments/_s151_mxd03_sola_123_verif/VERIFICADOR_V2.md`. Sobre `c101f9cc9`: 41 tests; SIERRA falla de verdad con
+  el jacobiano viejo (±1 a ±4 líneas dan 0,51 a 0,81 px; ±5 da 1,000); nulo en km correcto; lectura 4 alcanza sus
+  cuatro estados; sin regresiones; no aplicar (c) tal cual es aceptable.
+- Queda: en el borde el problema es la forma del campo (con bow tie, C − M a lo largo de la traza es un diente de sierra
+  dentro de cada barrido, ±1,2 km a 35-40° y ±3,8 en el borde; modelo SIN VERIFICAR) y ninguna traslación rígida lo
+  imita. Arreglos pedidos: sobre 35° la lectura 5 es descriptiva («SIN NULO COMPARABLE»), con test; rango principal de
+  las reglas 1 y 2 bajo 35°; `radius_km` en `cruces_de_borde`.
+- Para el sello: MxD03 vuelve a dar PIERDE PROTEGIDA por la letra; el probe dice si la posición es mejor (vara de cenit
+  bajo y medio, casi seguro MXD03 MÁS CERCA, como #828) y si las pérdidas de Láscar son azar o efecto de una posición
+  mejor (lectura 4 con signo); no contesta el borde del barrido (Chillán).
+
 ### 2026-10-17 18:18 UTC (vuelta 162): arreglos de la 1.23 aplicados (#846 en `c101f9cc`); segunda verificación
 - Nulo en km (20 rumbos geográficos del tamaño en km del corrimiento real): el pipeline usa la posición sólo como
   distancia en km; `invariante_km.py`, grilla regular 1 × 2 km: CV del cruce de los círculos de 3, 5 y 25 km 0,03 a 0,07
