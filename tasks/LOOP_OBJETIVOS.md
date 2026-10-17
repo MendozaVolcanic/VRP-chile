@@ -311,12 +311,25 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   MIROVA 353 K; el corpus ya llegó a 354,24 K, y un píxel borrado no aparece en `t_max`. Qué: en las pasadas de
   Chillán desde el 2026-09-28, contar en VNP02IMG/VJ102IMG (bit de saturación de I04) y MOD021KM (SI = 65533) los
   píxeles saturados, y recalcular el VRP con y sin ellos contra lo que MIROVA publicó (9,0, 10,0 y 8,24 MW).
-- [ ] **1.21 (agregada por el loop el 2026-10-16, del resultado de la 1.17) MxD03 junto con la etiqueta desde el
+- [x] **1.21 HECHA 2026-10-17 (vuelta 147, verificador CONFIRMADO): EMPEORA.** La etiqueta desde el cúmulo no es
+  adoptable (+3.544,5 errores, todos de la etiqueta). MxD03 sola cae por la letra de la regla 1 (2 protegidas de Láscar
+  por A46, Test 1 que deja de disparar), pero el nulo de posición pierde 4: ni refutada ni probada. Siguiente: tarea
+  1.23. Resultado en `experiments/_s151_mxd03_cumulo_121/resultado/`. Texto original:
+  **1.21 (agregada por el loop el 2026-10-16, del resultado de la 1.17) MxD03 junto con la etiqueta desde el
   cúmulo.** El probe 1.17 dio PIERDE PROTEGIDA por la letra, pero las 2 pérdidas vienen de que `distance_class` sale del
   hotspot final (`ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER = False`), no de la posición. Probe de tres brazos sobre la
   misma población (C; MxD03; MxD03 + etiqueta desde el cúmulo), con la regla 1 como compuerta, el término a lo largo
   de la traza agregado al modelo de corrimiento y un brazo con ruido de posición como control real. Pre-registro,
   verificador, sello de Nicolás. Informe del verificador de la 1.17 en `verif_117r`.
+- [ ] **1.23 (agregada por el loop el 2026-10-17, del verificador de la 1.21) MxD03 sola: lo que falta para decidirla.**
+  Por qué: la 1.21 no la refuta ni la prueba; sus 2 pérdidas son el Test 1 de Láscar cruzando el umbral (4,81 a 2,56
+  y 3,28 a 2,83) con ~0,4 km de corrimiento, y el nulo (un solo rumbo por gránulo) pierde 4. Qué: (1) nulo con ~20
+  rumbos por gránulo para tener distribución; (2) una vara de posición independiente (cúmulo VIIRS 375 de la misma
+  noche, o TIF UTM de MIROVA, A106); (3) por qué el Test 1 de Láscar es tan sensible a 0,4 km; (4) el caso del borde
+  del barrido (Chillán Aqua 2026-10-12 07:20, cenit 59°, MC elige otro cúmulo a 9,7 km), corrigiendo antes la
+  anisotropía del nulo sobre 50°. De sólo lectura más probe; pre-registro y verificador antes de correr.
+  Además, del mismo verificador: **8 records de producción salen hoy con más píxeles anómalos que los guardados**
+  (deriva de código, mismos 8 en la 1.17 y la 1.21, todos Standard): identificar el commit.
 - [ ] **1.22 (agregada el 2026-10-17, D-16 b aprobada por Nicolás) Desempate determinista del hotspot de escena
   MODIS.** ⚠️ Corregido el 2026-10-17 por el autor de #843: el píxel que cambia NO es el `np.nanargmax` de
   `process_modis.py:1218` (`diag_t_max_dist_km` es idéntico en los dos intentos), sino el primero de
@@ -365,6 +378,21 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-17 14:07 UTC (vuelta 147): verificador de la 1.21: CONFIRMADO; tarea 1.23 agregada
+- `experiments/_s151_mxd03_cumulo_121/resultado/VERIFICADOR.md`. Resumen idéntico reproducido; conteos iguales con
+  script propio; delta de MC = −38 (alertas bajo 1 MW) + 3.582,5 (negativos limpios). Cobertura: 12 jobs, un commit,
+  470 de 471 (falta Tupungatito `MOD021KM.A2026275.0225`, declarado, no alerta); C' = C en 24 de 24.
+- M contra C pierde las mismas 2 de la 1.17 (Láscar Terra 04-20 y 04-30 01:30) por la ETIQUETA (A46): con MxD03 el Test
+  1 deja de disparar (4,81 a 2,56; 3,28 a 2,83), el hotspot salta al Salar (19 y 21 km) y el cúmulo queda MÁS cerca del
+  cráter (0,23 y 0,48 km). MC contra CC pierde Chillán Aqua 2026-10-12 07:20 (MIROVA 2,18 MW a 2,24 km; cenit 59°):
+  con MxD03 se elige otro cúmulo, 2 píxeles a 9,7 km (producción: 6 a 1,68 km); ésta sí es de posición.
+- FRÁGIL: R pierde 4 de Láscar con el mismo mecanismo; coincide con M sólo en la del 04-30. M gana 9 contra 5 del
+  ruido, con un solo sorteo por gránulo. Las ~3.500 de más vienen de la etiqueta (MC contra CC −151, indeterminado);
+  el replay acierta (309 contra 312 predichas). 8 diferencias de C contra lo guardado: deriva de código (iguales en la
+  1.17 y la 1.21, todos Standard); D-16 aparece en otros 3 gránulos sin efecto.
+- 1.21 cerrada; 1.23 en la cola (nulo de varios rumbos, vara de posición independiente, sensibilidad del Test 1 de
+  Láscar, borde del barrido, y la deriva de los 8 records).
 
 ### 2026-10-17 13:59 UTC (vuelta 146): probe 1.21 evaluado (POR VERIFICAR): EMPEORA
 - Runs 39033482528 (Láscar-2) y 39034846297 (los otros 11), tag `s151-1.21-probe` (`e472c673`): 13 jobs verdes; un
