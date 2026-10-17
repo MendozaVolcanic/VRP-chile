@@ -379,6 +379,10 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 15:38 UTC (vuelta 152): espera
+- V2b 7 de 22 verdes; W5a 6 de 22; W5b pendiente. NRT verde 15:27. Disco 11,5 GB (tres worktrees de agentes, ~1 GB
+  cada uno: se retiran al terminar). En curso: verificador de #844 y agente del G3 (1.24).
+
 ### 2026-10-17 15:37 UTC (vuelta 151): 1.22 en PR #844 (producción, SIN merge); mecanismo confirmado; verificador lanzado
 - Tag `pre-s151-desempate-top100` en `4943bfb79`. PR #844 (`loop/1.22-desempate-top100`), CI verde (1.976 pasan, 28
   saltados); suite local 1.990. **Mecanismo confirmado por el autor:** de 6.482 pares MODIS entre intentos (V1, V2a,
