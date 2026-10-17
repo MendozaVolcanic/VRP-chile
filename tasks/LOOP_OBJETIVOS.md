@@ -317,6 +317,13 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   misma población (C; MxD03; MxD03 + etiqueta desde el cúmulo), con la regla 1 como compuerta, el término a lo largo
   de la traza agregado al modelo de corrimiento y un brazo con ruido de posición como control real. Pre-registro,
   verificador, sello de Nicolás. Informe del verificador de la 1.17 en `verif_117r`.
+- [ ] **1.22 (agregada el 2026-10-17, D-16 b aprobada por Nicolás) Desempate determinista del hotspot de escena
+  MODIS.** Por qué: dos corridas del mismo commit eligen distinto el píxel más caliente de la escena
+  (`np.nanargmax(roi_bt_full)`, `pipeline/process_modis.py:1218`) con la misma BT máxima; cambia `final_hotspot_source`
+  y el `vrp_mw` del record (V1 Llaima 4,281/3,568; W2a Copahue 4,782/1,834), no lo publicado. Qué: confirmar el
+  mecanismo (SOSPECHA: ulps de log/exp según la CPU) con un sintético y con los dos casos; proponer un desempate
+  explícito (BT redondeada más índice) con su test, tag defensivo y PR SIN merge (§1.1, A45); medir cuántos records
+  del corpus cambia. Revisar también el top-100 de `process_modis.py:1085` (`np.argsort` no estable).
 - [ ] **1.20 (agregada por el loop el 2026-10-16, del verificador de la 1.18) Techos que borran señal válida.** De sólo
   lectura. (1) Techo M15 de 343 K en `pipeline/process_viirs_mod.py:182` contra M15 válido hasta 374 K: ¿cuántos
   píxeles y records del corpus borra, y cuánto VRP cambia? (2) I04 de NOAA-21 con LUT máx 361,00 K contra el corte de
@@ -347,6 +354,7 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-13 (texto original) | Cobertura de los A/B largos: ¿repetir y unir intentos (A108, ~20 h por vuelta y puede abrir huecos nuevos) o evaluar sobre la intersección de pasadas presentes en todos los brazos, informando las excluidas (desviación registrada; la pérdida es por descarga, independiente del brazo)? Recomendación del loop: intersección, con la regla del 5 % del control contra producción como compuerta | `C:\Users\nmend\AppData\Local\Temp\claude\fk_v1\detalle_cobertura.txt` (V1: 31 de 44 jobs cortos, 0,5 a 1,4 % por job; C0 de PCC falla el 5 %) | F/K V1, V2a, diurno | pendiente |
 | D-12 | ~~Merge de la columna~~ **HECHO** (Nicolás, 2026-10-16): Mirova-v1#25 mergeado 11:43 UTC (`2eac1758`); historia despachada (run 38895687049); hito A119 en #838 | | | cerrada |
 | D-12 (texto original) | Merge de la columna `Distancia_aprox_*` en el scraper (Mirova-v1 es producción) | verificador limpio en dos vueltas: sin bloqueos; `Distancia_km` y columnas viejas byte a byte iguales; umbral 5 provisional | Mirova-v1#25 (`f774a5d`) | pendiente |
+| D-14/D-15/D-16 y cron | **DECIDIDAS por Nicolás el 2026-10-17 (~12:40 UTC): «sí a todo»**, es decir, las recomendaciones del loop. D-14: #840 mergeado (squash `e472c673`) y 1.21 sellada; tag `s151-1.21-probe` en `e472c673`; Láscar-2 suelto despachado (run 39033482528). D-15: tag `s151-fk-v2-codigo` en `7b74435e`; V2b despachada desde el tag (run 39033530622). D-16: (a) en curso (agente, rama `loop/unir-intentos-hotspot-escena`); (b) pasa a la tarea 1.22. Cron externo `10 1-12 * * *` UTC: lo cambia Nicolás en cron-job.org (su cuenta); falta la fecha de vencimiento del token | bitácora vuelta 137 | #840, tags | cerradas |
 | D-16 (ampliada 2026-10-17, vuelta 136) | **Ya no es sólo Copahue: bloquea también F/K V1.** En Llaima del control de V1 (intentos 1 y 3, mismo commit), 4 de 458 pasadas MODIS tienen otro hotspot de escena con la misma BT máxima, y 2 cambian campos de decisión (Terra 2026-10-06 01:45: `final_hotspot_source` test1/cluster_rescue, `vrp_mw` 4,281/3,568, clase `summit` en las dos). Unida, Llaima del control da 461 pasadas = F, y **la cobertura de V1 queda pareja**; sin unirla faltan 2 (VIIRS NOAA-21 750 del 09-16, sólo en el intento 1). Repetir no sirve: depende de la CPU de cada corrida. Opciones: (a) admitir en `unir_intentos.py` diferencias del hotspot de escena MODIS cuando `distance_class`, `primary_cluster` y el predicado del tablero coinciden, conservando el primer intento e informándolas (cambio del instrumento: tests y verificador); (b) arreglar el desempate en producción (A45). Recomendación: (a) ahora para poder evaluar V1 y W2, (b) como tarea propia | bitácora vueltas 127 y 136 | | pendiente |
 | D-16 | W2a del A/B diurno: el intento 2 solo es completo y parejo (1.085 noches por brazo), pero `unir_intentos.py` (#841) bloquea Copahue `_s151_ab_diurno_on` porque un record MODIS Aqua (2026-06-18 07:30) difiere en un campo de decisión entre intentos del MISMO commit: `final_hotspot_source` test1 contra cluster_rescue, hotspot a 20,31 contra 0,94 km, `vrp_mw` 4,782 contra 1,834; los 11 `anomaly_pixels`, `distance_class` (summit), `primary_cluster.vrp_mw` (1,834) y la BT máxima (274,29 K) idénticos. SOSPECHA: empate de BT máxima desempatado según la CPU. Opciones: (a) usar el intento 2 entero e informar el record; (b) repetir Copahue otra vez; (c) arreglar el desempate en producción (A45). Recomendación: (a) para W2 y (c) como tarea propia | bitácora vuelta 127 | | pendiente |
 | D-15 | Commit de V2b de F/K: el pre-registro dice `--ref main` (`PREREGISTRO.md:139`), pero desde el commit de V1 y V2a (`402447f3` y `7b74435e`, mismo `pipeline/`) entraron #785 (marca de régimen en `store.py`), #821 (rama diurna apagada por flag, `process_viirs_mod.py`) y #822 (perfiles diurnos). Con `main`, la ventana V2 mezclaría dos pipelines (A108). Recomendación del loop: despachar V2b desde un tag en `7b74435e` | `git diff --stat 7b74435ed origin/main -- pipeline/` | tag propuesto `s151-fk-v2-codigo` | pendiente |
@@ -354,6 +362,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-17 12:43 UTC (vuelta 137): Nicolás aprueba todo; #840 mergeado, 1.21 y V2b despachadas, D-16 (a) en curso
+- Nicolás: «sí a todo» (las cuatro recomendaciones). Hecho:
+  - D-14: #840 mergeado (squash `e472c673`, CI verde en `2d9be9a9`). Tag `s151-1.21-probe` en `e472c673`.
+    **Despachado el job suelto Láscar-2** (run 39033482528), para cronometrar; si termina bajo 70 min, los otros 11
+    desde el MISMO tag (README de la 1.21, l. 396-404).
+  - D-15: tag `s151-fk-v2-codigo` en `7b74435e` (mismo `pipeline/` que V1 y V2a). **V2b despachada** desde el tag
+    (run 39033530622, 2026-04-21 a 06-12, C0 y K, comando de `PREREGISTRO.md:139` salvo el `--ref`).
+  - D-16 (a): agente en worktree, rama `loop/unir-intentos-hotspot-escena`: categoría acotada para el hotspot de
+    escena MODIS (misma BT máxima, clase, cúmulo, píxeles y predicado iguales, y lo que lean las métricas); prueba
+    sobre V1 y Copahue. Después, verificador limpio. D-16 (b): tarea 1.22.
+  - Cron externo: lo cambia Nicolás en cron-job.org. Falta la fecha de vencimiento del token.
 
 ### 2026-10-17 12:23 UTC (vuelta 136): loop relanzado (18,2 GB); V1 unida salvo Llaima control (D-16); W4a pareja; W5a despachada
 - Nicolás reinició y corrió el Liberador de espacio: **18,22 GB libres** (`SoftwareDistribution\Download` 0,91 GB).
