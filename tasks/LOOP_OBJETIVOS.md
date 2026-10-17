@@ -354,6 +354,15 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 03:39 UTC (vuelta 133): disco en 3,30 GB, a 0,3 GB de la parada; es Windows instalando la actualización
+- `df -k`: 3,30 GB libres (5,9 a las 03:18). `C:\Windows\SoftwareDistribution` bajó de 6,43 a 0,97 GB: la actualización
+  descargada se está **instalando** (se expande en el almacén de componentes; `WinSxS\Temp` 0,65 GB, `servicing`
+  0,67 GB). No es del loop (Temp del loop ~0,7 GB, sin cambio). Suele recuperarse en parte al reiniciar y con el
+  Liberador de espacio; el loop no toca la configuración del sistema.
+- Monitor de parada cada 2 min: bajo 3 GB, el loop se detiene (§1.5), lo anota y abre el issue `loop-detenido`.
+  Recomendación a Nicolás: reiniciar cuando Windows lo pida y correr el Liberador de espacio («Limpieza de
+  actualizaciones de Windows»).
+
 ### 2026-10-17 03:18 UTC (vuelta 132): espera; disco en 5,9 GB (ciclo externo)
 - W3b 19 de 22 verdes, 3 en curso; W4a pendiente; V1 intento 3 37 de 44. NRT verde 02:53.
 - Disco en ciclos: 9,6, 8,9, 7,5, 6,2, 8,9, 8,5 y ahora 5,9 GB. Lo del loop en el Temp suma ~0,7 GB (sin cambio);
