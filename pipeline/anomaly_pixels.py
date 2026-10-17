@@ -22,7 +22,7 @@ def orden_vrp_descendente(vrps, rows, cols):
     empates son frecuentes. `np.argsort` por defecto no es estable y numpy lo despacha a una ruta
     SIMD distinta según la CPU (AVX2, AVX-512 o ninguna), así que el orden de los empates, y con él
     el hotspot de escena (primer elemento) y qué píxeles entran al top-100, cambiaba de un runner a
-    otro con el mismo commit (medido: Llaima Terra 2026-10-06 01:45, `vrp_mw` 4,281 contra 3,568).
+    otro con el mismo commit (medido en 153 de 6.482 pares MODIS entre intentos).
 
     La clave (VRP descendente, fila, columna) depende sólo de la identidad del píxel, no de su
     posición en el arreglo ni de la CPU: define una permutación ÚNICA, que `np.lexsort` (estable)
@@ -61,7 +61,7 @@ def build_anomaly_pixels(vrp_2d, lat, lon, dist, bt, top_n: int = 100):
     if len(rows) == 0:
         return []
     vrps = vrp_2d[rows, cols]
-    # S151 1.22: desempate explícito, independiente de la CPU (ver orden_vrp_descendente).
+    # S151 1.22: desempate explícito, orden de empates determinista (ver orden_vrp_descendente).
     order = orden_vrp_descendente(vrps, rows, cols)[:top_n]
     out = []
     for k in order:

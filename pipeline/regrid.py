@@ -114,7 +114,11 @@ def regrid_to_utm(lat2d, lon2d, bands: dict, center_lat: float,
     cx = (ix + 0.5) * cell_km - half_km
     cy = half_km - (iy + 0.5) * cell_km
     d2 = (x - cx) ** 2 + (y - cy) ** 2
-    orden = np.argsort(-d2[validas])          # peor primero, mejor al final
+    # S151 1.22 (A102): orden ESTABLE. Dos muestras a la misma distancia (por ejemplo, el solape
+    # del bow tie repite posiciones) empatan exacto, y el argsort por defecto las ordenaba distinto
+    # segun la CPU: otra muestra ganaba la celda con el mismo commit. Con `kind="stable"` gana
+    # siempre la de mayor indice del swath (se escribe ultima).
+    orden = np.argsort(-d2[validas], kind="stable")   # peor primero, mejor al final
     sel = np.flatnonzero(validas)[orden]
 
     out = {}

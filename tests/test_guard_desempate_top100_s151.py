@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-"""S151, tarea 1.22 (D-16 b): el top-100 de píxeles anómalos y el hotspot de escena no pueden
-depender de la CPU del runner.
+"""S151, tarea 1.22 (D-16 b): el orden de los empates que decide el top-100 de píxeles anómalos
+y el hotspot de escena tiene que ser determinista, no depender de la CPU del runner. (La
+aritmética sí sigue dependiendo de la CPU en el último dígito, por ejemplo `diag_mu_deti`: este
+arreglo no la toca.)
 
 POR QUÉ. En MODIS la temperatura de brillo sale de enteros escalados del L1B, así que toma valores
 discretos; con el área de píxel fija de nadir (A66) y el fondo del anillo como un solo número, dos
@@ -8,8 +10,9 @@ píxeles con el mismo entero dan un VRP por píxel IDÉNTICO bit a bit. Esos emp
 (cientos de píxeles a 244,39 K en Copahue). El corte top-100 se hacía con
 `np.argsort(-per_pixel_vrp_mw)[:100]`, cuyo algoritmo por defecto no es estable y que numpy despacha
 a una ruta SIMD distinta según la CPU (AVX2, AVX-512 o ninguna). Resultado medido: el mismo commit
-en dos runners da otro hotspot de escena en unos pocos records por volcán, y con él otro rescate por
-cúmulo y otro `vrp_mw` (Llaima Terra 2026-10-06 01:45, 4,281 contra 3,568 MW). Detalle en el cuerpo
+en dos runners da otro top-100 y, en unos pocos records, otro hotspot de escena, y con él otro
+rescate por cúmulo y otro `vrp_mw` (consistente con Llaima Terra 2026-10-06 01:45, 4,281 contra
+3,568 MW; la lista que probaría el empate en ese record no se guarda). Detalle en el cuerpo
 del PR de la tarea 1.22 y en `experiments/_s151_desempate_top100/`.
 
 El arreglo ordena por una clave que depende sólo de la identidad del píxel: VRP descendente y, en
@@ -133,68 +136,107 @@ def test_build_anomaly_pixels_no_depende_de_la_cpu():
     assert con == sin
 
 
-_ESCENA_MODIS = r'''
-import json
+_ESCENA_MODIS = r"""
+import json, os
 from pathlib import Path
 from unittest.mock import patch
 import numpy as np
 import pipeline.process_modis as pm
 
+if os.environ.get("ORDEN_VIEJO") == "1":
+    # Control: la expresion de antes del arreglo, para medir si la escena discrimina.
+    pm.orden_vrp_descendente = lambda v, r, c: np.argsort(-np.asarray(v))
+
 LAT0, LON0 = -39.42, -71.94
-# Malla de 0,5 km (el área por píxel sigue siendo la de nadir, 1 km2, A66): con más píxeles en el
-# ROI la fracción de píxeles calientes baja y la desviación del dNTI no tapa a la retícula.
+# Malla de 0,5 km (el area por pixel sigue siendo la de nadir, 1 km2, A66): con mas pixeles en el
+# ROI la fraccion de pixeles calientes baja y la desviacion del dNTI no tapa a la reticula.
 n = 121
 d = (np.arange(n) - n // 2) * 0.5
 y, x = np.meshgrid(d, d, indexing="ij")
 lat = (LAT0 + y / 111.0).astype(np.float32)
 lon = (LON0 + x / (111.0 * np.cos(np.radians(LAT0)))).astype(np.float32)
 r = np.hypot(y, x)
-rng = np.random.default_rng(11)
-bt21 = 255.0 + np.clip(r, 0, 12) * 1.2 + rng.normal(0, 0.15, r.shape)
-bt31 = bt21 - 1.0 + rng.normal(0, 0.15, r.shape)
-# Retícula de píxeles calientes AISLADOS con la misma temperatura exacta (como un mismo entero del
-# L1B): cada uno es anómalo contra sus 8 vecinos y todos empatan en VRP por píxel. Son más de 100,
-# así que el corte top-100 cae dentro de un empate, y el máximo también es un empate.
-hot = np.zeros(r.shape, bool)
-hot[::6, ::6] = True
-hot &= r <= 20
-bt21[hot] = 290.0
-bt31[hot] = 258.0
+
 
 def rad(bt, lam):
     return (pm.C1 / (lam ** 5 * (np.exp(pm.C2 / (lam * bt)) - 1))).astype(np.float32)
 
-data = {"band21": rad(bt21, pm.BAND21_LAMBDA), "band22": rad(bt21, pm.BAND21_LAMBDA),
-        "band31": rad(bt31, 11.03), "lat": lat, "lon": lon}
-with patch.object(pm, "read_modis_l1b", return_value=data):
-    rec = pm.calculate_vrp(
-        hdf_path=Path("MOD021KM.A2026200.0300.061.hdf"), geo_path=Path("MOD03.sintetico.hdf"),
-        volcano_lat=LAT0, volcano_lon=LON0, radius_km=25.0,
-        vent_lat=LAT0, vent_lon=LON0, inner_radius_km=25.0)
-ap = rec.get("anomaly_pixels") or []
-print(json.dumps({
-    "n": rec.get("n_anomalous_pixels"),
-    "hotspot": [rec.get("hotspot_lat"), rec.get("hotspot_lon")],
-    "pix": [(p["lat"], p["lon"]) for p in ap],
-    "vrp_top": [p["vrp_mw"] for p in ap[:2]],
-    "vrp_borde": [p["vrp_mw"] for p in ap[-1:]],
-}))
-'''
+
+salida = []
+for semilla in range(6):
+    rng = np.random.default_rng(11)
+    bt21 = 255.0 + np.clip(r, 0, 12) * 1.2 + rng.normal(0, 0.15, r.shape)
+    bt31 = bt21 - 1.0 + rng.normal(0, 0.15, r.shape)
+    # Reticula de pixeles calientes AISLADOS con la misma temperatura exacta (como un mismo entero
+    # del L1B): cada uno es anomalo contra sus 8 vecinos y todos empatan en VRP por pixel. Son mas de
+    # 100, asi que el corte top-100 cae dentro de un empate. Ademas, 4 de ellos (elegidos con la
+    # semilla) estan mas calientes y empatan entre si en el maximo: es el empate que decide el
+    # hotspot. Con un maximo empatado entre MUCHOS (toda la reticula) el argsort por defecto deja
+    # casi siempre el mismo primero en las dos rutas SIMD, y el hotspot no discriminaba.
+    hot = np.zeros(r.shape, bool)
+    hot[::6, ::6] = True
+    hot &= r <= 20
+    bt21[hot] = 290.0
+    bt31[hot] = 258.0
+    filas, cols = np.nonzero(hot)
+    k = np.random.default_rng(semilla).choice(filas.size, 4, replace=False)
+    bt21[filas[k], cols[k]] = 300.0
+    bt31[filas[k], cols[k]] = 260.0
+    data = {"band21": rad(bt21, pm.BAND21_LAMBDA), "band22": rad(bt21, pm.BAND21_LAMBDA),
+            "band31": rad(bt31, 11.03), "lat": lat, "lon": lon}
+    with patch.object(pm, "read_modis_l1b", return_value=data):
+        rec = pm.calculate_vrp(
+            hdf_path=Path("MOD021KM.A2026200.0300.061.hdf"), geo_path=Path("MOD03.sintetico.hdf"),
+            volcano_lat=LAT0, volcano_lon=LON0, radius_km=25.0,
+            vent_lat=LAT0, vent_lon=LON0, inner_radius_km=25.0)
+    ap = rec.get("anomaly_pixels") or []
+    salida.append({
+        "n": rec.get("n_anomalous_pixels"),
+        "hotspot": [rec.get("hotspot_lat"), rec.get("hotspot_lon")],
+        "pix": [(p["lat"], p["lon"]) for p in ap],
+        "vrp": [p["vrp_mw"] for p in ap],
+    })
+print(json.dumps(salida))
+"""
+
+
+def _correr_escena(sin_simd, orden_viejo):
+    os.environ["ORDEN_VIEJO"] = "1" if orden_viejo else "0"
+    try:
+        return _correr(_ESCENA_MODIS, sin_simd)
+    finally:
+        os.environ.pop("ORDEN_VIEJO", None)
+
+
+def _control_de_escena(res):
+    """Si la escena deja de tener empates en el maximo y en el borde, el test no mide lo que dice."""
+    for e in res:
+        assert e["n"] > 100, e["n"]
+        assert len(e["pix"]) == 100
+        assert e["vrp"][0] == e["vrp"][1] == e["vrp"][3] > e["vrp"][4], "ya no hay 4 empatados en el maximo"
+        assert e["vrp"][-1] == e["vrp"][4], "ya no hay empate en el borde del top-100"
+
+
+def test_control_con_el_orden_viejo_la_escena_discrimina_hotspot_y_top100():
+    """Control positivo (A110): con la expresion de antes del arreglo, apagar las extensiones SIMD
+    cambia el top-100 y, en alguna de las 6 escenas, el hotspot de escena. Si el hotspot no cambia
+    en ninguna, la asercion del hotspot del test de abajo no tiene poder en esta CPU y se dice."""
+    _requiere_simd()
+    con, sin = _correr_escena(False, True), _correr_escena(True, True)
+    _control_de_escena(con)
+    assert any(a["pix"] != b["pix"] for a, b in zip(con, sin)), "el orden viejo no cambio el top-100"
+    if not any(a["hotspot"] != b["hotspot"] for a, b in zip(con, sin)):
+        pytest.skip("en esta CPU el orden viejo no cambia el hotspot en ninguna escena: sin poder")
 
 
 def test_modis_top100_y_hotspot_no_dependen_de_la_cpu():
-    """Cadena MODIS completa (`calculate_vrp`) sobre una escena sintética con más de 100 píxeles
-    empatados: mismo hotspot de escena y mismo top-100, en el mismo orden, con y sin SIMD."""
+    """Cadena MODIS completa (`calculate_vrp`) sobre 6 escenas sinteticas con empates en el maximo
+    y en el borde: mismo hotspot de escena y mismo top-100, en el mismo orden, con y sin SIMD."""
     _requiere_simd()
-    con, sin = _correr(_ESCENA_MODIS, False), _correr(_ESCENA_MODIS, True)
-    # Control de la escena: si deja de tener empates en el máximo y en el borde, el test no mide
-    # lo que dice medir.
-    assert con["n"] > 100, con["n"]
-    assert len(con["pix"]) == 100
-    assert con["vrp_top"][0] == con["vrp_top"][1], "la escena ya no empata en el máximo"
-    assert con["vrp_borde"][0] == con["vrp_top"][0], "la escena ya no empata en el borde del top-100"
-    assert con["hotspot"] == sin["hotspot"]
-    assert con["pix"] == sin["pix"]
+    con, sin = _correr_escena(False, False), _correr_escena(True, False)
+    _control_de_escena(con)
+    assert [e["hotspot"] for e in con] == [e["hotspot"] for e in sin]
+    assert [e["pix"] for e in con] == [e["pix"] for e in sin]
 
 
 _SITIOS = {
@@ -220,3 +262,69 @@ def test_build_anomaly_pixels_usa_el_desempate_explicito():
     cuerpo = src.split("def build_anomaly_pixels", 1)[1]
     assert not re.search(r"(?<![A-Za-z0-9_])np\.argsort\s*\(", cuerpo)
     assert re.search(r"(?<![A-Za-z0-9_])orden_vrp_descendente\s*\(", cuerpo)
+
+
+_REGRID = r"""
+import hashlib, json, os
+import numpy as np
+import pipeline.regrid as rg
+
+if os.environ.get("ORDEN_VIEJO") == "1":
+    # Control: argsort sin `kind`, como antes del arreglo.
+    class _NP:
+        def __getattr__(self, nombre):
+            return getattr(np, nombre)
+
+        @staticmethod
+        def argsort(a, **_):
+            return np.argsort(a)
+
+    rg.np = _NP()
+
+LAT0, LON0 = -39.42, -71.94
+m = 80
+d = (np.arange(m) - m // 2) * 0.5
+y, x = np.meshgrid(d, d, indexing="ij")
+lat = LAT0 + y / 111.0
+lon = LON0 + x / (111.0 * np.cos(np.radians(LAT0)))
+# Cada posicion aparece DOS veces (filas duplicadas, como el solape del bow tie): la distancia al
+# centro de la celda empata exacto y el valor distingue cual muestra gano la celda.
+lat2, lon2 = np.repeat(lat, 2, axis=0), np.repeat(lon, 2, axis=0)
+valor = np.repeat(np.arange(m, dtype=float)[:, None], m, axis=1)
+valor = np.stack([valor, valor + 0.5], axis=1).reshape(2 * m, m)
+out = rg.regrid_to_utm(lat2, lon2, {"b": valor}, LAT0, LON0, cell_km=1.0, half_km=15.0)
+g = out["b"]
+print(json.dumps({"md5": hashlib.md5(np.nan_to_num(g, nan=-1).tobytes()).hexdigest(),
+                  "frac_segunda": float(np.nanmean((g % 1) == 0.5))}))
+"""
+
+
+def _correr_regrid(sin_simd, orden_viejo):
+    os.environ["ORDEN_VIEJO"] = "1" if orden_viejo else "0"
+    try:
+        return _correr(_REGRID, sin_simd)
+    finally:
+        os.environ.pop("ORDEN_VIEJO", None)
+
+
+def test_regrid_desempate_determinista_entre_muestras_duplicadas():
+    """`pipeline/regrid.py` (A102, hoy inerte: ENABLE_UTM_REGRID apagado). Entre dos muestras
+    a la misma distancia del centro de su celda gana siempre la de mayor indice del swath (orden
+    estable, escritura de peor a mejor), con y sin SIMD."""
+    nuevo = _correr_regrid(False, False)
+    assert nuevo["frac_segunda"] == 1.0, nuevo
+    if _extensiones_despachables():
+        assert _correr_regrid(True, False) == nuevo
+
+
+def test_control_regrid_con_el_orden_viejo_depende_de_la_cpu():
+    _requiere_simd()
+    con, sin = _correr_regrid(False, True), _correr_regrid(True, True)
+    if con == sin:
+        pytest.skip("en esta CPU el orden viejo del regrid coincide en las dos rutas: sin poder")
+    assert con != sin
+
+
+def test_regrid_usa_orden_estable():
+    src = (ROOT / "pipeline" / "regrid.py").read_text(encoding="utf-8")
+    assert re.search(r"(?<![A-Za-z0-9_])np\.argsort\s*\(\s*-d2\[validas\]\s*,\s*kind\s*=\s*\"stable\"\s*\)", src)
