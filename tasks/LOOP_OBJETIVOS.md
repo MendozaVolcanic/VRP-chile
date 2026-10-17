@@ -359,6 +359,10 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   Temp (1,67 GB; `Temp\claude` 1,38 GB), Autoscan (0,13 GB escritos en 10 h). Búsqueda en todo C: de archivos de más
   de 30 MB modificados en 20 min, en curso; monitor que avisa bajo 4 GB (la parada es 3 GB).
 - Runs: W3b 6 verdes, 3 en curso; W4a pendiente; V1 intento 3 31 verdes, 6 en curso, 7 en cola. NRT verde 01:16.
+- Resultado de la búsqueda (archivos de más de 30 MB escritos en 20 min en todo C:): sólo un journal de MongoDB
+  (100 MB), `WebCacheV01.dat` (90 MB) y archivos de Windows Update (`SoftwareDistribution\DataStore\DataStore.edb`,
+  `USOPrivate\UpdateStore\store.db`). Ninguno del loop. A los ~25 min el disco volvió a **8,9 GB**: caída transitoria,
+  con toda probabilidad Windows Update preparando la instalación y limpiando después (SOSPECHA, no verificado).
 
 ### 2026-10-17 00:46 UTC (vuelta 128): W3a completa tras la repetición; W3b corriendo
 - W3a intento 2 (repetición del job del control de PCC): `recolectar` cuenta **699 contra 699 noches, PAREJA**; su
