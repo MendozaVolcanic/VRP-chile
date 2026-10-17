@@ -380,6 +380,19 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-17 18:16 UTC (vuelta 161): 1.24 en PR #847 (G3 con `comparar()`, CI verde); verificador lanzado
+- `noches_identicas` clasifica cada par nocturno control/diurno con `unir_intentos.comparar`; `borde` y
+  `hotspot_escena` pasan por `unir_intentos._predicado` (node, por volcán); si el tablero difiere o no corre, el par es
+  `distinto`; un `distinto` es FALLA. Comprueba al importar que tolerancias y campos de proceso son los de
+  `unir_intentos`. `g3_solo.py` nuevo. Desviación D2 en el §11 del pre-registro.
+- Sobre W2 (2.154 pares nocturnos): G3 viejo FALLA en los dos órdenes de W2a; el nuevo CUMPLE en los dos con 0 distintos
+  (1,2: igual 1.108, tolerancia 1.017, orden 15, borde 13, hotspot_escena 1; 2,1: igual 909, tolerancia 1.216, orden 17,
+  borde 10, hotspot_escena 2). Un caso `hotspot_escena` (PCC Terra 06-18 02:15) aparece entre los dos BRAZOS, sin unión.
+- Autoprueba 67 de 67 (casos 23 a 25 nuevos); mutaciones 13 de 13. **Hallazgo de método:** 4 mutaciones del G3 contaban
+  como atrapadas sólo porque el evaluador mutado se caía; `mutar_evaluador.py` ya no cuenta una caída como atrapada.
+  Suite 2.001. Verificador limpio lanzado (`C:\Users\nmend\AppData\Local\Temp\claude\verif_847\`).
+- Runs: V2b 13 de 22; W5a 14 de 22; W5b pendiente. NRT verde 17:46. Disco 10,9 GB.
+
 ### 2026-10-17 18:01 UTC (vuelta 160): verificador del pre-registro 1.23: SELLABLE CON ARREGLOS (dos bloqueantes)
 - `experiments/_s151_mxd03_sola_123_verif/VERIFICADOR_V1.md`. 37 de 37 tests; `sensibilidad_test1_121.py` y
   `saltos_de_cumulo_121.py` reproducen idéntico. En pie: la vara VIIRS no está atada al ancla (Láscar: 127 pasadas
