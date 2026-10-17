@@ -6,8 +6,10 @@ fragil de Lascar (A46) y su nulo, con un solo rumbo por granulo y del tamano en 
 anisotropo sobre 50 grados de cenit. Estos tests fijan, antes de gastar una corrida:
 
   1. que la muestra es la de la 1.17 y que los 24 medios jobs la cubren exacta;
-  2. que el nulo tiene el tamano del corrimiento real EN PIXELES (no en km), con rumbos equiespaciados,
-     deterministas y parejos, y que eso cambia algo frente al nulo de la 1.21 (control negativo);
+  2. que el nulo tiene el tamano EN KM del corrimiento real (version 2, bloqueante 1 del verificador:
+     el invariante del pipeline es el km y el jacobiano de +-2 lineas se rompia con el bow tie), con
+     rumbos equiespaciados, deterministas y parejos, y que el jacobiano de la anotacion en pixeles cubre
+     un barrido entero;
   3. que la vara VIIRS quedo congelada con la referencia de la 1.17 y sin cumulos del Test 1;
   4. que el probe sintetico pasa por el pipeline real y que una mutacion lo hace fallar;
   5. que el evaluador PUEDE dar cada estado, con su control (A110, A116);
@@ -92,21 +94,48 @@ def test_jacobiano_y_pixeles_en_una_grilla_anisotropa():
     assert np.allclose(np.abs(jac), [[1.0, 0.0], [0.0, 2.0]], atol=1e-3)
     pl, pf = S.a_pixeles(jac, 0.0, 2.0)          # 2 km al este = 1 frame
     assert abs(pl) < 1e-6 and abs(abs(pf) - 1.0) < 1e-6
-    kms = [math.hypot(*S.vector_nulo(jac, 1.0, a)) for a in S.rumbos("x")]
-    assert 0.99 <= min(kms) and max(kms) <= 2.01 and max(kms) - min(kms) > 0.8
+    # el nulo es de 2 km en todos los rumbos; en pixeles va de 1 (a lo ancho) a 2 (a lo largo)
+    vec = [S.vector_nulo(2.0, a) for a in S.rumbos("x")]
+    assert all(abs(math.hypot(*v) - 2.0) < 1e-9 for v in vec)
+    px = [math.hypot(*S.a_pixeles(jac, *v)) for v in vec]
+    assert 0.99 <= min(px) and max(px) <= 2.01 and max(px) - min(px) > 0.8
 
 
-def test_el_nulo_de_la_121_no_tenia_el_tamano_en_pixeles():
-    """Control negativo de la correccion: el nulo de la 1.21 (mismo tamano en km, rumbo al azar) movia la
-    grilla anisotropa entre 1 y 2 pixeles; el de la 1.23, siempre 1."""
+def test_el_jacobiano_cubre_un_barrido_en_la_grilla_con_bow_tie():
+    """Bloqueante 1 del verificador: en la grilla de `_interp_geo` con bow tie el espaciado a lo largo de la
+    traza alterna 0,05 y 1,95 km por linea. Con +-5 lineas (un barrido) el jacobiano da 1 km por linea en
+    cualquier fase; con +-2 (version 1) da cualquier cosa entre 0,05 y 1,95."""
+    import probar_probe_sola as T
     import probe_sola as S
-    lat, lon = _grilla(1.0, 2.0)
-    jac = S.jacobiano(lat, lon, 20, 20)
-    px_121 = [math.hypot(*S.a_pixeles(jac, 2.0 * math.cos(math.radians(a)), 2.0 * math.sin(math.radians(a))))
-              for a in range(0, 360, 18)]
-    px_123 = [math.hypot(*S.a_pixeles(jac, *S.vector_nulo(jac, 1.0, a))) for a in S.rumbos("x")]
-    assert max(px_121) - min(px_121) > 0.9
-    assert max(px_123) - min(px_123) < 1e-6
+    d = T.escena_sierra()
+    nuevo = [abs(S.jacobiano(d["lat"], d["lon"], i, 40)[0][0]) for i in range(30, 50)]
+    viejo = [abs(S.jacobiano(d["lat"], d["lon"], i, 40, h_lin=2)[0][0]) for i in range(30, 50)]
+    assert max(abs(x - 1.0) for x in nuevo) < 0.01
+    assert min(viejo) < 0.1 and max(viejo) > 1.9
+
+
+@pytest.mark.skipif(not NODE, reason="necesita node para el predicado del tablero")
+def test_con_el_jacobiano_viejo_la_prueba_sierra_falla():
+    """Mutacion (A116): con +-2 lineas a lo largo de la traza, el caso SIERRA tiene que fallar."""
+    import probar_probe_sola as T
+    import probe_sola as S
+    real = S.jacobiano
+    with patch.object(S, "jacobiano", lambda lat, lon, i, j: real(lat, lon, i, j, h_lin=2)):
+        fallas = T.fallas_de(T.correr())
+    assert any(f.startswith("SIERRA") for f in fallas), fallas
+
+
+def test_el_invariante_en_km_quedo_medido():
+    """invariante_km_salida.txt: en una grilla regular de 1 x 2 km, con tamano fijo en km los centros que
+    cruzan el borde de los circulos de 3, 5 y 25 km casi no dependen del rumbo (CV <= 0,07), y con tamano
+    fijo en pixeles si (CV >= 0,24). En la grilla con bow tie ninguna de las dos unidades es invariante: lo
+    dice el README y por eso existe la anotacion tamano_del_nulo."""
+    txt = (EXP / "invariante_km_salida.txt").read_text(encoding="utf-8")
+    regular = txt.split("diente de sierra")[0]
+    for radio in ("3.0", "5.0", "25.0"):
+        km = float(re.search(r"radio\s+%s km, tamano fijo en km: .*CV ([\d.]+)" % re.escape(radio), regular).group(1))
+        px = float(re.search(r"radio\s+%s km, tamano fijo en px: .*CV ([\d.]+)" % re.escape(radio), regular).group(1))
+        assert km <= 0.07 and px >= 0.24, (radio, km, px)
 
 
 def test_trasladar_ne_aplica_el_vector_pedido():
@@ -157,19 +186,14 @@ def test_prueba_sintetica_completa():
 
 
 @pytest.mark.skipif(not NODE, reason="necesita node para el predicado del tablero")
-def test_si_el_nulo_fuera_isotropo_en_km_la_prueba_falla():
-    """Mutacion (A116): con el nulo de la 1.21 (tamano en km, sin jacobiano) el caso ANISO tiene que fallar."""
+def test_si_el_nulo_no_tuviera_el_km_del_real_la_prueba_falla():
+    """Mutacion (A116): un nulo de la mitad del tamano del real tiene que hacer fallar la prueba."""
     import probar_probe_sola as T
     import probe_sola as S
-
-    def en_km(jac, modulo_px, angulo):
-        km = math.hypot(*(jac @ np.array([modulo_px, 0.0])))   # el tamano real en km
-        a = math.radians(angulo)
-        return km * math.cos(a), km * math.sin(a)
-    with patch.object(S, "vector_nulo", en_km):
-        fallas = T.fallas_de({"aniso": T._caso(T.escena_aniso(), de_km=-2.0), "posicion": T.correr()["posicion"],
-                              "test1": T._caso(T.T21.escena_test1(), dn_km=-1.2), "ausente": T._caso(T.T.escena())})
-    assert any("ANISO" in f or "px contra" in f for f in fallas), fallas
+    real = S.vector_nulo
+    with patch.object(S, "vector_nulo", lambda km, a: real(0.5 * km, a)):
+        fallas = T.fallas_de(T.correr())
+    assert any("km contra" in f for f in fallas), fallas
 
 
 # ------------------------------------------------------------------ 5. el evaluador: cada estado
@@ -234,7 +258,7 @@ def test_estado_medido_y_no_adoptable_sin_mejora():
 
 @pytest.mark.parametrize("mutar,motivo", [
     (lambda m: m.update(cprima_igual=False), "C'"),
-    (lambda m: m["nulos"][3].update(px_aplicado=1.5), "px"),
+    (lambda m: m["nulos"][3].update(km=1.5, km_aplicado=1.5), "km del real"),
     (lambda m: m["nulos"][3].update(km_aplicado=0.9), "km"),
     (lambda m: m["nulos"][3].update(angulo_grados=1.0), "rumbos"),
     (lambda m: m["brazos"]["R07"].update(test1_llamadas=0), "espia"),
@@ -326,6 +350,42 @@ def test_adoptable_solo_con_mejora_y_sin_perdidas():
     r = ES.evaluar(pob, sal)
     assert r["balance_regla2"]["veredicto_M_contra_C"] == "MEJORA" and r["adoptable_en_la_replica"] is True
     assert r["balance_regla2"]["rango"]["estado"] == "BALANCE MEJOR QUE EL AZAR"
+
+
+def _t1(k, trig=False):
+    return {"triggered": trig, "caliente_en_anillo": False, "delta_L_integrated": 1.0, "sigma_bg": 1.0,
+            "n_roi": 28, "k_sigma_observed": k}
+
+
+def test_test1_con_signo_separa_alertas_de_negativos():
+    """Bloqueante 2 del verificador: si M sube k en las alertas y lo baja en los negativos limpios mas que
+    todos los nulos, la lectura dice SENAL DE POSICION MEJOR; si M se mueve como los nulos, SIN DIRECCION.
+    Los nulos suben y bajan k por igual (simetricos), M no."""
+    f, m = [], []
+    for i in range(12):
+        lab = "pos" if i < 6 else "neg_limpio"
+        f.append(_fila("s%d" % i, lab=lab, prot=False))
+        t1 = {"C": _t1(2.0)}
+        t1["M"] = _t1(2.0 + (0.8 if lab == "pos" else -0.8))
+        for k, b in enumerate(ES.NULOS):
+            t1[b] = _t1(2.0 + (0.3 if (k + i) % 2 else -0.3))
+        m.append(_medida("s%d" % i, test1=t1))
+    r = ES.evaluar(*_caso(f, m))["test1"]["con_signo"]
+    assert r["estado"] == "SENAL DE POSICION MEJOR", r
+    assert r["alertas"]["estado"] == "M SUBE K MAS QUE EL AZAR"
+    for x in m:                                    # control: M igual que un nulo
+        x["brazos"]["M"]["test1"] = dict(x["brazos"]["R01"]["test1"])
+    assert ES.evaluar(*_caso(f, m))["test1"]["con_signo"]["estado"] == "SIN DIRECCION (PROPIEDAD DEL TEST 1)"
+
+
+def test_tamano_del_nulo_se_informa_por_cenit():
+    f, m = _limpio()
+    for x in m:
+        for n in x["nulos"]:
+            n["razon_px_nulo_M"] = 1.0
+        x["cruces_de_borde"] = {b: {"1": 2, "3": 6, "5": 10} for b in ES.BRAZOS if b != "C"}
+    r = ES.evaluar(*_caso(f, m))["tamano_del_nulo"]["0-20"]
+    assert r["razon_px_nulo_M"]["mediana"] == 1.0 and r["cruces_M_sobre_nulo"]["5"]["mediana"] == 1.0
 
 
 def test_test1_propiedad_del_test1_y_especifica():
@@ -450,6 +510,7 @@ def test_la_vara_entra_al_evaluador_completo():
     pob, sal = _caso(filas, meds)
     r = ES.evaluar(pob, sal, tabla_vara=tab)
     assert r["vara"]["principal"]["n"] == 12 and r["vara"]["principal"]["estado"].startswith("MXD03 MAS CERCA")
+    assert r["vara"]["pico_centro_estricta_pos"]["n"] == 0      # el fixture no trae pos_centro
 
 
 # ------------------------------------------------------------------ las salidas medidas quedaron escritas

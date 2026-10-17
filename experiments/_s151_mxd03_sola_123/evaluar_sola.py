@@ -5,7 +5,7 @@
 # que en la 1.21 (2 protegidas perdidas, 9 ganadas, salvo deriva de codigo). Por la letra de la regla 1
 # (docs/MISSION.md) eso ya es PIERDE PROTEGIDA y este probe no lo puede cambiar. Lo que agrega son tres
 # lecturas que la 1.21 no podia dar, cada una con sus estados fijados antes de correr:
-#   1. el nulo con distribucion: 20 corrimientos al azar del mismo tamano EN PIXELES por granulo, y la
+#   1. el nulo con distribucion: 20 corrimientos al azar del mismo tamano EN KM por granulo, y la
 #      posicion de M entre ellos (rango), en las dos direcciones de la regla 1 (lo que M pierde de lo que
 #      C publica, y lo que C pierde de lo que M publica) y en el balance de la regla 2;
 #   2. la vara externa: cual de las dos geolocalizaciones pone el pixel caliente mas cerca del objeto
@@ -13,8 +13,9 @@
 #      satelite (Terra y Aqua corren la grilla en sentidos opuestos);
 #   3. el Test 1 y el borde del barrido: si los cruces del umbral y los saltos de cumulo de M son lo que
 #      hace cualquier corrimiento de ese tamano o algo propio de MxD03.
-# Los rangos son de Monte Carlo: con K nulos el p mas chico posible es 1/(K+1), por eso K = 20 es el
-# minimo que llega a 0,048 (README, «Poder»).
+# Los rangos son de Monte Carlo: con K nulos el p mas chico posible es 1/(K+1) (0,048 con K = 20; K = 19
+# tambien cumpliria p <= 0,05 con 0,050). Los 20 nulos de un granulo no son independientes (rumbos
+# vecinos dan resultados parecidos), asi que el p es nominal (README, «Poder»).
 #
 # Uso: python evaluar_sola.py <carpeta con los <job>.json> [--jobs '["Lascar-1a", ...]'] [--salida x.json]
 import argparse
@@ -39,8 +40,7 @@ K_NULOS = 20
 NULOS = tuple("R%02d" % k for k in range(K_NULOS))
 BRAZOS = ("C", "M") + NULOS
 ALFA = 0.05
-TOL_KM = 0.01             # el nulo aplicado tiene que ser el pedido (km)
-TOL_PX = 0.02             # y tener el modulo en pixeles del corrimiento real
+TOL_KM = 0.01             # el nulo tiene el tamano en km del corrimiento real, y el aplicado es el pedido
 TOL_RUMBO = 1e-3          # rumbos equiespaciados cada 360/K grados
 N_MIN_VARA = 10           # granulos con vara para dar un veredicto de posicion (README, «Poder»)
 N_MIN_NOCHES = 5
@@ -97,8 +97,8 @@ def _ne(vent, lat, lon):
 
 
 def _pos(f, b, fuente):
-    if fuente == "pico":
-        p = ((f.get("pico") or {}).get("pos") or {}).get(b)
+    if fuente in ("pico", "pico_centro"):
+        p = ((f.get("pico") or {}).get("pos" if fuente == "pico" else "pos_centro") or {}).get(b)
         return None if p is None else (p[0], p[1])
     s = (f.get("brazos") or {}).get(b) or {}
     return None if s.get("pc_lat") is None else (s["pc_lat"], s["pc_lon"])
@@ -287,6 +287,86 @@ def test1_lectura(ok):
                         "mediana_abs": {k: round(st.median(abs(v) for v in vs), 4) for k, vs in terminos.items() if vs},
                         "pixel_caliente": anillo}
     out["descomposicion"] = desc
+    out["con_signo"] = test1_con_signo(ok)
+    return out
+
+
+def test1_con_signo(ok):
+    """Verificador del pre-registro, bloqueante 2: la DIRECCION del cambio de k, por etiqueta de MIROVA.
+    Si MxD03 pone mejor el calor, el Test 1 deberia ver MAS donde MIROVA alerto (k sube, cruces de 0 a 1)
+    y MENOS donde MIROVA miro y no vio nada (k baja, cruces de 1 a 0). Por etiqueta (alertas: lab pos;
+    negativos limpios) se mide en M y en cada nulo la mediana de k_X - k_C (granulos con Test 1 calculado
+    en C y en X) y los cruces en cada sentido, y se ubica a M entre los 20 nulos."""
+    def medir(b, lab):
+        dk, sube, baja = [], 0, 0
+        for f in ok:
+            if f.get("lab") != lab:
+                continue
+            c = (f["brazos"]["C"] or {}).get("test1") or {}
+            x = (f["brazos"][b] or {}).get("test1") or {}
+            kc, kx = c.get("k_sigma_observed"), x.get("k_sigma_observed")
+            if kc and kx:
+                dk.append(kx - kc)
+            if c.get("triggered") is not None and x.get("triggered") is not None:
+                sube += (not c["triggered"]) and bool(x["triggered"])
+                baja += bool(c["triggered"]) and not x["triggered"]
+        return (st.median(dk) if dk else None), len(dk), sube, baja
+    out = {}
+    for lab, nombre in (("pos", "alertas"), ("neg_limpio", "negativos_limpios")):
+        m = medir("M", lab)
+        nul = [medir(b, lab) for b in NULOS]
+        meds = [x[0] for x in nul if x[0] is not None]
+        lec = lectura_rango(None if m[0] is None else round(m[0], 4), [round(v, 4) for v in meds],
+                            "M SUBE K MAS QUE EL AZAR", "M BAJA K MAS QUE EL AZAR", "M COMO EL AZAR")
+        lec.update({"n": m[1], "cruces_M_0_a_1": m[2], "cruces_M_1_a_0": m[3],
+                    "cruces_0_a_1": lectura_rango(m[2], [x[2] for x in nul], "M ENCIENDE MAS QUE EL AZAR",
+                                                  "M ENCIENDE MENOS QUE EL AZAR", "COMO EL AZAR"),
+                    "cruces_1_a_0": lectura_rango(m[3], [x[3] for x in nul], "M APAGA MAS QUE EL AZAR",
+                                                  "M APAGA MENOS QUE EL AZAR", "COMO EL AZAR")})
+        out[nombre] = lec
+    a, n = out["alertas"]["estado"], out["negativos_limpios"]["estado"]
+    if "SIN DATOS" in (a, n):
+        out["estado"] = "SIN DATOS"
+    elif a == "M SUBE K MAS QUE EL AZAR" and n == "M BAJA K MAS QUE EL AZAR":
+        out["estado"] = "SENAL DE POSICION MEJOR"
+    elif a == "M BAJA K MAS QUE EL AZAR" and n == "M SUBE K MAS QUE EL AZAR":
+        out["estado"] = "SENAL DE POSICION PEOR"
+    elif a == "M COMO EL AZAR" and n == "M COMO EL AZAR":
+        out["estado"] = "SIN DIRECCION (PROPIEDAD DEL TEST 1)"
+    else:
+        out["estado"] = "MIXTO"
+    return out
+
+
+def tamano_del_nulo(ok):
+    """Anotacion por cenit (bloqueante 1 del verificador): el nulo tiene el km de M por construccion; aca
+    se mide si tambien PERTURBA lo mismo. Razon del modulo en pixeles nulo / M (jacobiano sobre un barrido)
+    y razon de centros que cruzan el borde del disco de 1 y 3 km y del inner, M contra la mediana de los
+    nulos (con medio conteo para no dividir por 0). Lejos de 1 quiere decir que en ese cenit el nulo no es
+    comparable en esa unidad."""
+    out = {}
+    for lo, hi in BINS_CENIT:
+        sel = [f for f in ok if f.get("sensor_zenith_deg") is not None and lo <= f["sensor_zenith_deg"] < hi]
+        if not sel:
+            continue
+        px = sorted(x["razon_px_nulo_M"] for f in sel for x in (f.get("nulos") or [])
+                    if x.get("razon_px_nulo_M") is not None)
+        res = {"n": len(sel)}
+        if px:
+            res["razon_px_nulo_M"] = {"mediana": round(st.median(px), 3), "p10": round(px[int(0.1 * len(px))], 3),
+                                      "p90": round(px[min(int(0.9 * len(px)), len(px) - 1)], 3)}
+        cruces = defaultdict(list)
+        for f in sel:
+            cb = f.get("cruces_de_borde") or {}
+            if "M" not in cb:
+                continue
+            for r, vm in cb["M"].items():
+                vn = [cb[b][r] for b in NULOS if b in cb]
+                mn = st.median(vn) if vn else 0
+                if vm or mn:
+                    cruces[r].append((vm + 0.5) / (mn + 0.5))
+        res["cruces_M_sobre_nulo"] = {r: {"mediana": round(st.median(v), 3), "n": len(v)} for r, v in cruces.items()}
+        out["%d-%d" % (lo, hi)] = res
     return out
 
 
@@ -363,16 +443,18 @@ def evaluar(pob, salidas, ausentes=(), esperados=None, tabla_vara=None):
     for f in ok:
         if f.get("cprima_igual") is False:
             invalido.append("C' distinto de C en %s" % f["clave"])
-        mod = (f.get("corrimiento_px") or {}).get("modulo")
+        real = (f.get("desplazamiento") or {}).get("km")
         nulos = f.get("nulos") or []
-        if len(nulos) != K_NULOS or mod is None:
+        if len(nulos) != K_NULOS or real is None:
             invalido.append("%s: %d nulos" % (f["clave"], len(nulos)))
             continue
         for x in nulos:
+            # dos cosas distintas: el aplicado es el pedido (aritmetica de la traslacion) y el pedido tiene
+            # el tamano del corrimiento real (el diseno del nulo)
             if abs(x["km_aplicado"] - x["km"]) > TOL_KM:
                 invalido.append("%s: nulo %d aplicado %s km contra %s pedido" % (f["clave"], x["k"], x["km_aplicado"], x["km"]))
-            if abs(x["px_aplicado"] - mod) > TOL_PX:
-                invalido.append("%s: nulo %d con %s px contra %s del corrimiento real" % (f["clave"], x["k"], x["px_aplicado"], mod))
+            if abs(x["km"] - real) > TOL_KM:
+                invalido.append("%s: nulo %d de %s km contra %s del corrimiento real" % (f["clave"], x["k"], x["km"], real))
         difs = sorted((x["angulo_grados"] - nulos[0]["angulo_grados"]) % 360.0 for x in nulos)
         if any(abs(b - a - 360.0 / K_NULOS) > TOL_RUMBO for a, b in zip(difs[:-1], difs[1:])):
             invalido.append("%s: rumbos no equiespaciados" % f["clave"])
@@ -414,6 +496,7 @@ def evaluar(pob, salidas, ausentes=(), esperados=None, tabla_vara=None):
     varas = {}
     if tabla_vara:
         varas["principal"] = vara(ok, tabla_vara, "pico", "estricta", "pos")
+        varas["pico_centro_estricta_pos"] = vara(ok, tabla_vara, "pico_centro", "estricta", "pos")
         varas["pico_estricta_todos"] = vara(ok, tabla_vara, "pico", "estricta", "todos")
         varas["cumulo_estricta_pos"] = vara(ok, tabla_vara, "cumulo", "estricta", "pos")
         varas["pico_amplia_todos"] = vara(ok, tabla_vara, "pico", "amplia", "todos")
@@ -431,6 +514,7 @@ def evaluar(pob, salidas, ausentes=(), esperados=None, tabla_vara=None):
             "ausentes_del_archivo": len([a for a in ausentes if a["volcan"] in vols]),
             "regla1": regla1, "balance_regla2": balance,
             "vara": varas, "test1": test1_lectura(ok) if ok else None, "borde": borde_lectura(ok) if ok else None,
+            "tamano_del_nulo": tamano_del_nulo(ok) if ok else None,
             "M_contra_C_completo": {k: comp_M[k] for k in ("veredicto", "regla1", "tipos_de_cambio", "cortes")},
             "c_igual_a_guardada": {"si": sum(1 for f in ok if f.get("c_igual_a_guardada")), "de": len(ok)}}
 
@@ -496,7 +580,7 @@ def main():
         print("  vara %-22s %-34s n=%s dd=%s %s lambda=%s" % (k, v.get("estado"), v.get("n"), v.get("dd_mediana_km"),
                                                           v.get("dd_ic95"), v.get("lambda_mediana")))
     if r["test1"]:
-        print("  test 1: %s" % r["test1"]["cruces"]["estado"])
+        print("  test 1: %s | con signo: %s" % (r["test1"]["cruces"]["estado"], r["test1"]["con_signo"]["estado"]))
     if r["borde"]:
         print("  borde (50-90): %s" % (r["borde"].get("50-90") or {}).get("estado"))
 

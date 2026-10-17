@@ -9,14 +9,16 @@
 # 1.21):
 #   C       : produccion (lat/lon de `_interp_geo`);
 #   M       : lat/lon de MxD03 (lo unico que cambia es la posicion);
-#   R00-R19 : la grilla de `_interp_geo` trasladada en bloque, 20 rumbos por granulo. El tamano NO es el
-#             del corrimiento real en km (eso hacia la 1.21) sino en PIXELES: el pixel MODIS se ensancha a
-#             lo ancho del barrido, y sobre 50 grados de cenit el rumbo al azar en km movia la grilla 24 %
-#             mas pixeles que MxD03 (verificador de la 1.21). Aca el corrimiento real se pasa a pixeles con
-#             el jacobiano local de la grilla en el crater (km por linea y por frame, de las mismas lat/lon
-#             del granulo, sin angulos), se sortea un rumbo en el espacio de pixeles con ese modulo, y se
-#             vuelve a km con el mismo jacobiano. Los 20 rumbos son equiespaciados (18 grados) con una
-#             fase al azar por granulo, determinista (sha1 de la clave).
+#   R00-R19 : la grilla de `_interp_geo` trasladada en bloque, 20 rumbos por granulo (equiespaciados cada
+#             18 grados, con una fase al azar determinista: sha1 de la clave), todos del MISMO TAMANO EN KM
+#             que el corrimiento real medido en el crater. Version 1 lo fijaba en pixeles; el verificador
+#             del pre-registro mostro que el jacobiano de +-2 lineas sobre la grilla de `_interp_geo` mide
+#             UN tramo del diente de sierra que deja el bow tie, y sobre 50 grados el "mismo tamano en
+#             pixeles" movia la grilla de 2 a 8 veces mas km que MxD03 en un tercio de los granulos. Y la
+#             unidad correcta es el km: todo lo que el pipeline hace con la posicion pasa por distancias en
+#             km al crater, y para un circulo grande frente al pixel los centros que cruzan su borde al
+#             trasladar d km no dependen de la direccion (invariante_km_salida.txt). El modulo en pixeles
+#             de cada nulo y del real se guarda como anotacion, con el jacobiano sobre un barrido entero.
 #   C'      : (2 primeros granulos de cada job) la lat/lon de `_interp_geo` pasada por el parche de M:
 #             tiene que dar un record identico al de C. Prueba el parche.
 # La etiqueta es la de produccion en todos: ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER no se toca (la
@@ -27,7 +29,8 @@
 #     y donde cae el pixel mas caliente del disco (si cae en el anillo de fondo de 1 a 3 km); es lo que
 #     falta para decir POR QUE k salta con unos cientos de metros (punto 3 de la tarea);
 #   - la posicion del pixel MIR mas caliente cerca del crater, elegido POR INDICE (el mismo pixel fisico
-#     del L1B en todos los brazos) con su centroide de 3 x 3 pesado por el exceso: es la posicion pura de
+#     del L1B en todos los brazos) con su centroide de 3 x 3 pesado por el exceso, y el centro del pixel
+#     solo: es la posicion pura de
 #     la geolocalizacion, sin seleccion de cumulo en el medio. Es lo que se compara contra la vara VIIRS
 #     (vara_viirs.json).
 #
@@ -65,21 +68,25 @@ SAL = "s151-tarea-1.23-rumbos"
 NULOS = tuple("R%02d" % k for k in range(K_NULOS))
 BRAZOS = ("C", "M") + NULOS
 FLAG = "ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER"
-PASO_JAC = 2                     # diferencia centrada de +-2 pixeles para el jacobiano
+PASO_JAC_LINEA = 5               # +-5 lineas = un barrido entero (10 lineas): promedia el diente de sierra
+PASO_JAC_FRAME = 2               # +-2 frames a lo ancho
 CAMPOS_TEST1 = ("triggered", "abs_criterion", "rel_criterion", "n_roi", "n_bg", "n_contributing", "L_bg",
                 "sigma_bg", "delta_L_integrated", "sigma_delta_L_integrated", "k_sigma_observed",
                 "rel_observed", "reason")
 
 
 # ------------------------------------------------------------------ el nulo en pixeles
-def jacobiano(lat, lon, i, j, h=PASO_JAC):
+def jacobiano(lat, lon, i, j, h_lin=PASO_JAC_LINEA, h_frame=PASO_JAC_FRAME):
     """km por pixel en el pixel (i, j): [[dN/dlinea, dN/dframe], [dE/dlinea, dE/dframe]]. Diferencia
-    centrada de +-h pixeles sobre la misma grilla (recortada en los bordes). None si cae en NaN."""
+    centrada de +-h_lin lineas y +-h_frame frames sobre la misma grilla (recortada en los bordes). A lo
+    largo de la traza se usa un barrido entero: hacia el borde del barrido los barridos se traslapan (bow
+    tie) y la grilla de `_interp_geo` alterna tramos de 5 lineas con espaciado f y 2 - f km (f la huella);
+    +-5 lineas cubre los dos tramos y da el avance medio de 1 km por linea. None si cae en NaN."""
     lat = np.asarray(lat, dtype=np.float64)
     lon = np.asarray(lon, dtype=np.float64)
     ny, nx = lat.shape
-    i0, i1 = max(i - h, 0), min(i + h, ny - 1)
-    j0, j1 = max(j - h, 0), min(j + h, nx - 1)
+    i0, i1 = max(i - h_lin, 0), min(i + h_lin, ny - 1)
+    j0, j1 = max(j - h_frame, 0), min(j + h_frame, nx - 1)
     if i1 == i0 or j1 == j0:
         return None
     c = math.cos(math.radians(float(lat[i, j])))
@@ -100,19 +107,17 @@ def a_pixeles(jac, dn, de):
 
 
 def rumbos(clave, k=K_NULOS):
-    """k rumbos equiespaciados en el espacio de pixeles (grados desde el eje de lineas, hacia el eje de
-    frames), con una fase al azar determinista por granulo. Cada rumbo es uniforme por si solo."""
+    """k rumbos geograficos (grados desde el norte, hacia el este) equiespaciados, con una fase al azar
+    determinista por granulo. Cada rumbo es uniforme por si solo."""
     h = hashlib.sha1((SAL + clave).encode()).hexdigest()
     u = int(h[:12], 16) / float(16 ** 12)
     return [round(360.0 * ((u + n / k) % 1.0), 6) for n in range(k)]
 
 
-def vector_nulo(jac, modulo_px, angulo):
-    """(dn, de) km de un corrimiento de `modulo_px` pixeles en el rumbo `angulo` del espacio de pixeles."""
+def vector_nulo(km, angulo):
+    """(dn, de) km de un corrimiento de `km` en el rumbo `angulo` (desde el norte, hacia el este)."""
     a = math.radians(angulo)
-    q = np.array([modulo_px * math.cos(a), modulo_px * math.sin(a)])
-    v = jac @ q
-    return float(v[0]), float(v[1])
+    return km * math.cos(a), km * math.sin(a)
 
 
 def medido_en(lat_r, lon_r, lat, lon, i, j):
@@ -192,8 +197,12 @@ def pico_por_indice(datos, posiciones, lat_m, lon_m, vent, r_sel_km):
     if w.sum() <= 0:
         w = np.zeros_like(w)
         w[i - i0, j - j0] = 1.0
-    out = {"linea": int(i), "frame": int(j), "exceso": round(float(L[i, j] - med), 6), "pos": {}}
+    out = {"linea": int(i), "frame": int(j), "exceso": round(float(L[i, j] - med), 6), "pos": {}, "pos_centro": {}}
     for b, (la, lo) in posiciones.items():
+        # el centro del pixel caliente solo, sin 3 x 3 (verificador: el 3 x 3 pesado por el exceso sobre la
+        # mediana mete el gradiente de terreno de los vecinos, A69)
+        cl, co = float(la[i, j]), float(lo[i, j])
+        out["pos_centro"][b] = [round(cl, 6), round(co, 6)] if math.isfinite(cl) and math.isfinite(co) else None
         la = np.asarray(la[i0:i1, j0:j1], dtype=np.float64)
         lo = np.asarray(lo[i0:i1, j0:j1], dtype=np.float64)
         ok = np.isfinite(la) & np.isfinite(lo)
@@ -203,6 +212,31 @@ def pico_por_indice(datos, posiciones, lat_m, lon_m, vent, r_sel_km):
             continue
         out["pos"][b] = [round(float((ww * np.where(ok, la, 0)).sum() / ww.sum()), 6),
                          round(float((ww * np.where(ok, lo, 0)).sum() / ww.sum()), 6)]
+    return out
+
+
+def cruces_de_borde(posiciones, vent, i, j, radios, ventana=60):
+    """Cuantos centros de pixel cambian de lado de cada circulo (radio en km, centrado en el crater) entre
+    C y cada brazo, en una ventana de +-`ventana` pixeles alrededor del crater. Es el "tamano" del
+    corrimiento en la unidad que consume el pipeline: el disco y el anillo del Test 1 y el inner deciden
+    por distancia al crater. Anotacion: dice si el nulo perturba lo mismo que M (README, bloqueante 1 del
+    verificador)."""
+    lat_c, lon_c = posiciones["C"]
+    i0, i1, j0, j1 = max(i - ventana, 0), i + ventana + 1, max(j - ventana, 0), j + ventana + 1
+
+    def dentro(la, lo):
+        la = np.asarray(la[i0:i1, j0:j1], dtype=np.float64)
+        lo = np.asarray(lo[i0:i1, j0:j1], dtype=np.float64)
+        with np.errstate(invalid="ignore"):
+            d = haversine_km(vent[0], vent[1], la, lo)
+        return {r: np.nan_to_num(d, nan=1e9) <= r for r in radios}
+    base = dentro(lat_c, lon_c)
+    out = {}
+    for b, (la, lo) in posiciones.items():
+        if b == "C":
+            continue
+        x = dentro(la, lo)
+        out[b] = {"%g" % r: int(np.sum(base[r] != x[r])) for r in radios}
     return out
 
 
@@ -230,14 +264,15 @@ def medir_granulo(l1b, geo, volcan, latlon_m, datos, vent, clave, feats=None, co
     pos = {"C": None, "M": latlon_m}
     nulos = []
     for n, ang in zip(range(k), rumbos(clave, k)):
-        dn, de = vector_nulo(jac, modulo, ang)
+        dn, de = vector_nulo(desp["km"], ang)
         lat_r, lon_r = trasladar_ne(lat, lon, dn, de)
         ap = medido_en(lat_r, lon_r, lat, lon, desp["linea"], desp["frame"])
         apl, apf = a_pixeles(jac, ap["dn_km"], ap["de_km"])
         pos[nulos_n[n]] = (lat_r, lon_r)
         nulos.append({"k": n, "angulo_grados": ang, "dn_km": round(dn, 4), "de_km": round(de, 4),
                       "km": round(math.hypot(dn, de), 4), "km_aplicado": ap["km"],
-                      "px_aplicado": round(math.hypot(apl, apf), 4)})
+                      "px_aplicado": round(math.hypot(apl, apf), 4),
+                      "razon_px_nulo_M": round(math.hypot(apl, apf) / modulo, 4) if modulo > 1e-9 else None})
     recs, vistos = {}, {}
     for b in ("C", "M") + nulos_n:
         recs[b], vistos[b] = procesar(l1b, geo, volcan, pos[b], feats, lector)
@@ -252,6 +287,8 @@ def medir_granulo(l1b, geo, volcan, latlon_m, datos, vent, clave, feats=None, co
             "nulos": nulos, "brazos": {b: resumir(recs[b], vistos[b]) for b in brazos},
             "pub": dict(zip(brazos, pubs)),
             "pico": pico_por_indice(datos, posiciones, latlon_m[0], latlon_m[1], vent, float(inner or 5.0)),
+            "cruces_de_borde": cruces_de_borde(posiciones, vent, desp["linea"], desp["frame"],
+                                               (1.0, 3.0, float(inner or 5.0))),
             "cprima_igual": None}
     if con_cprima:
         rcp, _ = procesar(l1b, geo, volcan, (lat.copy(), lon.copy()), feats, lector)

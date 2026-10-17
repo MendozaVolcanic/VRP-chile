@@ -1,4 +1,4 @@
-name: "Probe S151 1.23, MxD03 sola contra 20 nulos en pixeles y una vara VIIRS (solo lectura)"
+name: "Probe S151 1.23, MxD03 sola contra 20 nulos en km y una vara VIIRS (solo lectura)"
 
 # Tarea 1.23 del loop. Criterio pre-registrado en experiments/_s151_mxd03_sola_123/README.md, escrito
 # antes de cualquier corrida. La muestra es la de la 1.17, sin tocar (poblacion.json; un test fija su
@@ -92,7 +92,7 @@ jobs:
           pip install pyhdf
           pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
           node --version
-      - name: Prueba sintetica (nulo en pixeles, anisotropia, espia del Test 1, pixel por indice y C' igual a C)
+      - name: Prueba sintetica (nulo en km, anisotropia, bow tie, espia del Test 1, pixel por indice y C' igual a C)
         env:
           VRP_PROFILE: mirova_equivalent
         run: |

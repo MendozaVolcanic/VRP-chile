@@ -7,8 +7,14 @@
 #             uno no (el nulo PUEDE cambiar la publicacion en los dos sentidos). El pixel por indice tiene
 #             que ser el foco, en la posicion de MxD03 en M y 2 km al sur en C.
 #   ANISO:    grilla con pixeles de 1 km a lo largo de la traza y 2 km a lo ancho (el borde del barrido),
-#             corrimiento real de 2 km a lo ancho = 1 px. Los nulos tienen que tener 1 px de modulo y entre
-#             1 y 2 km; un nulo isotropo en km (el de la 1.21) habria movido 2 km, o sea hasta 2 px.
+#             corrimiento real de 2 km a lo ancho (1 px). Los nulos tienen que tener 2 km, el mismo tamano
+#             EN KM que el real (version 2: el invariante del pipeline es el km, invariante_km.py), y su
+#             modulo en pixeles tiene que ir de 1 a 2 (la anotacion).
+#   SIERRA:   la grilla de `_interp_geo` con bow tie (verificador del pre-registro, jac_bowtie.py): filas de
+#             amarre en las lineas 2 + 5t de barridos de 10 lineas con huella f = 1,95 km, estiradas con
+#             la misma funcion del pipeline. El espaciado a lo largo de la traza alterna 0,05 y 1,95 km por
+#             linea. Corrimiento real de 1 km a lo largo: el jacobiano sobre un barrido entero tiene que
+#             dar 1 px; el de +-2 lineas de la version 1 daba 0,5 o 20 px segun la fase.
 #   TEST1:    disco de 5 pixeles a +1 K sobre el crater (dispara el Test 1, escena de la 1.21) y
 #             `_interp_geo` corrida 1,2 km al sur: en C el pixel mas caliente del disco cae a mas de 1 km
 #             del crater, dentro del anillo de fondo; en M cae en el centro. El espia tiene que verlo.
@@ -49,6 +55,32 @@ def escena_aniso(seed=1):
     return d
 
 
+def lineas_bowtie(n, f, total=2030):
+    """Posicion a lo largo de la traza (km) de n lineas al centro de un granulo de `total` lineas, tal como
+    las deja `_interp_geo` con bow tie: barridos de 10 lineas que avanzan 10 km, huella f km, filas de
+    amarre en 2 + 5t (offset 2 de #828), estiradas con pipeline.process_modis._interp_geo."""
+    L = np.arange(total)
+    y = 10.0 * (L // 10) + (L % 10 - 4.5) * f
+    tie = np.repeat(y[2::5][:, None], 2, axis=1)
+    yi = pm._interp_geo(tie, total, 2)[:, 0]
+    c = total // 2
+    return yi[c - n // 2:c - n // 2 + n]
+
+
+def escena_sierra(f=1.95, seed=1):
+    """La escena de la 1.17 (foco a 6 km al norte) sobre la grilla con bow tie: lineas en diente de sierra
+    de norte a sur, pixeles de 2 km a lo ancho."""
+    d = T.escena(seed=seed)
+    k = T.N // 2
+    y = lineas_bowtie(T.N, f)
+    y = y - y[k]
+    lats = T.VENT[0] - y / 111.32                      # la linea crece hacia el sur
+    lons = T.VENT[1] + 2.0 * (np.arange(T.N) - k) / (111.32 * np.cos(np.radians(T.VENT[0])))
+    lat, lon = np.meshgrid(lats, lons, indexing="ij")
+    d["lat"], d["lon"] = lat.astype(np.float32), lon.astype(np.float32)
+    return d
+
+
 def _caso(verdad, dn_km=0.0, de_km=0.0):
     """`_interp_geo` = la verdad corrida (dn, de) km; MxD03 = la verdad."""
     interp = dict(verdad)
@@ -64,6 +96,7 @@ def _caso(verdad, dn_km=0.0, de_km=0.0):
 def correr():
     return {"posicion": _caso(T.escena(), dn_km=-T.CORRIMIENTO_KM),
             "aniso": _caso(escena_aniso(), de_km=-2.0),
+            "sierra": _caso(escena_sierra(), dn_km=-1.0),
             "test1": _caso(T21.escena_test1(), dn_km=-1.2),
             "ausente": _caso(T.escena())}
 
@@ -73,10 +106,10 @@ def fallas_de(r):
     for nombre, f in r.items():
         if f["cprima_igual"] is not True:
             fallas.append("%s: C' distinto de C" % nombre)
-        mod = f["corrimiento_px"]["modulo"]
+        real = f["desplazamiento"]["km"]
         for x in f["nulos"]:
-            if abs(x["px_aplicado"] - mod) > 0.02:
-                fallas.append("%s: nulo %d con %.3f px contra %.3f del real" % (nombre, x["k"], x["px_aplicado"], mod))
+            if abs(x["km"] - real) > 0.01:
+                fallas.append("%s: nulo %d de %.3f km contra %.3f del real" % (nombre, x["k"], x["km"], real))
             if abs(x["km_aplicado"] - x["km"]) > 0.01:
                 fallas.append("%s: nulo %d aplicado %.3f km contra %.3f pedido" % (nombre, x["k"], x["km_aplicado"], x["km"]))
         difs = sorted((x["angulo_grados"] - f["nulos"][0]["angulo_grados"]) % 360 for x in f["nulos"])
@@ -106,10 +139,16 @@ def fallas_de(r):
                 fallas.append("POSICION: el pico del nulo %d no es C mas su vector" % x["k"])
     a = r["aniso"]
     if abs(a["corrimiento_px"]["modulo"] - 1.0) > 0.02:
-        fallas.append("ANISO: modulo %.3f px (se esperaba 1)" % a["corrimiento_px"]["modulo"])
-    kms = [x["km"] for x in a["nulos"]]
-    if min(kms) < 0.98 or max(kms) > 2.02 or max(kms) - min(kms) < 0.8:
-        fallas.append("ANISO: km de los nulos %s" % [round(x, 2) for x in kms])
+        fallas.append("ANISO: modulo real %.3f px (se esperaba 1)" % a["corrimiento_px"]["modulo"])
+    pxs = [x["px_aplicado"] for x in a["nulos"]]
+    if min(pxs) < 0.98 or max(pxs) > 2.02 or max(pxs) - min(pxs) < 0.8:
+        fallas.append("ANISO: px de los nulos %s (se esperaba de 1 a 2)" % [round(x, 2) for x in pxs])
+    if any(abs(x["km"] - 2.0) > 0.01 for x in a["nulos"]):
+        fallas.append("ANISO: km de los nulos distintos de 2")
+    si = r.get("sierra")
+    if si is not None and abs(si["corrimiento_px"]["modulo"] - 1.0) > 0.05:
+        fallas.append("SIERRA: modulo real %.3f px (se esperaba 1: el jacobiano tiene que cubrir un barrido)"
+                      % si["corrimiento_px"]["modulo"])
     t = r["test1"]
     tc, tm = (t["brazos"]["C"] or {}).get("test1") or {}, (t["brazos"]["M"] or {}).get("test1") or {}
     if tc.get("caliente_en_anillo") is not True or tm.get("caliente_en_anillo") is not False:
@@ -131,7 +170,7 @@ def main():
     r = correr()
     for nombre, f in r.items():
         t = (f["brazos"]["C"] or {}).get("test1") or {}
-        print("%-9s modulo %.3f px | km nulos %.2f a %.2f | pub C %d M %d nulos %d de 20 | test1 C k=%s anillo=%s | C' %s" % (
+        print("%-9s modulo real %.3f px | km nulos %.2f a %.2f | pub C %d M %d nulos %d de 20 | test1 C k=%s anillo=%s | C' %s" % (
             nombre.upper(), f["corrimiento_px"]["modulo"], min(x["km"] for x in f["nulos"]),
             max(x["km"] for x in f["nulos"]), f["pub"]["C"], f["pub"]["M"], sum(f["pub"][b] for b in S.NULOS),
             t.get("k_sigma_observed"), t.get("caliente_en_anillo"), f["cprima_igual"]))
@@ -139,8 +178,9 @@ def main():
     if fallas:
         print("FALLAS:", *fallas, sep="\n  ")
         sys.exit(1)
-    print("OK: nulo en pixeles (isotropo y anisotropo), aplicado igual al pedido, rumbos equiespaciados, el nulo "
-          "cambia la publicacion en los dos sentidos, pixel por indice, espia del Test 1 y C' == C")
+    print("OK: nulo del tamano en km del real (isotropo, anisotropo y con bow tie), aplicado igual al pedido, "
+          "rumbos equiespaciados, el nulo cambia la publicacion en los dos sentidos, jacobiano sobre un barrido, "
+          "pixel por indice, espia del Test 1 y C' == C")
 
 
 if __name__ == "__main__":
