@@ -391,6 +391,22 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 02:39 UTC (vuelta 180, S153): F/K V2 evaluada: K lectura A CUMPLE combinado (POR VERIFICAR); P4 pendiente
+- Instrumento fijado (`2766c198`). V1 re-unida (44 de 44 iguales salvo `_union_intentos`) y re-evaluada: CUMPLE, igual
+  que antes. V2a re-unida, V2b unida y pareja. Todo en `experiments/_s153_fk_v2/` (README con la desviación: logs de
+  V2b unidos porque el control de cableado exige 11 volcanes por carpeta; con las carpetas partidas salía INDECIDIBLE
+  sólo por eso).
+- **Combinado (§3 de la regla): K lectura A CUMPLE con la regla original y con SN.** V2: K no pierde ninguna protegida
+  (MODIS 39 de 39, contra 6 de C0; VIIRS 375 38 de 38; VIIRS 750 42 de 42); negativos limpios MODIS 10,8 a 0,9 %, VIIRS
+  375 85,4 a 3,7 %, VIIRS 750 21,8 a 1,1 %; P2 GANA en los tres. Lectura B: NO CUMPLE (veto) por V1 (informa, D-4).
+- **Pendiente antes del §4:** P4 FALLA en V2 (54 de 632 alertas con el cúmulo movido más de 0,5 km; 30 quedan más
+  cerca del cráter) → auditoría A61 de las movidas; cruce de 1 MW hacia abajo (§5: magnitud VIIRS 375 0,762 a 0,669,
+  VIIRS 750 0,594 a 0,534); Tupungatito de V1 con segundo lector.
+- **Con OCR (`--solo-tabla no`, informa):** VIIRS 375 K 57 de 59 protegidas: Lastarria 2026-04-18 04:42 NOAA-20 (1,29
+  MW, pendiente de repetición) y Lastarria 2026-05-02 05:06 Suomi NPP (2,36 MW, sólo OCR). Mirarlas.
+- Verificador limpio de V1+V2 lanzado (`C:\Users\nmend\AppData\Local\Temp\claude\verif_fk_v2\`), que además mide P4
+  y el cruce de 1 MW. Diurno: repetición de W5a corriendo (2 de 6), W6a pendiente detrás.
+
 ### 2026-10-18 02:40 UTC (vuelta 179, S153): V2b unida y PAREJA; W6a despachada; NRT sin despacho externo
 - **V2b repetida** (39068999603): los 4 volcanes repetidos parejos dentro del run (2.397 por brazo); el rojo de
   `recolectar` es sólo que los otros 7 no estaban. Intento 2 en `C:\Users\nmend\AppData\Local\Temp\claude\v2b_39033530622\i2\`.
