@@ -78,7 +78,11 @@ def test_no_muta_las_bandas_de_entrada():
     assert np.isnan(rad22[0]) and rad22[1] == 8.0
 
 
-def test_flag_operacional_arranca_apagado():
-    """Adopción por A/B (A67): el default del perfil operacional no cambia hoy."""
+def test_flag_operacional_encendido_desde_la_adopcion_de_k():
+    """Adopción por A/B (A67). S153: el A/B se hizo y K se adoptó con la regla escrita antes del resultado
+    (experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, #848; evidencia en experiments/_s153_fk_v2/), así que el
+    perfil operacional resuelve la banda 22 primaria. Antes este test fijaba False («el default no cambia hoy»);
+    sigue exigiendo lo mismo, que el valor operacional sea el decidido y no uno suelto, con el valor nuevo.
+    Volver a False es revertir la adopción (tag pre-s153-adopcion-k), no una edición del perfil."""
     from pipeline.profile import ENABLE_MODIS_B22_PRIMARY
-    assert ENABLE_MODIS_B22_PRIMARY is False
+    assert ENABLE_MODIS_B22_PRIMARY is True

@@ -34,6 +34,20 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(EXP))
 os.environ.setdefault("VRP_PROFILE", "mirova_equivalent")
+sys.path.insert(0, str(ROOT / "tests"))
+from produccion_pre_k import produccion_pre_k  # noqa: E402
+
+
+# S153: esta sonda MxD03 (tarea 1.17) se diseno y sello sobre la produccion de ANTES de K: sus escenas sinteticas
+# ejercen la rama del Test 1, la conectiva `min` y la banda 21, y sus mutaciones estan calibradas contra eso.
+# Desde la adopcion de K (#848) la produccion ya no tiene esa rama, asi que cada test del modulo corre con los
+# procesadores en la deteccion del ancla congelada (tests/produccion_pre_k.py). Sin esto las pruebas sinteticas
+# caen y, peor, las mutaciones quedan "atrapadas" por fallas que no son las suyas (A116).
+@pytest.fixture(autouse=True)
+def _produccion_pre_k():
+    with produccion_pre_k():
+        yield
+
 
 import seleccionar_mxd03 as S  # noqa: E402
 import evaluar_mxd03 as E  # noqa: E402

@@ -1,0 +1,24 @@
+# S154. REPROCESO HISTORICO CON K: la replica (mirova_equivalent, con K desde #850) escribiendo en otro directorio.
+#
+# PARA QUE. La historia de data/mirova_equivalent/ (2025-02-15 a 2026-09-17) quedo escrita con el detector anterior.
+# Se reprocesa con reproc-chunked.yml, que corre en trozos paralelos y se niega a escribir en la replica, asi que
+# necesita un perfil con directorio propio. Despues scripts/reemplazar_ventana_reproceso.py pasa la ventana a la
+# serie operacional en un solo commit, sin tomar el grupo push-main por horas (decision de Nicolas, 2026-10-18).
+#
+# IDENTICO A LA REPLICA salvo nombre y directorio: lo vigila tests/test_reproceso_historico_k_s154.py, que resuelve
+# todas las constantes de pipeline.profile para los dos perfiles. Declara los tres flags de K con el valor de K,
+# porque tests/test_guard_perfiles_congelados_s153.py exige que todo perfil derivado los escriba (A117).
+# NO OPERACIONAL: fuera del cron NRT.
+extends: mirova_equivalent
+profile: _s154_reproc_k_historico
+description: >
+  Replica con K en directorio aislado, para el reproceso historico por trozos.
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+
+output:
+  data_subdir: _s154_reproc_k_historico
+
+enable_modis_b22_primary: true

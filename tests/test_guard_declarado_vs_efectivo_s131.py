@@ -151,7 +151,8 @@ CITAS_CLAUDE_MD = [
     # V31.1: 1483 -> 1493, +10 por la marca de MIROVA sin distancia (helpers de estilo y tooltip).
     # S151: 1493 -> 1578, +85 por las alertas diurnas de MIROVA con sol (helpers, modo del tooltip, loader).
     # S153: 1578 -> 1594, +16 por el selector de noche o rango (script periodo.js, estilos, controles y estado).
-    ("frontend/index.html", 1594, "isValidDetection"),
+    # S153: 1594 -> 1595, +1 por el script cambio_detector.js (marca de la adopción de K) en la cabecera.
+    ("frontend/index.html", 1595, "isValidDetection"),
     # S151: predicado del tope D9, citado en la marca S151 de A23.
     ("pipeline/process_modis.py", 1009, "_path_d_cap_active"),
     # S140: corridas por el import de product_version (8b) y por el fondo persistido (T7).

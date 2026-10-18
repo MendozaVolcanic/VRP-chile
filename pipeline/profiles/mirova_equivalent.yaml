@@ -260,7 +260,15 @@ paths:
   # lake 0.05-0.21 MW). Tenerlo OFF previamente era omisión, no decisión
   # basada en papers — corregido S27 análisis multi-sensor. Cierre H_S27_1
   # de D4 en docs/MIROVA_DIVERGENCES.md.
-  enable_test1_path: true
+  # ⚠️ S153, ADOPCION DE K (regla experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, aprobada por Nicolas en #848;
+  # evidencia en experiments/_s153_fk_v2/): el Test 1 integrado en el ROI NO esta en el paper (D30, AUDIT_S146) y
+  # era la causa de que la replica publicara en 85 % de las pasadas de VIIRS 375 en que MIROVA no vio nada, con el
+  # cumulo en el borde del disco de 3 km. Se APAGA. El texto de arriba se conserva por historia. Reversion: git revert
+  # del PR de adopcion o el tag pre-s153-adopcion-k.
+  enable_test1_path: false
+  # S153 (K): conectiva de prosa de Coppola 2016a para los Tests 2 y 3 (`max`: hacen falta los dos caminos, el dNTI
+  # y su desviacion). Con `min` bastaba uno, el mas facil. Lo lee pipeline/profile.py:726 desde esta seccion.
+  enable_tests_23_prose_branch: true
   # S106 ancla espacial honesta (design 2026-06-11): posición del final_hotspot
   # desde el cluster contextual / vent / NTI-peak. NO toca deteccion ni magnitud.
   # ADOPTADO S106 (brazo A del A/B run 27343409067: trig_t1 0-diffs pareados en
@@ -564,7 +572,10 @@ enable_bt_sat_secondary_guard: true
 
 # S132 — B22 primaria en MODIS (Coppola 2016a l.141-144). OFF: espera el A/B con reproc
 # real. Mueve detección además de magnitud (B22 tiene 1/10 del ruido de B21).
-enable_modis_b22_primary: false
+# S153, ADOPCION DE K (#848, experiments/_s153_fk_v2/): el A/B con reproc real se hizo; con la banda 22 la replica
+# publica 39 de 39 alertas protegidas MODIS de Lascar en V2 (C0: 6) y baja la publicacion en negativos limpios de
+# 10,8 a 0,9 %. ON. Va junto con la conectiva `max`: con la banda 21, `max` apaga el detector MODIS (S147, S150).
+enable_modis_b22_primary: true
 
 # S132 - distance_class de MODIS desde el primary_cluster (decision #4). OFF: espera la
 # medicion sobre los records persistidos + el OK de Nicolas (S113 cerro esta cara del bug

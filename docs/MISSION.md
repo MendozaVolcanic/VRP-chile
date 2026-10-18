@@ -4,6 +4,18 @@
 > preguntas antes de proponer o implementar cualquier cosa que toque el
 > pipeline algorítmico.
 
+> ⚠️ **S153: el detector de la réplica cambió (adopción de K; marca A113).** Desde el merge del PR de adopción,
+> `mirova_equivalent` corre (1) **sin el Test 1 integrado en el ROI** (D30: no está en el paper y hacía publicar en
+> 85 a 88 % de los negativos limpios de VIIRS 375), (2) con la **conectiva `max`** de la prosa de Coppola 2016a en los
+> Tests 2 y 3 (hacen falta las dos condiciones, D26) y (3) con la **banda 22 primaria en MODIS** (D21). La regla de
+> decisión se escribió y aprobó antes del resultado (`experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`, #848) y la
+> evidencia está en `experiments/_s153_fk_v2/README.md`: con la lectura A, CUMPLE en las dos ventanas, 0 protegidas
+> perdidas que decidan, negativos limpios publicados de 88,2 y 85,4 % a 2,5 y 3,7 % en VIIRS 375. Toda frase de
+> este documento que describa el detector con el Test 1 integrado, con `min` o con la banda 21 describe el estado
+> previo a S153; se conserva por historia. El laboratorio (`experimental`) sigue con el detector anterior y es la
+> sombra (§4.9 de la regla). Toda comparación con MIROVA que cruce la fecha de adopción se estratifica por régimen
+> (A104). Reversión: `git revert` del PR de adopción (tag `pre-s153-adopcion-k`). Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.9.
+
 ## Misión (objetivos simultáneos, post-S86)
 
 VRP Chile cumple dos objetivos que comparten la misma infraestructura de
@@ -168,7 +180,9 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
      contra «la suma» **no está demostrado**. Además, cuando informa el cráter, su VRP es el del cráter
      solo, sin el foco lejano débil que nosotros sí alertamos (causa candidata: la conectiva `min`,
      SOSPECHA). El diseño del brazo que elija la mayor espera el A/B de F y K
-     (`experiments/_s151_seleccion_mirova/README.md`).
+     (`experiments/_s151_seleccion_mirova/README.md`). ⚠️ **S153: el A/B de F y K ya está hecho y K
+     se adoptó** (producción con `max`; marca del inicio de este documento); el brazo que elija la mayor
+     se diseña ahora sobre K.
    - ⚠️ **REBAJADA S146: esta lista de «Resueltas» se lee primero y varias entradas ya
      cayeron dentro del propio proyecto** (`docs/AUDIT_S146.md` §2, V-13, V-01, V-06). **D9 no
      está cerrada**: el «207 de 214 confirmados» no se reproduce con ninguna definición en que
@@ -310,6 +324,10 @@ según `git log -S` (`docs/AUDIT_S149.md` §0). Y el «recall 50 a 80 %» que ce
 EVIDENCIA y circular (`docs/audit_s147/VERIFICADOR_H_A01.md`; marca de S147 dentro de D30 en
 `docs/MIROVA_DIVERGENCES.md`). O sea: **«el literal pierde recall» no está medido**, y no sirve para
 defender el Test 1 integrado, que es un detector propio (D30). Texto original por historia:
+
+⚠️ **S153**: el Test 1 integrado ya no corre en la réplica (adopción de K, marca del inicio de este
+documento y marca S153 de D30); esta sección se conserva para el día en que una pérdida de recall
+medida vuelva a plantear la pregunta, y la respuesta sigue siendo la de abajo: investigar, no parchar.
 
 Esa es señal de que MIROVA usa un mecanismo que no replicamos todavía. La
 respuesta correcta NO es agregar parche — es **investigar qué mecanismo
