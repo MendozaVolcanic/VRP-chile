@@ -391,6 +391,20 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 ~03:20 UTC (vuelta 184, S153): auditoría A61 de P4: ninguna protegida movida a otro objeto
+- `experiments/_s153_fk_v2/a61/INFORME.md` (62 movidas: 8 de V1, 54 de V2). El «movimiento» es casi siempre cambio de
+  agregación: K deja el cúmulo de un píxel en 54 de 62; en 40 de 62 el centroide de K cae sobre un píxel que C0 también
+  marcó (38 a 0,00 km; en 30 es el más caliente de C0, cuyo centroide arrastraban 2 a 24 vecinos tibios). En 22 (VIIRS
+  375 débiles salvo Isluga 06-10) K publica en otro lugar; contra el radio de MIROVA (desde `mirova_center`,
+  cuantizado: 2,4 = 0,375·√41) compatible sólo K en 11, sólo C0 en 2, ninguno en 9; en 20 de 22 K se acerca al cráter.
+- **Las 14 protegidas:** 12 mismo objeto (Láscar MODIS 5, Láscar V750 4, Chillán MODIS 2, Villarrica MODIS 1);
+  Isluga V375 06-10 K se acerca a lo que vio MIROVA (C0 descartado por el radio); Tupungatito V375 09-14 el radio
+  descarta a los dos brazos y la protección descansa sólo en el OCR de Suomi NPP: SIN VERIFICAR.
+- Imágenes: 40 GeoTIFF bajados de a uno; ninguna protegida tiene imagen propia (archivo desde mayo, congelado desde el
+  22-sep); el instrumento de imagen **falla su nulo** con estas señales débiles (A110), así que no decide. **Veredicto
+  para el §3: ninguna movida pone el cúmulo publicado sobre otro objeto en una protegida; P4 no bloquea.**
+- Falta R2 (en curso). Después: pre-mortem, tag defensivo y PR de adopción (§4.6 a §4.8).
+
 ### 2026-10-18 03:06 UTC (vuelta 183, S153): segundo lector: las cuatro alertas que K no publica son LEJANAS
 - `experiments/_s153_fk_v2/lector2/INFORME.md`: Tupungatito 09-28 (22,5 km desde la referencia de MIROVA) y 09-29
   (9,6 km), Lastarria 04-18 (20,0 km; corrida la función real del scraper sobre la imagen propia, que quedó guardada con
