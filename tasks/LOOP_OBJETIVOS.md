@@ -362,6 +362,7 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
+| D-21 | **Merge de la adopción de K** (producción, A45). Cumple la regla #848 entera: combinado CUMPLE (original y SN), verificador CONFIRMADO, R3 idéntico, cruce de 1 MW ninguno, A61 sin protegidas movidas a otro objeto, segundo lector 4 de 4 lejanas, R2 5 de 5, K sobre main idéntico. Además: auto-audit sin recalibrar (recomendado), laboratorios lowT y ndc_focus en C0, aviso a consumidores | `experiments/_s153_fk_v2/` | #850, tag `pre-s153-adopcion-k` | pendiente |
 | D-19 | MxD03 después de la 1.23: las 2 protegidas que pierde caen por el **Test 1**, que K elimina. Propuesta del loop: no adoptarla sobre producción de hoy; si K se adopta (#848), pre-registrar MxD03 **sobre K** (sin Test 1 el mecanismo de esas pérdidas no existe), con Láscar bajo 35° como vara y el borde del barrido aparte | `experiments/_s151_mxd03_sola_123/resultado/` (evaluación y verificador CONFIRMADO) | | pendiente |
 | D-20 | ~~Regla de adopción de K~~ **APROBADA** (Nicolás, 2026-10-17 ~23:45 UTC: «tal como está, incluida la reversión con git revert pre-autorizada»), antes de evaluar V2; mergeada (squash `cf507f46`); instrumento fijado en `2766c198` | `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`, verificador limpio con arreglos aplicados | #848 | cerrada |
 | D-1 | Adoptar conectiva `max` en VIIRS 375 (criterio §1.2 por medir en 0.2) | `docs/S150_RESULTADO_MESES.md`, `docs/audit_s150/meta/AUDITOR_F2_NUMEROS.md` | pendiente | pendiente |
@@ -390,6 +391,17 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-18 03:56 UTC (vuelta 188, S153): PR de adopción de K abierto (#850), CI verde; ESPERA el sí de Nicolás
+- **#850** (rama `loop/adopcion-k`, `e0d3ebfd`): flags en `mirova_equivalent.yaml`; 46 perfiles derivados congelados en
+  C0; guards `test_guard_adopcion_k_s153.py` y `test_guard_perfiles_congelados_s153.py`; ficha SDA v1.9; marcas A113 en
+  D19, D21, D26, D30, D11, MISSION y CLAUDE.md (G8 remapeado a 1595); historial del auto-audit con la publicación en
+  negativos; `frontend/cambio_detector.js` (`CAMBIO_DETECTOR_UTC = null` hasta el merge); evidencia de
+  `experiments/_s153_fk_v2/` traída a la rama. Suite local 2.107 passed; CI verde; `MERGEABLE CLEAN`.
+- **Decisiones para Nicolás (D-21):** el merge; auto-audit sin recalibrar las primeras semanas (recomendado);
+  `experimental_lowT` y `experimental_ndc_focus` congelados en C0; aviso a OVDAS e Integracion_Plataformas; salvedad de
+  Tupungatito 2026-09-29.
+- Después del merge (loop): completar `CAMBIO_DETECTOR_UTC`, reproceso de 30 días con K en jobs partidos, R8, sombra.
 
 ### 2026-10-18 03:37 UTC (vuelta 187, S153): espera
 - Rama `loop/adopcion-k`: flags, 46 perfiles derivados congelados en C0 y guards commiteados (`5df26fe1`, suite 2.096
