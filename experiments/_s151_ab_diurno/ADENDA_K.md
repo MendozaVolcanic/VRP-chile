@@ -1,6 +1,8 @@
 # Adenda del pre-registro del A/B diurno de VIIRS: repetirlo sobre K (tarea 1.32, D-10, issue #813)
 
-Estado: **borrador, espera el verificador con contexto limpio y el sello de Nicolás** (2026-10-18). Nada de esta adenda
+Estado: **borrador v2, corregido con el verificador limpio** (`verificador_adenda_k/INFORME.md`), **espera el sello de
+Nicolás** con sus dos decisiones (§3) (2026-10-18). La evidencia de la corrida sobre C0 que se cita vive en la rama
+`loop/activo` (`experiments/_s151_ab_diurno/salidas/W2_W6_s154/`), no en `main`. Nada de esta adenda
 se despacha sin su «sí» y el candado `preregistro_aprobado=si` del workflow. Complementa a `PREREGISTRO.md`: todo lo que
 esta adenda no cambia rige tal como está allí (fenómeno, ventanas, métricas, nulo, criterio, candado, desviaciones).
 
@@ -15,10 +17,14 @@ explica buena parte de lo que se midió (hallazgo H4 del verificador):
   `test1_roi` (VIIRS 750: 389 de 731);
 - 11 de las 22 alertas protegidas que el brazo diurno recupera en VIIRS 375 salen sólo del Test 1, incluidas las 8 de W2;
 - el contrafactual que cuenta sólo los records `ctx_cluster` (sin aplicar la conectiva `max`) deja G1 W3 a W6
-  cumpliendo (P = 0,001) y G2 fallando (1.142 publicaciones contra 20 permitidas en VIIRS 375; 357 contra 6 en VIIRS
-  750). Con `max` el corte podría ser mucho mayor (SOSPECHA del verificador, no medida).
+  cumpliendo (P = 0,001) pero **G1 W2 a W6 fallando (P = 0,194)**: los 12 positivos de W2 son sólo del OCR y ninguno
+  sale por cúmulo contextual (verificador de esta adenda, V1). G2 falla en los dos sensores (1.142 publicaciones contra
+  20 permitidas en VIIRS 375; 357 contra 6 en VIIRS 750). Con `max` el corte podría ser mucho mayor (SOSPECHA del
+  verificador de W2 a W6, no medida).
 
-Si sobre K G1 cumple y G2 no, la regla del §6 da **DECIDE NICOLÁS CON M4**, no NO ADOPTAR. Por eso hay que medirlo.
+Si sobre K G1 cumple y G2 no, la regla del §6 da **DECIDE NICOLÁS CON M4**, no NO ADOPTAR. Y es probable que sobre K
+aparezca justo el caso que el §6 no previó: G1 cumple sin W2 y falla con W2 (§3.2). Por eso hay que medirlo, y decidir
+esa regla antes.
 
 ## 2. Qué cambia (y nada más)
 
@@ -37,7 +43,9 @@ Ventanas, métricas (M1 a M5), poblaciones, referencia congelada (el evaluador s
 reproduzca `sustrato.json`), G2 y G3: **sin cambio**. Las ventanas siguen partidas en mitades (W2a/W2b ... W6a/W6b, como
 en la corrida sobre C0). W1 se informa aparte, igual que antes.
 
-## 3. Una decisión aparte para el sello: el cuantil del nulo en G1
+## 3. Dos decisiones para el sello
+
+### 3.1 El cuantil del nulo en G1
 
 El nulo de G1 es discreto. En la corrida sobre C0, con el muestreo de 10.000 barajados el p95 de W2 a W6 salió +0,2446,
 y el cuantil exacto (convolución de hipergeométricas, calculado por el verificador) es +0,2760: el percentil cae en un
@@ -45,12 +53,28 @@ salto de la distribución. No cambió ese veredicto (D = +0,18), pero **en W3 a 
 (+0,2303 contra +0,2303, P(nulo ≥ D) = 0,106 y P(nulo > D) = 0,025 según el verificador). Con un empate, el resultado
 lo decide el muestreo, no los datos.
 
-- **Opción A (recomendada): cuantil exacto.** G1 cumple si P(nulo ≥ D) < 0,05, con la distribución exacta del nulo
-  (suma por estrato de hipergeométricas, por convolución). Se implementa en el evaluador ANTES de despachar, con su
-  prueba en el arnés (el muestreo actual tiene que coincidir con el exacto lejos de los saltos, y el exacto tiene que
-  dar el valor del verificador en W2 a W6 sobre C0). Cambia el método del §5, por eso va al sello.
+- **Opción A (recomendada): cola exacta.** G1 cumple si P(nulo ≥ D) < 0,05, con la distribución exacta del nulo (suma
+  por estrato de hipergeométricas, por convolución). El verificador de esta adenda la reimplementó por su cuenta: 0
+  diferencias contra fuerza bruta en 200 casos y reproduce 0,5223, 0,1058, 0,0253, +0,2760 y +0,2303. Por ser discreta
+  la regla es conservadora: la probabilidad real de cumplir por azar queda en 1,2 % y 2,5 % en las corridas sobre C0, no
+  en 5 %. Se implementa ANTES de despachar con estas pruebas en el arnés: (a) contra fuerza bruta en casos chicos; (b)
+  el caso de empate (D en un salto); (c) la mutación de «≥» por «>» tiene que caer; (d) comparar COLAS y no cuantiles
+  contra el muestreo (el p95 muestreado salta entre +0,2446 y +0,2760 según la semilla); (e) `controles_del_nulo`
+  validado contra la regla exacta y no contra el p95 muestreado. Cambia el método del §5, por eso va al sello.
 - **Opción B: dejarlo como está** (muestreo de 10.000, ahora determinista por #855) y declarar los empates como tales en
   el informe.
+
+### 3.2 Qué pasa si G1 cumple sin W2 y falla con W2
+
+El §6 dice «si falla en W2 a W6: NO ADOPTAR» y «si pasa sólo con W2: depende del OCR, decide Nicolás». El caso inverso
+(cumple en W3 a W6 y falla en W2 a W6) no está previsto, y con el texto actual cae en NO ADOPTAR. Es el caso probable
+sobre K: los 12 positivos de W2 son sólo del OCR (tramo de calidad A119 en que la tabla no tiene ni una alerta diurna), y
+en la corrida sobre C0 ninguno salió por cúmulo contextual.
+
+- **Opción i (recomendada): DECIDE NICOLÁS CON M4**, informando aparte las alertas de W2 que se pierden. Es el simétrico
+  de la regla que ya existe para «pasa sólo con W2»: en los dos casos el veredicto depende de alertas que sólo trae el
+  OCR, y el pre-registro ya decidió que eso no se resuelve solo.
+- **Opción ii: dejar el texto como está** (NO ADOPTAR), tratando W2 como parte plena del criterio.
 
 ## 4. Despacho
 
@@ -63,8 +87,17 @@ lo decide el muestreo, no los datos.
 - **Después de que termine el reproceso histórico con K** (tarea 1.24, run 39125546355, de a 8 jobs): con el NRT (11) y
   el histórico (8) el tope de 20 jobs concurrentes queda sin margen.
 - **Costo medido** sobre la corrida C0 (runs 38987988455, 39041204976, 39097155412): por media ventana y volcán, el
-  control tarda unos 15 a 24 min y el brazo diurno unos 40 a 58 (máximo 66). Unas 15 h de runner por media ventana, del
-  orden de **150 h** en total y **2 a 3 días de reloj** con `max-parallel: 3`. Sin el Test 1 puede cambiar; no está medido.
+  control tarda unos 15 a 24 min y el brazo diurno unos 40 a 58 (máximo 66). Entre **10 y 15 h de runner por media
+  ventana** y **3 a 5 días de reloj** con `max-parallel: 3` (corregido por el verificador, V3; el NRT corre con
+  `max-parallel: 8`). Sin el Test 1 puede cambiar; no está medido.
+- **Candado adicional, a implementar y verificar ANTES de despachar** (además de la opción A si se aprueba):
+  - **H2a, cableado por record y por commit.** El cableado actual mira sólo el log, y `unir_ventana.py` no copia logs
+    a la raíz unida, así que un job repetido desde otra referencia pasaría sin revisión. Con `--base k` el evaluador
+    tiene que exigir además, sobre los records de los dos brazos, 0 records con `triggered_test1` o
+    `final_hotspot_source = test1_roi` (en producción bajo K: 0 de 3.548, verificador de esta adenda) y
+    `regimen.codigo_sha` igual al commit del tag de despacho.
+  - **H2b, `--base` no puede quedar en su valor por defecto en silencio.** Si `--brazos` no es el de W2 a W6 sobre C0,
+    el evaluador exige `--base` explícito o se niega a decidir.
 - Cobertura: leer `cobertura.txt` de cada corrida antes de mirar resultados; si falta una noche o un volcán, repetir ese
   job con el mismo tag y unir con `experiments/_s153_fk_v2/unir_ventana.py` (D-13).
 

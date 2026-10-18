@@ -1,0 +1,14 @@
+== 1. fuerza bruta contra convolucion (estratos chicos, Fraction exacta)
+   200 casos al azar: 0 distintos
+
+== 2. clases de la corrida C0 (5018 pasadas)
+   W2 a W6: P 32 N 4683 K 2833 X_obs 25 D +0.1816 | P(>=D) 0.5223 P(>D) 0.3139 | cuantil95 exacto X=28 D +0.2760
+      regla A (P(>=D) < 0,05): FALLA | D > cuantil95 exacto: FALLA | el X minimo que cumple A: X=29 (D +0.3075, P(>=) 0.0120)
+      tamano real de la regla A bajo el nulo: P(cumplir por azar) = 0.0120 (nominal 0,05)
+   4. muestreo 10.000 x 20 semillas: P(>=D) muestreada 0.5137 a 0.5320 (exacta 0.5223, 3 EE = 0.0150) | p95 muestreado toma [0.2446, 0.276]
+      D del evaluador en float == atomo X_obs del nulo en float: True
+   W3 a W6: P 20 N 3587 K 2240 X_obs 17 D +0.2303 | P(>=D) 0.1058 P(>D) 0.0253 | cuantil95 exacto X=17 D +0.2303
+      regla A (P(>=D) < 0,05): FALLA | D > cuantil95 exacto: FALLA | el X minimo que cumple A: X=18 (D +0.2805, P(>=) 0.0253)
+      tamano real de la regla A bajo el nulo: P(cumplir por azar) = 0.0253 (nominal 0,05)
+   4. muestreo 10.000 x 20 semillas: P(>=D) muestreada 0.1017 a 0.1094 (exacta 0.1058, 3 EE = 0.0092) | p95 muestreado toma [0.2303]
+      D del evaluador en float == atomo X_obs del nulo en float: True
