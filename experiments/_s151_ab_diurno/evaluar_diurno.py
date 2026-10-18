@@ -508,7 +508,10 @@ def estratos_de(cls, ventanas, publicado=None):
         e[0] += 1
         e[1] += "pos" in c["pob"]
         e[2] += (publicado(k, c) if publicado else c["estado"] == "publicada")
-    return [tuple(v) for v in est.values()]
+    # S154 (H2): orden por clave. `cls` se arma iterando conjuntos de strings (orden según PYTHONHASHSEED), y el orden
+    # de los estratos decide cómo reparte el generador sus números: sin ordenar, el p95 cambiaba de un proceso a otro
+    # con la misma semilla (+0,2446 contra +0,2760 en W2 a W6).
+    return [tuple(est[k]) for k in sorted(est)]
 
 
 # Igualdad numérica, no umbral: cuando el nulo es degenerado (por ejemplo, un brazo que publica TODO un estrato y
@@ -549,7 +552,8 @@ def grupos_de(cls, ventanas):
     for k, c in cls.items():
         if c["ventana"] in ventanas and c["estado"] != "no_procesada" and ({"pos", "neg"} & c["pob"]):
             grupos[(k[0], k[1])].append(k)
-    return [(ks, ["pos" in cls[k]["pob"] for k in ks]) for ks in grupos.values()]
+    # S154 (H2): mismo motivo que en estratos_de; las pasadas también ordenadas, porque la permutación las recorre
+    return [(sorted(grupos[g]), ["pos" in cls[k]["pob"] for k in sorted(grupos[g])]) for g in sorted(grupos)]
 
 
 _POS, _NEG = frozenset({"pos"}), frozenset({"neg"})

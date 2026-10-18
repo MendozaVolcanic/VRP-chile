@@ -243,7 +243,34 @@ def chequear(caso, cond, detalle):
     print("   [%s] %s" % ("OK" if cond else "FALLA", detalle))
 
 
+def chequear_orden_del_nulo():
+    """S154 (verificador de W2 a W6, H2): el nulo barajado no puede depender del orden en que se recorre `cls`.
+    `cls` se arma iterando conjuntos de strings, cuyo orden cambia con PYTHONHASHSEED en cada proceso; si los estratos
+    salen en ese orden, el generador reparte sus números distinto y el p95 cambia con la misma semilla (+0,2446 contra
+    +0,2760 en dos corridas de W2 a W6). Mismos datos en dos órdenes: estratos, grupos y p95 idénticos."""
+    np = ED.np
+    base = []
+    for i, (vol, s) in enumerate([("Lascar", "VIIRS375"), ("Llaima", "VIIRS375"), ("Chaiten", "VIIRS750"),
+                                  ("Villarrica", "VIIRS375"), ("Copahue", "VIIRS750")]):
+        for j in range(40):
+            k = (vol, s, "2026-07-%02d %02d:00" % (1 + j % 28, j % 24))
+            base.append((k, {"ventana": "W3", "pob": {"pos"} if j % (5 + i) == 0 else {"neg"},
+                             "estado": "publicada" if (j * (i + 3)) % 7 < 3 else "sin_publicar"}))
+    a, b = dict(base), dict(reversed(base))
+    ea, eb = ED.estratos_de(a, ("W3",)), ED.estratos_de(b, ("W3",))
+    chequear("orden_del_nulo", ea == eb, "estratos en el mismo orden con cls recorrido al derecho y al revés")
+    ga, gb = ED.grupos_de(a, ("W3",)), ED.grupos_de(b, ("W3",))
+    chequear("orden_del_nulo", ga == gb, "grupos del control del nulo en el mismo orden")
+    # el nulo entero, no sólo el p95: con un nulo discreto el p95 puede coincidir de casualidad aunque las muestras
+    # salgan en otro reparto (pasó con estos datos antes del arreglo)
+    na = ED.g1(a, ("W3",), np.random.default_rng(ED.SEMILLA), con_nulo=True)["_nulo"]
+    nb = ED.g1(b, ("W3",), np.random.default_rng(ED.SEMILLA), con_nulo=True)["_nulo"]
+    chequear("orden_del_nulo", np.array_equal(na, nb),
+             "las %d muestras del nulo idénticas con la misma semilla (difieren %d)" % (len(na), int(np.sum(na != nb))))
+
+
 def main():
+    chequear_orden_del_nulo()
     tmp = Path(tempfile.mkdtemp(prefix="probar_diurno_"))
     try:
         filas, coords = ED.cargar_filas(ED.parser().parse_args(["--raiz", "x"]))
