@@ -1082,7 +1082,13 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   es el `primary_cluster` (todos los paths del hot_mask), no solo Tests 2/3 — pero quitarlo o snapearlo
   rompe Lastarria.
 
-- **A85.** ⚠️ **S151 (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P4)**: esta regla habla de
+- **A85.** ⚠️ **S153 (tarea 1.23 bis, `experiments/_s153_deriva_123bis/`, verificador limpio CONFIRMADO)**: lo de
+  abajo de que «la recaptura extra-radio volvió 4-6×» vale sólo para records escritos DESPUÉS del flip del
+  2026-07-01. Los records MODIS observados de enero a junio de 2026 (3.231, 10 volcanes) quedaron escritos con los dos
+  gates intra-radio encendidos (#226 y #229 del 2026-05-28 a #474) y nunca se reprocesaron; el 2025 lo escribió el
+  backfill S120 después del flip. Toda serie o A/B MODIS que cruce esas fronteras mezcla dos detectores (A104). En la
+  muestra de 250 cambian 5 publicaciones, ninguna protegida; VIIRS SIN VERIFICAR.
+  ⚠️ **S151 (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P4)**: esta regla habla de
   cercas alrededor de la selección, no de la regla de selección, y en eso sigue en pie. Pero bajo la
   regla de la anomalía MAYOR (decidida por Nicolás el 2026-10-09, A/B `vent_anchored` contra `vrp_max`
   pendiente, `docs/AUDIT_S150.md` §8) un cúmulo lejano más fuerte que gana no es robo, es fidelidad a

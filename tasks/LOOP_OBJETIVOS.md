@@ -362,6 +362,7 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
+| D-23 | Reproceso de los 3.231 records MODIS de enero a junio de 2026 escritos con los gates intra-radio (deriva 1.23 bis, CONFIRMADA). Recomendación: hacerlo dentro del reproceso histórico con K si se adopta #850, no antes | `experiments/_s153_deriva_123bis/` | | pendiente |
 | D-22 | Ratificar la desviación de W5a (intento 2 entero para Llaima `_s151_ab_diurno_on`: 2 records diurnos VIIRS 375 distintos por empate del top-100, mismo predicado, mismo cúmulo) y, aparte, decidir si se extiende a VIIRS el desempate determinista de #844 (producción, A45) | bitácora vuelta 189 | | pendiente |
 | D-21 | **Merge de la adopción de K** (producción, A45). Cumple la regla #848 entera: combinado CUMPLE (original y SN), verificador CONFIRMADO, R3 idéntico, cruce de 1 MW ninguno, A61 sin protegidas movidas a otro objeto, segundo lector 4 de 4 lejanas, R2 5 de 5, K sobre main idéntico. Además: auto-audit sin recalibrar (recomendado), laboratorios lowT y ndc_focus en C0, aviso a consumidores | `experiments/_s153_fk_v2/` | #850, tag `pre-s153-adopcion-k` | pendiente |
 | D-19 | MxD03 después de la 1.23: las 2 protegidas que pierde caen por el **Test 1**, que K elimina. Propuesta del loop: no adoptarla sobre producción de hoy; si K se adopta (#848), pre-registrar MxD03 **sobre K** (sin Test 1 el mecanismo de esas pérdidas no existe), con Láscar bajo 35° como vara y el borde del barrido aparte | `experiments/_s151_mxd03_sola_123/resultado/` (evaluación y verificador CONFIRMADO) | | pendiente |
@@ -392,6 +393,19 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-18 ~05:35 UTC (vuelta 192, S153): deriva 1.23 bis CONFIRMADA por verificador limpio; A85 marcada
+- `experiments/_s153_deriva_123bis/verificador/VERIFICADOR.md`: fechas de los gates resueltas con `pipeline.profile` en
+  cada commit (encendidos 2026-05-28 04:44 y 16:39 UTC, apagados 2026-07-01 20:46 UTC; único cambio de constantes en la
+  ventana); datación rehecha por barrido lineal (corrección: Chaitén 04-28 e Isluga 05-09 y 05-19 se escribieron el
+  06-06); controles nuevos que no dependen de la historia (firma estructural violada en 1 de 2.869 records de la ventana
+  contra 5.319 de 8.742 después; experimento natural en el flip 37 de 38 contra 30 de 30; #535 descartado). Corpus:
+  3.231 MODIS reproducidos; **segunda frontera en 2025** (backfill S120 escrito después del flip). Publicaciones en la
+  muestra: 5 de 250 cambian (3 se encienden en Isluga, 2 se apagan en Chaitén), todas negativos limpios, ninguna
+  protegida. VIIRS: deriva probablemente chica, SIN VERIFICAR.
+- A113: marca en A85 del `CLAUDE.md` (la recaptura «volvió» sólo desde el 2026-07-01).
+- **D-23 para Nicolás:** reprocesar o no los MODIS de enero a junio de 2026. Recomendación: no ahora; si se adopta K
+  (#850), el reproceso histórico con K los rehace todos de una vez con un solo detector.
 
 ### 2026-10-18 05:17 UTC (vuelta 191, S153): 1.23 bis: la deriva son los gates intra-radio, no un commit (POR VERIFICAR)
 - `experiments/_s153_deriva_123bis/INFORME.md`. Los 8 records MODIS (Chaitén 03-06 y 04-28, Copahue 03-06, Isluga
