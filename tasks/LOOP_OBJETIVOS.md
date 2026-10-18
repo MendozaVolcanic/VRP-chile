@@ -457,6 +457,18 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 ~20:55 UTC (vueltas 204-205, S154): 1.32 paso H2 mergeado (#855)
+- Causa de H2: `estratos_de` y `grupos_de` devolvían los estratos en el orden de recorrido de `cls` (conjuntos de
+  strings, orden según PYTHONHASHSEED); el generador reparte sus números en ese orden. Arreglo: ordenar por (volcán,
+  sensor). Chequeo `orden_del_nulo` en el arnés (mismos datos en dos órdenes): falló en estratos, grupos y nulo
+  completo (8.790 de 10.000 muestras distintas) y pasa con el arreglo; el p95 solo coincidía de casualidad con los
+  datos chicos (nulo discreto), por eso el chequeo compara el nulo entero. Batería completa 75 de 75. W2 a W6 real con
+  PYTHONHASHSEED 1 y 2: salidas idénticas (0 líneas de diferencia), veredicto sin cambio. #855 (`7968cc06`) mergeado.
+- Para la adenda de 1.32: el cuantil exacto (+0,2760 según el verificador) y el muestreo (+0,2446) difieren porque el
+  nulo es discreto y el percentil cae en un salto; W3 a W6 empata (D = p95). Proponer en la adenda el cuantil exacto
+  por convolución de hipergeométricas, que cambia el método pre-registrado y por eso va al sello de Nicolás.
+- Paradas: NRT verde, disco 17 GB. Histórico 1.24: 57 de 176.
+
 ### 2026-10-18 ~19:40 UTC (vuelta 203, S154): 1.32 paso H1 mergeado (#854)
 - Batería completa del arnés del evaluador diurno: 72 de 72 (`probar_salida.txt` actualizado). #854 (`ac95107a`):
   aviso A114 por sensor en `res["saturacion"]`, caso 26, filtro `PROBAR_SOLO`. CI verde, no toca §1.1, mergeado.
