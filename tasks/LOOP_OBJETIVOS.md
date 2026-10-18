@@ -394,6 +394,17 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 10:10 UTC (S154, dueña del loop: sesión S154 «retomar»): K ADOPTADA; reproceso de 30 días corriendo
+- Nicolás dio el sí a #850 (D-21). Merge squash `34cea39e` a las **09:57:30 UTC**, después de que todos los jobs del
+  NRT de las 09:10 arrancaran con C0 (esa corrida queda entera en C0; la de las 10:10 sale entera con K). CI de `main`
+  verde sobre el merge. Worktrees de #843 y #846 borrados (1,9 GB; disco 13 GB libres).
+- #851 (`CAMBIO_DETECTOR_UTC = "2026-10-18T09:57:30Z"`, más el test que reemplazaba literal `= null;`) mergeado; R8:
+  el aviso se ve en el tablero público, consola sin errores.
+- Tag de datos `pre-s154-reproc-k-datos` (`34cea39e`). Reproceso con K de la ventana por defecto del tablero:
+  `backfill-tier-a.yml`, 2026-09-18 a 2026-10-18, overwrite=true, run 39117638055 (despachado con `push-main` libre).
+- Histórico (D-23, pedido por Nicolás): pendiente de elegir la vía (ver la respuesta de S154).
+- W6a terminado (23 de 23 jobs, sin evaluar); W6b corriendo.
+
 ### 2026-10-18 06:07 UTC (vuelta 194): CIERRE de S153 (pedido de Nicolás); bloque de arranque S154
 - `tasks/BLOQUE_ARRANQUE_S154.md`. Loop detenido. Se fijó con trabajo en curso: diurno W6a (run 39090434307, 12 de 22)
   y W6b (run 39097155412, pendiente). Sin agentes vivos. #850 (adopción de K) abierto, CI verde, espera el sí de
