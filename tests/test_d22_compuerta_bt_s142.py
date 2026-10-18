@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests"))
 
+from produccion_pre_k import PERFIL as PERFIL_PRE_K  # noqa: E402
 from arnes_sintetico_s142 import (CENTRO_V375, N_V375, _redondear,  # noqa: E402
                                   correr_en_subproceso, entradas_helpers, salidas_helpers)
 from pipeline.detection_context import (contextual_dnti_hot_mask,  # noqa: E402
@@ -133,7 +134,9 @@ def test_el_segundo_pase_no_recibe_temperatura():
 
 @pytest.fixture(scope="module")
 def v375_sin_compuerta(tmp_path_factory):
-    texto = correr_en_subproceso(tmp_path_factory.mktemp("d22"), perfil="mirova_equivalent",
+    # S153: se compara contra el golden, que es la produccion de ANTES de K; por eso corre sobre el ancla
+    # congelada (tests/produccion_pre_k.py) y no sobre mirova_equivalent, que desde la adopcion es K.
+    texto = correr_en_subproceso(tmp_path_factory.mktemp("d22"), perfil=PERFIL_PRE_K,
                                  parches=("ENABLE_TESTS_23_NO_BT_GATE_VIIRS375=True",), solo="v375")
     return json.loads(texto)["v375"]
 

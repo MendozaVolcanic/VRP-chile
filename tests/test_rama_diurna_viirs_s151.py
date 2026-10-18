@@ -33,6 +33,7 @@ sys.path.insert(0, str(ROOT / "tests"))
 os.environ.setdefault("VRP_PROFILE", "mirova_equivalent")
 
 import arnes_sintetico_s142 as arnes  # noqa: E402
+from produccion_pre_k import produccion_pre_k  # noqa: E402
 
 # Villarrica (la malla del arnés) el 2026-07-19 (día 200). 06:00 UTC es la madrugada local;
 # 18:00 UTC es pasado el mediodía solar (elevación ~27°): pasada diurna sin ambigüedad.
@@ -271,10 +272,35 @@ def test_el_efecto_de_la_tabla_diurna_se_mide(cual):
     separar del Sol, y conservar lo fuerte. Los dos lados son controles: si el débil no marcara con
     el flag apagado, o el fuerte dejara de marcar con el flag encendido, el test no mediría nada.
     """
-    assert _marcados_en_el_dia(cual, 2.0, False) == 1, "control: el cráter débil no marca de noche"
-    assert _marcados_en_el_dia(cual, 2.0, True) == 0, "la Tabla 1 diurna no movió nada"
-    assert _marcados_en_el_dia(cual, 6.0, False) == 1
-    assert _marcados_en_el_dia(cual, 6.0, True) == 1, "la vara diurna mató también lo fuerte"
+    # S153: el barrido de 2 K y 6 K se midió con la conectiva `min` de la producción de antes de K; con `max`
+    # (adoptada en #848) el cráter de 2 K ya no marca ni de noche. Se mide sobre esa detección, fijada con el
+    # ancla congelada (tests/produccion_pre_k.py), porque los brazos del A/B diurno también la congelaron.
+    with produccion_pre_k():
+        assert _marcados_en_el_dia(cual, 2.0, False) == 1, "control: el cráter débil no marca de noche"
+        assert _marcados_en_el_dia(cual, 2.0, True) == 0, "la Tabla 1 diurna no movió nada"
+        assert _marcados_en_el_dia(cual, 6.0, False) == 1
+        assert _marcados_en_el_dia(cual, 6.0, True) == 1, "la vara diurna mató también lo fuerte"
+
+
+# S153: la misma medicion sobre la produccion de HOY (K), que es sobre la que se adoptaria la rama diurna.
+# Barrido S153 sobre el mismo cono plano: con `max` lo debil sube (V375 deja de marcar de noche bajo 3 K, V750
+# bajo 2 K) y la vara diurna deja pasar desde 13 K en V375 y desde 8 K en V750. Los puntos elegidos quedan a
+# 2 K o mas de cada borde. Los dos lados vuelven a ser controles (A116).
+K_DEBIL_FUERTE = {"v375": (6.0, 20.0), "v750": (4.0, 15.0)}
+
+
+@pytest.mark.parametrize("cual", ["v375", "v750"])
+def test_el_efecto_de_la_tabla_diurna_se_mide_con_k(cual):
+    import pipeline.process_viirs as pv
+    import pipeline.process_viirs_mod as pvm
+    modulo = pv if cual == "v375" else pvm
+    assert modulo.ENABLE_TESTS_23_PROSE_BRANCH is True and modulo.ENABLE_TEST1_PATH is False, (
+        "el procesador no esta en K: este test mediria otra deteccion")
+    debil, fuerte = K_DEBIL_FUERTE[cual]
+    assert _marcados_en_el_dia(cual, debil, False) == 1, "control: el crater debil no marca de noche"
+    assert _marcados_en_el_dia(cual, debil, True) == 0, "la Tabla 1 diurna no movio nada"
+    assert _marcados_en_el_dia(cual, fuerte, False) == 1
+    assert _marcados_en_el_dia(cual, fuerte, True) == 1, "la vara diurna mato tambien lo fuerte"
 
 
 # ── 4. fetch, run_pipeline y la auditoría ────────────────────────────────────────────────────

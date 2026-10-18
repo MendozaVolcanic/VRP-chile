@@ -20,6 +20,8 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tests"))
+from produccion_pre_k import PERFIL as PERFIL_PRE_K  # noqa: E402
 YAML_OP = ROOT / "pipeline" / "profiles" / "mirova_equivalent.yaml"
 PERFILES = ROOT / "pipeline" / "profiles"
 LEER = ("import pipeline.profile as p;"
@@ -112,7 +114,10 @@ def test_el_perfil_de_verificacion_solo_enciende_los_dos_flags_nuevos():
     if not (PERFILES / f"{nombre}.yaml").exists():
         pytest.fail(f"falta el perfil {nombre} (Tarea 6)")
     flags, _mh, _s, subdir = _leer_perfil(nombre)
-    _f_op, _mh2, _s2, _sub = _leer_perfil("mirova_equivalent")
+    # S153: el perfil de verificacion es «produccion de antes de K + los dos flags nuevos» (quedo congelado en
+    # la adopcion de K, porque se compara contra el golden de S142). Su referencia es el ancla congelada de esa
+    # produccion, no mirova_equivalent, que desde la adopcion difiere ademas en la conectiva (flags[5]).
+    _f_op, _mh2, _s2, _sub = _leer_perfil(PERFIL_PRE_K)
     assert flags[:2] == (True, True)
     assert flags[2:] == _f_op[2:], "el perfil de verificación no puede cambiar otros flags"
     assert subdir == nombre

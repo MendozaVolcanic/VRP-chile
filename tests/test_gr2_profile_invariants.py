@@ -93,7 +93,9 @@ EXPECTED_OPERATIONAL_FLAGS = {
     "ENABLE_PIXEL_LEVEL_DISTANCE_FILTER": True,
     "ENABLE_BT_PATH_HOT": False,
     "ENABLE_EXCLUDE_ZONES": False,
-    "ENABLE_TEST1_PATH": True,
+    # S153: Test 1 integrado APAGADO por la adopcion de K (regla #848, experiments/_s153_fk_v2/; tag de reversion
+    # pre-s153-adopcion-k). Lo fija tambien tests/test_guard_adopcion_k_s153.py junto con max y banda 22.
+    "ENABLE_TEST1_PATH": False,
     "ENABLE_DNTI_CONTEXTUAL_PATH": True,
     "ENABLE_DNTI_DUAL_ROI": True,
     "ENABLE_VENT_PATH": False,

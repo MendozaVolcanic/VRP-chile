@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests"))
 
+from produccion_pre_k import PERFIL as PERFIL_PRE_K  # noqa: E402
 from arnes_sintetico_s142 import (CENTRO_V375, correr_en_subproceso,  # noqa: E402
                                   escena_v375)
 from pipeline.vrp_regimes import neighbor_mean_radiance_background  # noqa: E402
@@ -144,7 +145,9 @@ def test_envoltorio_usa_el_fondo_de_hoy_solo_sin_vecinos_y_lo_cuenta():
 
 @pytest.fixture(scope="module")
 def v375_vecinos(tmp_path_factory):
-    texto = correr_en_subproceso(tmp_path_factory.mktemp("d25"), perfil="mirova_equivalent",
+    # S153: se compara contra el golden, que es la produccion de ANTES de K; por eso corre sobre el ancla
+    # congelada (tests/produccion_pre_k.py) y no sobre mirova_equivalent, que desde la adopcion es K.
+    texto = correr_en_subproceso(tmp_path_factory.mktemp("d25"), perfil=PERFIL_PRE_K,
                                  parches=("ENABLE_VRP_BG_NEIGHBOR_MEAN_VIIRS375=True",), solo="v375")
     return json.loads(texto)["v375"]
 

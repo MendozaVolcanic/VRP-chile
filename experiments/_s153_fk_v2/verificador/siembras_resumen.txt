@@ -1,0 +1,141 @@
+caso lascar375 modificados 0
+global {'A': 'CUMPLE | con auditoria espacial pendiente (P4)', 'B': 'PENDIENTE DE REPETICION'} | controles True cableado {'C0': True, 'K': True}
+   P1|K|MODIS|A CUMPLE
+   P1|K|VIIRS375|A CUMPLE
+   P1|K|VIIRS750|A CUMPLE
+   P2|K|MODIS|A GANA
+   P2|K|VIIRS375|A GANA
+   P2|K|VIIRS750|A GANA
+   P3|K|MODIS CUMPLE
+   P3|K|VIIRS375 CUMPLE
+   P3|K|VIIRS750 CUMPLE
+   P4|K FALLA
+   suma C0|VIIRS375|A {'decide': 863, 'total': 863, 'perdidas_mb': 0, 'neg_pub': 863, 'otras_pub': 1743}
+   suma K|VIIRS375|A {'decide': 63, 'total': 63, 'perdidas_mb': 26, 'neg_pub': 37, 'otras_pub': 507}
+   combinado: ["K lectura A: CUMPLE | por ventana [('V1', 'CUMPLE'), ('V2', 'CUMPLE | con auditoria espacial pendiente (P4)')]", 'regla SN       K lectura A: CUMPLE']
+
+caso lascar375r modificados 0
+global {'A': 'CUMPLE | con auditoria espacial pendiente (P4)', 'B': 'NO CUMPLE (veto)'} | controles True cableado {'C0': True, 'K': True}
+   P1|K|MODIS|A CUMPLE
+   P1|K|VIIRS375|A CUMPLE
+   P1|K|VIIRS750|A CUMPLE
+   P2|K|MODIS|A GANA
+   P2|K|VIIRS375|A GANA
+   P2|K|VIIRS750|A GANA
+   P3|K|MODIS CUMPLE
+   P3|K|VIIRS375 CUMPLE
+   P3|K|VIIRS750 CUMPLE
+   P4|K FALLA
+   suma C0|VIIRS375|A {'decide': 863, 'total': 863, 'perdidas_mb': 0, 'neg_pub': 863, 'otras_pub': 1743}
+   suma K|VIIRS375|A {'decide': 63, 'total': 63, 'perdidas_mb': 26, 'neg_pub': 37, 'otras_pub': 507}
+   combinado: ["K lectura A: CUMPLE | por ventana [('V1', 'CUMPLE'), ('V2', 'CUMPLE | con auditoria espacial pendiente (P4)')]", 'regla SN       K lectura A: CUMPLE']
+
+caso lascarmodis modificados 1
+global {'A': 'PENDIENTE DE REPETICION', 'B': 'PENDIENTE DE REPETICION'} | controles True cableado {'C0': True, 'K': True}
+   P1|K|MODIS|A PENDIENTE DE REPETICION
+   P1|K|VIIRS375|A CUMPLE
+   P1|K|VIIRS750|A CUMPLE
+   P2|K|MODIS|A GANA
+   P2|K|VIIRS375|A GANA
+   P2|K|VIIRS750|A GANA
+   P3|K|MODIS CUMPLE
+   P3|K|VIIRS375 CUMPLE
+   P3|K|VIIRS750 CUMPLE
+   P4|K FALLA
+   suma C0|VIIRS375|A {'decide': 863, 'total': 863, 'perdidas_mb': 0, 'neg_pub': 863, 'otras_pub': 1743}
+   suma K|VIIRS375|A {'decide': 63, 'total': 63, 'perdidas_mb': 26, 'neg_pub': 37, 'otras_pub': 507}
+   combinado: ["K lectura A: PENDIENTE DE REPETICION | por ventana [('V1', 'CUMPLE'), ('V2', 'PENDIENTE DE REPETICION')]", 'regla SN       K lectura A: PENDIENTE DE REPETICION']
+
+caso marzo375 modificados 0
+global {'A': 'CUMPLE | con auditoria espacial pendiente (P4)', 'B': 'PENDIENTE DE REPETICION'} | controles True cableado {'C0': True, 'K': True}
+   P1|K|MODIS|A CUMPLE
+   P1|K|VIIRS375|A CUMPLE
+   P1|K|VIIRS750|A CUMPLE
+   P2|K|MODIS|A GANA
+   P2|K|VIIRS375|A GANA
+   P2|K|VIIRS750|A GANA
+   P3|K|MODIS CUMPLE
+   P3|K|VIIRS375 CUMPLE
+   P3|K|VIIRS750 CUMPLE
+   P4|K FALLA
+   suma C0|VIIRS375|A {'decide': 863, 'total': 863, 'perdidas_mb': 0, 'neg_pub': 863, 'otras_pub': 1743}
+   suma K|VIIRS375|A {'decide': 63, 'total': 63, 'perdidas_mb': 26, 'neg_pub': 37, 'otras_pub': 507}
+   combinado: ["K lectura A: CUMPLE | por ventana [('V1', 'CUMPLE'), ('V2', 'CUMPLE | con auditoria espacial pendiente (P4)')]", 'regla SN       K lectura A: CUMPLE']
+
+caso pierde375 modificados 1126
+global {'A': 'NO CUMPLE (suma de errores)', 'B': 'PENDIENTE DE REPETICION'} | controles True cableado {'C0': True, 'K': True}
+   P1|K|MODIS|A CUMPLE
+   P1|K|VIIRS375|A CUMPLE
+   P1|K|VIIRS750|A CUMPLE
+   P2|K|MODIS|A GANA
+   P2|K|VIIRS375|A PIERDE
+   P2|K|VIIRS750|A GANA
+   P3|K|MODIS CUMPLE
+   P3|K|VIIRS375 CUMPLE
+   P3|K|VIIRS750 CUMPLE
+   P4|K FALLA
+   suma C0|VIIRS375|A {'decide': 863, 'total': 863, 'perdidas_mb': 0, 'neg_pub': 863, 'otras_pub': 1743}
+   suma K|VIIRS375|A {'decide': 889, 'total': 889, 'perdidas_mb': 26, 'neg_pub': 863, 'otras_pub': 507}
+   combinado: ["K lectura A: NO CUMPLE (suma de errores) | por ventana [('V1', 'CUMPLE'), ('V2', 'NO CUMPLE (suma de errores)')]", 'regla SN       K lectura A: CUMPLE']
+
+caso cable modificados 1
+global {'A': 'INDECIDIBLE', 'B': 'INDECIDIBLE'} | controles True cableado {'C0': True, 'K': False}
+   P1|K|MODIS|A INDECIDIBLE
+   P1|K|VIIRS375|A INDECIDIBLE
+   P1|K|VIIRS750|A INDECIDIBLE
+   P2|K|MODIS|A INDECIDIBLE
+   P2|K|VIIRS375|A INDECIDIBLE
+   P2|K|VIIRS750|A INDECIDIBLE
+   P3|K|MODIS INDECIDIBLE
+   P3|K|VIIRS375 INDECIDIBLE
+   P3|K|VIIRS750 INDECIDIBLE
+   P4|K INDECIDIBLE
+   suma C0|VIIRS375|A {'decide': 863, 'total': 863, 'perdidas_mb': 0, 'neg_pub': 863, 'otras_pub': 1743}
+   suma K|VIIRS375|A {'decide': 63, 'total': 63, 'perdidas_mb': 26, 'neg_pub': 37, 'otras_pub': 507}
+   combinado: ["K lectura A: INDECIDIBLE | por ventana [('V1', 'CUMPLE'), ('V2', 'INDECIDIBLE')]", 'regla SN       K lectura A: INDECIDIBLE']
+
+caso lascar375 modificados 1
+global {'A': 'PENDIENTE DE REPETICION', 'B': 'PENDIENTE DE REPETICION'} | controles True cableado {'C0': True, 'K': True}
+   P1|K|MODIS|A CUMPLE
+   P1|K|VIIRS375|A PENDIENTE DE REPETICION
+   P1|K|VIIRS750|A CUMPLE
+   P2|K|MODIS|A GANA
+   P2|K|VIIRS375|A GANA
+   P2|K|VIIRS750|A GANA
+   P3|K|MODIS CUMPLE
+   P3|K|VIIRS375 CUMPLE
+   P3|K|VIIRS750 CUMPLE
+   P4|K FALLA
+   suma C0|VIIRS375|A {'decide': 863, 'total': 863, 'perdidas_mb': 0, 'neg_pub': 863, 'otras_pub': 1743}
+   suma K|VIIRS375|A {'decide': 63, 'total': 63, 'perdidas_mb': 26, 'neg_pub': 37, 'otras_pub': 507}
+   combinado: ["K lectura A: PENDIENTE DE REPETICION | por ventana [('V1', 'CUMPLE'), ('V2', 'PENDIENTE DE REPETICION')]", 'regla SN       K lectura A: PENDIENTE DE REPETICION']
+caso lascar375r modificados 1
+global {'A': 'NO CUMPLE (veto)', 'B': 'NO CUMPLE (veto)'} | controles True cableado {'C0': True, 'K': True}
+   P1|K|MODIS|A CUMPLE
+   P1|K|VIIRS375|A VETADO
+   P1|K|VIIRS750|A CUMPLE
+   P2|K|MODIS|A GANA
+   P2|K|VIIRS375|A GANA
+   P2|K|VIIRS750|A GANA
+   P3|K|MODIS CUMPLE
+   P3|K|VIIRS375 CUMPLE
+   P3|K|VIIRS750 CUMPLE
+   P4|K FALLA
+   suma C0|VIIRS375|A {'decide': 863, 'total': 863, 'perdidas_mb': 0, 'neg_pub': 863, 'otras_pub': 1743}
+   suma K|VIIRS375|A {'decide': 63, 'total': 63, 'perdidas_mb': 26, 'neg_pub': 37, 'otras_pub': 507}
+   combinado: ["K lectura A: NO CUMPLE (veto) | por ventana [('V1', 'CUMPLE'), ('V2', 'NO CUMPLE (veto)')]", 'regla SN       K lectura A: NO CUMPLE (veto)']
+caso marzo375 modificados 1
+global {'A': 'CUMPLE | con auditoria espacial pendiente (P4)', 'B': 'PENDIENTE DE REPETICION'} | controles True cableado {'C0': True, 'K': True}
+   P1|K|MODIS|A CUMPLE
+   P1|K|VIIRS375|A CUMPLE
+   P1|K|VIIRS750|A CUMPLE
+   P2|K|MODIS|A GANA
+   P2|K|VIIRS375|A GANA
+   P2|K|VIIRS750|A GANA
+   P3|K|MODIS CUMPLE
+   P3|K|VIIRS375 CUMPLE
+   P3|K|VIIRS750 CUMPLE
+   P4|K FALLA
+   suma C0|VIIRS375|A {'decide': 863, 'total': 863, 'perdidas_mb': 0, 'neg_pub': 863, 'otras_pub': 1743}
+   suma K|VIIRS375|A {'decide': 63, 'total': 63, 'perdidas_mb': 26, 'neg_pub': 37, 'otras_pub': 507}
+   combinado: ["K lectura A: CUMPLE | por ventana [('V1', 'CUMPLE'), ('V2', 'CUMPLE | con auditoria espacial pendiente (P4)')]", 'regla SN       K lectura A: CUMPLE']
