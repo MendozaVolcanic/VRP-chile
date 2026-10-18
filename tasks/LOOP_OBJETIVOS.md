@@ -391,6 +391,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 03:05 UTC (vuelta 182, S153): R3 coincide; K sobre el main de hoy idéntico al del tag
+- **§4.3 (R3):** segundo instrumento escrito desde el texto del pre-registro, sin importar `evaluar_fk`,
+  `banco_paridad` ni `clase_mirova` (`experiments/_s153_fk_v2/r3/`): sustrato, P1 (A y B), P2 y la tabla §9 de C0, F, K
+  y G **idénticos número por número y pasada por pasada** en V1 y V2. Control de mecanismo: en los negativos de VIIRS
+  375 que C0 publica y K no (713 en V1, 826 en V2), K no tiene ningún píxel anómalo en 661 y 786, y en C0 venían del
+  Test 1 integrado en 675 y 783. Límite: comparte los insumos (referencia congelada, uniones, `index.html`).
+- **§4.5:** K sobre `main` (`5849ee65`, run 39091739488, Láscar y Chillán del 2026-10-01 al 10-03) contra K de la unión
+  de V1: 56 de 56 pasadas `igual`, 0 decisiones de publicar distintas (`experiments/_s153_fk_v2/k_main_contra_tag.py`).
+- Pendiente antes del PR: auditoría A61 de las movidas y segundo lector (agentes en curso), R2 con imágenes de MIROVA
+  (§4.4). Diurno: repetición de W5a 4 de 6, W6a pendiente. NRT: última corrida verde 23:44 UTC; el cron externo
+  sigue sin despachar (revisar a las 04:30 UTC).
+
 ### 2026-10-18 02:54 UTC (vuelta 181, S153): verificador limpio de F/K: CONFIRMADO; se abre el ciclo de la regla
 - `experiments/_s153_fk_v2/verificador/VERIFICADOR.md`: reproducido con 0 claves distintas; instrumento = `2766c198`
   (diff vacío en evaluador, `unir_intentos`, `armar_tabla`, `scripts/`, `pipeline/`); los 43.326 records unidos son
