@@ -457,6 +457,14 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 ~22:50 UTC (vuelta 207, S154): adenda del pre-registro del diurno sobre K, en verificación
+- `experiments/_s151_ab_diurno/ADENDA_K.md` en la rama `loop/diurno-k-adenda` (`4d8bcc62`): cambia sólo brazos y base
+  (cableado `--base k`); criterio, ventanas, métricas y referencia sin cambio; decisión aparte para el sello: cuantil
+  exacto del nulo en G1 (opción A, recomendada) o muestreo (B). Despacho desde un tag fijo, después del histórico 1.24.
+  Costo medido sobre la corrida C0 (runs 38987988455, 39041204976, 39097155412): control 15 a 24 min y diurno 40 a 58
+  min por media ventana y volcán, unas 150 h de runner. Cifras del verificador cotejadas contra su informe.
+- Verificador limpio de la adenda lanzado (escribe en `experiments/_s151_ab_diurno/verificador_adenda_k/`).
+
 ### 2026-10-18 ~22:30 UTC (vuelta 206, S154): infraestructura del A/B diurno sobre K mergeada (#856)
 - #856 (`2ca366cd`): perfiles `_s154_ab_diurno_k_control` (réplica K tal cual) y `_s154_ab_diurno_k_on` (K más
   `enable_daytime_viirs`); `tests/test_perfiles_diurno_k_s154.py` (control = producción salvo nombre y directorio;
