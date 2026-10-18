@@ -391,6 +391,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 03:37 UTC (vuelta 187, S153): espera
+- Rama `loop/adopcion-k`: flags, 46 perfiles derivados congelados en C0 y guards commiteados (`5df26fe1`, suite 2.096
+  passed; los 91 perfiles distintos de producción resuelven idéntico a `main`, comprobado resolviendo los 92). Agente
+  de documentos y marca visible en curso. NRT corriendo (programada de las 02:00, iniciada 03:09). Repetición de W5a 5
+  de 6; W6a pendiente. Disco 6,8 GB.
+
 ### 2026-10-18 03:15 UTC (vuelta 186, S153): R2 de K: cinco de cinco COINCIDEN (una con salvedad)
 - `experiments/_s153_fk_v2/r2/INFORME.md` y figuras `caso_*.png`. Lector `experiments/_s151_seleccion_mirova/comun_tif.py`
   (resta la mediana móvil: el campo crudo tiene su máximo en el valle tibio, A69); 9 GeoTIFF emparejados por
