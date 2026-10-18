@@ -269,8 +269,44 @@ def chequear_orden_del_nulo():
              "las %d muestras del nulo idénticas con la misma semilla (difieren %d)" % (len(na), int(np.sum(na != nb))))
 
 
+def chequear_base_k():
+    """S154 (tarea 1.32): con `--brazos` y `--base k` el evaluador lee los brazos del A/B sobre K y su cableado exige
+    los tres flags de K en los logs; un brazo que corrió con el Test 1 encendido tiene que salir como cableado roto."""
+    flags_k = {"ENABLE_TEST1_PATH": False, "ENABLE_TESTS_23_PROSE_BRANCH": True, "ENABLE_MODIS_B22_PRIMARY": True}
+    brazos0, decl0 = dict(ED.BRAZOS), {k: dict(v) for k, v in ED.DECLARADO.items()}
+    tmp = Path(tempfile.mkdtemp(prefix="probar_base_k_"))
+    try:
+        ED.configurar_brazos("_s154_ab_diurno_k_control", "_s154_ab_diurno_k_on", "k")
+        chequear("base_k", ED.BRAZOS == {"control": "_s154_ab_diurno_k_control", "diurno": "_s154_ab_diurno_k_on"},
+                 "--brazos cambia los nombres que lee el evaluador")
+        chequear("base_k", all(ED.DECLARADO[n][c] is v for n in ("control", "diurno") for c, v in flags_k.items()),
+                 "--base k exige los tres flags de K en los dos brazos")
+
+        def escribir_log(test1):
+            for n, diurno in (("control", False), ("diurno", True)):
+                b = ED.BRAZOS[n]
+                (tmp / b).mkdir(parents=True, exist_ok=True)
+                (tmp / b / "Lascar.json").write_text('{"volcano": "Lascar", "records": []}', encoding="utf-8")
+                fl = dict(flags_k, PROFILE_NAME=b, DATA_SUBDIR=b, ENABLE_DAYTIME_VIIRS=diurno, ENABLE_DAYTIME_MODIS=False,
+                          ENABLE_TEST1_PATH=test1)
+                (tmp / "logs").mkdir(exist_ok=True)
+                (tmp / "logs" / ("%s_Lascar.log" % b)).write_text("FLAGS_BRAZO " + json.dumps(fl) + "\n", encoding="utf-8")
+
+        escribir_log(test1=False)
+        ok = ED.cableado([str(tmp)], [str(tmp / "logs")], "control") + ED.cableado([str(tmp)], [str(tmp / "logs")], "diurno")
+        chequear("base_k", ok == [], "brazos que leyeron K: cableado limpio (%s)" % ok)
+        escribir_log(test1=True)
+        mal = ED.cableado([str(tmp)], [str(tmp / "logs")], "control")
+        chequear("base_k", any("ENABLE_TEST1_PATH" in x for x in mal), "un brazo con el Test 1 encendido sale como cableado roto (%s)" % mal)
+    finally:
+        ED.BRAZOS.clear(); ED.BRAZOS.update(brazos0)
+        ED.DECLARADO.clear(); ED.DECLARADO.update(decl0)
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def main():
     chequear_orden_del_nulo()
+    chequear_base_k()
     tmp = Path(tempfile.mkdtemp(prefix="probar_diurno_"))
     try:
         filas, coords = ED.cargar_filas(ED.parser().parse_args(["--raiz", "x"]))

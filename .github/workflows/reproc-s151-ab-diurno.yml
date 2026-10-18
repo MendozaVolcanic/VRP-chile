@@ -119,9 +119,12 @@ jobs:
       - name: El brazo LEE lo que declara (y escribe donde declara)
         env:
           VRP_PROFILE: ${{ matrix.profile }}
+          # S154: el brazo diurno es el que NO es control (antes el nombre del brazo diurno estaba fijo en el
+          # assert, y el A/B sobre K usa otros perfiles: _s154_ab_diurno_k_*)
+          ARM_CONTROL: ${{ github.event.inputs.control }}
         run: |
           set -euo pipefail
-          python -c "import pipeline.profile as p; from pipeline import diurno; \
+          python -c "import os, pipeline.profile as p; from pipeline import diurno; \
             print('brazo', p.PROFILE_NAME, \
             '| diurno_viirs', p.ENABLE_DAYTIME_VIIRS, \
             '| diurno_viirs_vivo', diurno.flag_viirs_diurno(), \
@@ -132,7 +135,7 @@ jobs:
             '| sensores', p.SENSOR_MODIS, p.SENSOR_VIIRS_375, p.SENSOR_VIIRS_750, \
             '| subdir', p.DATA_SUBDIR); \
             assert p.DATA_SUBDIR == p.PROFILE_NAME, 'el brazo escribiria fuera de su subdir'; \
-            assert p.ENABLE_DAYTIME_VIIRS == (p.PROFILE_NAME == '_s151_ab_diurno_on'), 'el flag diurno no es el que declara el brazo'"
+            assert p.ENABLE_DAYTIME_VIIRS == (p.PROFILE_NAME != os.environ['ARM_CONTROL']), 'el flag diurno no es el que declara el brazo'"
 
       - name: Reproceso del brazo
         env:
