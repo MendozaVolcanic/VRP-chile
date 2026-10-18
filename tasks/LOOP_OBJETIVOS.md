@@ -391,6 +391,16 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 03:06 UTC (vuelta 183, S153): segundo lector: las cuatro alertas que K no publica son LEJANAS
+- `experiments/_s153_fk_v2/lector2/INFORME.md`: Tupungatito 09-28 (22,5 km desde la referencia de MIROVA) y 09-29
+  (9,6 km), Lastarria 04-18 (20,0 km; corrida la función real del scraper sobre la imagen propia, que quedó guardada con
+  otro nombre: FALSO_POSITIVO_OCR) y 05-02 (19,3 km). Con la distancia propia, el scraper habría escrito
+  FALSO_POSITIVO, no ALERTA; el cúmulo de K está en el mismo lugar que el punto caliente de la miniatura de MIROVA.
+  **Ninguna cuenta como pérdida neta: la condición de Tupungatito del §3 de la regla queda cumplida.**
+- Salvedad SIN VERIFICAR para Nicolás: Tupungatito 09-29 04:54 trae además un punto tenue cerca del cráter (~5,4 km a
+  330° de la referencia), donde C0 publicaba 0,059 MW; los 1,86 MW de MIROVA podrían incluir algo de ahí.
+- R2 (§4.4) lanzado (`C:\Users\nmend\AppData\Local\Temp\claude\r2_fk\`). Falta además la auditoría A61 (en curso).
+
 ### 2026-10-18 03:05 UTC (vuelta 182, S153): R3 coincide; K sobre el main de hoy idéntico al del tag
 - **§4.3 (R3):** segundo instrumento escrito desde el texto del pre-registro, sin importar `evaluar_fk`,
   `banco_paridad` ni `clase_mirova` (`experiments/_s153_fk_v2/r3/`): sustrato, P1 (A y B), P2 y la tabla §9 de C0, F, K
