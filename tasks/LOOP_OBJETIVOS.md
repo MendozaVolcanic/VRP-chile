@@ -457,6 +457,16 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 ~22:30 UTC (vuelta 206, S154): infraestructura del A/B diurno sobre K mergeada (#856)
+- #856 (`2ca366cd`): perfiles `_s154_ab_diurno_k_control` (réplica K tal cual) y `_s154_ab_diurno_k_on` (K más
+  `enable_daytime_viirs`); `tests/test_perfiles_diurno_k_s154.py` (control = producción salvo nombre y directorio;
+  diurno difiere sólo en la palanca; base K); `evaluar_diurno.py` con `--brazos` y `--base k` (cableado exige los tres
+  flags de K; arnés `base_k`: un brazo con Test 1 encendido sale roto); workflow con el assert del brazo por la entrada
+  `control`. Las pruebas nuevas fallaban antes; 593 del repo en verde; arnés 79 de 79; CI verde.
+- Despacho futuro (tras el sello): `reproc-s151-ab-diurno.yml`, `brazos=["_s154_ab_diurno_k_control","_s154_ab_diurno_k_on"]`,
+  `control=_s154_ab_diurno_k_control`, mismas ventanas W2 a W6 en medias ventanas, desde un tag fijo (A108).
+- Paradas: NRT verde 20:08, disco 17 GB. Histórico 1.24: 65 de 176. Próximo: adenda del pre-registro.
+
 ### 2026-10-18 ~20:55 UTC (vueltas 204-205, S154): 1.32 paso H2 mergeado (#855)
 - Causa de H2: `estratos_de` y `grupos_de` devolvían los estratos en el orden de recorrido de `cls` (conjuntos de
   strings, orden según PYTHONHASHSEED); el generador reparte sus números en ese orden. Arreglo: ordenar por (volcán,
