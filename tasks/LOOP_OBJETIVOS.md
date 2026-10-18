@@ -363,7 +363,7 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
 | D-19 | MxD03 después de la 1.23: las 2 protegidas que pierde caen por el **Test 1**, que K elimina. Propuesta del loop: no adoptarla sobre producción de hoy; si K se adopta (#848), pre-registrar MxD03 **sobre K** (sin Test 1 el mecanismo de esas pérdidas no existe), con Láscar bajo 35° como vara y el borde del barrido aparte | `experiments/_s151_mxd03_sola_123/resultado/` (evaluación y verificador CONFIRMADO) | | pendiente |
-| D-20 | Regla de adopción de K escrita antes de evaluar V2 (opción A, pedida por Nicolás el 2026-10-17) | `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`, verificador limpio con arreglos aplicados | #848 | pendiente |
+| D-20 | ~~Regla de adopción de K~~ **APROBADA** (Nicolás, 2026-10-17 ~23:45 UTC: «tal como está, incluida la reversión con git revert pre-autorizada»), antes de evaluar V2; mergeada (squash `cf507f46`); instrumento fijado en `2766c198` | `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`, verificador limpio con arreglos aplicados | #848 | cerrada |
 | D-1 | Adoptar conectiva `max` en VIIRS 375 (criterio §1.2 por medir en 0.2) | `docs/S150_RESULTADO_MESES.md`, `docs/audit_s150/meta/AUDITOR_F2_NUMEROS.md` | pendiente | pendiente |
 | D-2 | ~~Merge del arreglo del scraper Mirova-v1#19 (tarea 0.5)~~ **HECHO** (Nicolás, 2026-10-15; squash `40ef1a45`) | CI verde de Mirova-v1#21; 4 tests | Mirova-v1#21 | #783 |
 | D-3 | Marca de régimen en `store.py` (tarea 0.6): **APROBADA** (Nicolás, 2026-10-15), se mergea con el CI del PR actualizado | 4 tests, 3 fallaban antes; suite 1706 | #785, tag `pre-s151-marca-regimen` | #786 |
@@ -390,6 +390,13 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-17 ~23:55 UTC (vuelta 178, S153): regla de adopción de K aprobada y mergeada (D-20)
+- Nicolás aprobó la regla del #848 tal como está, con la reversión por `git revert` pre-autorizada. Marca de
+  aprobación en el documento (`0c5a374e`), CI verde, **#848 mergeado** (squash `cf507f46`). Ninguna evaluación de V2
+  antes de esto. Próximo de F/K: cuando la repetición de V2b (run 39068999603) termine, contar cobertura, unir con
+  `unir_intentos.py` de `2766c198`, re-unir y re-evaluar V1 con ese mismo commit, evaluar V2, `--combinar` con la regla
+  original y con SN, y aplicar §3 de la regla.
 
 ### 2026-10-17 23:35 UTC (vuelta 177, S153): #847 mergeado; instrumento de F/K fijado en `2766c198`
 - **#847 mergeado** (squash `2766c198`; CI verde en `369e201e`). Mutaciones con el árbol quieto: **15 de 15** (sin
