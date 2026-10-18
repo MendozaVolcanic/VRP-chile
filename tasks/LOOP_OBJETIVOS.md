@@ -392,7 +392,13 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   (es la posición del cúmulo que el tablero ya usa para la distancia), con prueba en node y R8. Display legítimo (A72):
   el dato es real, el marcador elige el píxel equivocado. Bloqueo para mergear: el sí de Nicolás (D-24), porque cambia
   lo que ve el operador.
-- [ ] **1.27 Las 56 pasadas de la ventana de 30 días que quedaron sin K** (`experiments/_s154_reproc_k/ventana_30d.json`):
+- [~] **1.27 (vuelta 200: Terra IRRECUPERABLE; falta NOAA-21 del 18-oct desde el 2026-10-23)** CMR público, `MOD021KM`
+  en ventanas de una hora: el archivo estándar NO tiene Terra el 28-sep de 01:15 a 01:40, el 2-oct de 00:35 a 00:55 ni el
+  10-oct de 00:55 a 01:15 (control: el 9-oct a la misma hora está completo, 00:40 a 01:45 cada 5 min); `MOD021KM_NRT` da 0
+  en el catálogo. Esos records se escribieron con NRT de LANCE (`product_version: nrt`) y quedan en C0 con su marca de
+  régimen: no hay de dónde reprocesarlos. Las de NOAA-21 del 18-oct 06:4x se rehacen con `backfill-tier-a.yml`
+  (2026-10-18 a 2026-10-18, overwrite, `push-main` libre) cuando exista el producto estándar (3 a 5 días). Texto original:
+  **1.27 Las 56 pasadas de la ventana de 30 días que quedaron sin K** (`experiments/_s154_reproc_k/ventana_30d.json`):
   MODIS Terra del 28-sep, 2-oct y 10-oct y NOAA-21 del 18-oct 06:4x. Comprobar primero si los gránulos existen hoy en
   LAADS; si existen, `backfill-tier-a.yml` con overwrite sólo para esas fechas, despachado con `push-main` libre
   (justo después de un NRT); verificar con `verificar_ventana.py`.
@@ -449,6 +455,12 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-18 18:25 UTC (vuelta 200, S154): 1.27, las pasadas Terra sin K no se pueden reprocesar
+- Paradas: NRT verde 17:04, disco 17 GB. D-24 sin respuesta.
+- CMR (`MOD021KM`, ventanas de una hora): huecos en el archivo estándar de Terra exactamente en las pasadas que quedaron
+  en C0 (28-sep 01:15 a 01:40, 2-oct 00:35 a 00:55, 10-oct 00:55 a 01:15); control del 9-oct completo. `MOD021KM_NRT`: 0
+  en el catálogo. Quedan en C0 con su marca de régimen. NOAA-21 del 18-oct: rehacer desde el 2026-10-23.
 
 ### 2026-10-18 17:58 UTC (vuelta 199, S154): 1.31 (a) CONFIRMADA en el tablero público
 - Paradas: NRT verde 17:04, disco 17 GB. Histórico 1.24: 39 de 176.
