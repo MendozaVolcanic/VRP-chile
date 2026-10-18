@@ -394,6 +394,9 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 06:00 UTC (vuelta 193, S153): espera
+- NRT verde 04:10 y 05:10 (cron externo cada hora). W6a 10 de 22; W6b pendiente. #850 sin respuesta. Disco 6,4 GB.
+
 ### 2026-10-18 05:28 UTC (vuelta 192, S153): deriva 1.23 bis CONFIRMADA por verificador limpio; A85 marcada
 - `experiments/_s153_deriva_123bis/verificador/VERIFICADOR.md`: fechas de los gates resueltas con `pipeline.profile` en
   cada commit (encendidos 2026-05-28 04:44 y 16:39 UTC, apagados 2026-07-01 20:46 UTC; único cambio de constantes en la
