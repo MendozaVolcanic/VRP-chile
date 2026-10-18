@@ -391,6 +391,19 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 ~03:50 UTC (vuelta 186, S153): R2 de K: cinco de cinco COINCIDEN (una con salvedad)
+- `experiments/_s153_fk_v2/r2/INFORME.md` y figuras `caso_*.png`. Lector `experiments/_s151_seleccion_mirova/comun_tif.py`
+  (resta la mediana móvil: el campo crudo tiene su máximo en el valle tibio, A69); 9 GeoTIFF emparejados por
+  `acquisition_utc` con md5. Negativos de borde (Chaitén 09-10, cenit 66°) y de nadir (Láscar 09-06; Copahue 09-15
+  UTM): MIROVA calla, C0 publica, K calla. Protegida V375 de Láscar 06-03 05:24: K a 0,18 km del foco de MIROVA.
+  Cúmulo movido Tupungatito 06-03: K a 0,24 km del foco (C0 estaba a 2,71 km).
+- **Salvedades escritas (la regla pide explicarlas):** (a) el primer candidato del caso 3 (Láscar 06-02 05:42) y
+  NOAA-21 06-03 06:12 tienen TIF que no es de su pasada (foco a 17,5 y 22 km, BT 8 y 28 K distinta): SIN IMAGEN, se
+  eligió otro DESPUÉS de verlo, y se informa; (b) caso 4 MODIS Láscar 05-10: K publica a 1,34 km del foco, celda
+  vecina, del tamaño del corrimiento de geolocalización MODIS (#828): COINCIDE con salvedad, a juicio de Nicolás;
+  (c) en 4 de los 5 la imagen sale del mismo gránulo que nuestro detector (A109): no es independiente.
+- Con esto quedan hechos los controles §4.1 a §4.5. Falta: arreglo de los 22 tests (agente en curso), pre-mortem y PR.
+
 ### 2026-10-18 ~03:35 UTC (vuelta 185, S153): PR de adopción de K en preparación (rama `loop/adopcion-k`)
 - **Tag defensivo `pre-s153-adopcion-k`** en `5849ee65` (main), empujado (A38, A45). Worktree
   `.claude/worktrees/s153-adopcion`. Guard nuevo `tests/test_guard_adopcion_k_s153.py` (falló en los 3 casos antes del
