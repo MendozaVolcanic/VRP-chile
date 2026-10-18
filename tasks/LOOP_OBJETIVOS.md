@@ -393,6 +393,20 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 05:17 UTC (vuelta 191, S153): 1.23 bis: la deriva son los gates intra-radio, no un commit (POR VERIFICAR)
+- `experiments/_s153_deriva_123bis/INFORME.md`. Los 8 records MODIS (Chaitén 03-06 y 04-28, Copahue 03-06, Isluga
+  05-09, 05-18 y 05-19, Llaima 03-11, Chillán 03-19; todos Standard, sin Test 1, negativos limpios) se escribieron por
+  última vez con `enable_path_d_intra_radio_gate` y `enable_second_pass_intra_radio_gate` ENCENDIDOS (de #226/#229 el
+  2026-05-28 a #474 el 2026-07-01), en las promociones S97 y S102; el flip OFF de S118 no se acompañó de reproceso.
+  Pruebas: 247 de 250 records escritos con el gate salen hoy con más píxeles y 217 de 218 escritos después salen
+  iguales; ninguno de 470 sale con menos; en 49 de 56 el conteo de hoy es exactamente primer pase + recaptura previa.
+- **Alcance, POR VERIFICAR:** 3.231 records MODIS de enero a junio de 2026 (10 volcanes; Villarrica ninguno) escritos
+  con el gate y nunca reescritos. Toda serie o A/B MODIS que cruce el 2026-07-01 mezcla dos detectores, y el «la
+  recaptura volvió 4-6×» de A85 vale sólo desde julio. VIIRS (~4.500 expuestos) SIN VERIFICAR.
+- Verificador limpio lanzado (`C:\Users\nmend\AppData\Local\Temp\claude\verif_deriva\`). Corrida mínima de
+  confirmación (8 gránulos, tres brazos de gates) diseñada y NO despachada.
+- W6a corriendo; W6b pendiente; #850 sin respuesta.
+
 ### 2026-10-18 05:00 UTC (vuelta 190, S153): tarea 1.23 bis delegada; esperas
 - NRT verde a las 04:10 (primer despacho del cron externo, en hora de Chile). W6a 4 de 22; W6b pendiente. #850 sin
   respuesta. Disco 6,5 GB.
