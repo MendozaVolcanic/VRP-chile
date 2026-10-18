@@ -391,6 +391,24 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 02:54 UTC (vuelta 181, S153): verificador limpio de F/K: CONFIRMADO; se abre el ciclo de la regla
+- `experiments/_s153_fk_v2/verificador/VERIFICADOR.md`: reproducido con 0 claves distintas; instrumento = `2766c198`
+  (diff vacío en evaluador, `unir_intentos`, `armar_tabla`, `scripts/`, `pipeline/`); los 43.326 records unidos son
+  idénticos a un record de algún intento; `FLAGS_BRAZO` revisado en cada brazo, volcán e intento que aporta records;
+  determinismo entre intentos de V2 sin diferencias en 2.346 a 5.825 pasadas por brazo; siembras de V2 detectadas
+  (pérdida de Láscar PENDIENTE y VETADO con repetición, PIERDE, INDECIDIBLE por banda 21).
+- **Cruce de 1 MW (§5): ninguna protegida que C0 muestra sobre 1 MW queda bajo 1 MW con K**, en V1, V2 ni V2 con OCR
+  (dos cruzan hacia arriba). La magnitud no bloquea. P3 ciego otra vez: en los pares que cambian, VIIRS 375 K bajo C0
+  en 127 de 144 (media de d +0,031 [+0,012; +0,049]); VIIRS 750 media +0,055.
+- **P4 (V2):** 54 movidas, 30 hacia el cráter y 24 hacia afuera (en radio), mediana 1,15 km, máximo 4,06 km, ninguna
+  cruza el `inner_radius_km`; Lastarria 18 de las 25 de VIIRS 375 (12 hacia afuera), MODIS 6 de Láscar; 10 son
+  protegidas. V1: 8 movidas. Falta la auditoría A61 (§3 de la regla).
+- Lo que el CUMPLE no dice: fuera de Láscar y Chillán deciden 8 protegidas en total (una pérdida de 18 % pasaría con
+  20 % de probabilidad); por eso existe la sombra. Lastarria 2026-04-18 (sólo OCR, K la ve a 19,6 km como `far`, C0
+  publicaba 0,055 MW a 2,77 km por el Test 1): parece «C0 publicaba otro objeto», SIN VERIFICAR, mirar la imagen.
+- **Siguiente (antes del §4 y §4 en paralelo):** auditoría A61 de las 62 movidas; segundo lector de Tupungatito (V1) y
+  de las dos de Lastarria; recuento independiente R3; K sobre el `main` de hoy (§4.5).
+
 ### 2026-10-18 02:39 UTC (vuelta 180, S153): F/K V2 evaluada: K lectura A CUMPLE combinado (POR VERIFICAR); P4 pendiente
 - Instrumento fijado (`2766c198`). V1 re-unida (44 de 44 iguales salvo `_union_intentos`) y re-evaluada: CUMPLE, igual
   que antes. V2a re-unida, V2b unida y pareja. Todo en `experiments/_s153_fk_v2/` (README con la desviación: logs de
