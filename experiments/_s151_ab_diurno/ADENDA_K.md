@@ -1,7 +1,11 @@
 # Adenda del pre-registro del A/B diurno de VIIRS: repetirlo sobre K (tarea 1.32, D-10, issue #813)
 
-Estado: **borrador v2, corregido con el verificador limpio** (`verificador_adenda_k/INFORME.md`), **espera el sello de
-Nicolás** con sus dos decisiones (§3) (2026-10-18). La evidencia de la corrida sobre C0 que se cita vive en la rama
+Estado: **SELLADA por Nicolás el 2026-10-18 (~23:00 UTC), v2.** Sus palabras: «Sello la adenda del A/B diurno sobre K
+(D-25) con las dos opciones recomendadas: cola exacta del nulo en G1 y, si G1 cumple sin W2 y falla con W2, decido yo
+con M4. Implementa H2a, H2b y la cola exacta con sus pruebas y verificador antes de despachar.» Rigen entonces la
+opción A de §3.1 y la opción i de §3.2. El despacho espera el candado de §4 (H2a, H2b, cola exacta, cada uno con sus
+pruebas y verificador limpio) y el fin del reproceso histórico con K. Versión corregida con el verificador limpio
+(`verificador_adenda_k/INFORME.md`). La evidencia de la corrida sobre C0 que se cita vive en la rama
 `loop/activo` (`experiments/_s151_ab_diurno/salidas/W2_W6_s154/`), no en `main`. Nada de esta adenda
 se despacha sin su «sí» y el candado `preregistro_aprobado=si` del workflow. Complementa a `PREREGISTRO.md`: todo lo que
 esta adenda no cambia rige tal como está allí (fenómeno, ventanas, métricas, nulo, criterio, candado, desviaciones).
