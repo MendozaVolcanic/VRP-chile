@@ -63,6 +63,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import os
 import random
 import shutil
 import sys
@@ -280,6 +281,7 @@ def main():
                                          linea_extra="  VIIRS_NOAA20: kept 3 of 6 granules (night filter)"), []),
             ("15 lascar_todo", dict(publica=lambda w, k, U: k[0] == "Lascar"), []),
             ("16 g2_un_sensor", dict(publica=lambda w, k, U: k in U[w]["pos"] or k in seis_v750), []),
+            ("26 satura_v375", dict(publica=lambda w, k, U: k in U[w]["pos"] or (k[1] == "VIIRS375" and k in U[w]["neg"])), []),
             ("17 volatiles", dict(publica=lambda w, k, U: k in U[w]["pos"], volatiles_distintos=True), []),
             ("18 granulo_distinto", dict(publica=lambda w, k, U: k in U[w]["pos"], granulo_distinto=True), []),
             ("22 ruido_flotante", dict(publica=lambda w, k, U: k in U[w]["pos"], ruido_relativo=2e-16), []),
@@ -306,6 +308,12 @@ def main():
             ("19 v750_cerrado", dict(publica=lambda w, k, U: k in U[w]["pos"], sacar=todo_v750), []),
             ("20 tabla_sin_procesar", dict(publica=lambda w, k, U: k in U[w]["pos"], sacar=quince_w5), []),
         ]
+        # PROBAR_SOLO=26,1 corre sólo esos casos (por número): sirve para ver el rojo y el verde de un caso nuevo sin
+        # esperar la batería entera. La corrida que vale antes de un PR es la completa, sin la variable.
+        solo = {x.strip() for x in os.environ.get("PROBAR_SOLO", "").split(",") if x.strip()}
+        if solo:
+            casos = [c for c in casos if c[0].split()[0] in solo]
+            print("PROBAR_SOLO: sólo %s (NO es la batería completa)" % [c[0] for c in casos])
         salidas = {}
         for nombre, kw, extra in casos:
             d = tmp / nombre.split()[0]
@@ -389,6 +397,16 @@ def main():
                 r1 = res["G1_W2W6"]
                 chequear(n, r1["veredicto"] == "FALLA", "G1 FALLA (D %+.4f, p95 %+.4f)" % (r1["D"], r1["p95"]))
                 chequear(n, res["veredicto"].startswith("NO ADOPTAR"), "veredicto NO ADOPTAR")
+            elif n == "satura_v375":
+                # S154 (verificador de W2 a W6, H1): con VIIRS 375 saturado y VIIRS 750 callado, el q_neg conjunto queda
+                # bajo la banda y el aviso conjunto no salía; en W2 a W6 real 375 estaba en 89,3 % y el conjunto en 60,0 %.
+                q = {s: res["metricas"]["W2-W6"][s]["M2"]["tasa"] for s in ED.VIIRS}
+                sat = res.get("saturacion", {})
+                chequear(n, res["metricas"]["W2-W6"]["ambos"]["M2"]["tasa"] < ED.BANDA_SATURACION <= q["VIIRS375"],
+                         "el caso es el de H1: conjunto bajo la banda, 375 sobre ella (%s)" % q)
+                chequear(n, sat.get("VIIRS375") is True and sat.get("VIIRS750") is False,
+                         "aviso de saturación por sensor: 375 sí, 750 no (%s)" % sat)
+                chequear(n, "SATURACIÓN (A114) VIIRS375" in txt, "la línea del aviso nombra el sensor")
             elif n == "g2_un_sensor":
                 chequear(n, g["VIIRS375"]["veredicto"] == "CUMPLE" and g["VIIRS750"]["veredicto"] == "FALLA",
                          "G2 cumple en 375 y falla en 750 (%s)" % {s: (g[s]["publicadas"], g[s]["procesadas"]) for s in ED.VIIRS})

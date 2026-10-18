@@ -939,6 +939,16 @@ def evaluar(a):
         print("   poder (§5.6): con %d positivos y q_neg %s la desviación de M1 bajo azar es ~%.3f" % (r1["n_pos"], pct(r1["q_neg"]), sd))
         if r1["q_neg"] >= BANDA_SATURACION:
             print("   SATURACIÓN (A114): q_neg %s en la banda del Test 1 encendido; el A/B no puede decidir nada sobre la Tabla 1 diurna" % pct(r1["q_neg"]))
+        # S154 (verificador de W2 a W6, H1): también por sensor. Con un sensor saturado y el otro callado el q_neg
+        # conjunto queda bajo la banda y el aviso de arriba no sale (W2 a W6 real: VIIRS 375 89,3 %, conjunto 60,0 %).
+        res["saturacion"] = {}
+        for s in VIIRS:
+            m2 = (res.get("metricas", {}).get("W2-W6", {}).get(s) or {}).get("M2") or {}
+            q = m2.get("tasa")
+            res["saturacion"][s] = bool(q is not None and q >= BANDA_SATURACION)
+            if res["saturacion"][s]:
+                print("   SATURACIÓN (A114) %s: q_neg %s (%d/%d) en la banda del Test 1 encendido; en ese sensor el A/B no puede "
+                      "decidir nada sobre la Tabla 1 diurna" % (s, pct(q), m2["publicadas"], m2["procesadas"]))
         if r1["M1"] >= UMBRAL_AUDITORIA:
             print("   M1 sube de 0 a %s: mejora de más de 30 %%, exige auditoría independiente antes de aceptarla" % pct(r1["M1"]))
 
