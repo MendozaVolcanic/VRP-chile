@@ -394,7 +394,7 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-18 ~05:35 UTC (vuelta 192, S153): deriva 1.23 bis CONFIRMADA por verificador limpio; A85 marcada
+### 2026-10-18 05:28 UTC (vuelta 192, S153): deriva 1.23 bis CONFIRMADA por verificador limpio; A85 marcada
 - `experiments/_s153_deriva_123bis/verificador/VERIFICADOR.md`: fechas de los gates resueltas con `pipeline.profile` en
   cada commit (encendidos 2026-05-28 04:44 y 16:39 UTC, apagados 2026-07-01 20:46 UTC; único cambio de constantes en la
   ventana); datación rehecha por barrido lineal (corrección: Chaitén 04-28 e Isluga 05-09 y 05-19 se escribieron el
