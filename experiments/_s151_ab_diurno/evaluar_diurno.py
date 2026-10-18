@@ -73,6 +73,17 @@ from referencia_mirova_unificada import (HISTORICO_RECUPERADAS, RESPALDO_2026040
 BRAZOS = {"control": "_s151_ab_diurno_control", "diurno": "_s151_ab_diurno_on"}       # §2
 DECLARADO = {"control": {"ENABLE_DAYTIME_VIIRS": False, "ENABLE_DAYTIME_MODIS": False},
              "diurno": {"ENABLE_DAYTIME_VIIRS": True, "ENABLE_DAYTIME_MODIS": False}}
+# S154 (tarea 1.32): el A/B se repite sobre K. Con --base k el cableado exige además, en los dos brazos, los tres flags
+# de K leídos desde el log (si un brazo corrió con el Test 1 encendido, el A/B no sería sobre K y no se decide).
+FLAGS_BASE = {"c0": {}, "k": {"ENABLE_TEST1_PATH": False, "ENABLE_TESTS_23_PROSE_BRANCH": True,
+                              "ENABLE_MODIS_B22_PRIMARY": True}}
+
+
+def configurar_brazos(control, diurno, base="c0"):
+    """Nombres de los brazos y flags de base que el cableado exige (--brazos, --base). Por defecto, los de W2 a W6."""
+    BRAZOS.update({"control": control, "diurno": diurno})
+    for n, palanca in (("control", False), ("diurno", True)):
+        DECLARADO[n] = {"ENABLE_DAYTIME_VIIRS": palanca, "ENABLE_DAYTIME_MODIS": False, **FLAGS_BASE[base]}
 VIIRS = ("VIIRS375", "VIIRS750")
 VENTANAS = [w[0] for w in S.VENTANAS]                                                  # §3
 VENTANA = {w[0]: {"desde": w[1], "hasta": w[2], "vols": w[3] or list(bp.VOLS)} for w in S.VENTANAS}
@@ -508,7 +519,10 @@ def estratos_de(cls, ventanas, publicado=None):
         e[0] += 1
         e[1] += "pos" in c["pob"]
         e[2] += (publicado(k, c) if publicado else c["estado"] == "publicada")
-    return [tuple(v) for v in est.values()]
+    # S154 (H2): orden por clave. `cls` se arma iterando conjuntos de strings (orden según PYTHONHASHSEED), y el orden
+    # de los estratos decide cómo reparte el generador sus números: sin ordenar, el p95 cambiaba de un proceso a otro
+    # con la misma semilla (+0,2446 contra +0,2760 en W2 a W6).
+    return [tuple(est[k]) for k in sorted(est)]
 
 
 # Igualdad numérica, no umbral: cuando el nulo es degenerado (por ejemplo, un brazo que publica TODO un estrato y
@@ -549,7 +563,8 @@ def grupos_de(cls, ventanas):
     for k, c in cls.items():
         if c["ventana"] in ventanas and c["estado"] != "no_procesada" and ({"pos", "neg"} & c["pob"]):
             grupos[(k[0], k[1])].append(k)
-    return [(ks, ["pos" in cls[k]["pob"] for k in ks]) for ks in grupos.values()]
+    # S154 (H2): mismo motivo que en estratos_de; las pasadas también ordenadas, porque la permutación las recorre
+    return [(sorted(grupos[g]), ["pos" in cls[k]["pob"] for k in sorted(grupos[g])]) for g in sorted(grupos)]
 
 
 _POS, _NEG = frozenset({"pos"}), frozenset({"neg"})
@@ -816,6 +831,10 @@ def veredicto(res, controles):
 
 
 def evaluar(a):
+    if getattr(a, "brazos", None):
+        control, diurno = [x.strip() for x in a.brazos.split(",")]
+        configurar_brazos(control, diurno, getattr(a, "base", "c0"))
+        print("[brazos] control %s, diurno %s, base %s" % (control, diurno, getattr(a, "base", "c0")))
     a.raiz = [str(Path(r)) for r in a.raiz]
     a.logs = a.logs or [str(Path(r) / "logs") for r in a.raiz]
     if len(a.logs) != len(a.raiz):
@@ -939,6 +958,16 @@ def evaluar(a):
         print("   poder (§5.6): con %d positivos y q_neg %s la desviación de M1 bajo azar es ~%.3f" % (r1["n_pos"], pct(r1["q_neg"]), sd))
         if r1["q_neg"] >= BANDA_SATURACION:
             print("   SATURACIÓN (A114): q_neg %s en la banda del Test 1 encendido; el A/B no puede decidir nada sobre la Tabla 1 diurna" % pct(r1["q_neg"]))
+        # S154 (verificador de W2 a W6, H1): también por sensor. Con un sensor saturado y el otro callado el q_neg
+        # conjunto queda bajo la banda y el aviso de arriba no sale (W2 a W6 real: VIIRS 375 89,3 %, conjunto 60,0 %).
+        res["saturacion"] = {}
+        for s in VIIRS:
+            m2 = (res.get("metricas", {}).get("W2-W6", {}).get(s) or {}).get("M2") or {}
+            q = m2.get("tasa")
+            res["saturacion"][s] = bool(q is not None and q >= BANDA_SATURACION)
+            if res["saturacion"][s]:
+                print("   SATURACIÓN (A114) %s: q_neg %s (%d/%d) en la banda del Test 1 encendido; en ese sensor el A/B no puede "
+                      "decidir nada sobre la Tabla 1 diurna" % (s, pct(q), m2["publicadas"], m2["procesadas"]))
         if r1["M1"] >= UMBRAL_AUDITORIA:
             print("   M1 sube de 0 a %s: mejora de más de 30 %%, exige auditoría independiente antes de aceptarla" % pct(r1["M1"]))
 
@@ -972,6 +1001,10 @@ def parser():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--raiz", action="append", required=True, help="salidas de una corrida: <brazo>/<volcan>.json")
     ap.add_argument("--logs", action="append", default=[], help="logs de cada raíz (por defecto <raiz>/logs)")
+    ap.add_argument("--brazos", default="%s,%s" % (BRAZOS["control"], BRAZOS["diurno"]),
+                    help="control,diurno (S154: el A/B sobre K usa _s154_ab_diurno_k_control,_s154_ab_diurno_k_on)")
+    ap.add_argument("--base", choices=sorted(FLAGS_BASE), default="c0",
+                    help="detector de base que el cableado exige en los logs (k: los tres flags de K)")
     ap.add_argument("--repetidas", default="", help="ventanas ya repetidas por cobertura (§5.4), separadas por coma")
     ap.add_argument("--out")
     ap.add_argument("--cons", default=str(SNAP_CONS))

@@ -63,6 +63,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import os
 import random
 import shutil
 import sys
@@ -242,7 +243,70 @@ def chequear(caso, cond, detalle):
     print("   [%s] %s" % ("OK" if cond else "FALLA", detalle))
 
 
+def chequear_orden_del_nulo():
+    """S154 (verificador de W2 a W6, H2): el nulo barajado no puede depender del orden en que se recorre `cls`.
+    `cls` se arma iterando conjuntos de strings, cuyo orden cambia con PYTHONHASHSEED en cada proceso; si los estratos
+    salen en ese orden, el generador reparte sus números distinto y el p95 cambia con la misma semilla (+0,2446 contra
+    +0,2760 en dos corridas de W2 a W6). Mismos datos en dos órdenes: estratos, grupos y p95 idénticos."""
+    np = ED.np
+    base = []
+    for i, (vol, s) in enumerate([("Lascar", "VIIRS375"), ("Llaima", "VIIRS375"), ("Chaiten", "VIIRS750"),
+                                  ("Villarrica", "VIIRS375"), ("Copahue", "VIIRS750")]):
+        for j in range(40):
+            k = (vol, s, "2026-07-%02d %02d:00" % (1 + j % 28, j % 24))
+            base.append((k, {"ventana": "W3", "pob": {"pos"} if j % (5 + i) == 0 else {"neg"},
+                             "estado": "publicada" if (j * (i + 3)) % 7 < 3 else "sin_publicar"}))
+    a, b = dict(base), dict(reversed(base))
+    ea, eb = ED.estratos_de(a, ("W3",)), ED.estratos_de(b, ("W3",))
+    chequear("orden_del_nulo", ea == eb, "estratos en el mismo orden con cls recorrido al derecho y al revés")
+    ga, gb = ED.grupos_de(a, ("W3",)), ED.grupos_de(b, ("W3",))
+    chequear("orden_del_nulo", ga == gb, "grupos del control del nulo en el mismo orden")
+    # el nulo entero, no sólo el p95: con un nulo discreto el p95 puede coincidir de casualidad aunque las muestras
+    # salgan en otro reparto (pasó con estos datos antes del arreglo)
+    na = ED.g1(a, ("W3",), np.random.default_rng(ED.SEMILLA), con_nulo=True)["_nulo"]
+    nb = ED.g1(b, ("W3",), np.random.default_rng(ED.SEMILLA), con_nulo=True)["_nulo"]
+    chequear("orden_del_nulo", np.array_equal(na, nb),
+             "las %d muestras del nulo idénticas con la misma semilla (difieren %d)" % (len(na), int(np.sum(na != nb))))
+
+
+def chequear_base_k():
+    """S154 (tarea 1.32): con `--brazos` y `--base k` el evaluador lee los brazos del A/B sobre K y su cableado exige
+    los tres flags de K en los logs; un brazo que corrió con el Test 1 encendido tiene que salir como cableado roto."""
+    flags_k = {"ENABLE_TEST1_PATH": False, "ENABLE_TESTS_23_PROSE_BRANCH": True, "ENABLE_MODIS_B22_PRIMARY": True}
+    brazos0, decl0 = dict(ED.BRAZOS), {k: dict(v) for k, v in ED.DECLARADO.items()}
+    tmp = Path(tempfile.mkdtemp(prefix="probar_base_k_"))
+    try:
+        ED.configurar_brazos("_s154_ab_diurno_k_control", "_s154_ab_diurno_k_on", "k")
+        chequear("base_k", ED.BRAZOS == {"control": "_s154_ab_diurno_k_control", "diurno": "_s154_ab_diurno_k_on"},
+                 "--brazos cambia los nombres que lee el evaluador")
+        chequear("base_k", all(ED.DECLARADO[n][c] is v for n in ("control", "diurno") for c, v in flags_k.items()),
+                 "--base k exige los tres flags de K en los dos brazos")
+
+        def escribir_log(test1):
+            for n, diurno in (("control", False), ("diurno", True)):
+                b = ED.BRAZOS[n]
+                (tmp / b).mkdir(parents=True, exist_ok=True)
+                (tmp / b / "Lascar.json").write_text('{"volcano": "Lascar", "records": []}', encoding="utf-8")
+                fl = dict(flags_k, PROFILE_NAME=b, DATA_SUBDIR=b, ENABLE_DAYTIME_VIIRS=diurno, ENABLE_DAYTIME_MODIS=False,
+                          ENABLE_TEST1_PATH=test1)
+                (tmp / "logs").mkdir(exist_ok=True)
+                (tmp / "logs" / ("%s_Lascar.log" % b)).write_text("FLAGS_BRAZO " + json.dumps(fl) + "\n", encoding="utf-8")
+
+        escribir_log(test1=False)
+        ok = ED.cableado([str(tmp)], [str(tmp / "logs")], "control") + ED.cableado([str(tmp)], [str(tmp / "logs")], "diurno")
+        chequear("base_k", ok == [], "brazos que leyeron K: cableado limpio (%s)" % ok)
+        escribir_log(test1=True)
+        mal = ED.cableado([str(tmp)], [str(tmp / "logs")], "control")
+        chequear("base_k", any("ENABLE_TEST1_PATH" in x for x in mal), "un brazo con el Test 1 encendido sale como cableado roto (%s)" % mal)
+    finally:
+        ED.BRAZOS.clear(); ED.BRAZOS.update(brazos0)
+        ED.DECLARADO.clear(); ED.DECLARADO.update(decl0)
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def main():
+    chequear_orden_del_nulo()
+    chequear_base_k()
     tmp = Path(tempfile.mkdtemp(prefix="probar_diurno_"))
     try:
         filas, coords = ED.cargar_filas(ED.parser().parse_args(["--raiz", "x"]))
@@ -280,6 +344,7 @@ def main():
                                          linea_extra="  VIIRS_NOAA20: kept 3 of 6 granules (night filter)"), []),
             ("15 lascar_todo", dict(publica=lambda w, k, U: k[0] == "Lascar"), []),
             ("16 g2_un_sensor", dict(publica=lambda w, k, U: k in U[w]["pos"] or k in seis_v750), []),
+            ("26 satura_v375", dict(publica=lambda w, k, U: k in U[w]["pos"] or (k[1] == "VIIRS375" and k in U[w]["neg"])), []),
             ("17 volatiles", dict(publica=lambda w, k, U: k in U[w]["pos"], volatiles_distintos=True), []),
             ("18 granulo_distinto", dict(publica=lambda w, k, U: k in U[w]["pos"], granulo_distinto=True), []),
             ("22 ruido_flotante", dict(publica=lambda w, k, U: k in U[w]["pos"], ruido_relativo=2e-16), []),
@@ -306,6 +371,12 @@ def main():
             ("19 v750_cerrado", dict(publica=lambda w, k, U: k in U[w]["pos"], sacar=todo_v750), []),
             ("20 tabla_sin_procesar", dict(publica=lambda w, k, U: k in U[w]["pos"], sacar=quince_w5), []),
         ]
+        # PROBAR_SOLO=26,1 corre sólo esos casos (por número): sirve para ver el rojo y el verde de un caso nuevo sin
+        # esperar la batería entera. La corrida que vale antes de un PR es la completa, sin la variable.
+        solo = {x.strip() for x in os.environ.get("PROBAR_SOLO", "").split(",") if x.strip()}
+        if solo:
+            casos = [c for c in casos if c[0].split()[0] in solo]
+            print("PROBAR_SOLO: sólo %s (NO es la batería completa)" % [c[0] for c in casos])
         salidas = {}
         for nombre, kw, extra in casos:
             d = tmp / nombre.split()[0]
@@ -389,6 +460,16 @@ def main():
                 r1 = res["G1_W2W6"]
                 chequear(n, r1["veredicto"] == "FALLA", "G1 FALLA (D %+.4f, p95 %+.4f)" % (r1["D"], r1["p95"]))
                 chequear(n, res["veredicto"].startswith("NO ADOPTAR"), "veredicto NO ADOPTAR")
+            elif n == "satura_v375":
+                # S154 (verificador de W2 a W6, H1): con VIIRS 375 saturado y VIIRS 750 callado, el q_neg conjunto queda
+                # bajo la banda y el aviso conjunto no salía; en W2 a W6 real 375 estaba en 89,3 % y el conjunto en 60,0 %.
+                q = {s: res["metricas"]["W2-W6"][s]["M2"]["tasa"] for s in ED.VIIRS}
+                sat = res.get("saturacion", {})
+                chequear(n, res["metricas"]["W2-W6"]["ambos"]["M2"]["tasa"] < ED.BANDA_SATURACION <= q["VIIRS375"],
+                         "el caso es el de H1: conjunto bajo la banda, 375 sobre ella (%s)" % q)
+                chequear(n, sat.get("VIIRS375") is True and sat.get("VIIRS750") is False,
+                         "aviso de saturación por sensor: 375 sí, 750 no (%s)" % sat)
+                chequear(n, "SATURACIÓN (A114) VIIRS375" in txt, "la línea del aviso nombra el sensor")
             elif n == "g2_un_sensor":
                 chequear(n, g["VIIRS375"]["veredicto"] == "CUMPLE" and g["VIIRS750"]["veredicto"] == "FALLA",
                          "G2 cumple en 375 y falla en 750 (%s)" % {s: (g[s]["publicadas"], g[s]["procesadas"]) for s in ED.VIIRS})
