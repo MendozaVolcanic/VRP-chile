@@ -1,6 +1,11 @@
 # Regla de adopción de K, escrita antes de evaluar V2
 
-> **Estado:** versión 2, S153, 2026-10-17. Espera la aprobación de Nicolás. La versión 1 la revisó un verificador con
+> **Estado: APROBADA por Nicolás el 2026-10-17** («Apruebo la regla de adopción de K del PR #848 tal como está,
+> incluida la reversión con git revert pre-autorizada»), antes de cualquier evaluación de V2. El instrumento quedó
+> fijado en `2766c198` (merge de #847, §3). Desde aquí la regla no se cambia; si un resultado la pone en duda, la
+> duda se escribe y decide Nicolás.
+>
+> Versión 2, S153, 2026-10-17. La versión 1 la revisó un verificador con
 > contexto limpio («aprobable con arreglos», `C:\Users\nmend\AppData\Local\Temp\claude\verif_regla_fk\VERIFICADOR.md`,
 > sin versionar); la 2 aplica sus diez arreglos (§8). Se escribe **antes** de correr `evaluar_fk.py` sobre V2: al
 > escribirla, V2a está unida y pareja pero sin evaluar, y V2b quedó despareja y se está repitiendo (run 39068999603).
