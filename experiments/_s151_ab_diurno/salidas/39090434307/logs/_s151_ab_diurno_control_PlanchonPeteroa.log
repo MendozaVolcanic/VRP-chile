@@ -1,0 +1,433 @@
+FLAGS_BRAZO {"PROFILE_NAME": "_s151_ab_diurno_control", "DATA_SUBDIR": "_s151_ab_diurno_control", "ENABLE_DAYTIME_VIIRS": false, "ENABLE_DAYTIME_MODIS": false, "ENABLE_TEST1_PATH": true, "ENABLE_TESTS_23_PROSE_BRANCH": false, "ENABLE_MODIS_B22_PRIMARY": false, "ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER": false, "PATH_D_ONLY_CAP_MW": 5.0, "ENABLE_TESTS_23_NO_BT_GATE_VIIRS375": false, "ENABLE_VENT_ANCHORED_CLUSTERING": true, "ENABLE_ROI1_BOX_PAPER": false}
+[VRP profile=_s151_ab_diurno_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s151_ab_diurno_control
+=== [VRP profile=_s151_ab_diurno_control] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=_s151_ab_diurno_control ===
+Nighttime-only mode ON (MIROVA standard). Use --no-night-filter to disable.
+Overwrite mode ON: existing records will be replaced.
+
+>>> Planchón-Peteroa | 2026-10-01
+[diag 05:05:57Z] AUTH_START volcano=PlanchonPeteroa date=2026-10-01
+[diag 05:05:57Z] AUTH_OK
+[diag 05:05:57Z] SEARCH_START MODIS_TERRA
+/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/results.py:343: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  self["size"] = self.size()
+[diag 05:05:57Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 05:05:58Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10060410655,LAADS:10060029375]
+/opt/hostedtoolcache/Python/3.11.17/x64/lib/python3.11/site-packages/earthaccess/store.py:832: FutureWarning: As of version 1.0, `DataGranule.size` will be accessed as an attribute; e.g. use `DataCollection.size` **not** `DataCollection.size()`
+  total_size = round(sum(granule.size() for granule in granules) / 1024, 2)
+[diag 05:06:00Z] DOWNLOAD_DONE attempt=0 elapsed=2.2s n_files=2
+[diag 05:06:00Z] SEARCH_START MODIS_AQUA
+[diag 05:06:00Z] SEARCH_DONE MODIS_AQUA n_l1b=4
+  MODIS_AQUA: kept 2 of 4 granules (night filter)
+[diag 05:06:01Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10061304067,LAADS:10061303426]
+[diag 05:06:03Z] DOWNLOAD_DONE attempt=0 elapsed=2.2s n_files=2
+[diag 05:06:03Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10061305211,LAADS:10061303427]
+[diag 05:06:06Z] DOWNLOAD_DONE attempt=0 elapsed=2.3s n_files=2
+[diag 05:06:06Z] SEARCH_START VIIRS_SNPP
+[diag 05:06:06Z] SEARCH_DONE VIIRS_SNPP n_l1b=2
+  VIIRS_SNPP: kept 1 of 2 granules (night filter)
+[diag 05:06:06Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10060450021,LAADS:10060446413]
+[diag 05:06:09Z] DOWNLOAD_DONE attempt=0 elapsed=2.6s n_files=2
+[diag 05:06:09Z] SEARCH_START VIIRS_NOAA20
+[diag 05:06:09Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 05:06:10Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10060278248,LAADS:10060274733]
+[diag 05:06:13Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+[diag 05:06:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10060343144,LAADS:10060336702]
+[diag 05:06:15Z] DOWNLOAD_DONE attempt=0 elapsed=2.5s n_files=2
+[diag 05:06:15Z] SEARCH_START VIIRS_NOAA21
+[diag 05:06:15Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+[diag 05:06:16Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10060259565,LAADS:10060256704]
+[diag 05:06:19Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+[diag 05:06:19Z] SEARCH_START VIIRS_SNPP_750
+[diag 05:06:19Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=2
+  VIIRS_SNPP_750: kept 1 of 2 granules (night filter)
+[diag 05:06:19Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10060450025,LAADS:10060446416]
+[diag 05:06:22Z] DOWNLOAD_DONE attempt=0 elapsed=2.2s n_files=2
+[diag 05:06:22Z] SEARCH_START VIIRS_NOAA20_750
+[diag 05:06:22Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 05:06:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10060278252,LAADS:10060274734]
+[diag 05:06:24Z] DOWNLOAD_DONE attempt=0 elapsed=1.9s n_files=2
+[diag 05:06:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10060343156,LAADS:10060336703]
+[diag 05:06:26Z] DOWNLOAD_DONE attempt=0 elapsed=1.6s n_files=2
+[diag 05:06:26Z] SEARCH_START VIIRS_NOAA21_750
+[diag 05:06:26Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+[diag 05:06:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10060259569,LAADS:10060256708]
+[diag 05:06:28Z] DOWNLOAD_DONE attempt=0 elapsed=1.7s n_files=2
+  MODIS_TERRA | VRP=5.0 MW | T_bg=267.76 K | T_max=283.33 K | anomalous_px=96
+  MODIS_AQUA | VRP=5.0 MW | T_bg=245.76 K | T_max=260.24 K | anomalous_px=130
+  MODIS_AQUA | VRP=5.0 MW | T_bg=248.26 K | T_max=262.7 K | anomalous_px=141
+  VIIRS_SNPP (375m) | VRP_MIR=0.064 MW | VRP_TIR=0.0 MW | T_max=280.84 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.027 MW | VRP_TIR=0.0 MW | T_max=275.69 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.024 MW | VRP_TIR=0.0 MW | T_max=276.17 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.035 MW | VRP_TIR=0.0 MW | T_max=278.96 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=267.28 K | T_max=275.08 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=260.29 K | T_max=269.6 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=262.06 K | T_max=272.78 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=268.39 K | T_max=277.7 K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20261001
+
+>>> Planchón-Peteroa | 2026-10-02
+[diag 05:08:04Z] AUTH_START volcano=PlanchonPeteroa date=2026-10-02
+[diag 05:08:04Z] AUTH_OK
+[diag 05:08:04Z] SEARCH_START MODIS_TERRA
+[diag 05:08:04Z] SEARCH_DONE MODIS_TERRA n_l1b=1
+  MODIS_TERRA: kept 0 of 1 granules (night filter)
+[diag 05:08:04Z] SEARCH_START MODIS_AQUA
+[diag 05:08:05Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 05:08:06Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10061566879,LAADS:10061417090]
+[diag 05:08:08Z] DOWNLOAD_DONE attempt=0 elapsed=1.9s n_files=2
+[diag 05:08:08Z] SEARCH_START VIIRS_SNPP
+[diag 05:08:08Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 05:08:09Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10061290616,LAADS:10061289725]
+[diag 05:08:12Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+[diag 05:08:12Z] SEARCH_START VIIRS_NOAA20
+[diag 05:08:12Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=2
+  VIIRS_NOAA20: kept 1 of 2 granules (night filter)
+[diag 05:08:13Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10061302773,LAADS:10061298950]
+[diag 05:08:16Z] DOWNLOAD_DONE attempt=0 elapsed=3.0s n_files=2
+[diag 05:08:16Z] SEARCH_START VIIRS_NOAA21
+[diag 05:08:16Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=4
+  VIIRS_NOAA21: kept 2 of 4 granules (night filter)
+[diag 05:08:17Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10061267643,LAADS:10061262469]
+[diag 05:08:20Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 05:08:20Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10061313037,LAADS:10061306871]
+[diag 05:08:22Z] DOWNLOAD_DONE attempt=0 elapsed=2.3s n_files=2
+[diag 05:08:22Z] SEARCH_START VIIRS_SNPP_750
+[diag 05:08:23Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 05:08:24Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10061290618,LAADS:10061289728]
+[diag 05:08:26Z] DOWNLOAD_DONE attempt=0 elapsed=2.4s n_files=2
+[diag 05:08:26Z] SEARCH_START VIIRS_NOAA20_750
+[diag 05:08:26Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=2
+  VIIRS_NOAA20_750: kept 1 of 2 granules (night filter)
+[diag 05:08:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10061302785,LAADS:10061298952]
+[diag 05:08:29Z] DOWNLOAD_DONE attempt=0 elapsed=2.2s n_files=2
+[diag 05:08:29Z] SEARCH_START VIIRS_NOAA21_750
+[diag 05:08:30Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=4
+  VIIRS_NOAA21_750: kept 2 of 4 granules (night filter)
+[diag 05:08:30Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10061267647,LAADS:10061262470]
+[diag 05:08:32Z] DOWNLOAD_DONE attempt=0 elapsed=2.1s n_files=2
+[diag 05:08:32Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10061313043,LAADS:10061306875]
+[diag 05:08:35Z] DOWNLOAD_DONE attempt=0 elapsed=2.1s n_files=2
+  MODIS_AQUA | VRP=5.0 MW | T_bg=242.9 K | T_max=270.9 K | anomalous_px=382
+  VIIRS_SNPP (375m) | VRP_MIR=0.051 MW | VRP_TIR=0.0 MW | T_max=276.11 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.044 MW | VRP_TIR=0.0 MW | T_max=269.79 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.113 MW | VRP_TIR=0.0 MW | T_max=273.74 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.028 MW | VRP_TIR=0.0 MW | T_max=256.59 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=227.37 K | T_max=271.63 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=247.57 K | T_max=267.0 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=240.1 K | T_max=268.92 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=233.63 K | T_max=251.19 K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20261002
+
+>>> Planchón-Peteroa | 2026-10-03
+[diag 05:10:06Z] AUTH_START volcano=PlanchonPeteroa date=2026-10-03
+[diag 05:10:06Z] AUTH_OK
+[diag 05:10:06Z] SEARCH_START MODIS_TERRA
+[diag 05:10:07Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 05:10:08Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10061997954,LAADS:10061791338]
+[diag 05:10:09Z] DOWNLOAD_DONE attempt=0 elapsed=1.8s n_files=2
+[diag 05:10:09Z] SEARCH_START MODIS_AQUA
+[diag 05:10:10Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 05:10:11Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10062130424,LAADS:10062097195]
+[diag 05:10:13Z] DOWNLOAD_DONE attempt=0 elapsed=1.9s n_files=2
+[diag 05:10:13Z] SEARCH_START VIIRS_SNPP
+[diag 05:10:13Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 05:10:14Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10061980899,LAADS:10061979972]
+[diag 05:10:17Z] DOWNLOAD_DONE attempt=0 elapsed=2.5s n_files=2
+[diag 05:10:17Z] SEARCH_START VIIRS_NOAA20
+[diag 05:10:17Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+[diag 05:10:17Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10061968249,LAADS:10061967648]
+[diag 05:10:20Z] DOWNLOAD_DONE attempt=0 elapsed=2.5s n_files=2
+[diag 05:10:20Z] SEARCH_START VIIRS_NOAA21
+[diag 05:10:20Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 2 of 3 granules (night filter)
+[diag 05:10:21Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10061959019,LAADS:10061957769]
+[diag 05:10:23Z] DOWNLOAD_DONE attempt=0 elapsed=2.5s n_files=2
+[diag 05:10:23Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10061987053,LAADS:10061986785]
+[diag 05:10:26Z] DOWNLOAD_DONE attempt=0 elapsed=2.4s n_files=2
+[diag 05:10:26Z] SEARCH_START VIIRS_SNPP_750
+[diag 05:10:27Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 05:10:27Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10061980903,LAADS:10061979974]
+[diag 05:10:29Z] DOWNLOAD_DONE attempt=0 elapsed=1.7s n_files=2
+[diag 05:10:29Z] SEARCH_START VIIRS_NOAA20_750
+[diag 05:10:29Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+[diag 05:10:30Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10061968253,LAADS:10061967650]
+[diag 05:10:32Z] DOWNLOAD_DONE attempt=0 elapsed=1.6s n_files=2
+[diag 05:10:32Z] SEARCH_START VIIRS_NOAA21_750
+[diag 05:10:32Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 2 of 3 granules (night filter)
+[diag 05:10:33Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10061959025,LAADS:10061957774]
+[diag 05:10:35Z] DOWNLOAD_DONE attempt=0 elapsed=1.8s n_files=2
+[diag 05:10:35Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10061987063,LAADS:10061986786]
+[diag 05:10:36Z] DOWNLOAD_DONE attempt=0 elapsed=1.6s n_files=2
+  MODIS_TERRA | VRP=5.0 MW | T_bg=263.09 K | T_max=278.16 K | anomalous_px=114
+  MODIS_AQUA | VRP=5.0 MW | T_bg=264.38 K | T_max=278.78 K | anomalous_px=119
+  VIIRS_SNPP (375m) | VRP_MIR=0.068 MW | VRP_TIR=0.0 MW | T_max=277.98 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.041 MW | VRP_TIR=0.0 MW | T_max=278.24 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.037 MW | VRP_TIR=0.0 MW | T_max=277.84 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.041 MW | VRP_TIR=0.0 MW | T_max=276.64 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0.98 MW | T_bg=260.62 K | T_max=273.94 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=260.97 K | T_max=275.23 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=1.107 MW | T_bg=258.61 K | T_max=274.74 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=258.33 K | T_max=274.61 K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20261003
+
+>>> Planchón-Peteroa | 2026-10-04
+[diag 05:12:10Z] AUTH_START volcano=PlanchonPeteroa date=2026-10-04
+[diag 05:12:10Z] AUTH_OK
+[diag 05:12:10Z] SEARCH_START MODIS_TERRA
+[diag 05:12:11Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 05:12:12Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10062623033,LAADS:10062562616]
+[diag 05:12:14Z] DOWNLOAD_DONE attempt=0 elapsed=2.3s n_files=2
+[diag 05:12:14Z] SEARCH_START MODIS_AQUA
+[diag 05:12:14Z] SEARCH_DONE MODIS_AQUA n_l1b=3
+  MODIS_AQUA: kept 2 of 3 granules (night filter)
+[diag 05:12:15Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10062764867,LAADS:10062678610]
+[diag 05:12:17Z] DOWNLOAD_DONE attempt=0 elapsed=1.7s n_files=2
+[diag 05:12:17Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10062764871,LAADS:10062729038]
+[diag 05:12:19Z] DOWNLOAD_DONE attempt=0 elapsed=2.1s n_files=2
+[diag 05:12:19Z] SEARCH_START VIIRS_SNPP
+[diag 05:12:19Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 2 of 3 granules (night filter)
+[diag 05:12:20Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10062657802,LAADS:10062656753]
+[diag 05:12:22Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+[diag 05:12:22Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10062682440,LAADS:10062676373]
+[diag 05:12:25Z] DOWNLOAD_DONE attempt=0 elapsed=2.6s n_files=2
+[diag 05:12:25Z] SEARCH_START VIIRS_NOAA20
+[diag 05:12:26Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 1 of 3 granules (night filter)
+[diag 05:12:26Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10062588611,LAADS:10062585655]
+[diag 05:12:29Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+[diag 05:12:29Z] SEARCH_START VIIRS_NOAA21
+[diag 05:12:30Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=2
+  VIIRS_NOAA21: kept 1 of 2 granules (night filter)
+[diag 05:12:30Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10062605557,LAADS:10062602223]
+[diag 05:12:33Z] DOWNLOAD_DONE attempt=0 elapsed=2.5s n_files=2
+[diag 05:12:33Z] SEARCH_START VIIRS_SNPP_750
+[diag 05:12:33Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 2 of 3 granules (night filter)
+[diag 05:12:34Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10062657812,LAADS:10062656758]
+[diag 05:12:35Z] DOWNLOAD_DONE attempt=0 elapsed=1.6s n_files=2
+[diag 05:12:35Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10062682442,LAADS:10062676375]
+[diag 05:12:37Z] DOWNLOAD_DONE attempt=0 elapsed=1.7s n_files=2
+[diag 05:12:37Z] SEARCH_START VIIRS_NOAA20_750
+[diag 05:12:38Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 1 of 3 granules (night filter)
+[diag 05:12:38Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10062588623,LAADS:10062585658]
+[diag 05:12:40Z] DOWNLOAD_DONE attempt=0 elapsed=1.7s n_files=2
+[diag 05:12:40Z] SEARCH_START VIIRS_NOAA21_750
+[diag 05:12:40Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=2
+  VIIRS_NOAA21_750: kept 1 of 2 granules (night filter)
+[diag 05:12:41Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10062605567,LAADS:10062602229]
+[diag 05:12:43Z] DOWNLOAD_DONE attempt=0 elapsed=1.7s n_files=2
+  MODIS_TERRA | VRP=5.0 MW | T_bg=268.18 K | T_max=283.33 K | anomalous_px=48
+  MODIS_AQUA | VRP=5.0 MW | T_bg=253.38 K | T_max=265.43 K | anomalous_px=117
+  MODIS_AQUA | VRP=5.0 MW | T_bg=264.38 K | T_max=274.29 K | anomalous_px=45
+  VIIRS_SNPP (375m) | VRP_MIR=0.033 MW | VRP_TIR=0.0 MW | T_max=275.09 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.02 MW | VRP_TIR=0.0 MW | T_max=262.24 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.083 MW | VRP_TIR=0.0 MW | T_max=276.54 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.014 MW | VRP_TIR=0.0 MW | T_max=264.95 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=256.11 K | T_max=268.92 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=242.99 K | T_max=256.93 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=3.587 MW | T_bg=258.13 K | T_max=272.64 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0.626 MW | T_bg=247.38 K | T_max=262.81 K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20261004
+
+>>> Planchón-Peteroa | 2026-10-05
+[diag 05:14:17Z] AUTH_START volcano=PlanchonPeteroa date=2026-10-05
+[diag 05:14:17Z] AUTH_OK
+[diag 05:14:17Z] SEARCH_START MODIS_TERRA
+[diag 05:14:18Z] SEARCH_DONE MODIS_TERRA n_l1b=3
+  MODIS_TERRA: kept 1 of 3 granules (night filter)
+[diag 05:14:19Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10063102555,LAADS:10062948046]
+[diag 05:14:20Z] DOWNLOAD_DONE attempt=0 elapsed=1.7s n_files=2
+[diag 05:14:20Z] SEARCH_START MODIS_AQUA
+[diag 05:14:21Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 05:14:22Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10065936839,LAADS:10065898349]
+[diag 05:14:24Z] DOWNLOAD_DONE attempt=0 elapsed=2.2s n_files=2
+[diag 05:14:24Z] SEARCH_START VIIRS_SNPP
+[diag 05:14:25Z] SEARCH_DONE VIIRS_SNPP n_l1b=4
+  VIIRS_SNPP: kept 3 of 4 granules (night filter)
+[diag 05:14:26Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10063099547,LAADS:10063098896]
+[diag 05:14:28Z] DOWNLOAD_DONE attempt=0 elapsed=2.7s n_files=2
+[diag 05:14:28Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10063099192,LAADS:10063098867]
+[diag 05:14:31Z] DOWNLOAD_DONE attempt=0 elapsed=2.5s n_files=2
+[diag 05:14:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10063156972,LAADS:10063147711]
+[diag 05:14:33Z] DOWNLOAD_DONE attempt=0 elapsed=2.5s n_files=2
+[diag 05:14:33Z] SEARCH_START VIIRS_NOAA20
+[diag 05:14:34Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 05:14:34Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10063093060,LAADS:10063092624]
+[diag 05:14:37Z] DOWNLOAD_DONE attempt=0 elapsed=2.5s n_files=2
+[diag 05:14:37Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10063111248,LAADS:10063106297]
+[diag 05:14:39Z] DOWNLOAD_DONE attempt=0 elapsed=2.4s n_files=2
+[diag 05:14:39Z] SEARCH_START VIIRS_NOAA21
+[diag 05:14:39Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=2
+  VIIRS_NOAA21: kept 1 of 2 granules (night filter)
+[diag 05:14:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10063098446,LAADS:10063090450]
+[diag 05:14:42Z] DOWNLOAD_DONE attempt=0 elapsed=2.6s n_files=2
+[diag 05:14:42Z] SEARCH_START VIIRS_SNPP_750
+[diag 05:14:43Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=4
+  VIIRS_SNPP_750: kept 3 of 4 granules (night filter)
+[diag 05:14:44Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10063099551,LAADS:10063098898]
+[diag 05:14:46Z] DOWNLOAD_DONE attempt=0 elapsed=2.1s n_files=2
+[diag 05:14:46Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10063099200,LAADS:10063098872]
+[diag 05:14:47Z] DOWNLOAD_DONE attempt=0 elapsed=1.7s n_files=2
+[diag 05:14:47Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10063156980,LAADS:10063147716]
+[diag 05:14:49Z] DOWNLOAD_DONE attempt=0 elapsed=1.7s n_files=2
+[diag 05:14:49Z] SEARCH_START VIIRS_NOAA20_750
+[diag 05:14:49Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 05:14:50Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10063093070,LAADS:10063092625]
+[diag 05:14:52Z] DOWNLOAD_DONE attempt=0 elapsed=2.0s n_files=2
+[diag 05:14:52Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10063111260,LAADS:10063106301]
+[diag 05:14:53Z] DOWNLOAD_DONE attempt=0 elapsed=1.6s n_files=2
+[diag 05:14:53Z] SEARCH_START VIIRS_NOAA21_750
+[diag 05:14:54Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=2
+  VIIRS_NOAA21_750: kept 1 of 2 granules (night filter)
+[diag 05:14:54Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10063098448,LAADS:10063090452]
+[diag 05:14:56Z] DOWNLOAD_DONE attempt=0 elapsed=1.8s n_files=2
+  MODIS_TERRA | VRP=5.0 MW | T_bg=263.61 K | T_max=277.61 K | anomalous_px=71
+  MODIS_AQUA | VRP=5.0 MW | T_bg=263.83 K | T_max=279.36 K | anomalous_px=183
+  VIIRS_SNPP (375m) | VRP_MIR=0.022 MW | VRP_TIR=0.0 MW | T_max=275.29 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.0 MW | VRP_TIR=0.0 MW | T_max=275.75 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP (375m) | VRP_MIR=0.022 MW | VRP_TIR=0.0 MW | T_max=277.31 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.047 MW | VRP_TIR=0.0 MW | T_max=276.52 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.036 MW | VRP_TIR=0.0 MW | T_max=275.51 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.117 MW | VRP_TIR=0.0 MW | T_max=278.7 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=259.69 K | T_max=268.12 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=258.73 K | T_max=268.6 K | anomalous_px=0
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=262.16 K | T_max=272.88 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=261.19 K | T_max=271.38 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=258.87 K | T_max=269.45 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=2.245 MW | T_bg=264.34 K | T_max=274.74 K | anomalous_px=2
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20261005
+
+>>> Planchón-Peteroa | 2026-10-06
+[diag 05:17:10Z] AUTH_START volcano=PlanchonPeteroa date=2026-10-06
+[diag 05:17:10Z] AUTH_OK
+[diag 05:17:10Z] SEARCH_START MODIS_TERRA
+[diag 05:17:11Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 05:17:12Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10064611903,LAADS:10064197003]
+[diag 05:17:14Z] DOWNLOAD_DONE attempt=0 elapsed=1.9s n_files=2
+[diag 05:17:14Z] SEARCH_START MODIS_AQUA
+[diag 05:17:15Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 05:17:20Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10065990184,LAADS:10065947947]
+[diag 05:17:22Z] DOWNLOAD_DONE attempt=0 elapsed=2.1s n_files=2
+[diag 05:17:22Z] SEARCH_START VIIRS_SNPP
+[diag 05:17:23Z] SEARCH_DONE VIIRS_SNPP n_l1b=2
+  VIIRS_SNPP: kept 1 of 2 granules (night filter)
+[diag 05:17:28Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10064891603,LAADS:10064878322]
+[diag 05:17:31Z] DOWNLOAD_DONE attempt=0 elapsed=2.9s n_files=2
+[diag 05:17:31Z] SEARCH_START VIIRS_NOAA20
+[diag 05:17:31Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=3
+  VIIRS_NOAA20: kept 2 of 3 granules (night filter)
+[diag 05:17:33Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10064494297,LAADS:10064491407]
+[diag 05:17:36Z] DOWNLOAD_DONE attempt=0 elapsed=2.6s n_files=2
+[diag 05:17:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10064602177,LAADS:10064596597]
+[diag 05:17:38Z] DOWNLOAD_DONE attempt=0 elapsed=2.5s n_files=2
+[diag 05:17:38Z] SEARCH_START VIIRS_NOAA21
+[diag 05:17:43Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=4
+  VIIRS_NOAA21: kept 1 of 4 granules (night filter)
+[diag 05:17:45Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10064473599,LAADS:10064468028]
+[diag 05:17:48Z] DOWNLOAD_DONE attempt=0 elapsed=2.6s n_files=2
+[diag 05:17:48Z] SEARCH_START VIIRS_SNPP_750
+[diag 05:17:58Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=2
+  VIIRS_SNPP_750: kept 1 of 2 granules (night filter)
+[diag 05:18:12Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10064891613,LAADS:10064878324]
+[diag 05:18:14Z] DOWNLOAD_DONE attempt=0 elapsed=1.7s n_files=2
+[diag 05:18:14Z] SEARCH_START VIIRS_NOAA20_750
+[diag 05:18:15Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=3
+  VIIRS_NOAA20_750: kept 2 of 3 granules (night filter)
+[diag 05:18:17Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10064494301,LAADS:10064491408]
+[diag 05:18:19Z] DOWNLOAD_DONE attempt=0 elapsed=1.6s n_files=2
+[diag 05:18:19Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10064602189,LAADS:10064596598]
+[diag 05:18:21Z] DOWNLOAD_DONE attempt=0 elapsed=1.7s n_files=2
+[diag 05:18:21Z] SEARCH_START VIIRS_NOAA21_750
+[diag 05:18:21Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=4
+  VIIRS_NOAA21_750: kept 1 of 4 granules (night filter)
+[diag 05:18:31Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10064473607,LAADS:10064468031]
+[diag 05:18:33Z] DOWNLOAD_DONE attempt=0 elapsed=1.7s n_files=2
+  MODIS_TERRA | VRP=2.558 MW | T_bg=227.86 K | T_max=258.49 K | anomalous_px=797
+  MODIS_AQUA | VRP=5.0 MW | T_bg=232.64 K | T_max=254.26 K | anomalous_px=451
+  VIIRS_SNPP (375m) | VRP_MIR=0.015 MW | VRP_TIR=0.0 MW | T_max=282.1 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.07 MW | VRP_TIR=0.0 MW | T_max=244.1 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.12 MW | VRP_TIR=0.0 MW | T_max=243.86 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.011 MW | VRP_TIR=0.0 MW | T_max=241.85 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=235.28 K | T_max=245.93 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=227.28 K | T_max=238.79 K | anomalous_px=0
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=231.68 K | T_max=239.43 K | anomalous_px=0
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=232.63 K | T_max=239.41 K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20261006
+
+>>> Planchón-Peteroa | 2026-10-07
+[diag 05:20:06Z] AUTH_START volcano=PlanchonPeteroa date=2026-10-07
+[diag 05:20:06Z] AUTH_OK
+[diag 05:20:06Z] SEARCH_START MODIS_TERRA
+[diag 05:20:10Z] SEARCH_DONE MODIS_TERRA n_l1b=2
+  MODIS_TERRA: kept 1 of 2 granules (night filter)
+[diag 05:20:11Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_TERRA [LAADS:10066952475,LAADS:10066576425]
+[diag 05:20:13Z] DOWNLOAD_DONE attempt=0 elapsed=1.9s n_files=2
+[diag 05:20:13Z] SEARCH_START MODIS_AQUA
+[diag 05:20:15Z] SEARCH_DONE MODIS_AQUA n_l1b=2
+  MODIS_AQUA: kept 1 of 2 granules (night filter)
+[diag 05:20:18Z] DOWNLOAD_START attempt=0 n=2 dest=MODIS_AQUA [LAADS:10067380744,LAADS:10067073817]
+[diag 05:20:20Z] DOWNLOAD_DONE attempt=0 elapsed=1.8s n_files=2
+[diag 05:20:20Z] SEARCH_START VIIRS_SNPP
+[diag 05:20:21Z] SEARCH_DONE VIIRS_SNPP n_l1b=3
+  VIIRS_SNPP: kept 1 of 3 granules (night filter)
+[diag 05:20:22Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP [LAADS:10066963647,LAADS:10066876011]
+[diag 05:20:25Z] DOWNLOAD_DONE attempt=0 elapsed=2.8s n_files=2
+[diag 05:20:25Z] SEARCH_START VIIRS_NOAA20
+[diag 05:20:29Z] SEARCH_DONE VIIRS_NOAA20 n_l1b=2
+  VIIRS_NOAA20: kept 1 of 2 granules (night filter)
+[diag 05:20:30Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20 [LAADS:10066908175,LAADS:10066901235]
+[diag 05:20:33Z] DOWNLOAD_DONE attempt=0 elapsed=2.6s n_files=2
+[diag 05:20:33Z] SEARCH_START VIIRS_NOAA21
+[diag 05:20:33Z] SEARCH_DONE VIIRS_NOAA21 n_l1b=3
+  VIIRS_NOAA21: kept 1 of 3 granules (night filter)
+[diag 05:20:36Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21 [LAADS:10066727931,LAADS:10066714697]
+[diag 05:20:39Z] DOWNLOAD_DONE attempt=0 elapsed=2.6s n_files=2
+[diag 05:20:39Z] SEARCH_START VIIRS_SNPP_750
+[diag 05:20:39Z] SEARCH_DONE VIIRS_SNPP_750 n_l1b=3
+  VIIRS_SNPP_750: kept 1 of 3 granules (night filter)
+[diag 05:20:40Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_SNPP_750 [LAADS:10066963649,LAADS:10066876014]
+[diag 05:20:41Z] DOWNLOAD_DONE attempt=0 elapsed=1.8s n_files=2
+[diag 05:20:41Z] SEARCH_START VIIRS_NOAA20_750
+[diag 05:20:42Z] SEARCH_DONE VIIRS_NOAA20_750 n_l1b=2
+  VIIRS_NOAA20_750: kept 1 of 2 granules (night filter)
+[diag 05:20:42Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA20_750 [LAADS:10066908183,LAADS:10066901239]
+[diag 05:20:44Z] DOWNLOAD_DONE attempt=0 elapsed=1.6s n_files=2
+[diag 05:20:44Z] SEARCH_START VIIRS_NOAA21_750
+[diag 05:20:44Z] SEARCH_DONE VIIRS_NOAA21_750 n_l1b=3
+  VIIRS_NOAA21_750: kept 1 of 3 granules (night filter)
+[diag 05:20:45Z] DOWNLOAD_START attempt=0 n=2 dest=VIIRS_NOAA21_750 [LAADS:10066727933,LAADS:10066714700]
+[diag 05:20:46Z] DOWNLOAD_DONE attempt=0 elapsed=1.8s n_files=2
+  MODIS_TERRA | VRP=5.0 MW | T_bg=233.92 K | T_max=255.75 K | anomalous_px=181
+  MODIS_AQUA | VRP=34.407 MW | T_bg=270.49 K | T_max=281.55 K | anomalous_px=42
+  VIIRS_SNPP (375m) | VRP_MIR=0.112 MW | VRP_TIR=0.0 MW | T_max=277.14 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA20 (375m) | VRP_MIR=0.186 MW | VRP_TIR=0.0 MW | T_max=278.17 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_NOAA21 (375m) | VRP_MIR=0.048 MW | VRP_TIR=0.0 MW | T_max=278.5 K | VRP_VENT=0.0 MW (0px)
+  VIIRS_SNPP_750 (750m) | VRP=0 MW | T_bg=264.76 K | T_max=274.46 K | anomalous_px=1
+  VIIRS_NOAA20_750 (750m) | VRP=0 MW | T_bg=264.09 K | T_max=274.85 K | anomalous_px=1
+  VIIRS_NOAA21_750 (750m) | VRP=0 MW | T_bg=264.13 K | T_max=276.46 K | anomalous_px=0
+  Cleaned up /home/runner/work/VRP-chile/VRP-chile/tmp/PlanchonPeteroa/20261007
+
+Done.
