@@ -427,6 +427,21 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 16:46 UTC (vuelta 195, S154): 1.25 W6a repetida; raíces W2 a W6 armadas y parejas; 1.26 verificador lanzado
+- Paradas: NRT verde 15:10, disco 17 GB, #779 sin cambio. Histórico 1.24 (39125546355): 31 de 176 trozos verdes a las
+  16:38, de 38 a 82 min por trozo.
+- **1.25:** el rojo de W6a es cobertura: `_s151_ab_diurno_on` Chaitén con 4 noches de menos (798 contra control). Repetido
+  Chaitén en los dos brazos, 2026-10-01 a 10-07, `--ref s151-diurno-codigo` (= `eb97779f`, el mismo commit de W6a): run
+  39146249401. Intento 1 en `C:\Users\nmend\AppData\Local\Temp\claude\w6a_39090434307\i1\`.
+- Raíces de evaluación en `C:\Users\nmend\AppData\Local\Temp\claude\diurno_eval\` (una por media ventana): W2a = intento
+  2 entero (parejo por sí solo, opción (a) de D-16, que es la recomendación que Nicolás aprobó con «haz lo que
+  recomiendes» el 2026-10-17); W3a = intento 1 con el control de PCC de la unión; W5a = unión (logs del intento 1,
+  mismo commit); W2b, W3b, W4a, W4b, W5b, W6b = artefacto `todo`. `contar_pasadas_noche.py`: las 9 PAREJAS (0 faltan,
+  0 sobran) y con el día como se espera.
+- **1.26:** verificador limpio de `experiments/_s153_localizacion/` lanzado (agente en segundo plano; escribe en
+  `experiments/_s153_localizacion/verificador/`).
+- Próximo: unir Chaitén de W6a, contar, evaluar W2 a W6 con `evaluar_diurno.py` (W1 informa aparte) y verificador limpio.
+
 ### 2026-10-18 12:15 UTC (S154): ventana de 30 días con K verificada; histórico por trozos corriendo
 - Reproceso de 30 días (run 39117638055) 11 de 11 verde. `experiments/_s154_reproc_k/verificar_ventana.py` contra el
   tag `pre-s154-reproc-k-datos`: 3.521 de 3.577 pasadas de la ventana escritas con K, 0 perdidas, 0 cambiadas antes
