@@ -304,9 +304,154 @@ def chequear_base_k():
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+def _cls_desde_estratos(estratos, x_por_estrato):
+    """cls sintético: por estrato (n, P, K) y cuántas publicadas caen en positivos (x_s)."""
+    cls = {}
+    for i, ((n, p, k), xs) in enumerate(zip(estratos, x_por_estrato)):
+        for j in range(n):
+            es_pos = j < p
+            pub = (j < xs) if es_pos else (p <= j < p + (k - xs))
+            cls[("V%d" % i, "VIIRS375", "2026-07-01 %02d:%02d" % (j // 60, j % 60))] = {
+                "ventana": "W3", "pob": {"pos"} if es_pos else {"neg"}, "estado": "publicada" if pub else "sin_publicar"}
+    return cls
+
+
+def _pmf_fuerza_bruta(estratos):
+    """Distribución de X (publicadas entre positivos) enumerando todas las elecciones de positivos por estrato."""
+    from itertools import combinations
+    dist = {0: 1.0}
+    for n, p, k in estratos:
+        cuenta = {}
+        combos = list(combinations(range(n), p))
+        for c in combos:
+            x = sum(1 for i in c if i < k)          # las k primeras son las publicadas
+            cuenta[x] = cuenta.get(x, 0) + 1
+        nueva = {}
+        for a_, pa in dist.items():
+            for b_, cb in cuenta.items():
+                nueva[a_ + b_] = nueva.get(a_ + b_, 0.0) + pa * cb / len(combos)
+        dist = nueva
+    return dist
+
+
+def chequear_cola_exacta():
+    """S154, adenda K §3.1 (sellada): G1 decide con P(nulo >= D) exacta. Pruebas pedidas por el verificador de la
+    adenda (H4): contra fuerza bruta, el caso de empate, la mutación de «>=» por «>», y los controles del nulo con la
+    regla exacta. La regla sólo decide con --base k; con c0 se informa (la corrida sobre C0 queda reproducible)."""
+    np = ED.np
+    rnd = random.Random(11)
+    malos = 0
+    for _ in range(60):
+        est = []
+        for _s in range(rnd.randint(1, 3)):
+            n = rnd.randint(2, 9)
+            est.append((n, rnd.randint(1, n - 1), rnd.randint(0, n)))
+        bruta = _pmf_fuerza_bruta(est)
+        exacta = ED.distribucion_x_exacta(est)
+        malos += any(abs(exacta[x] - bruta.get(x, 0.0)) > 1e-12 for x in range(len(exacta))) or abs(sum(exacta) - 1) > 1e-12
+    chequear("cola_exacta", malos == 0, "distribución exacta de X igual a la fuerza bruta en 60 casos chicos (malos %d)" % malos)
+    est = [(9, 3, 4), (8, 2, 3), (7, 3, 2)]
+    pmf = ED.distribucion_x_exacta(est)
+    chequear("cola_exacta", all(abs(ED.cola_exacta(est, x) - float(sum(pmf[x:]))) < 1e-15 for x in range(len(pmf))),
+             "cola_exacta(x) = suma de la distribución desde x (incluye el propio x)")
+    # empate: un x con P(X >= x) >= 0,05 y P(X > x) < 0,05; la regla con «>=» FALLA y la mutada con «>» cumpliría
+    est_e, x_e = None, None
+    for n1 in range(4, 12):
+        e = [(n1, 2, 2), (6, 1, 2)]
+        pm = ED.distribucion_x_exacta(e)
+        for x in range(len(pm)):
+            if float(sum(pm[x:])) >= 0.05 > float(sum(pm[x + 1:])):
+                est_e, x_e = e, x
+                break
+        if est_e:
+            break
+    chequear("cola_exacta", est_e is not None, "existe el caso de empate que distingue «>=» de «>» (%s, x=%s)" % (est_e, x_e))
+    xs = [min(x_e, est_e[0][1]), x_e - min(x_e, est_e[0][1])]
+    cls_e = _cls_desde_estratos(est_e, xs)
+    brazos0, decl0, regla0 = dict(ED.BRAZOS), {k: dict(v) for k, v in ED.DECLARADO.items()}, dict(ED.REGLA)
+    try:
+        ED.configurar_brazos("_s154_ab_diurno_k_control", "_s154_ab_diurno_k_on", "k")
+        r = ED.g1(cls_e, ("W3",), np.random.default_rng(ED.SEMILLA))
+        chequear("cola_exacta", r["veredicto"] == "FALLA" and r["p_cola_exacta"] >= 0.05,
+                 "en el empate la regla exacta FALLA (P(X>=x) = %.4f); con «>» cumpliría (%.4f)" % (
+                     r["p_cola_exacta"], ED.cola_exacta(est_e, x_e + 1)))
+        # control del nulo con la regla exacta, sobre un brazo que no discrimina y uno perfecto
+        rnd2 = random.Random(3)
+        est_c = [(60, 8, 30), (50, 6, 20), (40, 5, 25)]
+        cls_c = _cls_desde_estratos(est_c, [rnd2.randint(0, min(p, k)) for n, p, k in est_c])
+        c = ED.controles_del_nulo(cls_c, ("W3",), np.random.default_rng(ED.SEMILLA))
+        chequear("cola_exacta", c["ok"] and "cola exacta" in c["texto"], "controles del nulo con la regla exacta: " + c["texto"])
+    finally:
+        ED.BRAZOS.clear(); ED.BRAZOS.update(brazos0)
+        ED.DECLARADO.clear(); ED.DECLARADO.update(decl0)
+        ED.REGLA.clear(); ED.REGLA.update(regla0)
+    # con c0 la decisión sigue siendo la del p95 muestreado, y la cola exacta se informa igual
+    r0 = ED.g1(cls_e, ("W3",), np.random.default_rng(ED.SEMILLA))
+    chequear("cola_exacta", "p_cola_exacta" in r0 and "p95" in r0, "con base c0 se informa la cola exacta sin cambiar la regla")
+
+
+def chequear_regla_w2():
+    """S154, adenda K §3.2 (sellada): con base K, si G1 cumple sin W2 y falla con W2, decide Nicolás con M4."""
+    res = {"repetir": [], "ventanas_presentes": list(ED.DECIDEN), "G3": "CUMPLE",
+           "G1_W2W6": {"veredicto": "FALLA"}, "G1_W3W6": {"veredicto": "CUMPLE"},
+           "G2": {s: {"veredicto": "FALLA"} for s in ED.VIIRS}}
+    regla0 = dict(ED.REGLA)
+    try:
+        ED.REGLA.update(w2_decide_nicolas=False)
+        v0 = ED.veredicto(res, [])
+        ED.REGLA.update(w2_decide_nicolas=True)
+        vk = ED.veredicto(res, [])
+    finally:
+        ED.REGLA.clear(); ED.REGLA.update(regla0)
+    chequear("regla_w2", v0.startswith("NO ADOPTAR"), "regla original: falla con W2 -> NO ADOPTAR (%s)" % v0[:40])
+    chequear("regla_w2", vk.startswith("DECIDE NICOLAS CON M4") and "W2" in vk, "adenda K: cumple sin W2 y falla con W2 -> DECIDE NICOLAS CON M4 (%s)" % vk[:70])
+
+
+def chequear_h2a_h2b():
+    """S154, adenda K §4 (sellada). H2a: con base K se revisan los records de los dos brazos (0 con Test 1 y el
+    codigo_sha del tag). H2b: con brazos que no son los de W2 a W6 sobre C0, --base tiene que ser explícito."""
+    tmp = Path(tempfile.mkdtemp(prefix="probar_h2a_"))
+    brazos0 = dict(ED.BRAZOS)
+    try:
+        ED.BRAZOS.update({"control": "_s154_ab_diurno_k_control", "diurno": "_s154_ab_diurno_k_on"})
+
+        def escribir_recs(**cambio):
+            for b in ED.BRAZOS.values():
+                (tmp / b).mkdir(parents=True, exist_ok=True)
+                r = {"datetime_utc": "2026-07-01 05:00", "sensor": "VIIRS_SNPP", "triggered_test1": False,
+                     "final_hotspot_source": "ctx_cluster", "regimen": {"perfil": b, "codigo_sha": "a" * 40}}
+                r.update(cambio)
+                (tmp / b / "Lascar.json").write_text(json.dumps({"volcano": "Lascar", "records": [r]}), encoding="utf-8")
+
+        escribir_recs()
+        chequear("h2a", ED.cableado_records([str(tmp)], "a" * 40) == [], "records de K con el sha del tag: limpio")
+        for nom, cambio in (("triggered_test1", {"triggered_test1": True}),
+                            ("test1_roi", {"final_hotspot_source": "test1_roi"}),
+                            ("sha", {"regimen": {"perfil": "x", "codigo_sha": "b" * 40}}),
+                            ("sin regimen", {"regimen": None})):
+            escribir_recs(**cambio)
+            p = ED.cableado_records([str(tmp)], "a" * 40)
+            chequear("h2a", len(p) > 0, "%s: sale como roto (%s)" % (nom, p[:1]))
+    finally:
+        ED.BRAZOS.clear(); ED.BRAZOS.update(brazos0)
+        shutil.rmtree(tmp, ignore_errors=True)
+    por_defecto = "%s,%s" % (brazos0["control"], brazos0["diurno"])
+    chequear("h2b", ED.resolver_base(por_defecto, None) == "c0", "brazos de W2 a W6 sobre C0 sin --base: c0")
+    chequear("h2b", ED.resolver_base("_s154_ab_diurno_k_control,_s154_ab_diurno_k_on", "k") == "k", "--base k explícito: k")
+    try:
+        ED.resolver_base("_s154_ab_diurno_k_control,_s154_ab_diurno_k_on", None)
+        rehusa = False
+    except SystemExit:
+        rehusa = True
+    chequear("h2b", rehusa, "brazos K sin --base: el evaluador se niega")
+
+
 def main():
     chequear_orden_del_nulo()
     chequear_base_k()
+    chequear_cola_exacta()
+    chequear_regla_w2()
+    chequear_h2a_h2b()
     tmp = Path(tempfile.mkdtemp(prefix="probar_diurno_"))
     try:
         filas, coords = ED.cargar_filas(ED.parser().parse_args(["--raiz", "x"]))

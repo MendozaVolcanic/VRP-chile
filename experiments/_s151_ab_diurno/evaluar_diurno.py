@@ -79,11 +79,47 @@ FLAGS_BASE = {"c0": {}, "k": {"ENABLE_TEST1_PATH": False, "ENABLE_TESTS_23_PROSE
                               "ENABLE_MODIS_B22_PRIMARY": True}}
 
 
+# S154, adenda K sellada por Nicolás (experiments/_s151_ab_diurno/ADENDA_K.md): con --base k, G1 decide con la cola
+# exacta del nulo (§3.1) y «cumple sin W2, falla con W2» pasa a DECIDE NICOLAS CON M4 (§3.2). Con c0 rige el
+# pre-registro original tal cual, para que la corrida sobre C0 siga siendo reproducible.
+REGLA = {"cola_exacta": False, "w2_decide_nicolas": False}
+
+
 def configurar_brazos(control, diurno, base="c0"):
     """Nombres de los brazos y flags de base que el cableado exige (--brazos, --base). Por defecto, los de W2 a W6."""
     BRAZOS.update({"control": control, "diurno": diurno})
     for n, palanca in (("control", False), ("diurno", True)):
         DECLARADO[n] = {"ENABLE_DAYTIME_VIIRS": palanca, "ENABLE_DAYTIME_MODIS": False, **FLAGS_BASE[base]}
+    REGLA.update(cola_exacta=(base == "k"), w2_decide_nicolas=(base == "k"))
+
+
+def resolver_base(brazos, base):
+    """H2b (adenda K §4): con brazos que no son los de W2 a W6 sobre C0, --base tiene que venir explícito; si no, el
+    evaluador se niega (antes, olvidar --base k apagaba en silencio la exigencia de K)."""
+    if base is not None:
+        return base
+    if brazos == "%s,%s" % ("_s151_ab_diurno_control", "_s151_ab_diurno_on"):
+        return "c0"
+    raise SystemExit("--brazos %s sin --base: decir explícitamente el detector de base (c0 o k), adenda K §4 H2b" % brazos)
+
+
+def cableado_records(raices, sha):
+    """H2a (adenda K §4): el cableado por log no ve un job repetido desde otra referencia (unir_ventana no copia logs).
+    Con base K se exige sobre los RECORDS de los dos brazos: ninguno con el Test 1 (triggered_test1 o
+    final_hotspot_source = test1_roi; en producción bajo K son 0 de 3.548) y todos con regimen.codigo_sha = el commit
+    del tag de despacho."""
+    prob = []
+    for nombre in ("control", "diurno"):
+        for raiz in raices:
+            for p in sorted((Path(raiz) / BRAZOS[nombre]).glob("*.json")):
+                recs = json.loads(p.read_text(encoding="utf-8")).get("records", [])
+                t1 = sum(1 for r in recs if r.get("triggered_test1") is True or r.get("final_hotspot_source") == "test1_roi")
+                otro = sum(1 for r in recs if ((r.get("regimen") or {}).get("codigo_sha")) != sha)
+                if t1:
+                    prob.append("%s/%s: %d records con el Test 1" % (BRAZOS[nombre], p.stem, t1))
+                if otro:
+                    prob.append("%s/%s: %d records con codigo_sha distinto del tag (o sin marca)" % (BRAZOS[nombre], p.stem, otro))
+    return prob
 VIIRS = ("VIIRS375", "VIIRS750")
 VENTANAS = [w[0] for w in S.VENTANAS]                                                  # §3
 VENTANA = {w[0]: {"desde": w[1], "hasta": w[2], "vols": w[3] or list(bp.VOLS)} for w in S.VENTANAS}
@@ -508,6 +544,22 @@ def nulo_barajado(estratos, rng, n=N_BARAJADOS):
     return X / P - (K - X) / N
 
 
+def distribucion_x_exacta(estratos):
+    """Distribución exacta de X = publicadas que caen en positivos bajo el barajado dentro de cada estrato: suma de
+    hipergeométricas independientes (población n_s, K_s publicadas, P_s positivos), por convolución. D = M1 − q_neg es
+    creciente en X, así que P(nulo >= D) = P(X >= x_obs). Adenda K §3.1."""
+    pmf = np.array([1.0])
+    for n_s, p_s, k_s in estratos:
+        pmf = np.convolve(pmf, stats.hypergeom(n_s, k_s, p_s).pmf(np.arange(p_s + 1)))
+    return pmf
+
+
+def cola_exacta(estratos, x):
+    """P(X >= x), incluido el propio x (la regla de la adenda es «P(nulo >= D) < 0,05»)."""
+    pmf = distribucion_x_exacta(estratos)
+    return float(pmf[max(x, 0):].sum()) if x < len(pmf) else 0.0
+
+
 def estratos_de(cls, ventanas, publicado=None):
     """(n_s, P_s, K_s) por (vol, sensor) sobre positivos y negativos PROCESADOS. `publicado` permite reemplazar la
     publicación real por la de un brazo sintético (controles del nulo)."""
@@ -548,10 +600,21 @@ def g1(cls, ventanas, rng, con_nulo=False):
     m1, qn, d, npos, nneg = d_de(cls, ventanas)
     if d is None:
         return {"veredicto": "SIN SUSTRATO", "n_pos": npos, "n_neg": nneg}
-    nulo = nulo_barajado(estratos_de(cls, ventanas), rng)
+    est = estratos_de(cls, ventanas)
+    nulo = nulo_barajado(est, rng)
     p95 = float(np.percentile(nulo, PERCENTIL_NULO))
-    out = {"veredicto": "CUMPLE" if d > p95 + EPS_D else "FALLA", "M1": m1, "q_neg": qn, "D": d, "p95": p95,
-           "mediana_nulo": float(np.median(nulo)), "n_pos": npos, "n_neg": nneg}
+    # Cola exacta (adenda K §3.1): siempre se informa; decide sólo con --base k.
+    x_obs = int(round(m1 * npos))
+    pmf = distribucion_x_exacta(est)
+    p_cola = float(pmf[x_obs:].sum())
+    kk = sum(e[2] for e in est)
+    x95 = int(np.searchsorted(np.cumsum(pmf), PERCENTIL_NULO / 100.0 - 1e-12))
+    p95_exacto = x95 / npos - (kk - x95) / nneg
+    cumple = (p_cola < ALFA_G2) if REGLA["cola_exacta"] else (d > p95 + EPS_D)
+    out = {"veredicto": "CUMPLE" if cumple else "FALLA", "M1": m1, "q_neg": qn, "D": d, "p95": p95,
+           "mediana_nulo": float(np.median(nulo)), "n_pos": npos, "n_neg": nneg,
+           "x_obs": x_obs, "p_cola_exacta": p_cola, "p95_exacto": p95_exacto,
+           "regla": "cola exacta" if REGLA["cola_exacta"] else "p95 muestreado"}
     if con_nulo:
         out["_nulo"] = nulo
     return out
@@ -602,6 +665,30 @@ def controles_del_nulo(cls, ventanas, rng):
     real = g1(cls, ventanas, rng, con_nulo=True)
     if "D" not in real:
         return {"ok": False, "texto": "sin sustrato para controlar el nulo"}
+    if REGLA["cola_exacta"]:
+        # Adenda K §3.1 (H4e del verificador): el control valida la regla que decide. (a) La fracción de
+        # permutaciones reales que «cumplen» (cola exacta < 0,05) tiene que coincidir con la probabilidad exacta de
+        # cumplir por azar, P(X >= x_crit), dentro de 3 errores estándar de las permutaciones. (b) Un brazo que
+        # publica sólo en positivos tiene que cumplir.
+        est = estratos_de(cls, ventanas)
+        pmf = distribucion_x_exacta(est)
+        colas = pmf[::-1].cumsum()[::-1]
+        criticos = [x for x in range(len(pmf)) if colas[x] < ALFA_G2]
+        x_crit = criticos[0] if criticos else len(pmf)
+        esperada = float(colas[x_crit]) if criticos else 0.0
+        grupos = grupos_de(cls, ventanas)
+        sobre = 0
+        for _ in range(N_BRAZOS_AZAR):
+            m1p, _q, _d, npp, _n = d_de(permutar_pob(cls, grupos, rng), ventanas)
+            sobre += m1p is not None and int(round(m1p * npp)) >= x_crit
+        frac = sobre / N_BRAZOS_AZAR
+        tol = 3 * math.sqrt(max(esperada * (1 - esperada), 1e-12) / N_BRAZOS_AZAR)
+        est_b = estratos_de(cls, ventanas, publicado=lambda k, c: "pos" in c["pob"])
+        pasa_b = cola_exacta(est_b, sum(e[1] for e in est_b)) < ALFA_G2
+        ok = abs(frac - esperada) <= tol and pasa_b
+        return {"ok": ok, "frac_permutaciones": frac, "frac_nulo": esperada, "tolerancia": tol, "perfecto_pasa": pasa_b,
+                "texto": "cola exacta: permutaciones reales de pos/neg por estrato que cumplen: %.3f contra %.3f exacto (± %.3f) | brazo que publica sólo en positivos pasa G1: %s"
+                         % (frac, esperada, tol, "sí" if pasa_b else "NO")}
     p95, nulo = real["p95"], real.pop("_nulo")
     esperada = float(np.mean(nulo > p95 + EPS_D))
     sobre = 0
@@ -798,6 +885,8 @@ def imprimir_g1_g2(res, titulo):
         if "D" in r:
             print("   G1 %-26s M1 %s - q_neg %s = %+.4f | p95 del nulo barajado %+.4f (mediana %+.4f) | %d positivos, %d negativos procesados -> %s"
                   % (etq, pct(r["M1"]), pct(r["q_neg"]), r["D"], r["p95"], r["mediana_nulo"], r["n_pos"], r["n_neg"], r["veredicto"]))
+            print("      cola exacta (adenda K §3.1): P(nulo >= D) = %.4f | p95 exacto %+.4f | decide: %s"
+                  % (r["p_cola_exacta"], r["p95_exacto"], r["regla"]))
         else:
             print("   G1 %-26s %s" % (etq, r["veredicto"]))
     print("   controles del nulo (§5.5): %s -> %s" % (res["controles_nulo"]["texto"], "OK" if res["controles_nulo"]["ok"] else "FALLA"))
@@ -820,9 +909,13 @@ def veredicto(res, controles):
     if res["G3"] != "CUMPLE":
         return "INDECIDIBLE (G3: %s; se resuelve antes de mirar M1 a M4)" % res["G3"]
     g1a, g1b = res["G1_W2W6"]["veredicto"], res["G1_W3W6"]["veredicto"]
-    if g1a != "CUMPLE":
-        return "NO ADOPTAR (G1 falla en W2 a W6: %s)" % g1a
     g2 = [res["G2"][s]["veredicto"] for s in VIIRS]
+    if g1a != "CUMPLE":
+        if REGLA["w2_decide_nicolas"] and g1b == "CUMPLE":
+            # Adenda K §3.2 (sellada): simétrica de «pasa sólo con W2»; las alertas de W2 son sólo del OCR.
+            return ("DECIDE NICOLAS CON M4 (G1 cumple sin W2 y falla con W2: las alertas de W2 son sólo OCR, adenda K "
+                    "§3.2; G2 %s)" % dict(zip(VIIRS, g2)))
+        return "NO ADOPTAR (G1 falla en W2 a W6: %s)" % g1a
     if g1b != "CUMPLE":
         return "DEPENDE DEL OCR, DECIDE NICOLAS (G1 pasa sólo con W2; G2 %s; ver M4)" % dict(zip(VIIRS, g2))
     if all(g == "CUMPLE" for g in g2):
@@ -833,8 +926,13 @@ def veredicto(res, controles):
 def evaluar(a):
     if getattr(a, "brazos", None):
         control, diurno = [x.strip() for x in a.brazos.split(",")]
-        configurar_brazos(control, diurno, getattr(a, "base", "c0"))
-        print("[brazos] control %s, diurno %s, base %s" % (control, diurno, getattr(a, "base", "c0")))
+        a.base = resolver_base(a.brazos.replace(" ", ""), getattr(a, "base", None))
+        if a.base == "k" and not getattr(a, "sha_codigo", None):
+            raise SystemExit("--base k exige --sha-codigo (commit del tag de despacho), adenda K §4 H2a")
+        configurar_brazos(control, diurno, a.base)
+        print("[brazos] control %s, diurno %s, base %s | regla G1: %s | W2: %s" % (
+            control, diurno, a.base, "cola exacta" if REGLA["cola_exacta"] else "p95 muestreado",
+            "decide Nicolás si cumple sin W2" if REGLA["w2_decide_nicolas"] else "pre-registro original"))
     a.raiz = [str(Path(r)) for r in a.raiz]
     a.logs = a.logs or [str(Path(r) / "logs") for r in a.raiz]
     if len(a.logs) != len(a.raiz):
@@ -874,6 +972,12 @@ def evaluar(a):
     print("   fuera de la palanca los dos brazos leyeron lo mismo: %s" % ("OK" if not p else "NO: " + "; ".join(p[:3])))
     if p:
         controles.append("los brazos leyeron flags distintos fuera de la palanca")
+    if getattr(a, "base", "c0") == "k":
+        p = cableado_records(a.raiz, a.sha_codigo)
+        print("   records de los dos brazos sin Test 1 y con codigo_sha %s (adenda K §4 H2a): %s"
+              % (a.sha_codigo[:12], "OK" if not p else "ROTO: " + "; ".join(p[:3]) + (" (y %d más)" % (len(p) - 3) if len(p) > 3 else "")))
+        if p:
+            controles.append("records de los brazos fuera de K o de otro commit (H2a)")
 
     # ---------------- 2. nulo 1: el instrumento puede dar distinto de cero
     # POR SENSOR (verificador del PR #822, hueco 6): VIIRS 375 y 750 son dos procesadores y dos compuertas; con
@@ -1003,8 +1107,11 @@ def parser():
     ap.add_argument("--logs", action="append", default=[], help="logs de cada raíz (por defecto <raiz>/logs)")
     ap.add_argument("--brazos", default="%s,%s" % (BRAZOS["control"], BRAZOS["diurno"]),
                     help="control,diurno (S154: el A/B sobre K usa _s154_ab_diurno_k_control,_s154_ab_diurno_k_on)")
-    ap.add_argument("--base", choices=sorted(FLAGS_BASE), default="c0",
-                    help="detector de base que el cableado exige en los logs (k: los tres flags de K)")
+    ap.add_argument("--base", choices=sorted(FLAGS_BASE), default=None,
+                    help="detector de base que el cableado exige en los logs (k: los tres flags de K). Obligatorio si "
+                         "--brazos no es el de W2 a W6 sobre C0 (adenda K §4 H2b)")
+    ap.add_argument("--sha-codigo", dest="sha_codigo", default=None,
+                    help="commit del tag de despacho; con --base k cada record de los dos brazos tiene que traerlo (H2a)")
     ap.add_argument("--repetidas", default="", help="ventanas ya repetidas por cobertura (§5.4), separadas por coma")
     ap.add_argument("--out")
     ap.add_argument("--cons", default=str(SNAP_CONS))
