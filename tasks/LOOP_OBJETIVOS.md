@@ -424,6 +424,7 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
+| D-25 | **Sello de la adenda del A/B diurno sobre K** (tarea 1.32), con dos decisiones: (1) cola exacta del nulo en G1 (recomendada) o muestreo; (2) si G1 cumple sin W2 y falla con W2: DECIDE NICOLÁS CON M4 (recomendada, simétrica de la regla de «pasa sólo con W2») o NO ADOPTAR. Después del sello y antes de despachar: H2a, H2b y, si se aprueba, la cola exacta con sus pruebas | `experiments/_s151_ab_diurno/ADENDA_K.md` v2, `verificador_adenda_k/INFORME.md` | #857 | pendiente |
 | D-24 | **CERRADA: sí** (Nicolás, 2026-10-18; #853 mergeado y R8). Arreglo del marcador del mapa de detalle en los records `ctx_cluster` (tarea 1.31): primer marcador = `final_hotspot` (el cúmulo) en vez de `anomaly_pixels[0]` (el píxel más fuerte de la escena). Cambia lo que ve el operador; con K afecta a todos los records. Recomendación: sí, después de confirmarlo en el navegador | `experiments/_s153_localizacion/verificador/INFORME.md` H3; `frontend/index.html` de `main` | | pendiente |
 | D-23 | **EN CURSO** (Nicolás, 2026-10-18: sí al reproceso histórico; tarea 1.24). Reproceso de los 3.231 records MODIS de enero a junio de 2026 escritos con los gates intra-radio (deriva 1.23 bis, CONFIRMADA). Recomendación: hacerlo dentro del reproceso histórico con K si se adopta #850, no antes | `experiments/_s153_deriva_123bis/` | | pendiente |
 | D-22 | Ratificar la desviación de W5a (intento 2 entero para Llaima `_s151_ab_diurno_on`: 2 records diurnos VIIRS 375 distintos por empate del top-100, mismo predicado, mismo cúmulo) y, aparte, decidir si se extiende a VIIRS el desempate determinista de #844 (producción, A45) | bitácora vuelta 189 | | pendiente |
@@ -456,6 +457,18 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-18 ~23:30 UTC (vuelta 208, S154): adenda v2 tras el verificador; D-25 a Nicolás (#857)
+- Verificador limpio de la adenda (`experiments/_s151_ab_diurno/verificador_adenda_k/INFORME.md`): P1 limpio (147
+  constantes, producción = control K salvo nombre y directorio); P2 hallazgos H2a (cableado sólo por log; `unir_ventana`
+  no copia logs; falta invariante por record, 0 de 3.548 records de producción bajo K con Test 1, y `codigo_sha`) y H2b
+  (`--base` por defecto en c0 se apaga sin aviso); P3 limpio; P4 regla bien, prueba insuficiente (H4: fuerza bruta,
+  empate, mutación de ≥, comparar colas, controles del nulo con la regla exacta; reimplementación propia reproduce los
+  valores). Propios: **V1 (gravedad 4)**, el contrafactual `ctx_cluster` falla en W2 a W6 (P = 0,194) aunque cumple en
+  W3 a W6: el caso «cumple sin W2, falla con W2» no está previsto en el §6; V2 evidencia sólo en `loop/activo`; V3 costo
+  10 a 15 h por media ventana, 3 a 5 días.
+- Adenda v2 con todo eso: §3 con dos decisiones para el sello, candado ampliado (H2a, H2b, pruebas de la cola exacta),
+  costo corregido. PR #857 (documento). D-25 en la cola de decisiones.
 
 ### 2026-10-18 ~22:50 UTC (vuelta 207, S154): adenda del pre-registro del diurno sobre K, en verificación
 - `experiments/_s151_ab_diurno/ADENDA_K.md` en la rama `loop/diurno-k-adenda` (`4d8bcc62`): cambia sólo brazos y base
