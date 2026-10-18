@@ -450,6 +450,16 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 17:58 UTC (vuelta 199, S154): 1.31 (a) CONFIRMADA en el tablero público
+- Paradas: NRT verde 17:04, disco 17 GB. Histórico 1.24: 39 de 176.
+- Con el código real del tablero publicado (`?volcano=Lascar&desde=2026-10-10&hasta=2026-10-10`, capas leídas con
+  `map.eachLayer` del mapa de detalle): la pasada VIIRS_NOAA20 2026-10-10 05:06, rotulada «summit» y «Confirmado por
+  MIROVA (MIROVA @ 1.50 km)», cúmulo de 1 píxel 0,040 MW y distancia 0,28 km en la tabla, se dibuja a **24,73 km del
+  cráter**, sobre el salar al SE. Las otras tres pasadas de esa noche, a 0,70 a 0,92 km. Captura en
+  `experiments/_s154_marcador/lascar_20261010_0506_marcador_en_salar.jpg`. Búsqueda en `data/mirova_equivalent/Lascar.json`:
+  4 records `ctx_cluster` «summit» de los últimos días con el píxel 0 a 20 a 25 km del cúmulo. Pendiente (b), el PR,
+  según la respuesta de Nicolás a D-24.
+
 ### 2026-10-18 ~18:10 UTC (vuelta 198, S154): verificador del diurno: PARCIAL; NO ADOPTAR vale para C0, no para K
 - Re-corrió el evaluador dos veces (con y sin `--repetidas`): mismos números. Tres caminos independientes: pareo
   aparte (0 discrepancias en 5.018 pasadas), nulo exacto por convolución de hipergeométricas (D de W2 a W6 en la
