@@ -391,7 +391,7 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-18 ~03:50 UTC (vuelta 186, S153): R2 de K: cinco de cinco COINCIDEN (una con salvedad)
+### 2026-10-18 03:15 UTC (vuelta 186, S153): R2 de K: cinco de cinco COINCIDEN (una con salvedad)
 - `experiments/_s153_fk_v2/r2/INFORME.md` y figuras `caso_*.png`. Lector `experiments/_s151_seleccion_mirova/comun_tif.py`
   (resta la mediana móvil: el campo crudo tiene su máximo en el valle tibio, A69); 9 GeoTIFF emparejados por
   `acquisition_utc` con md5. Negativos de borde (Chaitén 09-10, cenit 66°) y de nadir (Láscar 09-06; Copahue 09-15
@@ -404,7 +404,7 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   (c) en 4 de los 5 la imagen sale del mismo gránulo que nuestro detector (A109): no es independiente.
 - Con esto quedan hechos los controles §4.1 a §4.5. Falta: arreglo de los 22 tests (agente en curso), pre-mortem y PR.
 
-### 2026-10-18 ~03:35 UTC (vuelta 185, S153): PR de adopción de K en preparación (rama `loop/adopcion-k`)
+### 2026-10-18 ~03:12 UTC (vuelta 185, S153; hora corregida, decía ~03:35 estimada sin pedirla al servidor, A86): PR de adopción de K en preparación (rama `loop/adopcion-k`)
 - **Tag defensivo `pre-s153-adopcion-k`** en `5849ee65` (main), empujado (A38, A45). Worktree
   `.claude/worktrees/s153-adopcion`. Guard nuevo `tests/test_guard_adopcion_k_s153.py` (falló en los 3 casos antes del
   cambio); flags en `mirova_equivalent.yaml` (`paths.enable_test1_path: false`, `paths.enable_tests_23_prose_branch:
@@ -416,7 +416,7 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   anclar el golden sin debilitar nada. Los A/B en curso (diurno, desde tag) no se ven afectados.
 - Falta R2 (en curso). El PR no se mergea sin el sí de Nicolás (A45).
 
-### 2026-10-18 ~03:20 UTC (vuelta 184, S153): auditoría A61 de P4: ninguna protegida movida a otro objeto
+### 2026-10-18 ~03:10 UTC (vuelta 184, S153; hora corregida, decía ~03:20 estimada, A86): auditoría A61 de P4: ninguna protegida movida a otro objeto
 - `experiments/_s153_fk_v2/a61/INFORME.md` (62 movidas: 8 de V1, 54 de V2). El «movimiento» es casi siempre cambio de
   agregación: K deja el cúmulo de un píxel en 54 de 62; en 40 de 62 el centroide de K cae sobre un píxel que C0 también
   marcó (38 a 0,00 km; en 30 es el más caliente de C0, cuyo centroide arrastraban 2 a 24 vecinos tibios). En 22 (VIIRS
