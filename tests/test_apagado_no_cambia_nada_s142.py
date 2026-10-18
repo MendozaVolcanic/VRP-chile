@@ -32,6 +32,7 @@ sys.path.insert(0, str(ROOT / "tests"))
 
 import arnes_sintetico_s142 as arnes  # noqa: E402
 from arnes_sintetico_s142 import correr_en_subproceso  # noqa: E402
+from produccion_pre_k import PERFIL as PERFIL_PRE_K, produccion_pre_k  # noqa: E402
 
 GOLDEN = ROOT / "tests" / "golden_s142" / "apagado.json"
 PERFIL_VERIF = "_s142_verif_flags_nuevos"
@@ -73,9 +74,17 @@ def test_la_serializacion_ignora_el_ruido_del_ultimo_digito_pero_no_un_cambio_re
 
 
 def test_perfil_operacional_reproduce_el_golden_bit_a_bit(tmp_path):
-    texto = correr_en_subproceso(tmp_path, perfil="mirova_equivalent")
+    # S153: el golden es la salida de la producción de ANTES de K (se generó con mirova_equivalent en S142,
+    # y por eso dice "perfil": "mirova_equivalent"). Desde la adopción de K esa detección vive en el ancla
+    # congelada `_s146_ab_control` (tests/produccion_pre_k.py), así que la comparación bit a bit se hace contra
+    # ella: regenerar el golden con K dejaría de comparar contra el código previo. Sólo se normaliza el nombre
+    # del perfil, que es la única línea que el ancla escribe distinta (lo garantiza produccion_pre_k.valores()).
+    texto = correr_en_subproceso(tmp_path, perfil=PERFIL_PRE_K)
+    marca = '"perfil": "{}"'
+    assert texto.count(marca.format(PERFIL_PRE_K)) == 1
+    texto = texto.replace(marca.format(PERFIL_PRE_K), marca.format("mirova_equivalent"))
     assert texto == GOLDEN.read_text(encoding="utf-8"), (
-        "la salida con el perfil operacional cambió respecto del código previo: los flags "
+        "la salida con la producción de antes de K cambió respecto del código previo: los flags "
         "D22/D25 en OFF NO pueden cambiar nada")
 
 
@@ -100,10 +109,13 @@ def test_un_cambio_en_el_fondo_de_los_bloques_del_test1_rompe_el_golden():
     del Test 1 tiene que cambiar (y seguir disparando, para que el cambio sea del FONDO y no de
     haber perdido el disparo), mientras la escena contextual queda igual."""
     g = _golden()["v375"]
-    mutada = arnes.correr_v375("test1_difuso", False, {"TEST1_INNER_RING_KM": 1.8})
+    # S153: el golden es la producción de antes de K, con el Test 1 encendido; este control corre en
+    # proceso, así que se fija esa detección parcheando los procesadores (tests/produccion_pre_k.py).
+    with produccion_pre_k():
+        mutada = arnes.correr_v375("test1_difuso", False, {"TEST1_INNER_RING_KM": 1.8})
+        principal = arnes.correr_v375("nevado_vecino_tibio", False, {"TEST1_INNER_RING_KM": 1.8})
     assert mutada["triggered_test1"] is True, "el control perdió el disparo: ya no aísla el fondo"
     assert _canon(mutada) != _canon(g["test1_difuso|kernel=False"])
-    principal = arnes.correr_v375("nevado_vecino_tibio", False, {"TEST1_INNER_RING_KM": 1.8})
     assert _canon(principal) == _canon(g["nevado_vecino_tibio|kernel=False"]), (
         "el anillo del Test 1 movió también la escena contextual: el control no aísla nada")
 

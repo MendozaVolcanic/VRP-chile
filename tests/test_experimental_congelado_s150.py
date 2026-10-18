@@ -40,10 +40,15 @@ def _resolver(nombre):
     return json.loads([l for l in out.splitlines() if l.startswith("@@")][0][2:])
 
 
-def test_el_laboratorio_hoy_es_igual_a_produccion_salvo_nombre():
+# S153: la replica adopto K (regla #848). Como anunciaba el docstring, el test que exigia laboratorio == produccion
+# cayo a proposito y se reemplaza por la lista DECLARADA de diferencias: exactamente los tres flags de K.
+DIFERENCIAS_DECLARADAS = {"ENABLE_TEST1_PATH", "ENABLE_TESTS_23_PROSE_BRANCH", "ENABLE_MODIS_B22_PRIMARY"}
+
+
+def test_el_laboratorio_difiere_de_produccion_solo_en_lo_declarado():
     lab, prod = _resolver("experimental"), _resolver("mirova_equivalent")
     difieren = {k for k in set(lab) | set(prod) if lab.get(k) != prod.get(k)} - {"PROFILE_NAME", "DATA_SUBDIR"}
-    assert not difieren, difieren
+    assert difieren == DIFERENCIAS_DECLARADAS, difieren
 
 
 def test_los_valores_congelados_son_los_de_produccion_del_2026_10_09():

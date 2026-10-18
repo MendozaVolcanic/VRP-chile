@@ -22,9 +22,19 @@ description: >
   Brazo E: keep_peak ON y segundo pase APAGADO por completo. Más brusco que condicionarlo, pero acota por arriba cuánto depende del segundo pase el rescate del campo de Lastarria, y no necesita código nuevo. Lo señaló el verificador de S135.
 
 paths:
+  # S153, ADOPCION DE K (regla experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, #848): la replica apago el
+  # Test 1 integrado y encendio la conectiva max y la banda 22. Este perfil hereda de mirova_equivalent y su
+  # significado era la produccion de ANTES de K mas su propio cambio, asi que congela aca esos flags con el valor
+  # previo (como experimental.yaml en S150) para resolver igual que antes de la adopcion. Lo vigila
+  # tests/test_guard_perfiles_congelados_s153.py.
+  enable_test1_path: true
+  enable_tests_23_prose_branch: false
   enable_test1_contextual_keep_peak: true
   enable_second_pass_conditioned: false
   enable_second_pass_adjacent: false
 
 output:
   data_subdir: _s135_ab_e_sp_off
+
+# S153 (K): banda 21 primaria congelada; el porque esta en el comentario S153 de `paths:`.
+enable_modis_b22_primary: false

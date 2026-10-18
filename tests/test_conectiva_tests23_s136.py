@@ -65,13 +65,19 @@ def _correr(data, prosa=None):
 
 # ------------------------------------------------------------------ el flag
 
-def test_el_flag_existe_y_su_default_es_el_comportamiento_de_hoy():
-    """El default NO puede cambiar produccion: la formula literal sigue siendo la de por defecto."""
+def test_el_flag_existe_y_el_operacional_es_el_adoptado():
+    """El valor operacional es una adopcion, no una edicion suelta del perfil (A18/A91).
+
+    S153: la adopcion se hizo. K enciende la conectiva de prosa (`max`) con un A/B y una regla escrita antes del
+    resultado (experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, #848; experiments/_s153_fk_v2/). Antes este test
+    exigia False («el default es el comportamiento de hoy»); ahora exige el valor adoptado. El default del
+    PARAMETRO de la funcion sigue siendo la formula literal (`min`): lo fija el test siguiente, que no cambia.
+    """
     import pipeline.profile as P
     assert hasattr(P, FLAG), f"falta el flag {FLAG} en pipeline.profile"
-    assert getattr(P, FLAG) is False, (
-        f"{FLAG} debe ser False en el perfil operacional: encenderlo es una adopcion que "
-        "exige A/B con criterio pre-registrado (A18/A91)")
+    assert getattr(P, FLAG) is True, (
+        f"{FLAG} debe ser True en el perfil operacional desde la adopcion de K (S153): volver a False es "
+        "revertir la adopcion (tag pre-s153-adopcion-k), y exige la misma evidencia que encenderlo")
 
 
 def test_el_parametro_por_defecto_no_altera_el_resultado():
