@@ -358,6 +358,39 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
   fijada por física antes de correr, pasado por la huella VNP03 y por el detector. Decide la palanca de magnitud
   después de D25.
 
+### Bloque S154 (agregado el 2026-10-18; K adoptada en #850 a las 09:57:30 UTC). Dueño del loop: sesión S154 «retomar»
+
+Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de la cola:
+
+- [ ] **1.24 Reproceso histórico con K y reemplazo en la serie operacional** (autorizado por Nicolás el
+  2026-10-18: sí a los reprocesos 5 y 6, vía por trozos en perfil aislado). Run 39125546355 (`reproc-chunked.yml`,
+  `_s154_reproc_k_historico`, 2025-02-15 a 2026-09-17, 176 trozos de a 8, estimado 28 a 35 h). Al terminar: (a)
+  trozos fallidos o sin artefacto se repiten sólo esos (misma ventana del trozo); (b) ensayo por volcán con
+  `scripts/reemplazar_ventana_reproceso.py` (sin `--aplicar`, tope 2 %), informes en `experiments/_s154_reproc_k/`;
+  si un volcán se rehúsa, repetir sus trozos; (c) verificador limpio sobre los ensayos (no lo hace quien los corrió);
+  (d) aplicar los 11 en UN commit justo después de que termine un NRT y antes del siguiente (:10), con tag defensivo
+  previo; (e) `experiments/_s154_reproc_k/verificar_ventana.py` sobre 2025-02-15..2026-09-17 contra ese tag (0
+  perdidas, 0 cambiadas antes de la ventana) y R8 sobre el JSON publicado. Después, borrar
+  `data/_s154_reproc_k_historico/` de `main` en un PR (queda en la historia de git).
+- [ ] **1.25 Diurno W6a y evaluación W2 a W6** (autorizado 2026-10-18). W6a (39090434307) quedó con `recolectar` en
+  rojo por cobertura: al brazo `_s151_ab_diurno_on` le faltan 4 noches. Repetir los volcanes afectados en los dos
+  brazos, misma ventana (2026-10-01 a 10-07), `--ref s151-diurno-codigo`; unir con
+  `experiments/_s153_fk_v2/unir_ventana.py` (D-13); juntar W2 a W6 y evaluar con `evaluar_diurno.py`; verificador
+  limpio. El resultado responde #813 (D-10) y va a Nicolás; el loop no enciende la rama diurna.
+- [ ] **1.26 Verificador limpio de `experiments/_s153_localizacion/`** (autorizado 2026-10-18). Hasta entonces no se
+  cita.
+- [ ] **1.27 Las 56 pasadas de la ventana de 30 días que quedaron sin K** (`experiments/_s154_reproc_k/ventana_30d.json`):
+  MODIS Terra del 28-sep, 2-oct y 10-oct y NOAA-21 del 18-oct 06:4x. Comprobar primero si los gránulos existen hoy en
+  LAADS; si existen, `backfill-tier-a.yml` con overwrite sólo para esas fechas, despachado con `push-main` libre
+  (justo después de un NRT); verificar con `verificar_ventana.py`.
+- [ ] **1.28 Sombra de K** (regla de adopción §4.9): cada semana contar contra MIROVA producción (K) y sombra (C0) con el
+  mismo evaluador; reversión pre-autorizada con `git revert` de #850 si se pierde una protegida A que MIROVA y la
+  sombra publican y producción calla (confirmada en la cabecera de la imagen), con issue y aviso a Nicolás el mismo
+  día. Hasta 29 protegidas A nocturnas o 120 días.
+- [ ] **1.29 Pre-registro de D25 sobre K** (regla §5): escribir el pre-registro y su verificador. Bloqueo para
+  despachar: el sello de Nicolás.
+- [ ] **1.30 Pre-registro de MxD03 sobre K** (D-19): ídem. Bloqueo para despachar: el sello de Nicolás.
+
 ## 5. Cola de decisiones para Nicolás (el loop agrega; Nicolás responde en el issue)
 
 | # | decisión | evidencia | PR / tag | issue |
