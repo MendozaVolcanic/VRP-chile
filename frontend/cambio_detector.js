@@ -13,7 +13,7 @@
   "use strict";
 
   // Fecha y hora UTC del merge del PR de adopción de K, en ISO con Z (p. ej. "2026-10-19T14:05:00Z"). null = sin marca.
-  const CAMBIO_DETECTOR_UTC = null;
+  const CAMBIO_DETECTOR_UTC = "2026-10-18T09:57:30Z";
 
   const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
   const FICHA_URL = "https://github.com/MendozaVolcanic/VRP-chile/blob/main/docs/FICHA_SDA_VRP_CHILE.md";
