@@ -362,6 +362,7 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
+| D-22 | Ratificar la desviación de W5a (intento 2 entero para Llaima `_s151_ab_diurno_on`: 2 records diurnos VIIRS 375 distintos por empate del top-100, mismo predicado, mismo cúmulo) y, aparte, decidir si se extiende a VIIRS el desempate determinista de #844 (producción, A45) | bitácora vuelta 189 | | pendiente |
 | D-21 | **Merge de la adopción de K** (producción, A45). Cumple la regla #848 entera: combinado CUMPLE (original y SN), verificador CONFIRMADO, R3 idéntico, cruce de 1 MW ninguno, A61 sin protegidas movidas a otro objeto, segundo lector 4 de 4 lejanas, R2 5 de 5, K sobre main idéntico. Además: auto-audit sin recalibrar (recomendado), laboratorios lowT y ndc_focus en C0, aviso a consumidores | `experiments/_s153_fk_v2/` | #850, tag `pre-s153-adopcion-k` | pendiente |
 | D-19 | MxD03 después de la 1.23: las 2 protegidas que pierde caen por el **Test 1**, que K elimina. Propuesta del loop: no adoptarla sobre producción de hoy; si K se adopta (#848), pre-registrar MxD03 **sobre K** (sin Test 1 el mecanismo de esas pérdidas no existe), con Láscar bajo 35° como vara y el borde del barrido aparte | `experiments/_s151_mxd03_sola_123/resultado/` (evaluación y verificador CONFIRMADO) | | pendiente |
 | D-20 | ~~Regla de adopción de K~~ **APROBADA** (Nicolás, 2026-10-17 ~23:45 UTC: «tal como está, incluida la reversión con git revert pre-autorizada»), antes de evaluar V2; mergeada (squash `cf507f46`); instrumento fijado en `2766c198` | `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`, verificador limpio con arreglos aplicados | #848 | cerrada |
@@ -391,6 +392,23 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-18 04:27 UTC (vuelta 189, S153): W5a unida y PAREJA (con desviación); W6b despachada; cron externo en hora de Chile
+- **Cron externo: despachó a las 04:10 UTC** (= 01:10 de Chile): cron-job.org interpreta `10 1-12 * * *` en hora de
+  Chile, o sea 04:10 a 15:10 UTC. La ventana nocturna de MODIS (01 a 03 UTC) queda sólo con el programado de GitHub,
+  que viene con atraso de 1 a 2 h. Para Nicolás: poner la zona horaria del trabajo en UTC en cron-job.org, o la
+  expresión `10 22-23,0-9 * * *` en hora de Chile.
+- **W5a:** repetición (39068611598) pareja (339 por brazo en los 3 volcanes). Unión con `unir_ventana.py`: Llaima
+  `_s151_ab_diurno_on` NO une por 2 records diurnos de VIIRS 375 (SNPP 09-01 17:42: otro conjunto de píxeles con
+  lista llena; NOAA-21 09-09 17:54: un píxel del corte pasa de descartado a guardado y cambia el `vrp_mw` de escena,
+  36,902 contra 37,739). Es el desempate no estable del top-100 en VIIRS (#844 lo arregló sólo en MODIS). El
+  predicado del tablero da IGUAL en los dos pares, el cúmulo es idéntico (0,079 y 15,32 MW) y los dos intentos traen
+  los mismos 202 records. **Desviación:** se usó el intento 2 entero para ese archivo, como D-16 (a); no cambia
+  ninguna publicación ni toca el G3 (son pasadas diurnas). Para ratificar (D-22). **W5a unida: 1.199 contra 1.199,
+  PAREJA** (`C:\Users\nmend\AppData\Local\Temp\claude\w5a_39032518643\union\`).
+- **Diurno:** W6a corriendo (2 de 22); **W6b despachada** (run 39097155412, 2026-10-08 a 10-14, `--ref
+  s151-diurno-codigo`), pendiente detrás.
+- #850 sin respuesta todavía. NRT verde a las 03:09 y corriendo el de las 04:10.
 
 ### 2026-10-18 03:56 UTC (vuelta 188, S153): PR de adopción de K abierto (#850), CI verde; ESPERA el sí de Nicolás
 - **#850** (rama `loop/adopcion-k`, `e0d3ebfd`): flags en `mirova_equivalent.yaml`; 46 perfiles derivados congelados en
