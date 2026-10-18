@@ -391,6 +391,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 ~03:35 UTC (vuelta 185, S153): PR de adopción de K en preparación (rama `loop/adopcion-k`)
+- **Tag defensivo `pre-s153-adopcion-k`** en `5849ee65` (main), empujado (A38, A45). Worktree
+  `.claude/worktrees/s153-adopcion`. Guard nuevo `tests/test_guard_adopcion_k_s153.py` (falló en los 3 casos antes del
+  cambio); flags en `mirova_equivalent.yaml` (`paths.enable_test1_path: false`, `paths.enable_tests_23_prose_branch:
+  true`, `enable_modis_b22_primary: true`); actualizados `test_gr2_profile_invariants.py` y
+  `test_experimental_congelado_s150.py` (cayó a propósito, como anunciaba).
+- **Suite: 22 fallas.** Causa de fondo: muchos perfiles `_s1xx_*` hacen `extends: mirova_equivalent` y heredan K en
+  silencio (A117), por ejemplo `_s146_ab_control` = C0 de los A/B ya evaluados. Agente encargado de congelar los
+  brazos históricos con los flags de antes (como `experimental.yaml`), actualizar los tests de valor operacional y
+  anclar el golden sin debilitar nada. Los A/B en curso (diurno, desde tag) no se ven afectados.
+- Falta R2 (en curso). El PR no se mergea sin el sí de Nicolás (A45).
+
 ### 2026-10-18 ~03:20 UTC (vuelta 184, S153): auditoría A61 de P4: ninguna protegida movida a otro objeto
 - `experiments/_s153_fk_v2/a61/INFORME.md` (62 movidas: 8 de V1, 54 de V2). El «movimiento» es casi siempre cambio de
   agregación: K deja el cúmulo de un píxel en 54 de 62; en 40 de 62 el centroide de K cae sobre un píxel que C0 también
