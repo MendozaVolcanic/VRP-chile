@@ -403,6 +403,15 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 - [ ] **1.29 Pre-registro de D25 sobre K** (regla §5): escribir el pre-registro y su verificador. Bloqueo para
   despachar: el sello de Nicolás.
 - [ ] **1.30 Pre-registro de MxD03 sobre K** (D-19): ídem. Bloqueo para despachar: el sello de Nicolás.
+- [ ] **1.32 A/B diurno sobre K** (del verificador de 1.25, H4). El A/B W2 a W6 corrió sobre C0: de día el Test 1
+  dispara en 2.000 de las 2.077 publicaciones de VIIRS 375 en negativos limpios, 987 vienen sólo de `test1_roi`, y 11
+  de las 22 protegidas recuperadas también. El contrafactual sólo `ctx_cluster` (sin `max`) deja G1 W3 a W6 CUMPLIENDO
+  (P = 0,001) y G2 fallando (1.142 contra 20 permitidas; 357 contra 6); con `max` podría bajar a unas 96 y 38
+  (SOSPECHA). Si G1 cumple sobre K, la regla da «DECIDE NICOLÁS CON M4». Qué: perfiles diurnos sobre K (control =
+  réplica K, brazo = K más `enable_daytime_viirs`), con los tres flags de K declarados (guard S153); adenda del
+  pre-registro (mismas ventanas y reglas, sólo cambia la base); verificador; **sello de Nicolás** antes de despachar.
+  Arreglar antes el aviso A114 del evaluador (H1: `evaluar_diurno.py:940` junta los dos sensores en el q_neg; debe ser
+  por sensor) y fijar el nulo (H2: `:635`, el p95 cambia entre procesos con la misma semilla; usar el exacto).
 
 ## 5. Cola de decisiones para Nicolás (el loop agrega; Nicolás responde en el issue)
 
