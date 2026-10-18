@@ -457,6 +457,13 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 ~19:40 UTC (vuelta 203, S154): 1.32 paso H1 mergeado (#854)
+- Batería completa del arnés del evaluador diurno: 72 de 72 (`probar_salida.txt` actualizado). #854 (`ac95107a`):
+  aviso A114 por sensor en `res["saturacion"]`, caso 26, filtro `PROBAR_SOLO`. CI verde, no toca §1.1, mergeado.
+- Histórico 1.24: 49 de 176 trozos.
+- Próximo de 1.32: H2 (nulo dependiente del orden, `evaluar_diurno.py:635`), después perfiles diurnos sobre K y
+  adenda del pre-registro para el sello de Nicolás.
+
 ### 2026-10-18 19:10 UTC (vuelta 201-202, S154): D-24 aprobada y aplicada (#853); arreglo A114 del evaluador en prueba
 - **Nicolás aprobó D-24** («sí a D-24: confírmalo en el navegador con el código real y, si se confirma, mergea el PR
   del marcador con su prueba y R8»). Confirmación previa: vuelta 199. #853 (`c8fbe5b3`, squash 19:04:16 UTC):
