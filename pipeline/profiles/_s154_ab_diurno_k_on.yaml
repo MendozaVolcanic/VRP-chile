@@ -1,0 +1,20 @@
+# A/B diurno sobre K (S154, tarea 1.32). BRAZO DIURNO: el control (la réplica K) más enable_daytime_viirs y nada más.
+#
+# POR QUÉ: ver _s154_ab_diurno_k_control.yaml. La única diferencia con el control es la palanca, comprobada por
+# tests/test_perfiles_diurno_k_s154.py sobre todas las constantes de pipeline.profile. La rama diurna es sólo VIIRS
+# 375 y 750 (#821); MODIS diurno sigue apagado.
+# NO OPERACIONAL: fuera del cron NRT. NO DESPACHAR sin la adenda del pre-registro sellada por Nicolás.
+extends: mirova_equivalent
+profile: _s154_ab_diurno_k_on
+description: >
+  Brazo diurno del A/B sobre K: idéntico al control salvo enable_daytime_viirs en true.
+
+paths:
+  enable_test1_path: false
+  enable_tests_23_prose_branch: true
+  enable_daytime_viirs: true
+
+output:
+  data_subdir: _s154_ab_diurno_k_on
+
+enable_modis_b22_primary: true

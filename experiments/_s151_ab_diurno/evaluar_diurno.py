@@ -73,6 +73,17 @@ from referencia_mirova_unificada import (HISTORICO_RECUPERADAS, RESPALDO_2026040
 BRAZOS = {"control": "_s151_ab_diurno_control", "diurno": "_s151_ab_diurno_on"}       # §2
 DECLARADO = {"control": {"ENABLE_DAYTIME_VIIRS": False, "ENABLE_DAYTIME_MODIS": False},
              "diurno": {"ENABLE_DAYTIME_VIIRS": True, "ENABLE_DAYTIME_MODIS": False}}
+# S154 (tarea 1.32): el A/B se repite sobre K. Con --base k el cableado exige además, en los dos brazos, los tres flags
+# de K leídos desde el log (si un brazo corrió con el Test 1 encendido, el A/B no sería sobre K y no se decide).
+FLAGS_BASE = {"c0": {}, "k": {"ENABLE_TEST1_PATH": False, "ENABLE_TESTS_23_PROSE_BRANCH": True,
+                              "ENABLE_MODIS_B22_PRIMARY": True}}
+
+
+def configurar_brazos(control, diurno, base="c0"):
+    """Nombres de los brazos y flags de base que el cableado exige (--brazos, --base). Por defecto, los de W2 a W6."""
+    BRAZOS.update({"control": control, "diurno": diurno})
+    for n, palanca in (("control", False), ("diurno", True)):
+        DECLARADO[n] = {"ENABLE_DAYTIME_VIIRS": palanca, "ENABLE_DAYTIME_MODIS": False, **FLAGS_BASE[base]}
 VIIRS = ("VIIRS375", "VIIRS750")
 VENTANAS = [w[0] for w in S.VENTANAS]                                                  # §3
 VENTANA = {w[0]: {"desde": w[1], "hasta": w[2], "vols": w[3] or list(bp.VOLS)} for w in S.VENTANAS}
@@ -820,6 +831,10 @@ def veredicto(res, controles):
 
 
 def evaluar(a):
+    if getattr(a, "brazos", None):
+        control, diurno = [x.strip() for x in a.brazos.split(",")]
+        configurar_brazos(control, diurno, getattr(a, "base", "c0"))
+        print("[brazos] control %s, diurno %s, base %s" % (control, diurno, getattr(a, "base", "c0")))
     a.raiz = [str(Path(r)) for r in a.raiz]
     a.logs = a.logs or [str(Path(r) / "logs") for r in a.raiz]
     if len(a.logs) != len(a.raiz):
@@ -986,6 +1001,10 @@ def parser():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--raiz", action="append", required=True, help="salidas de una corrida: <brazo>/<volcan>.json")
     ap.add_argument("--logs", action="append", default=[], help="logs de cada raíz (por defecto <raiz>/logs)")
+    ap.add_argument("--brazos", default="%s,%s" % (BRAZOS["control"], BRAZOS["diurno"]),
+                    help="control,diurno (S154: el A/B sobre K usa _s154_ab_diurno_k_control,_s154_ab_diurno_k_on)")
+    ap.add_argument("--base", choices=sorted(FLAGS_BASE), default="c0",
+                    help="detector de base que el cableado exige en los logs (k: los tres flags de K)")
     ap.add_argument("--repetidas", default="", help="ventanas ya repetidas por cobertura (§5.4), separadas por coma")
     ap.add_argument("--out")
     ap.add_argument("--cons", default=str(SNAP_CONS))
