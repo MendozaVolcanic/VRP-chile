@@ -377,8 +377,19 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   brazos, misma ventana (2026-10-01 a 10-07), `--ref s151-diurno-codigo`; unir con
   `experiments/_s153_fk_v2/unir_ventana.py` (D-13); juntar W2 a W6 y evaluar con `evaluar_diurno.py`; verificador
   limpio. El resultado responde #813 (D-10) y va a Nicolás; el loop no enciende la rama diurna.
-- [ ] **1.26 Verificador limpio de `experiments/_s153_localizacion/`** (autorizado 2026-10-18). Hasta entonces no se
-  cita.
+- [x] **1.26 Verificador limpio de `experiments/_s153_localizacion/`** HECHA 2026-10-18 (vuelta 196): la tesis central
+  REFUTADA (K no relocaliza, deja de publicar); ver la marca sobre la entrada de la vuelta original y
+  `experiments/_s153_localizacion/verificador/INFORME.md`.
+- [ ] **1.31 El marcador del mapa de detalle no es el cúmulo en los records `ctx_cluster`** (hallazgo H3 del verificador de
+  1.26, gravedad 4; leído en `frontend/index.html` de `main` el 2026-10-18: para `test1_roi`/`test1_nti_peak` el primer
+  marcador es `final_hotspot`, pero para `ctx_cluster` es `anomaly_pixels[0]`, el píxel más fuerte de la escena, y por
+  defecto sólo se dibuja el índice 0). Con K todos los records son `ctx_cluster`. Medido por el verificador sin navegador:
+  en V1, marcadores a más de 2 km en Láscar 23 de 70 y Lastarria 34 de 46; en producción tras el backfill, Láscar
+  centroide 97 % bajo 1 km contra marcador 66 %. Qué: (a) confirmarlo con el código real en el navegador sobre el
+  tablero publicado; (b) si se confirma, PR que ponga `final_hotspot` como primer marcador también en `ctx_cluster`
+  (es la posición del cúmulo que el tablero ya usa para la distancia), con prueba en node y R8. Display legítimo (A72):
+  el dato es real, el marcador elige el píxel equivocado. Bloqueo para mergear: el sí de Nicolás (D-24), porque cambia
+  lo que ve el operador.
 - [ ] **1.27 Las 56 pasadas de la ventana de 30 días que quedaron sin K** (`experiments/_s154_reproc_k/ventana_30d.json`):
   MODIS Terra del 28-sep, 2-oct y 10-oct y NOAA-21 del 18-oct 06:4x. Comprobar primero si los gránulos existen hoy en
   LAADS; si existen, `backfill-tier-a.yml` con overwrite sólo para esas fechas, despachado con `push-main` libre
@@ -395,9 +406,10 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
-| D-23 | Reproceso de los 3.231 records MODIS de enero a junio de 2026 escritos con los gates intra-radio (deriva 1.23 bis, CONFIRMADA). Recomendación: hacerlo dentro del reproceso histórico con K si se adopta #850, no antes | `experiments/_s153_deriva_123bis/` | | pendiente |
+| D-24 | Arreglo del marcador del mapa de detalle en los records `ctx_cluster` (tarea 1.31): primer marcador = `final_hotspot` (el cúmulo) en vez de `anomaly_pixels[0]` (el píxel más fuerte de la escena). Cambia lo que ve el operador; con K afecta a todos los records. Recomendación: sí, después de confirmarlo en el navegador | `experiments/_s153_localizacion/verificador/INFORME.md` H3; `frontend/index.html` de `main` | | pendiente |
+| D-23 | **EN CURSO** (Nicolás, 2026-10-18: sí al reproceso histórico; tarea 1.24). Reproceso de los 3.231 records MODIS de enero a junio de 2026 escritos con los gates intra-radio (deriva 1.23 bis, CONFIRMADA). Recomendación: hacerlo dentro del reproceso histórico con K si se adopta #850, no antes | `experiments/_s153_deriva_123bis/` | | pendiente |
 | D-22 | Ratificar la desviación de W5a (intento 2 entero para Llaima `_s151_ab_diurno_on`: 2 records diurnos VIIRS 375 distintos por empate del top-100, mismo predicado, mismo cúmulo) y, aparte, decidir si se extiende a VIIRS el desempate determinista de #844 (producción, A45) | bitácora vuelta 189 | | pendiente |
-| D-21 | **Merge de la adopción de K** (producción, A45). Cumple la regla #848 entera: combinado CUMPLE (original y SN), verificador CONFIRMADO, R3 idéntico, cruce de 1 MW ninguno, A61 sin protegidas movidas a otro objeto, segundo lector 4 de 4 lejanas, R2 5 de 5, K sobre main idéntico. Además: auto-audit sin recalibrar (recomendado), laboratorios lowT y ndc_focus en C0, aviso a consumidores | `experiments/_s153_fk_v2/` | #850, tag `pre-s153-adopcion-k` | pendiente |
+| D-21 | **CERRADA: sí** (Nicolás, 2026-10-18; merge squash `34cea39e` a las 09:57:30 UTC, marca #851). **Merge de la adopción de K** (producción, A45). Cumple la regla #848 entera: combinado CUMPLE (original y SN), verificador CONFIRMADO, R3 idéntico, cruce de 1 MW ninguno, A61 sin protegidas movidas a otro objeto, segundo lector 4 de 4 lejanas, R2 5 de 5, K sobre main idéntico. Además: auto-audit sin recalibrar (recomendado), laboratorios lowT y ndc_focus en C0, aviso a consumidores | `experiments/_s153_fk_v2/` | #850, tag `pre-s153-adopcion-k` | pendiente |
 | D-19 | MxD03 después de la 1.23: las 2 protegidas que pierde caen por el **Test 1**, que K elimina. Propuesta del loop: no adoptarla sobre producción de hoy; si K se adopta (#848), pre-registrar MxD03 **sobre K** (sin Test 1 el mecanismo de esas pérdidas no existe), con Láscar bajo 35° como vara y el borde del barrido aparte | `experiments/_s151_mxd03_sola_123/resultado/` (evaluación y verificador CONFIRMADO) | | pendiente |
 | D-20 | ~~Regla de adopción de K~~ **APROBADA** (Nicolás, 2026-10-17 ~23:45 UTC: «tal como está, incluida la reversión con git revert pre-autorizada»), antes de evaluar V2; mergeada (squash `cf507f46`); instrumento fijado en `2766c198` | `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`, verificador limpio con arreglos aplicados | #848 | cerrada |
 | D-1 | Adoptar conectiva `max` en VIIRS 375 (criterio §1.2 por medir en 0.2) | `docs/S150_RESULTADO_MESES.md`, `docs/audit_s150/meta/AUDITOR_F2_NUMEROS.md` | pendiente | pendiente |
@@ -426,6 +438,22 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-18 ~16:55 UTC (vuelta 196, S154): 1.26 HECHA, la tesis de localización cae; 1.31 nueva (marcador del mapa)
+- Verificador limpio de `experiments/_s153_localizacion/` (informe y salidas crudas en `verificador/`): (1) «viene del
+  Test 1» PARCIAL (`triggered_test1` dice que disparó, no que decidió; cota inferior por `test1_roi`, p. ej.
+  Villarrica 115 de 189); (2) «cúmulo a 2 a 3 km» CONFIRMADA para el centroide (Villarrica 2,73, Llaima 2,75, Copahue
+  2,71, Láscar 0,37, sobre `60c45833f`) y REFUTADA como lo que ve el operador (para `test1_roi` el marcador va al
+  cráter); (3) «con K se juntan en el cráter» REFUTADA: K publica un subconjunto estricto de C0 y esas pasadas ya
+  estaban en el cráter con C0; (4) Lastarria SIN DATO; (5) «mismo mecanismo» PARCIAL (las 1.363 pasadas que K quita
+  tenían el cúmulo a 2,45 a 2,83 km: 713 negativos limpios, 21 positivas).
+- Hallazgos propios: **H3** (gravedad 4), marcador primario del mapa para `ctx_cluster` = `anomaly_pixels[0]`;
+  confirmado leyendo `frontend/index.html` de `main` (para `ctx_cluster` no se antepone `final_hotspot` y por defecto
+  sólo se dibuja el índice 0). Nueva tarea 1.31 y decisión D-24. **H4**: el backfill con K cambió los datos; los
+  scripts de la carpeta no se reproducen sobre los de hoy (sí sobre `60c45833f`). **H6**: K quita 21 pasadas que el
+  evaluador etiqueta positivas (no es el veto P1). Punto débil declarado: el marcador lo transcribió a Python, no lo
+  corrió con node.
+- 1.25: repetición de Chaitén (39146249401) en curso.
 
 ### 2026-10-18 16:46 UTC (vuelta 195, S154): 1.25 W6a repetida; raíces W2 a W6 armadas y parejas; 1.26 verificador lanzado
 - Paradas: NRT verde 15:10, disco 17 GB, #779 sin cambio. Histórico 1.24 (39125546355): 31 de 176 trozos verdes a las
@@ -673,6 +701,13 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 ### 2026-10-17 ~23:40 UTC (vuelta 176, S153): #849 en main y publicado; la localización de VIIRS 375 la decide el Test 1
 - **#849 mergeado** (squash `60c45833`, CI verde); Pages desplegado; R8: `index`, `diario`, `mosaico` y `periodo.js`
   dan 200, y en el sitio público la noche del 1-oct de Chillán carga con su franja, «máx 1 oct» y sin errores.
+- ⚠️ **S154, verificador limpio (`experiments/_s153_localizacion/verificador/INFORME.md`): la conclusión de abajo cae en
+  su parte central.** «Con K las mismas publicaciones se juntan en el cráter» es REFUTADA: los números se reproducen,
+  pero K publica un subconjunto estricto de C0 y esas mismas pasadas ya tenían el cúmulo en el cráter con C0
+  (Villarrica 0,19, Tupungatito 0,23, Chaitén 0,20, PP 0,42). K no relocaliza: deja de publicar las del borde. El
+  «2 a 3 km» es CONFIRMADO para el centroide del cúmulo pero no para lo que ve el operador (para `test1_roi` el
+  marcador va al cráter). «Viene del Test 1» y «mismo mecanismo» quedan PARCIALES; Lastarria SIN DATO. Texto
+  original conservado por historia:
 - **Localización (pedido de Nicolás), POR VERIFICAR** (`experiments/_s153_localizacion/`): en producción, casi todo lo
   que VIIRS 375 publica viene del Test 1 y su cúmulo cae a 2 a 3 km del cráter, en el borde del disco de 3 km
   (Villarrica 2,73 km, Llaima 2,75, Copahue 2,71; Láscar 0,37). Con K, sobre V1, las mismas publicaciones se juntan en
