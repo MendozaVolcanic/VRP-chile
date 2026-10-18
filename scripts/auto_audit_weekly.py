@@ -334,6 +334,27 @@ def recall_por_sensor(mir, vistos, ours, sensores, vols):
     return out
 
 
+def linea_historial(out, cobertura_pct, gt_stale_dias):
+    """Linea de `history.jsonl`: lo unico que se conserva semana a semana (latest.json se sobrescribe).
+
+    POR QUE lleva la publicacion en negativos limpios (S153, adopcion de K, REGLA_ADOPCION.md §4.8):
+    con K la de VIIRS 375 cae de 85 a 88 % a 2,5 a 3,7 % (experiments/_s153_fk_v2/, seccion 9 de los
+    logs), y la sombra del §4.9 investiga si sube por sobre lo medido en el A/B. Sin la serie no hay
+    contra que comparar. Sin alarma (decision S140): no agrega flags ni toca el veredicto. Si el banco
+    no corrio, el valor queda en None y `falsas_error` lo dice, en vez de un cero que se leeria como
+    "no publica en ningun negativo".
+    """
+    falsas = out.get("falsas_publicaciones") or {}
+    por_sensor = falsas.get("por_sensor") or {}
+    return {"date": out["generated_utc"][:10], "verdict": out["verdict"],
+            "cobertura_pct": cobertura_pct, "gt_stale_dias": gt_stale_dias,
+            "recall": {s: out["recall"][s]["recall_crater_pct"] for s in SENSORS},
+            "n_flags": len(out["flags"]),
+            "falsas_pub_pct": {s: (por_sensor.get(s) or {}).get("falsas_pub_pct") for s in SENSORS},
+            "n_neg_limpio": {s: (por_sensor.get(s) or {}).get("n_neg_limpio") for s in SENSORS},
+            "falsas_error": "error" in falsas}
+
+
 def main():
     today = datetime.now(timezone.utc).date()
     win = ((today - timedelta(days=WINDOW_DAYS)).isoformat(), today.isoformat())
@@ -540,10 +561,7 @@ def main():
     os.makedirs(OUTDIR, exist_ok=True)
     with open(os.path.join(OUTDIR, "latest.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1, ensure_ascii=False)
-    hist_line = {"date": out["generated_utc"][:10], "verdict": out["verdict"],
-                 "cobertura_pct": cobertura_pct, "gt_stale_dias": gt_stale_dias,
-                 "recall": {s: recall[s]["recall_crater_pct"] for s in SENSORS},
-                 "n_flags": len(flags)}
+    hist_line = linea_historial(out, cobertura_pct=cobertura_pct, gt_stale_dias=gt_stale_dias)
     with open(os.path.join(OUTDIR, "history.jsonl"), "a", encoding="utf-8") as f:
         f.write(json.dumps(hist_line, ensure_ascii=False) + "\n")
 

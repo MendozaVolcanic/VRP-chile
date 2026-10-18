@@ -799,6 +799,9 @@ y sumar (que es lo que hacemos hoy y pierde señal sub-pixel distribuida).
 
 ## H_S27_1 — Test 1 integrated-ROI activado en `_mirova_literal` (S27 cierre D4)
 
+> ⚠️ **S153: el Test 1 integrado se apagó en producción** (adopción de K, ver la marca S153 de D30). Lo que esta
+> entrada activó en S27 quedó desactivado en la réplica; el laboratorio lo conserva como sombra. Texto conservado.
+
 > ⚠️ **S147, marca agregada en S151 (A113; `docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P3): la
 > última frase de la marca de S146 que sigue («lo que cae es el respaldo bibliográfico, no el resultado
 > empírico de S27») también cayó.** El resultado empírico quedó SIN EVIDENCIA y circular en S147 (ver la
@@ -1551,7 +1554,7 @@ y **se descartó TODO con datos**:
 - **Frente B (N·σ Tabla 1)**: el N·σ canónico no separa (Láscar 3.5σ vs nevados 3.1σ, solapan); a 5σ
   literal Láscar-ALERTA queda 0/23 (apaga el foco real).
 - **Auditoría de fidelidad file:line + adversarial**: la detección MODIS YA es FIEL a Coppola 2016a
-  (dual-ROI 5/10 enable_dual_roi_bt, Tests 2∧3 OR `min(C1,μ+C2σ)`, σ global, second-run, ETI
+  (dual-ROI 5/10 enable_dual_roi_bt, Tests 2∧3 OR `min(C1,μ+C2σ)` [⚠️ S153: desde la adopción de K la conectiva es `max`, #848], σ global, second-run, ETI
   cuadrático, kernel 8-vec). **El difuso pasa GENUINAMENTE** (outlier espacial real a 1 km sobre
   topografía nival), no por bug. ~~Único gap de fidelidad literal: GAP #A (§298-300 retiro Test 1 K1
   del pool μ/σ, flag OFF) — backlog con A/B propio.~~ **GAP #A RESUELTO S115 = mislabel** (no es gap):
@@ -2437,6 +2440,8 @@ Detalle: `docs/s129/ROI1_CAJA_VS_CIRCULO.md`.
 
 ## D19 — `keep_peak` publica como *summit* a 0,0 km un píxel del borde del disco del Test 1, más frío que el fondo; y el second pass corre sin conjunto activo — **ABIERTA (CONFIRMADA gravedad 5 por verificador limpio; probe A75 corrido S135: el cráter no está en el Test 1, y los conteos son del régimen de fondo previo a #537; decisión D1/D2 de Nicolás pendiente)** S134/S135
 
+> ⚠️ **S153, adopción de K (regla `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md`, #848):** el disco del Test 1 integrado, donde `keep_peak` publicaba el píxel del borde, queda APAGADO en producción (`enable_test1_path: false`). Lo que esta D describe para el camino del Test 1 deja de ocurrir en la réplica; el second pass sin conjunto activo (D2) no lo toca K y sigue abierto. Evidencia: `experiments/_s153_fk_v2/`. Texto original conservado.
+
 **Medido S144 en el campo de MIROVA (frente cerrado, `docs/CIERRE_FRENTE_KEEP_PEAK_S144.md`).** El
 lugar donde `keep_peak` conserva su píxel **sí destaca** en la radiancia de MIROVA, medido en la imagen
 de otra pasada de la misma noche (que no eligió ese píxel): +0,0514 [+0,0264, +0,0766] de tasa de exceso
@@ -2595,6 +2600,14 @@ umbrales. Si algún día se hace, medir también el ETI (regresión NTI vs NTI_b
 
 ## D21: La banda MIR de MODIS: usamos la 21 como primaria; Coppola 2016a usa la 22 y la 21 sólo donde la 22 satura. **ABIERTA (medida S133 en magnitud y S137 en detección; ningún brazo cumple aún la batería)** S137 ⚠️ **El «ningún brazo cumple» cayó S146 (AUDIT_S146 §4, frente E E-08)**: con la vara corregida en el caso A2 el mejor brazo (banda 22, sin compuerta de temperatura, fondo local, conectiva `max`) pasa de 8 a **9 de 9**, y producción baja de 6 a **5 de 9**. Eso **levanta el bloqueo de criterio** que pesaba sobre D21, D22 y D11; no autoriza adoptar nada (9 de 9 en nueve escenas MODIS es fidelidad al Apéndice A, no dice nada de la sobre-publicación). Tres brazos quedan INDECIDIBLES por no guardar posición. Texto original conservado por historia
 
+> ⚠️ **S153, ADOPTADA en producción como parte de K** (A113; regla `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (aprobada en #848), evidencia `experiments/_s153_fk_v2/README.md`, `combinado.log`, `v1.log` y `v2.log`, sección 9): `enable_modis_b22_primary: true`
+> en `pipeline/profiles/mirova_equivalent.yaml`, junto con la conectiva `max` (D26) y sin el Test 1 integrado (D30).
+> Medido contra MIROVA en los 11 volcanes y dos ventanas: MODIS publica en 0,8 % de 893 y 0,9 % de 2.254 negativos
+> limpios (antes 12,3 y 10,8 %), y en Láscar 39 de 39 alertas protegidas (antes 6). Con esta marca, el «Producción
+> sigue en banda 21» y el «`ENABLE_MODIS_B22_PRIMARY = False`» de abajo describen el estado previo a S153. Lo que
+> sigue sin medir: la magnitud MODIS con banda 22 fuera de Láscar (sólo 7 pares en V2). Reversión: `git revert` del PR de adopción; estado anterior en el tag `pre-s153-adopcion-k`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.9.
+> El encabezado y el texto que siguen se conservan por historia.
+
 > ⚠️ **S150, marca agregada en S151** (A113; `docs/audit_s150/meta/AUDITOR_F4_PROPAGACION.md` F4-06):
 > **con banda 22, en Láscar, MODIS separa alertas de negativos; con banda 21 y sin el Test 1 no ve nada.**
 > Marzo a junio de 2026 (`docs/S150_RESULTADO_MESES.md`, tabla de MODIS; confirmado por
@@ -2731,6 +2744,15 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
 
 ## D26: El segundo pase calcula mu y sigma sin los filtros de no-aptos del paper (borde, dNTI < -0,1, K1). **ABIERTA, efecto nulo bajo la conectiva `min` (registrada S138)** S138 ⚠️ **el «efecto nulo» cayó en S145; marcado acá en S146**
 
+> ⚠️ **S153, la conectiva de los Tests 2 y 3 cambió en producción: `max`, no `min`** (A113; regla `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (aprobada en #848), evidencia `experiments/_s153_fk_v2/README.md`, `combinado.log`, `v1.log` y `v2.log`, sección 9).
+> `enable_tests_23_prose_branch: true` bajo `paths:` en `pipeline/profiles/mirova_equivalent.yaml`: hacen falta
+> las dos condiciones de la prosa de Coppola 2016a (el piso C1 **y** la media más C2 desviaciones), no la más fácil.
+> Consecuencia para esta D: todo lo escrito «bajo `min`» (el «efecto nulo» del encabezado, el «el piso gobierna»
+> de «Lo nuestro» y la «Gravedad 1 hoy») describe el estado previo a S153; bajo `max` el término del sigma puede gobernar
+> el umbral (S136 midió `mu + C2 sigma > C1` en el 100 % de MODIS, pero con banda 21; con banda 22 el sigma del dNTI cae 3,5 a 4,7 veces, D21, y la proporción bajo K no está medida), que es justo el caso que el texto de abajo estima en gravedad 3. **D26 queda abierta y sin
+> medir bajo `max`.** La conectiva `max` es la que midieron la batería del Apéndice A (S146, mejor brazo 9 de 9) y el A/B F/K. Reversión: `git revert` del PR de adopción; estado anterior en el tag `pre-s153-adopcion-k`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.9.
+> El encabezado y el texto que siguen se conservan por historia.
+
 > ⚠️ **S145, recogido en S146** (`docs/AUDIT_S146.md` §2). El «efecto nulo» de este encabezado se
 > derivó de un script que lee **sólo el dNTI**: midió el Test 2 y atribuyó la conclusión a los
 > dos. Medido después, **el sigma gobierna en el 58,7 % de VIIRS 375 y en el 75,0 % de VIIRS
@@ -2825,6 +2847,16 @@ El paper (p. 3) corrige el solapamiento de barridos antes de remuestrear; el có
 ---
 
 ## D30: El Test 1 integrado en el ROI es un detector PROPIO; el Test 1 del paper es por píxel y su cita bibliográfica no corresponde a ningún artículo localizable. **ABIERTA (registrada S146, AUDIT_S146 V-06, gravedad 5; descrita, sin decisión)** S146
+
+> ⚠️ **S153, RESUELTA en producción: el Test 1 integrado se APAGÓ** (`enable_test1_path: false` bajo `paths:`, A113;
+> regla `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (aprobada en #848), evidencia `experiments/_s153_fk_v2/README.md`, `combinado.log`, `v1.log` y `v2.log`, sección 9). Era la causa de que la réplica publicara en 88,2 % (V1, 2026-08-29 a 2026-10-08) y 85,4 % (V2,
+> 2026-03-01 a 2026-06-12) de los negativos limpios de VIIRS 375; con K, 2,5 y 3,7 %, sin perder ninguna alerta
+> protegida que decida (las 2 de Tupungatito de Suomi NPP las leyó un segundo lector: lejanas con su distancia
+> propia). Costo: 21 de 260 y 26 de 426 alertas de VIIRS 375, casi todas bajo 1 MW, y la magnitud de VIIRS 375
+> más baja en las pasadas que cambian (sin cruces de 1 MW hacia abajo). El código sigue en el repo y el
+> laboratorio (`experimental`) lo conserva encendido como sombra (REGLA_ADOPCION.md §4.9). Hijos de esta marca:
+> H_S27_1 (más arriba) y el «Test 1 integrado» de `CLAUDE.md` y `docs/MISSION.md`. Reversión: `git revert` del PR de adopción; estado anterior en el tag `pre-s153-adopcion-k`. Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.9.
+> El encabezado y el texto que siguen se conservan por historia.
 
 **El fenómeno, primero.** Una fuente térmica más chica que el píxel (el lago de lava de Villarrica,
 un campo fumarólico) no levanta ningún píxel lo bastante como para cruzar un umbral por píxel, pero

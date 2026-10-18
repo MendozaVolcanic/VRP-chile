@@ -109,7 +109,18 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   el catálogo dice que el NRT no usa. Y **ningún paper dice cuál está «adoptado
   operacionalmente»**: el «no adoptada» de la Ec. 9 es SOSPECHA, no cita. El cierre de D3 se
   apoya en esa Ec. 16. Texto original conservado por historia.
-- **NTI / dNTI contextual**: el gate de detección usa los umbrales **N·σ de Coppola 2016a Tabla 1
+- **NTI / dNTI contextual**: ⚠️ **S153, el detector de producción cambió (adopción de K, marca A113)**:
+  desde el merge del PR de adopción, `mirova_equivalent` corre **sin el Test 1 integrado en el ROI**
+  (`enable_test1_path: false`, D30), con la **conectiva `max`** en los Tests 2 y 3
+  (`enable_tests_23_prose_branch: true`: hacen falta el piso C1 **y** `μ+C2·σ`, no el `min` de abajo)
+  y con la **banda 22 primaria en MODIS** (`enable_modis_b22_primary: true`, D21). Regla aprobada
+  antes del resultado en `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (#848); evidencia en
+  `experiments/_s153_fk_v2/README.md` (con la lectura A, CUMPLE en V1 y V2: negativos limpios de
+  VIIRS 375 publicados de 88,2 y 85,4 % a 2,5 y 3,7 %, 0 protegidas perdidas que decidan). El
+  laboratorio `experimental` sigue con el detector anterior y es la sombra. Reversión: `git revert`
+  del PR (tag `pre-s153-adopcion-k`); ficha `docs/FICHA_SDA_VRP_CHILE.md` v1.9. El texto que sigue,
+  incluida la «rama OR completa `min(C1, μ+C2·σ)`» y la banda 21 primaria, describe el estado
+  previo a S153 y se conserva por historia. Texto anterior: el gate de detección usa los umbrales **N·σ de Coppola 2016a Tabla 1
   por dual-ROI** (NO 3σ uniforme — eso era el drift D2 histórico, ya resuelto). Verificado por
   auditoría de fidelidad file:line S114: el profile `mirova_equivalent.yaml` tiene
   `enable_dual_roi_bt: true` (**N·σ = 5 summit / 10 scene** noche, 15 día) + `enable_dnti_dual_roi:
@@ -124,7 +135,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   está apagado desde S40, `ENABLE_BT_PATH_HOT = False` leído de `pipeline.profile`, comprobado
   por la Fase 1 de S146 y por su verificador; la divergencia es de atribución, no de
   comportamiento, ver D31).
-  (b) el **Test 1 integrado en el ROI es un detector propio**: en `sp426.5.pdf` p. 6 el Test 1 es
+  (b) (⚠️ **S153: apagado en producción**, ver la marca al inicio de este punto) el **Test 1 integrado en el ROI es un detector propio**: en `sp426.5.pdf` p. 6 el Test 1 es
   por píxel contra K1, sin suma sobre el ROI, y la cita «Coppola 2015, Bull. Volcanol. 77:55»
   corresponde a Heap et al., mecánica de rocas en andesita (DOI 10.1007/s00445-015-0938-7;
   Crossref y OpenAlex dan 0 artículos de Coppola en esa revista en 2015, con control de
@@ -240,7 +251,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   **A10. Audit vs MIROVA usar `pc.vrp_mw` (NO `record.vrp_mw`)**: `record.vrp_mw` es sum
   scene-wide de todos hot_pixels; `pc.vrp_mw` (primary_cluster.vrp_mw) es solo cluster summit
   = lo que MIROVA reporta. Dashboard (`mirovaEqVrp`/`isValidDetection` en frontend/index.html,
-  l. 1594 (era 1578 hasta el selector de noche o rango de S153, 1493 hasta las alertas diurnas de MIROVA con sol de S151, 1483 hasta la marca de MIROVA sin distancia de V31.1, 1473 hasta S151, que agregó la marca A113 sobre el tope D9, y 1466 hasta S150, que agregó la marca del OCR en la línea de MIROVA); la cita la vigila el guard G8; el `:680` original hoy es una fila de la lista de volcanes) usa pc.vrp_mw. Audits con
+  l. 1595 (era 1594 hasta la marca de adopción del detector K de S153, 1578 hasta el selector de noche o rango de S153, 1493 hasta las alertas diurnas de MIROVA con sol de S151, 1483 hasta la marca de MIROVA sin distancia de V31.1, 1473 hasta S151, que agregó la marca A113 sobre el tope D9, y 1466 hasta S150, que agregó la marca del OCR en la línea de MIROVA); la cita la vigila el guard G8; el `:680` original hoy es una fila de la lista de volcanes) usa pc.vrp_mw. Audits con
   campo equivocado ocultaron problemas: Lastarria 1.04× → real 7.67×, Llaima 1.01× → real
   11.82×, PCC 52.77× → real 6.9×.
   - ⚠️ **Matiz S132, sólo VIIRS375**: para I-band el dashboard NO publica `pc.vrp_mw` sino la
