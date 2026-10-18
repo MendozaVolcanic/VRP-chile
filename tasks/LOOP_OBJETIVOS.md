@@ -391,6 +391,20 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 02:40 UTC (vuelta 179, S153): V2b unida y PAREJA; W6a despachada; NRT sin despacho externo
+- **V2b repetida** (39068999603): los 4 volcanes repetidos parejos dentro del run (2.397 por brazo); el rojo de
+  `recolectar` es sólo que los otros 7 no estaban. Intento 2 en `C:\Users\nmend\AppData\Local\Temp\claude\v2b_39033530622\i2\`.
+  Unión con `unir_intentos.py` de `2766c198` (comprobado igual por contenido en `loop/activo` tras traer `main`,
+  `f852e94c`): 8 pares, 0 distintos (Copahue control 5 por `borde`). **Cobertura de V2b unida: 6.147 contra 6.147,
+  PAREJA** (`v2b_39033530622\union\`). Siguiente: re-unir V1 y V2a con el mismo commit y evaluar.
+- **Diurno:** W5b terminó (23 de 23 verdes); la repetición de W5a arrancó. **W6a despachada** (run 39090434307,
+  2026-10-01 a 10-07, `--ref s151-diurno-codigo`), pendiente detrás. W6b cuando W6a arranque.
+- **NRT:** última corrida 23:44 UTC (la programada de las 22:00, con 1 h 44 de atraso), verde; último dato 15:47 UTC
+  (normal: no hay pasadas nocturnas entre las 16 y las 01 UTC). El cron externo nuevo (`10 1-12 * * *`) **no despachó
+  a la 01:10 ni a las 02:10 UTC**. SOSPECHA: cron-job.org interpreta la expresión en hora de Chile y la primera sería
+  a las 04:10 UTC. Revisar después de las 04:30 UTC; si no hay despacho, avisar a Nicolás (es su cuenta). Lejos del
+  umbral de 12 h de §1.5.
+
 ### 2026-10-17 ~23:55 UTC (vuelta 178, S153): regla de adopción de K aprobada y mergeada (D-20)
 - Nicolás aprobó la regla del #848 tal como está, con la reversión por `git revert` pre-autorizada. Marca de
   aprobación en el documento (`0c5a374e`), CI verde, **#848 mergeado** (squash `cf507f46`). Ninguna evaluación de V2
