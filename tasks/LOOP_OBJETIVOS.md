@@ -439,6 +439,18 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 ~17:40 UTC (vuelta 197, S154): diurno W2 a W6 evaluado: NO ADOPTAR (por verificar)
+- Paradas: NRT verde 15:10 (la de 17:04 en cola), disco 17 GB. Histórico 1.24: 33 de 176.
+- Chaitén de W6a repetido (39146249401) verde; unión con `unir_ventana.py`: `intento_entero`, 0 distintos (control 79
+  iguales, diurno 143 iguales). W6a PAREJA (802 contra 802). Las 10 medias ventanas completas y parejas.
+- `evaluar_diurno.py` sobre W2 a W6 (`--repetidas W2,W3,W5,W6`; W1 fuera, sólo informa y su raíz no se guardó), salida
+  en `experiments/_s151_ab_diurno/salidas/W2_W6_s154/`: **VEREDICTO NO ADOPTAR** (original, SN y SE). G3 CUMPLE
+  (9.762 pares nocturnos, 0 distintos: la noche no cambia). G1 FALLA (M1 78,1 % de 32 menos q_neg 60,0 % de 4.683 =
+  +0,18, p95 del nulo +0,24; sin W2, +0,23 contra +0,23). G2 FALLA: VIIRS 375 publica en 2.236 de 2.511 pasadas
+  diurnas de la tabla (MIROVA 13), VIIRS 750 en 766 de 2.466 (MIROVA 2). Salvedad A114: el A/B corrió sobre C0, donde
+  el Test 1 satura (el control publica en 88,8 % de los negativos limpios nocturnos de VIIRS 375); con K podría
+  cambiar. Verificador limpio lanzado, con esa pregunta explícita.
+
 ### 2026-10-18 ~16:55 UTC (vuelta 196, S154): 1.26 HECHA, la tesis de localización cae; 1.31 nueva (marcador del mapa)
 - Verificador limpio de `experiments/_s153_localizacion/` (informe y salidas crudas en `verificador/`): (1) «viene del
   Test 1» PARCIAL (`triggered_test1` dice que disparó, no que decidió; cota inferior por `test1_roi`, p. ej.
