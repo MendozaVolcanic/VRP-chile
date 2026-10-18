@@ -1616,6 +1616,47 @@ function isSummitDetection(r) {
   return (r.vrp_vent_mw ?? 0) > 0;
 }
 
+// Puntos del mapa de detalle para un record, el primero es el marcador que se dibuja por defecto.
+// S106 ancla honesta: cuando el pipeline ancló el record (final_hotspot_source = test1_roi, test1_nti_peak o
+// ctx_cluster) el marcador PRIMARIO es esa ancla. S154 (D-24, aprobado por Nicolás el 2026-10-18): ctx_cluster
+// se agrega a la lista porque su final_hotspot ES el centroide del cúmulo publicado, mientras que
+// anomaly_pixels[0] es el píxel de más energía de toda la escena y puede caer a 25 km (Láscar 2026-10-10 05:06,
+// dibujado en un salar con «summit» y 0,28 km en la tabla); con K (#850) todos los records son ctx_cluster.
+// Los anomaly_pixels siguen detrás, bajo el toggle «Todos los pixels» (evidencia preservada, regla S18).
+// Guard: tests/test_marcador_mapa_ctx_cluster_s154.py.
+function pixelesDelMarcador(r, v) {
+  const hasRealVentCoord = r.vent_hotspot_lat != null;
+  const hasFinal = r.final_hotspot_lat != null;
+  const anclaHonesta = hasFinal &&
+    ["test1_roi", "test1_nti_peak", "ctx_cluster"].includes(r.final_hotspot_source);
+  return anclaHonesta
+    ? [{
+        lat: r.final_hotspot_lat, lon: r.final_hotspot_lon,
+        dist_km: r.final_hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
+        vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0, real_coord: true
+      }].concat(r.anomaly_pixels || [])
+    : (r.anomaly_pixels && r.anomaly_pixels.length > 0)
+    ? r.anomaly_pixels
+    : (hasFinal ? [{
+        lat: r.final_hotspot_lat, lon: r.final_hotspot_lon,
+        dist_km: r.final_hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
+        vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0,
+        vent_only: r.final_hotspot_source === "vent", real_coord: true
+      }] : (r.hotspot_lat != null ? [{
+        lat: r.hotspot_lat, lon: r.hotspot_lon,
+        dist_km: r.hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
+        vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0
+      }] : (hasRealVentCoord ? [{
+        lat: r.vent_hotspot_lat, lon: r.vent_hotspot_lon,
+        dist_km: r.vent_hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
+        vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0, vent_only: true, real_coord: true
+      }] : (v.vent_lat ? [{
+        lat: v.vent_lat, lon: v.vent_lon,
+        dist_km: 0, bt_k: r.t_max_k ?? r.t_max_i04_k,
+        vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0, vent_only: true
+      }] : []))));
+}
+
 function latestDetection(records, includeFar = false, innerKm = 10) {
   // S90: devuelve la detección summit MÁS RECIENTE de las últimas 48h (no el
   // máximo del período) como {vrp, datetime_utc, ts}, o null si no hay ninguna.
@@ -2985,43 +3026,9 @@ function renderDetail() {
       // schema); si no existe, se calcula al vuelo con inner_radius_km del
       // volcán + distancia disponible.
       const isVentOnly = r.hotspot_lat == null && (!r.anomaly_pixels || r.anomaly_pixels.length === 0);
-      const hasRealVentCoord = r.vent_hotspot_lat != null;
-      const hasFinal = r.final_hotspot_lat != null;
-      // S106 ancla honesta: cuando el pipeline ancló el record por semántica
-      // Test1-integral (test1_roi → cráter, test1_nti_peak → pico NTI), el
-      // marker PRIMARIO del mapa es esa ancla — los anomaly_pixels de estos
-      // records son el FOOTPRINT de la integral (soporte de cómputo con
-      // arrastre topográfico A69, no detecciones puntuales reclamadas).
-      // El footprint sigue disponible bajo el toggle "Todos los pixels"
-      // (evidencia preservada, regla S18).
-      const isHonestTest1 = hasFinal &&
-        (r.final_hotspot_source === "test1_roi" || r.final_hotspot_source === "test1_nti_peak");
-      const pixels = isHonestTest1
-        ? [{
-            lat: r.final_hotspot_lat, lon: r.final_hotspot_lon,
-            dist_km: r.final_hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
-            vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0, real_coord: true
-          }].concat(r.anomaly_pixels || [])
-        : (r.anomaly_pixels && r.anomaly_pixels.length > 0)
-        ? r.anomaly_pixels
-        : (hasFinal ? [{
-            lat: r.final_hotspot_lat, lon: r.final_hotspot_lon,
-            dist_km: r.final_hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
-            vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0,
-            vent_only: r.final_hotspot_source === "vent", real_coord: true
-          }] : (r.hotspot_lat != null ? [{
-            lat: r.hotspot_lat, lon: r.hotspot_lon,
-            dist_km: r.hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
-            vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0
-          }] : (hasRealVentCoord ? [{
-            lat: r.vent_hotspot_lat, lon: r.vent_hotspot_lon,
-            dist_km: r.vent_hotspot_dist_km, bt_k: r.t_max_k ?? r.t_max_i04_k,
-            vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0, vent_only: true, real_coord: true
-          }] : (v.vent_lat ? [{
-            lat: v.vent_lat, lon: v.vent_lon,
-            dist_km: 0, bt_k: r.t_max_k ?? r.t_max_i04_k,
-            vrp_mw: r.vrp_mw ?? r.vrp_mir_mw ?? 0, vent_only: true
-          }] : []))));
+      // Primer punto = marcador por defecto: el ancla honesta (test1_roi, test1_nti_peak o ctx_cluster, S154 D-24)
+      // y después los anomaly_pixels. La lógica vive en pixelesDelMarcador para poder probarla en node.
+      const pixels = pixelesDelMarcador(r, v);
 
       // S14 D1: distance_class → colorear rojo (summit) o gris (far) al estilo MIROVA
       let distClass = r.distance_class;
