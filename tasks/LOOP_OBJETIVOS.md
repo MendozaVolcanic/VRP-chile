@@ -394,6 +394,18 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 12:15 UTC (S154): ventana de 30 días con K verificada; histórico por trozos corriendo
+- Reproceso de 30 días (run 39117638055) 11 de 11 verde. `experiments/_s154_reproc_k/verificar_ventana.py` contra el
+  tag `pre-s154-reproc-k-datos`: 3.521 de 3.577 pasadas de la ventana escritas con K, 0 perdidas, 0 cambiadas antes
+  de la ventana (`ventana_30d.json`). Las 56 sin K son gránulos que el reproceso no bajó: MODIS Terra del 28-sep,
+  2-oct y 10-oct en casi todos los volcanes, y NOAA-21 de la madrugada del 18-oct (SOSPECHA: Terra ausente en LAADS
+  esos días). R8: el JSON publicado de Villarrica trae 348 de 352 con K.
+- Costo previsto: el NRT de las 10:10 quedó cancelado (desplazado por el de las 11:10 mientras esperaba `push-main`).
+- Nicolás eligió la vía por trozos en perfil aislado. #852 mergeado: `_s154_reproc_k_historico.yaml` (resuelve
+  idéntico a la réplica salvo nombre y directorio; control negativo comprobado), `scripts/reemplazar_ventana_reproceso.py`
+  y 11 tests. `reproc-chunked.yml` despachado: run 39125546355, 2025-02-15 a 2026-09-17, 176 trozos (16 x 11), de a 8;
+  estimado 28 a 35 h. Después: ensayo del reemplazo por volcán, verificador limpio, aplicar en un commit entre NRT, R8.
+
 ### 2026-10-18 10:10 UTC (S154, dueña del loop: sesión S154 «retomar»): K ADOPTADA; reproceso de 30 días corriendo
 - Nicolás dio el sí a #850 (D-21). Merge squash `34cea39e` a las **09:57:30 UTC**, después de que todos los jobs del
   NRT de las 09:10 arrancaran con C0 (esa corrida queda entera en C0; la de las 10:10 sale entera con K). CI de `main`
