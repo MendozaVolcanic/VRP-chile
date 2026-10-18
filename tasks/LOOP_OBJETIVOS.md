@@ -394,6 +394,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 06:07 UTC (vuelta 194): CIERRE de S153 (pedido de Nicolás); bloque de arranque S154
+- `tasks/BLOQUE_ARRANQUE_S154.md`. Loop detenido. Se fijó con trabajo en curso: diurno W6a (run 39090434307, 12 de 22)
+  y W6b (run 39097155412, pendiente). Sin agentes vivos. #850 (adopción de K) abierto, CI verde, espera el sí de
+  Nicolás. Memoria: `project_s153_estado`, `feedback_s153_una_sesion_duena_del_loop`,
+  `reference_cronjob_org_zona_horaria`.
+
 ### 2026-10-18 06:00 UTC (vuelta 193, S153): espera
 - NRT verde 04:10 y 05:10 (cron externo cada hora). W6a 10 de 22; W6b pendiente. #850 sin respuesta. Disco 6,4 GB.
 
