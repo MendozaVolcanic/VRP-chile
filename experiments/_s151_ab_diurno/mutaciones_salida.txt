@@ -1,8 +1,8 @@
 MUTACION ninguna rc=0
-AUTOPRUEBA: 57 de 57 comprobaciones OK
+AUTOPRUEBA: 69 de 69 comprobaciones OK
 MUTACION estrato_unico rc=1
    [FALLA] veredicto ADOPTAR
-   [FALLA] controles del nulo: permutaciones reales de pos/neg por estrato sobre el p95: 0.150 contra 0.018 del nulo (± 0.017) | brazo que publica sólo en positivos pasa G1: sí
+   [FALLA] controles del nulo: permutaciones reales de pos/neg por estrato sobre el p95: 0.127 contra 0.018 del nulo (± 0.017) | brazo que publica sólo en positivos pasa G1: sí
    [FALLA] 1 de 12 en W2 (8 %) no obliga a repetir: veredicto ADOPTAR
    [FALLA] W3 con su único positivo sin procesar: PENDIENTE DE REPETICION
    [FALLA] y el resto decide: ADOPTAR
@@ -13,16 +13,13 @@ MUTACION estrato_unico rc=1
    [FALLA] processed_utc y first_processed_utc distintos entre brazos no son defecto de cableado (G3 CUMPLE)
    [FALLA] ruido de punto flotante de 2e-16 no es defecto de cableado (G3 CUMPLE)
    [FALLA] 87 pasadas de tabla VIIRS 375 de W5 sin procesar (más del 10 %): PENDIENTE DE REPETICION antes de G2
-   [FALLA] sin romper, caso 1: permutaciones reales de pos/neg por estrato sobre el p95: 0.150 contra 0.021 del nulo (± 0.018) | brazo que publica sólo en positivos pasa G1: sí -> FALLA
-AUTOPRUEBA: 44 de 57 comprobaciones OK | FALLAN: ['control_nulo', 'g2_un_sensor', 'lascar_todo', 'ruido_flotante', 'solo_protegidas', 'solo_w2', 'tabla_sin_procesar', 'una_no_procesada', 'volatiles', 'w3_sin_procesar']
+   [FALLA] sin romper, caso 1: permutaciones reales de pos/neg por estrato sobre el p95: 0.168 contra 0.021 del nulo (± 0.018) | brazo que publica sólo en positivos pasa G1: sí -> FALLA
+AUTOPRUEBA: 56 de 69 comprobaciones OK | FALLAN: ['control_nulo', 'g2_un_sensor', 'lascar_todo', 'ruido_flotante', 'solo_protegidas', 'solo_w2', 'tabla_sin_procesar', 'una_no_procesada', 'volatiles', 'w3_sin_procesar']
 MUTACION g2_any rc=1
-   [FALLA] G1 FALLA (D +0.154, p95 +0.122)
-   [FALLA] veredicto NO ADOPTAR
    [FALLA] con G2 en un solo sensor no da ADOPTAR: DECIDE NICOLAS CON M4
-AUTOPRUEBA: 54 de 57 comprobaciones OK | FALLAN: ['azar', 'g2_un_sensor']
-MUTACION volatiles rc=1
-   [FALLA] processed_utc y first_processed_utc distintos entre brazos no son defecto de cableado (G3 FALLA (noches distintas campo a campo: defecto del cableado))
-AUTOPRUEBA: 56 de 57 comprobaciones OK | FALLAN: ['volatiles']
+AUTOPRUEBA: 68 de 69 comprobaciones OK | FALLAN: ['g2_un_sensor']
+MUTACION volatiles rc=3
+   el evaluador mutado no importa: G3 y unir_intentos excluyen campos de proceso distintos
 MUTACION qneg_tabla rc=1
    [FALLA] veredicto ADOPTAR
    [FALLA] controles del nulo: permutaciones reales de pos/neg por estrato sobre el p95: 0.000 contra 0.035 del nulo (± 0.023) | brazo que publica sólo en positivos pasa G1: sí
@@ -34,16 +31,15 @@ MUTACION qneg_tabla rc=1
    [FALLA] ruido de punto flotante de 2e-16 no es defecto de cableado (G3 CUMPLE)
    [FALLA] 87 pasadas de tabla VIIRS 375 de W5 sin procesar (más del 10 %): PENDIENTE DE REPETICION antes de G2
    [FALLA] sin romper, caso 1: permutaciones reales de pos/neg por estrato sobre el p95: 0.000 contra 0.031 del nulo (± 0.022) | brazo que publica sólo en positivos pasa G1: sí -> FALLA
-   [FALLA] sin romper, caso 3: permutaciones reales de pos/neg por estrato sobre el p95: 0.000 contra 0.044 del nulo (± 0.025) | brazo que publica sólo en positivos pasa G1: sí -> FALLA
-AUTOPRUEBA: 46 de 57 comprobaciones OK | FALLAN: ['azar', 'control_nulo', 'g2_un_sensor', 'ruido_flotante', 'solo_protegidas', 'tabla_sin_procesar', 'una_no_procesada', 'volatiles', 'w3_sin_procesar']
+   [FALLA] sin romper, caso 3: permutaciones reales de pos/neg por estrato sobre el p95: 0.000 contra 0.031 del nulo (± 0.022) | brazo que publica sólo en positivos pasa G1: sí -> FALLA
+AUTOPRUEBA: 58 de 69 comprobaciones OK | FALLAN: ['azar', 'control_nulo', 'g2_un_sensor', 'ruido_flotante', 'solo_protegidas', 'tabla_sin_procesar', 'una_no_procesada', 'volatiles', 'w3_sin_procesar']
 MUTACION binom_off1 rc=1
    [FALLA] a cobertura completa G2 falla desde 19 (VIIRS 375) y 5 (VIIRS 750); el pre-registro dice 20 y 6
    [FALLA] 19 pasa y 20 falla en VIIRS 375
-AUTOPRUEBA: 55 de 57 comprobaciones OK | FALLAN: ['g2_borde']
+AUTOPRUEBA: 67 de 69 comprobaciones OK | FALLAN: ['g2_borde']
 MUTACION nulo_angosto rc=1
    [FALLA] veredicto ADOPTAR
-   [FALLA] controles del nulo: permutaciones reales de pos/neg por estrato sobre el p95: 0.509 contra 0.032 del nulo (± 0.022) | brazo que publica sólo en positivos pasa G1: sí
-   [FALLA] G1 FALLA (D +0.061, p95 +0.037)
+   [FALLA] controles del nulo: permutaciones reales de pos/neg por estrato sobre el p95: 0.548 contra 0.031 del nulo (± 0.022) | brazo que publica sólo en positivos pasa G1: sí
    [FALLA] veredicto NO ADOPTAR
    [FALLA] 1 de 12 en W2 (8 %) no obliga a repetir: veredicto ADOPTAR
    [FALLA] W3 con su único positivo sin procesar: PENDIENTE DE REPETICION
@@ -55,21 +51,65 @@ MUTACION nulo_angosto rc=1
    [FALLA] processed_utc y first_processed_utc distintos entre brazos no son defecto de cableado (G3 CUMPLE)
    [FALLA] ruido de punto flotante de 2e-16 no es defecto de cableado (G3 CUMPLE)
    [FALLA] 87 pasadas de tabla VIIRS 375 de W5 sin procesar (más del 10 %): PENDIENTE DE REPETICION antes de G2
-   [FALLA] sin romper, caso 1: permutaciones reales de pos/neg por estrato sobre el p95: 0.508 contra 0.031 del nulo (± 0.022) | brazo que publica sólo en positivos pasa G1: sí -> FALLA
-   [FALLA] sin romper, caso 3: permutaciones reales de pos/neg por estrato sobre el p95: 0.254 contra 0.041 del nulo (± 0.025) | brazo que publica sólo en positivos pasa G1: sí -> FALLA
-AUTOPRUEBA: 41 de 57 comprobaciones OK | FALLAN: ['azar', 'control_nulo', 'g2_un_sensor', 'lascar_todo', 'ruido_flotante', 'solo_protegidas', 'solo_w2', 'tabla_sin_procesar', 'una_no_procesada', 'volatiles', 'w3_sin_procesar']
+   [FALLA] sin romper, caso 1: permutaciones reales de pos/neg por estrato sobre el p95: 0.550 contra 0.032 del nulo (± 0.022) | brazo que publica sólo en positivos pasa G1: sí -> FALLA
+   [FALLA] sin romper, caso 3: permutaciones reales de pos/neg por estrato sobre el p95: 0.224 contra 0.027 del nulo (± 0.020) | brazo que publica sólo en positivos pasa G1: sí -> FALLA
+AUTOPRUEBA: 54 de 69 comprobaciones OK | FALLAN: ['azar', 'control_nulo', 'g2_un_sensor', 'lascar_todo', 'ruido_flotante', 'solo_protegidas', 'solo_w2', 'tabla_sin_procesar', 'una_no_procesada', 'volatiles', 'w3_sin_procesar']
 MUTACION sin_w2_igual rc=1
    [FALLA] G1 pasa con W2 y falla sin W2
    [FALLA] veredicto DEPENDE DEL OCR, DECIDE NICOLAS
-AUTOPRUEBA: 55 de 57 comprobaciones OK | FALLAN: ['solo_w2']
+AUTOPRUEBA: 67 de 69 comprobaciones OK | FALLAN: ['solo_w2']
+MUTACION g3_orden_falla rc=1
+   [FALLA] pares «orden» admitidos e informados: G3 FALLA (noches distintas: defecto del cableado), {'igual': 0, 'tolerancia': 0, 'orden': 933, 'borde': 0, 'hotspot_escena': 0, 'distinto': 0}
+AUTOPRUEBA: 68 de 69 comprobaciones OK | FALLAN: ['orden_pixeles']
+MUTACION g3_borde_falla rc=1
+   [FALLA] pares «borde» admitidos e informados: G3 FALLA (noches distintas: defecto del cableado), {'igual': 0, 'tolerancia': 0, 'orden': 0, 'borde': 933, 'hotspot_escena': 0, 'distinto': 0}
+AUTOPRUEBA: 68 de 69 comprobaciones OK | FALLAN: ['borde_v375_f5']
+MUTACION g3_escena_falla rc=1
+   [FALLA] pares «hotspot_escena» admitidos e informados: G3 FALLA (noches distintas: defecto del cableado), {'igual': 0, 'tolerancia': 0, 'orden': 0, 'borde': 0, 'hotspot_escena': 933, 'distinto': 0}
+AUTOPRUEBA: 68 de 69 comprobaciones OK | FALLAN: ['hotspot_escena']
+MUTACION g3_tolerancia_falla rc=1
+   [FALLA] ruido de punto flotante de 2e-16 no es defecto de cableado (G3 FALLA (noches distintas: defecto del cableado))
+AUTOPRUEBA: 68 de 69 comprobaciones OK | FALLAN: ['ruido_flotante']
+MUTACION g3_distinto_admitido rc=1
+   [FALLA] G3 FALLA ({'t_max_k': 1}) e INDECIDIBLE
+   [FALLA] diferencia real en las noches: G3 FALLA (G3 CUMPLE, {'anomaly_pixels': 933, 'diag_mu_deti': 933})
+   [FALLA] diferencia real en las noches: G3 FALLA (G3 CUMPLE, {'anomaly_pixels': 933})
+   [FALLA] diferencia real en las noches: G3 FALLA (G3 CUMPLE, {'anomaly_pixels': 933})
+   [FALLA] diferencia real en las noches: G3 FALLA (G3 CUMPLE, {'diag_sd_deti': 933})
+   [FALLA] diferencia real en las noches: G3 FALLA (G3 CUMPLE, {'diag_mu_deti': 933})
+   [FALLA] diferencia real en las noches: G3 FALLA (G3 CUMPLE, {'diag_mu_deti': 933})
+   [FALLA] G3 FALLA con 933 pares distintos (esperados 933; {'anomaly_pixels': 933})
+   [FALLA] G3 FALLA con 933 pares distintos (esperados 933; {'anomaly_pixels': 933, 'hotspot_lat': 933})
+   [FALLA] G3 FALLA con 933 pares distintos (esperados 933; {'anomaly_pixels': 933, 'hotspot_lat': 933})
+   [FALLA] G3 FALLA con 933 pares distintos (esperados 933; {'predicado del tablero distinto': 933})
+   [FALLA] G3 FALLA con 1 pares distintos (esperados 1; {'distance_class': 1})
+AUTOPRUEBA: 57 de 69 comprobaciones OK | FALLAN: ['absoluto_5e13', 'borde_fuera_del_corte', 'borde_lista_corta', 'borde_v375_sin_f5', 'clase_una_noche', 'diferencia_real', 'escena_predicado', 'noche_distinta', 'none_vs_cero', 'pixel_distinto', 'pixel_extra', 'relativo_1e8']
+MUTACION g3_sin_predicado rc=1
+   [FALLA] G3 FALLA con 0 pares distintos (esperados 933; {})
+   [FALLA] lo atrapa el predicado del tablero, no comparar ({})
+AUTOPRUEBA: 67 de 69 comprobaciones OK | FALLAN: ['escena_predicado']
+MUTACION u_sin_recorte_lleno rc=1
+   [FALLA] G3 FALLA con 0 pares distintos (esperados 933; {})
+AUTOPRUEBA: 68 de 69 comprobaciones OK | FALLAN: ['borde_lista_corta']
+MUTACION u_fuera_del_corte rc=1
+   [FALLA] G3 FALLA con 0 pares distintos (esperados 933; {})
+AUTOPRUEBA: 68 de 69 comprobaciones OK | FALLAN: ['borde_fuera_del_corte']
 
 RESUMEN
-   ninguna        rc=0 -> autoprueba verde, como debe
-   estrato_unico  rc=1 -> ATRAPADA
-   g2_any         rc=1 -> ATRAPADA
-   volatiles      rc=1 -> ATRAPADA
-   qneg_tabla     rc=1 -> ATRAPADA
-   binom_off1     rc=1 -> ATRAPADA
-   nulo_angosto   rc=1 -> ATRAPADA
-   sin_w2_igual   rc=1 -> ATRAPADA
-MUTACIONES ATRAPADAS: 7 de 7
+   ninguna              rc=0 -> autoprueba verde, como debe
+   estrato_unico        rc=1 -> ATRAPADA
+   g2_any               rc=1 -> ATRAPADA
+   volatiles            rc=3 -> ATRAPADA
+   qneg_tabla           rc=1 -> ATRAPADA
+   binom_off1           rc=1 -> ATRAPADA
+   nulo_angosto         rc=1 -> ATRAPADA
+   sin_w2_igual         rc=1 -> ATRAPADA
+   g3_orden_falla       rc=1 -> ATRAPADA
+   g3_borde_falla       rc=1 -> ATRAPADA
+   g3_escena_falla      rc=1 -> ATRAPADA
+   g3_tolerancia_falla  rc=1 -> ATRAPADA
+   g3_distinto_admitido rc=1 -> ATRAPADA
+   g3_sin_predicado     rc=1 -> ATRAPADA
+   u_sin_recorte_lleno  rc=1 -> ATRAPADA
+   u_fuera_del_corte    rc=1 -> ATRAPADA
+MUTACIONES ATRAPADAS: 15 de 15

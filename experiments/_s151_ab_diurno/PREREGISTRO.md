@@ -125,7 +125,11 @@ el brazo (sección 5, cobertura diurna); las no procesadas se cuentan aparte.
    diurnos con `diag_umbrales_diurnos = True` en cada ventana con pasadas diurnas en la tabla, y el
    control ninguno. Si el brazo diurno trae cero records diurnos, el cableado falló (el caso S92) y el
    A/B es INDECIDIBLE, no un «no mejora».
-2. **Las noches no cambian**: los records nocturnos de los dos brazos tienen que ser idénticos campo a
+2. ⚠️ **Precisado por las desviaciones D1 y D2 (§11)**: «idénticos campo a campo» se lee hoy como
+   «cada par nocturno clasificado por `unir_intentos.comparar` más el predicado del tablero, sin
+   ningún par `distinto`»; `orden`, `borde` y `hotspot_escena` se admiten y se informan aparte. Texto
+   original conservado:
+   **Las noches no cambian**: los records nocturnos de los dos brazos tienen que ser idénticos campo a
    campo (salvo `updated`, `processed_utc` y `regimen`). El flag no toca la noche por construcción
    (`tests/test_rama_diurna_viirs_s151.py`); una diferencia es un defecto del cableado o una
    diferencia de cobertura de NASA (A108), y se resuelve antes de mirar M1 a M4.
@@ -167,7 +171,7 @@ el brazo (sección 5, cobertura diurna); las no procesadas se cuentan aparte.
   en 6 o más en VIIRS 750 (`scipy.stats.binom`); el evaluador lo recalcula con el `n` procesado real.
   Límite declarado: `p_MIROVA` sale de pocos eventos (13 y 2) y la prueba lo trata como conocido; el
   evaluador informa además el intervalo de Clopper-Pearson de `p_MIROVA`.
-- **G3, noches intactas**: nulo 2 sin diferencias.
+- **G3, noches intactas**: nulo 2 sin diferencias (desde D2, §11: ningún par nocturno `distinto`).
 - Veredicto: G1, G2 y G3 → **ADOPTAR** (con R2 por píxel y verificador independiente antes del flip,
   reglas S33 y A45; y con el frontend corregido, sección 8). G1 y G3 sin G2 → **DECIDE NICOLÁS** con
   M4: cuántas alertas protegidas recupera contra cuántas publicaciones agrega en negativos diurnos
@@ -434,6 +438,66 @@ más fino, C1, es 3e-3), y enteros, bools, None y strings exactos, recursivo en 
 instrumento hecho después de ver datos; el motivo es mecánico y no depende del resultado (W1 sigue INDECIDIBLE).
 Lo fijan la autoprueba (casos 22 a 22g, 57 de 57) y las mutaciones: 8 de 8 sobre la comparación nueva y 7 de 7 sobre
 las de siempre. Informe del verificador: `C:\Users\nmend\AppData\Local\Temp\claude\verif_g3\VERIFICADOR.md`.
+
+**D2 (2026-10-17, rama `loop/diurno-g3-comparar`): G3 por par, con la regla de `unir_intentos`.** Motivo mecánico,
+no del resultado. (1) Los brazos corren en runners distintos y MODIS no es determinista bit a bit: el recorte top-100
+de `np.argsort(-per_pixel_vrp_mw)` (`pipeline/process_modis.py:1085-1099`) desempata distinto según la CPU, lo que
+cambia el orden y a veces el conjunto de `anomaly_pixels`, y a veces el hotspot de escena, y con él el rescate por
+cúmulo (`pipeline/store.py:390-422`) y el `vrp_mw` del record (D-16). (2) Las ventanas se arman uniendo intentos
+(D-13) y el G3, que comparaba el record crudo con las listas por posición, dependía del orden de la unión: en W2a
+Copahue 2026-06-18 07:30, 9 campos distintos con el orden (2,1) y ninguno con (1,2) (verificador del PR #843,
+`C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\experiments\_s151_unir_intentos_verif\VERIFICADOR_843.md`
+§3, sin versionar, que recomienda esta regla). Medido sobre W2 (W2a run 38853230521 unido con `unir_intentos.py` en
+los dos órdenes, más W2b run 38853273752): el G3 viejo da FALLA en los dos órdenes, con campos sólo de las listas de
+píxeles y sus derivados (hotspot, ancla final, geometría de visión, `vrp_mir_mw`, `discarded_n_pixels`) y, en el
+orden (2,1), además el rescate (`final_hotspot_source`, `discarded_reason`, `vrp_mw`, en 1 noche). Regla nueva: cada par nocturno control/diurno con
+el mismo gránulo y versión se clasifica con `unir_intentos.comparar` (sin VOLATILES; misma tolerancia que D1, y el
+evaluador exige al importar que las dos tolerancias y las dos listas de campos de proceso coincidan); los pares
+`borde` y `hotspot_escena` pasan además por el predicado del tablero con node (`unir_intentos._predicado`, por
+volcán), y si el tablero da distinto, o no se pudo correr, el par es `distinto`. G3 FALLA con cualquier `distinto`;
+`orden`, `borde` y `hotspot_escena` se informan aparte, par por par. La cobertura (A108) no cambia. Resultado sobre
+W2, mismo veredicto en los dos órdenes, CUMPLE con 0 distintos sobre 2.154 pares nocturnos (orden (1,2): igual
+1.108, tolerancia 1.017, orden 15, borde 13, hotspot_escena 1; orden (2,1): 909, 1.216, 17, 10 y 2). Las
+categorías cambian con el orden porque cambia qué intento conservó la unión; el veredicto no. Salidas en
+`C:\Users\nmend\AppData\Local\Temp\claude\g3_s151\g3_w2_{12,21}.{txt,json}`, con `g3_solo.py` (corre sólo el G3, sin
+mirar G1 ni G2). Lo fijan la autoprueba (casos 23 a 25: 67 de 67), `tests/test_g3_diurno_comparar_s151.py` y seis
+mutaciones `g3_*` de `mutar_evaluador.py`, una por categoría admitida, la que admite `distinto` y la que se salta
+el predicado (13 de 13 atrapadas, `mutaciones_salida.txt`). En la primera corrida cuatro `g3_*` daban «atrapada» sólo
+porque el evaluador mutado se caía (KeyError), no por el veredicto: se arregló el conteo y desde ahora
+`mutar_evaluador.py` informa una caída como «SE CAE» y no la cuenta como atrapada. La mutación
+`volatiles` la para desde ahora la guarda de coherencia al importar (el caso 17 ya no puede verla, porque `comparar`
+excluye sus campos de proceso por su cuenta). Lo que esta regla hereda de `comparar` y no acota (VERIFICADOR_843.md §4,
+LAX1 a LAX7) sigue sin acotar: el `vrp_mw` y la distancia del hotspot del lado no rescatado.
+
+**D2, arreglo del verificador del PR #847 (2026-10-17, misma rama).** El verificador con contexto limpio
+(`C:\Users\nmend\AppData\Local\Temp\claude\verif_847\VERIFICADOR.md`, sin versionar) sembró diferencias en W2 y
+encontró que `borde` se admitía donde el desempate no puede actuar: en VIIRS 375 (Chaitén, 4 píxeles) y VIIRS 750
+(1 píxel), cambiar o agregar un píxel sin tocar el conteo daba CUMPLE, y un píxel desplazado con `vrp_mir_mw` ×1,3
+también. Con menos de 100 píxeles el recorte top-100 no corta nada, así que otro conjunto es otra detección, y la
+rama diurna es VIIRS. Arreglo en `unir_intentos.comparar` (vale para el G3 y para las uniones de intentos): un
+conjunto de píxeles distinto sólo es `borde` (o `hotspot_escena` con píxeles distintos) si el recorte top-100
+cortó en los dos lados: la lista guardada (`anomaly_pixels` más `discarded_anomaly_pixels`) mide 100 **y**
+`n_anomalous_pixels`, el total detectado, supera 100 (el tope de `pipeline/process_modis.py:1085`,
+`process_viirs.py:1520`, `process_viirs_mod.py:1065` y `anomaly_pixels.py:16`, líneas en `a278acd2`); si no, es
+`distinto` con `sin_recorte` en el detalle. Y cada píxel que cambia tiene que empatar con el VRP mínimo de su lista
+(el del puesto 100); si no, `distinto` con `fuera_del_corte`. Estas dos condiciones las pidió la segunda vuelta del
+verificador (`VERIFICADOR_V2.md` en el temporal `verif_847_v2`, sin versionar): con la lista sola, 100 detectados
+exactos pasaban como recorte, y se admitía cambiar hasta el píxel más caliente. Con ellas, las uniones de W2a, V1
+y V2a y el G3 de W2 salen idénticos (los 108 y 23 pares `borde` reales empatan en el mínimo). No se limita a MODIS: entre los intentos de W2a hay un
+`borde` VIIRS 750 con la lista llena (Tupungatito VIIRS_NOAA21_750 2026-06-17 17:30), así que el empate existe también
+en VIIRS. Medido antes del cambio: entre intentos, 0 pares con conjunto distinto y lista corta de 108 (W2a 16,
+F/K V1 76, V2a 16), y entre los brazos de W2, 0 de 27. Con el comparar nuevo, las uniones de W2a (dos órdenes),
+F/K V1 y V2a salen byte a byte iguales a las del comparar de `origin/main` (22, 43 y 22 archivos; el 44.º de V1
+sólo existe en un intento), y el G3 sobre W2 no cambia. Además: si el predicado del tablero no corre, el G3 ya no
+dice FALLA (cableado) sino INDECIDIBLE, y `mutar_evaluador.py` sólo acepta como atrapada una aserción del import si
+es una de las dos guardas de coherencia. Lo fijan el caso 23b con la lista llena, los casos nuevos 23d (lista corta,
+FALLA) y 23e (cambia el píxel más caliente, FALLA), las mutaciones `u_sin_recorte_lleno` y `u_fuera_del_corte`
+(sobre `unir_intentos.py`) y los tests de `unir_intentos`. De paso
+apareció un defecto previo de la autoprueba, no del G3: el caso 3 (azar) sorteaba iterando un conjunto, cuyo
+orden sigue el hash de los strings y cambia con PYTHONHASHSEED en cada proceso, así que su D variaba por proceso
+(de -0,094 a +0,030 con las semillas 0 a 5) y en una corrida de mutaciones G1 pasó (D +0,154 contra p95 +0,123) y
+la autoprueba falló sin mutación. Ahora sortea sobre el conjunto ordenado (D -0,001 contra p95 +0,125 con
+cualquier semilla); el esperado (G1 FALLA) no cambia.
 
 **Nota de procedimiento (W1):** cada intento del brazo diurno perdió pasadas nocturnas distintas por descarga. Se
 unieron los dos intentos con `unir_intentos.py` (se niega si un gránulo común difiere; 325 comunes idénticos), lo que
