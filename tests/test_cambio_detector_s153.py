@@ -68,7 +68,7 @@ def test_las_tres_vistas_cargan_el_modulo_despues_de_chartjs():
         assert 0 < i_chart < i_mod, f"{v}: el módulo tiene que cargarse después de Chart.js para registrar el plugin"
 
 
-def test_la_constante_existe_y_en_esta_rama_es_null():
+def test_la_constante_existe_y_es_null_o_fecha_iso():
     src = MODULO.read_text(encoding="utf-8")
     assert re.search(r"^\s*const CAMBIO_DETECTOR_UTC = (null|\"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?Z\");", src, re.M)
     (v,) = node(f"const M = require({json.dumps(str(MODULO))}); process.stdout.write(JSON.stringify([M.CAMBIO_DETECTOR_UTC]));")
@@ -121,7 +121,8 @@ def test_camino_del_navegador_con_la_constante_completada(tmp_path):
     """Lo que pasará el día del merge: se completa la constante y el módulo, cargado como <script>, registra el
     plugin en Chart.js y pone el aviso en la página. Si el registro o el aviso dejaran de ocurrir, falla."""
     src = MODULO.read_text(encoding="utf-8")
-    completado, n = re.subn(r"const CAMBIO_DETECTOR_UTC = null;", f"const CAMBIO_DETECTOR_UTC = {json.dumps(FECHA)};", src)
+    # S154: la constante ya está completada con la hora del merge de #850; se reemplaza el valor que tenga (null o fecha).
+    completado, n = re.subn(r'const CAMBIO_DETECTOR_UTC = (null|"[^"]*");', f"const CAMBIO_DETECTOR_UTC = {json.dumps(FECHA)};", src)
     assert n == 1
     archivo = tmp_path / "cambio_detector_completado.js"
     archivo.write_text(completado, encoding="utf-8")
