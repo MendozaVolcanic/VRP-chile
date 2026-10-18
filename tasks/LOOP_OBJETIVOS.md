@@ -393,6 +393,12 @@ siempre con el tope de 2 A/B a la vez y sin desplazar el A/B de F/K en curso).**
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-18 05:00 UTC (vuelta 190, S153): tarea 1.23 bis delegada; esperas
+- NRT verde a las 04:10 (primer despacho del cron externo, en hora de Chile). W6a 4 de 22; W6b pendiente. #850 sin
+  respuesta. Disco 6,5 GB.
+- **1.23 bis** (commit de la deriva de los 8 records MODIS) delegada a un agente de sólo lectura, por arqueología de
+  código (MODIS no corre en Windows) (`C:\Users\nmend\AppData\Local\Temp\claude\deriva_123bis\`).
+
 ### 2026-10-18 04:27 UTC (vuelta 189, S153): W5a unida y PAREJA (con desviación); W6b despachada; cron externo en hora de Chile
 - **Cron externo: despachó a las 04:10 UTC** (= 01:10 de Chile): cron-job.org interpreta `10 1-12 * * *` en hora de
   Chile, o sea 04:10 a 15:10 UTC. La ventana nocturna de MODIS (01 a 03 UTC) queda sólo con el programado de GitHub,
