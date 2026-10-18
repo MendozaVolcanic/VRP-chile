@@ -382,7 +382,8 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 - [x] **1.26 Verificador limpio de `experiments/_s153_localizacion/`** HECHA 2026-10-18 (vuelta 196): la tesis central
   REFUTADA (K no relocaliza, deja de publicar); ver la marca sobre la entrada de la vuelta original y
   `experiments/_s153_localizacion/verificador/INFORME.md`.
-- [ ] **1.31 El marcador del mapa de detalle no es el cúmulo en los records `ctx_cluster`** (hallazgo H3 del verificador de
+- [x] **1.31 HECHA 2026-10-18 (#853, R8 en el tablero publicado; D-24 aprobada por Nicolás).** Texto original:
+  **1.31 El marcador del mapa de detalle no es el cúmulo en los records `ctx_cluster`** (hallazgo H3 del verificador de
   1.26, gravedad 4; leído en `frontend/index.html` de `main` el 2026-10-18: para `test1_roi`/`test1_nti_peak` el primer
   marcador es `final_hotspot`, pero para `ctx_cluster` es `anomaly_pixels[0]`, el píxel más fuerte de la escena, y por
   defecto sólo se dibuja el índice 0). Con K todos los records son `ctx_cluster`. Medido por el verificador sin navegador:
@@ -423,7 +424,7 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
-| D-24 | Arreglo del marcador del mapa de detalle en los records `ctx_cluster` (tarea 1.31): primer marcador = `final_hotspot` (el cúmulo) en vez de `anomaly_pixels[0]` (el píxel más fuerte de la escena). Cambia lo que ve el operador; con K afecta a todos los records. Recomendación: sí, después de confirmarlo en el navegador | `experiments/_s153_localizacion/verificador/INFORME.md` H3; `frontend/index.html` de `main` | | pendiente |
+| D-24 | **CERRADA: sí** (Nicolás, 2026-10-18; #853 mergeado y R8). Arreglo del marcador del mapa de detalle en los records `ctx_cluster` (tarea 1.31): primer marcador = `final_hotspot` (el cúmulo) en vez de `anomaly_pixels[0]` (el píxel más fuerte de la escena). Cambia lo que ve el operador; con K afecta a todos los records. Recomendación: sí, después de confirmarlo en el navegador | `experiments/_s153_localizacion/verificador/INFORME.md` H3; `frontend/index.html` de `main` | | pendiente |
 | D-23 | **EN CURSO** (Nicolás, 2026-10-18: sí al reproceso histórico; tarea 1.24). Reproceso de los 3.231 records MODIS de enero a junio de 2026 escritos con los gates intra-radio (deriva 1.23 bis, CONFIRMADA). Recomendación: hacerlo dentro del reproceso histórico con K si se adopta #850, no antes | `experiments/_s153_deriva_123bis/` | | pendiente |
 | D-22 | Ratificar la desviación de W5a (intento 2 entero para Llaima `_s151_ab_diurno_on`: 2 records diurnos VIIRS 375 distintos por empate del top-100, mismo predicado, mismo cúmulo) y, aparte, decidir si se extiende a VIIRS el desempate determinista de #844 (producción, A45) | bitácora vuelta 189 | | pendiente |
 | D-21 | **CERRADA: sí** (Nicolás, 2026-10-18; merge squash `34cea39e` a las 09:57:30 UTC, marca #851). **Merge de la adopción de K** (producción, A45). Cumple la regla #848 entera: combinado CUMPLE (original y SN), verificador CONFIRMADO, R3 idéntico, cruce de 1 MW ninguno, A61 sin protegidas movidas a otro objeto, segundo lector 4 de 4 lejanas, R2 5 de 5, K sobre main idéntico. Además: auto-audit sin recalibrar (recomendado), laboratorios lowT y ndc_focus en C0, aviso a consumidores | `experiments/_s153_fk_v2/` | #850, tag `pre-s153-adopcion-k` | pendiente |
@@ -455,6 +456,21 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-18 19:10 UTC (vuelta 201-202, S154): D-24 aprobada y aplicada (#853); arreglo A114 del evaluador en prueba
+- **Nicolás aprobó D-24** («sí a D-24: confírmalo en el navegador con el código real y, si se confirma, mergea el PR
+  del marcador con su prueba y R8»). Confirmación previa: vuelta 199. #853 (`c8fbe5b3`, squash 19:04:16 UTC):
+  `pixelesDelMarcador(r, v)` en `frontend/index.html`, `ctx_cluster` sumado a las anclas honestas (`final_hotspot`
+  primero = centroide del cúmulo en 247 de 247 records de la ventana), `anomaly_pixels` detrás. Prueba
+  `tests/test_marcador_mapa_ctx_cluster_s154.py` (6 en node; fallaban las 6 antes; control sobre datos reales de
+  Láscar); 261 pruebas que leen `index.html` en verde; CI verde. Navegador local y **R8 en el tablero publicado**:
+  Láscar 2026-10-10 05:06 NOAA-20 pasa de 24,73 km a 1,01 km del cráter, las otras tres de la noche sin cambio,
+  consola sin errores. Capturas antes y después en `experiments/_s154_marcador/`. 1.31 HECHA.
+- **1.32, paso H1** (rama `loop/diurno-evaluador-a114`, worktree `s153-adopcion`): caso 26 del arnés (VIIRS 375
+  saturado, 750 callado) en rojo con el evaluador viejo (`{}`) y en verde con el aviso por sensor
+  (`{'VIIRS375': True, 'VIIRS750': False}`), corriendo sólo 1, 3 y 26 con el filtro nuevo `PROBAR_SOLO` (el fallo de
+  `cobertura_workflow` en esa corrida es del filtro: el caso 14 reutiliza la carpeta del 8). Batería completa
+  corriendo antes del PR.
 
 ### 2026-10-18 18:25 UTC (vuelta 200, S154): 1.27, las pasadas Terra sin K no se pueden reprocesar
 - Paradas: NRT verde 17:04, disco 17 GB. D-24 sin respuesta.
