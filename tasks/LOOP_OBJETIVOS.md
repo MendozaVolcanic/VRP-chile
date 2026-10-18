@@ -372,7 +372,9 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   previo; (e) `experiments/_s154_reproc_k/verificar_ventana.py` sobre 2025-02-15..2026-09-17 contra ese tag (0
   perdidas, 0 cambiadas antes de la ventana) y R8 sobre el JSON publicado. Después, borrar
   `data/_s154_reproc_k_historico/` de `main` en un PR (queda en la historia de git).
-- [ ] **1.25 Diurno W6a y evaluación W2 a W6** (autorizado 2026-10-18). W6a (39090434307) quedó con `recolectar` en
+- [x] **1.25 HECHA 2026-10-18 (vuelta 198), verificador PARCIAL:** NO ADOPTAR se sostiene para C0 y NO se traslada a K
+  (`experiments/_s151_ab_diurno/salidas/W2_W6_s154/verificador/INFORME.md`). Sigue en 1.32. Texto original:
+  **1.25 Diurno W6a y evaluación W2 a W6** (autorizado 2026-10-18). W6a (39090434307) quedó con `recolectar` en
   rojo por cobertura: al brazo `_s151_ab_diurno_on` le faltan 4 noches. Repetir los volcanes afectados en los dos
   brazos, misma ventana (2026-10-01 a 10-07), `--ref s151-diurno-codigo`; unir con
   `experiments/_s153_fk_v2/unir_ventana.py` (D-13); juntar W2 a W6 y evaluar con `evaluar_diurno.py`; verificador
@@ -438,6 +440,22 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-18 ~18:10 UTC (vuelta 198, S154): verificador del diurno: PARCIAL; NO ADOPTAR vale para C0, no para K
+- Re-corrió el evaluador dos veces (con y sin `--repetidas`): mismos números. Tres caminos independientes: pareo
+  aparte (0 discrepancias en 5.018 pasadas), nulo exacto por convolución de hipergeométricas (D de W2 a W6 en la
+  mediana, P = 0,52), cobertura pareja en las 10 raíces. `--repetidas` no actúa (ninguna ventana pasa del 10 %). Los
+  siete commits de las raíces tienen `pipeline/`, tablero, `run_pipeline.py`, workflow y `volcanoes.yaml` idénticos:
+  todo es C0.
+- **H4 (gravedad 4): no se traslada a K.** De día el Test 1 dispara en 2.000 de 2.077 publicaciones de VIIRS 375 en
+  negativos limpios (987 sólo `test1_roi`; V750 389 de 731); 11 de las 22 protegidas recuperadas salen sólo del Test 1.
+  Contrafactual sólo `ctx_cluster`: G1 W2 a W6 sigue fallando (+0,132 contra +0,195), W3 a W6 cumple (P = 0,001); G2
+  falla (1.142 contra 20; 357 contra 6). Nueva tarea 1.32.
+- H1 (3): el aviso A114 del evaluador junta los dos sensores (60,0 %) y no ve que VIIRS 375 está en 89,3 %. H2 (2): el
+  p95 del nulo depende del orden de un conjunto (`:635`): +0,2446 o +0,2760, exacto +0,2760; no cambia el veredicto.
+  H3 (2): «sin W2 también falla» es un empate en el cuantil exacto. H5 (1): W5a mezcla commits `7b825ba` y `eb97779`
+  con código idéntico.
+- #813 comentado con el resultado.
 
 ### 2026-10-18 ~17:40 UTC (vuelta 197, S154): diurno W2 a W6 evaluado: NO ADOPTAR (por verificar)
 - Paradas: NRT verde 15:10 (la de 17:04 en cola), disco 17 GB. Histórico 1.24: 33 de 176.
