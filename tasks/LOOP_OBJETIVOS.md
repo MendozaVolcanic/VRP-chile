@@ -424,7 +424,7 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
-| D-25 | **Sello de la adenda del A/B diurno sobre K** (tarea 1.32), con dos decisiones: (1) cola exacta del nulo en G1 (recomendada) o muestreo; (2) si G1 cumple sin W2 y falla con W2: DECIDE NICOLÁS CON M4 (recomendada, simétrica de la regla de «pasa sólo con W2») o NO ADOPTAR. Después del sello y antes de despachar: H2a, H2b y, si se aprueba, la cola exacta con sus pruebas | `experiments/_s151_ab_diurno/ADENDA_K.md` v2, `verificador_adenda_k/INFORME.md` | #857 | pendiente |
+| D-25 | **CERRADA: SELLADA** (Nicolás, 2026-10-18, las dos opciones recomendadas; #857). **Sello de la adenda del A/B diurno sobre K** (tarea 1.32), con dos decisiones: (1) cola exacta del nulo en G1 (recomendada) o muestreo; (2) si G1 cumple sin W2 y falla con W2: DECIDE NICOLÁS CON M4 (recomendada, simétrica de la regla de «pasa sólo con W2») o NO ADOPTAR. Después del sello y antes de despachar: H2a, H2b y, si se aprueba, la cola exacta con sus pruebas | `experiments/_s151_ab_diurno/ADENDA_K.md` v2, `verificador_adenda_k/INFORME.md` | #857 | pendiente |
 | D-24 | **CERRADA: sí** (Nicolás, 2026-10-18; #853 mergeado y R8). Arreglo del marcador del mapa de detalle en los records `ctx_cluster` (tarea 1.31): primer marcador = `final_hotspot` (el cúmulo) en vez de `anomaly_pixels[0]` (el píxel más fuerte de la escena). Cambia lo que ve el operador; con K afecta a todos los records. Recomendación: sí, después de confirmarlo en el navegador | `experiments/_s153_localizacion/verificador/INFORME.md` H3; `frontend/index.html` de `main` | | pendiente |
 | D-23 | **EN CURSO** (Nicolás, 2026-10-18: sí al reproceso histórico; tarea 1.24). Reproceso de los 3.231 records MODIS de enero a junio de 2026 escritos con los gates intra-radio (deriva 1.23 bis, CONFIRMADA). Recomendación: hacerlo dentro del reproceso histórico con K si se adopta #850, no antes | `experiments/_s153_deriva_123bis/` | | pendiente |
 | D-22 | Ratificar la desviación de W5a (intento 2 entero para Llaima `_s151_ab_diurno_on`: 2 records diurnos VIIRS 375 distintos por empate del top-100, mismo predicado, mismo cúmulo) y, aparte, decidir si se extiende a VIIRS el desempate determinista de #844 (producción, A45) | bitácora vuelta 189 | | pendiente |
@@ -457,6 +457,19 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-19 ~00:30 UTC (vueltas 209-210, S154): D-25 SELLADA; candado implementado (#858), en verificación
+- **Nicolás selló la adenda** (D-25): «Sello la adenda del A/B diurno sobre K (D-25) con las dos opciones
+  recomendadas: cola exacta del nulo en G1 y, si G1 cumple sin W2 y falla con W2, decido yo con M4. Implementa H2a, H2b
+  y la cola exacta con sus pruebas y verificador antes de despachar.» Registrado en la adenda; #857 mergeado
+  (`34fedcd6`, CI del commit del sello esperado con conclusión antes del merge, A39).
+- #858 (rama `loop/diurno-k-candado`, CI verde, SIN mergear hasta el verificador): con `--base k`, G1 decide con
+  P(nulo >= D) exacta (siempre informada), regla W2 de la §3.2, controles del nulo contra la regla exacta, H2a
+  (`cableado_records`, 0 records con Test 1 y `codigo_sha` = `--sha-codigo`), H2b (`--base` sin valor por defecto).
+  Pruebas que fallaban antes; mutación «>=» por «>» probada sobre una copia dentro del árbol (la prueba cae); arnés 95
+  de 95. Sobre W2 a W6 real la cola exacta da 0,5223 y 0,1058 y p95 exacto +0,2760 y +0,2303, iguales a la
+  reimplementación del verificador de la adenda.
+- Verificador limpio del candado lanzado (`experiments/_s151_ab_diurno/verificador_candado_k/`).
 
 ### 2026-10-18 ~23:30 UTC (vuelta 208, S154): adenda v2 tras el verificador; D-25 a Nicolás (#857)
 - Verificador limpio de la adenda (`experiments/_s151_ab_diurno/verificador_adenda_k/INFORME.md`): P1 limpio (147
