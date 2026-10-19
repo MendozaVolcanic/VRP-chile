@@ -121,9 +121,12 @@ jobs:
             ABIERTOS=$(gh issue list --state open --search "in:title Auto-audit semanal DEGRADADO" --json number --jq 'length')
             if [ "$ABIERTOS" = "0" ]; then
               python -c "import json; print('\n'.join('- '+a for a in json.load(open('data/audit_continuous/latest.json'))['cobertura']['avisos']))" > /tmp/avisos.txt
+              # S156: los flags también, aunque el veredicto no los pueda interpretar (una alerta protegida
+              # sin publicar no deja de serlo porque la ventana esté degradada).
+              python -c "import json; print('\n'.join('- '+f for f in json.load(open('data/audit_continuous/latest.json'))['flags']) or '- ninguno')" > /tmp/flags.txt
               gh issue create \
                 --title "⚠ Auto-audit semanal DEGRADADO: $(date -u +%F)" \
-                --body "$(printf 'El auto-audit semanal no puede interpretar esta ventana:\n\n%s\n\nUn DEGRADADO no es una falla de detección: suele ser un apagón del NRT (revisar nrt-healthcheck y el vencimiento de EARTHDATA_TOKEN) o el scraper de MIROVA detenido.\nDetalle: `data/audit_continuous/latest.json`.' "$(cat /tmp/avisos.txt)")"
+                --body "$(printf 'El auto-audit semanal no puede interpretar esta ventana:\n\n%s\n\nUn DEGRADADO no es una falla de detección: suele ser un apagón del NRT (revisar nrt-healthcheck y el vencimiento de EARTHDATA_TOKEN), el scraper de MIROVA detenido o la frontera de detector de frontend/cambio_detector.js atrás de los datos.\n\nFlags de la corrida (sin interpretar):\n\n%s\n\nDetalle: `data/audit_continuous/latest.json`.' "$(cat /tmp/avisos.txt)" "$(cat /tmp/flags.txt)")"
             else
               echo "ya hay un issue DEGRADADO abierto; no se abre otro"
             fi

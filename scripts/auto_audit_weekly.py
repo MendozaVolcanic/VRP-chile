@@ -439,18 +439,24 @@ def _detector_banco(r, frontera):
     return _detector(bool(r.get("sha")), r["noche"], frontera)
 
 
-def aplicar_d9(alertas, modo=REGLA_MINIMAS):
+def aplicar_d9(alertas, modo=REGLA_MINIMAS, filas_ref=None):
     """Quita las pasadas mínimas (D-9) de las alertas del cargador canónico. 'original' no toca nada.
 
     La regla es la de `clase_mirova.aplicar_regla_minimas` (una sola implementación): una pasada es
     mínima sólo si TODAS sus filas de alerta tienen 0,05 MW o menos y ninguna alerta más alta del mismo
     volcán y sensor cae a 120 s. Para el recall, SN y SE dan lo mismo: la noche mínima no es alerta.
+    Las mínimas se calculan sobre `filas_ref`, las filas de la referencia unificada (consolidado y OCR
+    por separado, VRP vacío como vacío), que es sobre lo que la regla está definida. Sin ellas se
+    calculan sobre las alertas del cargador, que ya vienen deduplicadas (el consolidado le gana al OCR)
+    y con el VRP vacío en 0: el verificador de S156 mostró dos casos sintéticos donde eso diverge.
     """
     if modo == "original":
         return alertas
-    filas = [{"volcano": a["volcano"], "sensor_bucket": a["sensor_bucket"], "fecha_utc": a["fecha_utc"] or "",
-              "vrp_mw": a.get("vrp_mw"), "tipo": "ALERTA_TERMICA"} for a in alertas if a.get("fecha_utc")]
-    minimas = cm.aplicar_regla_minimas(filas, "SN").minimas
+    if filas_ref is None:
+        filas_ref = [{"volcano": a["volcano"], "sensor_bucket": a["sensor_bucket"],
+                      "fecha_utc": a["fecha_utc"] or "", "vrp_mw": a.get("vrp_mw"), "tipo": "ALERTA_TERMICA"}
+                     for a in alertas if a.get("fecha_utc")]
+    minimas = cm.aplicar_regla_minimas(filas_ref, "SN").minimas
     return [a for a in alertas
             if (a["volcano"], a["sensor_bucket"], (a["fecha_utc"] or "")[:16]) not in minimas]
 
@@ -487,7 +493,7 @@ def nuestros_por_noche(records_por_volcan, win, frontera):
     """
     ours = defaultdict(lambda: {"crater": [], "dash": [], "pub": [], "npix": []})
     vistos, dias = set(), set()
-    fuera = defaultdict(int)
+    fuera, n_det = defaultdict(int), defaultdict(int)
     for vol, records in records_por_volcan.items():
         for rec in records:
             dt = rec.get("datetime_utc")
@@ -498,6 +504,7 @@ def nuestros_por_noche(records_por_volcan, win, frontera):
                 continue
             dias.add(dt[:10])   # S150: hubo dato, haya o no detección, sea del detector que sea
             d_rec, d_noche = detector_de_record(rec, frontera), detector_de_noche(dt, frontera)
+            n_det[d_rec] += 1
             if d_rec != d_noche:
                 fuera[f"{d_rec} en noche {d_noche}"] += 1
                 continue
@@ -517,7 +524,38 @@ def nuestros_por_noche(records_por_volcan, win, frontera):
                     # S124: el conteo de pixeles es la variable que estratifica
                     # los DOS modos de falla (ver bloque de estratificación).
                     ours[key]["npix"].append(len(rec.get("anomaly_pixels") or []))
-    return {"ours": ours, "vistos": vistos, "dias_con_datos": dias, "fuera_de_detector": dict(fuera)}
+    return {"ours": ours, "vistos": vistos, "dias_con_datos": dias, "fuera_de_detector": dict(fuera),
+            "n_records_por_detector": dict(n_det)}
+
+
+def cargar_records():
+    """Records de data/mirova_equivalent/ por volcán, e integridad sobre TODO el archivo."""
+    records_por_volcan = {}
+    integrity = {"parse_errors": [], "duplicates_total": 0}
+    for vol in VOLS:
+        path = os.path.join(ROOT, "data", "mirova_equivalent", vol + ".json")
+        try:
+            d = json.load(open(path, encoding="utf-8"))
+        except Exception as e:  # noqa: BLE001 — A47-style corrupción es justo lo vigilado
+            integrity["parse_errors"].append(f"{vol}: {e}")
+            continue
+        seen = set()
+        for rec in d["records"]:
+            k2 = (rec.get("datetime_utc"), rec.get("sensor"))
+            if k2 in seen:
+                integrity["duplicates_total"] += 1
+            seen.add(k2)
+        records_por_volcan[vol] = d["records"]
+    return records_por_volcan, integrity
+
+
+def cargar_filas_referencia():
+    """Filas de la referencia unificada (para D-9), o None si no se pueden leer (cae al cargador)."""
+    try:
+        from referencia_mirova_unificada import cargar_referencia_unificada  # noqa: E402
+        return cargar_referencia_unificada(CONS, OCR)
+    except Exception:  # noqa: BLE001
+        return None
 
 
 def _mediana(xs):
@@ -602,7 +640,7 @@ def alertas_protegidas(filas, recs_banco, win, frontera, diurna=None):
         def diurna(b, vol, dt):
             ll = coords.get(vol)
             return bool(ll) and es_pasada_diurna_descartada(b, ll[0], ll[1], dt)
-    prot, instante = {}, {}
+    prot, instante, fuentes = {}, {}, defaultdict(set)
     for f in filas:
         if not cm.alerta_protegida(f) or not (win[0] <= f["fecha_utc"][:10] <= win[1]):
             continue
@@ -615,6 +653,7 @@ def alertas_protegidas(filas, recs_banco, win, frontera, diurna=None):
         k = cm.clave_pasada(f)
         prot[k] = max(prot.get(k, 0.0), f["vrp_mw"])
         instante.setdefault(k, dt)
+        fuentes[k].add(f.get("source"))
     por_vb = defaultdict(list)
     for r in recs_banco:
         por_vb[(r["vol"], r["b"])].append(r)
@@ -629,8 +668,26 @@ def alertas_protegidas(filas, recs_banco, win, frontera, diurna=None):
         lista.append({"volcano": vol, "sensor": b, "fecha_utc": minuto, "vrp_mirova_mw": round(prot[k], 3),
                       "detector": detector_de_noche(minuto, frontera), "estado": estado,
                       "detector_records": sorted({_detector_banco(r, frontera) for r in cand}),
-                      "noche_publicada_otra_pasada": any(r["pub"] for r in otras)})
+                      "noche_publicada_otra_pasada": any(r["pub"] for r in otras),
+                      "referencia_sospechosa": (fuentes[k] == {"OCR"} and minuto[:10] < HITO_OCR_SUOMI_NPP
+                                                and any("SNPP" in (r.get("sensor") or "") for r in cand))})
     return lista
+
+
+# A119: antes de este hito, en las filas SÓLO OCR de Suomi NPP la distancia y la clase pueden ser de OTRA
+# pasada (el VRP sí es de la suya). Una protegida que descansa sólo en una de esas filas sigue siendo
+# protegida por su VRP, pero el flag lo dice: dos de las cinco del 2026-10-19 (Tupungatito 28 y 29 de
+# septiembre) eran así, con nuestros cúmulos a 21,6 y 9,4 km (verificador de S156). El hito vive en
+# scripts/calidad_referencia_mirova.py, no copiado acá.
+def _hito_ocr_suomi_npp():
+    try:
+        from calidad_referencia_mirova import HITOS  # noqa: E402
+    except ImportError:
+        from scripts.calidad_referencia_mirova import HITOS  # noqa: E402
+    return next(f for f, canal, quien, _ in HITOS if canal == "ocr" and "Suomi" in quien)
+
+
+HITO_OCR_SUOMI_NPP = _hito_ocr_suomi_npp()
 
 
 def flags_protegidas(lista, vigente):
@@ -640,8 +697,10 @@ def flags_protegidas(lista, vigente):
             continue
         noche = ("la noche sí se publicó en otra pasada" if p["noche_publicada_otra_pasada"]
                  else "ninguna otra pasada de esa noche se publicó")
+        sospecha = (f"; referencia sospechosa: sólo OCR de Suomi NPP antes del {HITO_OCR_SUOMI_NPP}, la "
+                    "distancia puede ser de otra pasada (A119)" if p.get("referencia_sospechosa") else "")
         out.append(f"alerta protegida sin publicar: {p['volcano']} {p['sensor']} {p['fecha_utc']} UTC, "
-                   f"MIROVA {p['vrp_mirova_mw']} MW (detector {p['detector']}; {noche})")
+                   f"MIROVA {p['vrp_mirova_mw']} MW (detector {p['detector']}; {noche}{sospecha})")
     return out
 
 
@@ -680,26 +739,12 @@ def main():
     #    S156: con la regla D-9 decidida (SN) y, aparte, con la original, que sólo se informa.
     alertas = alertas_mirova()
     coords = _coords_por_volcan()
-    mir, n_diurnas_excluidas = noches_mirova(aplicar_d9(alertas, REGLA_MINIMAS), coords, win)
+    filas_ref = cargar_filas_referencia()
+    mir, n_diurnas_excluidas = noches_mirova(aplicar_d9(alertas, REGLA_MINIMAS, filas_ref), coords, win)
     mir_original, _ = noches_mirova(alertas, coords, win)
 
     # 2. Nuestros records + integridad (la integridad mira TODO el archivo, no sólo la ventana)
-    records_por_volcan = {}
-    integrity = {"parse_errors": [], "duplicates_total": 0}
-    for vol in VOLS:
-        path = os.path.join(ROOT, "data", "mirova_equivalent", vol + ".json")
-        try:
-            d = json.load(open(path, encoding="utf-8"))
-        except Exception as e:  # noqa: BLE001 — A47-style corrupción es justo lo vigilado
-            integrity["parse_errors"].append(f"{vol}: {e}")
-            continue
-        seen = set()
-        for rec in d["records"]:
-            k2 = (rec.get("datetime_utc"), rec.get("sensor"))
-            if k2 in seen:
-                integrity["duplicates_total"] += 1
-            seen.add(k2)
-        records_por_volcan[vol] = d["records"]
+    records_por_volcan, integrity = cargar_records()
     nuestros = nuestros_por_noche(records_por_volcan, win, frontera)
     ours, vistos = nuestros["ours"], nuestros["vistos"]
 
@@ -719,11 +764,16 @@ def main():
         flags.append(f"integridad: {integrity['duplicates_total']} records duplicados (datetime,sensor)")
 
     avisos_detector = []
-    if nuestros["fuera_de_detector"].get("K en noche C0"):
+    n_k_en_c0 = nuestros["fuera_de_detector"].get("K en noche C0")
+    if n_k_en_c0 and frontera is None:
         avisos_detector.append(
-            f"{nuestros['fuera_de_detector']['K en noche C0']} records de K con fecha anterior a la frontera "
-            f"{frontera}: si el histórico con K ya se aplicó, mover DATOS_K_DESDE_UTC en "
-            "frontend/cambio_detector.js (esas noches se están evaluando con C0)")
+            f"no se leyó DATOS_K_DESDE_UTC de frontend/cambio_detector.js y hay {n_k_en_c0} records de K: "
+            "todas las noches se están evaluando como C0 y K queda fuera del veredicto")
+    elif n_k_en_c0:
+        avisos_detector.append(
+            f"{n_k_en_c0} records de K con fecha anterior a la frontera {frontera}: si el histórico con K ya "
+            "se aplicó, mover DATOS_K_DESDE_UTC en frontend/cambio_detector.js (esas noches se están "
+            "evaluando con C0)")
 
     # 5. Banco de paridad (predicado del tablero con node): alertas protegidas y falsas publicaciones.
     #    Si no corre, las protegidas quedan sin evaluar y eso SÍ degrada el veredicto: el criterio de
@@ -735,6 +785,12 @@ def main():
         flags.extend(flags_protegidas(protegidas, vigente))
     except Exception as e:  # noqa: BLE001
         error_banco = f"{type(e).__name__}: {str(e)[:300]}"
+    # S156 (verificador, mutación «sin sha en el banco»): si el banco perdiera la marca de detector, las
+    # falsas de K quedarían con n 0 y valor None sin que nada lo dijera.
+    n_k_nuestros = nuestros["n_records_por_detector"].get("K", 0)
+    if banco is not None and n_k_nuestros and not any(r.get("sha") for r in banco[0]):
+        avisos_detector.append(f"el banco de paridad no trae la marca de detector (sha) y hay {n_k_nuestros} "
+                               "records de K en la ventana: las falsas por detector no se pueden separar")
 
     # --- S124: cobertura de la ventana, ANTES de interpretar los flags ---
     # S150 (D-02): dias con DATOS (no con deteccion) y la cola sin datos al final de la ventana.
@@ -750,7 +806,9 @@ def main():
     if gt_ultima:
         gt_stale_dias = (today - datetime.fromisoformat(gt_ultima).date()).days
 
-    cobertura_avisos = list(cob["avisos"])
+    # S156: un aviso de detector también degrada. Si la frontera no se lee o quedó atrás de los datos,
+    # las noches de K se evalúan como C0 y K desaparece del veredicto sin que nada lo diga (verificador).
+    cobertura_avisos = list(cob["avisos"]) + [f"detector: {a}" for a in avisos_detector]
     if gt_stale_dias is None:
         cobertura_avisos.append("no se pudo leer la fecha del ground truth: referencia sospechosa")
     elif gt_stale_dias > MAX_GT_STALE_DAYS:

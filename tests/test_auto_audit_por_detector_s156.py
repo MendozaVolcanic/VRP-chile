@@ -202,6 +202,24 @@ def test_protegidas_listadas_con_su_estado_y_flag_solo_sin_publicar_del_vigente(
     assert "NevadosDeChillan MODIS 2026-10-12 07:20" in flags[0] and "2.18" in flags[0]
 
 
+def test_protegida_solo_ocr_de_suomi_npp_antes_del_hito_se_marca_sospechosa():
+    """A119: antes del hito, la distancia de una fila sólo OCR de Suomi NPP puede ser de otra pasada."""
+    hito = aa.HITO_OCR_SUOMI_NPP
+    assert hito == "2026-10-09"
+    filas = [dict(_fila("Tupungatito", "VIIRS375", "2026-09-28 05:18:00", 2.51, tipo="ALERTA_TERMICA_OCR"),
+                  source="OCR"),
+             dict(_fila("Tupungatito", "VIIRS375", "2026-09-29 04:54:00", 1.86), source="CONS"),
+             dict(_fila("Tupungatito", "VIIRS375", "2026-10-12 04:54:00", 1.5, tipo="ALERTA_TERMICA_OCR"),
+                  source="OCR")]
+    recs = [dict(_brec("Tupungatito", "VIIRS375", "2026-09-28 05:18", False), sensor="VIIRS_SNPP"),
+            dict(_brec("Tupungatito", "VIIRS375", "2026-09-29 04:54", False), sensor="VIIRS_SNPP"),
+            dict(_brec("Tupungatito", "VIIRS375", "2026-10-12 04:54", False), sensor="VIIRS_SNPP")]
+    lista = aa.alertas_protegidas(filas, recs, ("2026-08-20", "2026-10-19"), FRONTERA, diurna=lambda *a: False)
+    assert [p["referencia_sospechosa"] for p in lista] == [True, False, False]
+    flags = aa.flags_protegidas(lista, "K")
+    assert "referencia sospechosa" in flags[0] and "referencia sospechosa" not in flags[1]
+
+
 def test_protegidas_diurnas_no_entran():
     filas = [_fila("Lascar", "VIIRS375", "2026-10-12 17:00:00", 3.0)]
     assert aa.alertas_protegidas(filas, [], ("2026-08-20", "2026-10-19"), FRONTERA,
