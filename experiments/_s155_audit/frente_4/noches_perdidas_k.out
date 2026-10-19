@@ -1,0 +1,34 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+[referencia MIROVA] la ventana 2026-08-18 a 2026-09-17 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-08-18 a 2026-09-17 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-09-18 a 2026-10-18 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+[referencia MIROVA] la ventana 2026-09-18 a 2026-10-18 pisa 2 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: tabla y OCR
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+
+== C0 previa ('2026-08-18', '2026-09-17') regla original: noches con alerta y record 121 | sin publicar 0 | de ellas con VRP MIROVA >= 1 MW: 0
+
+== C0 previa ('2026-08-18', '2026-09-17') regla SN: noches con alerta y record 112 | sin publicar 0 | de ellas con VRP MIROVA >= 1 MW: 0
+
+== K ('2026-09-18', '2026-10-18') regla original: noches con alerta y record 97 | sin publicar 9 | de ellas con VRP MIROVA >= 1 MW: 0
+    ('Chaiten', '2026-09-30') VRP_MIROVA_max 0.01 sensores_alerta ['VIIRS375']
+    ('Chaiten', '2026-10-11') VRP_MIROVA_max 0.16 sensores_alerta ['VIIRS375']
+    ('Copahue', '2026-09-20') VRP_MIROVA_max 0.02 sensores_alerta ['VIIRS375']
+    ('Copahue', '2026-09-24') VRP_MIROVA_max 0.01 sensores_alerta ['VIIRS375']
+    ('Isluga', '2026-09-19') VRP_MIROVA_max 0.06 sensores_alerta ['VIIRS375']
+    ('Llaima', '2026-10-03') VRP_MIROVA_max 0.01 sensores_alerta ['VIIRS375']
+    ('PuyehueCordonCaulle', '2026-10-01') VRP_MIROVA_max 0.05 sensores_alerta ['VIIRS375']
+    ('PuyehueCordonCaulle', '2026-10-18') VRP_MIROVA_max 0.1 sensores_alerta ['VIIRS375']
+    ('Villarrica', '2026-09-25') VRP_MIROVA_max 0.9 sensores_alerta ['MODIS']
+
+== K ('2026-09-18', '2026-10-18') regla SN: noches con alerta y record 85 | sin publicar 4 | de ellas con VRP MIROVA >= 1 MW: 0
+    ('Chaiten', '2026-10-11') VRP_MIROVA_max 0.16 sensores_alerta ['VIIRS375']
+    ('Isluga', '2026-09-19') VRP_MIROVA_max 0.06 sensores_alerta ['VIIRS375']
+    ('PuyehueCordonCaulle', '2026-10-18') VRP_MIROVA_max 0.1 sensores_alerta ['VIIRS375']
+    ('Villarrica', '2026-09-25') VRP_MIROVA_max 0.9 sensores_alerta ['MODIS']
