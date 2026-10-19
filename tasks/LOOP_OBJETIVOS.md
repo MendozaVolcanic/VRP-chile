@@ -509,6 +509,17 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-19 ~10:55 UTC (vuelta 220, S155): auditoría post-K lanzada (bloque 1 del plan)
+- Pedido de Nicolás: aprovechar el paralelo. Cinco auditores Opus en segundo plano, uno por frente, cada uno en su
+  worktree detached sobre `origin/main` `cb90031a` (`D:rp-trabajo\worktrees\s155-audit-f1` a `f5`, ~0,94 GB cada uno;
+  D: 18 GB libres después de crearlos). Preámbulo canónico entero; sin commits, sin despachos, sin Earthdata local.
+  Frentes: 1 propagación de K en docs y textos; 2 lo que ve el operador (tres vistas, predicados con node); 3
+  instrumentos (auto-audit, watchdog, evaluadores; #779 como caso); 4 cierres que K pudo volver falsos (censo S145); 5
+  magnitud de Chillán pasada por pasada (sin L1B: si hace falta, deja el gránulo especificado).
+- Pendiente: un verificador limpio por frente cuando cada uno entregue; después `docs/AUDIT_S155.md`.
+- Worktrees del candado (`s155-candado`, `s155-verif-candado`) borrados; el informe del verificador v3 quedó en
+  `experiments/_s151_ab_diurno/verificador_candado_k_v3/` (commit `e2fff4a2`).
+
 ### 2026-10-19 ~10:30 UTC (vuelta 219, S155): #859 mergeado y tag de despacho puesto (sin despachar)
 - Con el sí de Nicolás («mergea el #859 cuando el CI termine en verde, y después pon el tag»): CI del PR `pytest`
   SUCCESS sobre `5674eab7`; squash por API, `main` en `e66b402c`. Diff de `main` contra la rama vacío en
