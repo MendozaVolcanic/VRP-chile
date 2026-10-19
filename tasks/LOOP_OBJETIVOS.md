@@ -509,6 +509,24 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-19 12:22 UTC (vuelta 223, S156): arreglos 2 y 3 de AUDIT_S155 mergeados (#862) antes del auto-audit del lunes
+- Con el sí de Nicolás («parte por los arreglos 2 y 3 de AUDIT_S155 antes del auto-audit del lunes»). PR #862, squash
+  `484d037d`, CI verde sobre `ca3ee1eb`. Sin tocar `pipeline/`.
+- El auto-audit evalúa cada noche sólo con records de su detector (frontera leída de `frontend/cambio_detector.js`),
+  juzga sólo el vigente (K), D-9 SN decide, magnitud publicada por volcán y sensor, falsas por detector y cenit, y lista
+  por nombre las alertas protegidas (lectura A) con flag por cada una sin publicar. `history.jsonl` dice de qué detector
+  es cada línea. Un aviso de detector degrada el veredicto.
+- Corrida local con la referencia fresca (`experiments/_s156_autoaudit/`): `FUERA_DE_BANDA`, 10 flags, todos de K:
+  recall VIIRS 750 73,3 % (n 30); magnitud publicada Chillán MODIS 0,485, VIIRS 375 0,65, VIIRS 750 0,687, Tupungatito
+  VIIRS 375 0,251; cinco protegidas sin publicar (Tupungatito VIIRS 375 28 y 29-sep, marcadas referencia sospechosa por
+  A119; PCC VIIRS 750 10-oct; Chillán MODIS 12 y 15-oct). Falsas K VIIRS 375 3,3 % SN, 2,0 % original; C0 86,8 %.
+- Verificador limpio (`experiments/_s156_autoaudit/verificador/INFORME.md`): A1 a A4 y A6 confirmadas con instrumento
+  propio; A5 parcial y A7 refutada en parte (4 de 12 mutaciones). Arreglado en el mismo PR: prueba de punta a punta de
+  `main()` (12 de 12 por prueba), D-9 sobre la referencia unificada, avisos que degradan, marca de Suomi NPP.
+- El g1d/g2c de `test_guard_libro_de_pruebas_s146.py` que la vuelta 222 daba por fallando en local hoy pasa 7 de 7.
+- Abierto: el lunes se abre un issue nuevo con #779 todavía abierto (deduplicar es el arreglo 7); decisión de Nicolás
+  sobre cerrar #779. Worktrees `D:\vrp-trabajo\worktrees\s156-autoaudit` y `s156-verif` siguen en disco.
+
 ### 2026-10-19 11:31 UTC (vuelta 222, S155): #860 y #861 mergeados, marca verificada en el tablero público; cierre
 - Con el sí de Nicolás («mergea #860 y #861 cuando el CI esté verde, verifica que el tablero público muestre la marca
   nueva, y después corre /cierre»). #860: CI verde, squash `67122696` (el primer intento chocó con un commit del NRT,
