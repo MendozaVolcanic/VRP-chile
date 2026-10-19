@@ -425,8 +425,22 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   más el resto a nadir (0,72). TIFF de MIROVA para Chillán: el último es del 2026-09-22 (archivo congelado desde esa
   fecha), así que la referencia espacial de hoy son los PNG y la distancia del CSV. Decisión pendiente con Nicolás: qué
   pre-registrar primero (D17 regrid o D25).
+- [ ] **1.34 Índice por síntoma** (Nicolás, 2026-10-19: «continúa con lo que recomiendes», sobre la propuesta de
+  mejorar memoria y metodología tras el error de atribuir Chillán a D25). `docs/SINTOMAS.md`, corto: de cada síntoma
+  («magnitud baja», «sobre-publicación», «posición corrida», «pérdida de recall», «el A/B no cambia nada») a qué está
+  medido, con qué script, qué sigue abierto y qué no reabrir, con punteros a D-n, A-n y documentos de sesión. Se
+  actualiza en el mismo PR en que cambia una divergencia (como A113). Y un paso nuevo en el protocolo §2: antes de
+  proponer una palanca, leer el síntoma en `docs/SINTOMAS.md` y estratificar por cenit, sensor, volcán y régimen.
+- [ ] **1.35 Estratificación automática por cenit y régimen en los instrumentos** (mismo pedido). Que el auto-audit
+  semanal y los evaluadores de A/B informen sus métricas también por tramos de cenit del sensor y por régimen (antes y
+  después de #535 y de K), para que un agregado no esconda una curva (A90, A114). Con prueba y sin cambiar ningún
+  veredicto existente.
+- [ ] **1.36 Pre-registro de D17 sobre K (bow-tie + remuestreo) con Chillán como caso** (mismo pedido; va ANTES que
+  D25). Sale de 1.33: el déficit de magnitud cae con el cenit (Chillán y `docs/s130/GRADIENTE_CENITAL.md`). Pre-registro
+  con criterio de magnitud por tramo de cenit, verificador y sello de Nicolás. Sólo lectura hasta el sello (A45).
 - [ ] **1.29 Pre-registro de D25 sobre K** (regla §5): escribir el pre-registro y su verificador. Bloqueo para
   despachar: el sello de Nicolás. **Se alimenta de 1.33** (Chillán como caso, pedido de Nicolás el 2026-10-19).
+  **Va después de 1.36** (decisión de Nicolás del 2026-10-19: D17 primero).
 - [ ] **1.30 Pre-registro de MxD03 sobre K** (D-19): ídem. Bloqueo para despachar: el sello de Nicolás.
 - [ ] **1.32 A/B diurno sobre K** (del verificador de 1.25, H4). El A/B W2 a W6 corrió sobre C0: de día el Test 1
   dispara en 2.000 de las 2.077 publicaciones de VIIRS 375 en negativos limpios, 987 vienen sólo de `test1_roi`, y 11
@@ -475,6 +489,17 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-19 01:25 UTC (vuelta 213, S154): candado de la adenda K mergeado (#858); 1.34 a 1.36 en la cola
+- #858 mergeado (`cf272543`, squash 01:23 UTC, CI del último commit verde antes del merge). Pruebas del verificador del
+  candado agregadas; las cuatro mutaciones de la ruta K atrapadas por pruebas (M3 ya no cae: H2a sin sha devuelve
+  problema); batería completa 107 de 107.
+- **Antes de despachar el A/B diurno sobre K faltan:** (a) segunda vuelta de verificador limpio sobre el candado ya
+  mergeado; (b) que termine el histórico 1.24 (88 de 176 trozos a las 01:23); (c) tag de despacho y `--sha-codigo` con
+  `git rev-parse <tag>^{commit}` (H-5).
+- Nicolás: «continúa con lo que recomiendes» sobre la propuesta de memoria y metodología: índice por síntoma (1.34),
+  estratificación automática (1.35), D17 antes que D25 (1.36, luego 1.29); adelgazar el CLAUDE.md del proyecto en el
+  próximo `/cierre`. Memoria nueva: `feedback_s154_estratificar_por_cenit`.
 
 ### 2026-10-19 ~00:45 UTC (vueltas 211-212, S154): candado ampliado (sin commitear); 1.33 Chillán como prioridad
 - Verificador limpio del candado (`experiments/_s151_ab_diurno/verificador_candado_k/INFORME.md`): las cuatro piezas
