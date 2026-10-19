@@ -73,9 +73,11 @@ TOL_S = cm.VENTANA_S            # el pareo del etiquetador (banco_paridad.TOL_S)
 # mínimas (0,05 MW o menos en VIIRS 375, NONE en el banner de MIROVA) NO cuentan, y la cota es la del A/B medida con
 # la misma regla, SE (`reglas_d9.SE` de experiments/_s153_fk_v2/v1.json y v2.json): K pierde 7 Muy Bajo en V1 (suma
 # SE 28 menos 21 negativos, que SE no cambia) y 12 en V2 (49 menos 37). Las 16 y 26 de la etiqueta original incluían
-# 9 y 14 mínimas. El denominador con SE no quedó guardado: está entre 194 − 33 = 161 y 194 en V1 (33 pasadas pasan de
-# «pos» a «mínima») y entre 388 − 45 = 343 y 388 en V2; se toma el menor, que da la cota MÁS ALTA (dispara menos),
-# igual que «la mayor de V1 y V2». Con la etiqueta original, el único disparo con datos reales habría sido Llaima
+# 9 y 14 mínimas. El denominador con SE no quedó guardado: 33 pasadas pasan de «pos» a «mínima» en V1 y 45 en V2, y
+# no todas estaban en el denominador de Muy Bajo (el verificador 4 lo acotó a 163 a 166 en V1, por las sólo OCR de
+# Suomi NPP que el A/B excluye, y a cerca de 350 en V2, por las de marzo que `decide_sensor` deja fuera). Se toma 161
+# y 343, el menor posible, que da la cota MÁS ALTA (0,0870 contra 0,0845 a 0,086 con el real): dispara menos, igual
+# que «la mayor de V1 y V2». Con la etiqueta original, el único disparo con datos reales habría sido Llaima
 # VIIRS 375 2026-10-03 07:06, 0,01 MW, una pasada que MIROVA llama NONE (verificador 3).
 COTAS_AB = {
     "muy_bajo": {"VIIRS375": {"V1_SE": (7, 161), "V2_SE": (12, 343)}},
@@ -133,8 +135,8 @@ def pasadas_de_alerta(filas, prod, sombra, win, diurna=None):
     `prod_pub` / `sombra_pub` = True o False si hay record a ±120 s, None si no miró.
 
     `minima`: la pasada es mínima según D-9 (todas sus alertas de 0,05 MW o menos en VIIRS 375). La regla SN
-    dice que ahí MIROVA no vio nada: no cuenta para la reversión ni para la persistencia. Sí cuenta en el
-    disparador (i), porque la cota del A/B se midió con la etiqueta original (verificador 2 de S156).
+    dice que ahí MIROVA no vio nada: no cuenta para la reversión, la persistencia ni el disparador (i) (decisión
+    de Nicolás del 2026-10-19: (i) coherente con D-9, contra la cota SE del A/B).
     """
     diurna = diurna or _diurna_por_defecto()
     minimas = cm.aplicar_regla_minimas(filas, "SN").minimas
@@ -214,7 +216,21 @@ def leer_juzgadas(path=JUZGADAS):
         return {}
     with open(path, encoding="utf-8") as fh:
         d = json.load(fh)
-    return {(p["volcano"], p["sensor"], p["fecha_utc"][:16]): p for p in d["pasadas"]}
+    # Formato estricto: una entrada mal escrita («T», hora sin cero, nombre de volcán distinto) no calzaría con
+    # ninguna pasada y la candidata seguiría disparando sin que nadie entienda por qué (verificador 4, hallazgo 4).
+    # Mejor que el script caiga: el workflow abre el issue «el script fallo».
+    out = {}
+    for p in d["pasadas"]:
+        if (p.get("volcano") not in aa.VOLS or p.get("sensor") not in aa.SENSORS
+                or not re.fullmatch(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}", p.get("fecha_utc") or "")):
+            raise ValueError(f"entrada inválida en {path}: {p!r}; se espera volcano de {aa.VOLS}, sensor de "
+                             f"{aa.SENSORS} y fecha_utc 'YYYY-MM-DD HH:MM'")
+        out[(p["volcano"], p["sensor"], p["fecha_utc"])] = p
+    return out
+
+
+def _clave(p):
+    return (p["volcano"], p["sensor"], p["fecha_utc"][:16])
 
 
 def disparadores(pasadas, negs_prod, hoy, adopcion=None, juzgadas=None):
@@ -222,18 +238,32 @@ def disparadores(pasadas, negs_prod, hoy, adopcion=None, juzgadas=None):
 
     `adopcion`: 'YYYY-MM-DD HH:MM:SS' UTC (por defecto, la del tablero). `negs_prod`: records de producción
     etiquetados por el banco, con `dt` y `lab_original`. Sin adopción declarada no hay nada prospectivo.
-    `juzgadas`: {(volcán, sensor, minuto): registro} de las pasadas ya decididas; no vuelven a disparar.
+    `juzgadas`: {(volcán, sensor, minuto): registro} de las pasadas ya decididas. Una juzgada sale SÓLO de la
+    reversión (lo que se decidió fue si revertir): sigue contando en la persistencia, en los conteos y en la
+    duración, porque la sombra la vio igual (verificador 4 de S156, hallazgo 2).
     """
     adopcion = adopcion or leer_adopcion()
     juzgadas = juzgadas or {}
     corte = adopcion or "9999-99-99 99:99:99"
-    ya = [p for p in pasadas if (p["volcano"], p["sensor"], p["fecha_utc"][:16]) in juzgadas]
-    vivas = [p for p in pasadas if (p["volcano"], p["sensor"], p["fecha_utc"][:16]) not in juzgadas]
-    pros = [p for p in vivas if p["instante_utc"] >= corte]
-    retro = [p for p in vivas if p["instante_utc"] < corte]
+    pros = [p for p in pasadas if p["instante_utc"] >= corte]
+    retro = [p for p in pasadas if p["instante_utc"] < corte]
+
+    # Plazo de la regla PASADA POR PASADA (verificador 4, hallazgo 1): «hasta ver 29 protegidas» o 120 días. Una
+    # protegida está dentro del plazo si es una de las primeras 29 vistas en la sombra (la 29.ª incluida) y su
+    # instante es anterior al vencimiento. Así una pasada no cambia de clase con el día en que se corre.
+    vence = ((date.fromisoformat(adopcion[:10]) + timedelta(days=DIAS_MAXIMOS)).isoformat()
+             if adopcion else None)
+    vistas_pros = sorted((p for p in pros if p["protegida"] and p["sombra_pub"] is not None),
+                         key=lambda p: (p["instante_utc"], p["volcano"], p["sensor"]))
+    orden = {_clave(p): i + 1 for i, p in enumerate(vistas_pros)}
+
+    def dentro_de_plazo(p):
+        return bool(vence) and orden.get(_clave(p), 10 ** 9) <= PROTEGIDAS_OBJETIVO and p["instante_utc"][:10] < vence
 
     calla = _sombra_si_produccion_no(pros)
-    reversion = [p for p in calla if p["protegida"]]
+    candidatas = [p for p in calla if p["protegida"] and _clave(p) not in juzgadas]
+    reversion = [p for p in candidatas if dentro_de_plazo(p)]
+    fuera_de_plazo = [p for p in candidatas if not dentro_de_plazo(p)]
 
     # (i) Muy Bajo de VIIRS 375 por volcán, coherente con D-9 (decisión de Nicolás): sin las mínimas, y contra la
     # cota del A/B medida con la regla SE.
@@ -267,10 +297,7 @@ def disparadores(pasadas, negs_prod, hoy, adopcion=None, juzgadas=None):
     negativos = {"k": kn, "n": len(negs), "wilson": [round(lo, 4), round(hi, 4)] if negs else None,
                  "cota_ab": round(cota, 4), "dispara": bool(negs) and lo > cota}
 
-    vence = ((date.fromisoformat(adopcion[:10]) + timedelta(days=DIAS_MAXIMOS)).isoformat()
-             if adopcion else None)
-    # Una pasada juzgada no dispara, pero la sombra la vio: cuenta para la duración.
-    vistas = sum(1 for p in pasadas if p["instante_utc"] >= corte and p["protegida"] and p["sombra_pub"] is not None)
+    vistas = len(vistas_pros)
     duracion = {"protegidas_vistas_en_sombra": vistas, "objetivo": PROTEGIDAS_OBJETIVO,
                 "adopcion": adopcion, "vence": vence,
                 "cumplida": vistas >= PROTEGIDAS_OBJETIVO or bool(vence and hoy >= vence)}
@@ -287,19 +314,19 @@ def disparadores(pasadas, negs_prod, hoy, adopcion=None, juzgadas=None):
         "persistencia": _persistencia([p for p in calla_retro if not p["minima"]]),
     }
 
-    # Cumplido el plazo de la regla (29 protegidas vistas o 120 días), la reversión deja de estar pre-autorizada
-    # (decisión de Nicolás): una candidata se sigue informando, pero decide él.
-    if reversion and duracion["cumplida"]:
-        veredicto = "CANDIDATA_FUERA_DE_PLAZO"
-    elif reversion:
+    # Fuera del plazo, una candidata se sigue informando pero ya no está pre-autorizada (decisión de Nicolás).
+    if reversion:
         veredicto = "REVERSION_CANDIDATA"
+    elif fuera_de_plazo:
+        veredicto = "CANDIDATA_FUERA_DE_PLAZO"
     elif persistencia or negativos["dispara"] or any(m["dispara"] for m in muy_bajo.values()):
         veredicto = "INVESTIGAR"
     else:
         veredicto = "VERDE"
-    return {"veredicto": veredicto, "reversion": reversion, "muy_bajo": muy_bajo, "persistencia": persistencia,
-            "negativos_VIIRS375": negativos, "duracion": duracion, "retrospectivo": retrospectivo,
-            "juzgadas": [dict(p, juicio=juzgadas[(p["volcano"], p["sensor"], p["fecha_utc"][:16])]) for p in ya]}
+    return {"veredicto": veredicto, "reversion": reversion, "fuera_de_plazo": fuera_de_plazo, "muy_bajo": muy_bajo,
+            "persistencia": persistencia, "negativos_VIIRS375": negativos, "duracion": duracion,
+            "retrospectivo": retrospectivo,
+            "juzgadas": [dict(p, juicio=juzgadas[_clave(p)]) for p in pasadas if _clave(p) in juzgadas]}
 
 
 def _avisos_frescura(recs, hoy, nombre, revisar, vols=None, sensores=None):
@@ -447,6 +474,10 @@ def imprimir(out):
         print(f"  REVERSIÓN CANDIDATA: {p['volcano']} {p['sensor']} {p['fecha_utc']} UTC, MIROVA "
               f"{p['vrp_mirova_mw']} MW: la sombra publica y producción calla. Confirmar en la cabecera de la "
               "imagen de MIROVA antes de revertir (REGLA_ADOPCION.md §4 paso 9)")
+    for p in out.get("fuera_de_plazo", []):
+        print(f"  CANDIDATA FUERA DE PLAZO: {p['volcano']} {p['sensor']} {p['fecha_utc']} UTC, MIROVA "
+              f"{p['vrp_mirova_mw']} MW: la sombra publica y producción calla, fuera del plazo de la regla; sin "
+              "pre-autorización, decide Nicolás")
     estado = {True: "publica", False: "no publica", None: "sin record"}
     for p in out.get("protegidas_sin_publicar_k", []):
         print(f"  protegida que K no publica: {p['volcano']} {p['sensor']} {p['fecha_utc']} MIROVA "

@@ -1,0 +1,23 @@
+== 1. formato de fecha distinto en el archivo de juzgadas
+   '2026-10-20 05:54'         -> veredicto VERDE, juzgadas reconocidas 1
+   '2026-10-20 05:54:00'      -> veredicto VERDE, juzgadas reconocidas 1
+   '2026-10-20T05:54'         -> veredicto REVERSION_CANDIDATA, juzgadas reconocidas 0
+   '2026-10-20T05:54:00Z'     -> veredicto REVERSION_CANDIDATA, juzgadas reconocidas 0
+   '2026-10-20 5:54'          -> veredicto REVERSION_CANDIDATA, juzgadas reconocidas 0
+   variante de nombre 'Puyehue-Cordon Caulle' -> REVERSION_CANDIDATA (¿avisa que la entrada no calza con ninguna pasada? salida no tiene campo para eso)
+== 2. pasada juzgada posterior a la adopción: efecto sobre persistencia y Muy Bajo
+   sin juzgada: persistencia [{'volcano': 'V', 'noches': ['2026-10-20', '2026-10-21', '2026-10-22']}] veredicto INVESTIGAR
+   con la 1.a noche juzgada: persistencia [] veredicto INVESTIGAR
+   Muy Bajo sin / con juzgada: 3 3 / 2 2
+== 3. juzgada anterior a la adopción: ¿sale del retrospectivo?
+   sin juzgada: n_pasadas 2, protegidas vistas 2, perdidas 1
+   con juzgada: n_pasadas 1, protegidas vistas 1, perdidas 0
+== 4. plazo: la candidata ES la protegida número 29
+   vistas 29 cumplida True veredicto CANDIDATA_FUERA_DE_PLAZO
+   misma candidata con 20 vistas antes: veredicto REVERSION_CANDIDATA
+== 5. plazo por fecha: candidata del día 119, vista por primera vez el día 121 (retraso del OCR o workflow caído)
+   evaluada 2027-02-14: REVERSION_CANDIDATA | evaluada 2027-02-16: CANDIDATA_FUERA_DE_PLAZO
+== 6. juzgada posterior + plazo cumplido: la juzgada no dispara y sí cuenta
+   veredicto VERDE vistas 29 cumplida True
+== 7. prefijos de título del workflow
+   (sin líneas CHOQUE: ningún prefijo captura el título de otra clase)

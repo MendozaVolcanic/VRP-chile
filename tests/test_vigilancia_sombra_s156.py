@@ -563,11 +563,58 @@ def test_una_pasada_juzgada_no_dispara_pero_cuenta_para_la_duracion():
 
 
 def test_cumplido_el_plazo_la_reversion_ya_no_esta_preautorizada():
-    pas = [_pasada("A", "MODIS", "2027-02-16 07:20", True, False, True)]
-    d = _disp(pas, hoy="2027-02-16")
-    assert d["duracion"]["cumplida"] is True and d["veredicto"] == "CANDIDATA_FUERA_DE_PLAZO"
-    assert [p["volcano"] for p in d["reversion"]] == ["A"]          # se sigue informando
-    assert _disp(pas, hoy="2026-10-25")["veredicto"] == "REVERSION_CANDIDATA"
+    """El plazo se mide PASADA POR PASADA (verificador 4): una candidata posterior al vencimiento es fuera de plazo
+    se corra cuando se corra, y una anterior sigue dentro aunque la corrida sea después."""
+    tarde = [_pasada("A", "MODIS", "2027-02-16 07:20", True, False, True)]
+    d = _disp(tarde, hoy="2027-02-16")
+    assert d["veredicto"] == "CANDIDATA_FUERA_DE_PLAZO" and d["reversion"] == []
+    assert [p["volcano"] for p in d["fuera_de_plazo"]] == ["A"]      # se sigue informando
+    temprana = [_pasada("B", "MODIS", "2027-02-14 07:20", True, False, True)]
+    for hoy in ("2027-02-14", "2027-02-16", "2027-03-01"):
+        assert _disp(temprana, hoy=hoy)["veredicto"] == "REVERSION_CANDIDATA", hoy
+
+
+def test_el_plazo_cuenta_las_primeras_29_protegidas_la_29_incluida():
+    """«Hasta ver 29 protegidas»: la 29.ª vista todavía está dentro; la 30.ª ya no. Sólo cuentan las protegidas."""
+    vistas = [_pasada("V", "VIIRS375", f"2026-10-{19 + i // 10:02d} 0{i % 10}:00", True, True, True)
+              for i in range(28)]
+    ruido = [_pasada("V", "VIIRS375", "2026-10-19 00:30", False, True, True)]       # no protegida: no cuenta
+    la_29 = [_pasada("W", "MODIS", "2026-10-25 07:20", True, False, True)]
+    d = _disp(vistas + ruido + la_29, hoy="2026-10-26")
+    assert d["duracion"]["protegidas_vistas_en_sombra"] == 29 and d["duracion"]["cumplida"] is True
+    assert d["veredicto"] == "REVERSION_CANDIDATA"
+    la_30 = [_pasada("X", "MODIS", "2026-10-26 07:20", True, False, True)]
+    d = _disp(vistas + ruido + la_29 + la_30, hoy="2026-10-27")
+    assert [p["volcano"] for p in d["reversion"]] == ["W"] and [p["volcano"] for p in d["fuera_de_plazo"]] == ["X"]
+
+
+def test_fuera_de_plazo_exige_una_candidata():
+    pas = [_pasada("V", "VIIRS375", f"2026-10-{19 + i // 10:02d} 0{i % 10}:00", True, True, True) for i in range(30)]
+    assert _disp(pas, hoy="2027-03-01")["veredicto"] == "VERDE"
+
+
+def test_la_juzgada_solo_sale_de_la_reversion():
+    """Lo que se juzgó fue si revertir: la pasada sigue en la persistencia (verificador 4, hallazgo 2)."""
+    pas = [_pasada("V", "MODIS", f"2026-10-2{d} 07:20", True, False, True) for d in (2, 3, 4)]
+    juz = {("V", "MODIS", f"2026-10-2{d} 07:20"): {"decision": "x"} for d in (2, 3, 4)}
+    d = vs.disparadores(pas, [], hoy="2026-10-25", adopcion=ADOP, juzgadas=juz)
+    assert d["reversion"] == [] and d["persistencia"] and d["veredicto"] == "INVESTIGAR"
+    # y la clave mira el sensor: juzgar MODIS no juzga la misma pasada en VIIRS 750
+    otra = [_pasada("V", "VIIRS750", "2026-10-22 07:20", True, False, True)]
+    d = vs.disparadores(otra, [], hoy="2026-10-25", adopcion=ADOP, juzgadas=juz)
+    assert d["veredicto"] == "REVERSION_CANDIDATA"
+
+
+def test_juzgadas_con_formato_invalido_caen(tmp_path):
+    for malo in ({"volcano": "Puyehue", "sensor": "VIIRS750", "fecha_utc": "2026-10-10 05:54"},
+                 {"volcano": "PuyehueCordonCaulle", "sensor": "V750", "fecha_utc": "2026-10-10 05:54"},
+                 {"volcano": "PuyehueCordonCaulle", "sensor": "VIIRS750", "fecha_utc": "2026-10-10T05:54"},
+                 {"volcano": "PuyehueCordonCaulle", "sensor": "VIIRS750", "fecha_utc": "2026-10-10 5:54"},
+                 {"volcano": "PuyehueCordonCaulle", "sensor": "VIIRS750", "fecha_utc": "2026-10-10 05:54:02"}):
+        f = tmp_path / "j.json"
+        f.write_text(json.dumps({"pasadas": [malo]}), encoding="utf-8")
+        with pytest.raises(ValueError):
+            vs.leer_juzgadas(f)
 
 
 def test_el_archivo_de_juzgadas_trae_el_caso_pcc(tmp_path):
@@ -586,12 +633,24 @@ def test_evaluar_con_el_archivo_real_pone_pcc_como_juzgada(insumos, monkeypatch)
     monkeypatch.setattr(vs, "leer_juzgadas", LEER_JUZGADAS_REAL)
     out = vs.evaluar("2026-10-23")
     assert [p["fecha_utc"] for p in out["juzgadas"]] == ["2026-10-10 05:54"]
-    assert out["retrospectivo"]["protegidas_que_la_sombra_publica_y_k_calla"] == []
+    # la juzgada sigue en el retrospectivo: lo que se juzgó fue si revertir, no lo que vio la sombra
+    assert [p["fecha_utc"] for p in out["retrospectivo"]["protegidas_que_la_sombra_publica_y_k_calla"]] == [
+        "2026-10-10 05:54"]
+    assert out["veredicto"] == "VERDE"
 
 
 def test_el_workflow_tiene_el_issue_de_fuera_de_plazo():
+    """Su propia clase de issue, con un prefijo que no es prefijo de otro, y sin decir que hay pre-autorización."""
+    import re
     wf = (ROOT / ".github" / "workflows" / "vigilancia-sombra.yml").read_text(encoding="utf-8")
     assert "CANDIDATA_FUERA_DE_PLAZO)" in wf and "sombra_pasadas_juzgadas.json" in wf
+    titulos = re.findall(r'abrir "([^"]+)"', wf)
+    assert "Sombra de K: candidata fuera de plazo" in titulos and "Sombra de K: candidata a reversion" in titulos
+    for a in titulos:
+        for b in titulos:
+            assert a == b or not b.startswith(a), (a, b)
+    bloque = wf.split("CANDIDATA_FUERA_DE_PLAZO)", 1)[1].split(";;", 1)[0]
+    assert "NO hay reversion pre-autorizada" in bloque and "pre-autoriza revertir" not in bloque
 
 
 def test_evaluar_referencia_detenida_o_produccion_sin_k_queda_ciega(insumos):

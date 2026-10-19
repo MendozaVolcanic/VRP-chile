@@ -155,7 +155,10 @@ evidencia, y el paquete lo dice.
    menor posible, que da la cota más alta). La cita «(V1: 16 de 194)» de abajo es la de la etiqueta original, que
    contaba 9 mínimas; (d) **las pasadas ya juzgadas** se anotan en `sombra_pasadas_juzgadas.json` (junto a esta regla)
    y no vuelven a disparar; (e) **cumplido el plazo** (29 protegidas o 120 días), una candidata se sigue informando pero
-   ya no está pre-autorizada: decide Nicolás. Texto original conservado:
+   ya no está pre-autorizada: decide Nicolás. Notas de implementación (verificador 4, no son decisiones nuevas): el
+   plazo se mide pasada por pasada (dentro si es una de las primeras 29 protegidas vistas, la 29.ª incluida, y anterior
+   al vencimiento), que es la letra «hasta ver 29»; y una pasada juzgada sale sólo de la reversión, porque lo juzgado
+   fue si revertir, no lo que vio la sombra. Texto original conservado:
 
    **Sombra: el laboratorio congelado en C0.** `experimental-diario.yml` ya corre a diario los 11 Tier A con C0
    (`experimental_v2`). Cada semana se cuentan contra MIROVA producción (K) y sombra (C0) con el mismo evaluador.

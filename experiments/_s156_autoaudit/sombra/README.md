@@ -58,7 +58,22 @@ vuelven a disparar; y cumplido el plazo, una candidata sale como CANDIDATA_FUERA
 escenarios con `bash -eo pipefail` y un `gh` falso. `sombra_latest_2026-10-19_final.json`: la corrida de hoy (VERDE,
 PCC como juzgada).
 
-Lo que sigue abajo quedó resuelto por la decisión (c); se conserva como registro: con evaluación diaria, la primera Muy Bajo de VIIRS 375 que
+Verificador 4 (`verificador4/INFORME.md`): confirmó la cota SE (el denominador real es 163 a 166 en V1 y cerca de
+350 en V2; tomar 161 y 343 da 0,0870 contra 0,0845 a 0,086, el lado que dispara menos), la corrida real y las 62
+mutaciones. Arreglado: el plazo se mide PASADA POR PASADA (una protegida está dentro si es de las primeras 29 vistas,
+la 29.ª incluida, y anterior al vencimiento), así una pasada no cambia de clase con el día de la corrida ni abre un
+segundo issue; una pasada juzgada sale SÓLO de la reversión (sigue en la persistencia y en los conteos); formato
+estricto en el archivo de juzgadas (una entrada mal escrita hace caer el script, que abre su issue); textos propios
+para «fuera de plazo». `mutar_vigilancia.py` ahora muta también el workflow y cuenta sólo las fallas por aserción
+(lee el XML de JUnit), con una mutación de control que sólo hace caer el script y que el criterio no cuenta: 72 de 72.
+
+**Corrección de lo que decía este README**: la falsa alarma de (i) NO quedó resuelta con la decisión (c), sólo bajó.
+La cota inferior de Wilson de 1 de 1 (0,2065) y de 1 de 2 (0,0945) supera la cota nueva (0,0870), así que la primera
+Muy Bajo no mínima que la sombra publique y K calle en un volcán todavía dispara INVESTIGAR. El verificador 4 estimó
+0,58 de probabilidad de al menos un INVESTIGAR en 120 días (0,68 con la regla anterior). Es un issue de investigación,
+no una reversión.
+
+Lo que sigue abajo es el registro previo a la decisión (c): con evaluación diaria, la primera Muy Bajo de VIIRS 375 que
 la sombra publica y K calla en un volcán ya dispara INVESTIGAR (Wilson inferior de 1 de 1 = 0,2065 sobre la cota
 0,1298); el verificador 2 estimó 57 % de probabilidad de al menos una falsa alarma en 120 días si K pierde igual que en
 el A/B.

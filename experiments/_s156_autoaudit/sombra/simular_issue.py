@@ -20,7 +20,7 @@ base = json.load(open(real, encoding="utf-8"))
 rev = dict(base, veredicto="REVERSION_CANDIDATA",
            reversion=[{"volcano": "X", "sensor": "MODIS", "fecha_utc": "2026-10-25 07:20", "vrp_mirova_mw": 2.0}])
 ciega = dict(base, veredicto="VIGILANCIA_CIEGA", avisos=["la sombra de Llaima no produce hace 5 días"])
-fuera = dict(rev, veredicto="CANDIDATA_FUERA_DE_PLAZO")
+fuera = dict(base, veredicto="CANDIDATA_FUERA_DE_PLAZO", reversion=[], fuera_de_plazo=rev["reversion"])
 casos = [("fuera de plazo, sin issue abierto", fuera, "success", ""),
          ("reversion, sin issue abierto", rev, "success", ""),
          ("reversion, con issue abierto 901", rev, "success", "901"),

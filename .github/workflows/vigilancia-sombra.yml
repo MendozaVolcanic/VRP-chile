@@ -117,6 +117,8 @@ jobs:
           d = json.load(open("data/audit_continuous/sombra_latest.json", encoding="utf-8"))
           for p in d.get("reversion", []):
               print(f"- REVERSION CANDIDATA: {p['volcano']} {p['sensor']} {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la sombra publica y produccion calla")
+          for p in d.get("fuera_de_plazo", []):
+              print(f"- FUERA DE PLAZO (sin pre-autorizacion): {p['volcano']} {p['sensor']} {p['fecha_utc']} UTC, MIROVA {p['vrp_mirova_mw']} MW: la sombra publica y produccion calla")
           for k, m in (d.get("muy_bajo") or {}).items():
               if m["dispara"]:
                   print(f"- Muy Bajo {k}: {m['k']} de {m['n']}, Wilson {m['wilson']} sobre la cota del A/B {m['cota_ab']}")

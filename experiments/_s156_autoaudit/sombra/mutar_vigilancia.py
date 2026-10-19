@@ -1,13 +1,17 @@
-"""Mutaciones de scripts/vigilancia_sombra.py: cada una debe hacer FALLAR una prueba (no caer el script).
-Incluye las del autor y las 13 del verificador 2 de S156 (M1 a M13), con los textos del código de hoy.
-Uso: python mutar_vigilancia.py <raiz_worktree>. Restaura el archivo original al terminar."""
+"""Mutaciones de scripts/vigilancia_sombra.py y de .github/workflows/vigilancia-sombra.yml: cada una debe hacer
+FALLAR una prueba POR ASERCIÓN. Una mutación que sólo hace caer el script (KeyError, NameError...) no cuenta: el
+criterio lee el resumen `-rf` de pytest (verificador 4 de S156: el criterio anterior no distinguía).
+Incluye las del autor y las de los verificadores 2 (M), 3 (N) y 4 (Q), con los textos del código de hoy.
+Uso: python mutar_vigilancia.py <raiz_worktree>. Restaura los archivos originales al terminar."""
+import re
 import subprocess
 import sys
 from pathlib import Path
 
 raiz = Path(sys.argv[1])
-p = raiz / "scripts" / "vigilancia_sombra.py"
-orig = p.read_text(encoding="utf-8")
+SCRIPT = "scripts/vigilancia_sombra.py"
+WF = ".github/workflows/vigilancia-sombra.yml"
+originales = {f: (raiz / f).read_text(encoding="utf-8") for f in (SCRIPT, WF)}
 
 MUT = {
     # autor
@@ -27,17 +31,17 @@ MUT = {
                                '"cumplida": bool(vence and hoy >= vence)'),
     "muy_bajo_incluye_protegidas": ('if p["protegida"] or p["minima"] or p["prod_pub"] is None',
                                     'if p["minima"] or p["prod_pub"] is None'),
-    "sin_corte_prospectivo": ('pros = [p for p in vivas if p["instante_utc"] >= corte]', "pros = list(vivas)"),
-    "corte_al_minuto": ('pros = [p for p in vivas if p["instante_utc"] >= corte]',
-                        'pros = [p for p in vivas if p["instante_utc"][:16] >= corte[:16]]'),
-    "reversion_sin_protegida": ('reversion = [p for p in calla if p["protegida"]]', "reversion = list(calla)"),
+    "sin_corte_prospectivo": ('pros = [p for p in pasadas if p["instante_utc"] >= corte]', "pros = list(pasadas)"),
+    "corte_al_minuto": ('pros = [p for p in pasadas if p["instante_utc"] >= corte]',
+                        'pros = [p for p in pasadas if p["instante_utc"][:16] >= corte[:16]]'),
+    "reversion_sin_protegida": ('candidatas = [p for p in calla if p["protegida"] and _clave(p) not in juzgadas]',
+                                'candidatas = [p for p in calla if _clave(p) not in juzgadas]'),
     "sin_aviso_perfiles": ("\n              + avisos_perfiles(prod, sombra))", ")"),
     "ciega_no_degrada": ('veredicto = "VIGILANCIA_CIEGA"\n    out.update', "pass\n    out.update"),
     "sombra_detenida_tarde": ("MAX_DIAS_SOMBRA_SIN_DATOS = 3", "MAX_DIAS_SOMBRA_SIN_DATOS = 30"),
     "persistencia_dos": ("def _corridas(fechas, largo=3):", "def _corridas(fechas, largo=2):"),
     "sospecha_apagada": ("sospechosa = (bool(protegidas)", "sospechosa = (False and bool(protegidas)"),
-    "duracion_cuenta_retro": ('p["instante_utc"] >= corte and p["protegida"] and p["sombra_pub"] is not None)',
-                              'p["protegida"] and p["sombra_pub"] is not None)'),
+    "duracion_cuenta_retro": ('vistas_pros = sorted((p for p in pros if', 'vistas_pros = sorted((p for p in pasadas if'),
     "minima_mal_marcada": ('"minima": clave in minimas,', '"minima": False,'),
     "persistencia_con_minimas": ('persistencia = _persistencia([p for p in calla if not p["minima"]])',
                                  "persistencia = _persistencia(calla)"),
@@ -69,7 +73,7 @@ MUT = {
     "M13_reversion_con_produccion_sin_record": (
         'return [p for p in pasadas if p["sombra_pub"] is True and p["prod_pub"] is False]',
         'return [p for p in pasadas if p["sombra_pub"] is True and not p["prod_pub"]]'),
-    # verificador 3 (N1 a N28), con los textos de hoy
+    # verificador 3 (N1 a N28)
     "N1_minimas_umbral_004": ('minimas = cm.aplicar_regla_minimas(filas, "SN").minimas',
                               'minimas = cm.aplicar_regla_minimas(filas, "SN", umbral_mw=0.04).minimas'),
     "N3_instante_sin_segundos": ('"instante_utc": dt.strftime("%Y-%m-%d %H:%M:%S")',
@@ -91,8 +95,8 @@ MUT = {
     "N23_sospecha_si_alguna_es_ocr": ('{f.get("source") for f in protegidas} == {"OCR"}',
                                       '"OCR" in {f.get("source") for f in protegidas}'),
     "N24_investigar_ignora_persistencia": ("elif persistencia or negativos", "elif negativos"),
-    "N25_retro_incluye_corte": ('retro = [p for p in vivas if p["instante_utc"] < corte]',
-                                'retro = [p for p in vivas if p["instante_utc"] <= corte]'),
+    "N25_retro_incluye_corte": ('retro = [p for p in pasadas if p["instante_utc"] < corte]',
+                                'retro = [p for p in pasadas if p["instante_utc"] <= corte]'),
     "N27_corte_sin_adopcion_es_cero": ('corte = adopcion or "9999-99-99 99:99:99"', 'corte = adopcion or "0000"'),
     "N28_wilson_z_164": ("def wilson(k, n, z=1.96):", "def wilson(k, n, z=1.64):"),
     # sobre los arreglos del verificador 3
@@ -107,27 +111,72 @@ MUT = {
     "cota_muy_bajo_original": ('"muy_bajo": {"VIIRS375": {"V1_SE": (7, 161), "V2_SE": (12, 343)}}',
                                '"muy_bajo": {"VIIRS375": {"V1": (16, 194), "V2": (26, 388)}}'),
     "juzgadas_ignoradas": ("    juzgadas = juzgadas or {}\n", "    juzgadas = {}\n"),
-    "juzgadas_no_cuentan_duracion": ('vistas = sum(1 for p in pasadas if p["instante_utc"] >= corte and',
-                                     'vistas = sum(1 for p in pros if p["instante_utc"] >= corte and'),
-    "plazo_no_quita_preautorizacion": ('if reversion and duracion["cumplida"]:', "if False:"),
     "evaluar_sin_juzgadas": ("d = disparadores(pasadas, prod, hoy, adopcion, juzgadas=leer_juzgadas())",
                              "d = disparadores(pasadas, prod, hoy, adopcion)"),
+    # verificador 4 (Q)
+    "Q_plazo_por_dia_de_corrida": ("        return bool(vence) and orden.get(_clave(p), 10 ** 9) <= PROTEGIDAS_OBJETIVO and p[\"instante_utc\"][:10] < vence",
+                                   "        return not (vistas_pros and len(vistas_pros) >= PROTEGIDAS_OBJETIVO) and not (vence and hoy >= vence)"),
+    "Q_borde_29_excluido": ("orden.get(_clave(p), 10 ** 9) <= PROTEGIDAS_OBJETIVO", "orden.get(_clave(p), 10 ** 9) < PROTEGIDAS_OBJETIVO"),
+    "Q_duracion_cuenta_no_protegidas": ('vistas_pros = sorted((p for p in pros if p["protegida"] and p["sombra_pub"] is not None)',
+                                        'vistas_pros = sorted((p for p in pros if p["sombra_pub"] is not None)'),
+    "Q_fuera_sin_exigir_candidata": ("    elif fuera_de_plazo:\n", "    elif duracion[\"cumplida\"]:\n"),
+    "Q_juzgada_sale_de_persistencia": ('persistencia = _persistencia([p for p in calla if not p["minima"]])',
+                                       'persistencia = _persistencia([p for p in calla if not p["minima"] and _clave(p) not in juzgadas])'),
+    "Q_juzgadas_sin_sensor": ('    return (p["volcano"], p["sensor"], p["fecha_utc"][:16])',
+                              '    return (p["volcano"], "MODIS", p["fecha_utc"][:16])'),
+    "Q_juzgadas_formato_laxo": ('or not re.fullmatch(r"\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}", p.get("fecha_utc") or "")):',
+                                "or False):"),
+    # workflow
+    "WF_fuera_sin_issue": (WF, "            CANDIDATA_FUERA_DE_PLAZO)\n              abrir ", "            CANDIDATA_FUERA_DE_PLAZO)\n              echo "),
+    "WF_fuera_mismo_prefijo": (WF, 'abrir "Sombra de K: candidata fuera de plazo"', 'abrir "Sombra de K: candidata"'),
+    "WF_fuera_dice_preautoriza": (WF, "Fuera de plazo NO hay reversion pre-autorizada", "La regla pre-autoriza revertir"),
+    "WF_issue_sin_always": (WF, "        if: always()\n", ""),
+    "WF_sin_cron_respaldo": (WF, '    - cron: "40 23 * * *"\n', ""),
+}
+# Control del criterio (A110: un control se valida midiendo su nulo): esta mutación sólo hace caer el script con una
+# excepción que no es una aserción. Si el criterio la cuenta como atrapada, el criterio está roto.
+CONTROLES = {
+    "CONTROL_solo_caida": (SCRIPT, "    adopcion = adopcion or leer_adopcion()\n    juzgadas = juzgadas or {}\n",
+                           "    raise KeyError('control')\n"),
 }
 tests = ["tests/test_vigilancia_sombra_s156.py"]
+
+
+def por_asercion(junit):
+    """¿Alguna prueba falló por aserción? Lee el XML de JUnit: cada <failure> trae el mensaje de la excepción.
+    (En modo -q el resumen -rf de pytest no imprime el motivo, así que no sirve para esto.)"""
+    import xml.etree.ElementTree as ET
+    for f in ET.parse(junit).getroot().iter("failure"):
+        if re.match(r"(AssertionError|assert |Failed: DID NOT RAISE)", f.get("message") or ""):
+            return True
+    return False
+
+
 atrapadas = 0
+control_ok = None
 try:
-    for nombre, (a, b) in MUT.items():
+    for nombre, mut in list(CONTROLES.items()) + list(MUT.items()):
+        archivo, a, b = mut if len(mut) == 3 else (SCRIPT, *mut)
+        orig = originales[archivo]
         if orig.count(a) != 1:
             print(f"{nombre:40s} NO APLICA (cuenta {orig.count(a)})")
             continue
-        p.write_text(orig.replace(a, b), encoding="utf-8", newline="\n")
-        r = subprocess.run([sys.executable, "-m", "pytest", *tests, "-q", "--no-header", "-p", "no:cacheprovider"],
-                           cwd=raiz, capture_output=True, text=True)
+        (raiz / archivo).write_text(orig.replace(a, b), encoding="utf-8", newline="\n")
+        junit = raiz / ".mutar_junit.xml"
+        r = subprocess.run([sys.executable, "-m", "pytest", *tests, "-q", "--no-header", "-p", "no:cacheprovider",
+                            f"--junitxml={junit}"], cwd=raiz, capture_output=True, text=True)
+        (raiz / archivo).write_text(orig, encoding="utf-8", newline="\n")
         ult = (r.stdout.strip().splitlines() or [""])[-1]
-        # atrapada = al menos una prueba falla por aserción; un error de colección o una excepción en todas no cuenta
-        ok = r.returncode == 1 and "failed" in ult and "error" not in ult
+        ok = r.returncode == 1 and junit.exists() and por_asercion(junit)
+        junit.unlink(missing_ok=True)
+        if nombre in CONTROLES:
+            control_ok = (not ok) and r.returncode == 1
+            print(f"{nombre:40s} {'CONTROL OK: cae y NO cuenta' if control_ok else 'CONTROL ROTO'}  | {ult}")
+            continue
         atrapadas += ok
         print(f"{nombre:40s} {'ATRAPADA' if ok else 'NO ATRAPADA rc=%d' % r.returncode}  | {ult}")
 finally:
-    p.write_text(orig, encoding="utf-8", newline="\n")
-print(f"\n{atrapadas} de {len(MUT)} atrapadas por fallo de prueba")
+    for f, t in originales.items():
+        (raiz / f).write_text(t, encoding="utf-8", newline="\n")
+print(f"\n{atrapadas} de {len(MUT)} atrapadas por fallo de prueba por aserción; control del criterio: "
+      f"{'OK' if control_ok else 'ROTO'}")
