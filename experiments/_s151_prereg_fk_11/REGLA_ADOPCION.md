@@ -134,7 +134,22 @@ evidencia, y el paquete lo dice.
      días de `diario.html` se leería como «la erupción declina»;
    - el aviso a los consumidores: OVDAS y Integracion_Plataformas (`MAPA_WORKSPACE.md`);
    - **el sí explícito de Nicolás** antes del merge (A45), que incluye la pre-autorización de la reversión del paso 9.
-9. **Sombra: el laboratorio congelado en C0.** `experimental-diario.yml` ya corre a diario los 11 Tier A con C0
+9. ⚠️ **Lectura decidida el 2026-10-19 (S156), viendo un caso concreto.** La primera corrida de la vigilancia
+   (`scripts/vigilancia_sombra.py`) encontró una protegida A que la sombra publica y producción calla, confirmada en la
+   cabecera: Puyehue-Cordón Caulle, VIIRS 750 (NOAA-21), 2026-10-10 05:54 UTC, 1,19 MW; mismo objeto que MIROVA
+   (auditoría espacial A61) y misma pasada publicada por K en VIIRS 375. Es dato reprocesado con K, anterior a la
+   adopción y fuera de las ventanas del A/B. La regla no decía desde cuándo cuenta la vigilancia. Nicolás eligió («lo
+   que recomiendes», ante la recomendación B de la sesión): (a) **la unidad es la pasada**, como en el veto P1 del A/B;
+   no se reinterpreta a noche; (b) **la vigilancia del paso 9 cuenta desde la adopción** (`CAMBIO_DETECTOR_UTC`,
+   2026-10-18 09:57:30 UTC): sólo lo posterior dispara reversión o investigación y suma a la duración. Lo anterior
+   (datos K reprocesados) se informa como **retrospectivo**, no dispara, y una pérdida retrospectiva va a investigación
+   con issue. El caso de PCC es el primero de esa clase. Esta lectura se tomó **después** de ver el caso, y quien la
+   revise debe leerla así. Nota de implementación (no es decisión): la cota de (i) que la regla cita (V1, 16 de 194) es
+   de VIIRS 375, donde C0 no perdió ninguna Muy Bajo, así que es la pérdida diferencial; en MODIS y VIIRS 750 el A/B no
+   guardó el diferencial por pasada y (i) se informa sin disparar. Evidencia: `experiments/_s156_autoaudit/sombra/`.
+   Texto original conservado:
+
+   **Sombra: el laboratorio congelado en C0.** `experimental-diario.yml` ya corre a diario los 11 Tier A con C0
    (`experimental_v2`). Cada semana se cuentan contra MIROVA producción (K) y sombra (C0) con el mismo evaluador.
    - **Duración por protegidas, no por días:** hasta ver **29 protegidas A nocturnas** en la sombra, o 120 días, lo que
      ocurra primero. Con 29, una pérdida de una de cada diez protegidas se vería con 95 % de probabilidad
