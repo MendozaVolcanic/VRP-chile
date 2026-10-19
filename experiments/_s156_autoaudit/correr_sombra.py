@@ -8,7 +8,6 @@ sys.path.insert(0, raiz)
 sys.path.insert(0, os.path.join(raiz, "scripts"))
 import scripts.vigilancia_sombra as vs  # noqa: E402
 
-vs.aa.CONS = os.path.join(ref, "registro_vrp_consolidado.csv")
-vs.aa.OCR = os.path.join(ref, "registro_vrp_ocr.csv")
 vs.OUTDIR = out
-vs.main()
+vs.main(["--cons", os.path.join(ref, "registro_vrp_consolidado.csv"),
+         "--ocr", os.path.join(ref, "registro_vrp_ocr.csv")])

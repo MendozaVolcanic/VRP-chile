@@ -14,6 +14,12 @@ name: Vigilancia de la sombra de K
   workflow_run:
     workflows: ["Experimental diario (laboratorio congelado, 11 Tier A)"]
     types: [completed]
+  # Respaldo: si experimental-diario se renombra, se desactiva o no corre, el workflow_run no llega y nadie se
+  # entera. Con este cron la vigilancia corre igual una vez al dia y, sin datos frescos de la sombra, abre el
+  # issue de vigilancia ciega (verificador 2 de S156). El nombre de arriba lo amarra
+  # tests/test_vigilancia_sombra_s156.py::test_el_workflow_escucha_al_workflow_de_la_sombra.
+  schedule:
+    - cron: "40 23 * * *"
 
 permissions:
   contents: write
@@ -27,7 +33,7 @@ concurrency:
 
 jobs:
   vigilar:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # fijado como el NRT: ubuntu-latest migra a 26.04 desde el 2026-10-19
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
@@ -77,17 +83,24 @@ jobs:
           echo "all push attempts failed"; exit 1
 
       # Un issue por incidente y por clase: si ya hay uno abierto con el mismo titulo, no se abre otro.
+      # always(): si el push falla tras los cinco intentos, el issue de una reversion igual tiene que abrirse
+      # (verificador 2 de S156, hallazgo 2).
       - name: Open issue
+        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
           OUTCOME: ${{ steps.vigilancia.outcome }}
         run: |
+          # Deduplicacion por PREFIJO EXACTO del titulo, no por la busqueda de GitHub, que es por bolsa de palabras
+          # y se traga cualquier issue abierto a mano con las mismas palabras (verificador 2, hallazgo 4). Si ya hay
+          # uno abierto de la clase, se comenta con el detalle nuevo: un segundo caso no puede quedar sin rastro.
           abrir() {
-            ABIERTOS=$(gh issue list --state open --search "in:title \"$1\"" --json number --jq 'length')
-            if [ "$ABIERTOS" = "0" ]; then
+            NUM=$(PREFIJO="$1" gh issue list --state open --limit 200 --json number,title --jq '[.[] | select(.title | startswith(env.PREFIJO))][0].number // empty')
+            if [ -z "$NUM" ]; then
               gh issue create --title "$1: $(date -u +%F)" --body "$2"
             else
-              echo "ya hay un issue abierto de esta clase: $1"
+              echo "ya hay un issue abierto de esta clase (#$NUM): se comenta"
+              gh issue comment "$NUM" --body "$(printf 'Corrida del %s:\n\n%s' "$(date -u +%F)" "$2")"
             fi
           }
           if [ "$OUTCOME" != "success" ]; then

@@ -19,12 +19,13 @@ Qué mide, con el predicado del tablero ejecutado con node (banco de paridad) pa
 - REVERSIÓN (pre-autorizada): una alerta protegida A (alerta del scraper de 1 MW o más) nocturna que la
   sombra publica y producción calla. El script NO revierte: lo dice. La regla pide confirmarla en la cabecera
   de la imagen de MIROVA y que la sesión que la detecte haga `git revert` del PR de adopción.
-- INVESTIGAR (sin reversión): (i) alertas Muy Bajo (bajo 1 MW, regla D-9 SN) de VIIRS 375 que la sombra
+- INVESTIGAR (sin reversión): (i) alertas Muy Bajo (bajo 1 MW, etiqueta original como el A/B) de VIIRS 375 que la sombra
   publica y producción calla, por volcán, si la cota inferior de Wilson de su tasa supera la cota superior del
   A/B (V1, 16 de 194); en MODIS y VIIRS 750 el A/B no guardó la pérdida diferencial y se informa sin disparar;
   (ii) persistencia, tres noches seguidas en un volcán con una alerta que la sombra publica y producción no;
   (iii) publicación de VIIRS 375 de producción en negativos limpios, si la cota inferior de Wilson supera la
-  cota superior del A/B (la mayor de V1 y V2).
+  cota superior del A/B (la mayor de V1 y V2), también con la etiqueta original. La reversión y la
+  persistencia usan D-9 SN: una alerta mínima no es alerta.
 - Duración: hasta ver 29 protegidas A nocturnas en la sombra después de la adopción, o 120 días.
 - Vigilancia ciega: la sombra dejó de producir, no hay frontera o adopción declaradas, o la «sombra» trae
   records de producción. Una vigilancia ciega no da error: da VERDE. Por eso cada caso tiene su veredicto.
@@ -90,13 +91,14 @@ def cota_superior(tipo, sensor):
 
 
 def leer_adopcion(path=aa.CAMBIO_DETECTOR_JS):
-    """Instante 'YYYY-MM-DD HH:MM' (UTC) del merge de adopción de K (CAMBIO_DETECTOR_UTC), o None."""
+    """Instante 'YYYY-MM-DD HH:MM:SS' (UTC) del merge de adopción de K (CAMBIO_DETECTOR_UTC), o None.
+    Con segundos: la adopción fue a las 09:57:30 y una pasada de las 09:57:10 es todavía de antes."""
     try:
         with open(path, encoding="utf-8") as fh:
-            m = re.search(r'CAMBIO_DETECTOR_UTC\s*=\s*"(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})', fh.read())
+            m = re.search(r'CAMBIO_DETECTOR_UTC\s*=\s*"(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})(:\d{2})?', fh.read())
     except OSError:
         return None
-    return f"{m.group(1)} {m.group(2)}" if m else None
+    return f"{m.group(1)} {m.group(2)}{m.group(3) or ':00'}" if m else None
 
 
 def _diurna_por_defecto():
@@ -113,11 +115,18 @@ def _publica(cands):
 
 
 def pasadas_de_alerta(filas, prod, sombra, win, diurna=None):
-    """Cada pasada nocturna de la ventana con alerta de MIROVA (D-9 SN aplicada), con lo que hicieron
-    producción y sombra: `prod_pub` / `sombra_pub` = True o False si hay record a ±120 s, None si no miró."""
+    """Cada pasada nocturna de la ventana con alerta de MIROVA (lectura A: ALERTA_TERMICA u ALERTA_TERMICA_OCR,
+    nunca las filas sin geometría), con lo que hicieron producción y sombra en el MISMO sensor:
+    `prod_pub` / `sombra_pub` = True o False si hay record a ±120 s, None si no miró.
+
+    `minima`: la pasada es mínima según D-9 (todas sus alertas de 0,05 MW o menos en VIIRS 375). La regla SN
+    dice que ahí MIROVA no vio nada: no cuenta para la reversión ni para la persistencia. Sí cuenta en el
+    disparador (i), porque la cota del A/B se midió con la etiqueta original (verificador 2 de S156).
+    """
     diurna = diurna or _diurna_por_defecto()
+    minimas = cm.aplicar_regla_minimas(filas, "SN").minimas
     por_pasada = defaultdict(list)
-    for f in cm.aplicar_regla_minimas(filas, "SN").filas:
+    for f in filas:
         if f.get("tipo") in cm.TIPOS_ALERTA and win[0] <= f["fecha_utc"][:10] <= win[1]:
             por_pasada[cm.clave_pasada(f)].append(f)
     idx = {"prod": defaultdict(list), "sombra": defaultdict(list)}
@@ -125,13 +134,16 @@ def pasadas_de_alerta(filas, prod, sombra, win, diurna=None):
         for r in recs:
             idx[nombre][(r["vol"], r["b"])].append(r)
     out = []
-    for (vol, b, minuto), fs in sorted(por_pasada.items()):
+    for clave, fs in sorted(por_pasada.items()):
+        vol, b, minuto = clave
         try:
             dt = datetime.fromisoformat(fs[0]["fecha_utc"][:19]).replace(tzinfo=timezone.utc)
         except ValueError:
             continue
         if diurna(b, vol, dt):
             continue
+        # El pareo es por volcán Y sensor: en PCC el 2026-10-10 K publicó la pasada en VIIRS 375 y calló en
+        # VIIRS 750; parear sin sensor borra justo la pérdida (mutación M1 del verificador 2).
         cerca = {n: [r for r in idx[n].get((vol, b), []) if abs((r["dt"] - dt).total_seconds()) <= TOL_S]
                  for n in idx}
         vrps = [f["vrp_mw"] for f in fs if f.get("vrp_mw") is not None]
@@ -142,8 +154,10 @@ def pasadas_de_alerta(filas, prod, sombra, win, diurna=None):
                       and minuto[:10] < aa.HITO_OCR_SUOMI_NPP
                       and any("SNPP" in (r.get("sensor") or "") for n in cerca for r in cerca[n]))
         out.append({"volcano": vol, "sensor": b, "fecha_utc": minuto,
+                    "instante_utc": dt.strftime("%Y-%m-%d %H:%M:%S"),
                     "vrp_mirova_mw": round(max(vrps), 3) if vrps else None,
-                    "protegida": bool(protegidas), "referencia_sospechosa": sospechosa,
+                    "protegida": bool(protegidas), "minima": clave in minimas,
+                    "referencia_sospechosa": sospechosa,
                     "prod_pub": _publica(cerca["prod"]), "sombra_pub": _publica(cerca["sombra"])})
     return out
 
@@ -165,6 +179,7 @@ def _corridas(fechas, largo=3):
 
 
 def _sombra_si_produccion_no(pasadas):
+    """Pasadas que la sombra publica y producción, que SÍ miró, calla. Sin record de producción no es «calla»."""
     return [p for p in pasadas if p["sombra_pub"] is True and p["prod_pub"] is False]
 
 
@@ -175,20 +190,25 @@ def _persistencia(calla):
     return [{"volcano": v, "noches": c} for v, fs in sorted(por_volcan.items()) for c in _corridas(fs)]
 
 
+def _instante(adopcion):
+    return datetime.strptime(adopcion, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+
+
 def disparadores(pasadas, negs_prod, hoy, adopcion=None):
     """Los tres niveles del paso 9 sobre las pasadas POSTERIORES a la adopción; lo anterior, retrospectivo.
 
-    `adopcion`: 'YYYY-MM-DD HH:MM' UTC (por defecto, la del tablero). `negs_prod`: records de producción
-    etiquetados por el banco, con `dt`. Sin adopción declarada no hay nada prospectivo que vigilar.
+    `adopcion`: 'YYYY-MM-DD HH:MM:SS' UTC (por defecto, la del tablero). `negs_prod`: records de producción
+    etiquetados por el banco, con `dt` y `lab_original`. Sin adopción declarada no hay nada prospectivo.
     """
     adopcion = adopcion or leer_adopcion()
-    corte = adopcion or "9999-99-99 99:99"
-    pros = [p for p in pasadas if p["fecha_utc"][:16] >= corte]
-    retro = [p for p in pasadas if p["fecha_utc"][:16] < corte]
+    corte = adopcion or "9999-99-99 99:99:99"
+    pros = [p for p in pasadas if p["instante_utc"] >= corte]
+    retro = [p for p in pasadas if p["instante_utc"] < corte]
 
     calla = _sombra_si_produccion_no(pros)
     reversion = [p for p in calla if p["protegida"]]
 
+    # (i) Muy Bajo de VIIRS 375 por volcán, con la etiqueta ORIGINAL (incluye las mínimas), como la cota del A/B.
     muy_bajo = {}
     conteo = defaultdict(lambda: [0, 0])
     for p in pros:
@@ -196,7 +216,7 @@ def disparadores(pasadas, negs_prod, hoy, adopcion=None):
             continue
         c = conteo[(p["volcano"], p["sensor"])]
         c[1] += 1
-        c[0] += p["sombra_pub"] and not p["prod_pub"]
+        c[0] += bool(p["sombra_pub"] and not p["prod_pub"])
     for (vol, s), (kk, n) in sorted(conteo.items()):
         lo, hi = wilson(kk, n)
         cota = cota_superior("muy_bajo", s)
@@ -204,11 +224,14 @@ def disparadores(pasadas, negs_prod, hoy, adopcion=None):
                                   "cota_ab": round(cota, 4) if cota is not None else None,
                                   "dispara": cota is not None and lo > cota}
 
-    persistencia = _persistencia(calla)
+    # (ii) persistencia: «una alerta de MIROVA»; con D-9 SN, las mínimas no son alertas.
+    persistencia = _persistencia([p for p in calla if not p["minima"]])
 
-    corte_dt = (datetime.strptime(corte, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
-                if adopcion else None)
-    negs = [r for r in negs_prod if r["b"] == "VIIRS375" and r["lab"] == "neg_limpio"
+    # (iii) negativos limpios de VIIRS 375 con la etiqueta ORIGINAL, la misma con que se midió la cota del A/B:
+    # SN convierte en negativo una pasada donde MIROVA vio algo de 0,05 MW o menos y casi duplica la tasa
+    # (verificador 2 de S156, hallazgo 6).
+    corte_dt = _instante(adopcion) if adopcion else None
+    negs = [r for r in negs_prod if r["b"] == "VIIRS375" and r.get("lab_original") == "neg_limpio"
             and corte_dt is not None and r["dt"] >= corte_dt]
     kn = sum(bool(r["pub"]) for r in negs)
     lo, hi = wilson(kn, len(negs))
@@ -225,13 +248,14 @@ def disparadores(pasadas, negs_prod, hoy, adopcion=None):
 
     calla_retro = _sombra_si_produccion_no(retro)
     retrospectivo = {
-        "nota": "anterior a la adopción (datos K reprocesados): se informa y no dispara (REGLA_ADOPCION §4 paso 9, "
-                "lectura del 2026-10-19)",
+        "nota": "anterior a la adopción (datos K reprocesados): se informa y no dispara; una pérdida protegida "
+                "se investiga con un issue abierto a mano (el retrospectivo es fijo: la sombra no crece hacia "
+                "atrás). REGLA_ADOPCION §4 paso 9, lectura del 2026-10-19",
         "n_pasadas": len(retro),
         "protegidas_vistas_en_sombra": sum(1 for p in retro if p["protegida"] and p["sombra_pub"] is not None),
         "protegidas_que_la_sombra_publica_y_k_calla": [p for p in calla_retro if p["protegida"]],
         "muy_bajo_que_la_sombra_publica_y_k_calla": sum(1 for p in calla_retro if not p["protegida"]),
-        "persistencia": _persistencia(calla_retro),
+        "persistencia": _persistencia([p for p in calla_retro if not p["minima"]]),
     }
 
     if reversion:
@@ -244,14 +268,23 @@ def disparadores(pasadas, negs_prod, hoy, adopcion=None):
             "negativos_VIIRS375": negativos, "duracion": duracion, "retrospectivo": retrospectivo}
 
 
-def avisos_sombra(ultima_sombra, hoy):
-    if ultima_sombra is None:
-        return ["no hay records de la sombra en la ventana (data/experimental_v2): la vigilancia está ciega"]
-    dias = (date.fromisoformat(hoy) - date.fromisoformat(ultima_sombra)).days
-    if dias > MAX_DIAS_SOMBRA_SIN_DATOS:
-        return [f"la sombra no produce hace {dias} días (último dato {ultima_sombra}): revisar "
-                "experimental-diario.yml; mientras tanto la vigilancia está ciega"]
-    return []
+def avisos_sombra(sombra, hoy, vols=None):
+    """Frescura de la sombra POR VOLCÁN: si muere en uno solo, sumar los once la deja verde (verificador 2,
+    hallazgo 1: una protegida de 5 MW en Chillán con la sombra de Chillán muerta daba VERDE)."""
+    vols = vols or aa.VOLS
+    ultima = defaultdict(str)
+    for r in sombra:
+        ultima[r["vol"]] = max(ultima[r["vol"]], r["noche"])
+    av = []
+    for v in vols:
+        if not ultima.get(v):
+            av.append(f"no hay records de la sombra de {v} en la ventana (data/experimental_v2): ese volcán está ciego")
+            continue
+        dias = (date.fromisoformat(hoy) - date.fromisoformat(ultima[v])).days
+        if dias > MAX_DIAS_SOMBRA_SIN_DATOS:
+            av.append(f"la sombra de {v} no produce hace {dias} días (último dato {ultima[v]}): revisar "
+                      "experimental-diario.yml; mientras tanto ese volcán está ciego")
+    return av
 
 
 def avisos_perfiles(prod, sombra):
@@ -270,7 +303,8 @@ def avisos_perfiles(prod, sombra):
 
 def cargar_insumos(win):
     """Referencia unificada, records de producción (sólo K) y de la sombra, con el predicado del tablero.
-    Los de producción quedan etiquetados por el banco con D-9 SN (para los negativos limpios)."""
+    Los de producción quedan etiquetados por el banco con la regla original en `lab_original` (para los
+    negativos limpios, como la cota del A/B) y con D-9 SN en `lab`."""
     import banco_paridad as bp  # noqa: E402  (node; se carga en runtime)
     from referencia_mirova_unificada import cargar_referencia_unificada  # noqa: E402
     coords = aa._coords_por_volcan()
@@ -278,8 +312,10 @@ def cargar_insumos(win):
     filas = cargar_referencia_unificada(aa.CONS, aa.OCR)
     prod = [r for r in bp.cargar_nuestros(coords, inner, win) if r.get("sha")]   # sólo records de K
     sombra = bp.cargar_nuestros(coords, inner, win, data=SOMBRA)
-    idx = bp.indexar_referencia(filas, coords, win, regla_minimas="SN")
-    bp.etiquetar(prod, *idx[:3])
+    bp.etiquetar(prod, *bp.indexar_referencia(filas, coords, win)[:3])
+    for r in prod:
+        r["lab_original"] = r["lab"]
+    bp.etiquetar(prod, *bp.indexar_referencia(filas, coords, win, regla_minimas="SN")[:3])
     return filas, prod, sombra
 
 
@@ -298,13 +334,13 @@ def evaluar(hoy):
     filas, prod, sombra = cargar_insumos(win)
     pasadas = pasadas_de_alerta(filas, prod, sombra, win)
     d = disparadores(pasadas, prod, hoy, adopcion)
-    ultima = max((r["noche"] for r in sombra), default=None)
-    avisos = avisos_sombra(ultima, hoy) + avisos_perfiles(prod, sombra)
+    avisos = avisos_sombra(sombra, hoy) + avisos_perfiles(prod, sombra)
     veredicto = d["veredicto"]
     if veredicto == "VERDE" and avisos:
         veredicto = "VIGILANCIA_CIEGA"
     out.update({"ventana": list(win), "veredicto": veredicto, "avisos": avisos,
-                "sombra_desde": min((r["noche"] for r in sombra), default=None), "sombra_hasta": ultima,
+                "sombra_desde": min((r["noche"] for r in sombra), default=None),
+                "sombra_hasta": max((r["noche"] for r in sombra), default=None),
                 "n_pasadas_alerta": len(pasadas),
                 "n_pasadas_alerta_con_sombra": sum(1 for p in pasadas if p["sombra_pub"] is not None),
                 **{k: v for k, v in d.items() if k != "veredicto"},

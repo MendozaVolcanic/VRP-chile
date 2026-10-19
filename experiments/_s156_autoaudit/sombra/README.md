@@ -27,8 +27,21 @@ desde la adopción y lo anterior se informa como retrospectivo, sin disparar. Es
 diciendo que se decidió viendo este caso. Con esa lectura, `sombra_latest_2026-10-19_lectura_decidida.json` da VERDE y
 el caso queda en el bloque `retrospectivo`, con su issue de investigación.
 
-## Lo que cambió en el script después del verificador
+## Lo que cambió después de cada verificador
 
-Separación prospectivo y retrospectivo; la cota de Muy Bajo sólo en VIIRS 375 (en MODIS y VIIRS 750 el A/B no guardó
-la pérdida diferencial); marca A119 de Suomi NPP; aviso si la «sombra» trae records de producción; prueba de
-`evaluar()` y `main()` de punta a punta. `mutar_vigilancia.py`: 21 mutaciones, las 21 caen por fallo de prueba.
+Verificador 1 (`verificador/INFORME.md`): separación prospectivo y retrospectivo; la cota de Muy Bajo sólo en VIIRS
+375 (en MODIS y VIIRS 750 el A/B no guardó la pérdida diferencial); marca A119 de Suomi NPP; aviso si la «sombra»
+trae records de producción; prueba de `evaluar()` y `main()`.
+
+Verificador 2 (`verificador2/INFORME.md`): frescura de la
+sombra POR VOLCÁN (si muere en uno solo, sumar los once la dejaba verde); el issue se abre aunque falle el push
+(`if: always()`); deduplicación por prefijo exacto del título y comentario en el issue abierto (la búsqueda de GitHub
+es por bolsa de palabras); cron de respaldo y runner fijo en 24.04; (i) y (iii) con la etiqueta ORIGINAL, como las
+cotas del A/B, y reversión y persistencia con D-9 SN; corte de la adopción al segundo; prueba del cableado de
+`cargar_insumos` sin node. `mutar_vigilancia.py`: 37 mutaciones (las del autor y las 13 del verificador 2), las 37 caen
+por fallo de prueba (`mutar_vigilancia_salida.txt`).
+
+Queda para decidir (no se tocó, es la letra de la regla): con evaluación diaria, la primera Muy Bajo de VIIRS 375 que
+la sombra publica y K calla en un volcán ya dispara INVESTIGAR (Wilson inferior de 1 de 1 = 0,2065 sobre la cota
+0,1298); el verificador 2 estimó 57 % de probabilidad de al menos una falsa alarma en 120 días si K pierde igual que en
+el A/B.

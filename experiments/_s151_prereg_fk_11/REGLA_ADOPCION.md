@@ -143,7 +143,8 @@ evidencia, y el paquete lo dice.
    no se reinterpreta a noche; (b) **la vigilancia del paso 9 cuenta desde la adopción** (`CAMBIO_DETECTOR_UTC`,
    2026-10-18 09:57:30 UTC): sólo lo posterior dispara reversión o investigación y suma a la duración. Lo anterior
    (datos K reprocesados) se informa como **retrospectivo**, no dispara, y una pérdida retrospectiva va a investigación
-   con issue. El caso de PCC es el primero de esa clase. Esta lectura se tomó **después** de ver el caso, y quien la
+   con un issue que se abre a mano (el retrospectivo es fijo: la sombra existe desde el 2026-10-02 y no crece hacia
+   atrás, así que no hace falta automatizarlo). El caso de PCC es el primero de esa clase. El corte es al segundo. Esta lectura se tomó **después** de ver el caso, y quien la
    revise debe leerla así. Nota de implementación (no es decisión): la cota de (i) que la regla cita (V1, 16 de 194) es
    de VIIRS 375, donde C0 no perdió ninguna Muy Bajo, así que es la pérdida diferencial; en MODIS y VIIRS 750 el A/B no
    guardó el diferencial por pasada y (i) se informa sin disparar. Evidencia: `experiments/_s156_autoaudit/sombra/`.
