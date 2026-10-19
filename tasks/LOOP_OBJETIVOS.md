@@ -509,7 +509,18 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
-### 2026-10-19 ~14:30 UTC (vuelta 221, S155): auditoría post-K completa; #860 y #861 abiertos
+### 2026-10-19 11:31 UTC (vuelta 222, S155): #860 y #861 mergeados, marca verificada en el tablero público; cierre
+- Con el sí de Nicolás («mergea #860 y #861 cuando el CI esté verde, verifica que el tablero público muestre la marca
+  nueva, y después corre /cierre»). #860: CI verde, squash `67122696` (el primer intento chocó con un commit del NRT,
+  reintentado); Pages `39244255528` success; en `diario.html` público Copahue muestra la línea «detector K» el 18-sep y
+  el aviso nombra las dos fechas. #861: el primer CI falló por la guarda G6 (`docs/INDEX.md` tiene que listar la última
+  auditoría); arreglado en la rama, CI verde, squash `dd1c0b7b`.
+- Locales sólo en Windows: `tests/test_guard_libro_de_pruebas_s146.py` g1d y g2c fallan en este computador también sin
+  los cambios de la sesión (worktree de la marca), y el CI no las marca. SIN ATRIBUIR.
+- Horas de las vueltas 220 y 221 corregidas contra los commits (las había estimado sin pedir la hora al servidor, A86).
+- Worktrees de la sesión borrados (sólo queda la raíz en `loop/activo`). Histórico con K: 141 de 177 a las 11:31.
+
+### 2026-10-19 11:19 UTC (vuelta 221, S155): auditoría post-K completa; #860 y #861 abiertos
 - Cinco auditores y cinco verificadores limpios entregaron. Consolidado en `docs/AUDIT_S155.md` (PR #861, sólo docs y
   `experiments/_s155_audit/`; 40 archivos de más de 1 MB fuera, listados en `EXCLUIDOS.md`).
 - Hallazgo central, por cuatro vías y tres verificadores: la frontera C0/K de los datos es la fecha de observación
@@ -525,7 +536,7 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   abrirá un issue con 2 flags (Chillán y Tupungatito) que son mezcla de regímenes.
 - Worktrees de la auditoría borrados; quedan `s155-marca` y `s155-auditoria` hasta sus merges. Discos: C: 23 GB, D: 20 GB.
 
-### 2026-10-19 ~10:55 UTC (vuelta 220, S155): auditoría post-K lanzada (bloque 1 del plan)
+### 2026-10-19 10:39 UTC (vuelta 220, S155): auditoría post-K lanzada (bloque 1 del plan)
 - Pedido de Nicolás: aprovechar el paralelo. Cinco auditores Opus en segundo plano, uno por frente, cada uno en su
   worktree detached sobre `origin/main` `cb90031a` (`D:\vrp-trabajo\worktrees\s155-audit-f1` a `f5`, ~0,94 GB cada uno;
   D: 18 GB libres después de crearlos). Preámbulo canónico entero; sin commits, sin despachos, sin Earthdata local.
