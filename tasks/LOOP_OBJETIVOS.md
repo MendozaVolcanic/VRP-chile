@@ -509,6 +509,23 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-19 ~13:30 UTC (vuelta 224, S156): la vigilancia de la sombra encuentra una candidata a reversión de K
+- Arreglo 4 en curso, rama `s156-vigilancia-sombra` (worktree `D:\vrp-trabajo\worktrees\s156-sombra`, sin PR todavía):
+  `scripts/vigilancia_sombra.py` implementa el paso 9 de `REGLA_ADOPCION.md` §4, con 9 pruebas.
+- Corrida con la referencia del 2026-10-19 (ventana 2026-09-18 a 10-19; sombra del 10-02 al 10-18): **REVERSION_CANDIDATA**.
+  Puyehue-Cordón Caulle, VIIRS 750 (NOAA-21), 2026-10-10 05:54 UTC: fila de la TABLA (no OCR) ALERTA_TERMICA 1,19 MW
+  a 7,83 km; la sombra C0 publica (cúmulo 1,886 MW, 8 px, Test 1 integrado disparado: 4,8 K, 26 px; primer paso 2 px
+  más 6 recapturados); K no detecta nada (0 px, primer paso vacío). NTI máx −0,906 (piso), BT máx 277,7 contra fondo
+  271,85 K, cenit 23°. **Cabecera de la imagen de MIROVA confirmada**: PNG `20261010_083116_VIIRS750_Latest10NTI.png`
+  de mirova-tif-archive dice «Last Update 10-Oct-2026 05:54:02», «Thermal anomaly: LOW», «VRP = 1 MW».
+- Contexto: fuera de las ventanas del A/B (V1 08-29 a 10-08, V2 03-01 a 06-12), así que es evidencia nueva. La misma
+  pasada en VIIRS 375 sí la publica K (0,283 MW, MIROVA 0,39 Muy Bajo): la noche no se perdió, la pasada de 750 sí.
+  Las otras 4 protegidas que K no publica: Chillán MODIS 12 y 15-oct, la sombra tampoco; Tupungatito 28 y 29-sep, sin
+  sombra. Protegidas vistas en la sombra: 61 (objetivo 29, ya cumplido).
+- NO se revirtió: la regla la pre-autoriza, pero Nicolás está presente y la noche quedó cubierta por VIIRS 375; se le
+  presenta la decisión. Pendiente también: auditoría espacial A61 (¿es el mismo objeto que MIROVA a 7,83 km?) y
+  verificador limpio del código.
+
 ### 2026-10-19 12:22 UTC (vuelta 223, S156): arreglos 2 y 3 de AUDIT_S155 mergeados (#862) antes del auto-audit del lunes
 - Con el sí de Nicolás («parte por los arreglos 2 y 3 de AUDIT_S155 antes del auto-audit del lunes»). PR #862, squash
   `484d037d`, CI verde sobre `ca3ee1eb`. Sin tocar `pipeline/`.
