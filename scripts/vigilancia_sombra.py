@@ -268,23 +268,51 @@ def disparadores(pasadas, negs_prod, hoy, adopcion=None):
             "negativos_VIIRS375": negativos, "duracion": duracion, "retrospectivo": retrospectivo}
 
 
-def avisos_sombra(sombra, hoy, vols=None):
-    """Frescura de la sombra POR VOLCÁN: si muere en uno solo, sumar los once la deja verde (verificador 2,
-    hallazgo 1: una protegida de 5 MW en Chillán con la sombra de Chillán muerta daba VERDE)."""
+def _avisos_frescura(recs, hoy, nombre, revisar, vols=None, sensores=None):
+    """Frescura POR VOLCÁN Y SENSOR. Si un lado muere en un solo volcán o en un solo sensor, sumar todo lo deja
+    verde: el verificador 2 lo mostró con la sombra de Chillán (protegida de 5 MW, VERDE) y el 3 con la sombra
+    sin MODIS (13 protegidas MODIS sin mirar, VERDE)."""
     vols = vols or aa.VOLS
+    sensores = sensores or aa.SENSORS
     ultima = defaultdict(str)
-    for r in sombra:
-        ultima[r["vol"]] = max(ultima[r["vol"]], r["noche"])
+    for r in recs:
+        ultima[(r["vol"], r["b"])] = max(ultima[(r["vol"], r["b"])], r["noche"])
     av = []
     for v in vols:
-        if not ultima.get(v):
-            av.append(f"no hay records de la sombra de {v} en la ventana (data/experimental_v2): ese volcán está ciego")
-            continue
-        dias = (date.fromisoformat(hoy) - date.fromisoformat(ultima[v])).days
-        if dias > MAX_DIAS_SOMBRA_SIN_DATOS:
-            av.append(f"la sombra de {v} no produce hace {dias} días (último dato {ultima[v]}): revisar "
-                      "experimental-diario.yml; mientras tanto ese volcán está ciego")
+        for s in sensores:
+            u = ultima.get((v, s))
+            if not u:
+                av.append(f"no hay records de {nombre} de {v} en {s} en la ventana: ese volcán y sensor están ciegos")
+                continue
+            dias = (date.fromisoformat(hoy) - date.fromisoformat(u)).days
+            if dias > MAX_DIAS_SOMBRA_SIN_DATOS:
+                av.append(f"{nombre} de {v} en {s} no produce hace {dias} días (último dato {u}): revisar "
+                          f"{revisar}; mientras tanto ese volcán y sensor están ciegos")
     return av
+
+
+def avisos_sombra(sombra, hoy, vols=None, sensores=None):
+    return _avisos_frescura(sombra, hoy, "la sombra", "experimental-diario.yml", vols, sensores)
+
+
+def avisos_produccion(prod, hoy, vols=None, sensores=None):
+    """Producción sin records de K en un volcán o sensor (por ejemplo, si el filtro por `codigo_sha` deja
+    todo afuera) tampoco puede «callar»: la vigilancia no la ve (verificador 3, hallazgo 1)."""
+    return _avisos_frescura(prod, hoy, "producción (K)", "nrt.yml y la marca de régimen", vols, sensores)
+
+
+def avisos_referencia(filas, hoy):
+    """Una referencia de MIROVA vacía o detenida no da alertas y la vigilancia sale VERDE sin mirar nada
+    (verificador 3, hallazgo 1). Se mide sobre TODAS las filas, RUTINA incluidas, como el auto-audit
+    (`MAX_GT_STALE_DAYS`): un período sin alertas es legítimo, un archivo que no crece no."""
+    fechas = [f["fecha_utc"][:10] for f in filas if (f.get("fecha_utc") or "")[:4].isdigit()]
+    if not fechas:
+        return ["la referencia de MIROVA está vacía: no hay contra qué vigilar"]
+    dias = (date.fromisoformat(hoy) - date.fromisoformat(max(fechas))).days
+    if dias > aa.MAX_GT_STALE_DAYS:
+        return [f"la referencia de MIROVA no registra nada hace {dias} días (última fila {max(fechas)}): "
+                "es el scraper de Mirova-v1, no los volcanes"]
+    return []
 
 
 def avisos_perfiles(prod, sombra):
@@ -334,7 +362,9 @@ def evaluar(hoy):
     filas, prod, sombra = cargar_insumos(win)
     pasadas = pasadas_de_alerta(filas, prod, sombra, win)
     d = disparadores(pasadas, prod, hoy, adopcion)
-    avisos = avisos_sombra(sombra, hoy) + avisos_perfiles(prod, sombra)
+    avisos = (avisos_referencia(filas, hoy) + avisos_sombra(sombra, hoy) + avisos_produccion(prod, hoy)
+              + avisos_perfiles(prod, sombra))
+    # Un aviso no tapa una reversión ni una investigación: sólo impide que la falta de disparos se lea como VERDE.
     veredicto = d["veredicto"]
     if veredicto == "VERDE" and avisos:
         veredicto = "VIGILANCIA_CIEGA"

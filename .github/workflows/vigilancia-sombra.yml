@@ -94,6 +94,9 @@ jobs:
           # Deduplicacion por PREFIJO EXACTO del titulo, no por la busqueda de GitHub, que es por bolsa de palabras
           # y se traga cualquier issue abierto a mano con las mismas palabras (verificador 2, hallazgo 4). Si ya hay
           # uno abierto de la clase, se comenta con el detalle nuevo: un segundo caso no puede quedar sin rastro.
+          # OJO: un issue abierto A MANO cuyo titulo empiece igual que uno de estos («Sombra de K: candidata a
+          # reversion», etc.) recibe los comentarios en vez de que se abra uno nuevo. Los issues a mano sobre la
+          # sombra van con otro titulo (verificador 3 de S156).
           abrir() {
             NUM=$(PREFIJO="$1" gh issue list --state open --limit 200 --json number,title --jq '[.[] | select(.title | startswith(env.PREFIJO))][0].number // empty')
             if [ -z "$NUM" ]; then

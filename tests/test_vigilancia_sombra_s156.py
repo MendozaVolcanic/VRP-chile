@@ -286,13 +286,34 @@ def test_plazo_de_la_regla():
 
 # ------------------------------------------------------------------ avisos
 def test_la_frescura_de_la_sombra_es_por_volcan():
+    s1 = ["VIIRS375"]
     ok = [_rec(v, "VIIRS375", "05:00", "2026-10-18", True) for v in ("A", "B")]
-    assert vs.avisos_sombra(ok, "2026-10-19", vols=["A", "B"]) == []
+    assert vs.avisos_sombra(ok, "2026-10-19", vols=["A", "B"], sensores=s1) == []
     viejo = [_rec("A", "VIIRS375", "05:00", "2026-10-18", True), _rec("B", "VIIRS375", "05:00", "2026-10-10", True)]
-    av = vs.avisos_sombra(viejo, "2026-10-19", vols=["A", "B"])
+    av = vs.avisos_sombra(viejo, "2026-10-19", vols=["A", "B"], sensores=s1)
     assert len(av) == 1 and " B " in av[0]
-    assert vs.avisos_sombra(ok[:1], "2026-10-19", vols=["A", "B"])      # B sin ningún record
-    assert vs.avisos_sombra([], "2026-10-19", vols=["A"])
+    assert vs.avisos_sombra(ok[:1], "2026-10-19", vols=["A", "B"], sensores=s1)      # B sin ningún record
+    assert vs.avisos_sombra([], "2026-10-19", vols=["A"], sensores=s1)
+    # el borde: tres días sin datos todavía no es ciega, cuatro sí
+    assert vs.avisos_sombra([_rec("A", "VIIRS375", "05:00", "2026-10-16", True)], "2026-10-19",
+                            vols=["A"], sensores=s1) == []
+    assert vs.avisos_sombra([_rec("A", "VIIRS375", "05:00", "2026-10-15", True)], "2026-10-19",
+                            vols=["A"], sensores=s1)
+
+
+def test_la_frescura_es_tambien_por_sensor():
+    """Verificador 3: la sombra sin MODIS dejaba 13 protegidas MODIS sin mirar y daba VERDE."""
+    sin_modis = [_rec("A", s, "05:00", "2026-10-18", True) for s in ("VIIRS375", "VIIRS750")]
+    av = vs.avisos_sombra(sin_modis, "2026-10-19", vols=["A"], sensores=["MODIS", "VIIRS375", "VIIRS750"])
+    assert len(av) == 1 and "MODIS" in av[0]
+    assert vs.avisos_produccion(sin_modis, "2026-10-19", vols=["A"], sensores=["MODIS"])
+
+
+def test_referencia_vacia_o_detenida_es_aviso():
+    viva = [_fila("Lascar", "MODIS", "2026-10-18 06:00:00", 0.0, tipo="RUTINA")]
+    assert vs.avisos_referencia(viva, "2026-10-19") == []
+    assert vs.avisos_referencia([], "2026-10-19")
+    assert vs.avisos_referencia([_fila("Lascar", "MODIS", "2026-09-30 06:00:00", 0.0, tipo="RUTINA")], "2026-10-19")
 
 
 def test_mutacion_una_sombra_que_trae_produccion_es_aviso():
@@ -321,7 +342,7 @@ def test_mutacion_cargar_insumos_lee_la_sombra_filtra_k_y_etiqueta_original_y_sn
     filas, prod, sombra = vs.cargar_insumos(("2026-09-18", "2026-10-19"))
     assert llamadas == [None, vs.SOMBRA]
     assert prod == [rec_k] and sombra == [{"vol": "V", "fuente": "sombra"}]
-    assert (rec_k["lab_original"], rec_k["lab"]) == ("neg_limpio", "sn")
+    assert (rec_k.get("lab_original"), rec_k.get("lab")) == ("neg_limpio", "sn")
 
 
 # ------------------------------------------------------------------ evaluar() y main() de punta a punta
@@ -332,18 +353,28 @@ def insumos(monkeypatch):
         monkeypatch.setattr(vs.aa, "leer_frontera_k", lambda *a: frontera)
         monkeypatch.setattr(vs, "leer_adopcion", lambda *a: adopcion)
         monkeypatch.setattr(vs, "_diurna_por_defecto", lambda: NOCHE)
-        monkeypatch.setattr(vs.aa, "VOLS", ["PuyehueCordonCaulle", "NevadosDeChillan"])
+        monkeypatch.setattr(vs.aa, "VOLS", VOLS_CASO)
     return poner
+
+
+VOLS_CASO = ["PuyehueCordonCaulle", "NevadosDeChillan"]
+
+
+def _relleno(perfil, fecha="2026-10-22"):
+    """Un record sin alerta por volcán y sensor: la frescura se mide por volcán Y sensor."""
+    return [_rec(v, s, "03:00", fecha, False, perfil=perfil) for v in VOLS_CASO for s in vs.aa.SENSORS]
 
 
 def _caso_pcc():
     filas = [_fila("PuyehueCordonCaulle", "VIIRS750", "2026-10-10 05:54:02", 1.19),
-             _fila("NevadosDeChillan", "MODIS", "2026-10-22 07:20:00", 2.18)]
+             _fila("NevadosDeChillan", "MODIS", "2026-10-22 07:20:00", 2.18),
+             _fila("Lascar", "MODIS", "2026-10-22 06:00:00", 0.0, tipo="RUTINA")]     # la referencia está viva
     prod = [_rec("PuyehueCordonCaulle", "VIIRS750", "05:54", "2026-10-10", False, perfil="mirova_equivalent"),
             _rec("NevadosDeChillan", "MODIS", "07:20", "2026-10-22", True, perfil="mirova_equivalent")]
-    sombra = [_rec("PuyehueCordonCaulle", "VIIRS750", "05:54", "2026-10-22", True, perfil="experimental"),
-              _rec("PuyehueCordonCaulle", "VIIRS750", "05:54", "2026-10-10", True, perfil="experimental"),
+    prod += _relleno("mirova_equivalent")
+    sombra = [_rec("PuyehueCordonCaulle", "VIIRS750", "05:54", "2026-10-10", True, perfil="experimental"),
               _rec("NevadosDeChillan", "MODIS", "07:20", "2026-10-22", True, perfil="experimental")]
+    sombra += _relleno("experimental")
     return filas, prod, sombra
 
 
@@ -369,8 +400,7 @@ def test_evaluar_sombra_que_es_produccion_queda_ciega(insumos):
     """La única razón para quedar ciega acá es el perfil: los records de producción están frescos en los dos
     volcanes (sin el record del 10-22 en PCC la frescura la dejaba ciega igual y la prueba pasaba por otra cosa)."""
     filas, prod, _ = _caso_pcc()
-    prod.append(_rec("PuyehueCordonCaulle", "VIIRS750", "05:54", "2026-10-22", True, perfil="mirova_equivalent"))
-    assert vs.avisos_sombra(prod, "2026-10-23", vols=["PuyehueCordonCaulle", "NevadosDeChillan"]) == []
+    assert vs.avisos_sombra(prod, "2026-10-23", vols=VOLS_CASO) == []
     insumos(filas, prod, prod)
     out = vs.evaluar("2026-10-23")
     assert out["veredicto"] == "VIGILANCIA_CIEGA" and any("no es la sombra" in a for a in out["avisos"])
@@ -421,3 +451,95 @@ def test_main_acepta_la_referencia_por_argumento(insumos, monkeypatch, tmp_path)
     monkeypatch.setattr(vs.aa, "OCR", vs.aa.OCR)
     vs.main(["--cons", "x/cons.csv", "--ocr", "x/ocr.csv"])
     assert (vs.aa.CONS, vs.aa.OCR) == ("x/cons.csv", "x/ocr.csv")
+
+
+# ------------------------------------------------------------------ mutaciones del verificador 3 (N1 a N27)
+def test_n1_la_minima_incluye_0_05_exacto():
+    """D-9: el umbral es 0,05 MW incluido (clase_mirova.UMBRAL_MINIMA_MW), no 0,04."""
+    p = _pas([_fila("V", "VIIRS375", "2026-10-20 05:00:00", 0.05)])
+    assert p[0]["minima"] is True
+
+
+def test_n3_n25_el_corte_es_al_segundo_y_el_instante_exacto_es_posterior():
+    filas = [_fila("V", "MODIS", "2026-10-18 09:57:10", 2.0), _fila("W", "MODIS", "2026-10-18 09:57:40", 2.0),
+             _fila("X", "MODIS", "2026-10-18 09:57:30", 2.0)]
+    prod = [_rec(v, "MODIS", "09:57", "2026-10-18", False) for v in ("V", "W", "X")]
+    sombra = [_rec(v, "MODIS", "09:57", "2026-10-18", True) for v in ("V", "W", "X")]
+    p = _pas(filas, prod, sombra)
+    assert [x["instante_utc"] for x in p] == ["2026-10-18 09:57:10", "2026-10-18 09:57:40", "2026-10-18 09:57:30"]
+    d = _disp(p)
+    assert sorted(x["volcano"] for x in d["reversion"]) == ["W", "X"]
+    assert [x["volcano"] for x in d["retrospectivo"]["protegidas_que_la_sombra_publica_y_k_calla"]] == ["V"]
+
+
+def test_n5_los_negativos_cuentan_desde_el_instante_de_adopcion_no_desde_medianoche():
+    antes = [_rec("V", "VIIRS375", "05:00", "2026-10-18", True, lab="neg_limpio") for _ in range(50)]
+    assert _disp([], antes)["negativos_VIIRS375"]["n"] == 0
+
+
+def test_n9_muy_bajo_exige_record_de_la_sombra():
+    pas = [_pasada("V", "VIIRS375", "2026-10-20 05:00", False, False, None),
+           _pasada("V", "VIIRS375", "2026-10-22 05:00", False, False, True)]
+    assert _disp(pas)["muy_bajo"]["V|VIIRS375"]["n"] == 1
+
+
+def test_n12_la_persistencia_retrospectiva_tampoco_cuenta_minimas():
+    minimas = [_pasada("V", "VIIRS375", f"2026-10-1{d} 05:00", False, False, True, vrp=0.04, minima=True)
+               for d in (2, 3, 4)]
+    assert _disp(minimas)["retrospectivo"]["persistencia"] == []
+
+
+def test_n18_un_aviso_no_tapa_una_reversion(insumos):
+    filas, prod, sombra = _caso_pcc()
+    prod[1]["pub"] = False                                         # Chillán 10-22: K calla
+    sombra = [r for r in sombra if not (r["vol"] == "PuyehueCordonCaulle" and r["b"] == "MODIS")]  # aviso
+    insumos(filas, prod, sombra)
+    out = vs.evaluar("2026-10-23")
+    assert out["avisos"] and out["veredicto"] == "REVERSION_CANDIDATA"
+
+
+def test_n24_la_persistencia_sola_lleva_a_investigar():
+    pas = [_pasada("V", "MODIS", f"2026-10-2{d} 05:00", False, False, True) for d in (2, 3, 4)]
+    d = _disp(pas)
+    assert d["muy_bajo"]["V|MODIS"]["dispara"] is False and not d["negativos_VIIRS375"]["dispara"]
+    assert d["veredicto"] == "INVESTIGAR"
+
+
+def test_n19_main_usa_la_fecha_de_hoy_utc(insumos, monkeypatch, tmp_path):
+    insumos(*_caso_pcc())
+    monkeypatch.setattr(vs, "OUTDIR", str(tmp_path))
+    vs.main([])
+    linea = json.loads((tmp_path / "sombra_history.jsonl").read_text(encoding="utf-8").splitlines()[-1])
+    assert linea["date"] == datetime.now(timezone.utc).date().isoformat()
+
+
+def test_n22_el_pareo_acepta_hasta_120_segundos():
+    filas = [_fila("V", "VIIRS375", "2026-10-20 05:00:00", 0.3)]
+    p = _pas(filas, [_rec("V", "VIIRS375", "05:02", "2026-10-20", True)])
+    assert p[0]["prod_pub"] is True
+
+
+def test_n23_sospechosa_solo_si_todas_las_filas_protegidas_son_ocr():
+    filas = [_fila("T", "VIIRS375", "2026-09-28 05:18:00", 2.5, tipo="ALERTA_TERMICA_OCR", source="OCR"),
+             _fila("T", "VIIRS375", "2026-09-28 05:18:30", 2.4)]
+    recs = [_rec("T", "VIIRS375", "05:18", "2026-09-28", False, sensor="VIIRS_SNPP")]
+    assert _pas(filas, recs)[0]["referencia_sospechosa"] is False
+
+
+def test_n27_sin_adopcion_todo_es_retrospectivo():
+    pas = [_pasada("A", "MODIS", "2026-10-20 07:20", True, False, True)]
+    import unittest.mock as um
+    with um.patch.object(vs, "leer_adopcion", lambda *a: None):
+        d = vs.disparadores(pas, [], hoy="2026-10-25", adopcion=None)
+    assert d["reversion"] == [] and d["veredicto"] == "VERDE"
+    assert len(d["retrospectivo"]["protegidas_que_la_sombra_publica_y_k_calla"]) == 1
+
+
+def test_evaluar_referencia_detenida_o_produccion_sin_k_queda_ciega(insumos):
+    filas, prod, sombra = _caso_pcc()
+    insumos([f for f in filas if f["fecha_utc"] < "2026-10-11"], prod, sombra)
+    assert vs.evaluar("2026-10-23")["veredicto"] == "VIGILANCIA_CIEGA"
+    filas, prod, sombra = _caso_pcc()
+    insumos(filas, [], sombra)
+    out = vs.evaluar("2026-10-23")
+    assert out["veredicto"] == "VIGILANCIA_CIEGA" and any("producción" in a for a in out["avisos"])

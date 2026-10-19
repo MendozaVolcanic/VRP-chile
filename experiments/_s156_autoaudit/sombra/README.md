@@ -41,6 +41,14 @@ cotas del A/B, y reversión y persistencia con D-9 SN; corte de la adopción al 
 `cargar_insumos` sin node. `mutar_vigilancia.py`: 37 mutaciones (las del autor y las 13 del verificador 2), las 37 caen
 por fallo de prueba (`mutar_vigilancia_salida.txt`).
 
+Verificador 3 (`verificador3/INFORME.md`): confirmó los arreglos del 2 y la corrida de hoy campo por campo. Arreglado:
+tres maneras de quedar ciega que daban VERDE (referencia de MIROVA vacía o detenida, producción sin records de K,
+sombra sin un sensor): la frescura pasa a ser por volcán Y sensor en la sombra y en producción, y la referencia se mide
+como en el auto-audit (`MAX_GT_STALE_DAYS`). Un aviso nunca tapa una reversión. 12 mutaciones suyas sobrevivían; hoy
+`mutar_vigilancia.py` corre 56 y las 56 caen por fallo de prueba. `huecos_por_volcan_sensor.py`: desde el 2026-08-01
+ningún volcán y sensor pasó más de 2 días sin records, ni en producción ni en la sombra, así que el umbral de 3 días
+no habría dado ninguna falsa «vigilancia ciega».
+
 Queda para decidir (no se tocó, es la letra de la regla): con evaluación diaria, la primera Muy Bajo de VIIRS 375 que
 la sombra publica y K calla en un volcán ya dispara INVESTIGAR (Wilson inferior de 1 de 1 = 0,2065 sobre la cota
 0,1298); el verificador 2 estimó 57 % de probabilidad de al menos una falsa alarma en 120 días si K pierde igual que en
