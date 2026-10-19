@@ -1,0 +1,94 @@
+== a_verde: ref=0 vigilancia=success commit=0 issue=0 | push intentos=1
+   out6: veredicto: VERDE
+   out6: sin issue
+== b_reversion_sin_issue: ref=0 vigilancia=success commit=0 issue=0 | push intentos=1
+   gh: LIST prefijo='Sombra de K: candidata a reversion' -> []
+   gh: CREATE titulo='Sombra de K: candidata a reversion: 2026-10-19' cuerpo_lineas=6 cuerpo0='La vigilancia de la sombra encontro una alerta protegida de MIROVA (1 MW o mas) que la som'
+   gh:   BODY>> La vigilancia de la sombra encontro una alerta protegida de MIROVA (1 MW o mas) que la sombra (detector C0) publica y produccion (K) calla:
+   gh: 
+   gh: - REVERSION CANDIDATA: PuyehueCordonCaulle VIIRS750 2026-10-20 05:54 UTC, MIROVA 1.19 MW: la sombra publica y produccion calla
+   gh: 
+   gh: La regla (experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, paso 9) pre-autoriza revertir K con git revert del PR de adopcion, DESPUES de confirmar la alerta en la cabecera de la imagen de MIROVA (mirova-tif-archive, index_png.csv). Avisar a Nicolas hoy.
+   gh: Detalle: data/audit_continuous/sombra_latest.json.
+   out6: veredicto: REVERSION_CANDIDATA
+   out6: https://github.com/x/y/issues/999
+== c_reversion_con_issue: ref=0 vigilancia=success commit=0 issue=0 | push intentos=1
+   gh: LIST prefijo='Sombra de K: candidata a reversion' -> [41]
+   gh: COMMENT #41 cuerpo0='Corrida del 2026-10-19:' lineas=8
+   gh:   BODY>> Corrida del 2026-10-19:
+   gh: 
+   gh: La vigilancia de la sombra encontro una alerta protegida de MIROVA (1 MW o mas) que la sombra (detector C0) publica y produccion (K) calla:
+   gh: 
+   gh: - REVERSION CANDIDATA: PuyehueCordonCaulle VIIRS750 2026-10-20 05:54 UTC, MIROVA 1.19 MW: la sombra publica y produccion calla
+   gh: 
+   gh: La regla (experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, paso 9) pre-autoriza revertir K con git revert del PR de adopcion, DESPUES de confirmar la alerta en la cabecera de la imagen de MIROVA (mirova-tif-archive, index_png.csv). Avisar a Nicolas hoy.
+   gh: Detalle: data/audit_continuous/sombra_latest.json.
+   out6: veredicto: REVERSION_CANDIDATA
+   out6: ya hay un issue abierto de esta clase (#41): se comenta
+== d_script_cae: ref=0 vigilancia=failure commit=skip issue=0 | push intentos=0
+   gh: LIST prefijo='Vigilancia de la sombra de K: el script fallo' -> []
+   gh: CREATE titulo='Vigilancia de la sombra de K: el script fallo: 2026-10-19' cuerpo_lineas=1 cuerpo0='scripts/vigilancia_sombra.py no termino (run https://github.com/MendozaVolcanic/VRP-chile/'
+   gh:   BODY>> scripts/vigilancia_sombra.py no termino (run https://github.com/MendozaVolcanic/VRP-chile/actions/runs/123). Mientras no corra, nadie vigila si K pierde alertas que el detector anterior veia.
+   out6: https://github.com/x/y/issues/999
+== d2_script_cae_con_issue: ref=0 vigilancia=failure commit=skip issue=0 | push intentos=0
+   gh: LIST prefijo='Vigilancia de la sombra de K: el script fallo' -> [55]
+   gh: COMMENT #55 cuerpo0='Corrida del 2026-10-19:' lineas=3
+   gh:   BODY>> Corrida del 2026-10-19:
+   gh: 
+   gh: scripts/vigilancia_sombra.py no termino (run https://github.com/MendozaVolcanic/VRP-chile/actions/runs/123). Mientras no corra, nadie vigila si K pierde alertas que el detector anterior veia.
+   out6: ya hay un issue abierto de esta clase (#55): se comenta
+== e_push_falla_reversion: ref=0 vigilancia=success commit=1 issue=0 | push intentos=5
+   gh: LIST prefijo='Sombra de K: candidata a reversion' -> []
+   gh: CREATE titulo='Sombra de K: candidata a reversion: 2026-10-19' cuerpo_lineas=6 cuerpo0='La vigilancia de la sombra encontro una alerta protegida de MIROVA (1 MW o mas) que la som'
+   gh:   BODY>> La vigilancia de la sombra encontro una alerta protegida de MIROVA (1 MW o mas) que la sombra (detector C0) publica y produccion (K) calla:
+   gh: 
+   gh: - REVERSION CANDIDATA: PuyehueCordonCaulle VIIRS750 2026-10-20 05:54 UTC, MIROVA 1.19 MW: la sombra publica y produccion calla
+   gh: 
+   gh: La regla (experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, paso 9) pre-autoriza revertir K con git revert del PR de adopcion, DESPUES de confirmar la alerta en la cabecera de la imagen de MIROVA (mirova-tif-archive, index_png.csv). Avisar a Nicolas hoy.
+   gh: Detalle: data/audit_continuous/sombra_latest.json.
+   out6: veredicto: REVERSION_CANDIDATA
+   out6: https://github.com/x/y/issues/999
+== i_investigar: ref=0 vigilancia=success commit=0 issue=0 | push intentos=1
+   gh: LIST prefijo='Sombra de K: investigar' -> []
+   gh: CREATE titulo='Sombra de K: investigar: 2026-10-19' cuerpo_lineas=6 cuerpo0='La vigilancia de la sombra encontro un disparador de investigacion (sin reversion automati'
+   gh:   BODY>> La vigilancia de la sombra encontro un disparador de investigacion (sin reversion automatica):
+   gh: 
+   gh: - persistencia: Villarrica noches ['2026-10-20', '2026-10-21', '2026-10-22']
+   gh: 
+   gh: Regla: experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, paso 9.
+   gh: Detalle: data/audit_continuous/sombra_latest.json.
+   out6: veredicto: INVESTIGAR
+   out6: https://github.com/x/y/issues/999
+== j_ciega_comillas: ref=0 vigilancia=success commit=0 issue=0 | push intentos=1
+   gh: LIST prefijo='Sombra de K: vigilancia ciega' -> []
+   gh: CREATE titulo='Sombra de K: vigilancia ciega: 2026-10-19' cuerpo_lineas=7 cuerpo0='La vigilancia de la sombra no puede mirar:'
+   gh:   BODY>> La vigilancia de la sombra no puede mirar:
+   gh: 
+   gh: - aviso: la sombra de Llaima no produce hace 5 días (último dato 2026-10-14): revisar experimental-diario.yml; mientras tanto ese volcán está ciego
+   gh: - aviso: comillas 'simples' y "dobles" y $HOME y `x` y %s
+   gh: 
+   gh: Una vigilancia ciega no da error, da VERDE: por eso este issue. Revisar experimental-diario.yml y frontend/cambio_detector.js.
+   gh: Detalle: data/audit_continuous/sombra_latest.json.
+   out6: veredicto: VIGILANCIA_CIEGA
+   out6: https://github.com/x/y/issues/999
+== k_curl_falla: ref=22 vigilancia=skipped commit=skip issue=0 | push intentos=0
+   gh: LIST prefijo='Vigilancia de la sombra de K: el script fallo' -> []
+   gh: CREATE titulo='Vigilancia de la sombra de K: el script fallo: 2026-10-19' cuerpo_lineas=1 cuerpo0='scripts/vigilancia_sombra.py no termino (run https://github.com/MendozaVolcanic/VRP-chile/'
+   gh:   BODY>> scripts/vigilancia_sombra.py no termino (run https://github.com/MendozaVolcanic/VRP-chile/actions/runs/123). Mientras no corra, nadie vigila si K pierde alertas que el detector anterior veia.
+   out6: https://github.com/x/y/issues/999
+== l_gh_list_falla: ref=0 vigilancia=success commit=0 issue=1 | push intentos=1
+   out6: veredicto: REVERSION_CANDIDATA
+   out6: HTTP 502
+== m_issue_mano_mismo_prefijo: ref=0 vigilancia=success commit=0 issue=0 | push intentos=1
+   gh: LIST prefijo='Sombra de K: candidata a reversion' -> [60]
+   gh: COMMENT #60 cuerpo0='Corrida del 2026-10-19:' lineas=8
+   gh:   BODY>> Corrida del 2026-10-19:
+   gh: 
+   gh: La vigilancia de la sombra encontro una alerta protegida de MIROVA (1 MW o mas) que la sombra (detector C0) publica y produccion (K) calla:
+   gh: 
+   gh: - REVERSION CANDIDATA: PuyehueCordonCaulle VIIRS750 2026-10-20 05:54 UTC, MIROVA 1.19 MW: la sombra publica y produccion calla
+   gh: 
+   gh: La regla (experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md, paso 9) pre-autoriza revertir K con git revert del PR de adopcion, DESPUES de confirmar la alerta en la cabecera de la imagen de MIROVA (mirova-tif-archive, index_png.csv). Avisar a Nicolas hoy.
+   gh: Detalle: data/audit_continuous/sombra_latest.json.
+   out6: veredicto: REVERSION_CANDIDATA
+   out6: ya hay un issue abierto de esta clase (#60): se comenta

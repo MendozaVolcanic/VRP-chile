@@ -260,10 +260,12 @@ def parear(lista, t, tol=TOL_S):
 
 
 # ---------------------------------------------------------------- nuestros records
-def cargar_nuestros(coords, inner, ventana):
+def cargar_nuestros(coords, inner, ventana, data=None):
+    """`data`: carpeta de los JSON (por defecto la de produccion). S156: la vigilancia de la sombra la usa
+    con data/experimental_v2 para aplicar el MISMO predicado del tablero a los records del laboratorio."""
     recs, casos = [], []
     for vol in VOLS:
-        with open(DATA / f"{vol}.json", encoding="utf-8") as fh:
+        with open((DATA if data is None else Path(data)) / f"{vol}.json", encoding="utf-8") as fh:
             d = json.load(fh)
         for r in d["records"]:
             b = bucket(r.get("sensor"))
@@ -282,7 +284,8 @@ def cargar_nuestros(coords, inner, ventana):
                          "pc_dist": pc.get("centroid_dist_km"), "z": r.get("sensor_zenith_deg"),
                          # S156: aditivo. El codigo que escribio el record (marca de S151): el auto-audit
                          # separa con esto los detectores C0 y K (AUDIT_S155 F3-02). Ninguna etiqueta lo usa.
-                         "sha": (r.get("regimen") or {}).get("codigo_sha"), "sensor": r.get("sensor")})
+                         "sha": (r.get("regimen") or {}).get("codigo_sha"), "sensor": r.get("sensor"),
+                         "perfil": (r.get("regimen") or {}).get("perfil")})
             slim = {k: r.get(k) for k in CAMPOS_JS if k != "anomaly_pixels"}
             if r.get("f5_core_vrp_mw") is None:
                 slim["anomaly_pixels"] = [{k: p.get(k) for k in ("lat", "lon", "vrp_mw", "bt_k")}
