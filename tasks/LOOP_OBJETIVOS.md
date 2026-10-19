@@ -418,6 +418,12 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   el L1B si hace falta (A6, A97, A99 rebajada); empezar por la de las 06:48 en VIIRS 750 y comparar con la de VIIRS 375
   de la misma pasada (8,93 contra 25,79); (b) verificador limpio; (c) con eso, escribir el pre-registro de D25 sobre K
   (1.29) con Chillán como caso y criterio de magnitud, para el sello de Nicolás. Sólo lectura hasta el sello (A45).
+  ⚠️ **S154, 01:50 UTC, la atribución a D17 de abajo es FALSA como cierre** (la detectó el subagente del índice por
+  síntoma): la tarea 1.14 (`experiments/_s151_presupuesto_magnitud/README.md` §3.2) ya había retirado «el ángulo es
+  D17»: el Npix de MIROVA no crece hacia el borde, lo que empeora es nuestro fondo (F_bg 0,85 a 0,73) y el efecto de D25
+  crece con el ángulo (×1,18 a nadir, ×1,41 en el borde, Tabla C2). Estado vigente: la curva es real (Chillán la
+  repite; tabla reproducible en `experiments/_s154_chillan/razon_por_cenit.py` y su salida), el mecanismo está SIN
+  ATRIBUIR, con D25 y D17 compitiendo. Texto original conservado:
   **Primer resultado (2026-10-19, 00:55 UTC):** la razón cae con el cenit del sensor: VIIRS 0,64 a 0,72 a 20-22°,
   0,41 a 0,46 a 49°, 0,35 (375) y 0,12 (750) a 67,6°; MODIS 0,49 a 23° y 0,24 a 38°. Es la curva que S130 ya probó
   (`docs/s130/GRADIENTE_CENITAL.md`, D17: MIROVA remuestrea a malla de área constante y es plano con el ángulo; nosotros
@@ -435,12 +441,18 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   semanal y los evaluadores de A/B informen sus métricas también por tramos de cenit del sensor y por régimen (antes y
   después de #535 y de K), para que un agregado no esconda una curva (A90, A114). Con prueba y sin cambiar ningún
   veredicto existente.
-- [ ] **1.36 Pre-registro de D17 sobre K (bow-tie + remuestreo) con Chillán como caso** (mismo pedido; va ANTES que
-  D25). Sale de 1.33: el déficit de magnitud cae con el cenit (Chillán y `docs/s130/GRADIENTE_CENITAL.md`). Pre-registro
-  con criterio de magnitud por tramo de cenit, verificador y sello de Nicolás. Sólo lectura hasta el sello (A45).
-- [ ] **1.29 Pre-registro de D25 sobre K** (regla §5): escribir el pre-registro y su verificador. Bloqueo para
-  despachar: el sello de Nicolás. **Se alimenta de 1.33** (Chillán como caso, pedido de Nicolás el 2026-10-19).
-  **Va después de 1.36** (decisión de Nicolás del 2026-10-19: D17 primero).
+- [ ] **1.29 PRIMERO: pre-registro de D25 sobre K con Chillán como caso** (pedido original de Nicolás del
+  2026-10-19; el orden «D17 primero» que yo recomendé se apoyaba en una lectura de S130 ya retirada por 1.14 y se
+  revierte). D25 es la palanca cuyo efecto medido crece con el ángulo (1.14, Tabla C2). Criterio de magnitud informado
+  por tramo de cenit (la curva de Chillán y la de 1.14 como referencia), verificador limpio y sello de Nicolás. Bloqueo
+  para despachar: el sello.
+- [ ] **1.36 Después: D17 (bow-tie + remuestreo) como hipótesis competidora de la curva angular.** Sólo si después de
+  D25 queda dependencia con el cenit; diseñar la prueba que separe D17 de D25 (el Npix de MIROVA por tramo de cenit es
+  la firma que 1.14 usó). Sello de Nicolás antes de despachar.
+- [ ] **1.37 Propagar K al catálogo** (A113, hallado por el subagente del índice): `docs/MIROVA_DIVERGENCES.md` no
+  menciona #850; D21 (banda 22) sigue «ABIERTA» aunque la banda 22 está en producción desde el 2026-10-18, y lo mismo
+  para las otras dos palancas de K (Test 1 integrado, conectiva `max`). Marca al inicio de cada D afectada con qué
+  cambió, cuándo y el puntero a la regla de adopción.
 - [ ] **1.30 Pre-registro de MxD03 sobre K** (D-19): ídem. Bloqueo para despachar: el sello de Nicolás.
 - [ ] **1.32 A/B diurno sobre K** (del verificador de 1.25, H4). El A/B W2 a W6 corrió sobre C0: de día el Test 1
   dispara en 2.000 de las 2.077 publicaciones de VIIRS 375 en negativos limpios, 987 vienen sólo de `test1_roi`, y 11
