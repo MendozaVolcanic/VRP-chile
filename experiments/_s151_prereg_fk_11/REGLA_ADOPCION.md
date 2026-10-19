@@ -148,7 +148,14 @@ evidencia, y el paquete lo dice.
    revise debe leerla así. Nota de implementación (no es decisión): la cota de (i) que la regla cita (V1, 16 de 194) es
    de VIIRS 375, donde C0 no perdió ninguna Muy Bajo, así que es la pérdida diferencial; en MODIS y VIIRS 750 el A/B no
    guardó el diferencial por pasada y (i) se informa sin disparar. Evidencia: `experiments/_s156_autoaudit/sombra/`.
-   Texto original conservado:
+   **Dos decisiones más de Nicolás el mismo día**, ante los verificadores 2 y 3 (elegidas entre opciones, con la
+   recomendación de la sesión): (c) **(i) coherente con D-9**: las mínimas (0,05 MW o menos, NONE en el banner) no
+   cuentan, y la cota es la del A/B medida con la regla SE: 7 de 161 en V1 y 12 de 343 en V2, derivadas de
+   `experiments/_s153_fk_v2/v1.json` y `v2.json` (`reglas_d9.SE`; el denominador exacto no quedó guardado y se tomó el
+   menor posible, que da la cota más alta). La cita «(V1: 16 de 194)» de abajo es la de la etiqueta original, que
+   contaba 9 mínimas; (d) **las pasadas ya juzgadas** se anotan en `sombra_pasadas_juzgadas.json` (junto a esta regla)
+   y no vuelven a disparar; (e) **cumplido el plazo** (29 protegidas o 120 días), una candidata se sigue informando pero
+   ya no está pre-autorizada: decide Nicolás. Texto original conservado:
 
    **Sombra: el laboratorio congelado en C0.** `experimental-diario.yml` ya corre a diario los 11 Tier A con C0
    (`experimental_v2`). Cada semana se cuentan contra MIROVA producción (K) y sombra (C0) con el mismo evaluador.

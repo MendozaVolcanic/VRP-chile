@@ -19,9 +19,10 @@ Qué mide, con el predicado del tablero ejecutado con node (banco de paridad) pa
 - REVERSIÓN (pre-autorizada): una alerta protegida A (alerta del scraper de 1 MW o más) nocturna que la
   sombra publica y producción calla. El script NO revierte: lo dice. La regla pide confirmarla en la cabecera
   de la imagen de MIROVA y que la sesión que la detecte haga `git revert` del PR de adopción.
-- INVESTIGAR (sin reversión): (i) alertas Muy Bajo (bajo 1 MW, etiqueta original como el A/B) de VIIRS 375 que la sombra
+- INVESTIGAR (sin reversión): (i) alertas Muy Bajo (bajo 1 MW, sin las mínimas de D-9) de VIIRS 375 que la sombra
   publica y producción calla, por volcán, si la cota inferior de Wilson de su tasa supera la cota superior del
-  A/B (V1, 16 de 194); en MODIS y VIIRS 750 el A/B no guardó la pérdida diferencial y se informa sin disparar;
+  A/B con la misma regla (SE: 7 de 161 en V1, 12 de 343 en V2; ver COTAS_AB); en MODIS y VIIRS 750 el A/B no
+  guardó la pérdida diferencial y se informa sin disparar;
   (ii) persistencia, tres noches seguidas en un volcán con una alerta que la sombra publica y producción no;
   (iii) publicación de VIIRS 375 de producción en negativos limpios, si la cota inferior de Wilson supera la
   cota superior del A/B (la mayor de V1 y V2), también con la etiqueta original. La reversión y la
@@ -67,10 +68,22 @@ TOL_S = cm.VENTANA_S            # el pareo del etiquetador (banco_paridad.TOL_S)
 # VIIRS 750 C0 también perdía (4 de 4 y 10 de 30 en V1) y el A/B no guardó el detalle por pasada: no hay cota
 # diferencial y (i) se informa sin disparar (verificador de S156, hallazgo 3). Lo vigila
 # tests/test_vigilancia_sombra_s156.py contra el log.
+#
+# DECISIÓN de Nicolás (2026-10-19, después de los verificadores): el disparador (i) es coherente con D-9. Las
+# mínimas (0,05 MW o menos en VIIRS 375, NONE en el banner de MIROVA) NO cuentan, y la cota es la del A/B medida con
+# la misma regla, SE (`reglas_d9.SE` de experiments/_s153_fk_v2/v1.json y v2.json): K pierde 7 Muy Bajo en V1 (suma
+# SE 28 menos 21 negativos, que SE no cambia) y 12 en V2 (49 menos 37). Las 16 y 26 de la etiqueta original incluían
+# 9 y 14 mínimas. El denominador con SE no quedó guardado: está entre 194 − 33 = 161 y 194 en V1 (33 pasadas pasan de
+# «pos» a «mínima») y entre 388 − 45 = 343 y 388 en V2; se toma el menor, que da la cota MÁS ALTA (dispara menos),
+# igual que «la mayor de V1 y V2». Con la etiqueta original, el único disparo con datos reales habría sido Llaima
+# VIIRS 375 2026-10-03 07:06, 0,01 MW, una pasada que MIROVA llama NONE (verificador 3).
 COTAS_AB = {
-    "muy_bajo": {"VIIRS375": {"V1": (16, 194), "V2": (26, 388)}},
+    "muy_bajo": {"VIIRS375": {"V1_SE": (7, 161), "V2_SE": (12, 343)}},
     "negativos": {"VIIRS375": {"V1": (21, 832), "V2": (37, 1010)}},
 }
+# DECISIÓN de Nicolás (2026-10-19): las pasadas ya juzgadas se anotan en un archivo versionado, junto a la regla, y no
+# vuelven a disparar; sin eso una candidata sale todos los días hasta 120 días y cerrar su issue lo reabre.
+JUZGADAS = os.path.join(ROOT, "experiments", "_s151_prereg_fk_11", "sombra_pasadas_juzgadas.json")
 
 
 def wilson(k, n, z=1.96):
@@ -194,25 +207,40 @@ def _instante(adopcion):
     return datetime.strptime(adopcion, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
 
 
-def disparadores(pasadas, negs_prod, hoy, adopcion=None):
+def leer_juzgadas(path=JUZGADAS):
+    """Claves (volcán, sensor, minuto) de las pasadas ya juzgadas, con su registro. Archivo ausente = ninguna;
+    archivo ilegible = error (una lista de excepciones que no se puede leer no se ignora en silencio)."""
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as fh:
+        d = json.load(fh)
+    return {(p["volcano"], p["sensor"], p["fecha_utc"][:16]): p for p in d["pasadas"]}
+
+
+def disparadores(pasadas, negs_prod, hoy, adopcion=None, juzgadas=None):
     """Los tres niveles del paso 9 sobre las pasadas POSTERIORES a la adopción; lo anterior, retrospectivo.
 
     `adopcion`: 'YYYY-MM-DD HH:MM:SS' UTC (por defecto, la del tablero). `negs_prod`: records de producción
     etiquetados por el banco, con `dt` y `lab_original`. Sin adopción declarada no hay nada prospectivo.
+    `juzgadas`: {(volcán, sensor, minuto): registro} de las pasadas ya decididas; no vuelven a disparar.
     """
     adopcion = adopcion or leer_adopcion()
+    juzgadas = juzgadas or {}
     corte = adopcion or "9999-99-99 99:99:99"
-    pros = [p for p in pasadas if p["instante_utc"] >= corte]
-    retro = [p for p in pasadas if p["instante_utc"] < corte]
+    ya = [p for p in pasadas if (p["volcano"], p["sensor"], p["fecha_utc"][:16]) in juzgadas]
+    vivas = [p for p in pasadas if (p["volcano"], p["sensor"], p["fecha_utc"][:16]) not in juzgadas]
+    pros = [p for p in vivas if p["instante_utc"] >= corte]
+    retro = [p for p in vivas if p["instante_utc"] < corte]
 
     calla = _sombra_si_produccion_no(pros)
     reversion = [p for p in calla if p["protegida"]]
 
-    # (i) Muy Bajo de VIIRS 375 por volcán, con la etiqueta ORIGINAL (incluye las mínimas), como la cota del A/B.
+    # (i) Muy Bajo de VIIRS 375 por volcán, coherente con D-9 (decisión de Nicolás): sin las mínimas, y contra la
+    # cota del A/B medida con la regla SE.
     muy_bajo = {}
     conteo = defaultdict(lambda: [0, 0])
     for p in pros:
-        if p["protegida"] or p["prod_pub"] is None or p["sombra_pub"] is None:
+        if p["protegida"] or p["minima"] or p["prod_pub"] is None or p["sombra_pub"] is None:
             continue
         c = conteo[(p["volcano"], p["sensor"])]
         c[1] += 1
@@ -241,7 +269,8 @@ def disparadores(pasadas, negs_prod, hoy, adopcion=None):
 
     vence = ((date.fromisoformat(adopcion[:10]) + timedelta(days=DIAS_MAXIMOS)).isoformat()
              if adopcion else None)
-    vistas = sum(1 for p in pros if p["protegida"] and p["sombra_pub"] is not None)
+    # Una pasada juzgada no dispara, pero la sombra la vio: cuenta para la duración.
+    vistas = sum(1 for p in pasadas if p["instante_utc"] >= corte and p["protegida"] and p["sombra_pub"] is not None)
     duracion = {"protegidas_vistas_en_sombra": vistas, "objetivo": PROTEGIDAS_OBJETIVO,
                 "adopcion": adopcion, "vence": vence,
                 "cumplida": vistas >= PROTEGIDAS_OBJETIVO or bool(vence and hoy >= vence)}
@@ -258,14 +287,19 @@ def disparadores(pasadas, negs_prod, hoy, adopcion=None):
         "persistencia": _persistencia([p for p in calla_retro if not p["minima"]]),
     }
 
-    if reversion:
+    # Cumplido el plazo de la regla (29 protegidas vistas o 120 días), la reversión deja de estar pre-autorizada
+    # (decisión de Nicolás): una candidata se sigue informando, pero decide él.
+    if reversion and duracion["cumplida"]:
+        veredicto = "CANDIDATA_FUERA_DE_PLAZO"
+    elif reversion:
         veredicto = "REVERSION_CANDIDATA"
     elif persistencia or negativos["dispara"] or any(m["dispara"] for m in muy_bajo.values()):
         veredicto = "INVESTIGAR"
     else:
         veredicto = "VERDE"
     return {"veredicto": veredicto, "reversion": reversion, "muy_bajo": muy_bajo, "persistencia": persistencia,
-            "negativos_VIIRS375": negativos, "duracion": duracion, "retrospectivo": retrospectivo}
+            "negativos_VIIRS375": negativos, "duracion": duracion, "retrospectivo": retrospectivo,
+            "juzgadas": [dict(p, juicio=juzgadas[(p["volcano"], p["sensor"], p["fecha_utc"][:16])]) for p in ya]}
 
 
 def _avisos_frescura(recs, hoy, nombre, revisar, vols=None, sensores=None):
@@ -361,7 +395,7 @@ def evaluar(hoy):
     win = (frontera, hoy)
     filas, prod, sombra = cargar_insumos(win)
     pasadas = pasadas_de_alerta(filas, prod, sombra, win)
-    d = disparadores(pasadas, prod, hoy, adopcion)
+    d = disparadores(pasadas, prod, hoy, adopcion, juzgadas=leer_juzgadas())
     avisos = (avisos_referencia(filas, hoy) + avisos_sombra(sombra, hoy) + avisos_produccion(prod, hoy)
               + avisos_perfiles(prod, sombra))
     # Un aviso no tapa una reversión ni una investigación: sólo impide que la falta de disparos se lea como VERDE.
@@ -438,6 +472,9 @@ def imprimir(out):
               f"{len(r['protegidas_que_la_sombra_publica_y_k_calla'])} que la sombra publica y K calla")
         for p in r["protegidas_que_la_sombra_publica_y_k_calla"]:
             print(f"    {p['volcano']} {p['sensor']} {p['fecha_utc']} MIROVA {p['vrp_mirova_mw']} MW")
+    for p in out.get("juzgadas", []):
+        print(f"  ya juzgada (no dispara): {p['volcano']} {p['sensor']} {p['fecha_utc']} · "
+              f"{p['juicio'].get('decision')} ({p['juicio'].get('fecha_decision')})")
 
 
 if __name__ == "__main__":

@@ -24,6 +24,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import scripts.vigilancia_sombra as vs  # noqa: E402
 
 ADOP = "2026-10-18 09:57:30"
+LEER_JUZGADAS_REAL = vs.leer_juzgadas   # el fixture `insumos` la reemplaza por una lista vacía
 NOCHE = lambda *a: False  # noqa: E731
 VENTANA = ("2026-09-01", "2026-11-30")
 
@@ -62,7 +63,7 @@ def test_wilson_reproduce_la_cota_del_ab():
 
 def test_las_cotas_salen_de_los_logs_del_ab():
     """Muy Bajo perdidas y negativos publicados de K, lectura A, de experiments/_s153_fk_v2/v1.log y v2.log §6."""
-    assert vs.COTAS_AB["muy_bajo"] == {"VIIRS375": {"V1": (16, 194), "V2": (26, 388)}}
+    assert vs.COTAS_AB["muy_bajo"] == {"VIIRS375": {"V1_SE": (7, 161), "V2_SE": (12, 343)}}
     assert vs.COTAS_AB["negativos"] == {"VIIRS375": {"V1": (21, 832), "V2": (37, 1010)}}
     assert vs.cota_superior("negativos", "VIIRS375") == max(vs.wilson(21, 832)[1], vs.wilson(37, 1010)[1])
     assert vs.cota_superior("muy_bajo", "MODIS") is None and vs.cota_superior("muy_bajo", "VIIRS750") is None
@@ -72,6 +73,17 @@ def test_las_cotas_salen_de_los_logs_del_ab():
     assert "VIIRS375 C0  Muy Bajo perdidas    0 de  194" in v1   # por eso la de K es la diferencial
     assert "VIIRS375 K   Muy Bajo perdidas   26 de  388 | negativos publicados   37 de  1010" in v2
     assert "VIIRS375 C0  Muy Bajo perdidas    0 de  388" in v2
+
+
+def test_la_cota_se_de_muy_bajo_se_deriva_de_los_json_del_ab():
+    """Decisión de Nicolás (2026-10-19): (i) coherente con D-9. Pérdidas con SE = suma SE menos negativos (SE no
+    cambia negativos); denominador = Muy Bajo originales menos las pasadas que pasan de «pos» a «mínima»."""
+    for archivo, mb_orig, neg, (k, n) in (("v1", 194, 21, (7, 161)), ("v2", 388, 37, (12, 343))):
+        d = json.loads((ROOT / "experiments" / "_s153_fk_v2" / f"{archivo}.json").read_text(encoding="utf-8"))
+        se = d["reglas_d9"]["SE"]
+        assert se["suma"]["K|VIIRS375|A"] - neg == k
+        assert mb_orig - se["cambian"]["pos->minima"] == n
+        assert d["reglas_d9"]["original"]["suma"]["K|VIIRS375|A"] - neg in (16, 26)   # las de la etiqueta original
 
 
 def test_la_adopcion_sale_del_js_del_tablero_con_segundos():
@@ -237,12 +249,13 @@ def test_muy_bajo_viirs375_dispara_cuando_wilson_inferior_supera_la_cota():
     assert _disp(pas, hoy="2026-11-10")["muy_bajo"]["V|VIIRS375"]["dispara"] is False
 
 
-def test_mutacion_muy_bajo_cuenta_minimas_y_exige_que_la_sombra_publique():
-    """La cota del A/B se midió con la etiqueta original: las mínimas entran. Y sólo cuenta si la sombra publica."""
+def test_mutacion_muy_bajo_sin_minimas_y_exige_que_la_sombra_publique():
+    """Decisión de Nicolás: las mínimas (NONE en el banner) no cuentan; y sólo es pérdida si la sombra publica."""
     pas = [_pasada("V", "VIIRS375", "2026-10-20 05:00", False, False, True, vrp=0.04, minima=True),
-           _pasada("V", "VIIRS375", "2026-10-22 05:00", False, False, False)]
+           _pasada("V", "VIIRS375", "2026-10-22 05:00", False, False, False),
+           _pasada("V", "VIIRS375", "2026-10-24 05:00", False, True, True)]
     mb = _disp(pas)["muy_bajo"]["V|VIIRS375"]
-    assert (mb["k"], mb["n"]) == (1, 2)
+    assert (mb["k"], mb["n"]) == (0, 2)
 
 
 def test_mutacion_muy_bajo_sin_cota_en_modis_y_viirs750_no_dispara():
@@ -354,6 +367,7 @@ def insumos(monkeypatch):
         monkeypatch.setattr(vs, "leer_adopcion", lambda *a: adopcion)
         monkeypatch.setattr(vs, "_diurna_por_defecto", lambda: NOCHE)
         monkeypatch.setattr(vs.aa, "VOLS", VOLS_CASO)
+        monkeypatch.setattr(vs, "leer_juzgadas", lambda *a: {})
     return poner
 
 
@@ -533,6 +547,51 @@ def test_n27_sin_adopcion_todo_es_retrospectivo():
         d = vs.disparadores(pas, [], hoy="2026-10-25", adopcion=None)
     assert d["reversion"] == [] and d["veredicto"] == "VERDE"
     assert len(d["retrospectivo"]["protegidas_que_la_sombra_publica_y_k_calla"]) == 1
+
+
+# ------------------------------------------------------------------ decisiones de Nicolás del 2026-10-19
+def test_una_pasada_juzgada_no_dispara_pero_cuenta_para_la_duracion():
+    pas = [_pasada("A", "MODIS", "2026-10-20 07:20", True, False, True)]
+    juz = {("A", "MODIS", "2026-10-20 07:20"): {"decision": "no revertir", "fecha_decision": "2026-10-21"}}
+    d = vs.disparadores(pas, [], hoy="2026-10-25", adopcion=ADOP, juzgadas=juz)
+    assert d["veredicto"] == "VERDE" and d["reversion"] == []
+    assert [p["volcano"] for p in d["juzgadas"]] == ["A"] and d["juzgadas"][0]["juicio"]["decision"] == "no revertir"
+    assert d["duracion"]["protegidas_vistas_en_sombra"] == 1
+    # otra pasada del mismo volcán, no juzgada, sí dispara
+    pas.append(_pasada("A", "MODIS", "2026-10-22 07:20", True, False, True))
+    assert vs.disparadores(pas, [], hoy="2026-10-25", adopcion=ADOP, juzgadas=juz)["veredicto"] == "REVERSION_CANDIDATA"
+
+
+def test_cumplido_el_plazo_la_reversion_ya_no_esta_preautorizada():
+    pas = [_pasada("A", "MODIS", "2027-02-16 07:20", True, False, True)]
+    d = _disp(pas, hoy="2027-02-16")
+    assert d["duracion"]["cumplida"] is True and d["veredicto"] == "CANDIDATA_FUERA_DE_PLAZO"
+    assert [p["volcano"] for p in d["reversion"]] == ["A"]          # se sigue informando
+    assert _disp(pas, hoy="2026-10-25")["veredicto"] == "REVERSION_CANDIDATA"
+
+
+def test_el_archivo_de_juzgadas_trae_el_caso_pcc(tmp_path):
+    j = vs.leer_juzgadas()
+    reg = j[("PuyehueCordonCaulle", "VIIRS750", "2026-10-10 05:54")]
+    assert reg["quien"] and reg["fecha_decision"] == "2026-10-19" and "no revertir" in reg["decision"]
+    assert vs.leer_juzgadas(tmp_path / "no_existe.json") == {}
+    malo = tmp_path / "malo.json"
+    malo.write_text("{no es json", encoding="utf-8")
+    with pytest.raises(ValueError):
+        vs.leer_juzgadas(malo)
+
+
+def test_evaluar_con_el_archivo_real_pone_pcc_como_juzgada(insumos, monkeypatch):
+    insumos(*_caso_pcc())
+    monkeypatch.setattr(vs, "leer_juzgadas", LEER_JUZGADAS_REAL)
+    out = vs.evaluar("2026-10-23")
+    assert [p["fecha_utc"] for p in out["juzgadas"]] == ["2026-10-10 05:54"]
+    assert out["retrospectivo"]["protegidas_que_la_sombra_publica_y_k_calla"] == []
+
+
+def test_el_workflow_tiene_el_issue_de_fuera_de_plazo():
+    wf = (ROOT / ".github" / "workflows" / "vigilancia-sombra.yml").read_text(encoding="utf-8")
+    assert "CANDIDATA_FUERA_DE_PLAZO)" in wf and "sombra_pasadas_juzgadas.json" in wf
 
 
 def test_evaluar_referencia_detenida_o_produccion_sin_k_queda_ciega(insumos):

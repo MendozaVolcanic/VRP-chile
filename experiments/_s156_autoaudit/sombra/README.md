@@ -49,7 +49,16 @@ como en el auto-audit (`MAX_GT_STALE_DAYS`). Un aviso nunca tapa una reversión.
 ningún volcán y sensor pasó más de 2 días sin records, ni en producción ni en la sombra, así que el umbral de 3 días
 no habría dado ninguna falsa «vigilancia ciega».
 
-Queda para decidir (no se tocó, es la letra de la regla): con evaluación diaria, la primera Muy Bajo de VIIRS 375 que
+Decisiones de Nicolás después del verificador 3 (marca del paso 9 de la regla, puntos c, d y e): (i) coherente con D-9,
+sin las mínimas y contra la cota SE del A/B (7 de 161 en V1, 12 de 343 en V2, derivadas de `reglas_d9.SE` de
+`experiments/_s153_fk_v2/v1.json` y `v2.json`; lo vigila `test_la_cota_se_de_muy_bajo_se_deriva_de_los_json_del_ab`);
+pasadas ya juzgadas en `experiments/_s151_prereg_fk_11/sombra_pasadas_juzgadas.json` (PCC es la primera) que no
+vuelven a disparar; y cumplido el plazo, una candidata sale como CANDIDATA_FUERA_DE_PLAZO, sin pre-autorización.
+`mutar_vigilancia.py`: 62 mutaciones, las 62 caen por fallo de prueba. `simular_issue.py`: el paso del issue en seis
+escenarios con `bash -eo pipefail` y un `gh` falso. `sombra_latest_2026-10-19_final.json`: la corrida de hoy (VERDE,
+PCC como juzgada).
+
+Lo que sigue abajo quedó resuelto por la decisión (c); se conserva como registro: con evaluación diaria, la primera Muy Bajo de VIIRS 375 que
 la sombra publica y K calla en un volcán ya dispara INVESTIGAR (Wilson inferior de 1 de 1 = 0,2065 sobre la cota
 0,1298); el verificador 2 estimó 57 % de probabilidad de al menos una falsa alarma en 120 días si K pierde igual que en
 el A/B.
