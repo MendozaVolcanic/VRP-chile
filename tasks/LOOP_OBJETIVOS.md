@@ -418,6 +418,13 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   el L1B si hace falta (A6, A97, A99 rebajada); empezar por la de las 06:48 en VIIRS 750 y comparar con la de VIIRS 375
   de la misma pasada (8,93 contra 25,79); (b) verificador limpio; (c) con eso, escribir el pre-registro de D25 sobre K
   (1.29) con Chillán como caso y criterio de magnitud, para el sello de Nicolás. Sólo lectura hasta el sello (A45).
+  **Primer resultado (2026-10-19, 00:55 UTC):** la razón cae con el cenit del sensor: VIIRS 0,64 a 0,72 a 20-22°,
+  0,41 a 0,46 a 49°, 0,35 (375) y 0,12 (750) a 67,6°; MODIS 0,49 a 23° y 0,24 a 38°. Es la curva que S130 ya probó
+  (`docs/s130/GRADIENTE_CENITAL.md`, D17: MIROVA remuestrea a malla de área constante y es plano con el ángulo; nosotros
+  caemos 2,7×). O sea que el grueso del déficit en erupción es geométrico (D17, «bow-tie + regrid»), y D25 explica a lo
+  más el resto a nadir (0,72). TIFF de MIROVA para Chillán: el último es del 2026-09-22 (archivo congelado desde esa
+  fecha), así que la referencia espacial de hoy son los PNG y la distancia del CSV. Decisión pendiente con Nicolás: qué
+  pre-registrar primero (D17 regrid o D25).
 - [ ] **1.29 Pre-registro de D25 sobre K** (regla §5): escribir el pre-registro y su verificador. Bloqueo para
   despachar: el sello de Nicolás. **Se alimenta de 1.33** (Chillán como caso, pedido de Nicolás el 2026-10-19).
 - [ ] **1.30 Pre-registro de MxD03 sobre K** (D-19): ídem. Bloqueo para despachar: el sello de Nicolás.
