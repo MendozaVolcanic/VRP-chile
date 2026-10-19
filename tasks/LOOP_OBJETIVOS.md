@@ -509,6 +509,23 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-19 tarde (vuelta 225, S156): decisión B sobre PCC y vigilancia de la sombra endurecida (#863, sin mergear)
+- Auditoría espacial A61 del caso PCC: MISMO OBJETO que MIROVA, firmeza alta (ancla y centro de la grilla de MIROVA a
+  7,56 km; 216 pasadas de control). Verificador 1: candidata reproducida con instrumento propio, cabecera de NOAA-21
+  VIIRS 750 confirmada; las 61 protegidas «vistas» eran todas anteriores a la adopción.
+- **Decisión de Nicolás**: «lo que recomiendes» ante la recomendación B: no revertir; unidad = pasada; la vigilancia
+  cuenta desde la adopción (09:57:30); lo anterior es retrospectivo y va a investigación con issue a mano. Escrita al
+  inicio del paso 9 de `REGLA_ADOPCION.md` (rama `s156-vigilancia-sombra`), diciendo que se decidió viendo el caso.
+- Verificador 2: 12 de 13 mutaciones nuevas sobrevivían (la peor, parear sin sensor, borraba el caso PCC); sombra
+  muerta en un solo volcán daba VERDE; el issue no se abría si fallaba el push; deduplicación por bolsa de palabras.
+  Todo arreglado: 34 pruebas, 37 de 37 mutaciones por fallo de prueba, suite 2.175 aprobadas. (i) y (iii) pasan a la
+  etiqueta original (como las cotas del A/B); reversión y persistencia con D-9 SN.
+- Causa encontrada de la falla «local SIN ATRIBUIR» de la vuelta 222: g1d y g2c fallan con el repo en D: y el
+  temporal en C: (`relpath` entre discos); con `TMP` en D: pasan. Anotado en la memoria de dos discos.
+- Pendiente para Nicolás: con evaluación diaria, la primera Muy Bajo de VIIRS 375 perdida en un volcán dispara
+  INVESTIGAR (Wilson de 1 de 1); el verificador 2 estimó 57 % de falsa alarma en 120 días. Es la letra de la regla.
+- En curso: verificador 3 sobre `0b8d4bc5`. Después: merge de #863, issue de investigación del caso PCC.
+
 ### 2026-10-19 ~13:30 UTC (vuelta 224, S156): la vigilancia de la sombra encuentra una candidata a reversión de K
 - Arreglo 4 en curso, rama `s156-vigilancia-sombra` (worktree `D:\vrp-trabajo\worktrees\s156-sombra`, sin PR todavía):
   `scripts/vigilancia_sombra.py` implementa el paso 9 de `REGLA_ADOPCION.md` §4, con 9 pruebas.
