@@ -112,7 +112,7 @@ jobs:
             python -c "import json; print('\n'.join('- '+f for f in json.load(open('data/audit_continuous/latest.json'))['flags']))" > /tmp/flags.txt
             gh issue create \
               --title "⚠ Auto-audit semanal FUERA DE BANDA — $(date -u +%F)" \
-              --body "$(printf 'El auto-audit semanal (criterios eje2 S119, ventana rodante 60d) detectó paridad fuera de banda:\n\n%s\n\nDetalle: `data/audit_continuous/latest.json` · Bandas: recall crater ref-5pp, magnitud [0.5-2.0]x.\nProtocolo: verificar data fresca primero (A8), clasificar categoría física (A54) antes de proponer fix.' "$(cat /tmp/flags.txt)")"
+              --body "$(printf 'El auto-audit semanal (criterios eje2 S119 por detector, ventana rodante 60d) detectó paridad fuera de banda:\n\n%s\n\nJuzga SOLO el detector vigente (clave detector de latest.json); el otro se informa en por_detector (S156).\nDetalle: `data/audit_continuous/latest.json` · Bandas: recall cráter ref-5pp (S119); magnitud mediana publicada por volcán y sensor [0.7-1.4]x; alerta protegida de MIROVA (lectura A, 1 MW o más) sin publicar: cualquiera, sin mínimo de noches.\nProtocolo: verificar data fresca primero (A8), clasificar categoría física (A54) antes de proponer fix.' "$(cat /tmp/flags.txt)")"
           fi
           # S150 (auditoria S150, D-02): DEGRADADO no abria issue, y es el veredicto de un apagon del NRT
           # o de un scraper muerto, o sea justo lo que alguien tiene que saber. Un issue por incidente:

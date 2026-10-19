@@ -279,7 +279,10 @@ def cargar_nuestros(coords, inner, ventana):
             pc = r.get("primary_cluster") or {}
             recs.append({"vol": vol, "b": b, "dt": dt, "noche": dt.strftime("%Y-%m-%d"),
                          "dc": r.get("distance_class"), "pc_vrp": pc.get("vrp_mw"),
-                         "pc_dist": pc.get("centroid_dist_km"), "z": r.get("sensor_zenith_deg")})
+                         "pc_dist": pc.get("centroid_dist_km"), "z": r.get("sensor_zenith_deg"),
+                         # S156: aditivo. El codigo que escribio el record (marca de S151): el auto-audit
+                         # separa con esto los detectores C0 y K (AUDIT_S155 F3-02). Ninguna etiqueta lo usa.
+                         "sha": (r.get("regimen") or {}).get("codigo_sha")})
             slim = {k: r.get(k) for k in CAMPOS_JS if k != "anomaly_pixels"}
             if r.get("f5_core_vrp_mw") is None:
                 slim["anomaly_pixels"] = [{k: p.get(k) for k in ("lat", "lon", "vrp_mw", "bt_k")}

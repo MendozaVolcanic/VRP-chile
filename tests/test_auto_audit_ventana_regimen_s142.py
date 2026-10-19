@@ -46,6 +46,6 @@ def test_el_borde_exacto_no_se_recorta():
 def test_main_mide_falsas_con_su_ventana_y_la_publica():
     src = (ROOT / "scripts" / "auto_audit_weekly.py").read_text(encoding="utf-8")
     # A92: frontera de palabra, para que un nombre viejo contenido en otro no dé falso verde
-    assert re.search(r"(?<![A-Za-z0-9_])medir_falsas_ventana\(\s*win_falsas\s*\)", src)
+    assert re.search(r"(?<![A-Za-z0-9_])medir_falsas_ventana\(\s*win_falsas\b", src)
     assert re.search(r"(?<![A-Za-z0-9_])win_falsas\s*=\s*ventana_falsas\(", src)
     assert re.search(r"[\"']ventana_falsas[\"']\s*:", src)
