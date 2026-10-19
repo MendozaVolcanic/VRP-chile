@@ -509,6 +509,25 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-19 17:33 UTC (vuelta 226, S156): vigilancia de la sombra mergeada (#863) y probada en Actions; issue #865
+- #863 squash `9ac09b16`, CI verde sobre `4e9eae28`. Cinco verificadores limpios en total; cada uno encontró algo y
+  todo quedó arreglado o anotado (`experiments/_s156_autoaudit/sombra/README.md`). 65 pruebas; 82 de 82 mutaciones
+  (script y workflow) caen por aserción, con control del criterio; suite 2.206 aprobadas.
+- Decisiones de Nicolás escritas en la marca del paso 9 de `REGLA_ADOPCION.md`: (a) pasada; (b) desde la adopción;
+  (c) Muy Bajo coherente con D-9 (cota SE: 7 de 161 V1, 12 de 343 V2); (d) pasadas juzgadas en
+  `sombra_pasadas_juzgadas.json` (PCC la primera); (e) fuera de plazo sin pre-autorización; (f) rachas juzgadas.
+- Run real despachado a mano (39294849891): todos los pasos verdes, VERDE, commit `a4a9d222` con los dos archivos de
+  salida, sin issue. Desde ahora corre al terminar `experimental-diario` y a las 23:40 UTC de respaldo.
+- Issue #865 (investigación del caso PCC VIIRS 750 2026-10-10), con título que no choca con los automáticos.
+- Histórico con K (39125546355): 165 verdes, **1 fallido**, 11 pendientes a las 17:33. El fallido es NevadosDeChillan
+  trozo 9 (2025-12-08 a 2026-01-13): «runner received a shutdown signal» a los 50 min durante una búsqueda; no es el
+  tope (otros trozos duraron 160 min) ni el código. Al terminar el run: `gh run rerun 39125546355 --failed` y contar
+  pasadas contra el control antes del reemplazo (A108).
+- Anotado sin resolver: falsa alarma de Muy Bajo 0,58 en 120 días (bajó de 0,68); la clase de una pasada puede cambiar
+  si entra o sale una protegida anterior de la referencia (SIN VERIFICAR a escala diaria).
+- Heredoc con barras invertidas rompió archivos dos veces más en esta sesión (workflow y batería); arreglado con la
+  herramienta de edición. Worktrees de la tarea borrados.
+
 ### 2026-10-19 tarde (vuelta 225, S156): decisión B sobre PCC y vigilancia de la sombra endurecida (#863, sin mergear)
 - Auditoría espacial A61 del caso PCC: MISMO OBJETO que MIROVA, firmeza alta (ancla y centro de la grilla de MIROVA a
   7,56 km; 216 pasadas de control). Verificador 1: candidata reproducida con instrumento propio, cabecera de NOAA-21
