@@ -509,6 +509,29 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-19 ~09:20 UTC (vuelta 218, S155): pruebas del candado cerradas; PR #859
+- Worktree `D:\vrp-trabajo\worktrees\s155-candado`, rama `loop/s155-candado` desde `origin/main` (`4877788b`); commits
+  `1c1c2b1f`, `3d08652f`, `5674eab7`. Sólo `experiments/_s151_ab_diurno/`.
+- Pruebas de N-1 a N-5, H-3 y H-5 (verificador v2), vistas primero en rojo (las de N-5, H-5 y el conteo fallaban sobre
+  el evaluador sin cambios) y después en verde. Cambios mínimos al evaluador: H2a informa raíz o brazo sin records y
+  cuenta los leídos; `--base k` exige sha de 40 caracteres; rótulo final según la base. `DESPACHO_K.md` con
+  `git rev-parse <tag>^{commit}` (la adenda sellada no se tocó).
+- Error propio cazado por las mutaciones: el chequeo de 40 caracteres hizo que `sha_opcional` cayera por caída; ahora
+  cada rechazo da su motivo y la prueba lo mira.
+- Tercera vuelta del verificador limpio (Opus) sobre `1c1c2b1f`: listo para despachar desde las pruebas, con la
+  condición de no tocar el evaluador entre el tag y la evaluación; H2a da 0 problemas sobre las diez medias ventanas
+  reales de C0 rotuladas como K. Dejó V3-1 a V3-3 (gravedad 2) y V3-4 a V3-7 (gravedad 1) y 30 mutaciones propias;
+  V3-1 a V3-5 cerrados en `3d08652f`. Informe en `D:\vrp-trabajo\worktrees\s155-verif-candado\experiments\_s151_ab_diurno\verificador_candado_k_v3\INFORME.md`
+  (sin commitear; copiar al cierre si se conserva).
+- **Resultado final sobre el código de `5674eab7`: 72 mutaciones, 71 por prueba, 0 por caída**; `xobs_techo` es
+  equivalente (0 diferencias en 12.502.499 pares, `candado_k_s155/xobs_techo_equivalente_salida.txt`). Batería completa
+  138 de 138 con el árbol quieto.
+- Abierto, gravedad 1: `--brazos ""` (H-4); `gh workflow run` completo en `DESPACHO_K.md`; repetición como `--raiz`
+  aparte con un solo brazo da INDECIDIBLE (V3-6). SOSPECHA del verificador sobre `GITHUB_SHA` de un tag anotado: la
+  documentación de `workflow_dispatch` dice que es el último commit del ref; no comprobado en un run.
+- Siguiente: CI de #859 con conclusión, merge, tag `s154-diurno-k-codigo` y despacho del A/B diurno sobre K **después**
+  del fin del histórico (run 39125546355: 120 de 177 a las 07:04 UTC).
+
 ### 2026-10-19 ~03:25 UTC (vuelta 217, S154): segunda verificación del candado: el código decide bien, las pruebas no alcanzan
 - Informe en `experiments/_s151_ab_diurno/verificador_candado_k_v2/INFORME.md` (copiado a `loop/activo`). Batería completa
   107 de 107. Con el código de hoy el evaluador aplica la regla sellada (datos reales de C0: base c0 NO ADOPTAR; base k
