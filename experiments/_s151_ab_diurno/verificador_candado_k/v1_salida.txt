@@ -1,0 +1,42 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+clases reales: 5018 | pasadas a la vez pos y neg: 0
+
+== W2 a W6: 22 estratos, P 32 N 4683 K 2833 | len pmf ED 33, Fraction 33 | max |pmf ED - Fraction| 1.665e-16
+   regla p95 muestreado x_obs ED 25 propio 25 | cola ED 0.5222763730 Fraction 0.5222763730 (dif 5.6e-16) | p95 exacto ED +0.276025 propio +0.276025 | veredicto FALLA
+   regla cola exacta    x_obs ED 25 propio 25 | cola ED 0.5222763730 Fraction 0.5222763730 (dif 5.6e-16) | p95 exacto ED +0.276025 propio +0.276025 | veredicto FALLA
+   P(X > x_obs) Fraction 0.313903 (lo que daria la mutacion «>»)
+   control del nulo, sin romper                               -> OK | cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.014 contra 0.012 exacto (± 0.010) | brazo que publica sólo en positivos pasa G1: sí
+   control del nulo, pmf corrida +1 (cola de x-1)             -> OK | cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.002 contra 0.012 exacto (± 0.010) | brazo que publica sólo en positivos pasa G1: sí
+   control del nulo, pmf corrida -1                           -> FALLA | cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.042 contra 0.012 exacto (± 0.010) | brazo que publica sólo en positivos pasa G1: sí
+   control del nulo, sin estratos (una sola hipergeometrica)  -> FALLA | cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.545 contra 0.025 exacto (± 0.015) | brazo que publica sólo en positivos pasa G1: sí
+   control del nulo, binomial por estrato (con reposicion)    -> OK | cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.014 contra 0.012 exacto (± 0.010) | brazo que publica sólo en positivos pasa G1: sí
+
+== W3 a W6: 22 estratos, P 20 N 3587 K 2240 | len pmf ED 21, Fraction 21 | max |pmf ED - Fraction| 1.665e-16
+   regla p95 muestreado x_obs ED 17 propio 17 | cola ED 0.1057679874 Fraction 0.1057679874 (dif 6.9e-17) | p95 exacto ED +0.230262 propio +0.230262 | veredicto FALLA
+   regla cola exacta    x_obs ED 17 propio 17 | cola ED 0.1057679874 Fraction 0.1057679874 (dif 6.9e-17) | p95 exacto ED +0.230262 propio +0.230262 | veredicto FALLA
+   P(X > x_obs) Fraction 0.025295 (lo que daria la mutacion «>»)
+   control del nulo, sin romper                               -> OK | cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.033 contra 0.025 exacto (± 0.015) | brazo que publica sólo en positivos pasa G1: sí
+   control del nulo, pmf corrida +1 (cola de x-1)             -> FALLA | cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.005 contra 0.025 exacto (± 0.015) | brazo que publica sólo en positivos pasa G1: sí
+   control del nulo, pmf corrida -1                           -> FALLA | cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.114 contra 0.025 exacto (± 0.015) | brazo que publica sólo en positivos pasa G1: sí
+   control del nulo, sin estratos (una sola hipergeometrica)  -> FALLA | cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.114 contra 0.025 exacto (± 0.015) | brazo que publica sólo en positivos pasa G1: sí
+   control del nulo, binomial por estrato (con reposicion)    -> OK | cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.033 contra 0.026 exacto (± 0.015) | brazo que publica sólo en positivos pasa G1: sí
+
+== veredicto() en los cuatro casos de G1
+   regla W2 False G1 con W2 CUMPLE sin W2 CUMPLE G2 CUMPLE -> ADOPTAR (G1, G2 y G3; antes del flip: R2 por píxel, verifica
+   regla W2 False G1 con W2 CUMPLE sin W2 CUMPLE G2 FALLA  -> DECIDE NICOLAS CON M4 (G1 y G3 cumplen, G2 {'VIIRS375': 'FAL
+   regla W2 False G1 con W2 CUMPLE sin W2 FALLA  G2 CUMPLE -> DEPENDE DEL OCR, DECIDE NICOLAS (G1 pasa sólo con W2; G2 {'V
+   regla W2 False G1 con W2 CUMPLE sin W2 FALLA  G2 FALLA  -> DEPENDE DEL OCR, DECIDE NICOLAS (G1 pasa sólo con W2; G2 {'V
+   regla W2 False G1 con W2 FALLA  sin W2 CUMPLE G2 CUMPLE -> NO ADOPTAR (G1 falla en W2 a W6: FALLA)
+   regla W2 False G1 con W2 FALLA  sin W2 CUMPLE G2 FALLA  -> NO ADOPTAR (G1 falla en W2 a W6: FALLA)
+   regla W2 False G1 con W2 FALLA  sin W2 FALLA  G2 CUMPLE -> NO ADOPTAR (G1 falla en W2 a W6: FALLA)
+   regla W2 False G1 con W2 FALLA  sin W2 FALLA  G2 FALLA  -> NO ADOPTAR (G1 falla en W2 a W6: FALLA)
+   regla W2 False G1 con W2 SIN SUSTRATO sin W2 CUMPLE -> NO ADOPTAR (G1 falla en W2 a W6: SIN SUSTRATO)
+   regla W2 True  G1 con W2 CUMPLE sin W2 CUMPLE G2 CUMPLE -> ADOPTAR (G1, G2 y G3; antes del flip: R2 por píxel, verifica
+   regla W2 True  G1 con W2 CUMPLE sin W2 CUMPLE G2 FALLA  -> DECIDE NICOLAS CON M4 (G1 y G3 cumplen, G2 {'VIIRS375': 'FAL
+   regla W2 True  G1 con W2 CUMPLE sin W2 FALLA  G2 CUMPLE -> DEPENDE DEL OCR, DECIDE NICOLAS (G1 pasa sólo con W2; G2 {'V
+   regla W2 True  G1 con W2 CUMPLE sin W2 FALLA  G2 FALLA  -> DEPENDE DEL OCR, DECIDE NICOLAS (G1 pasa sólo con W2; G2 {'V
+   regla W2 True  G1 con W2 FALLA  sin W2 CUMPLE G2 CUMPLE -> DECIDE NICOLAS CON M4 (G1 cumple sin W2 y falla con W2: las 
+   regla W2 True  G1 con W2 FALLA  sin W2 CUMPLE G2 FALLA  -> DECIDE NICOLAS CON M4 (G1 cumple sin W2 y falla con W2: las 
+   regla W2 True  G1 con W2 FALLA  sin W2 FALLA  G2 CUMPLE -> NO ADOPTAR (G1 falla en W2 a W6: FALLA)
+   regla W2 True  G1 con W2 FALLA  sin W2 FALLA  G2 FALLA  -> NO ADOPTAR (G1 falla en W2 a W6: FALLA)
+   regla W2 True  G1 con W2 SIN SUSTRATO sin W2 CUMPLE -> DECIDE NICOLAS CON M4 (G1 cumple sin W2 y falla con W2: las 

@@ -96,9 +96,13 @@ def configurar_brazos(control, diurno, base="c0"):
 def resolver_base(brazos, base):
     """H2b (adenda K §4): con brazos que no son los de W2 a W6 sobre C0, --base tiene que venir explícito; si no, el
     evaluador se niega (antes, olvidar --base k apagaba en silencio la exigencia de K)."""
+    de_c0 = brazos == "%s,%s" % ("_s151_ab_diurno_control", "_s151_ab_diurno_on")
+    if base == "c0" and not de_c0:
+        # Verificador del candado, H-4: con otros brazos, «c0» decidiría con la regla vieja y sin H2a.
+        raise SystemExit("--base c0 sólo vale para los brazos de W2 a W6 sobre C0; con %s usar --base k (adenda K §4)" % brazos)
     if base is not None:
         return base
-    if brazos == "%s,%s" % ("_s151_ab_diurno_control", "_s151_ab_diurno_on"):
+    if de_c0:
         return "c0"
     raise SystemExit("--brazos %s sin --base: decir explícitamente el detector de base (c0 o k), adenda K §4 H2b" % brazos)
 
@@ -108,6 +112,10 @@ def cableado_records(raices, sha):
     Con base K se exige sobre los RECORDS de los dos brazos: ninguno con el Test 1 (triggered_test1 o
     final_hotspot_source = test1_roi; en producción bajo K son 0 de 3.548) y todos con regimen.codigo_sha = el commit
     del tag de despacho."""
+    if not sha:
+        # Sin sha no hay contra qué comparar: se informa como problema, no se deja caer (verificador del candado:
+        # una mutación que cae no es una mutación atrapada).
+        return ["sin --sha-codigo: no se puede comprobar el commit de los records (H2a)"]
     prob = []
     for nombre in ("control", "diurno"):
         for raiz in raices:
@@ -975,7 +983,7 @@ def evaluar(a):
     if getattr(a, "base", "c0") == "k":
         p = cableado_records(a.raiz, a.sha_codigo)
         print("   records de los dos brazos sin Test 1 y con codigo_sha %s (adenda K §4 H2a): %s"
-              % (a.sha_codigo[:12], "OK" if not p else "ROTO: " + "; ".join(p[:3]) + (" (y %d más)" % (len(p) - 3) if len(p) > 3 else "")))
+              % ((a.sha_codigo or "NINGUNO")[:12], "OK" if not p else "ROTO: " + "; ".join(p[:3]) + (" (y %d más)" % (len(p) - 3) if len(p) > 3 else "")))
         if p:
             controles.append("records de los brazos fuera de K o de otro commit (H2a)")
 
