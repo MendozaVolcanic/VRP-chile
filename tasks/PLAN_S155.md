@@ -22,6 +22,9 @@ cuatro veces que se usaron. El plan refuerza lo que funcionó y ataca esas causa
    #535 y de K).
 4. **Verificador limpio antes de aceptar cualquier resultado** (ya regla del loop; se mantiene).
 5. **Escala de la auditoría post-K aprobada:** 5 frentes más 5 verificadores.
+6. **Dos discos (Nicolás, 2026-10-19):** worktrees de tareas y agentes y temporales grandes en `D:\vrp-trabajo\`
+   (21,8 GB libres ese día); repo principal en C: (31,2 GB libres). Detalle en el protocolo §2 de
+   `tasks/LOOP_OBJETIVOS.md`. Los 5 frentes de la auditoría post-K corren cada uno en su worktree de D:.
 
 ## Orden de trabajo
 

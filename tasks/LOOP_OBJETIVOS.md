@@ -38,7 +38,7 @@ y dos verificadores, 2026-10-09).
 3. **Escala:** como máximo 5 agentes y 2 A/B en GitHub a la vez. Verificador con contexto limpio obligatorio
    antes de aceptar cualquier resultado (el que verifica no es el que encontró).
 4. **Aviso:** un issue por cada decisión lista para Nicolás; resumen diario en la bitácora (§6).
-5. **El loop se detiene solo si:** disco libre bajo 3 GB (`df -h /c`), el token de Earthdata falla, el NRT de
+5. **El loop se detiene solo si:** disco libre bajo 3 GB en C: o en D: (`df -h /c /d`), el token de Earthdata falla, el NRT de
    producción lleva más de 12 h sin corrida verde, o dos pruebas seguidas dan INDETERMINADO POR INSTRUMENTO.
    Al detenerse, lo escribe en la bitácora y abre un issue `loop-detenido`.
 6. **Sellos:** cada pre-registro lo sella Nicolás con `sellar.py --aprobo "Nicolas Mendoza" --informe <...>`
@@ -56,8 +56,15 @@ y dos verificadores, 2026-10-09).
    depender de que la anterior se haya mergeado. Al empezar cada vuelta, `git merge origin/main` en
    `loop/activo` para recoger el NRT y lo mergeado. Cada tarea que produce código o documentos va en su propia
    rama `loop/<tarea>` desde `main`, con su PR.
+   **Discos (Nicolás, 2026-10-19: «que se usen de aquí en adelante»):** el repo principal y `loop/activo` siguen en C:.
+   Los worktrees de tareas y de agentes (A44) y los temporales grandes (uniones de A/B, raíces de evaluación,
+   artefactos bajados) van en **D:**, en `D:\vrp-trabajo\worktrees\<tarea>` (`git worktree add
+   D:/vrp-trabajo/worktrees/<tarea> -b loop/<tarea> origin/main`, probado: los scripts ubican el repo desde ahí) y
+   `D:\vrp-trabajo\temporales\`. Así C: queda para el repo y el sistema, y caben más agentes en paralelo. Un worktree
+   se borra apenas se mergea su PR. El tope real de paralelismo sigue siendo GitHub (20 jobs, compartidos con el NRT) y
+   MODIS no se procesa en Windows (pyhdf): el disco permite más trabajo local, no corre más rápido los reprocesos.
 1. `gh api -i repos/MendozaVolcanic/VRP-chile | grep -i ^date` (hora del servidor, A86); `git fetch origin
-   --prune`; `git checkout loop/activo && git merge --no-edit origin/main`; `df -h /c`.
+   --prune`; `git checkout loop/activo && git merge --no-edit origin/main`; `df -h /c /d`.
 2. Chequeos de parada (§1.5): `gh run list --workflow nrt.yml --limit 3`; issues abiertos con etiqueta de alerta.
 3. Si hay algo corriendo (run de GitHub, agente): revisar su estado. Si terminó, evaluarlo según su tarea.
 4. Si no, tomar la primera tarea `[ ]` de §3 o §4 cuyo bloqueo esté libre. Una tarea por vuelta.
