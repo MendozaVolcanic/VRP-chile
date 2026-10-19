@@ -285,13 +285,15 @@ def chequear_base_k():
     """S154 (tarea 1.32): con `--brazos` y `--base k` el evaluador lee los brazos del A/B sobre K y su cableado exige
     los tres flags de K en los logs; un brazo que corrió con el Test 1 encendido tiene que salir como cableado roto."""
     flags_k = {"ENABLE_TEST1_PATH": False, "ENABLE_TESTS_23_PROSE_BRANCH": True, "ENABLE_MODIS_B22_PRIMARY": True}
-    brazos0, decl0 = dict(ED.BRAZOS), {k: dict(v) for k, v in ED.DECLARADO.items()}
+    brazos0, decl0, regla0 = dict(ED.BRAZOS), {k: dict(v) for k, v in ED.DECLARADO.items()}, dict(ED.REGLA)
     tmp = Path(tempfile.mkdtemp(prefix="probar_base_k_"))
     try:
         ED.configurar_brazos("_s154_ab_diurno_k_control", "_s154_ab_diurno_k_on", "k")
         chequear("base_k", ED.BRAZOS == {"control": "_s154_ab_diurno_k_control", "diurno": "_s154_ab_diurno_k_on"},
                  "--brazos cambia los nombres que lee el evaluador")
-        chequear("base_k", all(ED.DECLARADO[n][c] is v for n in ("control", "diurno") for c, v in flags_k.items()),
+        # .get: un flag que falta tiene que hacer FALLAR la prueba, no caer con KeyError (verificador v2,
+        # k_sin_flag_b22: una mutación que cae no es una mutación atrapada)
+        chequear("base_k", all(ED.DECLARADO[n].get(c) is v for n in ("control", "diurno") for c, v in flags_k.items()),
                  "--base k exige los tres flags de K en los dos brazos")
 
         def escribir_log(test1):
@@ -311,8 +313,10 @@ def chequear_base_k():
         mal = ED.cableado([str(tmp)], [str(tmp / "logs")], "control")
         chequear("base_k", any("ENABLE_TEST1_PATH" in x for x in mal), "un brazo con el Test 1 encendido sale como cableado roto (%s)" % mal)
     finally:
+        # verificador v2, N-3: también REGLA; antes quedaba en base k y la comprobación «con base c0» corría con la regla k
         ED.BRAZOS.clear(); ED.BRAZOS.update(brazos0)
         ED.DECLARADO.clear(); ED.DECLARADO.update(decl0)
+        ED.REGLA.clear(); ED.REGLA.update(regla0)
         shutil.rmtree(tmp, ignore_errors=True)
 
 
@@ -421,7 +425,8 @@ def chequear_cola_exacta():
         ED.REGLA.clear(); ED.REGLA.update(regla0)
     # con c0 la decisión sigue siendo la del p95 muestreado, y la cola exacta se informa igual
     r0 = ED.g1(cls_e, ("W3",), np.random.default_rng(ED.SEMILLA))
-    chequear("cola_exacta", "p_cola_exacta" in r0 and "p95" in r0, "con base c0 se informa la cola exacta sin cambiar la regla")
+    chequear("cola_exacta", "p_cola_exacta" in r0 and "p95" in r0 and r0["regla"] == "p95 muestreado",
+             "con base c0 se informa la cola exacta sin cambiar la regla (regla: %s)" % r0["regla"])
 
 
 def chequear_regla_w2():
@@ -433,12 +438,16 @@ def chequear_regla_w2():
     # así una base k que no encienda la regla W2 cae. Y el caso «falla también sin W2» tiene que seguir en NO ADOPTAR.
     brazos0, decl0, regla0 = dict(ED.BRAZOS), {k: dict(v) for k, v in ED.DECLARADO.items()}, dict(ED.REGLA)
     ambos_fallan = dict(res, G1_W3W6={"veredicto": "FALLA"})
+    # verificador v2 (w2_con_sin_sustrato): la regla de la §3.2 pide que G1 CUMPLA sin W2; sin sustrato en W3 a W6 no
+    # hay nada que cumpla, y el veredicto sigue siendo el de G1 con W2
+    sin_sustrato = dict(res, G1_W3W6={"veredicto": "SIN SUSTRATO"})
     try:
         ED.configurar_brazos("_s151_ab_diurno_control", "_s151_ab_diurno_on", "c0")
         v0 = ED.veredicto(res, [])
         ED.configurar_brazos("_s154_ab_diurno_k_control", "_s154_ab_diurno_k_on", "k")
         vk = ED.veredicto(res, [])
         vk_ambos = ED.veredicto(ambos_fallan, [])
+        vk_sin = ED.veredicto(sin_sustrato, [])
     finally:
         ED.BRAZOS.clear(); ED.BRAZOS.update(brazos0)
         ED.DECLARADO.clear(); ED.DECLARADO.update(decl0)
@@ -446,6 +455,7 @@ def chequear_regla_w2():
     chequear("regla_w2", v0.startswith("NO ADOPTAR"), "base c0: falla con W2 -> NO ADOPTAR (%s)" % v0[:40])
     chequear("regla_w2", vk.startswith("DECIDE NICOLAS CON M4") and "W2" in vk, "base k: cumple sin W2 y falla con W2 -> DECIDE NICOLAS CON M4 (%s)" % vk[:70])
     chequear("regla_w2", vk_ambos.startswith("NO ADOPTAR"), "base k: falla con y sin W2 -> NO ADOPTAR (%s)" % vk_ambos[:40])
+    chequear("regla_w2", vk_sin.startswith("NO ADOPTAR"), "base k: falla con W2 y SIN SUSTRATO sin W2 -> NO ADOPTAR (%s)" % vk_sin[:40])
 
 
 def chequear_h2a_h2b():
@@ -488,6 +498,144 @@ def chequear_h2a_h2b():
     chequear("h2b", rehusa, "brazos K sin --base: el evaluador se niega")
 
 
+K_BRAZOS = ("_s154_ab_diurno_k_control", "_s154_ab_diurno_k_on")
+C0_BRAZOS = ("_s151_ab_diurno_control", "_s151_ab_diurno_on")
+
+
+def _con_base(base, f):
+    """Corre f() con los brazos y la regla de esa base (como lo hace evaluar) y deja BRAZOS, DECLARADO y REGLA como
+    estaban. Así ninguna comprobación hereda la base de la anterior (verificador v2, N-3)."""
+    brazos0, decl0, regla0 = dict(ED.BRAZOS), {k: dict(v) for k, v in ED.DECLARADO.items()}, dict(ED.REGLA)
+    try:
+        ED.configurar_brazos(*(K_BRAZOS if base == "k" else C0_BRAZOS), base)
+        return f()
+    finally:
+        ED.BRAZOS.clear(); ED.BRAZOS.update(brazos0)
+        ED.DECLARADO.clear(); ED.DECLARADO.update(decl0)
+        ED.REGLA.clear(); ED.REGLA.update(regla0)
+
+
+def _repartir(est, x):
+    """Publicadas entre positivos por estrato que suman x, llenando en orden (cada estrato hasta min(P, K))."""
+    xs, resto = [], x
+    for n, p, k in est:
+        t = min(p, k, resto)
+        xs.append(t)
+        resto -= t
+    assert resto == 0 and all(k - t <= n - p for (n, p, k), t in zip(est, xs)), (est, x)
+    return xs
+
+
+def chequear_regla_que_decide():
+    """Verificador v2, N-1 (y H-3 en la regla): ninguna prueba distinguía la regla que DECIDE de la que se ROTULA. El
+    empate del arnés cae en el borde del soporte, donde la cola exacta y el p95 muestreado dan lo mismo, y k1 y k2 están
+    lejos del umbral. Estos dos casos son de los que lista m4_reglas_discrepan.py (800 casos en el borde del valor
+    crítico, 8 con veredicto distinto), uno en cada dirección: con base k tiene que decidir la cola exacta y con c0 el
+    p95 muestreado, y cada caso comprueba primero que de verdad discrimina."""
+    np = ED.np
+    casos = [([(102, 6, 30), (66, 10, 4), (95, 5, 26), (43, 8, 4)], 8),     # cola exacta FALLA (P 0,0507), p95 CUMPLE
+             ([(93, 9, 26), (61, 4, 20)], 7)]                                 # cola exacta CUMPLE (P 0,0490), p95 FALLA
+    for est, x in casos:
+        cls = _cls_desde_estratos(est, _repartir(est, x))
+        rk = _con_base("k", lambda: ED.g1(cls, ("W3",), np.random.default_rng(ED.SEMILLA)))
+        r0 = _con_base("c0", lambda: ED.g1(cls, ("W3",), np.random.default_rng(ED.SEMILLA)))
+        p = ED.cola_exacta(est, x)
+        por_cola = "CUMPLE" if p < ED.ALFA_G2 else "FALLA"
+        por_p95 = "CUMPLE" if r0["D"] > r0["p95"] + ED.EPS_D else "FALLA"
+        chequear("regla_decide", por_cola != por_p95,
+                 "x=%d: el caso discrimina (cola exacta %s con P = %.4f, p95 muestreado %s con D %+.4f contra %+.4f)"
+                 % (x, por_cola, p, por_p95, r0["D"], r0["p95"]))
+        chequear("regla_decide", rk["x_obs"] == x and rk["veredicto"] == por_cola and rk["regla"] == "cola exacta",
+                 "x=%d, base k: decide la cola exacta (%s, rótulo «%s»)" % (x, rk["veredicto"], rk["regla"]))
+        chequear("regla_decide", r0["veredicto"] == por_p95 and r0["regla"] == "p95 muestreado",
+                 "x=%d, base c0: decide el p95 muestreado (%s, rótulo «%s»)" % (x, r0["veredicto"], r0["regla"]))
+    # P exactamente igual a alfa: la regla sellada es P < 0,05, así que FALLA (atrapa «<=»). La distribución se
+    # reemplaza por una con cola exacta 0,05 en x_obs = 1, porque con una real la igualdad no se da.
+    est1 = [(4, 1, 1)]
+    cls1 = _cls_desde_estratos(est1, [1])
+    orig = ED.distribucion_x_exacta
+    try:
+        ED.distribucion_x_exacta = lambda e: np.array([0.95, 0.05])
+        r1 = _con_base("k", lambda: ED.g1(cls1, ("W3",), np.random.default_rng(ED.SEMILLA)))
+    finally:
+        ED.distribucion_x_exacta = orig
+    chequear("regla_decide", r1["p_cola_exacta"] == ED.ALFA_G2 and r1["veredicto"] == "FALLA",
+             "P = alfa exacto: FALLA (P %.17g, %s)" % (r1["p_cola_exacta"], r1["veredicto"]))
+    # Verificador v2, N-4: x_obs por redondeo. 15/22 · 22 da 14,999999999999998 en punto flotante: el truncamiento
+    # daría 14.
+    est2 = [(40, 22, 20)]
+    r2 = _con_base("k", lambda: ED.g1(_cls_desde_estratos(est2, [15]), ("W3",), np.random.default_rng(ED.SEMILLA)))
+    chequear("regla_decide", r2["x_obs"] == 15, "15 publicadas de 22 positivos: x_obs = %s (esperado 15)" % r2["x_obs"])
+    # Control del nulo con la regla exacta, parte (b): un estrato sin poder (P(X >= 1) = 0,5) deja la parte (a) en
+    # cero contra cero, y el control tiene que fallar porque ni el brazo perfecto puede cumplir.
+    c = _con_base("k", lambda: ED.controles_del_nulo(_cls_desde_estratos([(2, 1, 1)], [1]), ("W3",),
+                                                     np.random.default_rng(ED.SEMILLA)))
+    chequear("regla_decide", c["ok"] is False and c["perfecto_pasa"] is False,
+             "sin poder, el control del nulo FALLA aunque la parte (a) cuadre: " + c["texto"])
+
+
+def chequear_h2a_matriz():
+    """Verificador v2, N-2 y N-5. El A/B real corre con diez raíces y once volcanes; la prueba anterior usaba una raíz,
+    un volcán y los dos brazos iguales, y una H2a que mirara sólo la primera raíz, sólo Láscar o sólo el brazo diurno
+    pasaba la batería entera. Acá un record malo en CADA combinación de raíz, brazo y volcán tiene que salir como roto
+    y nombrar ese brazo y ese volcán. Y H2a no puede dar OK sobre cero records (N-5)."""
+    sha = "a" * 40
+    tmp = Path(tempfile.mkdtemp(prefix="probar_h2a_matriz_"))
+    raices = [str(tmp / "r1"), str(tmp / "r2")]
+    vols = ("Lascar", "Villarrica")
+
+    def escribir_todo(malo=None, cambio=None, raices_=raices):
+        for i, raiz in enumerate(raices_):
+            for nombre in ("control", "diurno"):
+                for vol in vols:
+                    d = Path(raiz) / ED.BRAZOS[nombre]
+                    d.mkdir(parents=True, exist_ok=True)
+                    r = {"datetime_utc": "2026-07-01 05:00", "sensor": "VIIRS_SNPP", "triggered_test1": False,
+                         "final_hotspot_source": "ctx_cluster", "regimen": {"perfil": ED.BRAZOS[nombre], "codigo_sha": sha}}
+                    if malo == (i, nombre, vol):
+                        r.update(cambio)
+                    (d / ("%s.json" % vol)).write_text(json.dumps({"volcano": vol, "records": [r]}), encoding="utf-8")
+
+    def cuerpo():
+        escribir_todo()
+        limpio = ED.cableado_records(raices, sha)
+        chequear("h2a_matriz", limpio == [], "dos raíces, dos volcanes, dos brazos, todo limpio: sin problemas (%s)" % limpio[:2])
+        fallos = []
+        for i in range(len(raices)):
+            for nombre in ("control", "diurno"):
+                for vol in vols:
+                    for etiqueta, cambio in (("Test 1", {"triggered_test1": True}),
+                                             ("sha con los 7 primeros iguales",
+                                              {"regimen": {"perfil": "x", "codigo_sha": sha[:7] + "b" * 33}})):
+                        escribir_todo(malo=(i, nombre, vol), cambio=cambio)
+                        p = ED.cableado_records(raices, sha)
+                        if not (len(p) == 1 and ("%s/%s:" % (ED.BRAZOS[nombre], vol)) in p[0]):
+                            fallos.append("raíz %d, %s, %s, %s -> %s" % (i + 1, nombre, vol, etiqueta, p[:2]))
+        chequear("h2a_matriz", not fallos, "un record malo en cualquier raíz, brazo y volcán sale como roto y lo nombra "
+                 "(16 casos; fallan %d: %s)" % (len(fallos), fallos[:2]))
+        # N-5: cero records. Una raíz sin los directorios de los brazos, y una con los JSON vacíos.
+        escribir_todo()
+        vacia = str(tmp / "sin_brazos")
+        Path(vacia).mkdir()
+        p_sin = ED.cableado_records([vacia], sha)
+        chequear("h2a_matriz", len(p_sin) > 0, "una raíz sin los directorios de los brazos: sale como problema (%s)" % p_sin[:1])
+        p_mixta = ED.cableado_records(raices + [vacia], sha)
+        chequear("h2a_matriz", p_mixta and all("sin_brazos" in x for x in p_mixta),
+                 "dos raíces llenas y una sin brazos: sale sólo la vacía (%s)" % p_mixta[:2])
+        for raiz in raices:
+            for nombre in ("control", "diurno"):
+                for vol in vols:
+                    (Path(raiz) / ED.BRAZOS[nombre] / ("%s.json" % vol)).write_text(
+                        json.dumps({"volcano": vol, "records": []}), encoding="utf-8")
+        p_vacios = ED.cableado_records(raices, sha)
+        chequear("h2a_matriz", len(p_vacios) > 0, "JSON de los dos brazos sin records: sale como problema (%s)" % p_vacios[:1])
+
+    try:
+        _con_base("k", cuerpo)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def chequear_punta_a_punta_k(UW, tmp):
     """Verificador del candado, H-1: evaluar() de punta a punta con --brazos K, --base k y --sha-codigo, sobre el
     universo real del pre-registro. Antes, cuatro mutaciones de la ruta K pasaban con el arnés en verde."""
@@ -511,6 +659,14 @@ def chequear_punta_a_punta_k(UW, tmp):
     chequear("punta_a_punta_k", res["veredicto"].startswith("ADOPTAR") and res["G1_W2W6"]["regla"] == "cola exacta",
              "decide con la cola exacta y da ADOPTAR (P = %.2g)" % res["G1_W2W6"]["p_cola_exacta"])
     chequear("punta_a_punta_k", "codigo_sha cccccccccccc (adenda K §4 H2a): OK" in txt, "H2a corre y da OK sobre records limpios")
+    # Verificador v2, N-5: la línea de H2a dice cuántos records leyó, para que un OK sobre nada no se vea igual que un
+    # OK sobre todo. H-5: la línea final no puede decir «regla original» cuando decide la adenda K.
+    import re
+    m = re.search(r"H2a: (\d+) records del control y (\d+) del diurno", txt)
+    chequear("punta_a_punta_k", bool(m) and int(m.group(1)) > 0 and int(m.group(2)) > 0,
+             "la línea de H2a informa los records leídos (%s)" % (m.group(0) if m else "sin conteo"))
+    chequear("punta_a_punta_k", "VEREDICTO (§6 con la adenda K)" in txt and "regla original" not in txt.split("== VEREDICTO")[-1],
+             "la línea final nombra la adenda K, no la regla original")
 
     # El caso «cumple sin W2, falla con W2» no se puede armar con datos sintéticos sobre el universo real (los 12
     # positivos de W2 no alcanzan a hundir G1 publicando negativos de W2: P 8,6e-08). La regla de la §3.2 se prueba en
@@ -527,14 +683,20 @@ def chequear_punta_a_punta_k(UW, tmp):
     res, _ = caso("k4", lambda w, k, U: k in U[w]["pos"], regimen_sha="d" * 40)
     chequear("punta_a_punta_k", res["veredicto"].startswith("INDECIDIBLE") and "H2a" in res["veredicto"],
              "records de otro commit: INDECIDIBLE por H2a")
-    for nom, ex in (("sin --sha-codigo", ["--brazos", ",".join(k_brazos), "--base", "k"]),
-                    ("brazos K con --base c0", ["--brazos", ",".join(k_brazos), "--base", "c0"])):
+    # Verificador v2, H-5: un sha abreviado no es el commit del tag (git rev-parse <tag>^{commit} da los 40
+    # caracteres); antes pasaba y H2a marcaba como «otro commit» todos los records, lejos de la causa.
+    # Cada rechazo tiene que dar SU motivo: si dos chequeos se tapan entre sí (sin sha cae en el de 40 caracteres), el
+    # operador lee la causa equivocada y una mutación que borra uno de los dos pasa.
+    for nom, ex, motivo in (("sin --sha-codigo", ["--brazos", ",".join(k_brazos), "--base", "k"], "exige --sha-codigo"),
+                            ("brazos K con --base c0", ["--brazos", ",".join(k_brazos), "--base", "c0"], "--base c0 sólo vale"),
+                            ("sha abreviado", ["--brazos", ",".join(k_brazos), "--base", "k", "--sha-codigo", sha[:12]],
+                             "no es un commit completo")):
         try:
             caso("k5", lambda w, k, U: k in U[w]["pos"], extra_=ex)
-            rehusa = False
-        except SystemExit:
-            rehusa = True
-        chequear("punta_a_punta_k", rehusa, "%s: el evaluador se niega" % nom)
+            rehusa = ""
+        except SystemExit as e:
+            rehusa = str(e)
+        chequear("punta_a_punta_k", motivo in rehusa, "%s: el evaluador se niega con su motivo (%s)" % (nom, rehusa[:80] or "no se negó"))
 
 
 def main():
@@ -543,6 +705,8 @@ def main():
     chequear_cola_exacta()
     chequear_regla_w2()
     chequear_h2a_h2b()
+    chequear_regla_que_decide()
+    chequear_h2a_matriz()
     tmp = Path(tempfile.mkdtemp(prefix="probar_diurno_"))
     try:
         filas, coords = ED.cargar_filas(ED.parser().parse_args(["--raiz", "x"]))
