@@ -509,6 +509,20 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-19 ~10:30 UTC (vuelta 219, S155): #859 mergeado y tag de despacho puesto (sin despachar)
+- Con el sí de Nicolás («mergea el #859 cuando el CI termine en verde, y después pon el tag»): CI del PR `pytest`
+  SUCCESS sobre `5674eab7`; squash por API, `main` en `e66b402c`. Diff de `main` contra la rama vacío en
+  `experiments/_s151_ab_diurno/` y `pipeline/`.
+- Tag anotado `s154-diurno-k-codigo` en el remoto. **Para `--sha-codigo`: `e66b402c70b1c97cb8164bc05e33a70d63501c9d`**
+  (`git rev-parse s154-diurno-k-codigo^{commit}`). Sin `^{commit}` sale el objeto tag `26a8398c…`, que ningún record
+  trae: es exactamente el caso de H-5. Como también tiene 40 caracteres, el chequeo de formato lo deja pasar, y H2a
+  marcaría todos los records como de otro commit (INDECIDIBLE, falla cerrada).
+- CI de `main` sobre `e66b402c` (run 39237172832, Tests): completed success.
+- **NO despachado.** Espera el fin del reproceso histórico con K (run 39125546355) y su reemplazo (1.24).
+- Disco: C: bajó de 33 a 23 GB libres entre las 03:48 y las 10:40 UTC sin causa encontrada en esta sesión (worktrees y
+  copias mutadas van a D:; temporales de los arneses en C: son 4 carpetas de 31 MB; el scratchpad de 4,6 GB de otra
+  sesión, Poleras, no cambia desde las 01:19). SIN ATRIBUIR; vigilar.
+
 ### 2026-10-19 ~09:20 UTC (vuelta 218, S155): pruebas del candado cerradas; PR #859
 - Worktree `D:\vrp-trabajo\worktrees\s155-candado`, rama `loop/s155-candado` desde `origin/main` (`4877788b`); commits
   `1c1c2b1f`, `3d08652f`, `5674eab7`. Sólo `experiments/_s151_ab_diurno/`.
