@@ -368,6 +368,7 @@ def insumos(monkeypatch):
         monkeypatch.setattr(vs, "_diurna_por_defecto", lambda: NOCHE)
         monkeypatch.setattr(vs.aa, "VOLS", VOLS_CASO)
         monkeypatch.setattr(vs, "leer_juzgadas", lambda *a: {})
+        monkeypatch.setattr(vs, "leer_rachas_juzgadas", lambda *a: {})
     return poner
 
 
@@ -588,6 +589,52 @@ def test_el_plazo_cuenta_las_primeras_29_protegidas_la_29_incluida():
     assert [p["volcano"] for p in d["reversion"]] == ["W"] and [p["volcano"] for p in d["fuera_de_plazo"]] == ["X"]
 
 
+def test_el_vencimiento_es_el_instante_de_adopcion_mas_120_dias():
+    """Verificador 5: el corte era la medianoche del 2027-02-15; es 2027-02-15 09:57:30."""
+    antes = [_pasada("A", "MODIS", "2027-02-15 05:00", True, False, True)]
+    despues = [_pasada("B", "MODIS", "2027-02-15 10:00", True, False, True)]
+    assert _disp(antes, hoy="2027-02-16")["veredicto"] == "REVERSION_CANDIDATA"
+    assert _disp(despues, hoy="2027-02-16")["veredicto"] == "CANDIDATA_FUERA_DE_PLAZO"
+    assert _disp([], hoy="2026-10-25")["duracion"]["vence_utc"] == "2027-02-15 09:57:30"
+
+
+def test_la_reversion_tiene_prioridad_sobre_fuera_de_plazo():
+    dentro = [_pasada("A", "MODIS", "2027-02-14 07:20", True, False, True)]
+    fuera = [_pasada("B", "MODIS", "2027-02-16 07:20", True, False, True)]
+    d = _disp(dentro + fuera, hoy="2027-02-17")
+    assert d["veredicto"] == "REVERSION_CANDIDATA"
+    assert [p["volcano"] for p in d["reversion"]] == ["A"] and [p["volcano"] for p in d["fuera_de_plazo"]] == ["B"]
+
+
+def test_una_juzgada_fuera_de_plazo_tampoco_sale():
+    fuera = [_pasada("B", "MODIS", "2027-02-16 07:20", True, False, True)]
+    juz = {("B", "MODIS", "2027-02-16 07:20"): {"decision": "no revertir"}}
+    d = vs.disparadores(fuera, [], hoy="2027-02-17", adopcion=ADOP, juzgadas=juz)
+    assert d["fuera_de_plazo"] == [] and d["veredicto"] == "VERDE"
+
+
+def test_el_detalle_del_issue_lista_las_candidatas_fuera_de_plazo():
+    import yaml
+    wf = yaml.safe_load((ROOT / ".github" / "workflows" / "vigilancia-sombra.yml").read_text(encoding="utf-8"))
+    run = next(s["run"] for s in wf["jobs"]["vigilar"]["steps"] if s.get("name") == "Open issue")
+    py = run.split("<<'PY' > /tmp/detalle.txt\n", 1)[1].split("\nPY\n", 1)[0]
+    import contextlib
+    import io
+    salida = io.StringIO()
+    d = {"reversion": [], "muy_bajo": {}, "persistencia": [], "negativos_VIIRS375": {}, "avisos": [],
+         "fuera_de_plazo": [{"volcano": "X", "sensor": "MODIS", "fecha_utc": "2027-02-16 07:20", "vrp_mirova_mw": 2.0}]}
+    import builtins
+    abrir_real = builtins.open
+
+    def abrir(ruta, *a, **k):
+        if str(ruta).endswith("sombra_latest.json"):
+            return io.StringIO(json.dumps(d))
+        return abrir_real(ruta, *a, **k)
+    with contextlib.redirect_stdout(salida):
+        exec(py, {"open": abrir, "__builtins__": builtins})
+    assert "FUERA DE PLAZO" in salida.getvalue() and "X MODIS 2027-02-16 07:20" in salida.getvalue()
+
+
 def test_fuera_de_plazo_exige_una_candidata():
     pas = [_pasada("V", "VIIRS375", f"2026-10-{19 + i // 10:02d} 0{i % 10}:00", True, True, True) for i in range(30)]
     assert _disp(pas, hoy="2027-03-01")["veredicto"] == "VERDE"
@@ -603,6 +650,51 @@ def test_la_juzgada_solo_sale_de_la_reversion():
     otra = [_pasada("V", "VIIRS750", "2026-10-22 07:20", True, False, True)]
     d = vs.disparadores(otra, [], hoy="2026-10-25", adopcion=ADOP, juzgadas=juz)
     assert d["veredicto"] == "REVERSION_CANDIDATA"
+
+
+def test_una_racha_juzgada_deja_de_disparar_y_vuelve_si_se_alarga():
+    """Decisión de Nicolás (f): sin esto la racha disparaba INVESTIGAR todos los días para siempre (verificador 5)."""
+    tres = [_pasada("V", "MODIS", f"2026-10-2{d} 07:20", False, False, True) for d in (2, 3, 4)]
+    rachas = {"V": {"2026-10-22", "2026-10-23", "2026-10-24"}}
+    d = vs.disparadores(tres, [], hoy="2026-12-01", adopcion=ADOP, rachas_juzgadas=rachas)
+    assert d["persistencia"] == [] and d["veredicto"] == "VERDE"
+    assert d["persistencia_juzgada"] == [{"volcano": "V", "noches": ["2026-10-22", "2026-10-23", "2026-10-24"]}]
+    # la misma racha alargada una noche: evidencia nueva, dispara otra vez
+    cuatro = tres + [_pasada("V", "MODIS", "2026-10-25 07:20", False, False, True)]
+    d = vs.disparadores(cuatro, [], hoy="2026-12-01", adopcion=ADOP, rachas_juzgadas=rachas)
+    assert d["veredicto"] == "INVESTIGAR" and d["persistencia"][0]["noches"][-1] == "2026-10-25"
+    # juzgar otro volcán no la apaga
+    d = vs.disparadores(tres, [], hoy="2026-12-01", adopcion=ADOP, rachas_juzgadas={"W": rachas["V"]})
+    assert d["veredicto"] == "INVESTIGAR"
+
+
+def test_rachas_juzgadas_del_archivo(tmp_path):
+    assert vs.leer_rachas_juzgadas() == {}                       # el archivo real todavía no tiene rachas
+    assert vs.leer_rachas_juzgadas(tmp_path / "no_existe.json") == {}
+    f = tmp_path / "j.json"
+    f.write_text(json.dumps({"pasadas": [], "rachas": [
+        {"volcano": "Llaima", "noches": ["2026-10-22", "2026-10-23", "2026-10-24"], "decision": "x"}]}),
+        encoding="utf-8")
+    assert vs.leer_rachas_juzgadas(f) == {"Llaima": {"2026-10-22", "2026-10-23", "2026-10-24"}}
+    for malo in ({"volcano": "Llaima", "noches": []}, {"volcano": "Llaima", "noches": ["22-10-2026"]},
+                 {"volcano": "Llaimas", "noches": ["2026-10-22"]}):
+        f.write_text(json.dumps({"pasadas": [], "rachas": [malo]}), encoding="utf-8")
+        with pytest.raises(ValueError):
+            vs.leer_rachas_juzgadas(f)
+
+
+def test_evaluar_usa_las_rachas_juzgadas(insumos, monkeypatch):
+    filas, prod, sombra = _caso_pcc()
+    # MODIS: no tiene cota de Muy Bajo, así que lo único que puede disparar es la persistencia
+    for d in (19, 20, 21):
+        filas.append(_fila("NevadosDeChillan", "MODIS", f"2026-10-{d} 05:00:00", 0.3))
+        prod.append(_rec("NevadosDeChillan", "MODIS", "05:00", f"2026-10-{d}", False, perfil="mirova_equivalent"))
+        sombra.append(_rec("NevadosDeChillan", "MODIS", "05:00", f"2026-10-{d}", True, perfil="experimental"))
+    insumos(filas, prod, sombra)
+    assert vs.evaluar("2026-10-23")["veredicto"] == "INVESTIGAR"
+    monkeypatch.setattr(vs, "leer_rachas_juzgadas",
+                        lambda *a: {"NevadosDeChillan": {"2026-10-19", "2026-10-20", "2026-10-21"}})
+    assert vs.evaluar("2026-10-23")["veredicto"] == "VERDE"
 
 
 def test_juzgadas_con_formato_invalido_caen(tmp_path):

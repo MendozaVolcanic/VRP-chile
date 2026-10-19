@@ -158,7 +158,10 @@ evidencia, y el paquete lo dice.
    ya no está pre-autorizada: decide Nicolás. Notas de implementación (verificador 4, no son decisiones nuevas): el
    plazo se mide pasada por pasada (dentro si es una de las primeras 29 protegidas vistas, la 29.ª incluida, y anterior
    al vencimiento), que es la letra «hasta ver 29»; y una pasada juzgada sale sólo de la reversión, porque lo juzgado
-   fue si revertir, no lo que vio la sombra. Texto original conservado:
+   fue si revertir, no lo que vio la sombra. (f) **Decisión de Nicolás, mismo día, ante el verificador 5**: una racha
+   de persistencia ya investigada se anota en la sección `rachas` del mismo archivo y deja de disparar; si se alarga con
+   una noche nueva, vuelve a disparar (sin esto la racha disparaba todos los días para siempre). Texto original
+   conservado:
 
    **Sombra: el laboratorio congelado en C0.** `experimental-diario.yml` ya corre a diario los 11 Tier A con C0
    (`experimental_v2`). Cada semana se cuentan contra MIROVA producción (K) y sombra (C0) con el mismo evaluador.

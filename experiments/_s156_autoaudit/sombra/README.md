@@ -67,6 +67,15 @@ estricto en el archivo de juzgadas (una entrada mal escrita hace caer el script,
 para «fuera de plazo». `mutar_vigilancia.py` ahora muta también el workflow y cuenta sólo las fallas por aserción
 (lee el XML de JUnit), con una mutación de control que sólo hace caer el script y que el criterio no cuenta: 72 de 72.
 
+Verificador 5 (`verificador5/INFORME.md`): nada que impidiera el merge; el criterio de la batería resistió 7 controles
+de su nulo. Arreglado: el vencimiento es el INSTANTE de adopción más 120 días (2027-02-15 09:57:30), no la
+medianoche; pruebas de la prioridad de la reversión sobre el fuera de plazo, de las juzgadas fuera de plazo y del
+detalle del issue; el historial guarda las candidatas fuera de plazo. **Decisión (f) de Nicolás**: una racha de
+persistencia investigada se anota en `rachas` del archivo de juzgadas y deja de disparar; si se alarga, vuelve. Queda
+anotado, sin arreglar: la clase de una pasada todavía puede cambiar si entra o sale de la referencia una protegida
+ANTERIOR (fila tardía o perdida); en los snapshots semanales no se ha visto con protegidas, a escala diaria está SIN
+VERIFICAR. `mutar_vigilancia.py`: 82 de 82 por aserción, control OK.
+
 **Corrección de lo que decía este README**: la falsa alarma de (i) NO quedó resuelta con la decisión (c), sólo bajó.
 La cota inferior de Wilson de 1 de 1 (0,2065) y de 1 de 2 (0,0945) supera la cota nueva (0,0870), así que la primera
 Muy Bajo no mínima que la sombra publique y K calle en un volcán todavía dispara INVESTIGAR. El verificador 4 estimó

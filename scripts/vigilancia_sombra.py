@@ -229,11 +229,31 @@ def leer_juzgadas(path=JUZGADAS):
     return out
 
 
+def leer_rachas_juzgadas(path=JUZGADAS):
+    """Noches de persistencia ya juzgadas, por volcán: {volcán: {noche, ...}}. DECISIÓN de Nicolás (2026-10-19):
+    una racha de tres noches que ya se investigó deja de disparar; si se alarga con una noche nueva, vuelve a disparar,
+    porque es evidencia nueva. Sin esto la racha disparaba todos los días para siempre (verificador 5, hallazgo 1).
+    Mismo archivo y mismo formato estricto que las pasadas."""
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as fh:
+        d = json.load(fh)
+    out = defaultdict(set)
+    for r in d.get("rachas", []):
+        noches = r.get("noches") or []
+        if (r.get("volcano") not in aa.VOLS or not noches
+                or not all(re.fullmatch(r"\d{4}-\d{2}-\d{2}", n or "") for n in noches)):
+            raise ValueError(f"racha inválida en {path}: {r!r}; se espera volcano de {aa.VOLS} y noches "
+                             "'YYYY-MM-DD'")
+        out[r["volcano"]].update(noches)
+    return dict(out)
+
+
 def _clave(p):
     return (p["volcano"], p["sensor"], p["fecha_utc"][:16])
 
 
-def disparadores(pasadas, negs_prod, hoy, adopcion=None, juzgadas=None):
+def disparadores(pasadas, negs_prod, hoy, adopcion=None, juzgadas=None, rachas_juzgadas=None):
     """Los tres niveles del paso 9 sobre las pasadas POSTERIORES a la adopción; lo anterior, retrospectivo.
 
     `adopcion`: 'YYYY-MM-DD HH:MM:SS' UTC (por defecto, la del tablero). `negs_prod`: records de producción
@@ -244,21 +264,27 @@ def disparadores(pasadas, negs_prod, hoy, adopcion=None, juzgadas=None):
     """
     adopcion = adopcion or leer_adopcion()
     juzgadas = juzgadas or {}
+    rachas_juzgadas = rachas_juzgadas or {}
     corte = adopcion or "9999-99-99 99:99:99"
     pros = [p for p in pasadas if p["instante_utc"] >= corte]
     retro = [p for p in pasadas if p["instante_utc"] < corte]
 
     # Plazo de la regla PASADA POR PASADA (verificador 4, hallazgo 1): «hasta ver 29 protegidas» o 120 días. Una
     # protegida está dentro del plazo si es una de las primeras 29 vistas en la sombra (la 29.ª incluida) y su
-    # instante es anterior al vencimiento. Así una pasada no cambia de clase con el día en que se corre.
+    # instante es anterior al vencimiento, que es el INSTANTE de adopción más 120 días (no la medianoche: verificador
+    # 5). La clase todavía puede cambiar si entra o sale de la referencia una protegida ANTERIOR (fila tardía o
+    # perdida); en los snapshots semanales no se ha visto con protegidas (verificador 5, e2).
     vence = ((date.fromisoformat(adopcion[:10]) + timedelta(days=DIAS_MAXIMOS)).isoformat()
              if adopcion else None)
+    vence_utc = ((_instante(adopcion) + timedelta(days=DIAS_MAXIMOS)).strftime("%Y-%m-%d %H:%M:%S")
+                 if adopcion else None)
     vistas_pros = sorted((p for p in pros if p["protegida"] and p["sombra_pub"] is not None),
                          key=lambda p: (p["instante_utc"], p["volcano"], p["sensor"]))
     orden = {_clave(p): i + 1 for i, p in enumerate(vistas_pros)}
 
     def dentro_de_plazo(p):
-        return bool(vence) and orden.get(_clave(p), 10 ** 9) <= PROTEGIDAS_OBJETIVO and p["instante_utc"][:10] < vence
+        return (bool(vence_utc) and orden.get(_clave(p), 10 ** 9) <= PROTEGIDAS_OBJETIVO
+                and p["instante_utc"] < vence_utc)
 
     calla = _sombra_si_produccion_no(pros)
     candidatas = [p for p in calla if p["protegida"] and _clave(p) not in juzgadas]
@@ -283,7 +309,10 @@ def disparadores(pasadas, negs_prod, hoy, adopcion=None, juzgadas=None):
                                   "dispara": cota is not None and lo > cota}
 
     # (ii) persistencia: «una alerta de MIROVA»; con D-9 SN, las mínimas no son alertas.
-    persistencia = _persistencia([p for p in calla if not p["minima"]])
+    rachas = _persistencia([p for p in calla if not p["minima"]])
+    # Una racha cuyas noches están TODAS juzgadas no dispara; si suma una noche nueva, sí (decisión de Nicolás).
+    persistencia = [r for r in rachas if not set(r["noches"]) <= rachas_juzgadas.get(r["volcano"], set())]
+    persistencia_juzgada = [r for r in rachas if r not in persistencia]
 
     # (iii) negativos limpios de VIIRS 375 con la etiqueta ORIGINAL, la misma con que se midió la cota del A/B:
     # SN convierte en negativo una pasada donde MIROVA vio algo de 0,05 MW o menos y casi duplica la tasa
@@ -299,7 +328,7 @@ def disparadores(pasadas, negs_prod, hoy, adopcion=None, juzgadas=None):
 
     vistas = len(vistas_pros)
     duracion = {"protegidas_vistas_en_sombra": vistas, "objetivo": PROTEGIDAS_OBJETIVO,
-                "adopcion": adopcion, "vence": vence,
+                "adopcion": adopcion, "vence": vence, "vence_utc": vence_utc,
                 "cumplida": vistas >= PROTEGIDAS_OBJETIVO or bool(vence and hoy >= vence)}
 
     calla_retro = _sombra_si_produccion_no(retro)
@@ -324,7 +353,8 @@ def disparadores(pasadas, negs_prod, hoy, adopcion=None, juzgadas=None):
     else:
         veredicto = "VERDE"
     return {"veredicto": veredicto, "reversion": reversion, "fuera_de_plazo": fuera_de_plazo, "muy_bajo": muy_bajo,
-            "persistencia": persistencia, "negativos_VIIRS375": negativos, "duracion": duracion,
+            "persistencia": persistencia, "persistencia_juzgada": persistencia_juzgada,
+            "negativos_VIIRS375": negativos, "duracion": duracion,
             "retrospectivo": retrospectivo,
             "juzgadas": [dict(p, juicio=juzgadas[_clave(p)]) for p in pasadas if _clave(p) in juzgadas]}
 
@@ -422,7 +452,8 @@ def evaluar(hoy):
     win = (frontera, hoy)
     filas, prod, sombra = cargar_insumos(win)
     pasadas = pasadas_de_alerta(filas, prod, sombra, win)
-    d = disparadores(pasadas, prod, hoy, adopcion, juzgadas=leer_juzgadas())
+    d = disparadores(pasadas, prod, hoy, adopcion, juzgadas=leer_juzgadas(),
+                     rachas_juzgadas=leer_rachas_juzgadas())
     avisos = (avisos_referencia(filas, hoy) + avisos_sombra(sombra, hoy) + avisos_produccion(prod, hoy)
               + avisos_perfiles(prod, sombra))
     # Un aviso no tapa una reversión ni una investigación: sólo impide que la falta de disparos se lea como VERDE.
@@ -457,7 +488,7 @@ def main(argv=None):
     with open(os.path.join(OUTDIR, "sombra_latest.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1, ensure_ascii=False)
     linea = {"date": hoy, "veredicto": out["veredicto"], "adopcion_k_utc": out.get("adopcion_k_utc"),
-             "n_reversion": len(out.get("reversion", [])),
+             "n_reversion": len(out.get("reversion", [])), "n_fuera_de_plazo": len(out.get("fuera_de_plazo", [])),
              "protegidas_vistas_en_sombra": (out.get("duracion") or {}).get("protegidas_vistas_en_sombra"),
              "negativos_VIIRS375": out.get("negativos_VIIRS375")}
     with open(os.path.join(OUTDIR, "sombra_history.jsonl"), "a", encoding="utf-8") as f:
@@ -489,6 +520,8 @@ def imprimir(out):
                   f"contra cota {m['cota_ab']}{' · DISPARA' if m['dispara'] else ''}")
     for p in out.get("persistencia", []):
         print(f"  PERSISTENCIA: {p['volcano']} noches {p['noches']}")
+    for p in out.get("persistencia_juzgada", []):
+        print(f"  persistencia ya juzgada (no dispara): {p['volcano']} noches {p['noches']}")
     n = out.get("negativos_VIIRS375")
     if n:
         print(f"  K VIIRS 375 en negativos limpios desde la adopción: {n['k']} de {n['n']} · Wilson {n['wilson']} "
