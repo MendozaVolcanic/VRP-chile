@@ -260,10 +260,12 @@ def parear(lista, t, tol=TOL_S):
 
 
 # ---------------------------------------------------------------- nuestros records
-def cargar_nuestros(coords, inner, ventana):
+def cargar_nuestros(coords, inner, ventana, data=None):
+    """`data`: carpeta de los JSON (por defecto la de produccion). S156: la vigilancia de la sombra la usa
+    con data/experimental_v2 para aplicar el MISMO predicado del tablero a los records del laboratorio."""
     recs, casos = [], []
     for vol in VOLS:
-        with open(DATA / f"{vol}.json", encoding="utf-8") as fh:
+        with open((DATA if data is None else Path(data)) / f"{vol}.json", encoding="utf-8") as fh:
             d = json.load(fh)
         for r in d["records"]:
             b = bucket(r.get("sensor"))
