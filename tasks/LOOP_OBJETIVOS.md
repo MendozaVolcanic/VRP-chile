@@ -502,6 +502,15 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-19 02:45 UTC (vuelta 216, S154): el PC se reinició; la segunda verificación del candado quedó a medias
+- El verificador v2 del candado se cortó sin INFORME (salidas parciales en
+  `experiments/_s151_ab_diurno/verificador_candado_k_v2/` del worktree `s153-adopcion`). Lo ya medido: **5 mutaciones NO
+  ATRAPADAS** (`control_sin_b`, `w2_con_sin_sustrato`, `h2a_solo_diurno`, `h2a_sha_prefijo7`,
+  `veredicto_w2_antes_de_g3`), 1 atrapada sólo por caída (`k_sin_flag_b22`, no cuenta, S152), y **la prueba del empate
+  no distingue cola exacta de p95 muestreado** (las dos dan FALLA); hay 8 de 800 casos de borde que sí discrepan y sirven
+  de prueba. El candado NO está listo para despachar: hay que cerrar esas mutaciones con pruebas. Verificador reanudado
+  desde su transcripción para escribir el informe. Histórico 1.24: 95 de 176. Ninguna copia mutada suelta.
+
 ### 2026-10-19 02:17 UTC (vuelta 215, S154): cron-job.org en UTC COMPROBADO
 - Despacho `workflow_dispatch` del NRT a las 02:10:21 UTC (run en cola al mirar). La decisión «cron» del bloque S154
   queda cerrada. Segunda verificación del candado: 11 salidas parciales, sin informe todavía.
