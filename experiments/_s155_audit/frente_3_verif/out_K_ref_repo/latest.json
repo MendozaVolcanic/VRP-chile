@@ -1,0 +1,181 @@
+{
+ "generated_utc": "2026-10-19T11:13:20Z",
+ "window": [
+  "2026-08-20",
+  "2026-10-19"
+ ],
+ "ventana_falsas": [
+  "2026-09-01",
+  "2026-10-19"
+ ],
+ "cobertura": {
+  "cobertura_propia_pct": 52.5,
+  "dias_con_datos": 32,
+  "dias_ventana": 61,
+  "ultimo_dia_con_datos": "2026-10-19",
+  "cola_sin_datos_dias": 0,
+  "gt_ultima_fecha_csv": "2026-10-14",
+  "gt_stale_dias": 5,
+  "alertas_diurnas_excluidas": 27,
+  "avisos": [
+   "cobertura propia 52.5% < 80.0% (32/61 días con datos)"
+  ]
+ },
+ "criteria": "eje2 S119 (crater A10 + dash), loader canónico CONS∪OCR, referencia filtrada a pasadas nocturnas con la misma regla del pipeline (_reject_daytime, S124)",
+ "recall": {
+  "MODIS": {
+   "n_noches": 10,
+   "noches_sin_datos": 2,
+   "recall_crater_pct": 60.0,
+   "recall_dash_pct": 60.0
+  },
+  "VIIRS750": {
+   "n_noches": 26,
+   "noches_sin_datos": 25,
+   "recall_crater_pct": 69.2,
+   "recall_dash_pct": 69.2
+  },
+  "VIIRS375": {
+   "n_noches": 94,
+   "noches_sin_datos": 110,
+   "recall_crater_pct": 91.5,
+   "recall_dash_pct": 91.5
+  }
+ },
+ "magnitud_ratio_by_vol": {
+  "Chaiten": {
+   "n_noches": 3,
+   "ratio_mediano": 0.687
+  },
+  "Isluga": {
+   "n_noches": 19,
+   "ratio_mediano": 0.331
+  },
+  "Lascar": {
+   "n_noches": 16,
+   "ratio_mediano": 0.399
+  },
+  "Lastarria": {
+   "n_noches": 11,
+   "ratio_mediano": 0.71
+  },
+  "NevadosDeChillan": {
+   "n_noches": 30,
+   "ratio_mediano": 0.649
+  },
+  "PlanchonPeteroa": {
+   "n_noches": 9,
+   "ratio_mediano": 0.823
+  },
+  "PuyehueCordonCaulle": {
+   "n_noches": 10,
+   "ratio_mediano": 0.747
+  },
+  "Tupungatito": {
+   "n_noches": 9,
+   "ratio_mediano": 0.281
+  },
+  "Villarrica": {
+   "n_noches": 3,
+   "ratio_mediano": 0.827
+  }
+ },
+ "magnitud_ratio_by_npix": {
+  "1px": {
+   "n_noches": 26,
+   "ratio_mediano": 0.693
+  },
+  "2px": {
+   "n_noches": 43,
+   "ratio_mediano": 0.54
+  },
+  "3-5px": {
+   "n_noches": 37,
+   "ratio_mediano": 0.469
+  },
+  "6+px": {
+   "n_noches": 4,
+   "ratio_mediano": 0.674
+  }
+ },
+ "falsas_publicaciones": {
+  "por_sensor": {
+   "MODIS": {
+    "n_neg_limpio": 558,
+    "n_publica": 6,
+    "falsas_pub_pct": 1.1
+   },
+   "VIIRS750": {
+    "n_neg_limpio": 804,
+    "n_publica": 10,
+    "falsas_pub_pct": 1.2
+   },
+   "VIIRS375": {
+    "n_neg_limpio": 552,
+    "n_publica": 11,
+    "falsas_pub_pct": 2.0
+   }
+  },
+  "por_regimen": {
+   "focal": {
+    "MODIS": {
+     "n_neg_limpio": 243,
+     "n_publica": 6,
+     "falsas_pub_pct": 2.5,
+     "banda_terminado_pct": 10.0,
+     "sobre_banda_terminado": false
+    },
+    "VIIRS750": {
+     "n_neg_limpio": 336,
+     "n_publica": 9,
+     "falsas_pub_pct": 2.7,
+     "banda_terminado_pct": 10.0,
+     "sobre_banda_terminado": false
+    },
+    "VIIRS375": {
+     "n_neg_limpio": 177,
+     "n_publica": 10,
+     "falsas_pub_pct": 5.6,
+     "banda_terminado_pct": 10.0,
+     "sobre_banda_terminado": false
+    }
+   },
+   "nevado": {
+    "MODIS": {
+     "n_neg_limpio": 315,
+     "n_publica": 0,
+     "falsas_pub_pct": 0.0,
+     "banda_terminado_pct": 15.0,
+     "sobre_banda_terminado": false
+    },
+    "VIIRS750": {
+     "n_neg_limpio": 468,
+     "n_publica": 1,
+     "falsas_pub_pct": 0.2,
+     "banda_terminado_pct": 15.0,
+     "sobre_banda_terminado": false
+    },
+    "VIIRS375": {
+     "n_neg_limpio": 375,
+     "n_publica": 1,
+     "falsas_pub_pct": 0.3,
+     "banda_terminado_pct": 15.0,
+     "sobre_banda_terminado": false
+    }
+   }
+  },
+  "alarma": false,
+  "nota": "medición sin alarma (decisión Nicolás S140); la banda es la de terminado de la spec §2, no un umbral de regresión"
+ },
+ "integrity": {
+  "parse_errors": [],
+  "duplicates_total": 0
+ },
+ "flags": [
+  "recall VIIRS750 69.2% < banda 79.5% (n=26)",
+  "recall VIIRS375 91.5% < banda 93.4% (n=94)",
+  "magnitud NevadosDeChillan 0.649x < 0.7 (SUB-estima, n=30) — déficit de régimen débil S124, ver docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md",
+  "magnitud Tupungatito 0.281x < 0.7 (SUB-estima, n=9) — déficit de régimen débil S124, ver docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md"
+ ],
+ "verdict": "DEGRADADO"
+}

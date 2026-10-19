@@ -1,0 +1,49 @@
+
+===== CORRIDA C0_ref_repo (ROOT=D:\vrp-trabajo\worktrees\s155-audit-f3\experiments\_s155_audit\frente_3_verif\raiz_C0, cons=mirova_v1_snapshot) =====
+  falsas MODIS     11.0% de 408 pasadas negativas limpias (sin alarma)
+  falsas VIIRS750  21.0% de 562 pasadas negativas limpias (sin alarma)
+  falsas VIIRS375  86.5% de 325 pasadas negativas limpias (sin alarma)
+Auto-audit semanal — ventana 2026-08-20 → 2026-10-19
+  MODIS     recall crater 100.0% (n=3)
+  VIIRS750  recall crater 88.0% (n=25)
+  VIIRS375  recall crater 99.1% (n=110)
+  ratio Chaiten              1.129x (n=9)
+  ratio Isluga               0.533x (n=27)
+  ratio Lascar               0.449x (n=24)
+  ratio Lastarria            0.676x (n=12)
+  ratio NevadosDeChillan     1.078x (n=4)
+  ratio PlanchonPeteroa      0.977x (n=8)
+  ratio PuyehueCordonCaulle  1.018x (n=23)
+  ratio Tupungatito          0.828x (n=14)
+  ratio Villarrica           0.835x (n=11)
+COBERTURA: cobertura propia 52.5% < 80.0% (32/61 días con datos)
+COBERTURA: 9 días sin datos nuestros al final de la ventana (último dato 2026-10-10): probable apagón del NRT en curso, revisar nrt-healthcheck y el token
+VEREDICTO: DEGRADADO
+
+RESUMEN C0 {"MODIS": [3, 100.0], "VIIRS750": [25, 88.0], "VIIRS375": [110, 99.1]} {"MODIS": [408, 11.0], "VIIRS750": [562, 21.0], "VIIRS375": [325, 86.5]} Tupungatito {'n_noches': 14, 'ratio_mediano': 0.828} Chillan {'n_noches': 4, 'ratio_mediano': 1.078}
+
+===== CORRIDA K_ref_repo (ROOT=D:\vrp-trabajo\worktrees\s155-audit-f3\experiments\_s155_audit\frente_3_verif\raiz_K, cons=mirova_v1_snapshot) =====
+  falsas MODIS     1.1% de 558 pasadas negativas limpias (sin alarma)
+  falsas VIIRS750  1.2% de 804 pasadas negativas limpias (sin alarma)
+  falsas VIIRS375  2.0% de 552 pasadas negativas limpias (sin alarma)
+Auto-audit semanal — ventana 2026-08-20 → 2026-10-19
+  MODIS     recall crater 60.0% (n=10)
+  VIIRS750  recall crater 69.2% (n=26)
+  VIIRS375  recall crater 91.5% (n=94)
+  ratio Chaiten              0.687x (n=3)
+  ratio Isluga               0.331x (n=19)
+  ratio Lascar               0.399x (n=16)
+  ratio Lastarria            0.71x (n=11)
+  ratio NevadosDeChillan     0.649x (n=30)
+  ratio PlanchonPeteroa      0.823x (n=9)
+  ratio PuyehueCordonCaulle  0.747x (n=10)
+  ratio Tupungatito          0.281x (n=9)
+  ratio Villarrica           0.827x (n=3)
+COBERTURA: cobertura propia 52.5% < 80.0% (32/61 días con datos)
+VEREDICTO: DEGRADADO — 4 flags
+  ⚠ recall VIIRS750 69.2% < banda 79.5% (n=26)
+  ⚠ recall VIIRS375 91.5% < banda 93.4% (n=94)
+  ⚠ magnitud NevadosDeChillan 0.649x < 0.7 (SUB-estima, n=30) — déficit de régimen débil S124, ver docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md
+  ⚠ magnitud Tupungatito 0.281x < 0.7 (SUB-estima, n=9) — déficit de régimen débil S124, ver docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md
+
+RESUMEN K {"MODIS": [10, 60.0], "VIIRS750": [26, 69.2], "VIIRS375": [94, 91.5]} {"MODIS": [558, 1.1], "VIIRS750": [804, 1.2], "VIIRS375": [552, 2.0]} Tupungatito {'n_noches': 9, 'ratio_mediano': 0.281} Chillan {'n_noches': 30, 'ratio_mediano': 0.649}

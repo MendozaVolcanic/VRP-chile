@@ -1,0 +1,177 @@
+{
+ "generated_utc": "2026-10-19T11:06:25Z",
+ "window": [
+  "2026-08-20",
+  "2026-10-19"
+ ],
+ "ventana_falsas": [
+  "2026-09-01",
+  "2026-10-19"
+ ],
+ "cobertura": {
+  "cobertura_propia_pct": 100.0,
+  "dias_con_datos": 61,
+  "dias_ventana": 61,
+  "ultimo_dia_con_datos": "2026-10-19",
+  "cola_sin_datos_dias": 0,
+  "gt_ultima_fecha_csv": "2026-10-19",
+  "gt_stale_dias": 0,
+  "alertas_diurnas_excluidas": 33,
+  "avisos": []
+ },
+ "criteria": "eje2 S119 (crater A10 + dash), loader canónico CONS∪OCR, referencia filtrada a pasadas nocturnas con la misma regla del pipeline (_reject_daytime, S124)",
+ "recall": {
+  "MODIS": {
+   "n_noches": 14,
+   "noches_sin_datos": 0,
+   "recall_crater_pct": 71.4,
+   "recall_dash_pct": 64.3
+  },
+  "VIIRS750": {
+   "n_noches": 55,
+   "noches_sin_datos": 0,
+   "recall_crater_pct": 80.0,
+   "recall_dash_pct": 80.0
+  },
+  "VIIRS375": {
+   "n_noches": 214,
+   "noches_sin_datos": 0,
+   "recall_crater_pct": 95.8,
+   "recall_dash_pct": 95.8
+  }
+ },
+ "magnitud_ratio_by_vol": {
+  "Chaiten": {
+   "n_noches": 13,
+   "ratio_mediano": 0.982
+  },
+  "Isluga": {
+   "n_noches": 49,
+   "ratio_mediano": 0.507
+  },
+  "Lascar": {
+   "n_noches": 40,
+   "ratio_mediano": 0.441
+  },
+  "Lastarria": {
+   "n_noches": 24,
+   "ratio_mediano": 0.736
+  },
+  "NevadosDeChillan": {
+   "n_noches": 41,
+   "ratio_mediano": 0.653
+  },
+  "PlanchonPeteroa": {
+   "n_noches": 18,
+   "ratio_mediano": 0.856
+  },
+  "PuyehueCordonCaulle": {
+   "n_noches": 35,
+   "ratio_mediano": 0.839
+  },
+  "Tupungatito": {
+   "n_noches": 24,
+   "ratio_mediano": 0.52
+  },
+  "Villarrica": {
+   "n_noches": 14,
+   "ratio_mediano": 0.831
+  }
+ },
+ "magnitud_ratio_by_npix": {
+  "1px": {
+   "n_noches": 77,
+   "ratio_mediano": 0.755
+  },
+  "2px": {
+   "n_noches": 77,
+   "ratio_mediano": 0.65
+  },
+  "3-5px": {
+   "n_noches": 68,
+   "ratio_mediano": 0.499
+  },
+  "6+px": {
+   "n_noches": 36,
+   "ratio_mediano": 0.752
+  }
+ },
+ "falsas_publicaciones": {
+  "por_sensor": {
+   "MODIS": {
+    "n_neg_limpio": 1054,
+    "n_publica": 52,
+    "falsas_pub_pct": 4.9
+   },
+   "VIIRS750": {
+    "n_neg_limpio": 1480,
+    "n_publica": 128,
+    "falsas_pub_pct": 8.6
+   },
+   "VIIRS375": {
+    "n_neg_limpio": 940,
+    "n_publica": 292,
+    "falsas_pub_pct": 31.1
+   }
+  },
+  "por_regimen": {
+   "focal": {
+    "MODIS": {
+     "n_neg_limpio": 467,
+     "n_publica": 41,
+     "falsas_pub_pct": 8.8,
+     "banda_terminado_pct": 10.0,
+     "sobre_banda_terminado": false
+    },
+    "VIIRS750": {
+     "n_neg_limpio": 612,
+     "n_publica": 69,
+     "falsas_pub_pct": 11.3,
+     "banda_terminado_pct": 10.0,
+     "sobre_banda_terminado": true
+    },
+    "VIIRS375": {
+     "n_neg_limpio": 285,
+     "n_publica": 87,
+     "falsas_pub_pct": 30.5,
+     "banda_terminado_pct": 10.0,
+     "sobre_banda_terminado": true
+    }
+   },
+   "nevado": {
+    "MODIS": {
+     "n_neg_limpio": 587,
+     "n_publica": 11,
+     "falsas_pub_pct": 1.9,
+     "banda_terminado_pct": 15.0,
+     "sobre_banda_terminado": false
+    },
+    "VIIRS750": {
+     "n_neg_limpio": 868,
+     "n_publica": 59,
+     "falsas_pub_pct": 6.8,
+     "banda_terminado_pct": 15.0,
+     "sobre_banda_terminado": false
+    },
+    "VIIRS375": {
+     "n_neg_limpio": 655,
+     "n_publica": 205,
+     "falsas_pub_pct": 31.3,
+     "banda_terminado_pct": 15.0,
+     "sobre_banda_terminado": true
+    }
+   }
+  },
+  "alarma": false,
+  "nota": "medición sin alarma (decisión Nicolás S140); la banda es la de terminado de la spec §2, no un umbral de regresión"
+ },
+ "integrity": {
+  "parse_errors": [],
+  "duplicates_total": 0
+ },
+ "flags": [
+  "magnitud NevadosDeChillan 0.653x < 0.7 (SUB-estima, n=41) — déficit de régimen débil S124, ver docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md",
+  "magnitud Tupungatito 0.52x < 0.7 (SUB-estima, n=24) — déficit de régimen débil S124, ver docs/S124_LA_PARIDAD_ESCONDE_UN_PROBLEMA.md"
+ ],
+ "verdict": "FUERA_DE_BANDA"
+}
