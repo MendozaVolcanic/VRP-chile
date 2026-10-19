@@ -502,6 +502,10 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-19 02:17 UTC (vuelta 215, S154): cron-job.org en UTC COMPROBADO
+- Despacho `workflow_dispatch` del NRT a las 02:10:21 UTC (run en cola al mirar). La decisión «cron» del bloque S154
+  queda cerrada. Segunda verificación del candado: 11 salidas parciales, sin informe todavía.
+
 ### 2026-10-19 01:55 UTC (vuelta 214, S154): cron-job.org en UTC; plan de S155; segunda verificación del candado en curso
 - **Nicolás cambió la zona horaria de `vrp-chile-cron-externo` a UTC** (expresión sin cambio, `10 1-12 * * *`).
   Comprobar el primer despacho a las 02:10 UTC (antes el primero salía a las 04:10 UTC y dejaba fuera la ventana MODIS).
