@@ -511,7 +511,7 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ### 2026-10-19 ~10:55 UTC (vuelta 220, S155): auditoría post-K lanzada (bloque 1 del plan)
 - Pedido de Nicolás: aprovechar el paralelo. Cinco auditores Opus en segundo plano, uno por frente, cada uno en su
-  worktree detached sobre `origin/main` `cb90031a` (`D:rp-trabajo\worktrees\s155-audit-f1` a `f5`, ~0,94 GB cada uno;
+  worktree detached sobre `origin/main` `cb90031a` (`D:\vrp-trabajo\worktrees\s155-audit-f1` a `f5`, ~0,94 GB cada uno;
   D: 18 GB libres después de crearlos). Preámbulo canónico entero; sin commits, sin despachos, sin Earthdata local.
   Frentes: 1 propagación de K en docs y textos; 2 lo que ve el operador (tres vistas, predicados con node); 3
   instrumentos (auto-audit, watchdog, evaluadores; #779 como caso); 4 cierres que K pudo volver falsos (censo S145); 5
