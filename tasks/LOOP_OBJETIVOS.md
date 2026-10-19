@@ -502,6 +502,15 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-19 01:55 UTC (vuelta 214, S154): cron-job.org en UTC; plan de S155; segunda verificación del candado en curso
+- **Nicolás cambió la zona horaria de `vrp-chile-cron-externo` a UTC** (expresión sin cambio, `10 1-12 * * *`).
+  Comprobar el primer despacho a las 02:10 UTC (antes el primero salía a las 04:10 UTC y dejaba fuera la ventana MODIS).
+- Plan de la próxima sesión acordado con Nicolás: `tasks/PLAN_S155.md` (auditoría post-K de 5 frentes con
+  verificadores, índice por síntoma, CLAUDE.md, estratificación automática, pruebas en curso, reglas de proceso).
+- Segunda vuelta del verificador del candado en curso (salidas parciales en
+  `experiments/_s151_ab_diurno/verificador_candado_k_v2/` del worktree `s153-adopcion`). El cierre de S154 espera su
+  informe.
+
 ### 2026-10-19 01:25 UTC (vuelta 213, S154): candado de la adenda K mergeado (#858); 1.34 a 1.36 en la cola
 - #858 mergeado (`cf272543`, squash 01:23 UTC, CI del último commit verde antes del merge). Pruebas del verificador del
   candado agregadas; las cuatro mutaciones de la ruta K atrapadas por pruebas (M3 ya no cae: H2a sin sha devuelve
