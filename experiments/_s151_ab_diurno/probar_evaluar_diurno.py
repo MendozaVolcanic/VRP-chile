@@ -63,6 +63,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import math
 import os
 import random
 import shutil
@@ -176,8 +177,10 @@ def noche_clase_una():
 
 def escribir(dirc, UW, publica, sacar=(), diurno_igual_control=False, flags_diurno=None, cambiar_noche=False,
              linea_extra="", volatiles_distintos=False, granulo_distinto=False, ruido_relativo=None,
-             modificar_noche=None):
-    """Escribe <dirc>/<brazo>/<vol>.json y <dirc>/logs/<brazo>_<vol>.log."""
+             modificar_noche=None, flags_ambos=None, regimen_sha=None, tocar_records=None):
+    """Escribe <dirc>/<brazo>/<vol>.json y <dirc>/logs/<brazo>_<vol>.log.
+    S154 (casos de punta a punta con --base k): `flags_ambos` se aplica al FLAGS_BRAZO de los dos brazos, `regimen_sha`
+    pone la marca regimen en cada record y `tocar_records(por)` permite romper records a propósito (H2a)."""
     por = {n: {v: [] for v in bp.VOLS} for n in ED.BRAZOS}
     i = 0
     for vol, b, t in noches(UW):
@@ -211,6 +214,13 @@ def escribir(dirc, UW, publica, sacar=(), diurno_igual_control=False, flags_diur
                     continue
                 i += 1
                 por["diurno"][k[0]].append(record(k[0], k[1], k[2], PUB if publica(w, k, UW) else NO, True, i))
+    if regimen_sha is not None:
+        for n in ED.BRAZOS:
+            for recs in por[n].values():
+                for r in recs:
+                    r["regimen"] = {"perfil": ED.BRAZOS[n], "codigo_sha": regimen_sha, "origen": "actions"}
+    if tocar_records is not None:
+        tocar_records(por)
     (dirc / "logs").mkdir(parents=True, exist_ok=True)
     for n in ED.BRAZOS:
         (dirc / ED.BRAZOS[n]).mkdir(parents=True, exist_ok=True)
@@ -220,6 +230,8 @@ def escribir(dirc, UW, publica, sacar=(), diurno_igual_control=False, flags_diur
             (dirc / ED.BRAZOS[n] / (vol + ".json")).write_text(json.dumps({"volcano": vol, "records": recs}), encoding="utf-8")
             fl = dict(FLAGS_BASE, PROFILE_NAME=ED.BRAZOS[n], DATA_SUBDIR=ED.BRAZOS[n],
                       ENABLE_DAYTIME_VIIRS=(n == "diurno"))
+            if flags_ambos:
+                fl.update(flags_ambos)
             if n == "diurno" and flags_diurno:
                 fl.update(flags_diurno)
             txt = "FLAGS_BRAZO " + json.dumps(fl) + "\n"
@@ -304,14 +316,240 @@ def chequear_base_k():
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+def _cls_desde_estratos(estratos, x_por_estrato):
+    """cls sintético: por estrato (n, P, K) y cuántas publicadas caen en positivos (x_s)."""
+    cls = {}
+    for i, ((n, p, k), xs) in enumerate(zip(estratos, x_por_estrato)):
+        for j in range(n):
+            es_pos = j < p
+            pub = (j < xs) if es_pos else (p <= j < p + (k - xs))
+            cls[("V%d" % i, "VIIRS375", "2026-07-01 %02d:%02d" % (j // 60, j % 60))] = {
+                "ventana": "W3", "pob": {"pos"} if es_pos else {"neg"}, "estado": "publicada" if pub else "sin_publicar"}
+    return cls
+
+
+def _pmf_fuerza_bruta(estratos):
+    """Distribución de X (publicadas entre positivos) enumerando todas las elecciones de positivos por estrato."""
+    from itertools import combinations
+    dist = {0: 1.0}
+    for n, p, k in estratos:
+        cuenta = {}
+        combos = list(combinations(range(n), p))
+        for c in combos:
+            x = sum(1 for i in c if i < k)          # las k primeras son las publicadas
+            cuenta[x] = cuenta.get(x, 0) + 1
+        nueva = {}
+        for a_, pa in dist.items():
+            for b_, cb in cuenta.items():
+                nueva[a_ + b_] = nueva.get(a_ + b_, 0.0) + pa * cb / len(combos)
+        dist = nueva
+    return dist
+
+
+def chequear_cola_exacta():
+    """S154, adenda K §3.1 (sellada): G1 decide con P(nulo >= D) exacta. Pruebas pedidas por el verificador de la
+    adenda (H4): contra fuerza bruta, el caso de empate, la mutación de «>=» por «>», y los controles del nulo con la
+    regla exacta. La regla sólo decide con --base k; con c0 se informa (la corrida sobre C0 queda reproducible)."""
+    np = ED.np
+    rnd = random.Random(11)
+    malos = 0
+    for _ in range(60):
+        est = []
+        for _s in range(rnd.randint(1, 3)):
+            n = rnd.randint(2, 9)
+            est.append((n, rnd.randint(1, n - 1), rnd.randint(0, n)))
+        bruta = _pmf_fuerza_bruta(est)
+        exacta = ED.distribucion_x_exacta(est)
+        malos += any(abs(exacta[x] - bruta.get(x, 0.0)) > 1e-12 for x in range(len(exacta))) or abs(sum(exacta) - 1) > 1e-12
+    chequear("cola_exacta", malos == 0, "distribución exacta de X igual a la fuerza bruta en 60 casos chicos (malos %d)" % malos)
+    est = [(9, 3, 4), (8, 2, 3), (7, 3, 2)]
+    pmf = ED.distribucion_x_exacta(est)
+    chequear("cola_exacta", all(abs(ED.cola_exacta(est, x) - float(sum(pmf[x:]))) < 1e-15 for x in range(len(pmf))),
+             "cola_exacta(x) = suma de la distribución desde x (incluye el propio x)")
+    # empate: un x con P(X >= x) >= 0,05 y P(X > x) < 0,05; la regla con «>=» FALLA y la mutada con «>» cumpliría
+    est_e, x_e = None, None
+    for n1 in range(4, 12):
+        e = [(n1, 2, 2), (6, 1, 2)]
+        pm = ED.distribucion_x_exacta(e)
+        for x in range(len(pm)):
+            if float(sum(pm[x:])) >= 0.05 > float(sum(pm[x + 1:])):
+                est_e, x_e = e, x
+                break
+        if est_e:
+            break
+    chequear("cola_exacta", est_e is not None, "existe el caso de empate que distingue «>=» de «>» (%s, x=%s)" % (est_e, x_e))
+    xs = [min(x_e, est_e[0][1]), x_e - min(x_e, est_e[0][1])]
+    cls_e = _cls_desde_estratos(est_e, xs)
+    brazos0, decl0, regla0 = dict(ED.BRAZOS), {k: dict(v) for k, v in ED.DECLARADO.items()}, dict(ED.REGLA)
+    try:
+        ED.configurar_brazos("_s154_ab_diurno_k_control", "_s154_ab_diurno_k_on", "k")
+        r = ED.g1(cls_e, ("W3",), np.random.default_rng(ED.SEMILLA))
+        chequear("cola_exacta", r["veredicto"] == "FALLA" and r["p_cola_exacta"] >= 0.05,
+                 "en el empate la regla exacta FALLA (P(X>=x) = %.4f); con «>» cumpliría (%.4f)" % (
+                     r["p_cola_exacta"], ED.cola_exacta(est_e, x_e + 1)))
+        # verificador del candado, H-3: además fija x_obs y el valor exacto de la cola, para atrapar también los
+        # errores conservadores (pmf[x_obs - 1:], x_obs - 1) que el veredicto solo no ve
+        chequear("cola_exacta", r["x_obs"] == x_e and abs(r["p_cola_exacta"] - ED.cola_exacta(est_e, x_e)) < 1e-15,
+                 "x_obs = %s (esperado %s) y la cola es exactamente P(X >= x_obs)" % (r["x_obs"], x_e))
+        # control del nulo con la regla exacta, sobre un brazo que no discrimina y uno perfecto
+        rnd2 = random.Random(3)
+        est_c = [(60, 8, 30), (50, 6, 20), (40, 5, 25)]
+        cls_c = _cls_desde_estratos(est_c, [rnd2.randint(0, min(p, k)) for n, p, k in est_c])
+        c = ED.controles_del_nulo(cls_c, ("W3",), np.random.default_rng(ED.SEMILLA))
+        chequear("cola_exacta", c["ok"] and "cola exacta" in c["texto"], "controles del nulo con la regla exacta: " + c["texto"])
+        # verificador del candado, H-2 (e): el control tiene que FALLAR con un nulo roto (distribución corrida en +1)
+        orig = ED.distribucion_x_exacta
+        try:
+            ED.distribucion_x_exacta = lambda e: np.concatenate([[0.0], orig(e)])
+            c_roto = ED.controles_del_nulo(cls_c, ("W3",), np.random.default_rng(ED.SEMILLA))
+        finally:
+            ED.distribucion_x_exacta = orig
+        chequear("cola_exacta", not c_roto["ok"], "con el nulo exacto corrido en +1 el control FALLA: " + c_roto["texto"])
+        # H-2 (d): colas del muestreo contra colas exactas, en todos los x (no cuantiles: el p95 muestreado salta)
+        n_m = 200000
+        mues = ED.nulo_barajado(est_c, np.random.default_rng(ED.SEMILLA), n=n_m)
+        pp, nn, kk = sum(e[1] for e in est_c), sum(e[0] - e[1] for e in est_c), sum(e[2] for e in est_c)
+        peor = 0.0
+        for x in range(pp + 1):
+            ex = ED.cola_exacta(est_c, x)
+            mc = float(np.mean(mues >= x / pp - (kk - x) / nn - 1e-12))
+            peor = max(peor, abs(mc - ex) / (4 * math.sqrt(max(ex * (1 - ex), 1e-12) / n_m) + 1e-9))
+        chequear("cola_exacta", peor <= 1.0, "colas del muestreo (%d) dentro de 4 errores estándar de las exactas en todos los x (peor %.2f)" % (n_m, peor))
+    finally:
+        ED.BRAZOS.clear(); ED.BRAZOS.update(brazos0)
+        ED.DECLARADO.clear(); ED.DECLARADO.update(decl0)
+        ED.REGLA.clear(); ED.REGLA.update(regla0)
+    # con c0 la decisión sigue siendo la del p95 muestreado, y la cola exacta se informa igual
+    r0 = ED.g1(cls_e, ("W3",), np.random.default_rng(ED.SEMILLA))
+    chequear("cola_exacta", "p_cola_exacta" in r0 and "p95" in r0, "con base c0 se informa la cola exacta sin cambiar la regla")
+
+
+def chequear_regla_w2():
+    """S154, adenda K §3.2 (sellada): con base K, si G1 cumple sin W2 y falla con W2, decide Nicolás con M4."""
+    res = {"repetir": [], "ventanas_presentes": list(ED.DECIDEN), "G3": "CUMPLE",
+           "G1_W2W6": {"veredicto": "FALLA"}, "G1_W3W6": {"veredicto": "CUMPLE"},
+           "G2": {s: {"veredicto": "FALLA"} for s in ED.VIIRS}}
+    # Verificador del candado, H-1: la regla se arma con configurar_brazos (como en evaluar), no tocando REGLA a mano;
+    # así una base k que no encienda la regla W2 cae. Y el caso «falla también sin W2» tiene que seguir en NO ADOPTAR.
+    brazos0, decl0, regla0 = dict(ED.BRAZOS), {k: dict(v) for k, v in ED.DECLARADO.items()}, dict(ED.REGLA)
+    ambos_fallan = dict(res, G1_W3W6={"veredicto": "FALLA"})
+    try:
+        ED.configurar_brazos("_s151_ab_diurno_control", "_s151_ab_diurno_on", "c0")
+        v0 = ED.veredicto(res, [])
+        ED.configurar_brazos("_s154_ab_diurno_k_control", "_s154_ab_diurno_k_on", "k")
+        vk = ED.veredicto(res, [])
+        vk_ambos = ED.veredicto(ambos_fallan, [])
+    finally:
+        ED.BRAZOS.clear(); ED.BRAZOS.update(brazos0)
+        ED.DECLARADO.clear(); ED.DECLARADO.update(decl0)
+        ED.REGLA.clear(); ED.REGLA.update(regla0)
+    chequear("regla_w2", v0.startswith("NO ADOPTAR"), "base c0: falla con W2 -> NO ADOPTAR (%s)" % v0[:40])
+    chequear("regla_w2", vk.startswith("DECIDE NICOLAS CON M4") and "W2" in vk, "base k: cumple sin W2 y falla con W2 -> DECIDE NICOLAS CON M4 (%s)" % vk[:70])
+    chequear("regla_w2", vk_ambos.startswith("NO ADOPTAR"), "base k: falla con y sin W2 -> NO ADOPTAR (%s)" % vk_ambos[:40])
+
+
+def chequear_h2a_h2b():
+    """S154, adenda K §4 (sellada). H2a: con base K se revisan los records de los dos brazos (0 con Test 1 y el
+    codigo_sha del tag). H2b: con brazos que no son los de W2 a W6 sobre C0, --base tiene que ser explícito."""
+    tmp = Path(tempfile.mkdtemp(prefix="probar_h2a_"))
+    brazos0 = dict(ED.BRAZOS)
+    try:
+        ED.BRAZOS.update({"control": "_s154_ab_diurno_k_control", "diurno": "_s154_ab_diurno_k_on"})
+
+        def escribir_recs(**cambio):
+            for b in ED.BRAZOS.values():
+                (tmp / b).mkdir(parents=True, exist_ok=True)
+                r = {"datetime_utc": "2026-07-01 05:00", "sensor": "VIIRS_SNPP", "triggered_test1": False,
+                     "final_hotspot_source": "ctx_cluster", "regimen": {"perfil": b, "codigo_sha": "a" * 40}}
+                r.update(cambio)
+                (tmp / b / "Lascar.json").write_text(json.dumps({"volcano": "Lascar", "records": [r]}), encoding="utf-8")
+
+        escribir_recs()
+        chequear("h2a", ED.cableado_records([str(tmp)], "a" * 40) == [], "records de K con el sha del tag: limpio")
+        chequear("h2a", len(ED.cableado_records([str(tmp)], None)) > 0, "sin sha: sale como problema, no se cae")
+        for nom, cambio in (("triggered_test1", {"triggered_test1": True}),
+                            ("test1_roi", {"final_hotspot_source": "test1_roi"}),
+                            ("sha", {"regimen": {"perfil": "x", "codigo_sha": "b" * 40}}),
+                            ("sin regimen", {"regimen": None})):
+            escribir_recs(**cambio)
+            p = ED.cableado_records([str(tmp)], "a" * 40)
+            chequear("h2a", len(p) > 0, "%s: sale como roto (%s)" % (nom, p[:1]))
+    finally:
+        ED.BRAZOS.clear(); ED.BRAZOS.update(brazos0)
+        shutil.rmtree(tmp, ignore_errors=True)
+    por_defecto = "%s,%s" % (brazos0["control"], brazos0["diurno"])
+    chequear("h2b", ED.resolver_base(por_defecto, None) == "c0", "brazos de W2 a W6 sobre C0 sin --base: c0")
+    chequear("h2b", ED.resolver_base("_s154_ab_diurno_k_control,_s154_ab_diurno_k_on", "k") == "k", "--base k explícito: k")
+    try:
+        ED.resolver_base("_s154_ab_diurno_k_control,_s154_ab_diurno_k_on", None)
+        rehusa = False
+    except SystemExit:
+        rehusa = True
+    chequear("h2b", rehusa, "brazos K sin --base: el evaluador se niega")
+
+
+def chequear_punta_a_punta_k(UW, tmp):
+    """Verificador del candado, H-1: evaluar() de punta a punta con --brazos K, --base k y --sha-codigo, sobre el
+    universo real del pre-registro. Antes, cuatro mutaciones de la ruta K pasaban con el arnés en verde."""
+    k_brazos = ("_s154_ab_diurno_k_control", "_s154_ab_diurno_k_on")
+    fk = {"ENABLE_TEST1_PATH": False, "ENABLE_TESTS_23_PROSE_BRANCH": True, "ENABLE_MODIS_B22_PRIMARY": True}
+    sha = "c" * 40
+    extra = ["--brazos", ",".join(k_brazos), "--base", "k", "--sha-codigo", sha]
+    defecto = ("_s151_ab_diurno_control", "_s151_ab_diurno_on")
+
+    def caso(nombre, publica, extra_=extra, **kw):
+        d = tmp / nombre
+        ED.configurar_brazos(*k_brazos, "k")
+        try:
+            escribir(d, UW, publica, flags_ambos=fk, regimen_sha=kw.pop("regimen_sha", sha), **kw)
+            return correr(d, extra_)
+        finally:
+            ED.configurar_brazos(*defecto, "c0")
+
+    res, txt = caso("k1", lambda w, k, U: k in U[w]["pos"])
+    print("\n== caso k1 (punta a punta, base k, sólo protegidas) -> %s" % res["veredicto"])
+    chequear("punta_a_punta_k", res["veredicto"].startswith("ADOPTAR") and res["G1_W2W6"]["regla"] == "cola exacta",
+             "decide con la cola exacta y da ADOPTAR (P = %.2g)" % res["G1_W2W6"]["p_cola_exacta"])
+    chequear("punta_a_punta_k", "codigo_sha cccccccccccc (adenda K §4 H2a): OK" in txt, "H2a corre y da OK sobre records limpios")
+
+    # El caso «cumple sin W2, falla con W2» no se puede armar con datos sintéticos sobre el universo real (los 12
+    # positivos de W2 no alcanzan a hundir G1 publicando negativos de W2: P 8,6e-08). La regla de la §3.2 se prueba en
+    # chequear_regla_w2 con la configuración real de la base k.
+    res, _ = caso("k2", lambda w, k, U: k in U[w]["neg"])
+    chequear("punta_a_punta_k", res["veredicto"].startswith("NO ADOPTAR") and res["G1_W2W6"]["p_cola_exacta"] > 0.05,
+             "base k, brazo que publica sólo en negativos: G1 falla con la cola exacta y da NO ADOPTAR (%s)" % res["veredicto"][:40])
+
+    def con_test1(por):
+        por["diurno"]["Lascar"][0]["triggered_test1"] = True
+    res, _ = caso("k3", lambda w, k, U: k in U[w]["pos"], tocar_records=con_test1)
+    chequear("punta_a_punta_k", res["veredicto"].startswith("INDECIDIBLE") and "H2a" in res["veredicto"],
+             "un record con el Test 1 en el brazo diurno: INDECIDIBLE por H2a (%s)" % res["veredicto"][:70])
+    res, _ = caso("k4", lambda w, k, U: k in U[w]["pos"], regimen_sha="d" * 40)
+    chequear("punta_a_punta_k", res["veredicto"].startswith("INDECIDIBLE") and "H2a" in res["veredicto"],
+             "records de otro commit: INDECIDIBLE por H2a")
+    for nom, ex in (("sin --sha-codigo", ["--brazos", ",".join(k_brazos), "--base", "k"]),
+                    ("brazos K con --base c0", ["--brazos", ",".join(k_brazos), "--base", "c0"])):
+        try:
+            caso("k5", lambda w, k, U: k in U[w]["pos"], extra_=ex)
+            rehusa = False
+        except SystemExit:
+            rehusa = True
+        chequear("punta_a_punta_k", rehusa, "%s: el evaluador se niega" % nom)
+
+
 def main():
     chequear_orden_del_nulo()
     chequear_base_k()
+    chequear_cola_exacta()
+    chequear_regla_w2()
+    chequear_h2a_h2b()
     tmp = Path(tempfile.mkdtemp(prefix="probar_diurno_"))
     try:
         filas, coords = ED.cargar_filas(ED.parser().parse_args(["--raiz", "x"]))
         UW = ED.universo_por_ventana(S.universo(filas, coords))
         print("Universo real del pre-registro: %s" % {w: (len(UW[w]["pos"]), len(UW[w]["neg"]), len(UW[w]["tabla"])) for w in ED.VENTANAS})
+        if not os.environ.get("PROBAR_SOLO") or "k" in os.environ.get("PROBAR_SOLO", "").split(","):
+            chequear_punta_a_punta_k(UW, tmp)
         pos_w2 = sorted(UW["W2"]["pos"])
         pos_w3 = sorted(UW["W3"]["pos"])
         rnd = random.Random(7)
