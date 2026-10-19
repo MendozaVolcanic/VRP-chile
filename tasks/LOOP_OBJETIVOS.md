@@ -502,6 +502,26 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-19 ~03:25 UTC (vuelta 217, S154): segunda verificación del candado: el código decide bien, las pruebas no alcanzan
+- Informe en `experiments/_s151_ab_diurno/verificador_candado_k_v2/INFORME.md` (copiado a `loop/activo`). Batería completa
+  107 de 107. Con el código de hoy el evaluador aplica la regla sellada (datos reales de C0: base c0 NO ADOPTAR; base k
+  cola 0,5223 y 0,1058, INDECIDIBLE por cableado y H2a, lo esperable con datos C0).
+- **Mutaciones: 42; 30 atrapadas por prueba, 1 por caída, 11 NO atrapadas.** Pasan incluso la batería completa:
+  `g1_regla_inversa`, `h2a_solo_primera_raiz`, `h2a_solo_lascar`, `h2a_solo_diurno`. No las atrapa la corrida 1,3,k:
+  `g1_siempre_cola`, `xobs_floor`, `alfa_g1_le`, `alfa_g1_0055`, `control_sin_b`, `w2_con_sin_sustrato`,
+  `h2a_sha_prefijo7`. `veredicto_w2_antes_de_g3` sólo cae con la batería completa. (Mi resumen previo de «5 no
+  atrapadas» estaba mal: eran 12 en la corrida filtrada.)
+- H-1 cerrado; H-2 cerrado con poco margen (el nulo +1 falla por 0,002); H-3 cerrado para x_obs y cola, ABIERTO para la
+  regla (el empate está en el borde del soporte, donde las dos reglas coinciden); H-4 cerrado; H-5 falta escribir
+  `git rev-parse <tag>^{commit}` en el procedimiento. Nuevos: N-1 (3) ninguna prueba distingue la regla que decide de la
+  del rótulo (`evaluar_diurno.py:621` y `:625`; usar uno de los 8 casos de borde de m4); N-2 (3) H2a probado con 1 raíz,
+  1 volcán y 1 brazo cuando el A/B corre con 10 raíces; N-3 (1) las comprobaciones rápidas dejan `ED.REGLA` en k; N-4 (2)
+  x_obs por truncamiento no se vería; N-5 (1) H2a da OK con cero records.
+- **Decisión del loop: NO despachar todavía.** La adenda sellada pide «cola exacta con sus pruebas antes de despachar»;
+  las pruebas no protegen la regla. Primer bloque de S155: cerrar N-1, N-2, N-3, N-4, N-5, H-3 (regla) y H-5, y que las
+  11 mutaciones caigan por prueba; tercera vuelta corta del verificador. El despacho espera además el fin del histórico
+  (95 de 176 a las 02:43).
+
 ### 2026-10-19 02:45 UTC (vuelta 216, S154): el PC se reinició; la segunda verificación del candado quedó a medias
 - El verificador v2 del candado se cortó sin INFORME (salidas parciales en
   `experiments/_s151_ab_diurno/verificador_candado_k_v2/` del worktree `s153-adopcion`). Lo ya medido: **5 mutaciones NO

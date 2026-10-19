@@ -27,9 +27,14 @@ cuatro veces que se usaron. El plan refuerza lo que funcionó y ataca esas causa
 
 ### Bloque 0: arranque (protocolo `/retomar`)
 - Estado real: `git fetch`, remoto, disco, NRT, issues de alerta (#779, #824, #813).
-- Leer el informe de la segunda vuelta del verificador del candado
-  (`experiments/_s151_ab_diurno/verificador_candado_k_v2/INFORME.md`, worktree `s153-adopcion`, rama
-  `loop/diurno-k-candado`) si quedó escrito; si no, relanzarlo.
+- **Cerrar las pruebas del candado del A/B diurno sobre K antes de cualquier despacho** (segunda verificación,
+  `experiments/_s151_ab_diurno/verificador_candado_k_v2/INFORME.md`): 11 mutaciones no atrapadas, 4 de ellas pasan la
+  batería completa (`g1_regla_inversa`, `h2a_solo_primera_raiz`, `h2a_solo_lascar`, `h2a_solo_diurno`). Arreglos:
+  N-1 (prueba que distinga cola exacta de p95 muestreado con un caso de borde de `m4_reglas_discrepan.py`), N-2 (H2a
+  con varias raíces, volcanes y los dos brazos), N-3 (restaurar `ED.REGLA` en las comprobaciones), N-4 (x_obs por
+  truncamiento), N-5 (H2a con cero records), H-3 regla y H-5 (`git rev-parse <tag>^{commit}` en el procedimiento).
+  Repetir las 42 mutaciones con `m1_mutaciones_v2.py` del verificador (todas por prueba, ninguna por caída) y tercera
+  vuelta corta de verificador limpio.
 - Estado del reproceso histórico con K (run 39125546355).
 
 ### Bloque 1: auditoría post-K (5 frentes en paralelo, cada uno con su verificador limpio)

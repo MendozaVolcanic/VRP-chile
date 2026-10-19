@@ -1,0 +1,143 @@
+inicio 2026-10-19T01:43:39Z
+PROBAR_SOLO=1,3,k | 43 corridas | arnes y evaluador de C:\Users\nmend\OneDrive\Escritorio\claude\Volcanologia\VRP Chile\.claude\worktrees\s153-adopcion\experiments\_s151_ab_diurno
+MUTACION ninguna                    NO ATRAPADA          308 s | 58 de 59 OK | fallan ['cobertura_workflow']
+MUTACION gt_en_g1                   ATRAPADA (prueba)    309 s | 56 de 59 OK | fallan ['cobertura_workflow', 'cola_exacta']
+        [FALLA] en el empate la regla exacta FALLA (P(X>=x) = 0.0000); con «>» cumpliría (0.0000)
+        [FALLA] x_obs = 3 (esperado 3) y la cola es exactamente P(X >= x_obs)
+MUTACION conservadora_en_g1         ATRAPADA (prueba)    297 s | 57 de 59 OK | fallan ['cobertura_workflow', 'cola_exacta']
+        [FALLA] x_obs = 3 (esperado 3) y la cola es exactamente P(X >= x_obs)
+MUTACION xobs_menos_1               ATRAPADA (prueba)    307 s | 57 de 59 OK | fallan ['cobertura_workflow', 'cola_exacta']
+        [FALLA] x_obs = 2 (esperado 3) y la cola es exactamente P(X >= x_obs)
+MUTACION xobs_mas_1                 ATRAPADA (prueba)    307 s | 56 de 59 OK | fallan ['cobertura_workflow', 'cola_exacta']
+        [FALLA] en el empate la regla exacta FALLA (P(X>=x) = 0.0000); con «>» cumpliría (0.0000)
+        [FALLA] x_obs = 4 (esperado 3) y la cola es exactamente P(X >= x_obs)
+MUTACION k_sin_cola                 ATRAPADA (prueba)    305 s | 55 de 59 OK | fallan ['cobertura_workflow', 'cola_exacta', 'punta_a_punta_k']
+        [FALLA] controles del nulo con la regla exacta: permutaciones reales de pos/neg por estrato sobre el p95: 0.024 contra 0.022 del nulo (± 0.019) | brazo que publica sólo en positivos pasa G1: sí
+        [FALLA] con el nulo exacto corrido en +1 el control FALLA: permutaciones reales de pos/neg por estrato sobre el p95: 0.024 contra 0.022 del nulo (± 0.019) | brazo que publica sólo en positivos pasa G1: sí
+        [FALLA] decide con la cola exacta y da ADOPTAR (P = 1.6e-63)
+MUTACION k_sin_w2                   ATRAPADA (prueba)    313 s | 57 de 59 OK | fallan ['cobertura_workflow', 'regla_w2']
+        [FALLA] base k: cumple sin W2 y falla con W2 -> DECIDE NICOLAS CON M4 (NO ADOPTAR (G1 falla en W2 a W6: FALLA))
+MUTACION control_siempre_ok         ATRAPADA (prueba)    311 s | 57 de 59 OK | fallan ['cobertura_workflow', 'cola_exacta']
+        [FALLA] con el nulo exacto corrido en +1 el control FALLA: cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.007 contra 0.023 exacto (± 0.014) | brazo que publica sólo en positivos pasa G1: sí
+MUTACION w2_sin_mirar_g1b           ATRAPADA (prueba)    309 s | 56 de 59 OK | fallan ['cobertura_workflow', 'punta_a_punta_k', 'regla_w2']
+        [FALLA] base k: falla con y sin W2 -> NO ADOPTAR (DECIDE NICOLAS CON M4 (G1 cumple sin W2 )
+        [FALLA] base k, brazo que publica sólo en negativos: G1 falla con la cola exacta y da NO ADOPTAR (DECIDE NICOLAS CON M4 (G1 cumple sin W2 )
+MUTACION h2a_apagado_en_evaluar     ATRAPADA (prueba)    311 s | 55 de 59 OK | fallan ['cobertura_workflow', 'punta_a_punta_k']
+        [FALLA] H2a corre y da OK sobre records limpios
+        [FALLA] un record con el Test 1 en el brazo diurno: INDECIDIBLE por H2a (INDECIDIBLE (G3: FALLA (noches distintas: defecto del cableado); se re)
+        [FALLA] records de otro commit: INDECIDIBLE por H2a
+MUTACION sha_opcional               ATRAPADA (prueba)    342 s | 57 de 59 OK | fallan ['cobertura_workflow', 'punta_a_punta_k']
+        [FALLA] sin --sha-codigo: el evaluador se niega
+MUTACION h2b_silencioso             ATRAPADA (prueba)    305 s | 57 de 59 OK | fallan ['cobertura_workflow', 'h2b']
+        [FALLA] brazos K sin --base: el evaluador se niega
+MUTACION h2a_solo_primera_raiz      NO ATRAPADA          304 s | 58 de 59 OK | fallan ['cobertura_workflow']
+MUTACION h2a_solo_control           ATRAPADA (prueba)    306 s | 57 de 59 OK | fallan ['cobertura_workflow', 'punta_a_punta_k']
+        [FALLA] un record con el Test 1 en el brazo diurno: INDECIDIBLE por H2a (INDECIDIBLE (G3: FALLA (noches distintas: defecto del cableado); se re)
+MUTACION h2a_solo_lascar            NO ATRAPADA          305 s | 58 de 59 OK | fallan ['cobertura_workflow']
+MUTACION h2a_sin_test1_roi          ATRAPADA (prueba)    359 s | 57 de 59 OK | fallan ['cobertura_workflow', 'h2a']
+        [FALLA] test1_roi: sale como roto ([])
+MUTACION h2b_c0_con_brazos_k        ATRAPADA (prueba)    400 s | 57 de 59 OK | fallan ['cobertura_workflow', 'punta_a_punta_k']
+        [FALLA] brazos K con --base c0: el evaluador se niega
+MUTACION alfa_g1_010                ATRAPADA (prueba)    363 s | 57 de 59 OK | fallan ['cobertura_workflow', 'cola_exacta']
+        [FALLA] en el empate la regla exacta FALLA (P(X>=x) = 0.0556); con «>» cumpliría (0.0000)
+MUTACION alfa_g1_le                 NO ATRAPADA          364 s | 58 de 59 OK | fallan ['cobertura_workflow']
+MUTACION alfa_g1_0055               NO ATRAPADA          358 s | 58 de 59 OK | fallan ['cobertura_workflow']
+MUTACION xobs_floor                 NO ATRAPADA          314 s | 58 de 59 OK | fallan ['cobertura_workflow']
+MUTACION g1_estratos_juntos         ATRAPADA (prueba)    308 s | 56 de 59 OK | fallan ['cobertura_workflow', 'cola_exacta']
+        [FALLA] en el empate la regla exacta FALLA (P(X>=x) = 0.0333); con «>» cumpliría (0.0000)
+        [FALLA] x_obs = 3 (esperado 3) y la cola es exactamente P(X >= x_obs)
+MUTACION g1_siempre_cola            NO ATRAPADA          314 s | 58 de 59 OK | fallan ['cobertura_workflow']
+MUTACION g1_regla_inversa           NO ATRAPADA          313 s | 58 de 59 OK | fallan ['cobertura_workflow']
+MUTACION cola_en_c0                 ATRAPADA (prueba)    317 s | 54 de 59 OK | fallan ['cobertura_workflow', 'control_nulo']
+        [FALLA] nulo x0,3, caso 1: cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.024 contra 0.032 exacto (± 0.017) | brazo que publica sólo en positivos pasa G1: sí -> OK
+        [FALLA] nulo x0,3, caso 3: cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.031 contra 0.027 exacto (± 0.015) | brazo que publica sólo en positivos pasa G1: sí -> OK
+        [FALLA] nulo corrido -0,5, caso 1: cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.024 contra 0.032 exacto (± 0.017) | brazo que publica sólo en positivos pasa G1: sí -> OK
+        [FALLA] nulo corrido -0,5, caso 3: cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.031 contra 0.027 exacto (± 0.015) | brazo que publica sólo en positivos pasa G1: sí -> OK
+MUTACION w2_en_c0                   ATRAPADA (prueba)    308 s | 57 de 59 OK | fallan ['cobertura_workflow', 'regla_w2']
+        [FALLA] base c0: falla con W2 -> NO ADOPTAR (DECIDE NICOLAS CON M4 (G1 cumple sin W2 )
+MUTACION control_tol_x10            ATRAPADA (prueba)    306 s | 57 de 59 OK | fallan ['cobertura_workflow', 'cola_exacta']
+        [FALLA] con el nulo exacto corrido en +1 el control FALLA: cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.007 contra 0.023 exacto (± 0.143) | brazo que publica sólo en positivos pasa G1: sí
+MUTACION control_tol_x5             ATRAPADA (prueba)    306 s | 57 de 59 OK | fallan ['cobertura_workflow', 'cola_exacta']
+        [FALLA] con el nulo exacto corrido en +1 el control FALLA: cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.007 contra 0.023 exacto (± 0.072) | brazo que publica sólo en positivos pasa G1: sí
+MUTACION control_xcrit_ultimo       ATRAPADA (prueba)    311 s | 57 de 59 OK | fallan ['cobertura_workflow', 'cola_exacta']
+        [FALLA] con el nulo exacto corrido en +1 el control FALLA: cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.000 contra 0.000 exacto (± 0.000) | brazo que publica sólo en positivos pasa G1: sí
+MUTACION control_colas_gt           ATRAPADA (prueba)    307 s | 54 de 59 OK | fallan ['cobertura_workflow', 'cola_exacta', 'punta_a_punta_k']
+        [FALLA] controles del nulo con la regla exacta: cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.069 contra 0.023 exacto (± 0.014) | brazo que publica sólo en positivos pasa G1: sí
+        [FALLA] con el nulo exacto corrido en +1 el control FALLA: cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.024 contra 0.023 exacto (± 0.014) | brazo que publica sólo en positivos pasa G1: sí
+        [FALLA] decide con la cola exacta y da ADOPTAR (P = 1.6e-63)
+        [FALLA] base k, brazo que publica sólo en negativos: G1 falla con la cola exacta y da NO ADOPTAR (INDECIDIBLE (controles del nulo barajado)
+MUTACION control_sin_b              NO ATRAPADA          353 s | 58 de 59 OK | fallan ['cobertura_workflow']
+MUTACION control_solo_b             ATRAPADA (prueba)    353 s | 57 de 59 OK | fallan ['cobertura_workflow', 'cola_exacta']
+        [FALLA] con el nulo exacto corrido en +1 el control FALLA: cola exacta: permutaciones reales de pos/neg por estrato que cumplen: 0.007 contra 0.023 exacto (± 0.014) | brazo que publica sólo en positivos pasa G1: sí
+MUTACION control_exacto_apagado     ATRAPADA (prueba)    343 s | 56 de 59 OK | fallan ['cobertura_workflow', 'cola_exacta']
+        [FALLA] controles del nulo con la regla exacta: permutaciones reales de pos/neg por estrato sobre el p95: 0.024 contra 0.022 del nulo (± 0.019) | brazo que publica sólo en positivos pasa G1: sí
+        [FALLA] con el nulo exacto corrido en +1 el control FALLA: permutaciones reales de pos/neg por estrato sobre el p95: 0.024 contra 0.022 del nulo (± 0.019) | brazo que publica sólo en positivos pasa G1: sí
+MUTACION w2_con_sin_sustrato        NO ATRAPADA          344 s | 58 de 59 OK | fallan ['cobertura_workflow']
+MUTACION h2a_solo_diurno            NO ATRAPADA          351 s | 58 de 59 OK | fallan ['cobertura_workflow']
+MUTACION h2a_ignora_ultima_raiz     ATRAPADA (prueba)    377 s | 52 de 59 OK | fallan ['cobertura_workflow', 'h2a', 'punta_a_punta_k']
+        [FALLA] triggered_test1: sale como roto ([])
+        [FALLA] test1_roi: sale como roto ([])
+        [FALLA] sha: sale como roto ([])
+        [FALLA] sin regimen: sale como roto ([])
+        [FALLA] un record con el Test 1 en el brazo diurno: INDECIDIBLE por H2a (INDECIDIBLE (G3: FALLA (noches distintas: defecto del cableado); se re)
+        [FALLA] records de otro commit: INDECIDIBLE por H2a
+MUTACION h2a_sha_prefijo7           NO ATRAPADA          376 s | 58 de 59 OK | fallan ['cobertura_workflow']
+MUTACION h2a_sin_regimen_ok         ATRAPADA (prueba)    381 s | 57 de 59 OK | fallan ['cobertura_workflow', 'h2a']
+        [FALLA] sin regimen: sale como roto ([])
+MUTACION h2a_no_bloquea             ATRAPADA (prueba)    378 s | 56 de 59 OK | fallan ['cobertura_workflow', 'punta_a_punta_k']
+        [FALLA] un record con el Test 1 en el brazo diurno: INDECIDIBLE por H2a (INDECIDIBLE (G3: FALLA (noches distintas: defecto del cableado); se re)
+        [FALLA] records de otro commit: INDECIDIBLE por H2a
+MUTACION h2a_sin_sha_ok             ATRAPADA (prueba)    360 s | 57 de 59 OK | fallan ['cobertura_workflow', 'h2a']
+        [FALLA] sin sha: sale como problema, no se cae
+MUTACION k_sin_flag_b22             ATRAPADA (caida)       5 s |     chequear("base_k", all(ED.DECLARADO[n][c] is v for n in ("control", "diurno") for c, v in flags_k.items()), /                            ~~~~~~~~~~~~~~~^^^ / KeyError: 'ENABLE_MODIS_B22_PRIMARY'
+MUTACION estratos_con_tabla         ATRAPADA (prueba)    231 s | 55 de 59 OK | fallan ['azar', 'cobertura_workflow', 'control_nulo', 'punta_a_punta_k']
+        [FALLA] base k, brazo que publica sólo en negativos: G1 falla con la cola exacta y da NO ADOPTAR (INDECIDIBLE (controles del nulo barajado)
+        [FALLA] veredicto NO ADOPTAR
+        [FALLA] sin romper, caso 3: permutaciones reales de pos/neg por estrato sobre el p95: 0.059 contra 0.033 del nulo (± 0.022) | brazo que publica sólo en positivos pasa G1: sí -> FALLA
+MUTACION veredicto_w2_antes_de_g3   NO ATRAPADA          233 s | 58 de 59 OK | fallan ['cobertura_workflow']
+
+RESUMEN
+   ninguna                    CONTROL OK
+   gt_en_g1                   ATRAPADA (prueba)
+   conservadora_en_g1         ATRAPADA (prueba)
+   xobs_menos_1               ATRAPADA (prueba)
+   xobs_mas_1                 ATRAPADA (prueba)
+   k_sin_cola                 ATRAPADA (prueba)
+   k_sin_w2                   ATRAPADA (prueba)
+   control_siempre_ok         ATRAPADA (prueba)
+   w2_sin_mirar_g1b           ATRAPADA (prueba)
+   h2a_apagado_en_evaluar     ATRAPADA (prueba)
+   sha_opcional               ATRAPADA (prueba)
+   h2b_silencioso             ATRAPADA (prueba)
+   h2a_solo_primera_raiz      NO ATRAPADA
+   h2a_solo_control           ATRAPADA (prueba)
+   h2a_solo_lascar            NO ATRAPADA
+   h2a_sin_test1_roi          ATRAPADA (prueba)
+   h2b_c0_con_brazos_k        ATRAPADA (prueba)
+   alfa_g1_010                ATRAPADA (prueba)
+   alfa_g1_le                 NO ATRAPADA
+   alfa_g1_0055               NO ATRAPADA
+   xobs_floor                 NO ATRAPADA
+   g1_estratos_juntos         ATRAPADA (prueba)
+   g1_siempre_cola            NO ATRAPADA
+   g1_regla_inversa           NO ATRAPADA
+   cola_en_c0                 ATRAPADA (prueba)
+   w2_en_c0                   ATRAPADA (prueba)
+   control_tol_x10            ATRAPADA (prueba)
+   control_tol_x5             ATRAPADA (prueba)
+   control_xcrit_ultimo       ATRAPADA (prueba)
+   control_colas_gt           ATRAPADA (prueba)
+   control_sin_b              NO ATRAPADA
+   control_solo_b             ATRAPADA (prueba)
+   control_exacto_apagado     ATRAPADA (prueba)
+   w2_con_sin_sustrato        NO ATRAPADA
+   h2a_solo_diurno            NO ATRAPADA
+   h2a_ignora_ultima_raiz     ATRAPADA (prueba)
+   h2a_sha_prefijo7           NO ATRAPADA
+   h2a_sin_regimen_ok         ATRAPADA (prueba)
+   h2a_no_bloquea             ATRAPADA (prueba)
+   h2a_sin_sha_ok             ATRAPADA (prueba)
+   k_sin_flag_b22             ATRAPADA (caida)
+   estratos_con_tabla         ATRAPADA (prueba)
+   veredicto_w2_antes_de_g3   NO ATRAPADA
+fin 2026-10-19T02:31:26Z
