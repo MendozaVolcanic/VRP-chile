@@ -509,6 +509,22 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-19 ~14:30 UTC (vuelta 221, S155): auditoría post-K completa; #860 y #861 abiertos
+- Cinco auditores y cinco verificadores limpios entregaron. Consolidado en `docs/AUDIT_S155.md` (PR #861, sólo docs y
+  `experiments/_s155_audit/`; 40 archivos de más de 1 MB fuera, listados en `EXCLUIDOS.md`).
+- Hallazgo central, por cuatro vías y tres verificadores: la frontera C0/K de los datos es la fecha de observación
+  2026-09-18, no el merge. Con el sí de Nicolás («cuando los verificadores confirmen... arregla la marca... y pásame el
+  PR»): #860 mueve la línea a esa fecha, el aviso dice las dos fechas y `tests/test_cambio_detector_frontera_s155.py`
+  mide la frontera contra los JSON (se pondrá roja cuando se aplique el histórico, 1.24). CI del PR verde; navegador
+  local con las tres vistas; **sin mergear, espera respuesta de Nicolás**.
+- Gravedad 4 verificados (además del central): F3-02 el auto-audit registra 31,1 % de publicación en negativos de
+  VIIRS 375 que es C0 86,5 % y K 1,8 %; F3-04 y F5-05 dos protegidas MODIS de Chillán (10-12 07:20 y 10-15 01:05) sin
+  detección ni instrumento que las vea; F2-02 Chillán un nivel bajo MIROVA (24 de 38 Moderado mostradas Bajo o Muy
+  Bajo); F5-01 cúmulo parcial en VIIRS 750 y MODIS (36 % modo de un píxel, 64 % selección).
+- Arreglos propuestos en orden en `docs/AUDIT_S155.md` §5; decisiones para Nicolás en §6. El auto-audit del lunes
+  abrirá un issue con 2 flags (Chillán y Tupungatito) que son mezcla de regímenes.
+- Worktrees de la auditoría borrados; quedan `s155-marca` y `s155-auditoria` hasta sus merges. Discos: C: 23 GB, D: 20 GB.
+
 ### 2026-10-19 ~10:55 UTC (vuelta 220, S155): auditoría post-K lanzada (bloque 1 del plan)
 - Pedido de Nicolás: aprovechar el paralelo. Cinco auditores Opus en segundo plano, uno por frente, cada uno en su
   worktree detached sobre `origin/main` `cb90031a` (`D:\vrp-trabajo\worktrees\s155-audit-f1` a `f5`, ~0,94 GB cada uno;
