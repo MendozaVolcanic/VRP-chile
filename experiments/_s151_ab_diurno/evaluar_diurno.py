@@ -107,11 +107,12 @@ def resolver_base(brazos, base):
     raise SystemExit("--brazos %s sin --base: decir explícitamente el detector de base (c0 o k), adenda K §4 H2b" % brazos)
 
 
-def cableado_records(raices, sha):
+def cableado_records(raices, sha, conteo=None):
     """H2a (adenda K §4): el cableado por log no ve un job repetido desde otra referencia (unir_ventana no copia logs).
     Con base K se exige sobre los RECORDS de los dos brazos: ninguno con el Test 1 (triggered_test1 o
     final_hotspot_source = test1_roi; en producción bajo K son 0 de 3.548) y todos con regimen.codigo_sha = el commit
-    del tag de despacho."""
+    del tag de despacho. Una raíz donde un brazo no trae ningún record también es un problema (verificador v2, N-5:
+    antes daba OK sobre nada, igual que sobre todo). `conteo`, si viene, recibe los records leídos por brazo."""
     if not sha:
         # Sin sha no hay contra qué comparar: se informa como problema, no se deja caer (verificador del candado:
         # una mutación que cae no es una mutación atrapada).
@@ -119,14 +120,20 @@ def cableado_records(raices, sha):
     prob = []
     for nombre in ("control", "diurno"):
         for raiz in raices:
+            leidos = 0
             for p in sorted((Path(raiz) / BRAZOS[nombre]).glob("*.json")):
                 recs = json.loads(p.read_text(encoding="utf-8")).get("records", [])
+                leidos += len(recs)
                 t1 = sum(1 for r in recs if r.get("triggered_test1") is True or r.get("final_hotspot_source") == "test1_roi")
                 otro = sum(1 for r in recs if ((r.get("regimen") or {}).get("codigo_sha")) != sha)
                 if t1:
                     prob.append("%s/%s: %d records con el Test 1" % (BRAZOS[nombre], p.stem, t1))
                 if otro:
                     prob.append("%s/%s: %d records con codigo_sha distinto del tag (o sin marca)" % (BRAZOS[nombre], p.stem, otro))
+            if not leidos:
+                prob.append("%s en %s: 0 records (sin directorio o vacío), H2a no tiene qué revisar" % (BRAZOS[nombre], raiz))
+            if conteo is not None:
+                conteo[nombre] = conteo.get(nombre, 0) + leidos
     return prob
 VIIRS = ("VIIRS375", "VIIRS750")
 VENTANAS = [w[0] for w in S.VENTANAS]                                                  # §3
@@ -937,6 +944,10 @@ def evaluar(a):
         a.base = resolver_base(a.brazos.replace(" ", ""), getattr(a, "base", None))
         if a.base == "k" and not getattr(a, "sha_codigo", None):
             raise SystemExit("--base k exige --sha-codigo (commit del tag de despacho), adenda K §4 H2a")
+        if a.base == "k" and not re.fullmatch(r"[0-9a-f]{40}", a.sha_codigo or ""):
+            # Verificador v2, H-5: un sha abreviado hacía que H2a marcara todos los records como de otro commit.
+            raise SystemExit("--sha-codigo %s no es un commit completo: usar git rev-parse <tag>^{commit} (40 caracteres)"
+                             % a.sha_codigo)
         configurar_brazos(control, diurno, a.base)
         print("[brazos] control %s, diurno %s, base %s | regla G1: %s | W2: %s" % (
             control, diurno, a.base, "cola exacta" if REGLA["cola_exacta"] else "p95 muestreado",
@@ -981,7 +992,9 @@ def evaluar(a):
     if p:
         controles.append("los brazos leyeron flags distintos fuera de la palanca")
     if getattr(a, "base", "c0") == "k":
-        p = cableado_records(a.raiz, a.sha_codigo)
+        leidos = {}
+        p = cableado_records(a.raiz, a.sha_codigo, leidos)
+        print("   H2a: %d records del control y %d del diurno leídos" % (leidos.get("control", 0), leidos.get("diurno", 0)))
         print("   records de los dos brazos sin Test 1 y con codigo_sha %s (adenda K §4 H2a): %s"
               % ((a.sha_codigo or "NINGUNO")[:12], "OK" if not p else "ROTO: " + "; ".join(p[:3]) + (" (y %d más)" % (len(p) - 3) if len(p) > 3 else "")))
         if p:
@@ -1101,7 +1114,8 @@ def evaluar(a):
 
     res["controles"] = controles
     res["veredicto"] = veredicto(res, controles)
-    print("\n== VEREDICTO (§6, regla original): %s" % res["veredicto"])
+    # Verificador v2, H-5: con base k decide la adenda K (cola exacta y regla W2), no la regla original.
+    print("\n== VEREDICTO (%s): %s" % ("§6 con la adenda K" if REGLA["cola_exacta"] else "§6, regla original", res["veredicto"]))
     if a.out:
         sal = {k: v for k, v in res.items() if k not in ("cls", "UW", "por_vb_on")}
         sal["clases"] = {"|".join(k): {"ventana": c["ventana"], "pob": sorted(c["pob"]), "estado": c["estado"]} for k, c in sorted(res["cls"].items())}
