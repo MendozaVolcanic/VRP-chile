@@ -407,8 +407,19 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   mismo evaluador; reversión pre-autorizada con `git revert` de #850 si se pierde una protegida A que MIROVA y la
   sombra publican y producción calla (confirmada en la cabecera de la imagen), con issue y aviso a Nicolás el mismo
   día. Hasta 29 protegidas A nocturnas o 120 días.
+- [ ] **1.33 PRIORIDAD (Nicolás, 2026-10-19): déficit de magnitud de Nevados de Chillán en erupción, pasada por
+  pasada.** «Sí, agrega al loop como prioridad el déficit de magnitud de Chillán: revisar pasada por pasada (empezando
+  por VIIRS 750 de las 06:48) y pre-registrar D25 sobre K con Chillán como caso.» Medido el 2026-10-18 (consolidado
+  remoto de Mirova-v1 contra `data/mirova_equivalent/NevadosDeChillan.json`, predicado del tablero con node): de noche
+  las 10 alertas de MIROVA publicadas también por nosotros, todas con K, pero razón de magnitud 0,12 a 0,72 (mediana
+  ~0,46), con «Bajo» donde MIROVA dice «Moderado» en 7 de 10. Peor caso: VIIRS_NOAA21_750 2026-10-18 06:48, 2,84 MW
+  contra 22,85 (0,12). Qué: (a) para cada pasada, descomponer la diferencia en selección (píxeles que suma MIROVA y
+  nosotros no: dETI, piso C1, A103), fondo (anillo regional contra vecinos, D25), recorte a cero y saturación, leyendo
+  el L1B si hace falta (A6, A97, A99 rebajada); empezar por la de las 06:48 en VIIRS 750 y comparar con la de VIIRS 375
+  de la misma pasada (8,93 contra 25,79); (b) verificador limpio; (c) con eso, escribir el pre-registro de D25 sobre K
+  (1.29) con Chillán como caso y criterio de magnitud, para el sello de Nicolás. Sólo lectura hasta el sello (A45).
 - [ ] **1.29 Pre-registro de D25 sobre K** (regla §5): escribir el pre-registro y su verificador. Bloqueo para
-  despachar: el sello de Nicolás.
+  despachar: el sello de Nicolás. **Se alimenta de 1.33** (Chillán como caso, pedido de Nicolás el 2026-10-19).
 - [ ] **1.30 Pre-registro de MxD03 sobre K** (D-19): ídem. Bloqueo para despachar: el sello de Nicolás.
 - [ ] **1.32 A/B diurno sobre K** (del verificador de 1.25, H4). El A/B W2 a W6 corrió sobre C0: de día el Test 1
   dispara en 2.000 de las 2.077 publicaciones de VIIRS 375 en negativos limpios, 987 vienen sólo de `test1_roi`, y 11
@@ -457,6 +468,25 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-19 ~00:45 UTC (vueltas 211-212, S154): candado ampliado (sin commitear); 1.33 Chillán como prioridad
+- Verificador limpio del candado (`experiments/_s151_ab_diurno/verificador_candado_k/INFORME.md`): las cuatro piezas
+  CONFIRMADAS en el código y en el cálculo (la cola exacta reproduce 0,5223 y 0,1058, x_obs 25 y 17), pero pruebas
+  PARCIALES: H-1 (cuatro mutaciones de la ruta K no atrapadas), H-2 (faltaban las pruebas (d) y la mitad de (e)), H-3
+  (el empate no fijaba x_obs), H-4 (`--base c0` con brazos K se aceptaba), H-5 (tag anotado: pasar `tag^{commit}`).
+- Agregado en `loop/diurno-k-candado` (worktree `s153-adopcion`), **SIN COMMITEAR**: casos de punta a punta con
+  `--base k` (k1 ADOPTAR con cola exacta y H2a OK; k2 NO ADOPTAR; k3 y k4 INDECIDIBLE por H2a; sin sha y `--base c0`
+  con brazos K, rechazo); regla W2 armada con `configurar_brazos` y su caso «falla con y sin W2»; colas del muestreo
+  contra las exactas (peor 0,47 de 4 errores estándar); control del nulo que FALLA con el nulo corrido en +1; empate con
+  x_obs y cola exacta; H-4 en `resolver_base`; H2a sin sha devuelve problema en vez de caerse (ESTE último sin probar).
+  Mutaciones re-corridas sobre copias dentro del árbol (borradas): M1 base k sin regla W2 y M4 decidir sin mirar G1 sin
+  W2, atrapadas; M2 H2a apagado, atrapada (punta a punta); M3 `--sha-codigo` opcional, el evaluador SE CAÍA (TypeError),
+  que no cuenta como atrapada (S152): por eso el cambio de H2a sin sha.
+- El clasificador de permisos dejó de responder a mitad de la vuelta: falta correr la prueba de H2a sin sha, repetir
+  M3, batería completa, commit, CI de #858 y merge. Después: tag de despacho (`git rev-parse <tag>^{commit}` para
+  `--sha-codigo`, H-5) y despacho cuando termine 1.24.
+- **1.33 agregada como PRIORIDAD por Nicolás**: déficit de magnitud de Chillán pasada por pasada, empezando por VIIRS
+  750 de las 06:48, y pre-registro de D25 sobre K con Chillán como caso.
 
 ### 2026-10-19 ~00:30 UTC (vueltas 209-210, S154): D-25 SELLADA; candado implementado (#858), en verificación
 - **Nicolás selló la adenda** (D-25): «Sello la adenda del A/B diurno sobre K (D-25) con las dos opciones
