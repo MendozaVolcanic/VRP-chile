@@ -509,6 +509,17 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~22:45 UTC (S157): adenda de D25 sellada (D-27) y #877 mergeado
+- Nicolás: «Sello la adenda de calibración de D25 con el nulo simétrico y la opción A (mejora en al menos dos
+  volcanes). Y mergea #877 con modo estricto en los reprocesos y sin modo estricto en el NRT.»
+- **D-27**: sello registrado en `ADENDA_CALIBRACION.md` sobre `0a91eb634` (rama `s157-prereg-d25`, `e3d88fd2`). Con
+  D-26 el candado de D25 queda completo; falta mergear #871 y despachar desde tag.
+- **#877 mergeado** (`54a085ed`) tras comprobar CLEAN, CI verde y tag `pre-s157-busqueda-ventana`; `Tests` verde
+  sobre `main`. Modo estricto: `--estricto-cobertura` en `reproc-chunked.yml` (2) y en el A/B; `nrt.yml` sin él (0).
+  Merge a las 22:30 UTC, fuera de la ventana del NRT (01:10 a 12:10 UTC). **Vigilar el primer NRT de las 01:10 UTC**
+  con el código nuevo (búsqueda por ventana en producción).
+- Nicolás preguntó si hacen falta tantos días de reproceso para las pruebas (respuesta en el chat).
+
 ### 2026-10-20 ~18:50 UTC (S157): Chillán completo; PR #878 con el JSON rearmado
 - Tercera pasada (run 39467050396): 13 de 13 verdes. Con las dos pasadas de relleno (44 trozos): 478 records
   agregados, 6.396 en total, control contra el tag intacto. **Contra la operacional faltan 6**, todas `nrt` de Suomi
