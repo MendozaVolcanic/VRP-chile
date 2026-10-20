@@ -509,6 +509,18 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 08:40 UTC (S157): la segunda pasada salió VERDE Y VACÍA: CMR de NASA caído
+- Run 39391332259: 31 de 31 trozos verdes en 5 a 11 min cada uno (contra 60 a 76 min con datos). Log: `WARN: Failed
+  to fetch <producto>: {"errors":["An Internal Error has occurred."]}` en los 8 productos. Artefactos: **0 records
+  nuevos** (los 267 que traen son del checkout, ventana del trozo 9). No sirve como relleno: se descarta.
+- CMR comprobado a las 08:36 UTC con la API pública: HTTP 500 en `granules.json` de MOD021KM y VNP02IMG. El NRT
+  escribió por última vez a las 07:50 UTC; sus runs siguen saliendo `success`, así que mientras dure la caída el NRT
+  publica nada sin avisar (mismo modo que A108 y la SOSPECHA de la entrada anterior).
+- Proceso local en segundo plano: prueba CMR cada 10 min (hasta 12 h) y, con dos respuestas 200 seguidas, relanza la
+  segunda pasada (mismos parámetros) y espera su fin. Después: contar records por trozo ANTES de usarla.
+- El JSON de Chillán en `data/_s154_reproc_k_historico/` de `main` quedó pisado por ese merge vacío; no importa
+  (nadie lo lee, el rearmado sale de los artefactos y del tag).
+
 ### 2026-10-20 08:15 UTC (S157): Chillán rearmado, pero los trozos VERDES del original perdieron 316 pasadas
 - B (39363796988) 4 de 4 verdes (60 a 67 min) y el trozo 9 (39370713699) verde en 132 min. Artefactos de los 4 runs
   en `D:\vrp-trabajo\temporales\s157_chillan\` (98 MB).
