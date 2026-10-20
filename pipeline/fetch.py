@@ -465,6 +465,252 @@ def _raise_if_credential_dead(exc: BaseException, where: str) -> None:
     ) from exc
 
 
+# ---------------------------------------------------------------------------
+# S157 — búsqueda por VENTANA y registro de COBERTURA.
+#
+# POR QUÉ (medido en experiments/_s157_busqueda_ventana/MEDICION.md): cada día y
+# plataforma hace dos búsquedas a CMR (L1B y geolocalización), ~590 por trozo de
+# 37 días. Con CMR lento (4 a 7 s por búsqueda) eso fue 45 a 63 % del job; con CMR
+# caído cada búsqueda devolvió HTTP 500, cayó al `except` genérico de
+# fetch_for_volcano y el job salió VERDE sin un solo dato (A108 por otro camino).
+#
+# QUÉ HACE. Con una ventana configurada (run_pipeline la configura con sus fechas),
+# la primera búsqueda de un producto consulta CMR UNA vez por toda la ventana y la
+# reparte por día con la MISMA regla con que CMR responde la consulta de un día:
+# earthaccess 0.17 manda `temporal=(D, D)` como [D 00:00:00Z, D 23:59:59Z]
+# (cmr/queries.py::_format_date) y CMR cruza por traslape con bordes incluidos. La
+# regla de hoy (standard primero, versiones en orden, NRT si el día viene vacío) se
+# conserva por día: cada intento se consulta sólo sobre el tramo de días que los
+# intentos anteriores dejaron vacíos. Donde la equivalencia no es segura (gránulo a
+# menos de 2 s de una medianoche, tiempos ilegibles, 20 o más gránulos en un día,
+# ventana truncada) ese día se consulta como hoy. Si la consulta de la ventana falla
+# dos veces, se vuelve al camino de hoy para el resto del proceso (en el NRT eso
+# acota el costo extra de una caída de CMR a ~2,5 min).
+#
+# NO CAMBIA qué gránulos entran: misma lista, mismo orden, por día. Interruptor:
+# VRP_BUSQUEDA_VENTANA=0 (variable de infraestructura como VRP_CMR_BREAKER, no de
+# método: no va al perfil). Caché en disco opcional para que el segundo brazo de un
+# A/B no vuelva a buscar (scripts/reproc_brazos.py).
+# ---------------------------------------------------------------------------
+_VENTANA: dict | None = None
+_VENTANA_CACHE: dict = {}
+_VENTANA_APAGADA: bool = False
+_VENTANA_COUNT = 2000          # una página de CMR; si se llena, la ventana no se usa
+_VENTANA_ESPERAS_S = [0, 20]   # un intento y un reintento
+_COUNT_POR_DIA = 20            # lo que pide la consulta de un día (search_granules)
+_MARGEN_MEDIANOCHE_S = 2.0
+
+# Cobertura: lo que no se pudo buscar ni bajar, por volcán, día y producto.
+_FALLAS: list = []
+
+
+def reiniciar_ventana() -> None:
+    """Olvida la ventana y su caché en memoria (un proceso nuevo)."""
+    global _VENTANA, _VENTANA_APAGADA
+    _VENTANA = None
+    _VENTANA_CACHE.clear()
+    _VENTANA_APAGADA = False
+
+
+def configurar_ventana(fechas, cache_dir=None, ventana=None) -> bool:
+    """Activa la búsqueda por ventana. `ventana=(ini, fin)` en 'YYYY-MM-DD' la fija
+    (un brazo que corre un solo día dentro de la ventana del A/B); si no, va de la
+    primera a la última de `fechas`. Devuelve False si el interruptor la apaga."""
+    global _VENTANA
+    if os.environ.get("VRP_BUSQUEDA_VENTANA", "1") == "0":
+        _VENTANA = None
+        return False
+    if ventana:
+        ini, fin = ventana
+    else:
+        fechas = list(fechas)
+        if not fechas:
+            _VENTANA = None
+            return False
+        ini, fin = min(fechas).strftime("%Y-%m-%d"), max(fechas).strftime("%Y-%m-%d")
+    d, d_fin = datetime.strptime(ini, "%Y-%m-%d"), datetime.strptime(fin, "%Y-%m-%d")
+    dias = []
+    while d <= d_fin:
+        dias.append(d.strftime("%Y-%m-%d"))
+        d += timedelta(days=1)
+    _VENTANA = {"ini": ini, "fin": fin, "dias": dias,
+                "cache_dir": Path(cache_dir) if cache_dir else None}
+    return True
+
+
+def _intentos(product_key: str) -> list[tuple[str, str]]:
+    """(short_name, versión) en el orden en que se consultan: standard y sus
+    versiones primero, después NRT (LANCE). S12."""
+    p = PRODUCTS[product_key]
+    out = [(p["short_name"], v) for v in
+           (p["versions"] if isinstance(p.get("versions"), list) else [p["version"]])]
+    if "nrt" in p:
+        nrt = p["nrt"]
+        out += [(nrt["short_name"], v) for v in
+                (nrt["versions"] if isinstance(nrt.get("versions"), list) else [nrt["version"]])]
+    return out
+
+
+def _parse_cmr(s: str) -> datetime:
+    return datetime.fromisoformat(str(s).replace("Z", "+00:00")).replace(tzinfo=None)
+
+
+def _repartir_por_dia(granulos: list, dias: list[str]) -> dict:
+    """Reparte por día los gránulos de una consulta de ventana con la regla de CMR
+    para `temporal=(D, D)`: entra el gránulo cuyo [inicio, fin] toca
+    [D 00:00:00, D 23:59:59], bordes incluidos. `None` = ese día se consulta como
+    hoy (equivalencia no asegurada)."""
+    out: dict = {d: [] for d in dias}
+    lim = {d: (datetime.strptime(d, "%Y-%m-%d"),
+               datetime.strptime(d, "%Y-%m-%d") + timedelta(hours=23, minutes=59, seconds=59))
+           for d in dias}
+    for g in granulos:
+        try:
+            rd = g["umm"]["TemporalExtent"]["RangeDateTime"]
+            ini, fin = _parse_cmr(rd["BeginningDateTime"]), _parse_cmr(rd["EndingDateTime"])
+        except (KeyError, TypeError, ValueError):
+            return {d: None for d in dias}
+        # Cerca de una medianoche la regla depende de milisegundos y de cómo CMR
+        # compara los bordes: esos dos días se consultan como hoy.
+        for t in (ini, fin):
+            m = datetime(t.year, t.month, t.day) + (timedelta(days=1) if t.hour >= 12 else timedelta(0))
+            if abs((t - m).total_seconds()) <= _MARGEN_MEDIANOCHE_S:
+                for dd in ((m - timedelta(days=1)).strftime("%Y-%m-%d"), m.strftime("%Y-%m-%d")):
+                    if dd in out:
+                        out[dd] = None
+        for d in dias:
+            if out[d] is not None and ini <= lim[d][1] and fin >= lim[d][0]:
+                out[d].append(g)
+    for d in dias:
+        if out[d] is not None and len(out[d]) >= _COUNT_POR_DIA:
+            out[d] = None
+    return out
+
+
+def _consultar_ventana(product_key, short_name, version, bbox, lo, hi) -> list:
+    import time
+    ultimo = None
+    for k, espera in enumerate(_VENTANA_ESPERAS_S):
+        if espera:
+            time.sleep(espera)
+        t0 = time.time()
+        try:
+            res = earthaccess.search_data(short_name=short_name, version=version,
+                                          bounding_box=bbox, temporal=(lo, hi),
+                                          count=_VENTANA_COUNT)
+            _diag(f"SEARCH_VENTANA [{product_key}] {short_name} v{version} {lo}..{hi} "
+                  f"n={len(res)} elapsed={time.time()-t0:.1f}s")
+            return res
+        except Exception as e:
+            _raise_if_credential_dead(e, f"search-ventana:{product_key}")
+            ultimo = e
+            _diag(f"SEARCH_VENTANA_ERR intento={k} [{product_key}] "
+                  f"err={type(e).__name__}: {str(e)[:90]}")
+    raise ultimo
+
+
+def _buscar_ventana(product_key: str, bbox: tuple, dias: list[str]) -> dict:
+    """{día: lista | None} para toda la ventana, con la regla standard → NRT por día."""
+    pendientes = list(dias)
+    resultado: dict = {}
+    for short_name, version in _intentos(product_key):
+        if not pendientes:
+            break
+        res = _consultar_ventana(product_key, short_name, version, bbox,
+                                 pendientes[0], pendientes[-1])
+        if len(res) >= _VENTANA_COUNT:  # truncada: no se puede repartir con certeza
+            _diag(f"SEARCH_VENTANA_TRUNCADA [{product_key}] -> por día")
+            return {d: None for d in dias}
+        por_dia = _repartir_por_dia(res, pendientes)
+        siguen = []
+        for d in pendientes:
+            if por_dia[d] is None or por_dia[d]:
+                resultado[d] = por_dia[d]
+            else:
+                siguen.append(d)
+        pendientes = siguen
+    for d in pendientes:
+        resultado[d] = []
+    return resultado
+
+
+def _archivo_cache(key) -> Path | None:
+    if not (_VENTANA and _VENTANA["cache_dir"]):
+        return None
+    import hashlib
+    product_key, bbox, ini, fin = key
+    h = hashlib.sha1(repr(tuple(round(x, 6) for x in bbox)).encode()).hexdigest()[:12]
+    return _VENTANA["cache_dir"] / f"{product_key}_{h}_{ini}_{fin}.json"
+
+
+def _cargar_cache(key):
+    ruta = _archivo_cache(key)
+    if ruta is None or not ruta.exists():
+        return None
+    import json
+    from earthaccess.results import DataGranule
+    with open(ruta, encoding="utf-8") as fh:
+        crudo = json.load(fh)
+    return {d: (None if v is None else
+                [DataGranule(x["granulo"], cloud_hosted=x["cloud_hosted"]) for x in v])
+            for d, v in crudo["dias"].items()}
+
+
+def _guardar_cache(key, por_dia) -> None:
+    ruta = _archivo_cache(key)
+    if ruta is None:
+        return
+    import json
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    crudo = {"producto": key[0], "bbox": list(key[1]), "ini": key[2], "fin": key[3],
+             "dias": {d: (None if v is None else
+                          [{"granulo": dict(g), "cloud_hosted": bool(getattr(g, "cloud_hosted", False))}
+                           for g in v])
+                      for d, v in por_dia.items()}}
+    tmp = ruta.with_suffix(".tmp")
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump(crudo, fh)
+    os.replace(tmp, ruta)
+
+
+def _desde_ventana(product_key: str, bbox: tuple, dia: str):
+    """Lista del día servida desde la ventana, o None para consultar como hoy."""
+    global _VENTANA_APAGADA
+    if _VENTANA is None or _VENTANA_APAGADA or not (_VENTANA["ini"] <= dia <= _VENTANA["fin"]):
+        return None
+    key = (product_key, bbox, _VENTANA["ini"], _VENTANA["fin"])
+    if key not in _VENTANA_CACHE:
+        por_dia = _cargar_cache(key)
+        if por_dia is None:
+            try:
+                por_dia = _buscar_ventana(product_key, bbox, _VENTANA["dias"])
+            except EarthdataCredentialError:
+                raise
+            except Exception as e:
+                _VENTANA_APAGADA = True
+                _diag(f"SEARCH_VENTANA_OFF [{product_key}] -> búsqueda por día el resto del "
+                      f"proceso err={type(e).__name__}: {str(e)[:90]}")
+                return None
+            _guardar_cache(key, por_dia)
+        _VENTANA_CACHE[key] = por_dia
+    lista = _VENTANA_CACHE[key].get(dia)
+    return None if lista is None else list(lista)
+
+
+def _registrar_falla(producto, fecha, motivo, etapa="busqueda", plataforma=None) -> None:
+    _FALLAS.append({"volcan": None, "fecha": fecha, "plataforma": plataforma,
+                    "producto": producto, "etapa": etapa, "motivo": str(motivo)[:200]})
+
+
+def fallas_de_cobertura() -> list[dict]:
+    """Búsquedas y descargas que no se pudieron hacer desde el último limpiar_fallas()."""
+    return [dict(f) for f in _FALLAS]
+
+
+def limpiar_fallas() -> None:
+    _FALLAS.clear()
+
+
 def search_granules(product_key: str, lat: float, lon: float,
                     radius_km: float, date: datetime) -> list:
     """
@@ -475,62 +721,62 @@ def search_granules(product_key: str, lat: float, lon: float,
     S116 circuit-breaker (incidente Copahue): si CMR (`cmr.earthdata.nasa.gov`)
     ya dio Timeout/ConnectionError en esta corrida, devuelve [] al instante (no
     quema otro ReadTimeout de 60s por cada sensor restante). Ver bloque arriba.
+
+    S157: con una ventana configurada la lista sale de la consulta de la ventana
+    (misma lista que la consulta de un día); un día ya resuelto se sirve aunque el
+    breaker esté encendido. Cada degradación a [] por falla queda en la cobertura.
     """
     global _CMR_SEARCH_DOWN
-    # Breaker CMR-search: si ya tripeó en esta corrida, fast-fail (degrada a []).
-    if ENABLE_CMR_SEARCH_BREAKER and _CMR_SEARCH_DOWN:
-        _diag(f"SEARCH_SKIP CMR degradada esta corrida [{product_key}]")
-        return []
-
     p = PRODUCTS[product_key]
     # Bounding box from radius (rough approximation: 1 degree lat ~ 111 km)
     delta = radius_km / 111.0
     bbox = (lon - delta, lat - delta, lon + delta, lat + delta)
     date_str = date.strftime("%Y-%m-%d")
 
+    desde_ventana = _desde_ventana(product_key, bbox, date_str)
+    if desde_ventana is not None:
+        return desde_ventana
+
+    # Breaker CMR-search: si ya tripeó en esta corrida, fast-fail (degrada a []).
+    if ENABLE_CMR_SEARCH_BREAKER and _CMR_SEARCH_DOWN:
+        _diag(f"SEARCH_SKIP CMR degradada esta corrida [{product_key}]")
+        _registrar_falla(product_key, date_str, "SEARCH_SKIP: CMR degradada esta corrida")
+        return []
+
     # S12: try STANDARD (calibrated, permanent) first, then NRT (LANCE, ~3h
     # latency but only kept ~7-14 days). This closes the 3-5 day gap we
     # previously had whenever the standard product hadn't been published yet.
-    attempts = [{
-        "short_name": p["short_name"],
-        "versions": p["versions"] if isinstance(p.get("versions"), list) else [p["version"]],
-    }]
-    if "nrt" in p:
-        nrt = p["nrt"]
-        attempts.append({
-            "short_name": nrt["short_name"],
-            "versions": nrt["versions"] if isinstance(nrt.get("versions"), list) else [nrt["version"]],
-        })
-
-    for attempt in attempts:
-        for ver in attempt["versions"]:
-            try:
-                results = earthaccess.search_data(
-                    short_name=attempt["short_name"],
-                    version=ver,
-                    bounding_box=bbox,
-                    temporal=(date_str, date_str),
-                    count=20,
-                )
-            except _CMR_SEARCH_ERRORS as e:
-                # S116: CMR caído/lento → tripear el breaker para la corrida y
-                # degradar a [] (no reintentar versiones ni quemar 60s × sensores).
-                if ENABLE_CMR_SEARCH_BREAKER:
-                    _CMR_SEARCH_DOWN = True
-                    _diag(f"SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON "
-                          f"esta corrida [{product_key}] err={type(e).__name__}: {str(e)[:90]}")
-                    return []
-                raise  # breaker OFF → comportamiento previo (propaga)
-            except Exception as e:
-                # S123: acá llega el rechazo de credencial (earthaccess lo
-                # envuelve en RuntimeError, así que no cae en el except de
-                # arriba — y está bien que no caiga: no debe tripear el breaker
-                # de red). Si es la credencial, aborta; cualquier otra cosa
-                # sigue propagando como antes.
-                _raise_if_credential_dead(e, f"search:{product_key}")
-                raise
-            if results:
-                return results
+    # S157: el orden vive en _intentos(), que comparte la búsqueda por ventana.
+    for short_name, ver in _intentos(product_key):
+        try:
+            results = earthaccess.search_data(
+                short_name=short_name,
+                version=ver,
+                bounding_box=bbox,
+                temporal=(date_str, date_str),
+                count=_COUNT_POR_DIA,
+            )
+        except _CMR_SEARCH_ERRORS as e:
+            # S116: CMR caído/lento → tripear el breaker para la corrida y
+            # degradar a [] (no reintentar versiones ni quemar 60s × sensores).
+            if ENABLE_CMR_SEARCH_BREAKER:
+                _CMR_SEARCH_DOWN = True
+                _diag(f"SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON "
+                      f"esta corrida [{product_key}] err={type(e).__name__}: {str(e)[:90]}")
+                _registrar_falla(product_key, date_str,
+                                 f"SEARCH_CMR_TIMEOUT: {type(e).__name__}: {str(e)[:120]}")
+                return []
+            raise  # breaker OFF → comportamiento previo (propaga)
+        except Exception as e:
+            # S123: acá llega el rechazo de credencial (earthaccess lo
+            # envuelve en RuntimeError, así que no cae en el except de
+            # arriba — y está bien que no caiga: no debe tripear el breaker
+            # de red). Si es la credencial, aborta; cualquier otra cosa
+            # sigue propagando como antes.
+            _raise_if_credential_dead(e, f"search:{product_key}")
+            raise
+        if results:
+            return results
     return []
 
 
@@ -808,7 +1054,12 @@ def fetch_for_volcano(volcano: dict, date: datetime,
     if skip_noaa20:
         all_platforms = [(p, l, g) for p, l, g in all_platforms if "NOAA20" not in p]
 
+    fecha_str = date.strftime("%Y-%m-%d")
     for platform, l1b_key, geo_key in all_platforms:
+        # S157: lo que no se pudo buscar ni bajar queda en la cobertura con volcán,
+        # día y plataforma (antes era un WARN y el job salía verde, MEDICION.md §3).
+        n_fallas_antes = len(_FALLAS)
+        etapa, producto = "busqueda", l1b_key
         try:
             _diag(f"SEARCH_START {platform}")
             l1b_granules = search_granules(l1b_key, lat, lon, radius, date)
@@ -835,8 +1086,11 @@ def fetch_for_volcano(volcano: dict, date: datetime,
                 if not l1b_granules:
                     continue
 
+            producto = geo_key
             geo_granules = search_granules(geo_key, lat, lon, radius, date)
+            _diag(f"SEARCH_GEO_DONE {platform} n_geo={len(geo_granules)}")
             matched = _match_granules(l1b_granules, geo_granules)
+            etapa, producto = "descarga", l1b_key
             platform_dir = tmp_dir / platform
             paths = []
             for l1b_g, geo_g in matched:
@@ -852,6 +1106,10 @@ def fetch_for_volcano(volcano: dict, date: datetime,
         except Exception as e:
             print(f"  WARN: Failed to fetch {platform}: {e}")
             results[platform] = []
+            _registrar_falla(producto, fecha_str, f"{type(e).__name__}: {str(e)[:150]}", etapa=etapa)
+        for f in _FALLAS[n_fallas_antes:]:
+            f["volcan"] = volcano.get("name", "?")
+            f["plataforma"] = f["plataforma"] or platform
 
     _resumen_hosts_caidos(volcano.get("name", "?"))  # S140 8d
     return results
