@@ -509,6 +509,15 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~11:40 UTC (S157): #872 mergeado con el flag apagado (sí de Nicolás)
+- Nicolás: «Sí: mergea #872 con el flag apagado. El encendido lo decido después.» Squash `5fd2ac2e` por la API, tras
+  comprobar CLEAN, CI verde y `enable_modis_mir_lambda_por_banda: false` en la rama. Tag defensivo
+  `pre-s157-lambda-b22` (`f101d730`) ya estaba puesto por la sesión.
+- Verificado sobre `5fd2ac2e`: `VRP_PROFILE=mirova_equivalent python -c "import pipeline.profile as p; ..."` da
+  `ENABLE_MODIS_MIR_LAMBDA_POR_BANDA = False` (A89); `Tests` y Pages verdes. Worktree de la sesión borrado.
+- Pendiente de Nicolás: encender el flag (efecto medido: magnitud MODIS +5,75 % mediana; contra MIROVA, 12 pasadas
+  con K, razón 0,362 a 0,382). Al encenderlo: R8 y reproceso de la ventana con K para que la serie no mezcle dos λ.
+
 ### 2026-10-20 11:15 UTC (S157): #872 (λ de B22) y #871 (pre-registro D25) listos; CMR sigue caído
 - **#872** (borrador, CI `pytest` verde, CLEAN): con K la vuelta a radiancia de MODIS usaba la λ de B21 (3,929 µm)
   sobre temperaturas de B22 (3,959 µm); magnitud MODIS 1,051 a 1,075 veces más baja (mediana 1,0575, 24 records
