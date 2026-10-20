@@ -106,6 +106,8 @@ def contar(recs, inner, clave):
             c[k]["pA"] += r["prot_A"]
             c[k]["pA_pub"] += r["prot_A"] and r["pub"]
             c[k]["pA_pub_1MW"] += r["prot_A"] and r["pub"] and (r.get("disp") or 0) >= 1
+            # Verificador H6: las que descansan sólo en el OCR de Suomi NPP antes del 2026-10-09 no deciden (lectura A).
+            c[k]["pA_pub_dec"] += r["prot_A"] and r["pub"] and not r["prot_A_solo_ocr_snpp"]
             c[k]["MB"] += not r["prot_A"]
             c[k]["MB_pub"] += (not r["prot_A"]) and r["pub"]
             c[k]["resc_pos"] += rescatable(r, inner)
@@ -120,13 +122,13 @@ def contar(recs, inner, clave):
 
 def imprimir(c, razones, claves, titulo):
     print("\n== " + titulo)
-    print("   %-26s %6s %5s | %4s %5s %6s | %5s %5s | %5s %5s | %6s %6s | %4s %6s" % (
-        "", "pasad", "alert", "pA", "pApub", "pA>=1", "MB", "MBpub", "negl", "negpu", "rescN", "rescP", "nR", "R_med"))
+    print("   %-26s %6s %5s | %4s %5s %5s %6s | %5s %5s | %5s %5s | %6s %6s | %4s %6s" % (
+        "", "pasad", "alert", "pA", "pApub", "pAdec", "pA>=1", "MB", "MBpub", "negl", "negpu", "rescN", "rescP", "nR", "R_med"))
     for k in claves:
         x = c.get(k, collections.Counter())
         rr = razones.get(k, [])
-        print("   %-26s %6d %5d | %4d %5d %6d | %5d %5d | %5d %5d | %6d %6d | %4d %6s" % (
-            "|".join(k), x["pasadas"], x["alertas"], x["pA"], x["pA_pub"], x["pA_pub_1MW"], x["MB"], x["MB_pub"],
+        print("   %-26s %6d %5d | %4d %5d %5d %6d | %5d %5d | %5d %5d | %6d %6d | %4d %6s" % (
+            "|".join(k), x["pasadas"], x["alertas"], x["pA"], x["pA_pub"], x["pA_pub_dec"], x["pA_pub_1MW"], x["MB"], x["MB_pub"],
             x["neg"], x["neg_pub"], x["resc_neg"], x["resc_pos"], len(rr),
             ("%.3f" % statistics.median(rr)) if rr else "-"))
 
@@ -160,7 +162,9 @@ def una_ventana(nombre, desde, hasta, ref, solo_tabla, datos):
     p_real, p_3 = sum(r["lab"] == "pos" for r in recs), sum(r["lab"] == "pos" for r in recs3)
     ok3 = p_real > 0 and p_3 <= 0.25 * p_real
     print("== C3. alertas pareadas %d, con la referencia corrida 7 días %d | %s" % (p_real, p_3, "OK" if ok3 else "FALLA"))
-    leyenda = ("pA protegidas A; pApub las que K publica; pA>=1 las que K publica con 1 MW o más (veto de cruce); MB alertas "
+    leyenda = ("conteos con la regla ORIGINAL de alertas mínimas (la SN de D-9 la aplica el evaluador); pA protegidas A; "
+               "pApub las que K publica; pAdec las que K publica sin las que descansan sólo en OCR de Suomi NPP (las que "
+               "DECIDEN con la lectura A); pA>=1 las que K publica con 1 MW o más (veto de cruce); MB alertas "
                "bajo 1 MW; negl negativos limpios; rescN/rescP cúmulos del cráter en 0,0 MW que K no publica, en negativos y "
                "en alertas (lo que D25 puede ENCENDER); nR y R_med: pares publicados con VRP de MIROVA y su razón mediana")
     for f, nom, claves in ((lambda r: (r["b"],), "POR SENSOR", [(s,) for s in SENS]),
@@ -178,7 +182,8 @@ def una_ventana(nombre, desde, hasta, ref, solo_tabla, datos):
     print("\n== PODER DEL VETO (cero pérdidas de protegidas A que K publica), por sensor")
     c, _ = contar(recs, inner, lambda r: (r["b"],))
     for s in SENS:
-        print("   %-8s %s" % (s, fk.poder(c[(s,)]["pA_pub"])))
+        print("   %-8s todas las que K publica: %s" % (s, fk.poder(c[(s,)]["pA_pub"])))
+        print("   %-8s las que deciden (sin OCR de Suomi NPP): %s" % (s, fk.poder(c[(s,)]["pA_pub_dec"])))
     return ok3
 
 

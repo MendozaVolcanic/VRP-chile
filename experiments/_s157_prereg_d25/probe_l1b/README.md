@@ -20,7 +20,11 @@ Ver el docstring de `probe_chillan.py`. Por gránulo, en el mismo proceso: contr
 encendido con el fondo de hoy), D25 con ventana hasta 7x7 (`h3`, el valor del perfil) y sólo 8 vecinos (`h1`). En
 MODIS no hay flag D25 (PREREGISTRO.md §2): se usa el camino opt-in del kernel local que ya existe en
 `process_modis`, con la media de temperatura en 3x3 (`kernel3`) y con un envoltorio que promedia radiancia como D25
-(`d25_rad`). Y el diagnóstico de selección sobre los vecinos 8-conexos no alertados del cúmulo publicado.
+(`d25_rad`). Y el diagnóstico de selección sobre los vecinos 8-conexos no alertados del cúmulo publicado, con el dNTI,
+el dETI y los umbrales del primer pase y del segundo (con K el segundo pase corre sin condicionar, sin compuerta de
+temperatura y con los activos fuera de la media: es la etapa que decide; hallazgo H11 del verificador del
+pre-registro). `prueba_probe.py` compara la reconstrucción del segundo pase con `second_pass_adjacent` en 20 escenas
+sintéticas: 60 píxeles nuevos, 0 discrepancias; reconstruyendo con `min` en lugar de `max`, 1.867.
 
 ## Controles (fijados antes)
 
@@ -56,3 +60,10 @@ criterio de magnitud del pre-registro (`../PREREGISTRO.md`) y la decisión entre
 python experiments/_s157_prereg_d25/probe_l1b/prueba_probe.py            # prueba sintética, sin red
 python experiments/_s157_prereg_d25/probe_l1b/analizar_probe.py resultado  # lee los JSON del artefacto
 ```
+
+## Resultado
+
+Pendiente. Primer intento, run 39408156347 (2026-10-20 10:29 UTC): los 10 gránulos fallaron en la búsqueda con
+`{"errors":["An Internal Error has occurred."]}` de CMR (HTTP 500, el mismo corte que dejó vacía la segunda pasada del
+reproceso de Chillán); el script salió con código 2 y el job quedó rojo, no verde vacío (S141). Se relanza al volver
+CMR, con el código que ya trae el segundo pase.

@@ -116,8 +116,11 @@ def main():
             print("%-17s %4s | sin diagnóstico: %s" % (p["sensor"], p["hhmm"], sel.get("error")))
             continue
         tib = [v for v in sel["vecinos"] if v["vrp_si_se_sumara_anillo_mw"] > 0]
+        # Motivo de rechazo en la etapa que decide con K, el segundo pase (verificador H11); sin sus columnas, primer pase.
         motivos = collections.Counter(
-            "+".join(n for n, ok in (("T2", v["pasa_t2"]), ("T3", v["pasa_t3"]), ("BT", v["pasa_bt"])) if not ok) or "pasa_todo"
+            ("2do:" + ("+".join(n for n, ok in (("T2", v["sp_pasa_t2"]), ("T3", v["sp_pasa_t3"])) if not ok) or "pasa"))
+            if "sp_pasa_t2" in v else
+            ("1ro:" + ("+".join(n for n, ok in (("T2", v["pasa_t2"]), ("T3", v["pasa_t3"]), ("BT", v["pasa_bt"])) if not ok) or "pasa"))
             for v in tib)
         falta = (p["M"] - x["disp"]) if (p["M"] and x.get("disp") is not None) else None
         print("%-17s %4s | %5d %6d | %6.2f %6s | %s" % (p["sensor"], p["hhmm"], sel["n_cumulo"], len(sel["vecinos"]),

@@ -23,8 +23,10 @@ QUÉ CORRE, por gránulo, en el mismo proceso y sobre el mismo archivo (sólo ca
               7x7 (la misma función que D25 usa en VIIRS), devuelta como temperatura a la longitud de onda con que
               process_modis vuelve a radiancia. Es el análogo de D25 en MODIS SIN tocar pipeline/.
 DIAGNÓSTICO DE SELECCIÓN (en d25_h3 y d25_rad): para cada vecino 8-conexo NO alertado del cúmulo publicado, su BT,
-su dNTI y su dETI del primer pase, los umbrales que tenía (conectiva `max` de K, summit o escena según la
-distancia), qué prueba lo dejó afuera y cuánta potencia agregaría si se sumara restando el anillo. Eso acota la
+su dNTI y su dETI del PRIMER pase (columnas sin prefijo: `pasa_t2`, `pasa_t3`, `pasa_bt`) y del SEGUNDO pase (prefijo
+`sp_`; con K corre sin condicionar, sin compuerta de temperatura y con los activos fuera de la media, así que es la
+etapa que decide; verificador H11), los umbrales que tenía (conectiva `max` de K, summit o escena), qué prueba lo dejó
+afuera y cuánta potencia agregaría si se sumara restando el anillo. Eso acota la
 selección: «si MIROVA sumara todos los vecinos del cúmulo, a lo más esto».
 
 CONTROLES (fijados antes de correr):
@@ -111,7 +113,7 @@ ESTADO: dict = {}
 
 def _reiniciar(brazo):
     ESTADO.clear()
-    ESTADO.update({"brazo": brazo, "fondo": [], "first_pass": None, "cumulos": None, "areas": None})
+    ESTADO.update({"brazo": brazo, "fondo": [], "first_pass": None, "second_pass": None, "cumulos": None, "areas": None})
 
 
 def _capturar_first_pass(real):
@@ -127,6 +129,44 @@ def _capturar_first_pass(real):
                                     "eti": None if diag.get("eti") is None else np.array(diag["eti"], dtype=np.float64)}
         return hot, diag
     return env
+
+
+def _capturar_second_pass(real):
+    """Verificador H11: con K el segundo pase corre sin condicionar sobre toda la escena y es la etapa que decide si
+    un vecino entra; recalcula dNTI y dETI SIN los activos en la media. Se guarda su entrada para reconstruirlo."""
+    def env(nti, eti, active_mask, **kw):
+        out = real(nti, eti, active_mask, **kw)
+        if ESTADO.get("second_pass") is None:
+            ESTADO["second_pass"] = {"nti": np.array(nti, dtype=np.float64), "eti": np.array(eti, dtype=np.float64),
+                                     "active": np.array(active_mask, dtype=bool),
+                                     "is_summit": None if kw.get("is_summit") is None else np.array(kw["is_summit"], dtype=bool),
+                                     "kw": {k: v for k, v in kw.items() if not isinstance(v, np.ndarray)},
+                                     "out": np.array(out, dtype=bool)}
+        return out
+    return env
+
+
+def segundo_pase_por_pixel(sp):
+    """Reconstruye dNTI, dETI y umbrales del segundo pase como detection_context.second_pass_adjacent."""
+    if sp is None:
+        return None
+    act = sp["active"]
+    dnti = sp["nti"] - dc._nanmean_8neighbors_fast(np.where(act, np.nan, sp["nti"]))
+    deti = sp["eti"] - dc._nanmean_8neighbors_fast(np.where(act, np.nan, sp["eti"]))
+    bg = (~act) & np.isfinite(dnti) & np.isfinite(deti)
+    if int(np.count_nonzero(bg)) < sp["kw"].get("min_bg_pixels", 10):
+        return None
+    mu_n, sd_n, mu_e, sd_e = (float(np.mean(dnti[bg])), float(np.std(dnti[bg])), float(np.mean(deti[bg])),
+                              float(np.std(deti[bg])))
+    kw = sp["kw"]
+    comb = max if kw.get("use_prose_branch") else min
+    dual = sp["is_summit"] is not None and kw.get("c1_dnti_scene") is not None
+
+    def thr(summit):
+        if dual and not summit:
+            return comb(kw["c1_dnti_scene"], mu_n + kw["c2_dnti_scene"] * sd_n), comb(kw["c1_deti_scene"], mu_e + kw["c2_deti_scene"] * sd_e)
+        return comb(kw["c1_dnti"], mu_n + kw["c2_dnti"] * sd_n), comb(kw["c1_deti"], mu_e + kw["c2_deti"] * sd_e)
+    return {"dnti": dnti, "deti": deti, "thr": thr, "is_summit": sp["is_summit"], "out": sp["out"]}
 
 
 def _capturar_cumulos(real):
@@ -222,12 +262,14 @@ def instalar(familia):
         pvm.vrp_bg_neighbor_mean_v750 = _fondo_viirs(pvm.vrp_bg_neighbor_mean_v750, pvm.M13_LAMBDA)
         for m in mods.values():
             m.first_pass_tests_2_and_3 = _capturar_first_pass(m.first_pass_tests_2_and_3)
+            m.second_pass_adjacent = _capturar_second_pass(m.second_pass_adjacent)
             m.cluster_hotspots = _capturar_cumulos(m.cluster_hotspots)
             m.resolve_viirs_pixel_areas = _capturar_areas(m.resolve_viirs_pixel_areas)
         return mods
     import pipeline.process_modis as pm
     pm.compute_local_background = _fondo_modis(pm.compute_local_background, pm)
     pm.first_pass_tests_2_and_3 = _capturar_first_pass(pm.first_pass_tests_2_and_3)
+    pm.second_pass_adjacent = _capturar_second_pass(pm.second_pass_adjacent)
     pm.cluster_hotspots = _capturar_cumulos(pm.cluster_hotspots)
     pm.modis_pixel_areas = _capturar_areas(pm.modis_pixel_areas)
     return {"modis": pm}
@@ -262,6 +304,7 @@ def vecinos_no_alertados(fp, cum, fondo, k_area, lam_planck, inner_km):
     summit_mask = dc.roi1_summit_mask(fp["dist"], kw.get("inner_km", inner_km), roi1)
     t_bg = fp["t_bg"]
     L_ring = float(lam_planck(np.array([t_bg]))[0])
+    sp2 = segundo_pase_por_pixel(ESTADO.get("second_pass"))
     filas, vistos = [], set()
     for (i, j) in cum["c0"]:
         for di in (-1, 0, 1):
@@ -274,7 +317,15 @@ def vecinos_no_alertados(fp, cum, fondo, k_area, lam_planck, inner_km):
                     continue
                 thn, the = umbrales(bool(summit_mask[a, b]))
                 L_n = float(lam_planck(np.array([bt[a, b]]))[0]) if np.isfinite(bt[a, b]) else float("nan")
-                filas.append({"ij": [a, b], "bt_k": round(float(bt[a, b]), 3), "dist_km": round(float(fp["dist"][a, b]), 3),
+                sp_col = {}
+                if sp2 is not None and sp2["dnti"].shape == hot.shape:
+                    sm = bool(sp2["is_summit"][a, b]) if sp2["is_summit"] is not None else True
+                    tn2, te2 = sp2["thr"](sm)
+                    sp_col = {"sp_dnti": float(sp2["dnti"][a, b]), "sp_deti": float(sp2["deti"][a, b]),
+                              "sp_thr_dnti": float(tn2), "sp_thr_deti": float(te2),
+                              "sp_pasa_t2": bool(sp2["dnti"][a, b] > tn2), "sp_pasa_t3": bool(sp2["deti"][a, b] > te2),
+                              "sp_activo": bool(sp2["out"][a, b])}
+                filas.append({**sp_col, "ij": [a, b], "bt_k": round(float(bt[a, b]), 3), "dist_km": round(float(fp["dist"][a, b]), 3),
                               "summit": bool(summit_mask[a, b]), "dnti": float(dnti[a, b]), "deti": float(deti[a, b]),
                               "thr_dnti": float(thn), "thr_deti": float(the),
                               "pasa_t2": bool(dnti[a, b] > thn), "pasa_t3": bool(deti[a, b] > the),

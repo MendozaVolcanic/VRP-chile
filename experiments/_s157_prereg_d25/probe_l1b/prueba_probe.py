@@ -55,6 +55,42 @@ out2 = pc.vecinos_no_alertados(fp, {"hot": hot2, "c0": [(4, 4), (4, 5)]}, [], 25
 if any(tuple(f["ij"]) == (4, 5) for f in out2["vecinos"]):
     fallas.append("un píxel alertado aparece como vecino no alertado")
 
+# 5. La reconstrucción del segundo pase (verificador H11) da los mismos píxeles nuevos que el real, con `max` y dual.
+import pipeline.detection_context as dc  # noqa: E402
+rng = np.random.default_rng(157)
+disc = nuevos = 0
+for _ in range(20):
+    nti = rng.normal(-0.9, 0.01, (40, 40))
+    eti = rng.normal(0.0, 0.01, (40, 40))
+    for _f in range(3):
+        i, j = rng.integers(3, 37, 2)
+        nti[i, j] += 0.3
+        eti[i, j] += 0.3
+        nti[i, j + 1] += 0.15
+        eti[i, j + 1] += 0.15
+    act = np.zeros((40, 40), bool)
+    act[np.argsort(nti, axis=None)[-3:] // 40, np.argsort(nti, axis=None)[-3:] % 40] = True
+    summit = np.zeros((40, 40), bool)
+    summit[10:30, 10:30] = True
+    kw = dict(c1_dnti=0.003, c1_deti=0.003, c2_dnti=5, c2_deti=5, is_summit=summit, c1_dnti_scene=0.01,
+              c1_deti_scene=0.01, c2_dnti_scene=10, c2_deti_scene=10, min_bg_pixels=10, conditioned=False,
+              use_prose_branch=True)
+    real = dc.second_pass_adjacent(nti, eti, act, **kw)
+    sp = pc.segundo_pase_por_pixel({"nti": nti, "eti": eti, "active": act, "is_summit": summit,
+                                    "kw": {k: v for k, v in kw.items() if k != "is_summit"}, "out": real})
+    for a in range(40):
+        for b in range(40):
+            if act[a, b]:
+                continue
+            tn, te = sp["thr"](bool(summit[a, b]))
+            nuevo = bool(sp["dnti"][a, b] > tn and sp["deti"][a, b] > te)
+            disc += nuevo != bool(real[a, b])
+            nuevos += bool(real[a, b])
+if disc:
+    fallas.append("segundo pase reconstruido: %d discrepancias con second_pass_adjacent" % disc)
+if nuevos == 0:   # sin píxeles nuevos la comparación no puede fallar (A116)
+    fallas.append("la escena sintética del segundo pase no produce ningún píxel nuevo")
+print("segundo pase: %d píxeles nuevos reales, %d discrepancias" % (nuevos, disc))
 if "--modis" in sys.argv:
     import pipeline.process_modis as pm
     lam = pm.BAND21_LAMBDA
