@@ -142,6 +142,16 @@ def f_area(b, z):
     return g_track * (g_track / math.cos(math.radians(tz)))
 
 
+def zona_agregacion(b, z):
+    """Zona de agregación a bordo de VIIRS por ángulo de barrido (ATBD 423-ATBD-002 §2.2, vía S131): 3:1 hasta
+    31,589°, 2:1 hasta 44,680°, 1:1 después. Es lo único que separa el área del píxel de cualquier otro efecto
+    del ángulo sin L1B (verificador S157, H3): al pasar de 2:1 a 1:1 el área CAE aunque el ángulo siga subiendo."""
+    if b not in ("VIIRS375", "VIIRS750") or z is None:
+        return None
+    s = _s131.scan_desde_cenital(abs(z))
+    return "3:1" if s < _s131.SCAN_3TO2 else ("2:1" if s < _s131.SCAN_2TO1 else "1:1")
+
+
 def zbin(z):
     return "<30" if z < 30 else ("30-50" if z < 50 else ">=50")
 
@@ -173,26 +183,33 @@ def main():
     with open(bp.DATA / f"{VOL}.json", encoding="utf-8") as fh:
         crudos = {(r["sensor"], r["datetime_utc"]): r for r in json.load(fh)["records"]}
 
-    filas_out, conteo = [], {"pos": 0, "pos_K": 0, "pos_K_pub": 0, "pos_K_no_pub": []}
+    filas_out, conteo = [], {"pos": 0, "pos_K": 0, "pos_K_pub": 0, "pos_K_no_pub": [], "sin_geometria_K_pub": 0}
     reproduccion = []
     for r in sorted(recs, key=lambda x: (x["dt"], x["b"])):
-        if r["lab"] != "pos":
+        # Verificador S157 H10: las alertas «sin geometría» (MIROVA vio calor en ESTA pasada pero el OCR no
+        # sabe dónde) no sirven para detección, pero su VRP es de la pasada y sí sirve para magnitud. Van como
+        # estrato APARTE (campo lab): no entran a los estratos ni al testigo, que son sólo de "pos".
+        if r["lab"] not in ("pos", "sin_geometria"):
             continue
-        conteo["pos"] += 1
+        es_pos = r["lab"] == "pos"
+        if es_pos:
+            conteo["pos"] += 1
         if not r.get("sha"):
             continue
-        conteo["pos_K"] += 1
+        if es_pos:
+            conteo["pos_K"] += 1
         crudo = crudos[(r["sensor"], r["dt"].strftime("%Y-%m-%d %H:%M"))]
         ref = bp.parear(por_vb.get((VOL, r["b"]), []), r["dt"])
-        alertas = [f for f in ref if bp.es_alerta(f["tipo"])]
+        alertas = [f for f in ref if (bp.es_alerta(f["tipo"]) if es_pos else bp.es_sin_geometria(f["tipo"]))]
         cons_al = [f for f in alertas if f["source"] == "CONS" and f["vrp_mw"]]
         usar = cons_al or [f for f in alertas if f["vrp_mw"]]
         if not r["pub"]:
-            conteo["pos_K_no_pub"].append(f'{r["dt"]:%Y-%m-%d %H:%M} {r["b"]}')
+            if es_pos:
+                conteo["pos_K_no_pub"].append(f'{r["dt"]:%Y-%m-%d %H:%M} {r["b"]}')
             continue
         if not usar:
             continue
-        conteo["pos_K_pub"] += 1
+        conteo["pos_K_pub" if es_pos else "sin_geometria_K_pub"] += 1
         M = max(f["vrp_mw"] for f in usar)
         fuente = usar[0]["source"]
         b, z = r["b"], crudo.get("sensor_zenith_deg")
@@ -214,7 +231,8 @@ def main():
         tstar_area = t_fondo_que_cierra(b, bts, M / fa) if fa else None
         techo = SENSOR[b]["techo"]
         filas_out.append({
-            "pasada": r["dt"].strftime("%Y-%m-%d %H:%M"), "sensor": r["sensor"], "b": b,
+            "pasada": r["dt"].strftime("%Y-%m-%d %H:%M"), "sensor": r["sensor"], "b": b, "lab": r["lab"],
+            "zona_agregacion": zona_agregacion(b, z),
             "cenital": z, "banda_cenital": zbin(z) if z is not None else None,
             "M": M, "fuente": fuente, "D": D, "R": D / M,
             "n_alertados": len(pix), "n_dentro": len(dentro), "n_recortados_a_cero": n_cero,
@@ -241,6 +259,9 @@ def main():
             "granulo": crudo.get("granule"), "version": crudo.get("product_version"),
             "codigo_sha": (crudo.get("regimen") or {}).get("codigo_sha"),
         })
+
+    sin_geo = [f for f in filas_out if f["lab"] == "sin_geometria"]
+    filas_out = [f for f in filas_out if f["lab"] == "pos"]
 
     # testigo de saturación de I4: misma pasada en VIIRS 750 (energía de M13 contra la de I4, cada una con el recorte a cero del procesador)
     por_pasada = {}
@@ -283,12 +304,32 @@ def main():
     else:
         rho = None
 
+    # Verificador S157 H6: el catálogo (D17, nota S141) pide reportar la magnitud también con cenit <= 40°.
+    def resumen(g):
+        if not g:
+            return None
+        return {"n": len(g), "cenital": st.median([f["cenital"] for f in g]), "f_area": st.median([f["f_area"] for f in g]),
+                "G": st.median([f["G"] for f in g]), "G_area": st.median([f["G_area"] for f in g]),
+                "R": st.median([f["R"] for f in g])}
+    corte40 = {b_: {"<=40": resumen([f for f in filas_out if f["b"] == b_ and f["cenital"] <= 40]),
+                    ">40": resumen([f for f in filas_out if f["b"] == b_ and f["cenital"] > 40])}
+               for b_ in ("VIIRS375", "VIIRS750", "MODIS")}
+    # Verificador S157 H3: contraste por zona de agregación en las pasadas de 40 a 62° de cenital. Si el déficit
+    # fuera área, la zona 2:1 (píxel más grande) tendría G MÁS BAJO que la 1:1 de cenital mayor.
+    zonas = {}
+    for etiqueta, base in (("pos", filas_out), ("pos+sin_geometria", filas_out + sin_geo)):
+        for b_ in ("VIIRS375", "VIIRS750"):
+            for zn in ("2:1", "1:1"):
+                zonas[f"{etiqueta}|{b_}|{zn}"] = resumen([f for f in base if f["b"] == b_ and 40 <= f["cenital"] <= 62
+                                                          and f["zona_agregacion"] == zn])
+
     out = {"meta": {"ventana": list(ventana), "volcan": VOL, "inner_km": inner[VOL], "procedencia": proc,
                     "conteo": conteo,
                     "control_reproduccion_pixel": {"n": len(reproduccion), "ok": sum(reproduccion)},
                     "testigo_corr_log_750_375_nuestro_vs_mirova": rho,
                     "generado_utc": datetime.now(timezone.utc).isoformat(timespec="seconds")},
-           "estratos": estratos, "pasadas": filas_out, "testigo_saturacion_i4": testigo}
+           "estratos": estratos, "corte_40": corte40, "zonas_agregacion": zonas,
+           "pasadas": filas_out, "sin_geometria": sin_geo, "testigo_saturacion_i4": testigo}
     (AQUI / "a_pasadas_salida.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
 
     L = []
@@ -316,6 +357,23 @@ def main():
             e["b"], e["banda"], e["n"], e["cenital"], e["R"], e["F_rec"], e["G"], e["G_fondo_m5"],
             e["G_fondo_m10"], e["G_fondo0"], e["f_area"], e["G_area"], e["n_fondo0_no_cierra"], e["n_area_cierra"],
             e["alza_fondo_m10"], e["alza_fondo0"], e["deficit_recorte"], e["deficit_G"]))
+    P("")
+    fr = lambda d: ("n %2d  cenital %4.1f  f_area %4.2f  R %4.2f  G %4.2f  G_area %4.2f" % (  # noqa: E731
+        d["n"], d["cenital"], d["f_area"], d["R"], d["G"], d["G_area"])) if d else "sin pasadas"
+    P("corte de D17 (nota S141): cenital <= 40 contra > 40 (medianas)")
+    for b_, d in corte40.items():
+        P(f"  {b_:8s} <=40: {fr(d['<=40'])}")
+        P(f"  {b_:8s}  >40: {fr(d['>40'])}")
+    P("")
+    P("contraste por zona de agregación, cenital 40 a 62 (si fuera área: G de 2:1 < G de 1:1)")
+    for k, d in zonas.items():
+        P(f"  {k:32s} {fr(d)}")
+    P("")
+    P(f"estrato aparte, alertas sin geometría publicadas con K: {len(sin_geo)}")
+    for f in sin_geo:
+        P("  %s  %-8s %5.1f  zona %-4s M %5.2f  D %5.2f  R %4.2f  G %4.2f  f_area %4.2f  G_area %4.2f" % (
+            f["pasada"], f["b"], f["cenital"], f["zona_agregacion"] or "-", f["M"], f["D"], f["R"], f["G"],
+            f["f_area"], f["G_area"]))
     P("")
     P(f"testigo de saturación: correlación (log) entre nuestra razón 750/375 y la de MIROVA, misma pasada: "
       f"{rho if rho is None else round(rho, 3)} (n {len(testigo)})")

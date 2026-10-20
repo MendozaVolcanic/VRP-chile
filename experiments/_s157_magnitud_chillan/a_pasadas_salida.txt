@@ -1,6 +1,6 @@
-Chillán, ventana 2026-09-18 a 2026-10-20, inner 5.0 km. Referencia: {"commit_cons": "25114fe720225050bdb9245236097cdec06cd86c", "commit_ocr": "7bf81852cd5d9103e03ed957ba998c0c90d73586", "sha_index_html": "74656c3fc80b1ce53b940cbae9f4218edef4da99", "sha_json": "3267428f3dcba788acb31bc4760d04e83586e79e"}
+Chillán, ventana 2026-09-18 a 2026-10-20, inner 5.0 km. Referencia: {"commit_cons": "87771312303346e075801e624bc08b7839cc5f16", "commit_ocr": "7bf81852cd5d9103e03ed957ba998c0c90d73586", "sha_index_html": "74656c3fc80b1ce53b940cbae9f4218edef4da99", "sha_json": "3267428f3dcba788acb31bc4760d04e83586e79e"}
 pasadas con alerta de MIROVA (nocturnas, ±2 min): 95; con K: 95; publicadas por el tablero: 87; no publicadas: ['2026-09-18 05:24 VIIRS375', '2026-09-28 04:42 VIIRS750', '2026-09-29 07:20 MODIS', '2026-10-01 04:42 VIIRS750', '2026-10-05 04:48 VIIRS375', '2026-10-12 05:54 VIIRS750', '2026-10-12 07:20 MODIS', '2026-10-15 01:05 MODIS']
-control: VRP por píxel reproducido con la fórmula del procesador en 223 de 223
+control: VRP por píxel reproducido con la fórmula del procesador en 263 de 263
 
 pasada            sensor    cen   M     D     R    | n  ncero S_in  F_rec F_cero G    | G_f0  f_area G_area | t_bg  t_max  T*    dT*  T*area dT*area
 2026-09-28 04:42  VIIRS375  65.1  2.58  0.49 0.19 |  2  0  0.67  0.74  1.00 0.26 |  0.39  3.00  0.78 | 261.8 288.4   -     -   248.0  13.8
@@ -101,6 +101,37 @@ estratos (medianas): sensor banda n | cenital R F_rec G | G-5K G-10K G_f0 | f_ar
   MODIS    <30     5 |  19.9 0.75 1.00 0.75 | 0.90 1.03 1.48 | 1.19 0.78 |  1  1 | 1.38 2.01 | 0.00 0.29
   MODIS    30-50   3 |  37.6 0.20 0.71 0.34 | 0.47 0.58 1.27 | 1.90 0.64 |  1  1 | 1.71 2.82 | 0.34 1.09
   MODIS    >=50    3 |  54.0 0.20 0.70 0.20 | 0.33 0.51 1.12 | 4.17 0.85 |  1  1 | 2.56 4.73 | 0.35 1.59
+
+corte de D17 (nota S141): cenital <= 40 contra > 40 (medianas)
+  VIIRS375 <=40: n 16  cenital 22.3  f_area 1.24  R 0.68  G 0.68  G_area 0.85
+  VIIRS375  >40: n 28  cenital 55.6  f_area 2.02  R 0.52  G 0.52  G_area 0.95
+  VIIRS750 <=40: n 13  cenital 22.4  f_area 1.24  R 0.79  G 0.79  G_area 0.97
+  VIIRS750  >40: n 19  cenital 53.6  f_area 1.76  R 0.35  G 0.37  G_area 0.66
+  MODIS    <=40: n  7  cenital 23.1  f_area 1.26  R 0.64  G 0.64  G_area 0.75
+  MODIS     >40: n  4  cenital 52.2  f_area 3.78  R 0.20  G 0.29  G_area 1.03
+
+contraste por zona de agregación, cenital 40 a 62 (si fuera área: G de 2:1 < G de 1:1)
+  pos|VIIRS375|2:1                 n 11  cenital 45.8  f_area 1.76  R 0.55  G 0.55  G_area 1.02
+  pos|VIIRS375|1:1                 n  9  cenital 56.4  f_area 1.57  R 0.60  G 0.60  G_area 0.95
+  pos|VIIRS750|2:1                 n  9  cenital 45.8  f_area 1.75  R 0.41  G 0.48  G_area 0.84
+  pos|VIIRS750|1:1                 n  5  cenital 55.8  f_area 1.51  R 0.19  G 0.34  G_area 0.59
+  pos+sin_geometria|VIIRS375|2:1   n 12  cenital 47.2  f_area 1.88  R 0.57  G 0.57  G_area 1.02
+  pos+sin_geometria|VIIRS375|1:1   n  9  cenital 56.4  f_area 1.57  R 0.60  G 0.60  G_area 0.95
+  pos+sin_geometria|VIIRS750|2:1   n 10  cenital 45.8  f_area 1.76  R 0.40  G 0.53  G_area 0.90
+  pos+sin_geometria|VIIRS750|1:1   n  5  cenital 55.8  f_area 1.51  R 0.19  G 0.34  G_area 0.59
+
+estrato aparte, alertas sin geometría publicadas con K: 11
+  2026-10-10 06:30  VIIRS375  50.5  zona 2:1  M 12.17  D 11.82  R 0.97  G 0.97  f_area 2.23  G_area 2.16
+  2026-10-10 06:30  VIIRS750  50.5  zona 2:1  M 32.00  D  4.33  R 0.14  G 0.81  f_area 2.23  G_area 1.80
+  2026-10-11 06:12  VIIRS375  29.8  zona 3:1  M  0.42  D  0.11  R 0.26  G 0.26  f_area 1.48  G_area 0.39
+  2026-10-15 05:00  VIIRS375  62.4  zona 1:1  M 22.13  D 10.36  R 0.47  G 0.47  f_area 2.40  G_area 1.12
+  2026-10-15 05:00  VIIRS750  62.4  zona 1:1  M 14.00  D  1.88  R 0.13  G 0.36  f_area 2.40  G_area 0.86
+  2026-10-16 06:18  VIIRS375  37.6  zona 2:1  M 11.24  D  9.34  R 0.83  G 0.83  f_area 1.26  G_area 1.05
+  2026-10-16 06:18  VIIRS750  37.6  zona 2:1  M 13.00  D  8.12  R 0.62  G 0.62  f_area 1.26  G_area 0.79
+  2026-10-17 05:24  VIIRS750  27.8  zona 3:1  M 21.00  D 11.59  R 0.55  G 0.55  f_area 1.40  G_area 0.77
+  2026-10-17 06:00  VIIRS375  10.5  zona 3:1  M 11.74  D 10.34  R 0.88  G 0.88  f_area 1.05  G_area 0.92
+  2026-10-17 06:00  VIIRS750  10.5  zona 3:1  M 17.00  D 14.32  R 0.84  G 0.84  f_area 1.05  G_area 0.88
+  2026-10-18 05:42  VIIRS375  20.5  zona 3:1  M 11.03  D  7.00  R 0.64  G 0.64  f_area 1.20  G_area 0.76
 
 testigo de saturación: correlación (log) entre nuestra razón 750/375 y la de MIROVA, misma pasada: 0.788 (n 30)
 testigo de saturación de I4 (S_in de VIIRS 750 sobre S_in de VIIRS 375 en la misma pasada):

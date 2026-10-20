@@ -14,6 +14,11 @@ sale blanco puro (R+G+B = 765). Se cuenta, en una ventana de 41 x 41 px centrada
 blanco puro. Una miniatura cubre la malla de 50 x 50 km de MIROVA (0,34 km por px; 1.14 y S151 calibraron esa
 georreferencia contra GeoTIFF), así que el conteo es un área.
 
+⚠️ VERIFICADOR S157 (H4, REFUTADO como discriminante): un mapa en coordenadas de terreno agranda la mancha
+de un píxel oblicuo sume MIROVA el VRP sobre celdas o sobre píxeles nativos, así que este instrumento NO puede
+distinguir las dos hipótesis; y el blanco sigue más a la potencia que al área. Se conserva como dato. Texto
+original del docstring:
+
 LO QUE NO ES. El blanco puro es el tope de la escala de grises de la lámina, no la máscara de alertados de
 MIROVA (A24: la imagen no trae la máscara). Si la escala fuera un estiramiento por percentil, todas las
 miniaturas tendrían casi el mismo número de px blancos; si fuera una escala fija en NTI, un píxel oblicuo
