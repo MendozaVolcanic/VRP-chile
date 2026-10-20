@@ -32,7 +32,7 @@ Rama `s157-busqueda-ventana`, tag defensivo `pre-s157-busqueda-ventana` (= `orig
 | tiempos | `resumir_probe.py` → `probe_resumen.md` | intento 2: Chillán 4 días y 2 brazos, tag 1381 s contra rama 810 s; Láscar 2 días, 703 contra 544 s. El tag perdió búsquedas por CMR caído, así que hizo menos trabajo: el ahorro medido es una cota inferior |
 | pérdida silenciosa, en vivo | `probe_intento1/` | con CMR caído (HTTP 500) el código del tag terminó verde en 11 y 14 s sin ningún record; la rama dejó escrita la cobertura incompleta |
 | mutaciones (A110) | `mutaciones.py` → `resultado_mutaciones.json` | control sin mutar pasa; 29 atrapadas por aserción, 0 sobreviven, 0 caídas, 2 equivalentes declaradas antes de correr (bordes `<=` contra `<`, que el margen de 2 s vuelve inobservables) |
-| suite completa, árbol quieto | `python -m pytest tests` | 2311 pasan, 28 omitidas, 2 xfail (antes de los arreglos del verificador; las 53 pruebas de S157 pasan después) |
+| suite completa, árbol quieto | `python -m pytest tests` | 2316 pasan, 28 omitidas, 2 xfail, con los arreglos del verificador (commit 2a85e0c0 en adelante) |
 
 ## Sin verificar
 
