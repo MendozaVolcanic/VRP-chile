@@ -87,8 +87,16 @@ def _noches(sn, dias, hora=5, sufijo=""):
     return out
 
 
+def _red_prohibida(*a, **k):
+    raise AssertionError("una prueba no puede tocar NASA (ni auth con el netrc local, A71)")
+
+
 @pytest.fixture(autouse=True)
 def _limpio(monkeypatch):
+    # Candado: auth, login y descarga reales prohibidos; cada prueba simula search_data.
+    monkeypatch.setattr(fetch.earthaccess, "login", _red_prohibida)
+    monkeypatch.setattr(fetch.earthaccess, "download", _red_prohibida)
+    monkeypatch.setattr(fetch.earthaccess, "search_data", _red_prohibida)
     fetch.reiniciar_ventana()
     fetch.limpiar_fallas()
     fetch._CMR_SEARCH_DOWN = False
