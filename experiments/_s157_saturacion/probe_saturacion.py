@@ -241,6 +241,16 @@ def bajar_laads(sensor, nombre, dest):
         if not nombres:
             return None, "LAADS sin %s %s" % (sn, stamp)
         f = dest / nombres[0]
+        # Primero earthaccess.download con la URL (el mismo manejo de la autenticación que usa el NRT);
+        # si no deja el archivo, la sesión con el token.
+        try:
+            import earthaccess
+            earthaccess.download(["%s/%s" % (url_dir, nombres[0])], str(dest))
+        except Exception as e:  # noqa: BLE001
+            print("   earthaccess.download: %s" % e, flush=True)
+        if f.exists() and f.stat().st_size > 1_000_000:
+            out.append(f)
+            continue
         for intento in range(3):
             try:
                 with sesion.get("%s/%s" % (url_dir, nombres[0]), stream=True, timeout=300) as r:
@@ -253,7 +263,8 @@ def bajar_laads(sensor, nombre, dest):
                 if intento == 2:
                     return None, "LAADS descarga fallida %s: %s" % (nombres[0], e)
         if f.stat().st_size < 1_000_000 or f.read_bytes()[:8].lstrip().startswith(b"<"):
-            return None, "LAADS devolvió algo que no es el archivo (%d bytes): %s" % (f.stat().st_size, nombres[0])
+            return None, "LAADS devolvió algo que no es el archivo (%d bytes): %s | %r" % (
+                f.stat().st_size, nombres[0], f.read_bytes()[:600])
         out.append(f)
     nota = "bajado del archivo de LAADS (CMR no lo indexaba)" + (
         "" if out[0].name == nombre else "; L1B reprocesado: %s en lugar de %s" % (out[0].name, nombre))
@@ -350,6 +361,10 @@ def main():
            and (p["grupo"] != "B" or (p.get("mirova_mw") or 0) >= a.min_mirova)]
     if a.job == "V750_MODIS":
         pas.append(POSITIVO)
+    # Orden: C, B, POS y al final A. El 2026-10-20 CMR no indexaba el 2026-10-18 (runs 39511561148 y 39512351523
+    # abortaron en las dos primeras pasadas, que eran del grupo A); C y B sí están en CMR, así que el corte de las
+    # dos primeras fallas vuelve a medir un defecto del probe y no la caída de CMR.
+    pas.sort(key=lambda p: {"C": 0, "B": 1, "POS": 2, "A": 3}[p["grupo"]])
     print("job %s: %d pasadas" % (a.job, len(pas)), flush=True)
     from pipeline.fetch import auth
     from run_pipeline import load_volcanoes

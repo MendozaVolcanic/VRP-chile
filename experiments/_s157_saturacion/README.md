@@ -84,6 +84,12 @@ mañana más 26 pasadas de un volcán son el caso, no la muestra.
   18), mientras el listado del archivo de LAADS sí los tenía con el nombre exacto del record. Se agregó un respaldo que
   baja L1B y GEO del archivo de LAADS cuando CMR no los indexa (`bajar_laads`), y se reintentó el mismo workflow, como
   hizo #871 tras el HTTP 500 de CMR.
+- **Run 39512351523** (2026-10-20 23:00 UTC, `dcf8cf380`): CMR seguía sin el 18 y el 19 (verificado a las 23:05: 0
+  VJ202IMG, 0 VNP02MOD). El respaldo encontró los archivos en el listado de LAADS, pero la descarga con la sesión
+  devolvió 10.833 bytes que no eran el archivo, en las dos primeras pasadas de cada job, y abortó. Tercer intento
+  (el último): el orden pasa a C, B, POS y A, para que las pasadas que CMR sí indexa (C y B, del 2026-09-28 al
+  2026-10-16) no dependan de la caída del 18; el respaldo de LAADS usa `earthaccess.download` con la URL y guarda el
+  comienzo de la respuesta si vuelve a fallar.
 
 ## Reproducir
 
