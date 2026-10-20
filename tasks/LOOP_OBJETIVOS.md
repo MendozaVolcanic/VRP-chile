@@ -509,6 +509,16 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~18:50 UTC (S157): Chillán completo; PR #878 con el JSON rearmado
+- Tercera pasada (run 39467050396): 13 de 13 verdes. Con las dos pasadas de relleno (44 trozos): 478 records
+  agregados, 6.396 en total, control contra el tag intacto. **Contra la operacional faltan 6**, todas `nrt` de Suomi
+  NPP del 5 y 6 de agosto de 2026 (sin estándar en NASA, igual que en los otros 10 volcanes).
+- **PR #878** (borrador): `data/_s154_reproc_k_historico/NevadosDeChillan.json` más el script y sus salidas, rama
+  `s157-chillan-rearmado` rebasada sobre `main`. Con esto los 11 Tier A del histórico con K están completos salvo las
+  pasadas sin estándar y las 31 `standard` de los otros 10 (plan de relleno de #873, sin despachar).
+- Siguiente en 1.24: rellenar las 31 de los otros 10 (el workflow ya conserva el archivo), decidir con Nicolás las
+  ~64 `nrt` sin estándar, y el ensayo de Chillán más el reemplazo de los 11 juntos entre corridas del NRT.
+
 ### 2026-10-20 ~18:30 UTC (S157): sello de D25 registrado aquí; la calibración de M necesita una adenda sellada
 - La sesión de D25 no pudo registrar el «Apruebo» (el control de permisos no acepta una aprobación reenviada). Se
   registró desde esta sesión en `PREREGISTRO.md` (rama `s157-prereg-d25`, `365d543e`) sobre `9ff738f3d`, el commit
