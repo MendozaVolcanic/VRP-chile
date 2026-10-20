@@ -22,6 +22,8 @@ from requests.exceptions import ReadTimeout
 import pipeline.fetch as fetch
 
 LAT, LON, R = -36.86, -71.38, 25.0
+# Valor de produccion, leido ANTES de que el fixture lo cambie a [0, 0] para que las pruebas no esperen.
+ESPERAS_PRODUCCION = list(fetch._VENTANA_ESPERAS_S)
 D0 = datetime(2026, 7, 18)
 
 
@@ -292,6 +294,13 @@ def test_ventana_que_falla_una_vez_se_reintenta(monkeypatch):
     fake = FakeCMR(cat, fallar=fallar)
     assert _con_ventana(fake, monkeypatch, "MODIS_TERRA_L1B", dias) == ref
     assert len(fake.llamadas) == 2 and fake.n_ventana() == 2
+
+
+def test_la_ventana_se_reintenta_una_vez_y_acota_el_costo_en_el_nrt():
+    # A3 del plan: con CMR caido, la ventana agrega a lo mas un intento, una espera corta y un reintento antes de
+    # volver al camino de hoy (dos timeouts de 60 s mas la espera: ~2,5 min en el NRT de 50 min).
+    assert len(ESPERAS_PRODUCCION) == 2 and ESPERAS_PRODUCCION[0] == 0
+    assert sum(ESPERAS_PRODUCCION) <= 30
 
 
 def test_credencial_muerta_en_la_ventana_aborta(monkeypatch):

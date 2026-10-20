@@ -107,6 +107,7 @@ def test_main_sin_estricto_no_falla_por_cobertura(monkeypatch):
 def test_main_configura_la_ventana_con_sus_fechas(monkeypatch):
     cod, vistos = _main(monkeypatch, ["--volcano", "Lascar", "--start", "2026-09-01", "--end", "2026-09-03"])
     assert [v[1] for v in vistos] == ["2026-09-01", "2026-09-02", "2026-09-03"]
+    assert all(v[2] for v in vistos), "run_pipeline no configuro la ventana"
     assert all(v[2]["ini"] == "2026-09-01" and v[2]["fin"] == "2026-09-03" for v in vistos)
 
 
@@ -114,6 +115,7 @@ def test_main_toma_la_ventana_del_entorno_para_un_solo_dia(monkeypatch, tmp_path
     monkeypatch.setenv("VRP_VENTANA_BUSQUEDA", "2026-09-01:2026-09-20")
     monkeypatch.setenv("VRP_CACHE_BUSQUEDA_DIR", str(tmp_path))
     cod, vistos = _main(monkeypatch, ["--volcano", "Lascar", "--date", "2026-09-05"])
+    assert vistos[0][2], "run_pipeline no configuro la ventana"
     assert vistos[0][2]["ini"] == "2026-09-01" and vistos[0][2]["fin"] == "2026-09-20"
     assert Path(vistos[0][2]["cache_dir"]) == tmp_path
 
