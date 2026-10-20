@@ -2,7 +2,7 @@
 # FICHA SDA · process_modis.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
 # Objetivo      : Detectar y cuantificar anomalias termicas en granulos MODIS L1B (Terra/Aqua) para apoyar
 #                 la vigilancia de actividad volcanica (alerta tecnica OVDAS).
-# Lógica        : En cada escena nocturna se buscan pixeles 'calientes' (Tests contextuales y de ROI
+# Lógica        : [⚠️ S157, detector K desde #850 (2026-10-18; en los datos desde la observacion del 2026-09-18): en produccion el Test 1 integrado en el ROI esta APAGADO (D30, detector propio, no de Coppola 2016a), los Tests 2 y 3 usan la conectiva max (D26) y la banda 22 es la MIR primaria (D21). Lo que sigue describe el estado previo.] En cada escena nocturna se buscan pixeles 'calientes' (Tests contextuales y de ROI
 #                 integrado de Coppola 2016a), se estima la temperatura de fondo local por anillo, y se
 #                 calcula la potencia radiada (VRP) con la ecuacion de Wooster/Planck.
 # Modelo/método : Reglas fisicas deterministicas (Planck/Wooster; Coppola 2015/2016a/2024). NO es caja negra
@@ -11,7 +11,7 @@
 #                 datos personales.
 # Variables     : BT del pixel, T de fondo (anillo/contextual), umbrales N·sigma dual-ROI (5 summit / 10
 #                 scene), area de pixel (nadir-fijo), distancia al crater.
-# Limitaciones  : Sesgo topografico en cumbres nevadas (MIR absoluto), sobre-deteccion difusa irreducible a
+# Limitaciones  : [⚠️ S157: con K (banda 22 y max) MODIS fuera de Lascar publica en 18 de 2.173 negativos limpios contra 242 antes (experiments/_s153_fk_v2/v2.log:233); el 'irreducible a 1 km' que sigue es previo a K (D11).] Sesgo topografico en cumbres nevadas (MIR absoluto), sobre-deteccion difusa irreducible a
 #                 1 km, saturacion de pixel, contaminacion por lago/nieve, falsos positivos por incendios.
 # Refs/datos    : Coppola 2016a (GS SP426.5), Coppola 2024 (Springer). La cita "Coppola et al.
 #                 2015 (BV 77:55)" se RETIRO en S147: no corresponde a ningun articulo
@@ -26,7 +26,7 @@ Algorithm: MIROVA (Coppola et al. 2015, sp426.5)
   VRP = A_pixel * sigma * (T_pix^4 - T_bg^4)
   threshold = max(5K, 3 * std_background)
 
-Bands:
+Bands:  [⚠️ S157: con K (#850) la banda 22 es la primaria y la 21 entra donde la 22 satura (D21); las dos lineas que siguen describen el estado previo.]
   EV_1KM_Emissive contains all 16 emissive bands [20-25, 27-36]
   - Band 21 (3.929 um): index 1 in EV_1KM_Emissive, primary MIR hotspot channel
   - Band 22 (3.959 um): index 2, used where Band 21 is saturated
