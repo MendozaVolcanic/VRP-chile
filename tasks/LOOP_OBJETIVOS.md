@@ -509,6 +509,23 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~23:20 UTC (S157): #865 explicado (#881, verificado); azimut (#879, sin verificar); saturación en curso
+- **#865 / #881** (verificador limpio confirmó; tres frases corregidas): la anomalía de PCC VIIRS 750 del 2026-10-10
+  05:54 son dos píxeles contiguos que se bajan el contraste uno al otro en el promedio de 8 vecinos. Con K el Test 2
+  pide max(C1, μ+5σ) = 0,01415 y dan 0,01332 (falta 5,9 %) y 0,01204 (14,9 %); pasan Test 3 y BT. Con `min`
+  (umbral 0,003) pasan: la palanca es la conectiva. El cúmulo de C0 salió de `ctx_cluster`, no del Test 1.
+  **Aislado**: K pierde 1 de 155 protegidas nocturnas de VIIRS 750 (2026-01-10..10-19), ésta. Volver VIIRS 750 a
+  `min` recupera 4 alertas bajo 1 MW y 0 protegidas, a costo de +314 negativos limpios publicados (1,1 % a 9,3 %;
+  PCC 6,2 % a 44,6 %; A/B de meses S151). Recomendación: no cambiar K; cerrar #865 con el mecanismo documentado.
+- **Azimut / #879** (SIN VERIFICAR, verificador pedido en primer plano): en VIIRS 375 con C0, MIROVA reporta 1,46
+  veces más desde el este (nulo 0,89 a 1,14), nosotros 1,15; crece con el cenit (MIROVA 1,91 sobre 35°). La
+  «MIROVA plana» de S130 sería el promedio de dos pendientes opuestas. Lado y hora están confundidos en VIIRS
+  (correlación −0,99); mecanismo en MIROVA sin identificar.
+- **Saturación / #880**: sin cifras; run 39512756808 en curso (CMR no indexa el 18 y 19-oct, el grupo de las 06:48
+  puede no bajar). Hallazgo de código verificado: el pipeline pone NaN en píxeles saturados (VIIRS bit 4, tope de
+  LUT, M15 ≥ 342,5 K; MODIS SI > 32767): si satura la banda térmica, el píxel nunca alerta. SOSPECHA para Chillán
+  en VIIRS 375; en VIIRS 750 M13 tiene doble ganancia (techo ~634 K) y sería improbable.
+
 ### 2026-10-20 ~23:10 UTC (S157): prueba corta del A/B de D25 PASA en lo sustantivo
 - Run 39510227734 (Chillán 2026-10-17..18, tres brazos, workflow de brazos juntos de #877): reproceso verde en 6 min;
   8 pasadas por brazo, 0 faltan, 0 sobran. `FLAGS_BRAZO`: D25 encendido sólo en `_s157_ab_d25_k_on` (375 y 750,
