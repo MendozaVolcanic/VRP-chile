@@ -509,6 +509,23 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 08:15 UTC (S157): Chillán rearmado, pero los trozos VERDES del original perdieron 316 pasadas
+- B (39363796988) 4 de 4 verdes (60 a 67 min) y el trozo 9 (39370713699) verde en 132 min. Artefactos de los 4 runs
+  en `D:\vrp-trabajo\temporales\s157_chillan\` (98 MB).
+- `experiments/_s157_chillan_rearmado/rearmar_y_contar.py` (rama `s157-chillan-rearmado`, worktree en
+  `D:\vrp-trabajo\s157-chillan-rearmado`): 21 trozos contiguos 2025-02-15..2026-09-17, 5.918 records, 0 duplicados.
+  **Control contra el tag `pre-s157-chillan-trozos`: 3.637 de 3.637 records idénticos** en las ventanas originales.
+- **Cobertura (A108): 326 pasadas de la operacional no están** (316 `standard`), en 51 días y 29 ventanas, casi
+  todas en trozos VERDES del run original (13, 14 y 15 suman 216; los nuevos sólo 12). Causa leída en el log del
+  trozo 15 (job 117669982883): `SEARCH_CMR_TIMEOUT host=cmr.earthdata.nasa.gov -> breaker ON esta corrida` y
+  `SEARCH_SKIP CMR degradada` para todos los productos: el cortacircuito de A64 salta días enteros sin fallar el job.
+  O sea que «verde» no dice nada de la cobertura, y el ensayo de los otros 10 (#866) lo midió bien por eso.
+- Segunda pasada completa de Chillán despachada: run 39391332259 (2025-02-15..2026-09-17, `max_days` 19, 31 trozos,
+  `main` en `d6c1c947`, mismo `pipeline/` que `3695f675`: sólo difieren dos perfiles diurnos). El script ganó
+  `--relleno`: de la segunda copia toma SOLO las claves que faltan; los records originales no se tocan.
+- SOSPECHA a medir: el cortacircuito por CMR también puede estar dejando días sin procesar en el NRT; un job verde
+  con `SEARCH_SKIP` no avisa. Candidato a vigilancia (cuántos `SEARCH_SKIP` por corrida).
+
 ### 2026-10-20 04:40 UTC (S157): tanda A de Chillán verde; B corriendo; trozo 9 en cola
 - Run 39363774747: 6 de 6 trozos verdes, de 65 a 76 min por 19 días (3,4 a 4,0 min por día de Chillán), más merge.
   Como se esperaba, el merge dejó `data/_s154_reproc_k_historico/NevadosDeChillan.json` sólo con su ventana (1.225
