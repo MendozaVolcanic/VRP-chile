@@ -509,6 +509,28 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~04:15 UTC (S157): resultados de las cuatro sesiones
+- **#867 MERGEADO** (watchdog por duración de job, F3-10 y parte de F3-07; CI verde) y **#824 CERRADO**. Queda
+  abierta la parte de F3-07 que vive en el auto-audit semanal.
+- **#866** (ensayo del reemplazo, 10 volcanes): los 10 PASAN el tope del 2 % (peor Planchón Peteroa, 0,37 %).
+  Verificador G4: con una sola `DATOS_K_DESDE_UTC` no hay frontera correcta si Chillán queda aparte, así que se
+  aplican los 11 juntos. El reemplazo agrega 7.518 records (llena el hueco 2025-11-16..2026-01-28). Quedan 89
+  pasadas en C0: 31 `standard` cortadas por NASA (repetibles) y 58 `nrt` de Suomi NPP del 2026-08-05 y 06 (quizá
+  sin estándar). CI verde. **Merge negado por el clasificador de permisos («merge sin revisión»): lo mergea Nicolás.**
+- **#868** (propagación de K, A113 en catálogo, MISSION, CLAUDE.md, INDEX, ficha, cabeceras y modal del tablero):
+  en `pipeline/` sólo cambian comentarios y la docstring (diff revisado). Suite 2.206 y CI verdes, verificador limpio
+  aplicado. **Mismo merge negado: lo mergea Nicolás.**
+- **#869** (magnitud de Chillán, 87 pasadas, verificador PARCIAL): en VIIRS 375 oblicuo el fondo no cierra el déficit
+  ni con fondo cero; en VIIRS 750 de borde pesa el recorte del tablero (F_rec 0,57). Recomienda D25 primero con el
+  criterio de Chillán corregido (V375 sólo con cenit de 40° o menos) y D17 después con dos brazos. Falta el L1B.
+- **Hallazgo lateral de #869, comprobado en el código**: con K, `process_modis.py` (~l. 1036 y 1040 de `main`) vuelve a
+  radiancia con `BAND21_LAMBDA` aunque la BT venga de B22; magnitud MODIS estimada de 1,052 a 1,059 veces menor.
+  Producción (A45): se investiga y se deja detrás de flag; el merge es de Nicolás.
+- Este turno lo abrió el aviso de las sesiones, así que la app no deja arrancar sesiones nuevas: quedaron propuestas
+  como tarjetas (merge de trozos que conserva el archivo más relleno de las 31 pasadas; λ de B22 en MODIS;
+  pre-registro de D25 sobre K con probe de L1B).
+- Disco: C: 27 GB, D: 18 GB (worktrees de 1,1 GB cada uno).
+
 ### 2026-10-20 ~03:45 UTC (S157, dueña del loop): cuatro sesiones paralelas en D:, el loop sigue sin pedir permiso
 - Nicolás: «todo lo que recomiendes y puedes, usa el disco D para que C no colapse, el loop debe continuar, no me pidas
   permiso». Límite que se mantiene: nada se ADOPTA en producción sin su sello (A45); todo lo demás avanza solo.
