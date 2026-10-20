@@ -28,13 +28,36 @@ def _key(record: dict) -> tuple:
     return (record.get("datetime_utc"), record.get("sensor"))
 
 
-def merge_stores(paths: list[Path], ventanas: list[tuple[str, str]] | None = None
-                 ) -> tuple[dict, int]:
-    """Devuelve (store unido, n_duplicados). Orden estable por datetime_utc."""
+def _en_alguna(fecha: str, ventanas) -> bool:
+    return any(v[0] <= fecha <= v[1] for v in ventanas)
+
+
+def merge_stores(paths: list[Path], ventanas: list[tuple[str, str]] | None = None,
+                 base: dict | None = None) -> tuple[dict, int]:
+    """Devuelve (store unido, n_duplicados). Orden estable por datetime_utc.
+
+    `base`: store que el destino ya tiene; ver el docstring del modulo."""
+    if base is not None and ventanas is None:
+        raise ValueError("--base exige --ventanas")
     merged: dict[tuple, dict] = {}
     volcano = ""
     updated = ""
     duplicados = 0
+    if base is not None:
+        volcano = base.get("volcano") or ""
+        updated = base.get("updated", "") or ""
+        conservados = reemplazados = 0
+        for rec in base.get("records", []):
+            # POR QUE se descarta lo de dentro aunque el trozo no lo traiga: el
+            # trozo reproceso ese tramo entero, y una pasada que ya no sale es
+            # parte de su resultado. Lo de fuera nadie lo toco en esta corrida.
+            if _en_alguna((rec.get("datetime_utc") or "")[:10], ventanas):
+                reemplazados += 1
+                continue
+            merged[_key(rec)] = rec
+            conservados += 1
+        print(f"  base: {conservados} records conservados fuera de las ventanas, "
+              f"{reemplazados} dentro (los reemplaza la corrida)")
     # Se procesan en orden de `updated` ascendente para que, ante un choque,
     # el store escrito más tarde sea el que sobrescriba.
     cargados = []
@@ -47,6 +70,9 @@ def merge_stores(paths: list[Path], ventanas: list[tuple[str, str]] | None = Non
     vent_por_path = dict(zip([str(x) for x in paths], ventanas or []))
 
     for store, p in cargados:
+        if (base is not None and volcano and store.get("volcano")
+                and store["volcano"] != volcano):
+            raise ValueError(f"la base es de {volcano!r} y {p} de {store['volcano']!r}")
         volcano = store.get("volcano") or volcano
         updated = max(updated, store.get("updated", ""))
         v = vent_por_path.get(str(p))
@@ -69,7 +95,13 @@ def merge_stores(paths: list[Path], ventanas: list[tuple[str, str]] | None = Non
         extra = f"  (+{fuera} fuera de su ventana {v[0]}..{v[1]}, ignorados)" if v else ""
         print(f"  {p}: {n} records{extra}")
 
-    records = sorted(merged.values(), key=lambda r: r.get("datetime_utc", ""))
+    records = sorted(merged.values(), key=lambda r: r.get("datetime_utc") or "")
+    if base is not None:
+        # mismas claves y en el mismo orden que la base: si la corrida no cambia
+        # nada, el archivo sale identico byte a byte
+        out = dict(base)
+        out.update({"volcano": volcano, "updated": updated, "records": records})
+        return out, duplicados
     return {"volcano": volcano, "updated": updated, "records": records}, duplicados
 
 
@@ -81,6 +113,10 @@ def main(argv=None) -> int:
                          "(ej. 2026-05-01:2026-05-30). Con esto, cada trozo "
                          "aporta solo sus records: sin ellas, el archivo "
                          "completo que subio el job resucita meses viejos.")
+    ap.add_argument("--base", default=None,
+                    help="JSON que el destino ya tiene (S157): se conservan sus "
+                         "records fuera de las ventanas. Exige --ventanas. Si "
+                         "no existe, es como no pasarlo.")
     ap.add_argument("inputs", nargs="+", help="JSON de cada trozo")
     args = ap.parse_args(argv)
 
@@ -101,8 +137,25 @@ def main(argv=None) -> int:
         print("ERROR: ningún trozo aportó JSON", file=sys.stderr)
         return 1
 
+    base = None
+    if args.base is not None:
+        if vent_raw is None:
+            print("ERROR: --base exige --ventanas (sin ellas no se sabe que "
+                  "tramo cubre la corrida)", file=sys.stderr)
+            return 1
+        if Path(args.base).exists():
+            with open(args.base, "r", encoding="utf-8") as f:
+                base = json.load(f)
+        else:
+            print(f"AVISO: no existe la base {args.base}; se une sin base",
+                  file=sys.stderr)
+
     print(f"Uniendo {len(paths)} trozos:")
-    store, duplicados = merge_stores(paths, ventanas)
+    try:
+        store, duplicados = merge_stores(paths, ventanas, base)
+    except ValueError as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        return 1
 
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
