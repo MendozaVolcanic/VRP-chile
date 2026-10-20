@@ -509,6 +509,19 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~03:45 UTC (S157, dueña del loop): cuatro sesiones paralelas en D:, el loop sigue sin pedir permiso
+- Nicolás: «todo lo que recomiendes y puedes, usa el disco D para que C no colapse, el loop debe continuar, no me pidas
+  permiso». Límite que se mantiene: nada se ADOPTA en producción sin su sello (A45); todo lo demás avanza solo.
+- Sesiones lanzadas, cada una en su propio worktree en `D:\vrp-trabajo\s157-*`, sin tocar esta bitácora ni despachar
+  workflows (salvo el CI de su PR): ensayo del reemplazo con K para los 10 volcanes completos (1.24 b y c, PR borrador,
+  sin aplicar); magnitud de Chillán pasada por pasada (1.33 a y b, sólo lectura, recomienda D25 o D17 para 1.29);
+  propagación de K a los textos (1.37 más arreglo 5 de AUDIT_S155, PR borrador); watchdog por duración de job (arreglo
+  7, F3-10 y F3-07; mergea si queda CLEAN y verde y cierra #824).
+- Decisiones del bloque S157 tabla b aplicadas con la recomendación: #864 abierto (estado de K); falsa alarma de Muy
+  Bajo aceptada; #824 se cierra al mergear el arreglo del watchdog, no antes (el watchdog lo reabriría); #776 sigue
+  como borrador, ligado a #865 (comentario en el PR); #813 postergado hasta después del reemplazo. Rotar el PAT y avisar
+  a OVDAS son de Nicolás (credencial y mensaje a terceros).
+
 ### 2026-10-20 03:25 UTC (S157 «retomar»): trozos caídos de Chillán relanzados; el merge no conserva el archivo
 - El histórico con K (39125546355) terminó a las 20:22 UTC del 19-oct: 172 verdes, **6 fallidos, todos de
   NevadosDeChillan** (el bloque S157 decía 3). Por el tope de 170 min del paso: 5, 6, **7, 11 y 12**; por el runner: 9.
