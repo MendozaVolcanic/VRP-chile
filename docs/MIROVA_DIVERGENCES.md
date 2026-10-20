@@ -3211,7 +3211,7 @@ Chillán): razón mediana 0,362 → 0,382. Es un sesgo de signo fijo, chico; no 
 (D25). El 18,9 no se toca: S14 lo reconstruyó con las columnas de radiancia del propio OSF de MIROVA
 (`experiments/21_results.json`), no con nuestra λ.
 
-**Arreglo.** `enable_modis_mir_lambda_por_banda` (OFF; con OFF el procesador es bit a bit el del tag, 48 de 48
+**Arreglo.** `enable_modis_mir_lambda_por_banda` (OFF; con OFF el procesador es bit a bit el del tag, 96 de 96
 combinaciones). Encenderlo es decisión de Nicolás (A45). Detalle y traza completa:
 `experiments/_s157_lambda_b22/README.md`.
 

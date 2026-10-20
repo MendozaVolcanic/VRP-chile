@@ -161,3 +161,17 @@ def test_la_clave_del_yaml_es_la_que_lee_el_codigo(seccion):
     finally:
         importlib.reload(prof)
     assert prof.ENABLE_MODIS_MIR_LAMBDA_POR_BANDA is False
+
+
+def test_test1_acepta_lambda_por_pixel():
+    """Verificador S157 H10: con el flag, el Test 1 integrado (apagado hoy, D30) también tiene que volver a
+    radiancia con la λ de cada píxel; con una λ escalar de B22, un píxel de B21 a 420 K saldría 1,028 veces
+    más brillante que lo medido. `bt_to_radiance_um` acepta un arreglo de λ con la forma de la temperatura y
+    da lo mismo que llamarla píxel por píxel; con escalar, igual que siempre."""
+    from pipeline.test1_integrated import bt_to_radiance_um
+    bt = np.array([[268.0, 300.0], [np.nan, 420.0]])
+    lam = np.array([[pm.BAND22_LAMBDA, pm.BAND22_LAMBDA], [pm.BAND22_LAMBDA, pm.BAND21_LAMBDA]])
+    L = bt_to_radiance_um(bt, lam)
+    for i, j in ((0, 0), (0, 1), (1, 1)):
+        assert L[i, j] == bt_to_radiance_um(np.array([bt[i, j]]), float(lam[i, j]))[0]
+    assert np.isnan(L[1, 0])

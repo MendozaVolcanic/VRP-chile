@@ -63,15 +63,15 @@ incluida la saturación (65533); l. 552-554: `bt21 = radiance_to_bt(rad21, BAND2
 
 | # | tag | rama | Qué | ¿Corre con K? | Con el flag |
 |---|---|---|---|---|---|
-| 1 | process_modis.py:1036 | :1080 | `L_bg_global`, fondo del anillo | sí | λ de la banda primaria |
-| 2 | :1040 | :1084-1085 | `hotpix_rad`, radiancia de cada píxel alertado | sí | λ de la banda de origen del píxel |
-| 3 | :1062 | :1107 | `L_bg` del kernel local 3×3 (5 Tier A opt-in) | sí, con `local_kernel_bg` | λ primaria |
-| 4 | :1155 → vrp_regimes.py:279-287 | :1200-1201 → vrp_regimes.py | magnitud por corona del cúmulo | no (`ENABLE_LOCAL_CLUSTER_MAGNITUDE` OFF) | λ por píxel (`lambda_grid`), fondo con la primaria |
-| 5 | :1253-1254 | :1299-1301 | camino de vent | no (`ENABLE_VENT_PATH_MODIS` OFF) | píxel con su λ, fondo con la primaria |
-| 6 | :746 → test1_integrated.py:442 | :790 | Test 1 integrado (detección en radiancia + su `L_bg`) | no (`enable_test1_path: false`, D30) | λ primaria, escalar |
-| 7 | :1367 | :1414 | `effective_L_bg` del recompute Test 1 | no (sólo si `final_hotspot_source == "test1"`) | λ primaria |
-| 8 | :1377, :1392 | :1424-1425, :1440-1441 | `t1_rad` del recompute Test 1 | no | λ por píxel |
-| 9 | :1528 | :1577 | `diag_L_bg_w_m2_sr_um` (diagnóstico) | sí | λ primaria |
+| 1 | process_modis.py:1036 | :1083 | `L_bg_global`, fondo del anillo | sí | λ de la banda primaria |
+| 2 | :1040 | :1087-1088 | `hotpix_rad`, radiancia de cada píxel alertado | sí | λ de la banda de origen del píxel |
+| 3 | :1062 | :1110 | `L_bg` del kernel local 3×3 (5 Tier A opt-in) | sí, con `local_kernel_bg` | λ primaria |
+| 4 | :1155 → vrp_regimes.py:279-287 | :1203-1204 → vrp_regimes.py | magnitud por corona del cúmulo | no (`ENABLE_LOCAL_CLUSTER_MAGNITUDE` OFF) | λ por píxel (`lambda_grid`), fondo con la primaria |
+| 5 | :1253-1254 | :1302-1304 | camino de vent | no (`ENABLE_VENT_PATH_MODIS` OFF) | píxel con su λ, fondo con la primaria |
+| 6 | :746 → test1_integrated.py:442 | :793 → test1_integrated.py | Test 1 integrado (detección en radiancia + su `L_bg`) | no (`enable_test1_path: false`, D30) | λ por píxel (`bt_to_radiance_um` acepta un arreglo de λ) |
+| 7 | :1367 | :1417 | `effective_L_bg` del recompute Test 1 | no (sólo si `final_hotspot_source == "test1"`) | λ primaria |
+| 8 | :1377, :1392 | :1427-1428, :1443-1444 | `t1_rad` del recompute Test 1 | no | λ por píxel |
+| 9 | :1528 | :1580 | `diag_L_bg_w_m2_sr_um` (diagnóstico) | sí | λ primaria |
 | 10 | :773 y :857 → detection_context.py:625 | sin cambio | `NTI_app`: Planck MIR de la temperatura TIR | sí, :857 en el primer pase | **no se toca**, ver §6 |
 
 Copias en línea buscadas (A102): `process_viirs.py` (I04, una sola banda, `I04_LAMBDA = 3.740`) y
@@ -98,6 +98,8 @@ da F = 1 con error 1,7·10⁻¹⁴.
 | Records MODIS con K y magnitud de cúmulo | 25 (1 topado por D9, factor 1) |
 | Factor F (magnitud corregida / actual) | mín 1,0527 · mediana 1,0575 · máx 1,0753 (n = 24) |
 | Sensibilidad a suponer magnitud de un píxel | diferencia máxima de F 0,0036 |
+| Records con kernel local de fondo | 10 de 24 (PCC, Villarrica, Planchón) |
+| Inversión exacta por píxel (verificador, desde `bt_k` y `vrp_mw` de cada píxel) | F del píxel pico 1,0514 a 1,0753, mediana 1,0575 |
 | Píxel representativo saturado (B21) | 0 de 24 |
 | Por volcán (mediana F) | Chillán 1,054 (13) · PCC 1,060 (7) · Villarrica 1,071 (2) · Láscar 1,060 (1) · Planchón 1,075 (1) |
 
@@ -120,6 +122,9 @@ cierra la brecha de Chillán (que #869 atribuye al fondo, D25, y a la selección
 no son una muestra para hablar de paridad por volcán. Lo que el arreglo hace es quitar un sesgo conocido y de
 signo fijo de la magnitud MODIS, no resolver la magnitud.
 
+El extremo bajo exacto es 1,051 (Chillán 2026-10-16 01:40, dos píxeles fuera del modo de un píxel): la
+aproximación del script con el promedio por píxel lo sobreestima en 0,001. En el resto coincide a 4 decimales.
+
 ## 6. Lo que NO se tocó, a propósito
 
 1. **`NTI_app` (sitio 10)**. Coppola 2016a p. 5 Ec. 2 lo arma con Planck en la banda MIR, o sea 3,959 µm;
@@ -129,7 +134,11 @@ signo fijo de la magnitud MODIS, no resolver la magnitud.
 2. **`BAND21_LAMBDA = 3.929`**. El paper centra las dos bandas en 3,959 µm. Con K sólo afecta la temperatura
    de los píxeles que saturan B22 (sobre ~331 K), que el arreglo ya devuelve a su radiancia medida porque usa
    la misma λ en la ida y en la vuelta. Cambiar el 3,929 mueve umbrales en kelvin de esos píxeles y de C0;
-   queda anotado, no se cambia.
+   queda anotado, no se cambia. Matiz del verificador (H12): con K cae a B21 todo píxel con DN inválido de B22,
+   no sólo el saturado (`calibrate()` deja NaN todo DN > 32767), y ese píxel entra a `bt_mir` con un escalón de
+   ~1,3 K respecto de sus vecinos de B22 (misma radiancia, otra λ en la inversión). Toca σ y umbrales en
+   kelvin, no la magnitud. Cuántos son, sin L1B: SIN MEDIR. Bajo C0 pasaba lo simétrico en los píxeles de
+   respaldo de B22, población no medida.
 3. **El fondo como temperatura y no como radiancia**. El paper promedia **radiancias** de los vecinos (p. 8);
    el pipeline toma la mediana de temperaturas del anillo y la convierte. Es D25, no este frente.
 
@@ -144,21 +153,39 @@ signo fijo de la magnitud MODIS, no resolver la magnitud.
 - Tests: `tests/test_lambda_por_banda_modis_s157.py` (7). RED observado antes del arreglo: el píxel de B22 daba
   8,054 MW contra 8,469 de su radiancia medida (razón 1,0515) y el de B21 saturado 400,24 contra 399,98 (el
   fondo). El guard de la clave del YAML se comprobó con mutación: renombrar la clave en `profile.py` lo hace caer.
-- Identidad con el flag apagado: `identidad_flag_apagado.py` corre el `process_modis.py` y el `vrp_regimes.py`
-  del tag contra los de la rama sobre 48 combinaciones (3 escenas × B22 primaria o no × kernel local × corona
-  × vent): **48 de 48 idénticas**; control con el flag encendido y B22 primaria, **24 de 24 distintas**;
-  cobertura: encender kernel local, corona o vent cambia el record en 6 de 6 escenas cada uno. **No cubierto**:
-  el recompute del Test 1 (sitios 6 a 8), porque el camino está apagado y la escena sintética no lo dispara.
+- La regla de origen de banda decide con `bt21` y `bt22`, los mismos arreglos con que `merge_mir_bands` arma
+  `bt_mir` (verificador H11: con las radiancias diferiría donde la radiancia es negativa).
+- Identidad con el flag apagado: `identidad_flag_apagado.py` corre `process_modis.py`, `vrp_regimes.py` y
+  `test1_integrated.py` del tag contra los de la rama sobre 96 combinaciones (3 escenas × B22 primaria o no ×
+  kernel local × corona × vent × Test 1 integrado): **96 de 96 idénticas**; control con el flag encendido y B22
+  primaria, **48 de 48 distintas**; cobertura: encender kernel local, corona, vent o Test 1 cambia el record en
+  6 de 6 escenas cada uno. Límite: compara el record serializado, que ya viene redondeado; por lectura, con el
+  flag apagado las expresiones son textualmente las del tag con el mismo escalar de Python (verificador H8).
+- Suite completa con el árbol quieto: ver el cuerpo del PR (la primera corrida dio 2 fallas causadas por esta
+  rama, un guard de texto del fondo persistido y una cita `file:line` de CLAUDE.md que se corrió; las dos se
+  actualizaron).
 
-## 8. Si Nicolás decide encenderlo
+## 8. Verificador con contexto limpio
+
+Informe completo en `verificador/INFORME_VERIFICADOR.md` (Opus, contexto limpio, leyó el paper renderizado,
+re-corrió los dos scripts desde copias e hizo tres mediciones propias). Veredicto: partes 1, 2, 3 y 5
+**CONFIRMADAS**; la parte 4 era **PARCIAL** porque el Test 1 usaba la λ de B22 también en los píxeles de B21 (H10).
+Aplicado en esta rama: H1 (guard de texto que la rama rompía), H10 (Test 1 con λ por píxel), H11 (regla de
+origen con las temperaturas), H7 y H9 (números y borde de Chillán en este README), H12 (anotado en §6). H13: el
+script escribe sus salidas junto a sí mismo; correrlo de nuevo sobrescribe las commiteadas, que es lo buscado
+para reproducir, pero para una verificación conviene correr una copia.
+
+## 9. Si Nicolás decide encenderlo
 
 Es un cambio de magnitud publicada en MODIS (+5 a +7,5 %). La máscara de píxeles alertados no depende de esta
-λ y el tablero publica con `pc.vrp_mw > 0` (`frontend/index.html`, `isValidDetection`), que no cambia de signo,
-así que **no se abre ni se cierra ninguna publicación**. Sí hay un borde de régimen: el modo de un solo píxel
-(`single_pixel_sub_mw`) se corta en 5 MW (`SUB_MW_REGIME_THRESHOLD_MW`) y el tope D9 también vale 5 MW. De los 25
-records con K, **uno** está en ese borde: Chillán 2026-10-01 01:45, 4,804 MW en modo de un píxel con 2 píxeles;
-×1,05 pasa de 5 MW, deja el modo de un píxel y pasaría a sumar los dos, así que su cambio es mayor que el 5 %
-(cuánto, sin L1B, no se sabe). Pasos: flip del YAML, reproceso de los records MODIS con K desde el
+λ, y el signo del exceso tampoco (misma λ en píxel y fondo). El tablero, además de `pc.vrp_mw > 0`, filtra
+artefactos por magnitud (10 y 50 MW, `frontend/index.html`): el verificador corrió el predicado del tablero con
+node sobre los 743 records MODIS con K escalando la magnitud por 1,05, 1,0753 y 1,20 y **no cambió ninguna
+publicación** (control con ×100: 5 cambios). El píxel pico tampoco cambia en ningún record. Hay un borde de
+régimen: el modo de un solo píxel se corta en 5 MW. De los 25 records con K, **uno** lo cruza: Chillán
+2026-10-01 01:45, 4,804 MW; su segundo píxel tiene VRP 0 con cualquier λ, así que pasa a **5,064 MW** (×1,054,
+exactamente su F), sale del modo de un píxel (cambia la etiqueta, no el número) y el tope D9 no actúa porque su
+fondo es 271,72 K. Pasos: flip del YAML, reproceso de los records MODIS con K desde el
 2026-09-18 (o esperar al NRT y marcar la frontera), FICHA SDA a v-siguiente, y un control a los 7 días de que la
 razón MODIS contra MIROVA se movió en la dirección y el tamaño medidos acá. El auto-audit semanal compara
 magnitudes contra una banda: revisar que el +5 % no cruce el borde de ningún volcán.

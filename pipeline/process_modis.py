@@ -340,7 +340,7 @@ def merge_mir_bands(rad21, rad22, b22_primary):
     return np.where(np.isnan(rad21), rad22, rad21)
 
 
-def lambda_mir_por_pixel(rad21, rad22, b22_primary, por_banda):
+def lambda_mir_por_pixel(m21, m22, b22_primary, por_banda):
     """Longitud de onda con que cada temperatura MIR de `bt_mir` vuelve a radiancia.
 
     POR QUÉ (S157). La magnitud de Coppola 2016a (p. 8, Ec. 6 y 7) es un exceso en radiancia de la banda
@@ -351,7 +351,10 @@ def lambda_mir_por_pixel(rad21, rad22, b22_primary, por_banda):
 
     `por_banda=False` conserva el comportamiento histórico (BAND21_LAMBDA en todos los píxeles), que con B22
     primaria baja la magnitud ~5 % (experiments/_s157_lambda_b22/). La regla de origen es la de
-    `merge_mir_bands`; donde las dos bandas son NaN la temperatura también lo es y la λ no importa.
+    `merge_mir_bands`: el llamador pasa `bt21` y `bt22`, los MISMOS arreglos con que se arma `bt_mir`, para que
+    la decisión por NaN sea idéntica (con las radiancias diferiría donde la radiancia es negativa, que da NaN
+    en temperatura y no en radiancia; verificador S157 H11). Donde las dos son NaN la temperatura también lo es
+    y la λ no importa.
 
     Con `por_banda=False` devuelve el ESCALAR BAND21_LAMBDA, no un arreglo: el código histórico hacía la
     cuenta de Planck con un escalar de Python sobre temperaturas float32 y un arreglo float64 la haría en
@@ -359,11 +362,11 @@ def lambda_mir_por_pixel(rad21, rad22, b22_primary, por_banda):
     """
     if not por_banda:
         return BAND21_LAMBDA
-    lam21 = np.full(np.shape(rad21), BAND21_LAMBDA, dtype=np.float64)
-    lam22 = np.full(np.shape(rad22), BAND22_LAMBDA, dtype=np.float64)
+    lam21 = np.full(np.shape(m21), BAND21_LAMBDA, dtype=np.float64)
+    lam22 = np.full(np.shape(m22), BAND22_LAMBDA, dtype=np.float64)
     if b22_primary:
-        return np.where(np.isnan(rad22), lam21, lam22)
-    return np.where(np.isnan(rad21), lam22, lam21)
+        return np.where(np.isnan(m22), lam21, lam22)
+    return np.where(np.isnan(m21), lam22, lam21)
 
 
 def lambda_en(lam, rows, cols):
@@ -594,7 +597,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     bt_mir = merge_mir_bands(bt21, bt22, ENABLE_MODIS_B22_PRIMARY)
     # S157: la λ de la vuelta a radiancia sale de la MISMA regla de origen (ver lambda_mir_por_pixel). Con el
     # flag apagado las dos son BAND21_LAMBDA y todo lo de abajo queda bit a bit como antes.
-    _lam_pix = lambda_mir_por_pixel(rad21, rad22, ENABLE_MODIS_B22_PRIMARY, ENABLE_MODIS_MIR_LAMBDA_POR_BANDA)
+    _lam_pix = lambda_mir_por_pixel(bt21, bt22, ENABLE_MODIS_B22_PRIMARY, ENABLE_MODIS_MIR_LAMBDA_POR_BANDA)
     _lam_bg = lambda_mir_fondo(ENABLE_MODIS_B22_PRIMARY, ENABLE_MODIS_MIR_LAMBDA_POR_BANDA)
 
     # F2.8 S73 H3: defensa secundaria post-Planck-inversion.
@@ -787,7 +790,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         test1_res = compute_test1_mir(
             bt=bt_mir, lat=lat, lon=lon,
             vent_lat=vent_lat, vent_lon=vent_lon,
-            lambda_um=_lam_bg,  # S157: escalar; con el flag apagado es BAND21_LAMBDA
+            lambda_um=_lam_pix,  # S157: λ por píxel; con el flag apagado es el escalar BAND21_LAMBDA
             roi_km=TEST1_ROI_KM,
             inner_ring_km=TEST1_INNER_RING_KM,
             k_sigma=TEST1_K_SIGMA,
@@ -1198,7 +1201,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                     _corona_pix = cluster_vrp_per_pixel_with_bg(
                         bt_mir, pixel_areas, _c["pixel_indices"],
                         _t_bk_corona, WOOSTER_COEFF, _lam_bg,
-                        lambda_grid=_lam_pix if np.ndim(_lam_pix) else None,  # S157: λ por píxel; el fondo con la de la banda primaria
+                        lambda_grid=_lam_pix if np.ndim(_lam_pix) else None,  # S157: λ por píxel, fondo con la primaria
                     )
                     _vrp_c = sum_cluster_vrp(_corona_pix)
                     _vrp_pp_eff = vrp_per_pixel_2d.copy()

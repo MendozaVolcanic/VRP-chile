@@ -6,7 +6,7 @@ CÓMO. Carga `pipeline/process_modis.py` tal como estaba en el tag `pre-s157-lam
 módulo hermano, y corre los dos procesadores sobre las mismas escenas sintéticas con los mismos flags,
 comparando el record completo serializado. Las combinaciones cubren los sitios tocados: B22 primaria o no,
 kernel de fondo local por volcán, magnitud por corona (que llama a `cluster_vrp_per_pixel_with_bg`), camino
-de vent y escena con un píxel de B22 saturado.
+de vent, Test 1 integrado y escena con un píxel de B22 saturado.
 
 P1 (si estuviera roto, lo vería): CONTROL con el flag ENCENDIDO en el procesador nuevo; tiene que dar distinto
 en las escenas con B22 primaria, si no la comparación no ve la λ.
@@ -48,8 +48,10 @@ def _cargar_viejo(ruta, nombre):
 
 vr_viejo = _cargar_viejo("pipeline/vrp_regimes.py", "pipeline._vr_viejo")
 viejo = _cargar_viejo("pipeline/process_modis.py", "pipeline._pm_viejo")
-# el viejo importó las funciones de magnitud por corona del vrp_regimes vivo: se las cambiamos por las del tag
+t1_viejo = _cargar_viejo("pipeline/test1_integrated.py", "pipeline._t1_viejo")
+# el viejo importó la magnitud por corona y el Test 1 de los módulos VIVOS: se los cambiamos por los del tag
 viejo.cluster_vrp_per_pixel_with_bg = vr_viejo.cluster_vrp_per_pixel_with_bg
+viejo.compute_test1_mir = t1_viejo.compute_test1_mir
 
 from test_lambda_por_banda_modis_s157 import CLAT, CLON, _escena  # noqa: E402
 
@@ -65,11 +67,12 @@ def escena(variante):
     return data
 
 
-def correr(mod, data, b22, kernel, corona, vent, flag):
+def correr(mod, data, b22, kernel, corona, vent, flag, t1=False):
     pats = [patch.object(mod, "read_modis_l1b", return_value=data),
             patch.object(mod, "ENABLE_MODIS_B22_PRIMARY", b22),
             patch.object(mod, "ENABLE_LOCAL_CLUSTER_MAGNITUDE", corona),
-            patch.object(mod, "ENABLE_VENT_PATH_MODIS", vent)]
+            patch.object(mod, "ENABLE_VENT_PATH_MODIS", vent),
+            patch.object(mod, "ENABLE_TEST1_PATH", t1)]
     if hasattr(mod, "ENABLE_MODIS_MIR_LAMBDA_POR_BANDA"):
         pats.append(patch.object(mod, "ENABLE_MODIS_MIR_LAMBDA_POR_BANDA", flag))
     for p in pats:
@@ -86,27 +89,31 @@ def correr(mod, data, b22, kernel, corona, vent, flag):
 
 def main():
     n = iguales = control_distinto = control_n = 0
-    for variante, b22, kernel, corona, vent in product(("base", "sin_saturado", "debil"), (True, False),
-                                                       (False, True), (False, True), (False, True)):
-        a = correr(viejo, escena(variante), b22, kernel, corona, vent, None)
-        b = correr(nuevo, escena(variante), b22, kernel, corona, vent, False)
+    for variante, b22, kernel, corona, vent, t1 in product(("base", "sin_saturado", "debil"), (True, False),
+                                                           (False, True), (False, True), (False, True),
+                                                           (False, True)):
+        a = correr(viejo, escena(variante), b22, kernel, corona, vent, None, t1)
+        b = correr(nuevo, escena(variante), b22, kernel, corona, vent, False, t1)
         n += 1
         iguales += a == b
         if a != b:
-            print("DISTINTO", variante, b22, kernel, corona, vent)
+            print("DISTINTO", variante, b22, kernel, corona, vent, t1)
         if b22:
-            c = correr(nuevo, escena(variante), b22, kernel, corona, vent, True)
+            c = correr(nuevo, escena(variante), b22, kernel, corona, vent, True, t1)
             control_n += 1
             control_distinto += c != a
     # Cobertura (P2): cada camino tocado tiene que CAMBIAR el record cuando se enciende; si no cambia, la
     # escena no lo ejercita y la identidad de arriba no dice nada de él.
     cob = {}
-    for nombre, idx in (("kernel_local", 0), ("corona", 1), ("vent", 2)):
+    for nombre, idx in (("kernel_local", 0), ("corona", 1), ("vent", 2), ("test1", 3)):
         cambia = 0
         for variante, b22 in product(("base", "sin_saturado", "debil"), (True, False)):
             base = [False, False, False]
-            on = list(base); on[idx] = True
-            cambia += correr(nuevo, escena(variante), b22, *base, False) != correr(nuevo, escena(variante), b22, *on, False)
+            on = list(base) + [False]
+            on[idx] = True
+            a0 = correr(nuevo, escena(variante), b22, *base, False)
+            a1 = correr(nuevo, escena(variante), b22, *on[:3], False, on[3])
+            cambia += a0 != a1
         cob[nombre] = cambia
     print(f"cobertura (de 6 escenas, cuántas cambian al encender el camino): {cob}")
     print(f"flag apagado: {iguales} de {n} combinaciones idénticas al tag {TAG}")
