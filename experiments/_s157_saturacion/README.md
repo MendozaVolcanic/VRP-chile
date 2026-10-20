@@ -20,8 +20,10 @@ sature la banda **térmica** (I05, M15, B31) para que el NTI quede en NaN y el p
 MIR esté sana. Si eso le pasa al píxel más caliente del cráter, la energía que falta es justo la del foco.
 
 El bit está verificado contra el UserGuide (`documentacion/VIIRS_L1B_UserGuide_Aug2021`, Tabla C.1: «4 = Saturation»,
-asignado cuando el conteo L1A llega a 4095; la radiancia se fija al «Reported Range» de la Tabla C.3) y el probe guarda
-los atributos `flag_masks` y `flag_meanings` del propio archivo para verificarlo contra el producto.
+asignado cuando el conteo L1A llega a 4095; para las bandas I y M la nota 1 de la p. 41 fija el DN en 4095, y lo de
+la radiancia fijada al «Reported Range» es de la DNB, Tabla C.2; corregido tras el verificador) y el probe guarda los
+atributos `flag_masks` y `flag_meanings` del propio archivo para verificarlo contra el producto (no se llegó a hacer:
+ver Resultado).
 
 ## Qué corre
 
@@ -90,6 +92,59 @@ mañana más 26 pasadas de un volcán son el caso, no la muestra.
   (el último): el orden pasa a C, B, POS y A, para que las pasadas que CMR sí indexa (C y B, del 2026-09-28 al
   2026-10-16) no dependan de la caída del 18; el respaldo de LAADS usa `earthaccess.download` con la URL y guarda el
   comienzo de la respuesta si vuelve a fallar.
+
+## Resultado (run 39512756808, 2026-10-20 23:06 UTC, `454e66931`): el probe NO midió lo que quería medir
+
+Tercer y último despacho (el coordinador pidió no volver a despachar). Salida: `analizar_saturacion_salida.txt`
+(`analizar_saturacion.py resultado`), artefactos en `resultado/`.
+
+- **Qué bajó.** 2 de 40 pasadas: el control C de MODIS Terra (2026-10-06 01:45, cenit 2,5°) y una oblicua del grupo
+  B, VIIRS 750 de Suomi NPP del 2026-09-29 06:36 (cenit 55,8°; publicamos 0,329 MW, MIROVA 2,03).
+- **Por qué no bajó el resto.** (1) Descargas de VJ202 (NOAA-21) rechazadas con HTTP 401 por
+  `data.laadsdaac.earthdatacloud.nasa.gov`, las primeras dos del job V375, que abortó por el corte de las dos primeras
+  fallas; la de Suomi NPP sí bajó. No se tocó ninguna credencial (A71). (2) **Defecto propio**: el job V750_MODIS se
+  cayó al escribir el JSON de la pasada de Suomi NPP porque `flag_meanings` llega como arreglo de bytes. Arreglado
+  después del run (`_a_texto`, `_a_json`), sin volver a correr. (3) El grupo A (2026-10-18) nunca llegó a intentarse
+  en este run (iba al final); en los dos runs anteriores CMR no lo indexaba y LAADS no lo entregó.
+- **Lo medido.** Control C de MODIS: 0 códigos SI > 32767 en B21, B22 y B31 en los 89 píxeles de la ventana, 0
+  perdidos, C-P1 en verde (C-0 cumple, trivialmente: noche fría). Oblicua V750 del 29-sep (sólo en el log, C-IDX no
+  quedó registrado, así que el agregado no la cuenta): **0 bits 4, 0 bits 2, 0 en el tope de la LUT y 0 perdidos por
+  el lector en M13 y en M15** sobre 156 píxeles de la ventana, cota 0,0 MW contra una falta de 1,70 MW. Coincide con
+  PS-1, pero es una pasada. (PS-1 decía «techo de reporte ~634 K»: ese es el techo de Campus 2022 que usa el pipeline; el de la Tabla C.3 es 683 K, línea 1 de la salida del análisis.)
+- **Hallazgo lateral, sin verificar.** En esa misma ventana, **44 de 156 píxeles traen M15 en sentinela** (DN
+  65532 a 65535) y M13 sano. Un sentinela no es saturación, pero el lector lo pone en NaN y el NTI de ese píxel no
+  existe. Si el código es 65533 (Bowtie_Deleted), el terreno lo ve el barrido vecino y no se pierde nada; si es otro,
+  sí. El contador no los contaba como perdidos (la BT cruda ya es NaN). Desde este commit el probe separa los
+  sentinelas por código (`sentinela_codigos`). Que M15 tenga sentinelas y M13 ninguno en la misma ventana es raro y
+  merece mirarse antes de creerlo.
+- **C-POS** no se alcanzó (iba después de las oblicuas). El contador sólo quedó validado por C-SIN (en verde en los
+  dos runners) y por el control nadir de MODIS.
+
+**Verificador con contexto limpio** (en primer plano, mismo día). Confirma el bit (Tabla C.1, p. 40, renderizada;
+la máscara se aplica a la banda correcta, como `process_viirs_mod.py`), los números de la pasada del 29-sep y el
+veredicto, y observa:
+- La cota 0 de esa pasada sale de **0 perdidos**, no de medir energía. Hay evidencia independiente más fuerte: el
+  `t_max_k` persistido de esa pasada es **273,28 K** (`pasadas.json`), el máximo de M13 en todo el ROI, así que la
+  saturación de M13 o M15 era físicamente imposible ahí sin necesidad del probe.
+- Lo que el contador deja fuera: los sentinelas (BT cruda ya NaN), los píxeles del cúmulo que entran recortados en el
+  tope (se cuentan aparte, sin cota), y en MODIS «perdido» es un modelo del probe, no la salida de `read_modis_l1b`,
+  e incluye cualquier código SI > 32767. La cota supone que un píxel perdido se habría alertado.
+- Los 44 sentinelas de M15 con M13 sano son **incoherentes con el bowtie**, que borra todas las bandas M: queda SIN
+  EVIDENCIA qué son. El probe ahora cuenta las máscaras 256 (Bowtie_Deleted) y 2048 (Dead_Detector).
+- Nombres: en este probe «bit2_oor» es la máscara 2 y «bit4_sat» la máscara 4; el pipeline llama «bit-2» a la
+  máscara 4 (posición del bit). Mismo bit, dos nombres.
+- El caso que motivó el probe (2026-10-18 06:48, falta de ~20 MW) **no se midió**. Pista del verificador, sin
+  verificar: en esa pasada VIIRS 375 ve ~310 K; un foco así llenando parte de un píxel M debería subir M13 sobre los
+  273 K que marca, lo que apunta a geometría (D17) más que a saturación.
+Aplicado: corrección de la cita, máscaras 256 y 2048, fondo de MODIS en la longitud de onda de la banda de la que sale
+la radiancia (B22 o B21), B22 en el veredicto de MODIS (recortada en 32767 cuenta; inválida no, porque con K entra la
+B21), y C-SIN extendido a `crudo_viirs` (HDF5 sintético) y `contar_modis`, con mutaciones de las máscaras 4 y 256
+atrapadas por aserción. C-POS sigue sin correr: el contador de MODIS no ha mostrado en datos reales que puede dar
+distinto de cero.
+
+**Veredicto.** Con una pasada oblicua medida no se puede decir si la saturación explica el déficit oblicuo de Chillán.
+Lo único medido apunta a que no (0 saturados, cota 0 contra 1,70 MW de falta), igual que la predicción PS-1 por física
+del sensor (M13 de doble ganancia, techo de reporte de 683 K según la Tabla C.3), pero es el caso, no la muestra.
 
 ## Reproducir
 

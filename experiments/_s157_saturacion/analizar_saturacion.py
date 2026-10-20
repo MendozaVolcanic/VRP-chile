@@ -101,7 +101,9 @@ def main():
             return "65533 %d inval %d (cum %d)" % (v.get("si_65533_sat", 0), v.get("si_invalido", 0), cu.get("si_invalido", 0))
         if p["sensor"].startswith("MODIS"):
             ver = "descartada" if r.get("n_perdidos_ventana", 0) == 0 and all(
-                (c[b]["cumulo"]["si_invalido"] == 0) for b in ("B21", "B31")) else (
+                # B22 inválida en el cúmulo no es pérdida (con K entra la B21, D21); B22 en 32767 sí entra recortada.
+                (c[b]["cumulo"]["si_invalido"] == 0 or b == "B22") and c[b]["cumulo"]["tope_32767"] == 0
+                for b in ("B21", "B22", "B31")) else (
                 "cierra" if (falta is not None and (r.get("cota_inferior_mw") or 0) >= falta) else "indeterminada")
         else:
             ver = veredicto(r, mir, tir, falta)
@@ -122,16 +124,43 @@ def main():
                       "bt_cruda_max_ventana": r.get("bt_cruda_max_ventana"),
                       "bt_pipeline_max_ventana": r.get("bt_pipeline_max_ventana")})
     print("\nFALLIDAS: %s" % malos if malos else "\nFALLIDAS: ninguna")
+    # Enmienda post hoc (run 39512756808): un job se cayó al ESCRIBIR el JSON de una pasada que sí se midió; su
+    # resultado quedó sólo en el log (línea «cota ... | C-P1 ... | {conteos de la ventana}»). Se lee de ahí, marcado.
+    con_json = {f["granulo"] for f in filas if "granulo" in f}
+    for lg in sorted(Path(a.dir).rglob("probe_*.log")):
+        actual = None
+        for linea in lg.read_text(encoding="utf-8", errors="replace").splitlines():
+            if linea.startswith("== "):
+                actual = linea.split()[1:4]
+            elif linea.startswith("   cota ") and actual and actual[2] not in con_json:
+                cota = linea.split()[1]
+                cp1 = "(True" in linea.split("|")[1]
+                try:
+                    cont = json.loads(linea.split("|", 2)[2].strip())
+                except ValueError:
+                    cont = "truncado"
+                pas = {x["granulo"]: x for x in json.loads((Path(__file__).resolve().parent / "pasadas.json")
+                                                           .read_text(encoding="utf-8"))}.get(actual[2], {})
+                es375 = actual[1].startswith("VIIRS") and not actual[1].endswith("_750")
+                pub = (pas.get("f5_core_vrp_mw") if es375 and pas.get("f5_core_vrp_mw") is not None
+                       else pas.get("pc_vrp_mw")) or 0.0   # persistido; C-P1 en verde dice que el control lo reproduce
+                M = pas.get("mirova_mw")
+                print("SOLO LOG %s %s %s | cenit %s | M %s pub %.3f falta %s | cota %s MW | C-P1 %s | ventana %s" % (
+                    actual[0], actual[1], actual[2], pas.get("cenit"), M, pub,
+                    "-" if M is None else "%.3f" % (M - pub), cota, cp1, json.dumps(cont)))
+                filas.append({"grupo": actual[0], "sensor": actual[1], "granulo": actual[2], "solo_log": True,
+                              "cota_inferior_mw": None if cota == "None" else float(cota), "C_P1": cp1,
+                              "ventana": cont})
     print("\nCONTROLES")
     c0 = [f for f in filas if f["grupo"] == "C"]
     print("   C-0  (grupo C sin perdidos ni bit 4): %s" % [
         (f["sensor"], f["n_perdidos_ventana"], f["veredicto"]) for f in c0])
     pos = [f for f in filas if f["grupo"] == "POS"]
     print("   C-POS (65533 > 0 en Planchón Peteroa): %s" % [f["C_POS_ok"] for f in pos])
-    nint = [f for f in filas if f["grupo"] in "AB" and not (f["C_P1"] and f["C_IDX"])]
+    nint = [f for f in filas if f["grupo"] in "AB" and not (f["C_P1"] and f.get("C_IDX"))]
     print("   pasadas que fallan C-P1 o C-IDX (no se interpretan): %s" % [(f["sensor"], f["granulo"][9:22]) for f in nint])
     print("\nAGREGADO (grupos A y B con alerta de MIROVA, controles en verde)")
-    ok = [f for f in filas if f["grupo"] in "AB" and f["mirova_mw"] is not None and f["C_P1"] and f["C_IDX"]]
+    ok = [f for f in filas if f["grupo"] in "AB" and f.get("mirova_mw") is not None and f["C_P1"] and f.get("C_IDX")]
     for nombre, sel in (("oblicuas (cenit >= 50)", [f for f in ok if (f["cenit"] or 0) >= 50]),
                         ("no oblicuas (cenit < 50)", [f for f in ok if (f["cenit"] or 0) < 50])):
         for fam in ("VIIRS375", "VIIRS750", "MODIS"):

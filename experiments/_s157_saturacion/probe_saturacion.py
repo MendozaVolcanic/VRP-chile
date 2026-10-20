@@ -60,7 +60,8 @@ from pipeline.geo_utils import get_detection_anchor  # noqa: E402
 from pipeline.scan_geometry import haversine_km  # noqa: E402
 
 FLAG_DNS_VIIRS = (65532, 65533, 65534, 65535)
-BIT_OOR, BIT_SAT, BIT_SOMESAT = 2, 4, 128
+# Máscaras de la Tabla C.1 (UserGuide p. 40), nombradas por su VALOR (el pipeline llama «bit-2» a la máscara 4).
+BIT_OOR, BIT_SAT, BIT_SOMESAT, BIT_BOWTIE, BIT_DEAD = 2, 4, 128, 256, 2048
 POSITIVO = {"grupo": "POS", "volcan": "PlanchonPeteroa", "sensor": "MODIS_AQUA",
             "granulo": "MYD021KM.A2026077.0805.061.2026078200542.hdf"}
 
@@ -80,6 +81,24 @@ def planck(bt, lam):
 # ---------------------------------------------------------------------------------------------------------------
 # Lectura cruda
 # ---------------------------------------------------------------------------------------------------------------
+def _a_texto(v):
+    """Atributo HDF5 a algo serializable. Run 39512756808: `flag_meanings` llega como arreglo de bytes y `tolist()`
+    deja bytes adentro, que json no serializa; el job se cayó al escribir la primera pasada VIIRS."""
+    if hasattr(v, "tolist"):
+        v = v.tolist()
+    if isinstance(v, bytes):
+        return v.decode("utf-8", "replace")
+    if isinstance(v, (list, tuple)):
+        return [_a_texto(x) for x in v]
+    return v if isinstance(v, (int, float, str, bool)) or v is None else str(v)
+
+
+def _a_json(x):
+    if isinstance(x, bytes):
+        return x.decode("utf-8", "replace")
+    return p871.a_json(x)
+
+
 def crudo_viirs(l1b, bandas):
     import h5py
     out = {}
@@ -96,7 +115,7 @@ def crudo_viirs(l1b, bandas):
             at = {}
             if qf is not None:
                 for k, v in obs[qfk].attrs.items():
-                    at[k] = v.tolist() if hasattr(v, "tolist") else (v.decode() if isinstance(v, bytes) else str(v))
+                    at[k] = _a_texto(v)
             out[b] = {"dn": dn, "qf": qf, "bt": bt, "lut_max": float(lut_ok.max()), "qf_attrs": at,
                       "valid_max": (obs[b].attrs.get("valid_max").tolist() if "valid_max" in obs[b].attrs else None)}
     return out
@@ -117,8 +136,17 @@ def contar_viirs(raw, pipe, mir, tir, ventana, cumulo, vecinos):
             d[nombre] = {"n": int(m.sum()), "bit4_sat": int(((qf & BIT_SAT) != 0)[m].sum()),
                          "bit2_oor": int(((qf & BIT_OOR) != 0)[m].sum()),
                          "bit128_somesat": int(((qf & BIT_SOMESAT) != 0)[m].sum()),
+                         # Verificador: el bowtie borra todas las bandas M, así que un sentinela sólo en M15 pide
+                         # saber si es Bowtie_Deleted (256) o Dead_Detector (2048).
+                         "mask256_bowtie": int(((qf & BIT_BOWTIE) != 0)[m].sum()),
+                         "mask2048_dead": int(((qf & BIT_DEAD) != 0)[m].sum()),
                          "tope_lut": int(tope[m].sum()), "perdidos_pipeline": int(lost[m].sum()),
-                         "sentinela": int(np.isin(r["dn"], FLAG_DNS_VIIRS)[m].sum())}
+                         "sentinela": int(np.isin(r["dn"], FLAG_DNS_VIIRS)[m].sum()),
+                         # Run 39512756808: 44 de 156 píxeles de la ventana con M15 en sentinela y M13 sano. Un
+                         # sentinela no es saturación, pero borra el NTI igual; se separa por código (65532 Missing_EV,
+                         # 65533 Bowtie_Deleted, 65534 Cal_Fail, 65535 Fill; FLAG_DNS de process_viirs.py).
+                         "sentinela_codigos": {str(c): int((r["dn"][m] == c).sum()) for c in FLAG_DNS_VIIRS
+                                               if int((r["dn"][m] == c).sum())}}
         d["lut_max_k"] = r["lut_max"]
         d["qf_attrs"] = r["qf_attrs"]
         d["valid_max_dn"] = r["valid_max"]
@@ -192,13 +220,16 @@ def cota_viirs(raw, mir, perdido, ventana, t_bg, lam, k_area, dist):
 
 def cota_modis(raw, perdido, ventana, t_bg, k_area, dist, pm):
     filas = []
-    lam = pm.BAND21_LAMBDA
     if t_bg is None or k_area is None:
         return [{"error": "sin t_bg o sin área", "n": int((perdido & ventana).sum())}]
-    L_bg = pm.C1 / (lam ** 5 * (np.exp(pm.C2 / (lam * t_bg)) - 1))
+    planck = lambda lam: pm.C1 / (lam ** 5 * (np.exp(pm.C2 / (lam * t_bg)) - 1))  # noqa: E731
     for i, j in zip(*np.where(perdido & ventana)):
         r22, r21 = raw["B22"]["rad"][i, j], raw["B21"]["rad"][i, j]
-        L = r22 if np.isfinite(r22) else (r21 if np.isfinite(r21) else raw["B21"]["rad_tope"])
+        # Verificador: el fondo va en la longitud de onda de la banda de la que sale la radiancia (B22 o B21).
+        if np.isfinite(r22):
+            L, L_bg = r22, planck(pm.BAND22_LAMBDA)
+        else:
+            L, L_bg = (r21 if np.isfinite(r21) else raw["B21"]["rad_tope"]), planck(pm.BAND21_LAMBDA)
         filas.append({"ij": [int(i), int(j)], "dist_km": round(float(dist[i, j]), 3), "L_mir": float(L),
                       "si": {b: int(raw[b]["si"][i, j]) for b in raw}, "mw": max(float(L) - L_bg, 0.0) * k_area / 1e6})
     return filas
@@ -396,7 +427,7 @@ def main():
         finally:
             shutil.rmtree(dest, ignore_errors=True)
         tag = "%s_%s_%s" % (p["grupo"], p["sensor"], ".".join(p["granulo"].split(".")[1:3]))
-        (out / (tag + ".json")).write_text(json.dumps(res, default=p871.a_json, ensure_ascii=False, indent=1),
+        (out / (tag + ".json")).write_text(json.dumps(res, default=_a_json, ensure_ascii=False, indent=1),
                                            encoding="utf-8")
     print("\nfaltan %d de %d" % (faltan, len(pas)))
     return 2 if faltan else 0

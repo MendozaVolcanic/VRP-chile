@@ -61,6 +61,62 @@ def main():
         print("   cota %.4f MW esperada %.4f" % (cota, cota_esp))
         if abs(cota - cota_esp) > 1e-9:
             fallas.append("cota %s" % con)
+    # Verificador S157: C-SIN tampoco probaba la lectura cruda ni el contador de MODIS.
+    # crudo_viirs sobre un HDF5 sintético con la forma del L1B (observation_data/<banda>, _quality_flags, _lut).
+    import tempfile
+    import h5py
+    with tempfile.TemporaryDirectory() as td:
+        fn = Path(td) / "sintetico.nc"
+        lut = np.linspace(200.0, 367.0, 65528).astype(np.float32)
+        lut = np.concatenate([lut, np.full(8, -999.9, dtype=np.float32)])
+        dn = np.full((3, 3), 1000, dtype=np.uint16)
+        dn[1, 1] = 65527                     # tope de la LUT
+        dn[0, 0] = 65533                     # sentinela
+        qf = np.zeros((3, 3), dtype=np.uint16)
+        qf[1, 1] = 4
+        qf[0, 0] = 256
+        with h5py.File(fn, "w") as f:
+            g = f.create_group("observation_data")
+            g["I04"] = dn
+            g["I04_quality_flags"] = qf
+            g["I04_quality_flags"].attrs["flag_masks"] = np.array([1, 2, 4, 256], dtype=np.uint16)
+            g["I04_quality_flags"].attrs["flag_meanings"] = np.array(
+                [b"Substitute_Cal", b"Out_of_Range", b"Saturation", b"Bowtie_Deleted"])
+            g["I04_brightness_temperature_lut"] = lut
+        raw = ps.crudo_viirs(fn, ("I04",))
+    r = raw["I04"]
+    got = (bool(np.isnan(r["bt"][0, 0])), round(float(r["bt"][1, 1]), 2), round(r["lut_max"], 2),
+           r["qf_attrs"]["flag_meanings"][2], int(r["qf"][1, 1]))
+    esp = (True, 367.0, 367.0, "Saturation", 4)
+    print("crudo_viirs %s esperado %s" % (got, esp))
+    if got != esp:
+        fallas.append("crudo_viirs")
+    raw["I05"] = dict(r)
+    pipe = {"I04": np.where(r["qf"] == 4, np.nan, r["bt"]), "I05": r["bt"].copy()}
+    nada = np.zeros((3, 3), dtype=bool)
+    cont, _ = ps.contar_viirs(raw, pipe, "I04", "I05", np.ones((3, 3), dtype=bool), nada, nada)
+    v = cont["I04"]["ventana"]
+    got = (v["bit4_sat"], v["mask256_bowtie"], v["sentinela"], v["sentinela_codigos"], v["perdidos_pipeline"])
+    esp = (1, 1, 1, {"65533": 1}, 1)
+    print("contar_viirs (máscaras 4 y 256, sentinela) %s esperado %s" % (got, esp))
+    if got != esp:
+        fallas.append("contar_viirs máscaras")
+    # contar_modis: B22 saturada (65533) con B21 sana no es pérdida; B31 inválida sí.
+    sh = (3, 3)
+
+    def banda(si):
+        return {"si": si, "rad": np.where(si > 32767, np.nan, si * 0.001), "rad_tope": 32.767, "lam": 3.9}
+    si22 = np.full(sh, 1000)
+    si22[1, 1] = 65533
+    si31 = np.full(sh, 1000)
+    si31[0, 2] = 65533
+    rawm = {"B21": banda(np.full(sh, 1000)), "B22": banda(si22), "B31": banda(si31)}
+    cm, perdm = ps.contar_modis(rawm, np.ones(sh, dtype=bool), np.zeros(sh, dtype=bool), np.zeros(sh, dtype=bool))
+    got = (cm["B22"]["ventana"]["si_65533_sat"], cm["B31"]["ventana"]["si_invalido"], int(perdm.sum()), bool(perdm[0, 2]))
+    esp = (1, 1, 1, True)
+    print("contar_modis %s esperado %s" % (got, esp))
+    if got != esp:
+        fallas.append("contar_modis")
     print("FALLAS: %s" % fallas if fallas else "C-SIN OK")
     return 1 if fallas else 0
 
