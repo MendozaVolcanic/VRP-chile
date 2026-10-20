@@ -509,6 +509,21 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~13:30 UTC (S157): 1.34 en #875 y 1.35 en #874, los dos en borrador con CI verde
+- **#874** (1.35, auto-audit por cenit y régimen, sólo `scripts/auto_audit_weekly.py` y su prueba): CI verde,
+  CLEAN, 7 de 7 mutaciones. Control positivo: la magnitud de Chillán cae con el cenit en los tres sensores (MODIS
+  0,707 a z<30 contra 0,171 a 0,203 en tramos oblicuos; VIIRS 375 no monótona, con n chico). Verificador limpio:
+  CON OBSERVACIONES, nada bloquea (no regresión, particiones, falsas V375 y corte #535 comprobados). Pedidas al autor:
+  conteo de noches con la misma pasada (35 de 98 en V375 no coinciden a ±120 s: el tramo no es la curva pareada de
+  S154), régimen partido en #571, y una prueba de no regresión que sí corra en el CI (`fetch-depth: 1` salta la de
+  SHA fijo). En curso.
+- **#875** (1.34, `docs/SINTOMAS.md`, 9 síntomas, 219 líneas): CI verde, CLEAN; verificador en primer plano aplicado.
+  Fuera de lo pedido, marcó con S157 (A113) D17 y `docs/s130/GRADIENTE_CENITAL.md`, que seguían dando la caída con el
+  ángulo por D17 probado sin la marca de 1.14. Hallazgo: A118 dice «D18 nunca se ha medido» (obsoleto; anotado).
+- `experiments/_s153_deriva_123bis/` (citado en la marca S153 de A85 en CLAUDE.md) **existe en `loop/activo`**
+  (vuelta 192, `97b027a0`) y no en `main`: no es una cita inventada, es una cita a otra rama. Pendiente: llevarlo a
+  `main` o anotar la rama en la marca.
+
 ### 2026-10-20 12:30 UTC (S157): NRT vacío mientras CMR cae (se recupera solo); #870 cerrado; 1.34 y 1.35 lanzadas
 - Nicolás: «continúa acá» (seguir en esta sesión, no abrir otras).
 - NRT: runs `success` a las 09:10, 10:10, 11:10 y 12:10 UTC sin un solo commit de datos (último, 07:50). El
