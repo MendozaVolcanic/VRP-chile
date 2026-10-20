@@ -148,3 +148,198 @@ def test_un_trozo_no_resucita_records_fuera_de_su_ventana(tmp_path):
     j = [r for r in con["records"] if r["datetime_utc"].startswith("2026-06")][0]
     assert j["vrp_mw"] == 9.9, "el trozo de junio debe conservar su reproceso"
     assert len(con["records"]) == 2, "mayo y junio, sin duplicados"
+
+
+# ---------------------------------------------------------------------------
+# S157: --base. El merge conserva lo que el archivo de destino ya tiene fuera
+# de las ventanas de la corrida.
+#
+# POR QUE: sin base, el merge escribia data/<perfil>/<Vol>.json SOLO con los
+# trozos de su propia corrida. Relanzar dos trozos caidos de un volcan borraba
+# en main todo el resto de su historico (paso con NevadosDeChillan en S157).
+# ---------------------------------------------------------------------------
+
+def _dump(path, store):
+    """Igual que pipeline/store.py::_save: indent=2, ensure_ascii por defecto."""
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(store, f, indent=2)
+    return path
+
+
+def _tres_meses():
+    abril = [_rec("2026-04-02T05:00:00Z", vrp=0.1), _rec("2026-04-20T05:10:00Z", "MODIS_AQUA", 0.2)]
+    mayo = [_rec("2026-05-03T05:00:00Z", vrp=0.3), _rec("2026-05-15T05:00:00Z", vrp=0.4)]
+    junio = [_rec("2026-06-07T05:00:00Z", vrp=0.5), _rec("2026-06-29T06:00:00Z", vrp=0.6)]
+    return abril, mayo, junio
+
+
+def _correr(out, base, ventanas, trozos):
+    args = ["--out", str(out)]
+    if base is not None:
+        args += ["--base", str(base)]
+    if ventanas is not None:
+        args += ["--ventanas", *ventanas]
+    return main(args + ["--", *[str(t) for t in trozos]])
+
+
+def _records(path):
+    return json.loads(Path(path).read_text(encoding="utf-8"))["records"]
+
+
+def test_base_conserva_las_ventanas_que_la_corrida_no_toca(tmp_path):
+    abril, mayo, junio = _tres_meses()
+    base = _dump(tmp_path / "base.json", _store("V", "2026-10-01T00:00:00Z", abril + mayo + junio))
+    # el trozo de mayo reprocesa: cambia una pasada, pierde otra y trae una nueva
+    mayo_k = [_rec("2026-05-03T05:00:00Z", vrp=9.3), _rec("2026-05-28T05:00:00Z", vrp=9.8)]
+    trozo = _dump(tmp_path / "c_mayo.json", _store("V", "2026-10-20T00:00:00Z", abril + mayo_k + junio))
+    out = tmp_path / "out" / "V.json"
+
+    assert _correr(out, base, ["2026-05-01:2026-05-31"], [trozo]) == 0
+
+    recs = _records(out)
+    fuera = [r for r in recs if not r["datetime_utc"].startswith("2026-05")]
+    dentro = [r for r in recs if r["datetime_utc"].startswith("2026-05")]
+    # abril y junio: los de la base, byte a byte y en el mismo orden
+    assert [json.dumps(r) for r in fuera] == [json.dumps(r) for r in abril + junio]
+    # mayo: exactamente lo del trozo; la pasada 05-15 de la base NO resucita
+    assert [json.dumps(r) for r in dentro] == [json.dumps(r) for r in mayo_k]
+
+
+def test_base_conserva_aunque_el_trozo_no_traiga_los_otros_meses(tmp_path):
+    """El caso de Chillan: el artefacto del trozo trae sólo su tramo (perfil
+    nuevo o checkout sin el resto). Abril y junio tienen que salir de la base."""
+    abril, mayo, junio = _tres_meses()
+    base = _dump(tmp_path / "base.json", _store("V", "2026-10-01T00:00:00Z", abril + mayo + junio))
+    trozo = _dump(tmp_path / "c.json", _store("V", "2026-10-20T00:00:00Z", mayo))
+    out = tmp_path / "V.json"
+
+    assert _correr(out, base, ["2026-05-01:2026-05-31"], [trozo]) == 0
+
+    assert [json.dumps(r) for r in _records(out)] == \
+        [json.dumps(r) for r in abril + mayo + junio]
+
+
+def test_base_identica_al_trozo_da_el_mismo_archivo_byte_a_byte(tmp_path):
+    abril, mayo, junio = _tres_meses()
+    st = _store("V", "2026-10-01T00:00:00Z", abril + mayo + junio)
+    base = _dump(tmp_path / "base.json", st)
+    trozo = _dump(tmp_path / "c.json", st)
+    out = tmp_path / "V.json"
+
+    assert _correr(out, base, ["2026-05-01:2026-05-31"], [trozo]) == 0
+
+    assert out.read_bytes() == base.read_bytes()
+
+
+@pytest.mark.parametrize("base_vacia", ["no_existe", "sin_records"])
+def test_sin_base_util_el_resultado_es_el_de_siempre(tmp_path, base_vacia):
+    abril, mayo, junio = _tres_meses()
+    trozo = _dump(tmp_path / "c.json", _store("V", "2026-10-20T00:00:00Z", abril + mayo + junio))
+    base = tmp_path / "base.json"
+    if base_vacia == "sin_records":
+        _dump(base, _store("V", "2026-10-01T00:00:00Z", []))
+    hoy, con = tmp_path / "hoy.json", tmp_path / "con.json"
+
+    assert _correr(hoy, None, ["2026-05-01:2026-05-31"], [trozo]) == 0
+    assert _correr(con, base, ["2026-05-01:2026-05-31"], [trozo]) == 0
+
+    assert con.read_bytes() == hoy.read_bytes()
+
+
+def test_base_bordes_de_ventana_son_inclusivos_por_fecha(tmp_path):
+    """La ventana se compara por fecha UTC (primeros 10 caracteres), cerrada en
+    los dos extremos, igual que el filtro de --ventanas sobre los trozos."""
+    bordes = [_rec("2026-04-30T23:59:59Z", vrp=1.0), _rec("2026-05-01T00:00:00Z", vrp=2.0),
+              _rec("2026-05-31 23:59", vrp=3.0), _rec("2026-06-01 00:00", vrp=4.0)]
+    base = _dump(tmp_path / "base.json", _store("V", "2026-10-01T00:00:00Z", bordes))
+    # el trozo de mayo NO trajo ninguna de las dos pasadas de borde de mayo
+    trozo = _dump(tmp_path / "c.json", _store("V", "2026-10-20T00:00:00Z",
+                                              [_rec("2026-05-10T05:00:00Z", vrp=5.0)]))
+    out = tmp_path / "V.json"
+
+    assert _correr(out, base, ["2026-05-01:2026-05-31"], [trozo]) == 0
+
+    assert [r["vrp_mw"] for r in _records(out)] == [1.0, 5.0, 4.0]
+
+
+def test_base_choque_dentro_de_la_ventana_gana_el_trozo_y_no_es_duplicado(tmp_path, capsys):
+    base = _dump(tmp_path / "base.json", _store("V", "2026-10-25T00:00:00Z", [
+        _rec("2026-05-03T05:00:00Z", vrp=1.0)]))
+    # aunque la base tenga `updated` MAS reciente, dentro de la ventana manda el trozo
+    trozo = _dump(tmp_path / "c.json", _store("V", "2026-10-20T00:00:00Z", [
+        _rec("2026-05-03T05:00:00Z", vrp=2.0)]))
+    out = tmp_path / "V.json"
+
+    assert _correr(out, base, ["2026-05-01:2026-05-31"], [trozo]) == 0
+
+    st = json.loads(out.read_text(encoding="utf-8"))
+    assert [r["vrp_mw"] for r in st["records"]] == [2.0]
+    assert st["updated"] == "2026-10-25T00:00:00Z"
+    assert "(0 duplicados" in capsys.readouterr().out
+
+
+def test_base_duplicados_entre_trozos_se_siguen_contando(tmp_path, capsys):
+    """Dos trozos con ventanas solapadas (relanzamiento): la regla vieja sigue."""
+    base = _dump(tmp_path / "base.json", _store("V", "2026-10-01T00:00:00Z", [
+        _rec("2026-04-02T05:00:00Z", vrp=0.1)]))
+    a = _dump(tmp_path / "a.json", _store("V", "2026-10-20T01:00:00Z", [
+        _rec("2026-05-03T05:00:00Z", vrp=1.0)]))
+    b = _dump(tmp_path / "b.json", _store("V", "2026-10-20T02:00:00Z", [
+        _rec("2026-05-03T05:00:00Z", vrp=2.0)]))
+    out = tmp_path / "V.json"
+
+    assert _correr(out, base, ["2026-05-01:2026-05-31", "2026-05-01:2026-05-31"], [a, b]) == 0
+
+    assert [r["vrp_mw"] for r in _records(out)] == [0.1, 2.0]
+    assert "(1 duplicados" in capsys.readouterr().out
+
+
+def test_base_trozo_caido_no_borra_su_ventana(tmp_path):
+    """Un trozo sin artefacto no aporta ventana: su tramo queda como estaba en
+    la base, en vez de desaparecer de main."""
+    abril, mayo, junio = _tres_meses()
+    base = _dump(tmp_path / "base.json", _store("V", "2026-10-01T00:00:00Z", abril + mayo + junio))
+    trozo_mayo = _dump(tmp_path / "c_mayo.json", _store("V", "2026-10-20T00:00:00Z",
+                                                        [_rec("2026-05-03T05:00:00Z", vrp=9.3)]))
+    out = tmp_path / "V.json"
+
+    assert _correr(out, base, ["2026-05-01:2026-05-31", "2026-06-01:2026-06-30"],
+                   [trozo_mayo, tmp_path / "c_junio_no_existe.json"]) == 0
+
+    recs = _records(out)
+    assert [json.dumps(r) for r in recs if r["datetime_utc"].startswith("2026-06")] == \
+        [json.dumps(r) for r in junio]
+
+
+def test_base_record_sin_fecha_se_conserva(tmp_path):
+    base = _dump(tmp_path / "base.json", _store("V", "2026-10-01T00:00:00Z", [
+        {"sensor": "VIIRS_SNPP", "vrp_mw": 7.0}]))
+    trozo = _dump(tmp_path / "c.json", _store("V", "2026-10-20T00:00:00Z", [
+        _rec("2026-05-03T05:00:00Z")]))
+    out = tmp_path / "V.json"
+
+    assert _correr(out, base, ["2026-05-01:2026-05-31"], [trozo]) == 0
+
+    assert len(_records(out)) == 2
+
+
+def test_base_sin_ventanas_se_rechaza(tmp_path):
+    """Sin ventanas no se sabe que tramo cubre la corrida: no hay forma segura
+    de decidir que conservar de la base."""
+    base = _dump(tmp_path / "base.json", _store("V", "2026-10-01T00:00:00Z", []))
+    trozo = _dump(tmp_path / "c.json", _store("V", "2026-10-20T00:00:00Z", [_rec("2026-05-03T05:00:00Z")]))
+    out = tmp_path / "V.json"
+
+    assert _correr(out, base, None, [trozo]) == 1
+    assert not out.exists()
+
+
+def test_base_de_otro_volcan_se_rechaza(tmp_path):
+    base = _dump(tmp_path / "base.json", _store("Lascar", "2026-10-01T00:00:00Z",
+                                                [_rec("2026-04-02T05:00:00Z")]))
+    trozo = _dump(tmp_path / "c.json", _store("Villarrica", "2026-10-20T00:00:00Z",
+                                              [_rec("2026-05-03T05:00:00Z")]))
+    out = tmp_path / "V.json"
+
+    assert _correr(out, base, ["2026-05-01:2026-05-31"], [trozo]) == 1
+    assert not out.exists()
