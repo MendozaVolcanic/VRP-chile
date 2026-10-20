@@ -509,6 +509,18 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~23:00 UTC (S157): #871 mergeado; prueba corta del A/B de D25; tres investigaciones en paralelo
+- Nicolás: «Sí: despacha D25 tal cual. Mergea #871 cuando quede verde sobre main y sigue con el orden: prueba corta
+  del A/B, NRT de las 01:10, relleno de las 31 y despacho de D25 desde tag.»
+- #871: merge de `origin/main` en la rama (choque en `reproc-s146-ab-sin-test1.yml`: se dejó la estructura de brazos
+  juntos de #877 y se llevaron los flags de D25 a su línea `FLAGS_BRAZO`), 64 pruebas del workflow y perfiles en
+  verde, CI verde, CLEAN; **mergeado `49c70c99`**.
+- Prueba corta del A/B nuevo: run **39510227734** (Chillán 2026-10-17..18, brazos control, gemelo y D25, desde
+  `main`). Primera corrida de punta a punta del workflow reestructurado.
+- Tres subagentes de sólo lectura en D:: saturación de VIIRS y MODIS en las pasadas oblicuas de Chillán (separa
+  saturación de D17; a lo más 2 jobs), efecto del lado del barrido contra MIROVA (pregunta de Nicolás; sin Actions)
+  y el caso PCC de #865 (traza por etapa y si es una clase).
+
 ### 2026-10-20 ~22:45 UTC (S157): adenda de D25 sellada (D-27) y #877 mergeado
 - Nicolás: «Sello la adenda de calibración de D25 con el nulo simétrico y la opción A (mejora en al menos dos
   volcanes). Y mergea #877 con modo estricto en los reprocesos y sin modo estricto en el NRT.»
