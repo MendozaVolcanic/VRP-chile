@@ -50,7 +50,7 @@ def test_temperatura_invalida_da_none():
 
 
 @pytest.mark.parametrize("rel,t_bg,lam,n_bg", [
-    ("pipeline/process_modis.py", "t_bg", "BAND21_LAMBDA", "_n_bg"),
+    ("pipeline/process_modis.py", "t_bg", "_lam_bg", "_n_bg"),  # S157: la λ del fondo (BAND21_LAMBDA con el flag apagado)
     ("pipeline/process_viirs.py", "t_bg_i04", "I04_LAMBDA", "n_bg_i04"),
     ("pipeline/process_viirs_mod.py", "t_bg", "M13_LAMBDA", "_n_bg"),
 ])

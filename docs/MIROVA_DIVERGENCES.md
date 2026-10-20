@@ -3192,3 +3192,29 @@ por MISSION. Estado: **ABIERTA, descrita, sin decisión**, prioridad media, por 
 frente del Test 1.
 
 **Consecuencia sobre las reglas**: rebaja la premisa de **A10** en `CLAUDE.md` (ver la marca ahí).
+
+## D33: Con K, la magnitud MODIS vuelve a radiancia con la longitud de onda de B21 aunque la temperatura venga de B22. **ABIERTA, arreglo listo detrás de flag apagado (registrada S157)** S157
+
+**Qué dice el paper.** Coppola 2016a (`documentacion/sp426.5.pdf`, p. 3, leída renderizada): las bandas 21 y 22
+están «centred at 3.959 µm» las dos, y MIROVA arma con sus RADIANCIAS una sola banda corregida L21ok a 3,959 µm;
+el exceso de la Ec. 6 (p. 8) es una diferencia de radiancias y RP = 18,9 · A · ΔL (Ec. 7).
+
+**Qué hacemos.** Pasamos por temperatura de brillo y volvemos a radiancia. Con K (B22 primaria, D21) la ida es con
+3,959 µm y la vuelta con 3,929 µm (`BAND21_LAMBDA`) en `pipeline/process_modis.py` (en el tag
+`pre-s157-lambda-b22`: l. 1036, 1040, 1062 en producción; 746, 1155, 1253-1254, 1367, 1377, 1392 en caminos
+apagados; 1528 en el diagnóstico). La radiancia que entra a la Ec. 7 sale ~5 % más baja que la medida. Bajo C0
+ida y vuelta usaban la misma λ y no había error: la divergencia nace con la adopción de K.
+
+**Cuánto.** `experiments/_s157_lambda_b22/medir_efecto_lambda.py`: F (corregida / actual) 1,053 a 1,075, mediana
+1,0575, en los 24 records MODIS con K y cúmulo (2026-09-18 a 2026-10-20). Contra MIROVA, 12 pasadas (11 de
+Chillán): razón mediana 0,362 → 0,382. Es un sesgo de signo fijo, chico; no es la palanca de la brecha de Chillán
+(D25). El 18,9 no se toca: S14 lo reconstruyó con las columnas de radiancia del propio OSF de MIROVA
+(`experiments/21_results.json`), no con nuestra λ.
+
+**Arreglo.** `enable_modis_mir_lambda_por_banda` (OFF; con OFF el procesador es bit a bit el del tag, 96 de 96
+combinaciones). Encenderlo es decisión de Nicolás (A45). Detalle y traza completa:
+`experiments/_s157_lambda_b22/README.md`.
+
+**Caras no tocadas, anotadas:** (1) el `NTI_app` usa la misma λ de B21 (3,929) donde el paper usa la de la banda MIR
+(p. 5, Ec. 2, 3,959): mueve detección, SIN MEDIR; (2) `BAND21_LAMBDA = 3.929` es el borde inferior de la ventana,
+no el centro de 3,959 µm que da el paper para B21.
