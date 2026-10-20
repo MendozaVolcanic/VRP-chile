@@ -509,6 +509,15 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~23:10 UTC (S157): prueba corta del A/B de D25 PASA en lo sustantivo
+- Run 39510227734 (Chillán 2026-10-17..18, tres brazos, workflow de brazos juntos de #877): reproceso verde en 6 min;
+  8 pasadas por brazo, 0 faltan, 0 sobran. `FLAGS_BRAZO`: D25 encendido sólo en `_s157_ab_d25_k_on` (375 y 750,
+  half 3), MODIS apagado y Test 1 apagado en los tres. Control y gemelo idénticos (suma `pc.vrp_mw` 58,273); D25
+  64,670 (+11 %, del orden del probe de L1B).
+- `recolectar` en rojo por el defecto conocido de las ventanas de un volcán (cuenta los otros 10 como «archivos que
+  no llegaron»; mismo caso que #870). No afecta al A/B completo, que corre los 11.
+- Proceso local esperando el NRT de las 01:10 UTC (primero con búsqueda por ventana en producción).
+
 ### 2026-10-20 ~23:00 UTC (S157): #871 mergeado; prueba corta del A/B de D25; tres investigaciones en paralelo
 - Nicolás: «Sí: despacha D25 tal cual. Mergea #871 cuando quede verde sobre main y sigue con el orden: prueba corta
   del A/B, NRT de las 01:10, relleno de las 31 y despacho de D25 desde tag.»
