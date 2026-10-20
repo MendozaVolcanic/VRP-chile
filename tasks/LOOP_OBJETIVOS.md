@@ -509,6 +509,18 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 11:15 UTC (S157): #872 (λ de B22) y #871 (pre-registro D25) listos; CMR sigue caído
+- **#872** (borrador, CI `pytest` verde, CLEAN): con K la vuelta a radiancia de MODIS usaba la λ de B21 (3,929 µm)
+  sobre temperaturas de B22 (3,959 µm); magnitud MODIS 1,051 a 1,075 veces más baja (mediana 1,0575, 24 records
+  desde el 2026-09-18). Contra MIROVA, 12 pasadas MODIS con K y alerta: razón mediana 0,362 a 0,382 (acerca en las 12,
+  pero es un 5 %: no es la palanca de Chillán). Arreglo detrás de `enable_modis_mir_lambda_por_banda: false`
+  (bit a bit igual con OFF, identidad 96 de 96 contra el tag `pre-s157-lambda-b22` = `f101d730`); D33 nueva en el
+  catálogo. Toca `pipeline/` (A45): **merge y encendido esperan el sí de Nicolás.**
+- **#871** (borrador): pre-registro de D25 sobre K, v2 con los 20 hallazgos del verificador. Falta el probe de L1B de
+  Chillán (CMR caído; se relanza solo). **Espera el sello de Nicolás**; no se despachó ningún A/B.
+- Sesión del merge que conserva el archivo: batería de mutaciones corriendo, sin PR todavía.
+- CMR: HTTP 500 en cada prueba desde las 08:10 hasta las 11:02 UTC (más de 3 h).
+
 ### 2026-10-20 ~09:15 UTC (S157): #866 y #868 mergeados con el sí de Nicolás; tres sesiones nuevas corriendo
 - Nicolás: «Sí: mergea #866 y #868 y arranca las tres tarjetas». Merges squash por la API (el clasificador los había
   negado sin su sí): #866 `8c94c847` (ensayo del reemplazo, sólo `experiments/`), #868 `f101d730` (propagación de
