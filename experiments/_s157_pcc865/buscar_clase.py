@@ -136,6 +136,34 @@ def main():
         if not cand:
             salida.append({**p, "record": None})
             print(f"  {p['volcano']:20s} {p['fecha_utc']} sin record K a +-120 s")
+    # Debajo de 1 MW: alertas VIIRS 750 (no mínimas por D-9) que C0 publica y K no, por volcán y por tramo A119.
+    bajo = [p for p in pas if p["sensor"] == "VIIRS750" and not p["protegida"] and not p["minima"]
+            and p["prod_pub"] is False and p["sombra_pub"] is True]
+    tot = [p for p in pas if p["sensor"] == "VIIRS750" and not p["protegida"] and not p["minima"]
+           and p["sombra_pub"] is True]
+    print(f"\nAlertas VIIRS 750 bajo 1 MW que C0 publica y K no: {len(bajo)} de {len(tot)} que C0 publica")
+    for vol, n in Counter(p["volcano"] for p in bajo).most_common():
+        nt = sum(1 for p in tot if p["volcano"] == vol)
+        vr = sorted(p["vrp_mirova_mw"] for p in bajo if p["volcano"] == vol)
+        print(f"  {vol:20s} {n:3d} de {nt:3d} | VRP MIROVA {vr}")
+    # ¿mismo mecanismo? K con primer y segundo pase vacíos (nada que publicar) contra K con píxeles que el tablero no
+    # publica. Se mira el record de K más cercano (±120 s) de la pasada.
+    mec = Counter()
+    for p in bajo:
+        t = datetime.fromisoformat(p["instante_utc"]).replace(tzinfo=timezone.utc)
+        rr = [r for r in K if r["vol"] == p["volcano"] and r["b"] == "VIIRS750"
+              and abs((r["dt"] - t).total_seconds()) <= bp.TOL_S]
+        for r in rr:
+            k = ik.get((p["volcano"], r["sensor"], r["dt"].strftime("%Y-%m-%d %H:%M"))) or {}
+            vacio = (k.get("n_anomalous_pixels") or 0) == 0
+            u = umbrales(k)
+            mec[(p["volcano"], "K vacio" if vacio else "K con pixeles sin publicar",
+                 "contraste>C1 en dNTI" if (u and u["contraste_gobierna_dnti"]) else "C1 gobierna dNTI")] += 1
+    print("  mecanismo (record de K de la pasada):")
+    for k, n in sorted(mec.items()):
+        print(f"    {k}: {n}")
+    desde_abril = [p for p in bajo if p["fecha_utc"] >= "2026-04-01"]
+    print(f"  desde abril (A119): {len(desde_abril)} de {sum(1 for p in tot if p['fecha_utc'] >= '2026-04-01')}")
     (HERE / "buscar_clase_resultado.json").write_text(json.dumps(salida, indent=1, default=str), encoding="utf-8")
 
 
