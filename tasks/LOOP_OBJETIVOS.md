@@ -509,6 +509,20 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 17:10 UTC (S157): segunda pasada con datos, pero CMR la volvió a cortar; tercera en espera
+- Run 39431309981: 31 de 31 verdes, hasta 82 min por trozo (esta vez con datos). Relleno: **277 pasadas
+  agregadas**, unión 6.195 records, control contra el tag intacto (3.637 de 3.637). Todo 2025 quedó completo.
+- **Siguen faltando 207** (197 `standard`), en 33 días entre 2026-05-14 y 2026-09-17, los MISMOS en las dos copias.
+  Log del trozo 2026-08-20..09-07 (job 118657483762): `SEARCH_CMR_TIMEOUT ... breaker ON esta corrida` a las 16:52
+  y desde ahí `SEARCH_SKIP` en cada día. CMR siguió inestable después de la caída de la mañana, y el cortacircuito
+  pierde el resto de cada trozo tras el primer timeout. A las 17:02 UTC CMR vuelve a dar HTTP 500.
+- Proceso local: con tres respuestas 200 seguidas de CMR, despacha la tercera pasada (2026-05-14..2026-09-17,
+  `max_days` 10, 13 trozos: un trozo corto pierde menos días si el cortacircuito salta; #873 ya conserva el resto
+  del archivo). `rearmar_y_contar.py --relleno` acepta varias pasadas y ventanas sueltas (rama
+  `s157-chillan-rearmado`).
+- Esto refuerza la mejora en curso del subagente (búsqueda por ventana y días que no salen verdes en silencio): hoy
+  el NRT y los reprocesos degradan sin avisar con cada inestabilidad de CMR.
+
 ### 2026-10-20 ~14:45 UTC (S157): aprobada la aceleración (búsqueda por ventana y brazos en un mismo job)
 - Nicolás: «Sí: parte por buscar una vez por ventana y procesar todos los brazos en el mismo job, con medición antes,
   tag defensivo y verificador. El merge de fetch.py me lo traes para el sí.»
