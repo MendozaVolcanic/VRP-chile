@@ -509,6 +509,21 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~14:30 UTC (S157): #874 y #875 mergeados; D25 SELLADO; segunda pasada de Chillán corriendo
+- Nicolás: «Apruebo» (a mergear #874 y #875 y a sellar D25 con las tres recomendaciones). #874 `b249b1b9`, #875
+  `3868c5db`; `Tests` verde sobre `3868c5db` (el de `b249b1b9` quedó cancelado por el siguiente, que lo contiene).
+- **D-26 SELLADA (D25 sobre K, #871)**: VIIRS 375 con cenit sobre 40° sólo bloquea; ventana de vecinos 7x7 sola;
+  MODIS fuera de este A/B (escribir D25 en MODIS se decide aparte). La sesión del pre-registro registra el sello con
+  la cita y arma el candado (`evaluar_d25.py`, pruebas y verificador); no despacha. El despacho, desde tag, después
+  del reproceso de Chillán.
+- CMR volvió a las 13:22 UTC (200 en las dos pruebas); el proceso local relanzó la segunda pasada de Chillán:
+  **run 39431309981** (13:33 UTC, 31 trozos de 19 días, con el merge nuevo de #873).
+- Medido en el log del trozo 15 del histórico (job 117669982883, 151 min entre marcadores): búsquedas en CMR
+  ~50 min (296 búsquedas, 8 por día de ventana, 9 timeouts), descargas ~15 min, después de la descarga ~36 min,
+  y ~51 min entre el fin de una búsqueda y el siguiente marcador (SIN ATRIBUIR: hay pasos sin marcador). SOSPECHA:
+  buscar una vez por ventana en vez de una por día y producto ahorraría cerca de un tercio y bajaría los cortes de
+  CMR. Y cada brazo de un A/B (`reproc-s146-ab-sin-test1.yml`, matrix brazo x volcán) busca y baja lo mismo otra vez.
+
 ### 2026-10-20 ~14:00 UTC (S157): #874 con las tres observaciones corregidas; #874 y #875 listos para merge
 - #874 `723480ec`: `n_misma_pasada` en cada celda (noches K con pasada máxima distinta de la de MIROVA: VIIRS 375 29
   de 90, VIIRS 750 4 de 22, MODIS 0 de 8), regímenes antes_535 / 535_a_571 / 571_a_K / K, prueba de no regresión que
