@@ -88,3 +88,24 @@ Los 10 pasan el tope del 2 % con margen (el peor, 0,37 %). Salida cruda de cada 
 ## 3. Verificador con contexto limpio (paso c)
 
 Ver `verificador/INFORME.md`. Recibió sólo las rutas y los scripts, sin el resultado esperado.
+Sus scripts están en `verificador/scripts/`. Resumen, de mayor a menor gravedad (detalle y salida cruda en el informe):
+
+- **G4. No hay una frontera de detector correcta si Chillán queda aparte.** `DATOS_K_DESDE_UTC`
+  (`frontend/cambio_detector.js:26`, hoy 2026-09-18) es una sola fecha para todos los volcanes, y la leen el
+  tablero y `scripts/auto_audit_weekly.py`. Si no se mueve, el aviso rotula C0 a 19 meses de K de 10 volcanes; si
+  se mueve al 2025-02-15, rotula K a la historia de Chillán. Comprobado por quien orquesta. Consecuencia para el
+  paso d: o se aplican los 11 juntos (como dice el plan), o la frontera pasa a ser por volcán.
+- **G3. El tope del 2 % no garantiza cobertura.** Quitando en memoria todo VIIRS_SNPP 375 de un trozo de 37 días,
+  los 10 pasan; quitando 375 y 750, Villarrica sigue pasando (Llaima se rehúsa). La compuerta real es `cobertura.py`,
+  que no corta.
+- **G3. Las 89 pasadas que quedan en C0 publican unas 40 veces** en el tablero (port en Python de `mirovaEqVrp`, no
+  node), entre ellas Puyehue Cordón Caulle MODIS Terra del 2026-07-13 con 5,0 MW. El tablero no lee la marca.
+- **G3. El ensayo no medía lo publicado.** Lo publicado en la ventana cae, por ejemplo, de 2.133 a 17 en Llaima y de
+  2.761 a 86 en Villarrica: es el efecto de K, pero no se cruzó con las alertas de MIROVA de 1 MW o más (SIN PROBAR).
+  Docstring de `ensayo.py` corregido.
+- **G2.** El script exige el perfil pero no el `codigo_sha` (los relanzamientos de Chillán corren sobre otro sha);
+  con `--aplicar` la escritura no es atómica; quedan 1 a 4 records C0 por volcán después de la ventana.
+- **G1.** Los agregados no tienen tope; el arnés podría leer un informe viejo si el script se cae.
+
+Verificado limpio por él: números reproducidos, fuera de la ventana el archivo no cambia un byte, sin duplicados
+C0 contra K, reproceso de un solo commit, ningún reemplazo baja de `standard` a `nrt`, cuentas del README.

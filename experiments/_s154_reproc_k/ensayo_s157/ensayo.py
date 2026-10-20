@@ -11,7 +11,8 @@ volcanes Tier A que no son NevadosDeChillan (Chillan se relanza aparte). Este sc
 3. agrega a cada informe, en `resumen.json`, lo que el conteo del script no dice: cuantas de las pasadas que se
    conservarian en C0 son `nrt` (producto de LANCE, quiza irrecuperable) o `standard` (el reproceso las perdio,
    repetir el trozo puede traerlas), por mes los records que se agregarian, y cuantos reemplazos cambian
-   `vrp_mw` o `distance_class` (que es lo que el tablero publica).
+   el campo `record.vrp_mw` o `distance_class`. OJO (verificador S157, G3): eso NO es lo que el tablero
+   publica, que pasa por mirovaEqVrp; lo publicado lo cuenta `verificador/scripts/publicadas.py`.
 
 Uso (desde la raiz del repo):
     python experiments/_s154_reproc_k/ensayo_s157/ensayo.py
