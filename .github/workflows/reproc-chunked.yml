@@ -134,13 +134,29 @@ jobs:
           EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
           VRP_PROFILE_IN: ${{ github.event.inputs.profile }}
         timeout-minutes: 170
+        # S157: run_pipeline busca en CMR una vez por producto y por ventana del trozo
+        # (pipeline/fetch.py). --estricto-cobertura: si una busqueda o una descarga no se
+        # pudo hacer (CMR caido, host caido), el job sale con 3 en vez de verde con dias
+        # vacios, y el trozo NO se sube (paso siguiente sin always): main conserva lo que
+        # tenia y el trozo se relanza. Antes, con CMR caido, 5 de 27 jobs salieron verdes
+        # sin un solo dato (experiments/_s157_busqueda_ventana/MEDICION.md, seccion 3).
         run: |
           python scripts/run_pipeline.py \
             --profile "$VRP_PROFILE_IN" \
             --volcano ${{ matrix.job.vol }} \
             --start ${{ matrix.job.start }} \
             --end ${{ matrix.job.end }} \
-            --overwrite
+            --overwrite \
+            --estricto-cobertura \
+            --cobertura-json cobertura/cobertura.json
+      - name: Guardar la cobertura del trozo (tambien si fallo)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-${{ matrix.job.vol }}-${{ matrix.job.idx }}-${{ matrix.job.start }}_${{ matrix.job.end }}
+          path: cobertura/cobertura.json
+          if-no-files-found: warn
+          retention-days: 7
       - name: Guardar el trozo
         # Sin `if: always()` a proposito: un trozo incompleto no debe pasar por
         # hecho — el merge lo reportaria como ventana cubierta cuando no lo esta.
