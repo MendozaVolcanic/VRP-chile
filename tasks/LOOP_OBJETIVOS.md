@@ -509,6 +509,20 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 ~00:00 UTC (S157): saturación (#880) sin poder decidir; dos hallazgos laterales
+- Run 39512756808 midió 2 de 40 pasadas. Grupo A (18-oct): sin medir (CMR no indexa el 18 ni el 19; respaldo de
+  LAADS falló). Grupo B: 1 medida (Suomi NPP 750, 2026-09-29 06:36, cenit 55,8°): 0 de 156 píxeles saturados, en el
+  tope o borrados; cota 0 contra 1,701 MW que faltan, pero `t_max_k` 273,28 K hacía imposible saturar. Controles:
+  C sólo MODIS (trivial), POS no corrió. **No decide.** Verificador limpio confirmó bit y números, corrigió una cita
+  (el «Reported Range» fijado es de la DNB, no de I y M) y pidió máscaras 256 y 2048 y fondo de MODIS por banda.
+  Pista del verificador (SIN VERIFICAR): a las 06:48 del 18-oct VIIRS 375 marca ~310 K y M13 273 K, más D17 que
+  saturación.
+- Lateral 1 (SIN VERIFICAR): 44 de 156 píxeles traen M15 en sentinela con M13 sano, incoherente con el bow-tie; el
+  lector los deja en NaN y se pierde su NTI en VIIRS 750. Candidato a investigar.
+- Lateral 2: la descarga de NOAA-21 dio HTTP 401 en LAADS en el probe. Vigilar si el NRT de las 01:10 también falla
+  en NOAA-21 (credencial o autorización de colección).
+- PR #880 borrador; rama auxiliar `s157-saturacion-probe` (sólo dispara el workflow).
+
 ### 2026-10-20 ~23:45 UTC (S157): azimut verificado (#879), con el efecto acotado
 - Verificador limpio en primer plano reprodujo exactas las cifras centrales (MIROVA 1,460, nosotros 1,145, razón
   0,865; 1,91 desde 35°) y confirmó signo del azimut (267 de 267 contra el banner), pareo (desfase 0 s), nulo (4 a
