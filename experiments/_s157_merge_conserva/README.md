@@ -19,8 +19,11 @@ versión del mismo archivo es la carrera de S25.
 
 1. `merge_chunk_stores.py --base <archivo>`: los records de la base cuya fecha UTC cae fuera de todas las
    ventanas de los trozos presentes se conservan tal cual (mismo objeto, mismo orden, mismas claves de
-   nivel superior); los de dentro se descartan y manda el trozo, aunque el trozo no traiga una pasada que la
-   base sí tenía (es el resultado del reproceso). Un trozo caído no aporta ventana, así que su tramo queda
+   nivel superior); los de dentro se descartan y manda el trozo. Eso no pierde las pasadas que el reproceso
+   no trajo: el trozo es el checkout del despacho con su tramo reprocesado, y `store.append_record` nunca
+   borra, así que una pasada no traída sigue en el trozo con su versión del checkout (corregido tras el
+   verificador; la primera redacción decía lo contrario). Dentro de las ventanas sólo se pierde lo que main
+   ganó después del despacho en esas fechas. Un trozo caído no aporta ventana, así que su tramo queda
    como estaba. `--base` exige `--ventanas`; una base inexistente o vacía da el mismo archivo que sin base;
    una base de otro volcán se rechaza.
 2. El job `merge` hace, en cada uno de sus 5 intentos: `fetch` de main, se para encima, copia la base de

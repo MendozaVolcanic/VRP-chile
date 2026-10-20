@@ -248,7 +248,9 @@ jobs:
               done
               BASE="$RUNNER_TEMP/base-$VOL.json"
               rm -f "$BASE"
-              if [ -f "data/$PROFILE/$VOL.json" ]; then cp "data/$PROFILE/$VOL.json" "$BASE"; fi
+              # sin `|| return 1` un cp fallido (bajo set +e) uniria SIN base y volveria
+              # a borrar el historico (hallazgo del verificador)
+              if [ -f "data/$PROFILE/$VOL.json" ]; then cp "data/$PROFILE/$VOL.json" "$BASE" || return 1; fi
               python "$MERGE" --out "data/$PROFILE/$VOL.json" --base "$BASE" \
                 --ventanas $VENT -- $FILES || return 1
             done

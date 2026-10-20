@@ -48,9 +48,12 @@ def merge_stores(paths: list[Path], ventanas: list[tuple[str, str]] | None = Non
         updated = base.get("updated", "") or ""
         conservados = reemplazados = 0
         for rec in base.get("records", []):
-            # POR QUE se descarta lo de dentro aunque el trozo no lo traiga: el
-            # trozo reproceso ese tramo entero, y una pasada que ya no sale es
-            # parte de su resultado. Lo de fuera nadie lo toco en esta corrida.
+            # POR QUE dentro manda el trozo: el trozo es el checkout del despacho
+            # con su tramo reprocesado, y pipeline/store.py::append_record nunca
+            # borra, asi que una pasada que el reproceso no trajo (corte de NASA)
+            # sigue en el trozo con su version del checkout. Lo unico de dentro que
+            # se pierde es lo que main gano DESPUES del despacho en esas fechas
+            # (limite declarado en el yml). Lo de fuera nadie lo toco.
             if _en_alguna((rec.get("datetime_utc") or "")[:10], ventanas):
                 reemplazados += 1
                 continue
