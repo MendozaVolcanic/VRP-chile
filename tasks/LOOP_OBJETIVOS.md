@@ -509,6 +509,29 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 03:25 UTC (S157 «retomar»): trozos caídos de Chillán relanzados; el merge no conserva el archivo
+- El histórico con K (39125546355) terminó a las 20:22 UTC del 19-oct: 172 verdes, **6 fallidos, todos de
+  NevadosDeChillan** (el bloque S157 decía 3). Por el tope de 170 min del paso: 5, 6, **7, 11 y 12**; por el runner: 9.
+  El merge del run sí corrió y dejó `data/_s154_reproc_k_historico/NevadosDeChillan.json` con los 10 trozos buenos
+  (3.637 records; faltan 2025-07-13..10-31, 2025-12-08..2026-01-13 y 2026-02-20..05-04).
+- Nicolás: «parte en dos los trozos 5, 6, 7, 11 y 12 sobre el commit 3695f675 y relanza el 9 tal cual».
+- **Hallazgo que cambia el cómo**: `scripts/merge_chunk_stores.py` escribe `--out` SÓLO con los trozos de su corrida
+  (no lee el archivo existente). Un run nuevo deja el JSON de Chillán con únicamente sus ventanas. `gh run rerun` no
+  sirve para partir trozos, y despachar desde un tag en `3695f675` haría lo mismo con un checkout donde el archivo ni
+  existe. Ruta elegida: despachar desde `main` y **rearmar Chillán a mano** desde los artefactos de los 4 runs con
+  `merge_chunk_stores.py --ventanas` (los del run original vencen el **2026-10-26**).
+- Mismo código: `git diff 3695f675 origin/main` no toca `pipeline/` (sólo agrega dos perfiles diurnos), ni
+  `scripts/run_pipeline.py`, `volcanoes.yaml`, `reproc-chunked.yml`, `merge_chunk_stores.py` o `split_date_window.py`.
+  Lo que cambió (`auto_audit_weekly.py`, `banco_paridad.py`, `vigilancia_sombra.py`, tests, CSV) no lo importa el
+  pipeline. Los runs nuevos quedan en `57d18ad7` (A108: mismo código, otro commit).
+- Tag defensivo `pre-s157-chillan-trozos` (`57d18ad7`): el JSON de Chillán con los 10 trozos, antes de que los merges
+  nuevos lo pisen (nadie automático lee ese directorio: grep en `.github/`, `frontend/`, `scripts/`).
+- Despachados, en serie porque comparten grupo de concurrencia (un tercero en cola desplaza al pendiente):
+  A = run 39363774747 (2025-07-13..10-31, `max_days` 19, 6 trozos); B = run 39363796988 (2026-02-20..05-04, 19,
+  4 trozos), en cola; C = trozo 9 tal cual (2025-12-08..2026-01-13, 37), lo despacha un proceso local cuando A
+  termine y B arranque.
+- Falta: contar pasadas de cada ventana contra lo esperado (A108) antes de rearmar y de dar el histórico por completo.
+
 ### 2026-10-19 17:33 UTC (vuelta 226, S156): vigilancia de la sombra mergeada (#863) y probada en Actions; issue #865
 - #863 squash `9ac09b16`, CI verde sobre `4e9eae28`. Cinco verificadores limpios en total; cada uno encontró algo y
   todo quedó arreglado o anotado (`experiments/_s156_autoaudit/sombra/README.md`). 65 pruebas; 82 de 82 mutaciones
