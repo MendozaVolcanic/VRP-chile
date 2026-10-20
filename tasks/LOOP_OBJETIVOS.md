@@ -509,6 +509,27 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 18:05 UTC (S157): #877 (búsqueda por ventana y brazos juntos) listo para el sí; tercera pasada corriendo
+- **#877** borrador, CI verde, CLEAN; tag `pre-s157-busqueda-ventana` (`ac015254`). Toca `pipeline/fetch.py`,
+  `scripts/run_pipeline.py`, `reproc-chunked.yml`, el A/B y tres scripts nuevos. Medición
+  (`experiments/_s157_busqueda_ventana/MEDICION.md`): los ~51 min sin marcador eran la búsqueda de geolocalización;
+  en 27 jobs, con CMR rápido la búsqueda pesa ~10 %, con CMR lento 45 a 63 %; con CMR caído (HTTP 500 salta el
+  cortacircuito) **5 de 27 reprocesos y 6 de 9 NRT terminaron verdes sin datos**. Por trozo de 37 días, de ~590
+  búsquedas a ~16. Probe 39462816493: Chillán 4 días y 2 brazos 1.381 s a 810 s; Láscar 703 a 544 s (cotas
+  inferiores: el tag perdió búsquedas). Identidad: 0 diferencias en 327 producto-días y 807 gránulos contra CMR;
+  74 records comparados, 0 diferencias más allá de redondeo de 9,1e-12 (control rama contra rama 3,4e-12); 36
+  pasadas sólo en la rama, todas perdidas por el tag por CMR caído. 53 pruebas, suite 2.316, 29 de 29 mutaciones.
+  Verificador: 7 hallazgos, 6 arreglados. **Decisiones para Nicolás en el PR**: (1) modo estricto rechaza el trozo
+  entero ante una falla transitoria; (2) con brazos juntos, un corte común a todos sale del conteo A108 y sólo lo
+  ve el modo estricto. Sin medir: costo en el NRT real con CMR caído (estimado 2,5 a 4,5 min) y el A/B
+  reestructurado de punta a punta.
+- Incidente reportado por el subagente: una prueba llamó a `process_date` real ~2 min con `~/_netrc` presente (riesgo
+  A71). Comprobado: el NRT de las 14:40 UTC tiene 88 `AUTH_OK` y 704 `SEARCH_DONE`; el próximo NRT corre a las 01:10
+  UTC (cron-job.org `10 1-12`). Sin señal de bloqueo. El `_netrc` local sigue siendo un riesgo para pruebas futuras.
+- Tercera pasada de Chillán despachada a las 17:33 UTC con CMR estable: **run 39467050396** (2026-05-14..09-17, 13
+  trozos de 10 días).
+- Rama remota `s157-validar-busqueda` (dispara el probe) se puede borrar tras el merge.
+
 ### 2026-10-20 17:10 UTC (S157): segunda pasada con datos, pero CMR la volvió a cortar; tercera en espera
 - Run 39431309981: 31 de 31 verdes, hasta 82 min por trozo (esta vez con datos). Relleno: **277 pasadas
   agregadas**, unión 6.195 records, control contra el tag intacto (3.637 de 3.637). Todo 2025 quedó completo.
