@@ -509,6 +509,18 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 12:30 UTC (S157): NRT vacío mientras CMR cae (se recupera solo); #870 cerrado; 1.34 y 1.35 lanzadas
+- Nicolás: «continúa acá» (seguir en esta sesión, no abrir otras).
+- NRT: runs `success` a las 09:10, 10:10, 11:10 y 12:10 UTC sin un solo commit de datos (último, 07:50). El
+  healthcheck mira 48 h, así que no avisa. **No se pierde nada**: `scripts/run_pipeline.py:384`
+  (`default_date_window`, 7 días hacia atrás) reprocesa la semana en cada corrida y recupera las pasadas cuando CMR
+  vuelva. Lo que sí cuesta es la latencia: mientras dure la caída, el tablero no muestra la mañana.
+- #870 (watchdog nuevo): era la repetición D1 de la caja (run 38698329137), ya evaluada con `--repeticion` en la
+  vuelta 55; la «falla» es la recolección que cuenta los 10 volcanes que la ventana no corre. Cerrado con comentario.
+- Lanzados dos subagentes de esta sesión, cada uno en su worktree de D:: **1.35** (auto-audit por tramo de cenit y
+  régimen, claves nuevas sin tocar veredictos, PR borrador) y **1.34** (`docs/SINTOMAS.md` con verificador, PR
+  borrador).
+
 ### 2026-10-20 ~12:00 UTC (S157): #873 mergeado: el merge de trozos ya no borra lo que main tiene
 - #873 squash `c408a909` por su sesión (verificador limpio incorporado en un segundo commit); `Tests` verde sobre
   `main` comprobado aquí. El job merge de `reproc-chunked.yml` lee la base de `origin/main` en cada intento y
