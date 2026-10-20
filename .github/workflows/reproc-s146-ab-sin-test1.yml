@@ -25,8 +25,9 @@ name: "A/B S146: sin el Test 1 integrado en el ROI (tres brazos, once Tier A, tr
 # A43: la clave "on" va entre comillas (Norway Problem de YAML 1.1).
 # A71: se autentica SOLO con EARTHDATA_TOKEN. El par usuario y clave de los secretos esta vencido
 #      y su reintento de login BLOQUEO la cuenta 10 minutos. Sin token, el job falla al instante.
-# A15: timeout >= 1,3 veces la duracion esperada (1,5 a 3 h por job) y muy por debajo del tope
-#      duro de 6 h de GitHub.
+# A15: timeout >= 1,3 veces la duracion esperada. Desde S157 todos los brazos van en el mismo job, el
+#      paso de reproceso tiene 170 min y el trozo de ventana se dimensiona para caber
+#      (scripts/reproc_brazos.py::dias_por_trozo).
 "on":
   workflow_dispatch:
     inputs:
@@ -54,6 +55,10 @@ name: "A/B S146: sin el Test 1 integrado en el ROI (tres brazos, once Tier A, tr
         description: 'Brazo que hace de control al contar cobertura en recolectar. Para los A/B de S147 (conectiva, caja) es _s146_ab_sin_test1'
         required: true
         default: "_s146_ab_control"
+      max_days:
+        description: 'S157: dias por trozo. Vacio = scripts/reproc_brazos.py::dias_por_trozo(n_brazos), que cabe en 170 min por paso'
+        required: false
+        default: ""
 
 # No entra al grupo push-main: este workflow no pushea a main. Se serializa consigo mismo para
 # que dos corridas no se pisen la rama de salida.
@@ -65,19 +70,50 @@ permissions:
   contents: read
 
 jobs:
-  reproc:
+  # S157: los brazos de un A/B comparten volcan y ventana, asi que corren en el MISMO job (scripts/reproc_brazos.py):
+  # cada busqueda a CMR y cada granulo se hacen una sola vez y solo el procesamiento se repite por brazo
+  # (experiments/_s157_busqueda_ventana/MEDICION.md). Para que todos quepan en el paso de 170 min (A15), la ventana se
+  # parte en trozos de dias_por_trozo(n_brazos) dias (40 con 1 brazo, 23 con 2, 16 con 3); la entrada max_days lo fija
+  # a mano si hace falta. Matrix volcan por trozo; recolectar une los trozos de cada brazo (scripts/unir_trozos_ab.py).
+  plan:
     if: github.event.inputs.preregistro_aprobado == 'si'
     runs-on: ubuntu-24.04  # S150: fijado; ubuntu-latest migra a 26.04 entre 2026-10-19 y 2026-11-19 (runner-images #14748). Cambiar despues de probar pyhdf en 26.04
-    timeout-minutes: 330
+    outputs:
+      jobs: ${{ steps.split.outputs.jobs }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Trozos de la ventana
+        id: split
+        env:
+          ARM_START: ${{ github.event.inputs.start }}
+          ARM_END: ${{ github.event.inputs.end }}
+          ARM_VOLS: ${{ github.event.inputs.vols }}
+          ARM_BRAZOS: ${{ github.event.inputs.brazos }}
+          ARM_MAX_DAYS: ${{ github.event.inputs.max_days }}
+        run: |
+          set -euo pipefail
+          python scripts/plan_trozos_ab.py >> "$GITHUB_OUTPUT"
+
+  reproc:
+    needs: plan
+    if: github.event.inputs.preregistro_aprobado == 'si'
+    runs-on: ubuntu-24.04  # S150: fijado; ubuntu-latest migra a 26.04 entre 2026-10-19 y 2026-11-19 (runner-images #14748). Cambiar despues de probar pyhdf en 26.04
+    # 170 del paso de reproceso mas ~15 de checkout, apt-get, pip, flags y subida (verificador S157: con 180 la
+    # subida del artefacto podia caer si el paso agotaba sus 170).
+    timeout-minutes: 200
     strategy:
       fail-fast: false
-      # Un volcan y un brazo por job, cada uno escribiendo en su propio data_subdir: dos procesos
-      # sobre el mismo directorio corrompen los JSON (A47). max-parallel 6 deja lugar al cron NRT
-      # dentro del tope de 20 jobs concurrentes y no satura a NASA.
+      # Un volcan y un trozo por job, con todos los brazos adentro EN SERIE: cada brazo escribe en su propio
+      # data_subdir y nunca dos procesos a la vez (A47). max-parallel 6 deja lugar al cron NRT dentro del tope de
+      # 20 jobs concurrentes y no satura a NASA.
       max-parallel: 6
       matrix:
-        volcano: ${{ fromJSON(github.event.inputs.vols) }}
-        profile: ${{ fromJSON(github.event.inputs.brazos) }}
+        job: ${{ fromJson(needs.plan.outputs.jobs) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -106,63 +142,81 @@ jobs:
           pip install pyhdf
           pip install earthaccess numpy h5py scipy pyyaml
 
-      - name: El brazo LEE lo que declara (y escribe donde declara)
+      - name: Cada brazo LEE lo que declara (y escribe donde declara)
         env:
-          VRP_PROFILE: ${{ matrix.profile }}
+          ARM_BRAZOS: ${{ github.event.inputs.brazos }}
+          ARM_VOLCANO: ${{ matrix.job.vol }}
         run: |
           set -euo pipefail
-          python -c "import pipeline.profile as p; \
-            print('brazo', p.PROFILE_NAME, \
-            '| test1_path', p.ENABLE_TEST1_PATH, \
-            '| prioridad_debil', p.ENABLE_TEST1_PRIORITY_WEAK_CLUSTER, \
-            '| conectiva_prosa', p.ENABLE_TESTS_23_PROSE_BRANCH, \
-            '| caja_roi1', p.ENABLE_ROI1_BOX_PAPER, \
-            '| modis_b22', p.ENABLE_MODIS_B22_PRIMARY, \
-            '| etiqueta_modis_cumulo', p.ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER, \
-            '| tope_d9_mw', p.PATH_D_ONLY_CAP_MW, \
-            '| sensores', p.SENSOR_MODIS, p.SENSOR_VIIRS_375, p.SENSOR_VIIRS_750, \
-            '| subdir', p.DATA_SUBDIR); \
-            assert p.DATA_SUBDIR == p.PROFILE_NAME, 'el brazo escribiria fuera de su subdir'"
+          mkdir -p logs
+          for ARM_PROFILE in $(python -c "import json, os; print(' '.join(json.loads(os.environ['ARM_BRAZOS'])))"); do
+            VRP_PROFILE="$ARM_PROFILE" python -c "import pipeline.profile as p; \
+              print('brazo', p.PROFILE_NAME, \
+              '| test1_path', p.ENABLE_TEST1_PATH, \
+              '| prioridad_debil', p.ENABLE_TEST1_PRIORITY_WEAK_CLUSTER, \
+              '| conectiva_prosa', p.ENABLE_TESTS_23_PROSE_BRANCH, \
+              '| caja_roi1', p.ENABLE_ROI1_BOX_PAPER, \
+              '| modis_b22', p.ENABLE_MODIS_B22_PRIMARY, \
+              '| etiqueta_modis_cumulo', p.ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER, \
+              '| tope_d9_mw', p.PATH_D_ONLY_CAP_MW, \
+              '| sensores', p.SENSOR_MODIS, p.SENSOR_VIIRS_375, p.SENSOR_VIIRS_750, \
+              '| subdir', p.DATA_SUBDIR); \
+              assert p.DATA_SUBDIR == p.PROFILE_NAME, 'el brazo escribiria fuera de su subdir'"
+            # S150 (verificador del pre-registro de NdC, N3): la primera linea del log de cada brazo deja escrito que
+            # flags LEYO, para que el evaluador compruebe el cableado desde el artefacto.
+            # S151 (tarea 1.4): ENABLE_VENT_ANCHORED_CLUSTERING. S151 (tarea 1.7): ENABLE_ROI1_BOX_PAPER y ROI1_BOX_HALF_KM.
+            VRP_PROFILE="$ARM_PROFILE" python -c "import json, pipeline.profile as p; print('FLAGS_BRAZO ' + json.dumps({k: getattr(p, k) for k in ('PROFILE_NAME', 'DATA_SUBDIR', 'ENABLE_TEST1_PATH', 'ENABLE_TESTS_23_PROSE_BRANCH', 'ENABLE_MODIS_B22_PRIMARY', 'ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER', 'PATH_D_ONLY_CAP_MW', 'ENABLE_TESTS_23_NO_BT_GATE_VIIRS375', 'ENABLE_VENT_ANCHORED_CLUSTERING', 'ENABLE_ROI1_BOX_PAPER', 'ROI1_BOX_HALF_KM')}))" | grep '^FLAGS_BRAZO ' > "logs/${ARM_PROFILE}_${ARM_VOLCANO}.log"
+          done
 
-      - name: Reproceso del brazo
+      - name: Reproceso de todos los brazos (una busqueda y una descarga por granulo)
         env:
           # Solo el token (A71). Ni EARTHDATA_USERNAME ni EARTHDATA_PASSWORD entran al entorno.
           EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
           # Las entradas viajan por env y NO se interpolan dentro del run (S128).
-          ARM_START: ${{ github.event.inputs.start }}
-          ARM_END: ${{ github.event.inputs.end }}
-          ARM_PROFILE: ${{ matrix.profile }}
-          ARM_VOLCANO: ${{ matrix.volcano }}
-        timeout-minutes: 300
+          ARM_START: ${{ matrix.job.start }}
+          ARM_END: ${{ matrix.job.end }}
+          ARM_BRAZOS: ${{ github.event.inputs.brazos }}
+          ARM_VOLCANO: ${{ matrix.job.vol }}
+        timeout-minutes: 170
         run: |
           set -euo pipefail
-          set -o pipefail
-          mkdir -p logs
-          # S150 (verificador del pre-registro de NdC, N3): la primera linea del log deja escrito que flags
-          # LEYO este job, para que el evaluador compruebe el cableado de cada brazo desde el artefacto.
-          # S151 (tarea 1.4): se agrega ENABLE_VENT_ANCHORED_CLUSTERING, el flag del A/B de la anomalia mayor.
-          # S151 (tarea 1.7): se agregan ENABLE_ROI1_BOX_PAPER y ROI1_BOX_HALF_KM, la caja de 5 x 5 km (D18).
-          VRP_PROFILE="$ARM_PROFILE" python -c "import json, pipeline.profile as p; print('FLAGS_BRAZO ' + json.dumps({k: getattr(p, k) for k in ('PROFILE_NAME', 'DATA_SUBDIR', 'ENABLE_TEST1_PATH', 'ENABLE_TESTS_23_PROSE_BRANCH', 'ENABLE_MODIS_B22_PRIMARY', 'ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER', 'PATH_D_ONLY_CAP_MW', 'ENABLE_TESTS_23_NO_BT_GATE_VIIRS375', 'ENABLE_VENT_ANCHORED_CLUSTERING', 'ENABLE_ROI1_BOX_PAPER', 'ROI1_BOX_HALF_KM')}))" | grep '^FLAGS_BRAZO ' > "logs/${ARM_PROFILE}_${ARM_VOLCANO}.log"
-          python scripts/run_pipeline.py \
-            --profile "$ARM_PROFILE" \
-            --volcano "$ARM_VOLCANO" \
-            --start "$ARM_START" \
-            --end "$ARM_END" \
-            --overwrite 2>&1 | tee -a "logs/${ARM_PROFILE}_${ARM_VOLCANO}.log"
+          PERFILES=$(python -c "import json, os; print(','.join(json.loads(os.environ['ARM_BRAZOS'])))")
+          # --estricto-cobertura: si una busqueda o descarga no se pudo hacer, el job sale rojo (codigo 3) en vez de
+          # verde con pasadas de menos (A108, MEDICION.md seccion 3). La salida se sube igual (if: always()) y
+          # recolectar cuenta la cobertura.
+          python scripts/reproc_brazos.py \
+            --volcano "$ARM_VOLCANO" --start "$ARM_START" --end "$ARM_END" \
+            --perfiles "$PERFILES" --trabajo "$RUNNER_TEMP/brazos" --logs logs \
+            --overwrite --estricto-cobertura --cobertura-json "cobertura/cobertura_${ARM_VOLCANO}.json"
 
-      - name: Subir el JSON del brazo
+      - name: Juntar la salida del trozo
+        if: always()
+        env:
+          ARM_BRAZOS: ${{ github.event.inputs.brazos }}
+          ARM_VOLCANO: ${{ matrix.job.vol }}
+        run: |
+          set -euo pipefail
+          mkdir -p salida/logs salida/cobertura
+          for ARM_PROFILE in $(python -c "import json, os; print(' '.join(json.loads(os.environ['ARM_BRAZOS'])))"); do
+            if [ -f "data/$ARM_PROFILE/$ARM_VOLCANO.json" ]; then
+              mkdir -p "salida/data/$ARM_PROFILE" && cp "data/$ARM_PROFILE/$ARM_VOLCANO.json" "salida/data/$ARM_PROFILE/"
+            fi
+          done
+          cp logs/*.log salida/logs/ 2>/dev/null || true
+          cp cobertura/*.json salida/cobertura/ 2>/dev/null || true
+          find salida -type f | sort
+
+      - name: Subir la salida del trozo
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: s146ab-${{ matrix.profile }}-${{ matrix.volcano }}
-          path: |
-            data/${{ matrix.profile }}/${{ matrix.volcano }}.json
-            logs/${{ matrix.profile }}_${{ matrix.volcano }}.log
+          name: s146ab-${{ matrix.job.vol }}-${{ matrix.job.idx }}-${{ matrix.job.start }}_${{ matrix.job.end }}
+          path: salida
           retention-days: 90
           if-no-files-found: error
 
   recolectar:
-    needs: reproc
+    needs: [plan, reproc]
     if: always() && github.event.inputs.preregistro_aprobado == 'si'
     runs-on: ubuntu-24.04  # S150: fijado; ubuntu-latest migra a 26.04 entre 2026-10-19 y 2026-11-19 (runner-images #14748). Cambiar despues de probar pyhdf en 26.04
     timeout-minutes: 30
@@ -180,22 +234,18 @@ jobs:
       - name: Dependencias minimas
         run: pip install pyyaml
 
-      - name: Bajar los artefactos de todos los brazos
+      - name: Bajar los artefactos de todos los trozos
+        # S157: SIN merge-multiple. Dos trozos del mismo brazo y volcan traen el mismo camino y se pisarian en
+        # silencio; cada artefacto queda en recolectado/<nombre>/ y unir_trozos_ab.py los une.
         uses: actions/download-artifact@v4
         with:
           pattern: s146ab-*
           path: recolectado
-          merge-multiple: true
 
-      - name: Ordenar por brazo
-        env:
-          BRAZOS: ${{ github.event.inputs.brazos }}
+      - name: Unir los trozos de cada brazo
         run: |
           set -euo pipefail
-          mkdir -p salidas
-          # download-artifact con merge-multiple deja los JSON bajo data/<brazo>/<volcan>.json
-          if [ -d recolectado/data ]; then cp -r recolectado/data/. salidas/; fi
-          if [ -d recolectado/logs ]; then mkdir -p salidas/logs && cp -r recolectado/logs/. salidas/logs/; fi
+          python scripts/unir_trozos_ab.py recolectado salidas
           find salidas -name '*.json' | sort | sed -n '1,200p'
 
       - name: COBERTURA PAREJA antes de mirar nada (A108)
