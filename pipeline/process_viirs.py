@@ -3,7 +3,7 @@
 # Objetivo      : Detectar y cuantificar anomalias termicas en granulos VIIRS I-band 375m
 #                 (VNP02IMG/VJ102IMG): el sensor de mayor resolucion espacial, clave para focos sub-pixel
 #                 debiles.
-# Lógica        : Misma cascada MIROVA-style que MODIS adaptada a 375m: deteccion contextual/ROI sobre I04,
+# Lógica        : [⚠️ S157, detector K desde #850 (2026-10-18; en los datos desde la observacion del 2026-09-18): sin el Test 1 integrado en el ROI (D30) y con conectiva max en los Tests 2 y 3 (D26); el 'ROI' que sigue es del estado previo, y el 'anillo de fondo intermedio' de abajo alimenta el VRP del Test 1, asi que probablemente no actua con K (SOSPECHA, cadena no trazada entera).] Misma cascada MIROVA-style que MODIS adaptada a 375m: deteccion contextual/ROI sobre I04,
 #                 fondo local por anillo, VRP por Wooster. En regimen de muy baja energia recupera focos
 #                 sub-pixel con anillo de fondo intermedio condicionado.
 # Modelo/método : Reglas fisicas deterministicas (Wooster MIR; adaptacion TIRVolcH Aveni 2024 / Campus

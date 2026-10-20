@@ -2,7 +2,7 @@
 # FICHA SDA · process_modis.py · SDA: VRP Chile (clon MIROVA) · ID: VRP-CL
 # Objetivo      : Detectar y cuantificar anomalias termicas en granulos MODIS L1B (Terra/Aqua) para apoyar
 #                 la vigilancia de actividad volcanica (alerta tecnica OVDAS).
-# Lógica        : En cada escena nocturna se buscan pixeles 'calientes' (Tests contextuales y de ROI
+# Lógica        : [⚠️ S157, detector K desde #850 (2026-10-18; en los datos desde la observacion del 2026-09-18): en produccion el Test 1 integrado en el ROI esta APAGADO (D30, detector propio, no de Coppola 2016a), los Tests 2 y 3 usan la conectiva max (D26) y la banda 22 es la MIR primaria (D21). Lo que sigue describe el estado previo.] En cada escena nocturna se buscan pixeles 'calientes' (Tests contextuales y de ROI
 #                 integrado de Coppola 2016a), se estima la temperatura de fondo local por anillo, y se
 #                 calcula la potencia radiada (VRP) con la ecuacion de Wooster/Planck.
 # Modelo/método : Reglas fisicas deterministicas (Planck/Wooster; Coppola 2015/2016a/2024). NO es caja negra
@@ -11,7 +11,7 @@
 #                 datos personales.
 # Variables     : BT del pixel, T de fondo (anillo/contextual), umbrales N·sigma dual-ROI (5 summit / 10
 #                 scene), area de pixel (nadir-fijo), distancia al crater.
-# Limitaciones  : Sesgo topografico en cumbres nevadas (MIR absoluto), sobre-deteccion difusa irreducible a
+# Limitaciones  : [⚠️ S157: con K (banda 22 y max) MODIS fuera de Lascar publica en 18 de 2.173 negativos limpios contra 242 antes (experiments/_s153_fk_v2/v2.log:233); el 'irreducible a 1 km' que sigue es previo a K (D11).] Sesgo topografico en cumbres nevadas (MIR absoluto), sobre-deteccion difusa irreducible a
 #                 1 km, saturacion de pixel, contaminacion por lago/nieve, falsos positivos por incendios.
 # Refs/datos    : Coppola 2016a (GS SP426.5), Coppola 2024 (Springer). La cita "Coppola et al.
 #                 2015 (BV 77:55)" se RETIRO en S147: no corresponde a ningun articulo
@@ -26,7 +26,7 @@ Algorithm: MIROVA (Coppola et al. 2015, sp426.5)
   VRP = A_pixel * sigma * (T_pix^4 - T_bg^4)
   threshold = max(5K, 3 * std_background)
 
-Bands:
+Bands:  [⚠️ S157: con K (#850) la banda 22 es la primaria y la 21 entra donde la 22 satura (D21); las dos lineas que siguen describen el estado previo.]
   EV_1KM_Emissive contains all 16 emissive bands [20-25, 27-36]
   - Band 21 (3.929 um): index 1 in EV_1KM_Emissive, primary MIR hotspot channel
   - Band 22 (3.959 um): index 2, used where Band 21 is saturated
@@ -170,6 +170,7 @@ from pipeline.profile import (
     ENABLE_BT_SAT_SECONDARY_GUARD,
     BT_SAT_MIR_K_MODIS,
     ENABLE_MODIS_B22_PRIMARY,
+    ENABLE_MODIS_MIR_LAMBDA_POR_BANDA,
     ENABLE_MODIS_DISTANCE_CLASS_FROM_CLUSTER,
     ENABLE_SINGLE_PIXEL_SUB_MW_MODE,
     SUB_MW_REGIME_THRESHOLD_MW,
@@ -337,6 +338,48 @@ def merge_mir_bands(rad21, rad22, b22_primary):
     if b22_primary:
         return np.where(np.isnan(rad22), rad21, rad22)
     return np.where(np.isnan(rad21), rad22, rad21)
+
+
+def lambda_mir_por_pixel(m21, m22, b22_primary, por_banda):
+    """Longitud de onda con que cada temperatura MIR de `bt_mir` vuelve a radiancia.
+
+    POR QUÉ (S157). La magnitud de Coppola 2016a (p. 8, Ec. 6 y 7) es un exceso en radiancia de la banda
+    corregida L21ok, armada con la radiancia de B22 o la de B21 donde B22 satura (p. 3). El pipeline invierte
+    Planck para trabajar umbrales en temperatura y vuelve a radiancia para la Ec. 7; esa vuelta devuelve la
+    radiancia MEDIDA sólo si usa la misma λ con que se invirtió, que es la de la banda de origen del píxel
+    (`bt21` con BAND21_LAMBDA, `bt22` con BAND22_LAMBDA, más arriba en `calculate_vrp`).
+
+    `por_banda=False` conserva el comportamiento histórico (BAND21_LAMBDA en todos los píxeles), que con B22
+    primaria baja la magnitud ~5 % (experiments/_s157_lambda_b22/). La regla de origen es la de
+    `merge_mir_bands`: el llamador pasa `bt21` y `bt22`, los MISMOS arreglos con que se arma `bt_mir`, para que
+    la decisión por NaN sea idéntica (con las radiancias diferiría donde la radiancia es negativa, que da NaN
+    en temperatura y no en radiancia; verificador S157 H11). Donde las dos son NaN la temperatura también lo es
+    y la λ no importa.
+
+    Con `por_banda=False` devuelve el ESCALAR BAND21_LAMBDA, no un arreglo: el código histórico hacía la
+    cuenta de Planck con un escalar de Python sobre temperaturas float32 y un arreglo float64 la haría en
+    float64. Con el escalar el procesador apagado queda bit a bit igual (A45). Para indexar, `lambda_en`.
+    """
+    if not por_banda:
+        return BAND21_LAMBDA
+    lam21 = np.full(np.shape(m21), BAND21_LAMBDA, dtype=np.float64)
+    lam22 = np.full(np.shape(m22), BAND22_LAMBDA, dtype=np.float64)
+    if b22_primary:
+        return np.where(np.isnan(m22), lam21, lam22)
+    return np.where(np.isnan(m21), lam22, lam21)
+
+
+def lambda_en(lam, rows, cols):
+    """`lam` en los píxeles (rows, cols): el escalar tal cual, o el arreglo indexado."""
+    return lam[rows, cols] if np.ndim(lam) else lam
+
+
+def lambda_mir_fondo(b22_primary, por_banda):
+    """λ con que la temperatura del FONDO vuelve a radiancia: la de la banda primaria, porque el fondo nunca
+    satura B22 (~331 K) y su temperatura sale de esa banda. `por_banda=False`: histórico, BAND21_LAMBDA."""
+    if por_banda and b22_primary:
+        return BAND22_LAMBDA
+    return BAND21_LAMBDA
 
 
 def _interp_geo(coarse: np.ndarray, target_lines: int, target_samples: int) -> np.ndarray:
@@ -552,6 +595,10 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     bt21 = radiance_to_bt(rad21, BAND21_LAMBDA)
     bt22 = radiance_to_bt(rad22, BAND22_LAMBDA)
     bt_mir = merge_mir_bands(bt21, bt22, ENABLE_MODIS_B22_PRIMARY)
+    # S157: la λ de la vuelta a radiancia sale de la MISMA regla de origen (ver lambda_mir_por_pixel). Con el
+    # flag apagado las dos son BAND21_LAMBDA y todo lo de abajo queda bit a bit como antes.
+    _lam_pix = lambda_mir_por_pixel(bt21, bt22, ENABLE_MODIS_B22_PRIMARY, ENABLE_MODIS_MIR_LAMBDA_POR_BANDA)
+    _lam_bg = lambda_mir_fondo(ENABLE_MODIS_B22_PRIMARY, ENABLE_MODIS_MIR_LAMBDA_POR_BANDA)
 
     # F2.8 S73 H3: defensa secundaria post-Planck-inversion.
     # Si por alguna razón un pixel saturado escapó al fix L1B (calibrate() filter
@@ -743,7 +790,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         test1_res = compute_test1_mir(
             bt=bt_mir, lat=lat, lon=lon,
             vent_lat=vent_lat, vent_lon=vent_lon,
-            lambda_um=BAND21_LAMBDA,
+            lambda_um=_lam_pix,  # S157: λ por píxel; con el flag apagado es el escalar BAND21_LAMBDA
             roi_km=TEST1_ROI_KM,
             inner_ring_km=TEST1_INNER_RING_KM,
             k_sigma=TEST1_K_SIGMA,
@@ -1033,11 +1080,12 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         # Use L_bg derived from BT median (not direct radiance median) to avoid
         # inconsistency when background annulus has heterogeneous terrain/clouds.
         # Planck is nonlinear: median(radiance) != radiance(median(BT)).
-        L_bg_global = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bg)) - 1)))
+        L_bg_global = float(C1 / (_lam_bg ** 5 * (np.exp(C2 / (_lam_bg * t_bg)) - 1)))
 
         hotpix_bt = bt_mir[hot_rows, hot_cols]
         # Convert hot pixel BT to radiance for consistent VRP calculation
-        hotpix_rad = C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * hotpix_bt)) - 1))
+        hotpix_lam = lambda_en(_lam_pix, hot_rows, hot_cols)  # S157: λ de la banda de origen de cada píxel
+        hotpix_rad = C1 / (hotpix_lam ** 5 * (np.exp(C2 / (hotpix_lam * hotpix_bt)) - 1))
         # Per-pixel area accounts for scan-angle elongation
         hotpix_area = pixel_areas[hot_rows, hot_cols]
 
@@ -1059,7 +1107,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
             # Fallback a t_bg global cuando local es NaN
             if t_bg is not None and not np.isnan(t_bg):
                 t_bk_arr = np.where(np.isnan(t_bk_arr), t_bg, t_bk_arr)
-            L_bg = C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bk_arr)) - 1))
+            L_bg = C1 / (_lam_bg ** 5 * (np.exp(C2 / (_lam_bg * t_bk_arr)) - 1))
             diag_L_bg_local = redondear_diag(float(np.nanmedian(L_bg)))  # S140 T7: fondo local que se resta
         else:
             L_bg = L_bg_global
@@ -1152,7 +1200,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                 if not _corona_degraded:
                     _corona_pix = cluster_vrp_per_pixel_with_bg(
                         bt_mir, pixel_areas, _c["pixel_indices"],
-                        _t_bk_corona, WOOSTER_COEFF, BAND21_LAMBDA,
+                        _t_bk_corona, WOOSTER_COEFF, _lam_bg,
+                        lambda_grid=_lam_pix if np.ndim(_lam_pix) else None,  # S157: λ por píxel, fondo con la primaria
                     )
                     _vrp_c = sum_cluster_vrp(_corona_pix)
                     _vrp_pp_eff = vrp_per_pixel_2d.copy()
@@ -1250,8 +1299,9 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
                 sigma_contrib = min(N_SIGMA_VENT * std_bg, MAX_VENT_SIGMA_CONTRIB_K)
                 modis_vent_thresh = max(MODIS_VENT_THRESHOLD_K, sigma_contrib)
                 if t_max_vent > (t_bg + modis_vent_thresh):
-                    L_vent = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_max_vent)) - 1)))
-                    L_bg_vent = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bg)) - 1)))
+                    _lv = float(lambda_en(_lam_pix, r_vent, c_vent))  # S157
+                    L_vent = float(C1 / (_lv ** 5 * (np.exp(C2 / (_lv * t_max_vent)) - 1)))
+                    L_bg_vent = float(C1 / (_lam_bg ** 5 * (np.exp(C2 / (_lam_bg * t_bg)) - 1)))
                     vent_area = float(pixel_areas[r_vent, c_vent])
                     vrp_vent_mw = float(vent_area * WOOSTER_COEFF * (L_vent - L_bg_vent)) / 1e6
                     # S12 E4: count hot pixels + floor check
@@ -1364,7 +1414,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
     # permanente, Lastarria fumarolas).
     if ENABLE_TEST1_LBG_GLOBAL and lbg_global_compatible and not np.isnan(t_bg):
         # MODIS Banda 21: Planck 3.929 µm
-        effective_L_bg = float(C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t_bg)) - 1)))
+        effective_L_bg = float(C1 / (_lam_bg ** 5 * (np.exp(C2 / (_lam_bg * t_bg)) - 1)))
     else:
         effective_L_bg = test1_L_bg_local
 
@@ -1374,7 +1424,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         t1_rows, t1_cols = np.where(test1_hot_filtered)
         if len(t1_rows) > 0:
             t1_bt = bt_mir[t1_rows, t1_cols]
-            t1_rad = C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t1_bt)) - 1))
+            t1_lam = lambda_en(_lam_pix, t1_rows, t1_cols)  # S157
+            t1_rad = C1 / (t1_lam ** 5 * (np.exp(C2 / (t1_lam * t1_bt)) - 1))
             t1_delta_L = np.maximum(t1_rad - effective_L_bg, 0.0)
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
@@ -1389,7 +1440,8 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         t1_rows, t1_cols = np.where(test1_hot_filtered)
         if len(t1_rows) > 0:
             t1_bt = bt_mir[t1_rows, t1_cols]
-            t1_rad = C1 / (BAND21_LAMBDA ** 5 * (np.exp(C2 / (BAND21_LAMBDA * t1_bt)) - 1))
+            t1_lam = lambda_en(_lam_pix, t1_rows, t1_cols)  # S157
+            t1_rad = C1 / (t1_lam ** 5 * (np.exp(C2 / (t1_lam * t1_bt)) - 1))
             t1_delta_L = np.maximum(t1_rad - effective_L_bg, 0.0)
             t1_area = pixel_areas[t1_rows, t1_cols]
             t1_vrp_arr = t1_area * WOOSTER_COEFF * t1_delta_L / 1e6
@@ -1525,7 +1577,7 @@ def calculate_vrp(hdf_path: Path, geo_path: Path,
         "anomaly_pixels": anomaly_pixels,
         "t_bg_k": round(t_bg, 2),
         # S140 T7: fondo en radiancia, en la banda del delta_L, para comparar con Tot_Lmir_bk de MIROVA.
-        "diag_L_bg_w_m2_sr_um": redondear_diag(radiancia_planck(t_bg, BAND21_LAMBDA)),
+        "diag_L_bg_w_m2_sr_um": redondear_diag(radiancia_planck(t_bg, _lam_bg)),
         "diag_n_bg_anillo": int(_n_bg),  # píxeles del anillo en la mediana de t_bg (no los "suitable" del paper)
         "diag_L_bg_local_w_m2_sr_um": diag_L_bg_local,
         "t_max_k": round(t_max, 2),

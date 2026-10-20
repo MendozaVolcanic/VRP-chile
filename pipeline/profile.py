@@ -635,6 +635,16 @@ BT_SAT_MIR_K_MODIS: float = float(_cfg.get("bt_sat_mir_k_modis", _p.get("bt_sat_
 # pre-registrado, nunca por flip a ciegas.
 ENABLE_MODIS_B22_PRIMARY: bool = bool(_cfg.get("enable_modis_b22_primary", _p.get("enable_modis_b22_primary", False)))
 
+# S157 - longitud de onda por banda en la vuelta a radiancia de MODIS (hallazgo lateral de #869).
+# POR QUE: la magnitud (Coppola 2016a p. 8, Ec. 6 y 7) es un exceso en RADIANCIA. El pipeline pasa por
+# temperatura de brillo y vuelve a radiancia; la vuelta devuelve la radiancia medida solo si usa la misma
+# longitud de onda que la ida. Con B22 primaria (K) la ida es con 3,959 um y la vuelta seguia con 3,929 um
+# (la de B21): la magnitud MODIS sale 1,053 a 1,075 veces mas baja (experiments/_s157_lambda_b22/).
+# ON: cada pixel vuelve con la lambda de su banda de origen y el fondo con la de la banda primaria.
+# Arranca OFF: cambia la magnitud publicada; encenderlo es decision de Nicolas (A45).
+ENABLE_MODIS_MIR_LAMBDA_POR_BANDA: bool = bool(_cfg.get("enable_modis_mir_lambda_por_banda",
+                                                        _p.get("enable_modis_mir_lambda_por_banda", False)))
+
 # S132 - origen de `distance_class` en MODIS (decision #4 de AUDIT_S131 §4).
 # POR QUE: la etiqueta se deriva hoy del `final_hotspot`, que en MODIS es el maximo de MIR
 # ABSOLUTA de la escena. A 1 km ese maximo esta dominado por el gradiente de altitud (A69)

@@ -15,6 +15,11 @@ Repo: https://github.com/MendozaVolcanic/VRP-chile
 
 **Primer comando obligatorio de cualquier sesión Claude**:
 
+> ⚠️ **S157** (`experiments/_s155_audit/frente_1_verif/INFORME.md` F1-12): en `main` el último bloque de arranque
+> es el de S150, anterior a K; los de S151 en adelante viven en la rama `loop/activo`
+> (`git ls-tree --name-only origin/loop/activo tasks/`). Y el «hoy: AUDIT_S123.md» del bloque quedó viejo: el
+> comando mismo da la última. Bloque conservado por historia.
+
 ```bash
 cd "C:/Users/nmend/OneDrive/Escritorio/claude/Volcanologia/VRP Chile"
 git fetch origin --prune
@@ -117,8 +122,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   antes del resultado en `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (#848); evidencia en
   `experiments/_s153_fk_v2/README.md` (con la lectura A, CUMPLE en V1 y V2: negativos limpios de
   VIIRS 375 publicados de 88,2 y 85,4 % a 2,5 y 3,7 %, 0 protegidas perdidas que decidan). El
-  laboratorio `experimental` sigue con el detector anterior y es la sombra. Reversión: `git revert`
-  del PR (tag `pre-s153-adopcion-k`); ficha `docs/FICHA_SDA_VRP_CHILE.md` v1.9. El texto que sigue,
+  laboratorio `experimental` sigue con el detector anterior y es la sombra. Reversión: (⚠️ **S157**:
+  el PR es **#850**, squash `34cea39e`, 2026-10-18 09:57:30 UTC; los datos cambian de detector en la
+  observación del 2026-09-18, no en el merge, porque los 30 días previos se reescribieron con K; y el
+  `git revert` ya no es limpio: sobre `main` del 2026-10-20 choca en tres archivos y no toca esos
+  datos, ver la marca S157 del inicio de `docs/MISSION.md` y `experiments/_s157_propagar_k/revert_hoy.out`)
+  `git revert` del PR (tag `pre-s153-adopcion-k`); ficha `docs/FICHA_SDA_VRP_CHILE.md` v1.9. El texto que sigue,
   incluida la «rama OR completa `min(C1, μ+C2·σ)`» y la banda 21 primaria, describe el estado
   previo a S153 y se conserva por historia. Texto anterior: el gate de detección usa los umbrales **N·σ de Coppola 2016a Tabla 1
   por dual-ROI** (NO 3σ uniforme — eso era el drift D2 histórico, ya resuelto). Verificado por
@@ -175,6 +184,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   `hotspot_*` o `vent_hotspot_*` por separado.
 
 ## Reglas operacionales S14 (aprendizajes)
+
+> ⚠️ **S157, propagación de K** (A113): las reglas A-número que explican un resultado por el Test 1 integrado en el
+> ROI (entre otras A12, A19, A66, A67, A69, A100 y A114) se escribieron con ese camino encendido. Desde #850
+> (2026-10-18; en los datos desde la observación del 2026-09-18) no corre en la réplica (D30): la lección de
+> método de cada regla se conserva, el mecanismo descrito ya no actúa en producción. A69, A82, A100 y A117 llevan
+> además su marca propia.
 - **A1. Calibración empírica > derivación teórica**: cuando haya data pública
   del mismo grupo (OSF, Zenodo), calcular coeficientes empíricos antes de
   confiar en un número de paper. Resolvió en 1 min discrepancia Di Bella vs
@@ -366,7 +381,7 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   las dos frases de esta regla que dicen que el tope «funciona» sólo quieren decir que recorta. No está
   medido que lo recortado sea artefacto (`docs/AUDIT_S146.md` C-02: el paper no lo sostiene), y el tope
   se arma con el fondo de la escena bajo 270 K sin que ningún píxel pase por temperatura ni por NTI
-  absoluto (`pipeline/process_modis.py:1009`). Corpus al 2026-10-14 (65.705 records): 1.565 cúmulos
+  absoluto (`pipeline/process_modis.py:1056`, era 1009 hasta S157). Corpus al 2026-10-14 (65.705 records): 1.565 cúmulos
   topados en 5,0 exacto (277 `summit`), los 1.565 con `primary_cluster.d9_capped`, y **343 cúmulos
   sobre 5 MW** (110 `summit`), así que «0 records sobre 5 MW» vale sólo para la población de S113 (A90).
   Script: `experiments/_s150_meta_audit/verif_docs/contar_topados_d9.py`. Marca de S146 conservada:
@@ -848,7 +863,13 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   Doc: `docs/AUDIT_S103_OVERDETECTION_PCC_VILLARRICA.md`. Acciones derivadas (futuras): display
   PCC (extensión naranja, no summit) + D9/A23 co-validación path-D.
 
-- **A69. El gradiente topográfico nocturno contamina los paths que usan MIR ABSOLUTO;
+- **A69.** ⚠️ **S157, propagación de K** (`experiments/_s155_audit/frente_1_verif/INFORME.md` F1-08): el camino
+  que esta regla culpa, el Test 1 integrado sobre MIR absoluto, está apagado en la réplica desde #850 (0 de 3.661
+  records procesados después del merge con `triggered_test1`, `experiments/_s155_audit/frente_1/efecto_k_en_datos.out`).
+  El «sigue viva en los 3 sensores» del sub-punto S125 de abajo describe el estado previo a K. Parte del mecanismo
+  puede seguir por otra puerta (la compuerta `bt > t_bg + 3 K` de D22 sigue encendida; la etiqueta MODIS sale del
+  `final_hotspot`): SOSPECHA del verificador de S155, no medida. Texto conservado por historia.
+  **A69. El gradiente topográfico nocturno contamina los paths que usan MIR ABSOLUTO;
   MIROVA es inmune porque detecta por NTI** (S104, causa raíz del sesgo espacial de los
   nevados, confirmada con 2 probes ground truth). En volcanes con cumbre nevada (cráter
   frío ~272K) y valle tibio de baja altitud (~281K), el campo crudo de BT MIR (I04) está
@@ -1017,7 +1038,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   ancla honesta — verificar data fresca antes de asumir el problema. Detalle:
   [[reference_s113_a46_bidirectional]] + `docs/S113_A46_COHERENCE_GUARD.md`.
 
-- **A82.** ⚠️ **S150, marca agregada en S151 (A113, hija de la marca S151 de D21 en `docs/MIROVA_DIVERGENCES.md`)**: el «a 1 km el foco débil y el gradiente difuso son el mismo objeto» queda en tensión con lo medido con banda 22 en Láscar, marzo a junio de 2026 (`docs/S150_RESULTADO_MESES.md`, verificado): con banda 22 MODIS publica 68 de 73 alertas de MIROVA y 11 de 96 pasadas en que MIROVA miró y no vio nada, y con `max` 67 de 73 y 2 de 96. Sólo Láscar; en los otros diez volcanes no está medido. Marcas anteriores conservadas: **⚠️ REBAJADA S124: «agotado» ya no aplica.** ⚠️ **Rebajada también por la vía espectral en S138 (AUDIT_S138 C3)**: los ejes que la regla da por agotados se barrieron sobre records producidos con banda 21 primaria (D21) y compuerta `bt > t_bg + 3 K` (D22), las dos divergencias que S137 abrió; «irreducible» vale sólo bajo esa configuración. ⚠️ **Y el número que sostiene el cierre no tiene tasa base, verificado S146 (AUDIT_S146 V-02)**: el «el pipeline encuentra el cráter 90 %» mide presencia de cúmulo, no detección. Con negativos limpios (pasadas donde MIROVA miró y todas sus filas son RUTINA) hay cúmulo con magnitud dentro del inner en **89,1 % de 4.800 pasadas MODIS**, contra **93,7 % de 158** cuando MIROVA alertó (ventana 2026-01-29 a 2026-08-28; después de #535, 86,0 % de 500 negativos y sólo 2 positivos): menos de 5 puntos de contraste, y 144 de esas 158 positivas son de Láscar. En VIIRS sí hay contraste (84,5 contra 62,1 en I-band; 47,5 contra 22,8 en M-band), así que el instrumento funciona y el problema es del número, no de la medición. Consecuencia: destapar la etiqueta destaparía por igual las noches con y sin actividad. **Esta rebaja baja también a A83, A84 y A85**, que citan el «irreducible / agotado» de A82 (A113). La auditoría S114 en que se
+- **A82.** ⚠️ **S157, propagación de K** (`experiments/_s155_audit/frente_1_verif/INFORME.md` F1-04): el «Sólo
+  Láscar; en los otros diez volcanes no está medido» de la marca que sigue ya no vale: K midió MODIS con banda 22 y
+  `max` en los 11, y fuera de Láscar publica en negativos limpios 7 de 825 (V1) y 18 de 2.173 (V2), contra 107 y 242
+  con el detector anterior (`experiments/_s153_fk_v2/v1.log:178`, `v2.log:233`; 158 de los 242 son de PCC). La
+  condición «bajo banda 21» con que S138 dejó vivo el «irreducible» ya no rige en producción. Qué hacer con D11 lo
+  decide Nicolás. ⚠️ **S150, marca agregada en S151 (A113, hija de la marca S151 de D21 en `docs/MIROVA_DIVERGENCES.md`)**: el «a 1 km el foco débil y el gradiente difuso son el mismo objeto» queda en tensión con lo medido con banda 22 en Láscar, marzo a junio de 2026 (`docs/S150_RESULTADO_MESES.md`, verificado): con banda 22 MODIS publica 68 de 73 alertas de MIROVA y 11 de 96 pasadas en que MIROVA miró y no vio nada, y con `max` 67 de 73 y 2 de 96. Sólo Láscar; en los otros diez volcanes no está medido. Marcas anteriores conservadas: **⚠️ REBAJADA S124: «agotado» ya no aplica.** ⚠️ **Rebajada también por la vía espectral en S138 (AUDIT_S138 C3)**: los ejes que la regla da por agotados se barrieron sobre records producidos con banda 21 primaria (D21) y compuerta `bt > t_bg + 3 K` (D22), las dos divergencias que S137 abrió; «irreducible» vale sólo bajo esa configuración. ⚠️ **Y el número que sostiene el cierre no tiene tasa base, verificado S146 (AUDIT_S146 V-02)**: el «el pipeline encuentra el cráter 90 %» mide presencia de cúmulo, no detección. Con negativos limpios (pasadas donde MIROVA miró y todas sus filas son RUTINA) hay cúmulo con magnitud dentro del inner en **89,1 % de 4.800 pasadas MODIS**, contra **93,7 % de 158** cuando MIROVA alertó (ventana 2026-01-29 a 2026-08-28; después de #535, 86,0 % de 500 negativos y sólo 2 positivos): menos de 5 puntos de contraste, y 144 de esas 158 positivas son de Láscar. En VIIRS sí hay contraste (84,5 contra 62,1 en I-band; 47,5 contra 22,8 en M-band), así que el instrumento funciona y el problema es del número, no de la medición. Consecuencia: destapar la etiqueta destaparía por igual las noches con y sin actividad. **Esta rebaja baja también a A83, A84 y A85**, que citan el «irreducible / agotado» de A82 (A113). La auditoría S114 en que se
   apoya cubrió umbrales, tests, kernel y second-run — **NO la geometría del ROI**.
   S124 mostró que la grilla UTM de MIROVA no está replicada y que
   `geo_utils.get_grid_center()` (escrita en S98 justo para eso) **nunca se cableó**
@@ -1304,7 +1330,11 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   343 son de un solo píxel). A igual selección **no coincidimos**: discrepamos 14 % en un sentido y
   13 % en el otro. Que el problema no esté en la fórmula sigue apoyado por otro script, pero **A99 ya
   no puede apagar la búsqueda en k, área, banda o Planck**.
-- **A100. `keep_peak` daba paridad por accidente** con un píxel a ~3 km del cráter (S139): nunca apagarlo solo.
+- **A100.** ⚠️ **S157**: con K el `keep_peak` de esta regla (el del filtro contextual del Test 1, D10 y D19) no actúa, porque sólo corre sobre records con
+  `final_hotspot_source == "test1"` y el Test 1 integrado está apagado (D10, D30; 0 de 3.687 records con esa fuente
+  desde la observación del 2026-09-18, `experiments/_s155_audit/frente_1_verif/v_fuente_hotspot_k.txt`). El «nunca
+  apagarlo solo» vale para el detector anterior. El keep-peak focal de MODIS y VIIRS 750 (`FOCAL_CLUSTER_KEEP_PEAK`,
+  `pipeline/process_modis.py:1172`) es otro mecanismo y sigue corriendo. **A100. `keep_peak` daba paridad por accidente** con un píxel a ~3 km del cráter (S139): nunca apagarlo solo.
 - **A101. Las citas `file:line` se remapean por contenido** (`difflib` contra `origin/main`, sólo bloques
   idénticos), nunca por aritmética ni en citas históricas deliberadas como A6 y A49 (S141).
 - **A102. Al corregir una función, buscar también las copias en línea de su lógica** (S141): el detector
@@ -1480,7 +1510,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   - **How to apply**: cuando un perfil se define **en relación** a otro, el guard compara los dos
     (`tests/test_guard_laboratorio_no_mas_ciego_s147.py`), no fija un número; y al cambiar un
     parámetro del perfil padre, buscar quién lo sobrescribe (`grep` de la clave en
-    `pipeline/profiles/`). Hoy el laboratorio es **idéntico** al operacional salvo el directorio de
+    `pipeline/profiles/`). (⚠️ **S157, FALSO desde K** (`experiments/_s155_audit/frente_1_verif/INFORME.md`
+    F1-07): el laboratorio quedó congelado con el detector anterior y difiere de producción en los tres flags
+    de K; en MODIS ve **menos**: en V2 el brazo C0 del A/B, que es el detector con que quedó el laboratorio,
+    publica 6 de 39 alertas protegidas contra 39 de 39 de K
+    (`experiments/_s153_fk_v2/v2.log:223-224`), aunque en VIIRS 375 y en negativos publica más. El guard de
+    esta regla sólo compara pisos de magnitud y sigue verde. Texto original:) Hoy el laboratorio es **idéntico** al operacional salvo el directorio de
     salida; su diferenciación real está diseñada en `docs/DISENO_SENSIBILIDAD_POR_ZONA_S147.md`.
 
 - **A118. Un flag que cambia un umbral o una geometría tiene que llegar a TODOS sus consumidores;
@@ -1822,7 +1857,9 @@ en S35 durante ~70 sesiones y confundía a las sesiones frías):
    D13, D17 y D18; el estado vivo son los encabezados de cada D en el catálogo) ~~**abiertas
    D2 y D3**~~ (ambas congeladas desde S27, sin plan activo; D2 quedó mitigada de facto por el
    loader CONS∪OCR de S86 — medida en 79,2 % en S128 y anotada en el doc en S131)
-   y **D12** (FN MODIS; C2 peak-of-kernel refutado en S122, cierre formal pendiente
+   y **D12** (⚠️ **S157**: con K, banda 22 y `max` desde #850, MODIS publica las 39 alertas protegidas de Láscar de la
+   ventana V2 contra 6 del detector anterior, `experiments/_s153_fk_v2/v2.log:223-224`; el «pierde ~70/79» de D12 es
+   previo a K y si D12 se cierra lo decide Nicolás. Texto original:) (FN MODIS; C2 peak-of-kernel refutado en S122, cierre formal pendiente
    de Nicolás). **CERRADAS, no reabrir** (anti-A8): (⚠️ **S151**: el «sólo el tope de 5 MW se
    confirma» de la marca que sigue quiere decir que el tope recorta, no que lo recortado sea
    artefacto; hoy hay 343 cúmulos sobre 5 MW, ver la marca S151 de A23.)
@@ -1831,10 +1868,13 @@ en S35 durante ~70 sesiones y confundía a las sesiones frías):
    en alertas (máximo 80 de 214, 37,4 %) y el «0 fuga» es circular; sólo el tope de 5 MW se
    confirma. Ver la rebaja de A23. El texto que sigue se conserva por historia.)
    D9 (S113, sus dos caras),
-   D11 cara far→summit (**⚠️ S125: leer con la rebaja de A82 — la auditoría S114
+   D11 cara far→summit (⚠️ **S157**: la condición «bajo banda 21» con que S138 dejó vivo este cierre ya no rige desde K
+   (#850); ver la marca S157 de D11 en `docs/MIROVA_DIVERGENCES.md` y de A82. Qué hacer con D11 lo decide Nicolás.)
+   (**⚠️ S125: leer con la rebaja de A82 — la auditoría S114
    en que se apoya nunca miró el eje geométrico del ROI, así que el "irreducible"
    vale para la vía espectral/de magnitud, NO bloquea una llegada por geometría**)
    y los gates intra-radio S84/S85 (flip OFF S118, verificado S119).
 5. `docs/SESSION_INDEX_CONSOLIDATED_S80.md` — ancla histórica S1-S80
+6. `docs/SINTOMAS.md` (S157, tarea 1.34): **antes de proponer una palanca, leer ahí el síntoma** (magnitud baja, sobre-publicación, posición corrida, recall, A/B inerte, run verde sin datos) con lo medido, lo abierto y lo que no se reabre.
 
 **Regla**: al cerrar sesión NO escribir estado acá — va al bloque de arranque + memoria.

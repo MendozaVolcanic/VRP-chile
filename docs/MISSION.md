@@ -15,6 +15,19 @@
 > previo a S153; se conserva por historia. El laboratorio (`experimental`) sigue con el detector anterior y es la
 > sombra (§4.9 de la regla). Toda comparación con MIROVA que cruce la fecha de adopción se estratifica por régimen
 > (A104). Reversión: `git revert` del PR de adopción (tag `pre-s153-adopcion-k`). Ficha: `docs/FICHA_SDA_VRP_CHILE.md` v1.9.
+>
+> ⚠️ **S157, lo que la marca de arriba no dice** (propagación de K, `docs/AUDIT_S155.md` §2 y arreglo 5; frente 1 en
+> `experiments/_s155_audit/frente_1_verif/INFORME.md`, F1-01 y V1-01). (a) El PR de adopción es **#850**, squash
+> `34cea39e`, mergeado el 2026-10-18 09:57:30 UTC. (b) **Los datos no cambian de detector en esa hora sino en la fecha
+> de observación 2026-09-18**: los 30 días previos al merge se reescribieron con K (commits `data(backfill)` del
+> 2026-10-18, por ejemplo `5783192c1`), salvo 26 records MODIS Terra; la marca del tablero va ahí desde #860, y la
+> frontera se moverá más atrás cuando se aplique el reproceso histórico con K. (c) **La reversión ya no es un
+> `git revert` limpio**: simulado sobre `main` del 2026-10-20, choca en `frontend/cambio_detector.js`,
+> `tests/test_cambio_detector_s153.py` y `scripts/auto_audit_weekly.py`, aunque el perfil sí vuelve a C0
+> (`experiments/_s157_propagar_k/simular_revert.sh`; conflictos en `revert_hoy.out`, flags del árbol revertido en
+> `revert_hoy_control.out`); y un revert no toca los records ya
+> reescritos con K. El procedimiento de la reversión pre-autorizada tiene que resolver esos conflictos y esos datos;
+> esta marca no lo decide.
 
 ## Misión (objetivos simultáneos, post-S86)
 
@@ -153,6 +166,11 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
    de magnitud fiel debe ser uniforme por sensor (Coppola 2016a §98-119, §431-441,
    §689-695; Coppola 2024 §1148-1155).
 
+   ⚠️ **S157, propagación de K**: la conmutación por volcán de la nota que sigue pasa por
+   `enable_test1_lbg_global`, que fija el fondo con que se recalcula el VRP del **Test 1 integrado**; con K ese camino
+   no corre (#850, D30), así que la conmutación probablemente ya no actúa en producción. SOSPECHA: no se trazó la
+   cadena entera (`experiments/_s155_audit/frente_1/INFORME.md` F1-14). Texto conservado por historia.
+
    ⚠️ **Nota de realidad (S125)**: el principio es correcto como norte, pero el
    operacional **hoy sí conmuta por volcán**: `enable_test1_lbg_global` está gateado por
    `lbg_global_compatible` en `volcanoes.yaml` (Láscar, NdC y Lastarria usan fondo global;
@@ -200,13 +218,24 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
      sobre-reporte de 1,35), y sus dos patas están rebajadas (nadir fijo no es el remuestreo,
      A66; `keep_peak` daba paridad por accidente, A100) (AUDIT_S146 §2 y E-06). Lo que sigue se
      conserva por historia.
+   - ⚠️ **S157, D4 se queda sin su mecanismo** (propagación de K, `experiments/_s155_audit/frente_1_verif/INFORME.md`
+     F1-09): el «D4 recall sub-pixel (S27)» de la línea que sigue se cerró con el Test 1 integrado, que con K no corre
+     (marca del inicio de este documento). Y K deja de publicar justo alertas débiles de VIIRS 375: 16 de 194 alertas
+     Muy Bajo en V1 y 26 de 388 en V2, contra 0 con el detector anterior (`experiments/_s153_fk_v2/v1.log:91` y
+     `v2.log:148`). La regla de adopción pesó ese costo; si D4 se reabre lo decide Nicolás.
    - Resueltas (no justifican features nuevas): D1 granularidad, D4 recall sub-pixel
      (S27), D5 magnitud (nadir S102/103 + ctxpeak D10 S100), D8/D8' cluster selection
      (S38/S62), sec³ off-nadir (S102/103), fix del ancla de detección (S98),
      **D9 path-D cirrus** (cap C S71 + magnitud curada por nadir/focal S102-S109;
      verificado S113: 0 fuga al dashboard + mediana 0.53×; t_bg-gate descartado anti-MIROVA/trap A68).
    - **Abiertas**: (⚠️ S131: esta enumeración quedó congelada en S105 y omitía D13, D17 y D18. **El catálogo `docs/MIROVA_DIVERGENCES.md` es la lista viva; esta sección no la duplica** — para el estado de hoy, leer los encabezados de cada D en ese archivo. Lo que sigue se conserva por historia.) D2 cobertura CSV ground truth · D3 FP explícito MIROVA ·
-     **D11 sesgo topográfico de paths MIR-absolutos (A69, S104)** — (⚠️ **REBAJADA S146**
+     **D11 sesgo topográfico de paths MIR-absolutos (A69, S104)** — (⚠️ **S157, la condición del cierre ya se
+     cumplió en producción** (propagación de K, `experiments/_s155_audit/frente_1_verif/INFORME.md` F1-04): S138 dejó
+     el «irreducible a 1 km» valiendo sólo bajo banda 21 primaria, y desde K la réplica corre con la banda 22. K midió
+     MODIS en los 11 volcanes: fuera de Láscar publica en negativos limpios 7 de 825 (V1) y 18 de 2.173 (V2), contra 107
+     y 242 con el detector anterior (`experiments/_s153_fk_v2/v1.log:178`, `v2.log:233`; de los 242, 158 son de PCC).
+     El cierre queda sin el respaldo con que se escribió. Qué hacer con D11 (reabrirla, re-cerrarla como resuelta por
+     K o medir sólo la cara de posición) no lo decide esta marca.) (⚠️ **REBAJADA S146**
      (AUDIT_S146 V-02): «irreducible» y «todos los ejes agotados» quedan rebajados acá igual que
      en A82 de `CLAUDE.md`, porque el número que sostiene el cierre no tiene tasa base. Con
      negativos limpios hay cúmulo con magnitud dentro del inner en **89,1 %** de las pasadas
@@ -257,7 +286,7 @@ Estas fueron las desviaciones históricas. Nunca repetir.
 | Parche histórico | Razón rechazo | Estado |
 |---|---|---|
 | `MAX_SIGMA_COMPONENT_K=7K` cap eruption | No en papers; anula 5σ/10σ MIROVA | ⚠️ **Neutralizado por VALOR, no removido del código (S125).** El bloque corre en cada pasada; el perfil operacional lo pone en `999.0`, pero el **default del código es `7.0`** — un perfil que omita la clave resucita el parche en silencio. |
-| Vent-path entero | No en papers; sub-pixel debe ir por Test 1 (Coppola 2016a SP426.5) | Removido S27 |
+| Vent-path entero | (⚠️ **S157**: el «sub-pixel debe ir por Test 1» describe el detector previo a K; desde #850 el Test 1 integrado no corre en la réplica. La razón primera, «no en papers», no cae. `experiments/_s155_audit/frente_1_verif/INFORME.md` F1-09. Texto original:) No en papers; sub-pixel debe ir por Test 1 (Coppola 2016a SP426.5) | Removido S27 |
 | `exclude_zones` (Salar, lagos) | No en papers; MIROVA no usa máscaras geográficas | Removido S27 |
 | Regla D vent-priority | Parche de clasificación visual, no en papers | Removido S27 |
 | Regla D Test 1-priority | Parche de composición de paths, no en papers | ⚠️ **SIGUE ACTIVA (corregido S125).** La fila decía "Removido S27" y es falsa: el bloque está vivo en los 3 procesadores (`process_viirs.py:1642-1710`, `process_modis.py:1196-1230`, `process_viirs_mod.py:1069`; líneas actualizadas S131) y está **parcialmente gateado**: la rama de clúster rival débil depende de `ENABLE_TEST1_PRIORITY_WEAK_CLUSTER` (`process_viirs.py:1695`), el resto no tiene flag y además se **amplió** después de S27 — port a MODIS en S30, y ajustes en S44 y S111. Ver `docs/AUDIT_S125_PROFUNDA.md` §1 F1. |
