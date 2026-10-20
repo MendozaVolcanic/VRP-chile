@@ -1,4 +1,4 @@
-name: Reproc watchdog — avisa si un reproceso muere o se cuelga
+name: "Reproc watchdog: avisa si un reproceso muere o se cuelga"
 
 # POR QUE EXISTE
 # ==============
@@ -14,27 +14,52 @@ name: Reproc watchdog — avisa si un reproceso muere o se cuelga
 # QUE MIRA
 # ========
 # Cada hora revisa los workflows cuyo nombre empieza con `reproc-` y abre un issue
-# cuando encuentra: (a) una corrida fallida sin issue previo, o (b) una corrida en
-# curso hace mas de 7 h — sobre el techo de 6 h por job de GitHub, o sea colgada.
+# cuando encuentra: (a) que la ULTIMA corrida de un reproceso termino en falla, (b) un
+# JOB en curso hace mas de 7 h, sobre el techo de 6 h por job de GitHub, o sea
+# colgado, o (c) una corrida sin terminar, sin ningun job corriendo, iniciada hace mas
+# de 72 h (huerfana o en cola eterna). Una falla anterior a una corrida mas nueva no
+# se reporta: se da por atendida al relanzar.
 #
-# Cierra el issue solo cuando el mismo workflow vuelve a correr en verde.
+# Cierra el issue cuando nada de eso se cumple dentro de MAX_DIAS_ANTIGUEDAD, contado
+# desde el inicio del ultimo intento de cada corrida (`run_started_at`, que cambia al
+# relanzar; `created_at` no cambia y dejaba invisible un re-run de una corrida vieja).
+#
+# POR JOB Y NO POR RUN (fix S157, AUDIT_S155 F3-10, issue #824)
+# =============================================================
+# Hasta S156 "colgada" se medía con la edad del RUN (`created_at`). Pero el techo de
+# GitHub es por JOB, y un reproceso por trozos de 178 jobs con `max-parallel: 8` vive
+# mas de 30 h sin que nada este colgado: el run 39125546355 no tuvo ningun job sobre
+# 2,9 h y el watchdog lo dio por colgado cada hora. Ahora se leen los jobs del run
+# (paginados) y solo cuenta un job `in_progress` cuyo `started_at` pasa el techo. Un
+# job en cola no cuenta (esperar detras de max-parallel es lo normal), y si la API de
+# jobs no responde el run queda SIN DATO: no se lee como sano ni se cierra el issue.
+#
+# NO REPETIR (fix S157, F3-07 aplicado al watchdog)
+# =================================================
+# El texto del aviso llevaba "hace X h", asi que cada comentario era distinto del
+# anterior y #824 junto 28 en 4 dias. Ahora el texto lleva fechas fijas (creacion del
+# run, arranque del job) y solo se comenta si difiere del ultimo aviso del watchdog
+# en la issue (marcado con MARCA y escrito por github-actions[bot]). Si la API de
+# jobs no responde, eso va al rojo del job de Actions y NO al texto del aviso: si
+# entrara al texto, un 502 intermitente lo haria alternar y volver a comentar.
+# El ruido repetido tapa la alerta verdadera.
 #
 # QUE NO MIRA (fix S133, issue #567)
 # ==================================
 # La lista de workflows sale de la API (`listRepoWorkflows`), y esa API devuelve
 # tambien los que ya se BORRARON del repo: GitHub conserva la entidad para poder
 # seguir mostrando su historial de corridas. Medido el 2026-09-03 sobre este repo,
-# `reproc-f28-pp-saturation.yml` — archivo inexistente en `.github/workflows/` desde
-# mayo — sigue apareciendo con `state: "active"` y su ultima corrida (fallida,
+# `reproc-f28-pp-saturation.yml` (archivo inexistente en `.github/workflows/` desde
+# mayo) sigue apareciendo con `state: "active"` y su ultima corrida (fallida,
 # 2026-05-23) hacia que el watchdog comentara la issue #567 una vez por hora, 22
 # veces. Ese ruido es el dano real: tapa la alerta verdadera cuando llegue.
 #
-# Filtrar por `state == "active"` NO alcanza — la evidencia de arriba lo refuta.
+# Filtrar por `state == "active"` NO alcanza: la evidencia de arriba lo refuta.
 # Por eso la fuente de verdad de "que existe" es el REPO, no la API: se listan los
 # archivos reales de `.github/workflows` en la rama por defecto y se vigila solo la
 # interseccion. Ademas se acotan las corridas a MAX_DIAS_ANTIGUEDAD, porque un A/B
 # de una sola vez que fallo y nunca va a volver a correr en verde jamas cerraria su
-# issue — mismo ruido perpetuo por otra puerta.
+# issue: mismo ruido perpetuo por otra puerta.
 
 "on":
   schedule:
@@ -58,8 +83,11 @@ jobs:
       - name: Revisar los reprocesos y avisar
         uses: actions/github-script@v7
         with:
+          # GitHub devuelve 502 a veces: el cliente reintenta los errores de servidor.
+          retries: 3
           script: |
             const HORAS_COLGADO = 7;          // el techo de GitHub es 6 h por job
+            const HORAS_ESTANCADA = 72;       // corrida viva sin ningun job corriendo
             const MAX_DIAS_ANTIGUEDAD = 14;   // mas viejo que esto ya no es accionable
             const TITULO = 'Reproc: corrida fallida o colgada';
             const { owner, repo } = context.repo;
@@ -74,14 +102,70 @@ jobs:
                                         && vivos.has(w.path));
             }
 
-            function evaluarCorrida(r, ahoraMs, horasColgado, maxDias) {
-              const horas = (ahoraMs - new Date(r.created_at).getTime()) / 36e5;
-              if (horas > maxDias * 24) return null;
-              if (r.status === 'completed' && r.conclusion !== 'success'
-                  && r.conclusion !== 'cancelled') return { tipo: 'fallida', horas };
-              if (r.status !== 'completed' && horas > horasColgado)
-                return { tipo: 'colgada', horas };
+            const MARCA = '<!-- reproc-watchdog -->';
+            const AUTOR = 'github-actions[bot]';
+            const HORAS_ESTANCADA_TXT = '72 h';
+
+            // r: el run. jobs: sus jobs (null si la API no respondio). Devuelve null si
+            // no hay nada que avisar; si no, {tipo: 'fallida' | 'colgada' |
+            // 'estancada' | 'sin_dato'}.
+            function evaluarCorrida(r, jobs, ahoraMs, horasColgado, maxDias,
+                                    horasEstancada = 72) {
+              // Desde el inicio del ultimo intento: un re-run de una corrida vieja
+              // tiene created_at viejo pero run_started_at nuevo.
+              const inicio = r.run_started_at || r.created_at;
+              const edad = (ahoraMs - new Date(inicio).getTime()) / 36e5;
+              if (!(edad <= maxDias * 24)) return null;
+              if (r.status === 'completed') {
+                if (r.conclusion !== 'success' && r.conclusion !== 'cancelled')
+                  return { tipo: 'fallida' };
+                return null;
+              }
+              if (!Array.isArray(jobs)) return { tipo: 'sin_dato' };
+              // El techo de 6 h es por JOB. Solo un job que de verdad esta corriendo
+              // cuenta: uno en cola puede traer started_at poblado y no corre.
+              const colgados = jobs
+                .filter(j => j.status === 'in_progress' && j.started_at)
+                .map(j => ({ name: j.name, started_at: j.started_at,
+                  horas: (ahoraMs - new Date(j.started_at).getTime()) / 36e5 }))
+                .filter(j => j.horas > horasColgado);
+              if (colgados.length) return { tipo: 'colgada', jobs: colgados };
+              // Viva hace mucho y sin nada corriendo: huerfana o en cola eterna. El
+              // techo es amplio porque esperar detras de max-parallel es normal.
+              if (edad > horasEstancada && !jobs.some(j => j.status === 'in_progress'))
+                return { tipo: 'estancada', inicio };
               return null;
+            }
+
+            // Sin edades ("hace X h"): el mismo estado da el mismo texto a cualquier
+            // hora, que es lo que permite no repetir el aviso.
+            function lineaProblema(w, r, v) {
+              if (v.tipo === 'fallida')
+                return `- **${w.name}**: la corrida creada el ${r.created_at} termino en `
+                  + `\`${r.conclusion}\` · ${r.html_url}`;
+              if (v.tipo === 'colgada')
+                return `- **${w.name}**: ${v.jobs.map(j => `el job «${j.name}» corre desde `
+                  + `${j.started_at}`).join('; ')}, sobre el techo de 6 h por job · ${r.html_url}`;
+              if (v.tipo === 'estancada')
+                return `- **${w.name}**: la corrida iniciada el ${v.inicio} sigue sin `
+                  + `terminar y sin ningun job corriendo (techo ${HORAS_ESTANCADA_TXT}) `
+                  + `· ${r.html_url}`;
+              return `- **${w.name}**: SIN DATO, no pude leer los jobs de la corrida `
+                + `en curso · ${r.html_url}`;
+            }
+
+            const normalizar = t => String(t || '').replace(/\r\n/g, '\n')
+              .split('\n').map(l => l.replace(/\s+$/, '')).join('\n').trim();
+
+            // Comentar solo si el aviso cambio respecto del ultimo del watchdog (los
+            // comentarios humanos no cuentan, aunque citen la marca; si no hay ninguno,
+            // el cuerpo de la issue).
+            function debeComentar(cuerpo, issue, comentarios) {
+              const delWatchdog = comentarios.filter(c => String(c.body || '').includes(MARCA)
+                && c.user && c.user.login === AUTOR);
+              const ultimo = delWatchdog.length
+                ? delWatchdog[delWatchdog.length - 1].body : issue.body;
+              return normalizar(cuerpo) !== normalizar(ultimo);
             }
             // --- FIN SELECCION PURA ---
 
@@ -103,20 +187,33 @@ jobs:
               pathsEnRepo);
             core.info(`vigilando ${wfs.length} reprocesos vivos de ${pathsEnRepo.length} archivos`);
 
+            const ahora = Date.now();
             const problemas = [];
+            const sinDato = [];
             for (const w of wfs) {
               const runs = (await github.rest.actions.listWorkflowRuns({
-                owner, repo, workflow_id: w.id, per_page: 3 })).data.workflow_runs;
+                owner, repo, workflow_id: w.id, per_page: 5 })).data.workflow_runs;
               if (!runs.length) continue;
-              const r = runs[0];
-              const v = evaluarCorrida(r, Date.now(), HORAS_COLGADO, MAX_DIAS_ANTIGUEDAD);
-              if (!v) continue;
-              if (v.tipo === 'fallida') {
-                problemas.push(`- **${w.name}** — ultima corrida \`${r.conclusion}\` `
-                  + `hace ${v.horas.toFixed(1)} h · ${r.html_url}`);
-              } else {
-                problemas.push(`- **${w.name}** — lleva ${v.horas.toFixed(1)} h en `
-                  + `\`${r.status}\`, sobre el techo de 6 h por job · ${r.html_url}`);
+              // La ultima corrida decide si hay falla vigente; ademas cualquier corrida
+              // en curso de las recientes puede tener un job colgado (dos trozos
+              // relanzados corren a la vez).
+              const aMirar = runs.filter((r, i) => i === 0 || r.status !== 'completed');
+              for (const r of aMirar) {
+                let jobs = [];
+                if (r.status !== 'completed') {
+                  try {
+                    jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun,
+                      { owner, repo, run_id: r.id, filter: 'latest', per_page: 100 });
+                  } catch (e) {
+                    core.warning(`sin dato de jobs del run ${r.id}: ${e.message}`);
+                    jobs = null;
+                  }
+                }
+                const v = evaluarCorrida(r, jobs, ahora, HORAS_COLGADO, MAX_DIAS_ANTIGUEDAD,
+                  HORAS_ESTANCADA);
+                if (!v) continue;
+                if (v.tipo === 'sin_dato') sinDato.push(lineaProblema(w, r, v));
+                else problemas.push(lineaProblema(w, r, v));
               }
             }
 
@@ -125,10 +222,17 @@ jobs:
               .filter(i => i.title === TITULO);
 
             if (!problemas.length) {
+              if (sinDato.length) {
+                // Sin dato no es verde: no se cierra nada sin haber mirado.
+                core.setFailed(`sin dato de jobs:\n${sinDato.join('\n')}`);
+                return;
+              }
               for (const i of abiertos) {
                 await github.rest.issues.createComment({ owner, repo,
                   issue_number: i.number,
-                  body: 'Los reprocesos volvieron a verde. Cerrando.' });
+                  body: `La ultima corrida de cada reproceso no fallo, ningun job pasa `
+                    + `el techo de 6 h y ninguna corrida esta estancada (ventana de `
+                    + `${MAX_DIAS_ANTIGUEDAD} dias). Cerrando.` });
                 await github.rest.issues.update({ owner, repo,
                   issue_number: i.number, state: 'closed' });
               }
@@ -137,21 +241,30 @@ jobs:
             }
 
             const cuerpo = [
-              'El watchdog encontro reprocesos que fallaron o llevan demasiado tiempo:',
+              'El watchdog encontro reprocesos que fallaron o con un job colgado:',
               '', ...problemas, '',
               '**Antes de relanzar**, revisar si es el modo de falla de S129: la ventana',
               'por defecto no entra en el `timeout-minutes`. El guard',
               '`tests/test_guard_timeout_vs_ventana_s129.py` lo mide (regla A15: el costo',
               'medido es ~2,4 min por dia de ventana, y GitHub corta a los 360 min por',
-              'job — pasada cierta ventana hay que partirla en chunks, no subir el reloj).',
+              'job: pasada cierta ventana hay que partirla en chunks, no subir el reloj).',
               '',
               '_Abierto automaticamente por `reproc-watchdog.yml`._',
+              MARCA,
             ].join('\n');
 
             if (abiertos.length) {
-              await github.rest.issues.createComment({ owner, repo,
-                issue_number: abiertos[0].number, body: cuerpo });
+              const issue = abiertos[0];
+              const comentarios = await github.paginate(github.rest.issues.listComments,
+                { owner, repo, issue_number: issue.number, per_page: 100 });
+              if (debeComentar(cuerpo, issue, comentarios)) {
+                await github.rest.issues.createComment({ owner, repo,
+                  issue_number: issue.number, body: cuerpo });
+              } else {
+                core.info(`#${issue.number} ya tiene este mismo aviso; no lo repito`);
+              }
             } else {
               await github.rest.issues.create({ owner, repo, title: TITULO,
                 body: cuerpo });
             }
+            if (sinDato.length) core.setFailed(`sin dato de jobs:\n${sinDato.join('\n')}`);
