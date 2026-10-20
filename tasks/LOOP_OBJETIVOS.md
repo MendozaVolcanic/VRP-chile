@@ -509,6 +509,17 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~12:00 UTC (S157): #873 mergeado: el merge de trozos ya no borra lo que main tiene
+- #873 squash `c408a909` por su sesión (verificador limpio incorporado en un segundo commit); `Tests` verde sobre
+  `main` comprobado aquí. El job merge de `reproc-chunked.yml` lee la base de `origin/main` en cada intento y
+  conserva lo que está fuera de las ventanas de la corrida. Desde ahora repetir unos trozos no borra el resto.
+- Plan de relleno en `experiments/_s157_relleno/` (sin despachar; CMR caído, decisiones desde el listado de LAADS):
+  las 31 `standard` están en LAADS (repetir esos días debería traerlas); las 58 `nrt` de Suomi NPP del 4 al 6 de
+  agosto de 2026 NO tienen estándar (hueco en la colección 5200 hasta el 6-ago 16:30 UTC). **Decisión para Nicolás
+  al aplicar el reemplazo**: esas 58 quedan en C0 con su marca o se procesan desde el NRT.
+- La segunda pasada de Chillán que relanza el proceso local saldrá ya con el merge nuevo; el rearmado sigue saliendo
+  de los artefactos, así que no cambia el método.
+
 ### 2026-10-20 ~11:40 UTC (S157): #872 mergeado con el flag apagado (sí de Nicolás)
 - Nicolás: «Sí: mergea #872 con el flag apagado. El encendido lo decido después.» Squash `5fd2ac2e` por la API, tras
   comprobar CLEAN, CI verde y `enable_modis_mir_lambda_por_banda: false` en la rama. Tag defensivo
