@@ -1,6 +1,15 @@
 # Pre-registro S157 (tarea 1.29): D25, fondo por vecinos, sobre K, con Nevados de Chillán como caso
 
-Estado: **BORRADOR v2 PARA EL SELLO DE NICOLÁS** (con el resultado del probe del L1B incorporado en §8 b, §8 c y §9). Nada de esto se despacha sin su «sí» escrito y sin el candado del §7
+**SELLADO por Nicolás el 2026-10-20 (D-26), sobre `9ff738f3d`** (este documento y `RESUMEN_SELLO.md` no cambiaron
+desde ese commit). Pregunta, hecha por la sesión dueña del loop (S157) con el resumen de una pantalla a la vista:
+«¿Sellas D25 con las tres recomendaciones?». Respuesta textual de Nicolás: «Apruebo». Decisiones del §8 que fija:
+(1) VIIRS 375 con cenit sobre 40° sólo puede bloquear; (2) ventana de vecinos 7x7 sola; (3) MODIS fuera de este
+A/B, y escribir D25 en MODIS se decide aparte. Registrado desde la sesión donde se dio el sello (la sesión lateral no
+pudo: el control de permisos no acepta una aprobación reenviada). **La calibración de M NO queda cubierta por este
+sello**: con la regla escrita, 5 de los 8 estratos que deciden quedan indecidibles con K (candado, `0a91eb634`), y
+el arreglo propuesto en `ADENDA_CALIBRACION.md` espera su propio sello. Sin ese segundo sello no se despacha.
+
+Estado previo: **BORRADOR v2 PARA EL SELLO DE NICOLÁS** (con el resultado del probe del L1B incorporado en §8 b, §8 c y §9). Nada de esto se despacha sin su «sí» escrito y sin el candado del §7
 (evaluador con sus pruebas y verificador limpio). Escrito el 2026-10-20 por una sesión lateral del loop, antes de
 correr ningún brazo, y corregido el mismo día con los 20 hallazgos del verificador con contexto limpio (veredicto
 PARCIAL, `verificador/INFORME.md`; qué cambió por cada hallazgo en el §10). Los números de sustrato salen de
