@@ -76,6 +76,15 @@ Por pasada, con `falta` = VRP de MIROVA menos lo que publicamos (núcleo F5' en 
 No mide D17: si la saturación queda descartada, D17 sigue siendo el candidato, no un hecho. Diez gránulos de una
 mañana más 26 pasadas de un volcán son el caso, no la muestra.
 
+## Intentos
+
+- **Run 39511561148** (2026-10-20 22:55 UTC, `fc7834727`): los dos jobs abortaron en la primera y la segunda pasada
+  con «sin gránulo» en la búsqueda, sin bajar nada (salida 3, el corte de las dos primeras fallas). No era defecto del
+  probe: a esa hora CMR devolvía 0 gránulos VIIRS del 2026-10-18 y 0 del 19 (241 por día del 15 y 16; 5 de MYD021KM el
+  18), mientras el listado del archivo de LAADS sí los tenía con el nombre exacto del record. Se agregó un respaldo que
+  baja L1B y GEO del archivo de LAADS cuando CMR no los indexa (`bajar_laads`), y se reintentó el mismo workflow, como
+  hizo #871 tras el HTTP 500 de CMR.
+
 ## Reproducir
 
 ```bash

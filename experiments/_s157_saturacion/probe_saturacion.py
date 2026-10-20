@@ -204,10 +204,69 @@ def cota_modis(raw, perdido, ventana, t_bg, k_area, dist, pm):
     return filas
 
 
+LAADS = "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData"
+
+
+def bajar_laads(sensor, nombre, dest):
+    """Respaldo cuando CMR no indexa el gránulo (2026-10-20 22:58 UTC: CMR devolvía 0 gránulos VIIRS y 5 MODIS del
+    2026-10-18, que el probe de #871 encontró ese mismo día a las 13:16; el archivo de LAADS sí los lista). Baja el
+    L1B y la GEO desde el listado del archivo de LAADS, con el token de Earthdata (A71). Mismo archivo: el nombre del
+    L1B es el del record; la GEO es la del mismo instante y la misma versión."""
+    import re
+    import requests
+    from pipeline.fetch import PRODUCTS
+    tok = os.environ.get("EARTHDATA_TOKEN", "")
+    stamp = ".".join(nombre.split(".")[1:3])
+    ver = nombre.split(".")[3]
+    col = {"002": "5200", "021": "5201", "061": "61"}[ver]
+    ydoy = stamp[1:5], stamp[5:8]
+    dest.mkdir(parents=True, exist_ok=True)
+    try:   # la sesión de earthaccess ya autenticada (auth()) conserva el token en la redirección a URS
+        import earthaccess
+        sesion = earthaccess.get_requests_https_session()
+    except Exception:  # noqa: BLE001
+        sesion = requests.Session()
+    sesion.headers.setdefault("Authorization", "Bearer " + tok)
+    out = []
+    for key in p871.PRODUCTO[sensor]:
+        if key is None:
+            out.append(None)
+            continue
+        sn = PRODUCTS[key]["short_name"]
+        url_dir = "%s/%s/%s/%s/%s" % (LAADS, col, sn, ydoy[0], ydoy[1])
+        lst = requests.get(url_dir + ".json", timeout=120).text
+        nombres = [n for n in re.findall(r'"name":\s*"([^"]+)"', lst) if n.startswith(sn + "." + stamp + ".")]
+        if key.endswith("_L1B") and nombre in nombres:
+            nombres = [nombre]
+        if not nombres:
+            return None, "LAADS sin %s %s" % (sn, stamp)
+        f = dest / nombres[0]
+        for intento in range(3):
+            try:
+                with sesion.get("%s/%s" % (url_dir, nombres[0]), stream=True, timeout=300) as r:
+                    r.raise_for_status()
+                    with open(f, "wb") as fh:
+                        for ch in r.iter_content(1 << 20):
+                            fh.write(ch)
+                break
+            except Exception as e:  # noqa: BLE001
+                if intento == 2:
+                    return None, "LAADS descarga fallida %s: %s" % (nombres[0], e)
+        if f.stat().st_size < 1_000_000 or f.read_bytes()[:8].lstrip().startswith(b"<"):
+            return None, "LAADS devolvió algo que no es el archivo (%d bytes): %s" % (f.stat().st_size, nombres[0])
+        out.append(f)
+    nota = "bajado del archivo de LAADS (CMR no lo indexaba)" + (
+        "" if out[0].name == nombre else "; L1B reprocesado: %s en lugar de %s" % (out[0].name, nombre))
+    return tuple(out), nota
+
+
 def procesar(p, mods, vols, dest):
     sensor, nombre = p["sensor"], p["granulo"]
     vol = vols[p.get("volcan", p871.VOLCAN)]
     par, nota = p871.bajar(vol, sensor, nombre, dest)
+    if par is None:
+        print("   CMR: %s -> respaldo LAADS" % nota, flush=True)
+        par, nota = bajar_laads(sensor, nombre, dest)
     if par is None:
         raise RuntimeError(nota)
     res = {"pasada": p, "nota_granulo": nota}
