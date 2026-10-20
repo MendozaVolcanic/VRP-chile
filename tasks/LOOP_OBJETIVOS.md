@@ -509,6 +509,14 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 04:40 UTC (S157): tanda A de Chillán verde; B corriendo; trozo 9 en cola
+- Run 39363774747: 6 de 6 trozos verdes, de 65 a 76 min por 19 días (3,4 a 4,0 min por día de Chillán), más merge.
+  Como se esperaba, el merge dejó `data/_s154_reproc_k_historico/NevadosDeChillan.json` sólo con su ventana (1.225
+  records, 2025-07-13..10-31); el archivo de 10 trozos está en el tag `pre-s157-chillan-trozos` (3.637 records).
+- B (39363796988) pasó a `in_progress` a las 04:39; el proceso local despachó el trozo 9 tal cual (run 39370713699,
+  en cola). Riesgo: a 3,4 a 4,0 min por día, 37 días son 126 a 148 min contra el tope de 170 (A15 pediría 164 a 192).
+  Si cae por tiempo, se parte en dos.
+
 ### 2026-10-20 ~04:15 UTC (S157): resultados de las cuatro sesiones
 - **#867 MERGEADO** (watchdog por duración de job, F3-10 y parte de F3-07; CI verde) y **#824 CERRADO**. Queda
   abierta la parte de F3-07 que vive en el auto-audit semanal.
