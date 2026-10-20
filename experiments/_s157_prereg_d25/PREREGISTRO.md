@@ -1,6 +1,6 @@
 # Pre-registro S157 (tarea 1.29): D25, fondo por vecinos, sobre K, con Nevados de Chillán como caso
 
-Estado: **BORRADOR v2 PARA EL SELLO DE NICOLÁS.** Nada de esto se despacha sin su «sí» escrito y sin el candado del §7
+Estado: **BORRADOR v2 PARA EL SELLO DE NICOLÁS** (con el resultado del probe del L1B incorporado en §8 b, §8 c y §9). Nada de esto se despacha sin su «sí» escrito y sin el candado del §7
 (evaluador con sus pruebas y verificador limpio). Escrito el 2026-10-20 por una sesión lateral del loop, antes de
 correr ningún brazo, y corregido el mismo día con los 20 hallazgos del verificador con contexto limpio (veredicto
 PARCIAL, `verificador/INFORME.md`; qué cambió por cada hallazgo en el §10). Los números de sustrato salen de
@@ -283,10 +283,14 @@ versión 1 de este documento; el verificador mostró que dejaba pasar una sobre-
 V1 sólo si el probe del L1B muestra, en los cúmulos de Chillán, que al menos la mitad de los píxeles alertados usan
 ventana mayor que 3x3 **y** la magnitud publicada cambia más de 5 % entre `h3` y `h1` en alguna pasada. Los dos umbrales
 son elegidos. **Si el probe no tiene resultado al momento del candado, rige la opción por defecto: sólo D** (H10).
+**Resultado del probe (run 39428997189): `h3` y `h1` dan magnitudes idénticas en los 10 gránulos; por esta regla, sólo
+D** (`probe_l1b/README.md`, Resultado).
 
 **c) MODIS.** Recomendado: **fuera de este A/B**, y decidir si se escribe el flag de D25 en MODIS (ciclo A45) con el
 resultado del probe (`kernel3` y `d25_rad` en las dos pasadas MODIS de Chillán). Alternativa: escribir el flag antes y
-meter MODIS en este A/B; retrasa todo y su sustrato es chico (12 protegidas que deciden en V1, 16 en V2).
+meter MODIS en este A/B; retrasa todo y su sustrato es chico (12 protegidas que deciden en V1, 16 en V2). **Dato del
+probe:** en Chillán el análogo de D25 sube MODIS ×1,32 y ×2,45 (razón 0,49 → 0,64 y 0,24 → 0,59), y el kernel 3x3
+que ya existe da lo mismo a 0,1 %.
 
 **d) Qué hacer con cada veredicto.**
 
@@ -306,8 +310,9 @@ meter MODIS en este A/B; retrasa todo y su sustrato es chico (12 protegidas que 
   volver a radiancia; hallazgo lateral de #869, ×1,05 a 1,06).
 - **D17**: si después de D25 la razón sigue cayendo con el cenit, D17 queda como hipótesis (tarea 1.36), con el
   contraste por zona de agregación que propuso #869.
-- **Selección**: D25 no agrega píxeles. Si MIROVA suma vecinos tibios que no alertamos, eso no se mueve; el probe del
-  L1B mide cuánto podría ser en Chillán y en qué etapa (primer o segundo pase) quedan afuera.
+- **Selección**: D25 no agrega píxeles. En Chillán el probe del L1B midió que los vecinos del cúmulo son cumbre nevada
+  más fría que el anillo y que, aunque MIROVA los sumara todos, aportarían 0,06 a 0,70 MW contra 2 a 17 MW que faltan:
+  ahí la selección no es la palanca.
 - **El poder del veto fuera de Láscar y Chillán**: como en F/K, en los otros volcanes hay 3 protegidas o menos por
   sensor y ventana (`sustrato_k_salida.txt`, tablas por volcán).
 - **El día**: los brazos son nocturnos; el A/B diurno sobre K es otra tarea (1.32).

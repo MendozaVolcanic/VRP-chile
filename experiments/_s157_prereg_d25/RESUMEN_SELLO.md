@@ -44,14 +44,17 @@ verificador limpio, como en la adenda K del diurno.
 
 **Lo que tienes que decidir** (detalle en `PREREGISTRO.md` §8):
 1. **VIIRS 375 oblicuo**: que sólo pueda bloquear (recomendado), que decida en las dos direcciones, o que sólo informe.
-2. **Ventana de vecinos**: sólo hasta 7x7 (recomendado); un brazo con 8 vecinos sólo si el probe del L1B muestra que
-   cambia más de 5 % en Chillán (umbral elegido); si el probe no corrió a tiempo, sólo 7x7.
-3. **MODIS**: fuera de este A/B (recomendado) y decidir si se escribe el flag con lo que muestre el probe, o escribirlo
-   antes y meterlo.
+2. **Ventana de vecinos**: resuelta por la regla del pre-registro con el probe (8 vecinos y 7x7 dan idéntico): sólo 7x7.
+3. **MODIS**: fuera de este A/B (recomendado) y decidir aparte si se escribe el flag (el probe dice que en Chillán sí
+   movería la magnitud), o escribirlo antes y meterlo.
 
-**Probe del L1B de Chillán** (`probe_l1b/`): escrito y probado, todavía sin correr porque el servicio CMR de NASA está
-caído (HTTP 500 desde la mañana del 2026-10-20); se relanza solo al volver. Su resultado, cuando exista, va en
-`probe_l1b/README.md`, sección «Resultado».
+**Probe del L1B de Chillán** (10 gránulos del 18-oct, controles en verde, `probe_l1b/README.md`): D25 sube VIIRS 375
+×1,08 a 1,09 en todo el cenit (a las 06:48 la razón pasa de 0,35 a 0,38) y VIIRS 750 ×1,13 a 1,14, y ×2,16 en la pasada
+de las 06:48 (0,12 a 0,27). Los vecinos del cráter son nieve 6 a 12 K más fría que el anillo, y aunque MIROVA los
+sumara todos no cerrarían nada (0,06 a 0,70 MW contra 2 a 17 que faltan): en Chillán el resto del déficit oblicuo no es
+fondo ni selección, queda para D17 o saturación. La ventana 1 contra 3 da lo mismo (decisión 2 resuelta: sólo 7x7). En
+MODIS, el análogo de D25 sube Chillán ×1,32 y ×2,45 (razón 0,49 a 0,64 y 0,24 a 0,59), y el kernel 3x3 que ya existe da
+lo mismo.
 
 **Verificador limpio**: PARCIAL, 20 hallazgos, todos incorporados en la versión 2 (`PREREGISTRO.md` §10).
 
