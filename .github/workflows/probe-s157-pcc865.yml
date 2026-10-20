@@ -1,0 +1,57 @@
+name: "Probe S157, atribucion por etapa de PCC VIIRS 750 del 2026-10-10 05:54 (issue #865, solo lectura)"
+
+# Un solo job, un solo granule (VJ202MOD.A2026283.0554.021). Cuatro brazos en el mismo proceso
+# (K, C0, min sin Test 1, max con Test 1). Solo lectura: no escribe en data/, no commitea, no hace push.
+# Se dispara por push a la rama s157-pcc865 (un workflow_dispatch solo se puede invocar desde main,
+# y esta rama no se mergea) y SOLO si cambia este yml o el script del probe.
+# A43: "on" entre comillas. S141: pipefail con tee y el script sale 2 si no baja el granule.
+# A71/S146: autentica SOLO por EARTHDATA_TOKEN (bloque de nrt.yml sin el par usuario y clave, vencido)
+# y falla al instante si viene vacio. Grupo de concurrencia propio, sin cancelar.
+"on":
+  push:
+    branches: [s157-pcc865]
+    paths:
+      - ".github/workflows/probe-s157-pcc865.yml"
+      - "experiments/_s157_pcc865/probe_etapas_pcc.py"
+
+concurrency:
+  group: probe-s157-pcc865
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install earthaccess numpy h5py scipy pyyaml pandas
+      - name: Probe cuatro brazos
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+        run: |
+          set -o pipefail
+          cd experiments/_s157_pcc865
+          mkdir -p out
+          python probe_etapas_pcc.py | tee out/report.txt
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s157-probe-pcc865
+          path: experiments/_s157_pcc865/out/
+          retention-days: 30
+          if-no-files-found: error
