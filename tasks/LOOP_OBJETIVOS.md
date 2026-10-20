@@ -509,6 +509,16 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~14:45 UTC (S157): aprobada la aceleración (búsqueda por ventana y brazos en un mismo job)
+- Nicolás: «Sí: parte por buscar una vez por ventana y procesar todos los brazos en el mismo job, con medición antes,
+  tag defensivo y verificador. El merge de fetch.py me lo traes para el sí.»
+- Subagente de esta sesión en `D:\vrp-trabajo\s157-busqueda-ventana` (rama `s157-busqueda-ventana`): medición
+  primero (atribuir los ~51 min sin marcador; se detiene si el ahorro no está), plan, tag
+  `pre-s157-busqueda-ventana`, TDD, validación en Actions con identidad de records contra el tag (sólo sin
+  reproc-chunked corriendo, a lo más 4 jobs), mutaciones, verificador limpio y PR borrador. **Merge: sí de Nicolás.**
+- El A/B de D25 (sellado) conviene despacharlo DESPUÉS de este cambio si llega a tiempo: con 3 brazos es donde más
+  rinde. Si no llega, se despacha igual con el workflow de hoy.
+
 ### 2026-10-20 ~14:30 UTC (S157): #874 y #875 mergeados; D25 SELLADO; segunda pasada de Chillán corriendo
 - Nicolás: «Apruebo» (a mergear #874 y #875 y a sellar D25 con las tres recomendaciones). #874 `b249b1b9`, #875
   `3868c5db`; `Tests` verde sobre `3868c5db` (el de `b249b1b9` quedó cancelado por el siguiente, que lo contiene).
