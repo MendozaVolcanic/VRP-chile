@@ -1,6 +1,14 @@
 # Adenda al pre-registro de D25 sobre K: la calibración de la magnitud (M)
 
-Estado: **BORRADOR PARA EL SELLO DE NICOLÁS.** Escrita el 2026-10-20 al armar el candado del §7, antes de correr ningún
+**SELLADA por Nicolás el 2026-10-20 (D-27), sobre `0a91eb634`** (último commit que tocó esta adenda y
+`evaluar_d25.py`). Respuesta textual de Nicolás, registrada por la sesión dueña del loop (S157): «Sello la adenda de
+calibración de D25 con el nulo simétrico y la opción A (mejora en al menos dos volcanes).» Rige: §2 entero (sorteo
+del signo de d por bloque noche-volcán, tope de 5 % de 200 por cola, colas exigidas según el estrato) y §3 opción A
+(un MEJORA cuenta sólo si la mediana de d es negativa en al menos dos volcanes del estrato con 3 pares o más; Chillán
+se informa aparte y por volcán). El evaluador corre con `--calibracion simetrica`. Con esto y el sello del
+pre-registro (D-26) el candado queda completo; el despacho, desde un tag.
+
+Estado previo: **BORRADOR PARA EL SELLO DE NICOLÁS.** Escrita el 2026-10-20 al armar el candado del §7, antes de correr ningún
 brazo. Sin esta decisión el A/B no se despacha: con la calibración tal como quedó escrita en el §5, ni el control
 positivo decide. Evidencia: `calibracion_previa_salida.txt` (pares reales de K en disco), `probar_salida.txt` (caso
 `sellada`) y el verificador con contexto limpio del evaluador (`verificador_evaluador/INFORME.md`, hallazgos H1, H4, H5
