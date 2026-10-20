@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Guard S133 — el reproc-watchdog no vigila workflows que ya no existen (issue #567).
+"""Guard S133: el reproc-watchdog no vigila workflows que ya no existen (issue #567).
 
 POR QUÉ. `listRepoWorkflows` devuelve también los workflows BORRADOS del repo: GitHub
 conserva la entidad para poder seguir mostrando su historial de corridas. Medido el
-2026-09-03 sobre MendozaVolcanic/VRP-chile, `reproc-f28-pp-saturation.yml` —archivo
-inexistente en `.github/workflows/` desde mayo— seguía apareciendo con
+2026-09-03 sobre MendozaVolcanic/VRP-chile, `reproc-f28-pp-saturation.yml` (archivo
+inexistente en `.github/workflows/` desde mayo) seguía apareciendo con
 `state: "active"` y su última corrida fallida (2026-05-23) hacía que el watchdog
 comentara la issue #567 una vez por hora, 22 veces. El daño no es la molestia: ese
 ruido tapa la alerta real cuando llegue.
@@ -113,7 +113,8 @@ def test_watchdog_conserva_los_filtros_previos(bloque_puro):
      0.2, None),
     ({"status": "completed", "conclusion": "cancelled", "created_at": "2026-09-03T00:00:00Z"},
      0.2, None),
-    # en curso hace 9 h = colgada (el techo de GitHub es 6 h por job)
+    # un job en curso hace 9 h = colgada (el techo de GitHub es 6 h por JOB; desde
+    # S157 se mide el job, no el run: ver tests/test_reproc_watchdog_por_job_s157.py)
     ({"status": "in_progress", "conclusion": None, "created_at": "2026-09-03T00:00:00Z"},
      9 / 24, "colgada"),
     # en curso hace 2 h = todavía normal
@@ -122,8 +123,12 @@ def test_watchdog_conserva_los_filtros_previos(bloque_puro):
 ])
 def test_evaluar_corrida(bloque_puro, run, dias, espera):
     ahora = "new Date('2026-09-03T00:00:00Z').getTime() + %f*86400000" % dias
-    got = _node(bloque_puro, "console.log(JSON.stringify(evaluarCorrida(%s, %s, 7, 14)));"
-                % (json.dumps(run), ahora))
+    # un único job que corre desde la creación del run
+    jobs = ([{"name": "j", "status": "in_progress", "conclusion": None,
+              "started_at": run["created_at"], "completed_at": None}]
+            if run["status"] != "completed" else [])
+    got = _node(bloque_puro, "console.log(JSON.stringify(evaluarCorrida(%s, %s, %s, 7, 14)));"
+                % (json.dumps(run), json.dumps(jobs), ahora))
     assert (got or {}).get("tipo") == espera
 
 
