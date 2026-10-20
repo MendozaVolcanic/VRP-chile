@@ -509,6 +509,15 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~14:00 UTC (S157): #874 con las tres observaciones corregidas; #874 y #875 listos para merge
+- #874 `723480ec`: `n_misma_pasada` en cada celda (noches K con pasada máxima distinta de la de MIROVA: VIIRS 375 29
+  de 90, VIIRS 750 4 de 22, MODIS 0 de 8), regímenes antes_535 / 535_a_571 / 571_a_K / K, prueba de no regresión que
+  corre en el CI (paso apagado contra encendido) y skip «SOLO LOCAL» explícito. 13 pruebas, 12 de 12 mutaciones,
+  suite 2.265, CI verde, CLEAN. Sin resolver: el verificador contó 98 noches K de V375 y el autor 90 (otra población,
+  SOSPECHA; no cambia ningún veredicto porque las claves son informativas).
+- #875 `0b905614`: CI verde, CLEAN. Los dos esperan el sí de Nicolás para mergear (el clasificador niega el merge
+  sin revisión).
+
 ### 2026-10-20 ~13:30 UTC (S157): 1.34 en #875 y 1.35 en #874, los dos en borrador con CI verde
 - **#874** (1.35, auto-audit por cenit y régimen, sólo `scripts/auto_audit_weekly.py` y su prueba): CI verde,
   CLEAN, 7 de 7 mutaciones. Control positivo: la magnitud de Chillán cae con el cenit en los tres sensores (MODIS
