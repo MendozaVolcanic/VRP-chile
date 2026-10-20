@@ -509,6 +509,20 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~18:30 UTC (S157): sello de D25 registrado aquí; la calibración de M necesita una adenda sellada
+- La sesión de D25 no pudo registrar el «Apruebo» (el control de permisos no acepta una aprobación reenviada). Se
+  registró desde esta sesión en `PREREGISTRO.md` (rama `s157-prereg-d25`, `365d543e`) sobre `9ff738f3d`, el commit
+  cuyo resumen vio Nicolás (el pre-registro no cambió desde ahí). Cita textual y las tres decisiones del §8.
+- Candado armado (`0a91eb634`, CI verde): `evaluar_d25.py`, 27 de 27 pruebas, 22 de 23 mutaciones (la que sobrevive,
+  `calib_por_par`, declarada); verificador del evaluador PARCIAL, 7 arreglos.
+- **No se despacha**: con la calibración de M escrita, 5 de 8 estratos que deciden quedan indecidibles con K y el
+  control positivo sale INDECIDIBLE. `ADENDA_CALIBRACION.md` propone nulo simétrico (sorteo del signo de d por bloque
+  noche-volcán, tope 5 % de 200 por cola) y, aparte, la opción A: un MEJORA cuenta sólo si la mediana de d es negativa
+  en al menos dos volcanes del estrato con 3 pares o más (cada estrato lo domina un volcán: V750 oblicuo es 19 de 23
+  pares de Chillán en V1). **Espera el sello de Nicolás.**
+- Incidente de esa sesión: sus mutaciones llenaron D: a 0 GB unos minutos; liberado (13 GB ahora) y el script borra
+  cada temporal. Sin daño visible en esta sesión.
+
 ### 2026-10-20 18:05 UTC (S157): #877 (búsqueda por ventana y brazos juntos) listo para el sí; tercera pasada corriendo
 - **#877** borrador, CI verde, CLEAN; tag `pre-s157-busqueda-ventana` (`ac015254`). Toca `pipeline/fetch.py`,
   `scripts/run_pipeline.py`, `reproc-chunked.yml`, el A/B y tres scripts nuevos. Medición
