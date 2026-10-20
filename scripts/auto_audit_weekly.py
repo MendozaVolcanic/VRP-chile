@@ -463,7 +463,15 @@ def aplicar_d9(alertas, modo=REGLA_MINIMAS, filas_ref=None):
 
 def noches_mirova(alertas, coords, win):
     """Noches con ALERTA nocturna de MIROVA por (volcán, sensor, fecha) con su VRP máximo."""
+    mir, _, n_diurnas = noches_mirova_con_instante(alertas, coords, win)
+    return mir, n_diurnas
+
+
+def noches_mirova_con_instante(alertas, coords, win):
+    """Lo mismo que noches_mirova y además la hora UTC de la alerta que da el máximo de cada noche (S157:
+    para contar en qué noches nuestra pasada máxima y la de MIROVA son la misma)."""
     mir = defaultdict(float)
+    inst = {}
     n_diurnas = 0
     for a in alertas:
         dt = a["fecha_utc"] or ""
@@ -480,8 +488,10 @@ def noches_mirova(alertas, coords, win):
                 n_diurnas += 1
                 continue
         key = (a["volcano"], a["sensor_bucket"], dt[:10])
+        if key not in inst or (a["vrp_mw"] or 0.0) > mir[key]:
+            inst[key] = dt
         mir[key] = max(mir[key], a["vrp_mw"] or 0.0)
-    return mir, n_diurnas
+    return mir, inst, n_diurnas
 
 
 def nuestros_por_noche(records_por_volcan, win, frontera):
@@ -491,7 +501,7 @@ def nuestros_por_noche(records_por_volcan, win, frontera):
     `pub` es la magnitud que el tablero publica: el núcleo F5 en VIIRS 375 (`f5_core_vrp_mw`, A10 matiz
     S132) y `pc.vrp_mw` en los otros dos (F3-06: el audit medía un número que no se publica).
     """
-    ours = defaultdict(lambda: {"crater": [], "dash": [], "pub": [], "npix": []})
+    ours = defaultdict(lambda: {"crater": [], "dash": [], "pub": [], "npix": [], "z_pub": [], "dt_pub": []})
     vistos, dias = set(), set()
     fuera, n_det = defaultdict(int), defaultdict(int)
     for vol, records in records_por_volcan.items():
@@ -521,6 +531,9 @@ def nuestros_por_noche(records_por_volcan, win, frontera):
                     core = rec.get("f5_core_vrp_mw")
                     ours[key]["pub"].append(core if (b == "VIIRS375" and isinstance(core, (int, float))
                                                      and core > 0) else vrp)
+                    # S157: cenit y hora de CADA publicación, en paralelo a `pub` (estratos de agregar_estratos).
+                    ours[key]["z_pub"].append(rec.get("sensor_zenith_deg"))
+                    ours[key]["dt_pub"].append(dt[:16])
                     # S124: el conteo de pixeles es la variable que estratifica
                     # los DOS modos de falla (ver bloque de estratificación).
                     ours[key]["npix"].append(len(rec.get("anomaly_pixels") or []))
@@ -599,6 +612,124 @@ def evaluar_detector(mir, ours, vistos, detector, frontera):
         "magnitud_ratio_by_npix": {b: {"n_noches": len(r), "ratio_mediano": _mediana(r)}
                                    for b, r in sorted(por_npix.items()) if r},
     }
+
+
+# --- S157 (tarea 1.35 del loop): estratos por cenit del sensor y por régimen, SIN veredicto ---
+# POR QUÉ: en Nevados de Chillán la razón contra MIROVA cae con el cenit del sensor (VIIRS 0,64 a 0,72 a
+# 20-22°, 0,41 a 0,46 a 49°, 0,12 a 0,35 a 67,6°, experiments/_s154_chillan/razon_por_cenit.py; atribución
+# SIN ATRIBUIR). Un píxel oblicuo es más grande y más deformado, y el agregado por volcán y sensor promedia
+# la curva: una semana con más pasadas de borde se lee como deriva del volcán (A90, A114). Y una ventana
+# que cruza #535 (2026-08-28 23:00 UTC, A104) o la frontera de K mezcla tres regímenes. Todo esto son
+# claves NUEVAS de latest.json, calculadas DESPUÉS del veredicto: no tocan flags, avisos ni claves de
+# siempre (tests/test_auto_audit_cenit_s157.py lo fija contra el código previo).
+CORTE_535 = "2026-08-28 23:00"   # A104: #535 apagó la máscara de nube de 260 K
+REGIMENES = ("antes_535", "535_a_571", "571_a_K", "K")   # #571 = INICIO_REGIMEN_FALSAS (quitó el piso VRP)
+TRAMOS_CENIT = ("z<30", "z30-50", "z50-60", "z>=60", "sin_cenit")   # orden de lectura, de nadir a borde
+
+
+def tramo_cenit(z):
+    """Tramo de cenit del banco de paridad (una sola implementación, A102); sin cenit, estrato aparte."""
+    if z is None:
+        return "sin_cenit"
+    import banco_paridad as bp  # noqa: E402  (importa este módulo: se carga en runtime)
+    return bp.zbin(z)
+
+
+def regimen_de_pasada(dt, frontera):
+    """'antes_535', '535_a_571', '571_a_K' o 'K' según la hora UTC 'YYYY-MM-DD HH:MM' de la pasada.
+    El corte de #571 es INICIO_REGIMEN_FALSAS, el mismo que recorta la ventana de falsas."""
+    if detector_de_noche(dt, frontera) == "K":
+        return "K"
+    if dt[:16] < CORTE_535:
+        return "antes_535"
+    return "535_a_571" if dt[:10] < INICIO_REGIMEN_FALSAS else "571_a_K"
+
+
+def _por_tramo(d):
+    return sorted(d.items(), key=lambda kv: TRAMOS_CENIT.index(kv[0]))
+
+
+def _resumen_razones(rs):
+    """rs: pares (razón, misma pasada que MIROVA: True / False / None si no se conoce la hora de MIROVA)."""
+    misma = [m for _, m in rs]
+    return {"n_noches": len(rs), "ratio_mediano": _mediana([x for x, _ in rs]),
+            "n_misma_pasada": None if any(m is None for m in misma) else sum(misma)}
+
+
+def _misma_pasada(dt_nuestra, dt_mirova):
+    """¿Nuestra pasada máxima y la de MIROVA son la misma, a ±TOL_PASADA_S (el pareo del banco)?
+    Nuestra hora tiene resolución de minuto ('YYYY-MM-DD HH:MM'). None si no se conoce la de MIROVA."""
+    if not dt_mirova:
+        return None
+    try:
+        a = datetime.fromisoformat(dt_nuestra[:16])
+        b = datetime.fromisoformat(dt_mirova[:19])
+    except ValueError:
+        return None
+    return abs((a - b).total_seconds()) <= TOL_PASADA_S
+
+
+def estratificar_magnitud(mir, ours, frontera, vigente, instantes_mirova=None):
+    """Magnitud publicada por volcán y sensor, por tramo de cenit (detector vigente, la misma población
+    que `magnitud_publicada_by_vol_sensor`) y por régimen (todas las noches de la ventana, cada una con
+    los records de su detector), con el cenit dentro de cada régimen.
+
+    La razón de una noche es max(pub) / MIROVA, así que su cenit y su régimen son los de la pasada que
+    publica ese máximo: la de otra pasada no entra al número.
+
+    OJO, A116: el tramo NO es «la razón a ese cenit» pareada por pasada como la curva de S154
+    (experiments/_s154_chillan/razon_por_cenit.py). Divide NUESTRO máximo de la noche por el máximo de
+    MIROVA de la noche, y el cenit es sólo el de nuestra pasada: la de MIROVA puede ser otra, con otro
+    cenit (verificador de S157: en las noches K pasa en 35 de 98 noches VIIRS 375 y 4 de 22 VIIRS 750).
+    Por eso cada celda lleva `n_misma_pasada`, las noches en que las dos pasadas coinciden a ±120 s
+    (`instantes_mirova`: hora de la alerta máxima de MIROVA por noche; sin ella el conteo queda None).
+    """
+    cen = defaultdict(lambda: defaultdict(list))
+    reg = defaultdict(lambda: defaultdict(list))
+    reg_cen = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+    for (vol, s, fecha), mvrp in mir.items():
+        if vol not in VOLS:
+            continue
+        o = ours.get((vol, s, fecha))
+        if not (o and o["dash"]) or mvrp <= 0:
+            continue
+        i = max(range(len(o["pub"])), key=lambda j: o["pub"][j])
+        tramo = tramo_cenit(o["z_pub"][i])
+        razon = (o["pub"][i] / mvrp,
+                 _misma_pasada(o["dt_pub"][i], (instantes_mirova or {}).get((vol, s, fecha))))
+        k, rg = f"{vol}|{s}", regimen_de_pasada(o["dt_pub"][i], frontera)
+        if detector_de_noche(fecha, frontera) == vigente:
+            cen[k][tramo].append(razon)
+        reg[k][rg].append(razon)
+        reg_cen[k][rg][tramo].append(razon)
+    por_cenit = {k: {t: _resumen_razones(r) for t, r in _por_tramo(d)} for k, d in sorted(cen.items())}
+    por_regimen = {k: {rg: {**_resumen_razones(r),
+                            "por_cenit": {t: _resumen_razones(x) for t, x in _por_tramo(reg_cen[k][rg])}}
+                       for rg, r in sorted(d.items(), key=lambda kv: REGIMENES.index(kv[0]))}
+                   for k, d in sorted(reg.items())}
+    return {"por_cenit": por_cenit, "por_regimen": por_regimen}
+
+
+def falsas_por_cenit(recs, frontera, vigente):
+    """Falsas publicaciones en negativos limpios del detector vigente, por sensor y tramo de cenit."""
+    out = {}
+    for s in SENSORS:
+        zb = defaultdict(list)
+        for r in recs:
+            if r["b"] == s and _detector_banco(r, frontera) == vigente:
+                zb[tramo_cenit(r.get("z"))].append(r)
+        out[s] = {t: _pct_falsas(v) for t, v in _por_tramo(zb) if any(x["lab"] == "neg_limpio" for x in v)}
+    return out
+
+
+def agregar_estratos(out, mir, ours, frontera, vigente, recs_falsas, instantes_mirova=None):
+    """Agrega a `out` las claves de S157. Sólo agrega: no reemplaza ni borra ninguna clave existente."""
+    est = estratificar_magnitud(mir, ours, frontera, vigente, instantes_mirova)
+    out["magnitud_publicada_by_vol_sensor_cenit"] = est["por_cenit"]
+    out["magnitud_publicada_by_vol_sensor_regimen"] = est["por_regimen"]
+    falsas = out.get("falsas_publicaciones")
+    if isinstance(falsas, dict) and "error" not in falsas and recs_falsas is not None:
+        falsas["por_cenit"] = falsas_por_cenit(recs_falsas, frontera, vigente)
 
 
 def flags_de_evaluacion(ev):
@@ -740,7 +871,8 @@ def main():
     alertas = alertas_mirova()
     coords = _coords_por_volcan()
     filas_ref = cargar_filas_referencia()
-    mir, n_diurnas_excluidas = noches_mirova(aplicar_d9(alertas, REGLA_MINIMAS, filas_ref), coords, win)
+    mir, inst_mir, n_diurnas_excluidas = noches_mirova_con_instante(aplicar_d9(alertas, REGLA_MINIMAS, filas_ref),
+                                                                    coords, win)
     mir_original, _ = noches_mirova(alertas, coords, win)
 
     # 2. Nuestros records + integridad (la integridad mira TODO el archivo, no sólo la ventana)
@@ -846,10 +978,12 @@ def main():
     # bloque en vez de tumbar el audit: recall y magnitud siguen valiendo por sí solos.
     # S156: por detector; las claves de siempre son las del vigente.
     win_falsas = ventana_falsas(today)
+    recs_falsas = None
     if banco is None:
         falsas = {"error": error_banco, "alarma": False}
     else:
-        falsas = resumir_falsas_por_detector(medir_falsas_ventana(win_falsas, banco), frontera, vigente)
+        recs_falsas = medir_falsas_ventana(win_falsas, banco)
+        falsas = resumir_falsas_por_detector(recs_falsas, frontera, vigente)
 
     out = {
         "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -876,6 +1010,8 @@ def main():
         "flags": flags,
         "verdict": verdict,
     }
+    # S157: estratos por cenit y régimen, después del veredicto y sin tocarlo.
+    agregar_estratos(out, mir, ours, frontera, vigente, recs_falsas, inst_mir)
     os.makedirs(OUTDIR, exist_ok=True)
     with open(os.path.join(OUTDIR, "latest.json"), "w", encoding="utf-8") as f:
         json.dump(out, f, indent=1, ensure_ascii=False)
@@ -892,6 +1028,10 @@ def main():
                   f"publicación {r['recall_dash_pct']}% (n={r['n_noches']})")
     for k, m in ev["magnitud_publicada_by_vol_sensor"].items():
         print(f"  [{vigente}] magnitud publicada {k:<30} {m['ratio_mediano']}x (n={m['n_noches']})")
+        tramos = (out.get("magnitud_publicada_by_vol_sensor_cenit") or {}).get(k) or {}
+        if tramos:
+            print("      por cenit: " + " · ".join(f"{t} {v['ratio_mediano']}x (n={v['n_noches']})"
+                                               for t, v in tramos.items()))
     if "error" in falsas:
         print(f"FALSAS PUBLICACIONES: no se pudo medir: {falsas['error']}")
     else:
