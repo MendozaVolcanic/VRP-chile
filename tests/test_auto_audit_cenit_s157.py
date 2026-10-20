@@ -53,13 +53,16 @@ def test_tramos_de_cenit_son_los_del_banco_y_sin_cenit_aparte():
     assert aa.tramo_cenit(None) == "sin_cenit"
 
 
-def test_regimen_de_pasada_separa_535_y_k():
+def test_regimen_de_pasada_separa_535_571_y_k():
     assert aa.regimen_de_pasada("2026-08-28 22:59", FRONTERA) == "antes_535"
-    assert aa.regimen_de_pasada("2026-08-28 23:00", FRONTERA) == "535_a_K"
-    assert aa.regimen_de_pasada("2026-09-17 09:00", FRONTERA) == "535_a_K"
+    assert aa.regimen_de_pasada("2026-08-28 23:00", FRONTERA) == "535_a_571"
+    assert aa.regimen_de_pasada("2026-08-31 23:59", FRONTERA) == "535_a_571"
+    # borde de #571: el mismo corte que la ventana de falsas (INICIO_REGIMEN_FALSAS)
+    assert aa.regimen_de_pasada(aa.INICIO_REGIMEN_FALSAS + " 00:00", FRONTERA) == "571_a_K"
+    assert aa.regimen_de_pasada("2026-09-17 09:00", FRONTERA) == "571_a_K"
     assert aa.regimen_de_pasada("2026-09-18 01:00", FRONTERA) == "K"
     # sin frontera declarada no hay K
-    assert aa.regimen_de_pasada("2026-10-01 01:00", None) == "535_a_K"
+    assert aa.regimen_de_pasada("2026-10-01 01:00", None) == "571_a_K"
 
 
 # ------------------------------------------------------------------ nuestros records por noche
@@ -89,9 +92,9 @@ def test_magnitud_publicada_por_cenit_muestra_la_curva():
     res = aa.nuestros_por_noche(recs, WIN, FRONTERA)
     est = aa.estratificar_magnitud(mir, res["ours"], FRONTERA, "K")
     c = est["por_cenit"]["NevadosDeChillan|VIIRS375"]
-    assert c["z<30"] == {"n_noches": 2, "ratio_mediano": 0.7}
-    assert c["z30-50"] == {"n_noches": 2, "ratio_mediano": 0.45}
-    assert c["z>=60"] == {"n_noches": 2, "ratio_mediano": 0.2}
+    assert c["z<30"] == {"n_noches": 2, "ratio_mediano": 0.7, "n_misma_pasada": None}
+    assert c["z30-50"] == {"n_noches": 2, "ratio_mediano": 0.45, "n_misma_pasada": None}
+    assert c["z>=60"] == {"n_noches": 2, "ratio_mediano": 0.2, "n_misma_pasada": None}
     assert "z50-60" not in c
 
 
@@ -103,7 +106,7 @@ def test_el_cenit_de_la_noche_es_el_de_la_pasada_que_publica_el_maximo():
                                  _rec("2026-10-18 05:06", vrp=9.78, core=9.78, z=48.6)]}
     res = aa.nuestros_por_noche(recs, WIN, FRONTERA)
     c = aa.estratificar_magnitud(mir, res["ours"], FRONTERA, "K")["por_cenit"]["NevadosDeChillan|VIIRS375"]
-    assert c == {"z30-50": {"n_noches": 1, "ratio_mediano": 0.489}}
+    assert c == {"z30-50": {"n_noches": 1, "ratio_mediano": 0.489, "n_misma_pasada": None}}
 
 
 def test_sin_cenit_se_cuenta_aparte_y_no_se_pierde_ninguna_noche():
@@ -114,7 +117,7 @@ def test_sin_cenit_se_cuenta_aparte_y_no_se_pierde_ninguna_noche():
     ev = aa.evaluar_detector(mir, res["ours"], res["vistos"], "K", FRONTERA)
     est = aa.estratificar_magnitud(mir, res["ours"], FRONTERA, "K")
     c = est["por_cenit"]["NevadosDeChillan|VIIRS375"]
-    assert c["sin_cenit"] == {"n_noches": 1, "ratio_mediano": 0.5}
+    assert c["sin_cenit"] == {"n_noches": 1, "ratio_mediano": 0.5, "n_misma_pasada": None}
     # la misma población que la clave de siempre: ninguna noche descartada en silencio
     for k, m in ev["magnitud_publicada_by_vol_sensor"].items():
         assert sum(t["n_noches"] for t in est["por_cenit"][k].values()) == m["n_noches"]
@@ -129,21 +132,53 @@ def test_por_cenit_es_solo_del_detector_vigente():
     assert c["z<30"]["n_noches"] == 2
 
 
-def test_magnitud_por_regimen_separa_antes_535_entre_535_y_k_y_lleva_el_cenit():
+def test_magnitud_por_regimen_separa_535_571_y_k_y_lleva_el_cenit():
     mir, recs = _chillan_k()
     extra = [("2026-08-25 05:00", 1.0, 21), ("2026-08-26 05:00", 1.0, 21),     # antes de #535
-             ("2026-09-05 05:00", 0.9, 21), ("2026-09-06 05:00", 0.3, 67)]     # #535 a K (C0)
+             ("2026-08-30 05:00", 0.8, 40),                                      # #535 a #571
+             ("2026-09-05 05:00", 0.9, 21), ("2026-09-06 05:00", 0.3, 67)]     # #571 a K (C0)
     for fecha, razon, z in extra:
         mir[("NevadosDeChillan", "VIIRS375", fecha[:10])] = 10.0
         recs["NevadosDeChillan"].append(_rec(fecha, vrp=10 * razon, core=10 * razon, z=z, sha=None))
     res = aa.nuestros_por_noche(recs, WIN, FRONTERA)
     reg = aa.estratificar_magnitud(mir, res["ours"], FRONTERA, "K")["por_regimen"]["NevadosDeChillan|VIIRS375"]
-    assert set(reg) == {"antes_535", "535_a_K", "K"}
+    assert list(reg) == ["antes_535", "535_a_571", "571_a_K", "K"]
     assert reg["antes_535"]["n_noches"] == 2 and reg["antes_535"]["ratio_mediano"] == 1.0
-    assert reg["535_a_K"]["n_noches"] == 2 and reg["535_a_K"]["ratio_mediano"] == 0.6
-    assert reg["535_a_K"]["por_cenit"] == {"z<30": {"n_noches": 1, "ratio_mediano": 0.9},
-                                          "z>=60": {"n_noches": 1, "ratio_mediano": 0.3}}
+    assert reg["535_a_571"]["n_noches"] == 1 and reg["535_a_571"]["ratio_mediano"] == 0.8
+    assert reg["571_a_K"]["n_noches"] == 2 and reg["571_a_K"]["ratio_mediano"] == 0.6
+    assert reg["571_a_K"]["por_cenit"] == {"z<30": {"n_noches": 1, "ratio_mediano": 0.9, "n_misma_pasada": None},
+                                          "z>=60": {"n_noches": 1, "ratio_mediano": 0.3, "n_misma_pasada": None}}
     assert reg["K"]["n_noches"] == 6 and reg["K"]["ratio_mediano"] == 0.45
+
+
+def test_cada_celda_cuenta_las_noches_en_que_nuestra_pasada_maxima_es_la_de_miroVA():
+    """El tramo divide NUESTRO máximo de la noche por el máximo de MIROVA de la noche: no es la razón
+    pareada por pasada de S154. n_misma_pasada dice en cuántas noches las dos pasadas son la misma (±120 s)."""
+    mir = {("NevadosDeChillan", "VIIRS375", "2026-10-01"): 10.0, ("NevadosDeChillan", "VIIRS375", "2026-10-02"): 10.0,
+           ("NevadosDeChillan", "VIIRS375", "2026-10-03"): 10.0}
+    recs = {"NevadosDeChillan": [_rec("2026-10-01 05:00", vrp=7, core=7, z=21),
+                                 _rec("2026-10-02 05:00", vrp=7, core=7, z=22),
+                                 _rec("2026-10-03 05:00", vrp=4, core=4, z=67)]}
+    inst = {("NevadosDeChillan", "VIIRS375", "2026-10-01"): "2026-10-01 05:02:00",    # 120 s: misma
+            ("NevadosDeChillan", "VIIRS375", "2026-10-02"): "2026-10-02 05:03:00",    # 180 s: otra
+            ("NevadosDeChillan", "VIIRS375", "2026-10-03"): "2026-10-03 04:58:30"}    # 90 s: misma
+    res = aa.nuestros_por_noche(recs, WIN, FRONTERA)
+    est = aa.estratificar_magnitud(mir, res["ours"], FRONTERA, "K", inst)
+    c = est["por_cenit"]["NevadosDeChillan|VIIRS375"]
+    assert c["z<30"] == {"n_noches": 2, "ratio_mediano": 0.7, "n_misma_pasada": 1}
+    assert c["z>=60"] == {"n_noches": 1, "ratio_mediano": 0.4, "n_misma_pasada": 1}
+    k = est["por_regimen"]["NevadosDeChillan|VIIRS375"]["K"]
+    assert k["n_misma_pasada"] == 2 and k["por_cenit"]["z<30"]["n_misma_pasada"] == 1
+
+
+def test_el_instante_de_miroVA_es_el_de_su_alerta_maxima_y_no_cambia_mir():
+    alertas = [{"volcano": "NevadosDeChillan", "sensor_bucket": "VIIRS375", "fecha_utc": "2026-10-01 05:00:00", "vrp_mw": 3.0},
+               {"volcano": "NevadosDeChillan", "sensor_bucket": "VIIRS375", "fecha_utc": "2026-10-01 06:40:00", "vrp_mw": 9.0},
+               {"volcano": "NevadosDeChillan", "sensor_bucket": "VIIRS375", "fecha_utc": "2026-10-01 07:10:00", "vrp_mw": 2.0}]
+    coords = {"NevadosDeChillan": (-36.86, -71.38)}
+    mir, inst, nd = aa.noches_mirova_con_instante(alertas, coords, WIN)
+    assert (mir, nd) == aa.noches_mirova(alertas, coords, WIN)
+    assert inst == {("NevadosDeChillan", "VIIRS375", "2026-10-01"): "2026-10-01 06:40:00"}
 
 
 # ------------------------------------------------------------------ falsas por cenit
@@ -231,7 +266,8 @@ def _sin_claves_nuevas(latest):
 
 
 def test_no_regresion_las_claves_de_siempre_no_cambian(tmp_path, monkeypatch):
-    """Antes = el mismo main() con el paso de estratos apagado. Todo lo que existía queda idéntico."""
+    """Antes = el mismo main() con el paso de estratos apagado. Todo lo que existía queda idéntico.
+    Corre en el CI (no necesita historia git), a diferencia de la comparación contra el commit base."""
     despues, hist_d = _correr_main(aa, tmp_path, monkeypatch, "despues")
     monkeypatch.setattr(aa, "agregar_estratos", lambda out, *a, **k: None)
     antes, hist_a = _correr_main(aa, tmp_path, monkeypatch, "antes")
@@ -239,6 +275,10 @@ def test_no_regresion_las_claves_de_siempre_no_cambian(tmp_path, monkeypatch):
     assert despues["magnitud_publicada_by_vol_sensor_cenit"]
     assert despues["magnitud_publicada_by_vol_sensor_regimen"]
     assert despues["falsas_publicaciones"]["por_cenit"]["VIIRS375"]
+    # el insumo trae alertas de MIROVA pareables: n_misma_pasada no queda en None
+    cel = despues["magnitud_publicada_by_vol_sensor_cenit"]["NevadosDeChillan|VIIRS375"]
+    assert all(t["n_misma_pasada"] is not None for t in cel.values())
+    assert sum(t["n_misma_pasada"] for t in cel.values()) > 0
     assert despues["magnitud_publicada_by_vol_sensor"]
     assert despues["flags"]
     for clave in antes:
@@ -264,11 +304,13 @@ def _modulo_base():
 
 
 def test_no_regresion_contra_el_codigo_de_main_previo(tmp_path, monkeypatch):
-    """Antes = el auto_audit_weekly.py del commit base, no un apagado simulado. Sin historia git
-    (checkout superficial del CI) no hay versión base que comparar y la prueba se salta."""
+    """SÓLO LOCAL. Antes = el auto_audit_weekly.py del commit base (SHA fijo, el de origen de la rama), no
+    un apagado simulado. El CI hace checkout con fetch-depth 1, no tiene ese commit y la prueba se salta
+    diciéndolo; la que corre en el CI es test_no_regresion_las_claves_de_siempre_no_cambian."""
     base = _modulo_base()
     if base is None:
-        pytest.skip(f"sin el commit {BASE_SHA} en este checkout")
+        pytest.skip(f"SOLO LOCAL: el CI hace checkout con fetch-depth 1 y no trae el commit base {BASE_SHA}; "
+                    "la no regresion del CI es test_no_regresion_las_claves_de_siempre_no_cambian")
     antes, hist_a = _correr_main(base, tmp_path, monkeypatch, "base")
     despues, hist_d = _correr_main(aa, tmp_path, monkeypatch, "nuevo")
     assert _sin_claves_nuevas(despues) == antes
