@@ -1875,5 +1875,6 @@ en S35 durante ~70 sesiones y confundía a las sesiones frías):
    vale para la vía espectral/de magnitud, NO bloquea una llegada por geometría**)
    y los gates intra-radio S84/S85 (flip OFF S118, verificado S119).
 5. `docs/SESSION_INDEX_CONSOLIDATED_S80.md` — ancla histórica S1-S80
+6. `docs/SINTOMAS.md` (S157, tarea 1.34): **antes de proponer una palanca, leer ahí el síntoma** (magnitud baja, sobre-publicación, posición corrida, recall, A/B inerte, run verde sin datos) con lo medido, lo abierto y lo que no se reabre.
 
 **Regla**: al cerrar sesión NO escribir estado acá — va al bloque de arranque + memoria.

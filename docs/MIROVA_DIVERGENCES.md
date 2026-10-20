@@ -2238,7 +2238,7 @@ cosa: ver D17.
 
 ---
 
-## D17 — Nuestra grilla F70 se centró en el punto equivocado — **ABIERTA (premisa probada, consecuencia NO)** S124/S125
+## D17 — Nuestra grilla F70 se centró en el punto equivocado — **ABIERTA (premisa probada, consecuencia NO)** S124/S125 ⚠️ **S157 (A113, tarea 1.34): el «mecanismo geométrico SÍ quedó probado» del bloque S130 de abajo NO atribuye la caída con el ángulo a D17. La tarea 1.14 (`experiments/_s151_presupuesto_magnitud/README.md` §3.2) midió que el Npix de MIROVA no crece hacia el borde y que lo que empeora es nuestro fondo (F_bg 0,85 a 0,73): la dependencia angular queda SIN ATRIBUIR, con D25 y D17 compitiendo (ver `docs/SINTOMAS.md` §1). Texto conservado por historia**
 
 > **S141, lectura de papers verificada renderizando las páginas** (`docs/audit_s141/lectura/VERIFICADOR_LECTORES.md` V-08 y V-13).
 > **Grilla por sensor.** MODIS 51 × 51 celdas de 1 km (Coppola et al. 2023, Front. Earth Sci. 11:1240107, p. 3, §2.1);
