@@ -509,6 +509,12 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~23:30 UTC (S157): #865 CERRADO sin cambiar K
+- Nicolás: «Sí: cierra #865 sin cambiar K, con el mecanismo y el costo documentados (#881).» Cerrado con comentario
+  (mecanismo, clase 1 de 155, costo de `min` en VIIRS 750 +314 negativos limpios). #881 queda en borrador.
+- Pendiente menor: `sombra_pasadas_juzgadas.json` registra PCC como «no revertir, investigar»; revisar si la
+  vigilancia de la sombra necesita la marca de cerrado para no reabrir el issue de investigación.
+
 ### 2026-10-20 ~23:20 UTC (S157): #865 explicado (#881, verificado); azimut (#879, sin verificar); saturación en curso
 - **#865 / #881** (verificador limpio confirmó; tres frases corregidas): la anomalía de PCC VIIRS 750 del 2026-10-10
   05:54 son dos píxeles contiguos que se bajan el contraste uno al otro en el promedio de 8 vecinos. Con K el Test 2
