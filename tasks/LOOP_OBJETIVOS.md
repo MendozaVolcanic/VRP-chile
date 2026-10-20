@@ -509,6 +509,16 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~09:15 UTC (S157): #866 y #868 mergeados con el sí de Nicolás; tres sesiones nuevas corriendo
+- Nicolás: «Sí: mergea #866 y #868 y arranca las tres tarjetas». Merges squash por la API (el clasificador los había
+  negado sin su sí): #866 `8c94c847` (ensayo del reemplazo, sólo `experiments/`), #868 `f101d730` (propagación de
+  K, A113). CI `Tests` verde sobre `f101d730` (el de `8c94c847` quedó cancelado por el siguiente, que lo contiene);
+  Pages verde y R8: el `index.html` publicado trae la marca S157 del modal.
+- Worktrees de #866 y #868 borrados (limpios). D: 15 GB libres.
+- Corriendo, cada una en su worktree de D:: merge de trozos que conserva el archivo más plan de relleno de las 31
+  pasadas (`local_4eec6aae`), λ de B22 en MODIS con K (`local_c5486ed1`), pre-registro de D25 sobre K con probe de
+  L1B (`local_51f1447d`). Las dos últimas dependen de CMR para bajar datos: la caída de NASA puede frenarlas.
+
 ### 2026-10-20 08:40 UTC (S157): la segunda pasada salió VERDE Y VACÍA: CMR de NASA caído
 - Run 39391332259: 31 de 31 trozos verdes en 5 a 11 min cada uno (contra 60 a 76 min con datos). Log: `WARN: Failed
   to fetch <producto>: {"errors":["An Internal Error has occurred."]}` en los 8 productos. Artefactos: **0 records
