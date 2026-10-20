@@ -37,6 +37,22 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parent.parent
 
 
+# Presupuesto de un trozo (A15): paso de 170 min con margen 1,3 = 130 min. Costo por día de ventana: 0,6 min de
+# búsqueda y descarga, compartidos por los brazos (MEDICION.md, CMR rápido; con la ventana, CMR lento ya casi no
+# pesa), y 1,6 min de proceso por brazo (2,2 min por día y brazo de experiments/_s151_prereg_fk_11/duracion_runs.py
+# menos lo compartido). El peor job de F/K tardó 1,42 veces la mediana.
+_PRESUPUESTO_MIN = 170 / 1.3
+_COMPARTIDO_MIN_DIA = 0.6
+_PROCESO_MIN_DIA_BRAZO = 1.6
+_PEOR_SOBRE_MEDIANA = 1.42
+
+
+def dias_por_trozo(n_brazos: int) -> int:
+    """Días de ventana por job para que n_brazos quepan en el paso de 170 min."""
+    costo = _PEOR_SOBRE_MEDIANA * (_COMPARTIDO_MIN_DIA + _PROCESO_MIN_DIA_BRAZO * max(1, n_brazos))
+    return max(1, int(_PRESUPUESTO_MIN // costo))
+
+
 def fechas(ini: str, fin: str) -> list[str]:
     d, d_fin = datetime.strptime(ini, "%Y-%m-%d"), datetime.strptime(fin, "%Y-%m-%d")
     out = []
