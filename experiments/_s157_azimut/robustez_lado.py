@@ -64,6 +64,39 @@ def con_celda(filas, extra):
     return [dict(f, bin=f["bin"] + "|" + extra(f)) for f in filas]
 
 
+def signo_por_noche(filas, max_dz=10.0):
+    """Por noche (volcan, fecha, sensor) con una pasada de cada lado de cenit parecido, el
+    cociente E/O de cada campo. Respeta la dependencia entre pasadas: una noche, un voto.
+    p = prueba de signo binomial exacta de dos colas."""
+    from math import comb
+    por = defaultdict(lambda: {"E": [], "O": []})
+    for f in filas:
+        por[(f["vol"], f["dt"][:10])][f["lado"]].append(f)
+    noches = []
+    for d in por.values():
+        mejor = None
+        for e in d["E"]:
+            for o in d["O"]:
+                dz = abs(abs(e["sz"]) - abs(o["sz"]))
+                if dz <= max_dz and (mejor is None or dz < mejor[0]):
+                    mejor = (dz, e, o)
+        if mejor:
+            noches.append(mejor[1:])
+    out = {"n_noches": len(noches), "max_dz_deg": max_dz}
+    for nom, c in m.CAMPOS.items():
+        q = sorted(c(e) / c(o) for e, o in noches)
+        if len(q) < 10:
+            out[nom] = None
+            continue
+        k = sum(x > 1 for x in q)
+        n = sum(x != 1 for x in q)
+        lo = min(k, n - k)
+        p = min(1.0, 2 * sum(comb(n, i) for i in range(lo + 1)) / 2 ** n)
+        out[nom] = {"factor_mediano": round(q[len(q) // 2], 3), "e_mayor": f"{k}/{n}",
+                    "p_signo": round(p, 4)}
+    return out
+
+
 def main():
     frontera = m.aa.leer_frontera_k()
     pas, noche = m.cargar_alertas()
@@ -77,6 +110,11 @@ def main():
         "+plataforma": lambda fs: con_celda(fs, plat),
         "desde_0613": lambda fs: [f for f in fs if f["dt"][:10] >= "2026-06-13"],
         "sin_Isluga": lambda fs: [f for f in fs if f["vol"] != "Isluga"],
+        "+mes": lambda fs: con_celda(fs, lambda f: f["dt"][:7]),
+        "sin_Isl+mes": lambda fs: con_celda([f for f in fs if f["vol"] != "Isluga"],
+                                            lambda f: f["dt"][:7]),
+        ">=35_sinIsl+mes": lambda fs: con_celda([f for f in fs if f["vol"] != "Isluga"
+                                                and abs(f["sz"]) >= 35], lambda f: f["dt"][:7]),
         "tramo<35": lambda fs: [f for f in fs if abs(f["sz"]) < 35],
         "tramo>=35": lambda fs: [f for f in fs if abs(f["sz"]) >= 35],
     }
@@ -98,6 +136,18 @@ def main():
                 return f"{x['factor_E_sobre_O']:6.3f} [{10**a:5.3f},{10**b:5.3f}] p{x['p_dos_colas']:.3f}"
             print(f"{bk:6s} {nom:12s} {e['n_pares']:5d} {e['n_en_celdas_validas']:6d}  "
                   f"{fmt(e['nuestro'])}  {fmt(e['mirova'])}  {fmt(e['razon'])}")
+    # prueba de signo por NOCHE: misma noche, una pasada de cada lado, cenit parecido
+    res["signo_por_noche"] = {}
+    print()
+    print("prueba de signo por noche (C0, pares E/O de la misma noche con |zE-zO| <= 10):")
+    for bk in ("v375", "v750"):
+        for nom, excl in (("todos", None), ("sin_Isluga", "Isluga")):
+            fs = [f for f in base if "C0" in f["grupos"] and f["bk"] == bk and f["vol"] != excl]
+            r = signo_por_noche(fs)
+            res["signo_por_noche"][f"{bk}|{nom}"] = r
+            print(f"  {bk} {nom:10s} noches {r['n_noches']:4d}  " + "  ".join(
+                f"{c}: {r[c]['factor_mediano']} (E>O {r[c]['e_mayor']}, p {r[c]['p_signo']})"
+                for c in ("nuestro", "mirova", "razon") if r.get(c)))
     # composicion: cuanto se separan E y O en hora y cenit dentro del pareo base
     comp = {}
     for bk in ("v375", "v750"):

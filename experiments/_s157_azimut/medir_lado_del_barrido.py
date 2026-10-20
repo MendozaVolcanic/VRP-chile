@@ -172,7 +172,8 @@ def verificar_convencion(registros):
     for _k, s in por_noche.items():
         s = sorted(s)
         if len(s) >= 2 and (s[-1][0] - s[0][0]).total_seconds() > 3600:
-            orden[f"primera_{s[0][1]}_ultima_{s[-1][1]}"] += 1
+            fam = "VIIRS" if "VIIRS" in _k[1] else "MODIS"
+            orden[f"{fam}|primera_{s[0][1]}_ultima_{s[-1][1]}"] += 1
     return {"banner_mismo_lado": mismo, "banner_pares": total,
             "banner_mediana_abs_dif_azimut_deg": round(st.median(difs), 2) if difs else None,
             "orden_orbital_noches": dict(orden)}
