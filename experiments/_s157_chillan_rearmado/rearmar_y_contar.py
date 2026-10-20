@@ -124,8 +124,11 @@ def main(argv=None) -> int:
     # de la union primaria no se tocan; asi una pasada que la segunda copia perdio por CMR no borra nada (A108).
     rellenadas = []
     if a.relleno:
+        # El relleno puede venir de varias pasadas (subcarpetas run_*) y de ventanas sueltas: sólo aporta claves
+        # que faltan, así que no se le exige cubrir la ventana entera ni que sus trozos no se pisen.
         tr = trozos(a.relleno)
-        exigir_cobertura_contigua(tr)
+        if not tr:
+            raise SystemExit(f"relleno sin trozos: {a.relleno}")
         store_r, _ = merge_stores([t["path"] for t in tr], [(t["inicio"], t["fin"]) for t in tr])
         presentes = {_key(r) for r in recs}
         for r in store_r["records"]:
