@@ -109,6 +109,22 @@ MUTACIONES = [
     ("trozo de 37 dias fijo", "scripts/reproc_brazos.py",
      "    return max(1, int(_PRESUPUESTO_MIN // costo))",
      "    return 37"),
+    # Hallazgos del verificador limpio de S157, con su arreglo:
+    ("etiquetado fuera del finally", "pipeline/fetch.py",
+     "        finally:\n            # finally y no despues del try",
+     "        except BaseException:\n            raise\n        if True:\n            # finally y no despues del try"),
+    ("dias recientes dentro de la ventana", "pipeline/fetch.py",
+     "        if d.strftime(\"%Y-%m-%d\") < primer_reciente:",
+     "        if True:"),
+    ("ventana apagada deja de servir lo cargado", "pipeline/fetch.py",
+     "    if _VENTANA is None or not (_VENTANA[\"ini\"] <= dia <= _VENTANA[\"fin\"]):",
+     "    if _VENTANA is None or _VENTANA_APAGADA or not (_VENTANA[\"ini\"] <= dia <= _VENTANA[\"fin\"]):"),
+    ("cache corrupta no se atrapa", "pipeline/fetch.py",
+     "        except (OSError, ValueError, KeyError, TypeError) as e:",
+     "        except ZeroDivisionError as e:"),
+    ("cobertura del driver solo al final", "scripts/reproc_brazos.py",
+     "        if cobertura_json:\n            Path(cobertura_json).parent",
+     "        if cobertura_json and fecha == fin:\n            Path(cobertura_json).parent"),
 ]
 
 

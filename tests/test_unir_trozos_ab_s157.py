@@ -75,13 +75,12 @@ pt = importlib.util.module_from_spec(_spec2)
 _spec2.loader.exec_module(pt)
 
 
-def test_plan_tres_brazos_parte_la_ventana_de_d25_en_trozos_de_17_dias():
+def test_plan_tres_brazos_parte_la_ventana_de_d25_en_trozos_de_16_dias():
     jobs = pt.plan("2026-08-29", "2026-10-18", ["Lascar", "Isluga"], ["_c", "_g", "_on"])
+    esperado = [("2026-08-29", "2026-09-13"), ("2026-09-14", "2026-09-29"), ("2026-09-30", "2026-10-15"),
+                ("2026-10-16", "2026-10-18")]
     assert [(j["vol"], j["idx"], j["start"], j["end"]) for j in jobs] == [
-        ("Lascar", 1, "2026-08-29", "2026-09-14"), ("Lascar", 2, "2026-09-15", "2026-10-01"),
-        ("Lascar", 3, "2026-10-02", "2026-10-18"),
-        ("Isluga", 1, "2026-08-29", "2026-09-14"), ("Isluga", 2, "2026-09-15", "2026-10-01"),
-        ("Isluga", 3, "2026-10-02", "2026-10-18")]
+        (v, k + 1, a, b) for v in ("Lascar", "Isluga") for k, (a, b) in enumerate(esperado)]
 
 
 def test_plan_max_days_a_mano_manda():

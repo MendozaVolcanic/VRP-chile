@@ -73,7 +73,7 @@ jobs:
   # S157: los brazos de un A/B comparten volcan y ventana, asi que corren en el MISMO job (scripts/reproc_brazos.py):
   # cada busqueda a CMR y cada granulo se hacen una sola vez y solo el procesamiento se repite por brazo
   # (experiments/_s157_busqueda_ventana/MEDICION.md). Para que todos quepan en el paso de 170 min (A15), la ventana se
-  # parte en trozos de dias_por_trozo(n_brazos) dias (41 con 1 brazo, 24 con 2, 17 con 3); la entrada max_days lo fija
+  # parte en trozos de dias_por_trozo(n_brazos) dias (40 con 1 brazo, 23 con 2, 16 con 3); la entrada max_days lo fija
   # a mano si hace falta. Matrix volcan por trozo; recolectar une los trozos de cada brazo (scripts/unir_trozos_ab.py).
   plan:
     if: github.event.inputs.preregistro_aprobado == 'si'
@@ -103,7 +103,9 @@ jobs:
     needs: plan
     if: github.event.inputs.preregistro_aprobado == 'si'
     runs-on: ubuntu-24.04  # S150: fijado; ubuntu-latest migra a 26.04 entre 2026-10-19 y 2026-11-19 (runner-images #14748). Cambiar despues de probar pyhdf en 26.04
-    timeout-minutes: 180
+    # 170 del paso de reproceso mas ~15 de checkout, apt-get, pip, flags y subida (verificador S157: con 180 la
+    # subida del artefacto podia caer si el paso agotaba sus 170).
+    timeout-minutes: 200
     strategy:
       fail-fast: false
       # Un volcan y un trozo por job, con todos los brazos adentro EN SERIE: cada brazo escribe en su propio

@@ -512,10 +512,16 @@ def reiniciar_ventana() -> None:
     _VENTANA_APAGADA = False
 
 
-def configurar_ventana(fechas, cache_dir=None, ventana=None) -> bool:
+def configurar_ventana(fechas, cache_dir=None, ventana=None, ahora=None) -> bool:
     """Activa la búsqueda por ventana. `ventana=(ini, fin)` en 'YYYY-MM-DD' la fija
     (un brazo que corre un solo día dentro de la ventana del A/B); si no, va de la
-    primera a la última de `fechas`. Devuelve False si el interruptor la apaga."""
+    primera a la última de `fechas`. Devuelve False si el interruptor la apaga o si
+    no queda ningún día fuera de los recientes.
+
+    Los dos últimos días (hoy y ayer en UTC, según `ahora`) quedan FUERA de la
+    ventana y se consultan como hoy, cuando el proceso llega a ellos: en el NRT esos
+    días se buscaban al final del job y LANCE puede haber publicado más gránulos
+    entre el inicio y ese momento (hallazgo del verificador limpio de S157)."""
     global _VENTANA
     if os.environ.get("VRP_BUSQUEDA_VENTANA", "1") == "0":
         _VENTANA = None
@@ -528,11 +534,18 @@ def configurar_ventana(fechas, cache_dir=None, ventana=None) -> bool:
             _VENTANA = None
             return False
         ini, fin = min(fechas).strftime("%Y-%m-%d"), max(fechas).strftime("%Y-%m-%d")
+    ahora = ahora or datetime.utcnow()
+    primer_reciente = (datetime(ahora.year, ahora.month, ahora.day) - timedelta(days=1)).strftime("%Y-%m-%d")
     d, d_fin = datetime.strptime(ini, "%Y-%m-%d"), datetime.strptime(fin, "%Y-%m-%d")
     dias = []
     while d <= d_fin:
-        dias.append(d.strftime("%Y-%m-%d"))
+        if d.strftime("%Y-%m-%d") < primer_reciente:
+            dias.append(d.strftime("%Y-%m-%d"))
         d += timedelta(days=1)
+    if not dias:
+        _VENTANA = None
+        return False
+    ini, fin = dias[0], dias[-1]
     _VENTANA = {"ini": ini, "fin": fin, "dias": dias,
                 "cache_dir": Path(cache_dir) if cache_dir else None}
     return True
@@ -676,11 +689,18 @@ def _guardar_cache(key, por_dia) -> None:
 def _desde_ventana(product_key: str, bbox: tuple, dia: str):
     """Lista del día servida desde la ventana, o None para consultar como hoy."""
     global _VENTANA_APAGADA
-    if _VENTANA is None or _VENTANA_APAGADA or not (_VENTANA["ini"] <= dia <= _VENTANA["fin"]):
+    if _VENTANA is None or not (_VENTANA["ini"] <= dia <= _VENTANA["fin"]):
         return None
     key = (product_key, bbox, _VENTANA["ini"], _VENTANA["fin"])
     if key not in _VENTANA_CACHE:
-        por_dia = _cargar_cache(key)
+        # Apagada sólo para consultas NUEVAS: lo ya cargado se sigue sirviendo.
+        if _VENTANA_APAGADA:
+            return None
+        try:
+            por_dia = _cargar_cache(key)
+        except (OSError, ValueError, KeyError, TypeError) as e:
+            _diag(f"SEARCH_VENTANA_CACHE_ILEGIBLE [{product_key}] {type(e).__name__}: {str(e)[:80]} -> se consulta")
+            por_dia = None
         if por_dia is None:
             try:
                 por_dia = _buscar_ventana(product_key, bbox, _VENTANA["dias"])
@@ -1107,9 +1127,13 @@ def fetch_for_volcano(volcano: dict, date: datetime,
             print(f"  WARN: Failed to fetch {platform}: {e}")
             results[platform] = []
             _registrar_falla(producto, fecha_str, f"{type(e).__name__}: {str(e)[:150]}", etapa=etapa)
-        for f in _FALLAS[n_fallas_antes:]:
-            f["volcan"] = volcano.get("name", "?")
-            f["plataforma"] = f["plataforma"] or platform
+        finally:
+            # finally y no despues del try: los `continue` de una busqueda vacia saltaban el
+            # etiquetado y la falla del cortacircuito quedaba sin volcan ni plataforma
+            # (verificador limpio S157).
+            for f in _FALLAS[n_fallas_antes:]:
+                f["volcan"] = volcano.get("name", "?")
+                f["plataforma"] = f["plataforma"] or platform
 
     _resumen_hosts_caidos(volcano.get("name", "?"))  # S140 8d
     return results

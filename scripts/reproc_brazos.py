@@ -44,12 +44,15 @@ RAIZ = Path(__file__).resolve().parent.parent
 _PRESUPUESTO_MIN = 170 / 1.3
 _COMPARTIDO_MIN_DIA = 0.6
 _PROCESO_MIN_DIA_BRAZO = 1.6
+# Un proceso de run_pipeline por día y brazo: imports (~2,3 s medidos en local) y lectura y escritura del store.
+_ARRANQUE_MIN_DIA_BRAZO = 0.1
 _PEOR_SOBRE_MEDIANA = 1.42
 
 
 def dias_por_trozo(n_brazos: int) -> int:
     """Días de ventana por job para que n_brazos quepan en el paso de 170 min."""
-    costo = _PEOR_SOBRE_MEDIANA * (_COMPARTIDO_MIN_DIA + _PROCESO_MIN_DIA_BRAZO * max(1, n_brazos))
+    costo = _PEOR_SOBRE_MEDIANA * (_COMPARTIDO_MIN_DIA
+                                   + (_PROCESO_MIN_DIA_BRAZO + _ARRANQUE_MIN_DIA_BRAZO) * max(1, n_brazos))
     return max(1, int(_PRESUPUESTO_MIN // costo))
 
 
@@ -93,10 +96,11 @@ def correr(volcan: str, ini: str, fin: str, perfiles: list[str], trabajo, overwr
             elif r.returncode == 0:
                 fallidos.append((fecha, perfil, "sin archivo de cobertura"))
         shutil.rmtree(granulos / volcan / fecha.replace("-", ""), ignore_errors=True)
-    if cobertura_json:
-        Path(cobertura_json).parent.mkdir(parents=True, exist_ok=True)
-        Path(cobertura_json).write_text(json.dumps({"fallas": fallas, "n": len(fallas)}, ensure_ascii=False,
-                                                   indent=1), encoding="utf-8")
+        # Día a día y no al final: si el paso muere por timeout, lo ya visto queda escrito (verificador S157).
+        if cobertura_json:
+            Path(cobertura_json).parent.mkdir(parents=True, exist_ok=True)
+            Path(cobertura_json).write_text(json.dumps({"fallas": fallas, "n": len(fallas), "hasta": fecha},
+                                                       ensure_ascii=False, indent=1), encoding="utf-8")
     if fallidos:
         print(f"::error::reproc_brazos {volcan}: {len(fallidos)} corridas de brazo fallaron: {fallidos[:10]}",
               flush=True)

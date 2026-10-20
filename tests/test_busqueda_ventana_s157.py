@@ -386,8 +386,12 @@ def test_cobertura_registra_cortacircuito_y_timeout(monkeypatch, tmp_path):
 
     monkeypatch.setattr(fetch.earthaccess, "search_data", FakeCMR({}, fallar=fallar))
     fetch.fetch_for_volcano(VOLCAN, D0, tmp_path)
-    motivos = sorted(f["motivo"].split(":")[0] for f in fetch.fallas_de_cobertura())
+    fallas = fetch.fallas_de_cobertura()
+    motivos = sorted(f["motivo"].split(":")[0] for f in fallas)
     assert motivos == ["SEARCH_CMR_TIMEOUT", "SEARCH_SKIP"]
+    # verificador S157: la busqueda L1B vacia salta al platform siguiente; la falla igual lleva volcan y plataforma
+    assert sorted((f["volcan"], f["plataforma"], f["fecha"]) for f in fallas) == [
+        ("NevadosDeChillan", "MODIS_AQUA", "2026-07-18"), ("NevadosDeChillan", "MODIS_TERRA", "2026-07-18")]
 
 
 def test_cobertura_no_registra_un_dia_sin_granulos(monkeypatch, tmp_path):
@@ -410,3 +414,62 @@ def test_cobertura_registra_descarga_fallida(monkeypatch, tmp_path):
     fetch.fetch_for_volcano(VOLCAN, D0, tmp_path)
     fallas = fetch.fallas_de_cobertura()
     assert [(f["plataforma"], f["etapa"]) for f in fallas] == [("MODIS_TERRA", "descarga")]
+
+
+# ---------------------------------------------------------------- hallazgos del verificador limpio (S157)
+
+def test_los_dos_ultimos_dias_se_consultan_por_dia_como_hoy(monkeypatch):
+    # En el NRT, hoy y ayer se seguian consultando al final del job, cuando LANCE ya publico mas; una ventana los
+    # congelaria al inicio. Esos dos dias quedan por el camino de hoy.
+    dias = _dias(8)
+    ahora = dias[-1].replace(hour=15)
+    cat = {("MOD021KM", "6.1"): _noches("MOD021KM", dias)}
+    fake = FakeCMR(cat)
+    monkeypatch.setattr(fetch.earthaccess, "search_data", fake)
+    assert fetch.configurar_ventana(dias, ahora=ahora)
+    for d in dias:
+        fetch.search_granules("MODIS_TERRA_L1B", LAT, LON, R, d)
+    ventanas = [t for _, _, t in fake.llamadas if t[0] != t[1]]
+    assert ventanas == [("2026-07-18", "2026-07-23")]
+    assert sorted(t[0] for _, _, t in fake.llamadas if t[0] == t[1]) == ["2026-07-24", "2026-07-25"]
+
+
+def test_ventana_de_solo_dias_recientes_no_se_activa(monkeypatch):
+    dias = _dias(2)
+    assert fetch.configurar_ventana(dias, ahora=dias[-1].replace(hour=3)) is False
+
+
+def test_una_ventana_fallida_no_apaga_las_ya_cargadas(monkeypatch):
+    dias = _dias(4)
+    cat = {("MOD021KM", "6.1"): _noches("MOD021KM", dias), ("MYD021KM", "6.1"): _noches("MYD021KM", dias)}
+
+    def fallar(sn, ver, temporal):
+        if sn == "MYD021KM" and temporal[0] != temporal[1]:
+            raise RuntimeError("HTTP 500")
+
+    fake = FakeCMR(cat, fallar=fallar)
+    monkeypatch.setattr(fetch.earthaccess, "search_data", fake)
+    fetch.configurar_ventana(dias)
+    fetch.search_granules("MODIS_TERRA_L1B", LAT, LON, R, dias[0])
+    fetch.search_granules("MODIS_AQUA_L1B", LAT, LON, R, dias[0])  # su ventana falla y cae por dia
+    n = len(fake.llamadas)
+    for d in dias:
+        fetch.search_granules("MODIS_TERRA_L1B", LAT, LON, R, d)
+    assert len(fake.llamadas) == n, "la ventana de MODIS_TERRA ya estaba cargada y debe seguir sirviendo"
+
+
+def test_cache_en_disco_corrupta_se_vuelve_a_consultar(monkeypatch, tmp_path):
+    dias = _dias(3)
+    cat = {("MOD021KM", "6.1"): _noches("MOD021KM", dias)}
+    ref = _por_dia(FakeCMR(cat), monkeypatch, "MODIS_TERRA_L1B", dias)
+    _con_ventana(FakeCMR(cat), monkeypatch, "MODIS_TERRA_L1B", dias, cache_dir=tmp_path)
+    for f in tmp_path.glob("*.json"):
+        f.write_text("{corrupto", encoding="utf-8")
+    fake = FakeCMR(cat)
+    try:
+        out = _con_ventana(fake, monkeypatch, "MODIS_TERRA_L1B", dias, cache_dir=tmp_path)
+    except Exception as e:  # noqa: BLE001
+        assert False, f"una cache ilegible debe volver a consultar, no romper: {type(e).__name__}"
+    assert out == ref
+    assert fake.n_ventana() == 1
+    assert fetch.fallas_de_cobertura() == []

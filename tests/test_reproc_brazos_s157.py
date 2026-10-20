@@ -219,9 +219,26 @@ def test_driver_sin_estricto_no_falla_por_cobertura(tmp_path):
 
 # ---------------------------------------------------------------- presupuesto del trozo (A15)
 
-@pytest.mark.parametrize("n,esperado", [(1, 41), (2, 24), (3, 17), (4, 13)])
+@pytest.mark.parametrize("n,esperado", [(1, 40), (2, 23), (3, 16), (4, 12)])
 def test_dias_por_trozo_cabe_en_170_min_con_margen(n, esperado):
     # 130,8 min = 170 / 1,3 (A15); peor job 1,42 veces la mediana (F/K); 0,6 min por dia de busqueda y descarga
-    # compartidas y 1,6 por dia y brazo de proceso (MEDICION.md y duracion_runs.py de F/K)
+    # compartidas, 1,6 por dia y brazo de proceso (MEDICION.md y duracion_runs.py de F/K) y 0,1 por dia y brazo de
+    # arranque de un proceso (imports y lectura del store; verificador S157)
     assert rb.dias_por_trozo(n) == esperado
-    assert esperado * 1.42 * (0.6 + 1.6 * n) * 1.3 <= 170
+    assert esperado * 1.42 * (0.6 + 1.7 * n) * 1.3 <= 170
+
+
+def test_driver_deja_la_cobertura_escrita_dia_a_dia(tmp_path):
+    # verificador S157: si el paso muere por timeout a mitad de la ventana, lo ya visto tiene que quedar escrito
+    class Corta(Ejecutor):
+        def __call__(self, cmd, env, stdout, stderr):
+            if cmd[cmd.index("--date") + 1] == "2026-09-02":
+                raise KeyboardInterrupt("timeout del paso")
+            return super().__call__(cmd, env, stdout, stderr)
+
+    ej = Corta(tmp_path, fallas_por={("_a", "2026-09-01"): [FALLA]})
+    salida = tmp_path / "cobertura.json"
+    with pytest.raises(KeyboardInterrupt):
+        rb.correr("Lascar", "2026-09-01", "2026-09-02", ["_a"], tmp_path, ejecutar=ej, cobertura_json=salida)
+    assert salida.exists(), "la cobertura del dia ya terminado tiene que estar escrita"
+    assert json.loads(salida.read_text(encoding="utf-8"))["fallas"] == [dict(FALLA, perfil="_a")]

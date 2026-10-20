@@ -1,7 +1,7 @@
 {
  "control": "PASA",
  "cuenta": {
-  "ATRAPADA": 24,
+  "ATRAPADA": 29,
   "PASA": 0,
   "CAIDA": 0,
   "EQUIVALENTE": 2,
@@ -30,13 +30,13 @@
    "mutacion": "sin margen de medianoche",
    "archivo": "pipeline/fetch.py",
    "estado": "ATRAPADA",
-   "detalle": "E   AssertionError: assert ([<[KeyError('CollectionReference') raised in repr()] DataGranule object at 0x198dec5cc30>] is None)"
+   "detalle": "E   AssertionError: assert ([<[KeyError('CollectionReference') raised in repr()] DataGranule object at 0x24ab1060be0>] is None)"
   },
   {
    "mutacion": "sin la regla de 20",
    "archivo": "pipeline/fetch.py",
    "estado": "ATRAPADA",
-   "detalle": "E   AssertionError: assert [<[KeyError('CollectionReference') raised in repr()] DataGranule object at 0x1edf2420910>, <[KeyError('CollectionRefer...bject at 0x1edf24213b0>, <[KeyError('CollectionRefer"
+   "detalle": "E   AssertionError: assert [<[KeyError('CollectionReference') raised in repr()] DataGranule object at 0x1a47f13cb40>, <[KeyError('CollectionRefer...bject at 0x1a47f13d5e0>, <[KeyError('CollectionRefer"
   },
   {
    "mutacion": "NRT antes que standard",
@@ -162,7 +162,37 @@
    "mutacion": "trozo de 37 dias fijo",
    "archivo": "scripts/reproc_brazos.py",
    "estado": "ATRAPADA",
-   "detalle": "E   assert 37 == 41"
+   "detalle": "E   assert 37 == 40"
+  },
+  {
+   "mutacion": "etiquetado fuera del finally",
+   "archivo": "pipeline/fetch.py",
+   "estado": "ATRAPADA",
+   "detalle": "E   AssertionError: assert [(None, None,...'2026-07-18')] == [('NevadosDeC...'2026-07-18')]"
+  },
+  {
+   "mutacion": "dias recientes dentro de la ventana",
+   "archivo": "pipeline/fetch.py",
+   "estado": "ATRAPADA",
+   "detalle": "E   AssertionError: assert [('2026-07-18', '2026-07-25')] == [('2026-07-18', '2026-07-23')]"
+  },
+  {
+   "mutacion": "ventana apagada deja de servir lo cargado",
+   "archivo": "pipeline/fetch.py",
+   "estado": "ATRAPADA",
+   "detalle": "E   AssertionError: la ventana de MODIS_TERRA ya estaba cargada y debe seguir sirviendo"
+  },
+  {
+   "mutacion": "cache corrupta no se atrapa",
+   "archivo": "pipeline/fetch.py",
+   "estado": "ATRAPADA",
+   "detalle": "E   json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)"
+  },
+  {
+   "mutacion": "cobertura del driver solo al final",
+   "archivo": "scripts/reproc_brazos.py",
+   "estado": "ATRAPADA",
+   "detalle": "E   AssertionError: la cobertura del dia ya terminado tiene que estar escrita"
   }
  ]
 }
