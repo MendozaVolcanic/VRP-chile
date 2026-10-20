@@ -509,6 +509,16 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-20 ~23:45 UTC (S157): azimut verificado (#879), con el efecto acotado
+- Verificador limpio en primer plano reprodujo exactas las cifras centrales (MIROVA 1,460, nosotros 1,145, razón
+  0,865; 1,91 desde 35°) y confirmó signo del azimut (267 de 267 contra el banner), pareo (desfase 0 s), nulo (4 a
+  5 % de falsos) y que el código de S130 agrega un par por record aunque su docstring diga «máximo de cada lado»
+  (`experiments/_s130_cenital/medir_gradiente_cenital.py` l. 20 y 102-103 contra l. 92-94).
+- Lo que cambió: nuestro efecto de lado es sólo Isluga; el de MIROVA sin Isluga baja a 1,2 a 1,4 y noche a noche ya
+  no es significativo (1,18, p 0,15). **Lo sólido: nuestra razón contra MIROVA es más baja desde el este, 0,79 noche
+  a noche sin Isluga, p < 0,001.** Lado y hora no se separan en VIIRS (las primeras pasadas desde el oeste son todas
+  MODIS). Sin verificar: mecanismo en MIROVA, K, `f5_core_vrp_mw`, y MODIS (el filtro 3 a 9 UTC de S130 bota Terra).
+
 ### 2026-10-20 ~23:30 UTC (S157): #865 CERRADO sin cambiar K
 - Nicolás: «Sí: cierra #865 sin cambiar K, con el mecanismo y el costo documentados (#881).» Cerrado con comentario
   (mecanismo, clase 1 de 155, costo de `min` en VIIRS 750 +314 negativos limpios). #881 queda en borrador.
