@@ -293,7 +293,15 @@ const github = {
     throw new Error('paginate inesperado');
   },
   rest: {
-    repos: {getContent: async () => ({data: [{type: 'file', path: WF.path}]})},
+    // S158: el script también lee la lista de corridas juzgadas (#876); acá no existe (404).
+    repos: {getContent: async ({path}) => {
+      if (path === '.github/reproc-watchdog-juzgadas.json') {
+        if (esc.juzgadasTexto == null)
+          throw Object.assign(new Error('Not Found'), {status: 404});
+        return {data: {content: Buffer.from(esc.juzgadasTexto, 'utf8').toString('base64')}};
+      }
+      return {data: [{type: 'file', path: WF.path}]};
+    }},
     actions: {
       listRepoWorkflows: async () => ({data: {workflows: [WF]}}),
       listWorkflowRuns: async () => ({data: {workflow_runs: (esc.runsAntes || []).concat([{...fx.run,
@@ -382,6 +390,38 @@ def test_simulado_sin_problemas_cierra(script):
     issue = {"number": 900, "title": TITULO, "body": "aviso viejo"}
     log = _simular(script, issues=[issue])
     assert log["cerrados"] == [900] and log["fallo"] is None
+
+
+def _lista(run_id, attempt=1, motivo="ya juzgada", referencia="issue #876"):
+    return json.dumps({"juzgadas": [{"run_id": run_id, "run_attempt": attempt,
+                                     "motivo": motivo, "referencia": referencia}]})
+
+
+def test_simulado_juzgada_cierra_el_issue_y_sin_lista_comenta(script):
+    """S158 #876, punta a punta: la falla juzgada deja cerrar el issue; sin la lista, no.
+
+    El control es el mismo escenario sin la lista: tiene que comentar la falla, o el
+    cierre de arriba no probaría que la exención llegó al script real (A116, A118).
+    """
+    issue = {"number": 900, "title": TITULO, "body": "aviso viejo"}
+    fallida = dict(runStatus="completed", runConclusion="failure", issues=[issue])
+    sin = _simular(script, **fallida)
+    assert len(sin["comentarios"]) == 1 and "termino en `failure`" in sin["comentarios"][0]
+    con = _simular(script, juzgadasTexto=_lista(39125546355), **fallida)
+    assert con["cerrados"] == [900] and con["comentarios"] != [] and con["fallo"] is None
+    assert "Cerrando" in con["comentarios"][0]
+    otra = _simular(script, juzgadasTexto=_lista(39125546355, attempt=2), **fallida)
+    assert otra["cerrados"] == [] and "termino en `failure`" in otra["comentarios"][0], (
+        "un juicio sobre otro intento eximió la corrida")
+
+
+def test_simulado_lista_invalida_va_al_rojo_y_no_exime(script):
+    """Una lista con una entrada sin motivo no exime nada y deja el job en rojo."""
+    issue = {"number": 900, "title": TITULO, "body": "aviso viejo"}
+    log = _simular(script, runStatus="completed", runConclusion="failure", issues=[issue],
+                   juzgadasTexto=_lista(39125546355, motivo=" "))
+    assert log["cerrados"] == [] and "termino en `failure`" in log["comentarios"][0]
+    assert log["fallo"] and "juzgadas" in log["fallo"]
 
 
 def test_simulado_corrida_en_curso_detras_de_otra_en_cola(script):
