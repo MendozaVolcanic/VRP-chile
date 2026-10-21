@@ -41,6 +41,7 @@ sesión (no sesiones aparte: el disco no alcanza para worktrees nuevos), cada un
 | V1 a V3 | **terminados** (commit 928ec40bf); lanzados el 2026-10-21 (Opus, esfuerzo alto): V1 = F1 y F6 (7 hallazgos), V2 = F2 y F5 (4), V3 = F3 y F4 (6); sólo título, ubicación y gravedad |
 | síntesis | **hecha**: docs/AUDIT_S158.md |
 | segunda ronda | aprobada por Nicolás; **C: ya tiene 31 GB libres** (2026-10-21); la lanza Nicolás en una sesión nueva con el prompt del brief |
+| segunda ronda | **hecha** el 2026-10-21 en la rama `claude/s158-audit-r2-0eeee2`: `docs/AUDIT_S158_R2.md`, material en `experiments/_s158_audit_r2/`, veredictos propios commiteados antes de leer la primera ronda (`26c9d078a`) |
 | sesión S158 de diseño y auditoría | **cerrada** el 2026-10-21: todo commiteado y subido (PR #885); temporales borrados; datos de Vulcano re-bajables con `experiments/_s158_d17_diseno/bajar_jepv6.py` |
 
 ## Pendiente, con dueño

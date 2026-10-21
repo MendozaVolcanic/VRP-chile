@@ -133,7 +133,11 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   `experiments/_s153_fk_v2/README.md` (con la lectura A, CUMPLE en V1 y V2: negativos limpios de
   VIIRS 375 publicados de 88,2 y 85,4 % a 2,5 y 3,7 %, 0 protegidas perdidas que decidan). El
   laboratorio `experimental` sigue con el detector anterior y es la sombra. Reversión: (⚠️ **S157**:
-  el PR es **#850**, squash `34cea39e`, 2026-10-18 09:57:30 UTC; los datos cambian de detector en la
+  el PR es **#850**, squash `34cea39e`, 2026-10-18 09:57:30 UTC; ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md R2-12,
+  marca A113): la frontera del 2026-09-18 ya no separa detectores; después se reprocesó el histórico y 0 de 71.968
+  records fechados de `data/mirova_equivalent/` tienen `processed_utc` anterior al merge (los 2.843 de los 34 volcanes
+  fuera del cron no traen sello), así que todo el corpus fechado es K y una ventana «antes de K» por fecha de
+  observación no mide el detector anterior; texto original: los datos cambian de detector en la
   observación del 2026-09-18, no en el merge, porque los 30 días previos se reescribieron con K; y el
   `git revert` ya no es limpio: sobre `main` del 2026-10-20 choca en tres archivos y no toca esos
   datos, ver la marca S157 del inicio de `docs/MISSION.md` y `experiments/_s157_propagar_k/revert_hoy.out`)
