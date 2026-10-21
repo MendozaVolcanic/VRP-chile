@@ -198,6 +198,22 @@ PROPIA]** El orden de trabajo que se desprende: (1) adoptar lo estructural en lo
 números de VIIRS 750 sólo en VIIRS 750; (3) para VIIRS 375 y MODIS, medir los números contra la referencia de MIROVA
 (A115) o pedirlos (el autor da su correo en la web).
 
+### 5.1 Lo que dicen de VIIRS 375 los datos publicados de Vulcano (OSF jepv6)
+
+El archivo S1 de Campus et al. 2024 (OSF jepv6, sin licencia declarada: leído, no copiado al repo) trae, para cada una
+de las 354 alertas de VIIRS 375 de MIROVA en Vulcano entre 2021 y 2023, el cenit, el azimut, Npix, la radiancia
+caliente sumada, la de fondo y el VRP (`experiments/_s158_d17_diseno/jepv6_cenit.py`, salida al lado):
+
+- **El coeficiente de VIIRS 375 queda confirmado**: VRP / (L_hot − L_bk) = 2.531.250 en las 354 (18,0 × 140.625 m²,
+  el de la calibración S14). MIROVA usa el área nominal fija también en banda I.
+- **L_MIRhot es la suma sobre los Npix** (la radiancia por píxel con Npix > 1 es la misma que con Npix = 1).
+- **Npix casi no crece con el cenit** (ρ = +0,07; mediana 1 hasta 40° y 2 sobre 40°), y **el VRP de MIROVA cae** con
+  el ángulo (1,28 a 0,72 relativo a su propia mediana móvil). En Chile pasa lo mismo y depende del volcán: ver
+  `docs/DISENO_D17_REMUESTREO_UTM.md` §3.6.
+
+Para VIIRS 375 no da los umbrales de detección, pero confirma la parte de la magnitud que el código de VIIRS 750
+no cubre.
+
 ## 6. Qué cambia en los frentes abiertos
 
 | frente | antes | con el código |
@@ -233,6 +249,60 @@ detector. Separa los dos problemas por primera vez.
 6. **Vigilar el historial de OSF** (§1) para enterarse de la próxima publicación.
 7. **Bajar los datos de jepv6** (Vulcano en VIIRS 375 procesado por MIROVA): puede traer conteos o posiciones por
    píxel de VIIRS 375, lo que más falta para la paridad de ese sensor. Pide tu permiso de descarga.
+
+## 7 bis. Plan revisado (Nicolás, 2026-10-21: «continua con todo lo que recomiendes, estas nuevas cosas cambian lo que estabamos haciendo»)
+
+Lo que cambia de fondo: hasta hoy cada frente de paridad era una hipótesis sobre qué hace MIROVA, sacada del texto.
+Para VIIRS 750 ahora hay un programa contra el cual medir, y para la magnitud de VIIRS 375 hay datos con Npix y
+radiancias (OSF jepv6). El orden que recomiendo, y lo que ya está en marcha:
+
+| # | frente | estado | por qué en este orden |
+|---|---|---|---|
+| 1 | port a Python del código de VIIRS 750 como oráculo | **en marcha** (sesión «Port a Python del detector MIROVA V750») | todo lo demás se mide con él |
+| 2 | D25 | el A/B en cola sigue; **en marcha** la adenda con el fondo del código (sesión «Adenda D25») | el fondo es la diferencia de nivel más directa de la magnitud |
+| 3 | A/B «detector del código» en VIIRS 750: K1 -0,7, mínimo de dNTI 0,02 fuera, 3 × 3 con central, Test 1 como alerta que sale del fondo, sin compuerta, segundo pase con regresión, filtro de 200 K y de escena | pre-registro después del oráculo | ataca la sobre-publicación con números que salen de MIROVA y no de un umbral elegido (A115) |
+| 4 | D32 y lo que se publica (unión de alertas, sin cúmulo, sin tope) | después de 3 | es lo que hoy separa nuestro nivel del de MIROVA aun con el detector igual |
+| 5 | D17 Fase 0: reproducir los TIF de VIIRS 375 y correr el oráculo sobre matrices remuestreadas en VIIRS 750 | después de 1 | con K la pendiente que D17 puede cerrar es como mucho un 23 % (§3.6 del diseño), así que va detrás del nivel |
+| 6 | MODIS: geolocalización con MxD03, luego bow tie (Liu et al. 2008, Coppola 2012 p. 4) | sin cambio | prerrequisito de cualquier remuestreo de MODIS |
+| 7 | trasladar lo estructural a MODIS y VIIRS 375 | después de 3, con su propio A/B | la estructura tiene cita; los números se miden contra la referencia |
+
+**Lo que se deja de hacer**: diseñar umbrales de VIIRS 750 por cuenta propia; adoptar el brazo D de D25 como «el
+fondo de MIROVA»; implementar D17 antes del oráculo.
+
+Todo lo que toque `pipeline/` sigue necesitando tag defensivo, pre-registro sellado y tu «sí» (A45).
+
+## Anexo A. Borrador de correo a Diego Coppola (para que Nicolás lo revise y lo envíe si quiere)
+
+No se envió. En inglés, que es el idioma de trabajo del grupo. El correo de contacto es el que da la web de MIROVA.
+
+> Subject: MIROVA code release (OSF zm62w) and a few questions from SERNAGEOMIN, Chile
+>
+> Dear Dr. Coppola,
+>
+> I am a geologist at the Chilean geological survey (SERNAGEOMIN), where we follow eleven Chilean volcanoes with a
+> near-real-time thermal system built to reproduce MIROVA as closely as possible, so that our observatory reads it as
+> it reads mirovaweb.it. Thank you for publishing the VIIRS 750 m detection and VRP code on OSF: comparing it with our
+> implementation was the most useful step we have taken in months.
+>
+> We would be grateful for help with a few points that the papers and the released code do not cover:
+>
+> 1. The MODIS and VIIRS 375 m parameters used operationally today (absolute NTI threshold, minimum NTI and ETI
+>    contrasts inside and outside the summit box, size of the summit box in pixels, size of the exclusion kernel for
+>    the background, cold-pixel filter), or whether they are the ones in Table 1 of Coppola et al. (2016).
+> 2. The interpolation used when resampling the granules to the UTM grid. Your VIIRS 375 m GeoTIFFs of 14 and 15
+>    September 2026 look consistent with linear interpolation of the scattered samples; is that right? And is the grid
+>    origin derived from the GVP summit coordinates with a fixed offset? In eight volcanoes we measure the grid centre
+>    about 62.5 m west and south of the summit coordinates we use, which we believe are the GVP ones.
+> 3. For MODIS, whether the bow-tie removal is still the procedure of Liu et al. (2008) cited in Coppola et al. (2012).
+> 4. Whether the per-pass GeoTIFF published on mirovaweb.it is the same resampled matrix used for detection.
+> 5. The local background in the contextual tests: the released code averages the 3 × 3 window including the central
+>    pixel, while the 2016 paper describes the mean of the eight neighbours. Which one is operational for MODIS?
+>
+> Any answer, even partial, would help us avoid guessing. Our work is public at https://github.com/MendozaVolcanic/VRP-chile.
+>
+> With best regards,
+> Nicolás Mendoza
+> SERNAGEOMIN, Chile
 
 ## 8. Lo que no se pudo verificar
 

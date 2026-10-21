@@ -2244,6 +2244,11 @@ cosa: ver D17.
 
 ## D17 — Nuestra grilla F70 se centró en el punto equivocado — **ABIERTA (premisa probada, consecuencia NO)** S124/S125 ⚠️ **S157 (A113, tarea 1.34): el «mecanismo geométrico SÍ quedó probado» del bloque S130 de abajo NO atribuye la caída con el ángulo a D17. La tarea 1.14 (`experiments/_s151_presupuesto_magnitud/README.md` §3.2) midió que el Npix de MIROVA no crece hacia el borde y que lo que empeora es nuestro fondo (F_bg 0,85 a 0,73): la dependencia angular queda SIN ATRIBUIR, con D25 y D17 compitiendo (ver `docs/SINTOMAS.md` §1). Texto conservado por historia**
 
+> ⚠️ **S158 (§3.6 del mismo documento): también cae «MIROVA es plano» del bloque S130.** Normalizando en el tiempo
+> dentro de cada volcán, el VRP de MIROVA en VIIRS 375 baja de 1,09 a 0,79 entre nadir y más de 50° (Chile, tabla sola,
+> n = 938; Láscar 1,41 a 0,37) y de 1,28 a 0,72 en Vulcano (OSF jepv6). Y con K nuestra razón contra MIROVA va de 0,79 a
+> 0,58 (S = 0,77), no de 0,74 a 0,25. Scripts `mirova_cenit_chile.py` y `jepv6_cenit.py` en `experiments/_s158_d17_diseno/`.
+>
 > ⚠️ **S158 (A113, `docs/DISENO_D17_REMUESTREO_UTM.md` §3): el título y la tabla de abajo cayeron en 8 de 11, medido sobre
 > los TIF UTM de MIROVA** (`experiments/_s158_d17_diseno/grilla_tif.py`). El centro de la grilla de MIROVA no es `mirova_center`
 > (que queda a 46 a 310 m de él) sino unos 62,5 m al oeste y al sur del `lat`/`lon` del yaml en 8 volcanes; F70 usó el punto más

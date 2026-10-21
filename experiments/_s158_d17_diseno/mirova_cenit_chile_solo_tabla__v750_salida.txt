@@ -1,0 +1,27 @@
+[referencia MIROVA] la ventana 2026-03-01 a 2026-10-20 pisa 8 tramos con defectos conocidos (docs/audit_s139/MAPA_BASES_MIROVA_V1.md seccion 2). Decide: SOLO la tabla; el OCR se informa aparte
+   - 2026-04-01 (tabla, VIIRS por pasada): antes la tabla exponia 1,6 a 1,8 granulos VIIRS por noche de volcan, contra 2,3 a 2,6 en abril a junio y 3,0 a 3,4 en agosto y septiembre: una TASA POR PASADA de VIIRS anterior a abril no es comparable con una posterior (MODIS es plano todo el ano)
+   - 2026-06-11 (ocr, VIIRS): antes la geometria del OCR estaba mal calibrada (Tupungatito 5,1 km en vez de 7; formula de distancia invertida): la separacion alerta contra falso positivo lejano del OCR no es confiable
+   - 2026-06-13 (ocr, VIIRS): antes el OCR no media la distancia (Distancia_km = 0 fijo) y sus notas quedaron en mojibake: el loader no les encuentra distancia
+   - 2026-08-06 (ocr, VIIRS): cambio de version del OCR a 30.0 (no es un defecto, es un cambio de regimen dentro de una ventana)
+   - 2026-04-09 (tabla, NOAA-21): antes no hay ninguna pasada de NOAA-21 en la tabla (0 de 1.003 pasadas de enero a marzo; cifra de docs/AUDIT_S149.md:56, no reconstruida: el CSV no trae el satelite en una columna)
+   - 2026-10-09 (ocr, Suomi NPP): antes, en las filas solo OCR de Suomi NPP la distancia y la clase pueden ser de OTRA pasada (la imagen de una pasada posterior); el VRP si es de la suya. Arreglo en Mirova-v1#20, 2026-10-09 14:01 UTC; evidencia en el commit 9a305c9db (#774)
+   - 2026-10-10 (ocr, VIIRS y MODIS): antes no hay filas ALERTA_SIN_GEOMETRIA_OCR: una pasada que la tabla se salta y cuya imagen de distancia ya era de una pasada posterior se perdio (V31, desde el 2026-10-09) o trajo la distancia de otra (antes, hito de Suomi NPP). Desde aqui V31.1 guarda su VRP sin distancia y el backfill recupera las del log de rechazos (13 al 2026-10-15). Son un estrato aparte: no son alerta de la lectura A
+   - 2026-04-14 (ocr, VIIRS 375): antes no hay Distancia_aprox_* (no hay Dist.png archivada que cubra la pasada). Desde aqui Mirova-v1#25 llena una columna COMPLEMENTARIA leida en las Dist.png posteriores, con rango y metodo; no reemplaza Distancia_km (el OCR acierta el lado crater o lejana en 197 de 197 pasadas con tabla). Solo VIIRS 375; umbral de calado de 5 pareos PROVISIONAL (no estable con otra banda)
+sensor: VIIRS 750
+fuentes: ['latest_consolidado.csv']
+alertas nocturnas con cenit pareado: 275 de 275
+
+volcán | n | (0, 20] | (20, 40] | (40, 50] | (50, 75] | Spearman cenit-rel
+Isluga               |   39 | 1.13 (17) | 0.97 (14) | 0.87 (5) | -- (3) | -0.395
+Lascar               |  130 | 1.19 (39) | 1.18 (48) | 0.79 (38) | 0.25 (5) | -0.366
+NevadosDeChillan     |   32 | -- (4) | 1.60 (8) | 1.05 (7) | 0.39 (13) | -0.116
+PuyehueCordonCaulle  |   39 | 1.21 (13) | 0.91 (16) | 1.06 (6) | -- (4) | -0.263
+TODOS                |  261 | 1.13 (90) | 0.99 (89) | 0.87 (57) | 0.51 (25) | -0.267
+
+pasadas con alerta de MIROVA donde publicamos magnitud: 201 de 275
+razón nuestra/MIROVA mediana por tramo de cenit (n)
+volcán | (0, 20] | (20, 40] | (40, 50] | (50, 75] | S = R(>40)/R(<=40)
+Lascar               | 0.65 (36) | 0.51 (44) | 0.50 (33) | 0.32 (5) | 0.85
+NevadosDeChillan     | -- (3) | 0.70 (8) | 0.39 (7) | 0.16 (11) | 0.40
+PuyehueCordonCaulle  | 0.74 (12) | 0.28 (9) | -- (2) | -- (3) | 0.93
+TODOS                | 0.65 (70) | 0.49 (68) | 0.47 (43) | 0.24 (20) | 0.79

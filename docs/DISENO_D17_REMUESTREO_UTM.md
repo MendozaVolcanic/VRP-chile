@@ -245,6 +245,42 @@ Después de escribir lo anterior apareció el código operacional de MIROVA para
 - **Un oráculo para la Fase 0** (§5, P0-6): con un port a Python de las dos funciones se corre el detector de MIROVA
   sobre nuestras matrices remuestreadas y se compara con lo que MIROVA publicó. Si coincide, el remuestreo es el suyo.
 
+### 3.6 MIROVA no es plano con el ángulo, y con K nuestra caída es más suave de lo que se creía (S158)
+
+S130 escribió que la magnitud de MIROVA no depende del cenit («MIROVA es plano, 0,23 a 0,27 en los cinco tramos»),
+mirando medianas por tramo sobre una población que mezcla volcanes distintos en cada tramo. Normalizando en el tiempo
+**dentro de cada volcán** (VRP dividido por la mediana móvil de 61 días de su propia serie), no es así:
+
+| fuente | ≤ 20° | 20 a 40° | 40 a 50° | > 50° | script |
+|---|---|---|---|---|---|
+| Vulcano, VIIRS 375, MIROVA (OSF jepv6, 2021 a 2023, n = 354) | 1,28 | 0,90 | 1,19 | 0,72 | `jepv6_cenit.py` |
+| Chile, VIIRS 375, MIROVA, tabla sola, desde marzo (n = 938) | 1,09 | 1,09 | 0,98 | 0,79 | `mirova_cenit_chile.py --solo-tabla` |
+| Chile, VIIRS 750, MIROVA, tabla sola (n = 261) | 1,13 | 0,99 | 0,87 | 0,51 | ídem `--v750` |
+
+La caída depende del volcán: fuerte en Láscar (1,41 a 0,37 en VIIRS 375, ρ = -0,63), Planchón-Peteroa y Cordón
+Caulle; nula en Tupungatito; invertida en Isluga. Láscar es el caso que la física predice, un foco en el fondo de un
+cráter profundo que las paredes tapan en vista oblicua (el mismo efecto que Coppola 2010 p. 8 describe para el
+Dolomieu, y Aveni 2024 §7.3). En Vulcano la cantidad de píxeles de MIROVA casi no crece con el cenit (ρ = +0,07) y el
+exceso por píxel cae a 0,56 entre nadir y más de 50°: su remuestreo compensa **parte** del crecimiento de la huella,
+no toda (con área fija y sin compensación la caída sería de un tercio o un cuarto). Coincide con el «partially» de
+Aveni 2023. Sesgo conocido: cerca del umbral, en oblicuo sólo pasan las pasadas fuertes, así que la caída real de
+MIROVA es por lo menos esta.
+
+**Nuestra razón contra MIROVA con K** (todo el histórico reemplazado con K en #883; magnitud publicada aproximada en
+Python, declarado en el script):
+
+| sensor | ≤ 20° | 20 a 40° | 40 a 50° | > 50° | S = R(>40°) / R(≤40°) |
+|---|---|---|---|---|---|
+| VIIRS 375 (n = 922) | 0,79 | 0,62 | 0,53 | 0,58 | 0,77 |
+| VIIRS 750 (n = 201) | 0,65 | 0,49 | 0,47 | 0,24 | 0,79 |
+
+**Qué cambia para D17.** (1) La línea base del estadístico S del §6.4 es 0,77 en VIIRS 375 y 0,79 en VIIRS 750, no la
+caída de 2,7× de S130 (medida con el detector anterior). Lo que D17 puede cerrar en la pendiente es como mucho ese
+23 %. (2) El déficit grande es de **nivel** (0,6 a 0,8 ya cerca del nadir), y ahí pesan otras cosas: lo que se publica
+(D32), el fondo del VRP (D25 y el fondo del código de MIROVA) y los umbrales de detección que el código reveló. (3) El
+criterio del A/B sigue siendo relativo a MIROVA (la razón), así que la caída propia de MIROVA ya está descontada: no hay
+que «aplanar» nuestra magnitud, sino igualar la de MIROVA ángulo por ángulo.
+
 ## 4. El diseño propuesto
 
 ### 4.1 La grilla

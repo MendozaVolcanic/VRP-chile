@@ -124,7 +124,10 @@ filtro, agregación o transformación en el pipeline, responder en orden**:
    ⚠️ **S158**: además de los papers existe ahora el **código operacional de VIIRS 750** publicado por MIROVA (OSF zm62w,
    2026-07-24, MIT; `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md`). En 3 puntos el paper y el código no dicen lo mismo (media de 8 vecinos contra 3 × 3 con el
    central, fondo del VRP, piso de -0,1). Si el código prevalece sobre el texto del paper lo decide Nicolás; mientras
-   tanto, toda respuesta a esta pregunta para VIIRS 750 cita también el código.
+   tanto, toda respuesta a esta pregunta para VIIRS 750 cita también el código. **Decisión de Nicolás, 2026-10-21**: a
+   la recomendación del §7 del informe («el código es la autoridad sobre el paper para VIIRS 750») respondió
+   «continua con todo lo que recomiendes». Para VIIRS 750, cuando el paper y el código difieren, manda el código; para
+   MODIS y VIIRS 375 manda el paper hasta tener su código o una medición.
    - Coppola 2016a SP 426.5 (Test 1 + NTI; Tabla 1 N·σ summit/scene, dual-ROI, dNTI 8-vec).
      ✅ **S128: «Coppola 2015» y «Coppola 2016a» eran la MISMA entrada, no dos papers.**
      El `Test 1` está dentro de `documentacion/sp426_5.txt` (`NTIPIX > K1 (Test 1)`, línea
