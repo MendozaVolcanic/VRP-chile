@@ -16,6 +16,12 @@
 // va donde cambian los datos y el aviso dice además desde cuándo corre K en producción. La frontera la vigila
 // tests/test_cambio_detector_frontera_s155.py contra los JSON: cuando se aplique el histórico con K (tarea 1.24) se
 // pondrá roja y habrá que mover DATOS_K_DESDE_UTC.
+//
+// S158 (tarea 1.24 aplicada): el histórico 2025-02-15..2026-09-17 se reemplazó por el reproceso con K en los 11
+// Tier A, y las 90 pasadas que NASA no permite reprocesar (Suomi NPP del 3 al 6-ago-2026, MODIS Terra sin estándar)
+// se apartaron a data/_c0_residuales/ por decisión de Nicolás del 2026-10-21. Desde el 2025-02-15, primer día de la
+// serie, todo lo publicado es K; lo vigila además tests/test_guard_serie_k_pura_s158.py (100 %, no 95 %). La
+// vigilancia de la sombra sigue cortando sus disparos en CAMBIO_DETECTOR_UTC, que no cambia.
 (function (raiz) {
   "use strict";
 
@@ -23,7 +29,7 @@
   const CAMBIO_DETECTOR_UTC = "2026-10-18T09:57:30Z";
   // Fecha de OBSERVACIÓN desde la que los records de data/mirova_equivalent/ son de K (medianoche UTC). Es donde va la
   // línea vertical. null = sin línea ni aviso.
-  const DATOS_K_DESDE_UTC = "2026-09-18T00:00:00Z";
+  const DATOS_K_DESDE_UTC = "2025-02-15T00:00:00Z";
 
   const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
   const FICHA_URL = "https://github.com/MendozaVolcanic/VRP-chile/blob/main/docs/FICHA_SDA_VRP_CHILE.md";
