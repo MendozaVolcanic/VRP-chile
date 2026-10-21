@@ -537,6 +537,16 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   exime sólo terminadas y sólo ese intento; entrada incompleta invalida la lista y deja el job en rojo. 41 de 41
   locales, dos mutaciones atrapadas por aserción. Merge cuando el CI dé conclusión (enmienda A39).
 - Relleno: 5.º (39534689286, PCC 2026-04-25) `success`; 6.º = 39535573533 (Copahue 2026-07-02).
+- **Nicolás, textual**: «has todo lo que recomiendes para que avancemos mas rapido». Aplicado: (1) las ~64 `nrt`
+  sin estándar **quedan en C0 con su marca** y se vuelve a consultar CMR antes de aplicar el reemplazo; Auto-fix
+  activo en #882. **El reemplazo en producción (1.24 d) NO se aplica con este mensaje**: A45 pide un sí puntual
+  sobre ese paso, con tag y ensayo a la vista; se le pide cuando esté listo.
+- 1.24 b adelantado: `experiments/_s158_reemplazo/ensayo_11.py` (copia del de S157 con Chillán y selección por
+  argumento), rama `s158-reemplazo-ensayo` (worktree `D:\vrp-trabajo\temporales\s158_reemplazo`). Avance sólo
+  Chillán: **PASA**, 5.558 en ventana, 5.552 reemplazados, 844 agregados, 6 en C0 (0,11 %, las 6 `nrt`), 5.904 a
+  6.748 records. Los 11 juntos se corren tras el relleno.
+- #880: CMR no devolvió gránulos del 18-oct sobre Chillán en ningún producto, ni siquiera MODIS; SIN DATO hasta
+  validar la consulta con un día que sí tenga (CMR lento, consulta de control en segundo plano).
 
 ### 2026-10-21 02:45 UTC: TRASPASO del loop de S157 a la sesión nueva (S158)
 - S157 detuvo sus tres procesos locales a las 02:41 UTC para que haya una sola dueña del loop (S153). **Desde ahora
