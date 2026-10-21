@@ -1,0 +1,91 @@
+== 1. cobertura (A108): objetivos 398 | con resultado 398
+   diurna     {'volcan_fuera_del_granulo': 2}
+   neg_pub    {'ok': 54}
+   neg_resto  {'ok': 141, 'volcan_fuera_del_granulo': 2}
+   pos_nopub  {'ok': 66, 'sin_granulo_VNP02MOD': 2}
+   pos_prot   {'ok': 91, 'sin_granulo_VJ202MOD': 1}
+   pos_resto  {'ok': 38}
+   r2_fuera   {'ok': 1}
+   SIN DATO (sin contar las que no tienen resultado): [(0, 'NevadosDeChillan', '2026-10-01 18:42', 'volcan_fuera_del_granulo'), (1, 'NevadosDeChillan', '2026-10-10 18:18', 'volcan_fuera_del_granulo'), (255, 'Chaiten', '2026-06-30 06:12', 'volcan_fuera_del_granulo'), (337, 'NevadosDeChillan', '2026-10-12 05:18', 'sin_granulo_VJ202MOD'), (357, 'Chaiten', '2026-05-15 04:24', 'volcan_fuera_del_granulo'), (393, 'Isluga', '2026-10-12 05:48', 'sin_granulo_VNP02MOD'), (394, 'NevadosDeChillan', '2026-10-12 05:54', 'sin_granulo_VNP02MOD')]
+   sin resultado: 0
+== 2. pasadas con los cinco brazos ok: 391
+== 3. nulo: K2 distinto de K en 0 de 391 []
+== 4. K contra produccion: publica distinto en 0 []
+   pc.vrp_mw distinto (>0,001 MW) en 0 []
+== 5. contadores: F sin fondo con K alertado [] | F sin recorte evitado [] | C sin compuerta []
+   F: magnitud post-hoc contra la del pipeline, distintas en 1 de 238 [(319, 6.213729624319477, 5.0)]
+   pasadas donde el cumulo cambia respecto de K: {'C': 8, 'F': 238, 'FC': 238}
+   control positivo F, Lascar 10-08 05:42: K pc {'n_pixels': 1, 'vrp_mw': 0.0, 'centroid_lat': -23.36405, 'centroid_lon': -67.73225, 'centroid_dist_km': 0.15, 'single_pixel_mode': True, 'geo_class': 'summit'} | F pc {'n_pixels': 1, 'vrp_mw': 0.422, 'centroid_lat': -23.36405, 'centroid_lon': -67.73225, 'centroid_dist_km': 0.15, 'geo_class': 'summit'} banda [0.32716554087306743, 0.4217722231797941]
+== 6. oraculo
+   ('Chaiten', '2026-10-06 05:30') MIROVA 0.18 | geo_linear 1px 0.155 | geo_nearest 1px 0.269 | geo_cubic 0px None | geo_linear_anillo_sensible 1px 0.155 | r2_linear 0px None | r2_nearest 1px 0.215
+   control ('Villarrica', '2026-09-19 05:48'): esperado (2, 0.47) | r2_linear 2 px 0.4744926716493771 banda [0.47449225565437536, 0.47449302369156987]
+   ('Villarrica', '2026-09-19 05:48') MIROVA 0.45 | geo_linear 1px 0.452 | geo_nearest 1px 0.735 | geo_cubic 1px 0.512 | geo_linear_anillo_sensible 1px 0.452 | r2_linear 2px 0.474 | r2_nearest 1px 0.744
+   ('Tupungatito', '2026-08-21 05:48') MIROVA 0.19 | geo_linear 0px None | geo_nearest 0px None | geo_cubic 0px None | geo_linear_anillo_sensible 1px 0.194 | r2_linear 0px None | r2_nearest 0px None
+   ('PuyehueCordonCaulle', '2026-10-16 05:42') MIROVA 0.61 | geo_linear 0px None | geo_nearest 0px None | geo_cubic 0px None | geo_linear_anillo_sensible 1px 0.61 | r2_linear 0px None | r2_nearest 0px None
+   control ('NevadosDeChillan', '2026-10-10 05:54'): esperado (5, 12.37) | r2_linear 5 px 12.36714337090119 banda [12.350502595362261, 12.510636150146338]
+   ('NevadosDeChillan', '2026-10-10 05:54') MIROVA 13.13 | geo_linear 5px 13.131 | geo_nearest 2px 11.65 | geo_cubic 8px 15.836 | geo_linear_anillo_sensible 5px 13.131 | r2_linear 5px 12.367 | r2_nearest 2px 11.65
+   ('PuyehueCordonCaulle', '2026-10-10 05:54') MIROVA 1.19 | geo_linear 0px None | geo_nearest 0px None | geo_cubic 0px None | geo_linear_anillo_sensible 2px 1.193 | r2_linear 0px None | r2_nearest 0px None
+   ('Lascar', '2026-09-26 05:48') MIROVA 0.74 | geo_linear 1px 0.415 | geo_nearest 1px 0.645 | geo_cubic 1px 0.531 | geo_linear_anillo_sensible 1px 0.415 | r2_linear 0px None | r2_nearest 1px 0.816
+   control ('Lascar', '2026-10-08 05:42'): esperado (1, 0.33) | r2_linear 1 px 0.3284122073933438 banda [0.1928217921975683, 0.3284122235047906]
+   ('Lascar', '2026-10-08 05:42') MIROVA 0.36 | geo_linear 1px 0.358 | geo_nearest 1px 0.502 | geo_cubic 1px 0.429 | geo_linear_anillo_sensible 1px 0.358 | r2_linear 1px 0.328 | r2_nearest 1px 0.439
+== 7. tabla por pasada: tabla_por_pasada.csv 398 filas
+== 8. veredicto (pasadas con peso > 0 y cinco brazos ok: 387 )
+   C: EMPATE | dE 0.0 (banda [0.0, 0.0, 0.0], IC95 0.0 a 0.0) | prot perdidas 0 ganadas 0 de 78 | bajo 1 MW ganadas 0.0 perdidas 0.0 de 175.0 | neg encendidos 0.0 apagados 0.0 de 5385.5 (K publica 54.0, X 54.0)
+   F: ENCIENDE DE MAS | dE 104.3 (banda [104.3, 104.3, 104.3], IC95 14.5 a 212.3) | prot perdidas 0 ganadas 0 de 78 | bajo 1 MW ganadas 48.0 perdidas 0.0 de 175.0 | neg encendidos 152.3 apagados 0.0 de 5385.5 (K publica 54.0, X 206.3)
+   FC: ENCIENDE DE MAS | dE 104.3 (banda [104.3, 104.3, 104.3], IC95 3.7 a 207.7) | prot perdidas 0 ganadas 0 de 78 | bajo 1 MW ganadas 48.0 perdidas 0.0 de 175.0 | neg encendidos 152.3 apagados 0.0 de 5385.5 (K publica 54.0, X 206.3)
+   K2: EMPATE | dE 0.0 (banda [0.0, 0.0, 0.0], IC95 0.0 a 0.0) | prot perdidas 0 ganadas 0 de 78 | bajo 1 MW ganadas 0.0 perdidas 0.0 de 175.0 | neg encendidos 0.0 apagados 0.0 de 5385.5 (K publica 54.0, X 54.0)
+   muestra cruda (sin pesos), publica por clase y brazo:
+     pos_nopub n= 66 K=0 K2=0 C=0 F=48 FC=48 O=44
+     pos_prot  n= 91 K=91 K2=91 C=91 F=91 FC=91 O=84
+     pos_resto n= 38 K=38 K2=38 C=38 F=38 FC=38 O=30
+     neg_pub   n= 54 K=54 K2=54 C=54 F=54 FC=54 O=4
+     neg_resto n=141 K=0 K2=0 C=0 F=6 FC=6 O=0
+   por volcan y cenit (crudo): pos publicadas K/C/F/FC/O y neg publicadas K/C/F/FC/O
+     Chaiten              z<=40 pos   1: 1/1/1/1/1  neg   7: 2/2/2/2/0
+     Chaiten              z>40  pos   0: 0/0/0/0/0  neg   7: 1/1/1/1/0
+     Copahue              z<=40 pos   0: 0/0/0/0/0  neg   6: 0/0/0/0/0
+     Copahue              z>40  pos   0: 0/0/0/0/0  neg   7: 0/0/0/0/0
+     Isluga               z<=40 pos  17: 4/4/16/16/17  neg  15: 9/9/12/12/1
+     Isluga               z>40  pos   7: 1/1/3/3/7  neg   8: 1/1/1/1/0
+     Lascar               z<=40 pos  57: 50/50/57/57/57  neg  15: 9/9/9/9/3
+     Lascar               z>40  pos  22: 17/17/21/21/22  neg   6: 0/0/0/0/0
+     Lastarria            z<=40 pos   0: 0/0/0/0/0  neg   6: 0/0/0/0/0
+     Lastarria            z>40  pos   0: 0/0/0/0/0  neg   7: 0/0/0/0/0
+     Llaima               z<=40 pos   0: 0/0/0/0/0  neg   7: 0/0/0/0/0
+     Llaima               z>40  pos   0: 0/0/0/0/0  neg   8: 1/1/1/1/0
+     NevadosDeChillan     z<=40 pos  10: 10/10/10/10/10  neg   7: 1/1/1/1/0
+     NevadosDeChillan     z>40  pos  18: 16/16/17/17/18  neg   7: 0/0/0/0/0
+     PlanchonPeteroa      z<=40 pos   7: 0/0/4/4/7  neg   6: 0/0/2/2/0
+     PlanchonPeteroa      z>40  pos   1: 0/0/0/0/1  neg   7: 0/0/0/0/0
+     PuyehueCordonCaulle  z<=40 pos  22: 13/13/18/18/0  neg  24: 18/18/18/18/0
+     PuyehueCordonCaulle  z>40  pos   6: 1/1/3/3/0  neg  14: 7/7/7/7/0
+     Tupungatito          z<=40 pos   7: 0/0/7/7/0  neg   8: 2/2/3/3/0
+     Tupungatito          z>40  pos   1: 0/0/1/1/0  neg   9: 2/2/2/2/0
+     Villarrica           z<=40 pos   5: 2/2/5/5/5  neg   6: 0/0/0/0/0
+     Villarrica           z>40  pos   0: 0/0/0/0/0  neg   8: 1/1/1/1/0
+   tramo antes 06-13: pos 86 publicadas K=60 C=60 F=83 FC=83
+   tramo desde 06-13: pos 95 publicadas K=55 C=55 F=80 FC=80
+   alertas solo OCR antes de 06-13 (no deciden): 14 K=14 C=14 F=14 FC=14
+== 9. razon de magnitud brazo / MIROVA en alertas que el brazo publica (mediana [q1, q3], n)
+   K        todas  0.510 [0.370, 0.733] n=115
+   K        1 px   0.527 [0.389, 0.735] n=83
+   K        2+ px  0.424 [0.285, 0.733] n=32
+   C        todas  0.510 [0.370, 0.733] n=115
+   C        1 px   0.534 [0.431, 0.741] n=80
+   C        2+ px  0.404 [0.256, 0.594] n=35
+   F        todas  0.990 [0.703, 1.290] n=163
+   F        1 px   1.046 [0.755, 1.315] n=131
+   F        2+ px  0.808 [0.598, 1.102] n=32
+   FC       todas  1.014 [0.723, 1.310] n=163
+   FC       1 px   1.055 [0.783, 1.315] n=125
+   FC       2+ px  0.845 [0.598, 1.185] n=38
+   placebo  todas  0.612 [0.444, 0.880] n=115
+   placebo  1 px   0.632 [0.467, 0.882] n=83
+   placebo  2+ px  0.509 [0.341, 0.880] n=32
+   O        todas  0.999 [0.978, 1.007] n=145
+   F ambiguas (la banda cruza el predicado): 0 []
+== 10. VA-1: cumulos con pixeles solo del segundo pase (por brazo, pasadas ok)
+   K: con cumulo 238, sin pixel del primer pase 108; en 0,0 MW 55 (de ellos sin primer pase 55)
+   C: con cumulo 238, sin pixel del primer pase 1; en 0,0 MW 55 (de ellos sin primer pase 0)
+   F: con cumulo 238, sin pixel del primer pase 108; en 0,0 MW 0 (de ellos sin primer pase 0)
+   FC: con cumulo 238, sin pixel del primer pase 1; en 0,0 MW 0 (de ellos sin primer pase 0)

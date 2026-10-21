@@ -46,7 +46,8 @@ def main():
     for d in a.art:
         for f in sorted(Path(d).rglob("resultados_*.json")):
             for r in json.loads(f.read_text(encoding="utf-8")):
-                res[r["id"]] = r
+                if r.get("estado") == "ok" or r["id"] not in res:   # un redisparo ok reemplaza a un SIN DATO
+                    res[r["id"]] = r
     inner = B.inner_desde_html()
     ok = [i for i, r in res.items() if r.get("estado") == "ok" and r.get("oraculo") and obj[i]["clase"] != "diurna"]
     L = []
