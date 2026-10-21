@@ -610,6 +610,18 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 - Pendiente 1.24 cola: PR que borre `data/_s154_reproc_k_historico/` de `main` (queda en la historia y en el tag).
   **NO antes de evaluar D25**: `experiments/_s157_prereg_d25/evaluar_d25.py` y `sustrato_k.py` lo leen. Junto con
   ese PR, pulir la frase del aviso de `frontend/cambio_detector.js` sobre «series que crucen» la frontera.
+- **D25, estado a las 16:48 UTC** (la app se cerró a media tarde y mató `d25_serie.sh`, que ya había despachado
+  todo): **V1 completo** tras el reintento (intento 2 de 39530508296: los trozos 4 de Llaima y Villarrica en
+  `success`; `recolectar` dio COBERTURA PAREJA, 4.610 pasadas por brazo, 0 faltan, 0 sobran). Su `failure` es sólo
+  la publicación de la rama `s146-ab/39530508296`, rechazada («fetch first») porque ya existía del intento 1: los
+  datos están en el artefacto `s146ab-todo` del intento 2 (vence 2027-01-19). Defecto menor del workflow: un
+  reintento no puede reescribir su propia rama de resultados. **V2a** 39575542584 `success`. **V2b** 39612909810
+  corriendo (16 de 23 jobs a las 16:48). Al terminar: cobertura de V2a y V2b (A108), `evaluar_d25.py --calibracion
+  simetrica`, verificador limpio, informe.
+- Sesiones paralelas entregadas: #885 (D17: diseño + auditoría de 6 frentes contra el código de MIROVA V750 en OSF,
+  verificadores corriendo al cierre de la app), #886 (Tupungatito: las 2 protegidas de #864 no son del cráter, déficit
+  0,36 a 0,49 por fondo), #887 (V750: ninguna pérdida por M15; 55 de 75 pérdidas son cráter en 0,0 MW). Nicolás
+  liberó espacio: C: 31 GB.
 - **#884 mergeado** (`34c23d1a`). CI de main sobre `8471add4`: Tests `success`, Deploy `success`. D25: V2a
   (39575542584) corriendo, V1 intento 2 pendiente detrás, V2b lo despacha el proceso local `d25_serie.sh`.
 - #880 (texto previo): CMR no devolvió gránulos del 18-oct sobre Chillán en ningún producto, ni siquiera MODIS; SIN DATO hasta
