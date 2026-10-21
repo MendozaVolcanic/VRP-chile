@@ -25,6 +25,15 @@ método** y no sólo repita a los mismos agentes.
   el bloque de `docs/_prompts/PREAMBULO-AUDITOR.md` en cada prompt. El plan de la primera ronda
   (`docs/PLAN_AUDITORIA_S158.md` §4) tiene un bloque común que sirve de modelo.
 
+## Investigaciones hermanas, para comparar al final
+
+Dos sesiones del mismo grupo investigaron en paralelo, sin ver la primera ronda, y llegaron por su cuenta a resultados
+que tocan las afirmaciones de abajo: PR #886 (Tupungatito VIIRS 375, rama `s158-tupungatito`,
+`experiments/_s158_tupungatito/README.md`) y PR #887 (alertas de VIIRS 750 que K no publica, rama `s158-v750-recall`,
+`experiments/_s158_v750/README.md`). Igual que con la primera ronda: léelas sólo después de tener tus mediciones, y
+la comparación con ellas va al entregable. Los datos de Vulcano (OSF jepv6) se bajan con
+`experiments/_s158_d17_diseno/bajar_jepv6.py` a una carpeta temporal fuera del repo (no declaran licencia).
+
 ## Lo que hay que hacer
 
 1. **Un segundo oráculo.** Port a Python de `MIROVA_VIIRS750_hotspot_detection.m` y `MIROVA_VIIRS750_VRP.m` escrito sin

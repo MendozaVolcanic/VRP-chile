@@ -40,4 +40,12 @@ sesión (no sesiones aparte: el disco no alcanza para worktrees nuevos), cada un
 | F1 a F6 | **terminados**; informes en f1/ a f6/ (commit 56ec42c6b) |
 | V1 a V3 | **terminados** (commit 928ec40bf); lanzados el 2026-10-21 (Opus, esfuerzo alto): V1 = F1 y F6 (7 hallazgos), V2 = F2 y F5 (4), V3 = F3 y F4 (6); sólo título, ubicación y gravedad |
 | síntesis | **hecha**: docs/AUDIT_S158.md |
-| segunda ronda | aprobada por Nicolás; espera 24,8 GB libres en C: para el worktree de la sesión nueva (§6 de la síntesis) |
+| segunda ronda | aprobada por Nicolás; **C: ya tiene 31 GB libres** (2026-10-21); la lanza Nicolás en una sesión nueva con el prompt del brief |
+| sesión S158 de diseño y auditoría | **cerrada** el 2026-10-21: todo commiteado y subido (PR #885); temporales borrados; datos de Vulcano re-bajables con `experiments/_s158_d17_diseno/bajar_jepv6.py` |
+
+## Pendiente, con dueño
+
+- Segunda ronda (brief en `BRIEF_SEGUNDA_RONDA.md`): segundo oráculo, replicación, meta-auditor, prueba con gránulos chilenos, marcas A113 de la tabla de F2, guía de revisión visual.
+- Adenda D25 con el fondo del código: su sesión falló por disco; conviene relanzarla **después** de que la segunda ronda confirme el hallazgo del fondo (decisión 1 de `docs/AUDIT_S158.md` §4).
+- Decisiones de Nicolás: tabla del §4 de `docs/AUDIT_S158.md`.
+- PR #886 y #887 (sesiones hermanas, borradores abiertos): llegaron por su cuenta a que el fondo del anillo deja cumbres en 0 MW; los revisa la sesión que los lanzó.
