@@ -31,7 +31,8 @@ por separado.
 
 324 pasadas de VIIRS 750 con alerta de MIROVA y record nuestro a ±2 min; publicamos 249 y perdemos **75** (recall
 0,7685, idéntico al del banco). Hay además **1** alerta sin record nuestro (Láscar, 2026-03-11 06:18, OCR, 2,0 MW): es
-cobertura, no detección. Los 10.756 records nocturnos de la ventana llevan la marca de K (0 sin marca).
+cobertura, no detección, y es **protegida**; su noche la publican VIIRS 750 en otra pasada, VIIRS 375 y MODIS
+(`noches_salida.txt`). Los 10.756 records nocturnos de la ventana llevan la marca de K (0 sin marca).
 
 ### 2. Dos mecanismos, y uno domina
 
@@ -44,31 +45,43 @@ Ninguna pérdida cae en las otras condiciones del predicado (alerta sólo lejos,
 del inner). La única protegida es Puyehue Cordón Caulle del 2026-10-10 05:54 (1,19 MW), que es #865, ya explicado y
 cerrado; no se reabre.
 
-**M3 es D25, el cráter en 0,0 MW** (`docs/MIROVA_DIVERGENCES.md`, D25, registrada en S138). Físicamente: en una cumbre
+**M3 tiene el patrón de D25, el cráter en 0,0 MW** (`docs/MIROVA_DIVERGENCES.md`, D25, registrada en S138). Físicamente: en una cumbre
 fría el píxel del cráter es apenas más tibio que sus vecinos inmediatos, lo que basta para que su NTI resalte y el
 segundo pase lo acepte; pero su temperatura en el infrarrojo medio queda **por debajo** de la mediana del anillo de 5 a
 25 km, que está lleno de terreno más bajo y más tibio. La resta píxel menos fondo sale negativa, se recorta a cero, y
 el tablero no publica un cúmulo de 0 MW. MIROVA, que según el paper toma como fondo la media de los vecinos del píxel (D25), publica
-en esas mismas pasadas entre 0,09 y 0,60 MW (mediana 0,24). Medido (`anatomia_salida.txt`):
+en esas mismas pasadas entre 0,09 y 0,60 MW (mediana 0,24). Lo que sigue describe el patrón; **que el fondo por vecinos
+devuelva estas alertas no está medido acá** (eso es lo que mide el A/B de D25 que corre la sesión dueña del loop). Medido (`anatomia_salida.txt`):
 
 - las 55 tienen el píxel más cercano al cráter con BT de M13 igual o menor que `t_bg_k` (en las 249 publicadas pasa en
-  6, todas con otro píxel más tibio en el cúmulo);
+  6, todas con otro píxel más tibio en el cúmulo). Ojo: esto es consecuencia de la fórmula y no una medición
+  independiente, porque con un solo fondo y el exceso recortado a cero, un cúmulo de 0,0 MW implica BT bajo el fondo
+  (verificador);
 - 54 de las 55 salen **sólo** de la recaptura del segundo pase, sin ningún píxel del primero;
 - medianas: fondo 265,8 K en M3 contra 265,5 K en publicadas, pero BT del píxel del cráter 263,7 K contra 270,8 K.
+  Esto sí es información: **el fondo es el mismo y lo que cambia es el píxel**, más frío en las perdidas. No es que el
+  anillo de esas pasadas esté más tibio que en las publicadas, sino que el píxel que alerta queda bajo un fondo de
+  nivel normal.
 
 El mismo patrón aparece donde MIROVA no vio nada: 68 de 5.994 negativos limpios (1,1 %), contra 55 de 324 positivas
-(17 %). Pesa más en unos volcanes que en otros: es M3 en 18 de las 41 positivas de Isluga, 11 de las 13 de Tupungatito,
+(17 %). Pero ese contraste mide sobre todo cuán seguido el detector alerta algo: **condicionado a que haya algún píxel
+alertado, M3 es 55 de 304 en positivas (18 %) contra 68 de 183 en negativos limpios (37 %)**. O sea que despegar del
+cero a todas las M3 publicaría proporcionalmente más pasadas donde MIROVA calla que donde alerta, lo mismo que midió
+S145 en el bloque de D25 del catálogo. Pesa más en unos volcanes que en otros: es M3 en 18 de las 41 positivas de Isluga, 11 de las 13 de Tupungatito,
 4 de las 9 de Planchón Peteroa y 11 de las 167 de Láscar.
 
-**M1**: las 20 son de cenit alto (mediana 44°, contra 21° en M3 y 24° en las publicadas), con el máximo de M13 de la
-escena a una mediana de 23,7 km del cráter y NTI máximo de −0,917. Con los campos persistidos no se puede separar
+**M1**: 11 de las 20 tienen cenit de 35° o más y 9 están bajo 35° (mediana 43°, contra 21° en M3 y 24° en las
+publicadas); el máximo de M13 de la escena está a una mediana de 23,6 km del cráter y el NTI máximo es −0,92. El cenit
+se correlaciona, pero no explica las 20. Con los campos persistidos no se puede separar
 entre señal bajo el umbral, geometría oblicua (D17) o un píxel del foco sin NTI: eso es lo que mide el probe de abajo.
 
 ### 3. En noches, el operador casi no pierde nada (A94)
 
 De las 75 pasadas perdidas, **74** caen en una noche en que el mismo volcán sí publica por otra vía: 59 sólo por
 VIIRS 375, 12 por otra pasada de VIIRS 750 y 3 por MODIS y VIIRS 375. Sólo **una** deja la noche del volcán sin
-ninguna publicación: Planchón Peteroa, 2026-08-15 05:06, M1, 0,09 MW.
+ninguna publicación: Planchón Peteroa, 2026-08-15 05:06, M1, 0,09 MW. Y la cobertura no depende de cómo se define
+la noche: en 74 de las 75 **la misma pasada** (mismo satélite, ±2 min) publica en banda I, VIIRS 375 (55 de 55 en M3,
+19 de 20 en M1).
 
 ## Probe L1B: M15 en sentinela junto al cráter (escrito ANTES de correr)
 
@@ -92,7 +105,8 @@ tierra. Si M13 conserva el píxel duplicado del bowtie y M15 no, ese terreno lo 
 nada. La cobertura y el código 65533 lo distinguen.
 
 **Controles.** C-SIN (`prueba_probe_m15.py`, corrido local: OK; 4 mutaciones del contador, el relleno y la cobertura
-atrapadas por aserción); C-P1 (el control reproduce el record persistido: si falla, la pasada se informa y no se
+atrapadas por aserción, corridas a mano y sin script commiteado; el verificador aplicó 5 propias y las 5 fallan por
+aserción); C-P1 (el control reproduce el record persistido: si falla, la pasada se informa y no se
 interpreta); C-NULO (sin ningún `nti_perdido` en la escena, relleno = control exacto); y el grupo C, donde el relleno
 no debería apagar publicaciones.
 
@@ -115,7 +129,8 @@ Salidas: `analizar_probe_salida.txt` (`analizar_probe.py resultado`), artefactos
 - **Controles.** C-SIN en verde en los 4 runners. C-P1 en verde en **125 de 125**: el control reproduce el record
   persistido, y el control publica en las 52 de C y en ninguna de las 73 de P, igual que el tablero.
 - **El lector no borra el NTI de ningún píxel con M13 válido.** En la escena entera de cada uno de los 125 gránulos hay
-  **0** píxeles con M13 válido y M15 NaN. En la ventana del cráter, M13 y M15 válidos coinciden en 125 de 125. No hay
+  **0** píxeles con M13 válido y M15 NaN (una dirección: M15 NaN implica M13 NaN). En la ventana del cráter los dos
+  conjuntos coinciden exactamente en las 125 (`n − m13_valido == n − m15_valido ==` número de 65533, verificador). No hay
   ningún píxel con la máscara 4 (Saturation), ninguno con la 2048 (Dead_Detector) ni ninguno con M15 sobre 342,5 K.
 - **Los sentinelas de M15 son el bowtie y aparecen igual en P que en C.** Todos los sentinelas de la ventana son 65533
   (Bowtie_Deleted, con máscara 256), 1.280 píxeles en 24 pasadas de P y 1.036 en 12 de C. Aparecen en **todas** las
@@ -128,21 +143,36 @@ Salidas: `analizar_probe_salida.txt` (`analizar_probe.py resultado`), artefactos
   millones por escena), M13 trae **327678** con el flag 256. El probe de #880 buscó en M13 los sentinelas de 16 bits
   (65532 a 65535), no encontró ninguno y lo leyó como «M13 sano». Las dos bandas están borradas en el mismo píxel, como
   dice el UserGuide, y ese terreno lo cubre el barrido vecino.
-- **El contrafactual no tuvo nada que rellenar.** Como no hay ningún `nti_perdido`, el brazo relleno es idéntico al
+- **El contrafactual no tuvo nada que rellenar**, así que el brazo relleno nunca se ejercitó sobre datos reales y C-NULO
+  pasa de forma trivial; no hay control positivo del brazo en un gránulo real (no cambia la conclusión, que sale de los
+  conteos). Como no hay ningún `nti_perdido`, el brazo relleno es idéntico al
   control en las 125 (C-NULO 125 de 125), y **el lector decide en 0 de 73** pérdidas medidas. PM-1 se cumple en lo que
   predecía (65533, máscara 256, sólo fuera del nadir); su parte de cobertura no se pudo medir porque no hubo perdidos.
   PM-2 (0 a 2) se cumple con 0. PM-3 se cumple: ninguna M3 cambia.
 
 **Respuesta.** Ninguna de las alertas de VIIRS 750 que K no publica se pierde por el lector de M15. La pérdida es de
-D25 (55 de 75: el cráter en 0,0 MW por el fondo del anillo) y de señal que no alerta con el cenit alto (20 de 75). Y
+D25 (55 de 75: el cráter en 0,0 MW por el fondo del anillo) y de pasadas en que el detector no alerta ningún píxel (20 de 75, más frecuentes con cenit alto, pero
+9 de ellas bajo 35°). Y
 para el operador casi no hay pérdida: 74 de las 75 caen en noches que otro sensor u otra pasada sí publica.
 
 **Hallazgo lateral, latente y sin efecto hoy.** `FLAG_DNS` de `pipeline/process_viirs_mod.py` es el conjunto de 16
 bits (65532 a 65535). Para M13 no atrapa ningún código real; los códigos de M13 se descartan sólo porque la LUT vale
 −999,9 en ellos y el lector borra toda BT negativa. Si un gránulo viniera sin LUT de M13, la rama de inversión de Planck
-los leería como radiancia válida (327678 × 0,00162 ≈ 530 W m⁻² sr⁻¹ µm⁻¹). Los tres gránulos del mini probe traen la LUT de M13 (327.681 entradas), y en los 125 del probe el lector dejó M13 en NaN
-exactamente donde M15 trae 65533, que es lo que hace la rama de la LUT. Queda
+los leería como radiancia válida (327678 × 0,00162 ≈ 530 W m⁻² sr⁻¹ µm⁻¹). Los tres gránulos del mini probe traen la LUT de M13 (327.681 entradas), y en los 125 del probe el lector dejó M13 en NaN en todos
+los píxeles con M15 = 65533 de la escena, y exactamente en ellos dentro de la ventana del cráter (en la escena entera,
+la igualdad exacta sólo está medida en los 3 del mini probe), que es lo que hace la rama de la LUT. Queda
 como seguimiento; acá no se toca `pipeline/`.
+
+## Verificador con contexto limpio (2026-10-21, en primer plano)
+
+Re-corrió sin red `listar_perdidas.py`, `analizar_probe.py` y `prueba_probe_m15.py` (salidas idénticas byte a byte) y
+comprobó los números de `anatomia` y `noches`. Confirmó el predicado del tablero (node sobre `frontend/index.html`),
+que los 27 sha de los records descienden de la adopción de K (`34cea39e`), el monkeypatch del lector
+(`process_viirs_mod.py:494`), la lectura de M13 = 327678 y el hallazgo lateral contra el código. Refutó o rebajó
+cuatro frases, ya corregidas arriba: el «cenit alto» de M1 (9 de 20 bajo 35°; la mediana era la superior, ahora
+`statistics.median`), «BT ≤ fondo» presentado como medición (es tautológico), el contraste con negativos sin
+condicionar (18 % contra 37 %), y la igualdad «exacta» de M13 y M15 en la escena entera. Agregó la alerta protegida sin
+record y la cobertura por la misma pasada en banda I, hoy calculadas por `noches.py` y `anatomia.py`.
 
 ## Lo que esto no decide
 

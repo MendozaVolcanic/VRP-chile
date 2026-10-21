@@ -7,13 +7,14 @@ from __future__ import annotations
 
 import collections
 import json
+import statistics
 import sys
 from pathlib import Path
 
 
 def mediana(xs):
-    xs = sorted(x for x in xs if x is not None)
-    return xs[len(xs) // 2] if xs else None
+    xs = [x for x in xs if x is not None]
+    return round(statistics.median(xs), 2) if xs else None
 
 
 def main(carpeta):

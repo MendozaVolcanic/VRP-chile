@@ -14,6 +14,7 @@ Uso:  python experiments/_s158_v750/anatomia.py   (lee los JSON de produccion y 
 from __future__ import annotations
 
 import collections
+import statistics
 import sys
 from pathlib import Path
 
@@ -62,8 +63,8 @@ def tabla(titulo, sel, f):
 
 
 def mediana(xs):
-    xs = sorted(x for x in xs if x is not None)
-    return xs[len(xs) // 2] if xs else None
+    xs = [x for x in xs if x is not None]
+    return round(statistics.median(xs), 2) if xs else None   # verificador S158: antes daba la mediana superior
 
 
 def main():
@@ -101,6 +102,13 @@ def main():
           f"t_max {mediana([r['t_max_k'] for r in m1])}, t_bg {mediana([r['t_bg_k'] for r in m1])}, "
           f"nti_max {mediana([r['nti_max'] for r in m1])}, cenit {mediana([r['z'] for r in m1])}, "
           f"dist t_max {mediana([r['diag_t_max_dist_km'] for r in m1])} km")
+    zs = sorted(round(r["z"], 1) for r in m1 if r["z"] is not None)
+    print(f"M1, cenit de cada pasada: {zs}; con 35 grados o mas: {sum(z >= 35 for z in zs)} de {len(zs)}")
+    con_px_pos = [r for r in pos if patron(r) != "sin_pixel"]
+    con_px_neg = [r for r in neg if patron(r) != "sin_pixel"]
+    print("Condicionado a que haya algun pixel alertado, fraccion summit VRP 0: "
+          f"positivas {sum(patron(r) == 'summit_vrp0' for r in con_px_pos)} de {len(con_px_pos)}, "
+          f"negativos limpios {sum(patron(r) == 'summit_vrp0' for r in con_px_neg)} de {len(con_px_neg)}")
     print("\nPor volcan, positivas: publicadas / M3 / M1:")
     for v in bp.VOLS:
         s = [r for r in pos if r["vol"] == v]

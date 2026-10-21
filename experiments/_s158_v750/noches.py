@@ -13,6 +13,7 @@ from __future__ import annotations
 import collections
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -49,6 +50,22 @@ def main():
     por_mec = collections.Counter(e["mecanismo"] for e in d["perdidas"] if (e["vol"], e["noche"]) in noches_solas)
     print(f"noches-volcan sin ninguna publicacion: {len(noches_solas)}; pasadas por mecanismo: {dict(por_mec)}")
     print("  por volcan:", dict(collections.Counter(v for v, _ in noches_solas)))
+    # Verificador S158: la misma pasada en banda I (mismo satelite, sensor sin el sufijo _750, a +-2 min) publica.
+    i_pub = collections.defaultdict(list)
+    for r in recs:
+        if r["b"] == "VIIRS375" and r["pub"]:
+            i_pub[(r["vol"], r["sensor"])].append(r["dt"])
+    misma = collections.Counter()
+    for e in d["perdidas"]:
+        t = datetime.strptime(e["dt"], "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+        ok = any(abs((t - x).total_seconds()) <= bp.TOL_S
+                 for x in i_pub.get((e["vol"], e["sensor"].replace("_750", "")), []))
+        misma[f"{e['mecanismo']}|banda_I_publica={ok}"] += 1
+    print("misma pasada en banda I publica, por mecanismo:", dict(sorted(misma.items())))
+    for c_ in d["sin_record"]:
+        k = (c_["vol"], c_["fecha_utc"][:10])
+        print(f"alerta sin record: {c_['vol']} {c_['fecha_utc']} {c_['mirova_vrp_mw']} MW, protegida {c_['protegida']}; "
+              f"sensores que publican esa noche: {sorted(pub.get(k, set()))}")
     return 0
 
 
