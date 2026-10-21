@@ -57,6 +57,12 @@ competidores. Creado S13 (2026-04-18). Cobertura **30/60 PDFs (54%)**.
 **Antes de investigar cualquier paper MIROVA, leer este doc primero.**
 Contiene:
 - Algoritmo Coppola 2016a SP426.5 completo (ETI cuadrático + Tests 1/2/3 + second-pass)
+- ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md, marca A113; evidencia en `experiments/_s158_audit_r2/a113/INFORME.md`
+  n 4): la fila de VIIRS 750 de esa tabla (§6, «n=12 nocturno, n=8 diurno», Di Bella 2024) **no es MIROVA**. El
+  código operacional de VIIRS 750 usa 5 σ en la caja de cumbre y 10 σ fuera de noche, y 15 σ de día
+  (`MIROVA_VIIRS750_hotspot_detection.m` l. 177 a 199; la caja de cumbre es `BOX == 2`, 7 × 7 celdas en la matriz de
+  ejemplo). Di Bella es INGV Catania (A9). Para VIIRS 375 no hay código: la fila no está refutada por código, sólo es
+  ajena a MIROVA por A9. El archivo está fuera de git y sin marca propia. Texto original:
 - Tabla canónica umbrales por sensor (MODIS / VIIRS750 / VIIRS375)
 - Sistemas competidores (HotLINK USGS AVO +22% recall, MOUNTS, NHI, V-STAR, etc.)
 - MIROVA OSF v2.5 stats (615k filas globales, 5211 Villarrica refs)
@@ -162,6 +168,12 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   (§298-300, retiro de píxeles Test 1 K1 del pool μ/σ) fue **RESUELTO S115 = MISLABEL** — no era un
   gap real (ver `docs/MIROVA_DIVERGENCES.md:1292` + `docs/AUDIT_S114_PARITY_BY_SENSOR.md:232`). NO
   reabrir como trabajo pendiente (anti-A8/A50). NTI absoluto floor 0.005 legacy.
+- ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md, marca A113; `experiments/_s158_audit_r2/a113/INFORME.md` n 7): la media
+  aritmética se sostiene, el conteo no en VIIRS 750. El código de MIROVA promedia la ventana de **3 × 3 con el píxel
+  central incluido** (`colfilt(..., [3 3], 'sliding', mean omitnan)`, `MIROVA_VIIRS750_hotspot_detection.m` l. 281 a
+  294 y 362 a 368). Sin NaN eso da 8/9 del contraste contra los 8 vecinos: el σ escala igual, pero los mínimos fijos
+  (0,003 / 0,02 / 0,01) quedan 9/8 más exigentes que en nuestro kernel. Para MODIS y VIIRS 375 manda el paper, que
+  renderizado dice «eight neighbouring pixels» (Coppola 2016a p. 5). Texto original:
 - **Kernel 8-vecinos dNTI contextual**: `np.mean` aritmética (Coppola 2016a + Campus 2024). **Drift D1
   RESUELTO S17** — previamente usábamos `np.median` sin respaldo documental.
 - **MIR solo nocturno** (contaminación solar diurna).
@@ -205,6 +217,13 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
 - **A3. Campos "distance" en schema deben documentar desde qué punto miden**:
   `hotspot_dist_km` se medía desde `volcano_lat/lon` (centro) no desde el
   vent. Ahora `final_hotspot_dist_km` unifica y documenta.
+- ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md, marca A113; `experiments/_s158_audit_r2/a113/INFORME.md` n 3): «no hay
+  máscaras geométricas ni radios adaptativos» cae en su forma absoluta para VIIRS 750. El código de MIROVA admite
+  píxeles excluidos (NaN en `BOX`, que no pueden alertar ni entrar a la estadística de la detección) y su comentario dice que las ROI se
+  desplazan, cambian de forma y tamaño por volcán, y pueden adaptarse para excluir volcanes vecinos u otras fuentes
+  térmicas persistentes (`MIROVA_VIIRS750_hotspot_detection.m` l. 25 a 29, 120 a 128, 140). Si MIROVA excluye algo en
+  los volcanes chilenos es SIN DATO (la matriz de ejemplo no trae NaN). Lo que sigue en pie: un solo juego de umbrales
+  por sensor; la variación por volcán es geometría. Texto original:
 - **A4. MIROVA es arquitecturalmente más simple que lo que creíamos**:
   no hay máscaras geométricas ni radios adaptativos. Es grilla UTM 51×51 +
   NTI/ETI/contextual (Coppola 2016a) + clasificación visual post-detección.
@@ -296,7 +315,14 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   reales son Láscar **16,9 K** e Isluga **8,3 K** (`scripts/libro_de_cuentas.py`, ids
   `A12_dT_lascar` / `A12_dT_isluga`). Isluga cae debajo del propio corte de 12 K, o sea
   pertenece a la clase que la regla dice que necesita kernel-bg. La lección de método
-  (el patrón térmico decide, validar por A/B — A19) sigue; los dos números no. Fix kernel-bg (Coppola 2024 L1129) reduce 70-90% del gap en Muy
+  (el patrón térmico decide, validar por A/B — A19) sigue; los dos números no. ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md,
+  marca A113; `experiments/_s158_audit_r2/a113/INFORME.md` n 5): la cita «Coppola 2024 L1129» no respalda el kernel.
+  Renderizada (libro `978-3-031-86841-2.pdf`, p. impresa 337), la frase es condicional y habla del **modelo de dos
+  componentes** («If T_bk is retrieved from the pixels adjacent to the hot one, Eq. 14 can be solved...»), no del fondo
+  del VRP. Y en VIIRS 750 el código de MIROVA aparta justo esos vecinos (dilatación de 3, 5 o 7 celdas) e interpola el
+  fondo desde más afuera (`MIROVA_VIIRS750_VRP.m` l. 63 a 81). Para MODIS el respaldo posible es otro: Coppola 2016a
+  p. 8 («arithmetic mean of all the pixels surrounding the active one»). El resultado empírico de S61 no cambia. Texto
+  original: Fix kernel-bg (Coppola 2024 L1129) reduce 70-90% del gap en Muy
   Bajo (validado Villarrica/PP S61).
 - **A13. ⚠️ FALSA — corregida S124.** Villarrica NO tiene distancia fija 0.84:
   sobre n=3338, el valor es **0.0 en 3284 casos** (98 %) y 0.84 solo 15 veces. El
@@ -381,7 +407,11 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   ruidoso. Para verdict robusto Tier A Muy Bajo: **multi-caso (3-5 ALERTAs)** +
   reportar moda + frecuencia, no single record. Mismo mecanismo que Tupungatito
   43% residual. Pendiente arquitectural S71+.
-- **A23.** ⚠️ **S151, sobre el tope de 5 MW** (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P5):
+- **A23.** ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md, marca A113; `experiments/_s158_audit_r2/a113/INFORME.md` n 13): el
+  tope de 5 MW con fondo bajo 270 K es nuestro; el código de MIROVA para VIIRS 750 no tiene tope de magnitud ni
+  compuerta por temperatura de fondo (`MIROVA_VIIRS750_VRP.m` l. 83 a 91; el único filtro térmico previo es BT de M15
+  ≤ 200 K, `MIROVA_VIIRS750_hotspot_detection.m` l. 147 a 154). Para MODIS y VIIRS 375 no hay código (TRASLADADA).
+  ⚠️ **S151, sobre el tope de 5 MW** (`docs/audit_s150/meta/VERIFICADOR_DOCUMENTOS.md` P5):
   las dos frases de esta regla que dicen que el tope «funciona» sólo quieren decir que recorta. No está
   medido que lo recortado sea artefacto (`docs/AUDIT_S146.md` C-02: el paper no lo sostiene), y el tope
   se arma con el fondo de la escena bajo 270 K sin que ningún píxel pase por temperatura ni por NTI

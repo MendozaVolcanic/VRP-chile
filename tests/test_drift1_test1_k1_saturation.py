@@ -1,3 +1,8 @@
+# ⚠️ S158 R2 (docs/AUDIT_S158_R2.md, marca A113; experiments/_s158_audit_r2/a113/INFORME.md n 10): el Test 1 K1 no es «mascara de saturacion» ni
+# «literal» retirarlo del reporte. Coppola 2016a p. 6 (renderizada): los pixeles del Test 1 son «flagged as
+# 'active'» y salen de los pasos siguientes; en VIIRS 750 el codigo los publica como alerta directa
+# (MIROVA_VIIRS750_hotspot_detection.m l. 201 a 206 y 245) y los saca del fondo (l. 276 y 328). El flag ON de
+# estas pruebas aleja de MIROVA; OFF es lo fiel en el reporte. Las aserciones no cambian.
 """Tests Drift #1a — Test 1 K1 retire from hot_mask (Coppola 2016a literal)."""
 import numpy as np
 import pytest

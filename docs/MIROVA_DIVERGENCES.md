@@ -303,6 +303,13 @@ Subagente Explore revisó 5 papers MIROVA canónicos buscando tratamiento explí
 
 #### S71 T1 Fase 2 — A/B + adopción Opción C (2026-05-21)
 
+> ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md, marca A113; `experiments/_s158_audit_r2/a113/INFORME.md` n 13): el tope de
+> 5 MW con fondo bajo 270 K es mecanismo **nuestro**, no de MIROVA. El código de VIIRS 750 no tiene tope de magnitud ni
+> compuerta por temperatura de fondo: el VRP es `deltaL_MIR × 1,97e7 × 0,5625` sin recorte ni límite
+> (`MIROVA_VIIRS750_VRP.m` l. 83 a 91), y el único filtro previo sobre el infrarrojo térmico es descartar píxeles con
+> BT de M15 ≤ 200 K (`MIROVA_VIIRS750_hotspot_detection.m` l. 147 a 154). Si MIROVA es inmune al cirrus, no es por un
+> tope. Para MODIS y VIIRS 375 no hay código (TRASLADADA). Texto conservado por historia.
+
 3 reprocs A/B sobre 11 vols Tier A ventana 2026-02-20 → 2026-05-20 (PRs #103-#111, merged). Cada opción en profile aislado + audit cruzado vs MIROVA NRT CONS+OCR.
 
 | Opción | Bug D9 count (vrp>5MW pD-only @ t_bg<260K) | Recall preservado | Adopción |
@@ -1082,6 +1089,14 @@ Los 6 FN tienen 3 mecanismos distintos.
 - Cluster centroid eligió siempre el grupo Salar (más caliente scene-wide)
   e ignoró el píxel cráter.
 
+> ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md, marca A113; `experiments/_s158_audit_r2/a113/INFORME.md` n 8): en VIIRS 750
+> el código de MIROVA no tiene selección de cúmulo de ningún tipo: la alerta es la unión de las tres regiones y los dos
+> pases más las alertas absolutas, y el VRP suma todos esos píxeles (`MIROVA_VIIRS750_hotspot_detection.m` l. 241 a
+> 248; `MIROVA_VIIRS750_VRP.m` l. 83 a 91). En el OSF v2.5 la distancia máxima de los píxeles sumados llega a 30 km
+> (percentil 99: 25,5 km en VIIRS 750). Y el mínimo fuera de la cumbre no es 0,010 en NTI sino 0,02 (0,01 sólo en ETI;
+> l. 183 a 187; la cumbre es `BOX == 2`, 7 × 7 celdas en la matriz de ejemplo). El caso de esta sección es MODIS, sin
+> código: para MODIS la refutación es TRASLADADA, y la Tabla 1 renderizada sí da 0,01 en ROI2. Texto conservado:
+
 **Conclusión D9**: MIROVA tiene **summit-priority cluster selection** no
 documentada explícitamente en Coppola 2016a SP426.5 pero operacional. La
 evidencia es triangular:
@@ -1286,6 +1301,18 @@ operacional Villarrica+PP, S62: PCC inner_radius + A/B Lastarria/Tup +
 Chaiten pendiente S63).
 
 ### D8 Background ring contaminado — RESUELTO ⚠️ **matizado S146: leer D25 antes de tomarlo por cerrado**
+
+> ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md, marca A113; `experiments/_s158_audit_r2/a113/INFORME.md` n 5): el «Coppola
+> 2024 L1129 literal» de abajo cae por dos lados. (1) La frase, renderizada (libro `978-3-031-86841-2.pdf`, p. impresa
+> 337), es condicional y pertenece al **modelo de dos componentes** («If T_bk is retrieved from the pixels adjacent to
+> the hot one, Eq. 14 can be solved by assuming one of the two other unknowns... two-component model»), no al fondo del
+> VRP de MIROVA. (2) En VIIRS 750 el código de MIROVA hace lo contrario: borra los alertados, **dilata** la exclusión
+> 3, 5 o 7 celdas según cuántos sean (con 4 o menos se van justo los 8 vecinos) e interpola el fondo con
+> `fillmissing2` desde más afuera, sin recorte (`MIROVA_VIIRS750_VRP.m` l. 63 a 85). En M-band nuestro kernel ni corre
+> (`pipeline/process_viirs_mod.py:460-467`). Para MODIS y VIIRS 375 no hay código; el respaldo posible es Coppola 2016a
+> p. 8 renderizada («arithmetic mean of all the pixels surrounding the active one (or around the active cluster)»),
+> que no dice «8 vecinos» ni excluye vecinos tibios. Los resultados empíricos de S61/S62 no cambian; cambia que el
+> fix no es «literal». Texto conservado por historia.
 
 > ⚠️ **S146 (`docs/AUDIT_S146.md` §2, frente A **A-07**).** «RESUELTO» vale para el parche
 > adoptado (el kernel local de vecinos), **no** para la divergencia de fondo contra el paper.
@@ -2846,6 +2873,14 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
 ---
 
 ## D27: El día no existe: la Tabla 1 diurna (K1 = -0,6, C1 = 0,02, C2 = 15) está escrita y nunca se ejecuta. **DELIBERADA (MISSION: sólo noche), registrada S138 para que conste como divergencia literal** S138
+
+> ⚠️ **S158 R2** (docs/AUDIT_S158_R2.md, marca A113; `experiments/_s158_audit_r2/a113/INFORME.md` n 6): la rama diurna
+> de VIIRS 750 cableada en S151 (`pipeline/diurno.py`, una sola tabla para VIIRS 375 y 750) usa K1 = -0,6, que es la
+> Tabla 1 de MODIS. El código de MIROVA para VIIRS 750 usa de día **K1 = -0,5** (C1 = 0,02 y C2 = 15 coinciden, en las
+> dos ROI y en NTI y ETI; `MIROVA_VIIRS750_hotspot_detection.m` l. 188 a 199). Y antes de todo **rechaza la escena
+> entera si el ángulo de reflejo solar es menor que 12°** (l. 83 a 89), filtro que nuestra rama no tiene (`grep -ri
+> glint pipeline/` vacío). Para VIIRS 375 no hay código: su -0,6 queda TRASLADADO, no refutado. Encendido hoy,
+> `ENABLE_DAYTIME_VIIRS` daría en VIIRS 750 un K1 distinto del código y ningún filtro de reflejo. Texto conservado:
 
 > ⚠️ **S151, tercera marca (decisión D-10 de Nicolás, 2026-10-15, opción 1; issue #813).** La rama
 > diurna de VIIRS 375 y 750 quedó **cableada y APAGADA** (`ENABLE_DAYTIME_VIIRS = False`, tag
