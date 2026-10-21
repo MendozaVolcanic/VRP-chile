@@ -1,0 +1,116 @@
+C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\nanops.py:1027: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\nmend\AppData\Local\Programs\Python\Python312\Lib\site-packages\pandas\core\nanops.py:1027: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+VIIRS 750 filas: 100641 cumplen: 92402 no cumplen: 8239
+
+fraccion que NO cumple por ano:
+anio
+2012    0.0529
+2013    0.0696
+2014    0.0729
+2015    0.0712
+2016    0.1054
+2017    0.1321
+2018    0.0927
+2019    0.0388
+2020    0.0783
+2021    0.1237
+2022    0.0921
+2023    0.0568
+2024    0.0772
+2025    0.0738
+
+fraccion que NO cumple por satelite (3 = SNPP, 4 = NOAA20 segun el pareo 01):
+{3: 0.0826, 4: 0.0804}
+por Dayflag: {0: 0.0559, 1: 0.2023}
+por class: {0: 0.0512, 1: 0.0836}
+
+fraccion que NO cumple por tramo de cenit FINO (sobre 45):
+          <lambda_0>   size
+zb                         
+[0, 45)       0.0000  58307
+[45, 48)      0.0000   5386
+[48, 49)      0.0000   1567
+[49, 50)      0.0000   1131
+[50, 51)      0.2780   1079
+[51, 52)      0.3788   2220
+[52, 53)      0.3713   1880
+[53, 55)      0.2605   3574
+[55, 58)      0.2439   4962
+[58, 60)      0.2790   4057
+[60, 63)      0.2126   5297
+[63, 66)      0.2031   4918
+[66, 70)      0.1600   6263
+
+cenit minimo de una fila que no cumple: 50.013 | cenit maximo de una que cumple: 69.993
+
+fraccion que NO cumple por Npix (sobre 50 grados):
+                      <lambda_0>   size
+Npix                                   
+(0.0, 1.0]                0.0000     61
+(1.0, 2.0]                0.0000    204
+(2.0, 3.0]                0.0000    354
+(3.0, 5.0]                0.0430   2348
+(5.0, 10.0]               0.1016  12763
+(10.0, 30.0]              0.3097  16360
+(30.0, 1000000000.0]      0.8218   2160
+
+fraccion que NO cumple por latitud del volcan (sobre 50 grados):
+            <lambda_0>   size
+Volc_LAT                     
+(-90, -40]      0.0732    574
+(-40, -20]      0.3262    935
+(-20, 0]        0.1695   9693
+(0, 20]         0.2477  15228
+(20, 40]        0.2859   2644
+(40, 60]        0.2008   3676
+(60, 90]        0.6553   1500
+
+NO cumplen: Npix x ratio (pixeles efectivos) describe:
+count    8239.000
+mean       11.500
+std         9.277
+min         0.437
+5%          2.747
+25%         5.450
+50%         8.907
+75%        14.812
+95%        28.367
+max       172.328
+fraccion con Npix x ratio a menos de 0,02 de un entero: 0.0414 | control (que esperaria el azar con dispersion uniforme): 0.04
+hipotesis B, c = (hot - VRP/k)/bk:
+count    8239.000
+mean          inf
+std           NaN
+min         1.088
+5%          1.596
+25%         2.492
+50%         3.959
+75%         7.733
+95%        24.081
+max           inf
+
+Spearman ratio vs SatZen (no cumplen): 0.1266
+Spearman ratio vs Npix: -0.0649
+Spearman ratio vs Tot_Lmir_bk/Npix (fondo medio): -0.0508
+Spearman ratio vs Tot_Lmir_hot/Npix: -0.481
+
+NO cumplen con Npix = 1: 0 de 61 filas Npix=1 sobre 50 grados
+
+hot implicito (VRP/k + bk) / Tot_Lmir_hot: {'count': 8239.0, 'mean': 0.574, 'std': 0.1809, 'min': 0.0392, '5%': 0.253, '50%': 0.5858, '95%': 0.8483, 'max': 0.9637}
+bk implicito (hot - VRP/k) / Tot_Lmir_bk: {'count': 8239.0, 'mean': inf, 'std': nan, 'min': 1.0881, '5%': 1.5965, '50%': 3.9588, '95%': 24.0815, 'max': inf}
+
+filas chilenas VIIRS 750 que no cumplen: 26 de 598 sobre 50 grados
+{'Chillán, Nevados de': 5, 'Copahue': 3, 'Llaima': 1, 'Planchón-Peteroa': 10, 'Puyehue-Cordón Caulle': 1, 'Villarrica': 6}
+                 timeUTC            Volc_Name     SatZen  Npix  Tot_Lmir_hot  Tot_Lmir_bk           VRP     ratio
+66898   23/09/2020 19:30  Chillán, Nevados de  62.182863     7     15.898186     3.902296  9.201713e+07  0.692225
+68314   24/10/2021 06:42  Chillán, Nevados de  67.450180    17     20.613601     3.048262  1.189566e+08  0.611144
+68704   12/02/2022 17:42  Chillán, Nevados de  60.311064    11     43.365808    12.863030  2.571602e+08  0.760809
+69358   17/02/2025 17:48  Chillán, Nevados de  55.391261     9     32.729335     5.227141  1.586059e+08  0.520431
+69402   27/02/2025 19:42  Chillán, Nevados de  68.537877    23    111.262263    13.561919  2.664274e+08  0.246090
+84427   27/03/2023 19:24              Copahue  57.640497    11     48.439835     5.819285  2.850227e+08  0.603492
+84731   05/03/2024 19:24              Copahue  57.728047     6     17.958358     4.789392  9.972392e+07  0.683375
+84975   16/11/2025 19:36              Copahue  61.498060     5     14.334271     2.602986  9.391947e+07  0.722473
+276628  22/02/2022 17:54               Llaima  53.026853    24    393.703977    14.781816  8.583596e+08  0.204423
+361165  24/03/2020 17:30     Planchón-Peteroa  65.113080    17     54.503707    11.743063  2.704488e+08  0.570758

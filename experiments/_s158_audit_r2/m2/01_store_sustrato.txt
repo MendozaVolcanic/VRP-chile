@@ -1,0 +1,26 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+records: 74811 | max datetime_utc: 2026-10-21 08:10 | corrida: 2026-10-21 17:04 UTC
+sensor x tier (A = tiene inner_radius_km): [(('MODIS', 'A'), 14565), (('MODIS', 'B'), 518), (('VIIRS', 'A'), 57403), (('VIIRS', 'B'), 2325)]
+
+[dedup] duplicados de (datetime_utc, sensor) por volcan (debe ser 0): 0 en los 45
+[dia/noche] records que _reject_daytime rechazaria hoy (flags OFF), por sensor: 0
+[geofence] anomaly_pixels con dist_km > radius_km, por volcan: {'AntillancaCasablanca': 5, 'Antuco': 26, 'Calbuco': 5, 'Callaqui': 11, 'CarranLosVenados': 15, 'CerroAzulQuizapu': 6, 'CorcovadoYanteles': 8, 'Guallatiri': 3, 'Hudson': 1, 'Huequi': 25, 'Irruputuncu': 3, 'LagunaDelMaule': 59, 'Lanin': 7, 'Lonquimay': 8, 'MacaCay': 14, 'Melimoyu': 8, 'Mentolat': 18, 'Michinmahuida': 5, 'MochoChoshuenco': 8, 'NevadoDeLongavi': 8, 'OlcaParuma': 1, 'Ollague': 4, 'Osorno': 15, 'Parinacota': 2, 'Putana': 4, 'Quetrupillan': 9, 'SanJose': 8, 'Sollipulli': 2, 'Taapaca': 1, 'Tinguiririca': 4, 'Tolhuaca': 4, 'YateHornopiren': 37}
+[geofence] anomaly_pixels con dist_km None (el filtro los trata como 0 km): 0
+[product_version] {'standard': 74669, 'nrt': 142}
+[nrt por sensor] {'MODIS_AQUA': 20, 'MODIS_TERRA': 15, 'VIIRS_NOAA21': 14, 'VIIRS_NOAA20': 21, 'VIIRS_NOAA20_750': 21, 'VIIRS_SNPP': 19, 'VIIRS_SNPP_750': 19, 'VIIRS_NOAA21_750': 13}
+[nrt por edad en meses (floor(dias/30), 12 = un anio o mas)] {0: 142}
+[discarded_reason] {None: 73388, 'eruption_hotspot_too_far': 723, 'partial_eruption_hotspot_too_far': 700}
+[diag_a46_relabel summit->far por sensor] {}
+[final_hotspot_source == cluster_rescue por sensor] {}
+[t_max_k ausente o None por sensor] {'VIIRS_SNPP': 164, 'VIIRS_NOAA21': 106, 'VIIRS_NOAA20': 177}
+[campos del cap/piso] {'diag_vrp_floor_mw': 1}
+[vrp_mw == 0 con pc.vrp_mw > 0, por (sensor, discarded_reason)] {('VIIRS', 'eruption_hotspot_too_far'): 433, ('VIIRS', 'partial_eruption_hotspot_too_far'): 11}
+[first_processed_utc] {'sin': 65011, 'con': 9800}
+
+== controles positivos ==
+Villarrica 2026-03-01 18:00 UTC (15:00 local) elev = 54.7 -> rechazar: True
+Villarrica 2026-03-01 05:00 UTC elev = -42.5 -> rechazar: False
+filtro 25 km sobre [1 km, 30 km]: (True, 1, 1) -> partial_eruption_hotspot_too_far quedan 1
+cap con t_max_k None y 60 GW -> 0.0 sanity_cap_pc_garbage
+cap con t_max_k 420 K y 60 GW -> 60000.0 True
+cap con SOLO t_max_i04_k 420 K y 60 GW (orden real de append_record) -> 0.0 sanity_cap_pc_garbage
