@@ -555,6 +555,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): Chillán MODIS entregado, verificador corriendo
+- Integrado a `s159-pruebas` (`0d949d1f5`; rama `s159-chillan` `05f16cf2c`; runs 39692725826 y 39693552091). SIN
+  VERIFICAR. Las dos protegidas MODIS de Chillán del #864 (10-12 07:20 y 10-15 01:05, ~58° de cenit) caen en el
+  **Test 2** (dNTI a ~3,7σ con umbral μ+5σ, no el piso C1) y también en la **compuerta de 3 K** (BT MIR 3,7 y 4,4 K
+  bajo `t_bg`: la cumbre nevada nocturna está 10 a 12 K más fría que el anillo de 5 a 25 km). Descartadas con número:
+  saturación, banda primaria, σ del fondo, nube. Sólo `min` más sin compuerta, juntos, detectan (2 y 3 píxeles), y aun
+  así la magnitud sale 0 MW por el fondo del anillo con recorte. Es la cara MODIS de D25 y R2-6 (D25 no existe en
+  `process_modis`, D-26). Estrato sep-oct: 16 protegidas MODIS de Chillán, 11 publicadas, estas 2 con record y 3
+  diurnas sin record (pipeline MODIS sólo nocturno, D-10).
+
 ### 2026-10-21 (S159, dueña del loop): pareo MODIS y borrador de MxD03 entregados; dos verificadores corriendo
 - **Pareo** (`s159-pruebas` `82220c314`, `experiments/_s159/pareo_modis/INFORME.md`), SIN VERIFICAR: el pareo de ±120 s
   acierta y ensanchar a ±5 min empeora (no tocar `TOL_S` ni `VENTANA_S`). De 6.646 records MODIS con referencia, 148
