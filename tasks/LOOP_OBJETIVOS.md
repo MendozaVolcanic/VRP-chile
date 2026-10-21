@@ -553,6 +553,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): verificador limpio de M entregado
+- Integrado a `s159-pruebas` (`db3e9cbb4`, fast-forward desde `s159-m`). Informe:
+  `experiments/_s159/m/verificador/INFORME.md`. **CONFIRMADAS** las afirmaciones 2 (desplazamientos 2,817 / 5,041 /
+  1,101 / 2,475 km; sin Láscar, 2,951 con n 9), 3 (Chillán: los 4 archivos existen en LAADS y LANCE, records con
+  `primary_cluster` nulo, primer pase 0 en los dos brazos) y 4 (Láscar 2,543 a 0,588 km en 38 de 38 con la misma
+  detección). **PARCIAL** la 1: los 12 cambios se reproducen, pero 7 de los 10 apagados salen del círculo (no «6 en el
+  borde»; Cordón Caulle 2025-08-03 06:35 se apaga sin salir); 4 de los 12 son de **fondo**, no de posición (Láscar,
+  `t_bg` se mueve 0,24 a 0,41 K y `pc.vrp_mw` cruza cero), contra el «fondo casi igual» de H5; con pareo a ±5 min hay 9
+  referencias de MIROVA, no 8 (7 de 9 se acercan); y el saldo apagados contra encendidos sale en parte del diseño
+  (población condicionada a que A publicó, A109).
+- Hallazgo del verificador para el instrumento de todas las evaluaciones MODIS (gravedad 2): el pareo por hora exacta
+  pierde las pasadas que caen en el borde entre gránulos (121 de 5.815 records MODIS sólo parean a ±5 min). Pendiente
+  medir su efecto en el auto-audit y en `banco_paridad`.
+
 ### 2026-10-21 ~22:40 UTC (S159, dueña del loop): frente M terminado, verificador limpio corriendo
 - M (rama `s159-m`, `cecd4b0f1`, run 39681481914, 85 de 85 records, controles en verde): **CONFIRMA** su
   pre-registro, todavía SIN VERIFICAR. Lo que afirma: con MxD03 cambian 12 de 57 publicaciones MODIS de cumbre sobre
