@@ -509,6 +509,20 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 ~02:50 UTC (S158, dueña del loop): despachadores relanzados y aprobación de la tabla b
+- Sin rastro de los procesos de S157 (verificado en la lista de procesos). Tres procesos locales de S158, con logs en
+  `D:\vrp-trabajo\temporales\s158\` (`relleno.log`, `d25.log`, `control_nrt.log`): relleno líneas 5 a 10 en serie
+  (el 4.º, 39533674886, terminó `success`; el 5.º, PCC 2026-04-25, = run 39534689286); V2a y V2b de D25 desde el tag
+  `s157-d25-k-codigo` (= `66961f65`, igual al de V1) con 0 A/B vivos; control del NRT a las 09:35 UTC.
+- **Aprobación de Nicolás, en esta sesión y textual**: «En las decisiones que te listó estoy de acuerdo con todas sus
+  recomendaciones, incluida responder #864 dejando lo de Chillán a la espera de D25.» Cubre la tabla b de
+  `tasks/BLOQUE_ARRANQUE_S158.md`: (1) las ~64 `nrt` sin estándar se procesan desde el NRT con K; (2) mergear #878;
+  (3) la λ de B22 se enciende junto con el reproceso que traiga D25; (4) mergear #869, #879 y #881, y #880 cuando
+  mida el 18-oct; (5) implementar la lista de corridas juzgadas del watchdog (#876); (6) #813 postergado hasta D25;
+  (7) PAT y aviso a OVDAS quedan con él. Y responder #864.
+- #881 traía `.github/workflows/probe-s157-pcc865.yml` (probe por push a su rama, sólo lectura): se archiva en
+  `.github/workflows/_archive/` antes del merge para que no quede un workflow muerto en `main`.
+
 ### 2026-10-21 02:45 UTC: TRASPASO del loop de S157 a la sesión nueva (S158)
 - S157 detuvo sus tres procesos locales a las 02:41 UTC para que haya una sola dueña del loop (S153). **Desde ahora
   la dueña es la sesión que corrió `/retomar` a las 02:36 UTC.** S157 no despacha nada más.
