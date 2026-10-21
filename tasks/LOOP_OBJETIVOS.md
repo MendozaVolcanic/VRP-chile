@@ -555,6 +555,15 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): verificador del pre-registro de MxD03: LISTO CON CAMBIOS
+- Informe `experiments/_s159/mxd03_prereg/verificador/INFORME.md` (`464152853`). Población reproducida exacta y no
+  condicionada a K; citas de Coppola 2026 p. 4 y Coppola 2016a sobre remuestreo textuales. Cuatro cambios obligatorios:
+  (1) P2 decide con un nulo muerto (K2 en el mismo proceso da ruido 0; 31 de 39 negativos que K publica son de Cordón
+  Caulle en el borde del radio de 20 km); (2) M bloquea por un 3 % (X = 0,97·K da EMPEORA con intervalo de ancho cero,
+  EMPEORA va sin el comparador D-28); (3) `evaluar_d25.py` es sólo VIIRS, hace falta evaluador MODIS; (4) Coppola 2016a
+  no dice 50° ni 55° (sólo «>30°», sobre cráteres hondos). Más cinco de redacción (pareo fijo a 120 s, CUMPLE = sin daño,
+  1.232 gránulos, tres afirmaciones heredadas corregidas, control 3 sin tolerancia). El autor escribe la v2.
+
 ### 2026-10-21 (S159, dueña del loop): Chillán MODIS entregado, verificador corriendo
 - Integrado a `s159-pruebas` (`0d949d1f5`; rama `s159-chillan` `05f16cf2c`; runs 39692725826 y 39693552091). SIN
   VERIFICAR. Las dos protegidas MODIS de Chillán del #864 (10-12 07:20 y 10-15 01:05, ~58° de cenit) caen en el
