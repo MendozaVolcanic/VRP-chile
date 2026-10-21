@@ -509,6 +509,21 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 02:45 UTC: TRASPASO del loop de S157 a la sesión nueva (S158)
+- S157 detuvo sus tres procesos locales a las 02:41 UTC para que haya una sola dueña del loop (S153). **Desde ahora
+  la dueña es la sesión que corrió `/retomar` a las 02:36 UTC.** S157 no despacha nada más.
+- Estado exacto que se hereda:
+  - **D25**: V1 = run 39530508296, corriendo. **V2a y V2b NO despachados.** Despacharlos según PREREGISTRO §6, desde
+    el tag `s157-d25-k-codigo`, recién con 0 A/B vivos (el despachador de S157 esperaba eso y se detuvo antes).
+  - **Relleno**: 3 de 10 verdes (39531624046 PP 2025-04-09, 39532248029 PP 2025-10-01, 39532959533 Chaitén
+    2025-10-18). **El 4.º (39533674886, Copahue 2026-03-07) sigue corriendo en GitHub**; no despachar el 5.º hasta
+    que termine (mismo grupo de concurrencia). Faltan 6: PCC 2026-04-25, Copahue 2026-07-02, Copahue 2026-07-05, PCC
+    2026-07-13, PP 2026-07-27, PCC 2026-09-11 (comandos en `D:\vrp-trabajo\temporales\relleno_cmds.txt`, líneas 5 a
+    10, y en `experiments/_s157_relleno/plan_relleno.json` del worktree `D:\vrp-trabajo\temporales\s157_relleno_wt`,
+    cuyos archivos regenerados siguen sin commitear).
+  - **Control del NRT**: no se hizo. A las 09:35 UTC, contar `NRT update` de 02:00 a 09:30 del 21-oct contra los 24
+    del 20-oct. A las 02:29 ya había 4.
+
 ### 2026-10-21 ~02:25 UTC (S157, tras el cierre): relleno confirmado en CMR y despachándose
 - `armar_relleno.py` con CMR arriba (consulta 02:11 UTC): **31 `standard` = «existe (CMR)», 58 `nrt` = «no_existe
   (CMR)»**. Los archivos regenerados quedaron sin commitear en `D:\vrp-trabajo\temporales\s157_relleno_wt` (worktree
