@@ -4,7 +4,9 @@
 POR QUÉ: la matriz de ejemplo que MIROVA publicó con su código es la pasada de Etna del 2023-05-19 00:54 (NOAA-20):
 el archivo OSF v2.5 la trae con el mismo cenit (7,753455827) y azimut (-77,46321927), y con el resultado que dio el
 sistema en producción: 5 píxeles, suma de L_hot 1,96534218, suma de L_bk 1,072886152, VRP 9.889.528,362 W. Que el port
-reproduzca eso prueba dos cosas a la vez: que el port es fiel y que el código publicado es el que corrió en esa pasada.
+reproduzca eso prueba que el port es fiel en la detección de cumbre, el fondo y la fórmula del VRP. No prueba los umbrales
+(en Etna ningún píxel entra por K1 ni por la región de fuera) ni el VRP sobre 50° de cenit, donde MIROVA publica otra
+cosa en el 24 % de las filas de VIIRS 750 del OSF (experiments/_s158_audit/f6/INFORME.md, hallazgos 1 y 2).
 Las dos preguntas del instrumento: (1) si el port estuviera roto en la detección, los índices o la suma de L_hot no
 coincidirían a 8 decimales; (2) el control de mutación (segundo pase apagado) muestra que la prueba puede fallar.
 Lo que este caso NO cubre (mutaciones que no cambian Etna): experiments/_s158_oraculo_mirova/mutar_oraculo_salida.txt.

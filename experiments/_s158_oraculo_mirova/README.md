@@ -14,8 +14,12 @@ instrumento para correr el detector de MIROVA sobre una matriz y comparar con el
 | suma de L_bk | 1,072886152 | 1,073661545 (0,07 %) |
 | VRP | 9.889.528 W | 9.880.936 W (0,09 %) |
 
-La detección coincide exacta; el fondo, con 0,07 % de diferencia. Eso prueba también que **el código publicado es el
-que corrió en producción** en esa pasada.
+La detección coincide exacta; el fondo, con 0,07 % de diferencia. ⚠️ **Corregido por el frente F6 de la auditoría S158**
+(`experiments/_s158_audit/f6/INFORME.md`, hallazgo 2): la primera versión decía que esto «prueba que el código publicado
+es el que corrió en producción». Dice más de lo que mide. En Etna los 5 píxeles entran por la caja de cumbre y ninguno
+por el Test 1 ni por la región de fuera, así que la pasada prueba la detección de cumbre, el fondo y la fórmula del VRP,
+no los umbrales. Y sobre 50° de cenit el VRP publicado de VIIRS 750 no es el del código en el 24 % de las filas del OSF
+(hallazgo 1 de F6): el código publicado no es toda la cadena.
 
 **Lo que este control no cubre** (`mutar_oraculo_salida.txt`): en Etna el foco supera todos los umbrales por mucho, así
 que cambiar los 8 vecinos por los 9, `max` por `min`, K1 a -0,8, el mínimo de dNTI a 0,010 o recortar a cero no cambia

@@ -34,7 +34,9 @@ cumbre (5σ y 0,003), el mínimo de ETI fuera (0,01), μ y σ de toda la escena,
 1,97 × 10⁷ con el área nominal fija de 0,5625 km², y que MIROVA suma **todos** los píxeles alertados de la pasada (D32,
 A10 rebajada en S147).
 
-**Urgente para Nicolás**: el brazo del A/B de D25 (run 39530508296, en cola desde las 01:59 UTC de hoy) calcula el
+**Urgente para Nicolás** (⚠️ actualizado por F5: el run terminó con falla a las 13:55 UTC en su segundo intento, le
+falta el 2026-10-18 entero y su métrica de magnitud da MEJORA con un brazo placebo; ver `experiments/_s158_audit/f5/INFORME.md`):
+el brazo del A/B de D25 (run 39530508296) calcula el
 fondo como la media de los vecinos no alertados de la ventana de 3 × 3; el código de MIROVA **excluye justo esos
 vecinos** (agranda el hueco de los alertados con un cuadrado de 3, 5 o 7 celdas de lado, o sea 1, 2 o 3 celdas hacia
 cada lado) e interpola por debajo, sin recortar (§4.3). El A/B sigue
@@ -75,6 +77,11 @@ remuestreo, la geolocalización, la nube o la cadena NRT («standard and readily
 MIROVA infrastructure and are not distributed», Coppola 2026 p. 21).
 
 ## 2. Cómo leer este código (advertencias)
+
+- ⚠️ **Auditoría S158, frente F6** (`experiments/_s158_audit/f6/INFORME.md`): sobre 50° de cenit el VRP que MIROVA publica
+  en VIIRS 750 no es el que da este código en el 24 % de las filas del OSF v2.5 (mediana 0,51 del VRP del código; escalón
+  exacto en 50°; nunca bajo 50°, nunca en VIIRS 375 ni MODIS). El código publicado no es toda la cadena. Y ningún
+  resultado publicado pone a prueba sus umbrales de detección: para eso falta una pasada débil.
 
 - Es una versión **compacta** («reproduces the essential scientific calculations and is not the complete operational
   MIROVA near-real-time processing chain», README). Dice conservar del operacional las constantes de Planck, las
@@ -158,6 +165,13 @@ nosotros. Cuánto, no está medido.
 **Patrón.** Aquí no nos equivocamos: el texto y el programa no dicen lo mismo. Lo que sí estuvo mal fue **suponer que
 el paper describe el programa**. La regla MISSION 1 pide cita verbatim del paper como autoridad; con el código
 publicado, la autoridad sobre «qué hace el sistema» es el código. Decisión de Nicolás (§7).
+
+⚠️ **REFUTADO por la auditoría S158 (F3 H5 y F5-06; pendiente del verificador)**: la lectura física del párrafo que
+sigue («el halo lleva calor y restarlo se come parte del exceso») no tenía respaldo y el único caso medido dice lo
+contrario. En Etna el fondo de vecinos del brazo D sube el VRP (+2,65 % contra MIROVA) y sacar la dilatación también lo
+sube (+0,8 %): los vecinos inmediatos están **más fríos** que el fondo interpolado. En VIIRS 375 nuestro fondo de 8
+vecinos queda 3 a 8 % bajo el de MIROVA (F3). Lo que sí sigue en pie: el brazo D no es el fondo de MIROVA. Texto
+original conservado:
 
 El fondo del VRP es el caso más delicado, porque **D25 lo diseñamos leyendo el paper**: «media de los vecinos no
 alertados», con ventana que crece hasta 7 × 7 sólo si no hay ninguno. El código hace casi lo contrario: **aparta el

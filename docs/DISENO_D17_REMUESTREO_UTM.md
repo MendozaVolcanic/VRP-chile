@@ -274,6 +274,20 @@ Python, declarado en el script):
 | VIIRS 375 (n = 922) | 0,79 | 0,62 | 0,53 | 0,58 | 0,77 |
 | VIIRS 750 (n = 201) | 0,65 | 0,49 | 0,47 | 0,24 | 0,79 |
 
+⚠️ **Auditoría S158, frente F6**: en VIIRS 750 parte de la caída de MIROVA sobre 50° puede no ser física ni del
+remuestreo: el OSF v2.5 muestra que sobre 50° de cenit MIROVA publica, en el 24 % de las filas, la mitad del VRP que da su
+código (escalón exacto en 50°, sólo VIIRS 750; `experiments/_s158_audit/f6/INFORME.md`, hallazgo 1). En el OSF casi no
+actúa bajo 20 MW y bajo 5 MW no hay datos, así que no se sabe si toca a las alertas chilenas débiles. En VIIRS 375 la
+identidad se cumple en todas las filas, y la curva de VIIRS 375 de la tabla de arriba no tiene esta duda.
+
+⚠️ **Rebajado por la auditoría S158, frente F3** (`experiments/_s158_audit/f3/INFORME.md`, H2; pendiente del
+verificador): el punto (1) de abajo y el «el déficit grande es de nivel» están mal. Con la energía en la misma región
+(todos los alertados de MIROVA dentro del inner), VIIRS 375 va de 0,98 de la de MIROVA a 0-10° a 0,72 a 30-40° y 0,48 a
+60-75°, y el Npix de MIROVA es plano mientras el nuestro cae. El estadístico S = R(>40°)/R(≤40°) esconde la pendiente
+porque el tramo de 40° o menos ya contiene casi toda la caída (la propia tabla de arriba lo muestra: 0,79 a 0,62 entre
+los dos primeros tramos). D17 vuelve a ser candidato fuerte a explicar la pendiente. Para el A/B del §6, la pendiente se
+mide por tramos finos, no con S. Texto original conservado:
+
 **Qué cambia para D17.** (1) La línea base del estadístico S del §6.4 es 0,77 en VIIRS 375 y 0,79 en VIIRS 750, no la
 caída de 2,7× de S130 (medida con el detector anterior). Lo que D17 puede cerrar en la pendiente es como mucho ese
 23 %. (2) El déficit grande es de **nivel** (0,6 a 0,8 ya cerca del nadir), y ahí pesan otras cosas: lo que se publica

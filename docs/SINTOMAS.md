@@ -63,7 +63,9 @@ atrás cuando se aplique el reproceso histórico con K (marca S157 de `docs/MISS
 
 - S158 (`docs/DISENO_D17_REMUESTREO_UTM.md` §3.6): MIROVA no es plano con el cenit (normalizado por volcán en el tiempo,
   VIIRS 375 de 1,09 a 0,79; Láscar 1,41 a 0,37), y con K nuestra razón contra MIROVA en VIIRS 375 va de 0,79 a 0,58
-  (S = 0,77; VIIRS 750 de 0,65 a 0,24, S = 0,79). El déficit grande es de nivel, no de pendiente.
+  (S = 0,77; VIIRS 750 de 0,65 a 0,24, S = 0,79). El déficit grande es de nivel, no de pendiente. ⚠️ **Rebajado por la
+  auditoría S158, F3 H2**: con la energía en la misma región la pendiente es fuerte (0,98 a 0-10°, 0,72 a 30-40°, 0,48 a
+  60-75°) y el S de dos tramos la escondía; ver la marca en el §3.6 del diseño.
 - S158 (`docs/DISENO_D17_REMUESTREO_UTM.md`): los TIF UTM de MIROVA muestran que su grilla no está centrada en `mirova_center`
   (falla hasta 310 m), que es UTM verdadera y que MIROVA interpola; nuestro F70 deja huecos en oblicuo y pierde energía con el
   ángulo como el área fija. Propone una Fase 0 de sólo lectura (reproducir los TIF) y un A/B sólo VIIRS sobre la base de D25.
