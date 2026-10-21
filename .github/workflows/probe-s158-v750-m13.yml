@@ -1,0 +1,54 @@
+name: "Probe S158, M13 en los pixeles con M15 Bowtie_Deleted (solo lectura)"
+
+# Vuelca DN, flags y LUT de M13 donde M15 trae 65533, en los 3 granulos de mayor cenit del probe de M15
+# (experiments/_s158_v750/probe_m13_bowtie.py). Solo lectura, artefacto. A43 "on" con comillas. A71: solo token.
+"on":
+  push:
+    branches: ["s158-v750-probe2"]
+  workflow_dispatch:
+
+concurrency:
+  group: probe-s158-v750-m13
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Token presente
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+        run: |
+          if [ -z "$EARTHDATA_TOKEN" ]; then echo "EARTHDATA_TOKEN vacio: no se corre (A71)"; exit 1; fi
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Dependencias
+        run: |
+          pip install --upgrade pip
+          sudo apt-get install -y libhdf4-dev
+          pip install pyhdf
+          pip install earthaccess numpy h5py scipy pyyaml pyproj pandas
+      - name: Probe
+        env:
+          EARTHDATA_TOKEN: ${{ secrets.EARTHDATA_TOKEN }}
+          VRP_PROFILE: mirova_equivalent
+          VRP_TMP_DIR: ${{ runner.temp }}/vrp_tmp
+        run: |
+          set -o pipefail
+          mkdir -p out
+          python experiments/_s158_v750/probe_m13_bowtie.py 2>&1 | tee out/probe_m13_bowtie.log
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s158-v750-m13-bowtie
+          path: out/*
+          retention-days: 30
+          if-no-files-found: error
