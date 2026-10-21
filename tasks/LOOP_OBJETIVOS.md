@@ -551,6 +551,21 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 tarde (S158 «retomar», dueña del loop): ola 1 de S159 COMPLETA
+- Siete frentes terminados y commiteados en `s159-pruebas` (P1 `69c482c64`, P2 `3f133d69d`, P3 `70e31dcb9`, GEO
+  `fbbbbfc1d`, O1 `46664ad9d`, COB `dc8b51832`; la rama se reescribió con el sí de Nicolás para sacar 52 páginas de
+  papers con copyright, que quedan en disco). IA en #889 (CI verde, merge bloqueado por el clasificador de permisos:
+  lo hace Nicolás) y su pieza del evaluador de D25 en #890 (borrador, requiere adenda).
+- Lo que cambia la ola 2: (1) **N usa la grilla de 750 m correcta** (GEO: esquina a -187,5 m en x e y de la de 375 m;
+  la prueba con gránulos de R2 usó la de 375 m) y rehace Láscar 2026-09-26 y Chaitén 2026-10-06; (2) **MODIS lleva dos
+  variantes de fondo**, media de vecinos y halo (P3: ningún paper MODIS describe halo, interpolación ni recorte);
+  (3) **con un píxel el VRP varía hasta 1,82 veces según la triangulación** (O1): informar banda o esperar O2 (paquete
+  para MATLAB Online listo en `experiments/_s159/o1/o2_paquete/`); (4) **M estratifica por lado del barrido y por
+  posición dentro del gránulo** (P3: ±2 líneas en los extremos); (5) toda evaluación contra el OSF 2025 empieza el
+  2025-02-15 (COB H1: 357 de las 411 «sin record» son anteriores a nuestra serie); (6) CMR no sirve Chile del 17 al
+  20 de octubre (COB H2): ninguna ventana los incluye sin declararlo.
+- Lista viva de lo que podríamos hacer mejor que MIROVA: `docs/BEYOND_MIROVA_EXTENSIONS.md` §12 (pedido de Nicolás).
+
 ### 2026-10-21 18:14 UTC (S158 «retomar», dueña del loop): bloque R2 incorporado; ola 1 de S159 corriendo
 - La segunda ronda cerró en el PR borrador #888 (checks verdes; ningún hallazgo refutado por sus verificadores). Su
   bloque `tasks/LOOP_BLOQUE_S158_R2.md` quedó copiado al §4 («Bloque S158 R2 y plan S159»); la sesión de la segunda
