@@ -79,3 +79,14 @@ mayor `min(dNTI − umbral_dNTI, dETI − umbral_dETI)`): (a) valor finito en el
 - **Positivo**: en C1, C2 y C3 el mejor píxel dentro del inner tiene que pasar las cuatro etapas. Si un control no
   pasa, el instrumento está roto y no hay veredicto.
 - Un gránulo que no baja queda SIN DATO (el script sale con código 2).
+
+## Adenda posterior al primer resultado (run 39692725826), declarada antes del segundo despacho
+
+El criterio de arriba no cambia y se aplica tal cual al run 39692725826. Ese run mostró que en T1 y T2 ningún
+contrafactual de un solo factor (F1, F2, F4, B21) enciende un píxel dentro del inner y que F3 (conectiva `min` y sin
+compuerta, juntas) sí enciende 2 y 3. El preregistro no tenía una regla para dos factores que sólo actúan juntos: se
+informa así, sin elegir uno. Además el mejor píxel tiene BT MIR por DEBAJO de `t_bg`, y la magnitud del cúmulo
+resta el fondo del anillo con recorte `dL >= 0` (`pipeline/process_modis.py`, bloque «S26: clip ΔL ≥ 0»), así que
+detectarlo podría no bastar para publicarlo. Para medirlo, sin criterio nuevo de causa, se agregan tres brazos que
+llegan hasta el record y el predicado del tablero (node): SC (primer pase sin compuerta), MIN (conectiva `min` en los
+dos pases) y MINSC (las dos). Son exploratorios: describen qué haría falta para publicar, no deciden la causa.

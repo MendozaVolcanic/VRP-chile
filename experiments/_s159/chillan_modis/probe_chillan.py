@@ -137,6 +137,7 @@ def main():
     auth()
     ORIG_READ, ORIG_FP, ORIG_SP = PM.read_modis_l1b, PM.first_pass_tests_2_and_3, PM.second_pass_adjacent
     ORIG_B22 = PM.ENABLE_MODIS_B22_PRIMARY
+    ORIG_PROSA = PM.ENABLE_TESTS_23_PROSE_BRANCH
     faltan = 0
 
     for tag, short, pat in OBJETIVOS:
@@ -152,8 +153,11 @@ def main():
         fila["archivo"] = Path(l1b).name
         try:
             dn = leer_dn(l1b)
-            for brazo in ("P", "B21"):
-                cap = {}
+            # Brazos (todos en memoria): P produccion; B21 banda 21 primaria; SC primer pase sin compuerta de 3 K;
+            # MIN conectiva min en los dos pases; MINSC las dos cosas. SC, MIN y MINSC llegan hasta el record, para
+            # saber si el pixel, una vez detectado, sobrevive a la magnitud (clip de dL >= 0 contra el fondo del anillo).
+            for brazo in ("P", "B21", "SC", "MIN", "MINSC"):
+                cap = {"sin_compuerta": brazo in ("SC", "MINSC")}
 
                 def lector(path):
                     d = ORIG_READ(path)
@@ -161,6 +165,8 @@ def main():
                     return d
 
                 def fp(*a, **k):
+                    if cap["sin_compuerta"]:
+                        k = dict(k, apply_bt_gate=False)
                     hot, diag = ORIG_FP(*a, **k)
                     cap["fp_args"], cap["fp_kw"], cap["fp_hot"], cap["fp_diag"] = a, k, hot, diag
                     kk = dict(k)
@@ -175,7 +181,8 @@ def main():
                     return res
 
                 PM.read_modis_l1b, PM.first_pass_tests_2_and_3, PM.second_pass_adjacent = lector, fp, sp
-                PM.ENABLE_MODIS_B22_PRIMARY = (brazo == "P") and ORIG_B22
+                PM.ENABLE_MODIS_B22_PRIMARY = (brazo != "B21") and ORIG_B22
+                PM.ENABLE_TESTS_23_PROSE_BRANCH = (brazo not in ("MIN", "MINSC")) and ORIG_PROSA
                 try:
                     res = PM.calculate_vrp(
                         Path(l1b), Path(l1b), v["lat"], v["lon"], v["radius_km"],
@@ -187,6 +194,7 @@ def main():
                 finally:
                     PM.read_modis_l1b, PM.first_pass_tests_2_and_3, PM.second_pass_adjacent = ORIG_READ, ORIG_FP, ORIG_SP
                     PM.ENABLE_MODIS_B22_PRIMARY = ORIG_B22
+                    PM.ENABLE_TESTS_23_PROSE_BRANCH = ORIG_PROSA
                 b = {"res_none": res is None}
                 # record como lo escribe produccion
                 if res:
@@ -205,6 +213,13 @@ def main():
                         pc = rec.get("primary_cluster") or {}
                         b["rec"] = {k: rec.get(k) for k in CAMPOS_REC}
                         b["rec"]["pc"] = {k: pc.get(k) for k in ("vrp_mw", "n_pixels", "centroid_dist_km")} if pc else None
+                        # record reducido para el predicado del tablero (banco_paridad.CAMPOS_JS), corrido despues con node
+                        slim = {kk: rec.get(kk) for kk in ("primary_cluster", "distance_class", "vrp_mw", "vrp_mir_mw",
+                                                          "discarded_reason", "triggered_test1", "vrp_vent_mw", "t_max_k",
+                                                          "sensor", "f5_core_vrp_mw")}
+                        slim["anomaly_pixels"] = [{kk: q.get(kk) for kk in ("lat", "lon", "vrp_mw", "bt_k")}
+                                                  for q in (rec.get("anomaly_pixels") or [])]
+                        b["slim"] = slim
                 if "fp_args" not in cap:
                     b["fp_no_corrio"] = True
                     fila[brazo] = b
@@ -302,7 +317,9 @@ def main():
         P = fila.get("P") or {}
         print(tag, fila["granulo"], "n_fp", P.get("n_fp"), "inner", P.get("n_fp_inner"), "F1", P.get("n_F1_inner"),
               "F2", P.get("n_F2_inner"), "F3", P.get("n_F3_inner"), "rep", P.get("replica_identica"),
-              "B21", (fila.get("B21") or {}).get("n_fp_inner"), fila.get("error", ""), flush=True)
+              "B21", (fila.get("B21") or {}).get("n_fp_inner"),
+              "pc SC/MIN/MINSC", [((fila.get(x) or {}).get("rec") or {}).get("pc") for x in ("SC", "MIN", "MINSC")],
+              fila.get("error", ""), flush=True)
         Path(l1b).unlink(missing_ok=True)
     sal.close()
     print("FALTAN:", faltan)
