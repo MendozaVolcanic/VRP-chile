@@ -33,6 +33,14 @@ ligeramente por pixel area + scan angle + orden de pixels):
 Ejecutar: pytest tests/test_golden_records.py -v
 Regenerar snapshots cuando un cambio sea INTENCIONAL: editar GOLDEN dict abajo
 (documentando en el commit por qué cambió el valor de referencia).
+
+S158 (reemplazo del histórico con K, tarea 1.24): el golden 4 se DIO VUELTA. Villarrica 2026-05-09
+06:36 VIIRS_NOAA20 lo publicaba el detector anterior por el Test 1 integrado (~0,04 MW), pero en
+esa pasada MIROVA no vio nada: el consolidado del scraper la trae como RUTINA con 0,0 MW en VIIRS375
+y en VIIRS (data/mirova_reference/mirova_v1_snapshot/registro_vrp_consolidado.csv). Era una
+publicación de más, no sensibilidad. K la calla, como MIROVA. El golden vigila ahora esa paridad:
+si K vuelve a publicar ahí, falla. La sensibilidad sub-píxel real de Villarrica la vigila la
+sombra del paso 9 (scripts/vigilancia_sombra.py), contra las alertas de MIROVA y no contra C0.
 """
 
 import json
@@ -96,19 +104,18 @@ GOLDEN = [
         },
     },
     {
-        "id": "villarrica_subpixel_test1roi_noaa20_2026_05_09",
+        "id": "villarrica_negativo_limpio_noaa20_2026_05_09",
         "volcano": "Villarrica",
         "datetime_utc": "2026-05-09 06:36",
         "sensor": "VIIRS_NOAA20",
-        "why": "Lava lake sub-pixel (~0.04 MW) capturado por Test1-ROI con ancla "
-               "honesta (final_hotspot_source=test1_roi, dist 0.0 al cráter). Caso "
-               "límite de detección: si vrp→0 perdimos sensibilidad sub-pixel (FN). "
-               "Reemplaza el viejo golden vent-sub-pixel (vent-path removido post-S27).",
+        "why": "S158: pasada en que MIROVA no vio nada (RUTINA, 0,0 MW) y que el detector "
+               "anterior publicaba por el Test 1 integrado. Con K el record queda sin "
+               "detección, como MIROVA. Si vrp vuelve a ser > 0, K volvió a publicar de "
+               "más donde MIROVA calla. Antes (S116) era el golden sub-píxel test1_roi.",
         "expected": {
-            "vrp_mw":                (0.01, 0.12),
-            "distance_class":        "summit",
-            "final_hotspot_source":  "test1_roi",
-            "final_hotspot_dist_km": (0.0, 0.05),
+            "vrp_mw":                (0.0, 0.0),
+            "distance_class":        None,
+            "final_hotspot_source":  None,
             "sensor":                "VIIRS_NOAA20",
         },
     },
