@@ -6,7 +6,7 @@ name: "Probe S159 Chillan MODIS, por que el primer pase no marca el crater a 58 
 # Solo lectura: no escribe en data/ (store.DATA_DIR va a un temporal), no commitea, no hace push; borra cada HDF.
 # A43: "on" entre comillas. S141: pipefail con tee; el script sale 2 si falta un granulo.
 # A71: autentica SOLO por EARTHDATA_TOKEN y falla al instante si viene vacio (el par usuario y clave esta vencido).
-# A15: 7 granulos L1B, 2 corridas de calculate_vrp cada uno (~2 a 4 min por granulo estimados); timeout 45.
+# A15: 7 granulos L1B, 5 corridas de calculate_vrp cada uno (run 39692725826: 2 corridas en ~25 s por granulo); timeout 45.
 "on":
   push:
     branches: ["s159-chillan-disparo"]
