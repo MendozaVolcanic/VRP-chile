@@ -1,0 +1,63 @@
+== 1. README §1: passes M>=9 en VIIRS375: t_max y t_bg
+  n 10 t_max 328.18 347.12 t_bg 270.81 275.47
+== 2. Tabla 2.1 (06:48 y nadir)
+  2026-10-18 05:42 VIIRS750 z20.5 M20.87 D14.03 R0.67 Frec1.00 G0.67 Gm10 0.77 Gf0 0.92 fa 1.20 Ga 0.80
+  2026-10-18 06:00 VIIRS375 z22.3 M9.94 D7.20 R0.72 Frec1.00 G0.72 Gm10 0.79 Gf0 0.89 fa 1.24 Ga 0.90
+  2026-10-18 06:00 VIIRS750 z22.3 M18.98 D13.60 R0.72 Frec1.00 G0.72 Gm10 0.81 Gf0 0.98 fa 1.24 Ga 0.89
+  2026-10-18 06:48 VIIRS375 z67.6 M25.79 D8.93 R0.35 Frec0.95 G0.36 Gm10 0.41 Gf0 0.47 fa 3.73 Ga 1.36
+  2026-10-18 06:48 VIIRS750 z67.6 M22.85 D2.84 R0.12 Frec0.42 G0.30 Gm10 0.55 Gf0 0.96 fa 3.72 Ga 1.11
+  06:48 V750 pixeles: [(288.4, 0.96, 2.841), (282.1, 0.82, 1.545), (281.0, 1.94, 1.338), (276.2, 0.29, 0.566), (276.1, 1.4, 0.547), (268.9, 1.57, 0.0)] t_bg 272.0
+  06:48 V750 primary_cluster: {'n_pixels': 2, 'vrp_mw': 2.841, 'single_pixel_mode': True}
+== 3. Recorte a cero
+  pasadas con recorte 25 de 87 F_cero min/max 1.0019052463598304 1.7298114705507648 F_cero None 2
+== 4. Seleccion: S_todos vs S_in y n_dentro por banda
+  VIIRS375 <30 n12 n_dentro med 2.5  S_todos/S_in med 1.00  n_alertados>n_dentro: 2
+  VIIRS375 30-50 n13 n_dentro med 2.0  S_todos/S_in med 1.00  n_alertados>n_dentro: 0
+  VIIRS375 >=50 n19 n_dentro med 3.0  S_todos/S_in med 1.00  n_alertados>n_dentro: 1
+  VIIRS750 <30 n9 n_dentro med 2.0  S_todos/S_in med 1.00  n_alertados>n_dentro: 0
+  VIIRS750 30-50 n12 n_dentro med 1.5  S_todos/S_in med 1.00  n_alertados>n_dentro: 0
+  VIIRS750 >=50 n11 n_dentro med 3.0  S_todos/S_in med 1.00  n_alertados>n_dentro: 0
+  MODIS <30 n5 n_dentro med 2.0  S_todos/S_in med 1.00  n_alertados>n_dentro: 0
+  MODIS 30-50 n3 n_dentro med 2.0  S_todos/S_in med 1.00  n_alertados>n_dentro: 0
+  MODIS >=50 n3 n_dentro med 2.0  S_todos/S_in med 1.00  n_alertados>n_dentro: 0
+== 5. Area: regresion log G contra log f_area (y cenital) por sensor
+  VIIRS375 n44 pendiente log G ~ log f = -0.71 [-1.10; -0.32] (−1 = el área lo explica todo; 0 = nada)
+     multiple: log f -0.80, cenital(rad) 0.12 | con sec(z): log f -0.51, sec -0.16  corr(log f, sec z) 0.91
+     solo M>=1 MW: n32 pendiente -0.95
+  VIIRS750 n32 pendiente log G ~ log f = -1.33 [-1.93; -0.68] (−1 = el área lo explica todo; 0 = nada)
+     multiple: log f -0.66, cenital(rad) -0.89 | con sec(z): log f -0.10, sec -0.98  corr(log f, sec z) 0.91
+     solo M>=1 MW: n30 pendiente -1.30
+== 6. Diente de sierra: pasadas VIIRS375 con cenital 50-58 (agregacion 1:1, f chica) contra 44-50 (2:1, f grande)
+  VIIRS375 44-52.6 (2:1) n9 f med 2.01 G med 0.58 Gf0 med 0.68  Gs [1.43, 0.44, 0.58, 0.54, 0.66, 0.3, 1.24, 0.59, 0.46]
+  VIIRS375 52.6-58.5 (1:1) n5 f med 1.49 G med 0.60 Gf0 med 1.33  Gs [1.27, 0.6, 0.51, 0.74, 0.6]
+  VIIRS750 44-52.6 (2:1) n7 f med 1.76 G med 0.57 Gf0 med 1.13  Gs [0.41, 0.57, 1.04, 0.27, 2.0, 0.48, 0.77]
+  VIIRS750 52.6-58.5 (1:1) n4 f med 1.50 G med 0.38 Gf0 med 1.56  Gs [0.33, 0.42, 0.56, 0.34]
+== 7. G_area: tendencia relativa a nadir y bootstrap de medianas por banda
+  VIIRS375 <30   n12 G med 0.73 [0.51; 0.84]  G_area med 0.80 [0.68; 0.91] cuartiles 0.73-0.91  G_area>=1: 1
+  VIIRS375 30-50 n13 G med 0.58 [0.46; 0.64]  G_area med 0.94 [0.84; 1.02] cuartiles 0.84-1.02  G_area>=1: 4
+  VIIRS375 >=50  n19 G med 0.45 [0.32; 0.60]  G_area med 0.95 [0.78; 1.21] cuartiles 0.76-1.36  G_area>=1: 9
+  VIIRS750 <30   n 9 G med 0.91 [0.67; 1.13]  G_area med 0.97 [0.80; 1.58] cuartiles 0.89-1.17  G_area>=1: 3
+  VIIRS750 30-50 n12 G med 0.45 [0.38; 0.72]  G_area med 0.79 [0.58; 1.04] cuartiles 0.59-1.04  G_area>=1: 4
+  VIIRS750 >=50  n11 G med 0.32 [0.10; 0.42]  G_area med 0.59 [0.35; 1.11] cuartiles 0.35-1.11  G_area>=1: 3
+  MODIS <30   n 5 G med 0.75 [0.49; 0.85]  G_area med 0.78 [0.61; 1.01] cuartiles 0.75-0.81  G_area>=1: 1
+  MODIS 30-50 n 3 G med 0.34 [0.14; 0.48]  G_area med 0.64 [0.24; 1.21] cuartiles 0.24-1.21  G_area>=1: 1
+  MODIS >=50  n 3 G med 0.20 [0.11; 0.38]  G_area med 0.85 [0.83; 1.28] cuartiles 0.83-1.28  G_area>=1: 1
+== 8. Techo con fondo cero, cuantas oblicuas (z>=30) 375 no cierran, y con pixel MAS CALIENTE replicado
+  n 32 G_f0<1: 25  G_area_fondo0<1: 7
+  n_dentro mediana oblicuas 375: 2.5  nadir: 2.5
+== 9. Testigo de saturacion: nulo
+  corr 0.788 n 30  pendiente y~x 0.52
+  corr(x, cenital) -0.724  corr(y, cenital) -0.653
+  corr parcial (control cenital lineal) 0.604
+  nulo barajado libre: p95 0.31 p99 0.43
+  corr(x, t_max375) 0.302  corr(y, t_max375) 0.597
+  log(G750/G375): mediana -0.07, sd 0.47, corr con cenital -0.47, con t_max375 -0.14
+  sd(x) 0.74 sd(y) 0.49
+  pasadas 375 con cerca_del_techo: 0
+== 10. G375 vs G750 por pasada (fondo/area comun?)
+  corr(logG375, logG750) 0.791
+== 11. Sensibilidad al fondo en 750: dT exceso (t_max - t_bg) contra cenital, y alza -10K contra dT
+  VIIRS750 corr(dT, cenital) -0.51  corr(log alza, log dT) -0.95  corr(log alza, cenital) 0.56
+     multiple log alza ~ log dT + cenital: -0.458, 0.0028
+  VIIRS375 corr(dT, cenital) -0.18  corr(log alza, log dT) -0.93  corr(log alza, cenital) 0.05
+     multiple log alza ~ log dT + cenital: -0.300, -0.0008
