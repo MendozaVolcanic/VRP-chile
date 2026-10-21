@@ -1,0 +1,17 @@
+[VRP profile=mirova_equivalent] anomaly_K=5.0 nsigma_mir=3.0 vent_K=1.0 nti_k1=-0.8 nti_rel=off vent_path=off sensors=MODIS:True V375:True V750:True data_subdir=mirova_equivalent
+records nuestros por categoria (ventana con referencia):
+  MODIS {'pareo_120s|noche': 6349, 'sin_fila|noche': 149, 'solo_vecino|noche': 148}
+  VIIRS375 {'control_150min': 50, 'pareo_120s|noche': 7806, 'sin_fila|noche': 4961, 'solo_vecino|noche': 224}
+  VIIRS750 {'control_150min': 42, 'pareo_120s|noche': 7606, 'sin_fila|noche': 5066, 'solo_vecino|noche': 196}
+filas MIROVA por categoria: {'MODIS|con_par|noche': 6349, 'MODIS|sin_record_cerca|dia': 6313, 'MODIS|sin_record_cerca|noche': 97, 'MODIS|solo_vecino|noche': 21, 'VIIRS375|con_par|noche': 7806, 'VIIRS375|sin_record_cerca|dia': 8164, 'VIIRS375|sin_record_cerca|noche': 36, 'VIIRS375|solo_vecino|noche': 2, 'VIIRS750|con_par|noche': 7606, 'VIIRS750|sin_record_cerca|dia': 8414, 'VIIRS750|sin_record_cerca|noche': 48, 'VIIRS750|solo_vecino|noche': 12}
+pares de granulos consecutivos (misma orbita) en la referencia: {'VIIRS375': 4, 'VIIRS750': 3, 'MODIS': 12} de {'VIIRS375': 16008, 'VIIRS750': 16080, 'MODIS': 12780}
+pares de granulos consecutivos en nuestros records: {'MODIS': 283, 'VIIRS375': 782, 'VIIRS750': 649} de {'MODIS': 14565, 'VIIRS375': 28822, 'VIIRS750': 28581}
+MODIS solo_vecino: 148 nocturnos: 148
+  con nuestro record en el granulo de MIROVA tambien: 130
+  por clase_ref (noche): Counter({'rutina': 147, 'alerta_bajo_1MW': 1})
+  por volcan (noche): Counter({'PuyehueCordonCaulle': 20, 'NevadosDeChillan': 18, 'Tupungatito': 15, 'Isluga': 14, 'Lascar': 13, 'Lastarria': 13, 'Llaima': 13, 'PlanchonPeteroa': 13, 'Copahue': 11, 'Chaiten': 9, 'Villarrica': 9})
+  por mes (noche): {'2026-01': 12, '2026-02': 10, '2026-03': 14, '2026-04': 18, '2026-05': 22, '2026-06': 17, '2026-07': 9, '2026-08': 11, '2026-09': 19, '2026-10': 16}
+  por desfase: Counter({(5,): 86, (-5,): 62})
+  por sensor: Counter({'MODIS_AQUA': 83, 'MODIS_TERRA': 65})
+  datetime == hora del granulo: 148 de 148
+CONTROL POSITIVO Chillan 2026-01-19 02:40: [{'vol': 'NevadosDeChillan', 'b': 'MODIS', 'sensor': 'MODIS_TERRA', 'dt': '2026-01-19 02:40', 'noche': True, 'mes': '2026-01', 'desfase_min': [-5], 'clase_ref': 'rutina', 'tipos_ref': ['RUTINA'], 'vrp_ref': 0, 'fuentes_ref': ['CONS'], 'granulo': 'MOD021KM.A2026019.0240.061.2026019131323.hdf', 'nuestro_en_granulo_de_mirova': False, 'nuestro_vecino_lados': [], 'zen': 44.31, 'dc': 'summit', 'pc_vrp': 0.849, 'n_bg_anillo': 981, 'n_bg_used': 1248, 'datetime_vs_granulo': '0240'}]
