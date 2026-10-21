@@ -545,7 +545,13 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   argumento), rama `s158-reemplazo-ensayo` (worktree `D:\vrp-trabajo\temporales\s158_reemplazo`). Avance sólo
   Chillán: **PASA**, 5.558 en ventana, 5.552 reemplazados, 844 agregados, 6 en C0 (0,11 %, las 6 `nrt`), 5.904 a
   6.748 records. Los 11 juntos se corren tras el relleno.
-- #880: CMR no devolvió gránulos del 18-oct sobre Chillán en ningún producto, ni siquiera MODIS; SIN DATO hasta
+- **#882 mergeado** (`d428137a`, CI `pytest` verde). Efecto medido: watchdog despachado sobre `main` (run
+  39536910831, `success`): «2 corridas juzgadas en la lista», «vigilando 14 reprocesos vivos de 44 archivos», «sin
+  problemas»; **#876 se cerró solo**.
+- `verificar_ventana.py` (1.24 e) vive sólo en `loop/activo` (`experiments/_s154_reproc_k/`), no en `main`.
+- #880, control de la consulta: misma caja sobre Chillán da 3/4/12 (VNP02IMG/VJ102IMG/MOD021KM) el 10-15, 3/3/6 el
+  10-16, 1/3/5 el 10-17 y 0/0/0 el 10-18 y 10-19: CMR aún no indexa el estándar del 18-oct; #880 sigue esperando.
+- #880 (texto previo): CMR no devolvió gránulos del 18-oct sobre Chillán en ningún producto, ni siquiera MODIS; SIN DATO hasta
   validar la consulta con un día que sí tenga (CMR lento, consulta de control en segundo plano).
 
 ### 2026-10-21 02:45 UTC: TRASPASO del loop de S157 a la sesión nueva (S158)
