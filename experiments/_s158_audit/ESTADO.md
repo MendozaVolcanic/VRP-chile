@@ -36,5 +36,5 @@ sesión (no sesiones aparte: el disco no alcanza para worktrees nuevos), cada un
 
 | frente | estado |
 |---|---|
-| F1 a F6 | por lanzar |
+| F1 a F6 | lanzados el 2026-10-21 como subagentes en segundo plano (F2 y F4 en Fable, el resto en Opus, esfuerzo alto); prompt = bloque canónico + §4 + §5 del plan, con carpeta y presupuesto de dos horas |
 | V1 a V3 | después de F1 a F6 |
