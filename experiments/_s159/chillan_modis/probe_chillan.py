@@ -17,6 +17,7 @@ Uso (Linux con pyhdf): EARTHDATA_TOKEN=... VRP_PROFILE=mirova_equivalent python 
 import argparse
 import copy
 import importlib.util
+import inspect
 import json
 import math
 import os
@@ -210,10 +211,13 @@ def main():
                     continue
                 d = cap["data"]
                 lat, lon = d["lat"], d["lon"]
-                a, k = cap["fp_args"], cap["fp_kw"]
-                nti, nti_app, bt = a[0], a[1], a[2]
-                roi_mask, dist_km, t_bg, bts = a[3], a[4], a[5], a[6]
-                rep = replicar_first_pass(nti, nti_app, bt, roi_mask, dist_km, t_bg, bts, **k)
+                # calculate_vrp llama con argumentos por nombre: se enlazan a la firma original
+                ba = inspect.signature(ORIG_FP).bind(*cap["fp_args"], **cap["fp_kw"])
+                ba.apply_defaults()
+                k = dict(ba.arguments)
+                nti, nti_app, bt = k["nti"], k["nti_app"], k["bt"]
+                roi_mask, dist_km, t_bg = k["roi_mask"], k["dist_km"], k["t_bg"]
+                rep = replicar_first_pass(**k)
                 b["replica_identica"] = bool(np.array_equal(rep["hot"], cap["fp_hot"]))
                 inner = k["inner_km"]
                 dv = hav(alat, alon, lat, lon)
@@ -242,14 +246,17 @@ def main():
                 sp_rep = None
                 if cap.get("sp"):
                     sa, sk, sres = cap["sp"][-1]
-                    sp_rep = replicar_second_pass(*sa, **sk)
+                    sb = inspect.signature(ORIG_SP).bind(*sa, **sk)
+                    sb.apply_defaults()
+                    sk = dict(sb.arguments)
+                    sp_rep = replicar_second_pass(**sk)
                     b["sp_replica_identica"] = bool(np.array_equal(sp_rep["out"], sres))
-                    b["sp_n_nuevos_inner"] = int((sres & ~sa[2] & dentro).sum())
-                    b["sp_n_nuevos"] = int((sres & ~sa[2]).sum())
+                    b["sp_n_nuevos_inner"] = int((sres & ~sk["active_mask"] & dentro).sum())
+                    b["sp_n_nuevos"] = int((sres & ~sk["active_mask"]).sum())
                     for kk in ("mu_dnti", "sd_dnti", "mu_deti", "sd_deti", "n_bg"):
                         b["sp_" + kk] = f(sp_rep.get(kk))
                     b["sp_kw"] = {x: (y if isinstance(y, (int, float, bool, type(None))) else str(type(y)))
-                                  for x, y in sk.items()}
+                                  for x, y in sk.items() if x not in ("nti", "eti", "active_mask", "is_summit")}
                 # pixeles cerca
                 ii, jj = np.where(dv <= R_GUARDA_KM)
                 ic, jc = np.unravel_index(np.nanargmin(np.where(np.isfinite(dv), dv, np.inf)), dv.shape)
