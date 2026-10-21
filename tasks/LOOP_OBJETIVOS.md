@@ -555,6 +555,16 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): pre-registro de MxD03 v2
+- `experiments/_s159/mxd03_prereg/PREREGISTRO_MXD03.md` v2 (`4a6559082` en `s159-pruebas`), §0 con cada cambio contra el
+  verificador. P2 con nulo de 20 semillas de R en los 2.046 records con cenit ≤ 35° (sobre 35° y sin Cordón Caulle sólo
+  informa); M sólo informa (la alternativa con el comparador D-28 en EMPEORA queda en el §11); evaluador
+  `evaluar_mxd03.py` diseñado, no implementado; citas corregidas; pareo fijo a 120 s; CUMPLE SIN DAÑO; ~47 h de runner
+  en 1.232 gránulos; control 3 sin tolerancia, con re-corrida en el `codigo_sha` del record (5.449 de 5.465 records
+  escritos con un `pipeline/` distinto del de hoy). §11 con 12 puntos para Nicolás. Discrepa del verificador en dos
+  números (H1: 7 de 31 negativos de Cordón Caulle a 17 km o más, no «muchos» en el borde; H9: 12 `codigo_sha` en la
+  ventana, no 16). PENDIENTE: verificación del delta v1 a v2 antes del sello.
+
 ### 2026-10-21 (S159, dueña del loop): verificador de Chillán MODIS entregado
 - `experiments/_s159/chillan_modis/verificador/INFORME.md`. **CONFIRMADAS**: Test 2 (z 3,78 y 3,72 contra 5; 0 de 28 y
   0 de 32 píxeles dentro de 5 km lo pasan, no depende del píxel elegido), magnitud 0 MW (Chillán sin `local_kernel_bg`,
