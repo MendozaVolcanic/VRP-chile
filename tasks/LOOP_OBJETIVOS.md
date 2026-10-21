@@ -555,6 +555,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): verificador de Chillán MODIS entregado
+- `experiments/_s159/chillan_modis/verificador/INFORME.md`. **CONFIRMADAS**: Test 2 (z 3,78 y 3,72 contra 5; 0 de 28 y
+  0 de 32 píxeles dentro de 5 km lo pasan, no depende del píxel elegido), magnitud 0 MW (Chillán sin `local_kernel_bg`,
+  fondo global del anillo con recorte), controles 7 de 7 y estrato (por CSV remoto: 16 protegidas, 11 publicadas, 2
+  con cúmulo nulo, 3 diurnas). **PARCIAL**: la compuerta (cuentas bien; la causa «cumbre nevada más fría» queda
+  SOSPECHA y no decide la detección porque el segundo pase corre sin ella) y los descartes: con el flag REAL la
+  conectiva `min` sola detecta dentro del inner (2 y 3 píxeles, cúmulo summit a 3,40 y 0,92 km); el «min más sin
+  compuerta» del agente aplicaba `min` sólo al primer pase, que no existe en producción. Para publicar no basta ninguna.
+- Propio: a 58° la geolocalización de `_interp_geo` está comprimida (separación entre filas 0,40 y 0,81 km contra 1,00
+  en nadir), así que las distancias del informe están en una geometría que no es la real (liga con M y MxD03).
+
 ### 2026-10-21 (S159, dueña del loop): verificador del comparador D-28: PARCIAL
 - `experiments/_s159/instrumentos/verificador_comparador/INFORME.md` (`63e310af5` en `s159-evaluador-d25`). El código
   sigue el §2 punto por punto; ninguna ganancia uniforme ni por volcán da MEJORA (0 de 56 y 0 de 54); el nulo de d′
