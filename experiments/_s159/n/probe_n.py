@@ -268,26 +268,44 @@ def resumen_brazo(nombre, PVM, volcan, l1b, geo):
 
 # ---------------------------------------------------------------- bajada
 def bajar_por_tag(tag, lat, lon, destino):
-    """Estrato diurno: no hay record nuestro; se busca el gránulo por día y caja en los tres satélites."""
-    from datetime import datetime
-    from pipeline import fetch as F
-    dia = datetime.strptime(tag[1:8], "%Y%j")
-    for plat in ("SNPP", "NOAA20", "NOAA21"):
+    """Estrato diurno: no hay record nuestro. Se busca en CMR por nombre de gránulo con la hora de MIROVA, en los
+    tres satélites (la búsqueda de producción por día y caja filtra lo diurno, por eso no sirve aquí)."""
+    import earthaccess
+    from pipeline.fetch import download_granules
+    for pref, vers in (("VNP", ("2",)), ("VJ1", ("2.1", "2")), ("VJ2", ("2.1",))):
         par = {}
-        for t in ("L1B", "GEO"):
-            try:
-                cand = F.search_granules(f"VIIRS_{plat}_MOD_{t}", lat, lon, 30, dia)
-            except Exception as e:  # noqa: BLE001
-                print(f"   busqueda {plat} {t} fallo: {type(e).__name__}: {str(e)[:100]}", flush=True)
-                cand = []
-            h = [g for g in cand if tag in str(g["umm"].get("GranuleUR", ""))]
-            if h:
-                par[t] = h[:1]
+        for tipo in ("02", "03"):
+            for sn in (f"{pref}{tipo}MOD", f"{pref}{tipo}MOD_NRT"):
+                h = []
+                for ver in vers:
+                    try:
+                        h = earthaccess.search_data(short_name=sn, version=ver, granule_name=f"{sn}.{tag}.*", count=5)
+                    except Exception as e:  # noqa: BLE001
+                        print(f"   busqueda {sn} {ver} fallo: {type(e).__name__}: {str(e)[:100]}", flush=True)
+                        h = []
+                    if h:
+                        break
+                if h:
+                    par[tipo] = h[:1]
+                    break
         if len(par) == 2:
-            p1 = F.download_granules(par["L1B"], destino)
-            p2 = F.download_granules(par["GEO"], destino)
-            return ([q for q in p1 if q.suffix in (".nc", ".h5")][0], [q for q in p2 if q.suffix in (".nc", ".h5")][0]), None
+            p1 = download_granules(par["02"], destino)
+            p2 = download_granules(par["03"], destino)
+            return ([q for q in p1 if q.suffix in (".nc", ".h5")][0],
+                    [q for q in p2 if q.suffix in (".nc", ".h5")][0]), None
     return None, "sin_granulo_diurno"
+
+
+def bajar_con_reintentos(nombre, destino, intentos=3):
+    """CMR da ReadTimeout transitorios (humo, run 39680724047: Chaitén 2026-10-06). Reintenta la búsqueda."""
+    err = None
+    for n in range(intentos):
+        par, err = PG.bajar(nombre, destino)
+        if not err:
+            return par, None
+        print(f"   intento {n + 1} de {intentos}: {err}", flush=True)
+        time.sleep(30)
+    return None, err
 
 
 def procesar_granulo(objs, destino, outdir, sin_k=False):
@@ -295,7 +313,7 @@ def procesar_granulo(objs, destino, outdir, sin_k=False):
     o0 = objs[0]
     PG.LATLON[0], PG.LATLON[1] = o0["grilla"]["centro_lat"], o0["grilla"]["centro_lon"]
     if o0.get("granule"):
-        par, err = PG.bajar(o0["granule"], destino)
+        par, err = bajar_con_reintentos(o0["granule"], destino)
     else:
         h = o0["hora_utc"]
         from datetime import datetime
