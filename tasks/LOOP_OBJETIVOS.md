@@ -555,6 +555,24 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): pareo MODIS y borrador de MxD03 entregados; dos verificadores corriendo
+- **Pareo** (`s159-pruebas` `82220c314`, `experiments/_s159/pareo_modis/INFORME.md`), SIN VERIFICAR: el pareo de ±120 s
+  acierta y ensanchar a ±5 min empeora (no tocar `TOL_S` ni `VENTANA_S`). De 6.646 records MODIS con referencia, 148
+  parean sólo con el gránulo vecino: 130 son la otra mitad de una pasada ya pareada, 18 son pasadas con un gránulo
+  nuestro; 0 protegidas. El «noveno caso» del verificador de M (Chillán 01-19) no vale. Hallazgo central: con el volcán
+  en dos gránulos MIROVA lista el del sur en 526 de 537 casos y sólo alerta si el cráter está en él (24 de 24), así que
+  RUTINA de gránulo vecino entran como negativos limpios (1 a 3 %); nuestras publicaciones del gránulo norte quedan fuera
+  de toda métrica. #864 no cambia (reproducido hoja por hoja, 0 de 1.203).
+- **Borrador del pre-registro de MxD03** (`a0484dc8b`, `experiments/_s159/mxd03_prereg/PREREGISTRO_MXD03.md`): censo de
+  5.465 pasadas MODIS nocturnas (2026-03-01 a 2026-10-16; 50 protegidas, 42 bajo 1 MW, 5.110 negativos limpios), brazos
+  K, K2 y X en arnés por gránulo (~58 h de runner contra 235 h de reproceso), nueve decisiones para Nicolás. Lo
+  inesperado: los TIF MODIS de MIROVA están todos en EPSG:4326 (la grilla UTM fue sólo VIIRS 375); 44 de las 50
+  protegidas están bajo 40° de cenit; 43 de 44 noches con protegida MODIS ya publican por VIIRS; Coppola 2026 no está en
+  la lista de papers de MISSION; el consolidado remoto cambió entre dos corridas de la misma tarde (congelar la
+  referencia).
+- Verificadores con contexto limpio lanzados para los dos. Corriendo además: censo de F (D-31), Chillán MODIS,
+  verificador del evaluador de D25.
+
 ### 2026-10-21 (S159, dueña del loop): verificador limpio de N entregado
 - Integrado a `s159-pruebas` (merge `1360c4631`; verificador en `s159-n` `dc07644df`). Informe:
   `experiments/_s159/n/verificador/INFORME.md`. Recalculó la publicación de los cinco brazos con el predicado del tablero
