@@ -592,7 +592,22 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   vigila que K calle; el sustrato C0 queda en la sombra `experimental_v2` (27) y en los residuos (3). El NRT de las
   11:10 generó conflicto: los 11 JSON se tomaron de main y el reemplazo se reaplicó (`cdbf7478`); 24 pruebas clave
   verdes. Falta el CI y el merge.
-- Tres sesiones propuestas a Nicolás (tarjetas, sin iniciar): v750-recall-m15, tupungatito-magnitud, d17-diseno.
+- **1.24 d HECHO: #883 MERGEADO** (squash `8471add4`, 2026-10-21 11:48:37 UTC; el 502 de la API llegó después del
+  merge, comprobado en el estado del PR). CI `pytest` verde sobre `615f26fd`. Auto-merge: Nicolás dijo sí, pero el
+  repo exige reglas de protección en `main` para usarlo y esas reglas bloquearían los push directos del NRT; el ajuste
+  `allow_auto_merge` se habilitó y se volvió a `false` sin efecto. Verificación: `verificar_ventana.py
+  --desde 2025-02-15 --hasta 2026-09-17 --corte 2026-10-18T09:57:30Z --tag pre-s158-reemplazo-k`: **68.072 de 68.072
+  con K, 0 sin K, 64 claves fuera (las de Suomi NPP apartadas; las 26 de Terra quedan después de la ventana), 0
+  cambiados antes**. R8: el sitio publicado sirve `DATOS_K_DESDE_UTC = 2025-02-15`; `Llaima/NevadosDeChillan/
+  Copahue_recent.json`: 0 pasadas Suomi NPP del 06-ago y 0 records sin marca; el tablero carga sin errores de
+  consola y el aviso dice «desde el 15 feb 2025 son del detector K». Pendiente menor: el aviso todavía dice que «las
+  series que cruzan el 15 feb 2025 mezclan dos detectores», que ya no aplica (la serie empieza ese día).
+- **#884** (workflow `aplicar-reemplazo.yml`: regenera sobre main en cada intento, sin rebase; guard nuevo, g4 lo
+  reconoce, mutación de orden atrapada), abierto, para los próximos reemplazos (D25, λ de B22).
+- Tres sesiones paralelas en worktrees de D: (la app exige 24,8 GB libres en C: para crear los suyos y había 16,8):
+  `local_5c68f9b3` (V750, `D:\vrp-trabajo\temporales\s158_v750`), `local_4b70f190` (Tupungatito, `..\s158_tupun`),
+  `local_a4b23469` (D17, `..\s158_d17`). Borrar cada worktree cuando entregue su PR.
+- Pendiente 1.24 cola: PR que borre `data/_s154_reproc_k_historico/` de `main` (queda en la historia y en el tag).
 - #880 (texto previo): CMR no devolvió gránulos del 18-oct sobre Chillán en ningún producto, ni siquiera MODIS; SIN DATO hasta
   validar la consulta con un día que sí tenga (CMR lento, consulta de control en segundo plano).
 
