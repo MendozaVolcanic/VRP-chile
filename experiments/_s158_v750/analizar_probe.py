@@ -56,6 +56,16 @@ def main(carpeta):
               f" | mascara 2048 {sum(r['ventana']['m15_mask2048_dead'] for r in s)} | sobre techo "
               f"{sum(r['ventana']['m15_sobre_techo'] for r in s)} | M13 sentinela "
               f"{dict(sum((collections.Counter(r['ventana']['m13_sentinela']) for r in s), collections.Counter()))}")
+        con65533 = [r for r in s if r["ventana"]["m15_sentinela"].get("65533")]
+        print(f"  pasadas con M15 = 65533 en la ventana: {len(con65533)} (pixeles {sum(r['ventana']['m15_sentinela'].get('65533', 0) for r in s)}"
+              f" de {sum(r['ventana']['n'] for r in s)}); M15 sentinela por codigo: "
+              f"{dict(sum((collections.Counter(r['ventana']['m15_sentinela']) for r in s), collections.Counter()))}")
+        print(f"  ventanas con m13_valido == m15_valido: {sum(r['ventana']['m13_valido'] == r['ventana']['m15_valido'] for r in s)} de {len(s)}"
+              f" | escena entera con nti_perdido > 0: {sum(r['escena_nti_perdido'] > 0 for r in s)}")
+        for lo, hi in ((0, 20), (20, 35), (35, 50), (50, 90)):
+            b = [r for r in s if r["pasada"]["z"] is not None and lo <= r["pasada"]["z"] < hi]
+            if b:
+                print(f"    cenit {lo}-{hi}: {len(b)} pasadas, con 65533 en la ventana {sum(1 for r in b if r in con65533)}")
         d = [x for r in toca for x in (r["cobertura"].get("dist_km") or []) if x is not None]
         esp = [r["cobertura"].get("espaciado_validos_km_mediana") for r in toca]
         print(f"  cobertura: distancia al valido mas cercano, mediana {mediana(d)} km, max {max(d) if d else None}; "

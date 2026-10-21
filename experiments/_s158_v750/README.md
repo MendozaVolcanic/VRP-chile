@@ -105,9 +105,44 @@ El agregado compara «toca» entre P y C: si la tasa es parecida, los sentinelas
 la mitad del espaciado típico (duplicado del bowtie), y sólo aparecen fuera del nadir. PM-2: el lector decide en 0 a
 2 de las 75. PM-3: M3 no cambia con el relleno (su causa es el fondo, D25).
 
-## Resultado del probe
+## Resultado del probe (run 39597022719, 2026-10-21, `806c50c2`; mini probe de M13, run 39600656583)
 
-(pendiente)
+Salidas: `analizar_probe_salida.txt` (`analizar_probe.py resultado`), artefactos en `resultado/` y `resultado_m13/`.
+
+- **Cobertura.** 125 de 127 pasadas medidas. Faltan 2 del grupo P, Isluga 05:48 y Chillán 05:54 del 2026-10-12, ambas
+  de Suomi NPP: CMR no devolvió el L1B (los jobs 2 y 3 salieron en rojo sólo por eso, salida 2 de S141). Las dos son
+  pérdidas de 0,24 y 0,40 MW (M3 y M1).
+- **Controles.** C-SIN en verde en los 4 runners. C-P1 en verde en **125 de 125**: el control reproduce el record
+  persistido, y el control publica en las 52 de C y en ninguna de las 73 de P, igual que el tablero.
+- **El lector no borra el NTI de ningún píxel con M13 válido.** En la escena entera de cada uno de los 125 gránulos hay
+  **0** píxeles con M13 válido y M15 NaN. En la ventana del cráter, M13 y M15 válidos coinciden en 125 de 125. No hay
+  ningún píxel con la máscara 4 (Saturation), ninguno con la 2048 (Dead_Detector) ni ninguno con M15 sobre 342,5 K.
+- **Los sentinelas de M15 son el bowtie y aparecen igual en P que en C.** Todos los sentinelas de la ventana son 65533
+  (Bowtie_Deleted, con máscara 256), 1.280 píxeles en 24 pasadas de P y 1.036 en 12 de C. Aparecen en **todas** las
+  pasadas con cenit de 35° o más (P 24 de 24, C 12 de 12) y en **ninguna** bajo 35°. Es geometría del barrido, no
+  una propiedad de las pasadas que perdemos.
+- **Por qué el «M13 sano» de #880 no era cierto** (mini probe, los tres gránulos de mayor cenit de `pasadas.json`,
+  todos de Chillán, 65° a 68°). En el L1B de NASA, M13, que es la banda de doble ganancia, viene como entero de 32 bits
+  con sus propios códigos: `valid_max` 327670, `flag_values` 327677 (Missing_EV), 327678 (Bowtie_Deleted) y 327679
+  (Cal_Fail), `_FillValue` 327680. En el **100 %** de los píxeles de esas escenas donde M15 trae 65533 (1,32 a 1,34
+  millones por escena), M13 trae **327678** con el flag 256. El probe de #880 buscó en M13 los sentinelas de 16 bits
+  (65532 a 65535), no encontró ninguno y lo leyó como «M13 sano». Las dos bandas están borradas en el mismo píxel, como
+  dice el UserGuide, y ese terreno lo cubre el barrido vecino.
+- **El contrafactual no tuvo nada que rellenar.** Como no hay ningún `nti_perdido`, el brazo relleno es idéntico al
+  control en las 125 (C-NULO 125 de 125), y **el lector decide en 0 de 73** pérdidas medidas. PM-1 se cumple en lo que
+  predecía (65533, máscara 256, sólo fuera del nadir); su parte de cobertura no se pudo medir porque no hubo perdidos.
+  PM-2 (0 a 2) se cumple con 0. PM-3 se cumple: ninguna M3 cambia.
+
+**Respuesta.** Ninguna de las alertas de VIIRS 750 que K no publica se pierde por el lector de M15. La pérdida es de
+D25 (55 de 75: el cráter en 0,0 MW por el fondo del anillo) y de señal que no alerta con el cenit alto (20 de 75). Y
+para el operador casi no hay pérdida: 74 de las 75 caen en noches que otro sensor u otra pasada sí publica.
+
+**Hallazgo lateral, latente y sin efecto hoy.** `FLAG_DNS` de `pipeline/process_viirs_mod.py` es el conjunto de 16
+bits (65532 a 65535). Para M13 no atrapa ningún código real; los códigos de M13 se descartan sólo porque la LUT vale
+−999,9 en ellos y el lector borra toda BT negativa. Si un gránulo viniera sin LUT de M13, la rama de inversión de Planck
+los leería como radiancia válida (327678 × 0,00162 ≈ 530 W m⁻² sr⁻¹ µm⁻¹). Los tres gránulos del mini probe traen la LUT de M13 (327.681 entradas), y en los 125 del probe el lector dejó M13 en NaN
+exactamente donde M15 trae 65533, que es lo que hace la rama de la LUT. Queda
+como seguimiento; acá no se toca `pipeline/`.
 
 ## Lo que esto no decide
 
