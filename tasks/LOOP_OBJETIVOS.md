@@ -555,6 +555,17 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 (S159, dueña del loop): verificador del comparador D-28: PARCIAL
+- `experiments/_s159/instrumentos/verificador_comparador/INFORME.md` (`63e310af5` en `s159-evaluador-d25`). El código
+  sigue el §2 punto por punto; ninguna ganancia uniforme ni por volcán da MEJORA (0 de 56 y 0 de 54); el nulo de d′
+  está centrado (2,4 a 3,0 % por cola en 20 semillas). Lo que falla: **poder** ante un efecto con dispersión entre
+  pasadas (mitad de camino con ruido 0,05 en log10: CUMPLE 12 de 12; con 0,10: 1 de 12), así que un SIN EFECTO no
+  distingue «no acerca» de «acerca con dispersión»; **tres guardas faltantes** (opción A sobre d′, calibración de d′
+  ignorada, opción A contada con d); y la **semilla de d′** decide V2 VIIRS 750 z≤40 (11 de 200 contra tope 10).
+- El implementador aplica D-30 (INDECIDIBLE, una cola), las tres guardas, la marca de `--calibracion sellada` en el
+  JSON y un §5 de la adenda con D-30 y la curva de poder declarada antes del tag. Semilla y repeticiones de la
+  calibración de d′: decisión para Nicolás.
+
 ### 2026-10-21 (S159, dueña del loop): verificador del pareo MODIS entregado
 - `experiments/_s159/pareo_modis/verificador/INFORME.md` (`0392cdffc`). **CONFIRMADAS**: el pareo a ±120 s (ensanchar
   rescata 0 de 2.212 alertas y sólo duplica el conteo; ninguna protegida en las 148); MIROVA lista el gránulo sur
