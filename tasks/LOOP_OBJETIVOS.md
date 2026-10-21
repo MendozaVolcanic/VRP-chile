@@ -567,6 +567,22 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 - H3 (informativo, para el sí del reemplazo): lo publicado en la ventana baja de 25.202 a 9.120 pasadas (Villarrica
   2.761 a 86, Llaima 2.133 a 17); protegidas de MIROVA cubiertas suben de 243 a 288 de 379, se pierden 3 pasadas y
   0 noches.
+- **Decisiones de Nicolás, textuales (AskUserQuestion, ~10:25 UTC)**: residuos C0 = «Sacarlas a un archivo aparte
+  (Recommended)»; reemplazo = «Sí, aplícalo (Recommended)» (pregunta: aplicar el reemplazo de los 11 con tag
+  defensivo, frontera al 2025-02-15, pruebas, `verificar_ventana.py`, un solo commit entre dos NRT).
+- El PC estuvo suspendido de ~03:40 a ~09:10: el control del NRT no escribió; contado a mano: **33** `NRT update`
+  de 02:00 a 09:30 del 21-oct contra **24** del 20-oct; NRT verde 8 de 8. **Control PASA.**
+- **V1 de D25 terminó `failure`**: 2 jobs (Llaima y Villarrica, trozo 4, 2026-10-16..18) con código 3 del modo
+  estricto, «3 búsquedas o descargas fallidas (días: ['2026-10-17'])», CMR inestable. V2a despachado por el
+  despachador a las 09:16 (39575542584). V1 relanzado sólo en sus fallidos (`gh run rerun --failed`, intento 2)
+  con V2a ya corriendo, así que entra como único pendiente del grupo y no desplaza a nadie.
+- Preparado en `s158-reemplazo-ensayo` (`356b0aa1`): frontera `DATOS_K_DESDE_UTC` al 2025-02-15, guard
+  `tests/test_guard_serie_k_pura_s158.py` (100 % con marca desde la frontera; línea base ROJA sobre main: las 26 de
+  Terra), `apartar_c0.py`, `aplicar_11.sh`. Ensayo aplicado en el worktree y descartado: 90 apartados, 106 pruebas
+  verdes, vigilancia de la sombra VERDE antes y después con los mismos disparadores (sólo crecen ventana,
+  retrospectivo 252 a 2.207 y la lista informativa de protegidas 5 a 9). El NRT rebasa con `-X theirs` (gana el
+  commit del NRT en un trozo en conflicto, al revés de lo que dice el comentario de `nrt.yml`), por eso el reemplazo
+  entra con el NRT quieto, regenerado sobre main fresco por `D:\vrp-trabajo\temporales\s158\aplicar_en_ventana.sh`.
 - #880 (texto previo): CMR no devolvió gránulos del 18-oct sobre Chillán en ningún producto, ni siquiera MODIS; SIN DATO hasta
   validar la consulta con un día que sí tenga (CMR lento, consulta de control en segundo plano).
 
