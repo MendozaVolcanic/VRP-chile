@@ -2690,6 +2690,8 @@ exige A45 y un A/B en los Tier A.
 
 ## D22: La compuerta de temperatura `bt > t_bg + 3 K` dentro de los Tests 2 y 3; la fórmula del paper no tiene condición de temperatura. **ABIERTA (divergencia literal confirmada; la atribución de S137 fue CORREGIDA en S138: la compuerta NO es lo que pierde a Villarrica A6)** S137, S138
 
+> ⚠️ **S158, código de MIROVA** (`docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §3 punto 6): el código operacional de VIIRS 750 publicado en OSF zm62w no tiene compuerta de temperatura en los Tests 2 y 3. La divergencia queda confirmada por el código, no sólo por el texto.
+
 > ⚠️ **Corrección S138** (`docs/AUDIT_S138.md` §8 y verificador §3.b, sobre las salidas commiteadas de la batería, sin reprocesar): la compuerta sólo actúa en el primer pase. El segundo pase (`second_pass_adjacent`, `detection_context.py:803`) recibe NTI, ETI y la máscara de activos, sin temperatura, y corre aunque no haya activos (`ENABLE_SECOND_PASS_CONDITIONED = False`, D19): rescata el píxel que la compuerta rechazó. En A6 con compuerta el cúmulo ya está a 0,8 km del cráter y publica 0,0 MW; quitar la compuerta no mueve ese cero; cambiar el fondo del anillo por vecinos da 0,539 MW (D25). Medido en producción: 14 % de los records VIIRS375 y 17 % de los VIIRS750 se detectan sólo en el segundo pase. **Un brazo de A/B que quite sólo la compuerta no devuelve ninguna alerta.** D22, D19/D2 y D25 no se pueden A/B-ear por separado. La divergencia literal sigue siendo real (la fórmula del paper no la tiene) y sigue abierta como fidelidad.
 
 **El paper** (`sp426.5.pdf`, p. 7): los Tests 2 y 3 son dNTI y dETI contra `C1` o contra
@@ -2721,6 +2723,8 @@ los Tier A. Hay que medirlo antes de proponer nada.
 
 ## D23: El Test 1 (NTI > K1) del paper no es un camino de detección en producción; sus píxeles sólo cuentan si además pasan los Tests 2 y 3. **ABIERTA (registrada S138, AUDIT_S138 H-S138-04)** S138
 
+> ⚠️ **S158, código de MIROVA** (`docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §3 punto 1): en VIIRS 750 los píxeles con NTI sobre K1 (-0,7) son alerta directa y salen del fondo de los tests contextuales. Confirma D23 y el GAP #A.
+
 **El paper** (p. 6): los píxeles con `NTI > K1` se declaran activos por el Test 1 y se descartan como no aptos para los pasos siguientes (eso último es el GAP #A dentro de D11, reabierto S128).
 
 **Lo nuestro**: K1 se calcula (`process_modis.py:662-668`) y entra a `combine_hot_paths` (l. 824), pero `hot_mask_2d = fp_hot` (l. 888) lo pisa con la salida del primer pase; `test1_mask=None` (l. 857-859). Igual en `process_viirs.py` (971-976, 1188, 1259) y `process_viirs_mod.py` (619-624, 783, 851). Control sintético (`experiments/_s138_audit/eje2/01_controles_sinteticos_detection_context.py`, M3): bloque 7x7 a 400 K sobre 280 K, el paper marcaría 49, el pipeline 28; interior 3x3, 1 de 9.
@@ -2746,6 +2750,8 @@ los Tier A. Hay que medirlo antes de proponer nada.
 ---
 
 ## D25: El fondo del VRP es la mediana de un anillo regional de 5 a 25 km, no la media de los píxeles que rodean al activo; y el exceso se recorta a cero. **ABIERTA (registrada S138, H-S138-01; es la palanca real detrás de A6 y del cráter en 0,0 MW)** S138
+
+> ⚠️ **S158, código de MIROVA** (`docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §3 punto 12 y §4.3): el fondo del VRP de MIROVA en VIIRS 750 no es la media de los vecinos no alertados: pone en NaN los alertados más un halo (cuadrado de 3, 5 o 7 celdas según npix ≤ 4, ≤ 30, > 30), interpola linealmente por debajo (`fillmissing2`) y no recorta ΔL a cero. El brazo D del pre-registro de S157 toma justo el halo que MIROVA aparta: si cumple, no es la adopción del fondo de MIROVA.
 
 **El paper** (p. 8, ecuación 6): el fondo es "the arithmetic mean of all the pixels surrounding the active one"; no necesita recorte.
 
@@ -2795,6 +2801,8 @@ su sustrato son 11 pasadas de rescate con 0 alertas de MIROVA, así que no hay n
 ---
 
 ## D26: ⚠️ **S157: abierta y sin medir bajo `max`, la conectiva de producción desde K (#850, 2026-10-18; marca S153 debajo)** · El segundo pase calcula mu y sigma sin los filtros de no-aptos del paper (borde, dNTI < -0,1, K1). **ABIERTA, efecto nulo bajo la conectiva `min` (registrada S138)** S138 ⚠️ **el «efecto nulo» cayó en S145; marcado acá en S146**
+
+> ⚠️ **S158, código de MIROVA** (`docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §3 punto 10): en VIIRS 750 el segundo pase excluye las alertas absolutas y las del primer pase y recalcula estadísticos **y** regresión; nosotros reusamos el ETI del primer pase.
 
 > ⚠️ **S153, la conectiva de los Tests 2 y 3 cambió en producción: `max`, no `min`** (A113; regla `experiments/_s151_prereg_fk_11/REGLA_ADOPCION.md` (aprobada en #848), evidencia `experiments/_s153_fk_v2/README.md`, `combinado.log`, `v1.log` y `v2.log`, sección 9).
 > `enable_tests_23_prose_branch: true` bajo `paths:` en `pipeline/profiles/mirova_equivalent.yaml`: hacen falta
@@ -2893,6 +2901,8 @@ El paper (p. 3) corrige el solapamiento de barridos antes de remuestrear; el có
 ---
 
 ## D29: Refit iterativo a 3 sigma en la regresión cuadrática de NTIbk. **ABIERTA, menor (registrada S138)** S138
+
+> ⚠️ **S158, código de MIROVA** (`docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §3 punto 7): en VIIRS 750 un solo `polyfit` de grado 2 sin las alertas. Confirma D29.
 
 `detection_context.py:685-688` y 745-765: la regresión NTI contra NTIapp se reajusta excluyendo residuos mayores a 3 sigma. El paper (p. 5, ecuación 4) describe un solo ajuste. Probablemente mejora el fondo, pero no está en el paper y no tiene flag. Gravedad 1.
 
@@ -3134,6 +3144,8 @@ camino entero es de BT y está apagado.
 
 ## D32: MIROVA publica la SUMA del VRP de todos los píxeles alertados de la pasada; nosotros publicamos un recorte (el cúmulo, y en banda I su núcleo). **ABIERTA (registrada S147, verificada con contexto limpio, gravedad 4; prioridad MEDIA, no es la palanca del 0,7)** S146/S147
 
+> ⚠️ **S158, código de MIROVA** (`docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §3 punto 11): en VIIRS 750 el alerta es la unión de todas las regiones y pases, y el VRP suma todos los alertados. Confirma D32.
+
 **El fenómeno, primero.** Una anomalía térmica volcánica no ocupa un píxel: ocupa un puñado. El
 lago de lava calienta su propio píxel y entibia a los vecinos, y una colada reciente se extiende
 por el flanco. Cuánta energía se le atribuye al volcán depende entonces de una decisión que parece
@@ -3231,3 +3243,23 @@ combinaciones). Encenderlo es decisión de Nicolás (A45). Detalle y traza compl
 **Caras no tocadas, anotadas:** (1) el `NTI_app` usa la misma λ de B21 (3,929) donde el paper usa la de la banda MIR
 (p. 5, Ec. 2, 3,959): mueve detección, SIN MEDIR; (2) `BAND21_LAMBDA = 3.929` es el borde inferior de la ventana,
 no el centro de 3,959 µm que da el paper para B21.
+
+---
+
+## D34: El código operacional de MIROVA para VIIRS 750 está publicado y difiere de producción en 10 de 13 puntos. **ABIERTA (registrada S158)** S158
+
+Desde el 2026-07-24 MIROVA publica en OSF zm62w (`MIROVA_Code_Repository`, MIT) su detección y su VRP de VIIRS 750 en
+MATLAB, con una matriz de ejemplo (Coppola et al. 2026, Scientific Data, p. 21, «Code Availability»). Copia verificada
+por hash en `experiments/_s158_d17_diseno/osf_codigo_mirova/`. Comparación punto por punto en `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md` §3.
+
+Divergencias que **no** estaban en este catálogo: K1 de VIIRS 750 (-0,7 en el código, -0,8 nuestro, tomado de la
+Tabla 1 de MODIS); mínimo de dNTI fuera de la cumbre (0,02 en el código, 0,010 nuestro; el de dETI coincide en 0,01);
+media local de 3 × 3 con el píxel central (nosotros 8 vecinos, como dice el paper); filtro de píxel frío (BT de M15 ≤
+200 K) y rechazo de escena con la mitad o más de NaN (no los tenemos); piso de -0,1 sólo en el contraste de NTI
+(nosotros en dNTI y dETI, como dice el paper); constantes de Planck de la implementación operacional (h 6,6256e-34,
+c 2,9979e8, k 1,38e-23; nosotros CODATA). Las otras divergencias que el código confirma ya estaban: D17, D18, D22, D23,
+D25, D26, D29, D32 y el GAP #A.
+
+**Alcance**: sólo VIIRS 750. La estructura se puede trasladar a MODIS y VIIRS 375 con cita (Campus 2022 p. 7: el
+algoritmo de VIIRS «is the same used for MODIS»); los números no (§5 del informe). Si el código prevalece sobre el
+paper cuando difieren lo decide Nicolás (§7 del informe).

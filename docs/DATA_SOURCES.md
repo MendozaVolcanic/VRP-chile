@@ -118,6 +118,9 @@ Si fuera redondeo, 1.6 y 1.7 → "2 MW". Como muestran "1", es **floor**.
 
 ### Oficial MIROVA (Coppola/INGV/UNITO)
 
+> ⚠️ **S158: FALSO desde el 2026-07-24.** MIROVA publica en OSF zm62w (`MIROVA_Code_Repository`, MIT) su detección y
+> su VRP de VIIRS 750 en MATLAB (Coppola et al. 2026, Scientific Data, p. 21). Ver `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md`. Texto de S17 conservado por historia.
+
 **NO EXISTE código público.** Verificado exhaustivamente S17:
 - GitHub INGV: 71 repos, 0 térmicos volcánicos.
 - UNITO-LGS: sin organización GitHub.

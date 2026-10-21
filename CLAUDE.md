@@ -114,6 +114,10 @@ para cross-linking con conceptos volcanológicos pero NO contiene los PDFs.
   el catálogo dice que el NRT no usa. Y **ningún paper dice cuál está «adoptado
   operacionalmente»**: el «no adoptada» de la Ec. 9 es SOSPECHA, no cita. El cierre de D3 se
   apoya en esa Ec. 16. Texto original conservado por historia.
+- ⚠️ **S158: MIROVA publicó su código operacional de VIIRS 750** (OSF zm62w, 2026-07-24, MIT; `docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md`, D34): difiere
+  de producción en 10 de 13 puntos, entre ellos K1 (-0,7), el mínimo de dNTI fuera de la cumbre (0,02), la media de 3 × 3
+  con el central y el fondo del VRP (interpolación bajo un halo dilatado, sin recorte). Lo de abajo describe nuestro
+  detector, no el de MIROVA.
 - **NTI / dNTI contextual**: ⚠️ **S153, el detector de producción cambió (adopción de K, marca A113)**:
   desde el merge del PR de adopción, `mirova_equivalent` corre **sin el Test 1 integrado en el ROI**
   (`enable_test1_path: false`, D30), con la **conectiva `max`** en los Tests 2 y 3

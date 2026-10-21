@@ -65,6 +65,10 @@ atrás cuando se aplique el reproceso histórico con K (marca S157 de `docs/MISS
   (falla hasta 310 m), que es UTM verdadera y que MIROVA interpola; nuestro F70 deja huecos en oblicuo y pierde energía con el
   ángulo como el área fija. Propone una Fase 0 de sólo lectura (reproducir los TIF) y un A/B sólo VIIRS sobre la base de D25.
 
+- S158 (`docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md`): el código operacional de MIROVA para VIIRS 750 estima el fondo del VRP interpolando bajo un halo
+  dilatado de los alertados, sin recortar ΔL a cero, y publica la suma de todos los alertados. El brazo de D25 (media de
+  los vecinos no alertados) no es ese fondo. Y fuera de la cumbre MIROVA exige un dNTI del doble que nosotros (0,02).
+
 **Abierto**: D25 (fondo = mediana del anillo, no media de vecinos; pre-registro sobre K en PR #871, borrador,
 espera sello); D17 como hipótesis competidora de la curva angular (tarea 1.36, rama `loop/activo`: sólo si después
 de D25 queda dependencia con el cenit); D32; D33 (encendido); D24.

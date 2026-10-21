@@ -227,6 +227,24 @@ cenit en cada brazo. Además el OSF es un producto filtrado (A105).
 - El «NO REABRIR» de D16 queda todavía más acotado: lo refutado fue un remuestreo que no podía corregir la magnitud
   oblicua.
 
+### 3.5 Lo que agrega el código publicado por MIROVA (S158, mismo día)
+
+Después de escribir lo anterior apareció el código operacional de MIROVA para VIIRS 750 (OSF zm62w, 2026-07-24, MIT;
+`docs/S158_CODIGO_MIROVA_VS_VRP_CHILE.md`). Para D17 aporta tres cosas y deja una sin resolver:
+
+- **El remuestreo no está publicado** (Coppola 2026 p. 21: las rutinas de «image resampling» «are not distributed»).
+  El interpolador sigue siendo una pregunta para la Fase 0.
+- **Las entradas son las matrices ya remuestreadas**, con nombre `ZI_M13` y `ZI_M15` («resampled VIIRS M13 spectral
+  radiance», README). `ZI` es el nombre clásico de la salida de `griddata` en MATLAB. **SOSPECHA**, coherente con la
+  firma lineal de los TIF (§3.2), no una prueba.
+- **El área de la fórmula es la nominal de la celda** (0,5625 km², `MIROVA_VIIRS750_VRP.m`), y la caja de cumbre es de
+  7 × 7 celdas centrada en la celda central de la grilla de 67 (matriz de ejemplo). Con 67 celdas la grilla de VIIRS 750
+  tiene celda central; con 134 la de VIIRS 375 tiene una esquina en el centro. Si las dos comparten el centro, cada celda
+  de 750 m contiene exactamente 2 × 2 celdas de 375 m. Es la hipótesis del §4.1 para VIIRS 750, ahora con un motivo
+  geométrico, todavía sin medir.
+- **Un oráculo para la Fase 0** (§5, P0-6): con un port a Python de las dos funciones se corre el detector de MIROVA
+  sobre nuestras matrices remuestreadas y se compara con lo que MIROVA publicó. Si coincide, el remuestreo es el suyo.
+
 ## 4. El diseño propuesto
 
 ### 4.1 La grilla
@@ -361,11 +379,19 @@ No reprocesa ni escribe en `data/`. Es un probe con controles escritos antes de 
   círculo de 5 km del cráter; si ninguno lo logra, el interpolador se declara NO IDENTIFICADO y el A/B corre con B
   advirtiéndolo en la primera línea del veredicto.
 - **P0-2, huecos de F70 en gránulos reales**: confirma o refuta el sintético del §3.3.
+- **Intento previo, NO CONCLUYENTE** (`experiments/_s158_d17_diseno/distancia_vs_grilla.py`): con la grilla exacta de los
+  TIF de VIIRS 375 se buscó desde qué celda mide MIROVA su `Distancia_km`. Sólo hay 10 pares alerta-TIF UTM, y ubicar el
+  foco como la celda de mayor exceso de radiancia MIR es débil para alertas de 0,03 a 0,4 MW (MIROVA detecta por NTI).
+  Ninguna celda de referencia coincide en más de 3 de 10. Con el oráculo (P0-6) el foco sale del detector de MIROVA.
 - **P0-3, grilla de VIIRS 750 y MODIS**: con la grilla hipotética del §4.1, el `Distancia_km` de las alertas de MIROVA
   de esos sensores debe caer en `√(i² + j²) · celda` desde la celda central (D15). Si no cierra, la hipótesis cae.
 - **P0-4, el caso de #880**: Chillán 2026-10-18 06:48, I4 y M13 remuestreados a sus grillas, energía co-ubicada en
   las dos bandas. Diagnóstico, no decide.
 - **P0-5, costo**: segundos por gránulo de cada candidato.
+- **P0-6, oráculo (VIIRS 750)**: port a Python de `MIROVA_VIIRS750_hotspot_detection.m` y `MIROVA_VIIRS750_VRP.m`
+  (con pruebas sobre la matriz de ejemplo), corrido sobre nuestras matrices de M13 y M15 remuestreadas con cada
+  candidato, en las pasadas de VIIRS 750 de V1 con alerta de MIROVA. Se compara el VRP y el `Distancia_km` del oráculo
+  contra lo publicado. Separa por primera vez el error del remuestreo del error del detector.
 
 **Controles antes de mirar el resultado**: (1) positivo, remuestrear el TIF de MIROVA consigo mismo (submuestreado a
 huella oblicua sintética) y recuperar su propio método; (2) negativo, comparar contra el TIF de **otra** pasada de la
