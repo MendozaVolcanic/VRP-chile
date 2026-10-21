@@ -471,6 +471,48 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
   Arreglar antes el aviso A114 del evaluador (H1: `evaluar_diurno.py:940` junta los dos sensores en el q_neg; debe ser
   por sensor) y fijar el nulo (H2: `:635`, el p95 cambia entre procesos con la misma semilla; usar el exacto).
 
+### Bloque S158 R2 y plan S159 (agregado el 2026-10-21 ~18:15 UTC por la sesión dueña del loop)
+
+Origen: `docs/AUDIT_S158_R2.md` (PR #888) y su bloque propuesto `tasks/LOOP_BLOQUE_S158_R2.md` (rama
+`claude/s158-audit-r2-0eeee2`), que se copia aquí y se borra de esa rama. Nicolás pidió que el loop siga «con todo lo
+que estamos desarrollando» y aprobó el 2026-10-21 el plan de pruebas S159
+(`docs/superpowers/specs/2026-10-21-pruebas-post-auditoria-s158-design.md`, rama `s159-pruebas`), incluidos Octave para
+O1 y un tope de 400 pasadas para el primer lote de N. Cada R2.x lleva entre corchetes el frente S159 que la trabaja.
+Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-registro, sello de Nicolás y verificador limpio.
+
+- [ ] **R2.1 Instrumentos antes de cualquier A/B** [frente IA, worktree `C:\vrp-trabajo\s159-instrumentos`, EN CURSO].
+  (a) Cero gránulos en un día con pasadas esperadas, y un L1B sin su geolocalización, cuentan como falla de cobertura y
+  no como «completa» (R2-9, VB-1); toca el flujo del NRT, así que no se mergea sin el sí de Nicolás. (b) Placebo de
+  ganancia constante obligatorio en toda métrica de magnitud (R2-8). (c) El default de calibración de
+  `experiments/_s157_prereg_d25/evaluar_d25.py:79` contradice la adenda sellada (VB-2): se corrige sólo por adenda y
+  con Nicolás. (d) Una sola definición de «alerta de MIROVA». (e) Prueba `xfail(strict)` del tope de cordura de
+  `pipeline/store.py:551-557` (R2-7); el arreglo, con tag y sí (A45).
+- [ ] **R2.2 A/B de D25: no leer el veredicto** [relectura D25, ola 2]. El 2026-10-18 y el 19 no se reponen mientras
+  CMR no los sirva (R2-13). Vigilar en cada vuelta si CMR vuelve a servirlos (búsqueda pública `granules.json`, sin
+  credenciales). Decisión para Nicolás: evaluar sin esos días o repetir en otra ventana, y agregar un brazo con el
+  fondo del código.
+- [ ] **R2.3 Pre-registro: fondo y suma del código en VIIRS 750 junto con quitar la compuerta de 3 K del primer pase**
+  (VA-1) [síntesis, ola 3, con los datos de N]. Métricas en las dos caras: alertas de MIROVA de la misma pasada
+  recuperadas (pareo a 8 min) y negativos limpios despegados del cero. Sello antes de despachar.
+- [ ] **R2.4 D17 fase 0** [frentes GEO (ola 1, sin gránulos) y N (ola 2, workflow de sólo lectura con
+  `EARTHDATA_TOKEN`)]: grilla de 750 m e interpolador de MIROVA. N cubre las ~40 pasadas del bloque R2 dentro de su
+  tope de 400.
+- [ ] **R2.5 ROI de MIROVA en Cordón Caulle y Tupungatito** [frente GEO, parte R, EN CURSO], con los TIF y la
+  `Distancia_km` cuantizada (D15).
+- [ ] **R2.6 Geolocalización MODIS desde MOD03** [frente M, ola 2]. P1 encontró el respaldo citable: Coppola 2026 Sci
+  Data p. 4 dice que MIROVA usa MOD03 con corrección de terreno. El verificador de R2 midió el corrimiento asimétrico
+  (2 a 3,6 km de un lado del barrido sobre 25°).
+- [ ] **R2.7 Marcas A113 pendientes**: las del §8 de `docs/AUDIT_S158_R2.md` (bajo A45, en el PR que toque cada
+  archivo), las U1 a U13 del meta-auditor (`experiments/_s158_audit_r2/m1/INFORME.md` §3) y las candidatas de P1 y P2
+  (`experiments/_s159/p1/INFORME.md` §4, `experiments/_s159/p2/INFORME.md`): entre ellas «MIR solo nocturno» en
+  CLAUDE.md:183 y «para MODIS y VIIRS 375 manda el paper» en `docs/MISSION.md:130`, cuando ningún paper describe la
+  detección de VIIRS 375 (P2).
+- [ ] **R2.8 Pendientes de Nicolás**: D-10 (VIIRS diurno; la rama apagada usa K1 -0,6 y no tiene filtro de reflejo
+  solar, VB-3) y la revisión visual del §9 de `docs/AUDIT_S158_R2.md`.
+- [ ] **S159 frentes sin R2.x** [ola 1, EN CURSO]: P3 (linaje MODIS), O1 (los ports contra el `.m` en Octave, con
+  paquete para MATLAB Online), COB (las 411 pasadas del OSF 2025 sin record nuestro y los huecos de producción del 13
+  y el 20 de octubre). P1 y P2 terminados (commits `241234581` y `353229357` en `s159-pruebas`).
+
 ## 5. Cola de decisiones para Nicolás (el loop agrega; Nicolás responde en el issue)
 
 | # | decisión | evidencia | PR / tag | issue |
@@ -508,6 +550,16 @@ Nicolás pidió el 2026-10-18 que «todo lo posible quede en el loop». Orden de
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-21 18:14 UTC (S158 «retomar», dueña del loop): bloque R2 incorporado; ola 1 de S159 corriendo
+- La segunda ronda cerró en el PR borrador #888 (checks verdes; ningún hallazgo refutado por sus verificadores). Su
+  bloque `tasks/LOOP_BLOQUE_S158_R2.md` quedó copiado al §4 («Bloque S158 R2 y plan S159»); la sesión de la segunda
+  ronda lo borra de su rama.
+- Plan S159 aprobado por Nicolás (texto: «Apruebo el plan completo, instala GNU Octave 11.3 con winget para O1, tope de
+  400 pasadas en el primer lote de N. Lanza la primera ola.»). Octave 11.3 instalado. Dos worktrees en C:
+  (`C:\vrp-trabajo\s159-pruebas`, rama `s159-pruebas`; `C:\vrp-trabajo\s159-instrumentos`, rama `s159-instrumentos`).
+- Ola 1: P1 y P2 terminados y commiteados; P3, GEO, COB, IA y O1 corriendo como subagentes. Nada despachado en
+  Actions todavía; nada tocado en `pipeline/`, `data/` ni `frontend/`.
 
 ### 2026-10-21 ~02:50 UTC (S158, dueña del loop): despachadores relanzados y aprobación de la tabla b
 - Sin rastro de los procesos de S157 (verificado en la lista de procesos). Tres procesos locales de S158, con logs en
