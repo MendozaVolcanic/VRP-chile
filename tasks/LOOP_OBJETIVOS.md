@@ -517,6 +517,7 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 | # | decisión | evidencia | PR / tag | issue |
 |---|---|---|---|---|
+| D-28 | **CERRADA: SELLADA** (Nicolás, 2026-10-21: «Placebo como comparador y no como compuerta, por adenda sellada»). Segunda adenda de D25: MEJORA de M sólo si D queda más cerca de MIROVA que K por ĝ (mediana de D/K del estrato); EMPEORA sigue contra K; la compuerta se retira. Los detalles del §3 derivan de (b) y se pueden objetar antes del tag de lectura | `experiments/_s157_prereg_d25/ADENDA_PLACEBO.md` (`2629f5a16`, rama `s159-evaluador-d25`) | #890 | (sin issue) |
 | D-25 | **CERRADA: SELLADA** (Nicolás, 2026-10-18, las dos opciones recomendadas; #857). **Sello de la adenda del A/B diurno sobre K** (tarea 1.32), con dos decisiones: (1) cola exacta del nulo en G1 (recomendada) o muestreo; (2) si G1 cumple sin W2 y falla con W2: DECIDE NICOLÁS CON M4 (recomendada, simétrica de la regla de «pasa sólo con W2») o NO ADOPTAR. Después del sello y antes de despachar: H2a, H2b y, si se aprueba, la cola exacta con sus pruebas | `experiments/_s151_ab_diurno/ADENDA_K.md` v2, `verificador_adenda_k/INFORME.md` | #857 | pendiente |
 | D-24 | **CERRADA: sí** (Nicolás, 2026-10-18; #853 mergeado y R8). Arreglo del marcador del mapa de detalle en los records `ctx_cluster` (tarea 1.31): primer marcador = `final_hotspot` (el cúmulo) en vez de `anomaly_pixels[0]` (el píxel más fuerte de la escena). Cambia lo que ve el operador; con K afecta a todos los records. Recomendación: sí, después de confirmarlo en el navegador | `experiments/_s153_localizacion/verificador/INFORME.md` H3; `frontend/index.html` de `main` | | pendiente |
 | D-23 | **EN CURSO** (Nicolás, 2026-10-18: sí al reproceso histórico; tarea 1.24). Reproceso de los 3.231 records MODIS de enero a junio de 2026 escritos con los gates intra-radio (deriva 1.23 bis, CONFIRMADA). Recomendación: hacerlo dentro del reproceso histórico con K si se adopta #850, no antes | `experiments/_s153_deriva_123bis/` | | pendiente |
@@ -550,6 +551,20 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 | D-11 | ~~Sello del probe 1.17~~ **SELLADO** (Nicolás, 2026-10-16); run 38894508138 sobre `d9b10482` (incluye #837) | Sello del probe 1.17 (posición MODIS con MxD03 en los 11 volcanes; regla 1 como compuerta) | `experiments/_s151_mxd03_etiquetas/README.md`, verificador limpio en dos vueltas (`experiments/_s151_mxd03_etiquetas_verif/`) | #834, #835, #837 | pendiente |
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
+
+### 2026-10-21 ~19:50 UTC (S159 «retomar», dueña del loop): D-28 sellada; ola 2 lanzada con N y M
+- Verificado al abrir: `loop/activo` = remoto (`a722063c4`); NRT operacional publicó a las 15:24 UTC; #885 a #890 en
+  borrador; CMR sigue sin Chile el 18 y 19 de octubre (0 gránulos en VNP02IMG, VJ102IMG y MOD021KM) y parcial el 17 y 20.
+  O2 sin correr. #864 abierto, a la espera de D25.
+- **D-28**: Nicolás eligió la opción (b) para el placebo de M. Adenda `ADENDA_PLACEBO.md` en `s159-evaluador-d25`
+  (`2629f5a16`), escrita antes de leer V1, V2a y V2b. Un agente la implementa en `evaluar_d25.py` (TDD, mutaciones,
+  sin tocar los brazos del A/B); falta después el verificador con contexto limpio antes del tag de lectura.
+- **#889**: Nicolás dijo que lo mergea él. Al anotar esto sigue abierto y en borrador.
+- **Ola 2**: N en `C:\vrp-trabajo\s159-n` (rama `s159-n`, disparo por `s159-n-disparo`) y M en `C:\vrp-trabajo\s159-m`
+  (rama `s159-m`, disparo por `s159-m-disparo`), los dos cortados de `origin/s159-pruebas` (`dc8b51832`), cada uno con
+  pre-registro propio antes de despachar. La relectura de D25 espera la decisión de los días sin CMR (decisión 3 del
+  bloque S159) y el verificador del evaluador.
+- Worktree nuevo `C:\vrp-trabajo\s159-evaluador` para #890. C: con 22 GB libres tras crear los tres.
 
 ### 2026-10-21 tarde (S158 «retomar», dueña del loop): ola 1 de S159 COMPLETA
 - Siete frentes terminados y commiteados en `s159-pruebas` (P1 `69c482c64`, P2 `3f133d69d`, P3 `70e31dcb9`, GEO
