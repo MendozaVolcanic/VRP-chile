@@ -553,6 +553,18 @@ Las reglas del §1 siguen intactas: nada se adopta en producción sin pre-regist
 
 ## 6. Bitácora (la más nueva arriba; una entrada por vuelta)
 
+### 2026-10-21 ~23:20 UTC (S159, dueña del loop): D-28 implementada; cuatro frentes nuevos en paralelo
+- **#890** (`b4258040c`, borrador): comparador implementado; roja 10 por aserción, verde 15 de 15,
+  `probar_evaluar_d25.py` 30 de 30 (los 27 de S157 idénticos), con los pares reales de K el placebo ya no da MEJORA
+  (|d′| máximo 0,0), mutaciones 4 de 4 más 2 extras, suite 2.357 pasan y 0 fallas en árbol quieto. Cinco preguntas
+  para la adenda en el PR. Verificador limpio corriendo. No se tocó ningún brazo del A/B.
+- **`vigilar-osf-mirova.yml` arreglado** en la rama de #888 (`7a8f9fe61`): las condiciones `if:` usaban comillas dobles
+  y GitHub rechazaba el archivo; el push siguiente sólo disparó Tests.
+- Lanzados sin crear worktrees (Nicolás pidió cuidar el espacio): **Chillán MODIS** (por qué el primer pase no ve las
+  dos protegidas del #864; worktree de M reusado en la rama `s159-chillan`), **pareo MODIS en el borde del gránulo**
+  (`experiments/_s159/pareo_modis/`, local) y **diseño del pre-registro de MxD03**
+  (`experiments/_s159/mxd03_prereg/`, sin despachar). N sigue corriendo.
+
 ### 2026-10-21 (S159, dueña del loop): verificador limpio de M entregado
 - Integrado a `s159-pruebas` (`db3e9cbb4`, fast-forward desde `s159-m`). Informe:
   `experiments/_s159/m/verificador/INFORME.md`. **CONFIRMADAS** las afirmaciones 2 (desplazamientos 2,817 / 5,041 /
