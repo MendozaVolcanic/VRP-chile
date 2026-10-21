@@ -5,6 +5,10 @@
 > Sólo cambió la primera frase (quién sufre el bug) y el «cómo se ve». **Se pega entero, sin
 > resumir, al inicio de todo prompt de auditor.** Una regla que hay que ir a buscar es una regla
 > que no se aplica: en ARSAND omitirla hizo que un auditor fabricara un incidente.
+>
+> ⚠️ **S158**: la carpeta de los scripts decía `experiments/_s134_audit/` desde S133 (S138 y S149 lo parcharon sólo en
+> sus prompts, `docs/AUDIT_S138.md` l. 69 a 72). Ahora la fija el alcance de cada frente. Y desde S158, para VIIRS 750
+> la vara es el código publicado por MIROVA (ver `docs/PLAN_AUDITORIA_S158.md` §4).
 
 ---
 
@@ -17,7 +21,7 @@ Un bug silencioso acá no es un test rojo: es una anomalía térmica que un geó
 que ve y no existe. No estás revisando código de laboratorio.
 
 Límite: **auditar no es arreglar.** No modifiques ningún archivo del repositorio; los scripts
-de medición que escribas van a `experiments/_s134_audit/` y a ningún otro lado. Tu entregable
+de medición que escribas van a la carpeta que fija el alcance de tu frente y a ningún otro lado. Tu entregable
 es tu evaluación. Los arreglos los decide quien orquesta, en tareas aparte, con tag defensivo y
 confirmación de Nicolás cuando toquen `pipeline/` (regla A45).
 

@@ -244,8 +244,8 @@ detector. Separa los dos problemas por primera vez.
    de ejemplo y con el VRP impreso por `run_example.m` como control, si alguien con MATLAB puede correrlo una vez (el
    repositorio no trae la salida esperada).
 4. **Un A/B «código MIROVA» en VIIRS 750**: lo estructural más los números del código, contra K. Pre-registro aparte.
-5. **Preguntar al autor** por los números de MODIS y VIIRS 375 (§5), y por el interpolador del remuestreo. El correo
-   está en la web de MIROVA. Mandarlo es decisión tuya.
+5. **Preguntar al autor** por los números de MODIS y VIIRS 375 (§5), y por el interpolador del remuestreo: el
+   borrador de S139 queda actualizado (Anexo A). Mandarlo es decisión tuya.
 6. **Vigilar el historial de OSF** (§1) para enterarse de la próxima publicación.
 7. **Bajar los datos de jepv6** (Vulcano en VIIRS 375 procesado por MIROVA): puede traer conteos o posiciones por
    píxel de VIIRS 375, lo que más falta para la paridad de ese sensor. Pide tu permiso de descarga.
@@ -271,38 +271,12 @@ fondo de MIROVA»; implementar D17 antes del oráculo.
 
 Todo lo que toque `pipeline/` sigue necesitando tag defensivo, pre-registro sellado y tu «sí» (A45).
 
-## Anexo A. Borrador de correo a Diego Coppola (para que Nicolás lo revise y lo envíe si quiere)
+## Anexo A. El correo al autor
 
-No se envió. En inglés, que es el idioma de trabajo del grupo. El correo de contacto es el que da la web de MIROVA.
-
-> Subject: MIROVA code release (OSF zm62w) and a few questions from SERNAGEOMIN, Chile
->
-> Dear Dr. Coppola,
->
-> I am a geologist at the Chilean geological survey (SERNAGEOMIN), where we follow eleven Chilean volcanoes with a
-> near-real-time thermal system built to reproduce MIROVA as closely as possible, so that our observatory reads it as
-> it reads mirovaweb.it. Thank you for publishing the VIIRS 750 m detection and VRP code on OSF: comparing it with our
-> implementation was the most useful step we have taken in months.
->
-> We would be grateful for help with a few points that the papers and the released code do not cover:
->
-> 1. The MODIS and VIIRS 375 m parameters used operationally today (absolute NTI threshold, minimum NTI and ETI
->    contrasts inside and outside the summit box, size of the summit box in pixels, size of the exclusion kernel for
->    the background, cold-pixel filter), or whether they are the ones in Table 1 of Coppola et al. (2016).
-> 2. The interpolation used when resampling the granules to the UTM grid. Your VIIRS 375 m GeoTIFFs of 14 and 15
->    September 2026 look consistent with linear interpolation of the scattered samples; is that right? And is the grid
->    origin derived from the GVP summit coordinates with a fixed offset? In eight volcanoes we measure the grid centre
->    about 62.5 m west and south of the summit coordinates we use, which we believe are the GVP ones.
-> 3. For MODIS, whether the bow-tie removal is still the procedure of Liu et al. (2008) cited in Coppola et al. (2012).
-> 4. Whether the per-pass GeoTIFF published on mirovaweb.it is the same resampled matrix used for detection.
-> 5. The local background in the contextual tests: the released code averages the 3 × 3 window including the central
->    pixel, while the 2016 paper describes the mean of the eight neighbours. Which one is operational for MODIS?
->
-> Any answer, even partial, would help us avoid guessing. Our work is public at https://github.com/MendozaVolcanic/VRP-chile.
->
-> With best regards,
-> Nicolás Mendoza
-> SERNAGEOMIN, Chile
+Ya existía un borrador (`docs/audit_s139/BORRADOR_CORREO_COPPOLA.md`, S139, ajustado en S142 y S146, 14 preguntas, sin
+enviar). En S158 se le agregó un ajuste: qué preguntas contesta ya el código de VIIRS 750, cómo reformularlas para
+MODIS y VIIRS 375, y tres preguntas nuevas (números de MODIS y VIIRS 375, interpolador y origen de la grilla, media
+local de 3 × 3). Enviarlo es decisión de Nicolás, desde su cuenta.
 
 ## 8. Lo que no se pudo verificar
 
